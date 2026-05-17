@@ -41,6 +41,9 @@ module PerformanceInsightsMetricDimensions =
   struct
     type nonrec t = PerformanceInsightsMetricDimension.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PerformanceInsightsMetricDimension.to_value)) |>
         (fun x -> `List x)
@@ -163,14 +166,15 @@ module PerformanceInsightsMetricDimensionGroup =
           (Xml.child xml_arg0 "Group") in
       make ?limit ?dimensions ?group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let limit =
-        field_map json "Limit" PerformanceInsightsMetricLimitInteger.of_json in
+        field_map json__ "Limit"
+          PerformanceInsightsMetricLimitInteger.of_json in
       let dimensions =
-        field_map json "Dimensions"
+        field_map json__ "Dimensions"
           PerformanceInsightsMetricDimensions.of_json in
       let group =
-        field_map json "Group" PerformanceInsightsMetricGroup.of_json in
+        field_map json__ "Group" PerformanceInsightsMetricGroup.of_json in
       make ?limit ?dimensions ?group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -202,6 +206,8 @@ module PerformanceInsightsMetricFilterMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -260,14 +266,14 @@ module PerformanceInsightsMetricQuery =
           (Xml.child xml_arg0 "Metric") in
       make ?filter ?groupBy ?metric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filter =
-        field_map json "Filter" PerformanceInsightsMetricFilterMap.of_json in
+        field_map json__ "Filter" PerformanceInsightsMetricFilterMap.of_json in
       let groupBy =
-        field_map json "GroupBy"
+        field_map json__ "GroupBy"
           PerformanceInsightsMetricDimensionGroup.of_json in
       let metric =
-        field_map json "Metric" PerformanceInsightsMetricName.of_json in
+        field_map json__ "Metric" PerformanceInsightsMetricName.of_json in
       make ?filter ?groupBy ?metric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -359,9 +365,9 @@ module PerformanceInsightsReferenceMetric =
           (Xml.child xml_arg0 "MetricQuery") in
       make ?metricQuery ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricQuery =
-        field_map json "MetricQuery" PerformanceInsightsMetricQuery.of_json in
+        field_map json__ "MetricQuery" PerformanceInsightsMetricQuery.of_json in
       make ?metricQuery ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -384,9 +390,9 @@ module PerformanceInsightsReferenceScalar =
           (Xml.child xml_arg0 "Value") in
       make ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let value =
-        field_map json "Value" PerformanceInsightsValueDouble.of_json in
+        field_map json__ "Value" PerformanceInsightsValueDouble.of_json in
       make ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -424,12 +430,12 @@ module RecommendationRelatedCloudWatchMetricsSourceDetail =
           (Xml.child xml_arg0 "MetricName") in
       make ?namespace ?metricName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let namespace =
-        field_map json "Namespace"
+        field_map json__ "Namespace"
           RecommendationRelatedCloudWatchMetricsSourceNamespace.of_json in
       let metricName =
-        field_map json "MetricName"
+        field_map json__ "MetricName"
           RecommendationRelatedCloudWatchMetricsSourceMetricName.of_json in
       make ?namespace ?metricName ()
     let to_json v = composed_to_json to_value v
@@ -459,9 +465,9 @@ module TimestampMetricValuePair =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?metricValue ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metricValue = field_map json "MetricValue" MetricValue.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let metricValue = field_map json__ "MetricValue" MetricValue.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?metricValue ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -522,12 +528,12 @@ module PerformanceInsightsReferenceComparisonValues =
           (Xml.child xml_arg0 "ReferenceScalar") in
       make ?referenceMetric ?referenceScalar ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceMetric =
-        field_map json "ReferenceMetric"
+        field_map json__ "ReferenceMetric"
           PerformanceInsightsReferenceMetric.of_json in
       let referenceScalar =
-        field_map json "ReferenceScalar"
+        field_map json__ "ReferenceScalar"
           PerformanceInsightsReferenceScalar.of_json in
       make ?referenceMetric ?referenceScalar ()
     let to_json v = composed_to_json to_value v
@@ -613,6 +619,9 @@ module RecommendationRelatedCloudWatchMetricsSourceDetails =
   struct
     type nonrec t = RecommendationRelatedCloudWatchMetricsSourceDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -667,6 +676,136 @@ module RecommendationRelatedEventResourceType =
       string_of_json ~kind:"RecommendationRelatedEventResourceType" j
     let to_json = simple_to_json to_value
   end
+module Explanation =
+  struct
+    type nonrec t = string
+    let context_ = "Explanation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Explanation" j
+    let to_json = simple_to_json to_value
+  end
+module LogAnomalyToken =
+  struct
+    type nonrec t = string
+    let context_ = "LogAnomalyToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogAnomalyToken" j
+    let to_json = simple_to_json to_value
+  end
+module LogAnomalyType =
+  struct
+    type nonrec t =
+      | KEYWORD 
+      | KEYWORD_TOKEN 
+      | FORMAT 
+      | HTTP_CODE 
+      | BLOCK_FORMAT 
+      | NUMERICAL_POINT 
+      | NUMERICAL_NAN 
+      | NEW_FIELD_NAME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KEYWORD -> "KEYWORD"
+      | KEYWORD_TOKEN -> "KEYWORD_TOKEN"
+      | FORMAT -> "FORMAT"
+      | HTTP_CODE -> "HTTP_CODE"
+      | BLOCK_FORMAT -> "BLOCK_FORMAT"
+      | NUMERICAL_POINT -> "NUMERICAL_POINT"
+      | NUMERICAL_NAN -> "NUMERICAL_NAN"
+      | NEW_FIELD_NAME -> "NEW_FIELD_NAME"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KEYWORD" -> KEYWORD
+      | "KEYWORD_TOKEN" -> KEYWORD_TOKEN
+      | "FORMAT" -> FORMAT
+      | "HTTP_CODE" -> HTTP_CODE
+      | "BLOCK_FORMAT" -> BLOCK_FORMAT
+      | "NUMERICAL_POINT" -> NUMERICAL_POINT
+      | "NUMERICAL_NAN" -> NUMERICAL_NAN
+      | "NEW_FIELD_NAME" -> NEW_FIELD_NAME
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LogAnomalyType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LogAnomalyType" j)
+    let to_json = simple_to_json to_value
+  end
+module LogEventId =
+  struct
+    type nonrec t = string
+    let context_ = "LogEventId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogEventId" j
+    let to_json = simple_to_json to_value
+  end
+module LogStreamName =
+  struct
+    type nonrec t = string
+    let context_ = "LogStreamName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogStreamName" j
+    let to_json = simple_to_json to_value
+  end
+module NumberOfLogLinesOccurrences =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NumberOfLogLinesOccurrences"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module CloudWatchMetricDataStatusCode =
   struct
     type nonrec t =
@@ -702,6 +841,9 @@ module TimestampMetricValuePairList =
   struct
     type nonrec t = TimestampMetricValuePair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TimestampMetricValuePair.to_value)) |>
         (fun x -> `List x)
@@ -749,14 +891,15 @@ module CloudWatchMetricsDimension =
           (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let value =
-        field_map json "Value" CloudWatchMetricsDimensionValue.of_json in
-      let name = field_map json "Name" CloudWatchMetricsDimensionName.of_json in
+        field_map json__ "Value" CloudWatchMetricsDimensionValue.of_json in
+      let name =
+        field_map json__ "Name" CloudWatchMetricsDimensionName.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The dimension of am Amazon CloudWatch metric that is used when DevOps Guru analyzes the resources in your account for operational problems and anomalous behavior. A dimension is a name/value pair that is part of the identity of a metric. A metric can have up to 10 dimensions. For more information, see Dimensions in the Amazon CloudWatch User Guide."]
+       "The dimension of an Amazon CloudWatch metric that is used when DevOps Guru analyzes the resources in your account for operational problems and anomalous behavior. A dimension is a name/value pair that is part of the identity of a metric. A metric can have up to 10 dimensions. For more information, see Dimensions in the Amazon CloudWatch User Guide."]
 module PerformanceInsightsReferenceData =
   struct
     type nonrec t =
@@ -785,12 +928,12 @@ module PerformanceInsightsReferenceData =
           (Xml.child xml_arg0 "Name") in
       make ?comparisonValues ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comparisonValues =
-        field_map json "ComparisonValues"
+        field_map json__ "ComparisonValues"
           PerformanceInsightsReferenceComparisonValues.of_json in
       let name =
-        field_map json "Name" PerformanceInsightsReferenceName.of_json in
+        field_map json__ "Name" PerformanceInsightsReferenceName.of_json in
       make ?comparisonValues ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -820,10 +963,10 @@ module PerformanceInsightsStat =
           (Xml.child xml_arg0 "Type") in
       make ?value ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let value =
-        field_map json "Value" PerformanceInsightsValueDouble.of_json in
-      let type_ = field_map json "Type" PerformanceInsightsStatType.of_json in
+        field_map json__ "Value" PerformanceInsightsValueDouble.of_json in
+      let type_ = field_map json__ "Type" PerformanceInsightsStatType.of_json in
       make ?value ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A statistic in a Performance Insights collection."]
@@ -874,6 +1017,9 @@ module TagValues =
   struct
     type nonrec t = TagValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -922,12 +1068,12 @@ module RecommendationRelatedAnomalyResource =
           (Xml.child xml_arg0 "Name") in
       make ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let type_ =
-        field_map json "Type"
+        field_map json__ "Type"
           RecommendationRelatedAnomalyResourceType.of_json in
       let name =
-        field_map json "Name"
+        field_map json__ "Name"
           RecommendationRelatedAnomalyResourceName.of_json in
       make ?type_ ?name ()
     let to_json v = composed_to_json to_value v
@@ -955,9 +1101,9 @@ module RecommendationRelatedAnomalySourceDetail =
           (Xml.child xml_arg0 "CloudWatchMetrics") in
       make ?cloudWatchMetrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchMetrics =
-        field_map json "CloudWatchMetrics"
+        field_map json__ "CloudWatchMetrics"
           RecommendationRelatedCloudWatchMetricsSourceDetails.of_json in
       make ?cloudWatchMetrics ()
     let to_json v = composed_to_json to_value v
@@ -992,15 +1138,178 @@ module RecommendationRelatedEventResource =
           (Xml.child xml_arg0 "Name") in
       make ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let type_ =
-        field_map json "Type" RecommendationRelatedEventResourceType.of_json in
+        field_map json__ "Type"
+          RecommendationRelatedEventResourceType.of_json in
       let name =
-        field_map json "Name" RecommendationRelatedEventResourceName.of_json in
+        field_map json__ "Name"
+          RecommendationRelatedEventResourceName.of_json in
       make ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an Amazon Web Services resource that emitted and event that is related to a recommendation in an insight."]
+module InsightSeverity =
+  struct
+    type nonrec t =
+      | LOW 
+      | MEDIUM 
+      | HIGH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LOW -> "LOW"
+      | MEDIUM -> "MEDIUM"
+      | HIGH -> "HIGH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LOW" -> LOW
+      | "MEDIUM" -> MEDIUM
+      | "HIGH" -> HIGH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InsightSeverity" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InsightSeverity" j)
+    let to_json = simple_to_json to_value
+  end
+module NotificationMessageType =
+  struct
+    type nonrec t =
+      | NEW_INSIGHT 
+      | CLOSED_INSIGHT 
+      | NEW_ASSOCIATION 
+      | SEVERITY_UPGRADED 
+      | NEW_RECOMMENDATION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NEW_INSIGHT -> "NEW_INSIGHT"
+      | CLOSED_INSIGHT -> "CLOSED_INSIGHT"
+      | NEW_ASSOCIATION -> "NEW_ASSOCIATION"
+      | SEVERITY_UPGRADED -> "SEVERITY_UPGRADED"
+      | NEW_RECOMMENDATION -> "NEW_RECOMMENDATION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NEW_INSIGHT" -> NEW_INSIGHT
+      | "CLOSED_INSIGHT" -> CLOSED_INSIGHT
+      | "NEW_ASSOCIATION" -> NEW_ASSOCIATION
+      | "SEVERITY_UPGRADED" -> SEVERITY_UPGRADED
+      | "NEW_RECOMMENDATION" -> NEW_RECOMMENDATION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration NotificationMessageType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"NotificationMessageType" j)
+    let to_json = simple_to_json to_value
+  end
+module LogAnomalyClass =
+  struct
+    type nonrec t =
+      {
+      logStreamName: LogStreamName.t option
+        [@ocaml.doc
+          "The name of the Amazon CloudWatch log stream that the anomalous log event belongs to. A log stream is a sequence of log events that share the same source."];
+      logAnomalyType: LogAnomalyType.t option
+        [@ocaml.doc "The type of log anomaly that has been detected."];
+      logAnomalyToken: LogAnomalyToken.t option
+        [@ocaml.doc
+          "The token where the anomaly was detected. This may refer to an exception or another location, or it may be blank for log anomalies such as format anomalies."];
+      logEventId: LogEventId.t option [@ocaml.doc "The ID of the log event."];
+      explanation: Explanation.t option
+        [@ocaml.doc
+          "The explanation for why the log event is considered an anomaly."];
+      numberOfLogLinesOccurrences: NumberOfLogLinesOccurrences.t option
+        [@ocaml.doc
+          "The number of log lines where this anomalous log event occurs."];
+      logEventTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The time of the first occurrence of the anomalous log event."]}
+    let make ?logStreamName =
+      fun ?logAnomalyType ->
+        fun ?logAnomalyToken ->
+          fun ?logEventId ->
+            fun ?explanation ->
+              fun ?numberOfLogLinesOccurrences ->
+                fun ?logEventTimestamp ->
+                  fun () ->
+                    {
+                      logStreamName;
+                      logAnomalyType;
+                      logAnomalyToken;
+                      logEventId;
+                      explanation;
+                      numberOfLogLinesOccurrences;
+                      logEventTimestamp
+                    }
+    let to_value x =
+      structure_to_value
+        [("LogStreamName",
+           (Option.map x.logStreamName ~f:LogStreamName.to_value));
+        ("LogAnomalyType",
+          (Option.map x.logAnomalyType ~f:LogAnomalyType.to_value));
+        ("LogAnomalyToken",
+          (Option.map x.logAnomalyToken ~f:LogAnomalyToken.to_value));
+        ("LogEventId", (Option.map x.logEventId ~f:LogEventId.to_value));
+        ("Explanation", (Option.map x.explanation ~f:Explanation.to_value));
+        ("NumberOfLogLinesOccurrences",
+          (Option.map x.numberOfLogLinesOccurrences
+             ~f:NumberOfLogLinesOccurrences.to_value));
+        ("LogEventTimestamp",
+          (Option.map x.logEventTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logEventTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LogEventTimestamp") in
+      let numberOfLogLinesOccurrences =
+        (Option.map ~f:NumberOfLogLinesOccurrences.of_xml)
+          (Xml.child xml_arg0 "NumberOfLogLinesOccurrences") in
+      let explanation =
+        (Option.map ~f:Explanation.of_xml) (Xml.child xml_arg0 "Explanation") in
+      let logEventId =
+        (Option.map ~f:LogEventId.of_xml) (Xml.child xml_arg0 "LogEventId") in
+      let logAnomalyToken =
+        (Option.map ~f:LogAnomalyToken.of_xml)
+          (Xml.child xml_arg0 "LogAnomalyToken") in
+      let logAnomalyType =
+        (Option.map ~f:LogAnomalyType.of_xml)
+          (Xml.child xml_arg0 "LogAnomalyType") in
+      let logStreamName =
+        (Option.map ~f:LogStreamName.of_xml)
+          (Xml.child xml_arg0 "LogStreamName") in
+      make ?logEventTimestamp ?numberOfLogLinesOccurrences ?explanation
+        ?logEventId ?logAnomalyToken ?logAnomalyType ?logStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logEventTimestamp =
+        field_map json__ "LogEventTimestamp" Timestamp.of_json in
+      let numberOfLogLinesOccurrences =
+        field_map json__ "NumberOfLogLinesOccurrences"
+          NumberOfLogLinesOccurrences.of_json in
+      let explanation = field_map json__ "Explanation" Explanation.of_json in
+      let logEventId = field_map json__ "LogEventId" LogEventId.of_json in
+      let logAnomalyToken =
+        field_map json__ "LogAnomalyToken" LogAnomalyToken.of_json in
+      let logAnomalyType =
+        field_map json__ "LogAnomalyType" LogAnomalyType.of_json in
+      let logStreamName =
+        field_map json__ "LogStreamName" LogStreamName.of_json in
+      make ?logEventTimestamp ?numberOfLogLinesOccurrences ?explanation
+        ?logEventId ?logAnomalyToken ?logAnomalyType ?logStreamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about an anomalous log event found within a log group."]
 module CloudWatchMetricsDataSummary =
   struct
     type nonrec t =
@@ -1031,11 +1340,11 @@ module CloudWatchMetricsDataSummary =
           (Xml.child xml_arg0 "TimestampMetricValuePairList") in
       make ?statusCode ?timestampMetricValuePairList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusCode =
-        field_map json "StatusCode" CloudWatchMetricDataStatusCode.of_json in
+        field_map json__ "StatusCode" CloudWatchMetricDataStatusCode.of_json in
       let timestampMetricValuePairList =
-        field_map json "TimestampMetricValuePairList"
+        field_map json__ "TimestampMetricValuePairList"
           TimestampMetricValuePairList.of_json in
       make ?statusCode ?timestampMetricValuePairList ()
     let to_json v = composed_to_json to_value v
@@ -1045,6 +1354,9 @@ module CloudWatchMetricsDimensions =
   struct
     type nonrec t = CloudWatchMetricsDimension.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchMetricsDimension.to_value)) |>
         (fun x -> `List x)
@@ -1197,6 +1509,9 @@ module PerformanceInsightsReferenceDataList =
   struct
     type nonrec t = PerformanceInsightsReferenceData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PerformanceInsightsReferenceData.to_value)) |>
         (fun x -> `List x)
@@ -1224,6 +1539,9 @@ module PerformanceInsightsStats =
   struct
     type nonrec t = PerformanceInsightsStat.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PerformanceInsightsStat.to_value)) |>
         (fun x -> `List x)
@@ -1250,6 +1568,9 @@ module StackNames =
   struct
     type nonrec t = StackName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StackName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1276,7 +1597,7 @@ module TagCollection =
       {
       appBoundaryKey: AppBoundaryKey.t
         [@ocaml.doc
-          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
+          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
       tagValues: TagValues.t
         [@ocaml.doc
           "The values in an Amazon Web Services tag collection. The tag's value is an optional field used to associate a string with the tag key (for example, 111122223333, Production, or a team name). The key and value are the tag's key pair. Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. You can specify a maximum of 256 characters for a tag value."]}
@@ -1298,14 +1619,14 @@ module TagCollection =
           (Xml.child_exn ~context:context_ xml_arg0 "AppBoundaryKey") in
       make ~tagValues ~appBoundaryKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map_exn json "TagValues" TagValues.of_json in
+    let of_json json__ =
+      let tagValues = field_map_exn json__ "TagValues" TagValues.of_json in
       let appBoundaryKey =
-        field_map_exn json "AppBoundaryKey" AppBoundaryKey.of_json in
+        field_map_exn json__ "AppBoundaryKey" AppBoundaryKey.of_json in
       make ~tagValues ~appBoundaryKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A collection of Amazon Web Services stags. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]
+       "A collection of Amazon Web Services tags. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]
 module ServiceName =
   struct
     type nonrec t =
@@ -1424,6 +1745,9 @@ module RecommendationRelatedAnomalyResources =
   struct
     type nonrec t = RecommendationRelatedAnomalyResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationRelatedAnomalyResource.to_value)) |>
         (fun x -> `List x)
@@ -1451,6 +1775,9 @@ module RelatedAnomalySourceDetails =
   struct
     type nonrec t = RecommendationRelatedAnomalySourceDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationRelatedAnomalySourceDetail.to_value))
         |> (fun x -> `List x)
@@ -1491,6 +1818,9 @@ module RecommendationRelatedEventResources =
   struct
     type nonrec t = RecommendationRelatedEventResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationRelatedEventResource.to_value)) |>
         (fun x -> `List x)
@@ -1512,6 +1842,71 @@ module RecommendationRelatedEventResources =
     let of_json j =
       list_of_json ~kind:"RecommendationRelatedEventResources"
         ~of_json:RecommendationRelatedEventResource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightSeverities =
+  struct
+    type nonrec t = InsightSeverity.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InsightSeverity.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InsightSeverity.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InsightSeverities" ~of_json:InsightSeverity.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module NotificationMessageTypes =
+  struct
+    type nonrec t = NotificationMessageType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NotificationMessageType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NotificationMessageType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NotificationMessageTypes"
+        ~of_json:NotificationMessageType.of_json j
     let to_json v = composed_to_json to_value v
   end
 module TopicArn =
@@ -1597,6 +1992,38 @@ module EventResourceType =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"EventResourceType" j
     let to_json = simple_to_json to_value
+  end
+module LogAnomalyClasses =
+  struct
+    type nonrec t = LogAnomalyClass.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LogAnomalyClass.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LogAnomalyClass.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LogAnomalyClasses" ~of_json:LogAnomalyClass.of_json
+        j
+    let to_json v = composed_to_json to_value v
   end
 module ResourceName =
   struct
@@ -1711,19 +2138,19 @@ module CloudWatchMetricsDetail =
       make ?metricDataSummary ?period ?unit ?stat ?dimensions ?namespace
         ?metricName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricDataSummary =
-        field_map json "MetricDataSummary"
+        field_map json__ "MetricDataSummary"
           CloudWatchMetricsDataSummary.of_json in
-      let period = field_map json "Period" CloudWatchMetricsPeriod.of_json in
-      let unit = field_map json "Unit" CloudWatchMetricsUnit.of_json in
-      let stat = field_map json "Stat" CloudWatchMetricsStat.of_json in
+      let period = field_map json__ "Period" CloudWatchMetricsPeriod.of_json in
+      let unit = field_map json__ "Unit" CloudWatchMetricsUnit.of_json in
+      let stat = field_map json__ "Stat" CloudWatchMetricsStat.of_json in
       let dimensions =
-        field_map json "Dimensions" CloudWatchMetricsDimensions.of_json in
+        field_map json__ "Dimensions" CloudWatchMetricsDimensions.of_json in
       let namespace =
-        field_map json "Namespace" CloudWatchMetricsNamespace.of_json in
+        field_map json__ "Namespace" CloudWatchMetricsNamespace.of_json in
       let metricName =
-        field_map json "MetricName" CloudWatchMetricsMetricName.of_json in
+        field_map json__ "MetricName" CloudWatchMetricsMetricName.of_json in
       make ?metricDataSummary ?period ?unit ?stat ?dimensions ?namespace
         ?metricName ()
     let to_json v = composed_to_json to_value v
@@ -1805,19 +2232,20 @@ module PerformanceInsightsMetricsDetail =
       make ?statsAtBaseline ?statsAtAnomaly ?referenceData ?metricQuery ?unit
         ?metricDisplayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statsAtBaseline =
-        field_map json "StatsAtBaseline" PerformanceInsightsStats.of_json in
+        field_map json__ "StatsAtBaseline" PerformanceInsightsStats.of_json in
       let statsAtAnomaly =
-        field_map json "StatsAtAnomaly" PerformanceInsightsStats.of_json in
+        field_map json__ "StatsAtAnomaly" PerformanceInsightsStats.of_json in
       let referenceData =
-        field_map json "ReferenceData"
+        field_map json__ "ReferenceData"
           PerformanceInsightsReferenceDataList.of_json in
       let metricQuery =
-        field_map json "MetricQuery" PerformanceInsightsMetricQuery.of_json in
-      let unit = field_map json "Unit" PerformanceInsightsMetricUnit.of_json in
+        field_map json__ "MetricQuery" PerformanceInsightsMetricQuery.of_json in
+      let unit =
+        field_map json__ "Unit" PerformanceInsightsMetricUnit.of_json in
       let metricDisplayName =
-        field_map json "MetricDisplayName"
+        field_map json__ "MetricDisplayName"
           PerformanceInsightsMetricDisplayName.of_json in
       make ?statsAtBaseline ?statsAtAnomaly ?referenceData ?metricQuery ?unit
         ?metricDisplayName ()
@@ -1859,6 +2287,9 @@ module UpdateTagValues =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1887,6 +2318,9 @@ module CostEstimationTagValues =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1942,8 +2376,8 @@ module CloudFormationCollection =
         (Option.map ~f:StackNames.of_xml) (Xml.child xml_arg0 "StackNames") in
       make ?stackNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stackNames = field_map json "StackNames" StackNames.of_json in
+    let of_json json__ =
+      let stackNames = field_map json__ "StackNames" StackNames.of_json in
       make ?stackNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1952,6 +2386,9 @@ module TagCollections =
   struct
     type nonrec t = TagCollection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagCollection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1976,6 +2413,9 @@ module ServiceNames =
   struct
     type nonrec t = ServiceName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2032,12 +2472,12 @@ module RecommendationRelatedAnomaly =
           (Xml.child xml_arg0 "Resources") in
       make ?anomalyId ?sourceDetails ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let anomalyId = field_map json "AnomalyId" AnomalyId.of_json in
+    let of_json json__ =
+      let anomalyId = field_map json__ "AnomalyId" AnomalyId.of_json in
       let sourceDetails =
-        field_map json "SourceDetails" RelatedAnomalySourceDetails.of_json in
+        field_map json__ "SourceDetails" RelatedAnomalySourceDetails.of_json in
       let resources =
-        field_map json "Resources"
+        field_map json__ "Resources"
           RecommendationRelatedAnomalyResources.of_json in
       make ?anomalyId ?sourceDetails ?resources ()
     let to_json v = composed_to_json to_value v
@@ -2071,15 +2511,53 @@ module RecommendationRelatedEvent =
           (Xml.child xml_arg0 "Name") in
       make ?resources ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resources =
-        field_map json "Resources"
+        field_map json__ "Resources"
           RecommendationRelatedEventResources.of_json in
-      let name = field_map json "Name" RecommendationRelatedEventName.of_json in
+      let name =
+        field_map json__ "Name" RecommendationRelatedEventName.of_json in
       make ?resources ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an event that is related to a recommendation."]
+module NotificationFilterConfig =
+  struct
+    type nonrec t =
+      {
+      severities: InsightSeverities.t option
+        [@ocaml.doc
+          "The severity levels that you want to receive notifications for. For example, you can choose to receive notifications only for insights with HIGH and MEDIUM severity levels. For more information, see Understanding insight severities."];
+      messageTypes: NotificationMessageTypes.t option
+        [@ocaml.doc
+          "The events that you want to receive notifications for. For example, you can choose to receive notifications only when the severity level is upgraded or a new insight is created."]}
+    let make ?severities =
+      fun ?messageTypes -> fun () -> { severities; messageTypes }
+    let to_value x =
+      structure_to_value
+        [("Severities",
+           (Option.map x.severities ~f:InsightSeverities.to_value));
+        ("MessageTypes",
+          (Option.map x.messageTypes ~f:NotificationMessageTypes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let messageTypes =
+        (Option.map ~f:NotificationMessageTypes.of_xml)
+          (Xml.child xml_arg0 "MessageTypes") in
+      let severities =
+        (Option.map ~f:InsightSeverities.of_xml)
+          (Xml.child xml_arg0 "Severities") in
+      make ?messageTypes ?severities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let messageTypes =
+        field_map json__ "MessageTypes" NotificationMessageTypes.of_json in
+      let severities =
+        field_map json__ "Severities" InsightSeverities.of_json in
+      make ?messageTypes ?severities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The filter configurations for the Amazon SNS notification topic you use with DevOps Guru. You can choose to specify which events or message types to receive notifications for. You can also choose to specify which severity levels to receive notifications for."]
 module SnsChannelConfig =
   struct
     type nonrec t =
@@ -2097,12 +2575,12 @@ module SnsChannelConfig =
         (Option.map ~f:TopicArn.of_xml) (Xml.child xml_arg0 "TopicArn") in
       make ?topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map json "TopicArn" TopicArn.of_json in
+    let of_json json__ =
+      let topicArn = field_map json__ "TopicArn" TopicArn.of_json in
       make ?topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the Amazon Resource Name (ARN) of an Amazon Simple Notification Service topic. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."]
+       "Contains the Amazon Resource Name (ARN) of an Amazon Simple Notification Service topic. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to send it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."]
 module EventResource =
   struct
     type nonrec t =
@@ -2130,14 +2608,39 @@ module EventResource =
         (Option.map ~f:EventResourceType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?arn ?name ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" EventResourceArn.of_json in
-      let name = field_map json "Name" EventResourceName.of_json in
-      let type_ = field_map json "Type" EventResourceType.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" EventResourceArn.of_json in
+      let name = field_map json__ "Name" EventResourceName.of_json in
+      let type_ = field_map json__ "Type" EventResourceType.of_json in
       make ?arn ?name ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon Web Services resource that emitted an event. Amazon Web Services resource events and metrics are analyzed by DevOps Guru to find anomalous behavior and provide recommendations to improve your operational solutions."]
+module LogAnomalyShowcase =
+  struct
+    type nonrec t =
+      {
+      logAnomalyClasses: LogAnomalyClasses.t option
+        [@ocaml.doc "A list of anomalous log events that may be related."]}
+    let make ?logAnomalyClasses = fun () -> { logAnomalyClasses }
+    let to_value x =
+      structure_to_value
+        [("LogAnomalyClasses",
+           (Option.map x.logAnomalyClasses ~f:LogAnomalyClasses.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logAnomalyClasses =
+        (Option.map ~f:LogAnomalyClasses.of_xml)
+          (Xml.child xml_arg0 "LogAnomalyClasses") in
+      make ?logAnomalyClasses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logAnomalyClasses =
+        field_map json__ "LogAnomalyClasses" LogAnomalyClasses.of_json in
+      make ?logAnomalyClasses ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A cluster of similar anomalous log events found within a log group."]
 module AnomalyResource =
   struct
     type nonrec t =
@@ -2159,9 +2662,9 @@ module AnomalyResource =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" ResourceType.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" ResourceType.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
       make ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2170,6 +2673,9 @@ module CloudWatchMetricsDetails =
   struct
     type nonrec t = CloudWatchMetricsDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchMetricsDetail.to_value)) |>
         (fun x -> `List x)
@@ -2196,6 +2702,9 @@ module PerformanceInsightsMetricsDetails =
   struct
     type nonrec t = PerformanceInsightsMetricsDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PerformanceInsightsMetricsDetail.to_value)) |>
         (fun x -> `List x)
@@ -2279,32 +2788,50 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      name: ErrorNameString.t [@ocaml.doc "The name of the field."];
-      message: ErrorMessageString.t
+      name: ErrorNameString.t option [@ocaml.doc "The name of the field."];
+      message: ErrorMessageString.t option
         [@ocaml.doc
           "The message associated with the validation exception with information to help determine its cause."]}
-    let context_ = "ValidationExceptionField"
-    let make ~name = fun ~message -> fun () -> { name; message }
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("Name", (Some (ErrorNameString.to_value x.name)));
-        ("Message", (Some (ErrorMessageString.to_value x.message)))]
+        [("Name", (Option.map x.name ~f:ErrorNameString.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessageString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessageString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:ErrorMessageString.of_xml)
+          (Xml.child xml_arg0 "Message") in
       let name =
-        ErrorNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~message ~name ()
+        (Option.map ~f:ErrorNameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ErrorMessageString.of_json in
-      let name = field_map_exn json "Name" ErrorNameString.of_json in
-      make ~message ~name ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageString.of_json in
+      let name = field_map json__ "Name" ErrorNameString.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The field associated with the validation exception."]
+module KMSKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "KMSKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KMSKeyId" j
+    let to_json = simple_to_json to_value
+  end
 module OptInStatus =
   struct
     type nonrec t =
@@ -2330,6 +2857,33 @@ module OptInStatus =
     let of_json j = of_string (string_of_json ~kind:"OptInStatus" j)
     let to_json = simple_to_json to_value
   end
+module ServerSideEncryptionType =
+  struct
+    type nonrec t =
+      | CUSTOMER_MANAGED_KEY 
+      | AWS_OWNED_KMS_KEY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CUSTOMER_MANAGED_KEY -> "CUSTOMER_MANAGED_KEY"
+      | AWS_OWNED_KMS_KEY -> "AWS_OWNED_KMS_KEY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CUSTOMER_MANAGED_KEY" -> CUSTOMER_MANAGED_KEY
+      | "AWS_OWNED_KMS_KEY" -> AWS_OWNED_KMS_KEY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServerSideEncryptionType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ServerSideEncryptionType" j)
+    let to_json = simple_to_json to_value
+  end
 module UpdateStackNames =
   struct
     type nonrec t = StackName.t list
@@ -2339,6 +2893,9 @@ module UpdateStackNames =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StackName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2365,7 +2922,7 @@ module UpdateTagCollectionFilter =
       {
       appBoundaryKey: AppBoundaryKey.t
         [@ocaml.doc
-          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
+          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
       tagValues: UpdateTagValues.t
         [@ocaml.doc
           "The values in an Amazon Web Services tag collection. The tag's value is an optional field used to associate a string with the tag key (for example, 111122223333, Production, or a team name). The key and value are the tag's key pair. Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. You can specify a maximum of 256 characters for a tag value."]}
@@ -2387,10 +2944,11 @@ module UpdateTagCollectionFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "AppBoundaryKey") in
       make ~tagValues ~appBoundaryKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map_exn json "TagValues" UpdateTagValues.of_json in
+    let of_json json__ =
+      let tagValues =
+        field_map_exn json__ "TagValues" UpdateTagValues.of_json in
       let appBoundaryKey =
-        field_map_exn json "AppBoundaryKey" AppBoundaryKey.of_json in
+        field_map_exn json__ "AppBoundaryKey" AppBoundaryKey.of_json in
       make ~tagValues ~appBoundaryKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2430,6 +2988,9 @@ module CostEstimationStackNames =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StackName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2457,7 +3018,7 @@ module TagCostEstimationResourceCollectionFilter =
       {
       appBoundaryKey: AppBoundaryKey.t
         [@ocaml.doc
-          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
+          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
       tagValues: CostEstimationTagValues.t
         [@ocaml.doc
           "The values in an Amazon Web Services tag collection. The tag's value is an optional field used to associate a string with the tag key (for example, 111122223333, Production, or a team name). The key and value are the tag's key pair. Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. You can specify a maximum of 256 characters for a tag value."]}
@@ -2479,11 +3040,11 @@ module TagCostEstimationResourceCollectionFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "AppBoundaryKey") in
       make ~tagValues ~appBoundaryKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagValues =
-        field_map_exn json "TagValues" CostEstimationTagValues.of_json in
+        field_map_exn json__ "TagValues" CostEstimationTagValues.of_json in
       let appBoundaryKey =
-        field_map_exn json "AppBoundaryKey" AppBoundaryKey.of_json in
+        field_map_exn json__ "AppBoundaryKey" AppBoundaryKey.of_json in
       make ~tagValues ~appBoundaryKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2492,6 +3053,9 @@ module AssociatedResourceArns =
   struct
     type nonrec t = ResourceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2553,34 +3117,6 @@ module InsightName =
     let of_json j = string_of_json ~kind:"InsightName" j
     let to_json = simple_to_json to_value
   end
-module InsightSeverity =
-  struct
-    type nonrec t =
-      | LOW 
-      | MEDIUM 
-      | HIGH 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | LOW -> "LOW"
-      | MEDIUM -> "MEDIUM"
-      | HIGH -> "HIGH"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "LOW" -> LOW
-      | "MEDIUM" -> MEDIUM
-      | "HIGH" -> HIGH
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration InsightSeverity" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"InsightSeverity" j)
-    let to_json = simple_to_json to_value
-  end
 module InsightStatus =
   struct
     type nonrec t =
@@ -2610,31 +3146,29 @@ module InsightTimeRange =
   struct
     type nonrec t =
       {
-      startTime: Timestamp.t
+      startTime: Timestamp.t option
         [@ocaml.doc
           "The time when the behavior described in an insight started."];
       endTime: Timestamp.t option
         [@ocaml.doc
           "The time when the behavior described in an insight ended."]}
-    let context_ = "InsightTimeRange"
-    let make ?endTime = fun ~startTime -> fun () -> { endTime; startTime }
+    let make ?startTime = fun ?endTime -> fun () -> { startTime; endTime }
     let to_value x =
       structure_to_value
-        [("StartTime", (Some (Timestamp.to_value x.startTime)));
+        [("StartTime", (Option.map x.startTime ~f:Timestamp.to_value));
         ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
       let startTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
-      make ?endTime ~startTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      make ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let startTime = field_map_exn json "StartTime" Timestamp.of_json in
-      make ?endTime ~startTime ()
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      make ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A time ranged that specifies when the observed behavior in an insight started and ended."]
@@ -2642,31 +3176,29 @@ module PredictionTimeRange =
   struct
     type nonrec t =
       {
-      startTime: Timestamp.t
+      startTime: Timestamp.t option
         [@ocaml.doc
           "The time range during which a metric limit is expected to be exceeded. This applies to proactive insights only."];
       endTime: Timestamp.t option
         [@ocaml.doc
           "The time when the behavior in a proactive insight is expected to end."]}
-    let context_ = "PredictionTimeRange"
-    let make ?endTime = fun ~startTime -> fun () -> { endTime; startTime }
+    let make ?startTime = fun ?endTime -> fun () -> { startTime; endTime }
     let to_value x =
       structure_to_value
-        [("StartTime", (Some (Timestamp.to_value x.startTime)));
+        [("StartTime", (Option.map x.startTime ~f:Timestamp.to_value));
         ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
       let startTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
-      make ?endTime ~startTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      make ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let startTime = field_map_exn json "StartTime" Timestamp.of_json in
-      make ?endTime ~startTime ()
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      make ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The time range during which anomalous behavior in a proactive anomaly or an insight is expected to occur."]
@@ -2679,7 +3211,7 @@ module ResourceCollection =
           "An array of the names of Amazon Web Services CloudFormation stacks. The stacks define Amazon Web Services resources that DevOps Guru analyzes. You can specify up to 500 Amazon Web Services CloudFormation stacks."];
       tags: TagCollections.t option
         [@ocaml.doc
-          "The Amazon Web Services tags that are used by resources in the resource collection. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
+          "The Amazon Web Services tags that are used by resources in the resource collection. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
     let make ?cloudFormation =
       fun ?tags -> fun () -> { cloudFormation; tags }
     let to_value x =
@@ -2696,10 +3228,10 @@ module ResourceCollection =
           (Xml.child xml_arg0 "CloudFormation") in
       make ?tags ?cloudFormation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagCollections.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagCollections.of_json in
       let cloudFormation =
-        field_map json "CloudFormation" CloudFormationCollection.of_json in
+        field_map json__ "CloudFormation" CloudFormationCollection.of_json in
       make ?tags ?cloudFormation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2723,8 +3255,8 @@ module ServiceCollection =
           (Xml.child xml_arg0 "ServiceNames") in
       make ?serviceNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceNames = field_map json "ServiceNames" ServiceNames.of_json in
+    let of_json json__ =
+      let serviceNames = field_map json__ "ServiceNames" ServiceNames.of_json in
       make ?serviceNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2798,6 +3330,9 @@ module RecommendationRelatedAnomalies =
   struct
     type nonrec t = RecommendationRelatedAnomaly.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationRelatedAnomaly.to_value)) |>
         (fun x -> `List x)
@@ -2824,6 +3359,9 @@ module RecommendationRelatedEvents =
   struct
     type nonrec t = RecommendationRelatedEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationRelatedEvent.to_value)) |>
         (fun x -> `List x)
@@ -2931,9 +3469,9 @@ module StartTimeRange =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "FromTime") in
       make ?toTime ?fromTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let toTime = field_map json "ToTime" Timestamp.of_json in
-      let fromTime = field_map json "FromTime" Timestamp.of_json in
+    let of_json json__ =
+      let toTime = field_map json__ "ToTime" Timestamp.of_json in
+      let fromTime = field_map json__ "FromTime" Timestamp.of_json in
       make ?toTime ?fromTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2959,9 +3497,9 @@ module EndTimeRange =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "FromTime") in
       make ?toTime ?fromTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let toTime = field_map json "ToTime" Timestamp.of_json in
-      let fromTime = field_map json "FromTime" Timestamp.of_json in
+    let of_json json__ =
+      let toTime = field_map json__ "ToTime" Timestamp.of_json in
+      let fromTime = field_map json__ "FromTime" Timestamp.of_json in
       make ?toTime ?fromTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2972,21 +3510,32 @@ module NotificationChannelConfig =
       {
       sns: SnsChannelConfig.t
         [@ocaml.doc
-          "Information about a notification channel configured in DevOps Guru to send notifications when insights are created. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."]}
+          "Information about a notification channel configured in DevOps Guru to send notifications when insights are created. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to send it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."];
+      filters: NotificationFilterConfig.t option
+        [@ocaml.doc
+          "The filter configurations for the Amazon SNS notification topic you use with DevOps Guru. If you do not provide filter configurations, the default configurations are to receive notifications for all message types of High or Medium severity."]}
     let context_ = "NotificationChannelConfig"
-    let make ~sns = fun () -> { sns }
+    let make ?filters = fun ~sns -> fun () -> { filters; sns }
     let to_value x =
-      structure_to_value [("Sns", (Some (SnsChannelConfig.to_value x.sns)))]
+      structure_to_value
+        [("Sns", (Some (SnsChannelConfig.to_value x.sns)));
+        ("Filters",
+          (Option.map x.filters ~f:NotificationFilterConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:NotificationFilterConfig.of_xml)
+          (Xml.child xml_arg0 "Filters") in
       let sns =
         SnsChannelConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Sns") in
-      make ~sns ()
+      make ?filters ~sns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sns = field_map_exn json "Sns" SnsChannelConfig.of_json in
-      make ~sns ()
+    let of_json json__ =
+      let filters =
+        field_map json__ "Filters" NotificationFilterConfig.of_json in
+      let sns = field_map_exn json__ "Sns" SnsChannelConfig.of_json in
+      make ?filters ~sns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about notification channels you have configured with DevOps Guru. The one supported notification channel is Amazon Simple Notification Service (Amazon SNS)."]
@@ -3010,6 +3559,160 @@ module NotificationChannelId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"NotificationChannelId" j
+    let to_json = simple_to_json to_value
+  end
+module MonitoredResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "MonitoredResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[\\.\\-_\\/#A-Za-z0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MonitoredResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module ResourcePermission =
+  struct
+    type nonrec t =
+      | FULL_PERMISSION 
+      | MISSING_PERMISSION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FULL_PERMISSION -> "FULL_PERMISSION"
+      | MISSING_PERMISSION -> "MISSING_PERMISSION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FULL_PERMISSION" -> FULL_PERMISSION
+      | "MISSING_PERMISSION" -> MISSING_PERMISSION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourcePermission" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourcePermission" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceTypeFilter =
+  struct
+    type nonrec t =
+      | LOG_GROUPS 
+      | CLOUDFRONT_DISTRIBUTION 
+      | DYNAMODB_TABLE 
+      | EC2_NAT_GATEWAY 
+      | ECS_CLUSTER 
+      | ECS_SERVICE 
+      | EKS_CLUSTER 
+      | ELASTIC_BEANSTALK_ENVIRONMENT 
+      | ELASTIC_LOAD_BALANCER_LOAD_BALANCER 
+      | ELASTIC_LOAD_BALANCING_V2_LOAD_BALANCER 
+      | ELASTIC_LOAD_BALANCING_V2_TARGET_GROUP 
+      | ELASTICACHE_CACHE_CLUSTER 
+      | ELASTICSEARCH_DOMAIN 
+      | KINESIS_STREAM 
+      | LAMBDA_FUNCTION 
+      | OPEN_SEARCH_SERVICE_DOMAIN 
+      | RDS_DB_INSTANCE 
+      | RDS_DB_CLUSTER 
+      | REDSHIFT_CLUSTER 
+      | ROUTE53_HOSTED_ZONE 
+      | ROUTE53_HEALTH_CHECK 
+      | S3_BUCKET 
+      | SAGEMAKER_ENDPOINT 
+      | SNS_TOPIC 
+      | SQS_QUEUE 
+      | STEP_FUNCTIONS_ACTIVITY 
+      | STEP_FUNCTIONS_STATE_MACHINE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LOG_GROUPS -> "LOG_GROUPS"
+      | CLOUDFRONT_DISTRIBUTION -> "CLOUDFRONT_DISTRIBUTION"
+      | DYNAMODB_TABLE -> "DYNAMODB_TABLE"
+      | EC2_NAT_GATEWAY -> "EC2_NAT_GATEWAY"
+      | ECS_CLUSTER -> "ECS_CLUSTER"
+      | ECS_SERVICE -> "ECS_SERVICE"
+      | EKS_CLUSTER -> "EKS_CLUSTER"
+      | ELASTIC_BEANSTALK_ENVIRONMENT -> "ELASTIC_BEANSTALK_ENVIRONMENT"
+      | ELASTIC_LOAD_BALANCER_LOAD_BALANCER ->
+          "ELASTIC_LOAD_BALANCER_LOAD_BALANCER"
+      | ELASTIC_LOAD_BALANCING_V2_LOAD_BALANCER ->
+          "ELASTIC_LOAD_BALANCING_V2_LOAD_BALANCER"
+      | ELASTIC_LOAD_BALANCING_V2_TARGET_GROUP ->
+          "ELASTIC_LOAD_BALANCING_V2_TARGET_GROUP"
+      | ELASTICACHE_CACHE_CLUSTER -> "ELASTICACHE_CACHE_CLUSTER"
+      | ELASTICSEARCH_DOMAIN -> "ELASTICSEARCH_DOMAIN"
+      | KINESIS_STREAM -> "KINESIS_STREAM"
+      | LAMBDA_FUNCTION -> "LAMBDA_FUNCTION"
+      | OPEN_SEARCH_SERVICE_DOMAIN -> "OPEN_SEARCH_SERVICE_DOMAIN"
+      | RDS_DB_INSTANCE -> "RDS_DB_INSTANCE"
+      | RDS_DB_CLUSTER -> "RDS_DB_CLUSTER"
+      | REDSHIFT_CLUSTER -> "REDSHIFT_CLUSTER"
+      | ROUTE53_HOSTED_ZONE -> "ROUTE53_HOSTED_ZONE"
+      | ROUTE53_HEALTH_CHECK -> "ROUTE53_HEALTH_CHECK"
+      | S3_BUCKET -> "S3_BUCKET"
+      | SAGEMAKER_ENDPOINT -> "SAGEMAKER_ENDPOINT"
+      | SNS_TOPIC -> "SNS_TOPIC"
+      | SQS_QUEUE -> "SQS_QUEUE"
+      | STEP_FUNCTIONS_ACTIVITY -> "STEP_FUNCTIONS_ACTIVITY"
+      | STEP_FUNCTIONS_STATE_MACHINE -> "STEP_FUNCTIONS_STATE_MACHINE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LOG_GROUPS" -> LOG_GROUPS
+      | "CLOUDFRONT_DISTRIBUTION" -> CLOUDFRONT_DISTRIBUTION
+      | "DYNAMODB_TABLE" -> DYNAMODB_TABLE
+      | "EC2_NAT_GATEWAY" -> EC2_NAT_GATEWAY
+      | "ECS_CLUSTER" -> ECS_CLUSTER
+      | "ECS_SERVICE" -> ECS_SERVICE
+      | "EKS_CLUSTER" -> EKS_CLUSTER
+      | "ELASTIC_BEANSTALK_ENVIRONMENT" -> ELASTIC_BEANSTALK_ENVIRONMENT
+      | "ELASTIC_LOAD_BALANCER_LOAD_BALANCER" ->
+          ELASTIC_LOAD_BALANCER_LOAD_BALANCER
+      | "ELASTIC_LOAD_BALANCING_V2_LOAD_BALANCER" ->
+          ELASTIC_LOAD_BALANCING_V2_LOAD_BALANCER
+      | "ELASTIC_LOAD_BALANCING_V2_TARGET_GROUP" ->
+          ELASTIC_LOAD_BALANCING_V2_TARGET_GROUP
+      | "ELASTICACHE_CACHE_CLUSTER" -> ELASTICACHE_CACHE_CLUSTER
+      | "ELASTICSEARCH_DOMAIN" -> ELASTICSEARCH_DOMAIN
+      | "KINESIS_STREAM" -> KINESIS_STREAM
+      | "LAMBDA_FUNCTION" -> LAMBDA_FUNCTION
+      | "OPEN_SEARCH_SERVICE_DOMAIN" -> OPEN_SEARCH_SERVICE_DOMAIN
+      | "RDS_DB_INSTANCE" -> RDS_DB_INSTANCE
+      | "RDS_DB_CLUSTER" -> RDS_DB_CLUSTER
+      | "REDSHIFT_CLUSTER" -> REDSHIFT_CLUSTER
+      | "ROUTE53_HOSTED_ZONE" -> ROUTE53_HOSTED_ZONE
+      | "ROUTE53_HEALTH_CHECK" -> ROUTE53_HEALTH_CHECK
+      | "S3_BUCKET" -> S3_BUCKET
+      | "SAGEMAKER_ENDPOINT" -> SAGEMAKER_ENDPOINT
+      | "SNS_TOPIC" -> SNS_TOPIC
+      | "SQS_QUEUE" -> SQS_QUEUE
+      | "STEP_FUNCTIONS_ACTIVITY" -> STEP_FUNCTIONS_ACTIVITY
+      | "STEP_FUNCTIONS_STATE_MACHINE" -> STEP_FUNCTIONS_STATE_MACHINE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceTypeFilter" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceTypeFilter" j)
     let to_json = simple_to_json to_value
   end
 module EventClass =
@@ -3106,6 +3809,9 @@ module EventResources =
   struct
     type nonrec t = EventResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3148,6 +3854,84 @@ module EventSource =
     let of_json j = string_of_json ~kind:"EventSource" j
     let to_json = simple_to_json to_value
   end
+module LogAnomalyShowcases =
+  struct
+    type nonrec t = LogAnomalyShowcase.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LogAnomalyShowcase.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LogAnomalyShowcase.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LogAnomalyShowcases"
+        ~of_json:LogAnomalyShowcase.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LogGroupName =
+  struct
+    type nonrec t = string
+    let context_ = "LogGroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogGroupName" j
+    let to_json = simple_to_json to_value
+  end
+module NumberOfLogLinesScanned =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NumberOfLogLinesScanned"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AnomalyDescription =
+  struct
+    type nonrec t = string
+    let context_ = "AnomalyDescription"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AnomalyDescription" j
+    let to_json = simple_to_json to_value
+  end
 module AnomalyLimit =
   struct
     type nonrec t = float
@@ -3165,29 +3949,27 @@ module AnomalyReportedTimeRange =
   struct
     type nonrec t =
       {
-      openTime: Timestamp.t
+      openTime: Timestamp.t option
         [@ocaml.doc "The time when an anomaly is opened."];
       closeTime: Timestamp.t option
         [@ocaml.doc "The time when an anomaly is closed."]}
-    let context_ = "AnomalyReportedTimeRange"
-    let make ?closeTime = fun ~openTime -> fun () -> { closeTime; openTime }
+    let make ?openTime = fun ?closeTime -> fun () -> { openTime; closeTime }
     let to_value x =
       structure_to_value
-        [("OpenTime", (Some (Timestamp.to_value x.openTime)));
+        [("OpenTime", (Option.map x.openTime ~f:Timestamp.to_value));
         ("CloseTime", (Option.map x.closeTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let closeTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CloseTime") in
       let openTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OpenTime") in
-      make ?closeTime ~openTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "OpenTime") in
+      make ?closeTime ?openTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let closeTime = field_map json "CloseTime" Timestamp.of_json in
-      let openTime = field_map_exn json "OpenTime" Timestamp.of_json in
-      make ?closeTime ~openTime ()
+    let of_json json__ =
+      let closeTime = field_map json__ "CloseTime" Timestamp.of_json in
+      let openTime = field_map json__ "OpenTime" Timestamp.of_json in
+      make ?closeTime ?openTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A time range that specifies when DevOps Guru opens and then closes an anomaly. This is different from AnomalyTimeRange, which specifies the time range when DevOps Guru actually observes the anomalous behavior."]
@@ -3195,6 +3977,9 @@ module AnomalyResources =
   struct
     type nonrec t = AnomalyResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AnomalyResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3275,12 +4060,12 @@ module AnomalySourceDetails =
           (Xml.child xml_arg0 "CloudWatchMetrics") in
       make ?performanceInsightsMetrics ?cloudWatchMetrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let performanceInsightsMetrics =
-        field_map json "PerformanceInsightsMetrics"
+        field_map json__ "PerformanceInsightsMetrics"
           PerformanceInsightsMetricsDetails.of_json in
       let cloudWatchMetrics =
-        field_map json "CloudWatchMetrics" CloudWatchMetricsDetails.of_json in
+        field_map json__ "CloudWatchMetrics" CloudWatchMetricsDetails.of_json in
       make ?performanceInsightsMetrics ?cloudWatchMetrics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3318,12 +4103,12 @@ module AnomalySourceMetadata =
         (Option.map ~f:AnomalySource.of_xml) (Xml.child xml_arg0 "Source") in
       make ?sourceResourceType ?sourceResourceName ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceResourceType =
-        field_map json "SourceResourceType" ResourceType.of_json in
+        field_map json__ "SourceResourceType" ResourceType.of_json in
       let sourceResourceName =
-        field_map json "SourceResourceName" ResourceName.of_json in
-      let source = field_map json "Source" AnomalySource.of_json in
+        field_map json__ "SourceResourceName" ResourceName.of_json in
+      let source = field_map json__ "Source" AnomalySource.of_json in
       make ?sourceResourceType ?sourceResourceName ?source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3357,45 +4142,30 @@ module AnomalyTimeRange =
   struct
     type nonrec t =
       {
-      startTime: Timestamp.t
+      startTime: Timestamp.t option
         [@ocaml.doc "The time when the anomalous behavior started."];
       endTime: Timestamp.t option
         [@ocaml.doc "The time when the anomalous behavior ended."]}
-    let context_ = "AnomalyTimeRange"
-    let make ?endTime = fun ~startTime -> fun () -> { endTime; startTime }
+    let make ?startTime = fun ?endTime -> fun () -> { startTime; endTime }
     let to_value x =
       structure_to_value
-        [("StartTime", (Some (Timestamp.to_value x.startTime)));
+        [("StartTime", (Option.map x.startTime ~f:Timestamp.to_value));
         ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
       let startTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
-      make ?endTime ~startTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      make ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let startTime = field_map_exn json "StartTime" Timestamp.of_json in
-      make ?endTime ~startTime ()
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      make ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A time range that specifies when the observed unusual behavior in an anomaly started and ended. This is different from AnomalyReportedTimeRange, which specifies the time range when DevOps Guru opens and then closes an anomaly."]
-module AnomalyDescription =
-  struct
-    type nonrec t = string
-    let context_ = "AnomalyDescription"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AnomalyDescription" j
-    let to_json = simple_to_json to_value
-  end
 module AnomalyName =
   struct
     type nonrec t = string
@@ -3438,35 +4208,33 @@ module TagCollectionFilter =
   struct
     type nonrec t =
       {
-      appBoundaryKey: AppBoundaryKey.t
+      appBoundaryKey: AppBoundaryKey.t option
         [@ocaml.doc
-          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
-      tagValues: TagValues.t
+          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
+      tagValues: TagValues.t option
         [@ocaml.doc
           "The values in an Amazon Web Services tag collection. The tag's value is an optional field used to associate a string with the tag key (for example, 111122223333, Production, or a team name). The key and value are the tag's key pair. Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. You can specify a maximum of 256 characters for a tag value."]}
-    let context_ = "TagCollectionFilter"
-    let make ~appBoundaryKey =
-      fun ~tagValues -> fun () -> { appBoundaryKey; tagValues }
+    let make ?appBoundaryKey =
+      fun ?tagValues -> fun () -> { appBoundaryKey; tagValues }
     let to_value x =
       structure_to_value
         [("AppBoundaryKey",
-           (Some (AppBoundaryKey.to_value x.appBoundaryKey)));
-        ("TagValues", (Some (TagValues.to_value x.tagValues)))]
+           (Option.map x.appBoundaryKey ~f:AppBoundaryKey.to_value));
+        ("TagValues", (Option.map x.tagValues ~f:TagValues.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tagValues =
-        TagValues.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TagValues") in
+        (Option.map ~f:TagValues.of_xml) (Xml.child xml_arg0 "TagValues") in
       let appBoundaryKey =
-        AppBoundaryKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AppBoundaryKey") in
-      make ~tagValues ~appBoundaryKey ()
+        (Option.map ~f:AppBoundaryKey.of_xml)
+          (Xml.child xml_arg0 "AppBoundaryKey") in
+      make ?tagValues ?appBoundaryKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map_exn json "TagValues" TagValues.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValues.of_json in
       let appBoundaryKey =
-        field_map_exn json "AppBoundaryKey" AppBoundaryKey.of_json in
-      make ~tagValues ~appBoundaryKey ()
+        field_map json__ "AppBoundaryKey" AppBoundaryKey.of_json in
+      make ?tagValues ?appBoundaryKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A collection of Amazon Web Services tags used to filter insights. This is used to return insights generated from only resources that contain the tags in the tag collection."]
@@ -3526,6 +4294,19 @@ module CostEstimationServiceResourceState =
       of_string (string_of_json ~kind:"CostEstimationServiceResourceState" j)
     let to_json = simple_to_json to_value
   end
+module AnalyzedResourceCount =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module InsightHealth =
   struct
     type nonrec t =
@@ -3571,14 +4352,15 @@ module InsightHealth =
       make ?meanTimeToRecoverInMilliseconds ?openReactiveInsights
         ?openProactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let meanTimeToRecoverInMilliseconds =
-        field_map json "MeanTimeToRecoverInMilliseconds"
+        field_map json__ "MeanTimeToRecoverInMilliseconds"
           MeanTimeToRecoverInMilliseconds.of_json in
       let openReactiveInsights =
-        field_map json "OpenReactiveInsights" NumOpenReactiveInsights.of_json in
+        field_map json__ "OpenReactiveInsights"
+          NumOpenReactiveInsights.of_json in
       let openProactiveInsights =
-        field_map json "OpenProactiveInsights"
+        field_map json__ "OpenProactiveInsights"
           NumOpenProactiveInsights.of_json in
       make ?meanTimeToRecoverInMilliseconds ?openReactiveInsights
         ?openProactiveInsights ()
@@ -3616,11 +4398,12 @@ module ServiceInsightHealth =
           (Xml.child xml_arg0 "OpenProactiveInsights") in
       make ?openReactiveInsights ?openProactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openReactiveInsights =
-        field_map json "OpenReactiveInsights" NumOpenReactiveInsights.of_json in
+        field_map json__ "OpenReactiveInsights"
+          NumOpenReactiveInsights.of_json in
       let openProactiveInsights =
-        field_map json "OpenProactiveInsights"
+        field_map json__ "OpenProactiveInsights"
           NumOpenProactiveInsights.of_json in
       make ?openReactiveInsights ?openProactiveInsights ()
     let to_json v = composed_to_json to_value v
@@ -3657,11 +4440,12 @@ module AccountInsightHealth =
           (Xml.child xml_arg0 "OpenProactiveInsights") in
       make ?openReactiveInsights ?openProactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openReactiveInsights =
-        field_map json "OpenReactiveInsights" NumOpenReactiveInsights.of_json in
+        field_map json__ "OpenReactiveInsights"
+          NumOpenReactiveInsights.of_json in
       let openProactiveInsights =
-        field_map json "OpenProactiveInsights"
+        field_map json__ "OpenProactiveInsights"
           NumOpenProactiveInsights.of_json in
       make ?openReactiveInsights ?openProactiveInsights ()
     let to_json v = composed_to_json to_value v
@@ -3737,6 +4521,9 @@ module ValidationExceptionFields =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -3800,6 +4587,69 @@ module ValidationExceptionReason =
       of_string (string_of_json ~kind:"ValidationExceptionReason" j)
     let to_json = simple_to_json to_value
   end
+module KMSServerSideEncryptionIntegrationConfig =
+  struct
+    type nonrec t =
+      {
+      kMSKeyId: KMSKeyId.t option
+        [@ocaml.doc
+          "Describes the specified KMS key. To specify a KMS key, use its key ID, key ARN, alias name, or alias ARN. When using an alias name, prefix it with \"alias/\". If you specify a predefined Amazon Web Services alias (an Amazon Web Services alias with no key ID), Amazon Web Services KMS associates the alias with an Amazon Web Services managed key and returns its KeyId and Arn in the response. To specify a KMS key in a different Amazon Web Services account, you must use the key ARN or alias ARN. For example: Key ID: 1234abcd-12ab-34cd-56ef-1234567890ab Key ARN: arn:aws:kms:us-east-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab Alias name: alias/ExampleAlias Alias ARN: arn:aws:kms:us-east-2:111122223333:alias/ExampleAlias"];
+      optInStatus: OptInStatus.t option
+        [@ocaml.doc
+          "Specifies if DevOps Guru is enabled for KMS integration."];
+      type_: ServerSideEncryptionType.t option
+        [@ocaml.doc
+          "The type of KMS key used. Customer managed keys are the KMS keys that you create. Amazon Web Services owned keys are keys that are owned and managed by DevOps Guru."]}
+    let make ?kMSKeyId =
+      fun ?optInStatus ->
+        fun ?type_ -> fun () -> { kMSKeyId; optInStatus; type_ }
+    let to_value x =
+      structure_to_value
+        [("KMSKeyId", (Option.map x.kMSKeyId ~f:KMSKeyId.to_value));
+        ("OptInStatus", (Option.map x.optInStatus ~f:OptInStatus.to_value));
+        ("Type", (Option.map x.type_ ~f:ServerSideEncryptionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:ServerSideEncryptionType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let optInStatus =
+        (Option.map ~f:OptInStatus.of_xml) (Xml.child xml_arg0 "OptInStatus") in
+      let kMSKeyId =
+        (Option.map ~f:KMSKeyId.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
+      make ?type_ ?optInStatus ?kMSKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" ServerSideEncryptionType.of_json in
+      let optInStatus = field_map json__ "OptInStatus" OptInStatus.of_json in
+      let kMSKeyId = field_map json__ "KMSKeyId" KMSKeyId.of_json in
+      make ?type_ ?optInStatus ?kMSKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about whether DevOps Guru is configured to encrypt server-side data using KMS."]
+module LogsAnomalyDetectionIntegrationConfig =
+  struct
+    type nonrec t =
+      {
+      optInStatus: OptInStatus.t option
+        [@ocaml.doc
+          "Specifies if DevOps Guru is configured to perform log anomaly detection on CloudWatch log groups."]}
+    let make ?optInStatus = fun () -> { optInStatus }
+    let to_value x =
+      structure_to_value
+        [("OptInStatus", (Option.map x.optInStatus ~f:OptInStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let optInStatus =
+        (Option.map ~f:OptInStatus.of_xml) (Xml.child xml_arg0 "OptInStatus") in
+      make ?optInStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let optInStatus = field_map json__ "OptInStatus" OptInStatus.of_json in
+      make ?optInStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the integration of DevOps Guru with CloudWatch log groups for log anomaly detection. You can use this to update the configuration."]
 module OpsCenterIntegrationConfig =
   struct
     type nonrec t =
@@ -3817,12 +4667,12 @@ module OpsCenterIntegrationConfig =
         (Option.map ~f:OptInStatus.of_xml) (Xml.child xml_arg0 "OptInStatus") in
       make ?optInStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let optInStatus = field_map json "OptInStatus" OptInStatus.of_json in
+    let of_json json__ =
+      let optInStatus = field_map json__ "OptInStatus" OptInStatus.of_json in
       make ?optInStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about whether DevOps Guru is configured to create an OpsItem in Amazon Web Services Systems Manager OpsCenter for each created insight."]
+       "Information about whether DevOps Guru is configured to create an OpsItem in Amazon Web Services Systems Manager OpsCenter for each created insight. You can use this to update the configuration."]
 module UpdateCloudFormationCollectionFilter =
   struct
     type nonrec t =
@@ -3842,8 +4692,8 @@ module UpdateCloudFormationCollectionFilter =
           (Xml.child xml_arg0 "StackNames") in
       make ?stackNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stackNames = field_map json "StackNames" UpdateStackNames.of_json in
+    let of_json json__ =
+      let stackNames = field_map json__ "StackNames" UpdateStackNames.of_json in
       make ?stackNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3852,6 +4702,9 @@ module UpdateTagCollectionFilters =
   struct
     type nonrec t = UpdateTagCollectionFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateTagCollectionFilter.to_value)) |>
         (fun x -> `List x)
@@ -3892,8 +4745,8 @@ module AmazonCodeGuruProfilerIntegration =
           (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" EventSourceOptInStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" EventSourceOptInStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3917,9 +4770,9 @@ module CloudFormationCostEstimationResourceCollectionFilter =
           (Xml.child xml_arg0 "StackNames") in
       make ?stackNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stackNames =
-        field_map json "StackNames" CostEstimationStackNames.of_json in
+        field_map json__ "StackNames" CostEstimationStackNames.of_json in
       make ?stackNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3928,6 +4781,9 @@ module TagCostEstimationResourceCollectionFilters =
   struct
     type nonrec t = TagCostEstimationResourceCollectionFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagCostEstimationResourceCollectionFilter.to_value))
         |> (fun x -> `List x)
@@ -4038,22 +4894,22 @@ module ProactiveInsightSummary =
       make ?associatedResourceArns ?serviceCollection ?resourceCollection
         ?predictionTimeRange ?insightTimeRange ?status ?severity ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associatedResourceArns =
-        field_map json "AssociatedResourceArns"
+        field_map json__ "AssociatedResourceArns"
           AssociatedResourceArns.of_json in
       let serviceCollection =
-        field_map json "ServiceCollection" ServiceCollection.of_json in
+        field_map json__ "ServiceCollection" ServiceCollection.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let predictionTimeRange =
-        field_map json "PredictionTimeRange" PredictionTimeRange.of_json in
+        field_map json__ "PredictionTimeRange" PredictionTimeRange.of_json in
       let insightTimeRange =
-        field_map json "InsightTimeRange" InsightTimeRange.of_json in
-      let status = field_map json "Status" InsightStatus.of_json in
-      let severity = field_map json "Severity" InsightSeverity.of_json in
-      let name = field_map json "Name" InsightName.of_json in
-      let id = field_map json "Id" InsightId.of_json in
+        field_map json__ "InsightTimeRange" InsightTimeRange.of_json in
+      let status = field_map json__ "Status" InsightStatus.of_json in
+      let severity = field_map json__ "Severity" InsightSeverity.of_json in
+      let name = field_map json__ "Name" InsightName.of_json in
+      let id = field_map json__ "Id" InsightId.of_json in
       make ?associatedResourceArns ?serviceCollection ?resourceCollection
         ?predictionTimeRange ?insightTimeRange ?status ?severity ?name ?id ()
     let to_json v = composed_to_json to_value v
@@ -4138,54 +4994,25 @@ module ReactiveInsightSummary =
       make ?associatedResourceArns ?serviceCollection ?resourceCollection
         ?insightTimeRange ?status ?severity ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associatedResourceArns =
-        field_map json "AssociatedResourceArns"
+        field_map json__ "AssociatedResourceArns"
           AssociatedResourceArns.of_json in
       let serviceCollection =
-        field_map json "ServiceCollection" ServiceCollection.of_json in
+        field_map json__ "ServiceCollection" ServiceCollection.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let insightTimeRange =
-        field_map json "InsightTimeRange" InsightTimeRange.of_json in
-      let status = field_map json "Status" InsightStatus.of_json in
-      let severity = field_map json "Severity" InsightSeverity.of_json in
-      let name = field_map json "Name" InsightName.of_json in
-      let id = field_map json "Id" InsightId.of_json in
+        field_map json__ "InsightTimeRange" InsightTimeRange.of_json in
+      let status = field_map json__ "Status" InsightStatus.of_json in
+      let severity = field_map json__ "Severity" InsightSeverity.of_json in
+      let name = field_map json__ "Name" InsightName.of_json in
+      let id = field_map json__ "Id" InsightId.of_json in
       make ?associatedResourceArns ?serviceCollection ?resourceCollection
         ?insightTimeRange ?status ?severity ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a reactive insight. This object is returned by DescribeInsight."]
-module InsightSeverities =
-  struct
-    type nonrec t = InsightSeverity.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:InsightSeverity.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:InsightSeverity.of_xml)
-    let of_json j =
-      list_of_json ~kind:"InsightSeverities" ~of_json:InsightSeverity.of_json
-        j
-    let to_json v = composed_to_json to_value v
-  end
 module InsightStatuses =
   struct
     type nonrec t = InsightStatus.t list
@@ -4194,6 +5021,9 @@ module InsightStatuses =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InsightStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4327,18 +5157,19 @@ module Recommendation =
       make ?category ?relatedAnomalies ?relatedEvents ?reason ?name ?link
         ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let category = field_map json "Category" RecommendationCategory.of_json in
+    let of_json json__ =
+      let category =
+        field_map json__ "Category" RecommendationCategory.of_json in
       let relatedAnomalies =
-        field_map json "RelatedAnomalies"
+        field_map json__ "RelatedAnomalies"
           RecommendationRelatedAnomalies.of_json in
       let relatedEvents =
-        field_map json "RelatedEvents" RecommendationRelatedEvents.of_json in
-      let reason = field_map json "Reason" RecommendationReason.of_json in
-      let name = field_map json "Name" RecommendationName.of_json in
-      let link = field_map json "Link" RecommendationLink.of_json in
+        field_map json__ "RelatedEvents" RecommendationRelatedEvents.of_json in
+      let reason = field_map json__ "Reason" RecommendationReason.of_json in
+      let name = field_map json__ "Name" RecommendationName.of_json in
+      let link = field_map json__ "Link" RecommendationLink.of_json in
       let description =
-        field_map json "Description" RecommendationDescription.of_json in
+        field_map json__ "Description" RecommendationDescription.of_json in
       make ?category ?relatedAnomalies ?relatedEvents ?reason ?name ?link
         ?description ()
     let to_json v = composed_to_json to_value v
@@ -4435,22 +5266,22 @@ module ProactiveOrganizationInsightSummary =
         ?insightTimeRange ?status ?severity ?name ?organizationalUnitId
         ?accountId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceCollection =
-        field_map json "ServiceCollection" ServiceCollection.of_json in
+        field_map json__ "ServiceCollection" ServiceCollection.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let predictionTimeRange =
-        field_map json "PredictionTimeRange" PredictionTimeRange.of_json in
+        field_map json__ "PredictionTimeRange" PredictionTimeRange.of_json in
       let insightTimeRange =
-        field_map json "InsightTimeRange" InsightTimeRange.of_json in
-      let status = field_map json "Status" InsightStatus.of_json in
-      let severity = field_map json "Severity" InsightSeverity.of_json in
-      let name = field_map json "Name" InsightName.of_json in
+        field_map json__ "InsightTimeRange" InsightTimeRange.of_json in
+      let status = field_map json__ "Status" InsightStatus.of_json in
+      let severity = field_map json__ "Severity" InsightSeverity.of_json in
+      let name = field_map json__ "Name" InsightName.of_json in
       let organizationalUnitId =
-        field_map json "OrganizationalUnitId" OrganizationalUnitId.of_json in
-      let accountId = field_map json "AccountId" AwsAccountId.of_json in
-      let id = field_map json "Id" InsightId.of_json in
+        field_map json__ "OrganizationalUnitId" OrganizationalUnitId.of_json in
+      let accountId = field_map json__ "AccountId" AwsAccountId.of_json in
+      let id = field_map json__ "Id" InsightId.of_json in
       make ?serviceCollection ?resourceCollection ?predictionTimeRange
         ?insightTimeRange ?status ?severity ?name ?organizationalUnitId
         ?accountId ?id ()
@@ -4539,20 +5370,20 @@ module ReactiveOrganizationInsightSummary =
       make ?serviceCollection ?resourceCollection ?insightTimeRange ?status
         ?severity ?name ?organizationalUnitId ?accountId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceCollection =
-        field_map json "ServiceCollection" ServiceCollection.of_json in
+        field_map json__ "ServiceCollection" ServiceCollection.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let insightTimeRange =
-        field_map json "InsightTimeRange" InsightTimeRange.of_json in
-      let status = field_map json "Status" InsightStatus.of_json in
-      let severity = field_map json "Severity" InsightSeverity.of_json in
-      let name = field_map json "Name" InsightName.of_json in
+        field_map json__ "InsightTimeRange" InsightTimeRange.of_json in
+      let status = field_map json__ "Status" InsightStatus.of_json in
+      let severity = field_map json__ "Severity" InsightSeverity.of_json in
+      let name = field_map json__ "Name" InsightName.of_json in
       let organizationalUnitId =
-        field_map json "OrganizationalUnitId" OrganizationalUnitId.of_json in
-      let accountId = field_map json "AccountId" AwsAccountId.of_json in
-      let id = field_map json "Id" InsightId.of_json in
+        field_map json__ "OrganizationalUnitId" OrganizationalUnitId.of_json in
+      let accountId = field_map json__ "AccountId" AwsAccountId.of_json in
+      let id = field_map json__ "Id" InsightId.of_json in
       make ?serviceCollection ?resourceCollection ?insightTimeRange ?status
         ?severity ?name ?organizationalUnitId ?accountId ?id ()
     let to_json v = composed_to_json to_value v
@@ -4584,10 +5415,10 @@ module ListInsightsAnyStatusFilter =
         InsightType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~startTimeRange ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startTimeRange =
-        field_map_exn json "StartTimeRange" StartTimeRange.of_json in
-      let type_ = field_map_exn json "Type" InsightType.of_json in
+        field_map_exn json__ "StartTimeRange" StartTimeRange.of_json in
+      let type_ = field_map_exn json__ "Type" InsightType.of_json in
       make ~startTimeRange ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Used to filter for insights that have any status."]
@@ -4616,10 +5447,10 @@ module ListInsightsClosedStatusFilter =
         InsightType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~endTimeRange ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endTimeRange =
-        field_map_exn json "EndTimeRange" EndTimeRange.of_json in
-      let type_ = field_map_exn json "Type" InsightType.of_json in
+        field_map_exn json__ "EndTimeRange" EndTimeRange.of_json in
+      let type_ = field_map_exn json__ "Type" InsightType.of_json in
       make ~endTimeRange ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Used to filter for insights that have the status CLOSED."]
@@ -4640,8 +5471,8 @@ module ListInsightsOngoingStatusFilter =
         InsightType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" InsightType.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" InsightType.of_json in
       make ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4671,13 +5502,113 @@ module NotificationChannel =
           (Xml.child xml_arg0 "Id") in
       make ?config ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let config = field_map json "Config" NotificationChannelConfig.of_json in
-      let id = field_map json "Id" NotificationChannelId.of_json in
+    let of_json json__ =
+      let config =
+        field_map json__ "Config" NotificationChannelConfig.of_json in
+      let id = field_map json__ "Id" NotificationChannelId.of_json in
       make ?config ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about a notification channel. A notification channel is used to notify you when DevOps Guru creates an insight. The one supported notification channel is Amazon Simple Notification Service (Amazon SNS). If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."]
+       "Information about a notification channel. A notification channel is used to notify you when DevOps Guru creates an insight. The one supported notification channel is Amazon Simple Notification Service (Amazon SNS). If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to send it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."]
+module MonitoredResourceIdentifier =
+  struct
+    type nonrec t =
+      {
+      monitoredResourceName: MonitoredResourceName.t option
+        [@ocaml.doc "The name of the resource being monitored."];
+      type_: ResourceType.t option
+        [@ocaml.doc "The type of resource being monitored."];
+      resourcePermission: ResourcePermission.t option
+        [@ocaml.doc "The permission status of a resource."];
+      lastUpdated: Timestamp.t option
+        [@ocaml.doc
+          "The time at which DevOps Guru last updated this resource."];
+      resourceCollection: ResourceCollection.t option }
+    let make ?monitoredResourceName =
+      fun ?type_ ->
+        fun ?resourcePermission ->
+          fun ?lastUpdated ->
+            fun ?resourceCollection ->
+              fun () ->
+                {
+                  monitoredResourceName;
+                  type_;
+                  resourcePermission;
+                  lastUpdated;
+                  resourceCollection
+                }
+    let to_value x =
+      structure_to_value
+        [("MonitoredResourceName",
+           (Option.map x.monitoredResourceName
+              ~f:MonitoredResourceName.to_value));
+        ("Type", (Option.map x.type_ ~f:ResourceType.to_value));
+        ("ResourcePermission",
+          (Option.map x.resourcePermission ~f:ResourcePermission.to_value));
+        ("LastUpdated", (Option.map x.lastUpdated ~f:Timestamp.to_value));
+        ("ResourceCollection",
+          (Option.map x.resourceCollection ~f:ResourceCollection.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceCollection =
+        (Option.map ~f:ResourceCollection.of_xml)
+          (Xml.child xml_arg0 "ResourceCollection") in
+      let lastUpdated =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "LastUpdated") in
+      let resourcePermission =
+        (Option.map ~f:ResourcePermission.of_xml)
+          (Xml.child xml_arg0 "ResourcePermission") in
+      let type_ =
+        (Option.map ~f:ResourceType.of_xml) (Xml.child xml_arg0 "Type") in
+      let monitoredResourceName =
+        (Option.map ~f:MonitoredResourceName.of_xml)
+          (Xml.child xml_arg0 "MonitoredResourceName") in
+      make ?resourceCollection ?lastUpdated ?resourcePermission ?type_
+        ?monitoredResourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceCollection =
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
+      let lastUpdated = field_map json__ "LastUpdated" Timestamp.of_json in
+      let resourcePermission =
+        field_map json__ "ResourcePermission" ResourcePermission.of_json in
+      let type_ = field_map json__ "Type" ResourceType.of_json in
+      let monitoredResourceName =
+        field_map json__ "MonitoredResourceName"
+          MonitoredResourceName.of_json in
+      make ?resourceCollection ?lastUpdated ?resourcePermission ?type_
+        ?monitoredResourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the resource that is being monitored, including the name of the resource, the type of resource, and whether or not permission is given to DevOps Guru to access that resource."]
+module ResourceTypeFilters =
+  struct
+    type nonrec t = ResourceTypeFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceTypeFilter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceTypeFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTypeFilters"
+        ~of_json:ResourceTypeFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Event =
   struct
     type nonrec t =
@@ -4750,16 +5681,16 @@ module Event =
       make ?resources ?eventClass ?dataSource ?name ?eventSource ?time ?id
         ?resourceCollection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resources = field_map json "Resources" EventResources.of_json in
-      let eventClass = field_map json "EventClass" EventClass.of_json in
-      let dataSource = field_map json "DataSource" EventDataSource.of_json in
-      let name = field_map json "Name" EventName.of_json in
-      let eventSource = field_map json "EventSource" EventSource.of_json in
-      let time = field_map json "Time" Timestamp.of_json in
-      let id = field_map json "Id" EventId.of_json in
+    let of_json json__ =
+      let resources = field_map json__ "Resources" EventResources.of_json in
+      let eventClass = field_map json__ "EventClass" EventClass.of_json in
+      let dataSource = field_map json__ "DataSource" EventDataSource.of_json in
+      let name = field_map json__ "Name" EventName.of_json in
+      let eventSource = field_map json__ "EventSource" EventSource.of_json in
+      let time = field_map json__ "Time" Timestamp.of_json in
+      let id = field_map json__ "Id" EventId.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       make ?resources ?eventClass ?dataSource ?name ?eventSource ?time ?id
         ?resourceCollection ()
     let to_json v = composed_to_json to_value v
@@ -4786,13 +5717,89 @@ module EventTimeRange =
           (Xml.child_exn ~context:context_ xml_arg0 "FromTime") in
       make ~toTime ~fromTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let toTime = field_map_exn json "ToTime" Timestamp.of_json in
-      let fromTime = field_map_exn json "FromTime" Timestamp.of_json in
+    let of_json json__ =
+      let toTime = field_map_exn json__ "ToTime" Timestamp.of_json in
+      let fromTime = field_map_exn json__ "FromTime" Timestamp.of_json in
       make ~toTime ~fromTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The time range during which an Amazon Web Services event occurred. Amazon Web Services resource events and metrics are analyzed by DevOps Guru to find anomalous behavior and provide recommendations to improve your operational solutions."]
+module AnomalousLogGroup =
+  struct
+    type nonrec t =
+      {
+      logGroupName: LogGroupName.t option
+        [@ocaml.doc "The name of the CloudWatch log group."];
+      impactStartTime: Timestamp.t option
+        [@ocaml.doc
+          "The time the anomalous log events began. The impact start time indicates the time of the first log anomaly event that occurs."];
+      impactEndTime: Timestamp.t option
+        [@ocaml.doc "The time the anomalous log events stopped."];
+      numberOfLogLinesScanned: NumberOfLogLinesScanned.t option
+        [@ocaml.doc
+          "The number of log lines that were scanned for anomalous log events."];
+      logAnomalyShowcases: LogAnomalyShowcases.t option
+        [@ocaml.doc
+          "The log anomalies in the log group. Each log anomaly displayed represents a cluster of similar anomalous log events."]}
+    let make ?logGroupName =
+      fun ?impactStartTime ->
+        fun ?impactEndTime ->
+          fun ?numberOfLogLinesScanned ->
+            fun ?logAnomalyShowcases ->
+              fun () ->
+                {
+                  logGroupName;
+                  impactStartTime;
+                  impactEndTime;
+                  numberOfLogLinesScanned;
+                  logAnomalyShowcases
+                }
+    let to_value x =
+      structure_to_value
+        [("LogGroupName",
+           (Option.map x.logGroupName ~f:LogGroupName.to_value));
+        ("ImpactStartTime",
+          (Option.map x.impactStartTime ~f:Timestamp.to_value));
+        ("ImpactEndTime", (Option.map x.impactEndTime ~f:Timestamp.to_value));
+        ("NumberOfLogLinesScanned",
+          (Option.map x.numberOfLogLinesScanned
+             ~f:NumberOfLogLinesScanned.to_value));
+        ("LogAnomalyShowcases",
+          (Option.map x.logAnomalyShowcases ~f:LogAnomalyShowcases.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logAnomalyShowcases =
+        (Option.map ~f:LogAnomalyShowcases.of_xml)
+          (Xml.child xml_arg0 "LogAnomalyShowcases") in
+      let numberOfLogLinesScanned =
+        (Option.map ~f:NumberOfLogLinesScanned.of_xml)
+          (Xml.child xml_arg0 "NumberOfLogLinesScanned") in
+      let impactEndTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ImpactEndTime") in
+      let impactStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ImpactStartTime") in
+      let logGroupName =
+        (Option.map ~f:LogGroupName.of_xml)
+          (Xml.child xml_arg0 "LogGroupName") in
+      make ?logAnomalyShowcases ?numberOfLogLinesScanned ?impactEndTime
+        ?impactStartTime ?logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logAnomalyShowcases =
+        field_map json__ "LogAnomalyShowcases" LogAnomalyShowcases.of_json in
+      let numberOfLogLinesScanned =
+        field_map json__ "NumberOfLogLinesScanned"
+          NumberOfLogLinesScanned.of_json in
+      let impactEndTime = field_map json__ "ImpactEndTime" Timestamp.of_json in
+      let impactStartTime =
+        field_map json__ "ImpactStartTime" Timestamp.of_json in
+      let logGroupName = field_map json__ "LogGroupName" LogGroupName.of_json in
+      make ?logAnomalyShowcases ?numberOfLogLinesScanned ?impactEndTime
+        ?impactStartTime ?logGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An Amazon CloudWatch log group that contains log anomalies and is used to generate an insight."]
 module ProactiveAnomalySummary =
   struct
     type nonrec t =
@@ -4825,7 +5832,9 @@ module ProactiveAnomalySummary =
           "The metadata of the source which detects proactive anomalies."];
       anomalyResources: AnomalyResources.t option
         [@ocaml.doc
-          "Information about a resource in which DevOps Guru detected anomalous behavior."]}
+          "Information about a resource in which DevOps Guru detected anomalous behavior."];
+      description: AnomalyDescription.t option
+        [@ocaml.doc "A description of the proactive anomaly."]}
     let make ?id =
       fun ?severity ->
         fun ?status ->
@@ -4839,22 +5848,24 @@ module ProactiveAnomalySummary =
                         fun ?limit ->
                           fun ?sourceMetadata ->
                             fun ?anomalyResources ->
-                              fun () ->
-                                {
-                                  id;
-                                  severity;
-                                  status;
-                                  updateTime;
-                                  anomalyTimeRange;
-                                  anomalyReportedTimeRange;
-                                  predictionTimeRange;
-                                  sourceDetails;
-                                  associatedInsightId;
-                                  resourceCollection;
-                                  limit;
-                                  sourceMetadata;
-                                  anomalyResources
-                                }
+                              fun ?description ->
+                                fun () ->
+                                  {
+                                    id;
+                                    severity;
+                                    status;
+                                    updateTime;
+                                    anomalyTimeRange;
+                                    anomalyReportedTimeRange;
+                                    predictionTimeRange;
+                                    sourceDetails;
+                                    associatedInsightId;
+                                    resourceCollection;
+                                    limit;
+                                    sourceMetadata;
+                                    anomalyResources;
+                                    description
+                                  }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:AnomalyId.to_value));
@@ -4878,9 +5889,14 @@ module ProactiveAnomalySummary =
         ("SourceMetadata",
           (Option.map x.sourceMetadata ~f:AnomalySourceMetadata.to_value));
         ("AnomalyResources",
-          (Option.map x.anomalyResources ~f:AnomalyResources.to_value))]
+          (Option.map x.anomalyResources ~f:AnomalyResources.to_value));
+        ("Description",
+          (Option.map x.description ~f:AnomalyDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:AnomalyDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let anomalyResources =
         (Option.map ~f:AnomalyResources.of_xml)
           (Xml.child xml_arg0 "AnomalyResources") in
@@ -4915,38 +5931,40 @@ module ProactiveAnomalySummary =
         (Option.map ~f:AnomalySeverity.of_xml)
           (Xml.child xml_arg0 "Severity") in
       let id = (Option.map ~f:AnomalyId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?anomalyResources ?sourceMetadata ?limit ?resourceCollection
-        ?associatedInsightId ?sourceDetails ?predictionTimeRange
-        ?anomalyReportedTimeRange ?anomalyTimeRange ?updateTime ?status
-        ?severity ?id ()
+      make ?description ?anomalyResources ?sourceMetadata ?limit
+        ?resourceCollection ?associatedInsightId ?sourceDetails
+        ?predictionTimeRange ?anomalyReportedTimeRange ?anomalyTimeRange
+        ?updateTime ?status ?severity ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" AnomalyDescription.of_json in
       let anomalyResources =
-        field_map json "AnomalyResources" AnomalyResources.of_json in
+        field_map json__ "AnomalyResources" AnomalyResources.of_json in
       let sourceMetadata =
-        field_map json "SourceMetadata" AnomalySourceMetadata.of_json in
-      let limit = field_map json "Limit" AnomalyLimit.of_json in
+        field_map json__ "SourceMetadata" AnomalySourceMetadata.of_json in
+      let limit = field_map json__ "Limit" AnomalyLimit.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let associatedInsightId =
-        field_map json "AssociatedInsightId" InsightId.of_json in
+        field_map json__ "AssociatedInsightId" InsightId.of_json in
       let sourceDetails =
-        field_map json "SourceDetails" AnomalySourceDetails.of_json in
+        field_map json__ "SourceDetails" AnomalySourceDetails.of_json in
       let predictionTimeRange =
-        field_map json "PredictionTimeRange" PredictionTimeRange.of_json in
+        field_map json__ "PredictionTimeRange" PredictionTimeRange.of_json in
       let anomalyReportedTimeRange =
-        field_map json "AnomalyReportedTimeRange"
+        field_map json__ "AnomalyReportedTimeRange"
           AnomalyReportedTimeRange.of_json in
       let anomalyTimeRange =
-        field_map json "AnomalyTimeRange" AnomalyTimeRange.of_json in
-      let updateTime = field_map json "UpdateTime" Timestamp.of_json in
-      let status = field_map json "Status" AnomalyStatus.of_json in
-      let severity = field_map json "Severity" AnomalySeverity.of_json in
-      let id = field_map json "Id" AnomalyId.of_json in
-      make ?anomalyResources ?sourceMetadata ?limit ?resourceCollection
-        ?associatedInsightId ?sourceDetails ?predictionTimeRange
-        ?anomalyReportedTimeRange ?anomalyTimeRange ?updateTime ?status
-        ?severity ?id ()
+        field_map json__ "AnomalyTimeRange" AnomalyTimeRange.of_json in
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let status = field_map json__ "Status" AnomalyStatus.of_json in
+      let severity = field_map json__ "Severity" AnomalySeverity.of_json in
+      let id = field_map json__ "Id" AnomalyId.of_json in
+      make ?description ?anomalyResources ?sourceMetadata ?limit
+        ?resourceCollection ?associatedInsightId ?sourceDetails
+        ?predictionTimeRange ?anomalyReportedTimeRange ?anomalyTimeRange
+        ?updateTime ?status ?severity ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details about a proactive anomaly. This object is returned by DescribeAnomaly."]
@@ -5077,29 +6095,29 @@ module ReactiveAnomalySummary =
         ?resourceCollection ?associatedInsightId ?sourceDetails
         ?anomalyReportedTimeRange ?anomalyTimeRange ?status ?severity ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let anomalyResources =
-        field_map json "AnomalyResources" AnomalyResources.of_json in
+        field_map json__ "AnomalyResources" AnomalyResources.of_json in
       let causalAnomalyId =
-        field_map json "CausalAnomalyId" AnomalyId.of_json in
+        field_map json__ "CausalAnomalyId" AnomalyId.of_json in
       let description =
-        field_map json "Description" AnomalyDescription.of_json in
-      let name = field_map json "Name" AnomalyName.of_json in
-      let type_ = field_map json "Type" AnomalyType.of_json in
+        field_map json__ "Description" AnomalyDescription.of_json in
+      let name = field_map json__ "Name" AnomalyName.of_json in
+      let type_ = field_map json__ "Type" AnomalyType.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let associatedInsightId =
-        field_map json "AssociatedInsightId" InsightId.of_json in
+        field_map json__ "AssociatedInsightId" InsightId.of_json in
       let sourceDetails =
-        field_map json "SourceDetails" AnomalySourceDetails.of_json in
+        field_map json__ "SourceDetails" AnomalySourceDetails.of_json in
       let anomalyReportedTimeRange =
-        field_map json "AnomalyReportedTimeRange"
+        field_map json__ "AnomalyReportedTimeRange"
           AnomalyReportedTimeRange.of_json in
       let anomalyTimeRange =
-        field_map json "AnomalyTimeRange" AnomalyTimeRange.of_json in
-      let status = field_map json "Status" AnomalyStatus.of_json in
-      let severity = field_map json "Severity" AnomalySeverity.of_json in
-      let id = field_map json "Id" AnomalyId.of_json in
+        field_map json__ "AnomalyTimeRange" AnomalyTimeRange.of_json in
+      let status = field_map json__ "Status" AnomalyStatus.of_json in
+      let severity = field_map json__ "Severity" AnomalySeverity.of_json in
+      let id = field_map json__ "Id" AnomalyId.of_json in
       make ?anomalyResources ?causalAnomalyId ?description ?name ?type_
         ?resourceCollection ?associatedInsightId ?sourceDetails
         ?anomalyReportedTimeRange ?anomalyTimeRange ?status ?severity ?id ()
@@ -5122,8 +6140,8 @@ module CloudFormationCollectionFilter =
         (Option.map ~f:StackNames.of_xml) (Xml.child xml_arg0 "StackNames") in
       make ?stackNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stackNames = field_map json "StackNames" StackNames.of_json in
+    let of_json json__ =
+      let stackNames = field_map json__ "StackNames" StackNames.of_json in
       make ?stackNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5132,6 +6150,9 @@ module TagCollectionFilters =
   struct
     type nonrec t = TagCollectionFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagCollectionFilter.to_value)) |>
         (fun x -> `List x)
@@ -5201,18 +6222,81 @@ module ServiceResourceCost =
         (Option.map ~f:ResourceType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?cost ?unitCost ?count ?state ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cost = field_map json "Cost" Cost.of_json in
-      let unitCost = field_map json "UnitCost" Cost.of_json in
+    let of_json json__ =
+      let cost = field_map json__ "Cost" Cost.of_json in
+      let unitCost = field_map json__ "UnitCost" Cost.of_json in
       let count =
-        field_map json "Count" CostEstimationServiceResourceCount.of_json in
+        field_map json__ "Count" CostEstimationServiceResourceCount.of_json in
       let state =
-        field_map json "State" CostEstimationServiceResourceState.of_json in
-      let type_ = field_map json "Type" ResourceType.of_json in
+        field_map json__ "State" CostEstimationServiceResourceState.of_json in
+      let type_ = field_map json__ "Type" ResourceType.of_json in
       make ?cost ?unitCost ?count ?state ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains information about the estimated monthly cost to analyze an Amazon Web Services resource. For more information, see Estimate your Amazon DevOps Guru costs and Amazon DevOps Guru pricing."]
+module KMSServerSideEncryptionIntegration =
+  struct
+    type nonrec t =
+      {
+      kMSKeyId: KMSKeyId.t option
+        [@ocaml.doc
+          "Describes the specified KMS key. To specify a KMS key, use its key ID, key ARN, alias name, or alias ARN. When using an alias name, prefix it with \"alias/\". If you specify a predefined Amazon Web Services alias (an Amazon Web Services alias with no key ID), Amazon Web Services KMS associates the alias with an Amazon Web Services managed key and returns its KeyId and Arn in the response. To specify a KMS key in a different Amazon Web Services account, you must use the key ARN or alias ARN. For example: Key ID: 1234abcd-12ab-34cd-56ef-1234567890ab Key ARN: arn:aws:kms:us-east-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab Alias name: alias/ExampleAlias Alias ARN: arn:aws:kms:us-east-2:111122223333:alias/ExampleAlias"];
+      optInStatus: OptInStatus.t option
+        [@ocaml.doc
+          "Specifies if DevOps Guru is enabled for customer managed keys."];
+      type_: ServerSideEncryptionType.t option
+        [@ocaml.doc
+          "The type of KMS key used. Customer managed keys are the KMS keys that you create. Amazon Web Services owned keys are keys that are owned and managed by DevOps Guru."]}
+    let make ?kMSKeyId =
+      fun ?optInStatus ->
+        fun ?type_ -> fun () -> { kMSKeyId; optInStatus; type_ }
+    let to_value x =
+      structure_to_value
+        [("KMSKeyId", (Option.map x.kMSKeyId ~f:KMSKeyId.to_value));
+        ("OptInStatus", (Option.map x.optInStatus ~f:OptInStatus.to_value));
+        ("Type", (Option.map x.type_ ~f:ServerSideEncryptionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:ServerSideEncryptionType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let optInStatus =
+        (Option.map ~f:OptInStatus.of_xml) (Xml.child xml_arg0 "OptInStatus") in
+      let kMSKeyId =
+        (Option.map ~f:KMSKeyId.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
+      make ?type_ ?optInStatus ?kMSKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" ServerSideEncryptionType.of_json in
+      let optInStatus = field_map json__ "OptInStatus" OptInStatus.of_json in
+      let kMSKeyId = field_map json__ "KMSKeyId" KMSKeyId.of_json in
+      make ?type_ ?optInStatus ?kMSKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the KMS encryption used with DevOps Guru."]
+module LogsAnomalyDetectionIntegration =
+  struct
+    type nonrec t =
+      {
+      optInStatus: OptInStatus.t option
+        [@ocaml.doc
+          "Specifies if DevOps Guru is configured to perform log anomaly detection on CloudWatch log groups."]}
+    let make ?optInStatus = fun () -> { optInStatus }
+    let to_value x =
+      structure_to_value
+        [("OptInStatus", (Option.map x.optInStatus ~f:OptInStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let optInStatus =
+        (Option.map ~f:OptInStatus.of_xml) (Xml.child xml_arg0 "OptInStatus") in
+      make ?optInStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let optInStatus = field_map json__ "OptInStatus" OptInStatus.of_json in
+      make ?optInStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the integration of DevOps Guru with CloudWatch log groups for log anomaly detection."]
 module OpsCenterIntegration =
   struct
     type nonrec t =
@@ -5230,8 +6314,8 @@ module OpsCenterIntegration =
         (Option.map ~f:OptInStatus.of_xml) (Xml.child xml_arg0 "OptInStatus") in
       make ?optInStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let optInStatus = field_map json "OptInStatus" OptInStatus.of_json in
+    let of_json json__ =
+      let optInStatus = field_map json__ "OptInStatus" OptInStatus.of_json in
       make ?optInStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5244,24 +6328,39 @@ module CloudFormationHealth =
         [@ocaml.doc "The name of the CloudFormation stack."];
       insight: InsightHealth.t option
         [@ocaml.doc
-          "Information about the health of the Amazon Web Services resources in your account that are specified by an Amazon Web Services CloudFormation stack, including the number of open proactive, open reactive insights, and the Mean Time to Recover (MTTR) of closed insights."]}
-    let make ?stackName = fun ?insight -> fun () -> { stackName; insight }
+          "Information about the health of the Amazon Web Services resources in your account that are specified by an Amazon Web Services CloudFormation stack, including the number of open proactive, open reactive insights, and the Mean Time to Recover (MTTR) of closed insights."];
+      analyzedResourceCount: AnalyzedResourceCount.t option
+        [@ocaml.doc
+          "Number of resources that DevOps Guru is monitoring in your account that are specified by an Amazon Web Services CloudFormation stack."]}
+    let make ?stackName =
+      fun ?insight ->
+        fun ?analyzedResourceCount ->
+          fun () -> { stackName; insight; analyzedResourceCount }
     let to_value x =
       structure_to_value
         [("StackName", (Option.map x.stackName ~f:StackName.to_value));
-        ("Insight", (Option.map x.insight ~f:InsightHealth.to_value))]
+        ("Insight", (Option.map x.insight ~f:InsightHealth.to_value));
+        ("AnalyzedResourceCount",
+          (Option.map x.analyzedResourceCount
+             ~f:AnalyzedResourceCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let analyzedResourceCount =
+        (Option.map ~f:AnalyzedResourceCount.of_xml)
+          (Xml.child xml_arg0 "AnalyzedResourceCount") in
       let insight =
         (Option.map ~f:InsightHealth.of_xml) (Xml.child xml_arg0 "Insight") in
       let stackName =
         (Option.map ~f:StackName.of_xml) (Xml.child xml_arg0 "StackName") in
-      make ?insight ?stackName ()
+      make ?analyzedResourceCount ?insight ?stackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let insight = field_map json "Insight" InsightHealth.of_json in
-      let stackName = field_map json "StackName" StackName.of_json in
-      make ?insight ?stackName ()
+    let of_json json__ =
+      let analyzedResourceCount =
+        field_map json__ "AnalyzedResourceCount"
+          AnalyzedResourceCount.of_json in
+      let insight = field_map json__ "Insight" InsightHealth.of_json in
+      let stackName = field_map json__ "StackName" StackName.of_json in
+      make ?analyzedResourceCount ?insight ?stackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the health of Amazon Web Services resources in your account that are specified by an Amazon Web Services CloudFormation stack."]
@@ -5273,26 +6372,40 @@ module ServiceHealth =
         [@ocaml.doc "The name of the Amazon Web Services service."];
       insight: ServiceInsightHealth.t option
         [@ocaml.doc
-          "Represents the health of an Amazon Web Services service. This is a ServiceInsightHealth that contains the number of open proactive and reactive insights for this service."]}
+          "Represents the health of an Amazon Web Services service. This is a ServiceInsightHealth that contains the number of open proactive and reactive insights for this service."];
+      analyzedResourceCount: AnalyzedResourceCount.t option
+        [@ocaml.doc
+          "Number of resources that DevOps Guru is monitoring in an analyzed Amazon Web Services service."]}
     let make ?serviceName =
-      fun ?insight -> fun () -> { serviceName; insight }
+      fun ?insight ->
+        fun ?analyzedResourceCount ->
+          fun () -> { serviceName; insight; analyzedResourceCount }
     let to_value x =
       structure_to_value
         [("ServiceName", (Option.map x.serviceName ~f:ServiceName.to_value));
-        ("Insight", (Option.map x.insight ~f:ServiceInsightHealth.to_value))]
+        ("Insight", (Option.map x.insight ~f:ServiceInsightHealth.to_value));
+        ("AnalyzedResourceCount",
+          (Option.map x.analyzedResourceCount
+             ~f:AnalyzedResourceCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let analyzedResourceCount =
+        (Option.map ~f:AnalyzedResourceCount.of_xml)
+          (Xml.child xml_arg0 "AnalyzedResourceCount") in
       let insight =
         (Option.map ~f:ServiceInsightHealth.of_xml)
           (Xml.child xml_arg0 "Insight") in
       let serviceName =
         (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
-      make ?insight ?serviceName ()
+      make ?analyzedResourceCount ?insight ?serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let insight = field_map json "Insight" ServiceInsightHealth.of_json in
-      let serviceName = field_map json "ServiceName" ServiceName.of_json in
-      make ?insight ?serviceName ()
+    let of_json json__ =
+      let analyzedResourceCount =
+        field_map json__ "AnalyzedResourceCount"
+          AnalyzedResourceCount.of_json in
+      let insight = field_map json__ "Insight" ServiceInsightHealth.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      make ?analyzedResourceCount ?insight ?serviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the health of an Amazon Web Services service."]
 module TagHealth =
@@ -5301,24 +6414,36 @@ module TagHealth =
       {
       appBoundaryKey: AppBoundaryKey.t option
         [@ocaml.doc
-          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
+          "An Amazon Web Services tag key that is used to identify the Amazon Web Services resources that DevOps Guru analyzes. All Amazon Web Services resources in your account and Region tagged with this key make up your DevOps Guru application and analysis boundary. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."];
       tagValue: TagValue.t option
         [@ocaml.doc
           "The value in an Amazon Web Services tag. The tag's value is an optional field used to associate a string with the tag key (for example, 111122223333, Production, or a team name). The key and value are the tag's key pair. Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. You can specify a maximum of 256 characters for a tag value."];
       insight: InsightHealth.t option
         [@ocaml.doc
-          "Information about the health of the Amazon Web Services resources in your account that are specified by an Amazon Web Services tag, including the number of open proactive, open reactive insights, and the Mean Time to Recover (MTTR) of closed insights."]}
+          "Information about the health of the Amazon Web Services resources in your account that are specified by an Amazon Web Services tag, including the number of open proactive, open reactive insights, and the Mean Time to Recover (MTTR) of closed insights."];
+      analyzedResourceCount: AnalyzedResourceCount.t option
+        [@ocaml.doc
+          "Number of resources that DevOps Guru is monitoring in your account that are specified by an Amazon Web Services tag."]}
     let make ?appBoundaryKey =
       fun ?tagValue ->
-        fun ?insight -> fun () -> { appBoundaryKey; tagValue; insight }
+        fun ?insight ->
+          fun ?analyzedResourceCount ->
+            fun () ->
+              { appBoundaryKey; tagValue; insight; analyzedResourceCount }
     let to_value x =
       structure_to_value
         [("AppBoundaryKey",
            (Option.map x.appBoundaryKey ~f:AppBoundaryKey.to_value));
         ("TagValue", (Option.map x.tagValue ~f:TagValue.to_value));
-        ("Insight", (Option.map x.insight ~f:InsightHealth.to_value))]
+        ("Insight", (Option.map x.insight ~f:InsightHealth.to_value));
+        ("AnalyzedResourceCount",
+          (Option.map x.analyzedResourceCount
+             ~f:AnalyzedResourceCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let analyzedResourceCount =
+        (Option.map ~f:AnalyzedResourceCount.of_xml)
+          (Xml.child xml_arg0 "AnalyzedResourceCount") in
       let insight =
         (Option.map ~f:InsightHealth.of_xml) (Xml.child xml_arg0 "Insight") in
       let tagValue =
@@ -5326,14 +6451,17 @@ module TagHealth =
       let appBoundaryKey =
         (Option.map ~f:AppBoundaryKey.of_xml)
           (Xml.child xml_arg0 "AppBoundaryKey") in
-      make ?insight ?tagValue ?appBoundaryKey ()
+      make ?analyzedResourceCount ?insight ?tagValue ?appBoundaryKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let insight = field_map json "Insight" InsightHealth.of_json in
-      let tagValue = field_map json "TagValue" TagValue.of_json in
+    let of_json json__ =
+      let analyzedResourceCount =
+        field_map json__ "AnalyzedResourceCount"
+          AnalyzedResourceCount.of_json in
+      let insight = field_map json__ "Insight" InsightHealth.of_json in
+      let tagValue = field_map json__ "TagValue" TagValue.of_json in
       let appBoundaryKey =
-        field_map json "AppBoundaryKey" AppBoundaryKey.of_json in
-      make ?insight ?tagValue ?appBoundaryKey ()
+        field_map json__ "AppBoundaryKey" AppBoundaryKey.of_json in
+      make ?analyzedResourceCount ?insight ?tagValue ?appBoundaryKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the health of Amazon Web Services resources in your account that are specified by an Amazon Web Services tag key."]
@@ -5360,9 +6488,9 @@ module AccountHealth =
         (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?insight ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let insight = field_map json "Insight" AccountInsightHealth.of_json in
-      let accountId = field_map json "AccountId" AwsAccountId.of_json in
+    let of_json json__ =
+      let insight = field_map json__ "Insight" AccountInsightHealth.of_json in
+      let accountId = field_map json__ "AccountId" AwsAccountId.of_json in
       make ?insight ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5403,22 +6531,21 @@ module SsmOpsItemId =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: ErrorMessageString.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessageString.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessageString.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:ErrorMessageString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessageString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessageString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ErrorMessageString.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageString.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You don't have permissions to perform the requested operation. The user or role that is making the request must have at least one IAM permissions policy attached that grants the required permissions. For more information, see Access Management in the IAM User Guide."]
@@ -5426,58 +6553,57 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      message: ErrorMessageString.t ;
-      resourceId: ResourceIdString.t
+      message: ErrorMessageString.t option ;
+      resourceId: ResourceIdString.t option
         [@ocaml.doc
           "The ID of the Amazon Web Services resource in which a conflict occurred."];
-      resourceType: ResourceIdType.t
+      resourceType: ResourceIdType.t option
         [@ocaml.doc
           "The type of the Amazon Web Services resource in which a conflict occurred."]}
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessageString.to_value x.message)));
-        ("ResourceId", (Some (ResourceIdString.to_value x.resourceId)));
-        ("ResourceType", (Some (ResourceIdType.to_value x.resourceType)))]
+        [("Message", (Option.map x.message ~f:ErrorMessageString.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ResourceIdString.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceIdType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        ResourceIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:ResourceIdType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        ResourceIdString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ResourceIdString.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let message =
-        ErrorMessageString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:ErrorMessageString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" ResourceIdType.of_json in
-      let resourceId =
-        field_map_exn json "ResourceId" ResourceIdString.of_json in
-      let message = field_map_exn json "Message" ErrorMessageString.of_json in
-      make ~resourceType ~resourceId ~message ()
+        field_map json__ "ResourceType" ResourceIdType.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceIdString.of_json in
+      let message = field_map json__ "Message" ErrorMessageString.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An exception that is thrown when a conflict occurs."]
 module InternalServerException =
   struct
     type nonrec t =
       {
-      message: ErrorMessageString.t ;
+      message: ErrorMessageString.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc
           "The number of seconds after which the action that caused the internal server exception can be retried."]}
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessageString.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ErrorMessageString.to_value));
         ("Retry-After",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -5486,22 +6612,22 @@ module InternalServerException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let message =
-        ErrorMessageString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:ErrorMessageString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "Message" ErrorMessageString.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "Message" ErrorMessageString.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal failure in an Amazon service occurred."]
 module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: ErrorMessageString.t ;
+      message: ErrorMessageString.t option ;
       quotaCode: ErrorQuotaCodeString.t option
         [@ocaml.doc
           "The code of the quota that was exceeded, causing the throttling exception."];
@@ -5511,15 +6637,14 @@ module ThrottlingException =
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc
           "The number of seconds after which the action that caused the throttling exception can be retried."]}
-    let context_ = "ThrottlingException"
-    let make ?quotaCode =
-      fun ?serviceCode ->
-        fun ?retryAfterSeconds ->
-          fun ~message ->
-            fun () -> { quotaCode; serviceCode; retryAfterSeconds; message }
+    let make ?message =
+      fun ?quotaCode ->
+        fun ?serviceCode ->
+          fun ?retryAfterSeconds ->
+            fun () -> { message; quotaCode; serviceCode; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessageString.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ErrorMessageString.to_value));
         ("QuotaCode",
           (Option.map x.quotaCode ~f:ErrorQuotaCodeString.to_value));
         ("ServiceCode",
@@ -5538,35 +6663,35 @@ module ThrottlingException =
         (Option.map ~f:ErrorQuotaCodeString.of_xml)
           (Xml.child xml_arg0 "QuotaCode") in
       let message =
-        ErrorMessageString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?retryAfterSeconds ?serviceCode ?quotaCode ~message ()
+        (Option.map ~f:ErrorMessageString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?retryAfterSeconds ?serviceCode ?quotaCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
       let serviceCode =
-        field_map json "ServiceCode" ErrorServiceCodeString.of_json in
-      let quotaCode = field_map json "QuotaCode" ErrorQuotaCodeString.of_json in
-      let message = field_map_exn json "Message" ErrorMessageString.of_json in
-      make ?retryAfterSeconds ?serviceCode ?quotaCode ~message ()
+        field_map json__ "ServiceCode" ErrorServiceCodeString.of_json in
+      let quotaCode =
+        field_map json__ "QuotaCode" ErrorQuotaCodeString.of_json in
+      let message = field_map json__ "Message" ErrorMessageString.of_json in
+      make ?retryAfterSeconds ?serviceCode ?quotaCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to a request throttling."]
 module ValidationException =
   struct
     type nonrec t =
       {
-      message: ErrorMessageString.t
+      message: ErrorMessageString.t option
         [@ocaml.doc "A message that describes the validation exception."];
       reason: ValidationExceptionReason.t option
         [@ocaml.doc "The reason the validation exception was thrown."];
       fields: ValidationExceptionFields.t option }
-    let context_ = "ValidationException"
-    let make ?reason =
-      fun ?fields -> fun ~message -> fun () -> { reason; fields; message }
+    let make ?message =
+      fun ?reason -> fun ?fields -> fun () -> { message; reason; fields }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessageString.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ErrorMessageString.to_value));
         ("Reason",
           (Option.map x.reason ~f:ValidationExceptionReason.to_value));
         ("Fields",
@@ -5580,38 +6705,70 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionReason.of_xml)
           (Xml.child xml_arg0 "Reason") in
       let message =
-        ErrorMessageString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?fields ?reason ~message ()
+        (Option.map ~f:ErrorMessageString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?fields ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fields = field_map json "Fields" ValidationExceptionFields.of_json in
-      let reason = field_map json "Reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "Message" ErrorMessageString.of_json in
-      make ?fields ?reason ~message ()
+    let of_json json__ =
+      let fields =
+        field_map json__ "Fields" ValidationExceptionFields.of_json in
+      let reason =
+        field_map json__ "Reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessageString.of_json in
+      make ?fields ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about data passed in to a field during a request that is not valid."]
 module UpdateServiceIntegrationConfig =
   struct
-    type nonrec t = {
-      opsCenter: OpsCenterIntegrationConfig.t option }
-    let make ?opsCenter = fun () -> { opsCenter }
+    type nonrec t =
+      {
+      opsCenter: OpsCenterIntegrationConfig.t option ;
+      logsAnomalyDetection: LogsAnomalyDetectionIntegrationConfig.t option
+        [@ocaml.doc
+          "Information about whether DevOps Guru is configured to perform log anomaly detection on Amazon CloudWatch log groups."];
+      kMSServerSideEncryption:
+        KMSServerSideEncryptionIntegrationConfig.t option
+        [@ocaml.doc
+          "Information about whether DevOps Guru is configured to encrypt server-side data using KMS."]}
+    let make ?opsCenter =
+      fun ?logsAnomalyDetection ->
+        fun ?kMSServerSideEncryption ->
+          fun () ->
+            { opsCenter; logsAnomalyDetection; kMSServerSideEncryption }
     let to_value x =
       structure_to_value
         [("OpsCenter",
-           (Option.map x.opsCenter ~f:OpsCenterIntegrationConfig.to_value))]
+           (Option.map x.opsCenter ~f:OpsCenterIntegrationConfig.to_value));
+        ("LogsAnomalyDetection",
+          (Option.map x.logsAnomalyDetection
+             ~f:LogsAnomalyDetectionIntegrationConfig.to_value));
+        ("KMSServerSideEncryption",
+          (Option.map x.kMSServerSideEncryption
+             ~f:KMSServerSideEncryptionIntegrationConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kMSServerSideEncryption =
+        (Option.map ~f:KMSServerSideEncryptionIntegrationConfig.of_xml)
+          (Xml.child xml_arg0 "KMSServerSideEncryption") in
+      let logsAnomalyDetection =
+        (Option.map ~f:LogsAnomalyDetectionIntegrationConfig.of_xml)
+          (Xml.child xml_arg0 "LogsAnomalyDetection") in
       let opsCenter =
         (Option.map ~f:OpsCenterIntegrationConfig.of_xml)
           (Xml.child xml_arg0 "OpsCenter") in
-      make ?opsCenter ()
+      make ?kMSServerSideEncryption ?logsAnomalyDetection ?opsCenter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let kMSServerSideEncryption =
+        field_map json__ "KMSServerSideEncryption"
+          KMSServerSideEncryptionIntegrationConfig.of_json in
+      let logsAnomalyDetection =
+        field_map json__ "LogsAnomalyDetection"
+          LogsAnomalyDetectionIntegrationConfig.of_json in
       let opsCenter =
-        field_map json "OpsCenter" OpsCenterIntegrationConfig.of_json in
-      make ?opsCenter ()
+        field_map json__ "OpsCenter" OpsCenterIntegrationConfig.of_json in
+      make ?kMSServerSideEncryption ?logsAnomalyDetection ?opsCenter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about updating the integration status of an Amazon Web Services service, such as Amazon Web Services Systems Manager, with DevOps Guru."]
@@ -5646,7 +6803,7 @@ module UpdateResourceCollectionFilter =
           "A collection of Amazon Web Services CloudFormation stacks. You can specify up to 500 Amazon Web Services CloudFormation stacks."];
       tags: UpdateTagCollectionFilters.t option
         [@ocaml.doc
-          "The updated Amazon Web Services tags used to filter the resources in the resource collection. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
+          "The updated Amazon Web Services tags used to filter the resources in the resource collection. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
     let make ?cloudFormation =
       fun ?tags -> fun () -> { cloudFormation; tags }
     let to_value x =
@@ -5665,10 +6822,10 @@ module UpdateResourceCollectionFilter =
           (Xml.child xml_arg0 "CloudFormation") in
       make ?tags ?cloudFormation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" UpdateTagCollectionFilters.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" UpdateTagCollectionFilters.of_json in
       let cloudFormation =
-        field_map json "CloudFormation"
+        field_map json__ "CloudFormation"
           UpdateCloudFormationCollectionFilter.of_json in
       make ?tags ?cloudFormation ()
     let to_json v = composed_to_json to_value v
@@ -5694,9 +6851,9 @@ module EventSourcesConfig =
           (Xml.child xml_arg0 "AmazonCodeGuruProfiler") in
       make ?amazonCodeGuruProfiler ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let amazonCodeGuruProfiler =
-        field_map json "AmazonCodeGuruProfiler"
+        field_map json__ "AmazonCodeGuruProfiler"
           AmazonCodeGuruProfilerIntegration.of_json in
       make ?amazonCodeGuruProfiler ()
     let to_json v = composed_to_json to_value v
@@ -5706,42 +6863,42 @@ module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: ErrorMessageString.t ;
-      resourceId: ResourceIdString.t
+      message: ErrorMessageString.t option ;
+      resourceId: ResourceIdString.t option
         [@ocaml.doc
           "The ID of the Amazon Web Services resource that could not be found."];
-      resourceType: ResourceIdType.t
+      resourceType: ResourceIdType.t option
         [@ocaml.doc
           "The type of the Amazon Web Services resource that could not be found."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessageString.to_value x.message)));
-        ("ResourceId", (Some (ResourceIdString.to_value x.resourceId)));
-        ("ResourceType", (Some (ResourceIdType.to_value x.resourceType)))]
+        [("Message", (Option.map x.message ~f:ErrorMessageString.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ResourceIdString.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceIdType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        ResourceIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:ResourceIdType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        ResourceIdString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ResourceIdString.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let message =
-        ErrorMessageString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:ErrorMessageString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" ResourceIdType.of_json in
-      let resourceId =
-        field_map_exn json "ResourceId" ResourceIdString.of_json in
-      let message = field_map_exn json "Message" ErrorMessageString.of_json in
-      make ~resourceType ~resourceId ~message ()
+        field_map json__ "ResourceType" ResourceIdType.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceIdString.of_json in
+      let message = field_map json__ "Message" ErrorMessageString.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A requested resource could not be found"]
 module ClientToken =
@@ -5775,7 +6932,7 @@ module CostEstimationResourceCollectionFilter =
           "An object that specifies the CloudFormation stack that defines the Amazon Web Services resources used to create a monthly estimate for DevOps Guru."];
       tags: TagCostEstimationResourceCollectionFilters.t option
         [@ocaml.doc
-          "The Amazon Web Services tags used to filter the resource collection that is used for a cost estimate. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
+          "The Amazon Web Services tags used to filter the resource collection that is used for a cost estimate. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
     let make ?cloudFormation =
       fun ?tags -> fun () -> { cloudFormation; tags }
     let to_value x =
@@ -5797,12 +6954,12 @@ module CostEstimationResourceCollectionFilter =
           (Xml.child xml_arg0 "CloudFormation") in
       make ?tags ?cloudFormation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tags =
-        field_map json "Tags"
+        field_map json__ "Tags"
           TagCostEstimationResourceCollectionFilters.of_json in
       let cloudFormation =
-        field_map json "CloudFormation"
+        field_map json__ "CloudFormation"
           CloudFormationCostEstimationResourceCollectionFilter.of_json in
       make ?tags ?cloudFormation ()
     let to_json v = composed_to_json to_value v
@@ -5812,6 +6969,9 @@ module ProactiveInsights =
   struct
     type nonrec t = ProactiveInsightSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProactiveInsightSummary.to_value)) |>
         (fun x -> `List x)
@@ -5838,6 +6998,9 @@ module ReactiveInsights =
   struct
     type nonrec t = ReactiveInsightSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReactiveInsightSummary.to_value)) |>
         (fun x -> `List x)
@@ -5890,6 +7053,9 @@ module SearchInsightsAccountIdList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsAccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5953,13 +7119,14 @@ module SearchOrganizationInsightsFilters =
           (Xml.child xml_arg0 "Severities") in
       make ?serviceCollection ?resourceCollection ?statuses ?severities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceCollection =
-        field_map json "ServiceCollection" ServiceCollection.of_json in
+        field_map json__ "ServiceCollection" ServiceCollection.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
-      let statuses = field_map json "Statuses" InsightStatuses.of_json in
-      let severities = field_map json "Severities" InsightSeverities.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
+      let statuses = field_map json__ "Statuses" InsightStatuses.of_json in
+      let severities =
+        field_map json__ "Severities" InsightSeverities.of_json in
       make ?serviceCollection ?resourceCollection ?statuses ?severities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6028,17 +7195,18 @@ module SearchInsightsFilters =
           (Xml.child xml_arg0 "Severities") in
       make ?serviceCollection ?resourceCollection ?statuses ?severities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceCollection =
-        field_map json "ServiceCollection" ServiceCollection.of_json in
+        field_map json__ "ServiceCollection" ServiceCollection.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
-      let statuses = field_map json "Statuses" InsightStatuses.of_json in
-      let severities = field_map json "Severities" InsightSeverities.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
+      let statuses = field_map json__ "Statuses" InsightStatuses.of_json in
+      let severities =
+        field_map json__ "Severities" InsightSeverities.of_json in
       make ?serviceCollection ?resourceCollection ?statuses ?severities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies one or more severity values and one or more status values that are used to search for insights."]
+       "Specifies values used to filter responses when searching for insights. You can use a ResourceCollection, ServiceCollection, array of severities, and an array of status values. Each filter type contains one or more values to search for. If you specify multiple filter types, the filter types are joined with an AND, and the request returns only results that match all of the specified filters."]
 module SearchInsightsMaxResults =
   struct
     type nonrec t = int
@@ -6079,9 +7247,11 @@ module InsightFeedback =
       let id = (Option.map ~f:InsightId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?feedback ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let feedback = field_map json "Feedback" InsightFeedbackOption.of_json in
-      let id = field_map json "Id" InsightId.of_json in make ?feedback ?id ()
+    let of_json json__ =
+      let feedback =
+        field_map json__ "Feedback" InsightFeedbackOption.of_json in
+      let id = field_map json__ "Id" InsightId.of_json in
+      make ?feedback ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about insight feedback received from a customer."]
@@ -6093,6 +7263,9 @@ module Recommendations =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Recommendation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6169,6 +7342,9 @@ module ProactiveOrganizationInsights =
   struct
     type nonrec t = ProactiveOrganizationInsightSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProactiveOrganizationInsightSummary.to_value)) |>
         (fun x -> `List x)
@@ -6196,6 +7372,9 @@ module ReactiveOrganizationInsights =
   struct
     type nonrec t = ReactiveOrganizationInsightSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReactiveOrganizationInsightSummary.to_value)) |>
         (fun x -> `List x)
@@ -6227,6 +7406,9 @@ module ListInsightsAccountIdList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsAccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6274,6 +7456,9 @@ module ListInsightsOrganizationalUnitIdList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationalUnitId.to_value)) |>
         (fun x -> `List x)
@@ -6331,12 +7516,12 @@ module ListInsightsStatusFilter =
           (Xml.child xml_arg0 "Ongoing") in
       make ?any ?closed ?ongoing ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let any = field_map json "Any" ListInsightsAnyStatusFilter.of_json in
+    let of_json json__ =
+      let any = field_map json__ "Any" ListInsightsAnyStatusFilter.of_json in
       let closed =
-        field_map json "Closed" ListInsightsClosedStatusFilter.of_json in
+        field_map json__ "Closed" ListInsightsClosedStatusFilter.of_json in
       let ongoing =
-        field_map json "Ongoing" ListInsightsOngoingStatusFilter.of_json in
+        field_map json__ "Ongoing" ListInsightsOngoingStatusFilter.of_json in
       make ?any ?closed ?ongoing ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6345,6 +7530,9 @@ module Channels =
   struct
     type nonrec t = NotificationChannel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NotificationChannel.to_value)) |>
         (fun x -> `List x)
@@ -6366,10 +7554,100 @@ module Channels =
       list_of_json ~kind:"Channels" ~of_json:NotificationChannel.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MonitoredResourceIdentifiers =
+  struct
+    type nonrec t = MonitoredResourceIdentifier.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MonitoredResourceIdentifier.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MonitoredResourceIdentifier.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MonitoredResourceIdentifiers"
+        ~of_json:MonitoredResourceIdentifier.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListMonitoredResourcesFilters =
+  struct
+    type nonrec t =
+      {
+      resourcePermission: ResourcePermission.t
+        [@ocaml.doc "The permission status of a resource."];
+      resourceTypeFilters: ResourceTypeFilters.t
+        [@ocaml.doc
+          "The type of resource that you wish to retrieve, such as log groups."]}
+    let context_ = "ListMonitoredResourcesFilters"
+    let make ~resourcePermission =
+      fun ~resourceTypeFilters ->
+        fun () -> { resourcePermission; resourceTypeFilters }
+    let to_value x =
+      structure_to_value
+        [("ResourcePermission",
+           (Some (ResourcePermission.to_value x.resourcePermission)));
+        ("ResourceTypeFilters",
+          (Some (ResourceTypeFilters.to_value x.resourceTypeFilters)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTypeFilters =
+        ResourceTypeFilters.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceTypeFilters") in
+      let resourcePermission =
+        ResourcePermission.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourcePermission") in
+      make ~resourceTypeFilters ~resourcePermission ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTypeFilters =
+        field_map_exn json__ "ResourceTypeFilters"
+          ResourceTypeFilters.of_json in
+      let resourcePermission =
+        field_map_exn json__ "ResourcePermission" ResourcePermission.of_json in
+      make ~resourceTypeFilters ~resourcePermission ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filters to determine which monitored resources you want to retrieve. You can filter by resource type or resource permission status."]
+module ListMonitoredResourcesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListMonitoredResourcesMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Events =
   struct
     type nonrec t = Event.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Event.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6454,15 +7732,15 @@ module ListEventsFilters =
       make ?resourceCollection ?dataSource ?eventSource ?eventClass
         ?eventTimeRange ?insightId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
-      let dataSource = field_map json "DataSource" EventDataSource.of_json in
-      let eventSource = field_map json "EventSource" EventSource.of_json in
-      let eventClass = field_map json "EventClass" EventClass.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
+      let dataSource = field_map json__ "DataSource" EventDataSource.of_json in
+      let eventSource = field_map json__ "EventSource" EventSource.of_json in
+      let eventClass = field_map json__ "EventClass" EventClass.of_json in
       let eventTimeRange =
-        field_map json "EventTimeRange" EventTimeRange.of_json in
-      let insightId = field_map json "InsightId" InsightId.of_json in
+        field_map json__ "EventTimeRange" EventTimeRange.of_json in
+      let insightId = field_map json__ "InsightId" InsightId.of_json in
       make ?resourceCollection ?dataSource ?eventSource ?eventClass
         ?eventTimeRange ?insightId ()
     let to_json v = composed_to_json to_value v
@@ -6486,10 +7764,60 @@ module ListEventsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module AnomalousLogGroups =
+  struct
+    type nonrec t = AnomalousLogGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AnomalousLogGroup.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AnomalousLogGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AnomalousLogGroups"
+        ~of_json:AnomalousLogGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListAnomalousLogGroupsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:200) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListAnomalousLogGroupsMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ProactiveAnomalies =
   struct
     type nonrec t = ProactiveAnomalySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProactiveAnomalySummary.to_value)) |>
         (fun x -> `List x)
@@ -6516,6 +7844,9 @@ module ReactiveAnomalies =
   struct
     type nonrec t = ReactiveAnomalySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReactiveAnomalySummary.to_value)) |>
         (fun x -> `List x)
@@ -6538,6 +7869,29 @@ module ReactiveAnomalies =
         ~of_json:ReactiveAnomalySummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListAnomaliesForInsightFilters =
+  struct
+    type nonrec t = {
+      serviceCollection: ServiceCollection.t option }
+    let make ?serviceCollection = fun () -> { serviceCollection }
+    let to_value x =
+      structure_to_value
+        [("ServiceCollection",
+           (Option.map x.serviceCollection ~f:ServiceCollection.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceCollection =
+        (Option.map ~f:ServiceCollection.of_xml)
+          (Xml.child xml_arg0 "ServiceCollection") in
+      make ?serviceCollection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceCollection =
+        field_map json__ "ServiceCollection" ServiceCollection.of_json in
+      make ?serviceCollection ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies one or more service names that are used to list anomalies."]
 module ListAnomaliesForInsightMaxResults =
   struct
     type nonrec t = int
@@ -6566,7 +7920,7 @@ module ResourceCollectionFilter =
           "Information about Amazon Web Services CloudFormation stacks. You can use up to 500 stacks to specify which Amazon Web Services resources in your account to analyze. For more information, see Stacks in the Amazon Web Services CloudFormation User Guide."];
       tags: TagCollectionFilters.t option
         [@ocaml.doc
-          "The Amazon Web Services tags used to filter the resources in the resource collection. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
+          "The Amazon Web Services tags used to filter the resources in the resource collection. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
     let make ?cloudFormation =
       fun ?tags -> fun () -> { cloudFormation; tags }
     let to_value x =
@@ -6585,10 +7939,10 @@ module ResourceCollectionFilter =
           (Xml.child xml_arg0 "CloudFormation") in
       make ?tags ?cloudFormation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagCollectionFilters.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagCollectionFilters.of_json in
       let cloudFormation =
-        field_map json "CloudFormation"
+        field_map json__ "CloudFormation"
           CloudFormationCollectionFilter.of_json in
       make ?tags ?cloudFormation ()
     let to_json v = composed_to_json to_value v
@@ -6671,9 +8025,9 @@ module CostEstimationTimeRange =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let startTime = field_map json "StartTime" Timestamp.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
       make ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The time range of a cost estimation."]
@@ -6681,6 +8035,9 @@ module ServiceResourceCosts =
   struct
     type nonrec t = ServiceResourceCost.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceResourceCost.to_value)) |>
         (fun x -> `List x)
@@ -6709,22 +8066,51 @@ module ServiceIntegrationConfig =
       {
       opsCenter: OpsCenterIntegration.t option
         [@ocaml.doc
-          "Information about whether DevOps Guru is configured to create an OpsItem in Amazon Web Services Systems Manager OpsCenter for each created insight."]}
-    let make ?opsCenter = fun () -> { opsCenter }
+          "Information about whether DevOps Guru is configured to create an OpsItem in Amazon Web Services Systems Manager OpsCenter for each created insight."];
+      logsAnomalyDetection: LogsAnomalyDetectionIntegration.t option
+        [@ocaml.doc
+          "Information about whether DevOps Guru is configured to perform log anomaly detection on Amazon CloudWatch log groups."];
+      kMSServerSideEncryption: KMSServerSideEncryptionIntegration.t option
+        [@ocaml.doc
+          "Information about whether DevOps Guru is configured to encrypt server-side data using KMS."]}
+    let make ?opsCenter =
+      fun ?logsAnomalyDetection ->
+        fun ?kMSServerSideEncryption ->
+          fun () ->
+            { opsCenter; logsAnomalyDetection; kMSServerSideEncryption }
     let to_value x =
       structure_to_value
         [("OpsCenter",
-           (Option.map x.opsCenter ~f:OpsCenterIntegration.to_value))]
+           (Option.map x.opsCenter ~f:OpsCenterIntegration.to_value));
+        ("LogsAnomalyDetection",
+          (Option.map x.logsAnomalyDetection
+             ~f:LogsAnomalyDetectionIntegration.to_value));
+        ("KMSServerSideEncryption",
+          (Option.map x.kMSServerSideEncryption
+             ~f:KMSServerSideEncryptionIntegration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kMSServerSideEncryption =
+        (Option.map ~f:KMSServerSideEncryptionIntegration.of_xml)
+          (Xml.child xml_arg0 "KMSServerSideEncryption") in
+      let logsAnomalyDetection =
+        (Option.map ~f:LogsAnomalyDetectionIntegration.of_xml)
+          (Xml.child xml_arg0 "LogsAnomalyDetection") in
       let opsCenter =
         (Option.map ~f:OpsCenterIntegration.of_xml)
           (Xml.child xml_arg0 "OpsCenter") in
-      make ?opsCenter ()
+      make ?kMSServerSideEncryption ?logsAnomalyDetection ?opsCenter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let opsCenter = field_map json "OpsCenter" OpsCenterIntegration.of_json in
-      make ?opsCenter ()
+    let of_json json__ =
+      let kMSServerSideEncryption =
+        field_map json__ "KMSServerSideEncryption"
+          KMSServerSideEncryptionIntegration.of_json in
+      let logsAnomalyDetection =
+        field_map json__ "LogsAnomalyDetection"
+          LogsAnomalyDetectionIntegration.of_json in
+      let opsCenter =
+        field_map json__ "OpsCenter" OpsCenterIntegration.of_json in
+      make ?kMSServerSideEncryption ?logsAnomalyDetection ?opsCenter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the integration of DevOps Guru with another Amazon Web Services service, such as Amazon Web Services Systems Manager."]
@@ -6732,6 +8118,9 @@ module CloudFormationHealths =
   struct
     type nonrec t = CloudFormationHealth.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudFormationHealth.to_value)) |>
         (fun x -> `List x)
@@ -6758,6 +8147,9 @@ module ServiceHealths =
   struct
     type nonrec t = ServiceHealth.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceHealth.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6782,6 +8174,9 @@ module TagHealths =
   struct
     type nonrec t = TagHealth.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagHealth.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6806,6 +8201,9 @@ module AccountHealths =
   struct
     type nonrec t = AccountHealth.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountHealth.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6834,6 +8232,9 @@ module AccountIdList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsAccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6916,6 +8317,9 @@ module OrganizationalUnitIdList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationalUnitId.to_value)) |>
         (fun x -> `List x)
@@ -7078,20 +8482,20 @@ module ProactiveInsight =
       make ?description ?ssmOpsItemId ?resourceCollection
         ?predictionTimeRange ?insightTimeRange ?status ?severity ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" InsightDescription.of_json in
-      let ssmOpsItemId = field_map json "SsmOpsItemId" SsmOpsItemId.of_json in
+        field_map json__ "Description" InsightDescription.of_json in
+      let ssmOpsItemId = field_map json__ "SsmOpsItemId" SsmOpsItemId.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let predictionTimeRange =
-        field_map json "PredictionTimeRange" PredictionTimeRange.of_json in
+        field_map json__ "PredictionTimeRange" PredictionTimeRange.of_json in
       let insightTimeRange =
-        field_map json "InsightTimeRange" InsightTimeRange.of_json in
-      let status = field_map json "Status" InsightStatus.of_json in
-      let severity = field_map json "Severity" InsightSeverity.of_json in
-      let name = field_map json "Name" InsightName.of_json in
-      let id = field_map json "Id" InsightId.of_json in
+        field_map json__ "InsightTimeRange" InsightTimeRange.of_json in
+      let status = field_map json__ "Status" InsightStatus.of_json in
+      let severity = field_map json__ "Severity" InsightSeverity.of_json in
+      let name = field_map json__ "Name" InsightName.of_json in
+      let id = field_map json__ "Id" InsightId.of_json in
       make ?description ?ssmOpsItemId ?resourceCollection
         ?predictionTimeRange ?insightTimeRange ?status ?severity ?name ?id ()
     let to_json v = composed_to_json to_value v
@@ -7174,18 +8578,18 @@ module ReactiveInsight =
       make ?description ?ssmOpsItemId ?resourceCollection ?insightTimeRange
         ?status ?severity ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" InsightDescription.of_json in
-      let ssmOpsItemId = field_map json "SsmOpsItemId" SsmOpsItemId.of_json in
+        field_map json__ "Description" InsightDescription.of_json in
+      let ssmOpsItemId = field_map json__ "SsmOpsItemId" SsmOpsItemId.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let insightTimeRange =
-        field_map json "InsightTimeRange" InsightTimeRange.of_json in
-      let status = field_map json "Status" InsightStatus.of_json in
-      let severity = field_map json "Severity" InsightSeverity.of_json in
-      let name = field_map json "Name" InsightName.of_json in
-      let id = field_map json "Id" InsightId.of_json in
+        field_map json__ "InsightTimeRange" InsightTimeRange.of_json in
+      let status = field_map json__ "Status" InsightStatus.of_json in
+      let severity = field_map json__ "Severity" InsightSeverity.of_json in
+      let name = field_map json__ "Name" InsightName.of_json in
+      let id = field_map json__ "Id" InsightId.of_json in
       make ?description ?ssmOpsItemId ?resourceCollection ?insightTimeRange
         ?status ?severity ?name ?id ()
     let to_json v = composed_to_json to_value v
@@ -7222,7 +8626,9 @@ module ProactiveAnomaly =
         [@ocaml.doc "The metadata for the anomaly."];
       anomalyResources: AnomalyResources.t option
         [@ocaml.doc
-          "Information about a resource in which DevOps Guru detected anomalous behavior."]}
+          "Information about a resource in which DevOps Guru detected anomalous behavior."];
+      description: AnomalyDescription.t option
+        [@ocaml.doc "A description of the proactive anomaly."]}
     let make ?id =
       fun ?severity ->
         fun ?status ->
@@ -7236,22 +8642,24 @@ module ProactiveAnomaly =
                         fun ?limit ->
                           fun ?sourceMetadata ->
                             fun ?anomalyResources ->
-                              fun () ->
-                                {
-                                  id;
-                                  severity;
-                                  status;
-                                  updateTime;
-                                  anomalyTimeRange;
-                                  anomalyReportedTimeRange;
-                                  predictionTimeRange;
-                                  sourceDetails;
-                                  associatedInsightId;
-                                  resourceCollection;
-                                  limit;
-                                  sourceMetadata;
-                                  anomalyResources
-                                }
+                              fun ?description ->
+                                fun () ->
+                                  {
+                                    id;
+                                    severity;
+                                    status;
+                                    updateTime;
+                                    anomalyTimeRange;
+                                    anomalyReportedTimeRange;
+                                    predictionTimeRange;
+                                    sourceDetails;
+                                    associatedInsightId;
+                                    resourceCollection;
+                                    limit;
+                                    sourceMetadata;
+                                    anomalyResources;
+                                    description
+                                  }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:AnomalyId.to_value));
@@ -7275,9 +8683,14 @@ module ProactiveAnomaly =
         ("SourceMetadata",
           (Option.map x.sourceMetadata ~f:AnomalySourceMetadata.to_value));
         ("AnomalyResources",
-          (Option.map x.anomalyResources ~f:AnomalyResources.to_value))]
+          (Option.map x.anomalyResources ~f:AnomalyResources.to_value));
+        ("Description",
+          (Option.map x.description ~f:AnomalyDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:AnomalyDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let anomalyResources =
         (Option.map ~f:AnomalyResources.of_xml)
           (Xml.child xml_arg0 "AnomalyResources") in
@@ -7312,38 +8725,40 @@ module ProactiveAnomaly =
         (Option.map ~f:AnomalySeverity.of_xml)
           (Xml.child xml_arg0 "Severity") in
       let id = (Option.map ~f:AnomalyId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?anomalyResources ?sourceMetadata ?limit ?resourceCollection
-        ?associatedInsightId ?sourceDetails ?predictionTimeRange
-        ?anomalyReportedTimeRange ?anomalyTimeRange ?updateTime ?status
-        ?severity ?id ()
+      make ?description ?anomalyResources ?sourceMetadata ?limit
+        ?resourceCollection ?associatedInsightId ?sourceDetails
+        ?predictionTimeRange ?anomalyReportedTimeRange ?anomalyTimeRange
+        ?updateTime ?status ?severity ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" AnomalyDescription.of_json in
       let anomalyResources =
-        field_map json "AnomalyResources" AnomalyResources.of_json in
+        field_map json__ "AnomalyResources" AnomalyResources.of_json in
       let sourceMetadata =
-        field_map json "SourceMetadata" AnomalySourceMetadata.of_json in
-      let limit = field_map json "Limit" AnomalyLimit.of_json in
+        field_map json__ "SourceMetadata" AnomalySourceMetadata.of_json in
+      let limit = field_map json__ "Limit" AnomalyLimit.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let associatedInsightId =
-        field_map json "AssociatedInsightId" InsightId.of_json in
+        field_map json__ "AssociatedInsightId" InsightId.of_json in
       let sourceDetails =
-        field_map json "SourceDetails" AnomalySourceDetails.of_json in
+        field_map json__ "SourceDetails" AnomalySourceDetails.of_json in
       let predictionTimeRange =
-        field_map json "PredictionTimeRange" PredictionTimeRange.of_json in
+        field_map json__ "PredictionTimeRange" PredictionTimeRange.of_json in
       let anomalyReportedTimeRange =
-        field_map json "AnomalyReportedTimeRange"
+        field_map json__ "AnomalyReportedTimeRange"
           AnomalyReportedTimeRange.of_json in
       let anomalyTimeRange =
-        field_map json "AnomalyTimeRange" AnomalyTimeRange.of_json in
-      let updateTime = field_map json "UpdateTime" Timestamp.of_json in
-      let status = field_map json "Status" AnomalyStatus.of_json in
-      let severity = field_map json "Severity" AnomalySeverity.of_json in
-      let id = field_map json "Id" AnomalyId.of_json in
-      make ?anomalyResources ?sourceMetadata ?limit ?resourceCollection
-        ?associatedInsightId ?sourceDetails ?predictionTimeRange
-        ?anomalyReportedTimeRange ?anomalyTimeRange ?updateTime ?status
-        ?severity ?id ()
+        field_map json__ "AnomalyTimeRange" AnomalyTimeRange.of_json in
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let status = field_map json__ "Status" AnomalyStatus.of_json in
+      let severity = field_map json__ "Severity" AnomalySeverity.of_json in
+      let id = field_map json__ "Id" AnomalyId.of_json in
+      make ?description ?anomalyResources ?sourceMetadata ?limit
+        ?resourceCollection ?associatedInsightId ?sourceDetails
+        ?predictionTimeRange ?anomalyReportedTimeRange ?anomalyTimeRange
+        ?updateTime ?status ?severity ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an anomaly. This object is returned by ListAnomalies."]
@@ -7474,29 +8889,29 @@ module ReactiveAnomaly =
         ?resourceCollection ?associatedInsightId ?sourceDetails
         ?anomalyReportedTimeRange ?anomalyTimeRange ?status ?severity ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let anomalyResources =
-        field_map json "AnomalyResources" AnomalyResources.of_json in
+        field_map json__ "AnomalyResources" AnomalyResources.of_json in
       let causalAnomalyId =
-        field_map json "CausalAnomalyId" AnomalyId.of_json in
+        field_map json__ "CausalAnomalyId" AnomalyId.of_json in
       let description =
-        field_map json "Description" AnomalyDescription.of_json in
-      let name = field_map json "Name" AnomalyName.of_json in
-      let type_ = field_map json "Type" AnomalyType.of_json in
+        field_map json__ "Description" AnomalyDescription.of_json in
+      let name = field_map json__ "Name" AnomalyName.of_json in
+      let type_ = field_map json__ "Type" AnomalyType.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollection.of_json in
+        field_map json__ "ResourceCollection" ResourceCollection.of_json in
       let associatedInsightId =
-        field_map json "AssociatedInsightId" InsightId.of_json in
+        field_map json__ "AssociatedInsightId" InsightId.of_json in
       let sourceDetails =
-        field_map json "SourceDetails" AnomalySourceDetails.of_json in
+        field_map json__ "SourceDetails" AnomalySourceDetails.of_json in
       let anomalyReportedTimeRange =
-        field_map json "AnomalyReportedTimeRange"
+        field_map json__ "AnomalyReportedTimeRange"
           AnomalyReportedTimeRange.of_json in
       let anomalyTimeRange =
-        field_map json "AnomalyTimeRange" AnomalyTimeRange.of_json in
-      let status = field_map json "Status" AnomalyStatus.of_json in
-      let severity = field_map json "Severity" AnomalySeverity.of_json in
-      let id = field_map json "Id" AnomalyId.of_json in
+        field_map json__ "AnomalyTimeRange" AnomalyTimeRange.of_json in
+      let status = field_map json__ "Status" AnomalyStatus.of_json in
+      let severity = field_map json__ "Severity" AnomalySeverity.of_json in
+      let id = field_map json__ "Id" AnomalyId.of_json in
       make ?anomalyResources ?causalAnomalyId ?description ?name ?type_
         ?resourceCollection ?associatedInsightId ?sourceDetails
         ?anomalyReportedTimeRange ?anomalyTimeRange ?status ?severity ?id ()
@@ -7518,8 +8933,8 @@ module ServiceQuotaExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7621,9 +9036,9 @@ module UpdateServiceIntegrationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceIntegration") in
       make ~serviceIntegration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceIntegration =
-        field_map_exn json "ServiceIntegration"
+        field_map_exn json__ "ServiceIntegration"
           UpdateServiceIntegrationConfig.of_json in
       make ~serviceIntegration ()
     let to_json v = composed_to_json to_value v
@@ -7733,12 +9148,12 @@ module UpdateResourceCollectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~resourceCollection ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceCollection =
-        field_map_exn json "ResourceCollection"
+        field_map_exn json__ "ResourceCollection"
           UpdateResourceCollectionFilter.of_json in
       let action =
-        field_map_exn json "Action" UpdateResourceCollectionAction.of_json in
+        field_map_exn json__ "Action" UpdateResourceCollectionAction.of_json in
       make ~resourceCollection ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7829,9 +9244,9 @@ module UpdateEventSourcesConfigRequest =
           (Xml.child xml_arg0 "EventSources") in
       make ?eventSources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSources =
-        field_map json "EventSources" EventSourcesConfig.of_json in
+        field_map json__ "EventSources" EventSourcesConfig.of_json in
       make ?eventSources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7951,10 +9366,10 @@ module StartCostEstimationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceCollection") in
       make ?clientToken ~resourceCollection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       let resourceCollection =
-        field_map_exn json "ResourceCollection"
+        field_map_exn json__ "ResourceCollection"
           CostEstimationResourceCollectionFilter.of_json in
       make ?clientToken ~resourceCollection ()
     let to_json v = composed_to_json to_value v
@@ -8050,12 +9465,12 @@ module SearchOrganizationInsightsResponse =
           (Xml.child xml_arg0 "ProactiveInsights") in
       make ?nextToken ?reactiveInsights ?proactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let reactiveInsights =
-        field_map json "ReactiveInsights" ReactiveInsights.of_json in
+        field_map json__ "ReactiveInsights" ReactiveInsights.of_json in
       let proactiveInsights =
-        field_map json "ProactiveInsights" ProactiveInsights.of_json in
+        field_map json__ "ProactiveInsights" ProactiveInsights.of_json in
       make ?nextToken ?reactiveInsights ?proactiveInsights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8128,18 +9543,18 @@ module SearchOrganizationInsightsRequest =
       make ~type_ ?nextToken ?maxResults ?filters ~startTimeRange ~accountIds
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" InsightType.of_json in
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" InsightType.of_json in
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           SearchOrganizationInsightsMaxResults.of_json in
       let filters =
-        field_map json "Filters" SearchOrganizationInsightsFilters.of_json in
+        field_map json__ "Filters" SearchOrganizationInsightsFilters.of_json in
       let startTimeRange =
-        field_map_exn json "StartTimeRange" StartTimeRange.of_json in
+        field_map_exn json__ "StartTimeRange" StartTimeRange.of_json in
       let accountIds =
-        field_map_exn json "AccountIds" SearchInsightsAccountIdList.of_json in
+        field_map_exn json__ "AccountIds" SearchInsightsAccountIdList.of_json in
       make ~type_ ?nextToken ?maxResults ?filters ~startTimeRange ~accountIds
         ()
     let to_json v = composed_to_json to_value v
@@ -8233,16 +9648,16 @@ module SearchInsightsResponse =
           (Xml.child xml_arg0 "ProactiveInsights") in
       make ?nextToken ?reactiveInsights ?proactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let reactiveInsights =
-        field_map json "ReactiveInsights" ReactiveInsights.of_json in
+        field_map json__ "ReactiveInsights" ReactiveInsights.of_json in
       let proactiveInsights =
-        field_map json "ProactiveInsights" ProactiveInsights.of_json in
+        field_map json__ "ProactiveInsights" ProactiveInsights.of_json in
       make ?nextToken ?reactiveInsights ?proactiveInsights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of insights in your Amazon Web Services account. You can specify which insights are returned by their start time, one or more statuses (ONGOING, CLOSED, and CLOSED), one or more severities (LOW, MEDIUM, and HIGH), and type (REACTIVE or PROACTIVE). Use the Filters parameter to specify status and severity search parameters. Use the Type parameter to specify REACTIVE or PROACTIVE in your search."]
+       "Returns a list of insights in your Amazon Web Services account. You can specify which insights are returned by their start time, one or more statuses (ONGOING or CLOSED), one or more severities (LOW, MEDIUM, and HIGH), and type (REACTIVE or PROACTIVE). Use the Filters parameter to specify status and severity search parameters. Use the Type parameter to specify REACTIVE or PROACTIVE in your search."]
 module SearchInsightsRequest =
   struct
     type nonrec t =
@@ -8296,18 +9711,18 @@ module SearchInsightsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "StartTimeRange") in
       make ~type_ ?nextToken ?maxResults ?filters ~startTimeRange ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" InsightType.of_json in
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" InsightType.of_json in
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" SearchInsightsMaxResults.of_json in
-      let filters = field_map json "Filters" SearchInsightsFilters.of_json in
+        field_map json__ "MaxResults" SearchInsightsMaxResults.of_json in
+      let filters = field_map json__ "Filters" SearchInsightsFilters.of_json in
       let startTimeRange =
-        field_map_exn json "StartTimeRange" StartTimeRange.of_json in
+        field_map_exn json__ "StartTimeRange" StartTimeRange.of_json in
       make ~type_ ?nextToken ?maxResults ?filters ~startTimeRange ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of insights in your Amazon Web Services account. You can specify which insights are returned by their start time, one or more statuses (ONGOING, CLOSED, and CLOSED), one or more severities (LOW, MEDIUM, and HIGH), and type (REACTIVE or PROACTIVE). Use the Filters parameter to specify status and severity search parameters. Use the Type parameter to specify REACTIVE or PROACTIVE in your search."]
+       "Returns a list of insights in your Amazon Web Services account. You can specify which insights are returned by their start time, one or more statuses (ONGOING or CLOSED), one or more severities (LOW, MEDIUM, and HIGH), and type (REACTIVE or PROACTIVE). Use the Filters parameter to specify status and severity search parameters. Use the Type parameter to specify REACTIVE or PROACTIVE in your search."]
 module RemoveNotificationChannelResponse =
   struct
     type nonrec t = unit
@@ -8411,8 +9826,8 @@ module RemoveNotificationChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" NotificationChannelId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" NotificationChannelId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8520,9 +9935,9 @@ module PutFeedbackRequest =
           (Xml.child xml_arg0 "InsightFeedback") in
       make ?insightFeedback ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let insightFeedback =
-        field_map json "InsightFeedback" InsightFeedback.of_json in
+        field_map json__ "InsightFeedback" InsightFeedback.of_json in
       make ?insightFeedback ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Collects customer feedback about the specified insight."]
@@ -8614,10 +10029,10 @@ module ListRecommendationsResponse =
           (Xml.child xml_arg0 "Recommendations") in
       make ?nextToken ?recommendations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let recommendations =
-        field_map json "Recommendations" Recommendations.of_json in
+        field_map json__ "Recommendations" Recommendations.of_json in
       make ?nextToken ?recommendations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8660,11 +10075,11 @@ module ListRecommendationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InsightId") in
       make ?accountId ?locale ?nextToken ~insightId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "AccountId" AwsAccountId.of_json in
-      let locale = field_map json "Locale" Locale.of_json in
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
-      let insightId = field_map_exn json "InsightId" InsightId.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AwsAccountId.of_json in
+      let locale = field_map json__ "Locale" Locale.of_json in
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let insightId = field_map_exn json__ "InsightId" InsightId.of_json in
       make ?accountId ?locale ?nextToken ~insightId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8761,13 +10176,13 @@ module ListOrganizationInsightsResponse =
           (Xml.child xml_arg0 "ProactiveInsights") in
       make ?nextToken ?reactiveInsights ?proactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let reactiveInsights =
-        field_map json "ReactiveInsights"
+        field_map json__ "ReactiveInsights"
           ReactiveOrganizationInsights.of_json in
       let proactiveInsights =
-        field_map json "ProactiveInsights"
+        field_map json__ "ProactiveInsights"
           ProactiveOrganizationInsights.of_json in
       make ?nextToken ?reactiveInsights ?proactiveInsights ()
     let to_json v = composed_to_json to_value v
@@ -8833,17 +10248,17 @@ module ListOrganizationInsightsRequest =
       make ?nextToken ?organizationalUnitIds ?accountIds ?maxResults
         ~statusFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let organizationalUnitIds =
-        field_map json "OrganizationalUnitIds"
+        field_map json__ "OrganizationalUnitIds"
           ListInsightsOrganizationalUnitIdList.of_json in
       let accountIds =
-        field_map json "AccountIds" ListInsightsAccountIdList.of_json in
+        field_map json__ "AccountIds" ListInsightsAccountIdList.of_json in
       let maxResults =
-        field_map json "MaxResults" ListInsightsMaxResults.of_json in
+        field_map json__ "MaxResults" ListInsightsMaxResults.of_json in
       let statusFilter =
-        field_map_exn json "StatusFilter" ListInsightsStatusFilter.of_json in
+        field_map_exn json__ "StatusFilter" ListInsightsStatusFilter.of_json in
       make ?nextToken ?organizationalUnitIds ?accountIds ?maxResults
         ~statusFilter ()
     let to_json v = composed_to_json to_value v
@@ -8926,9 +10341,9 @@ module ListNotificationChannelsResponse =
         (Option.map ~f:Channels.of_xml) (Xml.child xml_arg0 "Channels") in
       make ?nextToken ?channels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
-      let channels = field_map json "Channels" Channels.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let channels = field_map json__ "Channels" Channels.of_json in
       make ?nextToken ?channels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8950,12 +10365,149 @@ module ListNotificationChannelsRequest =
         (Option.map ~f:UuidNextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of notification channels configured for DevOps Guru. Each notification channel is used to notify you when DevOps Guru generates an insight that contains information about how to improve your operations. The one supported notification channel is Amazon Simple Notification Service (Amazon SNS)."]
+module ListMonitoredResourcesResponse =
+  struct
+    type nonrec t =
+      {
+      monitoredResourceIdentifiers: MonitoredResourceIdentifiers.t option
+        [@ocaml.doc
+          "Information about the resource that is being monitored, including the name of the resource, the type of resource, and whether or not permission is given to DevOps Guru to access that resource."];
+      nextToken: UuidNextToken.t option
+        [@ocaml.doc
+          "The pagination token to use to retrieve the next page of results for this operation. If there are no more pages, this value is null."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?monitoredResourceIdentifiers =
+      fun ?nextToken -> fun () -> { monitoredResourceIdentifiers; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MonitoredResourceIdentifiers",
+           (Option.map x.monitoredResourceIdentifiers
+              ~f:MonitoredResourceIdentifiers.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:UuidNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:UuidNextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let monitoredResourceIdentifiers =
+        (Option.map ~f:MonitoredResourceIdentifiers.of_xml)
+          (Xml.child xml_arg0 "MonitoredResourceIdentifiers") in
+      make ?nextToken ?monitoredResourceIdentifiers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let monitoredResourceIdentifiers =
+        field_map json__ "MonitoredResourceIdentifiers"
+          MonitoredResourceIdentifiers.of_json in
+      make ?nextToken ?monitoredResourceIdentifiers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the list of all log groups that are being monitored and tagged by DevOps Guru."]
+module ListMonitoredResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      filters: ListMonitoredResourcesFilters.t option
+        [@ocaml.doc
+          "Filters to determine which monitored resources you want to retrieve. You can filter by resource type or resource permission status."];
+      maxResults: ListMonitoredResourcesMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value."];
+      nextToken: UuidNextToken.t option
+        [@ocaml.doc
+          "The pagination token to use to retrieve the next page of results for this operation. If this value is null, it retrieves the first page."]}
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Filters",
+           (Option.map x.filters ~f:ListMonitoredResourcesFilters.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListMonitoredResourcesMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:UuidNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:UuidNextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListMonitoredResourcesMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:ListMonitoredResourcesFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          ListMonitoredResourcesMaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" ListMonitoredResourcesFilters.of_json in
+      make ?nextToken ?maxResults ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the list of all log groups that are being monitored and tagged by DevOps Guru."]
 module ListInsightsResponse =
   struct
     type nonrec t =
@@ -9044,12 +10596,12 @@ module ListInsightsResponse =
           (Xml.child xml_arg0 "ProactiveInsights") in
       make ?nextToken ?reactiveInsights ?proactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let reactiveInsights =
-        field_map json "ReactiveInsights" ReactiveInsights.of_json in
+        field_map json__ "ReactiveInsights" ReactiveInsights.of_json in
       let proactiveInsights =
-        field_map json "ProactiveInsights" ProactiveInsights.of_json in
+        field_map json__ "ProactiveInsights" ProactiveInsights.of_json in
       make ?nextToken ?reactiveInsights ?proactiveInsights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9091,12 +10643,12 @@ module ListInsightsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "StatusFilter") in
       make ?nextToken ?maxResults ~statusFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListInsightsMaxResults.of_json in
+        field_map json__ "MaxResults" ListInsightsMaxResults.of_json in
       let statusFilter =
-        field_map_exn json "StatusFilter" ListInsightsStatusFilter.of_json in
+        field_map_exn json__ "StatusFilter" ListInsightsStatusFilter.of_json in
       make ?nextToken ?maxResults ~statusFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9105,7 +10657,7 @@ module ListEventsResponse =
   struct
     type nonrec t =
       {
-      events: Events.t [@ocaml.doc "A list of the requested events."];
+      events: Events.t option [@ocaml.doc "A list of the requested events."];
       nextToken: UuidNextToken.t option
         [@ocaml.doc
           "The pagination token to use to retrieve the next page of results for this operation. If there are no more pages, this value is null."]}
@@ -9116,8 +10668,7 @@ module ListEventsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListEventsResponse"
-    let make ?nextToken = fun ~events -> fun () -> { nextToken; events }
+    let make ?events = fun ?nextToken -> fun () -> { events; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9176,20 +10727,20 @@ module ListEventsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Events", (Some (Events.to_value x.events)));
+        [("Events", (Option.map x.events ~f:Events.to_value));
         ("NextToken", (Option.map x.nextToken ~f:UuidNextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:UuidNextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let events =
-        Events.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Events") in
-      make ?nextToken ~events ()
+        (Option.map ~f:Events.of_xml) (Xml.child xml_arg0 "Events") in
+      make ?nextToken ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
-      let events = field_map_exn json "Events" Events.of_json in
-      make ?nextToken ~events ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let events = field_map json__ "Events" Events.of_json in
+      make ?nextToken ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the events emitted by the resources that are evaluated by DevOps Guru. You can use filters to specify which events are returned."]
@@ -9235,16 +10786,166 @@ module ListEventsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Filters") in
       make ?accountId ?nextToken ?maxResults ~filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "AccountId" AwsAccountId.of_json in
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AwsAccountId.of_json in
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListEventsMaxResults.of_json in
-      let filters = field_map_exn json "Filters" ListEventsFilters.of_json in
+        field_map json__ "MaxResults" ListEventsMaxResults.of_json in
+      let filters = field_map_exn json__ "Filters" ListEventsFilters.of_json in
       make ?accountId ?nextToken ?maxResults ~filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the events emitted by the resources that are evaluated by DevOps Guru. You can use filters to specify which events are returned."]
+module ListAnomalousLogGroupsResponse =
+  struct
+    type nonrec t =
+      {
+      insightId: InsightId.t option
+        [@ocaml.doc "The ID of the insight containing the log groups."];
+      anomalousLogGroups: AnomalousLogGroups.t option
+        [@ocaml.doc
+          "The list of Amazon CloudWatch log groups that are related to an insight."];
+      nextToken: UuidNextToken.t option
+        [@ocaml.doc
+          "The pagination token to use to retrieve the next page of results for this operation. If there are no more pages, this value is null."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?insightId =
+      fun ?anomalousLogGroups ->
+        fun ?nextToken ->
+          fun () -> { insightId; anomalousLogGroups; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InsightId", (Option.map x.insightId ~f:InsightId.to_value));
+        ("AnomalousLogGroups",
+          (Option.map x.anomalousLogGroups ~f:AnomalousLogGroups.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:UuidNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:UuidNextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let anomalousLogGroups =
+        (Option.map ~f:AnomalousLogGroups.of_xml)
+          (Xml.child xml_arg0 "AnomalousLogGroups") in
+      let insightId =
+        (Option.map ~f:InsightId.of_xml) (Xml.child xml_arg0 "InsightId") in
+      make ?nextToken ?anomalousLogGroups ?insightId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let anomalousLogGroups =
+        field_map json__ "AnomalousLogGroups" AnomalousLogGroups.of_json in
+      let insightId = field_map json__ "InsightId" InsightId.of_json in
+      make ?nextToken ?anomalousLogGroups ?insightId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the list of log groups that contain log anomalies."]
+module ListAnomalousLogGroupsRequest =
+  struct
+    type nonrec t =
+      {
+      insightId: InsightId.t
+        [@ocaml.doc "The ID of the insight containing the log groups."];
+      maxResults: ListAnomalousLogGroupsMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value."];
+      nextToken: UuidNextToken.t option
+        [@ocaml.doc
+          "The pagination token to use to retrieve the next page of results for this operation. If this value is null, it retrieves the first page."]}
+    let context_ = "ListAnomalousLogGroupsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~insightId -> fun () -> { maxResults; nextToken; insightId }
+    let to_value x =
+      structure_to_value
+        [("InsightId", (Some (InsightId.to_value x.insightId)));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListAnomalousLogGroupsMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:UuidNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:UuidNextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListAnomalousLogGroupsMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let insightId =
+        InsightId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InsightId") in
+      make ?nextToken ?maxResults ~insightId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          ListAnomalousLogGroupsMaxResults.of_json in
+      let insightId = field_map_exn json__ "InsightId" InsightId.of_json in
+      make ?nextToken ?maxResults ~insightId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the list of log groups that contain log anomalies."]
 module ListAnomaliesForInsightResponse =
   struct
     type nonrec t =
@@ -9344,12 +11045,12 @@ module ListAnomaliesForInsightResponse =
           (Xml.child xml_arg0 "ProactiveAnomalies") in
       make ?nextToken ?reactiveAnomalies ?proactiveAnomalies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let reactiveAnomalies =
-        field_map json "ReactiveAnomalies" ReactiveAnomalies.of_json in
+        field_map json__ "ReactiveAnomalies" ReactiveAnomalies.of_json in
       let proactiveAnomalies =
-        field_map json "ProactiveAnomalies" ProactiveAnomalies.of_json in
+        field_map json__ "ProactiveAnomalies" ProactiveAnomalies.of_json in
       make ?nextToken ?reactiveAnomalies ?proactiveAnomalies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9371,16 +11072,26 @@ module ListAnomaliesForInsightRequest =
         [@ocaml.doc
           "The pagination token to use to retrieve the next page of results for this operation. If this value is null, it retrieves the first page."];
       accountId: AwsAccountId.t option
-        [@ocaml.doc "The ID of the Amazon Web Services account."]}
+        [@ocaml.doc "The ID of the Amazon Web Services account."];
+      filters: ListAnomaliesForInsightFilters.t option
+        [@ocaml.doc
+          "Specifies one or more service names that are used to list anomalies."]}
     let context_ = "ListAnomaliesForInsightRequest"
     let make ?startTimeRange =
       fun ?maxResults ->
         fun ?nextToken ->
           fun ?accountId ->
-            fun ~insightId ->
-              fun () ->
-                { startTimeRange; maxResults; nextToken; accountId; insightId
-                }
+            fun ?filters ->
+              fun ~insightId ->
+                fun () ->
+                  {
+                    startTimeRange;
+                    maxResults;
+                    nextToken;
+                    accountId;
+                    filters;
+                    insightId
+                  }
     let to_value x =
       structure_to_value
         [("InsightId", (Some (InsightId.to_value x.insightId)));
@@ -9390,9 +11101,14 @@ module ListAnomaliesForInsightRequest =
           (Option.map x.maxResults
              ~f:ListAnomaliesForInsightMaxResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:UuidNextToken.to_value));
-        ("AccountId", (Option.map x.accountId ~f:AwsAccountId.to_value))]
+        ("AccountId", (Option.map x.accountId ~f:AwsAccountId.to_value));
+        ("Filters",
+          (Option.map x.filters ~f:ListAnomaliesForInsightFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:ListAnomaliesForInsightFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
       let accountId =
         (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let nextToken =
@@ -9406,17 +11122,22 @@ module ListAnomaliesForInsightRequest =
       let insightId =
         InsightId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InsightId") in
-      make ?accountId ?nextToken ?maxResults ?startTimeRange ~insightId ()
+      make ?filters ?accountId ?nextToken ?maxResults ?startTimeRange
+        ~insightId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "AccountId" AwsAccountId.of_json in
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let filters =
+        field_map json__ "Filters" ListAnomaliesForInsightFilters.of_json in
+      let accountId = field_map json__ "AccountId" AwsAccountId.of_json in
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListAnomaliesForInsightMaxResults.of_json in
+        field_map json__ "MaxResults"
+          ListAnomaliesForInsightMaxResults.of_json in
       let startTimeRange =
-        field_map json "StartTimeRange" StartTimeRange.of_json in
-      let insightId = field_map_exn json "InsightId" InsightId.of_json in
-      make ?accountId ?nextToken ?maxResults ?startTimeRange ~insightId ()
+        field_map json__ "StartTimeRange" StartTimeRange.of_json in
+      let insightId = field_map_exn json__ "InsightId" InsightId.of_json in
+      make ?filters ?accountId ?nextToken ?maxResults ?startTimeRange
+        ~insightId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the anomalies that belong to an insight that you specify using its ID."]
@@ -9510,10 +11231,11 @@ module GetResourceCollectionResponse =
           (Xml.child xml_arg0 "ResourceCollection") in
       make ?nextToken ?resourceCollection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection" ResourceCollectionFilter.of_json in
+        field_map json__ "ResourceCollection"
+          ResourceCollectionFilter.of_json in
       make ?nextToken ?resourceCollection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9546,10 +11268,10 @@ module GetResourceCollectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceCollectionType") in
       make ?nextToken ~resourceCollectionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let resourceCollectionType =
-        field_map_exn json "ResourceCollectionType"
+        field_map_exn json__ "ResourceCollectionType"
           ResourceCollectionType.of_json in
       make ?nextToken ~resourceCollectionType ()
     let to_json v = composed_to_json to_value v
@@ -9686,15 +11408,15 @@ module GetCostEstimationResponse =
       make ?nextToken ?totalCost ?timeRange ?costs ?status
         ?resourceCollection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
-      let totalCost = field_map json "TotalCost" Cost.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let totalCost = field_map json__ "TotalCost" Cost.of_json in
       let timeRange =
-        field_map json "TimeRange" CostEstimationTimeRange.of_json in
-      let costs = field_map json "Costs" ServiceResourceCosts.of_json in
-      let status = field_map json "Status" CostEstimationStatus.of_json in
+        field_map json__ "TimeRange" CostEstimationTimeRange.of_json in
+      let costs = field_map json__ "Costs" ServiceResourceCosts.of_json in
+      let status = field_map json__ "Status" CostEstimationStatus.of_json in
       let resourceCollection =
-        field_map json "ResourceCollection"
+        field_map json__ "ResourceCollection"
           CostEstimationResourceCollectionFilter.of_json in
       make ?nextToken ?totalCost ?timeRange ?costs ?status
         ?resourceCollection ()
@@ -9718,8 +11440,8 @@ module GetCostEstimationRequest =
         (Option.map ~f:UuidNextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9731,6 +11453,7 @@ module DescribeServiceIntegrationResponse =
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -9741,6 +11464,8 @@ module DescribeServiceIntegrationResponse =
           `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -9754,6 +11479,8 @@ module DescribeServiceIntegrationResponse =
           `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -9770,6 +11497,10 @@ module DescribeServiceIntegrationResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -9795,9 +11526,10 @@ module DescribeServiceIntegrationResponse =
           (Xml.child xml_arg0 "ServiceIntegration") in
       make ?serviceIntegration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceIntegration =
-        field_map json "ServiceIntegration" ServiceIntegrationConfig.of_json in
+        field_map json__ "ServiceIntegration"
+          ServiceIntegrationConfig.of_json in
       make ?serviceIntegration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9830,7 +11562,7 @@ module DescribeResourceCollectionHealthResponse =
           "The pagination token to use to retrieve the next page of results for this operation. If there are no more pages, this value is null."];
       tags: TagHealths.t option
         [@ocaml.doc
-          "The Amazon Web Services tags that are used by resources in the resource collection. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
+          "The Amazon Web Services tags that are used by resources in the resource collection. Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -9909,12 +11641,12 @@ module DescribeResourceCollectionHealthResponse =
           (Xml.child xml_arg0 "CloudFormation") in
       make ?tags ?nextToken ?service ?cloudFormation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagHealths.of_json in
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
-      let service = field_map json "Service" ServiceHealths.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagHealths.of_json in
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let service = field_map json__ "Service" ServiceHealths.of_json in
       let cloudFormation =
-        field_map json "CloudFormation" CloudFormationHealths.of_json in
+        field_map json__ "CloudFormation" CloudFormationHealths.of_json in
       make ?tags ?nextToken ?service ?cloudFormation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9947,10 +11679,10 @@ module DescribeResourceCollectionHealthRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceCollectionType") in
       make ?nextToken ~resourceCollectionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let resourceCollectionType =
-        field_map_exn json "ResourceCollectionType"
+        field_map_exn json__ "ResourceCollectionType"
           ResourceCollectionType.of_json in
       make ?nextToken ~resourceCollectionType ()
     let to_json v = composed_to_json to_value v
@@ -9973,7 +11705,7 @@ module DescribeOrganizationResourceCollectionHealthResponse =
           "The pagination token to use to retrieve the next page of results for this operation. If there are no more pages, this value is null."];
       tags: TagHealths.t option
         [@ocaml.doc
-          "Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be Devops-guru-deployment-application or Devops-guru-rds-application. While keys are case-sensitive, the case of key characters don't matter to DevOps Guru. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
+          "Tags help you identify and organize your Amazon Web Services resources. Many Amazon Web Services services support tagging, so you can assign the same tag to resources from different services to indicate that the resources are related. For example, you can assign the same tag to an Amazon DynamoDB table resource that you assign to an Lambda function. For more information about using tags, see the Tagging best practices whitepaper. Each Amazon Web Services tag has two parts. A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case-sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case-sensitive. Together these are known as key-value pairs. The string used for a key in a tag that you use to define your resource coverage must begin with the prefix Devops-guru-. The tag key might be DevOps-Guru-deployment-application or devops-guru-rds-application. When you create a key, the case of characters in the key can be whatever you choose. After you create a key, it is case-sensitive. For example, DevOps Guru works with a key named devops-guru-rds and a key named DevOps-Guru-RDS, and these act as two different keys. Possible key/value pairs in your application might be Devops-Guru-production-application/RDS or Devops-Guru-production-application/containers."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10057,13 +11789,13 @@ module DescribeOrganizationResourceCollectionHealthResponse =
           (Xml.child xml_arg0 "CloudFormation") in
       make ?tags ?nextToken ?account ?service ?cloudFormation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagHealths.of_json in
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
-      let account = field_map json "Account" AccountHealths.of_json in
-      let service = field_map json "Service" ServiceHealths.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagHealths.of_json in
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
+      let account = field_map json__ "Account" AccountHealths.of_json in
+      let service = field_map json__ "Service" ServiceHealths.of_json in
       let cloudFormation =
-        field_map json "CloudFormation" CloudFormationHealths.of_json in
+        field_map json__ "CloudFormation" CloudFormationHealths.of_json in
       make ?tags ?nextToken ?account ?service ?cloudFormation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10134,17 +11866,17 @@ module DescribeOrganizationResourceCollectionHealthRequest =
       make ?maxResults ?nextToken ?organizationalUnitIds ?accountIds
         ~organizationResourceCollectionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           OrganizationResourceCollectionMaxResults.of_json in
-      let nextToken = field_map json "NextToken" UuidNextToken.of_json in
+      let nextToken = field_map json__ "NextToken" UuidNextToken.of_json in
       let organizationalUnitIds =
-        field_map json "OrganizationalUnitIds"
+        field_map json__ "OrganizationalUnitIds"
           OrganizationalUnitIdList.of_json in
-      let accountIds = field_map json "AccountIds" AccountIdList.of_json in
+      let accountIds = field_map json__ "AccountIds" AccountIdList.of_json in
       let organizationResourceCollectionType =
-        field_map_exn json "OrganizationResourceCollectionType"
+        field_map_exn json__ "OrganizationResourceCollectionType"
           OrganizationResourceCollectionType.of_json in
       make ?maxResults ?nextToken ?organizationalUnitIds ?accountIds
         ~organizationResourceCollectionType ()
@@ -10155,10 +11887,10 @@ module DescribeOrganizationOverviewResponse =
   struct
     type nonrec t =
       {
-      reactiveInsights: NumReactiveInsights.t
+      reactiveInsights: NumReactiveInsights.t option
         [@ocaml.doc
           "An integer that specifies the number of open reactive insights in your Amazon Web Services account."];
-      proactiveInsights: NumProactiveInsights.t
+      proactiveInsights: NumProactiveInsights.t option
         [@ocaml.doc
           "An integer that specifies the number of open proactive insights in your Amazon Web Services account."]}
     type nonrec error =
@@ -10167,9 +11899,8 @@ module DescribeOrganizationOverviewResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeOrganizationOverviewResponse"
-    let make ~reactiveInsights =
-      fun ~proactiveInsights ->
+    let make ?reactiveInsights =
+      fun ?proactiveInsights ->
         fun () -> { reactiveInsights; proactiveInsights }
     let error_of_json name json =
       match name with
@@ -10222,25 +11953,25 @@ module DescribeOrganizationOverviewResponse =
     let to_value x =
       structure_to_value
         [("ReactiveInsights",
-           (Some (NumReactiveInsights.to_value x.reactiveInsights)));
+           (Option.map x.reactiveInsights ~f:NumReactiveInsights.to_value));
         ("ProactiveInsights",
-          (Some (NumProactiveInsights.to_value x.proactiveInsights)))]
+          (Option.map x.proactiveInsights ~f:NumProactiveInsights.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let proactiveInsights =
-        NumProactiveInsights.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProactiveInsights") in
+        (Option.map ~f:NumProactiveInsights.of_xml)
+          (Xml.child xml_arg0 "ProactiveInsights") in
       let reactiveInsights =
-        NumReactiveInsights.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ReactiveInsights") in
-      make ~proactiveInsights ~reactiveInsights ()
+        (Option.map ~f:NumReactiveInsights.of_xml)
+          (Xml.child xml_arg0 "ReactiveInsights") in
+      make ?proactiveInsights ?reactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let proactiveInsights =
-        field_map_exn json "ProactiveInsights" NumProactiveInsights.of_json in
+        field_map json__ "ProactiveInsights" NumProactiveInsights.of_json in
       let reactiveInsights =
-        field_map_exn json "ReactiveInsights" NumReactiveInsights.of_json in
-      make ~proactiveInsights ~reactiveInsights ()
+        field_map json__ "ReactiveInsights" NumReactiveInsights.of_json in
+      make ?proactiveInsights ?reactiveInsights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns an overview of your organization's history based on the specified time range. The overview includes the total reactive and proactive insights."]
@@ -10287,13 +12018,13 @@ module DescribeOrganizationOverviewRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FromTime") in
       make ?organizationalUnitIds ?accountIds ?toTime ~fromTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationalUnitIds =
-        field_map json "OrganizationalUnitIds"
+        field_map json__ "OrganizationalUnitIds"
           OrganizationalUnitIdList.of_json in
-      let accountIds = field_map json "AccountIds" AccountIdList.of_json in
-      let toTime = field_map json "ToTime" Timestamp.of_json in
-      let fromTime = field_map_exn json "FromTime" Timestamp.of_json in
+      let accountIds = field_map json__ "AccountIds" AccountIdList.of_json in
+      let toTime = field_map json__ "ToTime" Timestamp.of_json in
+      let fromTime = field_map_exn json__ "FromTime" Timestamp.of_json in
       make ?organizationalUnitIds ?accountIds ?toTime ~fromTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10302,16 +12033,16 @@ module DescribeOrganizationHealthResponse =
   struct
     type nonrec t =
       {
-      openReactiveInsights: NumOpenReactiveInsights.t
+      openReactiveInsights: NumOpenReactiveInsights.t option
         [@ocaml.doc
           "An integer that specifies the number of open reactive insights in your Amazon Web Services account."];
-      openProactiveInsights: NumOpenProactiveInsights.t
+      openProactiveInsights: NumOpenProactiveInsights.t option
         [@ocaml.doc
           "An integer that specifies the number of open proactive insights in your Amazon Web Services account."];
-      metricsAnalyzed: NumMetricsAnalyzed.t
+      metricsAnalyzed: NumMetricsAnalyzed.t option
         [@ocaml.doc
           "An integer that specifies the number of metrics that have been analyzed in your organization."];
-      resourceHours: ResourceHours.t
+      resourceHours: ResourceHours.t option
         [@ocaml.doc
           "The number of Amazon DevOps Guru resource analysis hours billed to the current Amazon Web Services account in the last hour."]}
     type nonrec error =
@@ -10320,11 +12051,10 @@ module DescribeOrganizationHealthResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeOrganizationHealthResponse"
-    let make ~openReactiveInsights =
-      fun ~openProactiveInsights ->
-        fun ~metricsAnalyzed ->
-          fun ~resourceHours ->
+    let make ?openReactiveInsights =
+      fun ?openProactiveInsights ->
+        fun ?metricsAnalyzed ->
+          fun ?resourceHours ->
             fun () ->
               {
                 openReactiveInsights;
@@ -10383,42 +12113,45 @@ module DescribeOrganizationHealthResponse =
     let to_value x =
       structure_to_value
         [("OpenReactiveInsights",
-           (Some (NumOpenReactiveInsights.to_value x.openReactiveInsights)));
+           (Option.map x.openReactiveInsights
+              ~f:NumOpenReactiveInsights.to_value));
         ("OpenProactiveInsights",
-          (Some (NumOpenProactiveInsights.to_value x.openProactiveInsights)));
+          (Option.map x.openProactiveInsights
+             ~f:NumOpenProactiveInsights.to_value));
         ("MetricsAnalyzed",
-          (Some (NumMetricsAnalyzed.to_value x.metricsAnalyzed)));
-        ("ResourceHours", (Some (ResourceHours.to_value x.resourceHours)))]
+          (Option.map x.metricsAnalyzed ~f:NumMetricsAnalyzed.to_value));
+        ("ResourceHours",
+          (Option.map x.resourceHours ~f:ResourceHours.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceHours =
-        ResourceHours.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceHours") in
+        (Option.map ~f:ResourceHours.of_xml)
+          (Xml.child xml_arg0 "ResourceHours") in
       let metricsAnalyzed =
-        NumMetricsAnalyzed.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricsAnalyzed") in
+        (Option.map ~f:NumMetricsAnalyzed.of_xml)
+          (Xml.child xml_arg0 "MetricsAnalyzed") in
       let openProactiveInsights =
-        NumOpenProactiveInsights.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OpenProactiveInsights") in
+        (Option.map ~f:NumOpenProactiveInsights.of_xml)
+          (Xml.child xml_arg0 "OpenProactiveInsights") in
       let openReactiveInsights =
-        NumOpenReactiveInsights.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OpenReactiveInsights") in
-      make ~resourceHours ~metricsAnalyzed ~openProactiveInsights
-        ~openReactiveInsights ()
+        (Option.map ~f:NumOpenReactiveInsights.of_xml)
+          (Xml.child xml_arg0 "OpenReactiveInsights") in
+      make ?resourceHours ?metricsAnalyzed ?openProactiveInsights
+        ?openReactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceHours =
-        field_map_exn json "ResourceHours" ResourceHours.of_json in
+        field_map json__ "ResourceHours" ResourceHours.of_json in
       let metricsAnalyzed =
-        field_map_exn json "MetricsAnalyzed" NumMetricsAnalyzed.of_json in
+        field_map json__ "MetricsAnalyzed" NumMetricsAnalyzed.of_json in
       let openProactiveInsights =
-        field_map_exn json "OpenProactiveInsights"
+        field_map json__ "OpenProactiveInsights"
           NumOpenProactiveInsights.of_json in
       let openReactiveInsights =
-        field_map_exn json "OpenReactiveInsights"
+        field_map json__ "OpenReactiveInsights"
           NumOpenReactiveInsights.of_json in
-      make ~resourceHours ~metricsAnalyzed ~openProactiveInsights
-        ~openReactiveInsights ()
+      make ?resourceHours ?metricsAnalyzed ?openProactiveInsights
+        ?openReactiveInsights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns active insights, predictive insights, and resource hours analyzed in last hour."]
@@ -10449,11 +12182,11 @@ module DescribeOrganizationHealthRequest =
           (Xml.child xml_arg0 "AccountIds") in
       make ?organizationalUnitIds ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationalUnitIds =
-        field_map json "OrganizationalUnitIds"
+        field_map json__ "OrganizationalUnitIds"
           OrganizationalUnitIdList.of_json in
-      let accountIds = field_map json "AccountIds" AccountIdList.of_json in
+      let accountIds = field_map json__ "AccountIds" AccountIdList.of_json in
       make ?organizationalUnitIds ?accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10549,11 +12282,11 @@ module DescribeInsightResponse =
           (Xml.child xml_arg0 "ProactiveInsight") in
       make ?reactiveInsight ?proactiveInsight ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reactiveInsight =
-        field_map json "ReactiveInsight" ReactiveInsight.of_json in
+        field_map json__ "ReactiveInsight" ReactiveInsight.of_json in
       let proactiveInsight =
-        field_map json "ProactiveInsight" ProactiveInsight.of_json in
+        field_map json__ "ProactiveInsight" ProactiveInsight.of_json in
       make ?reactiveInsight ?proactiveInsight ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10579,9 +12312,9 @@ module DescribeInsightRequest =
         InsightId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?accountId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "AccountId" AwsAccountId.of_json in
-      let id = field_map_exn json "Id" InsightId.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AwsAccountId.of_json in
+      let id = field_map_exn json__ "Id" InsightId.of_json in
       make ?accountId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10665,9 +12398,9 @@ module DescribeFeedbackResponse =
           (Xml.child xml_arg0 "InsightFeedback") in
       make ?insightFeedback ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let insightFeedback =
-        field_map json "InsightFeedback" InsightFeedback.of_json in
+        field_map json__ "InsightFeedback" InsightFeedback.of_json in
       make ?insightFeedback ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10689,8 +12422,8 @@ module DescribeFeedbackRequest =
         (Option.map ~f:InsightId.of_xml) (Xml.child xml_arg0 "InsightId") in
       make ?insightId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let insightId = field_map json "InsightId" InsightId.of_json in
+    let of_json json__ =
+      let insightId = field_map json__ "InsightId" InsightId.of_json in
       make ?insightId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10767,9 +12500,9 @@ module DescribeEventSourcesConfigResponse =
           (Xml.child xml_arg0 "EventSources") in
       make ?eventSources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSources =
-        field_map json "EventSources" EventSourcesConfig.of_json in
+        field_map json__ "EventSources" EventSourcesConfig.of_json in
       make ?eventSources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10878,11 +12611,11 @@ module DescribeAnomalyResponse =
           (Xml.child xml_arg0 "ProactiveAnomaly") in
       make ?reactiveAnomaly ?proactiveAnomaly ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reactiveAnomaly =
-        field_map json "ReactiveAnomaly" ReactiveAnomaly.of_json in
+        field_map json__ "ReactiveAnomaly" ReactiveAnomaly.of_json in
       let proactiveAnomaly =
-        field_map json "ProactiveAnomaly" ProactiveAnomaly.of_json in
+        field_map json__ "ProactiveAnomaly" ProactiveAnomaly.of_json in
       make ?reactiveAnomaly ?proactiveAnomaly ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10908,9 +12641,9 @@ module DescribeAnomalyRequest =
         AnomalyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?accountId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "AccountId" AwsAccountId.of_json in
-      let id = field_map_exn json "Id" AnomalyId.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AwsAccountId.of_json in
+      let id = field_map_exn json__ "Id" AnomalyId.of_json in
       make ?accountId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10919,13 +12652,14 @@ module DescribeAccountOverviewResponse =
   struct
     type nonrec t =
       {
-      reactiveInsights: NumReactiveInsights.t
+      reactiveInsights: NumReactiveInsights.t option
         [@ocaml.doc
           "An integer that specifies the number of open reactive insights in your Amazon Web Services account that were created during the time range passed in."];
-      proactiveInsights: NumProactiveInsights.t
+      proactiveInsights: NumProactiveInsights.t option
         [@ocaml.doc
           "An integer that specifies the number of open proactive insights in your Amazon Web Services account that were created during the time range passed in."];
-      meanTimeToRecoverInMilliseconds: MeanTimeToRecoverInMilliseconds.t
+      meanTimeToRecoverInMilliseconds:
+        MeanTimeToRecoverInMilliseconds.t option
         [@ocaml.doc
           "The Mean Time to Recover (MTTR) for all closed insights that were created during the time range passed in."]}
     type nonrec error =
@@ -10934,10 +12668,9 @@ module DescribeAccountOverviewResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAccountOverviewResponse"
-    let make ~reactiveInsights =
-      fun ~proactiveInsights ->
-        fun ~meanTimeToRecoverInMilliseconds ->
+    let make ?reactiveInsights =
+      fun ?proactiveInsights ->
+        fun ?meanTimeToRecoverInMilliseconds ->
           fun () ->
             {
               reactiveInsights;
@@ -10995,38 +12728,36 @@ module DescribeAccountOverviewResponse =
     let to_value x =
       structure_to_value
         [("ReactiveInsights",
-           (Some (NumReactiveInsights.to_value x.reactiveInsights)));
+           (Option.map x.reactiveInsights ~f:NumReactiveInsights.to_value));
         ("ProactiveInsights",
-          (Some (NumProactiveInsights.to_value x.proactiveInsights)));
+          (Option.map x.proactiveInsights ~f:NumProactiveInsights.to_value));
         ("MeanTimeToRecoverInMilliseconds",
-          (Some
-             (MeanTimeToRecoverInMilliseconds.to_value
-                x.meanTimeToRecoverInMilliseconds)))]
+          (Option.map x.meanTimeToRecoverInMilliseconds
+             ~f:MeanTimeToRecoverInMilliseconds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let meanTimeToRecoverInMilliseconds =
-        MeanTimeToRecoverInMilliseconds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "MeanTimeToRecoverInMilliseconds") in
+        (Option.map ~f:MeanTimeToRecoverInMilliseconds.of_xml)
+          (Xml.child xml_arg0 "MeanTimeToRecoverInMilliseconds") in
       let proactiveInsights =
-        NumProactiveInsights.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProactiveInsights") in
+        (Option.map ~f:NumProactiveInsights.of_xml)
+          (Xml.child xml_arg0 "ProactiveInsights") in
       let reactiveInsights =
-        NumReactiveInsights.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ReactiveInsights") in
-      make ~meanTimeToRecoverInMilliseconds ~proactiveInsights
-        ~reactiveInsights ()
+        (Option.map ~f:NumReactiveInsights.of_xml)
+          (Xml.child xml_arg0 "ReactiveInsights") in
+      make ?meanTimeToRecoverInMilliseconds ?proactiveInsights
+        ?reactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let meanTimeToRecoverInMilliseconds =
-        field_map_exn json "MeanTimeToRecoverInMilliseconds"
+        field_map json__ "MeanTimeToRecoverInMilliseconds"
           MeanTimeToRecoverInMilliseconds.of_json in
       let proactiveInsights =
-        field_map_exn json "ProactiveInsights" NumProactiveInsights.of_json in
+        field_map json__ "ProactiveInsights" NumProactiveInsights.of_json in
       let reactiveInsights =
-        field_map_exn json "ReactiveInsights" NumReactiveInsights.of_json in
-      make ~meanTimeToRecoverInMilliseconds ~proactiveInsights
-        ~reactiveInsights ()
+        field_map json__ "ReactiveInsights" NumReactiveInsights.of_json in
+      make ?meanTimeToRecoverInMilliseconds ?proactiveInsights
+        ?reactiveInsights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For the time range passed in, returns the number of open reactive insight that were created, the number of open proactive insights that were created, and the Mean Time to Recover (MTTR) for all closed reactive insights."]
@@ -11055,9 +12786,9 @@ module DescribeAccountOverviewRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FromTime") in
       make ?toTime ~fromTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let toTime = field_map json "ToTime" Timestamp.of_json in
-      let fromTime = field_map_exn json "FromTime" Timestamp.of_json in
+    let of_json json__ =
+      let toTime = field_map json__ "ToTime" Timestamp.of_json in
+      let fromTime = field_map_exn json__ "FromTime" Timestamp.of_json in
       make ?toTime ~fromTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11066,36 +12797,40 @@ module DescribeAccountHealthResponse =
   struct
     type nonrec t =
       {
-      openReactiveInsights: NumOpenReactiveInsights.t
+      openReactiveInsights: NumOpenReactiveInsights.t option
         [@ocaml.doc
           "An integer that specifies the number of open reactive insights in your Amazon Web Services account."];
-      openProactiveInsights: NumOpenProactiveInsights.t
+      openProactiveInsights: NumOpenProactiveInsights.t option
         [@ocaml.doc
           "An integer that specifies the number of open proactive insights in your Amazon Web Services account."];
-      metricsAnalyzed: NumMetricsAnalyzed.t
+      metricsAnalyzed: NumMetricsAnalyzed.t option
         [@ocaml.doc
           "An integer that specifies the number of metrics that have been analyzed in your Amazon Web Services account."];
-      resourceHours: ResourceHours.t
+      resourceHours: ResourceHours.t option
         [@ocaml.doc
-          "The number of Amazon DevOps Guru resource analysis hours billed to the current Amazon Web Services account in the last hour."]}
+          "The number of Amazon DevOps Guru resource analysis hours billed to the current Amazon Web Services account in the last hour."];
+      analyzedResourceCount: AnalyzedResourceCount.t option
+        [@ocaml.doc
+          "Number of resources that DevOps Guru is monitoring in your Amazon Web Services account."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAccountHealthResponse"
-    let make ~openReactiveInsights =
-      fun ~openProactiveInsights ->
-        fun ~metricsAnalyzed ->
-          fun ~resourceHours ->
-            fun () ->
-              {
-                openReactiveInsights;
-                openProactiveInsights;
-                metricsAnalyzed;
-                resourceHours
-              }
+    let make ?openReactiveInsights =
+      fun ?openProactiveInsights ->
+        fun ?metricsAnalyzed ->
+          fun ?resourceHours ->
+            fun ?analyzedResourceCount ->
+              fun () ->
+                {
+                  openReactiveInsights;
+                  openProactiveInsights;
+                  metricsAnalyzed;
+                  resourceHours;
+                  analyzedResourceCount
+                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -11147,42 +12882,54 @@ module DescribeAccountHealthResponse =
     let to_value x =
       structure_to_value
         [("OpenReactiveInsights",
-           (Some (NumOpenReactiveInsights.to_value x.openReactiveInsights)));
+           (Option.map x.openReactiveInsights
+              ~f:NumOpenReactiveInsights.to_value));
         ("OpenProactiveInsights",
-          (Some (NumOpenProactiveInsights.to_value x.openProactiveInsights)));
+          (Option.map x.openProactiveInsights
+             ~f:NumOpenProactiveInsights.to_value));
         ("MetricsAnalyzed",
-          (Some (NumMetricsAnalyzed.to_value x.metricsAnalyzed)));
-        ("ResourceHours", (Some (ResourceHours.to_value x.resourceHours)))]
+          (Option.map x.metricsAnalyzed ~f:NumMetricsAnalyzed.to_value));
+        ("ResourceHours",
+          (Option.map x.resourceHours ~f:ResourceHours.to_value));
+        ("AnalyzedResourceCount",
+          (Option.map x.analyzedResourceCount
+             ~f:AnalyzedResourceCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let analyzedResourceCount =
+        (Option.map ~f:AnalyzedResourceCount.of_xml)
+          (Xml.child xml_arg0 "AnalyzedResourceCount") in
       let resourceHours =
-        ResourceHours.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceHours") in
+        (Option.map ~f:ResourceHours.of_xml)
+          (Xml.child xml_arg0 "ResourceHours") in
       let metricsAnalyzed =
-        NumMetricsAnalyzed.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricsAnalyzed") in
+        (Option.map ~f:NumMetricsAnalyzed.of_xml)
+          (Xml.child xml_arg0 "MetricsAnalyzed") in
       let openProactiveInsights =
-        NumOpenProactiveInsights.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OpenProactiveInsights") in
+        (Option.map ~f:NumOpenProactiveInsights.of_xml)
+          (Xml.child xml_arg0 "OpenProactiveInsights") in
       let openReactiveInsights =
-        NumOpenReactiveInsights.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OpenReactiveInsights") in
-      make ~resourceHours ~metricsAnalyzed ~openProactiveInsights
-        ~openReactiveInsights ()
+        (Option.map ~f:NumOpenReactiveInsights.of_xml)
+          (Xml.child xml_arg0 "OpenReactiveInsights") in
+      make ?analyzedResourceCount ?resourceHours ?metricsAnalyzed
+        ?openProactiveInsights ?openReactiveInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let analyzedResourceCount =
+        field_map json__ "AnalyzedResourceCount"
+          AnalyzedResourceCount.of_json in
       let resourceHours =
-        field_map_exn json "ResourceHours" ResourceHours.of_json in
+        field_map json__ "ResourceHours" ResourceHours.of_json in
       let metricsAnalyzed =
-        field_map_exn json "MetricsAnalyzed" NumMetricsAnalyzed.of_json in
+        field_map json__ "MetricsAnalyzed" NumMetricsAnalyzed.of_json in
       let openProactiveInsights =
-        field_map_exn json "OpenProactiveInsights"
+        field_map json__ "OpenProactiveInsights"
           NumOpenProactiveInsights.of_json in
       let openReactiveInsights =
-        field_map_exn json "OpenReactiveInsights"
+        field_map json__ "OpenReactiveInsights"
           NumOpenReactiveInsights.of_json in
-      make ~resourceHours ~metricsAnalyzed ~openProactiveInsights
-        ~openReactiveInsights ()
+      make ?analyzedResourceCount ?resourceHours ?metricsAnalyzed
+        ?openProactiveInsights ?openReactiveInsights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the number of open reactive insights, the number of open proactive insights, and the number of metrics analyzed in your Amazon Web Services account. Use these numbers to gauge the health of operations in your Amazon Web Services account."]
@@ -11298,8 +13045,8 @@ module DeleteInsightRequest =
         InsightId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" InsightId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" InsightId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the insight along with the associated anomalies, events and recommendations."]
@@ -11307,7 +13054,7 @@ module AddNotificationChannelResponse =
   struct
     type nonrec t =
       {
-      id: NotificationChannelId.t
+      id: NotificationChannelId.t option
         [@ocaml.doc "The ID of the added notification channel."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -11318,8 +13065,7 @@ module AddNotificationChannelResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AddNotificationChannelResponse"
-    let make ~id = fun () -> { id }
+    let make ?id = fun () -> { id }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -11396,20 +13142,20 @@ module AddNotificationChannelResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Id", (Some (NotificationChannelId.to_value x.id)))]
+        [("Id", (Option.map x.id ~f:NotificationChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let id =
-        NotificationChannelId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~id ()
+        (Option.map ~f:NotificationChannelId.of_xml)
+          (Xml.child xml_arg0 "Id") in
+      make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" NotificationChannelId.of_json in
-      make ~id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" NotificationChannelId.of_json in
+      make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a notification channel to DevOps Guru. A notification channel is used to notify you about important DevOps Guru events, such as when an insight is generated. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."]
+       "Adds a notification channel to DevOps Guru. A notification channel is used to notify you about important DevOps Guru events, such as when an insight is generated. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to send it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."]
 module AddNotificationChannelRequest =
   struct
     type nonrec t =
@@ -11429,10 +13175,10 @@ module AddNotificationChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Config") in
       make ~config ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let config =
-        field_map_exn json "Config" NotificationChannelConfig.of_json in
+        field_map_exn json__ "Config" NotificationChannelConfig.of_json in
       make ~config ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a notification channel to DevOps Guru. A notification channel is used to notify you about important DevOps Guru events, such as when an insight is generated. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. For more information, see Permissions for cross account Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."]
+       "Adds a notification channel to DevOps Guru. A notification channel is used to notify you about important DevOps Guru events, such as when an insight is generated. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to send it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your account. DevOps Guru only supports standard SNS topics. For more information, see Permissions for Amazon SNS topics. If you use an Amazon SNS topic that is encrypted by an Amazon Web Services Key Management Service customer-managed key (CMK), then you must add permissions to the CMK. For more information, see Permissions for Amazon Web Services KMS\226\128\147encrypted Amazon SNS topics."]

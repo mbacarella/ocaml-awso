@@ -98,13 +98,87 @@ module StorageRuleType =
           (Xml.child xml_arg0 "StorageAllocatedInBytes") in
       make ?storageType ?storageAllocatedInBytes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let storageType = field_map json "StorageType" StorageType.of_json in
+    let of_json json__ =
+      let storageType = field_map json__ "StorageType" StorageType.of_json in
       let storageAllocatedInBytes =
-        field_map json "StorageAllocatedInBytes" PositiveSizeType.of_json in
+        field_map json__ "StorageAllocatedInBytes" PositiveSizeType.of_json in
       make ?storageType ?storageAllocatedInBytes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the storage for a user."]
+module DocumentSourceType =
+  struct
+    type nonrec t =
+      | ORIGINAL 
+      | WITH_COMMENTS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ORIGINAL -> "ORIGINAL"
+      | WITH_COMMENTS -> "WITH_COMMENTS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ORIGINAL" -> ORIGINAL
+      | "WITH_COMMENTS" -> WITH_COMMENTS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DocumentSourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DocumentSourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module UrlType =
+  struct
+    type nonrec t = string
+    let context_ = "UrlType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UrlType" j
+    let to_json = simple_to_json to_value
+  end
+module DocumentThumbnailType =
+  struct
+    type nonrec t =
+      | SMALL 
+      | SMALL_HQ 
+      | LARGE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SMALL -> "SMALL"
+      | SMALL_HQ -> "SMALL_HQ"
+      | LARGE -> "LARGE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SMALL" -> SMALL
+      | "SMALL_HQ" -> SMALL_HQ
+      | "LARGE" -> LARGE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DocumentThumbnailType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DocumentThumbnailType" j)
+    let to_json = simple_to_json to_value
+  end
 module GroupNameType =
   struct
     type nonrec t = string
@@ -198,137 +272,6 @@ module UsernameType =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"UsernameType" j
-    let to_json = simple_to_json to_value
-  end
-module DocumentSourceType =
-  struct
-    type nonrec t =
-      | ORIGINAL 
-      | WITH_COMMENTS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ORIGINAL -> "ORIGINAL"
-      | WITH_COMMENTS -> "WITH_COMMENTS"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ORIGINAL" -> ORIGINAL
-      | "WITH_COMMENTS" -> WITH_COMMENTS
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration DocumentSourceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"DocumentSourceType" j)
-    let to_json = simple_to_json to_value
-  end
-module UrlType =
-  struct
-    type nonrec t = string
-    let context_ = "UrlType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"UrlType" j
-    let to_json = simple_to_json to_value
-  end
-module DocumentThumbnailType =
-  struct
-    type nonrec t =
-      | SMALL 
-      | SMALL_HQ 
-      | LARGE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | SMALL -> "SMALL"
-      | SMALL_HQ -> "SMALL_HQ"
-      | LARGE -> "LARGE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "SMALL" -> SMALL
-      | "SMALL_HQ" -> SMALL_HQ
-      | "LARGE" -> LARGE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration DocumentThumbnailType" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"DocumentThumbnailType" j)
-    let to_json = simple_to_json to_value
-  end
-module RolePermissionType =
-  struct
-    type nonrec t =
-      | DIRECT 
-      | INHERITED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | DIRECT -> "DIRECT"
-      | INHERITED -> "INHERITED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "DIRECT" -> DIRECT
-      | "INHERITED" -> INHERITED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration RolePermissionType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"RolePermissionType" j)
-    let to_json = simple_to_json to_value
-  end
-module RoleType =
-  struct
-    type nonrec t =
-      | VIEWER 
-      | CONTRIBUTOR 
-      | OWNER 
-      | COOWNER 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | VIEWER -> "VIEWER"
-      | CONTRIBUTOR -> "CONTRIBUTOR"
-      | OWNER -> "OWNER"
-      | COOWNER -> "COOWNER"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "VIEWER" -> VIEWER
-      | "CONTRIBUTOR" -> CONTRIBUTOR
-      | "OWNER" -> OWNER
-      | "COOWNER" -> COOWNER
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration RoleType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"RoleType" j)
     let to_json = simple_to_json to_value
   end
 module LocaleType =
@@ -487,10 +430,11 @@ module UserStorageMetadata =
           (Xml.child xml_arg0 "StorageUtilizedInBytes") in
       make ?storageRule ?storageUtilizedInBytes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let storageRule = field_map json "StorageRule" StorageRuleType.of_json in
+    let of_json json__ =
+      let storageRule =
+        field_map json__ "StorageRule" StorageRuleType.of_json in
       let storageUtilizedInBytes =
-        field_map json "StorageUtilizedInBytes" SizeType.of_json in
+        field_map json__ "StorageUtilizedInBytes" SizeType.of_json in
       make ?storageRule ?storageUtilizedInBytes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the storage for a user."]
@@ -528,84 +472,6 @@ module UserType =
     let of_json j = of_string (string_of_json ~kind:"UserType" j)
     let to_json = simple_to_json to_value
   end
-module GroupMetadata =
-  struct
-    type nonrec t =
-      {
-      id: IdType.t option [@ocaml.doc "The ID of the user group."];
-      name: GroupNameType.t option [@ocaml.doc "The name of the group."]}
-    let make ?id = fun ?name -> fun () -> { id; name }
-    let to_value x =
-      structure_to_value
-        [("Id", (Option.map x.id ~f:IdType.to_value));
-        ("Name", (Option.map x.name ~f:GroupNameType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let name =
-        (Option.map ~f:GroupNameType.of_xml) (Xml.child xml_arg0 "Name") in
-      let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?name ?id ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" GroupNameType.of_json in
-      let id = field_map json "Id" IdType.of_json in make ?name ?id ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the metadata of a user group."]
-module UserMetadata =
-  struct
-    type nonrec t =
-      {
-      id: IdType.t option [@ocaml.doc "The ID of the user."];
-      username: UsernameType.t option [@ocaml.doc "The name of the user."];
-      givenName: UserAttributeValueType.t option
-        [@ocaml.doc "The given name of the user before a rename operation."];
-      surname: UserAttributeValueType.t option
-        [@ocaml.doc "The surname of the user."];
-      emailAddress: EmailAddressType.t option
-        [@ocaml.doc "The email address of the user."]}
-    let make ?id =
-      fun ?username ->
-        fun ?givenName ->
-          fun ?surname ->
-            fun ?emailAddress ->
-              fun () -> { id; username; givenName; surname; emailAddress }
-    let to_value x =
-      structure_to_value
-        [("Id", (Option.map x.id ~f:IdType.to_value));
-        ("Username", (Option.map x.username ~f:UsernameType.to_value));
-        ("GivenName",
-          (Option.map x.givenName ~f:UserAttributeValueType.to_value));
-        ("Surname",
-          (Option.map x.surname ~f:UserAttributeValueType.to_value));
-        ("EmailAddress",
-          (Option.map x.emailAddress ~f:EmailAddressType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let emailAddress =
-        (Option.map ~f:EmailAddressType.of_xml)
-          (Xml.child xml_arg0 "EmailAddress") in
-      let surname =
-        (Option.map ~f:UserAttributeValueType.of_xml)
-          (Xml.child xml_arg0 "Surname") in
-      let givenName =
-        (Option.map ~f:UserAttributeValueType.of_xml)
-          (Xml.child xml_arg0 "GivenName") in
-      let username =
-        (Option.map ~f:UsernameType.of_xml) (Xml.child xml_arg0 "Username") in
-      let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?emailAddress ?surname ?givenName ?username ?id ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailAddress =
-        field_map json "EmailAddress" EmailAddressType.of_json in
-      let surname = field_map json "Surname" UserAttributeValueType.of_json in
-      let givenName =
-        field_map json "GivenName" UserAttributeValueType.of_json in
-      let username = field_map json "Username" UsernameType.of_json in
-      let id = field_map json "Id" IdType.of_json in
-      make ?emailAddress ?surname ?givenName ?username ?id ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the metadata of the user."]
 module DocumentContentType =
   struct
     type nonrec t = string
@@ -645,6 +511,8 @@ module DocumentSourceUrlMap =
                     (fun x -> (UrlType.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -699,6 +567,8 @@ module DocumentThumbnailUrlMap =
                     (fun x -> (UrlType.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -790,31 +660,173 @@ module SharedLabel =
     let of_json j = string_of_json ~kind:"SharedLabel" j
     let to_json = simple_to_json to_value
   end
-module PermissionInfo =
+module PrincipalRoleType =
+  struct
+    type nonrec t =
+      | VIEWER 
+      | CONTRIBUTOR 
+      | OWNER 
+      | COOWNER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VIEWER -> "VIEWER"
+      | CONTRIBUTOR -> "CONTRIBUTOR"
+      | OWNER -> "OWNER"
+      | COOWNER -> "COOWNER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VIEWER" -> VIEWER
+      | "CONTRIBUTOR" -> CONTRIBUTOR
+      | "OWNER" -> OWNER
+      | "COOWNER" -> COOWNER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PrincipalRoleType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PrincipalRoleType" j)
+    let to_json = simple_to_json to_value
+  end
+module RolePermissionType =
+  struct
+    type nonrec t =
+      | DIRECT 
+      | INHERITED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DIRECT -> "DIRECT"
+      | INHERITED -> "INHERITED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DIRECT" -> DIRECT
+      | "INHERITED" -> INHERITED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RolePermissionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RolePermissionType" j)
+    let to_json = simple_to_json to_value
+  end
+module RoleType =
+  struct
+    type nonrec t =
+      | VIEWER 
+      | CONTRIBUTOR 
+      | OWNER 
+      | COOWNER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VIEWER -> "VIEWER"
+      | CONTRIBUTOR -> "CONTRIBUTOR"
+      | OWNER -> "OWNER"
+      | COOWNER -> "COOWNER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VIEWER" -> VIEWER
+      | "CONTRIBUTOR" -> CONTRIBUTOR
+      | "OWNER" -> OWNER
+      | "COOWNER" -> COOWNER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RoleType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RoleType" j)
+    let to_json = simple_to_json to_value
+  end
+module GroupMetadata =
   struct
     type nonrec t =
       {
-      role: RoleType.t option [@ocaml.doc "The role of the user."];
-      type_: RolePermissionType.t option
-        [@ocaml.doc "The type of permissions."]}
-    let make ?role = fun ?type_ -> fun () -> { role; type_ }
+      id: IdType.t option [@ocaml.doc "The ID of the user group."];
+      name: GroupNameType.t option [@ocaml.doc "The name of the group."]}
+    let make ?id = fun ?name -> fun () -> { id; name }
     let to_value x =
       structure_to_value
-        [("Role", (Option.map x.role ~f:RoleType.to_value));
-        ("Type", (Option.map x.type_ ~f:RolePermissionType.to_value))]
+        [("Id", (Option.map x.id ~f:IdType.to_value));
+        ("Name", (Option.map x.name ~f:GroupNameType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        (Option.map ~f:RolePermissionType.of_xml) (Xml.child xml_arg0 "Type") in
-      let role = (Option.map ~f:RoleType.of_xml) (Xml.child xml_arg0 "Role") in
-      make ?type_ ?role ()
+      let name =
+        (Option.map ~f:GroupNameType.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" RolePermissionType.of_json in
-      let role = field_map json "Role" RoleType.of_json in
-      make ?type_ ?role ()
+    let of_json json__ =
+      let name = field_map json__ "Name" GroupNameType.of_json in
+      let id = field_map json__ "Id" IdType.of_json in make ?name ?id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the permissions."]
+  end[@@ocaml.doc "Describes the metadata of a user group."]
+module UserMetadata =
+  struct
+    type nonrec t =
+      {
+      id: IdType.t option [@ocaml.doc "The ID of the user."];
+      username: UsernameType.t option [@ocaml.doc "The name of the user."];
+      givenName: UserAttributeValueType.t option
+        [@ocaml.doc "The given name of the user before a rename operation."];
+      surname: UserAttributeValueType.t option
+        [@ocaml.doc "The surname of the user."];
+      emailAddress: EmailAddressType.t option
+        [@ocaml.doc "The email address of the user."]}
+    let make ?id =
+      fun ?username ->
+        fun ?givenName ->
+          fun ?surname ->
+            fun ?emailAddress ->
+              fun () -> { id; username; givenName; surname; emailAddress }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:IdType.to_value));
+        ("Username", (Option.map x.username ~f:UsernameType.to_value));
+        ("GivenName",
+          (Option.map x.givenName ~f:UserAttributeValueType.to_value));
+        ("Surname",
+          (Option.map x.surname ~f:UserAttributeValueType.to_value));
+        ("EmailAddress",
+          (Option.map x.emailAddress ~f:EmailAddressType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let emailAddress =
+        (Option.map ~f:EmailAddressType.of_xml)
+          (Xml.child xml_arg0 "EmailAddress") in
+      let surname =
+        (Option.map ~f:UserAttributeValueType.of_xml)
+          (Xml.child xml_arg0 "Surname") in
+      let givenName =
+        (Option.map ~f:UserAttributeValueType.of_xml)
+          (Xml.child xml_arg0 "GivenName") in
+      let username =
+        (Option.map ~f:UsernameType.of_xml) (Xml.child xml_arg0 "Username") in
+      let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?emailAddress ?surname ?givenName ?username ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let emailAddress =
+        field_map json__ "EmailAddress" EmailAddressType.of_json in
+      let surname = field_map json__ "Surname" UserAttributeValueType.of_json in
+      let givenName =
+        field_map json__ "GivenName" UserAttributeValueType.of_json in
+      let username = field_map json__ "Username" UsernameType.of_json in
+      let id = field_map json__ "Id" IdType.of_json in
+      make ?emailAddress ?surname ?givenName ?username ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the metadata of the user."]
 module CommentIdType =
   struct
     type nonrec t = string
@@ -994,143 +1006,33 @@ module User =
         ?type_ ?status ?recycleBinFolderId ?rootFolderId ?organizationId
         ?surname ?givenName ?emailAddress ?username ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let storage = field_map json "Storage" UserStorageMetadata.of_json in
-      let locale = field_map json "Locale" LocaleType.of_json in
-      let timeZoneId = field_map json "TimeZoneId" TimeZoneIdType.of_json in
+    let of_json json__ =
+      let storage = field_map json__ "Storage" UserStorageMetadata.of_json in
+      let locale = field_map json__ "Locale" LocaleType.of_json in
+      let timeZoneId = field_map json__ "TimeZoneId" TimeZoneIdType.of_json in
       let modifiedTimestamp =
-        field_map json "ModifiedTimestamp" TimestampType.of_json in
+        field_map json__ "ModifiedTimestamp" TimestampType.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" TimestampType.of_json in
-      let type_ = field_map json "Type" UserType.of_json in
-      let status = field_map json "Status" UserStatusType.of_json in
+        field_map json__ "CreatedTimestamp" TimestampType.of_json in
+      let type_ = field_map json__ "Type" UserType.of_json in
+      let status = field_map json__ "Status" UserStatusType.of_json in
       let recycleBinFolderId =
-        field_map json "RecycleBinFolderId" ResourceIdType.of_json in
-      let rootFolderId = field_map json "RootFolderId" ResourceIdType.of_json in
-      let organizationId = field_map json "OrganizationId" IdType.of_json in
-      let surname = field_map json "Surname" UserAttributeValueType.of_json in
+        field_map json__ "RecycleBinFolderId" ResourceIdType.of_json in
+      let rootFolderId =
+        field_map json__ "RootFolderId" ResourceIdType.of_json in
+      let organizationId = field_map json__ "OrganizationId" IdType.of_json in
+      let surname = field_map json__ "Surname" UserAttributeValueType.of_json in
       let givenName =
-        field_map json "GivenName" UserAttributeValueType.of_json in
+        field_map json__ "GivenName" UserAttributeValueType.of_json in
       let emailAddress =
-        field_map json "EmailAddress" EmailAddressType.of_json in
-      let username = field_map json "Username" UsernameType.of_json in
-      let id = field_map json "Id" IdType.of_json in
+        field_map json__ "EmailAddress" EmailAddressType.of_json in
+      let username = field_map json__ "Username" UsernameType.of_json in
+      let id = field_map json__ "Id" IdType.of_json in
       make ?storage ?locale ?timeZoneId ?modifiedTimestamp ?createdTimestamp
         ?type_ ?status ?recycleBinFolderId ?rootFolderId ?organizationId
         ?surname ?givenName ?emailAddress ?username ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a user."]
-module GroupMetadataList =
-  struct
-    type nonrec t = GroupMetadata.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:GroupMetadata.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:GroupMetadata.of_xml)
-    let of_json j =
-      list_of_json ~kind:"GroupMetadataList" ~of_json:GroupMetadata.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module UserMetadataList =
-  struct
-    type nonrec t = UserMetadata.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:UserMetadata.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:UserMetadata.of_xml)
-    let of_json j =
-      list_of_json ~kind:"UserMetadataList" ~of_json:UserMetadata.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ResourceType =
-  struct
-    type nonrec t =
-      | FOLDER 
-      | DOCUMENT 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | FOLDER -> "FOLDER"
-      | DOCUMENT -> "DOCUMENT"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "FOLDER" -> FOLDER
-      | "DOCUMENT" -> DOCUMENT
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
-    let to_json = simple_to_json to_value
-  end
-module HeaderNameType =
-  struct
-    type nonrec t = string
-    let context_ = "HeaderNameType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\w-]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"HeaderNameType" j
-    let to_json = simple_to_json to_value
-  end
-module HeaderValueType =
-  struct
-    type nonrec t = string
-    let context_ = "HeaderValueType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"HeaderValueType" j
-    let to_json = simple_to_json to_value
-  end
 module DocumentVersionMetadata =
   struct
     type nonrec t =
@@ -1251,26 +1153,26 @@ module DocumentVersionMetadata =
         ?contentCreatedTimestamp ?modifiedTimestamp ?createdTimestamp ?status
         ?signature ?size ?contentType ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let source = field_map json "Source" DocumentSourceUrlMap.of_json in
+    let of_json json__ =
+      let source = field_map json__ "Source" DocumentSourceUrlMap.of_json in
       let thumbnail =
-        field_map json "Thumbnail" DocumentThumbnailUrlMap.of_json in
-      let creatorId = field_map json "CreatorId" IdType.of_json in
+        field_map json__ "Thumbnail" DocumentThumbnailUrlMap.of_json in
+      let creatorId = field_map json__ "CreatorId" IdType.of_json in
       let contentModifiedTimestamp =
-        field_map json "ContentModifiedTimestamp" TimestampType.of_json in
+        field_map json__ "ContentModifiedTimestamp" TimestampType.of_json in
       let contentCreatedTimestamp =
-        field_map json "ContentCreatedTimestamp" TimestampType.of_json in
+        field_map json__ "ContentCreatedTimestamp" TimestampType.of_json in
       let modifiedTimestamp =
-        field_map json "ModifiedTimestamp" TimestampType.of_json in
+        field_map json__ "ModifiedTimestamp" TimestampType.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" TimestampType.of_json in
-      let status = field_map json "Status" DocumentStatusType.of_json in
-      let signature = field_map json "Signature" HashType.of_json in
-      let size = field_map json "Size" SizeType.of_json in
+        field_map json__ "CreatedTimestamp" TimestampType.of_json in
+      let status = field_map json__ "Status" DocumentStatusType.of_json in
+      let signature = field_map json__ "Signature" HashType.of_json in
+      let size = field_map json__ "Size" SizeType.of_json in
       let contentType =
-        field_map json "ContentType" DocumentContentType.of_json in
-      let name = field_map json "Name" ResourceNameType.of_json in
-      let id = field_map json "Id" DocumentVersionIdType.of_json in
+        field_map json__ "ContentType" DocumentContentType.of_json in
+      let name = field_map json__ "Name" ResourceNameType.of_json in
+      let id = field_map json__ "Id" DocumentVersionIdType.of_json in
       make ?source ?thumbnail ?creatorId ?contentModifiedTimestamp
         ?contentCreatedTimestamp ?modifiedTimestamp ?createdTimestamp ?status
         ?signature ?size ?contentType ?name ?id ()
@@ -1313,6 +1215,9 @@ module SharedLabels =
     type nonrec t = SharedLabel.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SharedLabel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1333,6 +1238,863 @@ module SharedLabels =
       list_of_json ~kind:"SharedLabels" ~of_json:SharedLabel.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SearchPrincipalRoleList =
+  struct
+    type nonrec t = PrincipalRoleType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:4); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PrincipalRoleType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PrincipalRoleType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchPrincipalRoleList"
+        ~of_json:PrincipalRoleType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PermissionInfo =
+  struct
+    type nonrec t =
+      {
+      role: RoleType.t option [@ocaml.doc "The role of the user."];
+      type_: RolePermissionType.t option
+        [@ocaml.doc "The type of permissions."]}
+    let make ?role = fun ?type_ -> fun () -> { role; type_ }
+    let to_value x =
+      structure_to_value
+        [("Role", (Option.map x.role ~f:RoleType.to_value));
+        ("Type", (Option.map x.type_ ~f:RolePermissionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:RolePermissionType.of_xml) (Xml.child xml_arg0 "Type") in
+      let role = (Option.map ~f:RoleType.of_xml) (Xml.child xml_arg0 "Role") in
+      make ?type_ ?role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" RolePermissionType.of_json in
+      let role = field_map json__ "Role" RoleType.of_json in
+      make ?type_ ?role ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the permissions."]
+module GroupMetadataList =
+  struct
+    type nonrec t = GroupMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupMetadata.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupMetadataList" ~of_json:GroupMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UserMetadataList =
+  struct
+    type nonrec t = UserMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UserMetadata.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UserMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UserMetadataList" ~of_json:UserMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceType =
+  struct
+    type nonrec t =
+      | FOLDER 
+      | DOCUMENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FOLDER -> "FOLDER"
+      | DOCUMENT -> "DOCUMENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FOLDER" -> FOLDER
+      | "DOCUMENT" -> DOCUMENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module CommentMetadata =
+  struct
+    type nonrec t =
+      {
+      commentId: CommentIdType.t option [@ocaml.doc "The ID of the comment."];
+      contributor: User.t option
+        [@ocaml.doc "The user who made the comment."];
+      createdTimestamp: TimestampType.t option
+        [@ocaml.doc "The timestamp that the comment was created."];
+      commentStatus: CommentStatusType.t option
+        [@ocaml.doc "The status of the comment."];
+      recipientId: IdType.t option
+        [@ocaml.doc "The ID of the user being replied to."];
+      contributorId: IdType.t option
+        [@ocaml.doc "The ID of the user who made the comment."]}
+    let make ?commentId =
+      fun ?contributor ->
+        fun ?createdTimestamp ->
+          fun ?commentStatus ->
+            fun ?recipientId ->
+              fun ?contributorId ->
+                fun () ->
+                  {
+                    commentId;
+                    contributor;
+                    createdTimestamp;
+                    commentStatus;
+                    recipientId;
+                    contributorId
+                  }
+    let to_value x =
+      structure_to_value
+        [("CommentId", (Option.map x.commentId ~f:CommentIdType.to_value));
+        ("Contributor", (Option.map x.contributor ~f:User.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:TimestampType.to_value));
+        ("CommentStatus",
+          (Option.map x.commentStatus ~f:CommentStatusType.to_value));
+        ("RecipientId", (Option.map x.recipientId ~f:IdType.to_value));
+        ("ContributorId", (Option.map x.contributorId ~f:IdType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contributorId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "ContributorId") in
+      let recipientId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "RecipientId") in
+      let commentStatus =
+        (Option.map ~f:CommentStatusType.of_xml)
+          (Xml.child xml_arg0 "CommentStatus") in
+      let createdTimestamp =
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let contributor =
+        (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "Contributor") in
+      let commentId =
+        (Option.map ~f:CommentIdType.of_xml) (Xml.child xml_arg0 "CommentId") in
+      make ?contributorId ?recipientId ?commentStatus ?createdTimestamp
+        ?contributor ?commentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contributorId = field_map json__ "ContributorId" IdType.of_json in
+      let recipientId = field_map json__ "RecipientId" IdType.of_json in
+      let commentStatus =
+        field_map json__ "CommentStatus" CommentStatusType.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" TimestampType.of_json in
+      let contributor = field_map json__ "Contributor" User.of_json in
+      let commentId = field_map json__ "CommentId" CommentIdType.of_json in
+      make ?contributorId ?recipientId ?commentStatus ?createdTimestamp
+        ?contributor ?commentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the metadata of a comment."]
+module DocumentMetadata =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdType.t option [@ocaml.doc "The ID of the document."];
+      creatorId: IdType.t option [@ocaml.doc "The ID of the creator."];
+      parentFolderId: ResourceIdType.t option
+        [@ocaml.doc "The ID of the parent folder."];
+      createdTimestamp: TimestampType.t option
+        [@ocaml.doc "The time when the document was created."];
+      modifiedTimestamp: TimestampType.t option
+        [@ocaml.doc "The time when the document was updated."];
+      latestVersionMetadata: DocumentVersionMetadata.t option
+        [@ocaml.doc "The latest version of the document."];
+      resourceState: ResourceStateType.t option
+        [@ocaml.doc "The resource state."];
+      labels: SharedLabels.t option
+        [@ocaml.doc "List of labels on the document."]}
+    let make ?id =
+      fun ?creatorId ->
+        fun ?parentFolderId ->
+          fun ?createdTimestamp ->
+            fun ?modifiedTimestamp ->
+              fun ?latestVersionMetadata ->
+                fun ?resourceState ->
+                  fun ?labels ->
+                    fun () ->
+                      {
+                        id;
+                        creatorId;
+                        parentFolderId;
+                        createdTimestamp;
+                        modifiedTimestamp;
+                        latestVersionMetadata;
+                        resourceState;
+                        labels
+                      }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ResourceIdType.to_value));
+        ("CreatorId", (Option.map x.creatorId ~f:IdType.to_value));
+        ("ParentFolderId",
+          (Option.map x.parentFolderId ~f:ResourceIdType.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:TimestampType.to_value));
+        ("ModifiedTimestamp",
+          (Option.map x.modifiedTimestamp ~f:TimestampType.to_value));
+        ("LatestVersionMetadata",
+          (Option.map x.latestVersionMetadata
+             ~f:DocumentVersionMetadata.to_value));
+        ("ResourceState",
+          (Option.map x.resourceState ~f:ResourceStateType.to_value));
+        ("Labels", (Option.map x.labels ~f:SharedLabels.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labels =
+        (Option.map ~f:SharedLabels.of_xml) (Xml.child xml_arg0 "Labels") in
+      let resourceState =
+        (Option.map ~f:ResourceStateType.of_xml)
+          (Xml.child xml_arg0 "ResourceState") in
+      let latestVersionMetadata =
+        (Option.map ~f:DocumentVersionMetadata.of_xml)
+          (Xml.child xml_arg0 "LatestVersionMetadata") in
+      let modifiedTimestamp =
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "ModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let parentFolderId =
+        (Option.map ~f:ResourceIdType.of_xml)
+          (Xml.child xml_arg0 "ParentFolderId") in
+      let creatorId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "CreatorId") in
+      let id =
+        (Option.map ~f:ResourceIdType.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?labels ?resourceState ?latestVersionMetadata ?modifiedTimestamp
+        ?createdTimestamp ?parentFolderId ?creatorId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labels = field_map json__ "Labels" SharedLabels.of_json in
+      let resourceState =
+        field_map json__ "ResourceState" ResourceStateType.of_json in
+      let latestVersionMetadata =
+        field_map json__ "LatestVersionMetadata"
+          DocumentVersionMetadata.of_json in
+      let modifiedTimestamp =
+        field_map json__ "ModifiedTimestamp" TimestampType.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" TimestampType.of_json in
+      let parentFolderId =
+        field_map json__ "ParentFolderId" ResourceIdType.of_json in
+      let creatorId = field_map json__ "CreatorId" IdType.of_json in
+      let id = field_map json__ "Id" ResourceIdType.of_json in
+      make ?labels ?resourceState ?latestVersionMetadata ?modifiedTimestamp
+        ?createdTimestamp ?parentFolderId ?creatorId ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the document."]
+module FolderMetadata =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdType.t option [@ocaml.doc "The ID of the folder."];
+      name: ResourceNameType.t option [@ocaml.doc "The name of the folder."];
+      creatorId: IdType.t option [@ocaml.doc "The ID of the creator."];
+      parentFolderId: ResourceIdType.t option
+        [@ocaml.doc "The ID of the parent folder."];
+      createdTimestamp: TimestampType.t option
+        [@ocaml.doc "The time when the folder was created."];
+      modifiedTimestamp: TimestampType.t option
+        [@ocaml.doc "The time when the folder was updated."];
+      resourceState: ResourceStateType.t option
+        [@ocaml.doc "The resource state of the folder."];
+      signature: HashType.t option
+        [@ocaml.doc
+          "The unique identifier created from the subfolders and documents of the folder."];
+      labels: SharedLabels.t option
+        [@ocaml.doc "List of labels on the folder."];
+      size: SizeType.t option [@ocaml.doc "The size of the folder metadata."];
+      latestVersionSize: SizeType.t option
+        [@ocaml.doc "The size of the latest version of the folder metadata."]}
+    let make ?id =
+      fun ?name ->
+        fun ?creatorId ->
+          fun ?parentFolderId ->
+            fun ?createdTimestamp ->
+              fun ?modifiedTimestamp ->
+                fun ?resourceState ->
+                  fun ?signature ->
+                    fun ?labels ->
+                      fun ?size ->
+                        fun ?latestVersionSize ->
+                          fun () ->
+                            {
+                              id;
+                              name;
+                              creatorId;
+                              parentFolderId;
+                              createdTimestamp;
+                              modifiedTimestamp;
+                              resourceState;
+                              signature;
+                              labels;
+                              size;
+                              latestVersionSize
+                            }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ResourceIdType.to_value));
+        ("Name", (Option.map x.name ~f:ResourceNameType.to_value));
+        ("CreatorId", (Option.map x.creatorId ~f:IdType.to_value));
+        ("ParentFolderId",
+          (Option.map x.parentFolderId ~f:ResourceIdType.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:TimestampType.to_value));
+        ("ModifiedTimestamp",
+          (Option.map x.modifiedTimestamp ~f:TimestampType.to_value));
+        ("ResourceState",
+          (Option.map x.resourceState ~f:ResourceStateType.to_value));
+        ("Signature", (Option.map x.signature ~f:HashType.to_value));
+        ("Labels", (Option.map x.labels ~f:SharedLabels.to_value));
+        ("Size", (Option.map x.size ~f:SizeType.to_value));
+        ("LatestVersionSize",
+          (Option.map x.latestVersionSize ~f:SizeType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestVersionSize =
+        (Option.map ~f:SizeType.of_xml)
+          (Xml.child xml_arg0 "LatestVersionSize") in
+      let size = (Option.map ~f:SizeType.of_xml) (Xml.child xml_arg0 "Size") in
+      let labels =
+        (Option.map ~f:SharedLabels.of_xml) (Xml.child xml_arg0 "Labels") in
+      let signature =
+        (Option.map ~f:HashType.of_xml) (Xml.child xml_arg0 "Signature") in
+      let resourceState =
+        (Option.map ~f:ResourceStateType.of_xml)
+          (Xml.child xml_arg0 "ResourceState") in
+      let modifiedTimestamp =
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "ModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let parentFolderId =
+        (Option.map ~f:ResourceIdType.of_xml)
+          (Xml.child xml_arg0 "ParentFolderId") in
+      let creatorId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "CreatorId") in
+      let name =
+        (Option.map ~f:ResourceNameType.of_xml) (Xml.child xml_arg0 "Name") in
+      let id =
+        (Option.map ~f:ResourceIdType.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?latestVersionSize ?size ?labels ?signature ?resourceState
+        ?modifiedTimestamp ?createdTimestamp ?parentFolderId ?creatorId ?name
+        ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestVersionSize =
+        field_map json__ "LatestVersionSize" SizeType.of_json in
+      let size = field_map json__ "Size" SizeType.of_json in
+      let labels = field_map json__ "Labels" SharedLabels.of_json in
+      let signature = field_map json__ "Signature" HashType.of_json in
+      let resourceState =
+        field_map json__ "ResourceState" ResourceStateType.of_json in
+      let modifiedTimestamp =
+        field_map json__ "ModifiedTimestamp" TimestampType.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" TimestampType.of_json in
+      let parentFolderId =
+        field_map json__ "ParentFolderId" ResourceIdType.of_json in
+      let creatorId = field_map json__ "CreatorId" IdType.of_json in
+      let name = field_map json__ "Name" ResourceNameType.of_json in
+      let id = field_map json__ "Id" ResourceIdType.of_json in
+      make ?latestVersionSize ?size ?labels ?signature ?resourceState
+        ?modifiedTimestamp ?createdTimestamp ?parentFolderId ?creatorId ?name
+        ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a folder."]
+module ResponseItemType =
+  struct
+    type nonrec t =
+      | DOCUMENT 
+      | FOLDER 
+      | COMMENT 
+      | DOCUMENT_VERSION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DOCUMENT -> "DOCUMENT"
+      | FOLDER -> "FOLDER"
+      | COMMENT -> "COMMENT"
+      | DOCUMENT_VERSION -> "DOCUMENT_VERSION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DOCUMENT" -> DOCUMENT
+      | "FOLDER" -> FOLDER
+      | "COMMENT" -> COMMENT
+      | "DOCUMENT_VERSION" -> DOCUMENT_VERSION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResponseItemType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResponseItemType" j)
+    let to_json = simple_to_json to_value
+  end
+module ResponseItemWebUrl =
+  struct
+    type nonrec t = string
+    let context_ = "ResponseItemWebUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0020-\\uFFFF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResponseItemWebUrl" j
+    let to_json = simple_to_json to_value
+  end
+module LongType =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchAncestorId =
+  struct
+    type nonrec t = string
+    let context_ = "SearchAncestorId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SearchAncestorId" j
+    let to_json = simple_to_json to_value
+  end
+module SearchCollectionType =
+  struct
+    type nonrec t =
+      | OWNED 
+      | SHARED_WITH_ME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OWNED -> "OWNED"
+      | SHARED_WITH_ME -> "SHARED_WITH_ME"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OWNED" -> OWNED
+      | "SHARED_WITH_ME" -> SHARED_WITH_ME
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SearchCollectionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SearchCollectionType" j)
+    let to_json = simple_to_json to_value
+  end
+module ContentCategoryType =
+  struct
+    type nonrec t =
+      | IMAGE 
+      | DOCUMENT 
+      | PDF 
+      | SPREADSHEET 
+      | PRESENTATION 
+      | AUDIO 
+      | VIDEO 
+      | SOURCE_CODE 
+      | OTHER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IMAGE -> "IMAGE"
+      | DOCUMENT -> "DOCUMENT"
+      | PDF -> "PDF"
+      | SPREADSHEET -> "SPREADSHEET"
+      | PRESENTATION -> "PRESENTATION"
+      | AUDIO -> "AUDIO"
+      | VIDEO -> "VIDEO"
+      | SOURCE_CODE -> "SOURCE_CODE"
+      | OTHER -> "OTHER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IMAGE" -> IMAGE
+      | "DOCUMENT" -> DOCUMENT
+      | "PDF" -> PDF
+      | "SPREADSHEET" -> SPREADSHEET
+      | "PRESENTATION" -> PRESENTATION
+      | "AUDIO" -> AUDIO
+      | "VIDEO" -> VIDEO
+      | "SOURCE_CODE" -> SOURCE_CODE
+      | "OTHER" -> OTHER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ContentCategoryType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ContentCategoryType" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchLabel =
+  struct
+    type nonrec t = string
+    let context_ = "SearchLabel"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SearchLabel" j
+    let to_json = simple_to_json to_value
+  end
+module SearchPrincipalType =
+  struct
+    type nonrec t =
+      {
+      id: IdType.t [@ocaml.doc "UserIds or GroupIds."];
+      roles: SearchPrincipalRoleList.t option
+        [@ocaml.doc "The Role of a User or Group."]}
+    let context_ = "SearchPrincipalType"
+    let make ?roles = fun ~id -> fun () -> { roles; id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (IdType.to_value x.id)));
+        ("Roles", (Option.map x.roles ~f:SearchPrincipalRoleList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roles =
+        (Option.map ~f:SearchPrincipalRoleList.of_xml)
+          (Xml.child xml_arg0 "Roles") in
+      let id = IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ?roles ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roles = field_map json__ "Roles" SearchPrincipalRoleList.of_json in
+      let id = field_map_exn json__ "Id" IdType.of_json in make ?roles ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filter based on UserIds or GroupIds."]
+module SearchResourceType =
+  struct
+    type nonrec t =
+      | FOLDER 
+      | DOCUMENT 
+      | COMMENT 
+      | DOCUMENT_VERSION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FOLDER -> "FOLDER"
+      | DOCUMENT -> "DOCUMENT"
+      | COMMENT -> "COMMENT"
+      | DOCUMENT_VERSION -> "DOCUMENT_VERSION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FOLDER" -> FOLDER
+      | "DOCUMENT" -> DOCUMENT
+      | "COMMENT" -> COMMENT
+      | "DOCUMENT_VERSION" -> DOCUMENT_VERSION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SearchResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SearchResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module LanguageCodeType =
+  struct
+    type nonrec t =
+      | AR 
+      | BG 
+      | BN 
+      | DA 
+      | DE 
+      | CS 
+      | EL 
+      | EN 
+      | ES 
+      | FA 
+      | FI 
+      | FR 
+      | HI 
+      | HU 
+      | ID 
+      | IT 
+      | JA 
+      | KO 
+      | LT 
+      | LV 
+      | NL 
+      | NO 
+      | PT 
+      | RO 
+      | RU 
+      | SV 
+      | SW 
+      | TH 
+      | TR 
+      | ZH 
+      | DEFAULT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AR -> "AR"
+      | BG -> "BG"
+      | BN -> "BN"
+      | DA -> "DA"
+      | DE -> "DE"
+      | CS -> "CS"
+      | EL -> "EL"
+      | EN -> "EN"
+      | ES -> "ES"
+      | FA -> "FA"
+      | FI -> "FI"
+      | FR -> "FR"
+      | HI -> "HI"
+      | HU -> "HU"
+      | ID -> "ID"
+      | IT -> "IT"
+      | JA -> "JA"
+      | KO -> "KO"
+      | LT -> "LT"
+      | LV -> "LV"
+      | NL -> "NL"
+      | NO -> "NO"
+      | PT -> "PT"
+      | RO -> "RO"
+      | RU -> "RU"
+      | SV -> "SV"
+      | SW -> "SW"
+      | TH -> "TH"
+      | TR -> "TR"
+      | ZH -> "ZH"
+      | DEFAULT -> "DEFAULT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AR" -> AR
+      | "BG" -> BG
+      | "BN" -> BN
+      | "DA" -> DA
+      | "DE" -> DE
+      | "CS" -> CS
+      | "EL" -> EL
+      | "EN" -> EN
+      | "ES" -> ES
+      | "FA" -> FA
+      | "FI" -> FI
+      | "FR" -> FR
+      | "HI" -> HI
+      | "HU" -> HU
+      | "ID" -> ID
+      | "IT" -> IT
+      | "JA" -> JA
+      | "KO" -> KO
+      | "LT" -> LT
+      | "LV" -> LV
+      | "NL" -> NL
+      | "NO" -> NO
+      | "PT" -> PT
+      | "RO" -> RO
+      | "RU" -> RU
+      | "SV" -> SV
+      | "SW" -> SW
+      | "TH" -> TH
+      | "TR" -> TR
+      | "ZH" -> ZH
+      | "DEFAULT" -> DEFAULT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LanguageCodeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LanguageCodeType" j)
+    let to_json = simple_to_json to_value
+  end
+module OrderByFieldType =
+  struct
+    type nonrec t =
+      | RELEVANCE 
+      | NAME 
+      | SIZE 
+      | CREATED_TIMESTAMP 
+      | MODIFIED_TIMESTAMP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RELEVANCE -> "RELEVANCE"
+      | NAME -> "NAME"
+      | SIZE -> "SIZE"
+      | CREATED_TIMESTAMP -> "CREATED_TIMESTAMP"
+      | MODIFIED_TIMESTAMP -> "MODIFIED_TIMESTAMP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RELEVANCE" -> RELEVANCE
+      | "NAME" -> NAME
+      | "SIZE" -> SIZE
+      | "CREATED_TIMESTAMP" -> CREATED_TIMESTAMP
+      | "MODIFIED_TIMESTAMP" -> MODIFIED_TIMESTAMP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OrderByFieldType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OrderByFieldType" j)
+    let to_json = simple_to_json to_value
+  end
+module SortOrder =
+  struct
+    type nonrec t =
+      | ASC 
+      | DESC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ASC -> "ASC" | DESC -> "DESC" | Non_static_id s -> s
+    let of_string =
+      function | "ASC" -> ASC | "DESC" -> DESC | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
+    let to_json = simple_to_json to_value
+  end
+module HeaderNameType =
+  struct
+    type nonrec t = string
+    let context_ = "HeaderNameType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HeaderNameType" j
+    let to_json = simple_to_json to_value
+  end
+module HeaderValueType =
+  struct
+    type nonrec t = string
+    let context_ = "HeaderValueType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HeaderValueType" j
+    let to_json = simple_to_json to_value
+  end
 module ResourcePathComponent =
   struct
     type nonrec t =
@@ -1352,15 +2114,18 @@ module ResourcePathComponent =
       let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" ResourceNameType.of_json in
-      let id = field_map json "Id" IdType.of_json in make ?name ?id ()
+    let of_json json__ =
+      let name = field_map json__ "Name" ResourceNameType.of_json in
+      let id = field_map json__ "Id" IdType.of_json in make ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the resource path."]
 module PermissionInfoList =
   struct
     type nonrec t = PermissionInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PermissionInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1438,10 +2203,13 @@ module SubscriptionProtocolType =
   struct
     type nonrec t =
       | HTTPS 
+      | SQS 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | HTTPS -> "HTTPS" | Non_static_id s -> s
-    let of_string = function | "HTTPS" -> HTTPS | x -> Non_static_id x
+    let to_string =
+      function | HTTPS -> "HTTPS" | SQS -> "SQS" | Non_static_id s -> s
+    let of_string =
+      function | "HTTPS" -> HTTPS | "SQS" -> SQS | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -1634,70 +2402,6 @@ module BooleanType =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module CommentMetadata =
-  struct
-    type nonrec t =
-      {
-      commentId: CommentIdType.t option [@ocaml.doc "The ID of the comment."];
-      contributor: User.t option
-        [@ocaml.doc "The user who made the comment."];
-      createdTimestamp: TimestampType.t option
-        [@ocaml.doc "The timestamp that the comment was created."];
-      commentStatus: CommentStatusType.t option
-        [@ocaml.doc "The status of the comment."];
-      recipientId: IdType.t option
-        [@ocaml.doc "The ID of the user being replied to."]}
-    let make ?commentId =
-      fun ?contributor ->
-        fun ?createdTimestamp ->
-          fun ?commentStatus ->
-            fun ?recipientId ->
-              fun () ->
-                {
-                  commentId;
-                  contributor;
-                  createdTimestamp;
-                  commentStatus;
-                  recipientId
-                }
-    let to_value x =
-      structure_to_value
-        [("CommentId", (Option.map x.commentId ~f:CommentIdType.to_value));
-        ("Contributor", (Option.map x.contributor ~f:User.to_value));
-        ("CreatedTimestamp",
-          (Option.map x.createdTimestamp ~f:TimestampType.to_value));
-        ("CommentStatus",
-          (Option.map x.commentStatus ~f:CommentStatusType.to_value));
-        ("RecipientId", (Option.map x.recipientId ~f:IdType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let recipientId =
-        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "RecipientId") in
-      let commentStatus =
-        (Option.map ~f:CommentStatusType.of_xml)
-          (Xml.child xml_arg0 "CommentStatus") in
-      let createdTimestamp =
-        (Option.map ~f:TimestampType.of_xml)
-          (Xml.child xml_arg0 "CreatedTimestamp") in
-      let contributor =
-        (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "Contributor") in
-      let commentId =
-        (Option.map ~f:CommentIdType.of_xml) (Xml.child xml_arg0 "CommentId") in
-      make ?recipientId ?commentStatus ?createdTimestamp ?contributor
-        ?commentId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recipientId = field_map json "RecipientId" IdType.of_json in
-      let commentStatus =
-        field_map json "CommentStatus" CommentStatusType.of_json in
-      let createdTimestamp =
-        field_map json "CreatedTimestamp" TimestampType.of_json in
-      let contributor = field_map json "Contributor" User.of_json in
-      let commentId = field_map json "CommentId" CommentIdType.of_json in
-      make ?recipientId ?commentStatus ?createdTimestamp ?contributor
-        ?commentId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the metadata of a comment."]
 module Participants =
   struct
     type nonrec t =
@@ -1719,9 +2423,9 @@ module Participants =
         (Option.map ~f:UserMetadataList.of_xml) (Xml.child xml_arg0 "Users") in
       make ?groups ?users ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groups = field_map json "Groups" GroupMetadataList.of_json in
-      let users = field_map json "Users" UserMetadataList.of_json in
+    let of_json json__ =
+      let groups = field_map json__ "Groups" GroupMetadataList.of_json in
+      let users = field_map json__ "Users" UserMetadataList.of_json in
       make ?groups ?users ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the users or user groups."]
@@ -1791,16 +2495,16 @@ module ResourceMetadata =
         (Option.map ~f:ResourceType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?parentId ?owner ?versionId ?id ?originalName ?name ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parentId = field_map json "ParentId" ResourceIdType.of_json in
-      let owner = field_map json "Owner" UserMetadata.of_json in
+    let of_json json__ =
+      let parentId = field_map json__ "ParentId" ResourceIdType.of_json in
+      let owner = field_map json__ "Owner" UserMetadata.of_json in
       let versionId =
-        field_map json "VersionId" DocumentVersionIdType.of_json in
-      let id = field_map json "Id" ResourceIdType.of_json in
+        field_map json__ "VersionId" DocumentVersionIdType.of_json in
+      let id = field_map json__ "Id" ResourceIdType.of_json in
       let originalName =
-        field_map json "OriginalName" ResourceNameType.of_json in
-      let name = field_map json "Name" ResourceNameType.of_json in
-      let type_ = field_map json "Type" ResourceType.of_json in
+        field_map json__ "OriginalName" ResourceNameType.of_json in
+      let name = field_map json__ "Name" ResourceNameType.of_json in
+      let type_ = field_map json__ "Type" ResourceType.of_json in
       make ?parentId ?owner ?versionId ?id ?originalName ?name ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the metadata of a resource."]
@@ -1851,6 +2555,9 @@ module EntityIdList =
   struct
     type nonrec t = IdType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IdType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1884,6 +2591,419 @@ module ErrorMessageType =
     let of_json j = string_of_json ~kind:"ErrorMessageType" j
     let to_json = simple_to_json to_value
   end
+module ResponseItem =
+  struct
+    type nonrec t =
+      {
+      resourceType: ResponseItemType.t option
+        [@ocaml.doc "The type of item being returned."];
+      webUrl: ResponseItemWebUrl.t option
+        [@ocaml.doc "The webUrl of the item being returned."];
+      documentMetadata: DocumentMetadata.t option
+        [@ocaml.doc "The document that matches the query."];
+      folderMetadata: FolderMetadata.t option
+        [@ocaml.doc "The folder that matches the query."];
+      commentMetadata: CommentMetadata.t option
+        [@ocaml.doc "The comment that matches the query."];
+      documentVersionMetadata: DocumentVersionMetadata.t option
+        [@ocaml.doc "The document version that matches the metadata."]}
+    let make ?resourceType =
+      fun ?webUrl ->
+        fun ?documentMetadata ->
+          fun ?folderMetadata ->
+            fun ?commentMetadata ->
+              fun ?documentVersionMetadata ->
+                fun () ->
+                  {
+                    resourceType;
+                    webUrl;
+                    documentMetadata;
+                    folderMetadata;
+                    commentMetadata;
+                    documentVersionMetadata
+                  }
+    let to_value x =
+      structure_to_value
+        [("ResourceType",
+           (Option.map x.resourceType ~f:ResponseItemType.to_value));
+        ("WebUrl", (Option.map x.webUrl ~f:ResponseItemWebUrl.to_value));
+        ("DocumentMetadata",
+          (Option.map x.documentMetadata ~f:DocumentMetadata.to_value));
+        ("FolderMetadata",
+          (Option.map x.folderMetadata ~f:FolderMetadata.to_value));
+        ("CommentMetadata",
+          (Option.map x.commentMetadata ~f:CommentMetadata.to_value));
+        ("DocumentVersionMetadata",
+          (Option.map x.documentVersionMetadata
+             ~f:DocumentVersionMetadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let documentVersionMetadata =
+        (Option.map ~f:DocumentVersionMetadata.of_xml)
+          (Xml.child xml_arg0 "DocumentVersionMetadata") in
+      let commentMetadata =
+        (Option.map ~f:CommentMetadata.of_xml)
+          (Xml.child xml_arg0 "CommentMetadata") in
+      let folderMetadata =
+        (Option.map ~f:FolderMetadata.of_xml)
+          (Xml.child xml_arg0 "FolderMetadata") in
+      let documentMetadata =
+        (Option.map ~f:DocumentMetadata.of_xml)
+          (Xml.child xml_arg0 "DocumentMetadata") in
+      let webUrl =
+        (Option.map ~f:ResponseItemWebUrl.of_xml)
+          (Xml.child xml_arg0 "WebUrl") in
+      let resourceType =
+        (Option.map ~f:ResponseItemType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      make ?documentVersionMetadata ?commentMetadata ?folderMetadata
+        ?documentMetadata ?webUrl ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let documentVersionMetadata =
+        field_map json__ "DocumentVersionMetadata"
+          DocumentVersionMetadata.of_json in
+      let commentMetadata =
+        field_map json__ "CommentMetadata" CommentMetadata.of_json in
+      let folderMetadata =
+        field_map json__ "FolderMetadata" FolderMetadata.of_json in
+      let documentMetadata =
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
+      let webUrl = field_map json__ "WebUrl" ResponseItemWebUrl.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" ResponseItemType.of_json in
+      make ?documentVersionMetadata ?commentMetadata ?folderMetadata
+        ?documentMetadata ?webUrl ?resourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of Documents, Folders, Comments, and Document Versions matching the query."]
+module AdditionalResponseFieldType =
+  struct
+    type nonrec t =
+      | WEBURL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | WEBURL -> "WEBURL" | Non_static_id s -> s
+    let of_string = function | "WEBURL" -> WEBURL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AdditionalResponseFieldType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AdditionalResponseFieldType" j)
+    let to_json = simple_to_json to_value
+  end
+module DateRangeType =
+  struct
+    type nonrec t =
+      {
+      startValue: TimestampType.t option
+        [@ocaml.doc "Timestamp range start value (in epochs)"];
+      endValue: TimestampType.t option
+        [@ocaml.doc "Timestamp range end value (in epochs)."]}
+    let make ?startValue =
+      fun ?endValue -> fun () -> { startValue; endValue }
+    let to_value x =
+      structure_to_value
+        [("StartValue", (Option.map x.startValue ~f:TimestampType.to_value));
+        ("EndValue", (Option.map x.endValue ~f:TimestampType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endValue =
+        (Option.map ~f:TimestampType.of_xml) (Xml.child xml_arg0 "EndValue") in
+      let startValue =
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "StartValue") in
+      make ?endValue ?startValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endValue = field_map json__ "EndValue" TimestampType.of_json in
+      let startValue = field_map json__ "StartValue" TimestampType.of_json in
+      make ?endValue ?startValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters results based on timestamp range (in epochs)."]
+module LongRangeType =
+  struct
+    type nonrec t =
+      {
+      startValue: LongType.t option
+        [@ocaml.doc "The size start range (in bytes)."];
+      endValue: LongType.t option
+        [@ocaml.doc "The size end range (in bytes)."]}
+    let make ?startValue =
+      fun ?endValue -> fun () -> { startValue; endValue }
+    let to_value x =
+      structure_to_value
+        [("StartValue", (Option.map x.startValue ~f:LongType.to_value));
+        ("EndValue", (Option.map x.endValue ~f:LongType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endValue =
+        (Option.map ~f:LongType.of_xml) (Xml.child xml_arg0 "EndValue") in
+      let startValue =
+        (Option.map ~f:LongType.of_xml) (Xml.child xml_arg0 "StartValue") in
+      make ?endValue ?startValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endValue = field_map json__ "EndValue" LongType.of_json in
+      let startValue = field_map json__ "StartValue" LongType.of_json in
+      make ?endValue ?startValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filter based on size (in bytes)."]
+module SearchAncestorIdList =
+  struct
+    type nonrec t = SearchAncestorId.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchAncestorId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchAncestorId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchAncestorIdList"
+        ~of_json:SearchAncestorId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchCollectionTypeList =
+  struct
+    type nonrec t = SearchCollectionType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchCollectionType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchCollectionType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchCollectionTypeList"
+        ~of_json:SearchCollectionType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchContentCategoryTypeList =
+  struct
+    type nonrec t = ContentCategoryType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:9); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContentCategoryType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ContentCategoryType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchContentCategoryTypeList"
+        ~of_json:ContentCategoryType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchLabelList =
+  struct
+    type nonrec t = SearchLabel.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchLabel.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchLabel.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchLabelList" ~of_json:SearchLabel.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchPrincipalTypeList =
+  struct
+    type nonrec t = SearchPrincipalType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchPrincipalType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchPrincipalType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchPrincipalTypeList"
+        ~of_json:SearchPrincipalType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchResourceTypeList =
+  struct
+    type nonrec t = SearchResourceType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:4); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchResourceType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchResourceTypeList"
+        ~of_json:SearchResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TextLocaleTypeList =
+  struct
+    type nonrec t = LanguageCodeType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LanguageCodeType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LanguageCodeType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TextLocaleTypeList"
+        ~of_json:LanguageCodeType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchQueryScopeType =
+  struct
+    type nonrec t =
+      | NAME 
+      | CONTENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | NAME -> "NAME" | CONTENT -> "CONTENT" | Non_static_id s -> s
+    let of_string =
+      function | "NAME" -> NAME | "CONTENT" -> CONTENT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SearchQueryScopeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SearchQueryScopeType" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchSortResult =
+  struct
+    type nonrec t =
+      {
+      field: OrderByFieldType.t option
+        [@ocaml.doc "Sort search results based on this field name."];
+      order: SortOrder.t option [@ocaml.doc "Sort direction."]}
+    let make ?field = fun ?order -> fun () -> { field; order }
+    let to_value x =
+      structure_to_value
+        [("Field", (Option.map x.field ~f:OrderByFieldType.to_value));
+        ("Order", (Option.map x.order ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let order =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "Order") in
+      let field =
+        (Option.map ~f:OrderByFieldType.of_xml) (Xml.child xml_arg0 "Field") in
+      make ?order ?field ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let order = field_map json__ "Order" SortOrder.of_json in
+      let field = field_map json__ "Field" OrderByFieldType.of_json in
+      make ?order ?field ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The result of the sort operation."]
 module SignedHeaderMap =
   struct
     type nonrec t = (HeaderNameType.t * HeaderValueType.t) list
@@ -1906,6 +3026,8 @@ module SignedHeaderMap =
                        (HeaderValueType.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1913,224 +3035,6 @@ module SignedHeaderMap =
         ~of_json:HeaderValueType.of_json j
     let to_json v = composed_to_json to_value v
   end
-module DocumentMetadata =
-  struct
-    type nonrec t =
-      {
-      id: ResourceIdType.t option [@ocaml.doc "The ID of the document."];
-      creatorId: IdType.t option [@ocaml.doc "The ID of the creator."];
-      parentFolderId: ResourceIdType.t option
-        [@ocaml.doc "The ID of the parent folder."];
-      createdTimestamp: TimestampType.t option
-        [@ocaml.doc "The time when the document was created."];
-      modifiedTimestamp: TimestampType.t option
-        [@ocaml.doc "The time when the document was updated."];
-      latestVersionMetadata: DocumentVersionMetadata.t option
-        [@ocaml.doc "The latest version of the document."];
-      resourceState: ResourceStateType.t option
-        [@ocaml.doc "The resource state."];
-      labels: SharedLabels.t option
-        [@ocaml.doc "List of labels on the document."]}
-    let make ?id =
-      fun ?creatorId ->
-        fun ?parentFolderId ->
-          fun ?createdTimestamp ->
-            fun ?modifiedTimestamp ->
-              fun ?latestVersionMetadata ->
-                fun ?resourceState ->
-                  fun ?labels ->
-                    fun () ->
-                      {
-                        id;
-                        creatorId;
-                        parentFolderId;
-                        createdTimestamp;
-                        modifiedTimestamp;
-                        latestVersionMetadata;
-                        resourceState;
-                        labels
-                      }
-    let to_value x =
-      structure_to_value
-        [("Id", (Option.map x.id ~f:ResourceIdType.to_value));
-        ("CreatorId", (Option.map x.creatorId ~f:IdType.to_value));
-        ("ParentFolderId",
-          (Option.map x.parentFolderId ~f:ResourceIdType.to_value));
-        ("CreatedTimestamp",
-          (Option.map x.createdTimestamp ~f:TimestampType.to_value));
-        ("ModifiedTimestamp",
-          (Option.map x.modifiedTimestamp ~f:TimestampType.to_value));
-        ("LatestVersionMetadata",
-          (Option.map x.latestVersionMetadata
-             ~f:DocumentVersionMetadata.to_value));
-        ("ResourceState",
-          (Option.map x.resourceState ~f:ResourceStateType.to_value));
-        ("Labels", (Option.map x.labels ~f:SharedLabels.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let labels =
-        (Option.map ~f:SharedLabels.of_xml) (Xml.child xml_arg0 "Labels") in
-      let resourceState =
-        (Option.map ~f:ResourceStateType.of_xml)
-          (Xml.child xml_arg0 "ResourceState") in
-      let latestVersionMetadata =
-        (Option.map ~f:DocumentVersionMetadata.of_xml)
-          (Xml.child xml_arg0 "LatestVersionMetadata") in
-      let modifiedTimestamp =
-        (Option.map ~f:TimestampType.of_xml)
-          (Xml.child xml_arg0 "ModifiedTimestamp") in
-      let createdTimestamp =
-        (Option.map ~f:TimestampType.of_xml)
-          (Xml.child xml_arg0 "CreatedTimestamp") in
-      let parentFolderId =
-        (Option.map ~f:ResourceIdType.of_xml)
-          (Xml.child xml_arg0 "ParentFolderId") in
-      let creatorId =
-        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "CreatorId") in
-      let id =
-        (Option.map ~f:ResourceIdType.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?labels ?resourceState ?latestVersionMetadata ?modifiedTimestamp
-        ?createdTimestamp ?parentFolderId ?creatorId ?id ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labels = field_map json "Labels" SharedLabels.of_json in
-      let resourceState =
-        field_map json "ResourceState" ResourceStateType.of_json in
-      let latestVersionMetadata =
-        field_map json "LatestVersionMetadata"
-          DocumentVersionMetadata.of_json in
-      let modifiedTimestamp =
-        field_map json "ModifiedTimestamp" TimestampType.of_json in
-      let createdTimestamp =
-        field_map json "CreatedTimestamp" TimestampType.of_json in
-      let parentFolderId =
-        field_map json "ParentFolderId" ResourceIdType.of_json in
-      let creatorId = field_map json "CreatorId" IdType.of_json in
-      let id = field_map json "Id" ResourceIdType.of_json in
-      make ?labels ?resourceState ?latestVersionMetadata ?modifiedTimestamp
-        ?createdTimestamp ?parentFolderId ?creatorId ?id ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the document."]
-module FolderMetadata =
-  struct
-    type nonrec t =
-      {
-      id: ResourceIdType.t option [@ocaml.doc "The ID of the folder."];
-      name: ResourceNameType.t option [@ocaml.doc "The name of the folder."];
-      creatorId: IdType.t option [@ocaml.doc "The ID of the creator."];
-      parentFolderId: ResourceIdType.t option
-        [@ocaml.doc "The ID of the parent folder."];
-      createdTimestamp: TimestampType.t option
-        [@ocaml.doc "The time when the folder was created."];
-      modifiedTimestamp: TimestampType.t option
-        [@ocaml.doc "The time when the folder was updated."];
-      resourceState: ResourceStateType.t option
-        [@ocaml.doc "The resource state of the folder."];
-      signature: HashType.t option
-        [@ocaml.doc
-          "The unique identifier created from the subfolders and documents of the folder."];
-      labels: SharedLabels.t option
-        [@ocaml.doc "List of labels on the folder."];
-      size: SizeType.t option [@ocaml.doc "The size of the folder metadata."];
-      latestVersionSize: SizeType.t option
-        [@ocaml.doc "The size of the latest version of the folder metadata."]}
-    let make ?id =
-      fun ?name ->
-        fun ?creatorId ->
-          fun ?parentFolderId ->
-            fun ?createdTimestamp ->
-              fun ?modifiedTimestamp ->
-                fun ?resourceState ->
-                  fun ?signature ->
-                    fun ?labels ->
-                      fun ?size ->
-                        fun ?latestVersionSize ->
-                          fun () ->
-                            {
-                              id;
-                              name;
-                              creatorId;
-                              parentFolderId;
-                              createdTimestamp;
-                              modifiedTimestamp;
-                              resourceState;
-                              signature;
-                              labels;
-                              size;
-                              latestVersionSize
-                            }
-    let to_value x =
-      structure_to_value
-        [("Id", (Option.map x.id ~f:ResourceIdType.to_value));
-        ("Name", (Option.map x.name ~f:ResourceNameType.to_value));
-        ("CreatorId", (Option.map x.creatorId ~f:IdType.to_value));
-        ("ParentFolderId",
-          (Option.map x.parentFolderId ~f:ResourceIdType.to_value));
-        ("CreatedTimestamp",
-          (Option.map x.createdTimestamp ~f:TimestampType.to_value));
-        ("ModifiedTimestamp",
-          (Option.map x.modifiedTimestamp ~f:TimestampType.to_value));
-        ("ResourceState",
-          (Option.map x.resourceState ~f:ResourceStateType.to_value));
-        ("Signature", (Option.map x.signature ~f:HashType.to_value));
-        ("Labels", (Option.map x.labels ~f:SharedLabels.to_value));
-        ("Size", (Option.map x.size ~f:SizeType.to_value));
-        ("LatestVersionSize",
-          (Option.map x.latestVersionSize ~f:SizeType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let latestVersionSize =
-        (Option.map ~f:SizeType.of_xml)
-          (Xml.child xml_arg0 "LatestVersionSize") in
-      let size = (Option.map ~f:SizeType.of_xml) (Xml.child xml_arg0 "Size") in
-      let labels =
-        (Option.map ~f:SharedLabels.of_xml) (Xml.child xml_arg0 "Labels") in
-      let signature =
-        (Option.map ~f:HashType.of_xml) (Xml.child xml_arg0 "Signature") in
-      let resourceState =
-        (Option.map ~f:ResourceStateType.of_xml)
-          (Xml.child xml_arg0 "ResourceState") in
-      let modifiedTimestamp =
-        (Option.map ~f:TimestampType.of_xml)
-          (Xml.child xml_arg0 "ModifiedTimestamp") in
-      let createdTimestamp =
-        (Option.map ~f:TimestampType.of_xml)
-          (Xml.child xml_arg0 "CreatedTimestamp") in
-      let parentFolderId =
-        (Option.map ~f:ResourceIdType.of_xml)
-          (Xml.child xml_arg0 "ParentFolderId") in
-      let creatorId =
-        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "CreatorId") in
-      let name =
-        (Option.map ~f:ResourceNameType.of_xml) (Xml.child xml_arg0 "Name") in
-      let id =
-        (Option.map ~f:ResourceIdType.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?latestVersionSize ?size ?labels ?signature ?resourceState
-        ?modifiedTimestamp ?createdTimestamp ?parentFolderId ?creatorId ?name
-        ?id ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let latestVersionSize =
-        field_map json "LatestVersionSize" SizeType.of_json in
-      let size = field_map json "Size" SizeType.of_json in
-      let labels = field_map json "Labels" SharedLabels.of_json in
-      let signature = field_map json "Signature" HashType.of_json in
-      let resourceState =
-        field_map json "ResourceState" ResourceStateType.of_json in
-      let modifiedTimestamp =
-        field_map json "ModifiedTimestamp" TimestampType.of_json in
-      let createdTimestamp =
-        field_map json "CreatedTimestamp" TimestampType.of_json in
-      let parentFolderId =
-        field_map json "ParentFolderId" ResourceIdType.of_json in
-      let creatorId = field_map json "CreatorId" IdType.of_json in
-      let name = field_map json "Name" ResourceNameType.of_json in
-      let id = field_map json "Id" ResourceIdType.of_json in
-      make ?latestVersionSize ?size ?labels ?signature ?resourceState
-        ?modifiedTimestamp ?createdTimestamp ?parentFolderId ?creatorId ?name
-        ?id ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a folder."]
 module CustomMetadataKeyType =
   struct
     type nonrec t = string
@@ -2179,6 +3083,9 @@ module ResourcePathComponentList =
   struct
     type nonrec t = ResourcePathComponent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourcePathComponent.to_value)) |>
         (fun x -> `List x)
@@ -2225,10 +3132,10 @@ module Principal =
       let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
       make ?roles ?type_ ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roles = field_map json "Roles" PermissionInfoList.of_json in
-      let type_ = field_map json "Type" PrincipalType.of_json in
-      let id = field_map json "Id" IdType.of_json in
+    let of_json json__ =
+      let roles = field_map json__ "Roles" PermissionInfoList.of_json in
+      let type_ = field_map json__ "Type" PrincipalType.of_json in
+      let id = field_map json__ "Id" IdType.of_json in
       make ?roles ?type_ ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a resource."]
@@ -2264,12 +3171,12 @@ module Subscription =
         (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "SubscriptionId") in
       make ?protocol ?endPoint ?subscriptionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protocol =
-        field_map json "Protocol" SubscriptionProtocolType.of_json in
+        field_map json__ "Protocol" SubscriptionProtocolType.of_json in
       let endPoint =
-        field_map json "EndPoint" SubscriptionEndPointType.of_json in
-      let subscriptionId = field_map json "SubscriptionId" IdType.of_json in
+        field_map json__ "EndPoint" SubscriptionEndPointType.of_json in
+      let subscriptionId = field_map json__ "SubscriptionId" IdType.of_json in
       make ?protocol ?endPoint ?subscriptionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a subscription."]
@@ -2277,7 +3184,7 @@ module Comment =
   struct
     type nonrec t =
       {
-      commentId: CommentIdType.t [@ocaml.doc "The ID of the comment."];
+      commentId: CommentIdType.t option [@ocaml.doc "The ID of the comment."];
       parentId: CommentIdType.t option
         [@ocaml.doc "The ID of the parent comment."];
       threadId: CommentIdType.t option
@@ -2295,18 +3202,18 @@ module Comment =
       recipientId: IdType.t option
         [@ocaml.doc
           "If the comment is a reply to another user's comment, this field contains the user ID of the user being replied to."]}
-    let context_ = "Comment"
-    let make ?parentId =
-      fun ?threadId ->
-        fun ?text ->
-          fun ?contributor ->
-            fun ?createdTimestamp ->
-              fun ?status ->
-                fun ?visibility ->
-                  fun ?recipientId ->
-                    fun ~commentId ->
+    let make ?commentId =
+      fun ?parentId ->
+        fun ?threadId ->
+          fun ?text ->
+            fun ?contributor ->
+              fun ?createdTimestamp ->
+                fun ?status ->
+                  fun ?visibility ->
+                    fun ?recipientId ->
                       fun () ->
                         {
+                          commentId;
                           parentId;
                           threadId;
                           text;
@@ -2314,12 +3221,11 @@ module Comment =
                           createdTimestamp;
                           status;
                           visibility;
-                          recipientId;
-                          commentId
+                          recipientId
                         }
     let to_value x =
       structure_to_value
-        [("CommentId", (Some (CommentIdType.to_value x.commentId)));
+        [("CommentId", (Option.map x.commentId ~f:CommentIdType.to_value));
         ("ParentId", (Option.map x.parentId ~f:CommentIdType.to_value));
         ("ThreadId", (Option.map x.threadId ~f:CommentIdType.to_value));
         ("Text", (Option.map x.text ~f:CommentTextType.to_value));
@@ -2352,25 +3258,24 @@ module Comment =
       let parentId =
         (Option.map ~f:CommentIdType.of_xml) (Xml.child xml_arg0 "ParentId") in
       let commentId =
-        CommentIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CommentId") in
+        (Option.map ~f:CommentIdType.of_xml) (Xml.child xml_arg0 "CommentId") in
       make ?recipientId ?visibility ?status ?createdTimestamp ?contributor
-        ?text ?threadId ?parentId ~commentId ()
+        ?text ?threadId ?parentId ?commentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recipientId = field_map json "RecipientId" IdType.of_json in
+    let of_json json__ =
+      let recipientId = field_map json__ "RecipientId" IdType.of_json in
       let visibility =
-        field_map json "Visibility" CommentVisibilityType.of_json in
-      let status = field_map json "Status" CommentStatusType.of_json in
+        field_map json__ "Visibility" CommentVisibilityType.of_json in
+      let status = field_map json__ "Status" CommentStatusType.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" TimestampType.of_json in
-      let contributor = field_map json "Contributor" User.of_json in
-      let text = field_map json "Text" CommentTextType.of_json in
-      let threadId = field_map json "ThreadId" CommentIdType.of_json in
-      let parentId = field_map json "ParentId" CommentIdType.of_json in
-      let commentId = field_map_exn json "CommentId" CommentIdType.of_json in
+        field_map json__ "CreatedTimestamp" TimestampType.of_json in
+      let contributor = field_map json__ "Contributor" User.of_json in
+      let text = field_map json__ "Text" CommentTextType.of_json in
+      let threadId = field_map json__ "ThreadId" CommentIdType.of_json in
+      let parentId = field_map json__ "ParentId" CommentIdType.of_json in
+      let commentId = field_map json__ "CommentId" CommentIdType.of_json in
       make ?recipientId ?visibility ?status ?createdTimestamp ?contributor
-        ?text ?threadId ?parentId ~commentId ()
+        ?text ?threadId ?parentId ?commentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a comment."]
 module Activity =
@@ -2464,20 +3369,20 @@ module Activity =
       make ?commentMetadata ?originalParent ?resourceMetadata ?participants
         ?initiator ?organizationId ?isIndirectActivity ?timeStamp ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let commentMetadata =
-        field_map json "CommentMetadata" CommentMetadata.of_json in
+        field_map json__ "CommentMetadata" CommentMetadata.of_json in
       let originalParent =
-        field_map json "OriginalParent" ResourceMetadata.of_json in
+        field_map json__ "OriginalParent" ResourceMetadata.of_json in
       let resourceMetadata =
-        field_map json "ResourceMetadata" ResourceMetadata.of_json in
-      let participants = field_map json "Participants" Participants.of_json in
-      let initiator = field_map json "Initiator" UserMetadata.of_json in
-      let organizationId = field_map json "OrganizationId" IdType.of_json in
+        field_map json__ "ResourceMetadata" ResourceMetadata.of_json in
+      let participants = field_map json__ "Participants" Participants.of_json in
+      let initiator = field_map json__ "Initiator" UserMetadata.of_json in
+      let organizationId = field_map json__ "OrganizationId" IdType.of_json in
       let isIndirectActivity =
-        field_map json "IsIndirectActivity" BooleanType.of_json in
-      let timeStamp = field_map json "TimeStamp" TimestampType.of_json in
-      let type_ = field_map json "Type" ActivityType.of_json in
+        field_map json__ "IsIndirectActivity" BooleanType.of_json in
+      let timeStamp = field_map json__ "TimeStamp" TimestampType.of_json in
+      let type_ = field_map json__ "Type" ActivityType.of_json in
       make ?commentMetadata ?originalParent ?resourceMetadata ?participants
         ?initiator ?organizationId ?isIndirectActivity ?timeStamp ?type_ ()
     let to_json v = composed_to_json to_value v
@@ -2537,14 +3442,15 @@ module ShareResult =
       make ?statusMessage ?shareId ?status ?role ?inviteePrincipalId
         ?principalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusMessage = field_map json "StatusMessage" MessageType.of_json in
-      let shareId = field_map json "ShareId" ResourceIdType.of_json in
-      let status = field_map json "Status" ShareStatusType.of_json in
-      let role = field_map json "Role" RoleType.of_json in
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "StatusMessage" MessageType.of_json in
+      let shareId = field_map json__ "ShareId" ResourceIdType.of_json in
+      let status = field_map json__ "Status" ShareStatusType.of_json in
+      let role = field_map json__ "Role" RoleType.of_json in
       let inviteePrincipalId =
-        field_map json "InviteePrincipalId" IdType.of_json in
-      let principalId = field_map json "PrincipalId" IdType.of_json in
+        field_map json__ "InviteePrincipalId" IdType.of_json in
+      let principalId = field_map json__ "PrincipalId" IdType.of_json in
       make ?statusMessage ?shareId ?status ?role ?inviteePrincipalId
         ?principalId ()
     let to_json v = composed_to_json to_value v
@@ -2573,10 +3479,10 @@ module SharePrincipal =
       let id = IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~role ~type_ ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let role = field_map_exn json "Role" RoleType.of_json in
-      let type_ = field_map_exn json "Type" PrincipalType.of_json in
-      let id = field_map_exn json "Id" IdType.of_json in
+    let of_json json__ =
+      let role = field_map_exn json__ "Role" RoleType.of_json in
+      let type_ = field_map_exn json__ "Type" PrincipalType.of_json in
+      let id = field_map_exn json__ "Id" IdType.of_json in
       make ~role ~type_ ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the recipient type and ID, if available."]
@@ -2597,7 +3503,8 @@ module EntityNotExistsException =
     type nonrec t =
       {
       message: ErrorMessageType.t option ;
-      entityIds: EntityIdList.t option }
+      entityIds: EntityIdList.t option
+        [@ocaml.doc "The IDs of the non-existent resources."]}
     let make ?message = fun ?entityIds -> fun () -> { message; entityIds }
     let to_value x =
       structure_to_value
@@ -2612,9 +3519,9 @@ module EntityNotExistsException =
           (Xml.child xml_arg0 "Message") in
       make ?entityIds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entityIds = field_map json "EntityIds" EntityIdList.of_json in
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let entityIds = field_map json__ "EntityIds" EntityIdList.of_json in
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?entityIds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource does not exist."]
@@ -2633,12 +3540,12 @@ module FailedDependencyException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The AWS Directory Service cannot reach an on-premises instance. Or a dependency under the control of the organization is failing, such as a connected Active Directory."]
+       "The Directory Service cannot reach an on-premises instance. Or a dependency under the control of the organization is failing, such as a connected Active Directory."]
 module IllegalUserStateException =
   struct
     type nonrec t = {
@@ -2654,8 +3561,8 @@ module IllegalUserStateException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The user is undergoing transfer of ownership."]
@@ -2674,11 +3581,32 @@ module InvalidArgumentException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The pagination marker or limit fields are not valid."]
+module ProhibitedStateException =
+  struct
+    type nonrec t = {
+      message: ErrorMessageType.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessageType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessageType.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified document version is not in the INITIALIZED state."]
 module ServiceUnavailableException =
   struct
     type nonrec t = {
@@ -2694,8 +3622,8 @@ module ServiceUnavailableException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more of the dependencies is unavailable."]
@@ -2726,8 +3654,8 @@ module UnauthorizedResourceAccessException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2787,6 +3715,311 @@ module DocumentVersionStatus =
       of_string (string_of_json ~kind:"DocumentVersionStatus" j)
     let to_json = simple_to_json to_value
   end
+module NextMarkerType =
+  struct
+    type nonrec t = string
+    let context_ = "NextMarkerType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\d]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextMarkerType" j
+    let to_json = simple_to_json to_value
+  end
+module ResponseItemsList =
+  struct
+    type nonrec t = ResponseItem.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResponseItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResponseItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseItemsList" ~of_json:ResponseItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AdditionalResponseFieldsList =
+  struct
+    type nonrec t = AdditionalResponseFieldType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdditionalResponseFieldType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdditionalResponseFieldType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdditionalResponseFieldsList"
+        ~of_json:AdditionalResponseFieldType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Filters =
+  struct
+    type nonrec t =
+      {
+      textLocales: TextLocaleTypeList.t option
+        [@ocaml.doc "Filters by the locale of the content or comment."];
+      contentCategories: SearchContentCategoryTypeList.t option
+        [@ocaml.doc "Filters by content category."];
+      resourceTypes: SearchResourceTypeList.t option
+        [@ocaml.doc "Filters based on entity type."];
+      labels: SearchLabelList.t option
+        [@ocaml.doc "Filter by labels using exact match."];
+      principals: SearchPrincipalTypeList.t option
+        [@ocaml.doc "Filter based on UserIds or GroupIds."];
+      ancestorIds: SearchAncestorIdList.t option
+        [@ocaml.doc "Filter based on resource\226\128\153s path."];
+      searchCollectionTypes: SearchCollectionTypeList.t option
+        [@ocaml.doc "Filter based on file groupings."];
+      sizeRange: LongRangeType.t option
+        [@ocaml.doc "Filter based on size (in bytes)."];
+      createdRange: DateRangeType.t option
+        [@ocaml.doc
+          "Filter based on resource\226\128\153s creation timestamp."];
+      modifiedRange: DateRangeType.t option
+        [@ocaml.doc
+          "Filter based on resource\226\128\153s modified timestamp."]}
+    let make ?textLocales =
+      fun ?contentCategories ->
+        fun ?resourceTypes ->
+          fun ?labels ->
+            fun ?principals ->
+              fun ?ancestorIds ->
+                fun ?searchCollectionTypes ->
+                  fun ?sizeRange ->
+                    fun ?createdRange ->
+                      fun ?modifiedRange ->
+                        fun () ->
+                          {
+                            textLocales;
+                            contentCategories;
+                            resourceTypes;
+                            labels;
+                            principals;
+                            ancestorIds;
+                            searchCollectionTypes;
+                            sizeRange;
+                            createdRange;
+                            modifiedRange
+                          }
+    let to_value x =
+      structure_to_value
+        [("TextLocales",
+           (Option.map x.textLocales ~f:TextLocaleTypeList.to_value));
+        ("ContentCategories",
+          (Option.map x.contentCategories
+             ~f:SearchContentCategoryTypeList.to_value));
+        ("ResourceTypes",
+          (Option.map x.resourceTypes ~f:SearchResourceTypeList.to_value));
+        ("Labels", (Option.map x.labels ~f:SearchLabelList.to_value));
+        ("Principals",
+          (Option.map x.principals ~f:SearchPrincipalTypeList.to_value));
+        ("AncestorIds",
+          (Option.map x.ancestorIds ~f:SearchAncestorIdList.to_value));
+        ("SearchCollectionTypes",
+          (Option.map x.searchCollectionTypes
+             ~f:SearchCollectionTypeList.to_value));
+        ("SizeRange", (Option.map x.sizeRange ~f:LongRangeType.to_value));
+        ("CreatedRange",
+          (Option.map x.createdRange ~f:DateRangeType.to_value));
+        ("ModifiedRange",
+          (Option.map x.modifiedRange ~f:DateRangeType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modifiedRange =
+        (Option.map ~f:DateRangeType.of_xml)
+          (Xml.child xml_arg0 "ModifiedRange") in
+      let createdRange =
+        (Option.map ~f:DateRangeType.of_xml)
+          (Xml.child xml_arg0 "CreatedRange") in
+      let sizeRange =
+        (Option.map ~f:LongRangeType.of_xml) (Xml.child xml_arg0 "SizeRange") in
+      let searchCollectionTypes =
+        (Option.map ~f:SearchCollectionTypeList.of_xml)
+          (Xml.child xml_arg0 "SearchCollectionTypes") in
+      let ancestorIds =
+        (Option.map ~f:SearchAncestorIdList.of_xml)
+          (Xml.child xml_arg0 "AncestorIds") in
+      let principals =
+        (Option.map ~f:SearchPrincipalTypeList.of_xml)
+          (Xml.child xml_arg0 "Principals") in
+      let labels =
+        (Option.map ~f:SearchLabelList.of_xml) (Xml.child xml_arg0 "Labels") in
+      let resourceTypes =
+        (Option.map ~f:SearchResourceTypeList.of_xml)
+          (Xml.child xml_arg0 "ResourceTypes") in
+      let contentCategories =
+        (Option.map ~f:SearchContentCategoryTypeList.of_xml)
+          (Xml.child xml_arg0 "ContentCategories") in
+      let textLocales =
+        (Option.map ~f:TextLocaleTypeList.of_xml)
+          (Xml.child xml_arg0 "TextLocales") in
+      make ?modifiedRange ?createdRange ?sizeRange ?searchCollectionTypes
+        ?ancestorIds ?principals ?labels ?resourceTypes ?contentCategories
+        ?textLocales ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modifiedRange =
+        field_map json__ "ModifiedRange" DateRangeType.of_json in
+      let createdRange =
+        field_map json__ "CreatedRange" DateRangeType.of_json in
+      let sizeRange = field_map json__ "SizeRange" LongRangeType.of_json in
+      let searchCollectionTypes =
+        field_map json__ "SearchCollectionTypes"
+          SearchCollectionTypeList.of_json in
+      let ancestorIds =
+        field_map json__ "AncestorIds" SearchAncestorIdList.of_json in
+      let principals =
+        field_map json__ "Principals" SearchPrincipalTypeList.of_json in
+      let labels = field_map json__ "Labels" SearchLabelList.of_json in
+      let resourceTypes =
+        field_map json__ "ResourceTypes" SearchResourceTypeList.of_json in
+      let contentCategories =
+        field_map json__ "ContentCategories"
+          SearchContentCategoryTypeList.of_json in
+      let textLocales =
+        field_map json__ "TextLocales" TextLocaleTypeList.of_json in
+      make ?modifiedRange ?createdRange ?sizeRange ?searchCollectionTypes
+        ?ancestorIds ?principals ?labels ?resourceTypes ?contentCategories
+        ?textLocales ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters results based on entity metadata."]
+module SearchQueryScopeTypeList =
+  struct
+    type nonrec t = SearchQueryScopeType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchQueryScopeType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchQueryScopeType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchQueryScopeTypeList"
+        ~of_json:SearchQueryScopeType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchQueryType =
+  struct
+    type nonrec t = string
+    let context_ = "SearchQueryType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0020-\\uFFFF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SearchQueryType" j
+    let to_json = simple_to_json to_value
+  end
+module SearchResultSortList =
+  struct
+    type nonrec t = SearchSortResult.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchSortResult.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchSortResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchResultSortList"
+        ~of_json:SearchSortResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchResultsLimitType =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SearchResultsLimitType" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module DraftUploadOutOfSyncException =
   struct
     type nonrec t = {
@@ -2802,8 +4035,8 @@ module DraftUploadOutOfSyncException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2823,12 +4056,12 @@ module EntityAlreadyExistsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource already exists."]
-module ProhibitedStateException =
+module InvalidPasswordException =
   struct
     type nonrec t = {
       message: ErrorMessageType.t option }
@@ -2843,12 +4076,32 @@ module ProhibitedStateException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The password is invalid."]
+module LimitExceededException =
+  struct
+    type nonrec t = {
+      message: ErrorMessageType.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessageType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessageType.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified document version is not in the INITIALIZED state."]
+       "The maximum of 100,000 files and folders under the parent folder has been exceeded."]
 module ResourceAlreadyCheckedOutException =
   struct
     type nonrec t = {
@@ -2864,8 +4117,8 @@ module ResourceAlreadyCheckedOutException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource is already checked out."]
@@ -2884,8 +4137,8 @@ module StorageLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The storage limit has been exceeded."]
@@ -2904,8 +4157,8 @@ module StorageLimitWillExceedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The storage limit will be exceeded."]
@@ -2932,10 +4185,10 @@ module UploadMetadata =
         (Option.map ~f:UrlType.of_xml) (Xml.child xml_arg0 "UploadUrl") in
       make ?signedHeaders ?uploadUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let signedHeaders =
-        field_map json "SignedHeaders" SignedHeaderMap.of_json in
-      let uploadUrl = field_map json "UploadUrl" UrlType.of_json in
+        field_map json__ "SignedHeaders" SignedHeaderMap.of_json in
+      let uploadUrl = field_map json__ "UploadUrl" UrlType.of_json in
       make ?signedHeaders ?uploadUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the upload."]
@@ -2943,6 +4196,9 @@ module DocumentMetadataList =
   struct
     type nonrec t = DocumentMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2968,6 +4224,9 @@ module FolderMetadataList =
   struct
     type nonrec t = FolderMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FolderMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3072,6 +4331,8 @@ module CustomMetadataMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3097,9 +4358,9 @@ module ResourcePath =
           (Xml.child xml_arg0 "Components") in
       make ?components ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let components =
-        field_map json "Components" ResourcePathComponentList.of_json in
+        field_map json__ "Components" ResourcePathComponentList.of_json in
       make ?components ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the path information of a resource."]
@@ -3123,30 +4384,13 @@ module FieldNamesType =
     let of_json j = string_of_json ~kind:"FieldNamesType" j
     let to_json = simple_to_json to_value
   end
-module InvalidPasswordException =
-  struct
-    type nonrec t = {
-      message: ErrorMessageType.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessageType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessageType.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The password is invalid."]
 module OrganizationUserList =
   struct
     type nonrec t = User.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3182,8 +4426,8 @@ module RequestedEntityTooLargeException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3211,26 +4455,6 @@ module OrderType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration OrderType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"OrderType" j)
-    let to_json = simple_to_json to_value
-  end
-module SearchQueryType =
-  struct
-    type nonrec t = string
-    let context_ = "SearchQueryType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\u0020-\\uFFFF]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SearchQueryType" j
     let to_json = simple_to_json to_value
   end
 module UserFilterType =
@@ -3316,6 +4540,9 @@ module PrincipalList =
   struct
     type nonrec t = Principal.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Principal.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3341,6 +4568,9 @@ module SubscriptionList =
     type nonrec t = Subscription.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:256); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subscription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3448,6 +4678,9 @@ module DocumentVersionMetadataList =
   struct
     type nonrec t = DocumentVersionMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentVersionMetadata.to_value)) |>
         (fun x -> `List x)
@@ -3474,6 +4707,9 @@ module CommentList =
   struct
     type nonrec t = Comment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Comment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3494,10 +4730,33 @@ module CommentList =
       list_of_json ~kind:"CommentList" ~of_json:Comment.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SearchMarkerType =
+  struct
+    type nonrec t = string
+    let context_ = "SearchMarkerType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:12288) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0000-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SearchMarkerType" j
+    let to_json = simple_to_json to_value
+  end
 module UserActivities =
   struct
     type nonrec t = Activity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Activity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3543,6 +4802,9 @@ module CustomMetadataKeyList =
     type nonrec t = CustomMetadataKeyType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:8); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomMetadataKeyType.to_value)) |>
         (fun x -> `List x)
@@ -3600,8 +4862,8 @@ module TooManySubscriptionsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3637,12 +4899,32 @@ module TooManyLabelsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The limit has been reached on the number of labels for the specified resource."]
+module ConcurrentModificationException =
+  struct
+    type nonrec t = {
+      message: ErrorMessageType.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessageType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessageType.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource hierarchy is changing."]
 module ConflictingOperationException =
   struct
     type nonrec t = {
@@ -3658,33 +4940,12 @@ module ConflictingOperationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Another operation is in progress on the resource that conflicts with the current operation."]
-module LimitExceededException =
-  struct
-    type nonrec t = {
-      message: ErrorMessageType.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessageType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessageType.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The maximum of 100,000 folders under the parent folder has been exceeded."]
 module CustomMetadataLimitExceededException =
   struct
     type nonrec t = {
@@ -3700,8 +4961,8 @@ module CustomMetadataLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3721,8 +4982,8 @@ module DocumentLockedForCommentsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3742,8 +5003,8 @@ module InvalidCommentOperationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3752,6 +5013,9 @@ module ShareResultsList =
   struct
     type nonrec t = ShareResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ShareResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3778,7 +5042,7 @@ module NotificationOptions =
       {
       sendEmail: BooleanType.t option
         [@ocaml.doc
-          "Boolean value to indicate an email notification should be sent to the receipients."];
+          "Boolean value to indicate an email notification should be sent to the recipients."];
       emailMessage: MessageType.t option
         [@ocaml.doc "Text value to be included in the email body."]}
     let make ?sendEmail =
@@ -3796,9 +5060,9 @@ module NotificationOptions =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "SendEmail") in
       make ?emailMessage ?sendEmail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailMessage = field_map json "EmailMessage" MessageType.of_json in
-      let sendEmail = field_map json "SendEmail" BooleanType.of_json in
+    let of_json json__ =
+      let emailMessage = field_map json__ "EmailMessage" MessageType.of_json in
+      let sendEmail = field_map json__ "SendEmail" BooleanType.of_json in
       make ?emailMessage ?sendEmail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3807,6 +5071,9 @@ module SharePrincipalList =
   struct
     type nonrec t = SharePrincipal.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SharePrincipal.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3841,6 +5108,7 @@ module UpdateUserResponse =
       | `FailedDependencyException of FailedDependencyException.t 
       | `IllegalUserStateException of IllegalUserStateException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ProhibitedStateException of ProhibitedStateException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `UnauthorizedOperationException of UnauthorizedOperationException.t 
       | `UnauthorizedResourceAccessException of
@@ -3860,6 +5128,8 @@ module UpdateUserResponse =
           `IllegalUserStateException (IllegalUserStateException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ProhibitedStateException" ->
+          `ProhibitedStateException (ProhibitedStateException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
@@ -3885,6 +5155,8 @@ module UpdateUserResponse =
           `IllegalUserStateException (IllegalUserStateException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ProhibitedStateException" ->
+          `ProhibitedStateException (ProhibitedStateException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
@@ -3918,6 +5190,10 @@ module UpdateUserResponse =
           `Assoc
             [("error", (`String "InvalidArgumentException"));
             ("details", (InvalidArgumentException.to_json e))]
+      | `ProhibitedStateException e ->
+          `Assoc
+            [("error", (`String "ProhibitedStateException"));
+            ("details", (ProhibitedStateException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
@@ -3942,8 +5218,8 @@ module UpdateUserResponse =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map json "User" User.of_json in make ?user ()
+    let of_json json__ =
+      let user = field_map json__ "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the specified attributes of the specified user, and grants or revokes administrative privileges to the Amazon WorkDocs site."]
@@ -3953,7 +5229,7 @@ module UpdateUserRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       userId: IdType.t [@ocaml.doc "The ID of the user."];
       givenName: UserAttributeValueType.t option
         [@ocaml.doc "The given name of the user."];
@@ -3967,7 +5243,7 @@ module UpdateUserRequest =
       locale: LocaleType.t option [@ocaml.doc "The locale of the user."];
       grantPoweruserPrivileges: BooleanEnumType.t option
         [@ocaml.doc
-          "Boolean value to determine whether the user is granted Poweruser privileges."]}
+          "Boolean value to determine whether the user is granted Power user privileges."]}
     let context_ = "UpdateUserRequest"
     let make ?authenticationToken =
       fun ?givenName ->
@@ -4035,19 +5311,21 @@ module UpdateUserRequest =
       make ?grantPoweruserPrivileges ?locale ?timeZoneId ?storageRule ?type_
         ?surname ?givenName ~userId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let grantPoweruserPrivileges =
-        field_map json "GrantPoweruserPrivileges" BooleanEnumType.of_json in
-      let locale = field_map json "Locale" LocaleType.of_json in
-      let timeZoneId = field_map json "TimeZoneId" TimeZoneIdType.of_json in
-      let storageRule = field_map json "StorageRule" StorageRuleType.of_json in
-      let type_ = field_map json "Type" UserType.of_json in
-      let surname = field_map json "Surname" UserAttributeValueType.of_json in
+        field_map json__ "GrantPoweruserPrivileges" BooleanEnumType.of_json in
+      let locale = field_map json__ "Locale" LocaleType.of_json in
+      let timeZoneId = field_map json__ "TimeZoneId" TimeZoneIdType.of_json in
+      let storageRule =
+        field_map json__ "StorageRule" StorageRuleType.of_json in
+      let type_ = field_map json__ "Type" UserType.of_json in
+      let surname = field_map json__ "Surname" UserAttributeValueType.of_json in
       let givenName =
-        field_map json "GivenName" UserAttributeValueType.of_json in
-      let userId = field_map_exn json "UserId" IdType.of_json in
+        field_map json__ "GivenName" UserAttributeValueType.of_json in
+      let userId = field_map_exn json__ "UserId" IdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?grantPoweruserPrivileges ?locale ?timeZoneId ?storageRule ?type_
         ?surname ?givenName ~userId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
@@ -4059,7 +5337,7 @@ module UpdateFolderRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       folderId: ResourceIdType.t [@ocaml.doc "The ID of the folder."];
       name: ResourceNameType.t option [@ocaml.doc "The name of the folder."];
       parentFolderId: ResourceIdType.t option
@@ -4111,15 +5389,16 @@ module UpdateFolderRequest =
       make ?resourceState ?parentFolderId ?name ~folderId
         ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceState =
-        field_map json "ResourceState" ResourceStateType.of_json in
+        field_map json__ "ResourceState" ResourceStateType.of_json in
       let parentFolderId =
-        field_map json "ParentFolderId" ResourceIdType.of_json in
-      let name = field_map json "Name" ResourceNameType.of_json in
-      let folderId = field_map_exn json "FolderId" ResourceIdType.of_json in
+        field_map json__ "ParentFolderId" ResourceIdType.of_json in
+      let name = field_map json__ "Name" ResourceNameType.of_json in
+      let folderId = field_map_exn json__ "FolderId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?resourceState ?parentFolderId ?name ~folderId
         ?authenticationToken ()
     let to_json v = composed_to_json to_value v
@@ -4131,7 +5410,7 @@ module UpdateDocumentVersionRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."];
       versionId: DocumentVersionIdType.t
         [@ocaml.doc "The version ID of the document."];
@@ -4169,14 +5448,16 @@ module UpdateDocumentVersionRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?versionStatus ~versionId ~documentId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionStatus =
-        field_map json "VersionStatus" DocumentVersionStatus.of_json in
+        field_map json__ "VersionStatus" DocumentVersionStatus.of_json in
       let versionId =
-        field_map_exn json "VersionId" DocumentVersionIdType.of_json in
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+        field_map_exn json__ "VersionId" DocumentVersionIdType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?versionStatus ~versionId ~documentId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4187,7 +5468,7 @@ module UpdateDocumentRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."];
       name: ResourceNameType.t option
         [@ocaml.doc "The name of the document."];
@@ -4240,27 +5521,270 @@ module UpdateDocumentRequest =
       make ?resourceState ?parentFolderId ?name ~documentId
         ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceState =
-        field_map json "ResourceState" ResourceStateType.of_json in
+        field_map json__ "ResourceState" ResourceStateType.of_json in
       let parentFolderId =
-        field_map json "ParentFolderId" ResourceIdType.of_json in
-      let name = field_map json "Name" ResourceNameType.of_json in
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+        field_map json__ "ParentFolderId" ResourceIdType.of_json in
+      let name = field_map json__ "Name" ResourceNameType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?resourceState ?parentFolderId ?name ~documentId
         ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the specified attributes of a document. The user must have access to both the document and its parent folder, if applicable."]
+module SearchResourcesResponse =
+  struct
+    type nonrec t =
+      {
+      items: ResponseItemsList.t option
+        [@ocaml.doc
+          "List of Documents, Folders, Comments, and Document Versions matching the query."];
+      marker: NextMarkerType.t option
+        [@ocaml.doc
+          "The marker to use when requesting the next set of results. If there are no additional results, the string is empty."]}
+    type nonrec error =
+      [ `InvalidArgumentException of InvalidArgumentException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `UnauthorizedOperationException of UnauthorizedOperationException.t 
+      | `UnauthorizedResourceAccessException of
+          UnauthorizedResourceAccessException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?marker -> fun () -> { items; marker }
+    let error_of_json name json =
+      match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "UnauthorizedOperationException" ->
+          `UnauthorizedOperationException
+            (UnauthorizedOperationException.of_json json)
+      | "UnauthorizedResourceAccessException" ->
+          `UnauthorizedResourceAccessException
+            (UnauthorizedResourceAccessException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "UnauthorizedOperationException" ->
+          `UnauthorizedOperationException
+            (UnauthorizedOperationException.of_xml xml)
+      | "UnauthorizedResourceAccessException" ->
+          `UnauthorizedResourceAccessException
+            (UnauthorizedResourceAccessException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `UnauthorizedOperationException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedOperationException"));
+            ("details", (UnauthorizedOperationException.to_json e))]
+      | `UnauthorizedResourceAccessException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedResourceAccessException"));
+            ("details", (UnauthorizedResourceAccessException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Items", (Option.map x.items ~f:ResponseItemsList.to_value));
+        ("Marker", (Option.map x.marker ~f:NextMarkerType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:NextMarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
+      let items =
+        (Option.map ~f:ResponseItemsList.of_xml) (Xml.child xml_arg0 "Items") in
+      make ?marker ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" NextMarkerType.of_json in
+      let items = field_map json__ "Items" ResponseItemsList.of_json in
+      make ?marker ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches metadata and the content of folders, documents, document versions, and comments."]
+module SearchResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      authenticationToken: AuthenticationHeaderType.t option
+        [@ocaml.doc
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
+      queryText: SearchQueryType.t option
+        [@ocaml.doc
+          "The String to search for. Searches across different text fields based on request parameters. Use double quotes around the query string for exact phrase matches."];
+      queryScopes: SearchQueryScopeTypeList.t option
+        [@ocaml.doc
+          "Filter based on the text field type. A Folder has only a name and no content. A Comment has only content and no name. A Document or Document Version has a name and content"];
+      organizationId: IdType.t option
+        [@ocaml.doc
+          "Filters based on the resource owner OrgId. This is a mandatory parameter when using Admin SigV4 credentials."];
+      additionalResponseFields: AdditionalResponseFieldsList.t option
+        [@ocaml.doc
+          "A list of attributes to include in the response. Used to request fields that are not normally returned in a standard response."];
+      filters: Filters.t option
+        [@ocaml.doc "Filters results based on entity metadata."];
+      orderBy: SearchResultSortList.t option
+        [@ocaml.doc "Order by results in one or more categories."];
+      limit: SearchResultsLimitType.t option
+        [@ocaml.doc "Max results count per page."];
+      marker: NextMarkerType.t option
+        [@ocaml.doc "The marker for the next set of results."]}
+    let make ?authenticationToken =
+      fun ?queryText ->
+        fun ?queryScopes ->
+          fun ?organizationId ->
+            fun ?additionalResponseFields ->
+              fun ?filters ->
+                fun ?orderBy ->
+                  fun ?limit ->
+                    fun ?marker ->
+                      fun () ->
+                        {
+                          authenticationToken;
+                          queryText;
+                          queryScopes;
+                          organizationId;
+                          additionalResponseFields;
+                          filters;
+                          orderBy;
+                          limit;
+                          marker
+                        }
+    let to_value x =
+      structure_to_value
+        [("Authentication",
+           (Option.map x.authenticationToken
+              ~f:AuthenticationHeaderType.to_value));
+        ("QueryText", (Option.map x.queryText ~f:SearchQueryType.to_value));
+        ("QueryScopes",
+          (Option.map x.queryScopes ~f:SearchQueryScopeTypeList.to_value));
+        ("OrganizationId", (Option.map x.organizationId ~f:IdType.to_value));
+        ("AdditionalResponseFields",
+          (Option.map x.additionalResponseFields
+             ~f:AdditionalResponseFieldsList.to_value));
+        ("Filters", (Option.map x.filters ~f:Filters.to_value));
+        ("OrderBy", (Option.map x.orderBy ~f:SearchResultSortList.to_value));
+        ("Limit", (Option.map x.limit ~f:SearchResultsLimitType.to_value));
+        ("Marker", (Option.map x.marker ~f:NextMarkerType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:NextMarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
+      let limit =
+        (Option.map ~f:SearchResultsLimitType.of_xml)
+          (Xml.child xml_arg0 "Limit") in
+      let orderBy =
+        (Option.map ~f:SearchResultSortList.of_xml)
+          (Xml.child xml_arg0 "OrderBy") in
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
+      let additionalResponseFields =
+        (Option.map ~f:AdditionalResponseFieldsList.of_xml)
+          (Xml.child xml_arg0 "AdditionalResponseFields") in
+      let organizationId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "OrganizationId") in
+      let queryScopes =
+        (Option.map ~f:SearchQueryScopeTypeList.of_xml)
+          (Xml.child xml_arg0 "QueryScopes") in
+      let queryText =
+        (Option.map ~f:SearchQueryType.of_xml)
+          (Xml.child xml_arg0 "QueryText") in
+      let authenticationToken =
+        (Option.map ~f:AuthenticationHeaderType.of_xml)
+          (Xml.child xml_arg0 "Authentication") in
+      make ?marker ?limit ?orderBy ?filters ?additionalResponseFields
+        ?organizationId ?queryScopes ?queryText ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" NextMarkerType.of_json in
+      let limit = field_map json__ "Limit" SearchResultsLimitType.of_json in
+      let orderBy = field_map json__ "OrderBy" SearchResultSortList.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let additionalResponseFields =
+        field_map json__ "AdditionalResponseFields"
+          AdditionalResponseFieldsList.of_json in
+      let organizationId = field_map json__ "OrganizationId" IdType.of_json in
+      let queryScopes =
+        field_map json__ "QueryScopes" SearchQueryScopeTypeList.of_json in
+      let queryText = field_map json__ "QueryText" SearchQueryType.of_json in
+      let authenticationToken =
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
+      make ?marker ?limit ?orderBy ?filters ?additionalResponseFields
+        ?organizationId ?queryScopes ?queryText ?authenticationToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches metadata and the content of folders, documents, document versions, and comments."]
+module RestoreDocumentVersionsRequest =
+  struct
+    type nonrec t =
+      {
+      authenticationToken: AuthenticationHeaderType.t option
+        [@ocaml.doc
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
+      documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."]}
+    let context_ = "RestoreDocumentVersionsRequest"
+    let make ?authenticationToken =
+      fun ~documentId -> fun () -> { authenticationToken; documentId }
+    let to_value x =
+      structure_to_value
+        [("Authentication",
+           (Option.map x.authenticationToken
+              ~f:AuthenticationHeaderType.to_value));
+        ("DocumentId", (Some (ResourceIdType.to_value x.documentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let documentId =
+        ResourceIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DocumentId") in
+      let authenticationToken =
+        (Option.map ~f:AuthenticationHeaderType.of_xml)
+          (Xml.child xml_arg0 "Authentication") in
+      make ~documentId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
+      let authenticationToken =
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
+      make ~documentId ?authenticationToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Recovers a deleted version of an Amazon WorkDocs document."]
 module RemoveResourcePermissionRequest =
   struct
     type nonrec t =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       resourceId: ResourceIdType.t [@ocaml.doc "The ID of the resource."];
       principalId: IdType.t [@ocaml.doc "The principal ID of the resource."];
       principalType: PrincipalType.t option
@@ -4295,13 +5819,15 @@ module RemoveResourcePermissionRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?principalType ~principalId ~resourceId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let principalType =
-        field_map json "PrincipalType" PrincipalType.of_json in
-      let principalId = field_map_exn json "PrincipalId" IdType.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceIdType.of_json in
+        field_map json__ "PrincipalType" PrincipalType.of_json in
+      let principalId = field_map_exn json__ "PrincipalId" IdType.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?principalType ~principalId ~resourceId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4312,7 +5838,7 @@ module RemoveAllResourcePermissionsRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       resourceId: ResourceIdType.t [@ocaml.doc "The ID of the resource."]}
     let context_ = "RemoveAllResourcePermissionsRequest"
     let make ?authenticationToken =
@@ -4333,10 +5859,12 @@ module RemoveAllResourcePermissionsRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ~resourceId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceIdType.of_json in
+    let of_json json__ =
+      let resourceId =
+        field_map_exn json__ "ResourceId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ~resourceId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes all the permissions from the specified resource."]
@@ -4355,8 +5883,8 @@ module InvalidOperationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessageType.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation is invalid."]
@@ -4373,6 +5901,9 @@ module InitiateDocumentVersionUploadResponse =
       | `EntityAlreadyExistsException of EntityAlreadyExistsException.t 
       | `EntityNotExistsException of EntityNotExistsException.t 
       | `FailedDependencyException of FailedDependencyException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `InvalidPasswordException of InvalidPasswordException.t 
+      | `LimitExceededException of LimitExceededException.t 
       | `ProhibitedStateException of ProhibitedStateException.t 
       | `ResourceAlreadyCheckedOutException of
           ResourceAlreadyCheckedOutException.t 
@@ -4397,6 +5928,12 @@ module InitiateDocumentVersionUploadResponse =
           `EntityNotExistsException (EntityNotExistsException.of_json json)
       | "FailedDependencyException" ->
           `FailedDependencyException (FailedDependencyException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "InvalidPasswordException" ->
+          `InvalidPasswordException (InvalidPasswordException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
       | "ProhibitedStateException" ->
           `ProhibitedStateException (ProhibitedStateException.of_json json)
       | "ResourceAlreadyCheckedOutException" ->
@@ -4432,6 +5969,12 @@ module InitiateDocumentVersionUploadResponse =
           `EntityNotExistsException (EntityNotExistsException.of_xml xml)
       | "FailedDependencyException" ->
           `FailedDependencyException (FailedDependencyException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "InvalidPasswordException" ->
+          `InvalidPasswordException (InvalidPasswordException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
       | "ProhibitedStateException" ->
           `ProhibitedStateException (ProhibitedStateException.of_xml xml)
       | "ResourceAlreadyCheckedOutException" ->
@@ -4472,6 +6015,18 @@ module InitiateDocumentVersionUploadResponse =
           `Assoc
             [("error", (`String "FailedDependencyException"));
             ("details", (FailedDependencyException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `InvalidPasswordException e ->
+          `Assoc
+            [("error", (`String "InvalidPasswordException"));
+            ("details", (InvalidPasswordException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
       | `ProhibitedStateException e ->
           `Assoc
             [("error", (`String "ProhibitedStateException"));
@@ -4520,10 +6075,10 @@ module InitiateDocumentVersionUploadResponse =
           (Xml.child xml_arg0 "Metadata") in
       make ?uploadMetadata ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uploadMetadata =
-        field_map json "UploadMetadata" UploadMetadata.of_json in
-      let metadata = field_map json "Metadata" DocumentMetadata.of_json in
+        field_map json__ "UploadMetadata" UploadMetadata.of_json in
+      let metadata = field_map json__ "Metadata" DocumentMetadata.of_json in
       make ?uploadMetadata ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4534,7 +6089,7 @@ module InitiateDocumentVersionUploadRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       id: ResourceIdType.t option [@ocaml.doc "The ID of the document."];
       name: ResourceNameType.t option
         [@ocaml.doc "The name of the document."];
@@ -4548,9 +6103,8 @@ module InitiateDocumentVersionUploadRequest =
         [@ocaml.doc "The content type of the document."];
       documentSizeInBytes: SizeType.t option
         [@ocaml.doc "The size of the document, in bytes."];
-      parentFolderId: ResourceIdType.t
+      parentFolderId: ResourceIdType.t option
         [@ocaml.doc "The ID of the parent folder."]}
-    let context_ = "InitiateDocumentVersionUploadRequest"
     let make ?authenticationToken =
       fun ?id ->
         fun ?name ->
@@ -4558,7 +6112,7 @@ module InitiateDocumentVersionUploadRequest =
             fun ?contentModifiedTimestamp ->
               fun ?contentType ->
                 fun ?documentSizeInBytes ->
-                  fun ~parentFolderId ->
+                  fun ?parentFolderId ->
                     fun () ->
                       {
                         authenticationToken;
@@ -4585,12 +6139,13 @@ module InitiateDocumentVersionUploadRequest =
           (Option.map x.contentType ~f:DocumentContentType.to_value));
         ("DocumentSizeInBytes",
           (Option.map x.documentSizeInBytes ~f:SizeType.to_value));
-        ("ParentFolderId", (Some (ResourceIdType.to_value x.parentFolderId)))]
+        ("ParentFolderId",
+          (Option.map x.parentFolderId ~f:ResourceIdType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let parentFolderId =
-        ResourceIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ParentFolderId") in
+        (Option.map ~f:ResourceIdType.of_xml)
+          (Xml.child xml_arg0 "ParentFolderId") in
       let documentSizeInBytes =
         (Option.map ~f:SizeType.of_xml)
           (Xml.child xml_arg0 "DocumentSizeInBytes") in
@@ -4610,26 +6165,27 @@ module InitiateDocumentVersionUploadRequest =
       let authenticationToken =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
-      make ~parentFolderId ?documentSizeInBytes ?contentType
+      make ?parentFolderId ?documentSizeInBytes ?contentType
         ?contentModifiedTimestamp ?contentCreatedTimestamp ?name ?id
         ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parentFolderId =
-        field_map_exn json "ParentFolderId" ResourceIdType.of_json in
+        field_map json__ "ParentFolderId" ResourceIdType.of_json in
       let documentSizeInBytes =
-        field_map json "DocumentSizeInBytes" SizeType.of_json in
+        field_map json__ "DocumentSizeInBytes" SizeType.of_json in
       let contentType =
-        field_map json "ContentType" DocumentContentType.of_json in
+        field_map json__ "ContentType" DocumentContentType.of_json in
       let contentModifiedTimestamp =
-        field_map json "ContentModifiedTimestamp" TimestampType.of_json in
+        field_map json__ "ContentModifiedTimestamp" TimestampType.of_json in
       let contentCreatedTimestamp =
-        field_map json "ContentCreatedTimestamp" TimestampType.of_json in
-      let name = field_map json "Name" ResourceNameType.of_json in
-      let id = field_map json "Id" ResourceIdType.of_json in
+        field_map json__ "ContentCreatedTimestamp" TimestampType.of_json in
+      let name = field_map json__ "Name" ResourceNameType.of_json in
+      let id = field_map json__ "Id" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
-      make ~parentFolderId ?documentSizeInBytes ?contentType
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
+      make ?parentFolderId ?documentSizeInBytes ?contentType
         ?contentModifiedTimestamp ?contentCreatedTimestamp ?name ?id
         ?authenticationToken ()
     let to_json v = composed_to_json to_value v
@@ -4737,10 +6293,11 @@ module GetResourcesResponse =
           (Xml.child xml_arg0 "Folders") in
       make ?marker ?documents ?folders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let documents = field_map json "Documents" DocumentMetadataList.of_json in
-      let folders = field_map json "Folders" FolderMetadataList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let documents =
+        field_map json__ "Documents" DocumentMetadataList.of_json in
+      let folders = field_map json__ "Folders" FolderMetadataList.of_json in
       make ?marker ?documents ?folders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4751,7 +6308,7 @@ module GetResourcesRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "The Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "The Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       userId: IdType.t option
         [@ocaml.doc
           "The user ID for the resource collection. This is a required field for accessing the API operation using IAM credentials."];
@@ -4796,14 +6353,15 @@ module GetResourcesRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?limit ?collectionType ?userId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
       let collectionType =
-        field_map json "CollectionType" ResourceCollectionType.of_json in
-      let userId = field_map json "UserId" IdType.of_json in
+        field_map json__ "CollectionType" ResourceCollectionType.of_json in
+      let userId = field_map json__ "UserId" IdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?marker ?limit ?collectionType ?userId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4920,10 +6478,10 @@ module GetFolderResponse =
         (Option.map ~f:FolderMetadata.of_xml) (Xml.child xml_arg0 "Metadata") in
       make ?customMetadata ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customMetadata =
-        field_map json "CustomMetadata" CustomMetadataMap.of_json in
-      let metadata = field_map json "Metadata" FolderMetadata.of_json in
+        field_map json__ "CustomMetadata" CustomMetadataMap.of_json in
+      let metadata = field_map json__ "Metadata" FolderMetadata.of_json in
       make ?customMetadata ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the metadata of the specified folder."]
@@ -4933,7 +6491,7 @@ module GetFolderRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       folderId: ResourceIdType.t [@ocaml.doc "The ID of the folder."];
       includeCustomMetadata: BooleanType.t option
         [@ocaml.doc
@@ -4964,12 +6522,13 @@ module GetFolderRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?includeCustomMetadata ~folderId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeCustomMetadata =
-        field_map json "IncludeCustomMetadata" BooleanType.of_json in
-      let folderId = field_map_exn json "FolderId" ResourceIdType.of_json in
+        field_map json__ "IncludeCustomMetadata" BooleanType.of_json in
+      let folderId = field_map_exn json__ "FolderId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?includeCustomMetadata ~folderId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the metadata of the specified folder."]
@@ -5058,8 +6617,9 @@ module GetFolderPathResponse =
         (Option.map ~f:ResourcePath.of_xml) (Xml.child xml_arg0 "Path") in
       make ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map json "Path" ResourcePath.of_json in make ?path ()
+    let of_json json__ =
+      let path = field_map json__ "Path" ResourcePath.of_json in
+      make ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the path information (the hierarchy from the root folder) for the specified folder. By default, Amazon WorkDocs returns a maximum of 100 levels upwards from the requested folder and only includes the IDs of the parent folders in the path. You can limit the maximum number of levels. You can also request the parent folder names."]
@@ -5069,7 +6629,7 @@ module GetFolderPathRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       folderId: IdType.t [@ocaml.doc "The ID of the folder."];
       limit: LimitType.t option
         [@ocaml.doc
@@ -5111,13 +6671,14 @@ module GetFolderPathRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?fields ?limit ~folderId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let fields = field_map json "Fields" FieldNamesType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
-      let folderId = field_map_exn json "FolderId" IdType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let fields = field_map json__ "Fields" FieldNamesType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
+      let folderId = field_map_exn json__ "FolderId" IdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?marker ?fields ?limit ~folderId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5236,11 +6797,11 @@ module GetDocumentVersionResponse =
           (Xml.child xml_arg0 "Metadata") in
       make ?customMetadata ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customMetadata =
-        field_map json "CustomMetadata" CustomMetadataMap.of_json in
+        field_map json__ "CustomMetadata" CustomMetadataMap.of_json in
       let metadata =
-        field_map json "Metadata" DocumentVersionMetadata.of_json in
+        field_map json__ "Metadata" DocumentVersionMetadata.of_json in
       make ?customMetadata ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves version metadata for the specified document."]
@@ -5250,7 +6811,7 @@ module GetDocumentVersionRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."];
       versionId: DocumentVersionIdType.t
         [@ocaml.doc "The version ID of the document."];
@@ -5303,15 +6864,17 @@ module GetDocumentVersionRequest =
       make ?includeCustomMetadata ?fields ~versionId ~documentId
         ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeCustomMetadata =
-        field_map json "IncludeCustomMetadata" BooleanType.of_json in
-      let fields = field_map json "Fields" FieldNamesType.of_json in
+        field_map json__ "IncludeCustomMetadata" BooleanType.of_json in
+      let fields = field_map json__ "Fields" FieldNamesType.of_json in
       let versionId =
-        field_map_exn json "VersionId" DocumentVersionIdType.of_json in
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+        field_map_exn json__ "VersionId" DocumentVersionIdType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?includeCustomMetadata ?fields ~versionId ~documentId
         ?authenticationToken ()
     let to_json v = composed_to_json to_value v
@@ -5429,10 +6992,10 @@ module GetDocumentResponse =
           (Xml.child xml_arg0 "Metadata") in
       make ?customMetadata ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customMetadata =
-        field_map json "CustomMetadata" CustomMetadataMap.of_json in
-      let metadata = field_map json "Metadata" DocumentMetadata.of_json in
+        field_map json__ "CustomMetadata" CustomMetadataMap.of_json in
+      let metadata = field_map json__ "Metadata" DocumentMetadata.of_json in
       make ?customMetadata ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves details of a document."]
@@ -5442,7 +7005,7 @@ module GetDocumentRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."];
       includeCustomMetadata: BooleanType.t option
         [@ocaml.doc
@@ -5474,12 +7037,14 @@ module GetDocumentRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?includeCustomMetadata ~documentId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeCustomMetadata =
-        field_map json "IncludeCustomMetadata" BooleanType.of_json in
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+        field_map json__ "IncludeCustomMetadata" BooleanType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?includeCustomMetadata ~documentId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves details of a document."]
@@ -5568,8 +7133,9 @@ module GetDocumentPathResponse =
         (Option.map ~f:ResourcePath.of_xml) (Xml.child xml_arg0 "Path") in
       make ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map json "Path" ResourcePath.of_json in make ?path ()
+    let of_json json__ =
+      let path = field_map json__ "Path" ResourcePath.of_json in
+      make ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the path information (the hierarchy from the root folder) for the requested document. By default, Amazon WorkDocs returns a maximum of 100 levels upwards from the requested document and only includes the IDs of the parent folders in the path. You can limit the maximum number of levels. You can also request the names of the parent folders."]
@@ -5579,7 +7145,7 @@ module GetDocumentPathRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: IdType.t [@ocaml.doc "The ID of the document."];
       limit: LimitType.t option
         [@ocaml.doc
@@ -5621,13 +7187,14 @@ module GetDocumentPathRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?fields ?limit ~documentId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let fields = field_map json "Fields" FieldNamesType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
-      let documentId = field_map_exn json "DocumentId" IdType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let fields = field_map json__ "Fields" FieldNamesType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
+      let documentId = field_map_exn json__ "DocumentId" IdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?marker ?fields ?limit ~documentId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5715,8 +7282,8 @@ module GetCurrentUserResponse =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map json "User" User.of_json in make ?user ()
+    let of_json json__ =
+      let user = field_map json__ "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves details of the current user for whom the authentication token was generated. This is not a valid action for SigV4 (administrative API) clients. This action requires an authentication token. To get an authentication token, register an application with Amazon WorkDocs. For more information, see Authentication and Access Control for User Applications in the Amazon WorkDocs Developer Guide."]
@@ -5747,9 +7314,9 @@ module GetCurrentUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Authentication") in
       make ~authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationToken =
-        field_map_exn json "AuthenticationToken"
+        field_map_exn json__ "AuthenticationToken"
           AuthenticationHeaderType.of_json in
       make ~authenticationToken ()
     let to_json v = composed_to_json to_value v
@@ -5877,11 +7444,11 @@ module DescribeUsersResponse =
           (Xml.child xml_arg0 "Users") in
       make ?marker ?totalNumberOfUsers ?users ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
       let totalNumberOfUsers =
-        field_map json "TotalNumberOfUsers" SizeType.of_json in
-      let users = field_map json "Users" OrganizationUserList.of_json in
+        field_map json__ "TotalNumberOfUsers" SizeType.of_json in
+      let users = field_map json__ "Users" OrganizationUserList.of_json in
       make ?marker ?totalNumberOfUsers ?users ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5892,12 +7459,13 @@ module DescribeUsersRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       organizationId: IdType.t option
         [@ocaml.doc "The ID of the organization."];
       userIds: UserIdsType.t option [@ocaml.doc "The IDs of the users."];
       query: SearchQueryType.t option
-        [@ocaml.doc "A query to filter users by user name."];
+        [@ocaml.doc
+          "A query to filter users by user name. Remember the following about the Userids and Query parameters: If you don't use either parameter, the API returns a paginated list of all users on the site. If you use both parameters, the API ignores the Query parameter. The Userid parameter only returns user names that match a corresponding user ID. The Query parameter runs a \"prefix\" search for users by the GivenName, SurName, or UserName fields included in a CreateUser API call. For example, querying on Ma returns M\195\161rcia Oliveira, Mar\195\173a Garc\195\173a, and Mateo Jackson. If you use multiple characters, the API only returns data that matches all characters. For example, querying on Ma J only returns Mateo Jackson."];
       include_: UserFilterType.t option
         [@ocaml.doc
           "The state of the users. Specify \"ALL\" to include inactive users."];
@@ -5974,18 +7542,19 @@ module DescribeUsersRequest =
       make ?fields ?limit ?marker ?sort ?order ?include_ ?query ?userIds
         ?organizationId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fields = field_map json "Fields" FieldNamesType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let sort = field_map json "Sort" UserSortType.of_json in
-      let order = field_map json "Order" OrderType.of_json in
-      let include_ = field_map json "Include" UserFilterType.of_json in
-      let query = field_map json "Query" SearchQueryType.of_json in
-      let userIds = field_map json "UserIds" UserIdsType.of_json in
-      let organizationId = field_map json "OrganizationId" IdType.of_json in
+    let of_json json__ =
+      let fields = field_map json__ "Fields" FieldNamesType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let sort = field_map json__ "Sort" UserSortType.of_json in
+      let order = field_map json__ "Order" OrderType.of_json in
+      let include_ = field_map json__ "Include" UserFilterType.of_json in
+      let query = field_map json__ "Query" SearchQueryType.of_json in
+      let userIds = field_map json__ "UserIds" UserIdsType.of_json in
+      let organizationId = field_map json__ "OrganizationId" IdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?fields ?limit ?marker ?sort ?order ?include_ ?query ?userIds
         ?organizationId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
@@ -6083,9 +7652,9 @@ module DescribeRootFoldersResponse =
           (Xml.child xml_arg0 "Folders") in
       make ?marker ?folders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let folders = field_map json "Folders" FolderMetadataList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let folders = field_map json__ "Folders" FolderMetadataList.of_json in
       make ?marker ?folders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6123,11 +7692,11 @@ module DescribeRootFoldersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Authentication") in
       make ?marker ?limit ~authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
       let authenticationToken =
-        field_map_exn json "AuthenticationToken"
+        field_map_exn json__ "AuthenticationToken"
           AuthenticationHeaderType.of_json in
       make ?marker ?limit ~authenticationToken ()
     let to_json v = composed_to_json to_value v
@@ -6143,6 +7712,7 @@ module DescribeResourcePermissionsResponse =
           "The marker to use when requesting the next set of results. If there are no additional results, the string is empty."]}
     type nonrec error =
       [ `FailedDependencyException of FailedDependencyException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `UnauthorizedOperationException of UnauthorizedOperationException.t 
       | `UnauthorizedResourceAccessException of
@@ -6153,6 +7723,8 @@ module DescribeResourcePermissionsResponse =
       match name with
       | "FailedDependencyException" ->
           `FailedDependencyException (FailedDependencyException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
@@ -6169,6 +7741,8 @@ module DescribeResourcePermissionsResponse =
       match name with
       | "FailedDependencyException" ->
           `FailedDependencyException (FailedDependencyException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
@@ -6186,6 +7760,10 @@ module DescribeResourcePermissionsResponse =
           `Assoc
             [("error", (`String "FailedDependencyException"));
             ("details", (FailedDependencyException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
@@ -6216,9 +7794,9 @@ module DescribeResourcePermissionsResponse =
           (Xml.child xml_arg0 "Principals") in
       make ?marker ?principals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let principals = field_map json "Principals" PrincipalList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let principals = field_map json__ "Principals" PrincipalList.of_json in
       make ?marker ?principals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the permissions of a specified resource."]
@@ -6228,7 +7806,7 @@ module DescribeResourcePermissionsRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       resourceId: ResourceIdType.t [@ocaml.doc "The ID of the resource."];
       principalId: IdType.t option
         [@ocaml.doc "The ID of the principal to filter permissions by."];
@@ -6271,13 +7849,15 @@ module DescribeResourcePermissionsRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?limit ?principalId ~resourceId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
-      let principalId = field_map json "PrincipalId" IdType.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceIdType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
+      let principalId = field_map json__ "PrincipalId" IdType.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?marker ?limit ?principalId ~resourceId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the permissions of a specified resource."]
@@ -6356,10 +7936,10 @@ module DescribeNotificationSubscriptionsResponse =
           (Xml.child xml_arg0 "Subscriptions") in
       make ?marker ?subscriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
       let subscriptions =
-        field_map json "Subscriptions" SubscriptionList.of_json in
+        field_map json__ "Subscriptions" SubscriptionList.of_json in
       make ?marker ?subscriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the specified notification subscriptions."]
@@ -6393,10 +7973,11 @@ module DescribeNotificationSubscriptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ?limit ?marker ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitType.of_json in
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let organizationId = field_map_exn json "OrganizationId" IdType.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitType.of_json in
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" IdType.of_json in
       make ?limit ?marker ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the specified notification subscriptions."]
@@ -6483,9 +8064,9 @@ module DescribeGroupsResponse =
           (Xml.child xml_arg0 "Groups") in
       make ?marker ?groups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let groups = field_map json "Groups" GroupMetadataList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let groups = field_map json__ "Groups" GroupMetadataList.of_json in
       make ?marker ?groups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6496,7 +8077,7 @@ module DescribeGroupsRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       searchQuery: SearchQueryType.t
         [@ocaml.doc "A query to describe groups by group name."];
       organizationId: IdType.t option
@@ -6547,14 +8128,15 @@ module DescribeGroupsRequest =
       make ?limit ?marker ?organizationId ~searchQuery ?authenticationToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntegerType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let organizationId = field_map json "OrganizationId" IdType.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntegerType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let organizationId = field_map json__ "OrganizationId" IdType.of_json in
       let searchQuery =
-        field_map_exn json "SearchQuery" SearchQueryType.of_json in
+        field_map_exn json__ "SearchQuery" SearchQueryType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?limit ?marker ?organizationId ~searchQuery ?authenticationToken
         ()
     let to_json v = composed_to_json to_value v
@@ -6669,10 +8251,11 @@ module DescribeFolderContentsResponse =
           (Xml.child xml_arg0 "Folders") in
       make ?marker ?documents ?folders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let documents = field_map json "Documents" DocumentMetadataList.of_json in
-      let folders = field_map json "Folders" FolderMetadataList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let documents =
+        field_map json__ "Documents" DocumentMetadataList.of_json in
+      let folders = field_map json__ "Folders" FolderMetadataList.of_json in
       make ?marker ?documents ?folders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6683,7 +8266,7 @@ module DescribeFolderContentsRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       folderId: ResourceIdType.t [@ocaml.doc "The ID of the folder."];
       sort: ResourceSortType.t option [@ocaml.doc "The sorting criteria."];
       order: OrderType.t option
@@ -6752,16 +8335,17 @@ module DescribeFolderContentsRequest =
       make ?include_ ?type_ ?marker ?limit ?order ?sort ~folderId
         ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let include_ = field_map json "Include" FieldNamesType.of_json in
-      let type_ = field_map json "Type" FolderContentType.of_json in
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
-      let order = field_map json "Order" OrderType.of_json in
-      let sort = field_map json "Sort" ResourceSortType.of_json in
-      let folderId = field_map_exn json "FolderId" ResourceIdType.of_json in
+    let of_json json__ =
+      let include_ = field_map json__ "Include" FieldNamesType.of_json in
+      let type_ = field_map json__ "Type" FolderContentType.of_json in
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
+      let order = field_map json__ "Order" OrderType.of_json in
+      let sort = field_map json__ "Sort" ResourceSortType.of_json in
+      let folderId = field_map_exn json__ "FolderId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?include_ ?type_ ?marker ?limit ?order ?sort ~folderId
         ?authenticationToken ()
     let to_json v = composed_to_json to_value v
@@ -6780,6 +8364,7 @@ module DescribeDocumentVersionsResponse =
       [ `EntityNotExistsException of EntityNotExistsException.t 
       | `FailedDependencyException of FailedDependencyException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
+      | `InvalidPasswordException of InvalidPasswordException.t 
       | `ProhibitedStateException of ProhibitedStateException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `UnauthorizedOperationException of UnauthorizedOperationException.t 
@@ -6796,6 +8381,8 @@ module DescribeDocumentVersionsResponse =
           `FailedDependencyException (FailedDependencyException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "InvalidPasswordException" ->
+          `InvalidPasswordException (InvalidPasswordException.of_json json)
       | "ProhibitedStateException" ->
           `ProhibitedStateException (ProhibitedStateException.of_json json)
       | "ServiceUnavailableException" ->
@@ -6818,6 +8405,8 @@ module DescribeDocumentVersionsResponse =
           `FailedDependencyException (FailedDependencyException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "InvalidPasswordException" ->
+          `InvalidPasswordException (InvalidPasswordException.of_xml xml)
       | "ProhibitedStateException" ->
           `ProhibitedStateException (ProhibitedStateException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -6845,6 +8434,10 @@ module DescribeDocumentVersionsResponse =
           `Assoc
             [("error", (`String "InvalidArgumentException"));
             ("details", (InvalidArgumentException.to_json e))]
+      | `InvalidPasswordException e ->
+          `Assoc
+            [("error", (`String "InvalidPasswordException"));
+            ("details", (InvalidPasswordException.to_json e))]
       | `ProhibitedStateException e ->
           `Assoc
             [("error", (`String "ProhibitedStateException"));
@@ -6881,10 +8474,11 @@ module DescribeDocumentVersionsResponse =
           (Xml.child xml_arg0 "DocumentVersions") in
       make ?marker ?documentVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" PageMarkerType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
       let documentVersions =
-        field_map json "DocumentVersions" DocumentVersionMetadataList.of_json in
+        field_map json__ "DocumentVersions"
+          DocumentVersionMetadataList.of_json in
       make ?marker ?documentVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6895,7 +8489,7 @@ module DescribeDocumentVersionsRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."];
       marker: PageMarkerType.t option
         [@ocaml.doc
@@ -6954,14 +8548,16 @@ module DescribeDocumentVersionsRequest =
       make ?fields ?include_ ?limit ?marker ~documentId ?authenticationToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fields = field_map json "Fields" FieldNamesType.of_json in
-      let include_ = field_map json "Include" FieldNamesType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
-      let marker = field_map json "Marker" PageMarkerType.of_json in
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+    let of_json json__ =
+      let fields = field_map json__ "Fields" FieldNamesType.of_json in
+      let include_ = field_map json__ "Include" FieldNamesType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
+      let marker = field_map json__ "Marker" PageMarkerType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?fields ?include_ ?limit ?marker ~documentId ?authenticationToken
         ()
     let to_json v = composed_to_json to_value v
@@ -7069,9 +8665,9 @@ module DescribeCommentsResponse =
         (Option.map ~f:CommentList.of_xml) (Xml.child xml_arg0 "Comments") in
       make ?marker ?comments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let comments = field_map json "Comments" CommentList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let comments = field_map json__ "Comments" CommentList.of_json in
       make ?marker ?comments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7082,7 +8678,7 @@ module DescribeCommentsRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."];
       versionId: DocumentVersionIdType.t
         [@ocaml.doc "The ID of the document version."];
@@ -7125,14 +8721,16 @@ module DescribeCommentsRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?limit ~versionId ~documentId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
       let versionId =
-        field_map_exn json "VersionId" DocumentVersionIdType.of_json in
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+        field_map_exn json__ "VersionId" DocumentVersionIdType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?marker ?limit ~versionId ~documentId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7144,7 +8742,7 @@ module DescribeActivitiesResponse =
       userActivities: UserActivities.t option
         [@ocaml.doc
           "The list of activities for the specified user and time period."];
-      marker: MarkerType.t option
+      marker: SearchMarkerType.t option
         [@ocaml.doc "The marker for the next set of results."]}
     type nonrec error =
       [ `FailedDependencyException of FailedDependencyException.t 
@@ -7222,20 +8820,20 @@ module DescribeActivitiesResponse =
       structure_to_value
         [("UserActivities",
            (Option.map x.userActivities ~f:UserActivities.to_value));
-        ("Marker", (Option.map x.marker ~f:MarkerType.to_value))]
+        ("Marker", (Option.map x.marker ~f:SearchMarkerType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let marker =
-        (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
+        (Option.map ~f:SearchMarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
       let userActivities =
         (Option.map ~f:UserActivities.of_xml)
           (Xml.child xml_arg0 "UserActivities") in
       make ?marker ?userActivities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" SearchMarkerType.of_json in
       let userActivities =
-        field_map json "UserActivities" UserActivities.of_json in
+        field_map json__ "UserActivities" UserActivities.of_json in
       make ?marker ?userActivities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7246,7 +8844,7 @@ module DescribeActivitiesRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       startTime: TimestampType.t option
         [@ocaml.doc
           "The timestamp that determines the starting time of the activities. The response includes the activities performed after the specified timestamp."];
@@ -7270,7 +8868,7 @@ module DescribeActivitiesRequest =
           "Includes indirect activities. An indirect activity results from a direct activity performed on a parent resource. For example, sharing a parent folder (the direct activity) shares all of the subfolders and documents within the parent folder (the indirect activity)."];
       limit: LimitType.t option
         [@ocaml.doc "The maximum number of items to return."];
-      marker: MarkerType.t option
+      marker: SearchMarkerType.t option
         [@ocaml.doc "The marker for the next set of results."]}
     let make ?authenticationToken =
       fun ?startTime ->
@@ -7310,11 +8908,11 @@ module DescribeActivitiesRequest =
         ("includeIndirectActivities",
           (Option.map x.includeIndirectActivities ~f:BooleanType.to_value));
         ("limit", (Option.map x.limit ~f:LimitType.to_value));
-        ("marker", (Option.map x.marker ~f:MarkerType.to_value))]
+        ("marker", (Option.map x.marker ~f:SearchMarkerType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let marker =
-        (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "marker") in
+        (Option.map ~f:SearchMarkerType.of_xml) (Xml.child xml_arg0 "marker") in
       let limit =
         (Option.map ~f:LimitType.of_xml) (Xml.child xml_arg0 "limit") in
       let includeIndirectActivities =
@@ -7340,20 +8938,21 @@ module DescribeActivitiesRequest =
         ?activityTypes ?organizationId ?endTime ?startTime
         ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let limit = field_map json "Limit" LimitType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" SearchMarkerType.of_json in
+      let limit = field_map json__ "Limit" LimitType.of_json in
       let includeIndirectActivities =
-        field_map json "IncludeIndirectActivities" BooleanType.of_json in
-      let userId = field_map json "UserId" IdType.of_json in
-      let resourceId = field_map json "ResourceId" IdType.of_json in
+        field_map json__ "IncludeIndirectActivities" BooleanType.of_json in
+      let userId = field_map json__ "UserId" IdType.of_json in
+      let resourceId = field_map json__ "ResourceId" IdType.of_json in
       let activityTypes =
-        field_map json "ActivityTypes" ActivityNamesFilterType.of_json in
-      let organizationId = field_map json "OrganizationId" IdType.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map json "StartTime" TimestampType.of_json in
+        field_map json__ "ActivityTypes" ActivityNamesFilterType.of_json in
+      let organizationId = field_map json__ "OrganizationId" IdType.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?marker ?limit ?includeIndirectActivities ?userId ?resourceId
         ?activityTypes ?organizationId ?endTime ?startTime
         ?authenticationToken ()
@@ -7366,7 +8965,7 @@ module DeleteUserRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Do not set this field when using administrative API actions, as in accessing the API using AWS credentials."];
+          "Amazon WorkDocs authentication token. Do not set this field when using administrative API actions, as in accessing the API using Amazon Web Services credentials."];
       userId: IdType.t [@ocaml.doc "The ID of the user."]}
     let context_ = "DeleteUserRequest"
     let make ?authenticationToken =
@@ -7386,14 +8985,15 @@ module DeleteUserRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ~userId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" IdType.of_json in
+    let of_json json__ =
+      let userId = field_map_exn json__ "UserId" IdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ~userId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified user from a Simple AD or Microsoft AD directory."]
+       "Deletes the specified user from a Simple AD or Microsoft AD directory. Deleting a user immediately and permanently deletes all content in that user's folder structure. Site retention policies do NOT apply to this type of deletion."]
 module DeleteNotificationSubscriptionRequest =
   struct
     type nonrec t =
@@ -7417,9 +9017,11 @@ module DeleteNotificationSubscriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionId") in
       make ~organizationId ~subscriptionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let organizationId = field_map_exn json "OrganizationId" IdType.of_json in
-      let subscriptionId = field_map_exn json "SubscriptionId" IdType.of_json in
+    let of_json json__ =
+      let organizationId =
+        field_map_exn json__ "OrganizationId" IdType.of_json in
+      let subscriptionId =
+        field_map_exn json__ "SubscriptionId" IdType.of_json in
       make ~organizationId ~subscriptionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7430,6 +9032,7 @@ module DeleteLabelsResponse =
     type nonrec error =
       [ `EntityNotExistsException of EntityNotExistsException.t 
       | `FailedDependencyException of FailedDependencyException.t 
+      | `ProhibitedStateException of ProhibitedStateException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `UnauthorizedOperationException of UnauthorizedOperationException.t 
       | `UnauthorizedResourceAccessException of
@@ -7442,6 +9045,8 @@ module DeleteLabelsResponse =
           `EntityNotExistsException (EntityNotExistsException.of_json json)
       | "FailedDependencyException" ->
           `FailedDependencyException (FailedDependencyException.of_json json)
+      | "ProhibitedStateException" ->
+          `ProhibitedStateException (ProhibitedStateException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
@@ -7460,6 +9065,8 @@ module DeleteLabelsResponse =
           `EntityNotExistsException (EntityNotExistsException.of_xml xml)
       | "FailedDependencyException" ->
           `FailedDependencyException (FailedDependencyException.of_xml xml)
+      | "ProhibitedStateException" ->
+          `ProhibitedStateException (ProhibitedStateException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
@@ -7481,6 +9088,10 @@ module DeleteLabelsResponse =
           `Assoc
             [("error", (`String "FailedDependencyException"));
             ("details", (FailedDependencyException.to_json e))]
+      | `ProhibitedStateException e ->
+          `Assoc
+            [("error", (`String "ProhibitedStateException"));
+            ("details", (ProhibitedStateException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
@@ -7513,7 +9124,7 @@ module DeleteLabelsRequest =
       resourceId: ResourceIdType.t [@ocaml.doc "The ID of the resource."];
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       labels: SharedLabels.t option
         [@ocaml.doc "List of labels to delete from the resource."];
       deleteAll: BooleanType.t option
@@ -7547,12 +9158,14 @@ module DeleteLabelsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?deleteAll ?labels ?authenticationToken ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deleteAll = field_map json "DeleteAll" BooleanType.of_json in
-      let labels = field_map json "Labels" SharedLabels.of_json in
+    let of_json json__ =
+      let deleteAll = field_map json__ "DeleteAll" BooleanType.of_json in
+      let labels = field_map json__ "Labels" SharedLabels.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceIdType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" ResourceIdType.of_json in
       make ?deleteAll ?labels ?authenticationToken ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified list of labels from a resource."]
@@ -7562,7 +9175,7 @@ module DeleteFolderRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       folderId: ResourceIdType.t [@ocaml.doc "The ID of the folder."]}
     let context_ = "DeleteFolderRequest"
     let make ?authenticationToken =
@@ -7583,10 +9196,11 @@ module DeleteFolderRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ~folderId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let folderId = field_map_exn json "FolderId" ResourceIdType.of_json in
+    let of_json json__ =
+      let folderId = field_map_exn json__ "FolderId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ~folderId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7597,7 +9211,7 @@ module DeleteFolderContentsRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       folderId: ResourceIdType.t [@ocaml.doc "The ID of the folder."]}
     let context_ = "DeleteFolderContentsRequest"
     let make ?authenticationToken =
@@ -7618,20 +9232,88 @@ module DeleteFolderContentsRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ~folderId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let folderId = field_map_exn json "FolderId" ResourceIdType.of_json in
+    let of_json json__ =
+      let folderId = field_map_exn json__ "FolderId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ~folderId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the contents of the specified folder."]
+module DeleteDocumentVersionRequest =
+  struct
+    type nonrec t =
+      {
+      authenticationToken: AuthenticationHeaderType.t option
+        [@ocaml.doc
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
+      documentId: ResourceIdType.t
+        [@ocaml.doc
+          "The ID of the document associated with the version being deleted."];
+      versionId: DocumentVersionIdType.t
+        [@ocaml.doc "The ID of the version being deleted."];
+      deletePriorVersions: BooleanType.t
+        [@ocaml.doc
+          "Deletes all versions of a document prior to the current version."]}
+    let context_ = "DeleteDocumentVersionRequest"
+    let make ?authenticationToken =
+      fun ~documentId ->
+        fun ~versionId ->
+          fun ~deletePriorVersions ->
+            fun () ->
+              {
+                authenticationToken;
+                documentId;
+                versionId;
+                deletePriorVersions
+              }
+    let to_value x =
+      structure_to_value
+        [("Authentication",
+           (Option.map x.authenticationToken
+              ~f:AuthenticationHeaderType.to_value));
+        ("DocumentId", (Some (ResourceIdType.to_value x.documentId)));
+        ("VersionId", (Some (DocumentVersionIdType.to_value x.versionId)));
+        ("deletePriorVersions",
+          (Some (BooleanType.to_value x.deletePriorVersions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deletePriorVersions =
+        BooleanType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deletePriorVersions") in
+      let versionId =
+        DocumentVersionIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VersionId") in
+      let documentId =
+        ResourceIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DocumentId") in
+      let authenticationToken =
+        (Option.map ~f:AuthenticationHeaderType.of_xml)
+          (Xml.child xml_arg0 "Authentication") in
+      make ~deletePriorVersions ~versionId ~documentId ?authenticationToken
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deletePriorVersions =
+        field_map_exn json__ "DeletePriorVersions" BooleanType.of_json in
+      let versionId =
+        field_map_exn json__ "VersionId" DocumentVersionIdType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
+      let authenticationToken =
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
+      make ~deletePriorVersions ~versionId ~documentId ?authenticationToken
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a specific version of a document."]
 module DeleteDocumentRequest =
   struct
     type nonrec t =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."]}
     let context_ = "DeleteDocumentRequest"
     let make ?authenticationToken =
@@ -7652,10 +9334,12 @@ module DeleteDocumentRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ~documentId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+    let of_json json__ =
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ~documentId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7757,7 +9441,7 @@ module DeleteCustomMetadataRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       resourceId: ResourceIdType.t
         [@ocaml.doc "The ID of the resource, either a document or folder."];
       versionId: DocumentVersionIdType.t option
@@ -7805,14 +9489,16 @@ module DeleteCustomMetadataRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?deleteAll ?keys ?versionId ~resourceId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deleteAll = field_map json "DeleteAll" BooleanType.of_json in
-      let keys = field_map json "Keys" CustomMetadataKeyList.of_json in
+    let of_json json__ =
+      let deleteAll = field_map json__ "DeleteAll" BooleanType.of_json in
+      let keys = field_map json__ "Keys" CustomMetadataKeyList.of_json in
       let versionId =
-        field_map json "VersionId" DocumentVersionIdType.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceIdType.of_json in
+        field_map json__ "VersionId" DocumentVersionIdType.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?deleteAll ?keys ?versionId ~resourceId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes custom metadata from the specified resource."]
@@ -7822,7 +9508,7 @@ module DeleteCommentRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."];
       versionId: DocumentVersionIdType.t
         [@ocaml.doc "The ID of the document version."];
@@ -7858,13 +9544,15 @@ module DeleteCommentRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ~commentId ~versionId ~documentId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let commentId = field_map_exn json "CommentId" CommentIdType.of_json in
+    let of_json json__ =
+      let commentId = field_map_exn json__ "CommentId" CommentIdType.of_json in
       let versionId =
-        field_map_exn json "VersionId" DocumentVersionIdType.of_json in
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+        field_map_exn json__ "VersionId" DocumentVersionIdType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ~commentId ~versionId ~documentId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified comment from the document version."]
@@ -7875,7 +9563,7 @@ module DeactivateUserRequest =
       userId: IdType.t [@ocaml.doc "The ID of the user."];
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."]}
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."]}
     let context_ = "DeactivateUserRequest"
     let make ?authenticationToken =
       fun ~userId -> fun () -> { authenticationToken; userId }
@@ -7894,10 +9582,11 @@ module DeactivateUserRequest =
         IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ?authenticationToken ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
-      let userId = field_map_exn json "UserId" IdType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
+      let userId = field_map_exn json__ "UserId" IdType.of_json in
       make ?authenticationToken ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7987,8 +9676,8 @@ module CreateUserResponse =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map json "User" User.of_json in make ?user ()
+    let of_json json__ =
+      let user = field_map json__ "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a user in a Simple AD or Microsoft AD directory. The status of a newly created user is \"ACTIVE\". New users can access Amazon WorkDocs."]
@@ -8012,7 +9701,7 @@ module CreateUserRequest =
         [@ocaml.doc "The amount of storage for the user."];
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."]}
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."]}
     let context_ = "CreateUserRequest"
     let make ?organizationId =
       fun ?emailAddress ->
@@ -8081,20 +9770,22 @@ module CreateUserRequest =
       make ?authenticationToken ?storageRule ?timeZoneId ~password ~surname
         ~givenName ?emailAddress ~username ?organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
-      let storageRule = field_map json "StorageRule" StorageRuleType.of_json in
-      let timeZoneId = field_map json "TimeZoneId" TimeZoneIdType.of_json in
-      let password = field_map_exn json "Password" PasswordType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
+      let storageRule =
+        field_map json__ "StorageRule" StorageRuleType.of_json in
+      let timeZoneId = field_map json__ "TimeZoneId" TimeZoneIdType.of_json in
+      let password = field_map_exn json__ "Password" PasswordType.of_json in
       let surname =
-        field_map_exn json "Surname" UserAttributeValueType.of_json in
+        field_map_exn json__ "Surname" UserAttributeValueType.of_json in
       let givenName =
-        field_map_exn json "GivenName" UserAttributeValueType.of_json in
+        field_map_exn json__ "GivenName" UserAttributeValueType.of_json in
       let emailAddress =
-        field_map json "EmailAddress" EmailAddressType.of_json in
-      let username = field_map_exn json "Username" UsernameType.of_json in
-      let organizationId = field_map json "OrganizationId" IdType.of_json in
+        field_map json__ "EmailAddress" EmailAddressType.of_json in
+      let username = field_map_exn json__ "Username" UsernameType.of_json in
+      let organizationId = field_map json__ "OrganizationId" IdType.of_json in
       make ?authenticationToken ?storageRule ?timeZoneId ~password ~surname
         ~givenName ?emailAddress ~username ?organizationId ()
     let to_json v = composed_to_json to_value v
@@ -8106,7 +9797,8 @@ module CreateNotificationSubscriptionResponse =
       {
       subscription: Subscription.t option [@ocaml.doc "The subscription."]}
     type nonrec error =
-      [ `ServiceUnavailableException of ServiceUnavailableException.t 
+      [ `InvalidArgumentException of InvalidArgumentException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManySubscriptionsException of TooManySubscriptionsException.t 
       | `UnauthorizedResourceAccessException of
           UnauthorizedResourceAccessException.t 
@@ -8114,6 +9806,8 @@ module CreateNotificationSubscriptionResponse =
     let make ?subscription = fun () -> { subscription }
     let error_of_json name json =
       match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
@@ -8128,6 +9822,8 @@ module CreateNotificationSubscriptionResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
@@ -8141,6 +9837,10 @@ module CreateNotificationSubscriptionResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
@@ -8169,12 +9869,12 @@ module CreateNotificationSubscriptionResponse =
           (Xml.child xml_arg0 "Subscription") in
       make ?subscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscription = field_map json "Subscription" Subscription.of_json in
+    let of_json json__ =
+      let subscription = field_map json__ "Subscription" Subscription.of_json in
       make ?subscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configure Amazon WorkDocs to use Amazon SNS notifications. The endpoint receives a confirmation message, and must confirm the subscription. For more information, see Subscribe to Notifications in the Amazon WorkDocs Developer Guide."]
+       "Configure Amazon WorkDocs to use Amazon SNS notifications. The endpoint receives a confirmation message, and must confirm the subscription. For more information, see Setting up notifications for an IAM user or role in the Amazon WorkDocs Developer Guide."]
 module CreateNotificationSubscriptionRequest =
   struct
     type nonrec t =
@@ -8218,18 +9918,19 @@ module CreateNotificationSubscriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~subscriptionType ~protocol ~endpoint ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionType =
-        field_map_exn json "SubscriptionType" SubscriptionType.of_json in
+        field_map_exn json__ "SubscriptionType" SubscriptionType.of_json in
       let protocol =
-        field_map_exn json "Protocol" SubscriptionProtocolType.of_json in
+        field_map_exn json__ "Protocol" SubscriptionProtocolType.of_json in
       let endpoint =
-        field_map_exn json "Endpoint" SubscriptionEndPointType.of_json in
-      let organizationId = field_map_exn json "OrganizationId" IdType.of_json in
+        field_map_exn json__ "Endpoint" SubscriptionEndPointType.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" IdType.of_json in
       make ~subscriptionType ~protocol ~endpoint ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configure Amazon WorkDocs to use Amazon SNS notifications. The endpoint receives a confirmation message, and must confirm the subscription. For more information, see Subscribe to Notifications in the Amazon WorkDocs Developer Guide."]
+       "Configure Amazon WorkDocs to use Amazon SNS notifications. The endpoint receives a confirmation message, and must confirm the subscription. For more information, see Setting up notifications for an IAM user or role in the Amazon WorkDocs Developer Guide."]
 module CreateLabelsResponse =
   struct
     type nonrec t = unit
@@ -8331,7 +10032,7 @@ module CreateLabelsRequest =
         [@ocaml.doc "List of labels to add to the resource."];
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."]}
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."]}
     let context_ = "CreateLabelsRequest"
     let make ?authenticationToken =
       fun ~resourceId ->
@@ -8356,11 +10057,13 @@ module CreateLabelsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?authenticationToken ~labels ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
-      let labels = field_map_exn json "Labels" SharedLabels.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceIdType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
+      let labels = field_map_exn json__ "Labels" SharedLabels.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" ResourceIdType.of_json in
       make ?authenticationToken ~labels ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8372,7 +10075,9 @@ module CreateFolderResponse =
       metadata: FolderMetadata.t option
         [@ocaml.doc "The metadata of the folder."]}
     type nonrec error =
-      [ `ConflictingOperationException of ConflictingOperationException.t 
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `ConflictingOperationException of ConflictingOperationException.t 
       | `EntityAlreadyExistsException of EntityAlreadyExistsException.t 
       | `EntityNotExistsException of EntityNotExistsException.t 
       | `FailedDependencyException of FailedDependencyException.t 
@@ -8386,6 +10091,9 @@ module CreateFolderResponse =
     let make ?metadata = fun () -> { metadata }
     let error_of_json name json =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
       | "ConflictingOperationException" ->
           `ConflictingOperationException
             (ConflictingOperationException.of_json json)
@@ -8414,6 +10122,9 @@ module CreateFolderResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
       | "ConflictingOperationException" ->
           `ConflictingOperationException
             (ConflictingOperationException.of_xml xml)
@@ -8441,6 +10152,10 @@ module CreateFolderResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
       | `ConflictingOperationException e ->
           `Assoc
             [("error", (`String "ConflictingOperationException"));
@@ -8491,8 +10206,8 @@ module CreateFolderResponse =
         (Option.map ~f:FolderMetadata.of_xml) (Xml.child xml_arg0 "Metadata") in
       make ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map json "Metadata" FolderMetadata.of_json in
+    let of_json json__ =
+      let metadata = field_map json__ "Metadata" FolderMetadata.of_json in
       make ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8503,7 +10218,7 @@ module CreateFolderRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       name: ResourceNameType.t option
         [@ocaml.doc "The name of the new folder."];
       parentFolderId: ResourceIdType.t
@@ -8532,12 +10247,13 @@ module CreateFolderRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ~parentFolderId ?name ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parentFolderId =
-        field_map_exn json "ParentFolderId" ResourceIdType.of_json in
-      let name = field_map json "Name" ResourceNameType.of_json in
+        field_map_exn json__ "ParentFolderId" ResourceIdType.of_json in
+      let name = field_map json__ "Name" ResourceNameType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ~parentFolderId ?name ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8653,7 +10369,7 @@ module CreateCustomMetadataRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       resourceId: ResourceIdType.t [@ocaml.doc "The ID of the resource."];
       versionId: DocumentVersionIdType.t option
         [@ocaml.doc
@@ -8693,14 +10409,16 @@ module CreateCustomMetadataRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ~customMetadata ?versionId ~resourceId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customMetadata =
-        field_map_exn json "CustomMetadata" CustomMetadataMap.of_json in
+        field_map_exn json__ "CustomMetadata" CustomMetadataMap.of_json in
       let versionId =
-        field_map json "VersionId" DocumentVersionIdType.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceIdType.of_json in
+        field_map json__ "VersionId" DocumentVersionIdType.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ~customMetadata ?versionId ~resourceId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8825,8 +10543,8 @@ module CreateCommentResponse =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "Comment") in
       make ?comment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "Comment" Comment.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "Comment" Comment.of_json in
       make ?comment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a new comment to the specified document version."]
@@ -8836,7 +10554,7 @@ module CreateCommentRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."];
       versionId: DocumentVersionIdType.t
         [@ocaml.doc "The ID of the document version."];
@@ -8912,43 +10630,25 @@ module CreateCommentRequest =
       make ?notifyCollaborators ?visibility ~text ?threadId ?parentId
         ~versionId ~documentId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notifyCollaborators =
-        field_map json "NotifyCollaborators" BooleanType.of_json in
+        field_map json__ "NotifyCollaborators" BooleanType.of_json in
       let visibility =
-        field_map json "Visibility" CommentVisibilityType.of_json in
-      let text = field_map_exn json "Text" CommentTextType.of_json in
-      let threadId = field_map json "ThreadId" CommentIdType.of_json in
-      let parentId = field_map json "ParentId" CommentIdType.of_json in
+        field_map json__ "Visibility" CommentVisibilityType.of_json in
+      let text = field_map_exn json__ "Text" CommentTextType.of_json in
+      let threadId = field_map json__ "ThreadId" CommentIdType.of_json in
+      let parentId = field_map json__ "ParentId" CommentIdType.of_json in
       let versionId =
-        field_map_exn json "VersionId" DocumentVersionIdType.of_json in
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+        field_map_exn json__ "VersionId" DocumentVersionIdType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?notifyCollaborators ?visibility ~text ?threadId ?parentId
         ~versionId ~documentId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a new comment to the specified document version."]
-module ConcurrentModificationException =
-  struct
-    type nonrec t = {
-      message: ErrorMessageType.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessageType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessageType.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessageType.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The resource hierarchy is changing."]
 module AddResourcePermissionsResponse =
   struct
     type nonrec t =
@@ -8957,6 +10657,7 @@ module AddResourcePermissionsResponse =
         [@ocaml.doc "The share results."]}
     type nonrec error =
       [ `FailedDependencyException of FailedDependencyException.t 
+      | `ProhibitedStateException of ProhibitedStateException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `UnauthorizedOperationException of UnauthorizedOperationException.t 
       | `UnauthorizedResourceAccessException of
@@ -8967,6 +10668,8 @@ module AddResourcePermissionsResponse =
       match name with
       | "FailedDependencyException" ->
           `FailedDependencyException (FailedDependencyException.of_json json)
+      | "ProhibitedStateException" ->
+          `ProhibitedStateException (ProhibitedStateException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
@@ -8983,6 +10686,8 @@ module AddResourcePermissionsResponse =
       match name with
       | "FailedDependencyException" ->
           `FailedDependencyException (FailedDependencyException.of_xml xml)
+      | "ProhibitedStateException" ->
+          `ProhibitedStateException (ProhibitedStateException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
@@ -9000,6 +10705,10 @@ module AddResourcePermissionsResponse =
           `Assoc
             [("error", (`String "FailedDependencyException"));
             ("details", (FailedDependencyException.to_json e))]
+      | `ProhibitedStateException e ->
+          `Assoc
+            [("error", (`String "ProhibitedStateException"));
+            ("details", (ProhibitedStateException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
@@ -9028,9 +10737,9 @@ module AddResourcePermissionsResponse =
           (Xml.child xml_arg0 "ShareResults") in
       make ?shareResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shareResults =
-        field_map json "ShareResults" ShareResultsList.of_json in
+        field_map json__ "ShareResults" ShareResultsList.of_json in
       make ?shareResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9041,7 +10750,7 @@ module AddResourcePermissionsRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       resourceId: ResourceIdType.t [@ocaml.doc "The ID of the resource."];
       principals: SharePrincipalList.t
         [@ocaml.doc
@@ -9086,14 +10795,16 @@ module AddResourcePermissionsRequest =
       make ?notificationOptions ~principals ~resourceId ?authenticationToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notificationOptions =
-        field_map json "NotificationOptions" NotificationOptions.of_json in
+        field_map json__ "NotificationOptions" NotificationOptions.of_json in
       let principals =
-        field_map_exn json "Principals" SharePrincipalList.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceIdType.of_json in
+        field_map_exn json__ "Principals" SharePrincipalList.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ?notificationOptions ~principals ~resourceId ?authenticationToken
         ()
     let to_json v = composed_to_json to_value v
@@ -9182,8 +10893,8 @@ module ActivateUserResponse =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map json "User" User.of_json in make ?user ()
+    let of_json json__ =
+      let user = field_map json__ "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Activates the specified user. Only active users can access Amazon WorkDocs."]
@@ -9194,7 +10905,7 @@ module ActivateUserRequest =
       userId: IdType.t [@ocaml.doc "The ID of the user."];
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."]}
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."]}
     let context_ = "ActivateUserRequest"
     let make ?authenticationToken =
       fun ~userId -> fun () -> { authenticationToken; userId }
@@ -9213,10 +10924,11 @@ module ActivateUserRequest =
         IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ?authenticationToken ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
-      let userId = field_map_exn json "UserId" IdType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
+      let userId = field_map_exn json__ "UserId" IdType.of_json in
       make ?authenticationToken ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9227,7 +10939,7 @@ module AbortDocumentVersionUploadRequest =
       {
       authenticationToken: AuthenticationHeaderType.t option
         [@ocaml.doc
-          "Amazon WorkDocs authentication token. Not required when using AWS administrator credentials to access the API."];
+          "Amazon WorkDocs authentication token. Not required when using Amazon Web Services administrator credentials to access the API."];
       documentId: ResourceIdType.t [@ocaml.doc "The ID of the document."];
       versionId: DocumentVersionIdType.t
         [@ocaml.doc "The ID of the version."]}
@@ -9256,12 +10968,14 @@ module AbortDocumentVersionUploadRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ~versionId ~documentId ?authenticationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionId =
-        field_map_exn json "VersionId" DocumentVersionIdType.of_json in
-      let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
+        field_map_exn json__ "VersionId" DocumentVersionIdType.of_json in
+      let documentId =
+        field_map_exn json__ "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
-        field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
+        field_map json__ "AuthenticationToken"
+          AuthenticationHeaderType.of_json in
       make ~versionId ~documentId ?authenticationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

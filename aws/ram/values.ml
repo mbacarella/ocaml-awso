@@ -83,6 +83,9 @@ module ResourceShareAssociationStatus =
       | FAILED 
       | DISASSOCIATING 
       | DISASSOCIATED 
+      | SUSPENDED 
+      | SUSPENDING 
+      | RESTORING 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -92,6 +95,9 @@ module ResourceShareAssociationStatus =
       | FAILED -> "FAILED"
       | DISASSOCIATING -> "DISASSOCIATING"
       | DISASSOCIATED -> "DISASSOCIATED"
+      | SUSPENDED -> "SUSPENDED"
+      | SUSPENDING -> "SUSPENDING"
+      | RESTORING -> "RESTORING"
       | Non_static_id s -> s
     let of_string =
       function
@@ -100,6 +106,9 @@ module ResourceShareAssociationStatus =
       | "FAILED" -> FAILED
       | "DISASSOCIATING" -> DISASSOCIATING
       | "DISASSOCIATED" -> DISASSOCIATED
+      | "SUSPENDED" -> SUSPENDED
+      | "SUSPENDING" -> SUSPENDING
+      | "RESTORING" -> RESTORING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -117,17 +126,20 @@ module ResourceShareAssociationType =
     type nonrec t =
       | PRINCIPAL 
       | RESOURCE 
+      | SOURCE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | PRINCIPAL -> "PRINCIPAL"
       | RESOURCE -> "RESOURCE"
+      | SOURCE -> "SOURCE"
       | Non_static_id s -> s
     let of_string =
       function
       | "PRINCIPAL" -> PRINCIPAL
       | "RESOURCE" -> RESOURCE
+      | "SOURCE" -> SOURCE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -175,9 +187,9 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" TagValue.of_json in
-      let key = field_map json "key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "value" TagValue.of_json in
+      let key = field_map json__ "key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure containing a tag. A tag is metadata that you can attach to your resources to help organize and categorize them. You can also use them to help you secure your resources. For more information, see Controlling access to Amazon Web Services resources using tags. For more information about tags, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference Guide."]
@@ -186,12 +198,12 @@ module ResourceShareAssociation =
     type nonrec t =
       {
       resourceShareArn: String_.t option
-        [@ocaml.doc "The Amazon Resoure Name (ARN) of the resource share."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource share."];
       resourceShareName: String_.t option
         [@ocaml.doc "The name of the resource share."];
       associatedEntity: String_.t option
         [@ocaml.doc
-          "The associated entity. This can be either of the following: For a resource association, this is the Amazon Resoure Name (ARN) of the resource. For principal associations, this is one of the following: The ID of an Amazon Web Services account The Amazon Resoure Name (ARN) of an organization in Organizations The ARN of an organizational unit (OU) in Organizations The ARN of an IAM role The ARN of an IAM user"];
+          "The associated entity. This can be either of the following: For a resource association, this is the Amazon Resource Name (ARN) of the resource. For principal associations, this is one of the following: The ID of an Amazon Web Services account The Amazon Resource Name (ARN) of an organization in Organizations The ARN of an organizational unit (OU) in Organizations The ARN of an IAM role The ARN of an IAM user"];
       associationType: ResourceShareAssociationType.t option
         [@ocaml.doc "The type of entity included in this association."];
       status: ResourceShareAssociationStatus.t option
@@ -275,27 +287,29 @@ module ResourceShareAssociation =
         ?associationType ?associatedEntity ?resourceShareName
         ?resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let external_ = field_map json "external" Boolean.of_json in
-      let lastUpdatedTime = field_map json "lastUpdatedTime" DateTime.of_json in
-      let creationTime = field_map json "creationTime" DateTime.of_json in
-      let statusMessage = field_map json "statusMessage" String_.of_json in
+    let of_json json__ =
+      let external_ = field_map json__ "external" Boolean.of_json in
+      let lastUpdatedTime =
+        field_map json__ "lastUpdatedTime" DateTime.of_json in
+      let creationTime = field_map json__ "creationTime" DateTime.of_json in
+      let statusMessage = field_map json__ "statusMessage" String_.of_json in
       let status =
-        field_map json "status" ResourceShareAssociationStatus.of_json in
+        field_map json__ "status" ResourceShareAssociationStatus.of_json in
       let associationType =
-        field_map json "associationType" ResourceShareAssociationType.of_json in
+        field_map json__ "associationType"
+          ResourceShareAssociationType.of_json in
       let associatedEntity =
-        field_map json "associatedEntity" String_.of_json in
+        field_map json__ "associatedEntity" String_.of_json in
       let resourceShareName =
-        field_map json "resourceShareName" String_.of_json in
+        field_map json__ "resourceShareName" String_.of_json in
       let resourceShareArn =
-        field_map json "resourceShareArn" String_.of_json in
+        field_map json__ "resourceShareArn" String_.of_json in
       make ?external_ ?lastUpdatedTime ?creationTime ?statusMessage ?status
         ?associationType ?associatedEntity ?resourceShareName
         ?resourceShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an association with a resource share and either a principal or a resource."]
+       "Describes an association between a resource share and either a principal or a resource."]
 module ResourceRegionScope =
   struct
     type nonrec t =
@@ -356,6 +370,147 @@ module ResourceStatus =
     let of_json j = of_string (string_of_json ~kind:"ResourceStatus" j)
     let to_json = simple_to_json to_value
   end
+module PermissionFeatureSet =
+  struct
+    type nonrec t =
+      | CREATED_FROM_POLICY 
+      | PROMOTING_TO_STANDARD 
+      | STANDARD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATED_FROM_POLICY -> "CREATED_FROM_POLICY"
+      | PROMOTING_TO_STANDARD -> "PROMOTING_TO_STANDARD"
+      | STANDARD -> "STANDARD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATED_FROM_POLICY" -> CREATED_FROM_POLICY
+      | "PROMOTING_TO_STANDARD" -> PROMOTING_TO_STANDARD
+      | "STANDARD" -> STANDARD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PermissionFeatureSet" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PermissionFeatureSet" j)
+    let to_json = simple_to_json to_value
+  end
+module PermissionType =
+  struct
+    type nonrec t =
+      | CUSTOMER_MANAGED 
+      | AWS_MANAGED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CUSTOMER_MANAGED -> "CUSTOMER_MANAGED"
+      | AWS_MANAGED -> "AWS_MANAGED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CUSTOMER_MANAGED" -> CUSTOMER_MANAGED
+      | "AWS_MANAGED" -> AWS_MANAGED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PermissionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PermissionType" j)
+    let to_json = simple_to_json to_value
+  end
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReplacePermissionAssociationsWorkStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | COMPLETED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ReplacePermissionAssociationsWorkStatus"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ReplacePermissionAssociationsWorkStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceShareConfiguration =
+  struct
+    type nonrec t =
+      {
+      retainSharingOnAccountLeaveOrganization: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the consumer account retains access to the resource share after leaving the organization."]}
+    let make ?retainSharingOnAccountLeaveOrganization =
+      fun () -> { retainSharingOnAccountLeaveOrganization }
+    let to_value x =
+      structure_to_value
+        [("retainSharingOnAccountLeaveOrganization",
+           (Option.map x.retainSharingOnAccountLeaveOrganization
+              ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retainSharingOnAccountLeaveOrganization =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "retainSharingOnAccountLeaveOrganization") in
+      make ?retainSharingOnAccountLeaveOrganization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retainSharingOnAccountLeaveOrganization =
+        field_map json__ "retainSharingOnAccountLeaveOrganization"
+          Boolean.of_json in
+      make ?retainSharingOnAccountLeaveOrganization ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration of the resource share"]
 module ResourceShareFeatureSet =
   struct
     type nonrec t =
@@ -421,33 +576,13 @@ module ResourceShareStatus =
     let of_json j = of_string (string_of_json ~kind:"ResourceShareStatus" j)
     let to_json = simple_to_json to_value
   end
-module TagList =
-  struct
-    type nonrec t = Tag.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module TagValueList =
   struct
     type nonrec t = TagValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -472,6 +607,9 @@ module ResourceShareAssociationList =
   struct
     type nonrec t = ResourceShareAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceShareAssociation.to_value)) |>
         (fun x -> `List x)
@@ -528,21 +666,106 @@ module ResourceShareInvitationStatus =
       of_string (string_of_json ~kind:"ResourceShareInvitationStatus" j)
     let to_json = simple_to_json to_value
   end
+module AssociatedSource =
+  struct
+    type nonrec t =
+      {
+      resourceShareArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource share that contains the source association."];
+      sourceId: String_.t option
+        [@ocaml.doc
+          "The identifier of the source. This can be an account ID, Amazon Resource Name (ARN), organization ID, or organization path."];
+      sourceType: String_.t option [@ocaml.doc "The type of source."];
+      status: String_.t option
+        [@ocaml.doc "The current status of the source association."];
+      lastUpdatedTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time when the source association was last updated."];
+      creationTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time when the source association was created."];
+      statusMessage: String_.t option
+        [@ocaml.doc "A message about the status of the source association."]}
+    let make ?resourceShareArn =
+      fun ?sourceId ->
+        fun ?sourceType ->
+          fun ?status ->
+            fun ?lastUpdatedTime ->
+              fun ?creationTime ->
+                fun ?statusMessage ->
+                  fun () ->
+                    {
+                      resourceShareArn;
+                      sourceId;
+                      sourceType;
+                      status;
+                      lastUpdatedTime;
+                      creationTime;
+                      statusMessage
+                    }
+    let to_value x =
+      structure_to_value
+        [("resourceShareArn",
+           (Option.map x.resourceShareArn ~f:String_.to_value));
+        ("sourceId", (Option.map x.sourceId ~f:String_.to_value));
+        ("sourceType", (Option.map x.sourceType ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
+        ("lastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:DateTime.to_value));
+        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
+        ("statusMessage", (Option.map x.statusMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusMessage") in
+      let creationTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
+      let lastUpdatedTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedTime") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      let sourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceType") in
+      let sourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceId") in
+      let resourceShareArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceShareArn") in
+      make ?statusMessage ?creationTime ?lastUpdatedTime ?status ?sourceType
+        ?sourceId ?resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusMessage = field_map json__ "statusMessage" String_.of_json in
+      let creationTime = field_map json__ "creationTime" DateTime.of_json in
+      let lastUpdatedTime =
+        field_map json__ "lastUpdatedTime" DateTime.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let sourceType = field_map json__ "sourceType" String_.of_json in
+      let sourceId = field_map json__ "sourceId" String_.of_json in
+      let resourceShareArn =
+        field_map json__ "resourceShareArn" String_.of_json in
+      make ?statusMessage ?creationTime ?lastUpdatedTime ?status ?sourceType
+        ?sourceId ?resourceShareArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a source association in a resource share. Source associations control which sources can be used with service principals."]
 module Resource =
   struct
     type nonrec t =
       {
       arn: String_.t option
-        [@ocaml.doc "The Amazon Resoure Name (ARN) of the resource."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
       type_: String_.t option
         [@ocaml.doc
-          "The resource type. This takes the form of: service-code:resource-code"];
+          "The resource type. This takes the form of: service-code:resource-code, and is case-insensitive. For example, an Amazon EC2 Subnet would be represented by the string ec2:subnet."];
       resourceShareArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resoure Name (ARN) of the resource share this resource is associated with."];
+          "The Amazon Resource Name (ARN) of the resource share this resource is associated with."];
       resourceGroupArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resoure Name (ARN) of the resource group. This value is available only if the resource is part of a resource group."];
+          "The Amazon Resource Name (ARN) of the resource group. This value is available only if the resource is part of a resource group."];
       status: ResourceStatus.t option
         [@ocaml.doc "The current status of the resource."];
       statusMessage: String_.t option
@@ -552,7 +775,7 @@ module Resource =
           "The date and time when the resource was associated with the resource share."];
       lastUpdatedTime: DateTime.t option
         [@ocaml.doc
-          "The date an time when the association was last updated."];
+          "The date an time when the association between the resource and the resource share was last updated."];
       resourceRegionScope: ResourceRegionScope.t option
         [@ocaml.doc
           "Specifies the scope of visibility of this resource: REGIONAL \226\128\147 The resource can be accessed only by using requests that target the Amazon Web Services Region in which the resource exists. GLOBAL \226\128\147 The resource can be accessed from any Amazon Web Services Region."]}
@@ -617,19 +840,20 @@ module Resource =
       make ?resourceRegionScope ?lastUpdatedTime ?creationTime ?statusMessage
         ?status ?resourceGroupArn ?resourceShareArn ?type_ ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceRegionScope =
-        field_map json "resourceRegionScope" ResourceRegionScope.of_json in
-      let lastUpdatedTime = field_map json "lastUpdatedTime" DateTime.of_json in
-      let creationTime = field_map json "creationTime" DateTime.of_json in
-      let statusMessage = field_map json "statusMessage" String_.of_json in
-      let status = field_map json "status" ResourceStatus.of_json in
+        field_map json__ "resourceRegionScope" ResourceRegionScope.of_json in
+      let lastUpdatedTime =
+        field_map json__ "lastUpdatedTime" DateTime.of_json in
+      let creationTime = field_map json__ "creationTime" DateTime.of_json in
+      let statusMessage = field_map json__ "statusMessage" String_.of_json in
+      let status = field_map json__ "status" ResourceStatus.of_json in
       let resourceGroupArn =
-        field_map json "resourceGroupArn" String_.of_json in
+        field_map json__ "resourceGroupArn" String_.of_json in
       let resourceShareArn =
-        field_map json "resourceShareArn" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
-      let arn = field_map json "arn" String_.of_json in
+        field_map json__ "resourceShareArn" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
       make ?resourceRegionScope ?lastUpdatedTime ?creationTime ?statusMessage
         ?status ?resourceGroupArn ?resourceShareArn ?type_ ?arn ()
     let to_json v = composed_to_json to_value v
@@ -639,7 +863,9 @@ module ServiceNameAndResourceType =
   struct
     type nonrec t =
       {
-      resourceType: String_.t option [@ocaml.doc "The type of the resource."];
+      resourceType: String_.t option
+        [@ocaml.doc
+          "The type of the resource. This takes the form of: service-code:resource-code, and is case-insensitive. For example, an Amazon EC2 Subnet would be represented by the string ec2:subnet."];
       serviceName: String_.t option
         [@ocaml.doc
           "The name of the Amazon Web Services service to which resources of this type belong."];
@@ -667,11 +893,11 @@ module ServiceNameAndResourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       make ?resourceRegionScope ?serviceName ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceRegionScope =
-        field_map json "resourceRegionScope" ResourceRegionScope.of_json in
-      let serviceName = field_map json "serviceName" String_.of_json in
-      let resourceType = field_map json "resourceType" String_.of_json in
+        field_map json__ "resourceRegionScope" ResourceRegionScope.of_json in
+      let serviceName = field_map json__ "serviceName" String_.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
       make ?resourceRegionScope ?serviceName ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -682,16 +908,18 @@ module ResourceSharePermissionSummary =
       {
       arn: String_.t option
         [@ocaml.doc
-          "The Amazon Resoure Name (ARN) of the permission you want information about."];
+          "The Amazon Resource Name (ARN) of the permission you want information about."];
       version: String_.t option
         [@ocaml.doc
-          "The version of the permission represented in this structure."];
+          "The version of the permission associated with this resource share."];
       defaultVersion: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the version of the permission represented in this structure is the default version for this permission."];
-      name: String_.t option [@ocaml.doc "The name of this permission."];
+          "Specifies whether the version of the managed permission used by this resource share is the default version for this managed permission."];
+      name: String_.t option
+        [@ocaml.doc "The name of this managed permission."];
       resourceType: String_.t option
-        [@ocaml.doc "The type of resource to which this permission applies."];
+        [@ocaml.doc
+          "The type of resource to which this permission applies. This takes the form of: service-code:resource-code, and is case-insensitive. For example, an Amazon EC2 Subnet would be represented by the string ec2:subnet."];
       status: String_.t option
         [@ocaml.doc "The current status of the permission."];
       creationTime: DateTime.t option
@@ -701,7 +929,16 @@ module ResourceSharePermissionSummary =
           "The date and time when the permission was last updated."];
       isResourceTypeDefault: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the version of the permission represented in this structure is the default version for all resources of this resource type."]}
+          "Specifies whether the managed permission associated with this resource share is the default managed permission for all resources of this resource type."];
+      permissionType: PermissionType.t option
+        [@ocaml.doc
+          "The type of managed permission. This can be one of the following values: AWS_MANAGED \226\128\147 Amazon Web Services created and manages this managed permission. You can associate it with your resource shares, but you can't modify it. CUSTOMER_MANAGED \226\128\147 You, or another principal in your account created this managed permission. You can associate it with your resource shares and create new versions that have different permissions."];
+      featureSet: PermissionFeatureSet.t option
+        [@ocaml.doc
+          "Indicates what features are available for this resource share. This parameter can have one of the following values: STANDARD \226\128\147 A resource share that supports all functionality. These resource shares are visible to all principals you share the resource share with. You can modify these resource shares in RAM using the console or APIs. This resource share might have been created by RAM, or it might have been CREATED_FROM_POLICY and then promoted. CREATED_FROM_POLICY \226\128\147 The customer manually shared a resource by attaching a resource-based policy. That policy did not match any existing managed permissions, so RAM created this customer managed permission automatically on the customer's behalf based on the attached policy document. This type of resource share is visible only to the Amazon Web Services account that created it. You can't modify it in RAM unless you promote it. For more information, see PromoteResourceShareCreatedFromPolicy. PROMOTING_TO_STANDARD \226\128\147 This resource share was originally CREATED_FROM_POLICY, but the customer ran the PromoteResourceShareCreatedFromPolicy and that operation is still in progress. This value changes to STANDARD when complete."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of the tag key value pairs currently attached to the permission."]}
     let make ?arn =
       fun ?version ->
         fun ?defaultVersion ->
@@ -711,18 +948,24 @@ module ResourceSharePermissionSummary =
                 fun ?creationTime ->
                   fun ?lastUpdatedTime ->
                     fun ?isResourceTypeDefault ->
-                      fun () ->
-                        {
-                          arn;
-                          version;
-                          defaultVersion;
-                          name;
-                          resourceType;
-                          status;
-                          creationTime;
-                          lastUpdatedTime;
-                          isResourceTypeDefault
-                        }
+                      fun ?permissionType ->
+                        fun ?featureSet ->
+                          fun ?tags ->
+                            fun () ->
+                              {
+                                arn;
+                                version;
+                                defaultVersion;
+                                name;
+                                resourceType;
+                                status;
+                                creationTime;
+                                lastUpdatedTime;
+                                isResourceTypeDefault;
+                                permissionType;
+                                featureSet;
+                                tags
+                              }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:String_.to_value));
@@ -735,9 +978,21 @@ module ResourceSharePermissionSummary =
         ("lastUpdatedTime",
           (Option.map x.lastUpdatedTime ~f:DateTime.to_value));
         ("isResourceTypeDefault",
-          (Option.map x.isResourceTypeDefault ~f:Boolean.to_value))]
+          (Option.map x.isResourceTypeDefault ~f:Boolean.to_value));
+        ("permissionType",
+          (Option.map x.permissionType ~f:PermissionType.to_value));
+        ("featureSet",
+          (Option.map x.featureSet ~f:PermissionFeatureSet.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let featureSet =
+        (Option.map ~f:PermissionFeatureSet.of_xml)
+          (Xml.child xml_arg0 "featureSet") in
+      let permissionType =
+        (Option.map ~f:PermissionType.of_xml)
+          (Xml.child xml_arg0 "permissionType") in
       let isResourceTypeDefault =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "isResourceTypeDefault") in
@@ -756,42 +1011,172 @@ module ResourceSharePermissionSummary =
       let version =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "version") in
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?isResourceTypeDefault ?lastUpdatedTime ?creationTime ?status
-        ?resourceType ?name ?defaultVersion ?version ?arn ()
+      make ?tags ?featureSet ?permissionType ?isResourceTypeDefault
+        ?lastUpdatedTime ?creationTime ?status ?resourceType ?name
+        ?defaultVersion ?version ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let featureSet =
+        field_map json__ "featureSet" PermissionFeatureSet.of_json in
+      let permissionType =
+        field_map json__ "permissionType" PermissionType.of_json in
       let isResourceTypeDefault =
-        field_map json "isResourceTypeDefault" Boolean.of_json in
-      let lastUpdatedTime = field_map json "lastUpdatedTime" DateTime.of_json in
-      let creationTime = field_map json "creationTime" DateTime.of_json in
-      let status = field_map json "status" String_.of_json in
-      let resourceType = field_map json "resourceType" String_.of_json in
-      let name = field_map json "name" String_.of_json in
-      let defaultVersion = field_map json "defaultVersion" Boolean.of_json in
-      let version = field_map json "version" String_.of_json in
-      let arn = field_map json "arn" String_.of_json in
-      make ?isResourceTypeDefault ?lastUpdatedTime ?creationTime ?status
-        ?resourceType ?name ?defaultVersion ?version ?arn ()
+        field_map json__ "isResourceTypeDefault" Boolean.of_json in
+      let lastUpdatedTime =
+        field_map json__ "lastUpdatedTime" DateTime.of_json in
+      let creationTime = field_map json__ "creationTime" DateTime.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let defaultVersion = field_map json__ "defaultVersion" Boolean.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      make ?tags ?featureSet ?permissionType ?isResourceTypeDefault
+        ?lastUpdatedTime ?creationTime ?status ?resourceType ?name
+        ?defaultVersion ?version ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about an RAM permission."]
+module ReplacePermissionAssociationsWork =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option
+        [@ocaml.doc
+          "The unique identifier for the background task associated with one ReplacePermissionAssociations request."];
+      fromPermissionArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the managed permission that this background task is replacing."];
+      fromPermissionVersion: String_.t option
+        [@ocaml.doc
+          "The version of the managed permission that this background task is replacing."];
+      toPermissionArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the managed permission that this background task is associating with the resource shares in place of the managed permission and version specified in fromPermissionArn and fromPermissionVersion."];
+      toPermissionVersion: String_.t option
+        [@ocaml.doc
+          "The version of the managed permission that this background task is associating with the resource shares. This is always the version that is currently the default for this managed permission."];
+      status: ReplacePermissionAssociationsWorkStatus.t option
+        [@ocaml.doc
+          "Specifies the current status of the background tasks for the specified ID. The output is one of the following strings: IN_PROGRESS COMPLETED FAILED"];
+      statusMessage: String_.t option
+        [@ocaml.doc
+          "Specifies the reason for a FAILED status. This field is present only when there status is FAILED."];
+      creationTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time when this asynchronous background task was created."];
+      lastUpdatedTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time when the status of this background task was last updated."]}
+    let make ?id =
+      fun ?fromPermissionArn ->
+        fun ?fromPermissionVersion ->
+          fun ?toPermissionArn ->
+            fun ?toPermissionVersion ->
+              fun ?status ->
+                fun ?statusMessage ->
+                  fun ?creationTime ->
+                    fun ?lastUpdatedTime ->
+                      fun () ->
+                        {
+                          id;
+                          fromPermissionArn;
+                          fromPermissionVersion;
+                          toPermissionArn;
+                          toPermissionVersion;
+                          status;
+                          statusMessage;
+                          creationTime;
+                          lastUpdatedTime
+                        }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("fromPermissionArn",
+          (Option.map x.fromPermissionArn ~f:String_.to_value));
+        ("fromPermissionVersion",
+          (Option.map x.fromPermissionVersion ~f:String_.to_value));
+        ("toPermissionArn",
+          (Option.map x.toPermissionArn ~f:String_.to_value));
+        ("toPermissionVersion",
+          (Option.map x.toPermissionVersion ~f:String_.to_value));
+        ("status",
+          (Option.map x.status
+             ~f:ReplacePermissionAssociationsWorkStatus.to_value));
+        ("statusMessage", (Option.map x.statusMessage ~f:String_.to_value));
+        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
+        ("lastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:DateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedTime") in
+      let creationTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
+      let statusMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusMessage") in
+      let status =
+        (Option.map ~f:ReplacePermissionAssociationsWorkStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let toPermissionVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "toPermissionVersion") in
+      let toPermissionArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "toPermissionArn") in
+      let fromPermissionVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "fromPermissionVersion") in
+      let fromPermissionArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "fromPermissionArn") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?lastUpdatedTime ?creationTime ?statusMessage ?status
+        ?toPermissionVersion ?toPermissionArn ?fromPermissionVersion
+        ?fromPermissionArn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedTime =
+        field_map json__ "lastUpdatedTime" DateTime.of_json in
+      let creationTime = field_map json__ "creationTime" DateTime.of_json in
+      let statusMessage = field_map json__ "statusMessage" String_.of_json in
+      let status =
+        field_map json__ "status"
+          ReplacePermissionAssociationsWorkStatus.of_json in
+      let toPermissionVersion =
+        field_map json__ "toPermissionVersion" String_.of_json in
+      let toPermissionArn =
+        field_map json__ "toPermissionArn" String_.of_json in
+      let fromPermissionVersion =
+        field_map json__ "fromPermissionVersion" String_.of_json in
+      let fromPermissionArn =
+        field_map json__ "fromPermissionArn" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      make ?lastUpdatedTime ?creationTime ?statusMessage ?status
+        ?toPermissionVersion ?toPermissionArn ?fromPermissionVersion
+        ?fromPermissionArn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about an RAM permission that is associated with a resource share and any of its resources of a specified type."]
+       "A structure that represents the background work that RAM performs when you invoke the ReplacePermissionAssociations operation."]
 module Principal =
   struct
     type nonrec t =
       {
-      id: String_.t option [@ocaml.doc "The ID of the principal."];
+      id: String_.t option
+        [@ocaml.doc
+          "The ID of the principal that can be associated with a resource share."];
       resourceShareArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resoure Name (ARN) of a resource share the principal is associated with."];
+          "The Amazon Resource Name (ARN) of a resource share the principal is associated with."];
       creationTime: DateTime.t option
         [@ocaml.doc
           "The date and time when the principal was associated with the resource share."];
       lastUpdatedTime: DateTime.t option
         [@ocaml.doc
-          "The date and time when the association was last updated."];
+          "The date and time when the association between the resource share and the principal was last updated."];
       external_: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the principal belongs to the same organization in Organizations as the Amazon Web Services account that owns the resource share."]}
+          "Indicates the relationship between the Amazon Web Services account the principal belongs to and the account that owns the resource share: True \226\128\147 The two accounts belong to same organization. False \226\128\147 The two accounts do not belong to the same organization."]}
     let make ?id =
       fun ?resourceShareArn ->
         fun ?creationTime ->
@@ -829,30 +1214,133 @@ module Principal =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?external_ ?lastUpdatedTime ?creationTime ?resourceShareArn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let external_ = field_map json "external" Boolean.of_json in
-      let lastUpdatedTime = field_map json "lastUpdatedTime" DateTime.of_json in
-      let creationTime = field_map json "creationTime" DateTime.of_json in
+    let of_json json__ =
+      let external_ = field_map json__ "external" Boolean.of_json in
+      let lastUpdatedTime =
+        field_map json__ "lastUpdatedTime" DateTime.of_json in
+      let creationTime = field_map json__ "creationTime" DateTime.of_json in
       let resourceShareArn =
-        field_map json "resourceShareArn" String_.of_json in
-      let id = field_map json "id" String_.of_json in
+        field_map json__ "resourceShareArn" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
       make ?external_ ?lastUpdatedTime ?creationTime ?resourceShareArn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a principal for use with Resource Access Manager."]
+module AssociatedPermission =
+  struct
+    type nonrec t =
+      {
+      arn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the associated managed permission."];
+      permissionVersion: String_.t option
+        [@ocaml.doc
+          "The version of the permission currently associated with the resource share."];
+      defaultVersion: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the associated resource share is using the default version of the permission."];
+      resourceType: String_.t option
+        [@ocaml.doc "The resource type to which this permission applies."];
+      status: String_.t option
+        [@ocaml.doc
+          "The current status of the association between the permission and the resource share. The following are the possible values: ATTACHABLE \226\128\147 This permission or version can be associated with resource shares. UNATTACHABLE \226\128\147 This permission or version can't currently be associated with resource shares. DELETING \226\128\147 This permission or version is in the process of being deleted. DELETED \226\128\147 This permission or version is deleted."];
+      featureSet: PermissionFeatureSet.t option
+        [@ocaml.doc
+          "Indicates what features are available for this resource share. This parameter can have one of the following values: STANDARD \226\128\147 A resource share that supports all functionality. These resource shares are visible to all principals you share the resource share with. You can modify these resource shares in RAM using the console or APIs. This resource share might have been created by RAM, or it might have been CREATED_FROM_POLICY and then promoted. CREATED_FROM_POLICY \226\128\147 The customer manually shared a resource by attaching a resource-based policy. That policy did not match any existing managed permissions, so RAM created this customer managed permission automatically on the customer's behalf based on the attached policy document. This type of resource share is visible only to the Amazon Web Services account that created it. You can't modify it in RAM unless you promote it. For more information, see PromoteResourceShareCreatedFromPolicy. PROMOTING_TO_STANDARD \226\128\147 This resource share was originally CREATED_FROM_POLICY, but the customer ran the PromoteResourceShareCreatedFromPolicy and that operation is still in progress. This value changes to STANDARD when complete."];
+      lastUpdatedTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time when the association between the permission and the resource share was last updated."];
+      resourceShareArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a resource share associated with this permission."]}
+    let make ?arn =
+      fun ?permissionVersion ->
+        fun ?defaultVersion ->
+          fun ?resourceType ->
+            fun ?status ->
+              fun ?featureSet ->
+                fun ?lastUpdatedTime ->
+                  fun ?resourceShareArn ->
+                    fun () ->
+                      {
+                        arn;
+                        permissionVersion;
+                        defaultVersion;
+                        resourceType;
+                        status;
+                        featureSet;
+                        lastUpdatedTime;
+                        resourceShareArn
+                      }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:String_.to_value));
+        ("permissionVersion",
+          (Option.map x.permissionVersion ~f:String_.to_value));
+        ("defaultVersion", (Option.map x.defaultVersion ~f:Boolean.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
+        ("featureSet",
+          (Option.map x.featureSet ~f:PermissionFeatureSet.to_value));
+        ("lastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:DateTime.to_value));
+        ("resourceShareArn",
+          (Option.map x.resourceShareArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceShareArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceShareArn") in
+      let lastUpdatedTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedTime") in
+      let featureSet =
+        (Option.map ~f:PermissionFeatureSet.of_xml)
+          (Xml.child xml_arg0 "featureSet") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let defaultVersion =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "defaultVersion") in
+      let permissionVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "permissionVersion") in
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?resourceShareArn ?lastUpdatedTime ?featureSet ?status
+        ?resourceType ?defaultVersion ?permissionVersion ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceShareArn =
+        field_map json__ "resourceShareArn" String_.of_json in
+      let lastUpdatedTime =
+        field_map json__ "lastUpdatedTime" DateTime.of_json in
+      let featureSet =
+        field_map json__ "featureSet" PermissionFeatureSet.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let defaultVersion = field_map json__ "defaultVersion" Boolean.of_json in
+      let permissionVersion =
+        field_map json__ "permissionVersion" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      make ?resourceShareArn ?lastUpdatedTime ?featureSet ?status
+        ?resourceType ?defaultVersion ?permissionVersion ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that describes a managed permission associated with a resource share."]
 module ResourceShare =
   struct
     type nonrec t =
       {
       resourceShareArn: String_.t option
-        [@ocaml.doc "The Amazon Resoure Name (ARN) of the resource share"];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource share"];
       name: String_.t option [@ocaml.doc "The name of the resource share."];
       owningAccountId: String_.t option
         [@ocaml.doc
           "The ID of the Amazon Web Services account that owns the resource share."];
       allowExternalPrincipals: Boolean.t option
         [@ocaml.doc
-          "Indicates whether principals outside your organization in Organizations can be associated with a resource share."];
+          "Indicates whether principals outside your organization in Organizations can be associated with a resource share. True \226\128\147 the resource share can be shared with any Amazon Web Services account. False \226\128\147 the resource share can be shared with only accounts in the same organization as the account that owns the resource share."];
       status: ResourceShareStatus.t option
         [@ocaml.doc "The current status of the resource share."];
       statusMessage: String_.t option
@@ -867,7 +1355,9 @@ module ResourceShare =
           "The date and time when the resource share was last updated."];
       featureSet: ResourceShareFeatureSet.t option
         [@ocaml.doc
-          "Indicates how the resource share was created. Possible values include: CREATED_FROM_POLICY - Indicates that the resource share was created from an Identity and Access Management (IAM) resource-based permission policy attached to the resource. This type of resource share is visible only to the Amazon Web Services account that created it. You can't modify it in RAM unless you promote it. For more information, see PromoteResourceShareCreatedFromPolicy. PROMOTING_TO_STANDARD - The resource share is in the process of being promoted. For more information, see PromoteResourceShareCreatedFromPolicy. STANDARD - Indicates that the resource share was created in RAM using the console or APIs. These resource shares are visible to all principals you share the resource share with. You can modify these resource shares in RAM using the console or APIs."]}
+          "Indicates what features are available for this resource share. This parameter can have one of the following values: STANDARD \226\128\147 A resource share that supports all functionality. These resource shares are visible to all principals you share the resource share with. You can modify these resource shares in RAM using the console or APIs. This resource share might have been created by RAM, or it might have been CREATED_FROM_POLICY and then promoted. CREATED_FROM_POLICY \226\128\147 The customer manually shared a resource by attaching a resource-based policy. That policy did not match any existing managed permissions, so RAM created this customer managed permission automatically on the customer's behalf based on the attached policy document. This type of resource share is visible only to the Amazon Web Services account that created it. You can't modify it in RAM unless you promote it. For more information, see PromoteResourceShareCreatedFromPolicy. PROMOTING_TO_STANDARD \226\128\147 This resource share was originally CREATED_FROM_POLICY, but the customer ran the PromoteResourceShareCreatedFromPolicy and that operation is still in progress. This value changes to STANDARD when complete."];
+      resourceShareConfiguration: ResourceShareConfiguration.t option
+        [@ocaml.doc "The configuration of the resource share"]}
     let make ?resourceShareArn =
       fun ?name ->
         fun ?owningAccountId ->
@@ -878,19 +1368,21 @@ module ResourceShare =
                   fun ?creationTime ->
                     fun ?lastUpdatedTime ->
                       fun ?featureSet ->
-                        fun () ->
-                          {
-                            resourceShareArn;
-                            name;
-                            owningAccountId;
-                            allowExternalPrincipals;
-                            status;
-                            statusMessage;
-                            tags;
-                            creationTime;
-                            lastUpdatedTime;
-                            featureSet
-                          }
+                        fun ?resourceShareConfiguration ->
+                          fun () ->
+                            {
+                              resourceShareArn;
+                              name;
+                              owningAccountId;
+                              allowExternalPrincipals;
+                              status;
+                              statusMessage;
+                              tags;
+                              creationTime;
+                              lastUpdatedTime;
+                              featureSet;
+                              resourceShareConfiguration
+                            }
     let to_value x =
       structure_to_value
         [("resourceShareArn",
@@ -907,9 +1399,15 @@ module ResourceShare =
         ("lastUpdatedTime",
           (Option.map x.lastUpdatedTime ~f:DateTime.to_value));
         ("featureSet",
-          (Option.map x.featureSet ~f:ResourceShareFeatureSet.to_value))]
+          (Option.map x.featureSet ~f:ResourceShareFeatureSet.to_value));
+        ("resourceShareConfiguration",
+          (Option.map x.resourceShareConfiguration
+             ~f:ResourceShareConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceShareConfiguration =
+        (Option.map ~f:ResourceShareConfiguration.of_xml)
+          (Xml.child xml_arg0 "resourceShareConfiguration") in
       let featureSet =
         (Option.map ~f:ResourceShareFeatureSet.of_xml)
           (Xml.child xml_arg0 "featureSet") in
@@ -933,27 +1431,32 @@ module ResourceShare =
       let resourceShareArn =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "resourceShareArn") in
-      make ?featureSet ?lastUpdatedTime ?creationTime ?tags ?statusMessage
-        ?status ?allowExternalPrincipals ?owningAccountId ?name
-        ?resourceShareArn ()
+      make ?resourceShareConfiguration ?featureSet ?lastUpdatedTime
+        ?creationTime ?tags ?statusMessage ?status ?allowExternalPrincipals
+        ?owningAccountId ?name ?resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let resourceShareConfiguration =
+        field_map json__ "resourceShareConfiguration"
+          ResourceShareConfiguration.of_json in
       let featureSet =
-        field_map json "featureSet" ResourceShareFeatureSet.of_json in
-      let lastUpdatedTime = field_map json "lastUpdatedTime" DateTime.of_json in
-      let creationTime = field_map json "creationTime" DateTime.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let statusMessage = field_map json "statusMessage" String_.of_json in
-      let status = field_map json "status" ResourceShareStatus.of_json in
+        field_map json__ "featureSet" ResourceShareFeatureSet.of_json in
+      let lastUpdatedTime =
+        field_map json__ "lastUpdatedTime" DateTime.of_json in
+      let creationTime = field_map json__ "creationTime" DateTime.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let statusMessage = field_map json__ "statusMessage" String_.of_json in
+      let status = field_map json__ "status" ResourceShareStatus.of_json in
       let allowExternalPrincipals =
-        field_map json "allowExternalPrincipals" Boolean.of_json in
-      let owningAccountId = field_map json "owningAccountId" String_.of_json in
-      let name = field_map json "name" String_.of_json in
+        field_map json__ "allowExternalPrincipals" Boolean.of_json in
+      let owningAccountId =
+        field_map json__ "owningAccountId" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       let resourceShareArn =
-        field_map json "resourceShareArn" String_.of_json in
-      make ?featureSet ?lastUpdatedTime ?creationTime ?tags ?statusMessage
-        ?status ?allowExternalPrincipals ?owningAccountId ?name
-        ?resourceShareArn ()
+        field_map json__ "resourceShareArn" String_.of_json in
+      make ?resourceShareConfiguration ?featureSet ?lastUpdatedTime
+        ?creationTime ?tags ?statusMessage ?status ?allowExternalPrincipals
+        ?owningAccountId ?name ?resourceShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a resource share in RAM."]
 module TagFilter =
@@ -979,23 +1482,23 @@ module TagFilter =
         (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "tagKey") in
       make ?tagValues ?tagKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "tagValues" TagValueList.of_json in
-      let tagKey = field_map json "tagKey" TagKey.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "tagValues" TagValueList.of_json in
+      let tagKey = field_map json__ "tagKey" TagKey.of_json in
       make ?tagValues ?tagKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A tag key and optional list of possible values that you can use to filter results for tagged resources."]
+       "A tag key and optional list of possible values that you can use to filter results for tagged resources. Multiple tag filters are evaluated as an OR condition."]
 module ResourceShareInvitation =
   struct
     type nonrec t =
       {
       resourceShareInvitationArn: String_.t option
-        [@ocaml.doc "The Amazon Resoure Name (ARN) of the invitation."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the invitation."];
       resourceShareName: String_.t option
         [@ocaml.doc "The name of the resource share."];
       resourceShareArn: String_.t option
-        [@ocaml.doc "The Amazon Resoure Name (ARN) of the resource share"];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource share"];
       senderAccountId: String_.t option
         [@ocaml.doc
           "The ID of the Amazon Web Services account that sent the invitation."];
@@ -1011,7 +1514,7 @@ module ResourceShareInvitation =
           "To view the resources associated with a pending resource share invitation, use ListPendingInvitationResources."];
       receiverArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resoure Name (ARN) of the IAM user or role that received the invitation."]}
+          "The Amazon Resource Name (ARN) of the IAM user or role that received the invitation."]}
     let make ?resourceShareInvitationArn =
       fun ?resourceShareName ->
         fun ?resourceShareArn ->
@@ -1084,24 +1587,25 @@ module ResourceShareInvitation =
         ?invitationTimestamp ?receiverAccountId ?senderAccountId
         ?resourceShareArn ?resourceShareName ?resourceShareInvitationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let receiverArn = field_map json "receiverArn" String_.of_json in
+    let of_json json__ =
+      let receiverArn = field_map json__ "receiverArn" String_.of_json in
       let resourceShareAssociations =
-        field_map json "resourceShareAssociations"
+        field_map json__ "resourceShareAssociations"
           ResourceShareAssociationList.of_json in
       let status =
-        field_map json "status" ResourceShareInvitationStatus.of_json in
+        field_map json__ "status" ResourceShareInvitationStatus.of_json in
       let invitationTimestamp =
-        field_map json "invitationTimestamp" DateTime.of_json in
+        field_map json__ "invitationTimestamp" DateTime.of_json in
       let receiverAccountId =
-        field_map json "receiverAccountId" String_.of_json in
-      let senderAccountId = field_map json "senderAccountId" String_.of_json in
+        field_map json__ "receiverAccountId" String_.of_json in
+      let senderAccountId =
+        field_map json__ "senderAccountId" String_.of_json in
       let resourceShareArn =
-        field_map json "resourceShareArn" String_.of_json in
+        field_map json__ "resourceShareArn" String_.of_json in
       let resourceShareName =
-        field_map json "resourceShareName" String_.of_json in
+        field_map json__ "resourceShareName" String_.of_json in
       let resourceShareInvitationArn =
-        field_map json "resourceShareInvitationArn" String_.of_json in
+        field_map json__ "resourceShareInvitationArn" String_.of_json in
       make ?receiverArn ?resourceShareAssociations ?status
         ?invitationTimestamp ?receiverAccountId ?senderAccountId
         ?resourceShareArn ?resourceShareName ?resourceShareInvitationArn ()
@@ -1121,184 +1625,224 @@ module Policy =
     let of_json j = string_of_json ~kind:"Policy" j
     let to_json = simple_to_json to_value
   end
+module PermissionStatus =
+  struct
+    type nonrec t =
+      | ATTACHABLE 
+      | UNATTACHABLE 
+      | DELETING 
+      | DELETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ATTACHABLE -> "ATTACHABLE"
+      | UNATTACHABLE -> "UNATTACHABLE"
+      | DELETING -> "DELETING"
+      | DELETED -> "DELETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ATTACHABLE" -> ATTACHABLE
+      | "UNATTACHABLE" -> UNATTACHABLE
+      | "DELETING" -> DELETING
+      | "DELETED" -> DELETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PermissionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PermissionStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module IdempotentParameterMismatchException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "IdempotentParameterMismatchException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The client token input parameter was matched one used with a previous call to the operation, but at least one of the other input parameters is different from the previous call."]
+       "The operation failed because the client token input parameter matched one that was used with a previous call to the operation, but at least one of the other input parameters is different from the previous call."]
 module InvalidClientTokenException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InvalidClientTokenException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The client token is not valid."]
+  end[@@ocaml.doc
+       "The operation failed because the specified client token isn't valid."]
 module InvalidParameterException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InvalidParameterException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A parameter is not valid."]
+  end[@@ocaml.doc
+       "The operation failed because a parameter you specified isn't valid."]
 module MalformedArnException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "MalformedArnException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The format of an Amazon Resource Name (ARN) is not valid."]
+       "The operation failed because the specified Amazon Resource Name (ARN) has a format that isn't valid."]
 module MissingRequiredParameterException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "MissingRequiredParameterException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A required input parameter is missing."]
+  end[@@ocaml.doc
+       "The operation failed because a required input parameter is missing."]
 module OperationNotPermittedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "OperationNotPermittedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The requested operation is not permitted."]
+  end[@@ocaml.doc
+       "The operation failed because the requested operation isn't permitted."]
 module ServerInternalException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ServerInternalException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The service could not respond to the request due to an internal problem."]
+       "The operation failed because the service could not respond to the request due to an internal problem. Try again later."]
 module ServiceUnavailableException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ServiceUnavailableException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The service is not available."]
+  end[@@ocaml.doc
+       "The operation failed because the service isn't available. Try again later."]
 module UnknownResourceException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "UnknownResourceException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A specified resource was not found."]
+  end[@@ocaml.doc
+       "The operation failed because a specified resource couldn't be found."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1321,201 +1865,356 @@ module TagKeyList =
 module ResourceArnNotFoundException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceArnNotFoundException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified Amazon Resource Name (ARN) was not found."]
+  end[@@ocaml.doc
+       "The operation failed because the specified Amazon Resource Name (ARN) was not found."]
 module TagLimitExceededException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "TagLimitExceededException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This request would exceed the limit for tags for your account."]
+       "The operation failed because it would exceed the limit for tags for your Amazon Web Services account."]
 module TagPolicyViolationException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "TagPolicyViolationException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified tag key is a reserved word and can't be used."]
+       "The operation failed because the specified tag key is a reserved word and can't be used."]
+module Integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourceShareInvitationAlreadyAcceptedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceShareInvitationAlreadyAcceptedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified invitation was already accepted."]
+  end[@@ocaml.doc
+       "The operation failed because the specified invitation was already accepted."]
 module ResourceShareInvitationAlreadyRejectedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceShareInvitationAlreadyRejectedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified invitation was already rejected."]
+  end[@@ocaml.doc
+       "The operation failed because the specified invitation was already rejected."]
 module ResourceShareInvitationArnNotFoundException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceShareInvitationArnNotFoundException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified Amazon Resource Name (ARN) for an invitation was not found."]
+       "The operation failed because the specified Amazon Resource Name (ARN) for an invitation was not found."]
 module ResourceShareInvitationExpiredException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceShareInvitationExpiredException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified invitation is expired."]
+  end[@@ocaml.doc
+       "The operation failed because the specified invitation is past its expiration date and time."]
+module InvalidStateTransitionException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because the requested operation isn't valid for the resource share in its current state."]
 module ResourceShareLimitExceededException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceShareLimitExceededException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This request would exceed the limit for resource shares for your account."]
+       "The operation failed because it would exceed the limit for resource shares for your account. You can associate up to 100 resources per call. To view the limits for your Amazon Web Services account, see the RAM page in the Service Quotas console."]
+module UnmatchedPolicyPermissionException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There isn't an existing managed permission defined in RAM that has the same IAM permissions as the resource-based policy attached to the resource. You should first run PromotePermissionCreatedFromPolicy to create that managed permission."]
+module InvalidPolicyException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because a policy you specified isn't valid."]
+module AssociatedSourceList =
+  struct
+    type nonrec t = AssociatedSource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssociatedSource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssociatedSource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssociatedSourceList"
+        ~of_json:AssociatedSource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InvalidNextTokenException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InvalidNextTokenException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified value for NextToken is not valid."]
+  end[@@ocaml.doc
+       "The operation failed because the specified value for NextToken isn't valid. You must specify a value you received in the NextToken response of a previous call to this operation."]
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceShareArnList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceShareArnList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InvalidResourceTypeException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InvalidResourceTypeException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified resource type is not valid."]
+  end[@@ocaml.doc
+       "The operation failed because the specified resource type isn't valid."]
 module ResourceList =
   struct
     type nonrec t = Resource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1536,28 +2235,13 @@ module ResourceList =
       list_of_json ~kind:"ResourceList" ~of_json:Resource.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MaxResults =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module ResourceArnList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1633,34 +2317,13 @@ module ResourceRegionScopeFilter =
       of_string (string_of_json ~kind:"ResourceRegionScopeFilter" j)
     let to_json = simple_to_json to_value
   end
-module ResourceShareArnList =
-  struct
-    type nonrec t = String_.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ResourceShareArnList" ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module ServiceNameAndResourceTypeList =
   struct
     type nonrec t = ServiceNameAndResourceType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceNameAndResourceType.to_value)) |>
         (fun x -> `List x)
@@ -1687,6 +2350,9 @@ module ResourceSharePermissionList =
   struct
     type nonrec t = ResourceSharePermissionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceSharePermissionSummary.to_value)) |>
         (fun x -> `List x)
@@ -1709,10 +2375,71 @@ module ResourceSharePermissionList =
         ~of_json:ResourceSharePermissionSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ReplacePermissionAssociationsWorkList =
+  struct
+    type nonrec t = ReplacePermissionAssociationsWork.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReplacePermissionAssociationsWork.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ReplacePermissionAssociationsWork.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReplacePermissionAssociationsWorkList"
+        ~of_json:ReplacePermissionAssociationsWork.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReplacePermissionAssociationsWorkIdList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReplacePermissionAssociationsWorkIdList"
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PrincipalList =
   struct
     type nonrec t = Principal.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Principal.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1737,6 +2464,9 @@ module PrincipalArnOrIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1757,10 +2487,71 @@ module PrincipalArnOrIdList =
       list_of_json ~kind:"PrincipalArnOrIdList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PermissionTypeFilter =
+  struct
+    type nonrec t =
+      | ALL 
+      | AWS_MANAGED 
+      | CUSTOMER_MANAGED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL -> "ALL"
+      | AWS_MANAGED -> "AWS_MANAGED"
+      | CUSTOMER_MANAGED -> "CUSTOMER_MANAGED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL" -> ALL
+      | "AWS_MANAGED" -> AWS_MANAGED
+      | "CUSTOMER_MANAGED" -> CUSTOMER_MANAGED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PermissionTypeFilter" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PermissionTypeFilter" j)
+    let to_json = simple_to_json to_value
+  end
+module AssociatedPermissionList =
+  struct
+    type nonrec t = AssociatedPermission.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssociatedPermission.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssociatedPermission.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssociatedPermissionList"
+        ~of_json:AssociatedPermission.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResourceShareList =
   struct
     type nonrec t = ResourceShare.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceShare.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1785,6 +2576,9 @@ module TagFilters =
   struct
     type nonrec t = TagFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1808,26 +2602,30 @@ module TagFilters =
 module InvalidMaxResultsException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InvalidMaxResultsException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified value for MaxResults is not valid."]
+  end[@@ocaml.doc
+       "The operation failed because the specified value for MaxResults isn't valid."]
 module ResourceShareInvitationList =
   struct
     type nonrec t = ResourceShareInvitation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceShareInvitation.to_value)) |>
         (fun x -> `List x)
@@ -1854,6 +2652,9 @@ module ResourceShareInvitationArnList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1879,6 +2680,9 @@ module PolicyList =
   struct
     type nonrec t = Policy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Policy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1903,13 +2707,14 @@ module ResourceSharePermissionDetail =
     type nonrec t =
       {
       arn: String_.t option
-        [@ocaml.doc "The Amazon Resoure Name (ARN) of this RAM permission."];
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of this RAM managed permission."];
       version: String_.t option
         [@ocaml.doc
-          "The version of the permission represented in this structure."];
+          "The version of the permission described in this response."];
       defaultVersion: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the version of the permission represented in this structure is the default version for this permission."];
+          "Specifies whether the version of the permission represented in this response is the default version for this permission."];
       name: String_.t option [@ocaml.doc "The name of this permission."];
       resourceType: String_.t option
         [@ocaml.doc "The resource type to which this permission applies."];
@@ -1923,7 +2728,19 @@ module ResourceSharePermissionDetail =
           "The date and time when the permission was last updated."];
       isResourceTypeDefault: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the version of the permission represented in this structure is the default version for all resources of this resource type."]}
+          "Specifies whether the version of the permission represented in this response is the default version for all resources of this resource type."];
+      permissionType: PermissionType.t option
+        [@ocaml.doc
+          "The type of managed permission. This can be one of the following values: AWS_MANAGED \226\128\147 Amazon Web Services created and manages this managed permission. You can associate it with your resource shares, but you can't modify it. CUSTOMER_MANAGED \226\128\147 You, or another principal in your account created this managed permission. You can associate it with your resource shares and create new versions that have different permissions."];
+      featureSet: PermissionFeatureSet.t option
+        [@ocaml.doc
+          "Indicates what features are available for this resource share. This parameter can have one of the following values: STANDARD \226\128\147 A resource share that supports all functionality. These resource shares are visible to all principals you share the resource share with. You can modify these resource shares in RAM using the console or APIs. This resource share might have been created by RAM, or it might have been CREATED_FROM_POLICY and then promoted. CREATED_FROM_POLICY \226\128\147 The customer manually shared a resource by attaching a resource-based policy. That policy did not match any existing managed permissions, so RAM created this customer managed permission automatically on the customer's behalf based on the attached policy document. This type of resource share is visible only to the Amazon Web Services account that created it. You can't modify it in RAM unless you promote it. For more information, see PromoteResourceShareCreatedFromPolicy. PROMOTING_TO_STANDARD \226\128\147 This resource share was originally CREATED_FROM_POLICY, but the customer ran the PromoteResourceShareCreatedFromPolicy and that operation is still in progress. This value changes to STANDARD when complete."];
+      status: PermissionStatus.t option
+        [@ocaml.doc
+          "The current status of the association between the permission and the resource share. The following are the possible values: ATTACHABLE \226\128\147 This permission or version can be associated with resource shares. UNATTACHABLE \226\128\147 This permission or version can't currently be associated with resource shares. DELETING \226\128\147 This permission or version is in the process of being deleted. DELETED \226\128\147 This permission or version is deleted."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tag key and value pairs attached to the resource share."]}
     let make ?arn =
       fun ?version ->
         fun ?defaultVersion ->
@@ -1933,18 +2750,26 @@ module ResourceSharePermissionDetail =
                 fun ?creationTime ->
                   fun ?lastUpdatedTime ->
                     fun ?isResourceTypeDefault ->
-                      fun () ->
-                        {
-                          arn;
-                          version;
-                          defaultVersion;
-                          name;
-                          resourceType;
-                          permission;
-                          creationTime;
-                          lastUpdatedTime;
-                          isResourceTypeDefault
-                        }
+                      fun ?permissionType ->
+                        fun ?featureSet ->
+                          fun ?status ->
+                            fun ?tags ->
+                              fun () ->
+                                {
+                                  arn;
+                                  version;
+                                  defaultVersion;
+                                  name;
+                                  resourceType;
+                                  permission;
+                                  creationTime;
+                                  lastUpdatedTime;
+                                  isResourceTypeDefault;
+                                  permissionType;
+                                  featureSet;
+                                  status;
+                                  tags
+                                }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:String_.to_value));
@@ -1957,9 +2782,24 @@ module ResourceSharePermissionDetail =
         ("lastUpdatedTime",
           (Option.map x.lastUpdatedTime ~f:DateTime.to_value));
         ("isResourceTypeDefault",
-          (Option.map x.isResourceTypeDefault ~f:Boolean.to_value))]
+          (Option.map x.isResourceTypeDefault ~f:Boolean.to_value));
+        ("permissionType",
+          (Option.map x.permissionType ~f:PermissionType.to_value));
+        ("featureSet",
+          (Option.map x.featureSet ~f:PermissionFeatureSet.to_value));
+        ("status", (Option.map x.status ~f:PermissionStatus.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:PermissionStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let featureSet =
+        (Option.map ~f:PermissionFeatureSet.of_xml)
+          (Xml.child xml_arg0 "featureSet") in
+      let permissionType =
+        (Option.map ~f:PermissionType.of_xml)
+          (Xml.child xml_arg0 "permissionType") in
       let isResourceTypeDefault =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "isResourceTypeDefault") in
@@ -1978,60 +2818,87 @@ module ResourceSharePermissionDetail =
       let version =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "version") in
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?isResourceTypeDefault ?lastUpdatedTime ?creationTime ?permission
-        ?resourceType ?name ?defaultVersion ?version ?arn ()
+      make ?tags ?status ?featureSet ?permissionType ?isResourceTypeDefault
+        ?lastUpdatedTime ?creationTime ?permission ?resourceType ?name
+        ?defaultVersion ?version ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let status = field_map json__ "status" PermissionStatus.of_json in
+      let featureSet =
+        field_map json__ "featureSet" PermissionFeatureSet.of_json in
+      let permissionType =
+        field_map json__ "permissionType" PermissionType.of_json in
       let isResourceTypeDefault =
-        field_map json "isResourceTypeDefault" Boolean.of_json in
-      let lastUpdatedTime = field_map json "lastUpdatedTime" DateTime.of_json in
-      let creationTime = field_map json "creationTime" DateTime.of_json in
-      let permission = field_map json "permission" String_.of_json in
-      let resourceType = field_map json "resourceType" String_.of_json in
-      let name = field_map json "name" String_.of_json in
-      let defaultVersion = field_map json "defaultVersion" Boolean.of_json in
-      let version = field_map json "version" String_.of_json in
-      let arn = field_map json "arn" String_.of_json in
-      make ?isResourceTypeDefault ?lastUpdatedTime ?creationTime ?permission
-        ?resourceType ?name ?defaultVersion ?version ?arn ()
+        field_map json__ "isResourceTypeDefault" Boolean.of_json in
+      let lastUpdatedTime =
+        field_map json__ "lastUpdatedTime" DateTime.of_json in
+      let creationTime = field_map json__ "creationTime" DateTime.of_json in
+      let permission = field_map json__ "permission" String_.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let defaultVersion = field_map json__ "defaultVersion" Boolean.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      make ?tags ?status ?featureSet ?permissionType ?isResourceTypeDefault
+        ?lastUpdatedTime ?creationTime ?permission ?resourceType ?name
+        ?defaultVersion ?version ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about an RAM permission."]
-module Integer =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module InvalidStateTransitionException =
+  end[@@ocaml.doc "Information about a RAM managed permission."]
+module ThrottlingException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InvalidStateTransitionException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The requested state transition is not valid."]
+  end[@@ocaml.doc
+       "The operation failed because it exceeded the rate at which you are allowed to perform this operation. Please try again later."]
+module SourceArnOrAccountList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SourceArnOrAccountList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PermissionArnList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2052,26 +2919,106 @@ module PermissionArnList =
       list_of_json ~kind:"PermissionArnList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ThrottlingException =
+module MalformedPolicyTemplateException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You exceeded the rate at which you are allowed to perform this operation. Please try again later."]
+       "The operation failed because the policy template that you provided isn't valid."]
+module PermissionVersionsLimitExceededException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because it would exceed the limit for the number of versions you can have for a permission. To view the limits for your Amazon Web Services account, see the RAM page in the Service Quotas console."]
+module PermissionAlreadyExistsException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because a permission with the specified name already exists in the requested Amazon Web Services Region. Choose a different name."]
+module PermissionLimitExceededException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because it would exceed the maximum number of permissions you can create in each Amazon Web Services Region. To view the limits for your Amazon Web Services account, see the RAM page in the Service Quotas console."]
+module PermissionName =
+  struct
+    type nonrec t = string
+    let context_ = "PermissionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w.-]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PermissionName" j
+    let to_json = simple_to_json to_value
+  end
 module UpdateResourceShareResponse =
   struct
     type nonrec t =
@@ -2209,10 +3156,10 @@ module UpdateResourceShareResponse =
           (Xml.child xml_arg0 "resourceShare") in
       make ?clientToken ?resourceShare ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let resourceShare =
-        field_map json "resourceShare" ResourceShare.of_json in
+        field_map json__ "resourceShare" ResourceShare.of_json in
       make ?clientToken ?resourceShare ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2223,7 +3170,7 @@ module UpdateResourceShareRequest =
       {
       resourceShareArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the resource share that you want to modify."];
+          "Specifies the Amazon Resource Name (ARN) of the resource share that you want to modify."];
       name: String_.t option
         [@ocaml.doc
           "If specified, the new name that you want to attach to the resource share."];
@@ -2232,7 +3179,7 @@ module UpdateResourceShareRequest =
           "Specifies whether principals outside your organization in Organizations can be associated with a resource share."];
       clientToken: String_.t option
         [@ocaml.doc
-          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you."]}
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
     let context_ = "UpdateResourceShareRequest"
     let make ?name =
       fun ?allowExternalPrincipals ->
@@ -2261,13 +3208,13 @@ module UpdateResourceShareRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?clientToken ?allowExternalPrincipals ?name ~resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let allowExternalPrincipals =
-        field_map json "allowExternalPrincipals" Boolean.of_json in
-      let name = field_map json "name" String_.of_json in
+        field_map json__ "allowExternalPrincipals" Boolean.of_json in
+      let name = field_map json__ "name" String_.of_json in
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
+        field_map_exn json__ "resourceShareArn" String_.of_json in
       make ?clientToken ?allowExternalPrincipals ?name ~resourceShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2277,19 +3224,25 @@ module UntagResourceResponse =
     type nonrec t = unit
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
+      | `MalformedArnException of MalformedArnException.t 
       | `ServerInternalException of ServerInternalException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `UnknownResourceException of UnknownResourceException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_json json)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2297,11 +3250,15 @@ module UntagResourceResponse =
       match name with
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_xml xml)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2310,6 +3267,10 @@ module UntagResourceResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `MalformedArnException e ->
+          `Assoc
+            [("error", (`String "MalformedArnException"));
+            ("details", (MalformedArnException.to_json e))]
       | `ServerInternalException e ->
           `Assoc
             [("error", (`String "ServerInternalException"));
@@ -2318,6 +3279,10 @@ module UntagResourceResponse =
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
             ("details", (ServiceUnavailableException.to_json e))]
+      | `UnknownResourceException e ->
+          `Assoc
+            [("error", (`String "UnknownResourceException"));
+            ("details", (UnknownResourceException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2331,42 +3296,51 @@ module UntagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified tag key and value pairs from the specified resource share."]
+       "Removes the specified tag key and value pairs from the specified resource share or managed permission."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceShareArn: String_.t
+      resourceShareArn: String_.t option
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the resource share that you want to remove tags from. The tags are removed from the resource share, not the resources in the resource share."];
+          "Specifies the Amazon Resource Name (ARN) of the resource share that you want to remove tags from. The tags are removed from the resource share, not the resources in the resource share. You must specify either resourceShareArn, or resourceArn, but not both."];
       tagKeys: TagKeyList.t
         [@ocaml.doc
-          "Specifies a list of one or more tag keys that you want to remove."]}
+          "Specifies a list of one or more tag keys that you want to remove."];
+      resourceArn: String_.t option
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the managed permission that you want to remove tags from. You must specify either resourceArn, or resourceShareArn, but not both."]}
     let context_ = "UntagResourceRequest"
-    let make ~resourceShareArn =
-      fun ~tagKeys -> fun () -> { resourceShareArn; tagKeys }
+    let make ?resourceShareArn =
+      fun ?resourceArn ->
+        fun ~tagKeys -> fun () -> { resourceShareArn; resourceArn; tagKeys }
     let to_value x =
       structure_to_value
-        [("resourceShareArn", (Some (String_.to_value x.resourceShareArn)));
-        ("tagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+        [("resourceShareArn",
+           (Option.map x.resourceShareArn ~f:String_.to_value));
+        ("tagKeys", (Some (TagKeyList.to_value x.tagKeys)));
+        ("resourceArn", (Option.map x.resourceArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceArn") in
       let tagKeys =
         TagKeyList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "tagKeys") in
       let resourceShareArn =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
-      make ~tagKeys ~resourceShareArn ()
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceShareArn") in
+      make ?resourceArn ~tagKeys ?resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" String_.of_json in
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
-      make ~tagKeys ~resourceShareArn ()
+        field_map json__ "resourceShareArn" String_.of_json in
+      make ?resourceArn ~tagKeys ?resourceShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified tag key and value pairs from the specified resource share."]
+       "Removes the specified tag key and value pairs from the specified resource share or managed permission."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -2475,41 +3449,417 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified tag keys and values to the specified resource share. The tags are attached only to the resource share, not to the resources that are in the resource share."]
+       "Adds the specified tag keys and values to a resource share or managed permission. If you choose a resource share, the tags are attached to only the resource share, not to the resources that are in the resource share. The tags on a managed permission are the same for all versions of the managed permission."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceShareArn: String_.t
+      resourceShareArn: String_.t option
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the resource share that you want to add tags to."];
+          "Specifies the Amazon Resource Name (ARN) of the resource share that you want to add tags to. You must specify either resourceShareArn, or resourceArn, but not both."];
       tags: TagList.t
         [@ocaml.doc
-          "A list of one or more tag key and value pairs. The tag key must be present and not be an empty string. The tag value must be present but can be an empty string."]}
+          "A list of one or more tag key and value pairs. The tag key must be present and not be an empty string. The tag value must be present but can be an empty string."];
+      resourceArn: String_.t option
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the managed permission that you want to add tags to. You must specify either resourceArn, or resourceShareArn, but not both."]}
     let context_ = "TagResourceRequest"
-    let make ~resourceShareArn =
-      fun ~tags -> fun () -> { resourceShareArn; tags }
+    let make ?resourceShareArn =
+      fun ?resourceArn ->
+        fun ~tags -> fun () -> { resourceShareArn; resourceArn; tags }
     let to_value x =
       structure_to_value
-        [("resourceShareArn", (Some (String_.to_value x.resourceShareArn)));
-        ("tags", (Some (TagList.to_value x.tags)))]
+        [("resourceShareArn",
+           (Option.map x.resourceShareArn ~f:String_.to_value));
+        ("tags", (Some (TagList.to_value x.tags)));
+        ("resourceArn", (Option.map x.resourceArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceArn") in
       let tags =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       let resourceShareArn =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
-      make ~tags ~resourceShareArn ()
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceShareArn") in
+      make ?resourceArn ~tags ?resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" String_.of_json in
+      let tags = field_map_exn json__ "tags" TagList.of_json in
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
-      make ~tags ~resourceShareArn ()
+        field_map json__ "resourceShareArn" String_.of_json in
+      make ?resourceArn ~tags ?resourceShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified tag keys and values to the specified resource share. The tags are attached only to the resource share, not to the resources that are in the resource share."]
+       "Adds the specified tag keys and values to a resource share or managed permission. If you choose a resource share, the tags are attached to only the resource share, not to the resources that are in the resource share. The tags on a managed permission are the same for all versions of the managed permission."]
+module SetDefaultPermissionVersionResponse =
+  struct
+    type nonrec t =
+      {
+      returnValue: Boolean.t option
+        [@ocaml.doc
+          "A boolean value that indicates whether the operation was successful."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "The idempotency identifier associated with this request. If you want to repeat the same operation in an idempotent manner then you must include this value in the clientToken request parameter of that later call. All other parameters must also have the same values that you used in the first call."]}
+    type nonrec error =
+      [
+        `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidClientTokenException of InvalidClientTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `MalformedArnException of MalformedArnException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `UnknownResourceException of UnknownResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?returnValue =
+      fun ?clientToken -> fun () -> { returnValue; clientToken }
+    let error_of_json name json =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidClientTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidClientTokenException"));
+            ("details", (InvalidClientTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `MalformedArnException e ->
+          `Assoc
+            [("error", (`String "MalformedArnException"));
+            ("details", (MalformedArnException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `UnknownResourceException e ->
+          `Assoc
+            [("error", (`String "UnknownResourceException"));
+            ("details", (UnknownResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("returnValue", (Option.map x.returnValue ~f:Boolean.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let returnValue =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
+      make ?clientToken ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let returnValue = field_map json__ "returnValue" Boolean.of_json in
+      make ?clientToken ?returnValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Designates the specified version number as the default version for the specified customer managed permission. New resource shares automatically use this new default permission. Existing resource shares continue to use their original permission version, but you can use ReplacePermissionAssociations to update them."]
+module SetDefaultPermissionVersionRequest =
+  struct
+    type nonrec t =
+      {
+      permissionArn: String_.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the customer managed permission whose default version you want to change."];
+      permissionVersion: Integer.t
+        [@ocaml.doc
+          "Specifies the version number that you want to designate as the default for customer managed permission. To see a list of all available version numbers, use ListPermissionVersions."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
+    let context_ = "SetDefaultPermissionVersionRequest"
+    let make ?clientToken =
+      fun ~permissionArn ->
+        fun ~permissionVersion ->
+          fun () -> { clientToken; permissionArn; permissionVersion }
+    let to_value x =
+      structure_to_value
+        [("permissionArn", (Some (String_.to_value x.permissionArn)));
+        ("permissionVersion", (Some (Integer.to_value x.permissionVersion)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let permissionVersion =
+        Integer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionVersion") in
+      let permissionArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionArn") in
+      make ?clientToken ~permissionVersion ~permissionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let permissionVersion =
+        field_map_exn json__ "permissionVersion" Integer.of_json in
+      let permissionArn =
+        field_map_exn json__ "permissionArn" String_.of_json in
+      make ?clientToken ~permissionVersion ~permissionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Designates the specified version number as the default version for the specified customer managed permission. New resource shares automatically use this new default permission. Existing resource shares continue to use their original permission version, but you can use ReplacePermissionAssociations to update them."]
+module ReplacePermissionAssociationsResponse =
+  struct
+    type nonrec t =
+      {
+      replacePermissionAssociationsWork:
+        ReplacePermissionAssociationsWork.t option
+        [@ocaml.doc
+          "Specifies a data structure that you can use to track the asynchronous tasks that RAM performs to complete this operation. You can use the ListReplacePermissionAssociationsWork operation and pass the id value returned in this structure."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "The idempotency identifier associated with this request. If you want to repeat the same operation in an idempotent manner then you must include this value in the clientToken request parameter of that later call. All other parameters must also have the same values that you used in the first call."]}
+    type nonrec error =
+      [
+        `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidClientTokenException of InvalidClientTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `MalformedArnException of MalformedArnException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `UnknownResourceException of UnknownResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?replacePermissionAssociationsWork =
+      fun ?clientToken ->
+        fun () -> { replacePermissionAssociationsWork; clientToken }
+    let error_of_json name json =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidClientTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidClientTokenException"));
+            ("details", (InvalidClientTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `MalformedArnException e ->
+          `Assoc
+            [("error", (`String "MalformedArnException"));
+            ("details", (MalformedArnException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `UnknownResourceException e ->
+          `Assoc
+            [("error", (`String "UnknownResourceException"));
+            ("details", (UnknownResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("replacePermissionAssociationsWork",
+           (Option.map x.replacePermissionAssociationsWork
+              ~f:ReplacePermissionAssociationsWork.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let replacePermissionAssociationsWork =
+        (Option.map ~f:ReplacePermissionAssociationsWork.of_xml)
+          (Xml.child xml_arg0 "replacePermissionAssociationsWork") in
+      make ?clientToken ?replacePermissionAssociationsWork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let replacePermissionAssociationsWork =
+        field_map json__ "replacePermissionAssociationsWork"
+          ReplacePermissionAssociationsWork.of_json in
+      make ?clientToken ?replacePermissionAssociationsWork ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates all resource shares that use a managed permission to a different managed permission. This operation always applies the default version of the target managed permission. You can optionally specify that the update applies to only resource shares that currently use a specified version. This enables you to update to the latest version, without changing the which managed permission is used. You can use this operation to update all of your resource shares to use the current default version of the permission by specifying the same value for the fromPermissionArn and toPermissionArn parameters. You can use the optional fromPermissionVersion parameter to update only those resources that use a specified version of the managed permission to the new managed permission. To successfully perform this operation, you must have permission to update the resource-based policy on all affected resource types."]
+module ReplacePermissionAssociationsRequest =
+  struct
+    type nonrec t =
+      {
+      fromPermissionArn: String_.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the managed permission that you want to replace."];
+      fromPermissionVersion: Integer.t option
+        [@ocaml.doc
+          "Specifies that you want to updated the permissions for only those resource shares that use the specified version of the managed permission."];
+      toPermissionArn: String_.t
+        [@ocaml.doc
+          "Specifies the ARN of the managed permission that you want to associate with resource shares in place of the one specified by fromPerssionArn and fromPermissionVersion. The operation always associates the version that is currently the default for the specified managed permission."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
+    let context_ = "ReplacePermissionAssociationsRequest"
+    let make ?fromPermissionVersion =
+      fun ?clientToken ->
+        fun ~fromPermissionArn ->
+          fun ~toPermissionArn ->
+            fun () ->
+              {
+                fromPermissionVersion;
+                clientToken;
+                fromPermissionArn;
+                toPermissionArn
+              }
+    let to_value x =
+      structure_to_value
+        [("fromPermissionArn", (Some (String_.to_value x.fromPermissionArn)));
+        ("fromPermissionVersion",
+          (Option.map x.fromPermissionVersion ~f:Integer.to_value));
+        ("toPermissionArn", (Some (String_.to_value x.toPermissionArn)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let toPermissionArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "toPermissionArn") in
+      let fromPermissionVersion =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "fromPermissionVersion") in
+      let fromPermissionArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fromPermissionArn") in
+      make ?clientToken ~toPermissionArn ?fromPermissionVersion
+        ~fromPermissionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let toPermissionArn =
+        field_map_exn json__ "toPermissionArn" String_.of_json in
+      let fromPermissionVersion =
+        field_map json__ "fromPermissionVersion" Integer.of_json in
+      let fromPermissionArn =
+        field_map_exn json__ "fromPermissionArn" String_.of_json in
+      make ?clientToken ~toPermissionArn ?fromPermissionVersion
+        ~fromPermissionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates all resource shares that use a managed permission to a different managed permission. This operation always applies the default version of the target managed permission. You can optionally specify that the update applies to only resource shares that currently use a specified version. This enables you to update to the latest version, without changing the which managed permission is used. You can use this operation to update all of your resource shares to use the current default version of the permission by specifying the same value for the fromPermissionArn and toPermissionArn parameters. You can use the optional fromPermissionVersion parameter to update only those resources that use a specified version of the managed permission to the new managed permission. To successfully perform this operation, you must have permission to update the resource-based policy on all affected resource types."]
 module RejectResourceShareInvitationResponse =
   struct
     type nonrec t =
@@ -2673,10 +4023,10 @@ module RejectResourceShareInvitationResponse =
           (Xml.child xml_arg0 "resourceShareInvitation") in
       make ?clientToken ?resourceShareInvitation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let resourceShareInvitation =
-        field_map json "resourceShareInvitation"
+        field_map json__ "resourceShareInvitation"
           ResourceShareInvitation.of_json in
       make ?clientToken ?resourceShareInvitation ()
     let to_json v = composed_to_json to_value v
@@ -2688,10 +4038,10 @@ module RejectResourceShareInvitationRequest =
       {
       resourceShareInvitationArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the invitation that you want to reject."];
+          "Specifies the Amazon Resource Name (ARN) of the invitation that you want to reject."];
       clientToken: String_.t option
         [@ocaml.doc
-          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you."]}
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
     let context_ = "RejectResourceShareInvitationRequest"
     let make ?clientToken =
       fun ~resourceShareInvitationArn ->
@@ -2711,10 +4061,10 @@ module RejectResourceShareInvitationRequest =
              "resourceShareInvitationArn") in
       make ?clientToken ~resourceShareInvitationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let resourceShareInvitationArn =
-        field_map_exn json "resourceShareInvitationArn" String_.of_json in
+        field_map_exn json__ "resourceShareInvitationArn" String_.of_json in
       make ?clientToken ~resourceShareInvitationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2728,6 +4078,7 @@ module PromoteResourceShareCreatedFromPolicyResponse =
           "A return value of true indicates that the request succeeded. A value of false indicates that the request failed."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidStateTransitionException of InvalidStateTransitionException.t 
       | `MalformedArnException of MalformedArnException.t 
       | `MissingRequiredParameterException of
           MissingRequiredParameterException.t 
@@ -2737,12 +4088,17 @@ module PromoteResourceShareCreatedFromPolicyResponse =
       | `ServerInternalException of ServerInternalException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `UnknownResourceException of UnknownResourceException.t 
+      | `UnmatchedPolicyPermissionException of
+          UnmatchedPolicyPermissionException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?returnValue = fun () -> { returnValue }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidStateTransitionException" ->
+          `InvalidStateTransitionException
+            (InvalidStateTransitionException.of_json json)
       | "MalformedArnException" ->
           `MalformedArnException (MalformedArnException.of_json json)
       | "MissingRequiredParameterException" ->
@@ -2761,6 +4117,9 @@ module PromoteResourceShareCreatedFromPolicyResponse =
             (ServiceUnavailableException.of_json json)
       | "UnknownResourceException" ->
           `UnknownResourceException (UnknownResourceException.of_json json)
+      | "UnmatchedPolicyPermissionException" ->
+          `UnmatchedPolicyPermissionException
+            (UnmatchedPolicyPermissionException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2768,6 +4127,9 @@ module PromoteResourceShareCreatedFromPolicyResponse =
       match name with
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidStateTransitionException" ->
+          `InvalidStateTransitionException
+            (InvalidStateTransitionException.of_xml xml)
       | "MalformedArnException" ->
           `MalformedArnException (MalformedArnException.of_xml xml)
       | "MissingRequiredParameterException" ->
@@ -2786,6 +4148,9 @@ module PromoteResourceShareCreatedFromPolicyResponse =
             (ServiceUnavailableException.of_xml xml)
       | "UnknownResourceException" ->
           `UnknownResourceException (UnknownResourceException.of_xml xml)
+      | "UnmatchedPolicyPermissionException" ->
+          `UnmatchedPolicyPermissionException
+            (UnmatchedPolicyPermissionException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2794,6 +4159,10 @@ module PromoteResourceShareCreatedFromPolicyResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `InvalidStateTransitionException e ->
+          `Assoc
+            [("error", (`String "InvalidStateTransitionException"));
+            ("details", (InvalidStateTransitionException.to_json e))]
       | `MalformedArnException e ->
           `Assoc
             [("error", (`String "MalformedArnException"));
@@ -2822,6 +4191,10 @@ module PromoteResourceShareCreatedFromPolicyResponse =
           `Assoc
             [("error", (`String "UnknownResourceException"));
             ("details", (UnknownResourceException.to_json e))]
+      | `UnmatchedPolicyPermissionException e ->
+          `Assoc
+            [("error", (`String "UnmatchedPolicyPermissionException"));
+            ("details", (UnmatchedPolicyPermissionException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2836,19 +4209,19 @@ module PromoteResourceShareCreatedFromPolicyResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?returnValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let returnValue = field_map json "returnValue" Boolean.of_json in
+    let of_json json__ =
+      let returnValue = field_map json__ "returnValue" Boolean.of_json in
       make ?returnValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "When you attach a resource-based permission policy to a resource, it automatically creates a resource share. However, resource shares created this way are visible only to the resource share owner, and the resource share can't be modified in RAM. You can use this operation to promote the resource share to a full RAM resource share. When you promote a resource share, you can then manage the resource share in RAM and it becomes visible to all of the principals you shared it with."]
+       "When you attach a resource-based policy to a resource, RAM automatically creates a resource share of featureSet=CREATED_FROM_POLICY with a managed permission that has the same IAM permissions as the original resource-based policy. However, this type of managed permission is visible to only the resource share owner, and the associated resource share can't be modified by using RAM. This operation promotes the resource share to a STANDARD resource share that is fully manageable in RAM. When you promote a resource share, you can then manage the resource share in RAM and it becomes visible to all of the principals you shared it with. Before you perform this operation, you should first run PromotePermissionCreatedFromPolicyto ensure that you have an appropriate customer managed permission that can be associated with this resource share after its is promoted. If this operation can't find a managed permission that exactly matches the existing CREATED_FROM_POLICY permission, then this operation fails."]
 module PromoteResourceShareCreatedFromPolicyRequest =
   struct
     type nonrec t =
       {
       resourceShareArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the resource share to promote."]}
+          "Specifies the Amazon Resource Name (ARN) of the resource share to promote."]}
     let context_ = "PromoteResourceShareCreatedFromPolicyRequest"
     let make ~resourceShareArn = fun () -> { resourceShareArn }
     let to_value x =
@@ -2861,13 +4234,374 @@ module PromoteResourceShareCreatedFromPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ~resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
+        field_map_exn json__ "resourceShareArn" String_.of_json in
       make ~resourceShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "When you attach a resource-based permission policy to a resource, it automatically creates a resource share. However, resource shares created this way are visible only to the resource share owner, and the resource share can't be modified in RAM. You can use this operation to promote the resource share to a full RAM resource share. When you promote a resource share, you can then manage the resource share in RAM and it becomes visible to all of the principals you shared it with."]
+       "When you attach a resource-based policy to a resource, RAM automatically creates a resource share of featureSet=CREATED_FROM_POLICY with a managed permission that has the same IAM permissions as the original resource-based policy. However, this type of managed permission is visible to only the resource share owner, and the associated resource share can't be modified by using RAM. This operation promotes the resource share to a STANDARD resource share that is fully manageable in RAM. When you promote a resource share, you can then manage the resource share in RAM and it becomes visible to all of the principals you shared it with. Before you perform this operation, you should first run PromotePermissionCreatedFromPolicyto ensure that you have an appropriate customer managed permission that can be associated with this resource share after its is promoted. If this operation can't find a managed permission that exactly matches the existing CREATED_FROM_POLICY permission, then this operation fails."]
+module PromotePermissionCreatedFromPolicyResponse =
+  struct
+    type nonrec t =
+      {
+      permission: ResourceSharePermissionSummary.t option ;
+      clientToken: String_.t option
+        [@ocaml.doc
+          "The idempotency identifier associated with this request. If you want to repeat the same operation in an idempotent manner then you must include this value in the clientToken request parameter of that later call. All other parameters must also have the same values that you used in the first call."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidPolicyException of InvalidPolicyException.t 
+      | `MalformedArnException of MalformedArnException.t 
+      | `MissingRequiredParameterException of
+          MissingRequiredParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `UnknownResourceException of UnknownResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?permission =
+      fun ?clientToken -> fun () -> { permission; clientToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidPolicyException" ->
+          `InvalidPolicyException (InvalidPolicyException.of_json json)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_json json)
+      | "MissingRequiredParameterException" ->
+          `MissingRequiredParameterException
+            (MissingRequiredParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidPolicyException" ->
+          `InvalidPolicyException (InvalidPolicyException.of_xml xml)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_xml xml)
+      | "MissingRequiredParameterException" ->
+          `MissingRequiredParameterException
+            (MissingRequiredParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidPolicyException e ->
+          `Assoc
+            [("error", (`String "InvalidPolicyException"));
+            ("details", (InvalidPolicyException.to_json e))]
+      | `MalformedArnException e ->
+          `Assoc
+            [("error", (`String "MalformedArnException"));
+            ("details", (MalformedArnException.to_json e))]
+      | `MissingRequiredParameterException e ->
+          `Assoc
+            [("error", (`String "MissingRequiredParameterException"));
+            ("details", (MissingRequiredParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `UnknownResourceException e ->
+          `Assoc
+            [("error", (`String "UnknownResourceException"));
+            ("details", (UnknownResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("permission",
+           (Option.map x.permission
+              ~f:ResourceSharePermissionSummary.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let permission =
+        (Option.map ~f:ResourceSharePermissionSummary.of_xml)
+          (Xml.child xml_arg0 "permission") in
+      make ?clientToken ?permission ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let permission =
+        field_map json__ "permission" ResourceSharePermissionSummary.of_json in
+      make ?clientToken ?permission ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "When you attach a resource-based policy to a resource, RAM automatically creates a resource share of featureSet=CREATED_FROM_POLICY with a managed permission that has the same IAM permissions as the original resource-based policy. However, this type of managed permission is visible to only the resource share owner, and the associated resource share can't be modified by using RAM. This operation creates a separate, fully manageable customer managed permission that has the same IAM permissions as the original resource-based policy. You can associate this customer managed permission to any resource shares. Before you use PromoteResourceShareCreatedFromPolicy, you should first run this operation to ensure that you have an appropriate customer managed permission that can be associated with the promoted resource share. The original CREATED_FROM_POLICY policy isn't deleted, and resource shares using that original policy aren't automatically updated. You can't modify a CREATED_FROM_POLICY resource share so you can't associate the new customer managed permission by using ReplacePermsissionAssociations. However, if you use PromoteResourceShareCreatedFromPolicy, that operation automatically associates the fully manageable customer managed permission to the newly promoted STANDARD resource share. After you promote a resource share, if the original CREATED_FROM_POLICY managed permission has no other associations to A resource share, then RAM automatically deletes it."]
+module PromotePermissionCreatedFromPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      permissionArn: String_.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the CREATED_FROM_POLICY permission that you want to promote. You can get this Amazon Resource Name (ARN) by calling the ListResourceSharePermissions operation."];
+      name: String_.t
+        [@ocaml.doc
+          "Specifies a name for the promoted customer managed permission."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
+    let context_ = "PromotePermissionCreatedFromPolicyRequest"
+    let make ?clientToken =
+      fun ~permissionArn ->
+        fun ~name -> fun () -> { clientToken; permissionArn; name }
+    let to_value x =
+      structure_to_value
+        [("permissionArn", (Some (String_.to_value x.permissionArn)));
+        ("name", (Some (String_.to_value x.name)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let name =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let permissionArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionArn") in
+      make ?clientToken ~name ~permissionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      let permissionArn =
+        field_map_exn json__ "permissionArn" String_.of_json in
+      make ?clientToken ~name ~permissionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "When you attach a resource-based policy to a resource, RAM automatically creates a resource share of featureSet=CREATED_FROM_POLICY with a managed permission that has the same IAM permissions as the original resource-based policy. However, this type of managed permission is visible to only the resource share owner, and the associated resource share can't be modified by using RAM. This operation creates a separate, fully manageable customer managed permission that has the same IAM permissions as the original resource-based policy. You can associate this customer managed permission to any resource shares. Before you use PromoteResourceShareCreatedFromPolicy, you should first run this operation to ensure that you have an appropriate customer managed permission that can be associated with the promoted resource share. The original CREATED_FROM_POLICY policy isn't deleted, and resource shares using that original policy aren't automatically updated. You can't modify a CREATED_FROM_POLICY resource share so you can't associate the new customer managed permission by using ReplacePermsissionAssociations. However, if you use PromoteResourceShareCreatedFromPolicy, that operation automatically associates the fully manageable customer managed permission to the newly promoted STANDARD resource share. After you promote a resource share, if the original CREATED_FROM_POLICY managed permission has no other associations to A resource share, then RAM automatically deletes it."]
+module ListSourceAssociationsResponse =
+  struct
+    type nonrec t =
+      {
+      sourceAssociations: AssociatedSourceList.t option
+        [@ocaml.doc "Information about the source associations."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The pagination token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `MalformedArnException of MalformedArnException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `UnknownResourceException of UnknownResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sourceAssociations =
+      fun ?nextToken -> fun () -> { sourceAssociations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `MalformedArnException e ->
+          `Assoc
+            [("error", (`String "MalformedArnException"));
+            ("details", (MalformedArnException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `UnknownResourceException e ->
+          `Assoc
+            [("error", (`String "UnknownResourceException"));
+            ("details", (UnknownResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sourceAssociations",
+           (Option.map x.sourceAssociations ~f:AssociatedSourceList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let sourceAssociations =
+        (Option.map ~f:AssociatedSourceList.of_xml)
+          (Xml.child xml_arg0 "sourceAssociations") in
+      make ?nextToken ?sourceAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let sourceAssociations =
+        field_map json__ "sourceAssociations" AssociatedSourceList.of_json in
+      make ?nextToken ?sourceAssociations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists source associations for resource shares. Source associations control which sources can be used with service principals in resource shares. This operation provides visibility into source associations for resource share owners. You can filter the results by resource share Amazon Resource Name (ARN), source ID, source type, or association status. We recommend using pagination to ensure that the operation returns quickly and successfully."]
+module ListSourceAssociationsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceShareArns: ResourceShareArnList.t option
+        [@ocaml.doc
+          "The Amazon Resource Names (ARNs) of the resource shares for which you want to retrieve source associations."];
+      sourceId: String_.t option
+        [@ocaml.doc
+          "The identifier of the source for which you want to retrieve associations. This can be an account ID, Amazon Resource Name (ARN), organization ID, or organization path."];
+      sourceType: String_.t option
+        [@ocaml.doc
+          "The type of source for which you want to retrieve associations."];
+      associationStatus: ResourceShareAssociationStatus.t option
+        [@ocaml.doc
+          "The status of the source associations that you want to retrieve."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The pagination token that indicates the next set of results to retrieve."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned nextToken value."]}
+    let make ?resourceShareArns =
+      fun ?sourceId ->
+        fun ?sourceType ->
+          fun ?associationStatus ->
+            fun ?nextToken ->
+              fun ?maxResults ->
+                fun () ->
+                  {
+                    resourceShareArns;
+                    sourceId;
+                    sourceType;
+                    associationStatus;
+                    nextToken;
+                    maxResults
+                  }
+    let to_value x =
+      structure_to_value
+        [("resourceShareArns",
+           (Option.map x.resourceShareArns ~f:ResourceShareArnList.to_value));
+        ("sourceId", (Option.map x.sourceId ~f:String_.to_value));
+        ("sourceType", (Option.map x.sourceType ~f:String_.to_value));
+        ("associationStatus",
+          (Option.map x.associationStatus
+             ~f:ResourceShareAssociationStatus.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let associationStatus =
+        (Option.map ~f:ResourceShareAssociationStatus.of_xml)
+          (Xml.child xml_arg0 "associationStatus") in
+      let sourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceType") in
+      let sourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceId") in
+      let resourceShareArns =
+        (Option.map ~f:ResourceShareArnList.of_xml)
+          (Xml.child xml_arg0 "resourceShareArns") in
+      make ?maxResults ?nextToken ?associationStatus ?sourceType ?sourceId
+        ?resourceShareArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let associationStatus =
+        field_map json__ "associationStatus"
+          ResourceShareAssociationStatus.of_json in
+      let sourceType = field_map json__ "sourceType" String_.of_json in
+      let sourceId = field_map json__ "sourceId" String_.of_json in
+      let resourceShareArns =
+        field_map json__ "resourceShareArns" ResourceShareArnList.of_json in
+      make ?maxResults ?nextToken ?associationStatus ?sourceType ?sourceId
+        ?resourceShareArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists source associations for resource shares. Source associations control which sources can be used with service principals in resource shares. This operation provides visibility into source associations for resource share owners. You can filter the results by resource share Amazon Resource Name (ARN), source ID, source type, or association status. We recommend using pagination to ensure that the operation returns quickly and successfully."]
 module ListResourcesResponse =
   struct
     type nonrec t =
@@ -2977,13 +4711,13 @@ module ListResourcesResponse =
         (Option.map ~f:ResourceList.of_xml) (Xml.child xml_arg0 "resources") in
       make ?nextToken ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let resources = field_map json "resources" ResourceList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let resources = field_map json__ "resources" ResourceList.of_json in
       make ?nextToken ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the resources that you added to a resource share or the resources that are shared with you."]
+       "Lists the resources that you added to a resource share or the resources that are shared with you. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListResourcesRequest =
   struct
     type nonrec t =
@@ -3071,25 +4805,25 @@ module ListResourcesRequest =
       make ?resourceRegionScope ?maxResults ?nextToken ?resourceShareArns
         ?resourceArns ?resourceType ?principal ~resourceOwner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceRegionScope =
-        field_map json "resourceRegionScope"
+        field_map json__ "resourceRegionScope"
           ResourceRegionScopeFilter.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let resourceShareArns =
-        field_map json "resourceShareArns" ResourceShareArnList.of_json in
+        field_map json__ "resourceShareArns" ResourceShareArnList.of_json in
       let resourceArns =
-        field_map json "resourceArns" ResourceArnList.of_json in
-      let resourceType = field_map json "resourceType" String_.of_json in
-      let principal = field_map json "principal" String_.of_json in
+        field_map json__ "resourceArns" ResourceArnList.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let principal = field_map json__ "principal" String_.of_json in
       let resourceOwner =
-        field_map_exn json "resourceOwner" ResourceOwner.of_json in
+        field_map_exn json__ "resourceOwner" ResourceOwner.of_json in
       make ?resourceRegionScope ?maxResults ?nextToken ?resourceShareArns
         ?resourceArns ?resourceType ?principal ~resourceOwner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the resources that you added to a resource share or the resources that are shared with you."]
+       "Lists the resources that you added to a resource share or the resources that are shared with you. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListResourceTypesResponse =
   struct
     type nonrec t =
@@ -3173,10 +4907,11 @@ module ListResourceTypesResponse =
           (Xml.child xml_arg0 "resourceTypes") in
       make ?nextToken ?resourceTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let resourceTypes =
-        field_map json "resourceTypes" ServiceNameAndResourceTypeList.of_json in
+        field_map json__ "resourceTypes"
+          ServiceNameAndResourceTypeList.of_json in
       make ?nextToken ?resourceTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the resource types that can be shared by RAM."]
@@ -3215,12 +4950,12 @@ module ListResourceTypesRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?resourceRegionScope ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceRegionScope =
-        field_map json "resourceRegionScope"
+        field_map json__ "resourceRegionScope"
           ResourceRegionScopeFilter.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?resourceRegionScope ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the resource types that can be shared by RAM."]
@@ -3335,21 +5070,21 @@ module ListResourceSharePermissionsResponse =
           (Xml.child xml_arg0 "permissions") in
       make ?nextToken ?permissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let permissions =
-        field_map json "permissions" ResourceSharePermissionList.of_json in
+        field_map json__ "permissions" ResourceSharePermissionList.of_json in
       make ?nextToken ?permissions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the RAM permissions that are associated with a resource share."]
+       "Lists the RAM permissions that are associated with a resource share. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListResourceSharePermissionsRequest =
   struct
     type nonrec t =
       {
       resourceShareArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the resource share for which you want to retrieve the associated permissions."];
+          "Specifies the Amazon Resource Name (ARN) of the resource share for which you want to retrieve the associated permissions."];
       nextToken: String_.t option
         [@ocaml.doc
           "Specifies that you want to receive the next page of results. Valid only if you received a NextToken response in the previous request. If you did, it indicates that more output is available. Set this parameter to the value provided by the previous call's NextToken response to request the next page of results."];
@@ -3377,15 +5112,167 @@ module ListResourceSharePermissionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?maxResults ?nextToken ~resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
+        field_map_exn json__ "resourceShareArn" String_.of_json in
       make ?maxResults ?nextToken ~resourceShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the RAM permissions that are associated with a resource share."]
+       "Lists the RAM permissions that are associated with a resource share. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
+module ListReplacePermissionAssociationsWorkResponse =
+  struct
+    type nonrec t =
+      {
+      replacePermissionAssociationsWorks:
+        ReplacePermissionAssociationsWorkList.t option
+        [@ocaml.doc
+          "An array of data structures that provide details of the matching work IDs."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "If present, this value indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null. This indicates that this is the last page of results."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?replacePermissionAssociationsWorks =
+      fun ?nextToken ->
+        fun () -> { replacePermissionAssociationsWorks; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("replacePermissionAssociationsWorks",
+           (Option.map x.replacePermissionAssociationsWorks
+              ~f:ReplacePermissionAssociationsWorkList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let replacePermissionAssociationsWorks =
+        (Option.map ~f:ReplacePermissionAssociationsWorkList.of_xml)
+          (Xml.child xml_arg0 "replacePermissionAssociationsWorks") in
+      make ?nextToken ?replacePermissionAssociationsWorks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let replacePermissionAssociationsWorks =
+        field_map json__ "replacePermissionAssociationsWorks"
+          ReplacePermissionAssociationsWorkList.of_json in
+      make ?nextToken ?replacePermissionAssociationsWorks ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the current status of the asynchronous tasks performed by RAM when you perform the ReplacePermissionAssociationsWork operation. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
+module ListReplacePermissionAssociationsWorkRequest =
+  struct
+    type nonrec t =
+      {
+      workIds: ReplacePermissionAssociationsWorkIdList.t option
+        [@ocaml.doc
+          "A list of IDs. These values come from the idfield of the replacePermissionAssociationsWorkstructure returned by the ReplacePermissionAssociations operation."];
+      status: ReplacePermissionAssociationsWorkStatus.t option
+        [@ocaml.doc
+          "Specifies that you want to see only the details about requests with a status that matches this value."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "Specifies that you want to receive the next page of results. Valid only if you received a NextToken response in the previous request. If you did, it indicates that more output is available. Set this parameter to the value provided by the previous call's NextToken response to request the next page of results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Specifies the total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the number you specify, the NextToken response element is returned with a value (not null). Include the specified value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that the service might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+    let make ?workIds =
+      fun ?status ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun () -> { workIds; status; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("workIds",
+           (Option.map x.workIds
+              ~f:ReplacePermissionAssociationsWorkIdList.to_value));
+        ("status",
+          (Option.map x.status
+             ~f:ReplacePermissionAssociationsWorkStatus.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let status =
+        (Option.map ~f:ReplacePermissionAssociationsWorkStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let workIds =
+        (Option.map ~f:ReplacePermissionAssociationsWorkIdList.of_xml)
+          (Xml.child xml_arg0 "workIds") in
+      make ?maxResults ?nextToken ?status ?workIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let status =
+        field_map json__ "status"
+          ReplacePermissionAssociationsWorkStatus.of_json in
+      let workIds =
+        field_map json__ "workIds"
+          ReplacePermissionAssociationsWorkIdList.of_json in
+      make ?maxResults ?nextToken ?status ?workIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the current status of the asynchronous tasks performed by RAM when you perform the ReplacePermissionAssociationsWork operation. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListPrincipalsResponse =
   struct
     type nonrec t =
@@ -3485,13 +5372,13 @@ module ListPrincipalsResponse =
           (Xml.child xml_arg0 "principals") in
       make ?nextToken ?principals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let principals = field_map json "principals" PrincipalList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let principals = field_map json__ "principals" PrincipalList.of_json in
       make ?nextToken ?principals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the principals that you are sharing resources with or that are sharing resources with you."]
+       "Lists the principals that you are sharing resources with or that are sharing resources with you. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListPrincipalsRequest =
   struct
     type nonrec t =
@@ -3501,10 +5388,10 @@ module ListPrincipalsRequest =
           "Specifies that you want to list information for only resource shares that match the following: SELF \226\128\147 principals that your account is sharing resources with OTHER-ACCOUNTS \226\128\147 principals that are sharing resources with your account"];
       resourceArn: String_.t option
         [@ocaml.doc
-          "Specifies that you want to list principal information for the resource share with the specified Amazon Resoure Name (ARN)."];
+          "Specifies that you want to list principal information for the resource share with the specified Amazon Resource Name (ARN)."];
       principals: PrincipalArnOrIdList.t option
         [@ocaml.doc
-          "Specifies that you want to list information for only the listed principals. You can include the following values: An Amazon Web Services account ID, for example: 123456789012 An Amazon Resoure Name (ARN) of an organization in Organizations, for example: organizations::123456789012:organization/o-exampleorgid An ARN of an organizational unit (OU) in Organizations, for example: organizations::123456789012:ou/o-exampleorgid/ou-examplerootid-exampleouid123 An ARN of an IAM role, for example: iam::123456789012:role/rolename An ARN of an IAM user, for example: iam::123456789012user/username Not all resource types can be shared with IAM roles and users. For more information, see Sharing with IAM roles and users in the Resource Access Manager User Guide."];
+          "Specifies that you want to list information for only the listed principals. You can include the following values: An Amazon Web Services account ID, for example: 123456789012 An Amazon Resource Name (ARN) of an organization in Organizations, for example: organizations::123456789012:organization/o-exampleorgid An ARN of an organizational unit (OU) in Organizations, for example: organizations::123456789012:ou/o-exampleorgid/ou-examplerootid-exampleouid123 An ARN of an IAM role, for example: iam::123456789012:role/rolename An ARN of an IAM user, for example: iam::123456789012user/username A service principal name, for example: service-id.amazonaws.com Not all resource types can be shared with IAM roles and users. For more information, see Sharing with IAM roles and users in the Resource Access Manager User Guide."];
       resourceType: String_.t option
         [@ocaml.doc
           "Specifies that you want to list information for only principals associated with resource shares that include the specified resource type. For a list of valid values, query the ListResourceTypes operation."];
@@ -3568,22 +5455,22 @@ module ListPrincipalsRequest =
       make ?maxResults ?nextToken ?resourceShareArns ?resourceType
         ?principals ?resourceArn ~resourceOwner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let resourceShareArns =
-        field_map json "resourceShareArns" ResourceShareArnList.of_json in
-      let resourceType = field_map json "resourceType" String_.of_json in
+        field_map json__ "resourceShareArns" ResourceShareArnList.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
       let principals =
-        field_map json "principals" PrincipalArnOrIdList.of_json in
-      let resourceArn = field_map json "resourceArn" String_.of_json in
+        field_map json__ "principals" PrincipalArnOrIdList.of_json in
+      let resourceArn = field_map json__ "resourceArn" String_.of_json in
       let resourceOwner =
-        field_map_exn json "resourceOwner" ResourceOwner.of_json in
+        field_map_exn json__ "resourceOwner" ResourceOwner.of_json in
       make ?maxResults ?nextToken ?resourceShareArns ?resourceType
         ?principals ?resourceArn ~resourceOwner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the principals that you are sharing resources with or that are sharing resources with you."]
+       "Lists the principals that you are sharing resources with or that are sharing resources with you. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListPermissionsResponse =
   struct
     type nonrec t =
@@ -3677,53 +5564,65 @@ module ListPermissionsResponse =
           (Xml.child xml_arg0 "permissions") in
       make ?nextToken ?permissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let permissions =
-        field_map json "permissions" ResourceSharePermissionList.of_json in
+        field_map json__ "permissions" ResourceSharePermissionList.of_json in
       make ?nextToken ?permissions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a list of available RAM permissions that you can use for the supported resource types."]
+       "Retrieves a list of available RAM permissions that you can use for the supported resource types. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListPermissionsRequest =
   struct
     type nonrec t =
       {
       resourceType: String_.t option
         [@ocaml.doc
-          "Specifies that you want to list permissions for only the specified resource type. For example, to list only permissions that apply to EC2 subnets, specify ec2:Subnet. You can use the ListResourceTypes operation to get the specific string required."];
+          "Specifies that you want to list only those permissions that apply to the specified resource type. This parameter is not case sensitive. For example, to list only permissions that apply to Amazon EC2 subnets, specify ec2:subnet. You can use the ListResourceTypes operation to get the specific string required."];
       nextToken: String_.t option
         [@ocaml.doc
           "Specifies that you want to receive the next page of results. Valid only if you received a NextToken response in the previous request. If you did, it indicates that more output is available. Set this parameter to the value provided by the previous call's NextToken response to request the next page of results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "Specifies the total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the number you specify, the NextToken response element is returned with a value (not null). Include the specified value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that the service might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "Specifies the total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the number you specify, the NextToken response element is returned with a value (not null). Include the specified value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that the service might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."];
+      permissionType: PermissionTypeFilter.t option
+        [@ocaml.doc
+          "Specifies that you want to list only permissions of this type: AWS \226\128\147 returns only Amazon Web Services managed permissions. LOCAL \226\128\147 returns only customer managed permissions ALL \226\128\147 returns both Amazon Web Services managed permissions and customer managed permissions. If you don't specify this parameter, the default is All."]}
     let make ?resourceType =
       fun ?nextToken ->
-        fun ?maxResults -> fun () -> { resourceType; nextToken; maxResults }
+        fun ?maxResults ->
+          fun ?permissionType ->
+            fun () -> { resourceType; nextToken; maxResults; permissionType }
     let to_value x =
       structure_to_value
         [("resourceType", (Option.map x.resourceType ~f:String_.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("permissionType",
+          (Option.map x.permissionType ~f:PermissionTypeFilter.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let permissionType =
+        (Option.map ~f:PermissionTypeFilter.of_xml)
+          (Xml.child xml_arg0 "permissionType") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
-      make ?maxResults ?nextToken ?resourceType ()
+      make ?permissionType ?maxResults ?nextToken ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let resourceType = field_map json "resourceType" String_.of_json in
-      make ?maxResults ?nextToken ?resourceType ()
+    let of_json json__ =
+      let permissionType =
+        field_map json__ "permissionType" PermissionTypeFilter.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      make ?permissionType ?maxResults ?nextToken ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a list of available RAM permissions that you can use for the supported resource types."]
+       "Retrieves a list of available RAM permissions that you can use for the supported resource types. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListPermissionVersionsResponse =
   struct
     type nonrec t =
@@ -3835,21 +5734,21 @@ module ListPermissionVersionsResponse =
           (Xml.child xml_arg0 "permissions") in
       make ?nextToken ?permissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let permissions =
-        field_map json "permissions" ResourceSharePermissionList.of_json in
+        field_map json__ "permissions" ResourceSharePermissionList.of_json in
       make ?nextToken ?permissions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the available versions of the specified RAM permission."]
+       "Lists the available versions of the specified RAM permission. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListPermissionVersionsRequest =
   struct
     type nonrec t =
       {
       permissionArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the RAM permission whose versions you want to list. You can use the permissionVersion parameter on the AssociateResourceSharePermission operation to specify a non-default version to attach."];
+          "Specifies the Amazon Resource Name (ARN) of the RAM permission whose versions you want to list. You can use the permissionVersion parameter on the AssociateResourceSharePermission operation to specify a non-default version to attach."];
       nextToken: String_.t option
         [@ocaml.doc
           "Specifies that you want to receive the next page of results. Valid only if you received a NextToken response in the previous request. If you did, it indicates that more output is available. Set this parameter to the value provided by the previous call's NextToken response to request the next page of results."];
@@ -3877,14 +5776,217 @@ module ListPermissionVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "permissionArn") in
       make ?maxResults ?nextToken ~permissionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let permissionArn = field_map_exn json "permissionArn" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let permissionArn =
+        field_map_exn json__ "permissionArn" String_.of_json in
       make ?maxResults ?nextToken ~permissionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the available versions of the specified RAM permission."]
+       "Lists the available versions of the specified RAM permission. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
+module ListPermissionAssociationsResponse =
+  struct
+    type nonrec t =
+      {
+      permissions: AssociatedPermissionList.t option
+        [@ocaml.doc
+          "A structure with information about this customer managed permission."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "If present, this value indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null. This indicates that this is the last page of results."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `MalformedArnException of MalformedArnException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?permissions =
+      fun ?nextToken -> fun () -> { permissions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `MalformedArnException e ->
+          `Assoc
+            [("error", (`String "MalformedArnException"));
+            ("details", (MalformedArnException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("permissions",
+           (Option.map x.permissions ~f:AssociatedPermissionList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let permissions =
+        (Option.map ~f:AssociatedPermissionList.of_xml)
+          (Xml.child xml_arg0 "permissions") in
+      make ?nextToken ?permissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let permissions =
+        field_map json__ "permissions" AssociatedPermissionList.of_json in
+      make ?nextToken ?permissions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists information about the managed permission and its associations to any resource shares that use this managed permission. This lets you see which resource shares use which versions of the specified managed permission. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
+module ListPermissionAssociationsRequest =
+  struct
+    type nonrec t =
+      {
+      permissionArn: String_.t option
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the managed permission."];
+      permissionVersion: Integer.t option
+        [@ocaml.doc
+          "Specifies that you want to list only those associations with resource shares that use this version of the managed permission. If you don't provide a value for this parameter, then the operation returns information about associations with resource shares that use any version of the managed permission."];
+      associationStatus: ResourceShareAssociationStatus.t option
+        [@ocaml.doc
+          "Specifies that you want to list only those associations with resource shares that match this status."];
+      resourceType: String_.t option
+        [@ocaml.doc
+          "Specifies that you want to list only those associations with resource shares that include at least one resource of this resource type."];
+      featureSet: PermissionFeatureSet.t option
+        [@ocaml.doc
+          "Specifies that you want to list only those associations with resource shares that have a featureSet with this value."];
+      defaultVersion: Boolean.t option
+        [@ocaml.doc
+          "When true, specifies that you want to list only those associations with resource shares that use the default version of the specified managed permission. When false (the default value), lists associations with resource shares that use any version of the specified managed permission."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "Specifies that you want to receive the next page of results. Valid only if you received a NextToken response in the previous request. If you did, it indicates that more output is available. Set this parameter to the value provided by the previous call's NextToken response to request the next page of results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Specifies the total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the number you specify, the NextToken response element is returned with a value (not null). Include the specified value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that the service might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+    let make ?permissionArn =
+      fun ?permissionVersion ->
+        fun ?associationStatus ->
+          fun ?resourceType ->
+            fun ?featureSet ->
+              fun ?defaultVersion ->
+                fun ?nextToken ->
+                  fun ?maxResults ->
+                    fun () ->
+                      {
+                        permissionArn;
+                        permissionVersion;
+                        associationStatus;
+                        resourceType;
+                        featureSet;
+                        defaultVersion;
+                        nextToken;
+                        maxResults
+                      }
+    let to_value x =
+      structure_to_value
+        [("permissionArn", (Option.map x.permissionArn ~f:String_.to_value));
+        ("permissionVersion",
+          (Option.map x.permissionVersion ~f:Integer.to_value));
+        ("associationStatus",
+          (Option.map x.associationStatus
+             ~f:ResourceShareAssociationStatus.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("featureSet",
+          (Option.map x.featureSet ~f:PermissionFeatureSet.to_value));
+        ("defaultVersion", (Option.map x.defaultVersion ~f:Boolean.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let defaultVersion =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "defaultVersion") in
+      let featureSet =
+        (Option.map ~f:PermissionFeatureSet.of_xml)
+          (Xml.child xml_arg0 "featureSet") in
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let associationStatus =
+        (Option.map ~f:ResourceShareAssociationStatus.of_xml)
+          (Xml.child xml_arg0 "associationStatus") in
+      let permissionVersion =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "permissionVersion") in
+      let permissionArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "permissionArn") in
+      make ?maxResults ?nextToken ?defaultVersion ?featureSet ?resourceType
+        ?associationStatus ?permissionVersion ?permissionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let defaultVersion = field_map json__ "defaultVersion" Boolean.of_json in
+      let featureSet =
+        field_map json__ "featureSet" PermissionFeatureSet.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let associationStatus =
+        field_map json__ "associationStatus"
+          ResourceShareAssociationStatus.of_json in
+      let permissionVersion =
+        field_map json__ "permissionVersion" Integer.of_json in
+      let permissionArn = field_map json__ "permissionArn" String_.of_json in
+      make ?maxResults ?nextToken ?defaultVersion ?featureSet ?resourceType
+        ?associationStatus ?permissionVersion ?permissionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists information about the managed permission and its associations to any resource shares that use this managed permission. This lets you see which resource shares use which versions of the specified managed permission. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListPendingInvitationResourcesResponse =
   struct
     type nonrec t =
@@ -4026,20 +6128,20 @@ module ListPendingInvitationResourcesResponse =
         (Option.map ~f:ResourceList.of_xml) (Xml.child xml_arg0 "resources") in
       make ?nextToken ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let resources = field_map json "resources" ResourceList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let resources = field_map json__ "resources" ResourceList.of_json in
       make ?nextToken ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the resources in a resource share that is shared with you but for which the invitation is still PENDING. That means that you haven't accepted or rejected the invitation and the invitation hasn't expired."]
+       "Lists the resources in a resource share that is shared with you but for which the invitation is still PENDING. That means that you haven't accepted or rejected the invitation and the invitation hasn't expired. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module ListPendingInvitationResourcesRequest =
   struct
     type nonrec t =
       {
       resourceShareInvitationArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the invitation. You can use GetResourceShareInvitations to find the ARN of the invitation."];
+          "Specifies the Amazon Resource Name (ARN) of the invitation. You can use GetResourceShareInvitations to find the ARN of the invitation."];
       nextToken: String_.t option
         [@ocaml.doc
           "Specifies that you want to receive the next page of results. Valid only if you received a NextToken response in the previous request. If you did, it indicates that more output is available. Set this parameter to the value provided by the previous call's NextToken response to request the next page of results."];
@@ -4086,19 +6188,19 @@ module ListPendingInvitationResourcesRequest =
       make ?resourceRegionScope ?maxResults ?nextToken
         ~resourceShareInvitationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceRegionScope =
-        field_map json "resourceRegionScope"
+        field_map json__ "resourceRegionScope"
           ResourceRegionScopeFilter.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let resourceShareInvitationArn =
-        field_map_exn json "resourceShareInvitationArn" String_.of_json in
+        field_map_exn json__ "resourceShareInvitationArn" String_.of_json in
       make ?resourceRegionScope ?maxResults ?nextToken
         ~resourceShareInvitationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the resources in a resource share that is shared with you but for which the invitation is still PENDING. That means that you haven't accepted or rejected the invitation and the invitation hasn't expired."]
+       "Lists the resources in a resource share that is shared with you but for which the invitation is still PENDING. That means that you haven't accepted or rejected the invitation and the invitation hasn't expired. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module GetResourceSharesResponse =
   struct
     type nonrec t =
@@ -4199,14 +6301,14 @@ module GetResourceSharesResponse =
           (Xml.child xml_arg0 "resourceShares") in
       make ?nextToken ?resourceShares ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let resourceShares =
-        field_map json "resourceShares" ResourceShareList.of_json in
+        field_map json__ "resourceShares" ResourceShareList.of_json in
       make ?nextToken ?resourceShares ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves details about the resource shares that you own or that are shared with you."]
+       "Retrieves details about the resource shares that you own or that are shared with you. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module GetResourceSharesRequest =
   struct
     type nonrec t =
@@ -4234,7 +6336,10 @@ module GetResourceSharesRequest =
           "Specifies the total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the number you specify, the NextToken response element is returned with a value (not null). Include the specified value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that the service might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."];
       permissionArn: String_.t option
         [@ocaml.doc
-          "Specifies that you want to retrieve details of only those resource shares that use the RAM permission with this Amazon Resoure Name (ARN)."]}
+          "Specifies that you want to retrieve details of only those resource shares that use the managed permission with this Amazon Resource Name (ARN)."];
+      permissionVersion: Integer.t option
+        [@ocaml.doc
+          "Specifies that you want to retrieve details for only those resource shares that use the specified version of the managed permission."]}
     let context_ = "GetResourceSharesRequest"
     let make ?resourceShareArns =
       fun ?resourceShareStatus ->
@@ -4243,18 +6348,20 @@ module GetResourceSharesRequest =
             fun ?nextToken ->
               fun ?maxResults ->
                 fun ?permissionArn ->
-                  fun ~resourceOwner ->
-                    fun () ->
-                      {
-                        resourceShareArns;
-                        resourceShareStatus;
-                        name;
-                        tagFilters;
-                        nextToken;
-                        maxResults;
-                        permissionArn;
-                        resourceOwner
-                      }
+                  fun ?permissionVersion ->
+                    fun ~resourceOwner ->
+                      fun () ->
+                        {
+                          resourceShareArns;
+                          resourceShareStatus;
+                          name;
+                          tagFilters;
+                          nextToken;
+                          maxResults;
+                          permissionArn;
+                          permissionVersion;
+                          resourceOwner
+                        }
     let to_value x =
       structure_to_value
         [("resourceShareArns",
@@ -4266,9 +6373,14 @@ module GetResourceSharesRequest =
         ("tagFilters", (Option.map x.tagFilters ~f:TagFilters.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("permissionArn", (Option.map x.permissionArn ~f:String_.to_value))]
+        ("permissionArn", (Option.map x.permissionArn ~f:String_.to_value));
+        ("permissionVersion",
+          (Option.map x.permissionVersion ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let permissionVersion =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "permissionVersion") in
       let permissionArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "permissionArn") in
       let maxResults =
@@ -4287,26 +6399,30 @@ module GetResourceSharesRequest =
       let resourceShareArns =
         (Option.map ~f:ResourceShareArnList.of_xml)
           (Xml.child xml_arg0 "resourceShareArns") in
-      make ?permissionArn ?maxResults ?nextToken ?tagFilters ?name
-        ~resourceOwner ?resourceShareStatus ?resourceShareArns ()
+      make ?permissionVersion ?permissionArn ?maxResults ?nextToken
+        ?tagFilters ?name ~resourceOwner ?resourceShareStatus
+        ?resourceShareArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let permissionArn = field_map json "permissionArn" String_.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let tagFilters = field_map json "tagFilters" TagFilters.of_json in
-      let name = field_map json "name" String_.of_json in
+    let of_json json__ =
+      let permissionVersion =
+        field_map json__ "permissionVersion" Integer.of_json in
+      let permissionArn = field_map json__ "permissionArn" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let tagFilters = field_map json__ "tagFilters" TagFilters.of_json in
+      let name = field_map json__ "name" String_.of_json in
       let resourceOwner =
-        field_map_exn json "resourceOwner" ResourceOwner.of_json in
+        field_map_exn json__ "resourceOwner" ResourceOwner.of_json in
       let resourceShareStatus =
-        field_map json "resourceShareStatus" ResourceShareStatus.of_json in
+        field_map json__ "resourceShareStatus" ResourceShareStatus.of_json in
       let resourceShareArns =
-        field_map json "resourceShareArns" ResourceShareArnList.of_json in
-      make ?permissionArn ?maxResults ?nextToken ?tagFilters ?name
-        ~resourceOwner ?resourceShareStatus ?resourceShareArns ()
+        field_map json__ "resourceShareArns" ResourceShareArnList.of_json in
+      make ?permissionVersion ?permissionArn ?maxResults ?nextToken
+        ?tagFilters ?name ~resourceOwner ?resourceShareStatus
+        ?resourceShareArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves details about the resource shares that you own or that are shared with you."]
+       "Retrieves details about the resource shares that you own or that are shared with you. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module GetResourceShareInvitationsResponse =
   struct
     type nonrec t =
@@ -4432,15 +6548,15 @@ module GetResourceShareInvitationsResponse =
           (Xml.child xml_arg0 "resourceShareInvitations") in
       make ?nextToken ?resourceShareInvitations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let resourceShareInvitations =
-        field_map json "resourceShareInvitations"
+        field_map json__ "resourceShareInvitations"
           ResourceShareInvitationList.of_json in
       make ?nextToken ?resourceShareInvitations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves details about invitations that you have received for resource shares."]
+       "Retrieves details about invitations that you have received for resource shares. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module GetResourceShareInvitationsRequest =
   struct
     type nonrec t =
@@ -4492,19 +6608,19 @@ module GetResourceShareInvitationsRequest =
       make ?maxResults ?nextToken ?resourceShareArns
         ?resourceShareInvitationArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let resourceShareArns =
-        field_map json "resourceShareArns" ResourceShareArnList.of_json in
+        field_map json__ "resourceShareArns" ResourceShareArnList.of_json in
       let resourceShareInvitationArns =
-        field_map json "resourceShareInvitationArns"
+        field_map json__ "resourceShareInvitationArns"
           ResourceShareInvitationArnList.of_json in
       make ?maxResults ?nextToken ?resourceShareArns
         ?resourceShareInvitationArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves details about invitations that you have received for resource shares."]
+       "Retrieves details about invitations that you have received for resource shares. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module GetResourceShareAssociationsResponse =
   struct
     type nonrec t =
@@ -4617,34 +6733,34 @@ module GetResourceShareAssociationsResponse =
           (Xml.child xml_arg0 "resourceShareAssociations") in
       make ?nextToken ?resourceShareAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let resourceShareAssociations =
-        field_map json "resourceShareAssociations"
+        field_map json__ "resourceShareAssociations"
           ResourceShareAssociationList.of_json in
       make ?nextToken ?resourceShareAssociations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the resource and principal associations for resource shares that you own."]
+       "Retrieves the lists of resources and principals that associated for resource shares that you own. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module GetResourceShareAssociationsRequest =
   struct
     type nonrec t =
       {
       associationType: ResourceShareAssociationType.t
         [@ocaml.doc
-          "Specifies whether you want to retrieve the associations that involve a specified resource or principal. PRINCIPAL \226\128\147 list the principals that are associated with the specified resource share. RESOURCE \226\128\147 list the resources that are associated with the specified resource share."];
+          "Specifies whether you want to retrieve the associations that involve a specified resource or principal. PRINCIPAL \226\128\147 list the principals whose associations you want to see. RESOURCE \226\128\147 list the resources whose associations you want to see."];
       resourceShareArns: ResourceShareArnList.t option
         [@ocaml.doc
           "Specifies a list of Amazon Resource Names (ARNs) of the resource share whose associations you want to retrieve."];
       resourceArn: String_.t option
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the resource whose resource shares you want to retrieve. You cannot specify this parameter if the association type is PRINCIPAL."];
+          "Specifies the Amazon Resource Name (ARN) of a resource whose resource shares you want to retrieve. You cannot specify this parameter if the association type is PRINCIPAL."];
       principal: String_.t option
         [@ocaml.doc
-          "Specifies the ID of the principal whose resource shares you want to retrieve. This can be an Amazon Web Services account ID, an organization ID, an organizational unit ID, or the Amazon Resoure Name (ARN) of an individual IAM user or role. You cannot specify this parameter if the association type is RESOURCE."];
+          "Specifies the ID of the principal whose resource shares you want to retrieve. This can be an Amazon Web Services account ID, an organization ID, an organizational unit ID, or the Amazon Resource Name (ARN) of an individual IAM role or user. You cannot specify this parameter if the association type is RESOURCE."];
       associationStatus: ResourceShareAssociationStatus.t option
         [@ocaml.doc
-          "Specifies that you want to retrieve only associations with this status."];
+          "Specifies that you want to retrieve only associations that have this status."];
       nextToken: String_.t option
         [@ocaml.doc
           "Specifies that you want to receive the next page of results. Valid only if you received a NextToken response in the previous request. If you did, it indicates that more output is available. Set this parameter to the value provided by the previous call's NextToken response to request the next page of results."];
@@ -4704,24 +6820,24 @@ module GetResourceShareAssociationsRequest =
       make ?maxResults ?nextToken ?associationStatus ?principal ?resourceArn
         ?resourceShareArns ~associationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let associationStatus =
-        field_map json "associationStatus"
+        field_map json__ "associationStatus"
           ResourceShareAssociationStatus.of_json in
-      let principal = field_map json "principal" String_.of_json in
-      let resourceArn = field_map json "resourceArn" String_.of_json in
+      let principal = field_map json__ "principal" String_.of_json in
+      let resourceArn = field_map json__ "resourceArn" String_.of_json in
       let resourceShareArns =
-        field_map json "resourceShareArns" ResourceShareArnList.of_json in
+        field_map json__ "resourceShareArns" ResourceShareArnList.of_json in
       let associationType =
-        field_map_exn json "associationType"
+        field_map_exn json__ "associationType"
           ResourceShareAssociationType.of_json in
       make ?maxResults ?nextToken ?associationStatus ?principal ?resourceArn
         ?resourceShareArns ~associationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the resource and principal associations for resource shares that you own."]
+       "Retrieves the lists of resources and principals that associated for resource shares that you own. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module GetResourcePoliciesResponse =
   struct
     type nonrec t =
@@ -4820,13 +6936,13 @@ module GetResourcePoliciesResponse =
         (Option.map ~f:PolicyList.of_xml) (Xml.child xml_arg0 "policies") in
       make ?nextToken ?policies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let policies = field_map json "policies" PolicyList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let policies = field_map json__ "policies" PolicyList.of_json in
       make ?nextToken ?policies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the resource policies for the specified resources that you own and have shared."]
+       "Retrieves the resource policies for the specified resources that you own and have shared. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module GetResourcePoliciesRequest =
   struct
     type nonrec t =
@@ -4866,23 +6982,22 @@ module GetResourcePoliciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArns") in
       make ?maxResults ?nextToken ?principal ~resourceArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let principal = field_map json "principal" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let principal = field_map json__ "principal" String_.of_json in
       let resourceArns =
-        field_map_exn json "resourceArns" ResourceArnList.of_json in
+        field_map_exn json__ "resourceArns" ResourceArnList.of_json in
       make ?maxResults ?nextToken ?principal ~resourceArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the resource policies for the specified resources that you own and have shared."]
+       "Retrieves the resource policies for the specified resources that you own and have shared. Always check the NextToken response parameter for a null value when calling a paginated operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display."]
 module GetPermissionResponse =
   struct
     type nonrec t =
       {
       permission: ResourceSharePermissionDetail.t option
-        [@ocaml.doc
-          "An object that contains information about the permission."]}
+        [@ocaml.doc "An object with details about the permission."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `MalformedArnException of MalformedArnException.t 
@@ -4971,22 +7086,23 @@ module GetPermissionResponse =
           (Xml.child xml_arg0 "permission") in
       make ?permission ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permission =
-        field_map json "permission" ResourceSharePermissionDetail.of_json in
+        field_map json__ "permission" ResourceSharePermissionDetail.of_json in
       make ?permission ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets the contents of an RAM permission in JSON format."]
+  end[@@ocaml.doc
+       "Retrieves the contents of a managed permission in JSON format."]
 module GetPermissionRequest =
   struct
     type nonrec t =
       {
       permissionArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the permission whose contents you want to retrieve. To find the ARN for a permission, use either the ListPermissions operation or go to the Permissions library page in the RAM console and then choose the name of the permission. The ARN is displayed on the detail page."];
+          "Specifies the Amazon Resource Name (ARN) of the permission whose contents you want to retrieve. To find the ARN for a permission, use either the ListPermissions operation or go to the Permissions library page in the RAM console and then choose the name of the permission. The ARN is displayed on the detail page."];
       permissionVersion: Integer.t option
         [@ocaml.doc
-          "Specifies identifier for the version of the RAM permission to retrieve. If you don't specify this parameter, the operation retrieves the default version."]}
+          "Specifies the version number of the RAM permission to retrieve. If you don't specify this parameter, the operation retrieves the default version. To see the list of available versions, use ListPermissionVersions."]}
     let context_ = "GetPermissionRequest"
     let make ?permissionVersion =
       fun ~permissionArn -> fun () -> { permissionVersion; permissionArn }
@@ -5005,13 +7121,15 @@ module GetPermissionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "permissionArn") in
       make ?permissionVersion ~permissionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionVersion =
-        field_map json "permissionVersion" Integer.of_json in
-      let permissionArn = field_map_exn json "permissionArn" String_.of_json in
+        field_map json__ "permissionVersion" Integer.of_json in
+      let permissionArn =
+        field_map_exn json__ "permissionArn" String_.of_json in
       make ?permissionVersion ~permissionArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets the contents of an RAM permission in JSON format."]
+  end[@@ocaml.doc
+       "Retrieves the contents of a managed permission in JSON format."]
 module EnableSharingWithAwsOrganizationResponse =
   struct
     type nonrec t =
@@ -5078,12 +7196,12 @@ module EnableSharingWithAwsOrganizationResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?returnValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let returnValue = field_map json "returnValue" Boolean.of_json in
+    let of_json json__ =
+      let returnValue = field_map json__ "returnValue" Boolean.of_json in
       make ?returnValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables resource sharing within your organization in Organizations. Calling this operation enables RAM to retrieve information about the organization and its structure. This lets you share resources with all of the accounts in an organization by specifying the organization's ID, or all of the accounts in an organizational unit (OU) by specifying the OU's ID. Until you enable sharing within the organization, you can specify only individual Amazon Web Services accounts, or for supported resource types, IAM users and roles. You must call this operation from an IAM user or role in the organization's management account."]
+       "Enables resource sharing within your organization in Organizations. This operation creates a service-linked role called AWSServiceRoleForResourceAccessManager that has the IAM managed policy named AWSResourceAccessManagerServiceRolePolicy attached. This role permits RAM to retrieve information about the organization and its structure. This lets you share resources with all of the accounts in the calling account's organization by specifying the organization ID, or all of the accounts in an organizational unit (OU) by specifying the OU ID. Until you enable sharing within the organization, you can specify only individual Amazon Web Services accounts, or for supported resource types, IAM roles and users. You must call this operation from an IAM role or user in the organization's management account."]
 module EnableSharingWithAwsOrganizationRequest =
   struct
     type nonrec t = unit
@@ -5096,14 +7214,14 @@ module EnableSharingWithAwsOrganizationRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables resource sharing within your organization in Organizations. Calling this operation enables RAM to retrieve information about the organization and its structure. This lets you share resources with all of the accounts in an organization by specifying the organization's ID, or all of the accounts in an organizational unit (OU) by specifying the OU's ID. Until you enable sharing within the organization, you can specify only individual Amazon Web Services accounts, or for supported resource types, IAM users and roles. You must call this operation from an IAM user or role in the organization's management account."]
+       "Enables resource sharing within your organization in Organizations. This operation creates a service-linked role called AWSServiceRoleForResourceAccessManager that has the IAM managed policy named AWSResourceAccessManagerServiceRolePolicy attached. This role permits RAM to retrieve information about the organization and its structure. This lets you share resources with all of the accounts in the calling account's organization by specifying the organization ID, or all of the accounts in an organizational unit (OU) by specifying the OU ID. Until you enable sharing within the organization, you can specify only individual Amazon Web Services accounts, or for supported resource types, IAM roles and users. You must call this operation from an IAM role or user in the organization's management account."]
 module DisassociateResourceShareResponse =
   struct
     type nonrec t =
       {
       resourceShareAssociations: ResourceShareAssociationList.t option
         [@ocaml.doc
-          "An array of objects that contain information about the updated associations for this resource share."];
+          "An array of objects with information about the updated associations for this resource share."];
       clientToken: String_.t option
         [@ocaml.doc
           "The idempotency identifier associated with this request. If you want to repeat the same operation in an idempotent manner then you must include this value in the clientToken request parameter of that later call. All other parameters must also have the same values that you used in the first call."]}
@@ -5120,6 +7238,7 @@ module DisassociateResourceShareResponse =
           ResourceShareLimitExceededException.t 
       | `ServerInternalException of ServerInternalException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `UnknownResourceException of UnknownResourceException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resourceShareAssociations =
@@ -5151,6 +7270,8 @@ module DisassociateResourceShareResponse =
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "UnknownResourceException" ->
           `UnknownResourceException (UnknownResourceException.of_json json)
       | name ->
@@ -5182,6 +7303,8 @@ module DisassociateResourceShareResponse =
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "UnknownResourceException" ->
           `UnknownResourceException (UnknownResourceException.of_xml xml)
       | name ->
@@ -5224,6 +7347,10 @@ module DisassociateResourceShareResponse =
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
             ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `UnknownResourceException e ->
           `Assoc
             [("error", (`String "UnknownResourceException"));
@@ -5248,38 +7375,48 @@ module DisassociateResourceShareResponse =
           (Xml.child xml_arg0 "resourceShareAssociations") in
       make ?clientToken ?resourceShareAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let resourceShareAssociations =
-        field_map json "resourceShareAssociations"
+        field_map json__ "resourceShareAssociations"
           ResourceShareAssociationList.of_json in
       make ?clientToken ?resourceShareAssociations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates the specified principals or resources from the specified resource share."]
+       "Removes the specified principals, resources, or source constraints from participating in the specified resource share."]
 module DisassociateResourceShareRequest =
   struct
     type nonrec t =
       {
       resourceShareArn: String_.t
         [@ocaml.doc
-          "Specifies Amazon Resoure Name (ARN) of the resource share that you want to remove resources from."];
+          "Specifies Amazon Resource Name (ARN) of the resource share that you want to remove resources or principals from."];
       resourceArns: ResourceArnList.t option
         [@ocaml.doc
-          "Specifies a list of Amazon Resource Names (ARNs) for one or more resources that you want to remove from the resource share. After the operation runs, these resources are no longer shared with principals outside of the Amazon Web Services account that created the resources."];
+          "Specifies a list of Amazon Resource Names (ARNs) for one or more resources that you want to remove from the resource share. After the operation runs, these resources are no longer shared with principals associated with the resource share."];
       principals: PrincipalArnOrIdList.t option
         [@ocaml.doc
-          "Specifies a list of one or more principals that no longer are to have access to the resources in this resource share. You can include the following values: An Amazon Web Services account ID, for example: 123456789012 An Amazon Resoure Name (ARN) of an organization in Organizations, for example: organizations::123456789012:organization/o-exampleorgid An ARN of an organizational unit (OU) in Organizations, for example: organizations::123456789012:ou/o-exampleorgid/ou-examplerootid-exampleouid123 An ARN of an IAM role, for example: iam::123456789012:role/rolename An ARN of an IAM user, for example: iam::123456789012user/username Not all resource types can be shared with IAM roles and users. For more information, see Sharing with IAM roles and users in the Resource Access Manager User Guide."];
+          "Specifies a list of one or more principals that no longer are to have access to the resources in this resource share. You can include the following values: An Amazon Web Services account ID, for example: 123456789012 An Amazon Resource Name (ARN) of an organization in Organizations, for example: organizations::123456789012:organization/o-exampleorgid An ARN of an organizational unit (OU) in Organizations, for example: organizations::123456789012:ou/o-exampleorgid/ou-examplerootid-exampleouid123 An ARN of an IAM role, for example: iam::123456789012:role/rolename An ARN of an IAM user, for example: iam::123456789012user/username A service principal name, for example: service-id.amazonaws.com Not all resource types can be shared with IAM roles and users. For more information, see Sharing with IAM roles and users in the Resource Access Manager User Guide."];
       clientToken: String_.t option
         [@ocaml.doc
-          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you."]}
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."];
+      sources: SourceArnOrAccountList.t option
+        [@ocaml.doc
+          "Specifies source constraints (accounts, ARNs, organization IDs, or organization paths) to remove from the resource share. This enables granular management of source constraints while maintaining service principal associations. At least one source must remain when service principals are present."]}
     let context_ = "DisassociateResourceShareRequest"
     let make ?resourceArns =
       fun ?principals ->
         fun ?clientToken ->
-          fun ~resourceShareArn ->
-            fun () ->
-              { resourceArns; principals; clientToken; resourceShareArn }
+          fun ?sources ->
+            fun ~resourceShareArn ->
+              fun () ->
+                {
+                  resourceArns;
+                  principals;
+                  clientToken;
+                  sources;
+                  resourceShareArn
+                }
     let to_value x =
       structure_to_value
         [("resourceShareArn", (Some (String_.to_value x.resourceShareArn)));
@@ -5287,9 +7424,14 @@ module DisassociateResourceShareRequest =
           (Option.map x.resourceArns ~f:ResourceArnList.to_value));
         ("principals",
           (Option.map x.principals ~f:PrincipalArnOrIdList.to_value));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("sources",
+          (Option.map x.sources ~f:SourceArnOrAccountList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sources =
+        (Option.map ~f:SourceArnOrAccountList.of_xml)
+          (Xml.child xml_arg0 "sources") in
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let principals =
@@ -5301,20 +7443,23 @@ module DisassociateResourceShareRequest =
       let resourceShareArn =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
-      make ?clientToken ?principals ?resourceArns ~resourceShareArn ()
+      make ?sources ?clientToken ?principals ?resourceArns ~resourceShareArn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let sources = field_map json__ "sources" SourceArnOrAccountList.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let principals =
-        field_map json "principals" PrincipalArnOrIdList.of_json in
+        field_map json__ "principals" PrincipalArnOrIdList.of_json in
       let resourceArns =
-        field_map json "resourceArns" ResourceArnList.of_json in
+        field_map json__ "resourceArns" ResourceArnList.of_json in
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
-      make ?clientToken ?principals ?resourceArns ~resourceShareArn ()
+        field_map_exn json__ "resourceShareArn" String_.of_json in
+      make ?sources ?clientToken ?principals ?resourceArns ~resourceShareArn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates the specified principals or resources from the specified resource share."]
+       "Removes the specified principals, resources, or source constraints from participating in the specified resource share."]
 module DisassociateResourceSharePermissionResponse =
   struct
     type nonrec t =
@@ -5437,26 +7582,26 @@ module DisassociateResourceSharePermissionResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?clientToken ?returnValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let returnValue = field_map json "returnValue" Boolean.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let returnValue = field_map json__ "returnValue" Boolean.of_json in
       make ?clientToken ?returnValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates an RAM permission from a resource share. Permission changes take effect immediately. You can remove a RAM permission from a resource share only if there are currently no resources of the relevant resource type currently attached to the resource share."]
+       "Removes a managed permission from a resource share. Permission changes take effect immediately. You can remove a managed permission from a resource share only if there are currently no resources of the relevant resource type currently attached to the resource share."]
 module DisassociateResourceSharePermissionRequest =
   struct
     type nonrec t =
       {
       resourceShareArn: String_.t
         [@ocaml.doc
-          "The Amazon Resoure Name (ARN) of the resource share from which you want to disassociate a permission."];
+          "The Amazon Resource Name (ARN) of the resource share that you want to remove the managed permission from."];
       permissionArn: String_.t
         [@ocaml.doc
-          "The Amazon Resoure Name (ARN) of the permission to disassociate from the resource share. Changes to permissions take effect immediately."];
+          "The Amazon Resource Name (ARN) of the managed permission to disassociate from the resource share. Changes to permissions take effect immediately."];
       clientToken: String_.t option
         [@ocaml.doc
-          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you."]}
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
     let context_ = "DisassociateResourceSharePermissionRequest"
     let make ?clientToken =
       fun ~resourceShareArn ->
@@ -5479,15 +7624,16 @@ module DisassociateResourceSharePermissionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?clientToken ~permissionArn ~resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let permissionArn = field_map_exn json "permissionArn" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let permissionArn =
+        field_map_exn json__ "permissionArn" String_.of_json in
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
+        field_map_exn json__ "resourceShareArn" String_.of_json in
       make ?clientToken ~permissionArn ~resourceShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates an RAM permission from a resource share. Permission changes take effect immediately. You can remove a RAM permission from a resource share only if there are currently no resources of the relevant resource type currently attached to the resource share."]
+       "Removes a managed permission from a resource share. Permission changes take effect immediately. You can remove a managed permission from a resource share only if there are currently no resources of the relevant resource type currently attached to the resource share."]
 module DeleteResourceShareResponse =
   struct
     type nonrec t =
@@ -5509,6 +7655,7 @@ module DeleteResourceShareResponse =
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `ServerInternalException of ServerInternalException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `UnknownResourceException of UnknownResourceException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?returnValue =
@@ -5536,6 +7683,8 @@ module DeleteResourceShareResponse =
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "UnknownResourceException" ->
           `UnknownResourceException (UnknownResourceException.of_json json)
       | name ->
@@ -5564,6 +7713,8 @@ module DeleteResourceShareResponse =
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "UnknownResourceException" ->
           `UnknownResourceException (UnknownResourceException.of_xml xml)
       | name ->
@@ -5602,6 +7753,10 @@ module DeleteResourceShareResponse =
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
             ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `UnknownResourceException e ->
           `Assoc
             [("error", (`String "UnknownResourceException"));
@@ -5623,23 +7778,23 @@ module DeleteResourceShareResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?clientToken ?returnValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let returnValue = field_map json "returnValue" Boolean.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let returnValue = field_map json__ "returnValue" Boolean.of_json in
       make ?clientToken ?returnValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified resource share. This doesn't delete any of the resources that were associated with the resource share; it only stops the sharing of those resources outside of the Amazon Web Services account that created them."]
+       "Deletes the specified resource share. This doesn't delete any of the resources that were associated with the resource share; it only stops the sharing of those resources through this resource share."]
 module DeleteResourceShareRequest =
   struct
     type nonrec t =
       {
       resourceShareArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the resource share to delete."];
+          "Specifies the Amazon Resource Name (ARN) of the resource share to delete."];
       clientToken: String_.t option
         [@ocaml.doc
-          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you."]}
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
     let context_ = "DeleteResourceShareRequest"
     let make ?clientToken =
       fun ~resourceShareArn -> fun () -> { clientToken; resourceShareArn }
@@ -5656,14 +7811,370 @@ module DeleteResourceShareRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?clientToken ~resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
+        field_map_exn json__ "resourceShareArn" String_.of_json in
       make ?clientToken ~resourceShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified resource share. This doesn't delete any of the resources that were associated with the resource share; it only stops the sharing of those resources outside of the Amazon Web Services account that created them."]
+       "Deletes the specified resource share. This doesn't delete any of the resources that were associated with the resource share; it only stops the sharing of those resources through this resource share."]
+module DeletePermissionVersionResponse =
+  struct
+    type nonrec t =
+      {
+      returnValue: Boolean.t option
+        [@ocaml.doc
+          "A boolean value that indicates whether the operation is successful."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "The idempotency identifier associated with this request. If you want to repeat the same operation in an idempotent manner then you must include this value in the clientToken request parameter of that later call. All other parameters must also have the same values that you used in the first call."];
+      permissionStatus: PermissionStatus.t option
+        [@ocaml.doc
+          "This operation is performed asynchronously, and this response parameter indicates the current status."]}
+    type nonrec error =
+      [
+        `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidClientTokenException of InvalidClientTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `MalformedArnException of MalformedArnException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `UnknownResourceException of UnknownResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?returnValue =
+      fun ?clientToken ->
+        fun ?permissionStatus ->
+          fun () -> { returnValue; clientToken; permissionStatus }
+    let error_of_json name json =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidClientTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidClientTokenException"));
+            ("details", (InvalidClientTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `MalformedArnException e ->
+          `Assoc
+            [("error", (`String "MalformedArnException"));
+            ("details", (MalformedArnException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `UnknownResourceException e ->
+          `Assoc
+            [("error", (`String "UnknownResourceException"));
+            ("details", (UnknownResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("returnValue", (Option.map x.returnValue ~f:Boolean.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("permissionStatus",
+          (Option.map x.permissionStatus ~f:PermissionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let permissionStatus =
+        (Option.map ~f:PermissionStatus.of_xml)
+          (Xml.child xml_arg0 "permissionStatus") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let returnValue =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
+      make ?permissionStatus ?clientToken ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let permissionStatus =
+        field_map json__ "permissionStatus" PermissionStatus.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let returnValue = field_map json__ "returnValue" Boolean.of_json in
+      make ?permissionStatus ?clientToken ?returnValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes one version of a customer managed permission. The version you specify must not be attached to any resource share and must not be the default version for the permission. If a customer managed permission has the maximum of 5 versions, then you must delete at least one version before you can create another."]
+module DeletePermissionVersionRequest =
+  struct
+    type nonrec t =
+      {
+      permissionArn: String_.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the permission with the version you want to delete."];
+      permissionVersion: Integer.t
+        [@ocaml.doc
+          "Specifies the version number to delete. You can't delete the default version for a customer managed permission. You can't delete a version if it's the only version of the permission. You must either first create another version, or delete the permission completely. You can't delete a version if it is attached to any resource shares. If the version is the default, you must first use SetDefaultPermissionVersion to set a different version as the default for the customer managed permission, and then use AssociateResourceSharePermission to update your resource shares to use the new default version."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
+    let context_ = "DeletePermissionVersionRequest"
+    let make ?clientToken =
+      fun ~permissionArn ->
+        fun ~permissionVersion ->
+          fun () -> { clientToken; permissionArn; permissionVersion }
+    let to_value x =
+      structure_to_value
+        [("permissionArn", (Some (String_.to_value x.permissionArn)));
+        ("permissionVersion", (Some (Integer.to_value x.permissionVersion)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let permissionVersion =
+        Integer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionVersion") in
+      let permissionArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionArn") in
+      make ?clientToken ~permissionVersion ~permissionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let permissionVersion =
+        field_map_exn json__ "permissionVersion" Integer.of_json in
+      let permissionArn =
+        field_map_exn json__ "permissionArn" String_.of_json in
+      make ?clientToken ~permissionVersion ~permissionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes one version of a customer managed permission. The version you specify must not be attached to any resource share and must not be the default version for the permission. If a customer managed permission has the maximum of 5 versions, then you must delete at least one version before you can create another."]
+module DeletePermissionResponse =
+  struct
+    type nonrec t =
+      {
+      returnValue: Boolean.t option
+        [@ocaml.doc
+          "A boolean that indicates whether the delete operations succeeded."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "The idempotency identifier associated with this request. If you want to repeat the same operation in an idempotent manner then you must include this value in the clientToken request parameter of that later call. All other parameters must also have the same values that you used in the first call."];
+      permissionStatus: PermissionStatus.t option
+        [@ocaml.doc
+          "This operation is performed asynchronously, and this response parameter indicates the current status."]}
+    type nonrec error =
+      [
+        `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidClientTokenException of InvalidClientTokenException.t 
+      | `MalformedArnException of MalformedArnException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `UnknownResourceException of UnknownResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?returnValue =
+      fun ?clientToken ->
+        fun ?permissionStatus ->
+          fun () -> { returnValue; clientToken; permissionStatus }
+    let error_of_json name json =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_json json)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_xml xml)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidClientTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidClientTokenException"));
+            ("details", (InvalidClientTokenException.to_json e))]
+      | `MalformedArnException e ->
+          `Assoc
+            [("error", (`String "MalformedArnException"));
+            ("details", (MalformedArnException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `UnknownResourceException e ->
+          `Assoc
+            [("error", (`String "UnknownResourceException"));
+            ("details", (UnknownResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("returnValue", (Option.map x.returnValue ~f:Boolean.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("permissionStatus",
+          (Option.map x.permissionStatus ~f:PermissionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let permissionStatus =
+        (Option.map ~f:PermissionStatus.of_xml)
+          (Xml.child xml_arg0 "permissionStatus") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let returnValue =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
+      make ?permissionStatus ?clientToken ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let permissionStatus =
+        field_map json__ "permissionStatus" PermissionStatus.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let returnValue = field_map json__ "returnValue" Boolean.of_json in
+      make ?permissionStatus ?clientToken ?returnValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified customer managed permission in the Amazon Web Services Region in which you call this operation. You can delete a customer managed permission only if it isn't attached to any resource share. The operation deletes all versions associated with the customer managed permission."]
+module DeletePermissionRequest =
+  struct
+    type nonrec t =
+      {
+      permissionArn: String_.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the customer managed permission that you want to delete."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
+    let context_ = "DeletePermissionRequest"
+    let make ?clientToken =
+      fun ~permissionArn -> fun () -> { clientToken; permissionArn }
+    let to_value x =
+      structure_to_value
+        [("permissionArn", (Some (String_.to_value x.permissionArn)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let permissionArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionArn") in
+      make ?clientToken ~permissionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let permissionArn =
+        field_map_exn json__ "permissionArn" String_.of_json in
+      make ?clientToken ~permissionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified customer managed permission in the Amazon Web Services Region in which you call this operation. You can delete a customer managed permission only if it isn't attached to any resource share. The operation deletes all versions associated with the customer managed permission."]
 module CreateResourceShareResponse =
   struct
     type nonrec t =
@@ -5687,7 +8198,9 @@ module CreateResourceShareResponse =
           ResourceShareLimitExceededException.t 
       | `ServerInternalException of ServerInternalException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TagLimitExceededException of TagLimitExceededException.t 
       | `TagPolicyViolationException of TagPolicyViolationException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `UnknownResourceException of UnknownResourceException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resourceShare =
@@ -5718,9 +8231,13 @@ module CreateResourceShareResponse =
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
+      | "TagLimitExceededException" ->
+          `TagLimitExceededException (TagLimitExceededException.of_json json)
       | "TagPolicyViolationException" ->
           `TagPolicyViolationException
             (TagPolicyViolationException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "UnknownResourceException" ->
           `UnknownResourceException (UnknownResourceException.of_json json)
       | name ->
@@ -5752,9 +8269,13 @@ module CreateResourceShareResponse =
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
+      | "TagLimitExceededException" ->
+          `TagLimitExceededException (TagLimitExceededException.of_xml xml)
       | "TagPolicyViolationException" ->
           `TagPolicyViolationException
             (TagPolicyViolationException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "UnknownResourceException" ->
           `UnknownResourceException (UnknownResourceException.of_xml xml)
       | name ->
@@ -5797,10 +8318,18 @@ module CreateResourceShareResponse =
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
             ("details", (ServiceUnavailableException.to_json e))]
+      | `TagLimitExceededException e ->
+          `Assoc
+            [("error", (`String "TagLimitExceededException"));
+            ("details", (TagLimitExceededException.to_json e))]
       | `TagPolicyViolationException e ->
           `Assoc
             [("error", (`String "TagPolicyViolationException"));
             ("details", (TagPolicyViolationException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `UnknownResourceException e ->
           `Assoc
             [("error", (`String "UnknownResourceException"));
@@ -5824,14 +8353,14 @@ module CreateResourceShareResponse =
           (Xml.child xml_arg0 "resourceShare") in
       make ?clientToken ?resourceShare ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let resourceShare =
-        field_map json "resourceShare" ResourceShare.of_json in
+        field_map json__ "resourceShare" ResourceShare.of_json in
       make ?clientToken ?resourceShare ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a resource share. You can provide a list of the Amazon Resource Names (ARNs) for the resources that you want to share, a list of principals you want to share the resources with, and the permissions to grant those principals. Sharing a resource makes it available for use by principals outside of the Amazon Web Services account that created the resource. Sharing doesn't change any permissions or quotas that apply to the resource in the account that created it."]
+       "Creates a resource share. You can provide a list of the Amazon Resource Names (ARNs) for the resources that you want to share, a list of principals you want to share the resources with, the permissions to grant those principals, and optionally source constraints to enhance security for service principal sharing. Sharing a resource makes it available for use by principals outside of the Amazon Web Services account that created the resource. Sharing doesn't change any permissions or quotas that apply to the resource in the account that created it."]
 module CreateResourceShareRequest =
   struct
     type nonrec t =
@@ -5843,7 +8372,7 @@ module CreateResourceShareRequest =
           "Specifies a list of one or more ARNs of the resources to associate with the resource share."];
       principals: PrincipalArnOrIdList.t option
         [@ocaml.doc
-          "Specifies a list of one or more principals to associate with the resource share. You can include the following values: An Amazon Web Services account ID, for example: 123456789012 An Amazon Resoure Name (ARN) of an organization in Organizations, for example: organizations::123456789012:organization/o-exampleorgid An ARN of an organizational unit (OU) in Organizations, for example: organizations::123456789012:ou/o-exampleorgid/ou-examplerootid-exampleouid123 An ARN of an IAM role, for example: iam::123456789012:role/rolename An ARN of an IAM user, for example: iam::123456789012user/username Not all resource types can be shared with IAM roles and users. For more information, see Sharing with IAM roles and users in the Resource Access Manager User Guide."];
+          "Specifies a list of one or more principals to associate with the resource share. You can include the following values: An Amazon Web Services account ID, for example: 123456789012 An Amazon Resource Name (ARN) of an organization in Organizations, for example: organizations::123456789012:organization/o-exampleorgid An ARN of an organizational unit (OU) in Organizations, for example: organizations::123456789012:ou/o-exampleorgid/ou-examplerootid-exampleouid123 An ARN of an IAM role, for example: iam::123456789012:role/rolename An ARN of an IAM user, for example: iam::123456789012user/username A service principal name, for example: service-id.amazonaws.com Not all resource types can be shared with IAM roles and users. For more information, see Sharing with IAM roles and users in the Resource Access Manager User Guide."];
       tags: TagList.t option
         [@ocaml.doc
           "Specifies one or more tags to attach to the resource share itself. It doesn't attach the tags to the resources associated with the resource share."];
@@ -5852,10 +8381,15 @@ module CreateResourceShareRequest =
           "Specifies whether principals outside your organization in Organizations can be associated with a resource share. A value of true lets you share with individual Amazon Web Services accounts that are not in your organization. A value of false only has meaning if your account is a member of an Amazon Web Services Organization. The default value is true."];
       clientToken: String_.t option
         [@ocaml.doc
-          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you."];
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."];
       permissionArns: PermissionArnList.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Names (ARNs) of the RAM permission to associate with the resource share. If you do not specify an ARN for the permission, RAM automatically attaches the default version of the permission for each resource type. You can associate only one permission with each resource type included in the resource share."]}
+          "Specifies the Amazon Resource Names (ARNs) of the RAM permission to associate with the resource share. If you do not specify an ARN for the permission, RAM automatically attaches the default version of the permission for each resource type. You can associate only one permission with each resource type included in the resource share."];
+      sources: SourceArnOrAccountList.t option
+        [@ocaml.doc
+          "Specifies source constraints (accounts, ARNs, organization IDs, or organization paths) that limit when service principals can access resources in this resource share. When a service principal attempts to access a shared resource, validation is performed to ensure the request originates from one of the specified sources. This helps prevent confused deputy attacks by applying constraints on where service principals can access resources from."];
+      resourceShareConfiguration: ResourceShareConfiguration.t option
+        [@ocaml.doc "Specifies the configuration of this resource share."]}
     let context_ = "CreateResourceShareRequest"
     let make ?resourceArns =
       fun ?principals ->
@@ -5863,17 +8397,21 @@ module CreateResourceShareRequest =
           fun ?allowExternalPrincipals ->
             fun ?clientToken ->
               fun ?permissionArns ->
-                fun ~name ->
-                  fun () ->
-                    {
-                      resourceArns;
-                      principals;
-                      tags;
-                      allowExternalPrincipals;
-                      clientToken;
-                      permissionArns;
-                      name
-                    }
+                fun ?sources ->
+                  fun ?resourceShareConfiguration ->
+                    fun ~name ->
+                      fun () ->
+                        {
+                          resourceArns;
+                          principals;
+                          tags;
+                          allowExternalPrincipals;
+                          clientToken;
+                          permissionArns;
+                          sources;
+                          resourceShareConfiguration;
+                          name
+                        }
     let to_value x =
       structure_to_value
         [("name", (Some (String_.to_value x.name)));
@@ -5886,9 +8424,20 @@ module CreateResourceShareRequest =
           (Option.map x.allowExternalPrincipals ~f:Boolean.to_value));
         ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("permissionArns",
-          (Option.map x.permissionArns ~f:PermissionArnList.to_value))]
+          (Option.map x.permissionArns ~f:PermissionArnList.to_value));
+        ("sources",
+          (Option.map x.sources ~f:SourceArnOrAccountList.to_value));
+        ("resourceShareConfiguration",
+          (Option.map x.resourceShareConfiguration
+             ~f:ResourceShareConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceShareConfiguration =
+        (Option.map ~f:ResourceShareConfiguration.of_xml)
+          (Xml.child xml_arg0 "resourceShareConfiguration") in
+      let sources =
+        (Option.map ~f:SourceArnOrAccountList.of_xml)
+          (Xml.child xml_arg0 "sources") in
       let permissionArns =
         (Option.map ~f:PermissionArnList.of_xml)
           (Xml.child xml_arg0 "permissionArns") in
@@ -5906,26 +8455,452 @@ module CreateResourceShareRequest =
           (Xml.child xml_arg0 "resourceArns") in
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?permissionArns ?clientToken ?allowExternalPrincipals ?tags
-        ?principals ?resourceArns ~name ()
+      make ?resourceShareConfiguration ?sources ?permissionArns ?clientToken
+        ?allowExternalPrincipals ?tags ?principals ?resourceArns ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let resourceShareConfiguration =
+        field_map json__ "resourceShareConfiguration"
+          ResourceShareConfiguration.of_json in
+      let sources = field_map json__ "sources" SourceArnOrAccountList.of_json in
       let permissionArns =
-        field_map json "permissionArns" PermissionArnList.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+        field_map json__ "permissionArns" PermissionArnList.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let allowExternalPrincipals =
-        field_map json "allowExternalPrincipals" Boolean.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map json__ "allowExternalPrincipals" Boolean.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let principals =
-        field_map json "principals" PrincipalArnOrIdList.of_json in
+        field_map json__ "principals" PrincipalArnOrIdList.of_json in
       let resourceArns =
-        field_map json "resourceArns" ResourceArnList.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ?permissionArns ?clientToken ?allowExternalPrincipals ?tags
-        ?principals ?resourceArns ~name ()
+        field_map json__ "resourceArns" ResourceArnList.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ?resourceShareConfiguration ?sources ?permissionArns ?clientToken
+        ?allowExternalPrincipals ?tags ?principals ?resourceArns ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a resource share. You can provide a list of the Amazon Resource Names (ARNs) for the resources that you want to share, a list of principals you want to share the resources with, and the permissions to grant those principals. Sharing a resource makes it available for use by principals outside of the Amazon Web Services account that created the resource. Sharing doesn't change any permissions or quotas that apply to the resource in the account that created it."]
+       "Creates a resource share. You can provide a list of the Amazon Resource Names (ARNs) for the resources that you want to share, a list of principals you want to share the resources with, the permissions to grant those principals, and optionally source constraints to enhance security for service principal sharing. Sharing a resource makes it available for use by principals outside of the Amazon Web Services account that created the resource. Sharing doesn't change any permissions or quotas that apply to the resource in the account that created it."]
+module CreatePermissionVersionResponse =
+  struct
+    type nonrec t =
+      {
+      permission: ResourceSharePermissionDetail.t option ;
+      clientToken: String_.t option
+        [@ocaml.doc
+          "The idempotency identifier associated with this request. If you want to repeat the same operation in an idempotent manner then you must include this value in the clientToken request parameter of that later call. All other parameters must also have the same values that you used in the first call."]}
+    type nonrec error =
+      [
+        `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidClientTokenException of InvalidClientTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidPolicyException of InvalidPolicyException.t 
+      | `MalformedArnException of MalformedArnException.t 
+      | `MalformedPolicyTemplateException of
+          MalformedPolicyTemplateException.t 
+      | `PermissionVersionsLimitExceededException of
+          PermissionVersionsLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `UnknownResourceException of UnknownResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?permission =
+      fun ?clientToken -> fun () -> { permission; clientToken }
+    let error_of_json name json =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidPolicyException" ->
+          `InvalidPolicyException (InvalidPolicyException.of_json json)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_json json)
+      | "MalformedPolicyTemplateException" ->
+          `MalformedPolicyTemplateException
+            (MalformedPolicyTemplateException.of_json json)
+      | "PermissionVersionsLimitExceededException" ->
+          `PermissionVersionsLimitExceededException
+            (PermissionVersionsLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidPolicyException" ->
+          `InvalidPolicyException (InvalidPolicyException.of_xml xml)
+      | "MalformedArnException" ->
+          `MalformedArnException (MalformedArnException.of_xml xml)
+      | "MalformedPolicyTemplateException" ->
+          `MalformedPolicyTemplateException
+            (MalformedPolicyTemplateException.of_xml xml)
+      | "PermissionVersionsLimitExceededException" ->
+          `PermissionVersionsLimitExceededException
+            (PermissionVersionsLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "UnknownResourceException" ->
+          `UnknownResourceException (UnknownResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidClientTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidClientTokenException"));
+            ("details", (InvalidClientTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidPolicyException e ->
+          `Assoc
+            [("error", (`String "InvalidPolicyException"));
+            ("details", (InvalidPolicyException.to_json e))]
+      | `MalformedArnException e ->
+          `Assoc
+            [("error", (`String "MalformedArnException"));
+            ("details", (MalformedArnException.to_json e))]
+      | `MalformedPolicyTemplateException e ->
+          `Assoc
+            [("error", (`String "MalformedPolicyTemplateException"));
+            ("details", (MalformedPolicyTemplateException.to_json e))]
+      | `PermissionVersionsLimitExceededException e ->
+          `Assoc
+            [("error", (`String "PermissionVersionsLimitExceededException"));
+            ("details", (PermissionVersionsLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `UnknownResourceException e ->
+          `Assoc
+            [("error", (`String "UnknownResourceException"));
+            ("details", (UnknownResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("permission",
+           (Option.map x.permission ~f:ResourceSharePermissionDetail.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let permission =
+        (Option.map ~f:ResourceSharePermissionDetail.of_xml)
+          (Xml.child xml_arg0 "permission") in
+      make ?clientToken ?permission ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let permission =
+        field_map json__ "permission" ResourceSharePermissionDetail.of_json in
+      make ?clientToken ?permission ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new version of the specified customer managed permission. The new version is automatically set as the default version of the customer managed permission. New resource shares automatically use the default permission. Existing resource shares continue to use their original permission versions, but you can use ReplacePermissionAssociations to update them. If the specified customer managed permission already has the maximum of 5 versions, then you must delete one of the existing versions before you can create a new one."]
+module CreatePermissionVersionRequest =
+  struct
+    type nonrec t =
+      {
+      permissionArn: String_.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the customer managed permission you're creating a new version for."];
+      policyTemplate: Policy.t
+        [@ocaml.doc
+          "A string in JSON format string that contains the following elements of a resource-based policy: Effect: must be set to ALLOW. Action: specifies the actions that are allowed by this customer managed permission. The list must contain only actions that are supported by the specified resource type. For a list of all actions supported by each resource type, see Actions, resources, and condition keys for Amazon Web Services services in the Identity and Access Management User Guide. Condition: (optional) specifies conditional parameters that must evaluate to true when a user attempts an action for that action to be allowed. For more information about the Condition element, see IAM policies: Condition element in the Identity and Access Management User Guide. This template can't include either the Resource or Principal elements. Those are both filled in by RAM when it instantiates the resource-based policy on each resource shared using this managed permission. The Resource comes from the ARN of the specific resource that you are sharing. The Principal comes from the list of identities added to the resource share."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
+    let context_ = "CreatePermissionVersionRequest"
+    let make ?clientToken =
+      fun ~permissionArn ->
+        fun ~policyTemplate ->
+          fun () -> { clientToken; permissionArn; policyTemplate }
+    let to_value x =
+      structure_to_value
+        [("permissionArn", (Some (String_.to_value x.permissionArn)));
+        ("policyTemplate", (Some (Policy.to_value x.policyTemplate)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let policyTemplate =
+        Policy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyTemplate") in
+      let permissionArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionArn") in
+      make ?clientToken ~policyTemplate ~permissionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let policyTemplate =
+        field_map_exn json__ "policyTemplate" Policy.of_json in
+      let permissionArn =
+        field_map_exn json__ "permissionArn" String_.of_json in
+      make ?clientToken ~policyTemplate ~permissionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new version of the specified customer managed permission. The new version is automatically set as the default version of the customer managed permission. New resource shares automatically use the default permission. Existing resource shares continue to use their original permission versions, but you can use ReplacePermissionAssociations to update them. If the specified customer managed permission already has the maximum of 5 versions, then you must delete one of the existing versions before you can create a new one."]
+module CreatePermissionResponse =
+  struct
+    type nonrec t =
+      {
+      permission: ResourceSharePermissionSummary.t option
+        [@ocaml.doc
+          "A structure with information about this customer managed permission."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "The idempotency identifier associated with this request. If you want to repeat the same operation in an idempotent manner then you must include this value in the clientToken request parameter of that later call. All other parameters must also have the same values that you used in the first call."]}
+    type nonrec error =
+      [
+        `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidClientTokenException of InvalidClientTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidPolicyException of InvalidPolicyException.t 
+      | `MalformedPolicyTemplateException of
+          MalformedPolicyTemplateException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `PermissionAlreadyExistsException of
+          PermissionAlreadyExistsException.t 
+      | `PermissionLimitExceededException of
+          PermissionLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?permission =
+      fun ?clientToken -> fun () -> { permission; clientToken }
+    let error_of_json name json =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidPolicyException" ->
+          `InvalidPolicyException (InvalidPolicyException.of_json json)
+      | "MalformedPolicyTemplateException" ->
+          `MalformedPolicyTemplateException
+            (MalformedPolicyTemplateException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "PermissionAlreadyExistsException" ->
+          `PermissionAlreadyExistsException
+            (PermissionAlreadyExistsException.of_json json)
+      | "PermissionLimitExceededException" ->
+          `PermissionLimitExceededException
+            (PermissionLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidClientTokenException" ->
+          `InvalidClientTokenException
+            (InvalidClientTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidPolicyException" ->
+          `InvalidPolicyException (InvalidPolicyException.of_xml xml)
+      | "MalformedPolicyTemplateException" ->
+          `MalformedPolicyTemplateException
+            (MalformedPolicyTemplateException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "PermissionAlreadyExistsException" ->
+          `PermissionAlreadyExistsException
+            (PermissionAlreadyExistsException.of_xml xml)
+      | "PermissionLimitExceededException" ->
+          `PermissionLimitExceededException
+            (PermissionLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidClientTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidClientTokenException"));
+            ("details", (InvalidClientTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidPolicyException e ->
+          `Assoc
+            [("error", (`String "InvalidPolicyException"));
+            ("details", (InvalidPolicyException.to_json e))]
+      | `MalformedPolicyTemplateException e ->
+          `Assoc
+            [("error", (`String "MalformedPolicyTemplateException"));
+            ("details", (MalformedPolicyTemplateException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `PermissionAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "PermissionAlreadyExistsException"));
+            ("details", (PermissionAlreadyExistsException.to_json e))]
+      | `PermissionLimitExceededException e ->
+          `Assoc
+            [("error", (`String "PermissionLimitExceededException"));
+            ("details", (PermissionLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("permission",
+           (Option.map x.permission
+              ~f:ResourceSharePermissionSummary.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let permission =
+        (Option.map ~f:ResourceSharePermissionSummary.of_xml)
+          (Xml.child xml_arg0 "permission") in
+      make ?clientToken ?permission ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let permission =
+        field_map json__ "permission" ResourceSharePermissionSummary.of_json in
+      make ?clientToken ?permission ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a customer managed permission for a specified resource type that you can attach to resource shares. It is created in the Amazon Web Services Region in which you call the operation."]
+module CreatePermissionRequest =
+  struct
+    type nonrec t =
+      {
+      name: PermissionName.t
+        [@ocaml.doc
+          "Specifies the name of the customer managed permission. The name must be unique within the Amazon Web Services Region."];
+      resourceType: String_.t
+        [@ocaml.doc
+          "Specifies the name of the resource type that this customer managed permission applies to. The format is <service-code>:<resource-type> and is case sensitive. For example, to specify an Amazon EC2 Subnet, you can use the string ec2:Subnet. To see the list of valid values for this parameter, query the ListResourceTypes operation. This value must match the display name of the resource (available in ListResourceTypes)."];
+      policyTemplate: Policy.t
+        [@ocaml.doc
+          "A string in JSON format string that contains the following elements of a resource-based policy: Effect: must be set to ALLOW. Action: specifies the actions that are allowed by this customer managed permission. The list must contain only actions that are supported by the specified resource type. For a list of all actions supported by each resource type, see Actions, resources, and condition keys for Amazon Web Services services in the Identity and Access Management User Guide. Condition: (optional) specifies conditional parameters that must evaluate to true when a user attempts an action for that action to be allowed. For more information about the Condition element, see IAM policies: Condition element in the Identity and Access Management User Guide. This template can't include either the Resource or Principal elements. Those are both filled in by RAM when it instantiates the resource-based policy on each resource shared using this managed permission. The Resource comes from the ARN of the specific resource that you are sharing. The Principal comes from the list of identities added to the resource share."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Specifies a list of one or more tag key and value pairs to attach to the permission."]}
+    let context_ = "CreatePermissionRequest"
+    let make ?clientToken =
+      fun ?tags ->
+        fun ~name ->
+          fun ~resourceType ->
+            fun ~policyTemplate ->
+              fun () ->
+                { clientToken; tags; name; resourceType; policyTemplate }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (PermissionName.to_value x.name)));
+        ("resourceType", (Some (String_.to_value x.resourceType)));
+        ("policyTemplate", (Some (Policy.to_value x.policyTemplate)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let policyTemplate =
+        Policy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyTemplate") in
+      let resourceType =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let name =
+        PermissionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?tags ?clientToken ~policyTemplate ~resourceType ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let policyTemplate =
+        field_map_exn json__ "policyTemplate" Policy.of_json in
+      let resourceType = field_map_exn json__ "resourceType" String_.of_json in
+      let name = field_map_exn json__ "name" PermissionName.of_json in
+      make ?tags ?clientToken ~policyTemplate ~resourceType ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a customer managed permission for a specified resource type that you can attach to resource shares. It is created in the Amazon Web Services Region in which you call the operation."]
 module AssociateResourceShareResponse =
   struct
     type nonrec t =
@@ -6086,38 +9061,48 @@ module AssociateResourceShareResponse =
           (Xml.child xml_arg0 "resourceShareAssociations") in
       make ?clientToken ?resourceShareAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let resourceShareAssociations =
-        field_map json "resourceShareAssociations"
+        field_map json__ "resourceShareAssociations"
           ResourceShareAssociationList.of_json in
       make ?clientToken ?resourceShareAssociations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified list of principals and list of resources to a resource share. Principals that already have access to this resource share immediately receive access to the added resources. Newly added principals immediately receive access to the resources shared in this resource share."]
+       "Adds the specified list of principals, resources, and source constraints to a resource share. Principals that already have access to this resource share immediately receive access to the added resources. Newly added principals immediately receive access to the resources shared in this resource share."]
 module AssociateResourceShareRequest =
   struct
     type nonrec t =
       {
       resourceShareArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the resource share that you want to add principals or resources to."];
+          "Specifies the Amazon Resource Name (ARN) of the resource share that you want to add principals or resources to."];
       resourceArns: ResourceArnList.t option
         [@ocaml.doc
           "Specifies a list of Amazon Resource Names (ARNs) of the resources that you want to share. This can be null if you want to add only principals."];
       principals: PrincipalArnOrIdList.t option
         [@ocaml.doc
-          "Specifies a list of principals to whom you want to the resource share. This can be null if you want to add only resources. What the principals can do with the resources in the share is determined by the RAM permissions that you associate with the resource share. See AssociateResourceSharePermission. You can include the following values: An Amazon Web Services account ID, for example: 123456789012 An Amazon Resoure Name (ARN) of an organization in Organizations, for example: organizations::123456789012:organization/o-exampleorgid An ARN of an organizational unit (OU) in Organizations, for example: organizations::123456789012:ou/o-exampleorgid/ou-examplerootid-exampleouid123 An ARN of an IAM role, for example: iam::123456789012:role/rolename An ARN of an IAM user, for example: iam::123456789012user/username Not all resource types can be shared with IAM roles and users. For more information, see Sharing with IAM roles and users in the Resource Access Manager User Guide."];
+          "Specifies a list of principals to whom you want to the resource share. This can be null if you want to add only resources. What the principals can do with the resources in the share is determined by the RAM permissions that you associate with the resource share. See AssociateResourceSharePermission. You can include the following values: An Amazon Web Services account ID, for example: 123456789012 An Amazon Resource Name (ARN) of an organization in Organizations, for example: organizations::123456789012:organization/o-exampleorgid An ARN of an organizational unit (OU) in Organizations, for example: organizations::123456789012:ou/o-exampleorgid/ou-examplerootid-exampleouid123 An ARN of an IAM role, for example: iam::123456789012:role/rolename An ARN of an IAM user, for example: iam::123456789012user/username A service principal name, for example: service-id.amazonaws.com Not all resource types can be shared with IAM roles and users. For more information, see Sharing with IAM roles and users in the Resource Access Manager User Guide."];
       clientToken: String_.t option
         [@ocaml.doc
-          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you."]}
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."];
+      sources: SourceArnOrAccountList.t option
+        [@ocaml.doc
+          "Specifies source constraints (accounts, ARNs, organization IDs, or organization paths) that limit when service principals can access resources in this resource share. When a service principal attempts to access a shared resource, validation is performed to ensure the request originates from one of the specified sources. This helps prevent confused deputy attacks by applying constraints on where service principals can access resources from."]}
     let context_ = "AssociateResourceShareRequest"
     let make ?resourceArns =
       fun ?principals ->
         fun ?clientToken ->
-          fun ~resourceShareArn ->
-            fun () ->
-              { resourceArns; principals; clientToken; resourceShareArn }
+          fun ?sources ->
+            fun ~resourceShareArn ->
+              fun () ->
+                {
+                  resourceArns;
+                  principals;
+                  clientToken;
+                  sources;
+                  resourceShareArn
+                }
     let to_value x =
       structure_to_value
         [("resourceShareArn", (Some (String_.to_value x.resourceShareArn)));
@@ -6125,9 +9110,14 @@ module AssociateResourceShareRequest =
           (Option.map x.resourceArns ~f:ResourceArnList.to_value));
         ("principals",
           (Option.map x.principals ~f:PrincipalArnOrIdList.to_value));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("sources",
+          (Option.map x.sources ~f:SourceArnOrAccountList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sources =
+        (Option.map ~f:SourceArnOrAccountList.of_xml)
+          (Xml.child xml_arg0 "sources") in
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let principals =
@@ -6139,20 +9129,23 @@ module AssociateResourceShareRequest =
       let resourceShareArn =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
-      make ?clientToken ?principals ?resourceArns ~resourceShareArn ()
+      make ?sources ?clientToken ?principals ?resourceArns ~resourceShareArn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let sources = field_map json__ "sources" SourceArnOrAccountList.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let principals =
-        field_map json "principals" PrincipalArnOrIdList.of_json in
+        field_map json__ "principals" PrincipalArnOrIdList.of_json in
       let resourceArns =
-        field_map json "resourceArns" ResourceArnList.of_json in
+        field_map json__ "resourceArns" ResourceArnList.of_json in
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
-      make ?clientToken ?principals ?resourceArns ~resourceShareArn ()
+        field_map_exn json__ "resourceShareArn" String_.of_json in
+      make ?sources ?clientToken ?principals ?resourceArns ~resourceShareArn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified list of principals and list of resources to a resource share. Principals that already have access to this resource share immediately receive access to the added resources. Newly added principals immediately receive access to the resources shared in this resource share."]
+       "Adds the specified list of principals, resources, and source constraints to a resource share. Principals that already have access to this resource share immediately receive access to the added resources. Newly added principals immediately receive access to the resources shared in this resource share."]
 module AssociateResourceSharePermissionResponse =
   struct
     type nonrec t =
@@ -6264,9 +9257,9 @@ module AssociateResourceSharePermissionResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?clientToken ?returnValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let returnValue = field_map json "returnValue" Boolean.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let returnValue = field_map json__ "returnValue" Boolean.of_json in
       make ?clientToken ?returnValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6277,19 +9270,19 @@ module AssociateResourceSharePermissionRequest =
       {
       resourceShareArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the resource share to which you want to add or replace permissions."];
+          "Specifies the Amazon Resource Name (ARN) of the resource share to which you want to add or replace permissions."];
       permissionArn: String_.t
         [@ocaml.doc
-          "Specifies the Amazon Resoure Name (ARN) of the RAM permission to associate with the resource share. To find the ARN for a permission, use either the ListPermissions operation or go to the Permissions library page in the RAM console and then choose the name of the permission. The ARN is displayed on the detail page."];
+          "Specifies the Amazon Resource Name (ARN) of the RAM permission to associate with the resource share. To find the ARN for a permission, use either the ListPermissions operation or go to the Permissions library page in the RAM console and then choose the name of the permission. The ARN is displayed on the detail page."];
       replace: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the specified permission should replace or add to the existing permission associated with the resource share. Use true to replace the current permissions. Use false to add the permission to the current permission. The default value is false. A resource share can have only one permission per resource type. If a resource share already has a permission for the specified resource type and you don't set replace to true then the operation returns an error. This helps prevent accidental overwriting of a permission."];
+          "Specifies whether the specified permission should replace the existing permission associated with the resource share. Use true to replace the current permissions. Use false to add the permission to a resource share that currently doesn't have a permission. The default value is false. A resource share can have only one permission per resource type. If a resource share already has a permission for the specified resource type and you don't set replace to true then the operation returns an error. This helps prevent accidental overwriting of a permission."];
       clientToken: String_.t option
         [@ocaml.doc
-          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you."];
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."];
       permissionVersion: Integer.t option
         [@ocaml.doc
-          "Specifies the version of the RAM permission to associate with the resource share. If you don't specify this parameter, the operation uses the version designated as the default. You can use the ListPermissionVersions operation to discover the available versions of a permission."]}
+          "Specifies the version of the RAM permission to associate with the resource share. You can specify only the version that is currently set as the default version for the permission. If you also set the replace pararameter to true, then this operation updates an outdated version of the permission to the current default version. You don't need to specify this parameter because the default behavior is to use the version that is currently set as the default version for the permission. This parameter is supported for backwards compatibility."]}
     let context_ = "AssociateResourceSharePermissionRequest"
     let make ?replace =
       fun ?clientToken ->
@@ -6330,14 +9323,15 @@ module AssociateResourceSharePermissionRequest =
       make ?permissionVersion ?clientToken ?replace ~permissionArn
         ~resourceShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionVersion =
-        field_map json "permissionVersion" Integer.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let replace = field_map json "replace" Boolean.of_json in
-      let permissionArn = field_map_exn json "permissionArn" String_.of_json in
+        field_map json__ "permissionVersion" Integer.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let replace = field_map json__ "replace" Boolean.of_json in
+      let permissionArn =
+        field_map_exn json__ "permissionArn" String_.of_json in
       let resourceShareArn =
-        field_map_exn json "resourceShareArn" String_.of_json in
+        field_map_exn json__ "resourceShareArn" String_.of_json in
       make ?permissionVersion ?clientToken ?replace ~permissionArn
         ~resourceShareArn ()
     let to_json v = composed_to_json to_value v
@@ -6506,10 +9500,10 @@ module AcceptResourceShareInvitationResponse =
           (Xml.child xml_arg0 "resourceShareInvitation") in
       make ?clientToken ?resourceShareInvitation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let resourceShareInvitation =
-        field_map json "resourceShareInvitation"
+        field_map json__ "resourceShareInvitation"
           ResourceShareInvitation.of_json in
       make ?clientToken ?resourceShareInvitation ()
     let to_json v = composed_to_json to_value v
@@ -6521,10 +9515,10 @@ module AcceptResourceShareInvitationRequest =
       {
       resourceShareInvitationArn: String_.t
         [@ocaml.doc
-          "The Amazon Resoure Name (ARN) of the invitation that you want to accept."];
+          "The Amazon Resource Name (ARN) of the invitation that you want to accept."];
       clientToken: String_.t option
         [@ocaml.doc
-          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you."]}
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value.. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotentParameterMismatch error."]}
     let context_ = "AcceptResourceShareInvitationRequest"
     let make ?clientToken =
       fun ~resourceShareInvitationArn ->
@@ -6544,10 +9538,10 @@ module AcceptResourceShareInvitationRequest =
              "resourceShareInvitationArn") in
       make ?clientToken ~resourceShareInvitationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let resourceShareInvitationArn =
-        field_map_exn json "resourceShareInvitationArn" String_.of_json in
+        field_map_exn json__ "resourceShareInvitationArn" String_.of_json in
       make ?clientToken ~resourceShareInvitationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

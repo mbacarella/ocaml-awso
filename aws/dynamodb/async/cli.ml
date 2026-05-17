@@ -124,7 +124,7 @@ let create_backup =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and backupName =
          flag "backup-name" (required string) ~doc:"STRING BackupName" in
        fun () ->
@@ -164,6 +164,11 @@ let create_table =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and attributeDefinitions =
+         flag "attribute-definitions" (optional json_arg)
+           ~doc:"JSON AttributeDefinitions"
+       and keySchema =
+         flag "key-schema" (optional json_arg) ~doc:"JSON KeySchema"
        and localSecondaryIndexes =
          flag "local-secondary-indexes" (optional json_arg)
            ~doc:"JSON LocalSecondaryIndexList"
@@ -184,17 +189,34 @@ let create_table =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and tableClass =
          flag "table-class" (optional json_arg) ~doc:"JSON TableClass"
-       and attributeDefinitions =
-         flag "attribute-definitions" (required json_arg)
-           ~doc:"JSON AttributeDefinitions"
+       and deletionProtectionEnabled =
+         flag "deletion-protection-enabled" (optional bool)
+           ~doc:"BOOL DeletionProtectionEnabled"
+       and warmThroughput =
+         flag "warm-throughput" (optional json_arg)
+           ~doc:"JSON WarmThroughput"
+       and resourcePolicy =
+         flag "resource-policy" (optional string)
+           ~doc:"STRING ResourcePolicy"
+       and onDemandThroughput =
+         flag "on-demand-throughput" (optional json_arg)
+           ~doc:"JSON OnDemandThroughput"
+       and globalTableSourceArn =
+         flag "global-table-source-arn" (optional string)
+           ~doc:"STRING TableArn"
+       and globalTableSettingsReplicationMode =
+         flag "global-table-settings-replication-mode" (optional json_arg)
+           ~doc:"JSON GlobalTableSettingsReplicationMode"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
-       and keySchema =
-         flag "key-schema" (required json_arg) ~doc:"JSON KeySchema" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_table
            (Values.CreateTableInput.make
+              ?attributeDefinitions:(Option.map
+                                       ~f:Values.AttributeDefinitions.of_json
+                                       attributeDefinitions)
+              ?keySchema:(Option.map ~f:Values.KeySchema.of_json keySchema)
               ?localSecondaryIndexes:(Option.map
                                         ~f:Values.LocalSecondaryIndexList.of_json
                                         localSecondaryIndexes)
@@ -214,10 +236,17 @@ let create_table =
                                    sSESpecification)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?tableClass:(Option.map ~f:Values.TableClass.of_json tableClass)
-              ~attributeDefinitions:(Values.AttributeDefinitions.of_json
-                                       attributeDefinitions) ~tableName
-              ~keySchema:(Values.KeySchema.of_json keySchema) ())
-           (Some Values.CreateTableOutput.to_json)
+              ?deletionProtectionEnabled
+              ?warmThroughput:(Option.map ~f:Values.WarmThroughput.of_json
+                                 warmThroughput) ?resourcePolicy
+              ?onDemandThroughput:(Option.map
+                                     ~f:Values.OnDemandThroughput.of_json
+                                     onDemandThroughput)
+              ?globalTableSourceArn
+              ?globalTableSettingsReplicationMode:(Option.map
+                                                     ~f:Values.GlobalTableSettingsReplicationMode.of_json
+                                                     globalTableSettingsReplicationMode)
+              ~tableName ()) (Some Values.CreateTableOutput.to_json)
            (Some Values.CreateTableOutput.error_to_json)])
 let delete_backup =
   Command.async ~summary:""
@@ -268,8 +297,11 @@ let delete_item =
        and expressionAttributeValues =
          flag "expression-attribute-values" (optional json_arg)
            ~doc:"JSON ExpressionAttributeValueMap"
+       and returnValuesOnConditionCheckFailure =
+         flag "return-values-on-condition-check-failure" (optional json_arg)
+           ~doc:"JSON ReturnValuesOnConditionCheckFailure"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and key = flag "key" (required json_arg) ~doc:"JSON Key" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -295,9 +327,35 @@ let delete_item =
               ?expressionAttributeValues:(Option.map
                                             ~f:Values.ExpressionAttributeValueMap.of_json
                                             expressionAttributeValues)
+              ?returnValuesOnConditionCheckFailure:(Option.map
+                                                      ~f:Values.ReturnValuesOnConditionCheckFailure.of_json
+                                                      returnValuesOnConditionCheckFailure)
               ~tableName ~key:(Values.Key.of_json key) ())
            (Some Values.DeleteItemOutput.to_json)
            (Some Values.DeleteItemOutput.error_to_json)])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expectedRevisionId =
+         flag "expected-revision-id" (optional string)
+           ~doc:"STRING PolicyRevisionId"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING ResourceArnString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyInput.make ?expectedRevisionId
+              ~resourceArn ())
+           (Some Values.DeleteResourcePolicyOutput.to_json)
+           (Some Values.DeleteResourcePolicyOutput.error_to_json)])
 let delete_table =
   Command.async ~summary:""
     ([%map_open.Command
@@ -309,7 +367,7 @@ let delete_table =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_table (Values.DeleteTableInput.make ~tableName ())
@@ -343,7 +401,7 @@ let describe_continuous_backups =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_continuous_backups
@@ -363,7 +421,7 @@ let describe_contributor_insights =
        and indexName =
          flag "index-name" (optional string) ~doc:"STRING IndexName"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_contributor_insights
@@ -440,6 +498,23 @@ let describe_global_table_settings =
            (Values.DescribeGlobalTableSettingsInput.make ~globalTableName ())
            (Some Values.DescribeGlobalTableSettingsOutput.to_json)
            (Some Values.DescribeGlobalTableSettingsOutput.error_to_json)])
+let describe_import =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and importArn =
+         flag "import-arn" (required string) ~doc:"STRING ImportArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_import (Values.DescribeImportInput.make ~importArn ())
+           (Some Values.DescribeImportOutput.to_json)
+           (Some Values.DescribeImportOutput.error_to_json)])
 let describe_kinesis_streaming_destination =
   Command.async ~summary:""
     ([%map_open.Command
@@ -451,7 +526,7 @@ let describe_kinesis_streaming_destination =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_kinesis_streaming_destination
@@ -487,7 +562,7 @@ let describe_table =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_table (Values.DescribeTableInput.make ~tableName ())
@@ -504,7 +579,7 @@ let describe_table_replica_auto_scaling =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_table_replica_auto_scaling
@@ -522,7 +597,7 @@ let describe_time_to_live =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_time_to_live
@@ -539,15 +614,21 @@ let disable_kinesis_streaming_destination =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and enableKinesisStreamingConfiguration =
+         flag "enable-kinesis-streaming-configuration" (optional json_arg)
+           ~doc:"JSON EnableKinesisStreamingConfiguration"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and streamArn =
          flag "stream-arn" (required string) ~doc:"STRING StreamArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disable_kinesis_streaming_destination
-           (Values.KinesisStreamingDestinationInput.make ~tableName
-              ~streamArn ())
+           (Values.KinesisStreamingDestinationInput.make
+              ?enableKinesisStreamingConfiguration:(Option.map
+                                                      ~f:Values.EnableKinesisStreamingConfiguration.of_json
+                                                      enableKinesisStreamingConfiguration)
+              ~tableName ~streamArn ())
            (Some Values.KinesisStreamingDestinationOutput.to_json)
            (Some Values.KinesisStreamingDestinationOutput.error_to_json)])
 let enable_kinesis_streaming_destination =
@@ -560,15 +641,21 @@ let enable_kinesis_streaming_destination =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and enableKinesisStreamingConfiguration =
+         flag "enable-kinesis-streaming-configuration" (optional json_arg)
+           ~doc:"JSON EnableKinesisStreamingConfiguration"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and streamArn =
          flag "stream-arn" (required string) ~doc:"STRING StreamArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.enable_kinesis_streaming_destination
-           (Values.KinesisStreamingDestinationInput.make ~tableName
-              ~streamArn ())
+           (Values.KinesisStreamingDestinationInput.make
+              ?enableKinesisStreamingConfiguration:(Option.map
+                                                      ~f:Values.EnableKinesisStreamingConfiguration.of_json
+                                                      enableKinesisStreamingConfiguration)
+              ~tableName ~streamArn ())
            (Some Values.KinesisStreamingDestinationOutput.to_json)
            (Some Values.KinesisStreamingDestinationOutput.error_to_json)])
 let execute_statement =
@@ -593,6 +680,9 @@ let execute_statement =
            ~doc:"JSON ReturnConsumedCapacity"
        and limit =
          flag "limit" (optional int) ~doc:"INT PositiveIntegerObject"
+       and returnValuesOnConditionCheckFailure =
+         flag "return-values-on-condition-check-failure" (optional json_arg)
+           ~doc:"JSON ReturnValuesOnConditionCheckFailure"
        and statement =
          flag "statement" (required string) ~doc:"STRING PartiQLStatement" in
        fun () ->
@@ -605,6 +695,9 @@ let execute_statement =
               ?returnConsumedCapacity:(Option.map
                                          ~f:Values.ReturnConsumedCapacity.of_json
                                          returnConsumedCapacity) ?limit
+              ?returnValuesOnConditionCheckFailure:(Option.map
+                                                      ~f:Values.ReturnValuesOnConditionCheckFailure.of_json
+                                                      returnValuesOnConditionCheckFailure)
               ~statement ()) (Some Values.ExecuteStatementOutput.to_json)
            (Some Values.ExecuteStatementOutput.error_to_json)])
 let execute_transaction =
@@ -663,6 +756,11 @@ let export_table_to_point_in_time =
            ~doc:"STRING S3SseKmsKeyId"
        and exportFormat =
          flag "export-format" (optional json_arg) ~doc:"JSON ExportFormat"
+       and exportType =
+         flag "export-type" (optional json_arg) ~doc:"JSON ExportType"
+       and incrementalExportSpecification =
+         flag "incremental-export-specification" (optional json_arg)
+           ~doc:"JSON IncrementalExportSpecification"
        and tableArn =
          flag "table-arn" (required string) ~doc:"STRING TableArn"
        and s3Bucket =
@@ -676,7 +774,12 @@ let export_table_to_point_in_time =
               ?s3SseAlgorithm:(Option.map ~f:Values.S3SseAlgorithm.of_json
                                  s3SseAlgorithm) ?s3SseKmsKeyId
               ?exportFormat:(Option.map ~f:Values.ExportFormat.of_json
-                               exportFormat) ~tableArn ~s3Bucket ())
+                               exportFormat)
+              ?exportType:(Option.map ~f:Values.ExportType.of_json exportType)
+              ?incrementalExportSpecification:(Option.map
+                                                 ~f:Values.IncrementalExportSpecification.of_json
+                                                 incrementalExportSpecification)
+              ~tableArn ~s3Bucket ())
            (Some Values.ExportTableToPointInTimeOutput.to_json)
            (Some Values.ExportTableToPointInTimeOutput.error_to_json)])
 let get_item =
@@ -704,7 +807,7 @@ let get_item =
          flag "expression-attribute-names" (optional json_arg)
            ~doc:"JSON ExpressionAttributeNameMap"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and key = flag "key" (required json_arg) ~doc:"JSON Key" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -723,6 +826,67 @@ let get_item =
               ~tableName ~key:(Values.Key.of_json key) ())
            (Some Values.GetItemOutput.to_json)
            (Some Values.GetItemOutput.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING ResourceArnString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyInput.make ~resourceArn ())
+           (Some Values.GetResourcePolicyOutput.to_json)
+           (Some Values.GetResourcePolicyOutput.error_to_json)])
+let import_table =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and inputFormatOptions =
+         flag "input-format-options" (optional json_arg)
+           ~doc:"JSON InputFormatOptions"
+       and inputCompressionType =
+         flag "input-compression-type" (optional json_arg)
+           ~doc:"JSON InputCompressionType"
+       and s3BucketSource =
+         flag "s3-bucket-source" (required json_arg)
+           ~doc:"JSON S3BucketSource"
+       and inputFormat =
+         flag "input-format" (required json_arg) ~doc:"JSON InputFormat"
+       and tableCreationParameters =
+         flag "table-creation-parameters" (required json_arg)
+           ~doc:"JSON TableCreationParameters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.import_table
+           (Values.ImportTableInput.make ?clientToken
+              ?inputFormatOptions:(Option.map
+                                     ~f:Values.InputFormatOptions.of_json
+                                     inputFormatOptions)
+              ?inputCompressionType:(Option.map
+                                       ~f:Values.InputCompressionType.of_json
+                                       inputCompressionType)
+              ~s3BucketSource:(Values.S3BucketSource.of_json s3BucketSource)
+              ~inputFormat:(Values.InputFormat.of_json inputFormat)
+              ~tableCreationParameters:(Values.TableCreationParameters.of_json
+                                          tableCreationParameters) ())
+           (Some Values.ImportTableOutput.to_json)
+           (Some Values.ImportTableOutput.error_to_json)])
 let list_backups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -734,7 +898,7 @@ let list_backups =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (optional string) ~doc:"STRING TableName"
+         flag "table-name" (optional string) ~doc:"STRING TableArn"
        and limit = flag "limit" (optional int) ~doc:"INT BackupsInputLimit"
        and timeRangeLowerBound =
          flag "time-range-lower-bound" (optional json_arg)
@@ -773,7 +937,7 @@ let list_contributor_insights =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (optional string) ~doc:"STRING TableName"
+         flag "table-name" (optional string) ~doc:"STRING TableArn"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextTokenString"
        and maxResults =
@@ -832,6 +996,28 @@ let list_global_tables =
               ?limit ?regionName ())
            (Some Values.ListGlobalTablesOutput.to_json)
            (Some Values.ListGlobalTablesOutput.error_to_json)])
+let list_imports =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tableArn =
+         flag "table-arn" (optional string) ~doc:"STRING TableArn"
+       and pageSize =
+         flag "page-size" (optional int) ~doc:"INT ListImportsMaxLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING ImportNextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_imports
+           (Values.ListImportsInput.make ?tableArn ?pageSize ?nextToken ())
+           (Some Values.ListImportsOutput.to_json)
+           (Some Values.ListImportsOutput.error_to_json)])
 let list_tables =
   Command.async ~summary:""
     ([%map_open.Command
@@ -906,8 +1092,11 @@ let put_item =
        and expressionAttributeValues =
          flag "expression-attribute-values" (optional json_arg)
            ~doc:"JSON ExpressionAttributeValueMap"
+       and returnValuesOnConditionCheckFailure =
+         flag "return-values-on-condition-check-failure" (optional json_arg)
+           ~doc:"JSON ReturnValuesOnConditionCheckFailure"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and item =
          flag "item" (required json_arg) ~doc:"JSON PutItemInputAttributeMap" in
        fun () ->
@@ -934,9 +1123,40 @@ let put_item =
               ?expressionAttributeValues:(Option.map
                                             ~f:Values.ExpressionAttributeValueMap.of_json
                                             expressionAttributeValues)
+              ?returnValuesOnConditionCheckFailure:(Option.map
+                                                      ~f:Values.ReturnValuesOnConditionCheckFailure.of_json
+                                                      returnValuesOnConditionCheckFailure)
               ~tableName ~item:(Values.PutItemInputAttributeMap.of_json item)
               ()) (Some Values.PutItemOutput.to_json)
            (Some Values.PutItemOutput.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expectedRevisionId =
+         flag "expected-revision-id" (optional string)
+           ~doc:"STRING PolicyRevisionId"
+       and confirmRemoveSelfResourceAccess =
+         flag "confirm-remove-self-resource-access" (optional bool)
+           ~doc:"BOOL ConfirmRemoveSelfResourceAccess"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING ResourceArnString"
+       and policy =
+         flag "policy" (required string) ~doc:"STRING ResourcePolicy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyInput.make ?expectedRevisionId
+              ?confirmRemoveSelfResourceAccess ~resourceArn ~policy ())
+           (Some Values.PutResourcePolicyOutput.to_json)
+           (Some Values.PutResourcePolicyOutput.error_to_json)])
 let query =
   Command.async ~summary:""
     ([%map_open.Command
@@ -988,7 +1208,7 @@ let query =
          flag "expression-attribute-values" (optional json_arg)
            ~doc:"JSON ExpressionAttributeValueMap"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region Io.query
            (Values.QueryInput.make ?indexName
@@ -1039,6 +1259,9 @@ let restore_table_from_backup =
        and provisionedThroughputOverride =
          flag "provisioned-throughput-override" (optional json_arg)
            ~doc:"JSON ProvisionedThroughput"
+       and onDemandThroughputOverride =
+         flag "on-demand-throughput-override" (optional json_arg)
+           ~doc:"JSON OnDemandThroughput"
        and sSESpecificationOverride =
          flag "s-s-e-specification-override" (optional json_arg)
            ~doc:"JSON SSESpecification"
@@ -1061,6 +1284,9 @@ let restore_table_from_backup =
               ?provisionedThroughputOverride:(Option.map
                                                 ~f:Values.ProvisionedThroughput.of_json
                                                 provisionedThroughputOverride)
+              ?onDemandThroughputOverride:(Option.map
+                                             ~f:Values.OnDemandThroughput.of_json
+                                             onDemandThroughputOverride)
               ?sSESpecificationOverride:(Option.map
                                            ~f:Values.SSESpecification.of_json
                                            sSESpecificationOverride)
@@ -1098,6 +1324,9 @@ let restore_table_to_point_in_time =
        and provisionedThroughputOverride =
          flag "provisioned-throughput-override" (optional json_arg)
            ~doc:"JSON ProvisionedThroughput"
+       and onDemandThroughputOverride =
+         flag "on-demand-throughput-override" (optional json_arg)
+           ~doc:"JSON OnDemandThroughput"
        and sSESpecificationOverride =
          flag "s-s-e-specification-override" (optional json_arg)
            ~doc:"JSON SSESpecification"
@@ -1121,6 +1350,9 @@ let restore_table_to_point_in_time =
               ?provisionedThroughputOverride:(Option.map
                                                 ~f:Values.ProvisionedThroughput.of_json
                                                 provisionedThroughputOverride)
+              ?onDemandThroughputOverride:(Option.map
+                                             ~f:Values.OnDemandThroughput.of_json
+                                             onDemandThroughputOverride)
               ?sSESpecificationOverride:(Option.map
                                            ~f:Values.SSESpecification.of_json
                                            sSESpecificationOverride)
@@ -1174,7 +1406,7 @@ let scan =
        and consistentRead =
          flag "consistent-read" (optional bool) ~doc:"BOOL ConsistentRead"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region Io.scan
            (Values.ScanInput.make ?indexName
@@ -1315,7 +1547,7 @@ let update_continuous_backups =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and pointInTimeRecoverySpecification =
          flag "point-in-time-recovery-specification" (required json_arg)
            ~doc:"JSON PointInTimeRecoverySpecification" in
@@ -1339,15 +1571,21 @@ let update_contributor_insights =
            ~doc:"URL override endpoint url"
        and indexName =
          flag "index-name" (optional string) ~doc:"STRING IndexName"
+       and contributorInsightsMode =
+         flag "contributor-insights-mode" (optional json_arg)
+           ~doc:"JSON ContributorInsightsMode"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and contributorInsightsAction =
          flag "contributor-insights-action" (required json_arg)
            ~doc:"JSON ContributorInsightsAction" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_contributor_insights
-           (Values.UpdateContributorInsightsInput.make ?indexName ~tableName
+           (Values.UpdateContributorInsightsInput.make ?indexName
+              ?contributorInsightsMode:(Option.map
+                                          ~f:Values.ContributorInsightsMode.of_json
+                                          contributorInsightsMode) ~tableName
               ~contributorInsightsAction:(Values.ContributorInsightsAction.of_json
                                             contributorInsightsAction) ())
            (Some Values.UpdateContributorInsightsOutput.to_json)
@@ -1464,8 +1702,11 @@ let update_item =
        and expressionAttributeValues =
          flag "expression-attribute-values" (optional json_arg)
            ~doc:"JSON ExpressionAttributeValueMap"
+       and returnValuesOnConditionCheckFailure =
+         flag "return-values-on-condition-check-failure" (optional json_arg)
+           ~doc:"JSON ReturnValuesOnConditionCheckFailure"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and key = flag "key" (required json_arg) ~doc:"JSON Key" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1494,9 +1735,39 @@ let update_item =
               ?expressionAttributeValues:(Option.map
                                             ~f:Values.ExpressionAttributeValueMap.of_json
                                             expressionAttributeValues)
+              ?returnValuesOnConditionCheckFailure:(Option.map
+                                                      ~f:Values.ReturnValuesOnConditionCheckFailure.of_json
+                                                      returnValuesOnConditionCheckFailure)
               ~tableName ~key:(Values.Key.of_json key) ())
            (Some Values.UpdateItemOutput.to_json)
            (Some Values.UpdateItemOutput.error_to_json)])
+let update_kinesis_streaming_destination =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and updateKinesisStreamingConfiguration =
+         flag "update-kinesis-streaming-configuration" (optional json_arg)
+           ~doc:"JSON UpdateKinesisStreamingConfiguration"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING TableArn"
+       and streamArn =
+         flag "stream-arn" (required string) ~doc:"STRING StreamArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_kinesis_streaming_destination
+           (Values.UpdateKinesisStreamingDestinationInput.make
+              ?updateKinesisStreamingConfiguration:(Option.map
+                                                      ~f:Values.UpdateKinesisStreamingConfiguration.of_json
+                                                      updateKinesisStreamingConfiguration)
+              ~tableName ~streamArn ())
+           (Some Values.UpdateKinesisStreamingDestinationOutput.to_json)
+           (Some Values.UpdateKinesisStreamingDestinationOutput.error_to_json)])
 let update_table =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1529,8 +1800,26 @@ let update_table =
            ~doc:"JSON ReplicationGroupUpdateList"
        and tableClass =
          flag "table-class" (optional json_arg) ~doc:"JSON TableClass"
+       and deletionProtectionEnabled =
+         flag "deletion-protection-enabled" (optional bool)
+           ~doc:"BOOL DeletionProtectionEnabled"
+       and multiRegionConsistency =
+         flag "multi-region-consistency" (optional json_arg)
+           ~doc:"JSON MultiRegionConsistency"
+       and globalTableWitnessUpdates =
+         flag "global-table-witness-updates" (optional json_arg)
+           ~doc:"JSON GlobalTableWitnessGroupUpdateList"
+       and onDemandThroughput =
+         flag "on-demand-throughput" (optional json_arg)
+           ~doc:"JSON OnDemandThroughput"
+       and warmThroughput =
+         flag "warm-throughput" (optional json_arg)
+           ~doc:"JSON WarmThroughput"
+       and globalTableSettingsReplicationMode =
+         flag "global-table-settings-replication-mode" (optional json_arg)
+           ~doc:"JSON GlobalTableSettingsReplicationMode"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_table
@@ -1556,6 +1845,21 @@ let update_table =
                                  ~f:Values.ReplicationGroupUpdateList.of_json
                                  replicaUpdates)
               ?tableClass:(Option.map ~f:Values.TableClass.of_json tableClass)
+              ?deletionProtectionEnabled
+              ?multiRegionConsistency:(Option.map
+                                         ~f:Values.MultiRegionConsistency.of_json
+                                         multiRegionConsistency)
+              ?globalTableWitnessUpdates:(Option.map
+                                            ~f:Values.GlobalTableWitnessGroupUpdateList.of_json
+                                            globalTableWitnessUpdates)
+              ?onDemandThroughput:(Option.map
+                                     ~f:Values.OnDemandThroughput.of_json
+                                     onDemandThroughput)
+              ?warmThroughput:(Option.map ~f:Values.WarmThroughput.of_json
+                                 warmThroughput)
+              ?globalTableSettingsReplicationMode:(Option.map
+                                                     ~f:Values.GlobalTableSettingsReplicationMode.of_json
+                                                     globalTableSettingsReplicationMode)
               ~tableName ()) (Some Values.UpdateTableOutput.to_json)
            (Some Values.UpdateTableOutput.error_to_json)])
 let update_table_replica_auto_scaling =
@@ -1578,7 +1882,7 @@ let update_table_replica_auto_scaling =
          flag "replica-updates" (optional json_arg)
            ~doc:"JSON ReplicaAutoScalingUpdateList"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName" in
+         flag "table-name" (required string) ~doc:"STRING TableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_table_replica_auto_scaling
@@ -1605,7 +1909,7 @@ let update_time_to_live =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tableName =
-         flag "table-name" (required string) ~doc:"STRING TableName"
+         flag "table-name" (required string) ~doc:"STRING TableArn"
        and timeToLiveSpecification =
          flag "time-to-live-specification" (required json_arg)
            ~doc:"JSON TimeToLiveSpecification" in
@@ -1628,6 +1932,7 @@ let main =
     ("create-table", create_table);
     ("delete-backup", delete_backup);
     ("delete-item", delete_item);
+    ("delete-resource-policy", delete_resource_policy);
     ("delete-table", delete_table);
     ("describe-backup", describe_backup);
     ("describe-continuous-backups", describe_continuous_backups);
@@ -1636,6 +1941,7 @@ let main =
     ("describe-export", describe_export);
     ("describe-global-table", describe_global_table);
     ("describe-global-table-settings", describe_global_table_settings);
+    ("describe-import", describe_import);
     ("describe-kinesis-streaming-destination",
       describe_kinesis_streaming_destination);
     ("describe-limits", describe_limits);
@@ -1651,13 +1957,17 @@ let main =
     ("execute-transaction", execute_transaction);
     ("export-table-to-point-in-time", export_table_to_point_in_time);
     ("get-item", get_item);
+    ("get-resource-policy", get_resource_policy);
+    ("import-table", import_table);
     ("list-backups", list_backups);
     ("list-contributor-insights", list_contributor_insights);
     ("list-exports", list_exports);
     ("list-global-tables", list_global_tables);
+    ("list-imports", list_imports);
     ("list-tables", list_tables);
     ("list-tags-of-resource", list_tags_of_resource);
     ("put-item", put_item);
+    ("put-resource-policy", put_resource_policy);
     ("query", query);
     ("restore-table-from-backup", restore_table_from_backup);
     ("restore-table-to-point-in-time", restore_table_to_point_in_time);
@@ -1671,6 +1981,8 @@ let main =
     ("update-global-table", update_global_table);
     ("update-global-table-settings", update_global_table_settings);
     ("update-item", update_item);
+    ("update-kinesis-streaming-destination",
+      update_kinesis_streaming_destination);
     ("update-table", update_table);
     ("update-table-replica-auto-scaling", update_table_replica_auto_scaling);
     ("update-time-to-live", update_time_to_live)]

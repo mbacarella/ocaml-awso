@@ -26,6 +26,8 @@ type ('i, 'o, 'e) t =
   DescribeRoutingControlResponse.t, DescribeRoutingControlResponse.error) t 
   | DescribeSafetyRule: (DescribeSafetyRuleRequest.t,
   DescribeSafetyRuleResponse.t, DescribeSafetyRuleResponse.error) t 
+  | GetResourcePolicy: (GetResourcePolicyRequest.t,
+  GetResourcePolicyResponse.t, GetResourcePolicyResponse.error) t 
   | ListAssociatedRoute53HealthChecks:
   (ListAssociatedRoute53HealthChecksRequest.t,
   ListAssociatedRoute53HealthChecksResponse.t,
@@ -44,6 +46,8 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateCluster: (UpdateClusterRequest.t, UpdateClusterResponse.t,
+  UpdateClusterResponse.error) t 
   | UpdateControlPanel: (UpdateControlPanelRequest.t,
   UpdateControlPanelResponse.t, UpdateControlPanelResponse.error) t 
   | UpdateRoutingControl: (UpdateRoutingControlRequest.t,
@@ -64,6 +68,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeControlPanel -> `GET
   | DescribeRoutingControl -> `GET
   | DescribeSafetyRule -> `GET
+  | GetResourcePolicy -> `GET
   | ListAssociatedRoute53HealthChecks -> `GET
   | ListClusters -> `GET
   | ListControlPanels -> `GET
@@ -72,6 +77,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListTagsForResource -> `GET
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateCluster -> `PUT
   | UpdateControlPanel -> `PUT
   | UpdateRoutingControl -> `PUT
   | UpdateSafetyRule -> `PUT
@@ -111,6 +117,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeSafetyRule ->
           (Format.kasprintf Uri.of_string) "/safetyrule/%s"
             (Zz__string.to_header x.DescribeSafetyRuleRequest.safetyRuleArn)
+      | GetResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/resourcePolicy/%s"
+            (Zz__string.to_header x.GetResourcePolicyRequest.resourceArn)
       | ListAssociatedRoute53HealthChecks ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -182,6 +191,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (Zz__string.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("TagKeys", (Zz__listOf__string.to_header x.tagKeys))])
+      | UpdateCluster -> (Format.kasprintf Uri.of_string) "/cluster"
       | UpdateControlPanel ->
           (Format.kasprintf Uri.of_string) "/controlpanel"
       | UpdateRoutingControl ->
@@ -212,7 +222,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("Tags",
                                 (Zz__mapOf__stringMin0Max256PatternS.to_value
-                                   x)))])
+                                   x)));
+                      Option.map req.CreateClusterRequest.networkType
+                        ~f:(fun x ->
+                              ("NetworkType", (NetworkType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -334,6 +347,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeSafetyRule ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetResourcePolicy ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAssociatedRoute53HealthChecks ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -373,6 +389,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateCluster -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateControlPanel -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateRoutingControl -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSafetyRule -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -503,6 +520,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeSafetyRuleResponse.error_of_json))
+  | GetResourcePolicy ->
+      if is_success
+      then Ok (GetResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourcePolicyResponse.error_of_json))
   | ListAssociatedRoute53HealthChecks ->
       if is_success
       then
@@ -554,6 +577,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateCluster ->
+      if is_success
+      then Ok (UpdateClusterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateClusterResponse.error_of_json))
   | UpdateControlPanel ->
       if is_success
       then Ok (UpdateControlPanelResponse.of_json (response_to_json resp))

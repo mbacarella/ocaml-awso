@@ -35,14 +35,23 @@ type ('i, 'o, 'e) t =
   ListActionExecutionsOutput.t, ListActionExecutionsOutput.error) t 
   | ListActionTypes: (ListActionTypesInput.t, ListActionTypesOutput.t,
   ListActionTypesOutput.error) t 
+  | ListDeployActionExecutionTargets:
+  (ListDeployActionExecutionTargetsInput.t,
+  ListDeployActionExecutionTargetsOutput.t,
+  ListDeployActionExecutionTargetsOutput.error) t 
   | ListPipelineExecutions: (ListPipelineExecutionsInput.t,
   ListPipelineExecutionsOutput.t, ListPipelineExecutionsOutput.error) t 
   | ListPipelines: (ListPipelinesInput.t, ListPipelinesOutput.t,
   ListPipelinesOutput.error) t 
+  | ListRuleExecutions: (ListRuleExecutionsInput.t,
+  ListRuleExecutionsOutput.t, ListRuleExecutionsOutput.error) t 
+  | ListRuleTypes: (ListRuleTypesInput.t, ListRuleTypesOutput.t,
+  ListRuleTypesOutput.error) t 
   | ListTagsForResource: (ListTagsForResourceInput.t,
   ListTagsForResourceOutput.t, ListTagsForResourceOutput.error) t 
   | ListWebhooks: (ListWebhooksInput.t, ListWebhooksOutput.t,
   ListWebhooksOutput.error) t 
+  | OverrideStageCondition: (OverrideStageConditionInput.t, unit, unit) t 
   | PollForJobs: (PollForJobsInput.t, PollForJobsOutput.t,
   PollForJobsOutput.error) t 
   | PollForThirdPartyJobs: (PollForThirdPartyJobsInput.t,
@@ -64,6 +73,8 @@ type ('i, 'o, 'e) t =
   RegisterWebhookWithThirdPartyOutput.error) t 
   | RetryStageExecution: (RetryStageExecutionInput.t,
   RetryStageExecutionOutput.t, RetryStageExecutionOutput.error) t 
+  | RollbackStage: (RollbackStageInput.t, RollbackStageOutput.t,
+  RollbackStageOutput.error) t 
   | StartPipelineExecution: (StartPipelineExecutionInput.t,
   StartPipelineExecutionOutput.t, StartPipelineExecutionOutput.error) t 
   | StopPipelineExecution: (StopPipelineExecutionInput.t,
@@ -95,10 +106,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetThirdPartyJobDetails -> `POST
   | ListActionExecutions -> `POST
   | ListActionTypes -> `POST
+  | ListDeployActionExecutionTargets -> `POST
   | ListPipelineExecutions -> `POST
   | ListPipelines -> `POST
+  | ListRuleExecutions -> `POST
+  | ListRuleTypes -> `POST
   | ListTagsForResource -> `POST
   | ListWebhooks -> `POST
+  | OverrideStageCondition -> `POST
   | PollForJobs -> `POST
   | PollForThirdPartyJobs -> `POST
   | PutActionRevision -> `POST
@@ -110,6 +125,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutWebhook -> `POST
   | RegisterWebhookWithThirdParty -> `POST
   | RetryStageExecution -> `POST
+  | RollbackStage -> `POST
   | StartPipelineExecution -> `POST
   | StopPipelineExecution -> `POST
   | TagResource -> `POST
@@ -138,10 +154,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetThirdPartyJobDetails -> (Format.kasprintf Uri.of_string) "/"
       | ListActionExecutions -> (Format.kasprintf Uri.of_string) "/"
       | ListActionTypes -> (Format.kasprintf Uri.of_string) "/"
+      | ListDeployActionExecutionTargets ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListPipelineExecutions -> (Format.kasprintf Uri.of_string) "/"
       | ListPipelines -> (Format.kasprintf Uri.of_string) "/"
+      | ListRuleExecutions -> (Format.kasprintf Uri.of_string) "/"
+      | ListRuleTypes -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListWebhooks -> (Format.kasprintf Uri.of_string) "/"
+      | OverrideStageCondition -> (Format.kasprintf Uri.of_string) "/"
       | PollForJobs -> (Format.kasprintf Uri.of_string) "/"
       | PollForThirdPartyJobs -> (Format.kasprintf Uri.of_string) "/"
       | PutActionRevision -> (Format.kasprintf Uri.of_string) "/"
@@ -153,6 +174,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutWebhook -> (Format.kasprintf Uri.of_string) "/"
       | RegisterWebhookWithThirdParty -> (Format.kasprintf Uri.of_string) "/"
       | RetryStageExecution -> (Format.kasprintf Uri.of_string) "/"
+      | RollbackStage -> (Format.kasprintf Uri.of_string) "/"
       | StartPipelineExecution -> (Format.kasprintf Uri.of_string) "/"
       | StopPipelineExecution -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
@@ -307,6 +329,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodePipeline_20150709.ListActionTypes")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDeployActionExecutionTargets ->
+      let json = ListDeployActionExecutionTargetsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "CodePipeline_20150709.ListDeployActionExecutionTargets")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListPipelineExecutions ->
       let json = ListPipelineExecutionsInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -323,6 +354,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodePipeline_20150709.ListPipelines")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRuleExecutions ->
+      let json = ListRuleExecutionsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodePipeline_20150709.ListRuleExecutions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRuleTypes ->
+      let json = ListRuleTypesInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodePipeline_20150709.ListRuleTypes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -338,6 +385,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodePipeline_20150709.ListWebhooks")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | OverrideStageCondition ->
+      let json = OverrideStageConditionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodePipeline_20150709.OverrideStageCondition")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PollForJobs ->
       let json = PollForJobsInput.to_json req in
@@ -429,6 +484,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodePipeline_20150709.RetryStageExecution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RollbackStage ->
+      let json = RollbackStageInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodePipeline_20150709.RollbackStage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartPipelineExecution ->
       let json = StartPipelineExecutionInput.to_json req in
@@ -608,6 +671,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListActionTypesOutput.of_json json)
       else Error (parse_aws_error (Some ListActionTypesOutput.error_of_json))
+  | ListDeployActionExecutionTargets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDeployActionExecutionTargetsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListDeployActionExecutionTargetsOutput.error_of_json))
   | ListPipelineExecutions ->
       if is_success
       then
@@ -622,6 +694,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListPipelinesOutput.of_json json)
       else Error (parse_aws_error (Some ListPipelinesOutput.error_of_json))
+  | ListRuleExecutions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRuleExecutionsOutput.of_json json)
+      else
+        Error (parse_aws_error (Some ListRuleExecutionsOutput.error_of_json))
+  | ListRuleTypes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRuleTypesOutput.of_json json)
+      else Error (parse_aws_error (Some ListRuleTypesOutput.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -636,6 +721,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListWebhooksOutput.of_json json)
       else Error (parse_aws_error (Some ListWebhooksOutput.error_of_json))
+  | OverrideStageCondition ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PollForJobs ->
       if is_success
       then
@@ -695,6 +782,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some RetryStageExecutionOutput.error_of_json))
+  | RollbackStage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RollbackStageOutput.of_json json)
+      else Error (parse_aws_error (Some RollbackStageOutput.error_of_json))
   | StartPipelineExecution ->
       if is_success
       then

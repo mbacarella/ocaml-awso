@@ -13,24 +13,42 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let create_experiment_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateExperimentTemplate input
+let create_target_account_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTargetAccountConfiguration input
 let delete_experiment_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteExperimentTemplate input
+let delete_target_account_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTargetAccountConfiguration input
 let get_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAction input
 let get_experiment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetExperiment input
+let get_experiment_target_account_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetExperimentTargetAccountConfiguration
+    input
 let get_experiment_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetExperimentTemplate input
+let get_safety_lever ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSafetyLever input
+let get_target_account_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTargetAccountConfiguration input
 let get_target_resource_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTargetResourceType input
 let list_actions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListActions input
+let list_experiment_resolved_targets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListExperimentResolvedTargets input
+let list_experiment_target_account_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListExperimentTargetAccountConfigurations
+    input
 let list_experiment_templates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListExperimentTemplates input
 let list_experiments ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListExperiments input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_target_account_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTargetAccountConfigurations input
 let list_target_resource_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTargetResourceTypes input
 let start_experiment ?endpoint_url ?cfg input =
@@ -43,3 +61,7 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_experiment_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateExperimentTemplate input
+let update_safety_lever_state ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSafetyLeverState input
+let update_target_account_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTargetAccountConfiguration input

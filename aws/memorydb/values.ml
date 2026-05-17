@@ -84,9 +84,9 @@ module Endpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
       make ?port ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map json "Port" Integer.of_json in
-      let address = field_map json "Address" String_.of_json in
+    let of_json json__ =
+      let port = field_map json__ "Port" Integer.of_json in
+      let address = field_map json__ "Address" String_.of_json in
       make ?port ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -101,6 +101,34 @@ module TStamp =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module NetworkType =
+  struct
+    type nonrec t =
+      | Ipv4 
+      | Ipv6 
+      | Dual_stack 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ipv4 -> "ipv4"
+      | Ipv6 -> "ipv6"
+      | Dual_stack -> "dual_stack"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ipv4" -> Ipv4
+      | "ipv6" -> Ipv6
+      | "dual_stack" -> Dual_stack
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkType" j)
     let to_json = simple_to_json to_value
   end
 module ShardConfiguration =
@@ -126,10 +154,10 @@ module ShardConfiguration =
       let slots = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Slots") in
       make ?replicaCount ?slots ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaCount =
-        field_map json "ReplicaCount" IntegerOptional.of_json in
-      let slots = field_map json "Slots" String_.of_json in
+        field_map json__ "ReplicaCount" IntegerOptional.of_json in
+      let slots = field_map json__ "Slots" String_.of_json in
       make ?replicaCount ?slots ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -223,13 +251,13 @@ module Node =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?endpoint ?createTime ?availabilityZone ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpoint = field_map json "Endpoint" Endpoint.of_json in
-      let createTime = field_map json "CreateTime" TStamp.of_json in
+    let of_json json__ =
+      let endpoint = field_map json__ "Endpoint" Endpoint.of_json in
+      let createTime = field_map json__ "CreateTime" TStamp.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?endpoint ?createTime ?availabilityZone ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -248,11 +276,38 @@ module AvailabilityZone =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" String_.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates if the cluster has a Multi-AZ configuration (multiaz) or not (singleaz)."]
+module NetworkTypeList =
+  struct
+    type nonrec t = NetworkType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NetworkType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NetworkType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkTypeList" ~of_json:NetworkType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ShardDetail =
   struct
     type nonrec t =
@@ -289,13 +344,13 @@ module ShardDetail =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?snapshotCreationTime ?size ?configuration ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotCreationTime =
-        field_map json "SnapshotCreationTime" TStamp.of_json in
-      let size = field_map json "Size" String_.of_json in
+        field_map json__ "SnapshotCreationTime" TStamp.of_json in
+      let size = field_map json__ "Size" String_.of_json in
       let configuration =
-        field_map json "Configuration" ShardConfiguration.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "Configuration" ShardConfiguration.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?snapshotCreationTime ?size ?configuration ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides details of a shard in a snapshot"]
@@ -342,10 +397,10 @@ module PendingModifiedServiceUpdate =
           (Xml.child xml_arg0 "ServiceUpdateName") in
       make ?status ?serviceUpdateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ServiceUpdateStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ServiceUpdateStatus.of_json in
       let serviceUpdateName =
-        field_map json "ServiceUpdateName" String_.of_json in
+        field_map json__ "ServiceUpdateName" String_.of_json in
       make ?status ?serviceUpdateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -368,9 +423,9 @@ module SlotMigration =
           (Xml.child xml_arg0 "ProgressPercentage") in
       make ?progressPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let progressPercentage =
-        field_map json "ProgressPercentage" Double.of_json in
+        field_map json__ "ProgressPercentage" Double.of_json in
       make ?progressPercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -379,6 +434,9 @@ module NodeList =
   struct
     type nonrec t = Node.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Node.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -421,17 +479,20 @@ module AuthenticationType =
     type nonrec t =
       | Password 
       | No_password 
+      | Iam 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Password -> "password"
       | No_password -> "no-password"
+      | Iam -> "iam"
       | Non_static_id s -> s
     let of_string =
       function
       | "password" -> Password
       | "no-password" -> No_password
+      | "iam" -> Iam
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -464,28 +525,40 @@ module Subnet =
       identifier: String_.t option
         [@ocaml.doc "The unique identifier for the subnet."];
       availabilityZone: AvailabilityZone.t option
-        [@ocaml.doc "The Availability Zone where the subnet resides"]}
+        [@ocaml.doc "The Availability Zone where the subnet resides"];
+      supportedNetworkTypes: NetworkTypeList.t option
+        [@ocaml.doc
+          "The network types supported by this subnet. Returns an array of strings that can include 'ipv4', 'ipv6', or both, indicating whether the subnet supports IPv4 only, IPv6 only, or dual-stack deployments."]}
     let make ?identifier =
-      fun ?availabilityZone -> fun () -> { identifier; availabilityZone }
+      fun ?availabilityZone ->
+        fun ?supportedNetworkTypes ->
+          fun () -> { identifier; availabilityZone; supportedNetworkTypes }
     let to_value x =
       structure_to_value
         [("Identifier", (Option.map x.identifier ~f:String_.to_value));
         ("AvailabilityZone",
-          (Option.map x.availabilityZone ~f:AvailabilityZone.to_value))]
+          (Option.map x.availabilityZone ~f:AvailabilityZone.to_value));
+        ("SupportedNetworkTypes",
+          (Option.map x.supportedNetworkTypes ~f:NetworkTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedNetworkTypes =
+        (Option.map ~f:NetworkTypeList.of_xml)
+          (Xml.child xml_arg0 "SupportedNetworkTypes") in
       let availabilityZone =
         (Option.map ~f:AvailabilityZone.of_xml)
           (Xml.child xml_arg0 "AvailabilityZone") in
       let identifier =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
-      make ?availabilityZone ?identifier ()
+      make ?supportedNetworkTypes ?availabilityZone ?identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let supportedNetworkTypes =
+        field_map json__ "SupportedNetworkTypes" NetworkTypeList.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" AvailabilityZone.of_json in
-      let identifier = field_map json "Identifier" String_.of_json in
-      make ?availabilityZone ?identifier ()
+        field_map json__ "AvailabilityZone" AvailabilityZone.of_json in
+      let identifier = field_map json__ "Identifier" String_.of_json in
+      make ?supportedNetworkTypes ?availabilityZone ?identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the subnet associated with a cluster. This parameter refers to subnets defined in Amazon Virtual Private Cloud (Amazon VPC) and used with MemoryDB."]
@@ -493,6 +566,9 @@ module ShardDetails =
   struct
     type nonrec t = ShardDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ShardDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -513,6 +589,85 @@ module ShardDetails =
       list_of_json ~kind:"ShardDetails" ~of_json:ShardDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RecurringCharge =
+  struct
+    type nonrec t =
+      {
+      recurringChargeAmount: Double.t option
+        [@ocaml.doc
+          "The amount of the recurring charge to run this reserved node."];
+      recurringChargeFrequency: String_.t option
+        [@ocaml.doc
+          "The frequency of the recurring price charged to run this reserved node."]}
+    let make ?recurringChargeAmount =
+      fun ?recurringChargeFrequency ->
+        fun () -> { recurringChargeAmount; recurringChargeFrequency }
+    let to_value x =
+      structure_to_value
+        [("RecurringChargeAmount",
+           (Option.map x.recurringChargeAmount ~f:Double.to_value));
+        ("RecurringChargeFrequency",
+          (Option.map x.recurringChargeFrequency ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recurringChargeFrequency =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "RecurringChargeFrequency") in
+      let recurringChargeAmount =
+        (Option.map ~f:Double.of_xml)
+          (Xml.child xml_arg0 "RecurringChargeAmount") in
+      make ?recurringChargeFrequency ?recurringChargeAmount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recurringChargeFrequency =
+        field_map json__ "RecurringChargeFrequency" String_.of_json in
+      let recurringChargeAmount =
+        field_map json__ "RecurringChargeAmount" Double.of_json in
+      make ?recurringChargeFrequency ?recurringChargeAmount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The recurring charge to run this reserved node."]
+module RegionalCluster =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t option
+        [@ocaml.doc "The name of the Regional cluster"];
+      region: String_.t option
+        [@ocaml.doc
+          "The Region the current Regional cluster is assigned to."];
+      status: String_.t option
+        [@ocaml.doc "The status of the Regional cluster."];
+      aRN: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) the Regional cluster"]}
+    let make ?clusterName =
+      fun ?region ->
+        fun ?status ->
+          fun ?aRN -> fun () -> { clusterName; region; status; aRN }
+    let to_value x =
+      structure_to_value
+        [("ClusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("Region", (Option.map x.region ~f:String_.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value));
+        ("ARN", (Option.map x.aRN ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let region =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Region") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterName") in
+      make ?aRN ?status ?region ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let region = field_map json__ "Region" String_.of_json in
+      let clusterName = field_map json__ "ClusterName" String_.of_json in
+      make ?aRN ?status ?region ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents a Regional cluster"]
 module ACLsUpdateStatus =
   struct
     type nonrec t =
@@ -529,8 +684,8 @@ module ACLsUpdateStatus =
         (Option.map ~f:ACLName.of_xml) (Xml.child xml_arg0 "ACLToApply") in
       make ?aCLToApply ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aCLToApply = field_map json "ACLToApply" ACLName.of_json in
+    let of_json json__ =
+      let aCLToApply = field_map json__ "ACLToApply" ACLName.of_json in
       make ?aCLToApply ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The status of the ACL update"]
@@ -538,6 +693,9 @@ module PendingModifiedServiceUpdateList =
   struct
     type nonrec t = PendingModifiedServiceUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PendingModifiedServiceUpdate.to_value)) |>
         (fun x -> `List x)
@@ -578,9 +736,9 @@ module ReshardingStatus =
           (Xml.child xml_arg0 "SlotMigration") in
       make ?slotMigration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let slotMigration =
-        field_map json "SlotMigration" SlotMigration.of_json in
+        field_map json__ "SlotMigration" SlotMigration.of_json in
       make ?slotMigration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The status of the online resharding"]
@@ -608,9 +766,10 @@ module SecurityGroupMembership =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SecurityGroupId") in
       make ?status ?securityGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
-      let securityGroupId = field_map json "SecurityGroupId" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      let securityGroupId =
+        field_map json__ "SecurityGroupId" String_.of_json in
       make ?status ?securityGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a single security group and its status."]
@@ -655,13 +814,13 @@ module Shard =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?numberOfNodes ?nodes ?slots ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let numberOfNodes =
-        field_map json "NumberOfNodes" IntegerOptional.of_json in
-      let nodes = field_map json "Nodes" NodeList.of_json in
-      let slots = field_map json "Slots" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "NumberOfNodes" IntegerOptional.of_json in
+      let nodes = field_map json__ "Nodes" NodeList.of_json in
+      let slots = field_map json__ "Slots" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?numberOfNodes ?nodes ?slots ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -670,6 +829,9 @@ module UserNameList =
   struct
     type nonrec t = UserName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -694,6 +856,9 @@ module ACLNameList =
   struct
     type nonrec t = ACLName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ACLName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -740,10 +905,10 @@ module Authentication =
         (Option.map ~f:AuthenticationType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?passwordCount ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let passwordCount =
-        field_map json "PasswordCount" IntegerOptional.of_json in
-      let type_ = field_map json "Type" AuthenticationType.of_json in
+        field_map json__ "PasswordCount" IntegerOptional.of_json in
+      let type_ = field_map json__ "Type" AuthenticationType.of_json in
       make ?passwordCount ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -768,6 +933,9 @@ module FilterValueList =
     type nonrec t = FilterValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -792,6 +960,9 @@ module SubnetList =
   struct
     type nonrec t = Subnet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subnet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -820,8 +991,11 @@ module ClusterConfiguration =
         [@ocaml.doc "The description of the cluster configuration"];
       nodeType: String_.t option
         [@ocaml.doc "The node type used for the cluster"];
+      engine: String_.t option
+        [@ocaml.doc
+          "The name of the engine used by the cluster configuration."];
       engineVersion: String_.t option
-        [@ocaml.doc "The Redis engine version used by the cluster"];
+        [@ocaml.doc "The Redis OSS engine version used by the cluster"];
       maintenanceWindow: String_.t option
         [@ocaml.doc "The specified maintenance window for the cluster"];
       topicArn: String_.t option
@@ -842,43 +1016,56 @@ module ClusterConfiguration =
       numShards: IntegerOptional.t option
         [@ocaml.doc "The number of shards in the cluster"];
       shards: ShardDetails.t option
-        [@ocaml.doc "The list of shards in the cluster"]}
+        [@ocaml.doc "The list of shards in the cluster"];
+      multiRegionParameterGroupName: String_.t option
+        [@ocaml.doc
+          "The name of the multi-Region parameter group associated with the cluster configuration."];
+      multiRegionClusterName: String_.t option
+        [@ocaml.doc
+          "The name for the multi-Region cluster associated with the cluster configuration."]}
     let make ?name =
       fun ?description ->
         fun ?nodeType ->
-          fun ?engineVersion ->
-            fun ?maintenanceWindow ->
-              fun ?topicArn ->
-                fun ?port ->
-                  fun ?parameterGroupName ->
-                    fun ?subnetGroupName ->
-                      fun ?vpcId ->
-                        fun ?snapshotRetentionLimit ->
-                          fun ?snapshotWindow ->
-                            fun ?numShards ->
-                              fun ?shards ->
-                                fun () ->
-                                  {
-                                    name;
-                                    description;
-                                    nodeType;
-                                    engineVersion;
-                                    maintenanceWindow;
-                                    topicArn;
-                                    port;
-                                    parameterGroupName;
-                                    subnetGroupName;
-                                    vpcId;
-                                    snapshotRetentionLimit;
-                                    snapshotWindow;
-                                    numShards;
-                                    shards
-                                  }
+          fun ?engine ->
+            fun ?engineVersion ->
+              fun ?maintenanceWindow ->
+                fun ?topicArn ->
+                  fun ?port ->
+                    fun ?parameterGroupName ->
+                      fun ?subnetGroupName ->
+                        fun ?vpcId ->
+                          fun ?snapshotRetentionLimit ->
+                            fun ?snapshotWindow ->
+                              fun ?numShards ->
+                                fun ?shards ->
+                                  fun ?multiRegionParameterGroupName ->
+                                    fun ?multiRegionClusterName ->
+                                      fun () ->
+                                        {
+                                          name;
+                                          description;
+                                          nodeType;
+                                          engine;
+                                          engineVersion;
+                                          maintenanceWindow;
+                                          topicArn;
+                                          port;
+                                          parameterGroupName;
+                                          subnetGroupName;
+                                          vpcId;
+                                          snapshotRetentionLimit;
+                                          snapshotWindow;
+                                          numShards;
+                                          shards;
+                                          multiRegionParameterGroupName;
+                                          multiRegionClusterName
+                                        }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
         ("Description", (Option.map x.description ~f:String_.to_value));
         ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
         ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
         ("MaintenanceWindow",
           (Option.map x.maintenanceWindow ~f:String_.to_value));
@@ -893,9 +1080,19 @@ module ClusterConfiguration =
           (Option.map x.snapshotRetentionLimit ~f:IntegerOptional.to_value));
         ("SnapshotWindow", (Option.map x.snapshotWindow ~f:String_.to_value));
         ("NumShards", (Option.map x.numShards ~f:IntegerOptional.to_value));
-        ("Shards", (Option.map x.shards ~f:ShardDetails.to_value))]
+        ("Shards", (Option.map x.shards ~f:ShardDetails.to_value));
+        ("MultiRegionParameterGroupName",
+          (Option.map x.multiRegionParameterGroupName ~f:String_.to_value));
+        ("MultiRegionClusterName",
+          (Option.map x.multiRegionClusterName ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let multiRegionClusterName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionClusterName") in
+      let multiRegionParameterGroupName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionParameterGroupName") in
       let shards =
         (Option.map ~f:ShardDetails.of_xml) (Xml.child xml_arg0 "Shards") in
       let numShards =
@@ -921,38 +1118,70 @@ module ClusterConfiguration =
           (Xml.child xml_arg0 "MaintenanceWindow") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
       let nodeType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?shards ?numShards ?snapshotWindow ?snapshotRetentionLimit ?vpcId
+      make ?multiRegionClusterName ?multiRegionParameterGroupName ?shards
+        ?numShards ?snapshotWindow ?snapshotRetentionLimit ?vpcId
         ?subnetGroupName ?parameterGroupName ?port ?topicArn
-        ?maintenanceWindow ?engineVersion ?nodeType ?description ?name ()
+        ?maintenanceWindow ?engineVersion ?engine ?nodeType ?description
+        ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shards = field_map json "Shards" ShardDetails.of_json in
-      let numShards = field_map json "NumShards" IntegerOptional.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+    let of_json json__ =
+      let multiRegionClusterName =
+        field_map json__ "MultiRegionClusterName" String_.of_json in
+      let multiRegionParameterGroupName =
+        field_map json__ "MultiRegionParameterGroupName" String_.of_json in
+      let shards = field_map json__ "Shards" ShardDetails.of_json in
+      let numShards = field_map json__ "NumShards" IntegerOptional.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let subnetGroupName = field_map json "SubnetGroupName" String_.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let subnetGroupName =
+        field_map json__ "SubnetGroupName" String_.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
-      let topicArn = field_map json "TopicArn" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
+      let topicArn = field_map json__ "TopicArn" String_.of_json in
       let maintenanceWindow =
-        field_map json "MaintenanceWindow" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ?shards ?numShards ?snapshotWindow ?snapshotRetentionLimit ?vpcId
+        field_map json__ "MaintenanceWindow" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?multiRegionClusterName ?multiRegionParameterGroupName ?shards
+        ?numShards ?snapshotWindow ?snapshotRetentionLimit ?vpcId
         ?subnetGroupName ?parameterGroupName ?port ?topicArn
-        ?maintenanceWindow ?engineVersion ?nodeType ?description ?name ()
+        ?maintenanceWindow ?engineVersion ?engine ?nodeType ?description
+        ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of cluster configuration options."]
+module DataTieringStatus =
+  struct
+    type nonrec t =
+      | True 
+      | False 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | True -> "true" | False -> "false" | Non_static_id s -> s
+    let of_string =
+      function | "true" -> True | "false" -> False | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DataTieringStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataTieringStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ServiceUpdateType =
   struct
     type nonrec t =
@@ -971,6 +1200,75 @@ module ServiceUpdateType =
         (string_of_xml ~kind:"enumeration ServiceUpdateType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ServiceUpdateType" j)
     let to_json = simple_to_json to_value
+  end
+module RecurringChargeList =
+  struct
+    type nonrec t = RecurringCharge.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RecurringCharge.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RecurringCharge.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecurringChargeList"
+        ~of_json:RecurringCharge.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BooleanOptional =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module RegionalClusterList =
+  struct
+    type nonrec t = RegionalCluster.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RegionalCluster.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RegionalCluster.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RegionalClusterList"
+        ~of_json:RegionalCluster.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module SourceType =
   struct
@@ -1034,19 +1332,6 @@ module AZStatus =
     let of_json j = of_string (string_of_json ~kind:"AZStatus" j)
     let to_json = simple_to_json to_value
   end
-module BooleanOptional =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
 module ClusterPendingUpdates =
   struct
     type nonrec t =
@@ -1081,19 +1366,41 @@ module ClusterPendingUpdates =
           (Xml.child xml_arg0 "Resharding") in
       make ?serviceUpdates ?aCLs ?resharding ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceUpdates =
-        field_map json "ServiceUpdates"
+        field_map json__ "ServiceUpdates"
           PendingModifiedServiceUpdateList.of_json in
-      let aCLs = field_map json "ACLs" ACLsUpdateStatus.of_json in
-      let resharding = field_map json "Resharding" ReshardingStatus.of_json in
+      let aCLs = field_map json__ "ACLs" ACLsUpdateStatus.of_json in
+      let resharding = field_map json__ "Resharding" ReshardingStatus.of_json in
       make ?serviceUpdates ?aCLs ?resharding ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of updates being applied to the cluster"]
+module IpDiscovery =
+  struct
+    type nonrec t =
+      | Ipv4 
+      | Ipv6 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Ipv4 -> "ipv4" | Ipv6 -> "ipv6" | Non_static_id s -> s
+    let of_string =
+      function | "ipv4" -> Ipv4 | "ipv6" -> Ipv6 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IpDiscovery" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpDiscovery" j)
+    let to_json = simple_to_json to_value
+  end
 module SecurityGroupMembershipList =
   struct
     type nonrec t = SecurityGroupMembership.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupMembership.to_value)) |>
         (fun x -> `List x)
@@ -1120,6 +1427,9 @@ module ShardList =
   struct
     type nonrec t = Shard.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Shard.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1143,6 +1453,9 @@ module ACLClusterNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1189,11 +1502,11 @@ module ACLPendingChanges =
           (Xml.child xml_arg0 "UserNamesToRemove") in
       make ?userNamesToAdd ?userNamesToRemove ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userNamesToAdd =
-        field_map json "UserNamesToAdd" UserNameList.of_json in
+        field_map json__ "UserNamesToAdd" UserNameList.of_json in
       let userNamesToRemove =
-        field_map json "UserNamesToRemove" UserNameList.of_json in
+        field_map json__ "UserNamesToRemove" UserNameList.of_json in
       make ?userNamesToAdd ?userNamesToRemove ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the updates being applied to the ACL."]
@@ -1214,10 +1527,13 @@ module InputAuthenticationType =
   struct
     type nonrec t =
       | Password 
+      | Iam 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | Password -> "password" | Non_static_id s -> s
-    let of_string = function | "password" -> Password | x -> Non_static_id x
+    let to_string =
+      function | Password -> "password" | Iam -> "iam" | Non_static_id s -> s
+    let of_string =
+      function | "password" -> Password | "iam" -> Iam | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -1233,6 +1549,9 @@ module PasswordListInput =
     type nonrec t = String_.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1275,9 +1594,9 @@ module ParameterNameValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ParameterName") in
       make ?parameterValue ?parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameterValue = field_map json "ParameterValue" String_.of_json in
-      let parameterName = field_map json "ParameterName" String_.of_json in
+    let of_json json__ =
+      let parameterValue = field_map json__ "ParameterValue" String_.of_json in
+      let parameterName = field_map json__ "ParameterName" String_.of_json in
       make ?parameterValue ?parameterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1300,9 +1619,9 @@ module Tag =
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A tag that can be added to an MemoryDB resource. Tags are composed of a Key/Value pair. You can use tags to categorize and track all your MemoryDB resources. When you add or remove tags on clusters, those actions will be replicated to all nodes in the cluster. A tag with a null Value is permitted. For more information, see Tagging your MemoryDB resources"]
@@ -1373,16 +1692,16 @@ module User =
       make ?aRN ?authentication ?minimumEngineVersion ?aCLNames ?accessString
         ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
       let authentication =
-        field_map json "Authentication" Authentication.of_json in
+        field_map json__ "Authentication" Authentication.of_json in
       let minimumEngineVersion =
-        field_map json "MinimumEngineVersion" String_.of_json in
-      let aCLNames = field_map json "ACLNames" ACLNameList.of_json in
-      let accessString = field_map json "AccessString" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let aCLNames = field_map json__ "ACLNames" ACLNameList.of_json in
+      let accessString = field_map json__ "AccessString" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?aRN ?authentication ?minimumEngineVersion ?aCLNames ?accessString
         ?status ?name ()
     let to_json v = composed_to_json to_value v
@@ -1412,9 +1731,9 @@ module Filter =
         FilterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" FilterValueList.of_json in
-      let name = field_map_exn json "Name" FilterName.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "Values" FilterValueList.of_json in
+      let name = field_map_exn json__ "Name" FilterName.of_json in
       make ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1432,21 +1751,39 @@ module SubnetGroup =
       subnets: SubnetList.t option
         [@ocaml.doc "A list of subnets associated with the subnet group."];
       aRN: String_.t option
-        [@ocaml.doc "The ARN (Amazon Resource Name) of the subnet group."]}
+        [@ocaml.doc "The ARN (Amazon Resource Name) of the subnet group."];
+      supportedNetworkTypes: NetworkTypeList.t option
+        [@ocaml.doc
+          "The network types supported by this subnet group. Returns an array of strings that can include 'ipv4', 'ipv6', or both, indicating the IP address types that can be used for clusters deployed in this subnet group."]}
     let make ?name =
       fun ?description ->
         fun ?vpcId ->
           fun ?subnets ->
-            fun ?aRN -> fun () -> { name; description; vpcId; subnets; aRN }
+            fun ?aRN ->
+              fun ?supportedNetworkTypes ->
+                fun () ->
+                  {
+                    name;
+                    description;
+                    vpcId;
+                    subnets;
+                    aRN;
+                    supportedNetworkTypes
+                  }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
         ("Description", (Option.map x.description ~f:String_.to_value));
         ("VpcId", (Option.map x.vpcId ~f:String_.to_value));
         ("Subnets", (Option.map x.subnets ~f:SubnetList.to_value));
-        ("ARN", (Option.map x.aRN ~f:String_.to_value))]
+        ("ARN", (Option.map x.aRN ~f:String_.to_value));
+        ("SupportedNetworkTypes",
+          (Option.map x.supportedNetworkTypes ~f:NetworkTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedNetworkTypes =
+        (Option.map ~f:NetworkTypeList.of_xml)
+          (Xml.child xml_arg0 "SupportedNetworkTypes") in
       let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
       let subnets =
         (Option.map ~f:SubnetList.of_xml) (Xml.child xml_arg0 "Subnets") in
@@ -1454,15 +1791,17 @@ module SubnetGroup =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?aRN ?subnets ?vpcId ?description ?name ()
+      make ?supportedNetworkTypes ?aRN ?subnets ?vpcId ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
-      let subnets = field_map json "Subnets" SubnetList.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ?aRN ?subnets ?vpcId ?description ?name ()
+    let of_json json__ =
+      let supportedNetworkTypes =
+        field_map json__ "SupportedNetworkTypes" NetworkTypeList.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let subnets = field_map json__ "Subnets" SubnetList.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?supportedNetworkTypes ?aRN ?subnets ?vpcId ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of one of the following operations: CreateSubnetGroup UpdateSubnetGroup A subnet group is a collection of subnets (typically private) that you can designate for your clusters running in an Amazon Virtual Private Cloud (VPC) environment."]
@@ -1483,16 +1822,27 @@ module Snapshot =
         [@ocaml.doc "The ARN (Amazon Resource Name) of the snapshot."];
       clusterConfiguration: ClusterConfiguration.t option
         [@ocaml.doc
-          "The configuration of the cluster from which the snapshot was taken"]}
+          "The configuration of the cluster from which the snapshot was taken"];
+      dataTiering: DataTieringStatus.t option
+        [@ocaml.doc
+          "Enables data tiering. Data tiering is only supported for clusters using the r6gd node type. This parameter must be set when using r6gd nodes. For more information, see Data tiering."]}
     let make ?name =
       fun ?status ->
         fun ?source ->
           fun ?kmsKeyId ->
             fun ?aRN ->
               fun ?clusterConfiguration ->
-                fun () ->
-                  { name; status; source; kmsKeyId; aRN; clusterConfiguration
-                  }
+                fun ?dataTiering ->
+                  fun () ->
+                    {
+                      name;
+                      status;
+                      source;
+                      kmsKeyId;
+                      aRN;
+                      clusterConfiguration;
+                      dataTiering
+                    }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
@@ -1501,9 +1851,14 @@ module Snapshot =
         ("KmsKeyId", (Option.map x.kmsKeyId ~f:String_.to_value));
         ("ARN", (Option.map x.aRN ~f:String_.to_value));
         ("ClusterConfiguration",
-          (Option.map x.clusterConfiguration ~f:ClusterConfiguration.to_value))]
+          (Option.map x.clusterConfiguration ~f:ClusterConfiguration.to_value));
+        ("DataTiering",
+          (Option.map x.dataTiering ~f:DataTieringStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataTiering =
+        (Option.map ~f:DataTieringStatus.of_xml)
+          (Xml.child xml_arg0 "DataTiering") in
       let clusterConfiguration =
         (Option.map ~f:ClusterConfiguration.of_xml)
           (Xml.child xml_arg0 "ClusterConfiguration") in
@@ -1515,17 +1870,21 @@ module Snapshot =
       let status =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?clusterConfiguration ?aRN ?kmsKeyId ?source ?status ?name ()
+      make ?dataTiering ?clusterConfiguration ?aRN ?kmsKeyId ?source ?status
+        ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dataTiering =
+        field_map json__ "DataTiering" DataTieringStatus.of_json in
       let clusterConfiguration =
-        field_map json "ClusterConfiguration" ClusterConfiguration.of_json in
-      let aRN = field_map json "ARN" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let source = field_map json "Source" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ?clusterConfiguration ?aRN ?kmsKeyId ?source ?status ?name ()
+        field_map json__ "ClusterConfiguration" ClusterConfiguration.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?dataTiering ?clusterConfiguration ?aRN ?kmsKeyId ?source ?status
+        ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a copy of an entire cluster as of the time when the snapshot was taken."]
@@ -1547,6 +1906,9 @@ module ServiceUpdate =
         [@ocaml.doc "The status of the service update"];
       type_: ServiceUpdateType.t option
         [@ocaml.doc "Reflects the nature of the service update"];
+      engine: String_.t option
+        [@ocaml.doc
+          "The name of the engine for which a service update is available."];
       nodesUpdated: String_.t option
         [@ocaml.doc "A list of nodes updated by the service update"];
       autoUpdateStartDate: TStamp.t option
@@ -1558,19 +1920,21 @@ module ServiceUpdate =
           fun ?description ->
             fun ?status ->
               fun ?type_ ->
-                fun ?nodesUpdated ->
-                  fun ?autoUpdateStartDate ->
-                    fun () ->
-                      {
-                        clusterName;
-                        serviceUpdateName;
-                        releaseDate;
-                        description;
-                        status;
-                        type_;
-                        nodesUpdated;
-                        autoUpdateStartDate
-                      }
+                fun ?engine ->
+                  fun ?nodesUpdated ->
+                    fun ?autoUpdateStartDate ->
+                      fun () ->
+                        {
+                          clusterName;
+                          serviceUpdateName;
+                          releaseDate;
+                          description;
+                          status;
+                          type_;
+                          engine;
+                          nodesUpdated;
+                          autoUpdateStartDate
+                        }
     let to_value x =
       structure_to_value
         [("ClusterName", (Option.map x.clusterName ~f:String_.to_value));
@@ -1580,6 +1944,7 @@ module ServiceUpdate =
         ("Description", (Option.map x.description ~f:String_.to_value));
         ("Status", (Option.map x.status ~f:ServiceUpdateStatus.to_value));
         ("Type", (Option.map x.type_ ~f:ServiceUpdateType.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
         ("NodesUpdated", (Option.map x.nodesUpdated ~f:String_.to_value));
         ("AutoUpdateStartDate",
           (Option.map x.autoUpdateStartDate ~f:TStamp.to_value))]
@@ -1590,6 +1955,8 @@ module ServiceUpdate =
           (Xml.child xml_arg0 "AutoUpdateStartDate") in
       let nodesUpdated =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodesUpdated") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
       let type_ =
         (Option.map ~f:ServiceUpdateType.of_xml) (Xml.child xml_arg0 "Type") in
       let status =
@@ -1604,24 +1971,213 @@ module ServiceUpdate =
           (Xml.child xml_arg0 "ServiceUpdateName") in
       let clusterName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterName") in
-      make ?autoUpdateStartDate ?nodesUpdated ?type_ ?status ?description
-        ?releaseDate ?serviceUpdateName ?clusterName ()
+      make ?autoUpdateStartDate ?nodesUpdated ?engine ?type_ ?status
+        ?description ?releaseDate ?serviceUpdateName ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoUpdateStartDate =
-        field_map json "AutoUpdateStartDate" TStamp.of_json in
-      let nodesUpdated = field_map json "NodesUpdated" String_.of_json in
-      let type_ = field_map json "Type" ServiceUpdateType.of_json in
-      let status = field_map json "Status" ServiceUpdateStatus.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let releaseDate = field_map json "ReleaseDate" TStamp.of_json in
+        field_map json__ "AutoUpdateStartDate" TStamp.of_json in
+      let nodesUpdated = field_map json__ "NodesUpdated" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let type_ = field_map json__ "Type" ServiceUpdateType.of_json in
+      let status = field_map json__ "Status" ServiceUpdateStatus.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let releaseDate = field_map json__ "ReleaseDate" TStamp.of_json in
       let serviceUpdateName =
-        field_map json "ServiceUpdateName" String_.of_json in
-      let clusterName = field_map json "ClusterName" String_.of_json in
-      make ?autoUpdateStartDate ?nodesUpdated ?type_ ?status ?description
-        ?releaseDate ?serviceUpdateName ?clusterName ()
+        field_map json__ "ServiceUpdateName" String_.of_json in
+      let clusterName = field_map json__ "ClusterName" String_.of_json in
+      make ?autoUpdateStartDate ?nodesUpdated ?engine ?type_ ?status
+        ?description ?releaseDate ?serviceUpdateName ?clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An update that you can apply to your MemoryDB clusters."]
+module ReservedNode =
+  struct
+    type nonrec t =
+      {
+      reservationId: String_.t option
+        [@ocaml.doc
+          "A customer-specified identifier to track this reservation."];
+      reservedNodesOfferingId: String_.t option
+        [@ocaml.doc "The ID of the reserved node offering to purchase."];
+      nodeType: String_.t option
+        [@ocaml.doc "The node type for the reserved nodes."];
+      startTime: TStamp.t option
+        [@ocaml.doc "The time the reservation started."];
+      duration: Integer.t option
+        [@ocaml.doc "The duration of the reservation in seconds."];
+      fixedPrice: Double.t option
+        [@ocaml.doc "The fixed price charged for this reserved node."];
+      nodeCount: Integer.t option
+        [@ocaml.doc "The number of nodes that have been reserved."];
+      offeringType: String_.t option
+        [@ocaml.doc "The offering type of this reserved node."];
+      state: String_.t option [@ocaml.doc "The state of the reserved node."];
+      recurringCharges: RecurringChargeList.t option
+        [@ocaml.doc "The recurring price charged to run this reserved node."];
+      aRN: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the reserved node."]}
+    let make ?reservationId =
+      fun ?reservedNodesOfferingId ->
+        fun ?nodeType ->
+          fun ?startTime ->
+            fun ?duration ->
+              fun ?fixedPrice ->
+                fun ?nodeCount ->
+                  fun ?offeringType ->
+                    fun ?state ->
+                      fun ?recurringCharges ->
+                        fun ?aRN ->
+                          fun () ->
+                            {
+                              reservationId;
+                              reservedNodesOfferingId;
+                              nodeType;
+                              startTime;
+                              duration;
+                              fixedPrice;
+                              nodeCount;
+                              offeringType;
+                              state;
+                              recurringCharges;
+                              aRN
+                            }
+    let to_value x =
+      structure_to_value
+        [("ReservationId", (Option.map x.reservationId ~f:String_.to_value));
+        ("ReservedNodesOfferingId",
+          (Option.map x.reservedNodesOfferingId ~f:String_.to_value));
+        ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
+        ("StartTime", (Option.map x.startTime ~f:TStamp.to_value));
+        ("Duration", (Option.map x.duration ~f:Integer.to_value));
+        ("FixedPrice", (Option.map x.fixedPrice ~f:Double.to_value));
+        ("NodeCount", (Option.map x.nodeCount ~f:Integer.to_value));
+        ("OfferingType", (Option.map x.offeringType ~f:String_.to_value));
+        ("State", (Option.map x.state ~f:String_.to_value));
+        ("RecurringCharges",
+          (Option.map x.recurringCharges ~f:RecurringChargeList.to_value));
+        ("ARN", (Option.map x.aRN ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
+      let recurringCharges =
+        (Option.map ~f:RecurringChargeList.of_xml)
+          (Xml.child xml_arg0 "RecurringCharges") in
+      let state = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "State") in
+      let offeringType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OfferingType") in
+      let nodeCount =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "NodeCount") in
+      let fixedPrice =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "FixedPrice") in
+      let duration =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Duration") in
+      let startTime =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let nodeType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
+      let reservedNodesOfferingId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ReservedNodesOfferingId") in
+      let reservationId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ReservationId") in
+      make ?aRN ?recurringCharges ?state ?offeringType ?nodeCount ?fixedPrice
+        ?duration ?startTime ?nodeType ?reservedNodesOfferingId
+        ?reservationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let recurringCharges =
+        field_map json__ "RecurringCharges" RecurringChargeList.of_json in
+      let state = field_map json__ "State" String_.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
+      let nodeCount = field_map json__ "NodeCount" Integer.of_json in
+      let fixedPrice = field_map json__ "FixedPrice" Double.of_json in
+      let duration = field_map json__ "Duration" Integer.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let reservedNodesOfferingId =
+        field_map json__ "ReservedNodesOfferingId" String_.of_json in
+      let reservationId = field_map json__ "ReservationId" String_.of_json in
+      make ?aRN ?recurringCharges ?state ?offeringType ?nodeCount ?fixedPrice
+        ?duration ?startTime ?nodeType ?reservedNodesOfferingId
+        ?reservationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the output of a PurchaseReservedNodesOffering operation."]
+module ReservedNodesOffering =
+  struct
+    type nonrec t =
+      {
+      reservedNodesOfferingId: String_.t option
+        [@ocaml.doc "The offering identifier."];
+      nodeType: String_.t option
+        [@ocaml.doc
+          "The node type for the reserved nodes. For more information, see Supported node types."];
+      duration: Integer.t option
+        [@ocaml.doc "The duration of the reservation in seconds."];
+      fixedPrice: Double.t option
+        [@ocaml.doc "The fixed price charged for this reserved node."];
+      offeringType: String_.t option
+        [@ocaml.doc "The offering type of this reserved node."];
+      recurringCharges: RecurringChargeList.t option
+        [@ocaml.doc "The recurring price charged to run this reserved node."]}
+    let make ?reservedNodesOfferingId =
+      fun ?nodeType ->
+        fun ?duration ->
+          fun ?fixedPrice ->
+            fun ?offeringType ->
+              fun ?recurringCharges ->
+                fun () ->
+                  {
+                    reservedNodesOfferingId;
+                    nodeType;
+                    duration;
+                    fixedPrice;
+                    offeringType;
+                    recurringCharges
+                  }
+    let to_value x =
+      structure_to_value
+        [("ReservedNodesOfferingId",
+           (Option.map x.reservedNodesOfferingId ~f:String_.to_value));
+        ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
+        ("Duration", (Option.map x.duration ~f:Integer.to_value));
+        ("FixedPrice", (Option.map x.fixedPrice ~f:Double.to_value));
+        ("OfferingType", (Option.map x.offeringType ~f:String_.to_value));
+        ("RecurringCharges",
+          (Option.map x.recurringCharges ~f:RecurringChargeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recurringCharges =
+        (Option.map ~f:RecurringChargeList.of_xml)
+          (Xml.child xml_arg0 "RecurringCharges") in
+      let offeringType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OfferingType") in
+      let fixedPrice =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "FixedPrice") in
+      let duration =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Duration") in
+      let nodeType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
+      let reservedNodesOfferingId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ReservedNodesOfferingId") in
+      make ?recurringCharges ?offeringType ?fixedPrice ?duration ?nodeType
+        ?reservedNodesOfferingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recurringCharges =
+        field_map json__ "RecurringCharges" RecurringChargeList.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
+      let fixedPrice = field_map json__ "FixedPrice" Double.of_json in
+      let duration = field_map json__ "Duration" Integer.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let reservedNodesOfferingId =
+        field_map json__ "ReservedNodesOfferingId" String_.of_json in
+      make ?recurringCharges ?offeringType ?fixedPrice ?duration ?nodeType
+        ?reservedNodesOfferingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The offering type of this node."]
 module Parameter =
   struct
     type nonrec t =
@@ -1676,14 +2232,14 @@ module Parameter =
       make ?minimumEngineVersion ?allowedValues ?dataType ?description ?value
         ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minimumEngineVersion =
-        field_map json "MinimumEngineVersion" String_.of_json in
-      let allowedValues = field_map json "AllowedValues" String_.of_json in
-      let dataType = field_map json "DataType" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let value = field_map json "Value" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let allowedValues = field_map json__ "AllowedValues" String_.of_json in
+      let dataType = field_map json__ "DataType" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let value = field_map json__ "Value" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?minimumEngineVersion ?allowedValues ?dataType ?description ?value
         ?name ()
     let to_json v = composed_to_json to_value v
@@ -1721,15 +2277,258 @@ module ParameterGroup =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aRN ?description ?family ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let family = field_map json "Family" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let family = field_map json__ "Family" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?aRN ?description ?family ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a CreateParameterGroup operation. A parameter group represents a combination of specific values for the parameters that are passed to the engine software during startup."]
+module MultiRegionParameter =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option [@ocaml.doc "The name of the parameter."];
+      value: String_.t option [@ocaml.doc "The value of the parameter."];
+      description: String_.t option
+        [@ocaml.doc "A description of the parameter."];
+      source: String_.t option
+        [@ocaml.doc
+          "Indicates the source of the parameter value. Valid values: user | system | engine-default"];
+      dataType: String_.t option
+        [@ocaml.doc "The valid data type for the parameter."];
+      allowedValues: String_.t option
+        [@ocaml.doc "The valid range of values for the parameter."];
+      minimumEngineVersion: String_.t option
+        [@ocaml.doc
+          "The earliest engine version to which the parameter can apply."]}
+    let make ?name =
+      fun ?value ->
+        fun ?description ->
+          fun ?source ->
+            fun ?dataType ->
+              fun ?allowedValues ->
+                fun ?minimumEngineVersion ->
+                  fun () ->
+                    {
+                      name;
+                      value;
+                      description;
+                      source;
+                      dataType;
+                      allowedValues;
+                      minimumEngineVersion
+                    }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("Value", (Option.map x.value ~f:String_.to_value));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("Source", (Option.map x.source ~f:String_.to_value));
+        ("DataType", (Option.map x.dataType ~f:String_.to_value));
+        ("AllowedValues", (Option.map x.allowedValues ~f:String_.to_value));
+        ("MinimumEngineVersion",
+          (Option.map x.minimumEngineVersion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minimumEngineVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MinimumEngineVersion") in
+      let allowedValues =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AllowedValues") in
+      let dataType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataType") in
+      let source =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Source") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?minimumEngineVersion ?allowedValues ?dataType ?source
+        ?description ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minimumEngineVersion =
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let allowedValues = field_map json__ "AllowedValues" String_.of_json in
+      let dataType = field_map json__ "DataType" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let value = field_map json__ "Value" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?minimumEngineVersion ?allowedValues ?dataType ?source
+        ?description ?value ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an individual setting that controls some aspect of MemoryDB behavior across multiple regions."]
+module MultiRegionParameterGroup =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc "The name of the multi-region parameter group."];
+      family: String_.t option
+        [@ocaml.doc
+          "The name of the parameter group family that this multi-region parameter group is compatible with."];
+      description: String_.t option
+        [@ocaml.doc "A description of the multi-region parameter group."];
+      aRN: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the multi-region parameter group."]}
+    let make ?name =
+      fun ?family ->
+        fun ?description ->
+          fun ?aRN -> fun () -> { name; family; description; aRN }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("Family", (Option.map x.family ~f:String_.to_value));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("ARN", (Option.map x.aRN ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let family =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Family") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?aRN ?description ?family ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let family = field_map json__ "Family" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?aRN ?description ?family ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the output of a CreateMultiRegionParameterGroup operation. A multi-region parameter group represents a collection of parameters that can be applied to clusters across multiple regions."]
+module MultiRegionCluster =
+  struct
+    type nonrec t =
+      {
+      multiRegionClusterName: String_.t option
+        [@ocaml.doc "The name of the multi-Region cluster."];
+      description: String_.t option
+        [@ocaml.doc "The description of the multi-Region cluster."];
+      status: String_.t option
+        [@ocaml.doc "The current status of the multi-Region cluster."];
+      nodeType: String_.t option
+        [@ocaml.doc "The node type used by the multi-Region cluster."];
+      engine: String_.t option
+        [@ocaml.doc
+          "The name of the engine used by the multi-Region cluster."];
+      engineVersion: String_.t option
+        [@ocaml.doc
+          "The version of the engine used by the multi-Region cluster."];
+      numberOfShards: IntegerOptional.t option
+        [@ocaml.doc "The number of shards in the multi-Region cluster."];
+      clusters: RegionalClusterList.t option
+        [@ocaml.doc "The clusters in this multi-Region cluster."];
+      multiRegionParameterGroupName: String_.t option
+        [@ocaml.doc
+          "The name of the multi-Region parameter group associated with the cluster."];
+      tLSEnabled: BooleanOptional.t option
+        [@ocaml.doc "Indiciates if the multi-Region cluster is TLS enabled."];
+      aRN: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the multi-Region cluster."]}
+    let make ?multiRegionClusterName =
+      fun ?description ->
+        fun ?status ->
+          fun ?nodeType ->
+            fun ?engine ->
+              fun ?engineVersion ->
+                fun ?numberOfShards ->
+                  fun ?clusters ->
+                    fun ?multiRegionParameterGroupName ->
+                      fun ?tLSEnabled ->
+                        fun ?aRN ->
+                          fun () ->
+                            {
+                              multiRegionClusterName;
+                              description;
+                              status;
+                              nodeType;
+                              engine;
+                              engineVersion;
+                              numberOfShards;
+                              clusters;
+                              multiRegionParameterGroupName;
+                              tLSEnabled;
+                              aRN
+                            }
+    let to_value x =
+      structure_to_value
+        [("MultiRegionClusterName",
+           (Option.map x.multiRegionClusterName ~f:String_.to_value));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value));
+        ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
+        ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
+        ("NumberOfShards",
+          (Option.map x.numberOfShards ~f:IntegerOptional.to_value));
+        ("Clusters", (Option.map x.clusters ~f:RegionalClusterList.to_value));
+        ("MultiRegionParameterGroupName",
+          (Option.map x.multiRegionParameterGroupName ~f:String_.to_value));
+        ("TLSEnabled", (Option.map x.tLSEnabled ~f:BooleanOptional.to_value));
+        ("ARN", (Option.map x.aRN ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
+      let tLSEnabled =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "TLSEnabled") in
+      let multiRegionParameterGroupName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionParameterGroupName") in
+      let clusters =
+        (Option.map ~f:RegionalClusterList.of_xml)
+          (Xml.child xml_arg0 "Clusters") in
+      let numberOfShards =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "NumberOfShards") in
+      let engineVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
+      let nodeType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let multiRegionClusterName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionClusterName") in
+      make ?aRN ?tLSEnabled ?multiRegionParameterGroupName ?clusters
+        ?numberOfShards ?engineVersion ?engine ?nodeType ?status ?description
+        ?multiRegionClusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let tLSEnabled = field_map json__ "TLSEnabled" BooleanOptional.of_json in
+      let multiRegionParameterGroupName =
+        field_map json__ "MultiRegionParameterGroupName" String_.of_json in
+      let clusters = field_map json__ "Clusters" RegionalClusterList.of_json in
+      let numberOfShards =
+        field_map json__ "NumberOfShards" IntegerOptional.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let multiRegionClusterName =
+        field_map json__ "MultiRegionClusterName" String_.of_json in
+      make ?aRN ?tLSEnabled ?multiRegionParameterGroupName ?clusters
+        ?numberOfShards ?engineVersion ?engine ?nodeType ?status ?description
+        ?multiRegionClusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents a multi-Region cluster."]
 module Event =
   struct
     type nonrec t =
@@ -1764,11 +2563,11 @@ module Event =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceName") in
       make ?date ?message ?sourceType ?sourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let date = field_map json "Date" TStamp.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
-      let sourceName = field_map json "SourceName" String_.of_json in
+    let of_json json__ =
+      let date = field_map json__ "Date" TStamp.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let sourceName = field_map json__ "SourceName" String_.of_json in
       make ?date ?message ?sourceType ?sourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1777,20 +2576,30 @@ module EngineVersionInfo =
   struct
     type nonrec t =
       {
+      engine: String_.t option
+        [@ocaml.doc
+          "The name of the engine for which version information is provided."];
       engineVersion: String_.t option [@ocaml.doc "The engine version"];
       enginePatchVersion: String_.t option
         [@ocaml.doc "The patched engine version"];
       parameterGroupFamily: String_.t option
         [@ocaml.doc
           "Specifies the name of the parameter group family to which the engine default parameters apply."]}
-    let make ?engineVersion =
-      fun ?enginePatchVersion ->
-        fun ?parameterGroupFamily ->
-          fun () ->
-            { engineVersion; enginePatchVersion; parameterGroupFamily }
+    let make ?engine =
+      fun ?engineVersion ->
+        fun ?enginePatchVersion ->
+          fun ?parameterGroupFamily ->
+            fun () ->
+              {
+                engine;
+                engineVersion;
+                enginePatchVersion;
+                parameterGroupFamily
+              }
     let to_value x =
       structure_to_value
-        [("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
+        [("Engine", (Option.map x.engine ~f:String_.to_value));
+        ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
         ("EnginePatchVersion",
           (Option.map x.enginePatchVersion ~f:String_.to_value));
         ("ParameterGroupFamily",
@@ -1805,17 +2614,22 @@ module EngineVersionInfo =
           (Xml.child xml_arg0 "EnginePatchVersion") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
-      make ?parameterGroupFamily ?enginePatchVersion ?engineVersion ()
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
+      make ?parameterGroupFamily ?enginePatchVersion ?engineVersion ?engine
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroupFamily =
-        field_map json "ParameterGroupFamily" String_.of_json in
+        field_map json__ "ParameterGroupFamily" String_.of_json in
       let enginePatchVersion =
-        field_map json "EnginePatchVersion" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      make ?parameterGroupFamily ?enginePatchVersion ?engineVersion ()
+        field_map json__ "EnginePatchVersion" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      make ?parameterGroupFamily ?enginePatchVersion ?engineVersion ?engine
+        ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Provides details of the Redis engine version"]
+  end[@@ocaml.doc "Provides details of the Redis OSS engine version"]
 module Cluster =
   struct
     type nonrec t =
@@ -1830,6 +2644,9 @@ module Cluster =
           "The status of the cluster. For example, Available, Updating, Creating."];
       pendingUpdates: ClusterPendingUpdates.t option
         [@ocaml.doc "A group of settings that are currently being applied."];
+      multiRegionClusterName: String_.t option
+        [@ocaml.doc
+          "The name of the multi-Region cluster that this cluster belongs to."];
       numberOfShards: IntegerOptional.t option
         [@ocaml.doc "The number of shards in the cluster"];
       shards: ShardList.t option
@@ -1840,10 +2657,12 @@ module Cluster =
       clusterEndpoint: Endpoint.t option
         [@ocaml.doc "The cluster's configuration endpoint"];
       nodeType: String_.t option [@ocaml.doc "The cluster's node type"];
+      engine: String_.t option
+        [@ocaml.doc "The name of the engine used by the cluster."];
       engineVersion: String_.t option
-        [@ocaml.doc "The Redis engine version used by the cluster"];
+        [@ocaml.doc "The Redis OSS engine version used by the cluster"];
       enginePatchVersion: String_.t option
-        [@ocaml.doc "The Redis engine patch version used by the cluster"];
+        [@ocaml.doc "The Redis OSS engine patch version used by the cluster"];
       parameterGroupName: String_.t option
         [@ocaml.doc "The name of the parameter group used by the cluster"];
       parameterGroupStatus: String_.t option
@@ -1879,62 +2698,85 @@ module Cluster =
           "The name of the Access Control List associated with this cluster."];
       autoMinorVersionUpgrade: BooleanOptional.t option
         [@ocaml.doc
-          "When set to true, the cluster will automatically receive minor engine version upgrades after launch."]}
+          "When set to true, the cluster will automatically receive minor engine version upgrades after launch."];
+      dataTiering: DataTieringStatus.t option
+        [@ocaml.doc
+          "Enables data tiering. Data tiering is only supported for clusters using the r6gd node type. This parameter must be set when using r6gd nodes. For more information, see Data tiering."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The IP address type for the cluster. Returns 'ipv4' for IPv4 only, 'ipv6' for IPv6 only, or 'dual-stack' if the cluster supports both IPv4 and IPv6 addressing."];
+      ipDiscovery: IpDiscovery.t option
+        [@ocaml.doc
+          "The mechanism that the cluster uses to discover IP addresses. Returns 'ipv4' when DNS endpoints resolve to IPv4 addresses, or 'ipv6' when DNS endpoints resolve to IPv6 addresses."]}
     let make ?name =
       fun ?description ->
         fun ?status ->
           fun ?pendingUpdates ->
-            fun ?numberOfShards ->
-              fun ?shards ->
-                fun ?availabilityMode ->
-                  fun ?clusterEndpoint ->
-                    fun ?nodeType ->
-                      fun ?engineVersion ->
-                        fun ?enginePatchVersion ->
-                          fun ?parameterGroupName ->
-                            fun ?parameterGroupStatus ->
-                              fun ?securityGroups ->
-                                fun ?subnetGroupName ->
-                                  fun ?tLSEnabled ->
-                                    fun ?kmsKeyId ->
-                                      fun ?aRN ->
-                                        fun ?snsTopicArn ->
-                                          fun ?snsTopicStatus ->
-                                            fun ?snapshotRetentionLimit ->
-                                              fun ?maintenanceWindow ->
-                                                fun ?snapshotWindow ->
-                                                  fun ?aCLName ->
-                                                    fun
-                                                      ?autoMinorVersionUpgrade
-                                                      ->
-                                                      fun () ->
-                                                        {
-                                                          name;
-                                                          description;
-                                                          status;
-                                                          pendingUpdates;
-                                                          numberOfShards;
-                                                          shards;
-                                                          availabilityMode;
-                                                          clusterEndpoint;
-                                                          nodeType;
-                                                          engineVersion;
-                                                          enginePatchVersion;
-                                                          parameterGroupName;
-                                                          parameterGroupStatus;
-                                                          securityGroups;
-                                                          subnetGroupName;
-                                                          tLSEnabled;
-                                                          kmsKeyId;
-                                                          aRN;
-                                                          snsTopicArn;
-                                                          snsTopicStatus;
-                                                          snapshotRetentionLimit;
-                                                          maintenanceWindow;
-                                                          snapshotWindow;
-                                                          aCLName;
-                                                          autoMinorVersionUpgrade
-                                                        }
+            fun ?multiRegionClusterName ->
+              fun ?numberOfShards ->
+                fun ?shards ->
+                  fun ?availabilityMode ->
+                    fun ?clusterEndpoint ->
+                      fun ?nodeType ->
+                        fun ?engine ->
+                          fun ?engineVersion ->
+                            fun ?enginePatchVersion ->
+                              fun ?parameterGroupName ->
+                                fun ?parameterGroupStatus ->
+                                  fun ?securityGroups ->
+                                    fun ?subnetGroupName ->
+                                      fun ?tLSEnabled ->
+                                        fun ?kmsKeyId ->
+                                          fun ?aRN ->
+                                            fun ?snsTopicArn ->
+                                              fun ?snsTopicStatus ->
+                                                fun ?snapshotRetentionLimit
+                                                  ->
+                                                  fun ?maintenanceWindow ->
+                                                    fun ?snapshotWindow ->
+                                                      fun ?aCLName ->
+                                                        fun
+                                                          ?autoMinorVersionUpgrade
+                                                          ->
+                                                          fun ?dataTiering ->
+                                                            fun ?networkType
+                                                              ->
+                                                              fun
+                                                                ?ipDiscovery
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    name;
+                                                                    description;
+                                                                    status;
+                                                                    pendingUpdates;
+                                                                    multiRegionClusterName;
+                                                                    numberOfShards;
+                                                                    shards;
+                                                                    availabilityMode;
+                                                                    clusterEndpoint;
+                                                                    nodeType;
+                                                                    engine;
+                                                                    engineVersion;
+                                                                    enginePatchVersion;
+                                                                    parameterGroupName;
+                                                                    parameterGroupStatus;
+                                                                    securityGroups;
+                                                                    subnetGroupName;
+                                                                    tLSEnabled;
+                                                                    kmsKeyId;
+                                                                    aRN;
+                                                                    snsTopicArn;
+                                                                    snsTopicStatus;
+                                                                    snapshotRetentionLimit;
+                                                                    maintenanceWindow;
+                                                                    snapshotWindow;
+                                                                    aCLName;
+                                                                    autoMinorVersionUpgrade;
+                                                                    dataTiering;
+                                                                    networkType;
+                                                                    ipDiscovery
+                                                                  }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
@@ -1942,6 +2784,8 @@ module Cluster =
         ("Status", (Option.map x.status ~f:String_.to_value));
         ("PendingUpdates",
           (Option.map x.pendingUpdates ~f:ClusterPendingUpdates.to_value));
+        ("MultiRegionClusterName",
+          (Option.map x.multiRegionClusterName ~f:String_.to_value));
         ("NumberOfShards",
           (Option.map x.numberOfShards ~f:IntegerOptional.to_value));
         ("Shards", (Option.map x.shards ~f:ShardList.to_value));
@@ -1950,6 +2794,7 @@ module Cluster =
         ("ClusterEndpoint",
           (Option.map x.clusterEndpoint ~f:Endpoint.to_value));
         ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
         ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
         ("EnginePatchVersion",
           (Option.map x.enginePatchVersion ~f:String_.to_value));
@@ -1974,9 +2819,20 @@ module Cluster =
         ("SnapshotWindow", (Option.map x.snapshotWindow ~f:String_.to_value));
         ("ACLName", (Option.map x.aCLName ~f:ACLName.to_value));
         ("AutoMinorVersionUpgrade",
-          (Option.map x.autoMinorVersionUpgrade ~f:BooleanOptional.to_value))]
+          (Option.map x.autoMinorVersionUpgrade ~f:BooleanOptional.to_value));
+        ("DataTiering",
+          (Option.map x.dataTiering ~f:DataTieringStatus.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value));
+        ("IpDiscovery", (Option.map x.ipDiscovery ~f:IpDiscovery.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipDiscovery =
+        (Option.map ~f:IpDiscovery.of_xml) (Xml.child xml_arg0 "IpDiscovery") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let dataTiering =
+        (Option.map ~f:DataTieringStatus.of_xml)
+          (Xml.child xml_arg0 "DataTiering") in
       let autoMinorVersionUpgrade =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "AutoMinorVersionUpgrade") in
@@ -2016,6 +2872,8 @@ module Cluster =
           (Xml.child xml_arg0 "EnginePatchVersion") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
       let nodeType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
       let clusterEndpoint =
@@ -2029,6 +2887,9 @@ module Cluster =
       let numberOfShards =
         (Option.map ~f:IntegerOptional.of_xml)
           (Xml.child xml_arg0 "NumberOfShards") in
+      let multiRegionClusterName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionClusterName") in
       let pendingUpdates =
         (Option.map ~f:ClusterPendingUpdates.of_xml)
           (Xml.child xml_arg0 "PendingUpdates") in
@@ -2037,57 +2898,66 @@ module Cluster =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?autoMinorVersionUpgrade ?aCLName ?snapshotWindow
-        ?maintenanceWindow ?snapshotRetentionLimit ?snsTopicStatus
-        ?snsTopicArn ?aRN ?kmsKeyId ?tLSEnabled ?subnetGroupName
-        ?securityGroups ?parameterGroupStatus ?parameterGroupName
-        ?enginePatchVersion ?engineVersion ?nodeType ?clusterEndpoint
-        ?availabilityMode ?shards ?numberOfShards ?pendingUpdates ?status
-        ?description ?name ()
+      make ?ipDiscovery ?networkType ?dataTiering ?autoMinorVersionUpgrade
+        ?aCLName ?snapshotWindow ?maintenanceWindow ?snapshotRetentionLimit
+        ?snsTopicStatus ?snsTopicArn ?aRN ?kmsKeyId ?tLSEnabled
+        ?subnetGroupName ?securityGroups ?parameterGroupStatus
+        ?parameterGroupName ?enginePatchVersion ?engineVersion ?engine
+        ?nodeType ?clusterEndpoint ?availabilityMode ?shards ?numberOfShards
+        ?multiRegionClusterName ?pendingUpdates ?status ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipDiscovery = field_map json__ "IpDiscovery" IpDiscovery.of_json in
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let dataTiering =
+        field_map json__ "DataTiering" DataTieringStatus.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" BooleanOptional.of_json in
-      let aCLName = field_map json "ACLName" ACLName.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" BooleanOptional.of_json in
+      let aCLName = field_map json__ "ACLName" ACLName.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let maintenanceWindow =
-        field_map json "MaintenanceWindow" String_.of_json in
+        field_map json__ "MaintenanceWindow" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
-      let snsTopicStatus = field_map json "SnsTopicStatus" String_.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" String_.of_json in
-      let aRN = field_map json "ARN" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let tLSEnabled = field_map json "TLSEnabled" BooleanOptional.of_json in
-      let subnetGroupName = field_map json "SubnetGroupName" String_.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
+      let snsTopicStatus = field_map json__ "SnsTopicStatus" String_.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" String_.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let tLSEnabled = field_map json__ "TLSEnabled" BooleanOptional.of_json in
+      let subnetGroupName =
+        field_map json__ "SubnetGroupName" String_.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroupMembershipList.of_json in
+        field_map json__ "SecurityGroups" SecurityGroupMembershipList.of_json in
       let parameterGroupStatus =
-        field_map json "ParameterGroupStatus" String_.of_json in
+        field_map json__ "ParameterGroupStatus" String_.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
       let enginePatchVersion =
-        field_map json "EnginePatchVersion" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
-      let clusterEndpoint = field_map json "ClusterEndpoint" Endpoint.of_json in
+        field_map json__ "EnginePatchVersion" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let clusterEndpoint =
+        field_map json__ "ClusterEndpoint" Endpoint.of_json in
       let availabilityMode =
-        field_map json "AvailabilityMode" AZStatus.of_json in
-      let shards = field_map json "Shards" ShardList.of_json in
+        field_map json__ "AvailabilityMode" AZStatus.of_json in
+      let shards = field_map json__ "Shards" ShardList.of_json in
       let numberOfShards =
-        field_map json "NumberOfShards" IntegerOptional.of_json in
+        field_map json__ "NumberOfShards" IntegerOptional.of_json in
+      let multiRegionClusterName =
+        field_map json__ "MultiRegionClusterName" String_.of_json in
       let pendingUpdates =
-        field_map json "PendingUpdates" ClusterPendingUpdates.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ?autoMinorVersionUpgrade ?aCLName ?snapshotWindow
-        ?maintenanceWindow ?snapshotRetentionLimit ?snsTopicStatus
-        ?snsTopicArn ?aRN ?kmsKeyId ?tLSEnabled ?subnetGroupName
-        ?securityGroups ?parameterGroupStatus ?parameterGroupName
-        ?enginePatchVersion ?engineVersion ?nodeType ?clusterEndpoint
-        ?availabilityMode ?shards ?numberOfShards ?pendingUpdates ?status
-        ?description ?name ()
+        field_map json__ "PendingUpdates" ClusterPendingUpdates.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?ipDiscovery ?networkType ?dataTiering ?autoMinorVersionUpgrade
+        ?aCLName ?snapshotWindow ?maintenanceWindow ?snapshotRetentionLimit
+        ?snsTopicStatus ?snsTopicArn ?aRN ?kmsKeyId ?tLSEnabled
+        ?subnetGroupName ?securityGroups ?parameterGroupStatus
+        ?parameterGroupName ?enginePatchVersion ?engineVersion ?engine
+        ?nodeType ?clusterEndpoint ?availabilityMode ?shards ?numberOfShards
+        ?multiRegionClusterName ?pendingUpdates ?status ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains all of the attributes of a specific cluster."]
 module ACL =
@@ -2157,16 +3027,16 @@ module ACL =
       make ?aRN ?clusters ?pendingChanges ?minimumEngineVersion ?userNames
         ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
-      let clusters = field_map json "Clusters" ACLClusterNameList.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let clusters = field_map json__ "Clusters" ACLClusterNameList.of_json in
       let pendingChanges =
-        field_map json "PendingChanges" ACLPendingChanges.of_json in
+        field_map json__ "PendingChanges" ACLPendingChanges.of_json in
       let minimumEngineVersion =
-        field_map json "MinimumEngineVersion" String_.of_json in
-      let userNames = field_map json "UserNames" UserNameList.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let userNames = field_map json__ "UserNames" UserNameList.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?aRN ?clusters ?pendingChanges ?minimumEngineVersion ?userNames
         ?status ?name ()
     let to_json v = composed_to_json to_value v
@@ -2200,10 +3070,10 @@ module UnprocessedCluster =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterName") in
       make ?errorMessage ?errorType ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let errorType = field_map json "ErrorType" String_.of_json in
-      let clusterName = field_map json "ClusterName" String_.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorType = field_map json__ "ErrorType" String_.of_json in
+      let clusterName = field_map json__ "ClusterName" String_.of_json in
       make ?errorMessage ?errorType ?clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A cluster whose updates have failed"]
@@ -2222,11 +3092,11 @@ module InvalidParameterCombinationException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AwsQueryErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" AwsQueryErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified parameter combination is not valid."]
 module InvalidParameterValueException =
   struct
     type nonrec t = {
@@ -2242,11 +3112,11 @@ module InvalidParameterValueException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AwsQueryErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" AwsQueryErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified parameter value is not valid."]
 module InvalidUserStateFault =
   struct
     type nonrec t = unit
@@ -2258,7 +3128,8 @@ module InvalidUserStateFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The user is not in a valid state for the requested operation."]
 module UserNotFoundFault =
   struct
     type nonrec t = unit
@@ -2270,7 +3141,7 @@ module UserNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified user does not exist."]
 module AccessString =
   struct
     type nonrec t = string
@@ -2310,9 +3181,9 @@ module AuthenticationMode =
           (Xml.child xml_arg0 "Type") in
       make ?passwords ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let passwords = field_map json "Passwords" PasswordListInput.of_json in
-      let type_ = field_map json "Type" InputAuthenticationType.of_json in
+    let of_json json__ =
+      let passwords = field_map json__ "Passwords" PasswordListInput.of_json in
+      let type_ = field_map json__ "Type" InputAuthenticationType.of_json in
       make ?passwords ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2328,7 +3199,7 @@ module InvalidSubnet =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified subnet is not valid."]
 module ServiceLinkedRoleNotFoundFault =
   struct
     type nonrec t = unit
@@ -2340,7 +3211,7 @@ module ServiceLinkedRoleNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The required service-linked role was not found."]
 module SubnetGroupNotFoundFault =
   struct
     type nonrec t = unit
@@ -2352,7 +3223,7 @@ module SubnetGroupNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified subnet group does not exist."]
 module SubnetInUse =
   struct
     type nonrec t = unit
@@ -2364,7 +3235,7 @@ module SubnetInUse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The subnet is currently in use and cannot be deleted."]
 module SubnetNotAllowedFault =
   struct
     type nonrec t = unit
@@ -2376,7 +3247,7 @@ module SubnetNotAllowedFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified subnet is not allowed for this operation."]
 module SubnetQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -2388,11 +3259,15 @@ module SubnetQuotaExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of subnets allowed."]
 module SubnetIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2424,7 +3299,8 @@ module InvalidParameterGroupStateFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The parameter group is not in a valid state for the requested operation."]
 module ParameterGroupNotFoundFault =
   struct
     type nonrec t = unit
@@ -2436,11 +3312,14 @@ module ParameterGroupNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified parameter group does not exist."]
 module ParameterNameValueList =
   struct
     type nonrec t = ParameterNameValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterNameValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2462,6 +3341,91 @@ module ParameterNameValueList =
         ~of_json:ParameterNameValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InvalidMultiRegionClusterStateFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested operation cannot be performed on the multi-Region cluster in its current state."]
+module MultiRegionClusterNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified multi-Region cluster does not exist."]
+module MultiRegionParameterGroupNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified multi-Region parameter group does not exist."]
+module ShardConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      shardCount: Integer.t option
+        [@ocaml.doc "The number of shards in the cluster"]}
+    let make ?shardCount = fun () -> { shardCount }
+    let to_value x =
+      structure_to_value
+        [("ShardCount", (Option.map x.shardCount ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let shardCount =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "ShardCount") in
+      make ?shardCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let shardCount = field_map json__ "ShardCount" Integer.of_json in
+      make ?shardCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to configure the sharding properties of a cluster"]
+module UpdateStrategy =
+  struct
+    type nonrec t =
+      | Coordinated 
+      | Uncoordinated 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Coordinated -> "coordinated"
+      | Uncoordinated -> "uncoordinated"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "coordinated" -> Coordinated
+      | "uncoordinated" -> Uncoordinated
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UpdateStrategy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UpdateStrategy" j)
+    let to_json = simple_to_json to_value
+  end
 module ACLNotFoundFault =
   struct
     type nonrec t = unit
@@ -2473,7 +3437,7 @@ module ACLNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified ACL does not exist."]
 module ClusterNotFoundFault =
   struct
     type nonrec t = unit
@@ -2485,7 +3449,7 @@ module ClusterNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified cluster does not exist."]
 module ClusterQuotaForCustomerExceededFault =
   struct
     type nonrec t = unit
@@ -2497,7 +3461,8 @@ module ClusterQuotaForCustomerExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of clusters allowed for this customer."]
 module InvalidACLStateFault =
   struct
     type nonrec t = unit
@@ -2509,7 +3474,8 @@ module InvalidACLStateFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The ACL is not in a valid state for the requested operation."]
 module InvalidClusterStateFault =
   struct
     type nonrec t = unit
@@ -2521,7 +3487,8 @@ module InvalidClusterStateFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The cluster is not in a valid state for the requested operation."]
 module InvalidKMSKeyFault =
   struct
     type nonrec t = unit
@@ -2533,7 +3500,7 @@ module InvalidKMSKeyFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified KMS key is not valid or accessible."]
 module InvalidNodeStateFault =
   struct
     type nonrec t = unit
@@ -2545,7 +3512,8 @@ module InvalidNodeStateFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The node is not in a valid state for the requested operation."]
 module InvalidVPCNetworkStateFault =
   struct
     type nonrec t = unit
@@ -2557,7 +3525,8 @@ module InvalidVPCNetworkStateFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The VPC network is not in a valid state for the requested operation."]
 module NoOperationFault =
   struct
     type nonrec t = unit
@@ -2569,7 +3538,7 @@ module NoOperationFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The requested operation would result in no changes."]
 module NodeQuotaForClusterExceededFault =
   struct
     type nonrec t = unit
@@ -2581,7 +3550,8 @@ module NodeQuotaForClusterExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of nodes allowed for this cluster."]
 module NodeQuotaForCustomerExceededFault =
   struct
     type nonrec t = unit
@@ -2593,7 +3563,8 @@ module NodeQuotaForCustomerExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of nodes allowed for this customer."]
 module ShardsPerClusterQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -2605,7 +3576,8 @@ module ShardsPerClusterQuotaExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of shards allowed per cluster."]
 module ReplicaConfigurationRequest =
   struct
     type nonrec t =
@@ -2622,8 +3594,8 @@ module ReplicaConfigurationRequest =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "ReplicaCount") in
       make ?replicaCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replicaCount = field_map json "ReplicaCount" Integer.of_json in
+    let of_json json__ =
+      let replicaCount = field_map json__ "ReplicaCount" Integer.of_json in
       make ?replicaCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to configure the number of replicas in a shard"]
@@ -2631,6 +3603,9 @@ module SecurityGroupIdsList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2651,28 +3626,6 @@ module SecurityGroupIdsList =
       list_of_json ~kind:"SecurityGroupIdsList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ShardConfigurationRequest =
-  struct
-    type nonrec t =
-      {
-      shardCount: Integer.t option
-        [@ocaml.doc "The number of shards in the cluster"]}
-    let make ?shardCount = fun () -> { shardCount }
-    let to_value x =
-      structure_to_value
-        [("ShardCount", (Option.map x.shardCount ~f:Integer.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let shardCount =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "ShardCount") in
-      make ?shardCount ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shardCount = field_map json "ShardCount" Integer.of_json in
-      make ?shardCount ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A request to configure the sharding properties of a cluster"]
 module DefaultUserRequired =
   struct
     type nonrec t = unit
@@ -2684,7 +3637,7 @@ module DefaultUserRequired =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "A default user is required and must be specified."]
 module DuplicateUserNameFault =
   struct
     type nonrec t = unit
@@ -2696,12 +3649,15 @@ module DuplicateUserNameFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "A user with the specified name already exists."]
 module UserNameListInput =
   struct
     type nonrec t = UserName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2733,7 +3689,7 @@ module InvalidARNFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified Amazon Resource Name (ARN) is not valid."]
 module SnapshotNotFoundFault =
   struct
     type nonrec t = unit
@@ -2745,12 +3701,15 @@ module SnapshotNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified snapshot does not exist."]
 module TagList =
   struct
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:200); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2781,11 +3740,14 @@ module TagNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified tag does not exist."]
 module KeyList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2816,7 +3778,8 @@ module TagQuotaPerResourceExceeded =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of tags allowed per resource."]
 module Boolean =
   struct
     type nonrec t = bool
@@ -2834,6 +3797,9 @@ module ParameterNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2854,10 +3820,51 @@ module ParameterNameList =
       list_of_json ~kind:"ParameterNameList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ReservedNodeAlreadyExistsFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You already have a reservation with the given identifier."]
+module ReservedNodeQuotaExceededFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the user's node quota."]
+module ReservedNodesOfferingNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The requested node offering does not exist."]
 module NodeTypeList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2889,7 +3896,8 @@ module APICallRateForCustomerExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The customer has exceeded the maximum number of API requests allowed per time period."]
 module ShardNotFoundFault =
   struct
     type nonrec t = unit
@@ -2901,7 +3909,7 @@ module ShardNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified shard does not exist."]
 module TestFailoverNotAvailableFault =
   struct
     type nonrec t = unit
@@ -2913,11 +3921,15 @@ module TestFailoverNotAvailableFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Test failover is not available for this cluster configuration."]
 module UserList =
   struct
     type nonrec t = User.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2941,6 +3953,9 @@ module FilterList =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2964,6 +3979,9 @@ module SubnetGroupList =
   struct
     type nonrec t = SubnetGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2988,6 +4006,9 @@ module SnapshotList =
   struct
     type nonrec t = Snapshot.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Snapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3012,6 +4033,9 @@ module ServiceUpdateList =
   struct
     type nonrec t = ServiceUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceUpdate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3037,6 +4061,9 @@ module ClusterNameList =
     type nonrec t = String_.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3062,6 +4089,9 @@ module ServiceUpdateStatusList =
     type nonrec t = ServiceUpdateStatus.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:4); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceUpdateStatus.to_value)) |>
         (fun x -> `List x)
@@ -3084,10 +4114,81 @@ module ServiceUpdateStatusList =
         ~of_json:ServiceUpdateStatus.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ReservedNodeList =
+  struct
+    type nonrec t = ReservedNode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReservedNode.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReservedNode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReservedNodeList" ~of_json:ReservedNode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReservedNodeNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The requested node does not exist."]
+module ReservedNodesOfferingList =
+  struct
+    type nonrec t = ReservedNodesOffering.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReservedNodesOffering.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReservedNodesOffering.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReservedNodesOfferingList"
+        ~of_json:ReservedNodesOffering.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ParametersList =
   struct
     type nonrec t = Parameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Parameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3112,6 +4213,9 @@ module ParameterGroupList =
   struct
     type nonrec t = ParameterGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3133,10 +4237,99 @@ module ParameterGroupList =
         j
     let to_json v = composed_to_json to_value v
   end
+module MultiRegionParametersList =
+  struct
+    type nonrec t = MultiRegionParameter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MultiRegionParameter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MultiRegionParameter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MultiRegionParametersList"
+        ~of_json:MultiRegionParameter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MultiRegionParameterGroupList =
+  struct
+    type nonrec t = MultiRegionParameterGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MultiRegionParameterGroup.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MultiRegionParameterGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MultiRegionParameterGroupList"
+        ~of_json:MultiRegionParameterGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MultiRegionClusterList =
+  struct
+    type nonrec t = MultiRegionCluster.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MultiRegionCluster.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MultiRegionCluster.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MultiRegionClusterList"
+        ~of_json:MultiRegionCluster.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module EventList =
   struct
     type nonrec t = Event.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Event.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3160,6 +4353,9 @@ module EngineVersionInfoList =
   struct
     type nonrec t = EngineVersionInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EngineVersionInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3185,6 +4381,9 @@ module ClusterList =
   struct
     type nonrec t = Cluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Cluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3209,6 +4408,9 @@ module ACLList =
   struct
     type nonrec t = ACL.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ACL.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3239,7 +4441,8 @@ module SubnetGroupInUseFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The subnet group is currently in use and cannot be deleted."]
 module InvalidSnapshotStateFault =
   struct
     type nonrec t = unit
@@ -3251,7 +4454,8 @@ module InvalidSnapshotStateFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The snapshot is not in a valid state for the requested operation."]
 module SnapshotAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -3263,7 +4467,7 @@ module SnapshotAlreadyExistsFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "A snapshot with the specified name already exists."]
 module UserAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -3275,7 +4479,7 @@ module UserAlreadyExistsFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "A user with the specified name already exists."]
 module UserQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -3287,7 +4491,8 @@ module UserQuotaExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of users allowed."]
 module SubnetGroupAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -3299,7 +4504,7 @@ module SubnetGroupAlreadyExistsFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "A subnet group with the specified name already exists."]
 module SubnetGroupQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -3311,7 +4516,8 @@ module SubnetGroupQuotaExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of subnet groups allowed."]
 module SnapshotQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -3323,7 +4529,8 @@ module SnapshotQuotaExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of snapshots allowed."]
 module ParameterGroupAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -3335,7 +4542,8 @@ module ParameterGroupAlreadyExistsFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "A parameter group with the specified name already exists."]
 module ParameterGroupQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -3347,7 +4555,21 @@ module ParameterGroupQuotaExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of parameter groups allowed."]
+module MultiRegionClusterAlreadyExistsFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A multi-Region cluster with the specified name already exists."]
 module ClusterAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -3359,7 +4581,7 @@ module ClusterAlreadyExistsFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "A cluster with the specified name already exists."]
 module InsufficientClusterCapacityFault =
   struct
     type nonrec t = unit
@@ -3371,7 +4593,8 @@ module InsufficientClusterCapacityFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The cluster does not have sufficient capacity to perform the requested operation."]
 module InvalidCredentialsException =
   struct
     type nonrec t = unit
@@ -3383,11 +4606,14 @@ module InvalidCredentialsException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The provided credentials are not valid."]
 module SnapshotArnsList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3419,7 +4645,7 @@ module ACLAlreadyExistsFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "An ACL with the specified name already exists."]
 module ACLQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -3431,7 +4657,8 @@ module ACLQuotaExceededFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request cannot be processed because it would exceed the maximum number of ACLs allowed."]
 module KmsKeyId =
   struct
     type nonrec t = string
@@ -3475,11 +4702,14 @@ module ServiceUpdateNotFoundFault =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The specified service update does not exist."]
 module UnprocessedClusterList =
   struct
     type nonrec t = UnprocessedCluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UnprocessedCluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3520,9 +4750,9 @@ module ServiceUpdateRequest =
           (Xml.child xml_arg0 "ServiceUpdateNameToApply") in
       make ?serviceUpdateNameToApply ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceUpdateNameToApply =
-        field_map json "ServiceUpdateNameToApply" String_.of_json in
+        field_map json__ "ServiceUpdateNameToApply" String_.of_json in
       make ?serviceUpdateNameToApply ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to apply a service update"]
@@ -3598,8 +4828,8 @@ module UpdateUserResponse =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map json "User" User.of_json in make ?user ()
+    let of_json json__ =
+      let user = field_map json__ "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Changes user password(s) and/or access string."]
 module UpdateUserRequest =
@@ -3636,11 +4866,11 @@ module UpdateUserRequest =
         UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?accessString ?authenticationMode ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accessString = field_map json "AccessString" AccessString.of_json in
+    let of_json json__ =
+      let accessString = field_map json__ "AccessString" AccessString.of_json in
       let authenticationMode =
-        field_map json "AuthenticationMode" AuthenticationMode.of_json in
-      let userName = field_map_exn json "UserName" UserName.of_json in
+        field_map json__ "AuthenticationMode" AuthenticationMode.of_json in
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
       make ?accessString ?authenticationMode ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Changes user password(s) and/or access string."]
@@ -3730,8 +4960,8 @@ module UpdateSubnetGroupResponse =
         (Option.map ~f:SubnetGroup.of_xml) (Xml.child xml_arg0 "SubnetGroup") in
       make ?subnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetGroup = field_map json "SubnetGroup" SubnetGroup.of_json in
+    let of_json json__ =
+      let subnetGroup = field_map json__ "SubnetGroup" SubnetGroup.of_json in
       make ?subnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3768,11 +4998,12 @@ module UpdateSubnetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetGroupName") in
       make ?subnetIds ?description ~subnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetIds = field_map json "SubnetIds" SubnetIdentifierList.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let subnetIds =
+        field_map json__ "SubnetIds" SubnetIdentifierList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let subnetGroupName =
-        field_map_exn json "SubnetGroupName" String_.of_json in
+        field_map_exn json__ "SubnetGroupName" String_.of_json in
       make ?subnetIds ?description ~subnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3870,9 +5101,9 @@ module UpdateParameterGroupResponse =
           (Xml.child xml_arg0 "ParameterGroup") in
       make ?parameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroup =
-        field_map json "ParameterGroup" ParameterGroup.of_json in
+        field_map json__ "ParameterGroup" ParameterGroup.of_json in
       make ?parameterGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3906,21 +5137,217 @@ module UpdateParameterGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ~parameterNameValues ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterNameValues =
-        field_map_exn json "ParameterNameValues"
+        field_map_exn json__ "ParameterNameValues"
           ParameterNameValueList.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ~parameterNameValues ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the parameters of a parameter group. You can modify up to 20 parameters in a single request by submitting a list parameter name and value pairs."]
+module UpdateMultiRegionClusterResponse =
+  struct
+    type nonrec t =
+      {
+      multiRegionCluster: MultiRegionCluster.t option
+        [@ocaml.doc "The status of updating the multi-Region cluster."]}
+    type nonrec error =
+      [
+        `InvalidMultiRegionClusterStateFault of
+          InvalidMultiRegionClusterStateFault.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MultiRegionClusterNotFoundFault of MultiRegionClusterNotFoundFault.t 
+      | `MultiRegionParameterGroupNotFoundFault of
+          MultiRegionParameterGroupNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?multiRegionCluster = fun () -> { multiRegionCluster }
+    let error_of_json name json =
+      match name with
+      | "InvalidMultiRegionClusterStateFault" ->
+          `InvalidMultiRegionClusterStateFault
+            (InvalidMultiRegionClusterStateFault.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_json json)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidMultiRegionClusterStateFault" ->
+          `InvalidMultiRegionClusterStateFault
+            (InvalidMultiRegionClusterStateFault.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_xml xml)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidMultiRegionClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidMultiRegionClusterStateFault"));
+            ("details", (InvalidMultiRegionClusterStateFault.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MultiRegionClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionClusterNotFoundFault"));
+            ("details", (MultiRegionClusterNotFoundFault.to_json e))]
+      | `MultiRegionParameterGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionParameterGroupNotFoundFault"));
+            ("details", (MultiRegionParameterGroupNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MultiRegionCluster",
+           (Option.map x.multiRegionCluster ~f:MultiRegionCluster.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multiRegionCluster =
+        (Option.map ~f:MultiRegionCluster.of_xml)
+          (Xml.child xml_arg0 "MultiRegionCluster") in
+      make ?multiRegionCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multiRegionCluster =
+        field_map json__ "MultiRegionCluster" MultiRegionCluster.of_json in
+      make ?multiRegionCluster ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of an existing multi-Region cluster."]
+module UpdateMultiRegionClusterRequest =
+  struct
+    type nonrec t =
+      {
+      multiRegionClusterName: String_.t
+        [@ocaml.doc "The name of the multi-Region cluster to be updated."];
+      nodeType: String_.t option
+        [@ocaml.doc
+          "The new node type to be used for the multi-Region cluster."];
+      description: String_.t option
+        [@ocaml.doc "A new description for the multi-Region cluster."];
+      engineVersion: String_.t option
+        [@ocaml.doc
+          "The new engine version to be used for the multi-Region cluster."];
+      shardConfiguration: ShardConfigurationRequest.t option ;
+      multiRegionParameterGroupName: String_.t option
+        [@ocaml.doc
+          "The new multi-Region parameter group to be associated with the cluster."];
+      updateStrategy: UpdateStrategy.t option
+        [@ocaml.doc
+          "The strategy to use for the update operation. Supported values are \"coordinated\" or \"uncoordinated\"."]}
+    let context_ = "UpdateMultiRegionClusterRequest"
+    let make ?nodeType =
+      fun ?description ->
+        fun ?engineVersion ->
+          fun ?shardConfiguration ->
+            fun ?multiRegionParameterGroupName ->
+              fun ?updateStrategy ->
+                fun ~multiRegionClusterName ->
+                  fun () ->
+                    {
+                      nodeType;
+                      description;
+                      engineVersion;
+                      shardConfiguration;
+                      multiRegionParameterGroupName;
+                      updateStrategy;
+                      multiRegionClusterName
+                    }
+    let to_value x =
+      structure_to_value
+        [("MultiRegionClusterName",
+           (Some (String_.to_value x.multiRegionClusterName)));
+        ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
+        ("ShardConfiguration",
+          (Option.map x.shardConfiguration
+             ~f:ShardConfigurationRequest.to_value));
+        ("MultiRegionParameterGroupName",
+          (Option.map x.multiRegionParameterGroupName ~f:String_.to_value));
+        ("UpdateStrategy",
+          (Option.map x.updateStrategy ~f:UpdateStrategy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateStrategy =
+        (Option.map ~f:UpdateStrategy.of_xml)
+          (Xml.child xml_arg0 "UpdateStrategy") in
+      let multiRegionParameterGroupName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionParameterGroupName") in
+      let shardConfiguration =
+        (Option.map ~f:ShardConfigurationRequest.of_xml)
+          (Xml.child xml_arg0 "ShardConfiguration") in
+      let engineVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let nodeType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
+      let multiRegionClusterName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MultiRegionClusterName") in
+      make ?updateStrategy ?multiRegionParameterGroupName ?shardConfiguration
+        ?engineVersion ?description ?nodeType ~multiRegionClusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateStrategy =
+        field_map json__ "UpdateStrategy" UpdateStrategy.of_json in
+      let multiRegionParameterGroupName =
+        field_map json__ "MultiRegionParameterGroupName" String_.of_json in
+      let shardConfiguration =
+        field_map json__ "ShardConfiguration"
+          ShardConfigurationRequest.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let multiRegionClusterName =
+        field_map_exn json__ "MultiRegionClusterName" String_.of_json in
+      make ?updateStrategy ?multiRegionParameterGroupName ?shardConfiguration
+        ?engineVersion ?description ?nodeType ~multiRegionClusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of an existing multi-Region cluster."]
 module UpdateClusterResponse =
   struct
     type nonrec t =
       {
-      cluster: Cluster.t option [@ocaml.doc "The updated cluster"]}
+      cluster: Cluster.t option [@ocaml.doc "The updated cluster."]}
     type nonrec error =
       [ `ACLNotFoundFault of ACLNotFoundFault.t 
       | `ClusterNotFoundFault of ClusterNotFoundFault.t 
@@ -4114,8 +5541,8 @@ module UpdateClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4124,20 +5551,22 @@ module UpdateClusterRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t [@ocaml.doc "The name of the cluster to update"];
+      clusterName: String_.t
+        [@ocaml.doc "The name of the cluster to update."];
       description: String_.t option
-        [@ocaml.doc "The description of the cluster to update"];
+        [@ocaml.doc "The description of the cluster to update."];
       securityGroupIds: SecurityGroupIdsList.t option
-        [@ocaml.doc "The SecurityGroupIds to update"];
+        [@ocaml.doc "The SecurityGroupIds to update."];
       maintenanceWindow: String_.t option
-        [@ocaml.doc "The maintenance window to update"];
+        [@ocaml.doc
+          "Specifies the weekly time range during which maintenance on the cluster is performed. It is specified as a range in the format ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period. Valid values for ddd are: sun mon tue wed thu fri sat Example: sun:23:00-mon:01:30"];
       snsTopicArn: String_.t option
-        [@ocaml.doc "The SNS topic ARN to update"];
+        [@ocaml.doc "The SNS topic ARN to update."];
       snsTopicStatus: String_.t option
         [@ocaml.doc
           "The status of the Amazon SNS notification topic. Notifications are sent only if the status is active."];
       parameterGroupName: String_.t option
-        [@ocaml.doc "The name of the parameter group to update"];
+        [@ocaml.doc "The name of the parameter group to update."];
       snapshotWindow: String_.t option
         [@ocaml.doc
           "The daily time range (in UTC) during which MemoryDB begins taking a daily snapshot of your cluster."];
@@ -4147,16 +5576,21 @@ module UpdateClusterRequest =
       nodeType: String_.t option
         [@ocaml.doc
           "A valid node type that you want to scale this cluster up or down to."];
+      engine: String_.t option
+        [@ocaml.doc "The name of the engine to be used for the cluster."];
       engineVersion: String_.t option
         [@ocaml.doc
           "The upgraded version of the engine to be run on the nodes. You can upgrade to a newer engine version, but you cannot downgrade to an earlier engine version. If you want to use an earlier engine version, you must delete the existing cluster and create it anew with the earlier engine version."];
       replicaConfiguration: ReplicaConfigurationRequest.t option
-        [@ocaml.doc "The number of replicas that will reside in each shard"];
+        [@ocaml.doc "The number of replicas that will reside in each shard."];
       shardConfiguration: ShardConfigurationRequest.t option
-        [@ocaml.doc "The number of shards in the cluster"];
+        [@ocaml.doc "The number of shards in the cluster."];
       aCLName: ACLName.t option
         [@ocaml.doc
-          "The Access Control List that is associated with the cluster"]}
+          "The Access Control List that is associated with the cluster."];
+      ipDiscovery: IpDiscovery.t option
+        [@ocaml.doc
+          "The mechanism for discovering IP addresses for the cluster discovery protocol. Valid values are 'ipv4' or 'ipv6'. When set to 'ipv4', cluster discovery functions such as cluster slots, cluster shards, and cluster nodes will return IPv4 addresses for cluster nodes. When set to 'ipv6', the cluster discovery functions return IPv6 addresses for cluster nodes. The value must be compatible with the NetworkType parameter. If not specified, the default is 'ipv4'."]}
     let context_ = "UpdateClusterRequest"
     let make ?description =
       fun ?securityGroupIds ->
@@ -4167,28 +5601,32 @@ module UpdateClusterRequest =
                 fun ?snapshotWindow ->
                   fun ?snapshotRetentionLimit ->
                     fun ?nodeType ->
-                      fun ?engineVersion ->
-                        fun ?replicaConfiguration ->
-                          fun ?shardConfiguration ->
-                            fun ?aCLName ->
-                              fun ~clusterName ->
-                                fun () ->
-                                  {
-                                    description;
-                                    securityGroupIds;
-                                    maintenanceWindow;
-                                    snsTopicArn;
-                                    snsTopicStatus;
-                                    parameterGroupName;
-                                    snapshotWindow;
-                                    snapshotRetentionLimit;
-                                    nodeType;
-                                    engineVersion;
-                                    replicaConfiguration;
-                                    shardConfiguration;
-                                    aCLName;
-                                    clusterName
-                                  }
+                      fun ?engine ->
+                        fun ?engineVersion ->
+                          fun ?replicaConfiguration ->
+                            fun ?shardConfiguration ->
+                              fun ?aCLName ->
+                                fun ?ipDiscovery ->
+                                  fun ~clusterName ->
+                                    fun () ->
+                                      {
+                                        description;
+                                        securityGroupIds;
+                                        maintenanceWindow;
+                                        snsTopicArn;
+                                        snsTopicStatus;
+                                        parameterGroupName;
+                                        snapshotWindow;
+                                        snapshotRetentionLimit;
+                                        nodeType;
+                                        engine;
+                                        engineVersion;
+                                        replicaConfiguration;
+                                        shardConfiguration;
+                                        aCLName;
+                                        ipDiscovery;
+                                        clusterName
+                                      }
     let to_value x =
       structure_to_value
         [("ClusterName", (Some (String_.to_value x.clusterName)));
@@ -4205,6 +5643,7 @@ module UpdateClusterRequest =
         ("SnapshotRetentionLimit",
           (Option.map x.snapshotRetentionLimit ~f:IntegerOptional.to_value));
         ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
         ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
         ("ReplicaConfiguration",
           (Option.map x.replicaConfiguration
@@ -4212,9 +5651,12 @@ module UpdateClusterRequest =
         ("ShardConfiguration",
           (Option.map x.shardConfiguration
              ~f:ShardConfigurationRequest.to_value));
-        ("ACLName", (Option.map x.aCLName ~f:ACLName.to_value))]
+        ("ACLName", (Option.map x.aCLName ~f:ACLName.to_value));
+        ("IpDiscovery", (Option.map x.ipDiscovery ~f:IpDiscovery.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipDiscovery =
+        (Option.map ~f:IpDiscovery.of_xml) (Xml.child xml_arg0 "IpDiscovery") in
       let aCLName =
         (Option.map ~f:ACLName.of_xml) (Xml.child xml_arg0 "ACLName") in
       let shardConfiguration =
@@ -4225,6 +5667,8 @@ module UpdateClusterRequest =
           (Xml.child xml_arg0 "ReplicaConfiguration") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
       let nodeType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
       let snapshotRetentionLimit =
@@ -4250,37 +5694,40 @@ module UpdateClusterRequest =
       let clusterName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
-      make ?aCLName ?shardConfiguration ?replicaConfiguration ?engineVersion
-        ?nodeType ?snapshotRetentionLimit ?snapshotWindow ?parameterGroupName
-        ?snsTopicStatus ?snsTopicArn ?maintenanceWindow ?securityGroupIds
-        ?description ~clusterName ()
+      make ?ipDiscovery ?aCLName ?shardConfiguration ?replicaConfiguration
+        ?engineVersion ?engine ?nodeType ?snapshotRetentionLimit
+        ?snapshotWindow ?parameterGroupName ?snsTopicStatus ?snsTopicArn
+        ?maintenanceWindow ?securityGroupIds ?description ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aCLName = field_map json "ACLName" ACLName.of_json in
+    let of_json json__ =
+      let ipDiscovery = field_map json__ "IpDiscovery" IpDiscovery.of_json in
+      let aCLName = field_map json__ "ACLName" ACLName.of_json in
       let shardConfiguration =
-        field_map json "ShardConfiguration" ShardConfigurationRequest.of_json in
+        field_map json__ "ShardConfiguration"
+          ShardConfigurationRequest.of_json in
       let replicaConfiguration =
-        field_map json "ReplicaConfiguration"
+        field_map json__ "ReplicaConfiguration"
           ReplicaConfigurationRequest.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
-      let snsTopicStatus = field_map json "SnsTopicStatus" String_.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
+      let snsTopicStatus = field_map json__ "SnsTopicStatus" String_.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" String_.of_json in
       let maintenanceWindow =
-        field_map json "MaintenanceWindow" String_.of_json in
+        field_map json__ "MaintenanceWindow" String_.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIdsList.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
-      make ?aCLName ?shardConfiguration ?replicaConfiguration ?engineVersion
-        ?nodeType ?snapshotRetentionLimit ?snapshotWindow ?parameterGroupName
-        ?snsTopicStatus ?snsTopicArn ?maintenanceWindow ?securityGroupIds
-        ?description ~clusterName ()
+        field_map json__ "SecurityGroupIds" SecurityGroupIdsList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
+      make ?ipDiscovery ?aCLName ?shardConfiguration ?replicaConfiguration
+        ?engineVersion ?engine ?nodeType ?snapshotRetentionLimit
+        ?snapshotWindow ?parameterGroupName ?snsTopicStatus ?snsTopicArn
+        ?maintenanceWindow ?securityGroupIds ?description ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the settings for a cluster. You can use this operation to change one or more cluster configuration settings by specifying the settings and the new values."]
@@ -4288,7 +5735,7 @@ module UpdateACLResponse =
   struct
     type nonrec t =
       {
-      aCL: ACL.t option [@ocaml.doc "The updated Access Control List"]}
+      aCL: ACL.t option [@ocaml.doc "The updated Access Control List."]}
     type nonrec error =
       [ `ACLNotFoundFault of ACLNotFoundFault.t 
       | `DefaultUserRequired of DefaultUserRequired.t 
@@ -4382,8 +5829,8 @@ module UpdateACLResponse =
       let aCL = (Option.map ~f:ACL.of_xml) (Xml.child xml_arg0 "ACL") in
       make ?aCL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aCL = field_map json "ACL" ACL.of_json in make ?aCL ()
+    let of_json json__ =
+      let aCL = field_map json__ "ACL" ACL.of_json in make ?aCL ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Changes the list of users that belong to the Access Control List."]
@@ -4391,12 +5838,12 @@ module UpdateACLRequest =
   struct
     type nonrec t =
       {
-      aCLName: String_.t [@ocaml.doc "The name of the Access Control List"];
+      aCLName: String_.t [@ocaml.doc "The name of the Access Control List."];
       userNamesToAdd: UserNameListInput.t option
-        [@ocaml.doc "The list of users to add to the Access Control List"];
+        [@ocaml.doc "The list of users to add to the Access Control List."];
       userNamesToRemove: UserNameListInput.t option
         [@ocaml.doc
-          "The list of users to remove from the Access Control List"]}
+          "The list of users to remove from the Access Control List."]}
     let context_ = "UpdateACLRequest"
     let make ?userNamesToAdd =
       fun ?userNamesToRemove ->
@@ -4421,12 +5868,12 @@ module UpdateACLRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ACLName") in
       make ?userNamesToRemove ?userNamesToAdd ~aCLName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userNamesToRemove =
-        field_map json "UserNamesToRemove" UserNameListInput.of_json in
+        field_map json__ "UserNamesToRemove" UserNameListInput.of_json in
       let userNamesToAdd =
-        field_map json "UserNamesToAdd" UserNameListInput.of_json in
-      let aCLName = field_map_exn json "ACLName" String_.of_json in
+        field_map json__ "UserNamesToAdd" UserNameListInput.of_json in
+      let aCLName = field_map_exn json__ "ACLName" String_.of_json in
       make ?userNamesToRemove ?userNamesToAdd ~aCLName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4435,12 +5882,16 @@ module UntagResourceResponse =
   struct
     type nonrec t =
       {
-      tagList: TagList.t option [@ocaml.doc "The list of tags removed"]}
+      tagList: TagList.t option [@ocaml.doc "The list of tags removed."]}
     type nonrec error =
       [ `ACLNotFoundFault of ACLNotFoundFault.t 
       | `ClusterNotFoundFault of ClusterNotFoundFault.t 
       | `InvalidARNFault of InvalidARNFault.t 
       | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MultiRegionClusterNotFoundFault of MultiRegionClusterNotFoundFault.t 
+      | `MultiRegionParameterGroupNotFoundFault of
+          MultiRegionParameterGroupNotFoundFault.t 
       | `ParameterGroupNotFoundFault of ParameterGroupNotFoundFault.t 
       | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
       | `SnapshotNotFoundFault of SnapshotNotFoundFault.t 
@@ -4458,6 +5909,15 @@ module UntagResourceResponse =
       | "InvalidARNFault" -> `InvalidARNFault (InvalidARNFault.of_json json)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_json json)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_json json)
       | "ParameterGroupNotFoundFault" ->
           `ParameterGroupNotFoundFault
             (ParameterGroupNotFoundFault.of_json json)
@@ -4483,6 +5943,15 @@ module UntagResourceResponse =
       | "InvalidARNFault" -> `InvalidARNFault (InvalidARNFault.of_xml xml)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_xml xml)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_xml xml)
       | "ParameterGroupNotFoundFault" ->
           `ParameterGroupNotFoundFault
             (ParameterGroupNotFoundFault.of_xml xml)
@@ -4516,6 +5985,18 @@ module UntagResourceResponse =
           `Assoc
             [("error", (`String "InvalidClusterStateFault"));
             ("details", (InvalidClusterStateFault.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MultiRegionClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionClusterNotFoundFault"));
+            ("details", (MultiRegionClusterNotFoundFault.to_json e))]
+      | `MultiRegionParameterGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionParameterGroupNotFoundFault"));
+            ("details", (MultiRegionParameterGroupNotFoundFault.to_json e))]
       | `ParameterGroupNotFoundFault e ->
           `Assoc
             [("error", (`String "ParameterGroupNotFoundFault"));
@@ -4554,20 +6035,21 @@ module UntagResourceResponse =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       make ?tagList ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Use this operation to remove tags on a resource"]
+  end[@@ocaml.doc
+       "Use this operation to remove tags on a resource. A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track all your MemoryDB resources. For more information, see Tagging your MemoryDB resources. When you remove tags from multi region clusters, you might not immediately see the latest effective tags in the ListTags API response due to it being eventually consistent specifically for multi region clusters. For more information, see Tagging your MemoryDB resources. You can specify cost-allocation tags for your MemoryDB resources, Amazon generates a cost allocation report as a comma-separated value (CSV) file with your usage and costs aggregated by your tags. You can apply tags that represent business categories (such as cost centers, application names, or owners) to organize your costs across multiple services. For more information, see Using Cost Allocation Tags."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource to which the tags are to be removed"];
+          "The Amazon Resource Name (ARN) of the resource to which the tags are to be removed."];
       tagKeys: KeyList.t
-        [@ocaml.doc "The list of keys of the tags that are to be removed"]}
+        [@ocaml.doc "The list of keys of the tags that are to be removed."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -4584,12 +6066,13 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" KeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" KeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Use this operation to remove tags on a resource"]
+  end[@@ocaml.doc
+       "Use this operation to remove tags on a resource. A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track all your MemoryDB resources. For more information, see Tagging your MemoryDB resources. When you remove tags from multi region clusters, you might not immediately see the latest effective tags in the ListTags API response due to it being eventually consistent specifically for multi region clusters. For more information, see Tagging your MemoryDB resources. You can specify cost-allocation tags for your MemoryDB resources, Amazon generates a cost allocation report as a comma-separated value (CSV) file with your usage and costs aggregated by your tags. You can apply tags that represent business categories (such as cost centers, application names, or owners) to organize your costs across multiple services. For more information, see Using Cost Allocation Tags."]
 module TagResourceResponse =
   struct
     type nonrec t =
@@ -4601,6 +6084,10 @@ module TagResourceResponse =
       | `ClusterNotFoundFault of ClusterNotFoundFault.t 
       | `InvalidARNFault of InvalidARNFault.t 
       | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MultiRegionClusterNotFoundFault of MultiRegionClusterNotFoundFault.t 
+      | `MultiRegionParameterGroupNotFoundFault of
+          MultiRegionParameterGroupNotFoundFault.t 
       | `ParameterGroupNotFoundFault of ParameterGroupNotFoundFault.t 
       | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
       | `SnapshotNotFoundFault of SnapshotNotFoundFault.t 
@@ -4618,6 +6105,15 @@ module TagResourceResponse =
       | "InvalidARNFault" -> `InvalidARNFault (InvalidARNFault.of_json json)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_json json)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_json json)
       | "ParameterGroupNotFoundFault" ->
           `ParameterGroupNotFoundFault
             (ParameterGroupNotFoundFault.of_json json)
@@ -4644,6 +6140,15 @@ module TagResourceResponse =
       | "InvalidARNFault" -> `InvalidARNFault (InvalidARNFault.of_xml xml)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_xml xml)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_xml xml)
       | "ParameterGroupNotFoundFault" ->
           `ParameterGroupNotFoundFault
             (ParameterGroupNotFoundFault.of_xml xml)
@@ -4679,6 +6184,18 @@ module TagResourceResponse =
           `Assoc
             [("error", (`String "InvalidClusterStateFault"));
             ("details", (InvalidClusterStateFault.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MultiRegionClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionClusterNotFoundFault"));
+            ("details", (MultiRegionClusterNotFoundFault.to_json e))]
+      | `MultiRegionParameterGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionParameterGroupNotFoundFault"));
+            ("details", (MultiRegionParameterGroupNotFoundFault.to_json e))]
       | `ParameterGroupNotFoundFault e ->
           `Assoc
             [("error", (`String "ParameterGroupNotFoundFault"));
@@ -4717,19 +6234,19 @@ module TagResourceResponse =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       make ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track all your MemoryDB resources. When you add or remove tags on clusters, those actions will be replicated to all nodes in the cluster. For more information, see Resource-level permissions. For example, you can use cost-allocation tags to your MemoryDB resources, Amazon generates a cost allocation report as a comma-separated value (CSV) file with your usage and costs aggregated by your tags. You can apply tags that represent business categories (such as cost centers, application names, or owners) to organize your costs across multiple services. For more information, see Using Cost Allocation Tags."]
+       "Use this operation to add tags to a resource. A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track all your MemoryDB resources. For more information, see Tagging your MemoryDB resources. When you add tags to multi region clusters, you might not immediately see the latest effective tags in the ListTags API response due to it being eventually consistent specifically for multi region clusters. For more information, see Tagging your MemoryDB resources. You can specify cost-allocation tags for your MemoryDB resources, Amazon generates a cost allocation report as a comma-separated value (CSV) file with your usage and costs aggregated by your tags. You can apply tags that represent business categories (such as cost centers, application names, or owners) to organize your costs across multiple services. For more information, see Using Cost Allocation Tags."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource to which the tags are to be added"];
+          "The Amazon Resource Name (ARN) of the resource to which the tags are to be added."];
       tags: TagList.t
         [@ocaml.doc
           "A list of tags to be added to this resource. A tag is a key-value pair. A tag key must be accompanied by a tag value, although null is accepted."]}
@@ -4748,13 +6265,13 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track all your MemoryDB resources. When you add or remove tags on clusters, those actions will be replicated to all nodes in the cluster. For more information, see Resource-level permissions. For example, you can use cost-allocation tags to your MemoryDB resources, Amazon generates a cost allocation report as a comma-separated value (CSV) file with your usage and costs aggregated by your tags. You can apply tags that represent business categories (such as cost centers, application names, or owners) to organize your costs across multiple services. For more information, see Using Cost Allocation Tags."]
+       "Use this operation to add tags to a resource. A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track all your MemoryDB resources. For more information, see Tagging your MemoryDB resources. When you add tags to multi region clusters, you might not immediately see the latest effective tags in the ListTags API response due to it being eventually consistent specifically for multi region clusters. For more information, see Tagging your MemoryDB resources. You can specify cost-allocation tags for your MemoryDB resources, Amazon generates a cost allocation report as a comma-separated value (CSV) file with your usage and costs aggregated by your tags. You can apply tags that represent business categories (such as cost centers, application names, or owners) to organize your costs across multiple services. For more information, see Using Cost Allocation Tags."]
 module ResetParameterGroupResponse =
   struct
     type nonrec t =
@@ -4848,9 +6365,9 @@ module ResetParameterGroupResponse =
           (Xml.child xml_arg0 "ParameterGroup") in
       make ?parameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroup =
-        field_map json "ParameterGroup" ParameterGroup.of_json in
+        field_map json__ "ParameterGroup" ParameterGroup.of_json in
       make ?parameterGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4891,16 +6408,190 @@ module ResetParameterGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ?parameterNames ?allParameters ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterNames =
-        field_map json "ParameterNames" ParameterNameList.of_json in
-      let allParameters = field_map json "AllParameters" Boolean.of_json in
+        field_map json__ "ParameterNames" ParameterNameList.of_json in
+      let allParameters = field_map json__ "AllParameters" Boolean.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ?parameterNames ?allParameters ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the parameters of a parameter group to the engine or system default value. You can reset specific parameters by submitting a list of parameter names. To reset the entire parameter group, specify the AllParameters and ParameterGroupName parameters."]
+module PurchaseReservedNodesOfferingResponse =
+  struct
+    type nonrec t =
+      {
+      reservedNode: ReservedNode.t option
+        [@ocaml.doc
+          "Represents the output of a PurchaseReservedNodesOffering operation."]}
+    type nonrec error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ReservedNodeAlreadyExistsFault of ReservedNodeAlreadyExistsFault.t 
+      | `ReservedNodeQuotaExceededFault of ReservedNodeQuotaExceededFault.t 
+      | `ReservedNodesOfferingNotFoundFault of
+          ReservedNodesOfferingNotFoundFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `TagQuotaPerResourceExceeded of TagQuotaPerResourceExceeded.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reservedNode = fun () -> { reservedNode }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ReservedNodeAlreadyExistsFault" ->
+          `ReservedNodeAlreadyExistsFault
+            (ReservedNodeAlreadyExistsFault.of_json json)
+      | "ReservedNodeQuotaExceededFault" ->
+          `ReservedNodeQuotaExceededFault
+            (ReservedNodeQuotaExceededFault.of_json json)
+      | "ReservedNodesOfferingNotFoundFault" ->
+          `ReservedNodesOfferingNotFoundFault
+            (ReservedNodesOfferingNotFoundFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ReservedNodeAlreadyExistsFault" ->
+          `ReservedNodeAlreadyExistsFault
+            (ReservedNodeAlreadyExistsFault.of_xml xml)
+      | "ReservedNodeQuotaExceededFault" ->
+          `ReservedNodeQuotaExceededFault
+            (ReservedNodeQuotaExceededFault.of_xml xml)
+      | "ReservedNodesOfferingNotFoundFault" ->
+          `ReservedNodesOfferingNotFoundFault
+            (ReservedNodesOfferingNotFoundFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ReservedNodeAlreadyExistsFault e ->
+          `Assoc
+            [("error", (`String "ReservedNodeAlreadyExistsFault"));
+            ("details", (ReservedNodeAlreadyExistsFault.to_json e))]
+      | `ReservedNodeQuotaExceededFault e ->
+          `Assoc
+            [("error", (`String "ReservedNodeQuotaExceededFault"));
+            ("details", (ReservedNodeQuotaExceededFault.to_json e))]
+      | `ReservedNodesOfferingNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ReservedNodesOfferingNotFoundFault"));
+            ("details", (ReservedNodesOfferingNotFoundFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `TagQuotaPerResourceExceeded e ->
+          `Assoc
+            [("error", (`String "TagQuotaPerResourceExceeded"));
+            ("details", (TagQuotaPerResourceExceeded.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ReservedNode",
+           (Option.map x.reservedNode ~f:ReservedNode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reservedNode =
+        (Option.map ~f:ReservedNode.of_xml)
+          (Xml.child xml_arg0 "ReservedNode") in
+      make ?reservedNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reservedNode = field_map json__ "ReservedNode" ReservedNode.of_json in
+      make ?reservedNode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to purchase a reserved node offering. Reserved nodes are not eligible for cancellation and are non-refundable."]
+module PurchaseReservedNodesOfferingRequest =
+  struct
+    type nonrec t =
+      {
+      reservedNodesOfferingId: String_.t
+        [@ocaml.doc "The ID of the reserved node offering to purchase."];
+      reservationId: String_.t option
+        [@ocaml.doc
+          "A customer-specified identifier to track this reservation."];
+      nodeCount: IntegerOptional.t option
+        [@ocaml.doc "The number of node instances to reserve."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of tags to be added to this resource. A tag is a key-value pair. A tag key must be accompanied by a tag value, although null is accepted."]}
+    let context_ = "PurchaseReservedNodesOfferingRequest"
+    let make ?reservationId =
+      fun ?nodeCount ->
+        fun ?tags ->
+          fun ~reservedNodesOfferingId ->
+            fun () ->
+              { reservationId; nodeCount; tags; reservedNodesOfferingId }
+    let to_value x =
+      structure_to_value
+        [("ReservedNodesOfferingId",
+           (Some (String_.to_value x.reservedNodesOfferingId)));
+        ("ReservationId", (Option.map x.reservationId ~f:String_.to_value));
+        ("NodeCount", (Option.map x.nodeCount ~f:IntegerOptional.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let nodeCount =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "NodeCount") in
+      let reservationId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ReservationId") in
+      let reservedNodesOfferingId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReservedNodesOfferingId") in
+      make ?tags ?nodeCount ?reservationId ~reservedNodesOfferingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let nodeCount = field_map json__ "NodeCount" IntegerOptional.of_json in
+      let reservationId = field_map json__ "ReservationId" String_.of_json in
+      let reservedNodesOfferingId =
+        field_map_exn json__ "ReservedNodesOfferingId" String_.of_json in
+      make ?tags ?nodeCount ?reservationId ~reservedNodesOfferingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to purchase a reserved node offering. Reserved nodes are not eligible for cancellation and are non-refundable."]
 module ListTagsResponse =
   struct
     type nonrec t =
@@ -4912,6 +6603,9 @@ module ListTagsResponse =
       | `ClusterNotFoundFault of ClusterNotFoundFault.t 
       | `InvalidARNFault of InvalidARNFault.t 
       | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `MultiRegionClusterNotFoundFault of MultiRegionClusterNotFoundFault.t 
+      | `MultiRegionParameterGroupNotFoundFault of
+          MultiRegionParameterGroupNotFoundFault.t 
       | `ParameterGroupNotFoundFault of ParameterGroupNotFoundFault.t 
       | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
       | `SnapshotNotFoundFault of SnapshotNotFoundFault.t 
@@ -4928,6 +6622,12 @@ module ListTagsResponse =
       | "InvalidARNFault" -> `InvalidARNFault (InvalidARNFault.of_json json)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_json json)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_json json)
       | "ParameterGroupNotFoundFault" ->
           `ParameterGroupNotFoundFault
             (ParameterGroupNotFoundFault.of_json json)
@@ -4951,6 +6651,12 @@ module ListTagsResponse =
       | "InvalidARNFault" -> `InvalidARNFault (InvalidARNFault.of_xml xml)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_xml xml)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_xml xml)
       | "ParameterGroupNotFoundFault" ->
           `ParameterGroupNotFoundFault
             (ParameterGroupNotFoundFault.of_xml xml)
@@ -4983,6 +6689,14 @@ module ListTagsResponse =
           `Assoc
             [("error", (`String "InvalidClusterStateFault"));
             ("details", (InvalidClusterStateFault.to_json e))]
+      | `MultiRegionClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionClusterNotFoundFault"));
+            ("details", (MultiRegionClusterNotFoundFault.to_json e))]
+      | `MultiRegionParameterGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionParameterGroupNotFoundFault"));
+            ("details", (MultiRegionParameterGroupNotFoundFault.to_json e))]
       | `ParameterGroupNotFoundFault e ->
           `Assoc
             [("error", (`String "ParameterGroupNotFoundFault"));
@@ -5017,19 +6731,19 @@ module ListTagsResponse =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       make ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all tags currently on a named resource. A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track your MemoryDB resources. For more information, see Tagging your MemoryDB resources"]
+       "Lists all tags currently on a named resource. A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track your MemoryDB resources. For more information, see Tagging your MemoryDB resources. When you add or remove tags from multi region clusters, you might not immediately see the latest effective tags in the ListTags API response due to it being eventually consistent specifically for multi region clusters. For more information, see Tagging your MemoryDB resources."]
 module ListTagsRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource for which you want the list of tags"]}
+          "The Amazon Resource Name (ARN) of the resource for which you want the list of tags."]}
     let context_ = "ListTagsRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -5042,12 +6756,12 @@ module ListTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all tags currently on a named resource. A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track your MemoryDB resources. For more information, see Tagging your MemoryDB resources"]
+       "Lists all tags currently on a named resource. A tag is a key-value pair where the key and value are case-sensitive. You can use tags to categorize and track your MemoryDB resources. For more information, see Tagging your MemoryDB resources. When you add or remove tags from multi region clusters, you might not immediately see the latest effective tags in the ListTags API response due to it being eventually consistent specifically for multi region clusters. For more information, see Tagging your MemoryDB resources."]
 module ListAllowedNodeTypeUpdatesResponse =
   struct
     type nonrec t =
@@ -5138,11 +6852,11 @@ module ListAllowedNodeTypeUpdatesResponse =
           (Xml.child xml_arg0 "ScaleUpNodeTypes") in
       make ?scaleDownNodeTypes ?scaleUpNodeTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scaleDownNodeTypes =
-        field_map json "ScaleDownNodeTypes" NodeTypeList.of_json in
+        field_map json__ "ScaleDownNodeTypes" NodeTypeList.of_json in
       let scaleUpNodeTypes =
-        field_map json "ScaleUpNodeTypes" NodeTypeList.of_json in
+        field_map json__ "ScaleUpNodeTypes" NodeTypeList.of_json in
       make ?scaleDownNodeTypes ?scaleUpNodeTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5166,17 +6880,130 @@ module ListAllowedNodeTypeUpdatesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
       make ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
+    let of_json json__ =
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
       make ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all available node types that you can scale to from your cluster's current node type. When you use the UpdateCluster operation to scale your cluster, the value of the NodeType parameter must be one of the node types returned by this operation."]
+module ListAllowedMultiRegionClusterUpdatesResponse =
+  struct
+    type nonrec t =
+      {
+      scaleUpNodeTypes: NodeTypeList.t option
+        [@ocaml.doc "The node types that the cluster can be scaled up to."];
+      scaleDownNodeTypes: NodeTypeList.t option
+        [@ocaml.doc "The node types that the cluster can be scaled down to."]}
+    type nonrec error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MultiRegionClusterNotFoundFault of MultiRegionClusterNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?scaleUpNodeTypes =
+      fun ?scaleDownNodeTypes ->
+        fun () -> { scaleUpNodeTypes; scaleDownNodeTypes }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MultiRegionClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionClusterNotFoundFault"));
+            ("details", (MultiRegionClusterNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ScaleUpNodeTypes",
+           (Option.map x.scaleUpNodeTypes ~f:NodeTypeList.to_value));
+        ("ScaleDownNodeTypes",
+          (Option.map x.scaleDownNodeTypes ~f:NodeTypeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scaleDownNodeTypes =
+        (Option.map ~f:NodeTypeList.of_xml)
+          (Xml.child xml_arg0 "ScaleDownNodeTypes") in
+      let scaleUpNodeTypes =
+        (Option.map ~f:NodeTypeList.of_xml)
+          (Xml.child xml_arg0 "ScaleUpNodeTypes") in
+      make ?scaleDownNodeTypes ?scaleUpNodeTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scaleDownNodeTypes =
+        field_map json__ "ScaleDownNodeTypes" NodeTypeList.of_json in
+      let scaleUpNodeTypes =
+        field_map json__ "ScaleUpNodeTypes" NodeTypeList.of_json in
+      make ?scaleDownNodeTypes ?scaleUpNodeTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the allowed updates for a multi-Region cluster."]
+module ListAllowedMultiRegionClusterUpdatesRequest =
+  struct
+    type nonrec t =
+      {
+      multiRegionClusterName: String_.t
+        [@ocaml.doc "The name of the multi-Region cluster."]}
+    let context_ = "ListAllowedMultiRegionClusterUpdatesRequest"
+    let make ~multiRegionClusterName = fun () -> { multiRegionClusterName }
+    let to_value x =
+      structure_to_value
+        [("MultiRegionClusterName",
+           (Some (String_.to_value x.multiRegionClusterName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multiRegionClusterName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MultiRegionClusterName") in
+      make ~multiRegionClusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multiRegionClusterName =
+        field_map_exn json__ "MultiRegionClusterName" String_.of_json in
+      make ~multiRegionClusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the allowed updates for a multi-Region cluster."]
 module FailoverShardResponse =
   struct
     type nonrec t =
       {
-      cluster: Cluster.t option [@ocaml.doc "The cluster being failed over"]}
+      cluster: Cluster.t option [@ocaml.doc "The cluster being failed over."]}
     type nonrec error =
       [
         `APICallRateForCustomerExceededFault of
@@ -5288,17 +7115,18 @@ module FailoverShardResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Used to failover a shard"]
+  end[@@ocaml.doc
+       "Used to failover a shard. This API is designed for testing the behavior of your application in case of MemoryDB failover. It is not designed to be used as a production-level tool for initiating a failover to overcome a problem you may have with the cluster. Moreover, in certain conditions such as large scale operational events, Amazon may block this API."]
 module FailoverShardRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t [@ocaml.doc "The cluster being failed over"];
-      shardName: String_.t [@ocaml.doc "The name of the shard"]}
+      clusterName: String_.t [@ocaml.doc "The cluster being failed over."];
+      shardName: String_.t [@ocaml.doc "The name of the shard."]}
     let context_ = "FailoverShardRequest"
     let make ~clusterName =
       fun ~shardName -> fun () -> { clusterName; shardName }
@@ -5315,12 +7143,13 @@ module FailoverShardRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
       make ~shardName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shardName = field_map_exn json "ShardName" String_.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
+    let of_json json__ =
+      let shardName = field_map_exn json__ "ShardName" String_.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
       make ~shardName ~clusterName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Used to failover a shard"]
+  end[@@ocaml.doc
+       "Used to failover a shard. This API is designed for testing the behavior of your application in case of MemoryDB failover. It is not designed to be used as a production-level tool for initiating a failover to overcome a problem you may have with the cluster. Moreover, in certain conditions such as large scale operational events, Amazon may block this API."]
 module DescribeUsersResponse =
   struct
     type nonrec t =
@@ -5382,9 +7211,9 @@ module DescribeUsersResponse =
         (Option.map ~f:UserList.of_xml) (Xml.child xml_arg0 "Users") in
       make ?nextToken ?users ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let users = field_map json "Users" UserList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let users = field_map json__ "Users" UserList.of_json in
       make ?nextToken ?users ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of users."]
@@ -5392,7 +7221,7 @@ module DescribeUsersRequest =
   struct
     type nonrec t =
       {
-      userName: UserName.t option [@ocaml.doc "The name of the user"];
+      userName: UserName.t option [@ocaml.doc "The name of the user."];
       filters: FilterList.t option
         [@ocaml.doc "Filter to determine the list of users to return."];
       maxResults: IntegerOptional.t option
@@ -5425,11 +7254,11 @@ module DescribeUsersRequest =
         (Option.map ~f:UserName.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?nextToken ?maxResults ?filters ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let userName = field_map json "UserName" UserName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let userName = field_map json__ "UserName" UserName.of_json in
       make ?nextToken ?maxResults ?filters ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of users."]
@@ -5497,10 +7326,10 @@ module DescribeSubnetGroupsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?subnetGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subnetGroups =
-        field_map json "SubnetGroups" SubnetGroupList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "SubnetGroups" SubnetGroupList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?subnetGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5538,10 +7367,11 @@ module DescribeSubnetGroupsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SubnetGroupName") in
       make ?nextToken ?maxResults ?subnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
-      let subnetGroupName = field_map json "SubnetGroupName" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let subnetGroupName =
+        field_map json__ "SubnetGroupName" String_.of_json in
       make ?nextToken ?maxResults ?subnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5632,9 +7462,9 @@ module DescribeSnapshotsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?snapshots ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshots = field_map json "Snapshots" SnapshotList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let snapshots = field_map json__ "Snapshots" SnapshotList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?snapshots ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5703,13 +7533,13 @@ module DescribeSnapshotsRequest =
       make ?showDetail ?maxResults ?nextToken ?source ?snapshotName
         ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let showDetail = field_map json "ShowDetail" BooleanOptional.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let source = field_map json "Source" String_.of_json in
-      let snapshotName = field_map json "SnapshotName" String_.of_json in
-      let clusterName = field_map json "ClusterName" String_.of_json in
+    let of_json json__ =
+      let showDetail = field_map json__ "ShowDetail" BooleanOptional.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let snapshotName = field_map json__ "SnapshotName" String_.of_json in
+      let clusterName = field_map json__ "ClusterName" String_.of_json in
       make ?showDetail ?maxResults ?nextToken ?source ?snapshotName
         ?clusterName ()
     let to_json v = composed_to_json to_value v
@@ -5782,13 +7612,13 @@ module DescribeServiceUpdatesResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?serviceUpdates ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceUpdates =
-        field_map json "ServiceUpdates" ServiceUpdateList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "ServiceUpdates" ServiceUpdateList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?serviceUpdates ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns details of the service updates"]
+  end[@@ocaml.doc "Returns details of the service updates."]
 module DescribeServiceUpdatesRequest =
   struct
     type nonrec t =
@@ -5797,9 +7627,9 @@ module DescribeServiceUpdatesRequest =
         [@ocaml.doc "The unique ID of the service update to describe."];
       clusterNames: ClusterNameList.t option
         [@ocaml.doc
-          "The list of cluster names to identify service updates to apply"];
+          "The list of cluster names to identify service updates to apply."];
       status: ServiceUpdateStatusList.t option
-        [@ocaml.doc "The status(es) of the service updates to filter on"];
+        [@ocaml.doc "The status(es) of the service updates to filter on."];
       maxResults: IntegerOptional.t option
         [@ocaml.doc
           "The maximum number of records to include in the response. If more records exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
@@ -5846,17 +7676,377 @@ module DescribeServiceUpdatesRequest =
           (Xml.child xml_arg0 "ServiceUpdateName") in
       make ?nextToken ?maxResults ?status ?clusterNames ?serviceUpdateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
-      let status = field_map json "Status" ServiceUpdateStatusList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let status = field_map json__ "Status" ServiceUpdateStatusList.of_json in
       let clusterNames =
-        field_map json "ClusterNames" ClusterNameList.of_json in
+        field_map json__ "ClusterNames" ClusterNameList.of_json in
       let serviceUpdateName =
-        field_map json "ServiceUpdateName" String_.of_json in
+        field_map json__ "ServiceUpdateName" String_.of_json in
       make ?nextToken ?maxResults ?status ?clusterNames ?serviceUpdateName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns details of the service updates"]
+  end[@@ocaml.doc "Returns details of the service updates."]
+module DescribeReservedNodesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional marker returned from a prior request. Use this marker for pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by MaxRecords."];
+      reservedNodes: ReservedNodeList.t option
+        [@ocaml.doc
+          "Returns information about reserved nodes for this account, or about a specified reserved node."]}
+    type nonrec error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ReservedNodeNotFoundFault of ReservedNodeNotFoundFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?reservedNodes -> fun () -> { nextToken; reservedNodes }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ReservedNodeNotFoundFault" ->
+          `ReservedNodeNotFoundFault (ReservedNodeNotFoundFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ReservedNodeNotFoundFault" ->
+          `ReservedNodeNotFoundFault (ReservedNodeNotFoundFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ReservedNodeNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ReservedNodeNotFoundFault"));
+            ("details", (ReservedNodeNotFoundFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("ReservedNodes",
+          (Option.map x.reservedNodes ~f:ReservedNodeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reservedNodes =
+        (Option.map ~f:ReservedNodeList.of_xml)
+          (Xml.child xml_arg0 "ReservedNodes") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?reservedNodes ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reservedNodes =
+        field_map json__ "ReservedNodes" ReservedNodeList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?reservedNodes ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about reserved nodes for this account, or about a specified reserved node."]
+module DescribeReservedNodesRequest =
+  struct
+    type nonrec t =
+      {
+      reservationId: String_.t option
+        [@ocaml.doc
+          "The reserved node identifier filter value. Use this parameter to show only the reservation that matches the specified reservation ID."];
+      reservedNodesOfferingId: String_.t option
+        [@ocaml.doc
+          "The offering identifier filter value. Use this parameter to show only purchased reservations matching the specified offering identifier."];
+      nodeType: String_.t option
+        [@ocaml.doc
+          "The node type filter value. Use this parameter to show only those reservations matching the specified node type. For more information, see Supported node types."];
+      duration: String_.t option
+        [@ocaml.doc
+          "The duration filter value, specified in years or seconds. Use this parameter to show only reservations for this duration."];
+      offeringType: String_.t option
+        [@ocaml.doc
+          "The offering type filter value. Use this parameter to show only the available offerings matching the specified offering type. Valid values: \"All Upfront\"|\"Partial Upfront\"| \"No Upfront\""];
+      maxResults: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of records to include in the response. If more records exist than the specified MaxRecords value, a marker is included in the response so that the remaining results can be retrieved."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional marker returned from a prior request. Use this marker for pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by MaxRecords."]}
+    let make ?reservationId =
+      fun ?reservedNodesOfferingId ->
+        fun ?nodeType ->
+          fun ?duration ->
+            fun ?offeringType ->
+              fun ?maxResults ->
+                fun ?nextToken ->
+                  fun () ->
+                    {
+                      reservationId;
+                      reservedNodesOfferingId;
+                      nodeType;
+                      duration;
+                      offeringType;
+                      maxResults;
+                      nextToken
+                    }
+    let to_value x =
+      structure_to_value
+        [("ReservationId", (Option.map x.reservationId ~f:String_.to_value));
+        ("ReservedNodesOfferingId",
+          (Option.map x.reservedNodesOfferingId ~f:String_.to_value));
+        ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
+        ("Duration", (Option.map x.duration ~f:String_.to_value));
+        ("OfferingType", (Option.map x.offeringType ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:IntegerOptional.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let offeringType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OfferingType") in
+      let duration =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Duration") in
+      let nodeType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
+      let reservedNodesOfferingId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ReservedNodesOfferingId") in
+      let reservationId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ReservationId") in
+      make ?nextToken ?maxResults ?offeringType ?duration ?nodeType
+        ?reservedNodesOfferingId ?reservationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
+      let duration = field_map json__ "Duration" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let reservedNodesOfferingId =
+        field_map json__ "ReservedNodesOfferingId" String_.of_json in
+      let reservationId = field_map json__ "ReservationId" String_.of_json in
+      make ?nextToken ?maxResults ?offeringType ?duration ?nodeType
+        ?reservedNodesOfferingId ?reservationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about reserved nodes for this account, or about a specified reserved node."]
+module DescribeReservedNodesOfferingsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional marker returned from a prior request. Use this marker for pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by MaxRecords."];
+      reservedNodesOfferings: ReservedNodesOfferingList.t option
+        [@ocaml.doc "Lists available reserved node offerings."]}
+    type nonrec error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ReservedNodesOfferingNotFoundFault of
+          ReservedNodesOfferingNotFoundFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?reservedNodesOfferings ->
+        fun () -> { nextToken; reservedNodesOfferings }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ReservedNodesOfferingNotFoundFault" ->
+          `ReservedNodesOfferingNotFoundFault
+            (ReservedNodesOfferingNotFoundFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ReservedNodesOfferingNotFoundFault" ->
+          `ReservedNodesOfferingNotFoundFault
+            (ReservedNodesOfferingNotFoundFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ReservedNodesOfferingNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ReservedNodesOfferingNotFoundFault"));
+            ("details", (ReservedNodesOfferingNotFoundFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("ReservedNodesOfferings",
+          (Option.map x.reservedNodesOfferings
+             ~f:ReservedNodesOfferingList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reservedNodesOfferings =
+        (Option.map ~f:ReservedNodesOfferingList.of_xml)
+          (Xml.child xml_arg0 "ReservedNodesOfferings") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?reservedNodesOfferings ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reservedNodesOfferings =
+        field_map json__ "ReservedNodesOfferings"
+          ReservedNodesOfferingList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?reservedNodesOfferings ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists available reserved node offerings."]
+module DescribeReservedNodesOfferingsRequest =
+  struct
+    type nonrec t =
+      {
+      reservedNodesOfferingId: String_.t option
+        [@ocaml.doc
+          "The offering identifier filter value. Use this parameter to show only the available offering that matches the specified reservation identifier."];
+      nodeType: String_.t option
+        [@ocaml.doc
+          "The node type for the reserved nodes. For more information, see Supported node types."];
+      duration: String_.t option
+        [@ocaml.doc
+          "Duration filter value, specified in years or seconds. Use this parameter to show only reservations for a given duration."];
+      offeringType: String_.t option
+        [@ocaml.doc
+          "The offering type filter value. Use this parameter to show only the available offerings matching the specified offering type. Valid values: \"All Upfront\"|\"Partial Upfront\"| \"No Upfront\""];
+      maxResults: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of records to include in the response. If more records exist than the specified MaxRecords value, a marker is included in the response so that the remaining results can be retrieved."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional marker returned from a prior request. Use this marker for pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by MaxRecords."]}
+    let make ?reservedNodesOfferingId =
+      fun ?nodeType ->
+        fun ?duration ->
+          fun ?offeringType ->
+            fun ?maxResults ->
+              fun ?nextToken ->
+                fun () ->
+                  {
+                    reservedNodesOfferingId;
+                    nodeType;
+                    duration;
+                    offeringType;
+                    maxResults;
+                    nextToken
+                  }
+    let to_value x =
+      structure_to_value
+        [("ReservedNodesOfferingId",
+           (Option.map x.reservedNodesOfferingId ~f:String_.to_value));
+        ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
+        ("Duration", (Option.map x.duration ~f:String_.to_value));
+        ("OfferingType", (Option.map x.offeringType ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:IntegerOptional.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let offeringType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OfferingType") in
+      let duration =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Duration") in
+      let nodeType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
+      let reservedNodesOfferingId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ReservedNodesOfferingId") in
+      make ?nextToken ?maxResults ?offeringType ?duration ?nodeType
+        ?reservedNodesOfferingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
+      let duration = field_map json__ "Duration" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let reservedNodesOfferingId =
+        field_map json__ "ReservedNodesOfferingId" String_.of_json in
+      make ?nextToken ?maxResults ?offeringType ?duration ?nodeType
+        ?reservedNodesOfferingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists available reserved node offerings."]
 module DescribeParametersResponse =
   struct
     type nonrec t =
@@ -5946,9 +8136,9 @@ module DescribeParametersResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?parameters ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParametersList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParametersList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?parameters ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5989,11 +8179,11 @@ module DescribeParametersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ?nextToken ?maxResults ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ?nextToken ?maxResults ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6088,10 +8278,10 @@ module DescribeParameterGroupsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?parameterGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroups =
-        field_map json "ParameterGroups" ParameterGroupList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "ParameterGroups" ParameterGroupList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?parameterGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6131,15 +8321,470 @@ module DescribeParameterGroupsRequest =
           (Xml.child xml_arg0 "ParameterGroupName") in
       make ?nextToken ?maxResults ?parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
       make ?nextToken ?maxResults ?parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of parameter group descriptions. If a parameter group name is specified, the list contains only the descriptions for that group."]
+module DescribeMultiRegionParametersResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional token to include in the response. If this token is provided, the response includes only results beyond the token, up to the value specified by MaxResults."];
+      multiRegionParameters: MultiRegionParametersList.t option
+        [@ocaml.doc
+          "A list of parameters specific to a particular multi-region parameter group. Each element in the list contains detailed information about one parameter."]}
+    type nonrec error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MultiRegionParameterGroupNotFoundFault of
+          MultiRegionParameterGroupNotFoundFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?multiRegionParameters ->
+        fun () -> { nextToken; multiRegionParameters }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MultiRegionParameterGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionParameterGroupNotFoundFault"));
+            ("details", (MultiRegionParameterGroupNotFoundFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MultiRegionParameters",
+          (Option.map x.multiRegionParameters
+             ~f:MultiRegionParametersList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multiRegionParameters =
+        (Option.map ~f:MultiRegionParametersList.of_xml)
+          (Xml.child xml_arg0 "MultiRegionParameters") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?multiRegionParameters ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multiRegionParameters =
+        field_map json__ "MultiRegionParameters"
+          MultiRegionParametersList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?multiRegionParameters ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the detailed parameter list for a particular multi-region parameter group."]
+module DescribeMultiRegionParametersRequest =
+  struct
+    type nonrec t =
+      {
+      multiRegionParameterGroupName: String_.t
+        [@ocaml.doc
+          "The name of the multi-region parameter group to return details for."];
+      source: String_.t option
+        [@ocaml.doc
+          "The parameter types to return. Valid values: user | system | engine-default"];
+      maxResults: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of records to include in the response. If more records exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional token returned from a prior request. Use this token for pagination of results from this action. If this parameter is specified, the response includes only results beyond the token, up to the value specified by MaxResults."]}
+    let context_ = "DescribeMultiRegionParametersRequest"
+    let make ?source =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~multiRegionParameterGroupName ->
+            fun () ->
+              { source; maxResults; nextToken; multiRegionParameterGroupName
+              }
+    let to_value x =
+      structure_to_value
+        [("MultiRegionParameterGroupName",
+           (Some (String_.to_value x.multiRegionParameterGroupName)));
+        ("Source", (Option.map x.source ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:IntegerOptional.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let source =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Source") in
+      let multiRegionParameterGroupName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "MultiRegionParameterGroupName") in
+      make ?nextToken ?maxResults ?source ~multiRegionParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let multiRegionParameterGroupName =
+        field_map_exn json__ "MultiRegionParameterGroupName" String_.of_json in
+      make ?nextToken ?maxResults ?source ~multiRegionParameterGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the detailed parameter list for a particular multi-region parameter group."]
+module DescribeMultiRegionParameterGroupsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional token to include in the response. If this token is provided, the response includes only results beyond the token, up to the value specified by MaxResults."];
+      multiRegionParameterGroups: MultiRegionParameterGroupList.t option
+        [@ocaml.doc
+          "A list of multi-region parameter groups. Each element in the list contains detailed information about one parameter group."]}
+    type nonrec error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MultiRegionParameterGroupNotFoundFault of
+          MultiRegionParameterGroupNotFoundFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?multiRegionParameterGroups ->
+        fun () -> { nextToken; multiRegionParameterGroups }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MultiRegionParameterGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionParameterGroupNotFoundFault"));
+            ("details", (MultiRegionParameterGroupNotFoundFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MultiRegionParameterGroups",
+          (Option.map x.multiRegionParameterGroups
+             ~f:MultiRegionParameterGroupList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multiRegionParameterGroups =
+        (Option.map ~f:MultiRegionParameterGroupList.of_xml)
+          (Xml.child xml_arg0 "MultiRegionParameterGroups") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?multiRegionParameterGroups ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multiRegionParameterGroups =
+        field_map json__ "MultiRegionParameterGroups"
+          MultiRegionParameterGroupList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?multiRegionParameterGroups ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of multi-region parameter groups."]
+module DescribeMultiRegionParameterGroupsRequest =
+  struct
+    type nonrec t =
+      {
+      multiRegionParameterGroupName: String_.t option
+        [@ocaml.doc
+          "The request for information on a specific multi-region parameter group."];
+      maxResults: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of records to include in the response. If more records exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional token returned from a prior request. Use this token for pagination of results from this action. If this parameter is specified, the response includes only results beyond the token, up to the value specified by MaxResults."]}
+    let make ?multiRegionParameterGroupName =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun () -> { multiRegionParameterGroupName; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MultiRegionParameterGroupName",
+           (Option.map x.multiRegionParameterGroupName ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:IntegerOptional.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let multiRegionParameterGroupName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionParameterGroupName") in
+      make ?nextToken ?maxResults ?multiRegionParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let multiRegionParameterGroupName =
+        field_map json__ "MultiRegionParameterGroupName" String_.of_json in
+      make ?nextToken ?maxResults ?multiRegionParameterGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of multi-region parameter groups."]
+module DescribeMultiRegionClustersResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc "A token to use to retrieve the next page of results."];
+      multiRegionClusters: MultiRegionClusterList.t option
+        [@ocaml.doc "A list of multi-Region clusters."]}
+    type nonrec error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MultiRegionClusterNotFoundFault of MultiRegionClusterNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?multiRegionClusters ->
+        fun () -> { nextToken; multiRegionClusters }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MultiRegionClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionClusterNotFoundFault"));
+            ("details", (MultiRegionClusterNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MultiRegionClusters",
+          (Option.map x.multiRegionClusters
+             ~f:MultiRegionClusterList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multiRegionClusters =
+        (Option.map ~f:MultiRegionClusterList.of_xml)
+          (Xml.child xml_arg0 "MultiRegionClusters") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?multiRegionClusters ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multiRegionClusters =
+        field_map json__ "MultiRegionClusters" MultiRegionClusterList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?multiRegionClusters ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns details about one or more multi-Region clusters."]
+module DescribeMultiRegionClustersRequest =
+  struct
+    type nonrec t =
+      {
+      multiRegionClusterName: String_.t option
+        [@ocaml.doc
+          "The name of a specific multi-Region cluster to describe."];
+      maxResults: IntegerOptional.t option
+        [@ocaml.doc "The maximum number of results to return."];
+      nextToken: String_.t option
+        [@ocaml.doc "A token to specify where to start paginating."];
+      showClusterDetails: BooleanOptional.t option
+        [@ocaml.doc "Details about the multi-Region cluster."]}
+    let make ?multiRegionClusterName =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?showClusterDetails ->
+            fun () ->
+              {
+                multiRegionClusterName;
+                maxResults;
+                nextToken;
+                showClusterDetails
+              }
+    let to_value x =
+      structure_to_value
+        [("MultiRegionClusterName",
+           (Option.map x.multiRegionClusterName ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:IntegerOptional.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("ShowClusterDetails",
+          (Option.map x.showClusterDetails ~f:BooleanOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let showClusterDetails =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ShowClusterDetails") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let multiRegionClusterName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionClusterName") in
+      make ?showClusterDetails ?nextToken ?maxResults ?multiRegionClusterName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let showClusterDetails =
+        field_map json__ "ShowClusterDetails" BooleanOptional.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let multiRegionClusterName =
+        field_map json__ "MultiRegionClusterName" String_.of_json in
+      make ?showClusterDetails ?nextToken ?maxResults ?multiRegionClusterName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns details about one or more multi-Region clusters."]
 module DescribeEventsResponse =
   struct
     type nonrec t =
@@ -6216,9 +8861,9 @@ module DescribeEventsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?events ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" EventList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" EventList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?events ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6294,14 +8939,14 @@ module DescribeEventsRequest =
       make ?nextToken ?maxResults ?duration ?endTime ?startTime ?sourceType
         ?sourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
-      let duration = field_map json "Duration" IntegerOptional.of_json in
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
-      let sourceName = field_map json "SourceName" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let duration = field_map json__ "Duration" IntegerOptional.of_json in
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let sourceName = field_map json__ "SourceName" String_.of_json in
       make ?nextToken ?maxResults ?duration ?endTime ?startTime ?sourceType
         ?sourceName ()
     let to_json v = composed_to_json to_value v
@@ -6386,18 +9031,23 @@ module DescribeEngineVersionsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?engineVersions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let engineVersions =
-        field_map json "EngineVersions" EngineVersionInfoList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "EngineVersions" EngineVersionInfoList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?engineVersions ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of the available Redis engine versions."]
+  end[@@ocaml.doc
+       "Returns a list of the available Redis OSS engine versions."]
 module DescribeEngineVersionsRequest =
   struct
     type nonrec t =
       {
-      engineVersion: String_.t option [@ocaml.doc "The Redis engine version"];
+      engine: String_.t option
+        [@ocaml.doc
+          "The name of the engine for which to list available versions."];
+      engineVersion: String_.t option
+        [@ocaml.doc "The Redis OSS engine version"];
       parameterGroupFamily: String_.t option
         [@ocaml.doc
           "The name of a specific parameter group family to return details for."];
@@ -6410,22 +9060,25 @@ module DescribeEngineVersionsRequest =
       defaultOnly: Boolean.t option
         [@ocaml.doc
           "If true, specifies that only the default version of the specified engine or engine and major version combination is to be returned."]}
-    let make ?engineVersion =
-      fun ?parameterGroupFamily ->
-        fun ?maxResults ->
-          fun ?nextToken ->
-            fun ?defaultOnly ->
-              fun () ->
-                {
-                  engineVersion;
-                  parameterGroupFamily;
-                  maxResults;
-                  nextToken;
-                  defaultOnly
-                }
+    let make ?engine =
+      fun ?engineVersion ->
+        fun ?parameterGroupFamily ->
+          fun ?maxResults ->
+            fun ?nextToken ->
+              fun ?defaultOnly ->
+                fun () ->
+                  {
+                    engine;
+                    engineVersion;
+                    parameterGroupFamily;
+                    maxResults;
+                    nextToken;
+                    defaultOnly
+                  }
     let to_value x =
       structure_to_value
-        [("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
+        [("Engine", (Option.map x.engine ~f:String_.to_value));
+        ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
         ("ParameterGroupFamily",
           (Option.map x.parameterGroupFamily ~f:String_.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:IntegerOptional.to_value));
@@ -6445,20 +9098,24 @@ module DescribeEngineVersionsRequest =
           (Xml.child xml_arg0 "ParameterGroupFamily") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
       make ?defaultOnly ?nextToken ?maxResults ?parameterGroupFamily
-        ?engineVersion ()
+        ?engineVersion ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let defaultOnly = field_map json "DefaultOnly" Boolean.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
+    let of_json json__ =
+      let defaultOnly = field_map json__ "DefaultOnly" Boolean.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
       let parameterGroupFamily =
-        field_map json "ParameterGroupFamily" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
+        field_map json__ "ParameterGroupFamily" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       make ?defaultOnly ?nextToken ?maxResults ?parameterGroupFamily
-        ?engineVersion ()
+        ?engineVersion ?engine ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of the available Redis engine versions."]
+  end[@@ocaml.doc
+       "Returns a list of the available Redis OSS engine versions."]
 module DescribeClustersResponse =
   struct
     type nonrec t =
@@ -6541,9 +9198,9 @@ module DescribeClustersResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?clusters ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusters = field_map json "Clusters" ClusterList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let clusters = field_map json__ "Clusters" ClusterList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?clusters ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6552,7 +9209,7 @@ module DescribeClustersRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t option [@ocaml.doc "The name of the cluster"];
+      clusterName: String_.t option [@ocaml.doc "The name of the cluster."];
       maxResults: IntegerOptional.t option
         [@ocaml.doc
           "The maximum number of records to include in the response. If more records exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
@@ -6589,12 +9246,12 @@ module DescribeClustersRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterName") in
       make ?showShardDetails ?nextToken ?maxResults ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let showShardDetails =
-        field_map json "ShowShardDetails" BooleanOptional.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
-      let clusterName = field_map json "ClusterName" String_.of_json in
+        field_map json__ "ShowShardDetails" BooleanOptional.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let clusterName = field_map json__ "ClusterName" String_.of_json in
       make ?showShardDetails ?nextToken ?maxResults ?clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6603,7 +9260,7 @@ module DescribeACLsResponse =
   struct
     type nonrec t =
       {
-      aCLs: ACLList.t option [@ocaml.doc "The list of ACLs"];
+      aCLs: ACLList.t option [@ocaml.doc "The list of ACLs."];
       nextToken: String_.t option
         [@ocaml.doc
           "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged."]}
@@ -6657,17 +9314,17 @@ module DescribeACLsResponse =
       let aCLs = (Option.map ~f:ACLList.of_xml) (Xml.child xml_arg0 "ACLs") in
       make ?nextToken ?aCLs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let aCLs = field_map json "ACLs" ACLList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let aCLs = field_map json__ "ACLs" ACLList.of_json in
       make ?nextToken ?aCLs ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of ACLs"]
+  end[@@ocaml.doc "Returns a list of ACLs."]
 module DescribeACLsRequest =
   struct
     type nonrec t =
       {
-      aCLName: String_.t option [@ocaml.doc "The name of the ACL"];
+      aCLName: String_.t option [@ocaml.doc "The name of the ACL."];
       maxResults: IntegerOptional.t option
         [@ocaml.doc
           "The maximum number of records to include in the response. If more records exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
@@ -6693,13 +9350,13 @@ module DescribeACLsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ACLName") in
       make ?nextToken ?maxResults ?aCLName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
-      let aCLName = field_map json "ACLName" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let aCLName = field_map json__ "ACLName" String_.of_json in
       make ?nextToken ?maxResults ?aCLName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of ACLs"]
+  end[@@ocaml.doc "Returns a list of ACLs."]
 module DeleteUserResponse =
   struct
     type nonrec t =
@@ -6761,8 +9418,8 @@ module DeleteUserResponse =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map json "User" User.of_json in make ?user ()
+    let of_json json__ =
+      let user = field_map json__ "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a user. The user will be removed from all ACLs and in turn removed from all clusters."]
@@ -6782,8 +9439,8 @@ module DeleteUserRequest =
         UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
+    let of_json json__ =
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
       make ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6851,8 +9508,8 @@ module DeleteSubnetGroupResponse =
         (Option.map ~f:SubnetGroup.of_xml) (Xml.child xml_arg0 "SubnetGroup") in
       make ?subnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetGroup = field_map json "SubnetGroup" SubnetGroup.of_json in
+    let of_json json__ =
+      let subnetGroup = field_map json__ "SubnetGroup" SubnetGroup.of_json in
       make ?subnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6862,7 +9519,7 @@ module DeleteSubnetGroupRequest =
     type nonrec t =
       {
       subnetGroupName: String_.t
-        [@ocaml.doc "The name of the subnet group to delete"]}
+        [@ocaml.doc "The name of the subnet group to delete."]}
     let context_ = "DeleteSubnetGroupRequest"
     let make ~subnetGroupName = fun () -> { subnetGroupName }
     let to_value x =
@@ -6875,9 +9532,9 @@ module DeleteSubnetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetGroupName") in
       make ~subnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subnetGroupName =
-        field_map_exn json "SubnetGroupName" String_.of_json in
+        field_map_exn json__ "SubnetGroupName" String_.of_json in
       make ~subnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6969,8 +9626,8 @@ module DeleteSnapshotResponse =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6980,7 +9637,7 @@ module DeleteSnapshotRequest =
     type nonrec t =
       {
       snapshotName: String_.t
-        [@ocaml.doc "The name of the snapshot to delete"]}
+        [@ocaml.doc "The name of the snapshot to delete."]}
     let context_ = "DeleteSnapshotRequest"
     let make ~snapshotName = fun () -> { snapshotName }
     let to_value x =
@@ -6993,8 +9650,8 @@ module DeleteSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotName") in
       make ~snapshotName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotName = field_map_exn json "SnapshotName" String_.of_json in
+    let of_json json__ =
+      let snapshotName = field_map_exn json__ "SnapshotName" String_.of_json in
       make ~snapshotName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7092,9 +9749,9 @@ module DeleteParameterGroupResponse =
           (Xml.child xml_arg0 "ParameterGroup") in
       make ?parameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroup =
-        field_map json "ParameterGroup" ParameterGroup.of_json in
+        field_map json__ "ParameterGroup" ParameterGroup.of_json in
       make ?parameterGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7118,19 +9775,121 @@ module DeleteParameterGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the specified parameter group. You cannot delete a parameter group if it is associated with any clusters. You cannot delete the default parameter groups in your account."]
+module DeleteMultiRegionClusterResponse =
+  struct
+    type nonrec t =
+      {
+      multiRegionCluster: MultiRegionCluster.t option
+        [@ocaml.doc "Details about the deleted multi-Region cluster."]}
+    type nonrec error =
+      [
+        `InvalidMultiRegionClusterStateFault of
+          InvalidMultiRegionClusterStateFault.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MultiRegionClusterNotFoundFault of MultiRegionClusterNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?multiRegionCluster = fun () -> { multiRegionCluster }
+    let error_of_json name json =
+      match name with
+      | "InvalidMultiRegionClusterStateFault" ->
+          `InvalidMultiRegionClusterStateFault
+            (InvalidMultiRegionClusterStateFault.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidMultiRegionClusterStateFault" ->
+          `InvalidMultiRegionClusterStateFault
+            (InvalidMultiRegionClusterStateFault.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidMultiRegionClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidMultiRegionClusterStateFault"));
+            ("details", (InvalidMultiRegionClusterStateFault.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MultiRegionClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionClusterNotFoundFault"));
+            ("details", (MultiRegionClusterNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MultiRegionCluster",
+           (Option.map x.multiRegionCluster ~f:MultiRegionCluster.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multiRegionCluster =
+        (Option.map ~f:MultiRegionCluster.of_xml)
+          (Xml.child xml_arg0 "MultiRegionCluster") in
+      make ?multiRegionCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multiRegionCluster =
+        field_map json__ "MultiRegionCluster" MultiRegionCluster.of_json in
+      make ?multiRegionCluster ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes an existing multi-Region cluster."]
+module DeleteMultiRegionClusterRequest =
+  struct
+    type nonrec t =
+      {
+      multiRegionClusterName: String_.t
+        [@ocaml.doc "The name of the multi-Region cluster to be deleted."]}
+    let context_ = "DeleteMultiRegionClusterRequest"
+    let make ~multiRegionClusterName = fun () -> { multiRegionClusterName }
+    let to_value x =
+      structure_to_value
+        [("MultiRegionClusterName",
+           (Some (String_.to_value x.multiRegionClusterName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multiRegionClusterName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MultiRegionClusterName") in
+      make ~multiRegionClusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multiRegionClusterName =
+        field_map_exn json__ "MultiRegionClusterName" String_.of_json in
+      make ~multiRegionClusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes an existing multi-Region cluster."]
 module DeleteClusterResponse =
   struct
     type nonrec t =
       {
       cluster: Cluster.t option
-        [@ocaml.doc "The cluster object that has been deleted"]}
+        [@ocaml.doc "The cluster object that has been deleted."]}
     type nonrec error =
       [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
       | `InvalidClusterStateFault of InvalidClusterStateFault.t 
@@ -7221,27 +9980,34 @@ module DeleteClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a cluster. It also deletes all associated nodes and node endpoints"]
+       "Deletes a cluster. It also deletes all associated nodes and node endpoints. CreateSnapshot permission is required to create a final snapshot. Without this permission, the API call will fail with an Access Denied exception."]
 module DeleteClusterRequest =
   struct
     type nonrec t =
       {
       clusterName: String_.t
         [@ocaml.doc "The name of the cluster to be deleted"];
+      multiRegionClusterName: String_.t option
+        [@ocaml.doc "The name of the multi-Region cluster to be deleted."];
       finalSnapshotName: String_.t option
         [@ocaml.doc
           "The user-supplied name of a final cluster snapshot. This is the unique name that identifies the snapshot. MemoryDB creates the snapshot, and then deletes the cluster immediately afterward."]}
     let context_ = "DeleteClusterRequest"
-    let make ?finalSnapshotName =
-      fun ~clusterName -> fun () -> { finalSnapshotName; clusterName }
+    let make ?multiRegionClusterName =
+      fun ?finalSnapshotName ->
+        fun ~clusterName ->
+          fun () ->
+            { multiRegionClusterName; finalSnapshotName; clusterName }
     let to_value x =
       structure_to_value
         [("ClusterName", (Some (String_.to_value x.clusterName)));
+        ("MultiRegionClusterName",
+          (Option.map x.multiRegionClusterName ~f:String_.to_value));
         ("FinalSnapshotName",
           (Option.map x.finalSnapshotName ~f:String_.to_value))]
     let to_query v = to_query to_value v
@@ -7249,19 +10015,24 @@ module DeleteClusterRequest =
       let finalSnapshotName =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "FinalSnapshotName") in
+      let multiRegionClusterName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionClusterName") in
       let clusterName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
-      make ?finalSnapshotName ~clusterName ()
+      make ?finalSnapshotName ?multiRegionClusterName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let finalSnapshotName =
-        field_map json "FinalSnapshotName" String_.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
-      make ?finalSnapshotName ~clusterName ()
+        field_map json__ "FinalSnapshotName" String_.of_json in
+      let multiRegionClusterName =
+        field_map json__ "MultiRegionClusterName" String_.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
+      make ?finalSnapshotName ?multiRegionClusterName ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a cluster. It also deletes all associated nodes and node endpoints"]
+       "Deletes a cluster. It also deletes all associated nodes and node endpoints. CreateSnapshot permission is required to create a final snapshot. Without this permission, the API call will fail with an Access Denied exception."]
 module DeleteACLResponse =
   struct
     type nonrec t =
@@ -7322,8 +10093,8 @@ module DeleteACLResponse =
       let aCL = (Option.map ~f:ACL.of_xml) (Xml.child xml_arg0 "ACL") in
       make ?aCL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aCL = field_map json "ACL" ACL.of_json in make ?aCL ()
+    let of_json json__ =
+      let aCL = field_map json__ "ACL" ACL.of_json in make ?aCL ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes an Access Control List. The ACL must first be disassociated from the cluster before it can be deleted. For more information, see Authenticating users with Access Contol Lists (ACLs)."]
@@ -7332,7 +10103,7 @@ module DeleteACLRequest =
     type nonrec t =
       {
       aCLName: String_.t
-        [@ocaml.doc "The name of the Access Control List to delete"]}
+        [@ocaml.doc "The name of the Access Control List to delete."]}
     let context_ = "DeleteACLRequest"
     let make ~aCLName = fun () -> { aCLName }
     let to_value x =
@@ -7343,8 +10114,8 @@ module DeleteACLRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ACLName") in
       make ~aCLName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aCLName = field_map_exn json "ACLName" String_.of_json in
+    let of_json json__ =
+      let aCLName = field_map_exn json__ "ACLName" String_.of_json in
       make ~aCLName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7441,8 +10212,8 @@ module CreateUserResponse =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map json "User" User.of_json in make ?user ()
+    let of_json json__ =
+      let user = field_map json__ "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a MemoryDB user. For more information, see Authenticating users with Access Contol Lists (ACLs)."]
@@ -7487,13 +10258,13 @@ module CreateUserRequest =
         UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?tags ~accessString ~authenticationMode ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let accessString =
-        field_map_exn json "AccessString" AccessString.of_json in
+        field_map_exn json__ "AccessString" AccessString.of_json in
       let authenticationMode =
-        field_map_exn json "AuthenticationMode" AuthenticationMode.of_json in
-      let userName = field_map_exn json "UserName" UserName.of_json in
+        field_map_exn json__ "AuthenticationMode" AuthenticationMode.of_json in
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
       make ?tags ~accessString ~authenticationMode ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7503,7 +10274,7 @@ module CreateSubnetGroupResponse =
     type nonrec t =
       {
       subnetGroup: SubnetGroup.t option
-        [@ocaml.doc "The newly-created subnet group"]}
+        [@ocaml.doc "The newly-created subnet group."]}
     type nonrec error =
       [ `InvalidSubnet of InvalidSubnet.t 
       | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
@@ -7601,8 +10372,8 @@ module CreateSubnetGroupResponse =
         (Option.map ~f:SubnetGroup.of_xml) (Xml.child xml_arg0 "SubnetGroup") in
       make ?subnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetGroup = field_map json "SubnetGroup" SubnetGroup.of_json in
+    let of_json json__ =
+      let subnetGroup = field_map json__ "SubnetGroup" SubnetGroup.of_json in
       make ?subnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7644,13 +10415,13 @@ module CreateSubnetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetGroupName") in
       make ?tags ~subnetIds ?description ~subnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let subnetIds =
-        field_map_exn json "SubnetIds" SubnetIdentifierList.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map_exn json__ "SubnetIds" SubnetIdentifierList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let subnetGroupName =
-        field_map_exn json "SubnetGroupName" String_.of_json in
+        field_map_exn json__ "SubnetGroupName" String_.of_json in
       make ?tags ~subnetIds ?description ~subnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7771,8 +10542,8 @@ module CreateSnapshotResponse =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7815,11 +10586,11 @@ module CreateSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
       make ?tags ?kmsKeyId ~snapshotName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let snapshotName = field_map_exn json "SnapshotName" String_.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let snapshotName = field_map_exn json__ "SnapshotName" String_.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
       make ?tags ?kmsKeyId ~snapshotName ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7941,9 +10712,9 @@ module CreateParameterGroupResponse =
           (Xml.child xml_arg0 "ParameterGroup") in
       make ?parameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroup =
-        field_map json "ParameterGroup" ParameterGroup.of_json in
+        field_map json__ "ParameterGroup" ParameterGroup.of_json in
       make ?parameterGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7987,16 +10758,237 @@ module CreateParameterGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ?tags ?description ~family ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let family = field_map_exn json "Family" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let family = field_map_exn json__ "Family" String_.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ?tags ?description ~family ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new MemoryDB parameter group. A parameter group is a collection of parameters and their values that are applied to all of the nodes in any cluster. For more information, see Configuring engine parameters using parameter groups."]
+module CreateMultiRegionClusterResponse =
+  struct
+    type nonrec t =
+      {
+      multiRegionCluster: MultiRegionCluster.t option
+        [@ocaml.doc "Details about the newly created multi-Region cluster."]}
+    type nonrec error =
+      [
+        `ClusterQuotaForCustomerExceededFault of
+          ClusterQuotaForCustomerExceededFault.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MultiRegionClusterAlreadyExistsFault of
+          MultiRegionClusterAlreadyExistsFault.t 
+      | `MultiRegionParameterGroupNotFoundFault of
+          MultiRegionParameterGroupNotFoundFault.t 
+      | `TagQuotaPerResourceExceeded of TagQuotaPerResourceExceeded.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?multiRegionCluster = fun () -> { multiRegionCluster }
+    let error_of_json name json =
+      match name with
+      | "ClusterQuotaForCustomerExceededFault" ->
+          `ClusterQuotaForCustomerExceededFault
+            (ClusterQuotaForCustomerExceededFault.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MultiRegionClusterAlreadyExistsFault" ->
+          `MultiRegionClusterAlreadyExistsFault
+            (MultiRegionClusterAlreadyExistsFault.of_json json)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_json json)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterQuotaForCustomerExceededFault" ->
+          `ClusterQuotaForCustomerExceededFault
+            (ClusterQuotaForCustomerExceededFault.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MultiRegionClusterAlreadyExistsFault" ->
+          `MultiRegionClusterAlreadyExistsFault
+            (MultiRegionClusterAlreadyExistsFault.of_xml xml)
+      | "MultiRegionParameterGroupNotFoundFault" ->
+          `MultiRegionParameterGroupNotFoundFault
+            (MultiRegionParameterGroupNotFoundFault.of_xml xml)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterQuotaForCustomerExceededFault e ->
+          `Assoc
+            [("error", (`String "ClusterQuotaForCustomerExceededFault"));
+            ("details", (ClusterQuotaForCustomerExceededFault.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MultiRegionClusterAlreadyExistsFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionClusterAlreadyExistsFault"));
+            ("details", (MultiRegionClusterAlreadyExistsFault.to_json e))]
+      | `MultiRegionParameterGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionParameterGroupNotFoundFault"));
+            ("details", (MultiRegionParameterGroupNotFoundFault.to_json e))]
+      | `TagQuotaPerResourceExceeded e ->
+          `Assoc
+            [("error", (`String "TagQuotaPerResourceExceeded"));
+            ("details", (TagQuotaPerResourceExceeded.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MultiRegionCluster",
+           (Option.map x.multiRegionCluster ~f:MultiRegionCluster.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multiRegionCluster =
+        (Option.map ~f:MultiRegionCluster.of_xml)
+          (Xml.child xml_arg0 "MultiRegionCluster") in
+      make ?multiRegionCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multiRegionCluster =
+        field_map json__ "MultiRegionCluster" MultiRegionCluster.of_json in
+      make ?multiRegionCluster ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new multi-Region cluster."]
+module CreateMultiRegionClusterRequest =
+  struct
+    type nonrec t =
+      {
+      multiRegionClusterNameSuffix: String_.t
+        [@ocaml.doc
+          "A suffix to be added to the Multi-Region cluster name. Amazon MemoryDB automatically applies a prefix to the Multi-Region cluster Name when it is created. Each Amazon Region has its own prefix. For instance, a Multi-Region cluster Name created in the US-West-1 region will begin with \"virxk\", along with the suffix name you provide. The suffix guarantees uniqueness of the Multi-Region cluster name across multiple regions."];
+      description: String_.t option
+        [@ocaml.doc "A description for the multi-Region cluster."];
+      engine: String_.t option
+        [@ocaml.doc
+          "The name of the engine to be used for the multi-Region cluster."];
+      engineVersion: String_.t option
+        [@ocaml.doc
+          "The version of the engine to be used for the multi-Region cluster."];
+      nodeType: String_.t
+        [@ocaml.doc "The node type to be used for the multi-Region cluster."];
+      multiRegionParameterGroupName: String_.t option
+        [@ocaml.doc
+          "The name of the multi-Region parameter group to be associated with the cluster."];
+      numShards: IntegerOptional.t option
+        [@ocaml.doc "The number of shards for the multi-Region cluster."];
+      tLSEnabled: BooleanOptional.t option
+        [@ocaml.doc
+          "Whether to enable TLS encryption for the multi-Region cluster."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of tags to be applied to the multi-Region cluster."]}
+    let context_ = "CreateMultiRegionClusterRequest"
+    let make ?description =
+      fun ?engine ->
+        fun ?engineVersion ->
+          fun ?multiRegionParameterGroupName ->
+            fun ?numShards ->
+              fun ?tLSEnabled ->
+                fun ?tags ->
+                  fun ~multiRegionClusterNameSuffix ->
+                    fun ~nodeType ->
+                      fun () ->
+                        {
+                          description;
+                          engine;
+                          engineVersion;
+                          multiRegionParameterGroupName;
+                          numShards;
+                          tLSEnabled;
+                          tags;
+                          multiRegionClusterNameSuffix;
+                          nodeType
+                        }
+    let to_value x =
+      structure_to_value
+        [("MultiRegionClusterNameSuffix",
+           (Some (String_.to_value x.multiRegionClusterNameSuffix)));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
+        ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
+        ("NodeType", (Some (String_.to_value x.nodeType)));
+        ("MultiRegionParameterGroupName",
+          (Option.map x.multiRegionParameterGroupName ~f:String_.to_value));
+        ("NumShards", (Option.map x.numShards ~f:IntegerOptional.to_value));
+        ("TLSEnabled", (Option.map x.tLSEnabled ~f:BooleanOptional.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let tLSEnabled =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "TLSEnabled") in
+      let numShards =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "NumShards") in
+      let multiRegionParameterGroupName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionParameterGroupName") in
+      let nodeType =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "NodeType") in
+      let engineVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let multiRegionClusterNameSuffix =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "MultiRegionClusterNameSuffix") in
+      make ?tags ?tLSEnabled ?numShards ?multiRegionParameterGroupName
+        ~nodeType ?engineVersion ?engine ?description
+        ~multiRegionClusterNameSuffix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let tLSEnabled = field_map json__ "TLSEnabled" BooleanOptional.of_json in
+      let numShards = field_map json__ "NumShards" IntegerOptional.of_json in
+      let multiRegionParameterGroupName =
+        field_map json__ "MultiRegionParameterGroupName" String_.of_json in
+      let nodeType = field_map_exn json__ "NodeType" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let multiRegionClusterNameSuffix =
+        field_map_exn json__ "MultiRegionClusterNameSuffix" String_.of_json in
+      make ?tags ?tLSEnabled ?numShards ?multiRegionParameterGroupName
+        ~nodeType ?engineVersion ?engine ?description
+        ~multiRegionClusterNameSuffix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new multi-Region cluster."]
 module CreateClusterResponse =
   struct
     type nonrec t =
@@ -8011,10 +11003,13 @@ module CreateClusterResponse =
           InsufficientClusterCapacityFault.t 
       | `InvalidACLStateFault of InvalidACLStateFault.t 
       | `InvalidCredentialsException of InvalidCredentialsException.t 
+      | `InvalidMultiRegionClusterStateFault of
+          InvalidMultiRegionClusterStateFault.t 
       | `InvalidParameterCombinationException of
           InvalidParameterCombinationException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `InvalidVPCNetworkStateFault of InvalidVPCNetworkStateFault.t 
+      | `MultiRegionClusterNotFoundFault of MultiRegionClusterNotFoundFault.t 
       | `NodeQuotaForClusterExceededFault of
           NodeQuotaForClusterExceededFault.t 
       | `NodeQuotaForCustomerExceededFault of
@@ -8044,6 +11039,9 @@ module CreateClusterResponse =
       | "InvalidCredentialsException" ->
           `InvalidCredentialsException
             (InvalidCredentialsException.of_json json)
+      | "InvalidMultiRegionClusterStateFault" ->
+          `InvalidMultiRegionClusterStateFault
+            (InvalidMultiRegionClusterStateFault.of_json json)
       | "InvalidParameterCombinationException" ->
           `InvalidParameterCombinationException
             (InvalidParameterCombinationException.of_json json)
@@ -8053,6 +11051,9 @@ module CreateClusterResponse =
       | "InvalidVPCNetworkStateFault" ->
           `InvalidVPCNetworkStateFault
             (InvalidVPCNetworkStateFault.of_json json)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_json json)
       | "NodeQuotaForClusterExceededFault" ->
           `NodeQuotaForClusterExceededFault
             (NodeQuotaForClusterExceededFault.of_json json)
@@ -8092,6 +11093,9 @@ module CreateClusterResponse =
       | "InvalidCredentialsException" ->
           `InvalidCredentialsException
             (InvalidCredentialsException.of_xml xml)
+      | "InvalidMultiRegionClusterStateFault" ->
+          `InvalidMultiRegionClusterStateFault
+            (InvalidMultiRegionClusterStateFault.of_xml xml)
       | "InvalidParameterCombinationException" ->
           `InvalidParameterCombinationException
             (InvalidParameterCombinationException.of_xml xml)
@@ -8101,6 +11105,9 @@ module CreateClusterResponse =
       | "InvalidVPCNetworkStateFault" ->
           `InvalidVPCNetworkStateFault
             (InvalidVPCNetworkStateFault.of_xml xml)
+      | "MultiRegionClusterNotFoundFault" ->
+          `MultiRegionClusterNotFoundFault
+            (MultiRegionClusterNotFoundFault.of_xml xml)
       | "NodeQuotaForClusterExceededFault" ->
           `NodeQuotaForClusterExceededFault
             (NodeQuotaForClusterExceededFault.of_xml xml)
@@ -8149,6 +11156,10 @@ module CreateClusterResponse =
           `Assoc
             [("error", (`String "InvalidCredentialsException"));
             ("details", (InvalidCredentialsException.to_json e))]
+      | `InvalidMultiRegionClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidMultiRegionClusterStateFault"));
+            ("details", (InvalidMultiRegionClusterStateFault.to_json e))]
       | `InvalidParameterCombinationException e ->
           `Assoc
             [("error", (`String "InvalidParameterCombinationException"));
@@ -8161,6 +11172,10 @@ module CreateClusterResponse =
           `Assoc
             [("error", (`String "InvalidVPCNetworkStateFault"));
             ("details", (InvalidVPCNetworkStateFault.to_json e))]
+      | `MultiRegionClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "MultiRegionClusterNotFoundFault"));
+            ("details", (MultiRegionClusterNotFoundFault.to_json e))]
       | `NodeQuotaForClusterExceededFault e ->
           `Assoc
             [("error", (`String "NodeQuotaForClusterExceededFault"));
@@ -8203,8 +11218,8 @@ module CreateClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8219,6 +11234,8 @@ module CreateClusterRequest =
       nodeType: String_.t
         [@ocaml.doc
           "The compute and memory capacity of the nodes in the cluster."];
+      multiRegionClusterName: String_.t option
+        [@ocaml.doc "The name of the multi-Region cluster to be created."];
       parameterGroupName: String_.t option
         [@ocaml.doc
           "The name of the parameter group associated with the cluster."];
@@ -8238,7 +11255,7 @@ module CreateClusterRequest =
           "A list of security group names to associate with this cluster."];
       maintenanceWindow: String_.t option
         [@ocaml.doc
-          "Specifies the weekly time range during which maintenance on the cluster is performed. It is specified as a range in the format ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period."];
+          "Specifies the weekly time range during which maintenance on the cluster is performed. It is specified as a range in the format ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period. Valid values for ddd are: sun mon tue wed thu fri sat Example: sun:23:00-mon:01:30"];
       port: IntegerOptional.t option
         [@ocaml.doc
           "The port number on which each of the nodes accepts connections."];
@@ -8267,62 +11284,85 @@ module CreateClusterRequest =
       aCLName: ACLName.t
         [@ocaml.doc
           "The name of the Access Control List to associate with the cluster."];
+      engine: String_.t option
+        [@ocaml.doc "The name of the engine to be used for the cluster."];
       engineVersion: String_.t option
         [@ocaml.doc
-          "The version number of the Redis engine to be used for the cluster."];
+          "The version number of the Redis OSS engine to be used for the cluster."];
       autoMinorVersionUpgrade: BooleanOptional.t option
         [@ocaml.doc
-          "When set to true, the cluster will automatically receive minor engine version upgrades after launch."]}
+          "When set to true, the cluster will automatically receive minor engine version upgrades after launch."];
+      dataTiering: BooleanOptional.t option
+        [@ocaml.doc
+          "Enables data tiering. Data tiering is only supported for clusters using the r6gd node type. This parameter must be set when using r6gd nodes. For more information, see Data tiering."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "Specifies the IP address type for the cluster. Valid values are 'ipv4', 'ipv6', or 'dual_stack'. When set to 'ipv4', the cluster will only be accessible via IPv4 addresses. When set to 'ipv6', the cluster will only be accessible via IPv6 addresses. When set to 'dual_stack', the cluster will be accessible via both IPv4 and IPv6 addresses. If not specified, the default is 'ipv4'."];
+      ipDiscovery: IpDiscovery.t option
+        [@ocaml.doc
+          "The mechanism for discovering IP addresses for the cluster discovery protocol. Valid values are 'ipv4' or 'ipv6'. When set to 'ipv4', cluster discovery functions such as cluster slots, cluster shards, and cluster nodes return IPv4 addresses for cluster nodes. When set to 'ipv6', the cluster discovery functions return IPv6 addresses for cluster nodes. The value must be compatible with the NetworkType parameter. If not specified, the default is 'ipv4'."]}
     let context_ = "CreateClusterRequest"
-    let make ?parameterGroupName =
-      fun ?description ->
-        fun ?numShards ->
-          fun ?numReplicasPerShard ->
-            fun ?subnetGroupName ->
-              fun ?securityGroupIds ->
-                fun ?maintenanceWindow ->
-                  fun ?port ->
-                    fun ?snsTopicArn ->
-                      fun ?tLSEnabled ->
-                        fun ?kmsKeyId ->
-                          fun ?snapshotArns ->
-                            fun ?snapshotName ->
-                              fun ?snapshotRetentionLimit ->
-                                fun ?tags ->
-                                  fun ?snapshotWindow ->
-                                    fun ?engineVersion ->
-                                      fun ?autoMinorVersionUpgrade ->
-                                        fun ~clusterName ->
-                                          fun ~nodeType ->
-                                            fun ~aCLName ->
-                                              fun () ->
-                                                {
-                                                  parameterGroupName;
-                                                  description;
-                                                  numShards;
-                                                  numReplicasPerShard;
-                                                  subnetGroupName;
-                                                  securityGroupIds;
-                                                  maintenanceWindow;
-                                                  port;
-                                                  snsTopicArn;
-                                                  tLSEnabled;
-                                                  kmsKeyId;
-                                                  snapshotArns;
-                                                  snapshotName;
-                                                  snapshotRetentionLimit;
-                                                  tags;
-                                                  snapshotWindow;
-                                                  engineVersion;
-                                                  autoMinorVersionUpgrade;
-                                                  clusterName;
-                                                  nodeType;
-                                                  aCLName
-                                                }
+    let make ?multiRegionClusterName =
+      fun ?parameterGroupName ->
+        fun ?description ->
+          fun ?numShards ->
+            fun ?numReplicasPerShard ->
+              fun ?subnetGroupName ->
+                fun ?securityGroupIds ->
+                  fun ?maintenanceWindow ->
+                    fun ?port ->
+                      fun ?snsTopicArn ->
+                        fun ?tLSEnabled ->
+                          fun ?kmsKeyId ->
+                            fun ?snapshotArns ->
+                              fun ?snapshotName ->
+                                fun ?snapshotRetentionLimit ->
+                                  fun ?tags ->
+                                    fun ?snapshotWindow ->
+                                      fun ?engine ->
+                                        fun ?engineVersion ->
+                                          fun ?autoMinorVersionUpgrade ->
+                                            fun ?dataTiering ->
+                                              fun ?networkType ->
+                                                fun ?ipDiscovery ->
+                                                  fun ~clusterName ->
+                                                    fun ~nodeType ->
+                                                      fun ~aCLName ->
+                                                        fun () ->
+                                                          {
+                                                            multiRegionClusterName;
+                                                            parameterGroupName;
+                                                            description;
+                                                            numShards;
+                                                            numReplicasPerShard;
+                                                            subnetGroupName;
+                                                            securityGroupIds;
+                                                            maintenanceWindow;
+                                                            port;
+                                                            snsTopicArn;
+                                                            tLSEnabled;
+                                                            kmsKeyId;
+                                                            snapshotArns;
+                                                            snapshotName;
+                                                            snapshotRetentionLimit;
+                                                            tags;
+                                                            snapshotWindow;
+                                                            engine;
+                                                            engineVersion;
+                                                            autoMinorVersionUpgrade;
+                                                            dataTiering;
+                                                            networkType;
+                                                            ipDiscovery;
+                                                            clusterName;
+                                                            nodeType;
+                                                            aCLName
+                                                          }
     let to_value x =
       structure_to_value
         [("ClusterName", (Some (String_.to_value x.clusterName)));
         ("NodeType", (Some (String_.to_value x.nodeType)));
+        ("MultiRegionClusterName",
+          (Option.map x.multiRegionClusterName ~f:String_.to_value));
         ("ParameterGroupName",
           (Option.map x.parameterGroupName ~f:String_.to_value));
         ("Description", (Option.map x.description ~f:String_.to_value));
@@ -8347,16 +11387,30 @@ module CreateClusterRequest =
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("SnapshotWindow", (Option.map x.snapshotWindow ~f:String_.to_value));
         ("ACLName", (Some (ACLName.to_value x.aCLName)));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
         ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
         ("AutoMinorVersionUpgrade",
-          (Option.map x.autoMinorVersionUpgrade ~f:BooleanOptional.to_value))]
+          (Option.map x.autoMinorVersionUpgrade ~f:BooleanOptional.to_value));
+        ("DataTiering",
+          (Option.map x.dataTiering ~f:BooleanOptional.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value));
+        ("IpDiscovery", (Option.map x.ipDiscovery ~f:IpDiscovery.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipDiscovery =
+        (Option.map ~f:IpDiscovery.of_xml) (Xml.child xml_arg0 "IpDiscovery") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let dataTiering =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "DataTiering") in
       let autoMinorVersionUpgrade =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "AutoMinorVersionUpgrade") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
       let aCLName =
         ACLName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ACLName") in
       let snapshotWindow =
@@ -8398,51 +11452,64 @@ module CreateClusterRequest =
       let parameterGroupName =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ParameterGroupName") in
+      let multiRegionClusterName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MultiRegionClusterName") in
       let nodeType =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "NodeType") in
       let clusterName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
-      make ?autoMinorVersionUpgrade ?engineVersion ~aCLName ?snapshotWindow
-        ?tags ?snapshotRetentionLimit ?snapshotName ?snapshotArns ?kmsKeyId
+      make ?ipDiscovery ?networkType ?dataTiering ?autoMinorVersionUpgrade
+        ?engineVersion ?engine ~aCLName ?snapshotWindow ?tags
+        ?snapshotRetentionLimit ?snapshotName ?snapshotArns ?kmsKeyId
         ?tLSEnabled ?snsTopicArn ?port ?maintenanceWindow ?securityGroupIds
         ?subnetGroupName ?numReplicasPerShard ?numShards ?description
-        ?parameterGroupName ~nodeType ~clusterName ()
+        ?parameterGroupName ?multiRegionClusterName ~nodeType ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipDiscovery = field_map json__ "IpDiscovery" IpDiscovery.of_json in
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let dataTiering =
+        field_map json__ "DataTiering" BooleanOptional.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" BooleanOptional.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let aCLName = field_map_exn json "ACLName" ACLName.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" BooleanOptional.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let aCLName = field_map_exn json__ "ACLName" ACLName.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
-      let snapshotName = field_map json "SnapshotName" String_.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
+      let snapshotName = field_map json__ "SnapshotName" String_.of_json in
       let snapshotArns =
-        field_map json "SnapshotArns" SnapshotArnsList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let tLSEnabled = field_map json "TLSEnabled" BooleanOptional.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
+        field_map json__ "SnapshotArns" SnapshotArnsList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let tLSEnabled = field_map json__ "TLSEnabled" BooleanOptional.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let maintenanceWindow =
-        field_map json "MaintenanceWindow" String_.of_json in
+        field_map json__ "MaintenanceWindow" String_.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIdsList.of_json in
-      let subnetGroupName = field_map json "SubnetGroupName" String_.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIdsList.of_json in
+      let subnetGroupName =
+        field_map json__ "SubnetGroupName" String_.of_json in
       let numReplicasPerShard =
-        field_map json "NumReplicasPerShard" IntegerOptional.of_json in
-      let numShards = field_map json "NumShards" IntegerOptional.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "NumReplicasPerShard" IntegerOptional.of_json in
+      let numShards = field_map json__ "NumShards" IntegerOptional.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
-      let nodeType = field_map_exn json "NodeType" String_.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
-      make ?autoMinorVersionUpgrade ?engineVersion ~aCLName ?snapshotWindow
-        ?tags ?snapshotRetentionLimit ?snapshotName ?snapshotArns ?kmsKeyId
+        field_map json__ "ParameterGroupName" String_.of_json in
+      let multiRegionClusterName =
+        field_map json__ "MultiRegionClusterName" String_.of_json in
+      let nodeType = field_map_exn json__ "NodeType" String_.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
+      make ?ipDiscovery ?networkType ?dataTiering ?autoMinorVersionUpgrade
+        ?engineVersion ?engine ~aCLName ?snapshotWindow ?tags
+        ?snapshotRetentionLimit ?snapshotName ?snapshotArns ?kmsKeyId
         ?tLSEnabled ?snsTopicArn ?port ?maintenanceWindow ?securityGroupIds
         ?subnetGroupName ?numReplicasPerShard ?numShards ?description
-        ?parameterGroupName ~nodeType ~clusterName ()
+        ?parameterGroupName ?multiRegionClusterName ~nodeType ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a cluster. All nodes in the cluster run the same protocol-compliant engine software."]
@@ -8544,8 +11611,8 @@ module CreateACLResponse =
       let aCL = (Option.map ~f:ACL.of_xml) (Xml.child xml_arg0 "ACL") in
       make ?aCL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aCL = field_map json "ACL" ACL.of_json in make ?aCL ()
+    let of_json json__ =
+      let aCL = field_map json__ "ACL" ACL.of_json in make ?aCL ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an Access Control List. For more information, see Authenticating users with Access Contol Lists (ACLs)."]
@@ -8578,10 +11645,10 @@ module CreateACLRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ACLName") in
       make ?tags ?userNames ~aCLName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let userNames = field_map json "UserNames" UserNameListInput.of_json in
-      let aCLName = field_map_exn json "ACLName" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let userNames = field_map json__ "UserNames" UserNameListInput.of_json in
+      let aCLName = field_map_exn json__ "ACLName" String_.of_json in
       make ?tags ?userNames ~aCLName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8705,8 +11772,8 @@ module CopySnapshotResponse =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Makes a copy of an existing snapshot."]
@@ -8770,14 +11837,14 @@ module CopySnapshotRequest =
       make ?tags ?kmsKeyId ?targetBucket ~targetSnapshotName
         ~sourceSnapshotName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let targetBucket = field_map json "TargetBucket" TargetBucket.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let targetBucket = field_map json__ "TargetBucket" TargetBucket.of_json in
       let targetSnapshotName =
-        field_map_exn json "TargetSnapshotName" String_.of_json in
+        field_map_exn json__ "TargetSnapshotName" String_.of_json in
       let sourceSnapshotName =
-        field_map_exn json "SourceSnapshotName" String_.of_json in
+        field_map_exn json__ "SourceSnapshotName" String_.of_json in
       make ?tags ?kmsKeyId ?targetBucket ~targetSnapshotName
         ~sourceSnapshotName ()
     let to_json v = composed_to_json to_value v
@@ -8850,11 +11917,11 @@ module BatchUpdateClusterResponse =
           (Xml.child xml_arg0 "ProcessedClusters") in
       make ?unprocessedClusters ?processedClusters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedClusters =
-        field_map json "UnprocessedClusters" UnprocessedClusterList.of_json in
+        field_map json__ "UnprocessedClusters" UnprocessedClusterList.of_json in
       let processedClusters =
-        field_map json "ProcessedClusters" ClusterList.of_json in
+        field_map json__ "ProcessedClusters" ClusterList.of_json in
       make ?unprocessedClusters ?processedClusters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8885,11 +11952,11 @@ module BatchUpdateClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterNames") in
       make ?serviceUpdate ~clusterNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceUpdate =
-        field_map json "ServiceUpdate" ServiceUpdateRequest.of_json in
+        field_map json__ "ServiceUpdate" ServiceUpdateRequest.of_json in
       let clusterNames =
-        field_map_exn json "ClusterNames" ClusterNameList.of_json in
+        field_map_exn json__ "ClusterNames" ClusterNameList.of_json in
       make ?serviceUpdate ~clusterNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

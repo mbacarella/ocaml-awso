@@ -48,6 +48,12 @@ val create_forecast_export_job :
       CreateForecastExportJobRequest.t ->
         (CreateForecastExportJobResponse.t,
           CreateForecastExportJobResponse.error) Result.t Async.Deferred.t
+val create_monitor :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateMonitorRequest.t ->
+        (CreateMonitorResponse.t, CreateMonitorResponse.error) Result.t
+          Async.Deferred.t
 val create_predictor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -61,6 +67,24 @@ val create_predictor_backtest_export_job :
         (CreatePredictorBacktestExportJobResponse.t,
           CreatePredictorBacktestExportJobResponse.error) Result.t
           Async.Deferred.t
+val create_what_if_analysis :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateWhatIfAnalysisRequest.t ->
+        (CreateWhatIfAnalysisResponse.t, CreateWhatIfAnalysisResponse.error)
+          Result.t Async.Deferred.t
+val create_what_if_forecast :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateWhatIfForecastRequest.t ->
+        (CreateWhatIfForecastResponse.t, CreateWhatIfForecastResponse.error)
+          Result.t Async.Deferred.t
+val create_what_if_forecast_export :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateWhatIfForecastExportRequest.t ->
+        (CreateWhatIfForecastExportResponse.t,
+          CreateWhatIfForecastExportResponse.error) Result.t Async.Deferred.t
 val delete_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -92,6 +116,10 @@ val delete_forecast_export_job :
     ?cfg:Awso.Cfg.t ->
       DeleteForecastExportJobRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
+val delete_monitor :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteMonitorRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_predictor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -105,6 +133,19 @@ val delete_resource_tree :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourceTreeRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_what_if_analysis :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWhatIfAnalysisRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_what_if_forecast :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWhatIfForecastRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_what_if_forecast_export :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWhatIfForecastExportRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val describe_auto_predictor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -154,6 +195,12 @@ val describe_forecast_export_job :
       DescribeForecastExportJobRequest.t ->
         (DescribeForecastExportJobResponse.t,
           DescribeForecastExportJobResponse.error) Result.t Async.Deferred.t
+val describe_monitor :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMonitorRequest.t ->
+        (DescribeMonitorResponse.t, DescribeMonitorResponse.error) Result.t
+          Async.Deferred.t
 val describe_predictor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -166,6 +213,25 @@ val describe_predictor_backtest_export_job :
       DescribePredictorBacktestExportJobRequest.t ->
         (DescribePredictorBacktestExportJobResponse.t,
           DescribePredictorBacktestExportJobResponse.error) Result.t
+          Async.Deferred.t
+val describe_what_if_analysis :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeWhatIfAnalysisRequest.t ->
+        (DescribeWhatIfAnalysisResponse.t,
+          DescribeWhatIfAnalysisResponse.error) Result.t Async.Deferred.t
+val describe_what_if_forecast :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeWhatIfForecastRequest.t ->
+        (DescribeWhatIfForecastResponse.t,
+          DescribeWhatIfForecastResponse.error) Result.t Async.Deferred.t
+val describe_what_if_forecast_export :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeWhatIfForecastExportRequest.t ->
+        (DescribeWhatIfForecastExportResponse.t,
+          DescribeWhatIfForecastExportResponse.error) Result.t
           Async.Deferred.t
 val get_accuracy_metrics :
   ?endpoint_url:string ->
@@ -215,6 +281,18 @@ val list_forecasts :
       ListForecastsRequest.t ->
         (ListForecastsResponse.t, ListForecastsResponse.error) Result.t
           Async.Deferred.t
+val list_monitor_evaluations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMonitorEvaluationsRequest.t ->
+        (ListMonitorEvaluationsResponse.t,
+          ListMonitorEvaluationsResponse.error) Result.t Async.Deferred.t
+val list_monitors :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMonitorsRequest.t ->
+        (ListMonitorsResponse.t, ListMonitorsResponse.error) Result.t
+          Async.Deferred.t
 val list_predictor_backtest_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -234,6 +312,28 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Async.Deferred.t
+val list_what_if_analyses :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWhatIfAnalysesRequest.t ->
+        (ListWhatIfAnalysesResponse.t, ListWhatIfAnalysesResponse.error)
+          Result.t Async.Deferred.t
+val list_what_if_forecast_exports :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWhatIfForecastExportsRequest.t ->
+        (ListWhatIfForecastExportsResponse.t,
+          ListWhatIfForecastExportsResponse.error) Result.t Async.Deferred.t
+val list_what_if_forecasts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWhatIfForecastsRequest.t ->
+        (ListWhatIfForecastsResponse.t, ListWhatIfForecastsResponse.error)
+          Result.t Async.Deferred.t
+val resume_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ResumeResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val stop_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

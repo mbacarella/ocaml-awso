@@ -51,6 +51,24 @@ let add_permission =
            (Values.AddPermissionRequest.make ~queueUrl ~label
               ~aWSAccountIds:(Values.AWSAccountIdList.of_json aWSAccountIds)
               ~actions:(Values.ActionNameList.of_json actions) ()) None None])
+let cancel_message_move_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and taskHandle =
+         flag "task-handle" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_message_move_task
+           (Values.CancelMessageMoveTaskRequest.make ~taskHandle ())
+           (Some Values.CancelMessageMoveTaskResult.to_json)
+           (Some Values.CancelMessageMoveTaskResult.error_to_json)])
 let change_message_visibility =
   Command.async ~summary:""
     ([%map_open.Command
@@ -65,7 +83,7 @@ let change_message_visibility =
        and receiptHandle =
          flag "receipt-handle" (required string) ~doc:"STRING String"
        and visibilityTimeout =
-         flag "visibility-timeout" (required int) ~doc:"INT Integer" in
+         flag "visibility-timeout" (required int) ~doc:"INT NullableInteger" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.change_message_visibility
@@ -237,6 +255,26 @@ let list_dead_letter_source_queues =
               ?maxResults ~queueUrl ())
            (Some Values.ListDeadLetterSourceQueuesResult.to_json)
            (Some Values.ListDeadLetterSourceQueuesResult.error_to_json)])
+let list_message_move_tasks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT NullableInteger"
+       and sourceArn =
+         flag "source-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_message_move_tasks
+           (Values.ListMessageMoveTasksRequest.make ?maxResults ~sourceArn ())
+           (Some Values.ListMessageMoveTasksResult.to_json)
+           (Some Values.ListMessageMoveTasksResult.error_to_json)])
 let list_queue_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -303,15 +341,19 @@ let receive_message =
        and attributeNames =
          flag "attribute-names" (optional json_arg)
            ~doc:"JSON AttributeNameList"
+       and messageSystemAttributeNames =
+         flag "message-system-attribute-names" (optional json_arg)
+           ~doc:"JSON MessageSystemAttributeList"
        and messageAttributeNames =
          flag "message-attribute-names" (optional json_arg)
            ~doc:"JSON MessageAttributeNameList"
        and maxNumberOfMessages =
-         flag "max-number-of-messages" (optional int) ~doc:"INT Integer"
+         flag "max-number-of-messages" (optional int)
+           ~doc:"INT NullableInteger"
        and visibilityTimeout =
-         flag "visibility-timeout" (optional int) ~doc:"INT Integer"
+         flag "visibility-timeout" (optional int) ~doc:"INT NullableInteger"
        and waitTimeSeconds =
-         flag "wait-time-seconds" (optional int) ~doc:"INT Integer"
+         flag "wait-time-seconds" (optional int) ~doc:"INT NullableInteger"
        and receiveRequestAttemptId =
          flag "receive-request-attempt-id" (optional string)
            ~doc:"STRING String"
@@ -322,6 +364,9 @@ let receive_message =
            (Values.ReceiveMessageRequest.make
               ?attributeNames:(Option.map ~f:Values.AttributeNameList.of_json
                                  attributeNames)
+              ?messageSystemAttributeNames:(Option.map
+                                              ~f:Values.MessageSystemAttributeList.of_json
+                                              messageSystemAttributeNames)
               ?messageAttributeNames:(Option.map
                                         ~f:Values.MessageAttributeNameList.of_json
                                         messageAttributeNames)
@@ -357,7 +402,7 @@ let send_message =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and delaySeconds =
-         flag "delay-seconds" (optional int) ~doc:"INT Integer"
+         flag "delay-seconds" (optional int) ~doc:"INT NullableInteger"
        and messageAttributes =
          flag "message-attributes" (optional json_arg)
            ~doc:"JSON MessageBodyAttributeMap"
@@ -426,6 +471,30 @@ let set_queue_attributes =
            (Values.SetQueueAttributesRequest.make ~queueUrl
               ~attributes:(Values.QueueAttributeMap.of_json attributes) ())
            None None])
+let start_message_move_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationArn =
+         flag "destination-arn" (optional string) ~doc:"STRING String"
+       and maxNumberOfMessagesPerSecond =
+         flag "max-number-of-messages-per-second" (optional int)
+           ~doc:"INT NullableInteger"
+       and sourceArn =
+         flag "source-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_message_move_task
+           (Values.StartMessageMoveTaskRequest.make ?destinationArn
+              ?maxNumberOfMessagesPerSecond ~sourceArn ())
+           (Some Values.StartMessageMoveTaskResult.to_json)
+           (Some Values.StartMessageMoveTaskResult.error_to_json)])
 let tag_queue =
   Command.async ~summary:""
     ([%map_open.Command
@@ -465,6 +534,7 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-permission", add_permission);
+    ("cancel-message-move-task", cancel_message_move_task);
     ("change-message-visibility", change_message_visibility);
     ("change-message-visibility-batch", change_message_visibility_batch);
     ("create-queue", create_queue);
@@ -474,6 +544,7 @@ let main =
     ("get-queue-attributes", get_queue_attributes);
     ("get-queue-url", get_queue_url);
     ("list-dead-letter-source-queues", list_dead_letter_source_queues);
+    ("list-message-move-tasks", list_message_move_tasks);
     ("list-queue-tags", list_queue_tags);
     ("list-queues", list_queues);
     ("purge-queue", purge_queue);
@@ -482,5 +553,6 @@ let main =
     ("send-message", send_message);
     ("send-message-batch", send_message_batch);
     ("set-queue-attributes", set_queue_attributes);
+    ("start-message-move-task", start_message_move_task);
     ("tag-queue", tag_queue);
     ("untag-queue", untag_queue)]

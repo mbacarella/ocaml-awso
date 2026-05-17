@@ -58,16 +58,24 @@ module Graph = struct
 end
 
 (* The field of a structure shape is assumed not to be required unless
-   explicitly stated *)
+   explicitly stated. Exception shapes are special-cased: AWS routinely omits
+   fields that botocore marks required (e.g. AccessDeniedException with no
+   Message), so we treat exception members as always optional. *)
 let structure_shape_required_field (ss : Botodata.structure_shape) field_name =
-  match ss.required with
-  | Some required -> List.mem required field_name ~equal:String.equal
-  | None -> false
+  match ss.exception_ with
+  | Some true -> false
+  | _ -> (
+    match ss.required with
+    | Some required -> List.mem required field_name ~equal:String.equal
+    | None -> false)
 ;;
 
+let char_is_alpha c = Char.is_uppercase c || Char.is_lowercase c
+let char_is_digit c = Stdlib.( >= ) c '0' && Stdlib.( <= ) c '9'
+
 let char_censor = function
-  | ':' | '.' | '-' | '/' | '*' | ' ' | '(' | ')' -> '_'
-  | c -> c
+  | c when char_is_alpha c || char_is_digit c || Char.equal c '_' -> c
+  | _ -> '_'
 ;;
 
 let ocaml_keywords =
@@ -125,14 +133,31 @@ let ocaml_keywords =
 
 let capitalized_id x =
   let x =
-    (* Some shape names start with _. Lets convert to Zz_ so they
-       become valid module names. *)
-    if String.is_prefix x ~prefix:"_" then "Zz" ^ x else x
+    (* OCaml constructors and module names must start with an uppercase
+       letter. Prefix anything else (digit, '_') with "Zz" to make it valid. *)
+    if Int.( = ) (String.length x) 0
+    then "Zz"
+    else if (not (char_is_alpha x.[0])) || Char.is_lowercase x.[0]
+    then (
+      let prefix = if char_is_alpha x.[0] then "" else "Zz" in
+      prefix ^ x)
+    else x
   in
   let x = x |> String.capitalize |> String.map ~f:char_censor in
   (* Prevent collisions with standard library names. *)
   match x with
-  | "Core" | "Format" | "Option" | "Result" | "String" | "Uri" -> x ^ "_"
+  | "Bool"
+  | "Core"
+  | "Float"
+  | "Format"
+  | "Int"
+  | "Int64"
+  | "List"
+  | "Option"
+  | "Result"
+  | "Stdlib"
+  | "String"
+  | "Uri" -> x ^ "_"
   | x -> x
 ;;
 

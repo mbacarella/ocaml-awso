@@ -6,17 +6,42 @@ type ('i, 'o, 'e) t =
   CreateConnectionOutput.error) t 
   | CreateHost: (CreateHostInput.t, CreateHostOutput.t,
   CreateHostOutput.error) t 
+  | CreateRepositoryLink: (CreateRepositoryLinkInput.t,
+  CreateRepositoryLinkOutput.t, CreateRepositoryLinkOutput.error) t 
+  | CreateSyncConfiguration: (CreateSyncConfigurationInput.t,
+  CreateSyncConfigurationOutput.t, CreateSyncConfigurationOutput.error) t 
   | DeleteConnection: (DeleteConnectionInput.t, DeleteConnectionOutput.t,
   DeleteConnectionOutput.error) t 
   | DeleteHost: (DeleteHostInput.t, DeleteHostOutput.t,
   DeleteHostOutput.error) t 
+  | DeleteRepositoryLink: (DeleteRepositoryLinkInput.t,
+  DeleteRepositoryLinkOutput.t, DeleteRepositoryLinkOutput.error) t 
+  | DeleteSyncConfiguration: (DeleteSyncConfigurationInput.t,
+  DeleteSyncConfigurationOutput.t, DeleteSyncConfigurationOutput.error) t 
   | GetConnection: (GetConnectionInput.t, GetConnectionOutput.t,
   GetConnectionOutput.error) t 
   | GetHost: (GetHostInput.t, GetHostOutput.t, GetHostOutput.error) t 
+  | GetRepositoryLink: (GetRepositoryLinkInput.t, GetRepositoryLinkOutput.t,
+  GetRepositoryLinkOutput.error) t 
+  | GetRepositorySyncStatus: (GetRepositorySyncStatusInput.t,
+  GetRepositorySyncStatusOutput.t, GetRepositorySyncStatusOutput.error) t 
+  | GetResourceSyncStatus: (GetResourceSyncStatusInput.t,
+  GetResourceSyncStatusOutput.t, GetResourceSyncStatusOutput.error) t 
+  | GetSyncBlockerSummary: (GetSyncBlockerSummaryInput.t,
+  GetSyncBlockerSummaryOutput.t, GetSyncBlockerSummaryOutput.error) t 
+  | GetSyncConfiguration: (GetSyncConfigurationInput.t,
+  GetSyncConfigurationOutput.t, GetSyncConfigurationOutput.error) t 
   | ListConnections: (ListConnectionsInput.t, ListConnectionsOutput.t,
   ListConnectionsOutput.error) t 
   | ListHosts: (ListHostsInput.t, ListHostsOutput.t, ListHostsOutput.error) t
   
+  | ListRepositoryLinks: (ListRepositoryLinksInput.t,
+  ListRepositoryLinksOutput.t, ListRepositoryLinksOutput.error) t 
+  | ListRepositorySyncDefinitions: (ListRepositorySyncDefinitionsInput.t,
+  ListRepositorySyncDefinitionsOutput.t,
+  ListRepositorySyncDefinitionsOutput.error) t 
+  | ListSyncConfigurations: (ListSyncConfigurationsInput.t,
+  ListSyncConfigurationsOutput.t, ListSyncConfigurationsOutput.error) t 
   | ListTagsForResource: (ListTagsForResourceInput.t,
   ListTagsForResourceOutput.t, ListTagsForResourceOutput.error) t 
   | TagResource: (TagResourceInput.t, TagResourceOutput.t,
@@ -25,35 +50,71 @@ type ('i, 'o, 'e) t =
   UntagResourceOutput.error) t 
   | UpdateHost: (UpdateHostInput.t, UpdateHostOutput.t,
   UpdateHostOutput.error) t 
+  | UpdateRepositoryLink: (UpdateRepositoryLinkInput.t,
+  UpdateRepositoryLinkOutput.t, UpdateRepositoryLinkOutput.error) t 
+  | UpdateSyncBlocker: (UpdateSyncBlockerInput.t, UpdateSyncBlockerOutput.t,
+  UpdateSyncBlockerOutput.error) t 
+  | UpdateSyncConfiguration: (UpdateSyncConfigurationInput.t,
+  UpdateSyncConfigurationOutput.t, UpdateSyncConfigurationOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateConnection -> `POST
   | CreateHost -> `POST
+  | CreateRepositoryLink -> `POST
+  | CreateSyncConfiguration -> `POST
   | DeleteConnection -> `POST
   | DeleteHost -> `POST
+  | DeleteRepositoryLink -> `POST
+  | DeleteSyncConfiguration -> `POST
   | GetConnection -> `POST
   | GetHost -> `POST
+  | GetRepositoryLink -> `POST
+  | GetRepositorySyncStatus -> `POST
+  | GetResourceSyncStatus -> `POST
+  | GetSyncBlockerSummary -> `POST
+  | GetSyncConfiguration -> `POST
   | ListConnections -> `POST
   | ListHosts -> `POST
+  | ListRepositoryLinks -> `POST
+  | ListRepositorySyncDefinitions -> `POST
+  | ListSyncConfigurations -> `POST
   | ListTagsForResource -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateHost -> `POST
+  | UpdateRepositoryLink -> `POST
+  | UpdateSyncBlocker -> `POST
+  | UpdateSyncConfiguration -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateConnection -> (Format.kasprintf Uri.of_string) "/"
       | CreateHost -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRepositoryLink -> (Format.kasprintf Uri.of_string) "/"
+      | CreateSyncConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | DeleteConnection -> (Format.kasprintf Uri.of_string) "/"
       | DeleteHost -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRepositoryLink -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteSyncConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | GetConnection -> (Format.kasprintf Uri.of_string) "/"
       | GetHost -> (Format.kasprintf Uri.of_string) "/"
+      | GetRepositoryLink -> (Format.kasprintf Uri.of_string) "/"
+      | GetRepositorySyncStatus -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourceSyncStatus -> (Format.kasprintf Uri.of_string) "/"
+      | GetSyncBlockerSummary -> (Format.kasprintf Uri.of_string) "/"
+      | GetSyncConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | ListConnections -> (Format.kasprintf Uri.of_string) "/"
       | ListHosts -> (Format.kasprintf Uri.of_string) "/"
+      | ListRepositoryLinks -> (Format.kasprintf Uri.of_string) "/"
+      | ListRepositorySyncDefinitions -> (Format.kasprintf Uri.of_string) "/"
+      | ListSyncConfigurations -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateHost -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateHost -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateRepositoryLink -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateSyncBlocker -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateSyncConfiguration -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -75,6 +136,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.codestar.connections.CodeStar_connections_20191201.CreateHost")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRepositoryLink ->
+      let json = CreateRepositoryLinkInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.CreateRepositoryLink")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateSyncConfiguration ->
+      let json = CreateSyncConfigurationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.CreateSyncConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteConnection ->
       let json = DeleteConnectionInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -92,6 +171,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "com.amazonaws.codestar.connections.CodeStar_connections_20191201.DeleteHost")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteRepositoryLink ->
+      let json = DeleteRepositoryLinkInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.DeleteRepositoryLink")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteSyncConfiguration ->
+      let json = DeleteSyncConfigurationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.DeleteSyncConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetConnection ->
       let json = GetConnectionInput.to_json req in
@@ -111,6 +208,51 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.codestar.connections.CodeStar_connections_20191201.GetHost")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetRepositoryLink ->
+      let json = GetRepositoryLinkInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.GetRepositoryLink")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetRepositorySyncStatus ->
+      let json = GetRepositorySyncStatusInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.GetRepositorySyncStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourceSyncStatus ->
+      let json = GetResourceSyncStatusInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.GetResourceSyncStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetSyncBlockerSummary ->
+      let json = GetSyncBlockerSummaryInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.GetSyncBlockerSummary")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetSyncConfiguration ->
+      let json = GetSyncConfigurationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.GetSyncConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListConnections ->
       let json = ListConnectionsInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -128,6 +270,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "com.amazonaws.codestar.connections.CodeStar_connections_20191201.ListHosts")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRepositoryLinks ->
+      let json = ListRepositoryLinksInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.ListRepositoryLinks")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRepositorySyncDefinitions ->
+      let json = ListRepositorySyncDefinitionsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.ListRepositorySyncDefinitions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSyncConfigurations ->
+      let json = ListSyncConfigurationsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.ListSyncConfigurations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceInput.to_json req in
@@ -165,6 +334,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.codestar.connections.CodeStar_connections_20191201.UpdateHost")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateRepositoryLink ->
+      let json = UpdateRepositoryLinkInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.UpdateRepositoryLink")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateSyncBlocker ->
+      let json = UpdateSyncBlockerInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.UpdateSyncBlocker")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateSyncConfiguration ->
+      let json = UpdateSyncConfigurationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "com.amazonaws.codestar.connections.CodeStar_connections_20191201.UpdateSyncConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -201,6 +397,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateHostOutput.of_json json)
       else Error (parse_aws_error (Some CreateHostOutput.error_of_json))
+  | CreateRepositoryLink ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRepositoryLinkOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateRepositoryLinkOutput.error_of_json))
+  | CreateSyncConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateSyncConfigurationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateSyncConfigurationOutput.error_of_json))
   | DeleteConnection ->
       if is_success
       then
@@ -214,6 +426,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteHostOutput.of_json json)
       else Error (parse_aws_error (Some DeleteHostOutput.error_of_json))
+  | DeleteRepositoryLink ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRepositoryLinkOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteRepositoryLinkOutput.error_of_json))
+  | DeleteSyncConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteSyncConfigurationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteSyncConfigurationOutput.error_of_json))
   | GetConnection ->
       if is_success
       then
@@ -226,18 +454,82 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetHostOutput.of_json json)
       else Error (parse_aws_error (Some GetHostOutput.error_of_json))
+  | GetRepositoryLink ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRepositoryLinkOutput.of_json json)
+      else
+        Error (parse_aws_error (Some GetRepositoryLinkOutput.error_of_json))
+  | GetRepositorySyncStatus ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRepositorySyncStatusOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetRepositorySyncStatusOutput.error_of_json))
+  | GetResourceSyncStatus ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourceSyncStatusOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetResourceSyncStatusOutput.error_of_json))
+  | GetSyncBlockerSummary ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSyncBlockerSummaryOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetSyncBlockerSummaryOutput.error_of_json))
+  | GetSyncConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSyncConfigurationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetSyncConfigurationOutput.error_of_json))
   | ListConnections ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListConnectionsOutput.of_json json)
-      else Error (parse_aws_error None)
+      else Error (parse_aws_error (Some ListConnectionsOutput.error_of_json))
   | ListHosts ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListHostsOutput.of_json json)
       else Error (parse_aws_error None)
+  | ListRepositoryLinks ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRepositoryLinksOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListRepositoryLinksOutput.error_of_json))
+  | ListRepositorySyncDefinitions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRepositorySyncDefinitionsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListRepositorySyncDefinitionsOutput.error_of_json))
+  | ListSyncConfigurations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSyncConfigurationsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListSyncConfigurationsOutput.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -264,3 +556,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateHostOutput.of_json json)
       else Error (parse_aws_error (Some UpdateHostOutput.error_of_json))
+  | UpdateRepositoryLink ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRepositoryLinkOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateRepositoryLinkOutput.error_of_json))
+  | UpdateSyncBlocker ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSyncBlockerOutput.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateSyncBlockerOutput.error_of_json))
+  | UpdateSyncConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSyncConfigurationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateSyncConfigurationOutput.error_of_json))

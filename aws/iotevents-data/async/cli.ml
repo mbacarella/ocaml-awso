@@ -49,6 +49,26 @@ let batch_acknowledge_alarm =
                                             acknowledgeActionRequests) ())
            (Some Values.BatchAcknowledgeAlarmResponse.to_json)
            (Some Values.BatchAcknowledgeAlarmResponse.error_to_json)])
+let batch_delete_detector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectors =
+         flag "detectors" (required json_arg)
+           ~doc:"JSON DeleteDetectorRequests" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_delete_detector
+           (Values.BatchDeleteDetectorRequest.make
+              ~detectors:(Values.DeleteDetectorRequests.of_json detectors) ())
+           (Some Values.BatchDeleteDetectorResponse.to_json)
+           (Some Values.BatchDeleteDetectorResponse.error_to_json)])
 let batch_disable_alarm =
   Command.async ~summary:""
     ([%map_open.Command
@@ -267,6 +287,7 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-acknowledge-alarm", batch_acknowledge_alarm);
+    ("batch-delete-detector", batch_delete_detector);
     ("batch-disable-alarm", batch_disable_alarm);
     ("batch-enable-alarm", batch_enable_alarm);
     ("batch-put-message", batch_put_message);

@@ -2,28 +2,110 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AcceptPrimaryEmailUpdate: (AcceptPrimaryEmailUpdateRequest.t,
+  AcceptPrimaryEmailUpdateResponse.t, AcceptPrimaryEmailUpdateResponse.error)
+  t 
   | DeleteAlternateContact: (DeleteAlternateContactRequest.t, unit, unit) t 
+  | DisableRegion: (DisableRegionRequest.t, unit, unit) t 
+  | EnableRegion: (EnableRegionRequest.t, unit, unit) t 
+  | GetAccountInformation: (GetAccountInformationRequest.t,
+  GetAccountInformationResponse.t, GetAccountInformationResponse.error) t 
   | GetAlternateContact: (GetAlternateContactRequest.t,
   GetAlternateContactResponse.t, GetAlternateContactResponse.error) t 
+  | GetContactInformation: (GetContactInformationRequest.t,
+  GetContactInformationResponse.t, GetContactInformationResponse.error) t 
+  | GetGovCloudAccountInformation: (GetGovCloudAccountInformationRequest.t,
+  GetGovCloudAccountInformationResponse.t,
+  GetGovCloudAccountInformationResponse.error) t 
+  | GetPrimaryEmail: (GetPrimaryEmailRequest.t, GetPrimaryEmailResponse.t,
+  GetPrimaryEmailResponse.error) t 
+  | GetRegionOptStatus: (GetRegionOptStatusRequest.t,
+  GetRegionOptStatusResponse.t, GetRegionOptStatusResponse.error) t 
+  | ListRegions: (ListRegionsRequest.t, ListRegionsResponse.t,
+  ListRegionsResponse.error) t 
+  | PutAccountName: (PutAccountNameRequest.t, unit, unit) t 
   | PutAlternateContact: (PutAlternateContactRequest.t, unit, unit) t 
+  | PutContactInformation: (PutContactInformationRequest.t, unit, unit) t 
+  | StartPrimaryEmailUpdate: (StartPrimaryEmailUpdateRequest.t,
+  StartPrimaryEmailUpdateResponse.t, StartPrimaryEmailUpdateResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AcceptPrimaryEmailUpdate -> `POST
   | DeleteAlternateContact -> `POST
+  | DisableRegion -> `POST
+  | EnableRegion -> `POST
+  | GetAccountInformation -> `POST
   | GetAlternateContact -> `POST
+  | GetContactInformation -> `POST
+  | GetGovCloudAccountInformation -> `POST
+  | GetPrimaryEmail -> `POST
+  | GetRegionOptStatus -> `POST
+  | ListRegions -> `POST
+  | PutAccountName -> `POST
   | PutAlternateContact -> `POST
+  | PutContactInformation -> `POST
+  | StartPrimaryEmailUpdate -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AcceptPrimaryEmailUpdate ->
+          (Format.kasprintf Uri.of_string) "/acceptPrimaryEmailUpdate"
       | DeleteAlternateContact ->
           (Format.kasprintf Uri.of_string) "/deleteAlternateContact"
+      | DisableRegion -> (Format.kasprintf Uri.of_string) "/disableRegion"
+      | EnableRegion -> (Format.kasprintf Uri.of_string) "/enableRegion"
+      | GetAccountInformation ->
+          (Format.kasprintf Uri.of_string) "/getAccountInformation"
       | GetAlternateContact ->
           (Format.kasprintf Uri.of_string) "/getAlternateContact"
+      | GetContactInformation ->
+          (Format.kasprintf Uri.of_string) "/getContactInformation"
+      | GetGovCloudAccountInformation ->
+          (Format.kasprintf Uri.of_string) "/getGovCloudAccountInformation"
+      | GetPrimaryEmail ->
+          (Format.kasprintf Uri.of_string) "/getPrimaryEmail"
+      | GetRegionOptStatus ->
+          (Format.kasprintf Uri.of_string) "/getRegionOptStatus"
+      | ListRegions -> (Format.kasprintf Uri.of_string) "/listRegions"
+      | PutAccountName -> (Format.kasprintf Uri.of_string) "/putAccountName"
       | PutAlternateContact ->
-          (Format.kasprintf Uri.of_string) "/putAlternateContact")
+          (Format.kasprintf Uri.of_string) "/putAlternateContact"
+      | PutContactInformation ->
+          (Format.kasprintf Uri.of_string) "/putContactInformation"
+      | StartPrimaryEmailUpdate ->
+          (Format.kasprintf Uri.of_string) "/startPrimaryEmailUpdate")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | AcceptPrimaryEmailUpdate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AccountId",
+                           (AccountId.to_value
+                              req.AcceptPrimaryEmailUpdateRequest.accountId));
+                      Some
+                        ("PrimaryEmail",
+                          (PrimaryEmailAddress.to_value
+                             req.AcceptPrimaryEmailUpdateRequest.primaryEmail));
+                      Some
+                        ("Otp",
+                          (Otp.to_value
+                             req.AcceptPrimaryEmailUpdateRequest.otp))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteAlternateContact ->
       let (headers, body) =
         let headers =
@@ -33,12 +115,74 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.DeleteAlternateContactRequest.accountId
+                      [Some
+                         ("AlternateContactType",
+                           (AlternateContactType.to_value
+                              req.DeleteAlternateContactRequest.alternateContactType));
+                      Option.map req.DeleteAlternateContactRequest.accountId
+                        ~f:(fun x -> ("AccountId", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisableRegion ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.DisableRegionRequest.accountId
                          ~f:(fun x -> ("AccountId", (AccountId.to_value x)));
                       Some
-                        ("AlternateContactType",
-                          (AlternateContactType.to_value
-                             req.DeleteAlternateContactRequest.alternateContactType))])
+                        ("RegionName",
+                          (RegionName.to_value
+                             req.DisableRegionRequest.regionName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | EnableRegion ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.EnableRegionRequest.accountId
+                         ~f:(fun x -> ("AccountId", (AccountId.to_value x)));
+                      Some
+                        ("RegionName",
+                          (RegionName.to_value
+                             req.EnableRegionRequest.regionName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAccountInformation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetAccountInformationRequest.accountId
+                         ~f:(fun x -> ("AccountId", (AccountId.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -55,12 +199,146 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.GetAlternateContactRequest.accountId
+                      [Some
+                         ("AlternateContactType",
+                           (AlternateContactType.to_value
+                              req.GetAlternateContactRequest.alternateContactType));
+                      Option.map req.GetAlternateContactRequest.accountId
+                        ~f:(fun x -> ("AccountId", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetContactInformation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetContactInformationRequest.accountId
+                         ~f:(fun x -> ("AccountId", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetGovCloudAccountInformation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.GetGovCloudAccountInformationRequest.standardAccountId
+                         ~f:(fun x ->
+                               ("StandardAccountId", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPrimaryEmail ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AccountId",
+                           (AccountId.to_value
+                              req.GetPrimaryEmailRequest.accountId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRegionOptStatus ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetRegionOptStatusRequest.accountId
                          ~f:(fun x -> ("AccountId", (AccountId.to_value x)));
                       Some
-                        ("AlternateContactType",
-                          (AlternateContactType.to_value
-                             req.GetAlternateContactRequest.alternateContactType))])
+                        ("RegionName",
+                          (RegionName.to_value
+                             req.GetRegionOptStatusRequest.regionName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRegions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListRegionsRequest.accountId
+                         ~f:(fun x -> ("AccountId", (AccountId.to_value x)));
+                      Option.map req.ListRegionsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (ListRegionsRequestMaxResultsInteger.to_value
+                                   x)));
+                      Option.map req.ListRegionsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken",
+                                (ListRegionsRequestNextTokenString.to_value x)));
+                      Option.map
+                        req.ListRegionsRequest.regionOptStatusContains
+                        ~f:(fun x ->
+                              ("RegionOptStatusContains",
+                                (RegionOptStatusList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutAccountName ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AccountName",
+                           (AccountName.to_value
+                              req.PutAccountNameRequest.accountName));
+                      Option.map req.PutAccountNameRequest.accountId
+                        ~f:(fun x -> ("AccountId", (AccountId.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -77,27 +355,73 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.PutAlternateContactRequest.accountId
-                         ~f:(fun x -> ("AccountId", (AccountId.to_value x)));
+                      [Some
+                         ("Name",
+                           (Name.to_value req.PutAlternateContactRequest.name));
                       Some
-                        ("AlternateContactType",
-                          (AlternateContactType.to_value
-                             req.PutAlternateContactRequest.alternateContactType));
+                        ("Title",
+                          (Title.to_value
+                             req.PutAlternateContactRequest.title));
                       Some
                         ("EmailAddress",
                           (EmailAddress.to_value
                              req.PutAlternateContactRequest.emailAddress));
                       Some
-                        ("Name",
-                          (Name.to_value req.PutAlternateContactRequest.name));
-                      Some
                         ("PhoneNumber",
                           (PhoneNumber.to_value
                              req.PutAlternateContactRequest.phoneNumber));
                       Some
-                        ("Title",
-                          (Title.to_value
-                             req.PutAlternateContactRequest.title))])
+                        ("AlternateContactType",
+                          (AlternateContactType.to_value
+                             req.PutAlternateContactRequest.alternateContactType));
+                      Option.map req.PutAlternateContactRequest.accountId
+                        ~f:(fun x -> ("AccountId", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutContactInformation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ContactInformation",
+                           (ContactInformation.to_value
+                              req.PutContactInformationRequest.contactInformation));
+                      Option.map req.PutContactInformationRequest.accountId
+                        ~f:(fun x -> ("AccountId", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartPrimaryEmailUpdate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AccountId",
+                           (AccountId.to_value
+                              req.StartPrimaryEmailUpdateRequest.accountId));
+                      Some
+                        ("PrimaryEmail",
+                          (PrimaryEmailAddress.to_value
+                             req.StartPrimaryEmailUpdateRequest.primaryEmail))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -153,13 +477,74 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | AcceptPrimaryEmailUpdate ->
+      if is_success
+      then
+        Ok (AcceptPrimaryEmailUpdateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AcceptPrimaryEmailUpdateResponse.error_of_json))
   | DeleteAlternateContact ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DisableRegion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | EnableRegion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | GetAccountInformation ->
+      if is_success
+      then Ok (GetAccountInformationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetAccountInformationResponse.error_of_json))
   | GetAlternateContact ->
       if is_success
       then Ok (GetAlternateContactResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetAlternateContactResponse.error_of_json))
+  | GetContactInformation ->
+      if is_success
+      then Ok (GetContactInformationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetContactInformationResponse.error_of_json))
+  | GetGovCloudAccountInformation ->
+      if is_success
+      then
+        Ok
+          (GetGovCloudAccountInformationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetGovCloudAccountInformationResponse.error_of_json))
+  | GetPrimaryEmail ->
+      if is_success
+      then Ok (GetPrimaryEmailResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetPrimaryEmailResponse.error_of_json))
+  | GetRegionOptStatus ->
+      if is_success
+      then Ok (GetRegionOptStatusResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRegionOptStatusResponse.error_of_json))
+  | ListRegions ->
+      if is_success
+      then Ok (ListRegionsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRegionsResponse.error_of_json))
+  | PutAccountName ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutAlternateContact ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | PutContactInformation ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | StartPrimaryEmailUpdate ->
+      if is_success
+      then
+        Ok (StartPrimaryEmailUpdateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartPrimaryEmailUpdateResponse.error_of_json))

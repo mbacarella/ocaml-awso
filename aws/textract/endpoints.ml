@@ -8,8 +8,20 @@ type ('i, 'o, 'e) t =
   AnalyzeExpenseResponse.error) t 
   | AnalyzeID: (AnalyzeIDRequest.t, AnalyzeIDResponse.t,
   AnalyzeIDResponse.error) t 
+  | CreateAdapter: (CreateAdapterRequest.t, CreateAdapterResponse.t,
+  CreateAdapterResponse.error) t 
+  | CreateAdapterVersion: (CreateAdapterVersionRequest.t,
+  CreateAdapterVersionResponse.t, CreateAdapterVersionResponse.error) t 
+  | DeleteAdapter: (DeleteAdapterRequest.t, DeleteAdapterResponse.t,
+  DeleteAdapterResponse.error) t 
+  | DeleteAdapterVersion: (DeleteAdapterVersionRequest.t,
+  DeleteAdapterVersionResponse.t, DeleteAdapterVersionResponse.error) t 
   | DetectDocumentText: (DetectDocumentTextRequest.t,
   DetectDocumentTextResponse.t, DetectDocumentTextResponse.error) t 
+  | GetAdapter: (GetAdapterRequest.t, GetAdapterResponse.t,
+  GetAdapterResponse.error) t 
+  | GetAdapterVersion: (GetAdapterVersionRequest.t,
+  GetAdapterVersionResponse.t, GetAdapterVersionResponse.error) t 
   | GetDocumentAnalysis: (GetDocumentAnalysisRequest.t,
   GetDocumentAnalysisResponse.t, GetDocumentAnalysisResponse.error) t 
   | GetDocumentTextDetection: (GetDocumentTextDetectionRequest.t,
@@ -17,6 +29,17 @@ type ('i, 'o, 'e) t =
   t 
   | GetExpenseAnalysis: (GetExpenseAnalysisRequest.t,
   GetExpenseAnalysisResponse.t, GetExpenseAnalysisResponse.error) t 
+  | GetLendingAnalysis: (GetLendingAnalysisRequest.t,
+  GetLendingAnalysisResponse.t, GetLendingAnalysisResponse.error) t 
+  | GetLendingAnalysisSummary: (GetLendingAnalysisSummaryRequest.t,
+  GetLendingAnalysisSummaryResponse.t,
+  GetLendingAnalysisSummaryResponse.error) t 
+  | ListAdapterVersions: (ListAdapterVersionsRequest.t,
+  ListAdapterVersionsResponse.t, ListAdapterVersionsResponse.error) t 
+  | ListAdapters: (ListAdaptersRequest.t, ListAdaptersResponse.t,
+  ListAdaptersResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | StartDocumentAnalysis: (StartDocumentAnalysisRequest.t,
   StartDocumentAnalysisResponse.t, StartDocumentAnalysisResponse.error) t 
   | StartDocumentTextDetection: (StartDocumentTextDetectionRequest.t,
@@ -24,31 +47,69 @@ type ('i, 'o, 'e) t =
   StartDocumentTextDetectionResponse.error) t 
   | StartExpenseAnalysis: (StartExpenseAnalysisRequest.t,
   StartExpenseAnalysisResponse.t, StartExpenseAnalysisResponse.error) t 
+  | StartLendingAnalysis: (StartLendingAnalysisRequest.t,
+  StartLendingAnalysisResponse.t, StartLendingAnalysisResponse.error) t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
+  | UpdateAdapter: (UpdateAdapterRequest.t, UpdateAdapterResponse.t,
+  UpdateAdapterResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AnalyzeDocument -> `POST
   | AnalyzeExpense -> `POST
   | AnalyzeID -> `POST
+  | CreateAdapter -> `POST
+  | CreateAdapterVersion -> `POST
+  | DeleteAdapter -> `POST
+  | DeleteAdapterVersion -> `POST
   | DetectDocumentText -> `POST
+  | GetAdapter -> `POST
+  | GetAdapterVersion -> `POST
   | GetDocumentAnalysis -> `POST
   | GetDocumentTextDetection -> `POST
   | GetExpenseAnalysis -> `POST
+  | GetLendingAnalysis -> `POST
+  | GetLendingAnalysisSummary -> `POST
+  | ListAdapterVersions -> `POST
+  | ListAdapters -> `POST
+  | ListTagsForResource -> `POST
   | StartDocumentAnalysis -> `POST
   | StartDocumentTextDetection -> `POST
   | StartExpenseAnalysis -> `POST
+  | StartLendingAnalysis -> `POST
+  | TagResource -> `POST
+  | UntagResource -> `POST
+  | UpdateAdapter -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AnalyzeDocument -> (Format.kasprintf Uri.of_string) "/"
       | AnalyzeExpense -> (Format.kasprintf Uri.of_string) "/"
       | AnalyzeID -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAdapter -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAdapterVersion -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAdapter -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAdapterVersion -> (Format.kasprintf Uri.of_string) "/"
       | DetectDocumentText -> (Format.kasprintf Uri.of_string) "/"
+      | GetAdapter -> (Format.kasprintf Uri.of_string) "/"
+      | GetAdapterVersion -> (Format.kasprintf Uri.of_string) "/"
       | GetDocumentAnalysis -> (Format.kasprintf Uri.of_string) "/"
       | GetDocumentTextDetection -> (Format.kasprintf Uri.of_string) "/"
       | GetExpenseAnalysis -> (Format.kasprintf Uri.of_string) "/"
+      | GetLendingAnalysis -> (Format.kasprintf Uri.of_string) "/"
+      | GetLendingAnalysisSummary -> (Format.kasprintf Uri.of_string) "/"
+      | ListAdapterVersions -> (Format.kasprintf Uri.of_string) "/"
+      | ListAdapters -> (Format.kasprintf Uri.of_string) "/"
+      | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | StartDocumentAnalysis -> (Format.kasprintf Uri.of_string) "/"
       | StartDocumentTextDetection -> (Format.kasprintf Uri.of_string) "/"
-      | StartExpenseAnalysis -> (Format.kasprintf Uri.of_string) "/")
+      | StartExpenseAnalysis -> (Format.kasprintf Uri.of_string) "/"
+      | StartLendingAnalysis -> (Format.kasprintf Uri.of_string) "/"
+      | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAdapter -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -76,6 +137,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Textract.AnalyzeID")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAdapter ->
+      let json = CreateAdapterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.CreateAdapter")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAdapterVersion ->
+      let json = CreateAdapterVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.CreateAdapterVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAdapter ->
+      let json = DeleteAdapterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.DeleteAdapter")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAdapterVersion ->
+      let json = DeleteAdapterVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.DeleteAdapterVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DetectDocumentText ->
       let json = DetectDocumentTextRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -83,6 +176,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Textract.DetectDocumentText")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetAdapter ->
+      let json = GetAdapterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.GetAdapter")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetAdapterVersion ->
+      let json = GetAdapterVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.GetAdapterVersion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetDocumentAnalysis ->
       let json = GetDocumentAnalysisRequest.to_json req in
@@ -108,6 +217,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Textract.GetExpenseAnalysis")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLendingAnalysis ->
+      let json = GetLendingAnalysisRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.GetLendingAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLendingAnalysisSummary ->
+      let json = GetLendingAnalysisSummaryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.GetLendingAnalysisSummary")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAdapterVersions ->
+      let json = ListAdapterVersionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.ListAdapterVersions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAdapters ->
+      let json = ListAdaptersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.ListAdapters")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let json = ListTagsForResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartDocumentAnalysis ->
       let json = StartDocumentAnalysisRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -131,6 +280,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Textract.StartExpenseAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartLendingAnalysis ->
+      let json = StartLendingAnalysisRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.StartLendingAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TagResource ->
+      let json = TagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.TagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UntagResource ->
+      let json = UntagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAdapter ->
+      let json = UpdateAdapterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Textract.UpdateAdapter")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -175,6 +356,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (AnalyzeIDResponse.of_json json)
       else Error (parse_aws_error (Some AnalyzeIDResponse.error_of_json))
+  | CreateAdapter ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAdapterResponse.of_json json)
+      else Error (parse_aws_error (Some CreateAdapterResponse.error_of_json))
+  | CreateAdapterVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAdapterVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateAdapterVersionResponse.error_of_json))
+  | DeleteAdapter ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAdapterResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteAdapterResponse.error_of_json))
+  | DeleteAdapterVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAdapterVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteAdapterVersionResponse.error_of_json))
   | DetectDocumentText ->
       if is_success
       then
@@ -183,6 +392,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DetectDocumentTextResponse.error_of_json))
+  | GetAdapter ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAdapterResponse.of_json json)
+      else Error (parse_aws_error (Some GetAdapterResponse.error_of_json))
+  | GetAdapterVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAdapterVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetAdapterVersionResponse.error_of_json))
   | GetDocumentAnalysis ->
       if is_success
       then
@@ -208,6 +431,45 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetExpenseAnalysisResponse.error_of_json))
+  | GetLendingAnalysis ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLendingAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetLendingAnalysisResponse.error_of_json))
+  | GetLendingAnalysisSummary ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLendingAnalysisSummaryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLendingAnalysisSummaryResponse.error_of_json))
+  | ListAdapterVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAdapterVersionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListAdapterVersionsResponse.error_of_json))
+  | ListAdapters ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAdaptersResponse.of_json json)
+      else Error (parse_aws_error (Some ListAdaptersResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | StartDocumentAnalysis ->
       if is_success
       then
@@ -233,3 +495,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartExpenseAnalysisResponse.error_of_json))
+  | StartLendingAnalysis ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartLendingAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartLendingAnalysisResponse.error_of_json))
+  | TagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAdapter ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAdapterResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateAdapterResponse.error_of_json))

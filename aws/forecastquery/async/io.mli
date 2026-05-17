@@ -6,3 +6,9 @@ val query_forecast :
       QueryForecastRequest.t ->
         (QueryForecastResponse.t, QueryForecastResponse.error) Result.t
           Async.Deferred.t
+val query_what_if_forecast :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      QueryWhatIfForecastRequest.t ->
+        (QueryWhatIfForecastResponse.t, QueryWhatIfForecastResponse.error)
+          Result.t Async.Deferred.t

@@ -90,9 +90,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -124,6 +124,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -169,15 +172,35 @@ module UsageAllocation =
           (Xml.child_exn ~context:context_ xml_arg0 "AllocatedUsageQuantity") in
       make ?tags ~allocatedUsageQuantity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let allocatedUsageQuantity =
-        field_map_exn json "AllocatedUsageQuantity"
+        field_map_exn json__ "AllocatedUsageQuantity"
           AllocatedUsageQuantity.of_json in
       make ?tags ~allocatedUsageQuantity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Usage allocations allow you to split usage into buckets by tags. Each UsageAllocation indicates the usage quantity for a specific set of tags."]
+module CustomerAWSAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "CustomerAWSAccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomerAWSAccountId" j
+    let to_json = simple_to_json to_value
+  end
 module CustomerIdentifier =
   struct
     type nonrec t = string
@@ -185,10 +208,10 @@ module CustomerIdentifier =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\s\\S]+")));
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -196,6 +219,24 @@ module CustomerIdentifier =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"CustomerIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module LicenseArn =
+  struct
+    type nonrec t = string
+    let context_ = "LicenseArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:aws[a-zA-Z-]*:[A-Za-z0-9][A-Za-z0-9_/.-]{0,62}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,1023}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LicenseArn" j
     let to_json = simple_to_json to_value
   end
 module Timestamp =
@@ -219,6 +260,9 @@ module UsageAllocations =
           ((check_list_max i ~max:2500) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageAllocation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -298,44 +342,62 @@ module UsageRecord =
       {
       timestamp: Timestamp.t
         [@ocaml.doc
-          "Timestamp, in UTC, for which the usage is being reported. Your application can meter usage for up to one hour in the past. Make sure the timestamp value is not before the start of the software usage."];
-      customerIdentifier: CustomerIdentifier.t
+          "Timestamp, in UTC, for which the usage is being reported. Your application can meter usage for up to six hours in the past. Make sure the timestamp value is not before the start of the software usage."];
+      customerIdentifier: CustomerIdentifier.t option
         [@ocaml.doc
           "The CustomerIdentifier is obtained through the ResolveCustomer operation and represents an individual buyer in your application."];
       dimension: UsageDimension.t
         [@ocaml.doc
-          "During the process of registering a product on AWS Marketplace, dimensions are specified. These represent different units of value in your application."];
+          "During the process of registering a product on Amazon Web Services Marketplace, dimensions are specified. These represent different units of value in your application."];
       quantity: UsageQuantity.t option
         [@ocaml.doc
           "The quantity of usage consumed by the customer for the given dimension and time. Defaults to 0 if not specified."];
       usageAllocations: UsageAllocations.t option
         [@ocaml.doc
-          "The set of UsageAllocations to submit. The sum of all UsageAllocation quantities must equal the Quantity of the UsageRecord."]}
+          "The set of UsageAllocations to submit. The sum of all UsageAllocation quantities must equal the Quantity of the UsageRecord."];
+      customerAWSAccountId: CustomerAWSAccountId.t option
+        [@ocaml.doc
+          "The CustomerAWSAccountId parameter specifies the AWS account ID of the buyer. For existing integrations, to access your CustomerIdentifier to CustomerAWSAccountId mapping, see Account Feeds."];
+      licenseArn: LicenseArn.t option
+        [@ocaml.doc
+          "The LicenseArn is a unique identifier for a specific granted license. These are used for software purchased through Amazon Web Services Marketplace. To access your CustomerAWSAccountId and LicenseArn mapping, visit Agreements Feeds."]}
     let context_ = "UsageRecord"
-    let make ?quantity =
-      fun ?usageAllocations ->
-        fun ~timestamp ->
-          fun ~customerIdentifier ->
-            fun ~dimension ->
-              fun () ->
-                {
-                  quantity;
-                  usageAllocations;
-                  timestamp;
-                  customerIdentifier;
-                  dimension
-                }
+    let make ?customerIdentifier =
+      fun ?quantity ->
+        fun ?usageAllocations ->
+          fun ?customerAWSAccountId ->
+            fun ?licenseArn ->
+              fun ~timestamp ->
+                fun ~dimension ->
+                  fun () ->
+                    {
+                      customerIdentifier;
+                      quantity;
+                      usageAllocations;
+                      customerAWSAccountId;
+                      licenseArn;
+                      timestamp;
+                      dimension
+                    }
     let to_value x =
       structure_to_value
         [("Timestamp", (Some (Timestamp.to_value x.timestamp)));
         ("CustomerIdentifier",
-          (Some (CustomerIdentifier.to_value x.customerIdentifier)));
+          (Option.map x.customerIdentifier ~f:CustomerIdentifier.to_value));
         ("Dimension", (Some (UsageDimension.to_value x.dimension)));
         ("Quantity", (Option.map x.quantity ~f:UsageQuantity.to_value));
         ("UsageAllocations",
-          (Option.map x.usageAllocations ~f:UsageAllocations.to_value))]
+          (Option.map x.usageAllocations ~f:UsageAllocations.to_value));
+        ("CustomerAWSAccountId",
+          (Option.map x.customerAWSAccountId ~f:CustomerAWSAccountId.to_value));
+        ("LicenseArn", (Option.map x.licenseArn ~f:LicenseArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let licenseArn =
+        (Option.map ~f:LicenseArn.of_xml) (Xml.child xml_arg0 "LicenseArn") in
+      let customerAWSAccountId =
+        (Option.map ~f:CustomerAWSAccountId.of_xml)
+          (Xml.child xml_arg0 "CustomerAWSAccountId") in
       let usageAllocations =
         (Option.map ~f:UsageAllocations.of_xml)
           (Xml.child xml_arg0 "UsageAllocations") in
@@ -345,24 +407,27 @@ module UsageRecord =
         UsageDimension.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Dimension") in
       let customerIdentifier =
-        CustomerIdentifier.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CustomerIdentifier") in
+        (Option.map ~f:CustomerIdentifier.of_xml)
+          (Xml.child xml_arg0 "CustomerIdentifier") in
       let timestamp =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
-      make ?usageAllocations ?quantity ~dimension ~customerIdentifier
-        ~timestamp ()
+      make ?licenseArn ?customerAWSAccountId ?usageAllocations ?quantity
+        ~dimension ?customerIdentifier ~timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let licenseArn = field_map json__ "LicenseArn" LicenseArn.of_json in
+      let customerAWSAccountId =
+        field_map json__ "CustomerAWSAccountId" CustomerAWSAccountId.of_json in
       let usageAllocations =
-        field_map json "UsageAllocations" UsageAllocations.of_json in
-      let quantity = field_map json "Quantity" UsageQuantity.of_json in
-      let dimension = field_map_exn json "Dimension" UsageDimension.of_json in
+        field_map json__ "UsageAllocations" UsageAllocations.of_json in
+      let quantity = field_map json__ "Quantity" UsageQuantity.of_json in
+      let dimension = field_map_exn json__ "Dimension" UsageDimension.of_json in
       let customerIdentifier =
-        field_map_exn json "CustomerIdentifier" CustomerIdentifier.of_json in
-      let timestamp = field_map_exn json "Timestamp" Timestamp.of_json in
-      make ?usageAllocations ?quantity ~dimension ~customerIdentifier
-        ~timestamp ()
+        field_map json__ "CustomerIdentifier" CustomerIdentifier.of_json in
+      let timestamp = field_map_exn json__ "Timestamp" Timestamp.of_json in
+      make ?licenseArn ?customerAWSAccountId ?usageAllocations ?quantity
+        ~dimension ?customerIdentifier ~timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A UsageRecord indicates a quantity of usage for a given product, customer, dimension and time. Multiple requests with the same UsageRecords as input will be de-duplicated to prevent double charges."]
@@ -421,7 +486,7 @@ module UsageRecordResult =
           "The MeteringRecordId is a unique identifier for this metering event."];
       status: UsageRecordResultStatus.t option
         [@ocaml.doc
-          "The UsageRecordResult Status indicates the status of an individual UsageRecord processed by BatchMeterUsage. Success- The UsageRecord was accepted and honored by BatchMeterUsage. CustomerNotSubscribed- The CustomerIdentifier specified is not able to use your product. The UsageRecord was not honored. There are three causes for this result: The customer identifier is invalid. The customer identifier provided in the metering record does not have an active agreement or subscription with this product. Future UsageRecords for this customer will fail until the customer subscribes to your product. The customer's AWS account was suspended. DuplicateRecord- Indicates that the UsageRecord was invalid and not honored. A previously metered UsageRecord had the same customer, dimension, and time, but a different quantity."]}
+          "The UsageRecordResult Status indicates the status of an individual UsageRecord processed by BatchMeterUsage. Success- The UsageRecord was accepted and honored by BatchMeterUsage. CustomerNotSubscribed- The CustomerIdentifier specified is not able to use your product. The UsageRecord was not honored. There are three causes for this result: The customer identifier is invalid. The customer identifier provided in the metering record does not have an active agreement or subscription with this product. Future UsageRecords for this customer will fail until the customer subscribes to your product. The customer's Amazon Web Services account was suspended. DuplicateRecord- Indicates that the UsageRecord was invalid and not honored. A previously metered UsageRecord had the same customer, dimension, and time, but a different quantity."]}
     let make ?usageRecord =
       fun ?meteringRecordId ->
         fun ?status -> fun () -> { usageRecord; meteringRecordId; status }
@@ -443,35 +508,15 @@ module UsageRecordResult =
         (Option.map ~f:UsageRecord.of_xml) (Xml.child xml_arg0 "UsageRecord") in
       make ?status ?meteringRecordId ?usageRecord ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" UsageRecordResultStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" UsageRecordResultStatus.of_json in
       let meteringRecordId =
-        field_map json "MeteringRecordId" String_.of_json in
-      let usageRecord = field_map json "UsageRecord" UsageRecord.of_json in
+        field_map json__ "MeteringRecordId" String_.of_json in
+      let usageRecord = field_map json__ "UsageRecord" UsageRecord.of_json in
       make ?status ?meteringRecordId ?usageRecord ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A UsageRecordResult indicates the status of a given UsageRecord processed by BatchMeterUsage."]
-module CustomerAWSAccountId =
-  struct
-    type nonrec t = string
-    let context_ = "CustomerAWSAccountId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"^[0-9]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CustomerAWSAccountId" j
-    let to_json = simple_to_json to_value
-  end
 module DisabledApiException =
   struct
     type nonrec t = {
@@ -486,8 +531,8 @@ module DisabledApiException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The API is disabled in the Region."]
@@ -505,8 +550,8 @@ module ExpiredTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -525,12 +570,12 @@ module InternalServiceErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An internal error has occurred. Retry your request. If the problem persists, post a message with details on the AWS forums."]
+       "An internal error has occurred. Retry your request. If the problem persists, post a message with details on the Amazon Web Services forums."]
 module InvalidTokenException =
   struct
     type nonrec t = {
@@ -545,8 +590,8 @@ module InvalidTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Registration token is invalid."]
@@ -557,7 +602,7 @@ module ProductCode =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
                   (fun () -> check_pattern i ~pattern:"^[-a-zA-Z0-9/=:_.@]*$")));
@@ -584,8 +629,8 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The calls to the API are throttled."]
@@ -618,8 +663,8 @@ module CustomerNotEntitledException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -638,8 +683,8 @@ module InvalidProductCodeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -658,8 +703,8 @@ module InvalidPublicKeyVersionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Public Key version is invalid."]
@@ -677,12 +722,12 @@ module InvalidRegionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "RegisterUsage must be called in the same AWS Region the ECS task was launched in. This prevents a container from hardcoding a Region (e.g. withRegion(\226\128\156us-east-1\226\128\157) when calling RegisterUsage."]
+       "RegisterUsage must be called in the same Amazon Web Services Region the ECS task was launched in. This prevents a container from hardcoding a Region (e.g. withRegion(\226\128\156us-east-1\226\128\157) when calling RegisterUsage."]
 module PlatformNotSupportedException =
   struct
     type nonrec t = {
@@ -697,12 +742,12 @@ module PlatformNotSupportedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "AWS Marketplace does not support metering usage from the underlying platform. Currently, Amazon ECS, Amazon EKS, and AWS Fargate are supported."]
+       "Amazon Web Services Marketplace does not support metering usage from the underlying platform. Currently, Amazon ECS, Amazon EKS, and Fargate are supported."]
 module Nonce =
   struct
     type nonrec t = string
@@ -750,12 +795,31 @@ module DuplicateRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A metering record has already been emitted by the same EC2 instance, ECS task, or EKS pod for the given \\{usageDimension, timestamp\\} with a different usageQuantity."]
+module IdempotencyConflictException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The ClientToken is being used for multiple requests."]
 module InvalidEndpointRegionException =
   struct
     type nonrec t = {
@@ -770,12 +834,12 @@ module InvalidEndpointRegionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The endpoint being called is in a AWS Region different from your EC2 instance, ECS task, or EKS pod. The Region of the Metering Service endpoint and the AWS Region of the resource must match."]
+       "The endpoint being called is in a Amazon Web Services Region different from your EC2 instance, ECS task, or EKS pod. The Region of the Metering Service endpoint and the Amazon Web Services Region of the resource must match."]
 module InvalidTagException =
   struct
     type nonrec t = {
@@ -790,8 +854,8 @@ module InvalidTagException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -810,12 +874,12 @@ module InvalidUsageAllocationsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The usage allocation objects are invalid, or the number of allocations is greater than 500 for a single usage record."]
+       "Sum of allocated usage quantities is not equal to the usage quantity."]
 module InvalidUsageDimensionException =
   struct
     type nonrec t = {
@@ -830,8 +894,8 @@ module InvalidUsageDimensionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -850,8 +914,8 @@ module TimestampOutOfBoundsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -869,6 +933,24 @@ module Boolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
 module InvalidCustomerIdentifierException =
   struct
     type nonrec t = {
@@ -883,12 +965,32 @@ module InvalidCustomerIdentifierException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You have metered usage for a CustomerIdentifier that does not exist."]
+module InvalidLicenseException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Ensure the LicenseArn is valid, matches the customer, and usage is within the license activation period."]
 module UsageRecordList =
   struct
     type nonrec t = UsageRecord.t list
@@ -897,6 +999,9 @@ module UsageRecordList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -921,6 +1026,9 @@ module UsageRecordResultList =
   struct
     type nonrec t = UsageRecordResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageRecordResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -948,13 +1056,16 @@ module ResolveCustomerResult =
       {
       customerIdentifier: CustomerIdentifier.t option
         [@ocaml.doc
-          "The CustomerIdentifier is used to identify an individual customer in your application. Calls to BatchMeterUsage require CustomerIdentifiers for each UsageRecord."];
+          "The CustomerIdentifier is used to identify an individual customer in your application."];
       productCode: ProductCode.t option
         [@ocaml.doc
           "The product code is returned to confirm that the buyer is registering for your product. Subsequent BatchMeterUsage calls should be made using this product code."];
       customerAWSAccountId: CustomerAWSAccountId.t option
         [@ocaml.doc
-          "The CustomerAWSAccountId provides the AWS account ID associated with the CustomerIdentifier for the individual customer."]}
+          "The CustomerAWSAccountId provides the Amazon Web Services account ID associated with the CustomerIdentifier for the individual customer. Calls to BatchMeterUsage require CustomerAWSAccountId for each UsageRecord."];
+      licenseArn: LicenseArn.t option
+        [@ocaml.doc
+          "The LicenseArn is a unique identifier for a specific granted license. These are typically used for software purchased through Amazon Web Services Marketplace. Calls to BatchMeterUsage require LicenseArn for each UsageRecord. Once you receive the CustomerAWSAccountId and LicenseArn in the response, store that for future purposes/API calls/integrations."]}
     type nonrec error =
       [ `DisabledApiException of DisabledApiException.t 
       | `ExpiredTokenException of ExpiredTokenException.t 
@@ -965,7 +1076,14 @@ module ResolveCustomerResult =
     let make ?customerIdentifier =
       fun ?productCode ->
         fun ?customerAWSAccountId ->
-          fun () -> { customerIdentifier; productCode; customerAWSAccountId }
+          fun ?licenseArn ->
+            fun () ->
+              {
+                customerIdentifier;
+                productCode;
+                customerAWSAccountId;
+                licenseArn
+              }
     let error_of_json name json =
       match name with
       | "DisabledApiException" ->
@@ -1030,9 +1148,12 @@ module ResolveCustomerResult =
            (Option.map x.customerIdentifier ~f:CustomerIdentifier.to_value));
         ("ProductCode", (Option.map x.productCode ~f:ProductCode.to_value));
         ("CustomerAWSAccountId",
-          (Option.map x.customerAWSAccountId ~f:CustomerAWSAccountId.to_value))]
+          (Option.map x.customerAWSAccountId ~f:CustomerAWSAccountId.to_value));
+        ("LicenseArn", (Option.map x.licenseArn ~f:LicenseArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let licenseArn =
+        (Option.map ~f:LicenseArn.of_xml) (Xml.child xml_arg0 "LicenseArn") in
       let customerAWSAccountId =
         (Option.map ~f:CustomerAWSAccountId.of_xml)
           (Xml.child xml_arg0 "CustomerAWSAccountId") in
@@ -1041,25 +1162,28 @@ module ResolveCustomerResult =
       let customerIdentifier =
         (Option.map ~f:CustomerIdentifier.of_xml)
           (Xml.child xml_arg0 "CustomerIdentifier") in
-      make ?customerAWSAccountId ?productCode ?customerIdentifier ()
+      make ?licenseArn ?customerAWSAccountId ?productCode ?customerIdentifier
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let licenseArn = field_map json__ "LicenseArn" LicenseArn.of_json in
       let customerAWSAccountId =
-        field_map json "CustomerAWSAccountId" CustomerAWSAccountId.of_json in
-      let productCode = field_map json "ProductCode" ProductCode.of_json in
+        field_map json__ "CustomerAWSAccountId" CustomerAWSAccountId.of_json in
+      let productCode = field_map json__ "ProductCode" ProductCode.of_json in
       let customerIdentifier =
-        field_map json "CustomerIdentifier" CustomerIdentifier.of_json in
-      make ?customerAWSAccountId ?productCode ?customerIdentifier ()
+        field_map json__ "CustomerIdentifier" CustomerIdentifier.of_json in
+      make ?licenseArn ?customerAWSAccountId ?productCode ?customerIdentifier
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The result of the ResolveCustomer operation. Contains the CustomerIdentifier along with the CustomerAWSAccountId and ProductCode."]
+       "The result of the ResolveCustomer operation. Contains the CustomerIdentifier along with the CustomerAWSAccountId, ProductCode, and LicenseArn."]
 module ResolveCustomerRequest =
   struct
     type nonrec t =
       {
       registrationToken: NonEmptyString.t
         [@ocaml.doc
-          "When a buyer visits your website during the registration process, the buyer submits a registration token through the browser. The registration token is resolved to obtain a CustomerIdentifier along with the CustomerAWSAccountId and ProductCode."]}
+          "When a buyer visits your website during the registration process, the buyer submits a registration token through the browser. The registration token is resolved to obtain a CustomerIdentifier along with the CustomerAWSAccountId, ProductCode, and LicenseArn."]}
     let context_ = "ResolveCustomerRequest"
     let make ~registrationToken = fun () -> { registrationToken }
     let to_value x =
@@ -1073,9 +1197,9 @@ module ResolveCustomerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RegistrationToken") in
       make ~registrationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registrationToken =
-        field_map_exn json "RegistrationToken" NonEmptyString.of_json in
+        field_map_exn json__ "RegistrationToken" NonEmptyString.of_json in
       make ~registrationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains input to the ResolveCustomer operation."]
@@ -1205,23 +1329,24 @@ module RegisterUsageResult =
           (Xml.child xml_arg0 "PublicKeyRotationTimestamp") in
       make ?signature ?publicKeyRotationTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let signature = field_map json "Signature" NonEmptyString.of_json in
+    let of_json json__ =
+      let signature = field_map json__ "Signature" NonEmptyString.of_json in
       let publicKeyRotationTimestamp =
-        field_map json "PublicKeyRotationTimestamp" Timestamp.of_json in
+        field_map json__ "PublicKeyRotationTimestamp" Timestamp.of_json in
       make ?signature ?publicKeyRotationTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Paid container software products sold through AWS Marketplace must integrate with the AWS Marketplace Metering Service and call the RegisterUsage operation for software entitlement and metering. Free and BYOL products for Amazon ECS or Amazon EKS aren't required to call RegisterUsage, but you may choose to do so if you would like to receive usage data in your seller reports. The sections below explain the behavior of RegisterUsage. RegisterUsage performs two primary functions: metering and entitlement. Entitlement: RegisterUsage allows you to verify that the customer running your paid software is subscribed to your product on AWS Marketplace, enabling you to guard against unauthorized use. Your container image that integrates with RegisterUsage is only required to guard against unauthorized use at container startup, as such a CustomerNotSubscribedException or PlatformNotSupportedException will only be thrown on the initial call to RegisterUsage. Subsequent calls from the same Amazon ECS task instance (e.g. task-id) or Amazon EKS pod will not throw a CustomerNotSubscribedException, even if the customer unsubscribes while the Amazon ECS task or Amazon EKS pod is still running. Metering: RegisterUsage meters software use per ECS task, per hour, or per pod for Amazon EKS with usage prorated to the second. A minimum of 1 minute of usage applies to tasks that are short lived. For example, if a customer has a 10 node Amazon ECS or Amazon EKS cluster and a service configured as a Daemon Set, then Amazon ECS or Amazon EKS will launch a task on all 10 cluster nodes and the customer will be charged: (10 * hourly_rate). Metering for software use is automatically handled by the AWS Marketplace Metering Control Plane -- your software is not required to perform any metering specific actions, other than call RegisterUsage once for metering of software use to commence. The AWS Marketplace Metering Control Plane will also continue to bill customers for running ECS tasks and Amazon EKS pods, regardless of the customers subscription state, removing the need for your software to perform entitlement checks at runtime."]
+       "Paid container software products sold through Amazon Web Services Marketplace must integrate with the Amazon Web Services Marketplace Metering Service and call the RegisterUsage operation for software entitlement and metering. Free and BYOL products for Amazon ECS or Amazon EKS aren't required to call RegisterUsage, but you may choose to do so if you would like to receive usage data in your seller reports. The sections below explain the behavior of RegisterUsage. RegisterUsage performs two primary functions: metering and entitlement. Entitlement: RegisterUsage allows you to verify that the customer running your paid software is subscribed to your product on Amazon Web Services Marketplace, enabling you to guard against unauthorized use. Your container image that integrates with RegisterUsage is only required to guard against unauthorized use at container startup, as such a CustomerNotSubscribedException or PlatformNotSupportedException will only be thrown on the initial call to RegisterUsage. Subsequent calls from the same Amazon ECS task instance (e.g. task-id) or Amazon EKS pod will not throw a CustomerNotSubscribedException, even if the customer unsubscribes while the Amazon ECS task or Amazon EKS pod is still running. Metering: RegisterUsage meters software use per ECS task, per hour, or per pod for Amazon EKS with usage prorated to the second. A minimum of 1 minute of usage applies to tasks that are short lived. For example, if a customer has a 10 node Amazon ECS or Amazon EKS cluster and a service configured as a Daemon Set, then Amazon ECS or Amazon EKS will launch a task on all 10 cluster nodes and the customer will be charged for 10 tasks. Software metering is handled by the Amazon Web Services Marketplace metering control plane\226\128\148your software is not required to perform metering-specific actions other than to call RegisterUsage to commence metering. The Amazon Web Services Marketplace metering control plane will also bill customers for running ECS tasks and Amazon EKS pods, regardless of the customer's subscription state, which removes the need for your software to run entitlement checks at runtime. For containers, RegisterUsage should be called immediately at launch. If you don\226\128\153t register the container within the first 6 hours of the launch, Amazon Web Services Marketplace Metering Service doesn\226\128\153t provide any metering guarantees for previous months. Metering will continue, however, for the current month forward until the container ends. RegisterUsage is for metering paid hourly container products. For Amazon Web Services Regions that support RegisterUsage, see RegisterUsage Region support."]
 module RegisterUsageRequest =
   struct
     type nonrec t =
       {
       productCode: ProductCode.t
         [@ocaml.doc
-          "Product code is used to uniquely identify a product in AWS Marketplace. The product code should be the same as the one used during the publishing of a new product."];
+          "Product code is used to uniquely identify a product in Amazon Web Services Marketplace. The product code should be the same as the one used during the publishing of a new product."];
       publicKeyVersion: VersionInteger.t
-        [@ocaml.doc "Public Key Version provided by AWS Marketplace"];
+        [@ocaml.doc
+          "Public Key Version provided by Amazon Web Services Marketplace"];
       nonce: Nonce.t option
         [@ocaml.doc
           "(Optional) To scope down the registration to a specific running software instance and guard against replay attacks."]}
@@ -1247,15 +1372,16 @@ module RegisterUsageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProductCode") in
       make ?nonce ~publicKeyVersion ~productCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nonce = field_map json "Nonce" Nonce.of_json in
+    let of_json json__ =
+      let nonce = field_map json__ "Nonce" Nonce.of_json in
       let publicKeyVersion =
-        field_map_exn json "PublicKeyVersion" VersionInteger.of_json in
-      let productCode = field_map_exn json "ProductCode" ProductCode.of_json in
+        field_map_exn json__ "PublicKeyVersion" VersionInteger.of_json in
+      let productCode =
+        field_map_exn json__ "ProductCode" ProductCode.of_json in
       make ?nonce ~publicKeyVersion ~productCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Paid container software products sold through AWS Marketplace must integrate with the AWS Marketplace Metering Service and call the RegisterUsage operation for software entitlement and metering. Free and BYOL products for Amazon ECS or Amazon EKS aren't required to call RegisterUsage, but you may choose to do so if you would like to receive usage data in your seller reports. The sections below explain the behavior of RegisterUsage. RegisterUsage performs two primary functions: metering and entitlement. Entitlement: RegisterUsage allows you to verify that the customer running your paid software is subscribed to your product on AWS Marketplace, enabling you to guard against unauthorized use. Your container image that integrates with RegisterUsage is only required to guard against unauthorized use at container startup, as such a CustomerNotSubscribedException or PlatformNotSupportedException will only be thrown on the initial call to RegisterUsage. Subsequent calls from the same Amazon ECS task instance (e.g. task-id) or Amazon EKS pod will not throw a CustomerNotSubscribedException, even if the customer unsubscribes while the Amazon ECS task or Amazon EKS pod is still running. Metering: RegisterUsage meters software use per ECS task, per hour, or per pod for Amazon EKS with usage prorated to the second. A minimum of 1 minute of usage applies to tasks that are short lived. For example, if a customer has a 10 node Amazon ECS or Amazon EKS cluster and a service configured as a Daemon Set, then Amazon ECS or Amazon EKS will launch a task on all 10 cluster nodes and the customer will be charged: (10 * hourly_rate). Metering for software use is automatically handled by the AWS Marketplace Metering Control Plane -- your software is not required to perform any metering specific actions, other than call RegisterUsage once for metering of software use to commence. The AWS Marketplace Metering Control Plane will also continue to bill customers for running ECS tasks and Amazon EKS pods, regardless of the customers subscription state, removing the need for your software to perform entitlement checks at runtime."]
+       "Paid container software products sold through Amazon Web Services Marketplace must integrate with the Amazon Web Services Marketplace Metering Service and call the RegisterUsage operation for software entitlement and metering. Free and BYOL products for Amazon ECS or Amazon EKS aren't required to call RegisterUsage, but you may choose to do so if you would like to receive usage data in your seller reports. The sections below explain the behavior of RegisterUsage. RegisterUsage performs two primary functions: metering and entitlement. Entitlement: RegisterUsage allows you to verify that the customer running your paid software is subscribed to your product on Amazon Web Services Marketplace, enabling you to guard against unauthorized use. Your container image that integrates with RegisterUsage is only required to guard against unauthorized use at container startup, as such a CustomerNotSubscribedException or PlatformNotSupportedException will only be thrown on the initial call to RegisterUsage. Subsequent calls from the same Amazon ECS task instance (e.g. task-id) or Amazon EKS pod will not throw a CustomerNotSubscribedException, even if the customer unsubscribes while the Amazon ECS task or Amazon EKS pod is still running. Metering: RegisterUsage meters software use per ECS task, per hour, or per pod for Amazon EKS with usage prorated to the second. A minimum of 1 minute of usage applies to tasks that are short lived. For example, if a customer has a 10 node Amazon ECS or Amazon EKS cluster and a service configured as a Daemon Set, then Amazon ECS or Amazon EKS will launch a task on all 10 cluster nodes and the customer will be charged for 10 tasks. Software metering is handled by the Amazon Web Services Marketplace metering control plane\226\128\148your software is not required to perform metering-specific actions other than to call RegisterUsage to commence metering. The Amazon Web Services Marketplace metering control plane will also bill customers for running ECS tasks and Amazon EKS pods, regardless of the customer's subscription state, which removes the need for your software to run entitlement checks at runtime. For containers, RegisterUsage should be called immediately at launch. If you don\226\128\153t register the container within the first 6 hours of the launch, Amazon Web Services Marketplace Metering Service doesn\226\128\153t provide any metering guarantees for previous months. Metering will continue, however, for the current month forward until the container ends. RegisterUsage is for metering paid hourly container products. For Amazon Web Services Regions that support RegisterUsage, see RegisterUsage Region support."]
 module MeterUsageResult =
   struct
     type nonrec t =
@@ -1264,6 +1390,7 @@ module MeterUsageResult =
     type nonrec error =
       [ `CustomerNotEntitledException of CustomerNotEntitledException.t 
       | `DuplicateRequestException of DuplicateRequestException.t 
+      | `IdempotencyConflictException of IdempotencyConflictException.t 
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidEndpointRegionException of InvalidEndpointRegionException.t 
       | `InvalidProductCodeException of InvalidProductCodeException.t 
@@ -1282,6 +1409,9 @@ module MeterUsageResult =
             (CustomerNotEntitledException.of_json json)
       | "DuplicateRequestException" ->
           `DuplicateRequestException (DuplicateRequestException.of_json json)
+      | "IdempotencyConflictException" ->
+          `IdempotencyConflictException
+            (IdempotencyConflictException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
@@ -1314,6 +1444,9 @@ module MeterUsageResult =
             (CustomerNotEntitledException.of_xml xml)
       | "DuplicateRequestException" ->
           `DuplicateRequestException (DuplicateRequestException.of_xml xml)
+      | "IdempotencyConflictException" ->
+          `IdempotencyConflictException
+            (IdempotencyConflictException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
@@ -1348,6 +1481,10 @@ module MeterUsageResult =
           `Assoc
             [("error", (`String "DuplicateRequestException"));
             ("details", (DuplicateRequestException.to_json e))]
+      | `IdempotencyConflictException e ->
+          `Assoc
+            [("error", (`String "IdempotencyConflictException"));
+            ("details", (IdempotencyConflictException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -1396,23 +1533,23 @@ module MeterUsageResult =
           (Xml.child xml_arg0 "MeteringRecordId") in
       make ?meteringRecordId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let meteringRecordId =
-        field_map json "MeteringRecordId" String_.of_json in
+        field_map json__ "MeteringRecordId" String_.of_json in
       make ?meteringRecordId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "API to emit metering records. For identical requests, the API is idempotent. It simply returns the metering record ID. MeterUsage is authenticated on the buyer's AWS account using credentials from the EC2 instance, ECS task, or EKS pod. MeterUsage can optionally include multiple usage allocations, to provide customers with usage data split into buckets by tags that you define (or allow the customer to define). Usage records are expected to be submitted as quickly as possible after the event that is being recorded, and are not accepted more than 6 hours after the event."]
+       "As a seller, your software hosted in the buyer's Amazon Web Services account uses this API action to emit metering records directly to Amazon Web Services Marketplace. You must use the following buyer Amazon Web Services account credentials to sign the API request. For Amazon EC2 deployments, your software must use the IAM role for Amazon EC2 to sign the API call for MeterUsage API operation. For Amazon EKS deployments, your software must use IAM roles for service accounts (IRSA) to sign the API call for the MeterUsage API operation. Using EKS Pod Identity, the node role, or long-term access keys is not supported. For Amazon ECS deployments, your software must use Amazon ECS task IAM role to sign the API call for the MeterUsage API operation. Using the node role or long-term access keys are not supported. For Amazon Bedrock AgentCore Runtime deployments, your software must use the AgentCore Runtime execution role to sign the API call for the MeterUsage API operation. Long-term access keys are not supported. The handling of MeterUsage requests varies between Amazon Bedrock AgentCore Runtime and non-Amazon Bedrock AgentCore deployments. For non-Amazon Bedrock AgentCore Runtime deployments, you can only report usage once per hour for each dimension. For AMI-based products, this is per dimension and per EC2 instance. For container products, this is per dimension and per ECS task or EKS pod. You can't modify values after they're recorded. If you report usage before a current hour ends, you will be unable to report additional usage until the next hour begins. The Timestamp request parameter is rounded down to the hour and used to enforce this once-per-hour rule for idempotency. For requests that are identical after the Timestamp is rounded down, the API is idempotent and returns the metering record ID. For Amazon Bedrock AgentCore Runtime deployments, you can report usage multiple times per hour for the same dimension. You do not need to aggregate metering records by the hour. You must include an idempotency token in the ClientToken request parameter. If using an Amazon SDK or the Amazon Web Services CLI, you must use the latest version which automatically includes an idempotency token in the ClientToken request parameter so that the request is processed successfully. The Timestamp request parameter is not rounded down to the hour and is not used for duplicate validation. Requests with duplicate Timestamps are aggregated as long as the ClientToken is unique. If you submit records more than six hours after events occur, the records won't be accepted. The timestamp in your request determines when an event is recorded. You can optionally include multiple usage allocations, to provide customers with usage data split into buckets by tags that you define or allow the customer to define. For Amazon Web Services Regions that support MeterUsage, see MeterUsage Region support for Amazon EC2 and MeterUsage Region support for Amazon ECS and Amazon EKS."]
 module MeterUsageRequest =
   struct
     type nonrec t =
       {
       productCode: ProductCode.t
         [@ocaml.doc
-          "Product code is used to uniquely identify a product in AWS Marketplace. The product code should be the same as the one used during the publishing of a new product."];
+          "Product code is used to uniquely identify a product in Amazon Web Services Marketplace. The product code should be the same as the one used during the publishing of a new product."];
       timestamp: Timestamp.t
         [@ocaml.doc
-          "Timestamp, in UTC, for which the usage is being reported. Your application can meter usage for up to one hour in the past. Make sure the timestamp value is not before the start of the software usage."];
+          "Timestamp, in UTC, for which the usage is being reported. Your application can meter usage for up to six hours in the past. Make sure the timestamp value is not before the start of the software usage."];
       usageDimension: UsageDimension.t
         [@ocaml.doc
           "It will be one of the fcp dimension name provided during the publishing of the product."];
@@ -1424,23 +1561,28 @@ module MeterUsageRequest =
           "Checks whether you have the permissions required for the action, but does not make the request. If you have the permissions, the request returns DryRunOperation; otherwise, it returns UnauthorizedException. Defaults to false if not specified."];
       usageAllocations: UsageAllocations.t option
         [@ocaml.doc
-          "The set of UsageAllocations to submit. The sum of all UsageAllocation quantities must equal the UsageQuantity of the MeterUsage request, and each UsageAllocation must have a unique set of tags (include no tags)."]}
+          "The set of UsageAllocations to submit. The sum of all UsageAllocation quantities must equal the UsageQuantity of the MeterUsage request, and each UsageAllocation must have a unique set of tags (include no tags)."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Specifies a unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This lets you safely retry the request without accidentally performing the same operation a second time. Passing the same value to a later call to an operation requires that you also pass the same value for all other parameters. We recommend that you use a UUID type of value. If you don't provide this value, then Amazon Web Services generates a random one for you. If you retry the operation with the same ClientToken, but with different parameters, the retry fails with an IdempotencyConflictException error."]}
     let context_ = "MeterUsageRequest"
     let make ?usageQuantity =
       fun ?dryRun ->
         fun ?usageAllocations ->
-          fun ~productCode ->
-            fun ~timestamp ->
-              fun ~usageDimension ->
-                fun () ->
-                  {
-                    usageQuantity;
-                    dryRun;
-                    usageAllocations;
-                    productCode;
-                    timestamp;
-                    usageDimension
-                  }
+          fun ?clientToken ->
+            fun ~productCode ->
+              fun ~timestamp ->
+                fun ~usageDimension ->
+                  fun () ->
+                    {
+                      usageQuantity;
+                      dryRun;
+                      usageAllocations;
+                      clientToken;
+                      productCode;
+                      timestamp;
+                      usageDimension
+                    }
     let to_value x =
       structure_to_value
         [("ProductCode", (Some (ProductCode.to_value x.productCode)));
@@ -1450,9 +1592,12 @@ module MeterUsageRequest =
           (Option.map x.usageQuantity ~f:UsageQuantity.to_value));
         ("DryRun", (Option.map x.dryRun ~f:Boolean.to_value));
         ("UsageAllocations",
-          (Option.map x.usageAllocations ~f:UsageAllocations.to_value))]
+          (Option.map x.usageAllocations ~f:UsageAllocations.to_value));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       let usageAllocations =
         (Option.map ~f:UsageAllocations.of_xml)
           (Xml.child xml_arg0 "UsageAllocations") in
@@ -1470,31 +1615,33 @@ module MeterUsageRequest =
       let productCode =
         ProductCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProductCode") in
-      make ?usageAllocations ?dryRun ?usageQuantity ~usageDimension
-        ~timestamp ~productCode ()
+      make ?clientToken ?usageAllocations ?dryRun ?usageQuantity
+        ~usageDimension ~timestamp ~productCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       let usageAllocations =
-        field_map json "UsageAllocations" UsageAllocations.of_json in
-      let dryRun = field_map json "DryRun" Boolean.of_json in
+        field_map json__ "UsageAllocations" UsageAllocations.of_json in
+      let dryRun = field_map json__ "DryRun" Boolean.of_json in
       let usageQuantity =
-        field_map json "UsageQuantity" UsageQuantity.of_json in
+        field_map json__ "UsageQuantity" UsageQuantity.of_json in
       let usageDimension =
-        field_map_exn json "UsageDimension" UsageDimension.of_json in
-      let timestamp = field_map_exn json "Timestamp" Timestamp.of_json in
-      let productCode = field_map_exn json "ProductCode" ProductCode.of_json in
-      make ?usageAllocations ?dryRun ?usageQuantity ~usageDimension
-        ~timestamp ~productCode ()
+        field_map_exn json__ "UsageDimension" UsageDimension.of_json in
+      let timestamp = field_map_exn json__ "Timestamp" Timestamp.of_json in
+      let productCode =
+        field_map_exn json__ "ProductCode" ProductCode.of_json in
+      make ?clientToken ?usageAllocations ?dryRun ?usageQuantity
+        ~usageDimension ~timestamp ~productCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "API to emit metering records. For identical requests, the API is idempotent. It simply returns the metering record ID. MeterUsage is authenticated on the buyer's AWS account using credentials from the EC2 instance, ECS task, or EKS pod. MeterUsage can optionally include multiple usage allocations, to provide customers with usage data split into buckets by tags that you define (or allow the customer to define). Usage records are expected to be submitted as quickly as possible after the event that is being recorded, and are not accepted more than 6 hours after the event."]
+       "As a seller, your software hosted in the buyer's Amazon Web Services account uses this API action to emit metering records directly to Amazon Web Services Marketplace. You must use the following buyer Amazon Web Services account credentials to sign the API request. For Amazon EC2 deployments, your software must use the IAM role for Amazon EC2 to sign the API call for MeterUsage API operation. For Amazon EKS deployments, your software must use IAM roles for service accounts (IRSA) to sign the API call for the MeterUsage API operation. Using EKS Pod Identity, the node role, or long-term access keys is not supported. For Amazon ECS deployments, your software must use Amazon ECS task IAM role to sign the API call for the MeterUsage API operation. Using the node role or long-term access keys are not supported. For Amazon Bedrock AgentCore Runtime deployments, your software must use the AgentCore Runtime execution role to sign the API call for the MeterUsage API operation. Long-term access keys are not supported. The handling of MeterUsage requests varies between Amazon Bedrock AgentCore Runtime and non-Amazon Bedrock AgentCore deployments. For non-Amazon Bedrock AgentCore Runtime deployments, you can only report usage once per hour for each dimension. For AMI-based products, this is per dimension and per EC2 instance. For container products, this is per dimension and per ECS task or EKS pod. You can't modify values after they're recorded. If you report usage before a current hour ends, you will be unable to report additional usage until the next hour begins. The Timestamp request parameter is rounded down to the hour and used to enforce this once-per-hour rule for idempotency. For requests that are identical after the Timestamp is rounded down, the API is idempotent and returns the metering record ID. For Amazon Bedrock AgentCore Runtime deployments, you can report usage multiple times per hour for the same dimension. You do not need to aggregate metering records by the hour. You must include an idempotency token in the ClientToken request parameter. If using an Amazon SDK or the Amazon Web Services CLI, you must use the latest version which automatically includes an idempotency token in the ClientToken request parameter so that the request is processed successfully. The Timestamp request parameter is not rounded down to the hour and is not used for duplicate validation. Requests with duplicate Timestamps are aggregated as long as the ClientToken is unique. If you submit records more than six hours after events occur, the records won't be accepted. The timestamp in your request determines when an event is recorded. You can optionally include multiple usage allocations, to provide customers with usage data split into buckets by tags that you define or allow the customer to define. For Amazon Web Services Regions that support MeterUsage, see MeterUsage Region support for Amazon EC2 and MeterUsage Region support for Amazon ECS and Amazon EKS."]
 module BatchMeterUsageResult =
   struct
     type nonrec t =
       {
       results: UsageRecordResultList.t option
         [@ocaml.doc
-          "Contains all UsageRecords processed by BatchMeterUsage. These records were either honored by AWS Marketplace Metering Service or were invalid. Invalid records should be fixed before being resubmitted."];
+          "Contains all UsageRecords processed by BatchMeterUsage. These records were either honored by Amazon Web Services Marketplace Metering Service or were invalid. Invalid records should be fixed before being resubmitted."];
       unprocessedRecords: UsageRecordList.t option
         [@ocaml.doc
           "Contains all UsageRecords that were not processed by BatchMeterUsage. This is a list of UsageRecords. You can retry the failed request by making another BatchMeterUsage call with this list as input in the BatchMeterUsageRequest."]}
@@ -1503,6 +1650,7 @@ module BatchMeterUsageResult =
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidCustomerIdentifierException of
           InvalidCustomerIdentifierException.t 
+      | `InvalidLicenseException of InvalidLicenseException.t 
       | `InvalidProductCodeException of InvalidProductCodeException.t 
       | `InvalidTagException of InvalidTagException.t 
       | `InvalidUsageAllocationsException of
@@ -1523,6 +1671,8 @@ module BatchMeterUsageResult =
       | "InvalidCustomerIdentifierException" ->
           `InvalidCustomerIdentifierException
             (InvalidCustomerIdentifierException.of_json json)
+      | "InvalidLicenseException" ->
+          `InvalidLicenseException (InvalidLicenseException.of_json json)
       | "InvalidProductCodeException" ->
           `InvalidProductCodeException
             (InvalidProductCodeException.of_json json)
@@ -1552,6 +1702,8 @@ module BatchMeterUsageResult =
       | "InvalidCustomerIdentifierException" ->
           `InvalidCustomerIdentifierException
             (InvalidCustomerIdentifierException.of_xml xml)
+      | "InvalidLicenseException" ->
+          `InvalidLicenseException (InvalidLicenseException.of_xml xml)
       | "InvalidProductCodeException" ->
           `InvalidProductCodeException
             (InvalidProductCodeException.of_xml xml)
@@ -1584,6 +1736,10 @@ module BatchMeterUsageResult =
           `Assoc
             [("error", (`String "InvalidCustomerIdentifierException"));
             ("details", (InvalidCustomerIdentifierException.to_json e))]
+      | `InvalidLicenseException e ->
+          `Assoc
+            [("error", (`String "InvalidLicenseException"));
+            ("details", (InvalidLicenseException.to_json e))]
       | `InvalidProductCodeException e ->
           `Assoc
             [("error", (`String "InvalidProductCodeException"));
@@ -1629,10 +1785,10 @@ module BatchMeterUsageResult =
           (Xml.child xml_arg0 "Results") in
       make ?unprocessedRecords ?results ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedRecords =
-        field_map json "UnprocessedRecords" UsageRecordList.of_json in
-      let results = field_map json "Results" UsageRecordResultList.of_json in
+        field_map json__ "UnprocessedRecords" UsageRecordList.of_json in
+      let results = field_map json__ "Results" UsageRecordResultList.of_json in
       make ?unprocessedRecords ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1644,31 +1800,30 @@ module BatchMeterUsageRequest =
       usageRecords: UsageRecordList.t
         [@ocaml.doc
           "The set of UsageRecords to submit. BatchMeterUsage accepts up to 25 UsageRecords at a time."];
-      productCode: ProductCode.t
+      productCode: ProductCode.t option
         [@ocaml.doc
-          "Product code is used to uniquely identify a product in AWS Marketplace. The product code should be the same as the one used during the publishing of a new product."]}
+          "Product code is used to uniquely identify a product in Amazon Web Services Marketplace. The product code should be the same as the one used during the publishing of a new product."]}
     let context_ = "BatchMeterUsageRequest"
-    let make ~usageRecords =
-      fun ~productCode -> fun () -> { usageRecords; productCode }
+    let make ?productCode =
+      fun ~usageRecords -> fun () -> { productCode; usageRecords }
     let to_value x =
       structure_to_value
         [("UsageRecords", (Some (UsageRecordList.to_value x.usageRecords)));
-        ("ProductCode", (Some (ProductCode.to_value x.productCode)))]
+        ("ProductCode", (Option.map x.productCode ~f:ProductCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let productCode =
-        ProductCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProductCode") in
+        (Option.map ~f:ProductCode.of_xml) (Xml.child xml_arg0 "ProductCode") in
       let usageRecords =
         UsageRecordList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UsageRecords") in
-      make ~productCode ~usageRecords ()
+      make ?productCode ~usageRecords ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let productCode = field_map_exn json "ProductCode" ProductCode.of_json in
+    let of_json json__ =
+      let productCode = field_map json__ "ProductCode" ProductCode.of_json in
       let usageRecords =
-        field_map_exn json "UsageRecords" UsageRecordList.of_json in
-      make ~productCode ~usageRecords ()
+        field_map_exn json__ "UsageRecords" UsageRecordList.of_json in
+      make ?productCode ~usageRecords ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A BatchMeterUsageRequest contains UsageRecords, which indicate quantities of usage within your application."]

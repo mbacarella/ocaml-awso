@@ -145,6 +145,7 @@ let create_grant =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and clientToken =
          flag "client-token" (required string) ~doc:"STRING ClientToken"
        and grantName =
@@ -161,8 +162,9 @@ let create_grant =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_grant
-           (Values.CreateGrantRequest.make ~clientToken ~grantName
-              ~licenseArn
+           (Values.CreateGrantRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~clientToken
+              ~grantName ~licenseArn
               ~principals:(Values.PrincipalArnList.of_json principals)
               ~homeRegion
               ~allowedOperations:(Values.AllowedOperationList.of_json
@@ -190,6 +192,7 @@ let create_grant_version =
            ~doc:"STRING StatusReasonMessage"
        and sourceVersion =
          flag "source-version" (optional string) ~doc:"STRING String"
+       and options = flag "options" (optional json_arg) ~doc:"JSON Options"
        and clientToken =
          flag "client-token" (required string) ~doc:"STRING ClientToken"
        and grantArn = flag "grant-arn" (required string) ~doc:"STRING Arn" in
@@ -201,7 +204,9 @@ let create_grant_version =
                                     ~f:Values.AllowedOperationList.of_json
                                     allowedOperations)
               ?status:(Option.map ~f:Values.GrantStatus.of_json status)
-              ?statusReason ?sourceVersion ~clientToken ~grantArn ())
+              ?statusReason ?sourceVersion
+              ?options:(Option.map ~f:Values.Options.of_json options)
+              ~clientToken ~grantArn ())
            (Some Values.CreateGrantVersionResponse.to_json)
            (Some Values.CreateGrantVersionResponse.error_to_json)])
 let create_license =
@@ -216,6 +221,7 @@ let create_license =
            ~doc:"URL override endpoint url"
        and licenseMetadata =
          flag "license-metadata" (optional json_arg) ~doc:"JSON MetadataList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and licenseName =
          flag "license-name" (required string) ~doc:"STRING String"
        and productName =
@@ -241,15 +247,86 @@ let create_license =
            Io.create_license
            (Values.CreateLicenseRequest.make
               ?licenseMetadata:(Option.map ~f:Values.MetadataList.of_json
-                                  licenseMetadata) ~licenseName ~productName
-              ~productSKU ~issuer:(Values.Issuer.of_json issuer) ~homeRegion
-              ~validity:(Values.DatetimeRange.of_json validity)
+                                  licenseMetadata)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~licenseName
+              ~productName ~productSKU ~issuer:(Values.Issuer.of_json issuer)
+              ~homeRegion ~validity:(Values.DatetimeRange.of_json validity)
               ~entitlements:(Values.EntitlementList.of_json entitlements)
               ~beneficiary
               ~consumptionConfiguration:(Values.ConsumptionConfiguration.of_json
                                            consumptionConfiguration)
               ~clientToken ()) (Some Values.CreateLicenseResponse.to_json)
            (Some Values.CreateLicenseResponse.error_to_json)])
+let create_license_asset_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING LicenseAssetResourceDescription"
+       and properties =
+         flag "properties" (optional json_arg)
+           ~doc:"JSON LicenseAssetGroupPropertyList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and name =
+         flag "name" (required string) ~doc:"STRING LicenseAssetResourceName"
+       and licenseAssetGroupConfigurations =
+         flag "license-asset-group-configurations" (required json_arg)
+           ~doc:"JSON LicenseAssetGroupConfigurationList"
+       and associatedLicenseAssetRulesetARNs =
+         flag "associated-license-asset-ruleset-a-r-ns" (required json_arg)
+           ~doc:"JSON LicenseAssetRulesetArnList"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_license_asset_group
+           (Values.CreateLicenseAssetGroupRequest.make ?description
+              ?properties:(Option.map
+                             ~f:Values.LicenseAssetGroupPropertyList.of_json
+                             properties)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
+              ~licenseAssetGroupConfigurations:(Values.LicenseAssetGroupConfigurationList.of_json
+                                                  licenseAssetGroupConfigurations)
+              ~associatedLicenseAssetRulesetARNs:(Values.LicenseAssetRulesetArnList.of_json
+                                                    associatedLicenseAssetRulesetARNs)
+              ~clientToken ())
+           (Some Values.CreateLicenseAssetGroupResponse.to_json)
+           (Some Values.CreateLicenseAssetGroupResponse.error_to_json)])
+let create_license_asset_ruleset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING LicenseAssetResourceDescription"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and name =
+         flag "name" (required string) ~doc:"STRING LicenseAssetResourceName"
+       and rules =
+         flag "rules" (required json_arg) ~doc:"JSON LicenseAssetRuleList"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_license_asset_ruleset
+           (Values.CreateLicenseAssetRulesetRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
+              ~rules:(Values.LicenseAssetRuleList.of_json rules) ~clientToken
+              ()) (Some Values.CreateLicenseAssetRulesetResponse.to_json)
+           (Some Values.CreateLicenseAssetRulesetResponse.error_to_json)])
 let create_license_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -276,6 +353,8 @@ let create_license_configuration =
        and productInformationList =
          flag "product-information-list" (optional json_arg)
            ~doc:"JSON ProductInformationList"
+       and licenseExpiry =
+         flag "license-expiry" (optional json_arg) ~doc:"JSON BoxLong"
        and name = flag "name" (required string) ~doc:"STRING String"
        and licenseCountingType =
          flag "license-counting-type" (required json_arg)
@@ -292,7 +371,9 @@ let create_license_configuration =
               ?disassociateWhenNotFound
               ?productInformationList:(Option.map
                                          ~f:Values.ProductInformationList.of_json
-                                         productInformationList) ~name
+                                         productInformationList)
+              ?licenseExpiry:(Option.map ~f:Values.BoxLong.of_json
+                                licenseExpiry) ~name
               ~licenseCountingType:(Values.LicenseCountingType.of_json
                                       licenseCountingType) ())
            (Some Values.CreateLicenseConfigurationResponse.to_json)
@@ -489,6 +570,43 @@ let delete_license =
            (Values.DeleteLicenseRequest.make ~licenseArn ~sourceVersion ())
            (Some Values.DeleteLicenseResponse.to_json)
            (Some Values.DeleteLicenseResponse.error_to_json)])
+let delete_license_asset_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and licenseAssetGroupArn =
+         flag "license-asset-group-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_license_asset_group
+           (Values.DeleteLicenseAssetGroupRequest.make ~licenseAssetGroupArn
+              ()) (Some Values.DeleteLicenseAssetGroupResponse.to_json)
+           (Some Values.DeleteLicenseAssetGroupResponse.error_to_json)])
+let delete_license_asset_ruleset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and licenseAssetRulesetArn =
+         flag "license-asset-ruleset-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_license_asset_ruleset
+           (Values.DeleteLicenseAssetRulesetRequest.make
+              ~licenseAssetRulesetArn ())
+           (Some Values.DeleteLicenseAssetRulesetResponse.to_json)
+           (Some Values.DeleteLicenseAssetRulesetResponse.error_to_json)])
 let delete_license_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -626,6 +744,42 @@ let get_license =
            (Values.GetLicenseRequest.make ?version ~licenseArn ())
            (Some Values.GetLicenseResponse.to_json)
            (Some Values.GetLicenseResponse.error_to_json)])
+let get_license_asset_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and licenseAssetGroupArn =
+         flag "license-asset-group-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_license_asset_group
+           (Values.GetLicenseAssetGroupRequest.make ~licenseAssetGroupArn ())
+           (Some Values.GetLicenseAssetGroupResponse.to_json)
+           (Some Values.GetLicenseAssetGroupResponse.error_to_json)])
+let get_license_asset_ruleset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and licenseAssetRulesetArn =
+         flag "license-asset-ruleset-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_license_asset_ruleset
+           (Values.GetLicenseAssetRulesetRequest.make ~licenseAssetRulesetArn
+              ()) (Some Values.GetLicenseAssetRulesetResponse.to_json)
+           (Some Values.GetLicenseAssetRulesetResponse.error_to_json)])
 let get_license_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -721,6 +875,32 @@ let get_service_settings =
            Io.get_service_settings (Values.GetServiceSettingsRequest.make ())
            (Some Values.GetServiceSettingsResponse.to_json)
            (Some Values.GetServiceSettingsResponse.error_to_json)])
+let list_assets_for_license_asset_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and licenseAssetGroupArn =
+         flag "license-asset-group-arn" (required string)
+           ~doc:"STRING String"
+       and assetType =
+         flag "asset-type" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_assets_for_license_asset_group
+           (Values.ListAssetsForLicenseAssetGroupRequest.make ?maxResults
+              ?nextToken ~licenseAssetGroupArn ~assetType ())
+           (Some Values.ListAssetsForLicenseAssetGroupResponse.to_json)
+           (Some Values.ListAssetsForLicenseAssetGroupResponse.error_to_json)])
 let list_associations_for_license_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -800,6 +980,55 @@ let list_failures_for_license_configuration_operations =
               Values.ListFailuresForLicenseConfigurationOperationsResponse.to_json)
            (Some
               Values.ListFailuresForLicenseConfigurationOperationsResponse.error_to_json)])
+let list_license_asset_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_license_asset_groups
+           (Values.ListLicenseAssetGroupsRequest.make
+              ?filters:(Option.map ~f:Values.Filters.of_json filters)
+              ?maxResults ?nextToken ())
+           (Some Values.ListLicenseAssetGroupsResponse.to_json)
+           (Some Values.ListLicenseAssetGroupsResponse.error_to_json)])
+let list_license_asset_rulesets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters"
+       and showAWSManagedLicenseAssetRulesets =
+         flag "show-a-w-s-managed-license-asset-rulesets" (optional bool)
+           ~doc:"BOOL Boolean"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_license_asset_rulesets
+           (Values.ListLicenseAssetRulesetsRequest.make
+              ?filters:(Option.map ~f:Values.Filters.of_json filters)
+              ?showAWSManagedLicenseAssetRulesets ?maxResults ?nextToken ())
+           (Some Values.ListLicenseAssetRulesetsResponse.to_json)
+           (Some Values.ListLicenseAssetRulesetsResponse.error_to_json)])
 let list_license_configurations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -829,6 +1058,37 @@ let list_license_configurations =
               ?filters:(Option.map ~f:Values.Filters.of_json filters) ())
            (Some Values.ListLicenseConfigurationsResponse.to_json)
            (Some Values.ListLicenseConfigurationsResponse.error_to_json)])
+let list_license_configurations_for_organization =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and licenseConfigurationArns =
+         flag "license-configuration-arns" (optional json_arg)
+           ~doc:"JSON StringList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_license_configurations_for_organization
+           (Values.ListLicenseConfigurationsForOrganizationRequest.make
+              ?licenseConfigurationArns:(Option.map
+                                           ~f:Values.StringList.of_json
+                                           licenseConfigurationArns)
+              ?maxResults ?nextToken
+              ?filters:(Option.map ~f:Values.Filters.of_json filters) ())
+           (Some
+              Values.ListLicenseConfigurationsForOrganizationResponse.to_json)
+           (Some
+              Values.ListLicenseConfigurationsForOrganizationResponse.error_to_json)])
 let list_license_conversion_tasks =
   Command.async ~summary:""
     ([%map_open.Command
@@ -978,6 +1238,33 @@ let list_received_grants =
               ?nextToken ?maxResults ())
            (Some Values.ListReceivedGrantsResponse.to_json)
            (Some Values.ListReceivedGrantsResponse.error_to_json)])
+let list_received_grants_for_organization =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxSize100"
+       and licenseArn =
+         flag "license-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_received_grants_for_organization
+           (Values.ListReceivedGrantsForOrganizationRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?nextToken ?maxResults ~licenseArn ())
+           (Some Values.ListReceivedGrantsForOrganizationResponse.to_json)
+           (Some
+              Values.ListReceivedGrantsForOrganizationResponse.error_to_json)])
 let list_received_licenses =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1005,6 +1292,31 @@ let list_received_licenses =
               ?nextToken ?maxResults ())
            (Some Values.ListReceivedLicensesResponse.to_json)
            (Some Values.ListReceivedLicensesResponse.error_to_json)])
+let list_received_licenses_for_organization =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxSize100" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_received_licenses_for_organization
+           (Values.ListReceivedLicensesForOrganizationRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?nextToken ?maxResults ())
+           (Some Values.ListReceivedLicensesForOrganizationResponse.to_json)
+           (Some
+              Values.ListReceivedLicensesForOrganizationResponse.error_to_json)])
 let list_resource_inventory =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1159,6 +1471,83 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_license_asset_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING LicenseAssetResourceName"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING LicenseAssetResourceDescription"
+       and licenseAssetGroupConfigurations =
+         flag "license-asset-group-configurations" (optional json_arg)
+           ~doc:"JSON LicenseAssetGroupConfigurationList"
+       and properties =
+         flag "properties" (optional json_arg)
+           ~doc:"JSON LicenseAssetGroupPropertyList"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON LicenseAssetGroupStatus"
+       and associatedLicenseAssetRulesetARNs =
+         flag "associated-license-asset-ruleset-a-r-ns" (required json_arg)
+           ~doc:"JSON LicenseAssetRulesetArnList"
+       and licenseAssetGroupArn =
+         flag "license-asset-group-arn" (required string) ~doc:"STRING Arn"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_license_asset_group
+           (Values.UpdateLicenseAssetGroupRequest.make ?name ?description
+              ?licenseAssetGroupConfigurations:(Option.map
+                                                  ~f:Values.LicenseAssetGroupConfigurationList.of_json
+                                                  licenseAssetGroupConfigurations)
+              ?properties:(Option.map
+                             ~f:Values.LicenseAssetGroupPropertyList.of_json
+                             properties)
+              ?status:(Option.map ~f:Values.LicenseAssetGroupStatus.of_json
+                         status)
+              ~associatedLicenseAssetRulesetARNs:(Values.LicenseAssetRulesetArnList.of_json
+                                                    associatedLicenseAssetRulesetARNs)
+              ~licenseAssetGroupArn ~clientToken ())
+           (Some Values.UpdateLicenseAssetGroupResponse.to_json)
+           (Some Values.UpdateLicenseAssetGroupResponse.error_to_json)])
+let update_license_asset_ruleset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING LicenseAssetResourceName"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING LicenseAssetResourceDescription"
+       and rules =
+         flag "rules" (required json_arg) ~doc:"JSON LicenseAssetRuleList"
+       and licenseAssetRulesetArn =
+         flag "license-asset-ruleset-arn" (required string) ~doc:"STRING Arn"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_license_asset_ruleset
+           (Values.UpdateLicenseAssetRulesetRequest.make ?name ?description
+              ~rules:(Values.LicenseAssetRuleList.of_json rules)
+              ~licenseAssetRulesetArn ~clientToken ())
+           (Some Values.UpdateLicenseAssetRulesetResponse.to_json)
+           (Some Values.UpdateLicenseAssetRulesetResponse.error_to_json)])
 let update_license_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1188,6 +1577,8 @@ let update_license_configuration =
        and disassociateWhenNotFound =
          flag "disassociate-when-not-found" (optional bool)
            ~doc:"BOOL BoxBoolean"
+       and licenseExpiry =
+         flag "license-expiry" (optional json_arg) ~doc:"JSON BoxLong"
        and licenseConfigurationArn =
          flag "license-configuration-arn" (required string)
            ~doc:"STRING String" in
@@ -1206,7 +1597,9 @@ let update_license_configuration =
               ?productInformationList:(Option.map
                                          ~f:Values.ProductInformationList.of_json
                                          productInformationList)
-              ?disassociateWhenNotFound ~licenseConfigurationArn ())
+              ?disassociateWhenNotFound
+              ?licenseExpiry:(Option.map ~f:Values.BoxLong.of_json
+                                licenseExpiry) ~licenseConfigurationArn ())
            (Some Values.UpdateLicenseConfigurationResponse.to_json)
            (Some Values.UpdateLicenseConfigurationResponse.error_to_json)])
 let update_license_manager_report_generator =
@@ -1302,7 +1695,10 @@ let update_service_settings =
            ~doc:"JSON OrganizationConfiguration"
        and enableCrossAccountsDiscovery =
          flag "enable-cross-accounts-discovery" (optional bool)
-           ~doc:"BOOL BoxBoolean" in
+           ~doc:"BOOL BoxBoolean"
+       and enabledDiscoverySourceRegions =
+         flag "enabled-discovery-source-regions" (optional json_arg)
+           ~doc:"JSON StringList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_service_settings
@@ -1311,8 +1707,11 @@ let update_service_settings =
               ?organizationConfiguration:(Option.map
                                             ~f:Values.OrganizationConfiguration.of_json
                                             organizationConfiguration)
-              ?enableCrossAccountsDiscovery ())
-           (Some Values.UpdateServiceSettingsResponse.to_json)
+              ?enableCrossAccountsDiscovery
+              ?enabledDiscoverySourceRegions:(Option.map
+                                                ~f:Values.StringList.of_json
+                                                enabledDiscoverySourceRegions)
+              ()) (Some Values.UpdateServiceSettingsResponse.to_json)
            (Some Values.UpdateServiceSettingsResponse.error_to_json)])
 let main =
   Command.group
@@ -1324,6 +1723,8 @@ let main =
     ("create-grant", create_grant);
     ("create-grant-version", create_grant_version);
     ("create-license", create_license);
+    ("create-license-asset-group", create_license_asset_group);
+    ("create-license-asset-ruleset", create_license_asset_ruleset);
     ("create-license-configuration", create_license_configuration);
     ("create-license-conversion-task-for-resource",
       create_license_conversion_task_for_resource);
@@ -1333,6 +1734,8 @@ let main =
     ("create-token", create_token);
     ("delete-grant", delete_grant);
     ("delete-license", delete_license);
+    ("delete-license-asset-group", delete_license_asset_group);
+    ("delete-license-asset-ruleset", delete_license_asset_ruleset);
     ("delete-license-configuration", delete_license_configuration);
     ("delete-license-manager-report-generator",
       delete_license_manager_report_generator);
@@ -1341,18 +1744,26 @@ let main =
     ("get-access-token", get_access_token);
     ("get-grant", get_grant);
     ("get-license", get_license);
+    ("get-license-asset-group", get_license_asset_group);
+    ("get-license-asset-ruleset", get_license_asset_ruleset);
     ("get-license-configuration", get_license_configuration);
     ("get-license-conversion-task", get_license_conversion_task);
     ("get-license-manager-report-generator",
       get_license_manager_report_generator);
     ("get-license-usage", get_license_usage);
     ("get-service-settings", get_service_settings);
+    ("list-assets-for-license-asset-group",
+      list_assets_for_license_asset_group);
     ("list-associations-for-license-configuration",
       list_associations_for_license_configuration);
     ("list-distributed-grants", list_distributed_grants);
     ("list-failures-for-license-configuration-operations",
       list_failures_for_license_configuration_operations);
+    ("list-license-asset-groups", list_license_asset_groups);
+    ("list-license-asset-rulesets", list_license_asset_rulesets);
     ("list-license-configurations", list_license_configurations);
+    ("list-license-configurations-for-organization",
+      list_license_configurations_for_organization);
     ("list-license-conversion-tasks", list_license_conversion_tasks);
     ("list-license-manager-report-generators",
       list_license_manager_report_generators);
@@ -1361,7 +1772,11 @@ let main =
     ("list-license-versions", list_license_versions);
     ("list-licenses", list_licenses);
     ("list-received-grants", list_received_grants);
+    ("list-received-grants-for-organization",
+      list_received_grants_for_organization);
     ("list-received-licenses", list_received_licenses);
+    ("list-received-licenses-for-organization",
+      list_received_licenses_for_organization);
     ("list-resource-inventory", list_resource_inventory);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-tokens", list_tokens);
@@ -1370,6 +1785,8 @@ let main =
     ("reject-grant", reject_grant);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-license-asset-group", update_license_asset_group);
+    ("update-license-asset-ruleset", update_license_asset_ruleset);
     ("update-license-configuration", update_license_configuration);
     ("update-license-manager-report-generator",
       update_license_manager_report_generator);

@@ -7,35 +7,58 @@ let main =
     [("add-association", add_association);
     ("add-tags", add_tags);
     ("associate-trial-component", associate_trial_component);
+    ("attach-cluster-node-volume", attach_cluster_node_volume);
+    ("batch-add-cluster-nodes", batch_add_cluster_nodes);
+    ("batch-delete-cluster-nodes", batch_delete_cluster_nodes);
     ("batch-describe-model-package", batch_describe_model_package);
+    ("batch-reboot-cluster-nodes", batch_reboot_cluster_nodes);
+    ("batch-replace-cluster-nodes", batch_replace_cluster_nodes);
+    ("create-a-i-benchmark-job", create_a_i_benchmark_job);
+    ("create-a-i-recommendation-job", create_a_i_recommendation_job);
+    ("create-a-i-workload-config", create_a_i_workload_config);
     ("create-action", create_action);
     ("create-algorithm", create_algorithm);
     ("create-app", create_app);
     ("create-app-image-config", create_app_image_config);
     ("create-artifact", create_artifact);
     ("create-auto-m-l-job", create_auto_m_l_job);
+    ("create-auto-m-l-job-v2", create_auto_m_l_job_v2);
+    ("create-cluster", create_cluster);
+    ("create-cluster-scheduler-config", create_cluster_scheduler_config);
     ("create-code-repository", create_code_repository);
     ("create-compilation-job", create_compilation_job);
+    ("create-compute-quota", create_compute_quota);
     ("create-context", create_context);
     ("create-data-quality-job-definition",
       create_data_quality_job_definition);
     ("create-device-fleet", create_device_fleet);
     ("create-domain", create_domain);
+    ("create-edge-deployment-plan", create_edge_deployment_plan);
+    ("create-edge-deployment-stage", create_edge_deployment_stage);
     ("create-edge-packaging-job", create_edge_packaging_job);
     ("create-endpoint", create_endpoint);
     ("create-endpoint-config", create_endpoint_config);
     ("create-experiment", create_experiment);
     ("create-feature-group", create_feature_group);
     ("create-flow-definition", create_flow_definition);
+    ("create-hub", create_hub);
+    ("create-hub-content-presigned-urls", create_hub_content_presigned_urls);
+    ("create-hub-content-reference", create_hub_content_reference);
     ("create-human-task-ui", create_human_task_ui);
     ("create-hyper-parameter-tuning-job", create_hyper_parameter_tuning_job);
     ("create-image", create_image);
     ("create-image-version", create_image_version);
+    ("create-inference-component", create_inference_component);
+    ("create-inference-experiment", create_inference_experiment);
     ("create-inference-recommendations-job",
       create_inference_recommendations_job);
     ("create-labeling-job", create_labeling_job);
+    ("create-mlflow-app", create_mlflow_app);
+    ("create-mlflow-tracking-server", create_mlflow_tracking_server);
     ("create-model", create_model);
     ("create-model-bias-job-definition", create_model_bias_job_definition);
+    ("create-model-card", create_model_card);
+    ("create-model-card-export-job", create_model_card_export_job);
     ("create-model-explainability-job-definition",
       create_model_explainability_job_definition);
     ("create-model-package", create_model_package);
@@ -46,42 +69,68 @@ let main =
     ("create-notebook-instance", create_notebook_instance);
     ("create-notebook-instance-lifecycle-config",
       create_notebook_instance_lifecycle_config);
+    ("create-optimization-job", create_optimization_job);
+    ("create-partner-app", create_partner_app);
+    ("create-partner-app-presigned-url", create_partner_app_presigned_url);
     ("create-pipeline", create_pipeline);
     ("create-presigned-domain-url", create_presigned_domain_url);
+    ("create-presigned-mlflow-app-url", create_presigned_mlflow_app_url);
+    ("create-presigned-mlflow-tracking-server-url",
+      create_presigned_mlflow_tracking_server_url);
     ("create-presigned-notebook-instance-url",
       create_presigned_notebook_instance_url);
     ("create-processing-job", create_processing_job);
     ("create-project", create_project);
+    ("create-space", create_space);
     ("create-studio-lifecycle-config", create_studio_lifecycle_config);
     ("create-training-job", create_training_job);
+    ("create-training-plan", create_training_plan);
     ("create-transform-job", create_transform_job);
     ("create-trial", create_trial);
     ("create-trial-component", create_trial_component);
     ("create-user-profile", create_user_profile);
     ("create-workforce", create_workforce);
     ("create-workteam", create_workteam);
+    ("delete-a-i-benchmark-job", delete_a_i_benchmark_job);
+    ("delete-a-i-recommendation-job", delete_a_i_recommendation_job);
+    ("delete-a-i-workload-config", delete_a_i_workload_config);
     ("delete-action", delete_action);
     ("delete-algorithm", delete_algorithm);
     ("delete-app", delete_app);
     ("delete-app-image-config", delete_app_image_config);
     ("delete-artifact", delete_artifact);
     ("delete-association", delete_association);
+    ("delete-cluster", delete_cluster);
+    ("delete-cluster-scheduler-config", delete_cluster_scheduler_config);
     ("delete-code-repository", delete_code_repository);
+    ("delete-compilation-job", delete_compilation_job);
+    ("delete-compute-quota", delete_compute_quota);
     ("delete-context", delete_context);
     ("delete-data-quality-job-definition",
       delete_data_quality_job_definition);
     ("delete-device-fleet", delete_device_fleet);
     ("delete-domain", delete_domain);
+    ("delete-edge-deployment-plan", delete_edge_deployment_plan);
+    ("delete-edge-deployment-stage", delete_edge_deployment_stage);
     ("delete-endpoint", delete_endpoint);
     ("delete-endpoint-config", delete_endpoint_config);
     ("delete-experiment", delete_experiment);
     ("delete-feature-group", delete_feature_group);
     ("delete-flow-definition", delete_flow_definition);
+    ("delete-hub", delete_hub);
+    ("delete-hub-content", delete_hub_content);
+    ("delete-hub-content-reference", delete_hub_content_reference);
     ("delete-human-task-ui", delete_human_task_ui);
+    ("delete-hyper-parameter-tuning-job", delete_hyper_parameter_tuning_job);
     ("delete-image", delete_image);
     ("delete-image-version", delete_image_version);
+    ("delete-inference-component", delete_inference_component);
+    ("delete-inference-experiment", delete_inference_experiment);
+    ("delete-mlflow-app", delete_mlflow_app);
+    ("delete-mlflow-tracking-server", delete_mlflow_tracking_server);
     ("delete-model", delete_model);
     ("delete-model-bias-job-definition", delete_model_bias_job_definition);
+    ("delete-model-card", delete_model_card);
     ("delete-model-explainability-job-definition",
       delete_model_explainability_job_definition);
     ("delete-model-package", delete_model_package);
@@ -93,48 +142,72 @@ let main =
     ("delete-notebook-instance", delete_notebook_instance);
     ("delete-notebook-instance-lifecycle-config",
       delete_notebook_instance_lifecycle_config);
+    ("delete-optimization-job", delete_optimization_job);
+    ("delete-partner-app", delete_partner_app);
     ("delete-pipeline", delete_pipeline);
+    ("delete-processing-job", delete_processing_job);
     ("delete-project", delete_project);
+    ("delete-space", delete_space);
     ("delete-studio-lifecycle-config", delete_studio_lifecycle_config);
     ("delete-tags", delete_tags);
+    ("delete-training-job", delete_training_job);
     ("delete-trial", delete_trial);
     ("delete-trial-component", delete_trial_component);
     ("delete-user-profile", delete_user_profile);
     ("delete-workforce", delete_workforce);
     ("delete-workteam", delete_workteam);
     ("deregister-devices", deregister_devices);
+    ("describe-a-i-benchmark-job", describe_a_i_benchmark_job);
+    ("describe-a-i-recommendation-job", describe_a_i_recommendation_job);
+    ("describe-a-i-workload-config", describe_a_i_workload_config);
     ("describe-action", describe_action);
     ("describe-algorithm", describe_algorithm);
     ("describe-app", describe_app);
     ("describe-app-image-config", describe_app_image_config);
     ("describe-artifact", describe_artifact);
     ("describe-auto-m-l-job", describe_auto_m_l_job);
+    ("describe-auto-m-l-job-v2", describe_auto_m_l_job_v2);
+    ("describe-cluster", describe_cluster);
+    ("describe-cluster-event", describe_cluster_event);
+    ("describe-cluster-node", describe_cluster_node);
+    ("describe-cluster-scheduler-config", describe_cluster_scheduler_config);
     ("describe-code-repository", describe_code_repository);
     ("describe-compilation-job", describe_compilation_job);
+    ("describe-compute-quota", describe_compute_quota);
     ("describe-context", describe_context);
     ("describe-data-quality-job-definition",
       describe_data_quality_job_definition);
     ("describe-device", describe_device);
     ("describe-device-fleet", describe_device_fleet);
     ("describe-domain", describe_domain);
+    ("describe-edge-deployment-plan", describe_edge_deployment_plan);
     ("describe-edge-packaging-job", describe_edge_packaging_job);
     ("describe-endpoint", describe_endpoint);
     ("describe-endpoint-config", describe_endpoint_config);
     ("describe-experiment", describe_experiment);
     ("describe-feature-group", describe_feature_group);
+    ("describe-feature-metadata", describe_feature_metadata);
     ("describe-flow-definition", describe_flow_definition);
+    ("describe-hub", describe_hub);
+    ("describe-hub-content", describe_hub_content);
     ("describe-human-task-ui", describe_human_task_ui);
     ("describe-hyper-parameter-tuning-job",
       describe_hyper_parameter_tuning_job);
     ("describe-image", describe_image);
     ("describe-image-version", describe_image_version);
+    ("describe-inference-component", describe_inference_component);
+    ("describe-inference-experiment", describe_inference_experiment);
     ("describe-inference-recommendations-job",
       describe_inference_recommendations_job);
     ("describe-labeling-job", describe_labeling_job);
     ("describe-lineage-group", describe_lineage_group);
+    ("describe-mlflow-app", describe_mlflow_app);
+    ("describe-mlflow-tracking-server", describe_mlflow_tracking_server);
     ("describe-model", describe_model);
     ("describe-model-bias-job-definition",
       describe_model_bias_job_definition);
+    ("describe-model-card", describe_model_card);
+    ("describe-model-card-export-job", describe_model_card_export_job);
     ("describe-model-explainability-job-definition",
       describe_model_explainability_job_definition);
     ("describe-model-package", describe_model_package);
@@ -145,63 +218,97 @@ let main =
     ("describe-notebook-instance", describe_notebook_instance);
     ("describe-notebook-instance-lifecycle-config",
       describe_notebook_instance_lifecycle_config);
+    ("describe-optimization-job", describe_optimization_job);
+    ("describe-partner-app", describe_partner_app);
     ("describe-pipeline", describe_pipeline);
     ("describe-pipeline-definition-for-execution",
       describe_pipeline_definition_for_execution);
     ("describe-pipeline-execution", describe_pipeline_execution);
     ("describe-processing-job", describe_processing_job);
     ("describe-project", describe_project);
+    ("describe-reserved-capacity", describe_reserved_capacity);
+    ("describe-space", describe_space);
     ("describe-studio-lifecycle-config", describe_studio_lifecycle_config);
     ("describe-subscribed-workteam", describe_subscribed_workteam);
     ("describe-training-job", describe_training_job);
+    ("describe-training-plan", describe_training_plan);
+    ("describe-training-plan-extension-history",
+      describe_training_plan_extension_history);
     ("describe-transform-job", describe_transform_job);
     ("describe-trial", describe_trial);
     ("describe-trial-component", describe_trial_component);
     ("describe-user-profile", describe_user_profile);
     ("describe-workforce", describe_workforce);
     ("describe-workteam", describe_workteam);
+    ("detach-cluster-node-volume", detach_cluster_node_volume);
     ("disable-sagemaker-servicecatalog-portfolio",
       disable_sagemaker_servicecatalog_portfolio);
     ("disassociate-trial-component", disassociate_trial_component);
     ("enable-sagemaker-servicecatalog-portfolio",
       enable_sagemaker_servicecatalog_portfolio);
+    ("extend-training-plan", extend_training_plan);
     ("get-device-fleet-report", get_device_fleet_report);
     ("get-lineage-group-policy", get_lineage_group_policy);
     ("get-model-package-group-policy", get_model_package_group_policy);
     ("get-sagemaker-servicecatalog-portfolio-status",
       get_sagemaker_servicecatalog_portfolio_status);
+    ("get-scaling-configuration-recommendation",
+      get_scaling_configuration_recommendation);
     ("get-search-suggestions", get_search_suggestions);
+    ("import-hub-content", import_hub_content);
+    ("list-a-i-benchmark-jobs", list_a_i_benchmark_jobs);
+    ("list-a-i-recommendation-jobs", list_a_i_recommendation_jobs);
+    ("list-a-i-workload-configs", list_a_i_workload_configs);
     ("list-actions", list_actions);
     ("list-algorithms", list_algorithms);
+    ("list-aliases", list_aliases);
     ("list-app-image-configs", list_app_image_configs);
     ("list-apps", list_apps);
     ("list-artifacts", list_artifacts);
     ("list-associations", list_associations);
     ("list-auto-m-l-jobs", list_auto_m_l_jobs);
     ("list-candidates-for-auto-m-l-job", list_candidates_for_auto_m_l_job);
+    ("list-cluster-events", list_cluster_events);
+    ("list-cluster-nodes", list_cluster_nodes);
+    ("list-cluster-scheduler-configs", list_cluster_scheduler_configs);
+    ("list-clusters", list_clusters);
     ("list-code-repositories", list_code_repositories);
     ("list-compilation-jobs", list_compilation_jobs);
+    ("list-compute-quotas", list_compute_quotas);
     ("list-contexts", list_contexts);
     ("list-data-quality-job-definitions", list_data_quality_job_definitions);
     ("list-device-fleets", list_device_fleets);
     ("list-devices", list_devices);
     ("list-domains", list_domains);
+    ("list-edge-deployment-plans", list_edge_deployment_plans);
     ("list-edge-packaging-jobs", list_edge_packaging_jobs);
     ("list-endpoint-configs", list_endpoint_configs);
     ("list-endpoints", list_endpoints);
     ("list-experiments", list_experiments);
     ("list-feature-groups", list_feature_groups);
     ("list-flow-definitions", list_flow_definitions);
+    ("list-hub-content-versions", list_hub_content_versions);
+    ("list-hub-contents", list_hub_contents);
+    ("list-hubs", list_hubs);
     ("list-human-task-uis", list_human_task_uis);
     ("list-hyper-parameter-tuning-jobs", list_hyper_parameter_tuning_jobs);
     ("list-image-versions", list_image_versions);
     ("list-images", list_images);
+    ("list-inference-components", list_inference_components);
+    ("list-inference-experiments", list_inference_experiments);
+    ("list-inference-recommendations-job-steps",
+      list_inference_recommendations_job_steps);
     ("list-inference-recommendations-jobs",
       list_inference_recommendations_jobs);
     ("list-labeling-jobs", list_labeling_jobs);
     ("list-labeling-jobs-for-workteam", list_labeling_jobs_for_workteam);
     ("list-lineage-groups", list_lineage_groups);
+    ("list-mlflow-apps", list_mlflow_apps);
+    ("list-mlflow-tracking-servers", list_mlflow_tracking_servers);
     ("list-model-bias-job-definitions", list_model_bias_job_definitions);
+    ("list-model-card-export-jobs", list_model_card_export_jobs);
+    ("list-model-card-versions", list_model_card_versions);
+    ("list-model-cards", list_model_cards);
     ("list-model-explainability-job-definitions",
       list_model_explainability_job_definitions);
     ("list-model-metadata", list_model_metadata);
@@ -210,27 +317,38 @@ let main =
     ("list-model-quality-job-definitions",
       list_model_quality_job_definitions);
     ("list-models", list_models);
+    ("list-monitoring-alert-history", list_monitoring_alert_history);
+    ("list-monitoring-alerts", list_monitoring_alerts);
     ("list-monitoring-executions", list_monitoring_executions);
     ("list-monitoring-schedules", list_monitoring_schedules);
     ("list-notebook-instance-lifecycle-configs",
       list_notebook_instance_lifecycle_configs);
     ("list-notebook-instances", list_notebook_instances);
+    ("list-optimization-jobs", list_optimization_jobs);
+    ("list-partner-apps", list_partner_apps);
     ("list-pipeline-execution-steps", list_pipeline_execution_steps);
     ("list-pipeline-executions", list_pipeline_executions);
     ("list-pipeline-parameters-for-execution",
       list_pipeline_parameters_for_execution);
+    ("list-pipeline-versions", list_pipeline_versions);
     ("list-pipelines", list_pipelines);
     ("list-processing-jobs", list_processing_jobs);
     ("list-projects", list_projects);
+    ("list-resource-catalogs", list_resource_catalogs);
+    ("list-spaces", list_spaces);
+    ("list-stage-devices", list_stage_devices);
     ("list-studio-lifecycle-configs", list_studio_lifecycle_configs);
     ("list-subscribed-workteams", list_subscribed_workteams);
     ("list-tags", list_tags);
     ("list-training-jobs", list_training_jobs);
     ("list-training-jobs-for-hyper-parameter-tuning-job",
       list_training_jobs_for_hyper_parameter_tuning_job);
+    ("list-training-plans", list_training_plans);
     ("list-transform-jobs", list_transform_jobs);
     ("list-trial-components", list_trial_components);
     ("list-trials", list_trials);
+    ("list-ultra-servers-by-reserved-capacity",
+      list_ultra_servers_by_reserved_capacity);
     ("list-user-profiles", list_user_profiles);
     ("list-workforces", list_workforces);
     ("list-workteams", list_workteams);
@@ -240,22 +358,34 @@ let main =
     ("render-ui-template", render_ui_template);
     ("retry-pipeline-execution", retry_pipeline_execution);
     ("search", search);
+    ("search-training-plan-offerings", search_training_plan_offerings);
     ("send-pipeline-execution-step-failure",
       send_pipeline_execution_step_failure);
     ("send-pipeline-execution-step-success",
       send_pipeline_execution_step_success);
+    ("start-cluster-health-check", start_cluster_health_check);
+    ("start-edge-deployment-stage", start_edge_deployment_stage);
+    ("start-inference-experiment", start_inference_experiment);
+    ("start-mlflow-tracking-server", start_mlflow_tracking_server);
     ("start-monitoring-schedule", start_monitoring_schedule);
     ("start-notebook-instance", start_notebook_instance);
     ("start-pipeline-execution", start_pipeline_execution);
+    ("start-session", start_session);
+    ("stop-a-i-benchmark-job", stop_a_i_benchmark_job);
+    ("stop-a-i-recommendation-job", stop_a_i_recommendation_job);
     ("stop-auto-m-l-job", stop_auto_m_l_job);
     ("stop-compilation-job", stop_compilation_job);
+    ("stop-edge-deployment-stage", stop_edge_deployment_stage);
     ("stop-edge-packaging-job", stop_edge_packaging_job);
     ("stop-hyper-parameter-tuning-job", stop_hyper_parameter_tuning_job);
+    ("stop-inference-experiment", stop_inference_experiment);
     ("stop-inference-recommendations-job",
       stop_inference_recommendations_job);
     ("stop-labeling-job", stop_labeling_job);
+    ("stop-mlflow-tracking-server", stop_mlflow_tracking_server);
     ("stop-monitoring-schedule", stop_monitoring_schedule);
     ("stop-notebook-instance", stop_notebook_instance);
+    ("stop-optimization-job", stop_optimization_job);
     ("stop-pipeline-execution", stop_pipeline_execution);
     ("stop-processing-job", stop_processing_job);
     ("stop-training-job", stop_training_job);
@@ -263,7 +393,11 @@ let main =
     ("update-action", update_action);
     ("update-app-image-config", update_app_image_config);
     ("update-artifact", update_artifact);
+    ("update-cluster", update_cluster);
+    ("update-cluster-scheduler-config", update_cluster_scheduler_config);
+    ("update-cluster-software", update_cluster_software);
     ("update-code-repository", update_code_repository);
+    ("update-compute-quota", update_compute_quota);
     ("update-context", update_context);
     ("update-device-fleet", update_device_fleet);
     ("update-devices", update_devices);
@@ -272,15 +406,32 @@ let main =
     ("update-endpoint-weights-and-capacities",
       update_endpoint_weights_and_capacities);
     ("update-experiment", update_experiment);
+    ("update-feature-group", update_feature_group);
+    ("update-feature-metadata", update_feature_metadata);
+    ("update-hub", update_hub);
+    ("update-hub-content", update_hub_content);
+    ("update-hub-content-reference", update_hub_content_reference);
     ("update-image", update_image);
+    ("update-image-version", update_image_version);
+    ("update-inference-component", update_inference_component);
+    ("update-inference-component-runtime-config",
+      update_inference_component_runtime_config);
+    ("update-inference-experiment", update_inference_experiment);
+    ("update-mlflow-app", update_mlflow_app);
+    ("update-mlflow-tracking-server", update_mlflow_tracking_server);
+    ("update-model-card", update_model_card);
     ("update-model-package", update_model_package);
+    ("update-monitoring-alert", update_monitoring_alert);
     ("update-monitoring-schedule", update_monitoring_schedule);
     ("update-notebook-instance", update_notebook_instance);
     ("update-notebook-instance-lifecycle-config",
       update_notebook_instance_lifecycle_config);
+    ("update-partner-app", update_partner_app);
     ("update-pipeline", update_pipeline);
     ("update-pipeline-execution", update_pipeline_execution);
+    ("update-pipeline-version", update_pipeline_version);
     ("update-project", update_project);
+    ("update-space", update_space);
     ("update-training-job", update_training_job);
     ("update-trial", update_trial);
     ("update-trial-component", update_trial_component);

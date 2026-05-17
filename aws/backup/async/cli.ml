@@ -28,6 +28,56 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let associate_backup_vault_mpa_approval_team =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and requesterComment =
+         flag "requester-comment" (optional string)
+           ~doc:"STRING RequesterComment"
+       and backupVaultName =
+         flag "backup-vault-name" (required string)
+           ~doc:"STRING BackupVaultName"
+       and mpaApprovalTeamArn =
+         flag "mpa-approval-team-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_backup_vault_mpa_approval_team
+           (Values.AssociateBackupVaultMpaApprovalTeamInput.make
+              ?requesterComment ~backupVaultName ~mpaApprovalTeamArn ()) None
+           None])
+let cancel_legal_hold =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and retainRecordInDays =
+         flag "retain-record-in-days" (optional json_arg) ~doc:"JSON Long"
+       and legalHoldId =
+         flag "legal-hold-id" (required string) ~doc:"STRING String__lc1"
+       and cancelDescription =
+         flag "cancel-description" (required string)
+           ~doc:"STRING String__lc1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_legal_hold
+           (Values.CancelLegalHoldInput.make
+              ?retainRecordInDays:(Option.map ~f:Values.Long.of_json
+                                     retainRecordInDays) ~legalHoldId
+              ~cancelDescription ())
+           (Some Values.CancelLegalHoldOutput.to_json)
+           (Some Values.CancelLegalHoldOutput.error_to_json)])
 let create_backup_plan =
   Command.async ~summary:""
     ([%map_open.Command
@@ -41,7 +91,8 @@ let create_backup_plan =
        and backupPlanTags =
          flag "backup-plan-tags" (optional json_arg) ~doc:"JSON Tags"
        and creatorRequestId =
-         flag "creator-request-id" (optional string) ~doc:"STRING string"
+         flag "creator-request-id" (optional string)
+           ~doc:"STRING String__lc1"
        and backupPlan =
          flag "backup-plan" (required json_arg) ~doc:"JSON BackupPlanInput" in
        fun () ->
@@ -64,9 +115,10 @@ let create_backup_selection =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and creatorRequestId =
-         flag "creator-request-id" (optional string) ~doc:"STRING string"
+         flag "creator-request-id" (optional string)
+           ~doc:"STRING String__lc1"
        and backupPlanId =
-         flag "backup-plan-id" (required string) ~doc:"STRING string"
+         flag "backup-plan-id" (required string) ~doc:"STRING String__lc1"
        and backupSelection =
          flag "backup-selection" (required json_arg)
            ~doc:"JSON BackupSelection" in
@@ -94,7 +146,8 @@ let create_backup_vault =
        and encryptionKeyArn =
          flag "encryption-key-arn" (optional string) ~doc:"STRING ARN"
        and creatorRequestId =
-         flag "creator-request-id" (optional string) ~doc:"STRING string"
+         flag "creator-request-id" (optional string)
+           ~doc:"STRING String__lc1"
        and backupVaultName =
          flag "backup-vault-name" (required string)
            ~doc:"STRING BackupVaultName" in
@@ -121,7 +174,7 @@ let create_framework =
          flag "framework-description" (optional string)
            ~doc:"STRING FrameworkDescription"
        and idempotencyToken =
-         flag "idempotency-token" (optional string) ~doc:"STRING string"
+         flag "idempotency-token" (optional string) ~doc:"STRING String__lc1"
        and frameworkTags =
          flag "framework-tags" (optional json_arg) ~doc:"JSON stringMap"
        and frameworkName =
@@ -140,6 +193,71 @@ let create_framework =
                                     frameworkControls) ())
            (Some Values.CreateFrameworkOutput.to_json)
            (Some Values.CreateFrameworkOutput.error_to_json)])
+let create_legal_hold =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and idempotencyToken =
+         flag "idempotency-token" (optional string) ~doc:"STRING String__lc1"
+       and recoveryPointSelection =
+         flag "recovery-point-selection" (optional json_arg)
+           ~doc:"JSON RecoveryPointSelection"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and title = flag "title" (required string) ~doc:"STRING String__lc1"
+       and description =
+         flag "description" (required string) ~doc:"STRING String__lc1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_legal_hold
+           (Values.CreateLegalHoldInput.make ?idempotencyToken
+              ?recoveryPointSelection:(Option.map
+                                         ~f:Values.RecoveryPointSelection.of_json
+                                         recoveryPointSelection)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~title
+              ~description ()) (Some Values.CreateLegalHoldOutput.to_json)
+           (Some Values.CreateLegalHoldOutput.error_to_json)])
+let create_logically_air_gapped_backup_vault =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and backupVaultTags =
+         flag "backup-vault-tags" (optional json_arg) ~doc:"JSON Tags"
+       and creatorRequestId =
+         flag "creator-request-id" (optional string)
+           ~doc:"STRING String__lc1"
+       and encryptionKeyArn =
+         flag "encryption-key-arn" (optional string) ~doc:"STRING ARN"
+       and backupVaultName =
+         flag "backup-vault-name" (required string)
+           ~doc:"STRING BackupVaultName"
+       and minRetentionDays =
+         flag "min-retention-days" (required json_arg) ~doc:"JSON Long"
+       and maxRetentionDays =
+         flag "max-retention-days" (required json_arg) ~doc:"JSON Long" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_logically_air_gapped_backup_vault
+           (Values.CreateLogicallyAirGappedBackupVaultInput.make
+              ?backupVaultTags:(Option.map ~f:Values.Tags.of_json
+                                  backupVaultTags) ?creatorRequestId
+              ?encryptionKeyArn ~backupVaultName
+              ~minRetentionDays:(Values.Long.of_json minRetentionDays)
+              ~maxRetentionDays:(Values.Long.of_json maxRetentionDays) ())
+           (Some Values.CreateLogicallyAirGappedBackupVaultOutput.to_json)
+           (Some
+              Values.CreateLogicallyAirGappedBackupVaultOutput.error_to_json)])
 let create_report_plan =
   Command.async ~summary:""
     ([%map_open.Command
@@ -156,7 +274,7 @@ let create_report_plan =
        and reportPlanTags =
          flag "report-plan-tags" (optional json_arg) ~doc:"JSON stringMap"
        and idempotencyToken =
-         flag "idempotency-token" (optional string) ~doc:"STRING string"
+         flag "idempotency-token" (optional string) ~doc:"STRING String__lc1"
        and reportPlanName =
          flag "report-plan-name" (required string)
            ~doc:"STRING ReportPlanName"
@@ -177,6 +295,121 @@ let create_report_plan =
               ~reportSetting:(Values.ReportSetting.of_json reportSetting) ())
            (Some Values.CreateReportPlanOutput.to_json)
            (Some Values.CreateReportPlanOutput.error_to_json)])
+let create_restore_access_backup_vault =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and backupVaultName =
+         flag "backup-vault-name" (optional string)
+           ~doc:"STRING BackupVaultName"
+       and backupVaultTags =
+         flag "backup-vault-tags" (optional json_arg) ~doc:"JSON Tags"
+       and creatorRequestId =
+         flag "creator-request-id" (optional string)
+           ~doc:"STRING String__lc1"
+       and requesterComment =
+         flag "requester-comment" (optional string)
+           ~doc:"STRING RequesterComment"
+       and sourceBackupVaultArn =
+         flag "source-backup-vault-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_restore_access_backup_vault
+           (Values.CreateRestoreAccessBackupVaultInput.make ?backupVaultName
+              ?backupVaultTags:(Option.map ~f:Values.Tags.of_json
+                                  backupVaultTags) ?creatorRequestId
+              ?requesterComment ~sourceBackupVaultArn ())
+           (Some Values.CreateRestoreAccessBackupVaultOutput.to_json)
+           (Some Values.CreateRestoreAccessBackupVaultOutput.error_to_json)])
+let create_restore_testing_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and creatorRequestId =
+         flag "creator-request-id" (optional string) ~doc:"STRING String"
+       and tags =
+         flag "tags" (optional json_arg) ~doc:"JSON SensitiveStringMap"
+       and restoreTestingPlan =
+         flag "restore-testing-plan" (required json_arg)
+           ~doc:"JSON RestoreTestingPlanForCreate" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_restore_testing_plan
+           (Values.CreateRestoreTestingPlanInput.make ?creatorRequestId
+              ?tags:(Option.map ~f:Values.SensitiveStringMap.of_json tags)
+              ~restoreTestingPlan:(Values.RestoreTestingPlanForCreate.of_json
+                                     restoreTestingPlan) ())
+           (Some Values.CreateRestoreTestingPlanOutput.to_json)
+           (Some Values.CreateRestoreTestingPlanOutput.error_to_json)])
+let create_restore_testing_selection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and creatorRequestId =
+         flag "creator-request-id" (optional string) ~doc:"STRING String"
+       and restoreTestingPlanName =
+         flag "restore-testing-plan-name" (required string)
+           ~doc:"STRING String"
+       and restoreTestingSelection =
+         flag "restore-testing-selection" (required json_arg)
+           ~doc:"JSON RestoreTestingSelectionForCreate" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_restore_testing_selection
+           (Values.CreateRestoreTestingSelectionInput.make ?creatorRequestId
+              ~restoreTestingPlanName
+              ~restoreTestingSelection:(Values.RestoreTestingSelectionForCreate.of_json
+                                          restoreTestingSelection) ())
+           (Some Values.CreateRestoreTestingSelectionOutput.to_json)
+           (Some Values.CreateRestoreTestingSelectionOutput.error_to_json)])
+let create_tiering_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tieringConfigurationTags =
+         flag "tiering-configuration-tags" (optional json_arg)
+           ~doc:"JSON Tags"
+       and creatorRequestId =
+         flag "creator-request-id" (optional string)
+           ~doc:"STRING CreatorRequestId"
+       and tieringConfiguration =
+         flag "tiering-configuration" (required json_arg)
+           ~doc:"JSON TieringConfigurationInputForCreate" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_tiering_configuration
+           (Values.CreateTieringConfigurationInput.make
+              ?tieringConfigurationTags:(Option.map ~f:Values.Tags.of_json
+                                           tieringConfigurationTags)
+              ?creatorRequestId
+              ~tieringConfiguration:(Values.TieringConfigurationInputForCreate.of_json
+                                       tieringConfiguration) ())
+           (Some Values.CreateTieringConfigurationOutput.to_json)
+           (Some Values.CreateTieringConfigurationOutput.error_to_json)])
 let delete_backup_plan =
   Command.async ~summary:""
     ([%map_open.Command
@@ -188,7 +421,7 @@ let delete_backup_plan =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and backupPlanId =
-         flag "backup-plan-id" (required string) ~doc:"STRING string" in
+         flag "backup-plan-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_backup_plan
@@ -206,9 +439,9 @@ let delete_backup_selection =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and backupPlanId =
-         flag "backup-plan-id" (required string) ~doc:"STRING string"
+         flag "backup-plan-id" (required string) ~doc:"STRING String__lc1"
        and selectionId =
-         flag "selection-id" (required string) ~doc:"STRING string" in
+         flag "selection-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_backup_selection
@@ -225,7 +458,7 @@ let delete_backup_vault =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and backupVaultName =
-         flag "backup-vault-name" (required string) ~doc:"STRING string" in
+         flag "backup-vault-name" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_backup_vault
@@ -337,6 +570,66 @@ let delete_report_plan =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_report_plan
            (Values.DeleteReportPlanInput.make ~reportPlanName ()) None None])
+let delete_restore_testing_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and restoreTestingPlanName =
+         flag "restore-testing-plan-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_restore_testing_plan
+           (Values.DeleteRestoreTestingPlanInput.make ~restoreTestingPlanName
+              ()) None None])
+let delete_restore_testing_selection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and restoreTestingPlanName =
+         flag "restore-testing-plan-name" (required string)
+           ~doc:"STRING String"
+       and restoreTestingSelectionName =
+         flag "restore-testing-selection-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_restore_testing_selection
+           (Values.DeleteRestoreTestingSelectionInput.make
+              ~restoreTestingPlanName ~restoreTestingSelectionName ()) None
+           None])
+let delete_tiering_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tieringConfigurationName =
+         flag "tiering-configuration-name" (required string)
+           ~doc:"STRING TieringConfigurationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_tiering_configuration
+           (Values.DeleteTieringConfigurationInput.make
+              ~tieringConfigurationName ())
+           (Some Values.DeleteTieringConfigurationOutput.to_json)
+           (Some Values.DeleteTieringConfigurationOutput.error_to_json)])
 let describe_backup_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -348,7 +641,7 @@ let describe_backup_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and backupJobId =
-         flag "backup-job-id" (required string) ~doc:"STRING string" in
+         flag "backup-job-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_backup_job
@@ -365,12 +658,16 @@ let describe_backup_vault =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and backupVaultAccountId =
+         flag "backup-vault-account-id" (optional string)
+           ~doc:"STRING String__lc1"
        and backupVaultName =
-         flag "backup-vault-name" (required string) ~doc:"STRING string" in
+         flag "backup-vault-name" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_backup_vault
-           (Values.DescribeBackupVaultInput.make ~backupVaultName ())
+           (Values.DescribeBackupVaultInput.make ?backupVaultAccountId
+              ~backupVaultName ())
            (Some Values.DescribeBackupVaultOutput.to_json)
            (Some Values.DescribeBackupVaultOutput.error_to_json)])
 let describe_copy_job =
@@ -384,7 +681,7 @@ let describe_copy_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and copyJobId =
-         flag "copy-job-id" (required string) ~doc:"STRING string" in
+         flag "copy-job-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_copy_job
@@ -454,6 +751,9 @@ let describe_recovery_point =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and backupVaultAccountId =
+         flag "backup-vault-account-id" (optional string)
+           ~doc:"STRING AccountId"
        and backupVaultName =
          flag "backup-vault-name" (required string)
            ~doc:"STRING BackupVaultName"
@@ -462,8 +762,8 @@ let describe_recovery_point =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_recovery_point
-           (Values.DescribeRecoveryPointInput.make ~backupVaultName
-              ~recoveryPointArn ())
+           (Values.DescribeRecoveryPointInput.make ?backupVaultAccountId
+              ~backupVaultName ~recoveryPointArn ())
            (Some Values.DescribeRecoveryPointOutput.to_json)
            (Some Values.DescribeRecoveryPointOutput.error_to_json)])
 let describe_region_settings =
@@ -538,6 +838,45 @@ let describe_restore_job =
            (Values.DescribeRestoreJobInput.make ~restoreJobId ())
            (Some Values.DescribeRestoreJobOutput.to_json)
            (Some Values.DescribeRestoreJobOutput.error_to_json)])
+let describe_scan_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanJobId =
+         flag "scan-job-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_scan_job
+           (Values.DescribeScanJobInput.make ~scanJobId ())
+           (Some Values.DescribeScanJobOutput.to_json)
+           (Some Values.DescribeScanJobOutput.error_to_json)])
+let disassociate_backup_vault_mpa_approval_team =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and requesterComment =
+         flag "requester-comment" (optional string)
+           ~doc:"STRING RequesterComment"
+       and backupVaultName =
+         flag "backup-vault-name" (required string)
+           ~doc:"STRING BackupVaultName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_backup_vault_mpa_approval_team
+           (Values.DisassociateBackupVaultMpaApprovalTeamInput.make
+              ?requesterComment ~backupVaultName ()) None None])
 let disassociate_recovery_point =
   Command.async ~summary:""
     ([%map_open.Command
@@ -558,6 +897,26 @@ let disassociate_recovery_point =
            Io.disassociate_recovery_point
            (Values.DisassociateRecoveryPointInput.make ~backupVaultName
               ~recoveryPointArn ()) None None])
+let disassociate_recovery_point_from_parent =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and backupVaultName =
+         flag "backup-vault-name" (required string)
+           ~doc:"STRING BackupVaultName"
+       and recoveryPointArn =
+         flag "recovery-point-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_recovery_point_from_parent
+           (Values.DisassociateRecoveryPointFromParentInput.make
+              ~backupVaultName ~recoveryPointArn ()) None None])
 let export_backup_plan_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -569,7 +928,7 @@ let export_backup_plan_template =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and backupPlanId =
-         flag "backup-plan-id" (required string) ~doc:"STRING string" in
+         flag "backup-plan-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.export_backup_plan_template
@@ -587,13 +946,17 @@ let get_backup_plan =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and versionId =
-         flag "version-id" (optional string) ~doc:"STRING string"
+         flag "version-id" (optional string) ~doc:"STRING String__lc1"
+       and maxScheduledRunsPreview =
+         flag "max-scheduled-runs-preview" (optional int)
+           ~doc:"INT MaxScheduledRunsPreview"
        and backupPlanId =
-         flag "backup-plan-id" (required string) ~doc:"STRING string" in
+         flag "backup-plan-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_backup_plan
-           (Values.GetBackupPlanInput.make ?versionId ~backupPlanId ())
+           (Values.GetBackupPlanInput.make ?versionId
+              ?maxScheduledRunsPreview ~backupPlanId ())
            (Some Values.GetBackupPlanOutput.to_json)
            (Some Values.GetBackupPlanOutput.error_to_json)])
 let get_backup_plan_from_j_s_o_n =
@@ -608,7 +971,7 @@ let get_backup_plan_from_j_s_o_n =
            ~doc:"URL override endpoint url"
        and backupPlanTemplateJson =
          flag "backup-plan-template-json" (required string)
-           ~doc:"STRING string" in
+           ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_backup_plan_from_j_s_o_n
@@ -627,7 +990,7 @@ let get_backup_plan_from_template =
            ~doc:"URL override endpoint url"
        and backupPlanTemplateId =
          flag "backup-plan-template-id" (required string)
-           ~doc:"STRING string" in
+           ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_backup_plan_from_template
@@ -645,9 +1008,9 @@ let get_backup_selection =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and backupPlanId =
-         flag "backup-plan-id" (required string) ~doc:"STRING string"
+         flag "backup-plan-id" (required string) ~doc:"STRING String__lc1"
        and selectionId =
-         flag "selection-id" (required string) ~doc:"STRING string" in
+         flag "selection-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_backup_selection
@@ -692,7 +1055,24 @@ let get_backup_vault_notifications =
            (Values.GetBackupVaultNotificationsInput.make ~backupVaultName ())
            (Some Values.GetBackupVaultNotificationsOutput.to_json)
            (Some Values.GetBackupVaultNotificationsOutput.error_to_json)])
-let get_recovery_point_restore_metadata =
+let get_legal_hold =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and legalHoldId =
+         flag "legal-hold-id" (required string) ~doc:"STRING String__lc1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_legal_hold (Values.GetLegalHoldInput.make ~legalHoldId ())
+           (Some Values.GetLegalHoldOutput.to_json)
+           (Some Values.GetLegalHoldOutput.error_to_json)])
+let get_recovery_point_index_details =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -709,11 +1089,120 @@ let get_recovery_point_restore_metadata =
          flag "recovery-point-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_recovery_point_restore_metadata
-           (Values.GetRecoveryPointRestoreMetadataInput.make ~backupVaultName
+           Io.get_recovery_point_index_details
+           (Values.GetRecoveryPointIndexDetailsInput.make ~backupVaultName
               ~recoveryPointArn ())
+           (Some Values.GetRecoveryPointIndexDetailsOutput.to_json)
+           (Some Values.GetRecoveryPointIndexDetailsOutput.error_to_json)])
+let get_recovery_point_restore_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and backupVaultAccountId =
+         flag "backup-vault-account-id" (optional string)
+           ~doc:"STRING AccountId"
+       and backupVaultName =
+         flag "backup-vault-name" (required string)
+           ~doc:"STRING BackupVaultName"
+       and recoveryPointArn =
+         flag "recovery-point-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_recovery_point_restore_metadata
+           (Values.GetRecoveryPointRestoreMetadataInput.make
+              ?backupVaultAccountId ~backupVaultName ~recoveryPointArn ())
            (Some Values.GetRecoveryPointRestoreMetadataOutput.to_json)
            (Some Values.GetRecoveryPointRestoreMetadataOutput.error_to_json)])
+let get_restore_job_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and restoreJobId =
+         flag "restore-job-id" (required string) ~doc:"STRING RestoreJobId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_restore_job_metadata
+           (Values.GetRestoreJobMetadataInput.make ~restoreJobId ())
+           (Some Values.GetRestoreJobMetadataOutput.to_json)
+           (Some Values.GetRestoreJobMetadataOutput.error_to_json)])
+let get_restore_testing_inferred_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and backupVaultAccountId =
+         flag "backup-vault-account-id" (optional string)
+           ~doc:"STRING String"
+       and backupVaultName =
+         flag "backup-vault-name" (required string) ~doc:"STRING String"
+       and recoveryPointArn =
+         flag "recovery-point-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_restore_testing_inferred_metadata
+           (Values.GetRestoreTestingInferredMetadataInput.make
+              ?backupVaultAccountId ~backupVaultName ~recoveryPointArn ())
+           (Some Values.GetRestoreTestingInferredMetadataOutput.to_json)
+           (Some Values.GetRestoreTestingInferredMetadataOutput.error_to_json)])
+let get_restore_testing_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and restoreTestingPlanName =
+         flag "restore-testing-plan-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_restore_testing_plan
+           (Values.GetRestoreTestingPlanInput.make ~restoreTestingPlanName ())
+           (Some Values.GetRestoreTestingPlanOutput.to_json)
+           (Some Values.GetRestoreTestingPlanOutput.error_to_json)])
+let get_restore_testing_selection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and restoreTestingPlanName =
+         flag "restore-testing-plan-name" (required string)
+           ~doc:"STRING String"
+       and restoreTestingSelectionName =
+         flag "restore-testing-selection-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_restore_testing_selection
+           (Values.GetRestoreTestingSelectionInput.make
+              ~restoreTestingPlanName ~restoreTestingSelectionName ())
+           (Some Values.GetRestoreTestingSelectionOutput.to_json)
+           (Some Values.GetRestoreTestingSelectionOutput.error_to_json)])
 let get_supported_resource_types =
   Command.async ~summary:""
     ([%map_open.Command
@@ -730,6 +1219,63 @@ let get_supported_resource_types =
            Io.get_supported_resource_types (Fn.id ())
            (Some Values.GetSupportedResourceTypesOutput.to_json)
            (Some Values.GetSupportedResourceTypesOutput.error_to_json)])
+let get_tiering_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tieringConfigurationName =
+         flag "tiering-configuration-name" (required string)
+           ~doc:"STRING TieringConfigurationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_tiering_configuration
+           (Values.GetTieringConfigurationInput.make
+              ~tieringConfigurationName ())
+           (Some Values.GetTieringConfigurationOutput.to_json)
+           (Some Values.GetTieringConfigurationOutput.error_to_json)])
+let list_backup_job_summaries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON BackupJobStatus"
+       and resourceType =
+         flag "resource-type" (optional string) ~doc:"STRING ResourceType"
+       and messageCategory =
+         flag "message-category" (optional string)
+           ~doc:"STRING MessageCategory"
+       and aggregationPeriod =
+         flag "aggregation-period" (optional json_arg)
+           ~doc:"JSON AggregationPeriod"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_backup_job_summaries
+           (Values.ListBackupJobSummariesInput.make ?accountId
+              ?state:(Option.map ~f:Values.BackupJobStatus.of_json state)
+              ?resourceType ?messageCategory
+              ?aggregationPeriod:(Option.map
+                                    ~f:Values.AggregationPeriod.of_json
+                                    aggregationPeriod) ?maxResults ?nextToken
+              ()) (Some Values.ListBackupJobSummariesOutput.to_json)
+           (Some Values.ListBackupJobSummariesOutput.error_to_json)])
 let list_backup_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -741,7 +1287,7 @@ let list_backup_jobs =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and byResourceArn =
@@ -752,13 +1298,26 @@ let list_backup_jobs =
          flag "by-backup-vault-name" (optional string)
            ~doc:"STRING BackupVaultName"
        and byCreatedBefore =
-         flag "by-created-before" (optional json_arg) ~doc:"JSON timestamp"
+         flag "by-created-before" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
        and byCreatedAfter =
-         flag "by-created-after" (optional json_arg) ~doc:"JSON timestamp"
+         flag "by-created-after" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
        and byResourceType =
          flag "by-resource-type" (optional string) ~doc:"STRING ResourceType"
        and byAccountId =
-         flag "by-account-id" (optional string) ~doc:"STRING AccountId" in
+         flag "by-account-id" (optional string) ~doc:"STRING AccountId"
+       and byCompleteAfter =
+         flag "by-complete-after" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and byCompleteBefore =
+         flag "by-complete-before" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and byParentJobId =
+         flag "by-parent-job-id" (optional string) ~doc:"STRING String__lc1"
+       and byMessageCategory =
+         flag "by-message-category" (optional string)
+           ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_backup_jobs
@@ -766,11 +1325,16 @@ let list_backup_jobs =
               ?byResourceArn
               ?byState:(Option.map ~f:Values.BackupJobState.of_json byState)
               ?byBackupVaultName
-              ?byCreatedBefore:(Option.map ~f:Values.Timestamp.of_json
+              ?byCreatedBefore:(Option.map ~f:Values.Timestamp__lc1.of_json
                                   byCreatedBefore)
-              ?byCreatedAfter:(Option.map ~f:Values.Timestamp.of_json
+              ?byCreatedAfter:(Option.map ~f:Values.Timestamp__lc1.of_json
                                  byCreatedAfter) ?byResourceType ?byAccountId
-              ()) (Some Values.ListBackupJobsOutput.to_json)
+              ?byCompleteAfter:(Option.map ~f:Values.Timestamp__lc1.of_json
+                                  byCompleteAfter)
+              ?byCompleteBefore:(Option.map ~f:Values.Timestamp__lc1.of_json
+                                   byCompleteBefore) ?byParentJobId
+              ?byMessageCategory ())
+           (Some Values.ListBackupJobsOutput.to_json)
            (Some Values.ListBackupJobsOutput.error_to_json)])
 let list_backup_plan_templates =
   Command.async ~summary:""
@@ -783,7 +1347,7 @@ let list_backup_plan_templates =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults" in
        fun () ->
@@ -803,11 +1367,11 @@ let list_backup_plan_versions =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and backupPlanId =
-         flag "backup-plan-id" (required string) ~doc:"STRING string" in
+         flag "backup-plan-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_backup_plan_versions
@@ -826,7 +1390,7 @@ let list_backup_plans =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and includeDeleted =
@@ -848,11 +1412,11 @@ let list_backup_selections =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and backupPlanId =
-         flag "backup-plan-id" (required string) ~doc:"STRING string" in
+         flag "backup-plan-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_backup_selections
@@ -870,16 +1434,58 @@ let list_backup_vaults =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and byVaultType =
+         flag "by-vault-type" (optional json_arg) ~doc:"JSON VaultType"
+       and byShared =
+         flag "by-shared" (optional bool) ~doc:"BOOL Boolean__lc1"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_backup_vaults
-           (Values.ListBackupVaultsInput.make ?nextToken ?maxResults ())
-           (Some Values.ListBackupVaultsOutput.to_json)
+           (Values.ListBackupVaultsInput.make
+              ?byVaultType:(Option.map ~f:Values.VaultType.of_json
+                              byVaultType) ?byShared ?nextToken ?maxResults
+              ()) (Some Values.ListBackupVaultsOutput.to_json)
            (Some Values.ListBackupVaultsOutput.error_to_json)])
+let list_copy_job_summaries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and state = flag "state" (optional json_arg) ~doc:"JSON CopyJobStatus"
+       and resourceType =
+         flag "resource-type" (optional string) ~doc:"STRING ResourceType"
+       and messageCategory =
+         flag "message-category" (optional string)
+           ~doc:"STRING MessageCategory"
+       and aggregationPeriod =
+         flag "aggregation-period" (optional json_arg)
+           ~doc:"JSON AggregationPeriod"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_copy_job_summaries
+           (Values.ListCopyJobSummariesInput.make ?accountId
+              ?state:(Option.map ~f:Values.CopyJobStatus.of_json state)
+              ?resourceType ?messageCategory
+              ?aggregationPeriod:(Option.map
+                                    ~f:Values.AggregationPeriod.of_json
+                                    aggregationPeriod) ?maxResults ?nextToken
+              ()) (Some Values.ListCopyJobSummariesOutput.to_json)
+           (Some Values.ListCopyJobSummariesOutput.error_to_json)])
 let list_copy_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -891,7 +1497,7 @@ let list_copy_jobs =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and byResourceArn =
@@ -899,27 +1505,48 @@ let list_copy_jobs =
        and byState =
          flag "by-state" (optional json_arg) ~doc:"JSON CopyJobState"
        and byCreatedBefore =
-         flag "by-created-before" (optional json_arg) ~doc:"JSON timestamp"
+         flag "by-created-before" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
        and byCreatedAfter =
-         flag "by-created-after" (optional json_arg) ~doc:"JSON timestamp"
+         flag "by-created-after" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
        and byResourceType =
          flag "by-resource-type" (optional string) ~doc:"STRING ResourceType"
        and byDestinationVaultArn =
          flag "by-destination-vault-arn" (optional string)
-           ~doc:"STRING string"
+           ~doc:"STRING String__lc1"
        and byAccountId =
-         flag "by-account-id" (optional string) ~doc:"STRING AccountId" in
+         flag "by-account-id" (optional string) ~doc:"STRING AccountId"
+       and byCompleteBefore =
+         flag "by-complete-before" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and byCompleteAfter =
+         flag "by-complete-after" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and byParentJobId =
+         flag "by-parent-job-id" (optional string) ~doc:"STRING String__lc1"
+       and byMessageCategory =
+         flag "by-message-category" (optional string)
+           ~doc:"STRING String__lc1"
+       and bySourceRecoveryPointArn =
+         flag "by-source-recovery-point-arn" (optional string)
+           ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_copy_jobs
            (Values.ListCopyJobsInput.make ?nextToken ?maxResults
               ?byResourceArn
               ?byState:(Option.map ~f:Values.CopyJobState.of_json byState)
-              ?byCreatedBefore:(Option.map ~f:Values.Timestamp.of_json
+              ?byCreatedBefore:(Option.map ~f:Values.Timestamp__lc1.of_json
                                   byCreatedBefore)
-              ?byCreatedAfter:(Option.map ~f:Values.Timestamp.of_json
+              ?byCreatedAfter:(Option.map ~f:Values.Timestamp__lc1.of_json
                                  byCreatedAfter) ?byResourceType
-              ?byDestinationVaultArn ?byAccountId ())
+              ?byDestinationVaultArn ?byAccountId
+              ?byCompleteBefore:(Option.map ~f:Values.Timestamp__lc1.of_json
+                                   byCompleteBefore)
+              ?byCompleteAfter:(Option.map ~f:Values.Timestamp__lc1.of_json
+                                  byCompleteAfter) ?byParentJobId
+              ?byMessageCategory ?bySourceRecoveryPointArn ())
            (Some Values.ListCopyJobsOutput.to_json)
            (Some Values.ListCopyJobsOutput.error_to_json)])
 let list_frameworks =
@@ -935,13 +1562,70 @@ let list_frameworks =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxFrameworkInputs"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string" in
+         flag "next-token" (optional string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_frameworks
            (Values.ListFrameworksInput.make ?maxResults ?nextToken ())
            (Some Values.ListFrameworksOutput.to_json)
            (Some Values.ListFrameworksOutput.error_to_json)])
+let list_indexed_recovery_points =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and sourceResourceArn =
+         flag "source-resource-arn" (optional string) ~doc:"STRING ARN"
+       and createdBefore =
+         flag "created-before" (optional json_arg) ~doc:"JSON Timestamp__lc1"
+       and createdAfter =
+         flag "created-after" (optional json_arg) ~doc:"JSON Timestamp__lc1"
+       and resourceType =
+         flag "resource-type" (optional string) ~doc:"STRING ResourceType"
+       and indexStatus =
+         flag "index-status" (optional json_arg) ~doc:"JSON IndexStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_indexed_recovery_points
+           (Values.ListIndexedRecoveryPointsInput.make ?nextToken ?maxResults
+              ?sourceResourceArn
+              ?createdBefore:(Option.map ~f:Values.Timestamp__lc1.of_json
+                                createdBefore)
+              ?createdAfter:(Option.map ~f:Values.Timestamp__lc1.of_json
+                               createdAfter) ?resourceType
+              ?indexStatus:(Option.map ~f:Values.IndexStatus.of_json
+                              indexStatus) ())
+           (Some Values.ListIndexedRecoveryPointsOutput.to_json)
+           (Some Values.ListIndexedRecoveryPointsOutput.error_to_json)])
+let list_legal_holds =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_legal_holds
+           (Values.ListLegalHoldsInput.make ?nextToken ?maxResults ())
+           (Some Values.ListLegalHoldsOutput.to_json)
+           (Some Values.ListLegalHoldsOutput.error_to_json)])
 let list_protected_resources =
   Command.async ~summary:""
     ([%map_open.Command
@@ -953,7 +1637,7 @@ let list_protected_resources =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults" in
        fun () ->
@@ -962,6 +1646,35 @@ let list_protected_resources =
            (Values.ListProtectedResourcesInput.make ?nextToken ?maxResults ())
            (Some Values.ListProtectedResourcesOutput.to_json)
            (Some Values.ListProtectedResourcesOutput.error_to_json)])
+let list_protected_resources_by_backup_vault =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and backupVaultAccountId =
+         flag "backup-vault-account-id" (optional string)
+           ~doc:"STRING AccountId"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and backupVaultName =
+         flag "backup-vault-name" (required string)
+           ~doc:"STRING BackupVaultName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_protected_resources_by_backup_vault
+           (Values.ListProtectedResourcesByBackupVaultInput.make
+              ?backupVaultAccountId ?nextToken ?maxResults ~backupVaultName
+              ())
+           (Some Values.ListProtectedResourcesByBackupVaultOutput.to_json)
+           (Some
+              Values.ListProtectedResourcesByBackupVaultOutput.error_to_json)])
 let list_recovery_points_by_backup_vault =
   Command.async ~summary:""
     ([%map_open.Command
@@ -972,8 +1685,11 @@ let list_recovery_points_by_backup_vault =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and backupVaultAccountId =
+         flag "backup-vault-account-id" (optional string)
+           ~doc:"STRING AccountId"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and byResourceArn =
@@ -981,25 +1697,55 @@ let list_recovery_points_by_backup_vault =
        and byResourceType =
          flag "by-resource-type" (optional string) ~doc:"STRING ResourceType"
        and byBackupPlanId =
-         flag "by-backup-plan-id" (optional string) ~doc:"STRING string"
+         flag "by-backup-plan-id" (optional string) ~doc:"STRING String__lc1"
        and byCreatedBefore =
-         flag "by-created-before" (optional json_arg) ~doc:"JSON timestamp"
+         flag "by-created-before" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
        and byCreatedAfter =
-         flag "by-created-after" (optional json_arg) ~doc:"JSON timestamp"
+         flag "by-created-after" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and byParentRecoveryPointArn =
+         flag "by-parent-recovery-point-arn" (optional string)
+           ~doc:"STRING ARN"
        and backupVaultName =
          flag "backup-vault-name" (required string)
            ~doc:"STRING BackupVaultName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_recovery_points_by_backup_vault
-           (Values.ListRecoveryPointsByBackupVaultInput.make ?nextToken
-              ?maxResults ?byResourceArn ?byResourceType ?byBackupPlanId
-              ?byCreatedBefore:(Option.map ~f:Values.Timestamp.of_json
+           (Values.ListRecoveryPointsByBackupVaultInput.make
+              ?backupVaultAccountId ?nextToken ?maxResults ?byResourceArn
+              ?byResourceType ?byBackupPlanId
+              ?byCreatedBefore:(Option.map ~f:Values.Timestamp__lc1.of_json
                                   byCreatedBefore)
-              ?byCreatedAfter:(Option.map ~f:Values.Timestamp.of_json
-                                 byCreatedAfter) ~backupVaultName ())
+              ?byCreatedAfter:(Option.map ~f:Values.Timestamp__lc1.of_json
+                                 byCreatedAfter) ?byParentRecoveryPointArn
+              ~backupVaultName ())
            (Some Values.ListRecoveryPointsByBackupVaultOutput.to_json)
            (Some Values.ListRecoveryPointsByBackupVaultOutput.error_to_json)])
+let list_recovery_points_by_legal_hold =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and legalHoldId =
+         flag "legal-hold-id" (required string) ~doc:"STRING String__lc1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_recovery_points_by_legal_hold
+           (Values.ListRecoveryPointsByLegalHoldInput.make ?nextToken
+              ?maxResults ~legalHoldId ())
+           (Some Values.ListRecoveryPointsByLegalHoldOutput.to_json)
+           (Some Values.ListRecoveryPointsByLegalHoldOutput.error_to_json)])
 let list_recovery_points_by_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1011,16 +1757,19 @@ let list_recovery_points_by_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and managedByAWSBackupOnly =
+         flag "managed-by-a-w-s-backup-only" (optional bool)
+           ~doc:"BOOL Boolean__lc1"
        and resourceArn =
          flag "resource-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_recovery_points_by_resource
            (Values.ListRecoveryPointsByResourceInput.make ?nextToken
-              ?maxResults ~resourceArn ())
+              ?maxResults ?managedByAWSBackupOnly ~resourceArn ())
            (Some Values.ListRecoveryPointsByResourceOutput.to_json)
            (Some Values.ListRecoveryPointsByResourceOutput.error_to_json)])
 let list_report_jobs =
@@ -1037,21 +1786,24 @@ let list_report_jobs =
          flag "by-report-plan-name" (optional string)
            ~doc:"STRING ReportPlanName"
        and byCreationBefore =
-         flag "by-creation-before" (optional json_arg) ~doc:"JSON timestamp"
+         flag "by-creation-before" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
        and byCreationAfter =
-         flag "by-creation-after" (optional json_arg) ~doc:"JSON timestamp"
-       and byStatus = flag "by-status" (optional string) ~doc:"STRING string"
+         flag "by-creation-after" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and byStatus =
+         flag "by-status" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string" in
+         flag "next-token" (optional string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_report_jobs
            (Values.ListReportJobsInput.make ?byReportPlanName
-              ?byCreationBefore:(Option.map ~f:Values.Timestamp.of_json
+              ?byCreationBefore:(Option.map ~f:Values.Timestamp__lc1.of_json
                                    byCreationBefore)
-              ?byCreationAfter:(Option.map ~f:Values.Timestamp.of_json
+              ?byCreationAfter:(Option.map ~f:Values.Timestamp__lc1.of_json
                                   byCreationAfter) ?byStatus ?maxResults
               ?nextToken ()) (Some Values.ListReportJobsOutput.to_json)
            (Some Values.ListReportJobsOutput.error_to_json)])
@@ -1068,13 +1820,71 @@ let list_report_plans =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string" in
+         flag "next-token" (optional string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_report_plans
            (Values.ListReportPlansInput.make ?maxResults ?nextToken ())
            (Some Values.ListReportPlansOutput.to_json)
            (Some Values.ListReportPlansOutput.error_to_json)])
+let list_restore_access_backup_vaults =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and backupVaultName =
+         flag "backup-vault-name" (required string)
+           ~doc:"STRING BackupVaultName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_restore_access_backup_vaults
+           (Values.ListRestoreAccessBackupVaultsInput.make ?nextToken
+              ?maxResults ~backupVaultName ())
+           (Some Values.ListRestoreAccessBackupVaultsOutput.to_json)
+           (Some Values.ListRestoreAccessBackupVaultsOutput.error_to_json)])
+let list_restore_job_summaries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON RestoreJobState"
+       and resourceType =
+         flag "resource-type" (optional string) ~doc:"STRING ResourceType"
+       and aggregationPeriod =
+         flag "aggregation-period" (optional json_arg)
+           ~doc:"JSON AggregationPeriod"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_restore_job_summaries
+           (Values.ListRestoreJobSummariesInput.make ?accountId
+              ?state:(Option.map ~f:Values.RestoreJobState.of_json state)
+              ?resourceType
+              ?aggregationPeriod:(Option.map
+                                    ~f:Values.AggregationPeriod.of_json
+                                    aggregationPeriod) ?maxResults ?nextToken
+              ()) (Some Values.ListRestoreJobSummariesOutput.to_json)
+           (Some Values.ListRestoreJobSummariesOutput.error_to_json)])
 let list_restore_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1086,30 +1896,236 @@ let list_restore_jobs =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and byAccountId =
          flag "by-account-id" (optional string) ~doc:"STRING AccountId"
+       and byResourceType =
+         flag "by-resource-type" (optional string) ~doc:"STRING ResourceType"
        and byCreatedBefore =
-         flag "by-created-before" (optional json_arg) ~doc:"JSON timestamp"
+         flag "by-created-before" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
        and byCreatedAfter =
-         flag "by-created-after" (optional json_arg) ~doc:"JSON timestamp"
+         flag "by-created-after" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
        and byStatus =
-         flag "by-status" (optional json_arg) ~doc:"JSON RestoreJobStatus" in
+         flag "by-status" (optional json_arg) ~doc:"JSON RestoreJobStatus"
+       and byCompleteBefore =
+         flag "by-complete-before" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and byCompleteAfter =
+         flag "by-complete-after" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and byRestoreTestingPlanArn =
+         flag "by-restore-testing-plan-arn" (optional string)
+           ~doc:"STRING ARN"
+       and byParentJobId =
+         flag "by-parent-job-id" (optional string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_restore_jobs
            (Values.ListRestoreJobsInput.make ?nextToken ?maxResults
-              ?byAccountId
-              ?byCreatedBefore:(Option.map ~f:Values.Timestamp.of_json
+              ?byAccountId ?byResourceType
+              ?byCreatedBefore:(Option.map ~f:Values.Timestamp__lc1.of_json
                                   byCreatedBefore)
-              ?byCreatedAfter:(Option.map ~f:Values.Timestamp.of_json
+              ?byCreatedAfter:(Option.map ~f:Values.Timestamp__lc1.of_json
                                  byCreatedAfter)
               ?byStatus:(Option.map ~f:Values.RestoreJobStatus.of_json
-                           byStatus) ())
-           (Some Values.ListRestoreJobsOutput.to_json)
+                           byStatus)
+              ?byCompleteBefore:(Option.map ~f:Values.Timestamp__lc1.of_json
+                                   byCompleteBefore)
+              ?byCompleteAfter:(Option.map ~f:Values.Timestamp__lc1.of_json
+                                  byCompleteAfter) ?byRestoreTestingPlanArn
+              ?byParentJobId ()) (Some Values.ListRestoreJobsOutput.to_json)
            (Some Values.ListRestoreJobsOutput.error_to_json)])
+let list_restore_jobs_by_protected_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and byStatus =
+         flag "by-status" (optional json_arg) ~doc:"JSON RestoreJobStatus"
+       and byRecoveryPointCreationDateAfter =
+         flag "by-recovery-point-creation-date-after" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and byRecoveryPointCreationDateBefore =
+         flag "by-recovery-point-creation-date-before" (optional json_arg)
+           ~doc:"JSON Timestamp__lc1"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_restore_jobs_by_protected_resource
+           (Values.ListRestoreJobsByProtectedResourceInput.make
+              ?byStatus:(Option.map ~f:Values.RestoreJobStatus.of_json
+                           byStatus)
+              ?byRecoveryPointCreationDateAfter:(Option.map
+                                                   ~f:Values.Timestamp__lc1.of_json
+                                                   byRecoveryPointCreationDateAfter)
+              ?byRecoveryPointCreationDateBefore:(Option.map
+                                                    ~f:Values.Timestamp__lc1.of_json
+                                                    byRecoveryPointCreationDateBefore)
+              ?nextToken ?maxResults ~resourceArn ())
+           (Some Values.ListRestoreJobsByProtectedResourceOutput.to_json)
+           (Some
+              Values.ListRestoreJobsByProtectedResourceOutput.error_to_json)])
+let list_restore_testing_plans =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListRestoreTestingPlansInputMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_restore_testing_plans
+           (Values.ListRestoreTestingPlansInput.make ?maxResults ?nextToken
+              ()) (Some Values.ListRestoreTestingPlansOutput.to_json)
+           (Some Values.ListRestoreTestingPlansOutput.error_to_json)])
+let list_restore_testing_selections =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListRestoreTestingSelectionsInputMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and restoreTestingPlanName =
+         flag "restore-testing-plan-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_restore_testing_selections
+           (Values.ListRestoreTestingSelectionsInput.make ?maxResults
+              ?nextToken ~restoreTestingPlanName ())
+           (Some Values.ListRestoreTestingSelectionsOutput.to_json)
+           (Some Values.ListRestoreTestingSelectionsOutput.error_to_json)])
+let list_scan_job_summaries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and resourceType =
+         flag "resource-type" (optional string) ~doc:"STRING ResourceType"
+       and malwareScanner =
+         flag "malware-scanner" (optional json_arg)
+           ~doc:"JSON MalwareScanner"
+       and scanResultStatus =
+         flag "scan-result-status" (optional json_arg)
+           ~doc:"JSON ScanResultStatus"
+       and state = flag "state" (optional json_arg) ~doc:"JSON ScanJobStatus"
+       and aggregationPeriod =
+         flag "aggregation-period" (optional json_arg)
+           ~doc:"JSON AggregationPeriod"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_scan_job_summaries
+           (Values.ListScanJobSummariesInput.make ?accountId ?resourceType
+              ?malwareScanner:(Option.map ~f:Values.MalwareScanner.of_json
+                                 malwareScanner)
+              ?scanResultStatus:(Option.map
+                                   ~f:Values.ScanResultStatus.of_json
+                                   scanResultStatus)
+              ?state:(Option.map ~f:Values.ScanJobStatus.of_json state)
+              ?aggregationPeriod:(Option.map
+                                    ~f:Values.AggregationPeriod.of_json
+                                    aggregationPeriod) ?maxResults ?nextToken
+              ()) (Some Values.ListScanJobSummariesOutput.to_json)
+           (Some Values.ListScanJobSummariesOutput.error_to_json)])
+let list_scan_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and byAccountId =
+         flag "by-account-id" (optional string) ~doc:"STRING String"
+       and byBackupVaultName =
+         flag "by-backup-vault-name" (optional string) ~doc:"STRING String"
+       and byCompleteAfter =
+         flag "by-complete-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and byCompleteBefore =
+         flag "by-complete-before" (optional json_arg) ~doc:"JSON Timestamp"
+       and byMalwareScanner =
+         flag "by-malware-scanner" (optional json_arg)
+           ~doc:"JSON MalwareScanner"
+       and byRecoveryPointArn =
+         flag "by-recovery-point-arn" (optional string) ~doc:"STRING String"
+       and byResourceArn =
+         flag "by-resource-arn" (optional string) ~doc:"STRING String"
+       and byResourceType =
+         flag "by-resource-type" (optional json_arg)
+           ~doc:"JSON ScanResourceType"
+       and byScanResultStatus =
+         flag "by-scan-result-status" (optional json_arg)
+           ~doc:"JSON ScanResultStatus"
+       and byState =
+         flag "by-state" (optional json_arg) ~doc:"JSON ScanState"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListScanJobsInputMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_scan_jobs
+           (Values.ListScanJobsInput.make ?byAccountId ?byBackupVaultName
+              ?byCompleteAfter:(Option.map ~f:Values.Timestamp.of_json
+                                  byCompleteAfter)
+              ?byCompleteBefore:(Option.map ~f:Values.Timestamp.of_json
+                                   byCompleteBefore)
+              ?byMalwareScanner:(Option.map ~f:Values.MalwareScanner.of_json
+                                   byMalwareScanner) ?byRecoveryPointArn
+              ?byResourceArn
+              ?byResourceType:(Option.map ~f:Values.ScanResourceType.of_json
+                                 byResourceType)
+              ?byScanResultStatus:(Option.map
+                                     ~f:Values.ScanResultStatus.of_json
+                                     byScanResultStatus)
+              ?byState:(Option.map ~f:Values.ScanState.of_json byState)
+              ?maxResults ?nextToken ())
+           (Some Values.ListScanJobsOutput.to_json)
+           (Some Values.ListScanJobsOutput.error_to_json)])
 let list_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1121,7 +2137,7 @@ let list_tags =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING string"
+         flag "next-token" (optional string) ~doc:"STRING String__lc1"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and resourceArn =
@@ -1132,6 +2148,26 @@ let list_tags =
            (Values.ListTagsInput.make ?nextToken ?maxResults ~resourceArn ())
            (Some Values.ListTagsOutput.to_json)
            (Some Values.ListTagsOutput.error_to_json)])
+let list_tiering_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String__lc1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tiering_configurations
+           (Values.ListTieringConfigurationsInput.make ?maxResults ?nextToken
+              ()) (Some Values.ListTieringConfigurationsOutput.to_json)
+           (Some Values.ListTieringConfigurationsOutput.error_to_json)])
 let put_backup_vault_access_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1206,6 +2242,55 @@ let put_backup_vault_notifications =
               ~sNSTopicArn
               ~backupVaultEvents:(Values.BackupVaultEvents.of_json
                                     backupVaultEvents) ()) None None])
+let put_restore_validation_result =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and validationStatusMessage =
+         flag "validation-status-message" (optional string)
+           ~doc:"STRING String__lc1"
+       and restoreJobId =
+         flag "restore-job-id" (required string) ~doc:"STRING RestoreJobId"
+       and validationStatus =
+         flag "validation-status" (required json_arg)
+           ~doc:"JSON RestoreValidationStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_restore_validation_result
+           (Values.PutRestoreValidationResultInput.make
+              ?validationStatusMessage ~restoreJobId
+              ~validationStatus:(Values.RestoreValidationStatus.of_json
+                                   validationStatus) ()) None None])
+let revoke_restore_access_backup_vault =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and requesterComment =
+         flag "requester-comment" (optional string)
+           ~doc:"STRING RequesterComment"
+       and backupVaultName =
+         flag "backup-vault-name" (required string)
+           ~doc:"STRING BackupVaultName"
+       and restoreAccessBackupVaultArn =
+         flag "restore-access-backup-vault-arn" (required string)
+           ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.revoke_restore_access_backup_vault
+           (Values.RevokeRestoreAccessBackupVaultInput.make ?requesterComment
+              ~backupVaultName ~restoreAccessBackupVaultArn ()) None None])
 let start_backup_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1216,8 +2301,11 @@ let start_backup_job =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and logicallyAirGappedBackupVaultArn =
+         flag "logically-air-gapped-backup-vault-arn" (optional string)
+           ~doc:"STRING ARN"
        and idempotencyToken =
-         flag "idempotency-token" (optional string) ~doc:"STRING string"
+         flag "idempotency-token" (optional string) ~doc:"STRING String__lc1"
        and startWindowMinutes =
          flag "start-window-minutes" (optional json_arg)
            ~doc:"JSON WindowMinutes"
@@ -1230,6 +2318,7 @@ let start_backup_job =
          flag "recovery-point-tags" (optional json_arg) ~doc:"JSON Tags"
        and backupOptions =
          flag "backup-options" (optional json_arg) ~doc:"JSON BackupOptions"
+       and index = flag "index" (optional json_arg) ~doc:"JSON Index"
        and backupVaultName =
          flag "backup-vault-name" (required string)
            ~doc:"STRING BackupVaultName"
@@ -1240,7 +2329,8 @@ let start_backup_job =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_backup_job
-           (Values.StartBackupJobInput.make ?idempotencyToken
+           (Values.StartBackupJobInput.make ?logicallyAirGappedBackupVaultArn
+              ?idempotencyToken
               ?startWindowMinutes:(Option.map ~f:Values.WindowMinutes.of_json
                                      startWindowMinutes)
               ?completeWindowMinutes:(Option.map
@@ -1250,8 +2340,10 @@ let start_backup_job =
               ?recoveryPointTags:(Option.map ~f:Values.Tags.of_json
                                     recoveryPointTags)
               ?backupOptions:(Option.map ~f:Values.BackupOptions.of_json
-                                backupOptions) ~backupVaultName ~resourceArn
-              ~iamRoleArn ()) (Some Values.StartBackupJobOutput.to_json)
+                                backupOptions)
+              ?index:(Option.map ~f:Values.Index.of_json index)
+              ~backupVaultName ~resourceArn ~iamRoleArn ())
+           (Some Values.StartBackupJobOutput.to_json)
            (Some Values.StartBackupJobOutput.error_to_json)])
 let start_copy_job =
   Command.async ~summary:""
@@ -1264,7 +2356,7 @@ let start_copy_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and idempotencyToken =
-         flag "idempotency-token" (optional string) ~doc:"STRING string"
+         flag "idempotency-token" (optional string) ~doc:"STRING String__lc1"
        and lifecycle =
          flag "lifecycle" (optional json_arg) ~doc:"JSON Lifecycle"
        and recoveryPointArn =
@@ -1297,7 +2389,7 @@ let start_report_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and idempotencyToken =
-         flag "idempotency-token" (optional string) ~doc:"STRING string"
+         flag "idempotency-token" (optional string) ~doc:"STRING String__lc1"
        and reportPlanName =
          flag "report-plan-name" (required string)
            ~doc:"STRING ReportPlanName" in
@@ -1317,23 +2409,64 @@ let start_restore_job =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and iamRoleArn =
+         flag "iam-role-arn" (optional string) ~doc:"STRING IAMRoleArn"
        and idempotencyToken =
-         flag "idempotency-token" (optional string) ~doc:"STRING string"
+         flag "idempotency-token" (optional string) ~doc:"STRING String__lc1"
        and resourceType =
          flag "resource-type" (optional string) ~doc:"STRING ResourceType"
+       and copySourceTagsToRestoredResource =
+         flag "copy-source-tags-to-restored-resource" (optional bool)
+           ~doc:"BOOL Boolean__lc1"
        and recoveryPointArn =
          flag "recovery-point-arn" (required string) ~doc:"STRING ARN"
        and metadata =
-         flag "metadata" (required json_arg) ~doc:"JSON Metadata"
-       and iamRoleArn =
-         flag "iam-role-arn" (required string) ~doc:"STRING IAMRoleArn" in
+         flag "metadata" (required json_arg) ~doc:"JSON Metadata" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_restore_job
-           (Values.StartRestoreJobInput.make ?idempotencyToken ?resourceType
+           (Values.StartRestoreJobInput.make ?iamRoleArn ?idempotencyToken
+              ?resourceType ?copySourceTagsToRestoredResource
               ~recoveryPointArn ~metadata:(Values.Metadata.of_json metadata)
-              ~iamRoleArn ()) (Some Values.StartRestoreJobOutput.to_json)
+              ()) (Some Values.StartRestoreJobOutput.to_json)
            (Some Values.StartRestoreJobOutput.error_to_json)])
+let start_scan_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and idempotencyToken =
+         flag "idempotency-token" (optional string) ~doc:"STRING String"
+       and scanBaseRecoveryPointArn =
+         flag "scan-base-recovery-point-arn" (optional string)
+           ~doc:"STRING String"
+       and backupVaultName =
+         flag "backup-vault-name" (required string) ~doc:"STRING String"
+       and iamRoleArn =
+         flag "iam-role-arn" (required string) ~doc:"STRING String"
+       and malwareScanner =
+         flag "malware-scanner" (required json_arg)
+           ~doc:"JSON MalwareScanner"
+       and recoveryPointArn =
+         flag "recovery-point-arn" (required string) ~doc:"STRING String"
+       and scanMode =
+         flag "scan-mode" (required json_arg) ~doc:"JSON ScanMode"
+       and scannerRoleArn =
+         flag "scanner-role-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_scan_job
+           (Values.StartScanJobInput.make ?idempotencyToken
+              ?scanBaseRecoveryPointArn ~backupVaultName ~iamRoleArn
+              ~malwareScanner:(Values.MalwareScanner.of_json malwareScanner)
+              ~recoveryPointArn ~scanMode:(Values.ScanMode.of_json scanMode)
+              ~scannerRoleArn ()) (Some Values.StartScanJobOutput.to_json)
+           (Some Values.StartScanJobOutput.error_to_json)])
 let stop_backup_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1345,7 +2478,7 @@ let stop_backup_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and backupJobId =
-         flag "backup-job-id" (required string) ~doc:"STRING string" in
+         flag "backup-job-id" (required string) ~doc:"STRING String__lc1" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.stop_backup_job
@@ -1399,7 +2532,7 @@ let update_backup_plan =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and backupPlanId =
-         flag "backup-plan-id" (required string) ~doc:"STRING string"
+         flag "backup-plan-id" (required string) ~doc:"STRING String__lc1"
        and backupPlan =
          flag "backup-plan" (required json_arg) ~doc:"JSON BackupPlanInput" in
        fun () ->
@@ -1426,7 +2559,7 @@ let update_framework =
          flag "framework-controls" (optional json_arg)
            ~doc:"JSON FrameworkControls"
        and idempotencyToken =
-         flag "idempotency-token" (optional string) ~doc:"STRING string"
+         flag "idempotency-token" (optional string) ~doc:"STRING String__lc1"
        and frameworkName =
          flag "framework-name" (required string) ~doc:"STRING FrameworkName" in
        fun () ->
@@ -1457,6 +2590,32 @@ let update_global_settings =
            (Values.UpdateGlobalSettingsInput.make
               ?globalSettings:(Option.map ~f:Values.GlobalSettings.of_json
                                  globalSettings) ()) None None])
+let update_recovery_point_index_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and iamRoleArn =
+         flag "iam-role-arn" (optional string) ~doc:"STRING IAMRoleArn"
+       and backupVaultName =
+         flag "backup-vault-name" (required string)
+           ~doc:"STRING BackupVaultName"
+       and recoveryPointArn =
+         flag "recovery-point-arn" (required string) ~doc:"STRING ARN"
+       and index = flag "index" (required json_arg) ~doc:"JSON Index" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_recovery_point_index_settings
+           (Values.UpdateRecoveryPointIndexSettingsInput.make ?iamRoleArn
+              ~backupVaultName ~recoveryPointArn
+              ~index:(Values.Index.of_json index) ())
+           (Some Values.UpdateRecoveryPointIndexSettingsOutput.to_json)
+           (Some Values.UpdateRecoveryPointIndexSettingsOutput.error_to_json)])
 let update_recovery_point_lifecycle =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1528,7 +2687,7 @@ let update_report_plan =
        and reportSetting =
          flag "report-setting" (optional json_arg) ~doc:"JSON ReportSetting"
        and idempotencyToken =
-         flag "idempotency-token" (optional string) ~doc:"STRING string"
+         flag "idempotency-token" (optional string) ~doc:"STRING String__lc1"
        and reportPlanName =
          flag "report-plan-name" (required string)
            ~doc:"STRING ReportPlanName" in
@@ -1544,14 +2703,104 @@ let update_report_plan =
               ~reportPlanName ())
            (Some Values.UpdateReportPlanOutput.to_json)
            (Some Values.UpdateReportPlanOutput.error_to_json)])
+let update_restore_testing_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and restoreTestingPlan =
+         flag "restore-testing-plan" (required json_arg)
+           ~doc:"JSON RestoreTestingPlanForUpdate"
+       and restoreTestingPlanName =
+         flag "restore-testing-plan-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_restore_testing_plan
+           (Values.UpdateRestoreTestingPlanInput.make
+              ~restoreTestingPlan:(Values.RestoreTestingPlanForUpdate.of_json
+                                     restoreTestingPlan)
+              ~restoreTestingPlanName ())
+           (Some Values.UpdateRestoreTestingPlanOutput.to_json)
+           (Some Values.UpdateRestoreTestingPlanOutput.error_to_json)])
+let update_restore_testing_selection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and restoreTestingPlanName =
+         flag "restore-testing-plan-name" (required string)
+           ~doc:"STRING String"
+       and restoreTestingSelection =
+         flag "restore-testing-selection" (required json_arg)
+           ~doc:"JSON RestoreTestingSelectionForUpdate"
+       and restoreTestingSelectionName =
+         flag "restore-testing-selection-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_restore_testing_selection
+           (Values.UpdateRestoreTestingSelectionInput.make
+              ~restoreTestingPlanName
+              ~restoreTestingSelection:(Values.RestoreTestingSelectionForUpdate.of_json
+                                          restoreTestingSelection)
+              ~restoreTestingSelectionName ())
+           (Some Values.UpdateRestoreTestingSelectionOutput.to_json)
+           (Some Values.UpdateRestoreTestingSelectionOutput.error_to_json)])
+let update_tiering_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tieringConfigurationName =
+         flag "tiering-configuration-name" (required string)
+           ~doc:"STRING TieringConfigurationName"
+       and tieringConfiguration =
+         flag "tiering-configuration" (required json_arg)
+           ~doc:"JSON TieringConfigurationInputForUpdate" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_tiering_configuration
+           (Values.UpdateTieringConfigurationInput.make
+              ~tieringConfigurationName
+              ~tieringConfiguration:(Values.TieringConfigurationInputForUpdate.of_json
+                                       tieringConfiguration) ())
+           (Some Values.UpdateTieringConfigurationOutput.to_json)
+           (Some Values.UpdateTieringConfigurationOutput.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-backup-plan", create_backup_plan);
+    [("associate-backup-vault-mpa-approval-team",
+       associate_backup_vault_mpa_approval_team);
+    ("cancel-legal-hold", cancel_legal_hold);
+    ("create-backup-plan", create_backup_plan);
     ("create-backup-selection", create_backup_selection);
     ("create-backup-vault", create_backup_vault);
     ("create-framework", create_framework);
+    ("create-legal-hold", create_legal_hold);
+    ("create-logically-air-gapped-backup-vault",
+      create_logically_air_gapped_backup_vault);
     ("create-report-plan", create_report_plan);
+    ("create-restore-access-backup-vault",
+      create_restore_access_backup_vault);
+    ("create-restore-testing-plan", create_restore_testing_plan);
+    ("create-restore-testing-selection", create_restore_testing_selection);
+    ("create-tiering-configuration", create_tiering_configuration);
     ("delete-backup-plan", delete_backup_plan);
     ("delete-backup-selection", delete_backup_selection);
     ("delete-backup-vault", delete_backup_vault);
@@ -1562,6 +2811,9 @@ let main =
     ("delete-framework", delete_framework);
     ("delete-recovery-point", delete_recovery_point);
     ("delete-report-plan", delete_report_plan);
+    ("delete-restore-testing-plan", delete_restore_testing_plan);
+    ("delete-restore-testing-selection", delete_restore_testing_selection);
+    ("delete-tiering-configuration", delete_tiering_configuration);
     ("describe-backup-job", describe_backup_job);
     ("describe-backup-vault", describe_backup_vault);
     ("describe-copy-job", describe_copy_job);
@@ -1573,7 +2825,12 @@ let main =
     ("describe-report-job", describe_report_job);
     ("describe-report-plan", describe_report_plan);
     ("describe-restore-job", describe_restore_job);
+    ("describe-scan-job", describe_scan_job);
+    ("disassociate-backup-vault-mpa-approval-team",
+      disassociate_backup_vault_mpa_approval_team);
     ("disassociate-recovery-point", disassociate_recovery_point);
+    ("disassociate-recovery-point-from-parent",
+      disassociate_recovery_point_from_parent);
     ("export-backup-plan-template", export_backup_plan_template);
     ("get-backup-plan", get_backup_plan);
     ("get-backup-plan-from-j-s-o-n", get_backup_plan_from_j_s_o_n);
@@ -1581,39 +2838,73 @@ let main =
     ("get-backup-selection", get_backup_selection);
     ("get-backup-vault-access-policy", get_backup_vault_access_policy);
     ("get-backup-vault-notifications", get_backup_vault_notifications);
+    ("get-legal-hold", get_legal_hold);
+    ("get-recovery-point-index-details", get_recovery_point_index_details);
     ("get-recovery-point-restore-metadata",
       get_recovery_point_restore_metadata);
+    ("get-restore-job-metadata", get_restore_job_metadata);
+    ("get-restore-testing-inferred-metadata",
+      get_restore_testing_inferred_metadata);
+    ("get-restore-testing-plan", get_restore_testing_plan);
+    ("get-restore-testing-selection", get_restore_testing_selection);
     ("get-supported-resource-types", get_supported_resource_types);
+    ("get-tiering-configuration", get_tiering_configuration);
+    ("list-backup-job-summaries", list_backup_job_summaries);
     ("list-backup-jobs", list_backup_jobs);
     ("list-backup-plan-templates", list_backup_plan_templates);
     ("list-backup-plan-versions", list_backup_plan_versions);
     ("list-backup-plans", list_backup_plans);
     ("list-backup-selections", list_backup_selections);
     ("list-backup-vaults", list_backup_vaults);
+    ("list-copy-job-summaries", list_copy_job_summaries);
     ("list-copy-jobs", list_copy_jobs);
     ("list-frameworks", list_frameworks);
+    ("list-indexed-recovery-points", list_indexed_recovery_points);
+    ("list-legal-holds", list_legal_holds);
     ("list-protected-resources", list_protected_resources);
+    ("list-protected-resources-by-backup-vault",
+      list_protected_resources_by_backup_vault);
     ("list-recovery-points-by-backup-vault",
       list_recovery_points_by_backup_vault);
+    ("list-recovery-points-by-legal-hold",
+      list_recovery_points_by_legal_hold);
     ("list-recovery-points-by-resource", list_recovery_points_by_resource);
     ("list-report-jobs", list_report_jobs);
     ("list-report-plans", list_report_plans);
+    ("list-restore-access-backup-vaults", list_restore_access_backup_vaults);
+    ("list-restore-job-summaries", list_restore_job_summaries);
     ("list-restore-jobs", list_restore_jobs);
+    ("list-restore-jobs-by-protected-resource",
+      list_restore_jobs_by_protected_resource);
+    ("list-restore-testing-plans", list_restore_testing_plans);
+    ("list-restore-testing-selections", list_restore_testing_selections);
+    ("list-scan-job-summaries", list_scan_job_summaries);
+    ("list-scan-jobs", list_scan_jobs);
     ("list-tags", list_tags);
+    ("list-tiering-configurations", list_tiering_configurations);
     ("put-backup-vault-access-policy", put_backup_vault_access_policy);
     ("put-backup-vault-lock-configuration",
       put_backup_vault_lock_configuration);
     ("put-backup-vault-notifications", put_backup_vault_notifications);
+    ("put-restore-validation-result", put_restore_validation_result);
+    ("revoke-restore-access-backup-vault",
+      revoke_restore_access_backup_vault);
     ("start-backup-job", start_backup_job);
     ("start-copy-job", start_copy_job);
     ("start-report-job", start_report_job);
     ("start-restore-job", start_restore_job);
+    ("start-scan-job", start_scan_job);
     ("stop-backup-job", stop_backup_job);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-backup-plan", update_backup_plan);
     ("update-framework", update_framework);
     ("update-global-settings", update_global_settings);
+    ("update-recovery-point-index-settings",
+      update_recovery_point_index_settings);
     ("update-recovery-point-lifecycle", update_recovery_point_lifecycle);
     ("update-region-settings", update_region_settings);
-    ("update-report-plan", update_report_plan)]
+    ("update-report-plan", update_report_plan);
+    ("update-restore-testing-plan", update_restore_testing_plan);
+    ("update-restore-testing-selection", update_restore_testing_selection);
+    ("update-tiering-configuration", update_tiering_configuration)]

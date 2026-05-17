@@ -130,7 +130,9 @@ let to_header_converter_of_shape shape =
       [%expr fun _ -> failwithf "to_header is not implemented for List_shape objects" ()]
   | Enum_shape _ -> Some [%expr fun x -> to_string x]
   | Structure_shape _ -> None (* FIXME: unimplemented *)
-  | Map_shape _ -> None
+  | Map_shape _ ->
+    Some
+      [%expr fun _ -> failwithf "to_header is not implemented for Map_shape objects" ()]
 ;;
 
 let of_string_converter_of_shape shape =
@@ -143,7 +145,8 @@ let of_string_converter_of_shape shape =
   | Blob_shape _ -> [%expr fun x -> x]
   | Timestamp_shape _ -> [%expr fun x -> x]
   | String_shape _ -> [%expr fun x -> x]
-  | List_shape _ -> failwith "No of_string function for list shapes"
+  | List_shape _ ->
+    [%expr fun _ -> failwithf "of_string is not implemented for List_shape objects" ()]
   | Enum_shape es ->
     let case c =
       Ast_helper.Exp.case
@@ -429,6 +432,8 @@ let of_json_converter_of_shape shape_name shape =
   | String_shape _ ->
     [%expr fun j -> string_of_json ~kind:[%e Ast_convenience.str shape_name] j]
   | Structure_shape ss ->
+    let json_var = "json__" in
+    let json_var_e = Ast_convenience.evar json_var in
     let arguments, bindings =
       List.fold_left
         ss.members
@@ -446,14 +451,16 @@ let of_json_converter_of_shape shape_name shape =
           let pat = Ast_helper.Pat.var (Ast_convenience.mknoloc arg_id) in
           let arg e =
             [%expr
-              let [%p pat] = [%e field_map_e] json [%e field_name_e] [%e of_json_e] in
+              let [%p pat] =
+                [%e field_map_e] [%e json_var_e] [%e field_name_e] [%e of_json_e]
+              in
               [%e bindings e]]
           in
           let label = if argument_is_required then Labelled arg_id else Optional arg_id in
           (label, Ast_convenience.evar arg_id) :: labels, arg)
     in
     Ast_convenience.lam
-      (Ast_convenience.pvar (if List.is_empty ss.members then "_" else "json"))
+      (Ast_convenience.pvar (if List.is_empty ss.members then "_" else json_var))
       (Ast_helper.Exp.apply (Ast_convenience.evar "make") arguments |> bindings)
   | List_shape ls ->
     let constructor =
@@ -571,7 +578,20 @@ let structure_of_shape (service : Botodata.service) sn shape =
                (Ast_helper.Pat.var (Ast_convenience.mknoloc "of_string"))
                (of_string_converter_of_shape shape)
            ])
-    | List_shape _ | Structure_shape _ | Map_shape _ -> None
+    | List_shape _ ->
+      let loc = !Ast_helper.default_loc in
+      let unused_attr =
+        Ast_helper.Attr.mk (Ast_convenience.mknoloc "warning") (PStr [%str "-32"])
+      in
+      Some
+        (Ast_helper.Str.value
+           Nonrecursive
+           [ Ast_helper.Vb.mk
+               ~attrs:[ unused_attr ]
+               (Ast_helper.Pat.var (Ast_convenience.mknoloc "of_string"))
+               (of_string_converter_of_shape shape)
+           ])
+    | Structure_shape _ | Map_shape _ -> None
   in
   (* For Structure shapes we also emit an of_string, but it depends on of_xml
      so it must be placed after of_xml's definition. Suppress the
@@ -582,9 +602,7 @@ let structure_of_shape (service : Botodata.service) sn shape =
     | Structure_shape _ ->
       let loc = !Ast_helper.default_loc in
       let unused_attr =
-        Ast_helper.Attr.mk
-          (Ast_convenience.mknoloc "warning")
-          (PStr [%str "-32"])
+        Ast_helper.Attr.mk (Ast_convenience.mknoloc "warning") (PStr [%str "-32"])
       in
       Some
         (Ast_helper.Str.value
@@ -891,7 +909,11 @@ let module_declarations (service : Botodata.service) sg =
   else
     Shape.Graph.Topological.fold
       (fun sn acc ->
-         let shape = List.Assoc.find_exn service.shapes sn ~equal:String.equal in
+         let shape =
+           match List.Assoc.find service.shapes sn ~equal:String.equal with
+           | Some s -> s
+           | None -> failwithf "shape not found in service.shapes: %s" sn ()
+         in
          module_binding service sn shape :: acc)
       sg
       []

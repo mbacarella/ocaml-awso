@@ -11,8 +11,16 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let accept_address_transfer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AcceptAddressTransfer input
+let accept_capacity_reservation_billing_ownership ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AcceptCapacityReservationBillingOwnership
+    input
 let accept_reserved_instances_exchange_quote ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AcceptReservedInstancesExchangeQuote
+    input
+let accept_transit_gateway_client_vpn_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AcceptTransitGatewayClientVpnAttachment
     input
 let accept_transit_gateway_multicast_domain_associations ?endpoint_url ?cfg
   input =
@@ -43,8 +51,13 @@ let assign_ipv6_addresses ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssignIpv6Addresses input
 let assign_private_ip_addresses ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssignPrivateIpAddresses input
+let assign_private_nat_gateway_address ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssignPrivateNatGatewayAddress input
 let associate_address ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateAddress input
+let associate_capacity_reservation_billing_owner ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateCapacityReservationBillingOwner
+    input
 let associate_client_vpn_target_network ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateClientVpnTargetNetwork input
 let associate_dhcp_options ?endpoint_url ?cfg input =
@@ -55,13 +68,25 @@ let associate_iam_instance_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateIamInstanceProfile input
 let associate_instance_event_window ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateInstanceEventWindow input
+let associate_ipam_byoasn ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateIpamByoasn input
+let associate_ipam_resource_discovery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateIpamResourceDiscovery input
+let associate_nat_gateway_address ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateNatGatewayAddress input
+let associate_route_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateRouteServer input
 let associate_route_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateRouteTable input
+let associate_security_group_vpc ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateSecurityGroupVpc input
 let associate_subnet_cidr_block ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateSubnetCidrBlock input
 let associate_transit_gateway_multicast_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateTransitGatewayMulticastDomain
     input
+let associate_transit_gateway_policy_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateTransitGatewayPolicyTable input
 let associate_transit_gateway_route_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateTransitGatewayRouteTable input
 let associate_trunk_interface ?endpoint_url ?cfg input =
@@ -74,6 +99,8 @@ let attach_internet_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AttachInternetGateway input
 let attach_network_interface ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AttachNetworkInterface input
+let attach_verified_access_trust_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AttachVerifiedAccessTrustProvider input
 let attach_volume ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AttachVolume input
 let attach_vpn_gateway ?endpoint_url ?cfg input =
@@ -94,8 +121,12 @@ let cancel_capacity_reservation_fleets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelCapacityReservationFleets input
 let cancel_conversion_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelConversionTask input
+let cancel_declarative_policies_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelDeclarativePoliciesReport input
 let cancel_export_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelExportTask input
+let cancel_image_launch_permission ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelImageLaunchPermission input
 let cancel_import_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelImportTask input
 let cancel_reserved_instances_listing ?endpoint_url ?cfg input =
@@ -112,8 +143,15 @@ let copy_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopyImage input
 let copy_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopySnapshot input
+let copy_volumes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CopyVolumes input
+let create_capacity_manager_data_export ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCapacityManagerDataExport input
 let create_capacity_reservation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCapacityReservation input
+let create_capacity_reservation_by_splitting ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCapacityReservationBySplitting
+    input
 let create_capacity_reservation_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCapacityReservationFleet input
 let create_carrier_gateway ?endpoint_url ?cfg input =
@@ -122,12 +160,19 @@ let create_client_vpn_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateClientVpnEndpoint input
 let create_client_vpn_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateClientVpnRoute input
+let create_coip_cidr ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCoipCidr input
+let create_coip_pool ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCoipPool input
 let create_customer_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCustomerGateway input
 let create_default_subnet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDefaultSubnet input
 let create_default_vpc ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDefaultVpc input
+let create_delegate_mac_volume_ownership_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDelegateMacVolumeOwnershipTask
+    input
 let create_dhcp_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDhcpOptions input
 let create_egress_only_internet_gateway ?endpoint_url ?cfg input =
@@ -140,16 +185,36 @@ let create_fpga_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFpgaImage input
 let create_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateImage input
+let create_image_usage_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateImageUsageReport input
+let create_instance_connect_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateInstanceConnectEndpoint input
 let create_instance_event_window ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateInstanceEventWindow input
 let create_instance_export_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateInstanceExportTask input
 let create_internet_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateInternetGateway input
+let create_interruptible_capacity_reservation_allocation ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.CreateInterruptibleCapacityReservationAllocation input
 let create_ipam ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateIpam input
+let create_ipam_external_resource_verification_token ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.CreateIpamExternalResourceVerificationToken input
+let create_ipam_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIpamPolicy input
 let create_ipam_pool ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateIpamPool input
+let create_ipam_prefix_list_resolver ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIpamPrefixListResolver input
+let create_ipam_prefix_list_resolver_target ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIpamPrefixListResolverTarget input
+let create_ipam_resource_discovery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIpamResourceDiscovery input
 let create_ipam_scope ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateIpamScope input
 let create_key_pair ?endpoint_url ?cfg input =
@@ -160,10 +225,26 @@ let create_launch_template_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLaunchTemplateVersion input
 let create_local_gateway_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLocalGatewayRoute input
+let create_local_gateway_route_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLocalGatewayRouteTable input
+let create_local_gateway_route_table_virtual_interface_group_association
+  ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg
+    Endpoints.CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation
+    input
 let create_local_gateway_route_table_vpc_association ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg
     Endpoints.CreateLocalGatewayRouteTableVpcAssociation input
+let create_local_gateway_virtual_interface ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLocalGatewayVirtualInterface input
+let create_local_gateway_virtual_interface_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLocalGatewayVirtualInterfaceGroup
+    input
+let create_mac_system_integrity_protection_modification_task ?endpoint_url
+  ?cfg input =
+  eval ?endpoint_url ?cfg
+    Endpoints.CreateMacSystemIntegrityProtectionModificationTask input
 let create_managed_prefix_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateManagedPrefixList input
 let create_nat_gateway ?endpoint_url ?cfg input =
@@ -192,8 +273,18 @@ let create_restore_image_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRestoreImageTask input
 let create_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRoute input
+let create_route_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRouteServer input
+let create_route_server_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRouteServerEndpoint input
+let create_route_server_peer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRouteServerPeer input
 let create_route_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRouteTable input
+let create_secondary_network ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSecondaryNetwork input
+let create_secondary_subnet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSecondarySubnet input
 let create_security_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSecurityGroup input
 let create_snapshot ?endpoint_url ?cfg input =
@@ -224,11 +315,18 @@ let create_transit_gateway_connect ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayConnect input
 let create_transit_gateway_connect_peer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayConnectPeer input
+let create_transit_gateway_metering_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayMeteringPolicy input
+let create_transit_gateway_metering_policy_entry ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayMeteringPolicyEntry
+    input
 let create_transit_gateway_multicast_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayMulticastDomain input
 let create_transit_gateway_peering_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayPeeringAttachment
     input
+let create_transit_gateway_policy_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayPolicyTable input
 let create_transit_gateway_prefix_list_reference ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayPrefixListReference
     input
@@ -236,12 +334,28 @@ let create_transit_gateway_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayRoute input
 let create_transit_gateway_route_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayRouteTable input
+let create_transit_gateway_route_table_announcement ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.CreateTransitGatewayRouteTableAnnouncement input
 let create_transit_gateway_vpc_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayVpcAttachment input
+let create_verified_access_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVerifiedAccessEndpoint input
+let create_verified_access_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVerifiedAccessGroup input
+let create_verified_access_instance ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVerifiedAccessInstance input
+let create_verified_access_trust_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVerifiedAccessTrustProvider input
 let create_volume ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVolume input
 let create_vpc ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVpc input
+let create_vpc_block_public_access_exclusion ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVpcBlockPublicAccessExclusion input
+let create_vpc_encryption_control ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVpcEncryptionControl input
 let create_vpc_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVpcEndpoint input
 let create_vpc_endpoint_connection_notification ?endpoint_url ?cfg input =
@@ -252,18 +366,26 @@ let create_vpc_endpoint_service_configuration ?endpoint_url ?cfg input =
     input
 let create_vpc_peering_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVpcPeeringConnection input
+let create_vpn_concentrator ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVpnConcentrator input
 let create_vpn_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVpnConnection input
 let create_vpn_connection_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVpnConnectionRoute input
 let create_vpn_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVpnGateway input
+let delete_capacity_manager_data_export ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCapacityManagerDataExport input
 let delete_carrier_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCarrierGateway input
 let delete_client_vpn_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteClientVpnEndpoint input
 let delete_client_vpn_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteClientVpnRoute input
+let delete_coip_cidr ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCoipCidr input
+let delete_coip_pool ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCoipPool input
 let delete_customer_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCustomerGateway input
 let delete_dhcp_options ?endpoint_url ?cfg input =
@@ -276,14 +398,30 @@ let delete_flow_logs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFlowLogs input
 let delete_fpga_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFpgaImage input
+let delete_image_usage_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteImageUsageReport input
+let delete_instance_connect_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteInstanceConnectEndpoint input
 let delete_instance_event_window ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteInstanceEventWindow input
 let delete_internet_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteInternetGateway input
 let delete_ipam ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteIpam input
+let delete_ipam_external_resource_verification_token ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.DeleteIpamExternalResourceVerificationToken input
+let delete_ipam_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIpamPolicy input
 let delete_ipam_pool ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteIpamPool input
+let delete_ipam_prefix_list_resolver ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIpamPrefixListResolver input
+let delete_ipam_prefix_list_resolver_target ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIpamPrefixListResolverTarget input
+let delete_ipam_resource_discovery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIpamResourceDiscovery input
 let delete_ipam_scope ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteIpamScope input
 let delete_key_pair ?endpoint_url ?cfg input =
@@ -294,10 +432,22 @@ let delete_launch_template_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLaunchTemplateVersions input
 let delete_local_gateway_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLocalGatewayRoute input
+let delete_local_gateway_route_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLocalGatewayRouteTable input
+let delete_local_gateway_route_table_virtual_interface_group_association
+  ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation
+    input
 let delete_local_gateway_route_table_vpc_association ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg
     Endpoints.DeleteLocalGatewayRouteTableVpcAssociation input
+let delete_local_gateway_virtual_interface ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLocalGatewayVirtualInterface input
+let delete_local_gateway_virtual_interface_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLocalGatewayVirtualInterfaceGroup
+    input
 let delete_managed_prefix_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteManagedPrefixList input
 let delete_nat_gateway ?endpoint_url ?cfg input =
@@ -327,8 +477,18 @@ let delete_queued_reserved_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteQueuedReservedInstances input
 let delete_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRoute input
+let delete_route_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRouteServer input
+let delete_route_server_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRouteServerEndpoint input
+let delete_route_server_peer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRouteServerPeer input
 let delete_route_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRouteTable input
+let delete_secondary_network ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteSecondaryNetwork input
+let delete_secondary_subnet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteSecondarySubnet input
 let delete_security_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSecurityGroup input
 let delete_snapshot ?endpoint_url ?cfg input =
@@ -351,15 +511,25 @@ let delete_traffic_mirror_target ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTrafficMirrorTarget input
 let delete_transit_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTransitGateway input
+let delete_transit_gateway_client_vpn_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayClientVpnAttachment
+    input
 let delete_transit_gateway_connect ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayConnect input
 let delete_transit_gateway_connect_peer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayConnectPeer input
+let delete_transit_gateway_metering_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayMeteringPolicy input
+let delete_transit_gateway_metering_policy_entry ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayMeteringPolicyEntry
+    input
 let delete_transit_gateway_multicast_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayMulticastDomain input
 let delete_transit_gateway_peering_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayPeeringAttachment
     input
+let delete_transit_gateway_policy_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayPolicyTable input
 let delete_transit_gateway_prefix_list_reference ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayPrefixListReference
     input
@@ -367,12 +537,28 @@ let delete_transit_gateway_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayRoute input
 let delete_transit_gateway_route_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayRouteTable input
+let delete_transit_gateway_route_table_announcement ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.DeleteTransitGatewayRouteTableAnnouncement input
 let delete_transit_gateway_vpc_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTransitGatewayVpcAttachment input
+let delete_verified_access_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVerifiedAccessEndpoint input
+let delete_verified_access_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVerifiedAccessGroup input
+let delete_verified_access_instance ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVerifiedAccessInstance input
+let delete_verified_access_trust_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVerifiedAccessTrustProvider input
 let delete_volume ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVolume input
 let delete_vpc ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVpc input
+let delete_vpc_block_public_access_exclusion ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVpcBlockPublicAccessExclusion input
+let delete_vpc_encryption_control ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVpcEncryptionControl input
 let delete_vpc_endpoint_connection_notifications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVpcEndpointConnectionNotifications
     input
@@ -383,6 +569,8 @@ let delete_vpc_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVpcEndpoints input
 let delete_vpc_peering_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVpcPeeringConnection input
+let delete_vpn_concentrator ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVpnConcentrator input
 let delete_vpn_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVpnConnection input
 let delete_vpn_connection_route ?endpoint_url ?cfg input =
@@ -391,6 +579,8 @@ let delete_vpn_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVpnGateway input
 let deprovision_byoip_cidr ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeprovisionByoipCidr input
+let deprovision_ipam_byoasn ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeprovisionIpamByoasn input
 let deprovision_ipam_pool_cidr ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeprovisionIpamPoolCidr input
 let deprovision_public_ipv4_pool_cidr ?endpoint_url ?cfg input =
@@ -411,6 +601,8 @@ let deregister_transit_gateway_multicast_group_sources ?endpoint_url ?cfg
     Endpoints.DeregisterTransitGatewayMulticastGroupSources input
 let describe_account_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAccountAttributes input
+let describe_address_transfers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAddressTransfers input
 let describe_addresses ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAddresses input
 let describe_addresses_attribute ?endpoint_url ?cfg input =
@@ -419,12 +611,35 @@ let describe_aggregate_id_format ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAggregateIdFormat input
 let describe_availability_zones ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAvailabilityZones input
+let describe_aws_network_performance_metric_subscriptions ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DescribeAwsNetworkPerformanceMetricSubscriptions input
 let describe_bundle_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBundleTasks input
 let describe_byoip_cidrs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeByoipCidrs input
+let describe_capacity_block_extension_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCapacityBlockExtensionHistory
+    input
+let describe_capacity_block_extension_offerings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCapacityBlockExtensionOfferings
+    input
+let describe_capacity_block_offerings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCapacityBlockOfferings input
+let describe_capacity_block_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCapacityBlockStatus input
+let describe_capacity_blocks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCapacityBlocks input
+let describe_capacity_manager_data_exports ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCapacityManagerDataExports input
+let describe_capacity_reservation_billing_requests ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DescribeCapacityReservationBillingRequests input
 let describe_capacity_reservation_fleets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCapacityReservationFleets input
+let describe_capacity_reservation_topology ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCapacityReservationTopology input
 let describe_capacity_reservations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCapacityReservations input
 let describe_carrier_gateways ?endpoint_url ?cfg input =
@@ -447,6 +662,8 @@ let describe_conversion_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeConversionTasks input
 let describe_customer_gateways ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCustomerGateways input
+let describe_declarative_policies_reports ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDeclarativePoliciesReports input
 let describe_dhcp_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDhcpOptions input
 let describe_egress_only_internet_gateways ?endpoint_url ?cfg input =
@@ -488,6 +705,12 @@ let describe_identity_id_format ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeIdentityIdFormat input
 let describe_image_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeImageAttribute input
+let describe_image_references ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeImageReferences input
+let describe_image_usage_report_entries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeImageUsageReportEntries input
+let describe_image_usage_reports ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeImageUsageReports input
 let describe_images ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeImages input
 let describe_import_image_tasks ?endpoint_url ?cfg input =
@@ -496,6 +719,8 @@ let describe_import_snapshot_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeImportSnapshotTasks input
 let describe_instance_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInstanceAttribute input
+let describe_instance_connect_endpoints ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInstanceConnectEndpoints input
 let describe_instance_credit_specifications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInstanceCreditSpecifications
     input
@@ -505,8 +730,16 @@ let describe_instance_event_notification_attributes ?endpoint_url ?cfg input
     Endpoints.DescribeInstanceEventNotificationAttributes input
 let describe_instance_event_windows ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInstanceEventWindows input
+let describe_instance_image_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInstanceImageMetadata input
+let describe_instance_sql_ha_history_states ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInstanceSqlHaHistoryStates input
+let describe_instance_sql_ha_states ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInstanceSqlHaStates input
 let describe_instance_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInstanceStatus input
+let describe_instance_topology ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInstanceTopology input
 let describe_instance_type_offerings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInstanceTypeOfferings input
 let describe_instance_types ?endpoint_url ?cfg input =
@@ -515,8 +748,26 @@ let describe_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInstances input
 let describe_internet_gateways ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInternetGateways input
+let describe_ipam_byoasn ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIpamByoasn input
+let describe_ipam_external_resource_verification_tokens ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DescribeIpamExternalResourceVerificationTokens input
+let describe_ipam_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIpamPolicies input
 let describe_ipam_pools ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeIpamPools input
+let describe_ipam_prefix_list_resolver_targets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIpamPrefixListResolverTargets
+    input
+let describe_ipam_prefix_list_resolvers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIpamPrefixListResolvers input
+let describe_ipam_resource_discoveries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIpamResourceDiscoveries input
+let describe_ipam_resource_discovery_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIpamResourceDiscoveryAssociations
+    input
 let describe_ipam_scopes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeIpamScopes input
 let describe_ipams ?endpoint_url ?cfg input =
@@ -549,6 +800,12 @@ let describe_local_gateway_virtual_interfaces ?endpoint_url ?cfg input =
     input
 let describe_local_gateways ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLocalGateways input
+let describe_locked_snapshots ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeLockedSnapshots input
+let describe_mac_hosts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMacHosts input
+let describe_mac_modification_tasks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMacModificationTasks input
 let describe_managed_prefix_lists ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeManagedPrefixLists input
 let describe_moving_addresses ?endpoint_url ?cfg input =
@@ -573,6 +830,8 @@ let describe_network_interface_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeNetworkInterfacePermissions input
 let describe_network_interfaces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeNetworkInterfaces input
+let describe_outpost_lags ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeOutpostLags input
 let describe_placement_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribePlacementGroups input
 let describe_prefix_lists ?endpoint_url ?cfg input =
@@ -594,6 +853,12 @@ let describe_reserved_instances_modifications ?endpoint_url ?cfg input =
     input
 let describe_reserved_instances_offerings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReservedInstancesOfferings input
+let describe_route_server_endpoints ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeRouteServerEndpoints input
+let describe_route_server_peers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeRouteServerPeers input
+let describe_route_servers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeRouteServers input
 let describe_route_tables ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRouteTables input
 let describe_scheduled_instance_availability ?endpoint_url ?cfg input =
@@ -601,12 +866,24 @@ let describe_scheduled_instance_availability ?endpoint_url ?cfg input =
     input
 let describe_scheduled_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeScheduledInstances input
+let describe_secondary_interfaces ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSecondaryInterfaces input
+let describe_secondary_networks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSecondaryNetworks input
+let describe_secondary_subnets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSecondarySubnets input
 let describe_security_group_references ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSecurityGroupReferences input
 let describe_security_group_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSecurityGroupRules input
+let describe_security_group_vpc_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSecurityGroupVpcAssociations
+    input
 let describe_security_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSecurityGroups input
+let describe_service_link_virtual_interfaces ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeServiceLinkVirtualInterfaces
+    input
 let describe_snapshot_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSnapshotAttribute input
 let describe_snapshot_tier_status ?endpoint_url ?cfg input =
@@ -633,6 +910,8 @@ let describe_subnets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSubnets input
 let describe_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTags input
+let describe_traffic_mirror_filter_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTrafficMirrorFilterRules input
 let describe_traffic_mirror_filters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTrafficMirrorFilters input
 let describe_traffic_mirror_sessions ?endpoint_url ?cfg input =
@@ -645,12 +924,21 @@ let describe_transit_gateway_connect_peers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTransitGatewayConnectPeers input
 let describe_transit_gateway_connects ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTransitGatewayConnects input
+let describe_transit_gateway_metering_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTransitGatewayMeteringPolicies
+    input
 let describe_transit_gateway_multicast_domains ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTransitGatewayMulticastDomains
     input
 let describe_transit_gateway_peering_attachments ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTransitGatewayPeeringAttachments
     input
+let describe_transit_gateway_policy_tables ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTransitGatewayPolicyTables input
+let describe_transit_gateway_route_table_announcements ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DescribeTransitGatewayRouteTableAnnouncements input
 let describe_transit_gateway_route_tables ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTransitGatewayRouteTables input
 let describe_transit_gateway_vpc_attachments ?endpoint_url ?cfg input =
@@ -660,6 +948,19 @@ let describe_transit_gateways ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTransitGateways input
 let describe_trunk_interface_associations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTrunkInterfaceAssociations input
+let describe_verified_access_endpoints ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVerifiedAccessEndpoints input
+let describe_verified_access_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVerifiedAccessGroups input
+let describe_verified_access_instance_logging_configurations ?endpoint_url
+  ?cfg input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DescribeVerifiedAccessInstanceLoggingConfigurations input
+let describe_verified_access_instances ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVerifiedAccessInstances input
+let describe_verified_access_trust_providers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVerifiedAccessTrustProviders
+    input
 let describe_volume_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVolumeAttribute input
 let describe_volume_status ?endpoint_url ?cfg input =
@@ -670,10 +971,19 @@ let describe_volumes_modifications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVolumesModifications input
 let describe_vpc_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVpcAttribute input
+let describe_vpc_block_public_access_exclusions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVpcBlockPublicAccessExclusions
+    input
+let describe_vpc_block_public_access_options ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVpcBlockPublicAccessOptions input
 let describe_vpc_classic_link ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVpcClassicLink input
 let describe_vpc_classic_link_dns_support ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVpcClassicLinkDnsSupport input
+let describe_vpc_encryption_controls ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVpcEncryptionControls input
+let describe_vpc_endpoint_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVpcEndpointAssociations input
 let describe_vpc_endpoint_connection_notifications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg
     Endpoints.DescribeVpcEndpointConnectionNotifications input
@@ -693,6 +1003,8 @@ let describe_vpc_peering_connections ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVpcPeeringConnections input
 let describe_vpcs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVpcs input
+let describe_vpn_concentrators ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVpnConcentrators input
 let describe_vpn_connections ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVpnConnections input
 let describe_vpn_gateways ?endpoint_url ?cfg input =
@@ -703,22 +1015,50 @@ let detach_internet_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachInternetGateway input
 let detach_network_interface ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachNetworkInterface input
+let detach_verified_access_trust_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DetachVerifiedAccessTrustProvider input
 let detach_volume ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachVolume input
 let detach_vpn_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachVpnGateway input
+let disable_address_transfer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableAddressTransfer input
+let disable_allowed_images_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableAllowedImagesSettings input
+let disable_aws_network_performance_metric_subscription ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DisableAwsNetworkPerformanceMetricSubscription input
+let disable_capacity_manager ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableCapacityManager input
 let disable_ebs_encryption_by_default ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableEbsEncryptionByDefault input
 let disable_fast_launch ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableFastLaunch input
 let disable_fast_snapshot_restores ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableFastSnapshotRestores input
+let disable_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableImage input
+let disable_image_block_public_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableImageBlockPublicAccess input
 let disable_image_deprecation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableImageDeprecation input
+let disable_image_deregistration_protection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableImageDeregistrationProtection
+    input
+let disable_instance_sql_ha_standby_detections ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableInstanceSqlHaStandbyDetections
+    input
 let disable_ipam_organization_admin_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableIpamOrganizationAdminAccount input
+let disable_ipam_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableIpamPolicy input
+let disable_route_server_propagation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableRouteServerPropagation input
 let disable_serial_console_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableSerialConsoleAccess input
+let disable_snapshot_block_public_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableSnapshotBlockPublicAccess input
 let disable_transit_gateway_route_table_propagation ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg
@@ -731,6 +1071,10 @@ let disable_vpc_classic_link_dns_support ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableVpcClassicLinkDnsSupport input
 let disassociate_address ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateAddress input
+let disassociate_capacity_reservation_billing_owner ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.DisassociateCapacityReservationBillingOwner input
 let disassociate_client_vpn_target_network ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateClientVpnTargetNetwork input
 let disassociate_enclave_certificate_iam_role ?endpoint_url ?cfg input =
@@ -740,12 +1084,25 @@ let disassociate_iam_instance_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateIamInstanceProfile input
 let disassociate_instance_event_window ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateInstanceEventWindow input
+let disassociate_ipam_byoasn ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateIpamByoasn input
+let disassociate_ipam_resource_discovery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateIpamResourceDiscovery input
+let disassociate_nat_gateway_address ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateNatGatewayAddress input
+let disassociate_route_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateRouteServer input
 let disassociate_route_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateRouteTable input
+let disassociate_security_group_vpc ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateSecurityGroupVpc input
 let disassociate_subnet_cidr_block ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateSubnetCidrBlock input
 let disassociate_transit_gateway_multicast_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateTransitGatewayMulticastDomain
+    input
+let disassociate_transit_gateway_policy_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateTransitGatewayPolicyTable
     input
 let disassociate_transit_gateway_route_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateTransitGatewayRouteTable
@@ -754,18 +1111,47 @@ let disassociate_trunk_interface ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateTrunkInterface input
 let disassociate_vpc_cidr_block ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateVpcCidrBlock input
+let enable_address_transfer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableAddressTransfer input
+let enable_allowed_images_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableAllowedImagesSettings input
+let enable_aws_network_performance_metric_subscription ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.EnableAwsNetworkPerformanceMetricSubscription input
+let enable_capacity_manager ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableCapacityManager input
 let enable_ebs_encryption_by_default ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableEbsEncryptionByDefault input
 let enable_fast_launch ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableFastLaunch input
 let enable_fast_snapshot_restores ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableFastSnapshotRestores input
+let enable_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableImage input
+let enable_image_block_public_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableImageBlockPublicAccess input
 let enable_image_deprecation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableImageDeprecation input
+let enable_image_deregistration_protection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableImageDeregistrationProtection input
+let enable_instance_sql_ha_standby_detections ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableInstanceSqlHaStandbyDetections
+    input
 let enable_ipam_organization_admin_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableIpamOrganizationAdminAccount input
+let enable_ipam_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableIpamPolicy input
+let enable_reachability_analyzer_organization_sharing ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.EnableReachabilityAnalyzerOrganizationSharing input
+let enable_route_server_propagation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableRouteServerPropagation input
 let enable_serial_console_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableSerialConsoleAccess input
+let enable_snapshot_block_public_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableSnapshotBlockPublicAccess input
 let enable_transit_gateway_route_table_propagation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableTransitGatewayRouteTablePropagation
     input
@@ -787,11 +1173,29 @@ let export_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExportImage input
 let export_transit_gateway_routes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExportTransitGatewayRoutes input
+let export_verified_access_instance_client_configuration ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.ExportVerifiedAccessInstanceClientConfiguration input
+let get_active_vpn_tunnel_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetActiveVpnTunnelStatus input
+let get_allowed_images_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAllowedImagesSettings input
 let get_associated_enclave_certificate_iam_roles ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAssociatedEnclaveCertificateIamRoles
     input
 let get_associated_ipv6_pool_cidrs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAssociatedIpv6PoolCidrs input
+let get_aws_network_performance_data ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAwsNetworkPerformanceData input
+let get_capacity_manager_attributes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCapacityManagerAttributes input
+let get_capacity_manager_metric_data ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCapacityManagerMetricData input
+let get_capacity_manager_metric_dimensions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCapacityManagerMetricDimensions input
+let get_capacity_manager_monitored_tag_keys ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCapacityManagerMonitoredTagKeys input
 let get_capacity_reservation_usage ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCapacityReservationUsage input
 let get_coip_pool_usage ?endpoint_url ?cfg input =
@@ -800,27 +1204,58 @@ let get_console_output ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetConsoleOutput input
 let get_console_screenshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetConsoleScreenshot input
+let get_declarative_policies_report_summary ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDeclarativePoliciesReportSummary input
 let get_default_credit_specification ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDefaultCreditSpecification input
 let get_ebs_default_kms_key_id ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEbsDefaultKmsKeyId input
 let get_ebs_encryption_by_default ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEbsEncryptionByDefault input
+let get_enabled_ipam_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetEnabledIpamPolicy input
 let get_flow_logs_integration_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFlowLogsIntegrationTemplate input
 let get_groups_for_capacity_reservation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGroupsForCapacityReservation input
 let get_host_reservation_purchase_preview ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetHostReservationPurchasePreview input
+let get_image_ancestry ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetImageAncestry input
+let get_image_block_public_access_state ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetImageBlockPublicAccessState input
+let get_instance_metadata_defaults ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetInstanceMetadataDefaults input
+let get_instance_tpm_ek_pub ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetInstanceTpmEkPub input
 let get_instance_types_from_instance_requirements ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInstanceTypesFromInstanceRequirements
     input
+let get_instance_uefi_data ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetInstanceUefiData input
 let get_ipam_address_history ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetIpamAddressHistory input
+let get_ipam_discovered_accounts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIpamDiscoveredAccounts input
+let get_ipam_discovered_public_addresses ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIpamDiscoveredPublicAddresses input
+let get_ipam_discovered_resource_cidrs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIpamDiscoveredResourceCidrs input
+let get_ipam_policy_allocation_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIpamPolicyAllocationRules input
+let get_ipam_policy_organization_targets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIpamPolicyOrganizationTargets input
 let get_ipam_pool_allocations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetIpamPoolAllocations input
 let get_ipam_pool_cidrs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetIpamPoolCidrs input
+let get_ipam_prefix_list_resolver_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIpamPrefixListResolverRules input
+let get_ipam_prefix_list_resolver_version_entries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIpamPrefixListResolverVersionEntries
+    input
+let get_ipam_prefix_list_resolver_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIpamPrefixListResolverVersions input
 let get_ipam_resource_cidrs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetIpamResourceCidrs input
 let get_launch_template_data ?endpoint_url ?cfg input =
@@ -829,6 +1264,8 @@ let get_managed_prefix_list_associations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetManagedPrefixListAssociations input
 let get_managed_prefix_list_entries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetManagedPrefixListEntries input
+let get_managed_resource_visibility ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetManagedResourceVisibility input
 let get_network_insights_access_scope_analysis_findings ?endpoint_url ?cfg
   input =
   eval ?endpoint_url ?cfg
@@ -840,8 +1277,18 @@ let get_password_data ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPasswordData input
 let get_reserved_instances_exchange_quote ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetReservedInstancesExchangeQuote input
+let get_route_server_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRouteServerAssociations input
+let get_route_server_propagations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRouteServerPropagations input
+let get_route_server_routing_database ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRouteServerRoutingDatabase input
+let get_security_groups_for_vpc ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSecurityGroupsForVpc input
 let get_serial_console_access_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSerialConsoleAccessStatus input
+let get_snapshot_block_public_access_state ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSnapshotBlockPublicAccessState input
 let get_spot_placement_scores ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSpotPlacementScores input
 let get_subnet_cidr_reservations ?endpoint_url ?cfg input =
@@ -849,10 +1296,18 @@ let get_subnet_cidr_reservations ?endpoint_url ?cfg input =
 let get_transit_gateway_attachment_propagations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayAttachmentPropagations
     input
+let get_transit_gateway_metering_policy_entries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayMeteringPolicyEntries
+    input
 let get_transit_gateway_multicast_domain_associations ?endpoint_url ?cfg
   input =
   eval ?endpoint_url ?cfg
     Endpoints.GetTransitGatewayMulticastDomainAssociations input
+let get_transit_gateway_policy_table_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayPolicyTableAssociations
+    input
+let get_transit_gateway_policy_table_entries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayPolicyTableEntries input
 let get_transit_gateway_prefix_list_references ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayPrefixListReferences
     input
@@ -862,11 +1317,23 @@ let get_transit_gateway_route_table_associations ?endpoint_url ?cfg input =
 let get_transit_gateway_route_table_propagations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayRouteTablePropagations
     input
+let get_verified_access_endpoint_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetVerifiedAccessEndpointPolicy input
+let get_verified_access_endpoint_targets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetVerifiedAccessEndpointTargets input
+let get_verified_access_group_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetVerifiedAccessGroupPolicy input
+let get_vpc_resources_blocking_encryption_enforcement ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.GetVpcResourcesBlockingEncryptionEnforcement input
 let get_vpn_connection_device_sample_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetVpnConnectionDeviceSampleConfiguration
     input
 let get_vpn_connection_device_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetVpnConnectionDeviceTypes input
+let get_vpn_tunnel_replacement_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetVpnTunnelReplacementStatus input
 let import_client_vpn_client_certificate_revocation_list ?endpoint_url ?cfg
   input =
   eval ?endpoint_url ?cfg
@@ -885,6 +1352,10 @@ let list_images_in_recycle_bin ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImagesInRecycleBin input
 let list_snapshots_in_recycle_bin ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSnapshotsInRecycleBin input
+let list_volumes_in_recycle_bin ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVolumesInRecycleBin input
+let lock_snapshot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.LockSnapshot input
 let modify_address_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyAddressAttribute input
 let modify_availability_zone_group ?endpoint_url ?cfg input =
@@ -917,6 +1388,10 @@ let modify_instance_capacity_reservation_attributes ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg
     Endpoints.ModifyInstanceCapacityReservationAttributes input
+let modify_instance_connect_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyInstanceConnectEndpoint input
+let modify_instance_cpu_options ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyInstanceCpuOptions input
 let modify_instance_credit_specification ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyInstanceCreditSpecification input
 let modify_instance_event_start_time ?endpoint_url ?cfg input =
@@ -925,28 +1400,49 @@ let modify_instance_event_window ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyInstanceEventWindow input
 let modify_instance_maintenance_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyInstanceMaintenanceOptions input
+let modify_instance_metadata_defaults ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyInstanceMetadataDefaults input
 let modify_instance_metadata_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyInstanceMetadataOptions input
+let modify_instance_network_performance_options ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyInstanceNetworkPerformanceOptions
+    input
 let modify_instance_placement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyInstancePlacement input
 let modify_ipam ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyIpam input
+let modify_ipam_policy_allocation_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyIpamPolicyAllocationRules input
 let modify_ipam_pool ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyIpamPool input
+let modify_ipam_prefix_list_resolver ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyIpamPrefixListResolver input
+let modify_ipam_prefix_list_resolver_target ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyIpamPrefixListResolverTarget input
 let modify_ipam_resource_cidr ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyIpamResourceCidr input
+let modify_ipam_resource_discovery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyIpamResourceDiscovery input
 let modify_ipam_scope ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyIpamScope input
 let modify_launch_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyLaunchTemplate input
+let modify_local_gateway_route ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyLocalGatewayRoute input
 let modify_managed_prefix_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyManagedPrefixList input
+let modify_managed_resource_visibility ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyManagedResourceVisibility input
 let modify_network_interface_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyNetworkInterfaceAttribute input
 let modify_private_dns_name_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyPrivateDnsNameOptions input
+let modify_public_ip_dns_name_options ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyPublicIpDnsNameOptions input
 let modify_reserved_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyReservedInstances input
+let modify_route_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyRouteServer input
 let modify_security_group_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifySecurityGroupRules input
 let modify_snapshot_attribute ?endpoint_url ?cfg input =
@@ -966,17 +1462,41 @@ let modify_traffic_mirror_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyTrafficMirrorSession input
 let modify_transit_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyTransitGateway input
+let modify_transit_gateway_metering_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyTransitGatewayMeteringPolicy input
 let modify_transit_gateway_prefix_list_reference ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyTransitGatewayPrefixListReference
     input
 let modify_transit_gateway_vpc_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyTransitGatewayVpcAttachment input
+let modify_verified_access_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyVerifiedAccessEndpoint input
+let modify_verified_access_endpoint_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyVerifiedAccessEndpointPolicy input
+let modify_verified_access_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyVerifiedAccessGroup input
+let modify_verified_access_group_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyVerifiedAccessGroupPolicy input
+let modify_verified_access_instance ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyVerifiedAccessInstance input
+let modify_verified_access_instance_logging_configuration ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.ModifyVerifiedAccessInstanceLoggingConfiguration input
+let modify_verified_access_trust_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyVerifiedAccessTrustProvider input
 let modify_volume ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyVolume input
 let modify_volume_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyVolumeAttribute input
 let modify_vpc_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyVpcAttribute input
+let modify_vpc_block_public_access_exclusion ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyVpcBlockPublicAccessExclusion input
+let modify_vpc_block_public_access_options ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyVpcBlockPublicAccessOptions input
+let modify_vpc_encryption_control ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyVpcEncryptionControl input
 let modify_vpc_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyVpcEndpoint input
 let modify_vpc_endpoint_connection_notification ?endpoint_url ?cfg input =
@@ -1009,12 +1529,20 @@ let move_address_to_vpc ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.MoveAddressToVpc input
 let move_byoip_cidr_to_ipam ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.MoveByoipCidrToIpam input
+let move_capacity_reservation_instances ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.MoveCapacityReservationInstances input
 let provision_byoip_cidr ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ProvisionByoipCidr input
+let provision_ipam_byoasn ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ProvisionIpamByoasn input
 let provision_ipam_pool_cidr ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ProvisionIpamPoolCidr input
 let provision_public_ipv4_pool_cidr ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ProvisionPublicIpv4PoolCidr input
+let purchase_capacity_block ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PurchaseCapacityBlock input
+let purchase_capacity_block_extension ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PurchaseCapacityBlockExtension input
 let purchase_host_reservation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PurchaseHostReservation input
 let purchase_reserved_instances_offering ?endpoint_url ?cfg input =
@@ -1037,6 +1565,12 @@ let register_transit_gateway_multicast_group_sources ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg
     Endpoints.RegisterTransitGatewayMulticastGroupSources input
+let reject_capacity_reservation_billing_ownership ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RejectCapacityReservationBillingOwnership
+    input
+let reject_transit_gateway_client_vpn_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RejectTransitGatewayClientVpnAttachment
+    input
 let reject_transit_gateway_multicast_domain_associations ?endpoint_url ?cfg
   input =
   eval ?endpoint_url ?cfg
@@ -1059,6 +1593,10 @@ let release_ipam_pool_allocation ?endpoint_url ?cfg input =
 let replace_iam_instance_profile_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ReplaceIamInstanceProfileAssociation
     input
+let replace_image_criteria_in_allowed_images_settings ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.ReplaceImageCriteriaInAllowedImagesSettings input
 let replace_network_acl_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ReplaceNetworkAclAssociation input
 let replace_network_acl_entry ?endpoint_url ?cfg input =
@@ -1069,6 +1607,8 @@ let replace_route_table_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ReplaceRouteTableAssociation input
 let replace_transit_gateway_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ReplaceTransitGatewayRoute input
+let replace_vpn_tunnel ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ReplaceVpnTunnel input
 let report_instance_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ReportInstanceStatus input
 let request_spot_fleet ?endpoint_url ?cfg input =
@@ -1099,6 +1639,8 @@ let restore_snapshot_from_recycle_bin ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RestoreSnapshotFromRecycleBin input
 let restore_snapshot_tier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RestoreSnapshotTier input
+let restore_volume_from_recycle_bin ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RestoreVolumeFromRecycleBin input
 let revoke_client_vpn_ingress ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RevokeClientVpnIngress input
 let revoke_security_group_egress ?endpoint_url ?cfg input =
@@ -1117,6 +1659,8 @@ let search_transit_gateway_routes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchTransitGatewayRoutes input
 let send_diagnostic_interrupt ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendDiagnosticInterrupt input
+let start_declarative_policies_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartDeclarativePoliciesReport input
 let start_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartInstances input
 let start_network_insights_access_scope_analysis ?endpoint_url ?cfg input =
@@ -1138,8 +1682,22 @@ let unassign_ipv6_addresses ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UnassignIpv6Addresses input
 let unassign_private_ip_addresses ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UnassignPrivateIpAddresses input
+let unassign_private_nat_gateway_address ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UnassignPrivateNatGatewayAddress input
+let unlock_snapshot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UnlockSnapshot input
 let unmonitor_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UnmonitorInstances input
+let update_capacity_manager_monitored_tag_keys ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCapacityManagerMonitoredTagKeys
+    input
+let update_capacity_manager_organizations_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCapacityManagerOrganizationsAccess
+    input
+let update_interruptible_capacity_reservation_allocation ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.UpdateInterruptibleCapacityReservationAllocation input
 let update_security_group_rule_descriptions_egress ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSecurityGroupRuleDescriptionsEgress
     input

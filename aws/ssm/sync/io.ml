@@ -47,6 +47,8 @@ let delete_inventory ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteInventory input
 let delete_maintenance_window ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMaintenanceWindow input
+let delete_ops_item ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteOpsItem input
 let delete_ops_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteOpsMetadata input
 let delete_parameter ?endpoint_url ?cfg input =
@@ -57,6 +59,8 @@ let delete_patch_baseline ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePatchBaseline input
 let delete_resource_data_sync ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResourceDataSync input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let deregister_managed_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterManagedInstance input
 let deregister_patch_baseline_for_patch_group ?endpoint_url ?cfg input =
@@ -102,6 +106,8 @@ let describe_instance_patch_states_for_patch_group ?endpoint_url ?cfg input =
     input
 let describe_instance_patches ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInstancePatches input
+let describe_instance_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInstanceProperties input
 let describe_inventory_deletions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInventoryDeletions input
 let describe_maintenance_window_execution_task_invocations ?endpoint_url ?cfg
@@ -139,6 +145,8 @@ let describe_sessions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSessions input
 let disassociate_ops_item_related_item ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateOpsItemRelatedItem input
+let get_access_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAccessToken input
 let get_automation_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAutomationExecution input
 let get_calendar_state ?endpoint_url ?cfg input =
@@ -154,6 +162,8 @@ let get_deployable_patch_snapshot_for_instance ?endpoint_url ?cfg input =
     input
 let get_document ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDocument input
+let get_execution_preview ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetExecutionPreview input
 let get_inventory ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInventory input
 let get_inventory_schema ?endpoint_url ?cfg input =
@@ -188,6 +198,8 @@ let get_patch_baseline ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPatchBaseline input
 let get_patch_baseline_for_patch_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPatchBaselineForPatchGroup input
+let get_resource_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicies input
 let get_service_setting ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetServiceSetting input
 let label_parameter_version ?endpoint_url ?cfg input =
@@ -212,6 +224,10 @@ let list_documents ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDocuments input
 let list_inventory_entries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListInventoryEntries input
+let list_nodes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNodes input
+let list_nodes_summary ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNodesSummary input
 let list_ops_item_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOpsItemEvents input
 let list_ops_item_related_items ?endpoint_url ?cfg input =
@@ -232,6 +248,8 @@ let put_inventory ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutInventory input
 let put_parameter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutParameter input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let register_default_patch_baseline ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterDefaultPatchBaseline input
 let register_patch_baseline_for_patch_group ?endpoint_url ?cfg input =
@@ -250,12 +268,16 @@ let send_automation_signal ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendAutomationSignal input
 let send_command ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendCommand input
+let start_access_request ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartAccessRequest input
 let start_associations_once ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartAssociationsOnce input
 let start_automation_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartAutomationExecution input
 let start_change_request_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartChangeRequestExecution input
+let start_execution_preview ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartExecutionPreview input
 let start_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartSession input
 let stop_automation_execution ?endpoint_url ?cfg input =

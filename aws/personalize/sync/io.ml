@@ -17,6 +17,8 @@ let create_batch_segment_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBatchSegmentJob input
 let create_campaign ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCampaign input
+let create_data_deletion_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDataDeletionJob input
 let create_dataset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDataset input
 let create_dataset_export_job ?endpoint_url ?cfg input =
@@ -29,6 +31,8 @@ let create_event_tracker ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEventTracker input
 let create_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFilter input
+let create_metric_attribution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateMetricAttribution input
 let create_recommender ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRecommender input
 let create_schema ?endpoint_url ?cfg input =
@@ -47,6 +51,8 @@ let delete_event_tracker ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEventTracker input
 let delete_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFilter input
+let delete_metric_attribution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteMetricAttribution input
 let delete_recommender ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRecommender input
 let delete_schema ?endpoint_url ?cfg input =
@@ -61,6 +67,8 @@ let describe_batch_segment_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBatchSegmentJob input
 let describe_campaign ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCampaign input
+let describe_data_deletion_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDataDeletionJob input
 let describe_dataset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDataset input
 let describe_dataset_export_job ?endpoint_url ?cfg input =
@@ -75,6 +83,8 @@ let describe_feature_transformation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFeatureTransformation input
 let describe_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFilter input
+let describe_metric_attribution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMetricAttribution input
 let describe_recipe ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRecipe input
 let describe_recommender ?endpoint_url ?cfg input =
@@ -93,6 +103,8 @@ let list_batch_segment_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBatchSegmentJobs input
 let list_campaigns ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCampaigns input
+let list_data_deletion_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDataDeletionJobs input
 let list_dataset_export_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDatasetExportJobs input
 let list_dataset_groups ?endpoint_url ?cfg input =
@@ -105,6 +117,10 @@ let list_event_trackers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEventTrackers input
 let list_filters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFilters input
+let list_metric_attribution_metrics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMetricAttributionMetrics input
+let list_metric_attributions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMetricAttributions input
 let list_recipes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRecipes input
 let list_recommenders ?endpoint_url ?cfg input =
@@ -117,6 +133,10 @@ let list_solutions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSolutions input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let start_recommender ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartRecommender input
+let stop_recommender ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopRecommender input
 let stop_solution_version_creation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopSolutionVersionCreation input
 let tag_resource ?endpoint_url ?cfg input =
@@ -125,5 +145,11 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_campaign ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCampaign input
+let update_dataset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDataset input
+let update_metric_attribution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateMetricAttribution input
 let update_recommender ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateRecommender input
+let update_solution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSolution input

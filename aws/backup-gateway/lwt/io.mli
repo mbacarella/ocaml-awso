@@ -28,6 +28,34 @@ val disassociate_gateway_from_server :
       DisassociateGatewayFromServerInput.t ->
         (DisassociateGatewayFromServerOutput.t,
           DisassociateGatewayFromServerOutput.error) Result.t Lwt.t
+val get_bandwidth_rate_limit_schedule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetBandwidthRateLimitScheduleInput.t ->
+        (GetBandwidthRateLimitScheduleOutput.t,
+          GetBandwidthRateLimitScheduleOutput.error) Result.t Lwt.t
+val get_gateway :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetGatewayInput.t ->
+        (GetGatewayOutput.t, GetGatewayOutput.error) Result.t Lwt.t
+val get_hypervisor :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetHypervisorInput.t ->
+        (GetHypervisorOutput.t, GetHypervisorOutput.error) Result.t Lwt.t
+val get_hypervisor_property_mappings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetHypervisorPropertyMappingsInput.t ->
+        (GetHypervisorPropertyMappingsOutput.t,
+          GetHypervisorPropertyMappingsOutput.error) Result.t Lwt.t
+val get_virtual_machine :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetVirtualMachineInput.t ->
+        (GetVirtualMachineOutput.t, GetVirtualMachineOutput.error) Result.t
+          Lwt.t
 val import_hypervisor_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -56,12 +84,30 @@ val list_virtual_machines :
       ListVirtualMachinesInput.t ->
         (ListVirtualMachinesOutput.t, ListVirtualMachinesOutput.error)
           Result.t Lwt.t
+val put_bandwidth_rate_limit_schedule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutBandwidthRateLimitScheduleInput.t ->
+        (PutBandwidthRateLimitScheduleOutput.t,
+          PutBandwidthRateLimitScheduleOutput.error) Result.t Lwt.t
+val put_hypervisor_property_mappings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutHypervisorPropertyMappingsInput.t ->
+        (PutHypervisorPropertyMappingsOutput.t,
+          PutHypervisorPropertyMappingsOutput.error) Result.t Lwt.t
 val put_maintenance_start_time :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutMaintenanceStartTimeInput.t ->
         (PutMaintenanceStartTimeOutput.t,
           PutMaintenanceStartTimeOutput.error) Result.t Lwt.t
+val start_virtual_machines_metadata_sync :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartVirtualMachinesMetadataSyncInput.t ->
+        (StartVirtualMachinesMetadataSyncOutput.t,
+          StartVirtualMachinesMetadataSyncOutput.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -84,6 +130,12 @@ val update_gateway_information :
       UpdateGatewayInformationInput.t ->
         (UpdateGatewayInformationOutput.t,
           UpdateGatewayInformationOutput.error) Result.t Lwt.t
+val update_gateway_software_now :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateGatewaySoftwareNowInput.t ->
+        (UpdateGatewaySoftwareNowOutput.t,
+          UpdateGatewaySoftwareNowOutput.error) Result.t Lwt.t
 val update_hypervisor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

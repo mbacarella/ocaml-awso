@@ -84,6 +84,8 @@ let describe_pending_maintenance_actions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribePendingMaintenanceActions input
 let failover_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.FailoverDBCluster input
+let failover_global_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.FailoverGlobalCluster input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let modify_d_b_cluster ?endpoint_url ?cfg input =
@@ -119,3 +121,5 @@ let start_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartDBCluster input
 let stop_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopDBCluster input
+let switchover_global_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SwitchoverGlobalCluster input

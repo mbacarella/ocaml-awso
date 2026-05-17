@@ -11,6 +11,7 @@ let protocol = "query"
 let globalEndpoint = endpointPrefix ^ ".amazonaws.com"
 let serviceAbbreviation = "CloudWatch"
 let xmlNamespace = "http://monitoring.amazonaws.com/doc/2010-08-01/"
+let targetPrefix = "GraniteServiceVersion20100801"
 let simple_to_json to_value x =
   Botodata.Json.value_to_json_scalar (to_value x)
 let composed_to_json to_value x = Botodata.Json.value_to_json (to_value x)
@@ -50,7 +51,7 @@ module DimensionValue =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:255) >>=
+          ((check_string_max i ~max:1024) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -67,10 +68,10 @@ module Dimension =
       {
       name: DimensionName.t
         [@ocaml.doc
-          "The name of the dimension. Dimension names must contain only ASCII characters, must include at least one non-whitespace character, and cannot start with a colon (:)."];
+          "The name of the dimension. Dimension names must contain only ASCII characters, must include at least one non-whitespace character, and cannot start with a colon (:). ASCII control characters are not supported as part of dimension names."];
       value: DimensionValue.t
         [@ocaml.doc
-          "The value of the dimension. Dimension values must contain only ASCII characters and must include at least one non-whitespace character."]}
+          "The value of the dimension. Dimension values must contain only ASCII characters and must include at least one non-whitespace character. ASCII control characters are not supported as part of dimension values."]}
     let context_ = "Dimension"
     let make ~name = fun ~value -> fun () -> { name; value }
     let to_value x =
@@ -87,18 +88,21 @@ module Dimension =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" DimensionValue.of_json in
-      let name = field_map_exn json "Name" DimensionName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" DimensionValue.of_json in
+      let name = field_map_exn json__ "Name" DimensionName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A dimension is a name/value pair that is part of the identity of a metric. Because dimensions are part of the unique identifier for a metric, whenever you add a unique name/value pair to one of your metrics, you are creating a new variation of that metric. For example, many Amazon EC2 metrics publish InstanceId as a dimension name, and the actual instance ID as the value for that dimension. You can assign up to 10 dimensions to a metric."]
+       "A dimension is a name/value pair that is part of the identity of a metric. Because dimensions are part of the unique identifier for a metric, whenever you add a unique name/value pair to one of your metrics, you are creating a new variation of that metric. For example, many Amazon EC2 metrics publish InstanceId as a dimension name, and the actual instance ID as the value for that dimension. You can assign up to 30 dimensions to a metric."]
 module Dimensions =
   struct
     type nonrec t = Dimension.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+      let open Result in ok_or_failwith (check_list_max i ~max:30); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Dimension.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -185,10 +189,10 @@ module Metric =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?dimensions ?metricName ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
-      let namespace = field_map json "Namespace" Namespace.of_json in
+    let of_json json__ =
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
       make ?dimensions ?metricName ?namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a specific metric."]
@@ -319,6 +323,19 @@ module Stat =
     let of_json j = string_of_json ~kind:"Stat" j
     let to_json = simple_to_json to_value
   end
+module DatapointValue =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
 module Timestamp =
   struct
     type nonrec t = string
@@ -356,7 +373,7 @@ module MetricExpression =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
+          ((check_string_max i ~max:2048) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -407,7 +424,7 @@ module MetricStat =
           "The metric to return, including the metric name, namespace, and dimensions."];
       period: Period.t
         [@ocaml.doc
-          "The granularity, in seconds, of the returned data points. For metrics with regular resolution, a period can be as short as one minute (60 seconds) and must be a multiple of 60. For high-resolution metrics that are collected at intervals of less than one minute, the period can be 1, 5, 10, 30, 60, or any multiple of 60. High-resolution metrics are those metrics stored by a PutMetricData call that includes a StorageResolution of 1 second. If the StartTime parameter specifies a time stamp that is greater than 3 hours ago, you must specify the period as follows or no data points in that time range is returned: Start time between 3 hours and 15 days ago - Use a multiple of 60 seconds (1 minute). Start time between 15 and 63 days ago - Use a multiple of 300 seconds (5 minutes). Start time greater than 63 days ago - Use a multiple of 3600 seconds (1 hour)."];
+          "The granularity, in seconds, of the returned data points. For metrics with regular resolution, a period can be as short as one minute (60 seconds) and must be a multiple of 60. For high-resolution metrics that are collected at intervals of less than one minute, the period can be 1, 5, 10, 20, 30, 60, or any multiple of 60. High-resolution metrics are those metrics stored by a PutMetricData call that includes a StorageResolution of 1 second. If the StartTime parameter specifies a time stamp that is greater than 3 hours ago, you must specify the period as follows or no data points in that time range is returned: Start time between 3 hours and 15 days ago - Use a multiple of 60 seconds (1 minute). Start time between 15 and 63 days ago - Use a multiple of 300 seconds (5 minutes). Start time greater than 63 days ago - Use a multiple of 3600 seconds (1 hour)."];
       stat: Stat.t
         [@ocaml.doc
           "The statistic to return. It can include any CloudWatch statistic or extended statistic."];
@@ -436,11 +453,11 @@ module MetricStat =
         Metric.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
       make ?unit ~stat ~period ~metric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" StandardUnit.of_json in
-      let stat = field_map_exn json "Stat" Stat.of_json in
-      let period = field_map_exn json "Period" Period.of_json in
-      let metric = field_map_exn json "Metric" Metric.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" StandardUnit.of_json in
+      let stat = field_map_exn json__ "Stat" Stat.of_json in
+      let period = field_map_exn json__ "Period" Period.of_json in
+      let metric = field_map_exn json__ "Metric" Metric.of_json in
       make ?unit ~stat ~period ~metric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -456,6 +473,233 @@ module ReturnData =
     let of_xml xml_arg0 =
       Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
     let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module EntityAttributesMapKeyString =
+  struct
+    type nonrec t = string
+    let context_ = "EntityAttributesMapKeyString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntityAttributesMapKeyString" j
+    let to_json = simple_to_json to_value
+  end
+module EntityAttributesMapValueString =
+  struct
+    type nonrec t = string
+    let context_ = "EntityAttributesMapValueString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntityAttributesMapValueString" j
+    let to_json = simple_to_json to_value
+  end
+module EntityKeyAttributesMapKeyString =
+  struct
+    type nonrec t = string
+    let context_ = "EntityKeyAttributesMapKeyString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:32) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntityKeyAttributesMapKeyString" j
+    let to_json = simple_to_json to_value
+  end
+module EntityKeyAttributesMapValueString =
+  struct
+    type nonrec t = string
+    let context_ = "EntityKeyAttributesMapValueString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"EntityKeyAttributesMapValueString" j
+    let to_json = simple_to_json to_value
+  end
+module Counts =
+  struct
+    type nonrec t = DatapointValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatapointValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DatapointValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Counts" ~of_json:DatapointValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StatisticSet =
+  struct
+    type nonrec t =
+      {
+      sampleCount: DatapointValue.t
+        [@ocaml.doc "The number of samples used for the statistic set."];
+      sum: DatapointValue.t
+        [@ocaml.doc "The sum of values for the sample set."];
+      minimum: DatapointValue.t
+        [@ocaml.doc "The minimum value of the sample set."];
+      maximum: DatapointValue.t
+        [@ocaml.doc "The maximum value of the sample set."]}
+    let context_ = "StatisticSet"
+    let make ~sampleCount =
+      fun ~sum ->
+        fun ~minimum ->
+          fun ~maximum -> fun () -> { sampleCount; sum; minimum; maximum }
+    let to_value x =
+      structure_to_value
+        [("SampleCount", (Some (DatapointValue.to_value x.sampleCount)));
+        ("Sum", (Some (DatapointValue.to_value x.sum)));
+        ("Minimum", (Some (DatapointValue.to_value x.minimum)));
+        ("Maximum", (Some (DatapointValue.to_value x.maximum)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maximum =
+        DatapointValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Maximum") in
+      let minimum =
+        DatapointValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Minimum") in
+      let sum =
+        DatapointValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Sum") in
+      let sampleCount =
+        DatapointValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SampleCount") in
+      make ~maximum ~minimum ~sum ~sampleCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maximum = field_map_exn json__ "Maximum" DatapointValue.of_json in
+      let minimum = field_map_exn json__ "Minimum" DatapointValue.of_json in
+      let sum = field_map_exn json__ "Sum" DatapointValue.of_json in
+      let sampleCount =
+        field_map_exn json__ "SampleCount" DatapointValue.of_json in
+      make ~maximum ~minimum ~sum ~sampleCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a set of statistics that describes a specific metric."]
+module StorageResolution =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for StorageResolution" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Values =
+  struct
+    type nonrec t = DatapointValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatapointValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DatapointValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Values" ~of_json:DatapointValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
 module MessageDataCode =
@@ -522,9 +766,9 @@ module Range =
           (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
       make ~endTime ~startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map_exn json "EndTime" Timestamp.of_json in
-      let startTime = field_map_exn json "StartTime" Timestamp.of_json in
+    let of_json json__ =
+      let endTime = field_map_exn json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "StartTime" Timestamp.of_json in
       make ~endTime ~startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -547,13 +791,13 @@ module MetricDataQuery =
           "A human-readable label for this metric or expression. This is especially useful if this is an expression, so that you know what the value represents. If the metric or expression is shown in a CloudWatch dashboard widget, the label is shown. If Label is omitted, CloudWatch generates a default. You can put dynamic expressions into a label, so that it is more descriptive. For more information, see Using Dynamic Labels."];
       returnData: ReturnData.t option
         [@ocaml.doc
-          "When used in GetMetricData, this option indicates whether to return the timestamps and raw data values of this metric. If you are performing this call just to do math expressions and do not also need the raw data returned, you can specify False. If you omit this, the default of True is used. When used in PutMetricAlarm, specify True for the one expression result to use as the alarm. For all other metrics and expressions in the same PutMetricAlarm operation, specify ReturnData as False."];
+          "When used in GetMetricData, this option indicates whether to return the timestamps and raw data values of this metric. If you are performing this call just to do math expressions and do not also need the raw data returned, you can specify false. If you omit this, the default of true is used. When used in PutMetricAlarm, specify true for the one expression result to use as the alarm. For all other metrics and expressions in the same PutMetricAlarm operation, specify ReturnData as False."];
       period: Period.t option
         [@ocaml.doc
-          "The granularity, in seconds, of the returned data points. For metrics with regular resolution, a period can be as short as one minute (60 seconds) and must be a multiple of 60. For high-resolution metrics that are collected at intervals of less than one minute, the period can be 1, 5, 10, 30, 60, or any multiple of 60. High-resolution metrics are those metrics stored by a PutMetricData operation that includes a StorageResolution of 1 second."];
+          "The granularity, in seconds, of the returned data points. For metrics with regular resolution, a period can be as short as one minute (60 seconds) and must be a multiple of 60. For high-resolution metrics that are collected at intervals of less than one minute, the period can be 1, 5, 10, 20, 30, 60, or any multiple of 60. High-resolution metrics are those metrics stored by a PutMetricData operation that includes a StorageResolution of 1 second."];
       accountId: AccountId.t option
         [@ocaml.doc
-          "The ID of the account where the metrics are located, if this is a cross-account alarm. Use this field only for PutMetricAlarm operations. It is not used in GetMetricData operations."]}
+          "The ID of the account where the metrics are located. If you are performing a GetMetricData operation in a monitoring account, use this to specify which account to retrieve this metric from. If you are performing a PutMetricAlarm operation, use this to specify which account contains the metric that the alarm is watching."]}
     let context_ = "MetricDataQuery"
     let make ?metricStat =
       fun ?expression ->
@@ -602,19 +846,75 @@ module MetricDataQuery =
       make ?accountId ?period ?returnData ?label ?expression ?metricStat ~id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      let period = field_map json "Period" Period.of_json in
-      let returnData = field_map json "ReturnData" ReturnData.of_json in
-      let label = field_map json "Label" MetricLabel.of_json in
-      let expression = field_map json "Expression" MetricExpression.of_json in
-      let metricStat = field_map json "MetricStat" MetricStat.of_json in
-      let id = field_map_exn json "Id" MetricId.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let period = field_map json__ "Period" Period.of_json in
+      let returnData = field_map json__ "ReturnData" ReturnData.of_json in
+      let label = field_map json__ "Label" MetricLabel.of_json in
+      let expression = field_map json__ "Expression" MetricExpression.of_json in
+      let metricStat = field_map json__ "MetricStat" MetricStat.of_json in
+      let id = field_map_exn json__ "Id" MetricId.of_json in
       make ?accountId ?period ?returnData ?label ?expression ?metricStat ~id
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This structure is used in both GetMetricData and PutMetricAlarm. The supported use of this structure is different for those two operations. When used in GetMetricData, it indicates the metric data to return, and whether this call is just retrieving a batch set of data for one metric, or is performing a Metrics Insights query or a math expression. A single GetMetricData call can include up to 500 MetricDataQuery structures. When used in PutMetricAlarm, it enables you to create an alarm based on a metric math expression. Each MetricDataQuery in the array specifies either a metric to retrieve, or a math expression to be performed on retrieved metrics. A single PutMetricAlarm call can include up to 20 MetricDataQuery structures in the array. The 20 structures can include as many as 10 structures that contain a MetricStat parameter to retrieve a metric, and as many as 10 structures that contain the Expression parameter to perform a math expression. Of those Expression structures, one must have True as the value for ReturnData. The result of this expression is the value the alarm watches. Any expression used in a PutMetricAlarm operation must return a single time series. For more information, see Metric Math Syntax and Functions in the Amazon CloudWatch User Guide. Some of the parameters of this structure also have different uses whether you are using this structure in a GetMetricData operation or a PutMetricAlarm operation. These differences are explained in the following parameter list."]
+       "This structure is used in both GetMetricData and PutMetricAlarm. The supported use of this structure is different for those two operations. When used in GetMetricData, it indicates the metric data to return, and whether this call is just retrieving a batch set of data for one metric, or is performing a Metrics Insights query or a math expression. A single GetMetricData call can include up to 500 MetricDataQuery structures. When used in PutMetricAlarm, it enables you to create an alarm based on a metric math expression. Each MetricDataQuery in the array specifies either a metric to retrieve, or a math expression to be performed on retrieved metrics. A single PutMetricAlarm call can include up to 20 MetricDataQuery structures in the array. The 20 structures can include as many as 10 structures that contain a MetricStat parameter to retrieve a metric, and as many as 10 structures that contain the Expression parameter to perform a math expression. Of those Expression structures, one must have true as the value for ReturnData. The result of this expression is the value the alarm watches. Any expression used in a PutMetricAlarm operation must return a single time series. For more information, see Metric Math Syntax and Functions in the Amazon CloudWatch User Guide. Some of the parameters of this structure also have different uses whether you are using this structure in a GetMetricData operation or a PutMetricAlarm operation. These differences are explained in the following parameter list."]
+module PendingPeriod =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:86400) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PendingPeriod" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Query =
+  struct
+    type nonrec t = string
+    let context_ = "Query"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:10000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Query" j
+    let to_json = simple_to_json to_value
+  end
+module RecoveryPeriod =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:86400) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RecoveryPeriod" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module MetricStreamStatistic =
   struct
     type nonrec t = string
@@ -632,8 +932,7 @@ module MetricStreamStatisticsMetric =
   struct
     type nonrec t =
       {
-      namespace: Namespace.t
-        [@ocaml.doc "The metric namespace for the metric."];
+      namespace: Namespace.t [@ocaml.doc "The namespace of the metric."];
       metricName: MetricName.t [@ocaml.doc "The name of the metric."]}
     let context_ = "MetricStreamStatisticsMetric"
     let make ~namespace =
@@ -652,26 +951,223 @@ module MetricStreamStatisticsMetric =
           (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
       make ~metricName ~namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
-      let namespace = field_map_exn json "Namespace" Namespace.of_json in
+    let of_json json__ =
+      let metricName = field_map_exn json__ "MetricName" MetricName.of_json in
+      let namespace = field_map_exn json__ "Namespace" Namespace.of_json in
       make ~metricName ~namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This object contains the information for one metric that is to streamed with extended statistics."]
-module DatapointValue =
+       "This object contains the information for one metric that is to be streamed with additional statistics."]
+module EntityAttributesMap =
   struct
-    type nonrec t = float
-    let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Double x
+    type nonrec t =
+      (EntityAttributesMapKeyString.t * EntityAttributesMapValueString.t)
+        list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((EntityAttributesMapKeyString.of_string chopped),
+                              (EntityAttributesMapValueString.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (EntityAttributesMapKeyString.to_value x) |>
+                    (fun x ->
+                       (EntityAttributesMapValueString.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
     let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:EntityAttributesMapKeyString.of_string
+        ~of_json:EntityAttributesMapValueString.of_json j
+    let to_json v = composed_to_json to_value v
   end
+module EntityKeyAttributesMap =
+  struct
+    type nonrec t =
+      (EntityKeyAttributesMapKeyString.t *
+        EntityKeyAttributesMapValueString.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:2));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((EntityKeyAttributesMapKeyString.of_string
+                                chopped),
+                              (EntityKeyAttributesMapValueString.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (EntityKeyAttributesMapKeyString.to_value x) |>
+                    (fun x ->
+                       (EntityKeyAttributesMapValueString.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:EntityKeyAttributesMapKeyString.of_string
+        ~of_json:EntityKeyAttributesMapValueString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricDatum =
+  struct
+    type nonrec t =
+      {
+      metricName: MetricName.t [@ocaml.doc "The name of the metric."];
+      dimensions: Dimensions.t option
+        [@ocaml.doc "The dimensions associated with the metric."];
+      timestamp: Timestamp.t option
+        [@ocaml.doc
+          "The time the metric data was received, expressed as the number of milliseconds since Jan 1, 1970 00:00:00 UTC."];
+      value: DatapointValue.t option
+        [@ocaml.doc
+          "The value for the metric. Although the parameter accepts numbers of type Double, CloudWatch rejects values that are either too small or too large. Values must be in the range of -2^360 to 2^360. In addition, special values (for example, NaN, +Infinity, -Infinity) are not supported."];
+      statisticValues: StatisticSet.t option
+        [@ocaml.doc "The statistical values for the metric."];
+      values: Values.t option
+        [@ocaml.doc
+          "Array of numbers representing the values for the metric during the period. Each unique value is listed just once in this array, and the corresponding number in the Counts array specifies the number of times that value occurred during the period. You can include up to 150 unique values in each PutMetricData action that specifies a Values array. Although the Values array accepts numbers of type Double, CloudWatch rejects values that are either too small or too large. Values must be in the range of -2^360 to 2^360. In addition, special values (for example, NaN, +Infinity, -Infinity) are not supported."];
+      counts: Counts.t option
+        [@ocaml.doc
+          "Array of numbers that is used along with the Values array. Each number in the Count array is the number of times the corresponding value in the Values array occurred during the period. If you omit the Counts array, the default of 1 is used as the value for each count. If you include a Counts array, it must include the same amount of values as the Values array."];
+      unit: StandardUnit.t option
+        [@ocaml.doc
+          "When you are using a Put operation, this defines what unit you want to use when storing the metric. In a Get operation, this displays the unit that is used for the metric."];
+      storageResolution: StorageResolution.t option
+        [@ocaml.doc
+          "Valid values are 1 and 60. Setting this to 1 specifies this metric as a high-resolution metric, so that CloudWatch stores the metric with sub-minute resolution down to one second. Setting this to 60 specifies this metric as a regular-resolution metric, which CloudWatch stores at 1-minute resolution. Currently, high resolution is available only for custom metrics. For more information about high-resolution metrics, see High-Resolution Metrics in the Amazon CloudWatch User Guide. This field is optional, if you do not specify it the default of 60 is used."]}
+    let context_ = "MetricDatum"
+    let make ?dimensions =
+      fun ?timestamp ->
+        fun ?value ->
+          fun ?statisticValues ->
+            fun ?values ->
+              fun ?counts ->
+                fun ?unit ->
+                  fun ?storageResolution ->
+                    fun ~metricName ->
+                      fun () ->
+                        {
+                          dimensions;
+                          timestamp;
+                          value;
+                          statisticValues;
+                          values;
+                          counts;
+                          unit;
+                          storageResolution;
+                          metricName
+                        }
+    let to_value x =
+      structure_to_value
+        [("MetricName", (Some (MetricName.to_value x.metricName)));
+        ("Dimensions", (Option.map x.dimensions ~f:Dimensions.to_value));
+        ("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
+        ("Value", (Option.map x.value ~f:DatapointValue.to_value));
+        ("StatisticValues",
+          (Option.map x.statisticValues ~f:StatisticSet.to_value));
+        ("Values", (Option.map x.values ~f:Values.to_value));
+        ("Counts", (Option.map x.counts ~f:Counts.to_value));
+        ("Unit", (Option.map x.unit ~f:StandardUnit.to_value));
+        ("StorageResolution",
+          (Option.map x.storageResolution ~f:StorageResolution.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let storageResolution =
+        (Option.map ~f:StorageResolution.of_xml)
+          (Xml.child xml_arg0 "StorageResolution") in
+      let unit =
+        (Option.map ~f:StandardUnit.of_xml) (Xml.child xml_arg0 "Unit") in
+      let counts =
+        (Option.map ~f:Counts.of_xml) (Xml.child xml_arg0 "Counts") in
+      let values =
+        (Option.map ~f:Values.of_xml) (Xml.child xml_arg0 "Values") in
+      let statisticValues =
+        (Option.map ~f:StatisticSet.of_xml)
+          (Xml.child xml_arg0 "StatisticValues") in
+      let value =
+        (Option.map ~f:DatapointValue.of_xml) (Xml.child xml_arg0 "Value") in
+      let timestamp =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
+      let dimensions =
+        (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
+      let metricName =
+        MetricName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
+      make ?storageResolution ?unit ?counts ?values ?statisticValues ?value
+        ?timestamp ?dimensions ~metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let storageResolution =
+        field_map json__ "StorageResolution" StorageResolution.of_json in
+      let unit = field_map json__ "Unit" StandardUnit.of_json in
+      let counts = field_map json__ "Counts" Counts.of_json in
+      let values = field_map json__ "Values" Values.of_json in
+      let statisticValues =
+        field_map json__ "StatisticValues" StatisticSet.of_json in
+      let value = field_map json__ "Value" DatapointValue.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map_exn json__ "MetricName" MetricName.of_json in
+      make ?storageResolution ?unit ?counts ?values ?statisticValues ?value
+        ?timestamp ?dimensions ~metricName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Encapsulates the information sent to either create a metric or add new values to be aggregated into an existing metric."]
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t
+        [@ocaml.doc
+          "A string that you can use to assign a value. The combination of tag keys and values can help you organize and categorize your resources."];
+      value: TagValue.t [@ocaml.doc "The value for the specified tag key."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A key-value pair associated with a CloudWatch resource."]
 module DataPath =
   struct
     type nonrec t = string
@@ -698,15 +1194,51 @@ module Message =
     let of_json j = string_of_json ~kind:"Message" j
     let to_json = simple_to_json to_value
   end
+module InsightRuleName =
+  struct
+    type nonrec t = string
+    let context_ = "InsightRuleName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\x20-\\x7E]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InsightRuleName" j
+    let to_json = simple_to_json to_value
+  end
+module InsightRuleState =
+  struct
+    type nonrec t = string
+    let context_ = "InsightRuleState"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\x20-\\x7E]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InsightRuleState" j
+    let to_json = simple_to_json to_value
+  end
 module ExtendedStatistic =
   struct
     type nonrec t = string
     let context_ = "ExtendedStatistic"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i ~pattern:"p(\\d{1,2}(\\.\\d{0,2})?|100)");
-        i
+    let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -736,9 +1268,9 @@ module MessageData =
         (Option.map ~f:MessageDataCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?value ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" MessageDataValue.of_json in
-      let code = field_map json "Code" MessageDataCode.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" MessageDataValue.of_json in
+      let code = field_map json__ "Code" MessageDataCode.of_json in
       make ?value ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -747,34 +1279,32 @@ module InsightRuleContributorDatapoint =
   struct
     type nonrec t =
       {
-      timestamp: Timestamp.t [@ocaml.doc "The timestamp of the data point."];
-      approximateValue: InsightRuleUnboundDouble.t
+      timestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp of the data point."];
+      approximateValue: InsightRuleUnboundDouble.t option
         [@ocaml.doc
           "The approximate value that this contributor added during this timestamp."]}
-    let context_ = "InsightRuleContributorDatapoint"
-    let make ~timestamp =
-      fun ~approximateValue -> fun () -> { timestamp; approximateValue }
+    let make ?timestamp =
+      fun ?approximateValue -> fun () -> { timestamp; approximateValue }
     let to_value x =
       structure_to_value
-        [("Timestamp", (Some (Timestamp.to_value x.timestamp)));
+        [("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
         ("ApproximateValue",
-          (Some (InsightRuleUnboundDouble.to_value x.approximateValue)))]
+          (Option.map x.approximateValue ~f:InsightRuleUnboundDouble.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approximateValue =
-        InsightRuleUnboundDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApproximateValue") in
+        (Option.map ~f:InsightRuleUnboundDouble.of_xml)
+          (Xml.child xml_arg0 "ApproximateValue") in
       let timestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
-      make ~approximateValue ~timestamp ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
+      make ?approximateValue ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approximateValue =
-        field_map_exn json "ApproximateValue"
-          InsightRuleUnboundDouble.of_json in
-      let timestamp = field_map_exn json "Timestamp" Timestamp.of_json in
-      make ~approximateValue ~timestamp ()
+        field_map json__ "ApproximateValue" InsightRuleUnboundDouble.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      make ?approximateValue ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "One data point related to one contributor. For more information, see GetInsightRuleReport and InsightRuleContributor."]
@@ -795,6 +1325,9 @@ module AnomalyDetectorExcludedTimeRanges =
   struct
     type nonrec t = Range.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Range.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -834,10 +1367,26 @@ module AnomalyDetectorMetricTimezone =
     let of_json j = string_of_json ~kind:"AnomalyDetectorMetricTimezone" j
     let to_json = simple_to_json to_value
   end
+module PeriodicSpikes =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module MetricDataQueries =
   struct
     type nonrec t = MetricDataQuery.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricDataQuery.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -897,14 +1446,60 @@ module ResourceName =
     let of_json j = string_of_json ~kind:"ResourceName" j
     let to_json = simple_to_json to_value
   end
-module TagKey =
+module AlarmPromQLCriteria =
+  struct
+    type nonrec t =
+      {
+      query: Query.t
+        [@ocaml.doc
+          "The PromQL query that the alarm evaluates. The query must return a result of vector type. Each entry in the vector result represents an alarm contributor."];
+      pendingPeriod: PendingPeriod.t option
+        [@ocaml.doc
+          "The duration, in seconds, that a contributor must be continuously breaching before it transitions to the ALARM state."];
+      recoveryPeriod: RecoveryPeriod.t option
+        [@ocaml.doc
+          "The duration, in seconds, that a contributor must continuously not be breaching before it transitions back to the OK state."]}
+    let context_ = "AlarmPromQLCriteria"
+    let make ?pendingPeriod =
+      fun ?recoveryPeriod ->
+        fun ~query -> fun () -> { pendingPeriod; recoveryPeriod; query }
+    let to_value x =
+      structure_to_value
+        [("Query", (Some (Query.to_value x.query)));
+        ("PendingPeriod",
+          (Option.map x.pendingPeriod ~f:PendingPeriod.to_value));
+        ("RecoveryPeriod",
+          (Option.map x.recoveryPeriod ~f:RecoveryPeriod.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recoveryPeriod =
+        (Option.map ~f:RecoveryPeriod.of_xml)
+          (Xml.child xml_arg0 "RecoveryPeriod") in
+      let pendingPeriod =
+        (Option.map ~f:PendingPeriod.of_xml)
+          (Xml.child xml_arg0 "PendingPeriod") in
+      let query =
+        Query.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Query") in
+      make ?recoveryPeriod ?pendingPeriod ~query ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recoveryPeriod =
+        field_map json__ "RecoveryPeriod" RecoveryPeriod.of_json in
+      let pendingPeriod =
+        field_map json__ "PendingPeriod" PendingPeriod.of_json in
+      let query = field_map_exn json__ "Query" Query.of_json in
+      make ?recoveryPeriod ?pendingPeriod ~query ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the configuration that determines how a PromQL alarm evaluates its contributors, including the query to run and the durations that define when contributors transition between states."]
+module AttributeName =
   struct
     type nonrec t = string
-    let context_ = "TagKey"
+    let context_ = "AttributeName"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:128) >>=
+          ((check_string_max i ~max:255) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -912,31 +1507,62 @@ module TagKey =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
+    let of_json j = string_of_json ~kind:"AttributeName" j
     let to_json = simple_to_json to_value
   end
-module TagValue =
+module AttributeValue =
   struct
     type nonrec t = string
-    let context_ = "TagValue"
+    let context_ = "AttributeValue"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
+    let of_json j = string_of_json ~kind:"AttributeValue" j
     let to_json = simple_to_json to_value
+  end
+module MetricStreamFilterMetricNames =
+  struct
+    type nonrec t = MetricName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricStreamFilterMetricNames"
+        ~of_json:MetricName.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module MetricStreamStatisticsAdditionalStatistics =
   struct
     type nonrec t = MetricStreamStatistic.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricStreamStatistic.to_value)) |>
         (fun x -> `List x)
@@ -963,6 +1589,9 @@ module MetricStreamStatisticsIncludeMetrics =
   struct
     type nonrec t = MetricStreamStatisticsMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricStreamStatisticsMetric.to_value)) |>
         (fun x -> `List x)
@@ -985,100 +1614,52 @@ module MetricStreamStatisticsIncludeMetrics =
         ~of_json:MetricStreamStatisticsMetric.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Counts =
-  struct
-    type nonrec t = DatapointValue.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:DatapointValue.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DatapointValue.of_xml)
-    let of_json j =
-      list_of_json ~kind:"Counts" ~of_json:DatapointValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module StatisticSet =
+module Entity =
   struct
     type nonrec t =
       {
-      sampleCount: DatapointValue.t
-        [@ocaml.doc "The number of samples used for the statistic set."];
-      sum: DatapointValue.t
-        [@ocaml.doc "The sum of values for the sample set."];
-      minimum: DatapointValue.t
-        [@ocaml.doc "The minimum value of the sample set."];
-      maximum: DatapointValue.t
-        [@ocaml.doc "The maximum value of the sample set."]}
-    let context_ = "StatisticSet"
-    let make ~sampleCount =
-      fun ~sum ->
-        fun ~minimum ->
-          fun ~maximum -> fun () -> { sampleCount; sum; minimum; maximum }
+      keyAttributes: EntityKeyAttributesMap.t option
+        [@ocaml.doc
+          "The attributes of the entity which identify the specific entity, as a list of key-value pairs. Entities with the same KeyAttributes are considered to be the same entity. For an entity to be valid, the KeyAttributes must exist and be formatted correctly. There are five allowed attributes (key names): Type, ResourceType, Identifier, Name, and Environment. For details about how to use the key attributes to specify an entity, see How to add related information to telemetry in the CloudWatch User Guide."];
+      attributes: EntityAttributesMap.t option
+        [@ocaml.doc
+          "Additional attributes of the entity that are not used to specify the identity of the entity. A list of key-value pairs. For details about how to use the attributes, see How to add related information to telemetry in the CloudWatch User Guide."]}
+    let make ?keyAttributes =
+      fun ?attributes -> fun () -> { keyAttributes; attributes }
     let to_value x =
       structure_to_value
-        [("SampleCount", (Some (DatapointValue.to_value x.sampleCount)));
-        ("Sum", (Some (DatapointValue.to_value x.sum)));
-        ("Minimum", (Some (DatapointValue.to_value x.minimum)));
-        ("Maximum", (Some (DatapointValue.to_value x.maximum)))]
+        [("KeyAttributes",
+           (Option.map x.keyAttributes ~f:EntityKeyAttributesMap.to_value));
+        ("Attributes",
+          (Option.map x.attributes ~f:EntityAttributesMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let maximum =
-        DatapointValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Maximum") in
-      let minimum =
-        DatapointValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Minimum") in
-      let sum =
-        DatapointValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Sum") in
-      let sampleCount =
-        DatapointValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SampleCount") in
-      make ~maximum ~minimum ~sum ~sampleCount ()
+      let attributes =
+        (Option.map ~f:EntityAttributesMap.of_xml)
+          (Xml.child xml_arg0 "Attributes") in
+      let keyAttributes =
+        (Option.map ~f:EntityKeyAttributesMap.of_xml)
+          (Xml.child xml_arg0 "KeyAttributes") in
+      make ?attributes ?keyAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maximum = field_map_exn json "Maximum" DatapointValue.of_json in
-      let minimum = field_map_exn json "Minimum" DatapointValue.of_json in
-      let sum = field_map_exn json "Sum" DatapointValue.of_json in
-      let sampleCount =
-        field_map_exn json "SampleCount" DatapointValue.of_json in
-      make ~maximum ~minimum ~sum ~sampleCount ()
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" EntityAttributesMap.of_json in
+      let keyAttributes =
+        field_map json__ "KeyAttributes" EntityKeyAttributesMap.of_json in
+      make ?attributes ?keyAttributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a set of statistics that describes a specific metric."]
-module StorageResolution =
+       "An entity associated with metrics, to allow for finding related telemetry. An entity is typically a resource or service within your system. For example, metrics from an Amazon EC2 instance could be associated with that instance as the entity. Similarly, metrics from a service that you own could be associated with that service as the entity."]
+module MetricData =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:1); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for StorageResolution" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module Values =
-  struct
-    type nonrec t = DatapointValue.t list
+    type nonrec t = MetricDatum.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:DatapointValue.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:MetricDatum.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -1092,345 +1673,9 @@ module Values =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:DatapointValue.of_xml)
+                     | _ -> true))) ~f:MetricDatum.of_xml)
     let of_json j =
-      list_of_json ~kind:"Values" ~of_json:DatapointValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module DashboardValidationMessage =
-  struct
-    type nonrec t =
-      {
-      dataPath: DataPath.t option
-        [@ocaml.doc "The data path related to the message."];
-      message: Message.t option
-        [@ocaml.doc "A message describing the error or warning."]}
-    let make ?dataPath = fun ?message -> fun () -> { dataPath; message }
-    let to_value x =
-      structure_to_value
-        [("DataPath", (Option.map x.dataPath ~f:DataPath.to_value));
-        ("Message", (Option.map x.message ~f:Message.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
-      let dataPath =
-        (Option.map ~f:DataPath.of_xml) (Xml.child xml_arg0 "DataPath") in
-      make ?message ?dataPath ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
-      let dataPath = field_map json "DataPath" DataPath.of_json in
-      make ?message ?dataPath ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An error or warning for the operation."]
-module AmazonResourceName =
-  struct
-    type nonrec t = string
-    let context_ = "AmazonResourceName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AmazonResourceName" j
-    let to_json = simple_to_json to_value
-  end
-module MetricStreamName =
-  struct
-    type nonrec t = string
-    let context_ = "MetricStreamName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"MetricStreamName" j
-    let to_json = simple_to_json to_value
-  end
-module MetricStreamOutputFormat =
-  struct
-    type nonrec t =
-      | Json 
-      | Opentelemetry0_7 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | Json -> "json"
-      | Opentelemetry0_7 -> "opentelemetry0.7"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "json" -> Json
-      | "opentelemetry0.7" -> Opentelemetry0_7
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration MetricStreamOutputFormat" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"MetricStreamOutputFormat" j)
-    let to_json = simple_to_json to_value
-  end
-module MetricStreamState =
-  struct
-    type nonrec t = string
-    let context_ = "MetricStreamState"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"MetricStreamState" j
-    let to_json = simple_to_json to_value
-  end
-module DashboardArn =
-  struct
-    type nonrec t = string
-    let context_ = "DashboardArn"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DashboardArn" j
-    let to_json = simple_to_json to_value
-  end
-module DashboardName =
-  struct
-    type nonrec t = string
-    let context_ = "DashboardName"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DashboardName" j
-    let to_json = simple_to_json to_value
-  end
-module LastModified =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
-module Size =
-  struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
-module DatapointValueMap =
-  struct
-    type nonrec t = (ExtendedStatistic.t * DatapointValue.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((ExtendedStatistic.of_string chopped),
-                              (DatapointValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (ExtendedStatistic.to_value x) |>
-                    (fun x ->
-                       (DatapointValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:ExtendedStatistic.of_string
-        ~of_json:DatapointValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module DatapointValues =
-  struct
-    type nonrec t = DatapointValue.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:DatapointValue.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DatapointValue.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DatapointValues" ~of_json:DatapointValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module MetricDataResultMessages =
-  struct
-    type nonrec t = MessageData.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:MessageData.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:MessageData.of_xml)
-    let of_json j =
-      list_of_json ~kind:"MetricDataResultMessages"
-        ~of_json:MessageData.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module StatusCode =
-  struct
-    type nonrec t =
-      | Complete 
-      | InternalError 
-      | PartialData 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | Complete -> "Complete"
-      | InternalError -> "InternalError"
-      | PartialData -> "PartialData"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "Complete" -> Complete
-      | "InternalError" -> InternalError
-      | "PartialData" -> PartialData
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration StatusCode" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"StatusCode" j)
-    let to_json = simple_to_json to_value
-  end
-module Timestamps =
-  struct
-    type nonrec t = Timestamp.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Timestamp.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Timestamp.of_xml)
-    let of_json j =
-      list_of_json ~kind:"Timestamps" ~of_json:Timestamp.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module InsightRuleContributorDatapoints =
-  struct
-    type nonrec t = InsightRuleContributorDatapoint.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:InsightRuleContributorDatapoint.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:InsightRuleContributorDatapoint.of_xml)
-    let of_json j =
-      list_of_json ~kind:"InsightRuleContributorDatapoints"
-        ~of_json:InsightRuleContributorDatapoint.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module InsightRuleContributorKeys =
-  struct
-    type nonrec t = InsightRuleContributorKey.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:InsightRuleContributorKey.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:InsightRuleContributorKey.of_xml)
-    let of_json j =
-      list_of_json ~kind:"InsightRuleContributorKeys"
-        ~of_json:InsightRuleContributorKey.of_json j
+      list_of_json ~kind:"MetricData" ~of_json:MetricDatum.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ExceptionType =
@@ -1485,6 +1730,574 @@ module FailureResource =
     let of_json j = string_of_json ~kind:"FailureResource" j
     let to_json = simple_to_json to_value
   end
+module AmazonResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "AmazonResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AmazonResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TemplateName =
+  struct
+    type nonrec t = string
+    let context_ = "TemplateName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[0-9A-Za-z][\\-\\.\\_0-9A-Za-z]{0,126}[0-9A-Za-z]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TemplateName" j
+    let to_json = simple_to_json to_value
+  end
+module DashboardValidationMessage =
+  struct
+    type nonrec t =
+      {
+      dataPath: DataPath.t option
+        [@ocaml.doc "The data path related to the message."];
+      message: Message.t option
+        [@ocaml.doc "A message describing the error or warning."]}
+    let make ?dataPath = fun ?message -> fun () -> { dataPath; message }
+    let to_value x =
+      structure_to_value
+        [("DataPath", (Option.map x.dataPath ~f:DataPath.to_value));
+        ("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      let dataPath =
+        (Option.map ~f:DataPath.of_xml) (Xml.child xml_arg0 "DataPath") in
+      make ?message ?dataPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      let dataPath = field_map json__ "DataPath" DataPath.of_json in
+      make ?message ?dataPath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An error or warning for the operation."]
+module Name =
+  struct
+    type nonrec t = string
+    let context_ = "Name"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Name" j
+    let to_json = simple_to_json to_value
+  end
+module Duration =
+  struct
+    type nonrec t = string
+    let context_ = "Duration"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Duration" j
+    let to_json = simple_to_json to_value
+  end
+module Expression =
+  struct
+    type nonrec t = string
+    let context_ = "Expression"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Expression" j
+    let to_json = simple_to_json to_value
+  end
+module Timezone =
+  struct
+    type nonrec t = string
+    let context_ = "Timezone"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Timezone" j
+    let to_json = simple_to_json to_value
+  end
+module MetricStreamName =
+  struct
+    type nonrec t = string
+    let context_ = "MetricStreamName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricStreamName" j
+    let to_json = simple_to_json to_value
+  end
+module MetricStreamOutputFormat =
+  struct
+    type nonrec t =
+      | Json 
+      | Opentelemetry0_7 
+      | Opentelemetry1_0 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Json -> "json"
+      | Opentelemetry0_7 -> "opentelemetry0.7"
+      | Opentelemetry1_0 -> "opentelemetry1.0"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "json" -> Json
+      | "opentelemetry0.7" -> Opentelemetry0_7
+      | "opentelemetry1.0" -> Opentelemetry1_0
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MetricStreamOutputFormat" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MetricStreamOutputFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricStreamState =
+  struct
+    type nonrec t = string
+    let context_ = "MetricStreamState"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricStreamState" j
+    let to_json = simple_to_json to_value
+  end
+module ManagedRuleState =
+  struct
+    type nonrec t =
+      {
+      ruleName: InsightRuleName.t option
+        [@ocaml.doc
+          "The name of the Contributor Insights rule that contains data for the specified Amazon Web Services resource."];
+      state: InsightRuleState.t option
+        [@ocaml.doc "Indicates whether the rule is enabled or disabled."]}
+    let make ?ruleName = fun ?state -> fun () -> { ruleName; state }
+    let to_value x =
+      structure_to_value
+        [("RuleName", (Option.map x.ruleName ~f:InsightRuleName.to_value));
+        ("State", (Option.map x.state ~f:InsightRuleState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:InsightRuleState.of_xml) (Xml.child xml_arg0 "State") in
+      let ruleName =
+        (Option.map ~f:InsightRuleName.of_xml)
+          (Xml.child xml_arg0 "RuleName") in
+      make ?state ?ruleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" InsightRuleState.of_json in
+      let ruleName = field_map json__ "RuleName" InsightRuleName.of_json in
+      make ?state ?ruleName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status of a managed Contributor Insights rule."]
+module DashboardArn =
+  struct
+    type nonrec t = string
+    let context_ = "DashboardArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DashboardArn" j
+    let to_json = simple_to_json to_value
+  end
+module DashboardName =
+  struct
+    type nonrec t = string
+    let context_ = "DashboardName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DashboardName" j
+    let to_json = simple_to_json to_value
+  end
+module LastModified =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Size =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module AlarmMuteRuleStatus =
+  struct
+    type nonrec t =
+      | SCHEDULED 
+      | ACTIVE 
+      | EXPIRED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SCHEDULED -> "SCHEDULED"
+      | ACTIVE -> "ACTIVE"
+      | EXPIRED -> "EXPIRED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SCHEDULED" -> SCHEDULED
+      | "ACTIVE" -> ACTIVE
+      | "EXPIRED" -> EXPIRED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AlarmMuteRuleStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AlarmMuteRuleStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Arn =
+  struct
+    type nonrec t = string
+    let context_ = "Arn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1600) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Arn" j
+    let to_json = simple_to_json to_value
+  end
+module MuteType =
+  struct
+    type nonrec t = string
+    let context_ = "MuteType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MuteType" j
+    let to_json = simple_to_json to_value
+  end
+module DatapointValueMap =
+  struct
+    type nonrec t = (ExtendedStatistic.t * DatapointValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ExtendedStatistic.of_string chopped),
+                              (DatapointValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ExtendedStatistic.to_value x) |>
+                    (fun x ->
+                       (DatapointValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ExtendedStatistic.of_string
+        ~of_json:DatapointValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DatapointValues =
+  struct
+    type nonrec t = DatapointValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatapointValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DatapointValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatapointValues" ~of_json:DatapointValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricDataResultMessages =
+  struct
+    type nonrec t = MessageData.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MessageData.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MessageData.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDataResultMessages"
+        ~of_json:MessageData.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StatusCode =
+  struct
+    type nonrec t =
+      | Complete 
+      | InternalError 
+      | PartialData 
+      | Forbidden 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Complete -> "Complete"
+      | InternalError -> "InternalError"
+      | PartialData -> "PartialData"
+      | Forbidden -> "Forbidden"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Complete" -> Complete
+      | "InternalError" -> InternalError
+      | "PartialData" -> PartialData
+      | "Forbidden" -> Forbidden
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StatusCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StatusCode" j)
+    let to_json = simple_to_json to_value
+  end
+module Timestamps =
+  struct
+    type nonrec t = Timestamp.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Timestamp.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Timestamp.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Timestamps" ~of_json:Timestamp.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightRuleContributorDatapoints =
+  struct
+    type nonrec t = InsightRuleContributorDatapoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InsightRuleContributorDatapoint.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InsightRuleContributorDatapoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InsightRuleContributorDatapoints"
+        ~of_json:InsightRuleContributorDatapoint.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightRuleContributorKeys =
+  struct
+    type nonrec t = InsightRuleContributorKey.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InsightRuleContributorKey.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InsightRuleContributorKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InsightRuleContributorKeys"
+        ~of_json:InsightRuleContributorKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InsightRuleDefinition =
   struct
     type nonrec t = string
@@ -1505,24 +2318,30 @@ module InsightRuleDefinition =
     let of_json j = string_of_json ~kind:"InsightRuleDefinition" j
     let to_json = simple_to_json to_value
   end
-module InsightRuleName =
+module InsightRuleIsManaged =
   struct
-    type nonrec t = string
-    let context_ = "InsightRuleName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\x20-\\x7E]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"InsightRuleName" j
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module InsightRuleOnTransformedLogs =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
 module InsightRuleSchema =
@@ -1536,26 +2355,6 @@ module InsightRuleSchema =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"InsightRuleSchema" j
-    let to_json = simple_to_json to_value
-  end
-module InsightRuleState =
-  struct
-    type nonrec t = string
-    let context_ = "InsightRuleState"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:32) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\x20-\\x7E]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"InsightRuleState" j
     let to_json = simple_to_json to_value
   end
 module AnomalyDetectorConfiguration =
@@ -1588,11 +2387,12 @@ module AnomalyDetectorConfiguration =
           (Xml.child xml_arg0 "ExcludedTimeRanges") in
       make ?metricTimezone ?excludedTimeRanges ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricTimezone =
-        field_map json "MetricTimezone" AnomalyDetectorMetricTimezone.of_json in
+        field_map json__ "MetricTimezone"
+          AnomalyDetectorMetricTimezone.of_json in
       let excludedTimeRanges =
-        field_map json "ExcludedTimeRanges"
+        field_map json__ "ExcludedTimeRanges"
           AnomalyDetectorExcludedTimeRanges.of_json in
       make ?metricTimezone ?excludedTimeRanges ()
     let to_json v = composed_to_json to_value v
@@ -1628,13 +2428,39 @@ module AnomalyDetectorStateValue =
       of_string (string_of_json ~kind:"AnomalyDetectorStateValue" j)
     let to_json = simple_to_json to_value
   end
+module MetricCharacteristics =
+  struct
+    type nonrec t =
+      {
+      periodicSpikes: PeriodicSpikes.t option
+        [@ocaml.doc
+          "Set this parameter to true if values for this metric consistently include spikes that should not be considered to be anomalies. With this set to true, CloudWatch will expect to see spikes that occurred consistently during the model training period, and won't flag future similar spikes as anomalies."]}
+    let make ?periodicSpikes = fun () -> { periodicSpikes }
+    let to_value x =
+      structure_to_value
+        [("PeriodicSpikes",
+           (Option.map x.periodicSpikes ~f:PeriodicSpikes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let periodicSpikes =
+        (Option.map ~f:PeriodicSpikes.of_xml)
+          (Xml.child xml_arg0 "PeriodicSpikes") in
+      make ?periodicSpikes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let periodicSpikes =
+        field_map json__ "PeriodicSpikes" PeriodicSpikes.of_json in
+      make ?periodicSpikes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This object includes parameters that you can use to provide information to CloudWatch to help it build more accurate anomaly detection models."]
 module MetricMathAnomalyDetector =
   struct
     type nonrec t =
       {
       metricDataQueries: MetricDataQueries.t option
         [@ocaml.doc
-          "An array of metric data query structures that enables you to create an anomaly detector based on the result of a metric math expression. Each item in MetricDataQueries gets a metric or performs a math expression. One item in MetricDataQueries is the expression that provides the time series that the anomaly detector uses as input. Designate the expression by setting ReturnData to True for this object in the array. For all other expressions and metrics, set ReturnData to False. The designated expression must return a single time series."]}
+          "An array of metric data query structures that enables you to create an anomaly detector based on the result of a metric math expression. Each item in MetricDataQueries gets a metric or performs a math expression. One item in MetricDataQueries is the expression that provides the time series that the anomaly detector uses as input. Designate the expression by setting ReturnData to true for this object in the array. For all other expressions and metrics, set ReturnData to false. The designated expression must return a single time series."]}
     let make ?metricDataQueries = fun () -> { metricDataQueries }
     let to_value x =
       structure_to_value
@@ -1647,9 +2473,9 @@ module MetricMathAnomalyDetector =
           (Xml.child xml_arg0 "MetricDataQueries") in
       make ?metricDataQueries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricDataQueries =
-        field_map json "MetricDataQueries" MetricDataQueries.of_json in
+        field_map json__ "MetricDataQueries" MetricDataQueries.of_json in
       make ?metricDataQueries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1658,6 +2484,9 @@ module SingleMetricAnomalyDetector =
   struct
     type nonrec t =
       {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "If the CloudWatch metric that provides the time series that the anomaly detector uses as input is in another account, specify that account ID here. If you omit this parameter, the current account is used."];
       namespace: Namespace.t option
         [@ocaml.doc
           "The namespace of the metric to create the anomaly detection model for."];
@@ -1670,13 +2499,17 @@ module SingleMetricAnomalyDetector =
       stat: AnomalyDetectorMetricStat.t option
         [@ocaml.doc
           "The statistic to use for the metric and anomaly detection model."]}
-    let make ?namespace =
-      fun ?metricName ->
-        fun ?dimensions ->
-          fun ?stat -> fun () -> { namespace; metricName; dimensions; stat }
+    let make ?accountId =
+      fun ?namespace ->
+        fun ?metricName ->
+          fun ?dimensions ->
+            fun ?stat ->
+              fun () ->
+                { accountId; namespace; metricName; dimensions; stat }
     let to_value x =
       structure_to_value
-        [("Namespace", (Option.map x.namespace ~f:Namespace.to_value));
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("Namespace", (Option.map x.namespace ~f:Namespace.to_value));
         ("MetricName", (Option.map x.metricName ~f:MetricName.to_value));
         ("Dimensions", (Option.map x.dimensions ~f:Dimensions.to_value));
         ("Stat", (Option.map x.stat ~f:AnomalyDetectorMetricStat.to_value))]
@@ -1691,17 +2524,20 @@ module SingleMetricAnomalyDetector =
         (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
       let namespace =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
-      make ?stat ?dimensions ?metricName ?namespace ()
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?stat ?dimensions ?metricName ?namespace ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stat = field_map json "Stat" AnomalyDetectorMetricStat.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
-      let namespace = field_map json "Namespace" Namespace.of_json in
-      make ?stat ?dimensions ?metricName ?namespace ()
+    let of_json json__ =
+      let stat = field_map json__ "Stat" AnomalyDetectorMetricStat.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?stat ?dimensions ?metricName ?namespace ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Designates the CloudWatch metric and statistic that provides the time series the anomaly detector uses as input."]
+       "Designates the CloudWatch metric and statistic that provides the time series the anomaly detector uses as input. If you have enabled unified cross-account observability, and this account is a monitoring account, the metric can be in the same account or a source account."]
 module ActionsEnabled =
   struct
     type nonrec t = bool
@@ -1713,6 +2549,53 @@ module ActionsEnabled =
     let of_xml xml_arg0 =
       Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
     let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ActionsSuppressedBy =
+  struct
+    type nonrec t =
+      | WaitPeriod 
+      | ExtensionPeriod 
+      | Alarm 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | WaitPeriod -> "WaitPeriod"
+      | ExtensionPeriod -> "ExtensionPeriod"
+      | Alarm -> "Alarm"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "WaitPeriod" -> WaitPeriod
+      | "ExtensionPeriod" -> ExtensionPeriod
+      | "Alarm" -> Alarm
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ActionsSuppressedBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ActionsSuppressedBy" j)
+    let to_json = simple_to_json to_value
+  end
+module ActionsSuppressedReason =
+  struct
+    type nonrec t = string
+    let context_ = "ActionsSuppressedReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ActionsSuppressedReason" j
     let to_json = simple_to_json to_value
   end
 module AlarmArn =
@@ -1792,6 +2675,9 @@ module ResourceList =
     type nonrec t = ResourceName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1876,6 +2762,20 @@ module StateValue =
     let of_json j = of_string (string_of_json ~kind:"StateValue" j)
     let to_json = simple_to_json to_value
   end
+module SuppressorPeriod =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SuppressorPeriod" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ComparisonOperator =
   struct
     type nonrec t =
@@ -1952,6 +2852,50 @@ module EvaluateLowSampleCountPercentile =
     let of_json j = string_of_json ~kind:"EvaluateLowSampleCountPercentile" j
     let to_json = simple_to_json to_value
   end
+module EvaluationCriteria =
+  struct
+    type nonrec t =
+      {
+      promQLCriteria: AlarmPromQLCriteria.t option
+        [@ocaml.doc "The PromQL criteria for the alarm evaluation."]}
+    let make ?promQLCriteria = fun () -> { promQLCriteria }
+    let to_value x =
+      structure_to_value
+        [("PromQLCriteria",
+           (Option.map x.promQLCriteria ~f:AlarmPromQLCriteria.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let promQLCriteria =
+        (Option.map ~f:AlarmPromQLCriteria.of_xml)
+          (Xml.child xml_arg0 "PromQLCriteria") in
+      make ?promQLCriteria ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let promQLCriteria =
+        field_map json__ "PromQLCriteria" AlarmPromQLCriteria.of_json in
+      make ?promQLCriteria ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The evaluation criteria for an alarm. This is a union type that currently supports PromQLCriteria."]
+module EvaluationInterval =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3600) >>=
+             (fun () -> check_int_min i ~min:10));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for EvaluationInterval" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module EvaluationPeriods =
   struct
     type nonrec t = int
@@ -1965,6 +2909,34 @@ module EvaluationPeriods =
       Int.of_string
         (string_of_xml ~kind:"an integer for EvaluationPeriods" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module EvaluationState =
+  struct
+    type nonrec t =
+      | PARTIAL_DATA 
+      | EVALUATION_FAILURE 
+      | EVALUATION_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PARTIAL_DATA -> "PARTIAL_DATA"
+      | EVALUATION_FAILURE -> "EVALUATION_FAILURE"
+      | EVALUATION_ERROR -> "EVALUATION_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PARTIAL_DATA" -> PARTIAL_DATA
+      | "EVALUATION_FAILURE" -> EVALUATION_FAILURE
+      | "EVALUATION_ERROR" -> EVALUATION_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EvaluationState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EvaluationState" j)
     let to_json = simple_to_json to_value
   end
 module Statistic =
@@ -2057,6 +3029,60 @@ module AlarmType =
     let of_json j = of_string (string_of_json ~kind:"AlarmType" j)
     let to_json = simple_to_json to_value
   end
+module ContributorAttributes =
+  struct
+    type nonrec t = (AttributeName.t * AttributeValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:150) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((AttributeName.of_string chopped),
+                              (AttributeValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (AttributeName.to_value x) |>
+                    (fun x ->
+                       (AttributeValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:AttributeName.of_string
+        ~of_json:AttributeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ContributorId =
+  struct
+    type nonrec t = string
+    let context_ = "ContributorId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:16) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContributorId" j
+    let to_json = simple_to_json to_value
+  end
 module HistoryData =
   struct
     type nonrec t = string
@@ -2081,6 +3107,8 @@ module HistoryItemType =
       | ConfigurationUpdate 
       | StateUpdate 
       | Action 
+      | AlarmContributorStateUpdate 
+      | AlarmContributorAction 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2088,12 +3116,16 @@ module HistoryItemType =
       | ConfigurationUpdate -> "ConfigurationUpdate"
       | StateUpdate -> "StateUpdate"
       | Action -> "Action"
+      | AlarmContributorStateUpdate -> "AlarmContributorStateUpdate"
+      | AlarmContributorAction -> "AlarmContributorAction"
       | Non_static_id s -> s
     let of_string =
       function
       | "ConfigurationUpdate" -> ConfigurationUpdate
       | "StateUpdate" -> StateUpdate
       | "Action" -> Action
+      | "AlarmContributorStateUpdate" -> AlarmContributorStateUpdate
+      | "AlarmContributorAction" -> AlarmContributorAction
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2119,6 +3151,24 @@ module HistorySummary =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"HistorySummary" j
+    let to_json = simple_to_json to_value
+  end
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
 module FaultDescription =
@@ -2173,66 +3223,50 @@ module ResourceType =
     let of_json j = string_of_json ~kind:"ResourceType" j
     let to_json = simple_to_json to_value
   end
-module Tag =
-  struct
-    type nonrec t =
-      {
-      key: TagKey.t
-        [@ocaml.doc
-          "A string that you can use to assign a value. The combination of tag keys and values can help you organize and categorize your resources."];
-      value: TagValue.t [@ocaml.doc "The value for the specified tag key."]}
-    let context_ = "Tag"
-    let make ~key = fun ~value -> fun () -> { key; value }
-    let to_value x =
-      structure_to_value
-        [("Key", (Some (TagKey.to_value x.key)));
-        ("Value", (Some (TagValue.to_value x.value)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let key =
-        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ~value ~key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
-      make ~value ~key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A key-value pair associated with a CloudWatch resource."]
 module MetricStreamFilter =
   struct
     type nonrec t =
       {
       namespace: Namespace.t option
-        [@ocaml.doc "The name of the metric namespace in the filter."]}
-    let make ?namespace = fun () -> { namespace }
+        [@ocaml.doc
+          "The name of the metric namespace for this filter. The namespace can contain only ASCII printable characters (ASCII range 32 through 126). It must contain at least one non-whitespace character."];
+      metricNames: MetricStreamFilterMetricNames.t option
+        [@ocaml.doc
+          "The names of the metrics to either include or exclude from the metric stream. If you omit this parameter, all metrics in the namespace are included or excluded, depending on whether this filter is specified as an exclude filter or an include filter. Each metric name can contain only ASCII printable characters (ASCII range 32 through 126). Each metric name must contain at least one non-whitespace character."]}
+    let make ?namespace =
+      fun ?metricNames -> fun () -> { namespace; metricNames }
     let to_value x =
       structure_to_value
-        [("Namespace", (Option.map x.namespace ~f:Namespace.to_value))]
+        [("Namespace", (Option.map x.namespace ~f:Namespace.to_value));
+        ("MetricNames",
+          (Option.map x.metricNames ~f:MetricStreamFilterMetricNames.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let metricNames =
+        (Option.map ~f:MetricStreamFilterMetricNames.of_xml)
+          (Xml.child xml_arg0 "MetricNames") in
       let namespace =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
-      make ?namespace ()
+      make ?metricNames ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namespace = field_map json "Namespace" Namespace.of_json in
-      make ?namespace ()
+    let of_json json__ =
+      let metricNames =
+        field_map json__ "MetricNames" MetricStreamFilterMetricNames.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
+      make ?metricNames ?namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This structure contains the name of one of the metric namespaces that is listed in a filter of a metric stream."]
+       "This structure contains a metric namespace and optionally, a list of metric names, to either include in a metric stream or exclude from a metric stream. A metric stream's filters can include up to 1000 total names. This limit applies to the sum of namespace names and metric names in the filters. For example, this could include 10 metric namespace filters with 99 metrics each, or 20 namespace filters with 49 metrics specified in each filter."]
 module MetricStreamStatisticsConfiguration =
   struct
     type nonrec t =
       {
       includeMetrics: MetricStreamStatisticsIncludeMetrics.t
         [@ocaml.doc
-          "An array of metric name and namespace pairs that stream the extended statistics listed in the value of the AdditionalStatistics parameter. There can be as many as 100 pairs in the array. All metrics that match the combination of metric name and namespace will be streamed with the extended statistics, no matter their dimensions."];
+          "An array of metric name and namespace pairs that stream the additional statistics listed in the value of the AdditionalStatistics parameter. There can be as many as 100 pairs in the array. All metrics that match the combination of metric name and namespace will be streamed with the additional statistics, no matter their dimensions."];
       additionalStatistics: MetricStreamStatisticsAdditionalStatistics.t
         [@ocaml.doc
-          "The list of extended statistics that are to be streamed for the metrics listed in the IncludeMetrics array in this structure. This list can include as many as 20 statistics. If the OutputFormat for the stream is opentelemetry0.7, the only valid values are p?? percentile statistics such as p90, p99 and so on. If the OutputFormat for the stream is json, the valid values are include the abbreviations for all of the extended statistics listed in CloudWatch statistics definitions. For example, this includes tm98, wm90, PR(:300), and so on."]}
+          "The list of additional statistics that are to be streamed for the metrics listed in the IncludeMetrics array in this structure. This list can include as many as 20 statistics. If the OutputFormat for the stream is opentelemetry1.0 or opentelemetry0.7, the only valid values are p?? percentile statistics such as p90, p99 and so on. If the OutputFormat for the stream is json, the valid values include the abbreviations for all of the statistics listed in CloudWatch statistics definitions. For example, this includes tm98, wm90, PR(:300), and so on."]}
     let context_ = "MetricStreamStatisticsConfiguration"
     let make ~includeMetrics =
       fun ~additionalStatistics ->
@@ -2256,122 +3290,146 @@ module MetricStreamStatisticsConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "IncludeMetrics") in
       make ~additionalStatistics ~includeMetrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalStatistics =
-        field_map_exn json "AdditionalStatistics"
+        field_map_exn json__ "AdditionalStatistics"
           MetricStreamStatisticsAdditionalStatistics.of_json in
       let includeMetrics =
-        field_map_exn json "IncludeMetrics"
+        field_map_exn json__ "IncludeMetrics"
           MetricStreamStatisticsIncludeMetrics.of_json in
       make ~additionalStatistics ~includeMetrics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "By default, a metric stream always sends the MAX, MIN, SUM, and SAMPLECOUNT statistics for each metric that is streamed. This structure contains information for one metric that includes extended statistics in the stream. For more information about extended statistics, see CloudWatch, listed in CloudWatch statistics definitions."]
-module MetricDatum =
+       "By default, a metric stream always sends the MAX, MIN, SUM, and SAMPLECOUNT statistics for each metric that is streamed. This structure contains information for one metric that includes additional statistics in the stream. For more information about statistics, see CloudWatch, listed in CloudWatch statistics definitions."]
+module EntityMetricData =
   struct
     type nonrec t =
       {
-      metricName: MetricName.t [@ocaml.doc "The name of the metric."];
-      dimensions: Dimensions.t option
-        [@ocaml.doc "The dimensions associated with the metric."];
-      timestamp: Timestamp.t option
-        [@ocaml.doc
-          "The time the metric data was received, expressed as the number of milliseconds since Jan 1, 1970 00:00:00 UTC."];
-      value: DatapointValue.t option
-        [@ocaml.doc
-          "The value for the metric. Although the parameter accepts numbers of type Double, CloudWatch rejects values that are either too small or too large. Values must be in the range of -2^360 to 2^360. In addition, special values (for example, NaN, +Infinity, -Infinity) are not supported."];
-      statisticValues: StatisticSet.t option
-        [@ocaml.doc "The statistical values for the metric."];
-      values: Values.t option
-        [@ocaml.doc
-          "Array of numbers representing the values for the metric during the period. Each unique value is listed just once in this array, and the corresponding number in the Counts array specifies the number of times that value occurred during the period. You can include up to 150 unique values in each PutMetricData action that specifies a Values array. Although the Values array accepts numbers of type Double, CloudWatch rejects values that are either too small or too large. Values must be in the range of -2^360 to 2^360. In addition, special values (for example, NaN, +Infinity, -Infinity) are not supported."];
-      counts: Counts.t option
-        [@ocaml.doc
-          "Array of numbers that is used along with the Values array. Each number in the Count array is the number of times the corresponding value in the Values array occurred during the period. If you omit the Counts array, the default of 1 is used as the value for each count. If you include a Counts array, it must include the same amount of values as the Values array."];
-      unit: StandardUnit.t option
-        [@ocaml.doc
-          "When you are using a Put operation, this defines what unit you want to use when storing the metric. In a Get operation, this displays the unit that is used for the metric."];
-      storageResolution: StorageResolution.t option
-        [@ocaml.doc
-          "Valid values are 1 and 60. Setting this to 1 specifies this metric as a high-resolution metric, so that CloudWatch stores the metric with sub-minute resolution down to one second. Setting this to 60 specifies this metric as a regular-resolution metric, which CloudWatch stores at 1-minute resolution. Currently, high resolution is available only for custom metrics. For more information about high-resolution metrics, see High-Resolution Metrics in the Amazon CloudWatch User Guide. This field is optional, if you do not specify it the default of 60 is used."]}
-    let context_ = "MetricDatum"
-    let make ?dimensions =
-      fun ?timestamp ->
-        fun ?value ->
-          fun ?statisticValues ->
-            fun ?values ->
-              fun ?counts ->
-                fun ?unit ->
-                  fun ?storageResolution ->
-                    fun ~metricName ->
-                      fun () ->
-                        {
-                          dimensions;
-                          timestamp;
-                          value;
-                          statisticValues;
-                          values;
-                          counts;
-                          unit;
-                          storageResolution;
-                          metricName
-                        }
+      entity: Entity.t option
+        [@ocaml.doc "The entity associated with the metrics."];
+      metricData: MetricData.t option [@ocaml.doc "The metric data."]}
+    let make ?entity = fun ?metricData -> fun () -> { entity; metricData }
     let to_value x =
       structure_to_value
-        [("MetricName", (Some (MetricName.to_value x.metricName)));
-        ("Dimensions", (Option.map x.dimensions ~f:Dimensions.to_value));
-        ("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
-        ("Value", (Option.map x.value ~f:DatapointValue.to_value));
-        ("StatisticValues",
-          (Option.map x.statisticValues ~f:StatisticSet.to_value));
-        ("Values", (Option.map x.values ~f:Values.to_value));
-        ("Counts", (Option.map x.counts ~f:Counts.to_value));
-        ("Unit", (Option.map x.unit ~f:StandardUnit.to_value));
-        ("StorageResolution",
-          (Option.map x.storageResolution ~f:StorageResolution.to_value))]
+        [("Entity", (Option.map x.entity ~f:Entity.to_value));
+        ("MetricData", (Option.map x.metricData ~f:MetricData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let storageResolution =
-        (Option.map ~f:StorageResolution.of_xml)
-          (Xml.child xml_arg0 "StorageResolution") in
-      let unit =
-        (Option.map ~f:StandardUnit.of_xml) (Xml.child xml_arg0 "Unit") in
-      let counts =
-        (Option.map ~f:Counts.of_xml) (Xml.child xml_arg0 "Counts") in
-      let values =
-        (Option.map ~f:Values.of_xml) (Xml.child xml_arg0 "Values") in
-      let statisticValues =
-        (Option.map ~f:StatisticSet.of_xml)
-          (Xml.child xml_arg0 "StatisticValues") in
-      let value =
-        (Option.map ~f:DatapointValue.of_xml) (Xml.child xml_arg0 "Value") in
-      let timestamp =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
-      let dimensions =
-        (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
-      let metricName =
-        MetricName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
-      make ?storageResolution ?unit ?counts ?values ?statisticValues ?value
-        ?timestamp ?dimensions ~metricName ()
+      let metricData =
+        (Option.map ~f:MetricData.of_xml) (Xml.child xml_arg0 "MetricData") in
+      let entity =
+        (Option.map ~f:Entity.of_xml) (Xml.child xml_arg0 "Entity") in
+      make ?metricData ?entity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let storageResolution =
-        field_map json "StorageResolution" StorageResolution.of_json in
-      let unit = field_map json "Unit" StandardUnit.of_json in
-      let counts = field_map json "Counts" Counts.of_json in
-      let values = field_map json "Values" Values.of_json in
-      let statisticValues =
-        field_map json "StatisticValues" StatisticSet.of_json in
-      let value = field_map json "Value" DatapointValue.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
-      make ?storageResolution ?unit ?counts ?values ?statisticValues ?value
-        ?timestamp ?dimensions ~metricName ()
+    let of_json json__ =
+      let metricData = field_map json__ "MetricData" MetricData.of_json in
+      let entity = field_map json__ "Entity" Entity.of_json in
+      make ?metricData ?entity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Encapsulates the information sent to either create a metric or add new values to be aggregated into an existing metric."]
+       "A set of metrics that are associated with an entity, such as a specific service or resource. Contains the entity and the list of metric data associated with it."]
+module PartialFailure =
+  struct
+    type nonrec t =
+      {
+      failureResource: FailureResource.t option
+        [@ocaml.doc "The specified rule that could not be deleted."];
+      exceptionType: ExceptionType.t option [@ocaml.doc "The type of error."];
+      failureCode: FailureCode.t option [@ocaml.doc "The code of the error."];
+      failureDescription: FailureDescription.t option
+        [@ocaml.doc "A description of the error."]}
+    let make ?failureResource =
+      fun ?exceptionType ->
+        fun ?failureCode ->
+          fun ?failureDescription ->
+            fun () ->
+              {
+                failureResource;
+                exceptionType;
+                failureCode;
+                failureDescription
+              }
+    let to_value x =
+      structure_to_value
+        [("FailureResource",
+           (Option.map x.failureResource ~f:FailureResource.to_value));
+        ("ExceptionType",
+          (Option.map x.exceptionType ~f:ExceptionType.to_value));
+        ("FailureCode", (Option.map x.failureCode ~f:FailureCode.to_value));
+        ("FailureDescription",
+          (Option.map x.failureDescription ~f:FailureDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureDescription =
+        (Option.map ~f:FailureDescription.of_xml)
+          (Xml.child xml_arg0 "FailureDescription") in
+      let failureCode =
+        (Option.map ~f:FailureCode.of_xml) (Xml.child xml_arg0 "FailureCode") in
+      let exceptionType =
+        (Option.map ~f:ExceptionType.of_xml)
+          (Xml.child xml_arg0 "ExceptionType") in
+      let failureResource =
+        (Option.map ~f:FailureResource.of_xml)
+          (Xml.child xml_arg0 "FailureResource") in
+      make ?failureDescription ?failureCode ?exceptionType ?failureResource
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureDescription =
+        field_map json__ "FailureDescription" FailureDescription.of_json in
+      let failureCode = field_map json__ "FailureCode" FailureCode.of_json in
+      let exceptionType =
+        field_map json__ "ExceptionType" ExceptionType.of_json in
+      let failureResource =
+        field_map json__ "FailureResource" FailureResource.of_json in
+      make ?failureDescription ?failureCode ?exceptionType ?failureResource
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This array is empty if the API operation was successful for all the rules specified in the request. If the operation could not process one of the rules, the following data is returned for each of those rules."]
+module ManagedRule =
+  struct
+    type nonrec t =
+      {
+      templateName: TemplateName.t
+        [@ocaml.doc
+          "The template name for the managed Contributor Insights rule, as returned by ListManagedInsightRules."];
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "The ARN of an Amazon Web Services resource that has managed Contributor Insights rules."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of key-value pairs that you can associate with a managed Contributor Insights rule. You can associate as many as 50 tags with a rule. Tags can help you organize and categorize your resources. You also can use them to scope user permissions by granting a user permission to access or change only the resources that have certain tag values. To associate tags with a rule, you must have the cloudwatch:TagResource permission in addition to the cloudwatch:PutInsightRule permission. If you are using this operation to update an existing Contributor Insights rule, any tags that you specify in this parameter are ignored. To change the tags of an existing rule, use TagResource."]}
+    let context_ = "ManagedRule"
+    let make ?tags =
+      fun ~templateName ->
+        fun ~resourceARN -> fun () -> { tags; templateName; resourceARN }
+    let to_value x =
+      structure_to_value
+        [("TemplateName", (Some (TemplateName.to_value x.templateName)));
+        ("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      let templateName =
+        TemplateName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
+      make ?tags ~resourceARN ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      let templateName =
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
+      make ?tags ~resourceARN ~templateName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the information that's required to enable a managed Contributor Insights rule for an Amazon Web Services resource."]
 module DashboardErrorMessage =
   struct
     type nonrec t = string
@@ -2389,6 +3447,9 @@ module DashboardValidationMessages =
   struct
     type nonrec t = DashboardValidationMessage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DashboardValidationMessage.to_value)) |>
         (fun x -> `List x)
@@ -2411,6 +3472,75 @@ module DashboardValidationMessages =
         ~of_json:DashboardValidationMessage.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MuteTargetAlarmNameList =
+  struct
+    type nonrec t = Name.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Name.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Name.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MuteTargetAlarmNameList" ~of_json:Name.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Schedule =
+  struct
+    type nonrec t =
+      {
+      expression: Expression.t
+        [@ocaml.doc
+          "The schedule expression that defines when the mute rule activates. The expression must be between 1 and 256 characters in length. You can use one of two expression formats: Cron expressions - For recurring mute windows. Format: cron(Minutes Hours Day-of-month Month Day-of-week) Examples: cron(0 2 * * *) - Activates daily at 2:00 AM cron(0 2 * * SUN) - Activates every Sunday at 2:00 AM for weekly system maintenance cron(0 1 1 * *) - Activates on the first day of each month at 1:00 AM for monthly database maintenance cron(0 18 * * FRI) - Activates every Friday at 6:00 PM cron(0 23 * * *) - Activates every day at 11:00 PM during nightly backup operations The characters *, -, and , are supported in all fields. English names can be used for the month (JAN-DEC) and day of week (SUN-SAT) fields. At expressions - For one-time mute windows. Format: at(yyyy-MM-ddThh:mm) Examples: at(2024-05-10T14:00) - Activates once on May 10, 2024 at 2:00 PM during an active incident response session at(2024-12-23T00:00) - Activates once on December 23, 2024 at midnight during annual company shutdown"];
+      duration: Duration.t
+        [@ocaml.doc
+          "The length of time that alarms remain muted when the schedule activates. The duration must be between 1 and 50 characters in length. Specify the duration using ISO 8601 duration format with a minimum of 1 minute (PT1M) and maximum of 15 days (P15D). Examples: PT4H - 4 hours for weekly system maintenance P2DT12H - 2 days and 12 hours for weekend muting from Friday 6:00 PM to Monday 6:00 AM PT6H - 6 hours for monthly database maintenance PT2H - 2 hours for nightly backup operations P7D - 7 days for annual company shutdown The duration begins when the schedule expression time is reached. For recurring schedules, the duration applies to each occurrence."];
+      timezone: Timezone.t option
+        [@ocaml.doc
+          "The time zone to use when evaluating the schedule expression. The time zone must be between 1 and 50 characters in length. Specify the time zone using standard timezone identifiers (for example, America/New_York, Europe/London, or Asia/Tokyo). If you don't specify a time zone, UTC is used by default. The time zone affects how cron and at expressions are interpreted, as well as start and expire dates you specify Examples: America/New_York - Eastern Time (US) America/Los_Angeles - Pacific Time (US) Europe/London - British Time Asia/Tokyo - Japan Standard Time UTC - Coordinated Universal Time"]}
+    let context_ = "Schedule"
+    let make ?timezone =
+      fun ~expression ->
+        fun ~duration -> fun () -> { timezone; expression; duration }
+    let to_value x =
+      structure_to_value
+        [("Expression", (Some (Expression.to_value x.expression)));
+        ("Duration", (Some (Duration.to_value x.duration)));
+        ("Timezone", (Option.map x.timezone ~f:Timezone.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timezone =
+        (Option.map ~f:Timezone.of_xml) (Xml.child xml_arg0 "Timezone") in
+      let duration =
+        Duration.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Duration") in
+      let expression =
+        Expression.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
+      make ?timezone ~duration ~expression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timezone = field_map json__ "Timezone" Timezone.of_json in
+      let duration = field_map_exn json__ "Duration" Duration.of_json in
+      let expression = field_map_exn json__ "Expression" Expression.of_json in
+      make ?timezone ~duration ~expression ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies when and how long an alarm mute rule is active. The schedule uses either a cron expression for recurring mute windows or an at expression for one-time mute windows. When the schedule activates, the mute rule mutes alarm actions for the specified duration."]
 module DimensionFilter =
   struct
     type nonrec t =
@@ -2433,30 +3563,12 @@ module DimensionFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" DimensionValue.of_json in
-      let name = field_map_exn json "Name" DimensionName.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" DimensionValue.of_json in
+      let name = field_map_exn json__ "Name" DimensionName.of_json in
       make ?value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents filters for a dimension."]
-module ErrorMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ErrorMessage"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
 module MetricStreamEntry =
   struct
     type nonrec t =
@@ -2479,7 +3591,7 @@ module MetricStreamEntry =
           "The current state of this stream. Valid values are running and stopped."];
       outputFormat: MetricStreamOutputFormat.t option
         [@ocaml.doc
-          "The output format of this metric stream. Valid values are json and opentelemetry0.7."]}
+          "The output format of this metric stream. Valid values are json, opentelemetry1.0, and opentelemetry0.7."]}
     let make ?arn =
       fun ?creationDate ->
         fun ?lastUpdateDate ->
@@ -2531,21 +3643,67 @@ module MetricStreamEntry =
       make ?outputFormat ?state ?firehoseArn ?name ?lastUpdateDate
         ?creationDate ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputFormat =
-        field_map json "OutputFormat" MetricStreamOutputFormat.of_json in
-      let state = field_map json "State" MetricStreamState.of_json in
+        field_map json__ "OutputFormat" MetricStreamOutputFormat.of_json in
+      let state = field_map json__ "State" MetricStreamState.of_json in
       let firehoseArn =
-        field_map json "FirehoseArn" AmazonResourceName.of_json in
-      let name = field_map json "Name" MetricStreamName.of_json in
-      let lastUpdateDate = field_map json "LastUpdateDate" Timestamp.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let arn = field_map json "Arn" AmazonResourceName.of_json in
+        field_map json__ "FirehoseArn" AmazonResourceName.of_json in
+      let name = field_map json__ "Name" MetricStreamName.of_json in
+      let lastUpdateDate =
+        field_map json__ "LastUpdateDate" Timestamp.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
       make ?outputFormat ?state ?firehoseArn ?name ?lastUpdateDate
         ?creationDate ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains the configuration information about one metric stream."]
+module ManagedRuleDescription =
+  struct
+    type nonrec t =
+      {
+      templateName: TemplateName.t option
+        [@ocaml.doc
+          "The template name for the managed rule. Used to enable managed rules using PutManagedInsightRules."];
+      resourceARN: AmazonResourceName.t option
+        [@ocaml.doc
+          "If a managed rule is enabled, this is the ARN for the related Amazon Web Services resource."];
+      ruleState: ManagedRuleState.t option
+        [@ocaml.doc
+          "Describes the state of a managed rule. If present, it contains information about the Contributor Insights rule that contains information about the related Amazon Web Services resource."]}
+    let make ?templateName =
+      fun ?resourceARN ->
+        fun ?ruleState -> fun () -> { templateName; resourceARN; ruleState }
+    let to_value x =
+      structure_to_value
+        [("TemplateName",
+           (Option.map x.templateName ~f:TemplateName.to_value));
+        ("ResourceARN",
+          (Option.map x.resourceARN ~f:AmazonResourceName.to_value));
+        ("RuleState", (Option.map x.ruleState ~f:ManagedRuleState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ruleState =
+        (Option.map ~f:ManagedRuleState.of_xml)
+          (Xml.child xml_arg0 "RuleState") in
+      let resourceARN =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceARN") in
+      let templateName =
+        (Option.map ~f:TemplateName.of_xml)
+          (Xml.child xml_arg0 "TemplateName") in
+      make ?ruleState ?resourceARN ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ruleState = field_map json__ "RuleState" ManagedRuleState.of_json in
+      let resourceARN =
+        field_map json__ "ResourceARN" AmazonResourceName.of_json in
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
+      make ?ruleState ?resourceARN ?templateName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about managed Contributor Insights rules, as returned by ListManagedInsightRules."]
 module DashboardEntry =
   struct
     type nonrec t =
@@ -2586,15 +3744,83 @@ module DashboardEntry =
           (Xml.child xml_arg0 "DashboardName") in
       make ?size ?lastModified ?dashboardArn ?dashboardName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let size = field_map json "Size" Size.of_json in
-      let lastModified = field_map json "LastModified" LastModified.of_json in
-      let dashboardArn = field_map json "DashboardArn" DashboardArn.of_json in
+    let of_json json__ =
+      let size = field_map json__ "Size" Size.of_json in
+      let lastModified = field_map json__ "LastModified" LastModified.of_json in
+      let dashboardArn = field_map json__ "DashboardArn" DashboardArn.of_json in
       let dashboardName =
-        field_map json "DashboardName" DashboardName.of_json in
+        field_map json__ "DashboardName" DashboardName.of_json in
       make ?size ?lastModified ?dashboardArn ?dashboardName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a specific dashboard."]
+module AlarmMuteRuleSummary =
+  struct
+    type nonrec t =
+      {
+      alarmMuteRuleArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the alarm mute rule."];
+      expireDate: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the mute rule expires and is no longer evaluated. This field is only present if an expiration date was configured."];
+      status: AlarmMuteRuleStatus.t option
+        [@ocaml.doc
+          "The current status of the alarm mute rule. Valid values are SCHEDULED, ACTIVE, or EXPIRED."];
+      muteType: MuteType.t option
+        [@ocaml.doc
+          "Indicates whether the mute rule is one-time or recurring. Valid values are ONE_TIME or RECURRING."];
+      lastUpdatedTimestamp: Timestamp.t option
+        [@ocaml.doc "The date and time when the mute rule was last updated."]}
+    let make ?alarmMuteRuleArn =
+      fun ?expireDate ->
+        fun ?status ->
+          fun ?muteType ->
+            fun ?lastUpdatedTimestamp ->
+              fun () ->
+                {
+                  alarmMuteRuleArn;
+                  expireDate;
+                  status;
+                  muteType;
+                  lastUpdatedTimestamp
+                }
+    let to_value x =
+      structure_to_value
+        [("AlarmMuteRuleArn",
+           (Option.map x.alarmMuteRuleArn ~f:Arn.to_value));
+        ("ExpireDate", (Option.map x.expireDate ~f:Timestamp.to_value));
+        ("Status", (Option.map x.status ~f:AlarmMuteRuleStatus.to_value));
+        ("MuteType", (Option.map x.muteType ~f:MuteType.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let muteType =
+        (Option.map ~f:MuteType.of_xml) (Xml.child xml_arg0 "MuteType") in
+      let status =
+        (Option.map ~f:AlarmMuteRuleStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let expireDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ExpireDate") in
+      let alarmMuteRuleArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AlarmMuteRuleArn") in
+      make ?lastUpdatedTimestamp ?muteType ?status ?expireDate
+        ?alarmMuteRuleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
+      let muteType = field_map json__ "MuteType" MuteType.of_json in
+      let status = field_map json__ "Status" AlarmMuteRuleStatus.of_json in
+      let expireDate = field_map json__ "ExpireDate" Timestamp.of_json in
+      let alarmMuteRuleArn = field_map json__ "AlarmMuteRuleArn" Arn.of_json in
+      make ?lastUpdatedTimestamp ?muteType ?status ?expireDate
+        ?alarmMuteRuleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary information about an alarm mute rule, including its name, status, and configuration details."]
 module Datapoint =
   struct
     type nonrec t =
@@ -2671,16 +3897,16 @@ module Datapoint =
       make ?extendedStatistics ?unit ?maximum ?minimum ?sum ?average
         ?sampleCount ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let extendedStatistics =
-        field_map json "ExtendedStatistics" DatapointValueMap.of_json in
-      let unit = field_map json "Unit" StandardUnit.of_json in
-      let maximum = field_map json "Maximum" DatapointValue.of_json in
-      let minimum = field_map json "Minimum" DatapointValue.of_json in
-      let sum = field_map json "Sum" DatapointValue.of_json in
-      let average = field_map json "Average" DatapointValue.of_json in
-      let sampleCount = field_map json "SampleCount" DatapointValue.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+        field_map json__ "ExtendedStatistics" DatapointValueMap.of_json in
+      let unit = field_map json__ "Unit" StandardUnit.of_json in
+      let maximum = field_map json__ "Maximum" DatapointValue.of_json in
+      let minimum = field_map json__ "Minimum" DatapointValue.of_json in
+      let sum = field_map json__ "Sum" DatapointValue.of_json in
+      let average = field_map json__ "Average" DatapointValue.of_json in
+      let sampleCount = field_map json__ "SampleCount" DatapointValue.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?extendedStatistics ?unit ?maximum ?minimum ?sum ?average
         ?sampleCount ?timestamp ()
     let to_json v = composed_to_json to_value v
@@ -2739,14 +3965,14 @@ module MetricDataResult =
       let id = (Option.map ~f:MetricId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?messages ?statusCode ?values ?timestamps ?label ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let messages =
-        field_map json "Messages" MetricDataResultMessages.of_json in
-      let statusCode = field_map json "StatusCode" StatusCode.of_json in
-      let values = field_map json "Values" DatapointValues.of_json in
-      let timestamps = field_map json "Timestamps" Timestamps.of_json in
-      let label = field_map json "Label" MetricLabel.of_json in
-      let id = field_map json "Id" MetricId.of_json in
+        field_map json__ "Messages" MetricDataResultMessages.of_json in
+      let statusCode = field_map json__ "StatusCode" StatusCode.of_json in
+      let values = field_map json__ "Values" DatapointValues.of_json in
+      let timestamps = field_map json__ "Timestamps" Timestamps.of_json in
+      let label = field_map json__ "Label" MetricLabel.of_json in
+      let id = field_map json__ "Id" MetricId.of_json in
       make ?messages ?statusCode ?values ?timestamps ?label ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2781,51 +4007,50 @@ module InsightRuleContributor =
   struct
     type nonrec t =
       {
-      keys: InsightRuleContributorKeys.t
+      keys: InsightRuleContributorKeys.t option
         [@ocaml.doc
           "One of the log entry field keywords that is used to define contributors for this rule."];
-      approximateAggregateValue: InsightRuleUnboundDouble.t
+      approximateAggregateValue: InsightRuleUnboundDouble.t option
         [@ocaml.doc
           "An approximation of the aggregate value that comes from this contributor."];
-      datapoints: InsightRuleContributorDatapoints.t
+      datapoints: InsightRuleContributorDatapoints.t option
         [@ocaml.doc
           "An array of the data points where this contributor is present. Only the data points when this contributor appeared are included in the array."]}
-    let context_ = "InsightRuleContributor"
-    let make ~keys =
-      fun ~approximateAggregateValue ->
-        fun ~datapoints ->
+    let make ?keys =
+      fun ?approximateAggregateValue ->
+        fun ?datapoints ->
           fun () -> { keys; approximateAggregateValue; datapoints }
     let to_value x =
       structure_to_value
-        [("Keys", (Some (InsightRuleContributorKeys.to_value x.keys)));
+        [("Keys", (Option.map x.keys ~f:InsightRuleContributorKeys.to_value));
         ("ApproximateAggregateValue",
-          (Some
-             (InsightRuleUnboundDouble.to_value x.approximateAggregateValue)));
+          (Option.map x.approximateAggregateValue
+             ~f:InsightRuleUnboundDouble.to_value));
         ("Datapoints",
-          (Some (InsightRuleContributorDatapoints.to_value x.datapoints)))]
+          (Option.map x.datapoints
+             ~f:InsightRuleContributorDatapoints.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let datapoints =
-        InsightRuleContributorDatapoints.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Datapoints") in
+        (Option.map ~f:InsightRuleContributorDatapoints.of_xml)
+          (Xml.child xml_arg0 "Datapoints") in
       let approximateAggregateValue =
-        InsightRuleUnboundDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ApproximateAggregateValue") in
+        (Option.map ~f:InsightRuleUnboundDouble.of_xml)
+          (Xml.child xml_arg0 "ApproximateAggregateValue") in
       let keys =
-        InsightRuleContributorKeys.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Keys") in
-      make ~datapoints ~approximateAggregateValue ~keys ()
+        (Option.map ~f:InsightRuleContributorKeys.of_xml)
+          (Xml.child xml_arg0 "Keys") in
+      make ?datapoints ?approximateAggregateValue ?keys ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datapoints =
-        field_map_exn json "Datapoints"
+        field_map json__ "Datapoints"
           InsightRuleContributorDatapoints.of_json in
       let approximateAggregateValue =
-        field_map_exn json "ApproximateAggregateValue"
+        field_map json__ "ApproximateAggregateValue"
           InsightRuleUnboundDouble.of_json in
-      let keys = field_map_exn json "Keys" InsightRuleContributorKeys.of_json in
-      make ~datapoints ~approximateAggregateValue ~keys ()
+      let keys = field_map json__ "Keys" InsightRuleContributorKeys.of_json in
+      make ?datapoints ?approximateAggregateValue ?keys ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "One of the unique contributors found by a Contributor Insights rule. If the rule contains multiple keys, then a unique contributor is a unique combination of values from all the keys in the rule. If the rule contains a single key, then each unique contributor is each unique value for this key. For more information, see GetInsightRuleReport."]
@@ -2833,7 +4058,8 @@ module InsightRuleMetricDatapoint =
   struct
     type nonrec t =
       {
-      timestamp: Timestamp.t [@ocaml.doc "The timestamp of the data point."];
+      timestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp of the data point."];
       uniqueContributors: InsightRuleUnboundDouble.t option
         [@ocaml.doc
           "The number of unique contributors who published data during this timestamp. This statistic is returned only if you included it in the Metrics array in your request."];
@@ -2855,29 +4081,28 @@ module InsightRuleMetricDatapoint =
       maximum: InsightRuleUnboundDouble.t option
         [@ocaml.doc
           "The maximum value from a single occurence from a single contributor during the time period represented by that data point. This statistic is returned only if you included it in the Metrics array in your request."]}
-    let context_ = "InsightRuleMetricDatapoint"
-    let make ?uniqueContributors =
-      fun ?maxContributorValue ->
-        fun ?sampleCount ->
-          fun ?average ->
-            fun ?sum ->
-              fun ?minimum ->
-                fun ?maximum ->
-                  fun ~timestamp ->
+    let make ?timestamp =
+      fun ?uniqueContributors ->
+        fun ?maxContributorValue ->
+          fun ?sampleCount ->
+            fun ?average ->
+              fun ?sum ->
+                fun ?minimum ->
+                  fun ?maximum ->
                     fun () ->
                       {
+                        timestamp;
                         uniqueContributors;
                         maxContributorValue;
                         sampleCount;
                         average;
                         sum;
                         minimum;
-                        maximum;
-                        timestamp
+                        maximum
                       }
     let to_value x =
       structure_to_value
-        [("Timestamp", (Some (Timestamp.to_value x.timestamp)));
+        [("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
         ("UniqueContributors",
           (Option.map x.uniqueContributors
              ~f:InsightRuleUnboundDouble.to_value));
@@ -2917,25 +4142,29 @@ module InsightRuleMetricDatapoint =
         (Option.map ~f:InsightRuleUnboundDouble.of_xml)
           (Xml.child xml_arg0 "UniqueContributors") in
       let timestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?maximum ?minimum ?sum ?average ?sampleCount ?maxContributorValue
-        ?uniqueContributors ~timestamp ()
+        ?uniqueContributors ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maximum = field_map json "Maximum" InsightRuleUnboundDouble.of_json in
-      let minimum = field_map json "Minimum" InsightRuleUnboundDouble.of_json in
-      let sum = field_map json "Sum" InsightRuleUnboundDouble.of_json in
-      let average = field_map json "Average" InsightRuleUnboundDouble.of_json in
+    let of_json json__ =
+      let maximum =
+        field_map json__ "Maximum" InsightRuleUnboundDouble.of_json in
+      let minimum =
+        field_map json__ "Minimum" InsightRuleUnboundDouble.of_json in
+      let sum = field_map json__ "Sum" InsightRuleUnboundDouble.of_json in
+      let average =
+        field_map json__ "Average" InsightRuleUnboundDouble.of_json in
       let sampleCount =
-        field_map json "SampleCount" InsightRuleUnboundDouble.of_json in
+        field_map json__ "SampleCount" InsightRuleUnboundDouble.of_json in
       let maxContributorValue =
-        field_map json "MaxContributorValue" InsightRuleUnboundDouble.of_json in
+        field_map json__ "MaxContributorValue"
+          InsightRuleUnboundDouble.of_json in
       let uniqueContributors =
-        field_map json "UniqueContributors" InsightRuleUnboundDouble.of_json in
-      let timestamp = field_map_exn json "Timestamp" Timestamp.of_json in
+        field_map json__ "UniqueContributors"
+          InsightRuleUnboundDouble.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?maximum ?minimum ?sum ?average ?sampleCount ?maxContributorValue
-        ?uniqueContributors ~timestamp ()
+        ?uniqueContributors ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "One data point from the metric time series returned in a Contributor Insights rule report. For more information, see GetInsightRuleReport."]
@@ -2959,112 +4188,86 @@ module InsightRuleMetricName =
     let of_json j = string_of_json ~kind:"InsightRuleMetricName" j
     let to_json = simple_to_json to_value
   end
-module PartialFailure =
-  struct
-    type nonrec t =
-      {
-      failureResource: FailureResource.t option
-        [@ocaml.doc "The specified rule that could not be deleted."];
-      exceptionType: ExceptionType.t option [@ocaml.doc "The type of error."];
-      failureCode: FailureCode.t option [@ocaml.doc "The code of the error."];
-      failureDescription: FailureDescription.t option
-        [@ocaml.doc "A description of the error."]}
-    let make ?failureResource =
-      fun ?exceptionType ->
-        fun ?failureCode ->
-          fun ?failureDescription ->
-            fun () ->
-              {
-                failureResource;
-                exceptionType;
-                failureCode;
-                failureDescription
-              }
-    let to_value x =
-      structure_to_value
-        [("FailureResource",
-           (Option.map x.failureResource ~f:FailureResource.to_value));
-        ("ExceptionType",
-          (Option.map x.exceptionType ~f:ExceptionType.to_value));
-        ("FailureCode", (Option.map x.failureCode ~f:FailureCode.to_value));
-        ("FailureDescription",
-          (Option.map x.failureDescription ~f:FailureDescription.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let failureDescription =
-        (Option.map ~f:FailureDescription.of_xml)
-          (Xml.child xml_arg0 "FailureDescription") in
-      let failureCode =
-        (Option.map ~f:FailureCode.of_xml) (Xml.child xml_arg0 "FailureCode") in
-      let exceptionType =
-        (Option.map ~f:ExceptionType.of_xml)
-          (Xml.child xml_arg0 "ExceptionType") in
-      let failureResource =
-        (Option.map ~f:FailureResource.of_xml)
-          (Xml.child xml_arg0 "FailureResource") in
-      make ?failureDescription ?failureCode ?exceptionType ?failureResource
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failureDescription =
-        field_map json "FailureDescription" FailureDescription.of_json in
-      let failureCode = field_map json "FailureCode" FailureCode.of_json in
-      let exceptionType =
-        field_map json "ExceptionType" ExceptionType.of_json in
-      let failureResource =
-        field_map json "FailureResource" FailureResource.of_json in
-      make ?failureDescription ?failureCode ?exceptionType ?failureResource
-        ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "This array is empty if the API operation was successful for all the rules specified in the request. If the operation could not process one of the rules, the following data is returned for each of those rules."]
 module InsightRule =
   struct
     type nonrec t =
       {
-      name: InsightRuleName.t [@ocaml.doc "The name of the rule."];
-      state: InsightRuleState.t
+      name: InsightRuleName.t option [@ocaml.doc "The name of the rule."];
+      state: InsightRuleState.t option
         [@ocaml.doc "Indicates whether the rule is enabled or disabled."];
-      schema: InsightRuleSchema.t
+      schema: InsightRuleSchema.t option
         [@ocaml.doc
           "For rules that you create, this is always \\{\"Name\": \"CloudWatchLogRule\", \"Version\": 1\\}. For managed rules, this is \\{\"Name\": \"ServiceLogRule\", \"Version\": 1\\}"];
-      definition: InsightRuleDefinition.t
+      definition: InsightRuleDefinition.t option
         [@ocaml.doc
-          "The definition of the rule, as a JSON object. The definition contains the keywords used to define contributors, the value to aggregate on if this rule returns a sum instead of a count, and the filters. For details on the valid syntax, see Contributor Insights Rule Syntax."]}
-    let context_ = "InsightRule"
-    let make ~name =
-      fun ~state ->
-        fun ~schema ->
-          fun ~definition -> fun () -> { name; state; schema; definition }
+          "The definition of the rule, as a JSON object. The definition contains the keywords used to define contributors, the value to aggregate on if this rule returns a sum instead of a count, and the filters. For details on the valid syntax, see Contributor Insights Rule Syntax."];
+      managedRule: InsightRuleIsManaged.t option
+        [@ocaml.doc
+          "An optional built-in rule that Amazon Web Services manages."];
+      applyOnTransformedLogs: InsightRuleOnTransformedLogs.t option
+        [@ocaml.doc
+          "Displays whether the rule is evaluated on the transformed versions of logs, for log groups that have Log transformation enabled. If this is false, log events are evaluated before they are transformed."]}
+    let make ?name =
+      fun ?state ->
+        fun ?schema ->
+          fun ?definition ->
+            fun ?managedRule ->
+              fun ?applyOnTransformedLogs ->
+                fun () ->
+                  {
+                    name;
+                    state;
+                    schema;
+                    definition;
+                    managedRule;
+                    applyOnTransformedLogs
+                  }
     let to_value x =
       structure_to_value
-        [("Name", (Some (InsightRuleName.to_value x.name)));
-        ("State", (Some (InsightRuleState.to_value x.state)));
-        ("Schema", (Some (InsightRuleSchema.to_value x.schema)));
-        ("Definition", (Some (InsightRuleDefinition.to_value x.definition)))]
+        [("Name", (Option.map x.name ~f:InsightRuleName.to_value));
+        ("State", (Option.map x.state ~f:InsightRuleState.to_value));
+        ("Schema", (Option.map x.schema ~f:InsightRuleSchema.to_value));
+        ("Definition",
+          (Option.map x.definition ~f:InsightRuleDefinition.to_value));
+        ("ManagedRule",
+          (Option.map x.managedRule ~f:InsightRuleIsManaged.to_value));
+        ("ApplyOnTransformedLogs",
+          (Option.map x.applyOnTransformedLogs
+             ~f:InsightRuleOnTransformedLogs.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applyOnTransformedLogs =
+        (Option.map ~f:InsightRuleOnTransformedLogs.of_xml)
+          (Xml.child xml_arg0 "ApplyOnTransformedLogs") in
+      let managedRule =
+        (Option.map ~f:InsightRuleIsManaged.of_xml)
+          (Xml.child xml_arg0 "ManagedRule") in
       let definition =
-        InsightRuleDefinition.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Definition") in
+        (Option.map ~f:InsightRuleDefinition.of_xml)
+          (Xml.child xml_arg0 "Definition") in
       let schema =
-        InsightRuleSchema.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Schema") in
+        (Option.map ~f:InsightRuleSchema.of_xml)
+          (Xml.child xml_arg0 "Schema") in
       let state =
-        InsightRuleState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:InsightRuleState.of_xml) (Xml.child xml_arg0 "State") in
       let name =
-        InsightRuleName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~definition ~schema ~state ~name ()
+        (Option.map ~f:InsightRuleName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?applyOnTransformedLogs ?managedRule ?definition ?schema ?state
+        ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let applyOnTransformedLogs =
+        field_map json__ "ApplyOnTransformedLogs"
+          InsightRuleOnTransformedLogs.of_json in
+      let managedRule =
+        field_map json__ "ManagedRule" InsightRuleIsManaged.of_json in
       let definition =
-        field_map_exn json "Definition" InsightRuleDefinition.of_json in
-      let schema = field_map_exn json "Schema" InsightRuleSchema.of_json in
-      let state = field_map_exn json "State" InsightRuleState.of_json in
-      let name = field_map_exn json "Name" InsightRuleName.of_json in
-      make ~definition ~schema ~state ~name ()
+        field_map json__ "Definition" InsightRuleDefinition.of_json in
+      let schema = field_map json__ "Schema" InsightRuleSchema.of_json in
+      let state = field_map json__ "State" InsightRuleState.of_json in
+      let name = field_map json__ "Name" InsightRuleName.of_json in
+      make ?applyOnTransformedLogs ?managedRule ?definition ?schema ?state
+        ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains the definition for a Contributor Insights rule. For more information about this rule, see Using Constributor Insights to analyze high-cardinality data in the Amazon CloudWatch User Guide."]
@@ -3088,8 +4291,10 @@ module AnomalyDetector =
         [@ocaml.doc
           "The configuration specifies details about how the anomaly detection model is to be trained, including time ranges to exclude from use for training the model, and the time zone to use for the metric."];
       stateValue: AnomalyDetectorStateValue.t option
+        [@ocaml.doc "The current status of the anomaly detector's training."];
+      metricCharacteristics: MetricCharacteristics.t option
         [@ocaml.doc
-          "The current status of the anomaly detector's training. The possible values are TRAINED | PENDING_TRAINING | TRAINED_INSUFFICIENT_DATA"];
+          "This object includes parameters that you can use to provide information about your metric to CloudWatch to help it build more accurate anomaly detection models. Currently, it includes the PeriodicSpikes parameter."];
       singleMetricAnomalyDetector: SingleMetricAnomalyDetector.t option
         [@ocaml.doc
           "The CloudWatch metric and statistic for this anomaly detector."];
@@ -3102,19 +4307,21 @@ module AnomalyDetector =
           fun ?stat ->
             fun ?configuration ->
               fun ?stateValue ->
-                fun ?singleMetricAnomalyDetector ->
-                  fun ?metricMathAnomalyDetector ->
-                    fun () ->
-                      {
-                        namespace;
-                        metricName;
-                        dimensions;
-                        stat;
-                        configuration;
-                        stateValue;
-                        singleMetricAnomalyDetector;
-                        metricMathAnomalyDetector
-                      }
+                fun ?metricCharacteristics ->
+                  fun ?singleMetricAnomalyDetector ->
+                    fun ?metricMathAnomalyDetector ->
+                      fun () ->
+                        {
+                          namespace;
+                          metricName;
+                          dimensions;
+                          stat;
+                          configuration;
+                          stateValue;
+                          metricCharacteristics;
+                          singleMetricAnomalyDetector;
+                          metricMathAnomalyDetector
+                        }
     let to_value x =
       structure_to_value
         [("Namespace", (Option.map x.namespace ~f:Namespace.to_value));
@@ -3126,6 +4333,9 @@ module AnomalyDetector =
              ~f:AnomalyDetectorConfiguration.to_value));
         ("StateValue",
           (Option.map x.stateValue ~f:AnomalyDetectorStateValue.to_value));
+        ("MetricCharacteristics",
+          (Option.map x.metricCharacteristics
+             ~f:MetricCharacteristics.to_value));
         ("SingleMetricAnomalyDetector",
           (Option.map x.singleMetricAnomalyDetector
              ~f:SingleMetricAnomalyDetector.to_value));
@@ -3140,6 +4350,9 @@ module AnomalyDetector =
       let singleMetricAnomalyDetector =
         (Option.map ~f:SingleMetricAnomalyDetector.of_xml)
           (Xml.child xml_arg0 "SingleMetricAnomalyDetector") in
+      let metricCharacteristics =
+        (Option.map ~f:MetricCharacteristics.of_xml)
+          (Xml.child xml_arg0 "MetricCharacteristics") in
       let stateValue =
         (Option.map ~f:AnomalyDetectorStateValue.of_xml)
           (Xml.child xml_arg0 "StateValue") in
@@ -3156,30 +4369,33 @@ module AnomalyDetector =
       let namespace =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?metricMathAnomalyDetector ?singleMetricAnomalyDetector
-        ?stateValue ?configuration ?stat ?dimensions ?metricName ?namespace
-        ()
+        ?metricCharacteristics ?stateValue ?configuration ?stat ?dimensions
+        ?metricName ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricMathAnomalyDetector =
-        field_map json "MetricMathAnomalyDetector"
+        field_map json__ "MetricMathAnomalyDetector"
           MetricMathAnomalyDetector.of_json in
       let singleMetricAnomalyDetector =
-        field_map json "SingleMetricAnomalyDetector"
+        field_map json__ "SingleMetricAnomalyDetector"
           SingleMetricAnomalyDetector.of_json in
+      let metricCharacteristics =
+        field_map json__ "MetricCharacteristics"
+          MetricCharacteristics.of_json in
       let stateValue =
-        field_map json "StateValue" AnomalyDetectorStateValue.of_json in
+        field_map json__ "StateValue" AnomalyDetectorStateValue.of_json in
       let configuration =
-        field_map json "Configuration" AnomalyDetectorConfiguration.of_json in
-      let stat = field_map json "Stat" AnomalyDetectorMetricStat.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
-      let namespace = field_map json "Namespace" Namespace.of_json in
+        field_map json__ "Configuration" AnomalyDetectorConfiguration.of_json in
+      let stat = field_map json__ "Stat" AnomalyDetectorMetricStat.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
       make ?metricMathAnomalyDetector ?singleMetricAnomalyDetector
-        ?stateValue ?configuration ?stat ?dimensions ?metricName ?namespace
-        ()
+        ?metricCharacteristics ?stateValue ?configuration ?stat ?dimensions
+        ?metricName ?namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An anomaly detection model associated with a particular CloudWatch metric, statistic, or metric math expression. You can use the model to display a band of expected, normal values when the metric is graphed."]
+       "An anomaly detection model associated with a particular CloudWatch metric, statistic, or metric math expression. You can use the model to display a band of expected, normal values when the metric is graphed. If you have enabled unified cross-account observability, and this account is a monitoring account, the metric can be in the same account or a source account."]
 module AnomalyDetectorType =
   struct
     type nonrec t =
@@ -3238,9 +4454,27 @@ module CompositeAlarm =
       stateReasonData: StateReasonData.t option
         [@ocaml.doc "An explanation for the alarm state, in JSON format."];
       stateUpdatedTimestamp: Timestamp.t option
-        [@ocaml.doc "The time stamp of the last update to the alarm state."];
+        [@ocaml.doc
+          "Tracks the timestamp of any state update, even if StateValue doesn't change."];
       stateValue: StateValue.t option
-        [@ocaml.doc "The state value for the alarm."]}
+        [@ocaml.doc "The state value for the alarm."];
+      stateTransitionedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of the last change to the alarm's StateValue."];
+      actionsSuppressedBy: ActionsSuppressedBy.t option
+        [@ocaml.doc
+          "When the value is ALARM, it means that the actions are suppressed because the suppressor alarm is in ALARM When the value is WaitPeriod, it means that the actions are suppressed because the composite alarm is waiting for the suppressor alarm to go into into the ALARM state. The maximum waiting time is as specified in ActionsSuppressorWaitPeriod. After this time, the composite alarm performs its actions. When the value is ExtensionPeriod, it means that the actions are suppressed because the composite alarm is waiting after the suppressor alarm went out of the ALARM state. The maximum waiting time is as specified in ActionsSuppressorExtensionPeriod. After this time, the composite alarm performs its actions."];
+      actionsSuppressedReason: ActionsSuppressedReason.t option
+        [@ocaml.doc "Captures the reason for action suppression."];
+      actionsSuppressor: AlarmArn.t option
+        [@ocaml.doc
+          "Actions will be suppressed if the suppressor alarm is in the ALARM state. ActionsSuppressor can be an AlarmName or an Amazon Resource Name (ARN) from an existing alarm."];
+      actionsSuppressorWaitPeriod: SuppressorPeriod.t option
+        [@ocaml.doc
+          "The maximum time in seconds that the composite alarm waits for the suppressor alarm to go into the ALARM state. After this time, the composite alarm performs its actions. WaitPeriod is required only when ActionsSuppressor is specified."];
+      actionsSuppressorExtensionPeriod: SuppressorPeriod.t option
+        [@ocaml.doc
+          "The maximum time in seconds that the composite alarm waits after suppressor alarm goes out of the ALARM state. After this time, the composite alarm performs its actions. ExtensionPeriod is required only when ActionsSuppressor is specified."]}
     let make ?actionsEnabled =
       fun ?alarmActions ->
         fun ?alarmArn ->
@@ -3254,22 +4488,35 @@ module CompositeAlarm =
                         fun ?stateReasonData ->
                           fun ?stateUpdatedTimestamp ->
                             fun ?stateValue ->
-                              fun () ->
-                                {
-                                  actionsEnabled;
-                                  alarmActions;
-                                  alarmArn;
-                                  alarmConfigurationUpdatedTimestamp;
-                                  alarmDescription;
-                                  alarmName;
-                                  alarmRule;
-                                  insufficientDataActions;
-                                  oKActions;
-                                  stateReason;
-                                  stateReasonData;
-                                  stateUpdatedTimestamp;
-                                  stateValue
-                                }
+                              fun ?stateTransitionedTimestamp ->
+                                fun ?actionsSuppressedBy ->
+                                  fun ?actionsSuppressedReason ->
+                                    fun ?actionsSuppressor ->
+                                      fun ?actionsSuppressorWaitPeriod ->
+                                        fun ?actionsSuppressorExtensionPeriod
+                                          ->
+                                          fun () ->
+                                            {
+                                              actionsEnabled;
+                                              alarmActions;
+                                              alarmArn;
+                                              alarmConfigurationUpdatedTimestamp;
+                                              alarmDescription;
+                                              alarmName;
+                                              alarmRule;
+                                              insufficientDataActions;
+                                              oKActions;
+                                              stateReason;
+                                              stateReasonData;
+                                              stateUpdatedTimestamp;
+                                              stateValue;
+                                              stateTransitionedTimestamp;
+                                              actionsSuppressedBy;
+                                              actionsSuppressedReason;
+                                              actionsSuppressor;
+                                              actionsSuppressorWaitPeriod;
+                                              actionsSuppressorExtensionPeriod
+                                            }
     let to_value x =
       structure_to_value
         [("ActionsEnabled",
@@ -3292,9 +4539,42 @@ module CompositeAlarm =
           (Option.map x.stateReasonData ~f:StateReasonData.to_value));
         ("StateUpdatedTimestamp",
           (Option.map x.stateUpdatedTimestamp ~f:Timestamp.to_value));
-        ("StateValue", (Option.map x.stateValue ~f:StateValue.to_value))]
+        ("StateValue", (Option.map x.stateValue ~f:StateValue.to_value));
+        ("StateTransitionedTimestamp",
+          (Option.map x.stateTransitionedTimestamp ~f:Timestamp.to_value));
+        ("ActionsSuppressedBy",
+          (Option.map x.actionsSuppressedBy ~f:ActionsSuppressedBy.to_value));
+        ("ActionsSuppressedReason",
+          (Option.map x.actionsSuppressedReason
+             ~f:ActionsSuppressedReason.to_value));
+        ("ActionsSuppressor",
+          (Option.map x.actionsSuppressor ~f:AlarmArn.to_value));
+        ("ActionsSuppressorWaitPeriod",
+          (Option.map x.actionsSuppressorWaitPeriod
+             ~f:SuppressorPeriod.to_value));
+        ("ActionsSuppressorExtensionPeriod",
+          (Option.map x.actionsSuppressorExtensionPeriod
+             ~f:SuppressorPeriod.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let actionsSuppressorExtensionPeriod =
+        (Option.map ~f:SuppressorPeriod.of_xml)
+          (Xml.child xml_arg0 "ActionsSuppressorExtensionPeriod") in
+      let actionsSuppressorWaitPeriod =
+        (Option.map ~f:SuppressorPeriod.of_xml)
+          (Xml.child xml_arg0 "ActionsSuppressorWaitPeriod") in
+      let actionsSuppressor =
+        (Option.map ~f:AlarmArn.of_xml)
+          (Xml.child xml_arg0 "ActionsSuppressor") in
+      let actionsSuppressedReason =
+        (Option.map ~f:ActionsSuppressedReason.of_xml)
+          (Xml.child xml_arg0 "ActionsSuppressedReason") in
+      let actionsSuppressedBy =
+        (Option.map ~f:ActionsSuppressedBy.of_xml)
+          (Xml.child xml_arg0 "ActionsSuppressedBy") in
+      let stateTransitionedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "StateTransitionedTimestamp") in
       let stateValue =
         (Option.map ~f:StateValue.of_xml) (Xml.child xml_arg0 "StateValue") in
       let stateUpdatedTimestamp =
@@ -3328,35 +4608,57 @@ module CompositeAlarm =
       let actionsEnabled =
         (Option.map ~f:ActionsEnabled.of_xml)
           (Xml.child xml_arg0 "ActionsEnabled") in
-      make ?stateValue ?stateUpdatedTimestamp ?stateReasonData ?stateReason
-        ?oKActions ?insufficientDataActions ?alarmRule ?alarmName
-        ?alarmDescription ?alarmConfigurationUpdatedTimestamp ?alarmArn
-        ?alarmActions ?actionsEnabled ()
+      make ?actionsSuppressorExtensionPeriod ?actionsSuppressorWaitPeriod
+        ?actionsSuppressor ?actionsSuppressedReason ?actionsSuppressedBy
+        ?stateTransitionedTimestamp ?stateValue ?stateUpdatedTimestamp
+        ?stateReasonData ?stateReason ?oKActions ?insufficientDataActions
+        ?alarmRule ?alarmName ?alarmDescription
+        ?alarmConfigurationUpdatedTimestamp ?alarmArn ?alarmActions
+        ?actionsEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stateValue = field_map json "StateValue" StateValue.of_json in
+    let of_json json__ =
+      let actionsSuppressorExtensionPeriod =
+        field_map json__ "ActionsSuppressorExtensionPeriod"
+          SuppressorPeriod.of_json in
+      let actionsSuppressorWaitPeriod =
+        field_map json__ "ActionsSuppressorWaitPeriod"
+          SuppressorPeriod.of_json in
+      let actionsSuppressor =
+        field_map json__ "ActionsSuppressor" AlarmArn.of_json in
+      let actionsSuppressedReason =
+        field_map json__ "ActionsSuppressedReason"
+          ActionsSuppressedReason.of_json in
+      let actionsSuppressedBy =
+        field_map json__ "ActionsSuppressedBy" ActionsSuppressedBy.of_json in
+      let stateTransitionedTimestamp =
+        field_map json__ "StateTransitionedTimestamp" Timestamp.of_json in
+      let stateValue = field_map json__ "StateValue" StateValue.of_json in
       let stateUpdatedTimestamp =
-        field_map json "StateUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "StateUpdatedTimestamp" Timestamp.of_json in
       let stateReasonData =
-        field_map json "StateReasonData" StateReasonData.of_json in
-      let stateReason = field_map json "StateReason" StateReason.of_json in
-      let oKActions = field_map json "OKActions" ResourceList.of_json in
+        field_map json__ "StateReasonData" StateReasonData.of_json in
+      let stateReason = field_map json__ "StateReason" StateReason.of_json in
+      let oKActions = field_map json__ "OKActions" ResourceList.of_json in
       let insufficientDataActions =
-        field_map json "InsufficientDataActions" ResourceList.of_json in
-      let alarmRule = field_map json "AlarmRule" AlarmRule.of_json in
-      let alarmName = field_map json "AlarmName" AlarmName.of_json in
+        field_map json__ "InsufficientDataActions" ResourceList.of_json in
+      let alarmRule = field_map json__ "AlarmRule" AlarmRule.of_json in
+      let alarmName = field_map json__ "AlarmName" AlarmName.of_json in
       let alarmDescription =
-        field_map json "AlarmDescription" AlarmDescription.of_json in
+        field_map json__ "AlarmDescription" AlarmDescription.of_json in
       let alarmConfigurationUpdatedTimestamp =
-        field_map json "AlarmConfigurationUpdatedTimestamp" Timestamp.of_json in
-      let alarmArn = field_map json "AlarmArn" AlarmArn.of_json in
-      let alarmActions = field_map json "AlarmActions" ResourceList.of_json in
+        field_map json__ "AlarmConfigurationUpdatedTimestamp"
+          Timestamp.of_json in
+      let alarmArn = field_map json__ "AlarmArn" AlarmArn.of_json in
+      let alarmActions = field_map json__ "AlarmActions" ResourceList.of_json in
       let actionsEnabled =
-        field_map json "ActionsEnabled" ActionsEnabled.of_json in
-      make ?stateValue ?stateUpdatedTimestamp ?stateReasonData ?stateReason
-        ?oKActions ?insufficientDataActions ?alarmRule ?alarmName
-        ?alarmDescription ?alarmConfigurationUpdatedTimestamp ?alarmArn
-        ?alarmActions ?actionsEnabled ()
+        field_map json__ "ActionsEnabled" ActionsEnabled.of_json in
+      make ?actionsSuppressorExtensionPeriod ?actionsSuppressorWaitPeriod
+        ?actionsSuppressor ?actionsSuppressedReason ?actionsSuppressedBy
+        ?stateTransitionedTimestamp ?stateValue ?stateUpdatedTimestamp
+        ?stateReasonData ?stateReason ?oKActions ?insufficientDataActions
+        ?alarmRule ?alarmName ?alarmDescription
+        ?alarmConfigurationUpdatedTimestamp ?alarmArn ?alarmActions
+        ?actionsEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details about a composite alarm."]
 module MetricAlarm =
@@ -3390,7 +4692,8 @@ module MetricAlarm =
       stateReasonData: StateReasonData.t option
         [@ocaml.doc "An explanation for the alarm state, in JSON format."];
       stateUpdatedTimestamp: Timestamp.t option
-        [@ocaml.doc "The time stamp of the last update to the alarm state."];
+        [@ocaml.doc
+          "The time stamp of the last update to the value of either the StateValue or EvaluationState parameters."];
       metricName: MetricName.t option
         [@ocaml.doc
           "The name of the metric associated with the alarm, if this is an alarm based on a single metric."];
@@ -3423,7 +4726,7 @@ module MetricAlarm =
           "The arithmetic operation to use when comparing the specified statistic and threshold. The specified statistic value is used as the first operand."];
       treatMissingData: TreatMissingData.t option
         [@ocaml.doc
-          "Sets how this alarm is to handle missing data points. The valid values are breaching, notBreaching, ignore, and missing. For more information, see Configuring how CloudWatch alarms treat missing data. If this parameter is omitted, the default behavior of missing is used."];
+          "Sets how this alarm is to handle missing data points. The valid values are breaching, notBreaching, ignore, and missing. For more information, see Configuring how CloudWatch alarms treat missing data. If this parameter is omitted, the default behavior of missing is used. This parameter is not applicable to PromQL alarms."];
       evaluateLowSampleCountPercentile:
         EvaluateLowSampleCountPercentile.t option
         [@ocaml.doc
@@ -3433,7 +4736,18 @@ module MetricAlarm =
           "An array of MetricDataQuery structures, used in an alarm based on a metric math expression. Each structure either retrieves a metric or performs a math expression. One item in the Metrics array is the math expression that the alarm watches. This expression by designated by having ReturnData set to true."];
       thresholdMetricId: MetricId.t option
         [@ocaml.doc
-          "In an alarm based on an anomaly detection model, this is the ID of the ANOMALY_DETECTION_BAND function used as the threshold for the alarm."]}
+          "In an alarm based on an anomaly detection model, this is the ID of the ANOMALY_DETECTION_BAND function used as the threshold for the alarm."];
+      evaluationState: EvaluationState.t option
+        [@ocaml.doc
+          "If the value of this field is PARTIAL_DATA, it indicates that not all the available data was able to be retrieved due to quota limitations. For more information, see Create alarms on Metrics Insights queries. If the value of this field is EVALUATION_ERROR, it indicates configuration errors in alarm setup that require review and correction. Refer to StateReason field of the alarm for more details. If the value of this field is EVALUATION_FAILURE, it indicates temporary CloudWatch issues. We recommend manual monitoring until the issue is resolved"];
+      stateTransitionedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the alarm's StateValue most recently changed."];
+      evaluationCriteria: EvaluationCriteria.t option
+        [@ocaml.doc "The evaluation criteria for the alarm."];
+      evaluationInterval: EvaluationInterval.t option
+        [@ocaml.doc
+          "The frequency, in seconds, at which the alarm is evaluated."]}
     let make ?alarmName =
       fun ?alarmArn ->
         fun ?alarmDescription ->
@@ -3465,36 +4779,52 @@ module MetricAlarm =
                                                         fun
                                                           ?thresholdMetricId
                                                           ->
-                                                          fun () ->
-                                                            {
-                                                              alarmName;
-                                                              alarmArn;
-                                                              alarmDescription;
-                                                              alarmConfigurationUpdatedTimestamp;
-                                                              actionsEnabled;
-                                                              oKActions;
-                                                              alarmActions;
-                                                              insufficientDataActions;
-                                                              stateValue;
-                                                              stateReason;
-                                                              stateReasonData;
-                                                              stateUpdatedTimestamp;
-                                                              metricName;
-                                                              namespace;
-                                                              statistic;
-                                                              extendedStatistic;
-                                                              dimensions;
-                                                              period;
-                                                              unit;
-                                                              evaluationPeriods;
-                                                              datapointsToAlarm;
-                                                              threshold;
-                                                              comparisonOperator;
-                                                              treatMissingData;
-                                                              evaluateLowSampleCountPercentile;
-                                                              metrics;
-                                                              thresholdMetricId
-                                                            }
+                                                          fun
+                                                            ?evaluationState
+                                                            ->
+                                                            fun
+                                                              ?stateTransitionedTimestamp
+                                                              ->
+                                                              fun
+                                                                ?evaluationCriteria
+                                                                ->
+                                                                fun
+                                                                  ?evaluationInterval
+                                                                  ->
+                                                                  fun () ->
+                                                                    {
+                                                                    alarmName;
+                                                                    alarmArn;
+                                                                    alarmDescription;
+                                                                    alarmConfigurationUpdatedTimestamp;
+                                                                    actionsEnabled;
+                                                                    oKActions;
+                                                                    alarmActions;
+                                                                    insufficientDataActions;
+                                                                    stateValue;
+                                                                    stateReason;
+                                                                    stateReasonData;
+                                                                    stateUpdatedTimestamp;
+                                                                    metricName;
+                                                                    namespace;
+                                                                    statistic;
+                                                                    extendedStatistic;
+                                                                    dimensions;
+                                                                    period;
+                                                                    unit;
+                                                                    evaluationPeriods;
+                                                                    datapointsToAlarm;
+                                                                    threshold;
+                                                                    comparisonOperator;
+                                                                    treatMissingData;
+                                                                    evaluateLowSampleCountPercentile;
+                                                                    metrics;
+                                                                    thresholdMetricId;
+                                                                    evaluationState;
+                                                                    stateTransitionedTimestamp;
+                                                                    evaluationCriteria;
+                                                                    evaluationInterval
+                                                                    }
     let to_value x =
       structure_to_value
         [("AlarmName", (Option.map x.alarmName ~f:AlarmName.to_value));
@@ -3539,9 +4869,29 @@ module MetricAlarm =
              ~f:EvaluateLowSampleCountPercentile.to_value));
         ("Metrics", (Option.map x.metrics ~f:MetricDataQueries.to_value));
         ("ThresholdMetricId",
-          (Option.map x.thresholdMetricId ~f:MetricId.to_value))]
+          (Option.map x.thresholdMetricId ~f:MetricId.to_value));
+        ("EvaluationState",
+          (Option.map x.evaluationState ~f:EvaluationState.to_value));
+        ("StateTransitionedTimestamp",
+          (Option.map x.stateTransitionedTimestamp ~f:Timestamp.to_value));
+        ("EvaluationCriteria",
+          (Option.map x.evaluationCriteria ~f:EvaluationCriteria.to_value));
+        ("EvaluationInterval",
+          (Option.map x.evaluationInterval ~f:EvaluationInterval.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let evaluationInterval =
+        (Option.map ~f:EvaluationInterval.of_xml)
+          (Xml.child xml_arg0 "EvaluationInterval") in
+      let evaluationCriteria =
+        (Option.map ~f:EvaluationCriteria.of_xml)
+          (Xml.child xml_arg0 "EvaluationCriteria") in
+      let stateTransitionedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "StateTransitionedTimestamp") in
+      let evaluationState =
+        (Option.map ~f:EvaluationState.of_xml)
+          (Xml.child xml_arg0 "EvaluationState") in
       let thresholdMetricId =
         (Option.map ~f:MetricId.of_xml)
           (Xml.child xml_arg0 "ThresholdMetricId") in
@@ -3611,65 +4961,76 @@ module MetricAlarm =
         (Option.map ~f:AlarmArn.of_xml) (Xml.child xml_arg0 "AlarmArn") in
       let alarmName =
         (Option.map ~f:AlarmName.of_xml) (Xml.child xml_arg0 "AlarmName") in
-      make ?thresholdMetricId ?metrics ?evaluateLowSampleCountPercentile
-        ?treatMissingData ?comparisonOperator ?threshold ?datapointsToAlarm
-        ?evaluationPeriods ?unit ?period ?dimensions ?extendedStatistic
-        ?statistic ?namespace ?metricName ?stateUpdatedTimestamp
-        ?stateReasonData ?stateReason ?stateValue ?insufficientDataActions
-        ?alarmActions ?oKActions ?actionsEnabled
-        ?alarmConfigurationUpdatedTimestamp ?alarmDescription ?alarmArn
-        ?alarmName ()
+      make ?evaluationInterval ?evaluationCriteria
+        ?stateTransitionedTimestamp ?evaluationState ?thresholdMetricId
+        ?metrics ?evaluateLowSampleCountPercentile ?treatMissingData
+        ?comparisonOperator ?threshold ?datapointsToAlarm ?evaluationPeriods
+        ?unit ?period ?dimensions ?extendedStatistic ?statistic ?namespace
+        ?metricName ?stateUpdatedTimestamp ?stateReasonData ?stateReason
+        ?stateValue ?insufficientDataActions ?alarmActions ?oKActions
+        ?actionsEnabled ?alarmConfigurationUpdatedTimestamp ?alarmDescription
+        ?alarmArn ?alarmName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let evaluationInterval =
+        field_map json__ "EvaluationInterval" EvaluationInterval.of_json in
+      let evaluationCriteria =
+        field_map json__ "EvaluationCriteria" EvaluationCriteria.of_json in
+      let stateTransitionedTimestamp =
+        field_map json__ "StateTransitionedTimestamp" Timestamp.of_json in
+      let evaluationState =
+        field_map json__ "EvaluationState" EvaluationState.of_json in
       let thresholdMetricId =
-        field_map json "ThresholdMetricId" MetricId.of_json in
-      let metrics = field_map json "Metrics" MetricDataQueries.of_json in
+        field_map json__ "ThresholdMetricId" MetricId.of_json in
+      let metrics = field_map json__ "Metrics" MetricDataQueries.of_json in
       let evaluateLowSampleCountPercentile =
-        field_map json "EvaluateLowSampleCountPercentile"
+        field_map json__ "EvaluateLowSampleCountPercentile"
           EvaluateLowSampleCountPercentile.of_json in
       let treatMissingData =
-        field_map json "TreatMissingData" TreatMissingData.of_json in
+        field_map json__ "TreatMissingData" TreatMissingData.of_json in
       let comparisonOperator =
-        field_map json "ComparisonOperator" ComparisonOperator.of_json in
-      let threshold = field_map json "Threshold" Threshold.of_json in
+        field_map json__ "ComparisonOperator" ComparisonOperator.of_json in
+      let threshold = field_map json__ "Threshold" Threshold.of_json in
       let datapointsToAlarm =
-        field_map json "DatapointsToAlarm" DatapointsToAlarm.of_json in
+        field_map json__ "DatapointsToAlarm" DatapointsToAlarm.of_json in
       let evaluationPeriods =
-        field_map json "EvaluationPeriods" EvaluationPeriods.of_json in
-      let unit = field_map json "Unit" StandardUnit.of_json in
-      let period = field_map json "Period" Period.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
+        field_map json__ "EvaluationPeriods" EvaluationPeriods.of_json in
+      let unit = field_map json__ "Unit" StandardUnit.of_json in
+      let period = field_map json__ "Period" Period.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
       let extendedStatistic =
-        field_map json "ExtendedStatistic" ExtendedStatistic.of_json in
-      let statistic = field_map json "Statistic" Statistic.of_json in
-      let namespace = field_map json "Namespace" Namespace.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
+        field_map json__ "ExtendedStatistic" ExtendedStatistic.of_json in
+      let statistic = field_map json__ "Statistic" Statistic.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
       let stateUpdatedTimestamp =
-        field_map json "StateUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "StateUpdatedTimestamp" Timestamp.of_json in
       let stateReasonData =
-        field_map json "StateReasonData" StateReasonData.of_json in
-      let stateReason = field_map json "StateReason" StateReason.of_json in
-      let stateValue = field_map json "StateValue" StateValue.of_json in
+        field_map json__ "StateReasonData" StateReasonData.of_json in
+      let stateReason = field_map json__ "StateReason" StateReason.of_json in
+      let stateValue = field_map json__ "StateValue" StateValue.of_json in
       let insufficientDataActions =
-        field_map json "InsufficientDataActions" ResourceList.of_json in
-      let alarmActions = field_map json "AlarmActions" ResourceList.of_json in
-      let oKActions = field_map json "OKActions" ResourceList.of_json in
+        field_map json__ "InsufficientDataActions" ResourceList.of_json in
+      let alarmActions = field_map json__ "AlarmActions" ResourceList.of_json in
+      let oKActions = field_map json__ "OKActions" ResourceList.of_json in
       let actionsEnabled =
-        field_map json "ActionsEnabled" ActionsEnabled.of_json in
+        field_map json__ "ActionsEnabled" ActionsEnabled.of_json in
       let alarmConfigurationUpdatedTimestamp =
-        field_map json "AlarmConfigurationUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "AlarmConfigurationUpdatedTimestamp"
+          Timestamp.of_json in
       let alarmDescription =
-        field_map json "AlarmDescription" AlarmDescription.of_json in
-      let alarmArn = field_map json "AlarmArn" AlarmArn.of_json in
-      let alarmName = field_map json "AlarmName" AlarmName.of_json in
-      make ?thresholdMetricId ?metrics ?evaluateLowSampleCountPercentile
-        ?treatMissingData ?comparisonOperator ?threshold ?datapointsToAlarm
-        ?evaluationPeriods ?unit ?period ?dimensions ?extendedStatistic
-        ?statistic ?namespace ?metricName ?stateUpdatedTimestamp
-        ?stateReasonData ?stateReason ?stateValue ?insufficientDataActions
-        ?alarmActions ?oKActions ?actionsEnabled
-        ?alarmConfigurationUpdatedTimestamp ?alarmDescription ?alarmArn
-        ?alarmName ()
+        field_map json__ "AlarmDescription" AlarmDescription.of_json in
+      let alarmArn = field_map json__ "AlarmArn" AlarmArn.of_json in
+      let alarmName = field_map json__ "AlarmName" AlarmName.of_json in
+      make ?evaluationInterval ?evaluationCriteria
+        ?stateTransitionedTimestamp ?evaluationState ?thresholdMetricId
+        ?metrics ?evaluateLowSampleCountPercentile ?treatMissingData
+        ?comparisonOperator ?threshold ?datapointsToAlarm ?evaluationPeriods
+        ?unit ?period ?dimensions ?extendedStatistic ?statistic ?namespace
+        ?metricName ?stateUpdatedTimestamp ?stateReasonData ?stateReason
+        ?stateValue ?insufficientDataActions ?alarmActions ?oKActions
+        ?actionsEnabled ?alarmConfigurationUpdatedTimestamp ?alarmDescription
+        ?alarmArn ?alarmName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details about a metric alarm."]
 module AlarmHistoryItem =
@@ -3678,6 +5039,9 @@ module AlarmHistoryItem =
       {
       alarmName: AlarmName.t option
         [@ocaml.doc "The descriptive name for the alarm."];
+      alarmContributorId: ContributorId.t option
+        [@ocaml.doc
+          "The unique identifier of the alarm contributor associated with this history item, if applicable."];
       alarmType: AlarmType.t option
         [@ocaml.doc
           "The type of alarm, either metric alarm or composite alarm."];
@@ -3688,34 +5052,49 @@ module AlarmHistoryItem =
       historySummary: HistorySummary.t option
         [@ocaml.doc "A summary of the alarm history, in text format."];
       historyData: HistoryData.t option
-        [@ocaml.doc "Data about the alarm, in JSON format."]}
+        [@ocaml.doc "Data about the alarm, in JSON format."];
+      alarmContributorAttributes: ContributorAttributes.t option
+        [@ocaml.doc
+          "A map of attributes that describe the alarm contributor associated with this history item, providing context about the contributor's characteristics at the time of the event."]}
     let make ?alarmName =
-      fun ?alarmType ->
-        fun ?timestamp ->
-          fun ?historyItemType ->
-            fun ?historySummary ->
-              fun ?historyData ->
-                fun () ->
-                  {
-                    alarmName;
-                    alarmType;
-                    timestamp;
-                    historyItemType;
-                    historySummary;
-                    historyData
-                  }
+      fun ?alarmContributorId ->
+        fun ?alarmType ->
+          fun ?timestamp ->
+            fun ?historyItemType ->
+              fun ?historySummary ->
+                fun ?historyData ->
+                  fun ?alarmContributorAttributes ->
+                    fun () ->
+                      {
+                        alarmName;
+                        alarmContributorId;
+                        alarmType;
+                        timestamp;
+                        historyItemType;
+                        historySummary;
+                        historyData;
+                        alarmContributorAttributes
+                      }
     let to_value x =
       structure_to_value
         [("AlarmName", (Option.map x.alarmName ~f:AlarmName.to_value));
+        ("AlarmContributorId",
+          (Option.map x.alarmContributorId ~f:ContributorId.to_value));
         ("AlarmType", (Option.map x.alarmType ~f:AlarmType.to_value));
         ("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
         ("HistoryItemType",
           (Option.map x.historyItemType ~f:HistoryItemType.to_value));
         ("HistorySummary",
           (Option.map x.historySummary ~f:HistorySummary.to_value));
-        ("HistoryData", (Option.map x.historyData ~f:HistoryData.to_value))]
+        ("HistoryData", (Option.map x.historyData ~f:HistoryData.to_value));
+        ("AlarmContributorAttributes",
+          (Option.map x.alarmContributorAttributes
+             ~f:ContributorAttributes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let alarmContributorAttributes =
+        (Option.map ~f:ContributorAttributes.of_xml)
+          (Xml.child xml_arg0 "AlarmContributorAttributes") in
       let historyData =
         (Option.map ~f:HistoryData.of_xml) (Xml.child xml_arg0 "HistoryData") in
       let historySummary =
@@ -3728,24 +5107,100 @@ module AlarmHistoryItem =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       let alarmType =
         (Option.map ~f:AlarmType.of_xml) (Xml.child xml_arg0 "AlarmType") in
+      let alarmContributorId =
+        (Option.map ~f:ContributorId.of_xml)
+          (Xml.child xml_arg0 "AlarmContributorId") in
       let alarmName =
         (Option.map ~f:AlarmName.of_xml) (Xml.child xml_arg0 "AlarmName") in
-      make ?historyData ?historySummary ?historyItemType ?timestamp
-        ?alarmType ?alarmName ()
+      make ?alarmContributorAttributes ?historyData ?historySummary
+        ?historyItemType ?timestamp ?alarmType ?alarmContributorId ?alarmName
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let historyData = field_map json "HistoryData" HistoryData.of_json in
+    let of_json json__ =
+      let alarmContributorAttributes =
+        field_map json__ "AlarmContributorAttributes"
+          ContributorAttributes.of_json in
+      let historyData = field_map json__ "HistoryData" HistoryData.of_json in
       let historySummary =
-        field_map json "HistorySummary" HistorySummary.of_json in
+        field_map json__ "HistorySummary" HistorySummary.of_json in
       let historyItemType =
-        field_map json "HistoryItemType" HistoryItemType.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
-      let alarmType = field_map json "AlarmType" AlarmType.of_json in
-      let alarmName = field_map json "AlarmName" AlarmName.of_json in
-      make ?historyData ?historySummary ?historyItemType ?timestamp
-        ?alarmType ?alarmName ()
+        field_map json__ "HistoryItemType" HistoryItemType.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      let alarmType = field_map json__ "AlarmType" AlarmType.of_json in
+      let alarmContributorId =
+        field_map json__ "AlarmContributorId" ContributorId.of_json in
+      let alarmName = field_map json__ "AlarmName" AlarmName.of_json in
+      make ?alarmContributorAttributes ?historyData ?historySummary
+        ?historyItemType ?timestamp ?alarmType ?alarmContributorId ?alarmName
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the history of a specific alarm."]
+module AlarmContributor =
+  struct
+    type nonrec t =
+      {
+      contributorId: ContributorId.t option
+        [@ocaml.doc "The unique identifier for this alarm contributor."];
+      contributorAttributes: ContributorAttributes.t option
+        [@ocaml.doc
+          "A map of attributes that describe the contributor, such as metric dimensions and other identifying characteristics."];
+      stateReason: StateReason.t option
+        [@ocaml.doc
+          "An explanation for the contributor's current state, providing context about why it is in its current condition."];
+      stateTransitionedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the contributor last transitioned to its current state."]}
+    let make ?contributorId =
+      fun ?contributorAttributes ->
+        fun ?stateReason ->
+          fun ?stateTransitionedTimestamp ->
+            fun () ->
+              {
+                contributorId;
+                contributorAttributes;
+                stateReason;
+                stateTransitionedTimestamp
+              }
+    let to_value x =
+      structure_to_value
+        [("ContributorId",
+           (Option.map x.contributorId ~f:ContributorId.to_value));
+        ("ContributorAttributes",
+          (Option.map x.contributorAttributes
+             ~f:ContributorAttributes.to_value));
+        ("StateReason", (Option.map x.stateReason ~f:StateReason.to_value));
+        ("StateTransitionedTimestamp",
+          (Option.map x.stateTransitionedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stateTransitionedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "StateTransitionedTimestamp") in
+      let stateReason =
+        (Option.map ~f:StateReason.of_xml) (Xml.child xml_arg0 "StateReason") in
+      let contributorAttributes =
+        (Option.map ~f:ContributorAttributes.of_xml)
+          (Xml.child xml_arg0 "ContributorAttributes") in
+      let contributorId =
+        (Option.map ~f:ContributorId.of_xml)
+          (Xml.child xml_arg0 "ContributorId") in
+      make ?stateTransitionedTimestamp ?stateReason ?contributorAttributes
+        ?contributorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stateTransitionedTimestamp =
+        field_map json__ "StateTransitionedTimestamp" Timestamp.of_json in
+      let stateReason = field_map json__ "StateReason" StateReason.of_json in
+      let contributorAttributes =
+        field_map json__ "ContributorAttributes"
+          ContributorAttributes.of_json in
+      let contributorId =
+        field_map json__ "ContributorId" ContributorId.of_json in
+      make ?stateTransitionedTimestamp ?stateReason ?contributorAttributes
+        ?contributorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents an individual contributor to a multi-timeseries alarm, containing information about a specific time series and its contribution to the alarm's state."]
 module ConcurrentModificationException =
   struct
     type nonrec t = unit
@@ -3759,6 +5214,26 @@ module ConcurrentModificationException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "More than one process tried to modify a resource at the same time."]
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation attempted to create a resource that already exists."]
 module InternalServiceFault =
   struct
     type nonrec t = {
@@ -3774,8 +5249,8 @@ module InternalServiceFault =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" FaultDescription.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" FaultDescription.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3795,8 +5270,8 @@ module InvalidParameterValueException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AwsQueryErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" AwsQueryErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value of an input parameter is bad or out-of-range."]
@@ -3822,9 +5297,9 @@ module ResourceNotFoundException =
           (Xml.child xml_arg0 "ResourceType") in
       make ?resourceId ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+    let of_json json__ =
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       make ?resourceId ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The named resource does not exist."]
@@ -3832,6 +5307,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3851,29 +5329,6 @@ module TagKeyList =
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module TagList =
-  struct
-    type nonrec t = Tag.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module MissingRequiredParameterException =
   struct
     type nonrec t = {
@@ -3889,8 +5344,8 @@ module MissingRequiredParameterException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AwsQueryErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" AwsQueryErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An input parameter that is required is missing."]
@@ -3898,6 +5353,9 @@ module MetricStreamNames =
   struct
     type nonrec t = MetricStreamName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricStreamName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3934,16 +5392,32 @@ module InvalidParameterCombinationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AwsQueryErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" AwsQueryErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Parameters were used together that cannot be used together."]
+module IncludeLinkedAccountsMetrics =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module MetricStreamFilters =
   struct
     type nonrec t = MetricStreamFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricStreamFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3969,6 +5443,9 @@ module MetricStreamStatisticsConfigurations =
   struct
     type nonrec t = MetricStreamStatisticsConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricStreamStatisticsConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -3992,12 +5469,15 @@ module MetricStreamStatisticsConfigurations =
         ~of_json:MetricStreamStatisticsConfiguration.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MetricData =
+module EntityMetricDataList =
   struct
-    type nonrec t = MetricDatum.t list
+    type nonrec t = EntityMetricData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:MetricDatum.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:EntityMetricData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -4011,9 +5491,77 @@ module MetricData =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:MetricDatum.of_xml)
+                     | _ -> true))) ~f:EntityMetricData.of_xml)
     let of_json j =
-      list_of_json ~kind:"MetricData" ~of_json:MetricDatum.of_json j
+      list_of_json ~kind:"EntityMetricDataList"
+        ~of_json:EntityMetricData.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StrictEntityValidation =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module BatchFailures =
+  struct
+    type nonrec t = PartialFailure.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PartialFailure.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PartialFailure.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchFailures" ~of_json:PartialFailure.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ManagedRules =
+  struct
+    type nonrec t = ManagedRule.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ManagedRule.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ManagedRule.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ManagedRules" ~of_json:ManagedRule.of_json j
     let to_json v = composed_to_json to_value v
   end
 module LimitExceededException =
@@ -4054,11 +5602,11 @@ module DashboardInvalidInputError =
           (Xml.child xml_arg0 "Message") in
       make ?dashboardValidationMessages ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dashboardValidationMessages =
-        field_map json "dashboardValidationMessages"
+        field_map json__ "dashboardValidationMessages"
           DashboardValidationMessages.of_json in
-      let message = field_map json "message" DashboardErrorMessage.of_json in
+      let message = field_map json__ "message" DashboardErrorMessage.of_json in
       make ?dashboardValidationMessages ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Some part of the dashboard data is invalid."]
@@ -4075,10 +5623,64 @@ module DashboardBody =
     let of_json j = string_of_json ~kind:"DashboardBody" j
     let to_json = simple_to_json to_value
   end
+module MuteTargets =
+  struct
+    type nonrec t =
+      {
+      alarmNames: MuteTargetAlarmNameList.t
+        [@ocaml.doc
+          "The list of alarm names that this mute rule targets. You can specify up to 100 alarm names. Each alarm name must be between 1 and 255 characters in length. The alarm names must match existing alarms in your Amazon Web Services account and region."]}
+    let context_ = "MuteTargets"
+    let make ~alarmNames = fun () -> { alarmNames }
+    let to_value x =
+      structure_to_value
+        [("AlarmNames",
+           (Some (MuteTargetAlarmNameList.to_value x.alarmNames)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let alarmNames =
+        MuteTargetAlarmNameList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AlarmNames") in
+      make ~alarmNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let alarmNames =
+        field_map_exn json__ "AlarmNames" MuteTargetAlarmNameList.of_json in
+      make ~alarmNames ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies which alarms an alarm mute rule applies to. You can target up to 100 specific alarms by name. When a mute rule is active, the targeted alarms continue to evaluate metrics and transition between states, but their configured actions are muted."]
+module Rule =
+  struct
+    type nonrec t =
+      {
+      schedule: Schedule.t
+        [@ocaml.doc
+          "The schedule configuration that defines when the mute rule activates and how long it remains active."]}
+    let context_ = "Rule"
+    let make ~schedule = fun () -> { schedule }
+    let to_value x =
+      structure_to_value
+        [("Schedule", (Some (Schedule.to_value x.schedule)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let schedule =
+        Schedule.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Schedule") in
+      make ~schedule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let schedule = field_map_exn json__ "Schedule" Schedule.of_json in
+      make ~schedule ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the schedule configuration for an alarm mute rule. The rule contains a schedule that specifies when and how long alarms should be muted. The schedule can be a recurring pattern using cron expressions or a one-time mute window using at expressions."]
 module Metrics =
   struct
     type nonrec t = Metric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Metric.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4111,11 +5713,41 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end
+module OwningAccounts =
+  struct
+    type nonrec t = AccountId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OwningAccounts" ~of_json:AccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DimensionFilters =
   struct
     type nonrec t = DimensionFilter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DimensionFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4136,6 +5768,19 @@ module DimensionFilters =
       list_of_json ~kind:"DimensionFilters" ~of_json:DimensionFilter.of_json
         j
     let to_json v = composed_to_json to_value v
+  end
+module IncludeLinkedAccounts =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
   end
 module RecentlyActive =
   struct
@@ -4167,8 +5812,8 @@ module InvalidNextToken =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The next token specified is invalid."]
@@ -4176,6 +5821,9 @@ module MetricStreamEntries =
   struct
     type nonrec t = MetricStreamEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricStreamEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4216,10 +5864,60 @@ module ListMetricStreamsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ManagedRuleDescriptions =
+  struct
+    type nonrec t = ManagedRuleDescription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ManagedRuleDescription.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ManagedRuleDescription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ManagedRuleDescriptions"
+        ~of_json:ManagedRuleDescription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightRuleMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InsightRuleMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module DashboardEntries =
   struct
     type nonrec t = DashboardEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DashboardEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4251,6 +5949,108 @@ module DashboardNamePrefix =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"DashboardNamePrefix" j
+    let to_json = simple_to_json to_value
+  end
+module AlarmMuteRuleSummaries =
+  struct
+    type nonrec t = AlarmMuteRuleSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AlarmMuteRuleSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AlarmMuteRuleSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AlarmMuteRuleSummaries"
+        ~of_json:AlarmMuteRuleSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AlarmMuteRuleStatuses =
+  struct
+    type nonrec t = AlarmMuteRuleStatus.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AlarmMuteRuleStatus.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AlarmMuteRuleStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AlarmMuteRuleStatuses"
+        ~of_json:AlarmMuteRuleStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxRecords =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxRecords" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module OTelEnrichmentStatus =
+  struct
+    type nonrec t =
+      | Running 
+      | Stopped 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Running -> "Running"
+      | Stopped -> "Stopped"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Running" -> Running
+      | "Stopped" -> Stopped
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OTelEnrichmentStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OTelEnrichmentStatus" j)
     let to_json = simple_to_json to_value
   end
 module MetricWidgetImage =
@@ -4295,6 +6095,9 @@ module Datapoints =
   struct
     type nonrec t = Datapoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Datapoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4323,6 +6126,9 @@ module ExtendedStatistics =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExtendedStatistic.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4352,6 +6158,9 @@ module Statistics =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Statistic.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4376,6 +6185,9 @@ module MetricDataResults =
   struct
     type nonrec t = MetricDataResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricDataResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4431,9 +6243,9 @@ module LabelOptions =
           (Xml.child xml_arg0 "Timezone") in
       make ?timezone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timezone =
-        field_map json "Timezone" GetMetricDataLabelTimezone.of_json in
+        field_map json__ "Timezone" GetMetricDataLabelTimezone.of_json in
       make ?timezone ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4480,6 +6292,9 @@ module InsightRuleContributorKeyLabels =
   struct
     type nonrec t = InsightRuleContributorKeyLabel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InsightRuleContributorKeyLabel.to_value)) |>
         (fun x -> `List x)
@@ -4506,6 +6321,9 @@ module InsightRuleContributors =
   struct
     type nonrec t = InsightRuleContributor.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InsightRuleContributor.to_value)) |>
         (fun x -> `List x)
@@ -4532,6 +6350,9 @@ module InsightRuleMetricDatapoints =
   struct
     type nonrec t = InsightRuleMetricDatapoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InsightRuleMetricDatapoint.to_value)) |>
         (fun x -> `List x)
@@ -4571,6 +6392,9 @@ module InsightRuleMetricList =
   struct
     type nonrec t = InsightRuleMetricName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InsightRuleMetricName.to_value)) |>
         (fun x -> `List x)
@@ -4644,39 +6468,18 @@ module DashboardNotFoundError =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" DashboardErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" DashboardErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified dashboard does not exist."]
-module BatchFailures =
-  struct
-    type nonrec t = PartialFailure.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:PartialFailure.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:PartialFailure.of_xml)
-    let of_json j =
-      list_of_json ~kind:"BatchFailures" ~of_json:PartialFailure.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module InsightRuleNames =
   struct
     type nonrec t = InsightRuleName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InsightRuleName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4703,6 +6506,9 @@ module AlarmNames =
     type nonrec t = AlarmName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AlarmName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4727,6 +6533,9 @@ module InsightRules =
   struct
     type nonrec t = InsightRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InsightRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4747,28 +6556,13 @@ module InsightRules =
       list_of_json ~kind:"InsightRules" ~of_json:InsightRule.of_json j
     let to_json v = composed_to_json to_value v
   end
-module InsightRuleMaxResults =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for InsightRuleMaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module AnomalyDetectors =
   struct
     type nonrec t = AnomalyDetector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AnomalyDetector.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4795,6 +6589,9 @@ module AnomalyDetectorTypes =
     type nonrec t = AnomalyDetectorType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AnomalyDetectorType.to_value)) |>
         (fun x -> `List x)
@@ -4837,6 +6634,9 @@ module CompositeAlarms =
   struct
     type nonrec t = CompositeAlarm.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CompositeAlarm.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4861,6 +6661,9 @@ module MetricAlarms =
   struct
     type nonrec t = MetricAlarm.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricAlarm.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4921,6 +6724,9 @@ module AlarmTypes =
   struct
     type nonrec t = AlarmType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AlarmType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4941,28 +6747,13 @@ module AlarmTypes =
       list_of_json ~kind:"AlarmTypes" ~of_json:AlarmType.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MaxRecords =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxRecords" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module AlarmHistoryItems =
   struct
     type nonrec t = AlarmHistoryItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AlarmHistoryItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4984,10 +6775,41 @@ module AlarmHistoryItems =
         ~of_json:AlarmHistoryItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AlarmContributors =
+  struct
+    type nonrec t = AlarmContributor.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AlarmContributor.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AlarmContributor.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AlarmContributors"
+        ~of_json:AlarmContributor.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DashboardNames =
   struct
     type nonrec t = DashboardName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DashboardName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5019,6 +6841,7 @@ module UntagResourceOutput =
     type error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServiceFault of InternalServiceFault.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -5029,6 +6852,8 @@ module UntagResourceOutput =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServiceFault" ->
           `InternalServiceFault (InternalServiceFault.of_json json)
       | "InvalidParameterValueException" ->
@@ -5044,6 +6869,8 @@ module UntagResourceOutput =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServiceFault" ->
           `InternalServiceFault (InternalServiceFault.of_xml xml)
       | "InvalidParameterValueException" ->
@@ -5059,6 +6886,10 @@ module UntagResourceOutput =
           `Assoc
             [("error", (`String "ConcurrentModificationException"));
             ("details", (ConcurrentModificationException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServiceFault e ->
           `Assoc
             [("error", (`String "InternalServiceFault"));
@@ -5083,14 +6914,15 @@ module UntagResourceOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes one or more tags from the specified resource."]
+  end[@@ocaml.doc
+       "Removes one or more tags from the specified resource. Currently, alarms, dashboards, metric streams and Contributor Insights rules support tagging."]
 module UntagResourceInput =
   struct
     type nonrec t =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The ARN of the CloudWatch resource that you're removing tags from. The ARN format of an alarm is arn:aws:cloudwatch:Region:account-id:alarm:alarm-name The ARN format of a Contributor Insights rule is arn:aws:cloudwatch:Region:account-id:insight-rule:insight-rule-name For more information about ARN format, see Resource Types Defined by Amazon CloudWatch in the Amazon Web Services General Reference."];
+          "The ARN of the CloudWatch resource that you're removing tags from. The ARN format of an alarm is arn:aws:cloudwatch:Region:account-id:alarm:alarm-name The ARN format of a Contributor Insights rule is arn:aws:cloudwatch:Region:account-id:insight-rule/insight-rule-name The ARN format of a dashboard is arn:aws:cloudwatch::account-id:dashboard/dashboard-name The ARN format of a metric stream is arn:aws:cloudwatch:Region:account-id:metric-stream/metric-stream-name For more information about ARN format, see Resource Types Defined by Amazon CloudWatch in the Amazon Web Services General Reference."];
       tagKeys: TagKeyList.t
         [@ocaml.doc "The list of tag keys to remove from the resource."]}
     let context_ = "UntagResourceInput"
@@ -5110,13 +6942,14 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes one or more tags from the specified resource."]
+  end[@@ocaml.doc
+       "Removes one or more tags from the specified resource. Currently, alarms, dashboards, metric streams and Contributor Insights rules support tagging."]
 module TagResourceOutput =
   struct
     type tagResourceResult = unit
@@ -5128,6 +6961,7 @@ module TagResourceOutput =
     type error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServiceFault of InternalServiceFault.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -5138,6 +6972,8 @@ module TagResourceOutput =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServiceFault" ->
           `InternalServiceFault (InternalServiceFault.of_json json)
       | "InvalidParameterValueException" ->
@@ -5153,6 +6989,8 @@ module TagResourceOutput =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServiceFault" ->
           `InternalServiceFault (InternalServiceFault.of_xml xml)
       | "InvalidParameterValueException" ->
@@ -5168,6 +7006,10 @@ module TagResourceOutput =
           `Assoc
             [("error", (`String "ConcurrentModificationException"));
             ("details", (ConcurrentModificationException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServiceFault e ->
           `Assoc
             [("error", (`String "InternalServiceFault"));
@@ -5193,14 +7035,14 @@ module TagResourceOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns one or more tags (key-value pairs) to the specified CloudWatch resource. Currently, the only CloudWatch resources that can be tagged are alarms and Contributor Insights rules. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can use the TagResource action with an alarm that already has tags. If you specify a new tag key for the alarm, this tag is appended to the list of tags associated with the alarm. If you specify a tag key that is already associated with the alarm, the new tag value that you specify replaces the previous value for that tag. You can associate as many as 50 tags with a CloudWatch resource."]
+       "Assigns one or more tags (key-value pairs) to the specified CloudWatch resource. Currently, the only CloudWatch resources that can be tagged are alarms, dashboards, metric streams and Contributor Insights rules. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can use the TagResource action with an alarm that already has tags. If you specify a new tag key for the alarm, this tag is appended to the list of tags associated with the alarm. If you specify a tag key that is already associated with the alarm, the new tag value that you specify replaces the previous value for that tag. You can associate as many as 50 tags with a CloudWatch resource."]
 module TagResourceInput =
   struct
     type nonrec t =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The ARN of the CloudWatch resource that you're adding tags to. The ARN format of an alarm is arn:aws:cloudwatch:Region:account-id:alarm:alarm-name The ARN format of a Contributor Insights rule is arn:aws:cloudwatch:Region:account-id:insight-rule:insight-rule-name For more information about ARN format, see Resource Types Defined by Amazon CloudWatch in the Amazon Web Services General Reference."];
+          "The ARN of the CloudWatch resource that you're adding tags to. The ARN format of an alarm is arn:aws:cloudwatch:Region:account-id:alarm:alarm-name The ARN format of a Contributor Insights rule is arn:aws:cloudwatch:Region:account-id:insight-rule/insight-rule-name The ARN format of a dashboard is arn:aws:cloudwatch::account-id:dashboard/dashboard-name The ARN format of a metric stream is arn:aws:cloudwatch:Region:account-id:metric-stream/metric-stream-name For more information about ARN format, see Resource Types Defined by Amazon CloudWatch in the Amazon Web Services General Reference."];
       tags: TagList.t
         [@ocaml.doc
           "The list of key-value pairs to associate with the alarm."]}
@@ -5219,14 +7061,62 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns one or more tags (key-value pairs) to the specified CloudWatch resource. Currently, the only CloudWatch resources that can be tagged are alarms and Contributor Insights rules. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can use the TagResource action with an alarm that already has tags. If you specify a new tag key for the alarm, this tag is appended to the list of tags associated with the alarm. If you specify a tag key that is already associated with the alarm, the new tag value that you specify replaces the previous value for that tag. You can associate as many as 50 tags with a CloudWatch resource."]
+       "Assigns one or more tags (key-value pairs) to the specified CloudWatch resource. Currently, the only CloudWatch resources that can be tagged are alarms, dashboards, metric streams and Contributor Insights rules. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can use the TagResource action with an alarm that already has tags. If you specify a new tag key for the alarm, this tag is appended to the list of tags associated with the alarm. If you specify a tag key that is already associated with the alarm, the new tag value that you specify replaces the previous value for that tag. You can associate as many as 50 tags with a CloudWatch resource."]
+module StopOTelEnrichmentOutput =
+  struct
+    type stopOTelEnrichmentResult = unit
+    and responseMetaData = unit
+    and t =
+      {
+      stopOTelEnrichmentResult: stopOTelEnrichmentResult ;
+      responseMetaData: responseMetaData }
+    type error = [ `Unknown_operation_error of (string * string option) ]
+    let make () = { stopOTelEnrichmentResult = (); responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables enrichment and PromQL access for CloudWatch vended metrics for supported Amazon Web Services resources in the account. After disabling, these metrics are no longer enriched with resource ARN and resource tag labels, and cannot be queried using PromQL."]
+module StopOTelEnrichmentInput =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables enrichment and PromQL access for CloudWatch vended metrics for supported Amazon Web Services resources in the account. After disabling, these metrics are no longer enriched with resource ARN and resource tag labels, and cannot be queried using PromQL."]
 module StopMetricStreamsOutput =
   struct
     type stopMetricStreamsResult = unit
@@ -5314,12 +7204,60 @@ module StopMetricStreamsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Names") in
       make ~names ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let names = field_map_exn json "Names" MetricStreamNames.of_json in
+    let of_json json__ =
+      let names = field_map_exn json__ "Names" MetricStreamNames.of_json in
       make ~names ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops the streaming of metrics for one or more of your metric streams."]
+module StartOTelEnrichmentOutput =
+  struct
+    type startOTelEnrichmentResult = unit
+    and responseMetaData = unit
+    and t =
+      {
+      startOTelEnrichmentResult: startOTelEnrichmentResult ;
+      responseMetaData: responseMetaData }
+    type error = [ `Unknown_operation_error of (string * string option) ]
+    let make () = { startOTelEnrichmentResult = (); responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables enrichment and PromQL access for CloudWatch vended metrics for supported Amazon Web Services resources in the account. Once enabled, metrics that contain a resource identifier dimension (for example, EC2 CPUUtilization with an InstanceId dimension) are enriched with resource ARN and resource tag labels and become queryable using PromQL. Before calling this operation, you must enable resource tags on telemetry for your account. For more information, see Enable resource tags on telemetry."]
+module StartOTelEnrichmentInput =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables enrichment and PromQL access for CloudWatch vended metrics for supported Amazon Web Services resources in the account. Once enabled, metrics that contain a resource identifier dimension (for example, EC2 CPUUtilization with an InstanceId dimension) are enriched with resource ARN and resource tag labels and become queryable using PromQL. Before calling this operation, you must enable resource tags on telemetry for your account. For more information, see Enable resource tags on telemetry."]
 module StartMetricStreamsOutput =
   struct
     type startMetricStreamsResult = unit
@@ -5407,8 +7345,8 @@ module StartMetricStreamsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Names") in
       make ~names ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let names = field_map_exn json "Names" MetricStreamNames.of_json in
+    let of_json json__ =
+      let names = field_map_exn json__ "Names" MetricStreamNames.of_json in
       make ~names ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5454,12 +7392,13 @@ module SetAlarmStateInput =
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmName") in
       make ?stateReasonData ~stateReason ~stateValue ~alarmName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stateReasonData =
-        field_map json "StateReasonData" StateReasonData.of_json in
-      let stateReason = field_map_exn json "StateReason" StateReason.of_json in
-      let stateValue = field_map_exn json "StateValue" StateValue.of_json in
-      let alarmName = field_map_exn json "AlarmName" AlarmName.of_json in
+        field_map json__ "StateReasonData" StateReasonData.of_json in
+      let stateReason =
+        field_map_exn json__ "StateReason" StateReason.of_json in
+      let stateValue = field_map_exn json__ "StateValue" StateValue.of_json in
+      let alarmName = field_map_exn json__ "AlarmName" AlarmName.of_json in
       make ?stateReasonData ~stateReason ~stateValue ~alarmName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5478,8 +7417,8 @@ module ResourceNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The named resource does not exist."]
@@ -5584,12 +7523,12 @@ module PutMetricStreamOutput =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" AmazonResourceName.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
       make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a metric stream. Metric streams can automatically stream CloudWatch metrics to Amazon Web Services destinations including Amazon S3 and to many third-party solutions. For more information, see Using Metric Streams. To create a metric stream, you must be logged on to an account that has the iam:PassRole permission and either the CloudWatchFullAccess policy or the cloudwatch:PutMetricStream permission. When you create or update a metric stream, you choose one of the following: Stream metrics from all metric namespaces in the account. Stream metrics from all metric namespaces in the account, except for the namespaces that you list in ExcludeFilters. Stream metrics from only the metric namespaces that you list in IncludeFilters. By default, a metric stream always sends the MAX, MIN, SUM, and SAMPLECOUNT statistics for each metric that is streamed. You can use the StatisticsConfigurations parameter to have the metric stream also send extended statistics in the stream. Streaming extended statistics incurs additional costs. For more information, see Amazon CloudWatch Pricing. When you use PutMetricStream to create a new metric stream, the stream is created in the running state. If you use it to update an existing stream, the state of the stream is not changed."]
+       "Creates or updates a metric stream. Metric streams can automatically stream CloudWatch metrics to Amazon Web Services destinations, including Amazon S3, and to many third-party solutions. For more information, see Using Metric Streams. To create a metric stream, you must be signed in to an account that has the iam:PassRole permission and either the CloudWatchFullAccess policy or the cloudwatch:PutMetricStream permission. When you create or update a metric stream, you choose one of the following: Stream metrics from all metric namespaces in the account. Stream metrics from all metric namespaces in the account, except for the namespaces that you list in ExcludeFilters. Stream metrics from only the metric namespaces that you list in IncludeFilters. By default, a metric stream always sends the MAX, MIN, SUM, and SAMPLECOUNT statistics for each metric that is streamed. You can use the StatisticsConfigurations parameter to have the metric stream send additional statistics in the stream. Streaming additional statistics incurs additional costs. For more information, see Amazon CloudWatch Pricing. When you use PutMetricStream to create a new metric stream, the stream is created in the running state. If you use it to update an existing stream, the state of the stream is not changed. If you are using CloudWatch cross-account observability and you create a metric stream in a monitoring account, you can choose whether to include metrics from source accounts in the stream. For more information, see CloudWatch cross-account observability."]
 module PutMetricStreamInput =
   struct
     type nonrec t =
@@ -5605,39 +7544,44 @@ module PutMetricStreamInput =
           "If you specify this parameter, the stream sends metrics from all metric namespaces except for the namespaces that you specify here. You cannot include ExcludeFilters and IncludeFilters in the same operation."];
       firehoseArn: AmazonResourceName.t
         [@ocaml.doc
-          "The ARN of the Amazon Kinesis Firehose delivery stream to use for this metric stream. This Amazon Kinesis Firehose delivery stream must already exist and must be in the same account as the metric stream."];
+          "The ARN of the Amazon Kinesis Data Firehose delivery stream to use for this metric stream. This Amazon Kinesis Data Firehose delivery stream must already exist and must be in the same account as the metric stream."];
       roleArn: AmazonResourceName.t
         [@ocaml.doc
-          "The ARN of an IAM role that this metric stream will use to access Amazon Kinesis Firehose resources. This IAM role must already exist and must be in the same account as the metric stream. This IAM role must include the following permissions: firehose:PutRecord firehose:PutRecordBatch"];
+          "The ARN of an IAM role that this metric stream will use to access Amazon Kinesis Data Firehose resources. This IAM role must already exist and must be in the same account as the metric stream. This IAM role must include the following permissions: firehose:PutRecord firehose:PutRecordBatch"];
       outputFormat: MetricStreamOutputFormat.t
         [@ocaml.doc
-          "The output format for the stream. Valid values are json and opentelemetry0.7. For more information about metric stream output formats, see Metric streams output formats."];
+          "The output format for the stream. Valid values are json, opentelemetry1.0, and opentelemetry0.7. For more information about metric stream output formats, see Metric streams output formats."];
       tags: TagList.t option
         [@ocaml.doc
           "A list of key-value pairs to associate with the metric stream. You can associate as many as 50 tags with a metric stream. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. You can use this parameter only when you are creating a new metric stream. If you are using this operation to update an existing metric stream, any tags you specify in this parameter are ignored. To change the tags of an existing metric stream, use TagResource or UntagResource."];
       statisticsConfigurations: MetricStreamStatisticsConfigurations.t option
         [@ocaml.doc
-          "By default, a metric stream always sends the MAX, MIN, SUM, and SAMPLECOUNT statistics for each metric that is streamed. You can use this parameter to have the metric stream also send extended statistics in the stream. This array can have up to 100 members. For each entry in this array, you specify one or more metrics and the list of extended statistics to stream for those metrics. The extended statistics that you can stream depend on the stream's OutputFormat. If the OutputFormat is json, you can stream any extended statistic that is supported by CloudWatch, listed in CloudWatch statistics definitions. If the OutputFormat is opentelemetry0.7, you can stream percentile statistics (p??)."]}
+          "By default, a metric stream always sends the MAX, MIN, SUM, and SAMPLECOUNT statistics for each metric that is streamed. You can use this parameter to have the metric stream also send additional statistics in the stream. This array can have up to 100 members. For each entry in this array, you specify one or more metrics and the list of additional statistics to stream for those metrics. The additional statistics that you can stream depend on the stream's OutputFormat. If the OutputFormat is json, you can stream any additional statistic that is supported by CloudWatch, listed in CloudWatch statistics definitions. If the OutputFormat is opentelemetry1.0 or opentelemetry0.7, you can stream percentile statistics such as p95, p99.9, and so on."];
+      includeLinkedAccountsMetrics: IncludeLinkedAccountsMetrics.t option
+        [@ocaml.doc
+          "If you are creating a metric stream in a monitoring account, specify true to include metrics from source accounts in the metric stream."]}
     let context_ = "PutMetricStreamInput"
     let make ?includeFilters =
       fun ?excludeFilters ->
         fun ?tags ->
           fun ?statisticsConfigurations ->
-            fun ~name ->
-              fun ~firehoseArn ->
-                fun ~roleArn ->
-                  fun ~outputFormat ->
-                    fun () ->
-                      {
-                        includeFilters;
-                        excludeFilters;
-                        tags;
-                        statisticsConfigurations;
-                        name;
-                        firehoseArn;
-                        roleArn;
-                        outputFormat
-                      }
+            fun ?includeLinkedAccountsMetrics ->
+              fun ~name ->
+                fun ~firehoseArn ->
+                  fun ~roleArn ->
+                    fun ~outputFormat ->
+                      fun () ->
+                        {
+                          includeFilters;
+                          excludeFilters;
+                          tags;
+                          statisticsConfigurations;
+                          includeLinkedAccountsMetrics;
+                          name;
+                          firehoseArn;
+                          roleArn;
+                          outputFormat
+                        }
     let to_value x =
       structure_to_value
         [("Name", (Some (MetricStreamName.to_value x.name)));
@@ -5652,9 +7596,15 @@ module PutMetricStreamInput =
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("StatisticsConfigurations",
           (Option.map x.statisticsConfigurations
-             ~f:MetricStreamStatisticsConfigurations.to_value))]
+             ~f:MetricStreamStatisticsConfigurations.to_value));
+        ("IncludeLinkedAccountsMetrics",
+          (Option.map x.includeLinkedAccountsMetrics
+             ~f:IncludeLinkedAccountsMetrics.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let includeLinkedAccountsMetrics =
+        (Option.map ~f:IncludeLinkedAccountsMetrics.of_xml)
+          (Xml.child xml_arg0 "IncludeLinkedAccountsMetrics") in
       let statisticsConfigurations =
         (Option.map ~f:MetricStreamStatisticsConfigurations.of_xml)
           (Xml.child xml_arg0 "StatisticsConfigurations") in
@@ -5677,70 +7627,107 @@ module PutMetricStreamInput =
       let name =
         MetricStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?statisticsConfigurations ?tags ~outputFormat ~roleArn
-        ~firehoseArn ?excludeFilters ?includeFilters ~name ()
+      make ?includeLinkedAccountsMetrics ?statisticsConfigurations ?tags
+        ~outputFormat ~roleArn ~firehoseArn ?excludeFilters ?includeFilters
+        ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let includeLinkedAccountsMetrics =
+        field_map json__ "IncludeLinkedAccountsMetrics"
+          IncludeLinkedAccountsMetrics.of_json in
       let statisticsConfigurations =
-        field_map json "StatisticsConfigurations"
+        field_map json__ "StatisticsConfigurations"
           MetricStreamStatisticsConfigurations.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let outputFormat =
-        field_map_exn json "OutputFormat" MetricStreamOutputFormat.of_json in
-      let roleArn = field_map_exn json "RoleArn" AmazonResourceName.of_json in
+        field_map_exn json__ "OutputFormat" MetricStreamOutputFormat.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" AmazonResourceName.of_json in
       let firehoseArn =
-        field_map_exn json "FirehoseArn" AmazonResourceName.of_json in
+        field_map_exn json__ "FirehoseArn" AmazonResourceName.of_json in
       let excludeFilters =
-        field_map json "ExcludeFilters" MetricStreamFilters.of_json in
+        field_map json__ "ExcludeFilters" MetricStreamFilters.of_json in
       let includeFilters =
-        field_map json "IncludeFilters" MetricStreamFilters.of_json in
-      let name = field_map_exn json "Name" MetricStreamName.of_json in
-      make ?statisticsConfigurations ?tags ~outputFormat ~roleArn
-        ~firehoseArn ?excludeFilters ?includeFilters ~name ()
+        field_map json__ "IncludeFilters" MetricStreamFilters.of_json in
+      let name = field_map_exn json__ "Name" MetricStreamName.of_json in
+      make ?includeLinkedAccountsMetrics ?statisticsConfigurations ?tags
+        ~outputFormat ~roleArn ~firehoseArn ?excludeFilters ?includeFilters
+        ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a metric stream. Metric streams can automatically stream CloudWatch metrics to Amazon Web Services destinations including Amazon S3 and to many third-party solutions. For more information, see Using Metric Streams. To create a metric stream, you must be logged on to an account that has the iam:PassRole permission and either the CloudWatchFullAccess policy or the cloudwatch:PutMetricStream permission. When you create or update a metric stream, you choose one of the following: Stream metrics from all metric namespaces in the account. Stream metrics from all metric namespaces in the account, except for the namespaces that you list in ExcludeFilters. Stream metrics from only the metric namespaces that you list in IncludeFilters. By default, a metric stream always sends the MAX, MIN, SUM, and SAMPLECOUNT statistics for each metric that is streamed. You can use the StatisticsConfigurations parameter to have the metric stream also send extended statistics in the stream. Streaming extended statistics incurs additional costs. For more information, see Amazon CloudWatch Pricing. When you use PutMetricStream to create a new metric stream, the stream is created in the running state. If you use it to update an existing stream, the state of the stream is not changed."]
+       "Creates or updates a metric stream. Metric streams can automatically stream CloudWatch metrics to Amazon Web Services destinations, including Amazon S3, and to many third-party solutions. For more information, see Using Metric Streams. To create a metric stream, you must be signed in to an account that has the iam:PassRole permission and either the CloudWatchFullAccess policy or the cloudwatch:PutMetricStream permission. When you create or update a metric stream, you choose one of the following: Stream metrics from all metric namespaces in the account. Stream metrics from all metric namespaces in the account, except for the namespaces that you list in ExcludeFilters. Stream metrics from only the metric namespaces that you list in IncludeFilters. By default, a metric stream always sends the MAX, MIN, SUM, and SAMPLECOUNT statistics for each metric that is streamed. You can use the StatisticsConfigurations parameter to have the metric stream send additional statistics in the stream. Streaming additional statistics incurs additional costs. For more information, see Amazon CloudWatch Pricing. When you use PutMetricStream to create a new metric stream, the stream is created in the running state. If you use it to update an existing stream, the state of the stream is not changed. If you are using CloudWatch cross-account observability and you create a metric stream in a monitoring account, you can choose whether to include metrics from source accounts in the stream. For more information, see CloudWatch cross-account observability."]
 module PutMetricDataInput =
   struct
     type nonrec t =
       {
       namespace: Namespace.t
         [@ocaml.doc
-          "The namespace for the metric data. To avoid conflicts with Amazon Web Services service namespaces, you should not specify a namespace that begins with AWS/"];
-      metricData: MetricData.t
+          "The namespace for the metric data. You can use ASCII characters for the namespace, except for control characters which are not supported. To avoid conflicts with Amazon Web Services service namespaces, you should not specify a namespace that begins with AWS/"];
+      metricData: MetricData.t option
         [@ocaml.doc
-          "The data for the metric. The array can include no more than 20 metrics per call."]}
+          "The data for the metrics. Use this parameter if your metrics do not contain associated entities. The array can include no more than 1000 metrics per call. The limit of metrics allowed, 1000, is the sum of both EntityMetricData and MetricData metrics."];
+      entityMetricData: EntityMetricDataList.t option
+        [@ocaml.doc
+          "Data for metrics that contain associated entity information. You can include up to two EntityMetricData objects, each of which can contain a single Entity and associated metrics. The limit of metrics allowed, 1000, is the sum of both EntityMetricData and MetricData metrics."];
+      strictEntityValidation: StrictEntityValidation.t option
+        [@ocaml.doc
+          "Whether to accept valid metric data when an invalid entity is sent. When set to true: Any validation error (for entity or metric data) will fail the entire request, and no data will be ingested. The failed operation will return a 400 result with the error. When set to false: Validation errors in the entity will not associate the metric with the entity, but the metric data will still be accepted and ingested. Validation errors in the metric data will fail the entire request, and no data will be ingested. In the case of an invalid entity, the operation will return a 200 status, but an additional response header will contain information about the validation errors. The new header, X-Amzn-Failure-Message is an enumeration of the following values: InvalidEntity - The provided entity is invalid. InvalidKeyAttributes - The provided KeyAttributes of an entity is invalid. InvalidAttributes - The provided Attributes of an entity is invalid. InvalidTypeValue - The provided Type in the KeyAttributes of an entity is invalid. EntitySizeTooLarge - The number of EntityMetricData objects allowed is 2. MissingRequiredFields - There are missing required fields in the KeyAttributes for the provided Type. For details of the requirements for specifying an entity, see How to add related information to telemetry in the CloudWatch User Guide. This parameter is required when EntityMetricData is included."]}
     let context_ = "PutMetricDataInput"
-    let make ~namespace =
-      fun ~metricData -> fun () -> { namespace; metricData }
+    let make ?metricData =
+      fun ?entityMetricData ->
+        fun ?strictEntityValidation ->
+          fun ~namespace ->
+            fun () ->
+              {
+                metricData;
+                entityMetricData;
+                strictEntityValidation;
+                namespace
+              }
     let to_value x =
       structure_to_value
         [("Namespace", (Some (Namespace.to_value x.namespace)));
-        ("MetricData", (Some (MetricData.to_value x.metricData)))]
+        ("MetricData", (Option.map x.metricData ~f:MetricData.to_value));
+        ("EntityMetricData",
+          (Option.map x.entityMetricData ~f:EntityMetricDataList.to_value));
+        ("StrictEntityValidation",
+          (Option.map x.strictEntityValidation
+             ~f:StrictEntityValidation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let strictEntityValidation =
+        (Option.map ~f:StrictEntityValidation.of_xml)
+          (Xml.child xml_arg0 "StrictEntityValidation") in
+      let entityMetricData =
+        (Option.map ~f:EntityMetricDataList.of_xml)
+          (Xml.child xml_arg0 "EntityMetricData") in
       let metricData =
-        MetricData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricData") in
+        (Option.map ~f:MetricData.of_xml) (Xml.child xml_arg0 "MetricData") in
       let namespace =
         Namespace.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
-      make ~metricData ~namespace ()
+      make ?strictEntityValidation ?entityMetricData ?metricData ~namespace
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metricData = field_map_exn json "MetricData" MetricData.of_json in
-      let namespace = field_map_exn json "Namespace" Namespace.of_json in
-      make ~metricData ~namespace ()
+    let of_json json__ =
+      let strictEntityValidation =
+        field_map json__ "StrictEntityValidation"
+          StrictEntityValidation.of_json in
+      let entityMetricData =
+        field_map json__ "EntityMetricData" EntityMetricDataList.of_json in
+      let metricData = field_map json__ "MetricData" MetricData.of_json in
+      let namespace = field_map_exn json__ "Namespace" Namespace.of_json in
+      make ?strictEntityValidation ?entityMetricData ?metricData ~namespace
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Publishes metric data points to Amazon CloudWatch. CloudWatch associates the data points with the specified metric. If the specified metric does not exist, CloudWatch creates the metric. When CloudWatch creates a metric, it can take up to fifteen minutes for the metric to appear in calls to ListMetrics. You can publish either individual data points in the Value field, or arrays of values and the number of times each value occurred during the period by using the Values and Counts fields in the MetricDatum structure. Using the Values and Counts method enables you to publish up to 150 values per metric with one PutMetricData request, and supports retrieving percentile statistics on this data. Each PutMetricData request is limited to 40 KB in size for HTTP POST requests. You can send a payload compressed by gzip. Each request is also limited to no more than 20 different metrics. Although the Value parameter accepts numbers of type Double, CloudWatch rejects values that are either too small or too large. Values must be in the range of -2^360 to 2^360. In addition, special values (for example, NaN, +Infinity, -Infinity) are not supported. You can use up to 10 dimensions per metric to further clarify what data the metric collects. Each dimension consists of a Name and Value pair. For more information about specifying dimensions, see Publishing Metrics in the Amazon CloudWatch User Guide. You specify the time stamp to be associated with each data point. You can specify time stamps that are as much as two weeks before the current date, and as much as 2 hours after the current day and time. Data points with time stamps from 24 hours ago or longer can take at least 48 hours to become available for GetMetricData or GetMetricStatistics from the time they are submitted. Data points with time stamps between 3 and 24 hours ago can take as much as 2 hours to become available for for GetMetricData or GetMetricStatistics. CloudWatch needs raw data points to calculate percentile statistics. If you publish data using a statistic set instead, you can only retrieve percentile statistics for this data if one of the following conditions is true: The SampleCount value of the statistic set is 1 and Min, Max, and Sum are all equal. The Min and Max are equal, and Sum is equal to Min multiplied by SampleCount."]
+       "Publishes metric data to Amazon CloudWatch. CloudWatch associates the data with the specified metric. If the specified metric does not exist, CloudWatch creates the metric. When CloudWatch creates a metric, it can take up to fifteen minutes for the metric to appear in calls to ListMetrics. You can publish metrics with associated entity data (so that related telemetry can be found and viewed together), or publish metric data by itself. To send entity data with your metrics, use the EntityMetricData parameter. To send metrics without entity data, use the MetricData parameter. The EntityMetricData structure includes MetricData structures for the metric data. You can publish either individual values in the Value field, or arrays of values and the number of times each value occurred during the period by using the Values and Counts fields in the MetricData structure. Using the Values and Counts method enables you to publish up to 150 values per metric with one PutMetricData request, and supports retrieving percentile statistics on this data. Each PutMetricData request is limited to 1 MB in size for HTTP POST requests. You can send a payload compressed by gzip. Each request is also limited to no more than 1000 different metrics (across both the MetricData and EntityMetricData properties). Although the Value parameter accepts numbers of type Double, CloudWatch rejects values that are either too small or too large. Values must be in the range of -2^360 to 2^360. In addition, special values (for example, NaN, +Infinity, -Infinity) are not supported. You can use up to 30 dimensions per metric to further clarify what data the metric collects. Each dimension consists of a Name and Value pair. For more information about specifying dimensions, see Publishing Metrics in the Amazon CloudWatch User Guide. You specify the time stamp to be associated with each data point. You can specify time stamps that are as much as two weeks before the current date, and as much as 2 hours after the current day and time. Data points with time stamps from 24 hours ago or longer can take at least 48 hours to become available for GetMetricData or GetMetricStatistics from the time they are submitted. Data points with time stamps between 3 and 24 hours ago can take as much as 2 hours to become available for GetMetricData or GetMetricStatistics. CloudWatch needs raw data points to calculate percentile statistics. If you publish data using a statistic set instead, you can only retrieve percentile statistics for this data if one of the following conditions is true: The SampleCount value of the statistic set is 1 and Min, Max, and Sum are all equal. The Min and Max are equal, and Sum is equal to Min multiplied by SampleCount."]
 module PutMetricAlarmInput =
   struct
     type nonrec t =
       {
       alarmName: AlarmName.t
         [@ocaml.doc
-          "The name for the alarm. This name must be unique within the Region."];
+          "The name for the alarm. This name must be unique within the Region. The name must contain only UTF-8 characters, and can't contain ASCII control characters"];
       alarmDescription: AlarmDescription.t option
         [@ocaml.doc "The description for the alarm."];
       actionsEnabled: ActionsEnabled.t option
@@ -5748,16 +7735,16 @@ module PutMetricAlarmInput =
           "Indicates whether actions should be executed during any changes to the alarm state. The default is TRUE."];
       oKActions: ResourceList.t option
         [@ocaml.doc
-          "The actions to execute when this alarm transitions to an OK state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid Values: arn:aws:automate:region:ec2:stop | arn:aws:automate:region:ec2:terminate | arn:aws:automate:region:ec2:recover | arn:aws:automate:region:ec2:reboot | arn:aws:sns:region:account-id:sns-topic-name | arn:aws:autoscaling:region:account-id:scalingPolicy:policy-id:autoScalingGroupName/group-friendly-name:policyName/policy-friendly-name Valid Values (for use with IAM roles): arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Stop/1.0 | arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Terminate/1.0 | arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Reboot/1.0 | arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Recover/1.0"];
+          "The actions to execute when this alarm transitions to an OK state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid values: EC2 actions: arn:aws:automate:region:ec2:stop arn:aws:automate:region:ec2:terminate arn:aws:automate:region:ec2:reboot arn:aws:automate:region:ec2:recover arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Stop/1.0 arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Terminate/1.0 arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Reboot/1.0 arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Recover/1.0 Autoscaling action: arn:aws:autoscaling:region:account-id:scalingPolicy:policy-id:autoScalingGroupName/group-friendly-name:policyName/policy-friendly-name Lambda actions: Invoke the latest version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name Invoke a specific version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name:version-number Invoke a function by using an alias Lambda function: arn:aws:lambda:region:account-id:function:function-name:alias-name SNS notification action: arn:aws:sns:region:account-id:sns-topic-name SSM integration actions: arn:aws:ssm:region:account-id:opsitem:severity#CATEGORY=category-name arn:aws:ssm-incidents::account-id:responseplan/response-plan-name"];
       alarmActions: ResourceList.t option
         [@ocaml.doc
-          "The actions to execute when this alarm transitions to the ALARM state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid Values: arn:aws:automate:region:ec2:stop | arn:aws:automate:region:ec2:terminate | arn:aws:automate:region:ec2:recover | arn:aws:automate:region:ec2:reboot | arn:aws:sns:region:account-id:sns-topic-name | arn:aws:autoscaling:region:account-id:scalingPolicy:policy-id:autoScalingGroupName/group-friendly-name:policyName/policy-friendly-name | arn:aws:ssm:region:account-id:opsitem:severity | arn:aws:ssm-incidents::account-id:response-plan:response-plan-name Valid Values (for use with IAM roles): arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Stop/1.0 | arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Terminate/1.0 | arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Reboot/1.0 | arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Recover/1.0"];
+          "The actions to execute when this alarm transitions to the ALARM state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid values: EC2 actions: arn:aws:automate:region:ec2:stop arn:aws:automate:region:ec2:terminate arn:aws:automate:region:ec2:reboot arn:aws:automate:region:ec2:recover arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Stop/1.0 arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Terminate/1.0 arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Reboot/1.0 arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Recover/1.0 Autoscaling action: arn:aws:autoscaling:region:account-id:scalingPolicy:policy-id:autoScalingGroupName/group-friendly-name:policyName/policy-friendly-name Lambda actions: Invoke the latest version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name Invoke a specific version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name:version-number Invoke a function by using an alias Lambda function: arn:aws:lambda:region:account-id:function:function-name:alias-name SNS notification action: arn:aws:sns:region:account-id:sns-topic-name SSM integration actions: arn:aws:ssm:region:account-id:opsitem:severity#CATEGORY=category-name arn:aws:ssm-incidents::account-id:responseplan/response-plan-name Start a Amazon Q Developer operational investigation arn:aws:aiops:region:account-id:investigation-group:investigation-group-id"];
       insufficientDataActions: ResourceList.t option
         [@ocaml.doc
-          "The actions to execute when this alarm transitions to the INSUFFICIENT_DATA state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid Values: arn:aws:automate:region:ec2:stop | arn:aws:automate:region:ec2:terminate | arn:aws:automate:region:ec2:recover | arn:aws:automate:region:ec2:reboot | arn:aws:sns:region:account-id:sns-topic-name | arn:aws:autoscaling:region:account-id:scalingPolicy:policy-id:autoScalingGroupName/group-friendly-name:policyName/policy-friendly-name Valid Values (for use with IAM roles): >arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Stop/1.0 | arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Terminate/1.0 | arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Reboot/1.0"];
+          "The actions to execute when this alarm transitions to the INSUFFICIENT_DATA state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid values: EC2 actions: arn:aws:automate:region:ec2:stop arn:aws:automate:region:ec2:terminate arn:aws:automate:region:ec2:reboot arn:aws:automate:region:ec2:recover arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Stop/1.0 arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Terminate/1.0 arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Reboot/1.0 arn:aws:swf:region:account-id:action/actions/AWS_EC2.InstanceId.Recover/1.0 Autoscaling action: arn:aws:autoscaling:region:account-id:scalingPolicy:policy-id:autoScalingGroupName/group-friendly-name:policyName/policy-friendly-name Lambda actions: Invoke the latest version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name Invoke a specific version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name:version-number Invoke a function by using an alias Lambda function: arn:aws:lambda:region:account-id:function:function-name:alias-name SNS notification action: arn:aws:sns:region:account-id:sns-topic-name SSM integration actions: arn:aws:ssm:region:account-id:opsitem:severity#CATEGORY=category-name arn:aws:ssm-incidents::account-id:responseplan/response-plan-name"];
       metricName: MetricName.t option
         [@ocaml.doc
-          "The name for the metric associated with the alarm. For each PutMetricAlarm operation, you must specify either MetricName or a Metrics array. If you are creating an alarm based on a math expression, you cannot specify this parameter, or any of the Dimensions, Period, Namespace, Statistic, or ExtendedStatistic parameters. Instead, you specify all this information in the Metrics array."];
+          "The name for the metric associated with the alarm. For each PutMetricAlarm operation, you must specify either MetricName, a Metrics array, or an EvaluationCriteria. If you are creating an alarm based on a math expression, you cannot specify this parameter, or any of the Namespace, Dimensions, Period, Unit, Statistic, or ExtendedStatistic parameters. Instead, you specify all this information in the Metrics array."];
       namespace: Namespace.t option
         [@ocaml.doc
           "The namespace for the metric associated specified in MetricName."];
@@ -5766,43 +7753,49 @@ module PutMetricAlarmInput =
           "The statistic for the metric specified in MetricName, other than percentile. For percentile statistics, use ExtendedStatistic. When you call PutMetricAlarm and specify a MetricName, you must specify either Statistic or ExtendedStatistic, but not both."];
       extendedStatistic: ExtendedStatistic.t option
         [@ocaml.doc
-          "The percentile statistic for the metric specified in MetricName. Specify a value between p0.0 and p100. When you call PutMetricAlarm and specify a MetricName, you must specify either Statistic or ExtendedStatistic, but not both."];
+          "The extended statistic for the metric specified in MetricName. When you call PutMetricAlarm and specify a MetricName, you must specify either Statistic or ExtendedStatistic but not both. If you specify ExtendedStatistic, the following are valid values: p90 tm90 tc90 ts90 wm90 IQM PR(n:m) where n and m are values of the metric TC(X%:X%) where X is between 10 and 90 inclusive. TM(X%:X%) where X is between 10 and 90 inclusive. TS(X%:X%) where X is between 10 and 90 inclusive. WM(X%:X%) where X is between 10 and 90 inclusive. For more information about these extended statistics, see CloudWatch statistics definitions."];
       dimensions: Dimensions.t option
         [@ocaml.doc "The dimensions for the metric specified in MetricName."];
       period: Period.t option
         [@ocaml.doc
-          "The length, in seconds, used each time the metric specified in MetricName is evaluated. Valid values are 10, 30, and any multiple of 60. Period is required for alarms based on static thresholds. If you are creating an alarm based on a metric math expression, you specify the period for each metric within the objects in the Metrics array. Be sure to specify 10 or 30 only for metrics that are stored by a PutMetricData call with a StorageResolution of 1. If you specify a period of 10 or 30 for a metric that does not have sub-minute resolution, the alarm still attempts to gather data at the period rate that you specify. In this case, it does not receive data for the attempts that do not correspond to a one-minute data resolution, and the alarm might often lapse into INSUFFICENT_DATA status. Specifying 10 or 30 also sets this alarm as a high-resolution alarm, which has a higher charge than other alarms. For more information about pricing, see Amazon CloudWatch Pricing. An alarm's total current evaluation period can be no longer than one day, so Period multiplied by EvaluationPeriods cannot be more than 86,400 seconds."];
+          "The length, in seconds, used each time the metric specified in MetricName is evaluated. Valid values are 10, 20, 30, and any multiple of 60. Period is required for alarms based on static thresholds. If you are creating an alarm based on a metric math expression, you specify the period for each metric within the objects in the Metrics array. Be sure to specify 10, 20, or 30 only for metrics that are stored by a PutMetricData call with a StorageResolution of 1. If you specify a period of 10, 20, or 30 for a metric that does not have sub-minute resolution, the alarm still attempts to gather data at the period rate that you specify. In this case, it does not receive data for the attempts that do not correspond to a one-minute data resolution, and the alarm might often lapse into INSUFFICENT_DATA status. Specifying 10, 20, or 30 also sets this alarm as a high-resolution alarm, which has a higher charge than other alarms. For more information about pricing, see Amazon CloudWatch Pricing. An alarm's total current evaluation period can be no longer than seven days, so Period multiplied by EvaluationPeriods can't be more than 604,800 seconds. For alarms with a period of less than one hour (3,600 seconds), the total evaluation period can't be longer than one day (86,400 seconds)."];
       unit: StandardUnit.t option
         [@ocaml.doc
-          "The unit of measure for the statistic. For example, the units for the Amazon EC2 NetworkIn metric are Bytes because NetworkIn tracks the number of bytes that an instance receives on all network interfaces. You can also specify a unit when you create a custom metric. Units help provide conceptual meaning to your data. Metric data points that specify a unit of measure, such as Percent, are aggregated separately. If you don't specify Unit, CloudWatch retrieves all unit types that have been published for the metric and attempts to evaluate the alarm. Usually, metrics are published with only one unit, so the alarm works as intended. However, if the metric is published with multiple types of units and you don't specify a unit, the alarm's behavior is not defined and it behaves predictably. We recommend omitting Unit so that you don't inadvertently specify an incorrect unit that is not published for this metric. Doing so causes the alarm to be stuck in the INSUFFICIENT DATA state."];
-      evaluationPeriods: EvaluationPeriods.t
+          "The unit of measure for the statistic. For example, the units for the Amazon EC2 NetworkIn metric are Bytes because NetworkIn tracks the number of bytes that an instance receives on all network interfaces. You can also specify a unit when you create a custom metric. Units help provide conceptual meaning to your data. Metric data points that specify a unit of measure, such as Percent, are aggregated separately. If you are creating an alarm based on a metric math expression, you can specify the unit for each metric (if needed) within the objects in the Metrics array. If you don't specify Unit, CloudWatch retrieves all unit types that have been published for the metric and attempts to evaluate the alarm. Usually, metrics are published with only one unit, so the alarm works as intended. However, if the metric is published with multiple types of units and you don't specify a unit, the alarm's behavior is not defined and it behaves unpredictably. We recommend omitting Unit so that you don't inadvertently specify an incorrect unit that is not published for this metric. Doing so causes the alarm to be stuck in the INSUFFICIENT DATA state."];
+      evaluationPeriods: EvaluationPeriods.t option
         [@ocaml.doc
-          "The number of periods over which data is compared to the specified threshold. If you are setting an alarm that requires that a number of consecutive data points be breaching to trigger the alarm, this value specifies that number. If you are setting an \"M out of N\" alarm, this value is the N. An alarm's total current evaluation period can be no longer than one day, so this number multiplied by Period cannot be more than 86,400 seconds."];
+          "The number of periods over which data is compared to the specified threshold. If you are setting an alarm that requires that a number of consecutive data points be breaching to trigger the alarm, this value specifies that number. If you are setting an \"M out of N\" alarm, this value is the N."];
       datapointsToAlarm: DatapointsToAlarm.t option
         [@ocaml.doc
           "The number of data points that must be breaching to trigger the alarm. This is used only if you are setting an \"M out of N\" alarm. In that case, this value is the M. For more information, see Evaluating an Alarm in the Amazon CloudWatch User Guide."];
       threshold: Threshold.t option
         [@ocaml.doc
           "The value against which the specified statistic is compared. This parameter is required for alarms based on static thresholds, but should not be used for alarms based on anomaly detection models."];
-      comparisonOperator: ComparisonOperator.t
+      comparisonOperator: ComparisonOperator.t option
         [@ocaml.doc
           "The arithmetic operation to use when comparing the specified statistic and threshold. The specified statistic value is used as the first operand. The values LessThanLowerOrGreaterThanUpperThreshold, LessThanLowerThreshold, and GreaterThanUpperThreshold are used only for alarms based on anomaly detection models."];
       treatMissingData: TreatMissingData.t option
         [@ocaml.doc
-          "Sets how this alarm is to handle missing data points. If TreatMissingData is omitted, the default behavior of missing is used. For more information, see Configuring How CloudWatch Alarms Treats Missing Data. Valid Values: breaching | notBreaching | ignore | missing"];
+          "Sets how this alarm is to handle missing data points. If TreatMissingData is omitted, the default behavior of missing is used. For more information, see Configuring How CloudWatch Alarms Treats Missing Data. Valid Values: breaching | notBreaching | ignore | missing Alarms that evaluate metrics in the AWS/DynamoDB namespace always ignore missing data even if you choose a different option for TreatMissingData. When an AWS/DynamoDB metric has missing data, alarms that evaluate that metric remain in their current state. This parameter is not applicable to PromQL alarms."];
       evaluateLowSampleCountPercentile:
         EvaluateLowSampleCountPercentile.t option
         [@ocaml.doc
           "Used only for alarms based on percentiles. If you specify ignore, the alarm state does not change during periods with too few data points to be statistically significant. If you specify evaluate or omit this parameter, the alarm is always evaluated and possibly changes state no matter how many data points are available. For more information, see Percentile-Based CloudWatch Alarms and Low Data Samples. Valid Values: evaluate | ignore"];
       metrics: MetricDataQueries.t option
         [@ocaml.doc
-          "An array of MetricDataQuery structures that enable you to create an alarm based on the result of a metric math expression. For each PutMetricAlarm operation, you must specify either MetricName or a Metrics array. Each item in the Metrics array either retrieves a metric or performs a math expression. One item in the Metrics array is the expression that the alarm watches. You designate this expression by setting ReturnData to true for this object in the array. For more information, see MetricDataQuery. If you use the Metrics parameter, you cannot include the MetricName, Dimensions, Period, Namespace, Statistic, or ExtendedStatistic parameters of PutMetricAlarm in the same operation. Instead, you retrieve the metrics you are using in your math expression as part of the Metrics array."];
+          "An array of MetricDataQuery structures that enable you to create an alarm based on the result of a metric math expression. For each PutMetricAlarm operation, you must specify either MetricName, a Metrics array, or an EvaluationCriteria. Each item in the Metrics array either retrieves a metric or performs a math expression. One item in the Metrics array is the expression that the alarm watches. You designate this expression by setting ReturnData to true for this object in the array. For more information, see MetricDataQuery. If you use the Metrics parameter, you cannot include the Namespace, MetricName, Dimensions, Period, Unit, Statistic, or ExtendedStatistic parameters of PutMetricAlarm in the same operation. Instead, you retrieve the metrics you are using in your math expression as part of the Metrics array."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of key-value pairs to associate with the alarm. You can associate as many as 50 tags with an alarm. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. If you are using this operation to update an existing alarm, any tags you specify in this parameter are ignored. To change the tags of an existing alarm, use TagResource or UntagResource."];
+          "A list of key-value pairs to associate with the alarm. You can associate as many as 50 tags with an alarm. To be able to associate tags with the alarm when you create the alarm, you must have the cloudwatch:TagResource permission. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. If you are using this operation to update an existing alarm, any tags you specify in this parameter are ignored. To change the tags of an existing alarm, use TagResource or UntagResource. To use this field to set tags for an alarm when you create it, you must be signed on with both the cloudwatch:PutMetricAlarm and cloudwatch:TagResource permissions."];
       thresholdMetricId: MetricId.t option
         [@ocaml.doc
-          "If this is an alarm based on an anomaly detection model, make this value match the ID of the ANOMALY_DETECTION_BAND function. For an example of how to use this parameter, see the Anomaly Detection Model Alarm example on this page. If your alarm uses this parameter, it cannot have Auto Scaling actions."]}
+          "If this is an alarm based on an anomaly detection model, make this value match the ID of the ANOMALY_DETECTION_BAND function. For an example of how to use this parameter, see the Anomaly Detection Model Alarm example on this page. If your alarm uses this parameter, it cannot have Auto Scaling actions."];
+      evaluationCriteria: EvaluationCriteria.t option
+        [@ocaml.doc
+          "The evaluation criteria for the alarm. For each PutMetricAlarm operation, you must specify either MetricName, a Metrics array, or an EvaluationCriteria. If you use the EvaluationCriteria parameter, you cannot include the Namespace, MetricName, Dimensions, Period, Unit, Statistic, ExtendedStatistic, Metrics, Threshold, ComparisonOperator, ThresholdMetricId, EvaluationPeriods, or DatapointsToAlarm parameters of PutMetricAlarm in the same operation. Instead, all evaluation parameters are defined within this structure. For an example of how to use this parameter, see the PromQL alarm example on this page."];
+      evaluationInterval: EvaluationInterval.t option
+        [@ocaml.doc
+          "The frequency, in seconds, at which the alarm is evaluated. Valid values are 10, 20, 30, and any multiple of 60. This parameter is required for alarms that use EvaluationCriteria, and cannot be specified for alarms configured with MetricName or Metrics."]}
     let context_ = "PutMetricAlarmInput"
     let make ?alarmDescription =
       fun ?actionsEnabled ->
@@ -5816,41 +7809,46 @@ module PutMetricAlarmInput =
                       fun ?dimensions ->
                         fun ?period ->
                           fun ?unit ->
-                            fun ?datapointsToAlarm ->
-                              fun ?threshold ->
-                                fun ?treatMissingData ->
-                                  fun ?evaluateLowSampleCountPercentile ->
-                                    fun ?metrics ->
-                                      fun ?tags ->
-                                        fun ?thresholdMetricId ->
-                                          fun ~alarmName ->
-                                            fun ~evaluationPeriods ->
-                                              fun ~comparisonOperator ->
-                                                fun () ->
-                                                  {
-                                                    alarmDescription;
-                                                    actionsEnabled;
-                                                    oKActions;
-                                                    alarmActions;
-                                                    insufficientDataActions;
-                                                    metricName;
-                                                    namespace;
-                                                    statistic;
-                                                    extendedStatistic;
-                                                    dimensions;
-                                                    period;
-                                                    unit;
-                                                    datapointsToAlarm;
-                                                    threshold;
-                                                    treatMissingData;
-                                                    evaluateLowSampleCountPercentile;
-                                                    metrics;
-                                                    tags;
-                                                    thresholdMetricId;
-                                                    alarmName;
-                                                    evaluationPeriods;
-                                                    comparisonOperator
-                                                  }
+                            fun ?evaluationPeriods ->
+                              fun ?datapointsToAlarm ->
+                                fun ?threshold ->
+                                  fun ?comparisonOperator ->
+                                    fun ?treatMissingData ->
+                                      fun ?evaluateLowSampleCountPercentile
+                                        ->
+                                        fun ?metrics ->
+                                          fun ?tags ->
+                                            fun ?thresholdMetricId ->
+                                              fun ?evaluationCriteria ->
+                                                fun ?evaluationInterval ->
+                                                  fun ~alarmName ->
+                                                    fun () ->
+                                                      {
+                                                        alarmDescription;
+                                                        actionsEnabled;
+                                                        oKActions;
+                                                        alarmActions;
+                                                        insufficientDataActions;
+                                                        metricName;
+                                                        namespace;
+                                                        statistic;
+                                                        extendedStatistic;
+                                                        dimensions;
+                                                        period;
+                                                        unit;
+                                                        evaluationPeriods;
+                                                        datapointsToAlarm;
+                                                        threshold;
+                                                        comparisonOperator;
+                                                        treatMissingData;
+                                                        evaluateLowSampleCountPercentile;
+                                                        metrics;
+                                                        tags;
+                                                        thresholdMetricId;
+                                                        evaluationCriteria;
+                                                        evaluationInterval;
+                                                        alarmName
+                                                      }
     let to_value x =
       structure_to_value
         [("AlarmName", (Some (AlarmName.to_value x.alarmName)));
@@ -5872,12 +7870,12 @@ module PutMetricAlarmInput =
         ("Period", (Option.map x.period ~f:Period.to_value));
         ("Unit", (Option.map x.unit ~f:StandardUnit.to_value));
         ("EvaluationPeriods",
-          (Some (EvaluationPeriods.to_value x.evaluationPeriods)));
+          (Option.map x.evaluationPeriods ~f:EvaluationPeriods.to_value));
         ("DatapointsToAlarm",
           (Option.map x.datapointsToAlarm ~f:DatapointsToAlarm.to_value));
         ("Threshold", (Option.map x.threshold ~f:Threshold.to_value));
         ("ComparisonOperator",
-          (Some (ComparisonOperator.to_value x.comparisonOperator)));
+          (Option.map x.comparisonOperator ~f:ComparisonOperator.to_value));
         ("TreatMissingData",
           (Option.map x.treatMissingData ~f:TreatMissingData.to_value));
         ("EvaluateLowSampleCountPercentile",
@@ -5886,9 +7884,19 @@ module PutMetricAlarmInput =
         ("Metrics", (Option.map x.metrics ~f:MetricDataQueries.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("ThresholdMetricId",
-          (Option.map x.thresholdMetricId ~f:MetricId.to_value))]
+          (Option.map x.thresholdMetricId ~f:MetricId.to_value));
+        ("EvaluationCriteria",
+          (Option.map x.evaluationCriteria ~f:EvaluationCriteria.to_value));
+        ("EvaluationInterval",
+          (Option.map x.evaluationInterval ~f:EvaluationInterval.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let evaluationInterval =
+        (Option.map ~f:EvaluationInterval.of_xml)
+          (Xml.child xml_arg0 "EvaluationInterval") in
+      let evaluationCriteria =
+        (Option.map ~f:EvaluationCriteria.of_xml)
+          (Xml.child xml_arg0 "EvaluationCriteria") in
       let thresholdMetricId =
         (Option.map ~f:MetricId.of_xml)
           (Xml.child xml_arg0 "ThresholdMetricId") in
@@ -5903,16 +7911,16 @@ module PutMetricAlarmInput =
         (Option.map ~f:TreatMissingData.of_xml)
           (Xml.child xml_arg0 "TreatMissingData") in
       let comparisonOperator =
-        ComparisonOperator.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ComparisonOperator") in
+        (Option.map ~f:ComparisonOperator.of_xml)
+          (Xml.child xml_arg0 "ComparisonOperator") in
       let threshold =
         (Option.map ~f:Threshold.of_xml) (Xml.child xml_arg0 "Threshold") in
       let datapointsToAlarm =
         (Option.map ~f:DatapointsToAlarm.of_xml)
           (Xml.child xml_arg0 "DatapointsToAlarm") in
       let evaluationPeriods =
-        EvaluationPeriods.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EvaluationPeriods") in
+        (Option.map ~f:EvaluationPeriods.of_xml)
+          (Xml.child xml_arg0 "EvaluationPeriods") in
       let unit =
         (Option.map ~f:StandardUnit.of_xml) (Xml.child xml_arg0 "Unit") in
       let period =
@@ -5945,56 +7953,162 @@ module PutMetricAlarmInput =
       let alarmName =
         AlarmName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmName") in
-      make ?thresholdMetricId ?tags ?metrics
-        ?evaluateLowSampleCountPercentile ?treatMissingData
-        ~comparisonOperator ?threshold ?datapointsToAlarm ~evaluationPeriods
+      make ?evaluationInterval ?evaluationCriteria ?thresholdMetricId ?tags
+        ?metrics ?evaluateLowSampleCountPercentile ?treatMissingData
+        ?comparisonOperator ?threshold ?datapointsToAlarm ?evaluationPeriods
         ?unit ?period ?dimensions ?extendedStatistic ?statistic ?namespace
         ?metricName ?insufficientDataActions ?alarmActions ?oKActions
         ?actionsEnabled ?alarmDescription ~alarmName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let evaluationInterval =
+        field_map json__ "EvaluationInterval" EvaluationInterval.of_json in
+      let evaluationCriteria =
+        field_map json__ "EvaluationCriteria" EvaluationCriteria.of_json in
       let thresholdMetricId =
-        field_map json "ThresholdMetricId" MetricId.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let metrics = field_map json "Metrics" MetricDataQueries.of_json in
+        field_map json__ "ThresholdMetricId" MetricId.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let metrics = field_map json__ "Metrics" MetricDataQueries.of_json in
       let evaluateLowSampleCountPercentile =
-        field_map json "EvaluateLowSampleCountPercentile"
+        field_map json__ "EvaluateLowSampleCountPercentile"
           EvaluateLowSampleCountPercentile.of_json in
       let treatMissingData =
-        field_map json "TreatMissingData" TreatMissingData.of_json in
+        field_map json__ "TreatMissingData" TreatMissingData.of_json in
       let comparisonOperator =
-        field_map_exn json "ComparisonOperator" ComparisonOperator.of_json in
-      let threshold = field_map json "Threshold" Threshold.of_json in
+        field_map json__ "ComparisonOperator" ComparisonOperator.of_json in
+      let threshold = field_map json__ "Threshold" Threshold.of_json in
       let datapointsToAlarm =
-        field_map json "DatapointsToAlarm" DatapointsToAlarm.of_json in
+        field_map json__ "DatapointsToAlarm" DatapointsToAlarm.of_json in
       let evaluationPeriods =
-        field_map_exn json "EvaluationPeriods" EvaluationPeriods.of_json in
-      let unit = field_map json "Unit" StandardUnit.of_json in
-      let period = field_map json "Period" Period.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
+        field_map json__ "EvaluationPeriods" EvaluationPeriods.of_json in
+      let unit = field_map json__ "Unit" StandardUnit.of_json in
+      let period = field_map json__ "Period" Period.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
       let extendedStatistic =
-        field_map json "ExtendedStatistic" ExtendedStatistic.of_json in
-      let statistic = field_map json "Statistic" Statistic.of_json in
-      let namespace = field_map json "Namespace" Namespace.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
+        field_map json__ "ExtendedStatistic" ExtendedStatistic.of_json in
+      let statistic = field_map json__ "Statistic" Statistic.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
       let insufficientDataActions =
-        field_map json "InsufficientDataActions" ResourceList.of_json in
-      let alarmActions = field_map json "AlarmActions" ResourceList.of_json in
-      let oKActions = field_map json "OKActions" ResourceList.of_json in
+        field_map json__ "InsufficientDataActions" ResourceList.of_json in
+      let alarmActions = field_map json__ "AlarmActions" ResourceList.of_json in
+      let oKActions = field_map json__ "OKActions" ResourceList.of_json in
       let actionsEnabled =
-        field_map json "ActionsEnabled" ActionsEnabled.of_json in
+        field_map json__ "ActionsEnabled" ActionsEnabled.of_json in
       let alarmDescription =
-        field_map json "AlarmDescription" AlarmDescription.of_json in
-      let alarmName = field_map_exn json "AlarmName" AlarmName.of_json in
-      make ?thresholdMetricId ?tags ?metrics
-        ?evaluateLowSampleCountPercentile ?treatMissingData
-        ~comparisonOperator ?threshold ?datapointsToAlarm ~evaluationPeriods
+        field_map json__ "AlarmDescription" AlarmDescription.of_json in
+      let alarmName = field_map_exn json__ "AlarmName" AlarmName.of_json in
+      make ?evaluationInterval ?evaluationCriteria ?thresholdMetricId ?tags
+        ?metrics ?evaluateLowSampleCountPercentile ?treatMissingData
+        ?comparisonOperator ?threshold ?datapointsToAlarm ?evaluationPeriods
         ?unit ?period ?dimensions ?extendedStatistic ?statistic ?namespace
         ?metricName ?insufficientDataActions ?alarmActions ?oKActions
         ?actionsEnabled ?alarmDescription ~alarmName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates an alarm and associates it with the specified metric, metric math expression, or anomaly detection model. Alarms based on anomaly detection models cannot have Auto Scaling actions. When this operation creates an alarm, the alarm state is immediately set to INSUFFICIENT_DATA. The alarm is then evaluated and its state is set appropriately. Any actions associated with the new state are then executed. When you update an existing alarm, its state is left unchanged, but the update completely overwrites the previous configuration of the alarm. If you are an IAM user, you must have Amazon EC2 permissions for some alarm operations: The iam:CreateServiceLinkedRole for all alarms with EC2 actions The iam:CreateServiceLinkedRole to create an alarm with Systems Manager OpsItem actions. The first time you create an alarm in the Amazon Web Services Management Console, the CLI, or by using the PutMetricAlarm API, CloudWatch creates the necessary service-linked role for you. The service-linked roles are called AWSServiceRoleForCloudWatchEvents and AWSServiceRoleForCloudWatchAlarms_ActionSSM. For more information, see Amazon Web Services service-linked role. Cross-account alarms You can set an alarm on metrics in the current account, or in another account. To create a cross-account alarm that watches a metric in a different account, you must have completed the following pre-requisites: The account where the metrics are located (the sharing account) must already have a sharing role named CloudWatch-CrossAccountSharingRole. If it does not already have this role, you must create it using the instructions in Set up a sharing account in Cross-account cross-Region CloudWatch console. The policy for that role must grant access to the ID of the account where you are creating the alarm. The account where you are creating the alarm (the monitoring account) must already have a service-linked role named AWSServiceRoleForCloudWatchCrossAccount to allow CloudWatch to assume the sharing role in the sharing account. If it does not, you must create it following the directions in Set up a monitoring account in Cross-account cross-Region CloudWatch console."]
+       "Creates or updates an alarm and associates it with the specified metric, metric math expression, anomaly detection model, Metrics Insights query, or PromQL query. For more information about using a Metrics Insights query for an alarm, see Create alarms on Metrics Insights queries. Alarms based on anomaly detection models cannot have Auto Scaling actions. When this operation creates an alarm, the alarm state is immediately set to INSUFFICIENT_DATA. For PromQL alarms, the alarm state is instead immediately set to OK. The alarm is then evaluated and its state is set appropriately. Any actions associated with the new state are then executed. When you update an existing alarm, its state is left unchanged, but the update completely overwrites the previous configuration of the alarm. If you are an IAM user, you must have Amazon EC2 permissions for some alarm operations: The iam:CreateServiceLinkedRole permission for all alarms with EC2 actions The iam:CreateServiceLinkedRole permissions to create an alarm with Systems Manager OpsItem or response plan actions. The first time you create an alarm in the Amazon Web Services Management Console, the CLI, or by using the PutMetricAlarm API, CloudWatch creates the necessary service-linked role for you. The service-linked roles are called AWSServiceRoleForCloudWatchEvents and AWSServiceRoleForCloudWatchAlarms_ActionSSM. For more information, see Amazon Web Services service-linked role. Each PutMetricAlarm action has a maximum uncompressed payload of 120 KB. Cross-account alarms You can set an alarm on metrics in the current account, or in another account. To create a cross-account alarm that watches a metric in a different account, you must have completed the following pre-requisites: The account where the metrics are located (the sharing account) must already have a sharing role named CloudWatch-CrossAccountSharingRole. If it does not already have this role, you must create it using the instructions in Set up a sharing account in Cross-account cross-Region CloudWatch console. The policy for that role must grant access to the ID of the account where you are creating the alarm. The account where you are creating the alarm (the monitoring account) must already have a service-linked role named AWSServiceRoleForCloudWatchCrossAccount to allow CloudWatch to assume the sharing role in the sharing account. If it does not, you must create it following the directions in Set up a monitoring account in Cross-account cross-Region CloudWatch console."]
+module PutManagedInsightRulesOutput =
+  struct
+    type putManagedInsightRulesResult =
+      {
+      failures: BatchFailures.t option
+        [@ocaml.doc
+          "An array that lists the rules that could not be enabled."]}
+    and responseMetaData = unit
+    and t =
+      {
+      putManagedInsightRulesResult: putManagedInsightRulesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MissingRequiredParameterException of
+          MissingRequiredParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "PutManagedInsightRulesOutput"
+    let make ?failures =
+      fun () ->
+        { putManagedInsightRulesResult = { failures }; responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MissingRequiredParameterException" ->
+          `MissingRequiredParameterException
+            (MissingRequiredParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MissingRequiredParameterException" ->
+          `MissingRequiredParameterException
+            (MissingRequiredParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MissingRequiredParameterException e ->
+          `Assoc
+            [("error", (`String "MissingRequiredParameterException"));
+            ("details", (MissingRequiredParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.putManagedInsightRulesResult in
+      structure_to_wrapped_value
+        [("Failures", (Option.map x.failures ~f:BatchFailures.to_value))]
+        ~wrapper:"PutManagedInsightRulesResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "PutManagedInsightRulesResult" in
+      let failures =
+        (Option.map ~f:BatchFailures.of_xml) (Xml.child xml_arg0 "Failures") in
+      make ?failures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failures = field_map json__ "Failures" BatchFailures.of_json in
+      make ?failures ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a managed Contributor Insights rule for a specified Amazon Web Services resource. When you enable a managed rule, you create a Contributor Insights rule that collects data from Amazon Web Services services. You cannot edit these rules with PutInsightRule. The rules can be enabled, disabled, and deleted using EnableInsightRules, DisableInsightRules, and DeleteInsightRules. If a previously created managed rule is currently disabled, a subsequent call to this API will re-enable it. Use ListManagedInsightRules to describe all available rules."]
+module PutManagedInsightRulesInput =
+  struct
+    type nonrec t =
+      {
+      managedRules: ManagedRules.t
+        [@ocaml.doc "A list of ManagedRules to enable."]}
+    let context_ = "PutManagedInsightRulesInput"
+    let make ~managedRules = fun () -> { managedRules }
+    let to_value x =
+      structure_to_value
+        [("ManagedRules", (Some (ManagedRules.to_value x.managedRules)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let managedRules =
+        ManagedRules.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ManagedRules") in
+      make ~managedRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let managedRules =
+        field_map_exn json__ "ManagedRules" ManagedRules.of_json in
+      make ~managedRules ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a managed Contributor Insights rule for a specified Amazon Web Services resource. When you enable a managed rule, you create a Contributor Insights rule that collects data from Amazon Web Services services. You cannot edit these rules with PutInsightRule. The rules can be enabled, disabled, and deleted using EnableInsightRules, DisableInsightRules, and DeleteInsightRules. If a previously created managed rule is currently disabled, a subsequent call to this API will re-enable it. Use ListManagedInsightRules to describe all available rules."]
 module PutInsightRuleOutput =
   struct
     type putInsightRuleResult = unit
@@ -6076,22 +8190,39 @@ module PutInsightRuleInput =
           "The definition of the rule, as a JSON object. For details on the valid syntax, see Contributor Insights Rule Syntax."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of key-value pairs to associate with the Contributor Insights rule. You can associate as many as 50 tags with a rule. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only the resources that have certain tag values. To be able to associate tags with a rule, you must have the cloudwatch:TagResource permission in addition to the cloudwatch:PutInsightRule permission. If you are using this operation to update an existing Contributor Insights rule, any tags you specify in this parameter are ignored. To change the tags of an existing rule, use TagResource."]}
+          "A list of key-value pairs to associate with the Contributor Insights rule. You can associate as many as 50 tags with a rule. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only the resources that have certain tag values. To be able to associate tags with a rule, you must have the cloudwatch:TagResource permission in addition to the cloudwatch:PutInsightRule permission. If you are using this operation to update an existing Contributor Insights rule, any tags you specify in this parameter are ignored. To change the tags of an existing rule, use TagResource."];
+      applyOnTransformedLogs: InsightRuleOnTransformedLogs.t option
+        [@ocaml.doc
+          "Specify true to have this rule evaluate log events after they have been transformed by Log transformation. If you specify true, then the log events in log groups that have transformers will be evaluated by Contributor Insights after being transformed. Log groups that don't have transformers will still have their original log events evaluated by Contributor Insights. The default is false If a log group has a transformer, and transformation fails for some log events, those log events won't be evaluated by Contributor Insights. For information about investigating log transformation failures, see Transformation metrics and errors."]}
     let context_ = "PutInsightRuleInput"
     let make ?ruleState =
       fun ?tags ->
-        fun ~ruleName ->
-          fun ~ruleDefinition ->
-            fun () -> { ruleState; tags; ruleName; ruleDefinition }
+        fun ?applyOnTransformedLogs ->
+          fun ~ruleName ->
+            fun ~ruleDefinition ->
+              fun () ->
+                {
+                  ruleState;
+                  tags;
+                  applyOnTransformedLogs;
+                  ruleName;
+                  ruleDefinition
+                }
     let to_value x =
       structure_to_value
         [("RuleName", (Some (InsightRuleName.to_value x.ruleName)));
         ("RuleState", (Option.map x.ruleState ~f:InsightRuleState.to_value));
         ("RuleDefinition",
           (Some (InsightRuleDefinition.to_value x.ruleDefinition)));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ApplyOnTransformedLogs",
+          (Option.map x.applyOnTransformedLogs
+             ~f:InsightRuleOnTransformedLogs.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applyOnTransformedLogs =
+        (Option.map ~f:InsightRuleOnTransformedLogs.of_xml)
+          (Xml.child xml_arg0 "ApplyOnTransformedLogs") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let ruleDefinition =
         InsightRuleDefinition.of_xml
@@ -6102,15 +8233,20 @@ module PutInsightRuleInput =
       let ruleName =
         InsightRuleName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleName") in
-      make ?tags ~ruleDefinition ?ruleState ~ruleName ()
+      make ?applyOnTransformedLogs ?tags ~ruleDefinition ?ruleState ~ruleName
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let applyOnTransformedLogs =
+        field_map json__ "ApplyOnTransformedLogs"
+          InsightRuleOnTransformedLogs.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let ruleDefinition =
-        field_map_exn json "RuleDefinition" InsightRuleDefinition.of_json in
-      let ruleState = field_map json "RuleState" InsightRuleState.of_json in
-      let ruleName = field_map_exn json "RuleName" InsightRuleName.of_json in
-      make ?tags ~ruleDefinition ?ruleState ~ruleName ()
+        field_map_exn json__ "RuleDefinition" InsightRuleDefinition.of_json in
+      let ruleState = field_map json__ "RuleState" InsightRuleState.of_json in
+      let ruleName = field_map_exn json__ "RuleName" InsightRuleName.of_json in
+      make ?applyOnTransformedLogs ?tags ~ruleDefinition ?ruleState ~ruleName
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a Contributor Insights rule. Rules evaluate log events in a CloudWatch Logs log group, enabling you to find contributor data for the log events in that log group. For more information, see Using Contributor Insights to Analyze High-Cardinality Data. If you create a rule, delete it, and then re-create it with the same name, historical data from the first time the rule was created might not be available."]
@@ -6127,7 +8263,8 @@ module PutDashboardOutput =
       putDashboardResult: putDashboardResult ;
       responseMetaData: responseMetaData }
     type error =
-      [ `DashboardInvalidInputError of DashboardInvalidInputError.t 
+      [ `ConflictException of ConflictException.t 
+      | `DashboardInvalidInputError of DashboardInvalidInputError.t 
       | `InternalServiceFault of InternalServiceFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "PutDashboardOutput"
@@ -6139,6 +8276,8 @@ module PutDashboardOutput =
         }
     let error_of_json name json =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "DashboardInvalidInputError" ->
           `DashboardInvalidInputError
             (DashboardInvalidInputError.of_json json)
@@ -6149,6 +8288,8 @@ module PutDashboardOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "DashboardInvalidInputError" ->
           `DashboardInvalidInputError (DashboardInvalidInputError.of_xml xml)
       | "InternalServiceFault" ->
@@ -6157,6 +8298,10 @@ module PutDashboardOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `DashboardInvalidInputError e ->
           `Assoc
             [("error", (`String "DashboardInvalidInputError"));
@@ -6185,9 +8330,9 @@ module PutDashboardOutput =
           (Xml.child xml_arg0 "DashboardValidationMessages") in
       make ?dashboardValidationMessages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dashboardValidationMessages =
-        field_map json "DashboardValidationMessages"
+        field_map json__ "DashboardValidationMessages"
           DashboardValidationMessages.of_json in
       make ?dashboardValidationMessages ()
     let to_json v = composed_to_json to_value v
@@ -6202,30 +8347,38 @@ module PutDashboardInput =
           "The name of the dashboard. If a dashboard with this name already exists, this call modifies that dashboard, replacing its current contents. Otherwise, a new dashboard is created. The maximum length is 255, and valid characters are A-Z, a-z, 0-9, \"-\", and \"_\". This parameter is required."];
       dashboardBody: DashboardBody.t
         [@ocaml.doc
-          "The detailed information about the dashboard in JSON format, including the widgets to include and their location on the dashboard. This parameter is required. For more information about the syntax, see Dashboard Body Structure and Syntax."]}
+          "The detailed information about the dashboard in JSON format, including the widgets to include and their location on the dashboard. This parameter is required. For more information about the syntax, see Dashboard Body Structure and Syntax."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of key-value pairs to associate with the dashboard. You can associate as many as 50 tags with a dashboard. Tags can help you organize and categorize your dashboards. You can also use them to scope user permissions by granting a user permission to access or change only dashboards with certain tag values. You can use this parameter only when creating a new dashboard. If you specify Tags when updating an existing dashboard, the tag updates are ignored. To add or update tags on an existing dashboard, use TagResource. To remove tags, use UntagResource."]}
     let context_ = "PutDashboardInput"
-    let make ~dashboardName =
-      fun ~dashboardBody -> fun () -> { dashboardName; dashboardBody }
+    let make ?tags =
+      fun ~dashboardName ->
+        fun ~dashboardBody ->
+          fun () -> { tags; dashboardName; dashboardBody }
     let to_value x =
       structure_to_value
         [("DashboardName", (Some (DashboardName.to_value x.dashboardName)));
-        ("DashboardBody", (Some (DashboardBody.to_value x.dashboardBody)))]
+        ("DashboardBody", (Some (DashboardBody.to_value x.dashboardBody)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let dashboardBody =
         DashboardBody.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardBody") in
       let dashboardName =
         DashboardName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardName") in
-      make ~dashboardBody ~dashboardName ()
+      make ?tags ~dashboardBody ~dashboardName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let dashboardBody =
-        field_map_exn json "DashboardBody" DashboardBody.of_json in
+        field_map_exn json__ "DashboardBody" DashboardBody.of_json in
       let dashboardName =
-        field_map_exn json "DashboardName" DashboardName.of_json in
-      make ~dashboardBody ~dashboardName ()
+        field_map_exn json__ "DashboardName" DashboardName.of_json in
+      make ?tags ~dashboardBody ~dashboardName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a dashboard if it does not already exist, or updates an existing dashboard. If you update a dashboard, the entire contents are replaced with what you specify here. All dashboards in your account are global, not region-specific. A simple way to create a dashboard using PutDashboard is to copy an existing dashboard. To copy an existing dashboard using the console, you can load the dashboard and then use the View/edit source command in the Actions menu to display the JSON block for that dashboard. Another way to copy a dashboard is to use GetDashboard, and then use the data returned within DashboardBody as the template for the new dashboard when you call PutDashboard. When you create a dashboard with PutDashboard, a good practice is to add a text widget at the top of the dashboard with a message that the dashboard was created by script and should not be changed in the console. This message could also point console users to the location of the DashboardBody script or the CloudFormation template used to create the dashboard."]
@@ -6238,7 +8391,7 @@ module PutCompositeAlarmInput =
           "Indicates whether actions should be executed during any changes to the alarm state of the composite alarm. The default is TRUE."];
       alarmActions: ResourceList.t option
         [@ocaml.doc
-          "The actions to execute when this alarm transitions to the ALARM state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid Values: arn:aws:sns:region:account-id:sns-topic-name | arn:aws:ssm:region:account-id:opsitem:severity"];
+          "The actions to execute when this alarm transitions to the ALARM state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid Values: \\] Amazon SNS actions: arn:aws:sns:region:account-id:sns-topic-name Lambda actions: Invoke the latest version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name Invoke a specific version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name:version-number Invoke a function by using an alias Lambda function: arn:aws:lambda:region:account-id:function:function-name:alias-name Systems Manager actions: arn:aws:ssm:region:account-id:opsitem:severity Start a Amazon Q Developer operational investigation arn:aws:aiops:region:account-id:investigation-group:investigation-group-id"];
       alarmDescription: AlarmDescription.t option
         [@ocaml.doc "The description for the composite alarm."];
       alarmName: AlarmName.t
@@ -6249,13 +8402,22 @@ module PutCompositeAlarmInput =
           "An expression that specifies which other alarms are to be evaluated to determine this composite alarm's state. For each alarm that you reference, you designate a function that specifies whether that alarm needs to be in ALARM state, OK state, or INSUFFICIENT_DATA state. You can use operators (AND, OR and NOT) to combine multiple functions in a single expression. You can use parenthesis to logically group the functions in your expression. You can use either alarm names or ARNs to reference the other alarms that are to be evaluated. Functions can include the following: ALARM(\"alarm-name or alarm-ARN\") is TRUE if the named alarm is in ALARM state. OK(\"alarm-name or alarm-ARN\") is TRUE if the named alarm is in OK state. INSUFFICIENT_DATA(\"alarm-name or alarm-ARN\") is TRUE if the named alarm is in INSUFFICIENT_DATA state. TRUE always evaluates to TRUE. FALSE always evaluates to FALSE. TRUE and FALSE are useful for testing a complex AlarmRule structure, and for testing your alarm actions. Alarm names specified in AlarmRule can be surrounded with double-quotes (\"), but do not have to be. The following are some examples of AlarmRule: ALARM(CPUUtilizationTooHigh) AND ALARM(DiskReadOpsTooHigh) specifies that the composite alarm goes into ALARM state only if both CPUUtilizationTooHigh and DiskReadOpsTooHigh alarms are in ALARM state. ALARM(CPUUtilizationTooHigh) AND NOT ALARM(DeploymentInProgress) specifies that the alarm goes to ALARM state if CPUUtilizationTooHigh is in ALARM state and DeploymentInProgress is not in ALARM state. This example reduces alarm noise during a known deployment window. (ALARM(CPUUtilizationTooHigh) OR ALARM(DiskReadOpsTooHigh)) AND OK(NetworkOutTooHigh) goes into ALARM state if CPUUtilizationTooHigh OR DiskReadOpsTooHigh is in ALARM state, and if NetworkOutTooHigh is in OK state. This provides another example of using a composite alarm to prevent noise. This rule ensures that you are not notified with an alarm action on high CPU or disk usage if a known network problem is also occurring. The AlarmRule can specify as many as 100 \"children\" alarms. The AlarmRule expression can have as many as 500 elements. Elements are child alarms, TRUE or FALSE statements, and parentheses."];
       insufficientDataActions: ResourceList.t option
         [@ocaml.doc
-          "The actions to execute when this alarm transitions to the INSUFFICIENT_DATA state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid Values: arn:aws:sns:region:account-id:sns-topic-name"];
+          "The actions to execute when this alarm transitions to the INSUFFICIENT_DATA state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid Values: \\] Amazon SNS actions: arn:aws:sns:region:account-id:sns-topic-name Lambda actions: Invoke the latest version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name Invoke a specific version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name:version-number Invoke a function by using an alias Lambda function: arn:aws:lambda:region:account-id:function:function-name:alias-name"];
       oKActions: ResourceList.t option
         [@ocaml.doc
-          "The actions to execute when this alarm transitions to an OK state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid Values: arn:aws:sns:region:account-id:sns-topic-name"];
+          "The actions to execute when this alarm transitions to an OK state from any other state. Each action is specified as an Amazon Resource Name (ARN). Valid Values: \\] Amazon SNS actions: arn:aws:sns:region:account-id:sns-topic-name Lambda actions: Invoke the latest version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name Invoke a specific version of a Lambda function: arn:aws:lambda:region:account-id:function:function-name:version-number Invoke a function by using an alias Lambda function: arn:aws:lambda:region:account-id:function:function-name:alias-name"];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of key-value pairs to associate with the composite alarm. You can associate as many as 50 tags with an alarm. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only resources with certain tag values."]}
+          "A list of key-value pairs to associate with the alarm. You can associate as many as 50 tags with an alarm. To be able to associate tags with the alarm when you create the alarm, you must have the cloudwatch:TagResource permission. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. If you are using this operation to update an existing alarm, any tags you specify in this parameter are ignored. To change the tags of an existing alarm, use TagResource or UntagResource."];
+      actionsSuppressor: AlarmArn.t option
+        [@ocaml.doc
+          "Actions will be suppressed if the suppressor alarm is in the ALARM state. ActionsSuppressor can be an AlarmName or an Amazon Resource Name (ARN) from an existing alarm."];
+      actionsSuppressorWaitPeriod: SuppressorPeriod.t option
+        [@ocaml.doc
+          "The maximum time in seconds that the composite alarm waits for the suppressor alarm to go into the ALARM state. After this time, the composite alarm performs its actions. WaitPeriod is required only when ActionsSuppressor is specified."];
+      actionsSuppressorExtensionPeriod: SuppressorPeriod.t option
+        [@ocaml.doc
+          "The maximum time in seconds that the composite alarm waits after suppressor alarm goes out of the ALARM state. After this time, the composite alarm performs its actions. ExtensionPeriod is required only when ActionsSuppressor is specified."]}
     let context_ = "PutCompositeAlarmInput"
     let make ?actionsEnabled =
       fun ?alarmActions ->
@@ -6263,19 +8425,25 @@ module PutCompositeAlarmInput =
           fun ?insufficientDataActions ->
             fun ?oKActions ->
               fun ?tags ->
-                fun ~alarmName ->
-                  fun ~alarmRule ->
-                    fun () ->
-                      {
-                        actionsEnabled;
-                        alarmActions;
-                        alarmDescription;
-                        insufficientDataActions;
-                        oKActions;
-                        tags;
-                        alarmName;
-                        alarmRule
-                      }
+                fun ?actionsSuppressor ->
+                  fun ?actionsSuppressorWaitPeriod ->
+                    fun ?actionsSuppressorExtensionPeriod ->
+                      fun ~alarmName ->
+                        fun ~alarmRule ->
+                          fun () ->
+                            {
+                              actionsEnabled;
+                              alarmActions;
+                              alarmDescription;
+                              insufficientDataActions;
+                              oKActions;
+                              tags;
+                              actionsSuppressor;
+                              actionsSuppressorWaitPeriod;
+                              actionsSuppressorExtensionPeriod;
+                              alarmName;
+                              alarmRule
+                            }
     let to_value x =
       structure_to_value
         [("ActionsEnabled",
@@ -6289,9 +8457,26 @@ module PutCompositeAlarmInput =
         ("InsufficientDataActions",
           (Option.map x.insufficientDataActions ~f:ResourceList.to_value));
         ("OKActions", (Option.map x.oKActions ~f:ResourceList.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ActionsSuppressor",
+          (Option.map x.actionsSuppressor ~f:AlarmArn.to_value));
+        ("ActionsSuppressorWaitPeriod",
+          (Option.map x.actionsSuppressorWaitPeriod
+             ~f:SuppressorPeriod.to_value));
+        ("ActionsSuppressorExtensionPeriod",
+          (Option.map x.actionsSuppressorExtensionPeriod
+             ~f:SuppressorPeriod.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let actionsSuppressorExtensionPeriod =
+        (Option.map ~f:SuppressorPeriod.of_xml)
+          (Xml.child xml_arg0 "ActionsSuppressorExtensionPeriod") in
+      let actionsSuppressorWaitPeriod =
+        (Option.map ~f:SuppressorPeriod.of_xml)
+          (Xml.child xml_arg0 "ActionsSuppressorWaitPeriod") in
+      let actionsSuppressor =
+        (Option.map ~f:AlarmArn.of_xml)
+          (Xml.child xml_arg0 "ActionsSuppressor") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let oKActions =
         (Option.map ~f:ResourceList.of_xml) (Xml.child xml_arg0 "OKActions") in
@@ -6313,26 +8498,38 @@ module PutCompositeAlarmInput =
       let actionsEnabled =
         (Option.map ~f:ActionsEnabled.of_xml)
           (Xml.child xml_arg0 "ActionsEnabled") in
-      make ?tags ?oKActions ?insufficientDataActions ~alarmRule ~alarmName
-        ?alarmDescription ?alarmActions ?actionsEnabled ()
+      make ?actionsSuppressorExtensionPeriod ?actionsSuppressorWaitPeriod
+        ?actionsSuppressor ?tags ?oKActions ?insufficientDataActions
+        ~alarmRule ~alarmName ?alarmDescription ?alarmActions ?actionsEnabled
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let oKActions = field_map json "OKActions" ResourceList.of_json in
+    let of_json json__ =
+      let actionsSuppressorExtensionPeriod =
+        field_map json__ "ActionsSuppressorExtensionPeriod"
+          SuppressorPeriod.of_json in
+      let actionsSuppressorWaitPeriod =
+        field_map json__ "ActionsSuppressorWaitPeriod"
+          SuppressorPeriod.of_json in
+      let actionsSuppressor =
+        field_map json__ "ActionsSuppressor" AlarmArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let oKActions = field_map json__ "OKActions" ResourceList.of_json in
       let insufficientDataActions =
-        field_map json "InsufficientDataActions" ResourceList.of_json in
-      let alarmRule = field_map_exn json "AlarmRule" AlarmRule.of_json in
-      let alarmName = field_map_exn json "AlarmName" AlarmName.of_json in
+        field_map json__ "InsufficientDataActions" ResourceList.of_json in
+      let alarmRule = field_map_exn json__ "AlarmRule" AlarmRule.of_json in
+      let alarmName = field_map_exn json__ "AlarmName" AlarmName.of_json in
       let alarmDescription =
-        field_map json "AlarmDescription" AlarmDescription.of_json in
-      let alarmActions = field_map json "AlarmActions" ResourceList.of_json in
+        field_map json__ "AlarmDescription" AlarmDescription.of_json in
+      let alarmActions = field_map json__ "AlarmActions" ResourceList.of_json in
       let actionsEnabled =
-        field_map json "ActionsEnabled" ActionsEnabled.of_json in
-      make ?tags ?oKActions ?insufficientDataActions ~alarmRule ~alarmName
-        ?alarmDescription ?alarmActions ?actionsEnabled ()
+        field_map json__ "ActionsEnabled" ActionsEnabled.of_json in
+      make ?actionsSuppressorExtensionPeriod ?actionsSuppressorWaitPeriod
+        ?actionsSuppressor ?tags ?oKActions ?insufficientDataActions
+        ~alarmRule ~alarmName ?alarmDescription ?alarmActions ?actionsEnabled
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a composite alarm. When you create a composite alarm, you specify a rule expression for the alarm that takes into account the alarm states of other alarms that you have created. The composite alarm goes into ALARM state only if all conditions of the rule are met. The alarms specified in a composite alarm's rule expression can include metric alarms and other composite alarms. The rule expression of a composite alarm can include as many as 100 underlying alarms. Any single alarm can be included in the rule expressions of as many as 150 composite alarms. Using composite alarms can reduce alarm noise. You can create multiple metric alarms, and also create a composite alarm and set up alerts only for the composite alarm. For example, you could create a composite alarm that goes into ALARM state only when more than one of the underlying metric alarms are in ALARM state. Currently, the only alarm actions that can be taken by composite alarms are notifying SNS topics. It is possible to create a loop or cycle of composite alarms, where composite alarm A depends on composite alarm B, and composite alarm B also depends on composite alarm A. In this scenario, you can't delete any composite alarm that is part of the cycle because there is always still a composite alarm that depends on that alarm that you want to delete. To get out of such a situation, you must break the cycle by changing the rule of one of the composite alarms in the cycle to remove a dependency that creates the cycle. The simplest change to make to break a cycle is to change the AlarmRule of one of the alarms to False. Additionally, the evaluation of composite alarms stops if CloudWatch detects a cycle in the evaluation path. When this operation creates an alarm, the alarm state is immediately set to INSUFFICIENT_DATA. The alarm is then evaluated and its state is set appropriately. Any actions associated with the new state are then executed. For a composite alarm, this initial time after creation is the only time that the alarm can be in INSUFFICIENT_DATA state. When you update an existing alarm, its state is left unchanged, but the update completely overwrites the previous configuration of the alarm. To use this operation, you must be signed on with the cloudwatch:PutCompositeAlarm permission that is scoped to *. You can't create a composite alarms if your cloudwatch:PutCompositeAlarm permission has a narrower scope. If you are an IAM user, you must have iam:CreateServiceLinkedRole to create a composite alarm that has Systems Manager OpsItem actions."]
+       "Creates or updates a composite alarm. When you create a composite alarm, you specify a rule expression for the alarm that takes into account the alarm states of other alarms that you have created. The composite alarm goes into ALARM state only if all conditions of the rule are met. The alarms specified in a composite alarm's rule expression can include metric alarms and other composite alarms. The rule expression of a composite alarm can include as many as 100 underlying alarms. Any single alarm can be included in the rule expressions of as many as 150 composite alarms. Using composite alarms can reduce alarm noise. You can create multiple metric alarms, and also create a composite alarm and set up alerts only for the composite alarm. For example, you could create a composite alarm that goes into ALARM state only when more than one of the underlying metric alarms are in ALARM state. Composite alarms can take the following actions: Notify Amazon SNS topics. Invoke Lambda functions. Create OpsItems in Systems Manager Ops Center. Create incidents in Systems Manager Incident Manager. It is possible to create a loop or cycle of composite alarms, where composite alarm A depends on composite alarm B, and composite alarm B also depends on composite alarm A. In this scenario, you can't delete any composite alarm that is part of the cycle because there is always still a composite alarm that depends on that alarm that you want to delete. To get out of such a situation, you must break the cycle by changing the rule of one of the composite alarms in the cycle to remove a dependency that creates the cycle. The simplest change to make to break a cycle is to change the AlarmRule of one of the alarms to false. Additionally, the evaluation of composite alarms stops if CloudWatch detects a cycle in the evaluation path. When this operation creates an alarm, the alarm state is immediately set to INSUFFICIENT_DATA. The alarm is then evaluated and its state is set appropriately. Any actions associated with the new state are then executed. For a composite alarm, this initial time after creation is the only time that the alarm can be in INSUFFICIENT_DATA state. When you update an existing alarm, its state is left unchanged, but the update completely overwrites the previous configuration of the alarm. To use this operation, you must be signed on with the cloudwatch:PutCompositeAlarm permission that is scoped to *. You can't create a composite alarms if your cloudwatch:PutCompositeAlarm permission has a narrower scope. If you are an IAM user, you must have iam:CreateServiceLinkedRole to create a composite alarm that has Systems Manager OpsItem actions."]
 module PutAnomalyDetectorOutput =
   struct
     type putAnomalyDetectorResult = unit
@@ -6421,7 +8618,7 @@ module PutAnomalyDetectorOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an anomaly detection model for a CloudWatch metric. You can use the model to display a band of expected normal values when the metric is graphed. For more information, see CloudWatch Anomaly Detection."]
+       "Creates an anomaly detection model for a CloudWatch metric. You can use the model to display a band of expected normal values when the metric is graphed. If you have enabled unified cross-account observability, and this account is a monitoring account, the metric can be in the same account or a source account. You can specify the account ID in the object you specify in the SingleMetricAnomalyDetector parameter. For more information, see CloudWatch Anomaly Detection."]
 module PutAnomalyDetectorInput =
   struct
     type nonrec t =
@@ -6441,9 +8638,12 @@ module PutAnomalyDetectorInput =
       configuration: AnomalyDetectorConfiguration.t option
         [@ocaml.doc
           "The configuration specifies details about how the anomaly detection model is to be trained, including time ranges to exclude when training and updating the model. You can specify as many as 10 time ranges. The configuration can also include the time zone to use for the metric."];
+      metricCharacteristics: MetricCharacteristics.t option
+        [@ocaml.doc
+          "Use this object to include parameters to provide information about your metric to CloudWatch to help it build more accurate anomaly detection models. Currently, it includes the PeriodicSpikes parameter."];
       singleMetricAnomalyDetector: SingleMetricAnomalyDetector.t option
         [@ocaml.doc
-          "A single metric anomaly detector to be created. When using SingleMetricAnomalyDetector, you cannot include the following parameters in the same operation: Dimensions MetricName Namespace Stat the MetricMatchAnomalyDetector parameters of PutAnomalyDetectorInput Instead, specify the single metric anomaly detector attributes as part of the property SingleMetricAnomalyDetector."];
+          "A single metric anomaly detector to be created. When using SingleMetricAnomalyDetector, you cannot include the following parameters in the same operation: Dimensions MetricName Namespace Stat the MetricMathAnomalyDetector parameters of PutAnomalyDetectorInput Instead, specify the single metric anomaly detector attributes as part of the property SingleMetricAnomalyDetector."];
       metricMathAnomalyDetector: MetricMathAnomalyDetector.t option
         [@ocaml.doc
           "The metric math anomaly detector to be created. When using MetricMathAnomalyDetector, you cannot include the following parameters in the same operation: Dimensions MetricName Namespace Stat the SingleMetricAnomalyDetector parameters of PutAnomalyDetectorInput Instead, specify the metric math anomaly detector attributes as part of the property MetricMathAnomalyDetector."]}
@@ -6452,18 +8652,20 @@ module PutAnomalyDetectorInput =
         fun ?dimensions ->
           fun ?stat ->
             fun ?configuration ->
-              fun ?singleMetricAnomalyDetector ->
-                fun ?metricMathAnomalyDetector ->
-                  fun () ->
-                    {
-                      namespace;
-                      metricName;
-                      dimensions;
-                      stat;
-                      configuration;
-                      singleMetricAnomalyDetector;
-                      metricMathAnomalyDetector
-                    }
+              fun ?metricCharacteristics ->
+                fun ?singleMetricAnomalyDetector ->
+                  fun ?metricMathAnomalyDetector ->
+                    fun () ->
+                      {
+                        namespace;
+                        metricName;
+                        dimensions;
+                        stat;
+                        configuration;
+                        metricCharacteristics;
+                        singleMetricAnomalyDetector;
+                        metricMathAnomalyDetector
+                      }
     let to_value x =
       structure_to_value
         [("Namespace", (Option.map x.namespace ~f:Namespace.to_value));
@@ -6473,6 +8675,9 @@ module PutAnomalyDetectorInput =
         ("Configuration",
           (Option.map x.configuration
              ~f:AnomalyDetectorConfiguration.to_value));
+        ("MetricCharacteristics",
+          (Option.map x.metricCharacteristics
+             ~f:MetricCharacteristics.to_value));
         ("SingleMetricAnomalyDetector",
           (Option.map x.singleMetricAnomalyDetector
              ~f:SingleMetricAnomalyDetector.to_value));
@@ -6487,6 +8692,9 @@ module PutAnomalyDetectorInput =
       let singleMetricAnomalyDetector =
         (Option.map ~f:SingleMetricAnomalyDetector.of_xml)
           (Xml.child xml_arg0 "SingleMetricAnomalyDetector") in
+      let metricCharacteristics =
+        (Option.map ~f:MetricCharacteristics.of_xml)
+          (Xml.child xml_arg0 "MetricCharacteristics") in
       let configuration =
         (Option.map ~f:AnomalyDetectorConfiguration.of_xml)
           (Xml.child xml_arg0 "Configuration") in
@@ -6500,26 +8708,116 @@ module PutAnomalyDetectorInput =
       let namespace =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?metricMathAnomalyDetector ?singleMetricAnomalyDetector
-        ?configuration ?stat ?dimensions ?metricName ?namespace ()
+        ?metricCharacteristics ?configuration ?stat ?dimensions ?metricName
+        ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricMathAnomalyDetector =
-        field_map json "MetricMathAnomalyDetector"
+        field_map json__ "MetricMathAnomalyDetector"
           MetricMathAnomalyDetector.of_json in
       let singleMetricAnomalyDetector =
-        field_map json "SingleMetricAnomalyDetector"
+        field_map json__ "SingleMetricAnomalyDetector"
           SingleMetricAnomalyDetector.of_json in
+      let metricCharacteristics =
+        field_map json__ "MetricCharacteristics"
+          MetricCharacteristics.of_json in
       let configuration =
-        field_map json "Configuration" AnomalyDetectorConfiguration.of_json in
-      let stat = field_map json "Stat" AnomalyDetectorMetricStat.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
-      let namespace = field_map json "Namespace" Namespace.of_json in
+        field_map json__ "Configuration" AnomalyDetectorConfiguration.of_json in
+      let stat = field_map json__ "Stat" AnomalyDetectorMetricStat.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
       make ?metricMathAnomalyDetector ?singleMetricAnomalyDetector
-        ?configuration ?stat ?dimensions ?metricName ?namespace ()
+        ?metricCharacteristics ?configuration ?stat ?dimensions ?metricName
+        ?namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an anomaly detection model for a CloudWatch metric. You can use the model to display a band of expected normal values when the metric is graphed. For more information, see CloudWatch Anomaly Detection."]
+       "Creates an anomaly detection model for a CloudWatch metric. You can use the model to display a band of expected normal values when the metric is graphed. If you have enabled unified cross-account observability, and this account is a monitoring account, the metric can be in the same account or a source account. You can specify the account ID in the object you specify in the SingleMetricAnomalyDetector parameter. For more information, see CloudWatch Anomaly Detection."]
+module PutAlarmMuteRuleInput =
+  struct
+    type nonrec t =
+      {
+      name: Name.t
+        [@ocaml.doc
+          "The name of the alarm mute rule. This name must be unique within your Amazon Web Services account and region."];
+      description: AlarmDescription.t option
+        [@ocaml.doc
+          "A description of the alarm mute rule that helps you identify its purpose."];
+      rule: Rule.t
+        [@ocaml.doc
+          "The configuration that defines when and how long alarms should be muted."];
+      muteTargets: MuteTargets.t option
+        [@ocaml.doc "Specifies which alarms this rule applies to."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of key-value pairs to associate with the alarm mute rule. You can use tags to categorize and manage your mute rules."];
+      startDate: Timestamp.t option
+        [@ocaml.doc
+          "The date and time after which the mute rule takes effect, specified as a timestamp in ISO 8601 format (for example, 2026-04-15T08:00:00Z). If not specified, the mute rule takes effect immediately upon creation and the mutes are applied as per the schedule expression."];
+      expireDate: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the mute rule expires and is no longer evaluated, specified as a timestamp in ISO 8601 format (for example, 2026-12-31T23:59:59Z). After this time, the rule status becomes EXPIRED and will no longer mute the targeted alarms."]}
+    let context_ = "PutAlarmMuteRuleInput"
+    let make ?description =
+      fun ?muteTargets ->
+        fun ?tags ->
+          fun ?startDate ->
+            fun ?expireDate ->
+              fun ~name ->
+                fun ~rule ->
+                  fun () ->
+                    {
+                      description;
+                      muteTargets;
+                      tags;
+                      startDate;
+                      expireDate;
+                      name;
+                      rule
+                    }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (Name.to_value x.name)));
+        ("Description",
+          (Option.map x.description ~f:AlarmDescription.to_value));
+        ("Rule", (Some (Rule.to_value x.rule)));
+        ("MuteTargets", (Option.map x.muteTargets ~f:MuteTargets.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("StartDate", (Option.map x.startDate ~f:Timestamp.to_value));
+        ("ExpireDate", (Option.map x.expireDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expireDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ExpireDate") in
+      let startDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartDate") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let muteTargets =
+        (Option.map ~f:MuteTargets.of_xml) (Xml.child xml_arg0 "MuteTargets") in
+      let rule =
+        Rule.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Rule") in
+      let description =
+        (Option.map ~f:AlarmDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?expireDate ?startDate ?tags ?muteTargets ~rule ?description ~name
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expireDate = field_map json__ "ExpireDate" Timestamp.of_json in
+      let startDate = field_map json__ "StartDate" Timestamp.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let muteTargets = field_map json__ "MuteTargets" MuteTargets.of_json in
+      let rule = field_map_exn json__ "Rule" Rule.of_json in
+      let description =
+        field_map json__ "Description" AlarmDescription.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
+      make ?expireDate ?startDate ?tags ?muteTargets ~rule ?description ~name
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates an alarm mute rule. Alarm mute rules automatically mute alarm actions during predefined time windows. When a mute rule is active, targeted alarms continue to evaluate metrics and transition between states, but their configured actions (such as Amazon SNS notifications or Auto Scaling actions) are muted. You can create mute rules with recurring schedules using cron expressions or one-time mute windows using at expressions. Each mute rule can target up to 100 specific alarms by name. If you specify a rule name that already exists, this operation updates the existing rule with the new configuration. Permissions To create or update a mute rule, you must have the cloudwatch:PutAlarmMuteRule permission on two types of resources: the alarm mute rule resource itself, and each alarm that the rule targets. For example, If you want to allow a user to create mute rules that target only specific alarms named \"WebServerCPUAlarm\" and \"DatabaseConnectionAlarm\", you would create an IAM policy with one statement granting cloudwatch:PutAlarmMuteRule on the alarm mute rule resource (arn:aws:cloudwatch:\\[REGION\\]:123456789012:alarm-mute-rule:*), and another statement granting cloudwatch:PutAlarmMuteRule on the targeted alarm resources (arn:aws:cloudwatch:\\[REGION\\]:123456789012:alarm:WebServerCPUAlarm and arn:aws:cloudwatch:\\[REGION\\]:123456789012:alarm:DatabaseConnectionAlarm). You can also use IAM policy conditions to allow targeting alarms based on resource tags. For example, you can restrict users to create/update mute rules to only target alarms that have a specific tag key-value pair, such as Team=TeamA."]
 module ListTagsForResourceOutput =
   struct
     type listTagsForResourceResult =
@@ -6595,18 +8893,18 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays the tags associated with a CloudWatch resource. Currently, alarms and Contributor Insights rules support tagging."]
+       "Displays the tags associated with a CloudWatch resource. Currently, alarms, dashboards, metric streams and Contributor Insights rules support tagging."]
 module ListTagsForResourceInput =
   struct
     type nonrec t =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The ARN of the CloudWatch resource that you want to view tags for. The ARN format of an alarm is arn:aws:cloudwatch:Region:account-id:alarm:alarm-name The ARN format of a Contributor Insights rule is arn:aws:cloudwatch:Region:account-id:insight-rule:insight-rule-name For more information about ARN format, see Resource Types Defined by Amazon CloudWatch in the Amazon Web Services General Reference."]}
+          "The ARN of the CloudWatch resource that you want to view tags for. The ARN format of an alarm is arn:aws:cloudwatch:Region:account-id:alarm:alarm-name The ARN format of a Contributor Insights rule is arn:aws:cloudwatch:Region:account-id:insight-rule/insight-rule-name The ARN format of a dashboard is arn:aws:cloudwatch::account-id:dashboard/dashboard-name The ARN format of a metric stream is arn:aws:cloudwatch:Region:account-id:metric-stream/metric-stream-name For more information about ARN format, see Resource Types Defined by Amazon CloudWatch in the Amazon Web Services General Reference."]}
     let context_ = "ListTagsForResourceInput"
     let make ~resourceARN = fun () -> { resourceARN }
     let to_value x =
@@ -6619,13 +8917,13 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays the tags associated with a CloudWatch resource. Currently, alarms and Contributor Insights rules support tagging."]
+       "Displays the tags associated with a CloudWatch resource. Currently, alarms, dashboards, metric streams and Contributor Insights rules support tagging."]
 module ListMetricsOutput =
   struct
     type listMetricsResult =
@@ -6634,7 +8932,10 @@ module ListMetricsOutput =
         [@ocaml.doc "The metrics that match your request."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token that marks the start of the next batch of returned results."]}
+          "The token that marks the start of the next batch of returned results."];
+      owningAccounts: OwningAccounts.t option
+        [@ocaml.doc
+          "If you are using this operation in a monitoring account, this array contains the account IDs of the source accounts where the metrics in the returned data are from. This field is a 1:1 mapping between each metric that is returned and the ID of the owning account."]}
     and responseMetaData = unit
     and t =
       {
@@ -6647,9 +8948,12 @@ module ListMetricsOutput =
     let context_ = "ListMetricsOutput"
     let make ?metrics =
       fun ?nextToken ->
-        fun () ->
-          { listMetricsResult = { metrics; nextToken }; responseMetaData = ()
-          }
+        fun ?owningAccounts ->
+          fun () ->
+            {
+              listMetricsResult = { metrics; nextToken; owningAccounts };
+              responseMetaData = ()
+            }
     let error_of_json name json =
       match name with
       | "InternalServiceFault" ->
@@ -6688,24 +8992,31 @@ module ListMetricsOutput =
       let x = t.listMetricsResult in
       structure_to_wrapped_value
         [("Metrics", (Option.map x.metrics ~f:Metrics.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("OwningAccounts",
+          (Option.map x.owningAccounts ~f:OwningAccounts.to_value))]
         ~wrapper:"ListMetricsResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "ListMetricsResult" in
+      let owningAccounts =
+        (Option.map ~f:OwningAccounts.of_xml)
+          (Xml.child xml_arg0 "OwningAccounts") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let metrics =
         (Option.map ~f:Metrics.of_xml) (Xml.child xml_arg0 "Metrics") in
-      make ?nextToken ?metrics ()
+      make ?owningAccounts ?nextToken ?metrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let metrics = field_map json "Metrics" Metrics.of_json in
-      make ?nextToken ?metrics ()
+    let of_json json__ =
+      let owningAccounts =
+        field_map json__ "OwningAccounts" OwningAccounts.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let metrics = field_map json__ "Metrics" Metrics.of_json in
+      make ?owningAccounts ?nextToken ?metrics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the specified metrics. You can use the returned metrics with GetMetricData or GetMetricStatistics to obtain statistical data. Up to 500 results are returned for any one call. To retrieve additional results, use the returned token with subsequent calls. After you create a metric, allow up to 15 minutes before the metric appears. You can see statistics about the metric sooner by using GetMetricData or GetMetricStatistics. ListMetrics doesn't return information about metrics if those metrics haven't reported data in the past two weeks. To retrieve those metrics, use GetMetricData or GetMetricStatistics."]
+       "List the specified metrics. You can use the returned metrics with GetMetricData or GetMetricStatistics to get statistical data. Up to 500 results are returned for any one call. To retrieve additional results, use the returned token with subsequent calls. After you create a metric, allow up to 15 minutes for the metric to appear. To see metric statistics sooner, use GetMetricData or GetMetricStatistics. If you are using CloudWatch cross-account observability, you can use this operation in a monitoring account and view metrics from the linked source accounts. For more information, see CloudWatch cross-account observability. ListMetrics doesn't return information about metrics if those metrics haven't reported data in the past two weeks. To retrieve those metrics, use GetMetricData or GetMetricStatistics."]
 module ListMetricsInput =
   struct
     type nonrec t =
@@ -6718,26 +9029,36 @@ module ListMetricsInput =
           "The name of the metric to filter against. Only the metrics with names that match exactly will be returned."];
       dimensions: DimensionFilters.t option
         [@ocaml.doc
-          "The dimensions to filter against. Only the dimensions that match exactly will be returned."];
+          "The dimensions to filter against. Only the dimension with names that match exactly will be returned. If you specify one dimension name and a metric has that dimension and also other dimensions, it will be returned."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token returned by a previous call to indicate that there is more data available."];
       recentlyActive: RecentlyActive.t option
         [@ocaml.doc
-          "To filter the results to show only metrics that have had data points published in the past three hours, specify this parameter with a value of PT3H. This is the only valid value for this parameter. The results that are returned are an approximation of the value you specify. There is a low probability that the returned results include metrics with last published data as much as 40 minutes more than the specified time interval."]}
+          "To filter the results to show only metrics that have had data points published in the past three hours, specify this parameter with a value of PT3H. This is the only valid value for this parameter. The results that are returned are an approximation of the value you specify. There is a low probability that the returned results include metrics with last published data as much as 50 minutes more than the specified time interval."];
+      includeLinkedAccounts: IncludeLinkedAccounts.t option
+        [@ocaml.doc
+          "If you are using this operation in a monitoring account, specify true to include metrics from source accounts in the returned data. The default is false."];
+      owningAccount: AccountId.t option
+        [@ocaml.doc
+          "When you use this operation in a monitoring account, use this field to return metrics only from one source account. To do so, specify that source account ID in this field, and also specify true for IncludeLinkedAccounts."]}
     let make ?namespace =
       fun ?metricName ->
         fun ?dimensions ->
           fun ?nextToken ->
             fun ?recentlyActive ->
-              fun () ->
-                {
-                  namespace;
-                  metricName;
-                  dimensions;
-                  nextToken;
-                  recentlyActive
-                }
+              fun ?includeLinkedAccounts ->
+                fun ?owningAccount ->
+                  fun () ->
+                    {
+                      namespace;
+                      metricName;
+                      dimensions;
+                      nextToken;
+                      recentlyActive;
+                      includeLinkedAccounts;
+                      owningAccount
+                    }
     let to_value x =
       structure_to_value
         [("Namespace", (Option.map x.namespace ~f:Namespace.to_value));
@@ -6746,9 +9067,18 @@ module ListMetricsInput =
           (Option.map x.dimensions ~f:DimensionFilters.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("RecentlyActive",
-          (Option.map x.recentlyActive ~f:RecentlyActive.to_value))]
+          (Option.map x.recentlyActive ~f:RecentlyActive.to_value));
+        ("IncludeLinkedAccounts",
+          (Option.map x.includeLinkedAccounts
+             ~f:IncludeLinkedAccounts.to_value));
+        ("OwningAccount", (Option.map x.owningAccount ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let owningAccount =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "OwningAccount") in
+      let includeLinkedAccounts =
+        (Option.map ~f:IncludeLinkedAccounts.of_xml)
+          (Xml.child xml_arg0 "IncludeLinkedAccounts") in
       let recentlyActive =
         (Option.map ~f:RecentlyActive.of_xml)
           (Xml.child xml_arg0 "RecentlyActive") in
@@ -6761,19 +9091,25 @@ module ListMetricsInput =
         (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
       let namespace =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
-      make ?recentlyActive ?nextToken ?dimensions ?metricName ?namespace ()
+      make ?owningAccount ?includeLinkedAccounts ?recentlyActive ?nextToken
+        ?dimensions ?metricName ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let owningAccount = field_map json__ "OwningAccount" AccountId.of_json in
+      let includeLinkedAccounts =
+        field_map json__ "IncludeLinkedAccounts"
+          IncludeLinkedAccounts.of_json in
       let recentlyActive =
-        field_map json "RecentlyActive" RecentlyActive.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let dimensions = field_map json "Dimensions" DimensionFilters.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
-      let namespace = field_map json "Namespace" Namespace.of_json in
-      make ?recentlyActive ?nextToken ?dimensions ?metricName ?namespace ()
+        field_map json__ "RecentlyActive" RecentlyActive.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let dimensions = field_map json__ "Dimensions" DimensionFilters.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
+      make ?owningAccount ?includeLinkedAccounts ?recentlyActive ?nextToken
+        ?dimensions ?metricName ?namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the specified metrics. You can use the returned metrics with GetMetricData or GetMetricStatistics to obtain statistical data. Up to 500 results are returned for any one call. To retrieve additional results, use the returned token with subsequent calls. After you create a metric, allow up to 15 minutes before the metric appears. You can see statistics about the metric sooner by using GetMetricData or GetMetricStatistics. ListMetrics doesn't return information about metrics if those metrics haven't reported data in the past two weeks. To retrieve those metrics, use GetMetricData or GetMetricStatistics."]
+       "List the specified metrics. You can use the returned metrics with GetMetricData or GetMetricStatistics to get statistical data. Up to 500 results are returned for any one call. To retrieve additional results, use the returned token with subsequent calls. After you create a metric, allow up to 15 minutes for the metric to appear. To see metric statistics sooner, use GetMetricData or GetMetricStatistics. If you are using CloudWatch cross-account observability, you can use this operation in a monitoring account and view metrics from the linked source accounts. For more information, see CloudWatch cross-account observability. ListMetrics doesn't return information about metrics if those metrics haven't reported data in the past two weeks. To retrieve those metrics, use GetMetricData or GetMetricStatistics."]
 module ListMetricStreamsOutput =
   struct
     type listMetricStreamsResult =
@@ -6871,9 +9207,9 @@ module ListMetricStreamsOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?entries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entries = field_map json "Entries" MetricStreamEntries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let entries = field_map json__ "Entries" MetricStreamEntries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?entries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of metric streams in this account."]
@@ -6903,13 +9239,156 @@ module ListMetricStreamsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" ListMetricStreamsMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" ListMetricStreamsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of metric streams in this account."]
+module ListManagedInsightRulesOutput =
+  struct
+    type listManagedInsightRulesResult =
+      {
+      managedRules: ManagedRuleDescriptions.t option
+        [@ocaml.doc
+          "The managed rules that are available for the specified Amazon Web Services resource."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Include this value to get the next set of rules if the value was returned by the previous operation."]}
+    and responseMetaData = unit
+    and t =
+      {
+      listManagedInsightRulesResult: listManagedInsightRulesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidNextToken of InvalidNextToken.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MissingRequiredParameterException of
+          MissingRequiredParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ListManagedInsightRulesOutput"
+    let make ?managedRules =
+      fun ?nextToken ->
+        fun () ->
+          {
+            listManagedInsightRulesResult = { managedRules; nextToken };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MissingRequiredParameterException" ->
+          `MissingRequiredParameterException
+            (MissingRequiredParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MissingRequiredParameterException" ->
+          `MissingRequiredParameterException
+            (MissingRequiredParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MissingRequiredParameterException e ->
+          `Assoc
+            [("error", (`String "MissingRequiredParameterException"));
+            ("details", (MissingRequiredParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.listManagedInsightRulesResult in
+      structure_to_wrapped_value
+        [("ManagedRules",
+           (Option.map x.managedRules ~f:ManagedRuleDescriptions.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ~wrapper:"ListManagedInsightRulesResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "ListManagedInsightRulesResult" in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let managedRules =
+        (Option.map ~f:ManagedRuleDescriptions.of_xml)
+          (Xml.child xml_arg0 "ManagedRules") in
+      make ?nextToken ?managedRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let managedRules =
+        field_map json__ "ManagedRules" ManagedRuleDescriptions.of_json in
+      make ?nextToken ?managedRules ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list that contains the number of managed Contributor Insights rules in your account."]
+module ListManagedInsightRulesInput =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "The ARN of an Amazon Web Services resource that has managed Contributor Insights rules."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Include this value to get the next set of rules if the value was returned by the previous operation."];
+      maxResults: InsightRuleMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in one operation. If you omit this parameter, the default number is used. The default number is 100."]}
+    let context_ = "ListManagedInsightRulesInput"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~resourceARN -> fun () -> { nextToken; maxResults; resourceARN }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:InsightRuleMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:InsightRuleMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ?maxResults ?nextToken ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" InsightRuleMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ?maxResults ?nextToken ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list that contains the number of managed Contributor Insights rules in your account."]
 module ListDashboardsOutput =
   struct
     type listDashboardsResult =
@@ -6987,10 +9466,10 @@ module ListDashboardsOutput =
           (Xml.child xml_arg0 "DashboardEntries") in
       make ?nextToken ?dashboardEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dashboardEntries =
-        field_map json "DashboardEntries" DashboardEntries.of_json in
+        field_map json__ "DashboardEntries" DashboardEntries.of_json in
       make ?nextToken ?dashboardEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7021,14 +9500,150 @@ module ListDashboardsInput =
           (Xml.child xml_arg0 "DashboardNamePrefix") in
       make ?nextToken ?dashboardNamePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dashboardNamePrefix =
-        field_map json "DashboardNamePrefix" DashboardNamePrefix.of_json in
+        field_map json__ "DashboardNamePrefix" DashboardNamePrefix.of_json in
       make ?nextToken ?dashboardNamePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the dashboards for your account. If you include DashboardNamePrefix, only those dashboards with names starting with the prefix are listed. Otherwise, all dashboards in your account are listed. ListDashboards returns up to 1000 results on one page. If there are more than 1000 dashboards, you can call ListDashboards again and include the value you received for NextToken in the first call, to receive the next 1000 results."]
+module ListAlarmMuteRulesOutput =
+  struct
+    type listAlarmMuteRulesResult =
+      {
+      alarmMuteRuleSummaries: AlarmMuteRuleSummaries.t option
+        [@ocaml.doc "A list of alarm mute rule summaries."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of results. If this field is absent, there are no more results to retrieve."]}
+    and responseMetaData = unit
+    and t =
+      {
+      listAlarmMuteRulesResult: listAlarmMuteRulesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidNextToken of InvalidNextToken.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ListAlarmMuteRulesOutput"
+    let make ?alarmMuteRuleSummaries =
+      fun ?nextToken ->
+        fun () ->
+          {
+            listAlarmMuteRulesResult = { alarmMuteRuleSummaries; nextToken };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.listAlarmMuteRulesResult in
+      structure_to_wrapped_value
+        [("AlarmMuteRuleSummaries",
+           (Option.map x.alarmMuteRuleSummaries
+              ~f:AlarmMuteRuleSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ~wrapper:"ListAlarmMuteRulesResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "ListAlarmMuteRulesResult" in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let alarmMuteRuleSummaries =
+        (Option.map ~f:AlarmMuteRuleSummaries.of_xml)
+          (Xml.child xml_arg0 "AlarmMuteRuleSummaries") in
+      make ?nextToken ?alarmMuteRuleSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let alarmMuteRuleSummaries =
+        field_map json__ "AlarmMuteRuleSummaries"
+          AlarmMuteRuleSummaries.of_json in
+      make ?nextToken ?alarmMuteRuleSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists alarm mute rules in your Amazon Web Services account and region. You can filter the results by alarm name to find all mute rules targeting a specific alarm, or by status to find rules that are scheduled, active, or expired. This operation supports pagination for accounts with many mute rules. Use the MaxRecords and NextToken parameters to retrieve results in multiple calls. Permissions To list mute rules, you need the cloudwatch:ListAlarmMuteRules permission."]
+module ListAlarmMuteRulesInput =
+  struct
+    type nonrec t =
+      {
+      alarmName: Name.t option
+        [@ocaml.doc
+          "Filter results to show only mute rules that target the specified alarm name."];
+      statuses: AlarmMuteRuleStatuses.t option
+        [@ocaml.doc
+          "Filter results to show only mute rules with the specified statuses. Valid values are SCHEDULED, ACTIVE, or EXPIRED."];
+      maxRecords: MaxRecords.t option
+        [@ocaml.doc
+          "The maximum number of mute rules to return in one call. The default is 50."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token returned from a previous call to indicate where to continue retrieving results."]}
+    let make ?alarmName =
+      fun ?statuses ->
+        fun ?maxRecords ->
+          fun ?nextToken ->
+            fun () -> { alarmName; statuses; maxRecords; nextToken }
+    let to_value x =
+      structure_to_value
+        [("AlarmName", (Option.map x.alarmName ~f:Name.to_value));
+        ("Statuses",
+          (Option.map x.statuses ~f:AlarmMuteRuleStatuses.to_value));
+        ("MaxRecords", (Option.map x.maxRecords ~f:MaxRecords.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxRecords =
+        (Option.map ~f:MaxRecords.of_xml) (Xml.child xml_arg0 "MaxRecords") in
+      let statuses =
+        (Option.map ~f:AlarmMuteRuleStatuses.of_xml)
+          (Xml.child xml_arg0 "Statuses") in
+      let alarmName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "AlarmName") in
+      make ?nextToken ?maxRecords ?statuses ?alarmName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let statuses =
+        field_map json__ "Statuses" AlarmMuteRuleStatuses.of_json in
+      let alarmName = field_map json__ "AlarmName" Name.of_json in
+      make ?nextToken ?maxRecords ?statuses ?alarmName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists alarm mute rules in your Amazon Web Services account and region. You can filter the results by alarm name to find all mute rules targeting a specific alarm, or by status to find rules that are scheduled, active, or expired. This operation supports pagination for accounts with many mute rules. Use the MaxRecords and NextToken parameters to retrieve results in multiple calls. Permissions To list mute rules, you need the cloudwatch:ListAlarmMuteRules permission."]
 module LimitExceededFault =
   struct
     type nonrec t = {
@@ -7043,8 +9658,8 @@ module LimitExceededFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7063,11 +9678,77 @@ module InvalidFormatFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Data was not syntactically valid JSON."]
+module GetOTelEnrichmentOutput =
+  struct
+    type getOTelEnrichmentResult =
+      {
+      status: OTelEnrichmentStatus.t option
+        [@ocaml.doc
+          "The status of OTel enrichment for the account. Valid values are Running (enrichment is enabled) and Stopped (enrichment is disabled)."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getOTelEnrichmentResult: getOTelEnrichmentResult ;
+      responseMetaData: responseMetaData }
+    type error = [ `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetOTelEnrichmentOutput"
+    let make ?status =
+      fun () ->
+        { getOTelEnrichmentResult = { status }; responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getOTelEnrichmentResult in
+      structure_to_wrapped_value
+        [("Status", (Option.map x.status ~f:OTelEnrichmentStatus.to_value))]
+        ~wrapper:"GetOTelEnrichmentResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetOTelEnrichmentResult" in
+      let status =
+        (Option.map ~f:OTelEnrichmentStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" OTelEnrichmentStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the current status of vended metric enrichment for the account, including whether CloudWatch vended metrics are enriched with resource ARN and resource tag labels and queryable using PromQL. For the list of supported resources, see Supported Amazon Web Services infrastructure metrics."]
+module GetOTelEnrichmentInput =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the current status of vended metric enrichment for the account, including whether CloudWatch vended metrics are enriched with resource ARN and resource tag labels and queryable using PromQL. For the list of supported resources, see Supported Amazon Web Services infrastructure metrics."]
 module GetMetricWidgetImageOutput =
   struct
     type getMetricWidgetImageResult =
@@ -7122,9 +9803,9 @@ module GetMetricWidgetImageOutput =
           (Xml.child xml_arg0 "MetricWidgetImage") in
       make ?metricWidgetImage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricWidgetImage =
-        field_map json "MetricWidgetImage" MetricWidgetImage.of_json in
+        field_map json__ "MetricWidgetImage" MetricWidgetImage.of_json in
       make ?metricWidgetImage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7157,10 +9838,10 @@ module GetMetricWidgetImageInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricWidget") in
       make ?outputFormat ~metricWidget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputFormat = field_map json "OutputFormat" OutputFormat.of_json in
+    let of_json json__ =
+      let outputFormat = field_map json__ "OutputFormat" OutputFormat.of_json in
       let metricWidget =
-        field_map_exn json "MetricWidget" MetricWidget.of_json in
+        field_map_exn json__ "MetricWidget" MetricWidget.of_json in
       make ?outputFormat ~metricWidget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7181,7 +9862,7 @@ module GetMetricStreamOutput =
           "If this array of metric namespaces is present, then these namespaces are the only metric namespaces that are not streamed by this metric stream. In this case, all other metric namespaces in the account are streamed by this metric stream."];
       firehoseArn: AmazonResourceName.t option
         [@ocaml.doc
-          "The ARN of the Amazon Kinesis Firehose delivery stream that is used by this metric stream."];
+          "The ARN of the Amazon Kinesis Data Firehose delivery stream that is used by this metric stream."];
       roleArn: AmazonResourceName.t option
         [@ocaml.doc
           "The ARN of the IAM role that is used by this metric stream."];
@@ -7195,10 +9876,13 @@ module GetMetricStreamOutput =
           "The date of the most recent update to the metric stream's configuration."];
       outputFormat: MetricStreamOutputFormat.t option
         [@ocaml.doc
-          "The output format for the stream. Valid values are json and opentelemetry0.7. For more information about metric stream output formats, see Metric streams output formats."];
+          "The output format for the stream. Valid values are json, opentelemetry1.0, and opentelemetry0.7. For more information about metric stream output formats, see Metric streams output formats."];
       statisticsConfigurations: MetricStreamStatisticsConfigurations.t option
         [@ocaml.doc
-          "Each entry in this array displays information about one or more metrics that include extended statistics in the metric stream. For more information about extended statistics, see CloudWatch statistics definitions."]}
+          "Each entry in this array displays information about one or more metrics that include additional statistics in the metric stream. For more information about the additional statistics, see CloudWatch statistics definitions."];
+      includeLinkedAccountsMetrics: IncludeLinkedAccountsMetrics.t option
+        [@ocaml.doc
+          "If this is true and this metric stream is in a monitoring account, then the stream includes metrics from source accounts that the monitoring account is linked to."]}
     and responseMetaData = unit
     and t =
       {
@@ -7225,24 +9909,26 @@ module GetMetricStreamOutput =
                     fun ?lastUpdateDate ->
                       fun ?outputFormat ->
                         fun ?statisticsConfigurations ->
-                          fun () ->
-                            {
-                              getMetricStreamResult =
-                                {
-                                  arn;
-                                  name;
-                                  includeFilters;
-                                  excludeFilters;
-                                  firehoseArn;
-                                  roleArn;
-                                  state;
-                                  creationDate;
-                                  lastUpdateDate;
-                                  outputFormat;
-                                  statisticsConfigurations
-                                };
-                              responseMetaData = ()
-                            }
+                          fun ?includeLinkedAccountsMetrics ->
+                            fun () ->
+                              {
+                                getMetricStreamResult =
+                                  {
+                                    arn;
+                                    name;
+                                    includeFilters;
+                                    excludeFilters;
+                                    firehoseArn;
+                                    roleArn;
+                                    state;
+                                    creationDate;
+                                    lastUpdateDate;
+                                    outputFormat;
+                                    statisticsConfigurations;
+                                    includeLinkedAccountsMetrics
+                                  };
+                                responseMetaData = ()
+                              }
     let error_of_json name json =
       match name with
       | "InternalServiceFault" ->
@@ -7325,12 +10011,18 @@ module GetMetricStreamOutput =
           (Option.map x.outputFormat ~f:MetricStreamOutputFormat.to_value));
         ("StatisticsConfigurations",
           (Option.map x.statisticsConfigurations
-             ~f:MetricStreamStatisticsConfigurations.to_value))]
+             ~f:MetricStreamStatisticsConfigurations.to_value));
+        ("IncludeLinkedAccountsMetrics",
+          (Option.map x.includeLinkedAccountsMetrics
+             ~f:IncludeLinkedAccountsMetrics.to_value))]
         ~wrapper:"GetMetricStreamResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "GetMetricStreamResult" in
+      let includeLinkedAccountsMetrics =
+        (Option.map ~f:IncludeLinkedAccountsMetrics.of_xml)
+          (Xml.child xml_arg0 "IncludeLinkedAccountsMetrics") in
       let statisticsConfigurations =
         (Option.map ~f:MetricStreamStatisticsConfigurations.of_xml)
           (Xml.child xml_arg0 "StatisticsConfigurations") in
@@ -7360,31 +10052,35 @@ module GetMetricStreamOutput =
         (Option.map ~f:MetricStreamName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?statisticsConfigurations ?outputFormat ?lastUpdateDate
-        ?creationDate ?state ?roleArn ?firehoseArn ?excludeFilters
-        ?includeFilters ?name ?arn ()
+      make ?includeLinkedAccountsMetrics ?statisticsConfigurations
+        ?outputFormat ?lastUpdateDate ?creationDate ?state ?roleArn
+        ?firehoseArn ?excludeFilters ?includeFilters ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let includeLinkedAccountsMetrics =
+        field_map json__ "IncludeLinkedAccountsMetrics"
+          IncludeLinkedAccountsMetrics.of_json in
       let statisticsConfigurations =
-        field_map json "StatisticsConfigurations"
+        field_map json__ "StatisticsConfigurations"
           MetricStreamStatisticsConfigurations.of_json in
       let outputFormat =
-        field_map json "OutputFormat" MetricStreamOutputFormat.of_json in
-      let lastUpdateDate = field_map json "LastUpdateDate" Timestamp.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let state = field_map json "State" MetricStreamState.of_json in
-      let roleArn = field_map json "RoleArn" AmazonResourceName.of_json in
+        field_map json__ "OutputFormat" MetricStreamOutputFormat.of_json in
+      let lastUpdateDate =
+        field_map json__ "LastUpdateDate" Timestamp.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let state = field_map json__ "State" MetricStreamState.of_json in
+      let roleArn = field_map json__ "RoleArn" AmazonResourceName.of_json in
       let firehoseArn =
-        field_map json "FirehoseArn" AmazonResourceName.of_json in
+        field_map json__ "FirehoseArn" AmazonResourceName.of_json in
       let excludeFilters =
-        field_map json "ExcludeFilters" MetricStreamFilters.of_json in
+        field_map json__ "ExcludeFilters" MetricStreamFilters.of_json in
       let includeFilters =
-        field_map json "IncludeFilters" MetricStreamFilters.of_json in
-      let name = field_map json "Name" MetricStreamName.of_json in
-      let arn = field_map json "Arn" AmazonResourceName.of_json in
-      make ?statisticsConfigurations ?outputFormat ?lastUpdateDate
-        ?creationDate ?state ?roleArn ?firehoseArn ?excludeFilters
-        ?includeFilters ?name ?arn ()
+        field_map json__ "IncludeFilters" MetricStreamFilters.of_json in
+      let name = field_map json__ "Name" MetricStreamName.of_json in
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
+      make ?includeLinkedAccountsMetrics ?statisticsConfigurations
+        ?outputFormat ?lastUpdateDate ?creationDate ?state ?roleArn
+        ?firehoseArn ?excludeFilters ?includeFilters ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the metric stream that you specify."]
@@ -7407,8 +10103,8 @@ module GetMetricStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" MetricStreamName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" MetricStreamName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7512,9 +10208,9 @@ module GetMetricStatisticsOutput =
         (Option.map ~f:MetricLabel.of_xml) (Xml.child xml_arg0 "Label") in
       make ?datapoints ?label ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datapoints = field_map json "Datapoints" Datapoints.of_json in
-      let label = field_map json "Label" MetricLabel.of_json in
+    let of_json json__ =
+      let datapoints = field_map json__ "Datapoints" Datapoints.of_json in
+      let label = field_map json__ "Label" MetricLabel.of_json in
       make ?datapoints ?label ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7532,13 +10228,13 @@ module GetMetricStatisticsInput =
           "The dimensions. If the metric contains multiple dimensions, you must include a value for each dimension. CloudWatch treats each unique combination of dimensions as a separate metric. If a specific combination of dimensions was not published, you can't retrieve statistics for it. You must specify the same dimensions that were used when the metrics were created. For an example, see Dimension Combinations in the Amazon CloudWatch User Guide. For more information about specifying dimensions, see Publishing Metrics in the Amazon CloudWatch User Guide."];
       startTime: Timestamp.t
         [@ocaml.doc
-          "The time stamp that determines the first data point to return. Start times are evaluated relative to the time that CloudWatch receives the request. The value specified is inclusive; results include data points with the specified time stamp. In a raw HTTP query, the time stamp must be in ISO 8601 UTC format (for example, 2016-10-03T23:00:00Z). CloudWatch rounds the specified time stamp as follows: Start time less than 15 days ago - Round down to the nearest whole minute. For example, 12:32:34 is rounded down to 12:32:00. Start time between 15 and 63 days ago - Round down to the nearest 5-minute clock interval. For example, 12:32:34 is rounded down to 12:30:00. Start time greater than 63 days ago - Round down to the nearest 1-hour clock interval. For example, 12:32:34 is rounded down to 12:00:00. If you set Period to 5, 10, or 30, the start time of your request is rounded down to the nearest time that corresponds to even 5-, 10-, or 30-second divisions of a minute. For example, if you make a query at (HH:mm:ss) 01:05:23 for the previous 10-second period, the start time of your request is rounded down and you receive data from 01:05:10 to 01:05:20. If you make a query at 15:07:17 for the previous 5 minutes of data, using a period of 5 seconds, you receive data timestamped between 15:02:15 and 15:07:15."];
+          "The time stamp that determines the first data point to return. Start times are evaluated relative to the time that CloudWatch receives the request. The value specified is inclusive; results include data points with the specified time stamp. In a raw HTTP query, the time stamp must be in ISO 8601 UTC format (for example, 2016-10-03T23:00:00Z). CloudWatch rounds the specified time stamp as follows: Start time less than 15 days ago - Round down to the nearest whole minute. For example, 12:32:34 is rounded down to 12:32:00. Start time between 15 and 63 days ago - Round down to the nearest 5-minute clock interval. For example, 12:32:34 is rounded down to 12:30:00. Start time greater than 63 days ago - Round down to the nearest 1-hour clock interval. For example, 12:32:34 is rounded down to 12:00:00. If you set Period to 5, 10, 20, or 30, the start time of your request is rounded down to the nearest time that corresponds to even 5-, 10-, 20-, or 30-second divisions of a minute. For example, if you make a query at (HH:mm:ss) 01:05:23 for the previous 10-second period, the start time of your request is rounded down and you receive data from 01:05:10 to 01:05:20. If you make a query at 15:07:17 for the previous 5 minutes of data, using a period of 5 seconds, you receive data timestamped between 15:02:15 and 15:07:15."];
       endTime: Timestamp.t
         [@ocaml.doc
           "The time stamp that determines the last data point to return. The value specified is exclusive; results include data points up to the specified time stamp. In a raw HTTP query, the time stamp must be in ISO 8601 UTC format (for example, 2016-10-10T23:00:00Z)."];
       period: Period.t
         [@ocaml.doc
-          "The granularity, in seconds, of the returned data points. For metrics with regular resolution, a period can be as short as one minute (60 seconds) and must be a multiple of 60. For high-resolution metrics that are collected at intervals of less than one minute, the period can be 1, 5, 10, 30, 60, or any multiple of 60. High-resolution metrics are those metrics stored by a PutMetricData call that includes a StorageResolution of 1 second. If the StartTime parameter specifies a time stamp that is greater than 3 hours ago, you must specify the period as follows or no data points in that time range is returned: Start time between 3 hours and 15 days ago - Use a multiple of 60 seconds (1 minute). Start time between 15 and 63 days ago - Use a multiple of 300 seconds (5 minutes). Start time greater than 63 days ago - Use a multiple of 3600 seconds (1 hour)."];
+          "The granularity, in seconds, of the returned data points. For metrics with regular resolution, a period can be as short as one minute (60 seconds) and must be a multiple of 60. For high-resolution metrics that are collected at intervals of less than one minute, the period can be 1, 5, 10, 20, 30, 60, or any multiple of 60. High-resolution metrics are those metrics stored by a PutMetricData call that includes a StorageResolution of 1 second. If the StartTime parameter specifies a time stamp that is greater than 3 hours ago, you must specify the period as follows or no data points in that time range is returned: Start time between 3 hours and 15 days ago - Use a multiple of 60 seconds (1 minute). Start time between 15 and 63 days ago - Use a multiple of 300 seconds (5 minutes). Start time greater than 63 days ago - Use a multiple of 3600 seconds (1 hour)."];
       statistics: Statistics.t option
         [@ocaml.doc
           "The metric statistics, other than percentile. For percentile statistics, use ExtendedStatistics. When calling GetMetricStatistics, you must specify either Statistics or ExtendedStatistics, but not both."];
@@ -7609,17 +10305,17 @@ module GetMetricStatisticsInput =
       make ?unit ?extendedStatistics ?statistics ~period ~endTime ~startTime
         ?dimensions ~metricName ~namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" StandardUnit.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" StandardUnit.of_json in
       let extendedStatistics =
-        field_map json "ExtendedStatistics" ExtendedStatistics.of_json in
-      let statistics = field_map json "Statistics" Statistics.of_json in
-      let period = field_map_exn json "Period" Period.of_json in
-      let endTime = field_map_exn json "EndTime" Timestamp.of_json in
-      let startTime = field_map_exn json "StartTime" Timestamp.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
-      let namespace = field_map_exn json "Namespace" Namespace.of_json in
+        field_map json__ "ExtendedStatistics" ExtendedStatistics.of_json in
+      let statistics = field_map json__ "Statistics" Statistics.of_json in
+      let period = field_map_exn json__ "Period" Period.of_json in
+      let endTime = field_map_exn json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "StartTime" Timestamp.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map_exn json__ "MetricName" MetricName.of_json in
+      let namespace = field_map_exn json__ "Namespace" Namespace.of_json in
       make ?unit ?extendedStatistics ?statistics ~period ~endTime ~startTime
         ?dimensions ~metricName ~namespace ()
     let to_json v = composed_to_json to_value v
@@ -7700,12 +10396,12 @@ module GetMetricDataOutput =
           (Xml.child xml_arg0 "MetricDataResults") in
       make ?messages ?nextToken ?metricDataResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let messages =
-        field_map json "Messages" MetricDataResultMessages.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "Messages" MetricDataResultMessages.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let metricDataResults =
-        field_map json "MetricDataResults" MetricDataResults.of_json in
+        field_map json__ "MetricDataResults" MetricDataResults.of_json in
       make ?messages ?nextToken ?metricDataResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7719,7 +10415,7 @@ module GetMetricDataInput =
           "The metric queries to be returned. A single GetMetricData call can include as many as 500 MetricDataQuery structures. Each of these structures can specify either a metric to retrieve, a Metrics Insights query, or a math expression to perform on retrieved data."];
       startTime: Timestamp.t
         [@ocaml.doc
-          "The time stamp indicating the earliest data to be returned. The value specified is inclusive; results include data points with the specified time stamp. CloudWatch rounds the specified time stamp as follows: Start time less than 15 days ago - Round down to the nearest whole minute. For example, 12:32:34 is rounded down to 12:32:00. Start time between 15 and 63 days ago - Round down to the nearest 5-minute clock interval. For example, 12:32:34 is rounded down to 12:30:00. Start time greater than 63 days ago - Round down to the nearest 1-hour clock interval. For example, 12:32:34 is rounded down to 12:00:00. If you set Period to 5, 10, or 30, the start time of your request is rounded down to the nearest time that corresponds to even 5-, 10-, or 30-second divisions of a minute. For example, if you make a query at (HH:mm:ss) 01:05:23 for the previous 10-second period, the start time of your request is rounded down and you receive data from 01:05:10 to 01:05:20. If you make a query at 15:07:17 for the previous 5 minutes of data, using a period of 5 seconds, you receive data timestamped between 15:02:15 and 15:07:15. For better performance, specify StartTime and EndTime values that align with the value of the metric's Period and sync up with the beginning and end of an hour. For example, if the Period of a metric is 5 minutes, specifying 12:05 or 12:30 as StartTime can get a faster response from CloudWatch than setting 12:07 or 12:29 as the StartTime."];
+          "The time stamp indicating the earliest data to be returned. The value specified is inclusive; results include data points with the specified time stamp. CloudWatch rounds the specified time stamp as follows: Start time less than 15 days ago - Round down to the nearest whole minute. For example, 12:32:34 is rounded down to 12:32:00. Start time between 15 and 63 days ago - Round down to the nearest 5-minute clock interval. For example, 12:32:34 is rounded down to 12:30:00. Start time greater than 63 days ago - Round down to the nearest 1-hour clock interval. For example, 12:32:34 is rounded down to 12:00:00. If you set Period to 5, 10, 20, or 30, the start time of your request is rounded down to the nearest time that corresponds to even 5-, 10-, 20-, or 30-second divisions of a minute. For example, if you make a query at (HH:mm:ss) 01:05:23 for the previous 10-second period, the start time of your request is rounded down and you receive data from 01:05:10 to 01:05:20. If you make a query at 15:07:17 for the previous 5 minutes of data, using a period of 5 seconds, you receive data timestamped between 15:02:15 and 15:07:15. For better performance, specify StartTime and EndTime values that align with the value of the metric's Period and sync up with the beginning and end of an hour. For example, if the Period of a metric is 5 minutes, specifying 12:05 or 12:30 as StartTime can get a faster response from CloudWatch than setting 12:07 or 12:29 as the StartTime."];
       endTime: Timestamp.t
         [@ocaml.doc
           "The time stamp indicating the latest data to be returned. The value specified is exclusive; results include data points up to the specified time stamp. For better performance, specify StartTime and EndTime values that align with the value of the metric's Period and sync up with the beginning and end of an hour. For example, if the Period of a metric is 5 minutes, specifying 12:05 or 12:30 as EndTime can get a faster response from CloudWatch than setting 12:07 or 12:29 as the EndTime."];
@@ -7728,7 +10424,7 @@ module GetMetricDataInput =
           "Include this value, if it was returned by the previous GetMetricData operation, to get the next set of data points."];
       scanBy: ScanBy.t option
         [@ocaml.doc
-          "The order in which data points should be returned. TimestampDescending returns the newest data first and paginates when the MaxDatapoints limit is reached. TimestampAscending returns the oldest data first and paginates when the MaxDatapoints limit is reached."];
+          "The order in which data points should be returned. TimestampDescending returns the newest data first and paginates when the MaxDatapoints limit is reached. TimestampAscending returns the oldest data first and paginates when the MaxDatapoints limit is reached. If you omit this parameter, the default of TimestampDescending is used."];
       maxDatapoints: GetMetricDataMaxDatapoints.t option
         [@ocaml.doc
           "The maximum number of data points the request should return before paginating. If you omit this, the default of 100,800 is used."];
@@ -7788,16 +10484,16 @@ module GetMetricDataInput =
       make ?labelOptions ?maxDatapoints ?scanBy ?nextToken ~endTime
         ~startTime ~metricDataQueries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labelOptions = field_map json "LabelOptions" LabelOptions.of_json in
+    let of_json json__ =
+      let labelOptions = field_map json__ "LabelOptions" LabelOptions.of_json in
       let maxDatapoints =
-        field_map json "MaxDatapoints" GetMetricDataMaxDatapoints.of_json in
-      let scanBy = field_map json "ScanBy" ScanBy.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let endTime = field_map_exn json "EndTime" Timestamp.of_json in
-      let startTime = field_map_exn json "StartTime" Timestamp.of_json in
+        field_map json__ "MaxDatapoints" GetMetricDataMaxDatapoints.of_json in
+      let scanBy = field_map json__ "ScanBy" ScanBy.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let endTime = field_map_exn json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "StartTime" Timestamp.of_json in
       let metricDataQueries =
-        field_map_exn json "MetricDataQueries" MetricDataQueries.of_json in
+        field_map_exn json__ "MetricDataQueries" MetricDataQueries.of_json in
       make ?labelOptions ?maxDatapoints ?scanBy ?nextToken ~endTime
         ~startTime ~metricDataQueries ()
     let to_json v = composed_to_json to_value v
@@ -7945,21 +10641,22 @@ module GetInsightRuleReportOutput =
       make ?metricDatapoints ?contributors ?approximateUniqueCount
         ?aggregateValue ?aggregationStatistic ?keyLabels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricDatapoints =
-        field_map json "MetricDatapoints" InsightRuleMetricDatapoints.of_json in
+        field_map json__ "MetricDatapoints"
+          InsightRuleMetricDatapoints.of_json in
       let contributors =
-        field_map json "Contributors" InsightRuleContributors.of_json in
+        field_map json__ "Contributors" InsightRuleContributors.of_json in
       let approximateUniqueCount =
-        field_map json "ApproximateUniqueCount"
+        field_map json__ "ApproximateUniqueCount"
           InsightRuleUnboundLong.of_json in
       let aggregateValue =
-        field_map json "AggregateValue" InsightRuleUnboundDouble.of_json in
+        field_map json__ "AggregateValue" InsightRuleUnboundDouble.of_json in
       let aggregationStatistic =
-        field_map json "AggregationStatistic"
+        field_map json__ "AggregationStatistic"
           InsightRuleAggregationStatistic.of_json in
       let keyLabels =
-        field_map json "KeyLabels" InsightRuleContributorKeyLabels.of_json in
+        field_map json__ "KeyLabels" InsightRuleContributorKeyLabels.of_json in
       make ?metricDatapoints ?contributors ?approximateUniqueCount
         ?aggregateValue ?aggregationStatistic ?keyLabels ()
     let to_json v = composed_to_json to_value v
@@ -7988,7 +10685,7 @@ module GetInsightRuleReportInput =
           "Specifies which metrics to use for aggregation of contributor values for the report. You can specify one or more of the following metrics: UniqueContributors -- the number of unique contributors for each data point. MaxContributorValue -- the value of the top contributor for each data point. The identity of the contributor might change for each data point in the graph. If this rule aggregates by COUNT, the top contributor for each data point is the contributor with the most occurrences in that period. If the rule aggregates by SUM, the top contributor is the contributor with the highest sum in the log field specified by the rule's Value, during that period. SampleCount -- the number of data points matched by the rule. Sum -- the sum of the values from all contributors during the time period represented by that data point. Minimum -- the minimum value from a single observation during the time period represented by that data point. Maximum -- the maximum value from a single observation during the time period represented by that data point. Average -- the average value from all contributors during the time period represented by that data point."];
       orderBy: InsightRuleOrderBy.t option
         [@ocaml.doc
-          "Determines what statistic to use to rank the contributors. Valid values are SUM and MAXIMUM."]}
+          "Determines what statistic to use to rank the contributors. Valid values are Sum and Maximum."]}
     let context_ = "GetInsightRuleReportInput"
     let make ?maxContributorCount =
       fun ?metrics ->
@@ -8042,16 +10739,16 @@ module GetInsightRuleReportInput =
       make ?orderBy ?metrics ?maxContributorCount ~period ~endTime ~startTime
         ~ruleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map json "OrderBy" InsightRuleOrderBy.of_json in
-      let metrics = field_map json "Metrics" InsightRuleMetricList.of_json in
+    let of_json json__ =
+      let orderBy = field_map json__ "OrderBy" InsightRuleOrderBy.of_json in
+      let metrics = field_map json__ "Metrics" InsightRuleMetricList.of_json in
       let maxContributorCount =
-        field_map json "MaxContributorCount"
+        field_map json__ "MaxContributorCount"
           InsightRuleUnboundInteger.of_json in
-      let period = field_map_exn json "Period" Period.of_json in
-      let endTime = field_map_exn json "EndTime" Timestamp.of_json in
-      let startTime = field_map_exn json "StartTime" Timestamp.of_json in
-      let ruleName = field_map_exn json "RuleName" InsightRuleName.of_json in
+      let period = field_map_exn json__ "Period" Period.of_json in
+      let endTime = field_map_exn json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "StartTime" Timestamp.of_json in
+      let ruleName = field_map_exn json__ "RuleName" InsightRuleName.of_json in
       make ?orderBy ?metrics ?maxContributorCount ~period ~endTime ~startTime
         ~ruleName ()
     let to_json v = composed_to_json to_value v
@@ -8154,12 +10851,12 @@ module GetDashboardOutput =
           (Xml.child xml_arg0 "DashboardArn") in
       make ?dashboardName ?dashboardBody ?dashboardArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dashboardName =
-        field_map json "DashboardName" DashboardName.of_json in
+        field_map json__ "DashboardName" DashboardName.of_json in
       let dashboardBody =
-        field_map json "DashboardBody" DashboardBody.of_json in
-      let dashboardArn = field_map json "DashboardArn" DashboardArn.of_json in
+        field_map json__ "DashboardBody" DashboardBody.of_json in
+      let dashboardArn = field_map json__ "DashboardArn" DashboardArn.of_json in
       make ?dashboardName ?dashboardBody ?dashboardArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8182,13 +10879,188 @@ module GetDashboardInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardName") in
       make ~dashboardName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dashboardName =
-        field_map_exn json "DashboardName" DashboardName.of_json in
+        field_map_exn json__ "DashboardName" DashboardName.of_json in
       make ~dashboardName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays the details of the dashboard that you specify. To copy an existing dashboard, use GetDashboard, and then use the data returned within DashboardBody as the template for the new dashboard when you call PutDashboard to create the copy."]
+module GetAlarmMuteRuleOutput =
+  struct
+    type getAlarmMuteRuleResult =
+      {
+      name: Name.t option [@ocaml.doc "The name of the alarm mute rule."];
+      alarmMuteRuleArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the alarm mute rule."];
+      description: AlarmDescription.t option
+        [@ocaml.doc "The description of the alarm mute rule."];
+      rule: Rule.t option
+        [@ocaml.doc
+          "The configuration that defines when and how long alarms are muted."];
+      muteTargets: MuteTargets.t option
+        [@ocaml.doc "Specifies which alarms this rule applies to."];
+      startDate: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the mute rule becomes active. If not set, the rule is active immediately."];
+      expireDate: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the mute rule expires and is no longer evaluated."];
+      status: AlarmMuteRuleStatus.t option
+        [@ocaml.doc
+          "The current status of the alarm mute rule. Valid values are SCHEDULED, ACTIVE, or EXPIRED."];
+      lastUpdatedTimestamp: Timestamp.t option
+        [@ocaml.doc "The date and time when the mute rule was last updated."];
+      muteType: MuteType.t option
+        [@ocaml.doc
+          "Indicates whether the mute rule is one-time or recurring. Valid values are ONE_TIME or RECURRING."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getAlarmMuteRuleResult: getAlarmMuteRuleResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetAlarmMuteRuleOutput"
+    let make ?name =
+      fun ?alarmMuteRuleArn ->
+        fun ?description ->
+          fun ?rule ->
+            fun ?muteTargets ->
+              fun ?startDate ->
+                fun ?expireDate ->
+                  fun ?status ->
+                    fun ?lastUpdatedTimestamp ->
+                      fun ?muteType ->
+                        fun () ->
+                          {
+                            getAlarmMuteRuleResult =
+                              {
+                                name;
+                                alarmMuteRuleArn;
+                                description;
+                                rule;
+                                muteTargets;
+                                startDate;
+                                expireDate;
+                                status;
+                                lastUpdatedTimestamp;
+                                muteType
+                              };
+                            responseMetaData = ()
+                          }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getAlarmMuteRuleResult in
+      structure_to_wrapped_value
+        [("Name", (Option.map x.name ~f:Name.to_value));
+        ("AlarmMuteRuleArn", (Option.map x.alarmMuteRuleArn ~f:Arn.to_value));
+        ("Description",
+          (Option.map x.description ~f:AlarmDescription.to_value));
+        ("Rule", (Option.map x.rule ~f:Rule.to_value));
+        ("MuteTargets", (Option.map x.muteTargets ~f:MuteTargets.to_value));
+        ("StartDate", (Option.map x.startDate ~f:Timestamp.to_value));
+        ("ExpireDate", (Option.map x.expireDate ~f:Timestamp.to_value));
+        ("Status", (Option.map x.status ~f:AlarmMuteRuleStatus.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value));
+        ("MuteType", (Option.map x.muteType ~f:MuteType.to_value))]
+        ~wrapper:"GetAlarmMuteRuleResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetAlarmMuteRuleResult" in
+      let muteType =
+        (Option.map ~f:MuteType.of_xml) (Xml.child xml_arg0 "MuteType") in
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let status =
+        (Option.map ~f:AlarmMuteRuleStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let expireDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ExpireDate") in
+      let startDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartDate") in
+      let muteTargets =
+        (Option.map ~f:MuteTargets.of_xml) (Xml.child xml_arg0 "MuteTargets") in
+      let rule = (Option.map ~f:Rule.of_xml) (Xml.child xml_arg0 "Rule") in
+      let description =
+        (Option.map ~f:AlarmDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let alarmMuteRuleArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AlarmMuteRuleArn") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?muteType ?lastUpdatedTimestamp ?status ?expireDate ?startDate
+        ?muteTargets ?rule ?description ?alarmMuteRuleArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let muteType = field_map json__ "MuteType" MuteType.of_json in
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
+      let status = field_map json__ "Status" AlarmMuteRuleStatus.of_json in
+      let expireDate = field_map json__ "ExpireDate" Timestamp.of_json in
+      let startDate = field_map json__ "StartDate" Timestamp.of_json in
+      let muteTargets = field_map json__ "MuteTargets" MuteTargets.of_json in
+      let rule = field_map json__ "Rule" Rule.of_json in
+      let description =
+        field_map json__ "Description" AlarmDescription.of_json in
+      let alarmMuteRuleArn = field_map json__ "AlarmMuteRuleArn" Arn.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      make ?muteType ?lastUpdatedTimestamp ?status ?expireDate ?startDate
+        ?muteTargets ?rule ?description ?alarmMuteRuleArn ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves details for a specific alarm mute rule. This operation returns complete information about the mute rule, including its configuration, status, targeted alarms, and metadata. The returned status indicates the current state of the mute rule: SCHEDULED: The mute rule is configured and will become active in the future ACTIVE: The mute rule is currently muting alarm actions EXPIRED: The mute rule has passed its expiration date and will no longer become active Permissions To retrieve details for a mute rule, you need the cloudwatch:GetAlarmMuteRule permission on the alarm mute rule resource."]
+module GetAlarmMuteRuleInput =
+  struct
+    type nonrec t =
+      {
+      alarmMuteRuleName: Name.t
+        [@ocaml.doc "The name of the alarm mute rule to retrieve."]}
+    let context_ = "GetAlarmMuteRuleInput"
+    let make ~alarmMuteRuleName = fun () -> { alarmMuteRuleName }
+    let to_value x =
+      structure_to_value
+        [("AlarmMuteRuleName", (Some (Name.to_value x.alarmMuteRuleName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let alarmMuteRuleName =
+        Name.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AlarmMuteRuleName") in
+      make ~alarmMuteRuleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let alarmMuteRuleName =
+        field_map_exn json__ "AlarmMuteRuleName" Name.of_json in
+      make ~alarmMuteRuleName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves details for a specific alarm mute rule. This operation returns complete information about the mute rule, including its configuration, status, targeted alarms, and metadata. The returned status indicates the current state of the mute rule: SCHEDULED: The mute rule is configured and will become active in the future ACTIVE: The mute rule is currently muting alarm actions EXPIRED: The mute rule has passed its expiration date and will no longer become active Permissions To retrieve details for a mute rule, you need the cloudwatch:GetAlarmMuteRule permission on the alarm mute rule resource."]
 module EnableInsightRulesOutput =
   struct
     type enableInsightRulesResult =
@@ -8268,8 +11140,8 @@ module EnableInsightRulesOutput =
         (Option.map ~f:BatchFailures.of_xml) (Xml.child xml_arg0 "Failures") in
       make ?failures ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "Failures" BatchFailures.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "Failures" BatchFailures.of_json in
       make ?failures ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8293,8 +11165,9 @@ module EnableInsightRulesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleNames") in
       make ~ruleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleNames = field_map_exn json "RuleNames" InsightRuleNames.of_json in
+    let of_json json__ =
+      let ruleNames =
+        field_map_exn json__ "RuleNames" InsightRuleNames.of_json in
       make ~ruleNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8316,8 +11189,8 @@ module EnableAlarmActionsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmNames") in
       make ~alarmNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alarmNames = field_map_exn json "AlarmNames" AlarmNames.of_json in
+    let of_json json__ =
+      let alarmNames = field_map_exn json__ "AlarmNames" AlarmNames.of_json in
       make ~alarmNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Enables the actions for the specified alarms."]
@@ -8391,8 +11264,8 @@ module DisableInsightRulesOutput =
         (Option.map ~f:BatchFailures.of_xml) (Xml.child xml_arg0 "Failures") in
       make ?failures ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "Failures" BatchFailures.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "Failures" BatchFailures.of_json in
       make ?failures ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8416,8 +11289,9 @@ module DisableInsightRulesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleNames") in
       make ~ruleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleNames = field_map_exn json "RuleNames" InsightRuleNames.of_json in
+    let of_json json__ =
+      let ruleNames =
+        field_map_exn json__ "RuleNames" InsightRuleNames.of_json in
       make ~ruleNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8439,8 +11313,8 @@ module DisableAlarmActionsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmNames") in
       make ~alarmNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alarmNames = field_map_exn json "AlarmNames" AlarmNames.of_json in
+    let of_json json__ =
+      let alarmNames = field_map_exn json__ "AlarmNames" AlarmNames.of_json in
       make ~alarmNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8511,9 +11385,9 @@ module DescribeInsightRulesOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?insightRules ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let insightRules = field_map json "InsightRules" InsightRules.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let insightRules = field_map json__ "InsightRules" InsightRules.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?insightRules ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8544,10 +11418,10 @@ module DescribeInsightRulesInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" InsightRuleMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" InsightRuleMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8652,10 +11526,10 @@ module DescribeAnomalyDetectorsOutput =
           (Xml.child xml_arg0 "AnomalyDetectors") in
       make ?nextToken ?anomalyDetectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let anomalyDetectors =
-        field_map json "AnomalyDetectors" AnomalyDetectors.of_json in
+        field_map json__ "AnomalyDetectors" AnomalyDetectors.of_json in
       make ?nextToken ?anomalyDetectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8726,15 +11600,15 @@ module DescribeAnomalyDetectorsInput =
       make ?anomalyDetectorTypes ?dimensions ?metricName ?namespace
         ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let anomalyDetectorTypes =
-        field_map json "AnomalyDetectorTypes" AnomalyDetectorTypes.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
-      let namespace = field_map json "Namespace" Namespace.of_json in
+        field_map json__ "AnomalyDetectorTypes" AnomalyDetectorTypes.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxReturnedResultsCount.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" MaxReturnedResultsCount.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?anomalyDetectorTypes ?dimensions ?metricName ?namespace
         ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
@@ -8816,11 +11690,11 @@ module DescribeAlarmsOutput =
           (Xml.child xml_arg0 "CompositeAlarms") in
       make ?nextToken ?metricAlarms ?compositeAlarms ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let metricAlarms = field_map json "MetricAlarms" MetricAlarms.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let metricAlarms = field_map json__ "MetricAlarms" MetricAlarms.of_json in
       let compositeAlarms =
-        field_map json "CompositeAlarms" CompositeAlarms.of_json in
+        field_map json__ "CompositeAlarms" CompositeAlarms.of_json in
       make ?nextToken ?metricAlarms ?compositeAlarms ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8836,7 +11710,7 @@ module DescribeAlarmsInput =
           "An alarm name prefix. If you specify this parameter, you receive information about all alarms that have names that start with this prefix. If this parameter is specified, you cannot specify AlarmNames."];
       alarmTypes: AlarmTypes.t option
         [@ocaml.doc
-          "Use this parameter to specify whether you want the operation to return metric alarms or composite alarms. If you omit this parameter, only metric alarms are returned."];
+          "Use this parameter to specify whether you want the operation to return metric alarms or composite alarms. If you omit this parameter, only metric alarms are returned, even if composite alarms exist in the account. For example, if you omit this parameter or specify MetricAlarms, the operation returns only a list of metric alarms. It does not return any composite alarms, even if composite alarms exist in the account. If you specify CompositeAlarms, the operation returns only a list of composite alarms, and does not return any metric alarms."];
       childrenOfAlarmName: AlarmName.t option
         [@ocaml.doc
           "If you use this parameter and specify the name of a composite alarm, the operation returns information about the \"children\" alarms of the alarm you specify. These are the metric alarms and composite alarms referenced in the AlarmRule field of the composite alarm that you specify in ChildrenOfAlarmName. Information about the composite alarm that you name in ChildrenOfAlarmName is not returned. If you specify ChildrenOfAlarmName, you cannot specify any other parameters in the request except for MaxRecords and NextToken. If you do so, you receive a validation error. Only the Alarm Name, ARN, StateValue (OK/ALARM/INSUFFICIENT_DATA), and StateUpdatedTimestamp information are returned by this operation when you use this parameter. To get complete information about these alarms, perform another DescribeAlarms operation and specify the parent alarm names in the AlarmNames parameter."];
@@ -8918,19 +11792,19 @@ module DescribeAlarmsInput =
         ?parentsOfAlarmName ?childrenOfAlarmName ?alarmTypes ?alarmNamePrefix
         ?alarmNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let actionPrefix = field_map json "ActionPrefix" ActionPrefix.of_json in
-      let stateValue = field_map json "StateValue" StateValue.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let actionPrefix = field_map json__ "ActionPrefix" ActionPrefix.of_json in
+      let stateValue = field_map json__ "StateValue" StateValue.of_json in
       let parentsOfAlarmName =
-        field_map json "ParentsOfAlarmName" AlarmName.of_json in
+        field_map json__ "ParentsOfAlarmName" AlarmName.of_json in
       let childrenOfAlarmName =
-        field_map json "ChildrenOfAlarmName" AlarmName.of_json in
-      let alarmTypes = field_map json "AlarmTypes" AlarmTypes.of_json in
+        field_map json__ "ChildrenOfAlarmName" AlarmName.of_json in
+      let alarmTypes = field_map json__ "AlarmTypes" AlarmTypes.of_json in
       let alarmNamePrefix =
-        field_map json "AlarmNamePrefix" AlarmNamePrefix.of_json in
-      let alarmNames = field_map json "AlarmNames" AlarmNames.of_json in
+        field_map json__ "AlarmNamePrefix" AlarmNamePrefix.of_json in
+      let alarmNames = field_map json__ "AlarmNames" AlarmNames.of_json in
       make ?nextToken ?maxRecords ?actionPrefix ?stateValue
         ?parentsOfAlarmName ?childrenOfAlarmName ?alarmTypes ?alarmNamePrefix
         ?alarmNames ()
@@ -8988,8 +11862,8 @@ module DescribeAlarmsForMetricOutput =
           (Xml.child xml_arg0 "MetricAlarms") in
       make ?metricAlarms ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metricAlarms = field_map json "MetricAlarms" MetricAlarms.of_json in
+    let of_json json__ =
+      let metricAlarms = field_map json__ "MetricAlarms" MetricAlarms.of_json in
       make ?metricAlarms ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9063,15 +11937,15 @@ module DescribeAlarmsForMetricInput =
       make ?unit ?period ?dimensions ?extendedStatistic ?statistic ~namespace
         ~metricName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" StandardUnit.of_json in
-      let period = field_map json "Period" Period.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" StandardUnit.of_json in
+      let period = field_map json__ "Period" Period.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
       let extendedStatistic =
-        field_map json "ExtendedStatistic" ExtendedStatistic.of_json in
-      let statistic = field_map json "Statistic" Statistic.of_json in
-      let namespace = field_map_exn json "Namespace" Namespace.of_json in
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
+        field_map json__ "ExtendedStatistic" ExtendedStatistic.of_json in
+      let statistic = field_map json__ "Statistic" Statistic.of_json in
+      let namespace = field_map_exn json__ "Namespace" Namespace.of_json in
+      let metricName = field_map_exn json__ "MetricName" MetricName.of_json in
       make ?unit ?period ?dimensions ?extendedStatistic ?statistic ~namespace
         ~metricName ()
     let to_json v = composed_to_json to_value v
@@ -9143,10 +12017,10 @@ module DescribeAlarmHistoryOutput =
           (Xml.child xml_arg0 "AlarmHistoryItems") in
       make ?nextToken ?alarmHistoryItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let alarmHistoryItems =
-        field_map json "AlarmHistoryItems" AlarmHistoryItems.of_json in
+        field_map json__ "AlarmHistoryItems" AlarmHistoryItems.of_json in
       make ?nextToken ?alarmHistoryItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9156,6 +12030,9 @@ module DescribeAlarmHistoryInput =
     type nonrec t =
       {
       alarmName: AlarmName.t option [@ocaml.doc "The name of the alarm."];
+      alarmContributorId: ContributorId.t option
+        [@ocaml.doc
+          "The unique identifier of a specific alarm contributor to filter the alarm history results."];
       alarmTypes: AlarmTypes.t option
         [@ocaml.doc
           "Use this parameter to specify whether you want the operation to return metric alarms or composite alarms. If you omit this parameter, only metric alarms are returned."];
@@ -9175,27 +12052,31 @@ module DescribeAlarmHistoryInput =
         [@ocaml.doc
           "Specified whether to return the newest or oldest alarm history first. Specify TimestampDescending to have the newest event history returned first, and specify TimestampAscending to have the oldest history returned first."]}
     let make ?alarmName =
-      fun ?alarmTypes ->
-        fun ?historyItemType ->
-          fun ?startDate ->
-            fun ?endDate ->
-              fun ?maxRecords ->
-                fun ?nextToken ->
-                  fun ?scanBy ->
-                    fun () ->
-                      {
-                        alarmName;
-                        alarmTypes;
-                        historyItemType;
-                        startDate;
-                        endDate;
-                        maxRecords;
-                        nextToken;
-                        scanBy
-                      }
+      fun ?alarmContributorId ->
+        fun ?alarmTypes ->
+          fun ?historyItemType ->
+            fun ?startDate ->
+              fun ?endDate ->
+                fun ?maxRecords ->
+                  fun ?nextToken ->
+                    fun ?scanBy ->
+                      fun () ->
+                        {
+                          alarmName;
+                          alarmContributorId;
+                          alarmTypes;
+                          historyItemType;
+                          startDate;
+                          endDate;
+                          maxRecords;
+                          nextToken;
+                          scanBy
+                        }
     let to_value x =
       structure_to_value
         [("AlarmName", (Option.map x.alarmName ~f:AlarmName.to_value));
+        ("AlarmContributorId",
+          (Option.map x.alarmContributorId ~f:ContributorId.to_value));
         ("AlarmTypes", (Option.map x.alarmTypes ~f:AlarmTypes.to_value));
         ("HistoryItemType",
           (Option.map x.historyItemType ~f:HistoryItemType.to_value));
@@ -9221,26 +12102,150 @@ module DescribeAlarmHistoryInput =
           (Xml.child xml_arg0 "HistoryItemType") in
       let alarmTypes =
         (Option.map ~f:AlarmTypes.of_xml) (Xml.child xml_arg0 "AlarmTypes") in
+      let alarmContributorId =
+        (Option.map ~f:ContributorId.of_xml)
+          (Xml.child xml_arg0 "AlarmContributorId") in
       let alarmName =
         (Option.map ~f:AlarmName.of_xml) (Xml.child xml_arg0 "AlarmName") in
       make ?scanBy ?nextToken ?maxRecords ?endDate ?startDate
-        ?historyItemType ?alarmTypes ?alarmName ()
+        ?historyItemType ?alarmTypes ?alarmContributorId ?alarmName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scanBy = field_map json "ScanBy" ScanBy.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let endDate = field_map json "EndDate" Timestamp.of_json in
-      let startDate = field_map json "StartDate" Timestamp.of_json in
+    let of_json json__ =
+      let scanBy = field_map json__ "ScanBy" ScanBy.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let endDate = field_map json__ "EndDate" Timestamp.of_json in
+      let startDate = field_map json__ "StartDate" Timestamp.of_json in
       let historyItemType =
-        field_map json "HistoryItemType" HistoryItemType.of_json in
-      let alarmTypes = field_map json "AlarmTypes" AlarmTypes.of_json in
-      let alarmName = field_map json "AlarmName" AlarmName.of_json in
+        field_map json__ "HistoryItemType" HistoryItemType.of_json in
+      let alarmTypes = field_map json__ "AlarmTypes" AlarmTypes.of_json in
+      let alarmContributorId =
+        field_map json__ "AlarmContributorId" ContributorId.of_json in
+      let alarmName = field_map json__ "AlarmName" AlarmName.of_json in
       make ?scanBy ?nextToken ?maxRecords ?endDate ?startDate
-        ?historyItemType ?alarmTypes ?alarmName ()
+        ?historyItemType ?alarmTypes ?alarmContributorId ?alarmName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the history for the specified alarm. You can filter the results by date range or item type. If an alarm name is not specified, the histories for either all metric alarms or all composite alarms are returned. CloudWatch retains the history of an alarm even if you delete the alarm. To use this operation and return information about a composite alarm, you must be signed on with the cloudwatch:DescribeAlarmHistory permission that is scoped to *. You can't return information about composite alarms if your cloudwatch:DescribeAlarmHistory permission has a narrower scope."]
+module DescribeAlarmContributorsOutput =
+  struct
+    type describeAlarmContributorsResult =
+      {
+      alarmContributors: AlarmContributors.t option
+        [@ocaml.doc
+          "A list of alarm contributors that provide details about the individual time series contributing to the alarm's state."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token that marks the start of the next batch of returned results."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeAlarmContributorsResult: describeAlarmContributorsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidNextToken of InvalidNextToken.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeAlarmContributorsOutput"
+    let make ?alarmContributors =
+      fun ?nextToken ->
+        fun () ->
+          {
+            describeAlarmContributorsResult =
+              { alarmContributors; nextToken };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeAlarmContributorsResult in
+      structure_to_wrapped_value
+        [("AlarmContributors",
+           (Option.map x.alarmContributors ~f:AlarmContributors.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ~wrapper:"DescribeAlarmContributorsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DescribeAlarmContributorsResult" in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let alarmContributors =
+        (Option.map ~f:AlarmContributors.of_xml)
+          (Xml.child xml_arg0 "AlarmContributors") in
+      make ?nextToken ?alarmContributors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let alarmContributors =
+        field_map json__ "AlarmContributors" AlarmContributors.of_json in
+      make ?nextToken ?alarmContributors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the information of the current alarm contributors that are in ALARM state. This operation returns details about the individual time series that contribute to the alarm's state."]
+module DescribeAlarmContributorsInput =
+  struct
+    type nonrec t =
+      {
+      alarmName: AlarmName.t
+        [@ocaml.doc
+          "The name of the alarm for which to retrieve contributor information."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token returned by a previous call to indicate that there is more data available."]}
+    let context_ = "DescribeAlarmContributorsInput"
+    let make ?nextToken =
+      fun ~alarmName -> fun () -> { nextToken; alarmName }
+    let to_value x =
+      structure_to_value
+        [("AlarmName", (Some (AlarmName.to_value x.alarmName)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let alarmName =
+        AlarmName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AlarmName") in
+      make ?nextToken ~alarmName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let alarmName = field_map_exn json__ "AlarmName" AlarmName.of_json in
+      make ?nextToken ~alarmName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the information of the current alarm contributors that are in ALARM state. This operation returns details about the individual time series that contribute to the alarm's state."]
 module DeleteMetricStreamOutput =
   struct
     type deleteMetricStreamResult = unit
@@ -9326,8 +12331,8 @@ module DeleteMetricStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" MetricStreamName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" MetricStreamName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permanently deletes the metric stream that you specify."]
@@ -9401,8 +12406,8 @@ module DeleteInsightRulesOutput =
         (Option.map ~f:BatchFailures.of_xml) (Xml.child xml_arg0 "Failures") in
       make ?failures ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "Failures" BatchFailures.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "Failures" BatchFailures.of_json in
       make ?failures ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9426,8 +12431,9 @@ module DeleteInsightRulesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleNames") in
       make ~ruleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleNames = field_map_exn json "RuleNames" InsightRuleNames.of_json in
+    let of_json json__ =
+      let ruleNames =
+        field_map_exn json__ "RuleNames" InsightRuleNames.of_json in
       make ~ruleNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9441,15 +12447,15 @@ module DeleteDashboardsOutput =
       deleteDashboardsResult: deleteDashboardsResult ;
       responseMetaData: responseMetaData }
     type error =
-      [ `DashboardNotFoundError of DashboardNotFoundError.t 
+      [ `ConflictException of ConflictException.t 
       | `InternalServiceFault of InternalServiceFault.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = { deleteDashboardsResult = (); responseMetaData = () }
     let error_of_json name json =
       match name with
-      | "DashboardNotFoundError" ->
-          `DashboardNotFoundError (DashboardNotFoundError.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServiceFault" ->
           `InternalServiceFault (InternalServiceFault.of_json json)
       | "InvalidParameterValueException" ->
@@ -9460,8 +12466,8 @@ module DeleteDashboardsOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
-      | "DashboardNotFoundError" ->
-          `DashboardNotFoundError (DashboardNotFoundError.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServiceFault" ->
           `InternalServiceFault (InternalServiceFault.of_xml xml)
       | "InvalidParameterValueException" ->
@@ -9471,10 +12477,10 @@ module DeleteDashboardsOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
-      | `DashboardNotFoundError e ->
+      | `ConflictException e ->
           `Assoc
-            [("error", (`String "DashboardNotFoundError"));
-            ("details", (DashboardNotFoundError.to_json e))]
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServiceFault e ->
           `Assoc
             [("error", (`String "InternalServiceFault"));
@@ -9496,7 +12502,7 @@ module DeleteDashboardsOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes all dashboards that you specify. You can specify up to 100 dashboards to delete. If there is an error during this call, no dashboards are deleted."]
+       "Deletes all dashboards that you specify. You can specify up to 100 dashboards to delete. If there is an error during this call, the operation attempts to delete as many dashboards as possible."]
 module DeleteDashboardsInput =
   struct
     type nonrec t =
@@ -9517,13 +12523,13 @@ module DeleteDashboardsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardNames") in
       make ~dashboardNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dashboardNames =
-        field_map_exn json "DashboardNames" DashboardNames.of_json in
+        field_map_exn json__ "DashboardNames" DashboardNames.of_json in
       make ~dashboardNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes all dashboards that you specify. You can specify up to 100 dashboards to delete. If there is an error during this call, no dashboards are deleted."]
+       "Deletes all dashboards that you specify. You can specify up to 100 dashboards to delete. If there is an error during this call, the operation attempts to delete as many dashboards as possible."]
 module DeleteAnomalyDetectorOutput =
   struct
     type deleteAnomalyDetectorResult = unit
@@ -9612,7 +12618,7 @@ module DeleteAnomalyDetectorOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified anomaly detection model from your account."]
+       "Deletes the specified anomaly detection model from your account. For more information about how to delete an anomaly detection model, see Deleting an anomaly detection model in the CloudWatch User Guide."]
 module DeleteAnomalyDetectorInput =
   struct
     type nonrec t =
@@ -9682,27 +12688,29 @@ module DeleteAnomalyDetectorInput =
       make ?metricMathAnomalyDetector ?singleMetricAnomalyDetector ?stat
         ?dimensions ?metricName ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricMathAnomalyDetector =
-        field_map json "MetricMathAnomalyDetector"
+        field_map json__ "MetricMathAnomalyDetector"
           MetricMathAnomalyDetector.of_json in
       let singleMetricAnomalyDetector =
-        field_map json "SingleMetricAnomalyDetector"
+        field_map json__ "SingleMetricAnomalyDetector"
           SingleMetricAnomalyDetector.of_json in
-      let stat = field_map json "Stat" AnomalyDetectorMetricStat.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
-      let namespace = field_map json "Namespace" Namespace.of_json in
+      let stat = field_map json__ "Stat" AnomalyDetectorMetricStat.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
       make ?metricMathAnomalyDetector ?singleMetricAnomalyDetector ?stat
         ?dimensions ?metricName ?namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified anomaly detection model from your account."]
+       "Deletes the specified anomaly detection model from your account. For more information about how to delete an anomaly detection model, see Deleting an anomaly detection model in the CloudWatch User Guide."]
 module DeleteAlarmsInput =
   struct
     type nonrec t =
       {
-      alarmNames: AlarmNames.t [@ocaml.doc "The alarms to be deleted."]}
+      alarmNames: AlarmNames.t
+        [@ocaml.doc
+          "The alarms to be deleted. Do not enclose the alarm names in quote marks."]}
     let context_ = "DeleteAlarmsInput"
     let make ~alarmNames = fun () -> { alarmNames }
     let to_value x =
@@ -9715,9 +12723,34 @@ module DeleteAlarmsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmNames") in
       make ~alarmNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alarmNames = field_map_exn json "AlarmNames" AlarmNames.of_json in
+    let of_json json__ =
+      let alarmNames = field_map_exn json__ "AlarmNames" AlarmNames.of_json in
       make ~alarmNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified alarms. You can delete up to 100 alarms in one operation. However, this total can include no more than one composite alarm. For example, you could delete 99 metric alarms and one composite alarms with one operation, but you can't delete two composite alarms with one operation. In the event of an error, no alarms are deleted. It is possible to create a loop or cycle of composite alarms, where composite alarm A depends on composite alarm B, and composite alarm B also depends on composite alarm A. In this scenario, you can't delete any composite alarm that is part of the cycle because there is always still a composite alarm that depends on that alarm that you want to delete. To get out of such a situation, you must break the cycle by changing the rule of one of the composite alarms in the cycle to remove a dependency that creates the cycle. The simplest change to make to break a cycle is to change the AlarmRule of one of the alarms to False. Additionally, the evaluation of composite alarms stops if CloudWatch detects a cycle in the evaluation path."]
+       "Deletes the specified alarms. You can delete up to 100 alarms in one operation. However, this total can include no more than one composite alarm. For example, you could delete 99 metric alarms and one composite alarms with one operation, but you can't delete two composite alarms with one operation. If you specify any incorrect alarm names, the alarms you specify with correct names are still deleted. Other syntax errors might result in no alarms being deleted. To confirm that alarms were deleted successfully, you can use the DescribeAlarms operation after using DeleteAlarms. It is possible to create a loop or cycle of composite alarms, where composite alarm A depends on composite alarm B, and composite alarm B also depends on composite alarm A. In this scenario, you can't delete any composite alarm that is part of the cycle because there is always still a composite alarm that depends on that alarm that you want to delete. To get out of such a situation, you must break the cycle by changing the rule of one of the composite alarms in the cycle to remove a dependency that creates the cycle. The simplest change to make to break a cycle is to change the AlarmRule of one of the alarms to false. Additionally, the evaluation of composite alarms stops if CloudWatch detects a cycle in the evaluation path."]
+module DeleteAlarmMuteRuleInput =
+  struct
+    type nonrec t =
+      {
+      alarmMuteRuleName: Name.t
+        [@ocaml.doc "The name of the alarm mute rule to delete."]}
+    let context_ = "DeleteAlarmMuteRuleInput"
+    let make ~alarmMuteRuleName = fun () -> { alarmMuteRuleName }
+    let to_value x =
+      structure_to_value
+        [("AlarmMuteRuleName", (Some (Name.to_value x.alarmMuteRuleName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let alarmMuteRuleName =
+        Name.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AlarmMuteRuleName") in
+      make ~alarmMuteRuleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let alarmMuteRuleName =
+        field_map_exn json__ "AlarmMuteRuleName" Name.of_json in
+      make ~alarmMuteRuleName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a specific alarm mute rule. When you delete a mute rule, any alarms that are currently being muted by that rule are immediately unmuted. If those alarms are in an ALARM state, their configured actions will trigger. This operation is idempotent. If you delete a mute rule that does not exist, the operation succeeds without returning an error. Permissions To delete a mute rule, you need the cloudwatch:DeleteAlarmMuteRule permission on the alarm mute rule resource."]

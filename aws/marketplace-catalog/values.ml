@@ -24,6 +24,978 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module OfferSetAssociatedOfferIdsString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferSetAssociatedOfferIdsString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferSetAssociatedOfferIdsString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferBuyerAccountsString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferBuyerAccountsString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\d{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferBuyerAccountsString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferTargetingString =
+  struct
+    type nonrec t =
+      | BuyerAccounts 
+      | ParticipatingPrograms 
+      | CountryCodes 
+      | None 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BuyerAccounts -> "BuyerAccounts"
+      | ParticipatingPrograms -> "ParticipatingPrograms"
+      | CountryCodes -> "CountryCodes"
+      | None -> "None"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BuyerAccounts" -> BuyerAccounts
+      | "ParticipatingPrograms" -> ParticipatingPrograms
+      | "CountryCodes" -> CountryCodes
+      | "None" -> None
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OfferTargetingString" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OfferTargetingString" j)
+    let to_json = simple_to_json to_value
+  end
+module AmiProductEntityIdString =
+  struct
+    type nonrec t = string
+    let context_ = "AmiProductEntityIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AmiProductEntityIdString" j
+    let to_json = simple_to_json to_value
+  end
+module DateTimeISO8601 =
+  struct
+    type nonrec t = string
+    let context_ = "DateTimeISO8601"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\d]{4})\\-(1[0-2]|0[1-9])\\-(3[01]|0[1-9]|[12][\\d])T(2[0-3]|[01][\\d]):([0-5][\\d]):([0-5][\\d])Z$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DateTimeISO8601" j
+    let to_json = simple_to_json to_value
+  end
+module AmiProductTitleString =
+  struct
+    type nonrec t = string
+    let context_ = "AmiProductTitleString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AmiProductTitleString" j
+    let to_json = simple_to_json to_value
+  end
+module AmiProductVisibilityString =
+  struct
+    type nonrec t =
+      | Limited 
+      | Public 
+      | Restricted 
+      | Draft 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Limited -> "Limited"
+      | Public -> "Public"
+      | Restricted -> "Restricted"
+      | Draft -> "Draft"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Limited" -> Limited
+      | "Public" -> Public
+      | "Restricted" -> Restricted
+      | "Draft" -> Draft
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AmiProductVisibilityString"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AmiProductVisibilityString" j)
+    let to_json = simple_to_json to_value
+  end
+module ContainerProductEntityIdString =
+  struct
+    type nonrec t = string
+    let context_ = "ContainerProductEntityIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContainerProductEntityIdString" j
+    let to_json = simple_to_json to_value
+  end
+module ContainerProductTitleString =
+  struct
+    type nonrec t = string
+    let context_ = "ContainerProductTitleString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContainerProductTitleString" j
+    let to_json = simple_to_json to_value
+  end
+module ContainerProductVisibilityString =
+  struct
+    type nonrec t =
+      | Limited 
+      | Public 
+      | Restricted 
+      | Draft 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Limited -> "Limited"
+      | Public -> "Public"
+      | Restricted -> "Restricted"
+      | Draft -> "Draft"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Limited" -> Limited
+      | "Public" -> Public
+      | "Restricted" -> Restricted
+      | "Draft" -> Draft
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ContainerProductVisibilityString"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ContainerProductVisibilityString" j)
+    let to_json = simple_to_json to_value
+  end
+module DataProductEntityIdString =
+  struct
+    type nonrec t = string
+    let context_ = "DataProductEntityIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DataProductEntityIdString" j
+    let to_json = simple_to_json to_value
+  end
+module DataProductTitleString =
+  struct
+    type nonrec t = string
+    let context_ = "DataProductTitleString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DataProductTitleString" j
+    let to_json = simple_to_json to_value
+  end
+module DataProductVisibilityString =
+  struct
+    type nonrec t =
+      | Limited 
+      | Public 
+      | Restricted 
+      | Unavailable 
+      | Draft 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Limited -> "Limited"
+      | Public -> "Public"
+      | Restricted -> "Restricted"
+      | Unavailable -> "Unavailable"
+      | Draft -> "Draft"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Limited" -> Limited
+      | "Public" -> Public
+      | "Restricted" -> Restricted
+      | "Unavailable" -> Unavailable
+      | "Draft" -> Draft
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DataProductVisibilityString"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DataProductVisibilityString" j)
+    let to_json = simple_to_json to_value
+  end
+module MachineLearningProductEntityIdString =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The entity ID of a machine learning product. This string uniquely identifies the product."]
+    let context_ = "MachineLearningProductEntityIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"MachineLearningProductEntityIdString" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The entity ID of a machine learning product. This string uniquely identifies the product."]
+module MachineLearningProductTitleString =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The title of a machine learning product."]
+    let context_ = "MachineLearningProductTitleString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"MachineLearningProductTitleString" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The title of a machine learning product."]
+module MachineLearningProductVisibilityString =
+  struct
+    type nonrec t =
+      | Limited 
+      | Public 
+      | Restricted 
+      | Draft 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Limited -> "Limited"
+      | Public -> "Public"
+      | Restricted -> "Restricted"
+      | Draft -> "Draft"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Limited" -> Limited
+      | "Public" -> Public
+      | "Restricted" -> Restricted
+      | "Draft" -> Draft
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration MachineLearningProductVisibilityString"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"MachineLearningProductVisibilityString" j)
+    let to_json = simple_to_json to_value
+  end
+module OfferEntityIdString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferEntityIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferEntityIdString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferNameString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:150) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferNameString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferProductIdString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferProductIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferProductIdString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferResaleAuthorizationIdString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferResaleAuthorizationIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferResaleAuthorizationIdString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferSetIdString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferSetIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^offerset-[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferSetIdString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferStateString =
+  struct
+    type nonrec t =
+      | Draft 
+      | Released 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Draft -> "Draft"
+      | Released -> "Released"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Draft" -> Draft
+      | "Released" -> Released
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OfferStateString" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OfferStateString" j)
+    let to_json = simple_to_json to_value
+  end
+module OfferSetEntityIdString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferSetEntityIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^offerset-[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferSetEntityIdString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferSetNameString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferSetNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:150) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferSetNameString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferSetSolutionIdString =
+  struct
+    type nonrec t = string
+    let context_ = "OfferSetSolutionIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferSetSolutionIdString" j
+    let to_json = simple_to_json to_value
+  end
+module OfferSetStateString =
+  struct
+    type nonrec t =
+      | Draft 
+      | Released 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Draft -> "Draft"
+      | Released -> "Released"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Draft" -> Draft
+      | "Released" -> Released
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OfferSetStateString" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OfferSetStateString" j)
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationEntityIdString =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationEntityIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationEntityIdString" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationManufacturerAccountIdString =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationManufacturerAccountIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\d{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationManufacturerAccountIdString" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationManufacturerLegalNameString =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationManufacturerLegalNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationManufacturerLegalNameString" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationNameString =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResaleAuthorizationNameString" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationOfferExtendedStatusString =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationOfferExtendedStatusString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationOfferExtendedStatusString" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationProductIdString =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationProductIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationProductIdString" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationProductNameString =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationProductNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationProductNameString" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationResellerAccountIDString =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationResellerAccountIDString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\d{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationResellerAccountIDString" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationResellerLegalNameString =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationResellerLegalNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationResellerLegalNameString" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationStatusString =
+  struct
+    type nonrec t =
+      | Draft 
+      | Active 
+      | Restricted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Draft -> "Draft"
+      | Active -> "Active"
+      | Restricted -> "Restricted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Draft" -> Draft
+      | "Active" -> Active
+      | "Restricted" -> Restricted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResaleAuthorizationStatusString"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResaleAuthorizationStatusString" j)
+    let to_json = simple_to_json to_value
+  end
+module SaaSProductEntityIdString =
+  struct
+    type nonrec t = string
+    let context_ = "SaaSProductEntityIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SaaSProductEntityIdString" j
+    let to_json = simple_to_json to_value
+  end
+module SaaSProductTitleString =
+  struct
+    type nonrec t = string
+    let context_ = "SaaSProductTitleString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SaaSProductTitleString" j
+    let to_json = simple_to_json to_value
+  end
+module SaaSProductVisibilityString =
+  struct
+    type nonrec t =
+      | Limited 
+      | Public 
+      | Restricted 
+      | Draft 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Limited -> "Limited"
+      | Public -> "Public"
+      | Restricted -> "Restricted"
+      | Draft -> "Draft"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Limited" -> Limited
+      | "Public" -> Public
+      | "Restricted" -> Restricted
+      | "Draft" -> Draft
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SaaSProductVisibilityString"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SaaSProductVisibilityString" j)
+    let to_json = simple_to_json to_value
+  end
 module ErrorCodeString =
   struct
     type nonrec t = string
@@ -104,6 +1076,2071 @@ module Identifier =
     let of_json j = string_of_json ~kind:"Identifier" j
     let to_json = simple_to_json to_value
   end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t [@ocaml.doc "The key associated with the tag."];
+      value: TagValue.t [@ocaml.doc "The value associated with the tag."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A list of objects specifying each key name and value."]
+module OfferSetAssociatedOfferIdsList =
+  struct
+    type nonrec t = OfferSetAssociatedOfferIdsString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferSetAssociatedOfferIdsString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:OfferSetAssociatedOfferIdsString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferSetAssociatedOfferIdsList"
+        ~of_json:OfferSetAssociatedOfferIdsString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferBuyerAccountsList =
+  struct
+    type nonrec t = OfferBuyerAccountsString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:26) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferBuyerAccountsString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferBuyerAccountsString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferBuyerAccountsList"
+        ~of_json:OfferBuyerAccountsString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferTargetingList =
+  struct
+    type nonrec t = OfferTargetingString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferTargetingString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferTargetingString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferTargetingList"
+        ~of_json:OfferTargetingString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AmiProductEntityIdFilterValueList =
+  struct
+    type nonrec t = AmiProductEntityIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AmiProductEntityIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AmiProductEntityIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AmiProductEntityIdFilterValueList"
+        ~of_json:AmiProductEntityIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AmiProductLastModifiedDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc "Date after which the AMI product was last modified."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc "Date before which the AMI product was last modified."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that contains date range of the last modified date to be filtered on. You can optionally provide a BeforeValue and/or AfterValue. Both are inclusive."]
+module AmiProductTitleFilterValueList =
+  struct
+    type nonrec t = AmiProductTitleString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AmiProductTitleString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AmiProductTitleString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AmiProductTitleFilterValueList"
+        ~of_json:AmiProductTitleString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AmiProductVisibilityFilterValueList =
+  struct
+    type nonrec t = AmiProductVisibilityString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AmiProductVisibilityString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AmiProductVisibilityString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AmiProductVisibilityFilterValueList"
+        ~of_json:AmiProductVisibilityString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ContainerProductEntityIdFilterValueList =
+  struct
+    type nonrec t = ContainerProductEntityIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContainerProductEntityIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ContainerProductEntityIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ContainerProductEntityIdFilterValueList"
+        ~of_json:ContainerProductEntityIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ContainerProductLastModifiedDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Date after which the container product was last modified."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Date before which the container product was last modified."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that contains date range of the last modified date to be filtered on. You can optionally provide a BeforeValue and/or AfterValue. Both are inclusive."]
+module ContainerProductTitleFilterValueList =
+  struct
+    type nonrec t = ContainerProductTitleString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContainerProductTitleString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ContainerProductTitleString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ContainerProductTitleFilterValueList"
+        ~of_json:ContainerProductTitleString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ContainerProductVisibilityFilterValueList =
+  struct
+    type nonrec t = ContainerProductVisibilityString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContainerProductVisibilityString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ContainerProductVisibilityString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ContainerProductVisibilityFilterValueList"
+        ~of_json:ContainerProductVisibilityString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DataProductEntityIdFilterValueList =
+  struct
+    type nonrec t = DataProductEntityIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataProductEntityIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataProductEntityIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataProductEntityIdFilterValueList"
+        ~of_json:DataProductEntityIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DataProductLastModifiedDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc "Date after which the data product was last modified."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc "Date before which the data product was last modified."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that contains date range of the last modified date to be filtered on. You can optionally provide a BeforeValue and/or AfterValue. Both are inclusive."]
+module DataProductTitleFilterValueList =
+  struct
+    type nonrec t = DataProductTitleString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataProductTitleString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataProductTitleString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataProductTitleFilterValueList"
+        ~of_json:DataProductTitleString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DataProductVisibilityFilterValueList =
+  struct
+    type nonrec t = DataProductVisibilityString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataProductVisibilityString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataProductVisibilityString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataProductVisibilityFilterValueList"
+        ~of_json:DataProductVisibilityString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MachineLearningProductEntityIdFilterValueList =
+  struct
+    type nonrec t = MachineLearningProductEntityIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MachineLearningProductEntityIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:MachineLearningProductEntityIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MachineLearningProductEntityIdFilterValueList"
+        ~of_json:MachineLearningProductEntityIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MachineLearningProductLastModifiedDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "The start date (inclusive) of the date range. The operation returns machine learning products with last modified dates on or after this date."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "The end date (inclusive) of the date range. The operation returns machine learning products with last modified dates on or before this date."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A date range for filtering machine learning products by their last modified date."]
+module MachineLearningProductTitleFilterValueList =
+  struct
+    type nonrec t = MachineLearningProductTitleString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MachineLearningProductTitleString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:MachineLearningProductTitleString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MachineLearningProductTitleFilterValueList"
+        ~of_json:MachineLearningProductTitleString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MachineLearningProductVisibilityFilterValueList =
+  struct
+    type nonrec t = MachineLearningProductVisibilityString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MachineLearningProductVisibilityString.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:MachineLearningProductVisibilityString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MachineLearningProductVisibilityFilterValueList"
+        ~of_json:MachineLearningProductVisibilityString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferAvailabilityEndDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the AvailabilityEndDate of an offer after a date."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the AvailabilityEndDate of an offer before a date."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the AvailabilityEndDate of an offer with date range as input."]
+module OfferBuyerAccountsFilterWildcard =
+  struct
+    type nonrec t = string
+    let context_ = "OfferBuyerAccountsFilterWildcard"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OfferBuyerAccountsFilterWildcard" j
+    let to_json = simple_to_json to_value
+  end
+module OfferEntityIdFilterValueList =
+  struct
+    type nonrec t = OfferEntityIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferEntityIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferEntityIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferEntityIdFilterValueList"
+        ~of_json:OfferEntityIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferLastModifiedDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of an offer after a date."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of an offer before a date."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the LastModifiedDate of an offer with date range as input."]
+module OfferNameFilterValueList =
+  struct
+    type nonrec t = OfferNameString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferNameString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferNameString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferNameFilterValueList"
+        ~of_json:OfferNameString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferProductIdFilterValueList =
+  struct
+    type nonrec t = OfferProductIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferProductIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferProductIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferProductIdFilterValueList"
+        ~of_json:OfferProductIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferReleaseDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the ReleaseDate of offers after a date."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the ReleaseDate of offers before a date."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the ReleaseDate of an offer with date range as input."]
+module OfferResaleAuthorizationIdFilterValueList =
+  struct
+    type nonrec t = OfferResaleAuthorizationIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferResaleAuthorizationIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:OfferResaleAuthorizationIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferResaleAuthorizationIdFilterValueList"
+        ~of_json:OfferResaleAuthorizationIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferSetIdFilterValueList =
+  struct
+    type nonrec t = OfferSetIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferSetIdString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferSetIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferSetIdFilterValueList"
+        ~of_json:OfferSetIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferStateFilterValueList =
+  struct
+    type nonrec t = OfferStateString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferStateString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferStateString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferStateFilterValueList"
+        ~of_json:OfferStateString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferTargetingFilterValueList =
+  struct
+    type nonrec t = OfferTargetingString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferTargetingString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferTargetingString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferTargetingFilterValueList"
+        ~of_json:OfferTargetingString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferSetAssociatedOfferIdsFilterValueList =
+  struct
+    type nonrec t = OfferSetAssociatedOfferIdsString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferSetAssociatedOfferIdsString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:OfferSetAssociatedOfferIdsString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferSetAssociatedOfferIdsFilterValueList"
+        ~of_json:OfferSetAssociatedOfferIdsString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferSetEntityIdFilterValueList =
+  struct
+    type nonrec t = OfferSetEntityIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferSetEntityIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferSetEntityIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferSetEntityIdFilterValueList"
+        ~of_json:OfferSetEntityIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferSetLastModifiedDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of an offer set after a date."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of an offer set before a date."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the LastModifiedDate of an offer set with date range as input."]
+module OfferSetNameFilterValueList =
+  struct
+    type nonrec t = OfferSetNameString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferSetNameString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferSetNameString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferSetNameFilterValueList"
+        ~of_json:OfferSetNameString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferSetReleaseDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the ReleaseDate of offer set after a date."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the ReleaseDate of offer set before a date."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the ReleaseDate of an offer set with date range as input."]
+module OfferSetSolutionIdFilterValueList =
+  struct
+    type nonrec t = OfferSetSolutionIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferSetSolutionIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferSetSolutionIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferSetSolutionIdFilterValueList"
+        ~of_json:OfferSetSolutionIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OfferSetStateFilterValueList =
+  struct
+    type nonrec t = OfferSetStateString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OfferSetStateString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OfferSetStateString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OfferSetStateFilterValueList"
+        ~of_json:OfferSetStateString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationAvailabilityEndDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on AvailabilityEndDate of a ResaleAuthorization after a date."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on AvailabilityEndDate of a ResaleAuthorization before a date."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on AvailabilityEndDate of a ResaleAuthorization with date range as input."]
+module ResaleAuthorizationAvailabilityEndDateFilterValueList =
+  struct
+    type nonrec t = DateTimeISO8601.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DateTimeISO8601.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DateTimeISO8601.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"ResaleAuthorizationAvailabilityEndDateFilterValueList"
+        ~of_json:DateTimeISO8601.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationCreatedDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on CreatedDate of a ResaleAuthorization after a date."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on CreatedDate of a ResaleAuthorization before a date."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on CreatedDate of a ResaleAuthorization with date range as input."]
+module ResaleAuthorizationCreatedDateFilterValueList =
+  struct
+    type nonrec t = DateTimeISO8601.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DateTimeISO8601.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DateTimeISO8601.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResaleAuthorizationCreatedDateFilterValueList"
+        ~of_json:DateTimeISO8601.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationEntityIdFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationEntityIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResaleAuthorizationEntityIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ResaleAuthorizationEntityIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResaleAuthorizationEntityIdFilterValueList"
+        ~of_json:ResaleAuthorizationEntityIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationLastModifiedDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of a ResaleAuthorization after a date."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of a ResaleAuthorization before a date."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the LastModifiedDate of a ResaleAuthorization with date range as input."]
+module ResaleAuthorizationManufacturerAccountIdFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationManufacturerAccountIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:ResaleAuthorizationManufacturerAccountIdString.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ResaleAuthorizationManufacturerAccountIdString.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"ResaleAuthorizationManufacturerAccountIdFilterValueList"
+        ~of_json:ResaleAuthorizationManufacturerAccountIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationManufacturerAccountIdFilterWildcard =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationManufacturerAccountIdFilterWildcard"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\d{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"ResaleAuthorizationManufacturerAccountIdFilterWildcard" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationManufacturerLegalNameFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationManufacturerLegalNameString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:ResaleAuthorizationManufacturerLegalNameString.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ResaleAuthorizationManufacturerLegalNameString.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"ResaleAuthorizationManufacturerLegalNameFilterValueList"
+        ~of_json:ResaleAuthorizationManufacturerLegalNameString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationManufacturerLegalNameFilterWildcard =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationManufacturerLegalNameFilterWildcard"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"ResaleAuthorizationManufacturerLegalNameFilterWildcard" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationNameFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationNameString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResaleAuthorizationNameString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResaleAuthorizationNameString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResaleAuthorizationNameFilterValueList"
+        ~of_json:ResaleAuthorizationNameString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationNameFilterWildcard =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationNameFilterWildcard"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationNameFilterWildcard" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationOfferExtendedStatusFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationOfferExtendedStatusString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:ResaleAuthorizationOfferExtendedStatusString.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ResaleAuthorizationOfferExtendedStatusString.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"ResaleAuthorizationOfferExtendedStatusFilterValueList"
+        ~of_json:ResaleAuthorizationOfferExtendedStatusString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationProductIdFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationProductIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResaleAuthorizationProductIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ResaleAuthorizationProductIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResaleAuthorizationProductIdFilterValueList"
+        ~of_json:ResaleAuthorizationProductIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationProductIdFilterWildcard =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationProductIdFilterWildcard"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationProductIdFilterWildcard" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationProductNameFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationProductNameString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResaleAuthorizationProductNameString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ResaleAuthorizationProductNameString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResaleAuthorizationProductNameFilterValueList"
+        ~of_json:ResaleAuthorizationProductNameString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationProductNameFilterWildcard =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationProductNameFilterWildcard"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ResaleAuthorizationProductNameFilterWildcard" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationResellerAccountIDFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationResellerAccountIDString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:ResaleAuthorizationResellerAccountIDString.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ResaleAuthorizationResellerAccountIDString.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"ResaleAuthorizationResellerAccountIDFilterValueList"
+        ~of_json:ResaleAuthorizationResellerAccountIDString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationResellerAccountIDFilterWildcard =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationResellerAccountIDFilterWildcard"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\d{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"ResaleAuthorizationResellerAccountIDFilterWildcard" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationResellerLegalNameFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationResellerLegalNameString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:ResaleAuthorizationResellerLegalNameString.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ResaleAuthorizationResellerLegalNameString.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"ResaleAuthorizationResellerLegalNameFilterValueList"
+        ~of_json:ResaleAuthorizationResellerLegalNameString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResaleAuthorizationResellerLegalNameFilterWildcard =
+  struct
+    type nonrec t = string
+    let context_ = "ResaleAuthorizationResellerLegalNameFilterWildcard"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"ResaleAuthorizationResellerLegalNameFilterWildcard" j
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationStatusFilterValueList =
+  struct
+    type nonrec t = ResaleAuthorizationStatusString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResaleAuthorizationStatusString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResaleAuthorizationStatusString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResaleAuthorizationStatusFilterValueList"
+        ~of_json:ResaleAuthorizationStatusString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SaaSProductEntityIdFilterValueList =
+  struct
+    type nonrec t = SaaSProductEntityIdString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SaaSProductEntityIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SaaSProductEntityIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SaaSProductEntityIdFilterValueList"
+        ~of_json:SaaSProductEntityIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SaaSProductLastModifiedDateFilterDateRange =
+  struct
+    type nonrec t =
+      {
+      afterValue: DateTimeISO8601.t option
+        [@ocaml.doc "Date after which the SaaS product was last modified."];
+      beforeValue: DateTimeISO8601.t option
+        [@ocaml.doc "Date before which the SaaS product was last modified."]}
+    let make ?afterValue =
+      fun ?beforeValue -> fun () -> { afterValue; beforeValue }
+    let to_value x =
+      structure_to_value
+        [("AfterValue",
+           (Option.map x.afterValue ~f:DateTimeISO8601.to_value));
+        ("BeforeValue",
+          (Option.map x.beforeValue ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let beforeValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "BeforeValue") in
+      let afterValue =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AfterValue") in
+      make ?beforeValue ?afterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let beforeValue =
+        field_map json__ "BeforeValue" DateTimeISO8601.of_json in
+      let afterValue = field_map json__ "AfterValue" DateTimeISO8601.of_json in
+      make ?beforeValue ?afterValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that contains date range of the last modified date to be filtered on. You can optionally provide a BeforeValue and/or AfterValue. Both are inclusive."]
+module SaaSProductTitleFilterValueList =
+  struct
+    type nonrec t = SaaSProductTitleString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SaaSProductTitleString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SaaSProductTitleString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SaaSProductTitleFilterValueList"
+        ~of_json:SaaSProductTitleString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SaaSProductVisibilityFilterValueList =
+  struct
+    type nonrec t = SaaSProductVisibilityString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SaaSProductVisibilityString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SaaSProductVisibilityString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SaaSProductVisibilityFilterValueList"
+        ~of_json:SaaSProductVisibilityString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module FilterValueContent =
   struct
     type nonrec t = string
@@ -169,10 +3206,10 @@ module ErrorDetail =
           (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorMessage =
-        field_map json "ErrorMessage" ExceptionMessageContent.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCodeString.of_json in
+        field_map json__ "ErrorMessage" ExceptionMessageContent.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCodeString.of_json in
       make ?errorMessage ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about the error."]
@@ -237,9 +3274,9 @@ module Entity =
         EntityType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?identifier ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier = field_map json "Identifier" Identifier.of_json in
-      let type_ = field_map_exn json "Type" EntityType.of_json in
+    let of_json json__ =
+      let identifier = field_map json__ "Identifier" Identifier.of_json in
+      let type_ = field_map_exn json__ "Type" EntityType.of_json in
       make ?identifier ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -265,6 +3302,49 @@ module Json =
     let of_json j = string_of_json ~kind:"Json" j
     let to_json = simple_to_json to_value
   end
+module JsonDocumentType =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ARN =
   struct
     type nonrec t = string
@@ -285,28 +3365,113 @@ module ARN =
     let of_json j = string_of_json ~kind:"ARN" j
     let to_json = simple_to_json to_value
   end
-module DateTimeISO8601 =
+module AmiProductSummary =
   struct
-    type nonrec t = string
-    let context_ = "DateTimeISO8601"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:20) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^([\\d]{4})\\-(1[0-2]|0[1-9])\\-(3[01]|0[1-9]|[12][\\d])T(2[0-3]|[01][\\d]):([0-5][\\d]):([0-5][\\d])Z$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      productTitle: AmiProductTitleString.t option
+        [@ocaml.doc "The title of the AMI product."];
+      visibility: AmiProductVisibilityString.t option
+        [@ocaml.doc "The lifecycle of the AMI product."]}
+    let make ?productTitle =
+      fun ?visibility -> fun () -> { productTitle; visibility }
+    let to_value x =
+      structure_to_value
+        [("ProductTitle",
+           (Option.map x.productTitle ~f:AmiProductTitleString.to_value));
+        ("Visibility",
+          (Option.map x.visibility ~f:AmiProductVisibilityString.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DateTimeISO8601" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:AmiProductVisibilityString.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:AmiProductTitleString.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      make ?visibility ?productTitle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visibility =
+        field_map json__ "Visibility" AmiProductVisibilityString.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle" AmiProductTitleString.of_json in
+      make ?visibility ?productTitle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that contains summarized information about an AMI product."]
+module ContainerProductSummary =
+  struct
+    type nonrec t =
+      {
+      productTitle: ContainerProductTitleString.t option
+        [@ocaml.doc "The title of the container product."];
+      visibility: ContainerProductVisibilityString.t option
+        [@ocaml.doc "The lifecycle of the product."]}
+    let make ?productTitle =
+      fun ?visibility -> fun () -> { productTitle; visibility }
+    let to_value x =
+      structure_to_value
+        [("ProductTitle",
+           (Option.map x.productTitle ~f:ContainerProductTitleString.to_value));
+        ("Visibility",
+          (Option.map x.visibility
+             ~f:ContainerProductVisibilityString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:ContainerProductVisibilityString.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:ContainerProductTitleString.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      make ?visibility ?productTitle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visibility =
+        field_map json__ "Visibility"
+          ContainerProductVisibilityString.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle" ContainerProductTitleString.of_json in
+      make ?visibility ?productTitle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that contains summarized information about a container product."]
+module DataProductSummary =
+  struct
+    type nonrec t =
+      {
+      productTitle: DataProductTitleString.t option
+        [@ocaml.doc "The title of the data product."];
+      visibility: DataProductVisibilityString.t option
+        [@ocaml.doc "The lifecycle of the data product."]}
+    let make ?productTitle =
+      fun ?visibility -> fun () -> { productTitle; visibility }
+    let to_value x =
+      structure_to_value
+        [("ProductTitle",
+           (Option.map x.productTitle ~f:DataProductTitleString.to_value));
+        ("Visibility",
+          (Option.map x.visibility ~f:DataProductVisibilityString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:DataProductVisibilityString.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:DataProductTitleString.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      make ?visibility ?productTitle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visibility =
+        field_map json__ "Visibility" DataProductVisibilityString.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle" DataProductTitleString.of_json in
+      make ?visibility ?productTitle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that contains summarized information about a data product."]
 module EntityNameString =
   struct
     type nonrec t = string
@@ -327,6 +3492,415 @@ module EntityNameString =
     let of_json j = string_of_json ~kind:"EntityNameString" j
     let to_json = simple_to_json to_value
   end
+module MachineLearningProductSummary =
+  struct
+    type nonrec t =
+      {
+      productTitle: MachineLearningProductTitleString.t option
+        [@ocaml.doc "The title of the machine learning product."];
+      visibility: MachineLearningProductVisibilityString.t option
+        [@ocaml.doc
+          "The visibility status of the machine learning product. Valid values are Limited, Public, Restricted, and Draft."]}
+    let make ?productTitle =
+      fun ?visibility -> fun () -> { productTitle; visibility }
+    let to_value x =
+      structure_to_value
+        [("ProductTitle",
+           (Option.map x.productTitle
+              ~f:MachineLearningProductTitleString.to_value));
+        ("Visibility",
+          (Option.map x.visibility
+             ~f:MachineLearningProductVisibilityString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:MachineLearningProductVisibilityString.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:MachineLearningProductTitleString.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      make ?visibility ?productTitle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visibility =
+        field_map json__ "Visibility"
+          MachineLearningProductVisibilityString.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle"
+          MachineLearningProductTitleString.of_json in
+      make ?visibility ?productTitle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A summary of a machine learning product."]
+module OfferSetSummary =
+  struct
+    type nonrec t =
+      {
+      name: OfferSetNameString.t option
+        [@ocaml.doc "The name of the offer set."];
+      state: OfferSetStateString.t option
+        [@ocaml.doc "The state of the offer set."];
+      releaseDate: DateTimeISO8601.t option
+        [@ocaml.doc "The release date of the offer set."];
+      associatedOfferIds: OfferSetAssociatedOfferIdsList.t option
+        [@ocaml.doc "The list of offer IDs associated with the offer set."];
+      solutionId: OfferSetSolutionIdString.t option
+        [@ocaml.doc "The solution ID associated with the offer set."]}
+    let make ?name =
+      fun ?state ->
+        fun ?releaseDate ->
+          fun ?associatedOfferIds ->
+            fun ?solutionId ->
+              fun () ->
+                { name; state; releaseDate; associatedOfferIds; solutionId }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:OfferSetNameString.to_value));
+        ("State", (Option.map x.state ~f:OfferSetStateString.to_value));
+        ("ReleaseDate",
+          (Option.map x.releaseDate ~f:DateTimeISO8601.to_value));
+        ("AssociatedOfferIds",
+          (Option.map x.associatedOfferIds
+             ~f:OfferSetAssociatedOfferIdsList.to_value));
+        ("SolutionId",
+          (Option.map x.solutionId ~f:OfferSetSolutionIdString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let solutionId =
+        (Option.map ~f:OfferSetSolutionIdString.of_xml)
+          (Xml.child xml_arg0 "SolutionId") in
+      let associatedOfferIds =
+        (Option.map ~f:OfferSetAssociatedOfferIdsList.of_xml)
+          (Xml.child xml_arg0 "AssociatedOfferIds") in
+      let releaseDate =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "ReleaseDate") in
+      let state =
+        (Option.map ~f:OfferSetStateString.of_xml)
+          (Xml.child xml_arg0 "State") in
+      let name =
+        (Option.map ~f:OfferSetNameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?solutionId ?associatedOfferIds ?releaseDate ?state ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let solutionId =
+        field_map json__ "SolutionId" OfferSetSolutionIdString.of_json in
+      let associatedOfferIds =
+        field_map json__ "AssociatedOfferIds"
+          OfferSetAssociatedOfferIdsList.of_json in
+      let releaseDate =
+        field_map json__ "ReleaseDate" DateTimeISO8601.of_json in
+      let state = field_map json__ "State" OfferSetStateString.of_json in
+      let name = field_map json__ "Name" OfferSetNameString.of_json in
+      make ?solutionId ?associatedOfferIds ?releaseDate ?state ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summarized information about an offer set."]
+module OfferSummary =
+  struct
+    type nonrec t =
+      {
+      name: OfferNameString.t option [@ocaml.doc "The name of the offer."];
+      productId: OfferProductIdString.t option
+        [@ocaml.doc "The product ID of the offer."];
+      resaleAuthorizationId: OfferResaleAuthorizationIdString.t option
+        [@ocaml.doc "The ResaleAuthorizationId of the offer."];
+      releaseDate: DateTimeISO8601.t option
+        [@ocaml.doc "The release date of the offer."];
+      availabilityEndDate: DateTimeISO8601.t option
+        [@ocaml.doc "The availability end date of the offer."];
+      buyerAccounts: OfferBuyerAccountsList.t option
+        [@ocaml.doc "The buyer accounts in the offer."];
+      state: OfferStateString.t option
+        [@ocaml.doc "The status of the offer."];
+      targeting: OfferTargetingList.t option
+        [@ocaml.doc "The targeting in the offer."];
+      offerSetId: OfferSetIdString.t option
+        [@ocaml.doc "The offer set ID of the offer."]}
+    let make ?name =
+      fun ?productId ->
+        fun ?resaleAuthorizationId ->
+          fun ?releaseDate ->
+            fun ?availabilityEndDate ->
+              fun ?buyerAccounts ->
+                fun ?state ->
+                  fun ?targeting ->
+                    fun ?offerSetId ->
+                      fun () ->
+                        {
+                          name;
+                          productId;
+                          resaleAuthorizationId;
+                          releaseDate;
+                          availabilityEndDate;
+                          buyerAccounts;
+                          state;
+                          targeting;
+                          offerSetId
+                        }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:OfferNameString.to_value));
+        ("ProductId",
+          (Option.map x.productId ~f:OfferProductIdString.to_value));
+        ("ResaleAuthorizationId",
+          (Option.map x.resaleAuthorizationId
+             ~f:OfferResaleAuthorizationIdString.to_value));
+        ("ReleaseDate",
+          (Option.map x.releaseDate ~f:DateTimeISO8601.to_value));
+        ("AvailabilityEndDate",
+          (Option.map x.availabilityEndDate ~f:DateTimeISO8601.to_value));
+        ("BuyerAccounts",
+          (Option.map x.buyerAccounts ~f:OfferBuyerAccountsList.to_value));
+        ("State", (Option.map x.state ~f:OfferStateString.to_value));
+        ("Targeting",
+          (Option.map x.targeting ~f:OfferTargetingList.to_value));
+        ("OfferSetId",
+          (Option.map x.offerSetId ~f:OfferSetIdString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let offerSetId =
+        (Option.map ~f:OfferSetIdString.of_xml)
+          (Xml.child xml_arg0 "OfferSetId") in
+      let targeting =
+        (Option.map ~f:OfferTargetingList.of_xml)
+          (Xml.child xml_arg0 "Targeting") in
+      let state =
+        (Option.map ~f:OfferStateString.of_xml) (Xml.child xml_arg0 "State") in
+      let buyerAccounts =
+        (Option.map ~f:OfferBuyerAccountsList.of_xml)
+          (Xml.child xml_arg0 "BuyerAccounts") in
+      let availabilityEndDate =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AvailabilityEndDate") in
+      let releaseDate =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "ReleaseDate") in
+      let resaleAuthorizationId =
+        (Option.map ~f:OfferResaleAuthorizationIdString.of_xml)
+          (Xml.child xml_arg0 "ResaleAuthorizationId") in
+      let productId =
+        (Option.map ~f:OfferProductIdString.of_xml)
+          (Xml.child xml_arg0 "ProductId") in
+      let name =
+        (Option.map ~f:OfferNameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?offerSetId ?targeting ?state ?buyerAccounts ?availabilityEndDate
+        ?releaseDate ?resaleAuthorizationId ?productId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let offerSetId = field_map json__ "OfferSetId" OfferSetIdString.of_json in
+      let targeting = field_map json__ "Targeting" OfferTargetingList.of_json in
+      let state = field_map json__ "State" OfferStateString.of_json in
+      let buyerAccounts =
+        field_map json__ "BuyerAccounts" OfferBuyerAccountsList.of_json in
+      let availabilityEndDate =
+        field_map json__ "AvailabilityEndDate" DateTimeISO8601.of_json in
+      let releaseDate =
+        field_map json__ "ReleaseDate" DateTimeISO8601.of_json in
+      let resaleAuthorizationId =
+        field_map json__ "ResaleAuthorizationId"
+          OfferResaleAuthorizationIdString.of_json in
+      let productId =
+        field_map json__ "ProductId" OfferProductIdString.of_json in
+      let name = field_map json__ "Name" OfferNameString.of_json in
+      make ?offerSetId ?targeting ?state ?buyerAccounts ?availabilityEndDate
+        ?releaseDate ?resaleAuthorizationId ?productId ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summarized information about an offer."]
+module ResaleAuthorizationSummary =
+  struct
+    type nonrec t =
+      {
+      name: ResaleAuthorizationNameString.t option
+        [@ocaml.doc "The name of the ResaleAuthorization."];
+      productId: ResaleAuthorizationProductIdString.t option
+        [@ocaml.doc "The product ID of the ResaleAuthorization."];
+      productName: ResaleAuthorizationProductNameString.t option
+        [@ocaml.doc "The product name of the ResaleAuthorization."];
+      manufacturerAccountId:
+        ResaleAuthorizationManufacturerAccountIdString.t option
+        [@ocaml.doc
+          "The manufacturer account ID of the ResaleAuthorization."];
+      manufacturerLegalName:
+        ResaleAuthorizationManufacturerLegalNameString.t option
+        [@ocaml.doc
+          "The manufacturer legal name of the ResaleAuthorization."];
+      resellerAccountID: ResaleAuthorizationResellerAccountIDString.t option
+        [@ocaml.doc "The reseller account ID of the ResaleAuthorization."];
+      resellerLegalName: ResaleAuthorizationResellerLegalNameString.t option
+        [@ocaml.doc "The reseller legal name of the ResaleAuthorization"];
+      status: ResaleAuthorizationStatusString.t option
+        [@ocaml.doc "The status of the ResaleAuthorization."];
+      offerExtendedStatus:
+        ResaleAuthorizationOfferExtendedStatusString.t option
+        [@ocaml.doc "The offer extended status of the ResaleAuthorization"];
+      createdDate: DateTimeISO8601.t option
+        [@ocaml.doc "The created date of the ResaleAuthorization."];
+      availabilityEndDate: DateTimeISO8601.t option
+        [@ocaml.doc "The availability end date of the ResaleAuthorization."]}
+    let make ?name =
+      fun ?productId ->
+        fun ?productName ->
+          fun ?manufacturerAccountId ->
+            fun ?manufacturerLegalName ->
+              fun ?resellerAccountID ->
+                fun ?resellerLegalName ->
+                  fun ?status ->
+                    fun ?offerExtendedStatus ->
+                      fun ?createdDate ->
+                        fun ?availabilityEndDate ->
+                          fun () ->
+                            {
+                              name;
+                              productId;
+                              productName;
+                              manufacturerAccountId;
+                              manufacturerLegalName;
+                              resellerAccountID;
+                              resellerLegalName;
+                              status;
+                              offerExtendedStatus;
+                              createdDate;
+                              availabilityEndDate
+                            }
+    let to_value x =
+      structure_to_value
+        [("Name",
+           (Option.map x.name ~f:ResaleAuthorizationNameString.to_value));
+        ("ProductId",
+          (Option.map x.productId
+             ~f:ResaleAuthorizationProductIdString.to_value));
+        ("ProductName",
+          (Option.map x.productName
+             ~f:ResaleAuthorizationProductNameString.to_value));
+        ("ManufacturerAccountId",
+          (Option.map x.manufacturerAccountId
+             ~f:ResaleAuthorizationManufacturerAccountIdString.to_value));
+        ("ManufacturerLegalName",
+          (Option.map x.manufacturerLegalName
+             ~f:ResaleAuthorizationManufacturerLegalNameString.to_value));
+        ("ResellerAccountID",
+          (Option.map x.resellerAccountID
+             ~f:ResaleAuthorizationResellerAccountIDString.to_value));
+        ("ResellerLegalName",
+          (Option.map x.resellerLegalName
+             ~f:ResaleAuthorizationResellerLegalNameString.to_value));
+        ("Status",
+          (Option.map x.status ~f:ResaleAuthorizationStatusString.to_value));
+        ("OfferExtendedStatus",
+          (Option.map x.offerExtendedStatus
+             ~f:ResaleAuthorizationOfferExtendedStatusString.to_value));
+        ("CreatedDate",
+          (Option.map x.createdDate ~f:DateTimeISO8601.to_value));
+        ("AvailabilityEndDate",
+          (Option.map x.availabilityEndDate ~f:DateTimeISO8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let availabilityEndDate =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "AvailabilityEndDate") in
+      let createdDate =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "CreatedDate") in
+      let offerExtendedStatus =
+        (Option.map ~f:ResaleAuthorizationOfferExtendedStatusString.of_xml)
+          (Xml.child xml_arg0 "OfferExtendedStatus") in
+      let status =
+        (Option.map ~f:ResaleAuthorizationStatusString.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let resellerLegalName =
+        (Option.map ~f:ResaleAuthorizationResellerLegalNameString.of_xml)
+          (Xml.child xml_arg0 "ResellerLegalName") in
+      let resellerAccountID =
+        (Option.map ~f:ResaleAuthorizationResellerAccountIDString.of_xml)
+          (Xml.child xml_arg0 "ResellerAccountID") in
+      let manufacturerLegalName =
+        (Option.map ~f:ResaleAuthorizationManufacturerLegalNameString.of_xml)
+          (Xml.child xml_arg0 "ManufacturerLegalName") in
+      let manufacturerAccountId =
+        (Option.map ~f:ResaleAuthorizationManufacturerAccountIdString.of_xml)
+          (Xml.child xml_arg0 "ManufacturerAccountId") in
+      let productName =
+        (Option.map ~f:ResaleAuthorizationProductNameString.of_xml)
+          (Xml.child xml_arg0 "ProductName") in
+      let productId =
+        (Option.map ~f:ResaleAuthorizationProductIdString.of_xml)
+          (Xml.child xml_arg0 "ProductId") in
+      let name =
+        (Option.map ~f:ResaleAuthorizationNameString.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?availabilityEndDate ?createdDate ?offerExtendedStatus ?status
+        ?resellerLegalName ?resellerAccountID ?manufacturerLegalName
+        ?manufacturerAccountId ?productName ?productId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let availabilityEndDate =
+        field_map json__ "AvailabilityEndDate" DateTimeISO8601.of_json in
+      let createdDate =
+        field_map json__ "CreatedDate" DateTimeISO8601.of_json in
+      let offerExtendedStatus =
+        field_map json__ "OfferExtendedStatus"
+          ResaleAuthorizationOfferExtendedStatusString.of_json in
+      let status =
+        field_map json__ "Status" ResaleAuthorizationStatusString.of_json in
+      let resellerLegalName =
+        field_map json__ "ResellerLegalName"
+          ResaleAuthorizationResellerLegalNameString.of_json in
+      let resellerAccountID =
+        field_map json__ "ResellerAccountID"
+          ResaleAuthorizationResellerAccountIDString.of_json in
+      let manufacturerLegalName =
+        field_map json__ "ManufacturerLegalName"
+          ResaleAuthorizationManufacturerLegalNameString.of_json in
+      let manufacturerAccountId =
+        field_map json__ "ManufacturerAccountId"
+          ResaleAuthorizationManufacturerAccountIdString.of_json in
+      let productName =
+        field_map json__ "ProductName"
+          ResaleAuthorizationProductNameString.of_json in
+      let productId =
+        field_map json__ "ProductId"
+          ResaleAuthorizationProductIdString.of_json in
+      let name =
+        field_map json__ "Name" ResaleAuthorizationNameString.of_json in
+      make ?availabilityEndDate ?createdDate ?offerExtendedStatus ?status
+        ?resellerLegalName ?resellerAccountID ?manufacturerLegalName
+        ?manufacturerAccountId ?productName ?productId ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summarized information about a Resale Authorization."]
+module SaaSProductSummary =
+  struct
+    type nonrec t =
+      {
+      productTitle: SaaSProductTitleString.t option
+        [@ocaml.doc "The title of the SaaS product."];
+      visibility: SaaSProductVisibilityString.t option
+        [@ocaml.doc "The lifecycle of the SaaS product."]}
+    let make ?productTitle =
+      fun ?visibility -> fun () -> { productTitle; visibility }
+    let to_value x =
+      structure_to_value
+        [("ProductTitle",
+           (Option.map x.productTitle ~f:SaaSProductTitleString.to_value));
+        ("Visibility",
+          (Option.map x.visibility ~f:SaaSProductVisibilityString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:SaaSProductVisibilityString.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:SaaSProductTitleString.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      make ?visibility ?productTitle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visibility =
+        field_map json__ "Visibility" SaaSProductVisibilityString.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle" SaaSProductTitleString.of_json in
+      make ?visibility ?productTitle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that contains summarized information about a SaaS product."]
 module VisibilityValue =
   struct
     type nonrec t = string
@@ -345,6 +3919,1936 @@ module VisibilityValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"VisibilityValue" j
+    let to_json = simple_to_json to_value
+  end
+module AmiProductEntityIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: AmiProductEntityIdFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique entity id values to be filtered on."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:AmiProductEntityIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:AmiProductEntityIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          AmiProductEntityIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering on entity id of an AMI product."]
+module AmiProductLastModifiedDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: AmiProductLastModifiedDateFilterDateRange.t option
+        [@ocaml.doc "Dates between which the AMI product was last modified."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:AmiProductLastModifiedDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map ~f:AmiProductLastModifiedDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          AmiProductLastModifiedDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering based on the last modified date of AMI products."]
+module AmiProductTitleFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: AmiProductTitleFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique product title values to be filtered on."];
+      wildCardValue: AmiProductTitleString.t option
+        [@ocaml.doc
+          "A string that will be the wildCard input for product tile filter. It matches the provided value as a substring in the actual value."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList ~f:AmiProductTitleFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue ~f:AmiProductTitleString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:AmiProductTitleString.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map ~f:AmiProductTitleFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue" AmiProductTitleString.of_json in
+      let valueList =
+        field_map json__ "ValueList" AmiProductTitleFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object that allows filtering on product title."]
+module AmiProductVisibilityFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: AmiProductVisibilityFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique visibility values to be filtered on."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:AmiProductVisibilityFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:AmiProductVisibilityFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          AmiProductVisibilityFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering on the visibility of the product in the AWS Marketplace."]
+module ContainerProductEntityIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ContainerProductEntityIdFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique entity id values to be filtered on."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ContainerProductEntityIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:ContainerProductEntityIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          ContainerProductEntityIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering on entity id of a container product."]
+module ContainerProductLastModifiedDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: ContainerProductLastModifiedDateFilterDateRange.t option
+        [@ocaml.doc
+          "Dates between which the container product was last modified."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:ContainerProductLastModifiedDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map ~f:ContainerProductLastModifiedDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          ContainerProductLastModifiedDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering based on the last modified date of container products."]
+module ContainerProductTitleFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ContainerProductTitleFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique product title values to be filtered on."];
+      wildCardValue: ContainerProductTitleString.t option
+        [@ocaml.doc
+          "A string that will be the wildCard input for product tile filter. It matches the provided value as a substring in the actual value."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ContainerProductTitleFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue ~f:ContainerProductTitleString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:ContainerProductTitleString.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map ~f:ContainerProductTitleFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue" ContainerProductTitleString.of_json in
+      let valueList =
+        field_map json__ "ValueList"
+          ContainerProductTitleFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object that allows filtering on product title."]
+module ContainerProductVisibilityFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ContainerProductVisibilityFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique visibility values to be filtered on."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ContainerProductVisibilityFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:ContainerProductVisibilityFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          ContainerProductVisibilityFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering on the visibility of the product in the AWS Marketplace."]
+module DataProductEntityIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: DataProductEntityIdFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique entity id values to be filtered on."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:DataProductEntityIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:DataProductEntityIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          DataProductEntityIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering on entity id of a data product."]
+module DataProductLastModifiedDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: DataProductLastModifiedDateFilterDateRange.t option
+        [@ocaml.doc
+          "Dates between which the data product was last modified."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:DataProductLastModifiedDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map ~f:DataProductLastModifiedDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          DataProductLastModifiedDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering based on the last modified date of data products."]
+module DataProductTitleFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: DataProductTitleFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique product title values to be filtered on."];
+      wildCardValue: DataProductTitleString.t option
+        [@ocaml.doc
+          "A string that will be the wildCard input for product tile filter. It matches the provided value as a substring in the actual value."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:DataProductTitleFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue ~f:DataProductTitleString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:DataProductTitleString.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map ~f:DataProductTitleFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue" DataProductTitleString.of_json in
+      let valueList =
+        field_map json__ "ValueList" DataProductTitleFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object that allows filtering on product title."]
+module DataProductVisibilityFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: DataProductVisibilityFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique visibility values to be filtered on."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:DataProductVisibilityFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:DataProductVisibilityFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          DataProductVisibilityFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering on the visibility of the product in the AWS Marketplace."]
+module MachineLearningProductEntityIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: MachineLearningProductEntityIdFilterValueList.t option
+        [@ocaml.doc
+          "A list of entity IDs to filter by. The operation returns machine learning products with entity IDs that match the values in this list."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:MachineLearningProductEntityIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:MachineLearningProductEntityIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          MachineLearningProductEntityIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The filter for machine learning product entity IDs."]
+module MachineLearningProductLastModifiedDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange:
+        MachineLearningProductLastModifiedDateFilterDateRange.t option
+        [@ocaml.doc
+          "A date range to filter by. The operation returns machine learning products with last modified dates that fall within this range."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:MachineLearningProductLastModifiedDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map
+           ~f:MachineLearningProductLastModifiedDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          MachineLearningProductLastModifiedDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The filter for machine learning product last modified date."]
+module MachineLearningProductTitleFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: MachineLearningProductTitleFilterValueList.t option
+        [@ocaml.doc
+          "A list of product titles to filter by. The operation returns machine learning products with titles that exactly match the values in this list."];
+      wildCardValue: MachineLearningProductTitleString.t option
+        [@ocaml.doc
+          "A wildcard value to filter product titles. The operation returns machine learning products with titles that match this wildcard pattern."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:MachineLearningProductTitleFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue
+             ~f:MachineLearningProductTitleString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:MachineLearningProductTitleString.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map ~f:MachineLearningProductTitleFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue"
+          MachineLearningProductTitleString.of_json in
+      let valueList =
+        field_map json__ "ValueList"
+          MachineLearningProductTitleFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The filter for machine learning product titles."]
+module MachineLearningProductVisibilityFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: MachineLearningProductVisibilityFilterValueList.t option
+        [@ocaml.doc
+          "A list of visibility values to filter by. The operation returns machine learning products with visibility status that match the values in this list."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:MachineLearningProductVisibilityFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:MachineLearningProductVisibilityFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          MachineLearningProductVisibilityFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The filter for machine learning product visibility status."]
+module OfferAvailabilityEndDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: OfferAvailabilityEndDateFilterDateRange.t option
+        [@ocaml.doc
+          "Allows filtering on the AvailabilityEndDate of an offer with date range as input."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:OfferAvailabilityEndDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map ~f:OfferAvailabilityEndDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          OfferAvailabilityEndDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the AvailabilityEndDate of an offer."]
+module OfferBuyerAccountsFilter =
+  struct
+    type nonrec t =
+      {
+      wildCardValue: OfferBuyerAccountsFilterWildcard.t option
+        [@ocaml.doc
+          "Allows filtering on the BuyerAccounts of an offer with wild card input."]}
+    let make ?wildCardValue = fun () -> { wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("WildCardValue",
+           (Option.map x.wildCardValue
+              ~f:OfferBuyerAccountsFilterWildcard.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:OfferBuyerAccountsFilterWildcard.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      make ?wildCardValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue"
+          OfferBuyerAccountsFilterWildcard.of_json in
+      make ?wildCardValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the BuyerAccounts of an offer."]
+module OfferEntityIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferEntityIdFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on entity id of an offer with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList ~f:OfferEntityIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferEntityIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList" OfferEntityIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the entity id of an offer."]
+module OfferLastModifiedDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: OfferLastModifiedDateFilterDateRange.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of an offer with date range as input."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:OfferLastModifiedDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map ~f:OfferLastModifiedDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          OfferLastModifiedDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the LastModifiedDate of an offer."]
+module OfferNameFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferNameFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the Name of an offer with list input."];
+      wildCardValue: OfferNameString.t option
+        [@ocaml.doc
+          "Allows filtering on the Name of an offer with wild card input."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList ~f:OfferNameFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue ~f:OfferNameString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:OfferNameString.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map ~f:OfferNameFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue" OfferNameString.of_json in
+      let valueList =
+        field_map json__ "ValueList" OfferNameFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the Name of an offer."]
+module OfferProductIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferProductIdFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the ProductId of an offer with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList ~f:OfferProductIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferProductIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList" OfferProductIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the ProductId of an offer."]
+module OfferReleaseDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: OfferReleaseDateFilterDateRange.t option
+        [@ocaml.doc
+          "Allows filtering on the ReleaseDate of an offer with date range as input."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:OfferReleaseDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map ~f:OfferReleaseDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange" OfferReleaseDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the ReleaseDate of an offer."]
+module OfferResaleAuthorizationIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferResaleAuthorizationIdFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the ResaleAuthorizationId of an offer with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:OfferResaleAuthorizationIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferResaleAuthorizationIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          OfferResaleAuthorizationIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the ResaleAuthorizationId of an offer. Not all offers have a ResaleAuthorizationId. The response will only include offers for which you have permissions."]
+module OfferSetIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferSetIdFilterValueList.t option
+        [@ocaml.doc "Allows filtering on the OfferSetId of an offer."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList ~f:OfferSetIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferSetIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList" OfferSetIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the OfferSetId of an offer."]
+module OfferStateFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferStateFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the State of an offer with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList ~f:OfferStateFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferStateFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList" OfferStateFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the State of an offer."]
+module OfferTargetingFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferTargetingFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the Targeting of an offer with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList ~f:OfferTargetingFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferTargetingFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList" OfferTargetingFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the Targeting of an offer."]
+module OfferSetAssociatedOfferIdsFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferSetAssociatedOfferIdsFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the AssociatedOfferIds of an offer set with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:OfferSetAssociatedOfferIdsFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferSetAssociatedOfferIdsFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          OfferSetAssociatedOfferIdsFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the AssociatedOfferIds of an offer set."]
+module OfferSetEntityIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferSetEntityIdFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on entity id of an offer set with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:OfferSetEntityIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferSetEntityIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList" OfferSetEntityIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the entity id of an offer set."]
+module OfferSetLastModifiedDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: OfferSetLastModifiedDateFilterDateRange.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of an offer set with date range as input."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:OfferSetLastModifiedDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map ~f:OfferSetLastModifiedDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          OfferSetLastModifiedDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the LastModifiedDate of an offer set."]
+module OfferSetNameFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferSetNameFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the Name of an offer set with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList ~f:OfferSetNameFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferSetNameFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList" OfferSetNameFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the Name of an offer set."]
+module OfferSetReleaseDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: OfferSetReleaseDateFilterDateRange.t option
+        [@ocaml.doc
+          "Allows filtering on the ReleaseDate of an offer set with date range as input."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:OfferSetReleaseDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map ~f:OfferSetReleaseDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          OfferSetReleaseDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the ReleaseDate of an offer set."]
+module OfferSetSolutionIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferSetSolutionIdFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the SolutionId of an offer set with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:OfferSetSolutionIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferSetSolutionIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          OfferSetSolutionIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the SolutionId of an offer set."]
+module OfferSetStateFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: OfferSetStateFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the State of an offer set with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList ~f:OfferSetStateFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:OfferSetStateFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList" OfferSetStateFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the State of an offer set."]
+module ResaleAuthorizationAvailabilityEndDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange:
+        ResaleAuthorizationAvailabilityEndDateFilterDateRange.t option
+        [@ocaml.doc
+          "Allows filtering on AvailabilityEndDate of a ResaleAuthorization with date range as input"];
+      valueList:
+        ResaleAuthorizationAvailabilityEndDateFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on AvailabilityEndDate of a ResaleAuthorization with date value as input."]}
+    let make ?dateRange =
+      fun ?valueList -> fun () -> { dateRange; valueList }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:ResaleAuthorizationAvailabilityEndDateFilterDateRange.to_value));
+        ("ValueList",
+          (Option.map x.valueList
+             ~f:ResaleAuthorizationAvailabilityEndDateFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map
+           ~f:ResaleAuthorizationAvailabilityEndDateFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      let dateRange =
+        (Option.map
+           ~f:ResaleAuthorizationAvailabilityEndDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?valueList ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationAvailabilityEndDateFilterValueList.of_json in
+      let dateRange =
+        field_map json__ "DateRange"
+          ResaleAuthorizationAvailabilityEndDateFilterDateRange.of_json in
+      make ?valueList ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on AvailabilityEndDate of a ResaleAuthorization."]
+module ResaleAuthorizationCreatedDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: ResaleAuthorizationCreatedDateFilterDateRange.t option
+        [@ocaml.doc
+          "Allows filtering on CreatedDate of a ResaleAuthorization with date range as input."];
+      valueList: ResaleAuthorizationCreatedDateFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on CreatedDate of a ResaleAuthorization with date value as input."]}
+    let make ?dateRange =
+      fun ?valueList -> fun () -> { dateRange; valueList }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:ResaleAuthorizationCreatedDateFilterDateRange.to_value));
+        ("ValueList",
+          (Option.map x.valueList
+             ~f:ResaleAuthorizationCreatedDateFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:ResaleAuthorizationCreatedDateFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      let dateRange =
+        (Option.map ~f:ResaleAuthorizationCreatedDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?valueList ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationCreatedDateFilterValueList.of_json in
+      let dateRange =
+        field_map json__ "DateRange"
+          ResaleAuthorizationCreatedDateFilterDateRange.of_json in
+      make ?valueList ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on CreatedDate of a ResaleAuthorization."]
+module ResaleAuthorizationEntityIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ResaleAuthorizationEntityIdFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on EntityId of a ResaleAuthorization with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationEntityIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:ResaleAuthorizationEntityIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationEntityIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on EntityId of a ResaleAuthorization."]
+module ResaleAuthorizationLastModifiedDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: ResaleAuthorizationLastModifiedDateFilterDateRange.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of a ResaleAuthorization with date range as input."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:ResaleAuthorizationLastModifiedDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map
+           ~f:ResaleAuthorizationLastModifiedDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          ResaleAuthorizationLastModifiedDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the LastModifiedDate of a ResaleAuthorization."]
+module ResaleAuthorizationManufacturerAccountIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList:
+        ResaleAuthorizationManufacturerAccountIdFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the ManufacturerAccountId of a ResaleAuthorization with list input."];
+      wildCardValue:
+        ResaleAuthorizationManufacturerAccountIdFilterWildcard.t option
+        [@ocaml.doc
+          "Allows filtering on the ManufacturerAccountId of a ResaleAuthorization with wild card input."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationManufacturerAccountIdFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue
+             ~f:ResaleAuthorizationManufacturerAccountIdFilterWildcard.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map
+           ~f:ResaleAuthorizationManufacturerAccountIdFilterWildcard.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map
+           ~f:ResaleAuthorizationManufacturerAccountIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue"
+          ResaleAuthorizationManufacturerAccountIdFilterWildcard.of_json in
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationManufacturerAccountIdFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the ManufacturerAccountId of a ResaleAuthorization."]
+module ResaleAuthorizationManufacturerLegalNameFilter =
+  struct
+    type nonrec t =
+      {
+      valueList:
+        ResaleAuthorizationManufacturerLegalNameFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the ManufacturerLegalName of a ResaleAuthorization with list input."];
+      wildCardValue:
+        ResaleAuthorizationManufacturerLegalNameFilterWildcard.t option
+        [@ocaml.doc
+          "Allows filtering on the ManufacturerLegalName of a ResaleAuthorization with wild card input."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationManufacturerLegalNameFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue
+             ~f:ResaleAuthorizationManufacturerLegalNameFilterWildcard.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map
+           ~f:ResaleAuthorizationManufacturerLegalNameFilterWildcard.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map
+           ~f:ResaleAuthorizationManufacturerLegalNameFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue"
+          ResaleAuthorizationManufacturerLegalNameFilterWildcard.of_json in
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationManufacturerLegalNameFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the ManufacturerLegalName of a ResaleAuthorization."]
+module ResaleAuthorizationNameFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ResaleAuthorizationNameFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the Name of a ResaleAuthorization with list input."];
+      wildCardValue: ResaleAuthorizationNameFilterWildcard.t option
+        [@ocaml.doc
+          "Allows filtering on the Name of a ResaleAuthorization with wild card input."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationNameFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue
+             ~f:ResaleAuthorizationNameFilterWildcard.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:ResaleAuthorizationNameFilterWildcard.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map ~f:ResaleAuthorizationNameFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue"
+          ResaleAuthorizationNameFilterWildcard.of_json in
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationNameFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the Name of a ResaleAuthorization."]
+module ResaleAuthorizationOfferExtendedStatusFilter =
+  struct
+    type nonrec t =
+      {
+      valueList:
+        ResaleAuthorizationOfferExtendedStatusFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the OfferExtendedStatus of a ResaleAuthorization with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationOfferExtendedStatusFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map
+           ~f:ResaleAuthorizationOfferExtendedStatusFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationOfferExtendedStatusFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the OfferExtendedStatus of a ResaleAuthorization."]
+module ResaleAuthorizationProductIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ResaleAuthorizationProductIdFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the ProductId of a ResaleAuthorization with list input."];
+      wildCardValue: ResaleAuthorizationProductIdFilterWildcard.t option
+        [@ocaml.doc
+          "Allows filtering on the ProductId of a ResaleAuthorization with wild card input."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationProductIdFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue
+             ~f:ResaleAuthorizationProductIdFilterWildcard.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:ResaleAuthorizationProductIdFilterWildcard.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map ~f:ResaleAuthorizationProductIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue"
+          ResaleAuthorizationProductIdFilterWildcard.of_json in
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationProductIdFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the ProductId of a ResaleAuthorization."]
+module ResaleAuthorizationProductNameFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ResaleAuthorizationProductNameFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the ProductName of a ResaleAuthorization with list input."];
+      wildCardValue: ResaleAuthorizationProductNameFilterWildcard.t option
+        [@ocaml.doc
+          "Allows filtering on the ProductName of a ResaleAuthorization with wild card input."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationProductNameFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue
+             ~f:ResaleAuthorizationProductNameFilterWildcard.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:ResaleAuthorizationProductNameFilterWildcard.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map ~f:ResaleAuthorizationProductNameFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue"
+          ResaleAuthorizationProductNameFilterWildcard.of_json in
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationProductNameFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the ProductName of a ResaleAuthorization."]
+module ResaleAuthorizationResellerAccountIDFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ResaleAuthorizationResellerAccountIDFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the ResellerAccountID of a ResaleAuthorization with list input."];
+      wildCardValue:
+        ResaleAuthorizationResellerAccountIDFilterWildcard.t option
+        [@ocaml.doc
+          "Allows filtering on the ResellerAccountID of a ResaleAuthorization with wild card input."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationResellerAccountIDFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue
+             ~f:ResaleAuthorizationResellerAccountIDFilterWildcard.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map
+           ~f:ResaleAuthorizationResellerAccountIDFilterWildcard.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map
+           ~f:ResaleAuthorizationResellerAccountIDFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue"
+          ResaleAuthorizationResellerAccountIDFilterWildcard.of_json in
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationResellerAccountIDFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the ResellerAccountID of a ResaleAuthorization."]
+module ResaleAuthorizationResellerLegalNameFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ResaleAuthorizationResellerLegalNameFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the ResellerLegalNameProductName of a ResaleAuthorization with list input."];
+      wildCardValue:
+        ResaleAuthorizationResellerLegalNameFilterWildcard.t option
+        [@ocaml.doc
+          "Allows filtering on the ResellerLegalName of a ResaleAuthorization with wild card input."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationResellerLegalNameFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue
+             ~f:ResaleAuthorizationResellerLegalNameFilterWildcard.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map
+           ~f:ResaleAuthorizationResellerLegalNameFilterWildcard.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map
+           ~f:ResaleAuthorizationResellerLegalNameFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue"
+          ResaleAuthorizationResellerLegalNameFilterWildcard.of_json in
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationResellerLegalNameFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows filtering on the ResellerLegalName of a ResaleAuthorization."]
+module ResaleAuthorizationStatusFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: ResaleAuthorizationStatusFilterValueList.t option
+        [@ocaml.doc
+          "Allows filtering on the Status of a ResaleAuthorization with list input."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:ResaleAuthorizationStatusFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:ResaleAuthorizationStatusFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          ResaleAuthorizationStatusFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows filtering on the Status of a ResaleAuthorization."]
+module SaaSProductEntityIdFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: SaaSProductEntityIdFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique entity id values to be filtered on."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:SaaSProductEntityIdFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:SaaSProductEntityIdFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          SaaSProductEntityIdFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering on entity id of a SaaS product."]
+module SaaSProductLastModifiedDateFilter =
+  struct
+    type nonrec t =
+      {
+      dateRange: SaaSProductLastModifiedDateFilterDateRange.t option
+        [@ocaml.doc
+          "Dates between which the SaaS product was last modified."]}
+    let make ?dateRange = fun () -> { dateRange }
+    let to_value x =
+      structure_to_value
+        [("DateRange",
+           (Option.map x.dateRange
+              ~f:SaaSProductLastModifiedDateFilterDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateRange =
+        (Option.map ~f:SaaSProductLastModifiedDateFilterDateRange.of_xml)
+          (Xml.child xml_arg0 "DateRange") in
+      make ?dateRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateRange =
+        field_map json__ "DateRange"
+          SaaSProductLastModifiedDateFilterDateRange.of_json in
+      make ?dateRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering based on the last modified date of SaaS products"]
+module SaaSProductTitleFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: SaaSProductTitleFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique product title values to be filtered on."];
+      wildCardValue: SaaSProductTitleString.t option
+        [@ocaml.doc
+          "A string that will be the wildCard input for product tile filter. It matches the provided value as a substring in the actual value."]}
+    let make ?valueList =
+      fun ?wildCardValue -> fun () -> { valueList; wildCardValue }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:SaaSProductTitleFilterValueList.to_value));
+        ("WildCardValue",
+          (Option.map x.wildCardValue ~f:SaaSProductTitleString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wildCardValue =
+        (Option.map ~f:SaaSProductTitleString.of_xml)
+          (Xml.child xml_arg0 "WildCardValue") in
+      let valueList =
+        (Option.map ~f:SaaSProductTitleFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?wildCardValue ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wildCardValue =
+        field_map json__ "WildCardValue" SaaSProductTitleString.of_json in
+      let valueList =
+        field_map json__ "ValueList" SaaSProductTitleFilterValueList.of_json in
+      make ?wildCardValue ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object that allows filtering on product title."]
+module SaaSProductVisibilityFilter =
+  struct
+    type nonrec t =
+      {
+      valueList: SaaSProductVisibilityFilterValueList.t option
+        [@ocaml.doc
+          "A string array of unique visibility values to be filtered on."]}
+    let make ?valueList = fun () -> { valueList }
+    let to_value x =
+      structure_to_value
+        [("ValueList",
+           (Option.map x.valueList
+              ~f:SaaSProductVisibilityFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueList =
+        (Option.map ~f:SaaSProductVisibilityFilterValueList.of_xml)
+          (Xml.child xml_arg0 "ValueList") in
+      make ?valueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueList =
+        field_map json__ "ValueList"
+          SaaSProductVisibilityFilterValueList.of_json in
+      make ?valueList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object that allows filtering on the visibility of the product in the AWS Marketplace."]
+module AmiProductSortBy =
+  struct
+    type nonrec t =
+      | EntityId 
+      | LastModifiedDate 
+      | ProductTitle 
+      | Visibility 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EntityId -> "EntityId"
+      | LastModifiedDate -> "LastModifiedDate"
+      | ProductTitle -> "ProductTitle"
+      | Visibility -> "Visibility"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EntityId" -> EntityId
+      | "LastModifiedDate" -> LastModifiedDate
+      | "ProductTitle" -> ProductTitle
+      | "Visibility" -> Visibility
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AmiProductSortBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AmiProductSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module SortOrder =
+  struct
+    type nonrec t =
+      | ASCENDING 
+      | DESCENDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ASCENDING -> "ASCENDING"
+      | DESCENDING -> "DESCENDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ASCENDING" -> ASCENDING
+      | "DESCENDING" -> DESCENDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
+    let to_json = simple_to_json to_value
+  end
+module ContainerProductSortBy =
+  struct
+    type nonrec t =
+      | EntityId 
+      | LastModifiedDate 
+      | ProductTitle 
+      | Visibility 
+      | CompatibleAWSServices 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EntityId -> "EntityId"
+      | LastModifiedDate -> "LastModifiedDate"
+      | ProductTitle -> "ProductTitle"
+      | Visibility -> "Visibility"
+      | CompatibleAWSServices -> "CompatibleAWSServices"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EntityId" -> EntityId
+      | "LastModifiedDate" -> LastModifiedDate
+      | "ProductTitle" -> ProductTitle
+      | "Visibility" -> Visibility
+      | "CompatibleAWSServices" -> CompatibleAWSServices
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ContainerProductSortBy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ContainerProductSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module DataProductSortBy =
+  struct
+    type nonrec t =
+      | EntityId 
+      | ProductTitle 
+      | Visibility 
+      | LastModifiedDate 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EntityId -> "EntityId"
+      | ProductTitle -> "ProductTitle"
+      | Visibility -> "Visibility"
+      | LastModifiedDate -> "LastModifiedDate"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EntityId" -> EntityId
+      | "ProductTitle" -> ProductTitle
+      | "Visibility" -> Visibility
+      | "LastModifiedDate" -> LastModifiedDate
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DataProductSortBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataProductSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module MachineLearningProductSortBy =
+  struct
+    type nonrec t =
+      | EntityId 
+      | LastModifiedDate 
+      | ProductTitle 
+      | Visibility 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EntityId -> "EntityId"
+      | LastModifiedDate -> "LastModifiedDate"
+      | ProductTitle -> "ProductTitle"
+      | Visibility -> "Visibility"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EntityId" -> EntityId
+      | "LastModifiedDate" -> LastModifiedDate
+      | "ProductTitle" -> ProductTitle
+      | "Visibility" -> Visibility
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MachineLearningProductSortBy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MachineLearningProductSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module OfferSetSortBy =
+  struct
+    type nonrec t =
+      | Name 
+      | State 
+      | ReleaseDate 
+      | SolutionId 
+      | EntityId 
+      | LastModifiedDate 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Name -> "Name"
+      | State -> "State"
+      | ReleaseDate -> "ReleaseDate"
+      | SolutionId -> "SolutionId"
+      | EntityId -> "EntityId"
+      | LastModifiedDate -> "LastModifiedDate"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Name" -> Name
+      | "State" -> State
+      | "ReleaseDate" -> ReleaseDate
+      | "SolutionId" -> SolutionId
+      | "EntityId" -> EntityId
+      | "LastModifiedDate" -> LastModifiedDate
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OfferSetSortBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OfferSetSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module OfferSortBy =
+  struct
+    type nonrec t =
+      | EntityId 
+      | Name 
+      | ProductId 
+      | ResaleAuthorizationId 
+      | ReleaseDate 
+      | AvailabilityEndDate 
+      | BuyerAccounts 
+      | State 
+      | Targeting 
+      | LastModifiedDate 
+      | OfferSetId 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EntityId -> "EntityId"
+      | Name -> "Name"
+      | ProductId -> "ProductId"
+      | ResaleAuthorizationId -> "ResaleAuthorizationId"
+      | ReleaseDate -> "ReleaseDate"
+      | AvailabilityEndDate -> "AvailabilityEndDate"
+      | BuyerAccounts -> "BuyerAccounts"
+      | State -> "State"
+      | Targeting -> "Targeting"
+      | LastModifiedDate -> "LastModifiedDate"
+      | OfferSetId -> "OfferSetId"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EntityId" -> EntityId
+      | "Name" -> Name
+      | "ProductId" -> ProductId
+      | "ResaleAuthorizationId" -> ResaleAuthorizationId
+      | "ReleaseDate" -> ReleaseDate
+      | "AvailabilityEndDate" -> AvailabilityEndDate
+      | "BuyerAccounts" -> BuyerAccounts
+      | "State" -> State
+      | "Targeting" -> Targeting
+      | "LastModifiedDate" -> LastModifiedDate
+      | "OfferSetId" -> OfferSetId
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OfferSortBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OfferSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module ResaleAuthorizationSortBy =
+  struct
+    type nonrec t =
+      | EntityId 
+      | Name 
+      | ProductId 
+      | ProductName 
+      | ManufacturerAccountId 
+      | ManufacturerLegalName 
+      | ResellerAccountID 
+      | ResellerLegalName 
+      | Status 
+      | OfferExtendedStatus 
+      | CreatedDate 
+      | AvailabilityEndDate 
+      | LastModifiedDate 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EntityId -> "EntityId"
+      | Name -> "Name"
+      | ProductId -> "ProductId"
+      | ProductName -> "ProductName"
+      | ManufacturerAccountId -> "ManufacturerAccountId"
+      | ManufacturerLegalName -> "ManufacturerLegalName"
+      | ResellerAccountID -> "ResellerAccountID"
+      | ResellerLegalName -> "ResellerLegalName"
+      | Status -> "Status"
+      | OfferExtendedStatus -> "OfferExtendedStatus"
+      | CreatedDate -> "CreatedDate"
+      | AvailabilityEndDate -> "AvailabilityEndDate"
+      | LastModifiedDate -> "LastModifiedDate"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EntityId" -> EntityId
+      | "Name" -> Name
+      | "ProductId" -> ProductId
+      | "ProductName" -> ProductName
+      | "ManufacturerAccountId" -> ManufacturerAccountId
+      | "ManufacturerLegalName" -> ManufacturerLegalName
+      | "ResellerAccountID" -> ResellerAccountID
+      | "ResellerLegalName" -> ResellerLegalName
+      | "Status" -> Status
+      | "OfferExtendedStatus" -> OfferExtendedStatus
+      | "CreatedDate" -> CreatedDate
+      | "AvailabilityEndDate" -> AvailabilityEndDate
+      | "LastModifiedDate" -> LastModifiedDate
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResaleAuthorizationSortBy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResaleAuthorizationSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module SaaSProductSortBy =
+  struct
+    type nonrec t =
+      | EntityId 
+      | ProductTitle 
+      | Visibility 
+      | LastModifiedDate 
+      | DeliveryOptionTypes 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EntityId -> "EntityId"
+      | ProductTitle -> "ProductTitle"
+      | Visibility -> "Visibility"
+      | LastModifiedDate -> "LastModifiedDate"
+      | DeliveryOptionTypes -> "DeliveryOptionTypes"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EntityId" -> EntityId
+      | "ProductTitle" -> ProductTitle
+      | "Visibility" -> Visibility
+      | "LastModifiedDate" -> LastModifiedDate
+      | "DeliveryOptionTypes" -> DeliveryOptionTypes
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SaaSProductSortBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SaaSProductSortBy" j)
     let to_json = simple_to_json to_value
   end
 module FilterName =
@@ -375,6 +5879,9 @@ module ValueList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValueContent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -478,6 +5985,9 @@ module ResourceIdList =
   struct
     type nonrec t = ResourceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -502,6 +6012,9 @@ module ErrorDetailList =
   struct
     type nonrec t = ErrorDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ErrorDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -522,50 +6035,160 @@ module ErrorDetailList =
       list_of_json ~kind:"ErrorDetailList" ~of_json:ErrorDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
+module BatchDescribeErrorCodeString =
+  struct
+    type nonrec t = string
+    let context_ = "BatchDescribeErrorCodeString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:72) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z_]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BatchDescribeErrorCodeString" j
+    let to_json = simple_to_json to_value
+  end
+module BatchDescribeErrorMessageContent =
+  struct
+    type nonrec t = string
+    let context_ = "BatchDescribeErrorMessageContent"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"^(.)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BatchDescribeErrorMessageContent" j
+    let to_json = simple_to_json to_value
+  end
+module Catalog =
+  struct
+    type nonrec t = string
+    let context_ = "Catalog"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Catalog" j
+    let to_json = simple_to_json to_value
+  end
+module EntityId =
+  struct
+    type nonrec t = string
+    let context_ = "EntityId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][.a-zA-Z0-9/-]+[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntityId" j
+    let to_json = simple_to_json to_value
+  end
 module Change =
   struct
     type nonrec t =
       {
       changeType: ChangeType.t
         [@ocaml.doc
-          "Change types are single string values that describe your intention for the change. Each change type is unique for each EntityType provided in the change's scope."];
+          "Change types are single string values that describe your intention for the change. Each change type is unique for each EntityType provided in the change's scope. For more information about change types available for single-AMI products, see Working with single-AMI products. Also, for more information about change types available for container-based products, see Working with container products."];
       entity: Entity.t [@ocaml.doc "The entity to be changed."];
-      details: Json.t
+      entityTags: TagList.t option
+        [@ocaml.doc "The tags associated with the change."];
+      details: Json.t option
         [@ocaml.doc
-          "This object contains details specific to the change type of the requested change."];
+          "This object contains details specific to the change type of the requested change. For more information about change types available for single-AMI products, see Working with single-AMI products. Also, for more information about change types available for container-based products, see Working with container products."];
+      detailsDocument: JsonDocumentType.t option
+        [@ocaml.doc
+          "Alternative field that accepts a JSON value instead of a string for ChangeType details. You can use either Details or DetailsDocument, but not both. To download the \"DetailsDocument\" shapes, see the Python and Java shapes on GitHub."];
       changeName: ChangeName.t option
         [@ocaml.doc "Optional name for the change."]}
     let context_ = "Change"
-    let make ?changeName =
-      fun ~changeType ->
-        fun ~entity ->
-          fun ~details ->
-            fun () -> { changeName; changeType; entity; details }
+    let make ?entityTags =
+      fun ?details ->
+        fun ?detailsDocument ->
+          fun ?changeName ->
+            fun ~changeType ->
+              fun ~entity ->
+                fun () ->
+                  {
+                    entityTags;
+                    details;
+                    detailsDocument;
+                    changeName;
+                    changeType;
+                    entity
+                  }
     let to_value x =
       structure_to_value
         [("ChangeType", (Some (ChangeType.to_value x.changeType)));
         ("Entity", (Some (Entity.to_value x.entity)));
-        ("Details", (Some (Json.to_value x.details)));
+        ("EntityTags", (Option.map x.entityTags ~f:TagList.to_value));
+        ("Details", (Option.map x.details ~f:Json.to_value));
+        ("DetailsDocument",
+          (Option.map x.detailsDocument ~f:JsonDocumentType.to_value));
         ("ChangeName", (Option.map x.changeName ~f:ChangeName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeName =
         (Option.map ~f:ChangeName.of_xml) (Xml.child xml_arg0 "ChangeName") in
+      let detailsDocument =
+        (Option.map ~f:JsonDocumentType.of_xml)
+          (Xml.child xml_arg0 "DetailsDocument") in
       let details =
-        Json.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Details") in
+        (Option.map ~f:Json.of_xml) (Xml.child xml_arg0 "Details") in
+      let entityTags =
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "EntityTags") in
       let entity =
         Entity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Entity") in
       let changeType =
         ChangeType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeType") in
-      make ?changeName ~details ~entity ~changeType ()
+      make ?changeName ?detailsDocument ?details ?entityTags ~entity
+        ~changeType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeName = field_map json "ChangeName" ChangeName.of_json in
-      let details = field_map_exn json "Details" Json.of_json in
-      let entity = field_map_exn json "Entity" Entity.of_json in
-      let changeType = field_map_exn json "ChangeType" ChangeType.of_json in
-      make ?changeName ~details ~entity ~changeType ()
+    let of_json json__ =
+      let changeName = field_map json__ "ChangeName" ChangeName.of_json in
+      let detailsDocument =
+        field_map json__ "DetailsDocument" JsonDocumentType.of_json in
+      let details = field_map json__ "Details" Json.of_json in
+      let entityTags = field_map json__ "EntityTags" TagList.of_json in
+      let entity = field_map_exn json__ "Entity" Entity.of_json in
+      let changeType = field_map_exn json__ "ChangeType" ChangeType.of_json in
+      make ?changeName ?detailsDocument ?details ?entityTags ~entity
+        ~changeType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains the ChangeType, Details, and Entity."]
@@ -587,22 +6210,60 @@ module EntitySummary =
           "The last time the entity was published, using ISO 8601 format (2018-02-27T13:45:22Z)."];
       visibility: VisibilityValue.t option
         [@ocaml.doc
-          "The visibility status of the entity to buyers. This value can be Public (everyone can view the entity), Limited (the entity is visible to limited accounts only), or Restricted (the entity was published and then unpublished and only existing buyers can view it)."]}
+          "The visibility status of the entity to buyers. This value can be Public (everyone can view the entity), Limited (the entity is visible to limited accounts only), or Restricted (the entity was published and then unpublished and only existing buyers can view it)."];
+      amiProductSummary: AmiProductSummary.t option
+        [@ocaml.doc
+          "An object that contains summary information about the AMI product."];
+      containerProductSummary: ContainerProductSummary.t option
+        [@ocaml.doc
+          "An object that contains summary information about the container product."];
+      dataProductSummary: DataProductSummary.t option
+        [@ocaml.doc
+          "An object that contains summary information about the data product."];
+      saaSProductSummary: SaaSProductSummary.t option
+        [@ocaml.doc
+          "An object that contains summary information about the SaaS product."];
+      offerSummary: OfferSummary.t option
+        [@ocaml.doc
+          "An object that contains summary information about the offer."];
+      resaleAuthorizationSummary: ResaleAuthorizationSummary.t option
+        [@ocaml.doc
+          "An object that contains summary information about the Resale Authorization."];
+      machineLearningProductSummary: MachineLearningProductSummary.t option ;
+      offerSetSummary: OfferSetSummary.t option
+        [@ocaml.doc
+          "An object that contains summary information about the offer set."]}
     let make ?name =
       fun ?entityType ->
         fun ?entityId ->
           fun ?entityArn ->
             fun ?lastModifiedDate ->
               fun ?visibility ->
-                fun () ->
-                  {
-                    name;
-                    entityType;
-                    entityId;
-                    entityArn;
-                    lastModifiedDate;
-                    visibility
-                  }
+                fun ?amiProductSummary ->
+                  fun ?containerProductSummary ->
+                    fun ?dataProductSummary ->
+                      fun ?saaSProductSummary ->
+                        fun ?offerSummary ->
+                          fun ?resaleAuthorizationSummary ->
+                            fun ?machineLearningProductSummary ->
+                              fun ?offerSetSummary ->
+                                fun () ->
+                                  {
+                                    name;
+                                    entityType;
+                                    entityId;
+                                    entityArn;
+                                    lastModifiedDate;
+                                    visibility;
+                                    amiProductSummary;
+                                    containerProductSummary;
+                                    dataProductSummary;
+                                    saaSProductSummary;
+                                    offerSummary;
+                                    resaleAuthorizationSummary;
+                                    machineLearningProductSummary;
+                                    offerSetSummary
+                                  }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:EntityNameString.to_value));
@@ -611,9 +6272,52 @@ module EntitySummary =
         ("EntityArn", (Option.map x.entityArn ~f:ARN.to_value));
         ("LastModifiedDate",
           (Option.map x.lastModifiedDate ~f:DateTimeISO8601.to_value));
-        ("Visibility", (Option.map x.visibility ~f:VisibilityValue.to_value))]
+        ("Visibility", (Option.map x.visibility ~f:VisibilityValue.to_value));
+        ("AmiProductSummary",
+          (Option.map x.amiProductSummary ~f:AmiProductSummary.to_value));
+        ("ContainerProductSummary",
+          (Option.map x.containerProductSummary
+             ~f:ContainerProductSummary.to_value));
+        ("DataProductSummary",
+          (Option.map x.dataProductSummary ~f:DataProductSummary.to_value));
+        ("SaaSProductSummary",
+          (Option.map x.saaSProductSummary ~f:SaaSProductSummary.to_value));
+        ("OfferSummary",
+          (Option.map x.offerSummary ~f:OfferSummary.to_value));
+        ("ResaleAuthorizationSummary",
+          (Option.map x.resaleAuthorizationSummary
+             ~f:ResaleAuthorizationSummary.to_value));
+        ("MachineLearningProductSummary",
+          (Option.map x.machineLearningProductSummary
+             ~f:MachineLearningProductSummary.to_value));
+        ("OfferSetSummary",
+          (Option.map x.offerSetSummary ~f:OfferSetSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let offerSetSummary =
+        (Option.map ~f:OfferSetSummary.of_xml)
+          (Xml.child xml_arg0 "OfferSetSummary") in
+      let machineLearningProductSummary =
+        (Option.map ~f:MachineLearningProductSummary.of_xml)
+          (Xml.child xml_arg0 "MachineLearningProductSummary") in
+      let resaleAuthorizationSummary =
+        (Option.map ~f:ResaleAuthorizationSummary.of_xml)
+          (Xml.child xml_arg0 "ResaleAuthorizationSummary") in
+      let offerSummary =
+        (Option.map ~f:OfferSummary.of_xml)
+          (Xml.child xml_arg0 "OfferSummary") in
+      let saaSProductSummary =
+        (Option.map ~f:SaaSProductSummary.of_xml)
+          (Xml.child xml_arg0 "SaaSProductSummary") in
+      let dataProductSummary =
+        (Option.map ~f:DataProductSummary.of_xml)
+          (Xml.child xml_arg0 "DataProductSummary") in
+      let containerProductSummary =
+        (Option.map ~f:ContainerProductSummary.of_xml)
+          (Xml.child xml_arg0 "ContainerProductSummary") in
+      let amiProductSummary =
+        (Option.map ~f:AmiProductSummary.of_xml)
+          (Xml.child xml_arg0 "AmiProductSummary") in
       let visibility =
         (Option.map ~f:VisibilityValue.of_xml)
           (Xml.child xml_arg0 "Visibility") in
@@ -628,22 +6332,1030 @@ module EntitySummary =
         (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "EntityType") in
       let name =
         (Option.map ~f:EntityNameString.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?visibility ?lastModifiedDate ?entityArn ?entityId ?entityType
-        ?name ()
+      make ?offerSetSummary ?machineLearningProductSummary
+        ?resaleAuthorizationSummary ?offerSummary ?saaSProductSummary
+        ?dataProductSummary ?containerProductSummary ?amiProductSummary
+        ?visibility ?lastModifiedDate ?entityArn ?entityId ?entityType ?name
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let visibility = field_map json "Visibility" VisibilityValue.of_json in
+    let of_json json__ =
+      let offerSetSummary =
+        field_map json__ "OfferSetSummary" OfferSetSummary.of_json in
+      let machineLearningProductSummary =
+        field_map json__ "MachineLearningProductSummary"
+          MachineLearningProductSummary.of_json in
+      let resaleAuthorizationSummary =
+        field_map json__ "ResaleAuthorizationSummary"
+          ResaleAuthorizationSummary.of_json in
+      let offerSummary = field_map json__ "OfferSummary" OfferSummary.of_json in
+      let saaSProductSummary =
+        field_map json__ "SaaSProductSummary" SaaSProductSummary.of_json in
+      let dataProductSummary =
+        field_map json__ "DataProductSummary" DataProductSummary.of_json in
+      let containerProductSummary =
+        field_map json__ "ContainerProductSummary"
+          ContainerProductSummary.of_json in
+      let amiProductSummary =
+        field_map json__ "AmiProductSummary" AmiProductSummary.of_json in
+      let visibility = field_map json__ "Visibility" VisibilityValue.of_json in
       let lastModifiedDate =
-        field_map json "LastModifiedDate" DateTimeISO8601.of_json in
-      let entityArn = field_map json "EntityArn" ARN.of_json in
-      let entityId = field_map json "EntityId" ResourceId.of_json in
-      let entityType = field_map json "EntityType" EntityType.of_json in
-      let name = field_map json "Name" EntityNameString.of_json in
-      make ?visibility ?lastModifiedDate ?entityArn ?entityId ?entityType
-        ?name ()
+        field_map json__ "LastModifiedDate" DateTimeISO8601.of_json in
+      let entityArn = field_map json__ "EntityArn" ARN.of_json in
+      let entityId = field_map json__ "EntityId" ResourceId.of_json in
+      let entityType = field_map json__ "EntityType" EntityType.of_json in
+      let name = field_map json__ "Name" EntityNameString.of_json in
+      make ?offerSetSummary ?machineLearningProductSummary
+        ?resaleAuthorizationSummary ?offerSummary ?saaSProductSummary
+        ?dataProductSummary ?containerProductSummary ?amiProductSummary
+        ?visibility ?lastModifiedDate ?entityArn ?entityId ?entityType ?name
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This object is a container for common summary information about the entity. The summary doesn't contain the whole entity structure, but it does contain information common across all entities."]
+module AmiProductFilters =
+  struct
+    type nonrec t =
+      {
+      entityId: AmiProductEntityIdFilter.t option
+        [@ocaml.doc "Unique identifier for the AMI product."];
+      lastModifiedDate: AmiProductLastModifiedDateFilter.t option
+        [@ocaml.doc "The last date on which the AMI product was modified."];
+      productTitle: AmiProductTitleFilter.t option
+        [@ocaml.doc "The title of the AMI product."];
+      visibility: AmiProductVisibilityFilter.t option
+        [@ocaml.doc "The visibility of the AMI product."]}
+    let make ?entityId =
+      fun ?lastModifiedDate ->
+        fun ?productTitle ->
+          fun ?visibility ->
+            fun () ->
+              { entityId; lastModifiedDate; productTitle; visibility }
+    let to_value x =
+      structure_to_value
+        [("EntityId",
+           (Option.map x.entityId ~f:AmiProductEntityIdFilter.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate
+             ~f:AmiProductLastModifiedDateFilter.to_value));
+        ("ProductTitle",
+          (Option.map x.productTitle ~f:AmiProductTitleFilter.to_value));
+        ("Visibility",
+          (Option.map x.visibility ~f:AmiProductVisibilityFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:AmiProductVisibilityFilter.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:AmiProductTitleFilter.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      let lastModifiedDate =
+        (Option.map ~f:AmiProductLastModifiedDateFilter.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let entityId =
+        (Option.map ~f:AmiProductEntityIdFilter.of_xml)
+          (Xml.child xml_arg0 "EntityId") in
+      make ?visibility ?productTitle ?lastModifiedDate ?entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visibility =
+        field_map json__ "Visibility" AmiProductVisibilityFilter.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle" AmiProductTitleFilter.of_json in
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate"
+          AmiProductLastModifiedDateFilter.of_json in
+      let entityId =
+        field_map json__ "EntityId" AmiProductEntityIdFilter.of_json in
+      make ?visibility ?productTitle ?lastModifiedDate ?entityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing all the filter fields for AMI products. Client can add only one wildcard filter and a maximum of 8 filters in a single ListEntities request."]
+module ContainerProductFilters =
+  struct
+    type nonrec t =
+      {
+      entityId: ContainerProductEntityIdFilter.t option
+        [@ocaml.doc "Unique identifier for the container product."];
+      lastModifiedDate: ContainerProductLastModifiedDateFilter.t option
+        [@ocaml.doc
+          "The last date on which the container product was modified."];
+      productTitle: ContainerProductTitleFilter.t option
+        [@ocaml.doc "The title of the container product."];
+      visibility: ContainerProductVisibilityFilter.t option
+        [@ocaml.doc "The visibility of the container product."]}
+    let make ?entityId =
+      fun ?lastModifiedDate ->
+        fun ?productTitle ->
+          fun ?visibility ->
+            fun () ->
+              { entityId; lastModifiedDate; productTitle; visibility }
+    let to_value x =
+      structure_to_value
+        [("EntityId",
+           (Option.map x.entityId ~f:ContainerProductEntityIdFilter.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate
+             ~f:ContainerProductLastModifiedDateFilter.to_value));
+        ("ProductTitle",
+          (Option.map x.productTitle ~f:ContainerProductTitleFilter.to_value));
+        ("Visibility",
+          (Option.map x.visibility
+             ~f:ContainerProductVisibilityFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:ContainerProductVisibilityFilter.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:ContainerProductTitleFilter.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      let lastModifiedDate =
+        (Option.map ~f:ContainerProductLastModifiedDateFilter.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let entityId =
+        (Option.map ~f:ContainerProductEntityIdFilter.of_xml)
+          (Xml.child xml_arg0 "EntityId") in
+      make ?visibility ?productTitle ?lastModifiedDate ?entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visibility =
+        field_map json__ "Visibility"
+          ContainerProductVisibilityFilter.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle" ContainerProductTitleFilter.of_json in
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate"
+          ContainerProductLastModifiedDateFilter.of_json in
+      let entityId =
+        field_map json__ "EntityId" ContainerProductEntityIdFilter.of_json in
+      make ?visibility ?productTitle ?lastModifiedDate ?entityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing all the filter fields for container products. Client can add only one wildcard filter and a maximum of 8 filters in a single ListEntities request."]
+module DataProductFilters =
+  struct
+    type nonrec t =
+      {
+      entityId: DataProductEntityIdFilter.t option
+        [@ocaml.doc "Unique identifier for the data product."];
+      productTitle: DataProductTitleFilter.t option
+        [@ocaml.doc "The title of the data product."];
+      visibility: DataProductVisibilityFilter.t option
+        [@ocaml.doc "The visibility of the data product."];
+      lastModifiedDate: DataProductLastModifiedDateFilter.t option
+        [@ocaml.doc "The last date on which the data product was modified."]}
+    let make ?entityId =
+      fun ?productTitle ->
+        fun ?visibility ->
+          fun ?lastModifiedDate ->
+            fun () ->
+              { entityId; productTitle; visibility; lastModifiedDate }
+    let to_value x =
+      structure_to_value
+        [("EntityId",
+           (Option.map x.entityId ~f:DataProductEntityIdFilter.to_value));
+        ("ProductTitle",
+          (Option.map x.productTitle ~f:DataProductTitleFilter.to_value));
+        ("Visibility",
+          (Option.map x.visibility ~f:DataProductVisibilityFilter.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate
+             ~f:DataProductLastModifiedDateFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedDate =
+        (Option.map ~f:DataProductLastModifiedDateFilter.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let visibility =
+        (Option.map ~f:DataProductVisibilityFilter.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:DataProductTitleFilter.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      let entityId =
+        (Option.map ~f:DataProductEntityIdFilter.of_xml)
+          (Xml.child xml_arg0 "EntityId") in
+      make ?lastModifiedDate ?visibility ?productTitle ?entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate"
+          DataProductLastModifiedDateFilter.of_json in
+      let visibility =
+        field_map json__ "Visibility" DataProductVisibilityFilter.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle" DataProductTitleFilter.of_json in
+      let entityId =
+        field_map json__ "EntityId" DataProductEntityIdFilter.of_json in
+      make ?lastModifiedDate ?visibility ?productTitle ?entityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing all the filter fields for data products. Client can add only one wildcard filter and a maximum of 8 filters in a single ListEntities request."]
+module MachineLearningProductFilters =
+  struct
+    type nonrec t =
+      {
+      entityId: MachineLearningProductEntityIdFilter.t option
+        [@ocaml.doc "Filter machine learning products by their entity IDs."];
+      lastModifiedDate: MachineLearningProductLastModifiedDateFilter.t option
+        [@ocaml.doc
+          "Filter machine learning products by their last modified date."];
+      productTitle: MachineLearningProductTitleFilter.t option
+        [@ocaml.doc
+          "Filter machine learning products by their product titles."];
+      visibility: MachineLearningProductVisibilityFilter.t option
+        [@ocaml.doc
+          "Filter machine learning products by their visibility status."]}
+    let make ?entityId =
+      fun ?lastModifiedDate ->
+        fun ?productTitle ->
+          fun ?visibility ->
+            fun () ->
+              { entityId; lastModifiedDate; productTitle; visibility }
+    let to_value x =
+      structure_to_value
+        [("EntityId",
+           (Option.map x.entityId
+              ~f:MachineLearningProductEntityIdFilter.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate
+             ~f:MachineLearningProductLastModifiedDateFilter.to_value));
+        ("ProductTitle",
+          (Option.map x.productTitle
+             ~f:MachineLearningProductTitleFilter.to_value));
+        ("Visibility",
+          (Option.map x.visibility
+             ~f:MachineLearningProductVisibilityFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:MachineLearningProductVisibilityFilter.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:MachineLearningProductTitleFilter.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      let lastModifiedDate =
+        (Option.map ~f:MachineLearningProductLastModifiedDateFilter.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let entityId =
+        (Option.map ~f:MachineLearningProductEntityIdFilter.of_xml)
+          (Xml.child xml_arg0 "EntityId") in
+      make ?visibility ?productTitle ?lastModifiedDate ?entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visibility =
+        field_map json__ "Visibility"
+          MachineLearningProductVisibilityFilter.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle"
+          MachineLearningProductTitleFilter.of_json in
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate"
+          MachineLearningProductLastModifiedDateFilter.of_json in
+      let entityId =
+        field_map json__ "EntityId"
+          MachineLearningProductEntityIdFilter.of_json in
+      make ?visibility ?productTitle ?lastModifiedDate ?entityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The filters that you can use with the ListEntities operation to filter machine learning products. You can filter by EntityId, astModifiedDate, ProductTitle, and Visibility."]
+module OfferFilters =
+  struct
+    type nonrec t =
+      {
+      entityId: OfferEntityIdFilter.t option
+        [@ocaml.doc "Allows filtering on EntityId of an offer."];
+      name: OfferNameFilter.t option
+        [@ocaml.doc "Allows filtering on the Name of an offer."];
+      productId: OfferProductIdFilter.t option
+        [@ocaml.doc "Allows filtering on the ProductId of an offer."];
+      resaleAuthorizationId: OfferResaleAuthorizationIdFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the ResaleAuthorizationId of an offer. Not all offers have a ResaleAuthorizationId. The response will only include offers for which you have permissions."];
+      releaseDate: OfferReleaseDateFilter.t option
+        [@ocaml.doc "Allows filtering on the ReleaseDate of an offer."];
+      availabilityEndDate: OfferAvailabilityEndDateFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the AvailabilityEndDate of an offer."];
+      buyerAccounts: OfferBuyerAccountsFilter.t option
+        [@ocaml.doc "Allows filtering on the BuyerAccounts of an offer."];
+      state: OfferStateFilter.t option
+        [@ocaml.doc "Allows filtering on the State of an offer."];
+      targeting: OfferTargetingFilter.t option
+        [@ocaml.doc "Allows filtering on the Targeting of an offer."];
+      lastModifiedDate: OfferLastModifiedDateFilter.t option
+        [@ocaml.doc "Allows filtering on the LastModifiedDate of an offer."];
+      offerSetId: OfferSetIdFilter.t option
+        [@ocaml.doc "Allows filtering on the OfferSetId of an offer."]}
+    let make ?entityId =
+      fun ?name ->
+        fun ?productId ->
+          fun ?resaleAuthorizationId ->
+            fun ?releaseDate ->
+              fun ?availabilityEndDate ->
+                fun ?buyerAccounts ->
+                  fun ?state ->
+                    fun ?targeting ->
+                      fun ?lastModifiedDate ->
+                        fun ?offerSetId ->
+                          fun () ->
+                            {
+                              entityId;
+                              name;
+                              productId;
+                              resaleAuthorizationId;
+                              releaseDate;
+                              availabilityEndDate;
+                              buyerAccounts;
+                              state;
+                              targeting;
+                              lastModifiedDate;
+                              offerSetId
+                            }
+    let to_value x =
+      structure_to_value
+        [("EntityId",
+           (Option.map x.entityId ~f:OfferEntityIdFilter.to_value));
+        ("Name", (Option.map x.name ~f:OfferNameFilter.to_value));
+        ("ProductId",
+          (Option.map x.productId ~f:OfferProductIdFilter.to_value));
+        ("ResaleAuthorizationId",
+          (Option.map x.resaleAuthorizationId
+             ~f:OfferResaleAuthorizationIdFilter.to_value));
+        ("ReleaseDate",
+          (Option.map x.releaseDate ~f:OfferReleaseDateFilter.to_value));
+        ("AvailabilityEndDate",
+          (Option.map x.availabilityEndDate
+             ~f:OfferAvailabilityEndDateFilter.to_value));
+        ("BuyerAccounts",
+          (Option.map x.buyerAccounts ~f:OfferBuyerAccountsFilter.to_value));
+        ("State", (Option.map x.state ~f:OfferStateFilter.to_value));
+        ("Targeting",
+          (Option.map x.targeting ~f:OfferTargetingFilter.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate
+             ~f:OfferLastModifiedDateFilter.to_value));
+        ("OfferSetId",
+          (Option.map x.offerSetId ~f:OfferSetIdFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let offerSetId =
+        (Option.map ~f:OfferSetIdFilter.of_xml)
+          (Xml.child xml_arg0 "OfferSetId") in
+      let lastModifiedDate =
+        (Option.map ~f:OfferLastModifiedDateFilter.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let targeting =
+        (Option.map ~f:OfferTargetingFilter.of_xml)
+          (Xml.child xml_arg0 "Targeting") in
+      let state =
+        (Option.map ~f:OfferStateFilter.of_xml) (Xml.child xml_arg0 "State") in
+      let buyerAccounts =
+        (Option.map ~f:OfferBuyerAccountsFilter.of_xml)
+          (Xml.child xml_arg0 "BuyerAccounts") in
+      let availabilityEndDate =
+        (Option.map ~f:OfferAvailabilityEndDateFilter.of_xml)
+          (Xml.child xml_arg0 "AvailabilityEndDate") in
+      let releaseDate =
+        (Option.map ~f:OfferReleaseDateFilter.of_xml)
+          (Xml.child xml_arg0 "ReleaseDate") in
+      let resaleAuthorizationId =
+        (Option.map ~f:OfferResaleAuthorizationIdFilter.of_xml)
+          (Xml.child xml_arg0 "ResaleAuthorizationId") in
+      let productId =
+        (Option.map ~f:OfferProductIdFilter.of_xml)
+          (Xml.child xml_arg0 "ProductId") in
+      let name =
+        (Option.map ~f:OfferNameFilter.of_xml) (Xml.child xml_arg0 "Name") in
+      let entityId =
+        (Option.map ~f:OfferEntityIdFilter.of_xml)
+          (Xml.child xml_arg0 "EntityId") in
+      make ?offerSetId ?lastModifiedDate ?targeting ?state ?buyerAccounts
+        ?availabilityEndDate ?releaseDate ?resaleAuthorizationId ?productId
+        ?name ?entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let offerSetId = field_map json__ "OfferSetId" OfferSetIdFilter.of_json in
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate"
+          OfferLastModifiedDateFilter.of_json in
+      let targeting =
+        field_map json__ "Targeting" OfferTargetingFilter.of_json in
+      let state = field_map json__ "State" OfferStateFilter.of_json in
+      let buyerAccounts =
+        field_map json__ "BuyerAccounts" OfferBuyerAccountsFilter.of_json in
+      let availabilityEndDate =
+        field_map json__ "AvailabilityEndDate"
+          OfferAvailabilityEndDateFilter.of_json in
+      let releaseDate =
+        field_map json__ "ReleaseDate" OfferReleaseDateFilter.of_json in
+      let resaleAuthorizationId =
+        field_map json__ "ResaleAuthorizationId"
+          OfferResaleAuthorizationIdFilter.of_json in
+      let productId =
+        field_map json__ "ProductId" OfferProductIdFilter.of_json in
+      let name = field_map json__ "Name" OfferNameFilter.of_json in
+      let entityId = field_map json__ "EntityId" OfferEntityIdFilter.of_json in
+      make ?offerSetId ?lastModifiedDate ?targeting ?state ?buyerAccounts
+        ?availabilityEndDate ?releaseDate ?resaleAuthorizationId ?productId
+        ?name ?entityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing all the filter fields for offers entity. Client can add only one wildcard filter and a maximum of 8 filters in a single ListEntities request."]
+module OfferSetFilters =
+  struct
+    type nonrec t =
+      {
+      entityId: OfferSetEntityIdFilter.t option
+        [@ocaml.doc "Allows filtering on EntityId of an offer set."];
+      name: OfferSetNameFilter.t option
+        [@ocaml.doc "Allows filtering on the Name of an offer set."];
+      state: OfferSetStateFilter.t option
+        [@ocaml.doc "Allows filtering on the State of an offer set."];
+      releaseDate: OfferSetReleaseDateFilter.t option
+        [@ocaml.doc "Allows filtering on the ReleaseDate of an offer set."];
+      associatedOfferIds: OfferSetAssociatedOfferIdsFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the AssociatedOfferIds of an offer set."];
+      solutionId: OfferSetSolutionIdFilter.t option
+        [@ocaml.doc "Allows filtering on the SolutionId of an offer set."];
+      lastModifiedDate: OfferSetLastModifiedDateFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of an offer set."]}
+    let make ?entityId =
+      fun ?name ->
+        fun ?state ->
+          fun ?releaseDate ->
+            fun ?associatedOfferIds ->
+              fun ?solutionId ->
+                fun ?lastModifiedDate ->
+                  fun () ->
+                    {
+                      entityId;
+                      name;
+                      state;
+                      releaseDate;
+                      associatedOfferIds;
+                      solutionId;
+                      lastModifiedDate
+                    }
+    let to_value x =
+      structure_to_value
+        [("EntityId",
+           (Option.map x.entityId ~f:OfferSetEntityIdFilter.to_value));
+        ("Name", (Option.map x.name ~f:OfferSetNameFilter.to_value));
+        ("State", (Option.map x.state ~f:OfferSetStateFilter.to_value));
+        ("ReleaseDate",
+          (Option.map x.releaseDate ~f:OfferSetReleaseDateFilter.to_value));
+        ("AssociatedOfferIds",
+          (Option.map x.associatedOfferIds
+             ~f:OfferSetAssociatedOfferIdsFilter.to_value));
+        ("SolutionId",
+          (Option.map x.solutionId ~f:OfferSetSolutionIdFilter.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate
+             ~f:OfferSetLastModifiedDateFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedDate =
+        (Option.map ~f:OfferSetLastModifiedDateFilter.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let solutionId =
+        (Option.map ~f:OfferSetSolutionIdFilter.of_xml)
+          (Xml.child xml_arg0 "SolutionId") in
+      let associatedOfferIds =
+        (Option.map ~f:OfferSetAssociatedOfferIdsFilter.of_xml)
+          (Xml.child xml_arg0 "AssociatedOfferIds") in
+      let releaseDate =
+        (Option.map ~f:OfferSetReleaseDateFilter.of_xml)
+          (Xml.child xml_arg0 "ReleaseDate") in
+      let state =
+        (Option.map ~f:OfferSetStateFilter.of_xml)
+          (Xml.child xml_arg0 "State") in
+      let name =
+        (Option.map ~f:OfferSetNameFilter.of_xml) (Xml.child xml_arg0 "Name") in
+      let entityId =
+        (Option.map ~f:OfferSetEntityIdFilter.of_xml)
+          (Xml.child xml_arg0 "EntityId") in
+      make ?lastModifiedDate ?solutionId ?associatedOfferIds ?releaseDate
+        ?state ?name ?entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate"
+          OfferSetLastModifiedDateFilter.of_json in
+      let solutionId =
+        field_map json__ "SolutionId" OfferSetSolutionIdFilter.of_json in
+      let associatedOfferIds =
+        field_map json__ "AssociatedOfferIds"
+          OfferSetAssociatedOfferIdsFilter.of_json in
+      let releaseDate =
+        field_map json__ "ReleaseDate" OfferSetReleaseDateFilter.of_json in
+      let state = field_map json__ "State" OfferSetStateFilter.of_json in
+      let name = field_map json__ "Name" OfferSetNameFilter.of_json in
+      let entityId =
+        field_map json__ "EntityId" OfferSetEntityIdFilter.of_json in
+      make ?lastModifiedDate ?solutionId ?associatedOfferIds ?releaseDate
+        ?state ?name ?entityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing all the filter fields for offer sets entity. Client can add a maximum of 8 filters in a single ListEntities request."]
+module ResaleAuthorizationFilters =
+  struct
+    type nonrec t =
+      {
+      entityId: ResaleAuthorizationEntityIdFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the EntityId of a ResaleAuthorization."];
+      name: ResaleAuthorizationNameFilter.t option
+        [@ocaml.doc "Allows filtering on the Name of a ResaleAuthorization."];
+      productId: ResaleAuthorizationProductIdFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the ProductId of a ResaleAuthorization."];
+      createdDate: ResaleAuthorizationCreatedDateFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the CreatedDate of a ResaleAuthorization."];
+      availabilityEndDate:
+        ResaleAuthorizationAvailabilityEndDateFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the AvailabilityEndDate of a ResaleAuthorization."];
+      manufacturerAccountId:
+        ResaleAuthorizationManufacturerAccountIdFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the ManufacturerAccountId of a ResaleAuthorization."];
+      productName: ResaleAuthorizationProductNameFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the ProductName of a ResaleAuthorization."];
+      manufacturerLegalName:
+        ResaleAuthorizationManufacturerLegalNameFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the ManufacturerLegalName of a ResaleAuthorization."];
+      resellerAccountID: ResaleAuthorizationResellerAccountIDFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the ResellerAccountID of a ResaleAuthorization."];
+      resellerLegalName: ResaleAuthorizationResellerLegalNameFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the ResellerLegalName of a ResaleAuthorization."];
+      status: ResaleAuthorizationStatusFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the Status of a ResaleAuthorization."];
+      offerExtendedStatus:
+        ResaleAuthorizationOfferExtendedStatusFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the OfferExtendedStatus of a ResaleAuthorization."];
+      lastModifiedDate: ResaleAuthorizationLastModifiedDateFilter.t option
+        [@ocaml.doc
+          "Allows filtering on the LastModifiedDate of a ResaleAuthorization."]}
+    let make ?entityId =
+      fun ?name ->
+        fun ?productId ->
+          fun ?createdDate ->
+            fun ?availabilityEndDate ->
+              fun ?manufacturerAccountId ->
+                fun ?productName ->
+                  fun ?manufacturerLegalName ->
+                    fun ?resellerAccountID ->
+                      fun ?resellerLegalName ->
+                        fun ?status ->
+                          fun ?offerExtendedStatus ->
+                            fun ?lastModifiedDate ->
+                              fun () ->
+                                {
+                                  entityId;
+                                  name;
+                                  productId;
+                                  createdDate;
+                                  availabilityEndDate;
+                                  manufacturerAccountId;
+                                  productName;
+                                  manufacturerLegalName;
+                                  resellerAccountID;
+                                  resellerLegalName;
+                                  status;
+                                  offerExtendedStatus;
+                                  lastModifiedDate
+                                }
+    let to_value x =
+      structure_to_value
+        [("EntityId",
+           (Option.map x.entityId
+              ~f:ResaleAuthorizationEntityIdFilter.to_value));
+        ("Name",
+          (Option.map x.name ~f:ResaleAuthorizationNameFilter.to_value));
+        ("ProductId",
+          (Option.map x.productId
+             ~f:ResaleAuthorizationProductIdFilter.to_value));
+        ("CreatedDate",
+          (Option.map x.createdDate
+             ~f:ResaleAuthorizationCreatedDateFilter.to_value));
+        ("AvailabilityEndDate",
+          (Option.map x.availabilityEndDate
+             ~f:ResaleAuthorizationAvailabilityEndDateFilter.to_value));
+        ("ManufacturerAccountId",
+          (Option.map x.manufacturerAccountId
+             ~f:ResaleAuthorizationManufacturerAccountIdFilter.to_value));
+        ("ProductName",
+          (Option.map x.productName
+             ~f:ResaleAuthorizationProductNameFilter.to_value));
+        ("ManufacturerLegalName",
+          (Option.map x.manufacturerLegalName
+             ~f:ResaleAuthorizationManufacturerLegalNameFilter.to_value));
+        ("ResellerAccountID",
+          (Option.map x.resellerAccountID
+             ~f:ResaleAuthorizationResellerAccountIDFilter.to_value));
+        ("ResellerLegalName",
+          (Option.map x.resellerLegalName
+             ~f:ResaleAuthorizationResellerLegalNameFilter.to_value));
+        ("Status",
+          (Option.map x.status ~f:ResaleAuthorizationStatusFilter.to_value));
+        ("OfferExtendedStatus",
+          (Option.map x.offerExtendedStatus
+             ~f:ResaleAuthorizationOfferExtendedStatusFilter.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate
+             ~f:ResaleAuthorizationLastModifiedDateFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedDate =
+        (Option.map ~f:ResaleAuthorizationLastModifiedDateFilter.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let offerExtendedStatus =
+        (Option.map ~f:ResaleAuthorizationOfferExtendedStatusFilter.of_xml)
+          (Xml.child xml_arg0 "OfferExtendedStatus") in
+      let status =
+        (Option.map ~f:ResaleAuthorizationStatusFilter.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let resellerLegalName =
+        (Option.map ~f:ResaleAuthorizationResellerLegalNameFilter.of_xml)
+          (Xml.child xml_arg0 "ResellerLegalName") in
+      let resellerAccountID =
+        (Option.map ~f:ResaleAuthorizationResellerAccountIDFilter.of_xml)
+          (Xml.child xml_arg0 "ResellerAccountID") in
+      let manufacturerLegalName =
+        (Option.map ~f:ResaleAuthorizationManufacturerLegalNameFilter.of_xml)
+          (Xml.child xml_arg0 "ManufacturerLegalName") in
+      let productName =
+        (Option.map ~f:ResaleAuthorizationProductNameFilter.of_xml)
+          (Xml.child xml_arg0 "ProductName") in
+      let manufacturerAccountId =
+        (Option.map ~f:ResaleAuthorizationManufacturerAccountIdFilter.of_xml)
+          (Xml.child xml_arg0 "ManufacturerAccountId") in
+      let availabilityEndDate =
+        (Option.map ~f:ResaleAuthorizationAvailabilityEndDateFilter.of_xml)
+          (Xml.child xml_arg0 "AvailabilityEndDate") in
+      let createdDate =
+        (Option.map ~f:ResaleAuthorizationCreatedDateFilter.of_xml)
+          (Xml.child xml_arg0 "CreatedDate") in
+      let productId =
+        (Option.map ~f:ResaleAuthorizationProductIdFilter.of_xml)
+          (Xml.child xml_arg0 "ProductId") in
+      let name =
+        (Option.map ~f:ResaleAuthorizationNameFilter.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let entityId =
+        (Option.map ~f:ResaleAuthorizationEntityIdFilter.of_xml)
+          (Xml.child xml_arg0 "EntityId") in
+      make ?lastModifiedDate ?offerExtendedStatus ?status ?resellerLegalName
+        ?resellerAccountID ?manufacturerLegalName ?productName
+        ?manufacturerAccountId ?availabilityEndDate ?createdDate ?productId
+        ?name ?entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate"
+          ResaleAuthorizationLastModifiedDateFilter.of_json in
+      let offerExtendedStatus =
+        field_map json__ "OfferExtendedStatus"
+          ResaleAuthorizationOfferExtendedStatusFilter.of_json in
+      let status =
+        field_map json__ "Status" ResaleAuthorizationStatusFilter.of_json in
+      let resellerLegalName =
+        field_map json__ "ResellerLegalName"
+          ResaleAuthorizationResellerLegalNameFilter.of_json in
+      let resellerAccountID =
+        field_map json__ "ResellerAccountID"
+          ResaleAuthorizationResellerAccountIDFilter.of_json in
+      let manufacturerLegalName =
+        field_map json__ "ManufacturerLegalName"
+          ResaleAuthorizationManufacturerLegalNameFilter.of_json in
+      let productName =
+        field_map json__ "ProductName"
+          ResaleAuthorizationProductNameFilter.of_json in
+      let manufacturerAccountId =
+        field_map json__ "ManufacturerAccountId"
+          ResaleAuthorizationManufacturerAccountIdFilter.of_json in
+      let availabilityEndDate =
+        field_map json__ "AvailabilityEndDate"
+          ResaleAuthorizationAvailabilityEndDateFilter.of_json in
+      let createdDate =
+        field_map json__ "CreatedDate"
+          ResaleAuthorizationCreatedDateFilter.of_json in
+      let productId =
+        field_map json__ "ProductId"
+          ResaleAuthorizationProductIdFilter.of_json in
+      let name =
+        field_map json__ "Name" ResaleAuthorizationNameFilter.of_json in
+      let entityId =
+        field_map json__ "EntityId" ResaleAuthorizationEntityIdFilter.of_json in
+      make ?lastModifiedDate ?offerExtendedStatus ?status ?resellerLegalName
+        ?resellerAccountID ?manufacturerLegalName ?productName
+        ?manufacturerAccountId ?availabilityEndDate ?createdDate ?productId
+        ?name ?entityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing all the filter fields for resale authorization entity. Client can add only one wildcard filter and a maximum of 8 filters in a single ListEntities request."]
+module SaaSProductFilters =
+  struct
+    type nonrec t =
+      {
+      entityId: SaaSProductEntityIdFilter.t option
+        [@ocaml.doc "Unique identifier for the SaaS product."];
+      productTitle: SaaSProductTitleFilter.t option
+        [@ocaml.doc "The title of the SaaS product."];
+      visibility: SaaSProductVisibilityFilter.t option
+        [@ocaml.doc "The visibility of the SaaS product."];
+      lastModifiedDate: SaaSProductLastModifiedDateFilter.t option
+        [@ocaml.doc "The last date on which the SaaS product was modified."]}
+    let make ?entityId =
+      fun ?productTitle ->
+        fun ?visibility ->
+          fun ?lastModifiedDate ->
+            fun () ->
+              { entityId; productTitle; visibility; lastModifiedDate }
+    let to_value x =
+      structure_to_value
+        [("EntityId",
+           (Option.map x.entityId ~f:SaaSProductEntityIdFilter.to_value));
+        ("ProductTitle",
+          (Option.map x.productTitle ~f:SaaSProductTitleFilter.to_value));
+        ("Visibility",
+          (Option.map x.visibility ~f:SaaSProductVisibilityFilter.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate
+             ~f:SaaSProductLastModifiedDateFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedDate =
+        (Option.map ~f:SaaSProductLastModifiedDateFilter.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let visibility =
+        (Option.map ~f:SaaSProductVisibilityFilter.of_xml)
+          (Xml.child xml_arg0 "Visibility") in
+      let productTitle =
+        (Option.map ~f:SaaSProductTitleFilter.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      let entityId =
+        (Option.map ~f:SaaSProductEntityIdFilter.of_xml)
+          (Xml.child xml_arg0 "EntityId") in
+      make ?lastModifiedDate ?visibility ?productTitle ?entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate"
+          SaaSProductLastModifiedDateFilter.of_json in
+      let visibility =
+        field_map json__ "Visibility" SaaSProductVisibilityFilter.of_json in
+      let productTitle =
+        field_map json__ "ProductTitle" SaaSProductTitleFilter.of_json in
+      let entityId =
+        field_map json__ "EntityId" SaaSProductEntityIdFilter.of_json in
+      make ?lastModifiedDate ?visibility ?productTitle ?entityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing all the filter fields for SaaS products. Client can add only one wildcard filter and a maximum of 8 filters in a single ListEntities request."]
+module AmiProductSort =
+  struct
+    type nonrec t =
+      {
+      sortBy: AmiProductSortBy.t option
+        [@ocaml.doc "Field to sort the AMI products by."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc
+          "The sorting order. Can be ASCENDING or DESCENDING. The default value is DESCENDING."]}
+    let make ?sortBy = fun ?sortOrder -> fun () -> { sortBy; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("SortBy", (Option.map x.sortBy ~f:AmiProductSortBy.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:AmiProductSortBy.of_xml) (Xml.child xml_arg0 "SortBy") in
+      make ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" AmiProductSortBy.of_json in
+      make ?sortOrder ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Objects that allows sorting on AMI products based on certain fields and sorting order."]
+module ContainerProductSort =
+  struct
+    type nonrec t =
+      {
+      sortBy: ContainerProductSortBy.t option
+        [@ocaml.doc "Field to sort the container products by."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc
+          "The sorting order. Can be ASCENDING or DESCENDING. The default value is DESCENDING."]}
+    let make ?sortBy = fun ?sortOrder -> fun () -> { sortBy; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("SortBy", (Option.map x.sortBy ~f:ContainerProductSortBy.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:ContainerProductSortBy.of_xml)
+          (Xml.child xml_arg0 "SortBy") in
+      make ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" ContainerProductSortBy.of_json in
+      make ?sortOrder ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Objects that allows sorting on container products based on certain fields and sorting order."]
+module DataProductSort =
+  struct
+    type nonrec t =
+      {
+      sortBy: DataProductSortBy.t option
+        [@ocaml.doc "Field to sort the data products by."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc
+          "The sorting order. Can be ASCENDING or DESCENDING. The default value is DESCENDING."]}
+    let make ?sortBy = fun ?sortOrder -> fun () -> { sortBy; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("SortBy", (Option.map x.sortBy ~f:DataProductSortBy.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:DataProductSortBy.of_xml)
+          (Xml.child xml_arg0 "SortBy") in
+      make ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" DataProductSortBy.of_json in
+      make ?sortOrder ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Objects that allows sorting on data products based on certain fields and sorting order."]
+module MachineLearningProductSort =
+  struct
+    type nonrec t =
+      {
+      sortBy: MachineLearningProductSortBy.t option
+        [@ocaml.doc
+          "The field to sort by. Valid values: EntityId, LastModifiedDate, ProductTitle, and Visibility."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc
+          "The sort order. Valid values are ASC (ascending) and DESC (descending)."]}
+    let make ?sortBy = fun ?sortOrder -> fun () -> { sortBy; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("SortBy",
+           (Option.map x.sortBy ~f:MachineLearningProductSortBy.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:MachineLearningProductSortBy.of_xml)
+          (Xml.child xml_arg0 "SortBy") in
+      make ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy =
+        field_map json__ "SortBy" MachineLearningProductSortBy.of_json in
+      make ?sortOrder ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The sort options for machine learning products."]
+module OfferSetSort =
+  struct
+    type nonrec t =
+      {
+      sortBy: OfferSetSortBy.t option
+        [@ocaml.doc "Allows to sort offer sets."];
+      sortOrder: SortOrder.t option [@ocaml.doc "Allows to sort offer sets."]}
+    let make ?sortBy = fun ?sortOrder -> fun () -> { sortBy; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("SortBy", (Option.map x.sortBy ~f:OfferSetSortBy.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:OfferSetSortBy.of_xml) (Xml.child xml_arg0 "SortBy") in
+      make ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" OfferSetSortBy.of_json in
+      make ?sortOrder ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows to sort offer sets."]
+module OfferSort =
+  struct
+    type nonrec t =
+      {
+      sortBy: OfferSortBy.t option [@ocaml.doc "Allows to sort offers."];
+      sortOrder: SortOrder.t option [@ocaml.doc "Allows to sort offers."]}
+    let make ?sortBy = fun ?sortOrder -> fun () -> { sortBy; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("SortBy", (Option.map x.sortBy ~f:OfferSortBy.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:OfferSortBy.of_xml) (Xml.child xml_arg0 "SortBy") in
+      make ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" OfferSortBy.of_json in
+      make ?sortOrder ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows to sort offers."]
+module ResaleAuthorizationSort =
+  struct
+    type nonrec t =
+      {
+      sortBy: ResaleAuthorizationSortBy.t option
+        [@ocaml.doc "Allows to sort ResaleAuthorization."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc "Allows to sort ResaleAuthorization."]}
+    let make ?sortBy = fun ?sortOrder -> fun () -> { sortBy; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("SortBy",
+           (Option.map x.sortBy ~f:ResaleAuthorizationSortBy.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:ResaleAuthorizationSortBy.of_xml)
+          (Xml.child xml_arg0 "SortBy") in
+      make ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy =
+        field_map json__ "SortBy" ResaleAuthorizationSortBy.of_json in
+      make ?sortOrder ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Allows to sort ResaleAuthorization."]
+module SaaSProductSort =
+  struct
+    type nonrec t =
+      {
+      sortBy: SaaSProductSortBy.t option
+        [@ocaml.doc "Field to sort the SaaS products by."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc
+          "The sorting order. Can be ASCENDING or DESCENDING. The default value is DESCENDING."]}
+    let make ?sortBy = fun ?sortOrder -> fun () -> { sortBy; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("SortBy", (Option.map x.sortBy ~f:SaaSProductSortBy.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:SaaSProductSortBy.of_xml)
+          (Xml.child xml_arg0 "SortBy") in
+      make ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" SaaSProductSortBy.of_json in
+      make ?sortOrder ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Objects that allows sorting on SaaS products based on certain fields and sorting order."]
 module Filter =
   struct
     type nonrec t =
@@ -667,9 +7379,9 @@ module Filter =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?valueList ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let valueList = field_map json "ValueList" ValueList.of_json in
-      let name = field_map json "Name" FilterName.of_json in
+    let of_json json__ =
+      let valueList = field_map json__ "ValueList" ValueList.of_json in
+      let name = field_map json__ "Name" FilterName.of_json in
       make ?valueList ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -692,31 +7404,6 @@ module SortBy =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"SortBy" j
-    let to_json = simple_to_json to_value
-  end
-module SortOrder =
-  struct
-    type nonrec t =
-      | ASCENDING 
-      | DESCENDING 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ASCENDING -> "ASCENDING"
-      | DESCENDING -> "DESCENDING"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ASCENDING" -> ASCENDING
-      | "DESCENDING" -> DESCENDING
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
     let to_json = simple_to_json to_value
   end
 module ChangeSetSummaryListItem =
@@ -799,16 +7486,17 @@ module ChangeSetSummaryListItem =
       make ?failureCode ?entityIdList ?status ?endTime ?startTime
         ?changeSetName ?changeSetArn ?changeSetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failureCode = field_map json "FailureCode" FailureCode.of_json in
-      let entityIdList = field_map json "EntityIdList" ResourceIdList.of_json in
-      let status = field_map json "Status" ChangeStatus.of_json in
-      let endTime = field_map json "EndTime" DateTimeISO8601.of_json in
-      let startTime = field_map json "StartTime" DateTimeISO8601.of_json in
+    let of_json json__ =
+      let failureCode = field_map json__ "FailureCode" FailureCode.of_json in
+      let entityIdList =
+        field_map json__ "EntityIdList" ResourceIdList.of_json in
+      let status = field_map json__ "Status" ChangeStatus.of_json in
+      let endTime = field_map json__ "EndTime" DateTimeISO8601.of_json in
+      let startTime = field_map json__ "StartTime" DateTimeISO8601.of_json in
       let changeSetName =
-        field_map json "ChangeSetName" ChangeSetName.of_json in
-      let changeSetArn = field_map json "ChangeSetArn" ARN.of_json in
-      let changeSetId = field_map json "ChangeSetId" ResourceId.of_json in
+        field_map json__ "ChangeSetName" ChangeSetName.of_json in
+      let changeSetArn = field_map json__ "ChangeSetArn" ARN.of_json in
+      let changeSetId = field_map json__ "ChangeSetId" ResourceId.of_json in
       make ?failureCode ?entityIdList ?status ?endTime ?startTime
         ?changeSetName ?changeSetArn ?changeSetId ()
     let to_json v = composed_to_json to_value v
@@ -823,6 +7511,9 @@ module ChangeSummary =
       details: Json.t option
         [@ocaml.doc
           "This object contains details specific to the change type of the requested change."];
+      detailsDocument: JsonDocumentType.t option
+        [@ocaml.doc
+          "The JSON value of the details specific to the change type of the requested change. To download the \"DetailsDocument\" shapes, see the Python and Java shapes on GitHub."];
       errorDetailList: ErrorDetailList.t option
         [@ocaml.doc
           "An array of ErrorDetail objects associated with the change."];
@@ -831,15 +7522,25 @@ module ChangeSummary =
     let make ?changeType =
       fun ?entity ->
         fun ?details ->
-          fun ?errorDetailList ->
-            fun ?changeName ->
-              fun () ->
-                { changeType; entity; details; errorDetailList; changeName }
+          fun ?detailsDocument ->
+            fun ?errorDetailList ->
+              fun ?changeName ->
+                fun () ->
+                  {
+                    changeType;
+                    entity;
+                    details;
+                    detailsDocument;
+                    errorDetailList;
+                    changeName
+                  }
     let to_value x =
       structure_to_value
         [("ChangeType", (Option.map x.changeType ~f:ChangeType.to_value));
         ("Entity", (Option.map x.entity ~f:Entity.to_value));
         ("Details", (Option.map x.details ~f:Json.to_value));
+        ("DetailsDocument",
+          (Option.map x.detailsDocument ~f:JsonDocumentType.to_value));
         ("ErrorDetailList",
           (Option.map x.errorDetailList ~f:ErrorDetailList.to_value));
         ("ChangeName", (Option.map x.changeName ~f:ChangeName.to_value))]
@@ -850,25 +7551,168 @@ module ChangeSummary =
       let errorDetailList =
         (Option.map ~f:ErrorDetailList.of_xml)
           (Xml.child xml_arg0 "ErrorDetailList") in
+      let detailsDocument =
+        (Option.map ~f:JsonDocumentType.of_xml)
+          (Xml.child xml_arg0 "DetailsDocument") in
       let details =
         (Option.map ~f:Json.of_xml) (Xml.child xml_arg0 "Details") in
       let entity =
         (Option.map ~f:Entity.of_xml) (Xml.child xml_arg0 "Entity") in
       let changeType =
         (Option.map ~f:ChangeType.of_xml) (Xml.child xml_arg0 "ChangeType") in
-      make ?changeName ?errorDetailList ?details ?entity ?changeType ()
+      make ?changeName ?errorDetailList ?detailsDocument ?details ?entity
+        ?changeType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeName = field_map json "ChangeName" ChangeName.of_json in
+    let of_json json__ =
+      let changeName = field_map json__ "ChangeName" ChangeName.of_json in
       let errorDetailList =
-        field_map json "ErrorDetailList" ErrorDetailList.of_json in
-      let details = field_map json "Details" Json.of_json in
-      let entity = field_map json "Entity" Entity.of_json in
-      let changeType = field_map json "ChangeType" ChangeType.of_json in
-      make ?changeName ?errorDetailList ?details ?entity ?changeType ()
+        field_map json__ "ErrorDetailList" ErrorDetailList.of_json in
+      let detailsDocument =
+        field_map json__ "DetailsDocument" JsonDocumentType.of_json in
+      let details = field_map json__ "Details" Json.of_json in
+      let entity = field_map json__ "Entity" Entity.of_json in
+      let changeType = field_map json__ "ChangeType" ChangeType.of_json in
+      make ?changeName ?errorDetailList ?detailsDocument ?details ?entity
+        ?changeType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This object is a container for common summary information about the change. The summary doesn't contain the whole change structure."]
+module EntityDetail =
+  struct
+    type nonrec t =
+      {
+      entityType: EntityType.t option
+        [@ocaml.doc
+          "The entity type of the entity, in the format of EntityType\\@Version."];
+      entityArn: ARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the entity."];
+      entityIdentifier: Identifier.t option
+        [@ocaml.doc
+          "The ID of the entity, in the format of EntityId\\@RevisionId."];
+      lastModifiedDate: DateTimeISO8601.t option
+        [@ocaml.doc "The last time the entity was modified."];
+      detailsDocument: JsonDocumentType.t option
+        [@ocaml.doc "An object that contains all the details of the entity."]}
+    let make ?entityType =
+      fun ?entityArn ->
+        fun ?entityIdentifier ->
+          fun ?lastModifiedDate ->
+            fun ?detailsDocument ->
+              fun () ->
+                {
+                  entityType;
+                  entityArn;
+                  entityIdentifier;
+                  lastModifiedDate;
+                  detailsDocument
+                }
+    let to_value x =
+      structure_to_value
+        [("EntityType", (Option.map x.entityType ~f:EntityType.to_value));
+        ("EntityArn", (Option.map x.entityArn ~f:ARN.to_value));
+        ("EntityIdentifier",
+          (Option.map x.entityIdentifier ~f:Identifier.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate ~f:DateTimeISO8601.to_value));
+        ("DetailsDocument",
+          (Option.map x.detailsDocument ~f:JsonDocumentType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let detailsDocument =
+        (Option.map ~f:JsonDocumentType.of_xml)
+          (Xml.child xml_arg0 "DetailsDocument") in
+      let lastModifiedDate =
+        (Option.map ~f:DateTimeISO8601.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let entityIdentifier =
+        (Option.map ~f:Identifier.of_xml)
+          (Xml.child xml_arg0 "EntityIdentifier") in
+      let entityArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "EntityArn") in
+      let entityType =
+        (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "EntityType") in
+      make ?detailsDocument ?lastModifiedDate ?entityIdentifier ?entityArn
+        ?entityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let detailsDocument =
+        field_map json__ "DetailsDocument" JsonDocumentType.of_json in
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate" DateTimeISO8601.of_json in
+      let entityIdentifier =
+        field_map json__ "EntityIdentifier" Identifier.of_json in
+      let entityArn = field_map json__ "EntityArn" ARN.of_json in
+      let entityType = field_map json__ "EntityType" EntityType.of_json in
+      make ?detailsDocument ?lastModifiedDate ?entityIdentifier ?entityArn
+        ?entityType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains metadata and details about the entity."]
+module BatchDescribeErrorDetail =
+  struct
+    type nonrec t =
+      {
+      errorCode: BatchDescribeErrorCodeString.t option
+        [@ocaml.doc "The error code returned."];
+      errorMessage: BatchDescribeErrorMessageContent.t option
+        [@ocaml.doc "The error message returned."]}
+    let make ?errorCode =
+      fun ?errorMessage -> fun () -> { errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode",
+           (Option.map x.errorCode ~f:BatchDescribeErrorCodeString.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage
+             ~f:BatchDescribeErrorMessageContent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:BatchDescribeErrorMessageContent.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:BatchDescribeErrorCodeString.of_xml)
+          (Xml.child xml_arg0 "ErrorCode") in
+      make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage =
+        field_map json__ "ErrorMessage"
+          BatchDescribeErrorMessageContent.of_json in
+      let errorCode =
+        field_map json__ "ErrorCode" BatchDescribeErrorCodeString.of_json in
+      make ?errorMessage ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An object that contains an error code and error message."]
+module EntityRequest =
+  struct
+    type nonrec t =
+      {
+      catalog: Catalog.t
+        [@ocaml.doc
+          "The name of the catalog the entity is present in. The only value at this time is AWSMarketplace."];
+      entityId: EntityId.t [@ocaml.doc "The ID of the entity."]}
+    let context_ = "EntityRequest"
+    let make ~catalog = fun ~entityId -> fun () -> { catalog; entityId }
+    let to_value x =
+      structure_to_value
+        [("Catalog", (Some (Catalog.to_value x.catalog)));
+        ("EntityId", (Some (EntityId.to_value x.entityId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entityId =
+        EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
+      let catalog =
+        Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Catalog") in
+      make ~entityId ~catalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entityId = field_map_exn json__ "EntityId" EntityId.of_json in
+      let catalog = field_map_exn json__ "Catalog" Catalog.of_json in
+      make ~entityId ~catalog ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains entity ID and the catalog in which the entity is present."]
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -885,11 +7729,12 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessageContent.of_json in
+    let of_json json__ =
+      let message =
+        field_map json__ "Message" ExceptionMessageContent.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Access is denied."]
+  end[@@ocaml.doc "Access is denied. HTTP status code: 403"]
 module InternalServiceException =
   struct
     type nonrec t = {
@@ -906,32 +7751,13 @@ module InternalServiceException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessageContent.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "There was an internal service exception."]
-module ResourceInUseException =
-  struct
-    type nonrec t = {
-      message: ExceptionMessageContent.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message",
-           (Option.map x.message ~f:ExceptionMessageContent.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
+    let of_json json__ =
       let message =
-        (Option.map ~f:ExceptionMessageContent.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessageContent.of_json in
+        field_map json__ "Message" ExceptionMessageContent.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The resource is currently in use."]
+  end[@@ocaml.doc
+       "There was an internal service exception. HTTP status code: 500"]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -948,33 +7774,13 @@ module ResourceNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessageContent.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified resource wasn't found."]
-module ServiceQuotaExceededException =
-  struct
-    type nonrec t = {
-      message: ExceptionMessageContent.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message",
-           (Option.map x.message ~f:ExceptionMessageContent.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
+    let of_json json__ =
       let message =
-        (Option.map ~f:ExceptionMessageContent.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessageContent.of_json in
+        field_map json__ "Message" ExceptionMessageContent.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The maximum number of open requests per account has been exceeded."]
+       "The specified resource wasn't found. HTTP status code: 404"]
 module ThrottlingException =
   struct
     type nonrec t = {
@@ -991,11 +7797,12 @@ module ThrottlingException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessageContent.of_json in
+    let of_json json__ =
+      let message =
+        field_map json__ "Message" ExceptionMessageContent.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Too many requests."]
+  end[@@ocaml.doc "Too many requests. HTTP status code: 429"]
 module ValidationException =
   struct
     type nonrec t = {
@@ -1012,31 +7819,111 @@ module ValidationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessageContent.of_json in
+    let of_json json__ =
+      let message =
+        field_map json__ "Message" ExceptionMessageContent.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An error occurred during validation."]
-module Catalog =
+  end[@@ocaml.doc
+       "An error occurred during validation. HTTP status code: 422"]
+module ResourceARN =
   struct
     type nonrec t = string
-    let context_ = "Catalog"
+    let context_ = "ResourceARN"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z]+$")));
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:[\\w+=/,.@-]+:aws-marketplace:[\\w+=/,.@-]*:[0-9]+:[\\w+=,.@-]+(/[\\w+=,.@-]+)*$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Catalog" j
+    let of_json j = string_of_json ~kind:"ResourceARN" j
     let to_json = simple_to_json to_value
   end
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceInUseException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessageContent.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message",
+           (Option.map x.message ~f:ExceptionMessageContent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessageContent.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "Message" ExceptionMessageContent.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource is currently in use."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessageContent.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message",
+           (Option.map x.message ~f:ExceptionMessageContent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessageContent.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "Message" ExceptionMessageContent.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The maximum number of open requests per account has been exceeded."]
 module ClientRequestToken =
   struct
     type nonrec t = string
@@ -1046,8 +7933,8 @@ module ClientRequestToken =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:36) >>=
-                  (fun () -> check_pattern i ~pattern:"^[\\w\\-]+$")));
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[!-~]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1055,6 +7942,31 @@ module ClientRequestToken =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ClientRequestToken" j
+    let to_json = simple_to_json to_value
+  end
+module Intent =
+  struct
+    type nonrec t =
+      | VALIDATE 
+      | APPLY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VALIDATE -> "VALIDATE"
+      | APPLY -> "APPLY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VALIDATE" -> VALIDATE
+      | "APPLY" -> APPLY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Intent" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Intent" j)
     let to_json = simple_to_json to_value
   end
 module RequestedChangeList =
@@ -1065,6 +7977,9 @@ module RequestedChangeList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Change.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1085,10 +8000,35 @@ module RequestedChangeList =
       list_of_json ~kind:"RequestedChangeList" ~of_json:Change.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ResourcePolicyJson =
+  struct
+    type nonrec t = string
+    let context_ = "ResourcePolicyJson"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10240) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[\\u0009\\u000A\\u000D\\u0020-\\u00FF]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourcePolicyJson" j
+    let to_json = simple_to_json to_value
+  end
 module EntitySummaryList =
   struct
     type nonrec t = EntitySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntitySummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1129,6 +8069,225 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end
+module EntityTypeFilters =
+  struct
+    type nonrec t =
+      {
+      dataProductFilters: DataProductFilters.t option
+        [@ocaml.doc "A filter for data products."];
+      saaSProductFilters: SaaSProductFilters.t option
+        [@ocaml.doc "A filter for SaaS products."];
+      amiProductFilters: AmiProductFilters.t option
+        [@ocaml.doc "A filter for AMI products."];
+      offerFilters: OfferFilters.t option [@ocaml.doc "A filter for offers."];
+      containerProductFilters: ContainerProductFilters.t option
+        [@ocaml.doc "A filter for container products."];
+      resaleAuthorizationFilters: ResaleAuthorizationFilters.t option
+        [@ocaml.doc "A filter for Resale Authorizations."];
+      machineLearningProductFilters: MachineLearningProductFilters.t option ;
+      offerSetFilters: OfferSetFilters.t option
+        [@ocaml.doc "A filter for offer sets."]}
+    let make ?dataProductFilters =
+      fun ?saaSProductFilters ->
+        fun ?amiProductFilters ->
+          fun ?offerFilters ->
+            fun ?containerProductFilters ->
+              fun ?resaleAuthorizationFilters ->
+                fun ?machineLearningProductFilters ->
+                  fun ?offerSetFilters ->
+                    fun () ->
+                      {
+                        dataProductFilters;
+                        saaSProductFilters;
+                        amiProductFilters;
+                        offerFilters;
+                        containerProductFilters;
+                        resaleAuthorizationFilters;
+                        machineLearningProductFilters;
+                        offerSetFilters
+                      }
+    let to_value x =
+      structure_to_value
+        [("DataProductFilters",
+           (Option.map x.dataProductFilters ~f:DataProductFilters.to_value));
+        ("SaaSProductFilters",
+          (Option.map x.saaSProductFilters ~f:SaaSProductFilters.to_value));
+        ("AmiProductFilters",
+          (Option.map x.amiProductFilters ~f:AmiProductFilters.to_value));
+        ("OfferFilters",
+          (Option.map x.offerFilters ~f:OfferFilters.to_value));
+        ("ContainerProductFilters",
+          (Option.map x.containerProductFilters
+             ~f:ContainerProductFilters.to_value));
+        ("ResaleAuthorizationFilters",
+          (Option.map x.resaleAuthorizationFilters
+             ~f:ResaleAuthorizationFilters.to_value));
+        ("MachineLearningProductFilters",
+          (Option.map x.machineLearningProductFilters
+             ~f:MachineLearningProductFilters.to_value));
+        ("OfferSetFilters",
+          (Option.map x.offerSetFilters ~f:OfferSetFilters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let offerSetFilters =
+        (Option.map ~f:OfferSetFilters.of_xml)
+          (Xml.child xml_arg0 "OfferSetFilters") in
+      let machineLearningProductFilters =
+        (Option.map ~f:MachineLearningProductFilters.of_xml)
+          (Xml.child xml_arg0 "MachineLearningProductFilters") in
+      let resaleAuthorizationFilters =
+        (Option.map ~f:ResaleAuthorizationFilters.of_xml)
+          (Xml.child xml_arg0 "ResaleAuthorizationFilters") in
+      let containerProductFilters =
+        (Option.map ~f:ContainerProductFilters.of_xml)
+          (Xml.child xml_arg0 "ContainerProductFilters") in
+      let offerFilters =
+        (Option.map ~f:OfferFilters.of_xml)
+          (Xml.child xml_arg0 "OfferFilters") in
+      let amiProductFilters =
+        (Option.map ~f:AmiProductFilters.of_xml)
+          (Xml.child xml_arg0 "AmiProductFilters") in
+      let saaSProductFilters =
+        (Option.map ~f:SaaSProductFilters.of_xml)
+          (Xml.child xml_arg0 "SaaSProductFilters") in
+      let dataProductFilters =
+        (Option.map ~f:DataProductFilters.of_xml)
+          (Xml.child xml_arg0 "DataProductFilters") in
+      make ?offerSetFilters ?machineLearningProductFilters
+        ?resaleAuthorizationFilters ?containerProductFilters ?offerFilters
+        ?amiProductFilters ?saaSProductFilters ?dataProductFilters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let offerSetFilters =
+        field_map json__ "OfferSetFilters" OfferSetFilters.of_json in
+      let machineLearningProductFilters =
+        field_map json__ "MachineLearningProductFilters"
+          MachineLearningProductFilters.of_json in
+      let resaleAuthorizationFilters =
+        field_map json__ "ResaleAuthorizationFilters"
+          ResaleAuthorizationFilters.of_json in
+      let containerProductFilters =
+        field_map json__ "ContainerProductFilters"
+          ContainerProductFilters.of_json in
+      let offerFilters = field_map json__ "OfferFilters" OfferFilters.of_json in
+      let amiProductFilters =
+        field_map json__ "AmiProductFilters" AmiProductFilters.of_json in
+      let saaSProductFilters =
+        field_map json__ "SaaSProductFilters" SaaSProductFilters.of_json in
+      let dataProductFilters =
+        field_map json__ "DataProductFilters" DataProductFilters.of_json in
+      make ?offerSetFilters ?machineLearningProductFilters
+        ?resaleAuthorizationFilters ?containerProductFilters ?offerFilters
+        ?amiProductFilters ?saaSProductFilters ?dataProductFilters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object containing all the filter fields per entity type."]
+module EntityTypeSort =
+  struct
+    type nonrec t =
+      {
+      dataProductSort: DataProductSort.t option
+        [@ocaml.doc "A sort for data products."];
+      saaSProductSort: SaaSProductSort.t option
+        [@ocaml.doc "A sort for SaaS products."];
+      amiProductSort: AmiProductSort.t option
+        [@ocaml.doc "A sort for AMI products."];
+      offerSort: OfferSort.t option [@ocaml.doc "A sort for offers."];
+      containerProductSort: ContainerProductSort.t option
+        [@ocaml.doc "A sort for container products."];
+      resaleAuthorizationSort: ResaleAuthorizationSort.t option
+        [@ocaml.doc "A sort for Resale Authorizations."];
+      machineLearningProductSort: MachineLearningProductSort.t option ;
+      offerSetSort: OfferSetSort.t option
+        [@ocaml.doc "A sort for offer sets."]}
+    let make ?dataProductSort =
+      fun ?saaSProductSort ->
+        fun ?amiProductSort ->
+          fun ?offerSort ->
+            fun ?containerProductSort ->
+              fun ?resaleAuthorizationSort ->
+                fun ?machineLearningProductSort ->
+                  fun ?offerSetSort ->
+                    fun () ->
+                      {
+                        dataProductSort;
+                        saaSProductSort;
+                        amiProductSort;
+                        offerSort;
+                        containerProductSort;
+                        resaleAuthorizationSort;
+                        machineLearningProductSort;
+                        offerSetSort
+                      }
+    let to_value x =
+      structure_to_value
+        [("DataProductSort",
+           (Option.map x.dataProductSort ~f:DataProductSort.to_value));
+        ("SaaSProductSort",
+          (Option.map x.saaSProductSort ~f:SaaSProductSort.to_value));
+        ("AmiProductSort",
+          (Option.map x.amiProductSort ~f:AmiProductSort.to_value));
+        ("OfferSort", (Option.map x.offerSort ~f:OfferSort.to_value));
+        ("ContainerProductSort",
+          (Option.map x.containerProductSort ~f:ContainerProductSort.to_value));
+        ("ResaleAuthorizationSort",
+          (Option.map x.resaleAuthorizationSort
+             ~f:ResaleAuthorizationSort.to_value));
+        ("MachineLearningProductSort",
+          (Option.map x.machineLearningProductSort
+             ~f:MachineLearningProductSort.to_value));
+        ("OfferSetSort",
+          (Option.map x.offerSetSort ~f:OfferSetSort.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let offerSetSort =
+        (Option.map ~f:OfferSetSort.of_xml)
+          (Xml.child xml_arg0 "OfferSetSort") in
+      let machineLearningProductSort =
+        (Option.map ~f:MachineLearningProductSort.of_xml)
+          (Xml.child xml_arg0 "MachineLearningProductSort") in
+      let resaleAuthorizationSort =
+        (Option.map ~f:ResaleAuthorizationSort.of_xml)
+          (Xml.child xml_arg0 "ResaleAuthorizationSort") in
+      let containerProductSort =
+        (Option.map ~f:ContainerProductSort.of_xml)
+          (Xml.child xml_arg0 "ContainerProductSort") in
+      let offerSort =
+        (Option.map ~f:OfferSort.of_xml) (Xml.child xml_arg0 "OfferSort") in
+      let amiProductSort =
+        (Option.map ~f:AmiProductSort.of_xml)
+          (Xml.child xml_arg0 "AmiProductSort") in
+      let saaSProductSort =
+        (Option.map ~f:SaaSProductSort.of_xml)
+          (Xml.child xml_arg0 "SaaSProductSort") in
+      let dataProductSort =
+        (Option.map ~f:DataProductSort.of_xml)
+          (Xml.child xml_arg0 "DataProductSort") in
+      make ?offerSetSort ?machineLearningProductSort ?resaleAuthorizationSort
+        ?containerProductSort ?offerSort ?amiProductSort ?saaSProductSort
+        ?dataProductSort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let offerSetSort = field_map json__ "OfferSetSort" OfferSetSort.of_json in
+      let machineLearningProductSort =
+        field_map json__ "MachineLearningProductSort"
+          MachineLearningProductSort.of_json in
+      let resaleAuthorizationSort =
+        field_map json__ "ResaleAuthorizationSort"
+          ResaleAuthorizationSort.of_json in
+      let containerProductSort =
+        field_map json__ "ContainerProductSort" ContainerProductSort.of_json in
+      let offerSort = field_map json__ "OfferSort" OfferSort.of_json in
+      let amiProductSort =
+        field_map json__ "AmiProductSort" AmiProductSort.of_json in
+      let saaSProductSort =
+        field_map json__ "SaaSProductSort" SaaSProductSort.of_json in
+      let dataProductSort =
+        field_map json__ "DataProductSort" DataProductSort.of_json in
+      make ?offerSetSort ?machineLearningProductSort ?resaleAuthorizationSort
+        ?containerProductSort ?offerSort ?amiProductSort ?saaSProductSort
+        ?dataProductSort ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object containing all the sort fields per entity type."]
 module FilterList =
   struct
     type nonrec t = Filter.t list
@@ -1137,6 +8296,9 @@ module FilterList =
         ok_or_failwith
           ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1156,13 +8318,13 @@ module FilterList =
     let of_json j = list_of_json ~kind:"FilterList" ~of_json:Filter.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MaxResultInteger =
+module ListEntitiesMaxResultInteger =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -1170,8 +8332,28 @@ module MaxResultInteger =
     let to_header x = Int.to_string x
     let of_xml xml_arg0 =
       Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResultInteger" xml_arg0)
+        (string_of_xml ~kind:"an integer for ListEntitiesMaxResultInteger"
+           xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module OwnershipType =
+  struct
+    type nonrec t =
+      | SELF 
+      | SHARED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SELF -> "SELF" | SHARED -> "SHARED" | Non_static_id s -> s
+    let of_string =
+      function | "SELF" -> SELF | "SHARED" -> SHARED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OwnershipType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OwnershipType" j)
     let to_json = simple_to_json to_value
   end
 module Sort =
@@ -1180,7 +8362,7 @@ module Sort =
       {
       sortBy: SortBy.t option
         [@ocaml.doc
-          "For ListEntities, supported attributes include LastModifiedDate (default), Visibility, EntityId, and Name. For ListChangeSets, supported attributes include StartTime and EndTime."];
+          "For ListEntities, supported attributes include LastModifiedDate (default) and EntityId. In addition to LastModifiedDate and EntityId, each EntityType might support additional fields. For ListChangeSets, supported attributes include StartTime and EndTime."];
       sortOrder: SortOrder.t option
         [@ocaml.doc
           "The sorting order. Can be ASCENDING or DESCENDING. The default value is DESCENDING."]}
@@ -1197,9 +8379,9 @@ module Sort =
         (Option.map ~f:SortBy.of_xml) (Xml.child xml_arg0 "SortBy") in
       make ?sortOrder ?sortBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let sortBy = field_map json "SortBy" SortBy.of_json in
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" SortBy.of_json in
       make ?sortOrder ?sortBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1208,6 +8390,9 @@ module ChangeSetSummaryList =
   struct
     type nonrec t = ChangeSetSummaryListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChangeSetSummaryListItem.to_value)) |>
         (fun x -> `List x)
@@ -1230,6 +8415,25 @@ module ChangeSetSummaryList =
         ~of_json:ChangeSetSummaryListItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListChangeSetsMaxResultInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListChangeSetsMaxResultInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourceNotSupportedException =
   struct
     type nonrec t = {
@@ -1246,8 +8450,9 @@ module ResourceNotSupportedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessageContent.of_json in
+    let of_json json__ =
+      let message =
+        field_map json__ "Message" ExceptionMessageContent.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Currently, the specified resource is not supported."]
@@ -1255,6 +8460,9 @@ module ChangeSetDescription =
   struct
     type nonrec t = ChangeSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChangeSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1276,6 +8484,321 @@ module ChangeSetDescription =
         ~of_json:ChangeSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module EntityDetails =
+  struct
+    type nonrec t = (EntityId.t * EntityDetail.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types EntityId EntityDetail"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (EntityId.to_value x) |>
+                    (fun x -> (EntityDetail.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:EntityId.of_string
+        ~of_json:EntityDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Errors =
+  struct
+    type nonrec t = (EntityId.t * BatchDescribeErrorDetail.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types EntityId BatchDescribeErrorDetail"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (EntityId.to_value x) |>
+                    (fun x ->
+                       (BatchDescribeErrorDetail.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:EntityId.of_string
+        ~of_json:BatchDescribeErrorDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EntityRequestList =
+  struct
+    type nonrec t = EntityRequest.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EntityRequest.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EntityRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EntityRequestList" ~of_json:EntityRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes a tag or list of tags from a resource (either an entity or change set)."]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceARN.t
+        [@ocaml.doc
+          "Required. The Amazon Resource Name (ARN) associated with the resource you want to remove the tag from."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "Required. A list of key names of tags to be removed. Number of strings allowed: 0-256."]}
+    let context_ = "UntagResourceRequest"
+    let make ~resourceArn =
+      fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceARN.to_value x.resourceArn)));
+        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+      let resourceArn =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceARN.of_json in
+      make ~tagKeys ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes a tag or list of tags from a resource (either an entity or change set)."]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Tags a resource (either an entity or change set)."]
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceARN.t
+        [@ocaml.doc
+          "Required. The Amazon Resource Name (ARN) associated with the resource you want to tag."];
+      tags: TagList.t
+        [@ocaml.doc
+          "Required. A list of objects specifying each key name and value. Number of objects allowed: 1-50."]}
+    let context_ = "TagResourceRequest"
+    let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceARN.to_value x.resourceArn)));
+        ("Tags", (Some (TagList.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let resourceArn =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceARN.of_json in
+      make ~tags ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Tags a resource (either an entity or change set)."]
 module StartChangeSetResponse =
   struct
     type nonrec t =
@@ -1382,13 +8905,13 @@ module StartChangeSetResponse =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ChangeSetId") in
       make ?changeSetArn ?changeSetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeSetArn = field_map json "ChangeSetArn" ARN.of_json in
-      let changeSetId = field_map json "ChangeSetId" ResourceId.of_json in
+    let of_json json__ =
+      let changeSetArn = field_map json__ "ChangeSetArn" ARN.of_json in
+      let changeSetId = field_map json__ "ChangeSetId" ResourceId.of_json in
       make ?changeSetArn ?changeSetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation allows you to request changes for your entities. Within a single ChangeSet, you cannot start the same change type against the same entity multiple times. Additionally, when a ChangeSet is running, all the entities targeted by the different changes are locked until the ChangeSet has completed (either succeeded, cancelled, or failed). If you try to start a ChangeSet containing a change against an entity that is already locked, you will receive a ResourceInUseException. For example, you cannot start the ChangeSet described in the example later in this topic, because it contains two changes to execute the same change type (AddRevisions) against the same entity (entity-id\\@1). For more information about working with change sets, see Working with change sets."]
+       "Allows you to request changes for your entities. Within a single ChangeSet, you can't start the same change type against the same entity multiple times. Additionally, when a ChangeSet is running, all the entities targeted by the different changes are locked until the change set has completed (either succeeded, cancelled, or failed). If you try to start a change set containing a change against an entity that is already locked, you will receive a ResourceInUseException error. For example, you can't start the ChangeSet described in the example later in this topic because it contains two changes to run the same change type (AddRevisions) against the same entity (entity-id\\@1). For more information about working with change sets, see Working with change sets. For information about change types for single-AMI products, see Working with single-AMI products. Also, for more information about change types available for container-based products, see Working with container products. To download \"DetailsDocument\" shapes, see Python and Java shapes on GitHub."]
 module StartChangeSetRequest =
   struct
     type nonrec t =
@@ -1402,14 +8925,29 @@ module StartChangeSetRequest =
           "Optional case sensitive string of up to 100 ASCII characters. The change set name can be used to filter the list of change sets."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "A unique token to identify the request to ensure idempotency."]}
+          "A unique token to identify the request to ensure idempotency."];
+      changeSetTags: TagList.t option
+        [@ocaml.doc
+          "A list of objects specifying each key name and value for the ChangeSetTags property."];
+      intent: Intent.t option
+        [@ocaml.doc
+          "The intent related to the request. The default is APPLY. To test your request before applying changes to your entities, use VALIDATE. This feature is currently available for adding versions to single-AMI products. For more information, see Add a new version."]}
     let context_ = "StartChangeSetRequest"
     let make ?changeSetName =
       fun ?clientRequestToken ->
-        fun ~catalog ->
-          fun ~changeSet ->
-            fun () ->
-              { changeSetName; clientRequestToken; catalog; changeSet }
+        fun ?changeSetTags ->
+          fun ?intent ->
+            fun ~catalog ->
+              fun ~changeSet ->
+                fun () ->
+                  {
+                    changeSetName;
+                    clientRequestToken;
+                    changeSetTags;
+                    intent;
+                    catalog;
+                    changeSet
+                  }
     let to_value x =
       structure_to_value
         [("Catalog", (Some (Catalog.to_value x.catalog)));
@@ -1417,9 +8955,15 @@ module StartChangeSetRequest =
         ("ChangeSetName",
           (Option.map x.changeSetName ~f:ChangeSetName.to_value));
         ("ClientRequestToken",
-          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("ChangeSetTags", (Option.map x.changeSetTags ~f:TagList.to_value));
+        ("Intent", (Option.map x.intent ~f:Intent.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let intent =
+        (Option.map ~f:Intent.of_xml) (Xml.child xml_arg0 "Intent") in
+      let changeSetTags =
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "ChangeSetTags") in
       let clientRequestToken =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
@@ -1431,26 +8975,257 @@ module StartChangeSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeSet") in
       let catalog =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Catalog") in
-      make ?clientRequestToken ?changeSetName ~changeSet ~catalog ()
+      make ?intent ?changeSetTags ?clientRequestToken ?changeSetName
+        ~changeSet ~catalog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let intent = field_map json__ "Intent" Intent.of_json in
+      let changeSetTags = field_map json__ "ChangeSetTags" TagList.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let changeSetName =
-        field_map json "ChangeSetName" ChangeSetName.of_json in
+        field_map json__ "ChangeSetName" ChangeSetName.of_json in
       let changeSet =
-        field_map_exn json "ChangeSet" RequestedChangeList.of_json in
-      let catalog = field_map_exn json "Catalog" Catalog.of_json in
-      make ?clientRequestToken ?changeSetName ~changeSet ~catalog ()
+        field_map_exn json__ "ChangeSet" RequestedChangeList.of_json in
+      let catalog = field_map_exn json__ "Catalog" Catalog.of_json in
+      make ?intent ?changeSetTags ?clientRequestToken ?changeSetName
+        ~changeSet ~catalog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation allows you to request changes for your entities. Within a single ChangeSet, you cannot start the same change type against the same entity multiple times. Additionally, when a ChangeSet is running, all the entities targeted by the different changes are locked until the ChangeSet has completed (either succeeded, cancelled, or failed). If you try to start a ChangeSet containing a change against an entity that is already locked, you will receive a ResourceInUseException. For example, you cannot start the ChangeSet described in the example later in this topic, because it contains two changes to execute the same change type (AddRevisions) against the same entity (entity-id\\@1). For more information about working with change sets, see Working with change sets."]
+       "Allows you to request changes for your entities. Within a single ChangeSet, you can't start the same change type against the same entity multiple times. Additionally, when a ChangeSet is running, all the entities targeted by the different changes are locked until the change set has completed (either succeeded, cancelled, or failed). If you try to start a change set containing a change against an entity that is already locked, you will receive a ResourceInUseException error. For example, you can't start the ChangeSet described in the example later in this topic because it contains two changes to run the same change type (AddRevisions) against the same entity (entity-id\\@1). For more information about working with change sets, see Working with change sets. For information about change types for single-AMI products, see Working with single-AMI products. Also, for more information about change types available for container-based products, see Working with container products. To download \"DetailsDocument\" shapes, see Python and Java shapes on GitHub."]
+module PutResourcePolicyResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attaches a resource-based policy to an entity. Examples of an entity include: AmiProduct and ContainerProduct."]
+module PutResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the entity resource you want to associate with a resource policy."];
+      policy: ResourcePolicyJson.t
+        [@ocaml.doc "The policy document to set; formatted in JSON."]}
+    let context_ = "PutResourcePolicyRequest"
+    let make ~resourceArn = fun ~policy -> fun () -> { resourceArn; policy }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceARN.to_value x.resourceArn)));
+        ("Policy", (Some (ResourcePolicyJson.to_value x.policy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        ResourcePolicyJson.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
+      let resourceArn =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~policy ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" ResourcePolicyJson.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceARN.of_json in
+      make ~policy ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attaches a resource-based policy to an entity. Examples of an entity include: AmiProduct and ContainerProduct."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceARN.t option
+        [@ocaml.doc
+          "Required. The ARN associated with the resource you want to list tags on."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Required. A list of objects specifying each key name and value. Number of objects allowed: 1-50."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn = fun ?tags -> fun () -> { resourceArn; tags }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:ResourceARN.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let resourceArn =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?tags ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceARN.of_json in
+      make ?tags ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all tags that have been added to a resource (either an entity or change set)."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceARN.t
+        [@ocaml.doc
+          "Required. The Amazon Resource Name (ARN) associated with the resource you want to list tags on."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceARN.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceARN.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all tags that have been added to a resource (either an entity or change set)."]
 module ListEntitiesResponse =
   struct
     type nonrec t =
       {
       entitySummaryList: EntitySummaryList.t option
-        [@ocaml.doc "Array of EntitySummary object."];
+        [@ocaml.doc "Array of EntitySummary objects."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The value of the next token if it exists. Null if there is no more result."]}
@@ -1533,10 +9308,10 @@ module ListEntitiesResponse =
           (Xml.child xml_arg0 "EntitySummaryList") in
       make ?nextToken ?entitySummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let entitySummaryList =
-        field_map json "EntitySummaryList" EntitySummaryList.of_json in
+        field_map json__ "EntitySummaryList" EntitySummaryList.of_json in
       make ?nextToken ?entitySummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the list of entities of a given type."]
@@ -1548,7 +9323,8 @@ module ListEntitiesRequest =
         [@ocaml.doc
           "The catalog related to the request. Fixed value: AWSMarketplace"];
       entityType: EntityType.t
-        [@ocaml.doc "The type of entities to retrieve."];
+        [@ocaml.doc
+          "The type of entities to retrieve. Valid values are: AmiProduct, ContainerProduct, DataProduct, SaaSProduct, ProcurementPolicy, Experience, Audience, BrandingSettings, Offer, OfferSet, Seller, ResaleAuthorization, Solution."];
       filterList: FilterList.t option
         [@ocaml.doc
           "An array of filter objects. Each filter object contains two attributes, filterName and filterValues."];
@@ -1558,25 +9334,40 @@ module ListEntitiesRequest =
       nextToken: NextToken.t option
         [@ocaml.doc
           "The value of the next token, if it exists. Null if there are no more results."];
-      maxResults: MaxResultInteger.t option
+      maxResults: ListEntitiesMaxResultInteger.t option
         [@ocaml.doc
-          "Specifies the upper limit of the elements on a single page. If a value isn't provided, the default value is 20."]}
+          "Specifies the upper limit of the elements on a single page. If a value isn't provided, the default value is 20."];
+      ownershipType: OwnershipType.t option
+        [@ocaml.doc
+          "Filters the returned set of entities based on their owner. The default is SELF. To list entities shared with you through AWS Resource Access Manager (AWS RAM), set to SHARED. Entities shared through the AWS Marketplace Catalog API PutResourcePolicy operation can't be discovered through the SHARED parameter."];
+      entityTypeFilters: EntityTypeFilters.t option
+        [@ocaml.doc
+          "A Union object containing filter shapes for all EntityTypes. Each EntityTypeFilter shape will have filters applicable for that EntityType that can be used to search or filter entities."];
+      entityTypeSort: EntityTypeSort.t option
+        [@ocaml.doc
+          "A Union object containing Sort shapes for all EntityTypes. Each EntityTypeSort shape will have SortBy and SortOrder applicable for fields on that EntityType. This can be used to sort the results of the filter query."]}
     let context_ = "ListEntitiesRequest"
     let make ?filterList =
       fun ?sort ->
         fun ?nextToken ->
           fun ?maxResults ->
-            fun ~catalog ->
-              fun ~entityType ->
-                fun () ->
-                  {
-                    filterList;
-                    sort;
-                    nextToken;
-                    maxResults;
-                    catalog;
-                    entityType
-                  }
+            fun ?ownershipType ->
+              fun ?entityTypeFilters ->
+                fun ?entityTypeSort ->
+                  fun ~catalog ->
+                    fun ~entityType ->
+                      fun () ->
+                        {
+                          filterList;
+                          sort;
+                          nextToken;
+                          maxResults;
+                          ownershipType;
+                          entityTypeFilters;
+                          entityTypeSort;
+                          catalog;
+                          entityType
+                        }
     let to_value x =
       structure_to_value
         [("Catalog", (Some (Catalog.to_value x.catalog)));
@@ -1585,11 +9376,26 @@ module ListEntitiesRequest =
         ("Sort", (Option.map x.sort ~f:Sort.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:MaxResultInteger.to_value))]
+          (Option.map x.maxResults ~f:ListEntitiesMaxResultInteger.to_value));
+        ("OwnershipType",
+          (Option.map x.ownershipType ~f:OwnershipType.to_value));
+        ("EntityTypeFilters",
+          (Option.map x.entityTypeFilters ~f:EntityTypeFilters.to_value));
+        ("EntityTypeSort",
+          (Option.map x.entityTypeSort ~f:EntityTypeSort.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let entityTypeSort =
+        (Option.map ~f:EntityTypeSort.of_xml)
+          (Xml.child xml_arg0 "EntityTypeSort") in
+      let entityTypeFilters =
+        (Option.map ~f:EntityTypeFilters.of_xml)
+          (Xml.child xml_arg0 "EntityTypeFilters") in
+      let ownershipType =
+        (Option.map ~f:OwnershipType.of_xml)
+          (Xml.child xml_arg0 "OwnershipType") in
       let maxResults =
-        (Option.map ~f:MaxResultInteger.of_xml)
+        (Option.map ~f:ListEntitiesMaxResultInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
@@ -1601,16 +9407,25 @@ module ListEntitiesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EntityType") in
       let catalog =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Catalog") in
-      make ?maxResults ?nextToken ?sort ?filterList ~entityType ~catalog ()
+      make ?entityTypeSort ?entityTypeFilters ?ownershipType ?maxResults
+        ?nextToken ?sort ?filterList ~entityType ~catalog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultInteger.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let sort = field_map json "Sort" Sort.of_json in
-      let filterList = field_map json "FilterList" FilterList.of_json in
-      let entityType = field_map_exn json "EntityType" EntityType.of_json in
-      let catalog = field_map_exn json "Catalog" Catalog.of_json in
-      make ?maxResults ?nextToken ?sort ?filterList ~entityType ~catalog ()
+    let of_json json__ =
+      let entityTypeSort =
+        field_map json__ "EntityTypeSort" EntityTypeSort.of_json in
+      let entityTypeFilters =
+        field_map json__ "EntityTypeFilters" EntityTypeFilters.of_json in
+      let ownershipType =
+        field_map json__ "OwnershipType" OwnershipType.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" ListEntitiesMaxResultInteger.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let sort = field_map json__ "Sort" Sort.of_json in
+      let filterList = field_map json__ "FilterList" FilterList.of_json in
+      let entityType = field_map_exn json__ "EntityType" EntityType.of_json in
+      let catalog = field_map_exn json__ "Catalog" Catalog.of_json in
+      make ?entityTypeSort ?entityTypeFilters ?ownershipType ?maxResults
+        ?nextToken ?sort ?filterList ~entityType ~catalog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the list of entities of a given type."]
 module ListChangeSetsResponse =
@@ -1693,10 +9508,10 @@ module ListChangeSetsResponse =
           (Xml.child xml_arg0 "ChangeSetSummaryList") in
       make ?nextToken ?changeSetSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let changeSetSummaryList =
-        field_map json "ChangeSetSummaryList" ChangeSetSummaryList.of_json in
+        field_map json__ "ChangeSetSummaryList" ChangeSetSummaryList.of_json in
       make ?nextToken ?changeSetSummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1713,7 +9528,7 @@ module ListChangeSetsRequest =
       sort: Sort.t option
         [@ocaml.doc
           "An object that contains two attributes, SortBy and SortOrder."];
-      maxResults: MaxResultInteger.t option
+      maxResults: ListChangeSetsMaxResultInteger.t option
         [@ocaml.doc
           "The maximum number of results returned by a single call. This value must be provided in the next call to retrieve the next set of results. By default, this value is 20."];
       nextToken: NextToken.t option
@@ -1732,14 +9547,14 @@ module ListChangeSetsRequest =
         ("FilterList", (Option.map x.filterList ~f:FilterList.to_value));
         ("Sort", (Option.map x.sort ~f:Sort.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:MaxResultInteger.to_value));
+          (Option.map x.maxResults ~f:ListChangeSetsMaxResultInteger.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
-        (Option.map ~f:MaxResultInteger.of_xml)
+        (Option.map ~f:ListChangeSetsMaxResultInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       let sort = (Option.map ~f:Sort.of_xml) (Xml.child xml_arg0 "Sort") in
       let filterList =
@@ -1748,16 +9563,129 @@ module ListChangeSetsRequest =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Catalog") in
       make ?nextToken ?maxResults ?sort ?filterList ~catalog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResultInteger.of_json in
-      let sort = field_map json "Sort" Sort.of_json in
-      let filterList = field_map json "FilterList" FilterList.of_json in
-      let catalog = field_map_exn json "Catalog" Catalog.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" ListChangeSetsMaxResultInteger.of_json in
+      let sort = field_map json__ "Sort" Sort.of_json in
+      let filterList = field_map json__ "FilterList" FilterList.of_json in
+      let catalog = field_map_exn json__ "Catalog" Catalog.of_json in
       make ?nextToken ?maxResults ?sort ?filterList ~catalog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the list of change sets owned by the account being used to make the call. You can filter this list by providing any combination of entityId, ChangeSetName, and status. If you provide more than one filter, the API operation applies a logical AND between the filters. You can describe a change during the 60-day request history retention period for API calls."]
+module GetResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policy: ResourcePolicyJson.t option
+        [@ocaml.doc "The policy document to set; formatted in JSON."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policy = fun () -> { policy }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Policy", (Option.map x.policy ~f:ResourcePolicyJson.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:ResourcePolicyJson.of_xml)
+          (Xml.child xml_arg0 "Policy") in
+      make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" ResourcePolicyJson.of_json in
+      make ?policy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets a resource-based policy of an entity that is identified by its resource ARN."]
+module GetResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the entity resource that is associated with the resource policy."]}
+    let context_ = "GetResourcePolicyRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (ResourceARN.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceARN.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets a resource-based policy of an entity that is identified by its resource ARN."]
 module DescribeEntityResponse =
   struct
     type nonrec t =
@@ -1770,13 +9698,16 @@ module DescribeEntityResponse =
           "The identifier of the entity, in the format of EntityId\\@RevisionId."];
       entityArn: ARN.t option
         [@ocaml.doc
-          "The ARN associated to the unique identifier for the change set referenced in this request."];
+          "The ARN associated to the unique identifier for the entity referenced in this request."];
       lastModifiedDate: DateTimeISO8601.t option
         [@ocaml.doc
           "The last modified date of the entity, in ISO 8601 format (2018-02-27T13:45:22Z)."];
       details: Json.t option
         [@ocaml.doc
-          "This stringified JSON object includes the details of the entity."]}
+          "This stringified JSON object includes the details of the entity."];
+      detailsDocument: JsonDocumentType.t option
+        [@ocaml.doc
+          "The JSON value of the details specific to the entity. To download \"DetailsDocument\" shapes, see the Python and Java shapes on GitHub."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceException of InternalServiceException.t 
@@ -1790,14 +9721,16 @@ module DescribeEntityResponse =
         fun ?entityArn ->
           fun ?lastModifiedDate ->
             fun ?details ->
-              fun () ->
-                {
-                  entityType;
-                  entityIdentifier;
-                  entityArn;
-                  lastModifiedDate;
-                  details
-                }
+              fun ?detailsDocument ->
+                fun () ->
+                  {
+                    entityType;
+                    entityIdentifier;
+                    entityArn;
+                    lastModifiedDate;
+                    details;
+                    detailsDocument
+                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1872,9 +9805,14 @@ module DescribeEntityResponse =
         ("EntityArn", (Option.map x.entityArn ~f:ARN.to_value));
         ("LastModifiedDate",
           (Option.map x.lastModifiedDate ~f:DateTimeISO8601.to_value));
-        ("Details", (Option.map x.details ~f:Json.to_value))]
+        ("Details", (Option.map x.details ~f:Json.to_value));
+        ("DetailsDocument",
+          (Option.map x.detailsDocument ~f:JsonDocumentType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let detailsDocument =
+        (Option.map ~f:JsonDocumentType.of_xml)
+          (Xml.child xml_arg0 "DetailsDocument") in
       let details =
         (Option.map ~f:Json.of_xml) (Xml.child xml_arg0 "Details") in
       let lastModifiedDate =
@@ -1887,19 +9825,21 @@ module DescribeEntityResponse =
           (Xml.child xml_arg0 "EntityIdentifier") in
       let entityType =
         (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "EntityType") in
-      make ?details ?lastModifiedDate ?entityArn ?entityIdentifier
-        ?entityType ()
+      make ?detailsDocument ?details ?lastModifiedDate ?entityArn
+        ?entityIdentifier ?entityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "Details" Json.of_json in
+    let of_json json__ =
+      let detailsDocument =
+        field_map json__ "DetailsDocument" JsonDocumentType.of_json in
+      let details = field_map json__ "Details" Json.of_json in
       let lastModifiedDate =
-        field_map json "LastModifiedDate" DateTimeISO8601.of_json in
-      let entityArn = field_map json "EntityArn" ARN.of_json in
+        field_map json__ "LastModifiedDate" DateTimeISO8601.of_json in
+      let entityArn = field_map json__ "EntityArn" ARN.of_json in
       let entityIdentifier =
-        field_map json "EntityIdentifier" Identifier.of_json in
-      let entityType = field_map json "EntityType" EntityType.of_json in
-      make ?details ?lastModifiedDate ?entityArn ?entityIdentifier
-        ?entityType ()
+        field_map json__ "EntityIdentifier" Identifier.of_json in
+      let entityType = field_map json__ "EntityType" EntityType.of_json in
+      make ?detailsDocument ?details ?lastModifiedDate ?entityArn
+        ?entityIdentifier ?entityType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the metadata and content of the entity."]
 module DescribeEntityRequest =
@@ -1926,9 +9866,9 @@ module DescribeEntityRequest =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "catalog") in
       make ~entityId ~catalog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entityId = field_map_exn json "EntityId" ResourceId.of_json in
-      let catalog = field_map_exn json "Catalog" Catalog.of_json in
+    let of_json json__ =
+      let entityId = field_map_exn json__ "EntityId" ResourceId.of_json in
+      let catalog = field_map_exn json__ "Catalog" Catalog.of_json in
       make ~entityId ~catalog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the metadata and content of the entity."]
@@ -1945,6 +9885,9 @@ module DescribeChangeSetResponse =
       changeSetName: ChangeSetName.t option
         [@ocaml.doc
           "The optional name provided in the StartChangeSet request. If you do not provide a name, one is set by default."];
+      intent: Intent.t option
+        [@ocaml.doc
+          "The optional intent provided in the StartChangeSet request. If you do not provide an intent, APPLY is set by default."];
       startTime: DateTimeISO8601.t option
         [@ocaml.doc
           "The date and time, in ISO 8601 format (2018-02-27T13:45:22Z), the request started."];
@@ -1971,24 +9914,26 @@ module DescribeChangeSetResponse =
     let make ?changeSetId =
       fun ?changeSetArn ->
         fun ?changeSetName ->
-          fun ?startTime ->
-            fun ?endTime ->
-              fun ?status ->
-                fun ?failureCode ->
-                  fun ?failureDescription ->
-                    fun ?changeSet ->
-                      fun () ->
-                        {
-                          changeSetId;
-                          changeSetArn;
-                          changeSetName;
-                          startTime;
-                          endTime;
-                          status;
-                          failureCode;
-                          failureDescription;
-                          changeSet
-                        }
+          fun ?intent ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun ?status ->
+                  fun ?failureCode ->
+                    fun ?failureDescription ->
+                      fun ?changeSet ->
+                        fun () ->
+                          {
+                            changeSetId;
+                            changeSetArn;
+                            changeSetName;
+                            intent;
+                            startTime;
+                            endTime;
+                            status;
+                            failureCode;
+                            failureDescription;
+                            changeSet
+                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2051,6 +9996,7 @@ module DescribeChangeSetResponse =
         ("ChangeSetArn", (Option.map x.changeSetArn ~f:ARN.to_value));
         ("ChangeSetName",
           (Option.map x.changeSetName ~f:ChangeSetName.to_value));
+        ("Intent", (Option.map x.intent ~f:Intent.to_value));
         ("StartTime", (Option.map x.startTime ~f:DateTimeISO8601.to_value));
         ("EndTime", (Option.map x.endTime ~f:DateTimeISO8601.to_value));
         ("Status", (Option.map x.status ~f:ChangeStatus.to_value));
@@ -2077,6 +10023,8 @@ module DescribeChangeSetResponse =
       let startTime =
         (Option.map ~f:DateTimeISO8601.of_xml)
           (Xml.child xml_arg0 "StartTime") in
+      let intent =
+        (Option.map ~f:Intent.of_xml) (Xml.child xml_arg0 "Intent") in
       let changeSetName =
         (Option.map ~f:ChangeSetName.of_xml)
           (Xml.child xml_arg0 "ChangeSetName") in
@@ -2085,22 +10033,24 @@ module DescribeChangeSetResponse =
       let changeSetId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ChangeSetId") in
       make ?changeSet ?failureDescription ?failureCode ?status ?endTime
-        ?startTime ?changeSetName ?changeSetArn ?changeSetId ()
+        ?startTime ?intent ?changeSetName ?changeSetArn ?changeSetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeSet = field_map json "ChangeSet" ChangeSetDescription.of_json in
+    let of_json json__ =
+      let changeSet =
+        field_map json__ "ChangeSet" ChangeSetDescription.of_json in
       let failureDescription =
-        field_map json "FailureDescription" ExceptionMessageContent.of_json in
-      let failureCode = field_map json "FailureCode" FailureCode.of_json in
-      let status = field_map json "Status" ChangeStatus.of_json in
-      let endTime = field_map json "EndTime" DateTimeISO8601.of_json in
-      let startTime = field_map json "StartTime" DateTimeISO8601.of_json in
+        field_map json__ "FailureDescription" ExceptionMessageContent.of_json in
+      let failureCode = field_map json__ "FailureCode" FailureCode.of_json in
+      let status = field_map json__ "Status" ChangeStatus.of_json in
+      let endTime = field_map json__ "EndTime" DateTimeISO8601.of_json in
+      let startTime = field_map json__ "StartTime" DateTimeISO8601.of_json in
+      let intent = field_map json__ "Intent" Intent.of_json in
       let changeSetName =
-        field_map json "ChangeSetName" ChangeSetName.of_json in
-      let changeSetArn = field_map json "ChangeSetArn" ARN.of_json in
-      let changeSetId = field_map json "ChangeSetId" ResourceId.of_json in
+        field_map json__ "ChangeSetName" ChangeSetName.of_json in
+      let changeSetArn = field_map json__ "ChangeSetArn" ARN.of_json in
+      let changeSetId = field_map json__ "ChangeSetId" ResourceId.of_json in
       make ?changeSet ?failureDescription ?failureCode ?status ?endTime
-        ?startTime ?changeSetName ?changeSetArn ?changeSetId ()
+        ?startTime ?intent ?changeSetName ?changeSetArn ?changeSetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about a given change set."]
 module DescribeChangeSetRequest =
@@ -2129,12 +10079,114 @@ module DescribeChangeSetRequest =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "catalog") in
       make ~changeSetId ~catalog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeSetId = field_map_exn json "ChangeSetId" ResourceId.of_json in
-      let catalog = field_map_exn json "Catalog" Catalog.of_json in
+    let of_json json__ =
+      let changeSetId = field_map_exn json__ "ChangeSetId" ResourceId.of_json in
+      let catalog = field_map_exn json__ "Catalog" Catalog.of_json in
       make ~changeSetId ~catalog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about a given change set."]
+module DeleteResourcePolicyResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a resource-based policy on an entity that is identified by its resource ARN."]
+module DeleteResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the entity resource that is associated with the resource policy."]}
+    let context_ = "DeleteResourcePolicyRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (ResourceARN.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceARN.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a resource-based policy on an entity that is identified by its resource ARN."]
 module CancelChangeSetResponse =
   struct
     type nonrec t =
@@ -2231,9 +10283,9 @@ module CancelChangeSetResponse =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ChangeSetId") in
       make ?changeSetArn ?changeSetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeSetArn = field_map json "ChangeSetArn" ARN.of_json in
-      let changeSetId = field_map json "ChangeSetId" ResourceId.of_json in
+    let of_json json__ =
+      let changeSetArn = field_map json__ "ChangeSetArn" ARN.of_json in
+      let changeSetId = field_map json__ "ChangeSetId" ResourceId.of_json in
       make ?changeSetArn ?changeSetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2264,10 +10316,124 @@ module CancelChangeSetRequest =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "catalog") in
       make ~changeSetId ~catalog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeSetId = field_map_exn json "ChangeSetId" ResourceId.of_json in
-      let catalog = field_map_exn json "Catalog" Catalog.of_json in
+    let of_json json__ =
+      let changeSetId = field_map_exn json__ "ChangeSetId" ResourceId.of_json in
+      let catalog = field_map_exn json__ "Catalog" Catalog.of_json in
       make ~changeSetId ~catalog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used to cancel an open change request. Must be sent before the status of the request changes to APPLYING, the final stage of completing your change request. You can describe a change during the 60-day request history retention period for API calls."]
+module BatchDescribeEntitiesResponse =
+  struct
+    type nonrec t =
+      {
+      entityDetails: EntityDetails.t option
+        [@ocaml.doc "Details about each entity."];
+      errors: Errors.t option
+        [@ocaml.doc
+          "A map of errors returned, with EntityId as the key and errorDetail as the value."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entityDetails =
+      fun ?errors -> fun () -> { entityDetails; errors }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EntityDetails",
+           (Option.map x.entityDetails ~f:EntityDetails.to_value));
+        ("Errors", (Option.map x.errors ~f:Errors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:Errors.of_xml) (Xml.child xml_arg0 "Errors") in
+      let entityDetails =
+        (Option.map ~f:EntityDetails.of_xml)
+          (Xml.child xml_arg0 "EntityDetails") in
+      make ?errors ?entityDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors = field_map json__ "Errors" Errors.of_json in
+      let entityDetails =
+        field_map json__ "EntityDetails" EntityDetails.of_json in
+      make ?errors ?entityDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns metadata and content for multiple entities. This is the Batch version of the DescribeEntity API and uses the same IAM permission action as DescribeEntity API."]
+module BatchDescribeEntitiesRequest =
+  struct
+    type nonrec t =
+      {
+      entityRequestList: EntityRequestList.t
+        [@ocaml.doc
+          "List of entity IDs and the catalogs the entities are present in."]}
+    let context_ = "BatchDescribeEntitiesRequest"
+    let make ~entityRequestList = fun () -> { entityRequestList }
+    let to_value x =
+      structure_to_value
+        [("EntityRequestList",
+           (Some (EntityRequestList.to_value x.entityRequestList)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entityRequestList =
+        EntityRequestList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EntityRequestList") in
+      make ~entityRequestList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entityRequestList =
+        field_map_exn json__ "EntityRequestList" EntityRequestList.of_json in
+      make ~entityRequestList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns metadata and content for multiple entities. This is the Batch version of the DescribeEntity API and uses the same IAM permission action as DescribeEntity API."]

@@ -141,6 +141,29 @@ let batch_detect_syntax =
               ~languageCode:(Values.SyntaxLanguageCode.of_json languageCode)
               ()) (Some Values.BatchDetectSyntaxResponse.to_json)
            (Some Values.BatchDetectSyntaxResponse.error_to_json)])
+let batch_detect_targeted_sentiment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and textList =
+         flag "text-list" (required json_arg)
+           ~doc:"JSON CustomerInputStringList"
+       and languageCode =
+         flag "language-code" (required json_arg) ~doc:"JSON LanguageCode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_detect_targeted_sentiment
+           (Values.BatchDetectTargetedSentimentRequest.make
+              ~textList:(Values.CustomerInputStringList.of_json textList)
+              ~languageCode:(Values.LanguageCode.of_json languageCode) ())
+           (Some Values.BatchDetectTargetedSentimentResponse.to_json)
+           (Some Values.BatchDetectTargetedSentimentResponse.error_to_json)])
 let classify_document =
   Command.async ~summary:""
     ([%map_open.Command
@@ -152,14 +175,25 @@ let classify_document =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and text =
-         flag "text" (required string) ~doc:"STRING CustomerInputString"
+         flag "text" (optional string) ~doc:"STRING CustomerInputString"
+       and bytes =
+         flag "bytes" (optional json_arg)
+           ~doc:"JSON SemiStructuredDocumentBlob"
+       and documentReaderConfig =
+         flag "document-reader-config" (optional json_arg)
+           ~doc:"JSON DocumentReaderConfig"
        and endpointArn =
          flag "endpoint-arn" (required string)
            ~doc:"STRING DocumentClassifierEndpointArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.classify_document
-           (Values.ClassifyDocumentRequest.make ~text ~endpointArn ())
+           (Values.ClassifyDocumentRequest.make ?text
+              ?bytes:(Option.map ~f:Values.SemiStructuredDocumentBlob.of_json
+                        bytes)
+              ?documentReaderConfig:(Option.map
+                                       ~f:Values.DocumentReaderConfig.of_json
+                                       documentReaderConfig) ~endpointArn ())
            (Some Values.ClassifyDocumentResponse.to_json)
            (Some Values.ClassifyDocumentResponse.error_to_json)])
 let contains_pii_entities =
@@ -182,6 +216,45 @@ let contains_pii_entities =
               ~languageCode:(Values.LanguageCode.of_json languageCode) ())
            (Some Values.ContainsPiiEntitiesResponse.to_json)
            (Some Values.ContainsPiiEntitiesResponse.error_to_json)])
+let create_dataset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetType =
+         flag "dataset-type" (optional json_arg) ~doc:"JSON DatasetType"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestTokenString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and flywheelArn =
+         flag "flywheel-arn" (required string)
+           ~doc:"STRING ComprehendFlywheelArn"
+       and datasetName =
+         flag "dataset-name" (required string)
+           ~doc:"STRING ComprehendArnName"
+       and inputDataConfig =
+         flag "input-data-config" (required json_arg)
+           ~doc:"JSON DatasetInputDataConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_dataset
+           (Values.CreateDatasetRequest.make
+              ?datasetType:(Option.map ~f:Values.DatasetType.of_json
+                              datasetType) ?description ?clientRequestToken
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~flywheelArn
+              ~datasetName
+              ~inputDataConfig:(Values.DatasetInputDataConfig.of_json
+                                  inputDataConfig) ())
+           (Some Values.CreateDatasetResponse.to_json)
+           (Some Values.CreateDatasetResponse.error_to_json)])
 let create_document_classifier =
   Command.async ~summary:""
     ([%map_open.Command
@@ -250,6 +323,8 @@ let create_endpoint =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and modelArn =
+         flag "model-arn" (optional string) ~doc:"STRING ComprehendModelArn"
        and clientRequestToken =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestTokenString"
@@ -257,20 +332,21 @@ let create_endpoint =
        and dataAccessRoleArn =
          flag "data-access-role-arn" (optional string)
            ~doc:"STRING IamRoleArn"
+       and flywheelArn =
+         flag "flywheel-arn" (optional string)
+           ~doc:"STRING ComprehendFlywheelArn"
        and endpointName =
          flag "endpoint-name" (required string)
            ~doc:"STRING ComprehendEndpointName"
-       and modelArn =
-         flag "model-arn" (required string) ~doc:"STRING ComprehendModelArn"
        and desiredInferenceUnits =
          flag "desired-inference-units" (required int)
            ~doc:"INT InferenceUnitsInteger" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_endpoint
-           (Values.CreateEndpointRequest.make ?clientRequestToken
+           (Values.CreateEndpointRequest.make ?modelArn ?clientRequestToken
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ?dataAccessRoleArn ~endpointName ~modelArn
+              ?dataAccessRoleArn ?flywheelArn ~endpointName
               ~desiredInferenceUnits ())
            (Some Values.CreateEndpointResponse.to_json)
            (Some Values.CreateEndpointResponse.error_to_json)])
@@ -322,6 +398,52 @@ let create_entity_recognizer =
               ~languageCode:(Values.LanguageCode.of_json languageCode) ())
            (Some Values.CreateEntityRecognizerResponse.to_json)
            (Some Values.CreateEntityRecognizerResponse.error_to_json)])
+let create_flywheel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and activeModelArn =
+         flag "active-model-arn" (optional string)
+           ~doc:"STRING ComprehendModelArn"
+       and taskConfig =
+         flag "task-config" (optional json_arg) ~doc:"JSON TaskConfig"
+       and modelType =
+         flag "model-type" (optional json_arg) ~doc:"JSON ModelType"
+       and dataSecurityConfig =
+         flag "data-security-config" (optional json_arg)
+           ~doc:"JSON DataSecurityConfig"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestTokenString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and flywheelName =
+         flag "flywheel-name" (required string)
+           ~doc:"STRING ComprehendArnName"
+       and dataAccessRoleArn =
+         flag "data-access-role-arn" (required string)
+           ~doc:"STRING IamRoleArn"
+       and dataLakeS3Uri =
+         flag "data-lake-s3-uri" (required string)
+           ~doc:"STRING FlywheelS3Uri" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_flywheel
+           (Values.CreateFlywheelRequest.make ?activeModelArn
+              ?taskConfig:(Option.map ~f:Values.TaskConfig.of_json taskConfig)
+              ?modelType:(Option.map ~f:Values.ModelType.of_json modelType)
+              ?dataSecurityConfig:(Option.map
+                                     ~f:Values.DataSecurityConfig.of_json
+                                     dataSecurityConfig) ?clientRequestToken
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~flywheelName
+              ~dataAccessRoleArn ~dataLakeS3Uri ())
+           (Some Values.CreateFlywheelResponse.to_json)
+           (Some Values.CreateFlywheelResponse.error_to_json)])
 let delete_document_classifier =
   Command.async ~summary:""
     ([%map_open.Command
@@ -380,6 +502,25 @@ let delete_entity_recognizer =
            (Values.DeleteEntityRecognizerRequest.make ~entityRecognizerArn ())
            (Some Values.DeleteEntityRecognizerResponse.to_json)
            (Some Values.DeleteEntityRecognizerResponse.error_to_json)])
+let delete_flywheel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and flywheelArn =
+         flag "flywheel-arn" (required string)
+           ~doc:"STRING ComprehendFlywheelArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_flywheel
+           (Values.DeleteFlywheelRequest.make ~flywheelArn ())
+           (Some Values.DeleteFlywheelResponse.to_json)
+           (Some Values.DeleteFlywheelResponse.error_to_json)])
 let delete_resource_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -403,6 +544,25 @@ let delete_resource_policy =
               ~resourceArn ())
            (Some Values.DeleteResourcePolicyResponse.to_json)
            (Some Values.DeleteResourcePolicyResponse.error_to_json)])
+let describe_dataset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetArn =
+         flag "dataset-arn" (required string)
+           ~doc:"STRING ComprehendDatasetArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_dataset
+           (Values.DescribeDatasetRequest.make ~datasetArn ())
+           (Some Values.DescribeDatasetResponse.to_json)
+           (Some Values.DescribeDatasetResponse.error_to_json)])
 let describe_document_classification_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -531,6 +691,48 @@ let describe_events_detection_job =
            (Values.DescribeEventsDetectionJobRequest.make ~jobId ())
            (Some Values.DescribeEventsDetectionJobResponse.to_json)
            (Some Values.DescribeEventsDetectionJobResponse.error_to_json)])
+let describe_flywheel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and flywheelArn =
+         flag "flywheel-arn" (required string)
+           ~doc:"STRING ComprehendFlywheelArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_flywheel
+           (Values.DescribeFlywheelRequest.make ~flywheelArn ())
+           (Some Values.DescribeFlywheelResponse.to_json)
+           (Some Values.DescribeFlywheelResponse.error_to_json)])
+let describe_flywheel_iteration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and flywheelArn =
+         flag "flywheel-arn" (required string)
+           ~doc:"STRING ComprehendFlywheelArn"
+       and flywheelIterationId =
+         flag "flywheel-iteration-id" (required string)
+           ~doc:"STRING FlywheelIterationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_flywheel_iteration
+           (Values.DescribeFlywheelIterationRequest.make ~flywheelArn
+              ~flywheelIterationId ())
+           (Some Values.DescribeFlywheelIterationResponse.to_json)
+           (Some Values.DescribeFlywheelIterationResponse.error_to_json)])
 let describe_key_phrases_detection_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -665,19 +867,30 @@ let detect_entities =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and text =
+         flag "text" (optional string) ~doc:"STRING CustomerInputString"
        and languageCode =
          flag "language-code" (optional json_arg) ~doc:"JSON LanguageCode"
        and endpointArn =
          flag "endpoint-arn" (optional string)
            ~doc:"STRING EntityRecognizerEndpointArn"
-       and text =
-         flag "text" (required string) ~doc:"STRING CustomerInputString" in
+       and bytes =
+         flag "bytes" (optional json_arg)
+           ~doc:"JSON SemiStructuredDocumentBlob"
+       and documentReaderConfig =
+         flag "document-reader-config" (optional json_arg)
+           ~doc:"JSON DocumentReaderConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.detect_entities
-           (Values.DetectEntitiesRequest.make
+           (Values.DetectEntitiesRequest.make ?text
               ?languageCode:(Option.map ~f:Values.LanguageCode.of_json
-                               languageCode) ?endpointArn ~text ())
+                               languageCode) ?endpointArn
+              ?bytes:(Option.map ~f:Values.SemiStructuredDocumentBlob.of_json
+                        bytes)
+              ?documentReaderConfig:(Option.map
+                                       ~f:Values.DocumentReaderConfig.of_json
+                                       documentReaderConfig) ())
            (Some Values.DetectEntitiesResponse.to_json)
            (Some Values.DetectEntitiesResponse.error_to_json)])
 let detect_key_phrases =
@@ -764,6 +977,50 @@ let detect_syntax =
               ~languageCode:(Values.SyntaxLanguageCode.of_json languageCode)
               ()) (Some Values.DetectSyntaxResponse.to_json)
            (Some Values.DetectSyntaxResponse.error_to_json)])
+let detect_targeted_sentiment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and text =
+         flag "text" (required string) ~doc:"STRING CustomerInputString"
+       and languageCode =
+         flag "language-code" (required json_arg) ~doc:"JSON LanguageCode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.detect_targeted_sentiment
+           (Values.DetectTargetedSentimentRequest.make ~text
+              ~languageCode:(Values.LanguageCode.of_json languageCode) ())
+           (Some Values.DetectTargetedSentimentResponse.to_json)
+           (Some Values.DetectTargetedSentimentResponse.error_to_json)])
+let detect_toxic_content =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and textSegments =
+         flag "text-segments" (required json_arg)
+           ~doc:"JSON ListOfTextSegments"
+       and languageCode =
+         flag "language-code" (required json_arg) ~doc:"JSON LanguageCode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.detect_toxic_content
+           (Values.DetectToxicContentRequest.make
+              ~textSegments:(Values.ListOfTextSegments.of_json textSegments)
+              ~languageCode:(Values.LanguageCode.of_json languageCode) ())
+           (Some Values.DetectToxicContentResponse.to_json)
+           (Some Values.DetectToxicContentResponse.error_to_json)])
 let import_model =
   Command.async ~summary:""
     ([%map_open.Command
@@ -795,6 +1052,33 @@ let import_model =
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ~sourceModelArn ()) (Some Values.ImportModelResponse.to_json)
            (Some Values.ImportModelResponse.error_to_json)])
+let list_datasets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and flywheelArn =
+         flag "flywheel-arn" (optional string)
+           ~doc:"STRING ComprehendFlywheelArn"
+       and filter =
+         flag "filter" (optional json_arg) ~doc:"JSON DatasetFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsInteger" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_datasets
+           (Values.ListDatasetsRequest.make ?flywheelArn
+              ?filter:(Option.map ~f:Values.DatasetFilter.of_json filter)
+              ?nextToken ?maxResults ())
+           (Some Values.ListDatasetsResponse.to_json)
+           (Some Values.ListDatasetsResponse.error_to_json)])
 let list_document_classification_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1014,6 +1298,58 @@ let list_events_detection_jobs =
                          filter) ?nextToken ?maxResults ())
            (Some Values.ListEventsDetectionJobsResponse.to_json)
            (Some Values.ListEventsDetectionJobsResponse.error_to_json)])
+let list_flywheel_iteration_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON FlywheelIterationFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsInteger"
+       and flywheelArn =
+         flag "flywheel-arn" (required string)
+           ~doc:"STRING ComprehendFlywheelArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_flywheel_iteration_history
+           (Values.ListFlywheelIterationHistoryRequest.make
+              ?filter:(Option.map ~f:Values.FlywheelIterationFilter.of_json
+                         filter) ?nextToken ?maxResults ~flywheelArn ())
+           (Some Values.ListFlywheelIterationHistoryResponse.to_json)
+           (Some Values.ListFlywheelIterationHistoryResponse.error_to_json)])
+let list_flywheels =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg) ~doc:"JSON FlywheelFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsInteger" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_flywheels
+           (Values.ListFlywheelsRequest.make
+              ?filter:(Option.map ~f:Values.FlywheelFilter.of_json filter)
+              ?nextToken ?maxResults ())
+           (Some Values.ListFlywheelsResponse.to_json)
+           (Some Values.ListFlywheelsResponse.error_to_json)])
 let list_key_phrases_detection_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1198,6 +1534,9 @@ let start_document_classification_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and jobName = flag "job-name" (optional string) ~doc:"STRING JobName"
+       and documentClassifierArn =
+         flag "document-classifier-arn" (optional string)
+           ~doc:"STRING DocumentClassifierArn"
        and clientRequestToken =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestTokenString"
@@ -1206,9 +1545,9 @@ let start_document_classification_job =
        and vpcConfig =
          flag "vpc-config" (optional json_arg) ~doc:"JSON VpcConfig"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
-       and documentClassifierArn =
-         flag "document-classifier-arn" (required string)
-           ~doc:"STRING DocumentClassifierArn"
+       and flywheelArn =
+         flag "flywheel-arn" (optional string)
+           ~doc:"STRING ComprehendFlywheelArn"
        and inputDataConfig =
          flag "input-data-config" (required json_arg)
            ~doc:"JSON InputDataConfig"
@@ -1222,10 +1561,9 @@ let start_document_classification_job =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_document_classification_job
            (Values.StartDocumentClassificationJobRequest.make ?jobName
-              ?clientRequestToken ?volumeKmsKeyId
+              ?documentClassifierArn ?clientRequestToken ?volumeKmsKeyId
               ?vpcConfig:(Option.map ~f:Values.VpcConfig.of_json vpcConfig)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~documentClassifierArn
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?flywheelArn
               ~inputDataConfig:(Values.InputDataConfig.of_json
                                   inputDataConfig)
               ~outputDataConfig:(Values.OutputDataConfig.of_json
@@ -1296,6 +1634,9 @@ let start_entities_detection_job =
        and vpcConfig =
          flag "vpc-config" (optional json_arg) ~doc:"JSON VpcConfig"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and flywheelArn =
+         flag "flywheel-arn" (optional string)
+           ~doc:"STRING ComprehendFlywheelArn"
        and inputDataConfig =
          flag "input-data-config" (required json_arg)
            ~doc:"JSON InputDataConfig"
@@ -1313,7 +1654,7 @@ let start_entities_detection_job =
            (Values.StartEntitiesDetectionJobRequest.make ?jobName
               ?entityRecognizerArn ?clientRequestToken ?volumeKmsKeyId
               ?vpcConfig:(Option.map ~f:Values.VpcConfig.of_json vpcConfig)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?flywheelArn
               ~inputDataConfig:(Values.InputDataConfig.of_json
                                   inputDataConfig)
               ~outputDataConfig:(Values.OutputDataConfig.of_json
@@ -1365,6 +1706,29 @@ let start_events_detection_job =
                                    targetEventTypes) ())
            (Some Values.StartEventsDetectionJobResponse.to_json)
            (Some Values.StartEventsDetectionJobResponse.error_to_json)])
+let start_flywheel_iteration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestTokenString"
+       and flywheelArn =
+         flag "flywheel-arn" (required string)
+           ~doc:"STRING ComprehendFlywheelArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_flywheel_iteration
+           (Values.StartFlywheelIterationRequest.make ?clientRequestToken
+              ~flywheelArn ())
+           (Some Values.StartFlywheelIterationResponse.to_json)
+           (Some Values.StartFlywheelIterationResponse.error_to_json)])
 let start_key_phrases_detection_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1811,6 +2175,9 @@ let update_endpoint =
        and desiredDataAccessRoleArn =
          flag "desired-data-access-role-arn" (optional string)
            ~doc:"STRING IamRoleArn"
+       and flywheelArn =
+         flag "flywheel-arn" (optional string)
+           ~doc:"STRING ComprehendFlywheelArn"
        and endpointArn =
          flag "endpoint-arn" (required string)
            ~doc:"STRING ComprehendEndpointArn" in
@@ -1818,9 +2185,41 @@ let update_endpoint =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_endpoint
            (Values.UpdateEndpointRequest.make ?desiredModelArn
-              ?desiredInferenceUnits ?desiredDataAccessRoleArn ~endpointArn
-              ()) (Some Values.UpdateEndpointResponse.to_json)
+              ?desiredInferenceUnits ?desiredDataAccessRoleArn ?flywheelArn
+              ~endpointArn ()) (Some Values.UpdateEndpointResponse.to_json)
            (Some Values.UpdateEndpointResponse.error_to_json)])
+let update_flywheel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and activeModelArn =
+         flag "active-model-arn" (optional string)
+           ~doc:"STRING ComprehendModelArn"
+       and dataAccessRoleArn =
+         flag "data-access-role-arn" (optional string)
+           ~doc:"STRING IamRoleArn"
+       and dataSecurityConfig =
+         flag "data-security-config" (optional json_arg)
+           ~doc:"JSON UpdateDataSecurityConfig"
+       and flywheelArn =
+         flag "flywheel-arn" (required string)
+           ~doc:"STRING ComprehendFlywheelArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_flywheel
+           (Values.UpdateFlywheelRequest.make ?activeModelArn
+              ?dataAccessRoleArn
+              ?dataSecurityConfig:(Option.map
+                                     ~f:Values.UpdateDataSecurityConfig.of_json
+                                     dataSecurityConfig) ~flywheelArn ())
+           (Some Values.UpdateFlywheelResponse.to_json)
+           (Some Values.UpdateFlywheelResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -1829,15 +2228,20 @@ let main =
     ("batch-detect-key-phrases", batch_detect_key_phrases);
     ("batch-detect-sentiment", batch_detect_sentiment);
     ("batch-detect-syntax", batch_detect_syntax);
+    ("batch-detect-targeted-sentiment", batch_detect_targeted_sentiment);
     ("classify-document", classify_document);
     ("contains-pii-entities", contains_pii_entities);
+    ("create-dataset", create_dataset);
     ("create-document-classifier", create_document_classifier);
     ("create-endpoint", create_endpoint);
     ("create-entity-recognizer", create_entity_recognizer);
+    ("create-flywheel", create_flywheel);
     ("delete-document-classifier", delete_document_classifier);
     ("delete-endpoint", delete_endpoint);
     ("delete-entity-recognizer", delete_entity_recognizer);
+    ("delete-flywheel", delete_flywheel);
     ("delete-resource-policy", delete_resource_policy);
+    ("describe-dataset", describe_dataset);
     ("describe-document-classification-job",
       describe_document_classification_job);
     ("describe-document-classifier", describe_document_classifier);
@@ -1847,6 +2251,8 @@ let main =
     ("describe-entities-detection-job", describe_entities_detection_job);
     ("describe-entity-recognizer", describe_entity_recognizer);
     ("describe-events-detection-job", describe_events_detection_job);
+    ("describe-flywheel", describe_flywheel);
+    ("describe-flywheel-iteration", describe_flywheel_iteration);
     ("describe-key-phrases-detection-job",
       describe_key_phrases_detection_job);
     ("describe-pii-entities-detection-job",
@@ -1862,7 +2268,10 @@ let main =
     ("detect-pii-entities", detect_pii_entities);
     ("detect-sentiment", detect_sentiment);
     ("detect-syntax", detect_syntax);
+    ("detect-targeted-sentiment", detect_targeted_sentiment);
+    ("detect-toxic-content", detect_toxic_content);
     ("import-model", import_model);
+    ("list-datasets", list_datasets);
     ("list-document-classification-jobs", list_document_classification_jobs);
     ("list-document-classifier-summaries",
       list_document_classifier_summaries);
@@ -1874,6 +2283,8 @@ let main =
     ("list-entity-recognizer-summaries", list_entity_recognizer_summaries);
     ("list-entity-recognizers", list_entity_recognizers);
     ("list-events-detection-jobs", list_events_detection_jobs);
+    ("list-flywheel-iteration-history", list_flywheel_iteration_history);
+    ("list-flywheels", list_flywheels);
     ("list-key-phrases-detection-jobs", list_key_phrases_detection_jobs);
     ("list-pii-entities-detection-jobs", list_pii_entities_detection_jobs);
     ("list-sentiment-detection-jobs", list_sentiment_detection_jobs);
@@ -1887,6 +2298,7 @@ let main =
       start_dominant_language_detection_job);
     ("start-entities-detection-job", start_entities_detection_job);
     ("start-events-detection-job", start_events_detection_job);
+    ("start-flywheel-iteration", start_flywheel_iteration);
     ("start-key-phrases-detection-job", start_key_phrases_detection_job);
     ("start-pii-entities-detection-job", start_pii_entities_detection_job);
     ("start-sentiment-detection-job", start_sentiment_detection_job);
@@ -1906,4 +2318,5 @@ let main =
     ("stop-training-entity-recognizer", stop_training_entity_recognizer);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-endpoint", update_endpoint)]
+    ("update-endpoint", update_endpoint);
+    ("update-flywheel", update_flywheel)]

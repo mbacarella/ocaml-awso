@@ -100,6 +100,33 @@ let attach_load_balancers =
                                     loadBalancerNames) ())
            (Some Values.AttachLoadBalancersResultType.to_json)
            (Some Values.AttachLoadBalancersResultType.error_to_json)])
+let attach_traffic_sources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and skipZonalShiftValidation =
+         flag "skip-zonal-shift-validation" (optional bool)
+           ~doc:"BOOL SkipZonalShiftValidation"
+       and autoScalingGroupName =
+         flag "auto-scaling-group-name" (required string)
+           ~doc:"STRING XmlStringMaxLen255"
+       and trafficSources =
+         flag "traffic-sources" (required json_arg)
+           ~doc:"JSON TrafficSources" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.attach_traffic_sources
+           (Values.AttachTrafficSourcesType.make ?skipZonalShiftValidation
+              ~autoScalingGroupName
+              ~trafficSources:(Values.TrafficSources.of_json trafficSources)
+              ()) (Some Values.AttachTrafficSourcesResultType.to_json)
+           (Some Values.AttachTrafficSourcesResultType.error_to_json)])
 let batch_delete_scheduled_action =
   Command.async ~summary:""
     ([%map_open.Command
@@ -160,13 +187,17 @@ let cancel_instance_refresh =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and waitForTransitioningInstances =
+         flag "wait-for-transitioning-instances" (optional bool)
+           ~doc:"BOOL BooleanType"
        and autoScalingGroupName =
          flag "auto-scaling-group-name" (required string)
            ~doc:"STRING XmlStringMaxLen255" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.cancel_instance_refresh
-           (Values.CancelInstanceRefreshType.make ~autoScalingGroupName ())
+           (Values.CancelInstanceRefreshType.make
+              ?waitForTransitioningInstances ~autoScalingGroupName ())
            (Some Values.CancelInstanceRefreshAnswer.to_json)
            (Some Values.CancelInstanceRefreshAnswer.error_to_json)])
 let complete_lifecycle_action =
@@ -230,6 +261,9 @@ let create_auto_scaling_group =
        and availabilityZones =
          flag "availability-zones" (optional json_arg)
            ~doc:"JSON AvailabilityZones"
+       and availabilityZoneIds =
+         flag "availability-zone-ids" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneIds"
        and loadBalancerNames =
          flag "load-balancer-names" (optional json_arg)
            ~doc:"JSON LoadBalancerNames"
@@ -247,7 +281,7 @@ let create_auto_scaling_group =
            ~doc:"STRING XmlStringMaxLen255"
        and vPCZoneIdentifier =
          flag "v-p-c-zone-identifier" (optional string)
-           ~doc:"STRING XmlStringMaxLen2047"
+           ~doc:"STRING XmlStringMaxLen5000"
        and terminationPolicies =
          flag "termination-policies" (optional json_arg)
            ~doc:"JSON TerminationPolicies"
@@ -260,6 +294,9 @@ let create_auto_scaling_group =
        and lifecycleHookSpecificationList =
          flag "lifecycle-hook-specification-list" (optional json_arg)
            ~doc:"JSON LifecycleHookSpecifications"
+       and deletionProtection =
+         flag "deletion-protection" (optional json_arg)
+           ~doc:"JSON DeletionProtection"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and serviceLinkedRoleARN =
          flag "service-linked-role-a-r-n" (optional string)
@@ -271,6 +308,30 @@ let create_auto_scaling_group =
        and desiredCapacityType =
          flag "desired-capacity-type" (optional string)
            ~doc:"STRING XmlStringMaxLen255"
+       and defaultInstanceWarmup =
+         flag "default-instance-warmup" (optional int)
+           ~doc:"INT DefaultInstanceWarmup"
+       and trafficSources =
+         flag "traffic-sources" (optional json_arg)
+           ~doc:"JSON TrafficSources"
+       and instanceMaintenancePolicy =
+         flag "instance-maintenance-policy" (optional json_arg)
+           ~doc:"JSON InstanceMaintenancePolicy"
+       and availabilityZoneDistribution =
+         flag "availability-zone-distribution" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneDistribution"
+       and availabilityZoneImpairmentPolicy =
+         flag "availability-zone-impairment-policy" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneImpairmentPolicy"
+       and skipZonalShiftValidation =
+         flag "skip-zonal-shift-validation" (optional bool)
+           ~doc:"BOOL SkipZonalShiftValidation"
+       and capacityReservationSpecification =
+         flag "capacity-reservation-specification" (optional json_arg)
+           ~doc:"JSON CapacityReservationSpecification"
+       and instanceLifecyclePolicy =
+         flag "instance-lifecycle-policy" (optional json_arg)
+           ~doc:"JSON InstanceLifecyclePolicy"
        and autoScalingGroupName =
          flag "auto-scaling-group-name" (required string)
            ~doc:"STRING XmlStringMaxLen255"
@@ -292,6 +353,9 @@ let create_auto_scaling_group =
               ?availabilityZones:(Option.map
                                     ~f:Values.AvailabilityZones.of_json
                                     availabilityZones)
+              ?availabilityZoneIds:(Option.map
+                                      ~f:Values.AvailabilityZoneIds.of_json
+                                      availabilityZoneIds)
               ?loadBalancerNames:(Option.map
                                     ~f:Values.LoadBalancerNames.of_json
                                     loadBalancerNames)
@@ -305,10 +369,31 @@ let create_auto_scaling_group =
               ?lifecycleHookSpecificationList:(Option.map
                                                  ~f:Values.LifecycleHookSpecifications.of_json
                                                  lifecycleHookSpecificationList)
+              ?deletionProtection:(Option.map
+                                     ~f:Values.DeletionProtection.of_json
+                                     deletionProtection)
               ?tags:(Option.map ~f:Values.Tags.of_json tags)
               ?serviceLinkedRoleARN ?maxInstanceLifetime ?context
-              ?desiredCapacityType ~autoScalingGroupName ~minSize ~maxSize ())
-           None None])
+              ?desiredCapacityType ?defaultInstanceWarmup
+              ?trafficSources:(Option.map ~f:Values.TrafficSources.of_json
+                                 trafficSources)
+              ?instanceMaintenancePolicy:(Option.map
+                                            ~f:Values.InstanceMaintenancePolicy.of_json
+                                            instanceMaintenancePolicy)
+              ?availabilityZoneDistribution:(Option.map
+                                               ~f:Values.AvailabilityZoneDistribution.of_json
+                                               availabilityZoneDistribution)
+              ?availabilityZoneImpairmentPolicy:(Option.map
+                                                   ~f:Values.AvailabilityZoneImpairmentPolicy.of_json
+                                                   availabilityZoneImpairmentPolicy)
+              ?skipZonalShiftValidation
+              ?capacityReservationSpecification:(Option.map
+                                                   ~f:Values.CapacityReservationSpecification.of_json
+                                                   capacityReservationSpecification)
+              ?instanceLifecyclePolicy:(Option.map
+                                          ~f:Values.InstanceLifecyclePolicy.of_json
+                                          instanceLifecyclePolicy)
+              ~autoScalingGroupName ~minSize ~maxSize ()) None None])
 let create_launch_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -611,6 +696,9 @@ let describe_auto_scaling_groups =
        and autoScalingGroupNames =
          flag "auto-scaling-group-names" (optional json_arg)
            ~doc:"JSON AutoScalingGroupNames"
+       and includeInstances =
+         flag "include-instances" (optional bool)
+           ~doc:"BOOL IncludeInstances"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING XmlString"
        and maxRecords =
@@ -622,8 +710,8 @@ let describe_auto_scaling_groups =
            (Values.AutoScalingGroupNamesType.make
               ?autoScalingGroupNames:(Option.map
                                         ~f:Values.AutoScalingGroupNames.of_json
-                                        autoScalingGroupNames) ?nextToken
-              ?maxRecords
+                                        autoScalingGroupNames)
+              ?includeInstances ?nextToken ?maxRecords
               ?filters:(Option.map ~f:Values.Filters.of_json filters) ())
            (Some Values.AutoScalingGroupsType.to_json)
            (Some Values.AutoScalingGroupsType.error_to_json)])
@@ -912,14 +1000,16 @@ let describe_scaling_activities =
        and maxRecords =
          flag "max-records" (optional int) ~doc:"INT MaxRecords"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING XmlString" in
+         flag "next-token" (optional string) ~doc:"STRING XmlString"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_scaling_activities
            (Values.DescribeScalingActivitiesType.make
               ?activityIds:(Option.map ~f:Values.ActivityIds.of_json
                               activityIds) ?autoScalingGroupName
-              ?includeDeletedGroups ?maxRecords ?nextToken ())
+              ?includeDeletedGroups ?maxRecords ?nextToken
+              ?filters:(Option.map ~f:Values.Filters.of_json filters) ())
            (Some Values.ActivitiesType.to_json)
            (Some Values.ActivitiesType.error_to_json)])
 let describe_scaling_process_types =
@@ -1013,6 +1103,33 @@ let describe_termination_policy_types =
            Io.describe_termination_policy_types (Fn.id ())
            (Some Values.DescribeTerminationPolicyTypesAnswer.to_json)
            (Some Values.DescribeTerminationPolicyTypesAnswer.error_to_json)])
+let describe_traffic_sources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trafficSourceType =
+         flag "traffic-source-type" (optional string)
+           ~doc:"STRING XmlStringMaxLen255"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING XmlString"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT MaxRecords"
+       and autoScalingGroupName =
+         flag "auto-scaling-group-name" (required string)
+           ~doc:"STRING XmlStringMaxLen255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_traffic_sources
+           (Values.DescribeTrafficSourcesRequest.make ?trafficSourceType
+              ?nextToken ?maxRecords ~autoScalingGroupName ())
+           (Some Values.DescribeTrafficSourcesResponse.to_json)
+           (Some Values.DescribeTrafficSourcesResponse.error_to_json)])
 let describe_warm_pool =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1114,6 +1231,29 @@ let detach_load_balancers =
                                     loadBalancerNames) ())
            (Some Values.DetachLoadBalancersResultType.to_json)
            (Some Values.DetachLoadBalancersResultType.error_to_json)])
+let detach_traffic_sources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and autoScalingGroupName =
+         flag "auto-scaling-group-name" (required string)
+           ~doc:"STRING XmlStringMaxLen255"
+       and trafficSources =
+         flag "traffic-sources" (required json_arg)
+           ~doc:"JSON TrafficSources" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.detach_traffic_sources
+           (Values.DetachTrafficSourcesType.make ~autoScalingGroupName
+              ~trafficSources:(Values.TrafficSources.of_json trafficSources)
+              ()) (Some Values.DetachTrafficSourcesResultType.to_json)
+           (Some Values.DetachTrafficSourcesResultType.error_to_json)])
 let disable_metrics_collection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1263,6 +1403,51 @@ let get_predictive_scaling_forecast =
               ~endTime:(Values.TimestampType.of_json endTime) ())
            (Some Values.GetPredictiveScalingForecastAnswer.to_json)
            (Some Values.GetPredictiveScalingForecastAnswer.error_to_json)])
+let launch_instances =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and availabilityZones =
+         flag "availability-zones" (optional json_arg)
+           ~doc:"JSON AvailabilityZonesLimit1"
+       and availabilityZoneIds =
+         flag "availability-zone-ids" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneIdsLimit1"
+       and subnetIds =
+         flag "subnet-ids" (optional json_arg) ~doc:"JSON SubnetIdsLimit1"
+       and retryStrategy =
+         flag "retry-strategy" (optional json_arg) ~doc:"JSON RetryStrategy"
+       and autoScalingGroupName =
+         flag "auto-scaling-group-name" (required string)
+           ~doc:"STRING XmlStringMaxLen255"
+       and requestedCapacity =
+         flag "requested-capacity" (required int)
+           ~doc:"INT RequestedCapacity"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.launch_instances
+           (Values.LaunchInstancesRequest.make
+              ?availabilityZones:(Option.map
+                                    ~f:Values.AvailabilityZonesLimit1.of_json
+                                    availabilityZones)
+              ?availabilityZoneIds:(Option.map
+                                      ~f:Values.AvailabilityZoneIdsLimit1.of_json
+                                      availabilityZoneIds)
+              ?subnetIds:(Option.map ~f:Values.SubnetIdsLimit1.of_json
+                            subnetIds)
+              ?retryStrategy:(Option.map ~f:Values.RetryStrategy.of_json
+                                retryStrategy) ~autoScalingGroupName
+              ~requestedCapacity ~clientToken ())
+           (Some Values.LaunchInstancesResult.to_json)
+           (Some Values.LaunchInstancesResult.error_to_json)])
 let put_lifecycle_hook =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1283,7 +1468,7 @@ let put_lifecycle_hook =
            ~doc:"STRING NotificationTargetResourceName"
        and notificationMetadata =
          flag "notification-metadata" (optional string)
-           ~doc:"STRING XmlStringMaxLen1023"
+           ~doc:"STRING AnyPrintableAsciiStringMaxLen4000"
        and heartbeatTimeout =
          flag "heartbeat-timeout" (optional int) ~doc:"INT HeartbeatTimeout"
        and defaultResult =
@@ -1523,6 +1708,25 @@ let resume_processes =
               ?scalingProcesses:(Option.map ~f:Values.ProcessNames.of_json
                                    scalingProcesses) ~autoScalingGroupName ())
            None None])
+let rollback_instance_refresh =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and autoScalingGroupName =
+         flag "auto-scaling-group-name" (required string)
+           ~doc:"STRING XmlStringMaxLen255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.rollback_instance_refresh
+           (Values.RollbackInstanceRefreshType.make ~autoScalingGroupName ())
+           (Some Values.RollbackInstanceRefreshAnswer.to_json)
+           (Some Values.RollbackInstanceRefreshAnswer.error_to_json)])
 let set_desired_capacity =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1705,6 +1909,9 @@ let update_auto_scaling_group =
        and availabilityZones =
          flag "availability-zones" (optional json_arg)
            ~doc:"JSON AvailabilityZones"
+       and availabilityZoneIds =
+         flag "availability-zone-ids" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneIds"
        and healthCheckType =
          flag "health-check-type" (optional string)
            ~doc:"STRING XmlStringMaxLen32"
@@ -1713,10 +1920,10 @@ let update_auto_scaling_group =
            ~doc:"INT HealthCheckGracePeriod"
        and placementGroup =
          flag "placement-group" (optional string)
-           ~doc:"STRING XmlStringMaxLen255"
+           ~doc:"STRING UpdatePlacementGroupParam"
        and vPCZoneIdentifier =
          flag "v-p-c-zone-identifier" (optional string)
-           ~doc:"STRING XmlStringMaxLen2047"
+           ~doc:"STRING XmlStringMaxLen5000"
        and terminationPolicies =
          flag "termination-policies" (optional json_arg)
            ~doc:"JSON TerminationPolicies"
@@ -1736,6 +1943,30 @@ let update_auto_scaling_group =
        and desiredCapacityType =
          flag "desired-capacity-type" (optional string)
            ~doc:"STRING XmlStringMaxLen255"
+       and defaultInstanceWarmup =
+         flag "default-instance-warmup" (optional int)
+           ~doc:"INT DefaultInstanceWarmup"
+       and instanceMaintenancePolicy =
+         flag "instance-maintenance-policy" (optional json_arg)
+           ~doc:"JSON InstanceMaintenancePolicy"
+       and availabilityZoneDistribution =
+         flag "availability-zone-distribution" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneDistribution"
+       and availabilityZoneImpairmentPolicy =
+         flag "availability-zone-impairment-policy" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneImpairmentPolicy"
+       and skipZonalShiftValidation =
+         flag "skip-zonal-shift-validation" (optional bool)
+           ~doc:"BOOL SkipZonalShiftValidation"
+       and capacityReservationSpecification =
+         flag "capacity-reservation-specification" (optional json_arg)
+           ~doc:"JSON CapacityReservationSpecification"
+       and instanceLifecyclePolicy =
+         flag "instance-lifecycle-policy" (optional json_arg)
+           ~doc:"JSON InstanceLifecyclePolicy"
+       and deletionProtection =
+         flag "deletion-protection" (optional json_arg)
+           ~doc:"JSON DeletionProtection"
        and autoScalingGroupName =
          flag "auto-scaling-group-name" (required string)
            ~doc:"STRING XmlStringMaxLen255" in
@@ -1752,14 +1983,37 @@ let update_auto_scaling_group =
               ?maxSize ?desiredCapacity ?defaultCooldown
               ?availabilityZones:(Option.map
                                     ~f:Values.AvailabilityZones.of_json
-                                    availabilityZones) ?healthCheckType
+                                    availabilityZones)
+              ?availabilityZoneIds:(Option.map
+                                      ~f:Values.AvailabilityZoneIds.of_json
+                                      availabilityZoneIds) ?healthCheckType
               ?healthCheckGracePeriod ?placementGroup ?vPCZoneIdentifier
               ?terminationPolicies:(Option.map
                                       ~f:Values.TerminationPolicies.of_json
                                       terminationPolicies)
               ?newInstancesProtectedFromScaleIn ?serviceLinkedRoleARN
               ?maxInstanceLifetime ?capacityRebalance ?context
-              ?desiredCapacityType ~autoScalingGroupName ()) None None])
+              ?desiredCapacityType ?defaultInstanceWarmup
+              ?instanceMaintenancePolicy:(Option.map
+                                            ~f:Values.InstanceMaintenancePolicy.of_json
+                                            instanceMaintenancePolicy)
+              ?availabilityZoneDistribution:(Option.map
+                                               ~f:Values.AvailabilityZoneDistribution.of_json
+                                               availabilityZoneDistribution)
+              ?availabilityZoneImpairmentPolicy:(Option.map
+                                                   ~f:Values.AvailabilityZoneImpairmentPolicy.of_json
+                                                   availabilityZoneImpairmentPolicy)
+              ?skipZonalShiftValidation
+              ?capacityReservationSpecification:(Option.map
+                                                   ~f:Values.CapacityReservationSpecification.of_json
+                                                   capacityReservationSpecification)
+              ?instanceLifecyclePolicy:(Option.map
+                                          ~f:Values.InstanceLifecyclePolicy.of_json
+                                          instanceLifecyclePolicy)
+              ?deletionProtection:(Option.map
+                                     ~f:Values.DeletionProtection.of_json
+                                     deletionProtection)
+              ~autoScalingGroupName ()) None None])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -1767,6 +2021,7 @@ let main =
     ("attach-load-balancer-target-groups",
       attach_load_balancer_target_groups);
     ("attach-load-balancers", attach_load_balancers);
+    ("attach-traffic-sources", attach_traffic_sources);
     ("batch-delete-scheduled-action", batch_delete_scheduled_action);
     ("batch-put-scheduled-update-group-action",
       batch_put_scheduled_update_group_action);
@@ -1805,17 +2060,20 @@ let main =
     ("describe-scheduled-actions", describe_scheduled_actions);
     ("describe-tags", describe_tags);
     ("describe-termination-policy-types", describe_termination_policy_types);
+    ("describe-traffic-sources", describe_traffic_sources);
     ("describe-warm-pool", describe_warm_pool);
     ("detach-instances", detach_instances);
     ("detach-load-balancer-target-groups",
       detach_load_balancer_target_groups);
     ("detach-load-balancers", detach_load_balancers);
+    ("detach-traffic-sources", detach_traffic_sources);
     ("disable-metrics-collection", disable_metrics_collection);
     ("enable-metrics-collection", enable_metrics_collection);
     ("enter-standby", enter_standby);
     ("execute-policy", execute_policy);
     ("exit-standby", exit_standby);
     ("get-predictive-scaling-forecast", get_predictive_scaling_forecast);
+    ("launch-instances", launch_instances);
     ("put-lifecycle-hook", put_lifecycle_hook);
     ("put-notification-configuration", put_notification_configuration);
     ("put-scaling-policy", put_scaling_policy);
@@ -1823,6 +2081,7 @@ let main =
     ("put-warm-pool", put_warm_pool);
     ("record-lifecycle-action-heartbeat", record_lifecycle_action_heartbeat);
     ("resume-processes", resume_processes);
+    ("rollback-instance-refresh", rollback_instance_refresh);
     ("set-desired-capacity", set_desired_capacity);
     ("set-instance-health", set_instance_health);
     ("set-instance-protection", set_instance_protection);

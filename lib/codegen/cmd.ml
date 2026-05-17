@@ -200,9 +200,8 @@ module Generate_all = struct
      let loc = !Ast_helper.default_loc in
      let structure =
        [%str open! Import]
-       @ [ Botocore_endpoints.make_lookup_uri endpoints
-         ; Botocore_endpoints.make_lookup_credential_scope endpoints
-         ]
+       @ Botocore_endpoints.make_lookup_uri endpoints
+       @ Botocore_endpoints.make_lookup_credential_scope endpoints
      in
      write_generated
        ~argv:argv_strs

@@ -11,10 +11,16 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let create_performance_analysis_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePerformanceAnalysisReport input
+let delete_performance_analysis_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePerformanceAnalysisReport input
 let describe_dimension_keys ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDimensionKeys input
 let get_dimension_key_details ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDimensionKeyDetails input
+let get_performance_analysis_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPerformanceAnalysisReport input
 let get_resource_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResourceMetadata input
 let get_resource_metrics ?endpoint_url ?cfg input =
@@ -23,3 +29,11 @@ let list_available_resource_dimensions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAvailableResourceDimensions input
 let list_available_resource_metrics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAvailableResourceMetrics input
+let list_performance_analysis_reports ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPerformanceAnalysisReports input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input

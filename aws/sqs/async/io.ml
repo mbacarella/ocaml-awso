@@ -13,6 +13,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let add_permission ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddPermission input
+let cancel_message_move_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelMessageMoveTask input
 let change_message_visibility ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ChangeMessageVisibility input
 let change_message_visibility_batch ?endpoint_url ?cfg input =
@@ -31,6 +33,8 @@ let get_queue_url ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetQueueUrl input
 let list_dead_letter_source_queues ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDeadLetterSourceQueues input
+let list_message_move_tasks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMessageMoveTasks input
 let list_queue_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListQueueTags input
 let list_queues ?endpoint_url ?cfg input =
@@ -47,6 +51,8 @@ let send_message_batch ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendMessageBatch input
 let set_queue_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetQueueAttributes input
+let start_message_move_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartMessageMoveTask input
 let tag_queue ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagQueue input
 let untag_queue ?endpoint_url ?cfg input =

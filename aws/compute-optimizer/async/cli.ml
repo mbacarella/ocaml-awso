@@ -214,6 +214,91 @@ let export_e_c2_instance_recommendations =
            (Some Values.ExportEC2InstanceRecommendationsResponse.to_json)
            (Some
               Values.ExportEC2InstanceRecommendationsResponse.error_to_json)])
+let export_e_c_s_service_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON AccountIds"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ECSServiceRecommendationFilters"
+       and fieldsToExport =
+         flag "fields-to-export" (optional json_arg)
+           ~doc:"JSON ExportableECSServiceFields"
+       and fileFormat =
+         flag "file-format" (optional json_arg) ~doc:"JSON FileFormat"
+       and includeMemberAccounts =
+         flag "include-member-accounts" (optional bool)
+           ~doc:"BOOL IncludeMemberAccounts"
+       and s3DestinationConfig =
+         flag "s3-destination-config" (required json_arg)
+           ~doc:"JSON S3DestinationConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_e_c_s_service_recommendations
+           (Values.ExportECSServiceRecommendationsRequest.make
+              ?accountIds:(Option.map ~f:Values.AccountIds.of_json accountIds)
+              ?filters:(Option.map
+                          ~f:Values.ECSServiceRecommendationFilters.of_json
+                          filters)
+              ?fieldsToExport:(Option.map
+                                 ~f:Values.ExportableECSServiceFields.of_json
+                                 fieldsToExport)
+              ?fileFormat:(Option.map ~f:Values.FileFormat.of_json fileFormat)
+              ?includeMemberAccounts
+              ~s3DestinationConfig:(Values.S3DestinationConfig.of_json
+                                      s3DestinationConfig) ())
+           (Some Values.ExportECSServiceRecommendationsResponse.to_json)
+           (Some Values.ExportECSServiceRecommendationsResponse.error_to_json)])
+let export_idle_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON AccountIds"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON IdleRecommendationFilters"
+       and fieldsToExport =
+         flag "fields-to-export" (optional json_arg)
+           ~doc:"JSON ExportableIdleFields"
+       and fileFormat =
+         flag "file-format" (optional json_arg) ~doc:"JSON FileFormat"
+       and includeMemberAccounts =
+         flag "include-member-accounts" (optional bool)
+           ~doc:"BOOL IncludeMemberAccounts"
+       and s3DestinationConfig =
+         flag "s3-destination-config" (required json_arg)
+           ~doc:"JSON S3DestinationConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_idle_recommendations
+           (Values.ExportIdleRecommendationsRequest.make
+              ?accountIds:(Option.map ~f:Values.AccountIds.of_json accountIds)
+              ?filters:(Option.map
+                          ~f:Values.IdleRecommendationFilters.of_json filters)
+              ?fieldsToExport:(Option.map
+                                 ~f:Values.ExportableIdleFields.of_json
+                                 fieldsToExport)
+              ?fileFormat:(Option.map ~f:Values.FileFormat.of_json fileFormat)
+              ?includeMemberAccounts
+              ~s3DestinationConfig:(Values.S3DestinationConfig.of_json
+                                      s3DestinationConfig) ())
+           (Some Values.ExportIdleRecommendationsResponse.to_json)
+           (Some Values.ExportIdleRecommendationsResponse.error_to_json)])
 let export_lambda_function_recommendations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -258,6 +343,99 @@ let export_lambda_function_recommendations =
            (Some Values.ExportLambdaFunctionRecommendationsResponse.to_json)
            (Some
               Values.ExportLambdaFunctionRecommendationsResponse.error_to_json)])
+let export_license_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON AccountIds"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON LicenseRecommendationFilters"
+       and fieldsToExport =
+         flag "fields-to-export" (optional json_arg)
+           ~doc:"JSON ExportableLicenseFields"
+       and fileFormat =
+         flag "file-format" (optional json_arg) ~doc:"JSON FileFormat"
+       and includeMemberAccounts =
+         flag "include-member-accounts" (optional bool)
+           ~doc:"BOOL IncludeMemberAccounts"
+       and s3DestinationConfig =
+         flag "s3-destination-config" (required json_arg)
+           ~doc:"JSON S3DestinationConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_license_recommendations
+           (Values.ExportLicenseRecommendationsRequest.make
+              ?accountIds:(Option.map ~f:Values.AccountIds.of_json accountIds)
+              ?filters:(Option.map
+                          ~f:Values.LicenseRecommendationFilters.of_json
+                          filters)
+              ?fieldsToExport:(Option.map
+                                 ~f:Values.ExportableLicenseFields.of_json
+                                 fieldsToExport)
+              ?fileFormat:(Option.map ~f:Values.FileFormat.of_json fileFormat)
+              ?includeMemberAccounts
+              ~s3DestinationConfig:(Values.S3DestinationConfig.of_json
+                                      s3DestinationConfig) ())
+           (Some Values.ExportLicenseRecommendationsResponse.to_json)
+           (Some Values.ExportLicenseRecommendationsResponse.error_to_json)])
+let export_r_d_s_database_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON AccountIds"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON RDSDBRecommendationFilters"
+       and fieldsToExport =
+         flag "fields-to-export" (optional json_arg)
+           ~doc:"JSON ExportableRDSDBFields"
+       and fileFormat =
+         flag "file-format" (optional json_arg) ~doc:"JSON FileFormat"
+       and includeMemberAccounts =
+         flag "include-member-accounts" (optional bool)
+           ~doc:"BOOL IncludeMemberAccounts"
+       and recommendationPreferences =
+         flag "recommendation-preferences" (optional json_arg)
+           ~doc:"JSON RecommendationPreferences"
+       and s3DestinationConfig =
+         flag "s3-destination-config" (required json_arg)
+           ~doc:"JSON S3DestinationConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_r_d_s_database_recommendations
+           (Values.ExportRDSDatabaseRecommendationsRequest.make
+              ?accountIds:(Option.map ~f:Values.AccountIds.of_json accountIds)
+              ?filters:(Option.map
+                          ~f:Values.RDSDBRecommendationFilters.of_json
+                          filters)
+              ?fieldsToExport:(Option.map
+                                 ~f:Values.ExportableRDSDBFields.of_json
+                                 fieldsToExport)
+              ?fileFormat:(Option.map ~f:Values.FileFormat.of_json fileFormat)
+              ?includeMemberAccounts
+              ?recommendationPreferences:(Option.map
+                                            ~f:Values.RecommendationPreferences.of_json
+                                            recommendationPreferences)
+              ~s3DestinationConfig:(Values.S3DestinationConfig.of_json
+                                      s3DestinationConfig) ())
+           (Some Values.ExportRDSDatabaseRecommendationsResponse.to_json)
+           (Some
+              Values.ExportRDSDatabaseRecommendationsResponse.error_to_json)])
 let get_auto_scaling_group_recommendations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -396,6 +574,68 @@ let get_e_c2_recommendation_projected_metrics =
            (Some Values.GetEC2RecommendationProjectedMetricsResponse.to_json)
            (Some
               Values.GetEC2RecommendationProjectedMetricsResponse.error_to_json)])
+let get_e_c_s_service_recommendation_projected_metrics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceArn =
+         flag "service-arn" (required string) ~doc:"STRING ServiceArn"
+       and stat = flag "stat" (required json_arg) ~doc:"JSON MetricStatistic"
+       and period = flag "period" (required int) ~doc:"INT Period"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON Timestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_e_c_s_service_recommendation_projected_metrics
+           (Values.GetECSServiceRecommendationProjectedMetricsRequest.make
+              ~serviceArn ~stat:(Values.MetricStatistic.of_json stat) ~period
+              ~startTime:(Values.Timestamp.of_json startTime)
+              ~endTime:(Values.Timestamp.of_json endTime) ())
+           (Some
+              Values.GetECSServiceRecommendationProjectedMetricsResponse.to_json)
+           (Some
+              Values.GetECSServiceRecommendationProjectedMetricsResponse.error_to_json)])
+let get_e_c_s_service_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceArns =
+         flag "service-arns" (optional json_arg) ~doc:"JSON ServiceArns"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ECSServiceRecommendationFilters"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON AccountIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_e_c_s_service_recommendations
+           (Values.GetECSServiceRecommendationsRequest.make
+              ?serviceArns:(Option.map ~f:Values.ServiceArns.of_json
+                              serviceArns) ?nextToken ?maxResults
+              ?filters:(Option.map
+                          ~f:Values.ECSServiceRecommendationFilters.of_json
+                          filters)
+              ?accountIds:(Option.map ~f:Values.AccountIds.of_json accountIds)
+              ()) (Some Values.GetECSServiceRecommendationsResponse.to_json)
+           (Some Values.GetECSServiceRecommendationsResponse.error_to_json)])
 let get_effective_recommendation_preferences =
   Command.async ~summary:""
     ([%map_open.Command
@@ -458,6 +698,40 @@ let get_enrollment_statuses_for_organization =
            (Some Values.GetEnrollmentStatusesForOrganizationResponse.to_json)
            (Some
               Values.GetEnrollmentStatusesForOrganizationResponse.error_to_json)])
+let get_idle_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArns =
+         flag "resource-arns" (optional json_arg) ~doc:"JSON ResourceArns"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IdleMaxResults"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON IdleRecommendationFilters"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON AccountIds"
+       and orderBy = flag "order-by" (optional json_arg) ~doc:"JSON OrderBy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_idle_recommendations
+           (Values.GetIdleRecommendationsRequest.make
+              ?resourceArns:(Option.map ~f:Values.ResourceArns.of_json
+                               resourceArns) ?nextToken ?maxResults
+              ?filters:(Option.map
+                          ~f:Values.IdleRecommendationFilters.of_json filters)
+              ?accountIds:(Option.map ~f:Values.AccountIds.of_json accountIds)
+              ?orderBy:(Option.map ~f:Values.OrderBy.of_json orderBy) ())
+           (Some Values.GetIdleRecommendationsResponse.to_json)
+           (Some Values.GetIdleRecommendationsResponse.error_to_json)])
 let get_lambda_function_recommendations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -492,6 +766,113 @@ let get_lambda_function_recommendations =
            (Some Values.GetLambdaFunctionRecommendationsResponse.to_json)
            (Some
               Values.GetLambdaFunctionRecommendationsResponse.error_to_json)])
+let get_license_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArns =
+         flag "resource-arns" (optional json_arg) ~doc:"JSON ResourceArns"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON LicenseRecommendationFilters"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON AccountIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_license_recommendations
+           (Values.GetLicenseRecommendationsRequest.make
+              ?resourceArns:(Option.map ~f:Values.ResourceArns.of_json
+                               resourceArns) ?nextToken ?maxResults
+              ?filters:(Option.map
+                          ~f:Values.LicenseRecommendationFilters.of_json
+                          filters)
+              ?accountIds:(Option.map ~f:Values.AccountIds.of_json accountIds)
+              ()) (Some Values.GetLicenseRecommendationsResponse.to_json)
+           (Some Values.GetLicenseRecommendationsResponse.error_to_json)])
+let get_r_d_s_database_recommendation_projected_metrics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recommendationPreferences =
+         flag "recommendation-preferences" (optional json_arg)
+           ~doc:"JSON RecommendationPreferences"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn"
+       and stat = flag "stat" (required json_arg) ~doc:"JSON MetricStatistic"
+       and period = flag "period" (required int) ~doc:"INT Period"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON Timestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_r_d_s_database_recommendation_projected_metrics
+           (Values.GetRDSDatabaseRecommendationProjectedMetricsRequest.make
+              ?recommendationPreferences:(Option.map
+                                            ~f:Values.RecommendationPreferences.of_json
+                                            recommendationPreferences)
+              ~resourceArn ~stat:(Values.MetricStatistic.of_json stat)
+              ~period ~startTime:(Values.Timestamp.of_json startTime)
+              ~endTime:(Values.Timestamp.of_json endTime) ())
+           (Some
+              Values.GetRDSDatabaseRecommendationProjectedMetricsResponse.to_json)
+           (Some
+              Values.GetRDSDatabaseRecommendationProjectedMetricsResponse.error_to_json)])
+let get_r_d_s_database_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArns =
+         flag "resource-arns" (optional json_arg) ~doc:"JSON ResourceArns"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON RDSDBRecommendationFilters"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON AccountIds"
+       and recommendationPreferences =
+         flag "recommendation-preferences" (optional json_arg)
+           ~doc:"JSON RecommendationPreferences" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_r_d_s_database_recommendations
+           (Values.GetRDSDatabaseRecommendationsRequest.make
+              ?resourceArns:(Option.map ~f:Values.ResourceArns.of_json
+                               resourceArns) ?nextToken ?maxResults
+              ?filters:(Option.map
+                          ~f:Values.RDSDBRecommendationFilters.of_json
+                          filters)
+              ?accountIds:(Option.map ~f:Values.AccountIds.of_json accountIds)
+              ?recommendationPreferences:(Option.map
+                                            ~f:Values.RecommendationPreferences.of_json
+                                            recommendationPreferences) ())
+           (Some Values.GetRDSDatabaseRecommendationsResponse.to_json)
+           (Some Values.GetRDSDatabaseRecommendationsResponse.error_to_json)])
 let get_recommendation_preferences =
   Command.async ~summary:""
     ([%map_open.Command
@@ -559,6 +940,21 @@ let put_recommendation_preferences =
        and inferredWorkloadTypes =
          flag "inferred-workload-types" (optional json_arg)
            ~doc:"JSON InferredWorkloadTypesPreference"
+       and externalMetricsPreference =
+         flag "external-metrics-preference" (optional json_arg)
+           ~doc:"JSON ExternalMetricsPreference"
+       and lookBackPeriod =
+         flag "look-back-period" (optional json_arg)
+           ~doc:"JSON LookBackPeriodPreference"
+       and utilizationPreferences =
+         flag "utilization-preferences" (optional json_arg)
+           ~doc:"JSON UtilizationPreferences"
+       and preferredResources =
+         flag "preferred-resources" (optional json_arg)
+           ~doc:"JSON PreferredResources"
+       and savingsEstimationMode =
+         flag "savings-estimation-mode" (optional json_arg)
+           ~doc:"JSON SavingsEstimationMode"
        and resourceType =
          flag "resource-type" (required json_arg) ~doc:"JSON ResourceType" in
        fun () ->
@@ -572,6 +968,21 @@ let put_recommendation_preferences =
               ?inferredWorkloadTypes:(Option.map
                                         ~f:Values.InferredWorkloadTypesPreference.of_json
                                         inferredWorkloadTypes)
+              ?externalMetricsPreference:(Option.map
+                                            ~f:Values.ExternalMetricsPreference.of_json
+                                            externalMetricsPreference)
+              ?lookBackPeriod:(Option.map
+                                 ~f:Values.LookBackPeriodPreference.of_json
+                                 lookBackPeriod)
+              ?utilizationPreferences:(Option.map
+                                         ~f:Values.UtilizationPreferences.of_json
+                                         utilizationPreferences)
+              ?preferredResources:(Option.map
+                                     ~f:Values.PreferredResources.of_json
+                                     preferredResources)
+              ?savingsEstimationMode:(Option.map
+                                        ~f:Values.SavingsEstimationMode.of_json
+                                        savingsEstimationMode)
               ~resourceType:(Values.ResourceType.of_json resourceType) ())
            (Some Values.PutRecommendationPreferencesResponse.to_json)
            (Some Values.PutRecommendationPreferencesResponse.error_to_json)])
@@ -608,21 +1019,36 @@ let main =
       export_e_b_s_volume_recommendations);
     ("export-e-c2-instance-recommendations",
       export_e_c2_instance_recommendations);
+    ("export-e-c-s-service-recommendations",
+      export_e_c_s_service_recommendations);
+    ("export-idle-recommendations", export_idle_recommendations);
     ("export-lambda-function-recommendations",
       export_lambda_function_recommendations);
+    ("export-license-recommendations", export_license_recommendations);
+    ("export-r-d-s-database-recommendations",
+      export_r_d_s_database_recommendations);
     ("get-auto-scaling-group-recommendations",
       get_auto_scaling_group_recommendations);
     ("get-e-b-s-volume-recommendations", get_e_b_s_volume_recommendations);
     ("get-e-c2-instance-recommendations", get_e_c2_instance_recommendations);
     ("get-e-c2-recommendation-projected-metrics",
       get_e_c2_recommendation_projected_metrics);
+    ("get-e-c-s-service-recommendation-projected-metrics",
+      get_e_c_s_service_recommendation_projected_metrics);
+    ("get-e-c-s-service-recommendations", get_e_c_s_service_recommendations);
     ("get-effective-recommendation-preferences",
       get_effective_recommendation_preferences);
     ("get-enrollment-status", get_enrollment_status);
     ("get-enrollment-statuses-for-organization",
       get_enrollment_statuses_for_organization);
+    ("get-idle-recommendations", get_idle_recommendations);
     ("get-lambda-function-recommendations",
       get_lambda_function_recommendations);
+    ("get-license-recommendations", get_license_recommendations);
+    ("get-r-d-s-database-recommendation-projected-metrics",
+      get_r_d_s_database_recommendation_projected_metrics);
+    ("get-r-d-s-database-recommendations",
+      get_r_d_s_database_recommendations);
     ("get-recommendation-preferences", get_recommendation_preferences);
     ("get-recommendation-summaries", get_recommendation_summaries);
     ("put-recommendation-preferences", put_recommendation_preferences);

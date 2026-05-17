@@ -23,6 +23,267 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module BinaryAnalyzerName =
+  struct
+    type nonrec t =
+      | DLL_ANALYZER 
+      | BYTECODE_ANALYZER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DLL_ANALYZER -> "DLL_ANALYZER"
+      | BYTECODE_ANALYZER -> "BYTECODE_ANALYZER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DLL_ANALYZER" -> DLL_ANALYZER
+      | "BYTECODE_ANALYZER" -> BYTECODE_ANALYZER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration BinaryAnalyzerName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BinaryAnalyzerName" j)
+    let to_json = simple_to_json to_value
+  end
+module RunTimeAnalyzerName =
+  struct
+    type nonrec t =
+      | A2C_ANALYZER 
+      | REHOST_ANALYZER 
+      | EMP_PA_ANALYZER 
+      | DATABASE_ANALYZER 
+      | SCT_ANALYZER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | A2C_ANALYZER -> "A2C_ANALYZER"
+      | REHOST_ANALYZER -> "REHOST_ANALYZER"
+      | EMP_PA_ANALYZER -> "EMP_PA_ANALYZER"
+      | DATABASE_ANALYZER -> "DATABASE_ANALYZER"
+      | SCT_ANALYZER -> "SCT_ANALYZER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "A2C_ANALYZER" -> A2C_ANALYZER
+      | "REHOST_ANALYZER" -> REHOST_ANALYZER
+      | "EMP_PA_ANALYZER" -> EMP_PA_ANALYZER
+      | "DATABASE_ANALYZER" -> DATABASE_ANALYZER
+      | "SCT_ANALYZER" -> SCT_ANALYZER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RunTimeAnalyzerName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RunTimeAnalyzerName" j)
+    let to_json = simple_to_json to_value
+  end
+module SourceCodeAnalyzerName =
+  struct
+    type nonrec t =
+      | CSHARP_ANALYZER 
+      | JAVA_ANALYZER 
+      | BYTECODE_ANALYZER 
+      | PORTING_ASSISTANT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CSHARP_ANALYZER -> "CSHARP_ANALYZER"
+      | JAVA_ANALYZER -> "JAVA_ANALYZER"
+      | BYTECODE_ANALYZER -> "BYTECODE_ANALYZER"
+      | PORTING_ASSISTANT -> "PORTING_ASSISTANT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CSHARP_ANALYZER" -> CSHARP_ANALYZER
+      | "JAVA_ANALYZER" -> JAVA_ANALYZER
+      | "BYTECODE_ANALYZER" -> BYTECODE_ANALYZER
+      | "PORTING_ASSISTANT" -> PORTING_ASSISTANT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SourceCodeAnalyzerName" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SourceCodeAnalyzerName" j)
+    let to_json = simple_to_json to_value
+  end
+module S3Bucket =
+  struct
+    type nonrec t = string
+    let context_ = "S3Bucket"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[0-9a-z]+[0-9a-z\\.\\-]*[0-9a-z]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Bucket" j
+    let to_json = simple_to_json to_value
+  end
+module S3Key =
+  struct
+    type nonrec t = string
+    let context_ = "S3Key"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Key" j
+    let to_json = simple_to_json to_value
+  end
+module AnalyzerNameUnion =
+  struct
+    type nonrec t =
+      {
+      binaryAnalyzerName: BinaryAnalyzerName.t option
+        [@ocaml.doc "The binary analyzer names."];
+      runTimeAnalyzerName: RunTimeAnalyzerName.t option
+        [@ocaml.doc "The assessment analyzer names."];
+      sourceCodeAnalyzerName: SourceCodeAnalyzerName.t option
+        [@ocaml.doc "The source code analyzer names."]}
+    let make ?binaryAnalyzerName =
+      fun ?runTimeAnalyzerName ->
+        fun ?sourceCodeAnalyzerName ->
+          fun () ->
+            { binaryAnalyzerName; runTimeAnalyzerName; sourceCodeAnalyzerName
+            }
+    let to_value x =
+      structure_to_value
+        [("binaryAnalyzerName",
+           (Option.map x.binaryAnalyzerName ~f:BinaryAnalyzerName.to_value));
+        ("runTimeAnalyzerName",
+          (Option.map x.runTimeAnalyzerName ~f:RunTimeAnalyzerName.to_value));
+        ("sourceCodeAnalyzerName",
+          (Option.map x.sourceCodeAnalyzerName
+             ~f:SourceCodeAnalyzerName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceCodeAnalyzerName =
+        (Option.map ~f:SourceCodeAnalyzerName.of_xml)
+          (Xml.child xml_arg0 "sourceCodeAnalyzerName") in
+      let runTimeAnalyzerName =
+        (Option.map ~f:RunTimeAnalyzerName.of_xml)
+          (Xml.child xml_arg0 "runTimeAnalyzerName") in
+      let binaryAnalyzerName =
+        (Option.map ~f:BinaryAnalyzerName.of_xml)
+          (Xml.child xml_arg0 "binaryAnalyzerName") in
+      make ?sourceCodeAnalyzerName ?runTimeAnalyzerName ?binaryAnalyzerName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceCodeAnalyzerName =
+        field_map json__ "sourceCodeAnalyzerName"
+          SourceCodeAnalyzerName.of_json in
+      let runTimeAnalyzerName =
+        field_map json__ "runTimeAnalyzerName" RunTimeAnalyzerName.of_json in
+      let binaryAnalyzerName =
+        field_map json__ "binaryAnalyzerName" BinaryAnalyzerName.of_json in
+      make ?sourceCodeAnalyzerName ?runTimeAnalyzerName ?binaryAnalyzerName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The combination of the existing analyzers."]
+module AntipatternReportStatus =
+  struct
+    type nonrec t =
+      | FAILED 
+      | IN_PROGRESS 
+      | SUCCESS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FAILED -> "FAILED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCESS -> "SUCCESS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FAILED" -> FAILED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCESS" -> SUCCESS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AntipatternReportStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AntipatternReportStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module S3Object =
+  struct
+    type nonrec t =
+      {
+      s3Bucket: S3Bucket.t option [@ocaml.doc "The S3 bucket name."];
+      s3key: S3Key.t option [@ocaml.doc "The Amazon S3 key name."]}
+    let make ?s3Bucket = fun ?s3key -> fun () -> { s3Bucket; s3key }
+    let to_value x =
+      structure_to_value
+        [("s3Bucket", (Option.map x.s3Bucket ~f:S3Bucket.to_value));
+        ("s3key", (Option.map x.s3key ~f:S3Key.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3key = (Option.map ~f:S3Key.of_xml) (Xml.child xml_arg0 "s3key") in
+      let s3Bucket =
+        (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "s3Bucket") in
+      make ?s3key ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3key = field_map json__ "s3key" S3Key.of_json in
+      let s3Bucket = field_map json__ "s3Bucket" S3Bucket.of_json in
+      make ?s3key ?s3Bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains the S3 bucket name and the Amazon S3 key name."]
+module StatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "StatusMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StatusMessage" j
+    let to_json = simple_to_json to_value
+  end
 module IPAddress =
   struct
     type nonrec t = string
@@ -107,6 +368,267 @@ module NetMask =
     let of_json j = string_of_json ~kind:"NetMask" j
     let to_json = simple_to_json to_value
   end
+module AuthType =
+  struct
+    type nonrec t =
+      | NTLM 
+      | SSH 
+      | CERT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NTLM -> "NTLM"
+      | SSH -> "SSH"
+      | CERT -> "CERT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NTLM" -> NTLM
+      | "SSH" -> SSH
+      | "CERT" -> CERT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AuthType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AuthType" j)
+    let to_json = simple_to_json to_value
+  end
+module OSType =
+  struct
+    type nonrec t =
+      | LINUX 
+      | WINDOWS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LINUX -> "LINUX"
+      | WINDOWS -> "WINDOWS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LINUX" -> LINUX
+      | "WINDOWS" -> WINDOWS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OSType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OSType" j)
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module PipelineType =
+  struct
+    type nonrec t =
+      | AZURE_DEVOPS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | AZURE_DEVOPS -> "AZURE_DEVOPS" | Non_static_id s -> s
+    let of_string =
+      function | "AZURE_DEVOPS" -> AZURE_DEVOPS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PipelineType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PipelineType" j)
+    let to_json = simple_to_json to_value
+  end
+module VersionControlType =
+  struct
+    type nonrec t =
+      | GITHUB 
+      | GITHUB_ENTERPRISE 
+      | AZURE_DEVOPS_GIT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GITHUB -> "GITHUB"
+      | GITHUB_ENTERPRISE -> "GITHUB_ENTERPRISE"
+      | AZURE_DEVOPS_GIT -> "AZURE_DEVOPS_GIT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GITHUB" -> GITHUB
+      | "GITHUB_ENTERPRISE" -> GITHUB_ENTERPRISE
+      | "AZURE_DEVOPS_GIT" -> AZURE_DEVOPS_GIT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VersionControlType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VersionControlType" j)
+    let to_json = simple_to_json to_value
+  end
+module RuntimeAnalysisStatus =
+  struct
+    type nonrec t =
+      | ANALYSIS_TO_BE_SCHEDULED 
+      | ANALYSIS_STARTED 
+      | ANALYSIS_SUCCESS 
+      | ANALYSIS_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ANALYSIS_TO_BE_SCHEDULED -> "ANALYSIS_TO_BE_SCHEDULED"
+      | ANALYSIS_STARTED -> "ANALYSIS_STARTED"
+      | ANALYSIS_SUCCESS -> "ANALYSIS_SUCCESS"
+      | ANALYSIS_FAILED -> "ANALYSIS_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ANALYSIS_TO_BE_SCHEDULED" -> ANALYSIS_TO_BE_SCHEDULED
+      | "ANALYSIS_STARTED" -> ANALYSIS_STARTED
+      | "ANALYSIS_SUCCESS" -> ANALYSIS_SUCCESS
+      | "ANALYSIS_FAILED" -> ANALYSIS_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RuntimeAnalysisStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RuntimeAnalysisStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SrcCodeOrDbAnalysisStatus =
+  struct
+    type nonrec t =
+      | ANALYSIS_TO_BE_SCHEDULED 
+      | ANALYSIS_STARTED 
+      | ANALYSIS_SUCCESS 
+      | ANALYSIS_FAILED 
+      | ANALYSIS_PARTIAL_SUCCESS 
+      | UNCONFIGURED 
+      | CONFIGURED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ANALYSIS_TO_BE_SCHEDULED -> "ANALYSIS_TO_BE_SCHEDULED"
+      | ANALYSIS_STARTED -> "ANALYSIS_STARTED"
+      | ANALYSIS_SUCCESS -> "ANALYSIS_SUCCESS"
+      | ANALYSIS_FAILED -> "ANALYSIS_FAILED"
+      | ANALYSIS_PARTIAL_SUCCESS -> "ANALYSIS_PARTIAL_SUCCESS"
+      | UNCONFIGURED -> "UNCONFIGURED"
+      | CONFIGURED -> "CONFIGURED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ANALYSIS_TO_BE_SCHEDULED" -> ANALYSIS_TO_BE_SCHEDULED
+      | "ANALYSIS_STARTED" -> ANALYSIS_STARTED
+      | "ANALYSIS_SUCCESS" -> ANALYSIS_SUCCESS
+      | "ANALYSIS_FAILED" -> ANALYSIS_FAILED
+      | "ANALYSIS_PARTIAL_SUCCESS" -> ANALYSIS_PARTIAL_SUCCESS
+      | "UNCONFIGURED" -> UNCONFIGURED
+      | "CONFIGURED" -> CONFIGURED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SrcCodeOrDbAnalysisStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SrcCodeOrDbAnalysisStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AntipatternReportResult =
+  struct
+    type nonrec t =
+      {
+      analyzerName: AnalyzerNameUnion.t option
+        [@ocaml.doc "The analyzer name."];
+      antiPatternReportS3Object: S3Object.t option ;
+      antipatternReportStatus: AntipatternReportStatus.t option
+        [@ocaml.doc "The status of the anti-pattern report generation."];
+      antipatternReportStatusMessage: StatusMessage.t option
+        [@ocaml.doc "The status message for the anti-pattern."]}
+    let make ?analyzerName =
+      fun ?antiPatternReportS3Object ->
+        fun ?antipatternReportStatus ->
+          fun ?antipatternReportStatusMessage ->
+            fun () ->
+              {
+                analyzerName;
+                antiPatternReportS3Object;
+                antipatternReportStatus;
+                antipatternReportStatusMessage
+              }
+    let to_value x =
+      structure_to_value
+        [("analyzerName",
+           (Option.map x.analyzerName ~f:AnalyzerNameUnion.to_value));
+        ("antiPatternReportS3Object",
+          (Option.map x.antiPatternReportS3Object ~f:S3Object.to_value));
+        ("antipatternReportStatus",
+          (Option.map x.antipatternReportStatus
+             ~f:AntipatternReportStatus.to_value));
+        ("antipatternReportStatusMessage",
+          (Option.map x.antipatternReportStatusMessage
+             ~f:StatusMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let antipatternReportStatusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "antipatternReportStatusMessage") in
+      let antipatternReportStatus =
+        (Option.map ~f:AntipatternReportStatus.of_xml)
+          (Xml.child xml_arg0 "antipatternReportStatus") in
+      let antiPatternReportS3Object =
+        (Option.map ~f:S3Object.of_xml)
+          (Xml.child xml_arg0 "antiPatternReportS3Object") in
+      let analyzerName =
+        (Option.map ~f:AnalyzerNameUnion.of_xml)
+          (Xml.child xml_arg0 "analyzerName") in
+      make ?antipatternReportStatusMessage ?antipatternReportStatus
+        ?antiPatternReportS3Object ?analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let antipatternReportStatusMessage =
+        field_map json__ "antipatternReportStatusMessage"
+          StatusMessage.of_json in
+      let antipatternReportStatus =
+        field_map json__ "antipatternReportStatus"
+          AntipatternReportStatus.of_json in
+      let antiPatternReportS3Object =
+        field_map json__ "antiPatternReportS3Object" S3Object.of_json in
+      let analyzerName =
+        field_map json__ "analyzerName" AnalyzerNameUnion.of_json in
+      make ?antipatternReportStatusMessage ?antipatternReportStatus
+        ?antiPatternReportS3Object ?analyzerName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The anti-pattern report result."]
 module AwsManagedTargetDestination =
   struct
     type nonrec t =
@@ -530,80 +1052,53 @@ module NetworkInfo =
   struct
     type nonrec t =
       {
-      interfaceName: InterfaceName.t
+      interfaceName: InterfaceName.t option
         [@ocaml.doc
           "Information about the name of the interface of the server for which the assessment was run."];
-      ipAddress: IPAddress.t
+      ipAddress: IPAddress.t option
         [@ocaml.doc
           "Information about the IP address of the server for which the assessment was run."];
-      macAddress: MacAddress.t
+      macAddress: MacAddress.t option
         [@ocaml.doc
           "Information about the MAC address of the server for which the assessment was run."];
-      netMask: NetMask.t
+      netMask: NetMask.t option
         [@ocaml.doc
           "Information about the subnet mask of the server for which the assessment was run."]}
-    let context_ = "NetworkInfo"
-    let make ~interfaceName =
-      fun ~ipAddress ->
-        fun ~macAddress ->
-          fun ~netMask ->
+    let make ?interfaceName =
+      fun ?ipAddress ->
+        fun ?macAddress ->
+          fun ?netMask ->
             fun () -> { interfaceName; ipAddress; macAddress; netMask }
     let to_value x =
       structure_to_value
-        [("interfaceName", (Some (InterfaceName.to_value x.interfaceName)));
-        ("ipAddress", (Some (IPAddress.to_value x.ipAddress)));
-        ("macAddress", (Some (MacAddress.to_value x.macAddress)));
-        ("netMask", (Some (NetMask.to_value x.netMask)))]
+        [("interfaceName",
+           (Option.map x.interfaceName ~f:InterfaceName.to_value));
+        ("ipAddress", (Option.map x.ipAddress ~f:IPAddress.to_value));
+        ("macAddress", (Option.map x.macAddress ~f:MacAddress.to_value));
+        ("netMask", (Option.map x.netMask ~f:NetMask.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let netMask =
-        NetMask.of_xml (Xml.child_exn ~context:context_ xml_arg0 "netMask") in
+        (Option.map ~f:NetMask.of_xml) (Xml.child xml_arg0 "netMask") in
       let macAddress =
-        MacAddress.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "macAddress") in
+        (Option.map ~f:MacAddress.of_xml) (Xml.child xml_arg0 "macAddress") in
       let ipAddress =
-        IPAddress.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ipAddress") in
+        (Option.map ~f:IPAddress.of_xml) (Xml.child xml_arg0 "ipAddress") in
       let interfaceName =
-        InterfaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "interfaceName") in
-      make ~netMask ~macAddress ~ipAddress ~interfaceName ()
+        (Option.map ~f:InterfaceName.of_xml)
+          (Xml.child xml_arg0 "interfaceName") in
+      make ?netMask ?macAddress ?ipAddress ?interfaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let netMask = field_map_exn json "netMask" NetMask.of_json in
-      let macAddress = field_map_exn json "macAddress" MacAddress.of_json in
-      let ipAddress = field_map_exn json "ipAddress" IPAddress.of_json in
+    let of_json json__ =
+      let netMask = field_map json__ "netMask" NetMask.of_json in
+      let macAddress = field_map json__ "macAddress" MacAddress.of_json in
+      let ipAddress = field_map json__ "ipAddress" IPAddress.of_json in
       let interfaceName =
-        field_map_exn json "interfaceName" InterfaceName.of_json in
-      make ~netMask ~macAddress ~ipAddress ~interfaceName ()
+        field_map json__ "interfaceName" InterfaceName.of_json in
+      make ?netMask ?macAddress ?ipAddress ?interfaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the server's network for which the assessment was run."]
-module OSType =
-  struct
-    type nonrec t =
-      | LINUX 
-      | WINDOWS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | LINUX -> "LINUX"
-      | WINDOWS -> "WINDOWS"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "LINUX" -> LINUX
-      | "WINDOWS" -> WINDOWS
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration OSType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"OSType" j)
-    let to_json = simple_to_json to_value
-  end
 module OSVersion =
   struct
     type nonrec t = string
@@ -624,25 +1119,248 @@ module OSVersion =
     let of_json j = string_of_json ~kind:"OSVersion" j
     let to_json = simple_to_json to_value
   end
-module String_ =
+module IPAddressBasedRemoteInfo =
   struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      authType: AuthType.t option [@ocaml.doc "The type of authorization."];
+      ipAddressConfigurationTimeStamp: String_.t option
+        [@ocaml.doc "The time stamp of the configuration."];
+      osType: OSType.t option
+        [@ocaml.doc "The type of the operating system."]}
+    let make ?authType =
+      fun ?ipAddressConfigurationTimeStamp ->
+        fun ?osType ->
+          fun () -> { authType; ipAddressConfigurationTimeStamp; osType }
+    let to_value x =
+      structure_to_value
+        [("authType", (Option.map x.authType ~f:AuthType.to_value));
+        ("ipAddressConfigurationTimeStamp",
+          (Option.map x.ipAddressConfigurationTimeStamp ~f:String_.to_value));
+        ("osType", (Option.map x.osType ~f:OSType.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
+    let of_xml xml_arg0 =
+      let osType =
+        (Option.map ~f:OSType.of_xml) (Xml.child xml_arg0 "osType") in
+      let ipAddressConfigurationTimeStamp =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ipAddressConfigurationTimeStamp") in
+      let authType =
+        (Option.map ~f:AuthType.of_xml) (Xml.child xml_arg0 "authType") in
+      make ?osType ?ipAddressConfigurationTimeStamp ?authType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let osType = field_map json__ "osType" OSType.of_json in
+      let ipAddressConfigurationTimeStamp =
+        field_map json__ "ipAddressConfigurationTimeStamp" String_.of_json in
+      let authType = field_map json__ "authType" AuthType.of_json in
+      make ?osType ?ipAddressConfigurationTimeStamp ?authType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "IP address based configurations."]
+module PipelineInfo =
+  struct
+    type nonrec t =
+      {
+      pipelineConfigurationTimeStamp: String_.t option
+        [@ocaml.doc "The time when the pipeline info was configured."];
+      pipelineType: PipelineType.t option
+        [@ocaml.doc "The type of pipeline."]}
+    let make ?pipelineConfigurationTimeStamp =
+      fun ?pipelineType ->
+        fun () -> { pipelineConfigurationTimeStamp; pipelineType }
+    let to_value x =
+      structure_to_value
+        [("pipelineConfigurationTimeStamp",
+           (Option.map x.pipelineConfigurationTimeStamp ~f:String_.to_value));
+        ("pipelineType",
+          (Option.map x.pipelineType ~f:PipelineType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pipelineType =
+        (Option.map ~f:PipelineType.of_xml)
+          (Xml.child xml_arg0 "pipelineType") in
+      let pipelineConfigurationTimeStamp =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "pipelineConfigurationTimeStamp") in
+      make ?pipelineType ?pipelineConfigurationTimeStamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pipelineType = field_map json__ "pipelineType" PipelineType.of_json in
+      let pipelineConfigurationTimeStamp =
+        field_map json__ "pipelineConfigurationTimeStamp" String_.of_json in
+      make ?pipelineType ?pipelineConfigurationTimeStamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Detailed information of the pipeline."]
+module VcenterBasedRemoteInfo =
+  struct
+    type nonrec t =
+      {
+      osType: OSType.t option
+        [@ocaml.doc "The type of the operating system."];
+      vcenterConfigurationTimeStamp: String_.t option
+        [@ocaml.doc
+          "The time when the remote server based on vCenter was last configured."]}
+    let make ?osType =
+      fun ?vcenterConfigurationTimeStamp ->
+        fun () -> { osType; vcenterConfigurationTimeStamp }
+    let to_value x =
+      structure_to_value
+        [("osType", (Option.map x.osType ~f:OSType.to_value));
+        ("vcenterConfigurationTimeStamp",
+          (Option.map x.vcenterConfigurationTimeStamp ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vcenterConfigurationTimeStamp =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "vcenterConfigurationTimeStamp") in
+      let osType =
+        (Option.map ~f:OSType.of_xml) (Xml.child xml_arg0 "osType") in
+      make ?vcenterConfigurationTimeStamp ?osType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vcenterConfigurationTimeStamp =
+        field_map json__ "vcenterConfigurationTimeStamp" String_.of_json in
+      let osType = field_map json__ "osType" OSType.of_json in
+      make ?vcenterConfigurationTimeStamp ?osType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about the server in vCenter."]
+module VersionControlInfo =
+  struct
+    type nonrec t =
+      {
+      versionControlConfigurationTimeStamp: String_.t option
+        [@ocaml.doc
+          "The time when the version control system was last configured."];
+      versionControlType: VersionControlType.t option
+        [@ocaml.doc "The type of version control."]}
+    let make ?versionControlConfigurationTimeStamp =
+      fun ?versionControlType ->
+        fun () ->
+          { versionControlConfigurationTimeStamp; versionControlType }
+    let to_value x =
+      structure_to_value
+        [("versionControlConfigurationTimeStamp",
+           (Option.map x.versionControlConfigurationTimeStamp
+              ~f:String_.to_value));
+        ("versionControlType",
+          (Option.map x.versionControlType ~f:VersionControlType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let versionControlType =
+        (Option.map ~f:VersionControlType.of_xml)
+          (Xml.child xml_arg0 "versionControlType") in
+      let versionControlConfigurationTimeStamp =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "versionControlConfigurationTimeStamp") in
+      make ?versionControlType ?versionControlConfigurationTimeStamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let versionControlType =
+        field_map json__ "versionControlType" VersionControlType.of_json in
+      let versionControlConfigurationTimeStamp =
+        field_map json__ "versionControlConfigurationTimeStamp"
+          String_.of_json in
+      make ?versionControlType ?versionControlConfigurationTimeStamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about the version control configuration."]
+module AnalysisStatusUnion =
+  struct
+    type nonrec t =
+      {
+      runtimeAnalysisStatus: RuntimeAnalysisStatus.t option
+        [@ocaml.doc "The status of the analysis."];
+      srcCodeOrDbAnalysisStatus: SrcCodeOrDbAnalysisStatus.t option
+        [@ocaml.doc "The status of the source code or database analysis."]}
+    let make ?runtimeAnalysisStatus =
+      fun ?srcCodeOrDbAnalysisStatus ->
+        fun () -> { runtimeAnalysisStatus; srcCodeOrDbAnalysisStatus }
+    let to_value x =
+      structure_to_value
+        [("runtimeAnalysisStatus",
+           (Option.map x.runtimeAnalysisStatus
+              ~f:RuntimeAnalysisStatus.to_value));
+        ("srcCodeOrDbAnalysisStatus",
+          (Option.map x.srcCodeOrDbAnalysisStatus
+             ~f:SrcCodeOrDbAnalysisStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let srcCodeOrDbAnalysisStatus =
+        (Option.map ~f:SrcCodeOrDbAnalysisStatus.of_xml)
+          (Xml.child xml_arg0 "srcCodeOrDbAnalysisStatus") in
+      let runtimeAnalysisStatus =
+        (Option.map ~f:RuntimeAnalysisStatus.of_xml)
+          (Xml.child xml_arg0 "runtimeAnalysisStatus") in
+      make ?srcCodeOrDbAnalysisStatus ?runtimeAnalysisStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let srcCodeOrDbAnalysisStatus =
+        field_map json__ "srcCodeOrDbAnalysisStatus"
+          SrcCodeOrDbAnalysisStatus.of_json in
+      let runtimeAnalysisStatus =
+        field_map json__ "runtimeAnalysisStatus"
+          RuntimeAnalysisStatus.of_json in
+      make ?srcCodeOrDbAnalysisStatus ?runtimeAnalysisStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A combination of existing analysis statuses."]
+module AnalysisType =
+  struct
+    type nonrec t =
+      | SOURCE_CODE_ANALYSIS 
+      | DATABASE_ANALYSIS 
+      | RUNTIME_ANALYSIS 
+      | BINARY_ANALYSIS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SOURCE_CODE_ANALYSIS -> "SOURCE_CODE_ANALYSIS"
+      | DATABASE_ANALYSIS -> "DATABASE_ANALYSIS"
+      | RUNTIME_ANALYSIS -> "RUNTIME_ANALYSIS"
+      | BINARY_ANALYSIS -> "BINARY_ANALYSIS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SOURCE_CODE_ANALYSIS" -> SOURCE_CODE_ANALYSIS
+      | "DATABASE_ANALYSIS" -> DATABASE_ANALYSIS
+      | "RUNTIME_ANALYSIS" -> RUNTIME_ANALYSIS
+      | "BINARY_ANALYSIS" -> BINARY_ANALYSIS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AnalysisType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AnalysisType" j)
     let to_json = simple_to_json to_value
+  end
+module AntipatternReportResultList =
+  struct
+    type nonrec t = AntipatternReportResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AntipatternReportResult.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AntipatternReportResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AntipatternReportResultList"
+        ~of_json:AntipatternReportResult.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module AwsManagedTargetDestinations =
   struct
@@ -652,6 +1370,9 @@ module AwsManagedTargetDestinations =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsManagedTargetDestination.to_value)) |>
         (fun x -> `List x)
@@ -682,6 +1403,9 @@ module NoPreferenceTargetDestinations =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NoPreferenceTargetDestination.to_value)) |>
         (fun x -> `List x)
@@ -712,6 +1436,9 @@ module SelfManageTargetDestinations =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SelfManageTargetDestination.to_value)) |>
         (fun x -> `List x)
@@ -742,6 +1469,9 @@ module HeterogeneousTargetDatabaseEngines =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HeterogeneousTargetDatabaseEngine.to_value)) |>
         (fun x -> `List x)
@@ -773,6 +1503,9 @@ module HomogeneousTargetDatabaseEngines =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HomogeneousTargetDatabaseEngine.to_value)) |>
         (fun x -> `List x)
@@ -803,6 +1536,9 @@ module TargetDatabaseEngines =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetDatabaseEngine.to_value)) |>
         (fun x -> `List x)
@@ -845,9 +1581,9 @@ module AntipatternSeveritySummary =
       let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "count") in
       make ?severity ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let severity = field_map json "severity" Severity.of_json in
-      let count = field_map json "count" Integer.of_json in
+    let of_json json__ =
+      let severity = field_map json__ "severity" Severity.of_json in
+      let count = field_map json__ "count" Integer.of_json in
       make ?severity ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -872,9 +1608,9 @@ module StrategySummary =
       let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "count") in
       make ?strategy ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let strategy = field_map json "strategy" Strategy.of_json in
-      let count = field_map json "count" Integer.of_json in
+    let of_json json__ =
+      let strategy = field_map json__ "strategy" Strategy.of_json in
+      let count = field_map json__ "count" Integer.of_json in
       make ?strategy ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -895,6 +1631,7 @@ module TargetDestination =
       | Amazon_DocumentDB 
       | Amazon_DynamoDB 
       | Amazon_Relational_Database_Service 
+      | Babelfish_for_Aurora_PostgreSQL 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -918,6 +1655,7 @@ module TargetDestination =
       | Amazon_DynamoDB -> "Amazon DynamoDB"
       | Amazon_Relational_Database_Service ->
           "Amazon Relational Database Service"
+      | Babelfish_for_Aurora_PostgreSQL -> "Babelfish for Aurora PostgreSQL"
       | Non_static_id s -> s
     let of_string =
       function
@@ -940,6 +1678,7 @@ module TargetDestination =
       | "Amazon DynamoDB" -> Amazon_DynamoDB
       | "Amazon Relational Database Service" ->
           Amazon_Relational_Database_Service
+      | "Babelfish for Aurora PostgreSQL" -> Babelfish_for_Aurora_PostgreSQL
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -985,63 +1724,59 @@ module TransformationTool =
           (Xml.child xml_arg0 "description") in
       make ?tranformationToolInstallationLink ?name ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tranformationToolInstallationLink =
-        field_map json "tranformationToolInstallationLink"
+        field_map json__ "tranformationToolInstallationLink"
           TranformationToolInstallationLink.of_json in
-      let name = field_map json "name" TransformationToolName.of_json in
+      let name = field_map json__ "name" TransformationToolName.of_json in
       let description =
-        field_map json "description" TranformationToolDescription.of_json in
+        field_map json__ "description" TranformationToolDescription.of_json in
       make ?tranformationToolInstallationLink ?name ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information of the transformation tool that can be used to migrate and modernize the application."]
-module S3Bucket =
+module ServerErrorCategory =
   struct
-    type nonrec t = string
-    let context_ = "S3Bucket"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:63) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[0-9a-z]+[0-9a-z\\.\\-]*[0-9a-z]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | CONNECTIVITY_ERROR 
+      | CREDENTIAL_ERROR 
+      | PERMISSION_ERROR 
+      | ARCHITECTURE_ERROR 
+      | OTHER_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONNECTIVITY_ERROR -> "CONNECTIVITY_ERROR"
+      | CREDENTIAL_ERROR -> "CREDENTIAL_ERROR"
+      | PERMISSION_ERROR -> "PERMISSION_ERROR"
+      | ARCHITECTURE_ERROR -> "ARCHITECTURE_ERROR"
+      | OTHER_ERROR -> "OTHER_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONNECTIVITY_ERROR" -> CONNECTIVITY_ERROR
+      | "CREDENTIAL_ERROR" -> CREDENTIAL_ERROR
+      | "PERMISSION_ERROR" -> PERMISSION_ERROR
+      | "ARCHITECTURE_ERROR" -> ARCHITECTURE_ERROR
+      | "OTHER_ERROR" -> OTHER_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"S3Bucket" j
-    let to_json = simple_to_json to_value
-  end
-module S3Key =
-  struct
-    type nonrec t = string
-    let context_ = "S3Key"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"S3Key" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServerErrorCategory" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ServerErrorCategory" j)
     let to_json = simple_to_json to_value
   end
 module NetworkInfoList =
   struct
     type nonrec t = NetworkInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1082,28 +1817,274 @@ module OSInfo =
       let type_ = (Option.map ~f:OSType.of_xml) (Xml.child xml_arg0 "type") in
       make ?version ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" OSVersion.of_json in
-      let type_ = field_map json "type" OSType.of_json in
+    let of_json json__ =
+      let version = field_map json__ "version" OSVersion.of_json in
+      let type_ = field_map json__ "type" OSType.of_json in
       make ?version ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the operating system."]
+module IPAddressBasedRemoteInfoList =
+  struct
+    type nonrec t = IPAddressBasedRemoteInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IPAddressBasedRemoteInfo.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IPAddressBasedRemoteInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IPAddressBasedRemoteInfoList"
+        ~of_json:IPAddressBasedRemoteInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PipelineInfoList =
+  struct
+    type nonrec t = PipelineInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PipelineInfo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PipelineInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PipelineInfoList" ~of_json:PipelineInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RemoteSourceCodeAnalysisServerInfo =
+  struct
+    type nonrec t =
+      {
+      remoteSourceCodeAnalysisServerConfigurationTimestamp: String_.t option
+        [@ocaml.doc
+          "The time when the remote source code server was configured."]}
+    let make ?remoteSourceCodeAnalysisServerConfigurationTimestamp =
+      fun () -> { remoteSourceCodeAnalysisServerConfigurationTimestamp }
+    let to_value x =
+      structure_to_value
+        [("remoteSourceCodeAnalysisServerConfigurationTimestamp",
+           (Option.map x.remoteSourceCodeAnalysisServerConfigurationTimestamp
+              ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let remoteSourceCodeAnalysisServerConfigurationTimestamp =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0
+             "remoteSourceCodeAnalysisServerConfigurationTimestamp") in
+      make ?remoteSourceCodeAnalysisServerConfigurationTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let remoteSourceCodeAnalysisServerConfigurationTimestamp =
+        field_map json__
+          "remoteSourceCodeAnalysisServerConfigurationTimestamp"
+          String_.of_json in
+      make ?remoteSourceCodeAnalysisServerConfigurationTimestamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the server configured for source code analysis."]
+module VcenterBasedRemoteInfoList =
+  struct
+    type nonrec t = VcenterBasedRemoteInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VcenterBasedRemoteInfo.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VcenterBasedRemoteInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VcenterBasedRemoteInfoList"
+        ~of_json:VcenterBasedRemoteInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VersionControlInfoList =
+  struct
+    type nonrec t = VersionControlInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VersionControlInfo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VersionControlInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VersionControlInfoList"
+        ~of_json:VersionControlInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AppUnitErrorCategory =
+  struct
+    type nonrec t =
+      | CREDENTIAL_ERROR 
+      | CONNECTIVITY_ERROR 
+      | PERMISSION_ERROR 
+      | UNSUPPORTED_ERROR 
+      | OTHER_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREDENTIAL_ERROR -> "CREDENTIAL_ERROR"
+      | CONNECTIVITY_ERROR -> "CONNECTIVITY_ERROR"
+      | PERMISSION_ERROR -> "PERMISSION_ERROR"
+      | UNSUPPORTED_ERROR -> "UNSUPPORTED_ERROR"
+      | OTHER_ERROR -> "OTHER_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREDENTIAL_ERROR" -> CREDENTIAL_ERROR
+      | "CONNECTIVITY_ERROR" -> CONNECTIVITY_ERROR
+      | "PERMISSION_ERROR" -> PERMISSION_ERROR
+      | "UNSUPPORTED_ERROR" -> UNSUPPORTED_ERROR
+      | "OTHER_ERROR" -> OTHER_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AppUnitErrorCategory" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AppUnitErrorCategory" j)
+    let to_json = simple_to_json to_value
+  end
+module Result_ =
+  struct
+    type nonrec t =
+      {
+      analysisStatus: AnalysisStatusUnion.t option
+        [@ocaml.doc "The error in server analysis."];
+      analysisType: AnalysisType.t option
+        [@ocaml.doc "The error in server analysis."];
+      antipatternReportResultList: AntipatternReportResultList.t option
+        [@ocaml.doc "The error in server analysis."];
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc "The error in server analysis."]}
+    let make ?analysisStatus =
+      fun ?analysisType ->
+        fun ?antipatternReportResultList ->
+          fun ?statusMessage ->
+            fun () ->
+              {
+                analysisStatus;
+                analysisType;
+                antipatternReportResultList;
+                statusMessage
+              }
+    let to_value x =
+      structure_to_value
+        [("analysisStatus",
+           (Option.map x.analysisStatus ~f:AnalysisStatusUnion.to_value));
+        ("analysisType",
+          (Option.map x.analysisType ~f:AnalysisType.to_value));
+        ("antipatternReportResultList",
+          (Option.map x.antipatternReportResultList
+             ~f:AntipatternReportResultList.to_value));
+        ("statusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "statusMessage") in
+      let antipatternReportResultList =
+        (Option.map ~f:AntipatternReportResultList.of_xml)
+          (Xml.child xml_arg0 "antipatternReportResultList") in
+      let analysisType =
+        (Option.map ~f:AnalysisType.of_xml)
+          (Xml.child xml_arg0 "analysisType") in
+      let analysisStatus =
+        (Option.map ~f:AnalysisStatusUnion.of_xml)
+          (Xml.child xml_arg0 "analysisStatus") in
+      make ?statusMessage ?antipatternReportResultList ?analysisType
+        ?analysisStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "statusMessage" StatusMessage.of_json in
+      let antipatternReportResultList =
+        field_map json__ "antipatternReportResultList"
+          AntipatternReportResultList.of_json in
+      let analysisType = field_map json__ "analysisType" AnalysisType.of_json in
+      let analysisStatus =
+        field_map json__ "analysisStatus" AnalysisStatusUnion.of_json in
+      make ?statusMessage ?antipatternReportResultList ?analysisType
+        ?analysisStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The error in server analysis."]
 module SourceCodeRepository =
   struct
     type nonrec t =
       {
       branch: String_.t option [@ocaml.doc "The branch of the source code."];
+      projectName: String_.t option [@ocaml.doc "The name of the project."];
       repository: String_.t option
         [@ocaml.doc "The repository name for the source code."];
       versionControlType: String_.t option
         [@ocaml.doc "The type of repository to use for the source code."]}
     let make ?branch =
-      fun ?repository ->
-        fun ?versionControlType ->
-          fun () -> { branch; repository; versionControlType }
+      fun ?projectName ->
+        fun ?repository ->
+          fun ?versionControlType ->
+            fun () -> { branch; projectName; repository; versionControlType }
     let to_value x =
       structure_to_value
         [("branch", (Option.map x.branch ~f:String_.to_value));
+        ("projectName", (Option.map x.projectName ~f:String_.to_value));
         ("repository", (Option.map x.repository ~f:String_.to_value));
         ("versionControlType",
           (Option.map x.versionControlType ~f:String_.to_value))]
@@ -1114,16 +2095,19 @@ module SourceCodeRepository =
           (Xml.child xml_arg0 "versionControlType") in
       let repository =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "repository") in
+      let projectName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "projectName") in
       let branch =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "branch") in
-      make ?versionControlType ?repository ?branch ()
+      make ?versionControlType ?repository ?projectName ?branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionControlType =
-        field_map json "versionControlType" String_.of_json in
-      let repository = field_map json "repository" String_.of_json in
-      let branch = field_map json "branch" String_.of_json in
-      make ?versionControlType ?repository ?branch ()
+        field_map json__ "versionControlType" String_.of_json in
+      let repository = field_map json__ "repository" String_.of_json in
+      let projectName = field_map json__ "projectName" String_.of_json in
+      let branch = field_map json__ "branch" String_.of_json in
+      make ?versionControlType ?repository ?projectName ?branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Object containing source code information that is linked to an application component."]
@@ -1136,6 +2120,22 @@ module AppType =
       | IIS 
       | Oracle 
       | Other 
+      | Tomcat 
+      | JBoss 
+      | Spring 
+      | Mongo_DB 
+      | DB2 
+      | Maria_DB 
+      | MySQL 
+      | Sybase 
+      | PostgreSQLServer 
+      | Cassandra 
+      | IBM_WebSphere 
+      | Oracle_WebLogic 
+      | Visual_Basic 
+      | Unknown 
+      | DotnetCore 
+      | Dotnet 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1146,6 +2146,22 @@ module AppType =
       | IIS -> "IIS"
       | Oracle -> "Oracle"
       | Other -> "Other"
+      | Tomcat -> "Tomcat"
+      | JBoss -> "JBoss"
+      | Spring -> "Spring"
+      | Mongo_DB -> "Mongo DB"
+      | DB2 -> "DB2"
+      | Maria_DB -> "Maria DB"
+      | MySQL -> "MySQL"
+      | Sybase -> "Sybase"
+      | PostgreSQLServer -> "PostgreSQLServer"
+      | Cassandra -> "Cassandra"
+      | IBM_WebSphere -> "IBM WebSphere"
+      | Oracle_WebLogic -> "Oracle WebLogic"
+      | Visual_Basic -> "Visual Basic"
+      | Unknown -> "Unknown"
+      | DotnetCore -> "DotnetCore"
+      | Dotnet -> "Dotnet"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1155,6 +2171,22 @@ module AppType =
       | "IIS" -> IIS
       | "Oracle" -> Oracle
       | "Other" -> Other
+      | "Tomcat" -> Tomcat
+      | "JBoss" -> JBoss
+      | "Spring" -> Spring
+      | "Mongo DB" -> Mongo_DB
+      | "DB2" -> DB2
+      | "Maria DB" -> Maria_DB
+      | "MySQL" -> MySQL
+      | "Sybase" -> Sybase
+      | "PostgreSQLServer" -> PostgreSQLServer
+      | "Cassandra" -> Cassandra
+      | "IBM WebSphere" -> IBM_WebSphere
+      | "Oracle WebLogic" -> Oracle_WebLogic
+      | "Visual Basic" -> Visual_Basic
+      | "Unknown" -> Unknown
+      | "DotnetCore" -> DotnetCore
+      | "Dotnet" -> Dotnet
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1162,6 +2194,50 @@ module AppType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration AppType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"AppType" j)
+    let to_json = simple_to_json to_value
+  end
+module RunTimeAssessmentStatus =
+  struct
+    type nonrec t =
+      | DataCollectionTaskToBeScheduled 
+      | DataCollectionTaskScheduled 
+      | DataCollectionTaskStarted 
+      | DataCollectionTaskStopped 
+      | DataCollectionTaskSuccess 
+      | DataCollectionTaskFailed 
+      | DataCollectionTaskPartialSuccess 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DataCollectionTaskToBeScheduled -> "dataCollectionTaskToBeScheduled"
+      | DataCollectionTaskScheduled -> "dataCollectionTaskScheduled"
+      | DataCollectionTaskStarted -> "dataCollectionTaskStarted"
+      | DataCollectionTaskStopped -> "dataCollectionTaskStopped"
+      | DataCollectionTaskSuccess -> "dataCollectionTaskSuccess"
+      | DataCollectionTaskFailed -> "dataCollectionTaskFailed"
+      | DataCollectionTaskPartialSuccess ->
+          "dataCollectionTaskPartialSuccess"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "dataCollectionTaskToBeScheduled" -> DataCollectionTaskToBeScheduled
+      | "dataCollectionTaskScheduled" -> DataCollectionTaskScheduled
+      | "dataCollectionTaskStarted" -> DataCollectionTaskStarted
+      | "dataCollectionTaskStopped" -> DataCollectionTaskStopped
+      | "dataCollectionTaskSuccess" -> DataCollectionTaskSuccess
+      | "dataCollectionTaskFailed" -> DataCollectionTaskFailed
+      | "dataCollectionTaskPartialSuccess" ->
+          DataCollectionTaskPartialSuccess
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RunTimeAssessmentStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RunTimeAssessmentStatus" j)
     let to_json = simple_to_json to_value
   end
 module ServerOsType =
@@ -1218,6 +2294,26 @@ module Location =
     let of_json j = string_of_json ~kind:"Location" j
     let to_json = simple_to_json to_value
   end
+module ProjectName =
+  struct
+    type nonrec t = string
+    let context_ = "ProjectName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProjectName" j
+    let to_json = simple_to_json to_value
+  end
 module SourceVersion =
   struct
     type nonrec t = string
@@ -1243,17 +2339,20 @@ module VersionControl =
     type nonrec t =
       | GITHUB 
       | GITHUB_ENTERPRISE 
+      | AZURE_DEVOPS_GIT 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | GITHUB -> "GITHUB"
       | GITHUB_ENTERPRISE -> "GITHUB_ENTERPRISE"
+      | AZURE_DEVOPS_GIT -> "AZURE_DEVOPS_GIT"
       | Non_static_id s -> s
     let of_string =
       function
       | "GITHUB" -> GITHUB
       | "GITHUB_ENTERPRISE" -> GITHUB_ENTERPRISE
+      | "AZURE_DEVOPS_GIT" -> AZURE_DEVOPS_GIT
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1267,18 +2366,83 @@ module GroupName =
   struct
     type nonrec t =
       | ExternalId 
+      | ExternalSourceType 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | ExternalId -> "ExternalId" | Non_static_id s -> s
+      function
+      | ExternalId -> "ExternalId"
+      | ExternalSourceType -> "ExternalSourceType"
+      | Non_static_id s -> s
     let of_string =
-      function | "ExternalId" -> ExternalId | x -> Non_static_id x
+      function
+      | "ExternalId" -> ExternalId
+      | "ExternalSourceType" -> ExternalSourceType
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration GroupName" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"GroupName" j)
+    let to_json = simple_to_json to_value
+  end
+module AssessmentTargetValues =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssessmentTargetValues" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Condition =
+  struct
+    type nonrec t =
+      | EQUALS 
+      | NOT_EQUALS 
+      | CONTAINS 
+      | NOT_CONTAINS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EQUALS -> "EQUALS"
+      | NOT_EQUALS -> "NOT_EQUALS"
+      | CONTAINS -> "CONTAINS"
+      | NOT_CONTAINS -> "NOT_CONTAINS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EQUALS" -> EQUALS
+      | "NOT_EQUALS" -> NOT_EQUALS
+      | "CONTAINS" -> CONTAINS
+      | "NOT_CONTAINS" -> NOT_CONTAINS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Condition" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Condition" j)
     let to_json = simple_to_json to_value
   end
 module AwsManagedResources =
@@ -1301,9 +2465,9 @@ module AwsManagedResources =
           (Xml.child_exn ~context:context_ xml_arg0 "targetDestination") in
       make ~targetDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetDestination =
-        field_map_exn json "targetDestination"
+        field_map_exn json__ "targetDestination"
           AwsManagedTargetDestinations.of_json in
       make ~targetDestination ()
     let to_json v = composed_to_json to_value v
@@ -1330,9 +2494,9 @@ module NoManagementPreference =
           (Xml.child_exn ~context:context_ xml_arg0 "targetDestination") in
       make ~targetDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetDestination =
-        field_map_exn json "targetDestination"
+        field_map_exn json__ "targetDestination"
           NoPreferenceTargetDestinations.of_json in
       make ~targetDestination ()
     let to_json v = composed_to_json to_value v
@@ -1357,9 +2521,9 @@ module SelfManageResources =
           (Xml.child_exn ~context:context_ xml_arg0 "targetDestination") in
       make ~targetDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetDestination =
-        field_map_exn json "targetDestination"
+        field_map_exn json__ "targetDestination"
           SelfManageTargetDestinations.of_json in
       make ~targetDestination ()
     let to_json v = composed_to_json to_value v
@@ -1386,9 +2550,9 @@ module Heterogeneous =
           (Xml.child_exn ~context:context_ xml_arg0 "targetDatabaseEngine") in
       make ~targetDatabaseEngine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetDatabaseEngine =
-        field_map_exn json "targetDatabaseEngine"
+        field_map_exn json__ "targetDatabaseEngine"
           HeterogeneousTargetDatabaseEngines.of_json in
       make ~targetDatabaseEngine ()
     let to_json v = composed_to_json to_value v
@@ -1414,9 +2578,9 @@ module Homogeneous =
           (Xml.child xml_arg0 "targetDatabaseEngine") in
       make ?targetDatabaseEngine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetDatabaseEngine =
-        field_map json "targetDatabaseEngine"
+        field_map json__ "targetDatabaseEngine"
           HomogeneousTargetDatabaseEngines.of_json in
       make ?targetDatabaseEngine ()
     let to_json v = composed_to_json to_value v
@@ -1442,9 +2606,9 @@ module NoDatabaseMigrationPreference =
           (Xml.child_exn ~context:context_ xml_arg0 "targetDatabaseEngine") in
       make ~targetDatabaseEngine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetDatabaseEngine =
-        field_map_exn json "targetDatabaseEngine"
+        field_map_exn json__ "targetDatabaseEngine"
           TargetDatabaseEngines.of_json in
       make ~targetDatabaseEngine ()
     let to_json v = composed_to_json to_value v
@@ -1468,40 +2632,13 @@ module BusinessGoalsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module AntipatternReportStatus =
-  struct
-    type nonrec t =
-      | FAILED 
-      | IN_PROGRESS 
-      | SUCCESS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | FAILED -> "FAILED"
-      | IN_PROGRESS -> "IN_PROGRESS"
-      | SUCCESS -> "SUCCESS"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "FAILED" -> FAILED
-      | "IN_PROGRESS" -> IN_PROGRESS
-      | "SUCCESS" -> SUCCESS
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration AntipatternReportStatus" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"AntipatternReportStatus" j)
-    let to_json = simple_to_json to_value
-  end
 module ListAntipatternSeveritySummary =
   struct
     type nonrec t = AntipatternSeveritySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AntipatternSeveritySummary.to_value)) |>
         (fun x -> `List x)
@@ -1528,6 +2665,9 @@ module ListStrategySummary =
   struct
     type nonrec t = StrategySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StrategySummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1581,12 +2721,12 @@ module RecommendationSet =
         (Option.map ~f:Strategy.of_xml) (Xml.child xml_arg0 "strategy") in
       make ?transformationTool ?targetDestination ?strategy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transformationTool =
-        field_map json "transformationTool" TransformationTool.of_json in
+        field_map json__ "transformationTool" TransformationTool.of_json in
       let targetDestination =
-        field_map json "targetDestination" TargetDestination.of_json in
-      let strategy = field_map json "strategy" Strategy.of_json in
+        field_map json__ "targetDestination" TargetDestination.of_json in
+      let strategy = field_map json__ "strategy" Strategy.of_json in
       make ?transformationTool ?targetDestination ?strategy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains a recommendation set."]
@@ -1623,94 +2763,30 @@ module ResourceName =
     let of_json j = string_of_json ~kind:"ResourceName" j
     let to_json = simple_to_json to_value
   end
-module RunTimeAssessmentStatus =
-  struct
-    type nonrec t =
-      | DataCollectionTaskToBeScheduled 
-      | DataCollectionTaskScheduled 
-      | DataCollectionTaskStarted 
-      | DataCollectionTaskStopped 
-      | DataCollectionTaskSuccess 
-      | DataCollectionTaskFailed 
-      | DataCollectionTaskPartialSuccess 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | DataCollectionTaskToBeScheduled -> "dataCollectionTaskToBeScheduled"
-      | DataCollectionTaskScheduled -> "dataCollectionTaskScheduled"
-      | DataCollectionTaskStarted -> "dataCollectionTaskStarted"
-      | DataCollectionTaskStopped -> "dataCollectionTaskStopped"
-      | DataCollectionTaskSuccess -> "dataCollectionTaskSuccess"
-      | DataCollectionTaskFailed -> "dataCollectionTaskFailed"
-      | DataCollectionTaskPartialSuccess ->
-          "dataCollectionTaskPartialSuccess"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "dataCollectionTaskToBeScheduled" -> DataCollectionTaskToBeScheduled
-      | "dataCollectionTaskScheduled" -> DataCollectionTaskScheduled
-      | "dataCollectionTaskStarted" -> DataCollectionTaskStarted
-      | "dataCollectionTaskStopped" -> DataCollectionTaskStopped
-      | "dataCollectionTaskSuccess" -> DataCollectionTaskSuccess
-      | "dataCollectionTaskFailed" -> DataCollectionTaskFailed
-      | "dataCollectionTaskPartialSuccess" ->
-          DataCollectionTaskPartialSuccess
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration RunTimeAssessmentStatus" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"RunTimeAssessmentStatus" j)
-    let to_json = simple_to_json to_value
-  end
-module S3Object =
+module ServerError =
   struct
     type nonrec t =
       {
-      s3Bucket: S3Bucket.t option [@ocaml.doc "The S3 bucket name."];
-      s3key: S3Key.t option [@ocaml.doc "The Amazon S3 key name."]}
-    let make ?s3Bucket = fun ?s3key -> fun () -> { s3Bucket; s3key }
+      serverErrorCategory: ServerErrorCategory.t option
+        [@ocaml.doc "The error category of server analysis."]}
+    let make ?serverErrorCategory = fun () -> { serverErrorCategory }
     let to_value x =
       structure_to_value
-        [("s3Bucket", (Option.map x.s3Bucket ~f:S3Bucket.to_value));
-        ("s3key", (Option.map x.s3key ~f:S3Key.to_value))]
+        [("serverErrorCategory",
+           (Option.map x.serverErrorCategory ~f:ServerErrorCategory.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let s3key = (Option.map ~f:S3Key.of_xml) (Xml.child xml_arg0 "s3key") in
-      let s3Bucket =
-        (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "s3Bucket") in
-      make ?s3key ?s3Bucket ()
+      let serverErrorCategory =
+        (Option.map ~f:ServerErrorCategory.of_xml)
+          (Xml.child xml_arg0 "serverErrorCategory") in
+      make ?serverErrorCategory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3key = field_map json "s3key" S3Key.of_json in
-      let s3Bucket = field_map json "s3Bucket" S3Bucket.of_json in
-      make ?s3key ?s3Bucket ()
+    let of_json json__ =
+      let serverErrorCategory =
+        field_map json__ "serverErrorCategory" ServerErrorCategory.of_json in
+      make ?serverErrorCategory ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the S3 bucket name and the Amazon S3 key name."]
-module StatusMessage =
-  struct
-    type nonrec t = string
-    let context_ = "StatusMessage"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StatusMessage" j
-    let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "The error in server analysis."]
 module SystemInfo =
   struct
     type nonrec t =
@@ -1750,12 +2826,13 @@ module SystemInfo =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cpuArchitecture") in
       make ?osInfo ?networkInfoList ?fileSystemType ?cpuArchitecture ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let osInfo = field_map json "osInfo" OSInfo.of_json in
+    let of_json json__ =
+      let osInfo = field_map json__ "osInfo" OSInfo.of_json in
       let networkInfoList =
-        field_map json "networkInfoList" NetworkInfoList.of_json in
-      let fileSystemType = field_map json "fileSystemType" String_.of_json in
-      let cpuArchitecture = field_map json "cpuArchitecture" String_.of_json in
+        field_map json__ "networkInfoList" NetworkInfoList.of_json in
+      let fileSystemType = field_map json__ "fileSystemType" String_.of_json in
+      let cpuArchitecture =
+        field_map json__ "cpuArchitecture" String_.of_json in
       make ?osInfo ?networkInfoList ?fileSystemType ?cpuArchitecture ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1883,6 +2960,117 @@ module CollectorHealth =
     let of_json j = of_string (string_of_json ~kind:"CollectorHealth" j)
     let to_json = simple_to_json to_value
   end
+module ConfigurationSummary =
+  struct
+    type nonrec t =
+      {
+      ipAddressBasedRemoteInfoList: IPAddressBasedRemoteInfoList.t option
+        [@ocaml.doc "IP address based configurations."];
+      pipelineInfoList: PipelineInfoList.t option
+        [@ocaml.doc "The list of pipeline info configurations."];
+      remoteSourceCodeAnalysisServerInfo:
+        RemoteSourceCodeAnalysisServerInfo.t option
+        [@ocaml.doc
+          "Info about the remote server source code configuration."];
+      vcenterBasedRemoteInfoList: VcenterBasedRemoteInfoList.t option
+        [@ocaml.doc "The list of vCenter configurations."];
+      versionControlInfoList: VersionControlInfoList.t option
+        [@ocaml.doc "The list of the version control configurations."]}
+    let make ?ipAddressBasedRemoteInfoList =
+      fun ?pipelineInfoList ->
+        fun ?remoteSourceCodeAnalysisServerInfo ->
+          fun ?vcenterBasedRemoteInfoList ->
+            fun ?versionControlInfoList ->
+              fun () ->
+                {
+                  ipAddressBasedRemoteInfoList;
+                  pipelineInfoList;
+                  remoteSourceCodeAnalysisServerInfo;
+                  vcenterBasedRemoteInfoList;
+                  versionControlInfoList
+                }
+    let to_value x =
+      structure_to_value
+        [("ipAddressBasedRemoteInfoList",
+           (Option.map x.ipAddressBasedRemoteInfoList
+              ~f:IPAddressBasedRemoteInfoList.to_value));
+        ("pipelineInfoList",
+          (Option.map x.pipelineInfoList ~f:PipelineInfoList.to_value));
+        ("remoteSourceCodeAnalysisServerInfo",
+          (Option.map x.remoteSourceCodeAnalysisServerInfo
+             ~f:RemoteSourceCodeAnalysisServerInfo.to_value));
+        ("vcenterBasedRemoteInfoList",
+          (Option.map x.vcenterBasedRemoteInfoList
+             ~f:VcenterBasedRemoteInfoList.to_value));
+        ("versionControlInfoList",
+          (Option.map x.versionControlInfoList
+             ~f:VersionControlInfoList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let versionControlInfoList =
+        (Option.map ~f:VersionControlInfoList.of_xml)
+          (Xml.child xml_arg0 "versionControlInfoList") in
+      let vcenterBasedRemoteInfoList =
+        (Option.map ~f:VcenterBasedRemoteInfoList.of_xml)
+          (Xml.child xml_arg0 "vcenterBasedRemoteInfoList") in
+      let remoteSourceCodeAnalysisServerInfo =
+        (Option.map ~f:RemoteSourceCodeAnalysisServerInfo.of_xml)
+          (Xml.child xml_arg0 "remoteSourceCodeAnalysisServerInfo") in
+      let pipelineInfoList =
+        (Option.map ~f:PipelineInfoList.of_xml)
+          (Xml.child xml_arg0 "pipelineInfoList") in
+      let ipAddressBasedRemoteInfoList =
+        (Option.map ~f:IPAddressBasedRemoteInfoList.of_xml)
+          (Xml.child xml_arg0 "ipAddressBasedRemoteInfoList") in
+      make ?versionControlInfoList ?vcenterBasedRemoteInfoList
+        ?remoteSourceCodeAnalysisServerInfo ?pipelineInfoList
+        ?ipAddressBasedRemoteInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let versionControlInfoList =
+        field_map json__ "versionControlInfoList"
+          VersionControlInfoList.of_json in
+      let vcenterBasedRemoteInfoList =
+        field_map json__ "vcenterBasedRemoteInfoList"
+          VcenterBasedRemoteInfoList.of_json in
+      let remoteSourceCodeAnalysisServerInfo =
+        field_map json__ "remoteSourceCodeAnalysisServerInfo"
+          RemoteSourceCodeAnalysisServerInfo.of_json in
+      let pipelineInfoList =
+        field_map json__ "pipelineInfoList" PipelineInfoList.of_json in
+      let ipAddressBasedRemoteInfoList =
+        field_map json__ "ipAddressBasedRemoteInfoList"
+          IPAddressBasedRemoteInfoList.of_json in
+      make ?versionControlInfoList ?vcenterBasedRemoteInfoList
+        ?remoteSourceCodeAnalysisServerInfo ?pipelineInfoList
+        ?ipAddressBasedRemoteInfoList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary of the collector configuration."]
+module AppUnitError =
+  struct
+    type nonrec t =
+      {
+      appUnitErrorCategory: AppUnitErrorCategory.t option
+        [@ocaml.doc "The category of the error."]}
+    let make ?appUnitErrorCategory = fun () -> { appUnitErrorCategory }
+    let to_value x =
+      structure_to_value
+        [("appUnitErrorCategory",
+           (Option.map x.appUnitErrorCategory
+              ~f:AppUnitErrorCategory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appUnitErrorCategory =
+        (Option.map ~f:AppUnitErrorCategory.of_xml)
+          (Xml.child xml_arg0 "appUnitErrorCategory") in
+      make ?appUnitErrorCategory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appUnitErrorCategory =
+        field_map json__ "appUnitErrorCategory" AppUnitErrorCategory.of_json in
+      make ?appUnitErrorCategory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Error in the analysis of the application unit."]
 module Boolean =
   struct
     type nonrec t = bool
@@ -1913,8 +3101,8 @@ module DatabaseConfigDetail =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "secretName") in
       make ?secretName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretName = field_map json "secretName" String_.of_json in
+    let of_json json__ =
+      let secretName = field_map json__ "secretName" String_.of_json in
       make ?secretName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration information used for assessing databases."]
@@ -1971,6 +3159,33 @@ module ResourceSubType =
     let of_json j = of_string (string_of_json ~kind:"ResourceSubType" j)
     let to_json = simple_to_json to_value
   end
+module ResultList =
+  struct
+    type nonrec t = Result_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Result_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Result_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResultList" ~of_json:Result_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ServerId =
   struct
     type nonrec t = string
@@ -1995,6 +3210,9 @@ module SourceCodeRepositories =
   struct
     type nonrec t = SourceCodeRepository.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceCodeRepository.to_value)) |>
         (fun x -> `List x)
@@ -2017,45 +3235,13 @@ module SourceCodeRepositories =
         ~of_json:SourceCodeRepository.of_json j
     let to_json v = composed_to_json to_value v
   end
-module SrcCodeOrDbAnalysisStatus =
-  struct
-    type nonrec t =
-      | ANALYSIS_TO_BE_SCHEDULED 
-      | ANALYSIS_STARTED 
-      | ANALYSIS_SUCCESS 
-      | ANALYSIS_FAILED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ANALYSIS_TO_BE_SCHEDULED -> "ANALYSIS_TO_BE_SCHEDULED"
-      | ANALYSIS_STARTED -> "ANALYSIS_STARTED"
-      | ANALYSIS_SUCCESS -> "ANALYSIS_SUCCESS"
-      | ANALYSIS_FAILED -> "ANALYSIS_FAILED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ANALYSIS_TO_BE_SCHEDULED" -> ANALYSIS_TO_BE_SCHEDULED
-      | "ANALYSIS_STARTED" -> ANALYSIS_STARTED
-      | "ANALYSIS_SUCCESS" -> ANALYSIS_SUCCESS
-      | "ANALYSIS_FAILED" -> ANALYSIS_FAILED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration SrcCodeOrDbAnalysisStatus" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"SrcCodeOrDbAnalysisStatus" j)
-    let to_json = simple_to_json to_value
-  end
 module StrategyRecommendation =
   struct
     type nonrec t =
       | Recommended 
       | ViableOption 
       | NotRecommended 
+      | Potential 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2063,12 +3249,14 @@ module StrategyRecommendation =
       | Recommended -> "recommended"
       | ViableOption -> "viableOption"
       | NotRecommended -> "notRecommended"
+      | Potential -> "potential"
       | Non_static_id s -> s
     let of_string =
       function
       | "recommended" -> Recommended
       | "viableOption" -> ViableOption
       | "notRecommended" -> NotRecommended
+      | "potential" -> Potential
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2080,6 +3268,41 @@ module StrategyRecommendation =
       of_string (string_of_json ~kind:"StrategyRecommendation" j)
     let to_json = simple_to_json to_value
   end
+module ApplicationComponentStatusSummary =
+  struct
+    type nonrec t =
+      {
+      count: Integer.t option
+        [@ocaml.doc
+          "The number of application components successfully analyzed, partially successful or failed analysis."];
+      srcCodeOrDbAnalysisStatus: SrcCodeOrDbAnalysisStatus.t option
+        [@ocaml.doc "The status of database analysis."]}
+    let make ?count =
+      fun ?srcCodeOrDbAnalysisStatus ->
+        fun () -> { count; srcCodeOrDbAnalysisStatus }
+    let to_value x =
+      structure_to_value
+        [("count", (Option.map x.count ~f:Integer.to_value));
+        ("srcCodeOrDbAnalysisStatus",
+          (Option.map x.srcCodeOrDbAnalysisStatus
+             ~f:SrcCodeOrDbAnalysisStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let srcCodeOrDbAnalysisStatus =
+        (Option.map ~f:SrcCodeOrDbAnalysisStatus.of_xml)
+          (Xml.child xml_arg0 "srcCodeOrDbAnalysisStatus") in
+      let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "count") in
+      make ?srcCodeOrDbAnalysisStatus ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let srcCodeOrDbAnalysisStatus =
+        field_map json__ "srcCodeOrDbAnalysisStatus"
+          SrcCodeOrDbAnalysisStatus.of_json in
+      let count = field_map json__ "count" Integer.of_json in
+      make ?srcCodeOrDbAnalysisStatus ?count ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary of the analysis status of the application component."]
 module ApplicationComponentSummary =
   struct
     type nonrec t =
@@ -2100,12 +3323,46 @@ module ApplicationComponentSummary =
         (Option.map ~f:AppType.of_xml) (Xml.child xml_arg0 "appType") in
       make ?count ?appType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map json "count" Integer.of_json in
-      let appType = field_map json "appType" AppType.of_json in
+    let of_json json__ =
+      let count = field_map json__ "count" Integer.of_json in
+      let appType = field_map json__ "appType" AppType.of_json in
       make ?count ?appType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the summary of application components."]
+module ServerStatusSummary =
+  struct
+    type nonrec t =
+      {
+      count: Integer.t option
+        [@ocaml.doc
+          "The number of servers successfully analyzed, partially successful or failed analysis."];
+      runTimeAssessmentStatus: RunTimeAssessmentStatus.t option
+        [@ocaml.doc "The status of the run time."]}
+    let make ?count =
+      fun ?runTimeAssessmentStatus ->
+        fun () -> { count; runTimeAssessmentStatus }
+    let to_value x =
+      structure_to_value
+        [("count", (Option.map x.count ~f:Integer.to_value));
+        ("runTimeAssessmentStatus",
+          (Option.map x.runTimeAssessmentStatus
+             ~f:RunTimeAssessmentStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let runTimeAssessmentStatus =
+        (Option.map ~f:RunTimeAssessmentStatus.of_xml)
+          (Xml.child xml_arg0 "runTimeAssessmentStatus") in
+      let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "count") in
+      make ?runTimeAssessmentStatus ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let runTimeAssessmentStatus =
+        field_map json__ "runTimeAssessmentStatus"
+          RunTimeAssessmentStatus.of_json in
+      let count = field_map json__ "count" Integer.of_json in
+      make ?runTimeAssessmentStatus ?count ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status summary of the server analysis."]
 module ServerSummary =
   struct
     type nonrec t =
@@ -2127,9 +3384,9 @@ module ServerSummary =
           (Xml.child xml_arg0 "ServerOsType") in
       make ?count ?serverOsType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map json "count" Integer.of_json in
-      let serverOsType = field_map json "ServerOsType" ServerOsType.of_json in
+    let of_json json__ =
+      let count = field_map json__ "count" Integer.of_json in
+      let serverOsType = field_map json__ "ServerOsType" ServerOsType.of_json in
       make ?count ?serverOsType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2153,17 +3410,22 @@ module SourceCode =
       {
       location: Location.t option
         [@ocaml.doc "The repository name for the source code."];
+      projectName: ProjectName.t option
+        [@ocaml.doc "The name of the project."];
       sourceVersion: SourceVersion.t option
         [@ocaml.doc "The branch of the source code."];
       versionControl: VersionControl.t option
         [@ocaml.doc "The type of repository to use for the source code."]}
     let make ?location =
-      fun ?sourceVersion ->
-        fun ?versionControl ->
-          fun () -> { location; sourceVersion; versionControl }
+      fun ?projectName ->
+        fun ?sourceVersion ->
+          fun ?versionControl ->
+            fun () ->
+              { location; projectName; sourceVersion; versionControl }
     let to_value x =
       structure_to_value
         [("location", (Option.map x.location ~f:Location.to_value));
+        ("projectName", (Option.map x.projectName ~f:ProjectName.to_value));
         ("sourceVersion",
           (Option.map x.sourceVersion ~f:SourceVersion.to_value));
         ("versionControl",
@@ -2176,17 +3438,20 @@ module SourceCode =
       let sourceVersion =
         (Option.map ~f:SourceVersion.of_xml)
           (Xml.child xml_arg0 "sourceVersion") in
+      let projectName =
+        (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "projectName") in
       let location =
         (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "location") in
-      make ?versionControl ?sourceVersion ?location ()
+      make ?versionControl ?sourceVersion ?projectName ?location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionControl =
-        field_map json "versionControl" VersionControl.of_json in
+        field_map json__ "versionControl" VersionControl.of_json in
       let sourceVersion =
-        field_map json "sourceVersion" SourceVersion.of_json in
-      let location = field_map json "location" Location.of_json in
-      make ?versionControl ?sourceVersion ?location ()
+        field_map json__ "sourceVersion" SourceVersion.of_json in
+      let projectName = field_map json__ "projectName" ProjectName.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      make ?versionControl ?sourceVersion ?projectName ?location ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Object containing source code information that is linked to an application component."]
@@ -2209,13 +3474,49 @@ module Group =
       let name = (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" String_.of_json in
-      let name = field_map json "name" GroupName.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" String_.of_json in
+      let name = field_map json__ "name" GroupName.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The object containing information about distinct imports or groups for Strategy Recommendations."]
+module AssessmentTarget =
+  struct
+    type nonrec t =
+      {
+      condition: Condition.t [@ocaml.doc "Condition of an assessment."];
+      name: String_.t [@ocaml.doc "Name of an assessment."];
+      values: AssessmentTargetValues.t
+        [@ocaml.doc "Values of an assessment."]}
+    let context_ = "AssessmentTarget"
+    let make ~condition =
+      fun ~name -> fun ~values -> fun () -> { condition; name; values }
+    let to_value x =
+      structure_to_value
+        [("condition", (Some (Condition.to_value x.condition)));
+        ("name", (Some (String_.to_value x.name)));
+        ("values", (Some (AssessmentTargetValues.to_value x.values)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        AssessmentTargetValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "values") in
+      let name =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let condition =
+        Condition.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "condition") in
+      make ~values ~name ~condition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map_exn json__ "values" AssessmentTargetValues.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      let condition = field_map_exn json__ "condition" Condition.of_json in
+      make ~values ~name ~condition ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines the criteria of assessment."]
 module ManagementPreference =
   struct
     type nonrec t =
@@ -2254,13 +3555,13 @@ module ManagementPreference =
           (Xml.child xml_arg0 "awsManagedResources") in
       make ?selfManageResources ?noPreference ?awsManagedResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let selfManageResources =
-        field_map json "selfManageResources" SelfManageResources.of_json in
+        field_map json__ "selfManageResources" SelfManageResources.of_json in
       let noPreference =
-        field_map json "noPreference" NoManagementPreference.of_json in
+        field_map json__ "noPreference" NoManagementPreference.of_json in
       let awsManagedResources =
-        field_map json "awsManagedResources" AwsManagedResources.of_json in
+        field_map json__ "awsManagedResources" AwsManagedResources.of_json in
       make ?selfManageResources ?noPreference ?awsManagedResources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Preferences for migrating an application to AWS."]
@@ -2332,12 +3633,12 @@ module DatabaseMigrationPreference =
           (Xml.child xml_arg0 "heterogeneous") in
       make ?noPreference ?homogeneous ?heterogeneous ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let noPreference =
-        field_map json "noPreference" NoDatabaseMigrationPreference.of_json in
-      let homogeneous = field_map json "homogeneous" Homogeneous.of_json in
+        field_map json__ "noPreference" NoDatabaseMigrationPreference.of_json in
+      let homogeneous = field_map json__ "homogeneous" Homogeneous.of_json in
       let heterogeneous =
-        field_map json "heterogeneous" Heterogeneous.of_json in
+        field_map json__ "heterogeneous" Heterogeneous.of_json in
       make ?noPreference ?homogeneous ?heterogeneous ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Preferences for migrating a database to AWS."]
@@ -2400,17 +3701,17 @@ module BusinessGoals =
         ?modernizeInfrastructureWithCloudNativeTechnologies
         ?licenseCostReduction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let speedOfMigration =
-        field_map json "speedOfMigration" BusinessGoalsInteger.of_json in
+        field_map json__ "speedOfMigration" BusinessGoalsInteger.of_json in
       let reduceOperationalOverheadWithManagedServices =
-        field_map json "reduceOperationalOverheadWithManagedServices"
+        field_map json__ "reduceOperationalOverheadWithManagedServices"
           BusinessGoalsInteger.of_json in
       let modernizeInfrastructureWithCloudNativeTechnologies =
-        field_map json "modernizeInfrastructureWithCloudNativeTechnologies"
+        field_map json__ "modernizeInfrastructureWithCloudNativeTechnologies"
           BusinessGoalsInteger.of_json in
       let licenseCostReduction =
-        field_map json "licenseCostReduction" BusinessGoalsInteger.of_json in
+        field_map json__ "licenseCostReduction" BusinessGoalsInteger.of_json in
       make ?speedOfMigration ?reduceOperationalOverheadWithManagedServices
         ?modernizeInfrastructureWithCloudNativeTechnologies
         ?licenseCostReduction ()
@@ -2440,6 +3741,8 @@ module ServerDetail =
       name: ResourceName.t option [@ocaml.doc "The name of the server."];
       recommendationSet: RecommendationSet.t option
         [@ocaml.doc "A set of recommendations."];
+      serverError: ServerError.t option
+        [@ocaml.doc "The error in server analysis."];
       serverType: String_.t option [@ocaml.doc "The type of server."];
       statusMessage: StatusMessage.t option
         [@ocaml.doc
@@ -2456,25 +3759,27 @@ module ServerDetail =
                   fun ?listAntipatternSeveritySummary ->
                     fun ?name ->
                       fun ?recommendationSet ->
-                        fun ?serverType ->
-                          fun ?statusMessage ->
-                            fun ?systemInfo ->
-                              fun () ->
-                                {
-                                  antipatternReportS3Object;
-                                  antipatternReportStatus;
-                                  antipatternReportStatusMessage;
-                                  applicationComponentStrategySummary;
-                                  dataCollectionStatus;
-                                  id;
-                                  lastAnalyzedTimestamp;
-                                  listAntipatternSeveritySummary;
-                                  name;
-                                  recommendationSet;
-                                  serverType;
-                                  statusMessage;
-                                  systemInfo
-                                }
+                        fun ?serverError ->
+                          fun ?serverType ->
+                            fun ?statusMessage ->
+                              fun ?systemInfo ->
+                                fun () ->
+                                  {
+                                    antipatternReportS3Object;
+                                    antipatternReportStatus;
+                                    antipatternReportStatusMessage;
+                                    applicationComponentStrategySummary;
+                                    dataCollectionStatus;
+                                    id;
+                                    lastAnalyzedTimestamp;
+                                    listAntipatternSeveritySummary;
+                                    name;
+                                    recommendationSet;
+                                    serverError;
+                                    serverType;
+                                    statusMessage;
+                                    systemInfo
+                                  }
     let to_value x =
       structure_to_value
         [("antipatternReportS3Object",
@@ -2500,6 +3805,7 @@ module ServerDetail =
         ("name", (Option.map x.name ~f:ResourceName.to_value));
         ("recommendationSet",
           (Option.map x.recommendationSet ~f:RecommendationSet.to_value));
+        ("serverError", (Option.map x.serverError ~f:ServerError.to_value));
         ("serverType", (Option.map x.serverType ~f:String_.to_value));
         ("statusMessage",
           (Option.map x.statusMessage ~f:StatusMessage.to_value));
@@ -2513,6 +3819,8 @@ module ServerDetail =
           (Xml.child xml_arg0 "statusMessage") in
       let serverType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serverType") in
+      let serverError =
+        (Option.map ~f:ServerError.of_xml) (Xml.child xml_arg0 "serverError") in
       let recommendationSet =
         (Option.map ~f:RecommendationSet.of_xml)
           (Xml.child xml_arg0 "recommendationSet") in
@@ -2540,43 +3848,46 @@ module ServerDetail =
       let antipatternReportS3Object =
         (Option.map ~f:S3Object.of_xml)
           (Xml.child xml_arg0 "antipatternReportS3Object") in
-      make ?systemInfo ?statusMessage ?serverType ?recommendationSet ?name
-        ?listAntipatternSeveritySummary ?lastAnalyzedTimestamp ?id
-        ?dataCollectionStatus ?applicationComponentStrategySummary
-        ?antipatternReportStatusMessage ?antipatternReportStatus
-        ?antipatternReportS3Object ()
+      make ?systemInfo ?statusMessage ?serverType ?serverError
+        ?recommendationSet ?name ?listAntipatternSeveritySummary
+        ?lastAnalyzedTimestamp ?id ?dataCollectionStatus
+        ?applicationComponentStrategySummary ?antipatternReportStatusMessage
+        ?antipatternReportStatus ?antipatternReportS3Object ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let systemInfo = field_map json "systemInfo" SystemInfo.of_json in
+    let of_json json__ =
+      let systemInfo = field_map json__ "systemInfo" SystemInfo.of_json in
       let statusMessage =
-        field_map json "statusMessage" StatusMessage.of_json in
-      let serverType = field_map json "serverType" String_.of_json in
+        field_map json__ "statusMessage" StatusMessage.of_json in
+      let serverType = field_map json__ "serverType" String_.of_json in
+      let serverError = field_map json__ "serverError" ServerError.of_json in
       let recommendationSet =
-        field_map json "recommendationSet" RecommendationSet.of_json in
-      let name = field_map json "name" ResourceName.of_json in
+        field_map json__ "recommendationSet" RecommendationSet.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let listAntipatternSeveritySummary =
-        field_map json "listAntipatternSeveritySummary"
+        field_map json__ "listAntipatternSeveritySummary"
           ListAntipatternSeveritySummary.of_json in
       let lastAnalyzedTimestamp =
-        field_map json "lastAnalyzedTimestamp" TimeStamp.of_json in
-      let id = field_map json "id" ResourceId.of_json in
+        field_map json__ "lastAnalyzedTimestamp" TimeStamp.of_json in
+      let id = field_map json__ "id" ResourceId.of_json in
       let dataCollectionStatus =
-        field_map json "dataCollectionStatus" RunTimeAssessmentStatus.of_json in
+        field_map json__ "dataCollectionStatus"
+          RunTimeAssessmentStatus.of_json in
       let applicationComponentStrategySummary =
-        field_map json "applicationComponentStrategySummary"
+        field_map json__ "applicationComponentStrategySummary"
           ListStrategySummary.of_json in
       let antipatternReportStatusMessage =
-        field_map json "antipatternReportStatusMessage" StatusMessage.of_json in
+        field_map json__ "antipatternReportStatusMessage"
+          StatusMessage.of_json in
       let antipatternReportStatus =
-        field_map json "antipatternReportStatus"
+        field_map json__ "antipatternReportStatus"
           AntipatternReportStatus.of_json in
       let antipatternReportS3Object =
-        field_map json "antipatternReportS3Object" S3Object.of_json in
-      make ?systemInfo ?statusMessage ?serverType ?recommendationSet ?name
-        ?listAntipatternSeveritySummary ?lastAnalyzedTimestamp ?id
-        ?dataCollectionStatus ?applicationComponentStrategySummary
-        ?antipatternReportStatusMessage ?antipatternReportStatus
-        ?antipatternReportS3Object ()
+        field_map json__ "antipatternReportS3Object" S3Object.of_json in
+      make ?systemInfo ?statusMessage ?serverType ?serverError
+        ?recommendationSet ?name ?listAntipatternSeveritySummary
+        ?lastAnalyzedTimestamp ?id ?dataCollectionStatus
+        ?applicationComponentStrategySummary ?antipatternReportStatusMessage
+        ?antipatternReportStatus ?antipatternReportS3Object ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about a server."]
 module ImportFileTaskInformation =
@@ -2684,23 +3995,24 @@ module ImportFileTaskInformation =
         ?numberOfRecordsSuccess ?numberOfRecordsFailed ?inputS3Key
         ?inputS3Bucket ?importName ?id ?completionTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusReportS3Key =
-        field_map json "statusReportS3Key" ImportS3Key.of_json in
+        field_map json__ "statusReportS3Key" ImportS3Key.of_json in
       let statusReportS3Bucket =
-        field_map json "statusReportS3Bucket" ImportS3Bucket.of_json in
-      let status = field_map json "status" ImportFileTaskStatus.of_json in
-      let startTime = field_map json "startTime" TimeStamp.of_json in
+        field_map json__ "statusReportS3Bucket" ImportS3Bucket.of_json in
+      let status = field_map json__ "status" ImportFileTaskStatus.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
       let numberOfRecordsSuccess =
-        field_map json "numberOfRecordsSuccess" Integer.of_json in
+        field_map json__ "numberOfRecordsSuccess" Integer.of_json in
       let numberOfRecordsFailed =
-        field_map json "numberOfRecordsFailed" Integer.of_json in
-      let inputS3Key = field_map json "inputS3Key" ImportS3Key.of_json in
+        field_map json__ "numberOfRecordsFailed" Integer.of_json in
+      let inputS3Key = field_map json__ "inputS3Key" ImportS3Key.of_json in
       let inputS3Bucket =
-        field_map json "inputS3Bucket" ImportS3Bucket.of_json in
-      let importName = field_map json "importName" String_.of_json in
-      let id = field_map json "id" String_.of_json in
-      let completionTime = field_map json "completionTime" TimeStamp.of_json in
+        field_map json__ "inputS3Bucket" ImportS3Bucket.of_json in
+      let importName = field_map json__ "importName" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      let completionTime =
+        field_map json__ "completionTime" TimeStamp.of_json in
       make ?statusReportS3Key ?statusReportS3Bucket ?status ?startTime
         ?numberOfRecordsSuccess ?numberOfRecordsFailed ?inputS3Key
         ?inputS3Bucket ?importName ?id ?completionTime ()
@@ -2716,6 +4028,8 @@ module Collector =
       collectorVersion: String_.t option
         [@ocaml.doc
           "Current version of the collector that is running in the environment that you specify."];
+      configurationSummary: ConfigurationSummary.t option
+        [@ocaml.doc "Summary of the collector configuration."];
       hostName: String_.t option
         [@ocaml.doc "Hostname of the server that is hosting the collector."];
       ipAddress: String_.t option
@@ -2728,20 +4042,22 @@ module Collector =
     let make ?collectorHealth =
       fun ?collectorId ->
         fun ?collectorVersion ->
-          fun ?hostName ->
-            fun ?ipAddress ->
-              fun ?lastActivityTimeStamp ->
-                fun ?registeredTimeStamp ->
-                  fun () ->
-                    {
-                      collectorHealth;
-                      collectorId;
-                      collectorVersion;
-                      hostName;
-                      ipAddress;
-                      lastActivityTimeStamp;
-                      registeredTimeStamp
-                    }
+          fun ?configurationSummary ->
+            fun ?hostName ->
+              fun ?ipAddress ->
+                fun ?lastActivityTimeStamp ->
+                  fun ?registeredTimeStamp ->
+                    fun () ->
+                      {
+                        collectorHealth;
+                        collectorId;
+                        collectorVersion;
+                        configurationSummary;
+                        hostName;
+                        ipAddress;
+                        lastActivityTimeStamp;
+                        registeredTimeStamp
+                      }
     let to_value x =
       structure_to_value
         [("collectorHealth",
@@ -2749,6 +4065,8 @@ module Collector =
         ("collectorId", (Option.map x.collectorId ~f:String_.to_value));
         ("collectorVersion",
           (Option.map x.collectorVersion ~f:String_.to_value));
+        ("configurationSummary",
+          (Option.map x.configurationSummary ~f:ConfigurationSummary.to_value));
         ("hostName", (Option.map x.hostName ~f:String_.to_value));
         ("ipAddress", (Option.map x.ipAddress ~f:String_.to_value));
         ("lastActivityTimeStamp",
@@ -2767,6 +4085,9 @@ module Collector =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipAddress") in
       let hostName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "hostName") in
+      let configurationSummary =
+        (Option.map ~f:ConfigurationSummary.of_xml)
+          (Xml.child xml_arg0 "configurationSummary") in
       let collectorVersion =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "collectorVersion") in
@@ -2776,22 +4097,26 @@ module Collector =
         (Option.map ~f:CollectorHealth.of_xml)
           (Xml.child xml_arg0 "collectorHealth") in
       make ?registeredTimeStamp ?lastActivityTimeStamp ?ipAddress ?hostName
-        ?collectorVersion ?collectorId ?collectorHealth ()
+        ?configurationSummary ?collectorVersion ?collectorId ?collectorHealth
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registeredTimeStamp =
-        field_map json "registeredTimeStamp" String_.of_json in
+        field_map json__ "registeredTimeStamp" String_.of_json in
       let lastActivityTimeStamp =
-        field_map json "lastActivityTimeStamp" String_.of_json in
-      let ipAddress = field_map json "ipAddress" String_.of_json in
-      let hostName = field_map json "hostName" String_.of_json in
+        field_map json__ "lastActivityTimeStamp" String_.of_json in
+      let ipAddress = field_map json__ "ipAddress" String_.of_json in
+      let hostName = field_map json__ "hostName" String_.of_json in
+      let configurationSummary =
+        field_map json__ "configurationSummary" ConfigurationSummary.of_json in
       let collectorVersion =
-        field_map json "collectorVersion" String_.of_json in
-      let collectorId = field_map json "collectorId" String_.of_json in
+        field_map json__ "collectorVersion" String_.of_json in
+      let collectorId = field_map json__ "collectorId" String_.of_json in
       let collectorHealth =
-        field_map json "collectorHealth" CollectorHealth.of_json in
+        field_map json__ "collectorHealth" CollectorHealth.of_json in
       make ?registeredTimeStamp ?lastActivityTimeStamp ?ipAddress ?hostName
-        ?collectorVersion ?collectorId ?collectorHealth ()
+        ?configurationSummary ?collectorVersion ?collectorId ?collectorHealth
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Process data collector that runs in the environment that you specify."]
@@ -2811,6 +4136,9 @@ module ApplicationComponentDetail =
         [@ocaml.doc "The status message for the anti-pattern."];
       appType: AppType.t option
         [@ocaml.doc "The type of application component."];
+      appUnitError: AppUnitError.t option
+        [@ocaml.doc
+          "The error in the analysis of the source code or database."];
       associatedServerId: ServerId.t option
         [@ocaml.doc
           "The ID of the server that the application component is running on."];
@@ -2839,6 +4167,12 @@ module ApplicationComponentDetail =
           "The top recommendation set for the application component."];
       resourceSubType: ResourceSubType.t option
         [@ocaml.doc "The application component subtype."];
+      resultList: ResultList.t option
+        [@ocaml.doc "A list of the analysis results."];
+      runtimeStatus: RuntimeAnalysisStatus.t option
+        [@ocaml.doc "The status of the application unit."];
+      runtimeStatusMessage: StatusMessage.t option
+        [@ocaml.doc "The status message for the application unit."];
       sourceCodeRepositories: SourceCodeRepositories.t option
         [@ocaml.doc
           "Details about the source code repository associated with the application component."];
@@ -2850,42 +4184,50 @@ module ApplicationComponentDetail =
         fun ?antipatternReportStatus ->
           fun ?antipatternReportStatusMessage ->
             fun ?appType ->
-              fun ?associatedServerId ->
-                fun ?databaseConfigDetail ->
-                  fun ?id ->
-                    fun ?inclusionStatus ->
-                      fun ?lastAnalyzedTimestamp ->
-                        fun ?listAntipatternSeveritySummary ->
-                          fun ?moreServerAssociationExists ->
-                            fun ?name ->
-                              fun ?osDriver ->
-                                fun ?osVersion ->
-                                  fun ?recommendationSet ->
-                                    fun ?resourceSubType ->
-                                      fun ?sourceCodeRepositories ->
-                                        fun ?statusMessage ->
-                                          fun () ->
-                                            {
-                                              analysisStatus;
-                                              antipatternReportS3Object;
-                                              antipatternReportStatus;
-                                              antipatternReportStatusMessage;
-                                              appType;
-                                              associatedServerId;
-                                              databaseConfigDetail;
-                                              id;
-                                              inclusionStatus;
-                                              lastAnalyzedTimestamp;
-                                              listAntipatternSeveritySummary;
-                                              moreServerAssociationExists;
-                                              name;
-                                              osDriver;
-                                              osVersion;
-                                              recommendationSet;
-                                              resourceSubType;
-                                              sourceCodeRepositories;
-                                              statusMessage
-                                            }
+              fun ?appUnitError ->
+                fun ?associatedServerId ->
+                  fun ?databaseConfigDetail ->
+                    fun ?id ->
+                      fun ?inclusionStatus ->
+                        fun ?lastAnalyzedTimestamp ->
+                          fun ?listAntipatternSeveritySummary ->
+                            fun ?moreServerAssociationExists ->
+                              fun ?name ->
+                                fun ?osDriver ->
+                                  fun ?osVersion ->
+                                    fun ?recommendationSet ->
+                                      fun ?resourceSubType ->
+                                        fun ?resultList ->
+                                          fun ?runtimeStatus ->
+                                            fun ?runtimeStatusMessage ->
+                                              fun ?sourceCodeRepositories ->
+                                                fun ?statusMessage ->
+                                                  fun () ->
+                                                    {
+                                                      analysisStatus;
+                                                      antipatternReportS3Object;
+                                                      antipatternReportStatus;
+                                                      antipatternReportStatusMessage;
+                                                      appType;
+                                                      appUnitError;
+                                                      associatedServerId;
+                                                      databaseConfigDetail;
+                                                      id;
+                                                      inclusionStatus;
+                                                      lastAnalyzedTimestamp;
+                                                      listAntipatternSeveritySummary;
+                                                      moreServerAssociationExists;
+                                                      name;
+                                                      osDriver;
+                                                      osVersion;
+                                                      recommendationSet;
+                                                      resourceSubType;
+                                                      resultList;
+                                                      runtimeStatus;
+                                                      runtimeStatusMessage;
+                                                      sourceCodeRepositories;
+                                                      statusMessage
+                                                    }
     let to_value x =
       structure_to_value
         [("analysisStatus",
@@ -2899,6 +4241,8 @@ module ApplicationComponentDetail =
           (Option.map x.antipatternReportStatusMessage
              ~f:StatusMessage.to_value));
         ("appType", (Option.map x.appType ~f:AppType.to_value));
+        ("appUnitError",
+          (Option.map x.appUnitError ~f:AppUnitError.to_value));
         ("associatedServerId",
           (Option.map x.associatedServerId ~f:ServerId.to_value));
         ("databaseConfigDetail",
@@ -2920,6 +4264,11 @@ module ApplicationComponentDetail =
           (Option.map x.recommendationSet ~f:RecommendationSet.to_value));
         ("resourceSubType",
           (Option.map x.resourceSubType ~f:ResourceSubType.to_value));
+        ("resultList", (Option.map x.resultList ~f:ResultList.to_value));
+        ("runtimeStatus",
+          (Option.map x.runtimeStatus ~f:RuntimeAnalysisStatus.to_value));
+        ("runtimeStatusMessage",
+          (Option.map x.runtimeStatusMessage ~f:StatusMessage.to_value));
         ("sourceCodeRepositories",
           (Option.map x.sourceCodeRepositories
              ~f:SourceCodeRepositories.to_value));
@@ -2933,6 +4282,14 @@ module ApplicationComponentDetail =
       let sourceCodeRepositories =
         (Option.map ~f:SourceCodeRepositories.of_xml)
           (Xml.child xml_arg0 "sourceCodeRepositories") in
+      let runtimeStatusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "runtimeStatusMessage") in
+      let runtimeStatus =
+        (Option.map ~f:RuntimeAnalysisStatus.of_xml)
+          (Xml.child xml_arg0 "runtimeStatus") in
+      let resultList =
+        (Option.map ~f:ResultList.of_xml) (Xml.child xml_arg0 "resultList") in
       let resourceSubType =
         (Option.map ~f:ResourceSubType.of_xml)
           (Xml.child xml_arg0 "resourceSubType") in
@@ -2964,6 +4321,9 @@ module ApplicationComponentDetail =
       let associatedServerId =
         (Option.map ~f:ServerId.of_xml)
           (Xml.child xml_arg0 "associatedServerId") in
+      let appUnitError =
+        (Option.map ~f:AppUnitError.of_xml)
+          (Xml.child xml_arg0 "appUnitError") in
       let appType =
         (Option.map ~f:AppType.of_xml) (Xml.child xml_arg0 "appType") in
       let antipatternReportStatusMessage =
@@ -2978,61 +4338,111 @@ module ApplicationComponentDetail =
       let analysisStatus =
         (Option.map ~f:SrcCodeOrDbAnalysisStatus.of_xml)
           (Xml.child xml_arg0 "analysisStatus") in
-      make ?statusMessage ?sourceCodeRepositories ?resourceSubType
-        ?recommendationSet ?osVersion ?osDriver ?name
-        ?moreServerAssociationExists ?listAntipatternSeveritySummary
-        ?lastAnalyzedTimestamp ?inclusionStatus ?id ?databaseConfigDetail
-        ?associatedServerId ?appType ?antipatternReportStatusMessage
+      make ?statusMessage ?sourceCodeRepositories ?runtimeStatusMessage
+        ?runtimeStatus ?resultList ?resourceSubType ?recommendationSet
+        ?osVersion ?osDriver ?name ?moreServerAssociationExists
+        ?listAntipatternSeveritySummary ?lastAnalyzedTimestamp
+        ?inclusionStatus ?id ?databaseConfigDetail ?associatedServerId
+        ?appUnitError ?appType ?antipatternReportStatusMessage
         ?antipatternReportStatus ?antipatternReportS3Object ?analysisStatus
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "statusMessage" StatusMessage.of_json in
+        field_map json__ "statusMessage" StatusMessage.of_json in
       let sourceCodeRepositories =
-        field_map json "sourceCodeRepositories"
+        field_map json__ "sourceCodeRepositories"
           SourceCodeRepositories.of_json in
+      let runtimeStatusMessage =
+        field_map json__ "runtimeStatusMessage" StatusMessage.of_json in
+      let runtimeStatus =
+        field_map json__ "runtimeStatus" RuntimeAnalysisStatus.of_json in
+      let resultList = field_map json__ "resultList" ResultList.of_json in
       let resourceSubType =
-        field_map json "resourceSubType" ResourceSubType.of_json in
+        field_map json__ "resourceSubType" ResourceSubType.of_json in
       let recommendationSet =
-        field_map json "recommendationSet" RecommendationSet.of_json in
-      let osVersion = field_map json "osVersion" String_.of_json in
-      let osDriver = field_map json "osDriver" String_.of_json in
-      let name = field_map json "name" ResourceName.of_json in
+        field_map json__ "recommendationSet" RecommendationSet.of_json in
+      let osVersion = field_map json__ "osVersion" String_.of_json in
+      let osDriver = field_map json__ "osDriver" String_.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let moreServerAssociationExists =
-        field_map json "moreServerAssociationExists" Boolean.of_json in
+        field_map json__ "moreServerAssociationExists" Boolean.of_json in
       let listAntipatternSeveritySummary =
-        field_map json "listAntipatternSeveritySummary"
+        field_map json__ "listAntipatternSeveritySummary"
           ListAntipatternSeveritySummary.of_json in
       let lastAnalyzedTimestamp =
-        field_map json "lastAnalyzedTimestamp" TimeStamp.of_json in
+        field_map json__ "lastAnalyzedTimestamp" TimeStamp.of_json in
       let inclusionStatus =
-        field_map json "inclusionStatus" InclusionStatus.of_json in
-      let id = field_map json "id" ResourceId.of_json in
+        field_map json__ "inclusionStatus" InclusionStatus.of_json in
+      let id = field_map json__ "id" ResourceId.of_json in
       let databaseConfigDetail =
-        field_map json "databaseConfigDetail" DatabaseConfigDetail.of_json in
+        field_map json__ "databaseConfigDetail" DatabaseConfigDetail.of_json in
       let associatedServerId =
-        field_map json "associatedServerId" ServerId.of_json in
-      let appType = field_map json "appType" AppType.of_json in
+        field_map json__ "associatedServerId" ServerId.of_json in
+      let appUnitError = field_map json__ "appUnitError" AppUnitError.of_json in
+      let appType = field_map json__ "appType" AppType.of_json in
       let antipatternReportStatusMessage =
-        field_map json "antipatternReportStatusMessage" StatusMessage.of_json in
+        field_map json__ "antipatternReportStatusMessage"
+          StatusMessage.of_json in
       let antipatternReportStatus =
-        field_map json "antipatternReportStatus"
+        field_map json__ "antipatternReportStatus"
           AntipatternReportStatus.of_json in
       let antipatternReportS3Object =
-        field_map json "antipatternReportS3Object" S3Object.of_json in
+        field_map json__ "antipatternReportS3Object" S3Object.of_json in
       let analysisStatus =
-        field_map json "analysisStatus" SrcCodeOrDbAnalysisStatus.of_json in
-      make ?statusMessage ?sourceCodeRepositories ?resourceSubType
-        ?recommendationSet ?osVersion ?osDriver ?name
-        ?moreServerAssociationExists ?listAntipatternSeveritySummary
-        ?lastAnalyzedTimestamp ?inclusionStatus ?id ?databaseConfigDetail
-        ?associatedServerId ?appType ?antipatternReportStatusMessage
+        field_map json__ "analysisStatus" SrcCodeOrDbAnalysisStatus.of_json in
+      make ?statusMessage ?sourceCodeRepositories ?runtimeStatusMessage
+        ?runtimeStatus ?resultList ?resourceSubType ?recommendationSet
+        ?osVersion ?osDriver ?name ?moreServerAssociationExists
+        ?listAntipatternSeveritySummary ?lastAnalyzedTimestamp
+        ?inclusionStatus ?id ?databaseConfigDetail ?associatedServerId
+        ?appUnitError ?appType ?antipatternReportStatusMessage
         ?antipatternReportStatus ?antipatternReportS3Object ?analysisStatus
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains detailed information about an application component."]
+module AnalyzableServerSummary =
+  struct
+    type nonrec t =
+      {
+      hostname: String_.t option
+        [@ocaml.doc "The host name of the analyzable server."];
+      ipAddress: String_.t option
+        [@ocaml.doc "The ip address of the analyzable server."];
+      source: String_.t option
+        [@ocaml.doc "The data source of the analyzable server."];
+      vmId: String_.t option
+        [@ocaml.doc "The virtual machine id of the analyzable server."]}
+    let make ?hostname =
+      fun ?ipAddress ->
+        fun ?source ->
+          fun ?vmId -> fun () -> { hostname; ipAddress; source; vmId }
+    let to_value x =
+      structure_to_value
+        [("hostname", (Option.map x.hostname ~f:String_.to_value));
+        ("ipAddress", (Option.map x.ipAddress ~f:String_.to_value));
+        ("source", (Option.map x.source ~f:String_.to_value));
+        ("vmId", (Option.map x.vmId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vmId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vmId") in
+      let source =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "source") in
+      let ipAddress =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipAddress") in
+      let hostname =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "hostname") in
+      make ?vmId ?source ?ipAddress ?hostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vmId = field_map json__ "vmId" String_.of_json in
+      let source = field_map json__ "source" String_.of_json in
+      let ipAddress = field_map json__ "ipAddress" String_.of_json in
+      let hostname = field_map json__ "hostname" String_.of_json in
+      make ?vmId ?source ?ipAddress ?hostname ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information about an analyzable server."]
 module ServerStrategy =
   struct
     type nonrec t =
@@ -3082,13 +4492,13 @@ module ServerStrategy =
       make ?status ?recommendation ?numberOfApplicationComponents
         ?isPreferred ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" StrategyRecommendation.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" StrategyRecommendation.of_json in
       let recommendation =
-        field_map json "recommendation" RecommendationSet.of_json in
+        field_map json__ "recommendation" RecommendationSet.of_json in
       let numberOfApplicationComponents =
-        field_map json "numberOfApplicationComponents" Integer.of_json in
-      let isPreferred = field_map json "isPreferred" Boolean.of_json in
+        field_map json__ "numberOfApplicationComponents" Integer.of_json in
+      let isPreferred = field_map json__ "isPreferred" Boolean.of_json in
       make ?status ?recommendation ?numberOfApplicationComponents
         ?isPreferred ()
     let to_json v = composed_to_json to_value v
@@ -3115,9 +4525,9 @@ module AssociatedApplication =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" String_.of_json in
-      let id = field_map json "id" String_.of_json in make ?name ?id ()
+    let of_json json__ =
+      let name = field_map json__ "name" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in make ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Object containing details about applications as defined in Application Discovery Service."]
@@ -3189,6 +4599,9 @@ module S3Keys =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3208,10 +4621,43 @@ module S3Keys =
     let of_json j = list_of_json ~kind:"S3Keys" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListApplicationComponentStatusSummary =
+  struct
+    type nonrec t = ApplicationComponentStatusSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApplicationComponentStatusSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ApplicationComponentStatusSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListApplicationComponentStatusSummary"
+        ~of_json:ApplicationComponentStatusSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ListApplicationComponentSummary =
   struct
     type nonrec t = ApplicationComponentSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationComponentSummary.to_value)) |>
         (fun x -> `List x)
@@ -3234,10 +4680,42 @@ module ListApplicationComponentSummary =
         ~of_json:ApplicationComponentSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListServerStatusSummary =
+  struct
+    type nonrec t = ServerStatusSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServerStatusSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServerStatusSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListServerStatusSummary"
+        ~of_json:ServerStatusSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ListServerSummary =
   struct
     type nonrec t = ServerSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServerSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3289,6 +4767,26 @@ module AssessmentStatus =
     let of_json j = of_string (string_of_json ~kind:"AssessmentStatus" j)
     let to_json = simple_to_json to_value
   end
+module AssessmentStatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentStatusMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentStatusMessage" j
+    let to_json = simple_to_json to_value
+  end
 module ApplicationComponentStrategy =
   struct
     type nonrec t =
@@ -3321,11 +4819,11 @@ module ApplicationComponentStrategy =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPreferred") in
       make ?status ?recommendation ?isPreferred ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" StrategyRecommendation.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" StrategyRecommendation.of_json in
       let recommendation =
-        field_map json "recommendation" RecommendationSet.of_json in
-      let isPreferred = field_map json "isPreferred" Boolean.of_json in
+        field_map json__ "recommendation" RecommendationSet.of_json in
+      let isPreferred = field_map json__ "isPreferred" Boolean.of_json in
       make ?status ?recommendation ?isPreferred ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3344,8 +4842,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The server experienced an internal error. Try again."]
@@ -3363,8 +4861,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified ID in the request is not found."]
@@ -3382,8 +4880,8 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
@@ -3401,8 +4899,8 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body isn't valid."]
@@ -3449,12 +4947,13 @@ module StrategyOption =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPreferred") in
       make ?toolName ?targetDestination ?strategy ?isPreferred ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let toolName = field_map json "toolName" TransformationToolName.of_json in
+    let of_json json__ =
+      let toolName =
+        field_map json__ "toolName" TransformationToolName.of_json in
       let targetDestination =
-        field_map json "targetDestination" TargetDestination.of_json in
-      let strategy = field_map json "strategy" Strategy.of_json in
-      let isPreferred = field_map json "isPreferred" Boolean.of_json in
+        field_map json__ "targetDestination" TargetDestination.of_json in
+      let strategy = field_map json__ "strategy" Strategy.of_json in
+      let isPreferred = field_map json__ "isPreferred" Boolean.of_json in
       make ?toolName ?targetDestination ?strategy ?isPreferred ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3503,6 +5002,9 @@ module SourceCodeList =
   struct
     type nonrec t = SourceCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3526,23 +5028,23 @@ module SourceCodeList =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The AWS user account does not have permission to perform the action. Check the AWS Identity and Access Management (IAM) policy associated with this account."]
+       "The user does not have permission to perform the action. Check the AWS Identity and Access Management (IAM) policy associated with this user."]
 module AsyncTaskId =
   struct
     type nonrec t = string
@@ -3566,20 +5068,20 @@ module AsyncTaskId =
 module ConflictException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ConflictException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Exception to indicate that there is an ongoing task when a new task is created. Return when once the existing tasks are complete."]
@@ -3607,6 +5109,9 @@ module GroupIds =
   struct
     type nonrec t = Group.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Group.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3648,20 +5153,20 @@ module OutputFormat =
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The AWS account has reached its quota of imports. Contact AWS Support to increase the quota for this account."]
@@ -3670,17 +5175,25 @@ module DataSourceType =
     type nonrec t =
       | ApplicationDiscoveryService 
       | MPA 
+      | Import 
+      | StrategyRecommendationsApplicationDataCollector 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | ApplicationDiscoveryService -> "ApplicationDiscoveryService"
       | MPA -> "MPA"
+      | Import -> "Import"
+      | StrategyRecommendationsApplicationDataCollector ->
+          "StrategyRecommendationsApplicationDataCollector"
       | Non_static_id s -> s
     let of_string =
       function
       | "ApplicationDiscoveryService" -> ApplicationDiscoveryService
       | "MPA" -> MPA
+      | "Import" -> Import
+      | "StrategyRecommendationsApplicationDataCollector" ->
+          StrategyRecommendationsApplicationDataCollector
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3735,6 +5248,70 @@ module StartImportFileTaskRequestS3bucketForReportDataString =
         ~kind:"StartImportFileTaskRequestS3bucketForReportDataString" j
     let to_json = simple_to_json to_value
   end
+module AssessmentDataSourceType =
+  struct
+    type nonrec t =
+      | StrategyRecommendationsApplicationDataCollector 
+      | ManualImport 
+      | ApplicationDiscoveryService 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | StrategyRecommendationsApplicationDataCollector ->
+          "StrategyRecommendationsApplicationDataCollector"
+      | ManualImport -> "ManualImport"
+      | ApplicationDiscoveryService -> "ApplicationDiscoveryService"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "StrategyRecommendationsApplicationDataCollector" ->
+          StrategyRecommendationsApplicationDataCollector
+      | "ManualImport" -> ManualImport
+      | "ApplicationDiscoveryService" -> ApplicationDiscoveryService
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AssessmentDataSourceType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AssessmentDataSourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module AssessmentTargets =
+  struct
+    type nonrec t = AssessmentTarget.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssessmentTarget.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssessmentTarget.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssessmentTargets"
+        ~of_json:AssessmentTarget.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module StartAssessmentRequestS3bucketForAnalysisDataString =
   struct
     type nonrec t = string
@@ -3783,6 +5360,34 @@ module StartAssessmentRequestS3bucketForReportDataString =
         ~kind:"StartAssessmentRequestS3bucketForReportDataString" j
     let to_json = simple_to_json to_value
   end
+module ApplicationMode =
+  struct
+    type nonrec t =
+      | ALL 
+      | KNOWN 
+      | UNKNOWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL -> "ALL"
+      | KNOWN -> "KNOWN"
+      | UNKNOWN -> "UNKNOWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL" -> ALL
+      | "KNOWN" -> KNOWN
+      | "UNKNOWN" -> UNKNOWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ApplicationMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ApplicationMode" j)
+    let to_json = simple_to_json to_value
+  end
 module ApplicationPreferences =
   struct
     type nonrec t =
@@ -3803,9 +5408,9 @@ module ApplicationPreferences =
           (Xml.child xml_arg0 "managementPreference") in
       make ?managementPreference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managementPreference =
-        field_map json "managementPreference" ManagementPreference.of_json in
+        field_map json__ "managementPreference" ManagementPreference.of_json in
       make ?managementPreference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Application preferences that you specify."]
@@ -3840,12 +5445,12 @@ module DatabasePreferences =
           (Xml.child xml_arg0 "databaseManagementPreference") in
       make ?databaseMigrationPreference ?databaseManagementPreference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let databaseMigrationPreference =
-        field_map json "databaseMigrationPreference"
+        field_map json__ "databaseMigrationPreference"
           DatabaseMigrationPreference.of_json in
       let databaseManagementPreference =
-        field_map json "databaseManagementPreference"
+        field_map json__ "databaseManagementPreference"
           DatabaseManagementPreference.of_json in
       make ?databaseMigrationPreference ?databaseManagementPreference ()
     let to_json v = composed_to_json to_value v
@@ -3868,9 +5473,9 @@ module PrioritizeBusinessGoals =
           (Xml.child xml_arg0 "businessGoals") in
       make ?businessGoals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let businessGoals =
-        field_map json "businessGoals" BusinessGoals.of_json in
+        field_map json__ "businessGoals" BusinessGoals.of_json in
       make ?businessGoals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Rank of business goals based on priority."]
@@ -3898,6 +5503,9 @@ module ServerDetails =
   struct
     type nonrec t = ServerDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServerDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3939,6 +5547,8 @@ module ServerCriteria =
       | STRATEGY 
       | DESTINATION 
       | SERVER_ID 
+      | ANALYSIS_STATUS 
+      | ERROR_CATEGORY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3948,6 +5558,8 @@ module ServerCriteria =
       | STRATEGY -> "STRATEGY"
       | DESTINATION -> "DESTINATION"
       | SERVER_ID -> "SERVER_ID"
+      | ANALYSIS_STATUS -> "ANALYSIS_STATUS"
+      | ERROR_CATEGORY -> "ERROR_CATEGORY"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3956,6 +5568,8 @@ module ServerCriteria =
       | "STRATEGY" -> STRATEGY
       | "DESTINATION" -> DESTINATION
       | "SERVER_ID" -> SERVER_ID
+      | "ANALYSIS_STATUS" -> ANALYSIS_STATUS
+      | "ERROR_CATEGORY" -> ERROR_CATEGORY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3988,6 +5602,9 @@ module ListImportFileTaskInformation =
   struct
     type nonrec t = ImportFileTaskInformation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportFileTaskInformation.to_value)) |>
         (fun x -> `List x)
@@ -4014,6 +5631,9 @@ module Collectors =
   struct
     type nonrec t = Collector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Collector.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4038,6 +5658,9 @@ module ApplicationComponentDetails =
   struct
     type nonrec t = ApplicationComponentDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationComponentDetail.to_value)) |>
         (fun x -> `List x)
@@ -4074,8 +5697,8 @@ module ServiceLinkedRoleLockClientException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4089,6 +5712,8 @@ module ApplicationComponentCriteria =
       | APP_TYPE 
       | STRATEGY 
       | DESTINATION 
+      | ANALYSIS_STATUS 
+      | ERROR_CATEGORY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4099,6 +5724,8 @@ module ApplicationComponentCriteria =
       | APP_TYPE -> "APP_TYPE"
       | STRATEGY -> "STRATEGY"
       | DESTINATION -> "DESTINATION"
+      | ANALYSIS_STATUS -> "ANALYSIS_STATUS"
+      | ERROR_CATEGORY -> "ERROR_CATEGORY"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4108,6 +5735,8 @@ module ApplicationComponentCriteria =
       | "APP_TYPE" -> APP_TYPE
       | "STRATEGY" -> STRATEGY
       | "DESTINATION" -> DESTINATION
+      | "ANALYSIS_STATUS" -> ANALYSIS_STATUS
+      | "ERROR_CATEGORY" -> ERROR_CATEGORY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4142,10 +5771,42 @@ module ListApplicationComponentsRequestFilterValueString =
         ~kind:"ListApplicationComponentsRequestFilterValueString" j
     let to_json = simple_to_json to_value
   end
+module AnalyzableServerSummaryList =
+  struct
+    type nonrec t = AnalyzableServerSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AnalyzableServerSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AnalyzableServerSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AnalyzableServerSummaryList"
+        ~of_json:AnalyzableServerSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ServerStrategies =
   struct
     type nonrec t = ServerStrategy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServerStrategy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4170,6 +5831,9 @@ module AssociatedApplications =
   struct
     type nonrec t = AssociatedApplication.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssociatedApplication.to_value)) |>
         (fun x -> `List x)
@@ -4262,17 +5926,19 @@ module RecommendationReportDetails =
       make ?statusMessage ?status ?startTime ?s3Keys ?s3Bucket
         ?completionTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "statusMessage"
+        field_map json__ "statusMessage"
           RecommendationReportStatusMessage.of_json in
-      let status = field_map json "status" RecommendationReportStatus.of_json in
+      let status =
+        field_map json__ "status" RecommendationReportStatus.of_json in
       let startTime =
-        field_map json "startTime" RecommendationReportTimeStamp.of_json in
-      let s3Keys = field_map json "s3Keys" S3Keys.of_json in
-      let s3Bucket = field_map json "s3Bucket" String_.of_json in
+        field_map json__ "startTime" RecommendationReportTimeStamp.of_json in
+      let s3Keys = field_map json__ "s3Keys" S3Keys.of_json in
+      let s3Bucket = field_map json__ "s3Bucket" String_.of_json in
       let completionTime =
-        field_map json "completionTime" RecommendationReportTimeStamp.of_json in
+        field_map json__ "completionTime"
+          RecommendationReportTimeStamp.of_json in
       make ?statusMessage ?status ?startTime ?s3Keys ?s3Bucket
         ?completionTime ()
     let to_json v = composed_to_json to_value v
@@ -4293,11 +5959,17 @@ module AssessmentSummary =
         [@ocaml.doc "The time the assessment was performed."];
       listAntipatternSeveritySummary: ListAntipatternSeveritySummary.t option
         [@ocaml.doc "List of AntipatternSeveritySummary."];
+      listApplicationComponentStatusSummary:
+        ListApplicationComponentStatusSummary.t option
+        [@ocaml.doc
+          "List of status summaries of the analyzed application components."];
       listApplicationComponentStrategySummary: ListStrategySummary.t option
         [@ocaml.doc "List of ApplicationComponentStrategySummary."];
       listApplicationComponentSummary:
         ListApplicationComponentSummary.t option
         [@ocaml.doc "List of ApplicationComponentSummary."];
+      listServerStatusSummary: ListServerStatusSummary.t option
+        [@ocaml.doc "List of status summaries of the analyzed servers."];
       listServerStrategySummary: ListStrategySummary.t option
         [@ocaml.doc "List of ServerStrategySummary."];
       listServerSummary: ListServerSummary.t option
@@ -4307,22 +5979,26 @@ module AssessmentSummary =
         fun ?antipatternReportStatusMessage ->
           fun ?lastAnalyzedTimestamp ->
             fun ?listAntipatternSeveritySummary ->
-              fun ?listApplicationComponentStrategySummary ->
-                fun ?listApplicationComponentSummary ->
-                  fun ?listServerStrategySummary ->
-                    fun ?listServerSummary ->
-                      fun () ->
-                        {
-                          antipatternReportS3Object;
-                          antipatternReportStatus;
-                          antipatternReportStatusMessage;
-                          lastAnalyzedTimestamp;
-                          listAntipatternSeveritySummary;
-                          listApplicationComponentStrategySummary;
-                          listApplicationComponentSummary;
-                          listServerStrategySummary;
-                          listServerSummary
-                        }
+              fun ?listApplicationComponentStatusSummary ->
+                fun ?listApplicationComponentStrategySummary ->
+                  fun ?listApplicationComponentSummary ->
+                    fun ?listServerStatusSummary ->
+                      fun ?listServerStrategySummary ->
+                        fun ?listServerSummary ->
+                          fun () ->
+                            {
+                              antipatternReportS3Object;
+                              antipatternReportStatus;
+                              antipatternReportStatusMessage;
+                              lastAnalyzedTimestamp;
+                              listAntipatternSeveritySummary;
+                              listApplicationComponentStatusSummary;
+                              listApplicationComponentStrategySummary;
+                              listApplicationComponentSummary;
+                              listServerStatusSummary;
+                              listServerStrategySummary;
+                              listServerSummary
+                            }
     let to_value x =
       structure_to_value
         [("antipatternReportS3Object",
@@ -4338,12 +6014,18 @@ module AssessmentSummary =
         ("listAntipatternSeveritySummary",
           (Option.map x.listAntipatternSeveritySummary
              ~f:ListAntipatternSeveritySummary.to_value));
+        ("listApplicationComponentStatusSummary",
+          (Option.map x.listApplicationComponentStatusSummary
+             ~f:ListApplicationComponentStatusSummary.to_value));
         ("listApplicationComponentStrategySummary",
           (Option.map x.listApplicationComponentStrategySummary
              ~f:ListStrategySummary.to_value));
         ("listApplicationComponentSummary",
           (Option.map x.listApplicationComponentSummary
              ~f:ListApplicationComponentSummary.to_value));
+        ("listServerStatusSummary",
+          (Option.map x.listServerStatusSummary
+             ~f:ListServerStatusSummary.to_value));
         ("listServerStrategySummary",
           (Option.map x.listServerStrategySummary
              ~f:ListStrategySummary.to_value));
@@ -4357,12 +6039,18 @@ module AssessmentSummary =
       let listServerStrategySummary =
         (Option.map ~f:ListStrategySummary.of_xml)
           (Xml.child xml_arg0 "listServerStrategySummary") in
+      let listServerStatusSummary =
+        (Option.map ~f:ListServerStatusSummary.of_xml)
+          (Xml.child xml_arg0 "listServerStatusSummary") in
       let listApplicationComponentSummary =
         (Option.map ~f:ListApplicationComponentSummary.of_xml)
           (Xml.child xml_arg0 "listApplicationComponentSummary") in
       let listApplicationComponentStrategySummary =
         (Option.map ~f:ListStrategySummary.of_xml)
           (Xml.child xml_arg0 "listApplicationComponentStrategySummary") in
+      let listApplicationComponentStatusSummary =
+        (Option.map ~f:ListApplicationComponentStatusSummary.of_xml)
+          (Xml.child xml_arg0 "listApplicationComponentStatusSummary") in
       let listAntipatternSeveritySummary =
         (Option.map ~f:ListAntipatternSeveritySummary.of_xml)
           (Xml.child xml_arg0 "listAntipatternSeveritySummary") in
@@ -4379,44 +6067,72 @@ module AssessmentSummary =
         (Option.map ~f:S3Object.of_xml)
           (Xml.child xml_arg0 "antipatternReportS3Object") in
       make ?listServerSummary ?listServerStrategySummary
-        ?listApplicationComponentSummary
+        ?listServerStatusSummary ?listApplicationComponentSummary
         ?listApplicationComponentStrategySummary
+        ?listApplicationComponentStatusSummary
         ?listAntipatternSeveritySummary ?lastAnalyzedTimestamp
         ?antipatternReportStatusMessage ?antipatternReportStatus
         ?antipatternReportS3Object ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listServerSummary =
-        field_map json "listServerSummary" ListServerSummary.of_json in
+        field_map json__ "listServerSummary" ListServerSummary.of_json in
       let listServerStrategySummary =
-        field_map json "listServerStrategySummary"
+        field_map json__ "listServerStrategySummary"
           ListStrategySummary.of_json in
+      let listServerStatusSummary =
+        field_map json__ "listServerStatusSummary"
+          ListServerStatusSummary.of_json in
       let listApplicationComponentSummary =
-        field_map json "listApplicationComponentSummary"
+        field_map json__ "listApplicationComponentSummary"
           ListApplicationComponentSummary.of_json in
       let listApplicationComponentStrategySummary =
-        field_map json "listApplicationComponentStrategySummary"
+        field_map json__ "listApplicationComponentStrategySummary"
           ListStrategySummary.of_json in
+      let listApplicationComponentStatusSummary =
+        field_map json__ "listApplicationComponentStatusSummary"
+          ListApplicationComponentStatusSummary.of_json in
       let listAntipatternSeveritySummary =
-        field_map json "listAntipatternSeveritySummary"
+        field_map json__ "listAntipatternSeveritySummary"
           ListAntipatternSeveritySummary.of_json in
       let lastAnalyzedTimestamp =
-        field_map json "lastAnalyzedTimestamp" TimeStamp.of_json in
+        field_map json__ "lastAnalyzedTimestamp" TimeStamp.of_json in
       let antipatternReportStatusMessage =
-        field_map json "antipatternReportStatusMessage" StatusMessage.of_json in
+        field_map json__ "antipatternReportStatusMessage"
+          StatusMessage.of_json in
       let antipatternReportStatus =
-        field_map json "antipatternReportStatus"
+        field_map json__ "antipatternReportStatus"
           AntipatternReportStatus.of_json in
       let antipatternReportS3Object =
-        field_map json "antipatternReportS3Object" S3Object.of_json in
+        field_map json__ "antipatternReportS3Object" S3Object.of_json in
       make ?listServerSummary ?listServerStrategySummary
-        ?listApplicationComponentSummary
+        ?listServerStatusSummary ?listApplicationComponentSummary
         ?listApplicationComponentStrategySummary
+        ?listApplicationComponentStatusSummary
         ?listAntipatternSeveritySummary ?lastAnalyzedTimestamp
         ?antipatternReportStatusMessage ?antipatternReportStatus
         ?antipatternReportS3Object ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the summary of the assessment results."]
+module DependencyException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Dependency encountered an error."]
 module DataCollectionDetails =
   struct
     type nonrec t =
@@ -4434,6 +6150,8 @@ module DataCollectionDetails =
         [@ocaml.doc "The start time of assessment."];
       status: AssessmentStatus.t option
         [@ocaml.doc "The status of the assessment."];
+      statusMessage: AssessmentStatusMessage.t option
+        [@ocaml.doc "The status message of the assessment."];
       success: Integer.t option
         [@ocaml.doc "The number of successful servers in the assessment."]}
     let make ?completionTime =
@@ -4442,17 +6160,19 @@ module DataCollectionDetails =
           fun ?servers ->
             fun ?startTime ->
               fun ?status ->
-                fun ?success ->
-                  fun () ->
-                    {
-                      completionTime;
-                      failed;
-                      inProgress;
-                      servers;
-                      startTime;
-                      status;
-                      success
-                    }
+                fun ?statusMessage ->
+                  fun ?success ->
+                    fun () ->
+                      {
+                        completionTime;
+                        failed;
+                        inProgress;
+                        servers;
+                        startTime;
+                        status;
+                        statusMessage;
+                        success
+                      }
     let to_value x =
       structure_to_value
         [("completionTime",
@@ -4462,11 +6182,16 @@ module DataCollectionDetails =
         ("servers", (Option.map x.servers ~f:Integer.to_value));
         ("startTime", (Option.map x.startTime ~f:TimeStamp.to_value));
         ("status", (Option.map x.status ~f:AssessmentStatus.to_value));
+        ("statusMessage",
+          (Option.map x.statusMessage ~f:AssessmentStatusMessage.to_value));
         ("success", (Option.map x.success ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let success =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "success") in
+      let statusMessage =
+        (Option.map ~f:AssessmentStatusMessage.of_xml)
+          (Xml.child xml_arg0 "statusMessage") in
       let status =
         (Option.map ~f:AssessmentStatus.of_xml) (Xml.child xml_arg0 "status") in
       let startTime =
@@ -4480,25 +6205,31 @@ module DataCollectionDetails =
       let completionTime =
         (Option.map ~f:TimeStamp.of_xml)
           (Xml.child xml_arg0 "completionTime") in
-      make ?success ?status ?startTime ?servers ?inProgress ?failed
-        ?completionTime ()
+      make ?success ?statusMessage ?status ?startTime ?servers ?inProgress
+        ?failed ?completionTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let success = field_map json "success" Integer.of_json in
-      let status = field_map json "status" AssessmentStatus.of_json in
-      let startTime = field_map json "startTime" TimeStamp.of_json in
-      let servers = field_map json "servers" Integer.of_json in
-      let inProgress = field_map json "inProgress" Integer.of_json in
-      let failed = field_map json "failed" Integer.of_json in
-      let completionTime = field_map json "completionTime" TimeStamp.of_json in
-      make ?success ?status ?startTime ?servers ?inProgress ?failed
-        ?completionTime ()
+    let of_json json__ =
+      let success = field_map json__ "success" Integer.of_json in
+      let statusMessage =
+        field_map json__ "statusMessage" AssessmentStatusMessage.of_json in
+      let status = field_map json__ "status" AssessmentStatus.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
+      let servers = field_map json__ "servers" Integer.of_json in
+      let inProgress = field_map json__ "inProgress" Integer.of_json in
+      let failed = field_map json__ "failed" Integer.of_json in
+      let completionTime =
+        field_map json__ "completionTime" TimeStamp.of_json in
+      make ?success ?statusMessage ?status ?startTime ?servers ?inProgress
+        ?failed ?completionTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about an assessment."]
 module ApplicationComponentStrategies =
   struct
     type nonrec t = ApplicationComponentStrategy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationComponentStrategy.to_value)) |>
         (fun x -> `List x)
@@ -4525,6 +6256,9 @@ module AssociatedServerIDs =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4636,10 +6370,10 @@ module UpdateServerConfigRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "serverId") in
       make ?strategyOption ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let strategyOption =
-        field_map json "strategyOption" StrategyOption.of_json in
-      let serverId = field_map_exn json "serverId" ServerId.of_json in
+        field_map json__ "strategyOption" StrategyOption.of_json in
+      let serverId = field_map_exn json__ "serverId" ServerId.of_json in
       make ?strategyOption ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the configuration of the specified server."]
@@ -4713,9 +6447,13 @@ module UpdateApplicationComponentConfigRequest =
   struct
     type nonrec t =
       {
+      appType: AppType.t option [@ocaml.doc "The type of known component."];
       applicationComponentId: ApplicationComponentId.t
         [@ocaml.doc
           "The ID of the application component. The ID is unique within an AWS account."];
+      configureOnly: Boolean.t option
+        [@ocaml.doc
+          "Update the configuration request of an application component. If it is set to true, the source code and/or database credentials are updated. If it is set to false, the source code and/or database credentials are updated and an analysis is initiated."];
       inclusionStatus: InclusionStatus.t option
         [@ocaml.doc
           "Indicates whether the application component has been included for server recommendation or not."];
@@ -4728,23 +6466,29 @@ module UpdateApplicationComponentConfigRequest =
         [@ocaml.doc
           "The preferred strategy options for the application component. Use values from the GetApplicationComponentStrategies response."]}
     let context_ = "UpdateApplicationComponentConfigRequest"
-    let make ?inclusionStatus =
-      fun ?secretsManagerKey ->
-        fun ?sourceCodeList ->
-          fun ?strategyOption ->
-            fun ~applicationComponentId ->
-              fun () ->
-                {
-                  inclusionStatus;
-                  secretsManagerKey;
-                  sourceCodeList;
-                  strategyOption;
-                  applicationComponentId
-                }
+    let make ?appType =
+      fun ?configureOnly ->
+        fun ?inclusionStatus ->
+          fun ?secretsManagerKey ->
+            fun ?sourceCodeList ->
+              fun ?strategyOption ->
+                fun ~applicationComponentId ->
+                  fun () ->
+                    {
+                      appType;
+                      configureOnly;
+                      inclusionStatus;
+                      secretsManagerKey;
+                      sourceCodeList;
+                      strategyOption;
+                      applicationComponentId
+                    }
     let to_value x =
       structure_to_value
-        [("applicationComponentId",
-           (Some (ApplicationComponentId.to_value x.applicationComponentId)));
+        [("appType", (Option.map x.appType ~f:AppType.to_value));
+        ("applicationComponentId",
+          (Some (ApplicationComponentId.to_value x.applicationComponentId)));
+        ("configureOnly", (Option.map x.configureOnly ~f:Boolean.to_value));
         ("inclusionStatus",
           (Option.map x.inclusionStatus ~f:InclusionStatus.to_value));
         ("secretsManagerKey",
@@ -4767,26 +6511,32 @@ module UpdateApplicationComponentConfigRequest =
       let inclusionStatus =
         (Option.map ~f:InclusionStatus.of_xml)
           (Xml.child xml_arg0 "inclusionStatus") in
+      let configureOnly =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "configureOnly") in
       let applicationComponentId =
         ApplicationComponentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationComponentId") in
+      let appType =
+        (Option.map ~f:AppType.of_xml) (Xml.child xml_arg0 "appType") in
       make ?strategyOption ?sourceCodeList ?secretsManagerKey
-        ?inclusionStatus ~applicationComponentId ()
+        ?inclusionStatus ?configureOnly ~applicationComponentId ?appType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let strategyOption =
-        field_map json "strategyOption" StrategyOption.of_json in
+        field_map json__ "strategyOption" StrategyOption.of_json in
       let sourceCodeList =
-        field_map json "sourceCodeList" SourceCodeList.of_json in
+        field_map json__ "sourceCodeList" SourceCodeList.of_json in
       let secretsManagerKey =
-        field_map json "secretsManagerKey" SecretsManagerKey.of_json in
+        field_map json__ "secretsManagerKey" SecretsManagerKey.of_json in
       let inclusionStatus =
-        field_map json "inclusionStatus" InclusionStatus.of_json in
+        field_map json__ "inclusionStatus" InclusionStatus.of_json in
+      let configureOnly = field_map json__ "configureOnly" Boolean.of_json in
       let applicationComponentId =
-        field_map_exn json "applicationComponentId"
+        field_map_exn json__ "applicationComponentId"
           ApplicationComponentId.of_json in
+      let appType = field_map json__ "appType" AppType.of_json in
       make ?strategyOption ?sourceCodeList ?secretsManagerKey
-        ?inclusionStatus ~applicationComponentId ()
+        ?inclusionStatus ?configureOnly ~applicationComponentId ?appType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the configuration of an application component."]
 module StopAssessmentResponse =
@@ -4873,9 +6623,9 @@ module StopAssessmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentId =
-        field_map_exn json "assessmentId" AsyncTaskId.of_json in
+        field_map_exn json__ "assessmentId" AsyncTaskId.of_json in
       make ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops the assessment of an on-premises environment."]
@@ -4958,8 +6708,8 @@ module StartRecommendationReportGenerationResponse =
         (Option.map ~f:RecommendationTaskId.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" RecommendationTaskId.of_json in
+    let of_json json__ =
+      let id = field_map json__ "id" RecommendationTaskId.of_json in
       make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts generating a recommendation report."]
@@ -4989,9 +6739,9 @@ module StartRecommendationReportGenerationRequest =
         (Option.map ~f:GroupIds.of_xml) (Xml.child xml_arg0 "groupIdFilter") in
       make ?outputFormat ?groupIdFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputFormat = field_map json "outputFormat" OutputFormat.of_json in
-      let groupIdFilter = field_map json "groupIdFilter" GroupIds.of_json in
+    let of_json json__ =
+      let outputFormat = field_map json__ "outputFormat" OutputFormat.of_json in
+      let groupIdFilter = field_map json__ "groupIdFilter" GroupIds.of_json in
       make ?outputFormat ?groupIdFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts generating a recommendation report."]
@@ -5075,8 +6825,8 @@ module StartImportFileTaskResponse =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" String_.of_json in make ?id ()
+    let of_json json__ =
+      let id = field_map json__ "id" String_.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts a file import."]
 module StartImportFileTaskRequest =
@@ -5150,18 +6900,18 @@ module StartImportFileTaskRequest =
       make ~s3key ?s3bucketForReportData ~name ?groupId ?dataSourceType
         ~s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3key = field_map_exn json "s3key" String_.of_json in
+    let of_json json__ =
+      let s3key = field_map_exn json__ "s3key" String_.of_json in
       let s3bucketForReportData =
-        field_map json "s3bucketForReportData"
+        field_map json__ "s3bucketForReportData"
           StartImportFileTaskRequestS3bucketForReportDataString.of_json in
       let name =
-        field_map_exn json "name"
+        field_map_exn json__ "name"
           StartImportFileTaskRequestNameString.of_json in
-      let groupId = field_map json "groupId" GroupIds.of_json in
+      let groupId = field_map json__ "groupId" GroupIds.of_json in
       let dataSourceType =
-        field_map json "dataSourceType" DataSourceType.of_json in
-      let s3Bucket = field_map_exn json "S3Bucket" ImportS3Bucket.of_json in
+        field_map json__ "dataSourceType" DataSourceType.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" ImportS3Bucket.of_json in
       make ~s3key ?s3bucketForReportData ~name ?groupId ?dataSourceType
         ~s3Bucket ()
     let to_json v = composed_to_json to_value v
@@ -5240,8 +6990,8 @@ module StartAssessmentResponse =
           (Xml.child xml_arg0 "assessmentId") in
       make ?assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentId = field_map json "assessmentId" AsyncTaskId.of_json in
+    let of_json json__ =
+      let assessmentId = field_map json__ "assessmentId" AsyncTaskId.of_json in
       make ?assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts the assessment of an on-premises environment."]
@@ -5249,6 +6999,10 @@ module StartAssessmentRequest =
   struct
     type nonrec t =
       {
+      assessmentDataSourceType: AssessmentDataSourceType.t option
+        [@ocaml.doc "The data source type of an assessment to be started."];
+      assessmentTargets: AssessmentTargets.t option
+        [@ocaml.doc "List of criteria for assessment."];
       s3bucketForAnalysisData:
         StartAssessmentRequestS3bucketForAnalysisDataString.t option
         [@ocaml.doc
@@ -5257,14 +7011,27 @@ module StartAssessmentRequest =
         StartAssessmentRequestS3bucketForReportDataString.t option
         [@ocaml.doc
           "The S3 bucket where all the reports generated by the service are stored. The bucket name must begin with migrationhub-strategy-."]}
-    let make ?s3bucketForAnalysisData =
-      fun ?s3bucketForReportData ->
-        fun () -> { s3bucketForAnalysisData; s3bucketForReportData }
+    let make ?assessmentDataSourceType =
+      fun ?assessmentTargets ->
+        fun ?s3bucketForAnalysisData ->
+          fun ?s3bucketForReportData ->
+            fun () ->
+              {
+                assessmentDataSourceType;
+                assessmentTargets;
+                s3bucketForAnalysisData;
+                s3bucketForReportData
+              }
     let to_value x =
       structure_to_value
-        [("s3bucketForAnalysisData",
-           (Option.map x.s3bucketForAnalysisData
-              ~f:StartAssessmentRequestS3bucketForAnalysisDataString.to_value));
+        [("assessmentDataSourceType",
+           (Option.map x.assessmentDataSourceType
+              ~f:AssessmentDataSourceType.to_value));
+        ("assessmentTargets",
+          (Option.map x.assessmentTargets ~f:AssessmentTargets.to_value));
+        ("s3bucketForAnalysisData",
+          (Option.map x.s3bucketForAnalysisData
+             ~f:StartAssessmentRequestS3bucketForAnalysisDataString.to_value));
         ("s3bucketForReportData",
           (Option.map x.s3bucketForReportData
              ~f:StartAssessmentRequestS3bucketForReportDataString.to_value))]
@@ -5278,16 +7045,29 @@ module StartAssessmentRequest =
         (Option.map
            ~f:StartAssessmentRequestS3bucketForAnalysisDataString.of_xml)
           (Xml.child xml_arg0 "s3bucketForAnalysisData") in
-      make ?s3bucketForReportData ?s3bucketForAnalysisData ()
+      let assessmentTargets =
+        (Option.map ~f:AssessmentTargets.of_xml)
+          (Xml.child xml_arg0 "assessmentTargets") in
+      let assessmentDataSourceType =
+        (Option.map ~f:AssessmentDataSourceType.of_xml)
+          (Xml.child xml_arg0 "assessmentDataSourceType") in
+      make ?s3bucketForReportData ?s3bucketForAnalysisData ?assessmentTargets
+        ?assessmentDataSourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3bucketForReportData =
-        field_map json "s3bucketForReportData"
+        field_map json__ "s3bucketForReportData"
           StartAssessmentRequestS3bucketForReportDataString.of_json in
       let s3bucketForAnalysisData =
-        field_map json "s3bucketForAnalysisData"
+        field_map json__ "s3bucketForAnalysisData"
           StartAssessmentRequestS3bucketForAnalysisDataString.of_json in
-      make ?s3bucketForReportData ?s3bucketForAnalysisData ()
+      let assessmentTargets =
+        field_map json__ "assessmentTargets" AssessmentTargets.of_json in
+      let assessmentDataSourceType =
+        field_map json__ "assessmentDataSourceType"
+          AssessmentDataSourceType.of_json in
+      make ?s3bucketForReportData ?s3bucketForAnalysisData ?assessmentTargets
+        ?assessmentDataSourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts the assessment of an on-premises environment."]
 module PutPortfolioPreferencesResponse =
@@ -5370,6 +7150,8 @@ module PutPortfolioPreferencesRequest =
   struct
     type nonrec t =
       {
+      applicationMode: ApplicationMode.t option
+        [@ocaml.doc "The classification for application component types."];
       applicationPreferences: ApplicationPreferences.t option
         [@ocaml.doc
           "The transformation preferences for non-database applications."];
@@ -5378,20 +7160,24 @@ module PutPortfolioPreferencesRequest =
           "The transformation preferences for database applications."];
       prioritizeBusinessGoals: PrioritizeBusinessGoals.t option
         [@ocaml.doc "The rank of the business goals based on priority."]}
-    let make ?applicationPreferences =
-      fun ?databasePreferences ->
-        fun ?prioritizeBusinessGoals ->
-          fun () ->
-            {
-              applicationPreferences;
-              databasePreferences;
-              prioritizeBusinessGoals
-            }
+    let make ?applicationMode =
+      fun ?applicationPreferences ->
+        fun ?databasePreferences ->
+          fun ?prioritizeBusinessGoals ->
+            fun () ->
+              {
+                applicationMode;
+                applicationPreferences;
+                databasePreferences;
+                prioritizeBusinessGoals
+              }
     let to_value x =
       structure_to_value
-        [("applicationPreferences",
-           (Option.map x.applicationPreferences
-              ~f:ApplicationPreferences.to_value));
+        [("applicationMode",
+           (Option.map x.applicationMode ~f:ApplicationMode.to_value));
+        ("applicationPreferences",
+          (Option.map x.applicationPreferences
+             ~f:ApplicationPreferences.to_value));
         ("databasePreferences",
           (Option.map x.databasePreferences ~f:DatabasePreferences.to_value));
         ("prioritizeBusinessGoals",
@@ -5408,20 +7194,25 @@ module PutPortfolioPreferencesRequest =
       let applicationPreferences =
         (Option.map ~f:ApplicationPreferences.of_xml)
           (Xml.child xml_arg0 "applicationPreferences") in
+      let applicationMode =
+        (Option.map ~f:ApplicationMode.of_xml)
+          (Xml.child xml_arg0 "applicationMode") in
       make ?prioritizeBusinessGoals ?databasePreferences
-        ?applicationPreferences ()
+        ?applicationPreferences ?applicationMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let prioritizeBusinessGoals =
-        field_map json "prioritizeBusinessGoals"
+        field_map json__ "prioritizeBusinessGoals"
           PrioritizeBusinessGoals.of_json in
       let databasePreferences =
-        field_map json "databasePreferences" DatabasePreferences.of_json in
+        field_map json__ "databasePreferences" DatabasePreferences.of_json in
       let applicationPreferences =
-        field_map json "applicationPreferences"
+        field_map json__ "applicationPreferences"
           ApplicationPreferences.of_json in
+      let applicationMode =
+        field_map json__ "applicationMode" ApplicationMode.of_json in
       make ?prioritizeBusinessGoals ?databasePreferences
-        ?applicationPreferences ()
+        ?applicationPreferences ?applicationMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Saves the specified migration and modernization preferences."]
@@ -5504,9 +7295,9 @@ module ListServersResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?serverInfos ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverInfos = field_map json "serverInfos" ServerDetails.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let serverInfos = field_map json__ "serverInfos" ServerDetails.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?serverInfos ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of all the servers."]
@@ -5571,14 +7362,14 @@ module ListServersRequest =
       make ?sort ?serverCriteria ?nextToken ?maxResults ?groupIdFilter
         ?filterValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sort = field_map json "sort" SortOrder.of_json in
+    let of_json json__ =
+      let sort = field_map json__ "sort" SortOrder.of_json in
       let serverCriteria =
-        field_map json "serverCriteria" ServerCriteria.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResult.of_json in
-      let groupIdFilter = field_map json "groupIdFilter" GroupIds.of_json in
-      let filterValue = field_map json "filterValue" String_.of_json in
+        field_map json__ "serverCriteria" ServerCriteria.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResult.of_json in
+      let groupIdFilter = field_map json__ "groupIdFilter" GroupIds.of_json in
+      let filterValue = field_map json__ "filterValue" String_.of_json in
       make ?sort ?serverCriteria ?nextToken ?maxResults ?groupIdFilter
         ?filterValue ()
     let to_json v = composed_to_json to_value v
@@ -5662,10 +7453,10 @@ module ListImportFileTaskResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?taskInfos ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let taskInfos =
-        field_map json "taskInfos" ListImportFileTaskInformation.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+        field_map json__ "taskInfos" ListImportFileTaskInformation.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?taskInfos ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of all the imports performed."]
@@ -5693,9 +7484,9 @@ module ListImportFileTaskRequest =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of all the imports performed."]
@@ -5776,9 +7567,9 @@ module ListCollectorsResponse =
         (Option.map ~f:Collectors.of_xml) (Xml.child xml_arg0 "Collectors") in
       make ?nextToken ?collectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let collectors = field_map json "Collectors" Collectors.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let collectors = field_map json__ "Collectors" Collectors.of_json in
       make ?nextToken ?collectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of all the installed collectors."]
@@ -5806,9 +7597,9 @@ module ListCollectorsRequest =
         (Option.map ~f:MaxResult.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResult.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResult.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of all the installed collectors."]
@@ -5896,10 +7687,10 @@ module ListApplicationComponentsResponse =
           (Xml.child xml_arg0 "applicationComponentInfos") in
       make ?nextToken ?applicationComponentInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let applicationComponentInfos =
-        field_map json "applicationComponentInfos"
+        field_map json__ "applicationComponentInfos"
           ApplicationComponentDetails.of_json in
       make ?nextToken ?applicationComponentInfos ()
     let to_json v = composed_to_json to_value v
@@ -5972,22 +7763,148 @@ module ListApplicationComponentsRequest =
       make ?sort ?nextToken ?maxResults ?groupIdFilter ?filterValue
         ?applicationComponentCriteria ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sort = field_map json "sort" SortOrder.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResult.of_json in
-      let groupIdFilter = field_map json "groupIdFilter" GroupIds.of_json in
+    let of_json json__ =
+      let sort = field_map json__ "sort" SortOrder.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResult.of_json in
+      let groupIdFilter = field_map json__ "groupIdFilter" GroupIds.of_json in
       let filterValue =
-        field_map json "filterValue"
+        field_map json__ "filterValue"
           ListApplicationComponentsRequestFilterValueString.of_json in
       let applicationComponentCriteria =
-        field_map json "applicationComponentCriteria"
+        field_map json__ "applicationComponentCriteria"
           ApplicationComponentCriteria.of_json in
       make ?sort ?nextToken ?maxResults ?groupIdFilter ?filterValue
         ?applicationComponentCriteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of all the application components (processes)."]
+module ListAnalyzableServersResponse =
+  struct
+    type nonrec t =
+      {
+      analyzableServers: AnalyzableServerSummaryList.t option
+        [@ocaml.doc
+          "The list of analyzable servers with summary information about each server."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token you use to retrieve the next set of results, or null if there are no more results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?analyzableServers =
+      fun ?nextToken -> fun () -> { analyzableServers; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("analyzableServers",
+           (Option.map x.analyzableServers
+              ~f:AnalyzableServerSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let analyzableServers =
+        (Option.map ~f:AnalyzableServerSummaryList.of_xml)
+          (Xml.child xml_arg0 "analyzableServers") in
+      make ?nextToken ?analyzableServers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let analyzableServers =
+        field_map json__ "analyzableServers"
+          AnalyzableServerSummaryList.of_json in
+      make ?nextToken ?analyzableServers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents output for ListAnalyzableServers operation."]
+module ListAnalyzableServersRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResult.t option
+        [@ocaml.doc
+          "The maximum number of items to include in the response. The maximum value is 100."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token from a previous call that you use to retrieve the next set of results. For example, if a previous call to this action returned 100 items, but you set maxResults to 10. You'll receive a set of 10 results along with a token. You then use the returned token to retrieve the next set of 10."];
+      sort: SortOrder.t option
+        [@ocaml.doc
+          "Specifies whether to sort by ascending (ASC) or descending (DESC) order."]}
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?sort -> fun () -> { maxResults; nextToken; sort }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:MaxResult.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("sort", (Option.map x.sort ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sort = (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "sort") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResult.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ?sort ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sort = field_map json__ "sort" SortOrder.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResult.of_json in
+      make ?sort ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents input for ListAnalyzableServers operation."]
 module GetServerStrategiesResponse =
   struct
     type nonrec t =
@@ -6069,9 +7986,9 @@ module GetServerStrategiesResponse =
           (Xml.child xml_arg0 "serverStrategies") in
       make ?serverStrategies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serverStrategies =
-        field_map json "serverStrategies" ServerStrategies.of_json in
+        field_map json__ "serverStrategies" ServerStrategies.of_json in
       make ?serverStrategies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6092,8 +8009,8 @@ module GetServerStrategiesRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "serverId") in
       make ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "serverId" ServerId.of_json in
+    let of_json json__ =
+      let serverId = field_map_exn json__ "serverId" ServerId.of_json in
       make ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6197,11 +8114,11 @@ module GetServerDetailsResponse =
           (Xml.child xml_arg0 "associatedApplications") in
       make ?serverDetail ?nextToken ?associatedApplications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverDetail = field_map json "serverDetail" ServerDetail.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let serverDetail = field_map json__ "serverDetail" ServerDetail.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let associatedApplications =
-        field_map json "associatedApplications"
+        field_map json__ "associatedApplications"
           AssociatedApplications.of_json in
       make ?serverDetail ?nextToken ?associatedApplications ()
     let to_json v = composed_to_json to_value v
@@ -6236,10 +8153,10 @@ module GetServerDetailsRequest =
         (Option.map ~f:MaxResult.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~serverId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "serverId" ServerId.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResult.of_json in
+    let of_json json__ =
+      let serverId = field_map_exn json__ "serverId" ServerId.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResult.of_json in
       make ~serverId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves detailed information about a specified server."]
@@ -6333,11 +8250,11 @@ module GetRecommendationReportDetailsResponse =
         (Option.map ~f:RecommendationTaskId.of_xml) (Xml.child xml_arg0 "id") in
       make ?recommendationReportDetails ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationReportDetails =
-        field_map json "recommendationReportDetails"
+        field_map json__ "recommendationReportDetails"
           RecommendationReportDetails.of_json in
-      let id = field_map json "id" RecommendationTaskId.of_json in
+      let id = field_map json__ "id" RecommendationTaskId.of_json in
       make ?recommendationReportDetails ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6361,8 +8278,8 @@ module GetRecommendationReportDetailsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" RecommendationTaskId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" RecommendationTaskId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6431,9 +8348,9 @@ module GetPortfolioSummaryResponse =
           (Xml.child xml_arg0 "assessmentSummary") in
       make ?assessmentSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentSummary =
-        field_map json "assessmentSummary" AssessmentSummary.of_json in
+        field_map json__ "assessmentSummary" AssessmentSummary.of_json in
       make ?assessmentSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6455,6 +8372,8 @@ module GetPortfolioPreferencesResponse =
   struct
     type nonrec t =
       {
+      applicationMode: ApplicationMode.t option
+        [@ocaml.doc "The classification for application component types."];
       applicationPreferences: ApplicationPreferences.t option
         [@ocaml.doc
           "The transformation preferences for non-database applications."];
@@ -6469,15 +8388,17 @@ module GetPortfolioPreferencesResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?applicationPreferences =
-      fun ?databasePreferences ->
-        fun ?prioritizeBusinessGoals ->
-          fun () ->
-            {
-              applicationPreferences;
-              databasePreferences;
-              prioritizeBusinessGoals
-            }
+    let make ?applicationMode =
+      fun ?applicationPreferences ->
+        fun ?databasePreferences ->
+          fun ?prioritizeBusinessGoals ->
+            fun () ->
+              {
+                applicationMode;
+                applicationPreferences;
+                databasePreferences;
+                prioritizeBusinessGoals
+              }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6528,9 +8449,11 @@ module GetPortfolioPreferencesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("applicationPreferences",
-           (Option.map x.applicationPreferences
-              ~f:ApplicationPreferences.to_value));
+        [("applicationMode",
+           (Option.map x.applicationMode ~f:ApplicationMode.to_value));
+        ("applicationPreferences",
+          (Option.map x.applicationPreferences
+             ~f:ApplicationPreferences.to_value));
         ("databasePreferences",
           (Option.map x.databasePreferences ~f:DatabasePreferences.to_value));
         ("prioritizeBusinessGoals",
@@ -6547,20 +8470,25 @@ module GetPortfolioPreferencesResponse =
       let applicationPreferences =
         (Option.map ~f:ApplicationPreferences.of_xml)
           (Xml.child xml_arg0 "applicationPreferences") in
+      let applicationMode =
+        (Option.map ~f:ApplicationMode.of_xml)
+          (Xml.child xml_arg0 "applicationMode") in
       make ?prioritizeBusinessGoals ?databasePreferences
-        ?applicationPreferences ()
+        ?applicationPreferences ?applicationMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let prioritizeBusinessGoals =
-        field_map json "prioritizeBusinessGoals"
+        field_map json__ "prioritizeBusinessGoals"
           PrioritizeBusinessGoals.of_json in
       let databasePreferences =
-        field_map json "databasePreferences" DatabasePreferences.of_json in
+        field_map json__ "databasePreferences" DatabasePreferences.of_json in
       let applicationPreferences =
-        field_map json "applicationPreferences"
+        field_map json__ "applicationPreferences"
           ApplicationPreferences.of_json in
+      let applicationMode =
+        field_map json__ "applicationMode" ApplicationMode.of_json in
       make ?prioritizeBusinessGoals ?databasePreferences
-        ?applicationPreferences ()
+        ?applicationPreferences ?applicationMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves your migration and modernization preferences."]
 module GetPortfolioPreferencesRequest =
@@ -6575,6 +8503,90 @@ module GetPortfolioPreferencesRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves your migration and modernization preferences."]
+module GetLatestAssessmentIdResponse =
+  struct
+    type nonrec t =
+      {
+      id: AsyncTaskId.t option
+        [@ocaml.doc "The latest ID for the specific assessment task."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `DependencyException of DependencyException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id = fun () -> { id }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("id", (Option.map x.id ~f:AsyncTaskId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = (Option.map ~f:AsyncTaskId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "id" AsyncTaskId.of_json in make ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieve the latest ID of a specific assessment task."]
+module GetLatestAssessmentIdRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieve the latest ID of a specific assessment task."]
 module GetImportFileTaskResponse =
   struct
     type nonrec t =
@@ -6745,23 +8757,24 @@ module GetImportFileTaskResponse =
         ?numberOfRecordsSuccess ?numberOfRecordsFailed ?inputS3Key
         ?inputS3Bucket ?importName ?id ?completionTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusReportS3Key =
-        field_map json "statusReportS3Key" ImportS3Key.of_json in
+        field_map json__ "statusReportS3Key" ImportS3Key.of_json in
       let statusReportS3Bucket =
-        field_map json "statusReportS3Bucket" ImportS3Bucket.of_json in
-      let status = field_map json "status" ImportFileTaskStatus.of_json in
-      let startTime = field_map json "startTime" TimeStamp.of_json in
+        field_map json__ "statusReportS3Bucket" ImportS3Bucket.of_json in
+      let status = field_map json__ "status" ImportFileTaskStatus.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
       let numberOfRecordsSuccess =
-        field_map json "numberOfRecordsSuccess" Integer.of_json in
+        field_map json__ "numberOfRecordsSuccess" Integer.of_json in
       let numberOfRecordsFailed =
-        field_map json "numberOfRecordsFailed" Integer.of_json in
-      let inputS3Key = field_map json "inputS3Key" ImportS3Key.of_json in
+        field_map json__ "numberOfRecordsFailed" Integer.of_json in
+      let inputS3Key = field_map json__ "inputS3Key" ImportS3Key.of_json in
       let inputS3Bucket =
-        field_map json "inputS3Bucket" ImportS3Bucket.of_json in
-      let importName = field_map json "importName" String_.of_json in
-      let id = field_map json "id" String_.of_json in
-      let completionTime = field_map json "completionTime" TimeStamp.of_json in
+        field_map json__ "inputS3Bucket" ImportS3Bucket.of_json in
+      let importName = field_map json__ "importName" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      let completionTime =
+        field_map json__ "completionTime" TimeStamp.of_json in
       make ?statusReportS3Key ?statusReportS3Bucket ?status ?startTime
         ?numberOfRecordsSuccess ?numberOfRecordsFailed ?inputS3Key
         ?inputS3Bucket ?importName ?id ?completionTime ()
@@ -6783,14 +8796,16 @@ module GetImportFileTaskRequest =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" String_.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the details about a specific import task."]
 module GetAssessmentResponse =
   struct
     type nonrec t =
       {
+      assessmentTargets: AssessmentTargets.t option
+        [@ocaml.doc "List of criteria for assessment."];
       dataCollectionDetails: DataCollectionDetails.t option
         [@ocaml.doc "Detailed information about the assessment."];
       id: AsyncTaskId.t option
@@ -6801,8 +8816,9 @@ module GetAssessmentResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?dataCollectionDetails =
-      fun ?id -> fun () -> { dataCollectionDetails; id }
+    let make ?assessmentTargets =
+      fun ?dataCollectionDetails ->
+        fun ?id -> fun () -> { assessmentTargets; dataCollectionDetails; id }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6853,9 +8869,11 @@ module GetAssessmentResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("dataCollectionDetails",
-           (Option.map x.dataCollectionDetails
-              ~f:DataCollectionDetails.to_value));
+        [("assessmentTargets",
+           (Option.map x.assessmentTargets ~f:AssessmentTargets.to_value));
+        ("dataCollectionDetails",
+          (Option.map x.dataCollectionDetails
+             ~f:DataCollectionDetails.to_value));
         ("id", (Option.map x.id ~f:AsyncTaskId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -6863,13 +8881,19 @@ module GetAssessmentResponse =
       let dataCollectionDetails =
         (Option.map ~f:DataCollectionDetails.of_xml)
           (Xml.child xml_arg0 "dataCollectionDetails") in
-      make ?id ?dataCollectionDetails ()
+      let assessmentTargets =
+        (Option.map ~f:AssessmentTargets.of_xml)
+          (Xml.child xml_arg0 "assessmentTargets") in
+      make ?id ?dataCollectionDetails ?assessmentTargets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" AsyncTaskId.of_json in
+    let of_json json__ =
+      let id = field_map json__ "id" AsyncTaskId.of_json in
       let dataCollectionDetails =
-        field_map json "dataCollectionDetails" DataCollectionDetails.of_json in
-      make ?id ?dataCollectionDetails ()
+        field_map json__ "dataCollectionDetails"
+          DataCollectionDetails.of_json in
+      let assessmentTargets =
+        field_map json__ "assessmentTargets" AssessmentTargets.of_json in
+      make ?id ?dataCollectionDetails ?assessmentTargets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the status of an on-going assessment."]
 module GetAssessmentRequest =
@@ -6888,8 +8912,8 @@ module GetAssessmentRequest =
         AsyncTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" AsyncTaskId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" AsyncTaskId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the status of an on-going assessment."]
 module GetApplicationComponentStrategiesResponse =
@@ -6958,9 +8982,9 @@ module GetApplicationComponentStrategiesResponse =
           (Xml.child xml_arg0 "applicationComponentStrategies") in
       make ?applicationComponentStrategies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationComponentStrategies =
-        field_map json "applicationComponentStrategies"
+        field_map json__ "applicationComponentStrategies"
           ApplicationComponentStrategies.of_json in
       make ?applicationComponentStrategies ()
     let to_json v = composed_to_json to_value v
@@ -6986,9 +9010,9 @@ module GetApplicationComponentStrategiesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationComponentId") in
       make ~applicationComponentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationComponentId =
-        field_map_exn json "applicationComponentId"
+        field_map_exn json__ "applicationComponentId"
           ApplicationComponentId.of_json in
       make ~applicationComponentId ()
     let to_json v = composed_to_json to_value v
@@ -7094,16 +9118,16 @@ module GetApplicationComponentDetailsResponse =
       make ?moreApplicationResource ?associatedServerIds
         ?associatedApplications ?applicationComponentDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let moreApplicationResource =
-        field_map json "moreApplicationResource" Boolean.of_json in
+        field_map json__ "moreApplicationResource" Boolean.of_json in
       let associatedServerIds =
-        field_map json "associatedServerIds" AssociatedServerIDs.of_json in
+        field_map json__ "associatedServerIds" AssociatedServerIDs.of_json in
       let associatedApplications =
-        field_map json "associatedApplications"
+        field_map json__ "associatedApplications"
           AssociatedApplications.of_json in
       let applicationComponentDetail =
-        field_map json "applicationComponentDetail"
+        field_map json__ "applicationComponentDetail"
           ApplicationComponentDetail.of_json in
       make ?moreApplicationResource ?associatedServerIds
         ?associatedApplications ?applicationComponentDetail ()
@@ -7129,9 +9153,9 @@ module GetApplicationComponentDetailsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationComponentId") in
       make ~applicationComponentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationComponentId =
-        field_map_exn json "applicationComponentId"
+        field_map_exn json__ "applicationComponentId"
           ApplicationComponentId.of_json in
       make ~applicationComponentId ()
     let to_json v = composed_to_json to_value v

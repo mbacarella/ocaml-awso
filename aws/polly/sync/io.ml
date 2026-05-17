@@ -25,6 +25,8 @@ let list_speech_synthesis_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSpeechSynthesisTasks input
 let put_lexicon ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutLexicon input
+let start_speech_synthesis_stream ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartSpeechSynthesisStream input
 let start_speech_synthesis_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartSpeechSynthesisTask input
 let synthesize_speech ?endpoint_url ?cfg input =

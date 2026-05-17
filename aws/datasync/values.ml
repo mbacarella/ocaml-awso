@@ -25,26 +25,109 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module FilterAttributeValue =
+module IamRoleArn =
   struct
     type nonrec t = string
-    let context_ = "FilterAttributeValue"
+    let context_ = "IamRoleArn"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
+          ((check_string_max i ~max:2048) >>=
              (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^[0-9a-zA-Z_\\ \\-\\:\\*\\.\\\\/\\?-]*$")));
+                check_pattern i
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):iam::[0-9]{12}:role/.*$"));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FilterAttributeValue" j
+    let of_json j = string_of_json ~kind:"IamRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module S3BucketArn =
+  struct
+    type nonrec t = string
+    let context_ = "S3BucketArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:268) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):s3:[a-z\\-0-9]*:[0-9]{12}:accesspoint[/:][a-zA-Z0-9\\-.]{1,63}$|^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):s3-outposts:[a-z\\-0-9]+:[0-9]{12}:outpost[/:][a-zA-Z0-9\\-]{1,63}[/:]accesspoint[/:][a-zA-Z0-9\\-]{1,63}$|^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):s3:::[a-zA-Z0-9.\\-_]{1,255}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3BucketArn" j
+    let to_json = simple_to_json to_value
+  end
+module S3ObjectVersionId =
+  struct
+    type nonrec t = string
+    let context_ = "S3ObjectVersionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"^.+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3ObjectVersionId" j
+    let to_json = simple_to_json to_value
+  end
+module S3Subdirectory =
+  struct
+    type nonrec t = string
+    let context_ = "S3Subdirectory"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4096) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[a-zA-Z0-9_\\-\\+\\./\\(\\)\\p{Zs}]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Subdirectory" j
+    let to_json = simple_to_json to_value
+  end
+module ReportLevel =
+  struct
+    type nonrec t =
+      | ERRORS_ONLY 
+      | SUCCESSES_AND_ERRORS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ERRORS_ONLY -> "ERRORS_ONLY"
+      | SUCCESSES_AND_ERRORS -> "SUCCESSES_AND_ERRORS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ERRORS_ONLY" -> ERRORS_ONLY
+      | "SUCCESSES_AND_ERRORS" -> SUCCESSES_AND_ERRORS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ReportLevel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReportLevel" j)
     let to_json = simple_to_json to_value
   end
 module NfsVersion =
@@ -76,6 +159,143 @@ module NfsVersion =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration NfsVersion" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"NfsVersion" j)
+    let to_json = simple_to_json to_value
+  end
+module KmsKeyArn =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^(arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):kms:[a-z\\-0-9]+:[0-9]{12}:key/.*|)$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyArn" j
+    let to_json = simple_to_json to_value
+  end
+module SecretArn =
+  struct
+    type nonrec t = string
+    let context_ = "SecretArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^(arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):secretsmanager:[a-z\\-0-9]+:[0-9]{12}:secret:.*|)$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretArn" j
+    let to_json = simple_to_json to_value
+  end
+module IamRoleArnOrEmptyString =
+  struct
+    type nonrec t = string
+    let context_ = "IamRoleArnOrEmptyString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^(arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):iam::[0-9]{12}:role/[a-zA-Z0-9+=,.@_/-]+|)$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IamRoleArnOrEmptyString" j
+    let to_json = simple_to_json to_value
+  end
+module SmbVersion =
+  struct
+    type nonrec t =
+      | AUTOMATIC 
+      | SMB2 
+      | SMB3 
+      | SMB1 
+      | SMB2_0 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AUTOMATIC -> "AUTOMATIC"
+      | SMB2 -> "SMB2"
+      | SMB3 -> "SMB3"
+      | SMB1 -> "SMB1"
+      | SMB2_0 -> "SMB2_0"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AUTOMATIC" -> AUTOMATIC
+      | "SMB2" -> SMB2
+      | "SMB3" -> SMB3
+      | "SMB1" -> SMB1
+      | "SMB2_0" -> SMB2_0
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SmbVersion" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SmbVersion" j)
+    let to_json = simple_to_json to_value
+  end
+module FilterAttributeValue =
+  struct
+    type nonrec t = string
+    let context_ = "FilterAttributeValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[0-9a-zA-Z_\\ \\-\\:\\*\\.\\\\/\\?-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterAttributeValue" j
+    let to_json = simple_to_json to_value
+  end
+module AgentVersion =
+  struct
+    type nonrec t = string
+    let context_ = "AgentVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\s+=._:@/-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AgentVersion" j
     let to_json = simple_to_json to_value
   end
 module FilterType =
@@ -114,6 +334,145 @@ module FilterValue =
     let of_json j = string_of_json ~kind:"FilterValue" j
     let to_json = simple_to_json to_value
   end
+module S3ManifestConfig =
+  struct
+    type nonrec t =
+      {
+      manifestObjectPath: S3Subdirectory.t
+        [@ocaml.doc
+          "Specifies the Amazon S3 object key of your manifest. This can include a prefix (for example, prefix/my-manifest.csv)."];
+      bucketAccessRoleArn: IamRoleArn.t
+        [@ocaml.doc
+          "Specifies the Identity and Access Management (IAM) role that allows DataSync to access your manifest. For more information, see Providing DataSync access to your manifest."];
+      s3BucketArn: S3BucketArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the S3 bucket where you're hosting your manifest."];
+      manifestObjectVersionId: S3ObjectVersionId.t option
+        [@ocaml.doc
+          "Specifies the object version ID of the manifest that you want DataSync to use. If you don't set this, DataSync uses the latest version of the object."]}
+    let context_ = "S3ManifestConfig"
+    let make ?manifestObjectVersionId =
+      fun ~manifestObjectPath ->
+        fun ~bucketAccessRoleArn ->
+          fun ~s3BucketArn ->
+            fun () ->
+              {
+                manifestObjectVersionId;
+                manifestObjectPath;
+                bucketAccessRoleArn;
+                s3BucketArn
+              }
+    let to_value x =
+      structure_to_value
+        [("ManifestObjectPath",
+           (Some (S3Subdirectory.to_value x.manifestObjectPath)));
+        ("BucketAccessRoleArn",
+          (Some (IamRoleArn.to_value x.bucketAccessRoleArn)));
+        ("S3BucketArn", (Some (S3BucketArn.to_value x.s3BucketArn)));
+        ("ManifestObjectVersionId",
+          (Option.map x.manifestObjectVersionId ~f:S3ObjectVersionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let manifestObjectVersionId =
+        (Option.map ~f:S3ObjectVersionId.of_xml)
+          (Xml.child xml_arg0 "ManifestObjectVersionId") in
+      let s3BucketArn =
+        S3BucketArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3BucketArn") in
+      let bucketAccessRoleArn =
+        IamRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BucketAccessRoleArn") in
+      let manifestObjectPath =
+        S3Subdirectory.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ManifestObjectPath") in
+      make ?manifestObjectVersionId ~s3BucketArn ~bucketAccessRoleArn
+        ~manifestObjectPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let manifestObjectVersionId =
+        field_map json__ "ManifestObjectVersionId" S3ObjectVersionId.of_json in
+      let s3BucketArn =
+        field_map_exn json__ "S3BucketArn" S3BucketArn.of_json in
+      let bucketAccessRoleArn =
+        field_map_exn json__ "BucketAccessRoleArn" IamRoleArn.of_json in
+      let manifestObjectPath =
+        field_map_exn json__ "ManifestObjectPath" S3Subdirectory.of_json in
+      make ?manifestObjectVersionId ~s3BucketArn ~bucketAccessRoleArn
+        ~manifestObjectPath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the S3 bucket where you're hosting the manifest that you want DataSync to use. For more information and configuration examples, see Specifying what DataSync transfers by using a manifest."]
+module ReportDestinationS3 =
+  struct
+    type nonrec t =
+      {
+      subdirectory: S3Subdirectory.t option
+        [@ocaml.doc "Specifies a bucket prefix for your report."];
+      s3BucketArn: S3BucketArn.t
+        [@ocaml.doc
+          "Specifies the ARN of the S3 bucket where DataSync uploads your report."];
+      bucketAccessRoleArn: IamRoleArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the IAM policy that allows DataSync to upload a task report to your S3 bucket. For more information, see Allowing DataSync to upload a task report to an Amazon S3 bucket."]}
+    let context_ = "ReportDestinationS3"
+    let make ?subdirectory =
+      fun ~s3BucketArn ->
+        fun ~bucketAccessRoleArn ->
+          fun () -> { subdirectory; s3BucketArn; bucketAccessRoleArn }
+    let to_value x =
+      structure_to_value
+        [("Subdirectory",
+           (Option.map x.subdirectory ~f:S3Subdirectory.to_value));
+        ("S3BucketArn", (Some (S3BucketArn.to_value x.s3BucketArn)));
+        ("BucketAccessRoleArn",
+          (Some (IamRoleArn.to_value x.bucketAccessRoleArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bucketAccessRoleArn =
+        IamRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BucketAccessRoleArn") in
+      let s3BucketArn =
+        S3BucketArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3BucketArn") in
+      let subdirectory =
+        (Option.map ~f:S3Subdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      make ~bucketAccessRoleArn ~s3BucketArn ?subdirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bucketAccessRoleArn =
+        field_map_exn json__ "BucketAccessRoleArn" IamRoleArn.of_json in
+      let s3BucketArn =
+        field_map_exn json__ "S3BucketArn" S3BucketArn.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" S3Subdirectory.of_json in
+      make ~bucketAccessRoleArn ~s3BucketArn ?subdirectory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the Amazon S3 bucket where DataSync uploads your task report."]
+module ReportOverride =
+  struct
+    type nonrec t =
+      {
+      reportLevel: ReportLevel.t option
+        [@ocaml.doc
+          "Specifies whether your task report includes errors only or successes and errors. For example, your report might mostly include only what didn't go well in your transfer (ERRORS_ONLY). At the same time, you want to verify that your task filter is working correctly. In this situation, you can get a list of what files DataSync successfully skipped and if something transferred that you didn't to transfer (SUCCESSES_AND_ERRORS)."]}
+    let make ?reportLevel = fun () -> { reportLevel }
+    let to_value x =
+      structure_to_value
+        [("ReportLevel", (Option.map x.reportLevel ~f:ReportLevel.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reportLevel =
+        (Option.map ~f:ReportLevel.of_xml) (Xml.child xml_arg0 "ReportLevel") in
+      make ?reportLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reportLevel = field_map json__ "ReportLevel" ReportLevel.of_json in
+      make ?reportLevel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the level of detail for a particular aspect of your DataSync task report."]
 module AgentArn =
   struct
     type nonrec t = string
@@ -124,7 +483,7 @@ module AgentArn =
           ((check_string_max i ~max:128) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:agent/agent-[0-9a-z]{17}$"));
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:agent/agent-[0-9a-z]{17}$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -175,6 +534,219 @@ module HdfsServerPort =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module NfsMountOptions =
+  struct
+    type nonrec t =
+      {
+      version: NfsVersion.t option
+        [@ocaml.doc
+          "Specifies the NFS version that you want DataSync to use when mounting your NFS share. If the server refuses to use the version specified, the task fails. You can specify the following options: AUTOMATIC (default): DataSync chooses NFS version 4.1. NFS3: Stateless protocol version that allows for asynchronous writes on the server. NFSv4_0: Stateful, firewall-friendly protocol version that supports delegations and pseudo file systems. NFSv4_1: Stateful protocol version that supports sessions, directory delegations, and parallel data processing. NFS version 4.1 also includes all features available in version 4.0. DataSync currently only supports NFS version 3 with Amazon FSx for NetApp ONTAP locations."]}
+    let make ?version = fun () -> { version }
+    let to_value x =
+      structure_to_value
+        [("Version", (Option.map x.version ~f:NfsVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:NfsVersion.of_xml) (Xml.child xml_arg0 "Version") in
+      make ?version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "Version" NfsVersion.of_json in
+      make ?version ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies how DataSync can access a location using the NFS protocol."]
+module CmkSecretConfig =
+  struct
+    type nonrec t =
+      {
+      secretArn: SecretArn.t option
+        [@ocaml.doc
+          "Specifies the ARN for the DataSync-managed Secrets Manager secret that that is used to access a specific storage location. This property is generated by DataSync and is read-only. DataSync encrypts this secret with the KMS key that you specify for KmsKeyArn."];
+      kmsKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "Specifies the ARN for the customer-managed KMS key that DataSync uses to encrypt the DataSync-managed secret stored for SecretArn. DataSync provides this key to Secrets Manager."]}
+    let make ?secretArn =
+      fun ?kmsKeyArn -> fun () -> { secretArn; kmsKeyArn }
+    let to_value x =
+      structure_to_value
+        [("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
+        ("KmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "KmsKeyArn") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
+      make ?kmsKeyArn ?secretArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "KmsKeyArn" KmsKeyArn.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
+      make ?kmsKeyArn ?secretArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies configuration information for a DataSync-managed secret, such as an authentication token, secret key, password, or Kerberos keytab that DataSync uses to access a specific storage location, with a customer-managed KMS key. You can use either CmkSecretConfig or CustomSecretConfig to provide credentials for a CreateLocation request. Do not provide both parameters for the same request."]
+module CustomSecretConfig =
+  struct
+    type nonrec t =
+      {
+      secretArn: SecretArn.t option
+        [@ocaml.doc "Specifies the ARN for an Secrets Manager secret."];
+      secretAccessRoleArn: IamRoleArnOrEmptyString.t option
+        [@ocaml.doc
+          "Specifies the ARN for the Identity and Access Management role that DataSync uses to access the secret specified for SecretArn."]}
+    let make ?secretArn =
+      fun ?secretAccessRoleArn ->
+        fun () -> { secretArn; secretAccessRoleArn }
+    let to_value x =
+      structure_to_value
+        [("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
+        ("SecretAccessRoleArn",
+          (Option.map x.secretAccessRoleArn
+             ~f:IamRoleArnOrEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let secretAccessRoleArn =
+        (Option.map ~f:IamRoleArnOrEmptyString.of_xml)
+          (Xml.child xml_arg0 "SecretAccessRoleArn") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
+      make ?secretAccessRoleArn ?secretArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let secretAccessRoleArn =
+        field_map json__ "SecretAccessRoleArn"
+          IamRoleArnOrEmptyString.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
+      make ?secretAccessRoleArn ?secretArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies configuration information for a customer-managed Secrets Manager secret where a storage location credentials is stored in Secrets Manager as plain text (for authentication token, secret key, or password) or as binary (for Kerberos keytab). This configuration includes the secret ARN, and the ARN for an IAM role that provides access to the secret. You can use either CmkSecretConfig or CustomSecretConfig to provide credentials for a CreateLocation request. Do not provide both parameters for the same request."]
+module ManagedSecretConfig =
+  struct
+    type nonrec t =
+      {
+      secretArn: SecretArn.t option
+        [@ocaml.doc "Specifies the ARN for an Secrets Manager secret."]}
+    let make ?secretArn = fun () -> { secretArn }
+    let to_value x =
+      structure_to_value
+        [("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
+      make ?secretArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
+      make ?secretArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies configuration information for a DataSync-managed secret, such as an authentication token or set of credentials that DataSync uses to access a specific transfer location. DataSync uses the default Amazon Web Services-managed KMS key to encrypt this secret in Secrets Manager."]
+module SmbDomain =
+  struct
+    type nonrec t = string
+    let context_ = "SmbDomain"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:253) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[A-Za-z0-9]((\\.|-+)?[A-Za-z0-9]){0,252}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SmbDomain" j
+    let to_json = simple_to_json to_value
+  end
+module SmbMountOptions =
+  struct
+    type nonrec t =
+      {
+      version: SmbVersion.t option
+        [@ocaml.doc
+          "By default, DataSync automatically chooses an SMB protocol version based on negotiation with your SMB file server. You also can configure DataSync to use a specific SMB version, but we recommend doing this only if DataSync has trouble negotiating with the SMB file server automatically. These are the following options for configuring the SMB version: AUTOMATIC (default): DataSync and the SMB file server negotiate the highest version of SMB that they mutually support between 2.1 and 3.1.1. This is the recommended option. If you instead choose a specific version that your file server doesn't support, you may get an Operation Not Supported error. SMB3: Restricts the protocol negotiation to only SMB version 3.0.2. SMB2: Restricts the protocol negotiation to only SMB version 2.1. SMB2_0: Restricts the protocol negotiation to only SMB version 2.0. SMB1: Restricts the protocol negotiation to only SMB version 1.0. The SMB1 option isn't available when creating an Amazon FSx for NetApp ONTAP location."]}
+    let make ?version = fun () -> { version }
+    let to_value x =
+      structure_to_value
+        [("Version", (Option.map x.version ~f:SmbVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:SmbVersion.of_xml) (Xml.child xml_arg0 "Version") in
+      make ?version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "Version" SmbVersion.of_json in
+      make ?version ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the version of the Server Message Block (SMB) protocol that DataSync uses to access an SMB file server."]
+module SmbPassword =
+  struct
+    type nonrec t = string
+    let context_ = "SmbPassword"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:104) >>=
+             (fun () -> check_pattern i ~pattern:"^.{0,104}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SmbPassword" j
+    let to_json = simple_to_json to_value
+  end
+module SmbUser =
+  struct
+    type nonrec t = string
+    let context_ = "SmbUser"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:104) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[^\\x22\\x5B\\x5D/\\\\:;|=,+*?\\x3C\\x3E]{1,104}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SmbUser" j
+    let to_json = simple_to_json to_value
+  end
+module UpdateSmbDomain =
+  struct
+    type nonrec t = string
+    let context_ = "UpdateSmbDomain"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:253) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^([A-Za-z0-9]((\\.|-+)?[A-Za-z0-9]){0,252})?$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UpdateSmbDomain" j
+    let to_json = simple_to_json to_value
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -203,7 +775,7 @@ module TagValue =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
                   (fun () ->
@@ -227,7 +799,7 @@ module TaskArn =
           ((check_string_max i ~max:128) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]*:[0-9]{12}:task/task-[0-9a-f]{17}$"));
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:task/task-[0-9a-f]{17}$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -235,6 +807,31 @@ module TaskArn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TaskArn" j
+    let to_json = simple_to_json to_value
+  end
+module TaskMode =
+  struct
+    type nonrec t =
+      | BASIC 
+      | ENHANCED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BASIC -> "BASIC"
+      | ENHANCED -> "ENHANCED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BASIC" -> BASIC
+      | "ENHANCED" -> ENHANCED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TaskMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TaskMode" j)
     let to_json = simple_to_json to_value
   end
 module TaskStatus =
@@ -275,6 +872,9 @@ module FilterValues =
   struct
     type nonrec t = FilterAttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterAttributeValue.to_value)) |>
         (fun x -> `List x)
@@ -381,7 +981,7 @@ module TaskExecutionArn =
           ((check_string_max i ~max:128) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]*:[0-9]{12}:task/task-[0-9a-f]{17}/execution/exec-[0-9a-f]{17}$"));
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:task/task-[0-9a-f]{17}/execution/exec-[0-9a-f]{17}$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -395,6 +995,7 @@ module TaskExecutionStatus =
   struct
     type nonrec t =
       | QUEUED 
+      | CANCELLING 
       | LAUNCHING 
       | PREPARING 
       | TRANSFERRING 
@@ -406,6 +1007,7 @@ module TaskExecutionStatus =
     let to_string =
       function
       | QUEUED -> "QUEUED"
+      | CANCELLING -> "CANCELLING"
       | LAUNCHING -> "LAUNCHING"
       | PREPARING -> "PREPARING"
       | TRANSFERRING -> "TRANSFERRING"
@@ -416,6 +1018,7 @@ module TaskExecutionStatus =
     let of_string =
       function
       | "QUEUED" -> QUEUED
+      | "CANCELLING" -> CANCELLING
       | "LAUNCHING" -> LAUNCHING
       | "PREPARING" -> PREPARING
       | "TRANSFERRING" -> TRANSFERRING
@@ -442,7 +1045,7 @@ module LocationArn =
           ((check_string_max i ~max:128) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:location/loc-[0-9a-z]{17}$"));
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:location/loc-[0-9a-z]{17}$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -459,10 +1062,10 @@ module LocationUri =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:4356) >>=
+          ((check_string_max i ~max:4360) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^(efs|nfs|s3|smb|hdfs|fsx[a-z0-9]+)://[a-zA-Z0-9.:/\\-]+$"));
+                  ~pattern:"^(efs|nfs|s3|smb|hdfs|fsx[a-z0-9-]+)://[a-zA-Z0-9.:/\\-]+$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -526,29 +1129,28 @@ module AgentStatus =
     let of_json j = of_string (string_of_json ~kind:"AgentStatus" j)
     let to_json = simple_to_json to_value
   end
-module NfsMountOptions =
+module Platform =
   struct
     type nonrec t =
       {
-      version: NfsVersion.t option
-        [@ocaml.doc
-          "The specific NFS version that you want DataSync to use to mount your NFS share. If the server refuses to use the version specified, the sync will fail. If you don't specify a version, DataSync defaults to AUTOMATIC. That is, DataSync automatically selects a version based on negotiation with the NFS server. You can specify the following NFS versions: NFSv3 - stateless protocol version that allows for asynchronous writes on the server. NFSv4.0 - stateful, firewall-friendly protocol version that supports delegations and pseudo file systems. NFSv4.1 - stateful protocol version that supports sessions, directory delegations, and parallel data processing. Version 4.1 also includes all features available in version 4.0."]}
+      version: AgentVersion.t option
+        [@ocaml.doc "The version of the DataSync agent."]}
     let make ?version = fun () -> { version }
     let to_value x =
       structure_to_value
-        [("Version", (Option.map x.version ~f:NfsVersion.to_value))]
+        [("Version", (Option.map x.version ~f:AgentVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let version =
-        (Option.map ~f:NfsVersion.of_xml) (Xml.child xml_arg0 "Version") in
+        (Option.map ~f:AgentVersion.of_xml) (Xml.child xml_arg0 "Version") in
       make ?version ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" NfsVersion.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" AgentVersion.of_json in
       make ?version ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents the mount options that are available for DataSync to access an NFS location."]
+       "The platform-related details about the DataSync agent, such as the version number."]
 module Ec2SecurityGroupArn =
   struct
     type nonrec t = string
@@ -559,7 +1161,7 @@ module Ec2SecurityGroupArn =
           ((check_string_max i ~max:128) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):ec2:[a-z\\-0-9]*:[0-9]{12}:security-group/.*$"));
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):ec2:[a-z\\-0-9]*:[0-9]{12}:security-group/sg-[a-f0-9]+$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -579,7 +1181,7 @@ module Ec2SubnetArn =
           ((check_string_max i ~max:128) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):ec2:[a-z\\-0-9]*:[0-9]{12}:subnet/.*$"));
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):ec2:[a-z\\-0-9]*:[0-9]{12}:subnet/subnet-[a-f0-9]+$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -625,13 +1227,69 @@ module FilterRule =
         (Option.map ~f:FilterType.of_xml) (Xml.child xml_arg0 "FilterType") in
       make ?value ?filterType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" FilterValue.of_json in
-      let filterType = field_map json "FilterType" FilterType.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" FilterValue.of_json in
+      let filterType = field_map json__ "FilterType" FilterType.of_json in
       make ?value ?filterType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies which files, folders, and objects to include or exclude when transferring files from source to destination."]
+module ManifestAction =
+  struct
+    type nonrec t =
+      | TRANSFER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | TRANSFER -> "TRANSFER" | Non_static_id s -> s
+    let of_string = function | "TRANSFER" -> TRANSFER | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ManifestAction" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ManifestAction" j)
+    let to_json = simple_to_json to_value
+  end
+module ManifestFormat =
+  struct
+    type nonrec t =
+      | CSV 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | CSV -> "CSV" | Non_static_id s -> s
+    let of_string = function | "CSV" -> CSV | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ManifestFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ManifestFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module SourceManifestConfig =
+  struct
+    type nonrec t =
+      {
+      s3: S3ManifestConfig.t
+        [@ocaml.doc
+          "Specifies the S3 bucket where you're hosting your manifest."]}
+    let context_ = "SourceManifestConfig"
+    let make ~s3 = fun () -> { s3 }
+    let to_value x =
+      structure_to_value [("S3", (Some (S3ManifestConfig.to_value x.s3)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3 =
+        S3ManifestConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3") in
+      make ~s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3 = field_map_exn json__ "S3" S3ManifestConfig.of_json in
+      make ~s3 ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the manifest that you want DataSync to use and where it's hosted. For more information and configuration examples, see Specifying what DataSync transfers by using a manifest."]
 module Atime =
   struct
     type nonrec t =
@@ -753,6 +1411,31 @@ module Mtime =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration Mtime" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"Mtime" j)
+    let to_json = simple_to_json to_value
+  end
+module ObjectTags =
+  struct
+    type nonrec t =
+      | PRESERVE 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRESERVE -> "PRESERVE"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRESERVE" -> PRESERVE
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ObjectTags" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ObjectTags" j)
     let to_json = simple_to_json to_value
   end
 module OverwriteMode =
@@ -984,6 +1667,122 @@ module VerifyMode =
     let of_json j = of_string (string_of_json ~kind:"VerifyMode" j)
     let to_json = simple_to_json to_value
   end
+module ObjectVersionIds =
+  struct
+    type nonrec t =
+      | INCLUDE 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | INCLUDE -> "INCLUDE" | NONE -> "NONE" | Non_static_id s -> s
+    let of_string =
+      function | "INCLUDE" -> INCLUDE | "NONE" -> NONE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ObjectVersionIds" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ObjectVersionIds" j)
+    let to_json = simple_to_json to_value
+  end
+module ReportDestination =
+  struct
+    type nonrec t =
+      {
+      s3: ReportDestinationS3.t option
+        [@ocaml.doc
+          "Specifies the Amazon S3 bucket where DataSync uploads your task report."]}
+    let make ?s3 = fun () -> { s3 }
+    let to_value x =
+      structure_to_value
+        [("S3", (Option.map x.s3 ~f:ReportDestinationS3.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3 =
+        (Option.map ~f:ReportDestinationS3.of_xml) (Xml.child xml_arg0 "S3") in
+      make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3 = field_map json__ "S3" ReportDestinationS3.of_json in
+      make ?s3 ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies where DataSync uploads your task report."]
+module ReportOutputType =
+  struct
+    type nonrec t =
+      | SUMMARY_ONLY 
+      | STANDARD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUMMARY_ONLY -> "SUMMARY_ONLY"
+      | STANDARD -> "STANDARD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUMMARY_ONLY" -> SUMMARY_ONLY
+      | "STANDARD" -> STANDARD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ReportOutputType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReportOutputType" j)
+    let to_json = simple_to_json to_value
+  end
+module ReportOverrides =
+  struct
+    type nonrec t =
+      {
+      transferred: ReportOverride.t option
+        [@ocaml.doc
+          "Specifies the level of reporting for the files, objects, and directories that DataSync attempted to transfer."];
+      verified: ReportOverride.t option
+        [@ocaml.doc
+          "Specifies the level of reporting for the files, objects, and directories that DataSync attempted to verify at the end of your transfer."];
+      deleted: ReportOverride.t option
+        [@ocaml.doc
+          "Specifies the level of reporting for the files, objects, and directories that DataSync attempted to delete in your destination location. This only applies if you configure your task to delete data in the destination that isn't in the source."];
+      skipped: ReportOverride.t option
+        [@ocaml.doc
+          "Specifies the level of reporting for the files, objects, and directories that DataSync attempted to skip during your transfer."]}
+    let make ?transferred =
+      fun ?verified ->
+        fun ?deleted ->
+          fun ?skipped ->
+            fun () -> { transferred; verified; deleted; skipped }
+    let to_value x =
+      structure_to_value
+        [("Transferred",
+           (Option.map x.transferred ~f:ReportOverride.to_value));
+        ("Verified", (Option.map x.verified ~f:ReportOverride.to_value));
+        ("Deleted", (Option.map x.deleted ~f:ReportOverride.to_value));
+        ("Skipped", (Option.map x.skipped ~f:ReportOverride.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let skipped =
+        (Option.map ~f:ReportOverride.of_xml) (Xml.child xml_arg0 "Skipped") in
+      let deleted =
+        (Option.map ~f:ReportOverride.of_xml) (Xml.child xml_arg0 "Deleted") in
+      let verified =
+        (Option.map ~f:ReportOverride.of_xml) (Xml.child xml_arg0 "Verified") in
+      let transferred =
+        (Option.map ~f:ReportOverride.of_xml)
+          (Xml.child xml_arg0 "Transferred") in
+      make ?skipped ?deleted ?verified ?transferred ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let skipped = field_map json__ "Skipped" ReportOverride.of_json in
+      let deleted = field_map json__ "Deleted" ReportOverride.of_json in
+      let verified = field_map json__ "Verified" ReportOverride.of_json in
+      let transferred = field_map json__ "Transferred" ReportOverride.of_json in
+      make ?skipped ?deleted ?verified ?transferred ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The level of detail included in each aspect of your DataSync task report."]
 module ScheduleExpressionCron =
   struct
     type nonrec t = string
@@ -1004,32 +1803,51 @@ module ScheduleExpressionCron =
     let of_json j = string_of_json ~kind:"ScheduleExpressionCron" j
     let to_json = simple_to_json to_value
   end
-module SmbVersion =
+module ScheduleStatus =
   struct
     type nonrec t =
-      | AUTOMATIC 
-      | SMB2 
-      | SMB3 
+      | ENABLED 
+      | DISABLED 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | AUTOMATIC -> "AUTOMATIC"
-      | SMB2 -> "SMB2"
-      | SMB3 -> "SMB3"
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
       | Non_static_id s -> s
     let of_string =
       function
-      | "AUTOMATIC" -> AUTOMATIC
-      | "SMB2" -> SMB2
-      | "SMB3" -> SMB3
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration SmbVersion" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"SmbVersion" j)
+      of_string (string_of_xml ~kind:"enumeration ScheduleStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ScheduleStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ServerIpAddress =
+  struct
+    type nonrec t = string
+    let context_ = "ServerIpAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:7) >>=
+             (fun () ->
+                (check_string_max i ~max:39) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"\\A((25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))\\z")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServerIpAddress" j
     let to_json = simple_to_json to_value
   end
 module AgentArnList =
@@ -1038,8 +1856,11 @@ module AgentArnList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1086,9 +1907,10 @@ module HdfsNameNode =
           (Xml.child_exn ~context:context_ xml_arg0 "Hostname") in
       make ~port ~hostname ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map_exn json "Port" HdfsServerPort.of_json in
-      let hostname = field_map_exn json "Hostname" HdfsServerHostname.of_json in
+    let of_json json__ =
+      let port = field_map_exn json__ "Port" HdfsServerPort.of_json in
+      let hostname =
+        field_map_exn json__ "Hostname" HdfsServerHostname.of_json in
       make ~port ~hostname ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1159,6 +1981,223 @@ module HdfsRpcProtection =
     let of_json j = of_string (string_of_json ~kind:"HdfsRpcProtection" j)
     let to_json = simple_to_json to_value
   end
+module FsxProtocolNfs =
+  struct
+    type nonrec t = {
+      mountOptions: NfsMountOptions.t option }
+    let make ?mountOptions = fun () -> { mountOptions }
+    let to_value x =
+      structure_to_value
+        [("MountOptions",
+           (Option.map x.mountOptions ~f:NfsMountOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mountOptions =
+        (Option.map ~f:NfsMountOptions.of_xml)
+          (Xml.child xml_arg0 "MountOptions") in
+      make ?mountOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mountOptions =
+        field_map json__ "MountOptions" NfsMountOptions.of_json in
+      make ?mountOptions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the Network File System (NFS) protocol configuration that DataSync uses to access your FSx for OpenZFS file system or FSx for ONTAP file system's storage virtual machine (SVM)."]
+module FsxProtocolSmb =
+  struct
+    type nonrec t =
+      {
+      domain: SmbDomain.t option
+        [@ocaml.doc
+          "Specifies the name of the Windows domain that your storage virtual machine (SVM) belongs to. If you have multiple domains in your environment, configuring this setting makes sure that DataSync connects to the right SVM. If you have multiple Active Directory domains in your environment, configuring this parameter makes sure that DataSync connects to the right SVM."];
+      mountOptions: SmbMountOptions.t option ;
+      password: SmbPassword.t option
+        [@ocaml.doc
+          "Specifies the password of a user who has permission to access your SVM."];
+      user: SmbUser.t
+        [@ocaml.doc
+          "Specifies a user that can mount and access the files, folders, and metadata in your SVM. For information about choosing a user with the right level of access for your transfer, see Using the SMB protocol."];
+      managedSecretConfig: ManagedSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as a Password that DataSync uses to access a specific storage location. DataSync uses the default Amazon Web Services-managed KMS key to encrypt this secret in Secrets Manager. Do not provide this for a CreateLocation request. ManagedSecretConfig is a ReadOnly property and is only be populated in the DescribeLocation response."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, which includes the password that DataSync uses to access a specific FSx for ONTAP storage location (using SMB), with a customer-managed KMS key. When you include this parameter as part of a CreateLocationFsxOntap request, you provide only the KMS key ARN. DataSync uses this KMS key together with the Password you specify for to create a DataSync-managed secret to store the location access credentials. Make sure that DataSync has permission to access the KMS key that you specify. For more information, see Using a service-managed secret encrypted with a custom KMS key. You can use either CmkSecretConfig (with Password) or CustomSecretConfig (without Password) to provide credentials for a CreateLocationFsxOntap request. Do not provide both parameters for the same request."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed Secrets Manager secret where the password for an FSx for ONTAP storage location (using SMB) is stored in plain text, in Secrets Manager. This configuration includes the secret ARN, and the ARN for an IAM role that provides access to the secret. For more information, see Using a secret that you manage. You can use either CmkSecretConfig (with Password) or CustomSecretConfig (without Password) to provide credentials for a CreateLocationFsxOntap request. Do not provide both parameters for the same request."]}
+    let context_ = "FsxProtocolSmb"
+    let make ?domain =
+      fun ?mountOptions ->
+        fun ?password ->
+          fun ?managedSecretConfig ->
+            fun ?cmkSecretConfig ->
+              fun ?customSecretConfig ->
+                fun ~user ->
+                  fun () ->
+                    {
+                      domain;
+                      mountOptions;
+                      password;
+                      managedSecretConfig;
+                      cmkSecretConfig;
+                      customSecretConfig;
+                      user
+                    }
+    let to_value x =
+      structure_to_value
+        [("Domain", (Option.map x.domain ~f:SmbDomain.to_value));
+        ("MountOptions",
+          (Option.map x.mountOptions ~f:SmbMountOptions.to_value));
+        ("Password", (Option.map x.password ~f:SmbPassword.to_value));
+        ("User", (Some (SmbUser.to_value x.user)));
+        ("ManagedSecretConfig",
+          (Option.map x.managedSecretConfig ~f:ManagedSecretConfig.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let managedSecretConfig =
+        (Option.map ~f:ManagedSecretConfig.of_xml)
+          (Xml.child xml_arg0 "ManagedSecretConfig") in
+      let user =
+        SmbUser.of_xml (Xml.child_exn ~context:context_ xml_arg0 "User") in
+      let password =
+        (Option.map ~f:SmbPassword.of_xml) (Xml.child xml_arg0 "Password") in
+      let mountOptions =
+        (Option.map ~f:SmbMountOptions.of_xml)
+          (Xml.child xml_arg0 "MountOptions") in
+      let domain =
+        (Option.map ~f:SmbDomain.of_xml) (Xml.child xml_arg0 "Domain") in
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig ~user
+        ?password ?mountOptions ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let managedSecretConfig =
+        field_map json__ "ManagedSecretConfig" ManagedSecretConfig.of_json in
+      let user = field_map_exn json__ "User" SmbUser.of_json in
+      let password = field_map json__ "Password" SmbPassword.of_json in
+      let mountOptions =
+        field_map json__ "MountOptions" SmbMountOptions.of_json in
+      let domain = field_map json__ "Domain" SmbDomain.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig ~user
+        ?password ?mountOptions ?domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the Server Message Block (SMB) protocol configuration that DataSync uses to access your Amazon FSx for NetApp ONTAP file system's storage virtual machine (SVM). For more information, see Providing DataSync access to FSx for ONTAP file systems."]
+module FsxUpdateProtocolSmb =
+  struct
+    type nonrec t =
+      {
+      domain: UpdateSmbDomain.t option
+        [@ocaml.doc
+          "Specifies the name of the Windows domain that your storage virtual machine (SVM) belongs to. If you have multiple Active Directory domains in your environment, configuring this parameter makes sure that DataSync connects to the right SVM."];
+      mountOptions: SmbMountOptions.t option ;
+      password: SmbPassword.t option
+        [@ocaml.doc
+          "Specifies the password of a user who has permission to access your SVM."];
+      user: SmbUser.t option
+        [@ocaml.doc
+          "Specifies a user that can mount and access the files, folders, and metadata in your SVM. For information about choosing a user with the right level of access for your transfer, see Using the SMB protocol."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, such as a Password or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed secret, such as a Password or set of credentials that DataSync uses to access a specific transfer location. This configuration includes the secret ARN, and the ARN for an IAM role that provides access to the secret."]}
+    let make ?domain =
+      fun ?mountOptions ->
+        fun ?password ->
+          fun ?user ->
+            fun ?cmkSecretConfig ->
+              fun ?customSecretConfig ->
+                fun () ->
+                  {
+                    domain;
+                    mountOptions;
+                    password;
+                    user;
+                    cmkSecretConfig;
+                    customSecretConfig
+                  }
+    let to_value x =
+      structure_to_value
+        [("Domain", (Option.map x.domain ~f:UpdateSmbDomain.to_value));
+        ("MountOptions",
+          (Option.map x.mountOptions ~f:SmbMountOptions.to_value));
+        ("Password", (Option.map x.password ~f:SmbPassword.to_value));
+        ("User", (Option.map x.user ~f:SmbUser.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let user = (Option.map ~f:SmbUser.of_xml) (Xml.child xml_arg0 "User") in
+      let password =
+        (Option.map ~f:SmbPassword.of_xml) (Xml.child xml_arg0 "Password") in
+      let mountOptions =
+        (Option.map ~f:SmbMountOptions.of_xml)
+          (Xml.child xml_arg0 "MountOptions") in
+      let domain =
+        (Option.map ~f:UpdateSmbDomain.of_xml) (Xml.child xml_arg0 "Domain") in
+      make ?customSecretConfig ?cmkSecretConfig ?user ?password ?mountOptions
+        ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let user = field_map json__ "User" SmbUser.of_json in
+      let password = field_map json__ "Password" SmbPassword.of_json in
+      let mountOptions =
+        field_map json__ "MountOptions" SmbMountOptions.of_json in
+      let domain = field_map json__ "Domain" UpdateSmbDomain.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?user ?password ?mountOptions
+        ?domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the Server Message Block (SMB) protocol configuration that DataSync uses to access your Amazon FSx for NetApp ONTAP file system's storage virtual machine (SVM). For more information, see Providing DataSync access to FSx for ONTAP file systems."]
+module AzureBlobSasToken =
+  struct
+    type nonrec t = string
+    let context_ = "AzureBlobSasToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^.+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AzureBlobSasToken" j
+    let to_json = simple_to_json to_value
+  end
 module TagListEntry =
   struct
     type nonrec t =
@@ -1181,13 +2220,13 @@ module TagListEntry =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a single entry in a list of Amazon Web Services resource tags. TagListEntry returns an array that contains a list of tasks when the ListTagsForResource operation is called."]
+       "A key-value pair representing a single tag that's been applied to an Amazon Web Services resource."]
 module TaskListEntry =
   struct
     type nonrec t =
@@ -1195,28 +2234,37 @@ module TaskListEntry =
       taskArn: TaskArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the task."];
       status: TaskStatus.t option [@ocaml.doc "The status of the task."];
-      name: TagValue.t option [@ocaml.doc "The name of the task."]}
+      name: TagValue.t option [@ocaml.doc "The name of the task."];
+      taskMode: TaskMode.t option
+        [@ocaml.doc
+          "The task mode that you're using. For more information, see Choosing a task mode for your data transfer."]}
     let make ?taskArn =
-      fun ?status -> fun ?name -> fun () -> { taskArn; status; name }
+      fun ?status ->
+        fun ?name ->
+          fun ?taskMode -> fun () -> { taskArn; status; name; taskMode }
     let to_value x =
       structure_to_value
         [("TaskArn", (Option.map x.taskArn ~f:TaskArn.to_value));
         ("Status", (Option.map x.status ~f:TaskStatus.to_value));
-        ("Name", (Option.map x.name ~f:TagValue.to_value))]
+        ("Name", (Option.map x.name ~f:TagValue.to_value));
+        ("TaskMode", (Option.map x.taskMode ~f:TaskMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskMode =
+        (Option.map ~f:TaskMode.of_xml) (Xml.child xml_arg0 "TaskMode") in
       let name = (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Name") in
       let status =
         (Option.map ~f:TaskStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let taskArn =
         (Option.map ~f:TaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
-      make ?name ?status ?taskArn ()
+      make ?taskMode ?name ?status ?taskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" TagValue.of_json in
-      let status = field_map json "Status" TaskStatus.of_json in
-      let taskArn = field_map json "TaskArn" TaskArn.of_json in
-      make ?name ?status ?taskArn ()
+    let of_json json__ =
+      let taskMode = field_map json__ "TaskMode" TaskMode.of_json in
+      let name = field_map json__ "Name" TagValue.of_json in
+      let status = field_map json__ "Status" TaskStatus.of_json in
+      let taskArn = field_map json__ "TaskArn" TaskArn.of_json in
+      make ?taskMode ?name ?status ?taskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a single entry in a list of tasks. TaskListEntry returns an array that contains a list of tasks when the ListTasks operation is called. A task includes the source and destination file systems to sync and the options to use for the tasks."]
@@ -1232,7 +2280,7 @@ module TaskFilter =
           "The values that you want to filter for. For example, you might want to display only tasks for a specific destination location."];
       operator: Operator.t
         [@ocaml.doc
-          "The operator that is used to compare filter values (for example, Equals or Contains). For more about API filtering operators, see API filters for ListTasks and ListLocations."]}
+          "The operator that is used to compare filter values (for example, Equals or Contains)."]}
     let context_ = "TaskFilter"
     let make ~name =
       fun ~values -> fun ~operator -> fun () -> { name; values; operator }
@@ -1253,48 +2301,56 @@ module TaskFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~operator ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operator = field_map_exn json "Operator" Operator.of_json in
-      let values = field_map_exn json "Values" FilterValues.of_json in
-      let name = field_map_exn json "Name" TaskFilterName.of_json in
+    let of_json json__ =
+      let operator = field_map_exn json__ "Operator" Operator.of_json in
+      let values = field_map_exn json__ "Values" FilterValues.of_json in
+      let name = field_map_exn json__ "Name" TaskFilterName.of_json in
       make ~operator ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You can use API filters to narrow down the list of resources returned by ListTasks. For example, to retrieve all tasks on a source location, you can use ListTasks with filter name LocationId and Operator Equals with the ARN for the location."]
+       "You can use API filters to narrow down the list of resources returned by ListTasks. For example, to retrieve all tasks on a source location, you can use ListTasks with filter name LocationId and Operator Equals with the ARN for the location. For more information, see filtering DataSync resources."]
 module TaskExecutionListEntry =
   struct
     type nonrec t =
       {
       taskExecutionArn: TaskExecutionArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the task that was executed."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of a task execution."];
       status: TaskExecutionStatus.t option
-        [@ocaml.doc "The status of a task execution."]}
+        [@ocaml.doc
+          "The status of a task execution. For more information, see Task execution statuses."];
+      taskMode: TaskMode.t option
+        [@ocaml.doc
+          "The task mode that you're using. For more information, see Choosing a task mode for your data transfer."]}
     let make ?taskExecutionArn =
-      fun ?status -> fun () -> { taskExecutionArn; status }
+      fun ?status ->
+        fun ?taskMode -> fun () -> { taskExecutionArn; status; taskMode }
     let to_value x =
       structure_to_value
         [("TaskExecutionArn",
            (Option.map x.taskExecutionArn ~f:TaskExecutionArn.to_value));
-        ("Status", (Option.map x.status ~f:TaskExecutionStatus.to_value))]
+        ("Status", (Option.map x.status ~f:TaskExecutionStatus.to_value));
+        ("TaskMode", (Option.map x.taskMode ~f:TaskMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskMode =
+        (Option.map ~f:TaskMode.of_xml) (Xml.child xml_arg0 "TaskMode") in
       let status =
         (Option.map ~f:TaskExecutionStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       let taskExecutionArn =
         (Option.map ~f:TaskExecutionArn.of_xml)
           (Xml.child xml_arg0 "TaskExecutionArn") in
-      make ?status ?taskExecutionArn ()
+      make ?taskMode ?status ?taskExecutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" TaskExecutionStatus.of_json in
+    let of_json json__ =
+      let taskMode = field_map json__ "TaskMode" TaskMode.of_json in
+      let status = field_map json__ "Status" TaskExecutionStatus.of_json in
       let taskExecutionArn =
-        field_map json "TaskExecutionArn" TaskExecutionArn.of_json in
-      make ?status ?taskExecutionArn ()
+        field_map json__ "TaskExecutionArn" TaskExecutionArn.of_json in
+      make ?taskMode ?status ?taskExecutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a single entry in a list of task executions. TaskExecutionListEntry returns an array that contains a list of specific invocations of a task when the ListTaskExecutions operation is called."]
+       "Represents a single entry in a list of DataSync task executions that's returned with the ListTaskExecutions operation."]
 module LocationListEntry =
   struct
     type nonrec t =
@@ -1304,7 +2360,7 @@ module LocationListEntry =
           "The Amazon Resource Name (ARN) of the location. For Network File System (NFS) or Amazon EFS, the location is the export path. For Amazon S3, the location is the prefix path that you want to mount and use as the root of the location."];
       locationUri: LocationUri.t option
         [@ocaml.doc
-          "Represents a list of URIs of a location. LocationUri returns an array that contains a list of locations when the ListLocations operation is called. Format: TYPE://GLOBAL_ID/SUBDIR. TYPE designates the type of location (for example, nfs or s3). GLOBAL_ID is the globally unique identifier of the resource that backs the location. An example for EFS is us-east-2.fs-abcd1234. An example for Amazon S3 is the bucket name, such as myBucket. An example for NFS is a valid IPv4 address or a hostname that is compliant with Domain Name Service (DNS). SUBDIR is a valid file system path, delimited by forward slashes as is the *nix convention. For NFS and Amazon EFS, it's the export path to mount the location. For Amazon S3, it's the prefix path that you mount to and treat as the root of the location."]}
+          "Represents a list of URIs of a location. LocationUri returns an array that contains a list of locations when the ListLocations operation is called. Format: TYPE://GLOBAL_ID/SUBDIR. TYPE designates the type of location (for example, nfs or s3). GLOBAL_ID is the globally unique identifier of the resource that backs the location. An example for EFS is us-east-2.fs-abcd1234. An example for Amazon S3 is the bucket name, such as myBucket. An example for NFS is a valid IPv4 or IPv6 address or a hostname that is compliant with DNS. SUBDIR is a valid file system path, delimited by forward slashes as is the *nix convention. For NFS and Amazon EFS, it's the export path to mount the location. For Amazon S3, it's the prefix path that you mount to and treat as the root of the location."]}
     let make ?locationArn =
       fun ?locationUri -> fun () -> { locationArn; locationUri }
     let to_value x =
@@ -1319,9 +2375,9 @@ module LocationListEntry =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationUri ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationUri ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1338,7 +2394,7 @@ module LocationFilter =
           "The values that you want to filter for. For example, you might want to display only Amazon S3 locations."];
       operator: Operator.t
         [@ocaml.doc
-          "The operator that is used to compare filter values (for example, Equals or Contains). For more about API filtering operators, see API filters for ListTasks and ListLocations."]}
+          "The operator that is used to compare filter values (for example, Equals or Contains)."]}
     let context_ = "LocationFilter"
     let make ~name =
       fun ~values -> fun ~operator -> fun () -> { name; values; operator }
@@ -1359,46 +2415,57 @@ module LocationFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~operator ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operator = field_map_exn json "Operator" Operator.of_json in
-      let values = field_map_exn json "Values" FilterValues.of_json in
-      let name = field_map_exn json "Name" LocationFilterName.of_json in
+    let of_json json__ =
+      let operator = field_map_exn json__ "Operator" Operator.of_json in
+      let values = field_map_exn json__ "Values" FilterValues.of_json in
+      let name = field_map_exn json__ "Name" LocationFilterName.of_json in
       make ~operator ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You can use API filters to narrow down the list of resources returned by ListLocations. For example, to retrieve all your Amazon S3 locations, you can use ListLocations with filter name LocationType S3 and Operator Equals."]
+       "Narrow down the list of resources returned by ListLocations. For example, to see all your Amazon S3 locations, create a filter using \"Name\": \"LocationType\", \"Operator\": \"Equals\", and \"Values\": \"S3\". For more information, see filtering resources."]
 module AgentListEntry =
   struct
     type nonrec t =
       {
       agentArn: AgentArn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the agent."];
-      name: TagValue.t option [@ocaml.doc "The name of the agent."];
-      status: AgentStatus.t option [@ocaml.doc "The status of the agent."]}
+        [@ocaml.doc "The Amazon Resource Name (ARN) of a DataSync agent."];
+      name: TagValue.t option [@ocaml.doc "The name of an agent."];
+      status: AgentStatus.t option
+        [@ocaml.doc
+          "The status of an agent. If the status is ONLINE, the agent is configured properly and ready to use. If the status is OFFLINE, the agent has been out of contact with DataSync for five minutes or longer. This can happen for a few reasons. For more information, see What do I do if my agent is offline?"];
+      platform: Platform.t option
+        [@ocaml.doc
+          "The platform-related details about the agent, such as the version number."]}
     let make ?agentArn =
-      fun ?name -> fun ?status -> fun () -> { agentArn; name; status }
+      fun ?name ->
+        fun ?status ->
+          fun ?platform -> fun () -> { agentArn; name; status; platform }
     let to_value x =
       structure_to_value
         [("AgentArn", (Option.map x.agentArn ~f:AgentArn.to_value));
         ("Name", (Option.map x.name ~f:TagValue.to_value));
-        ("Status", (Option.map x.status ~f:AgentStatus.to_value))]
+        ("Status", (Option.map x.status ~f:AgentStatus.to_value));
+        ("Platform", (Option.map x.platform ~f:Platform.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let platform =
+        (Option.map ~f:Platform.of_xml) (Xml.child xml_arg0 "Platform") in
       let status =
         (Option.map ~f:AgentStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let name = (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Name") in
       let agentArn =
         (Option.map ~f:AgentArn.of_xml) (Xml.child xml_arg0 "AgentArn") in
-      make ?status ?name ?agentArn ()
+      make ?platform ?status ?name ?agentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" AgentStatus.of_json in
-      let name = field_map json "Name" TagValue.of_json in
-      let agentArn = field_map json "AgentArn" AgentArn.of_json in
-      make ?status ?name ?agentArn ()
+    let of_json json__ =
+      let platform = field_map json__ "Platform" Platform.of_json in
+      let status = field_map json__ "Status" AgentStatus.of_json in
+      let name = field_map json__ "Name" TagValue.of_json in
+      let agentArn = field_map json__ "AgentArn" AgentArn.of_json in
+      make ?platform ?status ?name ?agentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a single entry in a list of agents. AgentListEntry returns an array that contains a list of agents when the ListAgents operation is called."]
+       "Represents a single entry in a list (or array) of DataSync agents when you call the ListAgents operation."]
 module NetworkInterfaceArn =
   struct
     type nonrec t = string
@@ -1419,18 +2486,55 @@ module NetworkInterfaceArn =
     let of_json j = string_of_json ~kind:"NetworkInterfaceArn" j
     let to_json = simple_to_json to_value
   end
-module Duration =
+module ScheduleDisabledBy =
   struct
-    type nonrec t = Int64.t
-    let make i =
-      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
+    type nonrec t =
+      | USER 
+      | SERVICE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | USER -> "USER" | SERVICE -> "SERVICE" | Non_static_id s -> s
+    let of_string =
+      function | "USER" -> USER | "SERVICE" -> SERVICE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+      of_string
+        (string_of_xml ~kind:"enumeration ScheduleDisabledBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ScheduleDisabledBy" j)
+    let to_json = simple_to_json to_value
+  end
+module ScheduleDisabledReason =
+  struct
+    type nonrec t = string
+    let context_ = "ScheduleDisabledReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:8192) >>=
+             (fun () ->
+                check_pattern i ~pattern:"^[\\w\\s.,'?!:;\\/=|<>()-]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ScheduleDisabledReason" j
+    let to_json = simple_to_json to_value
+  end
+module Time =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
 module PhaseStatus =
@@ -1461,49 +2565,33 @@ module PhaseStatus =
     let of_json j = of_string (string_of_json ~kind:"PhaseStatus" j)
     let to_json = simple_to_json to_value
   end
-module IamRoleArn =
+module Long =
   struct
-    type nonrec t = string
-    let context_ = "IamRoleArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):iam::[0-9]{12}:role/.*$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IamRoleArn" j
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
-module FsxProtocolNfs =
+module Duration =
   struct
-    type nonrec t = {
-      mountOptions: NfsMountOptions.t option }
-    let make ?mountOptions = fun () -> { mountOptions }
-    let to_value x =
-      structure_to_value
-        [("MountOptions",
-           (Option.map x.mountOptions ~f:NfsMountOptions.to_value))]
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
     let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
     let of_xml xml_arg0 =
-      let mountOptions =
-        (Option.map ~f:NfsMountOptions.of_xml)
-          (Xml.child xml_arg0 "MountOptions") in
-      make ?mountOptions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mountOptions =
-        field_map json "MountOptions" NfsMountOptions.of_json in
-      make ?mountOptions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Represents the Network File System (NFS) protocol that DataSync uses to access your Amazon FSx for OpenZFS file system."]
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module Ec2SecurityGroupArnList =
   struct
     type nonrec t = Ec2SecurityGroupArn.t list
@@ -1512,6 +2600,9 @@ module Ec2SecurityGroupArnList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ec2SecurityGroupArn.to_value)) |>
         (fun x -> `List x)
@@ -1564,6 +2655,9 @@ module PLSecurityGroupArnList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ec2SecurityGroupArn.to_value)) |>
         (fun x -> `List x)
@@ -1594,6 +2688,9 @@ module PLSubnetArnList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ec2SubnetArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1647,35 +2744,47 @@ module InternalException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?errorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorCode = field_map json "errorCode" String_.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let errorCode = field_map json__ "errorCode" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?errorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown when an error occurs in the DataSync service."]
 module InvalidRequestException =
   struct
-    type nonrec t = {
+    type nonrec t =
+      {
       message: String_.t option ;
-      errorCode: String_.t option }
-    let make ?message = fun ?errorCode -> fun () -> { message; errorCode }
+      errorCode: String_.t option ;
+      datasyncErrorCode: String_.t option }
+    let make ?message =
+      fun ?errorCode ->
+        fun ?datasyncErrorCode ->
+          fun () -> { message; errorCode; datasyncErrorCode }
     let to_value x =
       structure_to_value
         [("message", (Option.map x.message ~f:String_.to_value));
-        ("errorCode", (Option.map x.errorCode ~f:String_.to_value))]
+        ("errorCode", (Option.map x.errorCode ~f:String_.to_value));
+        ("datasyncErrorCode",
+          (Option.map x.datasyncErrorCode ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let datasyncErrorCode =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "datasyncErrorCode") in
       let errorCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "errorCode") in
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?errorCode ?message ()
+      make ?datasyncErrorCode ?errorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorCode = field_map json "errorCode" String_.of_json in
-      let message = field_map json "message" String_.of_json in
-      make ?errorCode ?message ()
+    let of_json json__ =
+      let datasyncErrorCode =
+        field_map json__ "datasyncErrorCode" String_.of_json in
+      let errorCode = field_map json__ "errorCode" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?datasyncErrorCode ?errorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown when the client submits a malformed request."]
@@ -1687,6 +2796,9 @@ module FilterList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1717,7 +2829,7 @@ module LogGroupArn =
           ((check_string_max i ~max:562) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):logs:[a-z\\-0-9]*:[0-9]{12}:log-group:([^:\\*]*)(:\\*)?$"));
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):logs:[a-z\\-0-9]+:[0-9]{12}:log-group:([^:\\*]*)(:\\*)?$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1727,52 +2839,93 @@ module LogGroupArn =
     let of_json j = string_of_json ~kind:"LogGroupArn" j
     let to_json = simple_to_json to_value
   end
+module ManifestConfig =
+  struct
+    type nonrec t =
+      {
+      action: ManifestAction.t option
+        [@ocaml.doc "Specifies what DataSync uses the manifest for."];
+      format: ManifestFormat.t option
+        [@ocaml.doc
+          "Specifies the file format of your manifest. For more information, see Creating a manifest."];
+      source: SourceManifestConfig.t option
+        [@ocaml.doc
+          "Specifies the manifest that you want DataSync to use and where it's hosted. You must specify this parameter if you're configuring a new manifest on or after February 7, 2024. If you don't, you'll get a 400 status code and ValidationException error stating that you're missing the IAM role for DataSync to access the S3 bucket where you're hosting your manifest. For more information, see Providing DataSync access to your manifest."]}
+    let make ?action =
+      fun ?format -> fun ?source -> fun () -> { action; format; source }
+    let to_value x =
+      structure_to_value
+        [("Action", (Option.map x.action ~f:ManifestAction.to_value));
+        ("Format", (Option.map x.format ~f:ManifestFormat.to_value));
+        ("Source", (Option.map x.source ~f:SourceManifestConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let source =
+        (Option.map ~f:SourceManifestConfig.of_xml)
+          (Xml.child xml_arg0 "Source") in
+      let format =
+        (Option.map ~f:ManifestFormat.of_xml) (Xml.child xml_arg0 "Format") in
+      let action =
+        (Option.map ~f:ManifestAction.of_xml) (Xml.child xml_arg0 "Action") in
+      make ?source ?format ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source = field_map json__ "Source" SourceManifestConfig.of_json in
+      let format = field_map json__ "Format" ManifestFormat.of_json in
+      let action = field_map json__ "Action" ManifestAction.of_json in
+      make ?source ?format ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures a manifest, which is a list of files or objects that you want DataSync to transfer. For more information and configuration examples, see Specifying what DataSync transfers by using a manifest."]
 module Options =
   struct
     type nonrec t =
       {
       verifyMode: VerifyMode.t option
         [@ocaml.doc
-          "A value that determines whether a data integrity verification should be performed at the end of a task execution after all data and metadata have been transferred. For more information, see Configure task settings. Default value: POINT_IN_TIME_CONSISTENT. ONLY_FILES_TRANSFERRED (recommended): Perform verification only on files that were transferred. POINT_IN_TIME_CONSISTENT: Scan the entire source and entire destination at the end of the transfer to verify that source and destination are fully synchronized. This option isn't supported when transferring to S3 Glacier or S3 Glacier Deep Archive storage classes. NONE: No additional verification is done at the end of the transfer, but all data transmissions are integrity-checked with checksum verification during the transfer."];
+          "Specifies if and how DataSync checks the integrity of your data at the end of your transfer. ONLY_FILES_TRANSFERRED (recommended) - DataSync calculates the checksum of transferred data (including metadata) at the source location. At the end of the transfer, DataSync then compares this checksum to the checksum calculated on that data at the destination. This is the default option for Enhanced mode tasks. We recommend this option when transferring to S3 Glacier Flexible Retrieval or S3 Glacier Deep Archive storage classes. For more information, see Storage class considerations with Amazon S3 locations. POINT_IN_TIME_CONSISTENT - At the end of the transfer, DataSync checks the entire source and destination to verify that both locations are fully synchronized. The is the default option for Basic mode tasks and isn't currently supported with Enhanced mode tasks. If you use a manifest, DataSync only scans and verifies what's listed in the manifest. You can't use this option when transferring to S3 Glacier Flexible Retrieval or S3 Glacier Deep Archive storage classes. For more information, see Storage class considerations with Amazon S3 locations. NONE - DataSync performs data integrity checks only during your transfer. Unlike other options, there's no additional verification at the end of your transfer."];
       overwriteMode: OverwriteMode.t option
         [@ocaml.doc
-          "A value that determines whether files at the destination should be overwritten or preserved when copying files. If set to NEVER a destination file will not be replaced by a source file, even if the destination file differs from the source file. If you modify files in the destination and you sync the files, you can use this value to protect against overwriting those changes. Some storage classes have specific behaviors that can affect your S3 storage cost. For detailed information, see Considerations when working with Amazon S3 storage classes in DataSync in the DataSync User Guide."];
+          "Specifies whether DataSync should modify or preserve data at the destination location. ALWAYS (default) - DataSync modifies data in the destination location when source data (including metadata) has changed. If DataSync overwrites objects, you might incur additional charges for certain Amazon S3 storage classes (for example, for retrieval or early deletion). For more information, see Storage class considerations with Amazon S3 transfers. NEVER - DataSync doesn't overwrite data in the destination location even if the source data has changed. You can use this option to protect against overwriting changes made to files or objects in the destination."];
       atime: Atime.t option
         [@ocaml.doc
-          "A file metadata value that shows the last time a file was accessed (that is, when the file was read or written to). If you set Atime to BEST_EFFORT, DataSync attempts to preserve the original Atime attribute on all source files (that is, the version before the PREPARING phase). However, Atime's behavior is not fully standard across platforms, so DataSync can only do this on a best-effort basis. Default value: BEST_EFFORT. BEST_EFFORT: Attempt to preserve the per-file Atime value (recommended). NONE: Ignore Atime. If Atime is set to BEST_EFFORT, Mtime must be set to PRESERVE. If Atime is set to NONE, Mtime must also be NONE."];
+          "Specifies whether to preserve metadata indicating the last time a file was read or written to. The behavior of Atime isn't fully standard across platforms, so DataSync can only do this on a best-effort basis. BEST_EFFORT (default) - DataSync attempts to preserve the original Atime attribute on all source files (that is, the version before the PREPARING steps of the task execution). This option is recommended. NONE - Ignores Atime. If Atime is set to BEST_EFFORT, Mtime must be set to PRESERVE. If Atime is set to NONE, Mtime must also be NONE."];
       mtime: Mtime.t option
         [@ocaml.doc
-          "A value that indicates the last time that a file was modified (that is, a file was written to) before the PREPARING phase. This option is required for cases when you need to run the same task more than one time. Default value: PRESERVE. PRESERVE: Preserve original Mtime (recommended) NONE: Ignore Mtime. If Mtime is set to PRESERVE, Atime must be set to BEST_EFFORT. If Mtime is set to NONE, Atime must also be set to NONE."];
+          "Specifies whether to preserve metadata indicating the last time that a file was written to before the PREPARING step of your task execution. This option is required when you need to run the a task more than once. PRESERVE (default) - Preserves original Mtime, which is recommended. NONE - Ignores Mtime. If Mtime is set to PRESERVE, Atime must be set to BEST_EFFORT. If Mtime is set to NONE, Atime must also be set to NONE."];
       uid: Uid.t option
         [@ocaml.doc
-          "The POSIX user ID (UID) of the file's owner. This option should only be set for NFS, EFS, and S3 locations. To learn more about what metadata is copied by DataSync, see Metadata Copied by DataSync. Default value: INT_VALUE. This preserves the integer value of the ID. INT_VALUE: Preserve the integer value of UID and group ID (GID) (recommended). NONE: Ignore UID and GID."];
+          "Specifies the POSIX user ID (UID) of the file's owner. INT_VALUE (default) - Preserves the integer value of UID and group ID (GID), which is recommended. NONE - Ignores UID and GID. For more information, see Metadata copied by DataSync."];
       gid: Gid.t option
         [@ocaml.doc
-          "The POSIX group ID (GID) of the file's owners. This option should only be set for NFS, EFS, and S3 locations. For more information about what metadata is copied by DataSync, see Metadata Copied by DataSync. Default value: INT_VALUE. This preserves the integer value of the ID. INT_VALUE: Preserve the integer value of user ID (UID) and GID (recommended). NONE: Ignore UID and GID."];
+          "Specifies the POSIX group ID (GID) of the file's owners. INT_VALUE (default) - Preserves the integer value of user ID (UID) and GID, which is recommended. NONE - Ignores UID and GID. For more information, see Understanding how DataSync handles file and object metadata."];
       preserveDeletedFiles: PreserveDeletedFiles.t option
         [@ocaml.doc
-          "A value that specifies whether files in the destination that don't exist in the source file system should be preserved. This option can affect your storage cost. If your task deletes objects, you might incur minimum storage duration charges for certain storage classes. For detailed information, see Considerations when working with Amazon S3 storage classes in DataSync in the DataSync User Guide. Default value: PRESERVE. PRESERVE: Ignore such destination files (recommended). REMOVE: Delete destination files that aren\226\128\153t present in the source."];
+          "Specifies whether files in the destination location that don't exist in the source should be preserved. This option can affect your Amazon S3 storage cost. If your task deletes objects, you might incur minimum storage duration charges for certain storage classes. For detailed information, see Considerations when working with Amazon S3 storage classes in DataSync. PRESERVE (default) - Ignores such destination files, which is recommended. REMOVE - Deletes destination files that aren\226\128\153t present in the source. If you set this parameter to REMOVE, you can't set TransferMode to ALL. When you transfer all data, DataSync doesn't scan your destination location and doesn't know what to delete."];
       preserveDevices: PreserveDevices.t option
         [@ocaml.doc
-          "A value that determines whether DataSync should preserve the metadata of block and character devices in the source file system, and re-create the files with that device name and metadata on the destination. DataSync does not copy the contents of such devices, only the name and metadata. DataSync can't sync the actual contents of such devices, because they are nonterminal and don't return an end-of-file (EOF) marker. Default value: NONE. NONE: Ignore special devices (recommended). PRESERVE: Preserve character and block device metadata. This option isn't currently supported for Amazon EFS."];
+          "Specifies whether DataSync should preserve the metadata of block and character devices in the source location and recreate the files with that device name and metadata on the destination. DataSync copies only the name and metadata of such devices. DataSync can't copy the actual contents of these devices because they're nonterminal and don't return an end-of-file (EOF) marker. NONE (default) - Ignores special devices (recommended). PRESERVE - Preserves character and block device metadata. This option currently isn't supported for Amazon EFS."];
       posixPermissions: PosixPermissions.t option
         [@ocaml.doc
-          "A value that determines which users or groups can access a file for a specific purpose such as reading, writing, or execution of the file. This option should only be set for NFS, EFS, and S3 locations. For more information about what metadata is copied by DataSync, see Metadata Copied by DataSync. Default value: PRESERVE. PRESERVE: Preserve POSIX-style permissions (recommended). NONE: Ignore permissions. DataSync can preserve extant permissions of a source location."];
+          "Specifies which users or groups can access a file for a specific purpose such as reading, writing, or execution of the file. For more information, see Understanding how DataSync handles file and object metadata. PRESERVE (default) - Preserves POSIX-style permissions, which is recommended. NONE - Ignores POSIX-style permissions. DataSync can preserve extant permissions of a source location."];
       bytesPerSecond: BytesPerSecond.t option
         [@ocaml.doc
-          "A value that limits the bandwidth used by DataSync. For example, if you want DataSync to use a maximum of 1 MB, set this value to 1048576 (=1024*1024)."];
+          "Limits the bandwidth used by a DataSync task. For example, if you want DataSync to use a maximum of 1 MB, set this value to 1048576 (=1024*1024)."];
       taskQueueing: TaskQueueing.t option
         [@ocaml.doc
-          "A value that determines whether tasks should be queued before executing the tasks. If set to ENABLED, the tasks will be queued. The default is ENABLED. If you use the same agent to run multiple tasks, you can enable the tasks to run in series. For more information, see Queueing task executions."];
+          "Specifies whether your transfer tasks should be put into a queue during certain scenarios when running multiple tasks. This is ENABLED by default."];
       logLevel: LogLevel.t option
         [@ocaml.doc
-          "A value that determines the type of logs that DataSync publishes to a log stream in the Amazon CloudWatch log group that you provide. For more information about providing a log group for DataSync, see CloudWatchLogGroupArn. If set to OFF, no logs are published. BASIC publishes logs on errors for individual files transferred, and TRANSFER publishes logs for every file or object that is transferred and integrity checked."];
+          "Specifies the type of logs that DataSync publishes to a Amazon CloudWatch Logs log group. To specify the log group, see CloudWatchLogGroupArn. BASIC - Publishes logs with only basic information (such as transfer errors). TRANSFER - Publishes logs for all files or objects that your DataSync task transfers and performs data-integrity checks on. OFF - No logs are published."];
       transferMode: TransferMode.t option
         [@ocaml.doc
-          "A value that determines whether DataSync transfers only the data and metadata that differ between the source and the destination location, or whether DataSync transfers all the content from the source, without comparing to the destination location. CHANGED: DataSync copies only data or metadata that is new or different content from the source location to the destination location. ALL: DataSync copies all source location content to the destination, without comparing to existing content on the destination."];
+          "Specifies whether DataSync transfers only the data (including metadata) that differs between locations following an initial copy or transfers all data every time you run the task. If you're planning on recurring transfers, you might only want to transfer what's changed since your previous task execution. CHANGED (default) - After your initial full transfer, DataSync copies only the data and metadata that differs between the source and destination location. ALL - DataSync copies everything in the source to the destination without comparing differences between the locations."];
       securityDescriptorCopyFlags: SmbSecurityDescriptorCopyFlags.t option
         [@ocaml.doc
-          "A value that determines which components of the SMB security descriptor are copied from source to destination objects. This value is only used for transfers between SMB and Amazon FSx for Windows File Server locations, or between two Amazon FSx for Windows File Server locations. For more information about how DataSync handles metadata, see How DataSync Handles Metadata and Special Files. Default value: OWNER_DACL. OWNER_DACL: For each copied object, DataSync copies the following metadata: Object owner. NTFS discretionary access control lists (DACLs), which determine whether to grant access to an object. When choosing this option, DataSync does NOT copy the NTFS system access control lists (SACLs), which are used by administrators to log attempts to access a secured object. OWNER_DACL_SACL: For each copied object, DataSync copies the following metadata: Object owner. NTFS discretionary access control lists (DACLs), which determine whether to grant access to an object. NTFS system access control lists (SACLs), which are used by administrators to log attempts to access a secured object. Copying SACLs requires granting additional permissions to the Windows user that DataSync uses to access your SMB location. For information about choosing a user that ensures sufficient permissions to files, folders, and metadata, see user. NONE: None of the SMB security descriptor components are copied. Destination objects are owned by the user that was provided for accessing the destination location. DACLs and SACLs are set based on the destination server\226\128\153s configuration."]}
+          "Specifies which components of the SMB security descriptor are copied from source to destination objects. This value is only used for transfers between SMB and Amazon FSx for Windows File Server locations or between two FSx for Windows File Server locations. For more information, see Understanding how DataSync handles file and object metadata. OWNER_DACL (default) - For each copied object, DataSync copies the following metadata: The object owner. NTFS discretionary access control lists (DACLs), which determine whether to grant access to an object. DataSync won't copy NTFS system access control lists (SACLs) with this option. OWNER_DACL_SACL - For each copied object, DataSync copies the following metadata: The object owner. NTFS discretionary access control lists (DACLs), which determine whether to grant access to an object. SACLs, which are used by administrators to log attempts to access a secured object. Copying SACLs requires granting additional permissions to the Windows user that DataSync uses to access your SMB location. For information about choosing a user with the right permissions, see required permissions for SMB, FSx for Windows File Server, or FSx for ONTAP (depending on the type of location in your transfer). NONE - None of the SMB security descriptor components are copied. Destination objects are owned by the user that was provided for accessing the destination location. DACLs and SACLs are set based on the destination server\226\128\153s configuration."];
+      objectTags: ObjectTags.t option
+        [@ocaml.doc
+          "Specifies whether you want DataSync to PRESERVE object tags (default behavior) when transferring between object storage systems. If you want your DataSync task to ignore object tags, specify the NONE value."]}
     let make ?verifyMode =
       fun ?overwriteMode ->
         fun ?atime ->
@@ -1787,23 +2940,25 @@ module Options =
                           fun ?logLevel ->
                             fun ?transferMode ->
                               fun ?securityDescriptorCopyFlags ->
-                                fun () ->
-                                  {
-                                    verifyMode;
-                                    overwriteMode;
-                                    atime;
-                                    mtime;
-                                    uid;
-                                    gid;
-                                    preserveDeletedFiles;
-                                    preserveDevices;
-                                    posixPermissions;
-                                    bytesPerSecond;
-                                    taskQueueing;
-                                    logLevel;
-                                    transferMode;
-                                    securityDescriptorCopyFlags
-                                  }
+                                fun ?objectTags ->
+                                  fun () ->
+                                    {
+                                      verifyMode;
+                                      overwriteMode;
+                                      atime;
+                                      mtime;
+                                      uid;
+                                      gid;
+                                      preserveDeletedFiles;
+                                      preserveDevices;
+                                      posixPermissions;
+                                      bytesPerSecond;
+                                      taskQueueing;
+                                      logLevel;
+                                      transferMode;
+                                      securityDescriptorCopyFlags;
+                                      objectTags
+                                    }
     let to_value x =
       structure_to_value
         [("VerifyMode", (Option.map x.verifyMode ~f:VerifyMode.to_value));
@@ -1828,9 +2983,12 @@ module Options =
           (Option.map x.transferMode ~f:TransferMode.to_value));
         ("SecurityDescriptorCopyFlags",
           (Option.map x.securityDescriptorCopyFlags
-             ~f:SmbSecurityDescriptorCopyFlags.to_value))]
+             ~f:SmbSecurityDescriptorCopyFlags.to_value));
+        ("ObjectTags", (Option.map x.objectTags ~f:ObjectTags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let objectTags =
+        (Option.map ~f:ObjectTags.of_xml) (Xml.child xml_arg0 "ObjectTags") in
       let securityDescriptorCopyFlags =
         (Option.map ~f:SmbSecurityDescriptorCopyFlags.of_xml)
           (Xml.child xml_arg0 "SecurityDescriptorCopyFlags") in
@@ -1863,127 +3021,268 @@ module Options =
           (Xml.child xml_arg0 "OverwriteMode") in
       let verifyMode =
         (Option.map ~f:VerifyMode.of_xml) (Xml.child xml_arg0 "VerifyMode") in
-      make ?securityDescriptorCopyFlags ?transferMode ?logLevel ?taskQueueing
-        ?bytesPerSecond ?posixPermissions ?preserveDevices
+      make ?objectTags ?securityDescriptorCopyFlags ?transferMode ?logLevel
+        ?taskQueueing ?bytesPerSecond ?posixPermissions ?preserveDevices
         ?preserveDeletedFiles ?gid ?uid ?mtime ?atime ?overwriteMode
         ?verifyMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let objectTags = field_map json__ "ObjectTags" ObjectTags.of_json in
       let securityDescriptorCopyFlags =
-        field_map json "SecurityDescriptorCopyFlags"
+        field_map json__ "SecurityDescriptorCopyFlags"
           SmbSecurityDescriptorCopyFlags.of_json in
-      let transferMode = field_map json "TransferMode" TransferMode.of_json in
-      let logLevel = field_map json "LogLevel" LogLevel.of_json in
-      let taskQueueing = field_map json "TaskQueueing" TaskQueueing.of_json in
+      let transferMode = field_map json__ "TransferMode" TransferMode.of_json in
+      let logLevel = field_map json__ "LogLevel" LogLevel.of_json in
+      let taskQueueing = field_map json__ "TaskQueueing" TaskQueueing.of_json in
       let bytesPerSecond =
-        field_map json "BytesPerSecond" BytesPerSecond.of_json in
+        field_map json__ "BytesPerSecond" BytesPerSecond.of_json in
       let posixPermissions =
-        field_map json "PosixPermissions" PosixPermissions.of_json in
+        field_map json__ "PosixPermissions" PosixPermissions.of_json in
       let preserveDevices =
-        field_map json "PreserveDevices" PreserveDevices.of_json in
+        field_map json__ "PreserveDevices" PreserveDevices.of_json in
       let preserveDeletedFiles =
-        field_map json "PreserveDeletedFiles" PreserveDeletedFiles.of_json in
-      let gid = field_map json "Gid" Gid.of_json in
-      let uid = field_map json "Uid" Uid.of_json in
-      let mtime = field_map json "Mtime" Mtime.of_json in
-      let atime = field_map json "Atime" Atime.of_json in
+        field_map json__ "PreserveDeletedFiles" PreserveDeletedFiles.of_json in
+      let gid = field_map json__ "Gid" Gid.of_json in
+      let uid = field_map json__ "Uid" Uid.of_json in
+      let mtime = field_map json__ "Mtime" Mtime.of_json in
+      let atime = field_map json__ "Atime" Atime.of_json in
       let overwriteMode =
-        field_map json "OverwriteMode" OverwriteMode.of_json in
-      let verifyMode = field_map json "VerifyMode" VerifyMode.of_json in
-      make ?securityDescriptorCopyFlags ?transferMode ?logLevel ?taskQueueing
-        ?bytesPerSecond ?posixPermissions ?preserveDevices
+        field_map json__ "OverwriteMode" OverwriteMode.of_json in
+      let verifyMode = field_map json__ "VerifyMode" VerifyMode.of_json in
+      make ?objectTags ?securityDescriptorCopyFlags ?transferMode ?logLevel
+        ?taskQueueing ?bytesPerSecond ?posixPermissions ?preserveDevices
         ?preserveDeletedFiles ?gid ?uid ?mtime ?atime ?overwriteMode
         ?verifyMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents the options that are available to control the behavior of a StartTaskExecution operation. Behavior includes preserving metadata such as user ID (UID), group ID (GID), and file permissions, and also overwriting files in the destination, data integrity verification, and so on. A task has a set of default options associated with it. If you don't specify an option in StartTaskExecution, the default value is used. You can override the defaults options on each task execution by specifying an overriding Options value to StartTaskExecution."]
+       "Indicates how your transfer task is configured. These options include how DataSync handles files, objects, and their associated metadata during your transfer. You also can specify how to verify data integrity, set bandwidth limits for your task, among other options. Each option has a default value. Unless you need to, you don't have to configure any option before calling StartTaskExecution. You also can override your task options for each task execution. For example, you might want to adjust the LogLevel for an individual execution."]
+module TaskReportConfig =
+  struct
+    type nonrec t =
+      {
+      destination: ReportDestination.t option
+        [@ocaml.doc
+          "Specifies the Amazon S3 bucket where DataSync uploads your task report. For more information, see Task reports."];
+      outputType: ReportOutputType.t option
+        [@ocaml.doc
+          "Specifies the type of task report that you want: SUMMARY_ONLY: Provides necessary details about your task, including the number of files, objects, and directories transferred and transfer duration. STANDARD: Provides complete details about your task, including a full list of files, objects, and directories that were transferred, skipped, verified, and more."];
+      reportLevel: ReportLevel.t option
+        [@ocaml.doc
+          "Specifies whether you want your task report to include only what went wrong with your transfer or a list of what succeeded and didn't. ERRORS_ONLY: A report shows what DataSync was unable to transfer, skip, verify, and delete. SUCCESSES_AND_ERRORS: A report shows what DataSync was able and unable to transfer, skip, verify, and delete."];
+      objectVersionIds: ObjectVersionIds.t option
+        [@ocaml.doc
+          "Specifies whether your task report includes the new version of each object transferred into an S3 bucket. This only applies if you enable versioning on your bucket. Keep in mind that setting this to INCLUDE can increase the duration of your task execution."];
+      overrides: ReportOverrides.t option
+        [@ocaml.doc
+          "Customizes the reporting level for aspects of your task report. For example, your report might generally only include errors, but you could specify that you want a list of successes and errors just for the files that DataSync attempted to delete in your destination location."]}
+    let make ?destination =
+      fun ?outputType ->
+        fun ?reportLevel ->
+          fun ?objectVersionIds ->
+            fun ?overrides ->
+              fun () ->
+                {
+                  destination;
+                  outputType;
+                  reportLevel;
+                  objectVersionIds;
+                  overrides
+                }
+    let to_value x =
+      structure_to_value
+        [("Destination",
+           (Option.map x.destination ~f:ReportDestination.to_value));
+        ("OutputType",
+          (Option.map x.outputType ~f:ReportOutputType.to_value));
+        ("ReportLevel", (Option.map x.reportLevel ~f:ReportLevel.to_value));
+        ("ObjectVersionIds",
+          (Option.map x.objectVersionIds ~f:ObjectVersionIds.to_value));
+        ("Overrides", (Option.map x.overrides ~f:ReportOverrides.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let overrides =
+        (Option.map ~f:ReportOverrides.of_xml)
+          (Xml.child xml_arg0 "Overrides") in
+      let objectVersionIds =
+        (Option.map ~f:ObjectVersionIds.of_xml)
+          (Xml.child xml_arg0 "ObjectVersionIds") in
+      let reportLevel =
+        (Option.map ~f:ReportLevel.of_xml) (Xml.child xml_arg0 "ReportLevel") in
+      let outputType =
+        (Option.map ~f:ReportOutputType.of_xml)
+          (Xml.child xml_arg0 "OutputType") in
+      let destination =
+        (Option.map ~f:ReportDestination.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      make ?overrides ?objectVersionIds ?reportLevel ?outputType ?destination
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let overrides = field_map json__ "Overrides" ReportOverrides.of_json in
+      let objectVersionIds =
+        field_map json__ "ObjectVersionIds" ObjectVersionIds.of_json in
+      let reportLevel = field_map json__ "ReportLevel" ReportLevel.of_json in
+      let outputType = field_map json__ "OutputType" ReportOutputType.of_json in
+      let destination =
+        field_map json__ "Destination" ReportDestination.of_json in
+      make ?overrides ?objectVersionIds ?reportLevel ?outputType ?destination
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies how you want to configure a task report, which provides detailed information about for your DataSync transfer. For more information, see Task reports."]
 module TaskSchedule =
   struct
     type nonrec t =
       {
       scheduleExpression: ScheduleExpressionCron.t
         [@ocaml.doc
-          "A cron expression that specifies when DataSync initiates a scheduled transfer from a source to a destination location."]}
+          "Specifies your task schedule by using a cron or rate expression. Use cron expressions for task schedules that run on a specific time and day. For example, the following cron expression creates a task schedule that runs at 8 AM on the first Wednesday of every month: cron(0 8 * * 3#1) Use rate expressions for task schedules that run on a regular interval. For example, the following rate expression creates a task schedule that runs every 12 hours: rate(12 hours) For information about cron and rate expression syntax, see the Amazon EventBridge User Guide ."];
+      status: ScheduleStatus.t option
+        [@ocaml.doc
+          "Specifies whether to enable or disable your task schedule. Your schedule is enabled by default, but there can be situations where you need to disable it. For example, you might need to pause a recurring transfer to fix an issue with your task or perform maintenance on your storage system. DataSync might disable your schedule automatically if your task fails repeatedly with the same error. For more information, see TaskScheduleDetails."]}
     let context_ = "TaskSchedule"
-    let make ~scheduleExpression = fun () -> { scheduleExpression }
+    let make ?status =
+      fun ~scheduleExpression -> fun () -> { status; scheduleExpression }
     let to_value x =
       structure_to_value
         [("ScheduleExpression",
-           (Some (ScheduleExpressionCron.to_value x.scheduleExpression)))]
+           (Some (ScheduleExpressionCron.to_value x.scheduleExpression)));
+        ("Status", (Option.map x.status ~f:ScheduleStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ScheduleStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let scheduleExpression =
         ScheduleExpressionCron.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduleExpression") in
-      make ~scheduleExpression ()
+      make ?status ~scheduleExpression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let status = field_map json__ "Status" ScheduleStatus.of_json in
       let scheduleExpression =
-        field_map_exn json "ScheduleExpression"
+        field_map_exn json__ "ScheduleExpression"
           ScheduleExpressionCron.of_json in
-      make ~scheduleExpression ()
+      make ?status ~scheduleExpression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the schedule you want your task to use for repeated executions. For more information, see Schedule Expressions for Rules."]
-module SmbDomain =
+       "Configures your DataSync task to run on a schedule (at a minimum interval of 1 hour)."]
+module DnsIpList =
+  struct
+    type nonrec t = ServerIpAddress.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServerIpAddress.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServerIpAddress.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DnsIpList" ~of_json:ServerIpAddress.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KerberosKeytabFile =
   struct
     type nonrec t = string
-    let context_ = "SmbDomain"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:253) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"^([A-Za-z0-9]+[A-Za-z0-9-.]*)*[A-Za-z0-9-]*[A-Za-z0-9]$"));
-        i
+    let make i = i
     let of_string x = x
-    let to_value x = `String x
+    let to_value x = `Blob x
     let to_query v = to_query to_value v
     let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SmbDomain" j
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
     let to_json = simple_to_json to_value
   end
-module SmbMountOptions =
-  struct
-    type nonrec t =
-      {
-      version: SmbVersion.t option
-        [@ocaml.doc
-          "The specific SMB version that you want DataSync to use to mount your SMB share. If you don't specify a version, DataSync defaults to AUTOMATIC. That is, DataSync automatically selects a version based on negotiation with the SMB server."]}
-    let make ?version = fun () -> { version }
-    let to_value x =
-      structure_to_value
-        [("Version", (Option.map x.version ~f:SmbVersion.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let version =
-        (Option.map ~f:SmbVersion.of_xml) (Xml.child xml_arg0 "Version") in
-      make ?version ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" SmbVersion.of_json in
-      make ?version ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Represents the mount options that are available for DataSync to access an SMB location."]
-module SmbPassword =
+module KerberosKrb5ConfFile =
   struct
     type nonrec t = string
-    let context_ = "SmbPassword"
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module KerberosPrincipal =
+  struct
+    type nonrec t = string
+    let context_ = "KerberosPrincipal"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:104) >>=
-             (fun () -> check_pattern i ~pattern:"^.{0,104}$"));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^.+$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SmbPassword" j
+    let of_json j = string_of_json ~kind:"KerberosPrincipal" j
+    let to_json = simple_to_json to_value
+  end
+module ServerHostname =
+  struct
+    type nonrec t = string
+    let context_ = "ServerHostname"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^(([a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9\\-:]*[A-Za-z0-9])$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServerHostname" j
+    let to_json = simple_to_json to_value
+  end
+module SmbAuthenticationType =
+  struct
+    type nonrec t =
+      | NTLM 
+      | KERBEROS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NTLM -> "NTLM"
+      | KERBEROS -> "KERBEROS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NTLM" -> NTLM
+      | "KERBEROS" -> KERBEROS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SmbAuthenticationType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SmbAuthenticationType" j)
     let to_json = simple_to_json to_value
   end
 module SmbSubdirectory =
@@ -2006,24 +3305,74 @@ module SmbSubdirectory =
     let of_json j = string_of_json ~kind:"SmbSubdirectory" j
     let to_json = simple_to_json to_value
   end
-module SmbUser =
+module S3Config =
   struct
-    type nonrec t = string
-    let context_ = "SmbUser"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:104) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"^[^\\x5B\\x5D\\\\/:;|=,+*?]{1,104}$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      bucketAccessRoleArn: IamRoleArn.t
+        [@ocaml.doc
+          "Specifies the ARN of the IAM role that DataSync uses to access your S3 bucket."]}
+    let context_ = "S3Config"
+    let make ~bucketAccessRoleArn = fun () -> { bucketAccessRoleArn }
+    let to_value x =
+      structure_to_value
+        [("BucketAccessRoleArn",
+           (Some (IamRoleArn.to_value x.bucketAccessRoleArn)))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SmbUser" j
+    let of_xml xml_arg0 =
+      let bucketAccessRoleArn =
+        IamRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BucketAccessRoleArn") in
+      make ~bucketAccessRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bucketAccessRoleArn =
+        field_map_exn json__ "BucketAccessRoleArn" IamRoleArn.of_json in
+      make ~bucketAccessRoleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that DataSync uses to access your S3 bucket. For more information, see Providing DataSync access to S3 buckets."]
+module S3StorageClass =
+  struct
+    type nonrec t =
+      | STANDARD 
+      | STANDARD_IA 
+      | ONEZONE_IA 
+      | INTELLIGENT_TIERING 
+      | GLACIER 
+      | DEEP_ARCHIVE 
+      | OUTPOSTS 
+      | GLACIER_INSTANT_RETRIEVAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD -> "STANDARD"
+      | STANDARD_IA -> "STANDARD_IA"
+      | ONEZONE_IA -> "ONEZONE_IA"
+      | INTELLIGENT_TIERING -> "INTELLIGENT_TIERING"
+      | GLACIER -> "GLACIER"
+      | DEEP_ARCHIVE -> "DEEP_ARCHIVE"
+      | OUTPOSTS -> "OUTPOSTS"
+      | GLACIER_INSTANT_RETRIEVAL -> "GLACIER_INSTANT_RETRIEVAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD" -> STANDARD
+      | "STANDARD_IA" -> STANDARD_IA
+      | "ONEZONE_IA" -> ONEZONE_IA
+      | "INTELLIGENT_TIERING" -> INTELLIGENT_TIERING
+      | "GLACIER" -> GLACIER
+      | "DEEP_ARCHIVE" -> DEEP_ARCHIVE
+      | "OUTPOSTS" -> OUTPOSTS
+      | "GLACIER_INSTANT_RETRIEVAL" -> GLACIER_INSTANT_RETRIEVAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration S3StorageClass" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"S3StorageClass" j)
     let to_json = simple_to_json to_value
   end
 module ObjectStorageAccessKey =
@@ -2033,10 +3382,10 @@ module ObjectStorageAccessKey =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:8) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:200) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2046,6 +3395,18 @@ module ObjectStorageAccessKey =
     let of_json j = string_of_json ~kind:"ObjectStorageAccessKey" j
     let to_json = simple_to_json to_value
   end
+module ObjectStorageCertificate =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
 module ObjectStorageSecretKey =
   struct
     type nonrec t = string
@@ -2053,10 +3414,10 @@ module ObjectStorageSecretKey =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:8) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:200) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2108,26 +3469,6 @@ module ObjectStorageServerProtocol =
       of_string (string_of_json ~kind:"ObjectStorageServerProtocol" j)
     let to_json = simple_to_json to_value
   end
-module S3Subdirectory =
-  struct
-    type nonrec t = string
-    let context_ = "S3Subdirectory"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:4096) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"^[a-zA-Z0-9_\\-\\+\\./\\(\\)\\p{Zs}]*$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"S3Subdirectory" j
-    let to_json = simple_to_json to_value
-  end
 module NfsSubdirectory =
   struct
     type nonrec t = string
@@ -2153,7 +3494,8 @@ module OnPremConfig =
     type nonrec t =
       {
       agentArns: AgentArnList.t
-        [@ocaml.doc "ARNs of the agents to use for an NFS location."]}
+        [@ocaml.doc
+          "The Amazon Resource Names (ARNs) of the DataSync agents that can connect to your NFS file server. You can specify more than one agent. For more information, see Using multiple DataSync agents."]}
     let context_ = "OnPremConfig"
     let make ~agentArns = fun () -> { agentArns }
     let to_value x =
@@ -2166,12 +3508,12 @@ module OnPremConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "AgentArns") in
       make ~agentArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let agentArns = field_map_exn json "AgentArns" AgentArnList.of_json in
+    let of_json json__ =
+      let agentArns = field_map_exn json__ "AgentArns" AgentArnList.of_json in
       make ~agentArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of Amazon Resource Names (ARNs) of agents to use for a Network File System (NFS) location."]
+       "The DataSync agents that can connect to your Network File System (NFS) file server."]
 module HdfsAuthenticationType =
   struct
     type nonrec t =
@@ -2223,6 +3565,9 @@ module HdfsNameNodeList =
     type nonrec t = HdfsNameNode.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HdfsNameNode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2303,50 +3648,6 @@ module HdfsUser =
     let of_json j = string_of_json ~kind:"HdfsUser" j
     let to_json = simple_to_json to_value
   end
-module KerberosKeytabFile =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Blob x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
-    let of_json j = string_of_json ~kind:"a blob" j
-    let to_json = simple_to_json to_value
-  end
-module KerberosKrb5ConfFile =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Blob x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
-    let of_json j = string_of_json ~kind:"a blob" j
-    let to_json = simple_to_json to_value
-  end
-module KerberosPrincipal =
-  struct
-    type nonrec t = string
-    let context_ = "KerberosPrincipal"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"KerberosPrincipal" j
-    let to_json = simple_to_json to_value
-  end
 module KmsKeyProviderUri =
   struct
     type nonrec t = string
@@ -2399,16 +3700,307 @@ module QopConfiguration =
           (Xml.child xml_arg0 "RpcProtection") in
       make ?dataTransferProtection ?rpcProtection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataTransferProtection =
-        field_map json "DataTransferProtection"
+        field_map json__ "DataTransferProtection"
           HdfsDataTransferProtection.of_json in
       let rpcProtection =
-        field_map json "RpcProtection" HdfsRpcProtection.of_json in
+        field_map json__ "RpcProtection" HdfsRpcProtection.of_json in
       make ?dataTransferProtection ?rpcProtection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Quality of Protection (QOP) configuration specifies the Remote Procedure Call (RPC) and data transfer privacy settings configured on the Hadoop Distributed File System (HDFS) cluster."]
+module FsxWindowsSubdirectory =
+  struct
+    type nonrec t = string
+    let context_ = "FsxWindowsSubdirectory"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4096) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[a-zA-Z0-9_\\-\\+\\./\\(\\)\\$\\p{Zs}]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FsxWindowsSubdirectory" j
+    let to_json = simple_to_json to_value
+  end
+module FsxProtocol =
+  struct
+    type nonrec t =
+      {
+      nFS: FsxProtocolNfs.t option
+        [@ocaml.doc
+          "Specifies the Network File System (NFS) protocol configuration that DataSync uses to access your FSx for OpenZFS file system or FSx for ONTAP file system's storage virtual machine (SVM)."];
+      sMB: FsxProtocolSmb.t option
+        [@ocaml.doc
+          "Specifies the Server Message Block (SMB) protocol configuration that DataSync uses to access your FSx for ONTAP file system's SVM."]}
+    let make ?nFS = fun ?sMB -> fun () -> { nFS; sMB }
+    let to_value x =
+      structure_to_value
+        [("NFS", (Option.map x.nFS ~f:FsxProtocolNfs.to_value));
+        ("SMB", (Option.map x.sMB ~f:FsxProtocolSmb.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sMB =
+        (Option.map ~f:FsxProtocolSmb.of_xml) (Xml.child xml_arg0 "SMB") in
+      let nFS =
+        (Option.map ~f:FsxProtocolNfs.of_xml) (Xml.child xml_arg0 "NFS") in
+      make ?sMB ?nFS ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sMB = field_map json__ "SMB" FsxProtocolSmb.of_json in
+      let nFS = field_map json__ "NFS" FsxProtocolNfs.of_json in
+      make ?sMB ?nFS ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the data transfer protocol that DataSync uses to access your Amazon FSx file system."]
+module FsxOntapSubdirectory =
+  struct
+    type nonrec t = string
+    let context_ = "FsxOntapSubdirectory"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[^\\u0000\\u0085\\u2028\\u2029\\r\\n]{1,255}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FsxOntapSubdirectory" j
+    let to_json = simple_to_json to_value
+  end
+module FsxUpdateProtocol =
+  struct
+    type nonrec t =
+      {
+      nFS: FsxProtocolNfs.t option ;
+      sMB: FsxUpdateProtocolSmb.t option
+        [@ocaml.doc
+          "Specifies the Server Message Block (SMB) protocol configuration that DataSync uses to access your FSx for ONTAP file system's storage virtual machine (SVM)."]}
+    let make ?nFS = fun ?sMB -> fun () -> { nFS; sMB }
+    let to_value x =
+      structure_to_value
+        [("NFS", (Option.map x.nFS ~f:FsxProtocolNfs.to_value));
+        ("SMB", (Option.map x.sMB ~f:FsxUpdateProtocolSmb.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sMB =
+        (Option.map ~f:FsxUpdateProtocolSmb.of_xml)
+          (Xml.child xml_arg0 "SMB") in
+      let nFS =
+        (Option.map ~f:FsxProtocolNfs.of_xml) (Xml.child xml_arg0 "NFS") in
+      make ?sMB ?nFS ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sMB = field_map json__ "SMB" FsxUpdateProtocolSmb.of_json in
+      let nFS = field_map json__ "NFS" FsxProtocolNfs.of_json in
+      make ?sMB ?nFS ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the data transfer protocol that DataSync uses to access your Amazon FSx file system. You can't update the Network File System (NFS) protocol configuration for FSx for ONTAP locations. DataSync currently only supports NFS version 3 with this location type."]
+module EfsInTransitEncryption =
+  struct
+    type nonrec t =
+      | NONE 
+      | TLS1_2 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | NONE -> "NONE" | TLS1_2 -> "TLS1_2" | Non_static_id s -> s
+    let of_string =
+      function | "NONE" -> NONE | "TLS1_2" -> TLS1_2 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EfsInTransitEncryption" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EfsInTransitEncryption" j)
+    let to_json = simple_to_json to_value
+  end
+module EfsSubdirectory =
+  struct
+    type nonrec t = string
+    let context_ = "EfsSubdirectory"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4096) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[a-zA-Z0-9_\\-\\+\\./\\(\\)\\p{Zs}]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EfsSubdirectory" j
+    let to_json = simple_to_json to_value
+  end
+module UpdatedEfsAccessPointArn =
+  struct
+    type nonrec t = string
+    let context_ = "UpdatedEfsAccessPointArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"(^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):elasticfilesystem:[a-z\\-0-9]+:[0-9]{12}:access-point/fsap-[0-9a-f]{8,40}$)|(^$)"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UpdatedEfsAccessPointArn" j
+    let to_json = simple_to_json to_value
+  end
+module UpdatedEfsIamRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "UpdatedEfsIamRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"(^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):iam::[0-9]{12}:role/.*$)|(^$)"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UpdatedEfsIamRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module AzureAccessTier =
+  struct
+    type nonrec t =
+      | HOT 
+      | COOL 
+      | ARCHIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HOT -> "HOT"
+      | COOL -> "COOL"
+      | ARCHIVE -> "ARCHIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HOT" -> HOT
+      | "COOL" -> COOL
+      | "ARCHIVE" -> ARCHIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AzureAccessTier" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AzureAccessTier" j)
+    let to_json = simple_to_json to_value
+  end
+module AzureBlobAuthenticationType =
+  struct
+    type nonrec t =
+      | SAS 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SAS -> "SAS" | NONE -> "NONE" | Non_static_id s -> s
+    let of_string =
+      function | "SAS" -> SAS | "NONE" -> NONE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AzureBlobAuthenticationType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AzureBlobAuthenticationType" j)
+    let to_json = simple_to_json to_value
+  end
+module AzureBlobSasConfiguration =
+  struct
+    type nonrec t =
+      {
+      token: AzureBlobSasToken.t
+        [@ocaml.doc
+          "Specifies a SAS token that provides permissions to access your Azure Blob Storage. The token is part of the SAS URI string that comes after the storage resource URI and a question mark. A token looks something like this: sp=r&st=2023-12-20T14:54:52Z&se=2023-12-20T22:54:52Z&spr=https&sv=2021-06-08&sr=c&sig=aBBKDWQvyuVcTPH9EBp%2FXTI9E%2F%2Fmq171%2BZU178wcwqU%3D"]}
+    let context_ = "AzureBlobSasConfiguration"
+    let make ~token = fun () -> { token }
+    let to_value x =
+      structure_to_value
+        [("Token", (Some (AzureBlobSasToken.to_value x.token)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let token =
+        AzureBlobSasToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Token") in
+      make ~token ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let token = field_map_exn json__ "Token" AzureBlobSasToken.of_json in
+      make ~token ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The shared access signature (SAS) configuration that allows DataSync to access your Microsoft Azure Blob Storage. For more information, see SAS tokens for accessing your Azure Blob Storage."]
+module AzureBlobSubdirectory =
+  struct
+    type nonrec t = string
+    let context_ = "AzureBlobSubdirectory"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[\\p{L}\\p{M}\\p{Z}\\p{S}\\p{N}\\p{P}\\p{C}]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AzureBlobSubdirectory" j
+    let to_json = simple_to_json to_value
+  end
+module AzureBlobType =
+  struct
+    type nonrec t =
+      | BLOCK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | BLOCK -> "BLOCK" | Non_static_id s -> s
+    let of_string = function | "BLOCK" -> BLOCK | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AzureBlobType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AzureBlobType" j)
+    let to_json = simple_to_json to_value
+  end
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -2417,6 +4009,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2446,7 +4041,7 @@ module TaggableResourceArn =
           ((check_string_max i ~max:128) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:(agent|task|location)/(agent|task|loc)-[0-9a-z]{17}$"));
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:(((agent|task|location)/(agent|task|loc)-[a-z0-9]{17}(/execution/exec-[a-f0-9]{17})?)|(system/storage-system-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}(/job/discovery-job-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})?))$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2464,6 +4059,9 @@ module InputTagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagListEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2506,6 +4104,9 @@ module TaskList =
   struct
     type nonrec t = TaskListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TaskListEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2548,6 +4149,9 @@ module TaskFilters =
   struct
     type nonrec t = TaskFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TaskFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2572,6 +4176,9 @@ module TaskExecutionList =
   struct
     type nonrec t = TaskExecutionListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TaskExecutionListEntry.to_value)) |>
         (fun x -> `List x)
@@ -2602,6 +4209,9 @@ module OutputTagList =
         ok_or_failwith
           ((check_list_max i ~max:55) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagListEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2626,6 +4236,9 @@ module LocationList =
   struct
     type nonrec t = LocationListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocationListEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2650,6 +4263,9 @@ module LocationFilters =
   struct
     type nonrec t = LocationFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocationFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2674,6 +4290,9 @@ module AgentList =
   struct
     type nonrec t = AgentListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentListEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2698,6 +4317,9 @@ module DestinationNetworkInterfaceArns =
   struct
     type nonrec t = NetworkInterfaceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterfaceArn.to_value)) |>
         (fun x -> `List x)
@@ -2724,6 +4346,9 @@ module SourceNetworkInterfaceArns =
   struct
     type nonrec t = NetworkInterfaceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterfaceArn.to_value)) |>
         (fun x -> `List x)
@@ -2746,46 +4371,301 @@ module SourceNetworkInterfaceArns =
         ~of_json:NetworkInterfaceArn.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Time =
+module TaskScheduleDetails =
   struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    type nonrec t =
+      {
+      statusUpdateTime: Time.t option
+        [@ocaml.doc
+          "Indicates the last time the status of your task schedule changed. For example, if DataSync automatically disables your schedule because of a repeated error, you can see when the schedule was disabled."];
+      disabledReason: ScheduleDisabledReason.t option
+        [@ocaml.doc
+          "Provides a reason if the task schedule is disabled. If your schedule is disabled by USER, you see a Manually disabled by user. message. If your schedule is disabled by SERVICE, you see an error message to help you understand why the task keeps failing. For information on resolving DataSync errors, see Troubleshooting issues with DataSync transfers."];
+      disabledBy: ScheduleDisabledBy.t option
+        [@ocaml.doc
+          "Indicates how your task schedule was disabled. USER - Your schedule was manually disabled by using the UpdateTask operation or DataSync console. SERVICE - Your schedule was automatically disabled by DataSync because the task failed repeatedly with the same error."]}
+    let make ?statusUpdateTime =
+      fun ?disabledReason ->
+        fun ?disabledBy ->
+          fun () -> { statusUpdateTime; disabledReason; disabledBy }
+    let to_value x =
+      structure_to_value
+        [("StatusUpdateTime",
+           (Option.map x.statusUpdateTime ~f:Time.to_value));
+        ("DisabledReason",
+          (Option.map x.disabledReason ~f:ScheduleDisabledReason.to_value));
+        ("DisabledBy",
+          (Option.map x.disabledBy ~f:ScheduleDisabledBy.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let of_xml xml_arg0 =
+      let disabledBy =
+        (Option.map ~f:ScheduleDisabledBy.of_xml)
+          (Xml.child xml_arg0 "DisabledBy") in
+      let disabledReason =
+        (Option.map ~f:ScheduleDisabledReason.of_xml)
+          (Xml.child xml_arg0 "DisabledReason") in
+      let statusUpdateTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "StatusUpdateTime") in
+      make ?disabledBy ?disabledReason ?statusUpdateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let disabledBy =
+        field_map json__ "DisabledBy" ScheduleDisabledBy.of_json in
+      let disabledReason =
+        field_map json__ "DisabledReason" ScheduleDisabledReason.of_json in
+      let statusUpdateTime = field_map json__ "StatusUpdateTime" Time.of_json in
+      make ?disabledBy ?disabledReason ?statusUpdateTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides information about your DataSync task schedule."]
+module ItemCount =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module ReportResult =
+  struct
+    type nonrec t =
+      {
+      status: PhaseStatus.t option
+        [@ocaml.doc
+          "Indicates whether DataSync is still working on your report, created a report, or can't create a complete report."];
+      errorCode: String_.t option
+        [@ocaml.doc
+          "Indicates the code associated with the error if DataSync can't create a complete report."];
+      errorDetail: String_.t option
+        [@ocaml.doc "Provides details about issues creating a report."]}
+    let make ?status =
+      fun ?errorCode ->
+        fun ?errorDetail -> fun () -> { status; errorCode; errorDetail }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:PhaseStatus.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
+        ("ErrorDetail", (Option.map x.errorDetail ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorDetail =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorDetail") in
+      let errorCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let status =
+        (Option.map ~f:PhaseStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?errorDetail ?errorCode ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorDetail = field_map json__ "ErrorDetail" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      let status = field_map json__ "Status" PhaseStatus.of_json in
+      make ?errorDetail ?errorCode ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates whether DataSync created a complete task report for your transfer."]
+module TaskExecutionFilesFailedDetail =
+  struct
+    type nonrec t =
+      {
+      prepare: Long.t option
+        [@ocaml.doc
+          "The number of files or objects that DataSync fails to prepare during your task execution."];
+      transfer: Long.t option
+        [@ocaml.doc
+          "The number of files or objects that DataSync fails to transfer during your task execution."];
+      verify: Long.t option
+        [@ocaml.doc
+          "The number of files or objects that DataSync fails to verify during your task execution."];
+      delete: Long.t option
+        [@ocaml.doc
+          "The number of files or objects that DataSync fails to delete during your task execution."]}
+    let make ?prepare =
+      fun ?transfer ->
+        fun ?verify ->
+          fun ?delete -> fun () -> { prepare; transfer; verify; delete }
+    let to_value x =
+      structure_to_value
+        [("Prepare", (Option.map x.prepare ~f:Long.to_value));
+        ("Transfer", (Option.map x.transfer ~f:Long.to_value));
+        ("Verify", (Option.map x.verify ~f:Long.to_value));
+        ("Delete", (Option.map x.delete ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delete = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Delete") in
+      let verify = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Verify") in
+      let transfer =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Transfer") in
+      let prepare =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Prepare") in
+      make ?delete ?verify ?transfer ?prepare ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delete = field_map json__ "Delete" Long.of_json in
+      let verify = field_map json__ "Verify" Long.of_json in
+      let transfer = field_map json__ "Transfer" Long.of_json in
+      let prepare = field_map json__ "Prepare" Long.of_json in
+      make ?delete ?verify ?transfer ?prepare ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of files or objects that DataSync fails to prepare, transfer, verify, and delete during your task execution. Applies only to Enhanced mode tasks."]
+module TaskExecutionFilesListedDetail =
+  struct
+    type nonrec t =
+      {
+      atSource: Long.t option
+        [@ocaml.doc
+          "The number of files or objects that DataSync finds at your source location. With a manifest, DataSync lists only what's in your manifest (and not everything at your source location). With an include filter, DataSync lists only what matches the filter at your source location. With an exclude filter, DataSync lists everything at your source location before applying the filter."];
+      atDestinationForDelete: Long.t option
+        [@ocaml.doc
+          "The number of files or objects that DataSync finds at your destination location. This counter is only applicable if you configure your task to delete data in the destination that isn't in the source."]}
+    let make ?atSource =
+      fun ?atDestinationForDelete ->
+        fun () -> { atSource; atDestinationForDelete }
+    let to_value x =
+      structure_to_value
+        [("AtSource", (Option.map x.atSource ~f:Long.to_value));
+        ("AtDestinationForDelete",
+          (Option.map x.atDestinationForDelete ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let atDestinationForDelete =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "AtDestinationForDelete") in
+      let atSource =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "AtSource") in
+      make ?atDestinationForDelete ?atSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let atDestinationForDelete =
+        field_map json__ "AtDestinationForDelete" Long.of_json in
+      let atSource = field_map json__ "AtSource" Long.of_json in
+      make ?atDestinationForDelete ?atSource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of files or objects that DataSync finds at your locations. Applies only to Enhanced mode tasks."]
+module TaskExecutionFoldersFailedDetail =
+  struct
+    type nonrec t =
+      {
+      list: Long.t option
+        [@ocaml.doc
+          "The number of directories that DataSync fails to list during your task execution."];
+      prepare: Long.t option
+        [@ocaml.doc
+          "The number of directories that DataSync fails to prepare during your task execution."];
+      transfer: Long.t option
+        [@ocaml.doc
+          "The number of directories that DataSync fails to transfer during your task execution."];
+      verify: Long.t option
+        [@ocaml.doc
+          "The number of directories that DataSync fails to verify during your task execution."];
+      delete: Long.t option
+        [@ocaml.doc
+          "The number of directories that DataSync fails to delete during your task execution."]}
+    let make ?list =
+      fun ?prepare ->
+        fun ?transfer ->
+          fun ?verify ->
+            fun ?delete ->
+              fun () -> { list; prepare; transfer; verify; delete }
+    let to_value x =
+      structure_to_value
+        [("List", (Option.map x.list ~f:Long.to_value));
+        ("Prepare", (Option.map x.prepare ~f:Long.to_value));
+        ("Transfer", (Option.map x.transfer ~f:Long.to_value));
+        ("Verify", (Option.map x.verify ~f:Long.to_value));
+        ("Delete", (Option.map x.delete ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delete = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Delete") in
+      let verify = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Verify") in
+      let transfer =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Transfer") in
+      let prepare =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Prepare") in
+      let list = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "List") in
+      make ?delete ?verify ?transfer ?prepare ?list ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delete = field_map json__ "Delete" Long.of_json in
+      let verify = field_map json__ "Verify" Long.of_json in
+      let transfer = field_map json__ "Transfer" Long.of_json in
+      let prepare = field_map json__ "Prepare" Long.of_json in
+      let list = field_map json__ "List" Long.of_json in
+      make ?delete ?verify ?transfer ?prepare ?list ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of directories that DataSync fails to list, prepare, transfer, verify, and delete during your task execution. Applies only to Enhanced mode tasks."]
+module TaskExecutionFoldersListedDetail =
+  struct
+    type nonrec t =
+      {
+      atSource: Long.t option
+        [@ocaml.doc
+          "The number of directories that DataSync finds at your source location. With a manifest, DataSync lists only what's in your manifest (and not everything at your source location). With an include filter, DataSync lists only what matches the filter at your source location. With an exclude filter, DataSync lists everything at your source location before applying the filter."];
+      atDestinationForDelete: Long.t option
+        [@ocaml.doc
+          "The number of directories that DataSync finds at your destination location. This counter is only applicable if you configure your task to delete data in the destination that isn't in the source."]}
+    let make ?atSource =
+      fun ?atDestinationForDelete ->
+        fun () -> { atSource; atDestinationForDelete }
+    let to_value x =
+      structure_to_value
+        [("AtSource", (Option.map x.atSource ~f:Long.to_value));
+        ("AtDestinationForDelete",
+          (Option.map x.atDestinationForDelete ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let atDestinationForDelete =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "AtDestinationForDelete") in
+      let atSource =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "AtSource") in
+      make ?atDestinationForDelete ?atSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let atDestinationForDelete =
+        field_map json__ "AtDestinationForDelete" Long.of_json in
+      let atSource = field_map json__ "AtSource" Long.of_json in
+      make ?atDestinationForDelete ?atSource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of directories that DataSync finds at your locations. Applies only to Enhanced mode tasks."]
 module TaskExecutionResultDetail =
   struct
     type nonrec t =
       {
       prepareDuration: Duration.t option
         [@ocaml.doc
-          "The total time in milliseconds that DataSync spent in the PREPARING phase."];
+          "The time in milliseconds that your task execution was in the PREPARING step. For more information, see Task execution statuses. For Enhanced mode tasks, the value is always 0. For more information, see How DataSync prepares your data transfer."];
       prepareStatus: PhaseStatus.t option
-        [@ocaml.doc "The status of the PREPARING phase."];
-      totalDuration: Duration.t option
         [@ocaml.doc
-          "The total time in milliseconds that DataSync took to transfer the file from the source to the destination location."];
+          "The status of the PREPARING step for your task execution. For more information, see Task execution statuses."];
+      totalDuration: Duration.t option
+        [@ocaml.doc "The time in milliseconds that your task execution ran."];
       transferDuration: Duration.t option
         [@ocaml.doc
-          "The total time in milliseconds that DataSync spent in the TRANSFERRING phase."];
+          "The time in milliseconds that your task execution was in the TRANSFERRING step. For more information, see Task execution statuses. For Enhanced mode tasks, the value is always 0. For more information, see How DataSync transfers your data."];
       transferStatus: PhaseStatus.t option
-        [@ocaml.doc "The status of the TRANSFERRING phase."];
+        [@ocaml.doc
+          "The status of the TRANSFERRING step for your task execution. For more information, see Task execution statuses."];
       verifyDuration: Duration.t option
         [@ocaml.doc
-          "The total time in milliseconds that DataSync spent in the VERIFYING phase."];
+          "The time in milliseconds that your task execution was in the VERIFYING step. For more information, see Task execution statuses. For Enhanced mode tasks, the value is always 0. For more information, see How DataSync verifies your data's integrity."];
       verifyStatus: PhaseStatus.t option
-        [@ocaml.doc "The status of the VERIFYING phase."];
+        [@ocaml.doc
+          "The status of the VERIFYING step for your task execution. For more information, see Task execution statuses."];
       errorCode: String_.t option
         [@ocaml.doc
-          "Errors that DataSync encountered during execution of the task. You can use this error code to help troubleshoot issues."];
+          "An error that DataSync encountered during your task execution. You can use this information to help troubleshoot issues."];
       errorDetail: String_.t option
         [@ocaml.doc
-          "Detailed description of an error that was encountered during the task execution. You can use this information to help troubleshoot issues."]}
+          "The detailed description of an error that DataSync encountered during your task execution. You can use this information to help troubleshoot issues."]}
     let make ?prepareDuration =
       fun ?prepareStatus ->
         fun ?totalDuration ->
@@ -2852,135 +4732,76 @@ module TaskExecutionResultDetail =
         ?transferStatus ?transferDuration ?totalDuration ?prepareStatus
         ?prepareDuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorDetail = field_map json "ErrorDetail" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
-      let verifyStatus = field_map json "VerifyStatus" PhaseStatus.of_json in
-      let verifyDuration = field_map json "VerifyDuration" Duration.of_json in
+    let of_json json__ =
+      let errorDetail = field_map json__ "ErrorDetail" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      let verifyStatus = field_map json__ "VerifyStatus" PhaseStatus.of_json in
+      let verifyDuration = field_map json__ "VerifyDuration" Duration.of_json in
       let transferStatus =
-        field_map json "TransferStatus" PhaseStatus.of_json in
+        field_map json__ "TransferStatus" PhaseStatus.of_json in
       let transferDuration =
-        field_map json "TransferDuration" Duration.of_json in
-      let totalDuration = field_map json "TotalDuration" Duration.of_json in
-      let prepareStatus = field_map json "PrepareStatus" PhaseStatus.of_json in
-      let prepareDuration = field_map json "PrepareDuration" Duration.of_json in
+        field_map json__ "TransferDuration" Duration.of_json in
+      let totalDuration = field_map json__ "TotalDuration" Duration.of_json in
+      let prepareStatus =
+        field_map json__ "PrepareStatus" PhaseStatus.of_json in
+      let prepareDuration =
+        field_map json__ "PrepareDuration" Duration.of_json in
       make ?errorDetail ?errorCode ?verifyStatus ?verifyDuration
         ?transferStatus ?transferDuration ?totalDuration ?prepareStatus
         ?prepareDuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the detailed result of a TaskExecution operation. This result includes the time in milliseconds spent in each phase, the status of the task execution, and the errors encountered."]
-module Long =
+       "Provides detailed information about the result of your DataSync task execution."]
+module FsxFilesystemArn =
   struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
+    type nonrec t = string
+    let context_ = "FsxFilesystemArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):fsx:[a-z\\-0-9]+:[0-9]{12}:file-system/fs-[0-9a-f]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FsxFilesystemArn" j
     let to_json = simple_to_json to_value
   end
-module S3Config =
+module StorageVirtualMachineArn =
   struct
-    type nonrec t =
-      {
-      bucketAccessRoleArn: IamRoleArn.t
-        [@ocaml.doc "The ARN of the IAM role for accessing the S3 bucket."]}
-    let context_ = "S3Config"
-    let make ~bucketAccessRoleArn = fun () -> { bucketAccessRoleArn }
-    let to_value x =
-      structure_to_value
-        [("BucketAccessRoleArn",
-           (Some (IamRoleArn.to_value x.bucketAccessRoleArn)))]
+    type nonrec t = string
+    let context_ = "StorageVirtualMachineArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:162) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):fsx:[a-z\\-0-9]+:[0-9]{12}:storage-virtual-machine/fs-[0-9a-f]+/svm-[0-9a-f]{17,}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let bucketAccessRoleArn =
-        IamRoleArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BucketAccessRoleArn") in
-      make ~bucketAccessRoleArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bucketAccessRoleArn =
-        field_map_exn json "BucketAccessRoleArn" IamRoleArn.of_json in
-      make ~bucketAccessRoleArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role used to access an Amazon S3 bucket. For detailed information about using such a role, see Creating a Location for Amazon S3 in the DataSync User Guide."]
-module S3StorageClass =
-  struct
-    type nonrec t =
-      | STANDARD 
-      | STANDARD_IA 
-      | ONEZONE_IA 
-      | INTELLIGENT_TIERING 
-      | GLACIER 
-      | DEEP_ARCHIVE 
-      | OUTPOSTS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | STANDARD -> "STANDARD"
-      | STANDARD_IA -> "STANDARD_IA"
-      | ONEZONE_IA -> "ONEZONE_IA"
-      | INTELLIGENT_TIERING -> "INTELLIGENT_TIERING"
-      | GLACIER -> "GLACIER"
-      | DEEP_ARCHIVE -> "DEEP_ARCHIVE"
-      | OUTPOSTS -> "OUTPOSTS"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "STANDARD" -> STANDARD
-      | "STANDARD_IA" -> STANDARD_IA
-      | "ONEZONE_IA" -> ONEZONE_IA
-      | "INTELLIGENT_TIERING" -> INTELLIGENT_TIERING
-      | "GLACIER" -> GLACIER
-      | "DEEP_ARCHIVE" -> DEEP_ARCHIVE
-      | "OUTPOSTS" -> OUTPOSTS
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration S3StorageClass" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"S3StorageClass" j)
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StorageVirtualMachineArn" j
     let to_json = simple_to_json to_value
   end
-module FsxProtocol =
-  struct
-    type nonrec t =
-      {
-      nFS: FsxProtocolNfs.t option
-        [@ocaml.doc
-          "Represents the Network File System (NFS) protocol that DataSync uses to access your FSx for OpenZFS file system."]}
-    let make ?nFS = fun () -> { nFS }
-    let to_value x =
-      structure_to_value
-        [("NFS", (Option.map x.nFS ~f:FsxProtocolNfs.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nFS =
-        (Option.map ~f:FsxProtocolNfs.of_xml) (Xml.child xml_arg0 "NFS") in
-      make ?nFS ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nFS = field_map json "NFS" FsxProtocolNfs.of_json in make ?nFS ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Represents the protocol that DataSync uses to access your Amazon FSx for OpenZFS file system."]
 module Ec2Config =
   struct
     type nonrec t =
       {
       subnetArn: Ec2SubnetArn.t
         [@ocaml.doc
-          "The ARN of the subnet that DataSync uses to access the target EFS file system."];
+          "Specifies the ARN of a subnet where DataSync creates the network interfaces for managing traffic during your transfer. The subnet must be located: In the same virtual private cloud (VPC) as the Amazon EFS file system. In the same Availability Zone as at least one mount target for the Amazon EFS file system. You don't need to specify a subnet that includes a file system mount target."];
       securityGroupArns: Ec2SecurityGroupArnList.t
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the security groups that are configured for the Amazon EC2 resource."]}
+          "Specifies the Amazon Resource Names (ARNs) of the security groups associated with an Amazon EFS file system's mount target."]}
     let context_ = "Ec2Config"
     let make ~subnetArn =
       fun ~securityGroupArns -> fun () -> { subnetArn; securityGroupArns }
@@ -2999,21 +4820,42 @@ module Ec2Config =
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetArn") in
       make ~securityGroupArns ~subnetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupArns =
-        field_map_exn json "SecurityGroupArns"
+        field_map_exn json__ "SecurityGroupArns"
           Ec2SecurityGroupArnList.of_json in
-      let subnetArn = field_map_exn json "SubnetArn" Ec2SubnetArn.of_json in
+      let subnetArn = field_map_exn json__ "SubnetArn" Ec2SubnetArn.of_json in
       make ~securityGroupArns ~subnetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The subnet that DataSync uses to access target EFS file system. The subnet must have at least one mount target for that file system. The security group that you provide needs to be able to communicate with the security group on the mount target in the subnet specified."]
+       "The subnet and security groups that DataSync uses to connect to one of your Amazon EFS file system's mount targets."]
+module EfsAccessPointArn =
+  struct
+    type nonrec t = string
+    let context_ = "EfsAccessPointArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):elasticfilesystem:[a-z\\-0-9]+:[0-9]{12}:access-point/fsap-[0-9a-f]{8,40}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EfsAccessPointArn" j
+    let to_json = simple_to_json to_value
+  end
 module EndpointType =
   struct
     type nonrec t =
       | PUBLIC 
       | PRIVATE_LINK 
       | FIPS 
+      | FIPS_PRIVATE_LINK 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3021,12 +4863,14 @@ module EndpointType =
       | PUBLIC -> "PUBLIC"
       | PRIVATE_LINK -> "PRIVATE_LINK"
       | FIPS -> "FIPS"
+      | FIPS_PRIVATE_LINK -> "FIPS_PRIVATE_LINK"
       | Non_static_id s -> s
     let of_string =
       function
       | "PUBLIC" -> PUBLIC
       | "PRIVATE_LINK" -> PRIVATE_LINK
       | "FIPS" -> FIPS
+      | "FIPS_PRIVATE_LINK" -> FIPS_PRIVATE_LINK
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3042,16 +4886,16 @@ module PrivateLinkConfig =
       {
       vpcEndpointId: VpcEndpointId.t option
         [@ocaml.doc
-          "The ID of the VPC endpoint that is configured for an agent. An agent that is configured with a VPC endpoint will not be accessible over the public internet."];
+          "Specifies the ID of the VPC endpoint that your agent connects to."];
       privateLinkEndpoint: Endpoint.t option
         [@ocaml.doc
-          "The private endpoint that is configured for an agent that has access to IP addresses in a PrivateLink. An agent that is configured with this endpoint will not be accessible over the public internet."];
+          "Specifies the VPC endpoint provided by Amazon Web Services PrivateLink that your agent connects to."];
       subnetArns: PLSubnetArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the subnets that are configured for an agent activated in a VPC or an agent that has access to a VPC endpoint."];
+          "Specifies the ARN of the subnet where your VPC endpoint is located. You can only specify one ARN."];
       securityGroupArns: PLSecurityGroupArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the security groups that are configured for the EC2 resource that hosts an agent activated in a VPC or an agent that has access to a VPC endpoint."]}
+          "Specifies the Amazon Resource Names (ARN) of the security group that provides DataSync access to your VPC endpoint. You can only specify one ARN."]}
     let make ?vpcEndpointId =
       fun ?privateLinkEndpoint ->
         fun ?subnetArns ->
@@ -3089,59 +4933,19 @@ module PrivateLinkConfig =
       make ?securityGroupArns ?subnetArns ?privateLinkEndpoint ?vpcEndpointId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupArns =
-        field_map json "SecurityGroupArns" PLSecurityGroupArnList.of_json in
-      let subnetArns = field_map json "SubnetArns" PLSubnetArnList.of_json in
+        field_map json__ "SecurityGroupArns" PLSecurityGroupArnList.of_json in
+      let subnetArns = field_map json__ "SubnetArns" PLSubnetArnList.of_json in
       let privateLinkEndpoint =
-        field_map json "PrivateLinkEndpoint" Endpoint.of_json in
+        field_map json__ "PrivateLinkEndpoint" Endpoint.of_json in
       let vpcEndpointId =
-        field_map json "VpcEndpointId" VpcEndpointId.of_json in
+        field_map json__ "VpcEndpointId" VpcEndpointId.of_json in
       make ?securityGroupArns ?subnetArns ?privateLinkEndpoint ?vpcEndpointId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The VPC endpoint, subnet, and security group that an agent uses to access IP addresses in a VPC (Virtual Private Cloud)."]
-module ServerHostname =
-  struct
-    type nonrec t = string
-    let context_ = "ServerHostname"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"^(([a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9\\-]*[A-Za-z0-9])$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ServerHostname" j
-    let to_json = simple_to_json to_value
-  end
-module S3BucketArn =
-  struct
-    type nonrec t = string
-    let context_ = "S3BucketArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:156) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):(s3|s3-outposts):[a-z\\-0-9]*:[0-9]*:.*$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"S3BucketArn" j
-    let to_json = simple_to_json to_value
-  end
+       "Specifies how your DataSync agent connects to Amazon Web Services using a virtual private cloud (VPC) service endpoint. An agent that uses a VPC endpoint isn't accessible over the public internet."]
 module ObjectStorageBucketName =
   struct
     type nonrec t = string
@@ -3154,7 +4958,7 @@ module ObjectStorageBucketName =
                 (check_string_max i ~max:63) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[a-zA-Z0-9_\\-\\+\\./\\(\\)\\$\\p{Zs}]+$")));
+                       ~pattern:"^[a-zA-Z0-9_\\-\\+\\.\\(\\)\\$\\p{Zs}]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3162,46 +4966,6 @@ module ObjectStorageBucketName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ObjectStorageBucketName" j
-    let to_json = simple_to_json to_value
-  end
-module FsxFilesystemArn =
-  struct
-    type nonrec t = string
-    let context_ = "FsxFilesystemArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):fsx:[a-z\\-0-9]*:[0-9]{12}:file-system/fs-.*$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FsxFilesystemArn" j
-    let to_json = simple_to_json to_value
-  end
-module FsxWindowsSubdirectory =
-  struct
-    type nonrec t = string
-    let context_ = "FsxWindowsSubdirectory"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:4096) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"^[a-zA-Z0-9_\\-\\+\\./\\(\\)\\$\\p{Zs}]+$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FsxWindowsSubdirectory" j
     let to_json = simple_to_json to_value
   end
 module FsxOpenZfsSubdirectory =
@@ -3254,7 +5018,7 @@ module EfsFilesystemArn =
           ((check_string_max i ~max:128) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):elasticfilesystem:[a-z\\-0-9]*:[0-9]{12}:file-system/fs-.*$"));
+                  ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):elasticfilesystem:[a-z\\-0-9]+:[0-9]{12}:file-system/fs-[0-9a-f]{8,40}$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3264,24 +5028,24 @@ module EfsFilesystemArn =
     let of_json j = string_of_json ~kind:"EfsFilesystemArn" j
     let to_json = simple_to_json to_value
   end
-module EfsSubdirectory =
+module AzureBlobContainerUrl =
   struct
     type nonrec t = string
-    let context_ = "EfsSubdirectory"
+    let context_ = "AzureBlobContainerUrl"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:4096) >>=
+          ((check_string_max i ~max:325) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^[a-zA-Z0-9_\\-\\+\\./\\(\\)\\p{Zs}]*$"));
+                  ~pattern:"^https:\\/\\/[A-Za-z0-9]((\\.|-+)?[A-Za-z0-9]){0,252}\\/[a-z0-9](-?[a-z0-9]){2,62}$"));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EfsSubdirectory" j
+    let of_json j = string_of_json ~kind:"AzureBlobContainerUrl" j
     let to_json = simple_to_json to_value
   end
 module ActivationKey =
@@ -3350,28 +5114,34 @@ module UpdateTaskResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the metadata associated with a task."]
+  end[@@ocaml.doc
+       "Updates the configuration of a task, which defines where and how DataSync transfers your data."]
 module UpdateTaskRequest =
   struct
     type nonrec t =
       {
       taskArn: TaskArn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource name of the task to update."];
+        [@ocaml.doc "Specifies the ARN of the task that you want to update."];
       options: Options.t option ;
       excludes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to exclude from a task. The list should contain a single filter string that consists of the patterns to exclude. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."];
+          "Specifies exclude filters that define the files, objects, and folders in your source location that you don't want DataSync to transfer. For more information and examples, see Specifying what DataSync transfers by using filters."];
       schedule: TaskSchedule.t option
         [@ocaml.doc
-          "Specifies a schedule used to periodically transfer files from a source to a destination location. You can configure your task to execute hourly, daily, weekly or on specific days of the week. You control when in the day or hour you want the task to execute. The time you specify is UTC time. For more information, see Scheduling your task."];
-      name: TagValue.t option [@ocaml.doc "The name of the task to update."];
+          "Specifies a schedule for when you want your task to run. For more information, see Scheduling your task."];
+      name: TagValue.t option [@ocaml.doc "Specifies the name of your task."];
       cloudWatchLogGroupArn: LogGroupArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource name of the Amazon CloudWatch log group."];
+          "Specifies the Amazon Resource Name (ARN) of an Amazon CloudWatch log group for monitoring your task. For Enhanced mode tasks, you must use /aws/datasync as your log group name. For example: arn:aws:logs:us-east-1:111222333444:log-group:/aws/datasync:* For more information, see Monitoring data transfers with CloudWatch Logs."];
       includes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to include when running a task. The pattern contains a single filter string that consists of the patterns to include. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."]}
+          "Specifies include filters define the files, objects, and folders in your source location that you want DataSync to transfer. For more information and examples, see Specifying what DataSync transfers by using filters."];
+      manifestConfig: ManifestConfig.t option
+        [@ocaml.doc
+          "Configures a manifest, which is a list of files or objects that you want DataSync to transfer. For more information and configuration examples, see Specifying what DataSync transfers by using a manifest. When using this parameter, your caller identity (the IAM role that you're using DataSync with) must have the iam:PassRole permission. The AWSDataSyncFullAccess policy includes this permission. To remove a manifest configuration, specify this parameter as empty."];
+      taskReportConfig: TaskReportConfig.t option
+        [@ocaml.doc
+          "Specifies how you want to configure a task report, which provides detailed information about your DataSync transfer. For more information, see Monitoring your DataSync transfers with task reports. When using this parameter, your caller identity (the IAM role that you're using DataSync with) must have the iam:PassRole permission. The AWSDataSyncFullAccess policy includes this permission. To remove a task report configuration, specify this parameter as empty."]}
     let context_ = "UpdateTaskRequest"
     let make ?options =
       fun ?excludes ->
@@ -3379,17 +5149,21 @@ module UpdateTaskRequest =
           fun ?name ->
             fun ?cloudWatchLogGroupArn ->
               fun ?includes ->
-                fun ~taskArn ->
-                  fun () ->
-                    {
-                      options;
-                      excludes;
-                      schedule;
-                      name;
-                      cloudWatchLogGroupArn;
-                      includes;
-                      taskArn
-                    }
+                fun ?manifestConfig ->
+                  fun ?taskReportConfig ->
+                    fun ~taskArn ->
+                      fun () ->
+                        {
+                          options;
+                          excludes;
+                          schedule;
+                          name;
+                          cloudWatchLogGroupArn;
+                          includes;
+                          manifestConfig;
+                          taskReportConfig;
+                          taskArn
+                        }
     let to_value x =
       structure_to_value
         [("TaskArn", (Some (TaskArn.to_value x.taskArn)));
@@ -3399,9 +5173,19 @@ module UpdateTaskRequest =
         ("Name", (Option.map x.name ~f:TagValue.to_value));
         ("CloudWatchLogGroupArn",
           (Option.map x.cloudWatchLogGroupArn ~f:LogGroupArn.to_value));
-        ("Includes", (Option.map x.includes ~f:FilterList.to_value))]
+        ("Includes", (Option.map x.includes ~f:FilterList.to_value));
+        ("ManifestConfig",
+          (Option.map x.manifestConfig ~f:ManifestConfig.to_value));
+        ("TaskReportConfig",
+          (Option.map x.taskReportConfig ~f:TaskReportConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskReportConfig =
+        (Option.map ~f:TaskReportConfig.of_xml)
+          (Xml.child xml_arg0 "TaskReportConfig") in
+      let manifestConfig =
+        (Option.map ~f:ManifestConfig.of_xml)
+          (Xml.child xml_arg0 "ManifestConfig") in
       let includes =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Includes") in
       let cloudWatchLogGroupArn =
@@ -3416,20 +5200,24 @@ module UpdateTaskRequest =
         (Option.map ~f:Options.of_xml) (Xml.child xml_arg0 "Options") in
       let taskArn =
         TaskArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
-      make ?includes ?cloudWatchLogGroupArn ?name ?schedule ?excludes
-        ?options ~taskArn ()
+      make ?taskReportConfig ?manifestConfig ?includes ?cloudWatchLogGroupArn
+        ?name ?schedule ?excludes ?options ~taskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let includes = field_map json "Includes" FilterList.of_json in
+    let of_json json__ =
+      let taskReportConfig =
+        field_map json__ "TaskReportConfig" TaskReportConfig.of_json in
+      let manifestConfig =
+        field_map json__ "ManifestConfig" ManifestConfig.of_json in
+      let includes = field_map json__ "Includes" FilterList.of_json in
       let cloudWatchLogGroupArn =
-        field_map json "CloudWatchLogGroupArn" LogGroupArn.of_json in
-      let name = field_map json "Name" TagValue.of_json in
-      let schedule = field_map json "Schedule" TaskSchedule.of_json in
-      let excludes = field_map json "Excludes" FilterList.of_json in
-      let options = field_map json "Options" Options.of_json in
-      let taskArn = field_map_exn json "TaskArn" TaskArn.of_json in
-      make ?includes ?cloudWatchLogGroupArn ?name ?schedule ?excludes
-        ?options ~taskArn ()
+        field_map json__ "CloudWatchLogGroupArn" LogGroupArn.of_json in
+      let name = field_map json__ "Name" TagValue.of_json in
+      let schedule = field_map json__ "Schedule" TaskSchedule.of_json in
+      let excludes = field_map json__ "Excludes" FilterList.of_json in
+      let options = field_map json__ "Options" Options.of_json in
+      let taskArn = field_map_exn json__ "TaskArn" TaskArn.of_json in
+      make ?taskReportConfig ?manifestConfig ?includes ?cloudWatchLogGroupArn
+        ?name ?schedule ?excludes ?options ~taskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UpdateTaskResponse"]
 module UpdateTaskExecutionResponse =
@@ -3480,14 +5268,14 @@ module UpdateTaskExecutionResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates execution of a task. You can modify bandwidth throttling for a task execution that is running or queued. For more information, see Adjusting Bandwidth Throttling for a Task Execution. The only Option that can be modified by UpdateTaskExecution is BytesPerSecond ."]
+       "Updates the configuration of a running DataSync task execution. Currently, the only Option that you can modify with UpdateTaskExecution is BytesPerSecond , which throttles bandwidth for a running or queued task execution."]
 module UpdateTaskExecutionRequest =
   struct
     type nonrec t =
       {
       taskExecutionArn: TaskExecutionArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the specific task execution that is being updated."];
+          "Specifies the Amazon Resource Name (ARN) of the task execution that you're updating."];
       options: Options.t }
     let context_ = "UpdateTaskExecutionRequest"
     let make ~taskExecutionArn =
@@ -3506,14 +5294,14 @@ module UpdateTaskExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TaskExecutionArn") in
       make ~options ~taskExecutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let options = field_map_exn json "Options" Options.of_json in
+    let of_json json__ =
+      let options = field_map_exn json__ "Options" Options.of_json in
       let taskExecutionArn =
-        field_map_exn json "TaskExecutionArn" TaskExecutionArn.of_json in
+        field_map_exn json__ "TaskExecutionArn" TaskExecutionArn.of_json in
       make ~options ~taskExecutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates execution of a task. You can modify bandwidth throttling for a task execution that is running or queued. For more information, see Adjusting Bandwidth Throttling for a Task Execution. The only Option that can be modified by UpdateTaskExecution is BytesPerSecond ."]
+       "Updates the configuration of a running DataSync task execution. Currently, the only Option that you can modify with UpdateTaskExecution is BytesPerSecond , which throttles bandwidth for a running or queued task execution."]
 module UpdateLocationSmbResponse =
   struct
     type nonrec t = unit
@@ -3562,95 +5350,300 @@ module UpdateLocationSmbResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates some of the parameters of a previously created location for Server Message Block (SMB) file system access. For information about creating an SMB location, see Creating a location for SMB."]
+       "Modifies the following configuration parameters of the Server Message Block (SMB) transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with an SMB file server."]
 module UpdateLocationSmbRequest =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the SMB location to update."];
+          "Specifies the ARN of the SMB location that you want to update."];
       subdirectory: SmbSubdirectory.t option
         [@ocaml.doc
-          "The subdirectory in the SMB file system that is used to read data from the SMB source location or write data to the SMB destination. The SMB path should be a path that's exported by the SMB server, or a subdirectory of that path. The path should be such that it can be mounted by other SMB clients in your network. Subdirectory must be specified with forward slashes. For example, /path/to/folder. To transfer all the data in the folder that you specified, DataSync must have permissions to mount the SMB share and to access all the data in that share. To ensure this, do either of the following: Ensure that the user/password specified belongs to the user who can mount the share and who has the appropriate permissions for all of the files and directories that you want DataSync to access. Use credentials of a member of the Backup Operators group to mount the share. Doing either of these options enables the agent to access the data. For the agent to access directories, you must also enable all execute access."];
+          "Specifies the name of the share exported by your SMB file server where DataSync will read or write data. You can include a subdirectory in the share path (for example, /path/to/subdirectory). Make sure that other SMB clients in your network can also mount this path. To copy all data in the specified subdirectory, DataSync must be able to mount the SMB share and access all of its data. For more information, see Providing DataSync access to SMB file servers."];
+      serverHostname: ServerHostname.t option
+        [@ocaml.doc
+          "Specifies the domain name or IP address (IPv4 or IPv6) of the SMB file server that your DataSync agent connects to. If you're using Kerberos authentication, you must specify a domain name."];
       user: SmbUser.t option
         [@ocaml.doc
-          "The user who can mount the share has the permissions to access files and folders in the SMB share."];
+          "Specifies the user name that can mount your SMB file server and has permission to access the files and folders involved in your transfer. This parameter applies only if AuthenticationType is set to NTLM. For information about choosing a user with the right level of access for your transfer, see Providing DataSync access to SMB file servers."];
       domain: SmbDomain.t option
         [@ocaml.doc
-          "The name of the Windows domain that the SMB server belongs to."];
+          "Specifies the Windows domain name that your SMB file server belongs to. This parameter applies only if AuthenticationType is set to NTLM. If you have multiple domains in your environment, configuring this parameter makes sure that DataSync connects to the right file server."];
       password: SmbPassword.t option
         [@ocaml.doc
-          "The password of the user who can mount the share has the permissions to access files and folders in the SMB share."];
+          "Specifies the password of the user who can mount your SMB file server and has permission to access the files and folders involved in your transfer. This parameter applies only if AuthenticationType is set to NTLM."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, such as a Password or KerberosKeytab or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed secret, such as a Password or KerberosKeytab or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed Identity and Access Management (IAM) role that provides access to the secret."];
       agentArns: AgentArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of agents to use for a Simple Message Block (SMB) location."];
-      mountOptions: SmbMountOptions.t option }
+          "Specifies the DataSync agent (or agents) that can connect to your SMB file server. You specify an agent by using its Amazon Resource Name (ARN)."];
+      mountOptions: SmbMountOptions.t option ;
+      authenticationType: SmbAuthenticationType.t option
+        [@ocaml.doc
+          "Specifies the authentication protocol that DataSync uses to connect to your SMB file server. DataSync supports NTLM (default) and KERBEROS authentication. For more information, see Providing DataSync access to SMB file servers."];
+      dnsIpAddresses: DnsIpList.t option
+        [@ocaml.doc
+          "Specifies the IP addresses (IPv4 or IPv6) for the DNS servers that your SMB file server belongs to. This parameter applies only if AuthenticationType is set to KERBEROS. If you have multiple domains in your environment, configuring this parameter makes sure that DataSync connects to the right SMB file server."];
+      kerberosPrincipal: KerberosPrincipal.t option
+        [@ocaml.doc
+          "Specifies a Kerberos prinicpal, which is an identity in your Kerberos realm that has permission to access the files, folders, and file metadata in your SMB file server. A Kerberos principal might look like HOST/kerberosuser\\@MYDOMAIN.ORG. Principal names are case sensitive. Your DataSync task execution will fail if the principal that you specify for this parameter doesn\226\128\153t exactly match the principal that you use to create the keytab file."];
+      kerberosKeytab: KerberosKeytabFile.t option
+        [@ocaml.doc
+          "Specifies your Kerberos key table (keytab) file, which includes mappings between your Kerberos principal and encryption keys. To avoid task execution errors, make sure that the Kerberos principal that you use to create the keytab file matches exactly what you specify for KerberosPrincipal."];
+      kerberosKrb5Conf: KerberosKrb5ConfFile.t option
+        [@ocaml.doc
+          "Specifies a Kerberos configuration file (krb5.conf) that defines your Kerberos realm configuration. The file must be base64 encoded. If you're using the CLI, the encoding is done for you."]}
     let context_ = "UpdateLocationSmbRequest"
     let make ?subdirectory =
-      fun ?user ->
-        fun ?domain ->
-          fun ?password ->
-            fun ?agentArns ->
-              fun ?mountOptions ->
-                fun ~locationArn ->
-                  fun () ->
-                    {
-                      subdirectory;
-                      user;
-                      domain;
-                      password;
-                      agentArns;
-                      mountOptions;
-                      locationArn
-                    }
+      fun ?serverHostname ->
+        fun ?user ->
+          fun ?domain ->
+            fun ?password ->
+              fun ?cmkSecretConfig ->
+                fun ?customSecretConfig ->
+                  fun ?agentArns ->
+                    fun ?mountOptions ->
+                      fun ?authenticationType ->
+                        fun ?dnsIpAddresses ->
+                          fun ?kerberosPrincipal ->
+                            fun ?kerberosKeytab ->
+                              fun ?kerberosKrb5Conf ->
+                                fun ~locationArn ->
+                                  fun () ->
+                                    {
+                                      subdirectory;
+                                      serverHostname;
+                                      user;
+                                      domain;
+                                      password;
+                                      cmkSecretConfig;
+                                      customSecretConfig;
+                                      agentArns;
+                                      mountOptions;
+                                      authenticationType;
+                                      dnsIpAddresses;
+                                      kerberosPrincipal;
+                                      kerberosKeytab;
+                                      kerberosKrb5Conf;
+                                      locationArn
+                                    }
     let to_value x =
       structure_to_value
         [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
         ("Subdirectory",
           (Option.map x.subdirectory ~f:SmbSubdirectory.to_value));
+        ("ServerHostname",
+          (Option.map x.serverHostname ~f:ServerHostname.to_value));
         ("User", (Option.map x.user ~f:SmbUser.to_value));
         ("Domain", (Option.map x.domain ~f:SmbDomain.to_value));
         ("Password", (Option.map x.password ~f:SmbPassword.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value));
         ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value));
         ("MountOptions",
-          (Option.map x.mountOptions ~f:SmbMountOptions.to_value))]
+          (Option.map x.mountOptions ~f:SmbMountOptions.to_value));
+        ("AuthenticationType",
+          (Option.map x.authenticationType ~f:SmbAuthenticationType.to_value));
+        ("DnsIpAddresses",
+          (Option.map x.dnsIpAddresses ~f:DnsIpList.to_value));
+        ("KerberosPrincipal",
+          (Option.map x.kerberosPrincipal ~f:KerberosPrincipal.to_value));
+        ("KerberosKeytab",
+          (Option.map x.kerberosKeytab ~f:KerberosKeytabFile.to_value));
+        ("KerberosKrb5Conf",
+          (Option.map x.kerberosKrb5Conf ~f:KerberosKrb5ConfFile.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kerberosKrb5Conf =
+        (Option.map ~f:KerberosKrb5ConfFile.of_xml)
+          (Xml.child xml_arg0 "KerberosKrb5Conf") in
+      let kerberosKeytab =
+        (Option.map ~f:KerberosKeytabFile.of_xml)
+          (Xml.child xml_arg0 "KerberosKeytab") in
+      let kerberosPrincipal =
+        (Option.map ~f:KerberosPrincipal.of_xml)
+          (Xml.child xml_arg0 "KerberosPrincipal") in
+      let dnsIpAddresses =
+        (Option.map ~f:DnsIpList.of_xml)
+          (Xml.child xml_arg0 "DnsIpAddresses") in
+      let authenticationType =
+        (Option.map ~f:SmbAuthenticationType.of_xml)
+          (Xml.child xml_arg0 "AuthenticationType") in
       let mountOptions =
         (Option.map ~f:SmbMountOptions.of_xml)
           (Xml.child xml_arg0 "MountOptions") in
       let agentArns =
         (Option.map ~f:AgentArnList.of_xml) (Xml.child xml_arg0 "AgentArns") in
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
       let password =
         (Option.map ~f:SmbPassword.of_xml) (Xml.child xml_arg0 "Password") in
       let domain =
         (Option.map ~f:SmbDomain.of_xml) (Xml.child xml_arg0 "Domain") in
       let user = (Option.map ~f:SmbUser.of_xml) (Xml.child xml_arg0 "User") in
+      let serverHostname =
+        (Option.map ~f:ServerHostname.of_xml)
+          (Xml.child xml_arg0 "ServerHostname") in
       let subdirectory =
         (Option.map ~f:SmbSubdirectory.of_xml)
           (Xml.child xml_arg0 "Subdirectory") in
       let locationArn =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
-      make ?mountOptions ?agentArns ?password ?domain ?user ?subdirectory
-        ~locationArn ()
+      make ?kerberosKrb5Conf ?kerberosKeytab ?kerberosPrincipal
+        ?dnsIpAddresses ?authenticationType ?mountOptions ?agentArns
+        ?customSecretConfig ?cmkSecretConfig ?password ?domain ?user
+        ?serverHostname ?subdirectory ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let kerberosKrb5Conf =
+        field_map json__ "KerberosKrb5Conf" KerberosKrb5ConfFile.of_json in
+      let kerberosKeytab =
+        field_map json__ "KerberosKeytab" KerberosKeytabFile.of_json in
+      let kerberosPrincipal =
+        field_map json__ "KerberosPrincipal" KerberosPrincipal.of_json in
+      let dnsIpAddresses =
+        field_map json__ "DnsIpAddresses" DnsIpList.of_json in
+      let authenticationType =
+        field_map json__ "AuthenticationType" SmbAuthenticationType.of_json in
       let mountOptions =
-        field_map json "MountOptions" SmbMountOptions.of_json in
-      let agentArns = field_map json "AgentArns" AgentArnList.of_json in
-      let password = field_map json "Password" SmbPassword.of_json in
-      let domain = field_map json "Domain" SmbDomain.of_json in
-      let user = field_map json "User" SmbUser.of_json in
+        field_map json__ "MountOptions" SmbMountOptions.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let password = field_map json__ "Password" SmbPassword.of_json in
+      let domain = field_map json__ "Domain" SmbDomain.of_json in
+      let user = field_map json__ "User" SmbUser.of_json in
+      let serverHostname =
+        field_map json__ "ServerHostname" ServerHostname.of_json in
       let subdirectory =
-        field_map json "Subdirectory" SmbSubdirectory.of_json in
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
-      make ?mountOptions ?agentArns ?password ?domain ?user ?subdirectory
-        ~locationArn ()
+        field_map json__ "Subdirectory" SmbSubdirectory.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?kerberosKrb5Conf ?kerberosKeytab ?kerberosPrincipal
+        ?dnsIpAddresses ?authenticationType ?mountOptions ?agentArns
+        ?customSecretConfig ?cmkSecretConfig ?password ?domain ?user
+        ?serverHostname ?subdirectory ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates some of the parameters of a previously created location for Server Message Block (SMB) file system access. For information about creating an SMB location, see Creating a location for SMB."]
+       "Modifies the following configuration parameters of the Server Message Block (SMB) transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with an SMB file server."]
+module UpdateLocationS3Response =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon S3 transfer location that you're using with DataSync. Before you begin, make sure that you read the following topics: Storage class considerations with Amazon S3 locations Evaluating S3 request costs when using DataSync"]
+module UpdateLocationS3Request =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the Amazon S3 transfer location that you're updating."];
+      subdirectory: S3Subdirectory.t option
+        [@ocaml.doc
+          "Specifies a prefix in the S3 bucket that DataSync reads from or writes to (depending on whether the bucket is a source or destination location). DataSync can't transfer objects with a prefix that begins with a slash (/) or includes //, /./, or /../ patterns. For example: /photos photos//2006/January photos/./2006/February photos/../2006/March"];
+      s3StorageClass: S3StorageClass.t option
+        [@ocaml.doc
+          "Specifies the storage class that you want your objects to use when Amazon S3 is a transfer destination. For buckets in Amazon Web Services Regions, the storage class defaults to STANDARD. For buckets on Outposts, the storage class defaults to OUTPOSTS. For more information, see Storage class considerations with Amazon S3 transfers."];
+      s3Config: S3Config.t option }
+    let context_ = "UpdateLocationS3Request"
+    let make ?subdirectory =
+      fun ?s3StorageClass ->
+        fun ?s3Config ->
+          fun ~locationArn ->
+            fun () -> { subdirectory; s3StorageClass; s3Config; locationArn }
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
+        ("Subdirectory",
+          (Option.map x.subdirectory ~f:S3Subdirectory.to_value));
+        ("S3StorageClass",
+          (Option.map x.s3StorageClass ~f:S3StorageClass.to_value));
+        ("S3Config", (Option.map x.s3Config ~f:S3Config.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Config =
+        (Option.map ~f:S3Config.of_xml) (Xml.child xml_arg0 "S3Config") in
+      let s3StorageClass =
+        (Option.map ~f:S3StorageClass.of_xml)
+          (Xml.child xml_arg0 "S3StorageClass") in
+      let subdirectory =
+        (Option.map ~f:S3Subdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      let locationArn =
+        LocationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
+      make ?s3Config ?s3StorageClass ?subdirectory ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Config = field_map json__ "S3Config" S3Config.of_json in
+      let s3StorageClass =
+        field_map json__ "S3StorageClass" S3StorageClass.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" S3Subdirectory.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?s3Config ?s3StorageClass ?subdirectory ~locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon S3 transfer location that you're using with DataSync. Before you begin, make sure that you read the following topics: Storage class considerations with Amazon S3 locations Evaluating S3 request costs when using DataSync"]
 module UpdateLocationObjectStorageResponse =
   struct
     type nonrec t = unit
@@ -3699,50 +5692,70 @@ module UpdateLocationObjectStorageResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates some of the parameters of a previously created location for self-managed object storage server access. For information about creating a self-managed object storage location, see Creating a location for object storage."]
+       "Modifies the following configuration parameters of the object storage transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with an object storage system."]
 module UpdateLocationObjectStorageRequest =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the self-managed object storage server location to be updated."];
+          "Specifies the ARN of the object storage system location that you're updating."];
       serverPort: ObjectStorageServerPort.t option
         [@ocaml.doc
-          "The port that your self-managed object storage server accepts inbound network traffic on. The server port is set by default to TCP 80 (HTTP) or TCP 443 (HTTPS). You can specify a custom port if your self-managed object storage server requires one."];
+          "Specifies the port that your object storage server accepts inbound network traffic on (for example, port 443)."];
       serverProtocol: ObjectStorageServerProtocol.t option
         [@ocaml.doc
-          "The protocol that the object storage server uses to communicate. Valid values are HTTP or HTTPS."];
+          "Specifies the protocol that your object storage server uses to communicate."];
       subdirectory: S3Subdirectory.t option
         [@ocaml.doc
-          "The subdirectory in the self-managed object storage server that is used to read data from."];
+          "Specifies the object prefix for your object storage server. If this is a source location, DataSync only copies objects with this prefix. If this is a destination location, DataSync writes all objects with this prefix."];
+      serverHostname: ServerHostname.t option
+        [@ocaml.doc
+          "Specifies the domain name or IP address (IPv4 or IPv6) of the object storage server that your DataSync agent connects to."];
       accessKey: ObjectStorageAccessKey.t option
         [@ocaml.doc
-          "Optional. The access key is used if credentials are required to access the self-managed object storage server. If your object storage requires a user name and password to authenticate, use AccessKey and SecretKey to provide the user name and password, respectively."];
+          "Specifies the access key (for example, a user name) if credentials are required to authenticate with the object storage server."];
       secretKey: ObjectStorageSecretKey.t option
         [@ocaml.doc
-          "Optional. The secret key is used if credentials are required to access the self-managed object storage server. If your object storage requires a user name and password to authenticate, use AccessKey and SecretKey to provide the user name and password, respectively."];
+          "Specifies the secret key (for example, a password) if credentials are required to authenticate with the object storage server. If you provide a secret using SecretKey, but do not provide secret configuration details using CmkSecretConfig or CustomSecretConfig, then DataSync stores the token using your Amazon Web Services account's Secrets Manager secret."];
       agentArns: AgentArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the agents associated with the self-managed object storage server location."]}
+          "(Optional) Specifies the Amazon Resource Names (ARNs) of the DataSync agents that can connect with your object storage system. If you are setting up an agentless cross-cloud transfer, you do not need to specify a value for this parameter. You cannot add or remove agents from a storage location after you initially create it."];
+      serverCertificate: ObjectStorageCertificate.t option
+        [@ocaml.doc
+          "Specifies a certificate chain for DataSync to authenticate with your object storage system if the system uses a private or self-signed certificate authority (CA). You must specify a single .pem file with a full certificate chain (for example, file:///home/user/.ssh/object_storage_certificates.pem). The certificate chain might include: The object storage system's certificate All intermediate certificates (if there are any) The root certificate of the signing CA You can concatenate your certificates into a .pem file (which can be up to 32768 bytes before base64 encoding). The following example cat command creates an object_storage_certificates.pem file that includes three certificates: cat object_server_certificate.pem intermediate_certificate.pem ca_root_certificate.pem > object_storage_certificates.pem To use this parameter, configure ServerProtocol to HTTPS. Updating this parameter doesn't interfere with tasks that you have in progress."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, such as an authentication token or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed secret, such as an authentication token or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed Identity and Access Management (IAM) role that provides access to the secret."]}
     let context_ = "UpdateLocationObjectStorageRequest"
     let make ?serverPort =
       fun ?serverProtocol ->
         fun ?subdirectory ->
-          fun ?accessKey ->
-            fun ?secretKey ->
-              fun ?agentArns ->
-                fun ~locationArn ->
-                  fun () ->
-                    {
-                      serverPort;
-                      serverProtocol;
-                      subdirectory;
-                      accessKey;
-                      secretKey;
-                      agentArns;
-                      locationArn
-                    }
+          fun ?serverHostname ->
+            fun ?accessKey ->
+              fun ?secretKey ->
+                fun ?agentArns ->
+                  fun ?serverCertificate ->
+                    fun ?cmkSecretConfig ->
+                      fun ?customSecretConfig ->
+                        fun ~locationArn ->
+                          fun () ->
+                            {
+                              serverPort;
+                              serverProtocol;
+                              subdirectory;
+                              serverHostname;
+                              accessKey;
+                              secretKey;
+                              agentArns;
+                              serverCertificate;
+                              cmkSecretConfig;
+                              customSecretConfig;
+                              locationArn
+                            }
     let to_value x =
       structure_to_value
         [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
@@ -3753,13 +5766,31 @@ module UpdateLocationObjectStorageRequest =
              ~f:ObjectStorageServerProtocol.to_value));
         ("Subdirectory",
           (Option.map x.subdirectory ~f:S3Subdirectory.to_value));
+        ("ServerHostname",
+          (Option.map x.serverHostname ~f:ServerHostname.to_value));
         ("AccessKey",
           (Option.map x.accessKey ~f:ObjectStorageAccessKey.to_value));
         ("SecretKey",
           (Option.map x.secretKey ~f:ObjectStorageSecretKey.to_value));
-        ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value))]
+        ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value));
+        ("ServerCertificate",
+          (Option.map x.serverCertificate
+             ~f:ObjectStorageCertificate.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let serverCertificate =
+        (Option.map ~f:ObjectStorageCertificate.of_xml)
+          (Xml.child xml_arg0 "ServerCertificate") in
       let agentArns =
         (Option.map ~f:AgentArnList.of_xml) (Xml.child xml_arg0 "AgentArns") in
       let secretKey =
@@ -3768,6 +5799,9 @@ module UpdateLocationObjectStorageRequest =
       let accessKey =
         (Option.map ~f:ObjectStorageAccessKey.of_xml)
           (Xml.child xml_arg0 "AccessKey") in
+      let serverHostname =
+        (Option.map ~f:ServerHostname.of_xml)
+          (Xml.child xml_arg0 "ServerHostname") in
       let subdirectory =
         (Option.map ~f:S3Subdirectory.of_xml)
           (Xml.child xml_arg0 "Subdirectory") in
@@ -3780,26 +5814,38 @@ module UpdateLocationObjectStorageRequest =
       let locationArn =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
-      make ?agentArns ?secretKey ?accessKey ?subdirectory ?serverProtocol
+      make ?customSecretConfig ?cmkSecretConfig ?serverCertificate ?agentArns
+        ?secretKey ?accessKey ?serverHostname ?subdirectory ?serverProtocol
         ?serverPort ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let agentArns = field_map json "AgentArns" AgentArnList.of_json in
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let serverCertificate =
+        field_map json__ "ServerCertificate" ObjectStorageCertificate.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
       let secretKey =
-        field_map json "SecretKey" ObjectStorageSecretKey.of_json in
+        field_map json__ "SecretKey" ObjectStorageSecretKey.of_json in
       let accessKey =
-        field_map json "AccessKey" ObjectStorageAccessKey.of_json in
-      let subdirectory = field_map json "Subdirectory" S3Subdirectory.of_json in
+        field_map json__ "AccessKey" ObjectStorageAccessKey.of_json in
+      let serverHostname =
+        field_map json__ "ServerHostname" ServerHostname.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" S3Subdirectory.of_json in
       let serverProtocol =
-        field_map json "ServerProtocol" ObjectStorageServerProtocol.of_json in
+        field_map json__ "ServerProtocol" ObjectStorageServerProtocol.of_json in
       let serverPort =
-        field_map json "ServerPort" ObjectStorageServerPort.of_json in
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
-      make ?agentArns ?secretKey ?accessKey ?subdirectory ?serverProtocol
+        field_map json__ "ServerPort" ObjectStorageServerPort.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?serverCertificate ?agentArns
+        ?secretKey ?accessKey ?serverHostname ?subdirectory ?serverProtocol
         ?serverPort ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates some of the parameters of a previously created location for self-managed object storage server access. For information about creating a self-managed object storage location, see Creating a location for object storage."]
+       "Modifies the following configuration parameters of the object storage transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with an object storage system."]
 module UpdateLocationNfsResponse =
   struct
     type nonrec t = unit
@@ -3848,31 +5894,43 @@ module UpdateLocationNfsResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates some of the parameters of a previously created location for Network File System (NFS) access. For information about creating an NFS location, see Creating a location for NFS."]
+       "Modifies the following configuration parameters of the Network File System (NFS) transfer location that you're using with DataSync. For more information, see Configuring transfers with an NFS file server."]
 module UpdateLocationNfsRequest =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the NFS location to update."];
+          "Specifies the Amazon Resource Name (ARN) of the NFS transfer location that you want to update."];
       subdirectory: NfsSubdirectory.t option
         [@ocaml.doc
-          "The subdirectory in the NFS file system that is used to read data from the NFS source location or write data to the NFS destination. The NFS path should be a path that's exported by the NFS server, or a subdirectory of that path. The path should be such that it can be mounted by other NFS clients in your network. To see all the paths exported by your NFS server, run \"showmount -e nfs-server-name\" from an NFS client that has access to your server. You can specify any directory that appears in the results, and any subdirectory of that directory. Ensure that the NFS export is accessible without Kerberos authentication. To transfer all the data in the folder that you specified, DataSync must have permissions to read all the data. To ensure this, either configure the NFS export with no_root_squash, or ensure that the files you want DataSync to access have permissions that allow read access for all users. Doing either option enables the agent to read the files. For the agent to access directories, you must additionally enable all execute access. If you are copying data to or from your Snowcone device, see NFS Server on Snowcone for more information. For information about NFS export configuration, see 18.7. The /etc/exports Configuration File in the Red Hat Enterprise Linux documentation."];
+          "Specifies the export path in your NFS file server that you want DataSync to mount. This path (or a subdirectory of the path) is where DataSync transfers data to or from. For information on configuring an export for DataSync, see Accessing NFS file servers."];
+      serverHostname: ServerHostname.t option
+        [@ocaml.doc
+          "Specifies the DNS name or IP address (IPv4 or IPv6) of the NFS file server that your DataSync agent connects to."];
       onPremConfig: OnPremConfig.t option ;
       mountOptions: NfsMountOptions.t option }
     let context_ = "UpdateLocationNfsRequest"
     let make ?subdirectory =
-      fun ?onPremConfig ->
-        fun ?mountOptions ->
-          fun ~locationArn ->
-            fun () ->
-              { subdirectory; onPremConfig; mountOptions; locationArn }
+      fun ?serverHostname ->
+        fun ?onPremConfig ->
+          fun ?mountOptions ->
+            fun ~locationArn ->
+              fun () ->
+                {
+                  subdirectory;
+                  serverHostname;
+                  onPremConfig;
+                  mountOptions;
+                  locationArn
+                }
     let to_value x =
       structure_to_value
         [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
         ("Subdirectory",
           (Option.map x.subdirectory ~f:NfsSubdirectory.to_value));
+        ("ServerHostname",
+          (Option.map x.serverHostname ~f:ServerHostname.to_value));
         ("OnPremConfig",
           (Option.map x.onPremConfig ~f:OnPremConfig.to_value));
         ("MountOptions",
@@ -3885,25 +5943,33 @@ module UpdateLocationNfsRequest =
       let onPremConfig =
         (Option.map ~f:OnPremConfig.of_xml)
           (Xml.child xml_arg0 "OnPremConfig") in
+      let serverHostname =
+        (Option.map ~f:ServerHostname.of_xml)
+          (Xml.child xml_arg0 "ServerHostname") in
       let subdirectory =
         (Option.map ~f:NfsSubdirectory.of_xml)
           (Xml.child xml_arg0 "Subdirectory") in
       let locationArn =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
-      make ?mountOptions ?onPremConfig ?subdirectory ~locationArn ()
+      make ?mountOptions ?onPremConfig ?serverHostname ?subdirectory
+        ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mountOptions =
-        field_map json "MountOptions" NfsMountOptions.of_json in
-      let onPremConfig = field_map json "OnPremConfig" OnPremConfig.of_json in
+        field_map json__ "MountOptions" NfsMountOptions.of_json in
+      let onPremConfig = field_map json__ "OnPremConfig" OnPremConfig.of_json in
+      let serverHostname =
+        field_map json__ "ServerHostname" ServerHostname.of_json in
       let subdirectory =
-        field_map json "Subdirectory" NfsSubdirectory.of_json in
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
-      make ?mountOptions ?onPremConfig ?subdirectory ~locationArn ()
+        field_map json__ "Subdirectory" NfsSubdirectory.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?mountOptions ?onPremConfig ?serverHostname ?subdirectory
+        ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates some of the parameters of a previously created location for Network File System (NFS) access. For information about creating an NFS location, see Creating a location for NFS."]
+       "Modifies the following configuration parameters of the Network File System (NFS) transfer location that you're using with DataSync. For more information, see Configuring transfers with an NFS file server."]
 module UpdateLocationHdfsResponse =
   struct
     type nonrec t = unit
@@ -3952,7 +6018,7 @@ module UpdateLocationHdfsResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates some parameters of a previously created location for a Hadoop Distributed File System cluster."]
+       "Modifies the following configuration parameters of the Hadoop Distributed File System (HDFS) transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with an HDFS cluster."]
 module UpdateLocationHdfsRequest =
   struct
     type nonrec t =
@@ -3989,13 +6055,19 @@ module UpdateLocationHdfsRequest =
           "The Kerberos principal with access to the files and folders on the HDFS cluster."];
       kerberosKeytab: KerberosKeytabFile.t option
         [@ocaml.doc
-          "The Kerberos key table (keytab) that contains mappings between the defined Kerberos principal and the encrypted keys. You can load the keytab from a file by providing the file's address. If you use the CLI, it performs base64 encoding for you. Otherwise, provide the base64-encoded text."];
+          "The Kerberos key table (keytab) that contains mappings between the defined Kerberos principal and the encrypted keys. You can load the keytab from a file by providing the file's address."];
       kerberosKrb5Conf: KerberosKrb5ConfFile.t option
         [@ocaml.doc
           "The krb5.conf file that contains the Kerberos configuration information. You can load the krb5.conf file by providing the file's address. If you're using the CLI, it performs the base64 encoding for you. Otherwise, provide the base64-encoded text."];
       agentArns: AgentArnList.t option
         [@ocaml.doc
-          "The ARNs of the agents that are used to connect to the HDFS cluster."]}
+          "The Amazon Resource Names (ARNs) of the DataSync agents that can connect to your HDFS cluster."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, such as a KerberosKeytab or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed secret, such as a KerberosKeytab or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed Identity and Access Management (IAM) role that provides access to the secret."]}
     let context_ = "UpdateLocationHdfsRequest"
     let make ?subdirectory =
       fun ?nameNodes ->
@@ -4009,23 +6081,27 @@ module UpdateLocationHdfsRequest =
                       fun ?kerberosKeytab ->
                         fun ?kerberosKrb5Conf ->
                           fun ?agentArns ->
-                            fun ~locationArn ->
-                              fun () ->
-                                {
-                                  subdirectory;
-                                  nameNodes;
-                                  blockSize;
-                                  replicationFactor;
-                                  kmsKeyProviderUri;
-                                  qopConfiguration;
-                                  authenticationType;
-                                  simpleUser;
-                                  kerberosPrincipal;
-                                  kerberosKeytab;
-                                  kerberosKrb5Conf;
-                                  agentArns;
-                                  locationArn
-                                }
+                            fun ?cmkSecretConfig ->
+                              fun ?customSecretConfig ->
+                                fun ~locationArn ->
+                                  fun () ->
+                                    {
+                                      subdirectory;
+                                      nameNodes;
+                                      blockSize;
+                                      replicationFactor;
+                                      kmsKeyProviderUri;
+                                      qopConfiguration;
+                                      authenticationType;
+                                      simpleUser;
+                                      kerberosPrincipal;
+                                      kerberosKeytab;
+                                      kerberosKrb5Conf;
+                                      agentArns;
+                                      cmkSecretConfig;
+                                      customSecretConfig;
+                                      locationArn
+                                    }
     let to_value x =
       structure_to_value
         [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
@@ -4048,9 +6124,19 @@ module UpdateLocationHdfsRequest =
           (Option.map x.kerberosKeytab ~f:KerberosKeytabFile.to_value));
         ("KerberosKrb5Conf",
           (Option.map x.kerberosKrb5Conf ~f:KerberosKrb5ConfFile.to_value));
-        ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value))]
+        ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
       let agentArns =
         (Option.map ~f:AgentArnList.of_xml) (Xml.child xml_arg0 "AgentArns") in
       let kerberosKrb5Conf =
@@ -4087,40 +6173,767 @@ module UpdateLocationHdfsRequest =
       let locationArn =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
-      make ?agentArns ?kerberosKrb5Conf ?kerberosKeytab ?kerberosPrincipal
-        ?simpleUser ?authenticationType ?qopConfiguration ?kmsKeyProviderUri
-        ?replicationFactor ?blockSize ?nameNodes ?subdirectory ~locationArn
-        ()
+      make ?customSecretConfig ?cmkSecretConfig ?agentArns ?kerberosKrb5Conf
+        ?kerberosKeytab ?kerberosPrincipal ?simpleUser ?authenticationType
+        ?qopConfiguration ?kmsKeyProviderUri ?replicationFactor ?blockSize
+        ?nameNodes ?subdirectory ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let agentArns = field_map json "AgentArns" AgentArnList.of_json in
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
       let kerberosKrb5Conf =
-        field_map json "KerberosKrb5Conf" KerberosKrb5ConfFile.of_json in
+        field_map json__ "KerberosKrb5Conf" KerberosKrb5ConfFile.of_json in
       let kerberosKeytab =
-        field_map json "KerberosKeytab" KerberosKeytabFile.of_json in
+        field_map json__ "KerberosKeytab" KerberosKeytabFile.of_json in
       let kerberosPrincipal =
-        field_map json "KerberosPrincipal" KerberosPrincipal.of_json in
-      let simpleUser = field_map json "SimpleUser" HdfsUser.of_json in
+        field_map json__ "KerberosPrincipal" KerberosPrincipal.of_json in
+      let simpleUser = field_map json__ "SimpleUser" HdfsUser.of_json in
       let authenticationType =
-        field_map json "AuthenticationType" HdfsAuthenticationType.of_json in
+        field_map json__ "AuthenticationType" HdfsAuthenticationType.of_json in
       let qopConfiguration =
-        field_map json "QopConfiguration" QopConfiguration.of_json in
+        field_map json__ "QopConfiguration" QopConfiguration.of_json in
       let kmsKeyProviderUri =
-        field_map json "KmsKeyProviderUri" KmsKeyProviderUri.of_json in
+        field_map json__ "KmsKeyProviderUri" KmsKeyProviderUri.of_json in
       let replicationFactor =
-        field_map json "ReplicationFactor" HdfsReplicationFactor.of_json in
-      let blockSize = field_map json "BlockSize" HdfsBlockSize.of_json in
-      let nameNodes = field_map json "NameNodes" HdfsNameNodeList.of_json in
+        field_map json__ "ReplicationFactor" HdfsReplicationFactor.of_json in
+      let blockSize = field_map json__ "BlockSize" HdfsBlockSize.of_json in
+      let nameNodes = field_map json__ "NameNodes" HdfsNameNodeList.of_json in
       let subdirectory =
-        field_map json "Subdirectory" HdfsSubdirectory.of_json in
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
-      make ?agentArns ?kerberosKrb5Conf ?kerberosKeytab ?kerberosPrincipal
-        ?simpleUser ?authenticationType ?qopConfiguration ?kmsKeyProviderUri
-        ?replicationFactor ?blockSize ?nameNodes ?subdirectory ~locationArn
-        ()
+        field_map json__ "Subdirectory" HdfsSubdirectory.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?agentArns ?kerberosKrb5Conf
+        ?kerberosKeytab ?kerberosPrincipal ?simpleUser ?authenticationType
+        ?qopConfiguration ?kmsKeyProviderUri ?replicationFactor ?blockSize
+        ?nameNodes ?subdirectory ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates some parameters of a previously created location for a Hadoop Distributed File System cluster."]
+       "Modifies the following configuration parameters of the Hadoop Distributed File System (HDFS) transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with an HDFS cluster."]
+module UpdateLocationFsxWindowsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon FSx for Windows File Server transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with FSx for Windows File Server."]
+module UpdateLocationFsxWindowsRequest =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t
+        [@ocaml.doc
+          "Specifies the ARN of the FSx for Windows File Server transfer location that you're updating."];
+      subdirectory: FsxWindowsSubdirectory.t option
+        [@ocaml.doc
+          "Specifies a mount path for your file system using forward slashes. DataSync uses this subdirectory to read or write data (depending on whether the file system is a source or destination location)."];
+      domain: UpdateSmbDomain.t option
+        [@ocaml.doc
+          "Specifies the name of the Windows domain that your FSx for Windows File Server file system belongs to. If you have multiple Active Directory domains in your environment, configuring this parameter makes sure that DataSync connects to the right file system."];
+      user: SmbUser.t option
+        [@ocaml.doc
+          "Specifies the user with the permissions to mount and access the files, folders, and file metadata in your FSx for Windows File Server file system. For information about choosing a user with the right level of access for your transfer, see required permissions for FSx for Windows File Server locations."];
+      password: SmbPassword.t option
+        [@ocaml.doc
+          "Specifies the password of the user with the permissions to mount and access the files, folders, and file metadata in your FSx for Windows File Server file system."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, such as a Password or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed secret, such as a Password or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed Identity and Access Management (IAM) role that provides access to the secret."]}
+    let context_ = "UpdateLocationFsxWindowsRequest"
+    let make ?subdirectory =
+      fun ?domain ->
+        fun ?user ->
+          fun ?password ->
+            fun ?cmkSecretConfig ->
+              fun ?customSecretConfig ->
+                fun ~locationArn ->
+                  fun () ->
+                    {
+                      subdirectory;
+                      domain;
+                      user;
+                      password;
+                      cmkSecretConfig;
+                      customSecretConfig;
+                      locationArn
+                    }
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
+        ("Subdirectory",
+          (Option.map x.subdirectory ~f:FsxWindowsSubdirectory.to_value));
+        ("Domain", (Option.map x.domain ~f:UpdateSmbDomain.to_value));
+        ("User", (Option.map x.user ~f:SmbUser.to_value));
+        ("Password", (Option.map x.password ~f:SmbPassword.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let password =
+        (Option.map ~f:SmbPassword.of_xml) (Xml.child xml_arg0 "Password") in
+      let user = (Option.map ~f:SmbUser.of_xml) (Xml.child xml_arg0 "User") in
+      let domain =
+        (Option.map ~f:UpdateSmbDomain.of_xml) (Xml.child xml_arg0 "Domain") in
+      let subdirectory =
+        (Option.map ~f:FsxWindowsSubdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      let locationArn =
+        LocationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
+      make ?customSecretConfig ?cmkSecretConfig ?password ?user ?domain
+        ?subdirectory ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let password = field_map json__ "Password" SmbPassword.of_json in
+      let user = field_map json__ "User" SmbUser.of_json in
+      let domain = field_map json__ "Domain" UpdateSmbDomain.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" FsxWindowsSubdirectory.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?password ?user ?domain
+        ?subdirectory ~locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon FSx for Windows File Server transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with FSx for Windows File Server."]
+module UpdateLocationFsxOpenZfsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon FSx for OpenZFS transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with FSx for OpenZFS. Request parameters related to SMB aren't supported with the UpdateLocationFsxOpenZfs operation."]
+module UpdateLocationFsxOpenZfsRequest =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the FSx for OpenZFS transfer location that you're updating."];
+      protocol: FsxProtocol.t option ;
+      subdirectory: SmbSubdirectory.t option
+        [@ocaml.doc
+          "Specifies a subdirectory in the location's path that must begin with /fsx. DataSync uses this subdirectory to read or write data (depending on whether the file system is a source or destination location)."]}
+    let context_ = "UpdateLocationFsxOpenZfsRequest"
+    let make ?protocol =
+      fun ?subdirectory ->
+        fun ~locationArn -> fun () -> { protocol; subdirectory; locationArn }
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
+        ("Protocol", (Option.map x.protocol ~f:FsxProtocol.to_value));
+        ("Subdirectory",
+          (Option.map x.subdirectory ~f:SmbSubdirectory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subdirectory =
+        (Option.map ~f:SmbSubdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      let protocol =
+        (Option.map ~f:FsxProtocol.of_xml) (Xml.child xml_arg0 "Protocol") in
+      let locationArn =
+        LocationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
+      make ?subdirectory ?protocol ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subdirectory =
+        field_map json__ "Subdirectory" SmbSubdirectory.of_json in
+      let protocol = field_map json__ "Protocol" FsxProtocol.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?subdirectory ?protocol ~locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon FSx for OpenZFS transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with FSx for OpenZFS. Request parameters related to SMB aren't supported with the UpdateLocationFsxOpenZfs operation."]
+module UpdateLocationFsxOntapResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon FSx for NetApp ONTAP transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with FSx for ONTAP."]
+module UpdateLocationFsxOntapRequest =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the FSx for ONTAP transfer location that you're updating."];
+      protocol: FsxUpdateProtocol.t option
+        [@ocaml.doc
+          "Specifies the data transfer protocol that DataSync uses to access your Amazon FSx file system."];
+      subdirectory: FsxOntapSubdirectory.t option
+        [@ocaml.doc
+          "Specifies a path to the file share in the storage virtual machine (SVM) where you want to transfer data to or from. You can specify a junction path (also known as a mount point), qtree path (for NFS file shares), or share name (for SMB file shares). For example, your mount path might be /vol1, /vol1/tree1, or /share1. Don't specify a junction path in the SVM's root volume. For more information, see Managing FSx for ONTAP storage virtual machines in the Amazon FSx for NetApp ONTAP User Guide."]}
+    let context_ = "UpdateLocationFsxOntapRequest"
+    let make ?protocol =
+      fun ?subdirectory ->
+        fun ~locationArn -> fun () -> { protocol; subdirectory; locationArn }
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
+        ("Protocol", (Option.map x.protocol ~f:FsxUpdateProtocol.to_value));
+        ("Subdirectory",
+          (Option.map x.subdirectory ~f:FsxOntapSubdirectory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subdirectory =
+        (Option.map ~f:FsxOntapSubdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      let protocol =
+        (Option.map ~f:FsxUpdateProtocol.of_xml)
+          (Xml.child xml_arg0 "Protocol") in
+      let locationArn =
+        LocationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
+      make ?subdirectory ?protocol ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subdirectory =
+        field_map json__ "Subdirectory" FsxOntapSubdirectory.of_json in
+      let protocol = field_map json__ "Protocol" FsxUpdateProtocol.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?subdirectory ?protocol ~locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon FSx for NetApp ONTAP transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with FSx for ONTAP."]
+module UpdateLocationFsxLustreResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon FSx for Lustre transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with FSx for Lustre."]
+module UpdateLocationFsxLustreRequest =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the FSx for Lustre transfer location that you're updating."];
+      subdirectory: SmbSubdirectory.t option
+        [@ocaml.doc
+          "Specifies a mount path for your FSx for Lustre file system. The path can include subdirectories. When the location is used as a source, DataSync reads data from the mount path. When the location is used as a destination, DataSync writes data to the mount path. If you don't include this parameter, DataSync uses the file system's root directory (/)."]}
+    let context_ = "UpdateLocationFsxLustreRequest"
+    let make ?subdirectory =
+      fun ~locationArn -> fun () -> { subdirectory; locationArn }
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
+        ("Subdirectory",
+          (Option.map x.subdirectory ~f:SmbSubdirectory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subdirectory =
+        (Option.map ~f:SmbSubdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      let locationArn =
+        LocationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
+      make ?subdirectory ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subdirectory =
+        field_map json__ "Subdirectory" SmbSubdirectory.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?subdirectory ~locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon FSx for Lustre transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with FSx for Lustre."]
+module UpdateLocationEfsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon EFS transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with Amazon EFS."]
+module UpdateLocationEfsRequest =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the Amazon EFS transfer location that you're updating."];
+      subdirectory: EfsSubdirectory.t option
+        [@ocaml.doc
+          "Specifies a mount path for your Amazon EFS file system. This is where DataSync reads or writes data on your file system (depending on if this is a source or destination location). By default, DataSync uses the root directory (or access point if you provide one by using AccessPointArn). You can also include subdirectories using forward slashes (for example, /path/to/folder)."];
+      accessPointArn: UpdatedEfsAccessPointArn.t option
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the access point that DataSync uses to mount your Amazon EFS file system. For more information, see Accessing restricted Amazon EFS file systems."];
+      fileSystemAccessRoleArn: UpdatedEfsIamRoleArn.t option
+        [@ocaml.doc
+          "Specifies an Identity and Access Management (IAM) role that allows DataSync to access your Amazon EFS file system. For information on creating this role, see Creating a DataSync IAM role for Amazon EFS file system access."];
+      inTransitEncryption: EfsInTransitEncryption.t option
+        [@ocaml.doc
+          "Specifies whether you want DataSync to use Transport Layer Security (TLS) 1.2 encryption when it transfers data to or from your Amazon EFS file system. If you specify an access point using AccessPointArn or an IAM role using FileSystemAccessRoleArn, you must set this parameter to TLS1_2."]}
+    let context_ = "UpdateLocationEfsRequest"
+    let make ?subdirectory =
+      fun ?accessPointArn ->
+        fun ?fileSystemAccessRoleArn ->
+          fun ?inTransitEncryption ->
+            fun ~locationArn ->
+              fun () ->
+                {
+                  subdirectory;
+                  accessPointArn;
+                  fileSystemAccessRoleArn;
+                  inTransitEncryption;
+                  locationArn
+                }
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
+        ("Subdirectory",
+          (Option.map x.subdirectory ~f:EfsSubdirectory.to_value));
+        ("AccessPointArn",
+          (Option.map x.accessPointArn ~f:UpdatedEfsAccessPointArn.to_value));
+        ("FileSystemAccessRoleArn",
+          (Option.map x.fileSystemAccessRoleArn
+             ~f:UpdatedEfsIamRoleArn.to_value));
+        ("InTransitEncryption",
+          (Option.map x.inTransitEncryption
+             ~f:EfsInTransitEncryption.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let inTransitEncryption =
+        (Option.map ~f:EfsInTransitEncryption.of_xml)
+          (Xml.child xml_arg0 "InTransitEncryption") in
+      let fileSystemAccessRoleArn =
+        (Option.map ~f:UpdatedEfsIamRoleArn.of_xml)
+          (Xml.child xml_arg0 "FileSystemAccessRoleArn") in
+      let accessPointArn =
+        (Option.map ~f:UpdatedEfsAccessPointArn.of_xml)
+          (Xml.child xml_arg0 "AccessPointArn") in
+      let subdirectory =
+        (Option.map ~f:EfsSubdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      let locationArn =
+        LocationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
+      make ?inTransitEncryption ?fileSystemAccessRoleArn ?accessPointArn
+        ?subdirectory ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inTransitEncryption =
+        field_map json__ "InTransitEncryption" EfsInTransitEncryption.of_json in
+      let fileSystemAccessRoleArn =
+        field_map json__ "FileSystemAccessRoleArn"
+          UpdatedEfsIamRoleArn.of_json in
+      let accessPointArn =
+        field_map json__ "AccessPointArn" UpdatedEfsAccessPointArn.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" EfsSubdirectory.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?inTransitEncryption ?fileSystemAccessRoleArn ?accessPointArn
+        ?subdirectory ~locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configuration parameters of the Amazon EFS transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with Amazon EFS."]
+module UpdateLocationAzureBlobResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configurations of the Microsoft Azure Blob Storage transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with Azure Blob Storage."]
+module UpdateLocationAzureBlobRequest =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t
+        [@ocaml.doc
+          "Specifies the ARN of the Azure Blob Storage transfer location that you're updating."];
+      subdirectory: AzureBlobSubdirectory.t option
+        [@ocaml.doc
+          "Specifies path segments if you want to limit your transfer to a virtual directory in your container (for example, /my/images)."];
+      authenticationType: AzureBlobAuthenticationType.t option
+        [@ocaml.doc
+          "Specifies the authentication method DataSync uses to access your Azure Blob Storage. DataSync can access blob storage using a shared access signature (SAS)."];
+      sasConfiguration: AzureBlobSasConfiguration.t option
+        [@ocaml.doc
+          "Specifies the SAS configuration that allows DataSync to access your Azure Blob Storage."];
+      blobType: AzureBlobType.t option
+        [@ocaml.doc
+          "Specifies the type of blob that you want your objects or files to be when transferring them into Azure Blob Storage. Currently, DataSync only supports moving data into Azure Blob Storage as block blobs. For more information on blob types, see the Azure Blob Storage documentation."];
+      accessTier: AzureAccessTier.t option
+        [@ocaml.doc
+          "Specifies the access tier that you want your objects or files transferred into. This only applies when using the location as a transfer destination. For more information, see Access tiers."];
+      agentArns: AgentArnList.t option
+        [@ocaml.doc
+          "(Optional) Specifies the Amazon Resource Name (ARN) of the DataSync agent that can connect with your Azure Blob Storage container. If you are setting up an agentless cross-cloud transfer, you do not need to specify a value for this parameter. You can specify more than one agent. For more information, see Using multiple agents for your transfer. You cannot add or remove agents from a storage location after you initially create it."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, such as an authentication token or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed secret, such as an authentication token or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed Identity and Access Management (IAM) role that provides access to the secret."]}
+    let context_ = "UpdateLocationAzureBlobRequest"
+    let make ?subdirectory =
+      fun ?authenticationType ->
+        fun ?sasConfiguration ->
+          fun ?blobType ->
+            fun ?accessTier ->
+              fun ?agentArns ->
+                fun ?cmkSecretConfig ->
+                  fun ?customSecretConfig ->
+                    fun ~locationArn ->
+                      fun () ->
+                        {
+                          subdirectory;
+                          authenticationType;
+                          sasConfiguration;
+                          blobType;
+                          accessTier;
+                          agentArns;
+                          cmkSecretConfig;
+                          customSecretConfig;
+                          locationArn
+                        }
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Some (LocationArn.to_value x.locationArn)));
+        ("Subdirectory",
+          (Option.map x.subdirectory ~f:AzureBlobSubdirectory.to_value));
+        ("AuthenticationType",
+          (Option.map x.authenticationType
+             ~f:AzureBlobAuthenticationType.to_value));
+        ("SasConfiguration",
+          (Option.map x.sasConfiguration
+             ~f:AzureBlobSasConfiguration.to_value));
+        ("BlobType", (Option.map x.blobType ~f:AzureBlobType.to_value));
+        ("AccessTier", (Option.map x.accessTier ~f:AzureAccessTier.to_value));
+        ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let agentArns =
+        (Option.map ~f:AgentArnList.of_xml) (Xml.child xml_arg0 "AgentArns") in
+      let accessTier =
+        (Option.map ~f:AzureAccessTier.of_xml)
+          (Xml.child xml_arg0 "AccessTier") in
+      let blobType =
+        (Option.map ~f:AzureBlobType.of_xml) (Xml.child xml_arg0 "BlobType") in
+      let sasConfiguration =
+        (Option.map ~f:AzureBlobSasConfiguration.of_xml)
+          (Xml.child xml_arg0 "SasConfiguration") in
+      let authenticationType =
+        (Option.map ~f:AzureBlobAuthenticationType.of_xml)
+          (Xml.child xml_arg0 "AuthenticationType") in
+      let subdirectory =
+        (Option.map ~f:AzureBlobSubdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      let locationArn =
+        LocationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
+      make ?customSecretConfig ?cmkSecretConfig ?agentArns ?accessTier
+        ?blobType ?sasConfiguration ?authenticationType ?subdirectory
+        ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
+      let accessTier = field_map json__ "AccessTier" AzureAccessTier.of_json in
+      let blobType = field_map json__ "BlobType" AzureBlobType.of_json in
+      let sasConfiguration =
+        field_map json__ "SasConfiguration" AzureBlobSasConfiguration.of_json in
+      let authenticationType =
+        field_map json__ "AuthenticationType"
+          AzureBlobAuthenticationType.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" AzureBlobSubdirectory.of_json in
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?agentArns ?accessTier
+        ?blobType ?sasConfiguration ?authenticationType ?subdirectory
+        ~locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the following configurations of the Microsoft Azure Blob Storage transfer location that you're using with DataSync. For more information, see Configuring DataSync transfers with Azure Blob Storage."]
 module UpdateAgentResponse =
   struct
     type nonrec t = unit
@@ -4168,7 +6981,7 @@ module UpdateAgentResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the name of an agent."]
+  end[@@ocaml.doc "Updates the name of an DataSync agent."]
 module UpdateAgentRequest =
   struct
     type nonrec t =
@@ -4190,9 +7003,9 @@ module UpdateAgentRequest =
         AgentArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AgentArn") in
       make ?name ~agentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" TagValue.of_json in
-      let agentArn = field_map_exn json "AgentArn" AgentArn.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" TagValue.of_json in
+      let agentArn = field_map_exn json__ "AgentArn" AgentArn.of_json in
       make ?name ~agentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UpdateAgentRequest"]
@@ -4243,16 +7056,17 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes a tag from an Amazon Web Services resource."]
+  end[@@ocaml.doc "Removes tags from an Amazon Web Services resource."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: TaggableResourceArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource to remove the tag from."];
+          "Specifies the Amazon Resource Name (ARN) of the resource to remove the tags from."];
       keys: TagKeyList.t
-        [@ocaml.doc "The keys in the key-value pair in the tag to remove."]}
+        [@ocaml.doc
+          "Specifies the keys in the tags that you want to remove."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn = fun ~keys -> fun () -> { resourceArn; keys }
     let to_value x =
@@ -4268,10 +7082,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~keys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keys = field_map_exn json "Keys" TagKeyList.of_json in
+    let of_json json__ =
+      let keys = field_map_exn json__ "Keys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" TaggableResourceArn.of_json in
+        field_map_exn json__ "ResourceArn" TaggableResourceArn.of_json in
       make ~keys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UntagResourceRequest"]
@@ -4323,15 +7137,17 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Applies a key-value pair to an Amazon Web Services resource."]
+       "Applies a tag to an Amazon Web Services resource. Tags are key-value pairs that can help you manage, filter, and search for your resources. These include DataSync resources, such as locations, tasks, and task executions."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: TaggableResourceArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource to apply the tag to."];
-      tags: InputTagList.t [@ocaml.doc "The tags to apply."]}
+          "Specifies the Amazon Resource Name (ARN) of the resource to apply the tag to."];
+      tags: InputTagList.t
+        [@ocaml.doc
+          "Specifies the tags that you want to apply to the resource."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -4347,10 +7163,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" InputTagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" InputTagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" TaggableResourceArn.of_json in
+        field_map_exn json__ "ResourceArn" TaggableResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "TagResourceRequest"]
@@ -4359,8 +7175,7 @@ module StartTaskExecutionResponse =
     type nonrec t =
       {
       taskExecutionArn: TaskExecutionArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the specific task execution that was started."]}
+        [@ocaml.doc "The ARN of the running task execution."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -4409,9 +7224,9 @@ module StartTaskExecutionResponse =
           (Xml.child xml_arg0 "TaskExecutionArn") in
       make ?taskExecutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let taskExecutionArn =
-        field_map json "TaskExecutionArn" TaskExecutionArn.of_json in
+        field_map json__ "TaskExecutionArn" TaskExecutionArn.of_json in
       make ?taskExecutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "StartTaskExecutionResponse"]
@@ -4420,29 +7235,64 @@ module StartTaskExecutionRequest =
     type nonrec t =
       {
       taskArn: TaskArn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the task to start."];
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the task that you want to start."];
       overrideOptions: Options.t option ;
       includes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to include when running a task. The pattern should contain a single filter string that consists of the patterns to include. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."];
+          "Specifies a list of filter rules that determines which files to include when running a task. The pattern should contain a single filter string that consists of the patterns to include. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."];
       excludes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to exclude from a task. The list contains a single filter string that consists of the patterns to exclude. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."]}
+          "Specifies a list of filter rules that determines which files to exclude from a task. The list contains a single filter string that consists of the patterns to exclude. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."];
+      manifestConfig: ManifestConfig.t option
+        [@ocaml.doc
+          "Configures a manifest, which is a list of files or objects that you want DataSync to transfer. For more information and configuration examples, see Specifying what DataSync transfers by using a manifest. When using this parameter, your caller identity (the role that you're using DataSync with) must have the iam:PassRole permission. The AWSDataSyncFullAccess policy includes this permission. To remove a manifest configuration, specify this parameter with an empty value."];
+      taskReportConfig: TaskReportConfig.t option
+        [@ocaml.doc
+          "Specifies how you want to configure a task report, which provides detailed information about your DataSync transfer. For more information, see Monitoring your DataSync transfers with task reports. When using this parameter, your caller identity (the role that you're using DataSync with) must have the iam:PassRole permission. The AWSDataSyncFullAccess policy includes this permission. To remove a task report configuration, specify this parameter as empty."];
+      tags: InputTagList.t option
+        [@ocaml.doc
+          "Specifies the tags that you want to apply to the Amazon Resource Name (ARN) representing the task execution. Tags are key-value pairs that help you manage, filter, and search for your DataSync resources."]}
     let context_ = "StartTaskExecutionRequest"
     let make ?overrideOptions =
       fun ?includes ->
         fun ?excludes ->
-          fun ~taskArn ->
-            fun () -> { overrideOptions; includes; excludes; taskArn }
+          fun ?manifestConfig ->
+            fun ?taskReportConfig ->
+              fun ?tags ->
+                fun ~taskArn ->
+                  fun () ->
+                    {
+                      overrideOptions;
+                      includes;
+                      excludes;
+                      manifestConfig;
+                      taskReportConfig;
+                      tags;
+                      taskArn
+                    }
     let to_value x =
       structure_to_value
         [("TaskArn", (Some (TaskArn.to_value x.taskArn)));
         ("OverrideOptions",
           (Option.map x.overrideOptions ~f:Options.to_value));
         ("Includes", (Option.map x.includes ~f:FilterList.to_value));
-        ("Excludes", (Option.map x.excludes ~f:FilterList.to_value))]
+        ("Excludes", (Option.map x.excludes ~f:FilterList.to_value));
+        ("ManifestConfig",
+          (Option.map x.manifestConfig ~f:ManifestConfig.to_value));
+        ("TaskReportConfig",
+          (Option.map x.taskReportConfig ~f:TaskReportConfig.to_value));
+        ("Tags", (Option.map x.tags ~f:InputTagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:InputTagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let taskReportConfig =
+        (Option.map ~f:TaskReportConfig.of_xml)
+          (Xml.child xml_arg0 "TaskReportConfig") in
+      let manifestConfig =
+        (Option.map ~f:ManifestConfig.of_xml)
+          (Xml.child xml_arg0 "ManifestConfig") in
       let excludes =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Excludes") in
       let includes =
@@ -4451,14 +7301,22 @@ module StartTaskExecutionRequest =
         (Option.map ~f:Options.of_xml) (Xml.child xml_arg0 "OverrideOptions") in
       let taskArn =
         TaskArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
-      make ?excludes ?includes ?overrideOptions ~taskArn ()
+      make ?tags ?taskReportConfig ?manifestConfig ?excludes ?includes
+        ?overrideOptions ~taskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let excludes = field_map json "Excludes" FilterList.of_json in
-      let includes = field_map json "Includes" FilterList.of_json in
-      let overrideOptions = field_map json "OverrideOptions" Options.of_json in
-      let taskArn = field_map_exn json "TaskArn" TaskArn.of_json in
-      make ?excludes ?includes ?overrideOptions ~taskArn ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" InputTagList.of_json in
+      let taskReportConfig =
+        field_map json__ "TaskReportConfig" TaskReportConfig.of_json in
+      let manifestConfig =
+        field_map json__ "ManifestConfig" ManifestConfig.of_json in
+      let excludes = field_map json__ "Excludes" FilterList.of_json in
+      let includes = field_map json__ "Includes" FilterList.of_json in
+      let overrideOptions =
+        field_map json__ "OverrideOptions" Options.of_json in
+      let taskArn = field_map_exn json__ "TaskArn" TaskArn.of_json in
+      make ?tags ?taskReportConfig ?manifestConfig ?excludes ?includes
+        ?overrideOptions ~taskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "StartTaskExecutionRequest"]
 module ListTasksResponse =
@@ -4519,9 +7377,9 @@ module ListTasksResponse =
         (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "Tasks") in
       make ?nextToken ?tasks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tasks = field_map json "Tasks" TaskList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tasks = field_map json__ "Tasks" TaskList.of_json in
       make ?nextToken ?tasks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListTasksResponse"]
@@ -4555,10 +7413,10 @@ module ListTasksRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" TaskFilters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" TaskFilters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?filters ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListTasksRequest"]
@@ -4567,10 +7425,10 @@ module ListTaskExecutionsResponse =
     type nonrec t =
       {
       taskExecutions: TaskExecutionList.t option
-        [@ocaml.doc "A list of executed tasks."];
+        [@ocaml.doc "A list of the task's executions."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An opaque string that indicates the position at which to begin returning the next list of executed tasks."]}
+          "The opaque string that indicates the position to begin the next list of results in the response."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -4623,10 +7481,10 @@ module ListTaskExecutionsResponse =
           (Xml.child xml_arg0 "TaskExecutions") in
       make ?nextToken ?taskExecutions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let taskExecutions =
-        field_map json "TaskExecutions" TaskExecutionList.of_json in
+        field_map json__ "TaskExecutions" TaskExecutionList.of_json in
       make ?nextToken ?taskExecutions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListTaskExecutionsResponse"]
@@ -4636,12 +7494,12 @@ module ListTaskExecutionsRequest =
       {
       taskArn: TaskArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the task whose tasks you want to list."];
+          "Specifies the Amazon Resource Name (ARN) of the task that you want execution information about."];
       maxResults: MaxResults.t option
-        [@ocaml.doc "The maximum number of executed tasks to list."];
+        [@ocaml.doc "Specifies how many results you want in the response."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An opaque string that indicates the position at which to begin the next list of the executed tasks."]}
+          "Specifies an opaque string that indicates the position at which to begin the next list of results in the response."]}
     let make ?taskArn =
       fun ?maxResults ->
         fun ?nextToken -> fun () -> { taskArn; maxResults; nextToken }
@@ -4660,10 +7518,10 @@ module ListTaskExecutionsRequest =
         (Option.map ~f:TaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
       make ?nextToken ?maxResults ?taskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let taskArn = field_map json "TaskArn" TaskArn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let taskArn = field_map json__ "TaskArn" TaskArn.of_json in
       make ?nextToken ?maxResults ?taskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListTaskExecutions"]
@@ -4671,10 +7529,11 @@ module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
-      tags: OutputTagList.t option [@ocaml.doc "Array of resource tags."];
+      tags: OutputTagList.t option
+        [@ocaml.doc "An array of tags applied to the specified resource."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An opaque string that indicates the position at which to begin returning the next list of resource tags."]}
+          "The opaque string that indicates the position to begin the next list of results in the response."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -4724,9 +7583,9 @@ module ListTagsForResourceResponse =
         (Option.map ~f:OutputTagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tags = field_map json "Tags" OutputTagList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tags = field_map json__ "Tags" OutputTagList.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListTagsForResourceResponse"]
@@ -4736,12 +7595,13 @@ module ListTagsForResourceRequest =
       {
       resourceArn: TaggableResourceArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource whose tags to list."];
+          "Specifies the Amazon Resource Name (ARN) of the resource that you want tag information on."];
       maxResults: MaxResults.t option
-        [@ocaml.doc "The maximum number of locations to return."];
+        [@ocaml.doc
+          "Specifies how many results that you want in the response."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An opaque string that indicates the position at which to begin the next list of locations."]}
+          "Specifies an opaque string that indicates the position to begin the next list of results in the response."]}
     let context_ = "ListTagsForResourceRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -4762,11 +7622,11 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ?maxResults ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" TaggableResourceArn.of_json in
+        field_map_exn json__ "ResourceArn" TaggableResourceArn.of_json in
       make ?nextToken ?maxResults ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListTagsForResourceRequest"]
@@ -4829,9 +7689,9 @@ module ListLocationsResponse =
         (Option.map ~f:LocationList.of_xml) (Xml.child xml_arg0 "Locations") in
       make ?nextToken ?locations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let locations = field_map json "Locations" LocationList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let locations = field_map json__ "Locations" LocationList.of_json in
       make ?nextToken ?locations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListLocationsResponse"]
@@ -4865,10 +7725,10 @@ module ListLocationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" LocationFilters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" LocationFilters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?filters ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListLocationsRequest"]
@@ -4877,10 +7737,11 @@ module ListAgentsResponse =
     type nonrec t =
       {
       agents: AgentList.t option
-        [@ocaml.doc "A list of agents in your account."];
+        [@ocaml.doc
+          "A list of DataSync agents in your Amazon Web Services account in the Amazon Web Services Region specified in the request. The list is ordered by the agents' Amazon Resource Names (ARNs)."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An opaque string that indicates the position at which to begin returning the next list of agents."]}
+          "The opaque string that indicates the position to begin the next list of results in the response."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -4930,9 +7791,9 @@ module ListAgentsResponse =
         (Option.map ~f:AgentList.of_xml) (Xml.child xml_arg0 "Agents") in
       make ?nextToken ?agents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let agents = field_map json "Agents" AgentList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let agents = field_map json__ "Agents" AgentList.of_json in
       make ?nextToken ?agents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListAgentsResponse"]
@@ -4941,10 +7802,11 @@ module ListAgentsRequest =
     type nonrec t =
       {
       maxResults: MaxResults.t option
-        [@ocaml.doc "The maximum number of agents to list."];
+        [@ocaml.doc
+          "Specifies the maximum number of DataSync agents to list in a response. By default, a response shows a maximum of 100 agents."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An opaque string that indicates the position at which to begin the next list of agents."]}
+          "Specifies an opaque string that indicates the position to begin the next list of results in the response."]}
     let make ?maxResults =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
@@ -4959,9 +7821,9 @@ module ListAgentsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListAgentsRequest"]
@@ -4969,53 +7831,58 @@ module DescribeTaskResponse =
   struct
     type nonrec t =
       {
-      taskArn: TaskArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the task that was described."];
+      taskArn: TaskArn.t option [@ocaml.doc "The ARN of your task."];
       status: TaskStatus.t option
         [@ocaml.doc
-          "The status of the task that was described. For detailed information about task execution statuses, see Understanding Task Statuses in the DataSync User Guide."];
-      name: TagValue.t option
-        [@ocaml.doc "The name of the task that was described."];
+          "The status of your task. For information about what each status means, see Task statuses."];
+      name: TagValue.t option [@ocaml.doc "The name of your task."];
       currentTaskExecutionArn: TaskExecutionArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the task execution that is syncing files."];
+        [@ocaml.doc "The ARN of the most recent task execution."];
       sourceLocationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the source file system's location."];
+        [@ocaml.doc "The ARN of your transfer's source location."];
       destinationLocationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon Web Services storage resource's location."];
+        [@ocaml.doc "The ARN of your transfer's destination location."];
       cloudWatchLogGroupArn: LogGroupArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon CloudWatch log group that was used to monitor and log events in the task. For more information on these groups, see Working with Log Groups and Log Streams in the Amazon CloudWatch User Guide."];
+          "The Amazon Resource Name (ARN) of an Amazon CloudWatch log group for monitoring your task. For more information, see Monitoring data transfers with CloudWatch Logs."];
       sourceNetworkInterfaceArns: SourceNetworkInterfaceArns.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the source elastic network interfaces (ENIs) that were created for your subnet."];
+          "The ARNs of the network interfaces that DataSync created for your source location."];
       destinationNetworkInterfaceArns:
         DestinationNetworkInterfaceArns.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the destination elastic network interfaces (ENIs) that were created for your subnet."];
+          "The ARNs of the network interfaces that DataSync created for your destination location."];
       options: Options.t option
         [@ocaml.doc
-          "The set of configuration options that control the behavior of a single execution of the task that occurs when you call StartTaskExecution. You can configure these options to preserve metadata such as user ID (UID) and group (GID), file permissions, data integrity verification, and so on. For each individual task execution, you can override these options by specifying the overriding OverrideOptions value to StartTaskExecution operation."];
+          "The task's settings. For example, what file metadata gets preserved, how data integrity gets verified at the end of your transfer, bandwidth limits, among other options."];
       excludes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to exclude from a task. The list should contain a single filter string that consists of the patterns to exclude. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."];
+          "The exclude filters that define the files, objects, and folders in your source location that you don't want DataSync to transfer. For more information and examples, see Specifying what DataSync transfers by using filters."];
       schedule: TaskSchedule.t option
         [@ocaml.doc
-          "The schedule used to periodically transfer files from a source to a destination location."];
+          "The schedule for when you want your task to run. For more information, see Scheduling your task."];
       errorCode: String_.t option
         [@ocaml.doc
-          "Errors that DataSync encountered during execution of the task. You can use this error code to help troubleshoot issues."];
+          "If there's an issue with your task, you can use the error code to help you troubleshoot the problem. For more information, see Troubleshooting issues with DataSync transfers."];
       errorDetail: String_.t option
         [@ocaml.doc
-          "Detailed description of an error that was encountered during the task execution. You can use this information to help troubleshoot issues."];
+          "If there's an issue with your task, you can use the error details to help you troubleshoot the problem. For more information, see Troubleshooting issues with DataSync transfers."];
       creationTime: Time.t option
         [@ocaml.doc "The time that the task was created."];
       includes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to include when running a task. The pattern contains a single filter string that consists of the patterns to include. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."]}
+          "The include filters that define the files, objects, and folders in your source location that you want DataSync to transfer. For more information and examples, see Specifying what DataSync transfers by using filters."];
+      manifestConfig: ManifestConfig.t option
+        [@ocaml.doc
+          "The configuration of the manifest that lists the files or objects that you want DataSync to transfer. For more information, see Specifying what DataSync transfers by using a manifest."];
+      taskReportConfig: TaskReportConfig.t option
+        [@ocaml.doc
+          "The configuration of your task report, which provides detailed information about your DataSync transfer. For more information, see Monitoring your DataSync transfers with task reports."];
+      scheduleDetails: TaskScheduleDetails.t option
+        [@ocaml.doc "The details about your task schedule."];
+      taskMode: TaskMode.t option
+        [@ocaml.doc
+          "The task mode that you're using. For more information, see Choosing a task mode for your data transfer."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -5036,25 +7903,33 @@ module DescribeTaskResponse =
                               fun ?errorDetail ->
                                 fun ?creationTime ->
                                   fun ?includes ->
-                                    fun () ->
-                                      {
-                                        taskArn;
-                                        status;
-                                        name;
-                                        currentTaskExecutionArn;
-                                        sourceLocationArn;
-                                        destinationLocationArn;
-                                        cloudWatchLogGroupArn;
-                                        sourceNetworkInterfaceArns;
-                                        destinationNetworkInterfaceArns;
-                                        options;
-                                        excludes;
-                                        schedule;
-                                        errorCode;
-                                        errorDetail;
-                                        creationTime;
-                                        includes
-                                      }
+                                    fun ?manifestConfig ->
+                                      fun ?taskReportConfig ->
+                                        fun ?scheduleDetails ->
+                                          fun ?taskMode ->
+                                            fun () ->
+                                              {
+                                                taskArn;
+                                                status;
+                                                name;
+                                                currentTaskExecutionArn;
+                                                sourceLocationArn;
+                                                destinationLocationArn;
+                                                cloudWatchLogGroupArn;
+                                                sourceNetworkInterfaceArns;
+                                                destinationNetworkInterfaceArns;
+                                                options;
+                                                excludes;
+                                                schedule;
+                                                errorCode;
+                                                errorDetail;
+                                                creationTime;
+                                                includes;
+                                                manifestConfig;
+                                                taskReportConfig;
+                                                scheduleDetails;
+                                                taskMode
+                                              }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -5112,9 +7987,27 @@ module DescribeTaskResponse =
         ("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
         ("ErrorDetail", (Option.map x.errorDetail ~f:String_.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
-        ("Includes", (Option.map x.includes ~f:FilterList.to_value))]
+        ("Includes", (Option.map x.includes ~f:FilterList.to_value));
+        ("ManifestConfig",
+          (Option.map x.manifestConfig ~f:ManifestConfig.to_value));
+        ("TaskReportConfig",
+          (Option.map x.taskReportConfig ~f:TaskReportConfig.to_value));
+        ("ScheduleDetails",
+          (Option.map x.scheduleDetails ~f:TaskScheduleDetails.to_value));
+        ("TaskMode", (Option.map x.taskMode ~f:TaskMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskMode =
+        (Option.map ~f:TaskMode.of_xml) (Xml.child xml_arg0 "TaskMode") in
+      let scheduleDetails =
+        (Option.map ~f:TaskScheduleDetails.of_xml)
+          (Xml.child xml_arg0 "ScheduleDetails") in
+      let taskReportConfig =
+        (Option.map ~f:TaskReportConfig.of_xml)
+          (Xml.child xml_arg0 "TaskReportConfig") in
+      let manifestConfig =
+        (Option.map ~f:ManifestConfig.of_xml)
+          (Xml.child xml_arg0 "ManifestConfig") in
       let includes =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Includes") in
       let creationTime =
@@ -5152,42 +8045,49 @@ module DescribeTaskResponse =
         (Option.map ~f:TaskStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let taskArn =
         (Option.map ~f:TaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
-      make ?includes ?creationTime ?errorDetail ?errorCode ?schedule
-        ?excludes ?options ?destinationNetworkInterfaceArns
-        ?sourceNetworkInterfaceArns ?cloudWatchLogGroupArn
-        ?destinationLocationArn ?sourceLocationArn ?currentTaskExecutionArn
-        ?name ?status ?taskArn ()
+      make ?taskMode ?scheduleDetails ?taskReportConfig ?manifestConfig
+        ?includes ?creationTime ?errorDetail ?errorCode ?schedule ?excludes
+        ?options ?destinationNetworkInterfaceArns ?sourceNetworkInterfaceArns
+        ?cloudWatchLogGroupArn ?destinationLocationArn ?sourceLocationArn
+        ?currentTaskExecutionArn ?name ?status ?taskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let includes = field_map json "Includes" FilterList.of_json in
-      let creationTime = field_map json "CreationTime" Time.of_json in
-      let errorDetail = field_map json "ErrorDetail" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
-      let schedule = field_map json "Schedule" TaskSchedule.of_json in
-      let excludes = field_map json "Excludes" FilterList.of_json in
-      let options = field_map json "Options" Options.of_json in
+    let of_json json__ =
+      let taskMode = field_map json__ "TaskMode" TaskMode.of_json in
+      let scheduleDetails =
+        field_map json__ "ScheduleDetails" TaskScheduleDetails.of_json in
+      let taskReportConfig =
+        field_map json__ "TaskReportConfig" TaskReportConfig.of_json in
+      let manifestConfig =
+        field_map json__ "ManifestConfig" ManifestConfig.of_json in
+      let includes = field_map json__ "Includes" FilterList.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      let errorDetail = field_map json__ "ErrorDetail" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      let schedule = field_map json__ "Schedule" TaskSchedule.of_json in
+      let excludes = field_map json__ "Excludes" FilterList.of_json in
+      let options = field_map json__ "Options" Options.of_json in
       let destinationNetworkInterfaceArns =
-        field_map json "DestinationNetworkInterfaceArns"
+        field_map json__ "DestinationNetworkInterfaceArns"
           DestinationNetworkInterfaceArns.of_json in
       let sourceNetworkInterfaceArns =
-        field_map json "SourceNetworkInterfaceArns"
+        field_map json__ "SourceNetworkInterfaceArns"
           SourceNetworkInterfaceArns.of_json in
       let cloudWatchLogGroupArn =
-        field_map json "CloudWatchLogGroupArn" LogGroupArn.of_json in
+        field_map json__ "CloudWatchLogGroupArn" LogGroupArn.of_json in
       let destinationLocationArn =
-        field_map json "DestinationLocationArn" LocationArn.of_json in
+        field_map json__ "DestinationLocationArn" LocationArn.of_json in
       let sourceLocationArn =
-        field_map json "SourceLocationArn" LocationArn.of_json in
+        field_map json__ "SourceLocationArn" LocationArn.of_json in
       let currentTaskExecutionArn =
-        field_map json "CurrentTaskExecutionArn" TaskExecutionArn.of_json in
-      let name = field_map json "Name" TagValue.of_json in
-      let status = field_map json "Status" TaskStatus.of_json in
-      let taskArn = field_map json "TaskArn" TaskArn.of_json in
-      make ?includes ?creationTime ?errorDetail ?errorCode ?schedule
-        ?excludes ?options ?destinationNetworkInterfaceArns
-        ?sourceNetworkInterfaceArns ?cloudWatchLogGroupArn
-        ?destinationLocationArn ?sourceLocationArn ?currentTaskExecutionArn
-        ?name ?status ?taskArn ()
+        field_map json__ "CurrentTaskExecutionArn" TaskExecutionArn.of_json in
+      let name = field_map json__ "Name" TagValue.of_json in
+      let status = field_map json__ "Status" TaskStatus.of_json in
+      let taskArn = field_map json__ "TaskArn" TaskArn.of_json in
+      make ?taskMode ?scheduleDetails ?taskReportConfig ?manifestConfig
+        ?includes ?creationTime ?errorDetail ?errorCode ?schedule ?excludes
+        ?options ?destinationNetworkInterfaceArns ?sourceNetworkInterfaceArns
+        ?cloudWatchLogGroupArn ?destinationLocationArn ?sourceLocationArn
+        ?currentTaskExecutionArn ?name ?status ?taskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTaskResponse"]
 module DescribeTaskRequest =
@@ -5196,7 +8096,7 @@ module DescribeTaskRequest =
       {
       taskArn: TaskArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the task to describe."]}
+          "Specifies the Amazon Resource Name (ARN) of the transfer task that you want information about."]}
     let context_ = "DescribeTaskRequest"
     let make ~taskArn = fun () -> { taskArn }
     let to_value x =
@@ -5207,8 +8107,8 @@ module DescribeTaskRequest =
         TaskArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
       make ~taskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskArn = field_map_exn json "TaskArn" TaskArn.of_json in
+    let of_json json__ =
+      let taskArn = field_map_exn json__ "TaskArn" TaskArn.of_json in
       make ~taskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTaskRequest"]
@@ -5218,36 +8118,104 @@ module DescribeTaskExecutionResponse =
       {
       taskExecutionArn: TaskExecutionArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the task execution that was described. TaskExecutionArn is hierarchical and includes TaskArn for the task that was executed. For example, a TaskExecution value with the ARN arn:aws:datasync:us-east-1:111222333444:task/task-0208075f79cedf4a2/execution/exec-08ef1e88ec491019b executed the task with the ARN arn:aws:datasync:us-east-1:111222333444:task/task-0208075f79cedf4a2."];
+          "The ARN of the task execution that you wanted information about. TaskExecutionArn is hierarchical and includes TaskArn for the task that was executed. For example, a TaskExecution value with the ARN arn:aws:datasync:us-east-1:111222333444:task/task-0208075f79cedf4a2/execution/exec-08ef1e88ec491019b executed the task with the ARN arn:aws:datasync:us-east-1:111222333444:task/task-0208075f79cedf4a2."];
       status: TaskExecutionStatus.t option
-        [@ocaml.doc
-          "The status of the task execution. For detailed information about task execution statuses, see Understanding Task Statuses in the DataSync User Guide."];
+        [@ocaml.doc "The status of the task execution."];
       options: Options.t option ;
       excludes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to exclude from a task. The list should contain a single filter string that consists of the patterns to exclude. The patterns are delimited by \"|\" (that is, a pipe), for example: \"/folder1|/folder2\""];
+          "A list of filter rules that exclude specific data during your transfer. For more information and examples, see Filtering data transferred by DataSync."];
       includes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to include when running a task. The list should contain a single filter string that consists of the patterns to include. The patterns are delimited by \"|\" (that is, a pipe), for example: \"/folder1|/folder2\""];
+          "A list of filter rules that include specific data during your transfer. For more information and examples, see Filtering data transferred by DataSync."];
+      manifestConfig: ManifestConfig.t option
+        [@ocaml.doc
+          "The configuration of the manifest that lists the files or objects to transfer. For more information, see Specifying what DataSync transfers by using a manifest."];
       startTime: Time.t option
-        [@ocaml.doc "The time that the task execution was started."];
+        [@ocaml.doc
+          "The time that DataSync sends the request to start the task execution. For non-queued tasks, LaunchTime and StartTime are typically the same. For queued tasks, LaunchTime is typically later than StartTime because previously queued tasks must finish running before newer tasks can begin."];
       estimatedFilesToTransfer: Long.t option
         [@ocaml.doc
-          "The expected number of files that is to be transferred over the network. This value is calculated during the PREPARING phase, before the TRANSFERRING phase. This value is the expected number of files to be transferred. It's calculated based on comparing the content of the source and destination locations and finding the delta that needs to be transferred."];
+          "The number of files, objects, and directories that DataSync expects to transfer over the network. This value is calculated while DataSync prepares the transfer. How this gets calculated depends primarily on your task\226\128\153s transfer mode configuration: If TranserMode is set to CHANGED - The calculation is based on comparing the content of the source and destination locations and determining the difference that needs to be transferred. The difference can include: Anything that's added or modified at the source location. Anything that's in both locations and modified at the destination after an initial transfer (unless OverwriteMode is set to NEVER). (Basic task mode only) The number of items that DataSync expects to delete (if PreserveDeletedFiles is set to REMOVE). If TranserMode is set to ALL - The calculation is based only on the items that DataSync finds at the source location. For Enhanced mode tasks, this counter only includes files or objects. Directories are counted in EstimatedFoldersToTransfer."];
       estimatedBytesToTransfer: Long.t option
         [@ocaml.doc
-          "The estimated physical number of bytes that is to be transferred over the network."];
+          "The number of logical bytes that DataSync expects to write to the destination location."];
       filesTransferred: Long.t option
         [@ocaml.doc
-          "The actual number of files that was transferred over the network. This value is calculated and updated on an ongoing basis during the TRANSFERRING phase. It's updated periodically when each file is read from the source and sent over the network. If failures occur during a transfer, this value can be less than EstimatedFilesToTransfer. This value can also be greater than EstimatedFilesTransferred in some cases. This element is implementation-specific for some location types, so don't use it as an indicator for a correct file number or to monitor your task execution."];
+          "The number of files, objects, and directories that DataSync actually transfers over the network. This value is updated periodically during your task execution when something is read from the source and sent over the network. If DataSync fails to transfer something, this value can be less than EstimatedFilesToTransfer. In some cases, this value can also be greater than EstimatedFilesToTransfer. This element is implementation-specific for some location types, so don't use it as an exact indication of what's transferring or to monitor your task execution. For Enhanced mode tasks, this counter only includes files or objects. Directories are counted in FoldersTransferred."];
       bytesWritten: Long.t option
         [@ocaml.doc
-          "The number of logical bytes written to the destination Amazon Web Services storage resource."];
+          "The number of logical bytes that DataSync actually writes to the destination location."];
       bytesTransferred: Long.t option
         [@ocaml.doc
-          "The physical number of bytes transferred over the network."];
+          "The number of bytes that DataSync sends to the network before compression (if compression is possible). For the number of bytes transferred over the network, see BytesCompressed."];
+      bytesCompressed: Long.t option
+        [@ocaml.doc
+          "The number of physical bytes that DataSync transfers over the network after compression (if compression is possible). This number is typically less than BytesTransferred unless the data isn't compressible."];
       result: TaskExecutionResultDetail.t option
-        [@ocaml.doc "The result of the task execution."]}
+        [@ocaml.doc "The result of the task execution."];
+      taskReportConfig: TaskReportConfig.t option
+        [@ocaml.doc
+          "The configuration of your task report, which provides detailed information about for your DataSync transfer. For more information, see Creating a task report."];
+      filesDeleted: Long.t option
+        [@ocaml.doc
+          "The number of files, objects, and directories that DataSync actually deletes in your destination location. If you don't configure your task to delete data in the destination that isn't in the source, the value is always 0. For Enhanced mode tasks, this counter only includes files or objects. Directories are counted in FoldersDeleted."];
+      filesSkipped: Long.t option
+        [@ocaml.doc
+          "The number of files, objects, and directories that DataSync skips during your transfer. For Enhanced mode tasks, this counter only includes files or objects. Directories are counted in FoldersSkipped."];
+      filesVerified: Long.t option
+        [@ocaml.doc
+          "The number of files, objects, and directories that DataSync verifies during your transfer. When you configure your task to verify only the data that's transferred, DataSync doesn't verify directories in some situations or files that fail to transfer. For Enhanced mode tasks, this counter only includes files or objects. Directories are counted in FoldersVerified."];
+      reportResult: ReportResult.t option
+        [@ocaml.doc
+          "Indicates whether DataSync generated a complete task report for your transfer."];
+      estimatedFilesToDelete: Long.t option
+        [@ocaml.doc
+          "The number of files, objects, and directories that DataSync expects to delete in your destination location. If you don't configure your task to delete data in the destination that isn't in the source, the value is always 0. For Enhanced mode tasks, this counter only includes files or objects. Directories are counted in EstimatedFoldersToDelete."];
+      taskMode: TaskMode.t option
+        [@ocaml.doc
+          "The task mode that you're using. For more information, see Choosing a task mode for your data transfer."];
+      filesPrepared: Long.t option
+        [@ocaml.doc
+          "The number of files or objects that DataSync will attempt to transfer after comparing your source and destination locations. Applies only to Enhanced mode tasks. This counter isn't applicable if you configure your task to transfer all data. In that scenario, DataSync copies everything from the source to the destination without comparing differences between the locations."];
+      filesListed: TaskExecutionFilesListedDetail.t option
+        [@ocaml.doc
+          "The number of files or objects that DataSync finds at your locations. Applies only to Enhanced mode tasks."];
+      filesFailed: TaskExecutionFilesFailedDetail.t option
+        [@ocaml.doc
+          "The number of files or objects that DataSync fails to prepare, transfer, verify, and delete during your task execution. Applies only to Enhanced mode tasks."];
+      estimatedFoldersToDelete: ItemCount.t option
+        [@ocaml.doc
+          "The number of directories that DataSync expects to delete in your destination location. If you don't configure your task to delete data in the destination that isn't in the source, the value is always 0. Applies only to Enhanced mode tasks."];
+      estimatedFoldersToTransfer: ItemCount.t option
+        [@ocaml.doc
+          "The number of directories that DataSync expects to transfer over the network. This value is calculated as DataSync prepares directories to transfer. How this gets calculated depends primarily on your task\226\128\153s transfer mode configuration: If TranserMode is set to CHANGED - The calculation is based on comparing the content of the source and destination locations and determining the difference that needs to be transferred. The difference can include: Anything that's added or modified at the source location. Anything that's in both locations and modified at the destination after an initial transfer (unless OverwriteMode is set to NEVER). If TranserMode is set to ALL - The calculation is based only on the items that DataSync finds at the source location. Applies only to Enhanced mode tasks."];
+      foldersSkipped: ItemCount.t option
+        [@ocaml.doc
+          "The number of directories that DataSync skips during your transfer. Applies only to Enhanced mode tasks."];
+      foldersPrepared: ItemCount.t option
+        [@ocaml.doc
+          "The number of directories that DataSync will attempt to transfer after comparing your source and destination locations. Applies only to Enhanced mode tasks. This counter isn't applicable if you configure your task to transfer all data. In that scenario, DataSync copies everything from the source to the destination without comparing differences between the locations."];
+      foldersTransferred: ItemCount.t option
+        [@ocaml.doc
+          "The number of directories that DataSync actually transfers over the network. This value is updated periodically during your task execution when something is read from the source and sent over the network. If DataSync fails to transfer something, this value can be less than EstimatedFoldersToTransfer. In some cases, this value can also be greater than EstimatedFoldersToTransfer. Applies only to Enhanced mode tasks."];
+      foldersVerified: ItemCount.t option
+        [@ocaml.doc
+          "The number of directories that DataSync verifies during your transfer. Applies only to Enhanced mode tasks."];
+      foldersDeleted: ItemCount.t option
+        [@ocaml.doc
+          "The number of directories that DataSync actually deletes in your destination location. If you don't configure your task to delete data in the destination that isn't in the source, the value is always 0. Applies only to Enhanced mode tasks."];
+      foldersListed: TaskExecutionFoldersListedDetail.t option
+        [@ocaml.doc
+          "The number of directories that DataSync finds at your locations. Applies only to Enhanced mode tasks."];
+      foldersFailed: TaskExecutionFoldersFailedDetail.t option
+        [@ocaml.doc
+          "The number of directories that DataSync fails to list, prepare, transfer, verify, and delete during your task execution. Applies only to Enhanced mode tasks."];
+      launchTime: Time.t option
+        [@ocaml.doc
+          "The time that the task execution actually begins. For non-queued tasks, LaunchTime and StartTime are typically the same. For queued tasks, LaunchTime is typically later than StartTime because previously queued tasks must finish running before newer tasks can begin."];
+      endTime: Time.t option
+        [@ocaml.doc "The time that the transfer task ends."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -5257,28 +8225,95 @@ module DescribeTaskExecutionResponse =
         fun ?options ->
           fun ?excludes ->
             fun ?includes ->
-              fun ?startTime ->
-                fun ?estimatedFilesToTransfer ->
-                  fun ?estimatedBytesToTransfer ->
-                    fun ?filesTransferred ->
-                      fun ?bytesWritten ->
-                        fun ?bytesTransferred ->
-                          fun ?result ->
-                            fun () ->
-                              {
-                                taskExecutionArn;
-                                status;
-                                options;
-                                excludes;
-                                includes;
-                                startTime;
-                                estimatedFilesToTransfer;
-                                estimatedBytesToTransfer;
-                                filesTransferred;
-                                bytesWritten;
-                                bytesTransferred;
-                                result
-                              }
+              fun ?manifestConfig ->
+                fun ?startTime ->
+                  fun ?estimatedFilesToTransfer ->
+                    fun ?estimatedBytesToTransfer ->
+                      fun ?filesTransferred ->
+                        fun ?bytesWritten ->
+                          fun ?bytesTransferred ->
+                            fun ?bytesCompressed ->
+                              fun ?result ->
+                                fun ?taskReportConfig ->
+                                  fun ?filesDeleted ->
+                                    fun ?filesSkipped ->
+                                      fun ?filesVerified ->
+                                        fun ?reportResult ->
+                                          fun ?estimatedFilesToDelete ->
+                                            fun ?taskMode ->
+                                              fun ?filesPrepared ->
+                                                fun ?filesListed ->
+                                                  fun ?filesFailed ->
+                                                    fun
+                                                      ?estimatedFoldersToDelete
+                                                      ->
+                                                      fun
+                                                        ?estimatedFoldersToTransfer
+                                                        ->
+                                                        fun ?foldersSkipped
+                                                          ->
+                                                          fun
+                                                            ?foldersPrepared
+                                                            ->
+                                                            fun
+                                                              ?foldersTransferred
+                                                              ->
+                                                              fun
+                                                                ?foldersVerified
+                                                                ->
+                                                                fun
+                                                                  ?foldersDeleted
+                                                                  ->
+                                                                  fun
+                                                                    ?foldersListed
+                                                                    ->
+                                                                    fun
+                                                                    ?foldersFailed
+                                                                    ->
+                                                                    fun
+                                                                    ?launchTime
+                                                                    ->
+                                                                    fun
+                                                                    ?endTime
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
+                                                                    taskExecutionArn;
+                                                                    status;
+                                                                    options;
+                                                                    excludes;
+                                                                    includes;
+                                                                    manifestConfig;
+                                                                    startTime;
+                                                                    estimatedFilesToTransfer;
+                                                                    estimatedBytesToTransfer;
+                                                                    filesTransferred;
+                                                                    bytesWritten;
+                                                                    bytesTransferred;
+                                                                    bytesCompressed;
+                                                                    result;
+                                                                    taskReportConfig;
+                                                                    filesDeleted;
+                                                                    filesSkipped;
+                                                                    filesVerified;
+                                                                    reportResult;
+                                                                    estimatedFilesToDelete;
+                                                                    taskMode;
+                                                                    filesPrepared;
+                                                                    filesListed;
+                                                                    filesFailed;
+                                                                    estimatedFoldersToDelete;
+                                                                    estimatedFoldersToTransfer;
+                                                                    foldersSkipped;
+                                                                    foldersPrepared;
+                                                                    foldersTransferred;
+                                                                    foldersVerified;
+                                                                    foldersDeleted;
+                                                                    foldersListed;
+                                                                    foldersFailed;
+                                                                    launchTime;
+                                                                    endTime
+                                                                    }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -5319,6 +8354,8 @@ module DescribeTaskExecutionResponse =
         ("Options", (Option.map x.options ~f:Options.to_value));
         ("Excludes", (Option.map x.excludes ~f:FilterList.to_value));
         ("Includes", (Option.map x.includes ~f:FilterList.to_value));
+        ("ManifestConfig",
+          (Option.map x.manifestConfig ~f:ManifestConfig.to_value));
         ("StartTime", (Option.map x.startTime ~f:Time.to_value));
         ("EstimatedFilesToTransfer",
           (Option.map x.estimatedFilesToTransfer ~f:Long.to_value));
@@ -5329,13 +8366,111 @@ module DescribeTaskExecutionResponse =
         ("BytesWritten", (Option.map x.bytesWritten ~f:Long.to_value));
         ("BytesTransferred",
           (Option.map x.bytesTransferred ~f:Long.to_value));
+        ("BytesCompressed", (Option.map x.bytesCompressed ~f:Long.to_value));
         ("Result",
-          (Option.map x.result ~f:TaskExecutionResultDetail.to_value))]
+          (Option.map x.result ~f:TaskExecutionResultDetail.to_value));
+        ("TaskReportConfig",
+          (Option.map x.taskReportConfig ~f:TaskReportConfig.to_value));
+        ("FilesDeleted", (Option.map x.filesDeleted ~f:Long.to_value));
+        ("FilesSkipped", (Option.map x.filesSkipped ~f:Long.to_value));
+        ("FilesVerified", (Option.map x.filesVerified ~f:Long.to_value));
+        ("ReportResult",
+          (Option.map x.reportResult ~f:ReportResult.to_value));
+        ("EstimatedFilesToDelete",
+          (Option.map x.estimatedFilesToDelete ~f:Long.to_value));
+        ("TaskMode", (Option.map x.taskMode ~f:TaskMode.to_value));
+        ("FilesPrepared", (Option.map x.filesPrepared ~f:Long.to_value));
+        ("FilesListed",
+          (Option.map x.filesListed
+             ~f:TaskExecutionFilesListedDetail.to_value));
+        ("FilesFailed",
+          (Option.map x.filesFailed
+             ~f:TaskExecutionFilesFailedDetail.to_value));
+        ("EstimatedFoldersToDelete",
+          (Option.map x.estimatedFoldersToDelete ~f:ItemCount.to_value));
+        ("EstimatedFoldersToTransfer",
+          (Option.map x.estimatedFoldersToTransfer ~f:ItemCount.to_value));
+        ("FoldersSkipped",
+          (Option.map x.foldersSkipped ~f:ItemCount.to_value));
+        ("FoldersPrepared",
+          (Option.map x.foldersPrepared ~f:ItemCount.to_value));
+        ("FoldersTransferred",
+          (Option.map x.foldersTransferred ~f:ItemCount.to_value));
+        ("FoldersVerified",
+          (Option.map x.foldersVerified ~f:ItemCount.to_value));
+        ("FoldersDeleted",
+          (Option.map x.foldersDeleted ~f:ItemCount.to_value));
+        ("FoldersListed",
+          (Option.map x.foldersListed
+             ~f:TaskExecutionFoldersListedDetail.to_value));
+        ("FoldersFailed",
+          (Option.map x.foldersFailed
+             ~f:TaskExecutionFoldersFailedDetail.to_value));
+        ("LaunchTime", (Option.map x.launchTime ~f:Time.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Time.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let launchTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "LaunchTime") in
+      let foldersFailed =
+        (Option.map ~f:TaskExecutionFoldersFailedDetail.of_xml)
+          (Xml.child xml_arg0 "FoldersFailed") in
+      let foldersListed =
+        (Option.map ~f:TaskExecutionFoldersListedDetail.of_xml)
+          (Xml.child xml_arg0 "FoldersListed") in
+      let foldersDeleted =
+        (Option.map ~f:ItemCount.of_xml)
+          (Xml.child xml_arg0 "FoldersDeleted") in
+      let foldersVerified =
+        (Option.map ~f:ItemCount.of_xml)
+          (Xml.child xml_arg0 "FoldersVerified") in
+      let foldersTransferred =
+        (Option.map ~f:ItemCount.of_xml)
+          (Xml.child xml_arg0 "FoldersTransferred") in
+      let foldersPrepared =
+        (Option.map ~f:ItemCount.of_xml)
+          (Xml.child xml_arg0 "FoldersPrepared") in
+      let foldersSkipped =
+        (Option.map ~f:ItemCount.of_xml)
+          (Xml.child xml_arg0 "FoldersSkipped") in
+      let estimatedFoldersToTransfer =
+        (Option.map ~f:ItemCount.of_xml)
+          (Xml.child xml_arg0 "EstimatedFoldersToTransfer") in
+      let estimatedFoldersToDelete =
+        (Option.map ~f:ItemCount.of_xml)
+          (Xml.child xml_arg0 "EstimatedFoldersToDelete") in
+      let filesFailed =
+        (Option.map ~f:TaskExecutionFilesFailedDetail.of_xml)
+          (Xml.child xml_arg0 "FilesFailed") in
+      let filesListed =
+        (Option.map ~f:TaskExecutionFilesListedDetail.of_xml)
+          (Xml.child xml_arg0 "FilesListed") in
+      let filesPrepared =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "FilesPrepared") in
+      let taskMode =
+        (Option.map ~f:TaskMode.of_xml) (Xml.child xml_arg0 "TaskMode") in
+      let estimatedFilesToDelete =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "EstimatedFilesToDelete") in
+      let reportResult =
+        (Option.map ~f:ReportResult.of_xml)
+          (Xml.child xml_arg0 "ReportResult") in
+      let filesVerified =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "FilesVerified") in
+      let filesSkipped =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "FilesSkipped") in
+      let filesDeleted =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "FilesDeleted") in
+      let taskReportConfig =
+        (Option.map ~f:TaskReportConfig.of_xml)
+          (Xml.child xml_arg0 "TaskReportConfig") in
       let result =
         (Option.map ~f:TaskExecutionResultDetail.of_xml)
           (Xml.child xml_arg0 "Result") in
+      let bytesCompressed =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "BytesCompressed") in
       let bytesTransferred =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "BytesTransferred") in
       let bytesWritten =
@@ -5350,6 +8485,9 @@ module DescribeTaskExecutionResponse =
           (Xml.child xml_arg0 "EstimatedFilesToTransfer") in
       let startTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let manifestConfig =
+        (Option.map ~f:ManifestConfig.of_xml)
+          (Xml.child xml_arg0 "ManifestConfig") in
       let includes =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Includes") in
       let excludes =
@@ -5362,29 +8500,81 @@ module DescribeTaskExecutionResponse =
       let taskExecutionArn =
         (Option.map ~f:TaskExecutionArn.of_xml)
           (Xml.child xml_arg0 "TaskExecutionArn") in
-      make ?result ?bytesTransferred ?bytesWritten ?filesTransferred
-        ?estimatedBytesToTransfer ?estimatedFilesToTransfer ?startTime
-        ?includes ?excludes ?options ?status ?taskExecutionArn ()
+      make ?endTime ?launchTime ?foldersFailed ?foldersListed ?foldersDeleted
+        ?foldersVerified ?foldersTransferred ?foldersPrepared ?foldersSkipped
+        ?estimatedFoldersToTransfer ?estimatedFoldersToDelete ?filesFailed
+        ?filesListed ?filesPrepared ?taskMode ?estimatedFilesToDelete
+        ?reportResult ?filesVerified ?filesSkipped ?filesDeleted
+        ?taskReportConfig ?result ?bytesCompressed ?bytesTransferred
+        ?bytesWritten ?filesTransferred ?estimatedBytesToTransfer
+        ?estimatedFilesToTransfer ?startTime ?manifestConfig ?includes
+        ?excludes ?options ?status ?taskExecutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "Result" TaskExecutionResultDetail.of_json in
-      let bytesTransferred = field_map json "BytesTransferred" Long.of_json in
-      let bytesWritten = field_map json "BytesWritten" Long.of_json in
-      let filesTransferred = field_map json "FilesTransferred" Long.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Time.of_json in
+      let launchTime = field_map json__ "LaunchTime" Time.of_json in
+      let foldersFailed =
+        field_map json__ "FoldersFailed"
+          TaskExecutionFoldersFailedDetail.of_json in
+      let foldersListed =
+        field_map json__ "FoldersListed"
+          TaskExecutionFoldersListedDetail.of_json in
+      let foldersDeleted =
+        field_map json__ "FoldersDeleted" ItemCount.of_json in
+      let foldersVerified =
+        field_map json__ "FoldersVerified" ItemCount.of_json in
+      let foldersTransferred =
+        field_map json__ "FoldersTransferred" ItemCount.of_json in
+      let foldersPrepared =
+        field_map json__ "FoldersPrepared" ItemCount.of_json in
+      let foldersSkipped =
+        field_map json__ "FoldersSkipped" ItemCount.of_json in
+      let estimatedFoldersToTransfer =
+        field_map json__ "EstimatedFoldersToTransfer" ItemCount.of_json in
+      let estimatedFoldersToDelete =
+        field_map json__ "EstimatedFoldersToDelete" ItemCount.of_json in
+      let filesFailed =
+        field_map json__ "FilesFailed" TaskExecutionFilesFailedDetail.of_json in
+      let filesListed =
+        field_map json__ "FilesListed" TaskExecutionFilesListedDetail.of_json in
+      let filesPrepared = field_map json__ "FilesPrepared" Long.of_json in
+      let taskMode = field_map json__ "TaskMode" TaskMode.of_json in
+      let estimatedFilesToDelete =
+        field_map json__ "EstimatedFilesToDelete" Long.of_json in
+      let reportResult = field_map json__ "ReportResult" ReportResult.of_json in
+      let filesVerified = field_map json__ "FilesVerified" Long.of_json in
+      let filesSkipped = field_map json__ "FilesSkipped" Long.of_json in
+      let filesDeleted = field_map json__ "FilesDeleted" Long.of_json in
+      let taskReportConfig =
+        field_map json__ "TaskReportConfig" TaskReportConfig.of_json in
+      let result =
+        field_map json__ "Result" TaskExecutionResultDetail.of_json in
+      let bytesCompressed = field_map json__ "BytesCompressed" Long.of_json in
+      let bytesTransferred = field_map json__ "BytesTransferred" Long.of_json in
+      let bytesWritten = field_map json__ "BytesWritten" Long.of_json in
+      let filesTransferred = field_map json__ "FilesTransferred" Long.of_json in
       let estimatedBytesToTransfer =
-        field_map json "EstimatedBytesToTransfer" Long.of_json in
+        field_map json__ "EstimatedBytesToTransfer" Long.of_json in
       let estimatedFilesToTransfer =
-        field_map json "EstimatedFilesToTransfer" Long.of_json in
-      let startTime = field_map json "StartTime" Time.of_json in
-      let includes = field_map json "Includes" FilterList.of_json in
-      let excludes = field_map json "Excludes" FilterList.of_json in
-      let options = field_map json "Options" Options.of_json in
-      let status = field_map json "Status" TaskExecutionStatus.of_json in
+        field_map json__ "EstimatedFilesToTransfer" Long.of_json in
+      let startTime = field_map json__ "StartTime" Time.of_json in
+      let manifestConfig =
+        field_map json__ "ManifestConfig" ManifestConfig.of_json in
+      let includes = field_map json__ "Includes" FilterList.of_json in
+      let excludes = field_map json__ "Excludes" FilterList.of_json in
+      let options = field_map json__ "Options" Options.of_json in
+      let status = field_map json__ "Status" TaskExecutionStatus.of_json in
       let taskExecutionArn =
-        field_map json "TaskExecutionArn" TaskExecutionArn.of_json in
-      make ?result ?bytesTransferred ?bytesWritten ?filesTransferred
-        ?estimatedBytesToTransfer ?estimatedFilesToTransfer ?startTime
-        ?includes ?excludes ?options ?status ?taskExecutionArn ()
+        field_map json__ "TaskExecutionArn" TaskExecutionArn.of_json in
+      make ?endTime ?launchTime ?foldersFailed ?foldersListed ?foldersDeleted
+        ?foldersVerified ?foldersTransferred ?foldersPrepared ?foldersSkipped
+        ?estimatedFoldersToTransfer ?estimatedFoldersToDelete ?filesFailed
+        ?filesListed ?filesPrepared ?taskMode ?estimatedFilesToDelete
+        ?reportResult ?filesVerified ?filesSkipped ?filesDeleted
+        ?taskReportConfig ?result ?bytesCompressed ?bytesTransferred
+        ?bytesWritten ?filesTransferred ?estimatedBytesToTransfer
+        ?estimatedFilesToTransfer ?startTime ?manifestConfig ?includes
+        ?excludes ?options ?status ?taskExecutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTaskExecutionResponse"]
 module DescribeTaskExecutionRequest =
@@ -5393,7 +8583,7 @@ module DescribeTaskExecutionRequest =
       {
       taskExecutionArn: TaskExecutionArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the task that is being executed."]}
+          "Specifies the Amazon Resource Name (ARN) of the task execution that you want information about."]}
     let context_ = "DescribeTaskExecutionRequest"
     let make ~taskExecutionArn = fun () -> { taskExecutionArn }
     let to_value x =
@@ -5407,9 +8597,9 @@ module DescribeTaskExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TaskExecutionArn") in
       make ~taskExecutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let taskExecutionArn =
-        field_map_exn json "TaskExecutionArn" TaskExecutionArn.of_json in
+        field_map_exn json__ "TaskExecutionArn" TaskExecutionArn.of_json in
       make ~taskExecutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTaskExecutionRequest"]
@@ -5418,24 +8608,41 @@ module DescribeLocationSmbResponse =
     type nonrec t =
       {
       locationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the SMB location that was described."];
+        [@ocaml.doc "The ARN of the SMB location."];
       locationUri: LocationUri.t option
-        [@ocaml.doc "The URL of the source SMB location that was described."];
+        [@ocaml.doc "The URI of the SMB location."];
       agentArns: AgentArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the source SMB file system location that is created."];
+          "The ARNs of the DataSync agents that can connect with your SMB file server."];
       user: SmbUser.t option
         [@ocaml.doc
-          "The user who can mount the share, has the permissions to access files and folders in the SMB share."];
+          "The user that can mount and access the files, folders, and file metadata in your SMB file server. This element applies only if AuthenticationType is set to NTLM."];
       domain: SmbDomain.t option
         [@ocaml.doc
-          "The name of the Windows domain that the SMB server belongs to."];
+          "The name of the Windows domain that the SMB file server belongs to. This element applies only if AuthenticationType is set to NTLM."];
       mountOptions: SmbMountOptions.t option
         [@ocaml.doc
-          "The mount options that are available for DataSync to use to access an SMB location."];
+          "The SMB protocol version that DataSync uses to access your SMB file server."];
       creationTime: Time.t option
-        [@ocaml.doc "The time that the SMB location was created."]}
+        [@ocaml.doc "The time that the SMB location was created."];
+      dnsIpAddresses: DnsIpList.t option
+        [@ocaml.doc
+          "The IPv4 or IPv6 addresses for the DNS servers that your SMB file server belongs to. This element applies only if AuthenticationType is set to KERBEROS."];
+      kerberosPrincipal: KerberosPrincipal.t option
+        [@ocaml.doc
+          "The Kerberos principal that has permission to access the files, folders, and file metadata in your SMB file server."];
+      authenticationType: SmbAuthenticationType.t option
+        [@ocaml.doc
+          "The authentication protocol that DataSync uses to connect to your SMB file server."];
+      managedSecretConfig: ManagedSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as a Password or KerberosKeytab that DataSync uses to access a specific storage location. DataSync uses the default Amazon Web Services-managed KMS key to encrypt this secret in Secrets Manager."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as a Password or KerberosKeytab that DataSync uses to access a specific storage location, with a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a customer-managed secret, such as a Password or KerberosKeytab that DataSync uses to access a specific storage location, with a customer-managed Identity and Access Management (IAM) role that provides access to the secret."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -5447,16 +8654,28 @@ module DescribeLocationSmbResponse =
             fun ?domain ->
               fun ?mountOptions ->
                 fun ?creationTime ->
-                  fun () ->
-                    {
-                      locationArn;
-                      locationUri;
-                      agentArns;
-                      user;
-                      domain;
-                      mountOptions;
-                      creationTime
-                    }
+                  fun ?dnsIpAddresses ->
+                    fun ?kerberosPrincipal ->
+                      fun ?authenticationType ->
+                        fun ?managedSecretConfig ->
+                          fun ?cmkSecretConfig ->
+                            fun ?customSecretConfig ->
+                              fun () ->
+                                {
+                                  locationArn;
+                                  locationUri;
+                                  agentArns;
+                                  user;
+                                  domain;
+                                  mountOptions;
+                                  creationTime;
+                                  dnsIpAddresses;
+                                  kerberosPrincipal;
+                                  authenticationType;
+                                  managedSecretConfig;
+                                  cmkSecretConfig;
+                                  customSecretConfig
+                                }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -5498,9 +8717,39 @@ module DescribeLocationSmbResponse =
         ("Domain", (Option.map x.domain ~f:SmbDomain.to_value));
         ("MountOptions",
           (Option.map x.mountOptions ~f:SmbMountOptions.to_value));
-        ("CreationTime", (Option.map x.creationTime ~f:Time.to_value))]
+        ("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
+        ("DnsIpAddresses",
+          (Option.map x.dnsIpAddresses ~f:DnsIpList.to_value));
+        ("KerberosPrincipal",
+          (Option.map x.kerberosPrincipal ~f:KerberosPrincipal.to_value));
+        ("AuthenticationType",
+          (Option.map x.authenticationType ~f:SmbAuthenticationType.to_value));
+        ("ManagedSecretConfig",
+          (Option.map x.managedSecretConfig ~f:ManagedSecretConfig.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let managedSecretConfig =
+        (Option.map ~f:ManagedSecretConfig.of_xml)
+          (Xml.child xml_arg0 "ManagedSecretConfig") in
+      let authenticationType =
+        (Option.map ~f:SmbAuthenticationType.of_xml)
+          (Xml.child xml_arg0 "AuthenticationType") in
+      let kerberosPrincipal =
+        (Option.map ~f:KerberosPrincipal.of_xml)
+          (Xml.child xml_arg0 "KerberosPrincipal") in
+      let dnsIpAddresses =
+        (Option.map ~f:DnsIpList.of_xml)
+          (Xml.child xml_arg0 "DnsIpAddresses") in
       let creationTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "CreationTime") in
       let mountOptions =
@@ -5515,20 +8764,34 @@ module DescribeLocationSmbResponse =
         (Option.map ~f:LocationUri.of_xml) (Xml.child xml_arg0 "LocationUri") in
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
-      make ?creationTime ?mountOptions ?domain ?user ?agentArns ?locationUri
-        ?locationArn ()
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig
+        ?authenticationType ?kerberosPrincipal ?dnsIpAddresses ?creationTime
+        ?mountOptions ?domain ?user ?agentArns ?locationUri ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Time.of_json in
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let managedSecretConfig =
+        field_map json__ "ManagedSecretConfig" ManagedSecretConfig.of_json in
+      let authenticationType =
+        field_map json__ "AuthenticationType" SmbAuthenticationType.of_json in
+      let kerberosPrincipal =
+        field_map json__ "KerberosPrincipal" KerberosPrincipal.of_json in
+      let dnsIpAddresses =
+        field_map json__ "DnsIpAddresses" DnsIpList.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
       let mountOptions =
-        field_map json "MountOptions" SmbMountOptions.of_json in
-      let domain = field_map json "Domain" SmbDomain.of_json in
-      let user = field_map json "User" SmbUser.of_json in
-      let agentArns = field_map json "AgentArns" AgentArnList.of_json in
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
-      make ?creationTime ?mountOptions ?domain ?user ?agentArns ?locationUri
-        ?locationArn ()
+        field_map json__ "MountOptions" SmbMountOptions.of_json in
+      let domain = field_map json__ "Domain" SmbDomain.of_json in
+      let user = field_map json__ "User" SmbUser.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig
+        ?authenticationType ?kerberosPrincipal ?dnsIpAddresses ?creationTime
+        ?mountOptions ?domain ?user ?agentArns ?locationUri ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeLocationSmbResponse"]
 module DescribeLocationSmbRequest =
@@ -5537,7 +8800,7 @@ module DescribeLocationSmbRequest =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the SMB location to describe."]}
+          "Specifies the Amazon Resource Name (ARN) of the SMB location that you want information about."]}
     let context_ = "DescribeLocationSmbRequest"
     let make ~locationArn = fun () -> { locationArn }
     let to_value x =
@@ -5550,8 +8813,9 @@ module DescribeLocationSmbRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeLocationSmbRequest"]
@@ -5560,20 +8824,18 @@ module DescribeLocationS3Response =
     type nonrec t =
       {
       locationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon S3 bucket or access point."];
+        [@ocaml.doc "The ARN of the Amazon S3 location."];
       locationUri: LocationUri.t option
         [@ocaml.doc "The URL of the Amazon S3 location that was described."];
       s3StorageClass: S3StorageClass.t option
         [@ocaml.doc
-          "The Amazon S3 storage class that you chose to store your files in when this location is used as a task destination. For more information about S3 storage classes, see Amazon S3 Storage Classes. Some storage classes have behaviors that can affect your S3 storage cost. For detailed information, see Considerations when working with S3 storage classes in DataSync."];
+          "When Amazon S3 is a destination location, this is the storage class that you chose for your objects. Some storage classes have behaviors that can affect your Amazon S3 storage costs. For more information, see Storage class considerations with Amazon S3 transfers."];
       s3Config: S3Config.t option ;
       agentArns: AgentArnList.t option
         [@ocaml.doc
-          "If you are using DataSync on an Amazon Web Services Outpost, the Amazon Resource Name (ARNs) of the EC2 agents deployed on your Outpost. For more information about launching a DataSync agent on an Amazon Web Services Outpost, see Deploy your DataSync agent on Outposts."];
+          "The ARNs of the DataSync agents deployed on your Outpost when using working with Amazon S3 on Outposts. For more information, see Deploy your DataSync agent on Outposts."];
       creationTime: Time.t option
-        [@ocaml.doc
-          "The time that the Amazon S3 bucket location was created."]}
+        [@ocaml.doc "The time that the Amazon S3 location was created."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -5652,14 +8914,14 @@ module DescribeLocationS3Response =
       make ?creationTime ?agentArns ?s3Config ?s3StorageClass ?locationUri
         ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Time.of_json in
-      let agentArns = field_map json "AgentArns" AgentArnList.of_json in
-      let s3Config = field_map json "S3Config" S3Config.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
+      let s3Config = field_map json__ "S3Config" S3Config.of_json in
       let s3StorageClass =
-        field_map json "S3StorageClass" S3StorageClass.of_json in
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+        field_map json__ "S3StorageClass" S3StorageClass.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?creationTime ?agentArns ?s3Config ?s3StorageClass ?locationUri
         ?locationArn ()
     let to_json v = composed_to_json to_value v
@@ -5670,7 +8932,7 @@ module DescribeLocationS3Request =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon S3 bucket location to describe."]}
+          "Specifies the Amazon Resource Name (ARN) of the Amazon S3 location."]}
     let context_ = "DescribeLocationS3Request"
     let make ~locationArn = fun () -> { locationArn }
     let to_value x =
@@ -5683,8 +8945,9 @@ module DescribeLocationS3Request =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeLocationS3Request"]
@@ -5693,26 +8956,35 @@ module DescribeLocationObjectStorageResponse =
     type nonrec t =
       {
       locationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the self-managed object storage server location to describe."];
+        [@ocaml.doc "The ARN of the object storage system location."];
       locationUri: LocationUri.t option
-        [@ocaml.doc
-          "The URL of the source self-managed object storage server location that was described."];
+        [@ocaml.doc "The URI of the object storage system location."];
       accessKey: ObjectStorageAccessKey.t option
         [@ocaml.doc
-          "Optional. The access key is used if credentials are required to access the self-managed object storage server. If your object storage requires a user name and password to authenticate, use AccessKey and SecretKey to provide the user name and password, respectively."];
+          "The access key (for example, a user name) required to authenticate with the object storage system."];
       serverPort: ObjectStorageServerPort.t option
         [@ocaml.doc
-          "The port that your self-managed object storage server accepts inbound network traffic on. The server port is set by default to TCP 80 (HTTP) or TCP 443 (HTTPS)."];
+          "The port that your object storage server accepts inbound network traffic on (for example, port 443)."];
       serverProtocol: ObjectStorageServerProtocol.t option
         [@ocaml.doc
-          "The protocol that the object storage server uses to communicate. Valid values are HTTP or HTTPS."];
+          "The protocol that your object storage system uses to communicate."];
       agentArns: AgentArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the agents associated with the self-managed object storage server location."];
+          "The ARNs of the DataSync agents that can connect with your object storage system."];
       creationTime: Time.t option
+        [@ocaml.doc "The time that the location was created."];
+      serverCertificate: ObjectStorageCertificate.t option
         [@ocaml.doc
-          "The time that the self-managed object storage server agent was created."]}
+          "The certificate chain for DataSync to authenticate with your object storage system if the system uses a private or self-signed certificate authority (CA)."];
+      managedSecretConfig: ManagedSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as an authentication token or set of credentials that DataSync uses to access a specific transfer location. DataSync uses the default Amazon Web Services-managed KMS key to encrypt this secret in Secrets Manager."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as an authentication token or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a customer-managed secret, such as an authentication token or set of credentials that DataSync uses to access a specific transfer location, and a customer-managed Identity and Access Management (IAM) role that provides access to the secret."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -5724,16 +8996,24 @@ module DescribeLocationObjectStorageResponse =
             fun ?serverProtocol ->
               fun ?agentArns ->
                 fun ?creationTime ->
-                  fun () ->
-                    {
-                      locationArn;
-                      locationUri;
-                      accessKey;
-                      serverPort;
-                      serverProtocol;
-                      agentArns;
-                      creationTime
-                    }
+                  fun ?serverCertificate ->
+                    fun ?managedSecretConfig ->
+                      fun ?cmkSecretConfig ->
+                        fun ?customSecretConfig ->
+                          fun () ->
+                            {
+                              locationArn;
+                              locationUri;
+                              accessKey;
+                              serverPort;
+                              serverProtocol;
+                              agentArns;
+                              creationTime;
+                              serverCertificate;
+                              managedSecretConfig;
+                              cmkSecretConfig;
+                              customSecretConfig
+                            }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -5778,9 +9058,30 @@ module DescribeLocationObjectStorageResponse =
           (Option.map x.serverProtocol
              ~f:ObjectStorageServerProtocol.to_value));
         ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value));
-        ("CreationTime", (Option.map x.creationTime ~f:Time.to_value))]
+        ("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
+        ("ServerCertificate",
+          (Option.map x.serverCertificate
+             ~f:ObjectStorageCertificate.to_value));
+        ("ManagedSecretConfig",
+          (Option.map x.managedSecretConfig ~f:ManagedSecretConfig.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let managedSecretConfig =
+        (Option.map ~f:ManagedSecretConfig.of_xml)
+          (Xml.child xml_arg0 "ManagedSecretConfig") in
+      let serverCertificate =
+        (Option.map ~f:ObjectStorageCertificate.of_xml)
+          (Xml.child xml_arg0 "ServerCertificate") in
       let creationTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "CreationTime") in
       let agentArns =
@@ -5798,22 +9099,32 @@ module DescribeLocationObjectStorageResponse =
         (Option.map ~f:LocationUri.of_xml) (Xml.child xml_arg0 "LocationUri") in
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
-      make ?creationTime ?agentArns ?serverProtocol ?serverPort ?accessKey
-        ?locationUri ?locationArn ()
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig
+        ?serverCertificate ?creationTime ?agentArns ?serverProtocol
+        ?serverPort ?accessKey ?locationUri ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Time.of_json in
-      let agentArns = field_map json "AgentArns" AgentArnList.of_json in
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let managedSecretConfig =
+        field_map json__ "ManagedSecretConfig" ManagedSecretConfig.of_json in
+      let serverCertificate =
+        field_map json__ "ServerCertificate" ObjectStorageCertificate.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
       let serverProtocol =
-        field_map json "ServerProtocol" ObjectStorageServerProtocol.of_json in
+        field_map json__ "ServerProtocol" ObjectStorageServerProtocol.of_json in
       let serverPort =
-        field_map json "ServerPort" ObjectStorageServerPort.of_json in
+        field_map json__ "ServerPort" ObjectStorageServerPort.of_json in
       let accessKey =
-        field_map json "AccessKey" ObjectStorageAccessKey.of_json in
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
-      make ?creationTime ?agentArns ?serverProtocol ?serverPort ?accessKey
-        ?locationUri ?locationArn ()
+        field_map json__ "AccessKey" ObjectStorageAccessKey.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig
+        ?serverCertificate ?creationTime ?agentArns ?serverProtocol
+        ?serverPort ?accessKey ?locationUri ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeLocationObjectStorageResponse"]
 module DescribeLocationObjectStorageRequest =
@@ -5822,7 +9133,7 @@ module DescribeLocationObjectStorageRequest =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the self-managed object storage server location that was described."]}
+          "Specifies the Amazon Resource Name (ARN) of the object storage system location."]}
     let context_ = "DescribeLocationObjectStorageRequest"
     let make ~locationArn = fun () -> { locationArn }
     let to_value x =
@@ -5835,8 +9146,9 @@ module DescribeLocationObjectStorageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeLocationObjectStorageRequest"]
@@ -5845,16 +9157,15 @@ module DescribeLocationNfsResponse =
     type nonrec t =
       {
       locationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the NFS location that was described."];
+        [@ocaml.doc "The ARN of the NFS location."];
       locationUri: LocationUri.t option
-        [@ocaml.doc "The URL of the source NFS location that was described."];
+        [@ocaml.doc "The URI of the NFS location."];
       onPremConfig: OnPremConfig.t option ;
       mountOptions: NfsMountOptions.t option
         [@ocaml.doc
-          "The NFS mount options that DataSync used to mount your NFS share."];
+          "The mount options that DataSync uses to mount your NFS file server."];
       creationTime: Time.t option
-        [@ocaml.doc "The time that the NFS location was created."]}
+        [@ocaml.doc "The time when the NFS location was created."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -5930,13 +9241,13 @@ module DescribeLocationNfsResponse =
       make ?creationTime ?mountOptions ?onPremConfig ?locationUri
         ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Time.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
       let mountOptions =
-        field_map json "MountOptions" NfsMountOptions.of_json in
-      let onPremConfig = field_map json "OnPremConfig" OnPremConfig.of_json in
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+        field_map json__ "MountOptions" NfsMountOptions.of_json in
+      let onPremConfig = field_map json__ "OnPremConfig" OnPremConfig.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?creationTime ?mountOptions ?onPremConfig ?locationUri
         ?locationArn ()
     let to_json v = composed_to_json to_value v
@@ -5947,7 +9258,7 @@ module DescribeLocationNfsRequest =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the NFS location to describe."]}
+          "Specifies the Amazon Resource Name (ARN) of the NFS location that you want information about."]}
     let context_ = "DescribeLocationNfsRequest"
     let make ~locationArn = fun () -> { locationArn }
     let to_value x =
@@ -5960,8 +9271,9 @@ module DescribeLocationNfsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeLocationNfsRequest"]
@@ -5970,11 +9282,11 @@ module DescribeLocationHdfsResponse =
     type nonrec t =
       {
       locationArn: LocationArn.t option
-        [@ocaml.doc "The ARN of the HDFS cluster location."];
+        [@ocaml.doc "The ARN of the HDFS location."];
       locationUri: LocationUri.t option
-        [@ocaml.doc "The URI of the HDFS cluster location."];
+        [@ocaml.doc "The URI of the HDFS location."];
       nameNodes: HdfsNameNodeList.t option
-        [@ocaml.doc "The NameNode that manage the HDFS namespace."];
+        [@ocaml.doc "The NameNode that manages the HDFS namespace."];
       blockSize: HdfsBlockSize.t option
         [@ocaml.doc
           "The size of the data blocks to write into the HDFS cluster."];
@@ -5986,21 +9298,30 @@ module DescribeLocationHdfsResponse =
           "The URI of the HDFS cluster's Key Management Server (KMS)."];
       qopConfiguration: QopConfiguration.t option
         [@ocaml.doc
-          "The Quality of Protection (QOP) configuration specifies the Remote Procedure Call (RPC) and data transfer protection settings configured on the Hadoop Distributed File System (HDFS) cluster."];
+          "The Quality of Protection (QOP) configuration, which specifies the Remote Procedure Call (RPC) and data transfer protection settings configured on the HDFS cluster."];
       authenticationType: HdfsAuthenticationType.t option
         [@ocaml.doc
           "The type of authentication used to determine the identity of the user."];
       simpleUser: HdfsUser.t option
         [@ocaml.doc
-          "The user name used to identify the client on the host operating system. This parameter is used if the AuthenticationType is defined as SIMPLE."];
+          "The user name to identify the client on the host operating system. This parameter is used if the AuthenticationType is defined as SIMPLE."];
       kerberosPrincipal: KerberosPrincipal.t option
         [@ocaml.doc
           "The Kerberos principal with access to the files and folders on the HDFS cluster. This parameter is used if the AuthenticationType is defined as KERBEROS."];
       agentArns: AgentArnList.t option
         [@ocaml.doc
-          "The ARNs of the agents that are used to connect to the HDFS cluster."];
+          "The ARNs of the DataSync agents that can connect with your HDFS cluster."];
       creationTime: Time.t option
-        [@ocaml.doc "The time that the HDFS location was created."]}
+        [@ocaml.doc "The time that the HDFS location was created."];
+      managedSecretConfig: ManagedSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as a KerberosKeytab that DataSync uses to access a specific storage location. DataSync uses the default Amazon Web Services-managed KMS key to encrypt this secret in Secrets Manager."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as a KerberosKeytab that DataSync uses to access a specific storage location, with a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a customer-managed secret, such as a KerberosKeytab that DataSync uses to access a specific storage location, with a customer-managed Identity and Access Management (IAM) role that provides access to the secret."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -6017,21 +9338,27 @@ module DescribeLocationHdfsResponse =
                       fun ?kerberosPrincipal ->
                         fun ?agentArns ->
                           fun ?creationTime ->
-                            fun () ->
-                              {
-                                locationArn;
-                                locationUri;
-                                nameNodes;
-                                blockSize;
-                                replicationFactor;
-                                kmsKeyProviderUri;
-                                qopConfiguration;
-                                authenticationType;
-                                simpleUser;
-                                kerberosPrincipal;
-                                agentArns;
-                                creationTime
-                              }
+                            fun ?managedSecretConfig ->
+                              fun ?cmkSecretConfig ->
+                                fun ?customSecretConfig ->
+                                  fun () ->
+                                    {
+                                      locationArn;
+                                      locationUri;
+                                      nameNodes;
+                                      blockSize;
+                                      replicationFactor;
+                                      kmsKeyProviderUri;
+                                      qopConfiguration;
+                                      authenticationType;
+                                      simpleUser;
+                                      kerberosPrincipal;
+                                      agentArns;
+                                      creationTime;
+                                      managedSecretConfig;
+                                      cmkSecretConfig;
+                                      customSecretConfig
+                                    }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -6082,9 +9409,24 @@ module DescribeLocationHdfsResponse =
         ("KerberosPrincipal",
           (Option.map x.kerberosPrincipal ~f:KerberosPrincipal.to_value));
         ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value));
-        ("CreationTime", (Option.map x.creationTime ~f:Time.to_value))]
+        ("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
+        ("ManagedSecretConfig",
+          (Option.map x.managedSecretConfig ~f:ManagedSecretConfig.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let managedSecretConfig =
+        (Option.map ~f:ManagedSecretConfig.of_xml)
+          (Xml.child xml_arg0 "ManagedSecretConfig") in
       let creationTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "CreationTime") in
       let agentArns =
@@ -6115,41 +9457,49 @@ module DescribeLocationHdfsResponse =
         (Option.map ~f:LocationUri.of_xml) (Xml.child xml_arg0 "LocationUri") in
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
-      make ?creationTime ?agentArns ?kerberosPrincipal ?simpleUser
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig
+        ?creationTime ?agentArns ?kerberosPrincipal ?simpleUser
         ?authenticationType ?qopConfiguration ?kmsKeyProviderUri
         ?replicationFactor ?blockSize ?nameNodes ?locationUri ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Time.of_json in
-      let agentArns = field_map json "AgentArns" AgentArnList.of_json in
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let managedSecretConfig =
+        field_map json__ "ManagedSecretConfig" ManagedSecretConfig.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
       let kerberosPrincipal =
-        field_map json "KerberosPrincipal" KerberosPrincipal.of_json in
-      let simpleUser = field_map json "SimpleUser" HdfsUser.of_json in
+        field_map json__ "KerberosPrincipal" KerberosPrincipal.of_json in
+      let simpleUser = field_map json__ "SimpleUser" HdfsUser.of_json in
       let authenticationType =
-        field_map json "AuthenticationType" HdfsAuthenticationType.of_json in
+        field_map json__ "AuthenticationType" HdfsAuthenticationType.of_json in
       let qopConfiguration =
-        field_map json "QopConfiguration" QopConfiguration.of_json in
+        field_map json__ "QopConfiguration" QopConfiguration.of_json in
       let kmsKeyProviderUri =
-        field_map json "KmsKeyProviderUri" KmsKeyProviderUri.of_json in
+        field_map json__ "KmsKeyProviderUri" KmsKeyProviderUri.of_json in
       let replicationFactor =
-        field_map json "ReplicationFactor" HdfsReplicationFactor.of_json in
-      let blockSize = field_map json "BlockSize" HdfsBlockSize.of_json in
-      let nameNodes = field_map json "NameNodes" HdfsNameNodeList.of_json in
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
-      make ?creationTime ?agentArns ?kerberosPrincipal ?simpleUser
+        field_map json__ "ReplicationFactor" HdfsReplicationFactor.of_json in
+      let blockSize = field_map json__ "BlockSize" HdfsBlockSize.of_json in
+      let nameNodes = field_map json__ "NameNodes" HdfsNameNodeList.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig
+        ?creationTime ?agentArns ?kerberosPrincipal ?simpleUser
         ?authenticationType ?qopConfiguration ?kmsKeyProviderUri
         ?replicationFactor ?blockSize ?nameNodes ?locationUri ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata, such as the authentication information about the Hadoop Distributed File System (HDFS) location."]
+       "Provides details about how an DataSync transfer location for a Hadoop Distributed File System (HDFS) is configured."]
 module DescribeLocationHdfsRequest =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the HDFS cluster location to describe."]}
+          "Specifies the Amazon Resource Name (ARN) of the HDFS location."]}
     let context_ = "DescribeLocationHdfsRequest"
     let make ~locationArn = fun () -> { locationArn }
     let to_value x =
@@ -6162,34 +9512,43 @@ module DescribeLocationHdfsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata, such as the authentication information about the Hadoop Distributed File System (HDFS) location."]
+       "Provides details about how an DataSync transfer location for a Hadoop Distributed File System (HDFS) is configured."]
 module DescribeLocationFsxWindowsResponse =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the FSx for Windows File Server location that was described."];
+        [@ocaml.doc "The ARN of the FSx for Windows File Server location."];
       locationUri: LocationUri.t option
         [@ocaml.doc
-          "The URL of the FSx for Windows File Server location that was described."];
+          "The uniform resource identifier (URI) of the FSx for Windows File Server location."];
       securityGroupArns: Ec2SecurityGroupArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the security groups that are configured for the FSx for Windows File Server file system."];
+          "The ARNs of the Amazon EC2 security groups that provide access to your file system's preferred subnet. For information about configuring security groups for file system access, see the Amazon FSx for Windows File Server User Guide ."];
       creationTime: Time.t option
         [@ocaml.doc
           "The time that the FSx for Windows File Server location was created."];
       user: SmbUser.t option
         [@ocaml.doc
-          "The user who has the permissions to access files and folders in the FSx for Windows File Server file system."];
+          "The user with the permissions to mount and access the FSx for Windows File Server file system."];
       domain: SmbDomain.t option
         [@ocaml.doc
-          "The name of the Windows domain that the FSx for Windows File Server belongs to."]}
+          "The name of the Microsoft Active Directory domain that the FSx for Windows File Server file system belongs to."];
+      managedSecretConfig: ManagedSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as a Password that DataSync uses to access a specific storage location. DataSync uses the default Amazon Web Services-managed KMS key to encrypt this secret in Secrets Manager."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as a Password that DataSync uses to access a specific storage location, with a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a customer-managed secret, such as a Password that DataSync uses to access a specific storage location, with a customer-managed Identity and Access Management (IAM) role that provides access to the secret."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -6200,15 +9559,21 @@ module DescribeLocationFsxWindowsResponse =
           fun ?creationTime ->
             fun ?user ->
               fun ?domain ->
-                fun () ->
-                  {
-                    locationArn;
-                    locationUri;
-                    securityGroupArns;
-                    creationTime;
-                    user;
-                    domain
-                  }
+                fun ?managedSecretConfig ->
+                  fun ?cmkSecretConfig ->
+                    fun ?customSecretConfig ->
+                      fun () ->
+                        {
+                          locationArn;
+                          locationUri;
+                          securityGroupArns;
+                          creationTime;
+                          user;
+                          domain;
+                          managedSecretConfig;
+                          cmkSecretConfig;
+                          customSecretConfig
+                        }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -6249,9 +9614,24 @@ module DescribeLocationFsxWindowsResponse =
           (Option.map x.securityGroupArns ~f:Ec2SecurityGroupArnList.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
         ("User", (Option.map x.user ~f:SmbUser.to_value));
-        ("Domain", (Option.map x.domain ~f:SmbDomain.to_value))]
+        ("Domain", (Option.map x.domain ~f:SmbDomain.to_value));
+        ("ManagedSecretConfig",
+          (Option.map x.managedSecretConfig ~f:ManagedSecretConfig.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let managedSecretConfig =
+        (Option.map ~f:ManagedSecretConfig.of_xml)
+          (Xml.child xml_arg0 "ManagedSecretConfig") in
       let domain =
         (Option.map ~f:SmbDomain.of_xml) (Xml.child xml_arg0 "Domain") in
       let user = (Option.map ~f:SmbUser.of_xml) (Xml.child xml_arg0 "User") in
@@ -6264,29 +9644,35 @@ module DescribeLocationFsxWindowsResponse =
         (Option.map ~f:LocationUri.of_xml) (Xml.child xml_arg0 "LocationUri") in
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
-      make ?domain ?user ?creationTime ?securityGroupArns ?locationUri
-        ?locationArn ()
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig ?domain
+        ?user ?creationTime ?securityGroupArns ?locationUri ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "Domain" SmbDomain.of_json in
-      let user = field_map json "User" SmbUser.of_json in
-      let creationTime = field_map json "CreationTime" Time.of_json in
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let managedSecretConfig =
+        field_map json__ "ManagedSecretConfig" ManagedSecretConfig.of_json in
+      let domain = field_map json__ "Domain" SmbDomain.of_json in
+      let user = field_map json__ "User" SmbUser.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
       let securityGroupArns =
-        field_map json "SecurityGroupArns" Ec2SecurityGroupArnList.of_json in
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
-      make ?domain ?user ?creationTime ?securityGroupArns ?locationUri
-        ?locationArn ()
+        field_map json__ "SecurityGroupArns" Ec2SecurityGroupArnList.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig ?domain
+        ?user ?creationTime ?securityGroupArns ?locationUri ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about an Amazon FSx for Windows File Server location, such as information about its path."]
+       "Provides details about how an DataSync transfer location for an Amazon FSx for Windows File Server file system is configured."]
 module DescribeLocationFsxWindowsRequest =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the FSx for Windows File Server location to describe."]}
+          "Specifies the Amazon Resource Name (ARN) of the FSx for Windows File Server location."]}
     let context_ = "DescribeLocationFsxWindowsRequest"
     let make ~locationArn = fun () -> { locationArn }
     let to_value x =
@@ -6299,12 +9685,13 @@ module DescribeLocationFsxWindowsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about an Amazon FSx for Windows File Server location, such as information about its path."]
+       "Provides details about how an DataSync transfer location for an Amazon FSx for Windows File Server file system is configured."]
 module DescribeLocationFsxOpenZfsResponse =
   struct
     type nonrec t =
@@ -6397,18 +9784,18 @@ module DescribeLocationFsxOpenZfsResponse =
       make ?creationTime ?protocol ?securityGroupArns ?locationUri
         ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Time.of_json in
-      let protocol = field_map json "Protocol" FsxProtocol.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      let protocol = field_map json__ "Protocol" FsxProtocol.of_json in
       let securityGroupArns =
-        field_map json "SecurityGroupArns" Ec2SecurityGroupArnList.of_json in
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+        field_map json__ "SecurityGroupArns" Ec2SecurityGroupArnList.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?creationTime ?protocol ?securityGroupArns ?locationUri
         ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about an Amazon FSx for OpenZFS location, such as information about its path."]
+       "Provides details about how an DataSync transfer location for an Amazon FSx for OpenZFS file system is configured. Response elements related to SMB aren't supported with the DescribeLocationFsxOpenZfs operation."]
 module DescribeLocationFsxOpenZfsRequest =
   struct
     type nonrec t =
@@ -6428,12 +9815,164 @@ module DescribeLocationFsxOpenZfsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about an Amazon FSx for OpenZFS location, such as information about its path."]
+       "Provides details about how an DataSync transfer location for an Amazon FSx for OpenZFS file system is configured. Response elements related to SMB aren't supported with the DescribeLocationFsxOpenZfs operation."]
+module DescribeLocationFsxOntapResponse =
+  struct
+    type nonrec t =
+      {
+      creationTime: Time.t option
+        [@ocaml.doc "The time that the location was created."];
+      locationArn: LocationArn.t option
+        [@ocaml.doc "The ARN of the FSx for ONTAP file system location."];
+      locationUri: LocationUri.t option
+        [@ocaml.doc
+          "The uniform resource identifier (URI) of the FSx for ONTAP file system location."];
+      protocol: FsxProtocol.t option ;
+      securityGroupArns: Ec2SecurityGroupArnList.t option
+        [@ocaml.doc
+          "The security groups that DataSync uses to access your FSx for ONTAP file system."];
+      storageVirtualMachineArn: StorageVirtualMachineArn.t option
+        [@ocaml.doc
+          "The ARN of the storage virtual machine (SVM) on your FSx for ONTAP file system where you're copying data to or from."];
+      fsxFilesystemArn: FsxFilesystemArn.t option
+        [@ocaml.doc "The ARN of the FSx for ONTAP file system."]}
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?creationTime =
+      fun ?locationArn ->
+        fun ?locationUri ->
+          fun ?protocol ->
+            fun ?securityGroupArns ->
+              fun ?storageVirtualMachineArn ->
+                fun ?fsxFilesystemArn ->
+                  fun () ->
+                    {
+                      creationTime;
+                      locationArn;
+                      locationUri;
+                      protocol;
+                      securityGroupArns;
+                      storageVirtualMachineArn;
+                      fsxFilesystemArn
+                    }
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
+        ("LocationArn", (Option.map x.locationArn ~f:LocationArn.to_value));
+        ("LocationUri", (Option.map x.locationUri ~f:LocationUri.to_value));
+        ("Protocol", (Option.map x.protocol ~f:FsxProtocol.to_value));
+        ("SecurityGroupArns",
+          (Option.map x.securityGroupArns ~f:Ec2SecurityGroupArnList.to_value));
+        ("StorageVirtualMachineArn",
+          (Option.map x.storageVirtualMachineArn
+             ~f:StorageVirtualMachineArn.to_value));
+        ("FsxFilesystemArn",
+          (Option.map x.fsxFilesystemArn ~f:FsxFilesystemArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fsxFilesystemArn =
+        (Option.map ~f:FsxFilesystemArn.of_xml)
+          (Xml.child xml_arg0 "FsxFilesystemArn") in
+      let storageVirtualMachineArn =
+        (Option.map ~f:StorageVirtualMachineArn.of_xml)
+          (Xml.child xml_arg0 "StorageVirtualMachineArn") in
+      let securityGroupArns =
+        (Option.map ~f:Ec2SecurityGroupArnList.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupArns") in
+      let protocol =
+        (Option.map ~f:FsxProtocol.of_xml) (Xml.child xml_arg0 "Protocol") in
+      let locationUri =
+        (Option.map ~f:LocationUri.of_xml) (Xml.child xml_arg0 "LocationUri") in
+      let locationArn =
+        (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
+      let creationTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      make ?fsxFilesystemArn ?storageVirtualMachineArn ?securityGroupArns
+        ?protocol ?locationUri ?locationArn ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fsxFilesystemArn =
+        field_map json__ "FsxFilesystemArn" FsxFilesystemArn.of_json in
+      let storageVirtualMachineArn =
+        field_map json__ "StorageVirtualMachineArn"
+          StorageVirtualMachineArn.of_json in
+      let securityGroupArns =
+        field_map json__ "SecurityGroupArns" Ec2SecurityGroupArnList.of_json in
+      let protocol = field_map json__ "Protocol" FsxProtocol.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      make ?fsxFilesystemArn ?storageVirtualMachineArn ?securityGroupArns
+        ?protocol ?locationUri ?locationArn ?creationTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details about how an DataSync transfer location for an Amazon FSx for NetApp ONTAP file system is configured. If your location uses SMB, the DescribeLocationFsxOntap operation doesn't actually return a Password."]
+module DescribeLocationFsxOntapRequest =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the FSx for ONTAP file system location that you want information about."]}
+    let context_ = "DescribeLocationFsxOntapRequest"
+    let make ~locationArn = fun () -> { locationArn }
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Some (LocationArn.to_value x.locationArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let locationArn =
+        LocationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
+      make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ~locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details about how an DataSync transfer location for an Amazon FSx for NetApp ONTAP file system is configured. If your location uses SMB, the DescribeLocationFsxOntap operation doesn't actually return a Password."]
 module DescribeLocationFsxLustreResponse =
   struct
     type nonrec t =
@@ -6511,16 +10050,16 @@ module DescribeLocationFsxLustreResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?creationTime ?securityGroupArns ?locationUri ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Time.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
       let securityGroupArns =
-        field_map json "SecurityGroupArns" Ec2SecurityGroupArnList.of_json in
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+        field_map json__ "SecurityGroupArns" Ec2SecurityGroupArnList.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?creationTime ?securityGroupArns ?locationUri ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about an Amazon FSx for Lustre location, such as information about its path."]
+       "Provides details about how an DataSync transfer location for an Amazon FSx for Lustre file system is configured."]
 module DescribeLocationFsxLustreRequest =
   struct
     type nonrec t =
@@ -6540,24 +10079,33 @@ module DescribeLocationFsxLustreRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about an Amazon FSx for Lustre location, such as information about its path."]
+       "Provides details about how an DataSync transfer location for an Amazon FSx for Lustre file system is configured."]
 module DescribeLocationEfsResponse =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the EFS location that was described."];
+        [@ocaml.doc "The ARN of the Amazon EFS file system location."];
       locationUri: LocationUri.t option
-        [@ocaml.doc "The URL of the EFS location that was described."];
+        [@ocaml.doc "The URL of the Amazon EFS file system location."];
       ec2Config: Ec2Config.t option ;
       creationTime: Time.t option
-        [@ocaml.doc "The time that the EFS location was created."]}
+        [@ocaml.doc "The time that the location was created."];
+      accessPointArn: EfsAccessPointArn.t option
+        [@ocaml.doc
+          "The ARN of the access point that DataSync uses to access the Amazon EFS file system. For more information, see Accessing restricted file systems."];
+      fileSystemAccessRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Identity and Access Management (IAM) role that allows DataSync to access your Amazon EFS file system. For more information, see Creating a DataSync IAM role for file system access."];
+      inTransitEncryption: EfsInTransitEncryption.t option
+        [@ocaml.doc
+          "Indicates whether DataSync uses Transport Layer Security (TLS) encryption when transferring data to or from the Amazon EFS file system."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -6566,7 +10114,19 @@ module DescribeLocationEfsResponse =
       fun ?locationUri ->
         fun ?ec2Config ->
           fun ?creationTime ->
-            fun () -> { locationArn; locationUri; ec2Config; creationTime }
+            fun ?accessPointArn ->
+              fun ?fileSystemAccessRoleArn ->
+                fun ?inTransitEncryption ->
+                  fun () ->
+                    {
+                      locationArn;
+                      locationUri;
+                      ec2Config;
+                      creationTime;
+                      accessPointArn;
+                      fileSystemAccessRoleArn;
+                      inTransitEncryption
+                    }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -6604,9 +10164,25 @@ module DescribeLocationEfsResponse =
         [("LocationArn", (Option.map x.locationArn ~f:LocationArn.to_value));
         ("LocationUri", (Option.map x.locationUri ~f:LocationUri.to_value));
         ("Ec2Config", (Option.map x.ec2Config ~f:Ec2Config.to_value));
-        ("CreationTime", (Option.map x.creationTime ~f:Time.to_value))]
+        ("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
+        ("AccessPointArn",
+          (Option.map x.accessPointArn ~f:EfsAccessPointArn.to_value));
+        ("FileSystemAccessRoleArn",
+          (Option.map x.fileSystemAccessRoleArn ~f:IamRoleArn.to_value));
+        ("InTransitEncryption",
+          (Option.map x.inTransitEncryption
+             ~f:EfsInTransitEncryption.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let inTransitEncryption =
+        (Option.map ~f:EfsInTransitEncryption.of_xml)
+          (Xml.child xml_arg0 "InTransitEncryption") in
+      let fileSystemAccessRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "FileSystemAccessRoleArn") in
+      let accessPointArn =
+        (Option.map ~f:EfsAccessPointArn.of_xml)
+          (Xml.child xml_arg0 "AccessPointArn") in
       let creationTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "CreationTime") in
       let ec2Config =
@@ -6615,14 +10191,22 @@ module DescribeLocationEfsResponse =
         (Option.map ~f:LocationUri.of_xml) (Xml.child xml_arg0 "LocationUri") in
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
-      make ?creationTime ?ec2Config ?locationUri ?locationArn ()
+      make ?inTransitEncryption ?fileSystemAccessRoleArn ?accessPointArn
+        ?creationTime ?ec2Config ?locationUri ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Time.of_json in
-      let ec2Config = field_map json "Ec2Config" Ec2Config.of_json in
-      let locationUri = field_map json "LocationUri" LocationUri.of_json in
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
-      make ?creationTime ?ec2Config ?locationUri ?locationArn ()
+    let of_json json__ =
+      let inTransitEncryption =
+        field_map json__ "InTransitEncryption" EfsInTransitEncryption.of_json in
+      let fileSystemAccessRoleArn =
+        field_map json__ "FileSystemAccessRoleArn" IamRoleArn.of_json in
+      let accessPointArn =
+        field_map json__ "AccessPointArn" EfsAccessPointArn.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      let ec2Config = field_map json__ "Ec2Config" Ec2Config.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
+      make ?inTransitEncryption ?fileSystemAccessRoleArn ?accessPointArn
+        ?creationTime ?ec2Config ?locationUri ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeLocationEfsResponse"]
 module DescribeLocationEfsRequest =
@@ -6631,7 +10215,7 @@ module DescribeLocationEfsRequest =
       {
       locationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the EFS location to describe."]}
+          "The Amazon Resource Name (ARN) of the Amazon EFS file system location that you want information about."]}
     let context_ = "DescribeLocationEfsRequest"
     let make ~locationArn = fun () -> { locationArn }
     let to_value x =
@@ -6644,32 +10228,223 @@ module DescribeLocationEfsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeLocationEfsRequest"]
+module DescribeLocationAzureBlobResponse =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t option
+        [@ocaml.doc "The ARN of your Azure Blob Storage transfer location."];
+      locationUri: LocationUri.t option
+        [@ocaml.doc
+          "The URL of the Azure Blob Storage container involved in your transfer."];
+      authenticationType: AzureBlobAuthenticationType.t option
+        [@ocaml.doc
+          "The authentication method DataSync uses to access your Azure Blob Storage. DataSync can access blob storage using a shared access signature (SAS)."];
+      blobType: AzureBlobType.t option
+        [@ocaml.doc
+          "The type of blob that you want your objects or files to be when transferring them into Azure Blob Storage. Currently, DataSync only supports moving data into Azure Blob Storage as block blobs. For more information on blob types, see the Azure Blob Storage documentation."];
+      accessTier: AzureAccessTier.t option
+        [@ocaml.doc
+          "The access tier that you want your objects or files transferred into. This only applies when using the location as a transfer destination. For more information, see Access tiers."];
+      agentArns: AgentArnList.t option
+        [@ocaml.doc
+          "The ARNs of the DataSync agents that can connect with your Azure Blob Storage container."];
+      creationTime: Time.t option
+        [@ocaml.doc
+          "The time that your Azure Blob Storage transfer location was created."];
+      managedSecretConfig: ManagedSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as an authentication token that DataSync uses to access a specific storage location. DataSync uses the default Amazon Web Services-managed KMS key to encrypt this secret in Secrets Manager."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a DataSync-managed secret, such as an authentication token that DataSync uses to access a specific storage location, with a customer-managed KMS key."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Describes configuration information for a customer-managed secret, such as an authentication token that DataSync uses to access a specific storage location, with a customer-managed Identity and Access Management (IAM) role that provides access to the secret."]}
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?locationArn =
+      fun ?locationUri ->
+        fun ?authenticationType ->
+          fun ?blobType ->
+            fun ?accessTier ->
+              fun ?agentArns ->
+                fun ?creationTime ->
+                  fun ?managedSecretConfig ->
+                    fun ?cmkSecretConfig ->
+                      fun ?customSecretConfig ->
+                        fun () ->
+                          {
+                            locationArn;
+                            locationUri;
+                            authenticationType;
+                            blobType;
+                            accessTier;
+                            agentArns;
+                            creationTime;
+                            managedSecretConfig;
+                            cmkSecretConfig;
+                            customSecretConfig
+                          }
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Option.map x.locationArn ~f:LocationArn.to_value));
+        ("LocationUri", (Option.map x.locationUri ~f:LocationUri.to_value));
+        ("AuthenticationType",
+          (Option.map x.authenticationType
+             ~f:AzureBlobAuthenticationType.to_value));
+        ("BlobType", (Option.map x.blobType ~f:AzureBlobType.to_value));
+        ("AccessTier", (Option.map x.accessTier ~f:AzureAccessTier.to_value));
+        ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
+        ("ManagedSecretConfig",
+          (Option.map x.managedSecretConfig ~f:ManagedSecretConfig.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let managedSecretConfig =
+        (Option.map ~f:ManagedSecretConfig.of_xml)
+          (Xml.child xml_arg0 "ManagedSecretConfig") in
+      let creationTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let agentArns =
+        (Option.map ~f:AgentArnList.of_xml) (Xml.child xml_arg0 "AgentArns") in
+      let accessTier =
+        (Option.map ~f:AzureAccessTier.of_xml)
+          (Xml.child xml_arg0 "AccessTier") in
+      let blobType =
+        (Option.map ~f:AzureBlobType.of_xml) (Xml.child xml_arg0 "BlobType") in
+      let authenticationType =
+        (Option.map ~f:AzureBlobAuthenticationType.of_xml)
+          (Xml.child xml_arg0 "AuthenticationType") in
+      let locationUri =
+        (Option.map ~f:LocationUri.of_xml) (Xml.child xml_arg0 "LocationUri") in
+      let locationArn =
+        (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig
+        ?creationTime ?agentArns ?accessTier ?blobType ?authenticationType
+        ?locationUri ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let managedSecretConfig =
+        field_map json__ "ManagedSecretConfig" ManagedSecretConfig.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
+      let accessTier = field_map json__ "AccessTier" AzureAccessTier.of_json in
+      let blobType = field_map json__ "BlobType" AzureBlobType.of_json in
+      let authenticationType =
+        field_map json__ "AuthenticationType"
+          AzureBlobAuthenticationType.of_json in
+      let locationUri = field_map json__ "LocationUri" LocationUri.of_json in
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?managedSecretConfig
+        ?creationTime ?agentArns ?accessTier ?blobType ?authenticationType
+        ?locationUri ?locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details about how an DataSync transfer location for Microsoft Azure Blob Storage is configured."]
+module DescribeLocationAzureBlobRequest =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of your Azure Blob Storage transfer location."]}
+    let context_ = "DescribeLocationAzureBlobRequest"
+    let make ~locationArn = fun () -> { locationArn }
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Some (LocationArn.to_value x.locationArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let locationArn =
+        LocationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
+      make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
+      make ~locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details about how an DataSync transfer location for Microsoft Azure Blob Storage is configured."]
 module DescribeAgentResponse =
   struct
     type nonrec t =
       {
-      agentArn: AgentArn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the agent."];
+      agentArn: AgentArn.t option [@ocaml.doc "The ARN of the agent."];
       name: TagValue.t option [@ocaml.doc "The name of the agent."];
       status: AgentStatus.t option
         [@ocaml.doc
-          "The status of the agent. If the status is ONLINE, then the agent is configured properly and is available to use. The Running status is the normal running status for an agent. If the status is OFFLINE, the agent's VM is turned off or the agent is in an unhealthy state. When the issue that caused the unhealthy state is resolved, the agent returns to ONLINE status."];
+          "The status of the agent. If the status is ONLINE, the agent is configured properly and ready to use. If the status is OFFLINE, the agent has been out of contact with DataSync for five minutes or longer. This can happen for a few reasons. For more information, see What do I do if my agent is offline?"];
       lastConnectionTime: Time.t option
-        [@ocaml.doc "The time that the agent last connected to DataSync."];
-      creationTime: Time.t option
         [@ocaml.doc
-          "The time that the agent was activated (that is, created in your account)."];
+          "The last time that the agent was communicating with the DataSync service."];
+      creationTime: Time.t option
+        [@ocaml.doc "The time that the agent was activated."];
       endpointType: EndpointType.t option
         [@ocaml.doc
-          "The type of endpoint that your agent is connected to. If the endpoint is a VPC endpoint, the agent is not accessible over the public internet."];
+          "The type of service endpoint that your agent is connected to."];
       privateLinkConfig: PrivateLinkConfig.t option
         [@ocaml.doc
-          "The subnet and the security group that DataSync used to access a VPC endpoint."]}
+          "The network configuration that the agent uses when connecting to a VPC service endpoint."];
+      platform: Platform.t option
+        [@ocaml.doc
+          "The platform-related details about the agent, such as the version number."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -6681,16 +10456,18 @@ module DescribeAgentResponse =
             fun ?creationTime ->
               fun ?endpointType ->
                 fun ?privateLinkConfig ->
-                  fun () ->
-                    {
-                      agentArn;
-                      name;
-                      status;
-                      lastConnectionTime;
-                      creationTime;
-                      endpointType;
-                      privateLinkConfig
-                    }
+                  fun ?platform ->
+                    fun () ->
+                      {
+                        agentArn;
+                        name;
+                        status;
+                        lastConnectionTime;
+                        creationTime;
+                        endpointType;
+                        privateLinkConfig;
+                        platform
+                      }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -6734,9 +10511,12 @@ module DescribeAgentResponse =
         ("EndpointType",
           (Option.map x.endpointType ~f:EndpointType.to_value));
         ("PrivateLinkConfig",
-          (Option.map x.privateLinkConfig ~f:PrivateLinkConfig.to_value))]
+          (Option.map x.privateLinkConfig ~f:PrivateLinkConfig.to_value));
+        ("Platform", (Option.map x.platform ~f:Platform.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let platform =
+        (Option.map ~f:Platform.of_xml) (Xml.child xml_arg0 "Platform") in
       let privateLinkConfig =
         (Option.map ~f:PrivateLinkConfig.of_xml)
           (Xml.child xml_arg0 "PrivateLinkConfig") in
@@ -6752,21 +10532,22 @@ module DescribeAgentResponse =
       let name = (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Name") in
       let agentArn =
         (Option.map ~f:AgentArn.of_xml) (Xml.child xml_arg0 "AgentArn") in
-      make ?privateLinkConfig ?endpointType ?creationTime ?lastConnectionTime
-        ?status ?name ?agentArn ()
+      make ?platform ?privateLinkConfig ?endpointType ?creationTime
+        ?lastConnectionTime ?status ?name ?agentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let platform = field_map json__ "Platform" Platform.of_json in
       let privateLinkConfig =
-        field_map json "PrivateLinkConfig" PrivateLinkConfig.of_json in
-      let endpointType = field_map json "EndpointType" EndpointType.of_json in
-      let creationTime = field_map json "CreationTime" Time.of_json in
+        field_map json__ "PrivateLinkConfig" PrivateLinkConfig.of_json in
+      let endpointType = field_map json__ "EndpointType" EndpointType.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
       let lastConnectionTime =
-        field_map json "LastConnectionTime" Time.of_json in
-      let status = field_map json "Status" AgentStatus.of_json in
-      let name = field_map json "Name" TagValue.of_json in
-      let agentArn = field_map json "AgentArn" AgentArn.of_json in
-      make ?privateLinkConfig ?endpointType ?creationTime ?lastConnectionTime
-        ?status ?name ?agentArn ()
+        field_map json__ "LastConnectionTime" Time.of_json in
+      let status = field_map json__ "Status" AgentStatus.of_json in
+      let name = field_map json__ "Name" TagValue.of_json in
+      let agentArn = field_map json__ "AgentArn" AgentArn.of_json in
+      make ?platform ?privateLinkConfig ?endpointType ?creationTime
+        ?lastConnectionTime ?status ?name ?agentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeAgentResponse"]
 module DescribeAgentRequest =
@@ -6775,7 +10556,7 @@ module DescribeAgentRequest =
       {
       agentArn: AgentArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the agent to describe."]}
+          "Specifies the Amazon Resource Name (ARN) of the DataSync agent that you want information about."]}
     let context_ = "DescribeAgentRequest"
     let make ~agentArn = fun () -> { agentArn }
     let to_value x =
@@ -6787,8 +10568,8 @@ module DescribeAgentRequest =
         AgentArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AgentArn") in
       make ~agentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let agentArn = field_map_exn json "AgentArn" AgentArn.of_json in
+    let of_json json__ =
+      let agentArn = field_map_exn json__ "AgentArn" AgentArn.of_json in
       make ~agentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeAgent"]
@@ -6839,13 +10620,14 @@ module DeleteTaskResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a task."]
+  end[@@ocaml.doc "Deletes a transfer task resource from DataSync."]
 module DeleteTaskRequest =
   struct
     type nonrec t =
       {
       taskArn: TaskArn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the task to delete."]}
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the task that you want to delete."]}
     let context_ = "DeleteTaskRequest"
     let make ~taskArn = fun () -> { taskArn }
     let to_value x =
@@ -6856,8 +10638,8 @@ module DeleteTaskRequest =
         TaskArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
       make ~taskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskArn = field_map_exn json "TaskArn" TaskArn.of_json in
+    let of_json json__ =
+      let taskArn = field_map_exn json__ "TaskArn" TaskArn.of_json in
       make ~taskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteTask"]
@@ -6908,8 +10690,7 @@ module DeleteLocationResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes the configuration of a location used by DataSync."]
+  end[@@ocaml.doc "Deletes a transfer location resource from DataSync."]
 module DeleteLocationRequest =
   struct
     type nonrec t =
@@ -6929,8 +10710,9 @@ module DeleteLocationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn =
+        field_map_exn json__ "LocationArn" LocationArn.of_json in
       make ~locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteLocation"]
@@ -6982,7 +10764,7 @@ module DeleteAgentResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an agent. To specify which agent to delete, use the Amazon Resource Name (ARN) of the agent in your request. The operation disassociates the agent from your Amazon Web Services account. However, it doesn't delete the agent virtual machine (VM) from your on-premises environment."]
+       "Removes an DataSync agent resource from your Amazon Web Services account. Keep in mind that this operation (which can't be undone) doesn't remove the agent's virtual machine (VM) or Amazon EC2 instance from your storage environment. For next steps, you can delete the VM or instance from your storage environment or reuse it to activate a new agent."]
 module DeleteAgentRequest =
   struct
     type nonrec t =
@@ -7001,8 +10783,8 @@ module DeleteAgentRequest =
         AgentArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AgentArn") in
       make ~agentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let agentArn = field_map_exn json "AgentArn" AgentArn.of_json in
+    let of_json json__ =
+      let agentArn = field_map_exn json__ "AgentArn" AgentArn.of_json in
       make ~agentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteAgentRequest"]
@@ -7058,8 +10840,8 @@ module CreateTaskResponse =
         (Option.map ~f:TaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
       make ?taskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskArn = field_map json "TaskArn" TaskArn.of_json in
+    let of_json json__ =
+      let taskArn = field_map json__ "TaskArn" TaskArn.of_json in
       make ?taskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateTaskResponse"]
@@ -7068,32 +10850,38 @@ module CreateTaskRequest =
     type nonrec t =
       {
       sourceLocationArn: LocationArn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the source location for the task."];
+        [@ocaml.doc "Specifies the ARN of your transfer's source location."];
       destinationLocationArn: LocationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an Amazon Web Services storage resource's location."];
+          "Specifies the ARN of your transfer's destination location."];
       cloudWatchLogGroupArn: LogGroupArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon CloudWatch log group that is used to monitor and log events in the task."];
-      name: TagValue.t option
-        [@ocaml.doc
-          "The name of a task. This value is a text reference that is used to identify the task in the console."];
+          "Specifies the Amazon Resource Name (ARN) of an Amazon CloudWatch log group for monitoring your task. For Enhanced mode tasks, you don't need to specify anything. DataSync automatically sends logs to a CloudWatch log group named /aws/datasync."];
+      name: TagValue.t option [@ocaml.doc "Specifies the name of your task."];
       options: Options.t option
         [@ocaml.doc
-          "The set of configuration options that control the behavior of a single execution of the task that occurs when you call StartTaskExecution. You can configure these options to preserve metadata such as user ID (UID) and group ID (GID), file permissions, data integrity verification, and so on. For each individual task execution, you can override these options by specifying the OverrideOptions before starting the task execution. For more information, see the StartTaskExecution operation."];
+          "Specifies your task's settings, such as preserving file metadata, verifying data integrity, among other options."];
       excludes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to exclude from a task. The list should contain a single filter string that consists of the patterns to exclude. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."];
+          "Specifies exclude filters that define the files, objects, and folders in your source location that you don't want DataSync to transfer. For more information and examples, see Specifying what DataSync transfers by using filters."];
       schedule: TaskSchedule.t option
         [@ocaml.doc
-          "Specifies a schedule used to periodically transfer files from a source to a destination location. The schedule should be specified in UTC time. For more information, see Scheduling your task."];
+          "Specifies a schedule for when you want your task to run. For more information, see Scheduling your task."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents the tag that you want to add to the resource. The value can be an empty string."];
+          "Specifies the tags that you want to apply to your task. Tags are key-value pairs that help you manage, filter, and search for your DataSync resources."];
       includes: FilterList.t option
         [@ocaml.doc
-          "A list of filter rules that determines which files to include when running a task. The pattern contains a single filter string that consists of the patterns to include. The patterns are delimited by \"|\" (that is, a pipe), for example, \"/folder1|/folder2\"."]}
+          "Specifies include filters that define the files, objects, and folders in your source location that you want DataSync to transfer. For more information and examples, see Specifying what DataSync transfers by using filters."];
+      manifestConfig: ManifestConfig.t option
+        [@ocaml.doc
+          "Configures a manifest, which is a list of files or objects that you want DataSync to transfer. For more information and configuration examples, see Specifying what DataSync transfers by using a manifest. When using this parameter, your caller identity (the role that you're using DataSync with) must have the iam:PassRole permission. The AWSDataSyncFullAccess policy includes this permission."];
+      taskReportConfig: TaskReportConfig.t option
+        [@ocaml.doc
+          "Specifies how you want to configure a task report, which provides detailed information about your DataSync transfer. For more information, see Monitoring your DataSync transfers with task reports. When using this parameter, your caller identity (the role that you're using DataSync with) must have the iam:PassRole permission. The AWSDataSyncFullAccess policy includes this permission."];
+      taskMode: TaskMode.t option
+        [@ocaml.doc
+          "Specifies one of the following task modes for your data transfer: ENHANCED - Transfer virtually unlimited numbers of objects with higher performance than Basic mode. Enhanced mode tasks optimize the data transfer process by listing, preparing, transferring, and verifying data in parallel. Enhanced mode is currently available for transfers between Amazon S3 locations, transfers between Azure Blob and Amazon S3 without an agent, and transfers between other clouds and Amazon S3 without an agent. To create an Enhanced mode task, the IAM role that you use to call the CreateTask operation must have the iam:CreateServiceLinkedRole permission. BASIC (default) - Transfer files or objects between Amazon Web Services storage and all other supported DataSync locations. Basic mode tasks are subject to quotas on the number of files, objects, and directories in a dataset. Basic mode sequentially prepares, transfers, and verifies data, making it slower than Enhanced mode for most workloads. For more information, see Understanding task mode differences."]}
     let context_ = "CreateTaskRequest"
     let make ?cloudWatchLogGroupArn =
       fun ?name ->
@@ -7102,20 +10890,26 @@ module CreateTaskRequest =
             fun ?schedule ->
               fun ?tags ->
                 fun ?includes ->
-                  fun ~sourceLocationArn ->
-                    fun ~destinationLocationArn ->
-                      fun () ->
-                        {
-                          cloudWatchLogGroupArn;
-                          name;
-                          options;
-                          excludes;
-                          schedule;
-                          tags;
-                          includes;
-                          sourceLocationArn;
-                          destinationLocationArn
-                        }
+                  fun ?manifestConfig ->
+                    fun ?taskReportConfig ->
+                      fun ?taskMode ->
+                        fun ~sourceLocationArn ->
+                          fun ~destinationLocationArn ->
+                            fun () ->
+                              {
+                                cloudWatchLogGroupArn;
+                                name;
+                                options;
+                                excludes;
+                                schedule;
+                                tags;
+                                includes;
+                                manifestConfig;
+                                taskReportConfig;
+                                taskMode;
+                                sourceLocationArn;
+                                destinationLocationArn
+                              }
     let to_value x =
       structure_to_value
         [("SourceLocationArn",
@@ -7129,9 +10923,22 @@ module CreateTaskRequest =
         ("Excludes", (Option.map x.excludes ~f:FilterList.to_value));
         ("Schedule", (Option.map x.schedule ~f:TaskSchedule.to_value));
         ("Tags", (Option.map x.tags ~f:InputTagList.to_value));
-        ("Includes", (Option.map x.includes ~f:FilterList.to_value))]
+        ("Includes", (Option.map x.includes ~f:FilterList.to_value));
+        ("ManifestConfig",
+          (Option.map x.manifestConfig ~f:ManifestConfig.to_value));
+        ("TaskReportConfig",
+          (Option.map x.taskReportConfig ~f:TaskReportConfig.to_value));
+        ("TaskMode", (Option.map x.taskMode ~f:TaskMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskMode =
+        (Option.map ~f:TaskMode.of_xml) (Xml.child xml_arg0 "TaskMode") in
+      let taskReportConfig =
+        (Option.map ~f:TaskReportConfig.of_xml)
+          (Xml.child xml_arg0 "TaskReportConfig") in
+      let manifestConfig =
+        (Option.map ~f:ManifestConfig.of_xml)
+          (Xml.child xml_arg0 "ManifestConfig") in
       let includes =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Includes") in
       let tags =
@@ -7152,24 +10959,31 @@ module CreateTaskRequest =
       let sourceLocationArn =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationArn") in
-      make ?includes ?tags ?schedule ?excludes ?options ?name
-        ?cloudWatchLogGroupArn ~destinationLocationArn ~sourceLocationArn ()
+      make ?taskMode ?taskReportConfig ?manifestConfig ?includes ?tags
+        ?schedule ?excludes ?options ?name ?cloudWatchLogGroupArn
+        ~destinationLocationArn ~sourceLocationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let includes = field_map json "Includes" FilterList.of_json in
-      let tags = field_map json "Tags" InputTagList.of_json in
-      let schedule = field_map json "Schedule" TaskSchedule.of_json in
-      let excludes = field_map json "Excludes" FilterList.of_json in
-      let options = field_map json "Options" Options.of_json in
-      let name = field_map json "Name" TagValue.of_json in
+    let of_json json__ =
+      let taskMode = field_map json__ "TaskMode" TaskMode.of_json in
+      let taskReportConfig =
+        field_map json__ "TaskReportConfig" TaskReportConfig.of_json in
+      let manifestConfig =
+        field_map json__ "ManifestConfig" ManifestConfig.of_json in
+      let includes = field_map json__ "Includes" FilterList.of_json in
+      let tags = field_map json__ "Tags" InputTagList.of_json in
+      let schedule = field_map json__ "Schedule" TaskSchedule.of_json in
+      let excludes = field_map json__ "Excludes" FilterList.of_json in
+      let options = field_map json__ "Options" Options.of_json in
+      let name = field_map json__ "Name" TagValue.of_json in
       let cloudWatchLogGroupArn =
-        field_map json "CloudWatchLogGroupArn" LogGroupArn.of_json in
+        field_map json__ "CloudWatchLogGroupArn" LogGroupArn.of_json in
       let destinationLocationArn =
-        field_map_exn json "DestinationLocationArn" LocationArn.of_json in
+        field_map_exn json__ "DestinationLocationArn" LocationArn.of_json in
       let sourceLocationArn =
-        field_map_exn json "SourceLocationArn" LocationArn.of_json in
-      make ?includes ?tags ?schedule ?excludes ?options ?name
-        ?cloudWatchLogGroupArn ~destinationLocationArn ~sourceLocationArn ()
+        field_map_exn json__ "SourceLocationArn" LocationArn.of_json in
+      make ?taskMode ?taskReportConfig ?manifestConfig ?includes ?tags
+        ?schedule ?excludes ?options ?name ?cloudWatchLogGroupArn
+        ~destinationLocationArn ~sourceLocationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateTaskRequest"]
 module CreateLocationSmbResponse =
@@ -7177,8 +10991,7 @@ module CreateLocationSmbResponse =
     type nonrec t =
       {
       locationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the source SMB file system location that is created."]}
+        [@ocaml.doc "The ARN of the SMB location that you created."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -7225,8 +11038,8 @@ module CreateLocationSmbResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateLocationSmbResponse"]
@@ -7236,61 +11049,125 @@ module CreateLocationSmbRequest =
       {
       subdirectory: SmbSubdirectory.t
         [@ocaml.doc
-          "The subdirectory in the SMB file system that is used to read data from the SMB source location or write data to the SMB destination. The SMB path should be a path that's exported by the SMB server, or a subdirectory of that path. The path should be such that it can be mounted by other SMB clients in your network. Subdirectory must be specified with forward slashes. For example, /path/to/folder. To transfer all the data in the folder you specified, DataSync needs to have permissions to mount the SMB share, as well as to access all the data in that share. To ensure this, either ensure that the user/password specified belongs to the user who can mount the share, and who has the appropriate permissions for all of the files and directories that you want DataSync to access, or use credentials of a member of the Backup Operators group to mount the share. Doing either enables the agent to access the data. For the agent to access directories, you must additionally enable all execute access."];
+          "Specifies the name of the share exported by your SMB file server where DataSync will read or write data. You can include a subdirectory in the share path (for example, /path/to/subdirectory). Make sure that other SMB clients in your network can also mount this path. To copy all data in the subdirectory, DataSync must be able to mount the SMB share and access all of its data. For more information, see Providing DataSync access to SMB file servers."];
       serverHostname: ServerHostname.t
         [@ocaml.doc
-          "The name of the SMB server. This value is the IP address or Domain Name Service (DNS) name of the SMB server. An agent that is installed on-premises uses this hostname to mount the SMB server in a network. This name must either be DNS-compliant or must be an IP version 4 (IPv4) address."];
-      user: SmbUser.t
+          "Specifies the domain name or IP address (IPv4 or IPv6) of the SMB file server that your DataSync agent connects to. If you're using Kerberos authentication, you must specify a domain name."];
+      user: SmbUser.t option
         [@ocaml.doc
-          "The user who can mount the share, has the permissions to access files and folders in the SMB share. For information about choosing a user name that ensures sufficient permissions to files, folders, and metadata, see user."];
+          "Specifies the user that can mount and access the files, folders, and file metadata in your SMB file server. This parameter applies only if AuthenticationType is set to NTLM. For information about choosing a user with the right level of access for your transfer, see Providing DataSync access to SMB file servers."];
       domain: SmbDomain.t option
         [@ocaml.doc
-          "The name of the Windows domain that the SMB server belongs to."];
-      password: SmbPassword.t
+          "Specifies the Windows domain name that your SMB file server belongs to. This parameter applies only if AuthenticationType is set to NTLM. If you have multiple domains in your environment, configuring this parameter makes sure that DataSync connects to the right file server."];
+      password: SmbPassword.t option
         [@ocaml.doc
-          "The password of the user who can mount the share, has the permissions to access files and folders in the SMB share."];
+          "Specifies the password of the user who can mount your SMB file server and has permission to access the files and folders involved in your transfer. This parameter applies only if AuthenticationType is set to NTLM."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, either a Password or KerberosKeytab (for NTLM (default) and KERBEROS authentication types, respectively) that DataSync uses to access a specific SMB storage location, with a customer-managed KMS key. When you include this parameter as part of a CreateLocationSmbRequest request, you provide only the KMS key ARN. DataSync uses this KMS key together with either the Password or KerberosKeytab you specify to create a DataSync-managed secret to store the location access credentials. Make sure that DataSync has permission to access the KMS key that you specify. For more information, see Using a service-managed secret encrypted with a custom KMS key. You can use either CmkSecretConfig (with either Password or KerberosKeytab) or CustomSecretConfig (without any Password and KerberosKeytab) to provide credentials for a CreateLocationSmbRequest request. Do not provide both CmkSecretConfig and CustomSecretConfig parameters for the same request."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed Secrets Manager secret where the SMB storage location credentials is stored in Secrets Manager as plain text (for Password) or binary (for KerberosKeytab). This configuration includes the secret ARN, and the ARN for an IAM role that provides access to the secret. For more information, see Using a secret that you manage. You can use either CmkSecretConfig (with SasConfiguration) or CustomSecretConfig (without SasConfiguration) to provide credentials for a CreateLocationSmbRequest request. Do not provide both parameters for the same request."];
       agentArns: AgentArnList.t
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of agents to use for a Simple Message Block (SMB) location."];
+          "Specifies the DataSync agent (or agents) that can connect to your SMB file server. You specify an agent by using its Amazon Resource Name (ARN)."];
       mountOptions: SmbMountOptions.t option
         [@ocaml.doc
-          "The mount options used by DataSync to access the SMB server."];
+          "Specifies the version of the SMB protocol that DataSync uses to access your SMB file server."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents the tag that you want to add to the location. The value can be an empty string. We recommend using tags to name your resources."]}
+          "Specifies labels that help you categorize, filter, and search for your Amazon Web Services resources. We recommend creating at least a name tag for your location."];
+      authenticationType: SmbAuthenticationType.t option
+        [@ocaml.doc
+          "Specifies the authentication protocol that DataSync uses to connect to your SMB file server. DataSync supports NTLM (default) and KERBEROS authentication. For more information, see Providing DataSync access to SMB file servers."];
+      dnsIpAddresses: DnsIpList.t option
+        [@ocaml.doc
+          "Specifies the IPv4 or IPv6 addresses for the DNS servers that your SMB file server belongs to. This parameter applies only if AuthenticationType is set to KERBEROS. If you have multiple domains in your environment, configuring this parameter makes sure that DataSync connects to the right SMB file server."];
+      kerberosPrincipal: KerberosPrincipal.t option
+        [@ocaml.doc
+          "Specifies a Kerberos principal, which is an identity in your Kerberos realm that has permission to access the files, folders, and file metadata in your SMB file server. A Kerberos principal might look like HOST/kerberosuser\\@MYDOMAIN.ORG. Principal names are case sensitive. Your DataSync task execution will fail if the principal that you specify for this parameter doesn\226\128\153t exactly match the principal that you use to create the keytab file."];
+      kerberosKeytab: KerberosKeytabFile.t option
+        [@ocaml.doc
+          "Specifies your Kerberos key table (keytab) file, which includes mappings between your Kerberos principal and encryption keys. To avoid task execution errors, make sure that the Kerberos principal that you use to create the keytab file matches exactly what you specify for KerberosPrincipal."];
+      kerberosKrb5Conf: KerberosKrb5ConfFile.t option
+        [@ocaml.doc
+          "Specifies a Kerberos configuration file (krb5.conf) that defines your Kerberos realm configuration. The file must be base64 encoded. If you're using the CLI, the encoding is done for you."]}
     let context_ = "CreateLocationSmbRequest"
-    let make ?domain =
-      fun ?mountOptions ->
-        fun ?tags ->
-          fun ~subdirectory ->
-            fun ~serverHostname ->
-              fun ~user ->
-                fun ~password ->
-                  fun ~agentArns ->
-                    fun () ->
-                      {
-                        domain;
-                        mountOptions;
-                        tags;
-                        subdirectory;
-                        serverHostname;
-                        user;
-                        password;
-                        agentArns
-                      }
+    let make ?user =
+      fun ?domain ->
+        fun ?password ->
+          fun ?cmkSecretConfig ->
+            fun ?customSecretConfig ->
+              fun ?mountOptions ->
+                fun ?tags ->
+                  fun ?authenticationType ->
+                    fun ?dnsIpAddresses ->
+                      fun ?kerberosPrincipal ->
+                        fun ?kerberosKeytab ->
+                          fun ?kerberosKrb5Conf ->
+                            fun ~subdirectory ->
+                              fun ~serverHostname ->
+                                fun ~agentArns ->
+                                  fun () ->
+                                    {
+                                      user;
+                                      domain;
+                                      password;
+                                      cmkSecretConfig;
+                                      customSecretConfig;
+                                      mountOptions;
+                                      tags;
+                                      authenticationType;
+                                      dnsIpAddresses;
+                                      kerberosPrincipal;
+                                      kerberosKeytab;
+                                      kerberosKrb5Conf;
+                                      subdirectory;
+                                      serverHostname;
+                                      agentArns
+                                    }
     let to_value x =
       structure_to_value
         [("Subdirectory", (Some (SmbSubdirectory.to_value x.subdirectory)));
         ("ServerHostname", (Some (ServerHostname.to_value x.serverHostname)));
-        ("User", (Some (SmbUser.to_value x.user)));
+        ("User", (Option.map x.user ~f:SmbUser.to_value));
         ("Domain", (Option.map x.domain ~f:SmbDomain.to_value));
-        ("Password", (Some (SmbPassword.to_value x.password)));
+        ("Password", (Option.map x.password ~f:SmbPassword.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value));
         ("AgentArns", (Some (AgentArnList.to_value x.agentArns)));
         ("MountOptions",
           (Option.map x.mountOptions ~f:SmbMountOptions.to_value));
-        ("Tags", (Option.map x.tags ~f:InputTagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:InputTagList.to_value));
+        ("AuthenticationType",
+          (Option.map x.authenticationType ~f:SmbAuthenticationType.to_value));
+        ("DnsIpAddresses",
+          (Option.map x.dnsIpAddresses ~f:DnsIpList.to_value));
+        ("KerberosPrincipal",
+          (Option.map x.kerberosPrincipal ~f:KerberosPrincipal.to_value));
+        ("KerberosKeytab",
+          (Option.map x.kerberosKeytab ~f:KerberosKeytabFile.to_value));
+        ("KerberosKrb5Conf",
+          (Option.map x.kerberosKrb5Conf ~f:KerberosKrb5ConfFile.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kerberosKrb5Conf =
+        (Option.map ~f:KerberosKrb5ConfFile.of_xml)
+          (Xml.child xml_arg0 "KerberosKrb5Conf") in
+      let kerberosKeytab =
+        (Option.map ~f:KerberosKeytabFile.of_xml)
+          (Xml.child xml_arg0 "KerberosKeytab") in
+      let kerberosPrincipal =
+        (Option.map ~f:KerberosPrincipal.of_xml)
+          (Xml.child xml_arg0 "KerberosPrincipal") in
+      let dnsIpAddresses =
+        (Option.map ~f:DnsIpList.of_xml)
+          (Xml.child xml_arg0 "DnsIpAddresses") in
+      let authenticationType =
+        (Option.map ~f:SmbAuthenticationType.of_xml)
+          (Xml.child xml_arg0 "AuthenticationType") in
       let tags =
         (Option.map ~f:InputTagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let mountOptions =
@@ -7299,35 +11176,57 @@ module CreateLocationSmbRequest =
       let agentArns =
         AgentArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AgentArns") in
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
       let password =
-        SmbPassword.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Password") in
+        (Option.map ~f:SmbPassword.of_xml) (Xml.child xml_arg0 "Password") in
       let domain =
         (Option.map ~f:SmbDomain.of_xml) (Xml.child xml_arg0 "Domain") in
-      let user =
-        SmbUser.of_xml (Xml.child_exn ~context:context_ xml_arg0 "User") in
+      let user = (Option.map ~f:SmbUser.of_xml) (Xml.child xml_arg0 "User") in
       let serverHostname =
         ServerHostname.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerHostname") in
       let subdirectory =
         SmbSubdirectory.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Subdirectory") in
-      make ?tags ?mountOptions ~agentArns ~password ?domain ~user
+      make ?kerberosKrb5Conf ?kerberosKeytab ?kerberosPrincipal
+        ?dnsIpAddresses ?authenticationType ?tags ?mountOptions ~agentArns
+        ?customSecretConfig ?cmkSecretConfig ?password ?domain ?user
         ~serverHostname ~subdirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagList.of_json in
+    let of_json json__ =
+      let kerberosKrb5Conf =
+        field_map json__ "KerberosKrb5Conf" KerberosKrb5ConfFile.of_json in
+      let kerberosKeytab =
+        field_map json__ "KerberosKeytab" KerberosKeytabFile.of_json in
+      let kerberosPrincipal =
+        field_map json__ "KerberosPrincipal" KerberosPrincipal.of_json in
+      let dnsIpAddresses =
+        field_map json__ "DnsIpAddresses" DnsIpList.of_json in
+      let authenticationType =
+        field_map json__ "AuthenticationType" SmbAuthenticationType.of_json in
+      let tags = field_map json__ "Tags" InputTagList.of_json in
       let mountOptions =
-        field_map json "MountOptions" SmbMountOptions.of_json in
-      let agentArns = field_map_exn json "AgentArns" AgentArnList.of_json in
-      let password = field_map_exn json "Password" SmbPassword.of_json in
-      let domain = field_map json "Domain" SmbDomain.of_json in
-      let user = field_map_exn json "User" SmbUser.of_json in
+        field_map json__ "MountOptions" SmbMountOptions.of_json in
+      let agentArns = field_map_exn json__ "AgentArns" AgentArnList.of_json in
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let password = field_map json__ "Password" SmbPassword.of_json in
+      let domain = field_map json__ "Domain" SmbDomain.of_json in
+      let user = field_map json__ "User" SmbUser.of_json in
       let serverHostname =
-        field_map_exn json "ServerHostname" ServerHostname.of_json in
+        field_map_exn json__ "ServerHostname" ServerHostname.of_json in
       let subdirectory =
-        field_map_exn json "Subdirectory" SmbSubdirectory.of_json in
-      make ?tags ?mountOptions ~agentArns ~password ?domain ~user
+        field_map_exn json__ "Subdirectory" SmbSubdirectory.of_json in
+      make ?kerberosKrb5Conf ?kerberosKeytab ?kerberosPrincipal
+        ?dnsIpAddresses ?authenticationType ?tags ?mountOptions ~agentArns
+        ?customSecretConfig ?cmkSecretConfig ?password ?domain ?user
         ~serverHostname ~subdirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateLocationSmbRequest"]
@@ -7336,8 +11235,7 @@ module CreateLocationS3Response =
     type nonrec t =
       {
       locationArn: LocationArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the source Amazon S3 bucket location that is created."]}
+        [@ocaml.doc "The ARN of the S3 location that you created."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -7384,8 +11282,8 @@ module CreateLocationS3Response =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateLocationS3Response"]
@@ -7395,20 +11293,20 @@ module CreateLocationS3Request =
       {
       subdirectory: S3Subdirectory.t option
         [@ocaml.doc
-          "A subdirectory in the Amazon S3 bucket. This subdirectory in Amazon S3 is used to read data from the S3 source location or write data to the S3 destination."];
+          "Specifies a prefix in the S3 bucket that DataSync reads from or writes to (depending on whether the bucket is a source or destination location). DataSync can't transfer objects with a prefix that begins with a slash (/) or includes //, /./, or /../ patterns. For example: /photos photos//2006/January photos/./2006/February photos/../2006/March"];
       s3BucketArn: S3BucketArn.t
         [@ocaml.doc
-          "The ARN of the Amazon S3 bucket. If the bucket is on an Amazon Web Services Outpost, this must be an access point ARN."];
+          "Specifies the ARN of the S3 bucket that you want to use as a location. (When creating your DataSync task later, you specify whether this location is a transfer source or destination.) If your S3 bucket is located on an Outposts resource, you must specify an Amazon S3 access point. For more information, see Managing data access with Amazon S3 access points in the Amazon S3 User Guide."];
       s3StorageClass: S3StorageClass.t option
         [@ocaml.doc
-          "The Amazon S3 storage class that you want to store your files in when this location is used as a task destination. For buckets in Amazon Web Services Regions, the storage class defaults to Standard. For buckets on Outposts, the storage class defaults to Amazon Web Services S3 Outposts. For more information about S3 storage classes, see Amazon S3 Storage Classes. Some storage classes have behaviors that can affect your S3 storage cost. For detailed information, see Considerations when working with S3 storage classes in DataSync."];
+          "Specifies the storage class that you want your objects to use when Amazon S3 is a transfer destination. For buckets in Amazon Web Services Regions, the storage class defaults to STANDARD. For buckets on Outposts, the storage class defaults to OUTPOSTS. For more information, see Storage class considerations with Amazon S3 transfers."];
       s3Config: S3Config.t ;
       agentArns: AgentArnList.t option
         [@ocaml.doc
-          "If you're using DataSync on an Amazon Web Services Outpost, specify the Amazon Resource Names (ARNs) of the DataSync agents deployed on your Outpost. For more information about launching a DataSync agent on an Amazon Web Services Outpost, see Deploy your DataSync agent on Outposts."];
+          "(Amazon S3 on Outposts only) Specifies the Amazon Resource Name (ARN) of the DataSync agent on your Outpost. For more information, see Deploy your DataSync agent on Outposts."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents the tag that you want to add to the location. The value can be an empty string. We recommend using tags to name your resources."]}
+          "Specifies labels that help you categorize, filter, and search for your Amazon Web Services resources. We recommend creating at least a name tag for your transfer location."]}
     let context_ = "CreateLocationS3Request"
     let make ?subdirectory =
       fun ?s3StorageClass ->
@@ -7455,14 +11353,16 @@ module CreateLocationS3Request =
       make ?tags ?agentArns ~s3Config ?s3StorageClass ~s3BucketArn
         ?subdirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagList.of_json in
-      let agentArns = field_map json "AgentArns" AgentArnList.of_json in
-      let s3Config = field_map_exn json "S3Config" S3Config.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" InputTagList.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
+      let s3Config = field_map_exn json__ "S3Config" S3Config.of_json in
       let s3StorageClass =
-        field_map json "S3StorageClass" S3StorageClass.of_json in
-      let s3BucketArn = field_map_exn json "S3BucketArn" S3BucketArn.of_json in
-      let subdirectory = field_map json "Subdirectory" S3Subdirectory.of_json in
+        field_map json__ "S3StorageClass" S3StorageClass.of_json in
+      let s3BucketArn =
+        field_map_exn json__ "S3BucketArn" S3BucketArn.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" S3Subdirectory.of_json in
       make ?tags ?agentArns ~s3Config ?s3StorageClass ~s3BucketArn
         ?subdirectory ()
     let to_json v = composed_to_json to_value v
@@ -7473,7 +11373,7 @@ module CreateLocationObjectStorageResponse =
       {
       locationArn: LocationArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the agents associated with the self-managed object storage server location."]}
+          "Specifies the ARN of the object storage system location that you create."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -7520,8 +11420,8 @@ module CreateLocationObjectStorageResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateLocationObjectStorageResponse"]
@@ -7531,53 +11431,68 @@ module CreateLocationObjectStorageRequest =
       {
       serverHostname: ServerHostname.t
         [@ocaml.doc
-          "The name of the self-managed object storage server. This value is the IP address or Domain Name Service (DNS) name of the object storage server. An agent uses this hostname to mount the object storage server in a network."];
+          "Specifies the domain name or IP address (IPv4 or IPv6) of the object storage server that your DataSync agent connects to."];
       serverPort: ObjectStorageServerPort.t option
         [@ocaml.doc
-          "The port that your self-managed object storage server accepts inbound network traffic on. The server port is set by default to TCP 80 (HTTP) or TCP 443 (HTTPS). You can specify a custom port if your self-managed object storage server requires one."];
+          "Specifies the port that your object storage server accepts inbound network traffic on (for example, port 443)."];
       serverProtocol: ObjectStorageServerProtocol.t option
         [@ocaml.doc
-          "The protocol that the object storage server uses to communicate. Valid values are HTTP or HTTPS."];
+          "Specifies the protocol that your object storage server uses to communicate. If not specified, the default value is HTTPS."];
       subdirectory: S3Subdirectory.t option
         [@ocaml.doc
-          "The subdirectory in the self-managed object storage server that is used to read data from."];
+          "Specifies the object prefix for your object storage server. If this is a source location, DataSync only copies objects with this prefix. If this is a destination location, DataSync writes all objects with this prefix."];
       bucketName: ObjectStorageBucketName.t
         [@ocaml.doc
-          "The bucket on the self-managed object storage server that is used to read data from."];
+          "Specifies the name of the object storage bucket involved in the transfer."];
       accessKey: ObjectStorageAccessKey.t option
         [@ocaml.doc
-          "Optional. The access key is used if credentials are required to access the self-managed object storage server. If your object storage requires a user name and password to authenticate, use AccessKey and SecretKey to provide the user name and password, respectively."];
+          "Specifies the access key (for example, a user name) if credentials are required to authenticate with the object storage server."];
       secretKey: ObjectStorageSecretKey.t option
         [@ocaml.doc
-          "Optional. The secret key is used if credentials are required to access the self-managed object storage server. If your object storage requires a user name and password to authenticate, use AccessKey and SecretKey to provide the user name and password, respectively."];
-      agentArns: AgentArnList.t
+          "Specifies the secret key (for example, a password) if credentials are required to authenticate with the object storage server. If you provide a secret using SecretKey, but do not provide secret configuration details using CmkSecretConfig or CustomSecretConfig, then DataSync stores the token using your Amazon Web Services account's Secrets Manager secret."];
+      agentArns: AgentArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the agents associated with the self-managed object storage server location."];
+          "(Optional) Specifies the Amazon Resource Names (ARNs) of the DataSync agents that can connect with your object storage system. If you are setting up an agentless cross-cloud transfer, you do not need to specify a value for this parameter. Make sure you configure this parameter correctly when you first create your storage location. You cannot add or remove agents from a storage location after you create it."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents the tag that you want to add to the location. The value can be an empty string. We recommend using tags to name your resources."]}
+          "Specifies the key-value pair that represents a tag that you want to add to the resource. Tags can help you manage, filter, and search for your resources. We recommend creating a name tag for your location."];
+      serverCertificate: ObjectStorageCertificate.t option
+        [@ocaml.doc
+          "Specifies a certificate chain for DataSync to authenticate with your object storage system if the system uses a private or self-signed certificate authority (CA). You must specify a single .pem file with a full certificate chain (for example, file:///home/user/.ssh/object_storage_certificates.pem). The certificate chain might include: The object storage system's certificate All intermediate certificates (if there are any) The root certificate of the signing CA You can concatenate your certificates into a .pem file (which can be up to 32768 bytes before base64 encoding). The following example cat command creates an object_storage_certificates.pem file that includes three certificates: cat object_server_certificate.pem intermediate_certificate.pem ca_root_certificate.pem > object_storage_certificates.pem To use this parameter, configure ServerProtocol to HTTPS."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, which includes the SecretKey that DataSync uses to access a specific object storage location, with a customer-managed KMS key. When you include this parameter as part of a CreateLocationObjectStorage request, you provide only the KMS key ARN. DataSync uses this KMS key together with the value you specify for the SecretKey parameter to create a DataSync-managed secret to store the location access credentials. Make sure that DataSync has permission to access the KMS key that you specify. For more information, see Using a service-managed secret encrypted with a custom KMS key. You can use either CmkSecretConfig (with SecretKey) or CustomSecretConfig (without SecretKey) to provide credentials for a CreateLocationObjectStorage request. Do not provide both parameters for the same request."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed Secrets Manager secret where the secret key for a specific object storage location is stored in plain text, in Secrets Manager. This configuration includes the secret ARN, and the ARN for an IAM role that provides access to the secret. For more information, see Using a secret that you manage. You can use either CmkSecretConfig (with SecretKey) or CustomSecretConfig (without SecretKey) to provide credentials for a CreateLocationObjectStorage request. Do not provide both parameters for the same request."]}
     let context_ = "CreateLocationObjectStorageRequest"
     let make ?serverPort =
       fun ?serverProtocol ->
         fun ?subdirectory ->
           fun ?accessKey ->
             fun ?secretKey ->
-              fun ?tags ->
-                fun ~serverHostname ->
-                  fun ~bucketName ->
-                    fun ~agentArns ->
-                      fun () ->
-                        {
-                          serverPort;
-                          serverProtocol;
-                          subdirectory;
-                          accessKey;
-                          secretKey;
-                          tags;
-                          serverHostname;
-                          bucketName;
-                          agentArns
-                        }
+              fun ?agentArns ->
+                fun ?tags ->
+                  fun ?serverCertificate ->
+                    fun ?cmkSecretConfig ->
+                      fun ?customSecretConfig ->
+                        fun ~serverHostname ->
+                          fun ~bucketName ->
+                            fun () ->
+                              {
+                                serverPort;
+                                serverProtocol;
+                                subdirectory;
+                                accessKey;
+                                secretKey;
+                                agentArns;
+                                tags;
+                                serverCertificate;
+                                cmkSecretConfig;
+                                customSecretConfig;
+                                serverHostname;
+                                bucketName
+                              }
     let to_value x =
       structure_to_value
         [("ServerHostname",
@@ -7595,15 +11510,30 @@ module CreateLocationObjectStorageRequest =
           (Option.map x.accessKey ~f:ObjectStorageAccessKey.to_value));
         ("SecretKey",
           (Option.map x.secretKey ~f:ObjectStorageSecretKey.to_value));
-        ("AgentArns", (Some (AgentArnList.to_value x.agentArns)));
-        ("Tags", (Option.map x.tags ~f:InputTagList.to_value))]
+        ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value));
+        ("Tags", (Option.map x.tags ~f:InputTagList.to_value));
+        ("ServerCertificate",
+          (Option.map x.serverCertificate
+             ~f:ObjectStorageCertificate.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let serverCertificate =
+        (Option.map ~f:ObjectStorageCertificate.of_xml)
+          (Xml.child xml_arg0 "ServerCertificate") in
       let tags =
         (Option.map ~f:InputTagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let agentArns =
-        AgentArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AgentArns") in
+        (Option.map ~f:AgentArnList.of_xml) (Xml.child xml_arg0 "AgentArns") in
       let secretKey =
         (Option.map ~f:ObjectStorageSecretKey.of_xml)
           (Xml.child xml_arg0 "SecretKey") in
@@ -7625,26 +11555,35 @@ module CreateLocationObjectStorageRequest =
       let serverHostname =
         ServerHostname.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerHostname") in
-      make ?tags ~agentArns ?secretKey ?accessKey ~bucketName ?subdirectory
+      make ?customSecretConfig ?cmkSecretConfig ?serverCertificate ?tags
+        ?agentArns ?secretKey ?accessKey ~bucketName ?subdirectory
         ?serverProtocol ?serverPort ~serverHostname ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagList.of_json in
-      let agentArns = field_map_exn json "AgentArns" AgentArnList.of_json in
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let serverCertificate =
+        field_map json__ "ServerCertificate" ObjectStorageCertificate.of_json in
+      let tags = field_map json__ "Tags" InputTagList.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
       let secretKey =
-        field_map json "SecretKey" ObjectStorageSecretKey.of_json in
+        field_map json__ "SecretKey" ObjectStorageSecretKey.of_json in
       let accessKey =
-        field_map json "AccessKey" ObjectStorageAccessKey.of_json in
+        field_map json__ "AccessKey" ObjectStorageAccessKey.of_json in
       let bucketName =
-        field_map_exn json "BucketName" ObjectStorageBucketName.of_json in
-      let subdirectory = field_map json "Subdirectory" S3Subdirectory.of_json in
+        field_map_exn json__ "BucketName" ObjectStorageBucketName.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" S3Subdirectory.of_json in
       let serverProtocol =
-        field_map json "ServerProtocol" ObjectStorageServerProtocol.of_json in
+        field_map json__ "ServerProtocol" ObjectStorageServerProtocol.of_json in
       let serverPort =
-        field_map json "ServerPort" ObjectStorageServerPort.of_json in
+        field_map json__ "ServerPort" ObjectStorageServerPort.of_json in
       let serverHostname =
-        field_map_exn json "ServerHostname" ServerHostname.of_json in
-      make ?tags ~agentArns ?secretKey ?accessKey ~bucketName ?subdirectory
+        field_map_exn json__ "ServerHostname" ServerHostname.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?serverCertificate ?tags
+        ?agentArns ?secretKey ?accessKey ~bucketName ?subdirectory
         ?serverProtocol ?serverPort ~serverHostname ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateLocationObjectStorageRequest"]
@@ -7654,7 +11593,7 @@ module CreateLocationNfsResponse =
       {
       locationArn: LocationArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the source NFS file system location that is created."]}
+          "The ARN of the transfer location that you created for your NFS file server."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -7701,8 +11640,8 @@ module CreateLocationNfsResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateLocationNfsResponse"]
@@ -7712,19 +11651,19 @@ module CreateLocationNfsRequest =
       {
       subdirectory: NfsSubdirectory.t
         [@ocaml.doc
-          "The subdirectory in the NFS file system that is used to read data from the NFS source location or write data to the NFS destination. The NFS path should be a path that's exported by the NFS server, or a subdirectory of that path. The path should be such that it can be mounted by other NFS clients in your network. To see all the paths exported by your NFS server, run \"showmount -e nfs-server-name\" from an NFS client that has access to your server. You can specify any directory that appears in the results, and any subdirectory of that directory. Ensure that the NFS export is accessible without Kerberos authentication. To transfer all the data in the folder you specified, DataSync needs to have permissions to read all the data. To ensure this, either configure the NFS export with no_root_squash, or ensure that the permissions for all of the files that you want DataSync allow read access for all users. Doing either enables the agent to read the files. For the agent to access directories, you must additionally enable all execute access. If you are copying data to or from your Snowcone device, see NFS Server on Snowcone for more information. For information about NFS export configuration, see 18.7. The /etc/exports Configuration File in the Red Hat Enterprise Linux documentation."];
+          "Specifies the export path in your NFS file server that you want DataSync to mount. This path (or a subdirectory of the path) is where DataSync transfers data to or from. For information on configuring an export for DataSync, see Accessing NFS file servers."];
       serverHostname: ServerHostname.t
         [@ocaml.doc
-          "The name of the NFS server. This value is the IP address or Domain Name Service (DNS) name of the NFS server. An agent that is installed on-premises uses this hostname to mount the NFS server in a network. If you are copying data to or from your Snowcone device, see NFS Server on Snowcone for more information. This name must either be DNS-compliant or must be an IP version 4 (IPv4) address."];
+          "Specifies the DNS name or IP address (IPv4 or IPv6) of the NFS file server that your DataSync agent connects to."];
       onPremConfig: OnPremConfig.t
         [@ocaml.doc
-          "Contains a list of Amazon Resource Names (ARNs) of agents that are used to connect to an NFS server. If you are copying data to or from your Snowcone device, see NFS Server on Snowcone for more information."];
+          "Specifies the Amazon Resource Name (ARN) of the DataSync agent that can connect to your NFS file server. You can specify more than one agent. For more information, see Using multiple DataSync agents."];
       mountOptions: NfsMountOptions.t option
         [@ocaml.doc
-          "The NFS mount options that DataSync can use to mount your NFS share."];
+          "Specifies the options that DataSync can use to mount your NFS file server."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents the tag that you want to add to the location. The value can be an empty string. We recommend using tags to name your resources."]}
+          "Specifies labels that help you categorize, filter, and search for your Amazon Web Services resources. We recommend creating at least a name tag for your location."]}
     let context_ = "CreateLocationNfsRequest"
     let make ?mountOptions =
       fun ?tags ->
@@ -7765,16 +11704,16 @@ module CreateLocationNfsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Subdirectory") in
       make ?tags ?mountOptions ~onPremConfig ~serverHostname ~subdirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" InputTagList.of_json in
       let mountOptions =
-        field_map json "MountOptions" NfsMountOptions.of_json in
+        field_map json__ "MountOptions" NfsMountOptions.of_json in
       let onPremConfig =
-        field_map_exn json "OnPremConfig" OnPremConfig.of_json in
+        field_map_exn json__ "OnPremConfig" OnPremConfig.of_json in
       let serverHostname =
-        field_map_exn json "ServerHostname" ServerHostname.of_json in
+        field_map_exn json__ "ServerHostname" ServerHostname.of_json in
       let subdirectory =
-        field_map_exn json "Subdirectory" NfsSubdirectory.of_json in
+        field_map_exn json__ "Subdirectory" NfsSubdirectory.of_json in
       make ?tags ?mountOptions ~onPremConfig ~serverHostname ~subdirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateLocationNfsRequest"]
@@ -7784,7 +11723,7 @@ module CreateLocationHdfsResponse =
       {
       locationArn: LocationArn.t option
         [@ocaml.doc
-          "The ARN of the source HDFS cluster location that's created."]}
+          "The ARN of the source HDFS cluster location that you create."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -7831,12 +11770,12 @@ module CreateLocationHdfsResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an endpoint for a Hadoop Distributed File System (HDFS)."]
+       "Creates a transfer location for a Hadoop Distributed File System (HDFS). DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses HDFS clusters."]
 module CreateLocationHdfsRequest =
   struct
     type nonrec t =
@@ -7870,16 +11809,22 @@ module CreateLocationHdfsRequest =
           "The Kerberos principal with access to the files and folders on the HDFS cluster. If KERBEROS is specified for AuthenticationType, this parameter is required."];
       kerberosKeytab: KerberosKeytabFile.t option
         [@ocaml.doc
-          "The Kerberos key table (keytab) that contains mappings between the defined Kerberos principal and the encrypted keys. You can load the keytab from a file by providing the file's address. If you're using the CLI, it performs base64 encoding for you. Otherwise, provide the base64-encoded text. If KERBEROS is specified for AuthenticationType, this parameter is required."];
+          "The Kerberos key table (keytab) that contains mappings between the defined Kerberos principal and the encrypted keys. You can load the keytab from a file by providing the file's address. If KERBEROS is specified for AuthenticationType, this parameter is required."];
       kerberosKrb5Conf: KerberosKrb5ConfFile.t option
         [@ocaml.doc
           "The krb5.conf file that contains the Kerberos configuration information. You can load the krb5.conf file by providing the file's address. If you're using the CLI, it performs the base64 encoding for you. Otherwise, provide the base64-encoded text. If KERBEROS is specified for AuthenticationType, this parameter is required."];
       agentArns: AgentArnList.t
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the agents that are used to connect to the HDFS cluster."];
+          "The Amazon Resource Names (ARNs) of the DataSync agents that can connect to your HDFS cluster."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents the tag that you want to add to the location. The value can be an empty string. We recommend using tags to name your resources."]}
+          "The key-value pair that represents the tag that you want to add to the location. The value can be an empty string. We recommend using tags to name your resources."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, which includes the Kerberos keytab that DataSync uses to access a specific Hadoop Distributed File System (HDFS) storage location, with a customer-managed KMS key. When you include this parameter as part of a CreateLocationHdfs request, you provide only the KMS key ARN. DataSync uses this KMS key together with the KerberosKeytab you specify for to create a DataSync-managed secret to store the location access credentials. Make sure that DataSync has permission to access the KMS key that you specify. For more information, see Using a service-managed secret encrypted with a custom KMS key. You can use either CmkSecretConfig (with KerberosKeytab) or CustomSecretConfig (without KerberosKeytab) to provide credentials for a CreateLocationHdfs request. Do not provide both parameters for the same request."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed Secrets Manager secret where the Kerberos keytab for the HDFS storage location is stored in binary, in Secrets Manager. This configuration includes the secret ARN, and the ARN for an IAM role that provides access to the secret. For more information, see Using a secret that you manage. You can use either CmkSecretConfig (with KerberosKeytab) or CustomSecretConfig (without KerberosKeytab) to provide credentials for a CreateLocationHdfs request. Do not provide both parameters for the same request."]}
     let context_ = "CreateLocationHdfsRequest"
     let make ?subdirectory =
       fun ?blockSize ->
@@ -7891,25 +11836,29 @@ module CreateLocationHdfsRequest =
                   fun ?kerberosKeytab ->
                     fun ?kerberosKrb5Conf ->
                       fun ?tags ->
-                        fun ~nameNodes ->
-                          fun ~authenticationType ->
-                            fun ~agentArns ->
-                              fun () ->
-                                {
-                                  subdirectory;
-                                  blockSize;
-                                  replicationFactor;
-                                  kmsKeyProviderUri;
-                                  qopConfiguration;
-                                  simpleUser;
-                                  kerberosPrincipal;
-                                  kerberosKeytab;
-                                  kerberosKrb5Conf;
-                                  tags;
-                                  nameNodes;
-                                  authenticationType;
-                                  agentArns
-                                }
+                        fun ?cmkSecretConfig ->
+                          fun ?customSecretConfig ->
+                            fun ~nameNodes ->
+                              fun ~authenticationType ->
+                                fun ~agentArns ->
+                                  fun () ->
+                                    {
+                                      subdirectory;
+                                      blockSize;
+                                      replicationFactor;
+                                      kmsKeyProviderUri;
+                                      qopConfiguration;
+                                      simpleUser;
+                                      kerberosPrincipal;
+                                      kerberosKeytab;
+                                      kerberosKrb5Conf;
+                                      tags;
+                                      cmkSecretConfig;
+                                      customSecretConfig;
+                                      nameNodes;
+                                      authenticationType;
+                                      agentArns
+                                    }
     let to_value x =
       structure_to_value
         [("Subdirectory",
@@ -7932,9 +11881,19 @@ module CreateLocationHdfsRequest =
         ("KerberosKrb5Conf",
           (Option.map x.kerberosKrb5Conf ~f:KerberosKrb5ConfFile.to_value));
         ("AgentArns", (Some (AgentArnList.to_value x.agentArns)));
-        ("Tags", (Option.map x.tags ~f:InputTagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:InputTagList.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
       let tags =
         (Option.map ~f:InputTagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let agentArns =
@@ -7971,48 +11930,53 @@ module CreateLocationHdfsRequest =
       let subdirectory =
         (Option.map ~f:HdfsSubdirectory.of_xml)
           (Xml.child xml_arg0 "Subdirectory") in
-      make ?tags ~agentArns ?kerberosKrb5Conf ?kerberosKeytab
-        ?kerberosPrincipal ?simpleUser ~authenticationType ?qopConfiguration
-        ?kmsKeyProviderUri ?replicationFactor ?blockSize ~nameNodes
-        ?subdirectory ()
+      make ?customSecretConfig ?cmkSecretConfig ?tags ~agentArns
+        ?kerberosKrb5Conf ?kerberosKeytab ?kerberosPrincipal ?simpleUser
+        ~authenticationType ?qopConfiguration ?kmsKeyProviderUri
+        ?replicationFactor ?blockSize ~nameNodes ?subdirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagList.of_json in
-      let agentArns = field_map_exn json "AgentArns" AgentArnList.of_json in
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let tags = field_map json__ "Tags" InputTagList.of_json in
+      let agentArns = field_map_exn json__ "AgentArns" AgentArnList.of_json in
       let kerberosKrb5Conf =
-        field_map json "KerberosKrb5Conf" KerberosKrb5ConfFile.of_json in
+        field_map json__ "KerberosKrb5Conf" KerberosKrb5ConfFile.of_json in
       let kerberosKeytab =
-        field_map json "KerberosKeytab" KerberosKeytabFile.of_json in
+        field_map json__ "KerberosKeytab" KerberosKeytabFile.of_json in
       let kerberosPrincipal =
-        field_map json "KerberosPrincipal" KerberosPrincipal.of_json in
-      let simpleUser = field_map json "SimpleUser" HdfsUser.of_json in
+        field_map json__ "KerberosPrincipal" KerberosPrincipal.of_json in
+      let simpleUser = field_map json__ "SimpleUser" HdfsUser.of_json in
       let authenticationType =
-        field_map_exn json "AuthenticationType"
+        field_map_exn json__ "AuthenticationType"
           HdfsAuthenticationType.of_json in
       let qopConfiguration =
-        field_map json "QopConfiguration" QopConfiguration.of_json in
+        field_map json__ "QopConfiguration" QopConfiguration.of_json in
       let kmsKeyProviderUri =
-        field_map json "KmsKeyProviderUri" KmsKeyProviderUri.of_json in
+        field_map json__ "KmsKeyProviderUri" KmsKeyProviderUri.of_json in
       let replicationFactor =
-        field_map json "ReplicationFactor" HdfsReplicationFactor.of_json in
-      let blockSize = field_map json "BlockSize" HdfsBlockSize.of_json in
-      let nameNodes = field_map_exn json "NameNodes" HdfsNameNodeList.of_json in
+        field_map json__ "ReplicationFactor" HdfsReplicationFactor.of_json in
+      let blockSize = field_map json__ "BlockSize" HdfsBlockSize.of_json in
+      let nameNodes =
+        field_map_exn json__ "NameNodes" HdfsNameNodeList.of_json in
       let subdirectory =
-        field_map json "Subdirectory" HdfsSubdirectory.of_json in
-      make ?tags ~agentArns ?kerberosKrb5Conf ?kerberosKeytab
-        ?kerberosPrincipal ?simpleUser ~authenticationType ?qopConfiguration
-        ?kmsKeyProviderUri ?replicationFactor ?blockSize ~nameNodes
-        ?subdirectory ()
+        field_map json__ "Subdirectory" HdfsSubdirectory.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?tags ~agentArns
+        ?kerberosKrb5Conf ?kerberosKeytab ?kerberosPrincipal ?simpleUser
+        ~authenticationType ?qopConfiguration ?kmsKeyProviderUri
+        ?replicationFactor ?blockSize ~nameNodes ?subdirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an endpoint for a Hadoop Distributed File System (HDFS)."]
+       "Creates a transfer location for a Hadoop Distributed File System (HDFS). DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses HDFS clusters."]
 module CreateLocationFsxWindowsResponse =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the FSx for Windows File Server file system location you created."]}
+          "The ARN of the FSx for Windows File Server file system location you created."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -8059,55 +12023,65 @@ module CreateLocationFsxWindowsResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an endpoint for an Amazon FSx for Windows File Server file system."]
+       "Creates a transfer location for an Amazon FSx for Windows File Server file system. DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses FSx for Windows File Server file systems."]
 module CreateLocationFsxWindowsRequest =
   struct
     type nonrec t =
       {
       subdirectory: FsxWindowsSubdirectory.t option
         [@ocaml.doc
-          "A subdirectory in the location's path. This subdirectory in the Amazon FSx for Windows File Server file system is used to read data from the Amazon FSx for Windows File Server source location or write data to the FSx for Windows File Server destination."];
+          "Specifies a mount path for your file system using forward slashes. This is where DataSync reads or writes data (depending on if this is a source or destination location)."];
       fsxFilesystemArn: FsxFilesystemArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the FSx for Windows File Server file system."];
+          "Specifies the Amazon Resource Name (ARN) for the FSx for Windows File Server file system."];
       securityGroupArns: Ec2SecurityGroupArnList.t
         [@ocaml.doc
-          "The ARNs of the security groups that are used to configure the FSx for Windows File Server file system."];
+          "Specifies the ARNs of the Amazon EC2 security groups that provide access to your file system's preferred subnet. The security groups that you specify must be able to communicate with your file system's security groups. For information about configuring security groups for file system access, see the Amazon FSx for Windows File Server User Guide . If you choose a security group that doesn't allow connections from within itself, do one of the following: Configure the security group to allow it to communicate within itself. Choose a different security group that can communicate with the mount target's security group."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents a tag that you want to add to the resource. The value can be an empty string. This value helps you manage, filter, and search for your resources. We recommend that you create a name tag for your location."];
+          "Specifies labels that help you categorize, filter, and search for your Amazon Web Services resources. We recommend creating at least a name tag for your location."];
       user: SmbUser.t
         [@ocaml.doc
-          "The user who has the permissions to access files and folders in the FSx for Windows File Server file system. For information about choosing a user name that ensures sufficient permissions to files, folders, and metadata, see user."];
+          "Specifies the user with the permissions to mount and access the files, folders, and file metadata in your FSx for Windows File Server file system. For information about choosing a user with the right level of access for your transfer, see required permissions for FSx for Windows File Server locations."];
       domain: SmbDomain.t option
         [@ocaml.doc
-          "The name of the Windows domain that the FSx for Windows File Server belongs to."];
-      password: SmbPassword.t
+          "Specifies the name of the Windows domain that the FSx for Windows File Server file system belongs to. If you have multiple Active Directory domains in your environment, configuring this parameter makes sure that DataSync connects to the right file system."];
+      password: SmbPassword.t option
         [@ocaml.doc
-          "The password of the user who has the permissions to access files and folders in the FSx for Windows File Server file system."]}
+          "Specifies the password of the user with the permissions to mount and access the files, folders, and file metadata in your FSx for Windows File Server file system."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, which includes the password that DataSync uses to access a specific FSx Windows storage location, with a customer-managed KMS key. When you include this parameter as part of a CreateLocationFsxWindows request, you provide only the KMS key ARN. DataSync uses this KMS key together with the Password you specify for to create a DataSync-managed secret to store the location access credentials. Make sure that DataSync has permission to access the KMS key that you specify. For more information, see Using a service-managed secret encrypted with a custom KMS key. You can use either CmkSecretConfig (with Password) or CustomSecretConfig (without Password) to provide credentials for a CreateLocationFsxWindows request. Do not provide both parameters for the same request."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed Secrets Manager secret where the password for an FSx for Windows File Server storage location is stored in plain text, in Secrets Manager. This configuration includes the secret ARN, and the ARN for an IAM role that provides access to the secret. For more information, see Using a secret that you manage. You can use either CmkSecretConfig (with Password) or CustomSecretConfig (without Password) to provide credentials for a CreateLocationFsxWindows request. Do not provide both parameters for the same request."]}
     let context_ = "CreateLocationFsxWindowsRequest"
     let make ?subdirectory =
       fun ?tags ->
         fun ?domain ->
-          fun ~fsxFilesystemArn ->
-            fun ~securityGroupArns ->
-              fun ~user ->
-                fun ~password ->
-                  fun () ->
-                    {
-                      subdirectory;
-                      tags;
-                      domain;
-                      fsxFilesystemArn;
-                      securityGroupArns;
-                      user;
-                      password
-                    }
+          fun ?password ->
+            fun ?cmkSecretConfig ->
+              fun ?customSecretConfig ->
+                fun ~fsxFilesystemArn ->
+                  fun ~securityGroupArns ->
+                    fun ~user ->
+                      fun () ->
+                        {
+                          subdirectory;
+                          tags;
+                          domain;
+                          password;
+                          cmkSecretConfig;
+                          customSecretConfig;
+                          fsxFilesystemArn;
+                          securityGroupArns;
+                          user
+                        }
     let to_value x =
       structure_to_value
         [("Subdirectory",
@@ -8119,12 +12093,21 @@ module CreateLocationFsxWindowsRequest =
         ("Tags", (Option.map x.tags ~f:InputTagList.to_value));
         ("User", (Some (SmbUser.to_value x.user)));
         ("Domain", (Option.map x.domain ~f:SmbDomain.to_value));
-        ("Password", (Some (SmbPassword.to_value x.password)))]
+        ("Password", (Option.map x.password ~f:SmbPassword.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
       let password =
-        SmbPassword.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Password") in
+        (Option.map ~f:SmbPassword.of_xml) (Xml.child xml_arg0 "Password") in
       let domain =
         (Option.map ~f:SmbDomain.of_xml) (Xml.child xml_arg0 "Domain") in
       let user =
@@ -8140,26 +12123,30 @@ module CreateLocationFsxWindowsRequest =
       let subdirectory =
         (Option.map ~f:FsxWindowsSubdirectory.of_xml)
           (Xml.child xml_arg0 "Subdirectory") in
-      make ~password ?domain ~user ?tags ~securityGroupArns ~fsxFilesystemArn
-        ?subdirectory ()
+      make ?customSecretConfig ?cmkSecretConfig ?password ?domain ~user ?tags
+        ~securityGroupArns ~fsxFilesystemArn ?subdirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "Password" SmbPassword.of_json in
-      let domain = field_map json "Domain" SmbDomain.of_json in
-      let user = field_map_exn json "User" SmbUser.of_json in
-      let tags = field_map json "Tags" InputTagList.of_json in
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let password = field_map json__ "Password" SmbPassword.of_json in
+      let domain = field_map json__ "Domain" SmbDomain.of_json in
+      let user = field_map_exn json__ "User" SmbUser.of_json in
+      let tags = field_map json__ "Tags" InputTagList.of_json in
       let securityGroupArns =
-        field_map_exn json "SecurityGroupArns"
+        field_map_exn json__ "SecurityGroupArns"
           Ec2SecurityGroupArnList.of_json in
       let fsxFilesystemArn =
-        field_map_exn json "FsxFilesystemArn" FsxFilesystemArn.of_json in
+        field_map_exn json__ "FsxFilesystemArn" FsxFilesystemArn.of_json in
       let subdirectory =
-        field_map json "Subdirectory" FsxWindowsSubdirectory.of_json in
-      make ~password ?domain ~user ?tags ~securityGroupArns ~fsxFilesystemArn
-        ?subdirectory ()
+        field_map json__ "Subdirectory" FsxWindowsSubdirectory.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?password ?domain ~user ?tags
+        ~securityGroupArns ~fsxFilesystemArn ?subdirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an endpoint for an Amazon FSx for Windows File Server file system."]
+       "Creates a transfer location for an Amazon FSx for Windows File Server file system. DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses FSx for Windows File Server file systems."]
 module CreateLocationFsxOpenZfsResponse =
   struct
     type nonrec t =
@@ -8213,12 +12200,12 @@ module CreateLocationFsxOpenZfsResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an endpoint for an Amazon FSx for OpenZFS file system."]
+       "Creates a transfer location for an Amazon FSx for OpenZFS file system. DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses FSx for OpenZFS file systems. Request parameters related to SMB aren't supported with the CreateLocationFsxOpenZfs operation."]
 module CreateLocationFsxOpenZfsRequest =
   struct
     type nonrec t =
@@ -8281,28 +12268,28 @@ module CreateLocationFsxOpenZfsRequest =
       make ?tags ?subdirectory ~securityGroupArns ~protocol ~fsxFilesystemArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" InputTagList.of_json in
       let subdirectory =
-        field_map json "Subdirectory" FsxOpenZfsSubdirectory.of_json in
+        field_map json__ "Subdirectory" FsxOpenZfsSubdirectory.of_json in
       let securityGroupArns =
-        field_map_exn json "SecurityGroupArns"
+        field_map_exn json__ "SecurityGroupArns"
           Ec2SecurityGroupArnList.of_json in
-      let protocol = field_map_exn json "Protocol" FsxProtocol.of_json in
+      let protocol = field_map_exn json__ "Protocol" FsxProtocol.of_json in
       let fsxFilesystemArn =
-        field_map_exn json "FsxFilesystemArn" FsxFilesystemArn.of_json in
+        field_map_exn json__ "FsxFilesystemArn" FsxFilesystemArn.of_json in
       make ?tags ?subdirectory ~securityGroupArns ~protocol ~fsxFilesystemArn
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an endpoint for an Amazon FSx for OpenZFS file system."]
-module CreateLocationFsxLustreResponse =
+       "Creates a transfer location for an Amazon FSx for OpenZFS file system. DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses FSx for OpenZFS file systems. Request parameters related to SMB aren't supported with the CreateLocationFsxOpenZfs operation."]
+module CreateLocationFsxOntapResponse =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the FSx for Lustre file system location that's created."]}
+          "Specifies the ARN of the FSx for ONTAP file system location that you create."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -8349,28 +12336,165 @@ module CreateLocationFsxLustreResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an endpoint for an Amazon FSx for Lustre file system."]
+       "Creates a transfer location for an Amazon FSx for NetApp ONTAP file system. DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses FSx for ONTAP file systems."]
+module CreateLocationFsxOntapRequest =
+  struct
+    type nonrec t =
+      {
+      protocol: FsxProtocol.t ;
+      securityGroupArns: Ec2SecurityGroupArnList.t
+        [@ocaml.doc
+          "Specifies the Amazon EC2 security groups that provide access to your file system's preferred subnet. The security groups must allow outbound traffic on the following ports (depending on the protocol you use): Network File System (NFS): TCP ports 111, 635, and 2049 Server Message Block (SMB): TCP port 445 Your file system's security groups must also allow inbound traffic on the same ports."];
+      storageVirtualMachineArn: StorageVirtualMachineArn.t
+        [@ocaml.doc
+          "Specifies the ARN of the storage virtual machine (SVM) in your file system where you want to copy data to or from."];
+      subdirectory: FsxOntapSubdirectory.t option
+        [@ocaml.doc
+          "Specifies a path to the file share in the SVM where you want to transfer data to or from. You can specify a junction path (also known as a mount point), qtree path (for NFS file shares), or share name (for SMB file shares). For example, your mount path might be /vol1, /vol1/tree1, or /share1. Don't specify a junction path in the SVM's root volume. For more information, see Managing FSx for ONTAP storage virtual machines in the Amazon FSx for NetApp ONTAP User Guide."];
+      tags: InputTagList.t option
+        [@ocaml.doc
+          "Specifies labels that help you categorize, filter, and search for your Amazon Web Services resources. We recommend creating at least a name tag for your location."]}
+    let context_ = "CreateLocationFsxOntapRequest"
+    let make ?subdirectory =
+      fun ?tags ->
+        fun ~protocol ->
+          fun ~securityGroupArns ->
+            fun ~storageVirtualMachineArn ->
+              fun () ->
+                {
+                  subdirectory;
+                  tags;
+                  protocol;
+                  securityGroupArns;
+                  storageVirtualMachineArn
+                }
+    let to_value x =
+      structure_to_value
+        [("Protocol", (Some (FsxProtocol.to_value x.protocol)));
+        ("SecurityGroupArns",
+          (Some (Ec2SecurityGroupArnList.to_value x.securityGroupArns)));
+        ("StorageVirtualMachineArn",
+          (Some
+             (StorageVirtualMachineArn.to_value x.storageVirtualMachineArn)));
+        ("Subdirectory",
+          (Option.map x.subdirectory ~f:FsxOntapSubdirectory.to_value));
+        ("Tags", (Option.map x.tags ~f:InputTagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:InputTagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let subdirectory =
+        (Option.map ~f:FsxOntapSubdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      let storageVirtualMachineArn =
+        StorageVirtualMachineArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "StorageVirtualMachineArn") in
+      let securityGroupArns =
+        Ec2SecurityGroupArnList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupArns") in
+      let protocol =
+        FsxProtocol.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Protocol") in
+      make ?tags ?subdirectory ~storageVirtualMachineArn ~securityGroupArns
+        ~protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" InputTagList.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" FsxOntapSubdirectory.of_json in
+      let storageVirtualMachineArn =
+        field_map_exn json__ "StorageVirtualMachineArn"
+          StorageVirtualMachineArn.of_json in
+      let securityGroupArns =
+        field_map_exn json__ "SecurityGroupArns"
+          Ec2SecurityGroupArnList.of_json in
+      let protocol = field_map_exn json__ "Protocol" FsxProtocol.of_json in
+      make ?tags ?subdirectory ~storageVirtualMachineArn ~securityGroupArns
+        ~protocol ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a transfer location for an Amazon FSx for NetApp ONTAP file system. DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses FSx for ONTAP file systems."]
+module CreateLocationFsxLustreResponse =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the FSx for Lustre file system location that you created."]}
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?locationArn = fun () -> { locationArn }
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Option.map x.locationArn ~f:LocationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let locationArn =
+        (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
+      make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
+      make ?locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a transfer location for an Amazon FSx for Lustre file system. DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses FSx for Lustre file systems."]
 module CreateLocationFsxLustreRequest =
   struct
     type nonrec t =
       {
       fsxFilesystemArn: FsxFilesystemArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the FSx for Lustre file system."];
+          "Specifies the Amazon Resource Name (ARN) of the FSx for Lustre file system."];
       securityGroupArns: Ec2SecurityGroupArnList.t
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the security groups that are used to configure the FSx for Lustre file system."];
+          "Specifies the Amazon Resource Names (ARNs) of up to five security groups that provide access to your FSx for Lustre file system. The security groups must be able to access the file system's ports. The file system must also allow access from the security groups. For information about file system access, see the Amazon FSx for Lustre User Guide ."];
       subdirectory: FsxLustreSubdirectory.t option
         [@ocaml.doc
-          "A subdirectory in the location's path. This subdirectory in the FSx for Lustre file system is used to read data from the FSx for Lustre source location or write data to the FSx for Lustre destination."];
+          "Specifies a mount path for your FSx for Lustre file system. The path can include subdirectories. When the location is used as a source, DataSync reads data from the mount path. When the location is used as a destination, DataSync writes data to the mount path. If you don't include this parameter, DataSync uses the file system's root directory (/)."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents a tag that you want to add to the resource. The value can be an empty string. This value helps you manage, filter, and search for your resources. We recommend that you create a name tag for your location."]}
+          "Specifies labels that help you categorize, filter, and search for your Amazon Web Services resources. We recommend creating at least a name tag for your location."]}
     let context_ = "CreateLocationFsxLustreRequest"
     let make ?subdirectory =
       fun ?tags ->
@@ -8402,26 +12526,26 @@ module CreateLocationFsxLustreRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FsxFilesystemArn") in
       make ?tags ?subdirectory ~securityGroupArns ~fsxFilesystemArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" InputTagList.of_json in
       let subdirectory =
-        field_map json "Subdirectory" FsxLustreSubdirectory.of_json in
+        field_map json__ "Subdirectory" FsxLustreSubdirectory.of_json in
       let securityGroupArns =
-        field_map_exn json "SecurityGroupArns"
+        field_map_exn json__ "SecurityGroupArns"
           Ec2SecurityGroupArnList.of_json in
       let fsxFilesystemArn =
-        field_map_exn json "FsxFilesystemArn" FsxFilesystemArn.of_json in
+        field_map_exn json__ "FsxFilesystemArn" FsxFilesystemArn.of_json in
       make ?tags ?subdirectory ~securityGroupArns ~fsxFilesystemArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an endpoint for an Amazon FSx for Lustre file system."]
+       "Creates a transfer location for an Amazon FSx for Lustre file system. DataSync can use this location as a source or destination for transferring data. Before you begin, make sure that you understand how DataSync accesses FSx for Lustre file systems."]
 module CreateLocationEfsResponse =
   struct
     type nonrec t =
       {
       locationArn: LocationArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon EFS file system location that is created."]}
+          "The Amazon Resource Name (ARN) of the Amazon EFS file system location that you create."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -8468,8 +12592,8 @@ module CreateLocationEfsResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationArn = field_map json "LocationArn" LocationArn.of_json in
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
       make ?locationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateLocationEfs"]
@@ -8479,22 +12603,42 @@ module CreateLocationEfsRequest =
       {
       subdirectory: EfsSubdirectory.t option
         [@ocaml.doc
-          "A subdirectory in the location\226\128\153s path. This subdirectory in the EFS file system is used to read data from the EFS source location or write data to the EFS destination. By default, DataSync uses the root directory. Subdirectory must be specified with forward slashes. For example, /path/to/folder."];
+          "Specifies a mount path for your Amazon EFS file system. This is where DataSync reads or writes data on your file system (depending on if this is a source or destination location). By default, DataSync uses the root directory (or access point if you provide one by using AccessPointArn). You can also include subdirectories using forward slashes (for example, /path/to/folder)."];
       efsFilesystemArn: EfsFilesystemArn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the Amazon EFS file system."];
+        [@ocaml.doc "Specifies the ARN for your Amazon EFS file system."];
       ec2Config: Ec2Config.t
         [@ocaml.doc
-          "The subnet and security group that the Amazon EFS file system uses. The security group that you provide needs to be able to communicate with the security group on the mount target in the subnet specified. The exact relationship between security group M (of the mount target) and security group S (which you provide for DataSync to use at this stage) is as follows: Security group M (which you associate with the mount target) must allow inbound access for the Transmission Control Protocol (TCP) on the NFS port (2049) from security group S. You can enable inbound connections either by IP address (CIDR range) or security group. Security group S (provided to DataSync to access EFS) should have a rule that enables outbound connections to the NFS port on one of the file system\226\128\153s mount targets. You can enable outbound connections either by IP address (CIDR range) or security group. For information about security groups and mount targets, see Security Groups for Amazon EC2 Instances and Mount Targets in the Amazon EFS User Guide."];
+          "Specifies the subnet and security groups DataSync uses to connect to one of your Amazon EFS file system's mount targets."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents a tag that you want to add to the resource. The value can be an empty string. This value helps you manage, filter, and search for your resources. We recommend that you create a name tag for your location."]}
+          "Specifies the key-value pair that represents a tag that you want to add to the resource. The value can be an empty string. This value helps you manage, filter, and search for your resources. We recommend that you create a name tag for your location."];
+      accessPointArn: EfsAccessPointArn.t option
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the access point that DataSync uses to mount your Amazon EFS file system. For more information, see Accessing restricted file systems."];
+      fileSystemAccessRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "Specifies an Identity and Access Management (IAM) role that allows DataSync to access your Amazon EFS file system. For information on creating this role, see Creating a DataSync IAM role for file system access."];
+      inTransitEncryption: EfsInTransitEncryption.t option
+        [@ocaml.doc
+          "Specifies whether you want DataSync to use Transport Layer Security (TLS) 1.2 encryption when it transfers data to or from your Amazon EFS file system. If you specify an access point using AccessPointArn or an IAM role using FileSystemAccessRoleArn, you must set this parameter to TLS1_2."]}
     let context_ = "CreateLocationEfsRequest"
     let make ?subdirectory =
       fun ?tags ->
-        fun ~efsFilesystemArn ->
-          fun ~ec2Config ->
-            fun () -> { subdirectory; tags; efsFilesystemArn; ec2Config }
+        fun ?accessPointArn ->
+          fun ?fileSystemAccessRoleArn ->
+            fun ?inTransitEncryption ->
+              fun ~efsFilesystemArn ->
+                fun ~ec2Config ->
+                  fun () ->
+                    {
+                      subdirectory;
+                      tags;
+                      accessPointArn;
+                      fileSystemAccessRoleArn;
+                      inTransitEncryption;
+                      efsFilesystemArn;
+                      ec2Config
+                    }
     let to_value x =
       structure_to_value
         [("Subdirectory",
@@ -8502,9 +12646,25 @@ module CreateLocationEfsRequest =
         ("EfsFilesystemArn",
           (Some (EfsFilesystemArn.to_value x.efsFilesystemArn)));
         ("Ec2Config", (Some (Ec2Config.to_value x.ec2Config)));
-        ("Tags", (Option.map x.tags ~f:InputTagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:InputTagList.to_value));
+        ("AccessPointArn",
+          (Option.map x.accessPointArn ~f:EfsAccessPointArn.to_value));
+        ("FileSystemAccessRoleArn",
+          (Option.map x.fileSystemAccessRoleArn ~f:IamRoleArn.to_value));
+        ("InTransitEncryption",
+          (Option.map x.inTransitEncryption
+             ~f:EfsInTransitEncryption.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let inTransitEncryption =
+        (Option.map ~f:EfsInTransitEncryption.of_xml)
+          (Xml.child xml_arg0 "InTransitEncryption") in
+      let fileSystemAccessRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "FileSystemAccessRoleArn") in
+      let accessPointArn =
+        (Option.map ~f:EfsAccessPointArn.of_xml)
+          (Xml.child xml_arg0 "AccessPointArn") in
       let tags =
         (Option.map ~f:InputTagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let ec2Config =
@@ -8516,25 +12676,226 @@ module CreateLocationEfsRequest =
       let subdirectory =
         (Option.map ~f:EfsSubdirectory.of_xml)
           (Xml.child xml_arg0 "Subdirectory") in
-      make ?tags ~ec2Config ~efsFilesystemArn ?subdirectory ()
+      make ?inTransitEncryption ?fileSystemAccessRoleArn ?accessPointArn
+        ?tags ~ec2Config ~efsFilesystemArn ?subdirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagList.of_json in
-      let ec2Config = field_map_exn json "Ec2Config" Ec2Config.of_json in
+    let of_json json__ =
+      let inTransitEncryption =
+        field_map json__ "InTransitEncryption" EfsInTransitEncryption.of_json in
+      let fileSystemAccessRoleArn =
+        field_map json__ "FileSystemAccessRoleArn" IamRoleArn.of_json in
+      let accessPointArn =
+        field_map json__ "AccessPointArn" EfsAccessPointArn.of_json in
+      let tags = field_map json__ "Tags" InputTagList.of_json in
+      let ec2Config = field_map_exn json__ "Ec2Config" Ec2Config.of_json in
       let efsFilesystemArn =
-        field_map_exn json "EfsFilesystemArn" EfsFilesystemArn.of_json in
+        field_map_exn json__ "EfsFilesystemArn" EfsFilesystemArn.of_json in
       let subdirectory =
-        field_map json "Subdirectory" EfsSubdirectory.of_json in
-      make ?tags ~ec2Config ~efsFilesystemArn ?subdirectory ()
+        field_map json__ "Subdirectory" EfsSubdirectory.of_json in
+      make ?inTransitEncryption ?fileSystemAccessRoleArn ?accessPointArn
+        ?tags ~ec2Config ~efsFilesystemArn ?subdirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateLocationEfsRequest"]
+module CreateLocationAzureBlobResponse =
+  struct
+    type nonrec t =
+      {
+      locationArn: LocationArn.t option
+        [@ocaml.doc
+          "The ARN of the Azure Blob Storage transfer location that you created."]}
+    type nonrec error =
+      [ `InternalException of InternalException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?locationArn = fun () -> { locationArn }
+    let error_of_json name json =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LocationArn", (Option.map x.locationArn ~f:LocationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let locationArn =
+        (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
+      make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let locationArn = field_map json__ "LocationArn" LocationArn.of_json in
+      make ?locationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a transfer location for a Microsoft Azure Blob Storage container. DataSync can use this location as a transfer source or destination. You can make transfers with or without a DataSync agent that connects to your container. Before you begin, make sure you know how DataSync accesses Azure Blob Storage and works with access tiers and blob types."]
+module CreateLocationAzureBlobRequest =
+  struct
+    type nonrec t =
+      {
+      containerUrl: AzureBlobContainerUrl.t
+        [@ocaml.doc
+          "Specifies the URL of the Azure Blob Storage container involved in your transfer."];
+      authenticationType: AzureBlobAuthenticationType.t
+        [@ocaml.doc
+          "Specifies the authentication method DataSync uses to access your Azure Blob Storage. DataSync can access blob storage using a shared access signature (SAS)."];
+      sasConfiguration: AzureBlobSasConfiguration.t option
+        [@ocaml.doc
+          "Specifies the SAS configuration that allows DataSync to access your Azure Blob Storage. If you provide an authentication token using SasConfiguration, but do not provide secret configuration details using CmkSecretConfig or CustomSecretConfig, then DataSync stores the token using your Amazon Web Services account's secrets manager secret."];
+      blobType: AzureBlobType.t option
+        [@ocaml.doc
+          "Specifies the type of blob that you want your objects or files to be when transferring them into Azure Blob Storage. Currently, DataSync only supports moving data into Azure Blob Storage as block blobs. For more information on blob types, see the Azure Blob Storage documentation."];
+      accessTier: AzureAccessTier.t option
+        [@ocaml.doc
+          "Specifies the access tier that you want your objects or files transferred into. This only applies when using the location as a transfer destination. For more information, see Access tiers."];
+      subdirectory: AzureBlobSubdirectory.t option
+        [@ocaml.doc
+          "Specifies path segments if you want to limit your transfer to a virtual directory in your container (for example, /my/images)."];
+      agentArns: AgentArnList.t option
+        [@ocaml.doc
+          "(Optional) Specifies the Amazon Resource Name (ARN) of the DataSync agent that can connect with your Azure Blob Storage container. If you are setting up an agentless cross-cloud transfer, you do not need to specify a value for this parameter. You can specify more than one agent. For more information, see Using multiple agents for your transfer. Make sure you configure this parameter correctly when you first create your storage location. You cannot add or remove agents from a storage location after you create it."];
+      tags: InputTagList.t option
+        [@ocaml.doc
+          "Specifies labels that help you categorize, filter, and search for your Amazon Web Services resources. We recommend creating at least a name tag for your transfer location."];
+      cmkSecretConfig: CmkSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a DataSync-managed secret, which includes the authentication token that DataSync uses to access a specific AzureBlob storage location, with a customer-managed KMS key. When you include this parameter as part of a CreateLocationAzureBlob request, you provide only the KMS key ARN. DataSync uses this KMS key together with the authentication token you specify for SasConfiguration to create a DataSync-managed secret to store the location access credentials. Make sure that DataSync has permission to access the KMS key that you specify. For more information, see Using a service-managed secret encrypted with a custom KMS key. You can use either CmkSecretConfig (with SasConfiguration) or CustomSecretConfig (without SasConfiguration) to provide credentials for a CreateLocationAzureBlob request. Do not provide both parameters for the same request."];
+      customSecretConfig: CustomSecretConfig.t option
+        [@ocaml.doc
+          "Specifies configuration information for a customer-managed Secrets Manager secret where the authentication token for an AzureBlob storage location is stored in plain text, in Secrets Manager. This configuration includes the secret ARN, and the ARN for an IAM role that provides access to the secret. For more information, see Using a secret that you manage. You can use either CmkSecretConfig (with SasConfiguration) or CustomSecretConfig (without SasConfiguration) to provide credentials for a CreateLocationAzureBlob request. Do not provide both parameters for the same request."]}
+    let context_ = "CreateLocationAzureBlobRequest"
+    let make ?sasConfiguration =
+      fun ?blobType ->
+        fun ?accessTier ->
+          fun ?subdirectory ->
+            fun ?agentArns ->
+              fun ?tags ->
+                fun ?cmkSecretConfig ->
+                  fun ?customSecretConfig ->
+                    fun ~containerUrl ->
+                      fun ~authenticationType ->
+                        fun () ->
+                          {
+                            sasConfiguration;
+                            blobType;
+                            accessTier;
+                            subdirectory;
+                            agentArns;
+                            tags;
+                            cmkSecretConfig;
+                            customSecretConfig;
+                            containerUrl;
+                            authenticationType
+                          }
+    let to_value x =
+      structure_to_value
+        [("ContainerUrl",
+           (Some (AzureBlobContainerUrl.to_value x.containerUrl)));
+        ("AuthenticationType",
+          (Some (AzureBlobAuthenticationType.to_value x.authenticationType)));
+        ("SasConfiguration",
+          (Option.map x.sasConfiguration
+             ~f:AzureBlobSasConfiguration.to_value));
+        ("BlobType", (Option.map x.blobType ~f:AzureBlobType.to_value));
+        ("AccessTier", (Option.map x.accessTier ~f:AzureAccessTier.to_value));
+        ("Subdirectory",
+          (Option.map x.subdirectory ~f:AzureBlobSubdirectory.to_value));
+        ("AgentArns", (Option.map x.agentArns ~f:AgentArnList.to_value));
+        ("Tags", (Option.map x.tags ~f:InputTagList.to_value));
+        ("CmkSecretConfig",
+          (Option.map x.cmkSecretConfig ~f:CmkSecretConfig.to_value));
+        ("CustomSecretConfig",
+          (Option.map x.customSecretConfig ~f:CustomSecretConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customSecretConfig =
+        (Option.map ~f:CustomSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CustomSecretConfig") in
+      let cmkSecretConfig =
+        (Option.map ~f:CmkSecretConfig.of_xml)
+          (Xml.child xml_arg0 "CmkSecretConfig") in
+      let tags =
+        (Option.map ~f:InputTagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let agentArns =
+        (Option.map ~f:AgentArnList.of_xml) (Xml.child xml_arg0 "AgentArns") in
+      let subdirectory =
+        (Option.map ~f:AzureBlobSubdirectory.of_xml)
+          (Xml.child xml_arg0 "Subdirectory") in
+      let accessTier =
+        (Option.map ~f:AzureAccessTier.of_xml)
+          (Xml.child xml_arg0 "AccessTier") in
+      let blobType =
+        (Option.map ~f:AzureBlobType.of_xml) (Xml.child xml_arg0 "BlobType") in
+      let sasConfiguration =
+        (Option.map ~f:AzureBlobSasConfiguration.of_xml)
+          (Xml.child xml_arg0 "SasConfiguration") in
+      let authenticationType =
+        AzureBlobAuthenticationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AuthenticationType") in
+      let containerUrl =
+        AzureBlobContainerUrl.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ContainerUrl") in
+      make ?customSecretConfig ?cmkSecretConfig ?tags ?agentArns
+        ?subdirectory ?accessTier ?blobType ?sasConfiguration
+        ~authenticationType ~containerUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customSecretConfig =
+        field_map json__ "CustomSecretConfig" CustomSecretConfig.of_json in
+      let cmkSecretConfig =
+        field_map json__ "CmkSecretConfig" CmkSecretConfig.of_json in
+      let tags = field_map json__ "Tags" InputTagList.of_json in
+      let agentArns = field_map json__ "AgentArns" AgentArnList.of_json in
+      let subdirectory =
+        field_map json__ "Subdirectory" AzureBlobSubdirectory.of_json in
+      let accessTier = field_map json__ "AccessTier" AzureAccessTier.of_json in
+      let blobType = field_map json__ "BlobType" AzureBlobType.of_json in
+      let sasConfiguration =
+        field_map json__ "SasConfiguration" AzureBlobSasConfiguration.of_json in
+      let authenticationType =
+        field_map_exn json__ "AuthenticationType"
+          AzureBlobAuthenticationType.of_json in
+      let containerUrl =
+        field_map_exn json__ "ContainerUrl" AzureBlobContainerUrl.of_json in
+      make ?customSecretConfig ?cmkSecretConfig ?tags ?agentArns
+        ?subdirectory ?accessTier ?blobType ?sasConfiguration
+        ~authenticationType ~containerUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a transfer location for a Microsoft Azure Blob Storage container. DataSync can use this location as a transfer source or destination. You can make transfers with or without a DataSync agent that connects to your container. Before you begin, make sure you know how DataSync accesses Azure Blob Storage and works with access tiers and blob types."]
 module CreateAgentResponse =
   struct
     type nonrec t =
       {
       agentArn: AgentArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the agent. Use the ListAgents operation to return a list of agents for your account and Amazon Web Services Region."]}
+          "The ARN of the agent that you just activated. Use the ListAgents operation to return a list of agents in your Amazon Web Services account and Amazon Web Services Region."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -8581,8 +12942,8 @@ module CreateAgentResponse =
         (Option.map ~f:AgentArn.of_xml) (Xml.child xml_arg0 "AgentArn") in
       make ?agentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let agentArn = field_map json "AgentArn" AgentArn.of_json in
+    let of_json json__ =
+      let agentArn = field_map json__ "AgentArn" AgentArn.of_json in
       make ?agentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateAgentResponse"]
@@ -8592,22 +12953,22 @@ module CreateAgentRequest =
       {
       activationKey: ActivationKey.t
         [@ocaml.doc
-          "Your agent activation key. You can get the activation key either by sending an HTTP GET request with redirects that enable you to get the agent IP address (port 80). Alternatively, you can get it from the DataSync console. The redirect URL returned in the response provides you the activation key for your agent in the query string parameter activationKey. It might also include other activation-related parameters; however, these are merely defaults. The arguments you pass to this API call determine the actual configuration of your agent. For more information, see Activating an Agent in the DataSync User Guide."];
+          "Specifies your DataSync agent's activation key. If you don't have an activation key, see Activating your agent."];
       agentName: TagValue.t option
         [@ocaml.doc
-          "The name you configured for your agent. This value is a text reference that is used to identify the agent in the console."];
+          "Specifies a name for your agent. We recommend specifying a name that you can remember."];
       tags: InputTagList.t option
         [@ocaml.doc
-          "The key-value pair that represents the tag that you want to associate with the agent. The value can be an empty string. This value helps you manage, filter, and search for your agents. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@."];
+          "Specifies labels that help you categorize, filter, and search for your Amazon Web Services resources. We recommend creating at least one tag for your agent."];
       vpcEndpointId: VpcEndpointId.t option
         [@ocaml.doc
-          "The ID of the VPC (virtual private cloud) endpoint that the agent has access to. This is the client-side VPC endpoint, also called a PrivateLink. If you don't have a PrivateLink VPC endpoint, see Creating a VPC Endpoint Service Configuration in the Amazon VPC User Guide. VPC endpoint ID looks like this: vpce-01234d5aff67890e1."];
+          "Specifies the ID of the VPC service endpoint that you're using. For example, a VPC endpoint ID looks like vpce-01234d5aff67890e1. The VPC service endpoint you use must include the DataSync service name (for example, com.amazonaws.us-east-2.datasync)."];
       subnetArns: PLSubnetArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the subnets in which DataSync will create elastic network interfaces for each data transfer task. The agent that runs a task must be private. When you start a task that is associated with an agent created in a VPC, or one that has access to an IP address in a VPC, then the task is also private. In this case, DataSync creates four network interfaces for each task in your subnet. For a data transfer to work, the agent must be able to route to all these four network interfaces."];
+          "Specifies the ARN of the subnet where your VPC service endpoint is located. You can only specify one ARN."];
       securityGroupArns: PLSecurityGroupArnList.t option
         [@ocaml.doc
-          "The ARNs of the security groups used to protect your data transfer task subnets. See SecurityGroupArns."]}
+          "Specifies the Amazon Resource Name (ARN) of the security group that allows traffic between your agent and VPC service endpoint. You can only specify one ARN."]}
     let context_ = "CreateAgentRequest"
     let make ?agentName =
       fun ?tags ->
@@ -8655,16 +13016,16 @@ module CreateAgentRequest =
       make ?securityGroupArns ?subnetArns ?vpcEndpointId ?tags ?agentName
         ~activationKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupArns =
-        field_map json "SecurityGroupArns" PLSecurityGroupArnList.of_json in
-      let subnetArns = field_map json "SubnetArns" PLSubnetArnList.of_json in
+        field_map json__ "SecurityGroupArns" PLSecurityGroupArnList.of_json in
+      let subnetArns = field_map json__ "SubnetArns" PLSubnetArnList.of_json in
       let vpcEndpointId =
-        field_map json "VpcEndpointId" VpcEndpointId.of_json in
-      let tags = field_map json "Tags" InputTagList.of_json in
-      let agentName = field_map json "AgentName" TagValue.of_json in
+        field_map json__ "VpcEndpointId" VpcEndpointId.of_json in
+      let tags = field_map json__ "Tags" InputTagList.of_json in
+      let agentName = field_map json__ "AgentName" TagValue.of_json in
       let activationKey =
-        field_map_exn json "ActivationKey" ActivationKey.of_json in
+        field_map_exn json__ "ActivationKey" ActivationKey.of_json in
       make ?securityGroupArns ?subnetArns ?vpcEndpointId ?tags ?agentName
         ~activationKey ()
     let to_json v = composed_to_json to_value v
@@ -8717,14 +13078,14 @@ module CancelTaskExecutionResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels execution of a task. When you cancel a task execution, the transfer of some files is abruptly interrupted. The contents of files that are transferred to the destination might be incomplete or inconsistent with the source files. However, if you start a new task execution on the same task and you allow the task execution to complete, file content on the destination is complete and consistent. This applies to other unexpected failures that interrupt a task execution. In all of these cases, DataSync successfully complete the transfer when you start the next task execution."]
+       "Stops an DataSync task execution that's in progress. The transfer of some files are abruptly interrupted. File contents that're transferred to the destination might be incomplete or inconsistent with the source files. However, if you start a new task execution using the same task and allow it to finish, file content on the destination will be complete and consistent. This applies to other unexpected failures that interrupt a task execution. In all of these cases, DataSync successfully completes the transfer when you start the next task execution."]
 module CancelTaskExecutionRequest =
   struct
     type nonrec t =
       {
       taskExecutionArn: TaskExecutionArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the task execution to cancel."]}
+          "The Amazon Resource Name (ARN) of the task execution to stop."]}
     let context_ = "CancelTaskExecutionRequest"
     let make ~taskExecutionArn = fun () -> { taskExecutionArn }
     let to_value x =
@@ -8738,9 +13099,9 @@ module CancelTaskExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TaskExecutionArn") in
       make ~taskExecutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let taskExecutionArn =
-        field_map_exn json "TaskExecutionArn" TaskExecutionArn.of_json in
+        field_map_exn json__ "TaskExecutionArn" TaskExecutionArn.of_json in
       make ~taskExecutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CancelTaskExecutionRequest"]

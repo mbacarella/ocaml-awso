@@ -11,6 +11,17 @@ type ('i, 'o, 'e) t =
   | BatchDisassociateProjectAssets: (BatchDisassociateProjectAssetsRequest.t,
   BatchDisassociateProjectAssetsResponse.t,
   BatchDisassociateProjectAssetsResponse.error) t 
+  | BatchGetAssetPropertyAggregates:
+  (BatchGetAssetPropertyAggregatesRequest.t,
+  BatchGetAssetPropertyAggregatesResponse.t,
+  BatchGetAssetPropertyAggregatesResponse.error) t 
+  | BatchGetAssetPropertyValue: (BatchGetAssetPropertyValueRequest.t,
+  BatchGetAssetPropertyValueResponse.t,
+  BatchGetAssetPropertyValueResponse.error) t 
+  | BatchGetAssetPropertyValueHistory:
+  (BatchGetAssetPropertyValueHistoryRequest.t,
+  BatchGetAssetPropertyValueHistoryResponse.t,
+  BatchGetAssetPropertyValueHistoryResponse.error) t 
   | BatchPutAssetPropertyValue: (BatchPutAssetPropertyValueRequest.t,
   BatchPutAssetPropertyValueResponse.t,
   BatchPutAssetPropertyValueResponse.error) t 
@@ -20,8 +31,17 @@ type ('i, 'o, 'e) t =
   CreateAssetResponse.error) t 
   | CreateAssetModel: (CreateAssetModelRequest.t, CreateAssetModelResponse.t,
   CreateAssetModelResponse.error) t 
+  | CreateAssetModelCompositeModel: (CreateAssetModelCompositeModelRequest.t,
+  CreateAssetModelCompositeModelResponse.t,
+  CreateAssetModelCompositeModelResponse.error) t 
+  | CreateBulkImportJob: (CreateBulkImportJobRequest.t,
+  CreateBulkImportJobResponse.t, CreateBulkImportJobResponse.error) t 
+  | CreateComputationModel: (CreateComputationModelRequest.t,
+  CreateComputationModelResponse.t, CreateComputationModelResponse.error) t 
   | CreateDashboard: (CreateDashboardRequest.t, CreateDashboardResponse.t,
   CreateDashboardResponse.error) t 
+  | CreateDataset: (CreateDatasetRequest.t, CreateDatasetResponse.t,
+  CreateDatasetResponse.error) t 
   | CreateGateway: (CreateGatewayRequest.t, CreateGatewayResponse.t,
   CreateGatewayResponse.error) t 
   | CreatePortal: (CreatePortalRequest.t, CreatePortalResponse.t,
@@ -34,8 +54,19 @@ type ('i, 'o, 'e) t =
   DeleteAssetResponse.error) t 
   | DeleteAssetModel: (DeleteAssetModelRequest.t, DeleteAssetModelResponse.t,
   DeleteAssetModelResponse.error) t 
+  | DeleteAssetModelCompositeModel: (DeleteAssetModelCompositeModelRequest.t,
+  DeleteAssetModelCompositeModelResponse.t,
+  DeleteAssetModelCompositeModelResponse.error) t 
+  | DeleteAssetModelInterfaceRelationship:
+  (DeleteAssetModelInterfaceRelationshipRequest.t,
+  DeleteAssetModelInterfaceRelationshipResponse.t,
+  DeleteAssetModelInterfaceRelationshipResponse.error) t 
+  | DeleteComputationModel: (DeleteComputationModelRequest.t,
+  DeleteComputationModelResponse.t, DeleteComputationModelResponse.error) t 
   | DeleteDashboard: (DeleteDashboardRequest.t, DeleteDashboardResponse.t,
   DeleteDashboardResponse.error) t 
+  | DeleteDataset: (DeleteDatasetRequest.t, DeleteDatasetResponse.t,
+  DeleteDatasetResponse.error) t 
   | DeleteGateway: (DeleteGatewayRequest.t, unit, unit) t 
   | DeletePortal: (DeletePortalRequest.t, DeletePortalResponse.t,
   DeletePortalResponse.error) t 
@@ -44,18 +75,44 @@ type ('i, 'o, 'e) t =
   | DeleteTimeSeries: (DeleteTimeSeriesRequest.t, unit, unit) t 
   | DescribeAccessPolicy: (DescribeAccessPolicyRequest.t,
   DescribeAccessPolicyResponse.t, DescribeAccessPolicyResponse.error) t 
+  | DescribeAction: (DescribeActionRequest.t, DescribeActionResponse.t,
+  DescribeActionResponse.error) t 
   | DescribeAsset: (DescribeAssetRequest.t, DescribeAssetResponse.t,
   DescribeAssetResponse.error) t 
+  | DescribeAssetCompositeModel: (DescribeAssetCompositeModelRequest.t,
+  DescribeAssetCompositeModelResponse.t,
+  DescribeAssetCompositeModelResponse.error) t 
   | DescribeAssetModel: (DescribeAssetModelRequest.t,
   DescribeAssetModelResponse.t, DescribeAssetModelResponse.error) t 
+  | DescribeAssetModelCompositeModel:
+  (DescribeAssetModelCompositeModelRequest.t,
+  DescribeAssetModelCompositeModelResponse.t,
+  DescribeAssetModelCompositeModelResponse.error) t 
+  | DescribeAssetModelInterfaceRelationship:
+  (DescribeAssetModelInterfaceRelationshipRequest.t,
+  DescribeAssetModelInterfaceRelationshipResponse.t,
+  DescribeAssetModelInterfaceRelationshipResponse.error) t 
   | DescribeAssetProperty: (DescribeAssetPropertyRequest.t,
   DescribeAssetPropertyResponse.t, DescribeAssetPropertyResponse.error) t 
+  | DescribeBulkImportJob: (DescribeBulkImportJobRequest.t,
+  DescribeBulkImportJobResponse.t, DescribeBulkImportJobResponse.error) t 
+  | DescribeComputationModel: (DescribeComputationModelRequest.t,
+  DescribeComputationModelResponse.t, DescribeComputationModelResponse.error)
+  t 
+  | DescribeComputationModelExecutionSummary:
+  (DescribeComputationModelExecutionSummaryRequest.t,
+  DescribeComputationModelExecutionSummaryResponse.t,
+  DescribeComputationModelExecutionSummaryResponse.error) t 
   | DescribeDashboard: (DescribeDashboardRequest.t,
   DescribeDashboardResponse.t, DescribeDashboardResponse.error) t 
+  | DescribeDataset: (DescribeDatasetRequest.t, DescribeDatasetResponse.t,
+  DescribeDatasetResponse.error) t 
   | DescribeDefaultEncryptionConfiguration:
   (DescribeDefaultEncryptionConfigurationRequest.t,
   DescribeDefaultEncryptionConfigurationResponse.t,
   DescribeDefaultEncryptionConfigurationResponse.error) t 
+  | DescribeExecution: (DescribeExecutionRequest.t,
+  DescribeExecutionResponse.t, DescribeExecutionResponse.error) t 
   | DescribeGateway: (DescribeGatewayRequest.t, DescribeGatewayResponse.t,
   DescribeGatewayResponse.error) t 
   | DescribeGatewayCapabilityConfiguration:
@@ -76,6 +133,10 @@ type ('i, 'o, 'e) t =
   | DisassociateAssets: (DisassociateAssetsRequest.t, unit, unit) t 
   | DisassociateTimeSeriesFromAssetProperty:
   (DisassociateTimeSeriesFromAssetPropertyRequest.t, unit, unit) t 
+  | ExecuteAction: (ExecuteActionRequest.t, ExecuteActionResponse.t,
+  ExecuteActionResponse.error) t 
+  | ExecuteQuery: (ExecuteQueryRequest.t, ExecuteQueryResponse.t,
+  ExecuteQueryResponse.error) t 
   | GetAssetPropertyAggregates: (GetAssetPropertyAggregatesRequest.t,
   GetAssetPropertyAggregatesResponse.t,
   GetAssetPropertyAggregatesResponse.error) t 
@@ -88,20 +149,54 @@ type ('i, 'o, 'e) t =
   (GetInterpolatedAssetPropertyValuesRequest.t,
   GetInterpolatedAssetPropertyValuesResponse.t,
   GetInterpolatedAssetPropertyValuesResponse.error) t 
+  | InvokeAssistant: (InvokeAssistantRequest.t, InvokeAssistantResponse.t,
+  InvokeAssistantResponse.error) t 
   | ListAccessPolicies: (ListAccessPoliciesRequest.t,
   ListAccessPoliciesResponse.t, ListAccessPoliciesResponse.error) t 
+  | ListActions: (ListActionsRequest.t, ListActionsResponse.t,
+  ListActionsResponse.error) t 
+  | ListAssetModelCompositeModels: (ListAssetModelCompositeModelsRequest.t,
+  ListAssetModelCompositeModelsResponse.t,
+  ListAssetModelCompositeModelsResponse.error) t 
+  | ListAssetModelProperties: (ListAssetModelPropertiesRequest.t,
+  ListAssetModelPropertiesResponse.t, ListAssetModelPropertiesResponse.error)
+  t 
   | ListAssetModels: (ListAssetModelsRequest.t, ListAssetModelsResponse.t,
   ListAssetModelsResponse.error) t 
+  | ListAssetProperties: (ListAssetPropertiesRequest.t,
+  ListAssetPropertiesResponse.t, ListAssetPropertiesResponse.error) t 
   | ListAssetRelationships: (ListAssetRelationshipsRequest.t,
   ListAssetRelationshipsResponse.t, ListAssetRelationshipsResponse.error) t 
   | ListAssets: (ListAssetsRequest.t, ListAssetsResponse.t,
   ListAssetsResponse.error) t 
   | ListAssociatedAssets: (ListAssociatedAssetsRequest.t,
   ListAssociatedAssetsResponse.t, ListAssociatedAssetsResponse.error) t 
+  | ListBulkImportJobs: (ListBulkImportJobsRequest.t,
+  ListBulkImportJobsResponse.t, ListBulkImportJobsResponse.error) t 
+  | ListCompositionRelationships: (ListCompositionRelationshipsRequest.t,
+  ListCompositionRelationshipsResponse.t,
+  ListCompositionRelationshipsResponse.error) t 
+  | ListComputationModelDataBindingUsages:
+  (ListComputationModelDataBindingUsagesRequest.t,
+  ListComputationModelDataBindingUsagesResponse.t,
+  ListComputationModelDataBindingUsagesResponse.error) t 
+  | ListComputationModelResolveToResources:
+  (ListComputationModelResolveToResourcesRequest.t,
+  ListComputationModelResolveToResourcesResponse.t,
+  ListComputationModelResolveToResourcesResponse.error) t 
+  | ListComputationModels: (ListComputationModelsRequest.t,
+  ListComputationModelsResponse.t, ListComputationModelsResponse.error) t 
   | ListDashboards: (ListDashboardsRequest.t, ListDashboardsResponse.t,
   ListDashboardsResponse.error) t 
+  | ListDatasets: (ListDatasetsRequest.t, ListDatasetsResponse.t,
+  ListDatasetsResponse.error) t 
+  | ListExecutions: (ListExecutionsRequest.t, ListExecutionsResponse.t,
+  ListExecutionsResponse.error) t 
   | ListGateways: (ListGatewaysRequest.t, ListGatewaysResponse.t,
   ListGatewaysResponse.error) t 
+  | ListInterfaceRelationships: (ListInterfaceRelationshipsRequest.t,
+  ListInterfaceRelationshipsResponse.t,
+  ListInterfaceRelationshipsResponse.error) t 
   | ListPortals: (ListPortalsRequest.t, ListPortalsResponse.t,
   ListPortalsResponse.error) t 
   | ListProjectAssets: (ListProjectAssetsRequest.t,
@@ -112,6 +207,10 @@ type ('i, 'o, 'e) t =
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListTimeSeries: (ListTimeSeriesRequest.t, ListTimeSeriesResponse.t,
   ListTimeSeriesResponse.error) t 
+  | PutAssetModelInterfaceRelationship:
+  (PutAssetModelInterfaceRelationshipRequest.t,
+  PutAssetModelInterfaceRelationshipResponse.t,
+  PutAssetModelInterfaceRelationshipResponse.error) t 
   | PutDefaultEncryptionConfiguration:
   (PutDefaultEncryptionConfigurationRequest.t,
   PutDefaultEncryptionConfigurationResponse.t,
@@ -131,9 +230,16 @@ type ('i, 'o, 'e) t =
   UpdateAssetResponse.error) t 
   | UpdateAssetModel: (UpdateAssetModelRequest.t, UpdateAssetModelResponse.t,
   UpdateAssetModelResponse.error) t 
+  | UpdateAssetModelCompositeModel: (UpdateAssetModelCompositeModelRequest.t,
+  UpdateAssetModelCompositeModelResponse.t,
+  UpdateAssetModelCompositeModelResponse.error) t 
   | UpdateAssetProperty: (UpdateAssetPropertyRequest.t, unit, unit) t 
+  | UpdateComputationModel: (UpdateComputationModelRequest.t,
+  UpdateComputationModelResponse.t, UpdateComputationModelResponse.error) t 
   | UpdateDashboard: (UpdateDashboardRequest.t, UpdateDashboardResponse.t,
   UpdateDashboardResponse.error) t 
+  | UpdateDataset: (UpdateDatasetRequest.t, UpdateDatasetResponse.t,
+  UpdateDatasetResponse.error) t 
   | UpdateGateway: (UpdateGatewayRequest.t, unit, unit) t 
   | UpdateGatewayCapabilityConfiguration:
   (UpdateGatewayCapabilityConfigurationRequest.t,
@@ -149,28 +255,48 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AssociateTimeSeriesToAssetProperty -> `POST
   | BatchAssociateProjectAssets -> `POST
   | BatchDisassociateProjectAssets -> `POST
+  | BatchGetAssetPropertyAggregates -> `POST
+  | BatchGetAssetPropertyValue -> `POST
+  | BatchGetAssetPropertyValueHistory -> `POST
   | BatchPutAssetPropertyValue -> `POST
   | CreateAccessPolicy -> `POST
   | CreateAsset -> `POST
   | CreateAssetModel -> `POST
+  | CreateAssetModelCompositeModel -> `POST
+  | CreateBulkImportJob -> `POST
+  | CreateComputationModel -> `POST
   | CreateDashboard -> `POST
+  | CreateDataset -> `POST
   | CreateGateway -> `POST
   | CreatePortal -> `POST
   | CreateProject -> `POST
   | DeleteAccessPolicy -> `DELETE
   | DeleteAsset -> `DELETE
   | DeleteAssetModel -> `DELETE
+  | DeleteAssetModelCompositeModel -> `DELETE
+  | DeleteAssetModelInterfaceRelationship -> `DELETE
+  | DeleteComputationModel -> `DELETE
   | DeleteDashboard -> `DELETE
+  | DeleteDataset -> `DELETE
   | DeleteGateway -> `DELETE
   | DeletePortal -> `DELETE
   | DeleteProject -> `DELETE
   | DeleteTimeSeries -> `POST
   | DescribeAccessPolicy -> `GET
+  | DescribeAction -> `GET
   | DescribeAsset -> `GET
+  | DescribeAssetCompositeModel -> `GET
   | DescribeAssetModel -> `GET
+  | DescribeAssetModelCompositeModel -> `GET
+  | DescribeAssetModelInterfaceRelationship -> `GET
   | DescribeAssetProperty -> `GET
+  | DescribeBulkImportJob -> `GET
+  | DescribeComputationModel -> `GET
+  | DescribeComputationModelExecutionSummary -> `GET
   | DescribeDashboard -> `GET
+  | DescribeDataset -> `GET
   | DescribeDefaultEncryptionConfiguration -> `GET
+  | DescribeExecution -> `GET
   | DescribeGateway -> `GET
   | DescribeGatewayCapabilityConfiguration -> `GET
   | DescribeLoggingOptions -> `GET
@@ -180,22 +306,38 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeTimeSeries -> `GET
   | DisassociateAssets -> `POST
   | DisassociateTimeSeriesFromAssetProperty -> `POST
+  | ExecuteAction -> `POST
+  | ExecuteQuery -> `POST
   | GetAssetPropertyAggregates -> `GET
   | GetAssetPropertyValue -> `GET
   | GetAssetPropertyValueHistory -> `GET
   | GetInterpolatedAssetPropertyValues -> `GET
+  | InvokeAssistant -> `POST
   | ListAccessPolicies -> `GET
+  | ListActions -> `GET
+  | ListAssetModelCompositeModels -> `GET
+  | ListAssetModelProperties -> `GET
   | ListAssetModels -> `GET
+  | ListAssetProperties -> `GET
   | ListAssetRelationships -> `GET
   | ListAssets -> `GET
   | ListAssociatedAssets -> `GET
+  | ListBulkImportJobs -> `GET
+  | ListCompositionRelationships -> `GET
+  | ListComputationModelDataBindingUsages -> `POST
+  | ListComputationModelResolveToResources -> `GET
+  | ListComputationModels -> `GET
   | ListDashboards -> `GET
+  | ListDatasets -> `GET
+  | ListExecutions -> `GET
   | ListGateways -> `GET
+  | ListInterfaceRelationships -> `GET
   | ListPortals -> `GET
   | ListProjectAssets -> `GET
   | ListProjects -> `GET
   | ListTagsForResource -> `GET
   | ListTimeSeries -> `GET
+  | PutAssetModelInterfaceRelationship -> `PUT
   | PutDefaultEncryptionConfiguration -> `POST
   | PutLoggingOptions -> `PUT
   | PutStorageConfiguration -> `POST
@@ -204,8 +346,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateAccessPolicy -> `PUT
   | UpdateAsset -> `PUT
   | UpdateAssetModel -> `PUT
+  | UpdateAssetModelCompositeModel -> `PUT
   | UpdateAssetProperty -> `PUT
+  | UpdateComputationModel -> `POST
   | UpdateDashboard -> `PUT
+  | UpdateDataset -> `PUT
   | UpdateGateway -> `PUT
   | UpdateGatewayCapabilityConfiguration -> `POST
   | UpdatePortal -> `PUT
@@ -215,27 +360,42 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AssociateAssets ->
           (Format.kasprintf Uri.of_string) "/assets/%s/associate"
-            (ID.to_header x.AssociateAssetsRequest.assetId)
+            (CustomID.to_header x.AssociateAssetsRequest.assetId)
       | AssociateTimeSeriesToAssetProperty ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/timeseries/associate/")
             (List.filter_opt
                [Some ("alias", (PropertyAlias.to_header x.alias));
-               Some ("assetId", (ID.to_header x.assetId));
-               Some ("propertyId", (ID.to_header x.propertyId))])
+               Some ("assetId", (CustomID.to_header x.assetId));
+               Some ("propertyId", (CustomID.to_header x.propertyId))])
       | BatchAssociateProjectAssets ->
           (Format.kasprintf Uri.of_string) "/projects/%s/assets/associate"
             (ID.to_header x.BatchAssociateProjectAssetsRequest.projectId)
       | BatchDisassociateProjectAssets ->
           (Format.kasprintf Uri.of_string) "/projects/%s/assets/disassociate"
             (ID.to_header x.BatchDisassociateProjectAssetsRequest.projectId)
+      | BatchGetAssetPropertyAggregates ->
+          (Format.kasprintf Uri.of_string) "/properties/batch/aggregates"
+      | BatchGetAssetPropertyValue ->
+          (Format.kasprintf Uri.of_string) "/properties/batch/latest"
+      | BatchGetAssetPropertyValueHistory ->
+          (Format.kasprintf Uri.of_string) "/properties/batch/history"
       | BatchPutAssetPropertyValue ->
           (Format.kasprintf Uri.of_string) "/properties"
       | CreateAccessPolicy ->
           (Format.kasprintf Uri.of_string) "/access-policies"
       | CreateAsset -> (Format.kasprintf Uri.of_string) "/assets"
       | CreateAssetModel -> (Format.kasprintf Uri.of_string) "/asset-models"
+      | CreateAssetModelCompositeModel ->
+          (Format.kasprintf Uri.of_string)
+            "/asset-models/%s/composite-models"
+            (CustomID.to_header
+               x.CreateAssetModelCompositeModelRequest.assetModelId)
+      | CreateBulkImportJob -> (Format.kasprintf Uri.of_string) "/jobs"
+      | CreateComputationModel ->
+          (Format.kasprintf Uri.of_string) "/computation-models"
       | CreateDashboard -> (Format.kasprintf Uri.of_string) "/dashboards"
+      | CreateDataset -> (Format.kasprintf Uri.of_string) "/datasets"
       | CreateGateway ->
           (Format.kasprintf Uri.of_string) "/20200301/gateways"
       | CreatePortal -> (Format.kasprintf Uri.of_string) "/portals"
@@ -251,7 +411,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteAsset ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/assets/%s"
-               (ID.to_header x.DeleteAssetRequest.assetId))
+               (CustomID.to_header x.DeleteAssetRequest.assetId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
@@ -259,7 +419,40 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteAssetModel ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/asset-models/%s"
-               (ID.to_header x.DeleteAssetModelRequest.assetModelId))
+               (CustomID.to_header x.DeleteAssetModelRequest.assetModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | DeleteAssetModelCompositeModel ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/asset-models/%s/composite-models/%s"
+               (CustomID.to_header
+                  x.DeleteAssetModelCompositeModelRequest.assetModelId)
+               (CustomID.to_header
+                  x.DeleteAssetModelCompositeModelRequest.assetModelCompositeModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | DeleteAssetModelInterfaceRelationship ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/asset-models/%s/interface/%s/asset-model-interface-relationship"
+               (CustomID.to_header
+                  x.DeleteAssetModelInterfaceRelationshipRequest.assetModelId)
+               (CustomID.to_header
+                  x.DeleteAssetModelInterfaceRelationshipRequest.interfaceAssetModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | DeleteComputationModel ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/computation-models/%s"
+               (ID.to_header
+                  x.DeleteComputationModelRequest.computationModelId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
@@ -268,6 +461,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/dashboards/%s"
                (ID.to_header x.DeleteDashboardRequest.dashboardId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | DeleteDataset ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/datasets/%s"
+               (ID.to_header x.DeleteDatasetRequest.datasetId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
@@ -298,29 +499,113 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("alias", (PropertyAlias.to_header v)))
                   x.alias;
-               Option.map ~f:(fun v -> ("assetId", (ID.to_header v)))
+               Option.map ~f:(fun v -> ("assetId", (CustomID.to_header v)))
                  x.assetId;
-               Option.map ~f:(fun v -> ("propertyId", (ID.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("propertyId", (CustomID.to_header v)))
                  x.propertyId])
       | DescribeAccessPolicy ->
           (Format.kasprintf Uri.of_string) "/access-policies/%s"
             (ID.to_header x.DescribeAccessPolicyRequest.accessPolicyId)
+      | DescribeAction ->
+          (Format.kasprintf Uri.of_string) "/actions/%s"
+            (ID.to_header x.DescribeActionRequest.actionId)
       | DescribeAsset ->
-          (Format.kasprintf Uri.of_string) "/assets/%s"
-            (ID.to_header x.DescribeAssetRequest.assetId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/assets/%s"
+               (CustomID.to_header x.DescribeAssetRequest.assetId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("excludeProperties",
+                          (ExcludeProperties.to_header v)))
+                  x.excludeProperties])
+      | DescribeAssetCompositeModel ->
+          (Format.kasprintf Uri.of_string) "/assets/%s/composite-models/%s"
+            (CustomID.to_header x.DescribeAssetCompositeModelRequest.assetId)
+            (CustomID.to_header
+               x.DescribeAssetCompositeModelRequest.assetCompositeModelId)
       | DescribeAssetModel ->
-          (Format.kasprintf Uri.of_string) "/asset-models/%s"
-            (ID.to_header x.DescribeAssetModelRequest.assetModelId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/asset-models/%s"
+               (CustomID.to_header x.DescribeAssetModelRequest.assetModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("excludeProperties",
+                          (ExcludeProperties.to_header v)))
+                  x.excludeProperties;
+               Option.map
+                 ~f:(fun v ->
+                       ("assetModelVersion",
+                         (AssetModelVersionFilter.to_header v)))
+                 x.assetModelVersion])
+      | DescribeAssetModelCompositeModel ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/asset-models/%s/composite-models/%s"
+               (CustomID.to_header
+                  x.DescribeAssetModelCompositeModelRequest.assetModelId)
+               (CustomID.to_header
+                  x.DescribeAssetModelCompositeModelRequest.assetModelCompositeModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("assetModelVersion",
+                          (AssetModelVersionFilter.to_header v)))
+                  x.assetModelVersion])
+      | DescribeAssetModelInterfaceRelationship ->
+          (Format.kasprintf Uri.of_string)
+            "/asset-models/%s/interface/%s/asset-model-interface-relationship"
+            (CustomID.to_header
+               x.DescribeAssetModelInterfaceRelationshipRequest.assetModelId)
+            (CustomID.to_header
+               x.DescribeAssetModelInterfaceRelationshipRequest.interfaceAssetModelId)
       | DescribeAssetProperty ->
           (Format.kasprintf Uri.of_string) "/assets/%s/properties/%s"
-            (ID.to_header x.DescribeAssetPropertyRequest.assetId)
-            (ID.to_header x.DescribeAssetPropertyRequest.propertyId)
+            (CustomID.to_header x.DescribeAssetPropertyRequest.assetId)
+            (CustomID.to_header x.DescribeAssetPropertyRequest.propertyId)
+      | DescribeBulkImportJob ->
+          (Format.kasprintf Uri.of_string) "/jobs/%s"
+            (ID.to_header x.DescribeBulkImportJobRequest.jobId)
+      | DescribeComputationModel ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/computation-models/%s"
+               (ID.to_header
+                  x.DescribeComputationModelRequest.computationModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("computationModelVersion",
+                          (ComputationModelVersionFilter.to_header v)))
+                  x.computationModelVersion])
+      | DescribeComputationModelExecutionSummary ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/computation-models/%s/execution-summary"
+               (ID.to_header
+                  x.DescribeComputationModelExecutionSummaryRequest.computationModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("resolveToResourceType",
+                          (ResolveToResourceType.to_header v)))
+                  x.resolveToResourceType;
+               Option.map
+                 ~f:(fun v -> ("resolveToResourceId", (ID.to_header v)))
+                 x.resolveToResourceId])
       | DescribeDashboard ->
           (Format.kasprintf Uri.of_string) "/dashboards/%s"
             (ID.to_header x.DescribeDashboardRequest.dashboardId)
+      | DescribeDataset ->
+          (Format.kasprintf Uri.of_string) "/datasets/%s"
+            (ID.to_header x.DescribeDatasetRequest.datasetId)
       | DescribeDefaultEncryptionConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/configuration/account/encryption"
+      | DescribeExecution ->
+          (Format.kasprintf Uri.of_string) "/executions/%s"
+            (ID.to_header x.DescribeExecutionRequest.executionId)
       | DescribeGateway ->
           (Format.kasprintf Uri.of_string) "/20200301/gateways/%s"
             (ID.to_header x.DescribeGatewayRequest.gatewayId)
@@ -347,20 +632,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("alias", (PropertyAlias.to_header v)))
                   x.alias;
-               Option.map ~f:(fun v -> ("assetId", (ID.to_header v)))
+               Option.map ~f:(fun v -> ("assetId", (CustomID.to_header v)))
                  x.assetId;
-               Option.map ~f:(fun v -> ("propertyId", (ID.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("propertyId", (CustomID.to_header v)))
                  x.propertyId])
       | DisassociateAssets ->
           (Format.kasprintf Uri.of_string) "/assets/%s/disassociate"
-            (ID.to_header x.DisassociateAssetsRequest.assetId)
+            (CustomID.to_header x.DisassociateAssetsRequest.assetId)
       | DisassociateTimeSeriesFromAssetProperty ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/timeseries/disassociate/")
             (List.filter_opt
                [Some ("alias", (PropertyAlias.to_header x.alias));
-               Some ("assetId", (ID.to_header x.assetId));
-               Some ("propertyId", (ID.to_header x.propertyId))])
+               Some ("assetId", (CustomID.to_header x.assetId));
+               Some ("propertyId", (CustomID.to_header x.propertyId))])
+      | ExecuteAction -> (Format.kasprintf Uri.of_string) "/actions"
+      | ExecuteQuery -> (Format.kasprintf Uri.of_string) "/queries/execution"
       | GetAssetPropertyAggregates ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/properties/aggregates")
@@ -389,8 +677,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken;
                Option.map
-                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                 x.maxResults])
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (GetAssetPropertyValueAggregatesMaxResults.to_header
+                            v))) x.maxResults])
       | GetAssetPropertyValue ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/properties/latest")
@@ -430,7 +720,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken;
                Option.map
-                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (GetAssetPropertyValueHistoryMaxResults.to_header v)))
                  x.maxResults])
       | GetInterpolatedAssetPropertyValues ->
           Uri.add_query_params'
@@ -476,6 +768,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                        ("intervalWindowInSeconds",
                          (IntervalWindowInSeconds.to_header v)))
                  x.intervalWindowInSeconds])
+      | InvokeAssistant ->
+          (Format.kasprintf Uri.of_string) "/assistant/invocation"
       | ListAccessPolicies ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/access-policies")
@@ -491,7 +785,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.resourceType;
                Option.map ~f:(fun v -> ("resourceId", (ID.to_header v)))
                  x.resourceId;
-               Option.map ~f:(fun v -> ("iamArn", (ARN.to_header v)))
+               Option.map ~f:(fun v -> ("iamArn", (IamArn.to_header v)))
                  x.iamArn;
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
@@ -499,20 +793,106 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
-      | ListAssetModels ->
+      | ListActions ->
+          Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/actions")
+            (List.filter_opt
+               [Some
+                  ("targetResourceType",
+                    (TargetResourceType.to_header x.targetResourceType));
+               Some ("targetResourceId", (ID.to_header x.targetResourceId));
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("resolveToResourceType",
+                         (ResolveToResourceType.to_header v)))
+                 x.resolveToResourceType;
+               Option.map
+                 ~f:(fun v -> ("resolveToResourceId", (ID.to_header v)))
+                 x.resolveToResourceId])
+      | ListAssetModelCompositeModels ->
           Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/asset-models")
+            ((Format.kasprintf Uri.of_string)
+               "/asset-models/%s/composite-models"
+               (CustomID.to_header
+                  x.ListAssetModelCompositeModelsRequest.assetModelId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("assetModelVersion",
+                         (AssetModelVersionFilter.to_header v)))
+                 x.assetModelVersion])
+      | ListAssetModelProperties ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/asset-models/%s/properties"
+               (CustomID.to_header
+                  x.ListAssetModelPropertiesRequest.assetModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("filter",
+                         (ListAssetModelPropertiesFilter.to_header v)))
+                 x.filter;
+               Option.map
+                 ~f:(fun v ->
+                       ("assetModelVersion",
+                         (AssetModelVersionFilter.to_header v)))
+                 x.assetModelVersion])
+      | ListAssetModels ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/asset-models")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("assetModelTypes",
+                          (ListAssetModelsTypeFilter.to_header v)))
+                  x.assetModelTypes;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("assetModelVersion",
+                         (AssetModelVersionFilter.to_header v)))
+                 x.assetModelVersion])
+      | ListAssetProperties ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/assets/%s/properties"
+               (CustomID.to_header x.ListAssetPropertiesRequest.assetId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("filter", (ListAssetPropertiesFilter.to_header v)))
+                 x.filter])
       | ListAssetRelationships ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/assets/%s/assetRelationships"
-               (ID.to_header x.ListAssetRelationshipsRequest.assetId))
+               (CustomID.to_header x.ListAssetRelationshipsRequest.assetId))
             (List.filter_opt
                [Some
                   ("traversalType",
@@ -532,7 +912,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults;
-               Option.map ~f:(fun v -> ("assetModelId", (ID.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("assetModelId", (CustomID.to_header v)))
                  x.assetModelId;
                Option.map
                  ~f:(fun v -> ("filter", (ListAssetsFilter.to_header v)))
@@ -540,15 +921,73 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListAssociatedAssets ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/assets/%s/hierarchies"
-               (ID.to_header x.ListAssociatedAssetsRequest.assetId))
+               (CustomID.to_header x.ListAssociatedAssetsRequest.assetId))
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("hierarchyId", (ID.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("hierarchyId", (CustomID.to_header v)))
                   x.hierarchyId;
                Option.map
                  ~f:(fun v ->
                        ("traversalDirection",
                          (TraversalDirection.to_header v)))
                  x.traversalDirection;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListBulkImportJobs ->
+          Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/jobs")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("filter", (ListBulkImportJobsFilter.to_header v)))
+                 x.filter])
+      | ListCompositionRelationships ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/asset-models/%s/composition-relationships"
+               (ID.to_header
+                  x.ListCompositionRelationshipsRequest.assetModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListComputationModelDataBindingUsages ->
+          (Format.kasprintf Uri.of_string)
+            "/computation-models/data-binding-usages"
+      | ListComputationModelResolveToResources ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/computation-models/%s/resolve-to-resources"
+               (ID.to_header
+                  x.ListComputationModelResolveToResourcesRequest.computationModelId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListComputationModels ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/computation-models")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("computationModelType",
+                          (ComputationModelType.to_header v)))
+                  x.computationModelType;
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken;
@@ -566,9 +1005,57 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListDatasets ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/datasets")
+            (List.filter_opt
+               [Some
+                  ("sourceType", (DatasetSourceType.to_header x.sourceType));
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListExecutions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/executions")
+            (List.filter_opt
+               [Some
+                  ("targetResourceType",
+                    (TargetResourceType.to_header x.targetResourceType));
+               Some ("targetResourceId", (ID.to_header x.targetResourceId));
+               Option.map
+                 ~f:(fun v ->
+                       ("resolveToResourceType",
+                         (ResolveToResourceType.to_header v)))
+                 x.resolveToResourceType;
+               Option.map
+                 ~f:(fun v -> ("resolveToResourceId", (ID.to_header v)))
+                 x.resolveToResourceId;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("actionType", (Name.to_header v)))
+                 x.actionType])
       | ListGateways ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/20200301/gateways")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListInterfaceRelationships ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/interface/%s/asset-models"
+               (CustomID.to_header
+                  x.ListInterfaceRelationshipsRequest.interfaceAssetModelId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
@@ -623,7 +1110,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults;
-               Option.map ~f:(fun v -> ("assetId", (ID.to_header v)))
+               Option.map ~f:(fun v -> ("assetId", (CustomID.to_header v)))
                  x.assetId;
                Option.map
                  ~f:(fun v -> ("aliasPrefix", (PropertyAlias.to_header v)))
@@ -632,6 +1119,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("timeSeriesType", (ListTimeSeriesType.to_header v)))
                  x.timeSeriesType])
+      | PutAssetModelInterfaceRelationship ->
+          (Format.kasprintf Uri.of_string)
+            "/asset-models/%s/interface/%s/asset-model-interface-relationship"
+            (CustomID.to_header
+               x.PutAssetModelInterfaceRelationshipRequest.assetModelId)
+            (CustomID.to_header
+               x.PutAssetModelInterfaceRelationshipRequest.interfaceAssetModelId)
       | PutDefaultEncryptionConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/configuration/account/encryption"
@@ -656,17 +1150,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ID.to_header x.UpdateAccessPolicyRequest.accessPolicyId)
       | UpdateAsset ->
           (Format.kasprintf Uri.of_string) "/assets/%s"
-            (ID.to_header x.UpdateAssetRequest.assetId)
+            (CustomID.to_header x.UpdateAssetRequest.assetId)
       | UpdateAssetModel ->
           (Format.kasprintf Uri.of_string) "/asset-models/%s"
-            (ID.to_header x.UpdateAssetModelRequest.assetModelId)
+            (CustomID.to_header x.UpdateAssetModelRequest.assetModelId)
+      | UpdateAssetModelCompositeModel ->
+          (Format.kasprintf Uri.of_string)
+            "/asset-models/%s/composite-models/%s"
+            (CustomID.to_header
+               x.UpdateAssetModelCompositeModelRequest.assetModelId)
+            (CustomID.to_header
+               x.UpdateAssetModelCompositeModelRequest.assetModelCompositeModelId)
       | UpdateAssetProperty ->
           (Format.kasprintf Uri.of_string) "/assets/%s/properties/%s"
-            (ID.to_header x.UpdateAssetPropertyRequest.assetId)
-            (ID.to_header x.UpdateAssetPropertyRequest.propertyId)
+            (CustomID.to_header x.UpdateAssetPropertyRequest.assetId)
+            (CustomID.to_header x.UpdateAssetPropertyRequest.propertyId)
+      | UpdateComputationModel ->
+          (Format.kasprintf Uri.of_string) "/computation-models/%s"
+            (ID.to_header x.UpdateComputationModelRequest.computationModelId)
       | UpdateDashboard ->
           (Format.kasprintf Uri.of_string) "/dashboards/%s"
             (ID.to_header x.UpdateDashboardRequest.dashboardId)
+      | UpdateDataset ->
+          (Format.kasprintf Uri.of_string) "/datasets/%s"
+            (ID.to_header x.UpdateDatasetRequest.datasetId)
       | UpdateGateway ->
           (Format.kasprintf Uri.of_string) "/20200301/gateways/%s"
             (ID.to_header x.UpdateGatewayRequest.gatewayId)
@@ -695,11 +1202,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("hierarchyId",
-                           (ID.to_value
+                           (CustomID.to_value
                               req.AssociateAssetsRequest.hierarchyId));
                       Some
                         ("childAssetId",
-                          (ID.to_value
+                          (CustomID.to_value
                              req.AssociateAssetsRequest.childAssetId));
                       Option.map req.AssociateAssetsRequest.clientToken
                         ~f:(fun x ->
@@ -779,7 +1286,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | BatchPutAssetPropertyValue ->
+  | BatchGetAssetPropertyAggregates ->
       let (headers, body) =
         let headers =
           Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
@@ -790,8 +1297,94 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("entries",
-                           (PutAssetPropertyValueEntries.to_value
-                              req.BatchPutAssetPropertyValueRequest.entries))])
+                           (BatchGetAssetPropertyAggregatesEntries.to_value
+                              req.BatchGetAssetPropertyAggregatesRequest.entries));
+                      Option.map
+                        req.BatchGetAssetPropertyAggregatesRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.BatchGetAssetPropertyAggregatesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (BatchGetAssetPropertyAggregatesMaxResults.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetAssetPropertyValue ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("entries",
+                           (BatchGetAssetPropertyValueEntries.to_value
+                              req.BatchGetAssetPropertyValueRequest.entries));
+                      Option.map
+                        req.BatchGetAssetPropertyValueRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetAssetPropertyValueHistory ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("entries",
+                           (BatchGetAssetPropertyValueHistoryEntries.to_value
+                              req.BatchGetAssetPropertyValueHistoryRequest.entries));
+                      Option.map
+                        req.BatchGetAssetPropertyValueHistoryRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.BatchGetAssetPropertyValueHistoryRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (BatchGetAssetPropertyValueHistoryMaxResults.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchPutAssetPropertyValue ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.BatchPutAssetPropertyValueRequest.enablePartialEntryProcessing
+                         ~f:(fun x ->
+                               ("enablePartialEntryProcessing",
+                                 (BooleanValue.to_value x)));
+                      Some
+                        ("entries",
+                          (PutAssetPropertyValueEntries.to_value
+                             req.BatchPutAssetPropertyValueRequest.entries))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -846,12 +1439,21 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (Name.to_value req.CreateAssetRequest.assetName));
                       Some
                         ("assetModelId",
-                          (ID.to_value req.CreateAssetRequest.assetModelId));
+                          (CustomID.to_value
+                             req.CreateAssetRequest.assetModelId));
+                      Option.map req.CreateAssetRequest.assetId
+                        ~f:(fun x -> ("assetId", (ID.to_value x)));
+                      Option.map req.CreateAssetRequest.assetExternalId
+                        ~f:(fun x ->
+                              ("assetExternalId", (ExternalId.to_value x)));
                       Option.map req.CreateAssetRequest.clientToken
                         ~f:(fun x ->
                               ("clientToken", (ClientToken.to_value x)));
                       Option.map req.CreateAssetRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateAssetRequest.assetDescription
+                        ~f:(fun x ->
+                              ("assetDescription", (Description.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -872,6 +1474,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("assetModelName",
                            (Name.to_value
                               req.CreateAssetModelRequest.assetModelName));
+                      Option.map req.CreateAssetModelRequest.assetModelType
+                        ~f:(fun x ->
+                              ("assetModelType", (AssetModelType.to_value x)));
+                      Option.map req.CreateAssetModelRequest.assetModelId
+                        ~f:(fun x -> ("assetModelId", (ID.to_value x)));
+                      Option.map
+                        req.CreateAssetModelRequest.assetModelExternalId
+                        ~f:(fun x ->
+                              ("assetModelExternalId",
+                                (ExternalId.to_value x)));
                       Option.map
                         req.CreateAssetModelRequest.assetModelDescription
                         ~f:(fun x ->
@@ -897,6 +1509,159 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("clientToken", (ClientToken.to_value x)));
                       Option.map req.CreateAssetModelRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAssetModelCompositeModel ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Option.map req.CreateAssetModelCompositeModelRequest.ifMatch
+                   ~f:(fun x -> ("If-Match", (ETag.to_header x)));
+                Option.map
+                  req.CreateAssetModelCompositeModelRequest.ifNoneMatch
+                  ~f:(fun x -> ("If-None-Match", (SelectAll.to_header x)));
+                Option.map
+                  req.CreateAssetModelCompositeModelRequest.matchForVersionType
+                  ~f:(fun x ->
+                        ("Match-For-Version-Type",
+                          (AssetModelVersionType.to_header x)))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateAssetModelCompositeModelRequest.assetModelCompositeModelExternalId
+                         ~f:(fun x ->
+                               ("assetModelCompositeModelExternalId",
+                                 (ExternalId.to_value x)));
+                      Option.map
+                        req.CreateAssetModelCompositeModelRequest.parentAssetModelCompositeModelId
+                        ~f:(fun x ->
+                              ("parentAssetModelCompositeModelId",
+                                (CustomID.to_value x)));
+                      Option.map
+                        req.CreateAssetModelCompositeModelRequest.assetModelCompositeModelId
+                        ~f:(fun x ->
+                              ("assetModelCompositeModelId", (ID.to_value x)));
+                      Option.map
+                        req.CreateAssetModelCompositeModelRequest.assetModelCompositeModelDescription
+                        ~f:(fun x ->
+                              ("assetModelCompositeModelDescription",
+                                (Description.to_value x)));
+                      Some
+                        ("assetModelCompositeModelName",
+                          (Name.to_value
+                             req.CreateAssetModelCompositeModelRequest.assetModelCompositeModelName));
+                      Some
+                        ("assetModelCompositeModelType",
+                          (Name.to_value
+                             req.CreateAssetModelCompositeModelRequest.assetModelCompositeModelType));
+                      Option.map
+                        req.CreateAssetModelCompositeModelRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map
+                        req.CreateAssetModelCompositeModelRequest.composedAssetModelId
+                        ~f:(fun x ->
+                              ("composedAssetModelId", (CustomID.to_value x)));
+                      Option.map
+                        req.CreateAssetModelCompositeModelRequest.assetModelCompositeModelProperties
+                        ~f:(fun x ->
+                              ("assetModelCompositeModelProperties",
+                                (AssetModelPropertyDefinitions.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateBulkImportJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("jobName",
+                           (Name.to_value
+                              req.CreateBulkImportJobRequest.jobName));
+                      Some
+                        ("jobRoleArn",
+                          (ARN.to_value
+                             req.CreateBulkImportJobRequest.jobRoleArn));
+                      Some
+                        ("files",
+                          (Files.to_value
+                             req.CreateBulkImportJobRequest.files));
+                      Some
+                        ("errorReportLocation",
+                          (ErrorReportLocation.to_value
+                             req.CreateBulkImportJobRequest.errorReportLocation));
+                      Some
+                        ("jobConfiguration",
+                          (JobConfiguration.to_value
+                             req.CreateBulkImportJobRequest.jobConfiguration));
+                      Option.map
+                        req.CreateBulkImportJobRequest.adaptiveIngestion
+                        ~f:(fun x ->
+                              ("adaptiveIngestion",
+                                (AdaptiveIngestion.to_value x)));
+                      Option.map
+                        req.CreateBulkImportJobRequest.deleteFilesAfterImport
+                        ~f:(fun x ->
+                              ("deleteFilesAfterImport",
+                                (DeleteFilesAfterImport.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateComputationModel ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("computationModelName",
+                           (RestrictedName.to_value
+                              req.CreateComputationModelRequest.computationModelName));
+                      Option.map
+                        req.CreateComputationModelRequest.computationModelDescription
+                        ~f:(fun x ->
+                              ("computationModelDescription",
+                                (RestrictedDescription.to_value x)));
+                      Some
+                        ("computationModelConfiguration",
+                          (ComputationModelConfiguration.to_value
+                             req.CreateComputationModelRequest.computationModelConfiguration));
+                      Some
+                        ("computationModelDataBinding",
+                          (ComputationModelDataBinding.to_value
+                             req.CreateComputationModelRequest.computationModelDataBinding));
+                      Option.map
+                        req.CreateComputationModelRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateComputationModelRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -942,6 +1707,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateDataset ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateDatasetRequest.datasetId
+                         ~f:(fun x -> ("datasetId", (ID.to_value x)));
+                      Some
+                        ("datasetName",
+                          (RestrictedName.to_value
+                             req.CreateDatasetRequest.datasetName));
+                      Option.map req.CreateDatasetRequest.datasetDescription
+                        ~f:(fun x ->
+                              ("datasetDescription",
+                                (RestrictedDescription.to_value x)));
+                      Some
+                        ("datasetSource",
+                          (DatasetSource.to_value
+                             req.CreateDatasetRequest.datasetSource));
+                      Option.map req.CreateDatasetRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateDatasetRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateGateway ->
       let (headers, body) =
         let headers =
@@ -953,12 +1753,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("gatewayName",
-                           (Name.to_value
+                           (GatewayName.to_value
                               req.CreateGatewayRequest.gatewayName));
                       Some
                         ("gatewayPlatform",
                           (GatewayPlatform.to_value
                              req.CreateGatewayRequest.gatewayPlatform));
+                      Option.map req.CreateGatewayRequest.gatewayVersion
+                        ~f:(fun x ->
+                              ("gatewayVersion", (GatewayVersion.to_value x)));
                       Option.map req.CreateGatewayRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -995,7 +1798,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("portalLogoImageFile", (ImageFile.to_value x)));
                       Some
                         ("roleArn",
-                          (ARN.to_value req.CreatePortalRequest.roleArn));
+                          (IamArn.to_value req.CreatePortalRequest.roleArn));
                       Option.map req.CreatePortalRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)));
                       Option.map req.CreatePortalRequest.portalAuthMode
@@ -1006,7 +1809,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("notificationSenderEmail", (Email.to_value x)));
                       Option.map req.CreatePortalRequest.alarms
-                        ~f:(fun x -> ("alarms", (Alarms.to_value x)))])
+                        ~f:(fun x -> ("alarms", (Alarms.to_value x)));
+                      Option.map req.CreatePortalRequest.portalType
+                        ~f:(fun x -> ("portalType", (PortalType.to_value x)));
+                      Option.map
+                        req.CreatePortalRequest.portalTypeConfiguration
+                        ~f:(fun x ->
+                              ("portalTypeConfiguration",
+                                (PortalTypeConfiguration.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1048,7 +1858,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteAccessPolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteAsset -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteAssetModel -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteAssetModelCompositeModel ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteAssetModelInterfaceRelationship ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteComputationModel ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDashboard -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDataset -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteGateway -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePortal -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteProject -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -1074,19 +1891,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeAccessPolicy ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAction ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAsset ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAssetCompositeModel ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAssetModel ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAssetModelCompositeModel ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAssetModelInterfaceRelationship ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAssetProperty ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeBulkImportJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeComputationModel ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeComputationModelExecutionSummary ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDashboard ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDataset ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDefaultEncryptionConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeExecution ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeGateway ->
@@ -1121,11 +1965,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("hierarchyId",
-                           (ID.to_value
+                           (CustomID.to_value
                               req.DisassociateAssetsRequest.hierarchyId));
                       Some
                         ("childAssetId",
-                          (ID.to_value
+                          (CustomID.to_value
                              req.DisassociateAssetsRequest.childAssetId));
                       Option.map req.DisassociateAssetsRequest.clientToken
                         ~f:(fun x ->
@@ -1157,6 +2001,70 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ExecuteAction ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("targetResource",
+                           (TargetResource.to_value
+                              req.ExecuteActionRequest.targetResource));
+                      Some
+                        ("actionDefinitionId",
+                          (ID.to_value
+                             req.ExecuteActionRequest.actionDefinitionId));
+                      Some
+                        ("actionPayload",
+                          (ActionPayload.to_value
+                             req.ExecuteActionRequest.actionPayload));
+                      Option.map req.ExecuteActionRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.ExecuteActionRequest.resolveTo
+                        ~f:(fun x -> ("resolveTo", (ResolveTo.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ExecuteQuery ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("queryStatement",
+                           (QueryStatement.to_value
+                              req.ExecuteQueryRequest.queryStatement));
+                      Option.map req.ExecuteQueryRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken",
+                                (ExecuteQueryNextToken.to_value x)));
+                      Option.map req.ExecuteQueryRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (ExecuteQueryMaxResults.to_value x)));
+                      Option.map req.ExecuteQueryRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetAssetPropertyAggregates ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1169,10 +2077,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetInterpolatedAssetPropertyValues ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | InvokeAssistant ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.InvokeAssistantRequest.conversationId
+                         ~f:(fun x ->
+                               ("conversationId",
+                                 (ConversationId.to_value x)));
+                      Some
+                        ("message",
+                          (MessageInput.to_value
+                             req.InvokeAssistantRequest.message));
+                      Option.map req.InvokeAssistantRequest.enableTrace
+                        ~f:(fun x ->
+                              ("enableTrace", (PrimitiveBoolean.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAccessPolicies ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListActions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssetModelCompositeModels ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssetModelProperties ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAssetModels ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssetProperties ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAssetRelationships ->
@@ -1184,10 +2131,57 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListAssociatedAssets ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListBulkImportJobs ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCompositionRelationships ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListComputationModelDataBindingUsages ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("dataBindingValueFilter",
+                           (DataBindingValueFilter.to_value
+                              req.ListComputationModelDataBindingUsagesRequest.dataBindingValueFilter));
+                      Option.map
+                        req.ListComputationModelDataBindingUsagesRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.ListComputationModelDataBindingUsagesRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListComputationModelResolveToResources ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListComputationModels ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDashboards ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDatasets ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListExecutions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListGateways ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListInterfaceRelationships ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListPortals ->
@@ -1205,6 +2199,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListTimeSeries ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutAssetModelInterfaceRelationship ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | PutDefaultEncryptionConfiguration ->
       let (headers, body) =
         let headers =
@@ -1256,7 +2252,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.PutStorageConfigurationRequest.retentionPeriod
                         ~f:(fun x ->
                               ("retentionPeriod",
-                                (RetentionPeriod.to_value x)))])
+                                (RetentionPeriod.to_value x)));
+                      Option.map req.PutStorageConfigurationRequest.warmTier
+                        ~f:(fun x -> ("warmTier", (WarmTierState.to_value x)));
+                      Option.map
+                        req.PutStorageConfigurationRequest.warmTierRetentionPeriod
+                        ~f:(fun x ->
+                              ("warmTierRetentionPeriod",
+                                (WarmTierRetentionPeriod.to_value x)));
+                      Option.map
+                        req.PutStorageConfigurationRequest.disallowIngestNullNaN
+                        ~f:(fun x ->
+                              ("disallowIngestNullNaN",
+                                (DisallowIngestNullNaN.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1287,8 +2295,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateAccessPolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAsset -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAssetModel -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAssetModelCompositeModel ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAssetProperty -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateComputationModel ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("computationModelName",
+                           (RestrictedName.to_value
+                              req.UpdateComputationModelRequest.computationModelName));
+                      Option.map
+                        req.UpdateComputationModelRequest.computationModelDescription
+                        ~f:(fun x ->
+                              ("computationModelDescription",
+                                (RestrictedDescription.to_value x)));
+                      Some
+                        ("computationModelConfiguration",
+                          (ComputationModelConfiguration.to_value
+                             req.UpdateComputationModelRequest.computationModelConfiguration));
+                      Some
+                        ("computationModelDataBinding",
+                          (ComputationModelDataBinding.to_value
+                             req.UpdateComputationModelRequest.computationModelDataBinding));
+                      Option.map
+                        req.UpdateComputationModelRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateDashboard -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDataset -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateGateway -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateGatewayCapabilityConfiguration ->
       let (headers, body) =
@@ -1388,6 +2436,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some BatchDisassociateProjectAssetsResponse.error_of_json))
+  | BatchGetAssetPropertyAggregates ->
+      if is_success
+      then
+        Ok
+          (BatchGetAssetPropertyAggregatesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetAssetPropertyAggregatesResponse.error_of_json))
+  | BatchGetAssetPropertyValue ->
+      if is_success
+      then
+        Ok
+          (BatchGetAssetPropertyValueResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetAssetPropertyValueResponse.error_of_json))
+  | BatchGetAssetPropertyValueHistory ->
+      if is_success
+      then
+        Ok
+          (BatchGetAssetPropertyValueHistoryResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetAssetPropertyValueHistoryResponse.error_of_json))
   | BatchPutAssetPropertyValue ->
       if is_success
       then
@@ -1412,11 +2489,39 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (CreateAssetModelResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateAssetModelResponse.error_of_json))
+  | CreateAssetModelCompositeModel ->
+      if is_success
+      then
+        Ok
+          (CreateAssetModelCompositeModelResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAssetModelCompositeModelResponse.error_of_json))
+  | CreateBulkImportJob ->
+      if is_success
+      then Ok (CreateBulkImportJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateBulkImportJobResponse.error_of_json))
+  | CreateComputationModel ->
+      if is_success
+      then
+        Ok (CreateComputationModelResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateComputationModelResponse.error_of_json))
   | CreateDashboard ->
       if is_success
       then Ok (CreateDashboardResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateDashboardResponse.error_of_json))
+  | CreateDataset ->
+      if is_success
+      then Ok (CreateDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateDatasetResponse.error_of_json))
   | CreateGateway ->
       if is_success
       then Ok (CreateGatewayResponse.of_json (response_to_json resp))
@@ -1447,6 +2552,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DeleteAssetModelResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteAssetModelResponse.error_of_json))
+  | DeleteAssetModelCompositeModel ->
+      if is_success
+      then
+        Ok
+          (DeleteAssetModelCompositeModelResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAssetModelCompositeModelResponse.error_of_json))
+  | DeleteAssetModelInterfaceRelationship ->
+      if is_success
+      then
+        Ok
+          (DeleteAssetModelInterfaceRelationshipResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DeleteAssetModelInterfaceRelationshipResponse.error_of_json))
+  | DeleteComputationModel ->
+      if is_success
+      then
+        Ok (DeleteComputationModelResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteComputationModelResponse.error_of_json))
   | DeleteDashboard ->
       if is_success
       then
@@ -1455,6 +2589,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteDashboardResponse.of_header_and_body (headers, ()))
       else
         Error (parse_aws_error (Some DeleteDashboardResponse.error_of_json))
+  | DeleteDataset ->
+      if is_success
+      then Ok (DeleteDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteDatasetResponse.error_of_json))
   | DeleteGateway ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeletePortal ->
@@ -1476,28 +2614,94 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeAccessPolicyResponse.error_of_json))
+  | DescribeAction ->
+      if is_success
+      then Ok (DescribeActionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeActionResponse.error_of_json))
   | DescribeAsset ->
       if is_success
       then Ok (DescribeAssetResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DescribeAssetResponse.error_of_json))
+  | DescribeAssetCompositeModel ->
+      if is_success
+      then
+        Ok
+          (DescribeAssetCompositeModelResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAssetCompositeModelResponse.error_of_json))
   | DescribeAssetModel ->
       if is_success
       then Ok (DescribeAssetModelResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeAssetModelResponse.error_of_json))
+  | DescribeAssetModelCompositeModel ->
+      if is_success
+      then
+        Ok
+          (DescribeAssetModelCompositeModelResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAssetModelCompositeModelResponse.error_of_json))
+  | DescribeAssetModelInterfaceRelationship ->
+      if is_success
+      then
+        Ok
+          (DescribeAssetModelInterfaceRelationshipResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DescribeAssetModelInterfaceRelationshipResponse.error_of_json))
   | DescribeAssetProperty ->
       if is_success
       then Ok (DescribeAssetPropertyResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeAssetPropertyResponse.error_of_json))
+  | DescribeBulkImportJob ->
+      if is_success
+      then Ok (DescribeBulkImportJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeBulkImportJobResponse.error_of_json))
+  | DescribeComputationModel ->
+      if is_success
+      then
+        Ok (DescribeComputationModelResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeComputationModelResponse.error_of_json))
+  | DescribeComputationModelExecutionSummary ->
+      if is_success
+      then
+        Ok
+          (DescribeComputationModelExecutionSummaryResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DescribeComputationModelExecutionSummaryResponse.error_of_json))
   | DescribeDashboard ->
       if is_success
       then Ok (DescribeDashboardResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeDashboardResponse.error_of_json))
+  | DescribeDataset ->
+      if is_success
+      then Ok (DescribeDatasetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDatasetResponse.error_of_json))
   | DescribeDefaultEncryptionConfiguration ->
       if is_success
       then
@@ -1509,6 +2713,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 DescribeDefaultEncryptionConfigurationResponse.error_of_json))
+  | DescribeExecution ->
+      if is_success
+      then Ok (DescribeExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeExecutionResponse.error_of_json))
   | DescribeGateway ->
       if is_success
       then Ok (DescribeGatewayResponse.of_json (response_to_json resp))
@@ -1563,6 +2773,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateTimeSeriesFromAssetProperty ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | ExecuteAction ->
+      if is_success
+      then Ok (ExecuteActionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ExecuteActionResponse.error_of_json))
+  | ExecuteQuery ->
+      if is_success
+      then Ok (ExecuteQueryResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ExecuteQueryResponse.error_of_json))
   | GetAssetPropertyAggregates ->
       if is_success
       then
@@ -1598,17 +2816,54 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetInterpolatedAssetPropertyValuesResponse.error_of_json))
+  | InvokeAssistant ->
+      if is_success
+      then
+        let body = ResponseStream.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (InvokeAssistantResponse.of_header_and_body (headers, body))
+      else
+        Error (parse_aws_error (Some InvokeAssistantResponse.error_of_json))
   | ListAccessPolicies ->
       if is_success
       then Ok (ListAccessPoliciesResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListAccessPoliciesResponse.error_of_json))
+  | ListActions ->
+      if is_success
+      then Ok (ListActionsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListActionsResponse.error_of_json))
+  | ListAssetModelCompositeModels ->
+      if is_success
+      then
+        Ok
+          (ListAssetModelCompositeModelsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssetModelCompositeModelsResponse.error_of_json))
+  | ListAssetModelProperties ->
+      if is_success
+      then
+        Ok (ListAssetModelPropertiesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssetModelPropertiesResponse.error_of_json))
   | ListAssetModels ->
       if is_success
       then Ok (ListAssetModelsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListAssetModelsResponse.error_of_json))
+  | ListAssetProperties ->
+      if is_success
+      then Ok (ListAssetPropertiesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAssetPropertiesResponse.error_of_json))
   | ListAssetRelationships ->
       if is_success
       then
@@ -1627,15 +2882,77 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListAssociatedAssetsResponse.error_of_json))
+  | ListBulkImportJobs ->
+      if is_success
+      then Ok (ListBulkImportJobsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBulkImportJobsResponse.error_of_json))
+  | ListCompositionRelationships ->
+      if is_success
+      then
+        Ok
+          (ListCompositionRelationshipsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCompositionRelationshipsResponse.error_of_json))
+  | ListComputationModelDataBindingUsages ->
+      if is_success
+      then
+        Ok
+          (ListComputationModelDataBindingUsagesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListComputationModelDataBindingUsagesResponse.error_of_json))
+  | ListComputationModelResolveToResources ->
+      if is_success
+      then
+        Ok
+          (ListComputationModelResolveToResourcesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListComputationModelResolveToResourcesResponse.error_of_json))
+  | ListComputationModels ->
+      if is_success
+      then Ok (ListComputationModelsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListComputationModelsResponse.error_of_json))
   | ListDashboards ->
       if is_success
       then Ok (ListDashboardsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListDashboardsResponse.error_of_json))
+  | ListDatasets ->
+      if is_success
+      then Ok (ListDatasetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDatasetsResponse.error_of_json))
+  | ListExecutions ->
+      if is_success
+      then Ok (ListExecutionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListExecutionsResponse.error_of_json))
   | ListGateways ->
       if is_success
       then Ok (ListGatewaysResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListGatewaysResponse.error_of_json))
+  | ListInterfaceRelationships ->
+      if is_success
+      then
+        Ok
+          (ListInterfaceRelationshipsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListInterfaceRelationshipsResponse.error_of_json))
   | ListPortals ->
       if is_success
       then Ok (ListPortalsResponse.of_json (response_to_json resp))
@@ -1661,6 +2978,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListTimeSeriesResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListTimeSeriesResponse.error_of_json))
+  | PutAssetModelInterfaceRelationship ->
+      if is_success
+      then
+        Ok
+          (PutAssetModelInterfaceRelationshipResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutAssetModelInterfaceRelationshipResponse.error_of_json))
   | PutDefaultEncryptionConfiguration ->
       if is_success
       then
@@ -1720,8 +3047,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (UpdateAssetModelResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateAssetModelResponse.error_of_json))
+  | UpdateAssetModelCompositeModel ->
+      if is_success
+      then
+        Ok
+          (UpdateAssetModelCompositeModelResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAssetModelCompositeModelResponse.error_of_json))
   | UpdateAssetProperty ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateComputationModel ->
+      if is_success
+      then
+        Ok (UpdateComputationModelResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateComputationModelResponse.error_of_json))
   | UpdateDashboard ->
       if is_success
       then
@@ -1730,6 +3075,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateDashboardResponse.of_header_and_body (headers, ()))
       else
         Error (parse_aws_error (Some UpdateDashboardResponse.error_of_json))
+  | UpdateDataset ->
+      if is_success
+      then Ok (UpdateDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateDatasetResponse.error_of_json))
   | UpdateGateway ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateGatewayCapabilityConfiguration ->

@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let batch_get_secret_value ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetSecretValue input
 let cancel_rotate_secret ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelRotateSecret input
 let create_secret ?endpoint_url ?cfg input =

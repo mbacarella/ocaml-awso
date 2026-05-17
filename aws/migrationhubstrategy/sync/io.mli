@@ -23,6 +23,12 @@ val get_import_file_task :
       GetImportFileTaskRequest.t ->
         (GetImportFileTaskResponse.t, GetImportFileTaskResponse.error)
           Result.t
+val get_latest_assessment_id :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLatestAssessmentIdRequest.t ->
+        (GetLatestAssessmentIdResponse.t,
+          GetLatestAssessmentIdResponse.error) Result.t
 val get_portfolio_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -52,6 +58,12 @@ val get_server_strategies :
       GetServerStrategiesRequest.t ->
         (GetServerStrategiesResponse.t, GetServerStrategiesResponse.error)
           Result.t
+val list_analyzable_servers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAnalyzableServersRequest.t ->
+        (ListAnalyzableServersResponse.t,
+          ListAnalyzableServersResponse.error) Result.t
 val list_application_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

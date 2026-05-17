@@ -176,6 +176,27 @@ let get_tag_values =
            (Values.GetTagValuesInput.make ?paginationToken ~key ())
            (Some Values.GetTagValuesOutput.to_json)
            (Some Values.GetTagValuesOutput.error_to_json)])
+let list_required_tags =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxResultsForListRequiredTags" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_required_tags
+           (Values.ListRequiredTagsInput.make ?nextToken ?maxResults ())
+           (Some Values.ListRequiredTagsOutput.to_json)
+           (Some Values.ListRequiredTagsOutput.error_to_json)])
 let start_report_creation =
   Command.async ~summary:""
     ([%map_open.Command
@@ -249,6 +270,7 @@ let main =
     ("get-resources", get_resources);
     ("get-tag-keys", get_tag_keys);
     ("get-tag-values", get_tag_values);
+    ("list-required-tags", list_required_tags);
     ("start-report-creation", start_report_creation);
     ("tag-resources", tag_resources);
     ("untag-resources", untag_resources)]

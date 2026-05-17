@@ -11,6 +11,18 @@ val cancel_query :
       CancelQueryRequest.t ->
         (CancelQueryResponse.t, CancelQueryResponse.error) Result.t
           Async.Deferred.t
+val create_channel :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateChannelRequest.t ->
+        (CreateChannelResponse.t, CreateChannelResponse.error) Result.t
+          Async.Deferred.t
+val create_dashboard :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDashboardRequest.t ->
+        (CreateDashboardResponse.t, CreateDashboardResponse.error) Result.t
+          Async.Deferred.t
 val create_event_data_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -23,17 +35,42 @@ val create_trail :
       CreateTrailRequest.t ->
         (CreateTrailResponse.t, CreateTrailResponse.error) Result.t
           Async.Deferred.t
+val delete_channel :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteChannelRequest.t ->
+        (DeleteChannelResponse.t, DeleteChannelResponse.error) Result.t
+          Async.Deferred.t
+val delete_dashboard :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDashboardRequest.t ->
+        (DeleteDashboardResponse.t, DeleteDashboardResponse.error) Result.t
+          Async.Deferred.t
 val delete_event_data_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventDataStoreRequest.t ->
         (DeleteEventDataStoreResponse.t, DeleteEventDataStoreResponse.error)
           Result.t Async.Deferred.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyRequest.t ->
+        (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val delete_trail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrailRequest.t ->
         (DeleteTrailResponse.t, DeleteTrailResponse.error) Result.t
+          Async.Deferred.t
+val deregister_organization_delegated_admin :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeregisterOrganizationDelegatedAdminRequest.t ->
+        (DeregisterOrganizationDelegatedAdminResponse.t,
+          DeregisterOrganizationDelegatedAdminResponse.error) Result.t
           Async.Deferred.t
 val describe_query :
   ?endpoint_url:string ->
@@ -47,6 +84,42 @@ val describe_trails :
       DescribeTrailsRequest.t ->
         (DescribeTrailsResponse.t, DescribeTrailsResponse.error) Result.t
           Async.Deferred.t
+val disable_federation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisableFederationRequest.t ->
+        (DisableFederationResponse.t, DisableFederationResponse.error)
+          Result.t Async.Deferred.t
+val enable_federation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      EnableFederationRequest.t ->
+        (EnableFederationResponse.t, EnableFederationResponse.error) Result.t
+          Async.Deferred.t
+val generate_query :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GenerateQueryRequest.t ->
+        (GenerateQueryResponse.t, GenerateQueryResponse.error) Result.t
+          Async.Deferred.t
+val get_channel :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetChannelRequest.t ->
+        (GetChannelResponse.t, GetChannelResponse.error) Result.t
+          Async.Deferred.t
+val get_dashboard :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDashboardRequest.t ->
+        (GetDashboardResponse.t, GetDashboardResponse.error) Result.t
+          Async.Deferred.t
+val get_event_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetEventConfigurationRequest.t ->
+        (GetEventConfigurationResponse.t,
+          GetEventConfigurationResponse.error) Result.t Async.Deferred.t
 val get_event_data_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -59,6 +132,12 @@ val get_event_selectors :
       GetEventSelectorsRequest.t ->
         (GetEventSelectorsResponse.t, GetEventSelectorsResponse.error)
           Result.t Async.Deferred.t
+val get_import :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetImportRequest.t ->
+        (GetImportResponse.t, GetImportResponse.error) Result.t
+          Async.Deferred.t
 val get_insight_selectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -71,6 +150,12 @@ val get_query_results :
       GetQueryResultsRequest.t ->
         (GetQueryResultsResponse.t, GetQueryResultsResponse.error) Result.t
           Async.Deferred.t
+val get_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePolicyRequest.t ->
+        (GetResourcePolicyResponse.t, GetResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val get_trail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -83,12 +168,48 @@ val get_trail_status :
       GetTrailStatusRequest.t ->
         (GetTrailStatusResponse.t, GetTrailStatusResponse.error) Result.t
           Async.Deferred.t
+val list_channels :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListChannelsRequest.t ->
+        (ListChannelsResponse.t, ListChannelsResponse.error) Result.t
+          Async.Deferred.t
+val list_dashboards :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDashboardsRequest.t ->
+        (ListDashboardsResponse.t, ListDashboardsResponse.error) Result.t
+          Async.Deferred.t
 val list_event_data_stores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventDataStoresRequest.t ->
         (ListEventDataStoresResponse.t, ListEventDataStoresResponse.error)
           Result.t Async.Deferred.t
+val list_import_failures :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListImportFailuresRequest.t ->
+        (ListImportFailuresResponse.t, ListImportFailuresResponse.error)
+          Result.t Async.Deferred.t
+val list_imports :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListImportsRequest.t ->
+        (ListImportsResponse.t, ListImportsResponse.error) Result.t
+          Async.Deferred.t
+val list_insights_data :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInsightsDataRequest.t ->
+        (ListInsightsDataResponse.t, ListInsightsDataResponse.error) Result.t
+          Async.Deferred.t
+val list_insights_metric_data :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInsightsMetricDataRequest.t ->
+        (ListInsightsMetricDataResponse.t,
+          ListInsightsMetricDataResponse.error) Result.t Async.Deferred.t
 val list_public_keys :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -119,6 +240,12 @@ val lookup_events :
       LookupEventsRequest.t ->
         (LookupEventsResponse.t, LookupEventsResponse.error) Result.t
           Async.Deferred.t
+val put_event_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutEventConfigurationRequest.t ->
+        (PutEventConfigurationResponse.t,
+          PutEventConfigurationResponse.error) Result.t Async.Deferred.t
 val put_event_selectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -131,6 +258,19 @@ val put_insight_selectors :
       PutInsightSelectorsRequest.t ->
         (PutInsightSelectorsResponse.t, PutInsightSelectorsResponse.error)
           Result.t Async.Deferred.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyRequest.t ->
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
+val register_organization_delegated_admin :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RegisterOrganizationDelegatedAdminRequest.t ->
+        (RegisterOrganizationDelegatedAdminResponse.t,
+          RegisterOrganizationDelegatedAdminResponse.error) Result.t
+          Async.Deferred.t
 val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -143,6 +283,31 @@ val restore_event_data_store :
       RestoreEventDataStoreRequest.t ->
         (RestoreEventDataStoreResponse.t,
           RestoreEventDataStoreResponse.error) Result.t Async.Deferred.t
+val search_sample_queries :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SearchSampleQueriesRequest.t ->
+        (SearchSampleQueriesResponse.t, SearchSampleQueriesResponse.error)
+          Result.t Async.Deferred.t
+val start_dashboard_refresh :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartDashboardRefreshRequest.t ->
+        (StartDashboardRefreshResponse.t,
+          StartDashboardRefreshResponse.error) Result.t Async.Deferred.t
+val start_event_data_store_ingestion :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartEventDataStoreIngestionRequest.t ->
+        (StartEventDataStoreIngestionResponse.t,
+          StartEventDataStoreIngestionResponse.error) Result.t
+          Async.Deferred.t
+val start_import :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartImportRequest.t ->
+        (StartImportResponse.t, StartImportResponse.error) Result.t
+          Async.Deferred.t
 val start_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -155,11 +320,36 @@ val start_query :
       StartQueryRequest.t ->
         (StartQueryResponse.t, StartQueryResponse.error) Result.t
           Async.Deferred.t
+val stop_event_data_store_ingestion :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopEventDataStoreIngestionRequest.t ->
+        (StopEventDataStoreIngestionResponse.t,
+          StopEventDataStoreIngestionResponse.error) Result.t
+          Async.Deferred.t
+val stop_import :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopImportRequest.t ->
+        (StopImportResponse.t, StopImportResponse.error) Result.t
+          Async.Deferred.t
 val stop_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopLoggingRequest.t ->
         (StopLoggingResponse.t, StopLoggingResponse.error) Result.t
+          Async.Deferred.t
+val update_channel :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateChannelRequest.t ->
+        (UpdateChannelResponse.t, UpdateChannelResponse.error) Result.t
+          Async.Deferred.t
+val update_dashboard :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDashboardRequest.t ->
+        (UpdateDashboardResponse.t, UpdateDashboardResponse.error) Result.t
           Async.Deferred.t
 val update_event_data_store :
   ?endpoint_url:string ->

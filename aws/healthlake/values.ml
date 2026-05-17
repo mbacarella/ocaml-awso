@@ -92,15 +92,42 @@ module CmkType =
     let of_json j = of_string (string_of_json ~kind:"CmkType" j)
     let to_json = simple_to_json to_value
   end
+module GenericDouble =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module GenericLong =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module S3Configuration =
   struct
     type nonrec t =
       {
       s3Uri: S3Uri.t
         [@ocaml.doc
-          "The S3Uri is the user specified S3 location of the FHIR data to be imported into Amazon HealthLake."];
+          "The S3Uri is the user-specified S3 location of the FHIR data to be imported into AWS HealthLake."];
       kmsKeyId: EncryptionKeyID.t
-        [@ocaml.doc "The KMS key ID used to access the S3 bucket."]}
+        [@ocaml.doc
+          "The Key Management Service (KMS) key ID used to access the S3 bucket."]}
     let context_ = "S3Configuration"
     let make ~s3Uri = fun ~kmsKeyId -> fun () -> { s3Uri; kmsKeyId }
     let to_value x =
@@ -116,13 +143,134 @@ module S3Configuration =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~kmsKeyId ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map_exn json "KmsKeyId" EncryptionKeyID.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map_exn json__ "KmsKeyId" EncryptionKeyID.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
       make ~kmsKeyId ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration of the S3 bucket for either an import or export job. This includes assigning permissions for access."]
+       "The configuration of the S3 bucket for either an import or export job. This includes assigning access permissions."]
+module ErrorCategory =
+  struct
+    type nonrec t =
+      | RETRYABLE_ERROR 
+      | NON_RETRYABLE_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RETRYABLE_ERROR -> "RETRYABLE_ERROR"
+      | NON_RETRYABLE_ERROR -> "NON_RETRYABLE_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RETRYABLE_ERROR" -> RETRYABLE_ERROR
+      | "NON_RETRYABLE_ERROR" -> NON_RETRYABLE_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ErrorCategory" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ErrorCategory" j)
+    let to_json = simple_to_json to_value
+  end
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4096) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module AuthorizationStrategy =
+  struct
+    type nonrec t =
+      | SMART_ON_FHIR_V1 
+      | SMART_ON_FHIR 
+      | AWS_AUTH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SMART_ON_FHIR_V1 -> "SMART_ON_FHIR_V1"
+      | SMART_ON_FHIR -> "SMART_ON_FHIR"
+      | AWS_AUTH -> "AWS_AUTH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SMART_ON_FHIR_V1" -> SMART_ON_FHIR_V1
+      | "SMART_ON_FHIR" -> SMART_ON_FHIR
+      | "AWS_AUTH" -> AWS_AUTH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AuthorizationStrategy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AuthorizationStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ConfigurationMetadata =
+  struct
+    type nonrec t = string
+    let context_ = "ConfigurationMetadata"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConfigurationMetadata" j
+    let to_json = simple_to_json to_value
+  end
+module LambdaArn =
+  struct
+    type nonrec t = string
+    let context_ = "LambdaArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:49) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:lambda:[a-z]{2}-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9\\-_\\.]+(:(\\$LATEST|[a-zA-Z0-9\\-_]+))?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LambdaArn" j
+    let to_json = simple_to_json to_value
+  end
 module PreloadDataType =
   struct
     type nonrec t =
@@ -145,10 +293,10 @@ module KmsEncryptionConfig =
       {
       cmkType: CmkType.t
         [@ocaml.doc
-          "The type of customer-managed-key(CMK) used for encyrption. The two types of supported CMKs are customer owned CMKs and AWS owned CMKs."];
+          "The type of customer-managed-key (CMK) used for encryption."];
       kmsKeyId: EncryptionKeyID.t option
         [@ocaml.doc
-          "The KMS encryption key id/alias used to encrypt the Data Store contents at rest."]}
+          "The Key Management Service (KMS) encryption key id/alias used to encrypt the data store contents at rest."]}
     let context_ = "KmsEncryptionConfig"
     let make ?kmsKeyId = fun ~cmkType -> fun () -> { kmsKeyId; cmkType }
     let to_value x =
@@ -164,13 +312,13 @@ module KmsEncryptionConfig =
         CmkType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CmkType") in
       make ?kmsKeyId ~cmkType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" EncryptionKeyID.of_json in
-      let cmkType = field_map_exn json "CmkType" CmkType.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" EncryptionKeyID.of_json in
+      let cmkType = field_map_exn json__ "CmkType" CmkType.of_json in
       make ?kmsKeyId ~cmkType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The customer-managed-key(CMK) used when creating a Data Store. If a customer owned key is not specified, an AWS owned key will be used for encryption."]
+       "The customer-managed-key (CMK) used when creating a data store. If a customer-owned key is not specified, an AWS-owned key is used for encryption."]
 module TagKey =
   struct
     type nonrec t = string
@@ -265,7 +413,7 @@ module InputDataConfig =
       {
       s3Uri: S3Uri.t option
         [@ocaml.doc
-          "The S3Uri is the user specified S3 location of the FHIR data to be imported into Amazon HealthLake."]}
+          "The S3Uri is the user-specified S3 location of the FHIR data to be imported into AWS HealthLake."]}
     let make ?s3Uri = fun () -> { s3Uri }
     let to_value x =
       structure_to_value [("S3Uri", (Option.map x.s3Uri ~f:S3Uri.to_value))]
@@ -274,10 +422,10 @@ module InputDataConfig =
       let s3Uri = (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "S3Uri") in
       make ?s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Uri = field_map json "S3Uri" S3Uri.of_json in make ?s3Uri ()
+    let of_json json__ =
+      let s3Uri = field_map json__ "S3Uri" S3Uri.of_json in make ?s3Uri ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The input properties for an import job."]
+  end[@@ocaml.doc "The import job input properties."]
 module JobId =
   struct
     type nonrec t = string
@@ -322,31 +470,166 @@ module JobName =
     let of_json j = string_of_json ~kind:"JobName" j
     let to_json = simple_to_json to_value
   end
+module JobProgressReport =
+  struct
+    type nonrec t =
+      {
+      totalNumberOfScannedFiles: GenericLong.t option
+        [@ocaml.doc "The number of files scanned from the S3 input bucket."];
+      totalSizeOfScannedFilesInMB: GenericDouble.t option
+        [@ocaml.doc
+          "The size (in MB) of files scanned from the S3 input bucket."];
+      totalNumberOfImportedFiles: GenericLong.t option
+        [@ocaml.doc "The number of files imported."];
+      totalNumberOfResourcesScanned: GenericLong.t option
+        [@ocaml.doc
+          "The number of resources scanned from the S3 input bucket."];
+      totalNumberOfResourcesImported: GenericLong.t option
+        [@ocaml.doc "The number of resources imported."];
+      totalNumberOfResourcesWithCustomerError: GenericLong.t option
+        [@ocaml.doc
+          "The number of resources that failed due to customer error."];
+      totalNumberOfFilesReadWithCustomerError: GenericLong.t option
+        [@ocaml.doc
+          "The number of files that failed to be read from the S3 input bucket due to customer error."];
+      throughput: GenericDouble.t option
+        [@ocaml.doc "The transaction rate the import job is processed at."]}
+    let make ?totalNumberOfScannedFiles =
+      fun ?totalSizeOfScannedFilesInMB ->
+        fun ?totalNumberOfImportedFiles ->
+          fun ?totalNumberOfResourcesScanned ->
+            fun ?totalNumberOfResourcesImported ->
+              fun ?totalNumberOfResourcesWithCustomerError ->
+                fun ?totalNumberOfFilesReadWithCustomerError ->
+                  fun ?throughput ->
+                    fun () ->
+                      {
+                        totalNumberOfScannedFiles;
+                        totalSizeOfScannedFilesInMB;
+                        totalNumberOfImportedFiles;
+                        totalNumberOfResourcesScanned;
+                        totalNumberOfResourcesImported;
+                        totalNumberOfResourcesWithCustomerError;
+                        totalNumberOfFilesReadWithCustomerError;
+                        throughput
+                      }
+    let to_value x =
+      structure_to_value
+        [("TotalNumberOfScannedFiles",
+           (Option.map x.totalNumberOfScannedFiles ~f:GenericLong.to_value));
+        ("TotalSizeOfScannedFilesInMB",
+          (Option.map x.totalSizeOfScannedFilesInMB ~f:GenericDouble.to_value));
+        ("TotalNumberOfImportedFiles",
+          (Option.map x.totalNumberOfImportedFiles ~f:GenericLong.to_value));
+        ("TotalNumberOfResourcesScanned",
+          (Option.map x.totalNumberOfResourcesScanned ~f:GenericLong.to_value));
+        ("TotalNumberOfResourcesImported",
+          (Option.map x.totalNumberOfResourcesImported
+             ~f:GenericLong.to_value));
+        ("TotalNumberOfResourcesWithCustomerError",
+          (Option.map x.totalNumberOfResourcesWithCustomerError
+             ~f:GenericLong.to_value));
+        ("TotalNumberOfFilesReadWithCustomerError",
+          (Option.map x.totalNumberOfFilesReadWithCustomerError
+             ~f:GenericLong.to_value));
+        ("Throughput", (Option.map x.throughput ~f:GenericDouble.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let throughput =
+        (Option.map ~f:GenericDouble.of_xml)
+          (Xml.child xml_arg0 "Throughput") in
+      let totalNumberOfFilesReadWithCustomerError =
+        (Option.map ~f:GenericLong.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfFilesReadWithCustomerError") in
+      let totalNumberOfResourcesWithCustomerError =
+        (Option.map ~f:GenericLong.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfResourcesWithCustomerError") in
+      let totalNumberOfResourcesImported =
+        (Option.map ~f:GenericLong.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfResourcesImported") in
+      let totalNumberOfResourcesScanned =
+        (Option.map ~f:GenericLong.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfResourcesScanned") in
+      let totalNumberOfImportedFiles =
+        (Option.map ~f:GenericLong.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfImportedFiles") in
+      let totalSizeOfScannedFilesInMB =
+        (Option.map ~f:GenericDouble.of_xml)
+          (Xml.child xml_arg0 "TotalSizeOfScannedFilesInMB") in
+      let totalNumberOfScannedFiles =
+        (Option.map ~f:GenericLong.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfScannedFiles") in
+      make ?throughput ?totalNumberOfFilesReadWithCustomerError
+        ?totalNumberOfResourcesWithCustomerError
+        ?totalNumberOfResourcesImported ?totalNumberOfResourcesScanned
+        ?totalNumberOfImportedFiles ?totalSizeOfScannedFilesInMB
+        ?totalNumberOfScannedFiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let throughput = field_map json__ "Throughput" GenericDouble.of_json in
+      let totalNumberOfFilesReadWithCustomerError =
+        field_map json__ "TotalNumberOfFilesReadWithCustomerError"
+          GenericLong.of_json in
+      let totalNumberOfResourcesWithCustomerError =
+        field_map json__ "TotalNumberOfResourcesWithCustomerError"
+          GenericLong.of_json in
+      let totalNumberOfResourcesImported =
+        field_map json__ "TotalNumberOfResourcesImported" GenericLong.of_json in
+      let totalNumberOfResourcesScanned =
+        field_map json__ "TotalNumberOfResourcesScanned" GenericLong.of_json in
+      let totalNumberOfImportedFiles =
+        field_map json__ "TotalNumberOfImportedFiles" GenericLong.of_json in
+      let totalSizeOfScannedFilesInMB =
+        field_map json__ "TotalSizeOfScannedFilesInMB" GenericDouble.of_json in
+      let totalNumberOfScannedFiles =
+        field_map json__ "TotalNumberOfScannedFiles" GenericLong.of_json in
+      make ?throughput ?totalNumberOfFilesReadWithCustomerError
+        ?totalNumberOfResourcesWithCustomerError
+        ?totalNumberOfResourcesImported ?totalNumberOfResourcesScanned
+        ?totalNumberOfImportedFiles ?totalSizeOfScannedFilesInMB
+        ?totalNumberOfScannedFiles ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The progress report for the import job."]
 module JobStatus =
   struct
     type nonrec t =
       | SUBMITTED 
+      | QUEUED 
       | IN_PROGRESS 
       | COMPLETED_WITH_ERRORS 
       | COMPLETED 
       | FAILED 
+      | CANCEL_SUBMITTED 
+      | CANCEL_IN_PROGRESS 
+      | CANCEL_COMPLETED 
+      | CANCEL_FAILED 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | SUBMITTED -> "SUBMITTED"
+      | QUEUED -> "QUEUED"
       | IN_PROGRESS -> "IN_PROGRESS"
       | COMPLETED_WITH_ERRORS -> "COMPLETED_WITH_ERRORS"
       | COMPLETED -> "COMPLETED"
       | FAILED -> "FAILED"
+      | CANCEL_SUBMITTED -> "CANCEL_SUBMITTED"
+      | CANCEL_IN_PROGRESS -> "CANCEL_IN_PROGRESS"
+      | CANCEL_COMPLETED -> "CANCEL_COMPLETED"
+      | CANCEL_FAILED -> "CANCEL_FAILED"
       | Non_static_id s -> s
     let of_string =
       function
       | "SUBMITTED" -> SUBMITTED
+      | "QUEUED" -> QUEUED
       | "IN_PROGRESS" -> IN_PROGRESS
       | "COMPLETED_WITH_ERRORS" -> COMPLETED_WITH_ERRORS
       | "COMPLETED" -> COMPLETED
       | "FAILED" -> FAILED
+      | "CANCEL_SUBMITTED" -> CANCEL_SUBMITTED
+      | "CANCEL_IN_PROGRESS" -> CANCEL_IN_PROGRESS
+      | "CANCEL_COMPLETED" -> CANCEL_COMPLETED
+      | "CANCEL_FAILED" -> CANCEL_FAILED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -384,7 +667,7 @@ module OutputDataConfig =
       {
       s3Configuration: S3Configuration.t option
         [@ocaml.doc
-          "The output data configuration that was supplied when the export job was created."]}
+          "The output data configuration supplied when the export job was created."]}
     let make ?s3Configuration = fun () -> { s3Configuration }
     let to_value x =
       structure_to_value
@@ -397,13 +680,13 @@ module OutputDataConfig =
           (Xml.child xml_arg0 "S3Configuration") in
       make ?s3Configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Configuration =
-        field_map json "S3Configuration" S3Configuration.of_json in
+        field_map json__ "S3Configuration" S3Configuration.of_json in
       make ?s3Configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The output data configuration that was supplied when the export job was created."]
+       "The output data configuration supplied when the export job was created."]
 module Timestamp =
   struct
     type nonrec t = string
@@ -414,6 +697,34 @@ module Timestamp =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module ValidationLevel =
+  struct
+    type nonrec t =
+      | Strict 
+      | Structure_only 
+      | Minimal 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Strict -> "strict"
+      | Structure_only -> "structure-only"
+      | Minimal -> "minimal"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "strict" -> Strict
+      | "structure-only" -> Structure_only
+      | "minimal" -> Minimal
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ValidationLevel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ValidationLevel" j)
     let to_json = simple_to_json to_value
   end
 module DatastoreArn =
@@ -463,6 +774,7 @@ module DatastoreStatus =
       | ACTIVE 
       | DELETING 
       | DELETED 
+      | CREATE_FAILED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -471,6 +783,7 @@ module DatastoreStatus =
       | ACTIVE -> "ACTIVE"
       | DELETING -> "DELETING"
       | DELETED -> "DELETED"
+      | CREATE_FAILED -> "CREATE_FAILED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -478,6 +791,7 @@ module DatastoreStatus =
       | "ACTIVE" -> ACTIVE
       | "DELETING" -> DELETING
       | "DELETED" -> DELETED
+      | "CREATE_FAILED" -> CREATE_FAILED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -487,6 +801,40 @@ module DatastoreStatus =
     let of_json j = of_string (string_of_json ~kind:"DatastoreStatus" j)
     let to_json = simple_to_json to_value
   end
+module ErrorCause =
+  struct
+    type nonrec t =
+      {
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc "The error message text for ErrorCause."];
+      errorCategory: ErrorCategory.t option
+        [@ocaml.doc "The error category for ErrorCause."]}
+    let make ?errorMessage =
+      fun ?errorCategory -> fun () -> { errorMessage; errorCategory }
+    let to_value x =
+      structure_to_value
+        [("ErrorMessage",
+           (Option.map x.errorMessage ~f:ErrorMessage.to_value));
+        ("ErrorCategory",
+          (Option.map x.errorCategory ~f:ErrorCategory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorCategory =
+        (Option.map ~f:ErrorCategory.of_xml)
+          (Xml.child xml_arg0 "ErrorCategory") in
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      make ?errorCategory ?errorMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorCategory =
+        field_map json__ "ErrorCategory" ErrorCategory.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      make ?errorCategory ?errorMessage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The error information for CreateFHIRDatastore and DeleteFHIRDatastore actions."]
 module FHIRVersion =
   struct
     type nonrec t =
@@ -503,6 +851,73 @@ module FHIRVersion =
     let of_json j = of_string (string_of_json ~kind:"FHIRVersion" j)
     let to_json = simple_to_json to_value
   end
+module IdentityProviderConfiguration =
+  struct
+    type nonrec t =
+      {
+      authorizationStrategy: AuthorizationStrategy.t
+        [@ocaml.doc
+          "The authorization strategy selected when the HealthLake data store is created. HealthLake provides support for both SMART on FHIR V1 and V2 as described below. SMART_ON_FHIR_V1 \226\128\147 Support for only SMART on FHIR V1, which includes read (read/search) and write (create/update/delete) permissions. SMART_ON_FHIR \226\128\147 Support for both SMART on FHIR V1 and V2, which includes create, read, update, delete, and search permissions. AWS_AUTH \226\128\147 The default HealthLake authorization strategy; not affiliated with SMART on FHIR."];
+      fineGrainedAuthorizationEnabled: Boolean.t option
+        [@ocaml.doc
+          "The parameter to enable SMART on FHIR fine-grained authorization for the data store."];
+      metadata: ConfigurationMetadata.t option
+        [@ocaml.doc
+          "The JSON metadata elements to use in your identity provider configuration. Required elements are listed based on the launch specification of the SMART application. For more information on all possible elements, see Metadata in SMART's App Launch specification. authorization_endpoint: The URL to the OAuth2 authorization endpoint. grant_types_supported: An array of grant types that are supported at the token endpoint. You must provide at least one grant type option. Valid options are authorization_code and client_credentials. token_endpoint: The URL to the OAuth2 token endpoint. capabilities: An array of strings of the SMART capabilities that the authorization server supports. code_challenge_methods_supported: An array of strings of supported PKCE code challenge methods. You must include the S256 method in the array of PKCE code challenge methods."];
+      idpLambdaArn: LambdaArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Lambda function to use to decode the access token created by the authorization server."]}
+    let context_ = "IdentityProviderConfiguration"
+    let make ?fineGrainedAuthorizationEnabled =
+      fun ?metadata ->
+        fun ?idpLambdaArn ->
+          fun ~authorizationStrategy ->
+            fun () ->
+              {
+                fineGrainedAuthorizationEnabled;
+                metadata;
+                idpLambdaArn;
+                authorizationStrategy
+              }
+    let to_value x =
+      structure_to_value
+        [("AuthorizationStrategy",
+           (Some (AuthorizationStrategy.to_value x.authorizationStrategy)));
+        ("FineGrainedAuthorizationEnabled",
+          (Option.map x.fineGrainedAuthorizationEnabled ~f:Boolean.to_value));
+        ("Metadata",
+          (Option.map x.metadata ~f:ConfigurationMetadata.to_value));
+        ("IdpLambdaArn", (Option.map x.idpLambdaArn ~f:LambdaArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let idpLambdaArn =
+        (Option.map ~f:LambdaArn.of_xml) (Xml.child xml_arg0 "IdpLambdaArn") in
+      let metadata =
+        (Option.map ~f:ConfigurationMetadata.of_xml)
+          (Xml.child xml_arg0 "Metadata") in
+      let fineGrainedAuthorizationEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "FineGrainedAuthorizationEnabled") in
+      let authorizationStrategy =
+        AuthorizationStrategy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AuthorizationStrategy") in
+      make ?idpLambdaArn ?metadata ?fineGrainedAuthorizationEnabled
+        ~authorizationStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let idpLambdaArn = field_map json__ "IdpLambdaArn" LambdaArn.of_json in
+      let metadata =
+        field_map json__ "Metadata" ConfigurationMetadata.of_json in
+      let fineGrainedAuthorizationEnabled =
+        field_map json__ "FineGrainedAuthorizationEnabled" Boolean.of_json in
+      let authorizationStrategy =
+        field_map_exn json__ "AuthorizationStrategy"
+          AuthorizationStrategy.of_json in
+      make ?idpLambdaArn ?metadata ?fineGrainedAuthorizationEnabled
+        ~authorizationStrategy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The identity provider configuration selected when the data store was created."]
 module PreloadDataConfig =
   struct
     type nonrec t =
@@ -523,20 +938,20 @@ module PreloadDataConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "PreloadDataType") in
       make ~preloadDataType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let preloadDataType =
-        field_map_exn json "PreloadDataType" PreloadDataType.of_json in
+        field_map_exn json__ "PreloadDataType" PreloadDataType.of_json in
       make ~preloadDataType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The input properties for the preloaded Data Store. Only data preloaded from Synthea is supported."]
+       "The input properties for the preloaded (Synthea) data store."]
 module SseConfiguration =
   struct
     type nonrec t =
       {
       kmsEncryptionConfig: KmsEncryptionConfig.t
         [@ocaml.doc
-          "The KMS encryption configuration used to provide details for data encryption."]}
+          "The Key Management Service (KMS) encryption configuration used to provide details for data encryption."]}
     let context_ = "SseConfiguration"
     let make ~kmsEncryptionConfig = fun () -> { kmsEncryptionConfig }
     let to_value x =
@@ -550,13 +965,14 @@ module SseConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "KmsEncryptionConfig") in
       make ~kmsEncryptionConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let kmsEncryptionConfig =
-        field_map_exn json "KmsEncryptionConfig" KmsEncryptionConfig.of_json in
+        field_map_exn json__ "KmsEncryptionConfig"
+          KmsEncryptionConfig.of_json in
       make ~kmsEncryptionConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The server-side encryption key configuration for a customer provided encryption key."]
+       "The server-side encryption key configuration for a customer-provided encryption key."]
 module String_ =
   struct
     type nonrec t = string
@@ -583,7 +999,7 @@ module Tag =
         [@ocaml.doc "The key portion of a tag. Tag keys are case sensitive."];
       value: TagValue.t
         [@ocaml.doc
-          "The value portion of tag. Tag values are case sensitive."]}
+          "The value portion of a tag. Tag values are case-sensitive."]}
     let context_ = "Tag"
     let make ~key = fun ~value -> fun () -> { key; value }
     let to_value x =
@@ -598,188 +1014,198 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A tag is a label consisting of a user-defined key and value. The form for tags is \\{\"Key\", \"Value\"\\}"]
+       "A label consisting of a user-defined key and value. The form for tags is \\{\"Key\", \"Value\"\\}"]
 module ImportJobProperties =
   struct
     type nonrec t =
       {
-      jobId: JobId.t
-        [@ocaml.doc "The AWS-generated id number for the Import job."];
-      jobName: JobName.t option
-        [@ocaml.doc "The user-generated name for an Import job."];
-      jobStatus: JobStatus.t
-        [@ocaml.doc
-          "The job status for an Import job. Possible statuses are SUBMITTED, IN_PROGRESS, COMPLETED, FAILED."];
-      submitTime: Timestamp.t
-        [@ocaml.doc
-          "The time that the Import job was submitted for processing."];
+      jobId: JobId.t option [@ocaml.doc "The import job identifier."];
+      jobName: JobName.t option [@ocaml.doc "The import job name."];
+      jobStatus: JobStatus.t option [@ocaml.doc "The import job status."];
+      submitTime: Timestamp.t option
+        [@ocaml.doc "The time the import job was submitted for processing."];
       endTime: Timestamp.t option
-        [@ocaml.doc "The time that the Import job was completed."];
-      datastoreId: DatastoreId.t
-        [@ocaml.doc "The datastore id used when the Import job was created."];
-      inputDataConfig: InputDataConfig.t
+        [@ocaml.doc "The time the import job was completed."];
+      datastoreId: DatastoreId.t option
+        [@ocaml.doc "The data store identifier."];
+      inputDataConfig: InputDataConfig.t option
         [@ocaml.doc
-          "The input data configuration that was supplied when the Import job was created."];
+          "The input data configuration supplied when the import job was created."];
       jobOutputDataConfig: OutputDataConfig.t option ;
+      jobProgressReport: JobProgressReport.t option
+        [@ocaml.doc
+          "Displays the progress of the import job, including total resources scanned, total resources imported, and total size of data imported."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Amazon HealthLake access to your input data."];
+          "The Amazon Resource Name (ARN) that grants AWS HealthLake access to the input data."];
       message: Message.t option
         [@ocaml.doc
-          "An explanation of any errors that may have occurred during the FHIR import job."]}
-    let context_ = "ImportJobProperties"
-    let make ?jobName =
-      fun ?endTime ->
-        fun ?jobOutputDataConfig ->
-          fun ?dataAccessRoleArn ->
-            fun ?message ->
-              fun ~jobId ->
-                fun ~jobStatus ->
-                  fun ~submitTime ->
-                    fun ~datastoreId ->
-                      fun ~inputDataConfig ->
-                        fun () ->
-                          {
-                            jobName;
-                            endTime;
-                            jobOutputDataConfig;
-                            dataAccessRoleArn;
-                            message;
-                            jobId;
-                            jobStatus;
-                            submitTime;
-                            datastoreId;
-                            inputDataConfig
-                          }
+          "An explanation of any errors that might have occurred during the FHIR import job."];
+      validationLevel: ValidationLevel.t option
+        [@ocaml.doc "The validation level of the import job."]}
+    let make ?jobId =
+      fun ?jobName ->
+        fun ?jobStatus ->
+          fun ?submitTime ->
+            fun ?endTime ->
+              fun ?datastoreId ->
+                fun ?inputDataConfig ->
+                  fun ?jobOutputDataConfig ->
+                    fun ?jobProgressReport ->
+                      fun ?dataAccessRoleArn ->
+                        fun ?message ->
+                          fun ?validationLevel ->
+                            fun () ->
+                              {
+                                jobId;
+                                jobName;
+                                jobStatus;
+                                submitTime;
+                                endTime;
+                                datastoreId;
+                                inputDataConfig;
+                                jobOutputDataConfig;
+                                jobProgressReport;
+                                dataAccessRoleArn;
+                                message;
+                                validationLevel
+                              }
     let to_value x =
       structure_to_value
-        [("JobId", (Some (JobId.to_value x.jobId)));
+        [("JobId", (Option.map x.jobId ~f:JobId.to_value));
         ("JobName", (Option.map x.jobName ~f:JobName.to_value));
-        ("JobStatus", (Some (JobStatus.to_value x.jobStatus)));
-        ("SubmitTime", (Some (Timestamp.to_value x.submitTime)));
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
+        ("SubmitTime", (Option.map x.submitTime ~f:Timestamp.to_value));
         ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value));
-        ("DatastoreId", (Some (DatastoreId.to_value x.datastoreId)));
+        ("DatastoreId", (Option.map x.datastoreId ~f:DatastoreId.to_value));
         ("InputDataConfig",
-          (Some (InputDataConfig.to_value x.inputDataConfig)));
+          (Option.map x.inputDataConfig ~f:InputDataConfig.to_value));
         ("JobOutputDataConfig",
           (Option.map x.jobOutputDataConfig ~f:OutputDataConfig.to_value));
+        ("JobProgressReport",
+          (Option.map x.jobProgressReport ~f:JobProgressReport.to_value));
         ("DataAccessRoleArn",
           (Option.map x.dataAccessRoleArn ~f:IamRoleArn.to_value));
-        ("Message", (Option.map x.message ~f:Message.to_value))]
+        ("Message", (Option.map x.message ~f:Message.to_value));
+        ("ValidationLevel",
+          (Option.map x.validationLevel ~f:ValidationLevel.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let validationLevel =
+        (Option.map ~f:ValidationLevel.of_xml)
+          (Xml.child xml_arg0 "ValidationLevel") in
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       let dataAccessRoleArn =
         (Option.map ~f:IamRoleArn.of_xml)
           (Xml.child xml_arg0 "DataAccessRoleArn") in
+      let jobProgressReport =
+        (Option.map ~f:JobProgressReport.of_xml)
+          (Xml.child xml_arg0 "JobProgressReport") in
       let jobOutputDataConfig =
         (Option.map ~f:OutputDataConfig.of_xml)
           (Xml.child xml_arg0 "JobOutputDataConfig") in
       let inputDataConfig =
-        InputDataConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
+        (Option.map ~f:InputDataConfig.of_xml)
+          (Xml.child xml_arg0 "InputDataConfig") in
       let datastoreId =
-        DatastoreId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
+        (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
       let endTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
       let submitTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubmitTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SubmitTime") in
       let jobStatus =
-        JobStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobStatus") in
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
       let jobName =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
-      let jobId =
-        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
-      make ?message ?dataAccessRoleArn ?jobOutputDataConfig ~inputDataConfig
-        ~datastoreId ?endTime ~submitTime ~jobStatus ?jobName ~jobId ()
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      make ?validationLevel ?message ?dataAccessRoleArn ?jobProgressReport
+        ?jobOutputDataConfig ?inputDataConfig ?datastoreId ?endTime
+        ?submitTime ?jobStatus ?jobName ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let validationLevel =
+        field_map json__ "ValidationLevel" ValidationLevel.of_json in
+      let message = field_map json__ "Message" Message.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let jobProgressReport =
+        field_map json__ "JobProgressReport" JobProgressReport.of_json in
       let jobOutputDataConfig =
-        field_map json "JobOutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "JobOutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map_exn json "SubmitTime" Timestamp.of_json in
-      let jobStatus = field_map_exn json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      make ?message ?dataAccessRoleArn ?jobOutputDataConfig ~inputDataConfig
-        ~datastoreId ?endTime ~submitTime ~jobStatus ?jobName ~jobId ()
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let datastoreId = field_map json__ "DatastoreId" DatastoreId.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?validationLevel ?message ?dataAccessRoleArn ?jobProgressReport
+        ?jobOutputDataConfig ?inputDataConfig ?datastoreId ?endTime
+        ?submitTime ?jobStatus ?jobName ?jobId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Displays the properties of the import job, including the ID, Arn, Name, and the status of the Data Store."]
+  end[@@ocaml.doc "The import job properties."]
 module ExportJobProperties =
   struct
     type nonrec t =
       {
-      jobId: JobId.t [@ocaml.doc "The AWS generated ID for an export job."];
-      jobName: JobName.t option
-        [@ocaml.doc "The user generated name for an export job."];
-      jobStatus: JobStatus.t
-        [@ocaml.doc
-          "The status of a FHIR export job. Possible statuses are SUBMITTED, IN_PROGRESS, COMPLETED, or FAILED."];
-      submitTime: Timestamp.t
-        [@ocaml.doc "The time an export job was initiated."];
+      jobId: JobId.t option [@ocaml.doc "The export job identifier."];
+      jobName: JobName.t option [@ocaml.doc "The export job name."];
+      jobStatus: JobStatus.t option [@ocaml.doc "The export job status."];
+      submitTime: Timestamp.t option
+        [@ocaml.doc "The time the export job was initiated."];
       endTime: Timestamp.t option
-        [@ocaml.doc "The time an export job completed."];
-      datastoreId: DatastoreId.t
+        [@ocaml.doc "The time the export job completed."];
+      datastoreId: DatastoreId.t option
         [@ocaml.doc
-          "The AWS generated ID for the Data Store from which files are being exported for an export job."];
-      outputDataConfig: OutputDataConfig.t
+          "The data store identifier from which files are being exported."];
+      outputDataConfig: OutputDataConfig.t option
         [@ocaml.doc
-          "The output data configuration that was supplied when the export job was created."];
+          "The output data configuration supplied when the export job was created."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name used during the initiation of the job."];
+          "The Amazon Resource Name (ARN) used during the initiation of the export job."];
       message: Message.t option
         [@ocaml.doc
-          "An explanation of any errors that may have occurred during the export job."]}
-    let context_ = "ExportJobProperties"
-    let make ?jobName =
-      fun ?endTime ->
-        fun ?dataAccessRoleArn ->
-          fun ?message ->
-            fun ~jobId ->
-              fun ~jobStatus ->
-                fun ~submitTime ->
-                  fun ~datastoreId ->
-                    fun ~outputDataConfig ->
+          "An explanation of any errors that might have occurred during the export job."]}
+    let make ?jobId =
+      fun ?jobName ->
+        fun ?jobStatus ->
+          fun ?submitTime ->
+            fun ?endTime ->
+              fun ?datastoreId ->
+                fun ?outputDataConfig ->
+                  fun ?dataAccessRoleArn ->
+                    fun ?message ->
                       fun () ->
                         {
-                          jobName;
-                          endTime;
-                          dataAccessRoleArn;
-                          message;
                           jobId;
+                          jobName;
                           jobStatus;
                           submitTime;
+                          endTime;
                           datastoreId;
-                          outputDataConfig
+                          outputDataConfig;
+                          dataAccessRoleArn;
+                          message
                         }
     let to_value x =
       structure_to_value
-        [("JobId", (Some (JobId.to_value x.jobId)));
+        [("JobId", (Option.map x.jobId ~f:JobId.to_value));
         ("JobName", (Option.map x.jobName ~f:JobName.to_value));
-        ("JobStatus", (Some (JobStatus.to_value x.jobStatus)));
-        ("SubmitTime", (Some (Timestamp.to_value x.submitTime)));
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
+        ("SubmitTime", (Option.map x.submitTime ~f:Timestamp.to_value));
         ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value));
-        ("DatastoreId", (Some (DatastoreId.to_value x.datastoreId)));
+        ("DatastoreId", (Option.map x.datastoreId ~f:DatastoreId.to_value));
         ("OutputDataConfig",
-          (Some (OutputDataConfig.to_value x.outputDataConfig)));
+          (Option.map x.outputDataConfig ~f:OutputDataConfig.to_value));
         ("DataAccessRoleArn",
           (Option.map x.dataAccessRoleArn ~f:IamRoleArn.to_value));
         ("Message", (Option.map x.message ~f:Message.to_value))]
@@ -791,110 +1217,123 @@ module ExportJobProperties =
         (Option.map ~f:IamRoleArn.of_xml)
           (Xml.child xml_arg0 "DataAccessRoleArn") in
       let outputDataConfig =
-        OutputDataConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OutputDataConfig") in
+        (Option.map ~f:OutputDataConfig.of_xml)
+          (Xml.child xml_arg0 "OutputDataConfig") in
       let datastoreId =
-        DatastoreId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
+        (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
       let endTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
       let submitTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubmitTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SubmitTime") in
       let jobStatus =
-        JobStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobStatus") in
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
       let jobName =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
-      let jobId =
-        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
-      make ?message ?dataAccessRoleArn ~outputDataConfig ~datastoreId
-        ?endTime ~submitTime ~jobStatus ?jobName ~jobId ()
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      make ?message ?dataAccessRoleArn ?outputDataConfig ?datastoreId
+        ?endTime ?submitTime ?jobStatus ?jobName ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map_exn json "SubmitTime" Timestamp.of_json in
-      let jobStatus = field_map_exn json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      make ?message ?dataAccessRoleArn ~outputDataConfig ~datastoreId
-        ?endTime ~submitTime ~jobStatus ?jobName ~jobId ()
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
+      let datastoreId = field_map json__ "DatastoreId" DatastoreId.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?message ?dataAccessRoleArn ?outputDataConfig ?datastoreId
+        ?endTime ?submitTime ?jobStatus ?jobName ?jobId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The properties of a FHIR export job, including the ID, ARN, name, and the status of the job."]
+  end[@@ocaml.doc "The properties of a FHIR export job."]
 module DatastoreProperties =
   struct
     type nonrec t =
       {
-      datastoreId: DatastoreId.t
-        [@ocaml.doc "The AWS-generated ID number for the Data Store."];
-      datastoreArn: DatastoreArn.t
+      datastoreId: DatastoreId.t option
+        [@ocaml.doc "The data store identifier."];
+      datastoreArn: DatastoreArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name used in the creation of the Data Store."];
+          "The Amazon Resource Name (ARN) used in the creation of the data store."];
       datastoreName: DatastoreName.t option
-        [@ocaml.doc "The user-generated name for the Data Store."];
-      datastoreStatus: DatastoreStatus.t
-        [@ocaml.doc
-          "The status of the Data Store. Possible statuses are 'CREATING', 'ACTIVE', 'DELETING', or 'DELETED'."];
+        [@ocaml.doc "The data store name."];
+      datastoreStatus: DatastoreStatus.t option
+        [@ocaml.doc "The data store status."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The time that a Data Store was created."];
-      datastoreTypeVersion: FHIRVersion.t
-        [@ocaml.doc "The FHIR version. Only R4 version data is supported."];
-      datastoreEndpoint: String_.t
+        [@ocaml.doc "The time the data store was created."];
+      datastoreTypeVersion: FHIRVersion.t option
         [@ocaml.doc
-          "The AWS endpoint for the Data Store. Each Data Store will have it's own endpoint with Data Store ID in the endpoint URL."];
+          "The FHIR release version supported by the data store. Current support is for version R4."];
+      datastoreEndpoint: String_.t option
+        [@ocaml.doc "The AWS endpoint for the data store."];
       sseConfiguration: SseConfiguration.t option
         [@ocaml.doc
-          "The server-side encryption key configuration for a customer provided encryption key (CMK)."];
+          "The server-side encryption key configuration for a customer provided encryption key."];
       preloadDataConfig: PreloadDataConfig.t option
         [@ocaml.doc
-          "The preloaded data configuration for the Data Store. Only data preloaded from Synthea is supported."]}
-    let context_ = "DatastoreProperties"
-    let make ?datastoreName =
-      fun ?createdAt ->
-        fun ?sseConfiguration ->
-          fun ?preloadDataConfig ->
-            fun ~datastoreId ->
-              fun ~datastoreArn ->
-                fun ~datastoreStatus ->
-                  fun ~datastoreTypeVersion ->
-                    fun ~datastoreEndpoint ->
-                      fun () ->
-                        {
-                          datastoreName;
-                          createdAt;
-                          sseConfiguration;
-                          preloadDataConfig;
-                          datastoreId;
-                          datastoreArn;
-                          datastoreStatus;
-                          datastoreTypeVersion;
-                          datastoreEndpoint
-                        }
+          "The preloaded Synthea data configuration for the data store."];
+      identityProviderConfiguration: IdentityProviderConfiguration.t option
+        [@ocaml.doc
+          "The identity provider selected during data store creation."];
+      errorCause: ErrorCause.t option
+        [@ocaml.doc "The error cause for the current data store operation."]}
+    let make ?datastoreId =
+      fun ?datastoreArn ->
+        fun ?datastoreName ->
+          fun ?datastoreStatus ->
+            fun ?createdAt ->
+              fun ?datastoreTypeVersion ->
+                fun ?datastoreEndpoint ->
+                  fun ?sseConfiguration ->
+                    fun ?preloadDataConfig ->
+                      fun ?identityProviderConfiguration ->
+                        fun ?errorCause ->
+                          fun () ->
+                            {
+                              datastoreId;
+                              datastoreArn;
+                              datastoreName;
+                              datastoreStatus;
+                              createdAt;
+                              datastoreTypeVersion;
+                              datastoreEndpoint;
+                              sseConfiguration;
+                              preloadDataConfig;
+                              identityProviderConfiguration;
+                              errorCause
+                            }
     let to_value x =
       structure_to_value
-        [("DatastoreId", (Some (DatastoreId.to_value x.datastoreId)));
-        ("DatastoreArn", (Some (DatastoreArn.to_value x.datastoreArn)));
+        [("DatastoreId", (Option.map x.datastoreId ~f:DatastoreId.to_value));
+        ("DatastoreArn",
+          (Option.map x.datastoreArn ~f:DatastoreArn.to_value));
         ("DatastoreName",
           (Option.map x.datastoreName ~f:DatastoreName.to_value));
         ("DatastoreStatus",
-          (Some (DatastoreStatus.to_value x.datastoreStatus)));
+          (Option.map x.datastoreStatus ~f:DatastoreStatus.to_value));
         ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("DatastoreTypeVersion",
-          (Some (FHIRVersion.to_value x.datastoreTypeVersion)));
-        ("DatastoreEndpoint", (Some (String_.to_value x.datastoreEndpoint)));
+          (Option.map x.datastoreTypeVersion ~f:FHIRVersion.to_value));
+        ("DatastoreEndpoint",
+          (Option.map x.datastoreEndpoint ~f:String_.to_value));
         ("SseConfiguration",
           (Option.map x.sseConfiguration ~f:SseConfiguration.to_value));
         ("PreloadDataConfig",
-          (Option.map x.preloadDataConfig ~f:PreloadDataConfig.to_value))]
+          (Option.map x.preloadDataConfig ~f:PreloadDataConfig.to_value));
+        ("IdentityProviderConfiguration",
+          (Option.map x.identityProviderConfiguration
+             ~f:IdentityProviderConfiguration.to_value));
+        ("ErrorCause", (Option.map x.errorCause ~f:ErrorCause.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let errorCause =
+        (Option.map ~f:ErrorCause.of_xml) (Xml.child xml_arg0 "ErrorCause") in
+      let identityProviderConfiguration =
+        (Option.map ~f:IdentityProviderConfiguration.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderConfiguration") in
       let preloadDataConfig =
         (Option.map ~f:PreloadDataConfig.of_xml)
           (Xml.child xml_arg0 "PreloadDataConfig") in
@@ -902,52 +1341,53 @@ module DatastoreProperties =
         (Option.map ~f:SseConfiguration.of_xml)
           (Xml.child xml_arg0 "SseConfiguration") in
       let datastoreEndpoint =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreEndpoint") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "DatastoreEndpoint") in
       let datastoreTypeVersion =
-        FHIRVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreTypeVersion") in
+        (Option.map ~f:FHIRVersion.of_xml)
+          (Xml.child xml_arg0 "DatastoreTypeVersion") in
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       let datastoreStatus =
-        DatastoreStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreStatus") in
+        (Option.map ~f:DatastoreStatus.of_xml)
+          (Xml.child xml_arg0 "DatastoreStatus") in
       let datastoreName =
         (Option.map ~f:DatastoreName.of_xml)
           (Xml.child xml_arg0 "DatastoreName") in
       let datastoreArn =
-        DatastoreArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreArn") in
+        (Option.map ~f:DatastoreArn.of_xml)
+          (Xml.child xml_arg0 "DatastoreArn") in
       let datastoreId =
-        DatastoreId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
-      make ?preloadDataConfig ?sseConfiguration ~datastoreEndpoint
-        ~datastoreTypeVersion ?createdAt ~datastoreStatus ?datastoreName
-        ~datastoreArn ~datastoreId ()
+        (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
+      make ?errorCause ?identityProviderConfiguration ?preloadDataConfig
+        ?sseConfiguration ?datastoreEndpoint ?datastoreTypeVersion ?createdAt
+        ?datastoreStatus ?datastoreName ?datastoreArn ?datastoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let errorCause = field_map json__ "ErrorCause" ErrorCause.of_json in
+      let identityProviderConfiguration =
+        field_map json__ "IdentityProviderConfiguration"
+          IdentityProviderConfiguration.of_json in
       let preloadDataConfig =
-        field_map json "PreloadDataConfig" PreloadDataConfig.of_json in
+        field_map json__ "PreloadDataConfig" PreloadDataConfig.of_json in
       let sseConfiguration =
-        field_map json "SseConfiguration" SseConfiguration.of_json in
+        field_map json__ "SseConfiguration" SseConfiguration.of_json in
       let datastoreEndpoint =
-        field_map_exn json "DatastoreEndpoint" String_.of_json in
+        field_map json__ "DatastoreEndpoint" String_.of_json in
       let datastoreTypeVersion =
-        field_map_exn json "DatastoreTypeVersion" FHIRVersion.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+        field_map json__ "DatastoreTypeVersion" FHIRVersion.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       let datastoreStatus =
-        field_map_exn json "DatastoreStatus" DatastoreStatus.of_json in
+        field_map json__ "DatastoreStatus" DatastoreStatus.of_json in
       let datastoreName =
-        field_map json "DatastoreName" DatastoreName.of_json in
-      let datastoreArn =
-        field_map_exn json "DatastoreArn" DatastoreArn.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
-      make ?preloadDataConfig ?sseConfiguration ~datastoreEndpoint
-        ~datastoreTypeVersion ?createdAt ~datastoreStatus ?datastoreName
-        ~datastoreArn ~datastoreId ()
+        field_map json__ "DatastoreName" DatastoreName.of_json in
+      let datastoreArn = field_map json__ "DatastoreArn" DatastoreArn.of_json in
+      let datastoreId = field_map json__ "DatastoreId" DatastoreId.of_json in
+      make ?errorCause ?identityProviderConfiguration ?preloadDataConfig
+        ?sseConfiguration ?datastoreEndpoint ?datastoreTypeVersion ?createdAt
+        ?datastoreStatus ?datastoreName ?datastoreArn ?datastoreId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Displays the properties of the Data Store, including the ID, Arn, name, and the status of the Data Store."]
+  end[@@ocaml.doc "The data store properties."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -962,11 +1402,11 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The requested Data Store was not found."]
+  end[@@ocaml.doc "The requested data store was not found."]
 module ValidationException =
   struct
     type nonrec t = {
@@ -981,8 +1421,8 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The user input parameter was invalid."]
@@ -1017,6 +1457,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1045,6 +1488,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1078,8 +1524,8 @@ module AccessDeniedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1098,11 +1544,11 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Unknown error occurs in the service."]
+  end[@@ocaml.doc "An unknown internal error occurred in the service."]
 module ThrottlingException =
   struct
     type nonrec t = {
@@ -1117,8 +1563,8 @@ module ThrottlingException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1147,6 +1593,9 @@ module ImportJobPropertiesList =
   struct
     type nonrec t = ImportJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -1209,6 +1658,9 @@ module ExportJobPropertiesList =
   struct
     type nonrec t = ExportJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -1235,6 +1687,9 @@ module DatastorePropertiesList =
   struct
     type nonrec t = DatastoreProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatastoreProperties.to_value)) |>
         (fun x -> `List x)
@@ -1262,16 +1717,15 @@ module DatastoreFilter =
     type nonrec t =
       {
       datastoreName: DatastoreName.t option
-        [@ocaml.doc "Allows the user to filter Data Store results by name."];
+        [@ocaml.doc "Filter data store results by name."];
       datastoreStatus: DatastoreStatus.t option
-        [@ocaml.doc
-          "Allows the user to filter Data Store results by status."];
+        [@ocaml.doc "Filter data store results by status."];
       createdBefore: Timestamp.t option
         [@ocaml.doc
-          "A filter that allows the user to set cutoff dates for records. All Data Stores created before the specified date will be included in the results."];
+          "Filter to set cutoff dates for records. All data stores created before the specified date are included in the results."];
       createdAfter: Timestamp.t option
         [@ocaml.doc
-          "A filter that allows the user to set cutoff dates for records. All Data Stores created after the specified date will be included in the results."]}
+          "Filter to set cutoff dates for records. All data stores created after the specified date are included in the results."]}
     let make ?datastoreName =
       fun ?datastoreStatus ->
         fun ?createdBefore ->
@@ -1300,16 +1754,16 @@ module DatastoreFilter =
           (Xml.child xml_arg0 "DatastoreName") in
       make ?createdAfter ?createdBefore ?datastoreStatus ?datastoreName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAfter = field_map json "CreatedAfter" Timestamp.of_json in
-      let createdBefore = field_map json "CreatedBefore" Timestamp.of_json in
+    let of_json json__ =
+      let createdAfter = field_map json__ "CreatedAfter" Timestamp.of_json in
+      let createdBefore = field_map json__ "CreatedBefore" Timestamp.of_json in
       let datastoreStatus =
-        field_map json "DatastoreStatus" DatastoreStatus.of_json in
+        field_map json__ "DatastoreStatus" DatastoreStatus.of_json in
       let datastoreName =
-        field_map json "DatastoreName" DatastoreName.of_json in
+        field_map json__ "DatastoreName" DatastoreName.of_json in
       make ?createdAfter ?createdBefore ?datastoreStatus ?datastoreName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The filters applied to Data Store query."]
+  end[@@ocaml.doc "The filters applied to a data store query."]
 module BoundedLengthString =
   struct
     type nonrec t = string
@@ -1345,12 +1799,12 @@ module ConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Data Store is in a transition state and the user requested action can not be performed."]
+       "The data store is in a transition state and the user requested action cannot be performed."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -1398,17 +1852,18 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from a Data Store."]
+  end[@@ocaml.doc
+       "Remove a user-specifed key and value tag from a data store."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "\"The Amazon Resource Name(ARN) of the Data Store for which tags are being removed"];
+          "The Amazon Resource Name (ARN) of the data store from which tags are being removed."];
       tagKeys: TagKeyList.t
         [@ocaml.doc
-          "The keys for the tags to be removed from the Healthlake Data Store."]}
+          "The keys for the tags to be removed from the data store."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceARN =
       fun ~tagKeys -> fun () -> { resourceARN; tagKeys }
@@ -1426,13 +1881,14 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from a Data Store."]
+  end[@@ocaml.doc
+       "Remove a user-specifed key and value tag from a data store."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -1480,17 +1936,17 @@ module TagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Adds a user specifed key and value tag to a Data Store."]
+  end[@@ocaml.doc "Add a user-specifed key and value tag to a data store."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name(ARN)that gives Amazon HealthLake access to the Data Store which tags are being added to."];
+          "The Amazon Resource Name (ARN) that grants access to the data store tags are being added to."];
       tags: TagList.t
         [@ocaml.doc
-          "The user specified key and value pair tags being added to a Data Store."]}
+          "The user-specified key and value pair tags being added to a data store."]}
     let context_ = "TagResourceRequest"
     let make ~resourceARN = fun ~tags -> fun () -> { resourceARN; tags }
     let to_value x =
@@ -1506,21 +1962,21 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Adds a user specifed key and value tag to a Data Store."]
+  end[@@ocaml.doc "Add a user-specifed key and value tag to a data store."]
 module StartFHIRImportJobResponse =
   struct
     type nonrec t =
       {
-      jobId: JobId.t [@ocaml.doc "The AWS-generated job ID."];
-      jobStatus: JobStatus.t [@ocaml.doc "The status of an import job."];
+      jobId: JobId.t option [@ocaml.doc "The import job identifier."];
+      jobStatus: JobStatus.t option [@ocaml.doc "The import job status."];
       datastoreId: DatastoreId.t option
-        [@ocaml.doc "The AWS-generated Data Store ID."]}
+        [@ocaml.doc "The data store identifier."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -1528,10 +1984,9 @@ module StartFHIRImportJobResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartFHIRImportJobResponse"
-    let make ?datastoreId =
-      fun ~jobId ->
-        fun ~jobStatus -> fun () -> { datastoreId; jobId; jobStatus }
+    let make ?jobId =
+      fun ?jobStatus ->
+        fun ?datastoreId -> fun () -> { jobId; jobStatus; datastoreId }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1590,62 +2045,61 @@ module StartFHIRImportJobResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("JobId", (Some (JobId.to_value x.jobId)));
-        ("JobStatus", (Some (JobStatus.to_value x.jobStatus)));
+        [("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
         ("DatastoreId", (Option.map x.datastoreId ~f:DatastoreId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let datastoreId =
         (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
       let jobStatus =
-        JobStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobStatus") in
-      let jobId =
-        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
-      make ?datastoreId ~jobStatus ~jobId ()
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      make ?datastoreId ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datastoreId = field_map json "DatastoreId" DatastoreId.of_json in
-      let jobStatus = field_map_exn json "JobStatus" JobStatus.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      make ?datastoreId ~jobStatus ~jobId ()
+    let of_json json__ =
+      let datastoreId = field_map json__ "DatastoreId" DatastoreId.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?datastoreId ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Begins a FHIR Import job."]
+  end[@@ocaml.doc
+       "Start importing bulk FHIR data into an ACTIVE data store. The import job imports FHIR data found in the InputDataConfig object and stores processing results in the JobOutputDataConfig object."]
 module StartFHIRImportJobRequest =
   struct
     type nonrec t =
       {
-      jobName: JobName.t option
-        [@ocaml.doc
-          "The name of the FHIR Import job in the StartFHIRImport job request."];
+      jobName: JobName.t option [@ocaml.doc "The import job name."];
       inputDataConfig: InputDataConfig.t
-        [@ocaml.doc
-          "The input properties of the FHIR Import job in the StartFHIRImport job request."];
+        [@ocaml.doc "The input properties for the import job request."];
       jobOutputDataConfig: OutputDataConfig.t ;
-      datastoreId: DatastoreId.t
-        [@ocaml.doc "The AWS-generated Data Store ID."];
+      datastoreId: DatastoreId.t [@ocaml.doc "The data store identifier."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Amazon HealthLake access permission."];
-      clientToken: ClientTokenString.t
+          "The Amazon Resource Name (ARN) that grants access permission to AWS HealthLake."];
+      clientToken: ClientTokenString.t option
         [@ocaml.doc
-          "Optional user provided token used for ensuring idempotency."]}
+          "The optional user-provided token used for ensuring API idempotency."];
+      validationLevel: ValidationLevel.t option
+        [@ocaml.doc "The validation level of the import job."]}
     let context_ = "StartFHIRImportJobRequest"
     let make ?jobName =
-      fun ~inputDataConfig ->
-        fun ~jobOutputDataConfig ->
-          fun ~datastoreId ->
-            fun ~dataAccessRoleArn ->
-              fun ~clientToken ->
-                fun () ->
-                  {
-                    jobName;
-                    inputDataConfig;
-                    jobOutputDataConfig;
-                    datastoreId;
-                    dataAccessRoleArn;
-                    clientToken
-                  }
+      fun ?clientToken ->
+        fun ?validationLevel ->
+          fun ~inputDataConfig ->
+            fun ~jobOutputDataConfig ->
+              fun ~datastoreId ->
+                fun ~dataAccessRoleArn ->
+                  fun () ->
+                    {
+                      jobName;
+                      clientToken;
+                      validationLevel;
+                      inputDataConfig;
+                      jobOutputDataConfig;
+                      datastoreId;
+                      dataAccessRoleArn
+                    }
     let to_value x =
       structure_to_value
         [("JobName", (Option.map x.jobName ~f:JobName.to_value));
@@ -1656,12 +2110,18 @@ module StartFHIRImportJobRequest =
         ("DatastoreId", (Some (DatastoreId.to_value x.datastoreId)));
         ("DataAccessRoleArn",
           (Some (IamRoleArn.to_value x.dataAccessRoleArn)));
-        ("ClientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+        ("ClientToken",
+          (Option.map x.clientToken ~f:ClientTokenString.to_value));
+        ("ValidationLevel",
+          (Option.map x.validationLevel ~f:ValidationLevel.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let validationLevel =
+        (Option.map ~f:ValidationLevel.of_xml)
+          (Xml.child xml_arg0 "ValidationLevel") in
       let clientToken =
-        ClientTokenString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+        (Option.map ~f:ClientTokenString.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
       let dataAccessRoleArn =
         IamRoleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataAccessRoleArn") in
@@ -1676,35 +2136,37 @@ module StartFHIRImportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
       let jobName =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
-      make ~clientToken ~dataAccessRoleArn ~datastoreId ~jobOutputDataConfig
-        ~inputDataConfig ?jobName ()
+      make ?validationLevel ?clientToken ~dataAccessRoleArn ~datastoreId
+        ~jobOutputDataConfig ~inputDataConfig ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let validationLevel =
+        field_map json__ "ValidationLevel" ValidationLevel.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" ClientTokenString.of_json in
+        field_map json__ "ClientToken" ClientTokenString.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let datastoreId =
+        field_map_exn json__ "DatastoreId" DatastoreId.of_json in
       let jobOutputDataConfig =
-        field_map_exn json "JobOutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "JobOutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      make ~clientToken ~dataAccessRoleArn ~datastoreId ~jobOutputDataConfig
-        ~inputDataConfig ?jobName ()
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      make ?validationLevel ?clientToken ~dataAccessRoleArn ~datastoreId
+        ~jobOutputDataConfig ~inputDataConfig ?jobName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Begins a FHIR Import job."]
+  end[@@ocaml.doc
+       "Start importing bulk FHIR data into an ACTIVE data store. The import job imports FHIR data found in the InputDataConfig object and stores processing results in the JobOutputDataConfig object."]
 module StartFHIRExportJobResponse =
   struct
     type nonrec t =
       {
-      jobId: JobId.t [@ocaml.doc "The AWS generated ID for an export job."];
-      jobStatus: JobStatus.t
-        [@ocaml.doc
-          "The status of a FHIR export job. Possible statuses are SUBMITTED, IN_PROGRESS, COMPLETED, or FAILED."];
+      jobId: JobId.t option [@ocaml.doc "The export job identifier."];
+      jobStatus: JobStatus.t option [@ocaml.doc "The export job status."];
       datastoreId: DatastoreId.t option
         [@ocaml.doc
-          "The AWS generated ID for the Data Store from which files are being exported for an export job."]}
+          "The data store identifier from which files are being exported."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -1712,10 +2174,9 @@ module StartFHIRExportJobResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartFHIRExportJobResponse"
-    let make ?datastoreId =
-      fun ~jobId ->
-        fun ~jobStatus -> fun () -> { datastoreId; jobId; jobStatus }
+    let make ?jobId =
+      fun ?jobStatus ->
+        fun ?datastoreId -> fun () -> { jobId; jobStatus; datastoreId }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1774,58 +2235,55 @@ module StartFHIRExportJobResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("JobId", (Some (JobId.to_value x.jobId)));
-        ("JobStatus", (Some (JobStatus.to_value x.jobStatus)));
+        [("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
         ("DatastoreId", (Option.map x.datastoreId ~f:DatastoreId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let datastoreId =
         (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
       let jobStatus =
-        JobStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobStatus") in
-      let jobId =
-        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
-      make ?datastoreId ~jobStatus ~jobId ()
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      make ?datastoreId ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datastoreId = field_map json "DatastoreId" DatastoreId.of_json in
-      let jobStatus = field_map_exn json "JobStatus" JobStatus.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      make ?datastoreId ~jobStatus ~jobId ()
+    let of_json json__ =
+      let datastoreId = field_map json__ "DatastoreId" DatastoreId.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?datastoreId ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Begins a FHIR export job."]
+  end[@@ocaml.doc "Start a FHIR export job."]
 module StartFHIRExportJobRequest =
   struct
     type nonrec t =
       {
-      jobName: JobName.t option
-        [@ocaml.doc "The user generated name for an export job."];
+      jobName: JobName.t option [@ocaml.doc "The export job name."];
       outputDataConfig: OutputDataConfig.t
         [@ocaml.doc
-          "The output data configuration that was supplied when the export job was created."];
+          "The output data configuration supplied when the export job was started."];
       datastoreId: DatastoreId.t
         [@ocaml.doc
-          "The AWS generated ID for the Data Store from which files are being exported for an export job."];
+          "The data store identifier from which files are being exported."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name used during the initiation of the job."];
-      clientToken: ClientTokenString.t
+          "The Amazon Resource Name (ARN) used during initiation of the export job."];
+      clientToken: ClientTokenString.t option
         [@ocaml.doc
-          "An optional user provided token used for ensuring idempotency."]}
+          "An optional user provided token used for ensuring API idempotency."]}
     let context_ = "StartFHIRExportJobRequest"
     let make ?jobName =
-      fun ~outputDataConfig ->
-        fun ~datastoreId ->
-          fun ~dataAccessRoleArn ->
-            fun ~clientToken ->
+      fun ?clientToken ->
+        fun ~outputDataConfig ->
+          fun ~datastoreId ->
+            fun ~dataAccessRoleArn ->
               fun () ->
                 {
                   jobName;
+                  clientToken;
                   outputDataConfig;
                   datastoreId;
-                  dataAccessRoleArn;
-                  clientToken
+                  dataAccessRoleArn
                 }
     let to_value x =
       structure_to_value
@@ -1835,12 +2293,13 @@ module StartFHIRExportJobRequest =
         ("DatastoreId", (Some (DatastoreId.to_value x.datastoreId)));
         ("DataAccessRoleArn",
           (Some (IamRoleArn.to_value x.dataAccessRoleArn)));
-        ("ClientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+        ("ClientToken",
+          (Option.map x.clientToken ~f:ClientTokenString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let clientToken =
-        ClientTokenString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+        (Option.map ~f:ClientTokenString.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
       let dataAccessRoleArn =
         IamRoleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataAccessRoleArn") in
@@ -1852,28 +2311,29 @@ module StartFHIRExportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OutputDataConfig") in
       let jobName =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
-      make ~clientToken ~dataAccessRoleArn ~datastoreId ~outputDataConfig
+      make ?clientToken ~dataAccessRoleArn ~datastoreId ~outputDataConfig
         ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientToken =
-        field_map_exn json "ClientToken" ClientTokenString.of_json in
+        field_map json__ "ClientToken" ClientTokenString.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let datastoreId =
+        field_map_exn json__ "DatastoreId" DatastoreId.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      make ~clientToken ~dataAccessRoleArn ~datastoreId ~outputDataConfig
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      make ?clientToken ~dataAccessRoleArn ~datastoreId ~outputDataConfig
         ?jobName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Begins a FHIR export job."]
+  end[@@ocaml.doc "Start a FHIR export job."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
       tags: TagList.t option
-        [@ocaml.doc "Returns a list of tags associated with a Data Store."]}
+        [@ocaml.doc "Returns a list of tags associated with a data store."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
@@ -1918,18 +2378,18 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of all existing tags associated with a Data Store."]
+       "Returns a list of all existing tags associated with a data store."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name(ARN) of the Data Store for which tags are being added."]}
+          "The Amazon Resource Name (ARN) of the data store to which tags are being added."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceARN = fun () -> { resourceARN }
     let to_value x =
@@ -1942,23 +2402,22 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of all existing tags associated with a Data Store."]
+       "Returns a list of all existing tags associated with a data store."]
 module ListFHIRImportJobsResponse =
   struct
     type nonrec t =
       {
-      importJobPropertiesList: ImportJobPropertiesList.t
-        [@ocaml.doc
-          "The properties of a listed FHIR import jobs, including the ID, ARN, name, and the status of the job."];
+      importJobPropertiesList: ImportJobPropertiesList.t option
+        [@ocaml.doc "The properties for listed import jobs."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A pagination token used to identify the next page of results to return for a ListFHIRImportJobs query."]}
+          "The pagination token used to identify the next page of results to return."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -1966,10 +2425,8 @@ module ListFHIRImportJobsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListFHIRImportJobsResponse"
-    let make ?nextToken =
-      fun ~importJobPropertiesList ->
-        fun () -> { nextToken; importJobPropertiesList }
+    let make ?importJobPropertiesList =
+      fun ?nextToken -> fun () -> { importJobPropertiesList; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2029,51 +2486,52 @@ module ListFHIRImportJobsResponse =
     let to_value x =
       structure_to_value
         [("ImportJobPropertiesList",
-           (Some (ImportJobPropertiesList.to_value x.importJobPropertiesList)));
+           (Option.map x.importJobPropertiesList
+              ~f:ImportJobPropertiesList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let importJobPropertiesList =
-        ImportJobPropertiesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ImportJobPropertiesList") in
-      make ?nextToken ~importJobPropertiesList ()
+        (Option.map ~f:ImportJobPropertiesList.of_xml)
+          (Xml.child xml_arg0 "ImportJobPropertiesList") in
+      make ?nextToken ?importJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let importJobPropertiesList =
-        field_map_exn json "ImportJobPropertiesList"
+        field_map json__ "ImportJobPropertiesList"
           ImportJobPropertiesList.of_json in
-      make ?nextToken ~importJobPropertiesList ()
+      make ?nextToken ?importJobPropertiesList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all FHIR import jobs associated with an account and their statuses."]
+       "List all FHIR import jobs associated with an account and their statuses."]
 module ListFHIRImportJobsRequest =
   struct
     type nonrec t =
       {
       datastoreId: DatastoreId.t
         [@ocaml.doc
-          "This parameter limits the response to the import job with the specified Data Store ID."];
+          "Limits the response to the import job with the specified data store ID."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A pagination token used to identify the next page of results to return for a ListFHIRImportJobs query."];
+          "The pagination token used to identify the next page of results to return."];
       maxResults: MaxResultsInteger.t option
         [@ocaml.doc
-          "This parameter limits the number of results returned for a ListFHIRImportJobs to a maximum quantity specified by the user."];
+          "Limits the number of results returned for ListFHIRImportJobs to a maximum quantity specified by the user."];
       jobName: JobName.t option
         [@ocaml.doc
-          "This parameter limits the response to the import job with the specified job name."];
+          "Limits the response to the import job with the specified job name."];
       jobStatus: JobStatus.t option
         [@ocaml.doc
-          "This parameter limits the response to the import job with the specified job status."];
+          "Limits the response to the import job with the specified job status."];
       submittedBefore: Timestamp.t option
         [@ocaml.doc
-          "This parameter limits the response to FHIR import jobs submitted before a user specified date."];
+          "Limits the response to FHIR import jobs submitted before a user- specified date."];
       submittedAfter: Timestamp.t option
         [@ocaml.doc
-          "This parameter limits the response to FHIR import jobs submitted after a user specified date."]}
+          "Limits the response to FHIR import jobs submitted after a user-specified date."]}
     let context_ = "ListFHIRImportJobsRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -2127,30 +2585,32 @@ module ListFHIRImportJobsRequest =
       make ?submittedAfter ?submittedBefore ?jobStatus ?jobName ?maxResults
         ?nextToken ~datastoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let submittedAfter = field_map json "SubmittedAfter" Timestamp.of_json in
+    let of_json json__ =
+      let submittedAfter =
+        field_map json__ "SubmittedAfter" Timestamp.of_json in
       let submittedBefore =
-        field_map json "SubmittedBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
+        field_map json__ "SubmittedBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let datastoreId =
+        field_map_exn json__ "DatastoreId" DatastoreId.of_json in
       make ?submittedAfter ?submittedBefore ?jobStatus ?jobName ?maxResults
         ?nextToken ~datastoreId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all FHIR import jobs associated with an account and their statuses."]
+       "List all FHIR import jobs associated with an account and their statuses."]
 module ListFHIRExportJobsResponse =
   struct
     type nonrec t =
       {
-      exportJobPropertiesList: ExportJobPropertiesList.t
-        [@ocaml.doc
-          "The properties of listed FHIR export jobs, including the ID, ARN, name, and the status of the job."];
+      exportJobPropertiesList: ExportJobPropertiesList.t option
+        [@ocaml.doc "The properties of listed FHIR export jobs."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A pagination token used to identify the next page of results to return for a ListFHIRExportJobs query."]}
+          "The pagination token used to identify the next page of results to return."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2158,10 +2618,8 @@ module ListFHIRExportJobsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListFHIRExportJobsResponse"
-    let make ?nextToken =
-      fun ~exportJobPropertiesList ->
-        fun () -> { nextToken; exportJobPropertiesList }
+    let make ?exportJobPropertiesList =
+      fun ?nextToken -> fun () -> { exportJobPropertiesList; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2221,23 +2679,24 @@ module ListFHIRExportJobsResponse =
     let to_value x =
       structure_to_value
         [("ExportJobPropertiesList",
-           (Some (ExportJobPropertiesList.to_value x.exportJobPropertiesList)));
+           (Option.map x.exportJobPropertiesList
+              ~f:ExportJobPropertiesList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let exportJobPropertiesList =
-        ExportJobPropertiesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExportJobPropertiesList") in
-      make ?nextToken ~exportJobPropertiesList ()
+        (Option.map ~f:ExportJobPropertiesList.of_xml)
+          (Xml.child xml_arg0 "ExportJobPropertiesList") in
+      make ?nextToken ?exportJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let exportJobPropertiesList =
-        field_map_exn json "ExportJobPropertiesList"
+        field_map json__ "ExportJobPropertiesList"
           ExportJobPropertiesList.of_json in
-      make ?nextToken ~exportJobPropertiesList ()
+      make ?nextToken ?exportJobPropertiesList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all FHIR export jobs associated with an account and their statuses."]
@@ -2247,25 +2706,25 @@ module ListFHIRExportJobsRequest =
       {
       datastoreId: DatastoreId.t
         [@ocaml.doc
-          "This parameter limits the response to the export job with the specified Data Store ID."];
+          "Limits the response to the export job with the specified data store ID."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A pagination token used to identify the next page of results to return for a ListFHIRExportJobs query."];
+          "A pagination token used to identify the next page of results to return."];
       maxResults: MaxResultsInteger.t option
         [@ocaml.doc
-          "This parameter limits the number of results returned for a ListFHIRExportJobs to a maximum quantity specified by the user."];
+          "Limits the number of results returned for a ListFHIRExportJobs to a maximum quantity specified by the user."];
       jobName: JobName.t option
         [@ocaml.doc
-          "This parameter limits the response to the export job with the specified job name."];
+          "Limits the response to the export job with the specified job name."];
       jobStatus: JobStatus.t option
         [@ocaml.doc
-          "This parameter limits the response to the export jobs with the specified job status."];
+          "Limits the response to export jobs with the specified job status."];
       submittedBefore: Timestamp.t option
         [@ocaml.doc
-          "This parameter limits the response to FHIR export jobs submitted before a user specified date."];
+          "Limits the response to FHIR export jobs submitted before a user- specified date."];
       submittedAfter: Timestamp.t option
         [@ocaml.doc
-          "This parameter limits the response to FHIR export jobs submitted after a user specified date."]}
+          "Limits the response to FHIR export jobs submitted after a user-specified date."]}
     let context_ = "ListFHIRExportJobsRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -2319,15 +2778,18 @@ module ListFHIRExportJobsRequest =
       make ?submittedAfter ?submittedBefore ?jobStatus ?jobName ?maxResults
         ?nextToken ~datastoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let submittedAfter = field_map json "SubmittedAfter" Timestamp.of_json in
+    let of_json json__ =
+      let submittedAfter =
+        field_map json__ "SubmittedAfter" Timestamp.of_json in
       let submittedBefore =
-        field_map json "SubmittedBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
+        field_map json__ "SubmittedBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let datastoreId =
+        field_map_exn json__ "DatastoreId" DatastoreId.of_json in
       make ?submittedAfter ?submittedBefore ?jobStatus ?jobName ?maxResults
         ?nextToken ~datastoreId ()
     let to_json v = composed_to_json to_value v
@@ -2337,20 +2799,18 @@ module ListFHIRDatastoresResponse =
   struct
     type nonrec t =
       {
-      datastorePropertiesList: DatastorePropertiesList.t
-        [@ocaml.doc "All properties associated with the listed Data Stores."];
+      datastorePropertiesList: DatastorePropertiesList.t option
+        [@ocaml.doc "The properties associated with all listed data stores."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "Pagination token that can be used to retrieve the next page of results."]}
+          "The pagination token used to retrieve the next page of results."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListFHIRDatastoresResponse"
-    let make ?nextToken =
-      fun ~datastorePropertiesList ->
-        fun () -> { nextToken; datastorePropertiesList }
+    let make ?datastorePropertiesList =
+      fun ?nextToken -> fun () -> { datastorePropertiesList; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2394,39 +2854,39 @@ module ListFHIRDatastoresResponse =
     let to_value x =
       structure_to_value
         [("DatastorePropertiesList",
-           (Some (DatastorePropertiesList.to_value x.datastorePropertiesList)));
+           (Option.map x.datastorePropertiesList
+              ~f:DatastorePropertiesList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let datastorePropertiesList =
-        DatastorePropertiesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastorePropertiesList") in
-      make ?nextToken ~datastorePropertiesList ()
+        (Option.map ~f:DatastorePropertiesList.of_xml)
+          (Xml.child xml_arg0 "DatastorePropertiesList") in
+      make ?nextToken ?datastorePropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let datastorePropertiesList =
-        field_map_exn json "DatastorePropertiesList"
+        field_map json__ "DatastorePropertiesList"
           DatastorePropertiesList.of_json in
-      make ?nextToken ~datastorePropertiesList ()
+      make ?nextToken ?datastorePropertiesList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all FHIR Data Stores that are in the user\226\128\153s account, regardless of Data Store status."]
+       "List all FHIR-enabled data stores in a user\226\128\153s account, regardless of data store status."]
 module ListFHIRDatastoresRequest =
   struct
     type nonrec t =
       {
       filter: DatastoreFilter.t option
         [@ocaml.doc
-          "Lists all filters associated with a FHIR Data Store request."];
+          "List all filters associated with a FHIR data store request."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "Fetches the next page of Data Stores when results are paginated."];
+          "The token used to retrieve the next page of data stores when results are paginated."];
       maxResults: MaxResultsInteger.t option
-        [@ocaml.doc
-          "The maximum number of Data Stores returned in a single page of a ListFHIRDatastoresRequest call."]}
+        [@ocaml.doc "The maximum number of data stores returned on a page."]}
     let make ?filter =
       fun ?nextToken ->
         fun ?maxResults -> fun () -> { filter; nextToken; maxResults }
@@ -2447,29 +2907,28 @@ module ListFHIRDatastoresRequest =
         (Option.map ~f:DatastoreFilter.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filter = field_map json "Filter" DatastoreFilter.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filter = field_map json__ "Filter" DatastoreFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all FHIR Data Stores that are in the user\226\128\153s account, regardless of Data Store status."]
+       "List all FHIR-enabled data stores in a user\226\128\153s account, regardless of data store status."]
 module DescribeFHIRImportJobResponse =
   struct
     type nonrec t =
       {
-      importJobProperties: ImportJobProperties.t
-        [@ocaml.doc
-          "The properties of the Import job request, including the ID, ARN, name, and the status of the job."]}
+      importJobProperties: ImportJobProperties.t option
+        [@ocaml.doc "The import job properties."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeFHIRImportJobResponse"
-    let make ~importJobProperties = fun () -> { importJobProperties }
+    let make ?importJobProperties = fun () -> { importJobProperties }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2521,28 +2980,27 @@ module DescribeFHIRImportJobResponse =
     let to_value x =
       structure_to_value
         [("ImportJobProperties",
-           (Some (ImportJobProperties.to_value x.importJobProperties)))]
+           (Option.map x.importJobProperties ~f:ImportJobProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let importJobProperties =
-        ImportJobProperties.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ImportJobProperties") in
-      make ~importJobProperties ()
+        (Option.map ~f:ImportJobProperties.of_xml)
+          (Xml.child xml_arg0 "ImportJobProperties") in
+      make ?importJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let importJobProperties =
-        field_map_exn json "ImportJobProperties" ImportJobProperties.of_json in
-      make ~importJobProperties ()
+        field_map json__ "ImportJobProperties" ImportJobProperties.of_json in
+      make ?importJobProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays the properties of a FHIR import job, including the ID, ARN, name, and the status of the job."]
+       "Get the import job properties to learn more about the job or job progress."]
 module DescribeFHIRImportJobRequest =
   struct
     type nonrec t =
       {
-      datastoreId: DatastoreId.t
-        [@ocaml.doc "The AWS-generated ID of the Data Store."];
-      jobId: JobId.t [@ocaml.doc "The AWS-generated job ID."]}
+      datastoreId: DatastoreId.t [@ocaml.doc "The data store identifier."];
+      jobId: JobId.t [@ocaml.doc "The import job identifier."]}
     let context_ = "DescribeFHIRImportJobRequest"
     let make ~datastoreId = fun ~jobId -> fun () -> { datastoreId; jobId }
     let to_value x =
@@ -2558,28 +3016,27 @@ module DescribeFHIRImportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
       make ~jobId ~datastoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      let datastoreId =
+        field_map_exn json__ "DatastoreId" DatastoreId.of_json in
       make ~jobId ~datastoreId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays the properties of a FHIR import job, including the ID, ARN, name, and the status of the job."]
+       "Get the import job properties to learn more about the job or job progress."]
 module DescribeFHIRExportJobResponse =
   struct
     type nonrec t =
       {
-      exportJobProperties: ExportJobProperties.t
-        [@ocaml.doc
-          "Displays the properties of the export job, including the ID, Arn, Name, and the status of the job."]}
+      exportJobProperties: ExportJobProperties.t option
+        [@ocaml.doc "The export job properties."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeFHIRExportJobResponse"
-    let make ~exportJobProperties = fun () -> { exportJobProperties }
+    let make ?exportJobProperties = fun () -> { exportJobProperties }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2631,29 +3088,28 @@ module DescribeFHIRExportJobResponse =
     let to_value x =
       structure_to_value
         [("ExportJobProperties",
-           (Some (ExportJobProperties.to_value x.exportJobProperties)))]
+           (Option.map x.exportJobProperties ~f:ExportJobProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exportJobProperties =
-        ExportJobProperties.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExportJobProperties") in
-      make ~exportJobProperties ()
+        (Option.map ~f:ExportJobProperties.of_xml)
+          (Xml.child xml_arg0 "ExportJobProperties") in
+      make ?exportJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exportJobProperties =
-        field_map_exn json "ExportJobProperties" ExportJobProperties.of_json in
-      make ~exportJobProperties ()
+        field_map json__ "ExportJobProperties" ExportJobProperties.of_json in
+      make ?exportJobProperties ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Displays the properties of a FHIR export job, including the ID, ARN, name, and the status of the job."]
+  end[@@ocaml.doc "Get FHIR export job properties."]
 module DescribeFHIRExportJobRequest =
   struct
     type nonrec t =
       {
       datastoreId: DatastoreId.t
         [@ocaml.doc
-          "The AWS generated ID for the Data Store from which files are being exported from for an export job."];
-      jobId: JobId.t [@ocaml.doc "The AWS generated ID for an export job."]}
+          "The data store identifier from which FHIR data is being exported from."];
+      jobId: JobId.t [@ocaml.doc "The export job identifier."]}
     let context_ = "DescribeFHIRExportJobRequest"
     let make ~datastoreId = fun ~jobId -> fun () -> { datastoreId; jobId }
     let to_value x =
@@ -2669,28 +3125,26 @@ module DescribeFHIRExportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
       make ~jobId ~datastoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      let datastoreId =
+        field_map_exn json__ "DatastoreId" DatastoreId.of_json in
       make ~jobId ~datastoreId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Displays the properties of a FHIR export job, including the ID, ARN, name, and the status of the job."]
+  end[@@ocaml.doc "Get FHIR export job properties."]
 module DescribeFHIRDatastoreResponse =
   struct
     type nonrec t =
       {
-      datastoreProperties: DatastoreProperties.t
-        [@ocaml.doc
-          "All properties associated with a Data Store, including the Data Store ID, Data Store ARN, Data Store name, Data Store status, created at, Data Store type version, and Data Store endpoint."]}
+      datastoreProperties: DatastoreProperties.t option
+        [@ocaml.doc "The data store properties."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeFHIRDatastoreResponse"
-    let make ~datastoreProperties = fun () -> { datastoreProperties }
+    let make ?datastoreProperties = fun () -> { datastoreProperties }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2742,59 +3196,56 @@ module DescribeFHIRDatastoreResponse =
     let to_value x =
       structure_to_value
         [("DatastoreProperties",
-           (Some (DatastoreProperties.to_value x.datastoreProperties)))]
+           (Option.map x.datastoreProperties ~f:DatastoreProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let datastoreProperties =
-        DatastoreProperties.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreProperties") in
-      make ~datastoreProperties ()
+        (Option.map ~f:DatastoreProperties.of_xml)
+          (Xml.child xml_arg0 "DatastoreProperties") in
+      make ?datastoreProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datastoreProperties =
-        field_map_exn json "DatastoreProperties" DatastoreProperties.of_json in
-      make ~datastoreProperties ()
+        field_map json__ "DatastoreProperties" DatastoreProperties.of_json in
+      make ?datastoreProperties ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Gets the properties associated with the FHIR Data Store, including the Data Store ID, Data Store ARN, Data Store name, Data Store status, created at, Data Store type version, and Data Store endpoint."]
+  end[@@ocaml.doc "Get properties for a FHIR-enabled data store."]
 module DescribeFHIRDatastoreRequest =
   struct
     type nonrec t =
       {
-      datastoreId: DatastoreId.t option
-        [@ocaml.doc
-          "The AWS-generated Data Store id. This is part of the \226\128\152CreateFHIRDatastore\226\128\153 output."]}
-    let make ?datastoreId = fun () -> { datastoreId }
+      datastoreId: DatastoreId.t [@ocaml.doc "The data store identifier."]}
+    let context_ = "DescribeFHIRDatastoreRequest"
+    let make ~datastoreId = fun () -> { datastoreId }
     let to_value x =
       structure_to_value
-        [("DatastoreId", (Option.map x.datastoreId ~f:DatastoreId.to_value))]
+        [("DatastoreId", (Some (DatastoreId.to_value x.datastoreId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let datastoreId =
-        (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
-      make ?datastoreId ()
+        DatastoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
+      make ~datastoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datastoreId = field_map json "DatastoreId" DatastoreId.of_json in
-      make ?datastoreId ()
+    let of_json json__ =
+      let datastoreId =
+        field_map_exn json__ "DatastoreId" DatastoreId.of_json in
+      make ~datastoreId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Gets the properties associated with the FHIR Data Store, including the Data Store ID, Data Store ARN, Data Store name, Data Store status, created at, Data Store type version, and Data Store endpoint."]
+  end[@@ocaml.doc "Get properties for a FHIR-enabled data store."]
 module DeleteFHIRDatastoreResponse =
   struct
     type nonrec t =
       {
-      datastoreId: DatastoreId.t
-        [@ocaml.doc "The AWS-generated ID for the Data Store to be deleted."];
-      datastoreArn: DatastoreArn.t
+      datastoreId: DatastoreId.t option
+        [@ocaml.doc "The AWS-generated ID for the deleted data store."];
+      datastoreArn: DatastoreArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Amazon HealthLake access permission."];
-      datastoreStatus: DatastoreStatus.t
-        [@ocaml.doc
-          "The status of the Data Store that the user has requested to be deleted."];
-      datastoreEndpoint: BoundedLengthString.t
-        [@ocaml.doc
-          "The AWS endpoint for the Data Store the user has requested to be deleted."]}
+          "The Amazon Resource Name (ARN) that grants access permission to AWS HealthLake."];
+      datastoreStatus: DatastoreStatus.t option
+        [@ocaml.doc "The data store status."];
+      datastoreEndpoint: BoundedLengthString.t option
+        [@ocaml.doc "The AWS endpoint of the data store to be deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -2803,11 +3254,10 @@ module DeleteFHIRDatastoreResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteFHIRDatastoreResponse"
-    let make ~datastoreId =
-      fun ~datastoreArn ->
-        fun ~datastoreStatus ->
-          fun ~datastoreEndpoint ->
+    let make ?datastoreId =
+      fun ?datastoreArn ->
+        fun ?datastoreStatus ->
+          fun ?datastoreEndpoint ->
             fun () ->
               { datastoreId; datastoreArn; datastoreStatus; datastoreEndpoint
               }
@@ -2877,87 +3327,85 @@ module DeleteFHIRDatastoreResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DatastoreId", (Some (DatastoreId.to_value x.datastoreId)));
-        ("DatastoreArn", (Some (DatastoreArn.to_value x.datastoreArn)));
+        [("DatastoreId", (Option.map x.datastoreId ~f:DatastoreId.to_value));
+        ("DatastoreArn",
+          (Option.map x.datastoreArn ~f:DatastoreArn.to_value));
         ("DatastoreStatus",
-          (Some (DatastoreStatus.to_value x.datastoreStatus)));
+          (Option.map x.datastoreStatus ~f:DatastoreStatus.to_value));
         ("DatastoreEndpoint",
-          (Some (BoundedLengthString.to_value x.datastoreEndpoint)))]
+          (Option.map x.datastoreEndpoint ~f:BoundedLengthString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let datastoreEndpoint =
-        BoundedLengthString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreEndpoint") in
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "DatastoreEndpoint") in
       let datastoreStatus =
-        DatastoreStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreStatus") in
+        (Option.map ~f:DatastoreStatus.of_xml)
+          (Xml.child xml_arg0 "DatastoreStatus") in
       let datastoreArn =
-        DatastoreArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreArn") in
-      let datastoreId =
-        DatastoreId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
-      make ~datastoreEndpoint ~datastoreStatus ~datastoreArn ~datastoreId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datastoreEndpoint =
-        field_map_exn json "DatastoreEndpoint" BoundedLengthString.of_json in
-      let datastoreStatus =
-        field_map_exn json "DatastoreStatus" DatastoreStatus.of_json in
-      let datastoreArn =
-        field_map_exn json "DatastoreArn" DatastoreArn.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
-      make ~datastoreEndpoint ~datastoreStatus ~datastoreArn ~datastoreId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a Data Store."]
-module DeleteFHIRDatastoreRequest =
-  struct
-    type nonrec t =
-      {
-      datastoreId: DatastoreId.t option
-        [@ocaml.doc "The AWS-generated ID for the Data Store to be deleted."]}
-    let make ?datastoreId = fun () -> { datastoreId }
-    let to_value x =
-      structure_to_value
-        [("DatastoreId", (Option.map x.datastoreId ~f:DatastoreId.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
+        (Option.map ~f:DatastoreArn.of_xml)
+          (Xml.child xml_arg0 "DatastoreArn") in
       let datastoreId =
         (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
-      make ?datastoreId ()
+      make ?datastoreEndpoint ?datastoreStatus ?datastoreArn ?datastoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datastoreId = field_map json "DatastoreId" DatastoreId.of_json in
-      make ?datastoreId ()
+    let of_json json__ =
+      let datastoreEndpoint =
+        field_map json__ "DatastoreEndpoint" BoundedLengthString.of_json in
+      let datastoreStatus =
+        field_map json__ "DatastoreStatus" DatastoreStatus.of_json in
+      let datastoreArn = field_map json__ "DatastoreArn" DatastoreArn.of_json in
+      let datastoreId = field_map json__ "DatastoreId" DatastoreId.of_json in
+      make ?datastoreEndpoint ?datastoreStatus ?datastoreArn ?datastoreId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a Data Store."]
-module CreateFHIRDatastoreResponse =
+  end[@@ocaml.doc "Delete a FHIR-enabled data store."]
+module DeleteFHIRDatastoreRequest =
   struct
     type nonrec t =
       {
       datastoreId: DatastoreId.t
         [@ocaml.doc
-          "The AWS-generated Data Store id. This id is in the output from the initial Data Store creation call."];
-      datastoreArn: DatastoreArn.t
-        [@ocaml.doc
-          "The datastore ARN is generated during the creation of the Data Store and can be found in the output from the initial Data Store creation call."];
-      datastoreStatus: DatastoreStatus.t
-        [@ocaml.doc
-          "The status of the FHIR Data Store. Possible statuses are \226\128\152CREATING\226\128\153, \226\128\152ACTIVE\226\128\153, \226\128\152DELETING\226\128\153, \226\128\152DELETED\226\128\153."];
-      datastoreEndpoint: BoundedLengthString.t
-        [@ocaml.doc
-          "The AWS endpoint for the created Data Store. For preview, only US-east-1 endpoints are supported."]}
+          "The AWS-generated identifier for the data store to be deleted."]}
+    let context_ = "DeleteFHIRDatastoreRequest"
+    let make ~datastoreId = fun () -> { datastoreId }
+    let to_value x =
+      structure_to_value
+        [("DatastoreId", (Some (DatastoreId.to_value x.datastoreId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datastoreId =
+        DatastoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
+      make ~datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datastoreId =
+        field_map_exn json__ "DatastoreId" DatastoreId.of_json in
+      make ~datastoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete a FHIR-enabled data store."]
+module CreateFHIRDatastoreResponse =
+  struct
+    type nonrec t =
+      {
+      datastoreId: DatastoreId.t option
+        [@ocaml.doc "The data store identifier."];
+      datastoreArn: DatastoreArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) for the data store."];
+      datastoreStatus: DatastoreStatus.t option
+        [@ocaml.doc "The data store status."];
+      datastoreEndpoint: BoundedLengthString.t option
+        [@ocaml.doc "The AWS endpoint created for the data store."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateFHIRDatastoreResponse"
-    let make ~datastoreId =
-      fun ~datastoreArn ->
-        fun ~datastoreStatus ->
-          fun ~datastoreEndpoint ->
+    let make ?datastoreId =
+      fun ?datastoreArn ->
+        fun ?datastoreStatus ->
+          fun ?datastoreEndpoint ->
             fun () ->
               { datastoreId; datastoreArn; datastoreStatus; datastoreEndpoint
               }
@@ -3011,77 +3459,80 @@ module CreateFHIRDatastoreResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DatastoreId", (Some (DatastoreId.to_value x.datastoreId)));
-        ("DatastoreArn", (Some (DatastoreArn.to_value x.datastoreArn)));
+        [("DatastoreId", (Option.map x.datastoreId ~f:DatastoreId.to_value));
+        ("DatastoreArn",
+          (Option.map x.datastoreArn ~f:DatastoreArn.to_value));
         ("DatastoreStatus",
-          (Some (DatastoreStatus.to_value x.datastoreStatus)));
+          (Option.map x.datastoreStatus ~f:DatastoreStatus.to_value));
         ("DatastoreEndpoint",
-          (Some (BoundedLengthString.to_value x.datastoreEndpoint)))]
+          (Option.map x.datastoreEndpoint ~f:BoundedLengthString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let datastoreEndpoint =
-        BoundedLengthString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreEndpoint") in
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "DatastoreEndpoint") in
       let datastoreStatus =
-        DatastoreStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreStatus") in
+        (Option.map ~f:DatastoreStatus.of_xml)
+          (Xml.child xml_arg0 "DatastoreStatus") in
       let datastoreArn =
-        DatastoreArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreArn") in
+        (Option.map ~f:DatastoreArn.of_xml)
+          (Xml.child xml_arg0 "DatastoreArn") in
       let datastoreId =
-        DatastoreId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
-      make ~datastoreEndpoint ~datastoreStatus ~datastoreArn ~datastoreId ()
+        (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
+      make ?datastoreEndpoint ?datastoreStatus ?datastoreArn ?datastoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datastoreEndpoint =
-        field_map_exn json "DatastoreEndpoint" BoundedLengthString.of_json in
+        field_map json__ "DatastoreEndpoint" BoundedLengthString.of_json in
       let datastoreStatus =
-        field_map_exn json "DatastoreStatus" DatastoreStatus.of_json in
-      let datastoreArn =
-        field_map_exn json "DatastoreArn" DatastoreArn.of_json in
-      let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
-      make ~datastoreEndpoint ~datastoreStatus ~datastoreArn ~datastoreId ()
+        field_map json__ "DatastoreStatus" DatastoreStatus.of_json in
+      let datastoreArn = field_map json__ "DatastoreArn" DatastoreArn.of_json in
+      let datastoreId = field_map json__ "DatastoreId" DatastoreId.of_json in
+      make ?datastoreEndpoint ?datastoreStatus ?datastoreArn ?datastoreId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates a Data Store that can ingest and export FHIR formatted data."]
+  end[@@ocaml.doc "Create a FHIR-enabled data store."]
 module CreateFHIRDatastoreRequest =
   struct
     type nonrec t =
       {
       datastoreName: DatastoreName.t option
-        [@ocaml.doc "The user generated name for the Data Store."];
+        [@ocaml.doc "The data store name (user-generated)."];
       datastoreTypeVersion: FHIRVersion.t
         [@ocaml.doc
-          "The FHIR version of the Data Store. The only supported version is R4."];
+          "The FHIR release version supported by the data store. Current support is for version R4."];
       sseConfiguration: SseConfiguration.t option
         [@ocaml.doc
-          "The server-side encryption key configuration for a customer provided encryption key specified for creating a Data Store."];
+          "The server-side encryption key configuration for a customer-provided encryption key specified for creating a data store."];
       preloadDataConfig: PreloadDataConfig.t option
         [@ocaml.doc
-          "Optional parameter to preload data upon creation of the Data Store. Currently, the only supported preloaded data is synthetic data generated from Synthea."];
+          "An optional parameter to preload (import) open source Synthea FHIR data upon creation of the data store."];
       clientToken: ClientTokenString.t option
         [@ocaml.doc
-          "Optional user provided token used for ensuring idempotency."];
+          "An optional user-provided token to ensure API idempotency."];
       tags: TagList.t option
         [@ocaml.doc
-          "Resource tags that are applied to a Data Store when it is created."]}
+          "The resource tags applied to a data store when it is created."];
+      identityProviderConfiguration: IdentityProviderConfiguration.t option
+        [@ocaml.doc
+          "The identity provider configuration to use for the data store."]}
     let context_ = "CreateFHIRDatastoreRequest"
     let make ?datastoreName =
       fun ?sseConfiguration ->
         fun ?preloadDataConfig ->
           fun ?clientToken ->
             fun ?tags ->
-              fun ~datastoreTypeVersion ->
-                fun () ->
-                  {
-                    datastoreName;
-                    sseConfiguration;
-                    preloadDataConfig;
-                    clientToken;
-                    tags;
-                    datastoreTypeVersion
-                  }
+              fun ?identityProviderConfiguration ->
+                fun ~datastoreTypeVersion ->
+                  fun () ->
+                    {
+                      datastoreName;
+                      sseConfiguration;
+                      preloadDataConfig;
+                      clientToken;
+                      tags;
+                      identityProviderConfiguration;
+                      datastoreTypeVersion
+                    }
     let to_value x =
       structure_to_value
         [("DatastoreName",
@@ -3094,9 +3545,15 @@ module CreateFHIRDatastoreRequest =
           (Option.map x.preloadDataConfig ~f:PreloadDataConfig.to_value));
         ("ClientToken",
           (Option.map x.clientToken ~f:ClientTokenString.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("IdentityProviderConfiguration",
+          (Option.map x.identityProviderConfiguration
+             ~f:IdentityProviderConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let identityProviderConfiguration =
+        (Option.map ~f:IdentityProviderConfiguration.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderConfiguration") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let clientToken =
         (Option.map ~f:ClientTokenString.of_xml)
@@ -3113,23 +3570,27 @@ module CreateFHIRDatastoreRequest =
       let datastoreName =
         (Option.map ~f:DatastoreName.of_xml)
           (Xml.child xml_arg0 "DatastoreName") in
-      make ?tags ?clientToken ?preloadDataConfig ?sseConfiguration
-        ~datastoreTypeVersion ?datastoreName ()
+      make ?identityProviderConfiguration ?tags ?clientToken
+        ?preloadDataConfig ?sseConfiguration ~datastoreTypeVersion
+        ?datastoreName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let identityProviderConfiguration =
+        field_map json__ "IdentityProviderConfiguration"
+          IdentityProviderConfiguration.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientToken =
-        field_map json "ClientToken" ClientTokenString.of_json in
+        field_map json__ "ClientToken" ClientTokenString.of_json in
       let preloadDataConfig =
-        field_map json "PreloadDataConfig" PreloadDataConfig.of_json in
+        field_map json__ "PreloadDataConfig" PreloadDataConfig.of_json in
       let sseConfiguration =
-        field_map json "SseConfiguration" SseConfiguration.of_json in
+        field_map json__ "SseConfiguration" SseConfiguration.of_json in
       let datastoreTypeVersion =
-        field_map_exn json "DatastoreTypeVersion" FHIRVersion.of_json in
+        field_map_exn json__ "DatastoreTypeVersion" FHIRVersion.of_json in
       let datastoreName =
-        field_map json "DatastoreName" DatastoreName.of_json in
-      make ?tags ?clientToken ?preloadDataConfig ?sseConfiguration
-        ~datastoreTypeVersion ?datastoreName ()
+        field_map json__ "DatastoreName" DatastoreName.of_json in
+      make ?identityProviderConfiguration ?tags ?clientToken
+        ?preloadDataConfig ?sseConfiguration ~datastoreTypeVersion
+        ?datastoreName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates a Data Store that can ingest and export FHIR formatted data."]
+  end[@@ocaml.doc "Create a FHIR-enabled data store."]

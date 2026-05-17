@@ -24,6 +24,61 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module SyncBlockerContext =
+  struct
+    type nonrec t =
+      {
+      key: String_.t option
+        [@ocaml.doc "The key for the sync blocker context."];
+      value: String_.t option
+        [@ocaml.doc "The value of the sync blocker context."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("key", (Option.map x.key ~f:String_.to_value));
+        ("value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
+      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" String_.of_json in
+      let key = field_map json__ "key" String_.of_json in make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Detailed data of the context of the sync blocker."]
+module DeploymentId =
+  struct
+    type nonrec t = string
+    let context_ = "DeploymentId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeploymentId" j
+    let to_json = simple_to_json to_value
+  end
 module ResourceName =
   struct
     type nonrec t = string
@@ -66,19 +121,6 @@ module TemplateVersionPart =
     let of_json j = string_of_json ~kind:"TemplateVersionPart" j
     let to_json = simple_to_json to_value
   end
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
-  end
 module Timestamp =
   struct
     type nonrec t = string
@@ -91,41 +133,228 @@ module Timestamp =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module BlockerStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | RESOLVED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | RESOLVED -> "RESOLVED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "RESOLVED" -> RESOLVED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BlockerStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BlockerStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module BlockerType =
+  struct
+    type nonrec t =
+      | AUTOMATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | AUTOMATED -> "AUTOMATED" | Non_static_id s -> s
+    let of_string =
+      function | "AUTOMATED" -> AUTOMATED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BlockerType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BlockerType" j)
+    let to_json = simple_to_json to_value
+  end
+module SyncBlockerContexts =
+  struct
+    type nonrec t = SyncBlockerContext.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SyncBlockerContext.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SyncBlockerContext.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SyncBlockerContexts"
+        ~of_json:SyncBlockerContext.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceNameOrEmpty =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceNameOrEmpty"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(^$)|^[0-9A-Za-z]+[0-9A-Za-z_\\-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceNameOrEmpty" j
+    let to_json = simple_to_json to_value
+  end
+module SpecContents =
+  struct
+    type nonrec t = string
+    let context_ = "SpecContents"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:51200) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SpecContents" j
+    let to_json = simple_to_json to_value
+  end
+module TemplateFileContents =
+  struct
+    type nonrec t = string
+    let context_ = "TemplateFileContents"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:51200) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TemplateFileContents" j
+    let to_json = simple_to_json to_value
+  end
+module ComponentDeploymentIdList =
+  struct
+    type nonrec t = DeploymentId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeploymentId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeploymentId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ComponentDeploymentIdList"
+        ~of_json:DeploymentId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CompatibleEnvironmentTemplate =
   struct
     type nonrec t =
       {
-      majorVersion: TemplateVersionPart.t
+      majorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The major version of the compatible environment template."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc "The compatible environment template name."]}
-    let context_ = "CompatibleEnvironmentTemplate"
-    let make ~majorVersion =
-      fun ~templateName -> fun () -> { majorVersion; templateName }
+    let make ?majorVersion =
+      fun ?templateName -> fun () -> { majorVersion; templateName }
     let to_value x =
       structure_to_value
         [("majorVersion",
-           (Some (TemplateVersionPart.to_value x.majorVersion)));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+           (Option.map x.majorVersion ~f:TemplateVersionPart.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let majorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
-      make ~templateName ~majorVersion ()
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "majorVersion") in
+      make ?templateName ?majorVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
-      make ~templateName ~majorVersion ()
+        field_map json__ "majorVersion" TemplateVersionPart.of_json in
+      make ?templateName ?majorVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Compatible environment template data."]
+module ServiceTemplateSupportedComponentSourceType =
+  struct
+    type nonrec t =
+      | DIRECTLY_DEFINED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DIRECTLY_DEFINED -> "DIRECTLY_DEFINED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DIRECTLY_DEFINED" -> DIRECTLY_DEFINED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ServiceTemplateSupportedComponentSourceType"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ServiceTemplateSupportedComponentSourceType" j)
+    let to_json = simple_to_json to_value
+  end
 module Arn =
   struct
     type nonrec t = string
@@ -133,8 +362,12 @@ module Arn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:200) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov):[a-zA-Z0-9-]+:[a-zA-Z0-9-]*:\\d{12}:([\\w+=,.@-]+[/:])*[\\w+=,.@-]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -185,24 +418,6 @@ module DeploymentStatus =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration DeploymentStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"DeploymentStatus" j)
-    let to_json = simple_to_json to_value
-  end
-module SpecContents =
-  struct
-    type nonrec t = string
-    let context_ = "SpecContents"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:51200) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SpecContents" j
     let to_json = simple_to_json to_value
   end
 module StatusMessage =
@@ -665,6 +880,71 @@ module ServiceInstanceArn =
     let of_json j = string_of_json ~kind:"ServiceInstanceArn" j
     let to_json = simple_to_json to_value
   end
+module ListServiceInstancesFilterBy =
+  struct
+    type nonrec t =
+      | Name 
+      | DeploymentStatus 
+      | TemplateName 
+      | ServiceName 
+      | DeployedTemplateVersionStatus 
+      | EnvironmentName 
+      | LastDeploymentAttemptedAtBefore 
+      | LastDeploymentAttemptedAtAfter 
+      | CreatedAtBefore 
+      | CreatedAtAfter 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Name -> "name"
+      | DeploymentStatus -> "deploymentStatus"
+      | TemplateName -> "templateName"
+      | ServiceName -> "serviceName"
+      | DeployedTemplateVersionStatus -> "deployedTemplateVersionStatus"
+      | EnvironmentName -> "environmentName"
+      | LastDeploymentAttemptedAtBefore -> "lastDeploymentAttemptedAtBefore"
+      | LastDeploymentAttemptedAtAfter -> "lastDeploymentAttemptedAtAfter"
+      | CreatedAtBefore -> "createdAtBefore"
+      | CreatedAtAfter -> "createdAtAfter"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "name" -> Name
+      | "deploymentStatus" -> DeploymentStatus
+      | "templateName" -> TemplateName
+      | "serviceName" -> ServiceName
+      | "deployedTemplateVersionStatus" -> DeployedTemplateVersionStatus
+      | "environmentName" -> EnvironmentName
+      | "lastDeploymentAttemptedAtBefore" -> LastDeploymentAttemptedAtBefore
+      | "lastDeploymentAttemptedAtAfter" -> LastDeploymentAttemptedAtAfter
+      | "createdAtBefore" -> CreatedAtBefore
+      | "createdAtAfter" -> CreatedAtAfter
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ListServiceInstancesFilterBy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ListServiceInstancesFilterBy" j)
+    let to_json = simple_to_json to_value
+  end
+module ListServiceInstancesFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "ListServiceInstancesFilterValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ListServiceInstancesFilterValue" j
+    let to_json = simple_to_json to_value
+  end
 module AwsAccountId =
   struct
     type nonrec t = string
@@ -781,44 +1061,101 @@ module EnvironmentAccountConnectionStatus =
       of_string (string_of_json ~kind:"EnvironmentAccountConnectionStatus" j)
     let to_json = simple_to_json to_value
   end
+module DeploymentArn =
+  struct
+    type nonrec t = string
+    let context_ = "DeploymentArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeploymentArn" j
+    let to_json = simple_to_json to_value
+  end
+module DeploymentTargetResourceType =
+  struct
+    type nonrec t =
+      | ENVIRONMENT 
+      | SERVICE_PIPELINE 
+      | SERVICE_INSTANCE 
+      | COMPONENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENVIRONMENT -> "ENVIRONMENT"
+      | SERVICE_PIPELINE -> "SERVICE_PIPELINE"
+      | SERVICE_INSTANCE -> "SERVICE_INSTANCE"
+      | COMPONENT -> "COMPONENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENVIRONMENT" -> ENVIRONMENT
+      | "SERVICE_PIPELINE" -> SERVICE_PIPELINE
+      | "SERVICE_INSTANCE" -> SERVICE_INSTANCE
+      | "COMPONENT" -> COMPONENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeploymentTargetResourceType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DeploymentTargetResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module ComponentArn =
+  struct
+    type nonrec t = string
+    let context_ = "ComponentArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComponentArn" j
+    let to_json = simple_to_json to_value
+  end
 module ResourceSyncEvent =
   struct
     type nonrec t =
       {
-      event: String_.t [@ocaml.doc "A resource sync event."];
+      event: String_.t option [@ocaml.doc "A resource sync event."];
       externalId: String_.t option
         [@ocaml.doc "The external ID for the event."];
-      time: Timestamp.t [@ocaml.doc "The time when the event occurred."];
-      type_: String_.t [@ocaml.doc "The type of event."]}
-    let context_ = "ResourceSyncEvent"
-    let make ?externalId =
-      fun ~event ->
-        fun ~time ->
-          fun ~type_ -> fun () -> { externalId; event; time; type_ }
+      time: Timestamp.t option
+        [@ocaml.doc "The time when the event occurred."];
+      type_: String_.t option [@ocaml.doc "The type of event."]}
+    let make ?event =
+      fun ?externalId ->
+        fun ?time ->
+          fun ?type_ -> fun () -> { event; externalId; time; type_ }
     let to_value x =
       structure_to_value
-        [("event", (Some (String_.to_value x.event)));
+        [("event", (Option.map x.event ~f:String_.to_value));
         ("externalId", (Option.map x.externalId ~f:String_.to_value));
-        ("time", (Some (Timestamp.to_value x.time)));
-        ("type", (Some (String_.to_value x.type_)))]
+        ("time", (Option.map x.time ~f:Timestamp.to_value));
+        ("type", (Option.map x.type_ ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      let time =
-        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "time") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
+      let time = (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "time") in
       let externalId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "externalId") in
-      let event =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "event") in
-      make ~type_ ~time ?externalId ~event ()
+      let event = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "event") in
+      make ?type_ ?time ?externalId ?event ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" String_.of_json in
-      let time = field_map_exn json "time" Timestamp.of_json in
-      let externalId = field_map json "externalId" String_.of_json in
-      let event = field_map_exn json "event" String_.of_json in
-      make ~type_ ~time ?externalId ~event ()
+    let of_json json__ =
+      let type_ = field_map json__ "type" String_.of_json in
+      let time = field_map json__ "time" Timestamp.of_json in
+      let externalId = field_map json__ "externalId" String_.of_json in
+      let event = field_map json__ "event" String_.of_json in
+      make ?type_ ?time ?externalId ?event ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detail data for a resource sync event."]
 module SHA =
@@ -839,47 +1176,433 @@ module SHA =
     let of_json j = string_of_json ~kind:"SHA" j
     let to_json = simple_to_json to_value
   end
+module SyncBlocker =
+  struct
+    type nonrec t =
+      {
+      contexts: SyncBlockerContexts.t option
+        [@ocaml.doc "The contexts for the sync blocker."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time when the sync blocker was created."];
+      createdReason: String_.t option
+        [@ocaml.doc "The reason why the sync blocker was created."];
+      id: String_.t option [@ocaml.doc "The ID of the sync blocker."];
+      resolvedAt: Timestamp.t option
+        [@ocaml.doc "The time the sync blocker was resolved."];
+      resolvedReason: String_.t option
+        [@ocaml.doc "The reason the sync blocker was resolved."];
+      status: BlockerStatus.t option
+        [@ocaml.doc "The status of the sync blocker."];
+      type_: BlockerType.t option
+        [@ocaml.doc "The type of the sync blocker."]}
+    let make ?contexts =
+      fun ?createdAt ->
+        fun ?createdReason ->
+          fun ?id ->
+            fun ?resolvedAt ->
+              fun ?resolvedReason ->
+                fun ?status ->
+                  fun ?type_ ->
+                    fun () ->
+                      {
+                        contexts;
+                        createdAt;
+                        createdReason;
+                        id;
+                        resolvedAt;
+                        resolvedReason;
+                        status;
+                        type_
+                      }
+    let to_value x =
+      structure_to_value
+        [("contexts",
+           (Option.map x.contexts ~f:SyncBlockerContexts.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("createdReason", (Option.map x.createdReason ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:String_.to_value));
+        ("resolvedAt", (Option.map x.resolvedAt ~f:Timestamp.to_value));
+        ("resolvedReason", (Option.map x.resolvedReason ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:BlockerStatus.to_value));
+        ("type", (Option.map x.type_ ~f:BlockerType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:BlockerType.of_xml) (Xml.child xml_arg0 "type") in
+      let status =
+        (Option.map ~f:BlockerStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let resolvedReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resolvedReason") in
+      let resolvedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "resolvedAt") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      let createdReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "createdReason") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let contexts =
+        (Option.map ~f:SyncBlockerContexts.of_xml)
+          (Xml.child xml_arg0 "contexts") in
+      make ?type_ ?status ?resolvedReason ?resolvedAt ?id ?createdReason
+        ?createdAt ?contexts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" BlockerType.of_json in
+      let status = field_map json__ "status" BlockerStatus.of_json in
+      let resolvedReason = field_map json__ "resolvedReason" String_.of_json in
+      let resolvedAt = field_map json__ "resolvedAt" Timestamp.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      let createdReason = field_map json__ "createdReason" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let contexts = field_map json__ "contexts" SyncBlockerContexts.of_json in
+      make ?type_ ?status ?resolvedReason ?resolvedAt ?id ?createdReason
+        ?createdAt ?contexts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Detailed data of the sync blocker."]
+module Integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module RepositorySyncEvent =
   struct
     type nonrec t =
       {
-      event: String_.t
+      event: String_.t option
         [@ocaml.doc "Event detail for a repository sync attempt."];
       externalId: String_.t option
         [@ocaml.doc "The external ID of the sync event."];
-      time: Timestamp.t [@ocaml.doc "The time that the sync event occurred."];
-      type_: String_.t [@ocaml.doc "The type of event."]}
-    let context_ = "RepositorySyncEvent"
-    let make ?externalId =
-      fun ~event ->
-        fun ~time ->
-          fun ~type_ -> fun () -> { externalId; event; time; type_ }
+      time: Timestamp.t option
+        [@ocaml.doc "The time that the sync event occurred."];
+      type_: String_.t option [@ocaml.doc "The type of event."]}
+    let make ?event =
+      fun ?externalId ->
+        fun ?time ->
+          fun ?type_ -> fun () -> { event; externalId; time; type_ }
     let to_value x =
       structure_to_value
-        [("event", (Some (String_.to_value x.event)));
+        [("event", (Option.map x.event ~f:String_.to_value));
         ("externalId", (Option.map x.externalId ~f:String_.to_value));
-        ("time", (Some (Timestamp.to_value x.time)));
-        ("type", (Some (String_.to_value x.type_)))]
+        ("time", (Option.map x.time ~f:Timestamp.to_value));
+        ("type", (Option.map x.type_ ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      let time =
-        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "time") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
+      let time = (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "time") in
       let externalId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "externalId") in
-      let event =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "event") in
-      make ~type_ ~time ?externalId ~event ()
+      let event = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "event") in
+      make ?type_ ?time ?externalId ?event ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" String_.of_json in
-      let time = field_map_exn json "time" Timestamp.of_json in
-      let externalId = field_map json "externalId" String_.of_json in
-      let event = field_map_exn json "event" String_.of_json in
-      make ~type_ ~time ?externalId ~event ()
+    let of_json json__ =
+      let type_ = field_map json__ "type" String_.of_json in
+      let time = field_map json__ "time" Timestamp.of_json in
+      let externalId = field_map json__ "externalId" String_.of_json in
+      let event = field_map json__ "event" String_.of_json in
+      make ?type_ ?time ?externalId ?event ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Repository sync event detail data for a sync attempt."]
+module ComponentState =
+  struct
+    type nonrec t =
+      {
+      serviceInstanceName: ResourceNameOrEmpty.t option
+        [@ocaml.doc
+          "The name of the service instance that this component is attached to. Provided when a component is attached to a service instance."];
+      serviceName: ResourceNameOrEmpty.t option
+        [@ocaml.doc
+          "The name of the service that serviceInstanceName is associated with. Provided when a component is attached to a service instance."];
+      serviceSpec: SpecContents.t option
+        [@ocaml.doc
+          "The service spec that the component uses to access service inputs. Provided when a component is attached to a service instance."];
+      templateFile: TemplateFileContents.t option
+        [@ocaml.doc "The template file used."]}
+    let make ?serviceInstanceName =
+      fun ?serviceName ->
+        fun ?serviceSpec ->
+          fun ?templateFile ->
+            fun () ->
+              { serviceInstanceName; serviceName; serviceSpec; templateFile }
+    let to_value x =
+      structure_to_value
+        [("serviceInstanceName",
+           (Option.map x.serviceInstanceName ~f:ResourceNameOrEmpty.to_value));
+        ("serviceName",
+          (Option.map x.serviceName ~f:ResourceNameOrEmpty.to_value));
+        ("serviceSpec", (Option.map x.serviceSpec ~f:SpecContents.to_value));
+        ("templateFile",
+          (Option.map x.templateFile ~f:TemplateFileContents.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let templateFile =
+        (Option.map ~f:TemplateFileContents.of_xml)
+          (Xml.child xml_arg0 "templateFile") in
+      let serviceSpec =
+        (Option.map ~f:SpecContents.of_xml)
+          (Xml.child xml_arg0 "serviceSpec") in
+      let serviceName =
+        (Option.map ~f:ResourceNameOrEmpty.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceNameOrEmpty.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      make ?templateFile ?serviceSpec ?serviceName ?serviceInstanceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let templateFile =
+        field_map json__ "templateFile" TemplateFileContents.of_json in
+      let serviceSpec = field_map json__ "serviceSpec" SpecContents.of_json in
+      let serviceName =
+        field_map json__ "serviceName" ResourceNameOrEmpty.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceNameOrEmpty.of_json in
+      make ?templateFile ?serviceSpec ?serviceName ?serviceInstanceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The detailed data about the current state of the component."]
+module EnvironmentState =
+  struct
+    type nonrec t =
+      {
+      spec: SpecContents.t option
+        [@ocaml.doc
+          "The environment spec that was used to create the environment."];
+      templateMajorVersion: TemplateVersionPart.t option
+        [@ocaml.doc
+          "The major version of the environment template that was used to create the environment."];
+      templateMinorVersion: TemplateVersionPart.t option
+        [@ocaml.doc
+          "The minor version of the environment template that was used to create the environment."];
+      templateName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the environment template that was used to create the environment."]}
+    let make ?spec =
+      fun ?templateMajorVersion ->
+        fun ?templateMinorVersion ->
+          fun ?templateName ->
+            fun () ->
+              {
+                spec;
+                templateMajorVersion;
+                templateMinorVersion;
+                templateName
+              }
+    let to_value x =
+      structure_to_value
+        [("spec", (Option.map x.spec ~f:SpecContents.to_value));
+        ("templateMajorVersion",
+          (Option.map x.templateMajorVersion ~f:TemplateVersionPart.to_value));
+        ("templateMinorVersion",
+          (Option.map x.templateMinorVersion ~f:TemplateVersionPart.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let templateName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
+      let templateMinorVersion =
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMinorVersion") in
+      let templateMajorVersion =
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMajorVersion") in
+      let spec =
+        (Option.map ~f:SpecContents.of_xml) (Xml.child xml_arg0 "spec") in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
+      let templateMinorVersion =
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
+      let templateMajorVersion =
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let spec = field_map json__ "spec" SpecContents.of_json in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The detailed data about the current state of the environment."]
+module ServiceInstanceState =
+  struct
+    type nonrec t =
+      {
+      lastSuccessfulComponentDeploymentIds:
+        ComponentDeploymentIdList.t option
+        [@ocaml.doc
+          "The IDs for the last successful components deployed for this service instance."];
+      lastSuccessfulEnvironmentDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID for the last successful environment deployed for this service instance."];
+      lastSuccessfulServicePipelineDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID for the last successful service pipeline deployed for this service instance."];
+      spec: SpecContents.t option
+        [@ocaml.doc
+          "The service spec that was used to create the service instance."];
+      templateMajorVersion: TemplateVersionPart.t option
+        [@ocaml.doc
+          "The major version of the service template that was used to create the service pipeline."];
+      templateMinorVersion: TemplateVersionPart.t option
+        [@ocaml.doc
+          "The minor version of the service template that was used to create the service pipeline."];
+      templateName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service template that was used to create the service instance."]}
+    let make ?lastSuccessfulComponentDeploymentIds =
+      fun ?lastSuccessfulEnvironmentDeploymentId ->
+        fun ?lastSuccessfulServicePipelineDeploymentId ->
+          fun ?spec ->
+            fun ?templateMajorVersion ->
+              fun ?templateMinorVersion ->
+                fun ?templateName ->
+                  fun () ->
+                    {
+                      lastSuccessfulComponentDeploymentIds;
+                      lastSuccessfulEnvironmentDeploymentId;
+                      lastSuccessfulServicePipelineDeploymentId;
+                      spec;
+                      templateMajorVersion;
+                      templateMinorVersion;
+                      templateName
+                    }
+    let to_value x =
+      structure_to_value
+        [("lastSuccessfulComponentDeploymentIds",
+           (Option.map x.lastSuccessfulComponentDeploymentIds
+              ~f:ComponentDeploymentIdList.to_value));
+        ("lastSuccessfulEnvironmentDeploymentId",
+          (Option.map x.lastSuccessfulEnvironmentDeploymentId
+             ~f:DeploymentId.to_value));
+        ("lastSuccessfulServicePipelineDeploymentId",
+          (Option.map x.lastSuccessfulServicePipelineDeploymentId
+             ~f:DeploymentId.to_value));
+        ("spec", (Option.map x.spec ~f:SpecContents.to_value));
+        ("templateMajorVersion",
+          (Option.map x.templateMajorVersion ~f:TemplateVersionPart.to_value));
+        ("templateMinorVersion",
+          (Option.map x.templateMinorVersion ~f:TemplateVersionPart.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let templateName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
+      let templateMinorVersion =
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMinorVersion") in
+      let templateMajorVersion =
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMajorVersion") in
+      let spec =
+        (Option.map ~f:SpecContents.of_xml) (Xml.child xml_arg0 "spec") in
+      let lastSuccessfulServicePipelineDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSuccessfulServicePipelineDeploymentId") in
+      let lastSuccessfulEnvironmentDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSuccessfulEnvironmentDeploymentId") in
+      let lastSuccessfulComponentDeploymentIds =
+        (Option.map ~f:ComponentDeploymentIdList.of_xml)
+          (Xml.child xml_arg0 "lastSuccessfulComponentDeploymentIds") in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec
+        ?lastSuccessfulServicePipelineDeploymentId
+        ?lastSuccessfulEnvironmentDeploymentId
+        ?lastSuccessfulComponentDeploymentIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
+      let templateMinorVersion =
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
+      let templateMajorVersion =
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let spec = field_map json__ "spec" SpecContents.of_json in
+      let lastSuccessfulServicePipelineDeploymentId =
+        field_map json__ "lastSuccessfulServicePipelineDeploymentId"
+          DeploymentId.of_json in
+      let lastSuccessfulEnvironmentDeploymentId =
+        field_map json__ "lastSuccessfulEnvironmentDeploymentId"
+          DeploymentId.of_json in
+      let lastSuccessfulComponentDeploymentIds =
+        field_map json__ "lastSuccessfulComponentDeploymentIds"
+          ComponentDeploymentIdList.of_json in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec
+        ?lastSuccessfulServicePipelineDeploymentId
+        ?lastSuccessfulEnvironmentDeploymentId
+        ?lastSuccessfulComponentDeploymentIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The detailed data about the current state of this service instance."]
+module ServicePipelineState =
+  struct
+    type nonrec t =
+      {
+      spec: SpecContents.t option
+        [@ocaml.doc
+          "The service spec that was used to create the service pipeline."];
+      templateMajorVersion: TemplateVersionPart.t option
+        [@ocaml.doc
+          "The major version of the service template that was used to create the service pipeline."];
+      templateMinorVersion: TemplateVersionPart.t option
+        [@ocaml.doc
+          "The minor version of the service template that was used to create the service pipeline."];
+      templateName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service template that was used to create the service pipeline."]}
+    let make ?spec =
+      fun ?templateMajorVersion ->
+        fun ?templateMinorVersion ->
+          fun ?templateName ->
+            fun () ->
+              {
+                spec;
+                templateMajorVersion;
+                templateMinorVersion;
+                templateName
+              }
+    let to_value x =
+      structure_to_value
+        [("spec", (Option.map x.spec ~f:SpecContents.to_value));
+        ("templateMajorVersion",
+          (Option.map x.templateMajorVersion ~f:TemplateVersionPart.to_value));
+        ("templateMinorVersion",
+          (Option.map x.templateMinorVersion ~f:TemplateVersionPart.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let templateName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
+      let templateMinorVersion =
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMinorVersion") in
+      let templateMajorVersion =
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMajorVersion") in
+      let spec =
+        (Option.map ~f:SpecContents.of_xml) (Xml.child xml_arg0 "spec") in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
+      let templateMinorVersion =
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
+      let templateMajorVersion =
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let spec = field_map json__ "spec" SpecContents.of_json in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The detailed data about the current state of the service pipeline."]
 module S3Bucket =
   struct
     type nonrec t = string
@@ -980,6 +1703,9 @@ module CompatibleEnvironmentTemplateList =
   struct
     type nonrec t = CompatibleEnvironmentTemplate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CompatibleEnvironmentTemplate.to_value)) |>
         (fun x -> `List x)
@@ -1000,6 +1726,37 @@ module CompatibleEnvironmentTemplateList =
     let of_json j =
       list_of_json ~kind:"CompatibleEnvironmentTemplateList"
         ~of_json:CompatibleEnvironmentTemplate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceTemplateSupportedComponentSourceInputList =
+  struct
+    type nonrec t = ServiceTemplateSupportedComponentSourceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:ServiceTemplateSupportedComponentSourceType.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ServiceTemplateSupportedComponentSourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceTemplateSupportedComponentSourceInputList"
+        ~of_json:ServiceTemplateSupportedComponentSourceType.of_json j
     let to_json v = composed_to_json to_value v
   end
 module TemplateSchema =
@@ -1047,14 +1804,32 @@ module CompatibleEnvironmentTemplateInput =
           (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
       make ~templateName ~majorVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "majorVersion" TemplateVersionPart.of_json in
       make ~templateName ~majorVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Compatible environment template data."]
+module OpsFilePath =
+  struct
+    type nonrec t = string
+    let context_ = "OpsFilePath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4096) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OpsFilePath" j
+    let to_json = simple_to_json to_value
+  end
 module RepositoryId =
   struct
     type nonrec t = string
@@ -1077,181 +1852,224 @@ module ServicePipeline =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the service pipeline."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the service pipeline was created."];
-      deploymentStatus: DeploymentStatus.t
+      deploymentStatus: DeploymentStatus.t option
         [@ocaml.doc "The deployment status of the service pipeline."];
       deploymentStatusMessage: StatusMessage.t option
         [@ocaml.doc "A service pipeline deployment status message."];
-      lastDeploymentAttemptedAt: Timestamp.t
+      lastAttemptedDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last attempted deployment of this service pipeline."];
+      lastDeploymentAttemptedAt: Timestamp.t option
         [@ocaml.doc
           "The time when a deployment of the service pipeline was last attempted."];
-      lastDeploymentSucceededAt: Timestamp.t
+      lastDeploymentSucceededAt: Timestamp.t option
         [@ocaml.doc
           "The time when the service pipeline was last deployed successfully."];
+      lastSucceededDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last successful deployment of this service pipeline."];
       spec: SpecContents.t option
         [@ocaml.doc
           "The service spec that was used to create the service pipeline."];
-      templateMajorVersion: TemplateVersionPart.t
+      templateMajorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The major version of the service template that was used to create the service pipeline."];
-      templateMinorVersion: TemplateVersionPart.t
+      templateMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The minor version of the service template that was used to create the service pipeline."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc
           "The name of the service template that was used to create the service pipeline."]}
-    let context_ = "ServicePipeline"
-    let make ?deploymentStatusMessage =
-      fun ?spec ->
-        fun ~arn ->
-          fun ~createdAt ->
-            fun ~deploymentStatus ->
-              fun ~lastDeploymentAttemptedAt ->
-                fun ~lastDeploymentSucceededAt ->
-                  fun ~templateMajorVersion ->
-                    fun ~templateMinorVersion ->
-                      fun ~templateName ->
-                        fun () ->
-                          {
-                            deploymentStatusMessage;
-                            spec;
-                            arn;
-                            createdAt;
-                            deploymentStatus;
-                            lastDeploymentAttemptedAt;
-                            lastDeploymentSucceededAt;
-                            templateMajorVersion;
-                            templateMinorVersion;
-                            templateName
-                          }
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?deploymentStatus ->
+          fun ?deploymentStatusMessage ->
+            fun ?lastAttemptedDeploymentId ->
+              fun ?lastDeploymentAttemptedAt ->
+                fun ?lastDeploymentSucceededAt ->
+                  fun ?lastSucceededDeploymentId ->
+                    fun ?spec ->
+                      fun ?templateMajorVersion ->
+                        fun ?templateMinorVersion ->
+                          fun ?templateName ->
+                            fun () ->
+                              {
+                                arn;
+                                createdAt;
+                                deploymentStatus;
+                                deploymentStatusMessage;
+                                lastAttemptedDeploymentId;
+                                lastDeploymentAttemptedAt;
+                                lastDeploymentSucceededAt;
+                                lastSucceededDeploymentId;
+                                spec;
+                                templateMajorVersion;
+                                templateMinorVersion;
+                                templateName
+                              }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("deploymentStatus",
-          (Some (DeploymentStatus.to_value x.deploymentStatus)));
+          (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
         ("deploymentStatusMessage",
           (Option.map x.deploymentStatusMessage ~f:StatusMessage.to_value));
+        ("lastAttemptedDeploymentId",
+          (Option.map x.lastAttemptedDeploymentId ~f:DeploymentId.to_value));
         ("lastDeploymentAttemptedAt",
-          (Some (Timestamp.to_value x.lastDeploymentAttemptedAt)));
+          (Option.map x.lastDeploymentAttemptedAt ~f:Timestamp.to_value));
         ("lastDeploymentSucceededAt",
-          (Some (Timestamp.to_value x.lastDeploymentSucceededAt)));
+          (Option.map x.lastDeploymentSucceededAt ~f:Timestamp.to_value));
+        ("lastSucceededDeploymentId",
+          (Option.map x.lastSucceededDeploymentId ~f:DeploymentId.to_value));
         ("spec", (Option.map x.spec ~f:SpecContents.to_value));
         ("templateMajorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMajorVersion)));
+          (Option.map x.templateMajorVersion ~f:TemplateVersionPart.to_value));
         ("templateMinorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMinorVersion)));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+          (Option.map x.templateMinorVersion ~f:TemplateVersionPart.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let templateMinorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMinorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMinorVersion") in
       let templateMajorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMajorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMajorVersion") in
       let spec =
         (Option.map ~f:SpecContents.of_xml) (Xml.child xml_arg0 "spec") in
+      let lastSucceededDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSucceededDeploymentId") in
       let lastDeploymentSucceededAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentSucceededAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentSucceededAt") in
       let lastDeploymentAttemptedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentAttemptedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentAttemptedAt") in
+      let lastAttemptedDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDeploymentId") in
       let deploymentStatusMessage =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "deploymentStatusMessage") in
       let deploymentStatus =
-        DeploymentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deploymentStatus") in
+        (Option.map ~f:DeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "deploymentStatus") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion ?spec
-        ~lastDeploymentSucceededAt ~lastDeploymentAttemptedAt
-        ?deploymentStatusMessage ~deploymentStatus ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec
+        ?lastSucceededDeploymentId ?lastDeploymentSucceededAt
+        ?lastDeploymentAttemptedAt ?lastAttemptedDeploymentId
+        ?deploymentStatusMessage ?deploymentStatus ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let templateMinorVersion =
-        field_map_exn json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map_exn json "templateMajorVersion" TemplateVersionPart.of_json in
-      let spec = field_map json "spec" SpecContents.of_json in
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let spec = field_map json__ "spec" SpecContents.of_json in
+      let lastSucceededDeploymentId =
+        field_map json__ "lastSucceededDeploymentId" DeploymentId.of_json in
       let lastDeploymentSucceededAt =
-        field_map_exn json "lastDeploymentSucceededAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentSucceededAt" Timestamp.of_json in
       let lastDeploymentAttemptedAt =
-        field_map_exn json "lastDeploymentAttemptedAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentAttemptedAt" Timestamp.of_json in
+      let lastAttemptedDeploymentId =
+        field_map json__ "lastAttemptedDeploymentId" DeploymentId.of_json in
       let deploymentStatusMessage =
-        field_map json "deploymentStatusMessage" StatusMessage.of_json in
+        field_map json__ "deploymentStatusMessage" StatusMessage.of_json in
       let deploymentStatus =
-        field_map_exn json "deploymentStatus" DeploymentStatus.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion ?spec
-        ~lastDeploymentSucceededAt ~lastDeploymentAttemptedAt
-        ?deploymentStatusMessage ~deploymentStatus ~createdAt ~arn ()
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec
+        ?lastSucceededDeploymentId ?lastDeploymentSucceededAt
+        ?lastDeploymentAttemptedAt ?lastAttemptedDeploymentId
+        ?deploymentStatusMessage ?deploymentStatus ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The service pipeline detail data."]
+  end[@@ocaml.doc
+       "Detailed data of an Proton service instance pipeline resource."]
 module RepositoryBranch =
   struct
     type nonrec t =
       {
-      arn: RepositoryArn.t
+      arn: RepositoryArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the repository branch."];
-      branch: GitBranchName.t [@ocaml.doc "The repository branch."];
-      name: RepositoryName.t [@ocaml.doc "The repository name."];
-      provider: RepositoryProvider.t [@ocaml.doc "The repository provider."]}
-    let context_ = "RepositoryBranch"
-    let make ~arn =
-      fun ~branch ->
-        fun ~name ->
-          fun ~provider -> fun () -> { arn; branch; name; provider }
+          "The Amazon Resource Name (ARN) of the linked repository."];
+      branch: GitBranchName.t option [@ocaml.doc "The repository branch."];
+      name: RepositoryName.t option [@ocaml.doc "The repository name."];
+      provider: RepositoryProvider.t option
+        [@ocaml.doc "The repository provider."]}
+    let make ?arn =
+      fun ?branch ->
+        fun ?name ->
+          fun ?provider -> fun () -> { arn; branch; name; provider }
     let to_value x =
       structure_to_value
-        [("arn", (Some (RepositoryArn.to_value x.arn)));
-        ("branch", (Some (GitBranchName.to_value x.branch)));
-        ("name", (Some (RepositoryName.to_value x.name)));
-        ("provider", (Some (RepositoryProvider.to_value x.provider)))]
+        [("arn", (Option.map x.arn ~f:RepositoryArn.to_value));
+        ("branch", (Option.map x.branch ~f:GitBranchName.to_value));
+        ("name", (Option.map x.name ~f:RepositoryName.to_value));
+        ("provider", (Option.map x.provider ~f:RepositoryProvider.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let provider =
-        RepositoryProvider.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "provider") in
+        (Option.map ~f:RepositoryProvider.of_xml)
+          (Xml.child xml_arg0 "provider") in
       let name =
-        RepositoryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:RepositoryName.of_xml) (Xml.child xml_arg0 "name") in
       let branch =
-        GitBranchName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "branch") in
+        (Option.map ~f:GitBranchName.of_xml) (Xml.child xml_arg0 "branch") in
       let arn =
-        RepositoryArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~provider ~name ~branch ~arn ()
+        (Option.map ~f:RepositoryArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?provider ?name ?branch ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let provider = field_map_exn json "provider" RepositoryProvider.of_json in
-      let name = field_map_exn json "name" RepositoryName.of_json in
-      let branch = field_map_exn json "branch" GitBranchName.of_json in
-      let arn = field_map_exn json "arn" RepositoryArn.of_json in
-      make ~provider ~name ~branch ~arn ()
+    let of_json json__ =
+      let provider = field_map json__ "provider" RepositoryProvider.of_json in
+      let name = field_map json__ "name" RepositoryName.of_json in
+      let branch = field_map json__ "branch" GitBranchName.of_json in
+      let arn = field_map json__ "arn" RepositoryArn.of_json in
+      make ?provider ?name ?branch ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Detail data for a repository branch."]
-module PipelineRoleArn =
+  end[@@ocaml.doc "Detail data for a linked repository branch."]
+module RoleArn =
   struct
     type nonrec t = string
-    let context_ = "PipelineRoleArn"
+    let context_ = "RoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov):iam::\\d{12}:role/([\\w+=,.@-]{1,512}[/:])*([\\w+=,.@-]{1,64})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module RoleArnOrEmptyString =
+  struct
+    type nonrec t = string
+    let context_ = "RoleArnOrEmptyString"
     let make i =
       let open Result in
         ok_or_failwith
@@ -1260,14 +2078,14 @@ module PipelineRoleArn =
                 (check_string_max i ~max:2048) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"(^$)|(^arn:[a-zA-Z-]+:[a-zA-Z0-9-]+:[a-zA-Z0-9-]*:\\d*:[\\w+=\\/:,\\.@-]*)")));
+                       ~pattern:"(^$)|(^arn:(aws|aws-cn|aws-us-gov):iam::\\d{12}:role/([\\w+=,.@-]{1,512}[/:])*([\\w+=,.@-]{1,64})$)")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PipelineRoleArn" j
+    let of_json j = string_of_json ~kind:"RoleArnOrEmptyString" j
     let to_json = simple_to_json to_value
   end
 module Tag =
@@ -1290,9 +2108,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A description of a resource tag."]
@@ -1317,10 +2135,10 @@ module Output =
       let key = (Option.map ~f:OutputKey.of_xml) (Xml.child xml_arg0 "key") in
       make ?valueString ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let valueString =
-        field_map json "valueString" OutputValueString.of_json in
-      let key = field_map json "key" OutputKey.of_json in
+        field_map json__ "valueString" OutputValueString.of_json in
+      let key = field_map json__ "key" OutputKey.of_json in
       make ?valueString ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An infrastructure as code defined resource output."]
@@ -1328,143 +2146,142 @@ module ServiceSummary =
   struct
     type nonrec t =
       {
-      arn: ServiceArn.t
+      arn: ServiceArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the service."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the service was created."];
       description: Description.t option
         [@ocaml.doc "A description of the service."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc "The time when the service was last modified."];
-      name: ResourceName.t [@ocaml.doc "The name of the service."];
-      status: ServiceStatus.t [@ocaml.doc "The status of the service."];
+      name: ResourceName.t option [@ocaml.doc "The name of the service."];
+      status: ServiceStatus.t option
+        [@ocaml.doc "The status of the service."];
       statusMessage: StatusMessage.t option
         [@ocaml.doc "A service status message."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc "The name of the service template."]}
-    let context_ = "ServiceSummary"
-    let make ?description =
-      fun ?statusMessage ->
-        fun ~arn ->
-          fun ~createdAt ->
-            fun ~lastModifiedAt ->
-              fun ~name ->
-                fun ~status ->
-                  fun ~templateName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?lastModifiedAt ->
+            fun ?name ->
+              fun ?status ->
+                fun ?statusMessage ->
+                  fun ?templateName ->
                     fun () ->
                       {
-                        description;
-                        statusMessage;
                         arn;
                         createdAt;
+                        description;
                         lastModifiedAt;
                         name;
                         status;
+                        statusMessage;
                         templateName
                       }
     let to_value x =
       structure_to_value
-        [("arn", (Some (ServiceArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:ServiceArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
-        ("status", (Some (ServiceStatus.to_value x.status)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("status", (Option.map x.status ~f:ServiceStatus.to_value));
         ("statusMessage",
           (Option.map x.statusMessage ~f:StatusMessage.to_value));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let statusMessage =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "statusMessage") in
       let status =
-        ServiceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ServiceStatus.of_xml) (Xml.child xml_arg0 "status") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn =
-        ServiceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ?statusMessage ~status ~name ~lastModifiedAt
-        ?description ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:ServiceArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?templateName ?statusMessage ?status ?name ?lastModifiedAt
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let statusMessage =
-        field_map json "statusMessage" StatusMessage.of_json in
-      let status = field_map_exn json "status" ServiceStatus.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "statusMessage" StatusMessage.of_json in
+      let status = field_map json__ "status" ServiceStatus.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" ServiceArn.of_json in
-      make ~templateName ?statusMessage ~status ~name ~lastModifiedAt
-        ?description ~createdAt ~arn ()
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" ServiceArn.of_json in
+      make ?templateName ?statusMessage ?status ?name ?lastModifiedAt
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A summary of the service detail data."]
+  end[@@ocaml.doc "Summary data of an Proton service resource."]
 module ServiceTemplateSummary =
   struct
     type nonrec t =
       {
-      arn: ServiceTemplateArn.t
+      arn: ServiceTemplateArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the service template."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the service template was created."];
       description: Description.t option
         [@ocaml.doc "A description of the service template."];
       displayName: DisplayName.t option
         [@ocaml.doc
           "The service template name as displayed in the developer interface."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc "The time when the service template was last modified."];
-      name: ResourceName.t [@ocaml.doc "The name of the service template."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the service template."];
       pipelineProvisioning: Provisioning.t option
         [@ocaml.doc
           "If pipelineProvisioning is true, a service pipeline is included in the service template, otherwise a service pipeline isn't included in the service template."];
       recommendedVersion: FullTemplateVersionNumber.t option
         [@ocaml.doc "The recommended version of the service template."]}
-    let context_ = "ServiceTemplateSummary"
-    let make ?description =
-      fun ?displayName ->
-        fun ?pipelineProvisioning ->
-          fun ?recommendedVersion ->
-            fun ~arn ->
-              fun ~createdAt ->
-                fun ~lastModifiedAt ->
-                  fun ~name ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?displayName ->
+            fun ?lastModifiedAt ->
+              fun ?name ->
+                fun ?pipelineProvisioning ->
+                  fun ?recommendedVersion ->
                     fun () ->
                       {
-                        description;
-                        displayName;
-                        pipelineProvisioning;
-                        recommendedVersion;
                         arn;
                         createdAt;
+                        description;
+                        displayName;
                         lastModifiedAt;
-                        name
+                        name;
+                        pipelineProvisioning;
+                        recommendedVersion
                       }
     let to_value x =
       structure_to_value
-        [("arn", (Some (ServiceTemplateArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:ServiceTemplateArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
         ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
         ("pipelineProvisioning",
           (Option.map x.pipelineProvisioning ~f:Provisioning.to_value));
         ("recommendedVersion",
@@ -1479,165 +2296,165 @@ module ServiceTemplateSummary =
         (Option.map ~f:Provisioning.of_xml)
           (Xml.child xml_arg0 "pipelineProvisioning") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let displayName =
         (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn =
-        ServiceTemplateArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?recommendedVersion ?pipelineProvisioning ~name ~lastModifiedAt
-        ?displayName ?description ~createdAt ~arn ()
+        (Option.map ~f:ServiceTemplateArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?recommendedVersion ?pipelineProvisioning ?name ?lastModifiedAt
+        ?displayName ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendedVersion =
-        field_map json "recommendedVersion" FullTemplateVersionNumber.of_json in
+        field_map json__ "recommendedVersion"
+          FullTemplateVersionNumber.of_json in
       let pipelineProvisioning =
-        field_map json "pipelineProvisioning" Provisioning.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "pipelineProvisioning" Provisioning.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" ServiceTemplateArn.of_json in
-      make ?recommendedVersion ?pipelineProvisioning ~name ~lastModifiedAt
-        ?displayName ?description ~createdAt ~arn ()
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" ServiceTemplateArn.of_json in
+      make ?recommendedVersion ?pipelineProvisioning ?name ?lastModifiedAt
+        ?displayName ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The service template summary data."]
+  end[@@ocaml.doc "Summary data of an Proton service template resource."]
 module ServiceTemplateVersionSummary =
   struct
     type nonrec t =
       {
-      arn: ServiceTemplateVersionArn.t
+      arn: ServiceTemplateVersionArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the version of a service template."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The time when the version of a service template was created."];
       description: Description.t option
         [@ocaml.doc "A description of the version of a service template."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the version of a service template was last modified."];
-      majorVersion: TemplateVersionPart.t
+      majorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The latest major version that's associated with the version of a service template."];
-      minorVersion: TemplateVersionPart.t
+      minorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The minor version of a service template."];
       recommendedMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The recommended minor version of the service template."];
-      status: TemplateVersionStatus.t
+      status: TemplateVersionStatus.t option
         [@ocaml.doc "The service template minor version status."];
       statusMessage: StatusMessage.t option
         [@ocaml.doc "A service template minor version status message."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc "The name of the service template."]}
-    let context_ = "ServiceTemplateVersionSummary"
-    let make ?description =
-      fun ?recommendedMinorVersion ->
-        fun ?statusMessage ->
-          fun ~arn ->
-            fun ~createdAt ->
-              fun ~lastModifiedAt ->
-                fun ~majorVersion ->
-                  fun ~minorVersion ->
-                    fun ~status ->
-                      fun ~templateName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?lastModifiedAt ->
+            fun ?majorVersion ->
+              fun ?minorVersion ->
+                fun ?recommendedMinorVersion ->
+                  fun ?status ->
+                    fun ?statusMessage ->
+                      fun ?templateName ->
                         fun () ->
                           {
-                            description;
-                            recommendedMinorVersion;
-                            statusMessage;
                             arn;
                             createdAt;
+                            description;
                             lastModifiedAt;
                             majorVersion;
                             minorVersion;
+                            recommendedMinorVersion;
                             status;
+                            statusMessage;
                             templateName
                           }
     let to_value x =
       structure_to_value
-        [("arn", (Some (ServiceTemplateVersionArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:ServiceTemplateVersionArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
         ("majorVersion",
-          (Some (TemplateVersionPart.to_value x.majorVersion)));
+          (Option.map x.majorVersion ~f:TemplateVersionPart.to_value));
         ("minorVersion",
-          (Some (TemplateVersionPart.to_value x.minorVersion)));
+          (Option.map x.minorVersion ~f:TemplateVersionPart.to_value));
         ("recommendedMinorVersion",
           (Option.map x.recommendedMinorVersion
              ~f:TemplateVersionPart.to_value));
-        ("status", (Some (TemplateVersionStatus.to_value x.status)));
+        ("status", (Option.map x.status ~f:TemplateVersionStatus.to_value));
         ("statusMessage",
           (Option.map x.statusMessage ~f:StatusMessage.to_value));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let statusMessage =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "statusMessage") in
       let status =
-        TemplateVersionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:TemplateVersionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let recommendedMinorVersion =
         (Option.map ~f:TemplateVersionPart.of_xml)
           (Xml.child xml_arg0 "recommendedMinorVersion") in
       let minorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "minorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "minorVersion") in
       let majorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "majorVersion") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn =
-        ServiceTemplateVersionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ?statusMessage ~status ?recommendedMinorVersion
-        ~minorVersion ~majorVersion ~lastModifiedAt ?description ~createdAt
-        ~arn ()
+        (Option.map ~f:ServiceTemplateVersionArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?templateName ?statusMessage ?status ?recommendedMinorVersion
+        ?minorVersion ?majorVersion ?lastModifiedAt ?description ?createdAt
+        ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let statusMessage =
-        field_map json "statusMessage" StatusMessage.of_json in
-      let status = field_map_exn json "status" TemplateVersionStatus.of_json in
+        field_map json__ "statusMessage" StatusMessage.of_json in
+      let status = field_map json__ "status" TemplateVersionStatus.of_json in
       let recommendedMinorVersion =
-        field_map json "recommendedMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "recommendedMinorVersion"
+          TemplateVersionPart.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map json__ "majorVersion" TemplateVersionPart.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" ServiceTemplateVersionArn.of_json in
-      make ~templateName ?statusMessage ~status ?recommendedMinorVersion
-        ~minorVersion ~majorVersion ~lastModifiedAt ?description ~createdAt
-        ~arn ()
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" ServiceTemplateVersionArn.of_json in
+      make ?templateName ?statusMessage ?status ?recommendedMinorVersion
+        ?minorVersion ?majorVersion ?lastModifiedAt ?description ?createdAt
+        ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A summary of the service template version detail data."]
+  end[@@ocaml.doc
+       "Summary data of an Proton service template version resource."]
 module ProvisionedResource =
   struct
     type nonrec t =
@@ -1648,7 +2465,7 @@ module ProvisionedResource =
         [@ocaml.doc "The provisioned resource name."];
       provisioningEngine: ProvisionedResourceEngine.t option
         [@ocaml.doc
-          "The resource provisioning engine. At this time, CLOUDFORMATION can be used for Amazon Web Services-managed provisioning, and TERRAFORM can be used for self-managed provisioning. For more information, see Self-managed provisioning in the Proton Administrator Guide."]}
+          "The resource provisioning engine. At this time, CLOUDFORMATION can be used for Amazon Web Services-managed provisioning, and TERRAFORM can be used for self-managed provisioning. For more information, see Self-managed provisioning in the Proton User Guide."]}
     let make ?identifier =
       fun ?name ->
         fun ?provisioningEngine ->
@@ -1674,12 +2491,13 @@ module ProvisionedResource =
           (Xml.child xml_arg0 "identifier") in
       make ?provisioningEngine ?name ?identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisioningEngine =
-        field_map json "provisioningEngine" ProvisionedResourceEngine.of_json in
-      let name = field_map json "name" ProvisionedResourceName.of_json in
+        field_map json__ "provisioningEngine"
+          ProvisionedResourceEngine.of_json in
+      let name = field_map json__ "name" ProvisionedResourceName.of_json in
       let identifier =
-        field_map json "identifier" ProvisionedResourceIdentifier.of_json in
+        field_map json__ "identifier" ProvisionedResourceIdentifier.of_json in
       make ?provisioningEngine ?name ?identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detail data for a provisioned resource."]
@@ -1687,237 +2505,306 @@ module ServiceInstanceSummary =
   struct
     type nonrec t =
       {
-      arn: ServiceInstanceArn.t
+      arn: ServiceInstanceArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the service instance."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the service instance was created."];
-      deploymentStatus: DeploymentStatus.t
+      deploymentStatus: DeploymentStatus.t option
         [@ocaml.doc "The service instance deployment status."];
       deploymentStatusMessage: StatusMessage.t option
         [@ocaml.doc "A service instance deployment status message."];
-      environmentName: ResourceName.t
+      environmentName: ResourceName.t option
         [@ocaml.doc
           "The name of the environment that the service instance was deployed into."];
-      lastDeploymentAttemptedAt: Timestamp.t
+      lastAttemptedDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last attempted deployment of this service instance."];
+      lastDeploymentAttemptedAt: Timestamp.t option
         [@ocaml.doc
           "The time when a deployment of the service was last attempted."];
-      lastDeploymentSucceededAt: Timestamp.t
+      lastDeploymentSucceededAt: Timestamp.t option
         [@ocaml.doc
           "The time when the service was last deployed successfully."];
-      name: ResourceName.t [@ocaml.doc "The name of the service instance."];
-      serviceName: ResourceName.t
+      lastSucceededDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last successful deployment of this service instance."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the service instance."];
+      serviceName: ResourceName.t option
         [@ocaml.doc
           "The name of the service that the service instance belongs to."];
-      templateMajorVersion: TemplateVersionPart.t
+      templateMajorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The service instance template major version."];
-      templateMinorVersion: TemplateVersionPart.t
+      templateMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The service instance template minor version."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc "The name of the service template."]}
-    let context_ = "ServiceInstanceSummary"
-    let make ?deploymentStatusMessage =
-      fun ~arn ->
-        fun ~createdAt ->
-          fun ~deploymentStatus ->
-            fun ~environmentName ->
-              fun ~lastDeploymentAttemptedAt ->
-                fun ~lastDeploymentSucceededAt ->
-                  fun ~name ->
-                    fun ~serviceName ->
-                      fun ~templateMajorVersion ->
-                        fun ~templateMinorVersion ->
-                          fun ~templateName ->
-                            fun () ->
-                              {
-                                deploymentStatusMessage;
-                                arn;
-                                createdAt;
-                                deploymentStatus;
-                                environmentName;
-                                lastDeploymentAttemptedAt;
-                                lastDeploymentSucceededAt;
-                                name;
-                                serviceName;
-                                templateMajorVersion;
-                                templateMinorVersion;
-                                templateName
-                              }
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?deploymentStatus ->
+          fun ?deploymentStatusMessage ->
+            fun ?environmentName ->
+              fun ?lastAttemptedDeploymentId ->
+                fun ?lastDeploymentAttemptedAt ->
+                  fun ?lastDeploymentSucceededAt ->
+                    fun ?lastSucceededDeploymentId ->
+                      fun ?name ->
+                        fun ?serviceName ->
+                          fun ?templateMajorVersion ->
+                            fun ?templateMinorVersion ->
+                              fun ?templateName ->
+                                fun () ->
+                                  {
+                                    arn;
+                                    createdAt;
+                                    deploymentStatus;
+                                    deploymentStatusMessage;
+                                    environmentName;
+                                    lastAttemptedDeploymentId;
+                                    lastDeploymentAttemptedAt;
+                                    lastDeploymentSucceededAt;
+                                    lastSucceededDeploymentId;
+                                    name;
+                                    serviceName;
+                                    templateMajorVersion;
+                                    templateMinorVersion;
+                                    templateName
+                                  }
     let to_value x =
       structure_to_value
-        [("arn", (Some (ServiceInstanceArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:ServiceInstanceArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("deploymentStatus",
-          (Some (DeploymentStatus.to_value x.deploymentStatus)));
+          (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
         ("deploymentStatusMessage",
           (Option.map x.deploymentStatusMessage ~f:StatusMessage.to_value));
-        ("environmentName", (Some (ResourceName.to_value x.environmentName)));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("lastAttemptedDeploymentId",
+          (Option.map x.lastAttemptedDeploymentId ~f:DeploymentId.to_value));
         ("lastDeploymentAttemptedAt",
-          (Some (Timestamp.to_value x.lastDeploymentAttemptedAt)));
+          (Option.map x.lastDeploymentAttemptedAt ~f:Timestamp.to_value));
         ("lastDeploymentSucceededAt",
-          (Some (Timestamp.to_value x.lastDeploymentSucceededAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
-        ("serviceName", (Some (ResourceName.to_value x.serviceName)));
+          (Option.map x.lastDeploymentSucceededAt ~f:Timestamp.to_value));
+        ("lastSucceededDeploymentId",
+          (Option.map x.lastSucceededDeploymentId ~f:DeploymentId.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value));
         ("templateMajorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMajorVersion)));
+          (Option.map x.templateMajorVersion ~f:TemplateVersionPart.to_value));
         ("templateMinorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMinorVersion)));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+          (Option.map x.templateMinorVersion ~f:TemplateVersionPart.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let templateMinorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMinorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMinorVersion") in
       let templateMajorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMajorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMajorVersion") in
       let serviceName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastSucceededDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSucceededDeploymentId") in
       let lastDeploymentSucceededAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentSucceededAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentSucceededAt") in
       let lastDeploymentAttemptedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentAttemptedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentAttemptedAt") in
+      let lastAttemptedDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDeploymentId") in
       let environmentName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
       let deploymentStatusMessage =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "deploymentStatusMessage") in
       let deploymentStatus =
-        DeploymentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deploymentStatus") in
+        (Option.map ~f:DeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "deploymentStatus") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn =
-        ServiceInstanceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion
-        ~serviceName ~name ~lastDeploymentSucceededAt
-        ~lastDeploymentAttemptedAt ~environmentName ?deploymentStatusMessage
-        ~deploymentStatus ~createdAt ~arn ()
+        (Option.map ~f:ServiceInstanceArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion
+        ?serviceName ?name ?lastSucceededDeploymentId
+        ?lastDeploymentSucceededAt ?lastDeploymentAttemptedAt
+        ?lastAttemptedDeploymentId ?environmentName ?deploymentStatusMessage
+        ?deploymentStatus ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let templateMinorVersion =
-        field_map_exn json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map_exn json "templateMajorVersion" TemplateVersionPart.of_json in
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let lastSucceededDeploymentId =
+        field_map json__ "lastSucceededDeploymentId" DeploymentId.of_json in
       let lastDeploymentSucceededAt =
-        field_map_exn json "lastDeploymentSucceededAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentSucceededAt" Timestamp.of_json in
       let lastDeploymentAttemptedAt =
-        field_map_exn json "lastDeploymentAttemptedAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentAttemptedAt" Timestamp.of_json in
+      let lastAttemptedDeploymentId =
+        field_map json__ "lastAttemptedDeploymentId" DeploymentId.of_json in
       let environmentName =
-        field_map_exn json "environmentName" ResourceName.of_json in
+        field_map json__ "environmentName" ResourceName.of_json in
       let deploymentStatusMessage =
-        field_map json "deploymentStatusMessage" StatusMessage.of_json in
+        field_map json__ "deploymentStatusMessage" StatusMessage.of_json in
       let deploymentStatus =
-        field_map_exn json "deploymentStatus" DeploymentStatus.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" ServiceInstanceArn.of_json in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion
-        ~serviceName ~name ~lastDeploymentSucceededAt
-        ~lastDeploymentAttemptedAt ~environmentName ?deploymentStatusMessage
-        ~deploymentStatus ~createdAt ~arn ()
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" ServiceInstanceArn.of_json in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion
+        ?serviceName ?name ?lastSucceededDeploymentId
+        ?lastDeploymentSucceededAt ?lastDeploymentAttemptedAt
+        ?lastAttemptedDeploymentId ?environmentName ?deploymentStatusMessage
+        ?deploymentStatus ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A summary of the service instance detail data."]
+  end[@@ocaml.doc "Summary data of an Proton service instance resource."]
+module ListServiceInstancesFilter =
+  struct
+    type nonrec t =
+      {
+      key: ListServiceInstancesFilterBy.t option
+        [@ocaml.doc "The name of a filtering criterion."];
+      value: ListServiceInstancesFilterValue.t option
+        [@ocaml.doc
+          "A value to filter by. With the date/time keys (*At\\{Before,After\\}), the value is a valid RFC 3339 string with no UTC offset and with an optional fractional precision (for example, 1985-04-12T23:20:50.52Z)."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("key", (Option.map x.key ~f:ListServiceInstancesFilterBy.to_value));
+        ("value",
+          (Option.map x.value ~f:ListServiceInstancesFilterValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:ListServiceInstancesFilterValue.of_xml)
+          (Xml.child xml_arg0 "value") in
+      let key =
+        (Option.map ~f:ListServiceInstancesFilterBy.of_xml)
+          (Xml.child xml_arg0 "key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value =
+        field_map json__ "value" ListServiceInstancesFilterValue.of_json in
+      let key = field_map json__ "key" ListServiceInstancesFilterBy.of_json in
+      make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A filtering criterion to scope down the result list of the ListServiceInstances action."]
 module RepositorySyncDefinition =
   struct
     type nonrec t =
       {
-      branch: GitBranchName.t [@ocaml.doc "The repository branch."];
-      directory: String_.t [@ocaml.doc "The directory in the repository."];
-      parent: String_.t [@ocaml.doc "The resource that is synced from."];
-      target: String_.t [@ocaml.doc "The resource that is synced to."]}
-    let context_ = "RepositorySyncDefinition"
-    let make ~branch =
-      fun ~directory ->
-        fun ~parent ->
-          fun ~target -> fun () -> { branch; directory; parent; target }
+      branch: GitBranchName.t option [@ocaml.doc "The repository branch."];
+      directory: String_.t option
+        [@ocaml.doc "The directory in the repository."];
+      parent: String_.t option
+        [@ocaml.doc "The resource that is synced from."];
+      target: String_.t option [@ocaml.doc "The resource that is synced to."]}
+    let make ?branch =
+      fun ?directory ->
+        fun ?parent ->
+          fun ?target -> fun () -> { branch; directory; parent; target }
     let to_value x =
       structure_to_value
-        [("branch", (Some (GitBranchName.to_value x.branch)));
-        ("directory", (Some (String_.to_value x.directory)));
-        ("parent", (Some (String_.to_value x.parent)));
-        ("target", (Some (String_.to_value x.target)))]
+        [("branch", (Option.map x.branch ~f:GitBranchName.to_value));
+        ("directory", (Option.map x.directory ~f:String_.to_value));
+        ("parent", (Option.map x.parent ~f:String_.to_value));
+        ("target", (Option.map x.target ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let target =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "target") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "target") in
       let parent =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "parent") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "parent") in
       let directory =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "directory") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "directory") in
       let branch =
-        GitBranchName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "branch") in
-      make ~target ~parent ~directory ~branch ()
+        (Option.map ~f:GitBranchName.of_xml) (Xml.child xml_arg0 "branch") in
+      make ?target ?parent ?directory ?branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let target = field_map_exn json "target" String_.of_json in
-      let parent = field_map_exn json "parent" String_.of_json in
-      let directory = field_map_exn json "directory" String_.of_json in
-      let branch = field_map_exn json "branch" GitBranchName.of_json in
-      make ~target ~parent ~directory ~branch ()
+    let of_json json__ =
+      let target = field_map json__ "target" String_.of_json in
+      let parent = field_map json__ "parent" String_.of_json in
+      let directory = field_map json__ "directory" String_.of_json in
+      let branch = field_map json__ "branch" GitBranchName.of_json in
+      make ?target ?parent ?directory ?branch ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The repository sync definition."]
+  end[@@ocaml.doc "A repository sync definition."]
 module RepositorySummary =
   struct
     type nonrec t =
       {
-      arn: RepositoryArn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) for a repository."];
-      name: RepositoryName.t [@ocaml.doc "The repository name."];
-      provider: RepositoryProvider.t [@ocaml.doc "The repository provider."]}
-    let context_ = "RepositorySummary"
-    let make ~arn =
-      fun ~name -> fun ~provider -> fun () -> { arn; name; provider }
+      arn: RepositoryArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the linked repository."];
+      connectionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the of your connection that connects Proton to your repository."];
+      name: RepositoryName.t option [@ocaml.doc "The repository name."];
+      provider: RepositoryProvider.t option
+        [@ocaml.doc "The repository provider."]}
+    let make ?arn =
+      fun ?connectionArn ->
+        fun ?name ->
+          fun ?provider -> fun () -> { arn; connectionArn; name; provider }
     let to_value x =
       structure_to_value
-        [("arn", (Some (RepositoryArn.to_value x.arn)));
-        ("name", (Some (RepositoryName.to_value x.name)));
-        ("provider", (Some (RepositoryProvider.to_value x.provider)))]
+        [("arn", (Option.map x.arn ~f:RepositoryArn.to_value));
+        ("connectionArn", (Option.map x.connectionArn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:RepositoryName.to_value));
+        ("provider", (Option.map x.provider ~f:RepositoryProvider.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let provider =
-        RepositoryProvider.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "provider") in
+        (Option.map ~f:RepositoryProvider.of_xml)
+          (Xml.child xml_arg0 "provider") in
       let name =
-        RepositoryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:RepositoryName.of_xml) (Xml.child xml_arg0 "name") in
+      let connectionArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "connectionArn") in
       let arn =
-        RepositoryArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~provider ~name ~arn ()
+        (Option.map ~f:RepositoryArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?provider ?name ?connectionArn ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let provider = field_map_exn json "provider" RepositoryProvider.of_json in
-      let name = field_map_exn json "name" RepositoryName.of_json in
-      let arn = field_map_exn json "arn" RepositoryArn.of_json in
-      make ~provider ~name ~arn ()
+    let of_json json__ =
+      let provider = field_map json__ "provider" RepositoryProvider.of_json in
+      let name = field_map json__ "name" RepositoryName.of_json in
+      let connectionArn = field_map json__ "connectionArn" Arn.of_json in
+      let arn = field_map json__ "arn" RepositoryArn.of_json in
+      make ?provider ?name ?connectionArn ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A summary of detail data for a registered repository."]
+  end[@@ocaml.doc
+       "Summary data of a linked repository\226\128\148a repository that has been registered with Proton."]
 module EnvironmentSummary =
   struct
     type nonrec t =
       {
-      arn: EnvironmentArn.t
+      arn: EnvironmentArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the environment."];
-      createdAt: Timestamp.t
+      componentRoleArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that Proton uses when provisioning directly defined components in this environment. It determines the scope of infrastructure that a component can provision. The environment must have a componentRoleArn to allow directly defined components to be associated with the environment. For more information about components, see Proton components in the Proton User Guide."];
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the environment was created."];
-      deploymentStatus: DeploymentStatus.t
+      deploymentStatus: DeploymentStatus.t option
         [@ocaml.doc "The environment deployment status."];
       deploymentStatusMessage: StatusMessage.t option
         [@ocaml.doc "An environment deployment status message."];
@@ -1929,65 +2816,77 @@ module EnvironmentSummary =
       environmentAccountId: AwsAccountId.t option
         [@ocaml.doc
           "The ID of the environment account that the environment infrastructure resources are provisioned in."];
-      lastDeploymentAttemptedAt: Timestamp.t
+      lastAttemptedDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last attempted deployment of this environment."];
+      lastDeploymentAttemptedAt: Timestamp.t option
         [@ocaml.doc
           "The time when a deployment of the environment was last attempted."];
-      lastDeploymentSucceededAt: Timestamp.t
+      lastDeploymentSucceededAt: Timestamp.t option
         [@ocaml.doc
           "The time when the environment was last deployed successfully."];
-      name: ResourceName.t [@ocaml.doc "The name of the environment."];
+      lastSucceededDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last successful deployment of this environment."];
+      name: ResourceName.t option [@ocaml.doc "The name of the environment."];
       protonServiceRoleArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Proton service role that allows Proton to make calls to other services on your behalf."];
       provisioning: Provisioning.t option
         [@ocaml.doc
           "When included, indicates that the environment template is for customer provisioned and managed infrastructure."];
-      templateMajorVersion: TemplateVersionPart.t
+      templateMajorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The major version of the environment template."];
-      templateMinorVersion: TemplateVersionPart.t
+      templateMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The minor version of the environment template."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc "The name of the environment template."]}
-    let context_ = "EnvironmentSummary"
-    let make ?deploymentStatusMessage =
-      fun ?description ->
-        fun ?environmentAccountConnectionId ->
-          fun ?environmentAccountId ->
-            fun ?protonServiceRoleArn ->
-              fun ?provisioning ->
-                fun ~arn ->
-                  fun ~createdAt ->
-                    fun ~deploymentStatus ->
-                      fun ~lastDeploymentAttemptedAt ->
-                        fun ~lastDeploymentSucceededAt ->
-                          fun ~name ->
-                            fun ~templateMajorVersion ->
-                              fun ~templateMinorVersion ->
-                                fun ~templateName ->
-                                  fun () ->
-                                    {
-                                      deploymentStatusMessage;
-                                      description;
-                                      environmentAccountConnectionId;
-                                      environmentAccountId;
-                                      protonServiceRoleArn;
-                                      provisioning;
-                                      arn;
-                                      createdAt;
-                                      deploymentStatus;
-                                      lastDeploymentAttemptedAt;
-                                      lastDeploymentSucceededAt;
-                                      name;
-                                      templateMajorVersion;
-                                      templateMinorVersion;
-                                      templateName
-                                    }
+    let make ?arn =
+      fun ?componentRoleArn ->
+        fun ?createdAt ->
+          fun ?deploymentStatus ->
+            fun ?deploymentStatusMessage ->
+              fun ?description ->
+                fun ?environmentAccountConnectionId ->
+                  fun ?environmentAccountId ->
+                    fun ?lastAttemptedDeploymentId ->
+                      fun ?lastDeploymentAttemptedAt ->
+                        fun ?lastDeploymentSucceededAt ->
+                          fun ?lastSucceededDeploymentId ->
+                            fun ?name ->
+                              fun ?protonServiceRoleArn ->
+                                fun ?provisioning ->
+                                  fun ?templateMajorVersion ->
+                                    fun ?templateMinorVersion ->
+                                      fun ?templateName ->
+                                        fun () ->
+                                          {
+                                            arn;
+                                            componentRoleArn;
+                                            createdAt;
+                                            deploymentStatus;
+                                            deploymentStatusMessage;
+                                            description;
+                                            environmentAccountConnectionId;
+                                            environmentAccountId;
+                                            lastAttemptedDeploymentId;
+                                            lastDeploymentAttemptedAt;
+                                            lastDeploymentSucceededAt;
+                                            lastSucceededDeploymentId;
+                                            name;
+                                            protonServiceRoleArn;
+                                            provisioning;
+                                            templateMajorVersion;
+                                            templateMinorVersion;
+                                            templateName
+                                          }
     let to_value x =
       structure_to_value
-        [("arn", (Some (EnvironmentArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:EnvironmentArn.to_value));
+        ("componentRoleArn", (Option.map x.componentRoleArn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("deploymentStatus",
-          (Some (DeploymentStatus.to_value x.deploymentStatus)));
+          (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
         ("deploymentStatusMessage",
           (Option.map x.deploymentStatusMessage ~f:StatusMessage.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
@@ -1996,31 +2895,36 @@ module EnvironmentSummary =
              ~f:EnvironmentAccountConnectionId.to_value));
         ("environmentAccountId",
           (Option.map x.environmentAccountId ~f:AwsAccountId.to_value));
+        ("lastAttemptedDeploymentId",
+          (Option.map x.lastAttemptedDeploymentId ~f:DeploymentId.to_value));
         ("lastDeploymentAttemptedAt",
-          (Some (Timestamp.to_value x.lastDeploymentAttemptedAt)));
+          (Option.map x.lastDeploymentAttemptedAt ~f:Timestamp.to_value));
         ("lastDeploymentSucceededAt",
-          (Some (Timestamp.to_value x.lastDeploymentSucceededAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
+          (Option.map x.lastDeploymentSucceededAt ~f:Timestamp.to_value));
+        ("lastSucceededDeploymentId",
+          (Option.map x.lastSucceededDeploymentId ~f:DeploymentId.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
         ("protonServiceRoleArn",
           (Option.map x.protonServiceRoleArn ~f:Arn.to_value));
         ("provisioning",
           (Option.map x.provisioning ~f:Provisioning.to_value));
         ("templateMajorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMajorVersion)));
+          (Option.map x.templateMajorVersion ~f:TemplateVersionPart.to_value));
         ("templateMinorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMinorVersion)));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+          (Option.map x.templateMinorVersion ~f:TemplateVersionPart.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let templateMinorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMinorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMinorVersion") in
       let templateMajorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMajorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMajorVersion") in
       let provisioning =
         (Option.map ~f:Provisioning.of_xml)
           (Xml.child xml_arg0 "provisioning") in
@@ -2028,15 +2932,19 @@ module EnvironmentSummary =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "protonServiceRoleArn") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastSucceededDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSucceededDeploymentId") in
       let lastDeploymentSucceededAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentSucceededAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentSucceededAt") in
       let lastDeploymentAttemptedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentAttemptedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentAttemptedAt") in
+      let lastAttemptedDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDeploymentId") in
       let environmentAccountId =
         (Option.map ~f:AwsAccountId.of_xml)
           (Xml.child xml_arg0 "environmentAccountId") in
@@ -2049,54 +2957,61 @@ module EnvironmentSummary =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "deploymentStatusMessage") in
       let deploymentStatus =
-        DeploymentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deploymentStatus") in
+        (Option.map ~f:DeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "deploymentStatus") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let componentRoleArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "componentRoleArn") in
       let arn =
-        EnvironmentArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion
-        ?provisioning ?protonServiceRoleArn ~name ~lastDeploymentSucceededAt
-        ~lastDeploymentAttemptedAt ?environmentAccountId
+        (Option.map ~f:EnvironmentArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion
+        ?provisioning ?protonServiceRoleArn ?name ?lastSucceededDeploymentId
+        ?lastDeploymentSucceededAt ?lastDeploymentAttemptedAt
+        ?lastAttemptedDeploymentId ?environmentAccountId
         ?environmentAccountConnectionId ?description ?deploymentStatusMessage
-        ~deploymentStatus ~createdAt ~arn ()
+        ?deploymentStatus ?createdAt ?componentRoleArn ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let templateMinorVersion =
-        field_map_exn json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map_exn json "templateMajorVersion" TemplateVersionPart.of_json in
-      let provisioning = field_map json "provisioning" Provisioning.of_json in
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let provisioning = field_map json__ "provisioning" Provisioning.of_json in
       let protonServiceRoleArn =
-        field_map json "protonServiceRoleArn" Arn.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "protonServiceRoleArn" Arn.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let lastSucceededDeploymentId =
+        field_map json__ "lastSucceededDeploymentId" DeploymentId.of_json in
       let lastDeploymentSucceededAt =
-        field_map_exn json "lastDeploymentSucceededAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentSucceededAt" Timestamp.of_json in
       let lastDeploymentAttemptedAt =
-        field_map_exn json "lastDeploymentAttemptedAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentAttemptedAt" Timestamp.of_json in
+      let lastAttemptedDeploymentId =
+        field_map json__ "lastAttemptedDeploymentId" DeploymentId.of_json in
       let environmentAccountId =
-        field_map json "environmentAccountId" AwsAccountId.of_json in
+        field_map json__ "environmentAccountId" AwsAccountId.of_json in
       let environmentAccountConnectionId =
-        field_map json "environmentAccountConnectionId"
+        field_map json__ "environmentAccountConnectionId"
           EnvironmentAccountConnectionId.of_json in
-      let description = field_map json "description" Description.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let deploymentStatusMessage =
-        field_map json "deploymentStatusMessage" StatusMessage.of_json in
+        field_map json__ "deploymentStatusMessage" StatusMessage.of_json in
       let deploymentStatus =
-        field_map_exn json "deploymentStatus" DeploymentStatus.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" EnvironmentArn.of_json in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion
-        ?provisioning ?protonServiceRoleArn ~name ~lastDeploymentSucceededAt
-        ~lastDeploymentAttemptedAt ?environmentAccountId
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let componentRoleArn = field_map json__ "componentRoleArn" Arn.of_json in
+      let arn = field_map json__ "arn" EnvironmentArn.of_json in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion
+        ?provisioning ?protonServiceRoleArn ?name ?lastSucceededDeploymentId
+        ?lastDeploymentSucceededAt ?lastDeploymentAttemptedAt
+        ?lastAttemptedDeploymentId ?environmentAccountId
         ?environmentAccountConnectionId ?description ?deploymentStatusMessage
-        ~deploymentStatus ~createdAt ~arn ()
+        ?deploymentStatus ?createdAt ?componentRoleArn ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A summary of the environment detail data."]
+  end[@@ocaml.doc
+       "Summary data of an Proton environment resource. An Proton environment is a set of resources shared across Proton services."]
 module EnvironmentTemplateFilter =
   struct
     type nonrec t =
@@ -2125,11 +3040,11 @@ module EnvironmentTemplateFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
       make ~templateName ~majorVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "majorVersion" TemplateVersionPart.of_json in
       make ~templateName ~majorVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A search filter for environment templates."]
@@ -2137,54 +3052,54 @@ module EnvironmentTemplateSummary =
   struct
     type nonrec t =
       {
-      arn: EnvironmentTemplateArn.t
+      arn: EnvironmentTemplateArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the environment template."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the environment template was created."];
       description: Description.t option
         [@ocaml.doc "A description of the environment template."];
       displayName: DisplayName.t option
         [@ocaml.doc
           "The name of the environment template as displayed in the developer interface."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the environment template was last modified."];
-      name: ResourceName.t
+      name: ResourceName.t option
         [@ocaml.doc "The name of the environment template."];
       provisioning: Provisioning.t option
         [@ocaml.doc
           "When included, indicates that the environment template is for customer provisioned and managed infrastructure."];
       recommendedVersion: FullTemplateVersionNumber.t option
         [@ocaml.doc "The recommended version of the environment template."]}
-    let context_ = "EnvironmentTemplateSummary"
-    let make ?description =
-      fun ?displayName ->
-        fun ?provisioning ->
-          fun ?recommendedVersion ->
-            fun ~arn ->
-              fun ~createdAt ->
-                fun ~lastModifiedAt ->
-                  fun ~name ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?displayName ->
+            fun ?lastModifiedAt ->
+              fun ?name ->
+                fun ?provisioning ->
+                  fun ?recommendedVersion ->
                     fun () ->
                       {
-                        description;
-                        displayName;
-                        provisioning;
-                        recommendedVersion;
                         arn;
                         createdAt;
+                        description;
+                        displayName;
                         lastModifiedAt;
-                        name
+                        name;
+                        provisioning;
+                        recommendedVersion
                       }
     let to_value x =
       structure_to_value
-        [("arn", (Some (EnvironmentTemplateArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:EnvironmentTemplateArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
         ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
         ("provisioning",
           (Option.map x.provisioning ~f:Provisioning.to_value));
         ("recommendedVersion",
@@ -2199,166 +3114,166 @@ module EnvironmentTemplateSummary =
         (Option.map ~f:Provisioning.of_xml)
           (Xml.child xml_arg0 "provisioning") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let displayName =
         (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn =
-        EnvironmentTemplateArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?recommendedVersion ?provisioning ~name ~lastModifiedAt
-        ?displayName ?description ~createdAt ~arn ()
+        (Option.map ~f:EnvironmentTemplateArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?recommendedVersion ?provisioning ?name ?lastModifiedAt
+        ?displayName ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendedVersion =
-        field_map json "recommendedVersion" FullTemplateVersionNumber.of_json in
-      let provisioning = field_map json "provisioning" Provisioning.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "recommendedVersion"
+          FullTemplateVersionNumber.of_json in
+      let provisioning = field_map json__ "provisioning" Provisioning.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" EnvironmentTemplateArn.of_json in
-      make ?recommendedVersion ?provisioning ~name ~lastModifiedAt
-        ?displayName ?description ~createdAt ~arn ()
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" EnvironmentTemplateArn.of_json in
+      make ?recommendedVersion ?provisioning ?name ?lastModifiedAt
+        ?displayName ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The environment template data."]
 module EnvironmentTemplateVersionSummary =
   struct
     type nonrec t =
       {
-      arn: EnvironmentTemplateVersionArn.t
+      arn: EnvironmentTemplateVersionArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the version of an environment template."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The time when the version of an environment template was created."];
       description: Description.t option
         [@ocaml.doc
           "A description of the version of an environment template."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the version of an environment template was last modified."];
-      majorVersion: TemplateVersionPart.t
+      majorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The latest major version that's associated with the version of an environment template."];
-      minorVersion: TemplateVersionPart.t
+      minorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The version of an environment template."];
       recommendedMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The recommended minor version of the environment template."];
-      status: TemplateVersionStatus.t
+      status: TemplateVersionStatus.t option
         [@ocaml.doc "The status of the version of an environment template."];
       statusMessage: StatusMessage.t option
         [@ocaml.doc
           "The status message of the version of an environment template."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc "The name of the environment template."]}
-    let context_ = "EnvironmentTemplateVersionSummary"
-    let make ?description =
-      fun ?recommendedMinorVersion ->
-        fun ?statusMessage ->
-          fun ~arn ->
-            fun ~createdAt ->
-              fun ~lastModifiedAt ->
-                fun ~majorVersion ->
-                  fun ~minorVersion ->
-                    fun ~status ->
-                      fun ~templateName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?lastModifiedAt ->
+            fun ?majorVersion ->
+              fun ?minorVersion ->
+                fun ?recommendedMinorVersion ->
+                  fun ?status ->
+                    fun ?statusMessage ->
+                      fun ?templateName ->
                         fun () ->
                           {
-                            description;
-                            recommendedMinorVersion;
-                            statusMessage;
                             arn;
                             createdAt;
+                            description;
                             lastModifiedAt;
                             majorVersion;
                             minorVersion;
+                            recommendedMinorVersion;
                             status;
+                            statusMessage;
                             templateName
                           }
     let to_value x =
       structure_to_value
-        [("arn", (Some (EnvironmentTemplateVersionArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn",
+           (Option.map x.arn ~f:EnvironmentTemplateVersionArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
         ("majorVersion",
-          (Some (TemplateVersionPart.to_value x.majorVersion)));
+          (Option.map x.majorVersion ~f:TemplateVersionPart.to_value));
         ("minorVersion",
-          (Some (TemplateVersionPart.to_value x.minorVersion)));
+          (Option.map x.minorVersion ~f:TemplateVersionPart.to_value));
         ("recommendedMinorVersion",
           (Option.map x.recommendedMinorVersion
              ~f:TemplateVersionPart.to_value));
-        ("status", (Some (TemplateVersionStatus.to_value x.status)));
+        ("status", (Option.map x.status ~f:TemplateVersionStatus.to_value));
         ("statusMessage",
           (Option.map x.statusMessage ~f:StatusMessage.to_value));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let statusMessage =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "statusMessage") in
       let status =
-        TemplateVersionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:TemplateVersionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let recommendedMinorVersion =
         (Option.map ~f:TemplateVersionPart.of_xml)
           (Xml.child xml_arg0 "recommendedMinorVersion") in
       let minorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "minorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "minorVersion") in
       let majorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "majorVersion") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn =
-        EnvironmentTemplateVersionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ?statusMessage ~status ?recommendedMinorVersion
-        ~minorVersion ~majorVersion ~lastModifiedAt ?description ~createdAt
-        ~arn ()
+        (Option.map ~f:EnvironmentTemplateVersionArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?templateName ?statusMessage ?status ?recommendedMinorVersion
+        ?minorVersion ?majorVersion ?lastModifiedAt ?description ?createdAt
+        ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let statusMessage =
-        field_map json "statusMessage" StatusMessage.of_json in
-      let status = field_map_exn json "status" TemplateVersionStatus.of_json in
+        field_map json__ "statusMessage" StatusMessage.of_json in
+      let status = field_map json__ "status" TemplateVersionStatus.of_json in
       let recommendedMinorVersion =
-        field_map json "recommendedMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "recommendedMinorVersion"
+          TemplateVersionPart.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map json__ "majorVersion" TemplateVersionPart.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn =
-        field_map_exn json "arn" EnvironmentTemplateVersionArn.of_json in
-      make ~templateName ?statusMessage ~status ?recommendedMinorVersion
-        ~minorVersion ~majorVersion ~lastModifiedAt ?description ~createdAt
-        ~arn ()
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" EnvironmentTemplateVersionArn.of_json in
+      make ?templateName ?statusMessage ?status ?recommendedMinorVersion
+        ?minorVersion ?majorVersion ?lastModifiedAt ?description ?createdAt
+        ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A summary of the version of an environment template detail data."]
@@ -2366,124 +3281,475 @@ module EnvironmentAccountConnectionSummary =
   struct
     type nonrec t =
       {
-      arn: EnvironmentAccountConnectionArn.t
+      arn: EnvironmentAccountConnectionArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the environment account connection."];
-      environmentAccountId: AwsAccountId.t
+      componentRoleArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that Proton uses when provisioning directly defined components in the associated environment account. It determines the scope of infrastructure that a component can provision in the account. The environment account connection must have a componentRoleArn to allow directly defined components to be associated with any environments running in the account. For more information about components, see Proton components in the Proton User Guide."];
+      environmentAccountId: AwsAccountId.t option
         [@ocaml.doc
           "The ID of the environment account that's connected to the environment account connection."];
-      environmentName: ResourceName.t
+      environmentName: ResourceName.t option
         [@ocaml.doc
           "The name of the environment that's associated with the environment account connection."];
-      id: EnvironmentAccountConnectionId.t
+      id: EnvironmentAccountConnectionId.t option
         [@ocaml.doc "The ID of the environment account connection."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the environment account connection was last modified."];
-      managementAccountId: AwsAccountId.t
+      managementAccountId: AwsAccountId.t option
         [@ocaml.doc
           "The ID of the management account that's connected to the environment account connection."];
-      requestedAt: Timestamp.t
+      requestedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the environment account connection request was made."];
-      roleArn: Arn.t
+      roleArn: Arn.t option
         [@ocaml.doc
           "The IAM service role that's associated with the environment account connection."];
-      status: EnvironmentAccountConnectionStatus.t
+      status: EnvironmentAccountConnectionStatus.t option
         [@ocaml.doc "The status of the environment account connection."]}
-    let context_ = "EnvironmentAccountConnectionSummary"
-    let make ~arn =
-      fun ~environmentAccountId ->
-        fun ~environmentName ->
-          fun ~id ->
-            fun ~lastModifiedAt ->
-              fun ~managementAccountId ->
-                fun ~requestedAt ->
-                  fun ~roleArn ->
-                    fun ~status ->
-                      fun () ->
-                        {
-                          arn;
-                          environmentAccountId;
-                          environmentName;
-                          id;
-                          lastModifiedAt;
-                          managementAccountId;
-                          requestedAt;
-                          roleArn;
-                          status
-                        }
+    let make ?arn =
+      fun ?componentRoleArn ->
+        fun ?environmentAccountId ->
+          fun ?environmentName ->
+            fun ?id ->
+              fun ?lastModifiedAt ->
+                fun ?managementAccountId ->
+                  fun ?requestedAt ->
+                    fun ?roleArn ->
+                      fun ?status ->
+                        fun () ->
+                          {
+                            arn;
+                            componentRoleArn;
+                            environmentAccountId;
+                            environmentName;
+                            id;
+                            lastModifiedAt;
+                            managementAccountId;
+                            requestedAt;
+                            roleArn;
+                            status
+                          }
     let to_value x =
       structure_to_value
-        [("arn", (Some (EnvironmentAccountConnectionArn.to_value x.arn)));
+        [("arn",
+           (Option.map x.arn ~f:EnvironmentAccountConnectionArn.to_value));
+        ("componentRoleArn", (Option.map x.componentRoleArn ~f:Arn.to_value));
         ("environmentAccountId",
-          (Some (AwsAccountId.to_value x.environmentAccountId)));
-        ("environmentName", (Some (ResourceName.to_value x.environmentName)));
-        ("id", (Some (EnvironmentAccountConnectionId.to_value x.id)));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
+          (Option.map x.environmentAccountId ~f:AwsAccountId.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("id", (Option.map x.id ~f:EnvironmentAccountConnectionId.to_value));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
         ("managementAccountId",
-          (Some (AwsAccountId.to_value x.managementAccountId)));
-        ("requestedAt", (Some (Timestamp.to_value x.requestedAt)));
-        ("roleArn", (Some (Arn.to_value x.roleArn)));
+          (Option.map x.managementAccountId ~f:AwsAccountId.to_value));
+        ("requestedAt", (Option.map x.requestedAt ~f:Timestamp.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:Arn.to_value));
         ("status",
-          (Some (EnvironmentAccountConnectionStatus.to_value x.status)))]
+          (Option.map x.status ~f:EnvironmentAccountConnectionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        EnvironmentAccountConnectionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let roleArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+        (Option.map ~f:EnvironmentAccountConnectionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "roleArn") in
       let requestedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "requestedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "requestedAt") in
       let managementAccountId =
-        AwsAccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "managementAccountId") in
+        (Option.map ~f:AwsAccountId.of_xml)
+          (Xml.child xml_arg0 "managementAccountId") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let id =
-        EnvironmentAccountConnectionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+        (Option.map ~f:EnvironmentAccountConnectionId.of_xml)
+          (Xml.child xml_arg0 "id") in
       let environmentName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
       let environmentAccountId =
-        AwsAccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentAccountId") in
+        (Option.map ~f:AwsAccountId.of_xml)
+          (Xml.child xml_arg0 "environmentAccountId") in
+      let componentRoleArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "componentRoleArn") in
       let arn =
-        EnvironmentAccountConnectionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~status ~roleArn ~requestedAt ~managementAccountId ~lastModifiedAt
-        ~id ~environmentName ~environmentAccountId ~arn ()
+        (Option.map ~f:EnvironmentAccountConnectionArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?status ?roleArn ?requestedAt ?managementAccountId ?lastModifiedAt
+        ?id ?environmentName ?environmentAccountId ?componentRoleArn ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status"
-          EnvironmentAccountConnectionStatus.of_json in
-      let roleArn = field_map_exn json "roleArn" Arn.of_json in
-      let requestedAt = field_map_exn json "requestedAt" Timestamp.of_json in
+        field_map json__ "status" EnvironmentAccountConnectionStatus.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
+      let requestedAt = field_map json__ "requestedAt" Timestamp.of_json in
       let managementAccountId =
-        field_map_exn json "managementAccountId" AwsAccountId.of_json in
+        field_map json__ "managementAccountId" AwsAccountId.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let id = field_map_exn json "id" EnvironmentAccountConnectionId.of_json in
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let id = field_map json__ "id" EnvironmentAccountConnectionId.of_json in
       let environmentName =
-        field_map_exn json "environmentName" ResourceName.of_json in
+        field_map json__ "environmentName" ResourceName.of_json in
       let environmentAccountId =
-        field_map_exn json "environmentAccountId" AwsAccountId.of_json in
+        field_map json__ "environmentAccountId" AwsAccountId.of_json in
+      let componentRoleArn = field_map json__ "componentRoleArn" Arn.of_json in
       let arn =
-        field_map_exn json "arn" EnvironmentAccountConnectionArn.of_json in
-      make ~status ~roleArn ~requestedAt ~managementAccountId ~lastModifiedAt
-        ~id ~environmentName ~environmentAccountId ~arn ()
+        field_map json__ "arn" EnvironmentAccountConnectionArn.of_json in
+      make ?status ?roleArn ?requestedAt ?managementAccountId ?lastModifiedAt
+        ?id ?environmentName ?environmentAccountId ?componentRoleArn ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A summary of the environment account connection detail data."]
+       "Summary data of an Proton environment account connection resource."]
+module DeploymentSummary =
+  struct
+    type nonrec t =
+      {
+      arn: DeploymentArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the deployment."];
+      completedAt: Timestamp.t option
+        [@ocaml.doc "The date and time the deployment was completed."];
+      componentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the component associated with the deployment."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time the deployment was created."];
+      deploymentStatus: DeploymentStatus.t option
+        [@ocaml.doc "The current status of the deployment."];
+      environmentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the environment associated with the deployment."];
+      id: DeploymentId.t option [@ocaml.doc "The ID of the deployment."];
+      lastAttemptedDeploymentId: DeploymentId.t option
+        [@ocaml.doc "The ID of the last attempted deployment."];
+      lastModifiedAt: Timestamp.t option
+        [@ocaml.doc "The date and time the deployment was last modified."];
+      lastSucceededDeploymentId: DeploymentId.t option
+        [@ocaml.doc "The ID of the last successful deployment."];
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service instance associated with the deployment."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service associated with the deployment."];
+      targetArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the target of the deployment."];
+      targetResourceCreatedAt: Timestamp.t option
+        [@ocaml.doc "The date and time the target resource was created."];
+      targetResourceType: DeploymentTargetResourceType.t option
+        [@ocaml.doc
+          "The resource type of the deployment target. It can be an environment, service, service instance, or component."]}
+    let make ?arn =
+      fun ?completedAt ->
+        fun ?componentName ->
+          fun ?createdAt ->
+            fun ?deploymentStatus ->
+              fun ?environmentName ->
+                fun ?id ->
+                  fun ?lastAttemptedDeploymentId ->
+                    fun ?lastModifiedAt ->
+                      fun ?lastSucceededDeploymentId ->
+                        fun ?serviceInstanceName ->
+                          fun ?serviceName ->
+                            fun ?targetArn ->
+                              fun ?targetResourceCreatedAt ->
+                                fun ?targetResourceType ->
+                                  fun () ->
+                                    {
+                                      arn;
+                                      completedAt;
+                                      componentName;
+                                      createdAt;
+                                      deploymentStatus;
+                                      environmentName;
+                                      id;
+                                      lastAttemptedDeploymentId;
+                                      lastModifiedAt;
+                                      lastSucceededDeploymentId;
+                                      serviceInstanceName;
+                                      serviceName;
+                                      targetArn;
+                                      targetResourceCreatedAt;
+                                      targetResourceType
+                                    }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:DeploymentArn.to_value));
+        ("completedAt", (Option.map x.completedAt ~f:Timestamp.to_value));
+        ("componentName",
+          (Option.map x.componentName ~f:ResourceName.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("deploymentStatus",
+          (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("id", (Option.map x.id ~f:DeploymentId.to_value));
+        ("lastAttemptedDeploymentId",
+          (Option.map x.lastAttemptedDeploymentId ~f:DeploymentId.to_value));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("lastSucceededDeploymentId",
+          (Option.map x.lastSucceededDeploymentId ~f:DeploymentId.to_value));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value));
+        ("targetArn", (Option.map x.targetArn ~f:Arn.to_value));
+        ("targetResourceCreatedAt",
+          (Option.map x.targetResourceCreatedAt ~f:Timestamp.to_value));
+        ("targetResourceType",
+          (Option.map x.targetResourceType
+             ~f:DeploymentTargetResourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetResourceType =
+        (Option.map ~f:DeploymentTargetResourceType.of_xml)
+          (Xml.child xml_arg0 "targetResourceType") in
+      let targetResourceCreatedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "targetResourceCreatedAt") in
+      let targetArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "targetArn") in
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let lastSucceededDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSucceededDeploymentId") in
+      let lastModifiedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
+      let lastAttemptedDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDeploymentId") in
+      let id = (Option.map ~f:DeploymentId.of_xml) (Xml.child xml_arg0 "id") in
+      let environmentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
+      let deploymentStatus =
+        (Option.map ~f:DeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "deploymentStatus") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let componentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "componentName") in
+      let completedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "completedAt") in
+      let arn =
+        (Option.map ~f:DeploymentArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?targetResourceType ?targetResourceCreatedAt ?targetArn
+        ?serviceName ?serviceInstanceName ?lastSucceededDeploymentId
+        ?lastModifiedAt ?lastAttemptedDeploymentId ?id ?environmentName
+        ?deploymentStatus ?createdAt ?componentName ?completedAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetResourceType =
+        field_map json__ "targetResourceType"
+          DeploymentTargetResourceType.of_json in
+      let targetResourceCreatedAt =
+        field_map json__ "targetResourceCreatedAt" Timestamp.of_json in
+      let targetArn = field_map json__ "targetArn" Arn.of_json in
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      let lastSucceededDeploymentId =
+        field_map json__ "lastSucceededDeploymentId" DeploymentId.of_json in
+      let lastModifiedAt =
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let lastAttemptedDeploymentId =
+        field_map json__ "lastAttemptedDeploymentId" DeploymentId.of_json in
+      let id = field_map json__ "id" DeploymentId.of_json in
+      let environmentName =
+        field_map json__ "environmentName" ResourceName.of_json in
+      let deploymentStatus =
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let componentName =
+        field_map json__ "componentName" ResourceName.of_json in
+      let completedAt = field_map json__ "completedAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" DeploymentArn.of_json in
+      make ?targetResourceType ?targetResourceCreatedAt ?targetArn
+        ?serviceName ?serviceInstanceName ?lastSucceededDeploymentId
+        ?lastModifiedAt ?lastAttemptedDeploymentId ?id ?environmentName
+        ?deploymentStatus ?createdAt ?componentName ?completedAt ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary data of the deployment."]
+module ComponentSummary =
+  struct
+    type nonrec t =
+      {
+      arn: ComponentArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the component."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time when the component was created."];
+      deploymentStatus: DeploymentStatus.t option
+        [@ocaml.doc "The component deployment status."];
+      deploymentStatusMessage: StatusMessage.t option
+        [@ocaml.doc
+          "The message associated with the component deployment status."];
+      environmentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the Proton environment that this component is associated with."];
+      lastAttemptedDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last attempted deployment of this component."];
+      lastDeploymentAttemptedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time when a deployment of the component was last attempted."];
+      lastDeploymentSucceededAt: Timestamp.t option
+        [@ocaml.doc
+          "The time when the component was last deployed successfully."];
+      lastModifiedAt: Timestamp.t option
+        [@ocaml.doc "The time when the component was last modified."];
+      lastSucceededDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last successful deployment of this component."];
+      name: ResourceName.t option [@ocaml.doc "The name of the component."];
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service instance that this component is attached to. Provided when a component is attached to a service instance."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service that serviceInstanceName is associated with. Provided when a component is attached to a service instance."]}
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?deploymentStatus ->
+          fun ?deploymentStatusMessage ->
+            fun ?environmentName ->
+              fun ?lastAttemptedDeploymentId ->
+                fun ?lastDeploymentAttemptedAt ->
+                  fun ?lastDeploymentSucceededAt ->
+                    fun ?lastModifiedAt ->
+                      fun ?lastSucceededDeploymentId ->
+                        fun ?name ->
+                          fun ?serviceInstanceName ->
+                            fun ?serviceName ->
+                              fun () ->
+                                {
+                                  arn;
+                                  createdAt;
+                                  deploymentStatus;
+                                  deploymentStatusMessage;
+                                  environmentName;
+                                  lastAttemptedDeploymentId;
+                                  lastDeploymentAttemptedAt;
+                                  lastDeploymentSucceededAt;
+                                  lastModifiedAt;
+                                  lastSucceededDeploymentId;
+                                  name;
+                                  serviceInstanceName;
+                                  serviceName
+                                }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:ComponentArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("deploymentStatus",
+          (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
+        ("deploymentStatusMessage",
+          (Option.map x.deploymentStatusMessage ~f:StatusMessage.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("lastAttemptedDeploymentId",
+          (Option.map x.lastAttemptedDeploymentId ~f:DeploymentId.to_value));
+        ("lastDeploymentAttemptedAt",
+          (Option.map x.lastDeploymentAttemptedAt ~f:Timestamp.to_value));
+        ("lastDeploymentSucceededAt",
+          (Option.map x.lastDeploymentSucceededAt ~f:Timestamp.to_value));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("lastSucceededDeploymentId",
+          (Option.map x.lastSucceededDeploymentId ~f:DeploymentId.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastSucceededDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSucceededDeploymentId") in
+      let lastModifiedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
+      let lastDeploymentSucceededAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentSucceededAt") in
+      let lastDeploymentAttemptedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentAttemptedAt") in
+      let lastAttemptedDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDeploymentId") in
+      let environmentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
+      let deploymentStatusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "deploymentStatusMessage") in
+      let deploymentStatus =
+        (Option.map ~f:DeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "deploymentStatus") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn =
+        (Option.map ~f:ComponentArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?serviceName ?serviceInstanceName ?name ?lastSucceededDeploymentId
+        ?lastModifiedAt ?lastDeploymentSucceededAt ?lastDeploymentAttemptedAt
+        ?lastAttemptedDeploymentId ?environmentName ?deploymentStatusMessage
+        ?deploymentStatus ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let lastSucceededDeploymentId =
+        field_map json__ "lastSucceededDeploymentId" DeploymentId.of_json in
+      let lastModifiedAt =
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let lastDeploymentSucceededAt =
+        field_map json__ "lastDeploymentSucceededAt" Timestamp.of_json in
+      let lastDeploymentAttemptedAt =
+        field_map json__ "lastDeploymentAttemptedAt" Timestamp.of_json in
+      let lastAttemptedDeploymentId =
+        field_map json__ "lastAttemptedDeploymentId" DeploymentId.of_json in
+      let environmentName =
+        field_map json__ "environmentName" ResourceName.of_json in
+      let deploymentStatusMessage =
+        field_map json__ "deploymentStatusMessage" StatusMessage.of_json in
+      let deploymentStatus =
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" ComponentArn.of_json in
+      make ?serviceName ?serviceInstanceName ?name ?lastSucceededDeploymentId
+        ?lastModifiedAt ?lastDeploymentSucceededAt ?lastDeploymentAttemptedAt
+        ?lastAttemptedDeploymentId ?environmentName ?deploymentStatusMessage
+        ?deploymentStatus ?createdAt ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary data of an Proton component resource. For more information about components, see Proton components in the Proton User Guide."]
 module ResourceSyncEvents =
   struct
     type nonrec t = ResourceSyncEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceSyncEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2541,64 +3807,148 @@ module Revision =
   struct
     type nonrec t =
       {
-      branch: GitBranchName.t [@ocaml.doc "The repository branch."];
-      directory: String_.t
+      branch: GitBranchName.t option [@ocaml.doc "The repository branch."];
+      directory: String_.t option
         [@ocaml.doc
           "The repository directory changed by a commit and push that activated the sync attempt."];
-      repositoryName: RepositoryName.t [@ocaml.doc "The repository name."];
-      repositoryProvider: RepositoryProvider.t
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc "The repository name."];
+      repositoryProvider: RepositoryProvider.t option
         [@ocaml.doc "The repository provider."];
-      sha: SHA.t
+      sha: SHA.t option
         [@ocaml.doc "The secure hash algorithm (SHA) hash for the revision."]}
-    let context_ = "Revision"
-    let make ~branch =
-      fun ~directory ->
-        fun ~repositoryName ->
-          fun ~repositoryProvider ->
-            fun ~sha ->
+    let make ?branch =
+      fun ?directory ->
+        fun ?repositoryName ->
+          fun ?repositoryProvider ->
+            fun ?sha ->
               fun () ->
                 { branch; directory; repositoryName; repositoryProvider; sha
                 }
     let to_value x =
       structure_to_value
-        [("branch", (Some (GitBranchName.to_value x.branch)));
-        ("directory", (Some (String_.to_value x.directory)));
-        ("repositoryName", (Some (RepositoryName.to_value x.repositoryName)));
+        [("branch", (Option.map x.branch ~f:GitBranchName.to_value));
+        ("directory", (Option.map x.directory ~f:String_.to_value));
+        ("repositoryName",
+          (Option.map x.repositoryName ~f:RepositoryName.to_value));
         ("repositoryProvider",
-          (Some (RepositoryProvider.to_value x.repositoryProvider)));
-        ("sha", (Some (SHA.to_value x.sha)))]
+          (Option.map x.repositoryProvider ~f:RepositoryProvider.to_value));
+        ("sha", (Option.map x.sha ~f:SHA.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sha = SHA.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sha") in
+      let sha = (Option.map ~f:SHA.of_xml) (Xml.child xml_arg0 "sha") in
       let repositoryProvider =
-        RepositoryProvider.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "repositoryProvider") in
+        (Option.map ~f:RepositoryProvider.of_xml)
+          (Xml.child xml_arg0 "repositoryProvider") in
       let repositoryName =
-        RepositoryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "repositoryName") in
       let directory =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "directory") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "directory") in
       let branch =
-        GitBranchName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "branch") in
-      make ~sha ~repositoryProvider ~repositoryName ~directory ~branch ()
+        (Option.map ~f:GitBranchName.of_xml) (Xml.child xml_arg0 "branch") in
+      make ?sha ?repositoryProvider ?repositoryName ?directory ?branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sha = field_map_exn json "sha" SHA.of_json in
+    let of_json json__ =
+      let sha = field_map json__ "sha" SHA.of_json in
       let repositoryProvider =
-        field_map_exn json "repositoryProvider" RepositoryProvider.of_json in
+        field_map json__ "repositoryProvider" RepositoryProvider.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let directory = field_map_exn json "directory" String_.of_json in
-      let branch = field_map_exn json "branch" GitBranchName.of_json in
-      make ~sha ~repositoryProvider ~repositoryName ~directory ~branch ()
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let directory = field_map json__ "directory" String_.of_json in
+      let branch = field_map json__ "branch" GitBranchName.of_json in
+      make ?sha ?repositoryProvider ?repositoryName ?directory ?branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Revision detail data for a commit and push that activates a sync attempt"]
+module LatestSyncBlockers =
+  struct
+    type nonrec t = SyncBlocker.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SyncBlocker.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SyncBlocker.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LatestSyncBlockers" ~of_json:SyncBlocker.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceCountsSummary =
+  struct
+    type nonrec t =
+      {
+      behindMajor: Integer.t option
+        [@ocaml.doc
+          "The number of resources of this type in the Amazon Web Services account that need a major template version update."];
+      behindMinor: Integer.t option
+        [@ocaml.doc
+          "The number of resources of this type in the Amazon Web Services account that need a minor template version update."];
+      failed: Integer.t option
+        [@ocaml.doc
+          "The number of resources of this type in the Amazon Web Services account that failed to deploy."];
+      total: Integer.t option
+        [@ocaml.doc
+          "The total number of resources of this type in the Amazon Web Services account."];
+      upToDate: Integer.t option
+        [@ocaml.doc
+          "The number of resources of this type in the Amazon Web Services account that are up-to-date with their template."]}
+    let make ?behindMajor =
+      fun ?behindMinor ->
+        fun ?failed ->
+          fun ?total ->
+            fun ?upToDate ->
+              fun () -> { behindMajor; behindMinor; failed; total; upToDate }
+    let to_value x =
+      structure_to_value
+        [("behindMajor", (Option.map x.behindMajor ~f:Integer.to_value));
+        ("behindMinor", (Option.map x.behindMinor ~f:Integer.to_value));
+        ("failed", (Option.map x.failed ~f:Integer.to_value));
+        ("total", (Option.map x.total ~f:Integer.to_value));
+        ("upToDate", (Option.map x.upToDate ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let upToDate =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "upToDate") in
+      let total = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "total") in
+      let failed =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "failed") in
+      let behindMinor =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "behindMinor") in
+      let behindMajor =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "behindMajor") in
+      make ?upToDate ?total ?failed ?behindMinor ?behindMajor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let upToDate = field_map json__ "upToDate" Integer.of_json in
+      let total = field_map json__ "total" Integer.of_json in
+      let failed = field_map json__ "failed" Integer.of_json in
+      let behindMinor = field_map json__ "behindMinor" Integer.of_json in
+      let behindMajor = field_map json__ "behindMajor" Integer.of_json in
+      make ?upToDate ?total ?failed ?behindMinor ?behindMajor ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary counts of each Proton resource types."]
 module RepositorySyncEvents =
   struct
     type nonrec t = RepositorySyncEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositorySyncEvent.to_value)) |>
         (fun x -> `List x)
@@ -2656,6 +4006,65 @@ module RepositorySyncStatus =
     let of_json j = of_string (string_of_json ~kind:"RepositorySyncStatus" j)
     let to_json = simple_to_json to_value
   end
+module DeploymentState =
+  struct
+    type nonrec t =
+      {
+      component: ComponentState.t option
+        [@ocaml.doc
+          "The state of the component associated with the deployment."];
+      environment: EnvironmentState.t option
+        [@ocaml.doc
+          "The state of the environment associated with the deployment."];
+      serviceInstance: ServiceInstanceState.t option
+        [@ocaml.doc
+          "The state of the service instance associated with the deployment."];
+      servicePipeline: ServicePipelineState.t option
+        [@ocaml.doc
+          "The state of the service pipeline associated with the deployment."]}
+    let make ?component =
+      fun ?environment ->
+        fun ?serviceInstance ->
+          fun ?servicePipeline ->
+            fun () ->
+              { component; environment; serviceInstance; servicePipeline }
+    let to_value x =
+      structure_to_value
+        [("component", (Option.map x.component ~f:ComponentState.to_value));
+        ("environment",
+          (Option.map x.environment ~f:EnvironmentState.to_value));
+        ("serviceInstance",
+          (Option.map x.serviceInstance ~f:ServiceInstanceState.to_value));
+        ("servicePipeline",
+          (Option.map x.servicePipeline ~f:ServicePipelineState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let servicePipeline =
+        (Option.map ~f:ServicePipelineState.of_xml)
+          (Xml.child xml_arg0 "servicePipeline") in
+      let serviceInstance =
+        (Option.map ~f:ServiceInstanceState.of_xml)
+          (Xml.child xml_arg0 "serviceInstance") in
+      let environment =
+        (Option.map ~f:EnvironmentState.of_xml)
+          (Xml.child xml_arg0 "environment") in
+      let component =
+        (Option.map ~f:ComponentState.of_xml)
+          (Xml.child xml_arg0 "component") in
+      make ?servicePipeline ?serviceInstance ?environment ?component ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let servicePipeline =
+        field_map json__ "servicePipeline" ServicePipelineState.of_json in
+      let serviceInstance =
+        field_map json__ "serviceInstance" ServiceInstanceState.of_json in
+      let environment =
+        field_map json__ "environment" EnvironmentState.of_json in
+      let component = field_map json__ "component" ComponentState.of_json in
+      make ?servicePipeline ?serviceInstance ?environment ?component ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The detailed data about the current state of the deployment."]
 module S3ObjectSource =
   struct
     type nonrec t =
@@ -2679,216 +4088,202 @@ module S3ObjectSource =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bucket") in
       make ~key ~bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map_exn json "key" S3Key.of_json in
-      let bucket = field_map_exn json "bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let key = field_map_exn json__ "key" S3Key.of_json in
+      let bucket = field_map_exn json__ "bucket" S3Bucket.of_json in
       make ~key ~bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Template bundle S3 bucket data."]
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "There isn't sufficient access for performing this action."]
 module ConflictException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "ConflictException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request couldn't be made due to a conflicting operation or resource."]
 module InternalServerException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request failed to register with the service."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource wasn't found."]
 module TemplateSyncConfig =
   struct
     type nonrec t =
       {
-      branch: GitBranchName.t [@ocaml.doc "The repository branch."];
-      repositoryName: RepositoryName.t
-        [@ocaml.doc
-          "The name of the repository, for example myrepos/myrepo."];
-      repositoryProvider: RepositoryProvider.t
+      branch: GitBranchName.t option [@ocaml.doc "The repository branch."];
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc "The repository name (for example, myrepos/myrepo)."];
+      repositoryProvider: RepositoryProvider.t option
         [@ocaml.doc "The repository provider."];
       subdirectory: Subdirectory.t option
         [@ocaml.doc "A subdirectory path to your template bundle version."];
-      templateName: ResourceName.t [@ocaml.doc "The template name."];
-      templateType: TemplateType.t [@ocaml.doc "The template type."]}
-    let context_ = "TemplateSyncConfig"
-    let make ?subdirectory =
-      fun ~branch ->
-        fun ~repositoryName ->
-          fun ~repositoryProvider ->
-            fun ~templateName ->
-              fun ~templateType ->
+      templateName: ResourceName.t option [@ocaml.doc "The template name."];
+      templateType: TemplateType.t option [@ocaml.doc "The template type."]}
+    let make ?branch =
+      fun ?repositoryName ->
+        fun ?repositoryProvider ->
+          fun ?subdirectory ->
+            fun ?templateName ->
+              fun ?templateType ->
                 fun () ->
                   {
-                    subdirectory;
                     branch;
                     repositoryName;
                     repositoryProvider;
+                    subdirectory;
                     templateName;
                     templateType
                   }
     let to_value x =
       structure_to_value
-        [("branch", (Some (GitBranchName.to_value x.branch)));
-        ("repositoryName", (Some (RepositoryName.to_value x.repositoryName)));
+        [("branch", (Option.map x.branch ~f:GitBranchName.to_value));
+        ("repositoryName",
+          (Option.map x.repositoryName ~f:RepositoryName.to_value));
         ("repositoryProvider",
-          (Some (RepositoryProvider.to_value x.repositoryProvider)));
+          (Option.map x.repositoryProvider ~f:RepositoryProvider.to_value));
         ("subdirectory",
           (Option.map x.subdirectory ~f:Subdirectory.to_value));
-        ("templateName", (Some (ResourceName.to_value x.templateName)));
-        ("templateType", (Some (TemplateType.to_value x.templateType)))]
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value));
+        ("templateType",
+          (Option.map x.templateType ~f:TemplateType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateType =
-        TemplateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateType") in
+        (Option.map ~f:TemplateType.of_xml)
+          (Xml.child xml_arg0 "templateType") in
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let subdirectory =
         (Option.map ~f:Subdirectory.of_xml)
           (Xml.child xml_arg0 "subdirectory") in
       let repositoryProvider =
-        RepositoryProvider.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "repositoryProvider") in
+        (Option.map ~f:RepositoryProvider.of_xml)
+          (Xml.child xml_arg0 "repositoryProvider") in
       let repositoryName =
-        RepositoryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "repositoryName") in
       let branch =
-        GitBranchName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "branch") in
-      make ~templateType ~templateName ?subdirectory ~repositoryProvider
-        ~repositoryName ~branch ()
+        (Option.map ~f:GitBranchName.of_xml) (Xml.child xml_arg0 "branch") in
+      make ?templateType ?templateName ?subdirectory ?repositoryProvider
+        ?repositoryName ?branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateType =
-        field_map_exn json "templateType" TemplateType.of_json in
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
-      let subdirectory = field_map json "subdirectory" Subdirectory.of_json in
+    let of_json json__ =
+      let templateType = field_map json__ "templateType" TemplateType.of_json in
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
+      let subdirectory = field_map json__ "subdirectory" Subdirectory.of_json in
       let repositoryProvider =
-        field_map_exn json "repositoryProvider" RepositoryProvider.of_json in
+        field_map json__ "repositoryProvider" RepositoryProvider.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let branch = field_map_exn json "branch" GitBranchName.of_json in
-      make ~templateType ~templateName ?subdirectory ~repositoryProvider
-        ~repositoryName ~branch ()
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let branch = field_map json__ "branch" GitBranchName.of_json in
+      make ?templateType ?templateName ?subdirectory ?repositoryProvider
+        ?repositoryName ?branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The detail data for a template sync configuration."]
 module ThrottlingException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input is invalid or an out-of-range value was supplied for the input parameter."]
@@ -2896,152 +4291,170 @@ module ServiceTemplateVersion =
   struct
     type nonrec t =
       {
-      arn: ServiceTemplateVersionArn.t
+      arn: ServiceTemplateVersionArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the version of a service template."];
-      compatibleEnvironmentTemplates: CompatibleEnvironmentTemplateList.t
+      compatibleEnvironmentTemplates:
+        CompatibleEnvironmentTemplateList.t option
         [@ocaml.doc
           "An array of compatible environment template names for the major version of a service template."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The time when the version of a service template was created."];
       description: Description.t option
         [@ocaml.doc "A description of the version of a service template."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the version of a service template was last modified."];
-      majorVersion: TemplateVersionPart.t
+      majorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The latest major version that's associated with the version of a service template."];
-      minorVersion: TemplateVersionPart.t
+      minorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The minor version of a service template."];
       recommendedMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The recommended minor version of the service template."];
       schema: TemplateSchema.t option
         [@ocaml.doc "The schema of the version of a service template."];
-      status: TemplateVersionStatus.t
+      status: TemplateVersionStatus.t option
         [@ocaml.doc "The service template version status."];
       statusMessage: StatusMessage.t option
         [@ocaml.doc "A service template version status message."];
-      templateName: ResourceName.t
+      supportedComponentSources:
+        ServiceTemplateSupportedComponentSourceInputList.t option
+        [@ocaml.doc
+          "An array of supported component sources. Components with supported sources can be attached to service instances based on this service template version. For more information about components, see Proton components in the Proton User Guide."];
+      templateName: ResourceName.t option
         [@ocaml.doc "The name of the version of a service template."]}
-    let context_ = "ServiceTemplateVersion"
-    let make ?description =
-      fun ?recommendedMinorVersion ->
-        fun ?schema ->
-          fun ?statusMessage ->
-            fun ~arn ->
-              fun ~compatibleEnvironmentTemplates ->
-                fun ~createdAt ->
-                  fun ~lastModifiedAt ->
-                    fun ~majorVersion ->
-                      fun ~minorVersion ->
-                        fun ~status ->
-                          fun ~templateName ->
-                            fun () ->
-                              {
-                                description;
-                                recommendedMinorVersion;
-                                schema;
-                                statusMessage;
-                                arn;
-                                compatibleEnvironmentTemplates;
-                                createdAt;
-                                lastModifiedAt;
-                                majorVersion;
-                                minorVersion;
-                                status;
-                                templateName
-                              }
+    let make ?arn =
+      fun ?compatibleEnvironmentTemplates ->
+        fun ?createdAt ->
+          fun ?description ->
+            fun ?lastModifiedAt ->
+              fun ?majorVersion ->
+                fun ?minorVersion ->
+                  fun ?recommendedMinorVersion ->
+                    fun ?schema ->
+                      fun ?status ->
+                        fun ?statusMessage ->
+                          fun ?supportedComponentSources ->
+                            fun ?templateName ->
+                              fun () ->
+                                {
+                                  arn;
+                                  compatibleEnvironmentTemplates;
+                                  createdAt;
+                                  description;
+                                  lastModifiedAt;
+                                  majorVersion;
+                                  minorVersion;
+                                  recommendedMinorVersion;
+                                  schema;
+                                  status;
+                                  statusMessage;
+                                  supportedComponentSources;
+                                  templateName
+                                }
     let to_value x =
       structure_to_value
-        [("arn", (Some (ServiceTemplateVersionArn.to_value x.arn)));
+        [("arn", (Option.map x.arn ~f:ServiceTemplateVersionArn.to_value));
         ("compatibleEnvironmentTemplates",
-          (Some
-             (CompatibleEnvironmentTemplateList.to_value
-                x.compatibleEnvironmentTemplates)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+          (Option.map x.compatibleEnvironmentTemplates
+             ~f:CompatibleEnvironmentTemplateList.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
         ("majorVersion",
-          (Some (TemplateVersionPart.to_value x.majorVersion)));
+          (Option.map x.majorVersion ~f:TemplateVersionPart.to_value));
         ("minorVersion",
-          (Some (TemplateVersionPart.to_value x.minorVersion)));
+          (Option.map x.minorVersion ~f:TemplateVersionPart.to_value));
         ("recommendedMinorVersion",
           (Option.map x.recommendedMinorVersion
              ~f:TemplateVersionPart.to_value));
         ("schema", (Option.map x.schema ~f:TemplateSchema.to_value));
-        ("status", (Some (TemplateVersionStatus.to_value x.status)));
+        ("status", (Option.map x.status ~f:TemplateVersionStatus.to_value));
         ("statusMessage",
           (Option.map x.statusMessage ~f:StatusMessage.to_value));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+        ("supportedComponentSources",
+          (Option.map x.supportedComponentSources
+             ~f:ServiceTemplateSupportedComponentSourceInputList.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
+      let supportedComponentSources =
+        (Option.map
+           ~f:ServiceTemplateSupportedComponentSourceInputList.of_xml)
+          (Xml.child xml_arg0 "supportedComponentSources") in
       let statusMessage =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "statusMessage") in
       let status =
-        TemplateVersionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:TemplateVersionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let schema =
         (Option.map ~f:TemplateSchema.of_xml) (Xml.child xml_arg0 "schema") in
       let recommendedMinorVersion =
         (Option.map ~f:TemplateVersionPart.of_xml)
           (Xml.child xml_arg0 "recommendedMinorVersion") in
       let minorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "minorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "minorVersion") in
       let majorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "majorVersion") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let compatibleEnvironmentTemplates =
-        CompatibleEnvironmentTemplateList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "compatibleEnvironmentTemplates") in
+        (Option.map ~f:CompatibleEnvironmentTemplateList.of_xml)
+          (Xml.child xml_arg0 "compatibleEnvironmentTemplates") in
       let arn =
-        ServiceTemplateVersionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ?statusMessage ~status ?schema
-        ?recommendedMinorVersion ~minorVersion ~majorVersion ~lastModifiedAt
-        ?description ~createdAt ~compatibleEnvironmentTemplates ~arn ()
+        (Option.map ~f:ServiceTemplateVersionArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?templateName ?supportedComponentSources ?statusMessage ?status
+        ?schema ?recommendedMinorVersion ?minorVersion ?majorVersion
+        ?lastModifiedAt ?description ?createdAt
+        ?compatibleEnvironmentTemplates ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
+      let supportedComponentSources =
+        field_map json__ "supportedComponentSources"
+          ServiceTemplateSupportedComponentSourceInputList.of_json in
       let statusMessage =
-        field_map json "statusMessage" StatusMessage.of_json in
-      let status = field_map_exn json "status" TemplateVersionStatus.of_json in
-      let schema = field_map json "schema" TemplateSchema.of_json in
+        field_map json__ "statusMessage" StatusMessage.of_json in
+      let status = field_map json__ "status" TemplateVersionStatus.of_json in
+      let schema = field_map json__ "schema" TemplateSchema.of_json in
       let recommendedMinorVersion =
-        field_map json "recommendedMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "recommendedMinorVersion"
+          TemplateVersionPart.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map json__ "majorVersion" TemplateVersionPart.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let compatibleEnvironmentTemplates =
-        field_map_exn json "compatibleEnvironmentTemplates"
+        field_map json__ "compatibleEnvironmentTemplates"
           CompatibleEnvironmentTemplateList.of_json in
-      let arn = field_map_exn json "arn" ServiceTemplateVersionArn.of_json in
-      make ~templateName ?statusMessage ~status ?schema
-        ?recommendedMinorVersion ~minorVersion ~majorVersion ~lastModifiedAt
-        ?description ~createdAt ~compatibleEnvironmentTemplates ~arn ()
+      let arn = field_map json__ "arn" ServiceTemplateVersionArn.of_json in
+      make ?templateName ?supportedComponentSources ?statusMessage ?status
+        ?schema ?recommendedMinorVersion ?minorVersion ?majorVersion
+        ?lastModifiedAt ?description ?createdAt
+        ?compatibleEnvironmentTemplates ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The version of a service template detail data."]
+  end[@@ocaml.doc
+       "Detailed data of an Proton service template version resource."]
 module CompatibleEnvironmentTemplateInputList =
   struct
     type nonrec t = CompatibleEnvironmentTemplateInput.t list
@@ -3050,6 +4463,9 @@ module CompatibleEnvironmentTemplateInputList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CompatibleEnvironmentTemplateInput.to_value)) |>
         (fun x -> `List x)
@@ -3077,10 +4493,10 @@ module ServiceTemplate =
   struct
     type nonrec t =
       {
-      arn: ServiceTemplateArn.t
+      arn: ServiceTemplateArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the service template."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the service template was created."];
       description: Description.t option
         [@ocaml.doc "A description of the service template."];
@@ -3090,45 +4506,46 @@ module ServiceTemplate =
       encryptionKey: Arn.t option
         [@ocaml.doc
           "The customer provided service template encryption key that's used to encrypt data."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc "The time when the service template was last modified."];
-      name: ResourceName.t [@ocaml.doc "The name of the service template."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the service template."];
       pipelineProvisioning: Provisioning.t option
         [@ocaml.doc
           "If pipelineProvisioning is true, a service pipeline is included in the service template. Otherwise, a service pipeline isn't included in the service template."];
       recommendedVersion: FullTemplateVersionNumber.t option
         [@ocaml.doc "The recommended version of the service template."]}
-    let context_ = "ServiceTemplate"
-    let make ?description =
-      fun ?displayName ->
-        fun ?encryptionKey ->
-          fun ?pipelineProvisioning ->
-            fun ?recommendedVersion ->
-              fun ~arn ->
-                fun ~createdAt ->
-                  fun ~lastModifiedAt ->
-                    fun ~name ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?displayName ->
+            fun ?encryptionKey ->
+              fun ?lastModifiedAt ->
+                fun ?name ->
+                  fun ?pipelineProvisioning ->
+                    fun ?recommendedVersion ->
                       fun () ->
                         {
+                          arn;
+                          createdAt;
                           description;
                           displayName;
                           encryptionKey;
-                          pipelineProvisioning;
-                          recommendedVersion;
-                          arn;
-                          createdAt;
                           lastModifiedAt;
-                          name
+                          name;
+                          pipelineProvisioning;
+                          recommendedVersion
                         }
     let to_value x =
       structure_to_value
-        [("arn", (Some (ServiceTemplateArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:ServiceTemplateArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
         ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
         ("encryptionKey", (Option.map x.encryptionKey ~f:Arn.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
         ("pipelineProvisioning",
           (Option.map x.pipelineProvisioning ~f:Provisioning.to_value));
         ("recommendedVersion",
@@ -3143,10 +4560,10 @@ module ServiceTemplate =
         (Option.map ~f:Provisioning.of_xml)
           (Xml.child xml_arg0 "pipelineProvisioning") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let encryptionKey =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "encryptionKey") in
       let displayName =
@@ -3154,31 +4571,100 @@ module ServiceTemplate =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn =
-        ServiceTemplateArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?recommendedVersion ?pipelineProvisioning ~name ~lastModifiedAt
-        ?encryptionKey ?displayName ?description ~createdAt ~arn ()
+        (Option.map ~f:ServiceTemplateArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?recommendedVersion ?pipelineProvisioning ?name ?lastModifiedAt
+        ?encryptionKey ?displayName ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendedVersion =
-        field_map json "recommendedVersion" FullTemplateVersionNumber.of_json in
+        field_map json__ "recommendedVersion"
+          FullTemplateVersionNumber.of_json in
       let pipelineProvisioning =
-        field_map json "pipelineProvisioning" Provisioning.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "pipelineProvisioning" Provisioning.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let encryptionKey = field_map json "encryptionKey" Arn.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" ServiceTemplateArn.of_json in
-      make ?recommendedVersion ?pipelineProvisioning ~name ~lastModifiedAt
-        ?encryptionKey ?displayName ?description ~createdAt ~arn ()
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let encryptionKey = field_map json__ "encryptionKey" Arn.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" ServiceTemplateArn.of_json in
+      make ?recommendedVersion ?pipelineProvisioning ?name ?lastModifiedAt
+        ?encryptionKey ?displayName ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The service template detail data."]
+  end[@@ocaml.doc "Detailed data of an Proton service template resource."]
+module ServiceSyncConfig =
+  struct
+    type nonrec t =
+      {
+      branch: GitBranchName.t option
+        [@ocaml.doc
+          "The name of the code repository branch that holds the service code Proton will sync with."];
+      filePath: OpsFilePath.t option
+        [@ocaml.doc "The file path to the service sync configuration file."];
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc
+          "The name of the code repository that holds the service code Proton will sync with."];
+      repositoryProvider: RepositoryProvider.t option
+        [@ocaml.doc
+          "The name of the repository provider that holds the repository Proton will sync with."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service that the service instance is added to."]}
+    let make ?branch =
+      fun ?filePath ->
+        fun ?repositoryName ->
+          fun ?repositoryProvider ->
+            fun ?serviceName ->
+              fun () ->
+                {
+                  branch;
+                  filePath;
+                  repositoryName;
+                  repositoryProvider;
+                  serviceName
+                }
+    let to_value x =
+      structure_to_value
+        [("branch", (Option.map x.branch ~f:GitBranchName.to_value));
+        ("filePath", (Option.map x.filePath ~f:OpsFilePath.to_value));
+        ("repositoryName",
+          (Option.map x.repositoryName ~f:RepositoryName.to_value));
+        ("repositoryProvider",
+          (Option.map x.repositoryProvider ~f:RepositoryProvider.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let repositoryProvider =
+        (Option.map ~f:RepositoryProvider.of_xml)
+          (Xml.child xml_arg0 "repositoryProvider") in
+      let repositoryName =
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "repositoryName") in
+      let filePath =
+        (Option.map ~f:OpsFilePath.of_xml) (Xml.child xml_arg0 "filePath") in
+      let branch =
+        (Option.map ~f:GitBranchName.of_xml) (Xml.child xml_arg0 "branch") in
+      make ?serviceName ?repositoryProvider ?repositoryName ?filePath ?branch
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let repositoryProvider =
+        field_map json__ "repositoryProvider" RepositoryProvider.of_json in
+      let repositoryName =
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let filePath = field_map json__ "filePath" OpsFilePath.of_json in
+      let branch = field_map json__ "branch" GitBranchName.of_json in
+      make ?serviceName ?repositoryProvider ?repositoryName ?filePath ?branch
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Detailed data of the service sync configuration."]
 module DeploymentUpdateType =
   struct
     type nonrec t =
@@ -3215,93 +4701,94 @@ module Service =
   struct
     type nonrec t =
       {
-      arn: ServiceArn.t
+      arn: ServiceArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the service."];
       branchName: GitBranchName.t option
         [@ocaml.doc
           "The name of the code repository branch that holds the code that's deployed in Proton."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the service was created."];
       description: Description.t option
-        [@ocaml.doc "A description of a service."];
-      lastModifiedAt: Timestamp.t
+        [@ocaml.doc "A description of the service."];
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc "The time when the service was last modified."];
-      name: ResourceName.t [@ocaml.doc "The name of the service."];
+      name: ResourceName.t option [@ocaml.doc "The name of the service."];
       pipeline: ServicePipeline.t option
         [@ocaml.doc "The service pipeline detail data."];
       repositoryConnectionArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the repository connection. For more information, see Set up a repository connection in the Proton Administrator Guide and Setting up with Proton in the Proton User Guide."];
+          "The Amazon Resource Name (ARN) of the repository connection. For more information, see Setting up an AWS CodeStar connection in the Proton User Guide."];
       repositoryId: RepositoryId.t option
         [@ocaml.doc "The ID of the source code repository."];
-      spec: SpecContents.t
+      spec: SpecContents.t option
         [@ocaml.doc "The formatted specification that defines the service."];
-      status: ServiceStatus.t [@ocaml.doc "The status of the service."];
+      status: ServiceStatus.t option
+        [@ocaml.doc "The status of the service."];
       statusMessage: StatusMessage.t option
         [@ocaml.doc "A service status message."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc "The name of the service template."]}
-    let context_ = "Service"
-    let make ?branchName =
-      fun ?description ->
-        fun ?pipeline ->
-          fun ?repositoryConnectionArn ->
-            fun ?repositoryId ->
-              fun ?statusMessage ->
-                fun ~arn ->
-                  fun ~createdAt ->
-                    fun ~lastModifiedAt ->
-                      fun ~name ->
-                        fun ~spec ->
-                          fun ~status ->
-                            fun ~templateName ->
+    let make ?arn =
+      fun ?branchName ->
+        fun ?createdAt ->
+          fun ?description ->
+            fun ?lastModifiedAt ->
+              fun ?name ->
+                fun ?pipeline ->
+                  fun ?repositoryConnectionArn ->
+                    fun ?repositoryId ->
+                      fun ?spec ->
+                        fun ?status ->
+                          fun ?statusMessage ->
+                            fun ?templateName ->
                               fun () ->
                                 {
+                                  arn;
                                   branchName;
+                                  createdAt;
                                   description;
+                                  lastModifiedAt;
+                                  name;
                                   pipeline;
                                   repositoryConnectionArn;
                                   repositoryId;
-                                  statusMessage;
-                                  arn;
-                                  createdAt;
-                                  lastModifiedAt;
-                                  name;
                                   spec;
                                   status;
+                                  statusMessage;
                                   templateName
                                 }
     let to_value x =
       structure_to_value
-        [("arn", (Some (ServiceArn.to_value x.arn)));
+        [("arn", (Option.map x.arn ~f:ServiceArn.to_value));
         ("branchName", (Option.map x.branchName ~f:GitBranchName.to_value));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
         ("pipeline", (Option.map x.pipeline ~f:ServicePipeline.to_value));
         ("repositoryConnectionArn",
           (Option.map x.repositoryConnectionArn ~f:Arn.to_value));
         ("repositoryId",
           (Option.map x.repositoryId ~f:RepositoryId.to_value));
-        ("spec", (Some (SpecContents.to_value x.spec)));
-        ("status", (Some (ServiceStatus.to_value x.status)));
+        ("spec", (Option.map x.spec ~f:SpecContents.to_value));
+        ("status", (Option.map x.status ~f:ServiceStatus.to_value));
         ("statusMessage",
           (Option.map x.statusMessage ~f:StatusMessage.to_value));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let statusMessage =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "statusMessage") in
       let status =
-        ServiceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ServiceStatus.of_xml) (Xml.child xml_arg0 "status") in
       let spec =
-        SpecContents.of_xml (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+        (Option.map ~f:SpecContents.of_xml) (Xml.child xml_arg0 "spec") in
       let repositoryId =
         (Option.map ~f:RepositoryId.of_xml)
           (Xml.child xml_arg0 "repositoryId") in
@@ -3312,378 +4799,428 @@ module Service =
         (Option.map ~f:ServicePipeline.of_xml)
           (Xml.child xml_arg0 "pipeline") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let branchName =
         (Option.map ~f:GitBranchName.of_xml)
           (Xml.child xml_arg0 "branchName") in
-      let arn =
-        ServiceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ?statusMessage ~status ~spec ?repositoryId
-        ?repositoryConnectionArn ?pipeline ~name ~lastModifiedAt ?description
-        ~createdAt ?branchName ~arn ()
+      let arn = (Option.map ~f:ServiceArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?templateName ?statusMessage ?status ?spec ?repositoryId
+        ?repositoryConnectionArn ?pipeline ?name ?lastModifiedAt ?description
+        ?createdAt ?branchName ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let statusMessage =
-        field_map json "statusMessage" StatusMessage.of_json in
-      let status = field_map_exn json "status" ServiceStatus.of_json in
-      let spec = field_map_exn json "spec" SpecContents.of_json in
-      let repositoryId = field_map json "repositoryId" RepositoryId.of_json in
+        field_map json__ "statusMessage" StatusMessage.of_json in
+      let status = field_map json__ "status" ServiceStatus.of_json in
+      let spec = field_map json__ "spec" SpecContents.of_json in
+      let repositoryId = field_map json__ "repositoryId" RepositoryId.of_json in
       let repositoryConnectionArn =
-        field_map json "repositoryConnectionArn" Arn.of_json in
-      let pipeline = field_map json "pipeline" ServicePipeline.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "repositoryConnectionArn" Arn.of_json in
+      let pipeline = field_map json__ "pipeline" ServicePipeline.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let branchName = field_map json "branchName" GitBranchName.of_json in
-      let arn = field_map_exn json "arn" ServiceArn.of_json in
-      make ~templateName ?statusMessage ~status ~spec ?repositoryId
-        ?repositoryConnectionArn ?pipeline ~name ~lastModifiedAt ?description
-        ~createdAt ?branchName ~arn ()
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let branchName = field_map json__ "branchName" GitBranchName.of_json in
+      let arn = field_map json__ "arn" ServiceArn.of_json in
+      make ?templateName ?statusMessage ?status ?spec ?repositoryId
+        ?repositoryConnectionArn ?pipeline ?name ?lastModifiedAt ?description
+        ?createdAt ?branchName ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The service detail data."]
+  end[@@ocaml.doc "Detailed data of an Proton service resource."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A quota was exceeded. For more information, see Proton Quotas in the Proton Administrator Guide."]
+       "A quota was exceeded. For more information, see Proton Quotas in the Proton User Guide."]
 module ServiceInstance =
   struct
     type nonrec t =
       {
-      arn: ServiceInstanceArn.t
+      arn: ServiceInstanceArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the service instance."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the service instance was created."];
-      deploymentStatus: DeploymentStatus.t
+      deploymentStatus: DeploymentStatus.t option
         [@ocaml.doc "The service instance deployment status."];
       deploymentStatusMessage: StatusMessage.t option
-        [@ocaml.doc "A service instance deployment status message."];
-      environmentName: ResourceName.t
+        [@ocaml.doc
+          "The message associated with the service instance deployment status."];
+      environmentName: ResourceName.t option
         [@ocaml.doc
           "The name of the environment that the service instance was deployed into."];
-      lastDeploymentAttemptedAt: Timestamp.t
+      lastAttemptedDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last attempted deployment of this service instance."];
+      lastClientRequestToken: String_.t option
+        [@ocaml.doc "The last client request token received."];
+      lastDeploymentAttemptedAt: Timestamp.t option
         [@ocaml.doc
           "The time when a deployment of the service instance was last attempted."];
-      lastDeploymentSucceededAt: Timestamp.t
+      lastDeploymentSucceededAt: Timestamp.t option
         [@ocaml.doc
           "The time when the service instance was last deployed successfully."];
-      name: ResourceName.t [@ocaml.doc "The name of the service instance."];
-      serviceName: ResourceName.t
+      lastSucceededDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last successful deployment of this service instance."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the service instance."];
+      serviceName: ResourceName.t option
         [@ocaml.doc
           "The name of the service that the service instance belongs to."];
       spec: SpecContents.t option
         [@ocaml.doc
           "The service spec that was used to create the service instance."];
-      templateMajorVersion: TemplateVersionPart.t
+      templateMajorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The major version of the service template that was used to create the service instance."];
-      templateMinorVersion: TemplateVersionPart.t
+      templateMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The minor version of the service template that was used to create the service instance."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc
           "The name of the service template that was used to create the service instance."]}
-    let context_ = "ServiceInstance"
-    let make ?deploymentStatusMessage =
-      fun ?spec ->
-        fun ~arn ->
-          fun ~createdAt ->
-            fun ~deploymentStatus ->
-              fun ~environmentName ->
-                fun ~lastDeploymentAttemptedAt ->
-                  fun ~lastDeploymentSucceededAt ->
-                    fun ~name ->
-                      fun ~serviceName ->
-                        fun ~templateMajorVersion ->
-                          fun ~templateMinorVersion ->
-                            fun ~templateName ->
-                              fun () ->
-                                {
-                                  deploymentStatusMessage;
-                                  spec;
-                                  arn;
-                                  createdAt;
-                                  deploymentStatus;
-                                  environmentName;
-                                  lastDeploymentAttemptedAt;
-                                  lastDeploymentSucceededAt;
-                                  name;
-                                  serviceName;
-                                  templateMajorVersion;
-                                  templateMinorVersion;
-                                  templateName
-                                }
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?deploymentStatus ->
+          fun ?deploymentStatusMessage ->
+            fun ?environmentName ->
+              fun ?lastAttemptedDeploymentId ->
+                fun ?lastClientRequestToken ->
+                  fun ?lastDeploymentAttemptedAt ->
+                    fun ?lastDeploymentSucceededAt ->
+                      fun ?lastSucceededDeploymentId ->
+                        fun ?name ->
+                          fun ?serviceName ->
+                            fun ?spec ->
+                              fun ?templateMajorVersion ->
+                                fun ?templateMinorVersion ->
+                                  fun ?templateName ->
+                                    fun () ->
+                                      {
+                                        arn;
+                                        createdAt;
+                                        deploymentStatus;
+                                        deploymentStatusMessage;
+                                        environmentName;
+                                        lastAttemptedDeploymentId;
+                                        lastClientRequestToken;
+                                        lastDeploymentAttemptedAt;
+                                        lastDeploymentSucceededAt;
+                                        lastSucceededDeploymentId;
+                                        name;
+                                        serviceName;
+                                        spec;
+                                        templateMajorVersion;
+                                        templateMinorVersion;
+                                        templateName
+                                      }
     let to_value x =
       structure_to_value
-        [("arn", (Some (ServiceInstanceArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:ServiceInstanceArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("deploymentStatus",
-          (Some (DeploymentStatus.to_value x.deploymentStatus)));
+          (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
         ("deploymentStatusMessage",
           (Option.map x.deploymentStatusMessage ~f:StatusMessage.to_value));
-        ("environmentName", (Some (ResourceName.to_value x.environmentName)));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("lastAttemptedDeploymentId",
+          (Option.map x.lastAttemptedDeploymentId ~f:DeploymentId.to_value));
+        ("lastClientRequestToken",
+          (Option.map x.lastClientRequestToken ~f:String_.to_value));
         ("lastDeploymentAttemptedAt",
-          (Some (Timestamp.to_value x.lastDeploymentAttemptedAt)));
+          (Option.map x.lastDeploymentAttemptedAt ~f:Timestamp.to_value));
         ("lastDeploymentSucceededAt",
-          (Some (Timestamp.to_value x.lastDeploymentSucceededAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
-        ("serviceName", (Some (ResourceName.to_value x.serviceName)));
+          (Option.map x.lastDeploymentSucceededAt ~f:Timestamp.to_value));
+        ("lastSucceededDeploymentId",
+          (Option.map x.lastSucceededDeploymentId ~f:DeploymentId.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value));
         ("spec", (Option.map x.spec ~f:SpecContents.to_value));
         ("templateMajorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMajorVersion)));
+          (Option.map x.templateMajorVersion ~f:TemplateVersionPart.to_value));
         ("templateMinorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMinorVersion)));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+          (Option.map x.templateMinorVersion ~f:TemplateVersionPart.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let templateMinorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMinorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMinorVersion") in
       let templateMajorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMajorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMajorVersion") in
       let spec =
         (Option.map ~f:SpecContents.of_xml) (Xml.child xml_arg0 "spec") in
       let serviceName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastSucceededDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSucceededDeploymentId") in
       let lastDeploymentSucceededAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentSucceededAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentSucceededAt") in
       let lastDeploymentAttemptedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentAttemptedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentAttemptedAt") in
+      let lastClientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "lastClientRequestToken") in
+      let lastAttemptedDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDeploymentId") in
       let environmentName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
       let deploymentStatusMessage =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "deploymentStatusMessage") in
       let deploymentStatus =
-        DeploymentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deploymentStatus") in
+        (Option.map ~f:DeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "deploymentStatus") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn =
-        ServiceInstanceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion ?spec
-        ~serviceName ~name ~lastDeploymentSucceededAt
-        ~lastDeploymentAttemptedAt ~environmentName ?deploymentStatusMessage
-        ~deploymentStatus ~createdAt ~arn ()
+        (Option.map ~f:ServiceInstanceArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec
+        ?serviceName ?name ?lastSucceededDeploymentId
+        ?lastDeploymentSucceededAt ?lastDeploymentAttemptedAt
+        ?lastClientRequestToken ?lastAttemptedDeploymentId ?environmentName
+        ?deploymentStatusMessage ?deploymentStatus ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let templateMinorVersion =
-        field_map_exn json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map_exn json "templateMajorVersion" TemplateVersionPart.of_json in
-      let spec = field_map json "spec" SpecContents.of_json in
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let spec = field_map json__ "spec" SpecContents.of_json in
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let lastSucceededDeploymentId =
+        field_map json__ "lastSucceededDeploymentId" DeploymentId.of_json in
       let lastDeploymentSucceededAt =
-        field_map_exn json "lastDeploymentSucceededAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentSucceededAt" Timestamp.of_json in
       let lastDeploymentAttemptedAt =
-        field_map_exn json "lastDeploymentAttemptedAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentAttemptedAt" Timestamp.of_json in
+      let lastClientRequestToken =
+        field_map json__ "lastClientRequestToken" String_.of_json in
+      let lastAttemptedDeploymentId =
+        field_map json__ "lastAttemptedDeploymentId" DeploymentId.of_json in
       let environmentName =
-        field_map_exn json "environmentName" ResourceName.of_json in
+        field_map json__ "environmentName" ResourceName.of_json in
       let deploymentStatusMessage =
-        field_map json "deploymentStatusMessage" StatusMessage.of_json in
+        field_map json__ "deploymentStatusMessage" StatusMessage.of_json in
       let deploymentStatus =
-        field_map_exn json "deploymentStatus" DeploymentStatus.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" ServiceInstanceArn.of_json in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion ?spec
-        ~serviceName ~name ~lastDeploymentSucceededAt
-        ~lastDeploymentAttemptedAt ~environmentName ?deploymentStatusMessage
-        ~deploymentStatus ~createdAt ~arn ()
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" ServiceInstanceArn.of_json in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec
+        ?serviceName ?name ?lastSucceededDeploymentId
+        ?lastDeploymentSucceededAt ?lastDeploymentAttemptedAt
+        ?lastClientRequestToken ?lastAttemptedDeploymentId ?environmentName
+        ?deploymentStatusMessage ?deploymentStatus ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The service instance detail data."]
+  end[@@ocaml.doc "Detailed data of an Proton service instance resource."]
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[!-~]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
 module EnvironmentTemplateVersion =
   struct
     type nonrec t =
       {
-      arn: EnvironmentTemplateVersionArn.t
+      arn: EnvironmentTemplateVersionArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the version of an environment template."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The time when the version of an environment template was created."];
       description: Description.t option
         [@ocaml.doc
           "A description of the minor version of an environment template."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the version of an environment template was last modified."];
-      majorVersion: TemplateVersionPart.t
+      majorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The latest major version that's associated with the version of an environment template."];
-      minorVersion: TemplateVersionPart.t
+      minorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The minor version of an environment template."];
       recommendedMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc
           "The recommended minor version of the environment template."];
       schema: TemplateSchema.t option
         [@ocaml.doc "The schema of the version of an environment template."];
-      status: TemplateVersionStatus.t
+      status: TemplateVersionStatus.t option
         [@ocaml.doc "The status of the version of an environment template."];
       statusMessage: StatusMessage.t option
         [@ocaml.doc
           "The status message of the version of an environment template."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc "The name of the version of an environment template."]}
-    let context_ = "EnvironmentTemplateVersion"
-    let make ?description =
-      fun ?recommendedMinorVersion ->
-        fun ?schema ->
-          fun ?statusMessage ->
-            fun ~arn ->
-              fun ~createdAt ->
-                fun ~lastModifiedAt ->
-                  fun ~majorVersion ->
-                    fun ~minorVersion ->
-                      fun ~status ->
-                        fun ~templateName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?lastModifiedAt ->
+            fun ?majorVersion ->
+              fun ?minorVersion ->
+                fun ?recommendedMinorVersion ->
+                  fun ?schema ->
+                    fun ?status ->
+                      fun ?statusMessage ->
+                        fun ?templateName ->
                           fun () ->
                             {
-                              description;
-                              recommendedMinorVersion;
-                              schema;
-                              statusMessage;
                               arn;
                               createdAt;
+                              description;
                               lastModifiedAt;
                               majorVersion;
                               minorVersion;
+                              recommendedMinorVersion;
+                              schema;
                               status;
+                              statusMessage;
                               templateName
                             }
     let to_value x =
       structure_to_value
-        [("arn", (Some (EnvironmentTemplateVersionArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn",
+           (Option.map x.arn ~f:EnvironmentTemplateVersionArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
         ("majorVersion",
-          (Some (TemplateVersionPart.to_value x.majorVersion)));
+          (Option.map x.majorVersion ~f:TemplateVersionPart.to_value));
         ("minorVersion",
-          (Some (TemplateVersionPart.to_value x.minorVersion)));
+          (Option.map x.minorVersion ~f:TemplateVersionPart.to_value));
         ("recommendedMinorVersion",
           (Option.map x.recommendedMinorVersion
              ~f:TemplateVersionPart.to_value));
         ("schema", (Option.map x.schema ~f:TemplateSchema.to_value));
-        ("status", (Some (TemplateVersionStatus.to_value x.status)));
+        ("status", (Option.map x.status ~f:TemplateVersionStatus.to_value));
         ("statusMessage",
           (Option.map x.statusMessage ~f:StatusMessage.to_value));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let statusMessage =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "statusMessage") in
       let status =
-        TemplateVersionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:TemplateVersionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let schema =
         (Option.map ~f:TemplateSchema.of_xml) (Xml.child xml_arg0 "schema") in
       let recommendedMinorVersion =
         (Option.map ~f:TemplateVersionPart.of_xml)
           (Xml.child xml_arg0 "recommendedMinorVersion") in
       let minorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "minorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "minorVersion") in
       let majorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "majorVersion") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn =
-        EnvironmentTemplateVersionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ?statusMessage ~status ?schema
-        ?recommendedMinorVersion ~minorVersion ~majorVersion ~lastModifiedAt
-        ?description ~createdAt ~arn ()
+        (Option.map ~f:EnvironmentTemplateVersionArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?templateName ?statusMessage ?status ?schema
+        ?recommendedMinorVersion ?minorVersion ?majorVersion ?lastModifiedAt
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let statusMessage =
-        field_map json "statusMessage" StatusMessage.of_json in
-      let status = field_map_exn json "status" TemplateVersionStatus.of_json in
-      let schema = field_map json "schema" TemplateSchema.of_json in
+        field_map json__ "statusMessage" StatusMessage.of_json in
+      let status = field_map json__ "status" TemplateVersionStatus.of_json in
+      let schema = field_map json__ "schema" TemplateSchema.of_json in
       let recommendedMinorVersion =
-        field_map json "recommendedMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "recommendedMinorVersion"
+          TemplateVersionPart.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map json__ "majorVersion" TemplateVersionPart.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn =
-        field_map_exn json "arn" EnvironmentTemplateVersionArn.of_json in
-      make ~templateName ?statusMessage ~status ?schema
-        ?recommendedMinorVersion ~minorVersion ~majorVersion ~lastModifiedAt
-        ?description ~createdAt ~arn ()
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" EnvironmentTemplateVersionArn.of_json in
+      make ?templateName ?statusMessage ?status ?schema
+        ?recommendedMinorVersion ?minorVersion ?majorVersion ?lastModifiedAt
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The environment template version data."]
 module EnvironmentTemplate =
   struct
     type nonrec t =
       {
-      arn: EnvironmentTemplateArn.t
+      arn: EnvironmentTemplateArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the environment template."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the environment template was created."];
       description: Description.t option
         [@ocaml.doc "A description of the environment template."];
@@ -3693,10 +5230,10 @@ module EnvironmentTemplate =
       encryptionKey: Arn.t option
         [@ocaml.doc
           "The customer provided encryption key for the environment template."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the environment template was last modified."];
-      name: ResourceName.t
+      name: ResourceName.t option
         [@ocaml.doc "The name of the environment template."];
       provisioning: Provisioning.t option
         [@ocaml.doc
@@ -3704,37 +5241,37 @@ module EnvironmentTemplate =
       recommendedVersion: FullTemplateVersionNumber.t option
         [@ocaml.doc
           "The ID of the recommended version of the environment template."]}
-    let context_ = "EnvironmentTemplate"
-    let make ?description =
-      fun ?displayName ->
-        fun ?encryptionKey ->
-          fun ?provisioning ->
-            fun ?recommendedVersion ->
-              fun ~arn ->
-                fun ~createdAt ->
-                  fun ~lastModifiedAt ->
-                    fun ~name ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?displayName ->
+            fun ?encryptionKey ->
+              fun ?lastModifiedAt ->
+                fun ?name ->
+                  fun ?provisioning ->
+                    fun ?recommendedVersion ->
                       fun () ->
                         {
+                          arn;
+                          createdAt;
                           description;
                           displayName;
                           encryptionKey;
-                          provisioning;
-                          recommendedVersion;
-                          arn;
-                          createdAt;
                           lastModifiedAt;
-                          name
+                          name;
+                          provisioning;
+                          recommendedVersion
                         }
     let to_value x =
       structure_to_value
-        [("arn", (Some (EnvironmentTemplateArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:EnvironmentTemplateArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
         ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
         ("encryptionKey", (Option.map x.encryptionKey ~f:Arn.to_value));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
         ("provisioning",
           (Option.map x.provisioning ~f:Provisioning.to_value));
         ("recommendedVersion",
@@ -3749,10 +5286,10 @@ module EnvironmentTemplate =
         (Option.map ~f:Provisioning.of_xml)
           (Xml.child xml_arg0 "provisioning") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let encryptionKey =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "encryptionKey") in
       let displayName =
@@ -3760,39 +5297,45 @@ module EnvironmentTemplate =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn =
-        EnvironmentTemplateArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?recommendedVersion ?provisioning ~name ~lastModifiedAt
-        ?encryptionKey ?displayName ?description ~createdAt ~arn ()
+        (Option.map ~f:EnvironmentTemplateArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?recommendedVersion ?provisioning ?name ?lastModifiedAt
+        ?encryptionKey ?displayName ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendedVersion =
-        field_map json "recommendedVersion" FullTemplateVersionNumber.of_json in
-      let provisioning = field_map json "provisioning" Provisioning.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "recommendedVersion"
+          FullTemplateVersionNumber.of_json in
+      let provisioning = field_map json__ "provisioning" Provisioning.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let encryptionKey = field_map json "encryptionKey" Arn.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let description = field_map json "description" Description.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" EnvironmentTemplateArn.of_json in
-      make ?recommendedVersion ?provisioning ~name ~lastModifiedAt
-        ?encryptionKey ?displayName ?description ~createdAt ~arn ()
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let encryptionKey = field_map json__ "encryptionKey" Arn.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" EnvironmentTemplateArn.of_json in
+      make ?recommendedVersion ?provisioning ?name ?lastModifiedAt
+        ?encryptionKey ?displayName ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The environment template data."]
 module Environment =
   struct
     type nonrec t =
       {
-      arn: EnvironmentArn.t
+      arn: EnvironmentArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the environment."];
-      createdAt: Timestamp.t
+      codebuildRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that allows Proton to provision infrastructure using CodeBuild-based provisioning on your behalf."];
+      componentRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that Proton uses when provisioning directly defined components in this environment. It determines the scope of infrastructure that a component can provision. The environment must have a componentRoleArn to allow directly defined components to be associated with the environment. For more information about components, see Proton components in the Proton User Guide."];
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the environment was created."];
-      deploymentStatus: DeploymentStatus.t
+      deploymentStatus: DeploymentStatus.t option
         [@ocaml.doc "The environment deployment status."];
       deploymentStatusMessage: StatusMessage.t option
         [@ocaml.doc "An environment deployment status message."];
@@ -3804,13 +5347,19 @@ module Environment =
       environmentAccountId: AwsAccountId.t option
         [@ocaml.doc
           "The ID of the environment account that the environment infrastructure resources are provisioned in."];
-      lastDeploymentAttemptedAt: Timestamp.t
+      lastAttemptedDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last attempted deployment of this environment."];
+      lastDeploymentAttemptedAt: Timestamp.t option
         [@ocaml.doc
           "The time when a deployment of the environment was last attempted."];
-      lastDeploymentSucceededAt: Timestamp.t
+      lastDeploymentSucceededAt: Timestamp.t option
         [@ocaml.doc
           "The time when the environment was last deployed successfully."];
-      name: ResourceName.t [@ocaml.doc "The name of the environment."];
+      lastSucceededDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last successful deployment of this environment."];
+      name: ResourceName.t option [@ocaml.doc "The name of the environment."];
       protonServiceRoleArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Proton service role that allows Proton to make calls to other services on your behalf."];
@@ -3819,59 +5368,70 @@ module Environment =
           "When included, indicates that the environment template is for customer provisioned and managed infrastructure."];
       provisioningRepository: RepositoryBranch.t option
         [@ocaml.doc
-          "The infrastructure repository that you use to host your rendered infrastructure templates for self-managed provisioning."];
+          "The linked repository that you use to host your rendered infrastructure templates for self-managed provisioning. A linked repository is a repository that has been registered with Proton. For more information, see CreateRepository."];
       spec: SpecContents.t option [@ocaml.doc "The environment spec."];
-      templateMajorVersion: TemplateVersionPart.t
+      templateMajorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The major version of the environment template."];
-      templateMinorVersion: TemplateVersionPart.t
+      templateMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The minor version of the environment template."];
-      templateName: ResourceName.t
+      templateName: ResourceName.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the environment template."]}
-    let context_ = "Environment"
-    let make ?deploymentStatusMessage =
-      fun ?description ->
-        fun ?environmentAccountConnectionId ->
-          fun ?environmentAccountId ->
-            fun ?protonServiceRoleArn ->
-              fun ?provisioning ->
-                fun ?provisioningRepository ->
-                  fun ?spec ->
-                    fun ~arn ->
-                      fun ~createdAt ->
-                        fun ~deploymentStatus ->
-                          fun ~lastDeploymentAttemptedAt ->
-                            fun ~lastDeploymentSucceededAt ->
-                              fun ~name ->
-                                fun ~templateMajorVersion ->
-                                  fun ~templateMinorVersion ->
-                                    fun ~templateName ->
-                                      fun () ->
-                                        {
-                                          deploymentStatusMessage;
-                                          description;
-                                          environmentAccountConnectionId;
-                                          environmentAccountId;
-                                          protonServiceRoleArn;
-                                          provisioning;
-                                          provisioningRepository;
-                                          spec;
-                                          arn;
-                                          createdAt;
-                                          deploymentStatus;
-                                          lastDeploymentAttemptedAt;
-                                          lastDeploymentSucceededAt;
-                                          name;
-                                          templateMajorVersion;
-                                          templateMinorVersion;
-                                          templateName
-                                        }
+    let make ?arn =
+      fun ?codebuildRoleArn ->
+        fun ?componentRoleArn ->
+          fun ?createdAt ->
+            fun ?deploymentStatus ->
+              fun ?deploymentStatusMessage ->
+                fun ?description ->
+                  fun ?environmentAccountConnectionId ->
+                    fun ?environmentAccountId ->
+                      fun ?lastAttemptedDeploymentId ->
+                        fun ?lastDeploymentAttemptedAt ->
+                          fun ?lastDeploymentSucceededAt ->
+                            fun ?lastSucceededDeploymentId ->
+                              fun ?name ->
+                                fun ?protonServiceRoleArn ->
+                                  fun ?provisioning ->
+                                    fun ?provisioningRepository ->
+                                      fun ?spec ->
+                                        fun ?templateMajorVersion ->
+                                          fun ?templateMinorVersion ->
+                                            fun ?templateName ->
+                                              fun () ->
+                                                {
+                                                  arn;
+                                                  codebuildRoleArn;
+                                                  componentRoleArn;
+                                                  createdAt;
+                                                  deploymentStatus;
+                                                  deploymentStatusMessage;
+                                                  description;
+                                                  environmentAccountConnectionId;
+                                                  environmentAccountId;
+                                                  lastAttemptedDeploymentId;
+                                                  lastDeploymentAttemptedAt;
+                                                  lastDeploymentSucceededAt;
+                                                  lastSucceededDeploymentId;
+                                                  name;
+                                                  protonServiceRoleArn;
+                                                  provisioning;
+                                                  provisioningRepository;
+                                                  spec;
+                                                  templateMajorVersion;
+                                                  templateMinorVersion;
+                                                  templateName
+                                                }
     let to_value x =
       structure_to_value
-        [("arn", (Some (EnvironmentArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:EnvironmentArn.to_value));
+        ("codebuildRoleArn",
+          (Option.map x.codebuildRoleArn ~f:RoleArn.to_value));
+        ("componentRoleArn",
+          (Option.map x.componentRoleArn ~f:RoleArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("deploymentStatus",
-          (Some (DeploymentStatus.to_value x.deploymentStatus)));
+          (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
         ("deploymentStatusMessage",
           (Option.map x.deploymentStatusMessage ~f:StatusMessage.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
@@ -3880,11 +5440,15 @@ module Environment =
              ~f:EnvironmentAccountConnectionId.to_value));
         ("environmentAccountId",
           (Option.map x.environmentAccountId ~f:AwsAccountId.to_value));
+        ("lastAttemptedDeploymentId",
+          (Option.map x.lastAttemptedDeploymentId ~f:DeploymentId.to_value));
         ("lastDeploymentAttemptedAt",
-          (Some (Timestamp.to_value x.lastDeploymentAttemptedAt)));
+          (Option.map x.lastDeploymentAttemptedAt ~f:Timestamp.to_value));
         ("lastDeploymentSucceededAt",
-          (Some (Timestamp.to_value x.lastDeploymentSucceededAt)));
-        ("name", (Some (ResourceName.to_value x.name)));
+          (Option.map x.lastDeploymentSucceededAt ~f:Timestamp.to_value));
+        ("lastSucceededDeploymentId",
+          (Option.map x.lastSucceededDeploymentId ~f:DeploymentId.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
         ("protonServiceRoleArn",
           (Option.map x.protonServiceRoleArn ~f:Arn.to_value));
         ("provisioning",
@@ -3893,21 +5457,22 @@ module Environment =
           (Option.map x.provisioningRepository ~f:RepositoryBranch.to_value));
         ("spec", (Option.map x.spec ~f:SpecContents.to_value));
         ("templateMajorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMajorVersion)));
+          (Option.map x.templateMajorVersion ~f:TemplateVersionPart.to_value));
         ("templateMinorVersion",
-          (Some (TemplateVersionPart.to_value x.templateMinorVersion)));
-        ("templateName", (Some (ResourceName.to_value x.templateName)))]
+          (Option.map x.templateMinorVersion ~f:TemplateVersionPart.to_value));
+        ("templateName",
+          (Option.map x.templateName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "templateName") in
       let templateMinorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMinorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMinorVersion") in
       let templateMajorVersion =
-        TemplateVersionPart.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateMajorVersion") in
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMajorVersion") in
       let spec =
         (Option.map ~f:SpecContents.of_xml) (Xml.child xml_arg0 "spec") in
       let provisioningRepository =
@@ -3920,15 +5485,19 @@ module Environment =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "protonServiceRoleArn") in
       let name =
-        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastSucceededDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSucceededDeploymentId") in
       let lastDeploymentSucceededAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentSucceededAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentSucceededAt") in
       let lastDeploymentAttemptedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "lastDeploymentAttemptedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentAttemptedAt") in
+      let lastAttemptedDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDeploymentId") in
       let environmentAccountId =
         (Option.map ~f:AwsAccountId.of_xml)
           (Xml.child xml_arg0 "environmentAccountId") in
@@ -3941,58 +5510,73 @@ module Environment =
         (Option.map ~f:StatusMessage.of_xml)
           (Xml.child xml_arg0 "deploymentStatusMessage") in
       let deploymentStatus =
-        DeploymentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deploymentStatus") in
+        (Option.map ~f:DeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "deploymentStatus") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let componentRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "componentRoleArn") in
+      let codebuildRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "codebuildRoleArn") in
       let arn =
-        EnvironmentArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion ?spec
-        ?provisioningRepository ?provisioning ?protonServiceRoleArn ~name
-        ~lastDeploymentSucceededAt ~lastDeploymentAttemptedAt
+        (Option.map ~f:EnvironmentArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec
+        ?provisioningRepository ?provisioning ?protonServiceRoleArn ?name
+        ?lastSucceededDeploymentId ?lastDeploymentSucceededAt
+        ?lastDeploymentAttemptedAt ?lastAttemptedDeploymentId
         ?environmentAccountId ?environmentAccountConnectionId ?description
-        ?deploymentStatusMessage ~deploymentStatus ~createdAt ~arn ()
+        ?deploymentStatusMessage ?deploymentStatus ?createdAt
+        ?componentRoleArn ?codebuildRoleArn ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "templateName" ResourceName.of_json in
       let templateMinorVersion =
-        field_map_exn json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map_exn json "templateMajorVersion" TemplateVersionPart.of_json in
-      let spec = field_map json "spec" SpecContents.of_json in
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let spec = field_map json__ "spec" SpecContents.of_json in
       let provisioningRepository =
-        field_map json "provisioningRepository" RepositoryBranch.of_json in
-      let provisioning = field_map json "provisioning" Provisioning.of_json in
+        field_map json__ "provisioningRepository" RepositoryBranch.of_json in
+      let provisioning = field_map json__ "provisioning" Provisioning.of_json in
       let protonServiceRoleArn =
-        field_map json "protonServiceRoleArn" Arn.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "protonServiceRoleArn" Arn.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let lastSucceededDeploymentId =
+        field_map json__ "lastSucceededDeploymentId" DeploymentId.of_json in
       let lastDeploymentSucceededAt =
-        field_map_exn json "lastDeploymentSucceededAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentSucceededAt" Timestamp.of_json in
       let lastDeploymentAttemptedAt =
-        field_map_exn json "lastDeploymentAttemptedAt" Timestamp.of_json in
+        field_map json__ "lastDeploymentAttemptedAt" Timestamp.of_json in
+      let lastAttemptedDeploymentId =
+        field_map json__ "lastAttemptedDeploymentId" DeploymentId.of_json in
       let environmentAccountId =
-        field_map json "environmentAccountId" AwsAccountId.of_json in
+        field_map json__ "environmentAccountId" AwsAccountId.of_json in
       let environmentAccountConnectionId =
-        field_map json "environmentAccountConnectionId"
+        field_map json__ "environmentAccountConnectionId"
           EnvironmentAccountConnectionId.of_json in
-      let description = field_map json "description" Description.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let deploymentStatusMessage =
-        field_map json "deploymentStatusMessage" StatusMessage.of_json in
+        field_map json__ "deploymentStatusMessage" StatusMessage.of_json in
       let deploymentStatus =
-        field_map_exn json "deploymentStatus" DeploymentStatus.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" EnvironmentArn.of_json in
-      make ~templateName ~templateMinorVersion ~templateMajorVersion ?spec
-        ?provisioningRepository ?provisioning ?protonServiceRoleArn ~name
-        ~lastDeploymentSucceededAt ~lastDeploymentAttemptedAt
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let componentRoleArn =
+        field_map json__ "componentRoleArn" RoleArn.of_json in
+      let codebuildRoleArn =
+        field_map json__ "codebuildRoleArn" RoleArn.of_json in
+      let arn = field_map json__ "arn" EnvironmentArn.of_json in
+      make ?templateName ?templateMinorVersion ?templateMajorVersion ?spec
+        ?provisioningRepository ?provisioning ?protonServiceRoleArn ?name
+        ?lastSucceededDeploymentId ?lastDeploymentSucceededAt
+        ?lastDeploymentAttemptedAt ?lastAttemptedDeploymentId
         ?environmentAccountId ?environmentAccountConnectionId ?description
-        ?deploymentStatusMessage ~deploymentStatus ~createdAt ~arn ()
+        ?deploymentStatusMessage ?deploymentStatus ?createdAt
+        ?componentRoleArn ?codebuildRoleArn ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The environment detail data. An Proton environment is a set resources shared across an Proton service."]
+       "Detailed data of an Proton environment resource. An Proton environment is a set of resources shared across Proton services."]
 module RepositoryBranchInput =
   struct
     type nonrec t =
@@ -4021,170 +5605,454 @@ module RepositoryBranchInput =
           (Xml.child_exn ~context:context_ xml_arg0 "branch") in
       make ~provider ~name ~branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let provider = field_map_exn json "provider" RepositoryProvider.of_json in
-      let name = field_map_exn json "name" RepositoryName.of_json in
-      let branch = field_map_exn json "branch" GitBranchName.of_json in
+    let of_json json__ =
+      let provider =
+        field_map_exn json__ "provider" RepositoryProvider.of_json in
+      let name = field_map_exn json__ "name" RepositoryName.of_json in
+      let branch = field_map_exn json__ "branch" GitBranchName.of_json in
       make ~provider ~name ~branch ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Detail input data for a repository branch."]
+  end[@@ocaml.doc "Detail input data for a linked repository branch."]
 module EnvironmentAccountConnection =
   struct
     type nonrec t =
       {
-      arn: EnvironmentAccountConnectionArn.t
+      arn: EnvironmentAccountConnectionArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the environment account connection."];
-      environmentAccountId: AwsAccountId.t
+      codebuildRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM service role in the environment account. Proton uses this role to provision infrastructure resources using CodeBuild-based provisioning in the associated environment account."];
+      componentRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that Proton uses when provisioning directly defined components in the associated environment account. It determines the scope of infrastructure that a component can provision in the account. The environment account connection must have a componentRoleArn to allow directly defined components to be associated with any environments running in the account. For more information about components, see Proton components in the Proton User Guide."];
+      environmentAccountId: AwsAccountId.t option
         [@ocaml.doc
           "The environment account that's connected to the environment account connection."];
-      environmentName: ResourceName.t
+      environmentName: ResourceName.t option
         [@ocaml.doc
           "The name of the environment that's associated with the environment account connection."];
-      id: EnvironmentAccountConnectionId.t
+      id: EnvironmentAccountConnectionId.t option
         [@ocaml.doc "The ID of the environment account connection."];
-      lastModifiedAt: Timestamp.t
+      lastModifiedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the environment account connection was last modified."];
-      managementAccountId: AwsAccountId.t
+      managementAccountId: AwsAccountId.t option
         [@ocaml.doc
           "The ID of the management account that's connected to the environment account connection."];
-      requestedAt: Timestamp.t
+      requestedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the environment account connection request was made."];
-      roleArn: Arn.t
+      roleArn: Arn.t option
         [@ocaml.doc
           "The IAM service role that's associated with the environment account connection."];
-      status: EnvironmentAccountConnectionStatus.t
+      status: EnvironmentAccountConnectionStatus.t option
         [@ocaml.doc "The status of the environment account connection."]}
-    let context_ = "EnvironmentAccountConnection"
-    let make ~arn =
-      fun ~environmentAccountId ->
-        fun ~environmentName ->
-          fun ~id ->
-            fun ~lastModifiedAt ->
-              fun ~managementAccountId ->
-                fun ~requestedAt ->
-                  fun ~roleArn ->
-                    fun ~status ->
-                      fun () ->
-                        {
-                          arn;
-                          environmentAccountId;
-                          environmentName;
-                          id;
-                          lastModifiedAt;
-                          managementAccountId;
-                          requestedAt;
-                          roleArn;
-                          status
-                        }
+    let make ?arn =
+      fun ?codebuildRoleArn ->
+        fun ?componentRoleArn ->
+          fun ?environmentAccountId ->
+            fun ?environmentName ->
+              fun ?id ->
+                fun ?lastModifiedAt ->
+                  fun ?managementAccountId ->
+                    fun ?requestedAt ->
+                      fun ?roleArn ->
+                        fun ?status ->
+                          fun () ->
+                            {
+                              arn;
+                              codebuildRoleArn;
+                              componentRoleArn;
+                              environmentAccountId;
+                              environmentName;
+                              id;
+                              lastModifiedAt;
+                              managementAccountId;
+                              requestedAt;
+                              roleArn;
+                              status
+                            }
     let to_value x =
       structure_to_value
-        [("arn", (Some (EnvironmentAccountConnectionArn.to_value x.arn)));
+        [("arn",
+           (Option.map x.arn ~f:EnvironmentAccountConnectionArn.to_value));
+        ("codebuildRoleArn",
+          (Option.map x.codebuildRoleArn ~f:RoleArn.to_value));
+        ("componentRoleArn",
+          (Option.map x.componentRoleArn ~f:RoleArn.to_value));
         ("environmentAccountId",
-          (Some (AwsAccountId.to_value x.environmentAccountId)));
-        ("environmentName", (Some (ResourceName.to_value x.environmentName)));
-        ("id", (Some (EnvironmentAccountConnectionId.to_value x.id)));
-        ("lastModifiedAt", (Some (Timestamp.to_value x.lastModifiedAt)));
+          (Option.map x.environmentAccountId ~f:AwsAccountId.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("id", (Option.map x.id ~f:EnvironmentAccountConnectionId.to_value));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
         ("managementAccountId",
-          (Some (AwsAccountId.to_value x.managementAccountId)));
-        ("requestedAt", (Some (Timestamp.to_value x.requestedAt)));
-        ("roleArn", (Some (Arn.to_value x.roleArn)));
+          (Option.map x.managementAccountId ~f:AwsAccountId.to_value));
+        ("requestedAt", (Option.map x.requestedAt ~f:Timestamp.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:Arn.to_value));
         ("status",
-          (Some (EnvironmentAccountConnectionStatus.to_value x.status)))]
+          (Option.map x.status ~f:EnvironmentAccountConnectionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        EnvironmentAccountConnectionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let roleArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+        (Option.map ~f:EnvironmentAccountConnectionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "roleArn") in
       let requestedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "requestedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "requestedAt") in
       let managementAccountId =
-        AwsAccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "managementAccountId") in
+        (Option.map ~f:AwsAccountId.of_xml)
+          (Xml.child xml_arg0 "managementAccountId") in
       let lastModifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastModifiedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
       let id =
-        EnvironmentAccountConnectionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+        (Option.map ~f:EnvironmentAccountConnectionId.of_xml)
+          (Xml.child xml_arg0 "id") in
       let environmentName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
       let environmentAccountId =
-        AwsAccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentAccountId") in
+        (Option.map ~f:AwsAccountId.of_xml)
+          (Xml.child xml_arg0 "environmentAccountId") in
+      let componentRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "componentRoleArn") in
+      let codebuildRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "codebuildRoleArn") in
       let arn =
-        EnvironmentAccountConnectionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~status ~roleArn ~requestedAt ~managementAccountId ~lastModifiedAt
-        ~id ~environmentName ~environmentAccountId ~arn ()
+        (Option.map ~f:EnvironmentAccountConnectionArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?status ?roleArn ?requestedAt ?managementAccountId ?lastModifiedAt
+        ?id ?environmentName ?environmentAccountId ?componentRoleArn
+        ?codebuildRoleArn ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status"
-          EnvironmentAccountConnectionStatus.of_json in
-      let roleArn = field_map_exn json "roleArn" Arn.of_json in
-      let requestedAt = field_map_exn json "requestedAt" Timestamp.of_json in
+        field_map json__ "status" EnvironmentAccountConnectionStatus.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
+      let requestedAt = field_map json__ "requestedAt" Timestamp.of_json in
       let managementAccountId =
-        field_map_exn json "managementAccountId" AwsAccountId.of_json in
+        field_map json__ "managementAccountId" AwsAccountId.of_json in
       let lastModifiedAt =
-        field_map_exn json "lastModifiedAt" Timestamp.of_json in
-      let id = field_map_exn json "id" EnvironmentAccountConnectionId.of_json in
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let id = field_map json__ "id" EnvironmentAccountConnectionId.of_json in
       let environmentName =
-        field_map_exn json "environmentName" ResourceName.of_json in
+        field_map json__ "environmentName" ResourceName.of_json in
       let environmentAccountId =
-        field_map_exn json "environmentAccountId" AwsAccountId.of_json in
+        field_map json__ "environmentAccountId" AwsAccountId.of_json in
+      let componentRoleArn =
+        field_map json__ "componentRoleArn" RoleArn.of_json in
+      let codebuildRoleArn =
+        field_map json__ "codebuildRoleArn" RoleArn.of_json in
       let arn =
-        field_map_exn json "arn" EnvironmentAccountConnectionArn.of_json in
-      make ~status ~roleArn ~requestedAt ~managementAccountId ~lastModifiedAt
-        ~id ~environmentName ~environmentAccountId ~arn ()
+        field_map json__ "arn" EnvironmentAccountConnectionArn.of_json in
+      make ?status ?roleArn ?requestedAt ?managementAccountId ?lastModifiedAt
+        ?id ?environmentName ?environmentAccountId ?componentRoleArn
+        ?codebuildRoleArn ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The environment account connection detail data."]
+  end[@@ocaml.doc
+       "Detailed data of an Proton environment account connection resource."]
+module Component =
+  struct
+    type nonrec t =
+      {
+      arn: ComponentArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the component."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time when the component was created."];
+      deploymentStatus: DeploymentStatus.t option
+        [@ocaml.doc "The component deployment status."];
+      deploymentStatusMessage: StatusMessage.t option
+        [@ocaml.doc
+          "The message associated with the component deployment status."];
+      description: Description.t option
+        [@ocaml.doc "A description of the component."];
+      environmentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the Proton environment that this component is associated with."];
+      lastAttemptedDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last attempted deployment of this component."];
+      lastClientRequestToken: String_.t option
+        [@ocaml.doc "The last token the client requested."];
+      lastDeploymentAttemptedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time when a deployment of the component was last attempted."];
+      lastDeploymentSucceededAt: Timestamp.t option
+        [@ocaml.doc
+          "The time when the component was last deployed successfully."];
+      lastModifiedAt: Timestamp.t option
+        [@ocaml.doc "The time when the component was last modified."];
+      lastSucceededDeploymentId: DeploymentId.t option
+        [@ocaml.doc
+          "The ID of the last successful deployment of this component."];
+      name: ResourceName.t option [@ocaml.doc "The name of the component."];
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service instance that this component is attached to. Provided when a component is attached to a service instance."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service that serviceInstanceName is associated with. Provided when a component is attached to a service instance."];
+      serviceSpec: SpecContents.t option
+        [@ocaml.doc
+          "The service spec that the component uses to access service inputs. Provided when a component is attached to a service instance."]}
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?deploymentStatus ->
+          fun ?deploymentStatusMessage ->
+            fun ?description ->
+              fun ?environmentName ->
+                fun ?lastAttemptedDeploymentId ->
+                  fun ?lastClientRequestToken ->
+                    fun ?lastDeploymentAttemptedAt ->
+                      fun ?lastDeploymentSucceededAt ->
+                        fun ?lastModifiedAt ->
+                          fun ?lastSucceededDeploymentId ->
+                            fun ?name ->
+                              fun ?serviceInstanceName ->
+                                fun ?serviceName ->
+                                  fun ?serviceSpec ->
+                                    fun () ->
+                                      {
+                                        arn;
+                                        createdAt;
+                                        deploymentStatus;
+                                        deploymentStatusMessage;
+                                        description;
+                                        environmentName;
+                                        lastAttemptedDeploymentId;
+                                        lastClientRequestToken;
+                                        lastDeploymentAttemptedAt;
+                                        lastDeploymentSucceededAt;
+                                        lastModifiedAt;
+                                        lastSucceededDeploymentId;
+                                        name;
+                                        serviceInstanceName;
+                                        serviceName;
+                                        serviceSpec
+                                      }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:ComponentArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("deploymentStatus",
+          (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
+        ("deploymentStatusMessage",
+          (Option.map x.deploymentStatusMessage ~f:StatusMessage.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("lastAttemptedDeploymentId",
+          (Option.map x.lastAttemptedDeploymentId ~f:DeploymentId.to_value));
+        ("lastClientRequestToken",
+          (Option.map x.lastClientRequestToken ~f:String_.to_value));
+        ("lastDeploymentAttemptedAt",
+          (Option.map x.lastDeploymentAttemptedAt ~f:Timestamp.to_value));
+        ("lastDeploymentSucceededAt",
+          (Option.map x.lastDeploymentSucceededAt ~f:Timestamp.to_value));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("lastSucceededDeploymentId",
+          (Option.map x.lastSucceededDeploymentId ~f:DeploymentId.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value));
+        ("serviceSpec", (Option.map x.serviceSpec ~f:SpecContents.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceSpec =
+        (Option.map ~f:SpecContents.of_xml)
+          (Xml.child xml_arg0 "serviceSpec") in
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastSucceededDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSucceededDeploymentId") in
+      let lastModifiedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
+      let lastDeploymentSucceededAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentSucceededAt") in
+      let lastDeploymentAttemptedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastDeploymentAttemptedAt") in
+      let lastClientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "lastClientRequestToken") in
+      let lastAttemptedDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDeploymentId") in
+      let environmentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let deploymentStatusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "deploymentStatusMessage") in
+      let deploymentStatus =
+        (Option.map ~f:DeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "deploymentStatus") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn =
+        (Option.map ~f:ComponentArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?serviceSpec ?serviceName ?serviceInstanceName ?name
+        ?lastSucceededDeploymentId ?lastModifiedAt ?lastDeploymentSucceededAt
+        ?lastDeploymentAttemptedAt ?lastClientRequestToken
+        ?lastAttemptedDeploymentId ?environmentName ?description
+        ?deploymentStatusMessage ?deploymentStatus ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceSpec = field_map json__ "serviceSpec" SpecContents.of_json in
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let lastSucceededDeploymentId =
+        field_map json__ "lastSucceededDeploymentId" DeploymentId.of_json in
+      let lastModifiedAt =
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let lastDeploymentSucceededAt =
+        field_map json__ "lastDeploymentSucceededAt" Timestamp.of_json in
+      let lastDeploymentAttemptedAt =
+        field_map json__ "lastDeploymentAttemptedAt" Timestamp.of_json in
+      let lastClientRequestToken =
+        field_map json__ "lastClientRequestToken" String_.of_json in
+      let lastAttemptedDeploymentId =
+        field_map json__ "lastAttemptedDeploymentId" DeploymentId.of_json in
+      let environmentName =
+        field_map json__ "environmentName" ResourceName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let deploymentStatusMessage =
+        field_map json__ "deploymentStatusMessage" StatusMessage.of_json in
+      let deploymentStatus =
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" ComponentArn.of_json in
+      make ?serviceSpec ?serviceName ?serviceInstanceName ?name
+        ?lastSucceededDeploymentId ?lastModifiedAt ?lastDeploymentSucceededAt
+        ?lastDeploymentAttemptedAt ?lastClientRequestToken
+        ?lastAttemptedDeploymentId ?environmentName ?description
+        ?deploymentStatusMessage ?deploymentStatus ?createdAt ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detailed data of an Proton component resource. For more information about components, see Proton components in the Proton User Guide."]
+module ComponentDeploymentUpdateType =
+  struct
+    type nonrec t =
+      | NONE 
+      | CURRENT_VERSION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NONE -> "NONE"
+      | CURRENT_VERSION -> "CURRENT_VERSION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NONE" -> NONE
+      | "CURRENT_VERSION" -> CURRENT_VERSION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ComponentDeploymentUpdateType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ComponentDeploymentUpdateType" j)
+    let to_json = simple_to_json to_value
+  end
 module AccountSettings =
   struct
     type nonrec t =
       {
+      pipelineCodebuildRoleArn: RoleArnOrEmptyString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the service role that Proton uses for provisioning pipelines. Proton assumes this role for CodeBuild-based provisioning."];
       pipelineProvisioningRepository: RepositoryBranch.t option
         [@ocaml.doc
-          "The repository configured in the Amazon Web Services account for pipeline provisioning. Required it if you have environments configured for self-managed provisioning with services that include pipelines."];
-      pipelineServiceRoleArn: PipelineRoleArn.t option
+          "The linked repository for pipeline provisioning. Required if you have environments configured for self-managed provisioning with services that include pipelines. A linked repository is a repository that has been registered with Proton. For more information, see CreateRepository."];
+      pipelineServiceRoleArn: RoleArnOrEmptyString.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the service role you want to use for provisioning pipelines. Assumed by Proton for Amazon Web Services-managed provisioning, and by customer-owned automation for self-managed provisioning."]}
-    let make ?pipelineProvisioningRepository =
-      fun ?pipelineServiceRoleArn ->
-        fun () -> { pipelineProvisioningRepository; pipelineServiceRoleArn }
+    let make ?pipelineCodebuildRoleArn =
+      fun ?pipelineProvisioningRepository ->
+        fun ?pipelineServiceRoleArn ->
+          fun () ->
+            {
+              pipelineCodebuildRoleArn;
+              pipelineProvisioningRepository;
+              pipelineServiceRoleArn
+            }
     let to_value x =
       structure_to_value
-        [("pipelineProvisioningRepository",
-           (Option.map x.pipelineProvisioningRepository
-              ~f:RepositoryBranch.to_value));
+        [("pipelineCodebuildRoleArn",
+           (Option.map x.pipelineCodebuildRoleArn
+              ~f:RoleArnOrEmptyString.to_value));
+        ("pipelineProvisioningRepository",
+          (Option.map x.pipelineProvisioningRepository
+             ~f:RepositoryBranch.to_value));
         ("pipelineServiceRoleArn",
-          (Option.map x.pipelineServiceRoleArn ~f:PipelineRoleArn.to_value))]
+          (Option.map x.pipelineServiceRoleArn
+             ~f:RoleArnOrEmptyString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pipelineServiceRoleArn =
-        (Option.map ~f:PipelineRoleArn.of_xml)
+        (Option.map ~f:RoleArnOrEmptyString.of_xml)
           (Xml.child xml_arg0 "pipelineServiceRoleArn") in
       let pipelineProvisioningRepository =
         (Option.map ~f:RepositoryBranch.of_xml)
           (Xml.child xml_arg0 "pipelineProvisioningRepository") in
-      make ?pipelineServiceRoleArn ?pipelineProvisioningRepository ()
+      let pipelineCodebuildRoleArn =
+        (Option.map ~f:RoleArnOrEmptyString.of_xml)
+          (Xml.child xml_arg0 "pipelineCodebuildRoleArn") in
+      make ?pipelineServiceRoleArn ?pipelineProvisioningRepository
+        ?pipelineCodebuildRoleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineServiceRoleArn =
-        field_map json "pipelineServiceRoleArn" PipelineRoleArn.of_json in
+        field_map json__ "pipelineServiceRoleArn"
+          RoleArnOrEmptyString.of_json in
       let pipelineProvisioningRepository =
-        field_map json "pipelineProvisioningRepository"
+        field_map json__ "pipelineProvisioningRepository"
           RepositoryBranch.of_json in
-      make ?pipelineServiceRoleArn ?pipelineProvisioningRepository ()
+      let pipelineCodebuildRoleArn =
+        field_map json__ "pipelineCodebuildRoleArn"
+          RoleArnOrEmptyString.of_json in
+      make ?pipelineServiceRoleArn ?pipelineProvisioningRepository
+        ?pipelineCodebuildRoleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Proton pipeline service role and repository data shared across the Amazon Web Services account."]
+       "Proton settings that are used for multiple services in the Amazon Web Services account."]
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -4193,6 +6061,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4220,6 +6091,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4239,24 +6113,6 @@ module TagList =
     let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
-module DeploymentId =
-  struct
-    type nonrec t = string
-    let context_ = "DeploymentId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DeploymentId" j
-    let to_json = simple_to_json to_value
-  end
 module NotifyResourceDeploymentStatusChangeInputOutputsList =
   struct
     type nonrec t = Output.t list
@@ -4265,6 +6121,9 @@ module NotifyResourceDeploymentStatusChangeInputOutputsList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Output.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4286,6 +6145,28 @@ module NotifyResourceDeploymentStatusChangeInputOutputsList =
         ~kind:"NotifyResourceDeploymentStatusChangeInputOutputsList"
         ~of_json:Output.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module NotifyResourceDeploymentStatusChangeInputStatusMessageString =
+  struct
+    type nonrec t = string
+    let context_ =
+      "NotifyResourceDeploymentStatusChangeInputStatusMessageString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:5000) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"NotifyResourceDeploymentStatusChangeInputStatusMessageString"
+        j
+    let to_json = simple_to_json to_value
   end
 module ResourceDeploymentStatus =
   struct
@@ -4315,26 +6196,6 @@ module ResourceDeploymentStatus =
         (string_of_xml ~kind:"enumeration ResourceDeploymentStatus" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"ResourceDeploymentStatus" j)
-    let to_json = simple_to_json to_value
-  end
-module SyntheticNotifyResourceDeploymentStatusChangeInputString =
-  struct
-    type nonrec t = string
-    let context_ = "SyntheticNotifyResourceDeploymentStatusChangeInputString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:5000) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json
-        ~kind:"SyntheticNotifyResourceDeploymentStatusChangeInputString" j
     let to_json = simple_to_json to_value
   end
 module MaxPageResults =
@@ -4374,6 +6235,9 @@ module ServiceSummaryList =
   struct
     type nonrec t = ServiceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4399,6 +6263,9 @@ module ServiceTemplateSummaryList =
   struct
     type nonrec t = ServiceTemplateSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceTemplateSummary.to_value)) |>
         (fun x -> `List x)
@@ -4425,6 +6292,9 @@ module ServiceTemplateVersionSummaryList =
   struct
     type nonrec t = ServiceTemplateVersionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceTemplateVersionSummary.to_value)) |>
         (fun x -> `List x)
@@ -4469,6 +6339,9 @@ module ProvisionedResourceList =
   struct
     type nonrec t = ProvisionedResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisionedResource.to_value)) |>
         (fun x -> `List x)
@@ -4495,6 +6368,9 @@ module OutputsList =
   struct
     type nonrec t = Output.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Output.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4519,6 +6395,9 @@ module ServiceInstanceSummaryList =
   struct
     type nonrec t = ServiceInstanceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceInstanceSummary.to_value)) |>
         (fun x -> `List x)
@@ -4541,10 +6420,110 @@ module ServiceInstanceSummaryList =
         ~of_json:ServiceInstanceSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListServiceInstancesFilterList =
+  struct
+    type nonrec t = ListServiceInstancesFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListServiceInstancesFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListServiceInstancesFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListServiceInstancesFilterList"
+        ~of_json:ListServiceInstancesFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListServiceInstancesSortBy =
+  struct
+    type nonrec t =
+      | Name 
+      | DeploymentStatus 
+      | TemplateName 
+      | ServiceName 
+      | EnvironmentName 
+      | LastDeploymentAttemptedAt 
+      | CreatedAt 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Name -> "name"
+      | DeploymentStatus -> "deploymentStatus"
+      | TemplateName -> "templateName"
+      | ServiceName -> "serviceName"
+      | EnvironmentName -> "environmentName"
+      | LastDeploymentAttemptedAt -> "lastDeploymentAttemptedAt"
+      | CreatedAt -> "createdAt"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "name" -> Name
+      | "deploymentStatus" -> DeploymentStatus
+      | "templateName" -> TemplateName
+      | "serviceName" -> ServiceName
+      | "environmentName" -> EnvironmentName
+      | "lastDeploymentAttemptedAt" -> LastDeploymentAttemptedAt
+      | "createdAt" -> CreatedAt
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ListServiceInstancesSortBy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ListServiceInstancesSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module SortOrder =
+  struct
+    type nonrec t =
+      | ASCENDING 
+      | DESCENDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ASCENDING -> "ASCENDING"
+      | DESCENDING -> "DESCENDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ASCENDING" -> ASCENDING
+      | "DESCENDING" -> DESCENDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
+    let to_json = simple_to_json to_value
+  end
 module RepositorySyncDefinitionList =
   struct
     type nonrec t = RepositorySyncDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositorySyncDefinition.to_value)) |>
         (fun x -> `List x)
@@ -4571,12 +6550,19 @@ module SyncType =
   struct
     type nonrec t =
       | TEMPLATE_SYNC 
+      | SERVICE_SYNC 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | TEMPLATE_SYNC -> "TEMPLATE_SYNC" | Non_static_id s -> s
+      function
+      | TEMPLATE_SYNC -> "TEMPLATE_SYNC"
+      | SERVICE_SYNC -> "SERVICE_SYNC"
+      | Non_static_id s -> s
     let of_string =
-      function | "TEMPLATE_SYNC" -> TEMPLATE_SYNC | x -> Non_static_id x
+      function
+      | "TEMPLATE_SYNC" -> TEMPLATE_SYNC
+      | "SERVICE_SYNC" -> SERVICE_SYNC
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -4589,6 +6575,9 @@ module RepositorySummaryList =
   struct
     type nonrec t = RepositorySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositorySummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4614,6 +6603,9 @@ module EnvironmentSummaryList =
   struct
     type nonrec t = EnvironmentSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4639,6 +6631,9 @@ module EnvironmentTemplateFilterList =
   struct
     type nonrec t = EnvironmentTemplateFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentTemplateFilter.to_value)) |>
         (fun x -> `List x)
@@ -4665,6 +6660,9 @@ module EnvironmentTemplateSummaryList =
   struct
     type nonrec t = EnvironmentTemplateSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentTemplateSummary.to_value)) |>
         (fun x -> `List x)
@@ -4691,6 +6689,9 @@ module EnvironmentTemplateVersionSummaryList =
   struct
     type nonrec t = EnvironmentTemplateVersionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentTemplateVersionSummary.to_value)) |>
         (fun x -> `List x)
@@ -4718,6 +6719,9 @@ module EnvironmentAccountConnectionSummaryList =
   struct
     type nonrec t = EnvironmentAccountConnectionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentAccountConnectionSummary.to_value)) |>
         (fun x -> `List x)
@@ -4776,6 +6780,9 @@ module EnvironmentAccountConnectionStatusList =
   struct
     type nonrec t = EnvironmentAccountConnectionStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentAccountConnectionStatus.to_value)) |>
         (fun x -> `List x)
@@ -4799,29 +6806,84 @@ module EnvironmentAccountConnectionStatusList =
         ~of_json:EnvironmentAccountConnectionStatus.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DeploymentSummaryList =
+  struct
+    type nonrec t = DeploymentSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeploymentSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeploymentSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeploymentSummaryList"
+        ~of_json:DeploymentSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ComponentSummaryList =
+  struct
+    type nonrec t = ComponentSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ComponentSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ComponentSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ComponentSummaryList"
+        ~of_json:ComponentSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResourceSyncAttempt =
   struct
     type nonrec t =
       {
-      events: ResourceSyncEvents.t
+      events: ResourceSyncEvents.t option
         [@ocaml.doc "An array of events with detail data."];
-      initialRevision: Revision.t
+      initialRevision: Revision.t option
         [@ocaml.doc
           "Detail data for the initial repository commit, path and push."];
-      startedAt: Timestamp.t
+      startedAt: Timestamp.t option
         [@ocaml.doc "The time when the sync attempt started."];
-      status: ResourceSyncStatus.t
+      status: ResourceSyncStatus.t option
         [@ocaml.doc "The status of the sync attempt."];
-      target: String_.t [@ocaml.doc "The resource that is synced to."];
-      targetRevision: Revision.t
+      target: String_.t option [@ocaml.doc "The resource that is synced to."];
+      targetRevision: Revision.t option
         [@ocaml.doc "Detail data for the target revision."]}
-    let context_ = "ResourceSyncAttempt"
-    let make ~events =
-      fun ~initialRevision ->
-        fun ~startedAt ->
-          fun ~status ->
-            fun ~target ->
-              fun ~targetRevision ->
+    let make ?events =
+      fun ?initialRevision ->
+        fun ?startedAt ->
+          fun ?status ->
+            fun ?target ->
+              fun ?targetRevision ->
                 fun () ->
                   {
                     events;
@@ -4833,84 +6895,231 @@ module ResourceSyncAttempt =
                   }
     let to_value x =
       structure_to_value
-        [("events", (Some (ResourceSyncEvents.to_value x.events)));
-        ("initialRevision", (Some (Revision.to_value x.initialRevision)));
-        ("startedAt", (Some (Timestamp.to_value x.startedAt)));
-        ("status", (Some (ResourceSyncStatus.to_value x.status)));
-        ("target", (Some (String_.to_value x.target)));
-        ("targetRevision", (Some (Revision.to_value x.targetRevision)))]
+        [("events", (Option.map x.events ~f:ResourceSyncEvents.to_value));
+        ("initialRevision",
+          (Option.map x.initialRevision ~f:Revision.to_value));
+        ("startedAt", (Option.map x.startedAt ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:ResourceSyncStatus.to_value));
+        ("target", (Option.map x.target ~f:String_.to_value));
+        ("targetRevision",
+          (Option.map x.targetRevision ~f:Revision.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let targetRevision =
-        Revision.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "targetRevision") in
+        (Option.map ~f:Revision.of_xml) (Xml.child xml_arg0 "targetRevision") in
       let target =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "target") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "target") in
       let status =
-        ResourceSyncStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ResourceSyncStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let startedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startedAt") in
       let initialRevision =
-        Revision.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initialRevision") in
+        (Option.map ~f:Revision.of_xml)
+          (Xml.child xml_arg0 "initialRevision") in
       let events =
-        ResourceSyncEvents.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "events") in
-      make ~targetRevision ~target ~status ~startedAt ~initialRevision
-        ~events ()
+        (Option.map ~f:ResourceSyncEvents.of_xml)
+          (Xml.child xml_arg0 "events") in
+      make ?targetRevision ?target ?status ?startedAt ?initialRevision
+        ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetRevision =
-        field_map_exn json "targetRevision" Revision.of_json in
-      let target = field_map_exn json "target" String_.of_json in
-      let status = field_map_exn json "status" ResourceSyncStatus.of_json in
-      let startedAt = field_map_exn json "startedAt" Timestamp.of_json in
+    let of_json json__ =
+      let targetRevision = field_map json__ "targetRevision" Revision.of_json in
+      let target = field_map json__ "target" String_.of_json in
+      let status = field_map json__ "status" ResourceSyncStatus.of_json in
+      let startedAt = field_map json__ "startedAt" Timestamp.of_json in
       let initialRevision =
-        field_map_exn json "initialRevision" Revision.of_json in
-      let events = field_map_exn json "events" ResourceSyncEvents.of_json in
-      make ~targetRevision ~target ~status ~startedAt ~initialRevision
-        ~events ()
+        field_map json__ "initialRevision" Revision.of_json in
+      let events = field_map json__ "events" ResourceSyncEvents.of_json in
+      make ?targetRevision ?target ?status ?startedAt ?initialRevision
+        ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Detail data for a resource sync attempt activated by a push to a repository."]
+module ServiceSyncBlockerSummary =
+  struct
+    type nonrec t =
+      {
+      latestBlockers: LatestSyncBlockers.t option
+        [@ocaml.doc "The latest active blockers for the synced service."];
+      serviceInstanceName: String_.t option
+        [@ocaml.doc
+          "The name of the service instance that you want sync your service configuration with."];
+      serviceName: String_.t option
+        [@ocaml.doc
+          "The name of the service that you want to get the sync blocker summary for. If given a service instance name and a service name, it will return the blockers only applying to the instance that is blocked. If given only a service name, it will return the blockers that apply to all of the instances. In order to get the blockers for a single instance, you will need to make two distinct calls, one to get the sync blocker summary for the service and the other to get the sync blocker for the service instance."]}
+    let make ?latestBlockers =
+      fun ?serviceInstanceName ->
+        fun ?serviceName ->
+          fun () -> { latestBlockers; serviceInstanceName; serviceName }
+    let to_value x =
+      structure_to_value
+        [("latestBlockers",
+           (Option.map x.latestBlockers ~f:LatestSyncBlockers.to_value));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:String_.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let latestBlockers =
+        (Option.map ~f:LatestSyncBlockers.of_xml)
+          (Xml.child xml_arg0 "latestBlockers") in
+      make ?serviceName ?serviceInstanceName ?latestBlockers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName = field_map json__ "serviceName" String_.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" String_.of_json in
+      let latestBlockers =
+        field_map json__ "latestBlockers" LatestSyncBlockers.of_json in
+      make ?serviceName ?serviceInstanceName ?latestBlockers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If a service instance is manually updated, Proton wants to prevent accidentally overriding a manual change. A blocker is created because of the manual update or deletion of a service instance. The summary describes the blocker as being active or resolved."]
+module CountsSummary =
+  struct
+    type nonrec t =
+      {
+      components: ResourceCountsSummary.t option
+        [@ocaml.doc
+          "The total number of components in the Amazon Web Services account. The semantics of the components field are different from the semantics of results for other infrastructure-provisioning resources. That's because at this time components don't have associated templates, therefore they don't have the concept of staleness. The components object will only contain total and failed members."];
+      environmentTemplates: ResourceCountsSummary.t option
+        [@ocaml.doc
+          "The total number of environment templates in the Amazon Web Services account. The environmentTemplates object will only contain total members."];
+      environments: ResourceCountsSummary.t option
+        [@ocaml.doc
+          "The staleness counts for Proton environments in the Amazon Web Services account. The environments object will only contain total members."];
+      pipelines: ResourceCountsSummary.t option
+        [@ocaml.doc
+          "The staleness counts for Proton pipelines in the Amazon Web Services account."];
+      serviceInstances: ResourceCountsSummary.t option
+        [@ocaml.doc
+          "The staleness counts for Proton service instances in the Amazon Web Services account."];
+      serviceTemplates: ResourceCountsSummary.t option
+        [@ocaml.doc
+          "The total number of service templates in the Amazon Web Services account. The serviceTemplates object will only contain total members."];
+      services: ResourceCountsSummary.t option
+        [@ocaml.doc
+          "The staleness counts for Proton services in the Amazon Web Services account."]}
+    let make ?components =
+      fun ?environmentTemplates ->
+        fun ?environments ->
+          fun ?pipelines ->
+            fun ?serviceInstances ->
+              fun ?serviceTemplates ->
+                fun ?services ->
+                  fun () ->
+                    {
+                      components;
+                      environmentTemplates;
+                      environments;
+                      pipelines;
+                      serviceInstances;
+                      serviceTemplates;
+                      services
+                    }
+    let to_value x =
+      structure_to_value
+        [("components",
+           (Option.map x.components ~f:ResourceCountsSummary.to_value));
+        ("environmentTemplates",
+          (Option.map x.environmentTemplates
+             ~f:ResourceCountsSummary.to_value));
+        ("environments",
+          (Option.map x.environments ~f:ResourceCountsSummary.to_value));
+        ("pipelines",
+          (Option.map x.pipelines ~f:ResourceCountsSummary.to_value));
+        ("serviceInstances",
+          (Option.map x.serviceInstances ~f:ResourceCountsSummary.to_value));
+        ("serviceTemplates",
+          (Option.map x.serviceTemplates ~f:ResourceCountsSummary.to_value));
+        ("services",
+          (Option.map x.services ~f:ResourceCountsSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let services =
+        (Option.map ~f:ResourceCountsSummary.of_xml)
+          (Xml.child xml_arg0 "services") in
+      let serviceTemplates =
+        (Option.map ~f:ResourceCountsSummary.of_xml)
+          (Xml.child xml_arg0 "serviceTemplates") in
+      let serviceInstances =
+        (Option.map ~f:ResourceCountsSummary.of_xml)
+          (Xml.child xml_arg0 "serviceInstances") in
+      let pipelines =
+        (Option.map ~f:ResourceCountsSummary.of_xml)
+          (Xml.child xml_arg0 "pipelines") in
+      let environments =
+        (Option.map ~f:ResourceCountsSummary.of_xml)
+          (Xml.child xml_arg0 "environments") in
+      let environmentTemplates =
+        (Option.map ~f:ResourceCountsSummary.of_xml)
+          (Xml.child xml_arg0 "environmentTemplates") in
+      let components =
+        (Option.map ~f:ResourceCountsSummary.of_xml)
+          (Xml.child xml_arg0 "components") in
+      make ?services ?serviceTemplates ?serviceInstances ?pipelines
+        ?environments ?environmentTemplates ?components ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let services =
+        field_map json__ "services" ResourceCountsSummary.of_json in
+      let serviceTemplates =
+        field_map json__ "serviceTemplates" ResourceCountsSummary.of_json in
+      let serviceInstances =
+        field_map json__ "serviceInstances" ResourceCountsSummary.of_json in
+      let pipelines =
+        field_map json__ "pipelines" ResourceCountsSummary.of_json in
+      let environments =
+        field_map json__ "environments" ResourceCountsSummary.of_json in
+      let environmentTemplates =
+        field_map json__ "environmentTemplates" ResourceCountsSummary.of_json in
+      let components =
+        field_map json__ "components" ResourceCountsSummary.of_json in
+      make ?services ?serviceTemplates ?serviceInstances ?pipelines
+        ?environments ?environmentTemplates ?components ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary counts of each Proton resource type."]
 module RepositorySyncAttempt =
   struct
     type nonrec t =
       {
-      events: RepositorySyncEvents.t
+      events: RepositorySyncEvents.t option
         [@ocaml.doc "Detail data for sync attempt events."];
-      startedAt: Timestamp.t
+      startedAt: Timestamp.t option
         [@ocaml.doc "The time when the sync attempt started."];
-      status: RepositorySyncStatus.t [@ocaml.doc "The sync attempt status."]}
-    let context_ = "RepositorySyncAttempt"
-    let make ~events =
-      fun ~startedAt ->
-        fun ~status -> fun () -> { events; startedAt; status }
+      status: RepositorySyncStatus.t option
+        [@ocaml.doc "The sync attempt status."]}
+    let make ?events =
+      fun ?startedAt ->
+        fun ?status -> fun () -> { events; startedAt; status }
     let to_value x =
       structure_to_value
-        [("events", (Some (RepositorySyncEvents.to_value x.events)));
-        ("startedAt", (Some (Timestamp.to_value x.startedAt)));
-        ("status", (Some (RepositorySyncStatus.to_value x.status)))]
+        [("events", (Option.map x.events ~f:RepositorySyncEvents.to_value));
+        ("startedAt", (Option.map x.startedAt ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:RepositorySyncStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        RepositorySyncStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:RepositorySyncStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let startedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startedAt") in
       let events =
-        RepositorySyncEvents.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "events") in
-      make ~status ~startedAt ~events ()
+        (Option.map ~f:RepositorySyncEvents.of_xml)
+          (Xml.child xml_arg0 "events") in
+      make ?status ?startedAt ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" RepositorySyncStatus.of_json in
-      let startedAt = field_map_exn json "startedAt" Timestamp.of_json in
-      let events = field_map_exn json "events" RepositorySyncEvents.of_json in
-      make ~status ~startedAt ~events ()
+    let of_json json__ =
+      let status = field_map json__ "status" RepositorySyncStatus.of_json in
+      let startedAt = field_map json__ "startedAt" Timestamp.of_json in
+      let events = field_map json__ "events" RepositorySyncEvents.of_json in
+      make ?status ?startedAt ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Detail data for a repository sync attempt activated by a push to a repository."]
@@ -4918,75 +7127,267 @@ module Repository =
   struct
     type nonrec t =
       {
-      arn: RepositoryArn.t
-        [@ocaml.doc "The repository Amazon Resource Name (ARN)."];
-      connectionArn: Arn.t
+      arn: RepositoryArn.t option
         [@ocaml.doc
-          "The repository Amazon Web Services CodeStar connection that connects Proton to your repository."];
+          "The Amazon Resource Name (ARN) of the linked repository."];
+      connectionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of your AWS CodeStar connection that connects Proton to your repository provider account."];
       encryptionKey: Arn.t option
         [@ocaml.doc "Your customer Amazon Web Services KMS encryption key."];
-      name: RepositoryName.t [@ocaml.doc "The repository name."];
-      provider: RepositoryProvider.t [@ocaml.doc "The repository provider."]}
-    let context_ = "Repository"
-    let make ?encryptionKey =
-      fun ~arn ->
-        fun ~connectionArn ->
-          fun ~name ->
-            fun ~provider ->
-              fun () -> { encryptionKey; arn; connectionArn; name; provider }
+      name: RepositoryName.t option [@ocaml.doc "The repository name."];
+      provider: RepositoryProvider.t option
+        [@ocaml.doc "The repository provider."]}
+    let make ?arn =
+      fun ?connectionArn ->
+        fun ?encryptionKey ->
+          fun ?name ->
+            fun ?provider ->
+              fun () -> { arn; connectionArn; encryptionKey; name; provider }
     let to_value x =
       structure_to_value
-        [("arn", (Some (RepositoryArn.to_value x.arn)));
-        ("connectionArn", (Some (Arn.to_value x.connectionArn)));
+        [("arn", (Option.map x.arn ~f:RepositoryArn.to_value));
+        ("connectionArn", (Option.map x.connectionArn ~f:Arn.to_value));
         ("encryptionKey", (Option.map x.encryptionKey ~f:Arn.to_value));
-        ("name", (Some (RepositoryName.to_value x.name)));
-        ("provider", (Some (RepositoryProvider.to_value x.provider)))]
+        ("name", (Option.map x.name ~f:RepositoryName.to_value));
+        ("provider", (Option.map x.provider ~f:RepositoryProvider.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let provider =
-        RepositoryProvider.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "provider") in
+        (Option.map ~f:RepositoryProvider.of_xml)
+          (Xml.child xml_arg0 "provider") in
       let name =
-        RepositoryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:RepositoryName.of_xml) (Xml.child xml_arg0 "name") in
       let encryptionKey =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "encryptionKey") in
       let connectionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "connectionArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "connectionArn") in
       let arn =
-        RepositoryArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~provider ~name ?encryptionKey ~connectionArn ~arn ()
+        (Option.map ~f:RepositoryArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?provider ?name ?encryptionKey ?connectionArn ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let provider = field_map_exn json "provider" RepositoryProvider.of_json in
-      let name = field_map_exn json "name" RepositoryName.of_json in
-      let encryptionKey = field_map json "encryptionKey" Arn.of_json in
-      let connectionArn = field_map_exn json "connectionArn" Arn.of_json in
-      let arn = field_map_exn json "arn" RepositoryArn.of_json in
-      make ~provider ~name ?encryptionKey ~connectionArn ~arn ()
+    let of_json json__ =
+      let provider = field_map json__ "provider" RepositoryProvider.of_json in
+      let name = field_map json__ "name" RepositoryName.of_json in
+      let encryptionKey = field_map json__ "encryptionKey" Arn.of_json in
+      let connectionArn = field_map json__ "connectionArn" Arn.of_json in
+      let arn = field_map json__ "arn" RepositoryArn.of_json in
+      make ?provider ?name ?encryptionKey ?connectionArn ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detail date for a repository that has been registered with Proton."]
-module ClientToken =
+       "Detailed data of a linked repository\226\128\148a repository that has been registered with Proton."]
+module Deployment =
   struct
-    type nonrec t = string
-    let context_ = "ClientToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"^[!-~]*$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      arn: DeploymentArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the deployment."];
+      completedAt: Timestamp.t option
+        [@ocaml.doc "The date and time the deployment was completed."];
+      componentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the component associated with this deployment."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time the deployment was created."];
+      deploymentStatus: DeploymentStatus.t option
+        [@ocaml.doc "The status of the deployment."];
+      deploymentStatusMessage: StatusMessage.t option
+        [@ocaml.doc "The deployment status message."];
+      environmentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the environment associated with this deployment."];
+      id: DeploymentId.t option [@ocaml.doc "The ID of the deployment."];
+      initialState: DeploymentState.t option
+        [@ocaml.doc
+          "The initial state of the target resource at the time of the deployment."];
+      lastAttemptedDeploymentId: DeploymentId.t option
+        [@ocaml.doc "The ID of the last attempted deployment."];
+      lastModifiedAt: Timestamp.t option
+        [@ocaml.doc "The date and time the deployment was last modified."];
+      lastSucceededDeploymentId: DeploymentId.t option
+        [@ocaml.doc "The ID of the last successful deployment."];
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc "The name of the deployment's service instance."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc "The name of the service in this deployment."];
+      targetArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the target of the deployment."];
+      targetResourceCreatedAt: Timestamp.t option
+        [@ocaml.doc "The date and time the depoyment target was created."];
+      targetResourceType: DeploymentTargetResourceType.t option
+        [@ocaml.doc
+          "The resource type of the deployment target. It can be an environment, service, service instance, or component."];
+      targetState: DeploymentState.t option
+        [@ocaml.doc
+          "The target state of the target resource at the time of the deployment."]}
+    let make ?arn =
+      fun ?completedAt ->
+        fun ?componentName ->
+          fun ?createdAt ->
+            fun ?deploymentStatus ->
+              fun ?deploymentStatusMessage ->
+                fun ?environmentName ->
+                  fun ?id ->
+                    fun ?initialState ->
+                      fun ?lastAttemptedDeploymentId ->
+                        fun ?lastModifiedAt ->
+                          fun ?lastSucceededDeploymentId ->
+                            fun ?serviceInstanceName ->
+                              fun ?serviceName ->
+                                fun ?targetArn ->
+                                  fun ?targetResourceCreatedAt ->
+                                    fun ?targetResourceType ->
+                                      fun ?targetState ->
+                                        fun () ->
+                                          {
+                                            arn;
+                                            completedAt;
+                                            componentName;
+                                            createdAt;
+                                            deploymentStatus;
+                                            deploymentStatusMessage;
+                                            environmentName;
+                                            id;
+                                            initialState;
+                                            lastAttemptedDeploymentId;
+                                            lastModifiedAt;
+                                            lastSucceededDeploymentId;
+                                            serviceInstanceName;
+                                            serviceName;
+                                            targetArn;
+                                            targetResourceCreatedAt;
+                                            targetResourceType;
+                                            targetState
+                                          }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:DeploymentArn.to_value));
+        ("completedAt", (Option.map x.completedAt ~f:Timestamp.to_value));
+        ("componentName",
+          (Option.map x.componentName ~f:ResourceName.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("deploymentStatus",
+          (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
+        ("deploymentStatusMessage",
+          (Option.map x.deploymentStatusMessage ~f:StatusMessage.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("id", (Option.map x.id ~f:DeploymentId.to_value));
+        ("initialState",
+          (Option.map x.initialState ~f:DeploymentState.to_value));
+        ("lastAttemptedDeploymentId",
+          (Option.map x.lastAttemptedDeploymentId ~f:DeploymentId.to_value));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("lastSucceededDeploymentId",
+          (Option.map x.lastSucceededDeploymentId ~f:DeploymentId.to_value));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value));
+        ("targetArn", (Option.map x.targetArn ~f:Arn.to_value));
+        ("targetResourceCreatedAt",
+          (Option.map x.targetResourceCreatedAt ~f:Timestamp.to_value));
+        ("targetResourceType",
+          (Option.map x.targetResourceType
+             ~f:DeploymentTargetResourceType.to_value));
+        ("targetState",
+          (Option.map x.targetState ~f:DeploymentState.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ClientToken" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let targetState =
+        (Option.map ~f:DeploymentState.of_xml)
+          (Xml.child xml_arg0 "targetState") in
+      let targetResourceType =
+        (Option.map ~f:DeploymentTargetResourceType.of_xml)
+          (Xml.child xml_arg0 "targetResourceType") in
+      let targetResourceCreatedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "targetResourceCreatedAt") in
+      let targetArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "targetArn") in
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let lastSucceededDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastSucceededDeploymentId") in
+      let lastModifiedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
+      let lastAttemptedDeploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDeploymentId") in
+      let initialState =
+        (Option.map ~f:DeploymentState.of_xml)
+          (Xml.child xml_arg0 "initialState") in
+      let id = (Option.map ~f:DeploymentId.of_xml) (Xml.child xml_arg0 "id") in
+      let environmentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
+      let deploymentStatusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "deploymentStatusMessage") in
+      let deploymentStatus =
+        (Option.map ~f:DeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "deploymentStatus") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let componentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "componentName") in
+      let completedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "completedAt") in
+      let arn =
+        (Option.map ~f:DeploymentArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?targetState ?targetResourceType ?targetResourceCreatedAt
+        ?targetArn ?serviceName ?serviceInstanceName
+        ?lastSucceededDeploymentId ?lastModifiedAt ?lastAttemptedDeploymentId
+        ?initialState ?id ?environmentName ?deploymentStatusMessage
+        ?deploymentStatus ?createdAt ?componentName ?completedAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetState =
+        field_map json__ "targetState" DeploymentState.of_json in
+      let targetResourceType =
+        field_map json__ "targetResourceType"
+          DeploymentTargetResourceType.of_json in
+      let targetResourceCreatedAt =
+        field_map json__ "targetResourceCreatedAt" Timestamp.of_json in
+      let targetArn = field_map json__ "targetArn" Arn.of_json in
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      let lastSucceededDeploymentId =
+        field_map json__ "lastSucceededDeploymentId" DeploymentId.of_json in
+      let lastModifiedAt =
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let lastAttemptedDeploymentId =
+        field_map json__ "lastAttemptedDeploymentId" DeploymentId.of_json in
+      let initialState =
+        field_map json__ "initialState" DeploymentState.of_json in
+      let id = field_map json__ "id" DeploymentId.of_json in
+      let environmentName =
+        field_map json__ "environmentName" ResourceName.of_json in
+      let deploymentStatusMessage =
+        field_map json__ "deploymentStatusMessage" StatusMessage.of_json in
+      let deploymentStatus =
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let componentName =
+        field_map json__ "componentName" ResourceName.of_json in
+      let completedAt = field_map json__ "completedAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" DeploymentArn.of_json in
+      make ?targetState ?targetResourceType ?targetResourceCreatedAt
+        ?targetArn ?serviceName ?serviceInstanceName
+        ?lastSucceededDeploymentId ?lastModifiedAt ?lastAttemptedDeploymentId
+        ?initialState ?id ?environmentName ?deploymentStatusMessage
+        ?deploymentStatus ?createdAt ?componentName ?completedAt ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The detailed information about a deployment."]
 module TemplateVersionSourceInput =
   struct
     type nonrec t =
@@ -5004,10 +7405,28 @@ module TemplateVersionSourceInput =
         (Option.map ~f:S3ObjectSource.of_xml) (Xml.child xml_arg0 "s3") in
       make ?s3 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "s3" S3ObjectSource.of_json in make ?s3 ()
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3ObjectSource.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Template version source data."]
+module TemplateManifestContents =
+  struct
+    type nonrec t = string
+    let context_ = "TemplateManifestContents"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TemplateManifestContents" j
+    let to_json = simple_to_json to_value
+  end
 module UpdateTemplateSyncConfigOutput =
   struct
     type nonrec t =
@@ -5099,21 +7518,21 @@ module UpdateTemplateSyncConfigOutput =
           (Xml.child xml_arg0 "templateSyncConfig") in
       make ?templateSyncConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateSyncConfig =
-        field_map json "templateSyncConfig" TemplateSyncConfig.of_json in
+        field_map json__ "templateSyncConfig" TemplateSyncConfig.of_json in
       make ?templateSyncConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update template sync configuration parameters, except for the templateName and templateType."]
+       "Update template sync configuration parameters, except for the templateName and templateType. Repository details (branch, name, and provider) should be of a linked repository. A linked repository is a repository that has been registered with Proton. For more information, see CreateRepository."]
 module UpdateTemplateSyncConfigInput =
   struct
     type nonrec t =
       {
-      branch: GitBranchName.t [@ocaml.doc "The repository branch."];
+      branch: GitBranchName.t
+        [@ocaml.doc "The repository branch for your template."];
       repositoryName: RepositoryName.t
-        [@ocaml.doc
-          "The name of the repository (for example, myrepos/myrepo)."];
+        [@ocaml.doc "The repository name (for example, myrepos/myrepo)."];
       repositoryProvider: RepositoryProvider.t
         [@ocaml.doc "The repository provider."];
       subdirectory: Subdirectory.t option
@@ -5170,27 +7589,27 @@ module UpdateTemplateSyncConfigInput =
       make ~templateType ~templateName ?subdirectory ~repositoryProvider
         ~repositoryName ~branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateType =
-        field_map_exn json "templateType" TemplateType.of_json in
+        field_map_exn json__ "templateType" TemplateType.of_json in
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
-      let subdirectory = field_map json "subdirectory" Subdirectory.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
+      let subdirectory = field_map json__ "subdirectory" Subdirectory.of_json in
       let repositoryProvider =
-        field_map_exn json "repositoryProvider" RepositoryProvider.of_json in
+        field_map_exn json__ "repositoryProvider" RepositoryProvider.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let branch = field_map_exn json "branch" GitBranchName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let branch = field_map_exn json__ "branch" GitBranchName.of_json in
       make ~templateType ~templateName ?subdirectory ~repositoryProvider
         ~repositoryName ~branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update template sync configuration parameters, except for the templateName and templateType."]
+       "Update template sync configuration parameters, except for the templateName and templateType. Repository details (branch, name, and provider) should be of a linked repository. A linked repository is a repository that has been registered with Proton. For more information, see CreateRepository."]
 module UpdateServiceTemplateVersionOutput =
   struct
     type nonrec t =
       {
-      serviceTemplateVersion: ServiceTemplateVersion.t
+      serviceTemplateVersion: ServiceTemplateVersion.t option
         [@ocaml.doc
           "The service template version detail data that's returned by Proton."]}
     type nonrec error =
@@ -5201,8 +7620,7 @@ module UpdateServiceTemplateVersionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateServiceTemplateVersionOutput"
-    let make ~serviceTemplateVersion = fun () -> { serviceTemplateVersion }
+    let make ?serviceTemplateVersion = fun () -> { serviceTemplateVersion }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5270,19 +7688,20 @@ module UpdateServiceTemplateVersionOutput =
     let to_value x =
       structure_to_value
         [("serviceTemplateVersion",
-           (Some (ServiceTemplateVersion.to_value x.serviceTemplateVersion)))]
+           (Option.map x.serviceTemplateVersion
+              ~f:ServiceTemplateVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceTemplateVersion =
-        ServiceTemplateVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceTemplateVersion") in
-      make ~serviceTemplateVersion ()
+        (Option.map ~f:ServiceTemplateVersion.of_xml)
+          (Xml.child xml_arg0 "serviceTemplateVersion") in
+      make ?serviceTemplateVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceTemplateVersion =
-        field_map_exn json "serviceTemplateVersion"
+        field_map json__ "serviceTemplateVersion"
           ServiceTemplateVersion.of_json in
-      make ~serviceTemplateVersion ()
+      make ?serviceTemplateVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a major or minor version of a service template."]
 module UpdateServiceTemplateVersionInput =
@@ -5292,7 +7711,7 @@ module UpdateServiceTemplateVersionInput =
       compatibleEnvironmentTemplates:
         CompatibleEnvironmentTemplateInputList.t option
         [@ocaml.doc
-          "An array of compatible environment names for a service template major or minor version to update."];
+          "An array of environment template objects that are compatible with this service template version. A service instance based on this service template version can run in environments based on compatible templates."];
       description: Description.t option
         [@ocaml.doc "A description of a service template version to update."];
       majorVersion: TemplateVersionPart.t
@@ -5304,24 +7723,30 @@ module UpdateServiceTemplateVersionInput =
       status: TemplateVersionStatus.t option
         [@ocaml.doc
           "The status of the service template minor version to update."];
+      supportedComponentSources:
+        ServiceTemplateSupportedComponentSourceInputList.t option
+        [@ocaml.doc
+          "An array of supported component sources. Components with supported sources can be attached to service instances based on this service template version. A change to supportedComponentSources doesn't impact existing component attachments to instances based on this template version. A change only affects later associations. For more information about components, see Proton components in the Proton User Guide."];
       templateName: ResourceName.t
         [@ocaml.doc "The name of the service template."]}
     let context_ = "UpdateServiceTemplateVersionInput"
     let make ?compatibleEnvironmentTemplates =
       fun ?description ->
         fun ?status ->
-          fun ~majorVersion ->
-            fun ~minorVersion ->
-              fun ~templateName ->
-                fun () ->
-                  {
-                    compatibleEnvironmentTemplates;
-                    description;
-                    status;
-                    majorVersion;
-                    minorVersion;
-                    templateName
-                  }
+          fun ?supportedComponentSources ->
+            fun ~majorVersion ->
+              fun ~minorVersion ->
+                fun ~templateName ->
+                  fun () ->
+                    {
+                      compatibleEnvironmentTemplates;
+                      description;
+                      status;
+                      supportedComponentSources;
+                      majorVersion;
+                      minorVersion;
+                      templateName
+                    }
     let to_value x =
       structure_to_value
         [("compatibleEnvironmentTemplates",
@@ -5333,12 +7758,19 @@ module UpdateServiceTemplateVersionInput =
         ("minorVersion",
           (Some (TemplateVersionPart.to_value x.minorVersion)));
         ("status", (Option.map x.status ~f:TemplateVersionStatus.to_value));
+        ("supportedComponentSources",
+          (Option.map x.supportedComponentSources
+             ~f:ServiceTemplateSupportedComponentSourceInputList.to_value));
         ("templateName", (Some (ResourceName.to_value x.templateName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
+      let supportedComponentSources =
+        (Option.map
+           ~f:ServiceTemplateSupportedComponentSourceInputList.of_xml)
+          (Xml.child xml_arg0 "supportedComponentSources") in
       let status =
         (Option.map ~f:TemplateVersionStatus.of_xml)
           (Xml.child xml_arg0 "status") in
@@ -5353,30 +7785,33 @@ module UpdateServiceTemplateVersionInput =
       let compatibleEnvironmentTemplates =
         (Option.map ~f:CompatibleEnvironmentTemplateInputList.of_xml)
           (Xml.child xml_arg0 "compatibleEnvironmentTemplates") in
-      make ~templateName ?status ~minorVersion ~majorVersion ?description
-        ?compatibleEnvironmentTemplates ()
+      make ~templateName ?supportedComponentSources ?status ~minorVersion
+        ~majorVersion ?description ?compatibleEnvironmentTemplates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
-      let status = field_map json "status" TemplateVersionStatus.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
+      let supportedComponentSources =
+        field_map json__ "supportedComponentSources"
+          ServiceTemplateSupportedComponentSourceInputList.of_json in
+      let status = field_map json__ "status" TemplateVersionStatus.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map_exn json__ "majorVersion" TemplateVersionPart.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let compatibleEnvironmentTemplates =
-        field_map json "compatibleEnvironmentTemplates"
+        field_map json__ "compatibleEnvironmentTemplates"
           CompatibleEnvironmentTemplateInputList.of_json in
-      make ~templateName ?status ~minorVersion ~majorVersion ?description
-        ?compatibleEnvironmentTemplates ()
+      make ~templateName ?supportedComponentSources ?status ~minorVersion
+        ~majorVersion ?description ?compatibleEnvironmentTemplates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a major or minor version of a service template."]
 module UpdateServiceTemplateOutput =
   struct
     type nonrec t =
       {
-      serviceTemplate: ServiceTemplate.t
+      serviceTemplate: ServiceTemplate.t option
         [@ocaml.doc
           "The service template detail data that's returned by Proton."]}
     type nonrec error =
@@ -5387,8 +7822,7 @@ module UpdateServiceTemplateOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateServiceTemplateOutput"
-    let make ~serviceTemplate = fun () -> { serviceTemplate }
+    let make ?serviceTemplate = fun () -> { serviceTemplate }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5456,18 +7890,18 @@ module UpdateServiceTemplateOutput =
     let to_value x =
       structure_to_value
         [("serviceTemplate",
-           (Some (ServiceTemplate.to_value x.serviceTemplate)))]
+           (Option.map x.serviceTemplate ~f:ServiceTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceTemplate =
-        ServiceTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceTemplate") in
-      make ~serviceTemplate ()
+        (Option.map ~f:ServiceTemplate.of_xml)
+          (Xml.child xml_arg0 "serviceTemplate") in
+      make ?serviceTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceTemplate =
-        field_map_exn json "serviceTemplate" ServiceTemplate.of_json in
-      make ~serviceTemplate ()
+        field_map json__ "serviceTemplate" ServiceTemplate.of_json in
+      make ?serviceTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a service template."]
 module UpdateServiceTemplateInput =
@@ -5500,19 +7934,19 @@ module UpdateServiceTemplateInput =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       make ~name ?displayName ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let description = field_map json "description" Description.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let description = field_map json__ "description" Description.of_json in
       make ~name ?displayName ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a service template."]
-module UpdateServicePipelineOutput =
+module UpdateServiceSyncConfigOutput =
   struct
     type nonrec t =
       {
-      pipeline: ServicePipeline.t
-        [@ocaml.doc "The pipeline details that are returned by Proton."]}
+      serviceSyncConfig: ServiceSyncConfig.t option
+        [@ocaml.doc "The detailed data of the Proton Ops file."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -5521,8 +7955,7 @@ module UpdateServicePipelineOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateServicePipelineOutput"
-    let make ~pipeline = fun () -> { pipeline }
+    let make ?serviceSyncConfig = fun () -> { serviceSyncConfig }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5589,17 +8022,330 @@ module UpdateServicePipelineOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("pipeline", (Some (ServicePipeline.to_value x.pipeline)))]
+        [("serviceSyncConfig",
+           (Option.map x.serviceSyncConfig ~f:ServiceSyncConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceSyncConfig =
+        (Option.map ~f:ServiceSyncConfig.of_xml)
+          (Xml.child xml_arg0 "serviceSyncConfig") in
+      make ?serviceSyncConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceSyncConfig =
+        field_map json__ "serviceSyncConfig" ServiceSyncConfig.of_json in
+      make ?serviceSyncConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the Proton Ops config file."]
+module UpdateServiceSyncConfigInput =
+  struct
+    type nonrec t =
+      {
+      branch: GitBranchName.t
+        [@ocaml.doc
+          "The name of the code repository branch where the Proton Ops file is found."];
+      filePath: OpsFilePath.t [@ocaml.doc "The path to the Proton Ops file."];
+      repositoryName: RepositoryName.t
+        [@ocaml.doc
+          "The name of the repository where the Proton Ops file is found."];
+      repositoryProvider: RepositoryProvider.t
+        [@ocaml.doc
+          "The name of the repository provider where the Proton Ops file is found."];
+      serviceName: ResourceName.t
+        [@ocaml.doc "The name of the service the Proton Ops file is for."]}
+    let context_ = "UpdateServiceSyncConfigInput"
+    let make ~branch =
+      fun ~filePath ->
+        fun ~repositoryName ->
+          fun ~repositoryProvider ->
+            fun ~serviceName ->
+              fun () ->
+                {
+                  branch;
+                  filePath;
+                  repositoryName;
+                  repositoryProvider;
+                  serviceName
+                }
+    let to_value x =
+      structure_to_value
+        [("branch", (Some (GitBranchName.to_value x.branch)));
+        ("filePath", (Some (OpsFilePath.to_value x.filePath)));
+        ("repositoryName", (Some (RepositoryName.to_value x.repositoryName)));
+        ("repositoryProvider",
+          (Some (RepositoryProvider.to_value x.repositoryProvider)));
+        ("serviceName", (Some (ResourceName.to_value x.serviceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+      let repositoryProvider =
+        RepositoryProvider.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repositoryProvider") in
+      let repositoryName =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
+      let filePath =
+        OpsFilePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
+      let branch =
+        GitBranchName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "branch") in
+      make ~serviceName ~repositoryProvider ~repositoryName ~filePath ~branch
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      let repositoryProvider =
+        field_map_exn json__ "repositoryProvider" RepositoryProvider.of_json in
+      let repositoryName =
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let filePath = field_map_exn json__ "filePath" OpsFilePath.of_json in
+      let branch = field_map_exn json__ "branch" GitBranchName.of_json in
+      make ~serviceName ~repositoryProvider ~repositoryName ~filePath ~branch
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the Proton Ops config file."]
+module UpdateServiceSyncBlockerOutput =
+  struct
+    type nonrec t =
+      {
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service instance that you want to update the service sync blocker for."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service that you want to update the service sync blocker for."];
+      serviceSyncBlocker: SyncBlocker.t option
+        [@ocaml.doc
+          "The detailed data on the service sync blocker that was updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceInstanceName =
+      fun ?serviceName ->
+        fun ?serviceSyncBlocker ->
+          fun () -> { serviceInstanceName; serviceName; serviceSyncBlocker }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceInstanceName",
+           (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value));
+        ("serviceSyncBlocker",
+          (Option.map x.serviceSyncBlocker ~f:SyncBlocker.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceSyncBlocker =
+        (Option.map ~f:SyncBlocker.of_xml)
+          (Xml.child xml_arg0 "serviceSyncBlocker") in
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      make ?serviceSyncBlocker ?serviceName ?serviceInstanceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceSyncBlocker =
+        field_map json__ "serviceSyncBlocker" SyncBlocker.of_json in
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      make ?serviceSyncBlocker ?serviceName ?serviceInstanceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the service sync blocker by resolving it."]
+module UpdateServiceSyncBlockerInput =
+  struct
+    type nonrec t =
+      {
+      id: String_.t [@ocaml.doc "The ID of the service sync blocker."];
+      resolvedReason: String_.t
+        [@ocaml.doc "The reason the service sync blocker was resolved."]}
+    let context_ = "UpdateServiceSyncBlockerInput"
+    let make ~id = fun ~resolvedReason -> fun () -> { id; resolvedReason }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (String_.to_value x.id)));
+        ("resolvedReason", (Some (String_.to_value x.resolvedReason)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resolvedReason =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resolvedReason") in
+      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~resolvedReason ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resolvedReason =
+        field_map_exn json__ "resolvedReason" String_.of_json in
+      let id = field_map_exn json__ "id" String_.of_json in
+      make ~resolvedReason ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the service sync blocker by resolving it."]
+module UpdateServicePipelineOutput =
+  struct
+    type nonrec t =
+      {
+      pipeline: ServicePipeline.t option
+        [@ocaml.doc "The pipeline details that are returned by Proton."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?pipeline = fun () -> { pipeline }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("pipeline", (Option.map x.pipeline ~f:ServicePipeline.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pipeline =
-        ServicePipeline.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pipeline") in
-      make ~pipeline ()
+        (Option.map ~f:ServicePipeline.of_xml)
+          (Xml.child xml_arg0 "pipeline") in
+      make ?pipeline ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pipeline = field_map_exn json "pipeline" ServicePipeline.of_json in
-      make ~pipeline ()
+    let of_json json__ =
+      let pipeline = field_map json__ "pipeline" ServicePipeline.of_json in
+      make ?pipeline ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Update the service pipeline. There are four modes for updating a service pipeline. The deploymentType field defines the mode. NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the service pipeline is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include major or minor version parameters when you use this deployment-type. MINOR_VERSION In this mode, the service pipeline is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the service pipeline is deployed and updated with the published, recommended (latest) major and minor version of the current template by default. You can specify a different major version that's higher than the major version in use and a minor version."]
@@ -5664,15 +8410,16 @@ module UpdateServicePipelineInput =
       make ?templateMinorVersion ?templateMajorVersion ~spec ~serviceName
         ~deploymentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateMinorVersion =
-        field_map json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map json "templateMajorVersion" TemplateVersionPart.of_json in
-      let spec = field_map_exn json "spec" SpecContents.of_json in
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let spec = field_map_exn json__ "spec" SpecContents.of_json in
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
       let deploymentType =
-        field_map_exn json "deploymentType" DeploymentUpdateType.of_json in
+        field_map_exn json__ "deploymentType" DeploymentUpdateType.of_json in
       make ?templateMinorVersion ?templateMajorVersion ~spec ~serviceName
         ~deploymentType ()
     let to_json v = composed_to_json to_value v
@@ -5682,7 +8429,7 @@ module UpdateServiceOutput =
   struct
     type nonrec t =
       {
-      service: Service.t
+      service: Service.t option
         [@ocaml.doc "The service detail data that's returned by Proton."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -5693,8 +8440,7 @@ module UpdateServiceOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateServiceOutput"
-    let make ~service = fun () -> { service }
+    let make ?service = fun () -> { service }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5770,24 +8516,25 @@ module UpdateServiceOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("service", (Some (Service.to_value x.service)))]
+      structure_to_value
+        [("service", (Option.map x.service ~f:Service.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let service =
-        Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "service") in
-      make ~service ()
+        (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "service") in
+      make ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let service = field_map_exn json "service" Service.of_json in
-      make ~service ()
+    let of_json json__ =
+      let service = field_map json__ "service" Service.of_json in
+      make ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Edit a service description or use a spec to add and delete service instances. Existing service instances and the service pipeline can't be edited using this API. They can only be deleted. Use the description parameter to modify the description. Edit the spec parameter to add or delete instances."]
+       "Edit a service description or use a spec to add and delete service instances. Existing service instances and the service pipeline can't be edited using this API. They can only be deleted. Use the description parameter to modify the description. Edit the spec parameter to add or delete instances. You can't delete a service instance (remove it from the spec) if it has an attached component. For more information about components, see Proton components in the Proton User Guide."]
 module UpdateServiceInstanceOutput =
   struct
     type nonrec t =
       {
-      serviceInstance: ServiceInstance.t
+      serviceInstance: ServiceInstance.t option
         [@ocaml.doc
           "The service instance summary data that's returned by Proton."]}
     type nonrec error =
@@ -5798,8 +8545,7 @@ module UpdateServiceInstanceOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateServiceInstanceOutput"
-    let make ~serviceInstance = fun () -> { serviceInstance }
+    let make ?serviceInstance = fun () -> { serviceInstance }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5867,28 +8613,30 @@ module UpdateServiceInstanceOutput =
     let to_value x =
       structure_to_value
         [("serviceInstance",
-           (Some (ServiceInstance.to_value x.serviceInstance)))]
+           (Option.map x.serviceInstance ~f:ServiceInstance.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceInstance =
-        ServiceInstance.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceInstance") in
-      make ~serviceInstance ()
+        (Option.map ~f:ServiceInstance.of_xml)
+          (Xml.child xml_arg0 "serviceInstance") in
+      make ?serviceInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceInstance =
-        field_map_exn json "serviceInstance" ServiceInstance.of_json in
-      make ~serviceInstance ()
+        field_map json__ "serviceInstance" ServiceInstance.of_json in
+      make ?serviceInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update a service instance. There are four modes for updating a service instance. The deploymentType field defines the mode. NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the service instance is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include minor or major version parameters when you use this deployment-type. MINOR_VERSION In this mode, the service instance is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can also specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the service instance is deployed and updated with the published, recommended (latest) major and minor version of the current template, by default. You can also specify a different major version that's higher than the major version in use and a minor version."]
+       "Update a service instance. There are a few modes for updating a service instance. The deploymentType field defines the mode. You can't update a service instance while its deployment status, or the deployment status of a component attached to it, is IN_PROGRESS. For more information about components, see Proton components in the Proton User Guide."]
 module UpdateServiceInstanceInput =
   struct
     type nonrec t =
       {
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token of the service instance to update."];
       deploymentType: DeploymentUpdateType.t
         [@ocaml.doc
-          "The deployment type. There are four modes for updating a service instance. The deploymentType field defines the mode. NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the service instance is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include major or minor version parameters when you use this deployment-type. MINOR_VERSION In this mode, the service instance is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can also specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the service instance is deployed and updated with the published, recommended (latest) major and minor version of the current template, by default. You can specify a different major version that's higher than the major version in use and a minor version."];
+          "The deployment type. It defines the mode for updating a service instance, as follows: NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the service instance is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include major or minor version parameters when you use this deployment type. MINOR_VERSION In this mode, the service instance is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can also specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the service instance is deployed and updated with the published, recommended (latest) major and minor version of the current template, by default. You can specify a different major version that's higher than the major version in use and a minor version."];
       name: ResourceName.t
         [@ocaml.doc "The name of the service instance to update."];
       serviceName: ResourceName.t
@@ -5902,25 +8650,28 @@ module UpdateServiceInstanceInput =
       templateMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The minor version of the service template to update."]}
     let context_ = "UpdateServiceInstanceInput"
-    let make ?spec =
-      fun ?templateMajorVersion ->
-        fun ?templateMinorVersion ->
-          fun ~deploymentType ->
-            fun ~name ->
-              fun ~serviceName ->
-                fun () ->
-                  {
-                    spec;
-                    templateMajorVersion;
-                    templateMinorVersion;
-                    deploymentType;
-                    name;
-                    serviceName
-                  }
+    let make ?clientToken =
+      fun ?spec ->
+        fun ?templateMajorVersion ->
+          fun ?templateMinorVersion ->
+            fun ~deploymentType ->
+              fun ~name ->
+                fun ~serviceName ->
+                  fun () ->
+                    {
+                      clientToken;
+                      spec;
+                      templateMajorVersion;
+                      templateMinorVersion;
+                      deploymentType;
+                      name;
+                      serviceName
+                    }
     let to_value x =
       structure_to_value
-        [("deploymentType",
-           (Some (DeploymentUpdateType.to_value x.deploymentType)));
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("deploymentType",
+          (Some (DeploymentUpdateType.to_value x.deploymentType)));
         ("name", (Some (ResourceName.to_value x.name)));
         ("serviceName", (Some (ResourceName.to_value x.serviceName)));
         ("spec", (Option.map x.spec ~f:SpecContents.to_value));
@@ -5946,24 +8697,28 @@ module UpdateServiceInstanceInput =
       let deploymentType =
         DeploymentUpdateType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentType") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?templateMinorVersion ?templateMajorVersion ?spec ~serviceName
-        ~name ~deploymentType ()
+        ~name ~deploymentType ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateMinorVersion =
-        field_map json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map json "templateMajorVersion" TemplateVersionPart.of_json in
-      let spec = field_map json "spec" SpecContents.of_json in
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let spec = field_map json__ "spec" SpecContents.of_json in
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       let deploymentType =
-        field_map_exn json "deploymentType" DeploymentUpdateType.of_json in
+        field_map_exn json__ "deploymentType" DeploymentUpdateType.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ?templateMinorVersion ?templateMajorVersion ?spec ~serviceName
-        ~name ~deploymentType ()
+        ~name ~deploymentType ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update a service instance. There are four modes for updating a service instance. The deploymentType field defines the mode. NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the service instance is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include minor or major version parameters when you use this deployment-type. MINOR_VERSION In this mode, the service instance is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can also specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the service instance is deployed and updated with the published, recommended (latest) major and minor version of the current template, by default. You can also specify a different major version that's higher than the major version in use and a minor version."]
+       "Update a service instance. There are a few modes for updating a service instance. The deploymentType field defines the mode. You can't update a service instance while its deployment status, or the deployment status of a component attached to it, is IN_PROGRESS. For more information about components, see Proton components in the Proton User Guide."]
 module UpdateServiceInput =
   struct
     type nonrec t =
@@ -5973,7 +8728,7 @@ module UpdateServiceInput =
       name: ResourceName.t [@ocaml.doc "The name of the service to edit."];
       spec: SpecContents.t option
         [@ocaml.doc
-          "Lists the service instances to add and the existing service instances to remain. Omit the existing service instances to delete from the list. Don't include edits to the existing service instances or pipeline. For more information, see Edit a service in the Proton Administrator Guide or the Proton User Guide."]}
+          "Lists the service instances to add and the existing service instances to remain. Omit the existing service instances to delete from the list. Don't include edits to the existing service instances or pipeline. For more information, see Edit a service in the Proton User Guide."]}
     let context_ = "UpdateServiceInput"
     let make ?description =
       fun ?spec -> fun ~name -> fun () -> { description; spec; name }
@@ -5992,19 +8747,19 @@ module UpdateServiceInput =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       make ?spec ~name ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let spec = field_map json "spec" SpecContents.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
-      let description = field_map json "description" Description.of_json in
+    let of_json json__ =
+      let spec = field_map json__ "spec" SpecContents.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      let description = field_map json__ "description" Description.of_json in
       make ?spec ~name ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Edit a service description or use a spec to add and delete service instances. Existing service instances and the service pipeline can't be edited using this API. They can only be deleted. Use the description parameter to modify the description. Edit the spec parameter to add or delete instances."]
+       "Edit a service description or use a spec to add and delete service instances. Existing service instances and the service pipeline can't be edited using this API. They can only be deleted. Use the description parameter to modify the description. Edit the spec parameter to add or delete instances. You can't delete a service instance (remove it from the spec) if it has an attached component. For more information about components, see Proton components in the Proton User Guide."]
 module UpdateEnvironmentTemplateVersionOutput =
   struct
     type nonrec t =
       {
-      environmentTemplateVersion: EnvironmentTemplateVersion.t
+      environmentTemplateVersion: EnvironmentTemplateVersion.t option
         [@ocaml.doc
           "The environment template version detail data that's returned by Proton."]}
     type nonrec error =
@@ -6015,8 +8770,7 @@ module UpdateEnvironmentTemplateVersionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateEnvironmentTemplateVersionOutput"
-    let make ~environmentTemplateVersion =
+    let make ?environmentTemplateVersion =
       fun () -> { environmentTemplateVersion }
     let error_of_json name json =
       match name with
@@ -6085,22 +8839,20 @@ module UpdateEnvironmentTemplateVersionOutput =
     let to_value x =
       structure_to_value
         [("environmentTemplateVersion",
-           (Some
-              (EnvironmentTemplateVersion.to_value
-                 x.environmentTemplateVersion)))]
+           (Option.map x.environmentTemplateVersion
+              ~f:EnvironmentTemplateVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentTemplateVersion =
-        EnvironmentTemplateVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "environmentTemplateVersion") in
-      make ~environmentTemplateVersion ()
+        (Option.map ~f:EnvironmentTemplateVersion.of_xml)
+          (Xml.child xml_arg0 "environmentTemplateVersion") in
+      make ?environmentTemplateVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentTemplateVersion =
-        field_map_exn json "environmentTemplateVersion"
+        field_map json__ "environmentTemplateVersion"
           EnvironmentTemplateVersion.of_json in
-      make ~environmentTemplateVersion ()
+      make ?environmentTemplateVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Update a major or minor version of an environment template."]
@@ -6163,15 +8915,15 @@ module UpdateEnvironmentTemplateVersionInput =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       make ~templateName ?status ~minorVersion ~majorVersion ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
-      let status = field_map json "status" TemplateVersionStatus.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
+      let status = field_map json__ "status" TemplateVersionStatus.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map_exn json__ "majorVersion" TemplateVersionPart.of_json in
+      let description = field_map json__ "description" Description.of_json in
       make ~templateName ?status ~minorVersion ~majorVersion ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6180,7 +8932,7 @@ module UpdateEnvironmentTemplateOutput =
   struct
     type nonrec t =
       {
-      environmentTemplate: EnvironmentTemplate.t
+      environmentTemplate: EnvironmentTemplate.t option
         [@ocaml.doc
           "The environment template detail data that's returned by Proton."]}
     type nonrec error =
@@ -6191,8 +8943,7 @@ module UpdateEnvironmentTemplateOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateEnvironmentTemplateOutput"
-    let make ~environmentTemplate = fun () -> { environmentTemplate }
+    let make ?environmentTemplate = fun () -> { environmentTemplate }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6260,18 +9011,18 @@ module UpdateEnvironmentTemplateOutput =
     let to_value x =
       structure_to_value
         [("environmentTemplate",
-           (Some (EnvironmentTemplate.to_value x.environmentTemplate)))]
+           (Option.map x.environmentTemplate ~f:EnvironmentTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentTemplate =
-        EnvironmentTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentTemplate") in
-      make ~environmentTemplate ()
+        (Option.map ~f:EnvironmentTemplate.of_xml)
+          (Xml.child xml_arg0 "environmentTemplate") in
+      make ?environmentTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentTemplate =
-        field_map_exn json "environmentTemplate" EnvironmentTemplate.of_json in
-      make ~environmentTemplate ()
+        field_map json__ "environmentTemplate" EnvironmentTemplate.of_json in
+      make ?environmentTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update an environment template."]
 module UpdateEnvironmentTemplateInput =
@@ -6304,10 +9055,10 @@ module UpdateEnvironmentTemplateInput =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       make ~name ?displayName ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let description = field_map json "description" Description.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let description = field_map json__ "description" Description.of_json in
       make ~name ?displayName ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update an environment template."]
@@ -6315,7 +9066,7 @@ module UpdateEnvironmentOutput =
   struct
     type nonrec t =
       {
-      environment: Environment.t
+      environment: Environment.t option
         [@ocaml.doc "The environment detail data that's returned by Proton."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -6325,8 +9076,7 @@ module UpdateEnvironmentOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateEnvironmentOutput"
-    let make ~environment = fun () -> { environment }
+    let make ?environment = fun () -> { environment }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6393,24 +9143,29 @@ module UpdateEnvironmentOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("environment", (Some (Environment.to_value x.environment)))]
+        [("environment", (Option.map x.environment ~f:Environment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environment =
-        Environment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environment") in
-      make ~environment ()
+        (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "environment") in
+      make ?environment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environment = field_map_exn json "environment" Environment.of_json in
-      make ~environment ()
+    let of_json json__ =
+      let environment = field_map json__ "environment" Environment.of_json in
+      make ?environment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update an environment. If the environment is associated with an environment account connection, don't update or include the protonServiceRoleArn and provisioningRepository parameter to update or connect to an environment account connection. You can only update to a new environment account connection if that connection was created in the same environment account that the current environment account connection was created in. The account connection must also be associated with the current environment. If the environment isn't associated with an environment account connection, don't update or include the environmentAccountConnectionId parameter. You can't update or connect the environment to an environment account connection if it isn't already associated with an environment connection. You can update either the environmentAccountConnectionId or protonServiceRoleArn parameter and value. You can\226\128\153t update both. If the environment was configured for Amazon Web Services-managed provisioning, omit the provisioningRepository parameter. If the environment was configured for self-managed provisioning, specify the provisioningRepository parameter and omit the protonServiceRoleArn and environmentAccountConnectionId parameters. For more information, see Environments and Provisioning methods in the Proton Administrator Guide. There are four modes for updating an environment. The deploymentType field defines the mode. NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the environment is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include minor or major version parameters when you use this deployment-type. MINOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can also specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) major and minor version of the current template, by default. You can also specify a different major version that's higher than the major version in use and a minor version."]
+       "Update an environment. If the environment is associated with an environment account connection, don't update or include the protonServiceRoleArn and provisioningRepository parameter to update or connect to an environment account connection. You can only update to a new environment account connection if that connection was created in the same environment account that the current environment account connection was created in. The account connection must also be associated with the current environment. If the environment isn't associated with an environment account connection, don't update or include the environmentAccountConnectionId parameter. You can't update or connect the environment to an environment account connection if it isn't already associated with an environment connection. You can update either the environmentAccountConnectionId or protonServiceRoleArn parameter and value. You can\226\128\153t update both. If the environment was configured for Amazon Web Services-managed provisioning, omit the provisioningRepository parameter. If the environment was configured for self-managed provisioning, specify the provisioningRepository parameter and omit the protonServiceRoleArn and environmentAccountConnectionId parameters. For more information, see Environments and Provisioning methods in the Proton User Guide. There are four modes for updating an environment. The deploymentType field defines the mode. NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the environment is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include minor or major version parameters when you use this deployment-type. MINOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can also specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) major and minor version of the current template, by default. You can also specify a different major version that's higher than the major version in use and a minor version."]
 module UpdateEnvironmentInput =
   struct
     type nonrec t =
       {
+      codebuildRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that allows Proton to provision infrastructure using CodeBuild-based provisioning on your behalf."];
+      componentRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that Proton uses when provisioning directly defined components in this environment. It determines the scope of infrastructure that a component can provision. The environment must have a componentRoleArn to allow directly defined components to be associated with the environment. For more information about components, see Proton components in the Proton User Guide."];
       deploymentType: DeploymentUpdateType.t
         [@ocaml.doc
           "There are four modes for updating an environment. The deploymentType field defines the mode. NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the environment is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include major or minor version parameters when you use this deployment-type. MINOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can also specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) major and minor version of the current template, by default. You can also specify a different major version that is higher than the major version in use and a minor version (optional)."];
@@ -6426,7 +9181,7 @@ module UpdateEnvironmentInput =
           "The Amazon Resource Name (ARN) of the Proton service role that allows Proton to make API calls to other services your behalf."];
       provisioningRepository: RepositoryBranchInput.t option
         [@ocaml.doc
-          "The infrastructure repository that you use to host your rendered infrastructure templates for self-managed provisioning."];
+          "The linked repository that you use to host your rendered infrastructure templates for self-managed provisioning. A linked repository is a repository that has been registered with Proton. For more information, see CreateRepository."];
       spec: SpecContents.t option
         [@ocaml.doc "The formatted specification that defines the update."];
       templateMajorVersion: TemplateVersionPart.t option
@@ -6434,31 +9189,39 @@ module UpdateEnvironmentInput =
       templateMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The minor version of the environment to update."]}
     let context_ = "UpdateEnvironmentInput"
-    let make ?description =
-      fun ?environmentAccountConnectionId ->
-        fun ?protonServiceRoleArn ->
-          fun ?provisioningRepository ->
-            fun ?spec ->
-              fun ?templateMajorVersion ->
-                fun ?templateMinorVersion ->
-                  fun ~deploymentType ->
-                    fun ~name ->
-                      fun () ->
-                        {
-                          description;
-                          environmentAccountConnectionId;
-                          protonServiceRoleArn;
-                          provisioningRepository;
-                          spec;
-                          templateMajorVersion;
-                          templateMinorVersion;
-                          deploymentType;
-                          name
-                        }
+    let make ?codebuildRoleArn =
+      fun ?componentRoleArn ->
+        fun ?description ->
+          fun ?environmentAccountConnectionId ->
+            fun ?protonServiceRoleArn ->
+              fun ?provisioningRepository ->
+                fun ?spec ->
+                  fun ?templateMajorVersion ->
+                    fun ?templateMinorVersion ->
+                      fun ~deploymentType ->
+                        fun ~name ->
+                          fun () ->
+                            {
+                              codebuildRoleArn;
+                              componentRoleArn;
+                              description;
+                              environmentAccountConnectionId;
+                              protonServiceRoleArn;
+                              provisioningRepository;
+                              spec;
+                              templateMajorVersion;
+                              templateMinorVersion;
+                              deploymentType;
+                              name
+                            }
     let to_value x =
       structure_to_value
-        [("deploymentType",
-           (Some (DeploymentUpdateType.to_value x.deploymentType)));
+        [("codebuildRoleArn",
+           (Option.map x.codebuildRoleArn ~f:RoleArn.to_value));
+        ("componentRoleArn",
+          (Option.map x.componentRoleArn ~f:RoleArn.to_value));
+        ("deploymentType",
+          (Some (DeploymentUpdateType.to_value x.deploymentType)));
         ("description", (Option.map x.description ~f:Description.to_value));
         ("environmentAccountConnectionId",
           (Option.map x.environmentAccountConnectionId
@@ -6500,38 +9263,51 @@ module UpdateEnvironmentInput =
       let deploymentType =
         DeploymentUpdateType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentType") in
+      let componentRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "componentRoleArn") in
+      let codebuildRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "codebuildRoleArn") in
       make ?templateMinorVersion ?templateMajorVersion ?spec
         ?provisioningRepository ?protonServiceRoleArn ~name
-        ?environmentAccountConnectionId ?description ~deploymentType ()
+        ?environmentAccountConnectionId ?description ~deploymentType
+        ?componentRoleArn ?codebuildRoleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateMinorVersion =
-        field_map json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map json "templateMajorVersion" TemplateVersionPart.of_json in
-      let spec = field_map json "spec" SpecContents.of_json in
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let spec = field_map json__ "spec" SpecContents.of_json in
       let provisioningRepository =
-        field_map json "provisioningRepository" RepositoryBranchInput.of_json in
+        field_map json__ "provisioningRepository"
+          RepositoryBranchInput.of_json in
       let protonServiceRoleArn =
-        field_map json "protonServiceRoleArn" Arn.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "protonServiceRoleArn" Arn.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       let environmentAccountConnectionId =
-        field_map json "environmentAccountConnectionId"
+        field_map json__ "environmentAccountConnectionId"
           EnvironmentAccountConnectionId.of_json in
-      let description = field_map json "description" Description.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let deploymentType =
-        field_map_exn json "deploymentType" DeploymentUpdateType.of_json in
+        field_map_exn json__ "deploymentType" DeploymentUpdateType.of_json in
+      let componentRoleArn =
+        field_map json__ "componentRoleArn" RoleArn.of_json in
+      let codebuildRoleArn =
+        field_map json__ "codebuildRoleArn" RoleArn.of_json in
       make ?templateMinorVersion ?templateMajorVersion ?spec
         ?provisioningRepository ?protonServiceRoleArn ~name
-        ?environmentAccountConnectionId ?description ~deploymentType ()
+        ?environmentAccountConnectionId ?description ~deploymentType
+        ?componentRoleArn ?codebuildRoleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update an environment. If the environment is associated with an environment account connection, don't update or include the protonServiceRoleArn and provisioningRepository parameter to update or connect to an environment account connection. You can only update to a new environment account connection if that connection was created in the same environment account that the current environment account connection was created in. The account connection must also be associated with the current environment. If the environment isn't associated with an environment account connection, don't update or include the environmentAccountConnectionId parameter. You can't update or connect the environment to an environment account connection if it isn't already associated with an environment connection. You can update either the environmentAccountConnectionId or protonServiceRoleArn parameter and value. You can\226\128\153t update both. If the environment was configured for Amazon Web Services-managed provisioning, omit the provisioningRepository parameter. If the environment was configured for self-managed provisioning, specify the provisioningRepository parameter and omit the protonServiceRoleArn and environmentAccountConnectionId parameters. For more information, see Environments and Provisioning methods in the Proton Administrator Guide. There are four modes for updating an environment. The deploymentType field defines the mode. NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the environment is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include minor or major version parameters when you use this deployment-type. MINOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can also specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) major and minor version of the current template, by default. You can also specify a different major version that's higher than the major version in use and a minor version."]
+       "Update an environment. If the environment is associated with an environment account connection, don't update or include the protonServiceRoleArn and provisioningRepository parameter to update or connect to an environment account connection. You can only update to a new environment account connection if that connection was created in the same environment account that the current environment account connection was created in. The account connection must also be associated with the current environment. If the environment isn't associated with an environment account connection, don't update or include the environmentAccountConnectionId parameter. You can't update or connect the environment to an environment account connection if it isn't already associated with an environment connection. You can update either the environmentAccountConnectionId or protonServiceRoleArn parameter and value. You can\226\128\153t update both. If the environment was configured for Amazon Web Services-managed provisioning, omit the provisioningRepository parameter. If the environment was configured for self-managed provisioning, specify the provisioningRepository parameter and omit the protonServiceRoleArn and environmentAccountConnectionId parameters. For more information, see Environments and Provisioning methods in the Proton User Guide. There are four modes for updating an environment. The deploymentType field defines the mode. NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. CURRENT_VERSION In this mode, the environment is deployed and updated with the new spec that you provide. Only requested parameters are updated. Don\226\128\153t include minor or major version parameters when you use this deployment-type. MINOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) minor version of the current major version in use, by default. You can also specify a different minor version of the current major version in use. MAJOR_VERSION In this mode, the environment is deployed and updated with the published, recommended (latest) major and minor version of the current template, by default. You can also specify a different major version that's higher than the major version in use and a minor version."]
 module UpdateEnvironmentAccountConnectionOutput =
   struct
     type nonrec t =
       {
-      environmentAccountConnection: EnvironmentAccountConnection.t
+      environmentAccountConnection: EnvironmentAccountConnection.t option
         [@ocaml.doc
           "The environment account connection detail data that's returned by Proton."]}
     type nonrec error =
@@ -6542,8 +9318,7 @@ module UpdateEnvironmentAccountConnectionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateEnvironmentAccountConnectionOutput"
-    let make ~environmentAccountConnection =
+    let make ?environmentAccountConnection =
       fun () -> { environmentAccountConnection }
     let error_of_json name json =
       match name with
@@ -6612,62 +9387,295 @@ module UpdateEnvironmentAccountConnectionOutput =
     let to_value x =
       structure_to_value
         [("environmentAccountConnection",
-           (Some
-              (EnvironmentAccountConnection.to_value
-                 x.environmentAccountConnection)))]
+           (Option.map x.environmentAccountConnection
+              ~f:EnvironmentAccountConnection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentAccountConnection =
-        EnvironmentAccountConnection.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "environmentAccountConnection") in
-      make ~environmentAccountConnection ()
+        (Option.map ~f:EnvironmentAccountConnection.of_xml)
+          (Xml.child xml_arg0 "environmentAccountConnection") in
+      make ?environmentAccountConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentAccountConnection =
-        field_map_exn json "environmentAccountConnection"
+        field_map json__ "environmentAccountConnection"
           EnvironmentAccountConnection.of_json in
-      make ~environmentAccountConnection ()
+      make ?environmentAccountConnection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In an environment account, update an environment account connection to use a new IAM role. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In an environment account, update an environment account connection to use a new IAM role. For more information, see Environment account connections in the Proton User guide."]
 module UpdateEnvironmentAccountConnectionInput =
   struct
     type nonrec t =
       {
+      codebuildRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM service role in the environment account. Proton uses this role to provision infrastructure resources using CodeBuild-based provisioning in the associated environment account."];
+      componentRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that Proton uses when provisioning directly defined components in the associated environment account. It determines the scope of infrastructure that a component can provision in the account. The environment account connection must have a componentRoleArn to allow directly defined components to be associated with any environments running in the account. For more information about components, see Proton components in the Proton User Guide."];
       id: EnvironmentAccountConnectionId.t
         [@ocaml.doc
           "The ID of the environment account connection to update."];
-      roleArn: Arn.t
+      roleArn: RoleArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM service role that's associated with the environment account connection to update."]}
     let context_ = "UpdateEnvironmentAccountConnectionInput"
-    let make ~id = fun ~roleArn -> fun () -> { id; roleArn }
+    let make ?codebuildRoleArn =
+      fun ?componentRoleArn ->
+        fun ?roleArn ->
+          fun ~id ->
+            fun () -> { codebuildRoleArn; componentRoleArn; roleArn; id }
     let to_value x =
       structure_to_value
-        [("id", (Some (EnvironmentAccountConnectionId.to_value x.id)));
-        ("roleArn", (Some (Arn.to_value x.roleArn)))]
+        [("codebuildRoleArn",
+           (Option.map x.codebuildRoleArn ~f:RoleArn.to_value));
+        ("componentRoleArn",
+          (Option.map x.componentRoleArn ~f:RoleArn.to_value));
+        ("id", (Some (EnvironmentAccountConnectionId.to_value x.id)));
+        ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
       let id =
         EnvironmentAccountConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      make ~roleArn ~id ()
+      let componentRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "componentRoleArn") in
+      let codebuildRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "codebuildRoleArn") in
+      make ?roleArn ~id ?componentRoleArn ?codebuildRoleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "roleArn" Arn.of_json in
-      let id = field_map_exn json "id" EnvironmentAccountConnectionId.of_json in
-      make ~roleArn ~id ()
+    let of_json json__ =
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let id =
+        field_map_exn json__ "id" EnvironmentAccountConnectionId.of_json in
+      let componentRoleArn =
+        field_map json__ "componentRoleArn" RoleArn.of_json in
+      let codebuildRoleArn =
+        field_map json__ "codebuildRoleArn" RoleArn.of_json in
+      make ?roleArn ~id ?componentRoleArn ?codebuildRoleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In an environment account, update an environment account connection to use a new IAM role. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In an environment account, update an environment account connection to use a new IAM role. For more information, see Environment account connections in the Proton User guide."]
+module UpdateComponentOutput =
+  struct
+    type nonrec t =
+      {
+      component: Component.t option
+        [@ocaml.doc "The detailed data of the updated component."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?component = fun () -> { component }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("component", (Option.map x.component ~f:Component.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let component =
+        (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "component") in
+      make ?component ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let component = field_map json__ "component" Component.of_json in
+      make ?component ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update a component. There are a few modes for updating a component. The deploymentType field defines the mode. You can't update a component while its deployment status, or the deployment status of a service instance attached to it, is IN_PROGRESS. For more information about components, see Proton components in the Proton User Guide."]
+module UpdateComponentInput =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token for the updated component."];
+      deploymentType: ComponentDeploymentUpdateType.t
+        [@ocaml.doc
+          "The deployment type. It defines the mode for updating a component, as follows: NONE In this mode, a deployment doesn't occur. Only the requested metadata parameters are updated. You can only specify description in this mode. CURRENT_VERSION In this mode, the component is deployed and updated with the new serviceSpec, templateSource, and/or type that you provide. Only requested parameters are updated."];
+      description: Description.t option
+        [@ocaml.doc
+          "An optional customer-provided description of the component."];
+      name: ResourceName.t
+        [@ocaml.doc "The name of the component to update."];
+      serviceInstanceName: ResourceNameOrEmpty.t option
+        [@ocaml.doc
+          "The name of the service instance that you want to attach this component to. Don't specify to keep the component's current service instance attachment. Specify an empty string to detach the component from the service instance it's attached to. Specify non-empty values for both serviceInstanceName and serviceName or for neither of them."];
+      serviceName: ResourceNameOrEmpty.t option
+        [@ocaml.doc
+          "The name of the service that serviceInstanceName is associated with. Don't specify to keep the component's current service instance attachment. Specify an empty string to detach the component from the service instance it's attached to. Specify non-empty values for both serviceInstanceName and serviceName or for neither of them."];
+      serviceSpec: SpecContents.t option
+        [@ocaml.doc
+          "The service spec that you want the component to use to access service inputs. Set this only when the component is attached to a service instance."];
+      templateFile: TemplateFileContents.t option
+        [@ocaml.doc
+          "A path to the Infrastructure as Code (IaC) file describing infrastructure that a custom component provisions. Components support a single IaC file, even if you use Terraform as your template language."]}
+    let context_ = "UpdateComponentInput"
+    let make ?clientToken =
+      fun ?description ->
+        fun ?serviceInstanceName ->
+          fun ?serviceName ->
+            fun ?serviceSpec ->
+              fun ?templateFile ->
+                fun ~deploymentType ->
+                  fun ~name ->
+                    fun () ->
+                      {
+                        clientToken;
+                        description;
+                        serviceInstanceName;
+                        serviceName;
+                        serviceSpec;
+                        templateFile;
+                        deploymentType;
+                        name
+                      }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("deploymentType",
+          (Some (ComponentDeploymentUpdateType.to_value x.deploymentType)));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("name", (Some (ResourceName.to_value x.name)));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:ResourceNameOrEmpty.to_value));
+        ("serviceName",
+          (Option.map x.serviceName ~f:ResourceNameOrEmpty.to_value));
+        ("serviceSpec", (Option.map x.serviceSpec ~f:SpecContents.to_value));
+        ("templateFile",
+          (Option.map x.templateFile ~f:TemplateFileContents.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let templateFile =
+        (Option.map ~f:TemplateFileContents.of_xml)
+          (Xml.child xml_arg0 "templateFile") in
+      let serviceSpec =
+        (Option.map ~f:SpecContents.of_xml)
+          (Xml.child xml_arg0 "serviceSpec") in
+      let serviceName =
+        (Option.map ~f:ResourceNameOrEmpty.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceNameOrEmpty.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let deploymentType =
+        ComponentDeploymentUpdateType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deploymentType") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?templateFile ?serviceSpec ?serviceName ?serviceInstanceName ~name
+        ?description ~deploymentType ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let templateFile =
+        field_map json__ "templateFile" TemplateFileContents.of_json in
+      let serviceSpec = field_map json__ "serviceSpec" SpecContents.of_json in
+      let serviceName =
+        field_map json__ "serviceName" ResourceNameOrEmpty.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceNameOrEmpty.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let deploymentType =
+        field_map_exn json__ "deploymentType"
+          ComponentDeploymentUpdateType.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?templateFile ?serviceSpec ?serviceName ?serviceInstanceName ~name
+        ?description ~deploymentType ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update a component. There are a few modes for updating a component. The deploymentType field defines the mode. You can't update a component while its deployment status, or the deployment status of a service instance attached to it, is IN_PROGRESS. For more information about components, see Proton components in the Proton User Guide."]
 module UpdateAccountSettingsOutput =
   struct
     type nonrec t =
       {
-      accountSettings: AccountSettings.t
+      accountSettings: AccountSettings.t option
         [@ocaml.doc
           "The Proton pipeline service role and repository data shared across the Amazon Web Services account."]}
     type nonrec error =
@@ -6677,8 +9685,7 @@ module UpdateAccountSettingsOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateAccountSettingsOutput"
-    let make ~accountSettings = fun () -> { accountSettings }
+    let make ?accountSettings = fun () -> { accountSettings }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6738,61 +9745,97 @@ module UpdateAccountSettingsOutput =
     let to_value x =
       structure_to_value
         [("accountSettings",
-           (Some (AccountSettings.to_value x.accountSettings)))]
+           (Option.map x.accountSettings ~f:AccountSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let accountSettings =
-        AccountSettings.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "accountSettings") in
-      make ~accountSettings ()
+        (Option.map ~f:AccountSettings.of_xml)
+          (Xml.child xml_arg0 "accountSettings") in
+      make ?accountSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountSettings =
-        field_map_exn json "accountSettings" AccountSettings.of_json in
-      make ~accountSettings ()
+        field_map json__ "accountSettings" AccountSettings.of_json in
+      make ?accountSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update the Proton service pipeline role or repository settings."]
+       "Update Proton settings that are used for multiple services in the Amazon Web Services account."]
 module UpdateAccountSettingsInput =
   struct
     type nonrec t =
       {
+      deletePipelineProvisioningRepository: Boolean.t option
+        [@ocaml.doc
+          "Set to true to remove a configured pipeline repository from the account settings. Don't set this field if you are updating the configured pipeline repository."];
+      pipelineCodebuildRoleArn: RoleArnOrEmptyString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the service role you want to use for provisioning pipelines. Proton assumes this role for CodeBuild-based provisioning."];
       pipelineProvisioningRepository: RepositoryBranchInput.t option
         [@ocaml.doc
-          "A repository for pipeline provisioning. Specify it if you have environments configured for self-managed provisioning with services that include pipelines."];
-      pipelineServiceRoleArn: PipelineRoleArn.t option
+          "A linked repository for pipeline provisioning. Specify it if you have environments configured for self-managed provisioning with services that include pipelines. A linked repository is a repository that has been registered with Proton. For more information, see CreateRepository. To remove a previously configured repository, set deletePipelineProvisioningRepository to true, and don't set pipelineProvisioningRepository."];
+      pipelineServiceRoleArn: RoleArnOrEmptyString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the service role you want to use for provisioning pipelines. Assumed by Proton for Amazon Web Services-managed provisioning, and by customer-owned automation for self-managed provisioning."]}
-    let make ?pipelineProvisioningRepository =
-      fun ?pipelineServiceRoleArn ->
-        fun () -> { pipelineProvisioningRepository; pipelineServiceRoleArn }
+          "The Amazon Resource Name (ARN) of the service role you want to use for provisioning pipelines. Assumed by Proton for Amazon Web Services-managed provisioning, and by customer-owned automation for self-managed provisioning. To remove a previously configured ARN, specify an empty string."]}
+    let make ?deletePipelineProvisioningRepository =
+      fun ?pipelineCodebuildRoleArn ->
+        fun ?pipelineProvisioningRepository ->
+          fun ?pipelineServiceRoleArn ->
+            fun () ->
+              {
+                deletePipelineProvisioningRepository;
+                pipelineCodebuildRoleArn;
+                pipelineProvisioningRepository;
+                pipelineServiceRoleArn
+              }
     let to_value x =
       structure_to_value
-        [("pipelineProvisioningRepository",
-           (Option.map x.pipelineProvisioningRepository
-              ~f:RepositoryBranchInput.to_value));
+        [("deletePipelineProvisioningRepository",
+           (Option.map x.deletePipelineProvisioningRepository
+              ~f:Boolean.to_value));
+        ("pipelineCodebuildRoleArn",
+          (Option.map x.pipelineCodebuildRoleArn
+             ~f:RoleArnOrEmptyString.to_value));
+        ("pipelineProvisioningRepository",
+          (Option.map x.pipelineProvisioningRepository
+             ~f:RepositoryBranchInput.to_value));
         ("pipelineServiceRoleArn",
-          (Option.map x.pipelineServiceRoleArn ~f:PipelineRoleArn.to_value))]
+          (Option.map x.pipelineServiceRoleArn
+             ~f:RoleArnOrEmptyString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pipelineServiceRoleArn =
-        (Option.map ~f:PipelineRoleArn.of_xml)
+        (Option.map ~f:RoleArnOrEmptyString.of_xml)
           (Xml.child xml_arg0 "pipelineServiceRoleArn") in
       let pipelineProvisioningRepository =
         (Option.map ~f:RepositoryBranchInput.of_xml)
           (Xml.child xml_arg0 "pipelineProvisioningRepository") in
-      make ?pipelineServiceRoleArn ?pipelineProvisioningRepository ()
+      let pipelineCodebuildRoleArn =
+        (Option.map ~f:RoleArnOrEmptyString.of_xml)
+          (Xml.child xml_arg0 "pipelineCodebuildRoleArn") in
+      let deletePipelineProvisioningRepository =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "deletePipelineProvisioningRepository") in
+      make ?pipelineServiceRoleArn ?pipelineProvisioningRepository
+        ?pipelineCodebuildRoleArn ?deletePipelineProvisioningRepository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineServiceRoleArn =
-        field_map json "pipelineServiceRoleArn" PipelineRoleArn.of_json in
+        field_map json__ "pipelineServiceRoleArn"
+          RoleArnOrEmptyString.of_json in
       let pipelineProvisioningRepository =
-        field_map json "pipelineProvisioningRepository"
+        field_map json__ "pipelineProvisioningRepository"
           RepositoryBranchInput.of_json in
-      make ?pipelineServiceRoleArn ?pipelineProvisioningRepository ()
+      let pipelineCodebuildRoleArn =
+        field_map json__ "pipelineCodebuildRoleArn"
+          RoleArnOrEmptyString.of_json in
+      let deletePipelineProvisioningRepository =
+        field_map json__ "deletePipelineProvisioningRepository"
+          Boolean.of_json in
+      make ?pipelineServiceRoleArn ?pipelineProvisioningRepository
+        ?pipelineCodebuildRoleArn ?deletePipelineProvisioningRepository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update the Proton service pipeline role or repository settings."]
+       "Update Proton settings that are used for multiple services in the Amazon Web Services account."]
 module UntagResourceOutput =
   struct
     type nonrec t = unit
@@ -6877,7 +9920,7 @@ module UntagResourceOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Remove a customer tag from a resource. A tag is a key-value pair of metadata associated with an Proton resource. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."]
+       "Remove a customer tag from a resource. A tag is a key-value pair of metadata associated with an Proton resource. For more information, see Proton resources and tagging in the Proton User Guide."]
 module UntagResourceInput =
   struct
     type nonrec t =
@@ -6904,13 +9947,13 @@ module UntagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Remove a customer tag from a resource. A tag is a key-value pair of metadata associated with an Proton resource. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."]
+       "Remove a customer tag from a resource. A tag is a key-value pair of metadata associated with an Proton resource. For more information, see Proton resources and tagging in the Proton User Guide."]
 module TagResourceOutput =
   struct
     type nonrec t = unit
@@ -6995,7 +10038,7 @@ module TagResourceOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Tag a resource. A tag is a key-value pair of metadata that you associate with an Proton resource. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."]
+       "Tag a resource. A tag is a key-value pair of metadata that you associate with an Proton resource. For more information, see Proton resources and tagging in the Proton User Guide."]
 module TagResourceInput =
   struct
     type nonrec t =
@@ -7020,18 +10063,18 @@ module TagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Tag a resource. A tag is a key-value pair of metadata that you associate with an Proton resource. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."]
+       "Tag a resource. A tag is a key-value pair of metadata that you associate with an Proton resource. For more information, see Proton resources and tagging in the Proton User Guide."]
 module RejectEnvironmentAccountConnectionOutput =
   struct
     type nonrec t =
       {
-      environmentAccountConnection: EnvironmentAccountConnection.t
+      environmentAccountConnection: EnvironmentAccountConnection.t option
         [@ocaml.doc
           "The environment connection account detail data that's returned by Proton."]}
     type nonrec error =
@@ -7042,8 +10085,7 @@ module RejectEnvironmentAccountConnectionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RejectEnvironmentAccountConnectionOutput"
-    let make ~environmentAccountConnection =
+    let make ?environmentAccountConnection =
       fun () -> { environmentAccountConnection }
     let error_of_json name json =
       match name with
@@ -7112,25 +10154,23 @@ module RejectEnvironmentAccountConnectionOutput =
     let to_value x =
       structure_to_value
         [("environmentAccountConnection",
-           (Some
-              (EnvironmentAccountConnection.to_value
-                 x.environmentAccountConnection)))]
+           (Option.map x.environmentAccountConnection
+              ~f:EnvironmentAccountConnection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentAccountConnection =
-        EnvironmentAccountConnection.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "environmentAccountConnection") in
-      make ~environmentAccountConnection ()
+        (Option.map ~f:EnvironmentAccountConnection.of_xml)
+          (Xml.child xml_arg0 "environmentAccountConnection") in
+      make ?environmentAccountConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentAccountConnection =
-        field_map_exn json "environmentAccountConnection"
+        field_map json__ "environmentAccountConnection"
           EnvironmentAccountConnection.of_json in
-      make ~environmentAccountConnection ()
+      make ?environmentAccountConnection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In a management account, reject an environment account connection from another environment account. After you reject an environment account connection request, you can't accept or use the rejected environment account connection. You can\226\128\153t reject an environment account connection that's connected to an environment. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In a management account, reject an environment account connection from another environment account. After you reject an environment account connection request, you can't accept or use the rejected environment account connection. You can\226\128\153t reject an environment account connection that's connected to an environment. For more information, see Environment account connections in the Proton User guide."]
 module RejectEnvironmentAccountConnectionInput =
   struct
     type nonrec t =
@@ -7150,12 +10190,13 @@ module RejectEnvironmentAccountConnectionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" EnvironmentAccountConnectionId.of_json in
+    let of_json json__ =
+      let id =
+        field_map_exn json__ "id" EnvironmentAccountConnectionId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In a management account, reject an environment account connection from another environment account. After you reject an environment account connection request, you can't accept or use the rejected environment account connection. You can\226\128\153t reject an environment account connection that's connected to an environment. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In a management account, reject an environment account connection from another environment account. After you reject an environment account connection request, you can't accept or use the rejected environment account connection. You can\226\128\153t reject an environment account connection that's connected to an environment. For more information, see Environment account connections in the Proton User guide."]
 module NotifyResourceDeploymentStatusChangeOutput =
   struct
     type nonrec t = unit
@@ -7251,7 +10292,7 @@ module NotifyResourceDeploymentStatusChangeOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Notify Proton of status changes to a provisioned resource when you use self-managed provisioning. For more information, see Self-managed provisioning in the Proton Administrator Guide."]
+       "Notify Proton of status changes to a provisioned resource when you use self-managed provisioning. For more information, see Self-managed provisioning in the Proton User Guide."]
 module NotifyResourceDeploymentStatusChangeInput =
   struct
     type nonrec t =
@@ -7263,20 +10304,20 @@ module NotifyResourceDeploymentStatusChangeInput =
           "The provisioned resource state change detail data that's returned by Proton."];
       resourceArn: Arn.t
         [@ocaml.doc "The provisioned resource Amazon Resource Name (ARN)."];
-      status: ResourceDeploymentStatus.t
+      status: ResourceDeploymentStatus.t option
         [@ocaml.doc "The status of your provisioned resource."];
       statusMessage:
-        SyntheticNotifyResourceDeploymentStatusChangeInputString.t option
+        NotifyResourceDeploymentStatusChangeInputStatusMessageString.t option
         [@ocaml.doc
           "The deployment status message for your provisioned resource."]}
     let context_ = "NotifyResourceDeploymentStatusChangeInput"
     let make ?deploymentId =
       fun ?outputs ->
-        fun ?statusMessage ->
-          fun ~resourceArn ->
-            fun ~status ->
+        fun ?status ->
+          fun ?statusMessage ->
+            fun ~resourceArn ->
               fun () ->
-                { deploymentId; outputs; statusMessage; resourceArn; status }
+                { deploymentId; outputs; status; statusMessage; resourceArn }
     let to_value x =
       structure_to_value
         [("deploymentId",
@@ -7285,19 +10326,20 @@ module NotifyResourceDeploymentStatusChangeInput =
           (Option.map x.outputs
              ~f:NotifyResourceDeploymentStatusChangeInputOutputsList.to_value));
         ("resourceArn", (Some (Arn.to_value x.resourceArn)));
-        ("status", (Some (ResourceDeploymentStatus.to_value x.status)));
+        ("status",
+          (Option.map x.status ~f:ResourceDeploymentStatus.to_value));
         ("statusMessage",
           (Option.map x.statusMessage
-             ~f:SyntheticNotifyResourceDeploymentStatusChangeInputString.to_value))]
+             ~f:NotifyResourceDeploymentStatusChangeInputStatusMessageString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let statusMessage =
         (Option.map
-           ~f:SyntheticNotifyResourceDeploymentStatusChangeInputString.of_xml)
+           ~f:NotifyResourceDeploymentStatusChangeInputStatusMessageString.of_xml)
           (Xml.child xml_arg0 "statusMessage") in
       let status =
-        ResourceDeploymentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ResourceDeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       let outputs =
@@ -7307,23 +10349,22 @@ module NotifyResourceDeploymentStatusChangeInput =
       let deploymentId =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "deploymentId") in
-      make ?statusMessage ~status ~resourceArn ?outputs ?deploymentId ()
+      make ?statusMessage ?status ~resourceArn ?outputs ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "statusMessage"
-          SyntheticNotifyResourceDeploymentStatusChangeInputString.of_json in
-      let status =
-        field_map_exn json "status" ResourceDeploymentStatus.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+        field_map json__ "statusMessage"
+          NotifyResourceDeploymentStatusChangeInputStatusMessageString.of_json in
+      let status = field_map json__ "status" ResourceDeploymentStatus.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       let outputs =
-        field_map json "outputs"
+        field_map json__ "outputs"
           NotifyResourceDeploymentStatusChangeInputOutputsList.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
-      make ?statusMessage ~status ~resourceArn ?outputs ?deploymentId ()
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
+      make ?statusMessage ?status ~resourceArn ?outputs ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Notify Proton of status changes to a provisioned resource when you use self-managed provisioning. For more information, see Self-managed provisioning in the Proton Administrator Guide."]
+       "Notify Proton of status changes to a provisioned resource when you use self-managed provisioning. For more information, see Self-managed provisioning in the Proton User Guide."]
 module ListTagsForResourceOutput =
   struct
     type nonrec t =
@@ -7331,7 +10372,7 @@ module ListTagsForResourceOutput =
       nextToken: String_.t option
         [@ocaml.doc
           "A token that indicates the location of the next resource tag in the array of resource tags, after the current requested list of resource tags."];
-      tags: TagList.t
+      tags: TagList.t option
         [@ocaml.doc "A list of resource tags with detail data."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -7340,8 +10381,7 @@ module ListTagsForResourceOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourceOutput"
-    let make ?nextToken = fun ~tags -> fun () -> { nextToken; tags }
+    let make ?nextToken = fun ?tags -> fun () -> { nextToken; tags }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7401,22 +10441,21 @@ module ListTagsForResourceOutput =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("tags", (Some (TagList.to_value x.tags)))]
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~tags ?nextToken ()
+      make ?tags ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      make ~tags ?nextToken ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?tags ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List tags for a resource. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."]
+       "List tags for a resource. For more information, see Proton resources and tagging in the Proton User Guide."]
 module ListTagsForResourceInput =
   struct
     type nonrec t =
@@ -7449,14 +10488,14 @@ module ListTagsForResourceInput =
           (Xml.child xml_arg0 "maxResults") in
       make ~resourceArn ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
       make ~resourceArn ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List tags for a resource. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."]
+       "List tags for a resource. For more information, see Proton resources and tagging in the Proton User Guide."]
 module ListServicesOutput =
   struct
     type nonrec t =
@@ -7464,7 +10503,7 @@ module ListServicesOutput =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next service in the array of services, after the current requested list of services."];
-      services: ServiceSummaryList.t
+      services: ServiceSummaryList.t option
         [@ocaml.doc "An array of services with summaries of detail data."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -7472,8 +10511,7 @@ module ListServicesOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServicesOutput"
-    let make ?nextToken = fun ~services -> fun () -> { nextToken; services }
+    let make ?nextToken = fun ?services -> fun () -> { nextToken; services }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7525,20 +10563,20 @@ module ListServicesOutput =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("services", (Some (ServiceSummaryList.to_value x.services)))]
+        ("services", (Option.map x.services ~f:ServiceSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let services =
-        ServiceSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "services") in
+        (Option.map ~f:ServiceSummaryList.of_xml)
+          (Xml.child xml_arg0 "services") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~services ?nextToken ()
+      make ?services ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let services = field_map_exn json "services" ServiceSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~services ?nextToken ()
+    let of_json json__ =
+      let services = field_map json__ "services" ServiceSummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?services ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List services with summaries of detail data."]
 module ListServicesInput =
@@ -7565,9 +10603,9 @@ module ListServicesInput =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List services with summaries of detail data."]
@@ -7578,7 +10616,7 @@ module ListServiceTemplatesOutput =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next service template in the array of service templates, after the current requested list of service templates."];
-      templates: ServiceTemplateSummaryList.t
+      templates: ServiceTemplateSummaryList.t option
         [@ocaml.doc "An array of service templates with detail data."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -7586,9 +10624,8 @@ module ListServiceTemplatesOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServiceTemplatesOutput"
     let make ?nextToken =
-      fun ~templates -> fun () -> { nextToken; templates }
+      fun ?templates -> fun () -> { nextToken; templates }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7641,21 +10678,21 @@ module ListServiceTemplatesOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("templates",
-          (Some (ServiceTemplateSummaryList.to_value x.templates)))]
+          (Option.map x.templates ~f:ServiceTemplateSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templates =
-        ServiceTemplateSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templates") in
+        (Option.map ~f:ServiceTemplateSummaryList.of_xml)
+          (Xml.child xml_arg0 "templates") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~templates ?nextToken ()
+      make ?templates ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templates =
-        field_map_exn json "templates" ServiceTemplateSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~templates ?nextToken ()
+        field_map json__ "templates" ServiceTemplateSummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?templates ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List service templates with detail data."]
 module ListServiceTemplatesInput =
@@ -7682,9 +10719,9 @@ module ListServiceTemplatesInput =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List service templates with detail data."]
@@ -7695,7 +10732,7 @@ module ListServiceTemplateVersionsOutput =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next major or minor version in the array of major or minor versions of a service template, after the current requested list of service major or minor versions."];
-      templateVersions: ServiceTemplateVersionSummaryList.t
+      templateVersions: ServiceTemplateVersionSummaryList.t option
         [@ocaml.doc
           "An array of major or minor versions of a service template with detail data."]}
     type nonrec error =
@@ -7705,9 +10742,8 @@ module ListServiceTemplateVersionsOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServiceTemplateVersionsOutput"
     let make ?nextToken =
-      fun ~templateVersions -> fun () -> { nextToken; templateVersions }
+      fun ?templateVersions -> fun () -> { nextToken; templateVersions }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7768,23 +10804,23 @@ module ListServiceTemplateVersionsOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("templateVersions",
-          (Some
-             (ServiceTemplateVersionSummaryList.to_value x.templateVersions)))]
+          (Option.map x.templateVersions
+             ~f:ServiceTemplateVersionSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateVersions =
-        ServiceTemplateVersionSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateVersions") in
+        (Option.map ~f:ServiceTemplateVersionSummaryList.of_xml)
+          (Xml.child xml_arg0 "templateVersions") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~templateVersions ?nextToken ()
+      make ?templateVersions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateVersions =
-        field_map_exn json "templateVersions"
+        field_map json__ "templateVersions"
           ServiceTemplateVersionSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~templateVersions ?nextToken ()
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?templateVersions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List major or minor versions of a service template with detail data."]
@@ -7831,13 +10867,13 @@ module ListServiceTemplateVersionsInput =
           (Xml.child xml_arg0 "majorVersion") in
       make ~templateName ?nextToken ?maxResults ?majorVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
       let majorVersion =
-        field_map json "majorVersion" TemplateVersionPart.of_json in
+        field_map json__ "majorVersion" TemplateVersionPart.of_json in
       make ~templateName ?nextToken ?maxResults ?majorVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7849,7 +10885,7 @@ module ListServicePipelineProvisionedResourcesOutput =
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next provisioned resource in the array of provisioned resources, after the current requested list of provisioned resources."];
-      provisionedResources: ProvisionedResourceList.t
+      provisionedResources: ProvisionedResourceList.t option
         [@ocaml.doc
           "An array of provisioned resources for a service and pipeline."]}
     type nonrec error =
@@ -7859,9 +10895,8 @@ module ListServicePipelineProvisionedResourcesOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServicePipelineProvisionedResourcesOutput"
     let make ?nextToken =
-      fun ~provisionedResources ->
+      fun ?provisionedResources ->
         fun () -> { nextToken; provisionedResources }
     let error_of_json name json =
       match name with
@@ -7923,23 +10958,24 @@ module ListServicePipelineProvisionedResourcesOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
         ("provisionedResources",
-          (Some (ProvisionedResourceList.to_value x.provisionedResources)))]
+          (Option.map x.provisionedResources
+             ~f:ProvisionedResourceList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let provisionedResources =
-        ProvisionedResourceList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "provisionedResources") in
+        (Option.map ~f:ProvisionedResourceList.of_xml)
+          (Xml.child xml_arg0 "provisionedResources") in
       let nextToken =
         (Option.map ~f:EmptyNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~provisionedResources ?nextToken ()
+      make ?provisionedResources ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedResources =
-        field_map_exn json "provisionedResources"
+        field_map json__ "provisionedResources"
           ProvisionedResourceList.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
-      make ~provisionedResources ?nextToken ()
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      make ?provisionedResources ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List provisioned resources for a service and pipeline with details."]
@@ -7950,7 +10986,9 @@ module ListServicePipelineProvisionedResourcesInput =
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next provisioned resource in the array of provisioned resources, after the list of provisioned resources that was previously requested."];
-      serviceName: ResourceName.t [@ocaml.doc "The service name."]}
+      serviceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service whose pipeline's provisioned resources you want."]}
     let context_ = "ListServicePipelineProvisionedResourcesInput"
     let make ?nextToken =
       fun ~serviceName -> fun () -> { nextToken; serviceName }
@@ -7968,9 +11006,10 @@ module ListServicePipelineProvisionedResourcesInput =
           (Xml.child xml_arg0 "nextToken") in
       make ~serviceName ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
       make ~serviceName ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7982,7 +11021,9 @@ module ListServicePipelineOutputsOutput =
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next output in the array of outputs, after the current requested list of outputs."];
-      outputs: OutputsList.t [@ocaml.doc "An array of outputs."]}
+      outputs: OutputsList.t option
+        [@ocaml.doc
+          "An array of service pipeline Infrastructure as Code (IaC) outputs."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7990,8 +11031,7 @@ module ListServicePipelineOutputsOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServicePipelineOutputsOutput"
-    let make ?nextToken = fun ~outputs -> fun () -> { nextToken; outputs }
+    let make ?nextToken = fun ?outputs -> fun () -> { nextToken; outputs }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8051,38 +11091,45 @@ module ListServicePipelineOutputsOutput =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
-        ("outputs", (Some (OutputsList.to_value x.outputs)))]
+        ("outputs", (Option.map x.outputs ~f:OutputsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let outputs =
-        OutputsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputs") in
+        (Option.map ~f:OutputsList.of_xml) (Xml.child xml_arg0 "outputs") in
       let nextToken =
         (Option.map ~f:EmptyNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~outputs ?nextToken ()
+      make ?outputs ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputs = field_map_exn json "outputs" OutputsList.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
-      make ~outputs ?nextToken ()
+    let of_json json__ =
+      let outputs = field_map json__ "outputs" OutputsList.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      make ?outputs ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View a list service pipeline infrastructure as code outputs with detail."]
+       "Get a list of service pipeline Infrastructure as Code (IaC) outputs."]
 module ListServicePipelineOutputsInput =
   struct
     type nonrec t =
       {
+      deploymentId: DeploymentId.t option
+        [@ocaml.doc "The ID of the deployment you want the outputs for."];
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next output in the array of outputs, after the list of outputs that was previously requested."];
-      serviceName: ResourceName.t [@ocaml.doc "The service name."]}
+      serviceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service whose pipeline's outputs you want."]}
     let context_ = "ListServicePipelineOutputsInput"
-    let make ?nextToken =
-      fun ~serviceName -> fun () -> { nextToken; serviceName }
+    let make ?deploymentId =
+      fun ?nextToken ->
+        fun ~serviceName ->
+          fun () -> { deploymentId; nextToken; serviceName }
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
+        [("deploymentId",
+           (Option.map x.deploymentId ~f:DeploymentId.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
         ("serviceName", (Some (ResourceName.to_value x.serviceName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -8092,15 +11139,20 @@ module ListServicePipelineOutputsInput =
       let nextToken =
         (Option.map ~f:EmptyNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~serviceName ?nextToken ()
+      let deploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "deploymentId") in
+      make ~serviceName ?nextToken ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
-      make ~serviceName ?nextToken ()
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
+      make ~serviceName ?nextToken ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View a list service pipeline infrastructure as code outputs with detail."]
+       "Get a list of service pipeline Infrastructure as Code (IaC) outputs."]
 module ListServiceInstancesOutput =
   struct
     type nonrec t =
@@ -8108,9 +11160,8 @@ module ListServiceInstancesOutput =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next service instance in the array of service instances, after the current requested list of service instances."];
-      serviceInstances: ServiceInstanceSummaryList.t
-        [@ocaml.doc
-          "An array of service instances with summaries of detail data."]}
+      serviceInstances: ServiceInstanceSummaryList.t option
+        [@ocaml.doc "An array of service instances with summary data."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8118,9 +11169,8 @@ module ListServiceInstancesOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServiceInstancesOutput"
     let make ?nextToken =
-      fun ~serviceInstances -> fun () -> { nextToken; serviceInstances }
+      fun ?serviceInstances -> fun () -> { nextToken; serviceInstances }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8181,28 +11231,33 @@ module ListServiceInstancesOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("serviceInstances",
-          (Some (ServiceInstanceSummaryList.to_value x.serviceInstances)))]
+          (Option.map x.serviceInstances
+             ~f:ServiceInstanceSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceInstances =
-        ServiceInstanceSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceInstances") in
+        (Option.map ~f:ServiceInstanceSummaryList.of_xml)
+          (Xml.child xml_arg0 "serviceInstances") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~serviceInstances ?nextToken ()
+      make ?serviceInstances ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceInstances =
-        field_map_exn json "serviceInstances"
+        field_map json__ "serviceInstances"
           ServiceInstanceSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~serviceInstances ?nextToken ()
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?serviceInstances ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List service instances with summaries of detail data."]
+  end[@@ocaml.doc
+       "List service instances with summary data. This action lists service instances of all services in the Amazon Web Services account."]
 module ListServiceInstancesInput =
   struct
     type nonrec t =
       {
+      filters: ListServiceInstancesFilterList.t option
+        [@ocaml.doc
+          "An array of filtering criteria that scope down the result list. By default, all service instances in the Amazon Web Services account are returned."];
       maxResults: MaxPageResults.t option
         [@ocaml.doc "The maximum number of service instances to list."];
       nextToken: NextToken.t option
@@ -8210,17 +11265,44 @@ module ListServiceInstancesInput =
           "A token that indicates the location of the next service in the array of service instances, after the list of service instances that was previously requested."];
       serviceName: ResourceName.t option
         [@ocaml.doc
-          "The name of the service that the service instance belongs to."]}
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ?serviceName -> fun () -> { maxResults; nextToken; serviceName }
+          "The name of the service that the service instance belongs to."];
+      sortBy: ListServiceInstancesSortBy.t option
+        [@ocaml.doc
+          "The field that the result list is sorted by. When you choose to sort by serviceName, service instances within each service are sorted by service instance name. Default: serviceName"];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc "Result list sort order. Default: ASCENDING"]}
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?serviceName ->
+            fun ?sortBy ->
+              fun ?sortOrder ->
+                fun () ->
+                  {
+                    filters;
+                    maxResults;
+                    nextToken;
+                    serviceName;
+                    sortBy;
+                    sortOrder
+                  }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:MaxPageResults.to_value));
+        [("filters",
+           (Option.map x.filters ~f:ListServiceInstancesFilterList.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxPageResults.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value))]
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value));
+        ("sortBy",
+          (Option.map x.sortBy ~f:ListServiceInstancesSortBy.to_value));
+        ("sortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "sortOrder") in
+      let sortBy =
+        (Option.map ~f:ListServiceInstancesSortBy.of_xml)
+          (Xml.child xml_arg0 "sortBy") in
       let serviceName =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "serviceName") in
@@ -8229,15 +11311,24 @@ module ListServiceInstancesInput =
       let maxResults =
         (Option.map ~f:MaxPageResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
-      make ?serviceName ?nextToken ?maxResults ()
+      let filters =
+        (Option.map ~f:ListServiceInstancesFilterList.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      make ?sortOrder ?sortBy ?serviceName ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map json "serviceName" ResourceName.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
-      make ?serviceName ?nextToken ?maxResults ()
+    let of_json json__ =
+      let sortOrder = field_map json__ "sortOrder" SortOrder.of_json in
+      let sortBy =
+        field_map json__ "sortBy" ListServiceInstancesSortBy.of_json in
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
+      let filters =
+        field_map json__ "filters" ListServiceInstancesFilterList.of_json in
+      make ?sortOrder ?sortBy ?serviceName ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List service instances with summaries of detail data."]
+  end[@@ocaml.doc
+       "List service instances with summary data. This action lists service instances of all services in the Amazon Web Services account."]
 module ListServiceInstanceProvisionedResourcesOutput =
   struct
     type nonrec t =
@@ -8245,7 +11336,7 @@ module ListServiceInstanceProvisionedResourcesOutput =
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next provisioned resource in the array of provisioned resources, after the current requested list of provisioned resources."];
-      provisionedResources: ProvisionedResourceList.t
+      provisionedResources: ProvisionedResourceList.t option
         [@ocaml.doc
           "An array of provisioned resources for a service instance."]}
     type nonrec error =
@@ -8255,9 +11346,8 @@ module ListServiceInstanceProvisionedResourcesOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServiceInstanceProvisionedResourcesOutput"
     let make ?nextToken =
-      fun ~provisionedResources ->
+      fun ?provisionedResources ->
         fun () -> { nextToken; provisionedResources }
     let error_of_json name json =
       match name with
@@ -8319,23 +11409,24 @@ module ListServiceInstanceProvisionedResourcesOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
         ("provisionedResources",
-          (Some (ProvisionedResourceList.to_value x.provisionedResources)))]
+          (Option.map x.provisionedResources
+             ~f:ProvisionedResourceList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let provisionedResources =
-        ProvisionedResourceList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "provisionedResources") in
+        (Option.map ~f:ProvisionedResourceList.of_xml)
+          (Xml.child xml_arg0 "provisionedResources") in
       let nextToken =
         (Option.map ~f:EmptyNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~provisionedResources ?nextToken ()
+      make ?provisionedResources ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedResources =
-        field_map_exn json "provisionedResources"
+        field_map json__ "provisionedResources"
           ProvisionedResourceList.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
-      make ~provisionedResources ?nextToken ()
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      make ?provisionedResources ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List provisioned resources for a service instance with details."]
@@ -8347,8 +11438,11 @@ module ListServiceInstanceProvisionedResourcesInput =
         [@ocaml.doc
           "A token that indicates the location of the next provisioned resource in the array of provisioned resources, after the list of provisioned resources that was previously requested."];
       serviceInstanceName: ResourceName.t
-        [@ocaml.doc "The service instance name."];
-      serviceName: ResourceName.t [@ocaml.doc "The service name."]}
+        [@ocaml.doc
+          "The name of the service instance whose provisioned resources you want."];
+      serviceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service that serviceInstanceName is associated to."]}
     let context_ = "ListServiceInstanceProvisionedResourcesInput"
     let make ?nextToken =
       fun ~serviceInstanceName ->
@@ -8373,11 +11467,12 @@ module ListServiceInstanceProvisionedResourcesInput =
           (Xml.child xml_arg0 "nextToken") in
       make ~serviceName ~serviceInstanceName ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
       let serviceInstanceName =
-        field_map_exn json "serviceInstanceName" ResourceName.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
+        field_map_exn json__ "serviceInstanceName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
       make ~serviceName ~serviceInstanceName ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8389,9 +11484,9 @@ module ListServiceInstanceOutputsOutput =
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next output in the array of outputs, after the current requested list of outputs."];
-      outputs: OutputsList.t
+      outputs: OutputsList.t option
         [@ocaml.doc
-          "An array of service instance infrastructure as code outputs."]}
+          "An array of service instance Infrastructure as Code (IaC) outputs."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8399,8 +11494,7 @@ module ListServiceInstanceOutputsOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServiceInstanceOutputsOutput"
-    let make ?nextToken = fun ~outputs -> fun () -> { nextToken; outputs }
+    let make ?nextToken = fun ?outputs -> fun () -> { nextToken; outputs }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8460,42 +11554,50 @@ module ListServiceInstanceOutputsOutput =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
-        ("outputs", (Some (OutputsList.to_value x.outputs)))]
+        ("outputs", (Option.map x.outputs ~f:OutputsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let outputs =
-        OutputsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputs") in
+        (Option.map ~f:OutputsList.of_xml) (Xml.child xml_arg0 "outputs") in
       let nextToken =
         (Option.map ~f:EmptyNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~outputs ?nextToken ()
+      make ?outputs ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputs = field_map_exn json "outputs" OutputsList.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
-      make ~outputs ?nextToken ()
+    let of_json json__ =
+      let outputs = field_map json__ "outputs" OutputsList.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      make ?outputs ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View a list service instance infrastructure as code outputs with detail data."]
+       "Get a list service of instance Infrastructure as Code (IaC) outputs."]
 module ListServiceInstanceOutputsInput =
   struct
     type nonrec t =
       {
+      deploymentId: DeploymentId.t option
+        [@ocaml.doc "The ID of the deployment whose outputs you want."];
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next output in the array of outputs, after the list of outputs that was previously requested."];
       serviceInstanceName: ResourceName.t
-        [@ocaml.doc "The service instance name."];
-      serviceName: ResourceName.t [@ocaml.doc "The service name."]}
+        [@ocaml.doc
+          "The name of the service instance whose outputs you want."];
+      serviceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service that serviceInstanceName is associated to."]}
     let context_ = "ListServiceInstanceOutputsInput"
-    let make ?nextToken =
-      fun ~serviceInstanceName ->
-        fun ~serviceName ->
-          fun () -> { nextToken; serviceInstanceName; serviceName }
+    let make ?deploymentId =
+      fun ?nextToken ->
+        fun ~serviceInstanceName ->
+          fun ~serviceName ->
+            fun () ->
+              { deploymentId; nextToken; serviceInstanceName; serviceName }
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
+        [("deploymentId",
+           (Option.map x.deploymentId ~f:DeploymentId.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
         ("serviceInstanceName",
           (Some (ResourceName.to_value x.serviceInstanceName)));
         ("serviceName", (Some (ResourceName.to_value x.serviceName)))]
@@ -8510,17 +11612,22 @@ module ListServiceInstanceOutputsInput =
       let nextToken =
         (Option.map ~f:EmptyNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~serviceName ~serviceInstanceName ?nextToken ()
+      let deploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "deploymentId") in
+      make ~serviceName ~serviceInstanceName ?nextToken ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
       let serviceInstanceName =
-        field_map_exn json "serviceInstanceName" ResourceName.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
-      make ~serviceName ~serviceInstanceName ?nextToken ()
+        field_map_exn json__ "serviceInstanceName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
+      make ~serviceName ~serviceInstanceName ?nextToken ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View a list service instance infrastructure as code outputs with detail data."]
+       "Get a list service of instance Infrastructure as Code (IaC) outputs."]
 module ListRepositorySyncDefinitionsOutput =
   struct
     type nonrec t =
@@ -8528,7 +11635,7 @@ module ListRepositorySyncDefinitionsOutput =
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next repository sync definition in the array of repository sync definitions, after the current requested list of repository sync definitions."];
-      syncDefinitions: RepositorySyncDefinitionList.t
+      syncDefinitions: RepositorySyncDefinitionList.t option
         [@ocaml.doc "An array of repository sync definitions."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -8536,9 +11643,8 @@ module ListRepositorySyncDefinitionsOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRepositorySyncDefinitionsOutput"
     let make ?nextToken =
-      fun ~syncDefinitions -> fun () -> { nextToken; syncDefinitions }
+      fun ?syncDefinitions -> fun () -> { nextToken; syncDefinitions }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8591,23 +11697,24 @@ module ListRepositorySyncDefinitionsOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
         ("syncDefinitions",
-          (Some (RepositorySyncDefinitionList.to_value x.syncDefinitions)))]
+          (Option.map x.syncDefinitions
+             ~f:RepositorySyncDefinitionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let syncDefinitions =
-        RepositorySyncDefinitionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "syncDefinitions") in
+        (Option.map ~f:RepositorySyncDefinitionList.of_xml)
+          (Xml.child xml_arg0 "syncDefinitions") in
       let nextToken =
         (Option.map ~f:EmptyNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~syncDefinitions ?nextToken ()
+      make ?syncDefinitions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let syncDefinitions =
-        field_map_exn json "syncDefinitions"
+        field_map json__ "syncDefinitions"
           RepositorySyncDefinitionList.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
-      make ~syncDefinitions ?nextToken ()
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      make ?syncDefinitions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List repository sync definitions with detail data."]
 module ListRepositorySyncDefinitionsInput =
@@ -8652,13 +11759,13 @@ module ListRepositorySyncDefinitionsInput =
           (Xml.child xml_arg0 "nextToken") in
       make ~syncType ~repositoryProvider ~repositoryName ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let syncType = field_map_exn json "syncType" SyncType.of_json in
+    let of_json json__ =
+      let syncType = field_map_exn json__ "syncType" SyncType.of_json in
       let repositoryProvider =
-        field_map_exn json "repositoryProvider" RepositoryProvider.of_json in
+        field_map_exn json__ "repositoryProvider" RepositoryProvider.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
       make ~syncType ~repositoryProvider ~repositoryName ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List repository sync definitions with detail data."]
@@ -8669,8 +11776,8 @@ module ListRepositoriesOutput =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next repository in the array of repositories, after the current requested list of repositories."];
-      repositories: RepositorySummaryList.t
-        [@ocaml.doc "An array of repositories."]}
+      repositories: RepositorySummaryList.t option
+        [@ocaml.doc "An array of repository links."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8678,9 +11785,8 @@ module ListRepositoriesOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRepositoriesOutput"
     let make ?nextToken =
-      fun ~repositories -> fun () -> { nextToken; repositories }
+      fun ?repositories -> fun () -> { nextToken; repositories }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8741,23 +11847,23 @@ module ListRepositoriesOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("repositories",
-          (Some (RepositorySummaryList.to_value x.repositories)))]
+          (Option.map x.repositories ~f:RepositorySummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let repositories =
-        RepositorySummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "repositories") in
+        (Option.map ~f:RepositorySummaryList.of_xml)
+          (Xml.child xml_arg0 "repositories") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~repositories ?nextToken ()
+      make ?repositories ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositories =
-        field_map_exn json "repositories" RepositorySummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~repositories ?nextToken ()
+        field_map json__ "repositories" RepositorySummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?repositories ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List repositories with detail data."]
+  end[@@ocaml.doc "List linked repositories with detail data."]
 module ListRepositoriesInput =
   struct
     type nonrec t =
@@ -8782,17 +11888,17 @@ module ListRepositoriesInput =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List repositories with detail data."]
+  end[@@ocaml.doc "List linked repositories with detail data."]
 module ListEnvironmentsOutput =
   struct
     type nonrec t =
       {
-      environments: EnvironmentSummaryList.t
+      environments: EnvironmentSummaryList.t option
         [@ocaml.doc "An array of environment detail data summaries."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -8804,9 +11910,8 @@ module ListEnvironmentsOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListEnvironmentsOutput"
-    let make ?nextToken =
-      fun ~environments -> fun () -> { nextToken; environments }
+    let make ?environments =
+      fun ?nextToken -> fun () -> { environments; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8866,22 +11971,22 @@ module ListEnvironmentsOutput =
     let to_value x =
       structure_to_value
         [("environments",
-           (Some (EnvironmentSummaryList.to_value x.environments)));
+           (Option.map x.environments ~f:EnvironmentSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let environments =
-        EnvironmentSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environments") in
-      make ?nextToken ~environments ()
+        (Option.map ~f:EnvironmentSummaryList.of_xml)
+          (Xml.child xml_arg0 "environments") in
+      make ?nextToken ?environments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let environments =
-        field_map_exn json "environments" EnvironmentSummaryList.of_json in
-      make ?nextToken ~environments ()
+        field_map json__ "environments" EnvironmentSummaryList.of_json in
+      make ?nextToken ?environments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List environments with detail data summaries."]
 module ListEnvironmentsInput =
@@ -8918,11 +12023,11 @@ module ListEnvironmentsInput =
           (Xml.child xml_arg0 "environmentTemplates") in
       make ?nextToken ?maxResults ?environmentTemplates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
       let environmentTemplates =
-        field_map json "environmentTemplates"
+        field_map json__ "environmentTemplates"
           EnvironmentTemplateFilterList.of_json in
       make ?nextToken ?maxResults ?environmentTemplates ()
     let to_json v = composed_to_json to_value v
@@ -8934,7 +12039,7 @@ module ListEnvironmentTemplatesOutput =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next environment template in the array of environment templates, after the current requested list of environment templates."];
-      templates: EnvironmentTemplateSummaryList.t
+      templates: EnvironmentTemplateSummaryList.t option
         [@ocaml.doc "An array of environment templates with detail data."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -8942,9 +12047,8 @@ module ListEnvironmentTemplatesOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListEnvironmentTemplatesOutput"
     let make ?nextToken =
-      fun ~templates -> fun () -> { nextToken; templates }
+      fun ?templates -> fun () -> { nextToken; templates }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8997,21 +12101,21 @@ module ListEnvironmentTemplatesOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("templates",
-          (Some (EnvironmentTemplateSummaryList.to_value x.templates)))]
+          (Option.map x.templates ~f:EnvironmentTemplateSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templates =
-        EnvironmentTemplateSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templates") in
+        (Option.map ~f:EnvironmentTemplateSummaryList.of_xml)
+          (Xml.child xml_arg0 "templates") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~templates ?nextToken ()
+      make ?templates ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templates =
-        field_map_exn json "templates" EnvironmentTemplateSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~templates ?nextToken ()
+        field_map json__ "templates" EnvironmentTemplateSummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?templates ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List environment templates."]
 module ListEnvironmentTemplatesInput =
@@ -9038,9 +12142,9 @@ module ListEnvironmentTemplatesInput =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List environment templates."]
@@ -9051,7 +12155,7 @@ module ListEnvironmentTemplateVersionsOutput =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next major or minor version in the array of major or minor versions of an environment template, after the list of major or minor versions that was previously requested."];
-      templateVersions: EnvironmentTemplateVersionSummaryList.t
+      templateVersions: EnvironmentTemplateVersionSummaryList.t option
         [@ocaml.doc
           "An array of major or minor versions of an environment template detail data."]}
     type nonrec error =
@@ -9061,9 +12165,8 @@ module ListEnvironmentTemplateVersionsOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListEnvironmentTemplateVersionsOutput"
     let make ?nextToken =
-      fun ~templateVersions -> fun () -> { nextToken; templateVersions }
+      fun ?templateVersions -> fun () -> { nextToken; templateVersions }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9124,24 +12227,23 @@ module ListEnvironmentTemplateVersionsOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("templateVersions",
-          (Some
-             (EnvironmentTemplateVersionSummaryList.to_value
-                x.templateVersions)))]
+          (Option.map x.templateVersions
+             ~f:EnvironmentTemplateVersionSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateVersions =
-        EnvironmentTemplateVersionSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateVersions") in
+        (Option.map ~f:EnvironmentTemplateVersionSummaryList.of_xml)
+          (Xml.child xml_arg0 "templateVersions") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~templateVersions ?nextToken ()
+      make ?templateVersions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateVersions =
-        field_map_exn json "templateVersions"
+        field_map json__ "templateVersions"
           EnvironmentTemplateVersionSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~templateVersions ?nextToken ()
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?templateVersions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List major or minor versions of an environment template with detail data."]
@@ -9188,13 +12290,13 @@ module ListEnvironmentTemplateVersionsInput =
           (Xml.child xml_arg0 "majorVersion") in
       make ~templateName ?nextToken ?maxResults ?majorVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
       let majorVersion =
-        field_map json "majorVersion" TemplateVersionPart.of_json in
+        field_map json__ "majorVersion" TemplateVersionPart.of_json in
       make ~templateName ?nextToken ?maxResults ?majorVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9206,7 +12308,7 @@ module ListEnvironmentProvisionedResourcesOutput =
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next environment provisioned resource in the array of provisioned resources, after the current requested list of environment provisioned resources."];
-      provisionedResources: ProvisionedResourceList.t
+      provisionedResources: ProvisionedResourceList.t option
         [@ocaml.doc "An array of environment provisioned resources."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -9215,9 +12317,8 @@ module ListEnvironmentProvisionedResourcesOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListEnvironmentProvisionedResourcesOutput"
     let make ?nextToken =
-      fun ~provisionedResources ->
+      fun ?provisionedResources ->
         fun () -> { nextToken; provisionedResources }
     let error_of_json name json =
       match name with
@@ -9279,23 +12380,24 @@ module ListEnvironmentProvisionedResourcesOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
         ("provisionedResources",
-          (Some (ProvisionedResourceList.to_value x.provisionedResources)))]
+          (Option.map x.provisionedResources
+             ~f:ProvisionedResourceList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let provisionedResources =
-        ProvisionedResourceList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "provisionedResources") in
+        (Option.map ~f:ProvisionedResourceList.of_xml)
+          (Xml.child xml_arg0 "provisionedResources") in
       let nextToken =
         (Option.map ~f:EmptyNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~provisionedResources ?nextToken ()
+      make ?provisionedResources ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedResources =
-        field_map_exn json "provisionedResources"
+        field_map json__ "provisionedResources"
           ProvisionedResourceList.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
-      make ~provisionedResources ?nextToken ()
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      make ?provisionedResources ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the provisioned resources for your environment."]
 module ListEnvironmentProvisionedResourcesInput =
@@ -9324,10 +12426,10 @@ module ListEnvironmentProvisionedResourcesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
       make ?nextToken ~environmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
       let environmentName =
-        field_map_exn json "environmentName" ResourceName.of_json in
+        field_map_exn json__ "environmentName" ResourceName.of_json in
       make ?nextToken ~environmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the provisioned resources for your environment."]
@@ -9338,7 +12440,7 @@ module ListEnvironmentOutputsOutput =
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next environment output in the array of environment outputs, after the current requested list of environment outputs."];
-      outputs: OutputsList.t
+      outputs: OutputsList.t option
         [@ocaml.doc "An array of environment outputs with detail data."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -9347,8 +12449,7 @@ module ListEnvironmentOutputsOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListEnvironmentOutputsOutput"
-    let make ?nextToken = fun ~outputs -> fun () -> { nextToken; outputs }
+    let make ?nextToken = fun ?outputs -> fun () -> { nextToken; outputs }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9408,21 +12509,20 @@ module ListEnvironmentOutputsOutput =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
-        ("outputs", (Some (OutputsList.to_value x.outputs)))]
+        ("outputs", (Option.map x.outputs ~f:OutputsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let outputs =
-        OutputsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputs") in
+        (Option.map ~f:OutputsList.of_xml) (Xml.child xml_arg0 "outputs") in
       let nextToken =
         (Option.map ~f:EmptyNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~outputs ?nextToken ()
+      make ?outputs ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputs = field_map_exn json "outputs" OutputsList.of_json in
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
-      make ~outputs ?nextToken ()
+    let of_json json__ =
+      let outputs = field_map json__ "outputs" OutputsList.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      make ?outputs ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List the infrastructure as code outputs for your environment."]
@@ -9430,17 +12530,22 @@ module ListEnvironmentOutputsInput =
   struct
     type nonrec t =
       {
+      deploymentId: DeploymentId.t option
+        [@ocaml.doc "The ID of the deployment whose outputs you want."];
       environmentName: ResourceName.t [@ocaml.doc "The environment name."];
       nextToken: EmptyNextToken.t option
         [@ocaml.doc
           "A token that indicates the location of the next environment output in the array of environment outputs, after the list of environment outputs that was previously requested."]}
     let context_ = "ListEnvironmentOutputsInput"
-    let make ?nextToken =
-      fun ~environmentName -> fun () -> { nextToken; environmentName }
+    let make ?deploymentId =
+      fun ?nextToken ->
+        fun ~environmentName ->
+          fun () -> { deploymentId; nextToken; environmentName }
     let to_value x =
       structure_to_value
-        [("environmentName",
-           (Some (ResourceName.to_value x.environmentName)));
+        [("deploymentId",
+           (Option.map x.deploymentId ~f:DeploymentId.to_value));
+        ("environmentName", (Some (ResourceName.to_value x.environmentName)));
         ("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -9450,13 +12555,17 @@ module ListEnvironmentOutputsInput =
       let environmentName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
-      make ?nextToken ~environmentName ()
+      let deploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "deploymentId") in
+      make ?nextToken ~environmentName ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" EmptyNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
       let environmentName =
-        field_map_exn json "environmentName" ResourceName.of_json in
-      make ?nextToken ~environmentName ()
+        field_map_exn json__ "environmentName" ResourceName.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
+      make ?nextToken ~environmentName ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List the infrastructure as code outputs for your environment."]
@@ -9465,7 +12574,7 @@ module ListEnvironmentAccountConnectionsOutput =
     type nonrec t =
       {
       environmentAccountConnections:
-        EnvironmentAccountConnectionSummaryList.t
+        EnvironmentAccountConnectionSummaryList.t option
         [@ocaml.doc
           "An array of environment account connections with details that's returned by Proton."];
       nextToken: NextToken.t option
@@ -9477,10 +12586,9 @@ module ListEnvironmentAccountConnectionsOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListEnvironmentAccountConnectionsOutput"
-    let make ?nextToken =
-      fun ~environmentAccountConnections ->
-        fun () -> { nextToken; environmentAccountConnections }
+    let make ?environmentAccountConnections =
+      fun ?nextToken ->
+        fun () -> { environmentAccountConnections; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9532,29 +12640,27 @@ module ListEnvironmentAccountConnectionsOutput =
     let to_value x =
       structure_to_value
         [("environmentAccountConnections",
-           (Some
-              (EnvironmentAccountConnectionSummaryList.to_value
-                 x.environmentAccountConnections)));
+           (Option.map x.environmentAccountConnections
+              ~f:EnvironmentAccountConnectionSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let environmentAccountConnections =
-        EnvironmentAccountConnectionSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "environmentAccountConnections") in
-      make ?nextToken ~environmentAccountConnections ()
+        (Option.map ~f:EnvironmentAccountConnectionSummaryList.of_xml)
+          (Xml.child xml_arg0 "environmentAccountConnections") in
+      make ?nextToken ?environmentAccountConnections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let environmentAccountConnections =
-        field_map_exn json "environmentAccountConnections"
+        field_map json__ "environmentAccountConnections"
           EnvironmentAccountConnectionSummaryList.of_json in
-      make ?nextToken ~environmentAccountConnections ()
+      make ?nextToken ?environmentAccountConnections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View a list of environment account connections. For more information, see Environment account connections in the Proton Administrator guide."]
+       "View a list of environment account connections. For more information, see Environment account connections in the Proton User guide."]
 module ListEnvironmentAccountConnectionsInput =
   struct
     type nonrec t =
@@ -9619,21 +12725,633 @@ module ListEnvironmentAccountConnectionsInput =
           (Xml.child xml_arg0 "environmentName") in
       make ?statuses ~requestedBy ?nextToken ?maxResults ?environmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statuses =
-        field_map json "statuses"
+        field_map json__ "statuses"
           EnvironmentAccountConnectionStatusList.of_json in
       let requestedBy =
-        field_map_exn json "requestedBy"
+        field_map_exn json__ "requestedBy"
           EnvironmentAccountConnectionRequesterAccountType.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxPageResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
       let environmentName =
-        field_map json "environmentName" ResourceName.of_json in
+        field_map json__ "environmentName" ResourceName.of_json in
       make ?statuses ~requestedBy ?nextToken ?maxResults ?environmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View a list of environment account connections. For more information, see Environment account connections in the Proton Administrator guide."]
+       "View a list of environment account connections. For more information, see Environment account connections in the Proton User guide."]
+module ListDeploymentsOutput =
+  struct
+    type nonrec t =
+      {
+      deployments: DeploymentSummaryList.t option
+        [@ocaml.doc "An array of deployment with summary data."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates the location of the next deployment in the array of deployment, after the current requested list of deployment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?deployments =
+      fun ?nextToken -> fun () -> { deployments; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("deployments",
+           (Option.map x.deployments ~f:DeploymentSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let deployments =
+        (Option.map ~f:DeploymentSummaryList.of_xml)
+          (Xml.child xml_arg0 "deployments") in
+      make ?nextToken ?deployments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let deployments =
+        field_map json__ "deployments" DeploymentSummaryList.of_json in
+      make ?nextToken ?deployments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List deployments. You can filter the result list by environment, service, or a single service instance."]
+module ListDeploymentsInput =
+  struct
+    type nonrec t =
+      {
+      componentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of a component for result list filtering. Proton returns deployments associated with that component."];
+      environmentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of an environment for result list filtering. Proton returns deployments associated with the environment."];
+      maxResults: MaxPageResults.t option
+        [@ocaml.doc "The maximum number of deployments to list."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates the location of the next deployment in the array of deployment, after the list of deployment that was previously requested."];
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of a service instance for result list filtering. Proton returns the deployments associated with the service instance."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of a service for result list filtering. Proton returns deployments associated with service instances of the service."]}
+    let make ?componentName =
+      fun ?environmentName ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun ?serviceInstanceName ->
+              fun ?serviceName ->
+                fun () ->
+                  {
+                    componentName;
+                    environmentName;
+                    maxResults;
+                    nextToken;
+                    serviceInstanceName;
+                    serviceName
+                  }
+    let to_value x =
+      structure_to_value
+        [("componentName",
+           (Option.map x.componentName ~f:ResourceName.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxPageResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxPageResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let environmentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
+      let componentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "componentName") in
+      make ?serviceName ?serviceInstanceName ?nextToken ?maxResults
+        ?environmentName ?componentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
+      let environmentName =
+        field_map json__ "environmentName" ResourceName.of_json in
+      let componentName =
+        field_map json__ "componentName" ResourceName.of_json in
+      make ?serviceName ?serviceInstanceName ?nextToken ?maxResults
+        ?environmentName ?componentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List deployments. You can filter the result list by environment, service, or a single service instance."]
+module ListComponentsOutput =
+  struct
+    type nonrec t =
+      {
+      components: ComponentSummaryList.t option
+        [@ocaml.doc "An array of components with summary data."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates the location of the next component in the array of components, after the current requested list of components."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?components =
+      fun ?nextToken -> fun () -> { components; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("components",
+           (Option.map x.components ~f:ComponentSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let components =
+        (Option.map ~f:ComponentSummaryList.of_xml)
+          (Xml.child xml_arg0 "components") in
+      make ?nextToken ?components ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let components =
+        field_map json__ "components" ComponentSummaryList.of_json in
+      make ?nextToken ?components ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List components with summary data. You can filter the result list by environment, service, or a single service instance. For more information about components, see Proton components in the Proton User Guide."]
+module ListComponentsInput =
+  struct
+    type nonrec t =
+      {
+      environmentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of an environment for result list filtering. Proton returns components associated with the environment or attached to service instances running in it."];
+      maxResults: MaxPageResults.t option
+        [@ocaml.doc "The maximum number of components to list."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates the location of the next component in the array of components, after the list of components that was previously requested."];
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of a service instance for result list filtering. Proton returns the component attached to the service instance, if any."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of a service for result list filtering. Proton returns components attached to service instances of the service."]}
+    let make ?environmentName =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?serviceInstanceName ->
+            fun ?serviceName ->
+              fun () ->
+                {
+                  environmentName;
+                  maxResults;
+                  nextToken;
+                  serviceInstanceName;
+                  serviceName
+                }
+    let to_value x =
+      structure_to_value
+        [("environmentName",
+           (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxPageResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxPageResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let environmentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
+      make ?serviceName ?serviceInstanceName ?nextToken ?maxResults
+        ?environmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxPageResults.of_json in
+      let environmentName =
+        field_map json__ "environmentName" ResourceName.of_json in
+      make ?serviceName ?serviceInstanceName ?nextToken ?maxResults
+        ?environmentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List components with summary data. You can filter the result list by environment, service, or a single service instance. For more information about components, see Proton components in the Proton User Guide."]
+module ListComponentProvisionedResourcesOutput =
+  struct
+    type nonrec t =
+      {
+      nextToken: EmptyNextToken.t option
+        [@ocaml.doc
+          "A token that indicates the location of the next provisioned resource in the array of provisioned resources, after the current requested list of provisioned resources."];
+      provisionedResources: ProvisionedResourceList.t option
+        [@ocaml.doc "An array of provisioned resources for a component."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?provisionedResources ->
+        fun () -> { nextToken; provisionedResources }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
+        ("provisionedResources",
+          (Option.map x.provisionedResources
+             ~f:ProvisionedResourceList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let provisionedResources =
+        (Option.map ~f:ProvisionedResourceList.of_xml)
+          (Xml.child xml_arg0 "provisionedResources") in
+      let nextToken =
+        (Option.map ~f:EmptyNextToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?provisionedResources ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let provisionedResources =
+        field_map json__ "provisionedResources"
+          ProvisionedResourceList.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      make ?provisionedResources ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List provisioned resources for a component with details. For more information about components, see Proton components in the Proton User Guide."]
+module ListComponentProvisionedResourcesInput =
+  struct
+    type nonrec t =
+      {
+      componentName: ResourceName.t
+        [@ocaml.doc
+          "The name of the component whose provisioned resources you want."];
+      nextToken: EmptyNextToken.t option
+        [@ocaml.doc
+          "A token that indicates the location of the next provisioned resource in the array of provisioned resources, after the list of provisioned resources that was previously requested."]}
+    let context_ = "ListComponentProvisionedResourcesInput"
+    let make ?nextToken =
+      fun ~componentName -> fun () -> { nextToken; componentName }
+    let to_value x =
+      structure_to_value
+        [("componentName", (Some (ResourceName.to_value x.componentName)));
+        ("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:EmptyNextToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let componentName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "componentName") in
+      make ?nextToken ~componentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      let componentName =
+        field_map_exn json__ "componentName" ResourceName.of_json in
+      make ?nextToken ~componentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List provisioned resources for a component with details. For more information about components, see Proton components in the Proton User Guide."]
+module ListComponentOutputsOutput =
+  struct
+    type nonrec t =
+      {
+      nextToken: EmptyNextToken.t option
+        [@ocaml.doc
+          "A token that indicates the location of the next output in the array of outputs, after the list of outputs that was previously requested."];
+      outputs: OutputsList.t option
+        [@ocaml.doc
+          "An array of component Infrastructure as Code (IaC) outputs."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken = fun ?outputs -> fun () -> { nextToken; outputs }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value));
+        ("outputs", (Option.map x.outputs ~f:OutputsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outputs =
+        (Option.map ~f:OutputsList.of_xml) (Xml.child xml_arg0 "outputs") in
+      let nextToken =
+        (Option.map ~f:EmptyNextToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?outputs ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outputs = field_map json__ "outputs" OutputsList.of_json in
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      make ?outputs ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a list of component Infrastructure as Code (IaC) outputs. For more information about components, see Proton components in the Proton User Guide."]
+module ListComponentOutputsInput =
+  struct
+    type nonrec t =
+      {
+      componentName: ResourceName.t
+        [@ocaml.doc "The name of the component whose outputs you want."];
+      deploymentId: DeploymentId.t option
+        [@ocaml.doc "The ID of the deployment whose outputs you want."];
+      nextToken: EmptyNextToken.t option
+        [@ocaml.doc
+          "A token that indicates the location of the next output in the array of outputs, after the list of outputs that was previously requested."]}
+    let context_ = "ListComponentOutputsInput"
+    let make ?deploymentId =
+      fun ?nextToken ->
+        fun ~componentName ->
+          fun () -> { deploymentId; nextToken; componentName }
+    let to_value x =
+      structure_to_value
+        [("componentName", (Some (ResourceName.to_value x.componentName)));
+        ("deploymentId",
+          (Option.map x.deploymentId ~f:DeploymentId.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:EmptyNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:EmptyNextToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let deploymentId =
+        (Option.map ~f:DeploymentId.of_xml)
+          (Xml.child xml_arg0 "deploymentId") in
+      let componentName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "componentName") in
+      make ?nextToken ?deploymentId ~componentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" EmptyNextToken.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
+      let componentName =
+        field_map_exn json__ "componentName" ResourceName.of_json in
+      make ?nextToken ?deploymentId ~componentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a list of component Infrastructure as Code (IaC) outputs. For more information about components, see Proton components in the Proton User Guide."]
 module GetTemplateSyncStatusOutput =
   struct
     type nonrec t =
@@ -9733,12 +13451,12 @@ module GetTemplateSyncStatusOutput =
         (Option.map ~f:Revision.of_xml) (Xml.child xml_arg0 "desiredState") in
       make ?latestSync ?latestSuccessfulSync ?desiredState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestSync =
-        field_map json "latestSync" ResourceSyncAttempt.of_json in
+        field_map json__ "latestSync" ResourceSyncAttempt.of_json in
       let latestSuccessfulSync =
-        field_map json "latestSuccessfulSync" ResourceSyncAttempt.of_json in
-      let desiredState = field_map json "desiredState" Revision.of_json in
+        field_map json__ "latestSuccessfulSync" ResourceSyncAttempt.of_json in
+      let desiredState = field_map json__ "desiredState" Revision.of_json in
       make ?latestSync ?latestSuccessfulSync ?desiredState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get the status of a template sync."]
@@ -9774,13 +13492,13 @@ module GetTemplateSyncStatusInput =
           (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
       make ~templateVersion ~templateType ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateVersion =
-        field_map_exn json "templateVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "templateVersion" TemplateVersionPart.of_json in
       let templateType =
-        field_map_exn json "templateType" TemplateType.of_json in
+        field_map_exn json__ "templateType" TemplateType.of_json in
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       make ~templateVersion ~templateType ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get the status of a template sync."]
@@ -9866,9 +13584,9 @@ module GetTemplateSyncConfigOutput =
           (Xml.child xml_arg0 "templateSyncConfig") in
       make ?templateSyncConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateSyncConfig =
-        field_map json "templateSyncConfig" TemplateSyncConfig.of_json in
+        field_map json__ "templateSyncConfig" TemplateSyncConfig.of_json in
       make ?templateSyncConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get detail data for a template sync configuration."]
@@ -9895,11 +13613,11 @@ module GetTemplateSyncConfigInput =
           (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
       make ~templateType ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateType =
-        field_map_exn json "templateType" TemplateType.of_json in
+        field_map_exn json__ "templateType" TemplateType.of_json in
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       make ~templateType ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get detail data for a template sync configuration."]
@@ -9907,9 +13625,9 @@ module GetServiceTemplateVersionOutput =
   struct
     type nonrec t =
       {
-      serviceTemplateVersion: ServiceTemplateVersion.t
+      serviceTemplateVersion: ServiceTemplateVersion.t option
         [@ocaml.doc
-          "The service template version detail data that's returned by Proton."]}
+          "The detailed data of the requested service template version."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -9917,8 +13635,7 @@ module GetServiceTemplateVersionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetServiceTemplateVersionOutput"
-    let make ~serviceTemplateVersion = fun () -> { serviceTemplateVersion }
+    let make ?serviceTemplateVersion = fun () -> { serviceTemplateVersion }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9978,34 +13695,36 @@ module GetServiceTemplateVersionOutput =
     let to_value x =
       structure_to_value
         [("serviceTemplateVersion",
-           (Some (ServiceTemplateVersion.to_value x.serviceTemplateVersion)))]
+           (Option.map x.serviceTemplateVersion
+              ~f:ServiceTemplateVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceTemplateVersion =
-        ServiceTemplateVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceTemplateVersion") in
-      make ~serviceTemplateVersion ()
+        (Option.map ~f:ServiceTemplateVersion.of_xml)
+          (Xml.child xml_arg0 "serviceTemplateVersion") in
+      make ?serviceTemplateVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceTemplateVersion =
-        field_map_exn json "serviceTemplateVersion"
+        field_map json__ "serviceTemplateVersion"
           ServiceTemplateVersion.of_json in
-      make ~serviceTemplateVersion ()
+      make ?serviceTemplateVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View detail data for a major or minor version of a service template."]
+       "Get detailed data for a major or minor version of a service template."]
 module GetServiceTemplateVersionInput =
   struct
     type nonrec t =
       {
       majorVersion: TemplateVersionPart.t
         [@ocaml.doc
-          "To view service template major version detail data, include major Version."];
+          "To get service template major version detail data, include major Version."];
       minorVersion: TemplateVersionPart.t
         [@ocaml.doc
-          "To view service template minor version detail data, include minorVersion."];
+          "To get service template minor version detail data, include minorVersion."];
       templateName: ResourceName.t
-        [@ocaml.doc "The name of the service template."]}
+        [@ocaml.doc
+          "The name of the service template a version of which you want to get detailed data for."]}
     let context_ = "GetServiceTemplateVersionInput"
     let make ~majorVersion =
       fun ~minorVersion ->
@@ -10031,24 +13750,23 @@ module GetServiceTemplateVersionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
       make ~templateName ~minorVersion ~majorVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "majorVersion" TemplateVersionPart.of_json in
       make ~templateName ~minorVersion ~majorVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View detail data for a major or minor version of a service template."]
+       "Get detailed data for a major or minor version of a service template."]
 module GetServiceTemplateOutput =
   struct
     type nonrec t =
       {
-      serviceTemplate: ServiceTemplate.t
-        [@ocaml.doc
-          "The service template detail data that's returned by Proton."]}
+      serviceTemplate: ServiceTemplate.t option
+        [@ocaml.doc "The detailed data of the requested service template."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10056,8 +13774,7 @@ module GetServiceTemplateOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetServiceTemplateOutput"
-    let make ~serviceTemplate = fun () -> { serviceTemplate }
+    let make ?serviceTemplate = fun () -> { serviceTemplate }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10117,27 +13834,27 @@ module GetServiceTemplateOutput =
     let to_value x =
       structure_to_value
         [("serviceTemplate",
-           (Some (ServiceTemplate.to_value x.serviceTemplate)))]
+           (Option.map x.serviceTemplate ~f:ServiceTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceTemplate =
-        ServiceTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceTemplate") in
-      make ~serviceTemplate ()
+        (Option.map ~f:ServiceTemplate.of_xml)
+          (Xml.child xml_arg0 "serviceTemplate") in
+      make ?serviceTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceTemplate =
-        field_map_exn json "serviceTemplate" ServiceTemplate.of_json in
-      make ~serviceTemplate ()
+        field_map json__ "serviceTemplate" ServiceTemplate.of_json in
+      make ?serviceTemplate ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for a service template."]
+  end[@@ocaml.doc "Get detailed data for a service template."]
 module GetServiceTemplateInput =
   struct
     type nonrec t =
       {
       name: ResourceName.t
         [@ocaml.doc
-          "The name of the service template that you want to get detail data for."]}
+          "The name of the service template that you want to get detailed data for."]}
     let context_ = "GetServiceTemplateInput"
     let make ~name = fun () -> { name }
     let to_value x =
@@ -10148,17 +13865,259 @@ module GetServiceTemplateInput =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for a service template."]
+  end[@@ocaml.doc "Get detailed data for a service template."]
+module GetServiceSyncConfigOutput =
+  struct
+    type nonrec t =
+      {
+      serviceSyncConfig: ServiceSyncConfig.t option
+        [@ocaml.doc
+          "The detailed data of the requested service sync configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceSyncConfig = fun () -> { serviceSyncConfig }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceSyncConfig",
+           (Option.map x.serviceSyncConfig ~f:ServiceSyncConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceSyncConfig =
+        (Option.map ~f:ServiceSyncConfig.of_xml)
+          (Xml.child xml_arg0 "serviceSyncConfig") in
+      make ?serviceSyncConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceSyncConfig =
+        field_map json__ "serviceSyncConfig" ServiceSyncConfig.of_json in
+      make ?serviceSyncConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get detailed information for the service sync configuration."]
+module GetServiceSyncConfigInput =
+  struct
+    type nonrec t =
+      {
+      serviceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service that you want to get the service sync configuration for."]}
+    let context_ = "GetServiceSyncConfigInput"
+    let make ~serviceName = fun () -> { serviceName }
+    let to_value x =
+      structure_to_value
+        [("serviceName", (Some (ResourceName.to_value x.serviceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+      make ~serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      make ~serviceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get detailed information for the service sync configuration."]
+module GetServiceSyncBlockerSummaryOutput =
+  struct
+    type nonrec t =
+      {
+      serviceSyncBlockerSummary: ServiceSyncBlockerSummary.t option
+        [@ocaml.doc
+          "The detailed data of the requested service sync blocker summary."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceSyncBlockerSummary =
+      fun () -> { serviceSyncBlockerSummary }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceSyncBlockerSummary",
+           (Option.map x.serviceSyncBlockerSummary
+              ~f:ServiceSyncBlockerSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceSyncBlockerSummary =
+        (Option.map ~f:ServiceSyncBlockerSummary.of_xml)
+          (Xml.child xml_arg0 "serviceSyncBlockerSummary") in
+      make ?serviceSyncBlockerSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceSyncBlockerSummary =
+        field_map json__ "serviceSyncBlockerSummary"
+          ServiceSyncBlockerSummary.of_json in
+      make ?serviceSyncBlockerSummary ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get detailed data for the service sync blocker summary."]
+module GetServiceSyncBlockerSummaryInput =
+  struct
+    type nonrec t =
+      {
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service instance that you want to get the service sync blocker summary for. If given bothe the instance name and the service name, only the instance is blocked."];
+      serviceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service that you want to get the service sync blocker summary for. If given only the service name, all instances are blocked."]}
+    let context_ = "GetServiceSyncBlockerSummaryInput"
+    let make ?serviceInstanceName =
+      fun ~serviceName -> fun () -> { serviceInstanceName; serviceName }
+    let to_value x =
+      structure_to_value
+        [("serviceInstanceName",
+           (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Some (ResourceName.to_value x.serviceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      make ~serviceName ?serviceInstanceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      make ~serviceName ?serviceInstanceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get detailed data for the service sync blocker summary."]
 module GetServiceOutput =
   struct
     type nonrec t =
       {
       service: Service.t option
-        [@ocaml.doc "The service detail data that's returned by Proton."]}
+        [@ocaml.doc "The detailed data of the requested service."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10232,18 +14191,24 @@ module GetServiceOutput =
         (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "service") in
       make ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let service = field_map json "service" Service.of_json in
+    let of_json json__ =
+      let service = field_map json__ "service" Service.of_json in
       make ?service ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for a service."]
-module GetServiceInstanceOutput =
+  end[@@ocaml.doc "Get detailed data for a service."]
+module GetServiceInstanceSyncStatusOutput =
   struct
     type nonrec t =
       {
-      serviceInstance: ServiceInstance.t
+      desiredState: Revision.t option
         [@ocaml.doc
-          "The service instance detail data that's returned by Proton."]}
+          "The service instance sync desired state that's returned by Proton"];
+      latestSuccessfulSync: ResourceSyncAttempt.t option
+        [@ocaml.doc
+          "The detailed data of the latest successful sync with the service instance."];
+      latestSync: ResourceSyncAttempt.t option
+        [@ocaml.doc
+          "The detailed data of the latest sync with the service instance."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10251,8 +14216,144 @@ module GetServiceInstanceOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetServiceInstanceOutput"
-    let make ~serviceInstance = fun () -> { serviceInstance }
+    let make ?desiredState =
+      fun ?latestSuccessfulSync ->
+        fun ?latestSync ->
+          fun () -> { desiredState; latestSuccessfulSync; latestSync }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("desiredState", (Option.map x.desiredState ~f:Revision.to_value));
+        ("latestSuccessfulSync",
+          (Option.map x.latestSuccessfulSync ~f:ResourceSyncAttempt.to_value));
+        ("latestSync",
+          (Option.map x.latestSync ~f:ResourceSyncAttempt.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestSync =
+        (Option.map ~f:ResourceSyncAttempt.of_xml)
+          (Xml.child xml_arg0 "latestSync") in
+      let latestSuccessfulSync =
+        (Option.map ~f:ResourceSyncAttempt.of_xml)
+          (Xml.child xml_arg0 "latestSuccessfulSync") in
+      let desiredState =
+        (Option.map ~f:Revision.of_xml) (Xml.child xml_arg0 "desiredState") in
+      make ?latestSync ?latestSuccessfulSync ?desiredState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestSync =
+        field_map json__ "latestSync" ResourceSyncAttempt.of_json in
+      let latestSuccessfulSync =
+        field_map json__ "latestSuccessfulSync" ResourceSyncAttempt.of_json in
+      let desiredState = field_map json__ "desiredState" Revision.of_json in
+      make ?latestSync ?latestSuccessfulSync ?desiredState ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get the status of the synced service instance."]
+module GetServiceInstanceSyncStatusInput =
+  struct
+    type nonrec t =
+      {
+      serviceInstanceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service instance that you want the sync status input for."];
+      serviceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service that the service instance belongs to."]}
+    let context_ = "GetServiceInstanceSyncStatusInput"
+    let make ~serviceInstanceName =
+      fun ~serviceName -> fun () -> { serviceInstanceName; serviceName }
+    let to_value x =
+      structure_to_value
+        [("serviceInstanceName",
+           (Some (ResourceName.to_value x.serviceInstanceName)));
+        ("serviceName", (Some (ResourceName.to_value x.serviceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceInstanceName") in
+      make ~serviceName ~serviceInstanceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map_exn json__ "serviceInstanceName" ResourceName.of_json in
+      make ~serviceName ~serviceInstanceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get the status of the synced service instance."]
+module GetServiceInstanceOutput =
+  struct
+    type nonrec t =
+      {
+      serviceInstance: ServiceInstance.t option
+        [@ocaml.doc "The detailed data of the requested service instance."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceInstance = fun () -> { serviceInstance }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10312,31 +14413,31 @@ module GetServiceInstanceOutput =
     let to_value x =
       structure_to_value
         [("serviceInstance",
-           (Some (ServiceInstance.to_value x.serviceInstance)))]
+           (Option.map x.serviceInstance ~f:ServiceInstance.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceInstance =
-        ServiceInstance.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceInstance") in
-      make ~serviceInstance ()
+        (Option.map ~f:ServiceInstance.of_xml)
+          (Xml.child xml_arg0 "serviceInstance") in
+      make ?serviceInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceInstance =
-        field_map_exn json "serviceInstance" ServiceInstance.of_json in
-      make ~serviceInstance ()
+        field_map json__ "serviceInstance" ServiceInstance.of_json in
+      make ?serviceInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get detail data for a service instance. A service instance is an instantiation of service template and it runs in a specific environment."]
+       "Get detailed data for a service instance. A service instance is an instantiation of service template and it runs in a specific environment."]
 module GetServiceInstanceInput =
   struct
     type nonrec t =
       {
       name: ResourceName.t
         [@ocaml.doc
-          "The name of a service instance that you want to get the detail data for."];
+          "The name of a service instance that you want to get the detailed data for."];
       serviceName: ResourceName.t
         [@ocaml.doc
-          "The name of the service that the service instance belongs to."]}
+          "The name of the service that you want the service instance input for."]}
     let context_ = "GetServiceInstanceInput"
     let make ~name = fun ~serviceName -> fun () -> { name; serviceName }
     let to_value x =
@@ -10352,20 +14453,21 @@ module GetServiceInstanceInput =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~serviceName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~serviceName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get detail data for a service instance. A service instance is an instantiation of service template and it runs in a specific environment."]
+       "Get detailed data for a service instance. A service instance is an instantiation of service template and it runs in a specific environment."]
 module GetServiceInput =
   struct
     type nonrec t =
       {
       name: ResourceName.t
         [@ocaml.doc
-          "The name of the service that you want to get the detail data for."]}
+          "The name of the service that you want to get the detailed data for."]}
     let context_ = "GetServiceInput"
     let make ~name = fun () -> { name }
     let to_value x =
@@ -10376,11 +14478,100 @@ module GetServiceInput =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for a service."]
+  end[@@ocaml.doc "Get detailed data for a service."]
+module GetResourcesSummaryOutput =
+  struct
+    type nonrec t =
+      {
+      counts: CountsSummary.t option
+        [@ocaml.doc "Summary counts of each Proton resource type."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?counts = fun () -> { counts }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("counts", (Option.map x.counts ~f:CountsSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let counts =
+        (Option.map ~f:CountsSummary.of_xml) (Xml.child xml_arg0 "counts") in
+      make ?counts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let counts = field_map json__ "counts" CountsSummary.of_json in
+      make ?counts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get counts of Proton resources. For infrastructure-provisioning resources (environments, services, service instances, pipelines), the action returns staleness counts. A resource is stale when it's behind the recommended version of the Proton template that it uses and it needs an update to become current. The action returns staleness counts (counts of resources that are up-to-date, behind a template major version, or behind a template minor version), the total number of resources, and the number of resources that are in a failed state, grouped by resource type. Components, environments, and service templates return less information - see the components, environments, and serviceTemplates field descriptions. For context, the action also returns the total number of each type of Proton template in the Amazon Web Services account. For more information, see Proton dashboard in the Proton User Guide."]
+module GetResourcesSummaryInput =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get counts of Proton resources. For infrastructure-provisioning resources (environments, services, service instances, pipelines), the action returns staleness counts. A resource is stale when it's behind the recommended version of the Proton template that it uses and it needs an update to become current. The action returns staleness counts (counts of resources that are up-to-date, behind a template major version, or behind a template minor version), the total number of resources, and the number of resources that are in a failed state, grouped by resource type. Components, environments, and service templates return less information - see the components, environments, and serviceTemplates field descriptions. For context, the action also returns the total number of each type of Proton template in the Amazon Web Services account. For more information, see Proton dashboard in the Proton User Guide."]
 module GetRepositorySyncStatusOutput =
   struct
     type nonrec t =
@@ -10463,13 +14654,13 @@ module GetRepositorySyncStatusOutput =
           (Xml.child xml_arg0 "latestSync") in
       make ?latestSync ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestSync =
-        field_map json "latestSync" RepositorySyncAttempt.of_json in
+        field_map json__ "latestSync" RepositorySyncAttempt.of_json in
       make ?latestSync ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get the sync status of a repository used for Proton template sync. For more information about template sync, see . A repository sync status isn't tied to the Proton Repository resource (or any other Proton resource). Therefore, tags on an Proton Repository resource have no effect on this action. Specifically, you can't use these tags to control access to this action using Attribute-based access control (ABAC). For more information about ABAC, see ABAC in the Proton Administrator Guide."]
+       "Get the sync status of a repository used for Proton template sync. For more information about template sync, see . A repository sync status isn't tied to the Proton Repository resource (or any other Proton resource). Therefore, tags on an Proton Repository resource have no effect on this action. Specifically, you can't use these tags to control access to this action using Attribute-based access control (ABAC). For more information about ABAC, see ABAC in the Proton User Guide."]
 module GetRepositorySyncStatusInput =
   struct
     type nonrec t =
@@ -10508,23 +14699,24 @@ module GetRepositorySyncStatusInput =
           (Xml.child_exn ~context:context_ xml_arg0 "branch") in
       make ~syncType ~repositoryProvider ~repositoryName ~branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let syncType = field_map_exn json "syncType" SyncType.of_json in
+    let of_json json__ =
+      let syncType = field_map_exn json__ "syncType" SyncType.of_json in
       let repositoryProvider =
-        field_map_exn json "repositoryProvider" RepositoryProvider.of_json in
+        field_map_exn json__ "repositoryProvider" RepositoryProvider.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let branch = field_map_exn json "branch" GitBranchName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let branch = field_map_exn json__ "branch" GitBranchName.of_json in
       make ~syncType ~repositoryProvider ~repositoryName ~branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get the sync status of a repository used for Proton template sync. For more information about template sync, see . A repository sync status isn't tied to the Proton Repository resource (or any other Proton resource). Therefore, tags on an Proton Repository resource have no effect on this action. Specifically, you can't use these tags to control access to this action using Attribute-based access control (ABAC). For more information about ABAC, see ABAC in the Proton Administrator Guide."]
+       "Get the sync status of a repository used for Proton template sync. For more information about template sync, see . A repository sync status isn't tied to the Proton Repository resource (or any other Proton resource). Therefore, tags on an Proton Repository resource have no effect on this action. Specifically, you can't use these tags to control access to this action using Attribute-based access control (ABAC). For more information about ABAC, see ABAC in the Proton User Guide."]
 module GetRepositoryOutput =
   struct
     type nonrec t =
       {
-      repository: Repository.t
-        [@ocaml.doc "The repository detail data that's returned by Proton."]}
+      repository: Repository.t option
+        [@ocaml.doc
+          "The repository link's detail data that's returned by Proton."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10532,8 +14724,7 @@ module GetRepositoryOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetRepositoryOutput"
-    let make ~repository = fun () -> { repository }
+    let make ?repository = fun () -> { repository }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10592,19 +14783,18 @@ module GetRepositoryOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("repository", (Some (Repository.to_value x.repository)))]
+        [("repository", (Option.map x.repository ~f:Repository.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let repository =
-        Repository.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "repository") in
-      make ~repository ()
+        (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
+      make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repository = field_map_exn json "repository" Repository.of_json in
-      make ~repository ()
+    let of_json json__ =
+      let repository = field_map json__ "repository" Repository.of_json in
+      make ?repository ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for a repository."]
+  end[@@ocaml.doc "Get detail data for a linked repository."]
 module GetRepositoryInput =
   struct
     type nonrec t =
@@ -10628,19 +14818,20 @@ module GetRepositoryInput =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~provider ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let provider = field_map_exn json "provider" RepositoryProvider.of_json in
-      let name = field_map_exn json "name" RepositoryName.of_json in
+    let of_json json__ =
+      let provider =
+        field_map_exn json__ "provider" RepositoryProvider.of_json in
+      let name = field_map_exn json__ "name" RepositoryName.of_json in
       make ~provider ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for a repository."]
+  end[@@ocaml.doc "Get detail data for a linked repository."]
 module GetEnvironmentTemplateVersionOutput =
   struct
     type nonrec t =
       {
-      environmentTemplateVersion: EnvironmentTemplateVersion.t
+      environmentTemplateVersion: EnvironmentTemplateVersion.t option
         [@ocaml.doc
-          "The environment template version detail data that's returned by Proton."]}
+          "The detailed data of the requested environment template version."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10648,8 +14839,7 @@ module GetEnvironmentTemplateVersionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetEnvironmentTemplateVersionOutput"
-    let make ~environmentTemplateVersion =
+    let make ?environmentTemplateVersion =
       fun () -> { environmentTemplateVersion }
     let error_of_json name json =
       match name with
@@ -10710,37 +14900,36 @@ module GetEnvironmentTemplateVersionOutput =
     let to_value x =
       structure_to_value
         [("environmentTemplateVersion",
-           (Some
-              (EnvironmentTemplateVersion.to_value
-                 x.environmentTemplateVersion)))]
+           (Option.map x.environmentTemplateVersion
+              ~f:EnvironmentTemplateVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentTemplateVersion =
-        EnvironmentTemplateVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "environmentTemplateVersion") in
-      make ~environmentTemplateVersion ()
+        (Option.map ~f:EnvironmentTemplateVersion.of_xml)
+          (Xml.child xml_arg0 "environmentTemplateVersion") in
+      make ?environmentTemplateVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentTemplateVersion =
-        field_map_exn json "environmentTemplateVersion"
+        field_map json__ "environmentTemplateVersion"
           EnvironmentTemplateVersion.of_json in
-      make ~environmentTemplateVersion ()
+      make ?environmentTemplateVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View detail data for a major or minor version of an environment template."]
+       "Get detailed data for a major or minor version of an environment template."]
 module GetEnvironmentTemplateVersionInput =
   struct
     type nonrec t =
       {
       majorVersion: TemplateVersionPart.t
         [@ocaml.doc
-          "To view environment template major version detail data, include major Version."];
+          "To get environment template major version detail data, include major Version."];
       minorVersion: TemplateVersionPart.t
         [@ocaml.doc
-          "To view environment template minor version detail data, include minorVersion."];
+          "To get environment template minor version detail data, include minorVersion."];
       templateName: ResourceName.t
-        [@ocaml.doc "The name of the environment template."]}
+        [@ocaml.doc
+          "The name of the environment template a version of which you want to get detailed data for."]}
     let context_ = "GetEnvironmentTemplateVersionInput"
     let make ~majorVersion =
       fun ~minorVersion ->
@@ -10766,24 +14955,24 @@ module GetEnvironmentTemplateVersionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
       make ~templateName ~minorVersion ~majorVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "majorVersion" TemplateVersionPart.of_json in
       make ~templateName ~minorVersion ~majorVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "View detail data for a major or minor version of an environment template."]
+       "Get detailed data for a major or minor version of an environment template."]
 module GetEnvironmentTemplateOutput =
   struct
     type nonrec t =
       {
-      environmentTemplate: EnvironmentTemplate.t
+      environmentTemplate: EnvironmentTemplate.t option
         [@ocaml.doc
-          "The environment template detail data that's returned by Proton."]}
+          "The detailed data of the requested environment template."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10791,8 +14980,7 @@ module GetEnvironmentTemplateOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetEnvironmentTemplateOutput"
-    let make ~environmentTemplate = fun () -> { environmentTemplate }
+    let make ?environmentTemplate = fun () -> { environmentTemplate }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10852,27 +15040,27 @@ module GetEnvironmentTemplateOutput =
     let to_value x =
       structure_to_value
         [("environmentTemplate",
-           (Some (EnvironmentTemplate.to_value x.environmentTemplate)))]
+           (Option.map x.environmentTemplate ~f:EnvironmentTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentTemplate =
-        EnvironmentTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentTemplate") in
-      make ~environmentTemplate ()
+        (Option.map ~f:EnvironmentTemplate.of_xml)
+          (Xml.child xml_arg0 "environmentTemplate") in
+      make ?environmentTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentTemplate =
-        field_map_exn json "environmentTemplate" EnvironmentTemplate.of_json in
-      make ~environmentTemplate ()
+        field_map json__ "environmentTemplate" EnvironmentTemplate.of_json in
+      make ?environmentTemplate ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for an environment template."]
+  end[@@ocaml.doc "Get detailed data for an environment template."]
 module GetEnvironmentTemplateInput =
   struct
     type nonrec t =
       {
       name: ResourceName.t
         [@ocaml.doc
-          "The name of the environment template that you want to get the detail data for."]}
+          "The name of the environment template that you want to get the detailed data for."]}
     let context_ = "GetEnvironmentTemplateInput"
     let make ~name = fun () -> { name }
     let to_value x =
@@ -10883,17 +15071,17 @@ module GetEnvironmentTemplateInput =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for an environment template."]
+  end[@@ocaml.doc "Get detailed data for an environment template."]
 module GetEnvironmentOutput =
   struct
     type nonrec t =
       {
-      environment: Environment.t
-        [@ocaml.doc "The environment detail data that's returned by Proton."]}
+      environment: Environment.t option
+        [@ocaml.doc "The detailed data of the requested environment."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10901,8 +15089,7 @@ module GetEnvironmentOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetEnvironmentOutput"
-    let make ~environment = fun () -> { environment }
+    let make ?environment = fun () -> { environment }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10961,26 +15148,25 @@ module GetEnvironmentOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("environment", (Some (Environment.to_value x.environment)))]
+        [("environment", (Option.map x.environment ~f:Environment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environment =
-        Environment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environment") in
-      make ~environment ()
+        (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "environment") in
+      make ?environment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environment = field_map_exn json "environment" Environment.of_json in
-      make ~environment ()
+    let of_json json__ =
+      let environment = field_map json__ "environment" Environment.of_json in
+      make ?environment ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for an environment."]
+  end[@@ocaml.doc "Get detailed data for an environment."]
 module GetEnvironmentInput =
   struct
     type nonrec t =
       {
       name: ResourceName.t
         [@ocaml.doc
-          "The name of the environment that you want to get the detail data for."]}
+          "The name of the environment that you want to get the detailed data for."]}
     let context_ = "GetEnvironmentInput"
     let make ~name = fun () -> { name }
     let to_value x =
@@ -10991,18 +15177,18 @@ module GetEnvironmentInput =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for an environment."]
+  end[@@ocaml.doc "Get detailed data for an environment."]
 module GetEnvironmentAccountConnectionOutput =
   struct
     type nonrec t =
       {
-      environmentAccountConnection: EnvironmentAccountConnection.t
+      environmentAccountConnection: EnvironmentAccountConnection.t option
         [@ocaml.doc
-          "The environment account connection detail data that's returned by Proton."]}
+          "The detailed data of the requested environment account connection."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -11010,8 +15196,7 @@ module GetEnvironmentAccountConnectionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetEnvironmentAccountConnectionOutput"
-    let make ~environmentAccountConnection =
+    let make ?environmentAccountConnection =
       fun () -> { environmentAccountConnection }
     let error_of_json name json =
       match name with
@@ -11072,31 +15257,30 @@ module GetEnvironmentAccountConnectionOutput =
     let to_value x =
       structure_to_value
         [("environmentAccountConnection",
-           (Some
-              (EnvironmentAccountConnection.to_value
-                 x.environmentAccountConnection)))]
+           (Option.map x.environmentAccountConnection
+              ~f:EnvironmentAccountConnection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentAccountConnection =
-        EnvironmentAccountConnection.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "environmentAccountConnection") in
-      make ~environmentAccountConnection ()
+        (Option.map ~f:EnvironmentAccountConnection.of_xml)
+          (Xml.child xml_arg0 "environmentAccountConnection") in
+      make ?environmentAccountConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentAccountConnection =
-        field_map_exn json "environmentAccountConnection"
+        field_map json__ "environmentAccountConnection"
           EnvironmentAccountConnection.of_json in
-      make ~environmentAccountConnection ()
+      make ?environmentAccountConnection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In an environment account, view the detail data for an environment account connection. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In an environment account, get the detailed data for an environment account connection. For more information, see Environment account connections in the Proton User guide."]
 module GetEnvironmentAccountConnectionInput =
   struct
     type nonrec t =
       {
       id: EnvironmentAccountConnectionId.t
-        [@ocaml.doc "The ID of the environment account connection."]}
+        [@ocaml.doc
+          "The ID of the environment account connection that you want to get the detailed data for."]}
     let context_ = "GetEnvironmentAccountConnectionInput"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -11109,12 +15293,280 @@ module GetEnvironmentAccountConnectionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" EnvironmentAccountConnectionId.of_json in
+    let of_json json__ =
+      let id =
+        field_map_exn json__ "id" EnvironmentAccountConnectionId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In an environment account, view the detail data for an environment account connection. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In an environment account, get the detailed data for an environment account connection. For more information, see Environment account connections in the Proton User guide."]
+module GetDeploymentOutput =
+  struct
+    type nonrec t =
+      {
+      deployment: Deployment.t option
+        [@ocaml.doc "The detailed data of the requested deployment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?deployment = fun () -> { deployment }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("deployment", (Option.map x.deployment ~f:Deployment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deployment =
+        (Option.map ~f:Deployment.of_xml) (Xml.child xml_arg0 "deployment") in
+      make ?deployment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deployment = field_map json__ "deployment" Deployment.of_json in
+      make ?deployment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get detailed data for a deployment."]
+module GetDeploymentInput =
+  struct
+    type nonrec t =
+      {
+      componentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of a component that you want to get the detailed data for."];
+      environmentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of a environment that you want to get the detailed data for."];
+      id: DeploymentId.t
+        [@ocaml.doc
+          "The ID of the deployment that you want to get the detailed data for."];
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service instance associated with the given deployment ID. serviceName must be specified to identify the service instance."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service associated with the given deployment ID."]}
+    let context_ = "GetDeploymentInput"
+    let make ?componentName =
+      fun ?environmentName ->
+        fun ?serviceInstanceName ->
+          fun ?serviceName ->
+            fun ~id ->
+              fun () ->
+                {
+                  componentName;
+                  environmentName;
+                  serviceInstanceName;
+                  serviceName;
+                  id
+                }
+    let to_value x =
+      structure_to_value
+        [("componentName",
+           (Option.map x.componentName ~f:ResourceName.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("id", (Some (DeploymentId.to_value x.id)));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let id =
+        DeploymentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let environmentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
+      let componentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "componentName") in
+      make ?serviceName ?serviceInstanceName ~id ?environmentName
+        ?componentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      let id = field_map_exn json__ "id" DeploymentId.of_json in
+      let environmentName =
+        field_map json__ "environmentName" ResourceName.of_json in
+      let componentName =
+        field_map json__ "componentName" ResourceName.of_json in
+      make ?serviceName ?serviceInstanceName ~id ?environmentName
+        ?componentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get detailed data for a deployment."]
+module GetComponentOutput =
+  struct
+    type nonrec t =
+      {
+      component: Component.t option
+        [@ocaml.doc "The detailed data of the requested component."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?component = fun () -> { component }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("component", (Option.map x.component ~f:Component.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let component =
+        (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "component") in
+      make ?component ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let component = field_map json__ "component" Component.of_json in
+      make ?component ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get detailed data for a component. For more information about components, see Proton components in the Proton User Guide."]
+module GetComponentInput =
+  struct
+    type nonrec t =
+      {
+      name: ResourceName.t
+        [@ocaml.doc
+          "The name of the component that you want to get the detailed data for."]}
+    let context_ = "GetComponentInput"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value [("name", (Some (ResourceName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get detailed data for a component. For more information about components, see Proton components in the Proton User Guide."]
 module GetAccountSettingsOutput =
   struct
     type nonrec t =
@@ -11197,12 +15649,12 @@ module GetAccountSettingsOutput =
           (Xml.child xml_arg0 "accountSettings") in
       make ?accountSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountSettings =
-        field_map json "accountSettings" AccountSettings.of_json in
+        field_map json__ "accountSettings" AccountSettings.of_json in
       make ?accountSettings ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for the Proton pipeline service role."]
+  end[@@ocaml.doc "Get detail data for Proton account-wide settings."]
 module GetAccountSettingsInput =
   struct
     type nonrec t = unit
@@ -11214,7 +15666,7 @@ module GetAccountSettingsInput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get detail data for the Proton pipeline service role."]
+  end[@@ocaml.doc "Get detail data for Proton account-wide settings."]
 module DeleteTemplateSyncConfigOutput =
   struct
     type nonrec t =
@@ -11306,9 +15758,9 @@ module DeleteTemplateSyncConfigOutput =
           (Xml.child xml_arg0 "templateSyncConfig") in
       make ?templateSyncConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateSyncConfig =
-        field_map json "templateSyncConfig" TemplateSyncConfig.of_json in
+        field_map json__ "templateSyncConfig" TemplateSyncConfig.of_json in
       make ?templateSyncConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete a template sync configuration."]
@@ -11335,11 +15787,11 @@ module DeleteTemplateSyncConfigInput =
           (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
       make ~templateType ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateType =
-        field_map_exn json "templateType" TemplateType.of_json in
+        field_map_exn json__ "templateType" TemplateType.of_json in
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       make ~templateType ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete a template sync configuration."]
@@ -11349,7 +15801,7 @@ module DeleteServiceTemplateVersionOutput =
       {
       serviceTemplateVersion: ServiceTemplateVersion.t option
         [@ocaml.doc
-          "The service template version detail data that's returned by Proton."]}
+          "The detailed data of the service template version being deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11435,9 +15887,9 @@ module DeleteServiceTemplateVersionOutput =
           (Xml.child xml_arg0 "serviceTemplateVersion") in
       make ?serviceTemplateVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceTemplateVersion =
-        field_map json "serviceTemplateVersion"
+        field_map json__ "serviceTemplateVersion"
           ServiceTemplateVersion.of_json in
       make ?serviceTemplateVersion ()
     let to_json v = composed_to_json to_value v
@@ -11478,13 +15930,13 @@ module DeleteServiceTemplateVersionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
       make ~templateName ~minorVersion ~majorVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "majorVersion" TemplateVersionPart.of_json in
       make ~templateName ~minorVersion ~majorVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11495,7 +15947,7 @@ module DeleteServiceTemplateOutput =
       {
       serviceTemplate: ServiceTemplate.t option
         [@ocaml.doc
-          "The service template detail data that's returned by Proton."]}
+          "The detailed data of the service template being deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11580,9 +16032,9 @@ module DeleteServiceTemplateOutput =
           (Xml.child xml_arg0 "serviceTemplate") in
       make ?serviceTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceTemplate =
-        field_map json "serviceTemplate" ServiceTemplate.of_json in
+        field_map json__ "serviceTemplate" ServiceTemplate.of_json in
       make ?serviceTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11603,18 +16055,139 @@ module DeleteServiceTemplateInput =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "If no other major or minor versions of the service template exist, delete the service template."]
+module DeleteServiceSyncConfigOutput =
+  struct
+    type nonrec t =
+      {
+      serviceSyncConfig: ServiceSyncConfig.t option
+        [@ocaml.doc "The detailed data for the service sync config."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceSyncConfig = fun () -> { serviceSyncConfig }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceSyncConfig",
+           (Option.map x.serviceSyncConfig ~f:ServiceSyncConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceSyncConfig =
+        (Option.map ~f:ServiceSyncConfig.of_xml)
+          (Xml.child xml_arg0 "serviceSyncConfig") in
+      make ?serviceSyncConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceSyncConfig =
+        field_map json__ "serviceSyncConfig" ServiceSyncConfig.of_json in
+      make ?serviceSyncConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete the Proton Ops file."]
+module DeleteServiceSyncConfigInput =
+  struct
+    type nonrec t =
+      {
+      serviceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service that you want to delete the service sync configuration for."]}
+    let context_ = "DeleteServiceSyncConfigInput"
+    let make ~serviceName = fun () -> { serviceName }
+    let to_value x =
+      structure_to_value
+        [("serviceName", (Some (ResourceName.to_value x.serviceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+      make ~serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      make ~serviceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete the Proton Ops file."]
 module DeleteServiceOutput =
   struct
     type nonrec t =
       {
       service: Service.t option
-        [@ocaml.doc "The service detail data that's returned by Proton."]}
+        [@ocaml.doc "The detailed data of the service being deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11697,11 +16270,12 @@ module DeleteServiceOutput =
         (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "service") in
       make ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let service = field_map json "service" Service.of_json in
+    let of_json json__ =
+      let service = field_map json__ "service" Service.of_json in
       make ?service ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Delete a service."]
+  end[@@ocaml.doc
+       "Delete a service, with its instances and pipeline. You can't delete a service if it has any service instances that have components attached to them. For more information about components, see Proton components in the Proton User Guide."]
 module DeleteServiceInput =
   struct
     type nonrec t =
@@ -11717,17 +16291,19 @@ module DeleteServiceInput =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Delete a service."]
+  end[@@ocaml.doc
+       "Delete a service, with its instances and pipeline. You can't delete a service if it has any service instances that have components attached to them. For more information about components, see Proton components in the Proton User Guide."]
 module DeleteRepositoryOutput =
   struct
     type nonrec t =
       {
       repository: Repository.t option
-        [@ocaml.doc "The repository detail data that's returned by Proton."]}
+        [@ocaml.doc
+          "The deleted repository link's detail data that's returned by Proton."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11810,8 +16386,8 @@ module DeleteRepositoryOutput =
         (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repository = field_map json "repository" Repository.of_json in
+    let of_json json__ =
+      let repository = field_map json__ "repository" Repository.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "De-register and unlink your repository."]
@@ -11819,7 +16395,7 @@ module DeleteRepositoryInput =
   struct
     type nonrec t =
       {
-      name: RepositoryName.t [@ocaml.doc "The name of the repository."];
+      name: RepositoryName.t [@ocaml.doc "The repository name."];
       provider: RepositoryProvider.t [@ocaml.doc "The repository provider."]}
     let context_ = "DeleteRepositoryInput"
     let make ~name = fun ~provider -> fun () -> { name; provider }
@@ -11837,9 +16413,10 @@ module DeleteRepositoryInput =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~provider ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let provider = field_map_exn json "provider" RepositoryProvider.of_json in
-      let name = field_map_exn json "name" RepositoryName.of_json in
+    let of_json json__ =
+      let provider =
+        field_map_exn json__ "provider" RepositoryProvider.of_json in
+      let name = field_map_exn json__ "name" RepositoryName.of_json in
       make ~provider ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "De-register and unlink your repository."]
@@ -11849,7 +16426,7 @@ module DeleteEnvironmentTemplateVersionOutput =
       {
       environmentTemplateVersion: EnvironmentTemplateVersion.t option
         [@ocaml.doc
-          "The environment template version detail data that's returned by Proton."]}
+          "The detailed data of the environment template version being deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11936,9 +16513,9 @@ module DeleteEnvironmentTemplateVersionOutput =
           (Xml.child xml_arg0 "environmentTemplateVersion") in
       make ?environmentTemplateVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentTemplateVersion =
-        field_map json "environmentTemplateVersion"
+        field_map json__ "environmentTemplateVersion"
           EnvironmentTemplateVersion.of_json in
       make ?environmentTemplateVersion ()
     let to_json v = composed_to_json to_value v
@@ -11979,13 +16556,13 @@ module DeleteEnvironmentTemplateVersionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "majorVersion") in
       make ~templateName ~minorVersion ~majorVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       let minorVersion =
-        field_map_exn json "minorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "minorVersion" TemplateVersionPart.of_json in
       let majorVersion =
-        field_map_exn json "majorVersion" TemplateVersionPart.of_json in
+        field_map_exn json__ "majorVersion" TemplateVersionPart.of_json in
       make ~templateName ~minorVersion ~majorVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11996,7 +16573,7 @@ module DeleteEnvironmentTemplateOutput =
       {
       environmentTemplate: EnvironmentTemplate.t option
         [@ocaml.doc
-          "The environment template detail data that's returned by Proton."]}
+          "The detailed data of the environment template being deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -12081,9 +16658,9 @@ module DeleteEnvironmentTemplateOutput =
           (Xml.child xml_arg0 "environmentTemplate") in
       make ?environmentTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentTemplate =
-        field_map json "environmentTemplate" EnvironmentTemplate.of_json in
+        field_map json__ "environmentTemplate" EnvironmentTemplate.of_json in
       make ?environmentTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12104,8 +16681,8 @@ module DeleteEnvironmentTemplateInput =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12115,7 +16692,7 @@ module DeleteEnvironmentOutput =
     type nonrec t =
       {
       environment: Environment.t option
-        [@ocaml.doc "The environment detail data that's returned by Proton."]}
+        [@ocaml.doc "The detailed data of the environment being deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -12198,8 +16775,8 @@ module DeleteEnvironmentOutput =
         (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "environment") in
       make ?environment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environment = field_map json "environment" Environment.of_json in
+    let of_json json__ =
+      let environment = field_map json__ "environment" Environment.of_json in
       make ?environment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete an environment."]
@@ -12219,8 +16796,8 @@ module DeleteEnvironmentInput =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete an environment."]
@@ -12230,7 +16807,7 @@ module DeleteEnvironmentAccountConnectionOutput =
       {
       environmentAccountConnection: EnvironmentAccountConnection.t option
         [@ocaml.doc
-          "The environment account connection detail data that's returned by Proton."]}
+          "The detailed data of the environment account connection being deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -12317,14 +16894,14 @@ module DeleteEnvironmentAccountConnectionOutput =
           (Xml.child xml_arg0 "environmentAccountConnection") in
       make ?environmentAccountConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentAccountConnection =
-        field_map json "environmentAccountConnection"
+        field_map json__ "environmentAccountConnection"
           EnvironmentAccountConnection.of_json in
       make ?environmentAccountConnection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In an environment account, delete an environment account connection. After you delete an environment account connection that\226\128\153s in use by an Proton environment, Proton can\226\128\153t manage the environment infrastructure resources until a new environment account connection is accepted for the environment account and associated environment. You're responsible for cleaning up provisioned resources that remain without an environment connection. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In an environment account, delete an environment account connection. After you delete an environment account connection that\226\128\153s in use by an Proton environment, Proton can\226\128\153t manage the environment infrastructure resources until a new environment account connection is accepted for the environment account and associated environment. You're responsible for cleaning up provisioned resources that remain without an environment connection. For more information, see Environment account connections in the Proton User guide."]
 module DeleteEnvironmentAccountConnectionInput =
   struct
     type nonrec t =
@@ -12344,12 +16921,232 @@ module DeleteEnvironmentAccountConnectionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" EnvironmentAccountConnectionId.of_json in
+    let of_json json__ =
+      let id =
+        field_map_exn json__ "id" EnvironmentAccountConnectionId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In an environment account, delete an environment account connection. After you delete an environment account connection that\226\128\153s in use by an Proton environment, Proton can\226\128\153t manage the environment infrastructure resources until a new environment account connection is accepted for the environment account and associated environment. You're responsible for cleaning up provisioned resources that remain without an environment connection. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In an environment account, delete an environment account connection. After you delete an environment account connection that\226\128\153s in use by an Proton environment, Proton can\226\128\153t manage the environment infrastructure resources until a new environment account connection is accepted for the environment account and associated environment. You're responsible for cleaning up provisioned resources that remain without an environment connection. For more information, see Environment account connections in the Proton User guide."]
+module DeleteDeploymentOutput =
+  struct
+    type nonrec t =
+      {
+      deployment: Deployment.t option
+        [@ocaml.doc "The detailed data of the deployment being deleted."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?deployment = fun () -> { deployment }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("deployment", (Option.map x.deployment ~f:Deployment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deployment =
+        (Option.map ~f:Deployment.of_xml) (Xml.child xml_arg0 "deployment") in
+      make ?deployment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deployment = field_map json__ "deployment" Deployment.of_json in
+      make ?deployment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete the deployment."]
+module DeleteDeploymentInput =
+  struct
+    type nonrec t =
+      {
+      id: DeploymentId.t [@ocaml.doc "The ID of the deployment to delete."]}
+    let context_ = "DeleteDeploymentInput"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("id", (Some (DeploymentId.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        DeploymentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" DeploymentId.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete the deployment."]
+module DeleteComponentOutput =
+  struct
+    type nonrec t =
+      {
+      component: Component.t option
+        [@ocaml.doc "The detailed data of the component being deleted."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?component = fun () -> { component }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("component", (Option.map x.component ~f:Component.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let component =
+        (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "component") in
+      make ?component ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let component = field_map json__ "component" Component.of_json in
+      make ?component ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete an Proton component resource. For more information about components, see Proton components in the Proton User Guide."]
+module DeleteComponentInput =
+  struct
+    type nonrec t =
+      {
+      name: ResourceName.t
+        [@ocaml.doc "The name of the component to delete."]}
+    let context_ = "DeleteComponentInput"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value [("name", (Some (ResourceName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete an Proton component resource. For more information about components, see Proton components in the Proton User Guide."]
 module CreateTemplateSyncConfigOutput =
   struct
     type nonrec t =
@@ -12443,23 +17240,21 @@ module CreateTemplateSyncConfigOutput =
           (Xml.child xml_arg0 "templateSyncConfig") in
       make ?templateSyncConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateSyncConfig =
-        field_map json "templateSyncConfig" TemplateSyncConfig.of_json in
+        field_map json__ "templateSyncConfig" TemplateSyncConfig.of_json in
       make ?templateSyncConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Set up a template to create new template versions automatically. When a commit is pushed to your registered repository, Proton checks for changes to your repository template bundles. If it detects a template bundle change, a new major or minor version of its template is created, if the version doesn\226\128\153t already exist. For more information, see Template sync configurations in the Proton Administrator Guide."]
+       "Set up a template to create new template versions automatically by tracking a linked repository. A linked repository is a repository that has been registered with Proton. For more information, see CreateRepository. When a commit is pushed to your linked repository, Proton checks for changes to your repository template bundles. If it detects a template bundle change, a new major or minor version of its template is created, if the version doesn\226\128\153t already exist. For more information, see Template sync configurations in the Proton User Guide."]
 module CreateTemplateSyncConfigInput =
   struct
     type nonrec t =
       {
       branch: GitBranchName.t
-        [@ocaml.doc
-          "The branch of the registered repository for your template."];
+        [@ocaml.doc "The repository branch for your template."];
       repositoryName: RepositoryName.t
-        [@ocaml.doc
-          "The name of your repository (for example, myrepos/myrepo)."];
+        [@ocaml.doc "The repository name (for example, myrepos/myrepo)."];
       repositoryProvider: RepositoryProvider.t
         [@ocaml.doc "The provider type for your repository."];
       subdirectory: Subdirectory.t option
@@ -12518,27 +17313,27 @@ module CreateTemplateSyncConfigInput =
       make ~templateType ~templateName ?subdirectory ~repositoryProvider
         ~repositoryName ~branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateType =
-        field_map_exn json "templateType" TemplateType.of_json in
+        field_map_exn json__ "templateType" TemplateType.of_json in
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
-      let subdirectory = field_map json "subdirectory" Subdirectory.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
+      let subdirectory = field_map json__ "subdirectory" Subdirectory.of_json in
       let repositoryProvider =
-        field_map_exn json "repositoryProvider" RepositoryProvider.of_json in
+        field_map_exn json__ "repositoryProvider" RepositoryProvider.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let branch = field_map_exn json "branch" GitBranchName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let branch = field_map_exn json__ "branch" GitBranchName.of_json in
       make ~templateType ~templateName ?subdirectory ~repositoryProvider
         ~repositoryName ~branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Set up a template to create new template versions automatically. When a commit is pushed to your registered repository, Proton checks for changes to your repository template bundles. If it detects a template bundle change, a new major or minor version of its template is created, if the version doesn\226\128\153t already exist. For more information, see Template sync configurations in the Proton Administrator Guide."]
+       "Set up a template to create new template versions automatically by tracking a linked repository. A linked repository is a repository that has been registered with Proton. For more information, see CreateRepository. When a commit is pushed to your linked repository, Proton checks for changes to your repository template bundles. If it detects a template bundle change, a new major or minor version of its template is created, if the version doesn\226\128\153t already exist. For more information, see Template sync configurations in the Proton User Guide."]
 module CreateServiceTemplateVersionOutput =
   struct
     type nonrec t =
       {
-      serviceTemplateVersion: ServiceTemplateVersion.t
+      serviceTemplateVersion: ServiceTemplateVersion.t option
         [@ocaml.doc
           "The service template version summary of detail data that's returned by Proton."]}
     type nonrec error =
@@ -12550,8 +17345,7 @@ module CreateServiceTemplateVersionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateServiceTemplateVersionOutput"
-    let make ~serviceTemplateVersion = fun () -> { serviceTemplateVersion }
+    let make ?serviceTemplateVersion = fun () -> { serviceTemplateVersion }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12629,19 +17423,20 @@ module CreateServiceTemplateVersionOutput =
     let to_value x =
       structure_to_value
         [("serviceTemplateVersion",
-           (Some (ServiceTemplateVersion.to_value x.serviceTemplateVersion)))]
+           (Option.map x.serviceTemplateVersion
+              ~f:ServiceTemplateVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceTemplateVersion =
-        ServiceTemplateVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceTemplateVersion") in
-      make ~serviceTemplateVersion ()
+        (Option.map ~f:ServiceTemplateVersion.of_xml)
+          (Xml.child xml_arg0 "serviceTemplateVersion") in
+      make ?serviceTemplateVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceTemplateVersion =
-        field_map_exn json "serviceTemplateVersion"
+        field_map json__ "serviceTemplateVersion"
           ServiceTemplateVersion.of_json in
-      make ~serviceTemplateVersion ()
+      make ?serviceTemplateVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Create a new major or minor version of a service template. A major version of a service template is a version that isn't backward compatible. A minor version of a service template is a version that's backward compatible within its major version."]
@@ -12655,7 +17450,7 @@ module CreateServiceTemplateVersionInput =
       compatibleEnvironmentTemplates:
         CompatibleEnvironmentTemplateInputList.t
         [@ocaml.doc
-          "An array of compatible environment template objects for the new version of a service template."];
+          "An array of environment template objects that are compatible with the new service template version. A service instance based on this service template version can run in environments based on compatible templates."];
       description: Description.t option
         [@ocaml.doc
           "A description of the new version of a service template."];
@@ -12665,29 +17460,35 @@ module CreateServiceTemplateVersionInput =
       source: TemplateVersionSourceInput.t
         [@ocaml.doc
           "An object that includes the template bundle S3 bucket path and name for the new version of a service template."];
+      supportedComponentSources:
+        ServiceTemplateSupportedComponentSourceInputList.t option
+        [@ocaml.doc
+          "An array of supported component sources. Components with supported sources can be attached to service instances based on this service template version. For more information about components, see Proton components in the Proton User Guide."];
       tags: TagList.t option
         [@ocaml.doc
-          "An optional list of metadata items that you can associate with the Proton service template version. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."];
+          "An optional list of metadata items that you can associate with the Proton service template version. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."];
       templateName: ResourceName.t
         [@ocaml.doc "The name of the service template."]}
     let context_ = "CreateServiceTemplateVersionInput"
     let make ?clientToken =
       fun ?description ->
         fun ?majorVersion ->
-          fun ?tags ->
-            fun ~compatibleEnvironmentTemplates ->
-              fun ~source ->
-                fun ~templateName ->
-                  fun () ->
-                    {
-                      clientToken;
-                      description;
-                      majorVersion;
-                      tags;
-                      compatibleEnvironmentTemplates;
-                      source;
-                      templateName
-                    }
+          fun ?supportedComponentSources ->
+            fun ?tags ->
+              fun ~compatibleEnvironmentTemplates ->
+                fun ~source ->
+                  fun ~templateName ->
+                    fun () ->
+                      {
+                        clientToken;
+                        description;
+                        majorVersion;
+                        supportedComponentSources;
+                        tags;
+                        compatibleEnvironmentTemplates;
+                        source;
+                        templateName
+                      }
     let to_value x =
       structure_to_value
         [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
@@ -12699,6 +17500,9 @@ module CreateServiceTemplateVersionInput =
         ("majorVersion",
           (Option.map x.majorVersion ~f:TemplateVersionPart.to_value));
         ("source", (Some (TemplateVersionSourceInput.to_value x.source)));
+        ("supportedComponentSources",
+          (Option.map x.supportedComponentSources
+             ~f:ServiceTemplateSupportedComponentSourceInputList.to_value));
         ("tags", (Option.map x.tags ~f:TagList.to_value));
         ("templateName", (Some (ResourceName.to_value x.templateName)))]
     let to_query v = to_query to_value v
@@ -12707,6 +17511,10 @@ module CreateServiceTemplateVersionInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let supportedComponentSources =
+        (Option.map
+           ~f:ServiceTemplateSupportedComponentSourceInputList.of_xml)
+          (Xml.child xml_arg0 "supportedComponentSources") in
       let source =
         TemplateVersionSourceInput.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "source") in
@@ -12721,24 +17529,29 @@ module CreateServiceTemplateVersionInput =
              "compatibleEnvironmentTemplates") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~templateName ?tags ~source ?majorVersion ?description
-        ~compatibleEnvironmentTemplates ?clientToken ()
+      make ~templateName ?tags ?supportedComponentSources ~source
+        ?majorVersion ?description ~compatibleEnvironmentTemplates
+        ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let supportedComponentSources =
+        field_map json__ "supportedComponentSources"
+          ServiceTemplateSupportedComponentSourceInputList.of_json in
       let source =
-        field_map_exn json "source" TemplateVersionSourceInput.of_json in
+        field_map_exn json__ "source" TemplateVersionSourceInput.of_json in
       let majorVersion =
-        field_map json "majorVersion" TemplateVersionPart.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map json__ "majorVersion" TemplateVersionPart.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let compatibleEnvironmentTemplates =
-        field_map_exn json "compatibleEnvironmentTemplates"
+        field_map_exn json__ "compatibleEnvironmentTemplates"
           CompatibleEnvironmentTemplateInputList.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ~templateName ?tags ~source ?majorVersion ?description
-        ~compatibleEnvironmentTemplates ?clientToken ()
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ~templateName ?tags ?supportedComponentSources ~source
+        ?majorVersion ?description ~compatibleEnvironmentTemplates
+        ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Create a new major or minor version of a service template. A major version of a service template is a version that isn't backward compatible. A minor version of a service template is a version that's backward compatible within its major version."]
@@ -12746,7 +17559,7 @@ module CreateServiceTemplateOutput =
   struct
     type nonrec t =
       {
-      serviceTemplate: ServiceTemplate.t
+      serviceTemplate: ServiceTemplate.t option
         [@ocaml.doc
           "The service template detail data that's returned by Proton."]}
     type nonrec error =
@@ -12757,8 +17570,7 @@ module CreateServiceTemplateOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateServiceTemplateOutput"
-    let make ~serviceTemplate = fun () -> { serviceTemplate }
+    let make ?serviceTemplate = fun () -> { serviceTemplate }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12828,21 +17640,21 @@ module CreateServiceTemplateOutput =
     let to_value x =
       structure_to_value
         [("serviceTemplate",
-           (Some (ServiceTemplate.to_value x.serviceTemplate)))]
+           (Option.map x.serviceTemplate ~f:ServiceTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceTemplate =
-        ServiceTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceTemplate") in
-      make ~serviceTemplate ()
+        (Option.map ~f:ServiceTemplate.of_xml)
+          (Xml.child xml_arg0 "serviceTemplate") in
+      make ?serviceTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceTemplate =
-        field_map_exn json "serviceTemplate" ServiceTemplate.of_json in
-      make ~serviceTemplate ()
+        field_map json__ "serviceTemplate" ServiceTemplate.of_json in
+      make ?serviceTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a service template. The administrator creates a service template to define standardized infrastructure and an optional CI/CD service pipeline. Developers, in turn, select the service template from Proton. If the selected service template includes a service pipeline definition, they provide a link to their source code repository. Proton then deploys and manages the infrastructure defined by the selected service template. For more information, see Service Templates in the Proton Administrator Guide."]
+       "Create a service template. The administrator creates a service template to define standardized infrastructure and an optional CI/CD service pipeline. Developers, in turn, select the service template from Proton. If the selected service template includes a service pipeline definition, they provide a link to their source code repository. Proton then deploys and manages the infrastructure defined by the selected service template. For more information, see Proton templates in the Proton User Guide."]
 module CreateServiceTemplateInput =
   struct
     type nonrec t =
@@ -12858,10 +17670,10 @@ module CreateServiceTemplateInput =
       name: ResourceName.t [@ocaml.doc "The name of the service template."];
       pipelineProvisioning: Provisioning.t option
         [@ocaml.doc
-          "By default, Proton provides a service pipeline for your service. When this parameter is included, it indicates that an Proton service pipeline isn't provided for your service. After it's included, it can't be changed. For more information, see Service template bundles in the Proton Administrator Guide."];
+          "By default, Proton provides a service pipeline for your service. When this parameter is included, it indicates that an Proton service pipeline isn't provided for your service. After it's included, it can't be changed. For more information, see Template bundles in the Proton User Guide."];
       tags: TagList.t option
         [@ocaml.doc
-          "An optional list of metadata items that you can associate with the Proton service template. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."]}
+          "An optional list of metadata items that you can associate with the Proton service template. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."]}
     let context_ = "CreateServiceTemplateInput"
     let make ?description =
       fun ?displayName ->
@@ -12904,24 +17716,189 @@ module CreateServiceTemplateInput =
       make ?tags ?pipelineProvisioning ~name ?encryptionKey ?displayName
         ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let pipelineProvisioning =
-        field_map json "pipelineProvisioning" Provisioning.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
-      let encryptionKey = field_map json "encryptionKey" Arn.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map json__ "pipelineProvisioning" Provisioning.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      let encryptionKey = field_map json__ "encryptionKey" Arn.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let description = field_map json__ "description" Description.of_json in
       make ?tags ?pipelineProvisioning ~name ?encryptionKey ?displayName
         ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a service template. The administrator creates a service template to define standardized infrastructure and an optional CI/CD service pipeline. Developers, in turn, select the service template from Proton. If the selected service template includes a service pipeline definition, they provide a link to their source code repository. Proton then deploys and manages the infrastructure defined by the selected service template. For more information, see Service Templates in the Proton Administrator Guide."]
+       "Create a service template. The administrator creates a service template to define standardized infrastructure and an optional CI/CD service pipeline. Developers, in turn, select the service template from Proton. If the selected service template includes a service pipeline definition, they provide a link to their source code repository. Proton then deploys and manages the infrastructure defined by the selected service template. For more information, see Proton templates in the Proton User Guide."]
+module CreateServiceSyncConfigOutput =
+  struct
+    type nonrec t =
+      {
+      serviceSyncConfig: ServiceSyncConfig.t option
+        [@ocaml.doc "The detailed data of the Proton Ops file."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceSyncConfig = fun () -> { serviceSyncConfig }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceSyncConfig",
+           (Option.map x.serviceSyncConfig ~f:ServiceSyncConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceSyncConfig =
+        (Option.map ~f:ServiceSyncConfig.of_xml)
+          (Xml.child xml_arg0 "serviceSyncConfig") in
+      make ?serviceSyncConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceSyncConfig =
+        field_map json__ "serviceSyncConfig" ServiceSyncConfig.of_json in
+      make ?serviceSyncConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create the Proton Ops configuration file."]
+module CreateServiceSyncConfigInput =
+  struct
+    type nonrec t =
+      {
+      branch: GitBranchName.t
+        [@ocaml.doc "The repository branch for your Proton Ops file."];
+      filePath: OpsFilePath.t [@ocaml.doc "The path to the Proton Ops file."];
+      repositoryName: RepositoryName.t [@ocaml.doc "The repository name."];
+      repositoryProvider: RepositoryProvider.t
+        [@ocaml.doc "The provider type for your repository."];
+      serviceName: ResourceName.t
+        [@ocaml.doc "The name of the service the Proton Ops file is for."]}
+    let context_ = "CreateServiceSyncConfigInput"
+    let make ~branch =
+      fun ~filePath ->
+        fun ~repositoryName ->
+          fun ~repositoryProvider ->
+            fun ~serviceName ->
+              fun () ->
+                {
+                  branch;
+                  filePath;
+                  repositoryName;
+                  repositoryProvider;
+                  serviceName
+                }
+    let to_value x =
+      structure_to_value
+        [("branch", (Some (GitBranchName.to_value x.branch)));
+        ("filePath", (Some (OpsFilePath.to_value x.filePath)));
+        ("repositoryName", (Some (RepositoryName.to_value x.repositoryName)));
+        ("repositoryProvider",
+          (Some (RepositoryProvider.to_value x.repositoryProvider)));
+        ("serviceName", (Some (ResourceName.to_value x.serviceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+      let repositoryProvider =
+        RepositoryProvider.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repositoryProvider") in
+      let repositoryName =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
+      let filePath =
+        OpsFilePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
+      let branch =
+        GitBranchName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "branch") in
+      make ~serviceName ~repositoryProvider ~repositoryName ~filePath ~branch
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      let repositoryProvider =
+        field_map_exn json__ "repositoryProvider" RepositoryProvider.of_json in
+      let repositoryName =
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let filePath = field_map_exn json__ "filePath" OpsFilePath.of_json in
+      let branch = field_map_exn json__ "branch" GitBranchName.of_json in
+      make ~serviceName ~repositoryProvider ~repositoryName ~filePath ~branch
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create the Proton Ops configuration file."]
 module CreateServiceOutput =
   struct
     type nonrec t =
       {
-      service: Service.t
+      service: Service.t option
         [@ocaml.doc "The service detail data that's returned by Proton."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -12932,8 +17909,7 @@ module CreateServiceOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateServiceOutput"
-    let make ~service = fun () -> { service }
+    let make ?service = fun () -> { service }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -13009,19 +17985,204 @@ module CreateServiceOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("service", (Some (Service.to_value x.service)))]
+      structure_to_value
+        [("service", (Option.map x.service ~f:Service.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let service =
-        Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "service") in
-      make ~service ()
+        (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "service") in
+      make ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let service = field_map_exn json "service" Service.of_json in
-      make ~service ()
+    let of_json json__ =
+      let service = field_map json__ "service" Service.of_json in
+      make ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an Proton service. An Proton service is an instantiation of a service template and often includes several service instances and pipeline. For more information, see Services in the Proton Administrator Guide and Services in the Proton User Guide."]
+       "Create an Proton service. An Proton service is an instantiation of a service template and often includes several service instances and pipeline. For more information, see Services in the Proton User Guide."]
+module CreateServiceInstanceOutput =
+  struct
+    type nonrec t =
+      {
+      serviceInstance: ServiceInstance.t option
+        [@ocaml.doc
+          "The detailed data of the service instance being created."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceInstance = fun () -> { serviceInstance }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceInstance",
+           (Option.map x.serviceInstance ~f:ServiceInstance.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceInstance =
+        (Option.map ~f:ServiceInstance.of_xml)
+          (Xml.child xml_arg0 "serviceInstance") in
+      make ?serviceInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceInstance =
+        field_map json__ "serviceInstance" ServiceInstance.of_json in
+      make ?serviceInstance ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create a service instance."]
+module CreateServiceInstanceInput =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token of the service instance to create."];
+      name: ResourceName.t
+        [@ocaml.doc "The name of the service instance to create."];
+      serviceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service the service instance is added to."];
+      spec: SpecContents.t
+        [@ocaml.doc "The spec for the service instance you want to create."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An optional list of metadata items that you can associate with the Proton service instance. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."];
+      templateMajorVersion: TemplateVersionPart.t option
+        [@ocaml.doc
+          "To create a new major and minor version of the service template, exclude major Version."];
+      templateMinorVersion: TemplateVersionPart.t option
+        [@ocaml.doc
+          "To create a new minor version of the service template, include a major Version."]}
+    let context_ = "CreateServiceInstanceInput"
+    let make ?clientToken =
+      fun ?tags ->
+        fun ?templateMajorVersion ->
+          fun ?templateMinorVersion ->
+            fun ~name ->
+              fun ~serviceName ->
+                fun ~spec ->
+                  fun () ->
+                    {
+                      clientToken;
+                      tags;
+                      templateMajorVersion;
+                      templateMinorVersion;
+                      name;
+                      serviceName;
+                      spec
+                    }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("name", (Some (ResourceName.to_value x.name)));
+        ("serviceName", (Some (ResourceName.to_value x.serviceName)));
+        ("spec", (Some (SpecContents.to_value x.spec)));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("templateMajorVersion",
+          (Option.map x.templateMajorVersion ~f:TemplateVersionPart.to_value));
+        ("templateMinorVersion",
+          (Option.map x.templateMinorVersion ~f:TemplateVersionPart.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let templateMinorVersion =
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMinorVersion") in
+      let templateMajorVersion =
+        (Option.map ~f:TemplateVersionPart.of_xml)
+          (Xml.child xml_arg0 "templateMajorVersion") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let spec =
+        SpecContents.of_xml (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+      let serviceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?templateMinorVersion ?templateMajorVersion ?tags ~spec
+        ~serviceName ~name ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let templateMinorVersion =
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
+      let templateMajorVersion =
+        field_map json__ "templateMajorVersion" TemplateVersionPart.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map_exn json__ "spec" SpecContents.of_json in
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?templateMinorVersion ?templateMajorVersion ?tags ~spec
+        ~serviceName ~name ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create a service instance."]
 module CreateServiceInput =
   struct
     type nonrec t =
@@ -13034,16 +18195,16 @@ module CreateServiceInput =
       name: ResourceName.t [@ocaml.doc "The service name."];
       repositoryConnectionArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the repository connection. For more information, see Set up repository connection in the Proton Administrator Guide and Setting up with Proton in the Proton User Guide. Don't include this parameter if your service template doesn't include a service pipeline."];
+          "The Amazon Resource Name (ARN) of the repository connection. For more information, see Setting up an AWS CodeStar connection in the Proton User Guide. Don't include this parameter if your service template doesn't include a service pipeline."];
       repositoryId: RepositoryId.t option
         [@ocaml.doc
           "The ID of the code repository. Don't include this parameter if your service template doesn't include a service pipeline."];
       spec: SpecContents.t
         [@ocaml.doc
-          "A link to a spec file that provides inputs as defined in the service template bundle schema file. The spec file is in YAML format. Don\226\128\153t include pipeline inputs in the spec if your service template doesn\226\128\153t include a service pipeline. For more information, see Create a service in the Proton Administrator Guide and Create a service in the Proton User Guide."];
+          "A link to a spec file that provides inputs as defined in the service template bundle schema file. The spec file is in YAML format. Don\226\128\153t include pipeline inputs in the spec if your service template doesn\226\128\153t include a service pipeline. For more information, see Create a service in the Proton User Guide."];
       tags: TagList.t option
         [@ocaml.doc
-          "An optional list of metadata items that you can associate with the Proton service. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."];
+          "An optional list of metadata items that you can associate with the Proton service. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."];
       templateMajorVersion: TemplateVersionPart.t
         [@ocaml.doc
           "The major version of the service template that was used to create the service."];
@@ -13124,33 +18285,35 @@ module CreateServiceInput =
         ~spec ?repositoryId ?repositoryConnectionArn ~name ?description
         ?branchName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       let templateMinorVersion =
-        field_map json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map_exn json "templateMajorVersion" TemplateVersionPart.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let spec = field_map_exn json "spec" SpecContents.of_json in
-      let repositoryId = field_map json "repositoryId" RepositoryId.of_json in
+        field_map_exn json__ "templateMajorVersion"
+          TemplateVersionPart.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map_exn json__ "spec" SpecContents.of_json in
+      let repositoryId = field_map json__ "repositoryId" RepositoryId.of_json in
       let repositoryConnectionArn =
-        field_map json "repositoryConnectionArn" Arn.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
-      let description = field_map json "description" Description.of_json in
-      let branchName = field_map json "branchName" GitBranchName.of_json in
+        field_map json__ "repositoryConnectionArn" Arn.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let branchName = field_map json__ "branchName" GitBranchName.of_json in
       make ~templateName ?templateMinorVersion ~templateMajorVersion ?tags
         ~spec ?repositoryId ?repositoryConnectionArn ~name ?description
         ?branchName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an Proton service. An Proton service is an instantiation of a service template and often includes several service instances and pipeline. For more information, see Services in the Proton Administrator Guide and Services in the Proton User Guide."]
+       "Create an Proton service. An Proton service is an instantiation of a service template and often includes several service instances and pipeline. For more information, see Services in the Proton User Guide."]
 module CreateRepositoryOutput =
   struct
     type nonrec t =
       {
-      repository: Repository.t
-        [@ocaml.doc "The repository detail data that's returned by Proton."]}
+      repository: Repository.t option
+        [@ocaml.doc
+          "The repository link's detail data that's returned by Proton."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -13159,8 +18322,7 @@ module CreateRepositoryOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateRepositoryOutput"
-    let make ~repository = fun () -> { repository }
+    let make ?repository = fun () -> { repository }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -13229,27 +18391,26 @@ module CreateRepositoryOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("repository", (Some (Repository.to_value x.repository)))]
+        [("repository", (Option.map x.repository ~f:Repository.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let repository =
-        Repository.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "repository") in
-      make ~repository ()
+        (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
+      make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repository = field_map_exn json "repository" Repository.of_json in
-      make ~repository ()
+    let of_json json__ =
+      let repository = field_map json__ "repository" Repository.of_json in
+      make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create and register a link to a repository that can be used with self-managed provisioning (infrastructure or pipelines) or for template sync configurations. When you create a repository link, Proton creates a service-linked role for you. For more information, see Self-managed provisioning, Template bundles, and Template sync configurations in the Proton Administrator Guide."]
+       "Create and register a link to a repository. Proton uses the link to repeatedly access the repository, to either push to it (self-managed provisioning) or pull from it (template sync). You can share a linked repository across multiple resources (like environments using self-managed provisioning, or synced templates). When you create a repository link, Proton creates a service-linked role for you. For more information, see Self-managed provisioning, Template bundles, and Template sync configurations in the Proton User Guide."]
 module CreateRepositoryInput =
   struct
     type nonrec t =
       {
       connectionArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of your Amazon Web Services CodeStar connection. For more information, see Setting up for Proton in the Proton Administrator Guide."];
+          "The Amazon Resource Name (ARN) of your AWS CodeStar connection that connects Proton to your repository provider account. For more information, see Setting up for Proton in the Proton User Guide."];
       encryptionKey: Arn.t option
         [@ocaml.doc
           "The ARN of your customer Amazon Web Services Key Management Service (Amazon Web Services KMS) key."];
@@ -13258,7 +18419,7 @@ module CreateRepositoryInput =
       provider: RepositoryProvider.t [@ocaml.doc "The repository provider."];
       tags: TagList.t option
         [@ocaml.doc
-          "An optional list of metadata items that you can associate with the Proton repository. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."]}
+          "An optional list of metadata items that you can associate with the Proton repository. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."]}
     let context_ = "CreateRepositoryInput"
     let make ?encryptionKey =
       fun ?tags ->
@@ -13289,21 +18450,22 @@ module CreateRepositoryInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "connectionArn") in
       make ?tags ~provider ~name ?encryptionKey ~connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let provider = field_map_exn json "provider" RepositoryProvider.of_json in
-      let name = field_map_exn json "name" RepositoryName.of_json in
-      let encryptionKey = field_map json "encryptionKey" Arn.of_json in
-      let connectionArn = field_map_exn json "connectionArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let provider =
+        field_map_exn json__ "provider" RepositoryProvider.of_json in
+      let name = field_map_exn json__ "name" RepositoryName.of_json in
+      let encryptionKey = field_map json__ "encryptionKey" Arn.of_json in
+      let connectionArn = field_map_exn json__ "connectionArn" Arn.of_json in
       make ?tags ~provider ~name ?encryptionKey ~connectionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create and register a link to a repository that can be used with self-managed provisioning (infrastructure or pipelines) or for template sync configurations. When you create a repository link, Proton creates a service-linked role for you. For more information, see Self-managed provisioning, Template bundles, and Template sync configurations in the Proton Administrator Guide."]
+       "Create and register a link to a repository. Proton uses the link to repeatedly access the repository, to either push to it (self-managed provisioning) or pull from it (template sync). You can share a linked repository across multiple resources (like environments using self-managed provisioning, or synced templates). When you create a repository link, Proton creates a service-linked role for you. For more information, see Self-managed provisioning, Template bundles, and Template sync configurations in the Proton User Guide."]
 module CreateEnvironmentTemplateVersionOutput =
   struct
     type nonrec t =
       {
-      environmentTemplateVersion: EnvironmentTemplateVersion.t
+      environmentTemplateVersion: EnvironmentTemplateVersion.t option
         [@ocaml.doc
           "The environment template detail data that's returned by Proton."]}
     type nonrec error =
@@ -13315,8 +18477,7 @@ module CreateEnvironmentTemplateVersionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateEnvironmentTemplateVersionOutput"
-    let make ~environmentTemplateVersion =
+    let make ?environmentTemplateVersion =
       fun () -> { environmentTemplateVersion }
     let error_of_json name json =
       match name with
@@ -13395,22 +18556,20 @@ module CreateEnvironmentTemplateVersionOutput =
     let to_value x =
       structure_to_value
         [("environmentTemplateVersion",
-           (Some
-              (EnvironmentTemplateVersion.to_value
-                 x.environmentTemplateVersion)))]
+           (Option.map x.environmentTemplateVersion
+              ~f:EnvironmentTemplateVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentTemplateVersion =
-        EnvironmentTemplateVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "environmentTemplateVersion") in
-      make ~environmentTemplateVersion ()
+        (Option.map ~f:EnvironmentTemplateVersion.of_xml)
+          (Xml.child xml_arg0 "environmentTemplateVersion") in
+      make ?environmentTemplateVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentTemplateVersion =
-        field_map_exn json "environmentTemplateVersion"
+        field_map json__ "environmentTemplateVersion"
           EnvironmentTemplateVersion.of_json in
-      make ~environmentTemplateVersion ()
+      make ?environmentTemplateVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Create a new major or minor version of an environment template. A major version of an environment template is a version that isn't backwards compatible. A minor version of an environment template is a version that's backwards compatible within its major version."]
@@ -13432,7 +18591,7 @@ module CreateEnvironmentTemplateVersionInput =
           "An object that includes the template bundle S3 bucket path and name for the new version of an template."];
       tags: TagList.t option
         [@ocaml.doc
-          "An optional list of metadata items that you can associate with the Proton environment template version. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."];
+          "An optional list of metadata items that you can associate with the Proton environment template version. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."];
       templateName: ResourceName.t
         [@ocaml.doc "The name of the environment template."]}
     let context_ = "CreateEnvironmentTemplateVersionInput"
@@ -13479,16 +18638,16 @@ module CreateEnvironmentTemplateVersionInput =
       make ~templateName ?tags ~source ?majorVersion ?description
         ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let source =
-        field_map_exn json "source" TemplateVersionSourceInput.of_json in
+        field_map_exn json__ "source" TemplateVersionSourceInput.of_json in
       let majorVersion =
-        field_map json "majorVersion" TemplateVersionPart.of_json in
-      let description = field_map json "description" Description.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+        field_map json__ "majorVersion" TemplateVersionPart.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ~templateName ?tags ~source ?majorVersion ?description
         ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -13498,7 +18657,7 @@ module CreateEnvironmentTemplateOutput =
   struct
     type nonrec t =
       {
-      environmentTemplate: EnvironmentTemplate.t
+      environmentTemplate: EnvironmentTemplate.t option
         [@ocaml.doc
           "The environment template detail data that's returned by Proton."]}
     type nonrec error =
@@ -13509,8 +18668,7 @@ module CreateEnvironmentTemplateOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateEnvironmentTemplateOutput"
-    let make ~environmentTemplate = fun () -> { environmentTemplate }
+    let make ?environmentTemplate = fun () -> { environmentTemplate }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -13580,21 +18738,21 @@ module CreateEnvironmentTemplateOutput =
     let to_value x =
       structure_to_value
         [("environmentTemplate",
-           (Some (EnvironmentTemplate.to_value x.environmentTemplate)))]
+           (Option.map x.environmentTemplate ~f:EnvironmentTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentTemplate =
-        EnvironmentTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentTemplate") in
-      make ~environmentTemplate ()
+        (Option.map ~f:EnvironmentTemplate.of_xml)
+          (Xml.child xml_arg0 "environmentTemplate") in
+      make ?environmentTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentTemplate =
-        field_map_exn json "environmentTemplate" EnvironmentTemplate.of_json in
-      make ~environmentTemplate ()
+        field_map json__ "environmentTemplate" EnvironmentTemplate.of_json in
+      make ?environmentTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an environment template for Proton. For more information, see Environment Templates in the Proton Administrator Guide. You can create an environment template in one of the two following ways: Register and publish a standard environment template that instructs Proton to deploy and manage environment infrastructure. Register and publish a customer managed environment template that connects Proton to your existing provisioned infrastructure that you manage. Proton doesn't manage your existing provisioned infrastructure. To create an environment template for customer provisioned and managed infrastructure, include the provisioning parameter and set the value to CUSTOMER_MANAGED. For more information, see Register and publish an environment template in the Proton Administrator Guide."]
+       "Create an environment template for Proton. For more information, see Environment Templates in the Proton User Guide. You can create an environment template in one of the two following ways: Register and publish a standard environment template that instructs Proton to deploy and manage environment infrastructure. Register and publish a customer managed environment template that connects Proton to your existing provisioned infrastructure that you manage. Proton doesn't manage your existing provisioned infrastructure. To create an environment template for customer provisioned and managed infrastructure, include the provisioning parameter and set the value to CUSTOMER_MANAGED. For more information, see Register and publish an environment template in the Proton User Guide."]
 module CreateEnvironmentTemplateInput =
   struct
     type nonrec t =
@@ -13614,7 +18772,7 @@ module CreateEnvironmentTemplateInput =
           "When included, indicates that the environment template is for customer provisioned and managed infrastructure."];
       tags: TagList.t option
         [@ocaml.doc
-          "An optional list of metadata items that you can associate with the Proton environment template. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."]}
+          "An optional list of metadata items that you can associate with the Proton environment template. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."]}
     let context_ = "CreateEnvironmentTemplateInput"
     let make ?description =
       fun ?displayName ->
@@ -13657,23 +18815,23 @@ module CreateEnvironmentTemplateInput =
       make ?tags ?provisioning ~name ?encryptionKey ?displayName ?description
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let provisioning = field_map json "provisioning" Provisioning.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
-      let encryptionKey = field_map json "encryptionKey" Arn.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let description = field_map json "description" Description.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let provisioning = field_map json__ "provisioning" Provisioning.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      let encryptionKey = field_map json__ "encryptionKey" Arn.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let description = field_map json__ "description" Description.of_json in
       make ?tags ?provisioning ~name ?encryptionKey ?displayName ?description
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an environment template for Proton. For more information, see Environment Templates in the Proton Administrator Guide. You can create an environment template in one of the two following ways: Register and publish a standard environment template that instructs Proton to deploy and manage environment infrastructure. Register and publish a customer managed environment template that connects Proton to your existing provisioned infrastructure that you manage. Proton doesn't manage your existing provisioned infrastructure. To create an environment template for customer provisioned and managed infrastructure, include the provisioning parameter and set the value to CUSTOMER_MANAGED. For more information, see Register and publish an environment template in the Proton Administrator Guide."]
+       "Create an environment template for Proton. For more information, see Environment Templates in the Proton User Guide. You can create an environment template in one of the two following ways: Register and publish a standard environment template that instructs Proton to deploy and manage environment infrastructure. Register and publish a customer managed environment template that connects Proton to your existing provisioned infrastructure that you manage. Proton doesn't manage your existing provisioned infrastructure. To create an environment template for customer provisioned and managed infrastructure, include the provisioning parameter and set the value to CUSTOMER_MANAGED. For more information, see Register and publish an environment template in the Proton User Guide."]
 module CreateEnvironmentOutput =
   struct
     type nonrec t =
       {
-      environment: Environment.t
+      environment: Environment.t option
         [@ocaml.doc "The environment detail data that's returned by Proton."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -13684,8 +18842,7 @@ module CreateEnvironmentOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateEnvironmentOutput"
-    let make ~environment = fun () -> { environment }
+    let make ?environment = fun () -> { environment }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -13762,77 +18919,90 @@ module CreateEnvironmentOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("environment", (Some (Environment.to_value x.environment)))]
+        [("environment", (Option.map x.environment ~f:Environment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environment =
-        Environment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environment") in
-      make ~environment ()
+        (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "environment") in
+      make ?environment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environment = field_map_exn json "environment" Environment.of_json in
-      make ~environment ()
+    let of_json json__ =
+      let environment = field_map json__ "environment" Environment.of_json in
+      make ?environment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deploy a new environment. An Proton environment is created from an environment template that defines infrastructure and resources that can be shared across services. You can provision environments using the following methods: Amazon Web Services-managed provisioning: Proton makes direct calls to provision your resources. Self-managed provisioning: Proton makes pull requests on your repository to provide compiled infrastructure as code (IaC) files that your IaC engine uses to provision resources. For more information, see Environments and Provisioning methods in the Proton Administrator Guide."]
+       "Deploy a new environment. An Proton environment is created from an environment template that defines infrastructure and resources that can be shared across services. You can provision environments using the following methods: Amazon Web Services-managed provisioning: Proton makes direct calls to provision your resources. Self-managed provisioning: Proton makes pull requests on your repository to provide compiled infrastructure as code (IaC) files that your IaC engine uses to provision resources. For more information, see Environments and Provisioning methods in the Proton User Guide."]
 module CreateEnvironmentInput =
   struct
     type nonrec t =
       {
+      codebuildRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that allows Proton to provision infrastructure using CodeBuild-based provisioning on your behalf. To use CodeBuild-based provisioning for the environment or for any service instance running in the environment, specify either the environmentAccountConnectionId or codebuildRoleArn parameter."];
+      componentRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that Proton uses when provisioning directly defined components in this environment. It determines the scope of infrastructure that a component can provision. You must specify componentRoleArn to allow directly defined components to be associated with this environment. For more information about components, see Proton components in the Proton User Guide."];
       description: Description.t option
         [@ocaml.doc
           "A description of the environment that's being created and deployed."];
       environmentAccountConnectionId: EnvironmentAccountConnectionId.t option
         [@ocaml.doc
-          "The ID of the environment account connection that you provide if you're provisioning your environment infrastructure resources to an environment account. For more information, see Environment account connections in the Proton Administrator guide. To use Amazon Web Services-managed provisioning for the environment, specify either the environmentAccountConnectionId or protonServiceRoleArn parameter and omit the provisioningRepository parameter."];
+          "The ID of the environment account connection that you provide if you're provisioning your environment infrastructure resources to an environment account. For more information, see Environment account connections in the Proton User guide. To use Amazon Web Services-managed provisioning for the environment, specify either the environmentAccountConnectionId or protonServiceRoleArn parameter and omit the provisioningRepository parameter."];
       name: ResourceName.t [@ocaml.doc "The name of the environment."];
       protonServiceRoleArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Proton service role that allows Proton to make calls to other services on your behalf. To use Amazon Web Services-managed provisioning for the environment, specify either the environmentAccountConnectionId or protonServiceRoleArn parameter and omit the provisioningRepository parameter."];
       provisioningRepository: RepositoryBranchInput.t option
         [@ocaml.doc
-          "The infrastructure repository that you use to host your rendered infrastructure templates for self-managed provisioning. To use self-managed provisioning for the environment, specify this parameter and omit the environmentAccountConnectionId and protonServiceRoleArn parameters."];
+          "The linked repository that you use to host your rendered infrastructure templates for self-managed provisioning. A linked repository is a repository that has been registered with Proton. For more information, see CreateRepository. To use self-managed provisioning for the environment, specify this parameter and omit the environmentAccountConnectionId and protonServiceRoleArn parameters."];
       spec: SpecContents.t
         [@ocaml.doc
-          "A YAML formatted string that provides inputs as defined in the environment template bundle schema file. For more information, see Environments in the Proton Administrator Guide."];
+          "A YAML formatted string that provides inputs as defined in the environment template bundle schema file. For more information, see Environments in the Proton User Guide."];
       tags: TagList.t option
         [@ocaml.doc
-          "An optional list of metadata items that you can associate with the Proton environment. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton Administrator Guide or Proton User Guide."];
+          "An optional list of metadata items that you can associate with the Proton environment. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."];
       templateMajorVersion: TemplateVersionPart.t
         [@ocaml.doc "The major version of the environment template."];
       templateMinorVersion: TemplateVersionPart.t option
         [@ocaml.doc "The minor version of the environment template."];
       templateName: ResourceName.t
         [@ocaml.doc
-          "The name of the environment template. For more information, see Environment Templates in the Proton Administrator Guide."]}
+          "The name of the environment template. For more information, see Environment Templates in the Proton User Guide."]}
     let context_ = "CreateEnvironmentInput"
-    let make ?description =
-      fun ?environmentAccountConnectionId ->
-        fun ?protonServiceRoleArn ->
-          fun ?provisioningRepository ->
-            fun ?tags ->
-              fun ?templateMinorVersion ->
-                fun ~name ->
-                  fun ~spec ->
-                    fun ~templateMajorVersion ->
-                      fun ~templateName ->
-                        fun () ->
-                          {
-                            description;
-                            environmentAccountConnectionId;
-                            protonServiceRoleArn;
-                            provisioningRepository;
-                            tags;
-                            templateMinorVersion;
-                            name;
-                            spec;
-                            templateMajorVersion;
-                            templateName
-                          }
+    let make ?codebuildRoleArn =
+      fun ?componentRoleArn ->
+        fun ?description ->
+          fun ?environmentAccountConnectionId ->
+            fun ?protonServiceRoleArn ->
+              fun ?provisioningRepository ->
+                fun ?tags ->
+                  fun ?templateMinorVersion ->
+                    fun ~name ->
+                      fun ~spec ->
+                        fun ~templateMajorVersion ->
+                          fun ~templateName ->
+                            fun () ->
+                              {
+                                codebuildRoleArn;
+                                componentRoleArn;
+                                description;
+                                environmentAccountConnectionId;
+                                protonServiceRoleArn;
+                                provisioningRepository;
+                                tags;
+                                templateMinorVersion;
+                                name;
+                                spec;
+                                templateMajorVersion;
+                                templateName
+                              }
     let to_value x =
       structure_to_value
-        [("description", (Option.map x.description ~f:Description.to_value));
+        [("codebuildRoleArn",
+           (Option.map x.codebuildRoleArn ~f:RoleArn.to_value));
+        ("componentRoleArn",
+          (Option.map x.componentRoleArn ~f:RoleArn.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
         ("environmentAccountConnectionId",
           (Option.map x.environmentAccountConnectionId
              ~f:EnvironmentAccountConnectionId.to_value));
@@ -13876,39 +19046,53 @@ module CreateEnvironmentInput =
           (Xml.child xml_arg0 "environmentAccountConnectionId") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let componentRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "componentRoleArn") in
+      let codebuildRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "codebuildRoleArn") in
       make ~templateName ?templateMinorVersion ~templateMajorVersion ?tags
         ~spec ?provisioningRepository ?protonServiceRoleArn ~name
-        ?environmentAccountConnectionId ?description ()
+        ?environmentAccountConnectionId ?description ?componentRoleArn
+        ?codebuildRoleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "templateName" ResourceName.of_json in
+        field_map_exn json__ "templateName" ResourceName.of_json in
       let templateMinorVersion =
-        field_map json "templateMinorVersion" TemplateVersionPart.of_json in
+        field_map json__ "templateMinorVersion" TemplateVersionPart.of_json in
       let templateMajorVersion =
-        field_map_exn json "templateMajorVersion" TemplateVersionPart.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let spec = field_map_exn json "spec" SpecContents.of_json in
+        field_map_exn json__ "templateMajorVersion"
+          TemplateVersionPart.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map_exn json__ "spec" SpecContents.of_json in
       let provisioningRepository =
-        field_map json "provisioningRepository" RepositoryBranchInput.of_json in
+        field_map json__ "provisioningRepository"
+          RepositoryBranchInput.of_json in
       let protonServiceRoleArn =
-        field_map json "protonServiceRoleArn" Arn.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map json__ "protonServiceRoleArn" Arn.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       let environmentAccountConnectionId =
-        field_map json "environmentAccountConnectionId"
+        field_map json__ "environmentAccountConnectionId"
           EnvironmentAccountConnectionId.of_json in
-      let description = field_map json "description" Description.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let componentRoleArn =
+        field_map json__ "componentRoleArn" RoleArn.of_json in
+      let codebuildRoleArn =
+        field_map json__ "codebuildRoleArn" RoleArn.of_json in
       make ~templateName ?templateMinorVersion ~templateMajorVersion ?tags
         ~spec ?provisioningRepository ?protonServiceRoleArn ~name
-        ?environmentAccountConnectionId ?description ()
+        ?environmentAccountConnectionId ?description ?componentRoleArn
+        ?codebuildRoleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deploy a new environment. An Proton environment is created from an environment template that defines infrastructure and resources that can be shared across services. You can provision environments using the following methods: Amazon Web Services-managed provisioning: Proton makes direct calls to provision your resources. Self-managed provisioning: Proton makes pull requests on your repository to provide compiled infrastructure as code (IaC) files that your IaC engine uses to provision resources. For more information, see Environments and Provisioning methods in the Proton Administrator Guide."]
+       "Deploy a new environment. An Proton environment is created from an environment template that defines infrastructure and resources that can be shared across services. You can provision environments using the following methods: Amazon Web Services-managed provisioning: Proton makes direct calls to provision your resources. Self-managed provisioning: Proton makes pull requests on your repository to provide compiled infrastructure as code (IaC) files that your IaC engine uses to provision resources. For more information, see Environments and Provisioning methods in the Proton User Guide."]
 module CreateEnvironmentAccountConnectionOutput =
   struct
     type nonrec t =
       {
-      environmentAccountConnection: EnvironmentAccountConnection.t
+      environmentAccountConnection: EnvironmentAccountConnection.t option
         [@ocaml.doc
           "The environment account connection detail data that's returned by Proton."]}
     type nonrec error =
@@ -13919,8 +19103,7 @@ module CreateEnvironmentAccountConnectionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateEnvironmentAccountConnectionOutput"
-    let make ~environmentAccountConnection =
+    let make ?environmentAccountConnection =
       fun () -> { environmentAccountConnection }
     let error_of_json name json =
       match name with
@@ -13991,25 +19174,23 @@ module CreateEnvironmentAccountConnectionOutput =
     let to_value x =
       structure_to_value
         [("environmentAccountConnection",
-           (Some
-              (EnvironmentAccountConnection.to_value
-                 x.environmentAccountConnection)))]
+           (Option.map x.environmentAccountConnection
+              ~f:EnvironmentAccountConnection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentAccountConnection =
-        EnvironmentAccountConnection.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "environmentAccountConnection") in
-      make ~environmentAccountConnection ()
+        (Option.map ~f:EnvironmentAccountConnection.of_xml)
+          (Xml.child xml_arg0 "environmentAccountConnection") in
+      make ?environmentAccountConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentAccountConnection =
-        field_map_exn json "environmentAccountConnection"
+        field_map json__ "environmentAccountConnection"
           EnvironmentAccountConnection.of_json in
-      make ~environmentAccountConnection ()
+      make ?environmentAccountConnection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an environment account connection in an environment account so that environment infrastructure resources can be provisioned in the environment account from a management account. An environment account connection is a secure bi-directional connection between a management account and an environment account that maintains authorization and permissions. For more information, see Environment account connections in the Proton Administrator guide."]
+       "Create an environment account connection in an environment account so that environment infrastructure resources can be provisioned in the environment account from a management account. An environment account connection is a secure bi-directional connection between a management account and an environment account that maintains authorization and permissions. For more information, see Environment account connections in the Proton User guide."]
 module CreateEnvironmentAccountConnectionInput =
   struct
     type nonrec t =
@@ -14017,74 +19198,324 @@ module CreateEnvironmentAccountConnectionInput =
       clientToken: ClientToken.t option
         [@ocaml.doc
           "When included, if two identical requests are made with the same client token, Proton returns the environment account connection that the first request created."];
+      codebuildRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM service role in the environment account. Proton uses this role to provision infrastructure resources using CodeBuild-based provisioning in the associated environment account."];
+      componentRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that Proton uses when provisioning directly defined components in the associated environment account. It determines the scope of infrastructure that a component can provision in the account. You must specify componentRoleArn to allow directly defined components to be associated with any environments running in this account. For more information about components, see Proton components in the Proton User Guide."];
       environmentName: ResourceName.t
         [@ocaml.doc
           "The name of the Proton environment that's created in the associated management account."];
       managementAccountId: AwsAccountId.t
         [@ocaml.doc
           "The ID of the management account that accepts or rejects the environment account connection. You create and manage the Proton environment in this account. If the management account accepts the environment account connection, Proton can use the associated IAM role to provision environment infrastructure resources in the associated environment account."];
-      roleArn: Arn.t
+      roleArn: RoleArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM service role that's created in the environment account. Proton uses this role to provision infrastructure resources in the associated environment account."];
       tags: TagList.t option
         [@ocaml.doc
-          "An optional list of metadata items that you can associate with the Proton environment account connection. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton Administrator Guide."]}
+          "An optional list of metadata items that you can associate with the Proton environment account connection. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."]}
     let context_ = "CreateEnvironmentAccountConnectionInput"
     let make ?clientToken =
-      fun ?tags ->
-        fun ~environmentName ->
-          fun ~managementAccountId ->
-            fun ~roleArn ->
-              fun () ->
-                {
-                  clientToken;
-                  tags;
-                  environmentName;
-                  managementAccountId;
-                  roleArn
-                }
+      fun ?codebuildRoleArn ->
+        fun ?componentRoleArn ->
+          fun ?roleArn ->
+            fun ?tags ->
+              fun ~environmentName ->
+                fun ~managementAccountId ->
+                  fun () ->
+                    {
+                      clientToken;
+                      codebuildRoleArn;
+                      componentRoleArn;
+                      roleArn;
+                      tags;
+                      environmentName;
+                      managementAccountId
+                    }
     let to_value x =
       structure_to_value
         [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("codebuildRoleArn",
+          (Option.map x.codebuildRoleArn ~f:RoleArn.to_value));
+        ("componentRoleArn",
+          (Option.map x.componentRoleArn ~f:RoleArn.to_value));
         ("environmentName", (Some (ResourceName.to_value x.environmentName)));
         ("managementAccountId",
           (Some (AwsAccountId.to_value x.managementAccountId)));
-        ("roleArn", (Some (Arn.to_value x.roleArn)));
+        ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
         ("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let roleArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
       let managementAccountId =
         AwsAccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "managementAccountId") in
       let environmentName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let componentRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "componentRoleArn") in
+      let codebuildRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "codebuildRoleArn") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ?tags ~roleArn ~managementAccountId ~environmentName ?clientToken
-        ()
+      make ?tags ?roleArn ~managementAccountId ~environmentName
+        ?componentRoleArn ?codebuildRoleArn ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let roleArn = field_map_exn json "roleArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
       let managementAccountId =
-        field_map_exn json "managementAccountId" AwsAccountId.of_json in
+        field_map_exn json__ "managementAccountId" AwsAccountId.of_json in
       let environmentName =
-        field_map_exn json "environmentName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ?tags ~roleArn ~managementAccountId ~environmentName ?clientToken
-        ()
+        field_map_exn json__ "environmentName" ResourceName.of_json in
+      let componentRoleArn =
+        field_map json__ "componentRoleArn" RoleArn.of_json in
+      let codebuildRoleArn =
+        field_map json__ "codebuildRoleArn" RoleArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?tags ?roleArn ~managementAccountId ~environmentName
+        ?componentRoleArn ?codebuildRoleArn ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an environment account connection in an environment account so that environment infrastructure resources can be provisioned in the environment account from a management account. An environment account connection is a secure bi-directional connection between a management account and an environment account that maintains authorization and permissions. For more information, see Environment account connections in the Proton Administrator guide."]
+       "Create an environment account connection in an environment account so that environment infrastructure resources can be provisioned in the environment account from a management account. An environment account connection is a secure bi-directional connection between a management account and an environment account that maintains authorization and permissions. For more information, see Environment account connections in the Proton User guide."]
+module CreateComponentOutput =
+  struct
+    type nonrec t =
+      {
+      component: Component.t option
+        [@ocaml.doc "The detailed data of the created component."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?component = fun () -> { component }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("component", (Option.map x.component ~f:Component.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let component =
+        (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "component") in
+      make ?component ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let component = field_map json__ "component" Component.of_json in
+      make ?component ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create an Proton component. A component is an infrastructure extension for a service instance. For more information about components, see Proton components in the Proton User Guide."]
+module CreateComponentInput =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token for the created component."];
+      description: Description.t option
+        [@ocaml.doc
+          "An optional customer-provided description of the component."];
+      environmentName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the Proton environment that you want to associate this component with. You must specify this when you don't specify serviceInstanceName and serviceName."];
+      manifest: TemplateManifestContents.t
+        [@ocaml.doc
+          "A path to a manifest file that lists the Infrastructure as Code (IaC) file, template language, and rendering engine for infrastructure that a custom component provisions."];
+      name: ResourceName.t
+        [@ocaml.doc "The customer-provided name of the component."];
+      serviceInstanceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service instance that you want to attach this component to. If you don't specify this, the component isn't attached to any service instance. Specify both serviceInstanceName and serviceName or neither of them."];
+      serviceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the service that serviceInstanceName is associated with. If you don't specify this, the component isn't attached to any service instance. Specify both serviceInstanceName and serviceName or neither of them."];
+      serviceSpec: SpecContents.t option
+        [@ocaml.doc
+          "The service spec that you want the component to use to access service inputs. Set this only when you attach the component to a service instance."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An optional list of metadata items that you can associate with the Proton component. A tag is a key-value pair. For more information, see Proton resources and tagging in the Proton User Guide."];
+      templateFile: TemplateFileContents.t
+        [@ocaml.doc
+          "A path to the Infrastructure as Code (IaC) file describing infrastructure that a custom component provisions. Components support a single IaC file, even if you use Terraform as your template language."]}
+    let context_ = "CreateComponentInput"
+    let make ?clientToken =
+      fun ?description ->
+        fun ?environmentName ->
+          fun ?serviceInstanceName ->
+            fun ?serviceName ->
+              fun ?serviceSpec ->
+                fun ?tags ->
+                  fun ~manifest ->
+                    fun ~name ->
+                      fun ~templateFile ->
+                        fun () ->
+                          {
+                            clientToken;
+                            description;
+                            environmentName;
+                            serviceInstanceName;
+                            serviceName;
+                            serviceSpec;
+                            tags;
+                            manifest;
+                            name;
+                            templateFile
+                          }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:ResourceName.to_value));
+        ("manifest", (Some (TemplateManifestContents.to_value x.manifest)));
+        ("name", (Some (ResourceName.to_value x.name)));
+        ("serviceInstanceName",
+          (Option.map x.serviceInstanceName ~f:ResourceName.to_value));
+        ("serviceName", (Option.map x.serviceName ~f:ResourceName.to_value));
+        ("serviceSpec", (Option.map x.serviceSpec ~f:SpecContents.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("templateFile",
+          (Some (TemplateFileContents.to_value x.templateFile)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let templateFile =
+        TemplateFileContents.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "templateFile") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let serviceSpec =
+        (Option.map ~f:SpecContents.of_xml)
+          (Xml.child xml_arg0 "serviceSpec") in
+      let serviceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceName") in
+      let serviceInstanceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "serviceInstanceName") in
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let manifest =
+        TemplateManifestContents.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "manifest") in
+      let environmentName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ~templateFile ?tags ?serviceSpec ?serviceName ?serviceInstanceName
+        ~name ~manifest ?environmentName ?description ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let templateFile =
+        field_map_exn json__ "templateFile" TemplateFileContents.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let serviceSpec = field_map json__ "serviceSpec" SpecContents.of_json in
+      let serviceName = field_map json__ "serviceName" ResourceName.of_json in
+      let serviceInstanceName =
+        field_map json__ "serviceInstanceName" ResourceName.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      let manifest =
+        field_map_exn json__ "manifest" TemplateManifestContents.of_json in
+      let environmentName =
+        field_map json__ "environmentName" ResourceName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ~templateFile ?tags ?serviceSpec ?serviceName ?serviceInstanceName
+        ~name ~manifest ?environmentName ?description ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create an Proton component. A component is an infrastructure extension for a service instance. For more information about components, see Proton components in the Proton User Guide."]
 module CancelServicePipelineDeploymentOutput =
   struct
     type nonrec t =
       {
-      pipeline: ServicePipeline.t
+      pipeline: ServicePipeline.t option
         [@ocaml.doc
           "The service pipeline detail data that's returned by Proton."]}
     type nonrec error =
@@ -14095,8 +19526,7 @@ module CancelServicePipelineDeploymentOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CancelServicePipelineDeploymentOutput"
-    let make ~pipeline = fun () -> { pipeline }
+    let make ?pipeline = fun () -> { pipeline }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -14163,20 +19593,20 @@ module CancelServicePipelineDeploymentOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("pipeline", (Some (ServicePipeline.to_value x.pipeline)))]
+        [("pipeline", (Option.map x.pipeline ~f:ServicePipeline.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pipeline =
-        ServicePipeline.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pipeline") in
-      make ~pipeline ()
+        (Option.map ~f:ServicePipeline.of_xml)
+          (Xml.child xml_arg0 "pipeline") in
+      make ?pipeline ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pipeline = field_map_exn json "pipeline" ServicePipeline.of_json in
-      make ~pipeline ()
+    let of_json json__ =
+      let pipeline = field_map json__ "pipeline" ServicePipeline.of_json in
+      make ?pipeline ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attempts to cancel a service pipeline deployment on an UpdateServicePipeline action, if the deployment is IN_PROGRESS. For more information, see Update a service pipeline in the Proton Administrator guide or the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateServicePipeline action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
+       "Attempts to cancel a service pipeline deployment on an UpdateServicePipeline action, if the deployment is IN_PROGRESS. For more information, see Update a service pipeline in the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateServicePipeline action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
 module CancelServicePipelineDeploymentInput =
   struct
     type nonrec t =
@@ -14196,17 +19626,18 @@ module CancelServicePipelineDeploymentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
       make ~serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
       make ~serviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attempts to cancel a service pipeline deployment on an UpdateServicePipeline action, if the deployment is IN_PROGRESS. For more information, see Update a service pipeline in the Proton Administrator guide or the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateServicePipeline action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
+       "Attempts to cancel a service pipeline deployment on an UpdateServicePipeline action, if the deployment is IN_PROGRESS. For more information, see Update a service pipeline in the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateServicePipeline action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
 module CancelServiceInstanceDeploymentOutput =
   struct
     type nonrec t =
       {
-      serviceInstance: ServiceInstance.t
+      serviceInstance: ServiceInstance.t option
         [@ocaml.doc
           "The service instance summary data that's returned by Proton."]}
     type nonrec error =
@@ -14217,8 +19648,7 @@ module CancelServiceInstanceDeploymentOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CancelServiceInstanceDeploymentOutput"
-    let make ~serviceInstance = fun () -> { serviceInstance }
+    let make ?serviceInstance = fun () -> { serviceInstance }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -14286,21 +19716,21 @@ module CancelServiceInstanceDeploymentOutput =
     let to_value x =
       structure_to_value
         [("serviceInstance",
-           (Some (ServiceInstance.to_value x.serviceInstance)))]
+           (Option.map x.serviceInstance ~f:ServiceInstance.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceInstance =
-        ServiceInstance.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceInstance") in
-      make ~serviceInstance ()
+        (Option.map ~f:ServiceInstance.of_xml)
+          (Xml.child xml_arg0 "serviceInstance") in
+      make ?serviceInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceInstance =
-        field_map_exn json "serviceInstance" ServiceInstance.of_json in
-      make ~serviceInstance ()
+        field_map json__ "serviceInstance" ServiceInstance.of_json in
+      make ?serviceInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attempts to cancel a service instance deployment on an UpdateServiceInstance action, if the deployment is IN_PROGRESS. For more information, see Update a service instance in the Proton Administrator guide or the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateServiceInstance action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
+       "Attempts to cancel a service instance deployment on an UpdateServiceInstance action, if the deployment is IN_PROGRESS. For more information, see Update a service instance in the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateServiceInstance action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
 module CancelServiceInstanceDeploymentInput =
   struct
     type nonrec t =
@@ -14329,19 +19759,20 @@ module CancelServiceInstanceDeploymentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "serviceInstanceName") in
       make ~serviceName ~serviceInstanceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "serviceName" ResourceName.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "serviceName" ResourceName.of_json in
       let serviceInstanceName =
-        field_map_exn json "serviceInstanceName" ResourceName.of_json in
+        field_map_exn json__ "serviceInstanceName" ResourceName.of_json in
       make ~serviceName ~serviceInstanceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attempts to cancel a service instance deployment on an UpdateServiceInstance action, if the deployment is IN_PROGRESS. For more information, see Update a service instance in the Proton Administrator guide or the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateServiceInstance action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
+       "Attempts to cancel a service instance deployment on an UpdateServiceInstance action, if the deployment is IN_PROGRESS. For more information, see Update a service instance in the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateServiceInstance action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
 module CancelEnvironmentDeploymentOutput =
   struct
     type nonrec t =
       {
-      environment: Environment.t
+      environment: Environment.t option
         [@ocaml.doc
           "The environment summary data that's returned by Proton."]}
     type nonrec error =
@@ -14352,8 +19783,7 @@ module CancelEnvironmentDeploymentOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CancelEnvironmentDeploymentOutput"
-    let make ~environment = fun () -> { environment }
+    let make ?environment = fun () -> { environment }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -14420,20 +19850,19 @@ module CancelEnvironmentDeploymentOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("environment", (Some (Environment.to_value x.environment)))]
+        [("environment", (Option.map x.environment ~f:Environment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environment =
-        Environment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environment") in
-      make ~environment ()
+        (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "environment") in
+      make ?environment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environment = field_map_exn json "environment" Environment.of_json in
-      make ~environment ()
+    let of_json json__ =
+      let environment = field_map json__ "environment" Environment.of_json in
+      make ?environment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attempts to cancel an environment deployment on an UpdateEnvironment action, if the deployment is IN_PROGRESS. For more information, see Update an environment in the Proton Administrator guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateEnvironment action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
+       "Attempts to cancel an environment deployment on an UpdateEnvironment action, if the deployment is IN_PROGRESS. For more information, see Update an environment in the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateEnvironment action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
 module CancelEnvironmentDeploymentInput =
   struct
     type nonrec t =
@@ -14454,18 +19883,139 @@ module CancelEnvironmentDeploymentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
       make ~environmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentName =
-        field_map_exn json "environmentName" ResourceName.of_json in
+        field_map_exn json__ "environmentName" ResourceName.of_json in
       make ~environmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attempts to cancel an environment deployment on an UpdateEnvironment action, if the deployment is IN_PROGRESS. For more information, see Update an environment in the Proton Administrator guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateEnvironment action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
+       "Attempts to cancel an environment deployment on an UpdateEnvironment action, if the deployment is IN_PROGRESS. For more information, see Update an environment in the Proton User guide. The following list includes potential cancellation scenarios. If the cancellation attempt succeeds, the resulting deployment state is CANCELLED. If the cancellation attempt fails, the resulting deployment state is FAILED. If the current UpdateEnvironment action succeeds before the cancellation attempt starts, the resulting deployment state is SUCCEEDED and the cancellation attempt has no effect."]
+module CancelComponentDeploymentOutput =
+  struct
+    type nonrec t =
+      {
+      component: Component.t option
+        [@ocaml.doc
+          "The detailed data of the component with the deployment that is being canceled."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?component = fun () -> { component }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("component", (Option.map x.component ~f:Component.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let component =
+        (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "component") in
+      make ?component ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let component = field_map json__ "component" Component.of_json in
+      make ?component ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attempts to cancel a component deployment (for a component that is in the IN_PROGRESS deployment status). For more information about components, see Proton components in the Proton User Guide."]
+module CancelComponentDeploymentInput =
+  struct
+    type nonrec t =
+      {
+      componentName: ResourceName.t
+        [@ocaml.doc
+          "The name of the component with the deployment to cancel."]}
+    let context_ = "CancelComponentDeploymentInput"
+    let make ~componentName = fun () -> { componentName }
+    let to_value x =
+      structure_to_value
+        [("componentName", (Some (ResourceName.to_value x.componentName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let componentName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "componentName") in
+      make ~componentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let componentName =
+        field_map_exn json__ "componentName" ResourceName.of_json in
+      make ~componentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attempts to cancel a component deployment (for a component that is in the IN_PROGRESS deployment status). For more information about components, see Proton components in the Proton User Guide."]
 module AcceptEnvironmentAccountConnectionOutput =
   struct
     type nonrec t =
       {
-      environmentAccountConnection: EnvironmentAccountConnection.t
+      environmentAccountConnection: EnvironmentAccountConnection.t option
         [@ocaml.doc
           "The environment account connection data that's returned by Proton."]}
     type nonrec error =
@@ -14476,8 +20026,7 @@ module AcceptEnvironmentAccountConnectionOutput =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AcceptEnvironmentAccountConnectionOutput"
-    let make ~environmentAccountConnection =
+    let make ?environmentAccountConnection =
       fun () -> { environmentAccountConnection }
     let error_of_json name json =
       match name with
@@ -14546,25 +20095,23 @@ module AcceptEnvironmentAccountConnectionOutput =
     let to_value x =
       structure_to_value
         [("environmentAccountConnection",
-           (Some
-              (EnvironmentAccountConnection.to_value
-                 x.environmentAccountConnection)))]
+           (Option.map x.environmentAccountConnection
+              ~f:EnvironmentAccountConnection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let environmentAccountConnection =
-        EnvironmentAccountConnection.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "environmentAccountConnection") in
-      make ~environmentAccountConnection ()
+        (Option.map ~f:EnvironmentAccountConnection.of_xml)
+          (Xml.child xml_arg0 "environmentAccountConnection") in
+      make ?environmentAccountConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentAccountConnection =
-        field_map_exn json "environmentAccountConnection"
+        field_map json__ "environmentAccountConnection"
           EnvironmentAccountConnection.of_json in
-      make ~environmentAccountConnection ()
+      make ?environmentAccountConnection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In a management account, an environment account connection request is accepted. When the environment account connection request is accepted, Proton can use the associated IAM role to provision environment infrastructure resources in the associated environment account. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In a management account, an environment account connection request is accepted. When the environment account connection request is accepted, Proton can use the associated IAM role to provision environment infrastructure resources in the associated environment account. For more information, see Environment account connections in the Proton User guide."]
 module AcceptEnvironmentAccountConnectionInput =
   struct
     type nonrec t =
@@ -14583,9 +20130,10 @@ module AcceptEnvironmentAccountConnectionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" EnvironmentAccountConnectionId.of_json in
+    let of_json json__ =
+      let id =
+        field_map_exn json__ "id" EnvironmentAccountConnectionId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In a management account, an environment account connection request is accepted. When the environment account connection request is accepted, Proton can use the associated IAM role to provision environment infrastructure resources in the associated environment account. For more information, see Environment account connections in the Proton Administrator guide."]
+       "In a management account, an environment account connection request is accepted. When the environment account connection request is accepted, Proton can use the associated IAM role to provision environment infrastructure resources in the associated environment account. For more information, see Environment account connections in the Proton User guide."]

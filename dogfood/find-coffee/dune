@@ -1,0 +1,5 @@
+(executable
+ (name find_coffee)
+ (libraries awso-async.geo-places awso-async core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))

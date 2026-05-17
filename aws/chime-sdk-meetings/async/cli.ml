@@ -51,7 +51,7 @@ let batch_create_attendee =
                             attendees) ())
            (Some Values.BatchCreateAttendeeResponse.to_json)
            (Some Values.BatchCreateAttendeeResponse.error_to_json)])
-let create_attendee =
+let batch_update_attendee_capabilities_except =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -63,13 +63,46 @@ let create_attendee =
            ~doc:"URL override endpoint url"
        and meetingId =
          flag "meeting-id" (required string) ~doc:"STRING GuidString"
+       and excludedAttendeeIds =
+         flag "excluded-attendee-ids" (required json_arg)
+           ~doc:"JSON AttendeeIdsList"
+       and capabilities =
+         flag "capabilities" (required json_arg)
+           ~doc:"JSON AttendeeCapabilities" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_update_attendee_capabilities_except
+           (Values.BatchUpdateAttendeeCapabilitiesExceptRequest.make
+              ~meetingId
+              ~excludedAttendeeIds:(Values.AttendeeIdsList.of_json
+                                      excludedAttendeeIds)
+              ~capabilities:(Values.AttendeeCapabilities.of_json capabilities)
+              ()) None None])
+let create_attendee =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and capabilities =
+         flag "capabilities" (optional json_arg)
+           ~doc:"JSON AttendeeCapabilities"
+       and meetingId =
+         flag "meeting-id" (required string) ~doc:"STRING GuidString"
        and externalUserId =
          flag "external-user-id" (required string)
            ~doc:"STRING ExternalUserId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_attendee
-           (Values.CreateAttendeeRequest.make ~meetingId ~externalUserId ())
+           (Values.CreateAttendeeRequest.make
+              ?capabilities:(Option.map
+                               ~f:Values.AttendeeCapabilities.of_json
+                               capabilities) ~meetingId ~externalUserId ())
            (Some Values.CreateAttendeeResponse.to_json)
            (Some Values.CreateAttendeeResponse.error_to_json)])
 let create_meeting =
@@ -94,6 +127,12 @@ let create_meeting =
        and primaryMeetingId =
          flag "primary-meeting-id" (optional string)
            ~doc:"STRING PrimaryMeetingId"
+       and tenantIds =
+         flag "tenant-ids" (optional json_arg) ~doc:"JSON TenantIdList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and mediaPlacementNetworkType =
+         flag "media-placement-network-type" (optional json_arg)
+           ~doc:"JSON MediaPlacementNetworkType"
        and clientRequestToken =
          flag "client-request-token" (required string)
            ~doc:"STRING ClientRequestToken"
@@ -112,6 +151,11 @@ let create_meeting =
               ?meetingFeatures:(Option.map
                                   ~f:Values.MeetingFeaturesConfiguration.of_json
                                   meetingFeatures) ?primaryMeetingId
+              ?tenantIds:(Option.map ~f:Values.TenantIdList.of_json tenantIds)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?mediaPlacementNetworkType:(Option.map
+                                            ~f:Values.MediaPlacementNetworkType.of_json
+                                            mediaPlacementNetworkType)
               ~clientRequestToken ~mediaRegion ~externalMeetingId ())
            (Some Values.CreateMeetingResponse.to_json)
            (Some Values.CreateMeetingResponse.error_to_json)])
@@ -137,6 +181,12 @@ let create_meeting_with_attendees =
        and primaryMeetingId =
          flag "primary-meeting-id" (optional string)
            ~doc:"STRING PrimaryMeetingId"
+       and tenantIds =
+         flag "tenant-ids" (optional json_arg) ~doc:"JSON TenantIdList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and mediaPlacementNetworkType =
+         flag "media-placement-network-type" (optional json_arg)
+           ~doc:"JSON MediaPlacementNetworkType"
        and clientRequestToken =
          flag "client-request-token" (required string)
            ~doc:"STRING ClientRequestToken"
@@ -158,8 +208,13 @@ let create_meeting_with_attendees =
               ?notificationsConfiguration:(Option.map
                                              ~f:Values.NotificationsConfiguration.of_json
                                              notificationsConfiguration)
-              ?primaryMeetingId ~clientRequestToken ~mediaRegion
-              ~externalMeetingId
+              ?primaryMeetingId
+              ?tenantIds:(Option.map ~f:Values.TenantIdList.of_json tenantIds)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?mediaPlacementNetworkType:(Option.map
+                                            ~f:Values.MediaPlacementNetworkType.of_json
+                                            mediaPlacementNetworkType)
+              ~clientRequestToken ~mediaRegion ~externalMeetingId
               ~attendees:(Values.CreateMeetingWithAttendeesRequestItemList.of_json
                             attendees) ())
            (Some Values.CreateMeetingWithAttendeesResponse.to_json)
@@ -258,6 +313,25 @@ let list_attendees =
            (Values.ListAttendeesRequest.make ?nextToken ?maxResults
               ~meetingId ()) (Some Values.ListAttendeesResponse.to_json)
            (Some Values.ListAttendeesResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make ~resourceARN ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
 let start_meeting_transcription =
   Command.async ~summary:""
     ([%map_open.Command
@@ -297,10 +371,80 @@ let stop_meeting_transcription =
            Io.stop_meeting_transcription
            (Values.StopMeetingTranscriptionRequest.make ~meetingId ()) None
            None])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON TagList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make ~resourceARN
+              ~tags:(Values.TagList.of_json tags) ())
+           (Some Values.TagResourceResponse.to_json)
+           (Some Values.TagResourceResponse.error_to_json)])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make ~resourceARN
+              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
+           (Some Values.UntagResourceResponse.to_json)
+           (Some Values.UntagResourceResponse.error_to_json)])
+let update_attendee_capabilities =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and meetingId =
+         flag "meeting-id" (required string) ~doc:"STRING GuidString"
+       and attendeeId =
+         flag "attendee-id" (required string) ~doc:"STRING GuidString"
+       and capabilities =
+         flag "capabilities" (required json_arg)
+           ~doc:"JSON AttendeeCapabilities" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_attendee_capabilities
+           (Values.UpdateAttendeeCapabilitiesRequest.make ~meetingId
+              ~attendeeId
+              ~capabilities:(Values.AttendeeCapabilities.of_json capabilities)
+              ()) (Some Values.UpdateAttendeeCapabilitiesResponse.to_json)
+           (Some Values.UpdateAttendeeCapabilitiesResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-create-attendee", batch_create_attendee);
+    ("batch-update-attendee-capabilities-except",
+      batch_update_attendee_capabilities_except);
     ("create-attendee", create_attendee);
     ("create-meeting", create_meeting);
     ("create-meeting-with-attendees", create_meeting_with_attendees);
@@ -309,5 +453,9 @@ let main =
     ("get-attendee", get_attendee);
     ("get-meeting", get_meeting);
     ("list-attendees", list_attendees);
+    ("list-tags-for-resource", list_tags_for_resource);
     ("start-meeting-transcription", start_meeting_transcription);
-    ("stop-meeting-transcription", stop_meeting_transcription)]
+    ("stop-meeting-transcription", stop_meeting_transcription);
+    ("tag-resource", tag_resource);
+    ("untag-resource", untag_resource);
+    ("update-attendee-capabilities", update_attendee_capabilities)]

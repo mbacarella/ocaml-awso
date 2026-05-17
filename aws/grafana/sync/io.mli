@@ -10,11 +10,47 @@ val create_workspace :
     ?cfg:Awso.Cfg.t ->
       CreateWorkspaceRequest.t ->
         (CreateWorkspaceResponse.t, CreateWorkspaceResponse.error) Result.t
+val create_workspace_api_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateWorkspaceApiKeyRequest.t ->
+        (CreateWorkspaceApiKeyResponse.t,
+          CreateWorkspaceApiKeyResponse.error) Result.t
+val create_workspace_service_account :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateWorkspaceServiceAccountRequest.t ->
+        (CreateWorkspaceServiceAccountResponse.t,
+          CreateWorkspaceServiceAccountResponse.error) Result.t
+val create_workspace_service_account_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateWorkspaceServiceAccountTokenRequest.t ->
+        (CreateWorkspaceServiceAccountTokenResponse.t,
+          CreateWorkspaceServiceAccountTokenResponse.error) Result.t
 val delete_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorkspaceRequest.t ->
         (DeleteWorkspaceResponse.t, DeleteWorkspaceResponse.error) Result.t
+val delete_workspace_api_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWorkspaceApiKeyRequest.t ->
+        (DeleteWorkspaceApiKeyResponse.t,
+          DeleteWorkspaceApiKeyResponse.error) Result.t
+val delete_workspace_service_account :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWorkspaceServiceAccountRequest.t ->
+        (DeleteWorkspaceServiceAccountResponse.t,
+          DeleteWorkspaceServiceAccountResponse.error) Result.t
+val delete_workspace_service_account_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWorkspaceServiceAccountTokenRequest.t ->
+        (DeleteWorkspaceServiceAccountTokenResponse.t,
+          DeleteWorkspaceServiceAccountTokenResponse.error) Result.t
 val describe_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -27,6 +63,12 @@ val describe_workspace_authentication :
       DescribeWorkspaceAuthenticationRequest.t ->
         (DescribeWorkspaceAuthenticationResponse.t,
           DescribeWorkspaceAuthenticationResponse.error) Result.t
+val describe_workspace_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeWorkspaceConfigurationRequest.t ->
+        (DescribeWorkspaceConfigurationResponse.t,
+          DescribeWorkspaceConfigurationResponse.error) Result.t
 val disassociate_license :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -44,6 +86,23 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t
+val list_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVersionsRequest.t ->
+        (ListVersionsResponse.t, ListVersionsResponse.error) Result.t
+val list_workspace_service_account_tokens :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWorkspaceServiceAccountTokensRequest.t ->
+        (ListWorkspaceServiceAccountTokensResponse.t,
+          ListWorkspaceServiceAccountTokensResponse.error) Result.t
+val list_workspace_service_accounts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWorkspaceServiceAccountsRequest.t ->
+        (ListWorkspaceServiceAccountsResponse.t,
+          ListWorkspaceServiceAccountsResponse.error) Result.t
 val list_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -76,3 +135,9 @@ val update_workspace_authentication :
       UpdateWorkspaceAuthenticationRequest.t ->
         (UpdateWorkspaceAuthenticationResponse.t,
           UpdateWorkspaceAuthenticationResponse.error) Result.t
+val update_workspace_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateWorkspaceConfigurationRequest.t ->
+        (UpdateWorkspaceConfigurationResponse.t,
+          UpdateWorkspaceConfigurationResponse.error) Result.t

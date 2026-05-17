@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let batch_get_incident_findings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetIncidentFindings input
 let create_replication_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateReplicationSet input
 let create_response_plan ?endpoint_url ?cfg input =
@@ -37,6 +39,8 @@ let get_response_plan ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResponsePlan input
 let get_timeline_event ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTimelineEvent input
+let list_incident_findings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListIncidentFindings input
 let list_incident_records ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListIncidentRecords input
 let list_related_items ?endpoint_url ?cfg input =

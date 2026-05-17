@@ -213,6 +213,18 @@ let create_association =
        and targetLocations =
          flag "target-locations" (optional json_arg)
            ~doc:"JSON TargetLocations"
+       and scheduleOffset =
+         flag "schedule-offset" (optional int) ~doc:"INT ScheduleOffset"
+       and duration = flag "duration" (optional int) ~doc:"INT Duration"
+       and targetMaps =
+         flag "target-maps" (optional json_arg) ~doc:"JSON TargetMaps"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and alarmConfiguration =
+         flag "alarm-configuration" (optional json_arg)
+           ~doc:"JSON AlarmConfiguration"
+       and associationDispatchAssumeRole =
+         flag "association-dispatch-assume-role" (optional string)
+           ~doc:"STRING AssociationDispatchAssumeRoleArn"
        and name = flag "name" (required string) ~doc:"STRING DocumentARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -235,7 +247,13 @@ let create_association =
                                 ~f:Values.CalendarNameOrARNList.of_json
                                 calendarNames)
               ?targetLocations:(Option.map ~f:Values.TargetLocations.of_json
-                                  targetLocations) ~name ())
+                                  targetLocations) ?scheduleOffset ?duration
+              ?targetMaps:(Option.map ~f:Values.TargetMaps.of_json targetMaps)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?alarmConfiguration:(Option.map
+                                     ~f:Values.AlarmConfiguration.of_json
+                                     alarmConfiguration)
+              ?associationDispatchAssumeRole ~name ())
            (Some Values.CreateAssociationResult.to_json)
            (Some Values.CreateAssociationResult.error_to_json)])
 let create_association_batch =
@@ -248,6 +266,9 @@ let create_association_batch =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and associationDispatchAssumeRole =
+         flag "association-dispatch-assume-role" (optional string)
+           ~doc:"STRING AssociationDispatchAssumeRoleArn"
        and entries =
          flag "entries" (required json_arg)
            ~doc:"JSON CreateAssociationBatchRequestEntries" in
@@ -255,6 +276,7 @@ let create_association_batch =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_association_batch
            (Values.CreateAssociationBatchRequest.make
+              ?associationDispatchAssumeRole
               ~entries:(Values.CreateAssociationBatchRequestEntries.of_json
                           entries) ())
            (Some Values.CreateAssociationBatchResult.to_json)
@@ -393,6 +415,8 @@ let create_ops_item =
          flag "planned-start-time" (optional json_arg) ~doc:"JSON DateTime"
        and plannedEndTime =
          flag "planned-end-time" (optional json_arg) ~doc:"JSON DateTime"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING OpsItemAccountId"
        and description =
          flag "description" (required string)
            ~doc:"STRING OpsItemDescription"
@@ -420,8 +444,8 @@ let create_ops_item =
               ?plannedStartTime:(Option.map ~f:Values.DateTime.of_json
                                    plannedStartTime)
               ?plannedEndTime:(Option.map ~f:Values.DateTime.of_json
-                                 plannedEndTime) ~description ~source ~title
-              ()) (Some Values.CreateOpsItemResponse.to_json)
+                                 plannedEndTime) ?accountId ~description
+              ~source ~title ()) (Some Values.CreateOpsItemResponse.to_json)
            (Some Values.CreateOpsItemResponse.error_to_json)])
 let create_ops_metadata =
   Command.async ~summary:""
@@ -483,6 +507,9 @@ let create_patch_baseline =
            ~doc:"STRING BaselineDescription"
        and sources =
          flag "sources" (optional json_arg) ~doc:"JSON PatchSourceList"
+       and availableSecurityUpdatesComplianceStatus =
+         flag "available-security-updates-compliance-status"
+           (optional json_arg) ~doc:"JSON PatchComplianceStatus"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
@@ -509,6 +536,9 @@ let create_patch_baseline =
                                         ~f:Values.PatchAction.of_json
                                         rejectedPatchesAction) ?description
               ?sources:(Option.map ~f:Values.PatchSourceList.of_json sources)
+              ?availableSecurityUpdatesComplianceStatus:(Option.map
+                                                           ~f:Values.PatchComplianceStatus.of_json
+                                                           availableSecurityUpdatesComplianceStatus)
               ?clientToken ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ~name ()) (Some Values.CreatePatchBaselineResult.to_json)
            (Some Values.CreatePatchBaselineResult.error_to_json)])
@@ -656,6 +686,24 @@ let delete_maintenance_window =
            (Values.DeleteMaintenanceWindowRequest.make ~windowId ())
            (Some Values.DeleteMaintenanceWindowResult.to_json)
            (Some Values.DeleteMaintenanceWindowResult.error_to_json)])
+let delete_ops_item =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and opsItemId =
+         flag "ops-item-id" (required string) ~doc:"STRING OpsItemId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_ops_item
+           (Values.DeleteOpsItemRequest.make ~opsItemId ())
+           (Some Values.DeleteOpsItemResponse.to_json)
+           (Some Values.DeleteOpsItemResponse.error_to_json)])
 let delete_ops_metadata =
   Command.async ~summary:""
     ([%map_open.Command
@@ -750,6 +798,30 @@ let delete_resource_data_sync =
            (Values.DeleteResourceDataSyncRequest.make ?syncType ~syncName ())
            (Some Values.DeleteResourceDataSyncResult.to_json)
            (Some Values.DeleteResourceDataSyncResult.error_to_json)])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING ResourceArnString"
+       and policyId =
+         flag "policy-id" (required string) ~doc:"STRING PolicyId"
+       and policyHash =
+         flag "policy-hash" (required string) ~doc:"STRING PolicyHash" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyRequest.make ~resourceArn ~policyId
+              ~policyHash ())
+           (Some Values.DeleteResourcePolicyResponse.to_json)
+           (Some Values.DeleteResourcePolicyResponse.error_to_json)])
 let deregister_managed_instance =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1274,6 +1346,40 @@ let describe_instance_patches =
                           filters) ?nextToken ?maxResults ~instanceId ())
            (Some Values.DescribeInstancePatchesResult.to_json)
            (Some Values.DescribeInstancePatchesResult.error_to_json)])
+let describe_instance_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instancePropertyFilterList =
+         flag "instance-property-filter-list" (optional json_arg)
+           ~doc:"JSON InstancePropertyFilterList"
+       and filtersWithOperator =
+         flag "filters-with-operator" (optional json_arg)
+           ~doc:"JSON InstancePropertyStringFilterList"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT DescribeInstancePropertiesMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_instance_properties
+           (Values.DescribeInstancePropertiesRequest.make
+              ?instancePropertyFilterList:(Option.map
+                                             ~f:Values.InstancePropertyFilterList.of_json
+                                             instancePropertyFilterList)
+              ?filtersWithOperator:(Option.map
+                                      ~f:Values.InstancePropertyStringFilterList.of_json
+                                      filtersWithOperator) ?maxResults
+              ?nextToken ())
+           (Some Values.DescribeInstancePropertiesResult.to_json)
+           (Some Values.DescribeInstancePropertiesResult.error_to_json)])
 let describe_inventory_deletions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1590,7 +1696,8 @@ let describe_parameters =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and shared = flag "shared" (optional bool) ~doc:"BOOL Boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_parameters
@@ -1600,7 +1707,7 @@ let describe_parameters =
               ?parameterFilters:(Option.map
                                    ~f:Values.ParameterStringFilterList.of_json
                                    parameterFilters) ?maxResults ?nextToken
-              ()) (Some Values.DescribeParametersResult.to_json)
+              ?shared ()) (Some Values.DescribeParametersResult.to_json)
            (Some Values.DescribeParametersResult.error_to_json)])
 let describe_patch_baselines =
   Command.async ~summary:""
@@ -1751,6 +1858,25 @@ let disassociate_ops_item_related_item =
               ~associationId ())
            (Some Values.DisassociateOpsItemRelatedItemResponse.to_json)
            (Some Values.DisassociateOpsItemRelatedItemResponse.error_to_json)])
+let get_access_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accessRequestId =
+         flag "access-request-id" (required string)
+           ~doc:"STRING AccessRequestId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_access_token
+           (Values.GetAccessTokenRequest.make ~accessRequestId ())
+           (Some Values.GetAccessTokenResponse.to_json)
+           (Some Values.GetAccessTokenResponse.error_to_json)])
 let get_automation_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1868,6 +1994,9 @@ let get_deployable_patch_snapshot_for_instance =
        and baselineOverride =
          flag "baseline-override" (optional json_arg)
            ~doc:"JSON BaselineOverride"
+       and useS3DualStackEndpoint =
+         flag "use-s3-dual-stack-endpoint" (optional bool)
+           ~doc:"BOOL Boolean"
        and instanceId =
          flag "instance-id" (required string) ~doc:"STRING InstanceId"
        and snapshotId =
@@ -1878,8 +2007,8 @@ let get_deployable_patch_snapshot_for_instance =
            (Values.GetDeployablePatchSnapshotForInstanceRequest.make
               ?baselineOverride:(Option.map
                                    ~f:Values.BaselineOverride.of_json
-                                   baselineOverride) ~instanceId ~snapshotId
-              ())
+                                   baselineOverride) ?useS3DualStackEndpoint
+              ~instanceId ~snapshotId ())
            (Some Values.GetDeployablePatchSnapshotForInstanceResult.to_json)
            (Some
               Values.GetDeployablePatchSnapshotForInstanceResult.error_to_json)])
@@ -1911,6 +2040,25 @@ let get_document =
                                  documentFormat) ~name ())
            (Some Values.GetDocumentResult.to_json)
            (Some Values.GetDocumentResult.error_to_json)])
+let get_execution_preview =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and executionPreviewId =
+         flag "execution-preview-id" (required string)
+           ~doc:"STRING ExecutionPreviewId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_execution_preview
+           (Values.GetExecutionPreviewRequest.make ~executionPreviewId ())
+           (Some Values.GetExecutionPreviewResponse.to_json)
+           (Some Values.GetExecutionPreviewResponse.error_to_json)])
 let get_inventory =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2097,11 +2245,14 @@ let get_ops_item =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and opsItemArn =
+         flag "ops-item-arn" (optional string) ~doc:"STRING OpsItemArn"
        and opsItemId =
          flag "ops-item-id" (required string) ~doc:"STRING OpsItemId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_ops_item (Values.GetOpsItemRequest.make ~opsItemId ())
+           Io.get_ops_item
+           (Values.GetOpsItemRequest.make ?opsItemArn ~opsItemId ())
            (Some Values.GetOpsItemResponse.to_json)
            (Some Values.GetOpsItemResponse.error_to_json)])
 let get_ops_metadata =
@@ -2301,6 +2452,31 @@ let get_patch_baseline_for_patch_group =
                                   operatingSystem) ~patchGroup ())
            (Some Values.GetPatchBaselineForPatchGroupResult.to_json)
            (Some Values.GetPatchBaselineForPatchGroupResult.error_to_json)])
+let get_resource_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ResourcePolicyMaxResults"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING ResourceArnString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policies
+           (Values.GetResourcePoliciesRequest.make ?nextToken ?maxResults
+              ~resourceArn ())
+           (Some Values.GetResourcePoliciesResponse.to_json)
+           (Some Values.GetResourcePoliciesResponse.error_to_json)])
 let get_service_setting =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2627,6 +2803,64 @@ let list_inventory_entries =
                           filters) ?nextToken ?maxResults ~instanceId
               ~typeName ()) (Some Values.ListInventoryEntriesResult.to_json)
            (Some Values.ListInventoryEntriesResult.error_to_json)])
+let list_nodes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and syncName =
+         flag "sync-name" (optional string)
+           ~doc:"STRING ResourceDataSyncName"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON NodeFilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_nodes
+           (Values.ListNodesRequest.make ?syncName
+              ?filters:(Option.map ~f:Values.NodeFilterList.of_json filters)
+              ?nextToken ?maxResults ())
+           (Some Values.ListNodesResult.to_json)
+           (Some Values.ListNodesResult.error_to_json)])
+let list_nodes_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and syncName =
+         flag "sync-name" (optional string)
+           ~doc:"STRING ResourceDataSyncName"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON NodeFilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and aggregators =
+         flag "aggregators" (required json_arg)
+           ~doc:"JSON NodeAggregatorList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_nodes_summary
+           (Values.ListNodesSummaryRequest.make ?syncName
+              ?filters:(Option.map ~f:Values.NodeFilterList.of_json filters)
+              ?nextToken ?maxResults
+              ~aggregators:(Values.NodeAggregatorList.of_json aggregators) ())
+           (Some Values.ListNodesSummaryResult.to_json)
+           (Some Values.ListNodesSummaryResult.error_to_json)])
 let list_ops_item_events =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2917,6 +3151,31 @@ let put_parameter =
               ?policies ?dataType ~name ~value ())
            (Some Values.PutParameterResult.to_json)
            (Some Values.PutParameterResult.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyId =
+         flag "policy-id" (optional string) ~doc:"STRING PolicyId"
+       and policyHash =
+         flag "policy-hash" (optional string) ~doc:"STRING PolicyHash"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING ResourceArnString"
+       and policy = flag "policy" (required string) ~doc:"STRING Policy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make ?policyId ?policyHash
+              ~resourceArn ~policy ())
+           (Some Values.PutResourcePolicyResponse.to_json)
+           (Some Values.PutResourcePolicyResponse.error_to_json)])
 let register_default_patch_baseline =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3033,6 +3292,9 @@ let register_task_with_maintenance_window =
        and cutoffBehavior =
          flag "cutoff-behavior" (optional json_arg)
            ~doc:"JSON MaintenanceWindowTaskCutoffBehavior"
+       and alarmConfiguration =
+         flag "alarm-configuration" (optional json_arg)
+           ~doc:"JSON AlarmConfiguration"
        and windowId =
          flag "window-id" (required string) ~doc:"STRING MaintenanceWindowId"
        and taskArn =
@@ -3058,7 +3320,10 @@ let register_task_with_maintenance_window =
                               loggingInfo) ?name ?description ?clientToken
               ?cutoffBehavior:(Option.map
                                  ~f:Values.MaintenanceWindowTaskCutoffBehavior.of_json
-                                 cutoffBehavior) ~windowId ~taskArn
+                                 cutoffBehavior)
+              ?alarmConfiguration:(Option.map
+                                     ~f:Values.AlarmConfiguration.of_json
+                                     alarmConfiguration) ~windowId ~taskArn
               ~taskType:(Values.MaintenanceWindowTaskType.of_json taskType)
               ())
            (Some Values.RegisterTaskWithMaintenanceWindowResult.to_json)
@@ -3197,6 +3462,9 @@ let send_command =
        and cloudWatchOutputConfig =
          flag "cloud-watch-output-config" (optional json_arg)
            ~doc:"JSON CloudWatchOutputConfig"
+       and alarmConfiguration =
+         flag "alarm-configuration" (optional json_arg)
+           ~doc:"JSON AlarmConfiguration"
        and documentName =
          flag "document-name" (required string) ~doc:"STRING DocumentARN" in
        fun () ->
@@ -3219,8 +3487,33 @@ let send_command =
               ?cloudWatchOutputConfig:(Option.map
                                          ~f:Values.CloudWatchOutputConfig.of_json
                                          cloudWatchOutputConfig)
-              ~documentName ()) (Some Values.SendCommandResult.to_json)
+              ?alarmConfiguration:(Option.map
+                                     ~f:Values.AlarmConfiguration.of_json
+                                     alarmConfiguration) ~documentName ())
+           (Some Values.SendCommandResult.to_json)
            (Some Values.SendCommandResult.error_to_json)])
+let start_access_request =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and reason =
+         flag "reason" (required string) ~doc:"STRING String1to256"
+       and targets = flag "targets" (required json_arg) ~doc:"JSON Targets" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_access_request
+           (Values.StartAccessRequestRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~reason
+              ~targets:(Values.Targets.of_json targets) ())
+           (Some Values.StartAccessRequestResponse.to_json)
+           (Some Values.StartAccessRequestResponse.error_to_json)])
 let start_associations_once =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3276,6 +3569,12 @@ let start_automation_execution =
          flag "target-locations" (optional json_arg)
            ~doc:"JSON TargetLocations"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and alarmConfiguration =
+         flag "alarm-configuration" (optional json_arg)
+           ~doc:"JSON AlarmConfiguration"
+       and targetLocationsURL =
+         flag "target-locations-u-r-l" (optional string)
+           ~doc:"STRING TargetLocationsURL"
        and documentName =
          flag "document-name" (required string) ~doc:"STRING DocumentARN" in
        fun () ->
@@ -3292,8 +3591,12 @@ let start_automation_execution =
               ?maxConcurrency ?maxErrors
               ?targetLocations:(Option.map ~f:Values.TargetLocations.of_json
                                   targetLocations)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~documentName
-              ()) (Some Values.StartAutomationExecutionResult.to_json)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?alarmConfiguration:(Option.map
+                                     ~f:Values.AlarmConfiguration.of_json
+                                     alarmConfiguration) ?targetLocationsURL
+              ~documentName ())
+           (Some Values.StartAutomationExecutionResult.to_json)
            (Some Values.StartAutomationExecutionResult.error_to_json)])
 let start_change_request_execution =
   Command.async ~summary:""
@@ -3345,6 +3648,32 @@ let start_change_request_execution =
               ~documentName ~runbooks:(Values.Runbooks.of_json runbooks) ())
            (Some Values.StartChangeRequestExecutionResult.to_json)
            (Some Values.StartChangeRequestExecutionResult.error_to_json)])
+let start_execution_preview =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and documentVersion =
+         flag "document-version" (optional string)
+           ~doc:"STRING DocumentVersion"
+       and executionInputs =
+         flag "execution-inputs" (optional json_arg)
+           ~doc:"JSON ExecutionInputs"
+       and documentName =
+         flag "document-name" (required string) ~doc:"STRING DocumentName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_execution_preview
+           (Values.StartExecutionPreviewRequest.make ?documentVersion
+              ?executionInputs:(Option.map ~f:Values.ExecutionInputs.of_json
+                                  executionInputs) ~documentName ())
+           (Some Values.StartExecutionPreviewResponse.to_json)
+           (Some Values.StartExecutionPreviewResponse.error_to_json)])
 let start_session =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3490,6 +3819,17 @@ let update_association =
        and targetLocations =
          flag "target-locations" (optional json_arg)
            ~doc:"JSON TargetLocations"
+       and scheduleOffset =
+         flag "schedule-offset" (optional int) ~doc:"INT ScheduleOffset"
+       and duration = flag "duration" (optional int) ~doc:"INT Duration"
+       and targetMaps =
+         flag "target-maps" (optional json_arg) ~doc:"JSON TargetMaps"
+       and alarmConfiguration =
+         flag "alarm-configuration" (optional json_arg)
+           ~doc:"JSON AlarmConfiguration"
+       and associationDispatchAssumeRole =
+         flag "association-dispatch-assume-role" (optional string)
+           ~doc:"STRING AssociationDispatchAssumeRoleArn"
        and associationId =
          flag "association-id" (required string) ~doc:"STRING AssociationId" in
        fun () ->
@@ -3514,7 +3854,12 @@ let update_association =
                                 ~f:Values.CalendarNameOrARNList.of_json
                                 calendarNames)
               ?targetLocations:(Option.map ~f:Values.TargetLocations.of_json
-                                  targetLocations) ~associationId ())
+                                  targetLocations) ?scheduleOffset ?duration
+              ?targetMaps:(Option.map ~f:Values.TargetMaps.of_json targetMaps)
+              ?alarmConfiguration:(Option.map
+                                     ~f:Values.AlarmConfiguration.of_json
+                                     alarmConfiguration)
+              ?associationDispatchAssumeRole ~associationId ())
            (Some Values.UpdateAssociationResult.to_json)
            (Some Values.UpdateAssociationResult.error_to_json)])
 let update_association_status =
@@ -3756,6 +4101,9 @@ let update_maintenance_window_task =
        and cutoffBehavior =
          flag "cutoff-behavior" (optional json_arg)
            ~doc:"JSON MaintenanceWindowTaskCutoffBehavior"
+       and alarmConfiguration =
+         flag "alarm-configuration" (optional json_arg)
+           ~doc:"JSON AlarmConfiguration"
        and windowId =
          flag "window-id" (required string) ~doc:"STRING MaintenanceWindowId"
        and windowTaskId =
@@ -3778,7 +4126,11 @@ let update_maintenance_window_task =
                               loggingInfo) ?name ?description ?replace
               ?cutoffBehavior:(Option.map
                                  ~f:Values.MaintenanceWindowTaskCutoffBehavior.of_json
-                                 cutoffBehavior) ~windowId ~windowTaskId ())
+                                 cutoffBehavior)
+              ?alarmConfiguration:(Option.map
+                                     ~f:Values.AlarmConfiguration.of_json
+                                     alarmConfiguration) ~windowId
+              ~windowTaskId ())
            (Some Values.UpdateMaintenanceWindowTaskResult.to_json)
            (Some Values.UpdateMaintenanceWindowTaskResult.error_to_json)])
 let update_managed_instance_role =
@@ -3842,6 +4194,8 @@ let update_ops_item =
          flag "planned-start-time" (optional json_arg) ~doc:"JSON DateTime"
        and plannedEndTime =
          flag "planned-end-time" (optional json_arg) ~doc:"JSON DateTime"
+       and opsItemArn =
+         flag "ops-item-arn" (optional string) ~doc:"STRING OpsItemArn"
        and opsItemId =
          flag "ops-item-id" (required string) ~doc:"STRING OpsItemId" in
        fun () ->
@@ -3868,7 +4222,7 @@ let update_ops_item =
               ?plannedStartTime:(Option.map ~f:Values.DateTime.of_json
                                    plannedStartTime)
               ?plannedEndTime:(Option.map ~f:Values.DateTime.of_json
-                                 plannedEndTime) ~opsItemId ())
+                                 plannedEndTime) ?opsItemArn ~opsItemId ())
            (Some Values.UpdateOpsItemResponse.to_json)
            (Some Values.UpdateOpsItemResponse.error_to_json)])
 let update_ops_metadata =
@@ -3935,6 +4289,9 @@ let update_patch_baseline =
            ~doc:"STRING BaselineDescription"
        and sources =
          flag "sources" (optional json_arg) ~doc:"JSON PatchSourceList"
+       and availableSecurityUpdatesComplianceStatus =
+         flag "available-security-updates-compliance-status"
+           (optional json_arg) ~doc:"JSON PatchComplianceStatus"
        and replace = flag "replace" (optional bool) ~doc:"BOOL Boolean"
        and baselineId =
          flag "baseline-id" (required string) ~doc:"STRING BaselineId" in
@@ -3958,6 +4315,9 @@ let update_patch_baseline =
                                         ~f:Values.PatchAction.of_json
                                         rejectedPatchesAction) ?description
               ?sources:(Option.map ~f:Values.PatchSourceList.of_json sources)
+              ?availableSecurityUpdatesComplianceStatus:(Option.map
+                                                           ~f:Values.PatchComplianceStatus.of_json
+                                                           availableSecurityUpdatesComplianceStatus)
               ?replace ~baselineId ())
            (Some Values.UpdatePatchBaselineResult.to_json)
            (Some Values.UpdatePatchBaselineResult.error_to_json)])
@@ -4030,11 +4390,13 @@ let main =
     ("delete-document", delete_document);
     ("delete-inventory", delete_inventory);
     ("delete-maintenance-window", delete_maintenance_window);
+    ("delete-ops-item", delete_ops_item);
     ("delete-ops-metadata", delete_ops_metadata);
     ("delete-parameter", delete_parameter);
     ("delete-parameters", delete_parameters);
     ("delete-patch-baseline", delete_patch_baseline);
     ("delete-resource-data-sync", delete_resource_data_sync);
+    ("delete-resource-policy", delete_resource_policy);
     ("deregister-managed-instance", deregister_managed_instance);
     ("deregister-patch-baseline-for-patch-group",
       deregister_patch_baseline_for_patch_group);
@@ -4064,6 +4426,7 @@ let main =
     ("describe-instance-patch-states-for-patch-group",
       describe_instance_patch_states_for_patch_group);
     ("describe-instance-patches", describe_instance_patches);
+    ("describe-instance-properties", describe_instance_properties);
     ("describe-inventory-deletions", describe_inventory_deletions);
     ("describe-maintenance-window-execution-task-invocations",
       describe_maintenance_window_execution_task_invocations);
@@ -4088,6 +4451,7 @@ let main =
     ("describe-sessions", describe_sessions);
     ("disassociate-ops-item-related-item",
       disassociate_ops_item_related_item);
+    ("get-access-token", get_access_token);
     ("get-automation-execution", get_automation_execution);
     ("get-calendar-state", get_calendar_state);
     ("get-command-invocation", get_command_invocation);
@@ -4096,6 +4460,7 @@ let main =
     ("get-deployable-patch-snapshot-for-instance",
       get_deployable_patch_snapshot_for_instance);
     ("get-document", get_document);
+    ("get-execution-preview", get_execution_preview);
     ("get-inventory", get_inventory);
     ("get-inventory-schema", get_inventory_schema);
     ("get-maintenance-window", get_maintenance_window);
@@ -4115,6 +4480,7 @@ let main =
     ("get-patch-baseline", get_patch_baseline);
     ("get-patch-baseline-for-patch-group",
       get_patch_baseline_for_patch_group);
+    ("get-resource-policies", get_resource_policies);
     ("get-service-setting", get_service_setting);
     ("label-parameter-version", label_parameter_version);
     ("list-association-versions", list_association_versions);
@@ -4127,6 +4493,8 @@ let main =
     ("list-document-versions", list_document_versions);
     ("list-documents", list_documents);
     ("list-inventory-entries", list_inventory_entries);
+    ("list-nodes", list_nodes);
+    ("list-nodes-summary", list_nodes_summary);
     ("list-ops-item-events", list_ops_item_events);
     ("list-ops-item-related-items", list_ops_item_related_items);
     ("list-ops-metadata", list_ops_metadata);
@@ -4138,6 +4506,7 @@ let main =
     ("put-compliance-items", put_compliance_items);
     ("put-inventory", put_inventory);
     ("put-parameter", put_parameter);
+    ("put-resource-policy", put_resource_policy);
     ("register-default-patch-baseline", register_default_patch_baseline);
     ("register-patch-baseline-for-patch-group",
       register_patch_baseline_for_patch_group);
@@ -4150,9 +4519,11 @@ let main =
     ("resume-session", resume_session);
     ("send-automation-signal", send_automation_signal);
     ("send-command", send_command);
+    ("start-access-request", start_access_request);
     ("start-associations-once", start_associations_once);
     ("start-automation-execution", start_automation_execution);
     ("start-change-request-execution", start_change_request_execution);
+    ("start-execution-preview", start_execution_preview);
     ("start-session", start_session);
     ("stop-automation-execution", stop_automation_execution);
     ("terminate-session", terminate_session);

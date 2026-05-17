@@ -13,14 +13,51 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let add_profile_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddProfileKey input
+let batch_get_calculated_attribute_for_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetCalculatedAttributeForProfile
+    input
+let batch_get_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetProfile input
+let create_calculated_attribute_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCalculatedAttributeDefinition input
 let create_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDomain input
+let create_domain_layout ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDomainLayout input
+let create_event_stream ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateEventStream input
+let create_event_trigger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateEventTrigger input
 let create_integration_workflow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateIntegrationWorkflow input
 let create_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateProfile input
+let create_recommender ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRecommender input
+let create_recommender_filter ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRecommenderFilter input
+let create_recommender_schema ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRecommenderSchema input
+let create_segment_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSegmentDefinition input
+let create_segment_estimate ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSegmentEstimate input
+let create_segment_snapshot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSegmentSnapshot input
+let create_upload_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateUploadJob input
+let delete_calculated_attribute_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCalculatedAttributeDefinition input
 let delete_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDomain input
+let delete_domain_layout ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDomainLayout input
+let delete_domain_object_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDomainObjectType input
+let delete_event_stream ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteEventStream input
+let delete_event_trigger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteEventTrigger input
 let delete_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteIntegration input
 let delete_profile ?endpoint_url ?cfg input =
@@ -31,46 +68,130 @@ let delete_profile_object ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteProfileObject input
 let delete_profile_object_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteProfileObjectType input
+let delete_recommender ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRecommender input
+let delete_recommender_filter ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRecommenderFilter input
+let delete_recommender_schema ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRecommenderSchema input
+let delete_segment_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteSegmentDefinition input
 let delete_workflow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWorkflow input
+let detect_profile_object_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DetectProfileObjectType input
 let get_auto_merging_preview ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAutoMergingPreview input
+let get_calculated_attribute_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCalculatedAttributeDefinition input
+let get_calculated_attribute_for_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCalculatedAttributeForProfile input
 let get_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDomain input
+let get_domain_layout ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDomainLayout input
+let get_domain_object_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDomainObjectType input
+let get_event_stream ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetEventStream input
+let get_event_trigger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetEventTrigger input
 let get_identity_resolution_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetIdentityResolutionJob input
 let get_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetIntegration input
 let get_matches ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMatches input
+let get_object_type_attribute_statistics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetObjectTypeAttributeStatistics input
+let get_profile_history_record ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetProfileHistoryRecord input
 let get_profile_object_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetProfileObjectType input
 let get_profile_object_type_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetProfileObjectTypeTemplate input
+let get_profile_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetProfileRecommendations input
+let get_recommender ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRecommender input
+let get_recommender_filter ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRecommenderFilter input
+let get_recommender_schema ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRecommenderSchema input
+let get_segment_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSegmentDefinition input
+let get_segment_estimate ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSegmentEstimate input
+let get_segment_membership ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSegmentMembership input
+let get_segment_snapshot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSegmentSnapshot input
+let get_similar_profiles ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSimilarProfiles input
+let get_upload_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetUploadJob input
+let get_upload_job_path ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetUploadJobPath input
 let get_workflow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetWorkflow input
 let get_workflow_steps ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetWorkflowSteps input
 let list_account_integrations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccountIntegrations input
+let list_calculated_attribute_definitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCalculatedAttributeDefinitions input
+let list_calculated_attributes_for_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCalculatedAttributesForProfile input
+let list_domain_layouts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDomainLayouts input
+let list_domain_object_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDomainObjectTypes input
 let list_domains ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDomains input
+let list_event_streams ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListEventStreams input
+let list_event_triggers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListEventTriggers input
 let list_identity_resolution_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListIdentityResolutionJobs input
 let list_integrations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListIntegrations input
+let list_object_type_attribute_values ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListObjectTypeAttributeValues input
+let list_object_type_attributes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListObjectTypeAttributes input
+let list_profile_attribute_values ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListProfileAttributeValues input
+let list_profile_history_records ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListProfileHistoryRecords input
 let list_profile_object_type_templates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProfileObjectTypeTemplates input
 let list_profile_object_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProfileObjectTypes input
 let list_profile_objects ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProfileObjects input
+let list_recommender_filters ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRecommenderFilters input
+let list_recommender_recipes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRecommenderRecipes input
+let list_recommender_schemas ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRecommenderSchemas input
+let list_recommenders ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRecommenders input
+let list_rule_based_matches ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRuleBasedMatches input
+let list_segment_definitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSegmentDefinitions input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_upload_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListUploadJobs input
 let list_workflows ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWorkflows input
 let merge_profiles ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.MergeProfiles input
+let put_domain_object_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutDomainObjectType input
 let put_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutIntegration input
 let put_profile_object ?endpoint_url ?cfg input =
@@ -79,11 +200,27 @@ let put_profile_object_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutProfileObjectType input
 let search_profiles ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchProfiles input
+let start_recommender ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartRecommender input
+let start_upload_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartUploadJob input
+let stop_recommender ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopRecommender input
+let stop_upload_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopUploadJob input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_calculated_attribute_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCalculatedAttributeDefinition input
 let update_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDomain input
+let update_domain_layout ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDomainLayout input
+let update_event_trigger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateEventTrigger input
 let update_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateProfile input
+let update_recommender ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRecommender input

@@ -43,6 +43,9 @@ let abort_multipart_upload =
        and expectedBucketOwner =
          flag "expected-bucket-owner" (optional string)
            ~doc:"STRING AccountId"
+       and ifMatchInitiatedTime =
+         flag "if-match-initiated-time" (optional json_arg)
+           ~doc:"JSON IfMatchInitiatedTime"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
        and key = flag "key" (required string) ~doc:"STRING ObjectKey"
        and uploadId =
@@ -52,9 +55,11 @@ let abort_multipart_upload =
            Io.abort_multipart_upload
            (Values.AbortMultipartUploadRequest.make
               ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
-                               requestPayer) ?expectedBucketOwner ~bucket
-              ~key ~uploadId ())
-           (Some Values.AbortMultipartUploadOutput.to_json)
+                               requestPayer) ?expectedBucketOwner
+              ?ifMatchInitiatedTime:(Option.map
+                                       ~f:Values.IfMatchInitiatedTime.of_json
+                                       ifMatchInitiatedTime) ~bucket ~key
+              ~uploadId ()) (Some Values.AbortMultipartUploadOutput.to_json)
            (Some Values.AbortMultipartUploadOutput.error_to_json)])
 let complete_multipart_upload =
   Command.async ~summary:""
@@ -75,16 +80,40 @@ let complete_multipart_upload =
        and checksumCRC32C =
          flag "checksum-c-r-c32-c" (optional string)
            ~doc:"STRING ChecksumCRC32C"
+       and checksumCRC64NVME =
+         flag "checksum-c-r-c64-n-v-m-e" (optional string)
+           ~doc:"STRING ChecksumCRC64NVME"
        and checksumSHA1 =
          flag "checksum-s-h-a1" (optional string) ~doc:"STRING ChecksumSHA1"
        and checksumSHA256 =
          flag "checksum-s-h-a256" (optional string)
            ~doc:"STRING ChecksumSHA256"
+       and checksumSHA512 =
+         flag "checksum-s-h-a512" (optional string)
+           ~doc:"STRING ChecksumSHA512"
+       and checksumMD5 =
+         flag "checksum-m-d5" (optional string) ~doc:"STRING ChecksumMD5"
+       and checksumXXHASH64 =
+         flag "checksum-x-x-h-a-s-h64" (optional string)
+           ~doc:"STRING ChecksumXXHASH64"
+       and checksumXXHASH3 =
+         flag "checksum-x-x-h-a-s-h3" (optional string)
+           ~doc:"STRING ChecksumXXHASH3"
+       and checksumXXHASH128 =
+         flag "checksum-x-x-h-a-s-h128" (optional string)
+           ~doc:"STRING ChecksumXXHASH128"
+       and checksumType =
+         flag "checksum-type" (optional json_arg) ~doc:"JSON ChecksumType"
+       and mpuObjectSize =
+         flag "mpu-object-size" (optional json_arg) ~doc:"JSON MpuObjectSize"
        and requestPayer =
          flag "request-payer" (optional json_arg) ~doc:"JSON RequestPayer"
        and expectedBucketOwner =
          flag "expected-bucket-owner" (optional string)
            ~doc:"STRING AccountId"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING IfMatch"
+       and ifNoneMatch =
+         flag "if-none-match" (optional string) ~doc:"STRING IfNoneMatch"
        and sSECustomerAlgorithm =
          flag "s-s-e-customer-algorithm" (optional string)
            ~doc:"STRING SSECustomerAlgorithm"
@@ -105,11 +134,17 @@ let complete_multipart_upload =
               ?multipartUpload:(Option.map
                                   ~f:Values.CompletedMultipartUpload.of_json
                                   multipartUpload) ?checksumCRC32
-              ?checksumCRC32C ?checksumSHA1 ?checksumSHA256
+              ?checksumCRC32C ?checksumCRC64NVME ?checksumSHA1
+              ?checksumSHA256 ?checksumSHA512 ?checksumMD5 ?checksumXXHASH64
+              ?checksumXXHASH3 ?checksumXXHASH128
+              ?checksumType:(Option.map ~f:Values.ChecksumType.of_json
+                               checksumType)
+              ?mpuObjectSize:(Option.map ~f:Values.MpuObjectSize.of_json
+                                mpuObjectSize)
               ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
-                               requestPayer) ?expectedBucketOwner
-              ?sSECustomerAlgorithm ?sSECustomerKey ?sSECustomerKeyMD5
-              ~bucket ~key ~uploadId ())
+                               requestPayer) ?expectedBucketOwner ?ifMatch
+              ?ifNoneMatch ?sSECustomerAlgorithm ?sSECustomerKey
+              ?sSECustomerKeyMD5 ~bucket ~key ~uploadId ())
            (Some Values.CompleteMultipartUploadOutput.to_json)
            (Some Values.CompleteMultipartUploadOutput.error_to_json)])
 let copy_object =
@@ -151,7 +186,7 @@ let copy_object =
        and copySourceIfUnmodifiedSince =
          flag "copy-source-if-unmodified-since" (optional json_arg)
            ~doc:"JSON CopySourceIfUnmodifiedSince"
-       and expires = flag "expires" (optional json_arg) ~doc:"JSON Expires"
+       and expires = flag "expires" (optional string) ~doc:"STRING Expires"
        and grantFullControl =
          flag "grant-full-control" (optional string)
            ~doc:"STRING GrantFullControl"
@@ -162,6 +197,9 @@ let copy_object =
        and grantWriteACP =
          flag "grant-write-a-c-p" (optional string)
            ~doc:"STRING GrantWriteACP"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING IfMatch"
+       and ifNoneMatch =
+         flag "if-none-match" (optional string) ~doc:"STRING IfNoneMatch"
        and metadata =
          flag "metadata" (optional json_arg) ~doc:"JSON Metadata"
        and metadataDirective =
@@ -246,8 +284,8 @@ let copy_object =
               ?copySourceIfUnmodifiedSince:(Option.map
                                               ~f:Values.CopySourceIfUnmodifiedSince.of_json
                                               copySourceIfUnmodifiedSince)
-              ?expires:(Option.map ~f:Values.Expires.of_json expires)
-              ?grantFullControl ?grantRead ?grantReadACP ?grantWriteACP
+              ?expires ?grantFullControl ?grantRead ?grantReadACP
+              ?grantWriteACP ?ifMatch ?ifNoneMatch
               ?metadata:(Option.map ~f:Values.Metadata.of_json metadata)
               ?metadataDirective:(Option.map
                                     ~f:Values.MetadataDirective.of_json
@@ -309,6 +347,9 @@ let create_bucket =
        and objectOwnership =
          flag "object-ownership" (optional json_arg)
            ~doc:"JSON ObjectOwnership"
+       and bucketNamespace =
+         flag "bucket-namespace" (optional json_arg)
+           ~doc:"JSON BucketNamespace"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -321,9 +362,77 @@ let create_bucket =
               ?grantFullControl ?grantRead ?grantReadACP ?grantWrite
               ?grantWriteACP ?objectLockEnabledForBucket
               ?objectOwnership:(Option.map ~f:Values.ObjectOwnership.of_json
-                                  objectOwnership) ~bucket ())
+                                  objectOwnership)
+              ?bucketNamespace:(Option.map ~f:Values.BucketNamespace.of_json
+                                  bucketNamespace) ~bucket ())
            (Some Values.CreateBucketOutput.to_json)
            (Some Values.CreateBucketOutput.error_to_json)])
+let create_bucket_metadata_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and contentMD5 =
+         flag "content-m-d5" (optional string) ~doc:"STRING ContentMD5"
+       and checksumAlgorithm =
+         flag "checksum-algorithm" (optional json_arg)
+           ~doc:"JSON ChecksumAlgorithm"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
+       and metadataConfiguration =
+         flag "metadata-configuration" (required json_arg)
+           ~doc:"JSON MetadataConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_bucket_metadata_configuration
+           (Values.CreateBucketMetadataConfigurationRequest.make ?contentMD5
+              ?checksumAlgorithm:(Option.map
+                                    ~f:Values.ChecksumAlgorithm.of_json
+                                    checksumAlgorithm) ?expectedBucketOwner
+              ~bucket
+              ~metadataConfiguration:(Values.MetadataConfiguration.of_json
+                                        metadataConfiguration) ()) None None])
+let create_bucket_metadata_table_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and contentMD5 =
+         flag "content-m-d5" (optional string) ~doc:"STRING ContentMD5"
+       and checksumAlgorithm =
+         flag "checksum-algorithm" (optional json_arg)
+           ~doc:"JSON ChecksumAlgorithm"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
+       and metadataTableConfiguration =
+         flag "metadata-table-configuration" (required json_arg)
+           ~doc:"JSON MetadataTableConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_bucket_metadata_table_configuration
+           (Values.CreateBucketMetadataTableConfigurationRequest.make
+              ?contentMD5
+              ?checksumAlgorithm:(Option.map
+                                    ~f:Values.ChecksumAlgorithm.of_json
+                                    checksumAlgorithm) ?expectedBucketOwner
+              ~bucket
+              ~metadataTableConfiguration:(Values.MetadataTableConfiguration.of_json
+                                             metadataTableConfiguration) ())
+           None None])
 let create_multipart_upload =
   Command.async ~summary:""
     ([%map_open.Command
@@ -348,7 +457,7 @@ let create_multipart_upload =
            ~doc:"STRING ContentLanguage"
        and contentType =
          flag "content-type" (optional string) ~doc:"STRING ContentType"
-       and expires = flag "expires" (optional json_arg) ~doc:"JSON Expires"
+       and expires = flag "expires" (optional string) ~doc:"STRING Expires"
        and grantFullControl =
          flag "grant-full-control" (optional string)
            ~doc:"STRING GrantFullControl"
@@ -406,6 +515,8 @@ let create_multipart_upload =
        and checksumAlgorithm =
          flag "checksum-algorithm" (optional json_arg)
            ~doc:"JSON ChecksumAlgorithm"
+       and checksumType =
+         flag "checksum-type" (optional json_arg) ~doc:"JSON ChecksumType"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
        and key = flag "key" (required string) ~doc:"STRING ObjectKey" in
        fun () ->
@@ -414,9 +525,8 @@ let create_multipart_upload =
            (Values.CreateMultipartUploadRequest.make
               ?aCL:(Option.map ~f:Values.ObjectCannedACL.of_json aCL)
               ?cacheControl ?contentDisposition ?contentEncoding
-              ?contentLanguage ?contentType
-              ?expires:(Option.map ~f:Values.Expires.of_json expires)
-              ?grantFullControl ?grantRead ?grantReadACP ?grantWriteACP
+              ?contentLanguage ?contentType ?expires ?grantFullControl
+              ?grantRead ?grantReadACP ?grantWriteACP
               ?metadata:(Option.map ~f:Values.Metadata.of_json metadata)
               ?serverSideEncryption:(Option.map
                                        ~f:Values.ServerSideEncryption.of_json
@@ -438,9 +548,48 @@ let create_multipart_upload =
               ?expectedBucketOwner
               ?checksumAlgorithm:(Option.map
                                     ~f:Values.ChecksumAlgorithm.of_json
-                                    checksumAlgorithm) ~bucket ~key ())
+                                    checksumAlgorithm)
+              ?checksumType:(Option.map ~f:Values.ChecksumType.of_json
+                               checksumType) ~bucket ~key ())
            (Some Values.CreateMultipartUploadOutput.to_json)
            (Some Values.CreateMultipartUploadOutput.error_to_json)])
+let create_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionMode =
+         flag "session-mode" (optional json_arg) ~doc:"JSON SessionMode"
+       and serverSideEncryption =
+         flag "server-side-encryption" (optional json_arg)
+           ~doc:"JSON ServerSideEncryption"
+       and sSEKMSKeyId =
+         flag "s-s-e-k-m-s-key-id" (optional string)
+           ~doc:"STRING SSEKMSKeyId"
+       and sSEKMSEncryptionContext =
+         flag "s-s-e-k-m-s-encryption-context" (optional string)
+           ~doc:"STRING SSEKMSEncryptionContext"
+       and bucketKeyEnabled =
+         flag "bucket-key-enabled" (optional bool)
+           ~doc:"BOOL BucketKeyEnabled"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_session
+           (Values.CreateSessionRequest.make
+              ?sessionMode:(Option.map ~f:Values.SessionMode.of_json
+                              sessionMode)
+              ?serverSideEncryption:(Option.map
+                                       ~f:Values.ServerSideEncryption.of_json
+                                       serverSideEncryption) ?sSEKMSKeyId
+              ?sSEKMSEncryptionContext ?bucketKeyEnabled ~bucket ())
+           (Some Values.CreateSessionOutput.to_json)
+           (Some Values.CreateSessionOutput.error_to_json)])
 let delete_bucket =
   Command.async ~summary:""
     ([%map_open.Command
@@ -528,6 +677,9 @@ let delete_bucket_intelligent_tiering_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
        and id =
          flag "id" (required string) ~doc:"STRING IntelligentTieringId" in
@@ -535,7 +687,7 @@ let delete_bucket_intelligent_tiering_configuration =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_bucket_intelligent_tiering_configuration
            (Values.DeleteBucketIntelligentTieringConfigurationRequest.make
-              ~bucket ~id ()) None None])
+              ?expectedBucketOwner ~bucket ~id ()) None None])
 let delete_bucket_inventory_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -575,6 +727,44 @@ let delete_bucket_lifecycle =
            Io.delete_bucket_lifecycle
            (Values.DeleteBucketLifecycleRequest.make ?expectedBucketOwner
               ~bucket ()) None None])
+let delete_bucket_metadata_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_bucket_metadata_configuration
+           (Values.DeleteBucketMetadataConfigurationRequest.make
+              ?expectedBucketOwner ~bucket ()) None None])
+let delete_bucket_metadata_table_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_bucket_metadata_table_configuration
+           (Values.DeleteBucketMetadataTableConfigurationRequest.make
+              ?expectedBucketOwner ~bucket ()) None None])
 let delete_bucket_metrics_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -711,6 +901,12 @@ let delete_object =
        and expectedBucketOwner =
          flag "expected-bucket-owner" (optional string)
            ~doc:"STRING AccountId"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING IfMatch"
+       and ifMatchLastModifiedTime =
+         flag "if-match-last-modified-time" (optional json_arg)
+           ~doc:"JSON IfMatchLastModifiedTime"
+       and ifMatchSize =
+         flag "if-match-size" (optional json_arg) ~doc:"JSON IfMatchSize"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
        and key = flag "key" (required string) ~doc:"STRING ObjectKey" in
        fun () ->
@@ -719,7 +915,12 @@ let delete_object =
            (Values.DeleteObjectRequest.make ?mFA ?versionId
               ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
                                requestPayer) ?bypassGovernanceRetention
-              ?expectedBucketOwner ~bucket ~key ())
+              ?expectedBucketOwner ?ifMatch
+              ?ifMatchLastModifiedTime:(Option.map
+                                          ~f:Values.IfMatchLastModifiedTime.of_json
+                                          ifMatchLastModifiedTime)
+              ?ifMatchSize:(Option.map ~f:Values.IfMatchSize.of_json
+                              ifMatchSize) ~bucket ~key ())
            (Some Values.DeleteObjectOutput.to_json)
            (Some Values.DeleteObjectOutput.error_to_json)])
 let delete_object_tagging =
@@ -802,7 +1003,7 @@ let delete_public_access_block =
            Io.delete_public_access_block
            (Values.DeletePublicAccessBlockRequest.make ?expectedBucketOwner
               ~bucket ()) None None])
-let get_bucket_accelerate_configuration =
+let get_bucket_abac =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -818,9 +1019,33 @@ let get_bucket_accelerate_configuration =
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_bucket_abac
+           (Values.GetBucketAbacRequest.make ?expectedBucketOwner ~bucket ())
+           (Some Values.GetBucketAbacOutput.to_json)
+           (Some Values.GetBucketAbacOutput.error_to_json)])
+let get_bucket_accelerate_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and requestPayer =
+         flag "request-payer" (optional json_arg) ~doc:"JSON RequestPayer"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_bucket_accelerate_configuration
            (Values.GetBucketAccelerateConfigurationRequest.make
-              ?expectedBucketOwner ~bucket ())
+              ?expectedBucketOwner
+              ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
+                               requestPayer) ~bucket ())
            (Some Values.GetBucketAccelerateConfigurationOutput.to_json)
            (Some Values.GetBucketAccelerateConfigurationOutput.error_to_json)])
 let get_bucket_acl =
@@ -915,6 +1140,9 @@ let get_bucket_intelligent_tiering_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
        and id =
          flag "id" (required string) ~doc:"STRING IntelligentTieringId" in
@@ -922,7 +1150,7 @@ let get_bucket_intelligent_tiering_configuration =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_bucket_intelligent_tiering_configuration
            (Values.GetBucketIntelligentTieringConfigurationRequest.make
-              ~bucket ~id ())
+              ?expectedBucketOwner ~bucket ~id ())
            (Some
               Values.GetBucketIntelligentTieringConfigurationOutput.to_json)
            (Some
@@ -1030,6 +1258,49 @@ let get_bucket_logging =
            (Values.GetBucketLoggingRequest.make ?expectedBucketOwner ~bucket
               ()) (Some Values.GetBucketLoggingOutput.to_json)
            (Some Values.GetBucketLoggingOutput.error_to_json)])
+let get_bucket_metadata_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_bucket_metadata_configuration
+           (Values.GetBucketMetadataConfigurationRequest.make
+              ?expectedBucketOwner ~bucket ())
+           (Some Values.GetBucketMetadataConfigurationOutput.to_json)
+           (Some Values.GetBucketMetadataConfigurationOutput.error_to_json)])
+let get_bucket_metadata_table_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_bucket_metadata_table_configuration
+           (Values.GetBucketMetadataTableConfigurationRequest.make
+              ?expectedBucketOwner ~bucket ())
+           (Some Values.GetBucketMetadataTableConfigurationOutput.to_json)
+           (Some
+              Values.GetBucketMetadataTableConfigurationOutput.error_to_json)])
 let get_bucket_metrics_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1576,7 +1847,8 @@ let head_bucket =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.head_bucket
            (Values.HeadBucketRequest.make ?expectedBucketOwner ~bucket ())
-           None None])
+           (Some Values.HeadBucketOutput.to_json)
+           (Some Values.HeadBucketOutput.error_to_json)])
 let head_object =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1597,6 +1869,24 @@ let head_object =
          flag "if-unmodified-since" (optional json_arg)
            ~doc:"JSON IfUnmodifiedSince"
        and range = flag "range" (optional string) ~doc:"STRING Range"
+       and responseCacheControl =
+         flag "response-cache-control" (optional string)
+           ~doc:"STRING ResponseCacheControl"
+       and responseContentDisposition =
+         flag "response-content-disposition" (optional string)
+           ~doc:"STRING ResponseContentDisposition"
+       and responseContentEncoding =
+         flag "response-content-encoding" (optional string)
+           ~doc:"STRING ResponseContentEncoding"
+       and responseContentLanguage =
+         flag "response-content-language" (optional string)
+           ~doc:"STRING ResponseContentLanguage"
+       and responseContentType =
+         flag "response-content-type" (optional string)
+           ~doc:"STRING ResponseContentType"
+       and responseExpires =
+         flag "response-expires" (optional json_arg)
+           ~doc:"JSON ResponseExpires"
        and versionId =
          flag "version-id" (optional string) ~doc:"STRING ObjectVersionId"
        and sSECustomerAlgorithm =
@@ -1627,7 +1917,12 @@ let head_object =
                                   ifModifiedSince) ?ifNoneMatch
               ?ifUnmodifiedSince:(Option.map
                                     ~f:Values.IfUnmodifiedSince.of_json
-                                    ifUnmodifiedSince) ?range ?versionId
+                                    ifUnmodifiedSince) ?range
+              ?responseCacheControl ?responseContentDisposition
+              ?responseContentEncoding ?responseContentLanguage
+              ?responseContentType
+              ?responseExpires:(Option.map ~f:Values.ResponseExpires.of_json
+                                  responseExpires) ?versionId
               ?sSECustomerAlgorithm ?sSECustomerKey ?sSECustomerKeyMD5
               ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
                                requestPayer) ?partNumber ?expectedBucketOwner
@@ -1670,12 +1965,15 @@ let list_bucket_intelligent_tiering_configurations =
            ~doc:"URL override endpoint url"
        and continuationToken =
          flag "continuation-token" (optional string) ~doc:"STRING Token"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_bucket_intelligent_tiering_configurations
            (Values.ListBucketIntelligentTieringConfigurationsRequest.make
-              ?continuationToken ~bucket ())
+              ?continuationToken ?expectedBucketOwner ~bucket ())
            (Some
               Values.ListBucketIntelligentTieringConfigurationsOutput.to_json)
            (Some
@@ -1736,11 +2034,43 @@ let list_buckets =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and () = return () in
+       and maxBuckets =
+         flag "max-buckets" (optional int) ~doc:"INT MaxBuckets"
+       and continuationToken =
+         flag "continuation-token" (optional string) ~doc:"STRING Token"
+       and prefix = flag "prefix" (optional string) ~doc:"STRING Prefix"
+       and bucketRegion =
+         flag "bucket-region" (optional string) ~doc:"STRING BucketRegion" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_buckets (Fn.id ()) (Some Values.ListBucketsOutput.to_json)
+           Io.list_buckets
+           (Values.ListBucketsRequest.make ?maxBuckets ?continuationToken
+              ?prefix ?bucketRegion ())
+           (Some Values.ListBucketsOutput.to_json)
            (Some Values.ListBucketsOutput.error_to_json)])
+let list_directory_buckets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and continuationToken =
+         flag "continuation-token" (optional string)
+           ~doc:"STRING DirectoryBucketToken"
+       and maxDirectoryBuckets =
+         flag "max-directory-buckets" (optional int)
+           ~doc:"INT MaxDirectoryBuckets" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_directory_buckets
+           (Values.ListDirectoryBucketsRequest.make ?continuationToken
+              ?maxDirectoryBuckets ())
+           (Some Values.ListDirectoryBucketsOutput.to_json)
+           (Some Values.ListDirectoryBucketsOutput.error_to_json)])
 let list_multipart_uploads =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1766,6 +2096,8 @@ let list_multipart_uploads =
        and expectedBucketOwner =
          flag "expected-bucket-owner" (optional string)
            ~doc:"STRING AccountId"
+       and requestPayer =
+         flag "request-payer" (optional json_arg) ~doc:"JSON RequestPayer"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1773,7 +2105,9 @@ let list_multipart_uploads =
            (Values.ListMultipartUploadsRequest.make ?delimiter
               ?encodingType:(Option.map ~f:Values.EncodingType.of_json
                                encodingType) ?keyMarker ?maxUploads ?prefix
-              ?uploadIdMarker ?expectedBucketOwner ~bucket ())
+              ?uploadIdMarker ?expectedBucketOwner
+              ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
+                               requestPayer) ~bucket ())
            (Some Values.ListMultipartUploadsOutput.to_json)
            (Some Values.ListMultipartUploadsOutput.error_to_json)])
 let list_object_versions =
@@ -1800,6 +2134,11 @@ let list_object_versions =
        and expectedBucketOwner =
          flag "expected-bucket-owner" (optional string)
            ~doc:"STRING AccountId"
+       and requestPayer =
+         flag "request-payer" (optional json_arg) ~doc:"JSON RequestPayer"
+       and optionalObjectAttributes =
+         flag "optional-object-attributes" (optional json_arg)
+           ~doc:"JSON OptionalObjectAttributesList"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1807,8 +2146,13 @@ let list_object_versions =
            (Values.ListObjectVersionsRequest.make ?delimiter
               ?encodingType:(Option.map ~f:Values.EncodingType.of_json
                                encodingType) ?keyMarker ?maxKeys ?prefix
-              ?versionIdMarker ?expectedBucketOwner ~bucket ())
-           (Some Values.ListObjectVersionsOutput.to_json)
+              ?versionIdMarker ?expectedBucketOwner
+              ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
+                               requestPayer)
+              ?optionalObjectAttributes:(Option.map
+                                           ~f:Values.OptionalObjectAttributesList.of_json
+                                           optionalObjectAttributes) ~bucket
+              ()) (Some Values.ListObjectVersionsOutput.to_json)
            (Some Values.ListObjectVersionsOutput.error_to_json)])
 let list_objects =
   Command.async ~summary:""
@@ -1832,6 +2176,9 @@ let list_objects =
        and expectedBucketOwner =
          flag "expected-bucket-owner" (optional string)
            ~doc:"STRING AccountId"
+       and optionalObjectAttributes =
+         flag "optional-object-attributes" (optional json_arg)
+           ~doc:"JSON OptionalObjectAttributesList"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1840,8 +2187,11 @@ let list_objects =
               ?encodingType:(Option.map ~f:Values.EncodingType.of_json
                                encodingType) ?marker ?maxKeys ?prefix
               ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
-                               requestPayer) ?expectedBucketOwner ~bucket ())
-           (Some Values.ListObjectsOutput.to_json)
+                               requestPayer) ?expectedBucketOwner
+              ?optionalObjectAttributes:(Option.map
+                                           ~f:Values.OptionalObjectAttributesList.of_json
+                                           optionalObjectAttributes) ~bucket
+              ()) (Some Values.ListObjectsOutput.to_json)
            (Some Values.ListObjectsOutput.error_to_json)])
 let list_objects_v2 =
   Command.async ~summary:""
@@ -1870,6 +2220,9 @@ let list_objects_v2 =
        and expectedBucketOwner =
          flag "expected-bucket-owner" (optional string)
            ~doc:"STRING AccountId"
+       and optionalObjectAttributes =
+         flag "optional-object-attributes" (optional json_arg)
+           ~doc:"JSON OptionalObjectAttributesList"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1879,8 +2232,11 @@ let list_objects_v2 =
                                encodingType) ?maxKeys ?prefix
               ?continuationToken ?fetchOwner ?startAfter
               ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
-                               requestPayer) ?expectedBucketOwner ~bucket ())
-           (Some Values.ListObjectsV2Output.to_json)
+                               requestPayer) ?expectedBucketOwner
+              ?optionalObjectAttributes:(Option.map
+                                           ~f:Values.OptionalObjectAttributesList.of_json
+                                           optionalObjectAttributes) ~bucket
+              ()) (Some Values.ListObjectsV2Output.to_json)
            (Some Values.ListObjectsV2Output.error_to_json)])
 let list_parts =
   Command.async ~summary:""
@@ -1923,6 +2279,36 @@ let list_parts =
               ~bucket ~key ~uploadId ())
            (Some Values.ListPartsOutput.to_json)
            (Some Values.ListPartsOutput.error_to_json)])
+let put_bucket_abac =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and contentMD5 =
+         flag "content-m-d5" (optional string) ~doc:"STRING ContentMD5"
+       and checksumAlgorithm =
+         flag "checksum-algorithm" (optional json_arg)
+           ~doc:"JSON ChecksumAlgorithm"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
+       and abacStatus =
+         flag "abac-status" (required json_arg) ~doc:"JSON AbacStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_bucket_abac
+           (Values.PutBucketAbacRequest.make ?contentMD5
+              ?checksumAlgorithm:(Option.map
+                                    ~f:Values.ChecksumAlgorithm.of_json
+                                    checksumAlgorithm) ?expectedBucketOwner
+              ~bucket ~abacStatus:(Values.AbacStatus.of_json abacStatus) ())
+           None None])
 let put_bucket_accelerate_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2103,6 +2489,9 @@ let put_bucket_intelligent_tiering_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
        and id =
          flag "id" (required string) ~doc:"STRING IntelligentTieringId"
@@ -2113,7 +2502,7 @@ let put_bucket_intelligent_tiering_configuration =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_bucket_intelligent_tiering_configuration
            (Values.PutBucketIntelligentTieringConfigurationRequest.make
-              ~bucket ~id
+              ?expectedBucketOwner ~bucket ~id
               ~intelligentTieringConfiguration:(Values.IntelligentTieringConfiguration.of_json
                                                   intelligentTieringConfiguration)
               ()) None None])
@@ -2195,6 +2584,9 @@ let put_bucket_lifecycle_configuration =
        and expectedBucketOwner =
          flag "expected-bucket-owner" (optional string)
            ~doc:"STRING AccountId"
+       and transitionDefaultMinimumObjectSize =
+         flag "transition-default-minimum-object-size" (optional json_arg)
+           ~doc:"JSON TransitionDefaultMinimumObjectSize"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -2206,7 +2598,13 @@ let put_bucket_lifecycle_configuration =
               ?lifecycleConfiguration:(Option.map
                                          ~f:Values.BucketLifecycleConfiguration.of_json
                                          lifecycleConfiguration)
-              ?expectedBucketOwner ~bucket ()) None None])
+              ?expectedBucketOwner
+              ?transitionDefaultMinimumObjectSize:(Option.map
+                                                     ~f:Values.TransitionDefaultMinimumObjectSize.of_json
+                                                     transitionDefaultMinimumObjectSize)
+              ~bucket ())
+           (Some Values.PutBucketLifecycleConfigurationOutput.to_json)
+           (Some Values.PutBucketLifecycleConfigurationOutput.error_to_json)])
 let put_bucket_logging =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2340,6 +2738,9 @@ let put_bucket_ownership_controls =
        and expectedBucketOwner =
          flag "expected-bucket-owner" (optional string)
            ~doc:"STRING AccountId"
+       and checksumAlgorithm =
+         flag "checksum-algorithm" (optional json_arg)
+           ~doc:"JSON ChecksumAlgorithm"
        and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
        and ownershipControls =
          flag "ownership-controls" (required json_arg)
@@ -2348,7 +2749,10 @@ let put_bucket_ownership_controls =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_bucket_ownership_controls
            (Values.PutBucketOwnershipControlsRequest.make ?contentMD5
-              ?expectedBucketOwner ~bucket
+              ?expectedBucketOwner
+              ?checksumAlgorithm:(Option.map
+                                    ~f:Values.ChecksumAlgorithm.of_json
+                                    checksumAlgorithm) ~bucket
               ~ownershipControls:(Values.OwnershipControls.of_json
                                     ownershipControls) ()) None None])
 let put_bucket_policy =
@@ -2583,12 +2987,32 @@ let put_object =
        and checksumCRC32C =
          flag "checksum-c-r-c32-c" (optional string)
            ~doc:"STRING ChecksumCRC32C"
+       and checksumCRC64NVME =
+         flag "checksum-c-r-c64-n-v-m-e" (optional string)
+           ~doc:"STRING ChecksumCRC64NVME"
        and checksumSHA1 =
          flag "checksum-s-h-a1" (optional string) ~doc:"STRING ChecksumSHA1"
        and checksumSHA256 =
          flag "checksum-s-h-a256" (optional string)
            ~doc:"STRING ChecksumSHA256"
-       and expires = flag "expires" (optional json_arg) ~doc:"JSON Expires"
+       and checksumSHA512 =
+         flag "checksum-s-h-a512" (optional string)
+           ~doc:"STRING ChecksumSHA512"
+       and checksumMD5 =
+         flag "checksum-m-d5" (optional string) ~doc:"STRING ChecksumMD5"
+       and checksumXXHASH64 =
+         flag "checksum-x-x-h-a-s-h64" (optional string)
+           ~doc:"STRING ChecksumXXHASH64"
+       and checksumXXHASH3 =
+         flag "checksum-x-x-h-a-s-h3" (optional string)
+           ~doc:"STRING ChecksumXXHASH3"
+       and checksumXXHASH128 =
+         flag "checksum-x-x-h-a-s-h128" (optional string)
+           ~doc:"STRING ChecksumXXHASH128"
+       and expires = flag "expires" (optional string) ~doc:"STRING Expires"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING IfMatch"
+       and ifNoneMatch =
+         flag "if-none-match" (optional string) ~doc:"STRING IfNoneMatch"
        and grantFullControl =
          flag "grant-full-control" (optional string)
            ~doc:"STRING GrantFullControl"
@@ -2599,6 +3023,9 @@ let put_object =
        and grantWriteACP =
          flag "grant-write-a-c-p" (optional string)
            ~doc:"STRING GrantWriteACP"
+       and writeOffsetBytes =
+         flag "write-offset-bytes" (optional json_arg)
+           ~doc:"JSON WriteOffsetBytes"
        and metadata =
          flag "metadata" (optional json_arg) ~doc:"JSON Metadata"
        and serverSideEncryption =
@@ -2657,9 +3084,14 @@ let put_object =
               ?checksumAlgorithm:(Option.map
                                     ~f:Values.ChecksumAlgorithm.of_json
                                     checksumAlgorithm) ?checksumCRC32
-              ?checksumCRC32C ?checksumSHA1 ?checksumSHA256
-              ?expires:(Option.map ~f:Values.Expires.of_json expires)
-              ?grantFullControl ?grantRead ?grantReadACP ?grantWriteACP
+              ?checksumCRC32C ?checksumCRC64NVME ?checksumSHA1
+              ?checksumSHA256 ?checksumSHA512 ?checksumMD5 ?checksumXXHASH64
+              ?checksumXXHASH3 ?checksumXXHASH128 ?expires ?ifMatch
+              ?ifNoneMatch ?grantFullControl ?grantRead ?grantReadACP
+              ?grantWriteACP
+              ?writeOffsetBytes:(Option.map
+                                   ~f:Values.WriteOffsetBytes.of_json
+                                   writeOffsetBytes)
               ?metadata:(Option.map ~f:Values.Metadata.of_json metadata)
               ?serverSideEncryption:(Option.map
                                        ~f:Values.ServerSideEncryption.of_json
@@ -2931,6 +3363,66 @@ let put_public_access_block =
               ~publicAccessBlockConfiguration:(Values.PublicAccessBlockConfiguration.of_json
                                                  publicAccessBlockConfiguration)
               ()) None None])
+let rename_object =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationIfMatch =
+         flag "destination-if-match" (optional string) ~doc:"STRING IfMatch"
+       and destinationIfNoneMatch =
+         flag "destination-if-none-match" (optional string)
+           ~doc:"STRING IfNoneMatch"
+       and destinationIfModifiedSince =
+         flag "destination-if-modified-since" (optional json_arg)
+           ~doc:"JSON IfModifiedSince"
+       and destinationIfUnmodifiedSince =
+         flag "destination-if-unmodified-since" (optional json_arg)
+           ~doc:"JSON IfUnmodifiedSince"
+       and sourceIfMatch =
+         flag "source-if-match" (optional string)
+           ~doc:"STRING RenameSourceIfMatch"
+       and sourceIfNoneMatch =
+         flag "source-if-none-match" (optional string)
+           ~doc:"STRING RenameSourceIfNoneMatch"
+       and sourceIfModifiedSince =
+         flag "source-if-modified-since" (optional json_arg)
+           ~doc:"JSON RenameSourceIfModifiedSince"
+       and sourceIfUnmodifiedSince =
+         flag "source-if-unmodified-since" (optional json_arg)
+           ~doc:"JSON RenameSourceIfUnmodifiedSince"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
+       and key = flag "key" (required string) ~doc:"STRING ObjectKey"
+       and renameSource =
+         flag "rename-source" (required string) ~doc:"STRING RenameSource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.rename_object
+           (Values.RenameObjectRequest.make ?destinationIfMatch
+              ?destinationIfNoneMatch
+              ?destinationIfModifiedSince:(Option.map
+                                             ~f:Values.IfModifiedSince.of_json
+                                             destinationIfModifiedSince)
+              ?destinationIfUnmodifiedSince:(Option.map
+                                               ~f:Values.IfUnmodifiedSince.of_json
+                                               destinationIfUnmodifiedSince)
+              ?sourceIfMatch ?sourceIfNoneMatch
+              ?sourceIfModifiedSince:(Option.map
+                                        ~f:Values.RenameSourceIfModifiedSince.of_json
+                                        sourceIfModifiedSince)
+              ?sourceIfUnmodifiedSince:(Option.map
+                                          ~f:Values.RenameSourceIfUnmodifiedSince.of_json
+                                          sourceIfUnmodifiedSince)
+              ?clientToken ~bucket ~key ~renameSource ())
+           (Some Values.RenameObjectOutput.to_json)
+           (Some Values.RenameObjectOutput.error_to_json)])
 let restore_object =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3025,6 +3517,114 @@ let select_object_content =
                                       outputSerialization) ())
            (Some Values.SelectObjectContentOutput.to_json)
            (Some Values.SelectObjectContentOutput.error_to_json)])
+let update_bucket_metadata_inventory_table_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and contentMD5 =
+         flag "content-m-d5" (optional string) ~doc:"STRING ContentMD5"
+       and checksumAlgorithm =
+         flag "checksum-algorithm" (optional json_arg)
+           ~doc:"JSON ChecksumAlgorithm"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
+       and inventoryTableConfiguration =
+         flag "inventory-table-configuration" (required json_arg)
+           ~doc:"JSON InventoryTableConfigurationUpdates" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_bucket_metadata_inventory_table_configuration
+           (Values.UpdateBucketMetadataInventoryTableConfigurationRequest.make
+              ?contentMD5
+              ?checksumAlgorithm:(Option.map
+                                    ~f:Values.ChecksumAlgorithm.of_json
+                                    checksumAlgorithm) ?expectedBucketOwner
+              ~bucket
+              ~inventoryTableConfiguration:(Values.InventoryTableConfigurationUpdates.of_json
+                                              inventoryTableConfiguration) ())
+           None None])
+let update_bucket_metadata_journal_table_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and contentMD5 =
+         flag "content-m-d5" (optional string) ~doc:"STRING ContentMD5"
+       and checksumAlgorithm =
+         flag "checksum-algorithm" (optional json_arg)
+           ~doc:"JSON ChecksumAlgorithm"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
+       and journalTableConfiguration =
+         flag "journal-table-configuration" (required json_arg)
+           ~doc:"JSON JournalTableConfigurationUpdates" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_bucket_metadata_journal_table_configuration
+           (Values.UpdateBucketMetadataJournalTableConfigurationRequest.make
+              ?contentMD5
+              ?checksumAlgorithm:(Option.map
+                                    ~f:Values.ChecksumAlgorithm.of_json
+                                    checksumAlgorithm) ?expectedBucketOwner
+              ~bucket
+              ~journalTableConfiguration:(Values.JournalTableConfigurationUpdates.of_json
+                                            journalTableConfiguration) ())
+           None None])
+let update_object_encryption =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and versionId =
+         flag "version-id" (optional string) ~doc:"STRING ObjectVersionId"
+       and requestPayer =
+         flag "request-payer" (optional json_arg) ~doc:"JSON RequestPayer"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
+       and contentMD5 =
+         flag "content-m-d5" (optional string) ~doc:"STRING ContentMD5"
+       and checksumAlgorithm =
+         flag "checksum-algorithm" (optional json_arg)
+           ~doc:"JSON ChecksumAlgorithm"
+       and bucket = flag "bucket" (required string) ~doc:"STRING BucketName"
+       and key = flag "key" (required string) ~doc:"STRING ObjectKey"
+       and objectEncryption =
+         flag "object-encryption" (required json_arg)
+           ~doc:"JSON ObjectEncryption" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_object_encryption
+           (Values.UpdateObjectEncryptionRequest.make ?versionId
+              ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
+                               requestPayer) ?expectedBucketOwner ?contentMD5
+              ?checksumAlgorithm:(Option.map
+                                    ~f:Values.ChecksumAlgorithm.of_json
+                                    checksumAlgorithm) ~bucket ~key
+              ~objectEncryption:(Values.ObjectEncryption.of_json
+                                   objectEncryption) ())
+           (Some Values.UpdateObjectEncryptionResponse.to_json)
+           (Some Values.UpdateObjectEncryptionResponse.error_to_json)])
 let upload_part =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3049,11 +3649,28 @@ let upload_part =
        and checksumCRC32C =
          flag "checksum-c-r-c32-c" (optional string)
            ~doc:"STRING ChecksumCRC32C"
+       and checksumCRC64NVME =
+         flag "checksum-c-r-c64-n-v-m-e" (optional string)
+           ~doc:"STRING ChecksumCRC64NVME"
        and checksumSHA1 =
          flag "checksum-s-h-a1" (optional string) ~doc:"STRING ChecksumSHA1"
        and checksumSHA256 =
          flag "checksum-s-h-a256" (optional string)
            ~doc:"STRING ChecksumSHA256"
+       and checksumSHA512 =
+         flag "checksum-s-h-a512" (optional string)
+           ~doc:"STRING ChecksumSHA512"
+       and checksumMD5 =
+         flag "checksum-m-d5" (optional string) ~doc:"STRING ChecksumMD5"
+       and checksumXXHASH64 =
+         flag "checksum-x-x-h-a-s-h64" (optional string)
+           ~doc:"STRING ChecksumXXHASH64"
+       and checksumXXHASH3 =
+         flag "checksum-x-x-h-a-s-h3" (optional string)
+           ~doc:"STRING ChecksumXXHASH3"
+       and checksumXXHASH128 =
+         flag "checksum-x-x-h-a-s-h128" (optional string)
+           ~doc:"STRING ChecksumXXHASH128"
        and sSECustomerAlgorithm =
          flag "s-s-e-customer-algorithm" (optional string)
            ~doc:"STRING SSECustomerAlgorithm"
@@ -3084,8 +3701,10 @@ let upload_part =
               ?checksumAlgorithm:(Option.map
                                     ~f:Values.ChecksumAlgorithm.of_json
                                     checksumAlgorithm) ?checksumCRC32
-              ?checksumCRC32C ?checksumSHA1 ?checksumSHA256
-              ?sSECustomerAlgorithm ?sSECustomerKey ?sSECustomerKeyMD5
+              ?checksumCRC32C ?checksumCRC64NVME ?checksumSHA1
+              ?checksumSHA256 ?checksumSHA512 ?checksumMD5 ?checksumXXHASH64
+              ?checksumXXHASH3 ?checksumXXHASH128 ?sSECustomerAlgorithm
+              ?sSECustomerKey ?sSECustomerKeyMD5
               ?requestPayer:(Option.map ~f:Values.RequestPayer.of_json
                                requestPayer) ?expectedBucketOwner ~bucket
               ~key ~partNumber ~uploadId ())
@@ -3212,15 +3831,32 @@ let write_get_object_response =
        and checksumCRC32C =
          flag "checksum-c-r-c32-c" (optional string)
            ~doc:"STRING ChecksumCRC32C"
+       and checksumCRC64NVME =
+         flag "checksum-c-r-c64-n-v-m-e" (optional string)
+           ~doc:"STRING ChecksumCRC64NVME"
        and checksumSHA1 =
          flag "checksum-s-h-a1" (optional string) ~doc:"STRING ChecksumSHA1"
        and checksumSHA256 =
          flag "checksum-s-h-a256" (optional string)
            ~doc:"STRING ChecksumSHA256"
+       and checksumSHA512 =
+         flag "checksum-s-h-a512" (optional string)
+           ~doc:"STRING ChecksumSHA512"
+       and checksumMD5 =
+         flag "checksum-m-d5" (optional string) ~doc:"STRING ChecksumMD5"
+       and checksumXXHASH64 =
+         flag "checksum-x-x-h-a-s-h64" (optional string)
+           ~doc:"STRING ChecksumXXHASH64"
+       and checksumXXHASH3 =
+         flag "checksum-x-x-h-a-s-h3" (optional string)
+           ~doc:"STRING ChecksumXXHASH3"
+       and checksumXXHASH128 =
+         flag "checksum-x-x-h-a-s-h128" (optional string)
+           ~doc:"STRING ChecksumXXHASH128"
        and deleteMarker =
          flag "delete-marker" (optional bool) ~doc:"BOOL DeleteMarker"
        and eTag = flag "e-tag" (optional string) ~doc:"STRING ETag"
-       and expires = flag "expires" (optional json_arg) ~doc:"JSON Expires"
+       and expires = flag "expires" (optional string) ~doc:"STRING Expires"
        and expiration =
          flag "expiration" (optional string) ~doc:"STRING Expiration"
        and lastModified =
@@ -3280,10 +3916,10 @@ let write_get_object_response =
               ?contentDisposition ?contentEncoding ?contentLanguage
               ?contentLength:(Option.map ~f:Values.ContentLength.of_json
                                 contentLength) ?contentRange ?contentType
-              ?checksumCRC32 ?checksumCRC32C ?checksumSHA1 ?checksumSHA256
-              ?deleteMarker ?eTag
-              ?expires:(Option.map ~f:Values.Expires.of_json expires)
-              ?expiration
+              ?checksumCRC32 ?checksumCRC32C ?checksumCRC64NVME ?checksumSHA1
+              ?checksumSHA256 ?checksumSHA512 ?checksumMD5 ?checksumXXHASH64
+              ?checksumXXHASH3 ?checksumXXHASH128 ?deleteMarker ?eTag
+              ?expires ?expiration
               ?lastModified:(Option.map ~f:Values.LastModified.of_json
                                lastModified) ?missingMeta
               ?metadata:(Option.map ~f:Values.Metadata.of_json metadata)
@@ -3315,7 +3951,12 @@ let main =
     ("complete-multipart-upload", complete_multipart_upload);
     ("copy-object", copy_object);
     ("create-bucket", create_bucket);
+    ("create-bucket-metadata-configuration",
+      create_bucket_metadata_configuration);
+    ("create-bucket-metadata-table-configuration",
+      create_bucket_metadata_table_configuration);
     ("create-multipart-upload", create_multipart_upload);
+    ("create-session", create_session);
     ("delete-bucket", delete_bucket);
     ("delete-bucket-analytics-configuration",
       delete_bucket_analytics_configuration);
@@ -3326,6 +3967,10 @@ let main =
     ("delete-bucket-inventory-configuration",
       delete_bucket_inventory_configuration);
     ("delete-bucket-lifecycle", delete_bucket_lifecycle);
+    ("delete-bucket-metadata-configuration",
+      delete_bucket_metadata_configuration);
+    ("delete-bucket-metadata-table-configuration",
+      delete_bucket_metadata_table_configuration);
     ("delete-bucket-metrics-configuration",
       delete_bucket_metrics_configuration);
     ("delete-bucket-ownership-controls", delete_bucket_ownership_controls);
@@ -3337,6 +3982,7 @@ let main =
     ("delete-object-tagging", delete_object_tagging);
     ("delete-objects", delete_objects);
     ("delete-public-access-block", delete_public_access_block);
+    ("get-bucket-abac", get_bucket_abac);
     ("get-bucket-accelerate-configuration",
       get_bucket_accelerate_configuration);
     ("get-bucket-acl", get_bucket_acl);
@@ -3353,6 +3999,9 @@ let main =
       get_bucket_lifecycle_configuration);
     ("get-bucket-location", get_bucket_location);
     ("get-bucket-logging", get_bucket_logging);
+    ("get-bucket-metadata-configuration", get_bucket_metadata_configuration);
+    ("get-bucket-metadata-table-configuration",
+      get_bucket_metadata_table_configuration);
     ("get-bucket-metrics-configuration", get_bucket_metrics_configuration);
     ("get-bucket-notification", get_bucket_notification);
     ("get-bucket-notification-configuration",
@@ -3385,11 +4034,13 @@ let main =
     ("list-bucket-metrics-configurations",
       list_bucket_metrics_configurations);
     ("list-buckets", list_buckets);
+    ("list-directory-buckets", list_directory_buckets);
     ("list-multipart-uploads", list_multipart_uploads);
     ("list-object-versions", list_object_versions);
     ("list-objects", list_objects);
     ("list-objects-v2", list_objects_v2);
     ("list-parts", list_parts);
+    ("put-bucket-abac", put_bucket_abac);
     ("put-bucket-accelerate-configuration",
       put_bucket_accelerate_configuration);
     ("put-bucket-acl", put_bucket_acl);
@@ -3423,8 +4074,14 @@ let main =
     ("put-object-retention", put_object_retention);
     ("put-object-tagging", put_object_tagging);
     ("put-public-access-block", put_public_access_block);
+    ("rename-object", rename_object);
     ("restore-object", restore_object);
     ("select-object-content", select_object_content);
+    ("update-bucket-metadata-inventory-table-configuration",
+      update_bucket_metadata_inventory_table_configuration);
+    ("update-bucket-metadata-journal-table-configuration",
+      update_bucket_metadata_journal_table_configuration);
+    ("update-object-encryption", update_object_encryption);
     ("upload-part", upload_part);
     ("upload-part-copy", upload_part_copy);
     ("write-get-object-response", write_get_object_response)]

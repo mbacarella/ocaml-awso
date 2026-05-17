@@ -15,6 +15,8 @@ let accept_domain_transfer_from_another_aws_account ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg Endpoints.AcceptDomainTransferFromAnotherAwsAccount
     input
+let associate_delegation_signer_to_domain ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateDelegationSignerToDomain input
 let cancel_domain_transfer_to_another_aws_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelDomainTransferToAnotherAwsAccount
     input
@@ -30,6 +32,9 @@ let disable_domain_auto_renew ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableDomainAutoRenew input
 let disable_domain_transfer_lock ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableDomainTransferLock input
+let disassociate_delegation_signer_from_domain ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateDelegationSignerFromDomain
+    input
 let enable_domain_auto_renew ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableDomainAutoRenew input
 let enable_domain_transfer_lock ?endpoint_url ?cfg input =
@@ -50,6 +55,8 @@ let list_prices ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPrices input
 let list_tags_for_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForDomain input
+let push_domain ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PushDomain input
 let register_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterDomain input
 let reject_domain_transfer_from_another_aws_account ?endpoint_url ?cfg input
@@ -60,6 +67,8 @@ let renew_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RenewDomain input
 let resend_contact_reachability_email ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ResendContactReachabilityEmail input
+let resend_operation_authorization ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ResendOperationAuthorization input
 let retrieve_domain_auth_code ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RetrieveDomainAuthCode input
 let transfer_domain ?endpoint_url ?cfg input =

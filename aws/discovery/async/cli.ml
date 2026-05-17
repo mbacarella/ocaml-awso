@@ -55,6 +55,25 @@ let associate_configuration_items_to_application =
               Values.AssociateConfigurationItemsToApplicationResponse.to_json)
            (Some
               Values.AssociateConfigurationItemsToApplicationResponse.error_to_json)])
+let batch_delete_agents =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deleteAgents =
+         flag "delete-agents" (required json_arg) ~doc:"JSON DeleteAgents" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_delete_agents
+           (Values.BatchDeleteAgentsRequest.make
+              ~deleteAgents:(Values.DeleteAgents.of_json deleteAgents) ())
+           (Some Values.BatchDeleteAgentsResponse.to_json)
+           (Some Values.BatchDeleteAgentsResponse.error_to_json)])
 let batch_delete_import_data =
   Command.async ~summary:""
     ([%map_open.Command
@@ -65,13 +84,15 @@ let batch_delete_import_data =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deleteHistory =
+         flag "delete-history" (optional bool) ~doc:"BOOL Boolean"
        and importTaskIds =
          flag "import-task-ids" (required json_arg)
            ~doc:"JSON ToDeleteIdentifierList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_delete_import_data
-           (Values.BatchDeleteImportDataRequest.make
+           (Values.BatchDeleteImportDataRequest.make ?deleteHistory
               ~importTaskIds:(Values.ToDeleteIdentifierList.of_json
                                 importTaskIds) ())
            (Some Values.BatchDeleteImportDataResponse.to_json)
@@ -87,12 +108,14 @@ let create_application =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and description =
-         flag "description" (optional string) ~doc:"STRING String"
-       and name = flag "name" (required string) ~doc:"STRING String" in
+         flag "description" (optional string)
+           ~doc:"STRING ApplicationDescription"
+       and wave = flag "wave" (optional string) ~doc:"STRING ApplicationWave"
+       and name = flag "name" (required string) ~doc:"STRING ApplicationName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_application
-           (Values.CreateApplicationRequest.make ?description ~name ())
+           (Values.CreateApplicationRequest.make ?description ?wave ~name ())
            (Some Values.CreateApplicationResponse.to_json)
            (Some Values.CreateApplicationResponse.error_to_json)])
 let create_tags =
@@ -187,6 +210,25 @@ let describe_agents =
               ?maxResults ?nextToken ())
            (Some Values.DescribeAgentsResponse.to_json)
            (Some Values.DescribeAgentsResponse.error_to_json)])
+let describe_batch_delete_configuration_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and taskId = flag "task-id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_batch_delete_configuration_task
+           (Values.DescribeBatchDeleteConfigurationTaskRequest.make ~taskId
+              ())
+           (Some Values.DescribeBatchDeleteConfigurationTaskResponse.to_json)
+           (Some
+              Values.DescribeBatchDeleteConfigurationTaskResponse.error_to_json)])
 let describe_configurations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -454,6 +496,33 @@ let list_server_neighbors =
               ?maxResults ?nextToken ~configurationId ())
            (Some Values.ListServerNeighborsResponse.to_json)
            (Some Values.ListServerNeighborsResponse.error_to_json)])
+let start_batch_delete_configuration_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and configurationType =
+         flag "configuration-type" (required json_arg)
+           ~doc:"JSON DeletionConfigurationItemType"
+       and configurationIds =
+         flag "configuration-ids" (required json_arg)
+           ~doc:"JSON ConfigurationIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_batch_delete_configuration_task
+           (Values.StartBatchDeleteConfigurationTaskRequest.make
+              ~configurationType:(Values.DeletionConfigurationItemType.of_json
+                                    configurationType)
+              ~configurationIds:(Values.ConfigurationIdList.of_json
+                                   configurationIds) ())
+           (Some Values.StartBatchDeleteConfigurationTaskResponse.to_json)
+           (Some
+              Values.StartBatchDeleteConfigurationTaskResponse.error_to_json)])
 let start_continuous_export =
   Command.async ~summary:""
     ([%map_open.Command
@@ -508,7 +577,9 @@ let start_export_task =
        and startTime =
          flag "start-time" (optional json_arg) ~doc:"JSON TimeStamp"
        and endTime =
-         flag "end-time" (optional json_arg) ~doc:"JSON TimeStamp" in
+         flag "end-time" (optional json_arg) ~doc:"JSON TimeStamp"
+       and preferences =
+         flag "preferences" (optional json_arg) ~doc:"JSON ExportPreferences" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_export_task
@@ -518,7 +589,9 @@ let start_export_task =
                                    exportDataFormat)
               ?filters:(Option.map ~f:Values.ExportFilters.of_json filters)
               ?startTime:(Option.map ~f:Values.TimeStamp.of_json startTime)
-              ?endTime:(Option.map ~f:Values.TimeStamp.of_json endTime) ())
+              ?endTime:(Option.map ~f:Values.TimeStamp.of_json endTime)
+              ?preferences:(Option.map ~f:Values.ExportPreferences.of_json
+                              preferences) ())
            (Some Values.StartExportTaskResponse.to_json)
            (Some Values.StartExportTaskResponse.error_to_json)])
 let start_import_task =
@@ -591,16 +664,18 @@ let update_application =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and name = flag "name" (optional string) ~doc:"STRING String"
+       and name = flag "name" (optional string) ~doc:"STRING ApplicationName"
        and description =
-         flag "description" (optional string) ~doc:"STRING String"
+         flag "description" (optional string)
+           ~doc:"STRING ApplicationDescription"
+       and wave = flag "wave" (optional string) ~doc:"STRING ApplicationWave"
        and configurationId =
          flag "configuration-id" (required string)
            ~doc:"STRING ApplicationId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_application
-           (Values.UpdateApplicationRequest.make ?name ?description
+           (Values.UpdateApplicationRequest.make ?name ?description ?wave
               ~configurationId ())
            (Some Values.UpdateApplicationResponse.to_json)
            (Some Values.UpdateApplicationResponse.error_to_json)])
@@ -609,12 +684,15 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-configuration-items-to-application",
        associate_configuration_items_to_application);
+    ("batch-delete-agents", batch_delete_agents);
     ("batch-delete-import-data", batch_delete_import_data);
     ("create-application", create_application);
     ("create-tags", create_tags);
     ("delete-applications", delete_applications);
     ("delete-tags", delete_tags);
     ("describe-agents", describe_agents);
+    ("describe-batch-delete-configuration-task",
+      describe_batch_delete_configuration_task);
     ("describe-configurations", describe_configurations);
     ("describe-continuous-exports", describe_continuous_exports);
     ("describe-export-configurations", describe_export_configurations);
@@ -627,6 +705,8 @@ let main =
     ("get-discovery-summary", get_discovery_summary);
     ("list-configurations", list_configurations);
     ("list-server-neighbors", list_server_neighbors);
+    ("start-batch-delete-configuration-task",
+      start_batch_delete_configuration_task);
     ("start-continuous-export", start_continuous_export);
     ("start-data-collection-by-agent-ids",
       start_data_collection_by_agent_ids);

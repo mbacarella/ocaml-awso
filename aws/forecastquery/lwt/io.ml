@@ -13,3 +13,5 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let query_forecast ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.QueryForecast input
+let query_what_if_forecast ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.QueryWhatIfForecast input

@@ -17,6 +17,11 @@ val create_domain :
     ?cfg:Awso.Cfg.t ->
       CreateDomainRequest.t ->
         (CreateDomainResult.t, CreateDomainResult.error) Result.t
+val create_package_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePackageGroupRequest.t ->
+        (CreatePackageGroupResult.t, CreatePackageGroupResult.error) Result.t
 val create_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -33,6 +38,16 @@ val delete_domain_permissions_policy :
       DeleteDomainPermissionsPolicyRequest.t ->
         (DeleteDomainPermissionsPolicyResult.t,
           DeleteDomainPermissionsPolicyResult.error) Result.t
+val delete_package :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePackageRequest.t ->
+        (DeletePackageResult.t, DeletePackageResult.error) Result.t
+val delete_package_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePackageGroupRequest.t ->
+        (DeletePackageGroupResult.t, DeletePackageGroupResult.error) Result.t
 val delete_package_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -55,6 +70,17 @@ val describe_domain :
     ?cfg:Awso.Cfg.t ->
       DescribeDomainRequest.t ->
         (DescribeDomainResult.t, DescribeDomainResult.error) Result.t
+val describe_package :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribePackageRequest.t ->
+        (DescribePackageResult.t, DescribePackageResult.error) Result.t
+val describe_package_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribePackageGroupRequest.t ->
+        (DescribePackageGroupResult.t, DescribePackageGroupResult.error)
+          Result.t
 val describe_package_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -78,6 +104,12 @@ val dispose_package_versions :
       DisposePackageVersionsRequest.t ->
         (DisposePackageVersionsResult.t, DisposePackageVersionsResult.error)
           Result.t
+val get_associated_package_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAssociatedPackageGroupRequest.t ->
+        (GetAssociatedPackageGroupResult.t,
+          GetAssociatedPackageGroupResult.error) Result.t
 val get_authorization_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -114,11 +146,28 @@ val get_repository_permissions_policy :
       GetRepositoryPermissionsPolicyRequest.t ->
         (GetRepositoryPermissionsPolicyResult.t,
           GetRepositoryPermissionsPolicyResult.error) Result.t
+val list_allowed_repositories_for_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAllowedRepositoriesForGroupRequest.t ->
+        (ListAllowedRepositoriesForGroupResult.t,
+          ListAllowedRepositoriesForGroupResult.error) Result.t
+val list_associated_packages :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAssociatedPackagesRequest.t ->
+        (ListAssociatedPackagesResult.t, ListAssociatedPackagesResult.error)
+          Result.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsRequest.t ->
         (ListDomainsResult.t, ListDomainsResult.error) Result.t
+val list_package_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPackageGroupsRequest.t ->
+        (ListPackageGroupsResult.t, ListPackageGroupsResult.error) Result.t
 val list_package_version_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -153,11 +202,23 @@ val list_repositories_in_domain :
       ListRepositoriesInDomainRequest.t ->
         (ListRepositoriesInDomainResult.t,
           ListRepositoriesInDomainResult.error) Result.t
+val list_sub_package_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSubPackageGroupsRequest.t ->
+        (ListSubPackageGroupsResult.t, ListSubPackageGroupsResult.error)
+          Result.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t
+val publish_package_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PublishPackageVersionRequest.t ->
+        (PublishPackageVersionResult.t, PublishPackageVersionResult.error)
           Result.t
 val put_domain_permissions_policy :
   ?endpoint_url:string ->
@@ -165,6 +226,12 @@ val put_domain_permissions_policy :
       PutDomainPermissionsPolicyRequest.t ->
         (PutDomainPermissionsPolicyResult.t,
           PutDomainPermissionsPolicyResult.error) Result.t
+val put_package_origin_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutPackageOriginConfigurationRequest.t ->
+        (PutPackageOriginConfigurationResult.t,
+          PutPackageOriginConfigurationResult.error) Result.t
 val put_repository_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -181,6 +248,17 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResult.t, UntagResourceResult.error) Result.t
+val update_package_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePackageGroupRequest.t ->
+        (UpdatePackageGroupResult.t, UpdatePackageGroupResult.error) Result.t
+val update_package_group_origin_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePackageGroupOriginConfigurationRequest.t ->
+        (UpdatePackageGroupOriginConfigurationResult.t,
+          UpdatePackageGroupOriginConfigurationResult.error) Result.t
 val update_package_versions_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

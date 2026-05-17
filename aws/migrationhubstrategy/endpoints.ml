@@ -13,6 +13,8 @@ type ('i, 'o, 'e) t =
   GetAssessmentResponse.error) t 
   | GetImportFileTask: (GetImportFileTaskRequest.t,
   GetImportFileTaskResponse.t, GetImportFileTaskResponse.error) t 
+  | GetLatestAssessmentId: (GetLatestAssessmentIdRequest.t,
+  GetLatestAssessmentIdResponse.t, GetLatestAssessmentIdResponse.error) t 
   | GetPortfolioPreferences: (GetPortfolioPreferencesRequest.t,
   GetPortfolioPreferencesResponse.t, GetPortfolioPreferencesResponse.error) t
   
@@ -25,6 +27,8 @@ type ('i, 'o, 'e) t =
   GetServerDetailsResponse.error) t 
   | GetServerStrategies: (GetServerStrategiesRequest.t,
   GetServerStrategiesResponse.t, GetServerStrategiesResponse.error) t 
+  | ListAnalyzableServers: (ListAnalyzableServersRequest.t,
+  ListAnalyzableServersResponse.t, ListAnalyzableServersResponse.error) t 
   | ListApplicationComponents: (ListApplicationComponentsRequest.t,
   ListApplicationComponentsResponse.t,
   ListApplicationComponentsResponse.error) t 
@@ -59,11 +63,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetApplicationComponentStrategies -> `GET
   | GetAssessment -> `GET
   | GetImportFileTask -> `GET
+  | GetLatestAssessmentId -> `GET
   | GetPortfolioPreferences -> `GET
   | GetPortfolioSummary -> `GET
   | GetRecommendationReportDetails -> `GET
   | GetServerDetails -> `GET
   | GetServerStrategies -> `GET
+  | ListAnalyzableServers -> `POST
   | ListApplicationComponents -> `POST
   | ListCollectors -> `GET
   | ListImportFileTask -> `GET
@@ -94,6 +100,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetImportFileTask ->
           (Format.kasprintf Uri.of_string) "/get-import-file-task/%s"
             (String_.to_header x.GetImportFileTaskRequest.id)
+      | GetLatestAssessmentId ->
+          (Format.kasprintf Uri.of_string) "/get-latest-assessment-id"
       | GetPortfolioPreferences ->
           (Format.kasprintf Uri.of_string) "/get-portfolio-preferences"
       | GetPortfolioSummary ->
@@ -117,6 +125,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetServerStrategies ->
           (Format.kasprintf Uri.of_string) "/get-server-strategies/%s"
             (ServerId.to_header x.GetServerStrategiesRequest.serverId)
+      | ListAnalyzableServers ->
+          (Format.kasprintf Uri.of_string) "/list-analyzable-servers"
       | ListApplicationComponents ->
           (Format.kasprintf Uri.of_string) "/list-applicationcomponents"
       | ListCollectors ->
@@ -170,6 +180,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetImportFileTask ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetLatestAssessmentId ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetPortfolioPreferences ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -184,6 +197,28 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetServerStrategies ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAnalyzableServers ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListAnalyzableServersRequest.maxResults
+                         ~f:(fun x -> ("maxResults", (MaxResult.to_value x)));
+                      Option.map req.ListAnalyzableServersRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map req.ListAnalyzableServersRequest.sort
+                        ~f:(fun x -> ("sort", (SortOrder.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListApplicationComponents ->
       let (headers, body) =
@@ -268,10 +303,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Option.map
-                         req.PutPortfolioPreferencesRequest.applicationPreferences
+                         req.PutPortfolioPreferencesRequest.applicationMode
                          ~f:(fun x ->
-                               ("applicationPreferences",
-                                 (ApplicationPreferences.to_value x)));
+                               ("applicationMode",
+                                 (ApplicationMode.to_value x)));
+                      Option.map
+                        req.PutPortfolioPreferencesRequest.applicationPreferences
+                        ~f:(fun x ->
+                              ("applicationPreferences",
+                                (ApplicationPreferences.to_value x)));
                       Option.map
                         req.PutPortfolioPreferencesRequest.databasePreferences
                         ~f:(fun x ->
@@ -299,11 +339,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Option.map
-                         req.StartAssessmentRequest.s3bucketForAnalysisData
+                         req.StartAssessmentRequest.assessmentDataSourceType
                          ~f:(fun x ->
-                               ("s3bucketForAnalysisData",
-                                 (StartAssessmentRequestS3bucketForAnalysisDataString.to_value
-                                    x)));
+                               ("assessmentDataSourceType",
+                                 (AssessmentDataSourceType.to_value x)));
+                      Option.map req.StartAssessmentRequest.assessmentTargets
+                        ~f:(fun x ->
+                              ("assessmentTargets",
+                                (AssessmentTargets.to_value x)));
+                      Option.map
+                        req.StartAssessmentRequest.s3bucketForAnalysisData
+                        ~f:(fun x ->
+                              ("s3bucketForAnalysisData",
+                                (StartAssessmentRequestS3bucketForAnalysisDataString.to_value
+                                   x)));
                       Option.map
                         req.StartAssessmentRequest.s3bucketForReportData
                         ~f:(fun x ->
@@ -410,10 +459,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("applicationComponentId",
-                           (ApplicationComponentId.to_value
-                              req.UpdateApplicationComponentConfigRequest.applicationComponentId));
+                      [Option.map
+                         req.UpdateApplicationComponentConfigRequest.appType
+                         ~f:(fun x -> ("appType", (AppType.to_value x)));
+                      Some
+                        ("applicationComponentId",
+                          (ApplicationComponentId.to_value
+                             req.UpdateApplicationComponentConfigRequest.applicationComponentId));
+                      Option.map
+                        req.UpdateApplicationComponentConfigRequest.configureOnly
+                        ~f:(fun x -> ("configureOnly", (Boolean.to_value x)));
                       Option.map
                         req.UpdateApplicationComponentConfigRequest.inclusionStatus
                         ~f:(fun x ->
@@ -540,6 +595,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetImportFileTaskResponse.error_of_json))
+  | GetLatestAssessmentId ->
+      if is_success
+      then Ok (GetLatestAssessmentIdResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetLatestAssessmentIdResponse.error_of_json))
   | GetPortfolioPreferences ->
       if is_success
       then
@@ -575,6 +636,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetServerStrategiesResponse.error_of_json))
+  | ListAnalyzableServers ->
+      if is_success
+      then Ok (ListAnalyzableServersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAnalyzableServersResponse.error_of_json))
   | ListApplicationComponents ->
       if is_success
       then

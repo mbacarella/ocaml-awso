@@ -28,6 +28,69 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let create_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and subscriptions =
+         flag "subscriptions" (optional json_arg)
+           ~doc:"JSON SubscriptionList"
+       and publications =
+         flag "publications" (optional json_arg) ~doc:"JSON PublicationList"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and permissions =
+         flag "permissions" (optional json_arg) ~doc:"JSON PermissionList"
+       and isService = flag "is-service" (optional bool) ~doc:"BOOL Boolean"
+       and initializationTimeout =
+         flag "initialization-timeout" (optional int)
+           ~doc:"INT InitializationTimeout"
+       and applicationConfig =
+         flag "application-config" (optional json_arg)
+           ~doc:"JSON ApplicationConfig"
+       and iframeConfig =
+         flag "iframe-config" (optional json_arg) ~doc:"JSON IframeConfig"
+       and applicationType =
+         flag "application-type" (optional json_arg)
+           ~doc:"JSON ApplicationType"
+       and name = flag "name" (required string) ~doc:"STRING ApplicationName"
+       and namespace =
+         flag "namespace" (required string)
+           ~doc:"STRING ApplicationNamespace"
+       and applicationSourceConfig =
+         flag "application-source-config" (required json_arg)
+           ~doc:"JSON ApplicationSourceConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_application
+           (Values.CreateApplicationRequest.make ?description
+              ?subscriptions:(Option.map ~f:Values.SubscriptionList.of_json
+                                subscriptions)
+              ?publications:(Option.map ~f:Values.PublicationList.of_json
+                               publications) ?clientToken
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?permissions:(Option.map ~f:Values.PermissionList.of_json
+                              permissions) ?isService ?initializationTimeout
+              ?applicationConfig:(Option.map
+                                    ~f:Values.ApplicationConfig.of_json
+                                    applicationConfig)
+              ?iframeConfig:(Option.map ~f:Values.IframeConfig.of_json
+                               iframeConfig)
+              ?applicationType:(Option.map ~f:Values.ApplicationType.of_json
+                                  applicationType) ~name ~namespace
+              ~applicationSourceConfig:(Values.ApplicationSourceConfig.of_json
+                                          applicationSourceConfig) ())
+           (Some Values.CreateApplicationResponse.to_json)
+           (Some Values.CreateApplicationResponse.error_to_json)])
 let create_data_integration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -40,28 +103,86 @@ let create_data_integration =
            ~doc:"URL override endpoint url"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
-       and kmsKey =
-         flag "kms-key" (optional string) ~doc:"STRING NonBlankString"
        and sourceURI =
-         flag "source-u-r-i" (optional string) ~doc:"STRING NonBlankString"
+         flag "source-u-r-i" (optional string) ~doc:"STRING SourceURI"
        and scheduleConfig =
          flag "schedule-config" (optional json_arg)
            ~doc:"JSON ScheduleConfiguration"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
-       and name = flag "name" (required string) ~doc:"STRING Name" in
+       and fileConfiguration =
+         flag "file-configuration" (optional json_arg)
+           ~doc:"JSON FileConfiguration"
+       and objectConfiguration =
+         flag "object-configuration" (optional json_arg)
+           ~doc:"JSON ObjectConfiguration"
+       and name = flag "name" (required string) ~doc:"STRING Name"
+       and kmsKey =
+         flag "kms-key" (required string) ~doc:"STRING NonBlankString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_data_integration
-           (Values.CreateDataIntegrationRequest.make ?description ?kmsKey
-              ?sourceURI
+           (Values.CreateDataIntegrationRequest.make ?description ?sourceURI
               ?scheduleConfig:(Option.map
                                  ~f:Values.ScheduleConfiguration.of_json
                                  scheduleConfig)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?clientToken
-              ~name ()) (Some Values.CreateDataIntegrationResponse.to_json)
+              ?fileConfiguration:(Option.map
+                                    ~f:Values.FileConfiguration.of_json
+                                    fileConfiguration)
+              ?objectConfiguration:(Option.map
+                                      ~f:Values.ObjectConfiguration.of_json
+                                      objectConfiguration) ~name ~kmsKey ())
+           (Some Values.CreateDataIntegrationResponse.to_json)
            (Some Values.CreateDataIntegrationResponse.error_to_json)])
+let create_data_integration_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientId =
+         flag "client-id" (optional string) ~doc:"STRING ClientId"
+       and objectConfiguration =
+         flag "object-configuration" (optional json_arg)
+           ~doc:"JSON ObjectConfiguration"
+       and destinationURI =
+         flag "destination-u-r-i" (optional string)
+           ~doc:"STRING DestinationURI"
+       and clientAssociationMetadata =
+         flag "client-association-metadata" (optional json_arg)
+           ~doc:"JSON ClientAssociationMetadata"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and executionConfiguration =
+         flag "execution-configuration" (optional json_arg)
+           ~doc:"JSON ExecutionConfiguration"
+       and dataIntegrationIdentifier =
+         flag "data-integration-identifier" (required string)
+           ~doc:"STRING Identifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_data_integration_association
+           (Values.CreateDataIntegrationAssociationRequest.make ?clientId
+              ?objectConfiguration:(Option.map
+                                      ~f:Values.ObjectConfiguration.of_json
+                                      objectConfiguration) ?destinationURI
+              ?clientAssociationMetadata:(Option.map
+                                            ~f:Values.ClientAssociationMetadata.of_json
+                                            clientAssociationMetadata)
+              ?clientToken
+              ?executionConfiguration:(Option.map
+                                         ~f:Values.ExecutionConfiguration.of_json
+                                         executionConfiguration)
+              ~dataIntegrationIdentifier ())
+           (Some Values.CreateDataIntegrationAssociationResponse.to_json)
+           (Some
+              Values.CreateDataIntegrationAssociationResponse.error_to_json)])
 let create_event_integration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -92,6 +213,23 @@ let create_event_integration =
               ~eventBridgeBus ())
            (Some Values.CreateEventIntegrationResponse.to_json)
            (Some Values.CreateEventIntegrationResponse.error_to_json)])
+let delete_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and arn = flag "arn" (required string) ~doc:"STRING ArnOrUUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_application
+           (Values.DeleteApplicationRequest.make ~arn ())
+           (Some Values.DeleteApplicationResponse.to_json)
+           (Some Values.DeleteApplicationResponse.error_to_json)])
 let delete_data_integration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -129,6 +267,22 @@ let delete_event_integration =
            (Values.DeleteEventIntegrationRequest.make ~name ())
            (Some Values.DeleteEventIntegrationResponse.to_json)
            (Some Values.DeleteEventIntegrationResponse.error_to_json)])
+let get_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and arn = flag "arn" (required string) ~doc:"STRING ArnOrUUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_application (Values.GetApplicationRequest.make ~arn ())
+           (Some Values.GetApplicationResponse.to_json)
+           (Some Values.GetApplicationResponse.error_to_json)])
 let get_data_integration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -164,6 +318,54 @@ let get_event_integration =
            (Values.GetEventIntegrationRequest.make ~name ())
            (Some Values.GetEventIntegrationResponse.to_json)
            (Some Values.GetEventIntegrationResponse.error_to_json)])
+let list_application_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and applicationId =
+         flag "application-id" (required string) ~doc:"STRING ArnOrUUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_application_associations
+           (Values.ListApplicationAssociationsRequest.make ?nextToken
+              ?maxResults ~applicationId ())
+           (Some Values.ListApplicationAssociationsResponse.to_json)
+           (Some Values.ListApplicationAssociationsResponse.error_to_json)])
+let list_applications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and applicationType =
+         flag "application-type" (optional json_arg)
+           ~doc:"JSON ApplicationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_applications
+           (Values.ListApplicationsRequest.make ?nextToken ?maxResults
+              ?applicationType:(Option.map ~f:Values.ApplicationType.of_json
+                                  applicationType) ())
+           (Some Values.ListApplicationsResponse.to_json)
+           (Some Values.ListApplicationsResponse.error_to_json)])
 let list_data_integration_associations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -311,6 +513,64 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING ApplicationName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and applicationSourceConfig =
+         flag "application-source-config" (optional json_arg)
+           ~doc:"JSON ApplicationSourceConfig"
+       and subscriptions =
+         flag "subscriptions" (optional json_arg)
+           ~doc:"JSON SubscriptionList"
+       and publications =
+         flag "publications" (optional json_arg) ~doc:"JSON PublicationList"
+       and permissions =
+         flag "permissions" (optional json_arg) ~doc:"JSON PermissionList"
+       and isService = flag "is-service" (optional bool) ~doc:"BOOL Boolean"
+       and initializationTimeout =
+         flag "initialization-timeout" (optional int)
+           ~doc:"INT InitializationTimeout"
+       and applicationConfig =
+         flag "application-config" (optional json_arg)
+           ~doc:"JSON ApplicationConfig"
+       and iframeConfig =
+         flag "iframe-config" (optional json_arg) ~doc:"JSON IframeConfig"
+       and applicationType =
+         flag "application-type" (optional json_arg)
+           ~doc:"JSON ApplicationType"
+       and arn = flag "arn" (required string) ~doc:"STRING ArnOrUUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_application
+           (Values.UpdateApplicationRequest.make ?name ?description
+              ?applicationSourceConfig:(Option.map
+                                          ~f:Values.ApplicationSourceConfig.of_json
+                                          applicationSourceConfig)
+              ?subscriptions:(Option.map ~f:Values.SubscriptionList.of_json
+                                subscriptions)
+              ?publications:(Option.map ~f:Values.PublicationList.of_json
+                               publications)
+              ?permissions:(Option.map ~f:Values.PermissionList.of_json
+                              permissions) ?isService ?initializationTimeout
+              ?applicationConfig:(Option.map
+                                    ~f:Values.ApplicationConfig.of_json
+                                    applicationConfig)
+              ?iframeConfig:(Option.map ~f:Values.IframeConfig.of_json
+                               iframeConfig)
+              ?applicationType:(Option.map ~f:Values.ApplicationType.of_json
+                                  applicationType) ~arn ())
+           (Some Values.UpdateApplicationResponse.to_json)
+           (Some Values.UpdateApplicationResponse.error_to_json)])
 let update_data_integration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -333,6 +593,36 @@ let update_data_integration =
               ~identifier ())
            (Some Values.UpdateDataIntegrationResponse.to_json)
            (Some Values.UpdateDataIntegrationResponse.error_to_json)])
+let update_data_integration_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataIntegrationIdentifier =
+         flag "data-integration-identifier" (required string)
+           ~doc:"STRING Identifier"
+       and dataIntegrationAssociationIdentifier =
+         flag "data-integration-association-identifier" (required string)
+           ~doc:"STRING Identifier"
+       and executionConfiguration =
+         flag "execution-configuration" (required json_arg)
+           ~doc:"JSON ExecutionConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_data_integration_association
+           (Values.UpdateDataIntegrationAssociationRequest.make
+              ~dataIntegrationIdentifier
+              ~dataIntegrationAssociationIdentifier
+              ~executionConfiguration:(Values.ExecutionConfiguration.of_json
+                                         executionConfiguration) ())
+           (Some Values.UpdateDataIntegrationAssociationResponse.to_json)
+           (Some
+              Values.UpdateDataIntegrationAssociationResponse.error_to_json)])
 let update_event_integration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -355,12 +645,19 @@ let update_event_integration =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-data-integration", create_data_integration);
+    [("create-application", create_application);
+    ("create-data-integration", create_data_integration);
+    ("create-data-integration-association",
+      create_data_integration_association);
     ("create-event-integration", create_event_integration);
+    ("delete-application", delete_application);
     ("delete-data-integration", delete_data_integration);
     ("delete-event-integration", delete_event_integration);
+    ("get-application", get_application);
     ("get-data-integration", get_data_integration);
     ("get-event-integration", get_event_integration);
+    ("list-application-associations", list_application_associations);
+    ("list-applications", list_applications);
     ("list-data-integration-associations",
       list_data_integration_associations);
     ("list-data-integrations", list_data_integrations);
@@ -370,5 +667,8 @@ let main =
     ("list-tags-for-resource", list_tags_for_resource);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-application", update_application);
     ("update-data-integration", update_data_integration);
+    ("update-data-integration-association",
+      update_data_integration_association);
     ("update-event-integration", update_event_integration)]

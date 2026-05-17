@@ -46,6 +46,54 @@ let associate_member =
            (Values.AssociateMemberRequest.make ~accountId ())
            (Some Values.AssociateMemberResponse.to_json)
            (Some Values.AssociateMemberResponse.error_to_json)])
+let batch_associate_code_security_scan_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and associateConfigurationRequests =
+         flag "associate-configuration-requests" (required json_arg)
+           ~doc:"JSON AssociateConfigurationRequestList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_associate_code_security_scan_configuration
+           (Values.BatchAssociateCodeSecurityScanConfigurationRequest.make
+              ~associateConfigurationRequests:(Values.AssociateConfigurationRequestList.of_json
+                                                 associateConfigurationRequests)
+              ())
+           (Some
+              Values.BatchAssociateCodeSecurityScanConfigurationResponse.to_json)
+           (Some
+              Values.BatchAssociateCodeSecurityScanConfigurationResponse.error_to_json)])
+let batch_disassociate_code_security_scan_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and disassociateConfigurationRequests =
+         flag "disassociate-configuration-requests" (required json_arg)
+           ~doc:"JSON DisassociateConfigurationRequestList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_disassociate_code_security_scan_configuration
+           (Values.BatchDisassociateCodeSecurityScanConfigurationRequest.make
+              ~disassociateConfigurationRequests:(Values.DisassociateConfigurationRequestList.of_json
+                                                    disassociateConfigurationRequests)
+              ())
+           (Some
+              Values.BatchDisassociateCodeSecurityScanConfigurationResponse.to_json)
+           (Some
+              Values.BatchDisassociateCodeSecurityScanConfigurationResponse.error_to_json)])
 let batch_get_account_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -66,6 +114,46 @@ let batch_get_account_status =
                              accountIds) ())
            (Some Values.BatchGetAccountStatusResponse.to_json)
            (Some Values.BatchGetAccountStatusResponse.error_to_json)])
+let batch_get_code_snippet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and findingArns =
+         flag "finding-arns" (required json_arg)
+           ~doc:"JSON BatchGetCodeSnippetRequestFindingArnsList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_code_snippet
+           (Values.BatchGetCodeSnippetRequest.make
+              ~findingArns:(Values.BatchGetCodeSnippetRequestFindingArnsList.of_json
+                              findingArns) ())
+           (Some Values.BatchGetCodeSnippetResponse.to_json)
+           (Some Values.BatchGetCodeSnippetResponse.error_to_json)])
+let batch_get_finding_details =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and findingArns =
+         flag "finding-arns" (required json_arg) ~doc:"JSON FindingArnList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_finding_details
+           (Values.BatchGetFindingDetailsRequest.make
+              ~findingArns:(Values.FindingArnList.of_json findingArns) ())
+           (Some Values.BatchGetFindingDetailsResponse.to_json)
+           (Some Values.BatchGetFindingDetailsResponse.error_to_json)])
 let batch_get_free_trial_info =
   Command.async ~summary:""
     ([%map_open.Command
@@ -87,6 +175,50 @@ let batch_get_free_trial_info =
                              accountIds) ())
            (Some Values.BatchGetFreeTrialInfoResponse.to_json)
            (Some Values.BatchGetFreeTrialInfoResponse.error_to_json)])
+let batch_get_member_ec2_deep_inspection_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON AccountIdSet" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_member_ec2_deep_inspection_status
+           (Values.BatchGetMemberEc2DeepInspectionStatusRequest.make
+              ?accountIds:(Option.map ~f:Values.AccountIdSet.of_json
+                             accountIds) ())
+           (Some Values.BatchGetMemberEc2DeepInspectionStatusResponse.to_json)
+           (Some
+              Values.BatchGetMemberEc2DeepInspectionStatusResponse.error_to_json)])
+let batch_update_member_ec2_deep_inspection_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountIds =
+         flag "account-ids" (required json_arg)
+           ~doc:"JSON MemberAccountEc2DeepInspectionStatusList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_update_member_ec2_deep_inspection_status
+           (Values.BatchUpdateMemberEc2DeepInspectionStatusRequest.make
+              ~accountIds:(Values.MemberAccountEc2DeepInspectionStatusList.of_json
+                             accountIds) ())
+           (Some
+              Values.BatchUpdateMemberEc2DeepInspectionStatusResponse.to_json)
+           (Some
+              Values.BatchUpdateMemberEc2DeepInspectionStatusResponse.error_to_json)])
 let cancel_findings_report =
   Command.async ~summary:""
     ([%map_open.Command
@@ -105,6 +237,114 @@ let cancel_findings_report =
            (Values.CancelFindingsReportRequest.make ~reportId ())
            (Some Values.CancelFindingsReportResponse.to_json)
            (Some Values.CancelFindingsReportResponse.error_to_json)])
+let cancel_sbom_export =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reportId =
+         flag "report-id" (required string) ~doc:"STRING ReportId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_sbom_export
+           (Values.CancelSbomExportRequest.make ~reportId ())
+           (Some Values.CancelSbomExportResponse.to_json)
+           (Some Values.CancelSbomExportResponse.error_to_json)])
+let create_cis_scan_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON CisTagMap"
+       and scanName =
+         flag "scan-name" (required string) ~doc:"STRING CisScanName"
+       and securityLevel =
+         flag "security-level" (required json_arg)
+           ~doc:"JSON CisSecurityLevel"
+       and schedule =
+         flag "schedule" (required json_arg) ~doc:"JSON Schedule"
+       and targets =
+         flag "targets" (required json_arg) ~doc:"JSON CreateCisTargets" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_cis_scan_configuration
+           (Values.CreateCisScanConfigurationRequest.make
+              ?tags:(Option.map ~f:Values.CisTagMap.of_json tags) ~scanName
+              ~securityLevel:(Values.CisSecurityLevel.of_json securityLevel)
+              ~schedule:(Values.Schedule.of_json schedule)
+              ~targets:(Values.CreateCisTargets.of_json targets) ())
+           (Some Values.CreateCisScanConfigurationResponse.to_json)
+           (Some Values.CreateCisScanConfigurationResponse.error_to_json)])
+let create_code_security_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and details =
+         flag "details" (optional json_arg)
+           ~doc:"JSON CreateIntegrationDetail"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and name = flag "name" (required string) ~doc:"STRING IntegrationName"
+       and type_ =
+         flag "type-" (required json_arg) ~doc:"JSON IntegrationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_code_security_integration
+           (Values.CreateCodeSecurityIntegrationRequest.make
+              ?details:(Option.map ~f:Values.CreateIntegrationDetail.of_json
+                          details)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
+              ~type_:(Values.IntegrationType.of_json type_) ())
+           (Some Values.CreateCodeSecurityIntegrationResponse.to_json)
+           (Some Values.CreateCodeSecurityIntegrationResponse.error_to_json)])
+let create_code_security_scan_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scopeSettings =
+         flag "scope-settings" (optional json_arg) ~doc:"JSON ScopeSettings"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and name =
+         flag "name" (required string) ~doc:"STRING ScanConfigurationName"
+       and level =
+         flag "level" (required json_arg) ~doc:"JSON ConfigurationLevel"
+       and configuration =
+         flag "configuration" (required json_arg)
+           ~doc:"JSON CodeSecurityScanConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_code_security_scan_configuration
+           (Values.CreateCodeSecurityScanConfigurationRequest.make
+              ?scopeSettings:(Option.map ~f:Values.ScopeSettings.of_json
+                                scopeSettings)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
+              ~level:(Values.ConfigurationLevel.of_json level)
+              ~configuration:(Values.CodeSecurityScanConfiguration.of_json
+                                configuration) ())
+           (Some Values.CreateCodeSecurityScanConfigurationResponse.to_json)
+           (Some
+              Values.CreateCodeSecurityScanConfigurationResponse.error_to_json)])
 let create_filter =
   Command.async ~summary:""
     ([%map_open.Command
@@ -118,6 +358,8 @@ let create_filter =
        and description =
          flag "description" (optional string) ~doc:"STRING FilterDescription"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and reason =
+         flag "reason" (optional string) ~doc:"STRING FilterReason"
        and action =
          flag "action" (required json_arg) ~doc:"JSON FilterAction"
        and filterCriteria =
@@ -128,7 +370,7 @@ let create_filter =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_filter
            (Values.CreateFilterRequest.make ?description
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?reason
               ~action:(Values.FilterAction.of_json action)
               ~filterCriteria:(Values.FilterCriteria.of_json filterCriteria)
               ~name ()) (Some Values.CreateFilterResponse.to_json)
@@ -160,6 +402,95 @@ let create_findings_report =
               ~s3Destination:(Values.Destination.of_json s3Destination) ())
            (Some Values.CreateFindingsReportResponse.to_json)
            (Some Values.CreateFindingsReportResponse.error_to_json)])
+let create_sbom_export =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceFilterCriteria =
+         flag "resource-filter-criteria" (optional json_arg)
+           ~doc:"JSON ResourceFilterCriteria"
+       and reportFormat =
+         flag "report-format" (required json_arg)
+           ~doc:"JSON SbomReportFormat"
+       and s3Destination =
+         flag "s3-destination" (required json_arg) ~doc:"JSON Destination" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_sbom_export
+           (Values.CreateSbomExportRequest.make
+              ?resourceFilterCriteria:(Option.map
+                                         ~f:Values.ResourceFilterCriteria.of_json
+                                         resourceFilterCriteria)
+              ~reportFormat:(Values.SbomReportFormat.of_json reportFormat)
+              ~s3Destination:(Values.Destination.of_json s3Destination) ())
+           (Some Values.CreateSbomExportResponse.to_json)
+           (Some Values.CreateSbomExportResponse.error_to_json)])
+let delete_cis_scan_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanConfigurationArn =
+         flag "scan-configuration-arn" (required string)
+           ~doc:"STRING CisScanConfigurationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_cis_scan_configuration
+           (Values.DeleteCisScanConfigurationRequest.make
+              ~scanConfigurationArn ())
+           (Some Values.DeleteCisScanConfigurationResponse.to_json)
+           (Some Values.DeleteCisScanConfigurationResponse.error_to_json)])
+let delete_code_security_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationArn =
+         flag "integration-arn" (required string)
+           ~doc:"STRING CodeSecurityIntegrationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_code_security_integration
+           (Values.DeleteCodeSecurityIntegrationRequest.make ~integrationArn
+              ()) (Some Values.DeleteCodeSecurityIntegrationResponse.to_json)
+           (Some Values.DeleteCodeSecurityIntegrationResponse.error_to_json)])
+let delete_code_security_scan_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanConfigurationArn =
+         flag "scan-configuration-arn" (required string)
+           ~doc:"STRING ScanConfigurationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_code_security_scan_configuration
+           (Values.DeleteCodeSecurityScanConfigurationRequest.make
+              ~scanConfigurationArn ())
+           (Some Values.DeleteCodeSecurityScanConfigurationResponse.to_json)
+           (Some
+              Values.DeleteCodeSecurityScanConfigurationResponse.error_to_json)])
 let delete_filter =
   Command.async ~summary:""
     ([%map_open.Command
@@ -306,6 +637,182 @@ let enable_delegated_admin_account =
               ~delegatedAdminAccountId ())
            (Some Values.EnableDelegatedAdminAccountResponse.to_json)
            (Some Values.EnableDelegatedAdminAccountResponse.error_to_json)])
+let get_cis_scan_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and targetAccounts =
+         flag "target-accounts" (optional json_arg)
+           ~doc:"JSON ReportTargetAccounts"
+       and reportFormat =
+         flag "report-format" (optional json_arg) ~doc:"JSON CisReportFormat"
+       and scanArn =
+         flag "scan-arn" (required string) ~doc:"STRING CisScanArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_cis_scan_report
+           (Values.GetCisScanReportRequest.make
+              ?targetAccounts:(Option.map
+                                 ~f:Values.ReportTargetAccounts.of_json
+                                 targetAccounts)
+              ?reportFormat:(Option.map ~f:Values.CisReportFormat.of_json
+                               reportFormat) ~scanArn ())
+           (Some Values.GetCisScanReportResponse.to_json)
+           (Some Values.GetCisScanReportResponse.error_to_json)])
+let get_cis_scan_result_details =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON CisScanResultDetailsFilterCriteria"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON CisScanResultDetailsSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON CisSortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetCisScanResultDetailsMaxResults"
+       and scanArn =
+         flag "scan-arn" (required string) ~doc:"STRING CisScanArn"
+       and targetResourceId =
+         flag "target-resource-id" (required string) ~doc:"STRING ResourceId"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING AccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_cis_scan_result_details
+           (Values.GetCisScanResultDetailsRequest.make
+              ?filterCriteria:(Option.map
+                                 ~f:Values.CisScanResultDetailsFilterCriteria.of_json
+                                 filterCriteria)
+              ?sortBy:(Option.map
+                         ~f:Values.CisScanResultDetailsSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.CisSortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ~scanArn ~targetResourceId ~accountId ())
+           (Some Values.GetCisScanResultDetailsResponse.to_json)
+           (Some Values.GetCisScanResultDetailsResponse.error_to_json)])
+let get_clusters_for_image =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetClustersForImageRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING GetClustersForImageNextToken"
+       and filter =
+         flag "filter" (required json_arg)
+           ~doc:"JSON ClusterForImageFilterCriteria" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_clusters_for_image
+           (Values.GetClustersForImageRequest.make ?maxResults ?nextToken
+              ~filter:(Values.ClusterForImageFilterCriteria.of_json filter)
+              ()) (Some Values.GetClustersForImageResponse.to_json)
+           (Some Values.GetClustersForImageResponse.error_to_json)])
+let get_code_security_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and integrationArn =
+         flag "integration-arn" (required string)
+           ~doc:"STRING CodeSecurityIntegrationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_code_security_integration
+           (Values.GetCodeSecurityIntegrationRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~integrationArn ())
+           (Some Values.GetCodeSecurityIntegrationResponse.to_json)
+           (Some Values.GetCodeSecurityIntegrationResponse.error_to_json)])
+let get_code_security_scan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resource =
+         flag "resource" (required json_arg) ~doc:"JSON CodeSecurityResource"
+       and scanId =
+         flag "scan-id" (required string) ~doc:"STRING CodeSecurityUuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_code_security_scan
+           (Values.GetCodeSecurityScanRequest.make
+              ~resource:(Values.CodeSecurityResource.of_json resource)
+              ~scanId ()) (Some Values.GetCodeSecurityScanResponse.to_json)
+           (Some Values.GetCodeSecurityScanResponse.error_to_json)])
+let get_code_security_scan_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanConfigurationArn =
+         flag "scan-configuration-arn" (required string)
+           ~doc:"STRING ScanConfigurationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_code_security_scan_configuration
+           (Values.GetCodeSecurityScanConfigurationRequest.make
+              ~scanConfigurationArn ())
+           (Some Values.GetCodeSecurityScanConfigurationResponse.to_json)
+           (Some
+              Values.GetCodeSecurityScanConfigurationResponse.error_to_json)])
+let get_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_configuration (Values.GetConfigurationRequest.make ())
+           (Some Values.GetConfigurationResponse.to_json)
+           (Some Values.GetConfigurationResponse.error_to_json)])
 let get_delegated_admin_account =
   Command.async ~summary:""
     ([%map_open.Command
@@ -323,6 +830,46 @@ let get_delegated_admin_account =
            (Values.GetDelegatedAdminAccountRequest.make ())
            (Some Values.GetDelegatedAdminAccountResponse.to_json)
            (Some Values.GetDelegatedAdminAccountResponse.error_to_json)])
+let get_ec2_deep_inspection_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ec2_deep_inspection_configuration
+           (Values.GetEc2DeepInspectionConfigurationRequest.make ())
+           (Some Values.GetEc2DeepInspectionConfigurationResponse.to_json)
+           (Some
+              Values.GetEc2DeepInspectionConfigurationResponse.error_to_json)])
+let get_encryption_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanType =
+         flag "scan-type" (required json_arg) ~doc:"JSON ScanType"
+       and resourceType =
+         flag "resource-type" (required json_arg) ~doc:"JSON ResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_encryption_key
+           (Values.GetEncryptionKeyRequest.make
+              ~scanType:(Values.ScanType.of_json scanType)
+              ~resourceType:(Values.ResourceType.of_json resourceType) ())
+           (Some Values.GetEncryptionKeyResponse.to_json)
+           (Some Values.GetEncryptionKeyResponse.error_to_json)])
 let get_findings_report_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -358,6 +905,23 @@ let get_member =
            Io.get_member (Values.GetMemberRequest.make ~accountId ())
            (Some Values.GetMemberResponse.to_json)
            (Some Values.GetMemberResponse.error_to_json)])
+let get_sbom_export =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reportId =
+         flag "report-id" (required string) ~doc:"STRING ReportId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_sbom_export (Values.GetSbomExportRequest.make ~reportId ())
+           (Some Values.GetSbomExportResponse.to_json)
+           (Some Values.GetSbomExportResponse.error_to_json)])
 let list_account_permissions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -368,20 +932,21 @@ let list_account_permissions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and service = flag "service" (optional json_arg) ~doc:"JSON Service"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT ListAccountPermissionsMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and service = flag "service" (optional json_arg) ~doc:"JSON Service" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_account_permissions
-           (Values.ListAccountPermissionsRequest.make ?maxResults ?nextToken
-              ?service:(Option.map ~f:Values.Service.of_json service) ())
+           (Values.ListAccountPermissionsRequest.make
+              ?service:(Option.map ~f:Values.Service.of_json service)
+              ?maxResults ?nextToken ())
            (Some Values.ListAccountPermissionsResponse.to_json)
            (Some Values.ListAccountPermissionsResponse.error_to_json)])
-let list_coverage =
+let list_cis_scan_configurations =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -393,18 +958,246 @@ let list_coverage =
            ~doc:"URL override endpoint url"
        and filterCriteria =
          flag "filter-criteria" (optional json_arg)
-           ~doc:"JSON CoverageFilterCriteria"
+           ~doc:"JSON ListCisScanConfigurationsFilterCriteria"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON CisScanConfigurationsSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON CisSortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListCisScanConfigurationsMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cis_scan_configurations
+           (Values.ListCisScanConfigurationsRequest.make
+              ?filterCriteria:(Option.map
+                                 ~f:Values.ListCisScanConfigurationsFilterCriteria.of_json
+                                 filterCriteria)
+              ?sortBy:(Option.map
+                         ~f:Values.CisScanConfigurationsSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.CisSortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ())
+           (Some Values.ListCisScanConfigurationsResponse.to_json)
+           (Some Values.ListCisScanConfigurationsResponse.error_to_json)])
+let list_cis_scan_results_aggregated_by_checks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON CisScanResultsAggregatedByChecksFilterCriteria"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON CisScanResultsAggregatedByChecksSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON CisSortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT CisScanResultsMaxResults"
+       and scanArn =
+         flag "scan-arn" (required string) ~doc:"STRING CisScanArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cis_scan_results_aggregated_by_checks
+           (Values.ListCisScanResultsAggregatedByChecksRequest.make
+              ?filterCriteria:(Option.map
+                                 ~f:Values.CisScanResultsAggregatedByChecksFilterCriteria.of_json
+                                 filterCriteria)
+              ?sortBy:(Option.map
+                         ~f:Values.CisScanResultsAggregatedByChecksSortBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.CisSortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ~scanArn ())
+           (Some Values.ListCisScanResultsAggregatedByChecksResponse.to_json)
+           (Some
+              Values.ListCisScanResultsAggregatedByChecksResponse.error_to_json)])
+let list_cis_scan_results_aggregated_by_target_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON CisScanResultsAggregatedByTargetResourceFilterCriteria"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON CisScanResultsAggregatedByTargetResourceSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON CisSortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT CisScanResultsMaxResults"
+       and scanArn =
+         flag "scan-arn" (required string) ~doc:"STRING CisScanArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cis_scan_results_aggregated_by_target_resource
+           (Values.ListCisScanResultsAggregatedByTargetResourceRequest.make
+              ?filterCriteria:(Option.map
+                                 ~f:Values.CisScanResultsAggregatedByTargetResourceFilterCriteria.of_json
+                                 filterCriteria)
+              ?sortBy:(Option.map
+                         ~f:Values.CisScanResultsAggregatedByTargetResourceSortBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.CisSortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ~scanArn ())
+           (Some
+              Values.ListCisScanResultsAggregatedByTargetResourceResponse.to_json)
+           (Some
+              Values.ListCisScanResultsAggregatedByTargetResourceResponse.error_to_json)])
+let list_cis_scans =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON ListCisScansFilterCriteria"
+       and detailLevel =
+         flag "detail-level" (optional json_arg)
+           ~doc:"JSON ListCisScansDetailLevel"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON ListCisScansSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON CisSortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListCisScansMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cis_scans
+           (Values.ListCisScansRequest.make
+              ?filterCriteria:(Option.map
+                                 ~f:Values.ListCisScansFilterCriteria.of_json
+                                 filterCriteria)
+              ?detailLevel:(Option.map
+                              ~f:Values.ListCisScansDetailLevel.of_json
+                              detailLevel)
+              ?sortBy:(Option.map ~f:Values.ListCisScansSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.CisSortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ())
+           (Some Values.ListCisScansResponse.to_json)
+           (Some Values.ListCisScansResponse.error_to_json)])
+let list_code_security_integrations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListCodeSecurityIntegrationsRequestMaxResultsInteger" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_code_security_integrations
+           (Values.ListCodeSecurityIntegrationsRequest.make ?nextToken
+              ?maxResults ())
+           (Some Values.ListCodeSecurityIntegrationsResponse.to_json)
+           (Some Values.ListCodeSecurityIntegrationsResponse.error_to_json)])
+let list_code_security_scan_configuration_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListCodeSecurityScanConfigurationAssociationsRequestMaxResultsInteger"
+       and scanConfigurationArn =
+         flag "scan-configuration-arn" (required string)
+           ~doc:"STRING ScanConfigurationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_code_security_scan_configuration_associations
+           (Values.ListCodeSecurityScanConfigurationAssociationsRequest.make
+              ?nextToken ?maxResults ~scanConfigurationArn ())
+           (Some
+              Values.ListCodeSecurityScanConfigurationAssociationsResponse.to_json)
+           (Some
+              Values.ListCodeSecurityScanConfigurationAssociationsResponse.error_to_json)])
+let list_code_security_scan_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListCodeSecurityScanConfigurationsRequestMaxResultsInteger" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_code_security_scan_configurations
+           (Values.ListCodeSecurityScanConfigurationsRequest.make ?nextToken
+              ?maxResults ())
+           (Some Values.ListCodeSecurityScanConfigurationsResponse.to_json)
+           (Some
+              Values.ListCodeSecurityScanConfigurationsResponse.error_to_json)])
+let list_coverage =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT ListCoverageMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON CoverageFilterCriteria" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_coverage
-           (Values.ListCoverageRequest.make
+           (Values.ListCoverageRequest.make ?maxResults ?nextToken
               ?filterCriteria:(Option.map
                                  ~f:Values.CoverageFilterCriteria.of_json
-                                 filterCriteria) ?maxResults ?nextToken ())
+                                 filterCriteria) ())
            (Some Values.ListCoverageResponse.to_json)
            (Some Values.ListCoverageResponse.error_to_json)])
 let list_coverage_statistics =
@@ -466,20 +1259,20 @@ let list_filters =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and arns = flag "arns" (optional json_arg) ~doc:"JSON FilterArnList"
        and action =
          flag "action" (optional json_arg) ~doc:"JSON FilterAction"
-       and arns = flag "arns" (optional json_arg) ~doc:"JSON FilterArnList"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT ListFilterMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListFilterMaxResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_filters
            (Values.ListFiltersRequest.make
-              ?action:(Option.map ~f:Values.FilterAction.of_json action)
               ?arns:(Option.map ~f:Values.FilterArnList.of_json arns)
-              ?maxResults ?nextToken ())
+              ?action:(Option.map ~f:Values.FilterAction.of_json action)
+              ?nextToken ?maxResults ())
            (Some Values.ListFiltersResponse.to_json)
            (Some Values.ListFiltersResponse.error_to_json)])
 let list_finding_aggregations =
@@ -492,29 +1285,28 @@ let list_finding_aggregations =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListFindingAggregationsMaxResults"
        and accountIds =
          flag "account-ids" (optional json_arg) ~doc:"JSON StringFilterList"
        and aggregationRequest =
          flag "aggregation-request" (optional json_arg)
            ~doc:"JSON AggregationRequest"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT ListFindingAggregationsMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
        and aggregationType =
          flag "aggregation-type" (required json_arg)
            ~doc:"JSON AggregationType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_finding_aggregations
-           (Values.ListFindingAggregationsRequest.make
+           (Values.ListFindingAggregationsRequest.make ?nextToken ?maxResults
               ?accountIds:(Option.map ~f:Values.StringFilterList.of_json
                              accountIds)
               ?aggregationRequest:(Option.map
                                      ~f:Values.AggregationRequest.of_json
-                                     aggregationRequest) ?maxResults
-              ?nextToken
+                                     aggregationRequest)
               ~aggregationType:(Values.AggregationType.of_json
                                   aggregationType) ())
            (Some Values.ListFindingAggregationsResponse.to_json)
@@ -529,21 +1321,21 @@ let list_findings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and filterCriteria =
-         flag "filter-criteria" (optional json_arg)
-           ~doc:"JSON FilterCriteria"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT ListFindingsMaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON FilterCriteria"
        and sortCriteria =
          flag "sort-criteria" (optional json_arg) ~doc:"JSON SortCriteria" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_findings
-           (Values.ListFindingsRequest.make
+           (Values.ListFindingsRequest.make ?maxResults ?nextToken
               ?filterCriteria:(Option.map ~f:Values.FilterCriteria.of_json
-                                 filterCriteria) ?maxResults ?nextToken
+                                 filterCriteria)
               ?sortCriteria:(Option.map ~f:Values.SortCriteria.of_json
                                sortCriteria) ())
            (Some Values.ListFindingsResponse.to_json)
@@ -558,17 +1350,17 @@ let list_members =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and onlyAssociated =
+         flag "only-associated" (optional bool) ~doc:"BOOL Boolean"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT ListMembersMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and onlyAssociated =
-         flag "only-associated" (optional bool) ~doc:"BOOL Boolean" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_members
-           (Values.ListMembersRequest.make ?maxResults ?nextToken
-              ?onlyAssociated ()) (Some Values.ListMembersResponse.to_json)
+           (Values.ListMembersRequest.make ?onlyAssociated ?maxResults
+              ?nextToken ()) (Some Values.ListMembersResponse.to_json)
            (Some Values.ListMembersResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
@@ -598,23 +1390,179 @@ let list_usage_totals =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and accountIds =
-         flag "account-ids" (optional json_arg)
-           ~doc:"JSON UsageAccountIdList"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT ListUsageTotalsMaxResults"
        and nextToken =
          flag "next-token" (optional string)
-           ~doc:"STRING ListUsageTotalsNextToken" in
+           ~doc:"STRING ListUsageTotalsNextToken"
+       and accountIds =
+         flag "account-ids" (optional json_arg)
+           ~doc:"JSON UsageAccountIdList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_usage_totals
-           (Values.ListUsageTotalsRequest.make
+           (Values.ListUsageTotalsRequest.make ?maxResults ?nextToken
               ?accountIds:(Option.map ~f:Values.UsageAccountIdList.of_json
-                             accountIds) ?maxResults ?nextToken ())
+                             accountIds) ())
            (Some Values.ListUsageTotalsResponse.to_json)
            (Some Values.ListUsageTotalsResponse.error_to_json)])
+let reset_encryption_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanType =
+         flag "scan-type" (required json_arg) ~doc:"JSON ScanType"
+       and resourceType =
+         flag "resource-type" (required json_arg) ~doc:"JSON ResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reset_encryption_key
+           (Values.ResetEncryptionKeyRequest.make
+              ~scanType:(Values.ScanType.of_json scanType)
+              ~resourceType:(Values.ResourceType.of_json resourceType) ())
+           (Some Values.ResetEncryptionKeyResponse.to_json)
+           (Some Values.ResetEncryptionKeyResponse.error_to_json)])
+let search_vulnerabilities =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and filterCriteria =
+         flag "filter-criteria" (required json_arg)
+           ~doc:"JSON SearchVulnerabilitiesFilterCriteria" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_vulnerabilities
+           (Values.SearchVulnerabilitiesRequest.make ?nextToken
+              ~filterCriteria:(Values.SearchVulnerabilitiesFilterCriteria.of_json
+                                 filterCriteria) ())
+           (Some Values.SearchVulnerabilitiesResponse.to_json)
+           (Some Values.SearchVulnerabilitiesResponse.error_to_json)])
+let send_cis_session_health =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanJobId =
+         flag "scan-job-id" (required string) ~doc:"STRING UUID"
+       and sessionToken =
+         flag "session-token" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.send_cis_session_health
+           (Values.SendCisSessionHealthRequest.make ~scanJobId ~sessionToken
+              ()) (Some Values.SendCisSessionHealthResponse.to_json)
+           (Some Values.SendCisSessionHealthResponse.error_to_json)])
+let send_cis_session_telemetry =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanJobId =
+         flag "scan-job-id" (required string) ~doc:"STRING UUID"
+       and sessionToken =
+         flag "session-token" (required string) ~doc:"STRING UUID"
+       and messages =
+         flag "messages" (required json_arg) ~doc:"JSON CisSessionMessages" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.send_cis_session_telemetry
+           (Values.SendCisSessionTelemetryRequest.make ~scanJobId
+              ~sessionToken
+              ~messages:(Values.CisSessionMessages.of_json messages) ())
+           (Some Values.SendCisSessionTelemetryResponse.to_json)
+           (Some Values.SendCisSessionTelemetryResponse.error_to_json)])
+let start_cis_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanJobId =
+         flag "scan-job-id" (required string) ~doc:"STRING UUID"
+       and message =
+         flag "message" (required json_arg)
+           ~doc:"JSON StartCisSessionMessage" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_cis_session
+           (Values.StartCisSessionRequest.make ~scanJobId
+              ~message:(Values.StartCisSessionMessage.of_json message) ())
+           (Some Values.StartCisSessionResponse.to_json)
+           (Some Values.StartCisSessionResponse.error_to_json)])
+let start_code_security_scan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING CodeSecurityClientToken"
+       and resource =
+         flag "resource" (required json_arg) ~doc:"JSON CodeSecurityResource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_code_security_scan
+           (Values.StartCodeSecurityScanRequest.make ?clientToken
+              ~resource:(Values.CodeSecurityResource.of_json resource) ())
+           (Some Values.StartCodeSecurityScanResponse.to_json)
+           (Some Values.StartCodeSecurityScanResponse.error_to_json)])
+let stop_cis_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanJobId =
+         flag "scan-job-id" (required string) ~doc:"STRING UUID"
+       and sessionToken =
+         flag "session-token" (required string) ~doc:"STRING UUID"
+       and message =
+         flag "message" (required json_arg) ~doc:"JSON StopCisSessionMessage" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_cis_session
+           (Values.StopCisSessionRequest.make ~scanJobId ~sessionToken
+              ~message:(Values.StopCisSessionMessage.of_json message) ())
+           (Some Values.StopCisSessionResponse.to_json)
+           (Some Values.StopCisSessionResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -656,6 +1604,164 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_cis_scan_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanName =
+         flag "scan-name" (optional string) ~doc:"STRING CisScanName"
+       and securityLevel =
+         flag "security-level" (optional json_arg)
+           ~doc:"JSON CisSecurityLevel"
+       and schedule =
+         flag "schedule" (optional json_arg) ~doc:"JSON Schedule"
+       and targets =
+         flag "targets" (optional json_arg) ~doc:"JSON UpdateCisTargets"
+       and scanConfigurationArn =
+         flag "scan-configuration-arn" (required string)
+           ~doc:"STRING CisScanConfigurationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_cis_scan_configuration
+           (Values.UpdateCisScanConfigurationRequest.make ?scanName
+              ?securityLevel:(Option.map ~f:Values.CisSecurityLevel.of_json
+                                securityLevel)
+              ?schedule:(Option.map ~f:Values.Schedule.of_json schedule)
+              ?targets:(Option.map ~f:Values.UpdateCisTargets.of_json targets)
+              ~scanConfigurationArn ())
+           (Some Values.UpdateCisScanConfigurationResponse.to_json)
+           (Some Values.UpdateCisScanConfigurationResponse.error_to_json)])
+let update_code_security_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationArn =
+         flag "integration-arn" (required string)
+           ~doc:"STRING CodeSecurityIntegrationArn"
+       and details =
+         flag "details" (required json_arg)
+           ~doc:"JSON UpdateIntegrationDetails" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_code_security_integration
+           (Values.UpdateCodeSecurityIntegrationRequest.make ~integrationArn
+              ~details:(Values.UpdateIntegrationDetails.of_json details) ())
+           (Some Values.UpdateCodeSecurityIntegrationResponse.to_json)
+           (Some Values.UpdateCodeSecurityIntegrationResponse.error_to_json)])
+let update_code_security_scan_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanConfigurationArn =
+         flag "scan-configuration-arn" (required string)
+           ~doc:"STRING ScanConfigurationArn"
+       and configuration =
+         flag "configuration" (required json_arg)
+           ~doc:"JSON CodeSecurityScanConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_code_security_scan_configuration
+           (Values.UpdateCodeSecurityScanConfigurationRequest.make
+              ~scanConfigurationArn
+              ~configuration:(Values.CodeSecurityScanConfiguration.of_json
+                                configuration) ())
+           (Some Values.UpdateCodeSecurityScanConfigurationResponse.to_json)
+           (Some
+              Values.UpdateCodeSecurityScanConfigurationResponse.error_to_json)])
+let update_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ecrConfiguration =
+         flag "ecr-configuration" (optional json_arg)
+           ~doc:"JSON EcrConfiguration"
+       and ec2Configuration =
+         flag "ec2-configuration" (optional json_arg)
+           ~doc:"JSON Ec2Configuration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_configuration
+           (Values.UpdateConfigurationRequest.make
+              ?ecrConfiguration:(Option.map
+                                   ~f:Values.EcrConfiguration.of_json
+                                   ecrConfiguration)
+              ?ec2Configuration:(Option.map
+                                   ~f:Values.Ec2Configuration.of_json
+                                   ec2Configuration) ())
+           (Some Values.UpdateConfigurationResponse.to_json)
+           (Some Values.UpdateConfigurationResponse.error_to_json)])
+let update_ec2_deep_inspection_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and activateDeepInspection =
+         flag "activate-deep-inspection" (optional bool) ~doc:"BOOL Boolean"
+       and packagePaths =
+         flag "package-paths" (optional json_arg) ~doc:"JSON PathList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_ec2_deep_inspection_configuration
+           (Values.UpdateEc2DeepInspectionConfigurationRequest.make
+              ?activateDeepInspection
+              ?packagePaths:(Option.map ~f:Values.PathList.of_json
+                               packagePaths) ())
+           (Some Values.UpdateEc2DeepInspectionConfigurationResponse.to_json)
+           (Some
+              Values.UpdateEc2DeepInspectionConfigurationResponse.error_to_json)])
+let update_encryption_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and kmsKeyId =
+         flag "kms-key-id" (required string) ~doc:"STRING KmsKeyArn"
+       and scanType =
+         flag "scan-type" (required json_arg) ~doc:"JSON ScanType"
+       and resourceType =
+         flag "resource-type" (required json_arg) ~doc:"JSON ResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_encryption_key
+           (Values.UpdateEncryptionKeyRequest.make ~kmsKeyId
+              ~scanType:(Values.ScanType.of_json scanType)
+              ~resourceType:(Values.ResourceType.of_json resourceType) ())
+           (Some Values.UpdateEncryptionKeyResponse.to_json)
+           (Some Values.UpdateEncryptionKeyResponse.error_to_json)])
 let update_filter =
   Command.async ~summary:""
     ([%map_open.Command
@@ -674,6 +1780,8 @@ let update_filter =
          flag "filter-criteria" (optional json_arg)
            ~doc:"JSON FilterCriteria"
        and name = flag "name" (optional string) ~doc:"STRING FilterName"
+       and reason =
+         flag "reason" (optional string) ~doc:"STRING FilterReason"
        and filterArn =
          flag "filter-arn" (required string) ~doc:"STRING FilterArn" in
        fun () ->
@@ -683,9 +1791,30 @@ let update_filter =
               ?action:(Option.map ~f:Values.FilterAction.of_json action)
               ?description
               ?filterCriteria:(Option.map ~f:Values.FilterCriteria.of_json
-                                 filterCriteria) ?name ~filterArn ())
+                                 filterCriteria) ?name ?reason ~filterArn ())
            (Some Values.UpdateFilterResponse.to_json)
            (Some Values.UpdateFilterResponse.error_to_json)])
+let update_org_ec2_deep_inspection_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and orgPackagePaths =
+         flag "org-package-paths" (required json_arg) ~doc:"JSON PathList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_org_ec2_deep_inspection_configuration
+           (Values.UpdateOrgEc2DeepInspectionConfigurationRequest.make
+              ~orgPackagePaths:(Values.PathList.of_json orgPackagePaths) ())
+           (Some
+              Values.UpdateOrgEc2DeepInspectionConfigurationResponse.to_json)
+           (Some
+              Values.UpdateOrgEc2DeepInspectionConfigurationResponse.error_to_json)])
 let update_organization_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -709,11 +1838,31 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-member", associate_member);
+    ("batch-associate-code-security-scan-configuration",
+      batch_associate_code_security_scan_configuration);
+    ("batch-disassociate-code-security-scan-configuration",
+      batch_disassociate_code_security_scan_configuration);
     ("batch-get-account-status", batch_get_account_status);
+    ("batch-get-code-snippet", batch_get_code_snippet);
+    ("batch-get-finding-details", batch_get_finding_details);
     ("batch-get-free-trial-info", batch_get_free_trial_info);
+    ("batch-get-member-ec2-deep-inspection-status",
+      batch_get_member_ec2_deep_inspection_status);
+    ("batch-update-member-ec2-deep-inspection-status",
+      batch_update_member_ec2_deep_inspection_status);
     ("cancel-findings-report", cancel_findings_report);
+    ("cancel-sbom-export", cancel_sbom_export);
+    ("create-cis-scan-configuration", create_cis_scan_configuration);
+    ("create-code-security-integration", create_code_security_integration);
+    ("create-code-security-scan-configuration",
+      create_code_security_scan_configuration);
     ("create-filter", create_filter);
     ("create-findings-report", create_findings_report);
+    ("create-sbom-export", create_sbom_export);
+    ("delete-cis-scan-configuration", delete_cis_scan_configuration);
+    ("delete-code-security-integration", delete_code_security_integration);
+    ("delete-code-security-scan-configuration",
+      delete_code_security_scan_configuration);
     ("delete-filter", delete_filter);
     ("describe-organization-configuration",
       describe_organization_configuration);
@@ -722,10 +1871,33 @@ let main =
     ("disassociate-member", disassociate_member);
     ("enable", enable);
     ("enable-delegated-admin-account", enable_delegated_admin_account);
+    ("get-cis-scan-report", get_cis_scan_report);
+    ("get-cis-scan-result-details", get_cis_scan_result_details);
+    ("get-clusters-for-image", get_clusters_for_image);
+    ("get-code-security-integration", get_code_security_integration);
+    ("get-code-security-scan", get_code_security_scan);
+    ("get-code-security-scan-configuration",
+      get_code_security_scan_configuration);
+    ("get-configuration", get_configuration);
     ("get-delegated-admin-account", get_delegated_admin_account);
+    ("get-ec2-deep-inspection-configuration",
+      get_ec2_deep_inspection_configuration);
+    ("get-encryption-key", get_encryption_key);
     ("get-findings-report-status", get_findings_report_status);
     ("get-member", get_member);
+    ("get-sbom-export", get_sbom_export);
     ("list-account-permissions", list_account_permissions);
+    ("list-cis-scan-configurations", list_cis_scan_configurations);
+    ("list-cis-scan-results-aggregated-by-checks",
+      list_cis_scan_results_aggregated_by_checks);
+    ("list-cis-scan-results-aggregated-by-target-resource",
+      list_cis_scan_results_aggregated_by_target_resource);
+    ("list-cis-scans", list_cis_scans);
+    ("list-code-security-integrations", list_code_security_integrations);
+    ("list-code-security-scan-configuration-associations",
+      list_code_security_scan_configuration_associations);
+    ("list-code-security-scan-configurations",
+      list_code_security_scan_configurations);
     ("list-coverage", list_coverage);
     ("list-coverage-statistics", list_coverage_statistics);
     ("list-delegated-admin-accounts", list_delegated_admin_accounts);
@@ -735,7 +1907,24 @@ let main =
     ("list-members", list_members);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-usage-totals", list_usage_totals);
+    ("reset-encryption-key", reset_encryption_key);
+    ("search-vulnerabilities", search_vulnerabilities);
+    ("send-cis-session-health", send_cis_session_health);
+    ("send-cis-session-telemetry", send_cis_session_telemetry);
+    ("start-cis-session", start_cis_session);
+    ("start-code-security-scan", start_code_security_scan);
+    ("stop-cis-session", stop_cis_session);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-cis-scan-configuration", update_cis_scan_configuration);
+    ("update-code-security-integration", update_code_security_integration);
+    ("update-code-security-scan-configuration",
+      update_code_security_scan_configuration);
+    ("update-configuration", update_configuration);
+    ("update-ec2-deep-inspection-configuration",
+      update_ec2_deep_inspection_configuration);
+    ("update-encryption-key", update_encryption_key);
     ("update-filter", update_filter);
+    ("update-org-ec2-deep-inspection-configuration",
+      update_org_ec2_deep_inspection_configuration);
     ("update-organization-configuration", update_organization_configuration)]

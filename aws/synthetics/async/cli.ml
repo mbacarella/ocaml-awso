@@ -28,6 +28,28 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let associate_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and groupIdentifier =
+         flag "group-identifier" (required string)
+           ~doc:"STRING GroupIdentifier"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING CanaryArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_resource
+           (Values.AssociateResourceRequest.make ~groupIdentifier
+              ~resourceArn ())
+           (Some Values.AssociateResourceResponse.to_json)
+           (Some Values.AssociateResourceResponse.error_to_json)])
 let create_canary =
   Command.async ~summary:""
     ([%map_open.Command
@@ -49,6 +71,15 @@ let create_canary =
            ~doc:"INT MaxSize1024"
        and vpcConfig =
          flag "vpc-config" (optional json_arg) ~doc:"JSON VpcConfigInput"
+       and resourcesToReplicateTags =
+         flag "resources-to-replicate-tags" (optional json_arg)
+           ~doc:"JSON ResourceList"
+       and provisionedResourceCleanup =
+         flag "provisioned-resource-cleanup" (optional json_arg)
+           ~doc:"JSON ProvisionedResourceCleanupSetting"
+       and browserConfigs =
+         flag "browser-configs" (optional json_arg)
+           ~doc:"JSON BrowserConfigs"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and artifactConfig =
          flag "artifact-config" (optional json_arg)
@@ -72,6 +103,14 @@ let create_canary =
               ?failureRetentionPeriodInDays
               ?vpcConfig:(Option.map ~f:Values.VpcConfigInput.of_json
                             vpcConfig)
+              ?resourcesToReplicateTags:(Option.map
+                                           ~f:Values.ResourceList.of_json
+                                           resourcesToReplicateTags)
+              ?provisionedResourceCleanup:(Option.map
+                                             ~f:Values.ProvisionedResourceCleanupSetting.of_json
+                                             provisionedResourceCleanup)
+              ?browserConfigs:(Option.map ~f:Values.BrowserConfigs.of_json
+                                 browserConfigs)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?artifactConfig:(Option.map
                                  ~f:Values.ArtifactConfigInput.of_json
@@ -81,6 +120,25 @@ let create_canary =
               ~schedule:(Values.CanaryScheduleInput.of_json schedule)
               ~runtimeVersion ()) (Some Values.CreateCanaryResponse.to_json)
            (Some Values.CreateCanaryResponse.error_to_json)])
+let create_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and name = flag "name" (required string) ~doc:"STRING GroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_group
+           (Values.CreateGroupRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name ())
+           (Some Values.CreateGroupResponse.to_json)
+           (Some Values.CreateGroupResponse.error_to_json)])
 let delete_canary =
   Command.async ~summary:""
     ([%map_open.Command
@@ -91,12 +149,34 @@ let delete_canary =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deleteLambda =
+         flag "delete-lambda" (optional bool) ~doc:"BOOL boolean"
        and name = flag "name" (required string) ~doc:"STRING CanaryName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_canary (Values.DeleteCanaryRequest.make ~name ())
+           Io.delete_canary
+           (Values.DeleteCanaryRequest.make ?deleteLambda ~name ())
            (Some Values.DeleteCanaryResponse.to_json)
            (Some Values.DeleteCanaryResponse.error_to_json)])
+let delete_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and groupIdentifier =
+         flag "group-identifier" (required string)
+           ~doc:"STRING GroupIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_group
+           (Values.DeleteGroupRequest.make ~groupIdentifier ())
+           (Some Values.DeleteGroupResponse.to_json)
+           (Some Values.DeleteGroupResponse.error_to_json)])
 let describe_canaries =
   Command.async ~summary:""
     ([%map_open.Command
@@ -138,14 +218,18 @@ let describe_canaries_last_run =
          flag "max-results" (optional int) ~doc:"INT MaxSize100"
        and names =
          flag "names" (optional json_arg)
-           ~doc:"JSON DescribeCanariesLastRunNameFilter" in
+           ~doc:"JSON DescribeCanariesLastRunNameFilter"
+       and browserType =
+         flag "browser-type" (optional json_arg) ~doc:"JSON BrowserType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_canaries_last_run
            (Values.DescribeCanariesLastRunRequest.make ?nextToken ?maxResults
               ?names:(Option.map
                         ~f:Values.DescribeCanariesLastRunNameFilter.of_json
-                        names) ())
+                        names)
+              ?browserType:(Option.map ~f:Values.BrowserType.of_json
+                              browserType) ())
            (Some Values.DescribeCanariesLastRunResponse.to_json)
            (Some Values.DescribeCanariesLastRunResponse.error_to_json)])
 let describe_runtime_versions =
@@ -168,6 +252,28 @@ let describe_runtime_versions =
            (Values.DescribeRuntimeVersionsRequest.make ?nextToken ?maxResults
               ()) (Some Values.DescribeRuntimeVersionsResponse.to_json)
            (Some Values.DescribeRuntimeVersionsResponse.error_to_json)])
+let disassociate_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and groupIdentifier =
+         flag "group-identifier" (required string)
+           ~doc:"STRING GroupIdentifier"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING CanaryArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_resource
+           (Values.DisassociateResourceRequest.make ~groupIdentifier
+              ~resourceArn ())
+           (Some Values.DisassociateResourceResponse.to_json)
+           (Some Values.DisassociateResourceResponse.error_to_json)])
 let get_canary =
   Command.async ~summary:""
     ([%map_open.Command
@@ -178,10 +284,11 @@ let get_canary =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and dryRunId = flag "dry-run-id" (optional string) ~doc:"STRING UUID"
        and name = flag "name" (required string) ~doc:"STRING CanaryName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_canary (Values.GetCanaryRequest.make ~name ())
+           Io.get_canary (Values.GetCanaryRequest.make ?dryRunId ~name ())
            (Some Values.GetCanaryResponse.to_json)
            (Some Values.GetCanaryResponse.error_to_json)])
 let get_canary_runs =
@@ -198,13 +305,101 @@ let get_canary_runs =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxSize100"
+       and dryRunId = flag "dry-run-id" (optional string) ~doc:"STRING UUID"
+       and runType = flag "run-type" (optional json_arg) ~doc:"JSON RunType"
        and name = flag "name" (required string) ~doc:"STRING CanaryName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_canary_runs
-           (Values.GetCanaryRunsRequest.make ?nextToken ?maxResults ~name ())
-           (Some Values.GetCanaryRunsResponse.to_json)
+           (Values.GetCanaryRunsRequest.make ?nextToken ?maxResults ?dryRunId
+              ?runType:(Option.map ~f:Values.RunType.of_json runType) ~name
+              ()) (Some Values.GetCanaryRunsResponse.to_json)
            (Some Values.GetCanaryRunsResponse.error_to_json)])
+let get_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and groupIdentifier =
+         flag "group-identifier" (required string)
+           ~doc:"STRING GroupIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_group (Values.GetGroupRequest.make ~groupIdentifier ())
+           (Some Values.GetGroupResponse.to_json)
+           (Some Values.GetGroupResponse.error_to_json)])
+let list_associated_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxGroupResults"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING CanaryArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_associated_groups
+           (Values.ListAssociatedGroupsRequest.make ?nextToken ?maxResults
+              ~resourceArn ())
+           (Some Values.ListAssociatedGroupsResponse.to_json)
+           (Some Values.ListAssociatedGroupsResponse.error_to_json)])
+let list_group_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxGroupResults"
+       and groupIdentifier =
+         flag "group-identifier" (required string)
+           ~doc:"STRING GroupIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_group_resources
+           (Values.ListGroupResourcesRequest.make ?nextToken ?maxResults
+              ~groupIdentifier ())
+           (Some Values.ListGroupResourcesResponse.to_json)
+           (Some Values.ListGroupResourcesResponse.error_to_json)])
+let list_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxGroupResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_groups
+           (Values.ListGroupsRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListGroupsResponse.to_json)
+           (Some Values.ListGroupsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -216,7 +411,7 @@ let list_tags_for_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING CanaryArn" in
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_tags_for_resource
@@ -239,6 +434,77 @@ let start_canary =
            Io.start_canary (Values.StartCanaryRequest.make ~name ())
            (Some Values.StartCanaryResponse.to_json)
            (Some Values.StartCanaryResponse.error_to_json)])
+let start_canary_dry_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and code = flag "code" (optional json_arg) ~doc:"JSON CanaryCodeInput"
+       and runtimeVersion =
+         flag "runtime-version" (optional string) ~doc:"STRING String"
+       and runConfig =
+         flag "run-config" (optional json_arg)
+           ~doc:"JSON CanaryRunConfigInput"
+       and vpcConfig =
+         flag "vpc-config" (optional json_arg) ~doc:"JSON VpcConfigInput"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string) ~doc:"STRING RoleArn"
+       and successRetentionPeriodInDays =
+         flag "success-retention-period-in-days" (optional int)
+           ~doc:"INT MaxSize1024"
+       and failureRetentionPeriodInDays =
+         flag "failure-retention-period-in-days" (optional int)
+           ~doc:"INT MaxSize1024"
+       and visualReference =
+         flag "visual-reference" (optional json_arg)
+           ~doc:"JSON VisualReferenceInput"
+       and artifactS3Location =
+         flag "artifact-s3-location" (optional string) ~doc:"STRING String"
+       and artifactConfig =
+         flag "artifact-config" (optional json_arg)
+           ~doc:"JSON ArtifactConfigInput"
+       and provisionedResourceCleanup =
+         flag "provisioned-resource-cleanup" (optional json_arg)
+           ~doc:"JSON ProvisionedResourceCleanupSetting"
+       and browserConfigs =
+         flag "browser-configs" (optional json_arg)
+           ~doc:"JSON BrowserConfigs"
+       and visualReferences =
+         flag "visual-references" (optional json_arg)
+           ~doc:"JSON VisualReferences"
+       and name = flag "name" (required string) ~doc:"STRING CanaryName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_canary_dry_run
+           (Values.StartCanaryDryRunRequest.make
+              ?code:(Option.map ~f:Values.CanaryCodeInput.of_json code)
+              ?runtimeVersion
+              ?runConfig:(Option.map ~f:Values.CanaryRunConfigInput.of_json
+                            runConfig)
+              ?vpcConfig:(Option.map ~f:Values.VpcConfigInput.of_json
+                            vpcConfig) ?executionRoleArn
+              ?successRetentionPeriodInDays ?failureRetentionPeriodInDays
+              ?visualReference:(Option.map
+                                  ~f:Values.VisualReferenceInput.of_json
+                                  visualReference) ?artifactS3Location
+              ?artifactConfig:(Option.map
+                                 ~f:Values.ArtifactConfigInput.of_json
+                                 artifactConfig)
+              ?provisionedResourceCleanup:(Option.map
+                                             ~f:Values.ProvisionedResourceCleanupSetting.of_json
+                                             provisionedResourceCleanup)
+              ?browserConfigs:(Option.map ~f:Values.BrowserConfigs.of_json
+                                 browserConfigs)
+              ?visualReferences:(Option.map
+                                   ~f:Values.VisualReferences.of_json
+                                   visualReferences) ~name ())
+           (Some Values.StartCanaryDryRunResponse.to_json)
+           (Some Values.StartCanaryDryRunResponse.error_to_json)])
 let stop_canary =
   Command.async ~summary:""
     ([%map_open.Command
@@ -266,7 +532,7 @@ let tag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING CanaryArn"
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn"
        and tags = flag "tags" (required json_arg) ~doc:"JSON TagMap" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -286,7 +552,7 @@ let untag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING CanaryArn"
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn"
        and tagKeys =
          flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
        fun () ->
@@ -332,6 +598,16 @@ let update_canary =
        and artifactConfig =
          flag "artifact-config" (optional json_arg)
            ~doc:"JSON ArtifactConfigInput"
+       and provisionedResourceCleanup =
+         flag "provisioned-resource-cleanup" (optional json_arg)
+           ~doc:"JSON ProvisionedResourceCleanupSetting"
+       and dryRunId = flag "dry-run-id" (optional string) ~doc:"STRING UUID"
+       and visualReferences =
+         flag "visual-references" (optional json_arg)
+           ~doc:"JSON VisualReferences"
+       and browserConfigs =
+         flag "browser-configs" (optional json_arg)
+           ~doc:"JSON BrowserConfigs"
        and name = flag "name" (required string) ~doc:"STRING CanaryName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -351,21 +627,39 @@ let update_canary =
                                   visualReference) ?artifactS3Location
               ?artifactConfig:(Option.map
                                  ~f:Values.ArtifactConfigInput.of_json
-                                 artifactConfig) ~name ())
+                                 artifactConfig)
+              ?provisionedResourceCleanup:(Option.map
+                                             ~f:Values.ProvisionedResourceCleanupSetting.of_json
+                                             provisionedResourceCleanup)
+              ?dryRunId
+              ?visualReferences:(Option.map
+                                   ~f:Values.VisualReferences.of_json
+                                   visualReferences)
+              ?browserConfigs:(Option.map ~f:Values.BrowserConfigs.of_json
+                                 browserConfigs) ~name ())
            (Some Values.UpdateCanaryResponse.to_json)
            (Some Values.UpdateCanaryResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-canary", create_canary);
+    [("associate-resource", associate_resource);
+    ("create-canary", create_canary);
+    ("create-group", create_group);
     ("delete-canary", delete_canary);
+    ("delete-group", delete_group);
     ("describe-canaries", describe_canaries);
     ("describe-canaries-last-run", describe_canaries_last_run);
     ("describe-runtime-versions", describe_runtime_versions);
+    ("disassociate-resource", disassociate_resource);
     ("get-canary", get_canary);
     ("get-canary-runs", get_canary_runs);
+    ("get-group", get_group);
+    ("list-associated-groups", list_associated_groups);
+    ("list-group-resources", list_group_resources);
+    ("list-groups", list_groups);
     ("list-tags-for-resource", list_tags_for_resource);
     ("start-canary", start_canary);
+    ("start-canary-dry-run", start_canary_dry_run);
     ("stop-canary", stop_canary);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);

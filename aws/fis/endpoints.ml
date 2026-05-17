@@ -5,19 +5,43 @@ type ('i, 'o, 'e) t =
   | CreateExperimentTemplate: (CreateExperimentTemplateRequest.t,
   CreateExperimentTemplateResponse.t, CreateExperimentTemplateResponse.error)
   t 
+  | CreateTargetAccountConfiguration:
+  (CreateTargetAccountConfigurationRequest.t,
+  CreateTargetAccountConfigurationResponse.t,
+  CreateTargetAccountConfigurationResponse.error) t 
   | DeleteExperimentTemplate: (DeleteExperimentTemplateRequest.t,
   DeleteExperimentTemplateResponse.t, DeleteExperimentTemplateResponse.error)
   t 
+  | DeleteTargetAccountConfiguration:
+  (DeleteTargetAccountConfigurationRequest.t,
+  DeleteTargetAccountConfigurationResponse.t,
+  DeleteTargetAccountConfigurationResponse.error) t 
   | GetAction: (GetActionRequest.t, GetActionResponse.t,
   GetActionResponse.error) t 
   | GetExperiment: (GetExperimentRequest.t, GetExperimentResponse.t,
   GetExperimentResponse.error) t 
+  | GetExperimentTargetAccountConfiguration:
+  (GetExperimentTargetAccountConfigurationRequest.t,
+  GetExperimentTargetAccountConfigurationResponse.t,
+  GetExperimentTargetAccountConfigurationResponse.error) t 
   | GetExperimentTemplate: (GetExperimentTemplateRequest.t,
   GetExperimentTemplateResponse.t, GetExperimentTemplateResponse.error) t 
+  | GetSafetyLever: (GetSafetyLeverRequest.t, GetSafetyLeverResponse.t,
+  GetSafetyLeverResponse.error) t 
+  | GetTargetAccountConfiguration: (GetTargetAccountConfigurationRequest.t,
+  GetTargetAccountConfigurationResponse.t,
+  GetTargetAccountConfigurationResponse.error) t 
   | GetTargetResourceType: (GetTargetResourceTypeRequest.t,
   GetTargetResourceTypeResponse.t, GetTargetResourceTypeResponse.error) t 
   | ListActions: (ListActionsRequest.t, ListActionsResponse.t,
   ListActionsResponse.error) t 
+  | ListExperimentResolvedTargets: (ListExperimentResolvedTargetsRequest.t,
+  ListExperimentResolvedTargetsResponse.t,
+  ListExperimentResolvedTargetsResponse.error) t 
+  | ListExperimentTargetAccountConfigurations:
+  (ListExperimentTargetAccountConfigurationsRequest.t,
+  ListExperimentTargetAccountConfigurationsResponse.t,
+  ListExperimentTargetAccountConfigurationsResponse.error) t 
   | ListExperimentTemplates: (ListExperimentTemplatesRequest.t,
   ListExperimentTemplatesResponse.t, ListExperimentTemplatesResponse.error) t
   
@@ -25,6 +49,10 @@ type ('i, 'o, 'e) t =
   ListExperimentsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListTargetAccountConfigurations:
+  (ListTargetAccountConfigurationsRequest.t,
+  ListTargetAccountConfigurationsResponse.t,
+  ListTargetAccountConfigurationsResponse.error) t 
   | ListTargetResourceTypes: (ListTargetResourceTypesRequest.t,
   ListTargetResourceTypesResponse.t, ListTargetResourceTypesResponse.error) t
   
@@ -39,42 +67,89 @@ type ('i, 'o, 'e) t =
   | UpdateExperimentTemplate: (UpdateExperimentTemplateRequest.t,
   UpdateExperimentTemplateResponse.t, UpdateExperimentTemplateResponse.error)
   t 
+  | UpdateSafetyLeverState: (UpdateSafetyLeverStateRequest.t,
+  UpdateSafetyLeverStateResponse.t, UpdateSafetyLeverStateResponse.error) t 
+  | UpdateTargetAccountConfiguration:
+  (UpdateTargetAccountConfigurationRequest.t,
+  UpdateTargetAccountConfigurationResponse.t,
+  UpdateTargetAccountConfigurationResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateExperimentTemplate -> `POST
+  | CreateTargetAccountConfiguration -> `POST
   | DeleteExperimentTemplate -> `DELETE
+  | DeleteTargetAccountConfiguration -> `DELETE
   | GetAction -> `GET
   | GetExperiment -> `GET
+  | GetExperimentTargetAccountConfiguration -> `GET
   | GetExperimentTemplate -> `GET
+  | GetSafetyLever -> `GET
+  | GetTargetAccountConfiguration -> `GET
   | GetTargetResourceType -> `GET
   | ListActions -> `GET
+  | ListExperimentResolvedTargets -> `GET
+  | ListExperimentTargetAccountConfigurations -> `GET
   | ListExperimentTemplates -> `GET
   | ListExperiments -> `GET
   | ListTagsForResource -> `GET
+  | ListTargetAccountConfigurations -> `GET
   | ListTargetResourceTypes -> `GET
   | StartExperiment -> `POST
   | StopExperiment -> `DELETE
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateExperimentTemplate -> `PATCH
+  | UpdateSafetyLeverState -> `PATCH
+  | UpdateTargetAccountConfiguration -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateExperimentTemplate ->
           (Format.kasprintf Uri.of_string) "/experimentTemplates"
+      | CreateTargetAccountConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/experimentTemplates/%s/targetAccountConfigurations/%s"
+            (ExperimentTemplateId.to_header
+               x.CreateTargetAccountConfigurationRequest.experimentTemplateId)
+            (TargetAccountId.to_header
+               x.CreateTargetAccountConfigurationRequest.accountId)
       | DeleteExperimentTemplate ->
           (Format.kasprintf Uri.of_string) "/experimentTemplates/%s"
             (ExperimentTemplateId.to_header
                x.DeleteExperimentTemplateRequest.id)
+      | DeleteTargetAccountConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/experimentTemplates/%s/targetAccountConfigurations/%s"
+            (ExperimentTemplateId.to_header
+               x.DeleteTargetAccountConfigurationRequest.experimentTemplateId)
+            (TargetAccountId.to_header
+               x.DeleteTargetAccountConfigurationRequest.accountId)
       | GetAction ->
           (Format.kasprintf Uri.of_string) "/actions/%s"
             (ActionId.to_header x.GetActionRequest.id)
       | GetExperiment ->
           (Format.kasprintf Uri.of_string) "/experiments/%s"
             (ExperimentId.to_header x.GetExperimentRequest.id)
+      | GetExperimentTargetAccountConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/experiments/%s/targetAccountConfigurations/%s"
+            (ExperimentId.to_header
+               x.GetExperimentTargetAccountConfigurationRequest.experimentId)
+            (TargetAccountId.to_header
+               x.GetExperimentTargetAccountConfigurationRequest.accountId)
       | GetExperimentTemplate ->
           (Format.kasprintf Uri.of_string) "/experimentTemplates/%s"
             (ExperimentTemplateId.to_header x.GetExperimentTemplateRequest.id)
+      | GetSafetyLever ->
+          (Format.kasprintf Uri.of_string) "/safetyLevers/%s"
+            (SafetyLeverId.to_header x.GetSafetyLeverRequest.id)
+      | GetTargetAccountConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/experimentTemplates/%s/targetAccountConfigurations/%s"
+            (ExperimentTemplateId.to_header
+               x.GetTargetAccountConfigurationRequest.experimentTemplateId)
+            (TargetAccountId.to_header
+               x.GetTargetAccountConfigurationRequest.accountId)
       | GetTargetResourceType ->
           (Format.kasprintf Uri.of_string) "/targetResourceTypes/%s"
             (TargetResourceTypeId.to_header
@@ -89,6 +164,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListExperimentResolvedTargets ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/experiments/%s/resolvedTargets"
+               (ExperimentId.to_header
+                  x.ListExperimentResolvedTargetsRequest.experimentId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (ListExperimentResolvedTargetsMaxResults.to_header
+                             v))) x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("targetName", (TargetName.to_header v)))
+                 x.targetName])
+      | ListExperimentTargetAccountConfigurations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/experiments/%s/targetAccountConfigurations"
+               (ExperimentId.to_header
+                  x.ListExperimentTargetAccountConfigurationsRequest.experimentId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken])
       | ListExperimentTemplates ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/experimentTemplates")
@@ -112,10 +215,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("experimentTemplateId",
+                         (ExperimentTemplateId.to_header v)))
+                 x.experimentTemplateId])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ResourceArn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | ListTargetAccountConfigurations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/experimentTemplates/%s/targetAccountConfigurations"
+               (ExperimentTemplateId.to_header
+                  x.ListTargetAccountConfigurationsRequest.experimentTemplateId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (ListTargetAccountConfigurationsMaxResults.to_header
+                             v))) x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListTargetResourceTypes ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/targetResourceTypes")
@@ -146,7 +269,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateExperimentTemplate ->
           (Format.kasprintf Uri.of_string) "/experimentTemplates/%s"
             (ExperimentTemplateId.to_header
-               x.UpdateExperimentTemplateRequest.id))
+               x.UpdateExperimentTemplateRequest.id)
+      | UpdateSafetyLeverState ->
+          (Format.kasprintf Uri.of_string) "/safetyLevers/%s/state"
+            (SafetyLeverId.to_header x.UpdateSafetyLeverStateRequest.id)
+      | UpdateTargetAccountConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/experimentTemplates/%s/targetAccountConfigurations/%s"
+            (ExperimentTemplateId.to_header
+               x.UpdateTargetAccountConfigurationRequest.experimentTemplateId)
+            (TargetAccountId.to_header
+               x.UpdateTargetAccountConfigurationRequest.accountId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -192,6 +325,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("logConfiguration",
                                 (CreateExperimentTemplateLogConfigurationInput.to_value
+                                   x)));
+                      Option.map
+                        req.CreateExperimentTemplateRequest.experimentOptions
+                        ~f:(fun x ->
+                              ("experimentOptions",
+                                (CreateExperimentTemplateExperimentOptionsInput.to_value
+                                   x)));
+                      Option.map
+                        req.CreateExperimentTemplateRequest.experimentReportConfiguration
+                        ~f:(fun x ->
+                              ("experimentReportConfiguration",
+                                (CreateExperimentTemplateReportConfigurationInput.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTargetAccountConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateTargetAccountConfigurationRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken", (ClientToken.to_value x)));
+                      Some
+                        ("roleArn",
+                          (RoleArn.to_value
+                             req.CreateTargetAccountConfigurationRequest.roleArn));
+                      Option.map
+                        req.CreateTargetAccountConfigurationRequest.description
+                        ~f:(fun x ->
+                              ("description",
+                                (TargetAccountConfigurationDescription.to_value
                                    x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -202,19 +377,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteExperimentTemplate ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTargetAccountConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | GetAction ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetExperiment ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetExperimentTargetAccountConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetExperimentTemplate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSafetyLever ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTargetAccountConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTargetResourceType ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListActions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListExperimentResolvedTargets ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListExperimentTargetAccountConfigurations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListExperimentTemplates ->
@@ -224,6 +416,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTargetAccountConfigurations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTargetResourceTypes ->
@@ -246,6 +441,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("experimentTemplateId",
                           (ExperimentTemplateId.to_value
                              req.StartExperimentRequest.experimentTemplateId));
+                      Option.map req.StartExperimentRequest.experimentOptions
+                        ~f:(fun x ->
+                              ("experimentOptions",
+                                (StartExperimentExperimentOptionsInput.to_value
+                                   x)));
                       Option.map req.StartExperimentRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -277,6 +477,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateExperimentTemplate ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateSafetyLeverState ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateTargetAccountConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -334,6 +538,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateExperimentTemplateResponse.error_of_json))
+  | CreateTargetAccountConfiguration ->
+      if is_success
+      then
+        Ok
+          (CreateTargetAccountConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTargetAccountConfigurationResponse.error_of_json))
   | DeleteExperimentTemplate ->
       if is_success
       then
@@ -342,6 +556,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteExperimentTemplateResponse.error_of_json))
+  | DeleteTargetAccountConfiguration ->
+      if is_success
+      then
+        Ok
+          (DeleteTargetAccountConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteTargetAccountConfigurationResponse.error_of_json))
   | GetAction ->
       if is_success
       then Ok (GetActionResponse.of_json (response_to_json resp))
@@ -350,12 +574,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetExperimentResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetExperimentResponse.error_of_json))
+  | GetExperimentTargetAccountConfiguration ->
+      if is_success
+      then
+        Ok
+          (GetExperimentTargetAccountConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetExperimentTargetAccountConfigurationResponse.error_of_json))
   | GetExperimentTemplate ->
       if is_success
       then Ok (GetExperimentTemplateResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetExperimentTemplateResponse.error_of_json))
+  | GetSafetyLever ->
+      if is_success
+      then Ok (GetSafetyLeverResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetSafetyLeverResponse.error_of_json))
+  | GetTargetAccountConfiguration ->
+      if is_success
+      then
+        Ok
+          (GetTargetAccountConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTargetAccountConfigurationResponse.error_of_json))
   | GetTargetResourceType ->
       if is_success
       then Ok (GetTargetResourceTypeResponse.of_json (response_to_json resp))
@@ -366,6 +616,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListActionsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListActionsResponse.error_of_json))
+  | ListExperimentResolvedTargets ->
+      if is_success
+      then
+        Ok
+          (ListExperimentResolvedTargetsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListExperimentResolvedTargetsResponse.error_of_json))
+  | ListExperimentTargetAccountConfigurations ->
+      if is_success
+      then
+        Ok
+          (ListExperimentTargetAccountConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListExperimentTargetAccountConfigurationsResponse.error_of_json))
   | ListExperimentTemplates ->
       if is_success
       then
@@ -383,6 +654,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
       else Error (parse_aws_error None)
+  | ListTargetAccountConfigurations ->
+      if is_success
+      then
+        Ok
+          (ListTargetAccountConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTargetAccountConfigurationsResponse.error_of_json))
   | ListTargetResourceTypes ->
       if is_success
       then
@@ -423,3 +704,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateExperimentTemplateResponse.error_of_json))
+  | UpdateSafetyLeverState ->
+      if is_success
+      then
+        Ok (UpdateSafetyLeverStateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSafetyLeverStateResponse.error_of_json))
+  | UpdateTargetAccountConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateTargetAccountConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTargetAccountConfigurationResponse.error_of_json))

@@ -13,6 +13,9 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let batch_create_attendee ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchCreateAttendee input
+let batch_update_attendee_capabilities_except ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchUpdateAttendeeCapabilitiesExcept
+    input
 let create_attendee ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAttendee input
 let create_meeting ?endpoint_url ?cfg input =
@@ -29,7 +32,15 @@ let get_meeting ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMeeting input
 let list_attendees ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAttendees input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let start_meeting_transcription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMeetingTranscription input
 let stop_meeting_transcription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopMeetingTranscription input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_attendee_capabilities ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAttendeeCapabilities input

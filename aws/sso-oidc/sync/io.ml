@@ -13,6 +13,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let create_token ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateToken input
+let create_token_with_i_a_m ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTokenWithIAM input
 let register_client ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterClient input
 let start_device_authorization ?endpoint_url ?cfg input =

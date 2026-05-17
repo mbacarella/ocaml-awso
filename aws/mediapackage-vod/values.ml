@@ -24,6 +24,91 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module PresetSpeke20Audio =
+  struct
+    type nonrec t =
+      | PRESET_AUDIO_1 
+      | PRESET_AUDIO_2 
+      | PRESET_AUDIO_3 
+      | SHARED 
+      | UNENCRYPTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRESET_AUDIO_1 -> "PRESET-AUDIO-1"
+      | PRESET_AUDIO_2 -> "PRESET-AUDIO-2"
+      | PRESET_AUDIO_3 -> "PRESET-AUDIO-3"
+      | SHARED -> "SHARED"
+      | UNENCRYPTED -> "UNENCRYPTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRESET-AUDIO-1" -> PRESET_AUDIO_1
+      | "PRESET-AUDIO-2" -> PRESET_AUDIO_2
+      | "PRESET-AUDIO-3" -> PRESET_AUDIO_3
+      | "SHARED" -> SHARED
+      | "UNENCRYPTED" -> UNENCRYPTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PresetSpeke20Audio" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PresetSpeke20Audio" j)
+    let to_json = simple_to_json to_value
+  end
+module PresetSpeke20Video =
+  struct
+    type nonrec t =
+      | PRESET_VIDEO_1 
+      | PRESET_VIDEO_2 
+      | PRESET_VIDEO_3 
+      | PRESET_VIDEO_4 
+      | PRESET_VIDEO_5 
+      | PRESET_VIDEO_6 
+      | PRESET_VIDEO_7 
+      | PRESET_VIDEO_8 
+      | SHARED 
+      | UNENCRYPTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRESET_VIDEO_1 -> "PRESET-VIDEO-1"
+      | PRESET_VIDEO_2 -> "PRESET-VIDEO-2"
+      | PRESET_VIDEO_3 -> "PRESET-VIDEO-3"
+      | PRESET_VIDEO_4 -> "PRESET-VIDEO-4"
+      | PRESET_VIDEO_5 -> "PRESET-VIDEO-5"
+      | PRESET_VIDEO_6 -> "PRESET-VIDEO-6"
+      | PRESET_VIDEO_7 -> "PRESET-VIDEO-7"
+      | PRESET_VIDEO_8 -> "PRESET-VIDEO-8"
+      | SHARED -> "SHARED"
+      | UNENCRYPTED -> "UNENCRYPTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRESET-VIDEO-1" -> PRESET_VIDEO_1
+      | "PRESET-VIDEO-2" -> PRESET_VIDEO_2
+      | "PRESET-VIDEO-3" -> PRESET_VIDEO_3
+      | "PRESET-VIDEO-4" -> PRESET_VIDEO_4
+      | "PRESET-VIDEO-5" -> PRESET_VIDEO_5
+      | "PRESET-VIDEO-6" -> PRESET_VIDEO_6
+      | "PRESET-VIDEO-7" -> PRESET_VIDEO_7
+      | "PRESET-VIDEO-8" -> PRESET_VIDEO_8
+      | "SHARED" -> SHARED
+      | "UNENCRYPTED" -> UNENCRYPTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PresetSpeke20Video" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PresetSpeke20Video" j)
+    let to_json = simple_to_json to_value
+  end
 module Zz__string =
   struct
     type nonrec t = string
@@ -78,10 +163,50 @@ module Zz__integer =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module EncryptionContractConfiguration =
+  struct
+    type nonrec t =
+      {
+      presetSpeke20Audio: PresetSpeke20Audio.t
+        [@ocaml.doc "A collection of audio encryption presets."];
+      presetSpeke20Video: PresetSpeke20Video.t
+        [@ocaml.doc "A collection of video encryption presets."]}
+    let context_ = "EncryptionContractConfiguration"
+    let make ~presetSpeke20Audio =
+      fun ~presetSpeke20Video ->
+        fun () -> { presetSpeke20Audio; presetSpeke20Video }
+    let to_value x =
+      structure_to_value
+        [("presetSpeke20Audio",
+           (Some (PresetSpeke20Audio.to_value x.presetSpeke20Audio)));
+        ("presetSpeke20Video",
+          (Some (PresetSpeke20Video.to_value x.presetSpeke20Video)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let presetSpeke20Video =
+        PresetSpeke20Video.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "presetSpeke20Video") in
+      let presetSpeke20Audio =
+        PresetSpeke20Audio.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "presetSpeke20Audio") in
+      make ~presetSpeke20Video ~presetSpeke20Audio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let presetSpeke20Video =
+        field_map_exn json__ "PresetSpeke20Video" PresetSpeke20Video.of_json in
+      let presetSpeke20Audio =
+        field_map_exn json__ "PresetSpeke20Audio" PresetSpeke20Audio.of_json in
+      make ~presetSpeke20Video ~presetSpeke20Audio ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use encryptionContractConfiguration to configure one or more content encryption keys for your endpoints that use SPEKE 2.0. The encryption contract defines which content keys are used to encrypt the audio and video tracks in your stream. To configure the encryption contract, specify which audio and video encryption presets to use. Note the following considerations when using encryptionContractConfiguration: encryptionContractConfiguration can be used for DASH endpoints that use SPEKE 2.0. SPEKE 2.0 relies on the CPIX 2.3 specification. You must disable key rotation for this endpoint by setting keyRotationIntervalSeconds to 0."]
 module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -165,12 +290,12 @@ module StreamSelection =
           (Xml.child xml_arg0 "maxVideoBitsPerSecond") in
       make ?streamOrder ?minVideoBitsPerSecond ?maxVideoBitsPerSecond ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamOrder = field_map json "StreamOrder" StreamOrder.of_json in
+    let of_json json__ =
+      let streamOrder = field_map json__ "StreamOrder" StreamOrder.of_json in
       let minVideoBitsPerSecond =
-        field_map json "MinVideoBitsPerSecond" Zz__integer.of_json in
+        field_map json__ "MinVideoBitsPerSecond" Zz__integer.of_json in
       let maxVideoBitsPerSecond =
-        field_map json "MaxVideoBitsPerSecond" Zz__integer.of_json in
+        field_map json__ "MaxVideoBitsPerSecond" Zz__integer.of_json in
       make ?streamOrder ?minVideoBitsPerSecond ?maxVideoBitsPerSecond ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A StreamSelection configuration."]
@@ -261,6 +386,8 @@ module SpekeKeyProvider =
   struct
     type nonrec t =
       {
+      encryptionContractConfiguration:
+        EncryptionContractConfiguration.t option ;
       roleArn: Zz__string.t
         [@ocaml.doc
           "An Amazon Resource Name (ARN) of an IAM role that AWS Elemental MediaPackage will assume when accessing the key provider service."];
@@ -269,11 +396,18 @@ module SpekeKeyProvider =
       url: Zz__string.t
         [@ocaml.doc "The URL of the external key provider service."]}
     let context_ = "SpekeKeyProvider"
-    let make ~roleArn =
-      fun ~systemIds -> fun ~url -> fun () -> { roleArn; systemIds; url }
+    let make ?encryptionContractConfiguration =
+      fun ~roleArn ->
+        fun ~systemIds ->
+          fun ~url ->
+            fun () ->
+              { encryptionContractConfiguration; roleArn; systemIds; url }
     let to_value x =
       structure_to_value
-        [("roleArn", (Some (Zz__string.to_value x.roleArn)));
+        [("encryptionContractConfiguration",
+           (Option.map x.encryptionContractConfiguration
+              ~f:EncryptionContractConfiguration.to_value));
+        ("roleArn", (Some (Zz__string.to_value x.roleArn)));
         ("systemIds", (Some (Zz__listOf__string.to_value x.systemIds)));
         ("url", (Some (Zz__string.to_value x.url)))]
     let to_query v = to_query to_value v
@@ -286,14 +420,20 @@ module SpekeKeyProvider =
       let roleArn =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
-      make ~url ~systemIds ~roleArn ()
+      let encryptionContractConfiguration =
+        (Option.map ~f:EncryptionContractConfiguration.of_xml)
+          (Xml.child xml_arg0 "encryptionContractConfiguration") in
+      make ~url ~systemIds ~roleArn ?encryptionContractConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map_exn json "Url" Zz__string.of_json in
+    let of_json json__ =
+      let url = field_map_exn json__ "Url" Zz__string.of_json in
       let systemIds =
-        field_map_exn json "SystemIds" Zz__listOf__string.of_json in
-      let roleArn = field_map_exn json "RoleArn" Zz__string.of_json in
-      make ~url ~systemIds ~roleArn ()
+        field_map_exn json__ "SystemIds" Zz__listOf__string.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Zz__string.of_json in
+      let encryptionContractConfiguration =
+        field_map json__ "EncryptionContractConfiguration"
+          EncryptionContractConfiguration.of_json in
+      make ~url ~systemIds ~roleArn ?encryptionContractConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A configuration for accessing an external Secure Packager and Encoder Key Exchange (SPEKE) service that will provide encryption keys."]
@@ -366,16 +506,17 @@ module HlsManifest =
       make ?streamSelection ?repeatExtXKey ?programDateTimeIntervalSeconds
         ?manifestName ?includeIframeOnlyStream ?adMarkers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamSelection =
-        field_map json "StreamSelection" StreamSelection.of_json in
-      let repeatExtXKey = field_map json "RepeatExtXKey" Zz__boolean.of_json in
+        field_map json__ "StreamSelection" StreamSelection.of_json in
+      let repeatExtXKey =
+        field_map json__ "RepeatExtXKey" Zz__boolean.of_json in
       let programDateTimeIntervalSeconds =
-        field_map json "ProgramDateTimeIntervalSeconds" Zz__integer.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
+        field_map json__ "ProgramDateTimeIntervalSeconds" Zz__integer.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
       let includeIframeOnlyStream =
-        field_map json "IncludeIframeOnlyStream" Zz__boolean.of_json in
-      let adMarkers = field_map json "AdMarkers" AdMarkers.of_json in
+        field_map json__ "IncludeIframeOnlyStream" Zz__boolean.of_json in
+      let adMarkers = field_map json__ "AdMarkers" AdMarkers.of_json in
       make ?streamSelection ?repeatExtXKey ?programDateTimeIntervalSeconds
         ?manifestName ?includeIframeOnlyStream ?adMarkers ()
     let to_json v = composed_to_json to_value v
@@ -448,17 +589,17 @@ module DashManifest =
       make ?streamSelection ?scteMarkersSource ?profile ?minBufferTimeSeconds
         ?manifestName ?manifestLayout ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamSelection =
-        field_map json "StreamSelection" StreamSelection.of_json in
+        field_map json__ "StreamSelection" StreamSelection.of_json in
       let scteMarkersSource =
-        field_map json "ScteMarkersSource" ScteMarkersSource.of_json in
-      let profile = field_map json "Profile" Profile.of_json in
+        field_map json__ "ScteMarkersSource" ScteMarkersSource.of_json in
+      let profile = field_map json__ "Profile" Profile.of_json in
       let minBufferTimeSeconds =
-        field_map json "MinBufferTimeSeconds" Zz__integer.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
+        field_map json__ "MinBufferTimeSeconds" Zz__integer.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
       let manifestLayout =
-        field_map json "ManifestLayout" ManifestLayout.of_json in
+        field_map json__ "ManifestLayout" ManifestLayout.of_json in
       make ?streamSelection ?scteMarkersSource ?profile ?minBufferTimeSeconds
         ?manifestName ?manifestLayout ()
     let to_json v = composed_to_json to_value v
@@ -530,10 +671,10 @@ module MssManifest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "manifestName") in
       make ?streamSelection ?manifestName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamSelection =
-        field_map json "StreamSelection" StreamSelection.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
+        field_map json__ "StreamSelection" StreamSelection.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
       make ?streamSelection ?manifestName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -566,11 +707,11 @@ module CmafEncryption =
           (Xml.child xml_arg0 "constantInitializationVector") in
       make ~spekeKeyProvider ?constantInitializationVector ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spekeKeyProvider =
-        field_map_exn json "SpekeKeyProvider" SpekeKeyProvider.of_json in
+        field_map_exn json__ "SpekeKeyProvider" SpekeKeyProvider.of_json in
       let constantInitializationVector =
-        field_map json "ConstantInitializationVector" Zz__string.of_json in
+        field_map json__ "ConstantInitializationVector" Zz__string.of_json in
       make ~spekeKeyProvider ?constantInitializationVector ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A CMAF encryption configuration."]
@@ -578,6 +719,9 @@ module Zz__listOfHlsManifest =
   struct
     type nonrec t = HlsManifest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HlsManifest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -615,9 +759,9 @@ module DashEncryption =
           (Xml.child_exn ~context:context_ xml_arg0 "spekeKeyProvider") in
       make ~spekeKeyProvider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spekeKeyProvider =
-        field_map_exn json "SpekeKeyProvider" SpekeKeyProvider.of_json in
+        field_map_exn json__ "SpekeKeyProvider" SpekeKeyProvider.of_json in
       make ~spekeKeyProvider ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -656,6 +800,9 @@ module Zz__listOfDashManifest =
   struct
     type nonrec t = DashManifest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DashManifest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -681,6 +828,9 @@ module Zz__listOf__PeriodTriggersElement =
   struct
     type nonrec t = Zz__PeriodTriggersElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__PeriodTriggersElement.to_value)) |>
         (fun x -> `List x)
@@ -745,13 +895,13 @@ module HlsEncryption =
       make ~spekeKeyProvider ?encryptionMethod ?constantInitializationVector
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spekeKeyProvider =
-        field_map_exn json "SpekeKeyProvider" SpekeKeyProvider.of_json in
+        field_map_exn json__ "SpekeKeyProvider" SpekeKeyProvider.of_json in
       let encryptionMethod =
-        field_map json "EncryptionMethod" EncryptionMethod.of_json in
+        field_map json__ "EncryptionMethod" EncryptionMethod.of_json in
       let constantInitializationVector =
-        field_map json "ConstantInitializationVector" Zz__string.of_json in
+        field_map json__ "ConstantInitializationVector" Zz__string.of_json in
       make ~spekeKeyProvider ?encryptionMethod ?constantInitializationVector
         ()
     let to_json v = composed_to_json to_value v
@@ -773,9 +923,9 @@ module MssEncryption =
           (Xml.child_exn ~context:context_ xml_arg0 "spekeKeyProvider") in
       make ~spekeKeyProvider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spekeKeyProvider =
-        field_map_exn json "SpekeKeyProvider" SpekeKeyProvider.of_json in
+        field_map_exn json__ "SpekeKeyProvider" SpekeKeyProvider.of_json in
       make ~spekeKeyProvider ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -784,6 +934,9 @@ module Zz__listOfMssManifest =
   struct
     type nonrec t = MssManifest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MssManifest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -833,11 +986,11 @@ module Authorization =
           (Xml.child_exn ~context:context_ xml_arg0 "cdnIdentifierSecret") in
       make ~secretsRoleArn ~cdnIdentifierSecret ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretsRoleArn =
-        field_map_exn json "SecretsRoleArn" Zz__string.of_json in
+        field_map_exn json__ "SecretsRoleArn" Zz__string.of_json in
       let cdnIdentifierSecret =
-        field_map_exn json "CdnIdentifierSecret" Zz__string.of_json in
+        field_map_exn json__ "CdnIdentifierSecret" Zz__string.of_json in
       make ~secretsRoleArn ~cdnIdentifierSecret ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CDN Authorization credentials"]
@@ -857,8 +1010,8 @@ module EgressAccessLogs =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "logGroupName") in
       make ?logGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroupName = field_map json "LogGroupName" Zz__string.of_json in
+    let of_json json__ =
+      let logGroupName = field_map json__ "LogGroupName" Zz__string.of_json in
       make ?logGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configure egress access logging."]
@@ -883,6 +1036,8 @@ module Tags =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -942,15 +1097,15 @@ module CmafPackage =
       make ?segmentDurationSeconds ?includeEncoderConfigurationInSegments
         ~hlsManifests ?encryption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let segmentDurationSeconds =
-        field_map json "SegmentDurationSeconds" Zz__integer.of_json in
+        field_map json__ "SegmentDurationSeconds" Zz__integer.of_json in
       let includeEncoderConfigurationInSegments =
-        field_map json "IncludeEncoderConfigurationInSegments"
+        field_map json__ "IncludeEncoderConfigurationInSegments"
           Zz__boolean.of_json in
       let hlsManifests =
-        field_map_exn json "HlsManifests" Zz__listOfHlsManifest.of_json in
-      let encryption = field_map json "Encryption" CmafEncryption.of_json in
+        field_map_exn json__ "HlsManifests" Zz__listOfHlsManifest.of_json in
+      let encryption = field_map json__ "Encryption" CmafEncryption.of_json in
       make ?segmentDurationSeconds ?includeEncoderConfigurationInSegments
         ~hlsManifests ?encryption ()
     let to_json v = composed_to_json to_value v
@@ -965,6 +1120,9 @@ module DashPackage =
       includeEncoderConfigurationInSegments: Zz__boolean.t option
         [@ocaml.doc
           "When includeEncoderConfigurationInSegments is set to true, MediaPackage places your encoder's Sequence Parameter Set (SPS), Picture Parameter Set (PPS), and Video Parameter Set (VPS) metadata in every video segment instead of in the init fragment. This lets you use different SPS/PPS/VPS settings for your assets during content playback."];
+      includeIframeOnlyStream: Zz__boolean.t option
+        [@ocaml.doc
+          "When enabled, an I-Frame only stream will be included in the output."];
       periodTriggers: Zz__listOf__PeriodTriggersElement.t option
         [@ocaml.doc
           "A list of triggers that controls when the outgoing Dynamic Adaptive Streaming over HTTP (DASH) Media Presentation Description (MPD) will be partitioned into multiple periods. If empty, the content will not be partitioned into more than one period. If the list contains \"ADS\", new periods will be created where the Asset contains SCTE-35 ad markers."];
@@ -977,19 +1135,21 @@ module DashPackage =
     let context_ = "DashPackage"
     let make ?encryption =
       fun ?includeEncoderConfigurationInSegments ->
-        fun ?periodTriggers ->
-          fun ?segmentDurationSeconds ->
-            fun ?segmentTemplateFormat ->
-              fun ~dashManifests ->
-                fun () ->
-                  {
-                    encryption;
-                    includeEncoderConfigurationInSegments;
-                    periodTriggers;
-                    segmentDurationSeconds;
-                    segmentTemplateFormat;
-                    dashManifests
-                  }
+        fun ?includeIframeOnlyStream ->
+          fun ?periodTriggers ->
+            fun ?segmentDurationSeconds ->
+              fun ?segmentTemplateFormat ->
+                fun ~dashManifests ->
+                  fun () ->
+                    {
+                      encryption;
+                      includeEncoderConfigurationInSegments;
+                      includeIframeOnlyStream;
+                      periodTriggers;
+                      segmentDurationSeconds;
+                      segmentTemplateFormat;
+                      dashManifests
+                    }
     let to_value x =
       structure_to_value
         [("dashManifests",
@@ -998,6 +1158,8 @@ module DashPackage =
         ("includeEncoderConfigurationInSegments",
           (Option.map x.includeEncoderConfigurationInSegments
              ~f:Zz__boolean.to_value));
+        ("includeIframeOnlyStream",
+          (Option.map x.includeIframeOnlyStream ~f:Zz__boolean.to_value));
         ("periodTriggers",
           (Option.map x.periodTriggers
              ~f:Zz__listOf__PeriodTriggersElement.to_value));
@@ -1017,6 +1179,9 @@ module DashPackage =
       let periodTriggers =
         (Option.map ~f:Zz__listOf__PeriodTriggersElement.of_xml)
           (Xml.child xml_arg0 "periodTriggers") in
+      let includeIframeOnlyStream =
+        (Option.map ~f:Zz__boolean.of_xml)
+          (Xml.child xml_arg0 "includeIframeOnlyStream") in
       let includeEncoderConfigurationInSegments =
         (Option.map ~f:Zz__boolean.of_xml)
           (Xml.child xml_arg0 "includeEncoderConfigurationInSegments") in
@@ -1027,24 +1192,29 @@ module DashPackage =
         Zz__listOfDashManifest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dashManifests") in
       make ?segmentTemplateFormat ?segmentDurationSeconds ?periodTriggers
-        ?includeEncoderConfigurationInSegments ?encryption ~dashManifests ()
+        ?includeIframeOnlyStream ?includeEncoderConfigurationInSegments
+        ?encryption ~dashManifests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let segmentTemplateFormat =
-        field_map json "SegmentTemplateFormat" SegmentTemplateFormat.of_json in
+        field_map json__ "SegmentTemplateFormat"
+          SegmentTemplateFormat.of_json in
       let segmentDurationSeconds =
-        field_map json "SegmentDurationSeconds" Zz__integer.of_json in
+        field_map json__ "SegmentDurationSeconds" Zz__integer.of_json in
       let periodTriggers =
-        field_map json "PeriodTriggers"
+        field_map json__ "PeriodTriggers"
           Zz__listOf__PeriodTriggersElement.of_json in
+      let includeIframeOnlyStream =
+        field_map json__ "IncludeIframeOnlyStream" Zz__boolean.of_json in
       let includeEncoderConfigurationInSegments =
-        field_map json "IncludeEncoderConfigurationInSegments"
+        field_map json__ "IncludeEncoderConfigurationInSegments"
           Zz__boolean.of_json in
-      let encryption = field_map json "Encryption" DashEncryption.of_json in
+      let encryption = field_map json__ "Encryption" DashEncryption.of_json in
       let dashManifests =
-        field_map_exn json "DashManifests" Zz__listOfDashManifest.of_json in
+        field_map_exn json__ "DashManifests" Zz__listOfDashManifest.of_json in
       make ?segmentTemplateFormat ?segmentDurationSeconds ?periodTriggers
-        ?includeEncoderConfigurationInSegments ?encryption ~dashManifests ()
+        ?includeIframeOnlyStream ?includeEncoderConfigurationInSegments
+        ?encryption ~dashManifests ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A Dynamic Adaptive Streaming over HTTP (DASH) packaging configuration."]
@@ -1109,16 +1279,16 @@ module HlsPackage =
       make ?useAudioRenditionGroup ?segmentDurationSeconds
         ?includeDvbSubtitles ~hlsManifests ?encryption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let useAudioRenditionGroup =
-        field_map json "UseAudioRenditionGroup" Zz__boolean.of_json in
+        field_map json__ "UseAudioRenditionGroup" Zz__boolean.of_json in
       let segmentDurationSeconds =
-        field_map json "SegmentDurationSeconds" Zz__integer.of_json in
+        field_map json__ "SegmentDurationSeconds" Zz__integer.of_json in
       let includeDvbSubtitles =
-        field_map json "IncludeDvbSubtitles" Zz__boolean.of_json in
+        field_map json__ "IncludeDvbSubtitles" Zz__boolean.of_json in
       let hlsManifests =
-        field_map_exn json "HlsManifests" Zz__listOfHlsManifest.of_json in
-      let encryption = field_map json "Encryption" HlsEncryption.of_json in
+        field_map_exn json__ "HlsManifests" Zz__listOfHlsManifest.of_json in
+      let encryption = field_map json__ "Encryption" HlsEncryption.of_json in
       make ?useAudioRenditionGroup ?segmentDurationSeconds
         ?includeDvbSubtitles ~hlsManifests ?encryption ()
     let to_json v = composed_to_json to_value v
@@ -1157,12 +1327,12 @@ module MssPackage =
           (Xml.child xml_arg0 "encryption") in
       make ?segmentDurationSeconds ~mssManifests ?encryption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let segmentDurationSeconds =
-        field_map json "SegmentDurationSeconds" Zz__integer.of_json in
+        field_map json__ "SegmentDurationSeconds" Zz__integer.of_json in
       let mssManifests =
-        field_map_exn json "MssManifests" Zz__listOfMssManifest.of_json in
-      let encryption = field_map json "Encryption" MssEncryption.of_json in
+        field_map_exn json__ "MssManifests" Zz__listOfMssManifest.of_json in
+      let encryption = field_map json__ "Encryption" MssEncryption.of_json in
       make ?segmentDurationSeconds ~mssManifests ?encryption ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1171,34 +1341,45 @@ module PackagingGroup =
   struct
     type nonrec t =
       {
+      approximateAssetCount: Zz__integer.t option
+        [@ocaml.doc "The approximate asset count of the PackagingGroup."];
       arn: Zz__string.t option [@ocaml.doc "The ARN of the PackagingGroup."];
       authorization: Authorization.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The time the PackagingGroup was created."];
       domainName: Zz__string.t option
         [@ocaml.doc
           "The fully qualified domain name for Assets in the PackagingGroup."];
       egressAccessLogs: EgressAccessLogs.t option ;
       id: Zz__string.t option [@ocaml.doc "The ID of the PackagingGroup."];
       tags: Tags.t option }
-    let make ?arn =
-      fun ?authorization ->
-        fun ?domainName ->
-          fun ?egressAccessLogs ->
-            fun ?id ->
-              fun ?tags ->
-                fun () ->
-                  {
-                    arn;
-                    authorization;
-                    domainName;
-                    egressAccessLogs;
-                    id;
-                    tags
-                  }
+    let make ?approximateAssetCount =
+      fun ?arn ->
+        fun ?authorization ->
+          fun ?createdAt ->
+            fun ?domainName ->
+              fun ?egressAccessLogs ->
+                fun ?id ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        approximateAssetCount;
+                        arn;
+                        authorization;
+                        createdAt;
+                        domainName;
+                        egressAccessLogs;
+                        id;
+                        tags
+                      }
     let to_value x =
       structure_to_value
-        [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        [("approximateAssetCount",
+           (Option.map x.approximateAssetCount ~f:Zz__integer.to_value));
+        ("arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("authorization",
           (Option.map x.authorization ~f:Authorization.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("domainName", (Option.map x.domainName ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -1213,22 +1394,32 @@ module PackagingGroup =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let domainName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "domainName") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let authorization =
         (Option.map ~f:Authorization.of_xml)
           (Xml.child xml_arg0 "authorization") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
+      let approximateAssetCount =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "approximateAssetCount") in
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ?approximateAssetCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let domainName = field_map json "DomainName" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let domainName = field_map json__ "DomainName" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
+        field_map json__ "Authorization" Authorization.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let approximateAssetCount =
+        field_map json__ "ApproximateAssetCount" Zz__integer.of_json in
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ?approximateAssetCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A MediaPackage VOD PackagingGroup resource."]
 module PackagingConfiguration =
@@ -1238,6 +1429,8 @@ module PackagingConfiguration =
       arn: Zz__string.t option
         [@ocaml.doc "The ARN of the PackagingConfiguration."];
       cmafPackage: CmafPackage.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The time the PackagingConfiguration was created."];
       dashPackage: DashPackage.t option ;
       hlsPackage: HlsPackage.t option ;
       id: Zz__string.t option
@@ -1248,27 +1441,30 @@ module PackagingConfiguration =
       tags: Tags.t option }
     let make ?arn =
       fun ?cmafPackage ->
-        fun ?dashPackage ->
-          fun ?hlsPackage ->
-            fun ?id ->
-              fun ?mssPackage ->
-                fun ?packagingGroupId ->
-                  fun ?tags ->
-                    fun () ->
-                      {
-                        arn;
-                        cmafPackage;
-                        dashPackage;
-                        hlsPackage;
-                        id;
-                        mssPackage;
-                        packagingGroupId;
-                        tags
-                      }
+        fun ?createdAt ->
+          fun ?dashPackage ->
+            fun ?hlsPackage ->
+              fun ?id ->
+                fun ?mssPackage ->
+                  fun ?packagingGroupId ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          arn;
+                          cmafPackage;
+                          createdAt;
+                          dashPackage;
+                          hlsPackage;
+                          id;
+                          mssPackage;
+                          packagingGroupId;
+                          tags
+                        }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("cmafPackage", (Option.map x.cmafPackage ~f:CmafPackage.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("dashPackage", (Option.map x.dashPackage ~f:DashPackage.to_value));
         ("hlsPackage", (Option.map x.hlsPackage ~f:HlsPackage.to_value));
         ("id", (Option.map x.id ~f:Zz__string.to_value));
@@ -1289,24 +1485,27 @@ module PackagingConfiguration =
         (Option.map ~f:HlsPackage.of_xml) (Xml.child xml_arg0 "hlsPackage") in
       let dashPackage =
         (Option.map ~f:DashPackage.of_xml) (Xml.child xml_arg0 "dashPackage") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let cmafPackage =
         (Option.map ~f:CmafPackage.of_xml) (Xml.child xml_arg0 "cmafPackage") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?packagingGroupId ?mssPackage ?id ?hlsPackage ?dashPackage
-        ?cmafPackage ?arn ()
+        ?createdAt ?cmafPackage ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let packagingGroupId =
-        field_map json "PackagingGroupId" Zz__string.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
-      let cmafPackage = field_map json "CmafPackage" CmafPackage.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "PackagingGroupId" Zz__string.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let cmafPackage = field_map json__ "CmafPackage" CmafPackage.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?packagingGroupId ?mssPackage ?id ?hlsPackage ?dashPackage
-        ?cmafPackage ?arn ()
+        ?createdAt ?cmafPackage ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A MediaPackage VOD PackagingConfiguration resource."]
 module AssetShallow =
@@ -1378,16 +1577,16 @@ module AssetShallow =
       make ?tags ?sourceRoleArn ?sourceArn ?resourceId ?packagingGroupId ?id
         ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let sourceRoleArn = field_map json "SourceRoleArn" Zz__string.of_json in
-      let sourceArn = field_map json "SourceArn" Zz__string.of_json in
-      let resourceId = field_map json "ResourceId" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let sourceRoleArn = field_map json__ "SourceRoleArn" Zz__string.of_json in
+      let sourceArn = field_map json__ "SourceArn" Zz__string.of_json in
+      let resourceId = field_map json__ "ResourceId" Zz__string.of_json in
       let packagingGroupId =
-        field_map json "PackagingGroupId" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "PackagingGroupId" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?sourceRoleArn ?sourceArn ?resourceId ?packagingGroupId ?id
         ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
@@ -1424,11 +1623,11 @@ module EgressEndpoint =
           (Xml.child xml_arg0 "packagingConfigurationId") in
       make ?url ?status ?packagingConfigurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "Url" Zz__string.of_json in
-      let status = field_map json "Status" Zz__string.of_json in
+    let of_json json__ =
+      let url = field_map json__ "Url" Zz__string.of_json in
+      let status = field_map json__ "Status" Zz__string.of_json in
       let packagingConfigurationId =
-        field_map json "PackagingConfigurationId" Zz__string.of_json in
+        field_map json__ "PackagingConfigurationId" Zz__string.of_json in
       make ?url ?status ?packagingConfigurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1447,8 +1646,8 @@ module ForbiddenException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1467,8 +1666,8 @@ module InternalServerErrorException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected error occurred."]
@@ -1486,8 +1685,8 @@ module NotFoundException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource does not exist."]
@@ -1505,8 +1704,8 @@ module ServiceUnavailableException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected error occurred."]
@@ -1524,8 +1723,8 @@ module TooManyRequestsException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1544,8 +1743,8 @@ module UnprocessableEntityException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The parameters sent in the request are not valid."]
@@ -1570,6 +1769,8 @@ module Zz__mapOf__string =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1581,6 +1782,9 @@ module Zz__listOfPackagingGroup =
   struct
     type nonrec t = PackagingGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PackagingGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1606,6 +1810,9 @@ module Zz__listOfPackagingConfiguration =
   struct
     type nonrec t = PackagingConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PackagingConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1650,6 +1857,9 @@ module Zz__listOfAssetShallow =
   struct
     type nonrec t = AssetShallow.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssetShallow.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1675,6 +1885,9 @@ module Zz__listOfEgressEndpoint =
   struct
     type nonrec t = EgressEndpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EgressEndpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1726,8 +1939,12 @@ module UpdatePackagingGroupResponse =
   struct
     type nonrec t =
       {
+      approximateAssetCount: Zz__integer.t option
+        [@ocaml.doc "The approximate asset count of the PackagingGroup."];
       arn: Zz__string.t option [@ocaml.doc "The ARN of the PackagingGroup."];
       authorization: Authorization.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The time the PackagingGroup was created."];
       domainName: Zz__string.t option
         [@ocaml.doc
           "The fully qualified domain name for Assets in the PackagingGroup."];
@@ -1742,21 +1959,25 @@ module UpdatePackagingGroupResponse =
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?arn =
-      fun ?authorization ->
-        fun ?domainName ->
-          fun ?egressAccessLogs ->
-            fun ?id ->
-              fun ?tags ->
-                fun () ->
-                  {
-                    arn;
-                    authorization;
-                    domainName;
-                    egressAccessLogs;
-                    id;
-                    tags
-                  }
+    let make ?approximateAssetCount =
+      fun ?arn ->
+        fun ?authorization ->
+          fun ?createdAt ->
+            fun ?domainName ->
+              fun ?egressAccessLogs ->
+                fun ?id ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        approximateAssetCount;
+                        arn;
+                        authorization;
+                        createdAt;
+                        domainName;
+                        egressAccessLogs;
+                        id;
+                        tags
+                      }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -1829,9 +2050,12 @@ module UpdatePackagingGroupResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        [("approximateAssetCount",
+           (Option.map x.approximateAssetCount ~f:Zz__integer.to_value));
+        ("arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("authorization",
           (Option.map x.authorization ~f:Authorization.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("domainName", (Option.map x.domainName ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -1846,22 +2070,32 @@ module UpdatePackagingGroupResponse =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let domainName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "domainName") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let authorization =
         (Option.map ~f:Authorization.of_xml)
           (Xml.child xml_arg0 "authorization") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
+      let approximateAssetCount =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "approximateAssetCount") in
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ?approximateAssetCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let domainName = field_map json "DomainName" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let domainName = field_map json__ "DomainName" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
+        field_map json__ "Authorization" Authorization.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let approximateAssetCount =
+        field_map json__ "ApproximateAssetCount" Zz__integer.of_json in
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ?approximateAssetCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates a specific packaging group. You can't change the id attribute or any other system-generated attributes."]
@@ -1888,10 +2122,10 @@ module UpdatePackagingGroupRequest =
           (Xml.child xml_arg0 "authorization") in
       make ~id ?authorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
       make ~id ?authorization ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1923,9 +2157,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" Zz__listOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1948,8 +2182,8 @@ module TagsModel =
           (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Zz__mapOf__string.of_json in
       make ~tags ()
     let to_json v = composed_to_json to_value v
   end
@@ -1978,9 +2212,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Zz__mapOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Zz__mapOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2001,9 +2235,9 @@ module PackagingGroupUpdateParameters =
           (Xml.child xml_arg0 "authorization") in
       make ?authorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
       make ?authorization ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2033,10 +2267,10 @@ module PackagingGroupList =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?packagingGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packagingGroups =
-        field_map json "PackagingGroups" Zz__listOfPackagingGroup.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "PackagingGroups" Zz__listOfPackagingGroup.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?packagingGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2075,13 +2309,13 @@ module PackagingGroupCreateParameters =
           (Xml.child xml_arg0 "authorization") in
       make ?tags ~id ?egressAccessLogs ?authorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
       make ?tags ~id ?egressAccessLogs ?authorization ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2114,11 +2348,11 @@ module PackagingConfigurationList =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?packagingConfigurations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packagingConfigurations =
-        field_map json "PackagingConfigurations"
+        field_map json__ "PackagingConfigurations"
           Zz__listOfPackagingConfiguration.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?packagingConfigurations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2181,15 +2415,15 @@ module PackagingConfigurationCreateParameters =
       make ?tags ~packagingGroupId ?mssPackage ~id ?hlsPackage ?dashPackage
         ?cmafPackage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let packagingGroupId =
-        field_map_exn json "PackagingGroupId" Zz__string.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
-      let cmafPackage = field_map json "CmafPackage" CmafPackage.of_json in
+        field_map_exn json__ "PackagingGroupId" Zz__string.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
+      let cmafPackage = field_map json__ "CmafPackage" CmafPackage.of_json in
       make ?tags ~packagingGroupId ?mssPackage ~id ?hlsPackage ?dashPackage
         ?cmafPackage ()
     let to_json v = composed_to_json to_value v
@@ -2229,8 +2463,8 @@ module ListTagsForResourceResponse =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2254,8 +2488,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2363,10 +2597,10 @@ module ListPackagingGroupsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?packagingGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packagingGroups =
-        field_map json "PackagingGroups" Zz__listOfPackagingGroup.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "PackagingGroups" Zz__listOfPackagingGroup.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?packagingGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2394,9 +2628,9 @@ module ListPackagingGroupsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2507,11 +2741,11 @@ module ListPackagingConfigurationsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?packagingConfigurations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packagingConfigurations =
-        field_map json "PackagingConfigurations"
+        field_map json__ "PackagingConfigurations"
           Zz__listOfPackagingConfiguration.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?packagingConfigurations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2549,11 +2783,11 @@ module ListPackagingConfigurationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?packagingGroupId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packagingGroupId =
-        field_map json "PackagingGroupId" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map json__ "PackagingGroupId" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?packagingGroupId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2659,9 +2893,9 @@ module ListAssetsResponse =
           (Xml.child xml_arg0 "assets") in
       make ?nextToken ?assets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let assets = field_map json "Assets" Zz__listOfAssetShallow.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let assets = field_map json__ "Assets" Zz__listOfAssetShallow.of_json in
       make ?nextToken ?assets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2699,11 +2933,11 @@ module ListAssetsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?packagingGroupId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packagingGroupId =
-        field_map json "PackagingGroupId" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map json__ "PackagingGroupId" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?packagingGroupId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2712,8 +2946,12 @@ module DescribePackagingGroupResponse =
   struct
     type nonrec t =
       {
+      approximateAssetCount: Zz__integer.t option
+        [@ocaml.doc "The approximate asset count of the PackagingGroup."];
       arn: Zz__string.t option [@ocaml.doc "The ARN of the PackagingGroup."];
       authorization: Authorization.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The time the PackagingGroup was created."];
       domainName: Zz__string.t option
         [@ocaml.doc
           "The fully qualified domain name for Assets in the PackagingGroup."];
@@ -2728,190 +2966,23 @@ module DescribePackagingGroupResponse =
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?arn =
-      fun ?authorization ->
-        fun ?domainName ->
-          fun ?egressAccessLogs ->
-            fun ?id ->
-              fun ?tags ->
-                fun () ->
-                  {
-                    arn;
-                    authorization;
-                    domainName;
-                    egressAccessLogs;
-                    id;
-                    tags
-                  }
-    let error_of_json name json =
-      match name with
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_json json)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_json json)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_json json)
-      | "UnprocessableEntityException" ->
-          `UnprocessableEntityException
-            (UnprocessableEntityException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_xml xml)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_xml xml)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
-      | "UnprocessableEntityException" ->
-          `UnprocessableEntityException
-            (UnprocessableEntityException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `ForbiddenException e ->
-          `Assoc
-            [("error", (`String "ForbiddenException"));
-            ("details", (ForbiddenException.to_json e))]
-      | `InternalServerErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServerErrorException"));
-            ("details", (InternalServerErrorException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ServiceUnavailableException e ->
-          `Assoc
-            [("error", (`String "ServiceUnavailableException"));
-            ("details", (ServiceUnavailableException.to_json e))]
-      | `TooManyRequestsException e ->
-          `Assoc
-            [("error", (`String "TooManyRequestsException"));
-            ("details", (TooManyRequestsException.to_json e))]
-      | `UnprocessableEntityException e ->
-          `Assoc
-            [("error", (`String "UnprocessableEntityException"));
-            ("details", (UnprocessableEntityException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("arn", (Option.map x.arn ~f:Zz__string.to_value));
-        ("authorization",
-          (Option.map x.authorization ~f:Authorization.to_value));
-        ("domainName", (Option.map x.domainName ~f:Zz__string.to_value));
-        ("egressAccessLogs",
-          (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
-        ("id", (Option.map x.id ~f:Zz__string.to_value));
-        ("tags", (Option.map x.tags ~f:Tags.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
-      let id = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "id") in
-      let egressAccessLogs =
-        (Option.map ~f:EgressAccessLogs.of_xml)
-          (Xml.child xml_arg0 "egressAccessLogs") in
-      let domainName =
-        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "domainName") in
-      let authorization =
-        (Option.map ~f:Authorization.of_xml)
-          (Xml.child xml_arg0 "authorization") in
-      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let domainName = field_map json "DomainName" Zz__string.of_json in
-      let authorization =
-        field_map json "Authorization" Authorization.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns a description of a MediaPackage VOD PackagingGroup resource."]
-module DescribePackagingGroupRequest =
-  struct
-    type nonrec t =
-      {
-      id: Zz__string.t
-        [@ocaml.doc "The ID of a MediaPackage VOD PackagingGroup resource."]}
-    let context_ = "DescribePackagingGroupRequest"
-    let make ~id = fun () -> { id }
-    let to_value x =
-      structure_to_value [("id", (Some (Zz__string.to_value x.id)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let id =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      make ~id ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns a description of a MediaPackage VOD PackagingGroup resource."]
-module DescribePackagingConfigurationResponse =
-  struct
-    type nonrec t =
-      {
-      arn: Zz__string.t option
-        [@ocaml.doc "The ARN of the PackagingConfiguration."];
-      cmafPackage: CmafPackage.t option ;
-      dashPackage: DashPackage.t option ;
-      hlsPackage: HlsPackage.t option ;
-      id: Zz__string.t option
-        [@ocaml.doc "The ID of the PackagingConfiguration."];
-      mssPackage: MssPackage.t option ;
-      packagingGroupId: Zz__string.t option
-        [@ocaml.doc "The ID of a PackagingGroup."];
-      tags: Tags.t option }
-    type nonrec error =
-      [ `ForbiddenException of ForbiddenException.t 
-      | `InternalServerErrorException of InternalServerErrorException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ServiceUnavailableException of ServiceUnavailableException.t 
-      | `TooManyRequestsException of TooManyRequestsException.t 
-      | `UnprocessableEntityException of UnprocessableEntityException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?arn =
-      fun ?cmafPackage ->
-        fun ?dashPackage ->
-          fun ?hlsPackage ->
-            fun ?id ->
-              fun ?mssPackage ->
-                fun ?packagingGroupId ->
+    let make ?approximateAssetCount =
+      fun ?arn ->
+        fun ?authorization ->
+          fun ?createdAt ->
+            fun ?domainName ->
+              fun ?egressAccessLogs ->
+                fun ?id ->
                   fun ?tags ->
                     fun () ->
                       {
+                        approximateAssetCount;
                         arn;
-                        cmafPackage;
-                        dashPackage;
-                        hlsPackage;
+                        authorization;
+                        createdAt;
+                        domainName;
+                        egressAccessLogs;
                         id;
-                        mssPackage;
-                        packagingGroupId;
                         tags
                       }
     let error_of_json name json =
@@ -2986,8 +3057,197 @@ module DescribePackagingConfigurationResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
+        [("approximateAssetCount",
+           (Option.map x.approximateAssetCount ~f:Zz__integer.to_value));
+        ("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("authorization",
+          (Option.map x.authorization ~f:Authorization.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
+        ("domainName", (Option.map x.domainName ~f:Zz__string.to_value));
+        ("egressAccessLogs",
+          (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
+        ("id", (Option.map x.id ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let id = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "id") in
+      let egressAccessLogs =
+        (Option.map ~f:EgressAccessLogs.of_xml)
+          (Xml.child xml_arg0 "egressAccessLogs") in
+      let domainName =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "domainName") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let authorization =
+        (Option.map ~f:Authorization.of_xml)
+          (Xml.child xml_arg0 "authorization") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
+      let approximateAssetCount =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "approximateAssetCount") in
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ?approximateAssetCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let egressAccessLogs =
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let domainName = field_map json__ "DomainName" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let authorization =
+        field_map json__ "Authorization" Authorization.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let approximateAssetCount =
+        field_map json__ "ApproximateAssetCount" Zz__integer.of_json in
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ?approximateAssetCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a description of a MediaPackage VOD PackagingGroup resource."]
+module DescribePackagingGroupRequest =
+  struct
+    type nonrec t =
+      {
+      id: Zz__string.t
+        [@ocaml.doc "The ID of a MediaPackage VOD PackagingGroup resource."]}
+    let context_ = "DescribePackagingGroupRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("id", (Some (Zz__string.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a description of a MediaPackage VOD PackagingGroup resource."]
+module DescribePackagingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      arn: Zz__string.t option
+        [@ocaml.doc "The ARN of the PackagingConfiguration."];
+      cmafPackage: CmafPackage.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The time the PackagingConfiguration was created."];
+      dashPackage: DashPackage.t option ;
+      hlsPackage: HlsPackage.t option ;
+      id: Zz__string.t option
+        [@ocaml.doc "The ID of the PackagingConfiguration."];
+      mssPackage: MssPackage.t option ;
+      packagingGroupId: Zz__string.t option
+        [@ocaml.doc "The ID of a PackagingGroup."];
+      tags: Tags.t option }
+    type nonrec error =
+      [ `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnprocessableEntityException of UnprocessableEntityException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn =
+      fun ?cmafPackage ->
+        fun ?createdAt ->
+          fun ?dashPackage ->
+            fun ?hlsPackage ->
+              fun ?id ->
+                fun ?mssPackage ->
+                  fun ?packagingGroupId ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          arn;
+                          cmafPackage;
+                          createdAt;
+                          dashPackage;
+                          hlsPackage;
+                          id;
+                          mssPackage;
+                          packagingGroupId;
+                          tags
+                        }
+    let error_of_json name json =
+      match name with
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnprocessableEntityException e ->
+          `Assoc
+            [("error", (`String "UnprocessableEntityException"));
+            ("details", (UnprocessableEntityException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("cmafPackage", (Option.map x.cmafPackage ~f:CmafPackage.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("dashPackage", (Option.map x.dashPackage ~f:DashPackage.to_value));
         ("hlsPackage", (Option.map x.hlsPackage ~f:HlsPackage.to_value));
         ("id", (Option.map x.id ~f:Zz__string.to_value));
@@ -3008,24 +3268,27 @@ module DescribePackagingConfigurationResponse =
         (Option.map ~f:HlsPackage.of_xml) (Xml.child xml_arg0 "hlsPackage") in
       let dashPackage =
         (Option.map ~f:DashPackage.of_xml) (Xml.child xml_arg0 "dashPackage") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let cmafPackage =
         (Option.map ~f:CmafPackage.of_xml) (Xml.child xml_arg0 "cmafPackage") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?packagingGroupId ?mssPackage ?id ?hlsPackage ?dashPackage
-        ?cmafPackage ?arn ()
+        ?createdAt ?cmafPackage ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let packagingGroupId =
-        field_map json "PackagingGroupId" Zz__string.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
-      let cmafPackage = field_map json "CmafPackage" CmafPackage.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "PackagingGroupId" Zz__string.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let cmafPackage = field_map json__ "CmafPackage" CmafPackage.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?packagingGroupId ?mssPackage ?id ?hlsPackage ?dashPackage
-        ?cmafPackage ?arn ()
+        ?createdAt ?cmafPackage ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a description of a MediaPackage VOD PackagingConfiguration resource."]
@@ -3046,8 +3309,8 @@ module DescribePackagingConfigurationRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a description of a MediaPackage VOD PackagingConfiguration resource."]
@@ -3207,18 +3470,18 @@ module DescribeAssetResponse =
       make ?tags ?sourceRoleArn ?sourceArn ?resourceId ?packagingGroupId ?id
         ?egressEndpoints ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let sourceRoleArn = field_map json "SourceRoleArn" Zz__string.of_json in
-      let sourceArn = field_map json "SourceArn" Zz__string.of_json in
-      let resourceId = field_map json "ResourceId" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let sourceRoleArn = field_map json__ "SourceRoleArn" Zz__string.of_json in
+      let sourceArn = field_map json__ "SourceArn" Zz__string.of_json in
+      let resourceId = field_map json__ "ResourceId" Zz__string.of_json in
       let packagingGroupId =
-        field_map json "PackagingGroupId" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "PackagingGroupId" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let egressEndpoints =
-        field_map json "EgressEndpoints" Zz__listOfEgressEndpoint.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressEndpoints" Zz__listOfEgressEndpoint.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?sourceRoleArn ?sourceArn ?resourceId ?packagingGroupId ?id
         ?egressEndpoints ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
@@ -3240,8 +3503,8 @@ module DescribeAssetRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a description of a MediaPackage VOD Asset resource."]
@@ -3352,8 +3615,8 @@ module DeletePackagingGroupRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a MediaPackage VOD PackagingGroup resource."]
 module DeletePackagingConfigurationResponse =
@@ -3464,8 +3727,8 @@ module DeletePackagingConfigurationRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a MediaPackage VOD PackagingConfiguration resource."]
@@ -3576,8 +3839,8 @@ module DeleteAssetRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an existing MediaPackage VOD Asset resource."]
 module CreatePackagingGroupResponse =
@@ -3586,6 +3849,8 @@ module CreatePackagingGroupResponse =
       {
       arn: Zz__string.t option [@ocaml.doc "The ARN of the PackagingGroup."];
       authorization: Authorization.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The time the PackagingGroup was created."];
       domainName: Zz__string.t option
         [@ocaml.doc
           "The fully qualified domain name for Assets in the PackagingGroup."];
@@ -3602,19 +3867,21 @@ module CreatePackagingGroupResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
       fun ?authorization ->
-        fun ?domainName ->
-          fun ?egressAccessLogs ->
-            fun ?id ->
-              fun ?tags ->
-                fun () ->
-                  {
-                    arn;
-                    authorization;
-                    domainName;
-                    egressAccessLogs;
-                    id;
-                    tags
-                  }
+        fun ?createdAt ->
+          fun ?domainName ->
+            fun ?egressAccessLogs ->
+              fun ?id ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      arn;
+                      authorization;
+                      createdAt;
+                      domainName;
+                      egressAccessLogs;
+                      id;
+                      tags
+                    }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -3690,6 +3957,7 @@ module CreatePackagingGroupResponse =
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("authorization",
           (Option.map x.authorization ~f:Authorization.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("domainName", (Option.map x.domainName ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -3704,22 +3972,27 @@ module CreatePackagingGroupResponse =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let domainName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "domainName") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let authorization =
         (Option.map ~f:Authorization.of_xml)
           (Xml.child xml_arg0 "authorization") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let domainName = field_map json "DomainName" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let domainName = field_map json__ "DomainName" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
+        field_map json__ "Authorization" Authorization.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new MediaPackage VOD PackagingGroup resource."]
 module CreatePackagingGroupRequest =
@@ -3756,13 +4029,13 @@ module CreatePackagingGroupRequest =
           (Xml.child xml_arg0 "authorization") in
       make ?tags ~id ?egressAccessLogs ?authorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
       make ?tags ~id ?egressAccessLogs ?authorization ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3774,6 +4047,8 @@ module CreatePackagingConfigurationResponse =
       arn: Zz__string.t option
         [@ocaml.doc "The ARN of the PackagingConfiguration."];
       cmafPackage: CmafPackage.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The time the PackagingConfiguration was created."];
       dashPackage: DashPackage.t option ;
       hlsPackage: HlsPackage.t option ;
       id: Zz__string.t option
@@ -3792,23 +4067,25 @@ module CreatePackagingConfigurationResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
       fun ?cmafPackage ->
-        fun ?dashPackage ->
-          fun ?hlsPackage ->
-            fun ?id ->
-              fun ?mssPackage ->
-                fun ?packagingGroupId ->
-                  fun ?tags ->
-                    fun () ->
-                      {
-                        arn;
-                        cmafPackage;
-                        dashPackage;
-                        hlsPackage;
-                        id;
-                        mssPackage;
-                        packagingGroupId;
-                        tags
-                      }
+        fun ?createdAt ->
+          fun ?dashPackage ->
+            fun ?hlsPackage ->
+              fun ?id ->
+                fun ?mssPackage ->
+                  fun ?packagingGroupId ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          arn;
+                          cmafPackage;
+                          createdAt;
+                          dashPackage;
+                          hlsPackage;
+                          id;
+                          mssPackage;
+                          packagingGroupId;
+                          tags
+                        }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -3883,6 +4160,7 @@ module CreatePackagingConfigurationResponse =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("cmafPackage", (Option.map x.cmafPackage ~f:CmafPackage.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("dashPackage", (Option.map x.dashPackage ~f:DashPackage.to_value));
         ("hlsPackage", (Option.map x.hlsPackage ~f:HlsPackage.to_value));
         ("id", (Option.map x.id ~f:Zz__string.to_value));
@@ -3903,24 +4181,27 @@ module CreatePackagingConfigurationResponse =
         (Option.map ~f:HlsPackage.of_xml) (Xml.child xml_arg0 "hlsPackage") in
       let dashPackage =
         (Option.map ~f:DashPackage.of_xml) (Xml.child xml_arg0 "dashPackage") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let cmafPackage =
         (Option.map ~f:CmafPackage.of_xml) (Xml.child xml_arg0 "cmafPackage") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?packagingGroupId ?mssPackage ?id ?hlsPackage ?dashPackage
-        ?cmafPackage ?arn ()
+        ?createdAt ?cmafPackage ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let packagingGroupId =
-        field_map json "PackagingGroupId" Zz__string.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
-      let cmafPackage = field_map json "CmafPackage" CmafPackage.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "PackagingGroupId" Zz__string.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let cmafPackage = field_map json__ "CmafPackage" CmafPackage.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?packagingGroupId ?mssPackage ?id ?hlsPackage ?dashPackage
-        ?cmafPackage ?arn ()
+        ?createdAt ?cmafPackage ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new MediaPackage VOD PackagingConfiguration resource."]
@@ -3982,15 +4263,15 @@ module CreatePackagingConfigurationRequest =
       make ?tags ~packagingGroupId ?mssPackage ~id ?hlsPackage ?dashPackage
         ?cmafPackage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let packagingGroupId =
-        field_map_exn json "PackagingGroupId" Zz__string.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
-      let cmafPackage = field_map json "CmafPackage" CmafPackage.of_json in
+        field_map_exn json__ "PackagingGroupId" Zz__string.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
+      let cmafPackage = field_map json__ "CmafPackage" CmafPackage.of_json in
       make ?tags ~packagingGroupId ?mssPackage ~id ?hlsPackage ?dashPackage
         ?cmafPackage ()
     let to_json v = composed_to_json to_value v
@@ -4152,18 +4433,18 @@ module CreateAssetResponse =
       make ?tags ?sourceRoleArn ?sourceArn ?resourceId ?packagingGroupId ?id
         ?egressEndpoints ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let sourceRoleArn = field_map json "SourceRoleArn" Zz__string.of_json in
-      let sourceArn = field_map json "SourceArn" Zz__string.of_json in
-      let resourceId = field_map json "ResourceId" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let sourceRoleArn = field_map json__ "SourceRoleArn" Zz__string.of_json in
+      let sourceArn = field_map json__ "SourceArn" Zz__string.of_json in
+      let resourceId = field_map json__ "ResourceId" Zz__string.of_json in
       let packagingGroupId =
-        field_map json "PackagingGroupId" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "PackagingGroupId" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let egressEndpoints =
-        field_map json "EgressEndpoints" Zz__listOfEgressEndpoint.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressEndpoints" Zz__listOfEgressEndpoint.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?sourceRoleArn ?sourceArn ?resourceId ?packagingGroupId ?id
         ?egressEndpoints ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
@@ -4224,15 +4505,15 @@ module CreateAssetRequest =
       make ?tags ~sourceRoleArn ~sourceArn ?resourceId ~packagingGroupId ~id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let sourceRoleArn =
-        field_map_exn json "SourceRoleArn" Zz__string.of_json in
-      let sourceArn = field_map_exn json "SourceArn" Zz__string.of_json in
-      let resourceId = field_map json "ResourceId" Zz__string.of_json in
+        field_map_exn json__ "SourceRoleArn" Zz__string.of_json in
+      let sourceArn = field_map_exn json__ "SourceArn" Zz__string.of_json in
+      let resourceId = field_map json__ "ResourceId" Zz__string.of_json in
       let packagingGroupId =
-        field_map_exn json "PackagingGroupId" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+        field_map_exn json__ "PackagingGroupId" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       make ?tags ~sourceRoleArn ~sourceArn ?resourceId ~packagingGroupId ~id
         ()
     let to_json v = composed_to_json to_value v
@@ -4243,6 +4524,8 @@ module ConfigureLogsResponse =
       {
       arn: Zz__string.t option [@ocaml.doc "The ARN of the PackagingGroup."];
       authorization: Authorization.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The time the PackagingGroup was created."];
       domainName: Zz__string.t option
         [@ocaml.doc
           "The fully qualified domain name for Assets in the PackagingGroup."];
@@ -4259,19 +4542,21 @@ module ConfigureLogsResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
       fun ?authorization ->
-        fun ?domainName ->
-          fun ?egressAccessLogs ->
-            fun ?id ->
-              fun ?tags ->
-                fun () ->
-                  {
-                    arn;
-                    authorization;
-                    domainName;
-                    egressAccessLogs;
-                    id;
-                    tags
-                  }
+        fun ?createdAt ->
+          fun ?domainName ->
+            fun ?egressAccessLogs ->
+              fun ?id ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      arn;
+                      authorization;
+                      createdAt;
+                      domainName;
+                      egressAccessLogs;
+                      id;
+                      tags
+                    }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -4347,6 +4632,7 @@ module ConfigureLogsResponse =
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("authorization",
           (Option.map x.authorization ~f:Authorization.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("domainName", (Option.map x.domainName ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -4361,22 +4647,27 @@ module ConfigureLogsResponse =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let domainName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "domainName") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let authorization =
         (Option.map ~f:Authorization.of_xml)
           (Xml.child xml_arg0 "authorization") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let domainName = field_map json "DomainName" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let domainName = field_map json__ "DomainName" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?tags ?id ?egressAccessLogs ?domainName ?authorization ?arn ()
+        field_map json__ "Authorization" Authorization.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?tags ?id ?egressAccessLogs ?domainName ?createdAt ?authorization
+        ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Changes the packaging group's properities to configure log subscription"]
@@ -4404,10 +4695,10 @@ module ConfigureLogsRequest =
           (Xml.child xml_arg0 "egressAccessLogs") in
       make ~id ?egressAccessLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
       make ~id ?egressAccessLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The option to configure log subscription."]
@@ -4427,9 +4718,9 @@ module ConfigureLogsParameters =
           (Xml.child xml_arg0 "egressAccessLogs") in
       make ?egressAccessLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
       make ?egressAccessLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration parameters for egress access logging."]
@@ -4456,9 +4747,9 @@ module AssetList =
           (Xml.child xml_arg0 "assets") in
       make ?nextToken ?assets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let assets = field_map json "Assets" Zz__listOfAssetShallow.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let assets = field_map json__ "Assets" Zz__listOfAssetShallow.of_json in
       make ?nextToken ?assets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A collection of MediaPackage VOD Asset resources."]
@@ -4518,15 +4809,15 @@ module AssetCreateParameters =
       make ?tags ~sourceRoleArn ~sourceArn ?resourceId ~packagingGroupId ~id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let sourceRoleArn =
-        field_map_exn json "SourceRoleArn" Zz__string.of_json in
-      let sourceArn = field_map_exn json "SourceArn" Zz__string.of_json in
-      let resourceId = field_map json "ResourceId" Zz__string.of_json in
+        field_map_exn json__ "SourceRoleArn" Zz__string.of_json in
+      let sourceArn = field_map_exn json__ "SourceArn" Zz__string.of_json in
+      let resourceId = field_map json__ "ResourceId" Zz__string.of_json in
       let packagingGroupId =
-        field_map_exn json "PackagingGroupId" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+        field_map_exn json__ "PackagingGroupId" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       make ?tags ~sourceRoleArn ~sourceArn ?resourceId ~packagingGroupId ~id
         ()
     let to_json v = composed_to_json to_value v
@@ -4609,18 +4900,18 @@ module Asset =
       make ?tags ?sourceRoleArn ?sourceArn ?resourceId ?packagingGroupId ?id
         ?egressEndpoints ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let sourceRoleArn = field_map json "SourceRoleArn" Zz__string.of_json in
-      let sourceArn = field_map json "SourceArn" Zz__string.of_json in
-      let resourceId = field_map json "ResourceId" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let sourceRoleArn = field_map json__ "SourceRoleArn" Zz__string.of_json in
+      let sourceArn = field_map json__ "SourceArn" Zz__string.of_json in
+      let resourceId = field_map json__ "ResourceId" Zz__string.of_json in
       let packagingGroupId =
-        field_map json "PackagingGroupId" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "PackagingGroupId" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let egressEndpoints =
-        field_map json "EgressEndpoints" Zz__listOfEgressEndpoint.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressEndpoints" Zz__listOfEgressEndpoint.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?sourceRoleArn ?sourceArn ?resourceId ?packagingGroupId ?id
         ?egressEndpoints ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v

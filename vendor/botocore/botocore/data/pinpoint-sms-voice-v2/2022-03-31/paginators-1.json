@@ -65,6 +65,102 @@
       "output_token": "NextToken",
       "limit_key": "MaxResults",
       "result_key": "OriginationIdentities"
+    },
+    "DescribeRegistrationAttachments": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "RegistrationAttachments"
+    },
+    "DescribeRegistrationFieldDefinitions": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "RegistrationFieldDefinitions"
+    },
+    "DescribeRegistrationFieldValues": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "RegistrationFieldValues"
+    },
+    "DescribeRegistrationSectionDefinitions": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "RegistrationSectionDefinitions"
+    },
+    "DescribeRegistrationTypeDefinitions": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "RegistrationTypeDefinitions"
+    },
+    "DescribeRegistrationVersions": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "RegistrationVersions"
+    },
+    "DescribeRegistrations": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "Registrations"
+    },
+    "DescribeVerifiedDestinationNumbers": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "VerifiedDestinationNumbers"
+    },
+    "ListRegistrationAssociations": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "RegistrationAssociations"
+    },
+    "DescribeProtectConfigurations": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "ProtectConfigurations"
+    },
+    "ListProtectConfigurationRuleSetNumberOverrides": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "RuleSetNumberOverrides"
+    },
+    "DescribeNotifyConfigurations": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "NotifyConfigurations"
+    },
+    "DescribeNotifyTemplates": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "NotifyTemplates"
+    },
+    "DescribeRcsAgentCountryLaunchStatus": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "CountryLaunchStatus"
+    },
+    "DescribeRcsAgents": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "RcsAgents"
+    },
+    "ListNotifyCountries": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "NotifyCountries"
     }
   }
 }

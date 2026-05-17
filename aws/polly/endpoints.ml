@@ -16,6 +16,9 @@ type ('i, 'o, 'e) t =
   ListSpeechSynthesisTasksOutput.t, ListSpeechSynthesisTasksOutput.error) t 
   | PutLexicon: (PutLexiconInput.t, PutLexiconOutput.t,
   PutLexiconOutput.error) t 
+  | StartSpeechSynthesisStream: (StartSpeechSynthesisStreamInput.t,
+  StartSpeechSynthesisStreamOutput.t, StartSpeechSynthesisStreamOutput.error)
+  t 
   | StartSpeechSynthesisTask: (StartSpeechSynthesisTaskInput.t,
   StartSpeechSynthesisTaskOutput.t, StartSpeechSynthesisTaskOutput.error) t 
   | SynthesizeSpeech: (SynthesizeSpeechInput.t, SynthesizeSpeechOutput.t,
@@ -29,6 +32,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListLexicons -> `GET
   | ListSpeechSynthesisTasks -> `GET
   | PutLexicon -> `PUT
+  | StartSpeechSynthesisStream -> `POST
   | StartSpeechSynthesisTask -> `POST
   | SynthesizeSpeech -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -82,6 +86,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutLexicon ->
           (Format.kasprintf Uri.of_string) "/v1/lexicons/%s"
             (LexiconName.to_header x.PutLexiconInput.name)
+      | StartSpeechSynthesisStream ->
+          (Format.kasprintf Uri.of_string) "/v1/synthesisStream"
       | StartSpeechSynthesisTask ->
           (Format.kasprintf Uri.of_string) "/v1/synthesisTasks"
       | SynthesizeSpeech -> (Format.kasprintf Uri.of_string) "/v1/speech")
@@ -106,6 +112,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutLexicon -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StartSpeechSynthesisStream ->
+      let headers =
+        Some
+          ((List.filter_opt
+              [Some
+                 ("x-amzn-Engine",
+                   (Engine.to_header
+                      req.StartSpeechSynthesisStreamInput.engine));
+              Option.map req.StartSpeechSynthesisStreamInput.languageCode
+                ~f:(fun x ->
+                      ("x-amzn-LanguageCode", (LanguageCode.to_header x)));
+              Option.map req.StartSpeechSynthesisStreamInput.lexiconNames
+                ~f:(fun x ->
+                      ("x-amzn-LexiconNames", (LexiconNameList.to_header x)));
+              Some
+                ("x-amzn-OutputFormat",
+                  (OutputFormat.to_header
+                     req.StartSpeechSynthesisStreamInput.outputFormat));
+              Option.map req.StartSpeechSynthesisStreamInput.sampleRate
+                ~f:(fun x -> ("x-amzn-SampleRate", (SampleRate.to_header x)));
+              Some
+                ("x-amzn-VoiceId",
+                  (VoiceId.to_header
+                     req.StartSpeechSynthesisStreamInput.voiceId))])
+             |> Awso.Http.Headers.of_list) in
+      let body =
+        Option.map req.actionStream
+          ~f:(fun param ->
+                ((param |> StartSpeechSynthesisStreamActionStream.to_value)
+                   |> Awso.Botodata.Json.value_to_json)
+                  |> Yojson.Safe.to_string) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartSpeechSynthesisTask ->
       let (headers, body) =
         let headers =
@@ -296,6 +334,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (PutLexiconOutput.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some PutLexiconOutput.error_of_json))
+  | StartSpeechSynthesisStream ->
+      if is_success
+      then
+        let body =
+          StartSpeechSynthesisStreamEventStream.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StartSpeechSynthesisStreamOutput.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some StartSpeechSynthesisStreamOutput.error_of_json))
   | StartSpeechSynthesisTask ->
       if is_success
       then

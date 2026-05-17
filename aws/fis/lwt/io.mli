@@ -6,12 +6,24 @@ val create_experiment_template :
       CreateExperimentTemplateRequest.t ->
         (CreateExperimentTemplateResponse.t,
           CreateExperimentTemplateResponse.error) Result.t Lwt.t
+val create_target_account_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTargetAccountConfigurationRequest.t ->
+        (CreateTargetAccountConfigurationResponse.t,
+          CreateTargetAccountConfigurationResponse.error) Result.t Lwt.t
 val delete_experiment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteExperimentTemplateRequest.t ->
         (DeleteExperimentTemplateResponse.t,
           DeleteExperimentTemplateResponse.error) Result.t Lwt.t
+val delete_target_account_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteTargetAccountConfigurationRequest.t ->
+        (DeleteTargetAccountConfigurationResponse.t,
+          DeleteTargetAccountConfigurationResponse.error) Result.t Lwt.t
 val get_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -22,12 +34,31 @@ val get_experiment :
     ?cfg:Awso.Cfg.t ->
       GetExperimentRequest.t ->
         (GetExperimentResponse.t, GetExperimentResponse.error) Result.t Lwt.t
+val get_experiment_target_account_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetExperimentTargetAccountConfigurationRequest.t ->
+        (GetExperimentTargetAccountConfigurationResponse.t,
+          GetExperimentTargetAccountConfigurationResponse.error) Result.t
+          Lwt.t
 val get_experiment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExperimentTemplateRequest.t ->
         (GetExperimentTemplateResponse.t,
           GetExperimentTemplateResponse.error) Result.t Lwt.t
+val get_safety_lever :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSafetyLeverRequest.t ->
+        (GetSafetyLeverResponse.t, GetSafetyLeverResponse.error) Result.t
+          Lwt.t
+val get_target_account_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTargetAccountConfigurationRequest.t ->
+        (GetTargetAccountConfigurationResponse.t,
+          GetTargetAccountConfigurationResponse.error) Result.t Lwt.t
 val get_target_resource_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -39,6 +70,19 @@ val list_actions :
     ?cfg:Awso.Cfg.t ->
       ListActionsRequest.t ->
         (ListActionsResponse.t, ListActionsResponse.error) Result.t Lwt.t
+val list_experiment_resolved_targets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListExperimentResolvedTargetsRequest.t ->
+        (ListExperimentResolvedTargetsResponse.t,
+          ListExperimentResolvedTargetsResponse.error) Result.t Lwt.t
+val list_experiment_target_account_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListExperimentTargetAccountConfigurationsRequest.t ->
+        (ListExperimentTargetAccountConfigurationsResponse.t,
+          ListExperimentTargetAccountConfigurationsResponse.error) Result.t
+          Lwt.t
 val list_experiment_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -57,6 +101,12 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val list_target_account_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTargetAccountConfigurationsRequest.t ->
+        (ListTargetAccountConfigurationsResponse.t,
+          ListTargetAccountConfigurationsResponse.error) Result.t Lwt.t
 val list_target_resource_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -91,3 +141,15 @@ val update_experiment_template :
       UpdateExperimentTemplateRequest.t ->
         (UpdateExperimentTemplateResponse.t,
           UpdateExperimentTemplateResponse.error) Result.t Lwt.t
+val update_safety_lever_state :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSafetyLeverStateRequest.t ->
+        (UpdateSafetyLeverStateResponse.t,
+          UpdateSafetyLeverStateResponse.error) Result.t Lwt.t
+val update_target_account_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateTargetAccountConfigurationRequest.t ->
+        (UpdateTargetAccountConfigurationResponse.t,
+          UpdateTargetAccountConfigurationResponse.error) Result.t Lwt.t

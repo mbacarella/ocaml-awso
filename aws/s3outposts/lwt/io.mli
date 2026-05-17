@@ -13,6 +13,12 @@ val list_endpoints :
     ?cfg:Awso.Cfg.t ->
       ListEndpointsRequest.t ->
         (ListEndpointsResult.t, ListEndpointsResult.error) Result.t Lwt.t
+val list_outposts_with_s3 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListOutpostsWithS3Request.t ->
+        (ListOutpostsWithS3Result.t, ListOutpostsWithS3Result.error) Result.t
+          Lwt.t
 val list_shared_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

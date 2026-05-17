@@ -11,11 +11,41 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let create_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateGroup input
+let create_group_membership ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateGroupMembership input
+let create_user ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateUser input
+let delete_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteGroup input
+let delete_group_membership ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteGroupMembership input
+let delete_user ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteUser input
 let describe_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeGroup input
+let describe_group_membership ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeGroupMembership input
 let describe_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeUser input
+let get_group_id ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetGroupId input
+let get_group_membership_id ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetGroupMembershipId input
+let get_user_id ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetUserId input
+let is_member_in_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.IsMemberInGroups input
+let list_group_memberships ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListGroupMemberships input
+let list_group_memberships_for_member ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListGroupMembershipsForMember input
 let list_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGroups input
 let list_users ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUsers input
+let update_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateGroup input
+let update_user ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateUser input

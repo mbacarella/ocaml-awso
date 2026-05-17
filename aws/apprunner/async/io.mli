@@ -38,6 +38,12 @@ val create_vpc_connector :
       CreateVpcConnectorRequest.t ->
         (CreateVpcConnectorResponse.t, CreateVpcConnectorResponse.error)
           Result.t Async.Deferred.t
+val create_vpc_ingress_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateVpcIngressConnectionRequest.t ->
+        (CreateVpcIngressConnectionResponse.t,
+          CreateVpcIngressConnectionResponse.error) Result.t Async.Deferred.t
 val delete_auto_scaling_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -70,6 +76,12 @@ val delete_vpc_connector :
       DeleteVpcConnectorRequest.t ->
         (DeleteVpcConnectorResponse.t, DeleteVpcConnectorResponse.error)
           Result.t Async.Deferred.t
+val delete_vpc_ingress_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteVpcIngressConnectionRequest.t ->
+        (DeleteVpcIngressConnectionResponse.t,
+          DeleteVpcIngressConnectionResponse.error) Result.t Async.Deferred.t
 val describe_auto_scaling_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -102,6 +114,13 @@ val describe_vpc_connector :
       DescribeVpcConnectorRequest.t ->
         (DescribeVpcConnectorResponse.t, DescribeVpcConnectorResponse.error)
           Result.t Async.Deferred.t
+val describe_vpc_ingress_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeVpcIngressConnectionRequest.t ->
+        (DescribeVpcIngressConnectionResponse.t,
+          DescribeVpcIngressConnectionResponse.error) Result.t
+          Async.Deferred.t
 val disassociate_custom_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -140,6 +159,13 @@ val list_services :
       ListServicesRequest.t ->
         (ListServicesResponse.t, ListServicesResponse.error) Result.t
           Async.Deferred.t
+val list_services_for_auto_scaling_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListServicesForAutoScalingConfigurationRequest.t ->
+        (ListServicesForAutoScalingConfigurationResponse.t,
+          ListServicesForAutoScalingConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -152,6 +178,12 @@ val list_vpc_connectors :
       ListVpcConnectorsRequest.t ->
         (ListVpcConnectorsResponse.t, ListVpcConnectorsResponse.error)
           Result.t Async.Deferred.t
+val list_vpc_ingress_connections :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcIngressConnectionsRequest.t ->
+        (ListVpcIngressConnectionsResponse.t,
+          ListVpcIngressConnectionsResponse.error) Result.t Async.Deferred.t
 val pause_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -182,9 +214,22 @@ val untag_resource :
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
+val update_default_auto_scaling_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDefaultAutoScalingConfigurationRequest.t ->
+        (UpdateDefaultAutoScalingConfigurationResponse.t,
+          UpdateDefaultAutoScalingConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val update_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceRequest.t ->
         (UpdateServiceResponse.t, UpdateServiceResponse.error) Result.t
           Async.Deferred.t
+val update_vpc_ingress_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateVpcIngressConnectionRequest.t ->
+        (UpdateVpcIngressConnectionResponse.t,
+          UpdateVpcIngressConnectionResponse.error) Result.t Async.Deferred.t

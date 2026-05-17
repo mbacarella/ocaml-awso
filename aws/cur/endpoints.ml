@@ -7,23 +7,35 @@ type ('i, 'o, 'e) t =
   | DescribeReportDefinitions: (DescribeReportDefinitionsRequest.t,
   DescribeReportDefinitionsResponse.t,
   DescribeReportDefinitionsResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ModifyReportDefinition: (ModifyReportDefinitionRequest.t,
   ModifyReportDefinitionResponse.t, ModifyReportDefinitionResponse.error) t 
   | PutReportDefinition: (PutReportDefinitionRequest.t,
   PutReportDefinitionResponse.t, PutReportDefinitionResponse.error) t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | DeleteReportDefinition -> `POST
   | DescribeReportDefinitions -> `POST
+  | ListTagsForResource -> `POST
   | ModifyReportDefinition -> `POST
   | PutReportDefinition -> `POST
+  | TagResource -> `POST
+  | UntagResource -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | DeleteReportDefinition -> (Format.kasprintf Uri.of_string) "/"
       | DescribeReportDefinitions -> (Format.kasprintf Uri.of_string) "/"
+      | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ModifyReportDefinition -> (Format.kasprintf Uri.of_string) "/"
-      | PutReportDefinition -> (Format.kasprintf Uri.of_string) "/")
+      | PutReportDefinition -> (Format.kasprintf Uri.of_string) "/"
+      | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -45,6 +57,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSOrigamiServiceGatewayService.DescribeReportDefinitions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let json = ListTagsForResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrigamiServiceGatewayService.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ModifyReportDefinition ->
       let json = ModifyReportDefinitionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -62,6 +83,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSOrigamiServiceGatewayService.PutReportDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TagResource ->
+      let json = TagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSOrigamiServiceGatewayService.TagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UntagResource ->
+      let json = UntagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSOrigamiServiceGatewayService.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -104,6 +141,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeReportDefinitionsResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ModifyReportDefinition ->
       if is_success
       then
@@ -121,3 +166,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some PutReportDefinitionResponse.error_of_json))
+  | TagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))

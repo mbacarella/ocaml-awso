@@ -61,6 +61,7 @@ let associate_resource =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and options = flag "options" (optional json_arg) ~doc:"JSON Options"
        and application =
          flag "application" (required string)
            ~doc:"STRING ApplicationSpecifier"
@@ -71,7 +72,9 @@ let associate_resource =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_resource
-           (Values.AssociateResourceRequest.make ~application
+           (Values.AssociateResourceRequest.make
+              ?options:(Option.map ~f:Values.Options.of_json options)
+              ~application
               ~resourceType:(Values.ResourceType.of_json resourceType)
               ~resource ()) (Some Values.AssociateResourceResponse.to_json)
            (Some Values.AssociateResourceResponse.error_to_json)])
@@ -240,6 +243,13 @@ let get_associated_resource =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and resourceTagStatus =
+         flag "resource-tag-status" (optional json_arg)
+           ~doc:"JSON GetAssociatedResourceFilter"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and application =
          flag "application" (required string)
            ~doc:"STRING ApplicationSpecifier"
@@ -250,7 +260,11 @@ let get_associated_resource =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_associated_resource
-           (Values.GetAssociatedResourceRequest.make ~application
+           (Values.GetAssociatedResourceRequest.make ?nextToken
+              ?resourceTagStatus:(Option.map
+                                    ~f:Values.GetAssociatedResourceFilter.of_json
+                                    resourceTagStatus) ?maxResults
+              ~application
               ~resourceType:(Values.ResourceType.of_json resourceType)
               ~resource ())
            (Some Values.GetAssociatedResourceResponse.to_json)
@@ -274,6 +288,22 @@ let get_attribute_group =
            (Values.GetAttributeGroupRequest.make ~attributeGroup ())
            (Some Values.GetAttributeGroupResponse.to_json)
            (Some Values.GetAttributeGroupResponse.error_to_json)])
+let get_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_configuration (Fn.id ())
+           (Some Values.GetConfigurationResponse.to_json)
+           (Some Values.GetConfigurationResponse.error_to_json)])
 let list_applications =
   Command.async ~summary:""
     ([%map_open.Command
@@ -362,6 +392,31 @@ let list_attribute_groups =
            (Values.ListAttributeGroupsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListAttributeGroupsResponse.to_json)
            (Some Values.ListAttributeGroupsResponse.error_to_json)])
+let list_attribute_groups_for_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and application =
+         flag "application" (required string)
+           ~doc:"STRING ApplicationSpecifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_attribute_groups_for_application
+           (Values.ListAttributeGroupsForApplicationRequest.make ?nextToken
+              ?maxResults ~application ())
+           (Some Values.ListAttributeGroupsForApplicationResponse.to_json)
+           (Some
+              Values.ListAttributeGroupsForApplicationResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -380,6 +435,25 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let put_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and configuration =
+         flag "configuration" (required json_arg)
+           ~doc:"JSON AppRegistryConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_configuration
+           (Values.PutConfigurationRequest.make
+              ~configuration:(Values.AppRegistryConfiguration.of_json
+                                configuration) ()) None None])
 let sync_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -503,11 +577,15 @@ let main =
     ("get-application", get_application);
     ("get-associated-resource", get_associated_resource);
     ("get-attribute-group", get_attribute_group);
+    ("get-configuration", get_configuration);
     ("list-applications", list_applications);
     ("list-associated-attribute-groups", list_associated_attribute_groups);
     ("list-associated-resources", list_associated_resources);
     ("list-attribute-groups", list_attribute_groups);
+    ("list-attribute-groups-for-application",
+      list_attribute_groups_for_application);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("put-configuration", put_configuration);
     ("sync-resource", sync_resource);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);

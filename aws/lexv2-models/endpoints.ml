@@ -2,6 +2,18 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | BatchCreateCustomVocabularyItem:
+  (BatchCreateCustomVocabularyItemRequest.t,
+  BatchCreateCustomVocabularyItemResponse.t,
+  BatchCreateCustomVocabularyItemResponse.error) t 
+  | BatchDeleteCustomVocabularyItem:
+  (BatchDeleteCustomVocabularyItemRequest.t,
+  BatchDeleteCustomVocabularyItemResponse.t,
+  BatchDeleteCustomVocabularyItemResponse.error) t 
+  | BatchUpdateCustomVocabularyItem:
+  (BatchUpdateCustomVocabularyItemRequest.t,
+  BatchUpdateCustomVocabularyItemResponse.t,
+  BatchUpdateCustomVocabularyItemResponse.error) t 
   | BuildBotLocale: (BuildBotLocaleRequest.t, BuildBotLocaleResponse.t,
   BuildBotLocaleResponse.error) t 
   | CreateBot: (CreateBotRequest.t, CreateBotResponse.t,
@@ -10,6 +22,8 @@ type ('i, 'o, 'e) t =
   CreateBotAliasResponse.error) t 
   | CreateBotLocale: (CreateBotLocaleRequest.t, CreateBotLocaleResponse.t,
   CreateBotLocaleResponse.error) t 
+  | CreateBotReplica: (CreateBotReplicaRequest.t, CreateBotReplicaResponse.t,
+  CreateBotReplicaResponse.error) t 
   | CreateBotVersion: (CreateBotVersionRequest.t, CreateBotVersionResponse.t,
   CreateBotVersionResponse.error) t 
   | CreateExport: (CreateExportRequest.t, CreateExportResponse.t,
@@ -25,14 +39,23 @@ type ('i, 'o, 'e) t =
   CreateSlotResponse.error) t 
   | CreateSlotType: (CreateSlotTypeRequest.t, CreateSlotTypeResponse.t,
   CreateSlotTypeResponse.error) t 
+  | CreateTestSetDiscrepancyReport: (CreateTestSetDiscrepancyReportRequest.t,
+  CreateTestSetDiscrepancyReportResponse.t,
+  CreateTestSetDiscrepancyReportResponse.error) t 
   | CreateUploadUrl: (CreateUploadUrlRequest.t, CreateUploadUrlResponse.t,
   CreateUploadUrlResponse.error) t 
   | DeleteBot: (DeleteBotRequest.t, DeleteBotResponse.t,
   DeleteBotResponse.error) t 
   | DeleteBotAlias: (DeleteBotAliasRequest.t, DeleteBotAliasResponse.t,
   DeleteBotAliasResponse.error) t 
+  | DeleteBotAnalyzerRecommendation:
+  (DeleteBotAnalyzerRecommendationRequest.t,
+  DeleteBotAnalyzerRecommendationResponse.t,
+  DeleteBotAnalyzerRecommendationResponse.error) t 
   | DeleteBotLocale: (DeleteBotLocaleRequest.t, DeleteBotLocaleResponse.t,
   DeleteBotLocaleResponse.error) t 
+  | DeleteBotReplica: (DeleteBotReplicaRequest.t, DeleteBotReplicaResponse.t,
+  DeleteBotReplicaResponse.error) t 
   | DeleteBotVersion: (DeleteBotVersionRequest.t, DeleteBotVersionResponse.t,
   DeleteBotVersionResponse.error) t 
   | DeleteCustomVocabulary: (DeleteCustomVocabularyRequest.t,
@@ -49,17 +72,27 @@ type ('i, 'o, 'e) t =
   DeleteResourcePolicyStatementResponse.error) t 
   | DeleteSlot: (DeleteSlotRequest.t, unit, unit) t 
   | DeleteSlotType: (DeleteSlotTypeRequest.t, unit, unit) t 
+  | DeleteTestSet: (DeleteTestSetRequest.t, unit, unit) t 
   | DeleteUtterances: (DeleteUtterancesRequest.t, DeleteUtterancesResponse.t,
   DeleteUtterancesResponse.error) t 
   | DescribeBot: (DescribeBotRequest.t, DescribeBotResponse.t,
   DescribeBotResponse.error) t 
   | DescribeBotAlias: (DescribeBotAliasRequest.t, DescribeBotAliasResponse.t,
   DescribeBotAliasResponse.error) t 
+  | DescribeBotAnalyzerRecommendation:
+  (DescribeBotAnalyzerRecommendationRequest.t,
+  DescribeBotAnalyzerRecommendationResponse.t,
+  DescribeBotAnalyzerRecommendationResponse.error) t 
   | DescribeBotLocale: (DescribeBotLocaleRequest.t,
   DescribeBotLocaleResponse.t, DescribeBotLocaleResponse.error) t 
   | DescribeBotRecommendation: (DescribeBotRecommendationRequest.t,
   DescribeBotRecommendationResponse.t,
   DescribeBotRecommendationResponse.error) t 
+  | DescribeBotReplica: (DescribeBotReplicaRequest.t,
+  DescribeBotReplicaResponse.t, DescribeBotReplicaResponse.error) t 
+  | DescribeBotResourceGeneration: (DescribeBotResourceGenerationRequest.t,
+  DescribeBotResourceGenerationResponse.t,
+  DescribeBotResourceGenerationResponse.error) t 
   | DescribeBotVersion: (DescribeBotVersionRequest.t,
   DescribeBotVersionResponse.t, DescribeBotVersionResponse.error) t 
   | DescribeCustomVocabularyMetadata:
@@ -78,15 +111,42 @@ type ('i, 'o, 'e) t =
   DescribeSlotResponse.error) t 
   | DescribeSlotType: (DescribeSlotTypeRequest.t, DescribeSlotTypeResponse.t,
   DescribeSlotTypeResponse.error) t 
+  | DescribeTestExecution: (DescribeTestExecutionRequest.t,
+  DescribeTestExecutionResponse.t, DescribeTestExecutionResponse.error) t 
+  | DescribeTestSet: (DescribeTestSetRequest.t, DescribeTestSetResponse.t,
+  DescribeTestSetResponse.error) t 
+  | DescribeTestSetDiscrepancyReport:
+  (DescribeTestSetDiscrepancyReportRequest.t,
+  DescribeTestSetDiscrepancyReportResponse.t,
+  DescribeTestSetDiscrepancyReportResponse.error) t 
+  | DescribeTestSetGeneration: (DescribeTestSetGenerationRequest.t,
+  DescribeTestSetGenerationResponse.t,
+  DescribeTestSetGenerationResponse.error) t 
+  | GenerateBotElement: (GenerateBotElementRequest.t,
+  GenerateBotElementResponse.t, GenerateBotElementResponse.error) t 
+  | GetTestExecutionArtifactsUrl: (GetTestExecutionArtifactsUrlRequest.t,
+  GetTestExecutionArtifactsUrlResponse.t,
+  GetTestExecutionArtifactsUrlResponse.error) t 
   | ListAggregatedUtterances: (ListAggregatedUtterancesRequest.t,
   ListAggregatedUtterancesResponse.t, ListAggregatedUtterancesResponse.error)
   t 
+  | ListBotAliasReplicas: (ListBotAliasReplicasRequest.t,
+  ListBotAliasReplicasResponse.t, ListBotAliasReplicasResponse.error) t 
   | ListBotAliases: (ListBotAliasesRequest.t, ListBotAliasesResponse.t,
   ListBotAliasesResponse.error) t 
+  | ListBotAnalyzerHistory: (ListBotAnalyzerHistoryRequest.t,
+  ListBotAnalyzerHistoryResponse.t, ListBotAnalyzerHistoryResponse.error) t 
   | ListBotLocales: (ListBotLocalesRequest.t, ListBotLocalesResponse.t,
   ListBotLocalesResponse.error) t 
   | ListBotRecommendations: (ListBotRecommendationsRequest.t,
   ListBotRecommendationsResponse.t, ListBotRecommendationsResponse.error) t 
+  | ListBotReplicas: (ListBotReplicasRequest.t, ListBotReplicasResponse.t,
+  ListBotReplicasResponse.error) t 
+  | ListBotResourceGenerations: (ListBotResourceGenerationsRequest.t,
+  ListBotResourceGenerationsResponse.t,
+  ListBotResourceGenerationsResponse.error) t 
+  | ListBotVersionReplicas: (ListBotVersionReplicasRequest.t,
+  ListBotVersionReplicasResponse.t, ListBotVersionReplicasResponse.error) t 
   | ListBotVersions: (ListBotVersionsRequest.t, ListBotVersionsResponse.t,
   ListBotVersionsResponse.error) t 
   | ListBots: (ListBotsRequest.t, ListBotsResponse.t, ListBotsResponse.error)
@@ -95,27 +155,68 @@ type ('i, 'o, 'e) t =
   ListBuiltInIntentsResponse.t, ListBuiltInIntentsResponse.error) t 
   | ListBuiltInSlotTypes: (ListBuiltInSlotTypesRequest.t,
   ListBuiltInSlotTypesResponse.t, ListBuiltInSlotTypesResponse.error) t 
+  | ListCustomVocabularyItems: (ListCustomVocabularyItemsRequest.t,
+  ListCustomVocabularyItemsResponse.t,
+  ListCustomVocabularyItemsResponse.error) t 
   | ListExports: (ListExportsRequest.t, ListExportsResponse.t,
   ListExportsResponse.error) t 
   | ListImports: (ListImportsRequest.t, ListImportsResponse.t,
   ListImportsResponse.error) t 
+  | ListIntentMetrics: (ListIntentMetricsRequest.t,
+  ListIntentMetricsResponse.t, ListIntentMetricsResponse.error) t 
+  | ListIntentPaths: (ListIntentPathsRequest.t, ListIntentPathsResponse.t,
+  ListIntentPathsResponse.error) t 
+  | ListIntentStageMetrics: (ListIntentStageMetricsRequest.t,
+  ListIntentStageMetricsResponse.t, ListIntentStageMetricsResponse.error) t 
   | ListIntents: (ListIntentsRequest.t, ListIntentsResponse.t,
   ListIntentsResponse.error) t 
   | ListRecommendedIntents: (ListRecommendedIntentsRequest.t,
   ListRecommendedIntentsResponse.t, ListRecommendedIntentsResponse.error) t 
+  | ListSessionAnalyticsData: (ListSessionAnalyticsDataRequest.t,
+  ListSessionAnalyticsDataResponse.t, ListSessionAnalyticsDataResponse.error)
+  t 
+  | ListSessionMetrics: (ListSessionMetricsRequest.t,
+  ListSessionMetricsResponse.t, ListSessionMetricsResponse.error) t 
   | ListSlotTypes: (ListSlotTypesRequest.t, ListSlotTypesResponse.t,
   ListSlotTypesResponse.error) t 
   | ListSlots: (ListSlotsRequest.t, ListSlotsResponse.t,
   ListSlotsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListTestExecutionResultItems: (ListTestExecutionResultItemsRequest.t,
+  ListTestExecutionResultItemsResponse.t,
+  ListTestExecutionResultItemsResponse.error) t 
+  | ListTestExecutions: (ListTestExecutionsRequest.t,
+  ListTestExecutionsResponse.t, ListTestExecutionsResponse.error) t 
+  | ListTestSetRecords: (ListTestSetRecordsRequest.t,
+  ListTestSetRecordsResponse.t, ListTestSetRecordsResponse.error) t 
+  | ListTestSets: (ListTestSetsRequest.t, ListTestSetsResponse.t,
+  ListTestSetsResponse.error) t 
+  | ListUtteranceAnalyticsData: (ListUtteranceAnalyticsDataRequest.t,
+  ListUtteranceAnalyticsDataResponse.t,
+  ListUtteranceAnalyticsDataResponse.error) t 
+  | ListUtteranceMetrics: (ListUtteranceMetricsRequest.t,
+  ListUtteranceMetricsResponse.t, ListUtteranceMetricsResponse.error) t 
   | SearchAssociatedTranscripts: (SearchAssociatedTranscriptsRequest.t,
   SearchAssociatedTranscriptsResponse.t,
   SearchAssociatedTranscriptsResponse.error) t 
+  | StartBotAnalyzer: (StartBotAnalyzerRequest.t, StartBotAnalyzerResponse.t,
+  StartBotAnalyzerResponse.error) t 
   | StartBotRecommendation: (StartBotRecommendationRequest.t,
   StartBotRecommendationResponse.t, StartBotRecommendationResponse.error) t 
+  | StartBotResourceGeneration: (StartBotResourceGenerationRequest.t,
+  StartBotResourceGenerationResponse.t,
+  StartBotResourceGenerationResponse.error) t 
   | StartImport: (StartImportRequest.t, StartImportResponse.t,
   StartImportResponse.error) t 
+  | StartTestExecution: (StartTestExecutionRequest.t,
+  StartTestExecutionResponse.t, StartTestExecutionResponse.error) t 
+  | StartTestSetGeneration: (StartTestSetGenerationRequest.t,
+  StartTestSetGenerationResponse.t, StartTestSetGenerationResponse.error) t 
+  | StopBotAnalyzer: (StopBotAnalyzerRequest.t, StopBotAnalyzerResponse.t,
+  StopBotAnalyzerResponse.error) t 
+  | StopBotRecommendation: (StopBotRecommendationRequest.t,
+  StopBotRecommendationResponse.t, StopBotRecommendationResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -139,12 +240,18 @@ type ('i, 'o, 'e) t =
   UpdateSlotResponse.error) t 
   | UpdateSlotType: (UpdateSlotTypeRequest.t, UpdateSlotTypeResponse.t,
   UpdateSlotTypeResponse.error) t 
+  | UpdateTestSet: (UpdateTestSetRequest.t, UpdateTestSetResponse.t,
+  UpdateTestSetResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | BatchCreateCustomVocabularyItem -> `PUT
+  | BatchDeleteCustomVocabularyItem -> `POST
+  | BatchUpdateCustomVocabularyItem -> `PUT
   | BuildBotLocale -> `POST
   | CreateBot -> `PUT
   | CreateBotAlias -> `PUT
   | CreateBotLocale -> `PUT
+  | CreateBotReplica -> `PUT
   | CreateBotVersion -> `PUT
   | CreateExport -> `PUT
   | CreateIntent -> `PUT
@@ -152,10 +259,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateResourcePolicyStatement -> `POST
   | CreateSlot -> `PUT
   | CreateSlotType -> `PUT
+  | CreateTestSetDiscrepancyReport -> `POST
   | CreateUploadUrl -> `POST
   | DeleteBot -> `DELETE
   | DeleteBotAlias -> `DELETE
+  | DeleteBotAnalyzerRecommendation -> `DELETE
   | DeleteBotLocale -> `DELETE
+  | DeleteBotReplica -> `DELETE
   | DeleteBotVersion -> `DELETE
   | DeleteCustomVocabulary -> `DELETE
   | DeleteExport -> `DELETE
@@ -165,11 +275,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteResourcePolicyStatement -> `DELETE
   | DeleteSlot -> `DELETE
   | DeleteSlotType -> `DELETE
+  | DeleteTestSet -> `DELETE
   | DeleteUtterances -> `DELETE
   | DescribeBot -> `GET
   | DescribeBotAlias -> `GET
+  | DescribeBotAnalyzerRecommendation -> `POST
   | DescribeBotLocale -> `GET
   | DescribeBotRecommendation -> `GET
+  | DescribeBotReplica -> `GET
+  | DescribeBotResourceGeneration -> `GET
   | DescribeBotVersion -> `GET
   | DescribeCustomVocabularyMetadata -> `GET
   | DescribeExport -> `GET
@@ -178,24 +292,53 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeResourcePolicy -> `GET
   | DescribeSlot -> `GET
   | DescribeSlotType -> `GET
+  | DescribeTestExecution -> `GET
+  | DescribeTestSet -> `GET
+  | DescribeTestSetDiscrepancyReport -> `GET
+  | DescribeTestSetGeneration -> `GET
+  | GenerateBotElement -> `POST
+  | GetTestExecutionArtifactsUrl -> `GET
   | ListAggregatedUtterances -> `POST
+  | ListBotAliasReplicas -> `POST
   | ListBotAliases -> `POST
+  | ListBotAnalyzerHistory -> `POST
   | ListBotLocales -> `POST
   | ListBotRecommendations -> `POST
+  | ListBotReplicas -> `POST
+  | ListBotResourceGenerations -> `POST
+  | ListBotVersionReplicas -> `POST
   | ListBotVersions -> `POST
   | ListBots -> `POST
   | ListBuiltInIntents -> `POST
   | ListBuiltInSlotTypes -> `POST
+  | ListCustomVocabularyItems -> `POST
   | ListExports -> `POST
   | ListImports -> `POST
+  | ListIntentMetrics -> `POST
+  | ListIntentPaths -> `POST
+  | ListIntentStageMetrics -> `POST
   | ListIntents -> `POST
   | ListRecommendedIntents -> `POST
+  | ListSessionAnalyticsData -> `POST
+  | ListSessionMetrics -> `POST
   | ListSlotTypes -> `POST
   | ListSlots -> `POST
   | ListTagsForResource -> `GET
+  | ListTestExecutionResultItems -> `POST
+  | ListTestExecutions -> `POST
+  | ListTestSetRecords -> `POST
+  | ListTestSets -> `POST
+  | ListUtteranceAnalyticsData -> `POST
+  | ListUtteranceMetrics -> `POST
   | SearchAssociatedTranscripts -> `POST
+  | StartBotAnalyzer -> `POST
   | StartBotRecommendation -> `PUT
+  | StartBotResourceGeneration -> `PUT
   | StartImport -> `PUT
+  | StartTestExecution -> `POST
+  | StartTestSetGeneration -> `PUT
+  | StopBotAnalyzer -> `PUT
+  | StopBotRecommendation -> `PUT
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateBot -> `PUT
@@ -207,9 +350,34 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateResourcePolicy -> `PUT
   | UpdateSlot -> `PUT
   | UpdateSlotType -> `PUT
+  | UpdateTestSet -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | BatchCreateCustomVocabularyItem ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botversions/%s/botlocales/%s/customvocabulary/DEFAULT/batchcreate"
+            (Id.to_header x.BatchCreateCustomVocabularyItemRequest.botId)
+            (BotVersion.to_header
+               x.BatchCreateCustomVocabularyItemRequest.botVersion)
+            (LocaleId.to_header
+               x.BatchCreateCustomVocabularyItemRequest.localeId)
+      | BatchDeleteCustomVocabularyItem ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botversions/%s/botlocales/%s/customvocabulary/DEFAULT/batchdelete"
+            (Id.to_header x.BatchDeleteCustomVocabularyItemRequest.botId)
+            (BotVersion.to_header
+               x.BatchDeleteCustomVocabularyItemRequest.botVersion)
+            (LocaleId.to_header
+               x.BatchDeleteCustomVocabularyItemRequest.localeId)
+      | BatchUpdateCustomVocabularyItem ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botversions/%s/botlocales/%s/customvocabulary/DEFAULT/batchupdate"
+            (Id.to_header x.BatchUpdateCustomVocabularyItemRequest.botId)
+            (BotVersion.to_header
+               x.BatchUpdateCustomVocabularyItemRequest.botVersion)
+            (LocaleId.to_header
+               x.BatchUpdateCustomVocabularyItemRequest.localeId)
       | BuildBotLocale ->
           (Format.kasprintf Uri.of_string)
             "/bots/%s/botversions/%s/botlocales/%s/"
@@ -225,6 +393,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/bots/%s/botversions/%s/botlocales/"
             (Id.to_header x.CreateBotLocaleRequest.botId)
             (DraftBotVersion.to_header x.CreateBotLocaleRequest.botVersion)
+      | CreateBotReplica ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/replicas/"
+            (Id.to_header x.CreateBotReplicaRequest.botId)
       | CreateBotVersion ->
           (Format.kasprintf Uri.of_string) "/bots/%s/botversions/"
             (Id.to_header x.CreateBotVersionRequest.botId)
@@ -262,6 +433,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (Id.to_header x.CreateSlotTypeRequest.botId)
             (DraftBotVersion.to_header x.CreateSlotTypeRequest.botVersion)
             (LocaleId.to_header x.CreateSlotTypeRequest.localeId)
+      | CreateTestSetDiscrepancyReport ->
+          (Format.kasprintf Uri.of_string) "/testsets/%s/testsetdiscrepancy"
+            (Id.to_header x.CreateTestSetDiscrepancyReportRequest.testSetId)
       | CreateUploadUrl ->
           (Format.kasprintf Uri.of_string) "/createuploadurl/"
       | DeleteBot ->
@@ -285,12 +459,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                         ("skipResourceInUseCheck",
                           (SkipResourceInUseCheck.to_header v)))
                   x.skipResourceInUseCheck])
+      | DeleteBotAnalyzerRecommendation ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/botanalyzer/%s/"
+            (Id.to_header x.DeleteBotAnalyzerRecommendationRequest.botId)
+            (UUID.to_header
+               x.DeleteBotAnalyzerRecommendationRequest.botAnalyzerRequestId)
       | DeleteBotLocale ->
           (Format.kasprintf Uri.of_string)
             "/bots/%s/botversions/%s/botlocales/%s/"
             (Id.to_header x.DeleteBotLocaleRequest.botId)
             (DraftBotVersion.to_header x.DeleteBotLocaleRequest.botVersion)
             (LocaleId.to_header x.DeleteBotLocaleRequest.localeId)
+      | DeleteBotReplica ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/replicas/%s/"
+            (Id.to_header x.DeleteBotReplicaRequest.botId)
+            (ReplicaRegion.to_header x.DeleteBotReplicaRequest.replicaRegion)
       | DeleteBotVersion ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/bots/%s/botversions/%s/"
@@ -367,6 +550,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                         ("skipResourceInUseCheck",
                           (SkipResourceInUseCheck.to_header v)))
                   x.skipResourceInUseCheck])
+      | DeleteTestSet ->
+          (Format.kasprintf Uri.of_string) "/testsets/%s"
+            (Id.to_header x.DeleteTestSetRequest.testSetId)
       | DeleteUtterances ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/bots/%s/utterances/"
@@ -384,6 +570,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/bots/%s/botaliases/%s/"
             (Id.to_header x.DescribeBotAliasRequest.botId)
             (BotAliasId.to_header x.DescribeBotAliasRequest.botAliasId)
+      | DescribeBotAnalyzerRecommendation ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botanalyzer/describe/%s/"
+            (Id.to_header x.DescribeBotAnalyzerRecommendationRequest.botId)
+            (UUID.to_header
+               x.DescribeBotAnalyzerRecommendationRequest.botAnalyzerRequestId)
       | DescribeBotLocale ->
           (Format.kasprintf Uri.of_string)
             "/bots/%s/botversions/%s/botlocales/%s/"
@@ -399,6 +591,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (LocaleId.to_header x.DescribeBotRecommendationRequest.localeId)
             (Id.to_header
                x.DescribeBotRecommendationRequest.botRecommendationId)
+      | DescribeBotReplica ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/replicas/%s/"
+            (Id.to_header x.DescribeBotReplicaRequest.botId)
+            (ReplicaRegion.to_header
+               x.DescribeBotReplicaRequest.replicaRegion)
+      | DescribeBotResourceGeneration ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botversions/%s/botlocales/%s/generations/%s"
+            (Id.to_header x.DescribeBotResourceGenerationRequest.botId)
+            (BotVersion.to_header
+               x.DescribeBotResourceGenerationRequest.botVersion)
+            (LocaleId.to_header
+               x.DescribeBotResourceGenerationRequest.localeId)
+            (Id.to_header x.DescribeBotResourceGenerationRequest.generationId)
       | DescribeBotVersion ->
           (Format.kasprintf Uri.of_string) "/bots/%s/botversions/%s/"
             (Id.to_header x.DescribeBotVersionRequest.botId)
@@ -444,12 +650,44 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (BotVersion.to_header x.DescribeSlotTypeRequest.botVersion)
             (LocaleId.to_header x.DescribeSlotTypeRequest.localeId)
             (Id.to_header x.DescribeSlotTypeRequest.slotTypeId)
+      | DescribeTestExecution ->
+          (Format.kasprintf Uri.of_string) "/testexecutions/%s"
+            (Id.to_header x.DescribeTestExecutionRequest.testExecutionId)
+      | DescribeTestSet ->
+          (Format.kasprintf Uri.of_string) "/testsets/%s"
+            (Id.to_header x.DescribeTestSetRequest.testSetId)
+      | DescribeTestSetDiscrepancyReport ->
+          (Format.kasprintf Uri.of_string) "/testsetdiscrepancy/%s"
+            (Id.to_header
+               x.DescribeTestSetDiscrepancyReportRequest.testSetDiscrepancyReportId)
+      | DescribeTestSetGeneration ->
+          (Format.kasprintf Uri.of_string) "/testsetgenerations/%s"
+            (Id.to_header
+               x.DescribeTestSetGenerationRequest.testSetGenerationId)
+      | GenerateBotElement ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botversions/%s/botlocales/%s/generate"
+            (Id.to_header x.GenerateBotElementRequest.botId)
+            (BotVersion.to_header x.GenerateBotElementRequest.botVersion)
+            (LocaleId.to_header x.GenerateBotElementRequest.localeId)
+      | GetTestExecutionArtifactsUrl ->
+          (Format.kasprintf Uri.of_string) "/testexecutions/%s/artifacturl"
+            (Id.to_header
+               x.GetTestExecutionArtifactsUrlRequest.testExecutionId)
       | ListAggregatedUtterances ->
           (Format.kasprintf Uri.of_string) "/bots/%s/aggregatedutterances/"
             (Id.to_header x.ListAggregatedUtterancesRequest.botId)
+      | ListBotAliasReplicas ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/replicas/%s/botaliases/"
+            (Id.to_header x.ListBotAliasReplicasRequest.botId)
+            (ReplicaRegion.to_header
+               x.ListBotAliasReplicasRequest.replicaRegion)
       | ListBotAliases ->
           (Format.kasprintf Uri.of_string) "/bots/%s/botaliases/"
             (Id.to_header x.ListBotAliasesRequest.botId)
+      | ListBotAnalyzerHistory ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/botanalyzer/history/"
+            (Id.to_header x.ListBotAnalyzerHistoryRequest.botId)
       | ListBotLocales ->
           (Format.kasprintf Uri.of_string)
             "/bots/%s/botversions/%s/botlocales/"
@@ -462,6 +700,22 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (DraftBotVersion.to_header
                x.ListBotRecommendationsRequest.botVersion)
             (LocaleId.to_header x.ListBotRecommendationsRequest.localeId)
+      | ListBotReplicas ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/replicas/"
+            (Id.to_header x.ListBotReplicasRequest.botId)
+      | ListBotResourceGenerations ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botversions/%s/botlocales/%s/generations"
+            (Id.to_header x.ListBotResourceGenerationsRequest.botId)
+            (BotVersion.to_header
+               x.ListBotResourceGenerationsRequest.botVersion)
+            (LocaleId.to_header x.ListBotResourceGenerationsRequest.localeId)
+      | ListBotVersionReplicas ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/replicas/%s/botversions/"
+            (Id.to_header x.ListBotVersionReplicasRequest.botId)
+            (ReplicaRegion.to_header
+               x.ListBotVersionReplicasRequest.replicaRegion)
       | ListBotVersions ->
           (Format.kasprintf Uri.of_string) "/bots/%s/botversions/"
             (Id.to_header x.ListBotVersionsRequest.botId)
@@ -472,8 +726,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListBuiltInSlotTypes ->
           (Format.kasprintf Uri.of_string) "/builtins/locales/%s/slottypes/"
             (LocaleId.to_header x.ListBuiltInSlotTypesRequest.localeId)
+      | ListCustomVocabularyItems ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botversions/%s/botlocales/%s/customvocabulary/DEFAULT/list"
+            (Id.to_header x.ListCustomVocabularyItemsRequest.botId)
+            (BotVersion.to_header
+               x.ListCustomVocabularyItemsRequest.botVersion)
+            (LocaleId.to_header x.ListCustomVocabularyItemsRequest.localeId)
       | ListExports -> (Format.kasprintf Uri.of_string) "/exports/"
       | ListImports -> (Format.kasprintf Uri.of_string) "/imports/"
+      | ListIntentMetrics ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/analytics/intentmetrics"
+            (Id.to_header x.ListIntentMetricsRequest.botId)
+      | ListIntentPaths ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/analytics/intentpaths"
+            (Id.to_header x.ListIntentPathsRequest.botId)
+      | ListIntentStageMetrics ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/analytics/intentstagemetrics"
+            (Id.to_header x.ListIntentStageMetricsRequest.botId)
       | ListIntents ->
           (Format.kasprintf Uri.of_string)
             "/bots/%s/botversions/%s/botlocales/%s/intents/"
@@ -488,6 +759,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.ListRecommendedIntentsRequest.botVersion)
             (LocaleId.to_header x.ListRecommendedIntentsRequest.localeId)
             (Id.to_header x.ListRecommendedIntentsRequest.botRecommendationId)
+      | ListSessionAnalyticsData ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/analytics/sessions"
+            (Id.to_header x.ListSessionAnalyticsDataRequest.botId)
+      | ListSessionMetrics ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/analytics/sessionmetrics"
+            (Id.to_header x.ListSessionMetricsRequest.botId)
       | ListSlotTypes ->
           (Format.kasprintf Uri.of_string)
             "/bots/%s/botversions/%s/botlocales/%s/slottypes/"
@@ -505,6 +783,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (AmazonResourceName.to_header
                x.ListTagsForResourceRequest.resourceARN)
+      | ListTestExecutionResultItems ->
+          (Format.kasprintf Uri.of_string) "/testexecutions/%s/results"
+            (Id.to_header
+               x.ListTestExecutionResultItemsRequest.testExecutionId)
+      | ListTestExecutions ->
+          (Format.kasprintf Uri.of_string) "/testexecutions"
+      | ListTestSetRecords ->
+          (Format.kasprintf Uri.of_string) "/testsets/%s/records"
+            (Id.to_header x.ListTestSetRecordsRequest.testSetId)
+      | ListTestSets -> (Format.kasprintf Uri.of_string) "/testsets"
+      | ListUtteranceAnalyticsData ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/analytics/utterances"
+            (Id.to_header x.ListUtteranceAnalyticsDataRequest.botId)
+      | ListUtteranceMetrics ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/analytics/utterancemetrics"
+            (Id.to_header x.ListUtteranceMetricsRequest.botId)
       | SearchAssociatedTranscripts ->
           (Format.kasprintf Uri.of_string)
             "/bots/%s/botversions/%s/botlocales/%s/botrecommendations/%s/associatedtranscripts"
@@ -514,6 +809,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (LocaleId.to_header x.SearchAssociatedTranscriptsRequest.localeId)
             (Id.to_header
                x.SearchAssociatedTranscriptsRequest.botRecommendationId)
+      | StartBotAnalyzer ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/botanalyzer/"
+            (Id.to_header x.StartBotAnalyzerRequest.botId)
       | StartBotRecommendation ->
           (Format.kasprintf Uri.of_string)
             "/bots/%s/botversions/%s/botlocales/%s/botrecommendations/"
@@ -521,7 +819,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (DraftBotVersion.to_header
                x.StartBotRecommendationRequest.botVersion)
             (LocaleId.to_header x.StartBotRecommendationRequest.localeId)
+      | StartBotResourceGeneration ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botversions/%s/botlocales/%s/startgeneration"
+            (Id.to_header x.StartBotResourceGenerationRequest.botId)
+            (BotVersion.to_header
+               x.StartBotResourceGenerationRequest.botVersion)
+            (LocaleId.to_header x.StartBotResourceGenerationRequest.localeId)
       | StartImport -> (Format.kasprintf Uri.of_string) "/imports/"
+      | StartTestExecution ->
+          (Format.kasprintf Uri.of_string) "/testsets/%s/testexecutions"
+            (Id.to_header x.StartTestExecutionRequest.testSetId)
+      | StartTestSetGeneration ->
+          (Format.kasprintf Uri.of_string) "/testsetgenerations"
+      | StopBotAnalyzer ->
+          (Format.kasprintf Uri.of_string) "/bots/%s/botanalyzer/%s/stop/"
+            (Id.to_header x.StopBotAnalyzerRequest.botId)
+            (UUID.to_header x.StopBotAnalyzerRequest.botAnalyzerRequestId)
+      | StopBotRecommendation ->
+          (Format.kasprintf Uri.of_string)
+            "/bots/%s/botversions/%s/botlocales/%s/botrecommendations/%s/stopbotrecommendation"
+            (Id.to_header x.StopBotRecommendationRequest.botId)
+            (DraftBotVersion.to_header
+               x.StopBotRecommendationRequest.botVersion)
+            (LocaleId.to_header x.StopBotRecommendationRequest.localeId)
+            (Id.to_header x.StopBotRecommendationRequest.botRecommendationId)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (AmazonResourceName.to_header x.TagResourceRequest.resourceARN)
@@ -588,17 +910,45 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (Id.to_header x.UpdateSlotTypeRequest.botId)
             (DraftBotVersion.to_header x.UpdateSlotTypeRequest.botVersion)
             (LocaleId.to_header x.UpdateSlotTypeRequest.localeId)
-            (Id.to_header x.UpdateSlotTypeRequest.slotTypeId))
+            (Id.to_header x.UpdateSlotTypeRequest.slotTypeId)
+      | UpdateTestSet ->
+          (Format.kasprintf Uri.of_string) "/testsets/%s"
+            (Id.to_header x.UpdateTestSetRequest.testSetId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | BatchCreateCustomVocabularyItem ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | BatchDeleteCustomVocabularyItem ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("customVocabularyItemList",
+                           (DeleteCustomVocabularyItemsList.to_value
+                              req.BatchDeleteCustomVocabularyItemRequest.customVocabularyItemList))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchUpdateCustomVocabularyItem ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | BuildBotLocale ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateBot -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateBotAlias -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateBotLocale -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateBotReplica -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateBotVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateExport -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateIntent -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -659,12 +1009,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateSlot -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateSlotType -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateTestSetDiscrepancyReport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("target",
+                           (TestSetDiscrepancyReportResourceTarget.to_value
+                              req.CreateTestSetDiscrepancyReportRequest.target))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateUploadUrl ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteBot -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBotAlias -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteBotAnalyzerRecommendation ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBotLocale -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteBotReplica -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBotVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCustomVocabulary ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -676,6 +1049,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteSlot -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteSlotType -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTestSet -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteUtterances -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeBot ->
       let (headers, body) = (None, None) in
@@ -683,10 +1057,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeBotAlias ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeBotAnalyzerRecommendation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeBotAnalyzerRecommendationRequest.nextToken
+                         ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.DescribeBotAnalyzerRecommendationRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeBotLocale ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeBotRecommendation ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeBotReplica ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeBotResourceGeneration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeBotVersion ->
@@ -711,6 +1113,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeSlotType ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTestExecution ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTestSet ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTestSetDiscrepancyReport ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTestSetGeneration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GenerateBotElement ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("intentId",
+                           (Id.to_value
+                              req.GenerateBotElementRequest.intentId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTestExecutionArtifactsUrl ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAggregatedUtterances ->
@@ -757,6 +1194,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListBotAliasReplicas ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListBotAliasReplicasRequest.maxResults
+                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListBotAliasReplicasRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListBotAliases ->
       let (headers, body) =
         let headers =
@@ -770,6 +1227,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
                       Option.map req.ListBotAliasesRequest.nextToken
                         ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListBotAnalyzerHistory ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListBotAnalyzerHistoryRequest.localeId
+                         ~f:(fun x -> ("localeId", (LocaleId.to_value x)));
+                      Option.map req.ListBotAnalyzerHistoryRequest.botVersion
+                        ~f:(fun x ->
+                              ("botVersion", (DraftBotVersion.to_value x)));
+                      Option.map req.ListBotAnalyzerHistoryRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map req.ListBotAnalyzerHistoryRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -817,6 +1299,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
                       Option.map req.ListBotRecommendationsRequest.nextToken
                         ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListBotReplicas ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListBotResourceGenerations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListBotResourceGenerationsRequest.sortBy
+                         ~f:(fun x ->
+                               ("sortBy", (GenerationSortBy.to_value x)));
+                      Option.map
+                        req.ListBotResourceGenerationsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map
+                        req.ListBotResourceGenerationsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListBotVersionReplicas ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListBotVersionReplicasRequest.maxResults
+                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListBotVersionReplicasRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map req.ListBotVersionReplicasRequest.sortBy
+                        ~f:(fun x ->
+                              ("sortBy",
+                                (BotVersionReplicaSortBy.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -919,6 +1455,28 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCustomVocabularyItems ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListCustomVocabularyItemsRequest.maxResults
+                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map
+                        req.ListCustomVocabularyItemsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListExports ->
       let (headers, body) =
         let headers =
@@ -980,6 +1538,123 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListIntentMetrics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("startDateTime",
+                           (Timestamp.to_value
+                              req.ListIntentMetricsRequest.startDateTime));
+                      Some
+                        ("endDateTime",
+                          (Timestamp.to_value
+                             req.ListIntentMetricsRequest.endDateTime));
+                      Some
+                        ("metrics",
+                          (AnalyticsIntentMetrics.to_value
+                             req.ListIntentMetricsRequest.metrics));
+                      Option.map req.ListIntentMetricsRequest.binBy
+                        ~f:(fun x ->
+                              ("binBy", (AnalyticsBinByList.to_value x)));
+                      Option.map req.ListIntentMetricsRequest.groupBy
+                        ~f:(fun x ->
+                              ("groupBy",
+                                (AnalyticsIntentGroupByList.to_value x)));
+                      Option.map req.ListIntentMetricsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (AnalyticsIntentFilters.to_value x)));
+                      Option.map req.ListIntentMetricsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListIntentMetricsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListIntentPaths ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("startDateTime",
+                           (Timestamp.to_value
+                              req.ListIntentPathsRequest.startDateTime));
+                      Some
+                        ("endDateTime",
+                          (Timestamp.to_value
+                             req.ListIntentPathsRequest.endDateTime));
+                      Some
+                        ("intentPath",
+                          (AnalyticsPath.to_value
+                             req.ListIntentPathsRequest.intentPath));
+                      Option.map req.ListIntentPathsRequest.filters
+                        ~f:(fun x ->
+                              ("filters", (AnalyticsPathFilters.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListIntentStageMetrics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("startDateTime",
+                           (Timestamp.to_value
+                              req.ListIntentStageMetricsRequest.startDateTime));
+                      Some
+                        ("endDateTime",
+                          (Timestamp.to_value
+                             req.ListIntentStageMetricsRequest.endDateTime));
+                      Some
+                        ("metrics",
+                          (AnalyticsIntentStageMetrics.to_value
+                             req.ListIntentStageMetricsRequest.metrics));
+                      Option.map req.ListIntentStageMetricsRequest.binBy
+                        ~f:(fun x ->
+                              ("binBy", (AnalyticsBinByList.to_value x)));
+                      Option.map req.ListIntentStageMetricsRequest.groupBy
+                        ~f:(fun x ->
+                              ("groupBy",
+                                (AnalyticsIntentStageGroupByList.to_value x)));
+                      Option.map req.ListIntentStageMetricsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (AnalyticsIntentStageFilters.to_value x)));
+                      Option.map req.ListIntentStageMetricsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListIntentStageMetricsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListIntents ->
       let (headers, body) =
         let headers =
@@ -1017,6 +1692,86 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
                       Option.map req.ListRecommendedIntentsRequest.maxResults
                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSessionAnalyticsData ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("startDateTime",
+                           (Timestamp.to_value
+                              req.ListSessionAnalyticsDataRequest.startDateTime));
+                      Some
+                        ("endDateTime",
+                          (Timestamp.to_value
+                             req.ListSessionAnalyticsDataRequest.endDateTime));
+                      Option.map req.ListSessionAnalyticsDataRequest.sortBy
+                        ~f:(fun x ->
+                              ("sortBy", (SessionDataSortBy.to_value x)));
+                      Option.map req.ListSessionAnalyticsDataRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (AnalyticsSessionFilters.to_value x)));
+                      Option.map
+                        req.ListSessionAnalyticsDataRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map
+                        req.ListSessionAnalyticsDataRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSessionMetrics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("startDateTime",
+                           (Timestamp.to_value
+                              req.ListSessionMetricsRequest.startDateTime));
+                      Some
+                        ("endDateTime",
+                          (Timestamp.to_value
+                             req.ListSessionMetricsRequest.endDateTime));
+                      Some
+                        ("metrics",
+                          (AnalyticsSessionMetrics.to_value
+                             req.ListSessionMetricsRequest.metrics));
+                      Option.map req.ListSessionMetricsRequest.binBy
+                        ~f:(fun x ->
+                              ("binBy", (AnalyticsBinByList.to_value x)));
+                      Option.map req.ListSessionMetricsRequest.groupBy
+                        ~f:(fun x ->
+                              ("groupBy",
+                                (AnalyticsSessionGroupByList.to_value x)));
+                      Option.map req.ListSessionMetricsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (AnalyticsSessionFilters.to_value x)));
+                      Option.map req.ListSessionMetricsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListSessionMetricsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1076,6 +1831,182 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTestExecutionResultItems ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("resultFilterBy",
+                           (TestExecutionResultFilterBy.to_value
+                              req.ListTestExecutionResultItemsRequest.resultFilterBy));
+                      Option.map
+                        req.ListTestExecutionResultItemsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map
+                        req.ListTestExecutionResultItemsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTestExecutions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListTestExecutionsRequest.sortBy
+                         ~f:(fun x ->
+                               ("sortBy", (TestExecutionSortBy.to_value x)));
+                      Option.map req.ListTestExecutionsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListTestExecutionsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTestSetRecords ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListTestSetRecordsRequest.maxResults
+                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListTestSetRecordsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTestSets ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListTestSetsRequest.sortBy
+                         ~f:(fun x -> ("sortBy", (TestSetSortBy.to_value x)));
+                      Option.map req.ListTestSetsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListTestSetsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListUtteranceAnalyticsData ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("startDateTime",
+                           (Timestamp.to_value
+                              req.ListUtteranceAnalyticsDataRequest.startDateTime));
+                      Some
+                        ("endDateTime",
+                          (Timestamp.to_value
+                             req.ListUtteranceAnalyticsDataRequest.endDateTime));
+                      Option.map req.ListUtteranceAnalyticsDataRequest.sortBy
+                        ~f:(fun x ->
+                              ("sortBy", (UtteranceDataSortBy.to_value x)));
+                      Option.map
+                        req.ListUtteranceAnalyticsDataRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (AnalyticsUtteranceFilters.to_value x)));
+                      Option.map
+                        req.ListUtteranceAnalyticsDataRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map
+                        req.ListUtteranceAnalyticsDataRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListUtteranceMetrics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("startDateTime",
+                           (Timestamp.to_value
+                              req.ListUtteranceMetricsRequest.startDateTime));
+                      Some
+                        ("endDateTime",
+                          (Timestamp.to_value
+                             req.ListUtteranceMetricsRequest.endDateTime));
+                      Some
+                        ("metrics",
+                          (AnalyticsUtteranceMetrics.to_value
+                             req.ListUtteranceMetricsRequest.metrics));
+                      Option.map req.ListUtteranceMetricsRequest.binBy
+                        ~f:(fun x ->
+                              ("binBy", (AnalyticsBinByList.to_value x)));
+                      Option.map req.ListUtteranceMetricsRequest.groupBy
+                        ~f:(fun x ->
+                              ("groupBy",
+                                (AnalyticsUtteranceGroupByList.to_value x)));
+                      Option.map req.ListUtteranceMetricsRequest.attributes
+                        ~f:(fun x ->
+                              ("attributes",
+                                (AnalyticsUtteranceAttributes.to_value x)));
+                      Option.map req.ListUtteranceMetricsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (AnalyticsUtteranceFilters.to_value x)));
+                      Option.map req.ListUtteranceMetricsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListUtteranceMetricsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | SearchAssociatedTranscripts ->
       let (headers, body) =
         let headers =
@@ -1106,9 +2037,69 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartBotAnalyzer ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("analysisScope",
+                           (AnalysisScope.to_value
+                              req.StartBotAnalyzerRequest.analysisScope));
+                      Option.map req.StartBotAnalyzerRequest.localeId
+                        ~f:(fun x -> ("localeId", (LocaleId.to_value x)));
+                      Option.map req.StartBotAnalyzerRequest.botVersion
+                        ~f:(fun x ->
+                              ("botVersion", (DraftBotVersion.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartBotRecommendation ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | StartBotResourceGeneration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | StartImport -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StartTestExecution ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("target",
+                           (TestExecutionTarget.to_value
+                              req.StartTestExecutionRequest.target));
+                      Some
+                        ("apiMode",
+                          (TestExecutionApiMode.to_value
+                             req.StartTestExecutionRequest.apiMode));
+                      Option.map
+                        req.StartTestExecutionRequest.testExecutionModality
+                        ~f:(fun x ->
+                              ("testExecutionModality",
+                                (TestExecutionModality.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartTestSetGeneration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | StopBotAnalyzer -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StopBotRecommendation -> Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -1139,6 +2130,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSlot -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSlotType -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateTestSet -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -1187,6 +2179,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | BatchCreateCustomVocabularyItem ->
+      if is_success
+      then
+        Ok
+          (BatchCreateCustomVocabularyItemResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchCreateCustomVocabularyItemResponse.error_of_json))
+  | BatchDeleteCustomVocabularyItem ->
+      if is_success
+      then
+        Ok
+          (BatchDeleteCustomVocabularyItemResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteCustomVocabularyItemResponse.error_of_json))
+  | BatchUpdateCustomVocabularyItem ->
+      if is_success
+      then
+        Ok
+          (BatchUpdateCustomVocabularyItemResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchUpdateCustomVocabularyItemResponse.error_of_json))
   | BuildBotLocale ->
       if is_success
       then Ok (BuildBotLocaleResponse.of_json (response_to_json resp))
@@ -1206,6 +2228,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (CreateBotLocaleResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateBotLocaleResponse.error_of_json))
+  | CreateBotReplica ->
+      if is_success
+      then Ok (CreateBotReplicaResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateBotReplicaResponse.error_of_json))
   | CreateBotVersion ->
       if is_success
       then Ok (CreateBotVersionResponse.of_json (response_to_json resp))
@@ -1244,6 +2271,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (CreateSlotTypeResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateSlotTypeResponse.error_of_json))
+  | CreateTestSetDiscrepancyReport ->
+      if is_success
+      then
+        Ok
+          (CreateTestSetDiscrepancyReportResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTestSetDiscrepancyReportResponse.error_of_json))
   | CreateUploadUrl ->
       if is_success
       then Ok (CreateUploadUrlResponse.of_json (response_to_json resp))
@@ -1258,11 +2295,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DeleteBotAliasResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteBotAliasResponse.error_of_json))
+  | DeleteBotAnalyzerRecommendation ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteBotAnalyzerRecommendationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteBotAnalyzerRecommendationResponse.error_of_json))
   | DeleteBotLocale ->
       if is_success
       then Ok (DeleteBotLocaleResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteBotLocaleResponse.error_of_json))
+  | DeleteBotReplica ->
+      if is_success
+      then Ok (DeleteBotReplicaResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteBotReplicaResponse.error_of_json))
   | DeleteBotVersion ->
       if is_success
       then Ok (DeleteBotVersionResponse.of_json (response_to_json resp))
@@ -1305,6 +2359,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteSlot -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteSlotType ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTestSet ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteUtterances ->
       if is_success
       then
@@ -1322,6 +2378,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DescribeBotAliasResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeBotAliasResponse.error_of_json))
+  | DescribeBotAnalyzerRecommendation ->
+      if is_success
+      then
+        Ok
+          (DescribeBotAnalyzerRecommendationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeBotAnalyzerRecommendationResponse.error_of_json))
   | DescribeBotLocale ->
       if is_success
       then Ok (DescribeBotLocaleResponse.of_json (response_to_json resp))
@@ -1337,6 +2403,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeBotRecommendationResponse.error_of_json))
+  | DescribeBotReplica ->
+      if is_success
+      then Ok (DescribeBotReplicaResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeBotReplicaResponse.error_of_json))
+  | DescribeBotResourceGeneration ->
+      if is_success
+      then
+        Ok
+          (DescribeBotResourceGenerationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeBotResourceGenerationResponse.error_of_json))
   | DescribeBotVersion ->
       if is_success
       then Ok (DescribeBotVersionResponse.of_json (response_to_json resp))
@@ -1385,6 +2467,52 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DescribeSlotTypeResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeSlotTypeResponse.error_of_json))
+  | DescribeTestExecution ->
+      if is_success
+      then Ok (DescribeTestExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeTestExecutionResponse.error_of_json))
+  | DescribeTestSet ->
+      if is_success
+      then Ok (DescribeTestSetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeTestSetResponse.error_of_json))
+  | DescribeTestSetDiscrepancyReport ->
+      if is_success
+      then
+        Ok
+          (DescribeTestSetDiscrepancyReportResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTestSetDiscrepancyReportResponse.error_of_json))
+  | DescribeTestSetGeneration ->
+      if is_success
+      then
+        Ok
+          (DescribeTestSetGenerationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTestSetGenerationResponse.error_of_json))
+  | GenerateBotElement ->
+      if is_success
+      then Ok (GenerateBotElementResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GenerateBotElementResponse.error_of_json))
+  | GetTestExecutionArtifactsUrl ->
+      if is_success
+      then
+        Ok
+          (GetTestExecutionArtifactsUrlResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTestExecutionArtifactsUrlResponse.error_of_json))
   | ListAggregatedUtterances ->
       if is_success
       then
@@ -1393,11 +2521,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAggregatedUtterancesResponse.error_of_json))
+  | ListBotAliasReplicas ->
+      if is_success
+      then Ok (ListBotAliasReplicasResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBotAliasReplicasResponse.error_of_json))
   | ListBotAliases ->
       if is_success
       then Ok (ListBotAliasesResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListBotAliasesResponse.error_of_json))
+  | ListBotAnalyzerHistory ->
+      if is_success
+      then
+        Ok (ListBotAnalyzerHistoryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListBotAnalyzerHistoryResponse.error_of_json))
   | ListBotLocales ->
       if is_success
       then Ok (ListBotLocalesResponse.of_json (response_to_json resp))
@@ -1411,6 +2553,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListBotRecommendationsResponse.error_of_json))
+  | ListBotReplicas ->
+      if is_success
+      then Ok (ListBotReplicasResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListBotReplicasResponse.error_of_json))
+  | ListBotResourceGenerations ->
+      if is_success
+      then
+        Ok
+          (ListBotResourceGenerationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListBotResourceGenerationsResponse.error_of_json))
+  | ListBotVersionReplicas ->
+      if is_success
+      then
+        Ok (ListBotVersionReplicasResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListBotVersionReplicasResponse.error_of_json))
   | ListBotVersions ->
       if is_success
       then Ok (ListBotVersionsResponse.of_json (response_to_json resp))
@@ -1432,6 +2596,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListBuiltInSlotTypesResponse.error_of_json))
+  | ListCustomVocabularyItems ->
+      if is_success
+      then
+        Ok
+          (ListCustomVocabularyItemsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCustomVocabularyItemsResponse.error_of_json))
   | ListExports ->
       if is_success
       then Ok (ListExportsResponse.of_json (response_to_json resp))
@@ -1440,6 +2613,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListImportsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListImportsResponse.error_of_json))
+  | ListIntentMetrics ->
+      if is_success
+      then Ok (ListIntentMetricsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListIntentMetricsResponse.error_of_json))
+  | ListIntentPaths ->
+      if is_success
+      then Ok (ListIntentPathsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListIntentPathsResponse.error_of_json))
+  | ListIntentStageMetrics ->
+      if is_success
+      then
+        Ok (ListIntentStageMetricsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListIntentStageMetricsResponse.error_of_json))
   | ListIntents ->
       if is_success
       then Ok (ListIntentsResponse.of_json (response_to_json resp))
@@ -1452,6 +2644,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListRecommendedIntentsResponse.error_of_json))
+  | ListSessionAnalyticsData ->
+      if is_success
+      then
+        Ok (ListSessionAnalyticsDataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSessionAnalyticsDataResponse.error_of_json))
+  | ListSessionMetrics ->
+      if is_success
+      then Ok (ListSessionMetricsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListSessionMetricsResponse.error_of_json))
   | ListSlotTypes ->
       if is_success
       then Ok (ListSlotTypesResponse.of_json (response_to_json resp))
@@ -1466,6 +2672,47 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListTestExecutionResultItems ->
+      if is_success
+      then
+        Ok
+          (ListTestExecutionResultItemsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTestExecutionResultItemsResponse.error_of_json))
+  | ListTestExecutions ->
+      if is_success
+      then Ok (ListTestExecutionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTestExecutionsResponse.error_of_json))
+  | ListTestSetRecords ->
+      if is_success
+      then Ok (ListTestSetRecordsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTestSetRecordsResponse.error_of_json))
+  | ListTestSets ->
+      if is_success
+      then Ok (ListTestSetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTestSetsResponse.error_of_json))
+  | ListUtteranceAnalyticsData ->
+      if is_success
+      then
+        Ok
+          (ListUtteranceAnalyticsDataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListUtteranceAnalyticsDataResponse.error_of_json))
+  | ListUtteranceMetrics ->
+      if is_success
+      then Ok (ListUtteranceMetricsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListUtteranceMetricsResponse.error_of_json))
   | SearchAssociatedTranscripts ->
       if is_success
       then
@@ -1476,6 +2723,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some SearchAssociatedTranscriptsResponse.error_of_json))
+  | StartBotAnalyzer ->
+      if is_success
+      then Ok (StartBotAnalyzerResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartBotAnalyzerResponse.error_of_json))
   | StartBotRecommendation ->
       if is_success
       then
@@ -1484,10 +2736,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartBotRecommendationResponse.error_of_json))
+  | StartBotResourceGeneration ->
+      if is_success
+      then
+        Ok
+          (StartBotResourceGenerationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartBotResourceGenerationResponse.error_of_json))
   | StartImport ->
       if is_success
       then Ok (StartImportResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some StartImportResponse.error_of_json))
+  | StartTestExecution ->
+      if is_success
+      then Ok (StartTestExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartTestExecutionResponse.error_of_json))
+  | StartTestSetGeneration ->
+      if is_success
+      then
+        Ok (StartTestSetGenerationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartTestSetGenerationResponse.error_of_json))
+  | StopBotAnalyzer ->
+      if is_success
+      then Ok (StopBotAnalyzerResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StopBotAnalyzerResponse.error_of_json))
+  | StopBotRecommendation ->
+      if is_success
+      then Ok (StopBotRecommendationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StopBotRecommendationResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -1547,3 +2833,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (UpdateSlotTypeResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateSlotTypeResponse.error_of_json))
+  | UpdateTestSet ->
+      if is_success
+      then Ok (UpdateTestSetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateTestSetResponse.error_of_json))

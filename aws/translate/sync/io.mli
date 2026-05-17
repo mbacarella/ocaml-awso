@@ -37,11 +37,22 @@ val import_terminology :
       ImportTerminologyRequest.t ->
         (ImportTerminologyResponse.t, ImportTerminologyResponse.error)
           Result.t
+val list_languages :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLanguagesRequest.t ->
+        (ListLanguagesResponse.t, ListLanguagesResponse.error) Result.t
 val list_parallel_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListParallelDataRequest.t ->
         (ListParallelDataResponse.t, ListParallelDataResponse.error) Result.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceRequest.t ->
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t
 val list_terminologies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -66,11 +77,27 @@ val stop_text_translation_job :
       StopTextTranslationJobRequest.t ->
         (StopTextTranslationJobResponse.t,
           StopTextTranslationJobResponse.error) Result.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TagResourceRequest.t ->
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
+val translate_document :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TranslateDocumentRequest.t ->
+        (TranslateDocumentResponse.t, TranslateDocumentResponse.error)
+          Result.t
 val translate_text :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TranslateTextRequest.t ->
         (TranslateTextResponse.t, TranslateTextResponse.error) Result.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UntagResourceRequest.t ->
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
 val update_parallel_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

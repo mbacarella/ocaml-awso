@@ -7,6 +7,12 @@ val associate_configuration_items_to_application :
         (AssociateConfigurationItemsToApplicationResponse.t,
           AssociateConfigurationItemsToApplicationResponse.error) Result.t
           Lwt.t
+val batch_delete_agents :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchDeleteAgentsRequest.t ->
+        (BatchDeleteAgentsResponse.t, BatchDeleteAgentsResponse.error)
+          Result.t Lwt.t
 val batch_delete_import_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -41,6 +47,12 @@ val describe_agents :
       DescribeAgentsRequest.t ->
         (DescribeAgentsResponse.t, DescribeAgentsResponse.error) Result.t
           Lwt.t
+val describe_batch_delete_configuration_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeBatchDeleteConfigurationTaskRequest.t ->
+        (DescribeBatchDeleteConfigurationTaskResponse.t,
+          DescribeBatchDeleteConfigurationTaskResponse.error) Result.t Lwt.t
 val describe_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -107,6 +119,12 @@ val list_server_neighbors :
       ListServerNeighborsRequest.t ->
         (ListServerNeighborsResponse.t, ListServerNeighborsResponse.error)
           Result.t Lwt.t
+val start_batch_delete_configuration_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartBatchDeleteConfigurationTaskRequest.t ->
+        (StartBatchDeleteConfigurationTaskResponse.t,
+          StartBatchDeleteConfigurationTaskResponse.error) Result.t Lwt.t
 val start_continuous_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

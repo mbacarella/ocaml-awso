@@ -12,12 +12,30 @@ val create_inference_scheduler :
       CreateInferenceSchedulerRequest.t ->
         (CreateInferenceSchedulerResponse.t,
           CreateInferenceSchedulerResponse.error) Result.t Async.Deferred.t
+val create_label :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLabelRequest.t ->
+        (CreateLabelResponse.t, CreateLabelResponse.error) Result.t
+          Async.Deferred.t
+val create_label_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLabelGroupRequest.t ->
+        (CreateLabelGroupResponse.t, CreateLabelGroupResponse.error) Result.t
+          Async.Deferred.t
 val create_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateModelRequest.t ->
         (CreateModelResponse.t, CreateModelResponse.error) Result.t
           Async.Deferred.t
+val create_retraining_scheduler :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRetrainingSchedulerRequest.t ->
+        (CreateRetrainingSchedulerResponse.t,
+          CreateRetrainingSchedulerResponse.error) Result.t Async.Deferred.t
 val delete_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -27,10 +45,27 @@ val delete_inference_scheduler :
     ?cfg:Awso.Cfg.t ->
       DeleteInferenceSchedulerRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
+val delete_label :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLabelRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_label_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLabelGroupRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteModelRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_retraining_scheduler :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRetrainingSchedulerRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val describe_data_ingestion_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -49,12 +84,55 @@ val describe_inference_scheduler :
       DescribeInferenceSchedulerRequest.t ->
         (DescribeInferenceSchedulerResponse.t,
           DescribeInferenceSchedulerResponse.error) Result.t Async.Deferred.t
+val describe_label :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeLabelRequest.t ->
+        (DescribeLabelResponse.t, DescribeLabelResponse.error) Result.t
+          Async.Deferred.t
+val describe_label_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeLabelGroupRequest.t ->
+        (DescribeLabelGroupResponse.t, DescribeLabelGroupResponse.error)
+          Result.t Async.Deferred.t
 val describe_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeModelRequest.t ->
         (DescribeModelResponse.t, DescribeModelResponse.error) Result.t
           Async.Deferred.t
+val describe_model_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeModelVersionRequest.t ->
+        (DescribeModelVersionResponse.t, DescribeModelVersionResponse.error)
+          Result.t Async.Deferred.t
+val describe_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeResourcePolicyRequest.t ->
+        (DescribeResourcePolicyResponse.t,
+          DescribeResourcePolicyResponse.error) Result.t Async.Deferred.t
+val describe_retraining_scheduler :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRetrainingSchedulerRequest.t ->
+        (DescribeRetrainingSchedulerResponse.t,
+          DescribeRetrainingSchedulerResponse.error) Result.t
+          Async.Deferred.t
+val import_dataset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ImportDatasetRequest.t ->
+        (ImportDatasetResponse.t, ImportDatasetResponse.error) Result.t
+          Async.Deferred.t
+val import_model_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ImportModelVersionRequest.t ->
+        (ImportModelVersionResponse.t, ImportModelVersionResponse.error)
+          Result.t Async.Deferred.t
 val list_data_ingestion_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -67,6 +145,12 @@ val list_datasets :
       ListDatasetsRequest.t ->
         (ListDatasetsResponse.t, ListDatasetsResponse.error) Result.t
           Async.Deferred.t
+val list_inference_events :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInferenceEventsRequest.t ->
+        (ListInferenceEventsResponse.t, ListInferenceEventsResponse.error)
+          Result.t Async.Deferred.t
 val list_inference_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -79,17 +163,53 @@ val list_inference_schedulers :
       ListInferenceSchedulersRequest.t ->
         (ListInferenceSchedulersResponse.t,
           ListInferenceSchedulersResponse.error) Result.t Async.Deferred.t
+val list_label_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLabelGroupsRequest.t ->
+        (ListLabelGroupsResponse.t, ListLabelGroupsResponse.error) Result.t
+          Async.Deferred.t
+val list_labels :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLabelsRequest.t ->
+        (ListLabelsResponse.t, ListLabelsResponse.error) Result.t
+          Async.Deferred.t
+val list_model_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListModelVersionsRequest.t ->
+        (ListModelVersionsResponse.t, ListModelVersionsResponse.error)
+          Result.t Async.Deferred.t
 val list_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListModelsRequest.t ->
         (ListModelsResponse.t, ListModelsResponse.error) Result.t
           Async.Deferred.t
+val list_retraining_schedulers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRetrainingSchedulersRequest.t ->
+        (ListRetrainingSchedulersResponse.t,
+          ListRetrainingSchedulersResponse.error) Result.t Async.Deferred.t
+val list_sensor_statistics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSensorStatisticsRequest.t ->
+        (ListSensorStatisticsResponse.t, ListSensorStatisticsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyRequest.t ->
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
           Result.t Async.Deferred.t
 val start_data_ingestion_job :
   ?endpoint_url:string ->
@@ -103,12 +223,24 @@ val start_inference_scheduler :
       StartInferenceSchedulerRequest.t ->
         (StartInferenceSchedulerResponse.t,
           StartInferenceSchedulerResponse.error) Result.t Async.Deferred.t
+val start_retraining_scheduler :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartRetrainingSchedulerRequest.t ->
+        (StartRetrainingSchedulerResponse.t,
+          StartRetrainingSchedulerResponse.error) Result.t Async.Deferred.t
 val stop_inference_scheduler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopInferenceSchedulerRequest.t ->
         (StopInferenceSchedulerResponse.t,
           StopInferenceSchedulerResponse.error) Result.t Async.Deferred.t
+val stop_retraining_scheduler :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopRetrainingSchedulerRequest.t ->
+        (StopRetrainingSchedulerResponse.t,
+          StopRetrainingSchedulerResponse.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -121,8 +253,27 @@ val untag_resource :
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
+val update_active_model_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateActiveModelVersionRequest.t ->
+        (UpdateActiveModelVersionResponse.t,
+          UpdateActiveModelVersionResponse.error) Result.t Async.Deferred.t
 val update_inference_scheduler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateInferenceSchedulerRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val update_label_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLabelGroupRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val update_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateModelRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val update_retraining_scheduler :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRetrainingSchedulerRequest.t ->
         (unit, unit) Result.t Async.Deferred.t

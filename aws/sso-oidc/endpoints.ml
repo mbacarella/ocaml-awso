@@ -4,6 +4,8 @@ open Values
 type ('i, 'o, 'e) t =
   | CreateToken: (CreateTokenRequest.t, CreateTokenResponse.t,
   CreateTokenResponse.error) t 
+  | CreateTokenWithIAM: (CreateTokenWithIAMRequest.t,
+  CreateTokenWithIAMResponse.t, CreateTokenWithIAMResponse.error) t 
   | RegisterClient: (RegisterClientRequest.t, RegisterClientResponse.t,
   RegisterClientResponse.error) t 
   | StartDeviceAuthorization: (StartDeviceAuthorizationRequest.t,
@@ -12,12 +14,15 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateToken -> `POST
+  | CreateTokenWithIAM -> `POST
   | RegisterClient -> `POST
   | StartDeviceAuthorization -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateToken -> (Format.kasprintf Uri.of_string) "/token"
+      | CreateTokenWithIAM ->
+          (Format.kasprintf Uri.of_string) "/token?aws_iam=t"
       | RegisterClient -> (Format.kasprintf Uri.of_string) "/client/register"
       | StartDeviceAuthorization ->
           (Format.kasprintf Uri.of_string) "/device_authorization")
@@ -45,10 +50,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("grantType",
                           (GrantType.to_value
                              req.CreateTokenRequest.grantType));
-                      Some
-                        ("deviceCode",
-                          (DeviceCode.to_value
-                             req.CreateTokenRequest.deviceCode));
+                      Option.map req.CreateTokenRequest.deviceCode
+                        ~f:(fun x -> ("deviceCode", (DeviceCode.to_value x)));
                       Option.map req.CreateTokenRequest.code
                         ~f:(fun x -> ("code", (AuthCode.to_value x)));
                       Option.map req.CreateTokenRequest.refreshToken
@@ -57,7 +60,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateTokenRequest.scope
                         ~f:(fun x -> ("scope", (Scopes.to_value x)));
                       Option.map req.CreateTokenRequest.redirectUri
-                        ~f:(fun x -> ("redirectUri", (URI.to_value x)))])
+                        ~f:(fun x -> ("redirectUri", (URI.to_value x)));
+                      Option.map req.CreateTokenRequest.codeVerifier
+                        ~f:(fun x ->
+                              ("codeVerifier", (CodeVerifier.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTokenWithIAM ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("clientId",
+                           (ClientId.to_value
+                              req.CreateTokenWithIAMRequest.clientId));
+                      Some
+                        ("grantType",
+                          (GrantType.to_value
+                             req.CreateTokenWithIAMRequest.grantType));
+                      Option.map req.CreateTokenWithIAMRequest.code
+                        ~f:(fun x -> ("code", (AuthCode.to_value x)));
+                      Option.map req.CreateTokenWithIAMRequest.refreshToken
+                        ~f:(fun x ->
+                              ("refreshToken", (RefreshToken.to_value x)));
+                      Option.map req.CreateTokenWithIAMRequest.assertion
+                        ~f:(fun x -> ("assertion", (Assertion.to_value x)));
+                      Option.map req.CreateTokenWithIAMRequest.scope
+                        ~f:(fun x -> ("scope", (Scopes.to_value x)));
+                      Option.map req.CreateTokenWithIAMRequest.redirectUri
+                        ~f:(fun x -> ("redirectUri", (URI.to_value x)));
+                      Option.map req.CreateTokenWithIAMRequest.subjectToken
+                        ~f:(fun x ->
+                              ("subjectToken", (SubjectToken.to_value x)));
+                      Option.map
+                        req.CreateTokenWithIAMRequest.subjectTokenType
+                        ~f:(fun x ->
+                              ("subjectTokenType", (TokenTypeURI.to_value x)));
+                      Option.map
+                        req.CreateTokenWithIAMRequest.requestedTokenType
+                        ~f:(fun x ->
+                              ("requestedTokenType",
+                                (TokenTypeURI.to_value x)));
+                      Option.map req.CreateTokenWithIAMRequest.codeVerifier
+                        ~f:(fun x ->
+                              ("codeVerifier", (CodeVerifier.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -83,7 +139,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (ClientType.to_value
                              req.RegisterClientRequest.clientType));
                       Option.map req.RegisterClientRequest.scopes
-                        ~f:(fun x -> ("scopes", (Scopes.to_value x)))])
+                        ~f:(fun x -> ("scopes", (Scopes.to_value x)));
+                      Option.map req.RegisterClientRequest.redirectUris
+                        ~f:(fun x ->
+                              ("redirectUris", (RedirectUris.to_value x)));
+                      Option.map req.RegisterClientRequest.grantTypes
+                        ~f:(fun x -> ("grantTypes", (GrantTypes.to_value x)));
+                      Option.map req.RegisterClientRequest.issuerUrl
+                        ~f:(fun x -> ("issuerUrl", (URI.to_value x)));
+                      Option.map
+                        req.RegisterClientRequest.entitledApplicationArn
+                        ~f:(fun x ->
+                              ("entitledApplicationArn",
+                                (ArnType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -171,6 +239,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateTokenResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateTokenResponse.error_of_json))
+  | CreateTokenWithIAM ->
+      if is_success
+      then Ok (CreateTokenWithIAMResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateTokenWithIAMResponse.error_of_json))
   | RegisterClient ->
       if is_success
       then Ok (RegisterClientResponse.of_json (response_to_json resp))

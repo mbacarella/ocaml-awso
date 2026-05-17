@@ -15,10 +15,14 @@ let cancel_task_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelTaskExecution input
 let create_agent ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAgent input
+let create_location_azure_blob ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLocationAzureBlob input
 let create_location_efs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLocationEfs input
 let create_location_fsx_lustre ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLocationFsxLustre input
+let create_location_fsx_ontap ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLocationFsxOntap input
 let create_location_fsx_open_zfs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLocationFsxOpenZfs input
 let create_location_fsx_windows ?endpoint_url ?cfg input =
@@ -43,10 +47,14 @@ let delete_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTask input
 let describe_agent ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAgent input
+let describe_location_azure_blob ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeLocationAzureBlob input
 let describe_location_efs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLocationEfs input
 let describe_location_fsx_lustre ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLocationFsxLustre input
+let describe_location_fsx_ontap ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeLocationFsxOntap input
 let describe_location_fsx_open_zfs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLocationFsxOpenZfs input
 let describe_location_fsx_windows ?endpoint_url ?cfg input =
@@ -83,12 +91,26 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_agent ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAgent input
+let update_location_azure_blob ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLocationAzureBlob input
+let update_location_efs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLocationEfs input
+let update_location_fsx_lustre ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLocationFsxLustre input
+let update_location_fsx_ontap ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLocationFsxOntap input
+let update_location_fsx_open_zfs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLocationFsxOpenZfs input
+let update_location_fsx_windows ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLocationFsxWindows input
 let update_location_hdfs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLocationHdfs input
 let update_location_nfs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLocationNfs input
 let update_location_object_storage ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLocationObjectStorage input
+let update_location_s3 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLocationS3 input
 let update_location_smb ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLocationSmb input
 let update_task ?endpoint_url ?cfg input =

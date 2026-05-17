@@ -26,6 +26,11 @@ val get_environment :
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentInput.t ->
         (GetEnvironmentOutput.t, GetEnvironmentOutput.error) Result.t
+val invoke_rest_api :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      InvokeRestApiRequest.t ->
+        (InvokeRestApiResponse.t, InvokeRestApiResponse.error) Result.t
 val list_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

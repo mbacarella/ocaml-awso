@@ -54,75 +54,94 @@ let create_environment =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and airflowConfigurationOptions =
-         flag "airflow-configuration-options" (optional json_arg)
-           ~doc:"JSON SyntheticCreateEnvironmentInputAirflowConfigurationOptions"
-       and airflowVersion =
-         flag "airflow-version" (optional string)
-           ~doc:"STRING AirflowVersion"
-       and environmentClass =
-         flag "environment-class" (optional string)
-           ~doc:"STRING EnvironmentClass"
-       and kmsKey = flag "kms-key" (optional string) ~doc:"STRING KmsKey"
-       and loggingConfiguration =
-         flag "logging-configuration" (optional json_arg)
-           ~doc:"JSON LoggingConfigurationInput"
-       and maxWorkers =
-         flag "max-workers" (optional int) ~doc:"INT MaxWorkers"
-       and minWorkers =
-         flag "min-workers" (optional int) ~doc:"INT MinWorkers"
-       and pluginsS3ObjectVersion =
-         flag "plugins-s3-object-version" (optional string)
-           ~doc:"STRING S3ObjectVersion"
        and pluginsS3Path =
          flag "plugins-s3-path" (optional string) ~doc:"STRING RelativePath"
-       and requirementsS3ObjectVersion =
-         flag "requirements-s3-object-version" (optional string)
+       and pluginsS3ObjectVersion =
+         flag "plugins-s3-object-version" (optional string)
            ~doc:"STRING S3ObjectVersion"
        and requirementsS3Path =
          flag "requirements-s3-path" (optional string)
            ~doc:"STRING RelativePath"
-       and schedulers =
-         flag "schedulers" (optional int) ~doc:"INT Schedulers"
+       and requirementsS3ObjectVersion =
+         flag "requirements-s3-object-version" (optional string)
+           ~doc:"STRING S3ObjectVersion"
+       and startupScriptS3Path =
+         flag "startup-script-s3-path" (optional string)
+           ~doc:"STRING RelativePath"
+       and startupScriptS3ObjectVersion =
+         flag "startup-script-s3-object-version" (optional string)
+           ~doc:"STRING S3ObjectVersion"
+       and airflowConfigurationOptions =
+         flag "airflow-configuration-options" (optional json_arg)
+           ~doc:"JSON AirflowConfigurationOptions"
+       and environmentClass =
+         flag "environment-class" (optional string)
+           ~doc:"STRING EnvironmentClass"
+       and maxWorkers =
+         flag "max-workers" (optional int) ~doc:"INT MaxWorkers"
+       and kmsKey = flag "kms-key" (optional string) ~doc:"STRING KmsKey"
+       and airflowVersion =
+         flag "airflow-version" (optional string)
+           ~doc:"STRING AirflowVersion"
+       and loggingConfiguration =
+         flag "logging-configuration" (optional json_arg)
+           ~doc:"JSON LoggingConfigurationInput"
+       and weeklyMaintenanceWindowStart =
+         flag "weekly-maintenance-window-start" (optional string)
+           ~doc:"STRING WeeklyMaintenanceWindowStart"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and webserverAccessMode =
          flag "webserver-access-mode" (optional json_arg)
            ~doc:"JSON WebserverAccessMode"
-       and weeklyMaintenanceWindowStart =
-         flag "weekly-maintenance-window-start" (optional string)
-           ~doc:"STRING WeeklyMaintenanceWindowStart"
-       and dagS3Path =
-         flag "dag-s3-path" (required string) ~doc:"STRING RelativePath"
+       and minWorkers =
+         flag "min-workers" (optional int) ~doc:"INT MinWorkers"
+       and schedulers =
+         flag "schedulers" (optional int) ~doc:"INT Schedulers"
+       and endpointManagement =
+         flag "endpoint-management" (optional json_arg)
+           ~doc:"JSON EndpointManagement"
+       and minWebservers =
+         flag "min-webservers" (optional int) ~doc:"INT MinWebservers"
+       and maxWebservers =
+         flag "max-webservers" (optional int) ~doc:"INT MaxWebservers"
+       and name = flag "name" (required string) ~doc:"STRING EnvironmentName"
        and executionRoleArn =
          flag "execution-role-arn" (required string) ~doc:"STRING IamRoleArn"
-       and name = flag "name" (required string) ~doc:"STRING EnvironmentName"
+       and sourceBucketArn =
+         flag "source-bucket-arn" (required string) ~doc:"STRING S3BucketArn"
+       and dagS3Path =
+         flag "dag-s3-path" (required string) ~doc:"STRING RelativePath"
        and networkConfiguration =
          flag "network-configuration" (required json_arg)
-           ~doc:"JSON NetworkConfiguration"
-       and sourceBucketArn =
-         flag "source-bucket-arn" (required string) ~doc:"STRING S3BucketArn" in
+           ~doc:"JSON NetworkConfiguration" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_environment
-           (Values.CreateEnvironmentInput.make
+           (Values.CreateEnvironmentInput.make ?pluginsS3Path
+              ?pluginsS3ObjectVersion ?requirementsS3Path
+              ?requirementsS3ObjectVersion ?startupScriptS3Path
+              ?startupScriptS3ObjectVersion
               ?airflowConfigurationOptions:(Option.map
-                                              ~f:Values.SyntheticCreateEnvironmentInputAirflowConfigurationOptions.of_json
+                                              ~f:Values.AirflowConfigurationOptions.of_json
                                               airflowConfigurationOptions)
-              ?airflowVersion ?environmentClass ?kmsKey
+              ?environmentClass ?maxWorkers ?kmsKey ?airflowVersion
               ?loggingConfiguration:(Option.map
                                        ~f:Values.LoggingConfigurationInput.of_json
-                                       loggingConfiguration) ?maxWorkers
-              ?minWorkers ?pluginsS3ObjectVersion ?pluginsS3Path
-              ?requirementsS3ObjectVersion ?requirementsS3Path ?schedulers
+                                       loggingConfiguration)
+              ?weeklyMaintenanceWindowStart
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?webserverAccessMode:(Option.map
                                       ~f:Values.WebserverAccessMode.of_json
-                                      webserverAccessMode)
-              ?weeklyMaintenanceWindowStart ~dagS3Path ~executionRoleArn
-              ~name
+                                      webserverAccessMode) ?minWorkers
+              ?schedulers
+              ?endpointManagement:(Option.map
+                                     ~f:Values.EndpointManagement.of_json
+                                     endpointManagement) ?minWebservers
+              ?maxWebservers ~name ~executionRoleArn ~sourceBucketArn
+              ~dagS3Path
               ~networkConfiguration:(Values.NetworkConfiguration.of_json
-                                       networkConfiguration) ~sourceBucketArn
-              ()) (Some Values.CreateEnvironmentOutput.to_json)
+                                       networkConfiguration) ())
+           (Some Values.CreateEnvironmentOutput.to_json)
            (Some Values.CreateEnvironmentOutput.error_to_json)])
 let create_web_login_token =
   Command.async ~summary:""
@@ -174,6 +193,34 @@ let get_environment =
            Io.get_environment (Values.GetEnvironmentInput.make ~name ())
            (Some Values.GetEnvironmentOutput.to_json)
            (Some Values.GetEnvironmentOutput.error_to_json)])
+let invoke_rest_api =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and queryParameters =
+         flag "query-parameters" (optional json_arg) ~doc:"JSON Document"
+       and body =
+         flag "body" (optional json_arg) ~doc:"JSON RestApiRequestBody"
+       and name = flag "name" (required string) ~doc:"STRING EnvironmentName"
+       and path = flag "path" (required string) ~doc:"STRING RestApiPath"
+       and method_ =
+         flag "method-" (required json_arg) ~doc:"JSON RestApiMethod" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.invoke_rest_api
+           (Values.InvokeRestApiRequest.make
+              ?queryParameters:(Option.map ~f:Values.Document.of_json
+                                  queryParameters)
+              ?body:(Option.map ~f:Values.RestApiRequestBody.of_json body)
+              ~name ~path ~method_:(Values.RestApiMethod.of_json method_) ())
+           (Some Values.InvokeRestApiResponse.to_json)
+           (Some Values.InvokeRestApiResponse.error_to_json)])
 let list_environments =
   Command.async ~summary:""
     ([%map_open.Command
@@ -184,15 +231,15 @@ let list_environments =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int)
-           ~doc:"INT ListEnvironmentsInputMaxResultsInteger"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+           ~doc:"INT ListEnvironmentsInputMaxResultsInteger" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_environments
-           (Values.ListEnvironmentsInput.make ?maxResults ?nextToken ())
+           (Values.ListEnvironmentsInput.make ?nextToken ?maxResults ())
            (Some Values.ListEnvironmentsOutput.to_json)
            (Some Values.ListEnvironmentsOutput.error_to_json)])
 let list_tags_for_resource =
@@ -286,9 +333,11 @@ let update_environment =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string) ~doc:"STRING IamRoleArn"
        and airflowConfigurationOptions =
          flag "airflow-configuration-options" (optional json_arg)
-           ~doc:"JSON SyntheticUpdateEnvironmentInputAirflowConfigurationOptions"
+           ~doc:"JSON AirflowConfigurationOptions"
        and airflowVersion =
          flag "airflow-version" (optional string)
            ~doc:"STRING AirflowVersion"
@@ -297,8 +346,6 @@ let update_environment =
        and environmentClass =
          flag "environment-class" (optional string)
            ~doc:"STRING EnvironmentClass"
-       and executionRoleArn =
-         flag "execution-role-arn" (optional string) ~doc:"STRING IamRoleArn"
        and loggingConfiguration =
          flag "logging-configuration" (optional json_arg)
            ~doc:"JSON LoggingConfigurationInput"
@@ -306,24 +353,37 @@ let update_environment =
          flag "max-workers" (optional int) ~doc:"INT MaxWorkers"
        and minWorkers =
          flag "min-workers" (optional int) ~doc:"INT MinWorkers"
+       and maxWebservers =
+         flag "max-webservers" (optional int) ~doc:"INT MaxWebservers"
+       and minWebservers =
+         flag "min-webservers" (optional int) ~doc:"INT MinWebservers"
+       and workerReplacementStrategy =
+         flag "worker-replacement-strategy" (optional json_arg)
+           ~doc:"JSON WorkerReplacementStrategy"
        and networkConfiguration =
          flag "network-configuration" (optional json_arg)
            ~doc:"JSON UpdateNetworkConfigurationInput"
-       and pluginsS3ObjectVersion =
-         flag "plugins-s3-object-version" (optional string)
-           ~doc:"STRING S3ObjectVersion"
        and pluginsS3Path =
          flag "plugins-s3-path" (optional string) ~doc:"STRING RelativePath"
-       and requirementsS3ObjectVersion =
-         flag "requirements-s3-object-version" (optional string)
+       and pluginsS3ObjectVersion =
+         flag "plugins-s3-object-version" (optional string)
            ~doc:"STRING S3ObjectVersion"
        and requirementsS3Path =
          flag "requirements-s3-path" (optional string)
            ~doc:"STRING RelativePath"
+       and requirementsS3ObjectVersion =
+         flag "requirements-s3-object-version" (optional string)
+           ~doc:"STRING S3ObjectVersion"
        and schedulers =
          flag "schedulers" (optional int) ~doc:"INT Schedulers"
        and sourceBucketArn =
          flag "source-bucket-arn" (optional string) ~doc:"STRING S3BucketArn"
+       and startupScriptS3Path =
+         flag "startup-script-s3-path" (optional string)
+           ~doc:"STRING RelativePath"
+       and startupScriptS3ObjectVersion =
+         flag "startup-script-s3-object-version" (optional string)
+           ~doc:"STRING S3ObjectVersion"
        and webserverAccessMode =
          flag "webserver-access-mode" (optional json_arg)
            ~doc:"JSON WebserverAccessMode"
@@ -334,21 +394,24 @@ let update_environment =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_environment
-           (Values.UpdateEnvironmentInput.make
+           (Values.UpdateEnvironmentInput.make ?executionRoleArn
               ?airflowConfigurationOptions:(Option.map
-                                              ~f:Values.SyntheticUpdateEnvironmentInputAirflowConfigurationOptions.of_json
+                                              ~f:Values.AirflowConfigurationOptions.of_json
                                               airflowConfigurationOptions)
-              ?airflowVersion ?dagS3Path ?environmentClass ?executionRoleArn
+              ?airflowVersion ?dagS3Path ?environmentClass
               ?loggingConfiguration:(Option.map
                                        ~f:Values.LoggingConfigurationInput.of_json
                                        loggingConfiguration) ?maxWorkers
-              ?minWorkers
+              ?minWorkers ?maxWebservers ?minWebservers
+              ?workerReplacementStrategy:(Option.map
+                                            ~f:Values.WorkerReplacementStrategy.of_json
+                                            workerReplacementStrategy)
               ?networkConfiguration:(Option.map
                                        ~f:Values.UpdateNetworkConfigurationInput.of_json
-                                       networkConfiguration)
-              ?pluginsS3ObjectVersion ?pluginsS3Path
-              ?requirementsS3ObjectVersion ?requirementsS3Path ?schedulers
-              ?sourceBucketArn
+                                       networkConfiguration) ?pluginsS3Path
+              ?pluginsS3ObjectVersion ?requirementsS3Path
+              ?requirementsS3ObjectVersion ?schedulers ?sourceBucketArn
+              ?startupScriptS3Path ?startupScriptS3ObjectVersion
               ?webserverAccessMode:(Option.map
                                       ~f:Values.WebserverAccessMode.of_json
                                       webserverAccessMode)
@@ -363,6 +426,7 @@ let main =
     ("create-web-login-token", create_web_login_token);
     ("delete-environment", delete_environment);
     ("get-environment", get_environment);
+    ("invoke-rest-api", invoke_rest_api);
     ("list-environments", list_environments);
     ("list-tags-for-resource", list_tags_for_resource);
     ("publish-metrics", publish_metrics);

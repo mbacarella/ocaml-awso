@@ -59,6 +59,9 @@ module ListOfMfaTypesElement =
   struct
     type nonrec t = MfaTypesElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MfaTypesElement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -150,11 +153,11 @@ module BackendAuthAppleProviderConfig =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "client_id") in
       make ?teamId ?privateKey ?keyId ?clientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let teamId = field_map json "TeamId" Zz__string.of_json in
-      let privateKey = field_map json "PrivateKey" Zz__string.of_json in
-      let keyId = field_map json "KeyId" Zz__string.of_json in
-      let clientId = field_map json "ClientId" Zz__string.of_json in
+    let of_json json__ =
+      let teamId = field_map json__ "TeamId" Zz__string.of_json in
+      let privateKey = field_map json__ "PrivateKey" Zz__string.of_json in
+      let keyId = field_map json__ "KeyId" Zz__string.of_json in
+      let clientId = field_map json__ "ClientId" Zz__string.of_json in
       make ?teamId ?privateKey ?keyId ?clientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -184,9 +187,9 @@ module BackendAuthSocialProviderConfig =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "client_id") in
       make ?clientSecret ?clientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientSecret = field_map json "ClientSecret" Zz__string.of_json in
-      let clientId = field_map json "ClientId" Zz__string.of_json in
+    let of_json json__ =
+      let clientSecret = field_map json__ "ClientSecret" Zz__string.of_json in
+      let clientId = field_map json__ "ClientId" Zz__string.of_json in
       make ?clientSecret ?clientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -338,9 +341,9 @@ module EmailSettings =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "emailMessage") in
       make ?emailSubject ?emailMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailSubject = field_map json "EmailSubject" Zz__string.of_json in
-      let emailMessage = field_map json "EmailMessage" Zz__string.of_json in
+    let of_json json__ =
+      let emailSubject = field_map json__ "EmailSubject" Zz__string.of_json in
+      let emailMessage = field_map json__ "EmailMessage" Zz__string.of_json in
       make ?emailSubject ?emailMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -361,8 +364,8 @@ module SmsSettings =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "smsMessage") in
       make ?smsMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let smsMessage = field_map json "SmsMessage" Zz__string.of_json in
+    let of_json json__ =
+      let smsMessage = field_map json__ "SmsMessage" Zz__string.of_json in
       make ?smsMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "SMS settings for authentication."]
@@ -418,9 +421,10 @@ module Settings =
           (Xml.child xml_arg0 "mfaTypes") in
       make ?smsMessage ?mfaTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let smsMessage = field_map json "SmsMessage" Zz__string.of_json in
-      let mfaTypes = field_map json "MfaTypes" ListOfMfaTypesElement.of_json in
+    let of_json json__ =
+      let smsMessage = field_map json__ "SmsMessage" Zz__string.of_json in
+      let mfaTypes =
+        field_map json__ "MfaTypes" ListOfMfaTypesElement.of_json in
       make ?smsMessage ?mfaTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -429,6 +433,9 @@ module ListOfOAuthScopesElement =
   struct
     type nonrec t = OAuthScopesElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OAuthScopesElement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -454,6 +461,9 @@ module ListOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -540,17 +550,17 @@ module SocialProviderSettings =
           (Xml.child xml_arg0 "Facebook") in
       make ?signInWithApple ?loginWithAmazon ?google ?facebook ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let signInWithApple =
-        field_map json "SignInWithApple"
+        field_map json__ "SignInWithApple"
           BackendAuthAppleProviderConfig.of_json in
       let loginWithAmazon =
-        field_map json "LoginWithAmazon"
+        field_map json__ "LoginWithAmazon"
           BackendAuthSocialProviderConfig.of_json in
       let google =
-        field_map json "Google" BackendAuthSocialProviderConfig.of_json in
+        field_map json__ "Google" BackendAuthSocialProviderConfig.of_json in
       let facebook =
-        field_map json "Facebook" BackendAuthSocialProviderConfig.of_json in
+        field_map json__ "Facebook" BackendAuthSocialProviderConfig.of_json in
       make ?signInWithApple ?loginWithAmazon ?google ?facebook ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -559,6 +569,9 @@ module ListOfAdditionalConstraintsElement =
   struct
     type nonrec t = AdditionalConstraintsElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdditionalConstraintsElement.to_value)) |>
         (fun x -> `List x)
@@ -671,17 +684,20 @@ module BackendAPIAppSyncAuthSettings =
       make ?openIDProviderName ?openIDIssueURL ?openIDIatTTL ?openIDClientId
         ?openIDAuthTTL ?expirationTime ?description ?cognitoUserPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openIDProviderName =
-        field_map json "OpenIDProviderName" Zz__string.of_json in
-      let openIDIssueURL = field_map json "OpenIDIssueURL" Zz__string.of_json in
-      let openIDIatTTL = field_map json "OpenIDIatTTL" Zz__string.of_json in
-      let openIDClientId = field_map json "OpenIDClientId" Zz__string.of_json in
-      let openIDAuthTTL = field_map json "OpenIDAuthTTL" Zz__string.of_json in
-      let expirationTime = field_map json "ExpirationTime" Zz__double.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+        field_map json__ "OpenIDProviderName" Zz__string.of_json in
+      let openIDIssueURL =
+        field_map json__ "OpenIDIssueURL" Zz__string.of_json in
+      let openIDIatTTL = field_map json__ "OpenIDIatTTL" Zz__string.of_json in
+      let openIDClientId =
+        field_map json__ "OpenIDClientId" Zz__string.of_json in
+      let openIDAuthTTL = field_map json__ "OpenIDAuthTTL" Zz__string.of_json in
+      let expirationTime =
+        field_map json__ "ExpirationTime" Zz__double.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       let cognitoUserPoolId =
-        field_map json "CognitoUserPoolId" Zz__string.of_json in
+        field_map json__ "CognitoUserPoolId" Zz__string.of_json in
       make ?openIDProviderName ?openIDIssueURL ?openIDIatTTL ?openIDClientId
         ?openIDAuthTTL ?expirationTime ?description ?cognitoUserPoolId ()
     let to_json v = composed_to_json to_value v
@@ -795,6 +811,9 @@ module ListOfAuthenticatedElement =
   struct
     type nonrec t = AuthenticatedElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AuthenticatedElement.to_value)) |>
         (fun x -> `List x)
@@ -821,6 +840,9 @@ module ListOfUnAuthenticatedElement =
   struct
     type nonrec t = UnAuthenticatedElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UnAuthenticatedElement.to_value)) |>
         (fun x -> `List x)
@@ -892,12 +914,12 @@ module UpdateBackendAuthForgotPasswordConfig =
           (Xml.child xml_arg0 "deliveryMethod") in
       make ?smsSettings ?emailSettings ?deliveryMethod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let smsSettings = field_map json "SmsSettings" SmsSettings.of_json in
+    let of_json json__ =
+      let smsSettings = field_map json__ "SmsSettings" SmsSettings.of_json in
       let emailSettings =
-        field_map json "EmailSettings" EmailSettings.of_json in
+        field_map json__ "EmailSettings" EmailSettings.of_json in
       let deliveryMethod =
-        field_map json "DeliveryMethod" DeliveryMethod.of_json in
+        field_map json__ "DeliveryMethod" DeliveryMethod.of_json in
       make ?smsSettings ?emailSettings ?deliveryMethod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -924,9 +946,9 @@ module UpdateBackendAuthMFAConfig =
         (Option.map ~f:MFAMode.of_xml) (Xml.child xml_arg0 "MFAMode") in
       make ?settings ?mFAMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let settings = field_map json "Settings" Settings.of_json in
-      let mFAMode = field_map json "MFAMode" MFAMode.of_json in
+    let of_json json__ =
+      let settings = field_map json__ "Settings" Settings.of_json in
+      let mFAMode = field_map json__ "MFAMode" MFAMode.of_json in
       make ?settings ?mFAMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1004,19 +1026,19 @@ module UpdateBackendAuthOAuthConfig =
       make ?socialProviderSettings ?redirectSignOutURIs ?redirectSignInURIs
         ?oAuthScopes ?oAuthGrantType ?domainPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let socialProviderSettings =
-        field_map json "SocialProviderSettings"
+        field_map json__ "SocialProviderSettings"
           SocialProviderSettings.of_json in
       let redirectSignOutURIs =
-        field_map json "RedirectSignOutURIs" ListOf__string.of_json in
+        field_map json__ "RedirectSignOutURIs" ListOf__string.of_json in
       let redirectSignInURIs =
-        field_map json "RedirectSignInURIs" ListOf__string.of_json in
+        field_map json__ "RedirectSignInURIs" ListOf__string.of_json in
       let oAuthScopes =
-        field_map json "OAuthScopes" ListOfOAuthScopesElement.of_json in
+        field_map json__ "OAuthScopes" ListOfOAuthScopesElement.of_json in
       let oAuthGrantType =
-        field_map json "OAuthGrantType" OAuthGrantType.of_json in
-      let domainPrefix = field_map json "DomainPrefix" Zz__string.of_json in
+        field_map json__ "OAuthGrantType" OAuthGrantType.of_json in
+      let domainPrefix = field_map json__ "DomainPrefix" Zz__string.of_json in
       make ?socialProviderSettings ?redirectSignOutURIs ?redirectSignInURIs
         ?oAuthScopes ?oAuthGrantType ?domainPrefix ()
     let to_json v = composed_to_json to_value v
@@ -1052,10 +1074,10 @@ module UpdateBackendAuthPasswordPolicyConfig =
           (Xml.child xml_arg0 "additionalConstraints") in
       make ?minimumLength ?additionalConstraints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let minimumLength = field_map json "MinimumLength" Zz__double.of_json in
+    let of_json json__ =
+      let minimumLength = field_map json__ "MinimumLength" Zz__double.of_json in
       let additionalConstraints =
-        field_map json "AdditionalConstraints"
+        field_map json__ "AdditionalConstraints"
           ListOfAdditionalConstraintsElement.of_json in
       make ?minimumLength ?additionalConstraints ()
     let to_json v = composed_to_json to_value v
@@ -1095,12 +1117,12 @@ module UpdateBackendAuthVerificationMessageConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "deliveryMethod") in
       make ?smsSettings ?emailSettings ~deliveryMethod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let smsSettings = field_map json "SmsSettings" SmsSettings.of_json in
+    let of_json json__ =
+      let smsSettings = field_map json__ "SmsSettings" SmsSettings.of_json in
       let emailSettings =
-        field_map json "EmailSettings" EmailSettings.of_json in
+        field_map json__ "EmailSettings" EmailSettings.of_json in
       let deliveryMethod =
-        field_map_exn json "DeliveryMethod" DeliveryMethod.of_json in
+        field_map_exn json__ "DeliveryMethod" DeliveryMethod.of_json in
       make ?smsSettings ?emailSettings ~deliveryMethod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1158,10 +1180,10 @@ module BackendAPIAuthType =
       let mode = (Option.map ~f:Mode.of_xml) (Xml.child xml_arg0 "mode") in
       make ?settings ?mode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let settings =
-        field_map json "Settings" BackendAPIAppSyncAuthSettings.of_json in
-      let mode = field_map json "Mode" Mode.of_json in
+        field_map json__ "Settings" BackendAPIAppSyncAuthSettings.of_json in
+      let mode = field_map json__ "Mode" Mode.of_json in
       make ?settings ?mode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1203,12 +1225,12 @@ module CreateBackendAuthForgotPasswordConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "deliveryMethod") in
       make ?smsSettings ?emailSettings ~deliveryMethod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let smsSettings = field_map json "SmsSettings" SmsSettings.of_json in
+    let of_json json__ =
+      let smsSettings = field_map json__ "SmsSettings" SmsSettings.of_json in
       let emailSettings =
-        field_map json "EmailSettings" EmailSettings.of_json in
+        field_map json__ "EmailSettings" EmailSettings.of_json in
       let deliveryMethod =
-        field_map_exn json "DeliveryMethod" DeliveryMethod.of_json in
+        field_map_exn json__ "DeliveryMethod" DeliveryMethod.of_json in
       make ?smsSettings ?emailSettings ~deliveryMethod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1237,9 +1259,9 @@ module CreateBackendAuthMFAConfig =
         MFAMode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MFAMode") in
       make ?settings ~mFAMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let settings = field_map json "Settings" Settings.of_json in
-      let mFAMode = field_map_exn json "MFAMode" MFAMode.of_json in
+    let of_json json__ =
+      let settings = field_map json__ "Settings" Settings.of_json in
+      let mFAMode = field_map_exn json__ "MFAMode" MFAMode.of_json in
       make ?settings ~mFAMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1315,19 +1337,19 @@ module CreateBackendAuthOAuthConfig =
       make ?socialProviderSettings ~redirectSignOutURIs ~redirectSignInURIs
         ~oAuthScopes ~oAuthGrantType ?domainPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let socialProviderSettings =
-        field_map json "SocialProviderSettings"
+        field_map json__ "SocialProviderSettings"
           SocialProviderSettings.of_json in
       let redirectSignOutURIs =
-        field_map_exn json "RedirectSignOutURIs" ListOf__string.of_json in
+        field_map_exn json__ "RedirectSignOutURIs" ListOf__string.of_json in
       let redirectSignInURIs =
-        field_map_exn json "RedirectSignInURIs" ListOf__string.of_json in
+        field_map_exn json__ "RedirectSignInURIs" ListOf__string.of_json in
       let oAuthScopes =
-        field_map_exn json "OAuthScopes" ListOfOAuthScopesElement.of_json in
+        field_map_exn json__ "OAuthScopes" ListOfOAuthScopesElement.of_json in
       let oAuthGrantType =
-        field_map_exn json "OAuthGrantType" OAuthGrantType.of_json in
-      let domainPrefix = field_map json "DomainPrefix" Zz__string.of_json in
+        field_map_exn json__ "OAuthGrantType" OAuthGrantType.of_json in
+      let domainPrefix = field_map json__ "DomainPrefix" Zz__string.of_json in
       make ?socialProviderSettings ~redirectSignOutURIs ~redirectSignInURIs
         ~oAuthScopes ~oAuthGrantType ?domainPrefix ()
     let to_json v = composed_to_json to_value v
@@ -1363,11 +1385,11 @@ module CreateBackendAuthPasswordPolicyConfig =
           (Xml.child xml_arg0 "additionalConstraints") in
       make ~minimumLength ?additionalConstraints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minimumLength =
-        field_map_exn json "MinimumLength" Zz__double.of_json in
+        field_map_exn json__ "MinimumLength" Zz__double.of_json in
       let additionalConstraints =
-        field_map json "AdditionalConstraints"
+        field_map json__ "AdditionalConstraints"
           ListOfAdditionalConstraintsElement.of_json in
       make ~minimumLength ?additionalConstraints ()
     let to_json v = composed_to_json to_value v
@@ -1407,12 +1429,12 @@ module CreateBackendAuthVerificationMessageConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "deliveryMethod") in
       make ?smsSettings ?emailSettings ~deliveryMethod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let smsSettings = field_map json "SmsSettings" SmsSettings.of_json in
+    let of_json json__ =
+      let smsSettings = field_map json__ "SmsSettings" SmsSettings.of_json in
       let emailSettings =
-        field_map json "EmailSettings" EmailSettings.of_json in
+        field_map json__ "EmailSettings" EmailSettings.of_json in
       let deliveryMethod =
-        field_map_exn json "DeliveryMethod" DeliveryMethod.of_json in
+        field_map_exn json__ "DeliveryMethod" DeliveryMethod.of_json in
       make ?smsSettings ?emailSettings ~deliveryMethod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1421,6 +1443,9 @@ module ListOfRequiredSignUpAttributesElement =
   struct
     type nonrec t = RequiredSignUpAttributesElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RequiredSignUpAttributesElement.to_value)) |>
         (fun x -> `List x)
@@ -1504,11 +1529,13 @@ module BackendStoragePermissions =
           (Xml.child_exn ~context:context_ xml_arg0 "authenticated") in
       make ?unAuthenticated ~authenticated ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unAuthenticated =
-        field_map json "UnAuthenticated" ListOfUnAuthenticatedElement.of_json in
+        field_map json__ "UnAuthenticated"
+          ListOfUnAuthenticatedElement.of_json in
       let authenticated =
-        field_map_exn json "Authenticated" ListOfAuthenticatedElement.of_json in
+        field_map_exn json__ "Authenticated"
+          ListOfAuthenticatedElement.of_json in
       make ?unAuthenticated ~authenticated ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1589,9 +1616,9 @@ module UpdateBackendAuthIdentityPoolConfig =
           (Xml.child xml_arg0 "unauthenticatedLogin") in
       make ?unauthenticatedLogin ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unauthenticatedLogin =
-        field_map json "UnauthenticatedLogin" Zz__boolean.of_json in
+        field_map json__ "UnauthenticatedLogin" Zz__boolean.of_json in
       make ?unauthenticatedLogin ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1663,17 +1690,18 @@ module UpdateBackendAuthUserPoolConfig =
       make ?verificationMessage ?passwordPolicy ?oAuth ?mfa ?forgotPassword
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let verificationMessage =
-        field_map json "VerificationMessage"
+        field_map json__ "VerificationMessage"
           UpdateBackendAuthVerificationMessageConfig.of_json in
       let passwordPolicy =
-        field_map json "PasswordPolicy"
+        field_map json__ "PasswordPolicy"
           UpdateBackendAuthPasswordPolicyConfig.of_json in
-      let oAuth = field_map json "OAuth" UpdateBackendAuthOAuthConfig.of_json in
-      let mfa = field_map json "Mfa" UpdateBackendAuthMFAConfig.of_json in
+      let oAuth =
+        field_map json__ "OAuth" UpdateBackendAuthOAuthConfig.of_json in
+      let mfa = field_map json__ "Mfa" UpdateBackendAuthMFAConfig.of_json in
       let forgotPassword =
-        field_map json "ForgotPassword"
+        field_map json__ "ForgotPassword"
           UpdateBackendAuthForgotPasswordConfig.of_json in
       make ?verificationMessage ?passwordPolicy ?oAuth ?mfa ?forgotPassword
         ()
@@ -1698,9 +1726,9 @@ module BackendAPIConflictResolution =
           (Xml.child xml_arg0 "resolutionStrategy") in
       make ?resolutionStrategy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolutionStrategy =
-        field_map json "ResolutionStrategy" ResolutionStrategy.of_json in
+        field_map json__ "ResolutionStrategy" ResolutionStrategy.of_json in
       make ?resolutionStrategy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1709,6 +1737,9 @@ module ListOfBackendAPIAuthType =
   struct
     type nonrec t = BackendAPIAuthType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BackendAPIAuthType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1750,9 +1781,9 @@ module S3BucketInfo =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "creationDate") in
       make ?name ?creationDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
-      let creationDate = field_map json "CreationDate" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
+      let creationDate = field_map json__ "CreationDate" Zz__string.of_json in
       make ?name ?creationDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the metadata of the S3 bucket."]
@@ -1760,8 +1791,8 @@ module BackendJobRespObj =
   struct
     type nonrec t =
       {
-      appId: Zz__string.t [@ocaml.doc "The app ID."];
-      backendEnvironmentName: Zz__string.t
+      appId: Zz__string.t option [@ocaml.doc "The app ID."];
+      backendEnvironmentName: Zz__string.t option
         [@ocaml.doc "The name of the backend environment."];
       createTime: Zz__string.t option
         [@ocaml.doc "The time when the job was created."];
@@ -1774,31 +1805,30 @@ module BackendJobRespObj =
         [@ocaml.doc "The current status of the request."];
       updateTime: Zz__string.t option
         [@ocaml.doc "The time when the job was last updated."]}
-    let context_ = "BackendJobRespObj"
-    let make ?createTime =
-      fun ?error ->
-        fun ?jobId ->
-          fun ?operation ->
-            fun ?status ->
-              fun ?updateTime ->
-                fun ~appId ->
-                  fun ~backendEnvironmentName ->
+    let make ?appId =
+      fun ?backendEnvironmentName ->
+        fun ?createTime ->
+          fun ?error ->
+            fun ?jobId ->
+              fun ?operation ->
+                fun ?status ->
+                  fun ?updateTime ->
                     fun () ->
                       {
+                        appId;
+                        backendEnvironmentName;
                         createTime;
                         error;
                         jobId;
                         operation;
                         status;
-                        updateTime;
-                        appId;
-                        backendEnvironmentName
+                        updateTime
                       }
     let to_value x =
       structure_to_value
-        [("appId", (Some (Zz__string.to_value x.appId)));
+        [("appId", (Option.map x.appId ~f:Zz__string.to_value));
         ("backendEnvironmentName",
-          (Some (Zz__string.to_value x.backendEnvironmentName)));
+          (Option.map x.backendEnvironmentName ~f:Zz__string.to_value));
         ("createTime", (Option.map x.createTime ~f:Zz__string.to_value));
         ("error", (Option.map x.error ~f:Zz__string.to_value));
         ("jobId", (Option.map x.jobId ~f:Zz__string.to_value));
@@ -1820,25 +1850,25 @@ module BackendJobRespObj =
       let createTime =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createTime") in
       let backendEnvironmentName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironmentName") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "backendEnvironmentName") in
       let appId =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?updateTime ?status ?operation ?jobId ?error ?createTime
-        ~backendEnvironmentName ~appId ()
+        ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map json "UpdateTime" Zz__string.of_json in
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
-      let createTime = field_map json "CreateTime" Zz__string.of_json in
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Zz__string.of_json in
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
+      let createTime = field_map json__ "CreateTime" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?updateTime ?status ?operation ?jobId ?error ?createTime
-        ~backendEnvironmentName ~appId ()
+        ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
 module CreateBackendAuthIdentityPoolConfig =
@@ -1871,11 +1901,11 @@ module CreateBackendAuthIdentityPoolConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "identityPoolName") in
       make ~unauthenticatedLogin ~identityPoolName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unauthenticatedLogin =
-        field_map_exn json "UnauthenticatedLogin" Zz__boolean.of_json in
+        field_map_exn json__ "UnauthenticatedLogin" Zz__boolean.of_json in
       let identityPoolName =
-        field_map_exn json "IdentityPoolName" Zz__string.of_json in
+        field_map_exn json__ "IdentityPoolName" Zz__string.of_json in
       make ~unauthenticatedLogin ~identityPoolName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1979,23 +2009,25 @@ module CreateBackendAuthUserPoolConfig =
         ~requiredSignUpAttributes ?passwordPolicy ?oAuth ?mfa ?forgotPassword
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let verificationMessage =
-        field_map json "VerificationMessage"
+        field_map json__ "VerificationMessage"
           CreateBackendAuthVerificationMessageConfig.of_json in
-      let userPoolName = field_map_exn json "UserPoolName" Zz__string.of_json in
+      let userPoolName =
+        field_map_exn json__ "UserPoolName" Zz__string.of_json in
       let signInMethod =
-        field_map_exn json "SignInMethod" SignInMethod.of_json in
+        field_map_exn json__ "SignInMethod" SignInMethod.of_json in
       let requiredSignUpAttributes =
-        field_map_exn json "RequiredSignUpAttributes"
+        field_map_exn json__ "RequiredSignUpAttributes"
           ListOfRequiredSignUpAttributesElement.of_json in
       let passwordPolicy =
-        field_map json "PasswordPolicy"
+        field_map json__ "PasswordPolicy"
           CreateBackendAuthPasswordPolicyConfig.of_json in
-      let oAuth = field_map json "OAuth" CreateBackendAuthOAuthConfig.of_json in
-      let mfa = field_map json "Mfa" CreateBackendAuthMFAConfig.of_json in
+      let oAuth =
+        field_map json__ "OAuth" CreateBackendAuthOAuthConfig.of_json in
+      let mfa = field_map json__ "Mfa" CreateBackendAuthMFAConfig.of_json in
       let forgotPassword =
-        field_map json "ForgotPassword"
+        field_map json__ "ForgotPassword"
           CreateBackendAuthForgotPasswordConfig.of_json in
       make ?verificationMessage ~userPoolName ~signInMethod
         ~requiredSignUpAttributes ?passwordPolicy ?oAuth ?mfa ?forgotPassword
@@ -2019,8 +2051,8 @@ module BadRequestException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An error returned if a request is not formed properly."]
@@ -2040,8 +2072,8 @@ module GatewayTimeoutException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2069,9 +2101,9 @@ module NotFoundException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" Zz__string.of_json in
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" Zz__string.of_json in
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2098,9 +2130,9 @@ module TooManyRequestsException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "limitType") in
       make ?message ?limitType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let limitType = field_map json "LimitType" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let limitType = field_map json__ "LimitType" Zz__string.of_json in
       make ?message ?limitType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2132,10 +2164,11 @@ module UpdateBackendStorageResourceConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "permissions") in
       make ~serviceName ~permissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
       let permissions =
-        field_map_exn json "Permissions" BackendStoragePermissions.of_json in
+        field_map_exn json__ "Permissions" BackendStoragePermissions.of_json in
       make ~serviceName ~permissions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource configuration for updating backend storage."]
@@ -2191,14 +2224,15 @@ module LoginAuthConfigReqObj =
       make ?awsUserPoolsWebClientId ?awsUserPoolsId ?awsCognitoRegion
         ?awsCognitoIdentityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let awsUserPoolsWebClientId =
-        field_map json "AwsUserPoolsWebClientId" Zz__string.of_json in
-      let awsUserPoolsId = field_map json "AwsUserPoolsId" Zz__string.of_json in
+        field_map json__ "AwsUserPoolsWebClientId" Zz__string.of_json in
+      let awsUserPoolsId =
+        field_map json__ "AwsUserPoolsId" Zz__string.of_json in
       let awsCognitoRegion =
-        field_map json "AwsCognitoRegion" Zz__string.of_json in
+        field_map json__ "AwsCognitoRegion" Zz__string.of_json in
       let awsCognitoIdentityPoolId =
-        field_map json "AwsCognitoIdentityPoolId" Zz__string.of_json in
+        field_map json__ "AwsCognitoIdentityPoolId" Zz__string.of_json in
       make ?awsUserPoolsWebClientId ?awsUserPoolsId ?awsCognitoRegion
         ?awsCognitoIdentityPoolId ()
     let to_json v = composed_to_json to_value v
@@ -2251,16 +2285,16 @@ module UpdateBackendAuthResourceConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "authResources") in
       make ~userPoolConfigs ~service ?identityPoolConfigs ~authResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userPoolConfigs =
-        field_map_exn json "UserPoolConfigs"
+        field_map_exn json__ "UserPoolConfigs"
           UpdateBackendAuthUserPoolConfig.of_json in
-      let service = field_map_exn json "Service" Service.of_json in
+      let service = field_map_exn json__ "Service" Service.of_json in
       let identityPoolConfigs =
-        field_map json "IdentityPoolConfigs"
+        field_map json__ "IdentityPoolConfigs"
           UpdateBackendAuthIdentityPoolConfig.of_json in
       let authResources =
-        field_map_exn json "AuthResources" AuthResources.of_json in
+        field_map_exn json__ "AuthResources" AuthResources.of_json in
       make ~userPoolConfigs ~service ?identityPoolConfigs ~authResources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2337,18 +2371,19 @@ module BackendAPIResourceConfig =
       make ?transformSchema ?service ?defaultAuthType ?conflictResolution
         ?apiName ?additionalAuthTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transformSchema =
-        field_map json "TransformSchema" Zz__string.of_json in
-      let service = field_map json "Service" Zz__string.of_json in
+        field_map json__ "TransformSchema" Zz__string.of_json in
+      let service = field_map json__ "Service" Zz__string.of_json in
       let defaultAuthType =
-        field_map json "DefaultAuthType" BackendAPIAuthType.of_json in
+        field_map json__ "DefaultAuthType" BackendAPIAuthType.of_json in
       let conflictResolution =
-        field_map json "ConflictResolution"
+        field_map json__ "ConflictResolution"
           BackendAPIConflictResolution.of_json in
-      let apiName = field_map json "ApiName" Zz__string.of_json in
+      let apiName = field_map json__ "ApiName" Zz__string.of_json in
       let additionalAuthTypes =
-        field_map json "AdditionalAuthTypes" ListOfBackendAPIAuthType.of_json in
+        field_map json__ "AdditionalAuthTypes"
+          ListOfBackendAPIAuthType.of_json in
       make ?transformSchema ?service ?defaultAuthType ?conflictResolution
         ?apiName ?additionalAuthTypes ()
     let to_json v = composed_to_json to_value v
@@ -2358,6 +2393,9 @@ module ListOfS3BucketInfo =
   struct
     type nonrec t = S3BucketInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:S3BucketInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2382,6 +2420,9 @@ module ListOfBackendJobRespObj =
   struct
     type nonrec t = BackendJobRespObj.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BackendJobRespObj.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2427,49 +2468,46 @@ module GetBackendStorageResourceConfig =
       {
       bucketName: Zz__string.t option
         [@ocaml.doc "The name of the S3 bucket."];
-      imported: Zz__boolean.t
+      imported: Zz__boolean.t option
         [@ocaml.doc
           "Returns True if the storage resource has been imported."];
       permissions: BackendStoragePermissions.t option
         [@ocaml.doc
           "The authorization configuration for the storage S3 bucket."];
-      serviceName: ServiceName.t
+      serviceName: ServiceName.t option
         [@ocaml.doc "The name of the storage service."]}
-    let context_ = "GetBackendStorageResourceConfig"
     let make ?bucketName =
-      fun ?permissions ->
-        fun ~imported ->
-          fun ~serviceName ->
-            fun () -> { bucketName; permissions; imported; serviceName }
+      fun ?imported ->
+        fun ?permissions ->
+          fun ?serviceName ->
+            fun () -> { bucketName; imported; permissions; serviceName }
     let to_value x =
       structure_to_value
         [("bucketName", (Option.map x.bucketName ~f:Zz__string.to_value));
-        ("imported", (Some (Zz__boolean.to_value x.imported)));
+        ("imported", (Option.map x.imported ~f:Zz__boolean.to_value));
         ("permissions",
           (Option.map x.permissions ~f:BackendStoragePermissions.to_value));
-        ("serviceName", (Some (ServiceName.to_value x.serviceName)))]
+        ("serviceName", (Option.map x.serviceName ~f:ServiceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceName =
-        ServiceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceName") in
+        (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "serviceName") in
       let permissions =
         (Option.map ~f:BackendStoragePermissions.of_xml)
           (Xml.child xml_arg0 "permissions") in
       let imported =
-        Zz__boolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "imported") in
+        (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "imported") in
       let bucketName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucketName") in
-      make ~serviceName ?permissions ~imported ?bucketName ()
+      make ?serviceName ?permissions ?imported ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
+    let of_json json__ =
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
       let permissions =
-        field_map json "Permissions" BackendStoragePermissions.of_json in
-      let imported = field_map_exn json "Imported" Zz__boolean.of_json in
-      let bucketName = field_map json "BucketName" Zz__string.of_json in
-      make ~serviceName ?permissions ~imported ?bucketName ()
+        field_map json__ "Permissions" BackendStoragePermissions.of_json in
+      let imported = field_map json__ "Imported" Zz__boolean.of_json in
+      let bucketName = field_map json__ "BucketName" Zz__string.of_json in
+      make ?serviceName ?permissions ?imported ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details for a backend storage resource."]
 module CreateBackendAuthResourceConfig =
@@ -2520,16 +2558,16 @@ module CreateBackendAuthResourceConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "authResources") in
       make ~userPoolConfigs ~service ?identityPoolConfigs ~authResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userPoolConfigs =
-        field_map_exn json "UserPoolConfigs"
+        field_map_exn json__ "UserPoolConfigs"
           CreateBackendAuthUserPoolConfig.of_json in
-      let service = field_map_exn json "Service" Service.of_json in
+      let service = field_map_exn json__ "Service" Service.of_json in
       let identityPoolConfigs =
-        field_map json "IdentityPoolConfigs"
+        field_map json__ "IdentityPoolConfigs"
           CreateBackendAuthIdentityPoolConfig.of_json in
       let authResources =
-        field_map_exn json "AuthResources" AuthResources.of_json in
+        field_map_exn json__ "AuthResources" AuthResources.of_json in
       make ~userPoolConfigs ~service ?identityPoolConfigs ~authResources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2587,11 +2625,12 @@ module CreateBackendStorageResourceConfig =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ~serviceName ~permissions ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
       let permissions =
-        field_map_exn json "Permissions" BackendStoragePermissions.of_json in
-      let bucketName = field_map json "BucketName" Zz__string.of_json in
+        field_map_exn json__ "Permissions" BackendStoragePermissions.of_json in
+      let bucketName = field_map json__ "BucketName" Zz__string.of_json in
       make ~serviceName ~permissions ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource configuration for creating backend storage."]
@@ -2747,12 +2786,12 @@ module UpdateBackendStorageResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing backend storage resource."]
@@ -2799,14 +2838,15 @@ module UpdateBackendStorageRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig"
+        field_map_exn json__ "ResourceConfig"
           UpdateBackendStorageResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for UpdateBackendStorage."]
@@ -2838,10 +2878,11 @@ module UpdateBackendStorageReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceConfig") in
       make ~resourceName ~resourceConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig"
+        field_map_exn json__ "ResourceConfig"
           UpdateBackendStorageResourceConfig.of_json in
       make ~resourceName ~resourceConfig ()
     let to_json v = composed_to_json to_value v
@@ -2970,16 +3011,16 @@ module UpdateBackendJobResponse =
       make ?updateTime ?status ?operation ?jobId ?error ?createTime
         ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map json "UpdateTime" Zz__string.of_json in
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
-      let createTime = field_map json "CreateTime" Zz__string.of_json in
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Zz__string.of_json in
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
+      let createTime = field_map json__ "CreateTime" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?updateTime ?status ?operation ?jobId ?error ?createTime
         ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
@@ -3029,13 +3070,13 @@ module UpdateBackendJobRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?status ?operation ~jobId ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map_exn json "JobId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map_exn json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?operation ~jobId ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for GetBackendJob."]
@@ -3132,13 +3173,13 @@ module UpdateBackendConfigResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?loginAuthConfig ?error ?backendManagerAppId ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loginAuthConfig =
-        field_map json "LoginAuthConfig" LoginAuthConfigReqObj.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+        field_map json__ "LoginAuthConfig" LoginAuthConfigReqObj.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendManagerAppId =
-        field_map json "BackendManagerAppId" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendManagerAppId" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?loginAuthConfig ?error ?backendManagerAppId ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3168,10 +3209,10 @@ module UpdateBackendConfigRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?loginAuthConfig ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loginAuthConfig =
-        field_map json "LoginAuthConfig" LoginAuthConfigReqObj.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map json__ "LoginAuthConfig" LoginAuthConfigReqObj.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?loginAuthConfig ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for UpdateBackendConfig."]
@@ -3194,9 +3235,9 @@ module UpdateBackendConfigReqObj =
           (Xml.child xml_arg0 "loginAuthConfig") in
       make ?loginAuthConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loginAuthConfig =
-        field_map json "LoginAuthConfig" LoginAuthConfigReqObj.of_json in
+        field_map json__ "LoginAuthConfig" LoginAuthConfigReqObj.of_json in
       make ?loginAuthConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -3309,14 +3350,14 @@ module UpdateBackendAuthResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing backend authentication resource."]
@@ -3360,14 +3401,15 @@ module UpdateBackendAuthRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig"
+        field_map_exn json__ "ResourceConfig"
           UpdateBackendAuthResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for UpdateBackendAuth."]
@@ -3396,10 +3438,11 @@ module UpdateBackendAuthReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceConfig") in
       make ~resourceName ~resourceConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig"
+        field_map_exn json__ "ResourceConfig"
           UpdateBackendAuthResourceConfig.of_json in
       make ~resourceName ~resourceConfig ()
     let to_json v = composed_to_json to_value v
@@ -3513,14 +3556,14 @@ module UpdateBackendAPIResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing backend API resource."]
@@ -3565,13 +3608,14 @@ module UpdateBackendAPIRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ?resourceConfig ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig" BackendAPIResourceConfig.of_json in
+        field_map json__ "ResourceConfig" BackendAPIResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ?resourceConfig ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for UpdateBackendAPI."]
@@ -3600,9 +3644,11 @@ module RemoveBackendStorageReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceName") in
       make ~serviceName ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       make ~serviceName ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -3676,8 +3722,9 @@ module RemoveBackendConfigResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "error") in
       make ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" Zz__string.of_json in make ?error ()
+    let of_json json__ =
+      let error = field_map json__ "Error" Zz__string.of_json in
+      make ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes the AWS resources required to access the Amplify Admin UI."]
@@ -3697,8 +3744,9 @@ module RemoveBackendConfigRespObj =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "error") in
       make ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" Zz__string.of_json in make ?error ()
+    let of_json json__ =
+      let error = field_map json__ "Error" Zz__string.of_json in
+      make ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
 module RemoveBackendConfigRequest =
@@ -3715,8 +3763,8 @@ module RemoveBackendConfigRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+    let of_json json__ =
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3738,8 +3786,9 @@ module RemoveBackendAuthReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceName") in
       make ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       make ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -3836,12 +3885,12 @@ module RemoveAllBackendsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3886,12 +3935,12 @@ module RemoveAllBackendsRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -3920,10 +3969,10 @@ module RemoveAllBackendsRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?cleanAmplifyApp ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cleanAmplifyApp =
-        field_map json "CleanAmplifyApp" Zz__boolean.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map json__ "CleanAmplifyApp" Zz__boolean.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?cleanAmplifyApp ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for RemoveAllBackends."]
@@ -3946,9 +3995,9 @@ module RemoveAllBackendsReqObj =
           (Xml.child xml_arg0 "cleanAmplifyApp") in
       make ?cleanAmplifyApp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cleanAmplifyApp =
-        field_map json "CleanAmplifyApp" Zz__boolean.of_json in
+        field_map json__ "CleanAmplifyApp" Zz__boolean.of_json in
       make ?cleanAmplifyApp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -4027,9 +4076,9 @@ module ListS3BucketsResponse =
           (Xml.child xml_arg0 "buckets") in
       make ?nextToken ?buckets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let buckets = field_map json "Buckets" ListOfS3BucketInfo.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let buckets = field_map json__ "Buckets" ListOfS3BucketInfo.of_json in
       make ?nextToken ?buckets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The list of S3 buckets in your account."]
@@ -4054,9 +4103,9 @@ module ListS3BucketsRespObj =
           (Xml.child_exn ~context:context_ xml_arg0 "buckets") in
       make ?nextToken ~buckets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let buckets = field_map_exn json "Buckets" ListOfS3BucketInfo.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let buckets = field_map_exn json__ "Buckets" ListOfS3BucketInfo.of_json in
       make ?nextToken ~buckets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -4075,8 +4124,8 @@ module ListS3BucketsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for S3Buckets."]
@@ -4095,8 +4144,8 @@ module ListS3BucketsReqObj =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -4176,9 +4225,9 @@ module ListBackendJobsResponse =
           (Xml.child xml_arg0 "jobs") in
       make ?nextToken ?jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let jobs = field_map json "Jobs" ListOfBackendJobRespObj.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let jobs = field_map json__ "Jobs" ListOfBackendJobRespObj.of_json in
       make ?nextToken ?jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the jobs for the backend of an Amplify app."]
@@ -4251,16 +4300,16 @@ module ListBackendJobsRequest =
       make ?status ?operation ?nextToken ?maxResults ?jobId
         ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let maxResults =
-        field_map json "MaxResults" Zz__integerMin1Max25.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
+        field_map json__ "MaxResults" Zz__integerMin1Max25.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?nextToken ?maxResults ?jobId
         ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
@@ -4287,9 +4336,9 @@ module ListBackendJobRespObj =
           (Xml.child xml_arg0 "jobs") in
       make ?nextToken ?jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let jobs = field_map json "Jobs" ListOfBackendJobRespObj.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let jobs = field_map json__ "Jobs" ListOfBackendJobRespObj.of_json in
       make ?nextToken ?jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The returned list of backend jobs."]
@@ -4338,13 +4387,13 @@ module ListBackendJobReqObj =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?status ?operation ?nextToken ?maxResults ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let maxResults =
-        field_map json "MaxResults" Zz__integerMin1Max25.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
+        field_map json__ "MaxResults" Zz__integerMin1Max25.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
       make ?status ?operation ?nextToken ?maxResults ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -4370,9 +4419,9 @@ module LimitExceededException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "limitType") in
       make ?message ?limitType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let limitType = field_map json "LimitType" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let limitType = field_map json__ "LimitType" Zz__string.of_json in
       make ?message ?limitType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4393,8 +4442,8 @@ module InternalServiceException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4488,12 +4537,12 @@ module ImportBackendStorageResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Imports an existing backend storage resource."]
@@ -4536,12 +4585,13 @@ module ImportBackendStorageRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~serviceName ?bucketName ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
-      let bucketName = field_map json "BucketName" Zz__string.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
+      let bucketName = field_map json__ "BucketName" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~serviceName ?bucketName ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for ImportBackendStorage."]
@@ -4569,9 +4619,10 @@ module ImportBackendStorageReqObj =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ~serviceName ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
-      let bucketName = field_map json "BucketName" Zz__string.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
+      let bucketName = field_map json__ "BucketName" Zz__string.of_json in
       make ~serviceName ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -4684,14 +4735,14 @@ module ImportBackendAuthResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Imports an existing backend authentication resource."]
@@ -4758,15 +4809,16 @@ module ImportBackendAuthRequest =
       make ~webClientId ~userPoolId ~nativeClientId ?identityPoolId
         ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webClientId = field_map_exn json "WebClientId" Zz__string.of_json in
-      let userPoolId = field_map_exn json "UserPoolId" Zz__string.of_json in
+    let of_json json__ =
+      let webClientId = field_map_exn json__ "WebClientId" Zz__string.of_json in
+      let userPoolId = field_map_exn json__ "UserPoolId" Zz__string.of_json in
       let nativeClientId =
-        field_map_exn json "NativeClientId" Zz__string.of_json in
-      let identityPoolId = field_map json "IdentityPoolId" Zz__string.of_json in
+        field_map_exn json__ "NativeClientId" Zz__string.of_json in
+      let identityPoolId =
+        field_map json__ "IdentityPoolId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~webClientId ~userPoolId ~nativeClientId ?identityPoolId
         ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
@@ -4813,12 +4865,13 @@ module ImportBackendAuthReqObj =
           (Xml.child xml_arg0 "identityPoolId") in
       make ~webClientId ~userPoolId ~nativeClientId ?identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webClientId = field_map_exn json "WebClientId" Zz__string.of_json in
-      let userPoolId = field_map_exn json "UserPoolId" Zz__string.of_json in
+    let of_json json__ =
+      let webClientId = field_map_exn json__ "WebClientId" Zz__string.of_json in
+      let userPoolId = field_map_exn json__ "UserPoolId" Zz__string.of_json in
       let nativeClientId =
-        field_map_exn json "NativeClientId" Zz__string.of_json in
-      let identityPoolId = field_map json "IdentityPoolId" Zz__string.of_json in
+        field_map_exn json__ "NativeClientId" Zz__string.of_json in
+      let identityPoolId =
+        field_map json__ "IdentityPoolId" Zz__string.of_json in
       make ~webClientId ~userPoolId ~nativeClientId ?identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -4912,11 +4965,11 @@ module GetTokenResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?ttl ?sessionId ?challengeCode ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ttl = field_map json "Ttl" Zz__string.of_json in
-      let sessionId = field_map json "SessionId" Zz__string.of_json in
-      let challengeCode = field_map json "ChallengeCode" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+    let of_json json__ =
+      let ttl = field_map json__ "Ttl" Zz__string.of_json in
+      let sessionId = field_map json__ "SessionId" Zz__string.of_json in
+      let challengeCode = field_map json__ "ChallengeCode" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?ttl ?sessionId ?challengeCode ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4959,12 +5012,12 @@ module GetTokenRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~ttl ~sessionId ~challengeCode ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ttl = field_map_exn json "Ttl" Zz__string.of_json in
-      let sessionId = field_map_exn json "SessionId" Zz__string.of_json in
+    let of_json json__ =
+      let ttl = field_map_exn json__ "Ttl" Zz__string.of_json in
+      let sessionId = field_map_exn json__ "SessionId" Zz__string.of_json in
       let challengeCode =
-        field_map_exn json "ChallengeCode" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "ChallengeCode" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~ttl ~sessionId ~challengeCode ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -4989,9 +5042,9 @@ module GetTokenRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~sessionId ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionId = field_map_exn json "SessionId" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "SessionId" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~sessionId ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5091,14 +5144,14 @@ module GetBackendStorageResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?resourceName ?resourceConfig ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig"
+        field_map json__ "ResourceConfig"
           GetBackendStorageResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?resourceName ?resourceConfig ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets details for a backend storage resource."]
@@ -5144,14 +5197,14 @@ module GetBackendStorageRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?resourceName ?resourceConfig ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig"
+        field_map json__ "ResourceConfig"
           GetBackendStorageResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?resourceName ?resourceConfig ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -5187,11 +5240,12 @@ module GetBackendStorageRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for GetBackendStorage."]
@@ -5213,8 +5267,9 @@ module GetBackendStorageReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceName") in
       make ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       make ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -5343,18 +5398,18 @@ module GetBackendResponse =
       make ?error ?backendEnvironmentName ?backendEnvironmentList ?appName
         ?appId ?amplifyMetaConfig ?amplifyFeatureFlags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
       let backendEnvironmentList =
-        field_map json "BackendEnvironmentList" ListOf__string.of_json in
-      let appName = field_map json "AppName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentList" ListOf__string.of_json in
+      let appName = field_map json__ "AppName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       let amplifyMetaConfig =
-        field_map json "AmplifyMetaConfig" Zz__string.of_json in
+        field_map json__ "AmplifyMetaConfig" Zz__string.of_json in
       let amplifyFeatureFlags =
-        field_map json "AmplifyFeatureFlags" Zz__string.of_json in
+        field_map json__ "AmplifyFeatureFlags" Zz__string.of_json in
       make ?error ?backendEnvironmentName ?backendEnvironmentList ?appName
         ?appId ?amplifyMetaConfig ?amplifyFeatureFlags ()
     let to_json v = composed_to_json to_value v
@@ -5432,18 +5487,18 @@ module GetBackendRespObj =
       make ?error ?backendEnvironmentName ?backendEnvironmentList ?appName
         ~appId ?amplifyMetaConfig ?amplifyFeatureFlags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
       let backendEnvironmentList =
-        field_map json "BackendEnvironmentList" ListOf__string.of_json in
-      let appName = field_map json "AppName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentList" ListOf__string.of_json in
+      let appName = field_map json__ "AppName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       let amplifyMetaConfig =
-        field_map json "AmplifyMetaConfig" Zz__string.of_json in
+        field_map json__ "AmplifyMetaConfig" Zz__string.of_json in
       let amplifyFeatureFlags =
-        field_map json "AmplifyFeatureFlags" Zz__string.of_json in
+        field_map json__ "AmplifyFeatureFlags" Zz__string.of_json in
       make ?error ?backendEnvironmentName ?backendEnvironmentList ?appName
         ~appId ?amplifyMetaConfig ?amplifyFeatureFlags ()
     let to_json v = composed_to_json to_value v
@@ -5472,10 +5527,10 @@ module GetBackendRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for GetBackend."]
@@ -5497,9 +5552,9 @@ module GetBackendReqObj =
           (Xml.child xml_arg0 "backendEnvironmentName") in
       make ?backendEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
       make ?backendEnvironmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -5627,16 +5682,16 @@ module GetBackendJobResponse =
       make ?updateTime ?status ?operation ?jobId ?error ?createTime
         ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map json "UpdateTime" Zz__string.of_json in
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
-      let createTime = field_map json "CreateTime" Zz__string.of_json in
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Zz__string.of_json in
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
+      let createTime = field_map json__ "CreateTime" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?updateTime ?status ?operation ?jobId ?error ?createTime
         ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
@@ -5670,11 +5725,11 @@ module GetBackendJobRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~jobId ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" Zz__string.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~jobId ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a specific job."]
@@ -5786,15 +5841,15 @@ module GetBackendAuthResponse =
       make ?resourceName ?resourceConfig ?error ?backendEnvironmentName
         ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig"
+        field_map json__ "ResourceConfig"
           CreateBackendAuthResourceConfig.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?resourceName ?resourceConfig ?error ?backendEnvironmentName
         ?appId ()
     let to_json v = composed_to_json to_value v
@@ -5854,15 +5909,15 @@ module GetBackendAuthRespObj =
       make ?resourceName ?resourceConfig ?error ~backendEnvironmentName
         ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig"
+        field_map json__ "ResourceConfig"
           CreateBackendAuthResourceConfig.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?resourceName ?resourceConfig ?error ~backendEnvironmentName
         ~appId ()
     let to_json v = composed_to_json to_value v
@@ -5898,11 +5953,12 @@ module GetBackendAuthRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for GetBackendAuth."]
@@ -5923,8 +5979,9 @@ module GetBackendAuthReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceName") in
       make ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       make ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -6034,14 +6091,14 @@ module GetBackendAPIResponse =
       make ?resourceName ?resourceConfig ?error ?backendEnvironmentName
         ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig" BackendAPIResourceConfig.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+        field_map json__ "ResourceConfig" BackendAPIResourceConfig.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?resourceName ?resourceConfig ?error ?backendEnvironmentName
         ?appId ()
     let to_json v = composed_to_json to_value v
@@ -6099,14 +6156,14 @@ module GetBackendAPIRespObj =
       make ?resourceName ?resourceConfig ?error ~backendEnvironmentName
         ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig" BackendAPIResourceConfig.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+        field_map json__ "ResourceConfig" BackendAPIResourceConfig.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?resourceName ?resourceConfig ?error ~backendEnvironmentName
         ~appId ()
     let to_json v = composed_to_json to_value v
@@ -6152,13 +6209,14 @@ module GetBackendAPIRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ?resourceConfig ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig" BackendAPIResourceConfig.of_json in
+        field_map json__ "ResourceConfig" BackendAPIResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ?resourceConfig ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for GetBackendAPI."]
@@ -6169,14 +6227,20 @@ module GetBackendAPIModelsResponse =
       models: Zz__string.t option
         [@ocaml.doc "Stringified JSON of the datastore model."];
       status: Status.t option
-        [@ocaml.doc "The current status of the request."]}
+        [@ocaml.doc "The current status of the request."];
+      modelIntrospectionSchema: Zz__string.t option
+        [@ocaml.doc
+          "Stringified JSON of the model introspection schema for an existing backend API resource."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `GatewayTimeoutException of GatewayTimeoutException.t 
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?models = fun ?status -> fun () -> { models; status }
+    let make ?models =
+      fun ?status ->
+        fun ?modelIntrospectionSchema ->
+          fun () -> { models; status; modelIntrospectionSchema }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6228,22 +6292,29 @@ module GetBackendAPIModelsResponse =
     let to_value x =
       structure_to_value
         [("models", (Option.map x.models ~f:Zz__string.to_value));
-        ("status", (Option.map x.status ~f:Status.to_value))]
+        ("status", (Option.map x.status ~f:Status.to_value));
+        ("modelIntrospectionSchema",
+          (Option.map x.modelIntrospectionSchema ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let modelIntrospectionSchema =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "modelIntrospectionSchema") in
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
       let models =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "models") in
-      make ?status ?models ()
+      make ?modelIntrospectionSchema ?status ?models ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let models = field_map json "Models" Zz__string.of_json in
-      make ?status ?models ()
+    let of_json json__ =
+      let modelIntrospectionSchema =
+        field_map json__ "ModelIntrospectionSchema" Zz__string.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let models = field_map json__ "Models" Zz__string.of_json in
+      make ?modelIntrospectionSchema ?status ?models ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a model schema for existing backend API resource."]
+       "Gets a model introspection schema for an existing backend API resource."]
 module GetBackendAPIModelsRequest =
   struct
     type nonrec t =
@@ -6275,41 +6346,15 @@ module GetBackendAPIModelsRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for GetBackendAPIModels."]
-module GetBackendAPICodegenRespObj =
-  struct
-    type nonrec t =
-      {
-      models: Zz__string.t option
-        [@ocaml.doc "Stringified JSON of the datastore model."];
-      status: Status.t option
-        [@ocaml.doc "The current status of the request."]}
-    let make ?models = fun ?status -> fun () -> { models; status }
-    let to_value x =
-      structure_to_value
-        [("models", (Option.map x.models ~f:Zz__string.to_value));
-        ("status", (Option.map x.status ~f:Status.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let status =
-        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
-      let models =
-        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "models") in
-      make ?status ?models ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let models = field_map json "Models" Zz__string.of_json in
-      make ?status ?models ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The response object for this operation."]
 module GenerateBackendAPIModelsResponse =
   struct
     type nonrec t =
@@ -6419,14 +6464,14 @@ module GenerateBackendAPIModelsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6462,11 +6507,12 @@ module GenerateBackendAPIModelsRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for GenerateBackendAPIModels."]
@@ -6540,8 +6586,8 @@ module DeleteTokenResponse =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "isSuccess") in
       make ?isSuccess ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isSuccess = field_map json "IsSuccess" Zz__boolean.of_json in
+    let of_json json__ =
+      let isSuccess = field_map json__ "IsSuccess" Zz__boolean.of_json in
       make ?isSuccess ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6564,8 +6610,8 @@ module DeleteTokenRespObj =
           (Xml.child_exn ~context:context_ xml_arg0 "isSuccess") in
       make ~isSuccess ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isSuccess = field_map_exn json "IsSuccess" Zz__boolean.of_json in
+    let of_json json__ =
+      let isSuccess = field_map_exn json__ "IsSuccess" Zz__boolean.of_json in
       make ~isSuccess ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -6590,9 +6636,9 @@ module DeleteTokenRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~sessionId ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionId = field_map_exn json "SessionId" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "SessionId" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~sessionId ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6686,12 +6732,12 @@ module DeleteBackendStorageResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified backend storage resource."]
@@ -6735,12 +6781,14 @@ module DeleteBackendStorageRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~serviceName ~resourceName ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~serviceName ~resourceName ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for DeleteBackendStorage."]
@@ -6853,14 +6901,14 @@ module DeleteBackendResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6921,14 +6969,14 @@ module DeleteBackendRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The returned object for a request to delete a backend."]
@@ -6957,10 +7005,10 @@ module DeleteBackendRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7074,14 +7122,14 @@ module DeleteBackendAuthResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an existing backend authentication resource."]
@@ -7116,11 +7164,12 @@ module DeleteBackendAuthRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for DeleteBackendAuth."]
@@ -7233,14 +7282,14 @@ module DeleteBackendAPIResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an existing backend API resource."]
@@ -7285,13 +7334,14 @@ module DeleteBackendAPIRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ?resourceConfig ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig" BackendAPIResourceConfig.of_json in
+        field_map json__ "ResourceConfig" BackendAPIResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ?resourceConfig ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for DeleteBackendAPI."]
@@ -7385,11 +7435,11 @@ module CreateTokenResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?ttl ?sessionId ?challengeCode ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ttl = field_map json "Ttl" Zz__string.of_json in
-      let sessionId = field_map json "SessionId" Zz__string.of_json in
-      let challengeCode = field_map json "ChallengeCode" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+    let of_json json__ =
+      let ttl = field_map json__ "Ttl" Zz__string.of_json in
+      let sessionId = field_map json__ "SessionId" Zz__string.of_json in
+      let challengeCode = field_map json__ "ChallengeCode" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?ttl ?sessionId ?challengeCode ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7432,12 +7482,12 @@ module CreateTokenRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~ttl ~sessionId ~challengeCode ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ttl = field_map_exn json "Ttl" Zz__string.of_json in
-      let sessionId = field_map_exn json "SessionId" Zz__string.of_json in
+    let of_json json__ =
+      let ttl = field_map_exn json__ "Ttl" Zz__string.of_json in
+      let sessionId = field_map_exn json__ "SessionId" Zz__string.of_json in
       let challengeCode =
-        field_map_exn json "ChallengeCode" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "ChallengeCode" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~ttl ~sessionId ~challengeCode ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -7455,8 +7505,8 @@ module CreateTokenRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+    let of_json json__ =
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7550,12 +7600,12 @@ module CreateBackendStorageResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a backend storage resource."]
@@ -7602,14 +7652,15 @@ module CreateBackendStorageRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig"
+        field_map_exn json__ "ResourceConfig"
           CreateBackendStorageResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for CreateBackendStorage."]
@@ -7650,13 +7701,14 @@ module CreateBackendStorageReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironmentName") in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig"
+        field_map_exn json__ "ResourceConfig"
           CreateBackendStorageResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -7769,14 +7821,14 @@ module CreateBackendResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7837,14 +7889,14 @@ module CreateBackendRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object sent when a backend is created."]
@@ -7901,14 +7953,14 @@ module CreateBackendRequest =
       make ?resourceName ?resourceConfig ~backendEnvironmentName ~appName
         ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig" ResourceConfig.of_json in
+        field_map json__ "ResourceConfig" ResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appName = field_map_exn json "AppName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appName = field_map_exn json__ "AppName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?resourceName ?resourceConfig ~backendEnvironmentName ~appName
         ~appId ()
     let to_json v = composed_to_json to_value v
@@ -7966,14 +8018,14 @@ module CreateBackendReqObj =
       make ?resourceName ?resourceConfig ~backendEnvironmentName ~appName
         ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig" ResourceConfig.of_json in
+        field_map json__ "ResourceConfig" ResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appName = field_map_exn json "AppName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appName = field_map_exn json__ "AppName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?resourceName ?resourceConfig ~backendEnvironmentName ~appName
         ~appId ()
     let to_json v = composed_to_json to_value v
@@ -8067,12 +8119,12 @@ module CreateBackendConfigResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?jobId ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a config object for a backend."]
@@ -8112,12 +8164,12 @@ module CreateBackendConfigRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?status ?jobId ?backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?jobId ?backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -8145,10 +8197,10 @@ module CreateBackendConfigRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?backendManagerAppId ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backendManagerAppId =
-        field_map json "BackendManagerAppId" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map json__ "BackendManagerAppId" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?backendManagerAppId ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for CreateBackendConfig."]
@@ -8170,9 +8222,9 @@ module CreateBackendConfigReqObj =
           (Xml.child xml_arg0 "backendManagerAppId") in
       make ?backendManagerAppId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backendManagerAppId =
-        field_map json "BackendManagerAppId" Zz__string.of_json in
+        field_map json__ "BackendManagerAppId" Zz__string.of_json in
       make ?backendManagerAppId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -8285,14 +8337,14 @@ module CreateBackendAuthResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new backend authentication resource."]
@@ -8336,14 +8388,15 @@ module CreateBackendAuthRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig"
+        field_map_exn json__ "ResourceConfig"
           CreateBackendAuthResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for CreateBackendAuth."]
@@ -8381,13 +8434,14 @@ module CreateBackendAuthReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironmentName") in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig"
+        field_map_exn json__ "ResourceConfig"
           CreateBackendAuthResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -8500,14 +8554,14 @@ module CreateBackendAPIResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new backend API resource."]
@@ -8551,13 +8605,15 @@ module CreateBackendAPIRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig" BackendAPIResourceConfig.of_json in
+        field_map_exn json__ "ResourceConfig"
+          BackendAPIResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for CreateBackendAPI."]
@@ -8595,12 +8651,14 @@ module CreateBackendAPIReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironmentName") in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map_exn json "ResourceConfig" BackendAPIResourceConfig.of_json in
+        field_map_exn json__ "ResourceConfig"
+          BackendAPIResourceConfig.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
       make ~resourceName ~resourceConfig ~backendEnvironmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -8713,14 +8771,14 @@ module CloneBackendResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ?backendEnvironmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This operation clones an existing backend."]
@@ -8780,14 +8838,14 @@ module CloneBackendRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object sent when a backend is created."]
@@ -8825,12 +8883,12 @@ module CloneBackendRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~targetEnvironmentName ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetEnvironmentName =
-        field_map_exn json "TargetEnvironmentName" Zz__string.of_json in
+        field_map_exn json__ "TargetEnvironmentName" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~targetEnvironmentName ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body for CloneBackend."]
@@ -8854,9 +8912,9 @@ module CloneBackendReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "targetEnvironmentName") in
       make ~targetEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetEnvironmentName =
-        field_map_exn json "TargetEnvironmentName" Zz__string.of_json in
+        field_map_exn json__ "TargetEnvironmentName" Zz__string.of_json in
       make ~targetEnvironmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -8895,12 +8953,12 @@ module BackendStorageRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~status ~jobId ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" Zz__string.of_json in
-      let jobId = field_map_exn json "JobId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "Status" Zz__string.of_json in
+      let jobId = field_map_exn json__ "JobId" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ~status ~jobId ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -8927,9 +8985,9 @@ module BackendJobReqObj =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "operation") in
       make ?status ?operation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
       make ?status ?operation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -8972,13 +9030,13 @@ module BackendConfigRespObj =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "appId") in
       make ?loginAuthConfig ?error ?backendManagerAppId ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loginAuthConfig =
-        field_map json "LoginAuthConfig" LoginAuthConfigReqObj.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+        field_map json__ "LoginAuthConfig" LoginAuthConfigReqObj.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendManagerAppId =
-        field_map json "BackendManagerAppId" Zz__string.of_json in
-      let appId = field_map json "AppId" Zz__string.of_json in
+        field_map json__ "BackendManagerAppId" Zz__string.of_json in
+      let appId = field_map json__ "AppId" Zz__string.of_json in
       make ?loginAuthConfig ?error ?backendManagerAppId ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -9038,14 +9096,14 @@ module BackendAuthRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for this operation."]
@@ -9105,14 +9163,14 @@ module BackendAPIRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object sent when a backend is created."]
@@ -9142,10 +9200,11 @@ module BackendAPIReqObj =
           (Xml.child xml_arg0 "resourceConfig") in
       make ~resourceName ?resourceConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       let resourceConfig =
-        field_map json "ResourceConfig" BackendAPIResourceConfig.of_json in
+        field_map json__ "ResourceConfig" BackendAPIResourceConfig.of_json in
       make ~resourceName ?resourceConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]
@@ -9205,14 +9264,14 @@ module BackendAPICodegenRespObj =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Zz__string.of_json in
-      let operation = field_map json "Operation" Zz__string.of_json in
-      let jobId = field_map json "JobId" Zz__string.of_json in
-      let error = field_map json "Error" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Zz__string.of_json in
+      let operation = field_map json__ "Operation" Zz__string.of_json in
+      let jobId = field_map json__ "JobId" Zz__string.of_json in
+      let error = field_map json__ "Error" Zz__string.of_json in
       let backendEnvironmentName =
-        field_map_exn json "BackendEnvironmentName" Zz__string.of_json in
-      let appId = field_map_exn json "AppId" Zz__string.of_json in
+        field_map_exn json__ "BackendEnvironmentName" Zz__string.of_json in
+      let appId = field_map_exn json__ "AppId" Zz__string.of_json in
       make ?status ?operation ?jobId ?error ~backendEnvironmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object sent when a backend is created."]
@@ -9233,8 +9292,9 @@ module BackendAPICodegenReqObj =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceName") in
       make ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" Zz__string.of_json in
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" Zz__string.of_json in
       make ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for this operation."]

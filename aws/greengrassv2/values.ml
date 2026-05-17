@@ -106,6 +106,8 @@ module PlatformAttributesMap =
                        (NonEmptyString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -149,12 +151,12 @@ module LambdaDeviceMount =
           (Xml.child_exn ~context:context_ xml_arg0 "path") in
       make ?addGroupOwner ?permission ~path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let addGroupOwner =
-        field_map json "addGroupOwner" OptionalBoolean.of_json in
+        field_map json__ "addGroupOwner" OptionalBoolean.of_json in
       let permission =
-        field_map json "permission" LambdaFilesystemPermission.of_json in
-      let path = field_map_exn json "path" FileSystemPath.of_json in
+        field_map json__ "permission" LambdaFilesystemPermission.of_json in
+      let path = field_map_exn json__ "path" FileSystemPath.of_json in
       make ?addGroupOwner ?permission ~path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -205,18 +207,55 @@ module LambdaVolumeMount =
           (Xml.child_exn ~context:context_ xml_arg0 "sourcePath") in
       make ?addGroupOwner ?permission ~destinationPath ~sourcePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let addGroupOwner =
-        field_map json "addGroupOwner" OptionalBoolean.of_json in
+        field_map json__ "addGroupOwner" OptionalBoolean.of_json in
       let permission =
-        field_map json "permission" LambdaFilesystemPermission.of_json in
+        field_map json__ "permission" LambdaFilesystemPermission.of_json in
       let destinationPath =
-        field_map_exn json "destinationPath" FileSystemPath.of_json in
-      let sourcePath = field_map_exn json "sourcePath" FileSystemPath.of_json in
+        field_map_exn json__ "destinationPath" FileSystemPath.of_json in
+      let sourcePath =
+        field_map_exn json__ "sourcePath" FileSystemPath.of_json in
       make ?addGroupOwner ?permission ~destinationPath ~sourcePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a volume that Linux processes in a container can access. When you define a volume, the IoT Greengrass Core software mounts the source files to the destination inside the container."]
+module EffectiveDeploymentErrorCode =
+  struct
+    type nonrec t = string
+    let context_ = "EffectiveDeploymentErrorCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EffectiveDeploymentErrorCode" j
+    let to_json = simple_to_json to_value
+  end
+module EffectiveDeploymentErrorType =
+  struct
+    type nonrec t = string
+    let context_ = "EffectiveDeploymentErrorType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EffectiveDeploymentErrorType" j
+    let to_json = simple_to_json to_value
+  end
 module ComponentPlatform =
   struct
     type nonrec t =
@@ -226,7 +265,7 @@ module ComponentPlatform =
           "The friendly name of the platform. This name helps you identify the platform. If you omit this parameter, IoT Greengrass creates a friendly name from the os and architecture of the platform."];
       attributes: PlatformAttributesMap.t option
         [@ocaml.doc
-          "A dictionary of attributes for the platform. The IoT Greengrass Core software defines the os and platform by default. You can specify additional platform attributes for a core device when you deploy the Greengrass nucleus component. For more information, see the Greengrass nucleus component in the IoT Greengrass V2 Developer Guide."]}
+          "A dictionary of attributes for the platform. The IoT Greengrass Core software defines the os and architecture by default. You can specify additional platform attributes for a core device when you deploy the Greengrass nucleus component. For more information, see the Greengrass nucleus component in the IoT Greengrass V2 Developer Guide."]}
     let make ?name = fun ?attributes -> fun () -> { name; attributes }
     let to_value x =
       structure_to_value
@@ -242,10 +281,10 @@ module ComponentPlatform =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "name") in
       make ?attributes ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "attributes" PlatformAttributesMap.of_json in
-      let name = field_map json "name" NonEmptyString.of_json in
+        field_map json__ "attributes" PlatformAttributesMap.of_json in
+      let name = field_map json__ "name" NonEmptyString.of_json in
       make ?attributes ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -441,6 +480,9 @@ module LambdaDeviceList =
   struct
     type nonrec t = LambdaDeviceMount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaDeviceMount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -466,6 +508,9 @@ module LambdaVolumeList =
   struct
     type nonrec t = LambdaVolumeMount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaVolumeMount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -514,10 +559,90 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module InstalledComponentLifecycleStatusCode =
+  struct
+    type nonrec t = string
+    let context_ = "InstalledComponentLifecycleStatusCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"InstalledComponentLifecycleStatusCode" j
+    let to_json = simple_to_json to_value
+  end
+module EffectiveDeploymentErrorStack =
+  struct
+    type nonrec t = EffectiveDeploymentErrorCode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EffectiveDeploymentErrorCode.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EffectiveDeploymentErrorCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EffectiveDeploymentErrorStack"
+        ~of_json:EffectiveDeploymentErrorCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EffectiveDeploymentErrorTypeList =
+  struct
+    type nonrec t = EffectiveDeploymentErrorType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EffectiveDeploymentErrorType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EffectiveDeploymentErrorType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EffectiveDeploymentErrorTypeList"
+        ~of_json:EffectiveDeploymentErrorType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ComponentPlatformList =
   struct
     type nonrec t = ComponentPlatform.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentPlatform.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -547,7 +672,7 @@ module ComponentVersionARN =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"arn:aws(-cn|-us-gov)?:greengrass:[^:]+:(aws|[0-9]+):components:[^:]+:versions:[^:]+");
+             ~pattern:"arn:[^:]*:greengrass:[^:]*:(aws|[0-9]+):components:[^:]+:versions:[^:]+");
         i
     let of_string x = x
     let to_value x = `String x
@@ -564,10 +689,8 @@ module ComponentVersionString =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"[0-9a-zA-Z-.+]+")));
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
     let to_value x = `String x
@@ -593,6 +716,9 @@ module ComponentConfigurationPathList =
   struct
     type nonrec t = ComponentConfigurationPath.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentConfigurationPath.to_value)) |>
         (fun x -> `List x)
@@ -622,7 +748,7 @@ module ComponentConfigurationString =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:65536) >>=
+          ((check_string_max i ~max:10485760) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -655,9 +781,9 @@ module SystemResourceLimits =
         (Option.map ~f:Memory.of_xml) (Xml.child xml_arg0 "memory") in
       make ?cpus ?memory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cpus = field_map json "cpus" CPU.of_json in
-      let memory = field_map json "memory" Memory.of_json in
+    let of_json json__ =
+      let cpus = field_map json__ "cpus" CPU.of_json in
+      let memory = field_map json__ "memory" Memory.of_json in
       make ?cpus ?memory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -719,16 +845,16 @@ module IoTJobAbortCriteria =
       make ~minNumberOfExecutedThings ~thresholdPercentage ~action
         ~failureType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minNumberOfExecutedThings =
-        field_map_exn json "minNumberOfExecutedThings"
+        field_map_exn json__ "minNumberOfExecutedThings"
           IoTJobMinimumNumberOfExecutedThings.of_json in
       let thresholdPercentage =
-        field_map_exn json "thresholdPercentage"
+        field_map_exn json__ "thresholdPercentage"
           IoTJobAbortThresholdPercentage.of_json in
-      let action = field_map_exn json "action" IoTJobAbortAction.of_json in
+      let action = field_map_exn json__ "action" IoTJobAbortAction.of_json in
       let failureType =
-        field_map_exn json "failureType" IoTJobExecutionFailureType.of_json in
+        field_map_exn json__ "failureType" IoTJobExecutionFailureType.of_json in
       make ~minNumberOfExecutedThings ~thresholdPercentage ~action
         ~failureType ()
     let to_json v = composed_to_json to_value v
@@ -765,11 +891,13 @@ module IoTJobRateIncreaseCriteria =
           (Xml.child xml_arg0 "numberOfNotifiedThings") in
       make ?numberOfSucceededThings ?numberOfNotifiedThings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let numberOfSucceededThings =
-        field_map json "numberOfSucceededThings" IoTJobNumberOfThings.of_json in
+        field_map json__ "numberOfSucceededThings"
+          IoTJobNumberOfThings.of_json in
       let numberOfNotifiedThings =
-        field_map json "numberOfNotifiedThings" IoTJobNumberOfThings.of_json in
+        field_map json__ "numberOfNotifiedThings"
+          IoTJobNumberOfThings.of_json in
       make ?numberOfSucceededThings ?numberOfNotifiedThings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -857,9 +985,9 @@ module LambdaEventSource =
         TopicString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "topic") in
       make ~type_ ~topic ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" LambdaEventSourceType.of_json in
-      let topic = field_map_exn json "topic" TopicString.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" LambdaEventSourceType.of_json in
+      let topic = field_map_exn json__ "topic" TopicString.of_json in
       make ~type_ ~topic ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -921,13 +1049,13 @@ module LambdaContainerParams =
           (Xml.child xml_arg0 "memorySizeInKB") in
       make ?devices ?volumes ?mountROSysfs ?memorySizeInKB ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let devices = field_map json "devices" LambdaDeviceList.of_json in
-      let volumes = field_map json "volumes" LambdaVolumeList.of_json in
+    let of_json json__ =
+      let devices = field_map json__ "devices" LambdaDeviceList.of_json in
+      let volumes = field_map json__ "volumes" LambdaVolumeList.of_json in
       let mountROSysfs =
-        field_map json "mountROSysfs" OptionalBoolean.of_json in
+        field_map json__ "mountROSysfs" OptionalBoolean.of_json in
       let memorySizeInKB =
-        field_map json "memorySizeInKB" OptionalInteger.of_json in
+        field_map json__ "memorySizeInKB" OptionalInteger.of_json in
       make ?devices ?volumes ?mountROSysfs ?memorySizeInKB ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -962,26 +1090,25 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "The name of the exception field."];
-      message: String_.t [@ocaml.doc "The message of the exception field."]}
-    let context_ = "ValidationExceptionField"
-    let make ~name = fun ~message -> fun () -> { name; message }
+      name: String_.t option [@ocaml.doc "The name of the exception field."];
+      message: String_.t option
+        [@ocaml.doc "The message of the exception field."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("name", (Some (String_.to_value x.name)));
-        ("message", (Some (String_.to_value x.message)))]
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~message ~name ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ~message ~name ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a validation exception field."]
 module PortNumberInt =
@@ -1010,10 +1137,8 @@ module ComponentNameString =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_.]+")));
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1033,6 +1158,34 @@ module RecipeBlob =
     let to_header x = x
     let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
     let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module VendorGuidance =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | DISCONTINUED 
+      | DELETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | DISCONTINUED -> "DISCONTINUED"
+      | DELETED -> "DELETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "DISCONTINUED" -> DISCONTINUED
+      | "DELETED" -> DELETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration VendorGuidance" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VendorGuidance" j)
     let to_json = simple_to_json to_value
   end
 module ComponentVersionRequirementMap =
@@ -1057,6 +1210,8 @@ module ComponentVersionRequirementMap =
                        (NonEmptyString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1109,6 +1264,36 @@ module InstalledComponentLifecycleState =
     let of_json j =
       of_string (string_of_json ~kind:"InstalledComponentLifecycleState" j)
     let to_json = simple_to_json to_value
+  end
+module InstalledComponentLifecycleStatusCodeList =
+  struct
+    type nonrec t = InstalledComponentLifecycleStatusCode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstalledComponentLifecycleStatusCode.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:InstalledComponentLifecycleStatusCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstalledComponentLifecycleStatusCodeList"
+        ~of_json:InstalledComponentLifecycleStatusCode.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module IsRoot =
   struct
@@ -1195,6 +1380,7 @@ module EffectiveDeploymentExecutionStatus =
       | TIMED_OUT 
       | CANCELED 
       | REJECTED 
+      | SUCCEEDED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1206,6 +1392,7 @@ module EffectiveDeploymentExecutionStatus =
       | TIMED_OUT -> "TIMED_OUT"
       | CANCELED -> "CANCELED"
       | REJECTED -> "REJECTED"
+      | SUCCEEDED -> "SUCCEEDED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1216,6 +1403,7 @@ module EffectiveDeploymentExecutionStatus =
       | "TIMED_OUT" -> TIMED_OUT
       | "CANCELED" -> CANCELED
       | "REJECTED" -> REJECTED
+      | "SUCCEEDED" -> SUCCEEDED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1228,6 +1416,45 @@ module EffectiveDeploymentExecutionStatus =
       of_string (string_of_json ~kind:"EffectiveDeploymentExecutionStatus" j)
     let to_json = simple_to_json to_value
   end
+module EffectiveDeploymentStatusDetails =
+  struct
+    type nonrec t =
+      {
+      errorStack: EffectiveDeploymentErrorStack.t option
+        [@ocaml.doc
+          "Contains an ordered list of short error codes that range from the most generic error to the most specific one. The error codes describe the reason for failure whenever the coreDeviceExecutionStatus is in a failed state. The response will be an empty list if there is no error."];
+      errorTypes: EffectiveDeploymentErrorTypeList.t option
+        [@ocaml.doc
+          "Contains tags which describe the error. You can use the error types to classify errors to assist with remediating the failure. The response will be an empty list if there is no error."]}
+    let make ?errorStack =
+      fun ?errorTypes -> fun () -> { errorStack; errorTypes }
+    let to_value x =
+      structure_to_value
+        [("errorStack",
+           (Option.map x.errorStack ~f:EffectiveDeploymentErrorStack.to_value));
+        ("errorTypes",
+          (Option.map x.errorTypes
+             ~f:EffectiveDeploymentErrorTypeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorTypes =
+        (Option.map ~f:EffectiveDeploymentErrorTypeList.of_xml)
+          (Xml.child xml_arg0 "errorTypes") in
+      let errorStack =
+        (Option.map ~f:EffectiveDeploymentErrorStack.of_xml)
+          (Xml.child xml_arg0 "errorStack") in
+      make ?errorTypes ?errorStack ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorTypes =
+        field_map json__ "errorTypes"
+          EffectiveDeploymentErrorTypeList.of_json in
+      let errorStack =
+        field_map json__ "errorStack" EffectiveDeploymentErrorStack.of_json in
+      make ?errorTypes ?errorStack ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains all error-related information for the deployment record. The status details will be null if the deployment is in a success state. Greengrass nucleus v2.8.0 or later is required to get an accurate errorStack and errorTypes response. This field will not be returned for earlier Greengrass nucleus versions."]
 module IoTJobARN =
   struct
     type nonrec t = string
@@ -1235,8 +1462,7 @@ module IoTJobARN =
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i
-             ~pattern:"arn:aws(-cn|-us-gov)?:iot:[^:]+:[0-9]+:job/.+");
+          (check_pattern i ~pattern:"arn:[^:]*:iot:[^:]+:[0-9]+:job/.+");
         i
     let of_string x = x
     let to_value x = `String x
@@ -1285,7 +1511,7 @@ module TargetARN =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"arn:aws(-cn|-us-gov)?:iot:[^:]+:[0-9]+:(thing|thinggroup)/.+");
+             ~pattern:"arn:[^:]*:iot:[^:]*:[0-9]+:(thing|thinggroup)/.+");
         i
     let of_string x = x
     let to_value x = `String x
@@ -1342,6 +1568,78 @@ module IsLatestForTarget =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module ThingGroupARN =
+  struct
+    type nonrec t = string
+    let context_ = "ThingGroupARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:[^:]*:iot:[^:]*:[0-9]+:thinggroup/.+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ThingGroupARN" j
+    let to_json = simple_to_json to_value
+  end
+module CoreDeviceArchitectureString =
+  struct
+    type nonrec t = string
+    let context_ = "CoreDeviceArchitectureString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CoreDeviceArchitectureString" j
+    let to_json = simple_to_json to_value
+  end
+module CoreDevicePlatformString =
+  struct
+    type nonrec t = string
+    let context_ = "CoreDevicePlatformString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CoreDevicePlatformString" j
+    let to_json = simple_to_json to_value
+  end
+module CoreDeviceRuntimeString =
+  struct
+    type nonrec t = string
+    let context_ = "CoreDeviceRuntimeString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CoreDeviceRuntimeString" j
+    let to_json = simple_to_json to_value
+  end
 module CoreDeviceStatus =
   struct
     type nonrec t =
@@ -1393,7 +1691,7 @@ module ComponentARN =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"arn:aws(-cn|-us-gov)?:greengrass:[^:]+:(aws|[0-9]+):components:[^:]+");
+             ~pattern:"arn:[^:]*:greengrass:[^:]*:(aws|[0-9]+):components:[^:]+");
         i
     let of_string x = x
     let to_value x = `String x
@@ -1469,16 +1767,16 @@ module ComponentLatestVersion =
       make ?platforms ?publisher ?description ?creationTimestamp
         ?componentVersion ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let platforms =
-        field_map json "platforms" ComponentPlatformList.of_json in
-      let publisher = field_map json "publisher" NonEmptyString.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
+        field_map json__ "platforms" ComponentPlatformList.of_json in
+      let publisher = field_map json__ "publisher" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       let creationTimestamp =
-        field_map json "creationTimestamp" Timestamp.of_json in
+        field_map json__ "creationTimestamp" Timestamp.of_json in
       let componentVersion =
-        field_map json "componentVersion" ComponentVersionString.of_json in
-      let arn = field_map json "arn" ComponentVersionARN.of_json in
+        field_map json__ "componentVersion" ComponentVersionString.of_json in
+      let arn = field_map json__ "arn" ComponentVersionARN.of_json in
       make ?platforms ?publisher ?description ?creationTimestamp
         ?componentVersion ?arn ()
     let to_json v = composed_to_json to_value v
@@ -1529,10 +1827,11 @@ module ComponentConfigurationUpdate =
           (Xml.child xml_arg0 "merge") in
       make ?reset ?merge ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reset =
-        field_map json "reset" ComponentConfigurationPathList.of_json in
-      let merge = field_map json "merge" ComponentConfigurationString.of_json in
+        field_map json__ "reset" ComponentConfigurationPathList.of_json in
+      let merge =
+        field_map json__ "merge" ComponentConfigurationString.of_json in
       make ?reset ?merge ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1574,11 +1873,11 @@ module ComponentRunWith =
           (Xml.child xml_arg0 "posixUser") in
       make ?windowsUser ?systemResourceLimits ?posixUser ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let windowsUser = field_map json "windowsUser" NonEmptyString.of_json in
+    let of_json json__ =
+      let windowsUser = field_map json__ "windowsUser" NonEmptyString.of_json in
       let systemResourceLimits =
-        field_map json "systemResourceLimits" SystemResourceLimits.of_json in
-      let posixUser = field_map json "posixUser" NonEmptyString.of_json in
+        field_map json__ "systemResourceLimits" SystemResourceLimits.of_json in
+      let posixUser = field_map json__ "posixUser" NonEmptyString.of_json in
       make ?windowsUser ?systemResourceLimits ?posixUser ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1588,6 +1887,9 @@ module IoTJobAbortCriteriaList =
     type nonrec t = IoTJobAbortCriteria.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IoTJobAbortCriteria.to_value)) |>
         (fun x -> `List x)
@@ -1650,15 +1952,15 @@ module IoTJobExponentialRolloutRate =
           (Xml.child_exn ~context:context_ xml_arg0 "baseRatePerMinute") in
       make ~rateIncreaseCriteria ~incrementFactor ~baseRatePerMinute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rateIncreaseCriteria =
-        field_map_exn json "rateIncreaseCriteria"
+        field_map_exn json__ "rateIncreaseCriteria"
           IoTJobRateIncreaseCriteria.of_json in
       let incrementFactor =
-        field_map_exn json "incrementFactor"
+        field_map_exn json__ "incrementFactor"
           IoTJobRolloutIncrementFactor.of_json in
       let baseRatePerMinute =
-        field_map_exn json "baseRatePerMinute"
+        field_map_exn json__ "baseRatePerMinute"
           IoTJobRolloutBaseRatePerMinute.of_json in
       make ~rateIncreaseCriteria ~incrementFactor ~baseRatePerMinute ()
     let to_json v = composed_to_json to_value v
@@ -1753,11 +2055,11 @@ module ComponentDependencyRequirement =
           (Xml.child xml_arg0 "versionRequirement") in
       make ?dependencyType ?versionRequirement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dependencyType =
-        field_map json "dependencyType" ComponentDependencyType.of_json in
+        field_map json__ "dependencyType" ComponentDependencyType.of_json in
       let versionRequirement =
-        field_map json "versionRequirement" NonEmptyString.of_json in
+        field_map json__ "versionRequirement" NonEmptyString.of_json in
       make ?dependencyType ?versionRequirement ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1783,6 +2085,8 @@ module LambdaEnvironmentVariables =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1794,6 +2098,9 @@ module LambdaEventSourceList =
   struct
     type nonrec t = LambdaEventSource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaEventSource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1819,6 +2126,9 @@ module LambdaExecArgsList =
   struct
     type nonrec t = LambdaExecArg.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaExecArg.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1890,11 +2200,11 @@ module LambdaLinuxProcessParams =
           (Xml.child xml_arg0 "isolationMode") in
       make ?containerParams ?isolationMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerParams =
-        field_map json "containerParams" LambdaContainerParams.of_json in
+        field_map json__ "containerParams" LambdaContainerParams.of_json in
       let isolationMode =
-        field_map json "isolationMode" LambdaIsolationMode.of_json in
+        field_map json__ "isolationMode" LambdaIsolationMode.of_json in
       make ?containerParams ?isolationMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1917,6 +2227,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -2010,11 +2323,11 @@ module ConnectivityInfo =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
       make ?metadata ?portNumber ?hostAddress ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map json "metadata" String_.of_json in
-      let portNumber = field_map json "portNumber" PortNumberInt.of_json in
-      let hostAddress = field_map json "hostAddress" String_.of_json in
-      let id = field_map json "id" String_.of_json in
+    let of_json json__ =
+      let metadata = field_map json__ "metadata" String_.of_json in
+      let portNumber = field_map json__ "portNumber" PortNumberInt.of_json in
+      let hostAddress = field_map json__ "hostAddress" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
       make ?metadata ?portNumber ?hostAddress ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2026,11 +2339,8 @@ module TagKey =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^(?!aws:)[a-zA-Z+-=._:/]+$")));
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2065,12 +2375,28 @@ module ResolvedComponentVersion =
       componentVersion: ComponentVersionString.t option
         [@ocaml.doc "The version of the component."];
       recipe: RecipeBlob.t option
-        [@ocaml.doc "The recipe of the component version."]}
+        [@ocaml.doc "The recipe of the component version."];
+      vendorGuidance: VendorGuidance.t option
+        [@ocaml.doc
+          "The vendor guidance state for the component version. This state indicates whether the component version has any issues that you should consider before you deploy it. The vendor guidance state can be: ACTIVE \226\128\147 This component version is available and recommended for use. DISCONTINUED \226\128\147 This component version has been discontinued by its publisher. You can deploy this component version, but we recommend that you use a different version of this component. DELETED \226\128\147 This component version has been deleted by its publisher, so you can't deploy it. If you have any existing deployments that specify this component version, those deployments will fail."];
+      message: NonEmptyString.t option
+        [@ocaml.doc
+          "A message that communicates details about the vendor guidance state of the component version. This message communicates why a component version is discontinued or deleted."]}
     let make ?arn =
       fun ?componentName ->
         fun ?componentVersion ->
           fun ?recipe ->
-            fun () -> { arn; componentName; componentVersion; recipe }
+            fun ?vendorGuidance ->
+              fun ?message ->
+                fun () ->
+                  {
+                    arn;
+                    componentName;
+                    componentVersion;
+                    recipe;
+                    vendorGuidance;
+                    message
+                  }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ComponentVersionARN.to_value));
@@ -2078,9 +2404,17 @@ module ResolvedComponentVersion =
           (Option.map x.componentName ~f:ComponentNameString.to_value));
         ("componentVersion",
           (Option.map x.componentVersion ~f:ComponentVersionString.to_value));
-        ("recipe", (Option.map x.recipe ~f:RecipeBlob.to_value))]
+        ("recipe", (Option.map x.recipe ~f:RecipeBlob.to_value));
+        ("vendorGuidance",
+          (Option.map x.vendorGuidance ~f:VendorGuidance.to_value));
+        ("message", (Option.map x.message ~f:NonEmptyString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "message") in
+      let vendorGuidance =
+        (Option.map ~f:VendorGuidance.of_xml)
+          (Xml.child xml_arg0 "vendorGuidance") in
       let recipe =
         (Option.map ~f:RecipeBlob.of_xml) (Xml.child xml_arg0 "recipe") in
       let componentVersion =
@@ -2091,16 +2425,21 @@ module ResolvedComponentVersion =
           (Xml.child xml_arg0 "componentName") in
       let arn =
         (Option.map ~f:ComponentVersionARN.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?recipe ?componentVersion ?componentName ?arn ()
+      make ?message ?vendorGuidance ?recipe ?componentVersion ?componentName
+        ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recipe = field_map json "recipe" RecipeBlob.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" NonEmptyString.of_json in
+      let vendorGuidance =
+        field_map json__ "vendorGuidance" VendorGuidance.of_json in
+      let recipe = field_map json__ "recipe" RecipeBlob.of_json in
       let componentVersion =
-        field_map json "componentVersion" ComponentVersionString.of_json in
+        field_map json__ "componentVersion" ComponentVersionString.of_json in
       let componentName =
-        field_map json "componentName" ComponentNameString.of_json in
-      let arn = field_map json "arn" ComponentVersionARN.of_json in
-      make ?recipe ?componentVersion ?componentName ?arn ()
+        field_map json__ "componentName" ComponentNameString.of_json in
+      let arn = field_map json__ "arn" ComponentVersionARN.of_json in
+      make ?message ?vendorGuidance ?recipe ?componentVersion ?componentName
+        ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a component version that is compatible to run on a Greengrass core device."]
@@ -2141,14 +2480,14 @@ module ComponentCandidate =
           (Xml.child xml_arg0 "componentName") in
       make ?versionRequirements ?componentVersion ?componentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionRequirements =
-        field_map json "versionRequirements"
+        field_map json__ "versionRequirements"
           ComponentVersionRequirementMap.of_json in
       let componentVersion =
-        field_map json "componentVersion" ComponentVersionString.of_json in
+        field_map json__ "componentVersion" ComponentVersionString.of_json in
       let componentName =
-        field_map json "componentName" ComponentNameString.of_json in
+        field_map json__ "componentName" ComponentNameString.of_json in
       make ?versionRequirements ?componentVersion ?componentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2165,22 +2504,43 @@ module InstalledComponent =
         [@ocaml.doc "The lifecycle state of the component."];
       lifecycleStateDetails: LifecycleStateDetails.t option
         [@ocaml.doc
-          "The details about the lifecycle state of the component."];
+          "A detailed response about the lifecycle state of the component that explains the reason why a component has an error or is broken."];
       isRoot: IsRoot.t option
-        [@ocaml.doc "Whether or not the component is a root component."]}
+        [@ocaml.doc "Whether or not the component is a root component."];
+      lastStatusChangeTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The status of how current the data is. This response is based off of component state changes. The status reflects component disruptions and deployments. If a component only sees a configuration update during a deployment, it might not undergo a state change and this status would not be updated."];
+      lastReportedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time the Greengrass core device sent a message containing a component's state to the Amazon Web Services Cloud. A component does not need to see a state change for this field to update."];
+      lastInstallationSource: NonEmptyString.t option
+        [@ocaml.doc
+          "The most recent deployment source that brought the component to the Greengrass core device. For a thing group deployment or thing deployment, the source will be the ID of the last deployment that contained the component. For local deployments it will be LOCAL. Any deployment will attempt to reinstall currently broken components on the device, which will update the last installation source."];
+      lifecycleStatusCodes:
+        InstalledComponentLifecycleStatusCodeList.t option
+        [@ocaml.doc
+          "The status codes that indicate the reason for failure whenever the lifecycleState has an error or is in a broken state. Greengrass nucleus v2.8.0 or later is required to get an accurate lifecycleStatusCodes response. This response can be inaccurate in earlier Greengrass nucleus versions."]}
     let make ?componentName =
       fun ?componentVersion ->
         fun ?lifecycleState ->
           fun ?lifecycleStateDetails ->
             fun ?isRoot ->
-              fun () ->
-                {
-                  componentName;
-                  componentVersion;
-                  lifecycleState;
-                  lifecycleStateDetails;
-                  isRoot
-                }
+              fun ?lastStatusChangeTimestamp ->
+                fun ?lastReportedTimestamp ->
+                  fun ?lastInstallationSource ->
+                    fun ?lifecycleStatusCodes ->
+                      fun () ->
+                        {
+                          componentName;
+                          componentVersion;
+                          lifecycleState;
+                          lifecycleStateDetails;
+                          isRoot;
+                          lastStatusChangeTimestamp;
+                          lastReportedTimestamp;
+                          lastInstallationSource;
+                          lifecycleStatusCodes
+                        }
     let to_value x =
       structure_to_value
         [("componentName",
@@ -2193,9 +2553,30 @@ module InstalledComponent =
         ("lifecycleStateDetails",
           (Option.map x.lifecycleStateDetails
              ~f:LifecycleStateDetails.to_value));
-        ("isRoot", (Option.map x.isRoot ~f:IsRoot.to_value))]
+        ("isRoot", (Option.map x.isRoot ~f:IsRoot.to_value));
+        ("lastStatusChangeTimestamp",
+          (Option.map x.lastStatusChangeTimestamp ~f:Timestamp.to_value));
+        ("lastReportedTimestamp",
+          (Option.map x.lastReportedTimestamp ~f:Timestamp.to_value));
+        ("lastInstallationSource",
+          (Option.map x.lastInstallationSource ~f:NonEmptyString.to_value));
+        ("lifecycleStatusCodes",
+          (Option.map x.lifecycleStatusCodes
+             ~f:InstalledComponentLifecycleStatusCodeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lifecycleStatusCodes =
+        (Option.map ~f:InstalledComponentLifecycleStatusCodeList.of_xml)
+          (Xml.child xml_arg0 "lifecycleStatusCodes") in
+      let lastInstallationSource =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "lastInstallationSource") in
+      let lastReportedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastReportedTimestamp") in
+      let lastStatusChangeTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastStatusChangeTimestamp") in
       let isRoot =
         (Option.map ~f:IsRoot.of_xml) (Xml.child xml_arg0 "isRoot") in
       let lifecycleStateDetails =
@@ -2210,21 +2591,35 @@ module InstalledComponent =
       let componentName =
         (Option.map ~f:ComponentNameString.of_xml)
           (Xml.child xml_arg0 "componentName") in
-      make ?isRoot ?lifecycleStateDetails ?lifecycleState ?componentVersion
+      make ?lifecycleStatusCodes ?lastInstallationSource
+        ?lastReportedTimestamp ?lastStatusChangeTimestamp ?isRoot
+        ?lifecycleStateDetails ?lifecycleState ?componentVersion
         ?componentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isRoot = field_map json "isRoot" IsRoot.of_json in
+    let of_json json__ =
+      let lifecycleStatusCodes =
+        field_map json__ "lifecycleStatusCodes"
+          InstalledComponentLifecycleStatusCodeList.of_json in
+      let lastInstallationSource =
+        field_map json__ "lastInstallationSource" NonEmptyString.of_json in
+      let lastReportedTimestamp =
+        field_map json__ "lastReportedTimestamp" Timestamp.of_json in
+      let lastStatusChangeTimestamp =
+        field_map json__ "lastStatusChangeTimestamp" Timestamp.of_json in
+      let isRoot = field_map json__ "isRoot" IsRoot.of_json in
       let lifecycleStateDetails =
-        field_map json "lifecycleStateDetails" LifecycleStateDetails.of_json in
+        field_map json__ "lifecycleStateDetails"
+          LifecycleStateDetails.of_json in
       let lifecycleState =
-        field_map json "lifecycleState"
+        field_map json__ "lifecycleState"
           InstalledComponentLifecycleState.of_json in
       let componentVersion =
-        field_map json "componentVersion" ComponentVersionString.of_json in
+        field_map json__ "componentVersion" ComponentVersionString.of_json in
       let componentName =
-        field_map json "componentName" ComponentNameString.of_json in
-      make ?isRoot ?lifecycleStateDetails ?lifecycleState ?componentVersion
+        field_map json__ "componentName" ComponentNameString.of_json in
+      make ?lifecycleStatusCodes ?lastInstallationSource
+        ?lastReportedTimestamp ?lastStatusChangeTimestamp ?isRoot
+        ?lifecycleStateDetails ?lifecycleState ?componentVersion
         ?componentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2233,8 +2628,9 @@ module EffectiveDeployment =
   struct
     type nonrec t =
       {
-      deploymentId: DeploymentID.t [@ocaml.doc "The ID of the deployment."];
-      deploymentName: DeploymentName.t
+      deploymentId: DeploymentID.t option
+        [@ocaml.doc "The ID of the deployment."];
+      deploymentName: DeploymentName.t option
         [@ocaml.doc "The name of the deployment."];
       iotJobId: IoTJobId.t option
         [@ocaml.doc
@@ -2244,78 +2640,87 @@ module EffectiveDeployment =
           "The ARN of the IoT job that applies the deployment to target devices."];
       description: Description.t option
         [@ocaml.doc "The description of the deployment job."];
-      targetArn: TargetARN.t
+      targetArn: TargetARN.t option
         [@ocaml.doc "The ARN of the target IoT thing or thing group."];
-      coreDeviceExecutionStatus: EffectiveDeploymentExecutionStatus.t
+      coreDeviceExecutionStatus: EffectiveDeploymentExecutionStatus.t option
         [@ocaml.doc
-          "The status of the deployment job on the Greengrass core device."];
+          "The status of the deployment job on the Greengrass core device. IN_PROGRESS \226\128\147 The deployment job is running. QUEUED \226\128\147 The deployment job is in the job queue and waiting to run. FAILED \226\128\147 The deployment failed. For more information, see the statusDetails field. COMPLETED \226\128\147 The deployment to an IoT thing was completed successfully. TIMED_OUT \226\128\147 The deployment didn't complete in the allotted time. CANCELED \226\128\147 The deployment was canceled by the user. REJECTED \226\128\147 The deployment was rejected. For more information, see the statusDetails field. SUCCEEDED \226\128\147 The deployment to an IoT thing group was completed successfully."];
       reason: Reason.t option
         [@ocaml.doc
           "The reason code for the update, if the job was updated."];
-      creationTimestamp: Timestamp.t
+      creationTimestamp: Timestamp.t option
         [@ocaml.doc
           "The time at which the deployment was created, expressed in ISO 8601 format."];
-      modifiedTimestamp: Timestamp.t
+      modifiedTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The time at which the deployment job was last modified, expressed in ISO 8601 format."]}
-    let context_ = "EffectiveDeployment"
-    let make ?iotJobId =
-      fun ?iotJobArn ->
-        fun ?description ->
-          fun ?reason ->
-            fun ~deploymentId ->
-              fun ~deploymentName ->
-                fun ~targetArn ->
-                  fun ~coreDeviceExecutionStatus ->
-                    fun ~creationTimestamp ->
-                      fun ~modifiedTimestamp ->
-                        fun () ->
-                          {
-                            iotJobId;
-                            iotJobArn;
-                            description;
-                            reason;
-                            deploymentId;
-                            deploymentName;
-                            targetArn;
-                            coreDeviceExecutionStatus;
-                            creationTimestamp;
-                            modifiedTimestamp
-                          }
+          "The time at which the deployment job was last modified, expressed in ISO 8601 format."];
+      statusDetails: EffectiveDeploymentStatusDetails.t option
+        [@ocaml.doc
+          "The status details that explain why a deployment has an error. This response will be null if the deployment is in a success state."]}
+    let make ?deploymentId =
+      fun ?deploymentName ->
+        fun ?iotJobId ->
+          fun ?iotJobArn ->
+            fun ?description ->
+              fun ?targetArn ->
+                fun ?coreDeviceExecutionStatus ->
+                  fun ?reason ->
+                    fun ?creationTimestamp ->
+                      fun ?modifiedTimestamp ->
+                        fun ?statusDetails ->
+                          fun () ->
+                            {
+                              deploymentId;
+                              deploymentName;
+                              iotJobId;
+                              iotJobArn;
+                              description;
+                              targetArn;
+                              coreDeviceExecutionStatus;
+                              reason;
+                              creationTimestamp;
+                              modifiedTimestamp;
+                              statusDetails
+                            }
     let to_value x =
       structure_to_value
-        [("deploymentId", (Some (DeploymentID.to_value x.deploymentId)));
-        ("deploymentName", (Some (DeploymentName.to_value x.deploymentName)));
+        [("deploymentId",
+           (Option.map x.deploymentId ~f:DeploymentID.to_value));
+        ("deploymentName",
+          (Option.map x.deploymentName ~f:DeploymentName.to_value));
         ("iotJobId", (Option.map x.iotJobId ~f:IoTJobId.to_value));
         ("iotJobArn", (Option.map x.iotJobArn ~f:IoTJobARN.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("targetArn", (Some (TargetARN.to_value x.targetArn)));
+        ("targetArn", (Option.map x.targetArn ~f:TargetARN.to_value));
         ("coreDeviceExecutionStatus",
-          (Some
-             (EffectiveDeploymentExecutionStatus.to_value
-                x.coreDeviceExecutionStatus)));
+          (Option.map x.coreDeviceExecutionStatus
+             ~f:EffectiveDeploymentExecutionStatus.to_value));
         ("reason", (Option.map x.reason ~f:Reason.to_value));
         ("creationTimestamp",
-          (Some (Timestamp.to_value x.creationTimestamp)));
+          (Option.map x.creationTimestamp ~f:Timestamp.to_value));
         ("modifiedTimestamp",
-          (Some (Timestamp.to_value x.modifiedTimestamp)))]
+          (Option.map x.modifiedTimestamp ~f:Timestamp.to_value));
+        ("statusDetails",
+          (Option.map x.statusDetails
+             ~f:EffectiveDeploymentStatusDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let statusDetails =
+        (Option.map ~f:EffectiveDeploymentStatusDetails.of_xml)
+          (Xml.child xml_arg0 "statusDetails") in
       let modifiedTimestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "modifiedTimestamp") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "modifiedTimestamp") in
       let creationTimestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationTimestamp") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "creationTimestamp") in
       let reason =
         (Option.map ~f:Reason.of_xml) (Xml.child xml_arg0 "reason") in
       let coreDeviceExecutionStatus =
-        EffectiveDeploymentExecutionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "coreDeviceExecutionStatus") in
+        (Option.map ~f:EffectiveDeploymentExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "coreDeviceExecutionStatus") in
       let targetArn =
-        TargetARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "targetArn") in
+        (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "targetArn") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let iotJobArn =
@@ -2323,35 +2728,37 @@ module EffectiveDeployment =
       let iotJobId =
         (Option.map ~f:IoTJobId.of_xml) (Xml.child xml_arg0 "iotJobId") in
       let deploymentName =
-        DeploymentName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deploymentName") in
+        (Option.map ~f:DeploymentName.of_xml)
+          (Xml.child xml_arg0 "deploymentName") in
       let deploymentId =
-        DeploymentID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
-      make ~modifiedTimestamp ~creationTimestamp ?reason
-        ~coreDeviceExecutionStatus ~targetArn ?description ?iotJobArn
-        ?iotJobId ~deploymentName ~deploymentId ()
+        (Option.map ~f:DeploymentID.of_xml)
+          (Xml.child xml_arg0 "deploymentId") in
+      make ?statusDetails ?modifiedTimestamp ?creationTimestamp ?reason
+        ?coreDeviceExecutionStatus ?targetArn ?description ?iotJobArn
+        ?iotJobId ?deploymentName ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let statusDetails =
+        field_map json__ "statusDetails"
+          EffectiveDeploymentStatusDetails.of_json in
       let modifiedTimestamp =
-        field_map_exn json "modifiedTimestamp" Timestamp.of_json in
+        field_map json__ "modifiedTimestamp" Timestamp.of_json in
       let creationTimestamp =
-        field_map_exn json "creationTimestamp" Timestamp.of_json in
-      let reason = field_map json "reason" Reason.of_json in
+        field_map json__ "creationTimestamp" Timestamp.of_json in
+      let reason = field_map json__ "reason" Reason.of_json in
       let coreDeviceExecutionStatus =
-        field_map_exn json "coreDeviceExecutionStatus"
+        field_map json__ "coreDeviceExecutionStatus"
           EffectiveDeploymentExecutionStatus.of_json in
-      let targetArn = field_map_exn json "targetArn" TargetARN.of_json in
-      let description = field_map json "description" Description.of_json in
-      let iotJobArn = field_map json "iotJobArn" IoTJobARN.of_json in
-      let iotJobId = field_map json "iotJobId" IoTJobId.of_json in
+      let targetArn = field_map json__ "targetArn" TargetARN.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let iotJobArn = field_map json__ "iotJobArn" IoTJobARN.of_json in
+      let iotJobId = field_map json__ "iotJobId" IoTJobId.of_json in
       let deploymentName =
-        field_map_exn json "deploymentName" DeploymentName.of_json in
-      let deploymentId =
-        field_map_exn json "deploymentId" DeploymentID.of_json in
-      make ~modifiedTimestamp ~creationTimestamp ?reason
-        ~coreDeviceExecutionStatus ~targetArn ?description ?iotJobArn
-        ?iotJobId ~deploymentName ~deploymentId ()
+        field_map json__ "deploymentName" DeploymentName.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentID.of_json in
+      make ?statusDetails ?modifiedTimestamp ?creationTimestamp ?reason
+        ?coreDeviceExecutionStatus ?targetArn ?description ?iotJobArn
+        ?iotJobId ?deploymentName ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a deployment job that IoT Greengrass sends to a Greengrass core device."]
@@ -2360,7 +2767,8 @@ module Deployment =
     type nonrec t =
       {
       targetArn: TargetARN.t option
-        [@ocaml.doc "The ARN of the target IoT thing or thing group."];
+        [@ocaml.doc
+          "The ARN of the target IoT thing or thing group. When creating a subdeployment, the targetARN can only be a thing group."];
       revisionId: NonEmptyString.t option
         [@ocaml.doc "The revision number of the deployment."];
       deploymentId: NonEmptyString.t option
@@ -2374,7 +2782,10 @@ module Deployment =
         [@ocaml.doc "The status of the deployment."];
       isLatestForTarget: IsLatestForTarget.t option
         [@ocaml.doc
-          "Whether or not the deployment is the latest revision for its target."]}
+          "Whether or not the deployment is the latest revision for its target."];
+      parentTargetArn: ThingGroupARN.t option
+        [@ocaml.doc
+          "The parent deployment's target ARN within a subdeployment."]}
     let make ?targetArn =
       fun ?revisionId ->
         fun ?deploymentId ->
@@ -2382,16 +2793,18 @@ module Deployment =
             fun ?creationTimestamp ->
               fun ?deploymentStatus ->
                 fun ?isLatestForTarget ->
-                  fun () ->
-                    {
-                      targetArn;
-                      revisionId;
-                      deploymentId;
-                      deploymentName;
-                      creationTimestamp;
-                      deploymentStatus;
-                      isLatestForTarget
-                    }
+                  fun ?parentTargetArn ->
+                    fun () ->
+                      {
+                        targetArn;
+                        revisionId;
+                        deploymentId;
+                        deploymentName;
+                        creationTimestamp;
+                        deploymentStatus;
+                        isLatestForTarget;
+                        parentTargetArn
+                      }
     let to_value x =
       structure_to_value
         [("targetArn", (Option.map x.targetArn ~f:TargetARN.to_value));
@@ -2405,9 +2818,14 @@ module Deployment =
         ("deploymentStatus",
           (Option.map x.deploymentStatus ~f:DeploymentStatus.to_value));
         ("isLatestForTarget",
-          (Option.map x.isLatestForTarget ~f:IsLatestForTarget.to_value))]
+          (Option.map x.isLatestForTarget ~f:IsLatestForTarget.to_value));
+        ("parentTargetArn",
+          (Option.map x.parentTargetArn ~f:ThingGroupARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let parentTargetArn =
+        (Option.map ~f:ThingGroupARN.of_xml)
+          (Xml.child xml_arg0 "parentTargetArn") in
       let isLatestForTarget =
         (Option.map ~f:IsLatestForTarget.of_xml)
           (Xml.child xml_arg0 "isLatestForTarget") in
@@ -2428,23 +2846,28 @@ module Deployment =
           (Xml.child xml_arg0 "revisionId") in
       let targetArn =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "targetArn") in
-      make ?isLatestForTarget ?deploymentStatus ?creationTimestamp
-        ?deploymentName ?deploymentId ?revisionId ?targetArn ()
+      make ?parentTargetArn ?isLatestForTarget ?deploymentStatus
+        ?creationTimestamp ?deploymentName ?deploymentId ?revisionId
+        ?targetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let parentTargetArn =
+        field_map json__ "parentTargetArn" ThingGroupARN.of_json in
       let isLatestForTarget =
-        field_map json "isLatestForTarget" IsLatestForTarget.of_json in
+        field_map json__ "isLatestForTarget" IsLatestForTarget.of_json in
       let deploymentStatus =
-        field_map json "deploymentStatus" DeploymentStatus.of_json in
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
       let creationTimestamp =
-        field_map json "creationTimestamp" Timestamp.of_json in
+        field_map json__ "creationTimestamp" Timestamp.of_json in
       let deploymentName =
-        field_map json "deploymentName" NonEmptyString.of_json in
-      let deploymentId = field_map json "deploymentId" NonEmptyString.of_json in
-      let revisionId = field_map json "revisionId" NonEmptyString.of_json in
-      let targetArn = field_map json "targetArn" TargetARN.of_json in
-      make ?isLatestForTarget ?deploymentStatus ?creationTimestamp
-        ?deploymentName ?deploymentId ?revisionId ?targetArn ()
+        field_map json__ "deploymentName" NonEmptyString.of_json in
+      let deploymentId =
+        field_map json__ "deploymentId" NonEmptyString.of_json in
+      let revisionId = field_map json__ "revisionId" NonEmptyString.of_json in
+      let targetArn = field_map json__ "targetArn" TargetARN.of_json in
+      make ?parentTargetArn ?isLatestForTarget ?deploymentStatus
+        ?creationTimestamp ?deploymentName ?deploymentId ?revisionId
+        ?targetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a deployment."]
 module CoreDevice =
@@ -2459,21 +2882,54 @@ module CoreDevice =
           "The status of the core device. Core devices can have the following statuses: HEALTHY \226\128\147 The IoT Greengrass Core software and all components run on the core device without issue. UNHEALTHY \226\128\147 The IoT Greengrass Core software or a component is in a failed state on the core device."];
       lastStatusUpdateTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The time at which the core device's status last updated, expressed in ISO 8601 format."]}
+          "The time at which the core device's status last updated, expressed in ISO 8601 format."];
+      platform: CoreDevicePlatformString.t option
+        [@ocaml.doc
+          "The operating system platform that the core device runs."];
+      architecture: CoreDeviceArchitectureString.t option
+        [@ocaml.doc "The computer architecture of the core device."];
+      runtime: CoreDeviceRuntimeString.t option
+        [@ocaml.doc
+          "The runtime for the core device. The runtime can be: aws_nucleus_classic aws_nucleus_lite"]}
     let make ?coreDeviceThingName =
       fun ?status ->
         fun ?lastStatusUpdateTimestamp ->
-          fun () ->
-            { coreDeviceThingName; status; lastStatusUpdateTimestamp }
+          fun ?platform ->
+            fun ?architecture ->
+              fun ?runtime ->
+                fun () ->
+                  {
+                    coreDeviceThingName;
+                    status;
+                    lastStatusUpdateTimestamp;
+                    platform;
+                    architecture;
+                    runtime
+                  }
     let to_value x =
       structure_to_value
         [("coreDeviceThingName",
            (Option.map x.coreDeviceThingName ~f:CoreDeviceThingName.to_value));
         ("status", (Option.map x.status ~f:CoreDeviceStatus.to_value));
         ("lastStatusUpdateTimestamp",
-          (Option.map x.lastStatusUpdateTimestamp ~f:Timestamp.to_value))]
+          (Option.map x.lastStatusUpdateTimestamp ~f:Timestamp.to_value));
+        ("platform",
+          (Option.map x.platform ~f:CoreDevicePlatformString.to_value));
+        ("architecture",
+          (Option.map x.architecture ~f:CoreDeviceArchitectureString.to_value));
+        ("runtime",
+          (Option.map x.runtime ~f:CoreDeviceRuntimeString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let runtime =
+        (Option.map ~f:CoreDeviceRuntimeString.of_xml)
+          (Xml.child xml_arg0 "runtime") in
+      let architecture =
+        (Option.map ~f:CoreDeviceArchitectureString.of_xml)
+          (Xml.child xml_arg0 "architecture") in
+      let platform =
+        (Option.map ~f:CoreDevicePlatformString.of_xml)
+          (Xml.child xml_arg0 "platform") in
       let lastStatusUpdateTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "lastStatusUpdateTimestamp") in
@@ -2482,15 +2938,23 @@ module CoreDevice =
       let coreDeviceThingName =
         (Option.map ~f:CoreDeviceThingName.of_xml)
           (Xml.child xml_arg0 "coreDeviceThingName") in
-      make ?lastStatusUpdateTimestamp ?status ?coreDeviceThingName ()
+      make ?runtime ?architecture ?platform ?lastStatusUpdateTimestamp
+        ?status ?coreDeviceThingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let runtime =
+        field_map json__ "runtime" CoreDeviceRuntimeString.of_json in
+      let architecture =
+        field_map json__ "architecture" CoreDeviceArchitectureString.of_json in
+      let platform =
+        field_map json__ "platform" CoreDevicePlatformString.of_json in
       let lastStatusUpdateTimestamp =
-        field_map json "lastStatusUpdateTimestamp" Timestamp.of_json in
-      let status = field_map json "status" CoreDeviceStatus.of_json in
+        field_map json__ "lastStatusUpdateTimestamp" Timestamp.of_json in
+      let status = field_map json__ "status" CoreDeviceStatus.of_json in
       let coreDeviceThingName =
-        field_map json "coreDeviceThingName" CoreDeviceThingName.of_json in
-      make ?lastStatusUpdateTimestamp ?status ?coreDeviceThingName ()
+        field_map json__ "coreDeviceThingName" CoreDeviceThingName.of_json in
+      make ?runtime ?architecture ?platform ?lastStatusUpdateTimestamp
+        ?status ?coreDeviceThingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a Greengrass core device, which is an IoT thing that runs the IoT Greengrass Core software."]
@@ -2526,12 +2990,12 @@ module Component =
         (Option.map ~f:ComponentARN.of_xml) (Xml.child xml_arg0 "arn") in
       make ?latestVersion ?componentName ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestVersion =
-        field_map json "latestVersion" ComponentLatestVersion.of_json in
+        field_map json__ "latestVersion" ComponentLatestVersion.of_json in
       let componentName =
-        field_map json "componentName" ComponentNameString.of_json in
-      let arn = field_map json "arn" ComponentARN.of_json in
+        field_map json__ "componentName" ComponentNameString.of_json in
+      let arn = field_map json__ "arn" ComponentARN.of_json in
       make ?latestVersion ?componentName ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a component."]
@@ -2567,12 +3031,12 @@ module ComponentVersionListItem =
           (Xml.child xml_arg0 "componentName") in
       make ?arn ?componentVersion ?componentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "arn" NonEmptyString.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "arn" NonEmptyString.of_json in
       let componentVersion =
-        field_map json "componentVersion" ComponentVersionString.of_json in
+        field_map json__ "componentVersion" ComponentVersionString.of_json in
       let componentName =
-        field_map json "componentName" ComponentNameString.of_json in
+        field_map json__ "componentName" ComponentNameString.of_json in
       make ?arn ?componentVersion ?componentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2604,10 +3068,10 @@ module AssociatedClientDevice =
         (Option.map ~f:IoTThingName.of_xml) (Xml.child xml_arg0 "thingName") in
       make ?associationTimestamp ?thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationTimestamp =
-        field_map json "associationTimestamp" Timestamp.of_json in
-      let thingName = field_map json "thingName" IoTThingName.of_json in
+        field_map json__ "associationTimestamp" Timestamp.of_json in
+      let thingName = field_map json__ "thingName" IoTThingName.of_json in
       make ?associationTimestamp ?thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2616,7 +3080,7 @@ module ComponentDeploymentSpecification =
   struct
     type nonrec t =
       {
-      componentVersion: ComponentVersionString.t option
+      componentVersion: ComponentVersionString.t
         [@ocaml.doc "The version of the component."];
       configurationUpdate: ComponentConfigurationUpdate.t option
         [@ocaml.doc
@@ -2624,14 +3088,15 @@ module ComponentDeploymentSpecification =
       runWith: ComponentRunWith.t option
         [@ocaml.doc
           "The system user and group that the IoT Greengrass Core software uses to run component processes on the core device. If you omit this parameter, the IoT Greengrass Core software uses the system user and group that you configure for the core device. For more information, see Configure the user and group that run components in the IoT Greengrass V2 Developer Guide."]}
-    let make ?componentVersion =
-      fun ?configurationUpdate ->
-        fun ?runWith ->
-          fun () -> { componentVersion; configurationUpdate; runWith }
+    let context_ = "ComponentDeploymentSpecification"
+    let make ?configurationUpdate =
+      fun ?runWith ->
+        fun ~componentVersion ->
+          fun () -> { configurationUpdate; runWith; componentVersion }
     let to_value x =
       structure_to_value
         [("componentVersion",
-           (Option.map x.componentVersion ~f:ComponentVersionString.to_value));
+           (Some (ComponentVersionString.to_value x.componentVersion)));
         ("configurationUpdate",
           (Option.map x.configurationUpdate
              ~f:ComponentConfigurationUpdate.to_value));
@@ -2645,18 +3110,19 @@ module ComponentDeploymentSpecification =
         (Option.map ~f:ComponentConfigurationUpdate.of_xml)
           (Xml.child xml_arg0 "configurationUpdate") in
       let componentVersion =
-        (Option.map ~f:ComponentVersionString.of_xml)
-          (Xml.child xml_arg0 "componentVersion") in
-      make ?runWith ?configurationUpdate ?componentVersion ()
+        ComponentVersionString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "componentVersion") in
+      make ?runWith ?configurationUpdate ~componentVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runWith = field_map json "runWith" ComponentRunWith.of_json in
+    let of_json json__ =
+      let runWith = field_map json__ "runWith" ComponentRunWith.of_json in
       let configurationUpdate =
-        field_map json "configurationUpdate"
+        field_map json__ "configurationUpdate"
           ComponentConfigurationUpdate.of_json in
       let componentVersion =
-        field_map json "componentVersion" ComponentVersionString.of_json in
-      make ?runWith ?configurationUpdate ?componentVersion ()
+        field_map_exn json__ "componentVersion"
+          ComponentVersionString.of_json in
+      make ?runWith ?configurationUpdate ~componentVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a component to deploy."]
 module IoTJobAbortConfig =
@@ -2679,9 +3145,9 @@ module IoTJobAbortConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "criteriaList") in
       make ~criteriaList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let criteriaList =
-        field_map_exn json "criteriaList" IoTJobAbortCriteriaList.of_json in
+        field_map_exn json__ "criteriaList" IoTJobAbortCriteriaList.of_json in
       make ~criteriaList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2716,11 +3182,12 @@ module IoTJobExecutionsRolloutConfig =
           (Xml.child xml_arg0 "exponentialRate") in
       make ?maximumPerMinute ?exponentialRate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maximumPerMinute =
-        field_map json "maximumPerMinute" IoTJobMaxExecutionsPerMin.of_json in
+        field_map json__ "maximumPerMinute" IoTJobMaxExecutionsPerMin.of_json in
       let exponentialRate =
-        field_map json "exponentialRate" IoTJobExponentialRolloutRate.of_json in
+        field_map json__ "exponentialRate"
+          IoTJobExponentialRolloutRate.of_json in
       make ?maximumPerMinute ?exponentialRate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2746,9 +3213,9 @@ module IoTJobTimeoutConfig =
           (Xml.child xml_arg0 "inProgressTimeoutInMinutes") in
       make ?inProgressTimeoutInMinutes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inProgressTimeoutInMinutes =
-        field_map json "inProgressTimeoutInMinutes"
+        field_map json__ "inProgressTimeoutInMinutes"
           IoTJobInProgressTimeoutInMinutes.of_json in
       make ?inProgressTimeoutInMinutes ()
     let to_json v = composed_to_json to_value v
@@ -2783,11 +3250,12 @@ module DeploymentComponentUpdatePolicy =
           (Xml.child xml_arg0 "timeoutInSeconds") in
       make ?action ?timeoutInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let action =
-        field_map json "action" DeploymentComponentUpdatePolicyAction.of_json in
+        field_map json__ "action"
+          DeploymentComponentUpdatePolicyAction.of_json in
       let timeoutInSeconds =
-        field_map json "timeoutInSeconds" OptionalInteger.of_json in
+        field_map json__ "timeoutInSeconds" OptionalInteger.of_json in
       make ?action ?timeoutInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2811,9 +3279,9 @@ module DeploymentConfigurationValidationPolicy =
           (Xml.child xml_arg0 "timeoutInSeconds") in
       make ?timeoutInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeoutInSeconds =
-        field_map json "timeoutInSeconds" OptionalInteger.of_json in
+        field_map json__ "timeoutInSeconds" OptionalInteger.of_json in
       make ?timeoutInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2903,6 +3371,8 @@ module StringMap =
                        (NonEmptyString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2936,6 +3406,8 @@ module ComponentDependencyMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3069,29 +3541,30 @@ module LambdaExecutionParameters =
         ?timeoutInSeconds ?maxIdleTimeInSeconds ?maxInstancesCount
         ?maxQueueSize ?eventSources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let linuxProcessParams =
-        field_map json "linuxProcessParams" LambdaLinuxProcessParams.of_json in
+        field_map json__ "linuxProcessParams"
+          LambdaLinuxProcessParams.of_json in
       let environmentVariables =
-        field_map json "environmentVariables"
+        field_map json__ "environmentVariables"
           LambdaEnvironmentVariables.of_json in
-      let execArgs = field_map json "execArgs" LambdaExecArgsList.of_json in
+      let execArgs = field_map json__ "execArgs" LambdaExecArgsList.of_json in
       let inputPayloadEncodingType =
-        field_map json "inputPayloadEncodingType"
+        field_map json__ "inputPayloadEncodingType"
           LambdaInputPayloadEncodingType.of_json in
-      let pinned = field_map json "pinned" OptionalBoolean.of_json in
+      let pinned = field_map json__ "pinned" OptionalBoolean.of_json in
       let statusTimeoutInSeconds =
-        field_map json "statusTimeoutInSeconds" OptionalInteger.of_json in
+        field_map json__ "statusTimeoutInSeconds" OptionalInteger.of_json in
       let timeoutInSeconds =
-        field_map json "timeoutInSeconds" OptionalInteger.of_json in
+        field_map json__ "timeoutInSeconds" OptionalInteger.of_json in
       let maxIdleTimeInSeconds =
-        field_map json "maxIdleTimeInSeconds" OptionalInteger.of_json in
+        field_map json__ "maxIdleTimeInSeconds" OptionalInteger.of_json in
       let maxInstancesCount =
-        field_map json "maxInstancesCount" OptionalInteger.of_json in
+        field_map json__ "maxInstancesCount" OptionalInteger.of_json in
       let maxQueueSize =
-        field_map json "maxQueueSize" OptionalInteger.of_json in
+        field_map json__ "maxQueueSize" OptionalInteger.of_json in
       let eventSources =
-        field_map json "eventSources" LambdaEventSourceList.of_json in
+        field_map json__ "eventSources" LambdaEventSourceList.of_json in
       make ?linuxProcessParams ?environmentVariables ?execArgs
         ?inputPayloadEncodingType ?pinned ?statusTimeoutInSeconds
         ?timeoutInSeconds ?maxIdleTimeInSeconds ?maxInstancesCount
@@ -3099,25 +3572,6 @@ module LambdaExecutionParameters =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains parameters for a Lambda function that runs on IoT Greengrass."]
-module LambdaFunctionARNWithVersionNumber =
-  struct
-    type nonrec t = string
-    let context_ = "LambdaFunctionARNWithVersionNumber"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"arn:aws(-cn|-us-gov)?:lambda:[^:]+:[0-9]+:function:[a-zA-Z0-9-_]+:[0-9]+");
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json ~kind:"LambdaFunctionARNWithVersionNumber" j
-    let to_json = simple_to_json to_value
-  end
 module DisassociateClientDeviceFromCoreDeviceErrorEntry =
   struct
     type nonrec t =
@@ -3147,10 +3601,10 @@ module DisassociateClientDeviceFromCoreDeviceErrorEntry =
         (Option.map ~f:IoTThingName.of_xml) (Xml.child xml_arg0 "thingName") in
       make ?message ?code ?thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" NonEmptyString.of_json in
-      let code = field_map json "code" NonEmptyString.of_json in
-      let thingName = field_map json "thingName" IoTThingName.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" NonEmptyString.of_json in
+      let code = field_map json__ "code" NonEmptyString.of_json in
+      let thingName = field_map json__ "thingName" IoTThingName.of_json in
       make ?message ?code ?thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3174,8 +3628,8 @@ module DisassociateClientDeviceFromCoreDeviceEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingName = field_map_exn json "thingName" IoTThingName.of_json in
+    let of_json json__ =
+      let thingName = field_map_exn json__ "thingName" IoTThingName.of_json in
       make ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3209,10 +3663,10 @@ module AssociateClientDeviceWithCoreDeviceErrorEntry =
         (Option.map ~f:IoTThingName.of_xml) (Xml.child xml_arg0 "thingName") in
       make ?message ?code ?thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" NonEmptyString.of_json in
-      let code = field_map json "code" NonEmptyString.of_json in
-      let thingName = field_map json "thingName" IoTThingName.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" NonEmptyString.of_json in
+      let code = field_map json__ "code" NonEmptyString.of_json in
+      let thingName = field_map json__ "thingName" IoTThingName.of_json in
       make ?message ?code ?thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3236,8 +3690,8 @@ module AssociateClientDeviceWithCoreDeviceEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingName = field_map_exn json "thingName" IoTThingName.of_json in
+    let of_json json__ =
+      let thingName = field_map_exn json__ "thingName" IoTThingName.of_json in
       make ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3246,16 +3700,15 @@ module InternalServerException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc
           "The amount of time to wait before you retry the request."]}
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("Retry-After",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -3264,14 +3717,14 @@ module InternalServerException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "retryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "IoT Greengrass can't process your request right now. Try again later."]
@@ -3279,17 +3732,16 @@ module ValidationException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       reason: ValidationExceptionReason.t option
         [@ocaml.doc "The reason for the validation exception."];
       fields: ValidationExceptionFieldList.t option
         [@ocaml.doc "The list of fields that failed to validate."]}
-    let context_ = "ValidationException"
-    let make ?reason =
-      fun ?fields -> fun ~message -> fun () -> { reason; fields; message }
+    let make ?message =
+      fun ?reason -> fun ?fields -> fun () -> { message; reason; fields }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("reason",
           (Option.map x.reason ~f:ValidationExceptionReason.to_value));
         ("fields",
@@ -3303,15 +3755,16 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionReason.of_xml)
           (Xml.child xml_arg0 "reason") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?fields ?reason ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?fields ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fields =
-        field_map json "fields" ValidationExceptionFieldList.of_json in
-      let reason = field_map json "reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?fields ?reason ~message ()
+        field_map json__ "fields" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?fields ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request isn't valid. This can occur if your request contains malformed JSON or unsupported characters."]
@@ -3319,6 +3772,9 @@ module ConnectivityInfoList =
   struct
     type nonrec t = ConnectivityInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectivityInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3344,37 +3800,34 @@ module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t
+      message: String_.t option ;
+      resourceId: String_.t option
         [@ocaml.doc "The ID of the resource that isn't found."];
-      resourceType: String_.t
+      resourceType: String_.t option
         [@ocaml.doc "The type of the resource that isn't found."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource can't be found."]
 module GenericV2ARN =
@@ -3385,7 +3838,7 @@ module GenericV2ARN =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"arn:aws(-cn|-us-gov)?:greengrass:[^:]+:(aws|[0-9]+):(components|deployments|coreDevices):.+");
+             ~pattern:"arn:[^:]*:greengrass:[^:]*:(aws|[0-9]+):(components|deployments|coreDevices):.*");
         i
     let of_string x = x
     let to_value x = `String x
@@ -3401,8 +3854,12 @@ module TagKeyList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3428,7 +3885,8 @@ module TagMap =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
         i
     let of_header xs =
       make
@@ -3447,6 +3905,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3457,59 +3917,56 @@ module TagMap =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You don't have permission to perform the action."]
 module ConflictException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t
+      message: String_.t option ;
+      resourceId: String_.t option
         [@ocaml.doc
           "The ID of the resource that conflicts with the request."];
-      resourceType: String_.t
+      resourceType: String_.t option
         [@ocaml.doc
           "The type of the resource that conflicts with the request."]}
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Your request has conflicting operations. This can occur if you're trying to perform more than one operation on the same resource at the same time."]
@@ -3517,6 +3974,9 @@ module ResolvedComponentVersionsList =
   struct
     type nonrec t = ResolvedComponentVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResolvedComponentVersion.to_value)) |>
         (fun x -> `List x)
@@ -3543,7 +4003,7 @@ module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       quotaCode: String_.t option
         [@ocaml.doc "The code for the quota in Service Quotas."];
       serviceCode: String_.t option
@@ -3551,15 +4011,14 @@ module ThrottlingException =
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc
           "The amount of time to wait before you retry the request."]}
-    let context_ = "ThrottlingException"
-    let make ?quotaCode =
-      fun ?serviceCode ->
-        fun ?retryAfterSeconds ->
-          fun ~message ->
-            fun () -> { quotaCode; serviceCode; retryAfterSeconds; message }
+    let make ?message =
+      fun ?quotaCode ->
+        fun ?serviceCode ->
+          fun ?retryAfterSeconds ->
+            fun () -> { message; quotaCode; serviceCode; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("quotaCode", (Option.map x.quotaCode ~f:String_.to_value));
         ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value));
         ("Retry-After",
@@ -3574,16 +4033,16 @@ module ThrottlingException =
       let quotaCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaCode") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ?serviceCode ?quotaCode ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?serviceCode ?quotaCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
-      let serviceCode = field_map json "serviceCode" String_.of_json in
-      let quotaCode = field_map json "quotaCode" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ?serviceCode ?quotaCode ~message ()
+        field_map json__ "retryAfterSeconds" RetryAfterSeconds.of_json in
+      let serviceCode = field_map json__ "serviceCode" String_.of_json in
+      let quotaCode = field_map json__ "quotaCode" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?serviceCode ?quotaCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Your request exceeded a request rate quota. For example, you might have exceeded the amount of times that you can retrieve device or deployment status per second."]
@@ -3591,6 +4050,9 @@ module ComponentCandidateList =
   struct
     type nonrec t = ComponentCandidate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentCandidate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3616,6 +4078,9 @@ module InstalledComponentList =
   struct
     type nonrec t = InstalledComponent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstalledComponent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3668,10 +4133,35 @@ module DefaultMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module InstalledComponentTopologyFilter =
+  struct
+    type nonrec t =
+      | ALL 
+      | ROOT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ALL -> "ALL" | ROOT -> "ROOT" | Non_static_id s -> s
+    let of_string =
+      function | "ALL" -> ALL | "ROOT" -> ROOT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InstalledComponentTopologyFilter"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InstalledComponentTopologyFilter" j)
+    let to_json = simple_to_json to_value
+  end
 module EffectiveDeploymentsList =
   struct
     type nonrec t = EffectiveDeployment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EffectiveDeployment.to_value)) |>
         (fun x -> `List x)
@@ -3698,6 +4188,9 @@ module DeploymentList =
   struct
     type nonrec t = Deployment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Deployment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3749,6 +4242,9 @@ module CoreDevicesList =
   struct
     type nonrec t = CoreDevice.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoreDevice.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3769,28 +4265,13 @@ module CoreDevicesList =
       list_of_json ~kind:"CoreDevicesList" ~of_json:CoreDevice.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ThingGroupARN =
-  struct
-    type nonrec t = string
-    let context_ = "ThingGroupARN"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"arn:aws(-cn|-us-gov)?:iot:[^:]+:[0-9]+:thinggroup/.+");
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ThingGroupARN" j
-    let to_json = simple_to_json to_value
-  end
 module ComponentList =
   struct
     type nonrec t = Component.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Component.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3842,6 +4323,9 @@ module ComponentVersionList =
   struct
     type nonrec t = ComponentVersionListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentVersionListItem.to_value)) |>
         (fun x -> `List x)
@@ -3873,6 +4357,9 @@ module AssociatedClientDeviceList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssociatedClientDevice.to_value)) |>
         (fun x -> `List x)
@@ -3921,6 +4408,8 @@ module ComponentDeploymentSpecifications =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3968,13 +4457,13 @@ module DeploymentIoTJobConfiguration =
           (Xml.child xml_arg0 "jobExecutionsRolloutConfig") in
       make ?timeoutConfig ?abortConfig ?jobExecutionsRolloutConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeoutConfig =
-        field_map json "timeoutConfig" IoTJobTimeoutConfig.of_json in
+        field_map json__ "timeoutConfig" IoTJobTimeoutConfig.of_json in
       let abortConfig =
-        field_map json "abortConfig" IoTJobAbortConfig.of_json in
+        field_map json__ "abortConfig" IoTJobAbortConfig.of_json in
       let jobExecutionsRolloutConfig =
-        field_map json "jobExecutionsRolloutConfig"
+        field_map json__ "jobExecutionsRolloutConfig"
           IoTJobExecutionsRolloutConfig.of_json in
       make ?timeoutConfig ?abortConfig ?jobExecutionsRolloutConfig ()
     let to_json v = composed_to_json to_value v
@@ -4027,15 +4516,15 @@ module DeploymentPolicies =
       make ?configurationValidationPolicy ?componentUpdatePolicy
         ?failureHandlingPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationValidationPolicy =
-        field_map json "configurationValidationPolicy"
+        field_map json__ "configurationValidationPolicy"
           DeploymentConfigurationValidationPolicy.of_json in
       let componentUpdatePolicy =
-        field_map json "componentUpdatePolicy"
+        field_map json__ "componentUpdatePolicy"
           DeploymentComponentUpdatePolicy.of_json in
       let failureHandlingPolicy =
-        field_map json "failureHandlingPolicy"
+        field_map json__ "failureHandlingPolicy"
           DeploymentFailureHandlingPolicy.of_json in
       make ?configurationValidationPolicy ?componentUpdatePolicy
         ?failureHandlingPolicy ()
@@ -4055,42 +4544,6 @@ module NullableString =
     let of_json j = string_of_json ~kind:"NullableString" j
     let to_json = simple_to_json to_value
   end
-module CoreDeviceArchitectureString =
-  struct
-    type nonrec t = string
-    let context_ = "CoreDeviceArchitectureString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CoreDeviceArchitectureString" j
-    let to_json = simple_to_json to_value
-  end
-module CoreDevicePlatformString =
-  struct
-    type nonrec t = string
-    let context_ = "CoreDevicePlatformString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CoreDevicePlatformString" j
-    let to_json = simple_to_json to_value
-  end
 module GGCVersion =
   struct
     type nonrec t = string
@@ -4107,6 +4560,56 @@ module GGCVersion =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"GGCVersion" j
+    let to_json = simple_to_json to_value
+  end
+module IotEndpointType =
+  struct
+    type nonrec t =
+      | Fips 
+      | Standard 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Fips -> "fips"
+      | Standard -> "standard"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "fips" -> Fips
+      | "standard" -> Standard
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IotEndpointType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IotEndpointType" j)
+    let to_json = simple_to_json to_value
+  end
+module S3EndpointType =
+  struct
+    type nonrec t =
+      | REGIONAL 
+      | GLOBAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REGIONAL -> "REGIONAL"
+      | GLOBAL -> "GLOBAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REGIONAL" -> REGIONAL
+      | "GLOBAL" -> GLOBAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration S3EndpointType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"S3EndpointType" j)
     let to_json = simple_to_json to_value
   end
 module RecipeOutputFormat =
@@ -4134,24 +4637,50 @@ module CloudComponentStatus =
     type nonrec t =
       {
       componentState: CloudComponentState.t option
-        [@ocaml.doc "The state of the component."];
+        [@ocaml.doc "The state of the component version."];
       message: NonEmptyString.t option
         [@ocaml.doc
-          "A message that communicates details, such as errors, about the status of the component."];
+          "A message that communicates details, such as errors, about the status of the component version."];
       errors: StringMap.t option
         [@ocaml.doc
-          "A dictionary of errors that communicate why the component is in an error state. For example, if IoT Greengrass can't access an artifact for the component, then errors contains the artifact's URI as a key, and the error message as the value for that key."]}
+          "A dictionary of errors that communicate why the component version is in an error state. For example, if IoT Greengrass can't access an artifact for the component version, then errors contains the artifact's URI as a key, and the error message as the value for that key."];
+      vendorGuidance: VendorGuidance.t option
+        [@ocaml.doc
+          "The vendor guidance state for the component version. This state indicates whether the component version has any issues that you should consider before you deploy it. The vendor guidance state can be: ACTIVE \226\128\147 This component version is available and recommended for use. DISCONTINUED \226\128\147 This component version has been discontinued by its publisher. You can deploy this component version, but we recommend that you use a different version of this component. DELETED \226\128\147 This component version has been deleted by its publisher, so you can't deploy it. If you have any existing deployments that specify this component version, those deployments will fail."];
+      vendorGuidanceMessage: NonEmptyString.t option
+        [@ocaml.doc
+          "A message that communicates details about the vendor guidance state of the component version. This message communicates why a component version is discontinued or deleted."]}
     let make ?componentState =
       fun ?message ->
-        fun ?errors -> fun () -> { componentState; message; errors }
+        fun ?errors ->
+          fun ?vendorGuidance ->
+            fun ?vendorGuidanceMessage ->
+              fun () ->
+                {
+                  componentState;
+                  message;
+                  errors;
+                  vendorGuidance;
+                  vendorGuidanceMessage
+                }
     let to_value x =
       structure_to_value
         [("componentState",
            (Option.map x.componentState ~f:CloudComponentState.to_value));
         ("message", (Option.map x.message ~f:NonEmptyString.to_value));
-        ("errors", (Option.map x.errors ~f:StringMap.to_value))]
+        ("errors", (Option.map x.errors ~f:StringMap.to_value));
+        ("vendorGuidance",
+          (Option.map x.vendorGuidance ~f:VendorGuidance.to_value));
+        ("vendorGuidanceMessage",
+          (Option.map x.vendorGuidanceMessage ~f:NonEmptyString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let vendorGuidanceMessage =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "vendorGuidanceMessage") in
+      let vendorGuidance =
+        (Option.map ~f:VendorGuidance.of_xml)
+          (Xml.child xml_arg0 "vendorGuidance") in
       let errors =
         (Option.map ~f:StringMap.of_xml) (Xml.child xml_arg0 "errors") in
       let message =
@@ -4159,17 +4688,23 @@ module CloudComponentStatus =
       let componentState =
         (Option.map ~f:CloudComponentState.of_xml)
           (Xml.child xml_arg0 "componentState") in
-      make ?errors ?message ?componentState ()
+      make ?vendorGuidanceMessage ?vendorGuidance ?errors ?message
+        ?componentState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "errors" StringMap.of_json in
-      let message = field_map json "message" NonEmptyString.of_json in
+    let of_json json__ =
+      let vendorGuidanceMessage =
+        field_map json__ "vendorGuidanceMessage" NonEmptyString.of_json in
+      let vendorGuidance =
+        field_map json__ "vendorGuidance" VendorGuidance.of_json in
+      let errors = field_map json__ "errors" StringMap.of_json in
+      let message = field_map json__ "message" NonEmptyString.of_json in
       let componentState =
-        field_map json "componentState" CloudComponentState.of_json in
-      make ?errors ?message ?componentState ()
+        field_map json__ "componentState" CloudComponentState.of_json in
+      make ?vendorGuidanceMessage ?vendorGuidance ?errors ?message
+        ?componentState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the status of a component in the IoT Greengrass service."]
+       "Contains the status of a component version in the IoT Greengrass service."]
 module DescriptionString =
   struct
     type nonrec t = string
@@ -4199,20 +4734,20 @@ module PublisherString =
 module RequestAlreadyInProgressException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "RequestAlreadyInProgressException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request is already in progress. This exception occurs when you use a client token for multiple requests while IoT Greengrass is still processing an earlier request that uses the same client token."]
@@ -4236,57 +4771,73 @@ module ClientTokenString =
     let of_json j = string_of_json ~kind:"ClientTokenString" j
     let to_json = simple_to_json to_value
   end
+module DeploymentNameString =
+  struct
+    type nonrec t = string
+    let context_ = "DeploymentNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeploymentNameString" j
+    let to_json = simple_to_json to_value
+  end
 module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       resourceId: String_.t option
         [@ocaml.doc "The ID of the resource that exceeds the service quota."];
       resourceType: String_.t option
         [@ocaml.doc
           "The type of the resource that exceeds the service quota."];
-      quotaCode: String_.t
+      quotaCode: String_.t option
         [@ocaml.doc "The code for the quota in Service Quotas."];
-      serviceCode: String_.t
+      serviceCode: String_.t option
         [@ocaml.doc "The code for the service in Service Quotas."]}
-    let context_ = "ServiceQuotaExceededException"
-    let make ?resourceId =
-      fun ?resourceType ->
-        fun ~message ->
-          fun ~quotaCode ->
-            fun ~serviceCode ->
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?quotaCode ->
+            fun ?serviceCode ->
               fun () ->
-                { resourceId; resourceType; message; quotaCode; serviceCode }
+                { message; resourceId; resourceType; quotaCode; serviceCode }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
         ("resourceType", (Option.map x.resourceType ~f:String_.to_value));
-        ("quotaCode", (Some (String_.to_value x.quotaCode)));
-        ("serviceCode", (Some (String_.to_value x.serviceCode)))]
+        ("quotaCode", (Option.map x.quotaCode ~f:String_.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceCode =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceCode") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
       let quotaCode =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "quotaCode") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaCode") in
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~serviceCode ~quotaCode ?resourceType ?resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?serviceCode ?quotaCode ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map_exn json "serviceCode" String_.of_json in
-      let quotaCode = field_map_exn json "quotaCode" String_.of_json in
-      let resourceType = field_map json "resourceType" String_.of_json in
-      let resourceId = field_map json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~serviceCode ~quotaCode ?resourceType ?resourceId ~message ()
+    let of_json json__ =
+      let serviceCode = field_map json__ "serviceCode" String_.of_json in
+      let quotaCode = field_map json__ "quotaCode" String_.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?serviceCode ?quotaCode ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Your request exceeds a service quota. For example, you might have the maximum number of components that you can create."]
@@ -4294,7 +4845,7 @@ module LambdaFunctionRecipeSource =
   struct
     type nonrec t =
       {
-      lambdaArn: LambdaFunctionARNWithVersionNumber.t
+      lambdaArn: NonEmptyString.t
         [@ocaml.doc
           "The ARN of the Lambda function. The ARN must include the version of the function to import. You can't use version aliases like $LATEST."];
       componentName: ComponentNameString.t option
@@ -4329,8 +4880,7 @@ module LambdaFunctionRecipeSource =
                   }
     let to_value x =
       structure_to_value
-        [("lambdaArn",
-           (Some (LambdaFunctionARNWithVersionNumber.to_value x.lambdaArn)));
+        [("lambdaArn", (Some (NonEmptyString.to_value x.lambdaArn)));
         ("componentName",
           (Option.map x.componentName ~f:ComponentNameString.to_value));
         ("componentVersion",
@@ -4361,26 +4911,25 @@ module LambdaFunctionRecipeSource =
         (Option.map ~f:ComponentNameString.of_xml)
           (Xml.child xml_arg0 "componentName") in
       let lambdaArn =
-        LambdaFunctionARNWithVersionNumber.of_xml
+        NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "lambdaArn") in
       make ?componentLambdaParameters ?componentDependencies
         ?componentPlatforms ?componentVersion ?componentName ~lambdaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentLambdaParameters =
-        field_map json "componentLambdaParameters"
+        field_map json__ "componentLambdaParameters"
           LambdaExecutionParameters.of_json in
       let componentDependencies =
-        field_map json "componentDependencies" ComponentDependencyMap.of_json in
+        field_map json__ "componentDependencies"
+          ComponentDependencyMap.of_json in
       let componentPlatforms =
-        field_map json "componentPlatforms" ComponentPlatformList.of_json in
+        field_map json__ "componentPlatforms" ComponentPlatformList.of_json in
       let componentVersion =
-        field_map json "componentVersion" ComponentVersionString.of_json in
+        field_map json__ "componentVersion" ComponentVersionString.of_json in
       let componentName =
-        field_map json "componentName" ComponentNameString.of_json in
-      let lambdaArn =
-        field_map_exn json "lambdaArn"
-          LambdaFunctionARNWithVersionNumber.of_json in
+        field_map json__ "componentName" ComponentNameString.of_json in
+      let lambdaArn = field_map_exn json__ "lambdaArn" NonEmptyString.of_json in
       make ?componentLambdaParameters ?componentDependencies
         ?componentPlatforms ?componentVersion ?componentName ~lambdaArn ()
     let to_json v = composed_to_json to_value v
@@ -4390,11 +4939,10 @@ module DisassociateClientDeviceFromCoreDeviceErrorList =
   struct
     type nonrec t = DisassociateClientDeviceFromCoreDeviceErrorEntry.t list
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -4429,6 +4977,9 @@ module DisassociateClientDeviceFromCoreDeviceEntryList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:DisassociateClientDeviceFromCoreDeviceEntry.to_value))
@@ -4457,11 +5008,10 @@ module AssociateClientDeviceWithCoreDeviceErrorList =
   struct
     type nonrec t = AssociateClientDeviceWithCoreDeviceErrorEntry.t list
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:AssociateClientDeviceWithCoreDeviceErrorEntry.to_value))
@@ -4495,6 +5045,9 @@ module AssociateClientDeviceWithCoreDeviceEntryList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssociateClientDeviceWithCoreDeviceEntry.to_value))
         |> (fun x -> `List x)
@@ -4577,9 +5130,9 @@ module UpdateConnectivityInfoResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Version") in
       make ?message ?version ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let version = field_map json "version" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let version = field_map json__ "version" String_.of_json in
       make ?message ?version ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4611,11 +5164,11 @@ module UpdateConnectivityInfoRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ~connectivityInfo ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectivityInfo =
-        field_map_exn json "connectivityInfo" ConnectivityInfoList.of_json in
+        field_map_exn json__ "connectivityInfo" ConnectivityInfoList.of_json in
       let thingName =
-        field_map_exn json "thingName" CoreDeviceThingName.of_json in
+        field_map_exn json__ "thingName" CoreDeviceThingName.of_json in
       make ~connectivityInfo ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4702,9 +5255,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" GenericV2ARN.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" GenericV2ARN.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from an IoT Greengrass resource."]
@@ -4790,9 +5344,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" GenericV2ARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" GenericV2ARN.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4890,9 +5445,9 @@ module ResolveComponentCandidatesResponse =
           (Xml.child xml_arg0 "resolvedComponentVersions") in
       make ?resolvedComponentVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolvedComponentVersions =
-        field_map json "resolvedComponentVersions"
+        field_map json__ "resolvedComponentVersions"
           ResolvedComponentVersionsList.of_json in
       make ?resolvedComponentVersions ()
     let to_json v = composed_to_json to_value v
@@ -4902,34 +5457,33 @@ module ResolveComponentCandidatesRequest =
   struct
     type nonrec t =
       {
-      platform: ComponentPlatform.t
+      platform: ComponentPlatform.t option
         [@ocaml.doc "The platform to use to resolve compatible components."];
-      componentCandidates: ComponentCandidateList.t
+      componentCandidates: ComponentCandidateList.t option
         [@ocaml.doc "The list of components to resolve."]}
-    let context_ = "ResolveComponentCandidatesRequest"
-    let make ~platform =
-      fun ~componentCandidates -> fun () -> { platform; componentCandidates }
+    let make ?platform =
+      fun ?componentCandidates -> fun () -> { platform; componentCandidates }
     let to_value x =
       structure_to_value
-        [("platform", (Some (ComponentPlatform.to_value x.platform)));
+        [("platform", (Option.map x.platform ~f:ComponentPlatform.to_value));
         ("componentCandidates",
-          (Some (ComponentCandidateList.to_value x.componentCandidates)))]
+          (Option.map x.componentCandidates
+             ~f:ComponentCandidateList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let componentCandidates =
-        ComponentCandidateList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "componentCandidates") in
+        (Option.map ~f:ComponentCandidateList.of_xml)
+          (Xml.child xml_arg0 "componentCandidates") in
       let platform =
-        ComponentPlatform.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "platform") in
-      make ~componentCandidates ~platform ()
+        (Option.map ~f:ComponentPlatform.of_xml)
+          (Xml.child xml_arg0 "platform") in
+      make ?componentCandidates ?platform ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentCandidates =
-        field_map_exn json "componentCandidates"
-          ComponentCandidateList.of_json in
-      let platform = field_map_exn json "platform" ComponentPlatform.of_json in
-      make ~componentCandidates ~platform ()
+        field_map json__ "componentCandidates" ComponentCandidateList.of_json in
+      let platform = field_map json__ "platform" ComponentPlatform.of_json in
+      make ?componentCandidates ?platform ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of components that meet the component, version, and platform requirements of a deployment. Greengrass core devices call this operation when they receive a deployment to identify the components to install. This operation identifies components that meet all dependency requirements for a deployment. If the requirements conflict, then this operation returns an error and the deployment fails. For example, this occurs if component A requires version >2.0.0 and component B requires version <2.0.0 of a component dependency. When you specify the component candidates to resolve, IoT Greengrass compares each component's digest from the core device with the component's digest in the Amazon Web Services Cloud. If the digests don't match, then IoT Greengrass specifies to use the version from the Amazon Web Services Cloud. To use this operation, you must use the data plane API endpoint and authenticate with an IoT device certificate. For more information, see IoT Greengrass endpoints and quotas."]
@@ -4993,8 +5547,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the list of tags for an IoT Greengrass resource."]
@@ -5015,8 +5569,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" GenericV2ARN.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "resourceArn" GenericV2ARN.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5027,7 +5582,7 @@ module ListInstalledComponentsResponse =
       {
       installedComponents: InstalledComponentList.t option
         [@ocaml.doc
-          "A list that summarizes each component on the core device."];
+          "A list that summarizes each component on the core device. Greengrass nucleus v2.7.0 or later is required to get an accurate lastStatusChangeTimestamp response. This response can be inaccurate in earlier Greengrass nucleus versions. Greengrass nucleus v2.8.0 or later is required to get an accurate lastInstallationSource and lastReportedTimestamp response. This response can be inaccurate or null in earlier Greengrass nucleus versions."];
       nextToken: NextTokenString.t option
         [@ocaml.doc
           "The token for the next set of results, or null if there are no additional results."]}
@@ -5112,14 +5667,14 @@ module ListInstalledComponentsResponse =
           (Xml.child xml_arg0 "installedComponents") in
       make ?nextToken ?installedComponents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
       let installedComponents =
-        field_map json "installedComponents" InstalledComponentList.of_json in
+        field_map json__ "installedComponents" InstalledComponentList.of_json in
       make ?nextToken ?installedComponents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a paginated list of the components that a Greengrass core device runs."]
+       "Retrieves a paginated list of the components that a Greengrass core device runs. By default, this list doesn't include components that are deployed as dependencies of other components. To include dependencies in the response, set the topologyFilter parameter to ALL. IoT Greengrass relies on individual devices to send status updates to the Amazon Web Services Cloud. If the IoT Greengrass Core software isn't running on the device, or if device isn't connected to the Amazon Web Services Cloud, then the reported status of that device might not reflect its current status. The status timestamp indicates when the device status was last updated. Core devices send status updates at the following times: When the IoT Greengrass Core software starts When the core device receives a deployment from the Amazon Web Services Cloud When the status of any component on the core device becomes BROKEN At a regular interval that you can configure, which defaults to 24 hours For IoT Greengrass Core v2.7.0, the core device sends status updates upon local deployment and cloud deployment"]
 module ListInstalledComponentsRequest =
   struct
     type nonrec t =
@@ -5132,21 +5687,32 @@ module ListInstalledComponentsRequest =
           "The maximum number of results to be returned per paginated request."];
       nextToken: NextTokenString.t option
         [@ocaml.doc
-          "The token to be used for the next set of paginated results."]}
+          "The token to be used for the next set of paginated results."];
+      topologyFilter: InstalledComponentTopologyFilter.t option
+        [@ocaml.doc
+          "The filter for the list of components. Choose from the following options: ALL \226\128\147 The list includes all components installed on the core device. ROOT \226\128\147 The list includes only root components, which are components that you specify in a deployment. When you choose this option, the list doesn't include components that the core device installs as dependencies of other components. Default: ROOT"]}
     let context_ = "ListInstalledComponentsRequest"
     let make ?maxResults =
       fun ?nextToken ->
-        fun ~coreDeviceThingName ->
-          fun () -> { maxResults; nextToken; coreDeviceThingName }
+        fun ?topologyFilter ->
+          fun ~coreDeviceThingName ->
+            fun () ->
+              { maxResults; nextToken; topologyFilter; coreDeviceThingName }
     let to_value x =
       structure_to_value
         [("coreDeviceThingName",
            (Some (CoreDeviceThingName.to_value x.coreDeviceThingName)));
         ("maxResults",
           (Option.map x.maxResults ~f:DefaultMaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:NextTokenString.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:NextTokenString.to_value));
+        ("topologyFilter",
+          (Option.map x.topologyFilter
+             ~f:InstalledComponentTopologyFilter.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let topologyFilter =
+        (Option.map ~f:InstalledComponentTopologyFilter.of_xml)
+          (Xml.child xml_arg0 "topologyFilter") in
       let nextToken =
         (Option.map ~f:NextTokenString.of_xml)
           (Xml.child xml_arg0 "nextToken") in
@@ -5156,17 +5722,22 @@ module ListInstalledComponentsRequest =
       let coreDeviceThingName =
         CoreDeviceThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreDeviceThingName") in
-      make ?nextToken ?maxResults ~coreDeviceThingName ()
+      make ?topologyFilter ?nextToken ?maxResults ~coreDeviceThingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let maxResults = field_map json "maxResults" DefaultMaxResults.of_json in
+    let of_json json__ =
+      let topologyFilter =
+        field_map json__ "topologyFilter"
+          InstalledComponentTopologyFilter.of_json in
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let maxResults =
+        field_map json__ "maxResults" DefaultMaxResults.of_json in
       let coreDeviceThingName =
-        field_map_exn json "coreDeviceThingName" CoreDeviceThingName.of_json in
-      make ?nextToken ?maxResults ~coreDeviceThingName ()
+        field_map_exn json__ "coreDeviceThingName"
+          CoreDeviceThingName.of_json in
+      make ?topologyFilter ?nextToken ?maxResults ~coreDeviceThingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a paginated list of the components that a Greengrass core device runs."]
+       "Retrieves a paginated list of the components that a Greengrass core device runs. By default, this list doesn't include components that are deployed as dependencies of other components. To include dependencies in the response, set the topologyFilter parameter to ALL. IoT Greengrass relies on individual devices to send status updates to the Amazon Web Services Cloud. If the IoT Greengrass Core software isn't running on the device, or if device isn't connected to the Amazon Web Services Cloud, then the reported status of that device might not reflect its current status. The status timestamp indicates when the device status was last updated. Core devices send status updates at the following times: When the IoT Greengrass Core software starts When the core device receives a deployment from the Amazon Web Services Cloud When the status of any component on the core device becomes BROKEN At a regular interval that you can configure, which defaults to 24 hours For IoT Greengrass Core v2.7.0, the core device sends status updates upon local deployment and cloud deployment"]
 module ListEffectiveDeploymentsResponse =
   struct
     type nonrec t =
@@ -5258,10 +5829,10 @@ module ListEffectiveDeploymentsResponse =
           (Xml.child xml_arg0 "effectiveDeployments") in
       make ?nextToken ?effectiveDeployments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
       let effectiveDeployments =
-        field_map json "effectiveDeployments"
+        field_map json__ "effectiveDeployments"
           EffectiveDeploymentsList.of_json in
       make ?nextToken ?effectiveDeployments ()
     let to_json v = composed_to_json to_value v
@@ -5305,11 +5876,13 @@ module ListEffectiveDeploymentsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreDeviceThingName") in
       make ?nextToken ?maxResults ~coreDeviceThingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let maxResults = field_map json "maxResults" DefaultMaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let maxResults =
+        field_map json__ "maxResults" DefaultMaxResults.of_json in
       let coreDeviceThingName =
-        field_map_exn json "coreDeviceThingName" CoreDeviceThingName.of_json in
+        field_map_exn json__ "coreDeviceThingName"
+          CoreDeviceThingName.of_json in
       make ?nextToken ?maxResults ~coreDeviceThingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5394,9 +5967,9 @@ module ListDeploymentsResponse =
           (Xml.child xml_arg0 "deployments") in
       make ?nextToken ?deployments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let deployments = field_map json "deployments" DeploymentList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let deployments = field_map json__ "deployments" DeploymentList.of_json in
       make ?nextToken ?deployments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a paginated list of deployments."]
@@ -5409,22 +5982,35 @@ module ListDeploymentsRequest =
       historyFilter: DeploymentHistoryFilter.t option
         [@ocaml.doc
           "The filter for the list of deployments. Choose one of the following options: ALL \226\128\147 The list includes all deployments. LATEST_ONLY \226\128\147 The list includes only the latest revision of each deployment. Default: LATEST_ONLY"];
+      parentTargetArn: ThingGroupARN.t option
+        [@ocaml.doc
+          "The parent deployment's target ARN within a subdeployment."];
       maxResults: DefaultMaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to be returned per paginated request."];
+          "The maximum number of results to be returned per paginated request. Default: 50"];
       nextToken: NextTokenString.t option
         [@ocaml.doc
           "The token to be used for the next set of paginated results."]}
     let make ?targetArn =
       fun ?historyFilter ->
-        fun ?maxResults ->
-          fun ?nextToken ->
-            fun () -> { targetArn; historyFilter; maxResults; nextToken }
+        fun ?parentTargetArn ->
+          fun ?maxResults ->
+            fun ?nextToken ->
+              fun () ->
+                {
+                  targetArn;
+                  historyFilter;
+                  parentTargetArn;
+                  maxResults;
+                  nextToken
+                }
     let to_value x =
       structure_to_value
         [("targetArn", (Option.map x.targetArn ~f:TargetARN.to_value));
         ("historyFilter",
           (Option.map x.historyFilter ~f:DeploymentHistoryFilter.to_value));
+        ("parentTargetArn",
+          (Option.map x.parentTargetArn ~f:ThingGroupARN.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:DefaultMaxResults.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextTokenString.to_value))]
@@ -5436,20 +6022,28 @@ module ListDeploymentsRequest =
       let maxResults =
         (Option.map ~f:DefaultMaxResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
+      let parentTargetArn =
+        (Option.map ~f:ThingGroupARN.of_xml)
+          (Xml.child xml_arg0 "parentTargetArn") in
       let historyFilter =
         (Option.map ~f:DeploymentHistoryFilter.of_xml)
           (Xml.child xml_arg0 "historyFilter") in
       let targetArn =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "targetArn") in
-      make ?nextToken ?maxResults ?historyFilter ?targetArn ()
+      make ?nextToken ?maxResults ?parentTargetArn ?historyFilter ?targetArn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let maxResults = field_map json "maxResults" DefaultMaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let maxResults =
+        field_map json__ "maxResults" DefaultMaxResults.of_json in
+      let parentTargetArn =
+        field_map json__ "parentTargetArn" ThingGroupARN.of_json in
       let historyFilter =
-        field_map json "historyFilter" DeploymentHistoryFilter.of_json in
-      let targetArn = field_map json "targetArn" TargetARN.of_json in
-      make ?nextToken ?maxResults ?historyFilter ?targetArn ()
+        field_map json__ "historyFilter" DeploymentHistoryFilter.of_json in
+      let targetArn = field_map json__ "targetArn" TargetARN.of_json in
+      make ?nextToken ?maxResults ?parentTargetArn ?historyFilter ?targetArn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a paginated list of deployments."]
 module ListCoreDevicesResponse =
@@ -5532,19 +6126,21 @@ module ListCoreDevicesResponse =
           (Xml.child xml_arg0 "coreDevices") in
       make ?nextToken ?coreDevices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let coreDevices = field_map json "coreDevices" CoreDevicesList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let coreDevices =
+        field_map json__ "coreDevices" CoreDevicesList.of_json in
       make ?nextToken ?coreDevices ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves a paginated list of Greengrass core devices."]
+  end[@@ocaml.doc
+       "Retrieves a paginated list of Greengrass core devices. IoT Greengrass relies on individual devices to send status updates to the Amazon Web Services Cloud. If the IoT Greengrass Core software isn't running on the device, or if device isn't connected to the Amazon Web Services Cloud, then the reported status of that device might not reflect its current status. The status timestamp indicates when the device status was last updated. Core devices send status updates at the following times: When the IoT Greengrass Core software starts When the core device receives a deployment from the Amazon Web Services Cloud For Greengrass nucleus 2.12.2 and earlier, the core device sends status updates when the status of any component on the core device becomes ERRORED or BROKEN. For Greengrass nucleus 2.12.3 and later, the core device sends status updates when the status of any component on the core device becomes ERRORED, BROKEN, RUNNING, or FINISHED. At a regular interval that you can configure, which defaults to 24 hours For IoT Greengrass Core v2.7.0, the core device sends status updates upon local deployment and cloud deployment"]
 module ListCoreDevicesRequest =
   struct
     type nonrec t =
       {
       thingGroupArn: ThingGroupARN.t option
         [@ocaml.doc
-          "The ARN of the IoT thing group by which to filter. If you specify this parameter, the list includes only core devices that are members of this thing group."];
+          "The ARN of the IoT thing group by which to filter. If you specify this parameter, the list includes only core devices that have successfully deployed a deployment that targets the thing group. When you remove a core device from a thing group, the list continues to include that core device."];
       status: CoreDeviceStatus.t option
         [@ocaml.doc
           "The core device status by which to filter. If you specify this parameter, the list includes only core devices that have this status. Choose one of the following options: HEALTHY \226\128\147 The IoT Greengrass Core software and all components run on the core device without issue. UNHEALTHY \226\128\147 The IoT Greengrass Core software or a component is in a failed state on the core device."];
@@ -5553,12 +6149,17 @@ module ListCoreDevicesRequest =
           "The maximum number of results to be returned per paginated request."];
       nextToken: NextTokenString.t option
         [@ocaml.doc
-          "The token to be used for the next set of paginated results."]}
+          "The token to be used for the next set of paginated results."];
+      runtime: CoreDeviceRuntimeString.t option
+        [@ocaml.doc
+          "The runtime to be used by the core device. The runtime can be: aws_nucleus_classic aws_nucleus_lite"]}
     let make ?thingGroupArn =
       fun ?status ->
         fun ?maxResults ->
           fun ?nextToken ->
-            fun () -> { thingGroupArn; status; maxResults; nextToken }
+            fun ?runtime ->
+              fun () ->
+                { thingGroupArn; status; maxResults; nextToken; runtime }
     let to_value x =
       structure_to_value
         [("thingGroupArn",
@@ -5566,9 +6167,14 @@ module ListCoreDevicesRequest =
         ("status", (Option.map x.status ~f:CoreDeviceStatus.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:DefaultMaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:NextTokenString.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:NextTokenString.to_value));
+        ("runtime",
+          (Option.map x.runtime ~f:CoreDeviceRuntimeString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let runtime =
+        (Option.map ~f:CoreDeviceRuntimeString.of_xml)
+          (Xml.child xml_arg0 "runtime") in
       let nextToken =
         (Option.map ~f:NextTokenString.of_xml)
           (Xml.child xml_arg0 "nextToken") in
@@ -5580,17 +6186,21 @@ module ListCoreDevicesRequest =
       let thingGroupArn =
         (Option.map ~f:ThingGroupARN.of_xml)
           (Xml.child xml_arg0 "thingGroupArn") in
-      make ?nextToken ?maxResults ?status ?thingGroupArn ()
+      make ?runtime ?nextToken ?maxResults ?status ?thingGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let maxResults = field_map json "maxResults" DefaultMaxResults.of_json in
-      let status = field_map json "status" CoreDeviceStatus.of_json in
+    let of_json json__ =
+      let runtime =
+        field_map json__ "runtime" CoreDeviceRuntimeString.of_json in
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let maxResults =
+        field_map json__ "maxResults" DefaultMaxResults.of_json in
+      let status = field_map json__ "status" CoreDeviceStatus.of_json in
       let thingGroupArn =
-        field_map json "thingGroupArn" ThingGroupARN.of_json in
-      make ?nextToken ?maxResults ?status ?thingGroupArn ()
+        field_map json__ "thingGroupArn" ThingGroupARN.of_json in
+      make ?runtime ?nextToken ?maxResults ?status ?thingGroupArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves a paginated list of Greengrass core devices."]
+  end[@@ocaml.doc
+       "Retrieves a paginated list of Greengrass core devices. IoT Greengrass relies on individual devices to send status updates to the Amazon Web Services Cloud. If the IoT Greengrass Core software isn't running on the device, or if device isn't connected to the Amazon Web Services Cloud, then the reported status of that device might not reflect its current status. The status timestamp indicates when the device status was last updated. Core devices send status updates at the following times: When the IoT Greengrass Core software starts When the core device receives a deployment from the Amazon Web Services Cloud For Greengrass nucleus 2.12.2 and earlier, the core device sends status updates when the status of any component on the core device becomes ERRORED or BROKEN. For Greengrass nucleus 2.12.3 and later, the core device sends status updates when the status of any component on the core device becomes ERRORED, BROKEN, RUNNING, or FINISHED. At a regular interval that you can configure, which defaults to 24 hours For IoT Greengrass Core v2.7.0, the core device sends status updates upon local deployment and cloud deployment"]
 module ListComponentsResponse =
   struct
     type nonrec t =
@@ -5603,6 +6213,7 @@ module ListComponentsResponse =
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -5614,6 +6225,8 @@ module ListComponentsResponse =
           `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -5627,6 +6240,8 @@ module ListComponentsResponse =
           `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -5643,6 +6258,10 @@ module ListComponentsResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -5670,9 +6289,9 @@ module ListComponentsResponse =
           (Xml.child xml_arg0 "components") in
       make ?nextToken ?components ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let components = field_map json "components" ComponentList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let components = field_map json__ "components" ComponentList.of_json in
       make ?nextToken ?components ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5711,10 +6330,11 @@ module ListComponentsRequest =
           (Xml.child xml_arg0 "scope") in
       make ?nextToken ?maxResults ?scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let maxResults = field_map json "maxResults" DefaultMaxResults.of_json in
-      let scope = field_map json "scope" ComponentVisibilityScope.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let maxResults =
+        field_map json__ "maxResults" DefaultMaxResults.of_json in
+      let scope = field_map json__ "scope" ComponentVisibilityScope.of_json in
       make ?nextToken ?maxResults ?scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5808,10 +6428,10 @@ module ListComponentVersionsResponse =
           (Xml.child xml_arg0 "componentVersions") in
       make ?nextToken ?componentVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
       let componentVersions =
-        field_map json "componentVersions" ComponentVersionList.of_json in
+        field_map json__ "componentVersions" ComponentVersionList.of_json in
       make ?nextToken ?componentVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5820,7 +6440,7 @@ module ListComponentVersionsRequest =
   struct
     type nonrec t =
       {
-      arn: ComponentARN.t [@ocaml.doc "The ARN of the component version."];
+      arn: ComponentARN.t [@ocaml.doc "The ARN of the component."];
       maxResults: DefaultMaxResults.t option
         [@ocaml.doc
           "The maximum number of results to be returned per paginated request."];
@@ -5848,10 +6468,11 @@ module ListComponentVersionsRequest =
         ComponentARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ?maxResults ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let maxResults = field_map json "maxResults" DefaultMaxResults.of_json in
-      let arn = field_map_exn json "arn" ComponentARN.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let maxResults =
+        field_map json__ "maxResults" DefaultMaxResults.of_json in
+      let arn = field_map_exn json__ "arn" ComponentARN.of_json in
       make ?nextToken ?maxResults ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5947,10 +6568,10 @@ module ListClientDevicesAssociatedWithCoreDeviceResponse =
           (Xml.child xml_arg0 "associatedClientDevices") in
       make ?nextToken ?associatedClientDevices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
       let associatedClientDevices =
-        field_map json "associatedClientDevices"
+        field_map json__ "associatedClientDevices"
           AssociatedClientDeviceList.of_json in
       make ?nextToken ?associatedClientDevices ()
     let to_json v = composed_to_json to_value v
@@ -5994,11 +6615,12 @@ module ListClientDevicesAssociatedWithCoreDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreDeviceThingName") in
       make ?nextToken ?maxResults ~coreDeviceThingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextTokenString.of_json in
-      let maxResults = field_map json "maxResults" DefaultMaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextTokenString.of_json in
+      let maxResults =
+        field_map json__ "maxResults" DefaultMaxResults.of_json in
       let coreDeviceThingName =
-        field_map_exn json "coreDeviceThingName" IoTThingName.of_json in
+        field_map_exn json__ "coreDeviceThingName" IoTThingName.of_json in
       make ?nextToken ?maxResults ~coreDeviceThingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6054,9 +6676,9 @@ module GetServiceRoleForAccountResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AssociatedAt") in
       make ?roleArn ?associatedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "roleArn" String_.of_json in
-      let associatedAt = field_map json "associatedAt" String_.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "roleArn" String_.of_json in
+      let associatedAt = field_map json__ "associatedAt" String_.of_json in
       make ?roleArn ?associatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6109,6 +6731,9 @@ module GetDeploymentResponse =
       isLatestForTarget: IsLatestForTarget.t option
         [@ocaml.doc
           "Whether or not the deployment is the latest revision for its target."];
+      parentTargetArn: ThingGroupARN.t option
+        [@ocaml.doc
+          "The parent deployment's target ARN within a subdeployment."];
       tags: TagMap.t option
         [@ocaml.doc
           "A list of key-value pairs that contain metadata for the resource. For more information, see Tag your resources in the IoT Greengrass V2 Developer Guide."]}
@@ -6131,23 +6756,25 @@ module GetDeploymentResponse =
                       fun ?iotJobConfiguration ->
                         fun ?creationTimestamp ->
                           fun ?isLatestForTarget ->
-                            fun ?tags ->
-                              fun () ->
-                                {
-                                  targetArn;
-                                  revisionId;
-                                  deploymentId;
-                                  deploymentName;
-                                  deploymentStatus;
-                                  iotJobId;
-                                  iotJobArn;
-                                  components;
-                                  deploymentPolicies;
-                                  iotJobConfiguration;
-                                  creationTimestamp;
-                                  isLatestForTarget;
-                                  tags
-                                }
+                            fun ?parentTargetArn ->
+                              fun ?tags ->
+                                fun () ->
+                                  {
+                                    targetArn;
+                                    revisionId;
+                                    deploymentId;
+                                    deploymentName;
+                                    deploymentStatus;
+                                    iotJobId;
+                                    iotJobArn;
+                                    components;
+                                    deploymentPolicies;
+                                    iotJobConfiguration;
+                                    creationTimestamp;
+                                    isLatestForTarget;
+                                    parentTargetArn;
+                                    tags
+                                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6228,10 +6855,15 @@ module GetDeploymentResponse =
           (Option.map x.creationTimestamp ~f:Timestamp.to_value));
         ("isLatestForTarget",
           (Option.map x.isLatestForTarget ~f:IsLatestForTarget.to_value));
+        ("parentTargetArn",
+          (Option.map x.parentTargetArn ~f:ThingGroupARN.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let parentTargetArn =
+        (Option.map ~f:ThingGroupARN.of_xml)
+          (Xml.child xml_arg0 "parentTargetArn") in
       let isLatestForTarget =
         (Option.map ~f:IsLatestForTarget.of_xml)
           (Xml.child xml_arg0 "isLatestForTarget") in
@@ -6265,36 +6897,40 @@ module GetDeploymentResponse =
           (Xml.child xml_arg0 "revisionId") in
       let targetArn =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "targetArn") in
-      make ?tags ?isLatestForTarget ?creationTimestamp ?iotJobConfiguration
-        ?deploymentPolicies ?components ?iotJobArn ?iotJobId
-        ?deploymentStatus ?deploymentName ?deploymentId ?revisionId
+      make ?tags ?parentTargetArn ?isLatestForTarget ?creationTimestamp
+        ?iotJobConfiguration ?deploymentPolicies ?components ?iotJobArn
+        ?iotJobId ?deploymentStatus ?deploymentName ?deploymentId ?revisionId
         ?targetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let parentTargetArn =
+        field_map json__ "parentTargetArn" ThingGroupARN.of_json in
       let isLatestForTarget =
-        field_map json "isLatestForTarget" IsLatestForTarget.of_json in
+        field_map json__ "isLatestForTarget" IsLatestForTarget.of_json in
       let creationTimestamp =
-        field_map json "creationTimestamp" Timestamp.of_json in
+        field_map json__ "creationTimestamp" Timestamp.of_json in
       let iotJobConfiguration =
-        field_map json "iotJobConfiguration"
+        field_map json__ "iotJobConfiguration"
           DeploymentIoTJobConfiguration.of_json in
       let deploymentPolicies =
-        field_map json "deploymentPolicies" DeploymentPolicies.of_json in
+        field_map json__ "deploymentPolicies" DeploymentPolicies.of_json in
       let components =
-        field_map json "components" ComponentDeploymentSpecifications.of_json in
-      let iotJobArn = field_map json "iotJobArn" IoTJobARN.of_json in
-      let iotJobId = field_map json "iotJobId" NullableString.of_json in
+        field_map json__ "components"
+          ComponentDeploymentSpecifications.of_json in
+      let iotJobArn = field_map json__ "iotJobArn" IoTJobARN.of_json in
+      let iotJobId = field_map json__ "iotJobId" NullableString.of_json in
       let deploymentStatus =
-        field_map json "deploymentStatus" DeploymentStatus.of_json in
+        field_map json__ "deploymentStatus" DeploymentStatus.of_json in
       let deploymentName =
-        field_map json "deploymentName" NullableString.of_json in
-      let deploymentId = field_map json "deploymentId" NonEmptyString.of_json in
-      let revisionId = field_map json "revisionId" NonEmptyString.of_json in
-      let targetArn = field_map json "targetArn" TargetARN.of_json in
-      make ?tags ?isLatestForTarget ?creationTimestamp ?iotJobConfiguration
-        ?deploymentPolicies ?components ?iotJobArn ?iotJobId
-        ?deploymentStatus ?deploymentName ?deploymentId ?revisionId
+        field_map json__ "deploymentName" NullableString.of_json in
+      let deploymentId =
+        field_map json__ "deploymentId" NonEmptyString.of_json in
+      let revisionId = field_map json__ "revisionId" NonEmptyString.of_json in
+      let targetArn = field_map json__ "targetArn" TargetARN.of_json in
+      make ?tags ?parentTargetArn ?isLatestForTarget ?creationTimestamp
+        ?iotJobConfiguration ?deploymentPolicies ?components ?iotJobArn
+        ?iotJobId ?deploymentStatus ?deploymentName ?deploymentId ?revisionId
         ?targetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6316,9 +6952,9 @@ module GetDeploymentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentId =
-        field_map_exn json "deploymentId" NonEmptyString.of_json in
+        field_map_exn json__ "deploymentId" NonEmptyString.of_json in
       make ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6338,6 +6974,9 @@ module GetCoreDeviceResponse =
           "The operating system platform that the core device runs."];
       architecture: CoreDeviceArchitectureString.t option
         [@ocaml.doc "The computer architecture of the core device."];
+      runtime: CoreDeviceRuntimeString.t option
+        [@ocaml.doc
+          "The runtime for the core device. The runtime can be: aws_nucleus_classic aws_nucleus_lite"];
       status: CoreDeviceStatus.t option
         [@ocaml.doc
           "The status of the core device. The core device status can be: HEALTHY \226\128\147 The IoT Greengrass Core software and all components run on the core device without issue. UNHEALTHY \226\128\147 The IoT Greengrass Core software or a component is in a failed state on the core device."];
@@ -6358,19 +6997,21 @@ module GetCoreDeviceResponse =
       fun ?coreVersion ->
         fun ?platform ->
           fun ?architecture ->
-            fun ?status ->
-              fun ?lastStatusUpdateTimestamp ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      coreDeviceThingName;
-                      coreVersion;
-                      platform;
-                      architecture;
-                      status;
-                      lastStatusUpdateTimestamp;
-                      tags
-                    }
+            fun ?runtime ->
+              fun ?status ->
+                fun ?lastStatusUpdateTimestamp ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        coreDeviceThingName;
+                        coreVersion;
+                        platform;
+                        architecture;
+                        runtime;
+                        status;
+                        lastStatusUpdateTimestamp;
+                        tags
+                      }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6436,6 +7077,8 @@ module GetCoreDeviceResponse =
           (Option.map x.platform ~f:CoreDevicePlatformString.to_value));
         ("architecture",
           (Option.map x.architecture ~f:CoreDeviceArchitectureString.to_value));
+        ("runtime",
+          (Option.map x.runtime ~f:CoreDeviceRuntimeString.to_value));
         ("status", (Option.map x.status ~f:CoreDeviceStatus.to_value));
         ("lastStatusUpdateTimestamp",
           (Option.map x.lastStatusUpdateTimestamp ~f:Timestamp.to_value));
@@ -6448,6 +7091,9 @@ module GetCoreDeviceResponse =
           (Xml.child xml_arg0 "lastStatusUpdateTimestamp") in
       let status =
         (Option.map ~f:CoreDeviceStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let runtime =
+        (Option.map ~f:CoreDeviceRuntimeString.of_xml)
+          (Xml.child xml_arg0 "runtime") in
       let architecture =
         (Option.map ~f:CoreDeviceArchitectureString.of_xml)
           (Xml.child xml_arg0 "architecture") in
@@ -6459,25 +7105,28 @@ module GetCoreDeviceResponse =
       let coreDeviceThingName =
         (Option.map ~f:CoreDeviceThingName.of_xml)
           (Xml.child xml_arg0 "coreDeviceThingName") in
-      make ?tags ?lastStatusUpdateTimestamp ?status ?architecture ?platform
-        ?coreVersion ?coreDeviceThingName ()
+      make ?tags ?lastStatusUpdateTimestamp ?status ?runtime ?architecture
+        ?platform ?coreVersion ?coreDeviceThingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let lastStatusUpdateTimestamp =
-        field_map json "lastStatusUpdateTimestamp" Timestamp.of_json in
-      let status = field_map json "status" CoreDeviceStatus.of_json in
+        field_map json__ "lastStatusUpdateTimestamp" Timestamp.of_json in
+      let status = field_map json__ "status" CoreDeviceStatus.of_json in
+      let runtime =
+        field_map json__ "runtime" CoreDeviceRuntimeString.of_json in
       let architecture =
-        field_map json "architecture" CoreDeviceArchitectureString.of_json in
+        field_map json__ "architecture" CoreDeviceArchitectureString.of_json in
       let platform =
-        field_map json "platform" CoreDevicePlatformString.of_json in
-      let coreVersion = field_map json "coreVersion" GGCVersion.of_json in
+        field_map json__ "platform" CoreDevicePlatformString.of_json in
+      let coreVersion = field_map json__ "coreVersion" GGCVersion.of_json in
       let coreDeviceThingName =
-        field_map json "coreDeviceThingName" CoreDeviceThingName.of_json in
-      make ?tags ?lastStatusUpdateTimestamp ?status ?architecture ?platform
-        ?coreVersion ?coreDeviceThingName ()
+        field_map json__ "coreDeviceThingName" CoreDeviceThingName.of_json in
+      make ?tags ?lastStatusUpdateTimestamp ?status ?runtime ?architecture
+        ?platform ?coreVersion ?coreDeviceThingName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves metadata for a Greengrass core device."]
+  end[@@ocaml.doc
+       "Retrieves metadata for a Greengrass core device. IoT Greengrass relies on individual devices to send status updates to the Amazon Web Services Cloud. If the IoT Greengrass Core software isn't running on the device, or if device isn't connected to the Amazon Web Services Cloud, then the reported status of that device might not reflect its current status. The status timestamp indicates when the device status was last updated. Core devices send status updates at the following times: When the IoT Greengrass Core software starts When the core device receives a deployment from the Amazon Web Services Cloud When the status of any component on the core device becomes BROKEN At a regular interval that you can configure, which defaults to 24 hours For IoT Greengrass Core v2.7.0, the core device sends status updates upon local deployment and cloud deployment"]
 module GetCoreDeviceRequest =
   struct
     type nonrec t =
@@ -6498,12 +7147,14 @@ module GetCoreDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreDeviceThingName") in
       make ~coreDeviceThingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreDeviceThingName =
-        field_map_exn json "coreDeviceThingName" CoreDeviceThingName.of_json in
+        field_map_exn json__ "coreDeviceThingName"
+          CoreDeviceThingName.of_json in
       make ~coreDeviceThingName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves metadata for a Greengrass core device."]
+  end[@@ocaml.doc
+       "Retrieves metadata for a Greengrass core device. IoT Greengrass relies on individual devices to send status updates to the Amazon Web Services Cloud. If the IoT Greengrass Core software isn't running on the device, or if device isn't connected to the Amazon Web Services Cloud, then the reported status of that device might not reflect its current status. The status timestamp indicates when the device status was last updated. Core devices send status updates at the following times: When the IoT Greengrass Core software starts When the core device receives a deployment from the Amazon Web Services Cloud When the status of any component on the core device becomes BROKEN At a regular interval that you can configure, which defaults to 24 hours For IoT Greengrass Core v2.7.0, the core device sends status updates upon local deployment and cloud deployment"]
 module GetConnectivityInfoResponse =
   struct
     type nonrec t =
@@ -6564,10 +7215,10 @@ module GetConnectivityInfoResponse =
           (Xml.child xml_arg0 "ConnectivityInfo") in
       make ?message ?connectivityInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       let connectivityInfo =
-        field_map json "connectivityInfo" ConnectivityInfoList.of_json in
+        field_map json__ "connectivityInfo" ConnectivityInfoList.of_json in
       make ?message ?connectivityInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6591,9 +7242,9 @@ module GetConnectivityInfoRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thingName =
-        field_map_exn json "thingName" CoreDeviceThingName.of_json in
+        field_map_exn json__ "thingName" CoreDeviceThingName.of_json in
       make ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6602,7 +7253,8 @@ module GetComponentVersionArtifactResponse =
   struct
     type nonrec t =
       {
-      preSignedUrl: NonEmptyString.t [@ocaml.doc "The URL of the artifact."]}
+      preSignedUrl: NonEmptyString.t option
+        [@ocaml.doc "The URL of the artifact."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -6610,8 +7262,7 @@ module GetComponentVersionArtifactResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetComponentVersionArtifactResponse"
-    let make ~preSignedUrl = fun () -> { preSignedUrl }
+    let make ?preSignedUrl = fun () -> { preSignedUrl }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6670,62 +7321,87 @@ module GetComponentVersionArtifactResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("preSignedUrl", (Some (NonEmptyString.to_value x.preSignedUrl)))]
+        [("preSignedUrl",
+           (Option.map x.preSignedUrl ~f:NonEmptyString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let preSignedUrl =
-        NonEmptyString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "preSignedUrl") in
-      make ~preSignedUrl ()
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "preSignedUrl") in
+      make ?preSignedUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let preSignedUrl =
-        field_map_exn json "preSignedUrl" NonEmptyString.of_json in
-      make ~preSignedUrl ()
+        field_map json__ "preSignedUrl" NonEmptyString.of_json in
+      make ?preSignedUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the pre-signed URL to download a public component artifact. Core devices call this operation to identify the URL that they can use to download an artifact to install."]
+       "Gets the pre-signed URL to download a public or a Lambda component artifact. Core devices call this operation to identify the URL that they can use to download an artifact to install."]
 module GetComponentVersionArtifactRequest =
   struct
     type nonrec t =
       {
       arn: ComponentVersionARN.t
         [@ocaml.doc
-          "The ARN of the component version. Specify the ARN of a public component version."];
+          "The ARN of the component version. Specify the ARN of a public or a Lambda component version."];
       artifactName: NonEmptyString.t
         [@ocaml.doc
-          "The name of the artifact. You can use the GetComponent operation to download the component recipe, which includes the URI of the artifact. The artifact name is the section of the URI after the scheme. For example, in the artifact URI greengrass:SomeArtifact.zip, the artifact name is SomeArtifact.zip."]}
+          "The name of the artifact. You can use the GetComponent operation to download the component recipe, which includes the URI of the artifact. The artifact name is the section of the URI after the scheme. For example, in the artifact URI greengrass:SomeArtifact.zip, the artifact name is SomeArtifact.zip."];
+      s3EndpointType: S3EndpointType.t option
+        [@ocaml.doc
+          "Specifies the endpoint to use when getting Amazon S3 pre-signed URLs. All Amazon Web Services Regions except US East (N. Virginia) use REGIONAL in all cases. In the US East (N. Virginia) Region the default is GLOBAL, but you can change it to REGIONAL with this parameter."];
+      iotEndpointType: IotEndpointType.t option
+        [@ocaml.doc
+          "Determines if the Amazon S3 URL returned is a FIPS pre-signed URL endpoint. Specify fips if you want the returned Amazon S3 pre-signed URL to point to an Amazon S3 FIPS endpoint. If you don't specify a value, the default is standard."]}
     let context_ = "GetComponentVersionArtifactRequest"
-    let make ~arn = fun ~artifactName -> fun () -> { arn; artifactName }
+    let make ?s3EndpointType =
+      fun ?iotEndpointType ->
+        fun ~arn ->
+          fun ~artifactName ->
+            fun () -> { s3EndpointType; iotEndpointType; arn; artifactName }
     let to_value x =
       structure_to_value
         [("arn", (Some (ComponentVersionARN.to_value x.arn)));
-        ("artifactName", (Some (NonEmptyString.to_value x.artifactName)))]
+        ("artifactName", (Some (NonEmptyString.to_value x.artifactName)));
+        ("s3EndpointType",
+          (Option.map x.s3EndpointType ~f:S3EndpointType.to_value));
+        ("x-amz-iot-endpoint-type",
+          (Option.map x.iotEndpointType ~f:IotEndpointType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let iotEndpointType =
+        (Option.map ~f:IotEndpointType.of_xml)
+          (Xml.child xml_arg0 "x-amz-iot-endpoint-type") in
+      let s3EndpointType =
+        (Option.map ~f:S3EndpointType.of_xml)
+          (Xml.child xml_arg0 "s3EndpointType") in
       let artifactName =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "artifactName") in
       let arn =
         ComponentVersionARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~artifactName ~arn ()
+      make ?iotEndpointType ?s3EndpointType ~artifactName ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let iotEndpointType =
+        field_map json__ "iotEndpointType" IotEndpointType.of_json in
+      let s3EndpointType =
+        field_map json__ "s3EndpointType" S3EndpointType.of_json in
       let artifactName =
-        field_map_exn json "artifactName" NonEmptyString.of_json in
-      let arn = field_map_exn json "arn" ComponentVersionARN.of_json in
-      make ~artifactName ~arn ()
+        field_map_exn json__ "artifactName" NonEmptyString.of_json in
+      let arn = field_map_exn json__ "arn" ComponentVersionARN.of_json in
+      make ?iotEndpointType ?s3EndpointType ~artifactName ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the pre-signed URL to download a public component artifact. Core devices call this operation to identify the URL that they can use to download an artifact to install."]
+       "Gets the pre-signed URL to download a public or a Lambda component artifact. Core devices call this operation to identify the URL that they can use to download an artifact to install."]
 module GetComponentResponse =
   struct
     type nonrec t =
       {
-      recipeOutputFormat: RecipeOutputFormat.t
+      recipeOutputFormat: RecipeOutputFormat.t option
         [@ocaml.doc "The format of the recipe."];
-      recipe: RecipeBlob.t
+      recipe: RecipeBlob.t option
         [@ocaml.doc "The recipe of the component version."];
       tags: TagMap.t option
         [@ocaml.doc
@@ -6737,10 +7413,9 @@ module GetComponentResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetComponentResponse"
-    let make ?tags =
-      fun ~recipeOutputFormat ->
-        fun ~recipe -> fun () -> { tags; recipeOutputFormat; recipe }
+    let make ?recipeOutputFormat =
+      fun ?recipe ->
+        fun ?tags -> fun () -> { recipeOutputFormat; recipe; tags }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6800,28 +7475,27 @@ module GetComponentResponse =
     let to_value x =
       structure_to_value
         [("recipeOutputFormat",
-           (Some (RecipeOutputFormat.to_value x.recipeOutputFormat)));
-        ("recipe", (Some (RecipeBlob.to_value x.recipe)));
+           (Option.map x.recipeOutputFormat ~f:RecipeOutputFormat.to_value));
+        ("recipe", (Option.map x.recipe ~f:RecipeBlob.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let recipe =
-        RecipeBlob.of_xml (Xml.child_exn ~context:context_ xml_arg0 "recipe") in
+        (Option.map ~f:RecipeBlob.of_xml) (Xml.child xml_arg0 "recipe") in
       let recipeOutputFormat =
-        RecipeOutputFormat.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recipeOutputFormat") in
-      make ?tags ~recipe ~recipeOutputFormat ()
+        (Option.map ~f:RecipeOutputFormat.of_xml)
+          (Xml.child xml_arg0 "recipeOutputFormat") in
+      make ?tags ?recipe ?recipeOutputFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let recipe = field_map_exn json "recipe" RecipeBlob.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let recipe = field_map json__ "recipe" RecipeBlob.of_json in
       let recipeOutputFormat =
-        field_map_exn json "recipeOutputFormat" RecipeOutputFormat.of_json in
-      make ?tags ~recipe ~recipeOutputFormat ()
+        field_map json__ "recipeOutputFormat" RecipeOutputFormat.of_json in
+      make ?tags ?recipe ?recipeOutputFormat ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Gets the recipe for a version of a component. Core devices can call this operation to identify the artifacts and requirements to install a component."]
+  end[@@ocaml.doc "Gets the recipe for a version of a component."]
 module GetComponentRequest =
   struct
     type nonrec t =
@@ -6848,14 +7522,13 @@ module GetComponentRequest =
           (Xml.child xml_arg0 "recipeOutputFormat") in
       make ~arn ?recipeOutputFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" ComponentVersionARN.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" ComponentVersionARN.of_json in
       let recipeOutputFormat =
-        field_map json "recipeOutputFormat" RecipeOutputFormat.of_json in
+        field_map json__ "recipeOutputFormat" RecipeOutputFormat.of_json in
       make ~arn ?recipeOutputFormat ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Gets the recipe for a version of a component. Core devices can call this operation to identify the artifacts and requirements to install a component."]
+  end[@@ocaml.doc "Gets the recipe for a version of a component."]
 module DisassociateServiceRoleFromAccountResponse =
   struct
     type nonrec t =
@@ -6901,8 +7574,9 @@ module DisassociateServiceRoleFromAccountResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DisassociatedAt") in
       make ?disassociatedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let disassociatedAt = field_map json "disassociatedAt" String_.of_json in
+    let of_json json__ =
+      let disassociatedAt =
+        field_map json__ "disassociatedAt" String_.of_json in
       make ?disassociatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7074,21 +7748,21 @@ module DescribeComponentResponse =
       make ?tags ?platforms ?status ?description ?publisher
         ?creationTimestamp ?componentVersion ?componentName ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let platforms =
-        field_map json "platforms" ComponentPlatformList.of_json in
-      let status = field_map json "status" CloudComponentStatus.of_json in
+        field_map json__ "platforms" ComponentPlatformList.of_json in
+      let status = field_map json__ "status" CloudComponentStatus.of_json in
       let description =
-        field_map json "description" DescriptionString.of_json in
-      let publisher = field_map json "publisher" PublisherString.of_json in
+        field_map json__ "description" DescriptionString.of_json in
+      let publisher = field_map json__ "publisher" PublisherString.of_json in
       let creationTimestamp =
-        field_map json "creationTimestamp" Timestamp.of_json in
+        field_map json__ "creationTimestamp" Timestamp.of_json in
       let componentVersion =
-        field_map json "componentVersion" ComponentVersionString.of_json in
+        field_map json__ "componentVersion" ComponentVersionString.of_json in
       let componentName =
-        field_map json "componentName" ComponentNameString.of_json in
-      let arn = field_map json "arn" ComponentVersionARN.of_json in
+        field_map json__ "componentName" ComponentNameString.of_json in
+      let arn = field_map json__ "arn" ComponentVersionARN.of_json in
       make ?tags ?platforms ?status ?description ?publisher
         ?creationTimestamp ?componentVersion ?componentName ?arn ()
     let to_json v = composed_to_json to_value v
@@ -7111,11 +7785,35 @@ module DescribeComponentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" ComponentVersionARN.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" ComponentVersionARN.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves metadata for a version of a component."]
+module DeleteDeploymentRequest =
+  struct
+    type nonrec t =
+      {
+      deploymentId: NonEmptyString.t [@ocaml.doc "The ID of the deployment."]}
+    let context_ = "DeleteDeploymentRequest"
+    let make ~deploymentId = fun () -> { deploymentId }
+    let to_value x =
+      structure_to_value
+        [("deploymentId", (Some (NonEmptyString.to_value x.deploymentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deploymentId =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
+      make ~deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deploymentId =
+        field_map_exn json__ "deploymentId" NonEmptyString.of_json in
+      make ~deploymentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a deployment. To delete an active deployment, you must first cancel it. For more information, see CancelDeployment. Deleting a deployment doesn't affect core devices that run that deployment, because core devices store the deployment's configuration on the device. Additionally, core devices can roll back to a previous deployment that has been deleted."]
 module DeleteCoreDeviceRequest =
   struct
     type nonrec t =
@@ -7136,9 +7834,10 @@ module DeleteCoreDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreDeviceThingName") in
       make ~coreDeviceThingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreDeviceThingName =
-        field_map_exn json "coreDeviceThingName" CoreDeviceThingName.of_json in
+        field_map_exn json__ "coreDeviceThingName"
+          CoreDeviceThingName.of_json in
       make ~coreDeviceThingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7161,8 +7860,8 @@ module DeleteComponentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" ComponentVersionARN.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" ComponentVersionARN.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7181,6 +7880,7 @@ module CreateDeploymentResponse =
           "The ARN of the IoT job that applies the deployment to target devices."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `RequestAlreadyInProgressException of
           RequestAlreadyInProgressException.t 
@@ -7195,6 +7895,8 @@ module CreateDeploymentResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "RequestAlreadyInProgressException" ->
@@ -7213,6 +7915,8 @@ module CreateDeploymentResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "RequestAlreadyInProgressException" ->
@@ -7232,6 +7936,10 @@ module CreateDeploymentResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -7274,10 +7982,11 @@ module CreateDeploymentResponse =
           (Xml.child xml_arg0 "deploymentId") in
       make ?iotJobArn ?iotJobId ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iotJobArn = field_map json "iotJobArn" IoTJobARN.of_json in
-      let iotJobId = field_map json "iotJobId" NonEmptyString.of_json in
-      let deploymentId = field_map json "deploymentId" NonEmptyString.of_json in
+    let of_json json__ =
+      let iotJobArn = field_map json__ "iotJobArn" IoTJobARN.of_json in
+      let iotJobId = field_map json__ "iotJobId" NonEmptyString.of_json in
+      let deploymentId =
+        field_map json__ "deploymentId" NonEmptyString.of_json in
       make ?iotJobArn ?iotJobId ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7287,8 +7996,9 @@ module CreateDeploymentRequest =
     type nonrec t =
       {
       targetArn: TargetARN.t
-        [@ocaml.doc "The ARN of the target IoT thing or thing group."];
-      deploymentName: NonEmptyString.t option
+        [@ocaml.doc
+          "The ARN of the target IoT thing or thing group. When creating a subdeployment, the targetARN can only be a thing group."];
+      deploymentName: DeploymentNameString.t option
         [@ocaml.doc "The name of the deployment."];
       components: ComponentDeploymentSpecifications.t option
         [@ocaml.doc
@@ -7299,6 +8009,9 @@ module CreateDeploymentRequest =
       deploymentPolicies: DeploymentPolicies.t option
         [@ocaml.doc
           "The deployment policies for the deployment. These policies define how the deployment updates components and handles failure."];
+      parentTargetArn: ThingGroupARN.t option
+        [@ocaml.doc
+          "The parent deployment's target ARN within a subdeployment."];
       tags: TagMap.t option
         [@ocaml.doc
           "A list of key-value pairs that contain metadata for the resource. For more information, see Tag your resources in the IoT Greengrass V2 Developer Guide."];
@@ -7310,24 +8023,26 @@ module CreateDeploymentRequest =
       fun ?components ->
         fun ?iotJobConfiguration ->
           fun ?deploymentPolicies ->
-            fun ?tags ->
-              fun ?clientToken ->
-                fun ~targetArn ->
-                  fun () ->
-                    {
-                      deploymentName;
-                      components;
-                      iotJobConfiguration;
-                      deploymentPolicies;
-                      tags;
-                      clientToken;
-                      targetArn
-                    }
+            fun ?parentTargetArn ->
+              fun ?tags ->
+                fun ?clientToken ->
+                  fun ~targetArn ->
+                    fun () ->
+                      {
+                        deploymentName;
+                        components;
+                        iotJobConfiguration;
+                        deploymentPolicies;
+                        parentTargetArn;
+                        tags;
+                        clientToken;
+                        targetArn
+                      }
     let to_value x =
       structure_to_value
         [("targetArn", (Some (TargetARN.to_value x.targetArn)));
         ("deploymentName",
-          (Option.map x.deploymentName ~f:NonEmptyString.to_value));
+          (Option.map x.deploymentName ~f:DeploymentNameString.to_value));
         ("components",
           (Option.map x.components
              ~f:ComponentDeploymentSpecifications.to_value));
@@ -7336,6 +8051,8 @@ module CreateDeploymentRequest =
              ~f:DeploymentIoTJobConfiguration.to_value));
         ("deploymentPolicies",
           (Option.map x.deploymentPolicies ~f:DeploymentPolicies.to_value));
+        ("parentTargetArn",
+          (Option.map x.parentTargetArn ~f:ThingGroupARN.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
         ("clientToken",
           (Option.map x.clientToken ~f:ClientTokenString.to_value))]
@@ -7345,6 +8062,9 @@ module CreateDeploymentRequest =
         (Option.map ~f:ClientTokenString.of_xml)
           (Xml.child xml_arg0 "clientToken") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let parentTargetArn =
+        (Option.map ~f:ThingGroupARN.of_xml)
+          (Xml.child xml_arg0 "parentTargetArn") in
       let deploymentPolicies =
         (Option.map ~f:DeploymentPolicies.of_xml)
           (Xml.child xml_arg0 "deploymentPolicies") in
@@ -7355,30 +8075,33 @@ module CreateDeploymentRequest =
         (Option.map ~f:ComponentDeploymentSpecifications.of_xml)
           (Xml.child xml_arg0 "components") in
       let deploymentName =
-        (Option.map ~f:NonEmptyString.of_xml)
+        (Option.map ~f:DeploymentNameString.of_xml)
           (Xml.child xml_arg0 "deploymentName") in
       let targetArn =
         TargetARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetArn") in
-      make ?clientToken ?tags ?deploymentPolicies ?iotJobConfiguration
-        ?components ?deploymentName ~targetArn ()
+      make ?clientToken ?tags ?parentTargetArn ?deploymentPolicies
+        ?iotJobConfiguration ?components ?deploymentName ~targetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientToken =
-        field_map json "clientToken" ClientTokenString.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+        field_map json__ "clientToken" ClientTokenString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let parentTargetArn =
+        field_map json__ "parentTargetArn" ThingGroupARN.of_json in
       let deploymentPolicies =
-        field_map json "deploymentPolicies" DeploymentPolicies.of_json in
+        field_map json__ "deploymentPolicies" DeploymentPolicies.of_json in
       let iotJobConfiguration =
-        field_map json "iotJobConfiguration"
+        field_map json__ "iotJobConfiguration"
           DeploymentIoTJobConfiguration.of_json in
       let components =
-        field_map json "components" ComponentDeploymentSpecifications.of_json in
+        field_map json__ "components"
+          ComponentDeploymentSpecifications.of_json in
       let deploymentName =
-        field_map json "deploymentName" NonEmptyString.of_json in
-      let targetArn = field_map_exn json "targetArn" TargetARN.of_json in
-      make ?clientToken ?tags ?deploymentPolicies ?iotJobConfiguration
-        ?components ?deploymentName ~targetArn ()
+        field_map json__ "deploymentName" DeploymentNameString.of_json in
+      let targetArn = field_map_exn json__ "targetArn" TargetARN.of_json in
+      make ?clientToken ?tags ?parentTargetArn ?deploymentPolicies
+        ?iotJobConfiguration ?components ?deploymentName ~targetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a continuous deployment for a target, which is a Greengrass core device or group of core devices. When you add a new core device to a group of core devices that has a deployment, IoT Greengrass deploys that group's deployment to the new device. You can define one deployment for each target. When you create a new deployment for a target that has an existing deployment, you replace the previous deployment. IoT Greengrass applies the new deployment to the target devices. Every deployment has a revision number that indicates how many deployment revisions you define for a target. Use this operation to create a new revision of an existing deployment. For more information, see the Create deployments in the IoT Greengrass V2 Developer Guide."]
@@ -7388,14 +8111,14 @@ module CreateComponentVersionResponse =
       {
       arn: ComponentVersionARN.t option
         [@ocaml.doc "The ARN of the component version."];
-      componentName: ComponentNameString.t
+      componentName: ComponentNameString.t option
         [@ocaml.doc "The name of the component."];
-      componentVersion: ComponentVersionString.t
+      componentVersion: ComponentVersionString.t option
         [@ocaml.doc "The version of the component."];
-      creationTimestamp: Timestamp.t
+      creationTimestamp: Timestamp.t option
         [@ocaml.doc
           "The time at which the component was created, expressed in ISO 8601 format."];
-      status: CloudComponentStatus.t
+      status: CloudComponentStatus.t option
         [@ocaml.doc
           "The status of the component version in IoT Greengrass V2. This status is different from the status of the component on a core device."]}
     type nonrec error =
@@ -7408,12 +8131,11 @@ module CreateComponentVersionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateComponentVersionResponse"
     let make ?arn =
-      fun ~componentName ->
-        fun ~componentVersion ->
-          fun ~creationTimestamp ->
-            fun ~status ->
+      fun ?componentName ->
+        fun ?componentVersion ->
+          fun ?creationTimestamp ->
+            fun ?status ->
               fun () ->
                 {
                   arn;
@@ -7502,45 +8224,45 @@ module CreateComponentVersionResponse =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ComponentVersionARN.to_value));
         ("componentName",
-          (Some (ComponentNameString.to_value x.componentName)));
+          (Option.map x.componentName ~f:ComponentNameString.to_value));
         ("componentVersion",
-          (Some (ComponentVersionString.to_value x.componentVersion)));
+          (Option.map x.componentVersion ~f:ComponentVersionString.to_value));
         ("creationTimestamp",
-          (Some (Timestamp.to_value x.creationTimestamp)));
-        ("status", (Some (CloudComponentStatus.to_value x.status)))]
+          (Option.map x.creationTimestamp ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:CloudComponentStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        CloudComponentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:CloudComponentStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let creationTimestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationTimestamp") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "creationTimestamp") in
       let componentVersion =
-        ComponentVersionString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "componentVersion") in
+        (Option.map ~f:ComponentVersionString.of_xml)
+          (Xml.child xml_arg0 "componentVersion") in
       let componentName =
-        ComponentNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "componentName") in
+        (Option.map ~f:ComponentNameString.of_xml)
+          (Xml.child xml_arg0 "componentName") in
       let arn =
         (Option.map ~f:ComponentVersionARN.of_xml) (Xml.child xml_arg0 "arn") in
-      make ~status ~creationTimestamp ~componentVersion ~componentName ?arn
+      make ?status ?creationTimestamp ?componentVersion ?componentName ?arn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" CloudComponentStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" CloudComponentStatus.of_json in
       let creationTimestamp =
-        field_map_exn json "creationTimestamp" Timestamp.of_json in
+        field_map json__ "creationTimestamp" Timestamp.of_json in
       let componentVersion =
-        field_map_exn json "componentVersion" ComponentVersionString.of_json in
+        field_map json__ "componentVersion" ComponentVersionString.of_json in
       let componentName =
-        field_map_exn json "componentName" ComponentNameString.of_json in
-      let arn = field_map json "arn" ComponentVersionARN.of_json in
-      make ~status ~creationTimestamp ~componentVersion ~componentName ?arn
+        field_map json__ "componentName" ComponentNameString.of_json in
+      let arn = field_map json__ "arn" ComponentVersionARN.of_json in
+      make ?status ?creationTimestamp ?componentVersion ?componentName ?arn
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a component. Components are software that run on Greengrass core devices. After you develop and test a component on your core device, you can use this operation to upload your component to IoT Greengrass. Then, you can deploy the component to other core devices. You can use this operation to do the following: Create components from recipes Create a component from a recipe, which is a file that defines the component's metadata, parameters, dependencies, lifecycle, artifacts, and platform capability. For more information, see IoT Greengrass component recipe reference in the IoT Greengrass V2 Developer Guide. To create a component from a recipe, specify inlineRecipe when you call this operation. Create components from Lambda functions Create a component from an Lambda function that runs on IoT Greengrass. This creates a recipe and artifacts from the Lambda function's deployment package. You can use this operation to migrate Lambda functions from IoT Greengrass V1 to IoT Greengrass V2. This function only accepts Lambda functions that use the following runtimes: Python 2.7 \226\128\147 python2.7 Python 3.7 \226\128\147 python3.7 Python 3.8 \226\128\147 python3.8 Java 8 \226\128\147 java8 Node.js 10 \226\128\147 nodejs10.x Node.js 12 \226\128\147 nodejs12.x To create a component from a Lambda function, specify lambdaFunction when you call this operation. IoT Greengrass currently supports Lambda functions on only Linux core devices."]
+       "Creates a component. Components are software that run on Greengrass core devices. After you develop and test a component on your core device, you can use this operation to upload your component to IoT Greengrass. Then, you can deploy the component to other core devices. You can use this operation to do the following: Create components from recipes Create a component from a recipe, which is a file that defines the component's metadata, parameters, dependencies, lifecycle, artifacts, and platform capability. For more information, see IoT Greengrass component recipe reference in the IoT Greengrass V2 Developer Guide. To create a component from a recipe, specify inlineRecipe when you call this operation. Create components from Lambda functions Create a component from an Lambda function that runs on IoT Greengrass. This creates a recipe and artifacts from the Lambda function's deployment package. You can use this operation to migrate Lambda functions from IoT Greengrass V1 to IoT Greengrass V2. This function accepts Lambda functions in all supported versions of Python, Node.js, and Java runtimes. IoT Greengrass doesn't apply any additional restrictions on deprecated Lambda runtime versions. To create a component from a Lambda function, specify lambdaFunction when you call this operation. IoT Greengrass currently supports Lambda functions on only Linux core devices."]
 module CreateComponentVersionRequest =
   struct
     type nonrec t =
@@ -7583,17 +8305,17 @@ module CreateComponentVersionRequest =
         (Option.map ~f:RecipeBlob.of_xml) (Xml.child xml_arg0 "inlineRecipe") in
       make ?clientToken ?tags ?lambdaFunction ?inlineRecipe ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientToken =
-        field_map json "clientToken" ClientTokenString.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+        field_map json__ "clientToken" ClientTokenString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let lambdaFunction =
-        field_map json "lambdaFunction" LambdaFunctionRecipeSource.of_json in
-      let inlineRecipe = field_map json "inlineRecipe" RecipeBlob.of_json in
+        field_map json__ "lambdaFunction" LambdaFunctionRecipeSource.of_json in
+      let inlineRecipe = field_map json__ "inlineRecipe" RecipeBlob.of_json in
       make ?clientToken ?tags ?lambdaFunction ?inlineRecipe ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a component. Components are software that run on Greengrass core devices. After you develop and test a component on your core device, you can use this operation to upload your component to IoT Greengrass. Then, you can deploy the component to other core devices. You can use this operation to do the following: Create components from recipes Create a component from a recipe, which is a file that defines the component's metadata, parameters, dependencies, lifecycle, artifacts, and platform capability. For more information, see IoT Greengrass component recipe reference in the IoT Greengrass V2 Developer Guide. To create a component from a recipe, specify inlineRecipe when you call this operation. Create components from Lambda functions Create a component from an Lambda function that runs on IoT Greengrass. This creates a recipe and artifacts from the Lambda function's deployment package. You can use this operation to migrate Lambda functions from IoT Greengrass V1 to IoT Greengrass V2. This function only accepts Lambda functions that use the following runtimes: Python 2.7 \226\128\147 python2.7 Python 3.7 \226\128\147 python3.7 Python 3.8 \226\128\147 python3.8 Java 8 \226\128\147 java8 Node.js 10 \226\128\147 nodejs10.x Node.js 12 \226\128\147 nodejs12.x To create a component from a Lambda function, specify lambdaFunction when you call this operation. IoT Greengrass currently supports Lambda functions on only Linux core devices."]
+       "Creates a component. Components are software that run on Greengrass core devices. After you develop and test a component on your core device, you can use this operation to upload your component to IoT Greengrass. Then, you can deploy the component to other core devices. You can use this operation to do the following: Create components from recipes Create a component from a recipe, which is a file that defines the component's metadata, parameters, dependencies, lifecycle, artifacts, and platform capability. For more information, see IoT Greengrass component recipe reference in the IoT Greengrass V2 Developer Guide. To create a component from a recipe, specify inlineRecipe when you call this operation. Create components from Lambda functions Create a component from an Lambda function that runs on IoT Greengrass. This creates a recipe and artifacts from the Lambda function's deployment package. You can use this operation to migrate Lambda functions from IoT Greengrass V1 to IoT Greengrass V2. This function accepts Lambda functions in all supported versions of Python, Node.js, and Java runtimes. IoT Greengrass doesn't apply any additional restrictions on deprecated Lambda runtime versions. To create a component from a Lambda function, specify lambdaFunction when you call this operation. IoT Greengrass currently supports Lambda functions on only Linux core devices."]
 module CancelDeploymentResponse =
   struct
     type nonrec t =
@@ -7683,8 +8405,8 @@ module CancelDeploymentResponse =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" NonEmptyString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" NonEmptyString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7706,9 +8428,9 @@ module CancelDeploymentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentId =
-        field_map_exn json "deploymentId" NonEmptyString.of_json in
+        field_map_exn json__ "deploymentId" NonEmptyString.of_json in
       make ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7796,9 +8518,9 @@ module BatchDisassociateClientDeviceFromCoreDeviceResponse =
           (Xml.child xml_arg0 "errorEntries") in
       make ?errorEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorEntries =
-        field_map json "errorEntries"
+        field_map json__ "errorEntries"
           DisassociateClientDeviceFromCoreDeviceErrorList.of_json in
       make ?errorEntries ()
     let to_json v = composed_to_json to_value v
@@ -7833,11 +8555,11 @@ module BatchDisassociateClientDeviceFromCoreDeviceRequest =
           (Xml.child xml_arg0 "entries") in
       make ~coreDeviceThingName ?entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreDeviceThingName =
-        field_map_exn json "coreDeviceThingName" IoTThingName.of_json in
+        field_map_exn json__ "coreDeviceThingName" IoTThingName.of_json in
       let entries =
-        field_map json "entries"
+        field_map json__ "entries"
           DisassociateClientDeviceFromCoreDeviceEntryList.of_json in
       make ~coreDeviceThingName ?entries ()
     let to_json v = composed_to_json to_value v
@@ -7926,9 +8648,9 @@ module BatchAssociateClientDeviceWithCoreDeviceResponse =
           (Xml.child xml_arg0 "errorEntries") in
       make ?errorEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorEntries =
-        field_map json "errorEntries"
+        field_map json__ "errorEntries"
           AssociateClientDeviceWithCoreDeviceErrorList.of_json in
       make ?errorEntries ()
     let to_json v = composed_to_json to_value v
@@ -7963,11 +8685,11 @@ module BatchAssociateClientDeviceWithCoreDeviceRequest =
           (Xml.child xml_arg0 "entries") in
       make ~coreDeviceThingName ?entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreDeviceThingName =
-        field_map_exn json "coreDeviceThingName" IoTThingName.of_json in
+        field_map_exn json__ "coreDeviceThingName" IoTThingName.of_json in
       let entries =
-        field_map json "entries"
+        field_map json__ "entries"
           AssociateClientDeviceWithCoreDeviceEntryList.of_json in
       make ~coreDeviceThingName ?entries ()
     let to_json v = composed_to_json to_value v
@@ -8026,8 +8748,8 @@ module AssociateServiceRoleToAccountResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AssociatedAt") in
       make ?associatedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let associatedAt = field_map json "associatedAt" String_.of_json in
+    let of_json json__ =
+      let associatedAt = field_map json__ "associatedAt" String_.of_json in
       make ?associatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8049,8 +8771,8 @@ module AssociateServiceRoleToAccountRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "roleArn" String_.of_json in
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "roleArn" String_.of_json in
       make ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

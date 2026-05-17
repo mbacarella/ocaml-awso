@@ -51,9 +51,7 @@ module DetailsValue =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:"[^\\p{C}]*+")));
+             (fun () -> check_pattern i ~pattern:"[^\\p{C}]+"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -61,6 +59,105 @@ module DetailsValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"DetailsValue" j
+    let to_json = simple_to_json to_value
+  end
+module BinaryParameterValue =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module BooleanParameterValue =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module DoubleParameterValue =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module IntegerParameterValue =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IntegerParameterValue" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LongParameterValue =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module StringParameterValue =
+  struct
+    type nonrec t = string
+    let context_ = "StringParameterValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StringParameterValue" j
+    let to_json = simple_to_json to_value
+  end
+module UnsignedLongParameterValue =
+  struct
+    type nonrec t = string
+    let context_ = "UnsignedLongParameterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UnsignedLongParameterValue" j
     let to_json = simple_to_json to_value
   end
 module ExecutionNumber =
@@ -182,6 +279,8 @@ module DetailsMap =
                     (fun x -> (DetailsValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -292,6 +391,106 @@ module ThingName =
     let of_json j = string_of_json ~kind:"ThingName" j
     let to_json = simple_to_json to_value
   end
+module ResourceId =
+  struct
+    type nonrec t = string
+    let context_ = "resourceId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"resourceId" j
+    let to_json = simple_to_json to_value
+  end
+module CommandParameterName =
+  struct
+    type nonrec t = string
+    let context_ = "CommandParameterName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:192) >>=
+                  (fun () -> check_pattern i ~pattern:"^[.$a-zA-Z0-9_-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CommandParameterName" j
+    let to_json = simple_to_json to_value
+  end
+module CommandParameterValue =
+  struct
+    type nonrec t =
+      {
+      s: StringParameterValue.t option
+        [@ocaml.doc
+          "An attribute of type String. For example: \"S\": \"Hello\""];
+      b: BooleanParameterValue.t option
+        [@ocaml.doc
+          "An attribute of type Boolean. For example: \"BOOL\": true"];
+      i: IntegerParameterValue.t option
+        [@ocaml.doc "An attribute of type Integer (Thirty-Two Bits)."];
+      l: LongParameterValue.t option
+        [@ocaml.doc "An attribute of type Long."];
+      d: DoubleParameterValue.t option
+        [@ocaml.doc "An attribute of type Double (Sixty-Four Bits)."];
+      bIN: BinaryParameterValue.t option
+        [@ocaml.doc "An attribute of type Binary."];
+      uL: UnsignedLongParameterValue.t option
+        [@ocaml.doc "An attribute of type Unsigned Long."]}
+    let make ?s =
+      fun ?b ->
+        fun ?i ->
+          fun ?l ->
+            fun ?d ->
+              fun ?bIN -> fun ?uL -> fun () -> { s; b; i; l; d; bIN; uL }
+    let to_value x =
+      structure_to_value
+        [("S", (Option.map x.s ~f:StringParameterValue.to_value));
+        ("B", (Option.map x.b ~f:BooleanParameterValue.to_value));
+        ("I", (Option.map x.i ~f:IntegerParameterValue.to_value));
+        ("L", (Option.map x.l ~f:LongParameterValue.to_value));
+        ("D", (Option.map x.d ~f:DoubleParameterValue.to_value));
+        ("BIN", (Option.map x.bIN ~f:BinaryParameterValue.to_value));
+        ("UL", (Option.map x.uL ~f:UnsignedLongParameterValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uL =
+        (Option.map ~f:UnsignedLongParameterValue.of_xml)
+          (Xml.child xml_arg0 "UL") in
+      let bIN =
+        (Option.map ~f:BinaryParameterValue.of_xml)
+          (Xml.child xml_arg0 "BIN") in
+      let d =
+        (Option.map ~f:DoubleParameterValue.of_xml) (Xml.child xml_arg0 "D") in
+      let l =
+        (Option.map ~f:LongParameterValue.of_xml) (Xml.child xml_arg0 "L") in
+      let i =
+        (Option.map ~f:IntegerParameterValue.of_xml) (Xml.child xml_arg0 "I") in
+      let b =
+        (Option.map ~f:BooleanParameterValue.of_xml) (Xml.child xml_arg0 "B") in
+      let s =
+        (Option.map ~f:StringParameterValue.of_xml) (Xml.child xml_arg0 "S") in
+      make ?uL ?bIN ?d ?l ?i ?b ?s ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uL = field_map json__ "UL" UnsignedLongParameterValue.of_json in
+      let bIN = field_map json__ "BIN" BinaryParameterValue.of_json in
+      let d = field_map json__ "D" DoubleParameterValue.of_json in
+      let l = field_map json__ "L" LongParameterValue.of_json in
+      let i = field_map json__ "I" IntegerParameterValue.of_json in
+      let b = field_map json__ "B" BooleanParameterValue.of_json in
+      let s = field_map json__ "S" StringParameterValue.of_json in
+      make ?uL ?bIN ?d ?l ?i ?b ?s ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The list of values used to describe a specific command parameter."]
 module JobExecutionSummary =
   struct
     type nonrec t =
@@ -301,16 +500,16 @@ module JobExecutionSummary =
           "The unique identifier you assigned to this job when it was created."];
       queuedAt: QueuedAt.t option
         [@ocaml.doc
-          "The time, in milliseconds since the epoch, when the job execution was enqueued."];
+          "The time, in seconds since the epoch, when the job execution was enqueued."];
       startedAt: StartedAt.t option
         [@ocaml.doc
-          "The time, in milliseconds since the epoch, when the job execution started."];
+          "The time, in seconds since the epoch, when the job execution started."];
       lastUpdatedAt: LastUpdatedAt.t option
         [@ocaml.doc
-          "The time, in milliseconds since the epoch, when the job execution was last updated."];
+          "The time, in seconds since the epoch, when the job execution was last updated."];
       versionNumber: VersionNumber.t option
         [@ocaml.doc
-          "The version of the job execution. Job execution versions are incremented each time AWS IoT Jobs receives an update from a device."];
+          "The version of the job execution. Job execution versions are incremented each time IoT Jobs receives an update from a device."];
       executionNumber: ExecutionNumber.t option
         [@ocaml.doc
           "A number that identifies a particular job execution on a particular device."]}
@@ -359,16 +558,16 @@ module JobExecutionSummary =
       make ?executionNumber ?versionNumber ?lastUpdatedAt ?startedAt
         ?queuedAt ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let executionNumber =
-        field_map json "executionNumber" ExecutionNumber.of_json in
+        field_map json__ "executionNumber" ExecutionNumber.of_json in
       let versionNumber =
-        field_map json "versionNumber" VersionNumber.of_json in
+        field_map json__ "versionNumber" VersionNumber.of_json in
       let lastUpdatedAt =
-        field_map json "lastUpdatedAt" LastUpdatedAt.of_json in
-      let startedAt = field_map json "startedAt" StartedAt.of_json in
-      let queuedAt = field_map json "queuedAt" QueuedAt.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+        field_map json__ "lastUpdatedAt" LastUpdatedAt.of_json in
+      let startedAt = field_map json__ "startedAt" StartedAt.of_json in
+      let queuedAt = field_map json__ "queuedAt" QueuedAt.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?executionNumber ?versionNumber ?lastUpdatedAt ?startedAt
         ?queuedAt ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -389,8 +588,8 @@ module CertificateValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The certificate is invalid."]
@@ -410,12 +609,11 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The contents of the request were invalid. For example, this code is returned when an UpdateJobExecution request contains invalid status details. The message contains details about the error."]
+  end[@@ocaml.doc "The contents of the request were invalid."]
 module InvalidStateTransitionException =
   struct
     type nonrec t = {
@@ -430,8 +628,8 @@ module InvalidStateTransitionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -442,10 +640,10 @@ module JobExecutionState =
       {
       status: JobExecutionStatus.t option
         [@ocaml.doc
-          "The status of the job execution. Can be one of: \"QUEUED\", \"IN_PROGRESS\", \"FAILED\", \"SUCCESS\", \"CANCELED\", \"REJECTED\", or \"REMOVED\"."];
+          "The status of the job execution. Can be one of: \"QUEUED\", \"IN_PROGRESS\", \"FAILED\", \"SUCCESS\", \"CANCELED\", \"TIMED_OUT\", \"REJECTED\", or \"REMOVED\"."];
       statusDetails: DetailsMap.t option
         [@ocaml.doc
-          "A collection of name/value pairs that describe the status of the job execution."];
+          "A collection of name/value pairs that describe the status of the job execution. The maximum length of the value in the name/value pair is 1,024 characters."];
       versionNumber: VersionNumber.t option
         [@ocaml.doc
           "The version of the job execution. Job execution versions are incremented each time they are updated by a device."]}
@@ -473,11 +671,11 @@ module JobExecutionState =
           (Xml.child xml_arg0 "status") in
       make ?versionNumber ?statusDetails ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionNumber =
-        field_map json "versionNumber" VersionNumber.of_json in
-      let statusDetails = field_map json "statusDetails" DetailsMap.of_json in
-      let status = field_map json "status" JobExecutionStatus.of_json in
+        field_map json__ "versionNumber" VersionNumber.of_json in
+      let statusDetails = field_map json__ "statusDetails" DetailsMap.of_json in
+      let status = field_map json__ "status" JobExecutionStatus.of_json in
       make ?versionNumber ?statusDetails ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains data about the state of a job execution."]
@@ -497,8 +695,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource does not exist."]
@@ -518,8 +716,8 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is temporarily unavailable."]
@@ -544,9 +742,9 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?payload ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map json "payload" BinaryBlob.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let payload = field_map json__ "payload" BinaryBlob.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?payload ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The rate exceeds the limit."]
@@ -613,23 +811,23 @@ module JobExecution =
         [@ocaml.doc "The name of the thing that is executing the job."];
       status: JobExecutionStatus.t option
         [@ocaml.doc
-          "The status of the job execution. Can be one of: \"QUEUED\", \"IN_PROGRESS\", \"FAILED\", \"SUCCESS\", \"CANCELED\", \"REJECTED\", or \"REMOVED\"."];
+          "The status of the job execution. Can be one of: \"QUEUED\", \"IN_PROGRESS\", \"FAILED\", \"SUCCESS\", \"CANCELED\", \"TIMED_OUT\", \"REJECTED\", or \"REMOVED\"."];
       statusDetails: DetailsMap.t option
         [@ocaml.doc
-          "A collection of name/value pairs that describe the status of the job execution."];
+          "A collection of name/value pairs that describe the status of the job execution. The maximum length of the value in the name/value pair is 1,024 characters."];
       queuedAt: QueuedAt.t option
         [@ocaml.doc
-          "The time, in milliseconds since the epoch, when the job execution was enqueued."];
+          "The time, in seconds since the epoch, when the job execution was enqueued."];
       startedAt: StartedAt.t option
         [@ocaml.doc
-          "The time, in milliseconds since the epoch, when the job execution was started."];
+          "The time, in seconds since the epoch, when the job execution was started."];
       lastUpdatedAt: LastUpdatedAt.t option
         [@ocaml.doc
-          "The time, in milliseconds since the epoch, when the job execution was last updated."];
+          "The time, in seconds since the epoch, when the job execution was last updated."];
       approximateSecondsBeforeTimedOut:
         ApproximateSecondsBeforeTimedOut.t option
         [@ocaml.doc
-          "The estimated number of seconds that remain before the job execution status will be changed to TIMED_OUT."];
+          "The estimated number of seconds that remain before the job execution status will be changed to TIMED_OUT. The actual job execution timeout can occur up to 60 seconds later than the estimated duration."];
       versionNumber: VersionNumber.t option
         [@ocaml.doc
           "The version of the job execution. Job execution versions are incremented each time they are updated by a device."];
@@ -715,32 +913,237 @@ module JobExecution =
         ?approximateSecondsBeforeTimedOut ?lastUpdatedAt ?startedAt ?queuedAt
         ?statusDetails ?status ?thingName ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobDocument = field_map json "jobDocument" JobDocument.of_json in
+    let of_json json__ =
+      let jobDocument = field_map json__ "jobDocument" JobDocument.of_json in
       let executionNumber =
-        field_map json "executionNumber" ExecutionNumber.of_json in
+        field_map json__ "executionNumber" ExecutionNumber.of_json in
       let versionNumber =
-        field_map json "versionNumber" VersionNumber.of_json in
+        field_map json__ "versionNumber" VersionNumber.of_json in
       let approximateSecondsBeforeTimedOut =
-        field_map json "approximateSecondsBeforeTimedOut"
+        field_map json__ "approximateSecondsBeforeTimedOut"
           ApproximateSecondsBeforeTimedOut.of_json in
       let lastUpdatedAt =
-        field_map json "lastUpdatedAt" LastUpdatedAt.of_json in
-      let startedAt = field_map json "startedAt" StartedAt.of_json in
-      let queuedAt = field_map json "queuedAt" QueuedAt.of_json in
-      let statusDetails = field_map json "statusDetails" DetailsMap.of_json in
-      let status = field_map json "status" JobExecutionStatus.of_json in
-      let thingName = field_map json "thingName" ThingName.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+        field_map json__ "lastUpdatedAt" LastUpdatedAt.of_json in
+      let startedAt = field_map json__ "startedAt" StartedAt.of_json in
+      let queuedAt = field_map json__ "queuedAt" QueuedAt.of_json in
+      let statusDetails = field_map json__ "statusDetails" DetailsMap.of_json in
+      let status = field_map json__ "status" JobExecutionStatus.of_json in
+      let thingName = field_map json__ "thingName" ThingName.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?jobDocument ?executionNumber ?versionNumber
         ?approximateSecondsBeforeTimedOut ?lastUpdatedAt ?startedAt ?queuedAt
         ?statusDetails ?status ?thingName ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains data about a job execution."]
+module CommandExecutionId =
+  struct
+    type nonrec t = string
+    let context_ = "CommandExecutionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CommandExecutionId" j
+    let to_json = simple_to_json to_value
+  end
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      resourceId: ResourceId.t option
+        [@ocaml.doc
+          "A conflict occurred while performing the API request on the resource ID."]}
+    let make ?message = fun ?resourceId -> fun () -> { message; resourceId }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:ResourceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?resourceId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A conflict has occurred when performing the API request."]
+module InternalServerException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An internal server error occurred when performing the API request."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The service quota has been exceeded for this request."]
+module ValidationException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A validation error occurred when performing the API request."]
+module ClientRequestTokenV2 =
+  struct
+    type nonrec t = string
+    let context_ = "ClientRequestTokenV2"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\x21-\\x7E]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientRequestTokenV2" j
+    let to_json = simple_to_json to_value
+  end
+module CommandArn =
+  struct
+    type nonrec t = string
+    let context_ = "CommandArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CommandArn" j
+    let to_json = simple_to_json to_value
+  end
+module CommandExecutionParameterMap =
+  struct
+    type nonrec t = (CommandParameterName.t * CommandParameterValue.t) list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types CommandParameterName CommandParameterValue"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (CommandParameterName.to_value x) |>
+                    (fun x ->
+                       (CommandParameterValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:CommandParameterName.of_string
+        ~of_json:CommandParameterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CommandExecutionTimeoutInSeconds =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:1L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module TargetArn =
+  struct
+    type nonrec t = string
+    let context_ = "TargetArn"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetArn" j
+    let to_json = simple_to_json to_value
+  end
 module JobExecutionSummaryList =
   struct
     type nonrec t = JobExecutionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobExecutionSummary.to_value)) |>
         (fun x -> `List x)
@@ -777,8 +1180,8 @@ module TerminalStateException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The job is in a terminal state."]
@@ -900,13 +1303,14 @@ module UpdateJobExecutionResponse =
           (Xml.child xml_arg0 "executionState") in
       make ?jobDocument ?executionState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobDocument = field_map json "jobDocument" JobDocument.of_json in
+    let of_json json__ =
+      let jobDocument = field_map json__ "jobDocument" JobDocument.of_json in
       let executionState =
-        field_map json "executionState" JobExecutionState.of_json in
+        field_map json__ "executionState" JobExecutionState.of_json in
       make ?jobDocument ?executionState ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the status of a job execution."]
+  end[@@ocaml.doc
+       "Updates the status of a job execution. Requires permission to access the UpdateJobExecution action."]
 module UpdateJobExecutionRequest =
   struct
     type nonrec t =
@@ -921,10 +1325,10 @@ module UpdateJobExecutionRequest =
           "The new status for the job execution (IN_PROGRESS, FAILED, SUCCESS, or REJECTED). This must be specified on every update."];
       statusDetails: DetailsMap.t option
         [@ocaml.doc
-          "Optional. A collection of name/value pairs that describe the status of the job execution. If not specified, the statusDetails are unchanged."];
+          "Optional. A collection of name/value pairs that describe the status of the job execution. If not specified, the statusDetails are unchanged. The maximum length of the value in the name/value pair is 1,024 characters."];
       stepTimeoutInMinutes: StepTimeoutInMinutes.t option
         [@ocaml.doc
-          "Specifies the amount of time this device has to finish execution of this job. If the job execution status is not set to a terminal state before this timer expires, or before the timer is reset (by again calling UpdateJobExecution, setting the status to IN_PROGRESS and specifying a new timeout value in this field) the job execution status will be automatically set to TIMED_OUT. Note that setting or resetting this timeout has no effect on that job execution timeout which may have been specified when the job was created (CreateJob using field timeoutConfig)."];
+          "Specifies the amount of time this device has to finish execution of this job. If the job execution status is not set to a terminal state before this timer expires, or before the timer is reset (by again calling UpdateJobExecution, setting the status to IN_PROGRESS, and specifying a new timeout value in this field) the job execution status will be automatically set to TIMED_OUT. Note that setting or resetting the step timeout has no effect on the in progress timeout that may have been specified when the job was created (CreateJob using field timeoutConfig). Valid values for this parameter range from 1 to 10080 (1 minute to 7 days). A value of -1 is also valid and will cancel the current step timer (created by an earlier use of UpdateJobExecutionRequest)."];
       expectedVersion: ExpectedVersion.t option
         [@ocaml.doc
           "Optional. The expected current version of the job execution. Each time you update the job execution, its version is incremented. If the version of the job execution stored in Jobs does not match, the update is rejected with a VersionMismatch error, and an ErrorResponse that contains the current job execution status data is returned. (This makes it unnecessary to perform a separate DescribeJobExecution request in order to obtain the job execution status data.)"];
@@ -1009,27 +1413,28 @@ module UpdateJobExecutionRequest =
         ?expectedVersion ?stepTimeoutInMinutes ?statusDetails ~status
         ~thingName ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let executionNumber =
-        field_map json "executionNumber" ExecutionNumber.of_json in
+        field_map json__ "executionNumber" ExecutionNumber.of_json in
       let includeJobDocument =
-        field_map json "includeJobDocument" IncludeJobDocument.of_json in
+        field_map json__ "includeJobDocument" IncludeJobDocument.of_json in
       let includeJobExecutionState =
-        field_map json "includeJobExecutionState"
+        field_map json__ "includeJobExecutionState"
           IncludeExecutionState.of_json in
       let expectedVersion =
-        field_map json "expectedVersion" ExpectedVersion.of_json in
+        field_map json__ "expectedVersion" ExpectedVersion.of_json in
       let stepTimeoutInMinutes =
-        field_map json "stepTimeoutInMinutes" StepTimeoutInMinutes.of_json in
-      let statusDetails = field_map json "statusDetails" DetailsMap.of_json in
-      let status = field_map_exn json "status" JobExecutionStatus.of_json in
-      let thingName = field_map_exn json "thingName" ThingName.of_json in
-      let jobId = field_map_exn json "jobId" JobId.of_json in
+        field_map json__ "stepTimeoutInMinutes" StepTimeoutInMinutes.of_json in
+      let statusDetails = field_map json__ "statusDetails" DetailsMap.of_json in
+      let status = field_map_exn json__ "status" JobExecutionStatus.of_json in
+      let thingName = field_map_exn json__ "thingName" ThingName.of_json in
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
       make ?executionNumber ?includeJobDocument ?includeJobExecutionState
         ?expectedVersion ?stepTimeoutInMinutes ?statusDetails ~status
         ~thingName ~jobId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the status of a job execution."]
+  end[@@ocaml.doc
+       "Updates the status of a job execution. Requires permission to access the UpdateJobExecution action."]
 module StartNextPendingJobExecutionResponse =
   struct
     type nonrec t =
@@ -1112,12 +1517,12 @@ module StartNextPendingJobExecutionResponse =
         (Option.map ~f:JobExecution.of_xml) (Xml.child xml_arg0 "execution") in
       make ?execution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let execution = field_map json "execution" JobExecution.of_json in
+    let of_json json__ =
+      let execution = field_map json__ "execution" JobExecution.of_json in
       make ?execution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets and starts the next pending (status IN_PROGRESS or QUEUED) job execution for a thing."]
+       "Gets and starts the next pending (status IN_PROGRESS or QUEUED) job execution for a thing. Requires permission to access the StartNextPendingJobExecution action."]
 module StartNextPendingJobExecutionRequest =
   struct
     type nonrec t =
@@ -1126,10 +1531,10 @@ module StartNextPendingJobExecutionRequest =
         [@ocaml.doc "The name of the thing associated with the device."];
       statusDetails: DetailsMap.t option
         [@ocaml.doc
-          "A collection of name/value pairs that describe the status of the job execution. If not specified, the statusDetails are unchanged."];
+          "A collection of name/value pairs that describe the status of the job execution. If not specified, the statusDetails are unchanged. The maximum length of the value in the name/value pair is 1,024 characters."];
       stepTimeoutInMinutes: StepTimeoutInMinutes.t option
         [@ocaml.doc
-          "Specifies the amount of time this device has to finish execution of this job. If the job execution status is not set to a terminal state before this timer expires, or before the timer is reset (by calling UpdateJobExecution, setting the status to IN_PROGRESS and specifying a new timeout value in field stepTimeoutInMinutes) the job execution status will be automatically set to TIMED_OUT. Note that setting this timeout has no effect on that job execution timeout which may have been specified when the job was created (CreateJob using field timeoutConfig)."]}
+          "Specifies the amount of time this device has to finish execution of this job. If the job execution status is not set to a terminal state before this timer expires, or before the timer is reset (by calling UpdateJobExecution, setting the status to IN_PROGRESS, and specifying a new timeout value in field stepTimeoutInMinutes) the job execution status will be automatically set to TIMED_OUT. Note that setting the step timeout has no effect on the in progress timeout that may have been specified when the job was created (CreateJob using field timeoutConfig). Valid values for this parameter range from 1 to 10080 (1 minute to 7 days)."]}
     let context_ = "StartNextPendingJobExecutionRequest"
     let make ?statusDetails =
       fun ?stepTimeoutInMinutes ->
@@ -1155,15 +1560,193 @@ module StartNextPendingJobExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ?stepTimeoutInMinutes ?statusDetails ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stepTimeoutInMinutes =
-        field_map json "stepTimeoutInMinutes" StepTimeoutInMinutes.of_json in
-      let statusDetails = field_map json "statusDetails" DetailsMap.of_json in
-      let thingName = field_map_exn json "thingName" ThingName.of_json in
+        field_map json__ "stepTimeoutInMinutes" StepTimeoutInMinutes.of_json in
+      let statusDetails = field_map json__ "statusDetails" DetailsMap.of_json in
+      let thingName = field_map_exn json__ "thingName" ThingName.of_json in
       make ?stepTimeoutInMinutes ?statusDetails ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets and starts the next pending (status IN_PROGRESS or QUEUED) job execution for a thing."]
+       "Gets and starts the next pending (status IN_PROGRESS or QUEUED) job execution for a thing. Requires permission to access the StartNextPendingJobExecution action."]
+module StartCommandExecutionResponse =
+  struct
+    type nonrec t =
+      {
+      executionId: CommandExecutionId.t option
+        [@ocaml.doc "A unique identifier for the command execution."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?executionId = fun () -> { executionId }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("executionId",
+           (Option.map x.executionId ~f:CommandExecutionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionId =
+        (Option.map ~f:CommandExecutionId.of_xml)
+          (Xml.child xml_arg0 "executionId") in
+      make ?executionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionId =
+        field_map json__ "executionId" CommandExecutionId.of_json in
+      make ?executionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Using the command created with the CreateCommand API, start a command execution on a specific device."]
+module StartCommandExecutionRequest =
+  struct
+    type nonrec t =
+      {
+      targetArn: TargetArn.t
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the device where the command execution is occurring."];
+      commandArn: CommandArn.t
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the command. For example, arn:aws:iot:<region>:<accountid>:command/<commandName>"];
+      parameters: CommandExecutionParameterMap.t option
+        [@ocaml.doc
+          "A list of parameters that are required by the StartCommandExecution API when performing the command on a device."];
+      executionTimeoutSeconds: CommandExecutionTimeoutInSeconds.t option
+        [@ocaml.doc
+          "Specifies the amount of time in second the device has to finish the command execution. A timer is started as soon as the command execution is created. If the command execution status is not set to another terminal state before the timer expires, it will automatically update to TIMED_OUT."];
+      clientToken: ClientRequestTokenV2.t option
+        [@ocaml.doc
+          "The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you retry the request using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, Amazon Web Services SDKs will automatically generate a unique client request."]}
+    let context_ = "StartCommandExecutionRequest"
+    let make ?parameters =
+      fun ?executionTimeoutSeconds ->
+        fun ?clientToken ->
+          fun ~targetArn ->
+            fun ~commandArn ->
+              fun () ->
+                {
+                  parameters;
+                  executionTimeoutSeconds;
+                  clientToken;
+                  targetArn;
+                  commandArn
+                }
+    let to_value x =
+      structure_to_value
+        [("targetArn", (Some (TargetArn.to_value x.targetArn)));
+        ("commandArn", (Some (CommandArn.to_value x.commandArn)));
+        ("parameters",
+          (Option.map x.parameters ~f:CommandExecutionParameterMap.to_value));
+        ("executionTimeoutSeconds",
+          (Option.map x.executionTimeoutSeconds
+             ~f:CommandExecutionTimeoutInSeconds.to_value));
+        ("clientToken",
+          (Option.map x.clientToken ~f:ClientRequestTokenV2.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientRequestTokenV2.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let executionTimeoutSeconds =
+        (Option.map ~f:CommandExecutionTimeoutInSeconds.of_xml)
+          (Xml.child xml_arg0 "executionTimeoutSeconds") in
+      let parameters =
+        (Option.map ~f:CommandExecutionParameterMap.of_xml)
+          (Xml.child xml_arg0 "parameters") in
+      let commandArn =
+        CommandArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "commandArn") in
+      let targetArn =
+        TargetArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "targetArn") in
+      make ?clientToken ?executionTimeoutSeconds ?parameters ~commandArn
+        ~targetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" ClientRequestTokenV2.of_json in
+      let executionTimeoutSeconds =
+        field_map json__ "executionTimeoutSeconds"
+          CommandExecutionTimeoutInSeconds.of_json in
+      let parameters =
+        field_map json__ "parameters" CommandExecutionParameterMap.of_json in
+      let commandArn = field_map_exn json__ "commandArn" CommandArn.of_json in
+      let targetArn = field_map_exn json__ "targetArn" TargetArn.of_json in
+      make ?clientToken ?executionTimeoutSeconds ?parameters ~commandArn
+        ~targetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Using the command created with the CreateCommand API, start a command execution on a specific device."]
 module GetPendingJobExecutionsResponse =
   struct
     type nonrec t =
@@ -1259,15 +1842,15 @@ module GetPendingJobExecutionsResponse =
           (Xml.child xml_arg0 "inProgressJobs") in
       make ?queuedJobs ?inProgressJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queuedJobs =
-        field_map json "queuedJobs" JobExecutionSummaryList.of_json in
+        field_map json__ "queuedJobs" JobExecutionSummaryList.of_json in
       let inProgressJobs =
-        field_map json "inProgressJobs" JobExecutionSummaryList.of_json in
+        field_map json__ "inProgressJobs" JobExecutionSummaryList.of_json in
       make ?queuedJobs ?inProgressJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the list of all jobs for a thing that are not in a terminal status."]
+       "Gets the list of all jobs for a thing that are not in a terminal status. Requires permission to access the GetPendingJobExecutions action."]
 module GetPendingJobExecutionsRequest =
   struct
     type nonrec t =
@@ -1286,12 +1869,12 @@ module GetPendingJobExecutionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingName = field_map_exn json "thingName" ThingName.of_json in
+    let of_json json__ =
+      let thingName = field_map_exn json__ "thingName" ThingName.of_json in
       make ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the list of all jobs for a thing that are not in a terminal status."]
+       "Gets the list of all jobs for a thing that are not in a terminal status. Requires permission to access the GetPendingJobExecutions action."]
 module DescribeJobExecutionResponse =
   struct
     type nonrec t =
@@ -1384,11 +1967,12 @@ module DescribeJobExecutionResponse =
         (Option.map ~f:JobExecution.of_xml) (Xml.child xml_arg0 "execution") in
       make ?execution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let execution = field_map json "execution" JobExecution.of_json in
+    let of_json json__ =
+      let execution = field_map json__ "execution" JobExecution.of_json in
       make ?execution ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets details of a job execution."]
+  end[@@ocaml.doc
+       "Gets details of a job execution. Requires permission to access the DescribeJobExecution action."]
 module DescribeJobExecutionRequest =
   struct
     type nonrec t =
@@ -1401,7 +1985,7 @@ module DescribeJobExecutionRequest =
           "The thing name associated with the device the job execution is running on."];
       includeJobDocument: IncludeJobDocument.t option
         [@ocaml.doc
-          "Optional. When set to true, the response contains the job document. The default is false."];
+          "Optional. Unless set to false, the response contains the job document. The default is true."];
       executionNumber: ExecutionNumber.t option
         [@ocaml.doc
           "Optional. A number that identifies a particular job execution on a particular device. If not specified, the latest job execution is returned."]}
@@ -1436,14 +2020,15 @@ module DescribeJobExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ?executionNumber ?includeJobDocument ~thingName ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let executionNumber =
-        field_map json "executionNumber" ExecutionNumber.of_json in
+        field_map json__ "executionNumber" ExecutionNumber.of_json in
       let includeJobDocument =
-        field_map json "includeJobDocument" IncludeJobDocument.of_json in
-      let thingName = field_map_exn json "thingName" ThingName.of_json in
+        field_map json__ "includeJobDocument" IncludeJobDocument.of_json in
+      let thingName = field_map_exn json__ "thingName" ThingName.of_json in
       let jobId =
-        field_map_exn json "jobId" DescribeJobExecutionJobId.of_json in
+        field_map_exn json__ "jobId" DescribeJobExecutionJobId.of_json in
       make ?executionNumber ?includeJobDocument ~thingName ~jobId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets details of a job execution."]
+  end[@@ocaml.doc
+       "Gets details of a job execution. Requires permission to access the DescribeJobExecution action."]

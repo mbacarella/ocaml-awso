@@ -17,6 +17,8 @@ let attach_load_balancer_target_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AttachLoadBalancerTargetGroups input
 let attach_load_balancers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AttachLoadBalancers input
+let attach_traffic_sources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AttachTrafficSources input
 let batch_delete_scheduled_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchDeleteScheduledAction input
 let batch_put_scheduled_update_group_action ?endpoint_url ?cfg input =
@@ -86,6 +88,8 @@ let describe_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTags input
 let describe_termination_policy_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTerminationPolicyTypes input
+let describe_traffic_sources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTrafficSources input
 let describe_warm_pool ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWarmPool input
 let detach_instances ?endpoint_url ?cfg input =
@@ -94,6 +98,8 @@ let detach_load_balancer_target_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachLoadBalancerTargetGroups input
 let detach_load_balancers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachLoadBalancers input
+let detach_traffic_sources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DetachTrafficSources input
 let disable_metrics_collection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableMetricsCollection input
 let enable_metrics_collection ?endpoint_url ?cfg input =
@@ -106,6 +112,8 @@ let exit_standby ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExitStandby input
 let get_predictive_scaling_forecast ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPredictiveScalingForecast input
+let launch_instances ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.LaunchInstances input
 let put_lifecycle_hook ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutLifecycleHook input
 let put_notification_configuration ?endpoint_url ?cfg input =
@@ -120,6 +128,8 @@ let record_lifecycle_action_heartbeat ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RecordLifecycleActionHeartbeat input
 let resume_processes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ResumeProcesses input
+let rollback_instance_refresh ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RollbackInstanceRefresh input
 let set_desired_capacity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetDesiredCapacity input
 let set_instance_health ?endpoint_url ?cfg input =

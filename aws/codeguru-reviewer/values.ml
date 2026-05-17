@@ -113,7 +113,7 @@ module CodeArtifacts =
           "The S3 object key for a source code .zip file. This is required for all code reviews."];
       buildArtifactsObjectKey: BuildArtifactsObjectKey.t option
         [@ocaml.doc
-          "The S3 object key for a build artifacts .zip file that contains .jar or .class files. This is required for a code review with security analysis. For more information, see Create code reviews with security analysis in the Amazon CodeGuru Reviewer User Guide."]}
+          "The S3 object key for a build artifacts .zip file that contains .jar or .class files. This is required for a code review with security analysis. For more information, see Create code reviews with GitHub Actions in the Amazon CodeGuru Reviewer User Guide."]}
     let context_ = "CodeArtifacts"
     let make ?buildArtifactsObjectKey =
       fun ~sourceCodeArtifactsObjectKey ->
@@ -138,12 +138,12 @@ module CodeArtifacts =
              "SourceCodeArtifactsObjectKey") in
       make ?buildArtifactsObjectKey ~sourceCodeArtifactsObjectKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let buildArtifactsObjectKey =
-        field_map json "BuildArtifactsObjectKey"
+        field_map json__ "BuildArtifactsObjectKey"
           BuildArtifactsObjectKey.of_json in
       let sourceCodeArtifactsObjectKey =
-        field_map_exn json "SourceCodeArtifactsObjectKey"
+        field_map_exn json__ "SourceCodeArtifactsObjectKey"
           SourceCodeArtifactsObjectKey.of_json in
       make ?buildArtifactsObjectKey ~sourceCodeArtifactsObjectKey ()
     let to_json v = composed_to_json to_value v
@@ -247,9 +247,9 @@ module EventInfo =
       let name = (Option.map ~f:EventName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?state ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" EventState.of_json in
-      let name = field_map json "Name" EventName.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" EventState.of_json in
+      let name = field_map json__ "Name" EventName.of_json in
       make ?state ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -366,10 +366,10 @@ module S3RepositoryDetails =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "BucketName") in
       make ?codeArtifacts ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let codeArtifacts =
-        field_map json "CodeArtifacts" CodeArtifacts.of_json in
-      let bucketName = field_map json "BucketName" S3BucketName.of_json in
+        field_map json__ "CodeArtifacts" CodeArtifacts.of_json in
+      let bucketName = field_map json__ "BucketName" S3BucketName.of_json in
       make ?codeArtifacts ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -444,6 +444,9 @@ module RuleTags =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -521,7 +524,7 @@ module FindingsCount =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
-module MeteredLinesOfCodeCount =
+module LinesOfCodeCount =
   struct
     type nonrec t = Int64.t
     let make i = i
@@ -564,11 +567,11 @@ module BranchDiffSourceCodeType =
           (Xml.child_exn ~context:context_ xml_arg0 "SourceBranchName") in
       make ~destinationBranchName ~sourceBranchName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationBranchName =
-        field_map_exn json "DestinationBranchName" BranchName.of_json in
+        field_map_exn json__ "DestinationBranchName" BranchName.of_json in
       let sourceBranchName =
-        field_map_exn json "SourceBranchName" BranchName.of_json in
+        field_map_exn json__ "SourceBranchName" BranchName.of_json in
       make ~destinationBranchName ~sourceBranchName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -608,11 +611,12 @@ module CommitDiffSourceCodeType =
         (Option.map ~f:CommitId.of_xml) (Xml.child xml_arg0 "SourceCommit") in
       make ?mergeBaseCommit ?destinationCommit ?sourceCommit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mergeBaseCommit = field_map json "MergeBaseCommit" CommitId.of_json in
+    let of_json json__ =
+      let mergeBaseCommit =
+        field_map json__ "MergeBaseCommit" CommitId.of_json in
       let destinationCommit =
-        field_map json "DestinationCommit" CommitId.of_json in
-      let sourceCommit = field_map json "SourceCommit" CommitId.of_json in
+        field_map json__ "DestinationCommit" CommitId.of_json in
+      let sourceCommit = field_map json__ "SourceCommit" CommitId.of_json in
       make ?mergeBaseCommit ?destinationCommit ?sourceCommit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -636,8 +640,8 @@ module RepositoryHeadSourceCodeType =
           (Xml.child_exn ~context:context_ xml_arg0 "BranchName") in
       make ~branchName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branchName = field_map_exn json "BranchName" BranchName.of_json in
+    let of_json json__ =
+      let branchName = field_map_exn json__ "BranchName" BranchName.of_json in
       make ~branchName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -681,11 +685,11 @@ module RequestMetadata =
         (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
       make ?vendorName ?eventInfo ?requester ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vendorName = field_map json "VendorName" VendorName.of_json in
-      let eventInfo = field_map json "EventInfo" EventInfo.of_json in
-      let requester = field_map json "Requester" Requester.of_json in
-      let requestId = field_map json "RequestId" RequestId.of_json in
+    let of_json json__ =
+      let vendorName = field_map json__ "VendorName" VendorName.of_json in
+      let eventInfo = field_map json__ "EventInfo" EventInfo.of_json in
+      let requester = field_map json__ "Requester" Requester.of_json in
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
       make ?vendorName ?eventInfo ?requester ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -715,9 +719,9 @@ module S3BucketRepository =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?details ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "Details" S3RepositoryDetails.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let details = field_map json__ "Details" S3RepositoryDetails.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ?details ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1041,14 +1045,14 @@ module RuleMetadata =
         (Option.map ~f:RuleId.of_xml) (Xml.child xml_arg0 "RuleId") in
       make ?ruleTags ?longDescription ?shortDescription ?ruleName ?ruleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleTags = field_map json "RuleTags" RuleTags.of_json in
+    let of_json json__ =
+      let ruleTags = field_map json__ "RuleTags" RuleTags.of_json in
       let longDescription =
-        field_map json "LongDescription" LongDescription.of_json in
+        field_map json__ "LongDescription" LongDescription.of_json in
       let shortDescription =
-        field_map json "ShortDescription" ShortDescription.of_json in
-      let ruleName = field_map json "RuleName" RuleName.of_json in
-      let ruleId = field_map json "RuleId" RuleId.of_json in
+        field_map json__ "ShortDescription" ShortDescription.of_json in
+      let ruleName = field_map json__ "RuleName" RuleName.of_json in
+      let ruleId = field_map json__ "RuleId" RuleId.of_json in
       make ?ruleTags ?longDescription ?shortDescription ?ruleName ?ruleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1113,6 +1117,9 @@ module Reactions =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Reaction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1186,20 +1193,31 @@ module MetricsSummary =
   struct
     type nonrec t =
       {
-      meteredLinesOfCodeCount: MeteredLinesOfCodeCount.t option
+      meteredLinesOfCodeCount: LinesOfCodeCount.t option
         [@ocaml.doc
           "Lines of code metered in the code review. For the initial code review pull request and all subsequent revisions, this includes all lines of code in the files added to the pull request. In subsequent revisions, for files that already existed in the pull request, this includes only the changed lines of code. In both cases, this does not include non-code lines such as comments and import statements. For example, if you submit a pull request containing 5 files, each with 500 lines of code, and in a subsequent revision you added a new file with 200 lines of code, and also modified a total of 25 lines across the initial 5 files, MeteredLinesOfCodeCount includes the first 5 files (5 * 500 = 2,500 lines), the new file (200 lines) and the 25 changed lines of code for a total of 2,725 lines of code."];
+      suppressedLinesOfCodeCount: LinesOfCodeCount.t option
+        [@ocaml.doc
+          "Lines of code suppressed in the code review based on the excludeFiles element in the aws-codeguru-reviewer.yml file. For full repository analyses, this number includes all lines of code in the files that are suppressed. For pull requests, this number only includes the changed lines of code that are suppressed. In both cases, this number does not include non-code lines such as comments and import statements. For example, if you initiate a full repository analysis on a repository containing 5 files, each file with 100 lines of code, and 2 files are listed as excluded in the aws-codeguru-reviewer.yml file, then SuppressedLinesOfCodeCount returns 200 (2 * 100) as the total number of lines of code suppressed. However, if you submit a pull request for the same repository, then SuppressedLinesOfCodeCount only includes the lines in the 2 files that changed. If only 1 of the 2 files changed in the pull request, then SuppressedLinesOfCodeCount returns 100 (1 * 100) as the total number of lines of code suppressed."];
       findingsCount: FindingsCount.t option
         [@ocaml.doc
           "Total number of recommendations found in the code review."]}
     let make ?meteredLinesOfCodeCount =
-      fun ?findingsCount ->
-        fun () -> { meteredLinesOfCodeCount; findingsCount }
+      fun ?suppressedLinesOfCodeCount ->
+        fun ?findingsCount ->
+          fun () ->
+            {
+              meteredLinesOfCodeCount;
+              suppressedLinesOfCodeCount;
+              findingsCount
+            }
     let to_value x =
       structure_to_value
         [("MeteredLinesOfCodeCount",
-           (Option.map x.meteredLinesOfCodeCount
-              ~f:MeteredLinesOfCodeCount.to_value));
+           (Option.map x.meteredLinesOfCodeCount ~f:LinesOfCodeCount.to_value));
+        ("SuppressedLinesOfCodeCount",
+          (Option.map x.suppressedLinesOfCodeCount
+             ~f:LinesOfCodeCount.to_value));
         ("FindingsCount",
           (Option.map x.findingsCount ~f:FindingsCount.to_value))]
     let to_query v = to_query to_value v
@@ -1207,18 +1225,25 @@ module MetricsSummary =
       let findingsCount =
         (Option.map ~f:FindingsCount.of_xml)
           (Xml.child xml_arg0 "FindingsCount") in
+      let suppressedLinesOfCodeCount =
+        (Option.map ~f:LinesOfCodeCount.of_xml)
+          (Xml.child xml_arg0 "SuppressedLinesOfCodeCount") in
       let meteredLinesOfCodeCount =
-        (Option.map ~f:MeteredLinesOfCodeCount.of_xml)
+        (Option.map ~f:LinesOfCodeCount.of_xml)
           (Xml.child xml_arg0 "MeteredLinesOfCodeCount") in
-      make ?findingsCount ?meteredLinesOfCodeCount ()
+      make ?findingsCount ?suppressedLinesOfCodeCount
+        ?meteredLinesOfCodeCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let findingsCount =
-        field_map json "FindingsCount" FindingsCount.of_json in
+        field_map json__ "FindingsCount" FindingsCount.of_json in
+      let suppressedLinesOfCodeCount =
+        field_map json__ "SuppressedLinesOfCodeCount"
+          LinesOfCodeCount.of_json in
       let meteredLinesOfCodeCount =
-        field_map json "MeteredLinesOfCodeCount"
-          MeteredLinesOfCodeCount.of_json in
-      make ?findingsCount ?meteredLinesOfCodeCount ()
+        field_map json__ "MeteredLinesOfCodeCount" LinesOfCodeCount.of_json in
+      make ?findingsCount ?suppressedLinesOfCodeCount
+        ?meteredLinesOfCodeCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about metrics summaries."]
 module PullRequestId =
@@ -1302,17 +1327,18 @@ module SourceCodeType =
       make ?requestMetadata ?s3BucketRepository ?branchDiff ?repositoryHead
         ?commitDiff ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestMetadata =
-        field_map json "RequestMetadata" RequestMetadata.of_json in
+        field_map json__ "RequestMetadata" RequestMetadata.of_json in
       let s3BucketRepository =
-        field_map json "S3BucketRepository" S3BucketRepository.of_json in
+        field_map json__ "S3BucketRepository" S3BucketRepository.of_json in
       let branchDiff =
-        field_map json "BranchDiff" BranchDiffSourceCodeType.of_json in
+        field_map json__ "BranchDiff" BranchDiffSourceCodeType.of_json in
       let repositoryHead =
-        field_map json "RepositoryHead" RepositoryHeadSourceCodeType.of_json in
+        field_map json__ "RepositoryHead"
+          RepositoryHeadSourceCodeType.of_json in
       let commitDiff =
-        field_map json "CommitDiff" CommitDiffSourceCodeType.of_json in
+        field_map json__ "CommitDiff" CommitDiffSourceCodeType.of_json in
       make ?requestMetadata ?s3BucketRepository ?branchDiff ?repositoryHead
         ?commitDiff ()
     let to_json v = composed_to_json to_value v
@@ -1464,7 +1490,7 @@ module RepositoryAssociationSummary =
       {
       associationArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations ."];
+          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations."];
       connectionArn: ConnectionArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of an Amazon Web Services CodeStar Connections connection. Its format is arn:aws:codestar-connections:region-id:aws-account_id:connection/connection-id. For more information, see Connection in the Amazon Web Services CodeStar Connections API Reference."];
@@ -1482,7 +1508,7 @@ module RepositoryAssociationSummary =
         [@ocaml.doc "The provider type of the repository association."];
       state: RepositoryAssociationState.t option
         [@ocaml.doc
-          "The state of the repository association. The valid repository association states are: Associated: The repository association is complete. Associating: CodeGuru Reviewer is: Setting up pull request notifications. This is required for pull requests to trigger a CodeGuru Reviewer review. If your repository ProviderType is GitHub, GitHub Enterprise Server, or Bitbucket, CodeGuru Reviewer creates webhooks in your repository to trigger CodeGuru Reviewer reviews. If you delete these webhooks, reviews of code in your repository cannot be triggered. Setting up source code access. This is required for CodeGuru Reviewer to securely clone code in your repository. Failed: The repository failed to associate or disassociate. Disassociating: CodeGuru Reviewer is removing the repository's pull request notifications and source code access. Disassociated: CodeGuru Reviewer successfully disassociated the repository. You can create a new association with this repository if you want to review source code in it later. You can control access to code reviews created in an associated repository with tags after it has been disassociated. For more information, see Using tags to control access to associated repositories in the Amazon CodeGuru Reviewer User Guide."]}
+          "The state of the repository association. The valid repository association states are: Associated: The repository association is complete. Associating: CodeGuru Reviewer is: Setting up pull request notifications. This is required for pull requests to trigger a CodeGuru Reviewer review. If your repository ProviderType is GitHub, GitHub Enterprise Server, or Bitbucket, CodeGuru Reviewer creates webhooks in your repository to trigger CodeGuru Reviewer reviews. If you delete these webhooks, reviews of code in your repository cannot be triggered. Setting up source code access. This is required for CodeGuru Reviewer to securely clone code in your repository. Failed: The repository failed to associate or disassociate. Disassociating: CodeGuru Reviewer is removing the repository's pull request notifications and source code access. Disassociated: CodeGuru Reviewer successfully disassociated the repository. You can create a new association with this repository if you want to review source code in it later. You can control access to code reviews created in anassociated repository with tags after it has been disassociated. For more information, see Using tags to control access to associated repositories in the Amazon CodeGuru Reviewer User Guide."]}
     let make ?associationArn =
       fun ?connectionArn ->
         fun ?lastUpdatedTimeStamp ->
@@ -1541,18 +1567,18 @@ module RepositoryAssociationSummary =
       make ?state ?providerType ?owner ?name ?associationId
         ?lastUpdatedTimeStamp ?connectionArn ?associationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" RepositoryAssociationState.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
-      let owner = field_map json "Owner" Owner.of_json in
-      let name = field_map json "Name" Name.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" RepositoryAssociationState.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
+      let owner = field_map json__ "Owner" Owner.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       let associationId =
-        field_map json "AssociationId" AssociationId.of_json in
+        field_map json__ "AssociationId" AssociationId.of_json in
       let lastUpdatedTimeStamp =
-        field_map json "LastUpdatedTimeStamp" TimeStamp.of_json in
+        field_map json__ "LastUpdatedTimeStamp" TimeStamp.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
-      let associationArn = field_map json "AssociationArn" Arn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
+      let associationArn = field_map json__ "AssociationArn" Arn.of_json in
       make ?state ?providerType ?owner ?name ?associationId
         ?lastUpdatedTimeStamp ?connectionArn ?associationArn ()
     let to_json v = composed_to_json to_value v
@@ -1642,18 +1668,18 @@ module RecommendationSummary =
       make ?severity ?ruleMetadata ?recommendationCategory ?description
         ?endLine ?startLine ?recommendationId ?filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let severity = field_map json "Severity" Severity.of_json in
-      let ruleMetadata = field_map json "RuleMetadata" RuleMetadata.of_json in
+    let of_json json__ =
+      let severity = field_map json__ "Severity" Severity.of_json in
+      let ruleMetadata = field_map json__ "RuleMetadata" RuleMetadata.of_json in
       let recommendationCategory =
-        field_map json "RecommendationCategory"
+        field_map json__ "RecommendationCategory"
           RecommendationCategory.of_json in
-      let description = field_map json "Description" Text.of_json in
-      let endLine = field_map json "EndLine" LineNumber.of_json in
-      let startLine = field_map json "StartLine" LineNumber.of_json in
+      let description = field_map json__ "Description" Text.of_json in
+      let endLine = field_map json__ "EndLine" LineNumber.of_json in
+      let startLine = field_map json__ "StartLine" LineNumber.of_json in
       let recommendationId =
-        field_map json "RecommendationId" RecommendationId.of_json in
-      let filePath = field_map json "FilePath" FilePath.of_json in
+        field_map json__ "RecommendationId" RecommendationId.of_json in
+      let filePath = field_map json__ "FilePath" FilePath.of_json in
       make ?severity ?ruleMetadata ?recommendationCategory ?description
         ?endLine ?startLine ?recommendationId ?filePath ()
     let to_json v = composed_to_json to_value v
@@ -1691,11 +1717,11 @@ module RecommendationFeedbackSummary =
           (Xml.child xml_arg0 "RecommendationId") in
       make ?userId ?reactions ?recommendationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map json "UserId" UserId.of_json in
-      let reactions = field_map json "Reactions" Reactions.of_json in
+    let of_json json__ =
+      let userId = field_map json__ "UserId" UserId.of_json in
+      let reactions = field_map json__ "Reactions" Reactions.of_json in
       let recommendationId =
-        field_map json "RecommendationId" RecommendationId.of_json in
+        field_map json__ "RecommendationId" RecommendationId.of_json in
       make ?userId ?reactions ?recommendationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about recommendation feedback summaries."]
@@ -1809,24 +1835,24 @@ module CodeReviewSummary =
         ?lastUpdatedTimeStamp ?createdTimeStamp ?state ?providerType ?owner
         ?repositoryName ?codeReviewArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceCodeType =
-        field_map json "SourceCodeType" SourceCodeType.of_json in
+        field_map json__ "SourceCodeType" SourceCodeType.of_json in
       let metricsSummary =
-        field_map json "MetricsSummary" MetricsSummary.of_json in
+        field_map json__ "MetricsSummary" MetricsSummary.of_json in
       let pullRequestId =
-        field_map json "PullRequestId" PullRequestId.of_json in
-      let type_ = field_map json "Type" Type.of_json in
+        field_map json__ "PullRequestId" PullRequestId.of_json in
+      let type_ = field_map json__ "Type" Type.of_json in
       let lastUpdatedTimeStamp =
-        field_map json "LastUpdatedTimeStamp" TimeStamp.of_json in
+        field_map json__ "LastUpdatedTimeStamp" TimeStamp.of_json in
       let createdTimeStamp =
-        field_map json "CreatedTimeStamp" TimeStamp.of_json in
-      let state = field_map json "State" JobState.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
-      let owner = field_map json "Owner" Owner.of_json in
-      let repositoryName = field_map json "RepositoryName" Name.of_json in
-      let codeReviewArn = field_map json "CodeReviewArn" Arn.of_json in
-      let name = field_map json "Name" Name.of_json in
+        field_map json__ "CreatedTimeStamp" TimeStamp.of_json in
+      let state = field_map json__ "State" JobState.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
+      let owner = field_map json__ "Owner" Owner.of_json in
+      let repositoryName = field_map json__ "RepositoryName" Name.of_json in
+      let codeReviewArn = field_map json__ "CodeReviewArn" Arn.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       make ?sourceCodeType ?metricsSummary ?pullRequestId ?type_
         ?lastUpdatedTimeStamp ?createdTimeStamp ?state ?providerType ?owner
         ?repositoryName ?codeReviewArn ?name ()
@@ -1838,7 +1864,7 @@ module KMSKeyDetails =
       {
       kMSKeyId: KMSKeyId.t option
         [@ocaml.doc
-          "The ID of the Amazon Web Services KMS key that is associated with a respository association."];
+          "The ID of the Amazon Web Services KMS key that is associated with a repository association."];
       encryptionOption: EncryptionOption.t option
         [@ocaml.doc
           "The encryption option for a repository association. It is either owned by Amazon Web Services Key Management Service (KMS) (AWS_OWNED_CMK) or customer managed (CUSTOMER_MANAGED_CMK)."]}
@@ -1858,14 +1884,14 @@ module KMSKeyDetails =
         (Option.map ~f:KMSKeyId.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
       make ?encryptionOption ?kMSKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionOption =
-        field_map json "EncryptionOption" EncryptionOption.of_json in
-      let kMSKeyId = field_map json "KMSKeyId" KMSKeyId.of_json in
+        field_map json__ "EncryptionOption" EncryptionOption.of_json in
+      let kMSKeyId = field_map json__ "KMSKeyId" KMSKeyId.of_json in
       make ?encryptionOption ?kMSKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that contains: The encryption option for a repository association. It is either owned by Amazon Web Services Key Management Service (KMS) (AWS_OWNED_CMK) or customer managed (CUSTOMER_MANAGED_CMK). The ID of the Amazon Web Services KMS key that is associated with a respository association."]
+       "An object that contains: The encryption option for a repository association. It is either owned by Amazon Web Services Key Management Service (KMS) (AWS_OWNED_CMK) or customer managed (CUSTOMER_MANAGED_CMK). The ID of the Amazon Web Services KMS key that is associated with a repository association."]
 module StateReason =
   struct
     type nonrec t = string
@@ -1888,6 +1914,9 @@ module AnalysisTypes =
   struct
     type nonrec t = AnalysisType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AnalysisType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1930,24 +1959,63 @@ module AssociationArn =
     let of_json j = string_of_json ~kind:"AssociationArn" j
     let to_json = simple_to_json to_value
   end
+module ConfigFileState =
+  struct
+    type nonrec t =
+      | Present 
+      | Absent 
+      | PresentWithErrors 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Present -> "Present"
+      | Absent -> "Absent"
+      | PresentWithErrors -> "PresentWithErrors"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Present" -> Present
+      | "Absent" -> Absent
+      | "PresentWithErrors" -> PresentWithErrors
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ConfigFileState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ConfigFileState" j)
+    let to_json = simple_to_json to_value
+  end
 module Metrics =
   struct
     type nonrec t =
       {
-      meteredLinesOfCodeCount: MeteredLinesOfCodeCount.t option
+      meteredLinesOfCodeCount: LinesOfCodeCount.t option
         [@ocaml.doc
-          "MeteredLinesOfCode is the number of lines of code in the repository where the code review happened. This does not include non-code lines such as comments and blank lines."];
+          "MeteredLinesOfCodeCount is the number of lines of code in the repository where the code review happened. This does not include non-code lines such as comments and blank lines."];
+      suppressedLinesOfCodeCount: LinesOfCodeCount.t option
+        [@ocaml.doc
+          "SuppressedLinesOfCodeCount is the number of lines of code in the repository where the code review happened that CodeGuru Reviewer did not analyze. The lines suppressed in the analysis is based on the excludeFiles variable in the aws-codeguru-reviewer.yml file. This number does not include non-code lines such as comments and blank lines."];
       findingsCount: FindingsCount.t option
         [@ocaml.doc
           "Total number of recommendations found in the code review."]}
     let make ?meteredLinesOfCodeCount =
-      fun ?findingsCount ->
-        fun () -> { meteredLinesOfCodeCount; findingsCount }
+      fun ?suppressedLinesOfCodeCount ->
+        fun ?findingsCount ->
+          fun () ->
+            {
+              meteredLinesOfCodeCount;
+              suppressedLinesOfCodeCount;
+              findingsCount
+            }
     let to_value x =
       structure_to_value
         [("MeteredLinesOfCodeCount",
-           (Option.map x.meteredLinesOfCodeCount
-              ~f:MeteredLinesOfCodeCount.to_value));
+           (Option.map x.meteredLinesOfCodeCount ~f:LinesOfCodeCount.to_value));
+        ("SuppressedLinesOfCodeCount",
+          (Option.map x.suppressedLinesOfCodeCount
+             ~f:LinesOfCodeCount.to_value));
         ("FindingsCount",
           (Option.map x.findingsCount ~f:FindingsCount.to_value))]
     let to_query v = to_query to_value v
@@ -1955,18 +2023,25 @@ module Metrics =
       let findingsCount =
         (Option.map ~f:FindingsCount.of_xml)
           (Xml.child xml_arg0 "FindingsCount") in
+      let suppressedLinesOfCodeCount =
+        (Option.map ~f:LinesOfCodeCount.of_xml)
+          (Xml.child xml_arg0 "SuppressedLinesOfCodeCount") in
       let meteredLinesOfCodeCount =
-        (Option.map ~f:MeteredLinesOfCodeCount.of_xml)
+        (Option.map ~f:LinesOfCodeCount.of_xml)
           (Xml.child xml_arg0 "MeteredLinesOfCodeCount") in
-      make ?findingsCount ?meteredLinesOfCodeCount ()
+      make ?findingsCount ?suppressedLinesOfCodeCount
+        ?meteredLinesOfCodeCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let findingsCount =
-        field_map json "FindingsCount" FindingsCount.of_json in
+        field_map json__ "FindingsCount" FindingsCount.of_json in
+      let suppressedLinesOfCodeCount =
+        field_map json__ "SuppressedLinesOfCodeCount"
+          LinesOfCodeCount.of_json in
       let meteredLinesOfCodeCount =
-        field_map json "MeteredLinesOfCodeCount"
-          MeteredLinesOfCodeCount.of_json in
-      make ?findingsCount ?meteredLinesOfCodeCount ()
+        field_map json__ "MeteredLinesOfCodeCount" LinesOfCodeCount.of_json in
+      make ?findingsCount ?suppressedLinesOfCodeCount
+        ?meteredLinesOfCodeCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the statistics from the code review."]
 module RepositoryAnalysis =
@@ -1996,15 +2071,16 @@ module RepositoryAnalysis =
           (Xml.child xml_arg0 "RepositoryHead") in
       make ?sourceCodeType ?repositoryHead ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceCodeType =
-        field_map json "SourceCodeType" SourceCodeType.of_json in
+        field_map json__ "SourceCodeType" SourceCodeType.of_json in
       let repositoryHead =
-        field_map json "RepositoryHead" RepositoryHeadSourceCodeType.of_json in
+        field_map json__ "RepositoryHead"
+          RepositoryHeadSourceCodeType.of_json in
       make ?sourceCodeType ?repositoryHead ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A code review type that analyzes all code under a specified branch in an associated repository. The associated repository is specified using its ARN when you call CreateCodeReview ."]
+       "A code review type that analyzes all code under a specified branch in an associated repository. The associated repository is specified using its ARN when you call CreateCodeReview."]
 module CodeCommitRepository =
   struct
     type nonrec t =
@@ -2022,8 +2098,8 @@ module CodeCommitRepository =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" Name.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an Amazon Web Services CodeCommit repository. The CodeCommit repository must be in the same Amazon Web Services Region and Amazon Web Services account where its CodeGuru Reviewer code reviews are configured."]
@@ -2051,9 +2127,9 @@ module S3Repository =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~bucketName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bucketName = field_map_exn json "BucketName" S3BucketName.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let bucketName = field_map_exn json__ "BucketName" S3BucketName.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ~bucketName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a repository in an S3 bucket."]
@@ -2068,7 +2144,7 @@ module ThirdPartySourceRepository =
           "The Amazon Resource Name (ARN) of an Amazon Web Services CodeStar Connections connection. Its format is arn:aws:codestar-connections:region-id:aws-account_id:connection/connection-id. For more information, see Connection in the Amazon Web Services CodeStar Connections API Reference."];
       owner: Owner.t
         [@ocaml.doc
-          "The owner of the repository. For a GitHub, GitHub Enterprise, or Bitbucket repository, this is the username for the account that owns the repository. For an S3 repository, this can be the username or Amazon Web Services account ID."]}
+          "The owner of the repository. For a GitHub, GitHub Enterprise, or Bitbucket repository, this is the username for the account that owns the repository. For an S3 repository, this can be the username or Amazon Web Services account ID"]}
     let context_ = "ThirdPartySourceRepository"
     let make ~name =
       fun ~connectionArn ->
@@ -2089,11 +2165,11 @@ module ThirdPartySourceRepository =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~owner ~connectionArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let owner = field_map_exn json "Owner" Owner.of_json in
+    let of_json json__ =
+      let owner = field_map_exn json__ "Owner" Owner.of_json in
       let connectionArn =
-        field_map_exn json "ConnectionArn" ConnectionArn.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+        field_map_exn json__ "ConnectionArn" ConnectionArn.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ~owner ~connectionArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2112,8 +2188,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2132,8 +2208,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource specified in the request was not found."]
@@ -2151,8 +2227,8 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input fails to satisfy the specified constraints."]
@@ -2164,6 +2240,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2208,6 +2287,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2229,8 +2310,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2249,8 +2330,8 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
@@ -2276,6 +2357,9 @@ module RepositoryAssociationSummaries =
   struct
     type nonrec t = RepositoryAssociationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryAssociationSummary.to_value)) |>
         (fun x -> `List x)
@@ -2324,6 +2408,9 @@ module Names =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Name.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2351,6 +2438,9 @@ module Owners =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Owner.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2378,6 +2468,9 @@ module ProviderTypes =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProviderType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2406,6 +2499,9 @@ module RepositoryAssociationStates =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryAssociationState.to_value)) |>
         (fun x -> `List x)
@@ -2432,6 +2528,9 @@ module RecommendationSummaries =
   struct
     type nonrec t = RecommendationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationSummary.to_value)) |>
         (fun x -> `List x)
@@ -2477,6 +2576,9 @@ module RecommendationFeedbackSummaries =
   struct
     type nonrec t = RecommendationFeedbackSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationFeedbackSummary.to_value)) |>
         (fun x -> `List x)
@@ -2508,6 +2610,9 @@ module RecommendationIds =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2538,6 +2643,9 @@ module UserIds =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2561,6 +2669,9 @@ module CodeReviewSummaries =
   struct
     type nonrec t = CodeReviewSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CodeReviewSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2590,6 +2701,9 @@ module JobStates =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2638,6 +2752,9 @@ module RepositoryNames =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Name.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2672,8 +2789,8 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2692,8 +2809,8 @@ module NotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource specified in the request was not found."]
@@ -2717,7 +2834,7 @@ module RepositoryAssociation =
         [@ocaml.doc "The provider type of the repository association."];
       state: RepositoryAssociationState.t option
         [@ocaml.doc
-          "The state of the repository association. The valid repository association states are: Associated: The repository association is complete. Associating: CodeGuru Reviewer is: Setting up pull request notifications. This is required for pull requests to trigger a CodeGuru Reviewer review. If your repository ProviderType is GitHub, GitHub Enterprise Server, or Bitbucket, CodeGuru Reviewer creates webhooks in your repository to trigger CodeGuru Reviewer reviews. If you delete these webhooks, reviews of code in your repository cannot be triggered. Setting up source code access. This is required for CodeGuru Reviewer to securely clone code in your repository. Failed: The repository failed to associate or disassociate. Disassociating: CodeGuru Reviewer is removing the repository's pull request notifications and source code access. Disassociated: CodeGuru Reviewer successfully disassociated the repository. You can create a new association with this repository if you want to review source code in it later. You can control access to code reviews created in an associated repository with tags after it has been disassociated. For more information, see Using tags to control access to associated repositories in the Amazon CodeGuru Reviewer User Guide."];
+          "The state of the repository association. The valid repository association states are: Associated: The repository association is complete. Associating: CodeGuru Reviewer is: Setting up pull request notifications. This is required for pull requests to trigger a CodeGuru Reviewer review. If your repository ProviderType is GitHub, GitHub Enterprise Server, or Bitbucket, CodeGuru Reviewer creates webhooks in your repository to trigger CodeGuru Reviewer reviews. If you delete these webhooks, reviews of code in your repository cannot be triggered. Setting up source code access. This is required for CodeGuru Reviewer to securely clone code in your repository. Failed: The repository failed to associate or disassociate. Disassociating: CodeGuru Reviewer is removing the repository's pull request notifications and source code access. Disassociated: CodeGuru Reviewer successfully disassociated the repository. You can create a new association with this repository if you want to review source code in it later. You can control access to code reviews created in anassociated repository with tags after it has been disassociated. For more information, see Using tags to control access to associated repositories in the Amazon CodeGuru Reviewer User Guide."];
       stateReason: StateReason.t option
         [@ocaml.doc
           "A description of why the repository association is in the current state."];
@@ -2729,7 +2846,7 @@ module RepositoryAssociation =
           "The time, in milliseconds since the epoch, when the repository association was created."];
       kMSKeyDetails: KMSKeyDetails.t option
         [@ocaml.doc
-          "A KMSKeyDetails object that contains: The encryption option for this repository association. It is either owned by Amazon Web Services Key Management Service (KMS) (AWS_OWNED_CMK) or customer managed (CUSTOMER_MANAGED_CMK). The ID of the Amazon Web Services KMS key that is associated with this respository association."];
+          "A KMSKeyDetails object that contains: The encryption option for this repository association. It is either owned by Amazon Web Services Key Management Service (KMS) (AWS_OWNED_CMK) or customer managed (CUSTOMER_MANAGED_CMK). The ID of the Amazon Web Services KMS key that is associated with this repository association."];
       s3RepositoryDetails: S3RepositoryDetails.t option }
     let make ?associationId =
       fun ?associationArn ->
@@ -2816,25 +2933,25 @@ module RepositoryAssociation =
         ?lastUpdatedTimeStamp ?stateReason ?state ?providerType ?owner ?name
         ?connectionArn ?associationArn ?associationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3RepositoryDetails =
-        field_map json "S3RepositoryDetails" S3RepositoryDetails.of_json in
+        field_map json__ "S3RepositoryDetails" S3RepositoryDetails.of_json in
       let kMSKeyDetails =
-        field_map json "KMSKeyDetails" KMSKeyDetails.of_json in
+        field_map json__ "KMSKeyDetails" KMSKeyDetails.of_json in
       let createdTimeStamp =
-        field_map json "CreatedTimeStamp" TimeStamp.of_json in
+        field_map json__ "CreatedTimeStamp" TimeStamp.of_json in
       let lastUpdatedTimeStamp =
-        field_map json "LastUpdatedTimeStamp" TimeStamp.of_json in
-      let stateReason = field_map json "StateReason" StateReason.of_json in
-      let state = field_map json "State" RepositoryAssociationState.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
-      let owner = field_map json "Owner" Owner.of_json in
-      let name = field_map json "Name" Name.of_json in
+        field_map json__ "LastUpdatedTimeStamp" TimeStamp.of_json in
+      let stateReason = field_map json__ "StateReason" StateReason.of_json in
+      let state = field_map json__ "State" RepositoryAssociationState.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
+      let owner = field_map json__ "Owner" Owner.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
-      let associationArn = field_map json "AssociationArn" Arn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
+      let associationArn = field_map json__ "AssociationArn" Arn.of_json in
       let associationId =
-        field_map json "AssociationId" AssociationId.of_json in
+        field_map json__ "AssociationId" AssociationId.of_json in
       make ?s3RepositoryDetails ?kMSKeyDetails ?createdTimeStamp
         ?lastUpdatedTimeStamp ?stateReason ?state ?providerType ?owner ?name
         ?connectionArn ?associationArn ?associationId ()
@@ -2907,16 +3024,16 @@ module RecommendationFeedback =
       make ?lastUpdatedTimeStamp ?createdTimeStamp ?userId ?reactions
         ?recommendationId ?codeReviewArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedTimeStamp =
-        field_map json "LastUpdatedTimeStamp" TimeStamp.of_json in
+        field_map json__ "LastUpdatedTimeStamp" TimeStamp.of_json in
       let createdTimeStamp =
-        field_map json "CreatedTimeStamp" TimeStamp.of_json in
-      let userId = field_map json "UserId" UserId.of_json in
-      let reactions = field_map json "Reactions" Reactions.of_json in
+        field_map json__ "CreatedTimeStamp" TimeStamp.of_json in
+      let userId = field_map json__ "UserId" UserId.of_json in
+      let reactions = field_map json__ "Reactions" Reactions.of_json in
       let recommendationId =
-        field_map json "RecommendationId" RecommendationId.of_json in
-      let codeReviewArn = field_map json "CodeReviewArn" Arn.of_json in
+        field_map json__ "RecommendationId" RecommendationId.of_json in
+      let codeReviewArn = field_map json__ "CodeReviewArn" Arn.of_json in
       make ?lastUpdatedTimeStamp ?createdTimeStamp ?userId ?reactions
         ?recommendationId ?codeReviewArn ()
     let to_json v = composed_to_json to_value v
@@ -2955,12 +3072,15 @@ module CodeReview =
         [@ocaml.doc "The type of the source code for the code review."];
       associationArn: AssociationArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the RepositoryAssociation that contains the reviewed source code. You can retrieve associated repository ARNs by calling ListRepositoryAssociations ."];
+          "The Amazon Resource Name (ARN) of the RepositoryAssociation that contains the reviewed source code. You can retrieve associated repository ARNs by calling ListRepositoryAssociations."];
       metrics: Metrics.t option
         [@ocaml.doc "The statistics from the code review."];
       analysisTypes: AnalysisTypes.t option
         [@ocaml.doc
-          "They types of analysis performed during a repository analysis or a pull request review. You can specify either Security, CodeQuality, or both."]}
+          "The types of analysis performed during a repository analysis or a pull request review. You can specify either Security, CodeQuality, or both."];
+      configFileState: ConfigFileState.t option
+        [@ocaml.doc
+          "The state of the aws-codeguru-reviewer.yml configuration file that allows the configuration of the CodeGuru Reviewer analysis. The file either exists, doesn't exist, or exists with errors at the root directory of your repository."]}
     let make ?name =
       fun ?codeReviewArn ->
         fun ?repositoryName ->
@@ -2976,24 +3096,26 @@ module CodeReview =
                             fun ?associationArn ->
                               fun ?metrics ->
                                 fun ?analysisTypes ->
-                                  fun () ->
-                                    {
-                                      name;
-                                      codeReviewArn;
-                                      repositoryName;
-                                      owner;
-                                      providerType;
-                                      state;
-                                      stateReason;
-                                      createdTimeStamp;
-                                      lastUpdatedTimeStamp;
-                                      type_;
-                                      pullRequestId;
-                                      sourceCodeType;
-                                      associationArn;
-                                      metrics;
-                                      analysisTypes
-                                    }
+                                  fun ?configFileState ->
+                                    fun () ->
+                                      {
+                                        name;
+                                        codeReviewArn;
+                                        repositoryName;
+                                        owner;
+                                        providerType;
+                                        state;
+                                        stateReason;
+                                        createdTimeStamp;
+                                        lastUpdatedTimeStamp;
+                                        type_;
+                                        pullRequestId;
+                                        sourceCodeType;
+                                        associationArn;
+                                        metrics;
+                                        analysisTypes;
+                                        configFileState
+                                      }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:Name.to_value));
@@ -3017,9 +3139,14 @@ module CodeReview =
           (Option.map x.associationArn ~f:AssociationArn.to_value));
         ("Metrics", (Option.map x.metrics ~f:Metrics.to_value));
         ("AnalysisTypes",
-          (Option.map x.analysisTypes ~f:AnalysisTypes.to_value))]
+          (Option.map x.analysisTypes ~f:AnalysisTypes.to_value));
+        ("ConfigFileState",
+          (Option.map x.configFileState ~f:ConfigFileState.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let configFileState =
+        (Option.map ~f:ConfigFileState.of_xml)
+          (Xml.child xml_arg0 "ConfigFileState") in
       let analysisTypes =
         (Option.map ~f:AnalysisTypes.of_xml)
           (Xml.child xml_arg0 "AnalysisTypes") in
@@ -3054,37 +3181,39 @@ module CodeReview =
       let codeReviewArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CodeReviewArn") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?analysisTypes ?metrics ?associationArn ?sourceCodeType
-        ?pullRequestId ?type_ ?lastUpdatedTimeStamp ?createdTimeStamp
-        ?stateReason ?state ?providerType ?owner ?repositoryName
-        ?codeReviewArn ?name ()
+      make ?configFileState ?analysisTypes ?metrics ?associationArn
+        ?sourceCodeType ?pullRequestId ?type_ ?lastUpdatedTimeStamp
+        ?createdTimeStamp ?stateReason ?state ?providerType ?owner
+        ?repositoryName ?codeReviewArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let configFileState =
+        field_map json__ "ConfigFileState" ConfigFileState.of_json in
       let analysisTypes =
-        field_map json "AnalysisTypes" AnalysisTypes.of_json in
-      let metrics = field_map json "Metrics" Metrics.of_json in
+        field_map json__ "AnalysisTypes" AnalysisTypes.of_json in
+      let metrics = field_map json__ "Metrics" Metrics.of_json in
       let associationArn =
-        field_map json "AssociationArn" AssociationArn.of_json in
+        field_map json__ "AssociationArn" AssociationArn.of_json in
       let sourceCodeType =
-        field_map json "SourceCodeType" SourceCodeType.of_json in
+        field_map json__ "SourceCodeType" SourceCodeType.of_json in
       let pullRequestId =
-        field_map json "PullRequestId" PullRequestId.of_json in
-      let type_ = field_map json "Type" Type.of_json in
+        field_map json__ "PullRequestId" PullRequestId.of_json in
+      let type_ = field_map json__ "Type" Type.of_json in
       let lastUpdatedTimeStamp =
-        field_map json "LastUpdatedTimeStamp" TimeStamp.of_json in
+        field_map json__ "LastUpdatedTimeStamp" TimeStamp.of_json in
       let createdTimeStamp =
-        field_map json "CreatedTimeStamp" TimeStamp.of_json in
-      let stateReason = field_map json "StateReason" StateReason.of_json in
-      let state = field_map json "State" JobState.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
-      let owner = field_map json "Owner" Owner.of_json in
-      let repositoryName = field_map json "RepositoryName" Name.of_json in
-      let codeReviewArn = field_map json "CodeReviewArn" Arn.of_json in
-      let name = field_map json "Name" Name.of_json in
-      make ?analysisTypes ?metrics ?associationArn ?sourceCodeType
-        ?pullRequestId ?type_ ?lastUpdatedTimeStamp ?createdTimeStamp
-        ?stateReason ?state ?providerType ?owner ?repositoryName
-        ?codeReviewArn ?name ()
+        field_map json__ "CreatedTimeStamp" TimeStamp.of_json in
+      let stateReason = field_map json__ "StateReason" StateReason.of_json in
+      let state = field_map json__ "State" JobState.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
+      let owner = field_map json__ "Owner" Owner.of_json in
+      let repositoryName = field_map json__ "RepositoryName" Name.of_json in
+      let codeReviewArn = field_map json__ "CodeReviewArn" Arn.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      make ?configFileState ?analysisTypes ?metrics ?associationArn
+        ?sourceCodeType ?pullRequestId ?type_ ?lastUpdatedTimeStamp
+        ?createdTimeStamp ?stateReason ?state ?providerType ?owner
+        ?repositoryName ?codeReviewArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a code review. A code review belongs to the associated repository that contains the reviewed code."]
@@ -3134,7 +3263,7 @@ module CodeReviewType =
       {
       repositoryAnalysis: RepositoryAnalysis.t
         [@ocaml.doc
-          "A code review that analyzes all code under a specified branch in an associated repository. The associated repository is specified using its ARN in CreateCodeReview ."];
+          "A code review that analyzes all code under a specified branch in an associated repository. The associated repository is specified using its ARN in CreateCodeReview."];
       analysisTypes: AnalysisTypes.t option
         [@ocaml.doc
           "They types of analysis performed during a repository analysis or a pull request review. You can specify either Security, CodeQuality, or both."]}
@@ -3158,15 +3287,15 @@ module CodeReviewType =
           (Xml.child_exn ~context:context_ xml_arg0 "RepositoryAnalysis") in
       make ?analysisTypes ~repositoryAnalysis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let analysisTypes =
-        field_map json "AnalysisTypes" AnalysisTypes.of_json in
+        field_map json__ "AnalysisTypes" AnalysisTypes.of_json in
       let repositoryAnalysis =
-        field_map_exn json "RepositoryAnalysis" RepositoryAnalysis.of_json in
+        field_map_exn json__ "RepositoryAnalysis" RepositoryAnalysis.of_json in
       make ?analysisTypes ~repositoryAnalysis ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The type of a code review. There are two code review types: PullRequest - A code review that is automatically triggered by a pull request on an associated repository. RepositoryAnalysis - A code review that analyzes all code under a specified branch in an associated repository. The associated repository is specified using its ARN in CreateCodeReview ."]
+       "The type of a code review. There are two code review types: PullRequest - A code review that is automatically triggered by a pull request on an associated repository. RepositoryAnalysis - A code review that analyzes all code under a specified branch in an associated repository. The associated repository is specified using its ARN in CreateCodeReview."]
 module Repository =
   struct
     type nonrec t =
@@ -3211,15 +3340,15 @@ module Repository =
           (Xml.child xml_arg0 "CodeCommit") in
       make ?s3Bucket ?gitHubEnterpriseServer ?bitbucket ?codeCommit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Bucket = field_map json "S3Bucket" S3Repository.of_json in
+    let of_json json__ =
+      let s3Bucket = field_map json__ "S3Bucket" S3Repository.of_json in
       let gitHubEnterpriseServer =
-        field_map json "GitHubEnterpriseServer"
+        field_map json__ "GitHubEnterpriseServer"
           ThirdPartySourceRepository.of_json in
       let bitbucket =
-        field_map json "Bitbucket" ThirdPartySourceRepository.of_json in
+        field_map json__ "Bitbucket" ThirdPartySourceRepository.of_json in
       let codeCommit =
-        field_map json "CodeCommit" CodeCommitRepository.of_json in
+        field_map json__ "CodeCommit" CodeCommitRepository.of_json in
       make ?s3Bucket ?gitHubEnterpriseServer ?bitbucket ?codeCommit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3287,7 +3416,7 @@ module UntagResourceRequest =
       {
       resourceArn: AssociationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations ."];
+          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations."];
       tagKeys: TagKeyList.t
         [@ocaml.doc
           "A list of the keys for each tag you want to remove from an associated repository."]}
@@ -3308,10 +3437,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" AssociationArn.of_json in
+        field_map_exn json__ "resourceArn" AssociationArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from an associated repository."]
@@ -3378,7 +3507,7 @@ module TagResourceRequest =
       {
       resourceArn: AssociationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations ."];
+          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations."];
       tags: TagMap.t
         [@ocaml.doc
           "An array of key-value pairs used to tag an associated repository. A tag is a custom attribute label with two parts: A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case sensitive."]}
@@ -3397,10 +3526,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" AssociationArn.of_json in
+        field_map_exn json__ "resourceArn" AssociationArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds one or more tags to an associated repository."]
@@ -3516,11 +3645,11 @@ module PutRecommendationFeedbackRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CodeReviewArn") in
       make ~reactions ~recommendationId ~codeReviewArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reactions = field_map_exn json "Reactions" Reactions.of_json in
+    let of_json json__ =
+      let reactions = field_map_exn json__ "Reactions" Reactions.of_json in
       let recommendationId =
-        field_map_exn json "RecommendationId" RecommendationId.of_json in
-      let codeReviewArn = field_map_exn json "CodeReviewArn" Arn.of_json in
+        field_map_exn json__ "RecommendationId" RecommendationId.of_json in
+      let codeReviewArn = field_map_exn json__ "CodeReviewArn" Arn.of_json in
       make ~reactions ~recommendationId ~codeReviewArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3585,8 +3714,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the list of tags associated with an associated repository resource."]
@@ -3596,7 +3725,7 @@ module ListTagsForResourceRequest =
       {
       resourceArn: AssociationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations ."]}
+          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -3609,9 +3738,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" AssociationArn.of_json in
+        field_map_exn json__ "resourceArn" AssociationArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3689,15 +3818,15 @@ module ListRepositoryAssociationsResponse =
           (Xml.child xml_arg0 "RepositoryAssociationSummaries") in
       make ?nextToken ?repositoryAssociationSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let repositoryAssociationSummaries =
-        field_map json "RepositoryAssociationSummaries"
+        field_map json__ "RepositoryAssociationSummaries"
           RepositoryAssociationSummaries.of_json in
       make ?nextToken ?repositoryAssociationSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of RepositoryAssociationSummary objects that contain summary information about a repository association. You can filter the returned list by ProviderType , Name , State , and Owner ."]
+       "Returns a list of RepositoryAssociationSummary objects that contain summary information about a repository association. You can filter the returned list by ProviderType, Name, State, and Owner."]
 module ListRepositoryAssociationsRequest =
   struct
     type nonrec t =
@@ -3706,7 +3835,7 @@ module ListRepositoryAssociationsRequest =
         [@ocaml.doc "List of provider types to use as a filter."];
       states: RepositoryAssociationStates.t option
         [@ocaml.doc
-          "List of repository association states to use as a filter. The valid repository association states are: Associated: The repository association is complete. Associating: CodeGuru Reviewer is: Setting up pull request notifications. This is required for pull requests to trigger a CodeGuru Reviewer review. If your repository ProviderType is GitHub, GitHub Enterprise Server, or Bitbucket, CodeGuru Reviewer creates webhooks in your repository to trigger CodeGuru Reviewer reviews. If you delete these webhooks, reviews of code in your repository cannot be triggered. Setting up source code access. This is required for CodeGuru Reviewer to securely clone code in your repository. Failed: The repository failed to associate or disassociate. Disassociating: CodeGuru Reviewer is removing the repository's pull request notifications and source code access. Disassociated: CodeGuru Reviewer successfully disassociated the repository. You can create a new association with this repository if you want to review source code in it later. You can control access to code reviews created in an associated repository with tags after it has been disassociated. For more information, see Using tags to control access to associated repositories in the Amazon CodeGuru Reviewer User Guide."];
+          "List of repository association states to use as a filter. The valid repository association states are: Associated: The repository association is complete. Associating: CodeGuru Reviewer is: Setting up pull request notifications. This is required for pull requests to trigger a CodeGuru Reviewer review. If your repository ProviderType is GitHub, GitHub Enterprise Server, or Bitbucket, CodeGuru Reviewer creates webhooks in your repository to trigger CodeGuru Reviewer reviews. If you delete these webhooks, reviews of code in your repository cannot be triggered. Setting up source code access. This is required for CodeGuru Reviewer to securely clone code in your repository. Failed: The repository failed to associate or disassociate. Disassociating: CodeGuru Reviewer is removing the repository's pull request notifications and source code access. Disassociated: CodeGuru Reviewer successfully disassociated the repository. You can create a new association with this repository if you want to review source code in it later. You can control access to code reviews created in anassociated repository with tags after it has been disassociated. For more information, see Using tags to control access to associated repositories in the Amazon CodeGuru Reviewer User Guide."];
       names: Names.t option
         [@ocaml.doc "List of repository names to use as a filter."];
       owners: Owners.t option
@@ -3759,19 +3888,19 @@ module ListRepositoryAssociationsRequest =
           (Xml.child xml_arg0 "ProviderType") in
       make ?nextToken ?maxResults ?owners ?names ?states ?providerTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let owners = field_map json "Owners" Owners.of_json in
-      let names = field_map json "Names" Names.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let owners = field_map json__ "Owners" Owners.of_json in
+      let names = field_map json__ "Names" Names.of_json in
       let states =
-        field_map json "States" RepositoryAssociationStates.of_json in
+        field_map json__ "States" RepositoryAssociationStates.of_json in
       let providerTypes =
-        field_map json "ProviderTypes" ProviderTypes.of_json in
+        field_map json__ "ProviderTypes" ProviderTypes.of_json in
       make ?nextToken ?maxResults ?owners ?names ?states ?providerTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of RepositoryAssociationSummary objects that contain summary information about a repository association. You can filter the returned list by ProviderType , Name , State , and Owner ."]
+       "Returns a list of RepositoryAssociationSummary objects that contain summary information about a repository association. You can filter the returned list by ProviderType, Name, State, and Owner."]
 module ListRecommendationsResponse =
   struct
     type nonrec t =
@@ -3859,10 +3988,10 @@ module ListRecommendationsResponse =
           (Xml.child xml_arg0 "RecommendationSummaries") in
       make ?nextToken ?recommendationSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let recommendationSummaries =
-        field_map json "RecommendationSummaries"
+        field_map json__ "RecommendationSummaries"
           RecommendationSummaries.of_json in
       make ?nextToken ?recommendationSummaries ()
     let to_json v = composed_to_json to_value v
@@ -3901,11 +4030,11 @@ module ListRecommendationsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~codeReviewArn ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let codeReviewArn = field_map_exn json "CodeReviewArn" Arn.of_json in
+    let of_json json__ =
+      let codeReviewArn = field_map_exn json__ "CodeReviewArn" Arn.of_json in
       let maxResults =
-        field_map json "MaxResults" ListRecommendationsMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" ListRecommendationsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ~codeReviewArn ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4002,10 +4131,10 @@ module ListRecommendationFeedbackResponse =
           (Xml.child xml_arg0 "RecommendationFeedbackSummaries") in
       make ?nextToken ?recommendationFeedbackSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let recommendationFeedbackSummaries =
-        field_map json "RecommendationFeedbackSummaries"
+        field_map json__ "RecommendationFeedbackSummaries"
           RecommendationFeedbackSummaries.of_json in
       make ?nextToken ?recommendationFeedbackSummaries ()
     let to_json v = composed_to_json to_value v
@@ -4068,13 +4197,13 @@ module ListRecommendationFeedbackRequest =
       make ?recommendationIds ?userIds ~codeReviewArn ?maxResults ?nextToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationIds =
-        field_map json "RecommendationIds" RecommendationIds.of_json in
-      let userIds = field_map json "UserIds" UserIds.of_json in
-      let codeReviewArn = field_map_exn json "CodeReviewArn" Arn.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "RecommendationIds" RecommendationIds.of_json in
+      let userIds = field_map json__ "UserIds" UserIds.of_json in
+      let codeReviewArn = field_map_exn json__ "CodeReviewArn" Arn.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?recommendationIds ?userIds ~codeReviewArn ?maxResults ?nextToken
         ()
     let to_json v = composed_to_json to_value v
@@ -4158,10 +4287,10 @@ module ListCodeReviewsResponse =
           (Xml.child xml_arg0 "CodeReviewSummaries") in
       make ?nextToken ?codeReviewSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let codeReviewSummaries =
-        field_map json "CodeReviewSummaries" CodeReviewSummaries.of_json in
+        field_map json__ "CodeReviewSummaries" CodeReviewSummaries.of_json in
       make ?nextToken ?codeReviewSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4234,16 +4363,16 @@ module ListCodeReviewsRequest =
       make ?nextToken ?maxResults ~type_ ?repositoryNames ?states
         ?providerTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListCodeReviewsMaxResults.of_json in
-      let type_ = field_map_exn json "Type" Type.of_json in
+        field_map json__ "MaxResults" ListCodeReviewsMaxResults.of_json in
+      let type_ = field_map_exn json__ "Type" Type.of_json in
       let repositoryNames =
-        field_map json "RepositoryNames" RepositoryNames.of_json in
-      let states = field_map json "States" JobStates.of_json in
+        field_map json__ "RepositoryNames" RepositoryNames.of_json in
+      let states = field_map json__ "States" JobStates.of_json in
       let providerTypes =
-        field_map json "ProviderTypes" ProviderTypes.of_json in
+        field_map json__ "ProviderTypes" ProviderTypes.of_json in
       make ?nextToken ?maxResults ~type_ ?repositoryNames ?states
         ?providerTypes ()
     let to_json v = composed_to_json to_value v
@@ -4346,10 +4475,11 @@ module DisassociateRepositoryResponse =
           (Xml.child xml_arg0 "RepositoryAssociation") in
       make ?tags ?repositoryAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let repositoryAssociation =
-        field_map json "RepositoryAssociation" RepositoryAssociation.of_json in
+        field_map json__ "RepositoryAssociation"
+          RepositoryAssociation.of_json in
       make ?tags ?repositoryAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4360,7 +4490,7 @@ module DisassociateRepositoryRequest =
       {
       associationArn: AssociationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations ."]}
+          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations."]}
     let context_ = "DisassociateRepositoryRequest"
     let make ~associationArn = fun () -> { associationArn }
     let to_value x =
@@ -4374,9 +4504,9 @@ module DisassociateRepositoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationArn") in
       make ~associationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationArn =
-        field_map_exn json "AssociationArn" AssociationArn.of_json in
+        field_map_exn json__ "AssociationArn" AssociationArn.of_json in
       make ~associationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4469,10 +4599,11 @@ module DescribeRepositoryAssociationResponse =
           (Xml.child xml_arg0 "RepositoryAssociation") in
       make ?tags ?repositoryAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let repositoryAssociation =
-        field_map json "RepositoryAssociation" RepositoryAssociation.of_json in
+        field_map json__ "RepositoryAssociation"
+          RepositoryAssociation.of_json in
       make ?tags ?repositoryAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4483,7 +4614,7 @@ module DescribeRepositoryAssociationRequest =
       {
       associationArn: AssociationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations ."]}
+          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations."]}
     let context_ = "DescribeRepositoryAssociationRequest"
     let make ~associationArn = fun () -> { associationArn }
     let to_value x =
@@ -4497,9 +4628,9 @@ module DescribeRepositoryAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationArn") in
       make ~associationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationArn =
-        field_map_exn json "AssociationArn" AssociationArn.of_json in
+        field_map_exn json__ "AssociationArn" AssociationArn.of_json in
       make ~associationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4586,9 +4717,9 @@ module DescribeRecommendationFeedbackResponse =
           (Xml.child xml_arg0 "RecommendationFeedback") in
       make ?recommendationFeedback ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationFeedback =
-        field_map json "RecommendationFeedback"
+        field_map json__ "RecommendationFeedback"
           RecommendationFeedback.of_json in
       make ?recommendationFeedback ()
     let to_json v = composed_to_json to_value v
@@ -4629,11 +4760,11 @@ module DescribeRecommendationFeedbackRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CodeReviewArn") in
       make ?userId ~recommendationId ~codeReviewArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map json "UserId" UserId.of_json in
+    let of_json json__ =
+      let userId = field_map json__ "UserId" UserId.of_json in
       let recommendationId =
-        field_map_exn json "RecommendationId" RecommendationId.of_json in
-      let codeReviewArn = field_map_exn json "CodeReviewArn" Arn.of_json in
+        field_map_exn json__ "RecommendationId" RecommendationId.of_json in
+      let codeReviewArn = field_map_exn json__ "CodeReviewArn" Arn.of_json in
       make ?userId ~recommendationId ~codeReviewArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4717,8 +4848,8 @@ module DescribeCodeReviewResponse =
         (Option.map ~f:CodeReview.of_xml) (Xml.child xml_arg0 "CodeReview") in
       make ?codeReview ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let codeReview = field_map json "CodeReview" CodeReview.of_json in
+    let of_json json__ =
+      let codeReview = field_map json__ "CodeReview" CodeReview.of_json in
       make ?codeReview ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4741,8 +4872,8 @@ module DescribeCodeReviewRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CodeReviewArn") in
       make ~codeReviewArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let codeReviewArn = field_map_exn json "CodeReviewArn" Arn.of_json in
+    let of_json json__ =
+      let codeReviewArn = field_map_exn json__ "CodeReviewArn" Arn.of_json in
       make ~codeReviewArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4833,8 +4964,8 @@ module CreateCodeReviewResponse =
         (Option.map ~f:CodeReview.of_xml) (Xml.child xml_arg0 "CodeReview") in
       make ?codeReview ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let codeReview = field_map json "CodeReview" CodeReview.of_json in
+    let of_json json__ =
+      let codeReview = field_map json__ "CodeReview" CodeReview.of_json in
       make ?codeReview ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4848,7 +4979,7 @@ module CreateCodeReviewRequest =
           "The name of the code review. The name of each code review in your Amazon Web Services account must be unique."];
       repositoryAssociationArn: AssociationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations . A code review can only be created on an associated repository. This is the ARN of the associated repository."];
+          "The Amazon Resource Name (ARN) of the RepositoryAssociation object. You can retrieve this ARN by calling ListRepositoryAssociations. A code review can only be created on an associated repository. This is the ARN of the associated repository."];
       type_: CodeReviewType.t
         [@ocaml.doc
           "The type of code review to create. This is specified using a CodeReviewType object. You can create a code review only of type RepositoryAnalysis."];
@@ -4887,13 +5018,14 @@ module CreateCodeReviewRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?clientRequestToken ~type_ ~repositoryAssociationArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let type_ = field_map_exn json "Type" CodeReviewType.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let type_ = field_map_exn json__ "Type" CodeReviewType.of_json in
       let repositoryAssociationArn =
-        field_map_exn json "RepositoryAssociationArn" AssociationArn.of_json in
-      let name = field_map_exn json "Name" CodeReviewName.of_json in
+        field_map_exn json__ "RepositoryAssociationArn"
+          AssociationArn.of_json in
+      let name = field_map_exn json__ "Name" CodeReviewName.of_json in
       make ?clientRequestToken ~type_ ~repositoryAssociationArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4986,14 +5118,15 @@ module AssociateRepositoryResponse =
           (Xml.child xml_arg0 "RepositoryAssociation") in
       make ?tags ?repositoryAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let repositoryAssociation =
-        field_map json "RepositoryAssociation" RepositoryAssociation.of_json in
+        field_map json__ "RepositoryAssociation"
+          RepositoryAssociation.of_json in
       make ?tags ?repositoryAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use to associate an Amazon Web Services CodeCommit repository or a repostory managed by Amazon Web Services CodeStar Connections with Amazon CodeGuru Reviewer. When you associate a repository, CodeGuru Reviewer reviews source code changes in the repository's pull requests and provides automatic recommendations. You can view recommendations using the CodeGuru Reviewer console. For more information, see Recommendations in Amazon CodeGuru Reviewer in the Amazon CodeGuru Reviewer User Guide. If you associate a CodeCommit or S3 repository, it must be in the same Amazon Web Services Region and Amazon Web Services account where its CodeGuru Reviewer code reviews are configured. Bitbucket and GitHub Enterprise Server repositories are managed by Amazon Web Services CodeStar Connections to connect to CodeGuru Reviewer. For more information, see Associate a repository in the Amazon CodeGuru Reviewer User Guide. You cannot use the CodeGuru Reviewer SDK or the Amazon Web Services CLI to associate a GitHub repository with Amazon CodeGuru Reviewer. To associate a GitHub repository, use the console. For more information, see Getting started with CodeGuru Reviewer in the CodeGuru Reviewer User Guide."]
+       "Use to associate an Amazon Web Services CodeCommit repository or a repository managed by Amazon Web Services CodeStar Connections with Amazon CodeGuru Reviewer. When you associate a repository, CodeGuru Reviewer reviews source code changes in the repository's pull requests and provides automatic recommendations. You can view recommendations using the CodeGuru Reviewer console. For more information, see Recommendations in Amazon CodeGuru Reviewer in the Amazon CodeGuru Reviewer User Guide. If you associate a CodeCommit or S3 repository, it must be in the same Amazon Web Services Region and Amazon Web Services account where its CodeGuru Reviewer code reviews are configured. Bitbucket and GitHub Enterprise Server repositories are managed by Amazon Web Services CodeStar Connections to connect to CodeGuru Reviewer. For more information, see Associate a repository in the Amazon CodeGuru Reviewer User Guide. You cannot use the CodeGuru Reviewer SDK or the Amazon Web Services CLI to associate a GitHub repository with Amazon CodeGuru Reviewer. To associate a GitHub repository, use the console. For more information, see Getting started with CodeGuru Reviewer in the CodeGuru Reviewer User Guide."]
 module AssociateRepositoryRequest =
   struct
     type nonrec t =
@@ -5007,7 +5140,7 @@ module AssociateRepositoryRequest =
           "An array of key-value pairs used to tag an associated repository. A tag is a custom attribute label with two parts: A tag key (for example, CostCenter, Environment, Project, or Secret). Tag keys are case sensitive. An optional field known as a tag value (for example, 111122223333, Production, or a team name). Omitting the tag value is the same as using an empty string. Like tag keys, tag values are case sensitive."];
       kMSKeyDetails: KMSKeyDetails.t option
         [@ocaml.doc
-          "A KMSKeyDetails object that contains: The encryption option for this repository association. It is either owned by Amazon Web Services Key Management Service (KMS) (AWS_OWNED_CMK) or customer managed (CUSTOMER_MANAGED_CMK). The ID of the Amazon Web Services KMS key that is associated with this respository association."]}
+          "A KMSKeyDetails object that contains: The encryption option for this repository association. It is either owned by Amazon Web Services Key Management Service (KMS) (AWS_OWNED_CMK) or customer managed (CUSTOMER_MANAGED_CMK). The ID of the Amazon Web Services KMS key that is associated with this repository association."]}
     let context_ = "AssociateRepositoryRequest"
     let make ?clientRequestToken =
       fun ?tags ->
@@ -5036,14 +5169,14 @@ module AssociateRepositoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Repository") in
       make ?kMSKeyDetails ?tags ?clientRequestToken ~repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let kMSKeyDetails =
-        field_map json "KMSKeyDetails" KMSKeyDetails.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+        field_map json__ "KMSKeyDetails" KMSKeyDetails.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let repository = field_map_exn json "Repository" Repository.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let repository = field_map_exn json__ "Repository" Repository.of_json in
       make ?kMSKeyDetails ?tags ?clientRequestToken ~repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use to associate an Amazon Web Services CodeCommit repository or a repostory managed by Amazon Web Services CodeStar Connections with Amazon CodeGuru Reviewer. When you associate a repository, CodeGuru Reviewer reviews source code changes in the repository's pull requests and provides automatic recommendations. You can view recommendations using the CodeGuru Reviewer console. For more information, see Recommendations in Amazon CodeGuru Reviewer in the Amazon CodeGuru Reviewer User Guide. If you associate a CodeCommit or S3 repository, it must be in the same Amazon Web Services Region and Amazon Web Services account where its CodeGuru Reviewer code reviews are configured. Bitbucket and GitHub Enterprise Server repositories are managed by Amazon Web Services CodeStar Connections to connect to CodeGuru Reviewer. For more information, see Associate a repository in the Amazon CodeGuru Reviewer User Guide. You cannot use the CodeGuru Reviewer SDK or the Amazon Web Services CLI to associate a GitHub repository with Amazon CodeGuru Reviewer. To associate a GitHub repository, use the console. For more information, see Getting started with CodeGuru Reviewer in the CodeGuru Reviewer User Guide."]
+       "Use to associate an Amazon Web Services CodeCommit repository or a repository managed by Amazon Web Services CodeStar Connections with Amazon CodeGuru Reviewer. When you associate a repository, CodeGuru Reviewer reviews source code changes in the repository's pull requests and provides automatic recommendations. You can view recommendations using the CodeGuru Reviewer console. For more information, see Recommendations in Amazon CodeGuru Reviewer in the Amazon CodeGuru Reviewer User Guide. If you associate a CodeCommit or S3 repository, it must be in the same Amazon Web Services Region and Amazon Web Services account where its CodeGuru Reviewer code reviews are configured. Bitbucket and GitHub Enterprise Server repositories are managed by Amazon Web Services CodeStar Connections to connect to CodeGuru Reviewer. For more information, see Associate a repository in the Amazon CodeGuru Reviewer User Guide. You cannot use the CodeGuru Reviewer SDK or the Amazon Web Services CLI to associate a GitHub repository with Amazon CodeGuru Reviewer. To associate a GitHub repository, use the console. For more information, see Getting started with CodeGuru Reviewer in the CodeGuru Reviewer User Guide."]

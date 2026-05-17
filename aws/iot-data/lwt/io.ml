@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let delete_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteConnection input
 let delete_thing_shadow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteThingShadow input
 let get_retained_message ?endpoint_url ?cfg input =

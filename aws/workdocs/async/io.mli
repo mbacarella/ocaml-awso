@@ -72,6 +72,11 @@ val delete_document :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDocumentRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_document_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDocumentVersionRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val delete_folder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -210,6 +215,17 @@ val remove_resource_permission :
     ?cfg:Awso.Cfg.t ->
       RemoveResourcePermissionRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
+val restore_document_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RestoreDocumentVersionsRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val search_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SearchResourcesRequest.t ->
+        (SearchResourcesResponse.t, SearchResourcesResponse.error) Result.t
+          Async.Deferred.t
 val update_document :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

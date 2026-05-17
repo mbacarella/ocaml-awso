@@ -178,6 +178,9 @@ let create_topic =
        and attributes =
          flag "attributes" (optional json_arg) ~doc:"JSON TopicAttributesMap"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and dataProtectionPolicy =
+         flag "data-protection-policy" (optional string)
+           ~doc:"STRING attributeValue"
        and name = flag "name" (required string) ~doc:"STRING topicName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -185,7 +188,8 @@ let create_topic =
            (Values.CreateTopicInput.make
               ?attributes:(Option.map ~f:Values.TopicAttributesMap.of_json
                              attributes)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name ())
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?dataProtectionPolicy ~name ())
            (Some Values.CreateTopicResponse.to_json)
            (Some Values.CreateTopicResponse.error_to_json)])
 let delete_endpoint =
@@ -257,6 +261,24 @@ let delete_topic =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_topic (Values.DeleteTopicInput.make ~topicArn ()) None
            None])
+let get_data_protection_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING topicARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_protection_policy
+           (Values.GetDataProtectionPolicyInput.make ~resourceArn ())
+           (Some Values.GetDataProtectionPolicyResponse.to_json)
+           (Some Values.GetDataProtectionPolicyResponse.error_to_json)])
 let get_endpoint_attributes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -576,7 +598,7 @@ let publish =
        and targetArn =
          flag "target-arn" (optional string) ~doc:"STRING String"
        and phoneNumber =
-         flag "phone-number" (optional string) ~doc:"STRING String"
+         flag "phone-number" (optional string) ~doc:"STRING PhoneNumber"
        and subject = flag "subject" (optional string) ~doc:"STRING subject"
        and messageStructure =
          flag "message-structure" (optional string)
@@ -624,6 +646,26 @@ let publish_batch =
                                              publishBatchRequestEntries) ())
            (Some Values.PublishBatchResponse.to_json)
            (Some Values.PublishBatchResponse.error_to_json)])
+let put_data_protection_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING topicARN"
+       and dataProtectionPolicy =
+         flag "data-protection-policy" (required string)
+           ~doc:"STRING attributeValue" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_data_protection_policy
+           (Values.PutDataProtectionPolicyInput.make ~resourceArn
+              ~dataProtectionPolicy ()) None None])
 let remove_permission =
   Command.async ~summary:""
     ([%map_open.Command
@@ -874,6 +916,7 @@ let main =
     ("delete-platform-application", delete_platform_application);
     ("delete-s-m-s-sandbox-phone-number", delete_s_m_s_sandbox_phone_number);
     ("delete-topic", delete_topic);
+    ("get-data-protection-policy", get_data_protection_policy);
     ("get-endpoint-attributes", get_endpoint_attributes);
     ("get-platform-application-attributes",
       get_platform_application_attributes);
@@ -894,6 +937,7 @@ let main =
     ("opt-in-phone-number", opt_in_phone_number);
     ("publish", publish);
     ("publish-batch", publish_batch);
+    ("put-data-protection-policy", put_data_protection_policy);
     ("remove-permission", remove_permission);
     ("set-endpoint-attributes", set_endpoint_attributes);
     ("set-platform-application-attributes",

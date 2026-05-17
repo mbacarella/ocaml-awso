@@ -28,7 +28,12 @@ module String_ =
   struct
     type nonrec t = string
     let context_ = "String"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:10000) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]*"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -41,13 +46,151 @@ module FilterValue =
   struct
     type nonrec t = string
     let context_ = "FilterValue"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_pattern i ~pattern:"(^$|[\\s\\S]*\\S[\\s\\S]*)"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"FilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module EC2InstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "EC2InstanceType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:25) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\d\\.\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EC2InstanceType" j
+    let to_json = simple_to_json to_value
+  end
+module OfferingClass =
+  struct
+    type nonrec t =
+      | STANDARD 
+      | CONVERTIBLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD -> "STANDARD"
+      | CONVERTIBLE -> "CONVERTIBLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD" -> STANDARD
+      | "CONVERTIBLE" -> CONVERTIBLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OfferingClass" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OfferingClass" j)
+    let to_json = simple_to_json to_value
+  end
+module PurchasingOption =
+  struct
+    type nonrec t =
+      | ALL_UPFRONT 
+      | PARTIAL_UPFRONT 
+      | NO_UPFRONT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL_UPFRONT -> "ALL_UPFRONT"
+      | PARTIAL_UPFRONT -> "PARTIAL_UPFRONT"
+      | NO_UPFRONT -> "NO_UPFRONT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL_UPFRONT" -> ALL_UPFRONT
+      | "PARTIAL_UPFRONT" -> PARTIAL_UPFRONT
+      | "NO_UPFRONT" -> NO_UPFRONT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PurchasingOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PurchasingOption" j)
+    let to_json = simple_to_json to_value
+  end
+module TermLength =
+  struct
+    type nonrec t =
+      | ONE_YEAR 
+      | THREE_YEAR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ONE_YEAR -> "ONE_YEAR"
+      | THREE_YEAR -> "THREE_YEAR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ONE_YEAR" -> ONE_YEAR
+      | "THREE_YEAR" -> THREE_YEAR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TermLength" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TermLength" j)
+    let to_json = simple_to_json to_value
+  end
+module UsageMetricBasisName =
+  struct
+    type nonrec t = string
+    let context_ = "UsageMetricBasisName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^(p(\\d{1,2}|100)|AVG|SPEC|MAX)$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UsageMetricBasisName" j
+    let to_json = simple_to_json to_value
+  end
+module UsageMetricPercentageAdjust =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:100.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
 module ImportTaskFilterValue =
@@ -57,7 +200,7 @@ module ImportTaskFilterValue =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:100) >>=
+          ((check_string_max i ~max:255) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -86,16 +229,88 @@ module DatabaseName =
     let of_json j = string_of_json ~kind:"DatabaseName" j
     let to_json = simple_to_json to_value
   end
+module ConfigurationId =
+  struct
+    type nonrec t = string
+    let context_ = "ConfigurationId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () -> check_pattern i ~pattern:"\\S*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConfigurationId" j
+    let to_json = simple_to_json to_value
+  end
+module WarningCode =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for WarningCode" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module WarningText =
+  struct
+    type nonrec t = string
+    let context_ = "WarningText"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WarningText" j
+    let to_json = simple_to_json to_value
+  end
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ErrorStatusCode =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ErrorStatusCode" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module AgentNetworkInfo =
   struct
     type nonrec t =
       {
       ipAddress: String_.t option
         [@ocaml.doc
-          "The IP address for the host where the agent/connector resides."];
+          "The IP address for the host where the agent/collector resides."];
       macAddress: String_.t option
         [@ocaml.doc
-          "The MAC address for the host where the agent/connector resides."]}
+          "The MAC address for the host where the agent/collector resides."]}
     let make ?ipAddress =
       fun ?macAddress -> fun () -> { ipAddress; macAddress }
     let to_value x =
@@ -110,13 +325,13 @@ module AgentNetworkInfo =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipAddress") in
       make ?macAddress ?ipAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let macAddress = field_map json "macAddress" String_.of_json in
-      let ipAddress = field_map json "ipAddress" String_.of_json in
+    let of_json json__ =
+      let macAddress = field_map json__ "macAddress" String_.of_json in
+      let ipAddress = field_map json__ "ipAddress" String_.of_json in
       make ?macAddress ?ipAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Network details about the host where the agent/connector resides."]
+       "Network details about the host where the agent/collector resides."]
 module Boolean =
   struct
     type nonrec t = bool
@@ -134,7 +349,12 @@ module Condition =
   struct
     type nonrec t = string
     let context_ = "Condition"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () -> check_pattern i ~pattern:"\\S+"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -147,7 +367,12 @@ module FilterName =
   struct
     type nonrec t = string
     let context_ = "FilterName"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -160,6 +385,9 @@ module FilterValues =
   struct
     type nonrec t = FilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -180,6 +408,175 @@ module FilterValues =
       list_of_json ~kind:"FilterValues" ~of_json:FilterValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ExcludedInstanceTypes =
+  struct
+    type nonrec t = EC2InstanceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EC2InstanceType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EC2InstanceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExcludedInstanceTypes"
+        ~of_json:EC2InstanceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExportEnabled =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ReservedInstanceOptions =
+  struct
+    type nonrec t =
+      {
+      purchasingOption: PurchasingOption.t
+        [@ocaml.doc "The payment plan to use for your Reserved Instance."];
+      offeringClass: OfferingClass.t
+        [@ocaml.doc
+          "The flexibility to change the instance types needed for your Reserved Instance."];
+      termLength: TermLength.t
+        [@ocaml.doc "The preferred duration of the Reserved Instance term."]}
+    let context_ = "ReservedInstanceOptions"
+    let make ~purchasingOption =
+      fun ~offeringClass ->
+        fun ~termLength ->
+          fun () -> { purchasingOption; offeringClass; termLength }
+    let to_value x =
+      structure_to_value
+        [("purchasingOption",
+           (Some (PurchasingOption.to_value x.purchasingOption)));
+        ("offeringClass", (Some (OfferingClass.to_value x.offeringClass)));
+        ("termLength", (Some (TermLength.to_value x.termLength)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let termLength =
+        TermLength.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "termLength") in
+      let offeringClass =
+        OfferingClass.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "offeringClass") in
+      let purchasingOption =
+        PurchasingOption.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "purchasingOption") in
+      make ~termLength ~offeringClass ~purchasingOption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let termLength = field_map_exn json__ "termLength" TermLength.of_json in
+      let offeringClass =
+        field_map_exn json__ "offeringClass" OfferingClass.of_json in
+      let purchasingOption =
+        field_map_exn json__ "purchasingOption" PurchasingOption.of_json in
+      make ~termLength ~offeringClass ~purchasingOption ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Used to provide Reserved Instance preferences for the recommendation."]
+module Tenancy =
+  struct
+    type nonrec t =
+      | DEDICATED 
+      | SHARED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DEDICATED -> "DEDICATED"
+      | SHARED -> "SHARED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DEDICATED" -> DEDICATED
+      | "SHARED" -> SHARED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Tenancy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Tenancy" j)
+    let to_json = simple_to_json to_value
+  end
+module UsageMetricBasis =
+  struct
+    type nonrec t =
+      {
+      name: UsageMetricBasisName.t option
+        [@ocaml.doc
+          "A utilization metric that is used by the recommendations."];
+      percentageAdjust: UsageMetricPercentageAdjust.t option
+        [@ocaml.doc
+          "Specifies the percentage of the specified utilization metric that is used by the recommendations."]}
+    let make ?name =
+      fun ?percentageAdjust -> fun () -> { name; percentageAdjust }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:UsageMetricBasisName.to_value));
+        ("percentageAdjust",
+          (Option.map x.percentageAdjust
+             ~f:UsageMetricPercentageAdjust.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let percentageAdjust =
+        (Option.map ~f:UsageMetricPercentageAdjust.of_xml)
+          (Xml.child xml_arg0 "percentageAdjust") in
+      let name =
+        (Option.map ~f:UsageMetricBasisName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?percentageAdjust ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let percentageAdjust =
+        field_map json__ "percentageAdjust"
+          UsageMetricPercentageAdjust.of_json in
+      let name = field_map json__ "name" UsageMetricBasisName.of_json in
+      make ?percentageAdjust ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the performance metrics to use for the server that is used for recommendations."]
+module UserPreferredRegion =
+  struct
+    type nonrec t = string
+    let context_ = "UserPreferredRegion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:30) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-z]{2}-[a-z\\-]+-[0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UserPreferredRegion" j
+    let to_json = simple_to_json to_value
+  end
 module BoxedInteger =
   struct
     type nonrec t = int
@@ -194,19 +591,6 @@ module BoxedInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module ConfigurationId =
-  struct
-    type nonrec t = string
-    let context_ = "ConfigurationId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ConfigurationId" j
-    let to_json = simple_to_json to_value
-  end
 module Long =
   struct
     type nonrec t = Int64.t
@@ -218,6 +602,24 @@ module Long =
     let of_xml xml_arg0 =
       Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module OrderByElementFieldName =
+  struct
+    type nonrec t = string
+    let context_ = "OrderByElementFieldName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OrderByElementFieldName" j
     let to_json = simple_to_json to_value
   end
 module OrderString =
@@ -328,6 +730,38 @@ module ClientRequestToken =
     let of_json j = string_of_json ~kind:"ClientRequestToken" j
     let to_json = simple_to_json to_value
   end
+module FileClassification =
+  struct
+    type nonrec t =
+      | MODELIZEIT_EXPORT 
+      | RVTOOLS_EXPORT 
+      | VMWARE_NSX_EXPORT 
+      | IMPORT_TEMPLATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MODELIZEIT_EXPORT -> "MODELIZEIT_EXPORT"
+      | RVTOOLS_EXPORT -> "RVTOOLS_EXPORT"
+      | VMWARE_NSX_EXPORT -> "VMWARE_NSX_EXPORT"
+      | IMPORT_TEMPLATE -> "IMPORT_TEMPLATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MODELIZEIT_EXPORT" -> MODELIZEIT_EXPORT
+      | "RVTOOLS_EXPORT" -> RVTOOLS_EXPORT
+      | "VMWARE_NSX_EXPORT" -> VMWARE_NSX_EXPORT
+      | "IMPORT_TEMPLATE" -> IMPORT_TEMPLATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FileClassification" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FileClassification" j)
+    let to_json = simple_to_json to_value
+  end
 module ImportStatus =
   struct
     type nonrec t =
@@ -337,6 +771,7 @@ module ImportStatus =
       | IMPORT_FAILED 
       | IMPORT_FAILED_SERVER_LIMIT_EXCEEDED 
       | IMPORT_FAILED_RECORD_LIMIT_EXCEEDED 
+      | IMPORT_FAILED_UNSUPPORTED_FILE_TYPE 
       | DELETE_IN_PROGRESS 
       | DELETE_COMPLETE 
       | DELETE_FAILED 
@@ -354,6 +789,8 @@ module ImportStatus =
           "IMPORT_FAILED_SERVER_LIMIT_EXCEEDED"
       | IMPORT_FAILED_RECORD_LIMIT_EXCEEDED ->
           "IMPORT_FAILED_RECORD_LIMIT_EXCEEDED"
+      | IMPORT_FAILED_UNSUPPORTED_FILE_TYPE ->
+          "IMPORT_FAILED_UNSUPPORTED_FILE_TYPE"
       | DELETE_IN_PROGRESS -> "DELETE_IN_PROGRESS"
       | DELETE_COMPLETE -> "DELETE_COMPLETE"
       | DELETE_FAILED -> "DELETE_FAILED"
@@ -370,6 +807,8 @@ module ImportStatus =
           IMPORT_FAILED_SERVER_LIMIT_EXCEEDED
       | "IMPORT_FAILED_RECORD_LIMIT_EXCEEDED" ->
           IMPORT_FAILED_RECORD_LIMIT_EXCEEDED
+      | "IMPORT_FAILED_UNSUPPORTED_FILE_TYPE" ->
+          IMPORT_FAILED_UNSUPPORTED_FILE_TYPE
       | "DELETE_IN_PROGRESS" -> DELETE_IN_PROGRESS
       | "DELETE_COMPLETE" -> DELETE_COMPLETE
       | "DELETE_FAILED" -> DELETE_FAILED
@@ -388,7 +827,13 @@ module ImportTaskIdentifier =
   struct
     type nonrec t = string
     let context_ = "ImportTaskIdentifier"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () ->
+                check_pattern i ~pattern:"^import-task-[a-fA-F0-9]{32}$"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -404,8 +849,10 @@ module ImportTaskName =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:100) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -422,8 +869,12 @@ module ImportURL =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:4000) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:4000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"\\S+://\\S+/[\\s\\S]*\\S[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -465,6 +916,7 @@ module ImportTaskFilterName =
       | IMPORT_TASK_ID 
       | STATUS 
       | NAME 
+      | FILE_CLASSIFICATION 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -472,12 +924,14 @@ module ImportTaskFilterName =
       | IMPORT_TASK_ID -> "IMPORT_TASK_ID"
       | STATUS -> "STATUS"
       | NAME -> "NAME"
+      | FILE_CLASSIFICATION -> "FILE_CLASSIFICATION"
       | Non_static_id s -> s
     let of_string =
       function
       | "IMPORT_TASK_ID" -> IMPORT_TASK_ID
       | "STATUS" -> STATUS
       | "NAME" -> NAME
+      | "FILE_CLASSIFICATION" -> FILE_CLASSIFICATION
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -497,6 +951,9 @@ module ImportTaskFilterValueList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportTaskFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -536,7 +993,12 @@ module ConfigurationsExportId =
   struct
     type nonrec t = string
     let context_ = "ConfigurationsExportId"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () -> check_pattern i ~pattern:"\\S*"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -690,6 +1152,8 @@ module SchemaStorageConfig =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -704,8 +1168,10 @@ module StringMax255 =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -715,11 +1181,107 @@ module StringMax255 =
     let of_json j = string_of_json ~kind:"StringMax255" j
     let to_json = simple_to_json to_value
   end
+module DeletionWarning =
+  struct
+    type nonrec t =
+      {
+      configurationId: ConfigurationId.t option
+        [@ocaml.doc
+          "The unique identifier of the configuration that produced a warning."];
+      warningCode: WarningCode.t option
+        [@ocaml.doc
+          "The integer warning code associated with the warning message."];
+      warningText: WarningText.t option
+        [@ocaml.doc
+          "A descriptive message of the warning the associated configuration ID produced."]}
+    let make ?configurationId =
+      fun ?warningCode ->
+        fun ?warningText ->
+          fun () -> { configurationId; warningCode; warningText }
+    let to_value x =
+      structure_to_value
+        [("configurationId",
+           (Option.map x.configurationId ~f:ConfigurationId.to_value));
+        ("warningCode", (Option.map x.warningCode ~f:WarningCode.to_value));
+        ("warningText", (Option.map x.warningText ~f:WarningText.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let warningText =
+        (Option.map ~f:WarningText.of_xml) (Xml.child xml_arg0 "warningText") in
+      let warningCode =
+        (Option.map ~f:WarningCode.of_xml) (Xml.child xml_arg0 "warningCode") in
+      let configurationId =
+        (Option.map ~f:ConfigurationId.of_xml)
+          (Xml.child xml_arg0 "configurationId") in
+      make ?warningText ?warningCode ?configurationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let warningText = field_map json__ "warningText" WarningText.of_json in
+      let warningCode = field_map json__ "warningCode" WarningCode.of_json in
+      let configurationId =
+        field_map json__ "configurationId" ConfigurationId.of_json in
+      make ?warningText ?warningCode ?configurationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A configuration ID paired with a warning message."]
+module FailedConfiguration =
+  struct
+    type nonrec t =
+      {
+      configurationId: ConfigurationId.t option
+        [@ocaml.doc
+          "The unique identifier of the configuration the failed to delete."];
+      errorStatusCode: ErrorStatusCode.t option
+        [@ocaml.doc
+          "The integer error code associated with the error message."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "A descriptive message indicating why the associated configuration failed to delete."]}
+    let make ?configurationId =
+      fun ?errorStatusCode ->
+        fun ?errorMessage ->
+          fun () -> { configurationId; errorStatusCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("configurationId",
+           (Option.map x.configurationId ~f:ConfigurationId.to_value));
+        ("errorStatusCode",
+          (Option.map x.errorStatusCode ~f:ErrorStatusCode.to_value));
+        ("errorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "errorMessage") in
+      let errorStatusCode =
+        (Option.map ~f:ErrorStatusCode.of_xml)
+          (Xml.child xml_arg0 "errorStatusCode") in
+      let configurationId =
+        (Option.map ~f:ConfigurationId.of_xml)
+          (Xml.child xml_arg0 "configurationId") in
+      make ?errorMessage ?errorStatusCode ?configurationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorStatusCode =
+        field_map json__ "errorStatusCode" ErrorStatusCode.of_json in
+      let configurationId =
+        field_map json__ "configurationId" ConfigurationId.of_json in
+      make ?errorMessage ?errorStatusCode ?configurationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A configuration ID paired with an error message."]
 module AgentId =
   struct
     type nonrec t = string
     let context_ = "AgentId"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:10) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"\\S+")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -732,6 +1294,9 @@ module AgentNetworkInfoList =
   struct
     type nonrec t = AgentNetworkInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentNetworkInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -835,6 +1400,35 @@ module BatchDeleteImportDataErrorDescription =
       string_of_json ~kind:"BatchDeleteImportDataErrorDescription" j
     let to_json = simple_to_json to_value
   end
+module DeleteAgentErrorCode =
+  struct
+    type nonrec t =
+      | NOT_FOUND 
+      | INTERNAL_SERVER_ERROR 
+      | AGENT_IN_USE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NOT_FOUND -> "NOT_FOUND"
+      | INTERNAL_SERVER_ERROR -> "INTERNAL_SERVER_ERROR"
+      | AGENT_IN_USE -> "AGENT_IN_USE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NOT_FOUND" -> NOT_FOUND
+      | "INTERNAL_SERVER_ERROR" -> INTERNAL_SERVER_ERROR
+      | "AGENT_IN_USE" -> AGENT_IN_USE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeleteAgentErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeleteAgentErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
 module Message =
   struct
     type nonrec t = string
@@ -852,10 +1446,10 @@ module AgentConfigurationStatus =
   struct
     type nonrec t =
       {
-      agentId: String_.t option [@ocaml.doc "The agent/connector ID."];
+      agentId: String_.t option [@ocaml.doc "The agent ID."];
       operationSucceeded: Boolean.t option
         [@ocaml.doc
-          "Information about the status of the StartDataCollection and StopDataCollection operations. The system has recorded the data collection operation. The agent/connector receives this command the next time it polls for a new command."];
+          "Information about the status of the StartDataCollection and StopDataCollection operations. The system has recorded the data collection operation. The agent receives this command the next time it polls for a new command."];
       description: String_.t option
         [@ocaml.doc "A description of the operation performed."]}
     let make ?agentId =
@@ -879,26 +1473,23 @@ module AgentConfigurationStatus =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "agentId") in
       make ?description ?operationSucceeded ?agentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "description" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "description" String_.of_json in
       let operationSucceeded =
-        field_map json "operationSucceeded" Boolean.of_json in
-      let agentId = field_map json "agentId" String_.of_json in
+        field_map json__ "operationSucceeded" Boolean.of_json in
+      let agentId = field_map json__ "agentId" String_.of_json in
       make ?description ?operationSucceeded ?agentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about agents or connectors that were instructed to start collecting data. Information includes the agent/connector ID, a description of the operation, and whether the agent/connector configuration was updated."]
+       "Information about agents that were instructed to start collecting data. Information includes the agent ID, a description of the operation, and whether the agent configuration was updated."]
 module ExportDataFormat =
   struct
     type nonrec t =
       | CSV 
-      | GRAPHML 
       | Non_static_id of string 
     let make i = i
-    let to_string =
-      function | CSV -> "CSV" | GRAPHML -> "GRAPHML" | Non_static_id s -> s
-    let of_string =
-      function | "CSV" -> CSV | "GRAPHML" -> GRAPHML | x -> Non_static_id x
+    let to_string = function | CSV -> "CSV" | Non_static_id s -> s
+    let of_string = function | "CSV" -> CSV | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -913,10 +1504,10 @@ module ExportFilter =
       {
       name: FilterName.t
         [@ocaml.doc
-          "A single ExportFilter name. Supported filters: agentId."];
+          "A single ExportFilter name. Supported filters: agentIds."];
       values: FilterValues.t
         [@ocaml.doc
-          "A single agentId for a Discovery Agent. An agentId can be found using the DescribeAgents action. Typically an ADS agentId is in the form o-0123456789abcdef0."];
+          "A single agent ID for a Discovery Agent. An agent ID can be found using the DescribeAgents action. Typically an ADS agent ID is in the form o-0123456789abcdef0."];
       condition: Condition.t [@ocaml.doc "Supported condition: EQUALS"]}
     let context_ = "ExportFilter"
     let make ~name =
@@ -938,61 +1529,166 @@ module ExportFilter =
         FilterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~condition ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let condition = field_map_exn json "condition" Condition.of_json in
-      let values = field_map_exn json "values" FilterValues.of_json in
-      let name = field_map_exn json "name" FilterName.of_json in
+    let of_json json__ =
+      let condition = field_map_exn json__ "condition" Condition.of_json in
+      let values = field_map_exn json__ "values" FilterValues.of_json in
+      let name = field_map_exn json__ "name" FilterName.of_json in
       make ~condition ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used to select which agent's data is to be exported. A single agent ID may be selected for export using the StartExportTask action."]
+module Ec2RecommendationsExportPreferences =
+  struct
+    type nonrec t =
+      {
+      enabled: ExportEnabled.t option
+        [@ocaml.doc
+          "If set to true, the export preferences is set to Ec2RecommendationsExportPreferences."];
+      cpuPerformanceMetricBasis: UsageMetricBasis.t option
+        [@ocaml.doc
+          "The recommended EC2 instance type that matches the CPU usage metric of server performance data."];
+      ramPerformanceMetricBasis: UsageMetricBasis.t option
+        [@ocaml.doc
+          "The recommended EC2 instance type that matches the Memory usage metric of server performance data."];
+      tenancy: Tenancy.t option
+        [@ocaml.doc
+          "The target tenancy to use for your recommended EC2 instances."];
+      excludedInstanceTypes: ExcludedInstanceTypes.t option
+        [@ocaml.doc
+          "An array of instance types to exclude from recommendations."];
+      preferredRegion: UserPreferredRegion.t option
+        [@ocaml.doc
+          "The target Amazon Web Services Region for the recommendations. You can use any of the Region codes available for the chosen service, as listed in Amazon Web Services service endpoints in the Amazon Web Services General Reference."];
+      reservedInstanceOptions: ReservedInstanceOptions.t option
+        [@ocaml.doc
+          "The contract type for a reserved instance. If blank, we assume an On-Demand instance is preferred."]}
+    let make ?enabled =
+      fun ?cpuPerformanceMetricBasis ->
+        fun ?ramPerformanceMetricBasis ->
+          fun ?tenancy ->
+            fun ?excludedInstanceTypes ->
+              fun ?preferredRegion ->
+                fun ?reservedInstanceOptions ->
+                  fun () ->
+                    {
+                      enabled;
+                      cpuPerformanceMetricBasis;
+                      ramPerformanceMetricBasis;
+                      tenancy;
+                      excludedInstanceTypes;
+                      preferredRegion;
+                      reservedInstanceOptions
+                    }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:ExportEnabled.to_value));
+        ("cpuPerformanceMetricBasis",
+          (Option.map x.cpuPerformanceMetricBasis
+             ~f:UsageMetricBasis.to_value));
+        ("ramPerformanceMetricBasis",
+          (Option.map x.ramPerformanceMetricBasis
+             ~f:UsageMetricBasis.to_value));
+        ("tenancy", (Option.map x.tenancy ~f:Tenancy.to_value));
+        ("excludedInstanceTypes",
+          (Option.map x.excludedInstanceTypes
+             ~f:ExcludedInstanceTypes.to_value));
+        ("preferredRegion",
+          (Option.map x.preferredRegion ~f:UserPreferredRegion.to_value));
+        ("reservedInstanceOptions",
+          (Option.map x.reservedInstanceOptions
+             ~f:ReservedInstanceOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reservedInstanceOptions =
+        (Option.map ~f:ReservedInstanceOptions.of_xml)
+          (Xml.child xml_arg0 "reservedInstanceOptions") in
+      let preferredRegion =
+        (Option.map ~f:UserPreferredRegion.of_xml)
+          (Xml.child xml_arg0 "preferredRegion") in
+      let excludedInstanceTypes =
+        (Option.map ~f:ExcludedInstanceTypes.of_xml)
+          (Xml.child xml_arg0 "excludedInstanceTypes") in
+      let tenancy =
+        (Option.map ~f:Tenancy.of_xml) (Xml.child xml_arg0 "tenancy") in
+      let ramPerformanceMetricBasis =
+        (Option.map ~f:UsageMetricBasis.of_xml)
+          (Xml.child xml_arg0 "ramPerformanceMetricBasis") in
+      let cpuPerformanceMetricBasis =
+        (Option.map ~f:UsageMetricBasis.of_xml)
+          (Xml.child xml_arg0 "cpuPerformanceMetricBasis") in
+      let enabled =
+        (Option.map ~f:ExportEnabled.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?reservedInstanceOptions ?preferredRegion ?excludedInstanceTypes
+        ?tenancy ?ramPerformanceMetricBasis ?cpuPerformanceMetricBasis
+        ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reservedInstanceOptions =
+        field_map json__ "reservedInstanceOptions"
+          ReservedInstanceOptions.of_json in
+      let preferredRegion =
+        field_map json__ "preferredRegion" UserPreferredRegion.of_json in
+      let excludedInstanceTypes =
+        field_map json__ "excludedInstanceTypes"
+          ExcludedInstanceTypes.of_json in
+      let tenancy = field_map json__ "tenancy" Tenancy.of_json in
+      let ramPerformanceMetricBasis =
+        field_map json__ "ramPerformanceMetricBasis" UsageMetricBasis.of_json in
+      let cpuPerformanceMetricBasis =
+        field_map json__ "cpuPerformanceMetricBasis" UsageMetricBasis.of_json in
+      let enabled = field_map json__ "enabled" ExportEnabled.of_json in
+      make ?reservedInstanceOptions ?preferredRegion ?excludedInstanceTypes
+        ?tenancy ?ramPerformanceMetricBasis ?cpuPerformanceMetricBasis
+        ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that the exported data must include EC2 instance type matches for on-premises servers that are discovered through Amazon Web Services Application Discovery Service."]
 module NeighborConnectionDetail =
   struct
     type nonrec t =
       {
-      sourceServerId: ConfigurationId.t
+      sourceServerId: ConfigurationId.t option
         [@ocaml.doc
           "The ID of the server that opened the network connection."];
-      destinationServerId: ConfigurationId.t
+      destinationServerId: ConfigurationId.t option
         [@ocaml.doc
           "The ID of the server that accepted the network connection."];
       destinationPort: BoxedInteger.t option
         [@ocaml.doc "The destination network port for the connection."];
       transportProtocol: String_.t option
         [@ocaml.doc "The network protocol used for the connection."];
-      connectionsCount: Long.t
+      connectionsCount: Long.t option
         [@ocaml.doc
           "The number of open network connections with the neighboring server."]}
-    let context_ = "NeighborConnectionDetail"
-    let make ?destinationPort =
-      fun ?transportProtocol ->
-        fun ~sourceServerId ->
-          fun ~destinationServerId ->
-            fun ~connectionsCount ->
+    let make ?sourceServerId =
+      fun ?destinationServerId ->
+        fun ?destinationPort ->
+          fun ?transportProtocol ->
+            fun ?connectionsCount ->
               fun () ->
                 {
-                  destinationPort;
-                  transportProtocol;
                   sourceServerId;
                   destinationServerId;
+                  destinationPort;
+                  transportProtocol;
                   connectionsCount
                 }
     let to_value x =
       structure_to_value
         [("sourceServerId",
-           (Some (ConfigurationId.to_value x.sourceServerId)));
+           (Option.map x.sourceServerId ~f:ConfigurationId.to_value));
         ("destinationServerId",
-          (Some (ConfigurationId.to_value x.destinationServerId)));
+          (Option.map x.destinationServerId ~f:ConfigurationId.to_value));
         ("destinationPort",
           (Option.map x.destinationPort ~f:BoxedInteger.to_value));
         ("transportProtocol",
           (Option.map x.transportProtocol ~f:String_.to_value));
-        ("connectionsCount", (Some (Long.to_value x.connectionsCount)))]
+        ("connectionsCount",
+          (Option.map x.connectionsCount ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let connectionsCount =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "connectionsCount") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "connectionsCount") in
       let transportProtocol =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "transportProtocol") in
@@ -1000,27 +1696,26 @@ module NeighborConnectionDetail =
         (Option.map ~f:BoxedInteger.of_xml)
           (Xml.child xml_arg0 "destinationPort") in
       let destinationServerId =
-        ConfigurationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "destinationServerId") in
+        (Option.map ~f:ConfigurationId.of_xml)
+          (Xml.child xml_arg0 "destinationServerId") in
       let sourceServerId =
-        ConfigurationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerId") in
-      make ~connectionsCount ?transportProtocol ?destinationPort
-        ~destinationServerId ~sourceServerId ()
+        (Option.map ~f:ConfigurationId.of_xml)
+          (Xml.child xml_arg0 "sourceServerId") in
+      make ?connectionsCount ?transportProtocol ?destinationPort
+        ?destinationServerId ?sourceServerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectionsCount =
-        field_map_exn json "connectionsCount" Long.of_json in
+    let of_json json__ =
+      let connectionsCount = field_map json__ "connectionsCount" Long.of_json in
       let transportProtocol =
-        field_map json "transportProtocol" String_.of_json in
+        field_map json__ "transportProtocol" String_.of_json in
       let destinationPort =
-        field_map json "destinationPort" BoxedInteger.of_json in
+        field_map json__ "destinationPort" BoxedInteger.of_json in
       let destinationServerId =
-        field_map_exn json "destinationServerId" ConfigurationId.of_json in
+        field_map json__ "destinationServerId" ConfigurationId.of_json in
       let sourceServerId =
-        field_map_exn json "sourceServerId" ConfigurationId.of_json in
-      make ~connectionsCount ?transportProtocol ?destinationPort
-        ~destinationServerId ~sourceServerId ()
+        field_map json__ "sourceServerId" ConfigurationId.of_json in
+      make ?connectionsCount ?transportProtocol ?destinationPort
+        ?destinationServerId ?sourceServerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about neighboring servers."]
 module Configuration =
@@ -1044,6 +1739,8 @@ module Configuration =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1082,38 +1779,41 @@ module Filter =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~condition ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let condition = field_map_exn json "condition" Condition.of_json in
-      let values = field_map_exn json "values" FilterValues.of_json in
-      let name = field_map_exn json "name" String_.of_json in
+    let of_json json__ =
+      let condition = field_map_exn json__ "condition" Condition.of_json in
+      let values = field_map_exn json__ "values" FilterValues.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
       make ~condition ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A filter that can use conditional operators. For more information about filters, see Querying Discovered Configuration Items in the AWS Application Discovery Service User Guide."]
+       "A filter that can use conditional operators. For more information about filters, see Querying Discovered Configuration Items in the Amazon Web Services Application Discovery Service User Guide."]
 module OrderByElement =
   struct
     type nonrec t =
       {
-      fieldName: String_.t [@ocaml.doc "The field on which to order."];
+      fieldName: OrderByElementFieldName.t
+        [@ocaml.doc "The field on which to order."];
       sortOrder: OrderString.t option [@ocaml.doc "Ordering direction."]}
     let context_ = "OrderByElement"
     let make ?sortOrder =
       fun ~fieldName -> fun () -> { sortOrder; fieldName }
     let to_value x =
       structure_to_value
-        [("fieldName", (Some (String_.to_value x.fieldName)));
+        [("fieldName", (Some (OrderByElementFieldName.to_value x.fieldName)));
         ("sortOrder", (Option.map x.sortOrder ~f:OrderString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sortOrder =
         (Option.map ~f:OrderString.of_xml) (Xml.child xml_arg0 "sortOrder") in
       let fieldName =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "fieldName") in
+        OrderByElementFieldName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fieldName") in
       make ?sortOrder ~fieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortOrder = field_map json "sortOrder" OrderString.of_json in
-      let fieldName = field_map_exn json "fieldName" String_.of_json in
+    let of_json json__ =
+      let sortOrder = field_map json__ "sortOrder" OrderString.of_json in
+      let fieldName =
+        field_map_exn json__ "fieldName" OrderByElementFieldName.of_json in
       make ?sortOrder ~fieldName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A field and direction for ordered output."]
@@ -1174,14 +1874,15 @@ module ConfigurationTag =
           (Xml.child xml_arg0 "configurationType") in
       make ?timeOfCreation ?value ?key ?configurationId ?configurationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeOfCreation = field_map json "timeOfCreation" TimeStamp.of_json in
-      let value = field_map json "value" TagValue.of_json in
-      let key = field_map json "key" TagKey.of_json in
+    let of_json json__ =
+      let timeOfCreation =
+        field_map json__ "timeOfCreation" TimeStamp.of_json in
+      let value = field_map json__ "value" TagValue.of_json in
+      let key = field_map json__ "key" TagKey.of_json in
       let configurationId =
-        field_map json "configurationId" ConfigurationId.of_json in
+        field_map json__ "configurationId" ConfigurationId.of_json in
       let configurationType =
-        field_map json "configurationType" ConfigurationItemType.of_json in
+        field_map json__ "configurationType" ConfigurationItemType.of_json in
       make ?timeOfCreation ?value ?key ?configurationId ?configurationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1207,9 +1908,9 @@ module TagFilter =
         FilterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "values" FilterValues.of_json in
-      let name = field_map_exn json "name" FilterName.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "values" FilterValues.of_json in
+      let name = field_map_exn json__ "name" FilterName.of_json in
       make ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1220,7 +1921,7 @@ module ImportTask =
       {
       importTaskId: ImportTaskIdentifier.t option
         [@ocaml.doc
-          "The unique ID for a specific import task. These IDs aren't globally unique, but they are unique within an AWS account."];
+          "The unique ID for a specific import task. These IDs aren't globally unique, but they are unique within an Amazon Web Services account."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
           "A unique token used to prevent the same import request from occurring more than once. If you didn't provide a token, a token was automatically generated when the import task request was sent."];
@@ -1242,6 +1943,8 @@ module ImportTask =
       importDeletedTime: TimeStamp.t option
         [@ocaml.doc
           "The time that the import task request was deleted, presented in the Unix time stamp format."];
+      fileClassification: FileClassification.t option
+        [@ocaml.doc "The type of file detected by the import task."];
       serverImportSuccess: Integer.t option
         [@ocaml.doc
           "The total number of server records in the import file that were successfully imported."];
@@ -1265,27 +1968,29 @@ module ImportTask =
               fun ?importRequestTime ->
                 fun ?importCompletionTime ->
                   fun ?importDeletedTime ->
-                    fun ?serverImportSuccess ->
-                      fun ?serverImportFailure ->
-                        fun ?applicationImportSuccess ->
-                          fun ?applicationImportFailure ->
-                            fun ?errorsAndFailedEntriesZip ->
-                              fun () ->
-                                {
-                                  importTaskId;
-                                  clientRequestToken;
-                                  name;
-                                  importUrl;
-                                  status;
-                                  importRequestTime;
-                                  importCompletionTime;
-                                  importDeletedTime;
-                                  serverImportSuccess;
-                                  serverImportFailure;
-                                  applicationImportSuccess;
-                                  applicationImportFailure;
-                                  errorsAndFailedEntriesZip
-                                }
+                    fun ?fileClassification ->
+                      fun ?serverImportSuccess ->
+                        fun ?serverImportFailure ->
+                          fun ?applicationImportSuccess ->
+                            fun ?applicationImportFailure ->
+                              fun ?errorsAndFailedEntriesZip ->
+                                fun () ->
+                                  {
+                                    importTaskId;
+                                    clientRequestToken;
+                                    name;
+                                    importUrl;
+                                    status;
+                                    importRequestTime;
+                                    importCompletionTime;
+                                    importDeletedTime;
+                                    fileClassification;
+                                    serverImportSuccess;
+                                    serverImportFailure;
+                                    applicationImportSuccess;
+                                    applicationImportFailure;
+                                    errorsAndFailedEntriesZip
+                                  }
     let to_value x =
       structure_to_value
         [("importTaskId",
@@ -1301,6 +2006,8 @@ module ImportTask =
           (Option.map x.importCompletionTime ~f:TimeStamp.to_value));
         ("importDeletedTime",
           (Option.map x.importDeletedTime ~f:TimeStamp.to_value));
+        ("fileClassification",
+          (Option.map x.fileClassification ~f:FileClassification.to_value));
         ("serverImportSuccess",
           (Option.map x.serverImportSuccess ~f:Integer.to_value));
         ("serverImportFailure",
@@ -1328,6 +2035,9 @@ module ImportTask =
       let serverImportSuccess =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "serverImportSuccess") in
+      let fileClassification =
+        (Option.map ~f:FileClassification.of_xml)
+          (Xml.child xml_arg0 "fileClassification") in
       let importDeletedTime =
         (Option.map ~f:TimeStamp.of_xml)
           (Xml.child xml_arg0 "importDeletedTime") in
@@ -1351,37 +2061,41 @@ module ImportTask =
           (Xml.child xml_arg0 "importTaskId") in
       make ?errorsAndFailedEntriesZip ?applicationImportFailure
         ?applicationImportSuccess ?serverImportFailure ?serverImportSuccess
-        ?importDeletedTime ?importCompletionTime ?importRequestTime ?status
-        ?importUrl ?name ?clientRequestToken ?importTaskId ()
+        ?fileClassification ?importDeletedTime ?importCompletionTime
+        ?importRequestTime ?status ?importUrl ?name ?clientRequestToken
+        ?importTaskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorsAndFailedEntriesZip =
-        field_map json "errorsAndFailedEntriesZip" S3PresignedUrl.of_json in
+        field_map json__ "errorsAndFailedEntriesZip" S3PresignedUrl.of_json in
       let applicationImportFailure =
-        field_map json "applicationImportFailure" Integer.of_json in
+        field_map json__ "applicationImportFailure" Integer.of_json in
       let applicationImportSuccess =
-        field_map json "applicationImportSuccess" Integer.of_json in
+        field_map json__ "applicationImportSuccess" Integer.of_json in
       let serverImportFailure =
-        field_map json "serverImportFailure" Integer.of_json in
+        field_map json__ "serverImportFailure" Integer.of_json in
       let serverImportSuccess =
-        field_map json "serverImportSuccess" Integer.of_json in
+        field_map json__ "serverImportSuccess" Integer.of_json in
+      let fileClassification =
+        field_map json__ "fileClassification" FileClassification.of_json in
       let importDeletedTime =
-        field_map json "importDeletedTime" TimeStamp.of_json in
+        field_map json__ "importDeletedTime" TimeStamp.of_json in
       let importCompletionTime =
-        field_map json "importCompletionTime" TimeStamp.of_json in
+        field_map json__ "importCompletionTime" TimeStamp.of_json in
       let importRequestTime =
-        field_map json "importRequestTime" TimeStamp.of_json in
-      let status = field_map json "status" ImportStatus.of_json in
-      let importUrl = field_map json "importUrl" ImportURL.of_json in
-      let name = field_map json "name" ImportTaskName.of_json in
+        field_map json__ "importRequestTime" TimeStamp.of_json in
+      let status = field_map json__ "status" ImportStatus.of_json in
+      let importUrl = field_map json__ "importUrl" ImportURL.of_json in
+      let name = field_map json__ "name" ImportTaskName.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
       let importTaskId =
-        field_map json "importTaskId" ImportTaskIdentifier.of_json in
+        field_map json__ "importTaskId" ImportTaskIdentifier.of_json in
       make ?errorsAndFailedEntriesZip ?applicationImportFailure
         ?applicationImportSuccess ?serverImportFailure ?serverImportSuccess
-        ?importDeletedTime ?importCompletionTime ?importRequestTime ?status
-        ?importUrl ?name ?clientRequestToken ?importTaskId ()
+        ?fileClassification ?importDeletedTime ?importCompletionTime
+        ?importRequestTime ?status ?importUrl ?name ?clientRequestToken
+        ?importTaskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An array of information related to the import task request that includes status information, times, IDs, the Amazon S3 Object URL for the import file, and more."]
@@ -1411,9 +2125,10 @@ module ImportTaskFilter =
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" ImportTaskFilterValueList.of_json in
-      let name = field_map json "name" ImportTaskFilterName.of_json in
+    let of_json json__ =
+      let values =
+        field_map json__ "values" ImportTaskFilterValueList.of_json in
+      let name = field_map json__ "name" ImportTaskFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1422,16 +2137,16 @@ module ExportInfo =
   struct
     type nonrec t =
       {
-      exportId: ConfigurationsExportId.t
+      exportId: ConfigurationsExportId.t option
         [@ocaml.doc "A unique identifier used to query an export."];
-      exportStatus: ExportStatus.t
+      exportStatus: ExportStatus.t option
         [@ocaml.doc "The status of the data export job."];
-      statusMessage: ExportStatusMessage.t
+      statusMessage: ExportStatusMessage.t option
         [@ocaml.doc "A status message provided for API callers."];
       configurationsDownloadUrl: ConfigurationsDownloadUrl.t option
         [@ocaml.doc
           "A URL for an Amazon S3 bucket where you can review the exported data. The URL is displayed only if the export succeeded."];
-      exportRequestTime: ExportRequestTime.t
+      exportRequestTime: ExportRequestTime.t option
         [@ocaml.doc "The time that the data export was initiated."];
       isTruncated: Boolean.t option
         [@ocaml.doc
@@ -1442,37 +2157,38 @@ module ExportInfo =
       requestedEndTime: TimeStamp.t option
         [@ocaml.doc
           "The endTime used in the StartExportTask request. If no endTime was requested, this result does not appear in ExportInfo."]}
-    let context_ = "ExportInfo"
-    let make ?configurationsDownloadUrl =
-      fun ?isTruncated ->
-        fun ?requestedStartTime ->
-          fun ?requestedEndTime ->
-            fun ~exportId ->
-              fun ~exportStatus ->
-                fun ~statusMessage ->
-                  fun ~exportRequestTime ->
+    let make ?exportId =
+      fun ?exportStatus ->
+        fun ?statusMessage ->
+          fun ?configurationsDownloadUrl ->
+            fun ?exportRequestTime ->
+              fun ?isTruncated ->
+                fun ?requestedStartTime ->
+                  fun ?requestedEndTime ->
                     fun () ->
                       {
-                        configurationsDownloadUrl;
-                        isTruncated;
-                        requestedStartTime;
-                        requestedEndTime;
                         exportId;
                         exportStatus;
                         statusMessage;
-                        exportRequestTime
+                        configurationsDownloadUrl;
+                        exportRequestTime;
+                        isTruncated;
+                        requestedStartTime;
+                        requestedEndTime
                       }
     let to_value x =
       structure_to_value
-        [("exportId", (Some (ConfigurationsExportId.to_value x.exportId)));
-        ("exportStatus", (Some (ExportStatus.to_value x.exportStatus)));
+        [("exportId",
+           (Option.map x.exportId ~f:ConfigurationsExportId.to_value));
+        ("exportStatus",
+          (Option.map x.exportStatus ~f:ExportStatus.to_value));
         ("statusMessage",
-          (Some (ExportStatusMessage.to_value x.statusMessage)));
+          (Option.map x.statusMessage ~f:ExportStatusMessage.to_value));
         ("configurationsDownloadUrl",
           (Option.map x.configurationsDownloadUrl
              ~f:ConfigurationsDownloadUrl.to_value));
         ("exportRequestTime",
-          (Some (ExportRequestTime.to_value x.exportRequestTime)));
+          (Option.map x.exportRequestTime ~f:ExportRequestTime.to_value));
         ("isTruncated", (Option.map x.isTruncated ~f:Boolean.to_value));
         ("requestedStartTime",
           (Option.map x.requestedStartTime ~f:TimeStamp.to_value));
@@ -1489,44 +2205,43 @@ module ExportInfo =
       let isTruncated =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isTruncated") in
       let exportRequestTime =
-        ExportRequestTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "exportRequestTime") in
+        (Option.map ~f:ExportRequestTime.of_xml)
+          (Xml.child xml_arg0 "exportRequestTime") in
       let configurationsDownloadUrl =
         (Option.map ~f:ConfigurationsDownloadUrl.of_xml)
           (Xml.child xml_arg0 "configurationsDownloadUrl") in
       let statusMessage =
-        ExportStatusMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "statusMessage") in
+        (Option.map ~f:ExportStatusMessage.of_xml)
+          (Xml.child xml_arg0 "statusMessage") in
       let exportStatus =
-        ExportStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "exportStatus") in
+        (Option.map ~f:ExportStatus.of_xml)
+          (Xml.child xml_arg0 "exportStatus") in
       let exportId =
-        ConfigurationsExportId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "exportId") in
+        (Option.map ~f:ConfigurationsExportId.of_xml)
+          (Xml.child xml_arg0 "exportId") in
       make ?requestedEndTime ?requestedStartTime ?isTruncated
-        ~exportRequestTime ?configurationsDownloadUrl ~statusMessage
-        ~exportStatus ~exportId ()
+        ?exportRequestTime ?configurationsDownloadUrl ?statusMessage
+        ?exportStatus ?exportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestedEndTime =
-        field_map json "requestedEndTime" TimeStamp.of_json in
+        field_map json__ "requestedEndTime" TimeStamp.of_json in
       let requestedStartTime =
-        field_map json "requestedStartTime" TimeStamp.of_json in
-      let isTruncated = field_map json "isTruncated" Boolean.of_json in
+        field_map json__ "requestedStartTime" TimeStamp.of_json in
+      let isTruncated = field_map json__ "isTruncated" Boolean.of_json in
       let exportRequestTime =
-        field_map_exn json "exportRequestTime" ExportRequestTime.of_json in
+        field_map json__ "exportRequestTime" ExportRequestTime.of_json in
       let configurationsDownloadUrl =
-        field_map json "configurationsDownloadUrl"
+        field_map json__ "configurationsDownloadUrl"
           ConfigurationsDownloadUrl.of_json in
       let statusMessage =
-        field_map_exn json "statusMessage" ExportStatusMessage.of_json in
-      let exportStatus =
-        field_map_exn json "exportStatus" ExportStatus.of_json in
+        field_map json__ "statusMessage" ExportStatusMessage.of_json in
+      let exportStatus = field_map json__ "exportStatus" ExportStatus.of_json in
       let exportId =
-        field_map_exn json "exportId" ConfigurationsExportId.of_json in
+        field_map json__ "exportId" ConfigurationsExportId.of_json in
       make ?requestedEndTime ?requestedStartTime ?isTruncated
-        ~exportRequestTime ?configurationsDownloadUrl ~statusMessage
-        ~exportStatus ~exportId ()
+        ?exportRequestTime ?configurationsDownloadUrl ?statusMessage
+        ?exportStatus ?exportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information regarding the export status of discovered data. The value is an array of objects."]
@@ -1541,7 +2256,7 @@ module ContinuousExportDescription =
           "Describes the status of the export. Can be one of the following values: START_IN_PROGRESS - setting up resources to start continuous export. START_FAILED - an error occurred setting up continuous export. To recover, call start-continuous-export again. ACTIVE - data is being exported to the customer bucket. ERROR - an error occurred during export. To fix the issue, call stop-continuous-export and start-continuous-export. STOP_IN_PROGRESS - stopping the export. STOP_FAILED - an error occurred stopping the export. To recover, call stop-continuous-export again. INACTIVE - the continuous export has been stopped. Data is no longer being exported to the customer bucket."];
       statusDetail: StringMax255.t option
         [@ocaml.doc
-          "Contains information about any errors that have occurred. This data type can have the following values: ACCESS_DENIED - You don\226\128\153t have permission to start Data Exploration in Amazon Athena. Contact your AWS administrator for help. For more information, see Setting Up AWS Application Discovery Service in the Application Discovery Service User Guide. DELIVERY_STREAM_LIMIT_FAILURE - You reached the limit for Amazon Kinesis Data Firehose delivery streams. Reduce the number of streams or request a limit increase and try again. For more information, see Kinesis Data Streams Limits in the Amazon Kinesis Data Streams Developer Guide. FIREHOSE_ROLE_MISSING - The Data Exploration feature is in an error state because your IAM User is missing the AWSApplicationDiscoveryServiceFirehose role. Turn on Data Exploration in Amazon Athena and try again. For more information, see Step 3: Provide Application Discovery Service Access to Non-Administrator Users by Attaching Policies in the Application Discovery Service User Guide. FIREHOSE_STREAM_DOES_NOT_EXIST - The Data Exploration feature is in an error state because your IAM User is missing one or more of the Kinesis data delivery streams. INTERNAL_FAILURE - The Data Exploration feature is in an error state because of an internal failure. Try again later. If this problem persists, contact AWS Support. S3_BUCKET_LIMIT_FAILURE - You reached the limit for Amazon S3 buckets. Reduce the number of Amazon S3 buckets or request a limit increase and try again. For more information, see Bucket Restrictions and Limitations in the Amazon Simple Storage Service Developer Guide. S3_NOT_SIGNED_UP - Your account is not signed up for the Amazon S3 service. You must sign up before you can use Amazon S3. You can sign up at the following URL: https://aws.amazon.com/s3."];
+          "Contains information about any errors that have occurred. This data type can have the following values: ACCESS_DENIED - You don\226\128\153t have permission to start Data Exploration in Amazon Athena. Contact your Amazon Web Services administrator for help. For more information, see Setting Up Amazon Web Services Application Discovery Service in the Application Discovery Service User Guide. DELIVERY_STREAM_LIMIT_FAILURE - You reached the limit for Amazon Kinesis Data Firehose delivery streams. Reduce the number of streams or request a limit increase and try again. For more information, see Kinesis Data Streams Limits in the Amazon Kinesis Data Streams Developer Guide. FIREHOSE_ROLE_MISSING - The Data Exploration feature is in an error state because your user is missing the Amazon Web ServicesApplicationDiscoveryServiceFirehose role. Turn on Data Exploration in Amazon Athena and try again. For more information, see Creating the Amazon Web ServicesApplicationDiscoveryServiceFirehose Role in the Application Discovery Service User Guide. FIREHOSE_STREAM_DOES_NOT_EXIST - The Data Exploration feature is in an error state because your user is missing one or more of the Kinesis data delivery streams. INTERNAL_FAILURE - The Data Exploration feature is in an error state because of an internal failure. Try again later. If this problem persists, contact Amazon Web Services Support. LAKE_FORMATION_ACCESS_DENIED - You don't have sufficient lake formation permissions to start continuous export. For more information, see Upgrading Amazon Web Services Glue Data Permissions to the Amazon Web Services Lake Formation Model in the Amazon Web Services Lake Formation Developer Guide. You can use one of the following two ways to resolve this issue. If you don\226\128\153t want to use the Lake Formation permission model, you can change the default Data Catalog settings to use only Amazon Web Services Identity and Access Management (IAM) access control for new databases. For more information, see Change Data Catalog Settings in the Lake Formation Developer Guide. You can give the service-linked IAM roles AWSServiceRoleForApplicationDiscoveryServiceContinuousExport and AWSApplicationDiscoveryServiceFirehose the required Lake Formation permissions. For more information, see Granting Database Permissions in the Lake Formation Developer Guide. AWSServiceRoleForApplicationDiscoveryServiceContinuousExport - Grant database creator permissions, which gives the role database creation ability and implicit permissions for any created tables. For more information, see Implicit Lake Formation Permissions in the Lake Formation Developer Guide. AWSApplicationDiscoveryServiceFirehose - Grant describe permissions for all tables in the database. S3_BUCKET_LIMIT_FAILURE - You reached the limit for Amazon S3 buckets. Reduce the number of S3 buckets or request a limit increase and try again. For more information, see Bucket Restrictions and Limitations in the Amazon Simple Storage Service Developer Guide. S3_NOT_SIGNED_UP - Your account is not signed up for the Amazon S3 service. You must sign up before you can use Amazon S3. You can sign up at the following URL: https://aws.amazon.com/s3."];
       s3Bucket: S3Bucket.t option
         [@ocaml.doc
           "The name of the s3 bucket where the export data parquet files are stored."];
@@ -1614,16 +2329,17 @@ module ContinuousExportDescription =
       make ?schemaStorageConfig ?dataSource ?stopTime ?startTime ?s3Bucket
         ?statusDetail ?status ?exportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaStorageConfig =
-        field_map json "schemaStorageConfig" SchemaStorageConfig.of_json in
-      let dataSource = field_map json "dataSource" DataSource.of_json in
-      let stopTime = field_map json "stopTime" TimeStamp.of_json in
-      let startTime = field_map json "startTime" TimeStamp.of_json in
-      let s3Bucket = field_map json "s3Bucket" S3Bucket.of_json in
-      let statusDetail = field_map json "statusDetail" StringMax255.of_json in
-      let status = field_map json "status" ContinuousExportStatus.of_json in
-      let exportId = field_map json "exportId" ConfigurationsExportId.of_json in
+        field_map json__ "schemaStorageConfig" SchemaStorageConfig.of_json in
+      let dataSource = field_map json__ "dataSource" DataSource.of_json in
+      let stopTime = field_map json__ "stopTime" TimeStamp.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
+      let s3Bucket = field_map json__ "s3Bucket" S3Bucket.of_json in
+      let statusDetail = field_map json__ "statusDetail" StringMax255.of_json in
+      let status = field_map json__ "status" ContinuousExportStatus.of_json in
+      let exportId =
+        field_map json__ "exportId" ConfigurationsExportId.of_json in
       make ?schemaStorageConfig ?dataSource ?stopTime ?startTime ?s3Bucket
         ?statusDetail ?status ?exportId ()
     let to_json v = composed_to_json to_value v
@@ -1649,6 +2365,8 @@ module DescribeConfigurationsAttribute =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1656,27 +2374,184 @@ module DescribeConfigurationsAttribute =
         ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module BatchDeleteConfigurationTaskStatus =
+  struct
+    type nonrec t =
+      | INITIALIZING 
+      | VALIDATING 
+      | DELETING 
+      | COMPLETED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INITIALIZING -> "INITIALIZING"
+      | VALIDATING -> "VALIDATING"
+      | DELETING -> "DELETING"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INITIALIZING" -> INITIALIZING
+      | "VALIDATING" -> VALIDATING
+      | "DELETING" -> DELETING
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration BatchDeleteConfigurationTaskStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"BatchDeleteConfigurationTaskStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ConfigurationIdList =
+  struct
+    type nonrec t = ConfigurationId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConfigurationId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConfigurationId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConfigurationIdList"
+        ~of_json:ConfigurationId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DeletionConfigurationItemType =
+  struct
+    type nonrec t =
+      | SERVER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | SERVER -> "SERVER" | Non_static_id s -> s
+    let of_string = function | "SERVER" -> SERVER | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeletionConfigurationItemType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DeletionConfigurationItemType" j)
+    let to_json = simple_to_json to_value
+  end
+module DeletionWarningsList =
+  struct
+    type nonrec t = DeletionWarning.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeletionWarning.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeletionWarning.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeletionWarningsList"
+        ~of_json:DeletionWarning.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FailedConfigurationList =
+  struct
+    type nonrec t = FailedConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FailedConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FailedConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FailedConfigurationList"
+        ~of_json:FailedConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UUID =
+  struct
+    type nonrec t = string
+    let context_ = "UUID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UUID" j
+    let to_json = simple_to_json to_value
+  end
 module AgentInfo =
   struct
     type nonrec t =
       {
-      agentId: AgentId.t option [@ocaml.doc "The agent or connector ID."];
+      agentId: AgentId.t option [@ocaml.doc "The agent or collector ID."];
       hostName: String_.t option
         [@ocaml.doc
-          "The name of the host where the agent or connector resides. The host can be a server or virtual machine."];
+          "The name of the host where the agent or collector resides. The host can be a server or virtual machine."];
       agentNetworkInfoList: AgentNetworkInfoList.t option
         [@ocaml.doc
-          "Network details about the host where the agent or connector resides."];
+          "Network details about the host where the agent or collector resides."];
       connectorId: String_.t option [@ocaml.doc "The ID of the connector."];
       version: String_.t option
-        [@ocaml.doc "The agent or connector version."];
-      health: AgentStatus.t option
-        [@ocaml.doc "The health of the agent or connector."];
+        [@ocaml.doc "The agent or collector version."];
+      health: AgentStatus.t option [@ocaml.doc "The health of the agent."];
       lastHealthPingTime: String_.t option
-        [@ocaml.doc "Time since agent or connector health was reported."];
+        [@ocaml.doc "Time since agent health was reported."];
       collectionStatus: String_.t option
-        [@ocaml.doc
-          "Status of the collection process for an agent or connector."];
+        [@ocaml.doc "Status of the collection process for an agent."];
       agentType: String_.t option [@ocaml.doc "Type of agent."];
       registeredTime: String_.t option
         [@ocaml.doc "Agent's first registration timestamp in UTC."]}
@@ -1747,26 +2622,26 @@ module AgentInfo =
         ?health ?version ?connectorId ?agentNetworkInfoList ?hostName
         ?agentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registeredTime = field_map json "registeredTime" String_.of_json in
-      let agentType = field_map json "agentType" String_.of_json in
+    let of_json json__ =
+      let registeredTime = field_map json__ "registeredTime" String_.of_json in
+      let agentType = field_map json__ "agentType" String_.of_json in
       let collectionStatus =
-        field_map json "collectionStatus" String_.of_json in
+        field_map json__ "collectionStatus" String_.of_json in
       let lastHealthPingTime =
-        field_map json "lastHealthPingTime" String_.of_json in
-      let health = field_map json "health" AgentStatus.of_json in
-      let version = field_map json "version" String_.of_json in
-      let connectorId = field_map json "connectorId" String_.of_json in
+        field_map json__ "lastHealthPingTime" String_.of_json in
+      let health = field_map json__ "health" AgentStatus.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let connectorId = field_map json__ "connectorId" String_.of_json in
       let agentNetworkInfoList =
-        field_map json "agentNetworkInfoList" AgentNetworkInfoList.of_json in
-      let hostName = field_map json "hostName" String_.of_json in
-      let agentId = field_map json "agentId" AgentId.of_json in
+        field_map json__ "agentNetworkInfoList" AgentNetworkInfoList.of_json in
+      let hostName = field_map json__ "hostName" String_.of_json in
+      let agentId = field_map json__ "agentId" AgentId.of_json in
       make ?registeredTime ?agentType ?collectionStatus ?lastHealthPingTime
         ?health ?version ?connectorId ?agentNetworkInfoList ?hostName
         ?agentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about agents or connectors associated with the user\226\128\153s AWS account. Information includes agent or connector IDs, IP addresses, media access control (MAC) addresses, agent or connector health, hostname where the agent or connector resides, and agent version for each agent."]
+       "Information about agents associated with the user\226\128\153s Amazon Web Services account. Information includes agent IDs, IP addresses, media access control (MAC) addresses, agent or collector status, hostname where the agent resides, and agent version for each agent."]
 module Tag =
   struct
     type nonrec t =
@@ -1788,17 +2663,23 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Metadata that help you categorize IT assets."]
+  end[@@ocaml.doc
+       "Metadata that help you categorize IT assets. Do not store sensitive information (like personal data) in tags."]
 module ApplicationId =
   struct
     type nonrec t = string
     let context_ = "ApplicationId"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () -> check_pattern i ~pattern:"\\S+"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -1846,18 +2727,88 @@ module BatchDeleteImportDataError =
           (Xml.child xml_arg0 "importTaskId") in
       make ?errorDescription ?errorCode ?importTaskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorDescription =
-        field_map json "errorDescription"
+        field_map json__ "errorDescription"
           BatchDeleteImportDataErrorDescription.of_json in
       let errorCode =
-        field_map json "errorCode" BatchDeleteImportDataErrorCode.of_json in
+        field_map json__ "errorCode" BatchDeleteImportDataErrorCode.of_json in
       let importTaskId =
-        field_map json "importTaskId" ImportTaskIdentifier.of_json in
+        field_map json__ "importTaskId" ImportTaskIdentifier.of_json in
       make ?errorDescription ?errorCode ?importTaskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Error messages returned for each import task that you deleted as a response for this command."]
+module BatchDeleteAgentError =
+  struct
+    type nonrec t =
+      {
+      agentId: AgentId.t option
+        [@ocaml.doc "The ID of the agent or data collector to delete."];
+      errorMessage: String_.t option
+        [@ocaml.doc
+          "The description of the error that occurred for the delete failed agent."];
+      errorCode: DeleteAgentErrorCode.t option
+        [@ocaml.doc
+          "The type of error that occurred for the delete failed agent. Valid status are: AGENT_IN_USE | NOT_FOUND | INTERNAL_SERVER_ERROR."]}
+    let make ?agentId =
+      fun ?errorMessage ->
+        fun ?errorCode -> fun () -> { agentId; errorMessage; errorCode }
+    let to_value x =
+      structure_to_value
+        [("agentId", (Option.map x.agentId ~f:AgentId.to_value));
+        ("errorMessage", (Option.map x.errorMessage ~f:String_.to_value));
+        ("errorCode",
+          (Option.map x.errorCode ~f:DeleteAgentErrorCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorCode =
+        (Option.map ~f:DeleteAgentErrorCode.of_xml)
+          (Xml.child xml_arg0 "errorCode") in
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "errorMessage") in
+      let agentId =
+        (Option.map ~f:AgentId.of_xml) (Xml.child xml_arg0 "agentId") in
+      make ?errorCode ?errorMessage ?agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorCode =
+        field_map json__ "errorCode" DeleteAgentErrorCode.of_json in
+      let errorMessage = field_map json__ "errorMessage" String_.of_json in
+      let agentId = field_map json__ "agentId" AgentId.of_json in
+      make ?errorCode ?errorMessage ?agentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing the agent or data collector that failed to delete, each containing agentId, errorMessage, and errorCode."]
+module DeleteAgent =
+  struct
+    type nonrec t =
+      {
+      agentId: AgentId.t
+        [@ocaml.doc "The ID of the agent or data collector to delete."];
+      force: Boolean.t option
+        [@ocaml.doc
+          "Optional flag used to force delete an agent or data collector. It is needed to delete any agent in HEALTHY/UNHEALTHY/RUNNING status. Note that deleting an agent that is actively reporting health causes it to be re-registered with a different agent ID after data collector re-connects with Amazon Web Services."]}
+    let context_ = "DeleteAgent"
+    let make ?force = fun ~agentId -> fun () -> { force; agentId }
+    let to_value x =
+      structure_to_value
+        [("agentId", (Some (AgentId.to_value x.agentId)));
+        ("force", (Option.map x.force ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let force = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "force") in
+      let agentId =
+        AgentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentId") in
+      make ?force ~agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let force = field_map json__ "force" Boolean.of_json in
+      let agentId = field_map_exn json__ "agentId" AgentId.of_json in
+      make ?force ~agentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing the agent or data collector to be deleted along with the optional configurations for error handling."]
 module AuthorizationErrorException =
   struct
     type nonrec t = {
@@ -1872,12 +2823,12 @@ module AuthorizationErrorException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The AWS user account does not have permission to perform the action. Check the IAM policy associated with this account."]
+       "The user does not have permission to perform the action. Check the IAM policy associated with this user."]
 module HomeRegionNotSetException =
   struct
     type nonrec t = {
@@ -1892,12 +2843,12 @@ module HomeRegionNotSetException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The home region is not set. Set the home region to continue."]
+       "The home Region is not set. Set the home Region to continue."]
 module InvalidParameterException =
   struct
     type nonrec t = {
@@ -1912,8 +2863,8 @@ module InvalidParameterException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1932,8 +2883,8 @@ module InvalidParameterValueException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1952,15 +2903,76 @@ module ServerInternalErrorException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The server experienced an internal error. Try again."]
+module ApplicationDescription =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_pattern i ~pattern:"(^$|[\\s\\S]*\\S[\\s\\S]*)"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationDescription" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationName =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:127) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationName" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationWave =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationWave"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^($|[^\\s\\x00]( *[^\\s\\x00])*$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationWave" j
+    let to_json = simple_to_json to_value
+  end
 module AgentConfigurationStatusList =
   struct
     type nonrec t = AgentConfigurationStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentConfigurationStatus.to_value)) |>
         (fun x -> `List x)
@@ -1987,6 +2999,9 @@ module AgentIds =
   struct
     type nonrec t = AgentId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2020,8 +3035,8 @@ module OperationNotPermittedException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This operation is not permitted."]
@@ -2039,8 +3054,8 @@ module ResourceInUseException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2059,8 +3074,8 @@ module ResourceNotFoundException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2069,6 +3084,9 @@ module ExportDataFormats =
   struct
     type nonrec t = ExportDataFormat.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportDataFormat.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2094,6 +3112,9 @@ module ExportFilters =
   struct
     type nonrec t = ExportFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2114,6 +3135,36 @@ module ExportFilters =
       list_of_json ~kind:"ExportFilters" ~of_json:ExportFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ExportPreferences =
+  struct
+    type nonrec t =
+      {
+      ec2RecommendationsPreferences:
+        Ec2RecommendationsExportPreferences.t option
+        [@ocaml.doc
+          "If enabled, exported data includes EC2 instance type matches for on-premises servers discovered through Amazon Web Services Application Discovery Service."]}
+    let make ?ec2RecommendationsPreferences =
+      fun () -> { ec2RecommendationsPreferences }
+    let to_value x =
+      structure_to_value
+        [("ec2RecommendationsPreferences",
+           (Option.map x.ec2RecommendationsPreferences
+              ~f:Ec2RecommendationsExportPreferences.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ec2RecommendationsPreferences =
+        (Option.map ~f:Ec2RecommendationsExportPreferences.of_xml)
+          (Xml.child xml_arg0 "ec2RecommendationsPreferences") in
+      make ?ec2RecommendationsPreferences ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ec2RecommendationsPreferences =
+        field_map json__ "ec2RecommendationsPreferences"
+          Ec2RecommendationsExportPreferences.of_json in
+      make ?ec2RecommendationsPreferences ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the type of data that is being exported. Only one ExportPreferences can be enabled for a StartExportTask action."]
 module ConflictErrorException =
   struct
     type nonrec t = {
@@ -2128,15 +3179,38 @@ module ConflictErrorException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Conflict error."]
+module LimitExceededException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The limit of 200 configuration IDs per request has been exceeded."]
 module NeighborDetailsList =
   struct
     type nonrec t = NeighborConnectionDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NeighborConnectionDetail.to_value)) |>
         (fun x -> `List x)
@@ -2159,35 +3233,13 @@ module NeighborDetailsList =
         ~of_json:NeighborConnectionDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ConfigurationIdList =
-  struct
-    type nonrec t = ConfigurationId.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ConfigurationId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ConfigurationId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ConfigurationIdList"
-        ~of_json:ConfigurationId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module Configurations =
   struct
     type nonrec t = Configuration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Configuration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2225,6 +3277,9 @@ module Filters =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2248,6 +3303,9 @@ module OrderByList =
   struct
     type nonrec t = OrderByElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrderByElement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2272,27 +3330,27 @@ module CustomerAgentInfo =
   struct
     type nonrec t =
       {
-      activeAgents: Integer.t
+      activeAgents: Integer.t option
         [@ocaml.doc "Number of active discovery agents."];
-      healthyAgents: Integer.t
+      healthyAgents: Integer.t option
         [@ocaml.doc "Number of healthy discovery agents"];
-      blackListedAgents: Integer.t
+      blackListedAgents: Integer.t option
         [@ocaml.doc "Number of blacklisted discovery agents."];
-      shutdownAgents: Integer.t
+      shutdownAgents: Integer.t option
         [@ocaml.doc "Number of discovery agents with status SHUTDOWN."];
-      unhealthyAgents: Integer.t
+      unhealthyAgents: Integer.t option
         [@ocaml.doc "Number of unhealthy discovery agents."];
-      totalAgents: Integer.t [@ocaml.doc "Total number of discovery agents."];
-      unknownAgents: Integer.t
+      totalAgents: Integer.t option
+        [@ocaml.doc "Total number of discovery agents."];
+      unknownAgents: Integer.t option
         [@ocaml.doc "Number of unknown discovery agents."]}
-    let context_ = "CustomerAgentInfo"
-    let make ~activeAgents =
-      fun ~healthyAgents ->
-        fun ~blackListedAgents ->
-          fun ~shutdownAgents ->
-            fun ~unhealthyAgents ->
-              fun ~totalAgents ->
-                fun ~unknownAgents ->
+    let make ?activeAgents =
+      fun ?healthyAgents ->
+        fun ?blackListedAgents ->
+          fun ?shutdownAgents ->
+            fun ?unhealthyAgents ->
+              fun ?totalAgents ->
+                fun ?unknownAgents ->
                   fun () ->
                     {
                       activeAgents;
@@ -2305,80 +3363,178 @@ module CustomerAgentInfo =
                     }
     let to_value x =
       structure_to_value
-        [("activeAgents", (Some (Integer.to_value x.activeAgents)));
-        ("healthyAgents", (Some (Integer.to_value x.healthyAgents)));
-        ("blackListedAgents", (Some (Integer.to_value x.blackListedAgents)));
-        ("shutdownAgents", (Some (Integer.to_value x.shutdownAgents)));
-        ("unhealthyAgents", (Some (Integer.to_value x.unhealthyAgents)));
-        ("totalAgents", (Some (Integer.to_value x.totalAgents)));
-        ("unknownAgents", (Some (Integer.to_value x.unknownAgents)))]
+        [("activeAgents", (Option.map x.activeAgents ~f:Integer.to_value));
+        ("healthyAgents", (Option.map x.healthyAgents ~f:Integer.to_value));
+        ("blackListedAgents",
+          (Option.map x.blackListedAgents ~f:Integer.to_value));
+        ("shutdownAgents", (Option.map x.shutdownAgents ~f:Integer.to_value));
+        ("unhealthyAgents",
+          (Option.map x.unhealthyAgents ~f:Integer.to_value));
+        ("totalAgents", (Option.map x.totalAgents ~f:Integer.to_value));
+        ("unknownAgents", (Option.map x.unknownAgents ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let unknownAgents =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "unknownAgents") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "unknownAgents") in
       let totalAgents =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "totalAgents") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "totalAgents") in
       let unhealthyAgents =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "unhealthyAgents") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "unhealthyAgents") in
       let shutdownAgents =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "shutdownAgents") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "shutdownAgents") in
       let blackListedAgents =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "blackListedAgents") in
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "blackListedAgents") in
       let healthyAgents =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "healthyAgents") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "healthyAgents") in
       let activeAgents =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activeAgents") in
-      make ~unknownAgents ~totalAgents ~unhealthyAgents ~shutdownAgents
-        ~blackListedAgents ~healthyAgents ~activeAgents ()
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "activeAgents") in
+      make ?unknownAgents ?totalAgents ?unhealthyAgents ?shutdownAgents
+        ?blackListedAgents ?healthyAgents ?activeAgents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unknownAgents = field_map_exn json "unknownAgents" Integer.of_json in
-      let totalAgents = field_map_exn json "totalAgents" Integer.of_json in
+    let of_json json__ =
+      let unknownAgents = field_map json__ "unknownAgents" Integer.of_json in
+      let totalAgents = field_map json__ "totalAgents" Integer.of_json in
       let unhealthyAgents =
-        field_map_exn json "unhealthyAgents" Integer.of_json in
-      let shutdownAgents =
-        field_map_exn json "shutdownAgents" Integer.of_json in
+        field_map json__ "unhealthyAgents" Integer.of_json in
+      let shutdownAgents = field_map json__ "shutdownAgents" Integer.of_json in
       let blackListedAgents =
-        field_map_exn json "blackListedAgents" Integer.of_json in
-      let healthyAgents = field_map_exn json "healthyAgents" Integer.of_json in
-      let activeAgents = field_map_exn json "activeAgents" Integer.of_json in
-      make ~unknownAgents ~totalAgents ~unhealthyAgents ~shutdownAgents
-        ~blackListedAgents ~healthyAgents ~activeAgents ()
+        field_map json__ "blackListedAgents" Integer.of_json in
+      let healthyAgents = field_map json__ "healthyAgents" Integer.of_json in
+      let activeAgents = field_map json__ "activeAgents" Integer.of_json in
+      make ?unknownAgents ?totalAgents ?unhealthyAgents ?shutdownAgents
+        ?blackListedAgents ?healthyAgents ?activeAgents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Inventory data for installed discovery agents."]
+module CustomerAgentlessCollectorInfo =
+  struct
+    type nonrec t =
+      {
+      activeAgentlessCollectors: Integer.t option
+        [@ocaml.doc "The number of active Agentless Collector collectors."];
+      healthyAgentlessCollectors: Integer.t option
+        [@ocaml.doc "The number of healthy Agentless Collector collectors."];
+      denyListedAgentlessCollectors: Integer.t option
+        [@ocaml.doc
+          "The number of deny-listed Agentless Collector collectors."];
+      shutdownAgentlessCollectors: Integer.t option
+        [@ocaml.doc
+          "The number of Agentless Collector collectors with SHUTDOWN status."];
+      unhealthyAgentlessCollectors: Integer.t option
+        [@ocaml.doc
+          "The number of unhealthy Agentless Collector collectors."];
+      totalAgentlessCollectors: Integer.t option
+        [@ocaml.doc "The total number of Agentless Collector collectors."];
+      unknownAgentlessCollectors: Integer.t option
+        [@ocaml.doc "The number of unknown Agentless Collector collectors."]}
+    let make ?activeAgentlessCollectors =
+      fun ?healthyAgentlessCollectors ->
+        fun ?denyListedAgentlessCollectors ->
+          fun ?shutdownAgentlessCollectors ->
+            fun ?unhealthyAgentlessCollectors ->
+              fun ?totalAgentlessCollectors ->
+                fun ?unknownAgentlessCollectors ->
+                  fun () ->
+                    {
+                      activeAgentlessCollectors;
+                      healthyAgentlessCollectors;
+                      denyListedAgentlessCollectors;
+                      shutdownAgentlessCollectors;
+                      unhealthyAgentlessCollectors;
+                      totalAgentlessCollectors;
+                      unknownAgentlessCollectors
+                    }
+    let to_value x =
+      structure_to_value
+        [("activeAgentlessCollectors",
+           (Option.map x.activeAgentlessCollectors ~f:Integer.to_value));
+        ("healthyAgentlessCollectors",
+          (Option.map x.healthyAgentlessCollectors ~f:Integer.to_value));
+        ("denyListedAgentlessCollectors",
+          (Option.map x.denyListedAgentlessCollectors ~f:Integer.to_value));
+        ("shutdownAgentlessCollectors",
+          (Option.map x.shutdownAgentlessCollectors ~f:Integer.to_value));
+        ("unhealthyAgentlessCollectors",
+          (Option.map x.unhealthyAgentlessCollectors ~f:Integer.to_value));
+        ("totalAgentlessCollectors",
+          (Option.map x.totalAgentlessCollectors ~f:Integer.to_value));
+        ("unknownAgentlessCollectors",
+          (Option.map x.unknownAgentlessCollectors ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unknownAgentlessCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "unknownAgentlessCollectors") in
+      let totalAgentlessCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalAgentlessCollectors") in
+      let unhealthyAgentlessCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "unhealthyAgentlessCollectors") in
+      let shutdownAgentlessCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "shutdownAgentlessCollectors") in
+      let denyListedAgentlessCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "denyListedAgentlessCollectors") in
+      let healthyAgentlessCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "healthyAgentlessCollectors") in
+      let activeAgentlessCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "activeAgentlessCollectors") in
+      make ?unknownAgentlessCollectors ?totalAgentlessCollectors
+        ?unhealthyAgentlessCollectors ?shutdownAgentlessCollectors
+        ?denyListedAgentlessCollectors ?healthyAgentlessCollectors
+        ?activeAgentlessCollectors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unknownAgentlessCollectors =
+        field_map json__ "unknownAgentlessCollectors" Integer.of_json in
+      let totalAgentlessCollectors =
+        field_map json__ "totalAgentlessCollectors" Integer.of_json in
+      let unhealthyAgentlessCollectors =
+        field_map json__ "unhealthyAgentlessCollectors" Integer.of_json in
+      let shutdownAgentlessCollectors =
+        field_map json__ "shutdownAgentlessCollectors" Integer.of_json in
+      let denyListedAgentlessCollectors =
+        field_map json__ "denyListedAgentlessCollectors" Integer.of_json in
+      let healthyAgentlessCollectors =
+        field_map json__ "healthyAgentlessCollectors" Integer.of_json in
+      let activeAgentlessCollectors =
+        field_map json__ "activeAgentlessCollectors" Integer.of_json in
+      make ?unknownAgentlessCollectors ?totalAgentlessCollectors
+        ?unhealthyAgentlessCollectors ?shutdownAgentlessCollectors
+        ?denyListedAgentlessCollectors ?healthyAgentlessCollectors
+        ?activeAgentlessCollectors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The inventory data for installed Agentless Collector collectors."]
 module CustomerConnectorInfo =
   struct
     type nonrec t =
       {
-      activeConnectors: Integer.t
+      activeConnectors: Integer.t option
         [@ocaml.doc "Number of active discovery connectors."];
-      healthyConnectors: Integer.t
+      healthyConnectors: Integer.t option
         [@ocaml.doc "Number of healthy discovery connectors."];
-      blackListedConnectors: Integer.t
+      blackListedConnectors: Integer.t option
         [@ocaml.doc "Number of blacklisted discovery connectors."];
-      shutdownConnectors: Integer.t
+      shutdownConnectors: Integer.t option
         [@ocaml.doc "Number of discovery connectors with status SHUTDOWN,"];
-      unhealthyConnectors: Integer.t
+      unhealthyConnectors: Integer.t option
         [@ocaml.doc "Number of unhealthy discovery connectors."];
-      totalConnectors: Integer.t
+      totalConnectors: Integer.t option
         [@ocaml.doc "Total number of discovery connectors."];
-      unknownConnectors: Integer.t
+      unknownConnectors: Integer.t option
         [@ocaml.doc "Number of unknown discovery connectors."]}
-    let context_ = "CustomerConnectorInfo"
-    let make ~activeConnectors =
-      fun ~healthyConnectors ->
-        fun ~blackListedConnectors ->
-          fun ~shutdownConnectors ->
-            fun ~unhealthyConnectors ->
-              fun ~totalConnectors ->
-                fun ~unknownConnectors ->
+    let make ?activeConnectors =
+      fun ?healthyConnectors ->
+        fun ?blackListedConnectors ->
+          fun ?shutdownConnectors ->
+            fun ?unhealthyConnectors ->
+              fun ?totalConnectors ->
+                fun ?unknownConnectors ->
                   fun () ->
                     {
                       activeConnectors;
@@ -2391,67 +3547,175 @@ module CustomerConnectorInfo =
                     }
     let to_value x =
       structure_to_value
-        [("activeConnectors", (Some (Integer.to_value x.activeConnectors)));
-        ("healthyConnectors", (Some (Integer.to_value x.healthyConnectors)));
+        [("activeConnectors",
+           (Option.map x.activeConnectors ~f:Integer.to_value));
+        ("healthyConnectors",
+          (Option.map x.healthyConnectors ~f:Integer.to_value));
         ("blackListedConnectors",
-          (Some (Integer.to_value x.blackListedConnectors)));
+          (Option.map x.blackListedConnectors ~f:Integer.to_value));
         ("shutdownConnectors",
-          (Some (Integer.to_value x.shutdownConnectors)));
+          (Option.map x.shutdownConnectors ~f:Integer.to_value));
         ("unhealthyConnectors",
-          (Some (Integer.to_value x.unhealthyConnectors)));
-        ("totalConnectors", (Some (Integer.to_value x.totalConnectors)));
-        ("unknownConnectors", (Some (Integer.to_value x.unknownConnectors)))]
+          (Option.map x.unhealthyConnectors ~f:Integer.to_value));
+        ("totalConnectors",
+          (Option.map x.totalConnectors ~f:Integer.to_value));
+        ("unknownConnectors",
+          (Option.map x.unknownConnectors ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let unknownConnectors =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "unknownConnectors") in
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "unknownConnectors") in
       let totalConnectors =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "totalConnectors") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "totalConnectors") in
       let unhealthyConnectors =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "unhealthyConnectors") in
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "unhealthyConnectors") in
       let shutdownConnectors =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "shutdownConnectors") in
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "shutdownConnectors") in
       let blackListedConnectors =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "blackListedConnectors") in
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "blackListedConnectors") in
       let healthyConnectors =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "healthyConnectors") in
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "healthyConnectors") in
       let activeConnectors =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activeConnectors") in
-      make ~unknownConnectors ~totalConnectors ~unhealthyConnectors
-        ~shutdownConnectors ~blackListedConnectors ~healthyConnectors
-        ~activeConnectors ()
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "activeConnectors") in
+      make ?unknownConnectors ?totalConnectors ?unhealthyConnectors
+        ?shutdownConnectors ?blackListedConnectors ?healthyConnectors
+        ?activeConnectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unknownConnectors =
-        field_map_exn json "unknownConnectors" Integer.of_json in
+        field_map json__ "unknownConnectors" Integer.of_json in
       let totalConnectors =
-        field_map_exn json "totalConnectors" Integer.of_json in
+        field_map json__ "totalConnectors" Integer.of_json in
       let unhealthyConnectors =
-        field_map_exn json "unhealthyConnectors" Integer.of_json in
+        field_map json__ "unhealthyConnectors" Integer.of_json in
       let shutdownConnectors =
-        field_map_exn json "shutdownConnectors" Integer.of_json in
+        field_map json__ "shutdownConnectors" Integer.of_json in
       let blackListedConnectors =
-        field_map_exn json "blackListedConnectors" Integer.of_json in
+        field_map json__ "blackListedConnectors" Integer.of_json in
       let healthyConnectors =
-        field_map_exn json "healthyConnectors" Integer.of_json in
+        field_map json__ "healthyConnectors" Integer.of_json in
       let activeConnectors =
-        field_map_exn json "activeConnectors" Integer.of_json in
-      make ~unknownConnectors ~totalConnectors ~unhealthyConnectors
-        ~shutdownConnectors ~blackListedConnectors ~healthyConnectors
-        ~activeConnectors ()
+        field_map json__ "activeConnectors" Integer.of_json in
+      make ?unknownConnectors ?totalConnectors ?unhealthyConnectors
+        ?shutdownConnectors ?blackListedConnectors ?healthyConnectors
+        ?activeConnectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Inventory data for installed discovery connectors."]
+module CustomerMeCollectorInfo =
+  struct
+    type nonrec t =
+      {
+      activeMeCollectors: Integer.t option
+        [@ocaml.doc "The number of active Migration Evaluator collectors."];
+      healthyMeCollectors: Integer.t option
+        [@ocaml.doc "The number of healthy Migration Evaluator collectors."];
+      denyListedMeCollectors: Integer.t option
+        [@ocaml.doc
+          "The number of deny-listed Migration Evaluator collectors."];
+      shutdownMeCollectors: Integer.t option
+        [@ocaml.doc
+          "The number of Migration Evaluator collectors with SHUTDOWN status."];
+      unhealthyMeCollectors: Integer.t option
+        [@ocaml.doc
+          "The number of unhealthy Migration Evaluator collectors."];
+      totalMeCollectors: Integer.t option
+        [@ocaml.doc "The total number of Migration Evaluator collectors."];
+      unknownMeCollectors: Integer.t option
+        [@ocaml.doc "The number of unknown Migration Evaluator collectors."]}
+    let make ?activeMeCollectors =
+      fun ?healthyMeCollectors ->
+        fun ?denyListedMeCollectors ->
+          fun ?shutdownMeCollectors ->
+            fun ?unhealthyMeCollectors ->
+              fun ?totalMeCollectors ->
+                fun ?unknownMeCollectors ->
+                  fun () ->
+                    {
+                      activeMeCollectors;
+                      healthyMeCollectors;
+                      denyListedMeCollectors;
+                      shutdownMeCollectors;
+                      unhealthyMeCollectors;
+                      totalMeCollectors;
+                      unknownMeCollectors
+                    }
+    let to_value x =
+      structure_to_value
+        [("activeMeCollectors",
+           (Option.map x.activeMeCollectors ~f:Integer.to_value));
+        ("healthyMeCollectors",
+          (Option.map x.healthyMeCollectors ~f:Integer.to_value));
+        ("denyListedMeCollectors",
+          (Option.map x.denyListedMeCollectors ~f:Integer.to_value));
+        ("shutdownMeCollectors",
+          (Option.map x.shutdownMeCollectors ~f:Integer.to_value));
+        ("unhealthyMeCollectors",
+          (Option.map x.unhealthyMeCollectors ~f:Integer.to_value));
+        ("totalMeCollectors",
+          (Option.map x.totalMeCollectors ~f:Integer.to_value));
+        ("unknownMeCollectors",
+          (Option.map x.unknownMeCollectors ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unknownMeCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "unknownMeCollectors") in
+      let totalMeCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalMeCollectors") in
+      let unhealthyMeCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "unhealthyMeCollectors") in
+      let shutdownMeCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "shutdownMeCollectors") in
+      let denyListedMeCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "denyListedMeCollectors") in
+      let healthyMeCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "healthyMeCollectors") in
+      let activeMeCollectors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "activeMeCollectors") in
+      make ?unknownMeCollectors ?totalMeCollectors ?unhealthyMeCollectors
+        ?shutdownMeCollectors ?denyListedMeCollectors ?healthyMeCollectors
+        ?activeMeCollectors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unknownMeCollectors =
+        field_map json__ "unknownMeCollectors" Integer.of_json in
+      let totalMeCollectors =
+        field_map json__ "totalMeCollectors" Integer.of_json in
+      let unhealthyMeCollectors =
+        field_map json__ "unhealthyMeCollectors" Integer.of_json in
+      let shutdownMeCollectors =
+        field_map json__ "shutdownMeCollectors" Integer.of_json in
+      let denyListedMeCollectors =
+        field_map json__ "denyListedMeCollectors" Integer.of_json in
+      let healthyMeCollectors =
+        field_map json__ "healthyMeCollectors" Integer.of_json in
+      let activeMeCollectors =
+        field_map json__ "activeMeCollectors" Integer.of_json in
+      make ?unknownMeCollectors ?totalMeCollectors ?unhealthyMeCollectors
+        ?shutdownMeCollectors ?denyListedMeCollectors ?healthyMeCollectors
+        ?activeMeCollectors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The inventory data for installed Migration Evaluator collectors."]
 module ConfigurationTagSet =
   struct
     type nonrec t = ConfigurationTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2477,6 +3741,9 @@ module TagFilters =
   struct
     type nonrec t = TagFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2501,6 +3768,9 @@ module ImportTaskList =
   struct
     type nonrec t = ImportTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2525,6 +3795,9 @@ module DescribeImportTasksFilterList =
   struct
     type nonrec t = ImportTaskFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportTaskFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2569,6 +3842,9 @@ module ExportsInfo =
   struct
     type nonrec t = ExportInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2593,6 +3869,9 @@ module ExportIds =
   struct
     type nonrec t = ConfigurationsExportId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationsExportId.to_value)) |>
         (fun x -> `List x)
@@ -2619,6 +3898,9 @@ module ContinuousExportDescriptions =
   struct
     type nonrec t = ContinuousExportDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContinuousExportDescription.to_value)) |>
         (fun x -> `List x)
@@ -2645,6 +3927,9 @@ module ContinuousExportIds =
   struct
     type nonrec t = ConfigurationsExportId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationsExportId.to_value)) |>
         (fun x -> `List x)
@@ -2691,6 +3976,9 @@ module DescribeConfigurationsAttributes =
   struct
     type nonrec t = DescribeConfigurationsAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DescribeConfigurationsAttribute.to_value)) |>
         (fun x -> `List x)
@@ -2713,10 +4001,138 @@ module DescribeConfigurationsAttributes =
         ~of_json:DescribeConfigurationsAttribute.of_json j
     let to_json v = composed_to_json to_value v
   end
+module BatchDeleteConfigurationTask =
+  struct
+    type nonrec t =
+      {
+      taskId: UUID.t option
+        [@ocaml.doc "The deletion task's unique identifier."];
+      status: BatchDeleteConfigurationTaskStatus.t option
+        [@ocaml.doc
+          "The current execution status of the deletion task. Valid status are: INITIALIZING | VALIDATING | DELETING | COMPLETED | FAILED."];
+      startTime: TimeStamp.t option
+        [@ocaml.doc
+          "An epoch seconds timestamp (UTC) of when the deletion task was started."];
+      endTime: TimeStamp.t option
+        [@ocaml.doc
+          "An epoch seconds timestamp (UTC) of when the deletion task was completed or failed."];
+      configurationType: DeletionConfigurationItemType.t option
+        [@ocaml.doc
+          "The type of configuration item to delete. Supported types are: SERVER."];
+      requestedConfigurations: ConfigurationIdList.t option
+        [@ocaml.doc
+          "The list of configuration IDs that were originally requested to be deleted by the deletion task."];
+      deletedConfigurations: ConfigurationIdList.t option
+        [@ocaml.doc
+          "The list of configuration IDs that were successfully deleted by the deletion task."];
+      failedConfigurations: FailedConfigurationList.t option
+        [@ocaml.doc
+          "A list of configuration IDs that failed to delete during the deletion task, each paired with an error message."];
+      deletionWarnings: DeletionWarningsList.t option
+        [@ocaml.doc
+          "A list of configuration IDs that produced warnings regarding their deletion, paired with a warning message."]}
+    let make ?taskId =
+      fun ?status ->
+        fun ?startTime ->
+          fun ?endTime ->
+            fun ?configurationType ->
+              fun ?requestedConfigurations ->
+                fun ?deletedConfigurations ->
+                  fun ?failedConfigurations ->
+                    fun ?deletionWarnings ->
+                      fun () ->
+                        {
+                          taskId;
+                          status;
+                          startTime;
+                          endTime;
+                          configurationType;
+                          requestedConfigurations;
+                          deletedConfigurations;
+                          failedConfigurations;
+                          deletionWarnings
+                        }
+    let to_value x =
+      structure_to_value
+        [("taskId", (Option.map x.taskId ~f:UUID.to_value));
+        ("status",
+          (Option.map x.status ~f:BatchDeleteConfigurationTaskStatus.to_value));
+        ("startTime", (Option.map x.startTime ~f:TimeStamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:TimeStamp.to_value));
+        ("configurationType",
+          (Option.map x.configurationType
+             ~f:DeletionConfigurationItemType.to_value));
+        ("requestedConfigurations",
+          (Option.map x.requestedConfigurations
+             ~f:ConfigurationIdList.to_value));
+        ("deletedConfigurations",
+          (Option.map x.deletedConfigurations ~f:ConfigurationIdList.to_value));
+        ("failedConfigurations",
+          (Option.map x.failedConfigurations
+             ~f:FailedConfigurationList.to_value));
+        ("deletionWarnings",
+          (Option.map x.deletionWarnings ~f:DeletionWarningsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deletionWarnings =
+        (Option.map ~f:DeletionWarningsList.of_xml)
+          (Xml.child xml_arg0 "deletionWarnings") in
+      let failedConfigurations =
+        (Option.map ~f:FailedConfigurationList.of_xml)
+          (Xml.child xml_arg0 "failedConfigurations") in
+      let deletedConfigurations =
+        (Option.map ~f:ConfigurationIdList.of_xml)
+          (Xml.child xml_arg0 "deletedConfigurations") in
+      let requestedConfigurations =
+        (Option.map ~f:ConfigurationIdList.of_xml)
+          (Xml.child xml_arg0 "requestedConfigurations") in
+      let configurationType =
+        (Option.map ~f:DeletionConfigurationItemType.of_xml)
+          (Xml.child xml_arg0 "configurationType") in
+      let endTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let status =
+        (Option.map ~f:BatchDeleteConfigurationTaskStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let taskId = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "taskId") in
+      make ?deletionWarnings ?failedConfigurations ?deletedConfigurations
+        ?requestedConfigurations ?configurationType ?endTime ?startTime
+        ?status ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deletionWarnings =
+        field_map json__ "deletionWarnings" DeletionWarningsList.of_json in
+      let failedConfigurations =
+        field_map json__ "failedConfigurations"
+          FailedConfigurationList.of_json in
+      let deletedConfigurations =
+        field_map json__ "deletedConfigurations" ConfigurationIdList.of_json in
+      let requestedConfigurations =
+        field_map json__ "requestedConfigurations"
+          ConfigurationIdList.of_json in
+      let configurationType =
+        field_map json__ "configurationType"
+          DeletionConfigurationItemType.of_json in
+      let endTime = field_map json__ "endTime" TimeStamp.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
+      let status =
+        field_map json__ "status" BatchDeleteConfigurationTaskStatus.of_json in
+      let taskId = field_map json__ "taskId" UUID.of_json in
+      make ?deletionWarnings ?failedConfigurations ?deletedConfigurations
+        ?requestedConfigurations ?configurationType ?endTime ?startTime
+        ?status ?taskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A metadata object that represents the deletion task being executed."]
 module AgentsInfo =
   struct
     type nonrec t = AgentInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2741,6 +4157,9 @@ module TagSet =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2764,6 +4183,9 @@ module ApplicationIdsList =
   struct
     type nonrec t = ApplicationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2789,6 +4211,9 @@ module BatchDeleteImportDataErrorList =
   struct
     type nonrec t = BatchDeleteImportDataError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDeleteImportDataError.to_value)) |>
         (fun x -> `List x)
@@ -2819,6 +4244,9 @@ module ToDeleteIdentifierList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportTaskIdentifier.to_value)) |>
         (fun x -> `List x)
@@ -2839,6 +4267,66 @@ module ToDeleteIdentifierList =
     let of_json j =
       list_of_json ~kind:"ToDeleteIdentifierList"
         ~of_json:ImportTaskIdentifier.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchDeleteAgentErrors =
+  struct
+    type nonrec t = BatchDeleteAgentError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchDeleteAgentError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BatchDeleteAgentError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchDeleteAgentErrors"
+        ~of_json:BatchDeleteAgentError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DeleteAgents =
+  struct
+    type nonrec t = DeleteAgent.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeleteAgent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeleteAgent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeleteAgents" ~of_json:DeleteAgent.of_json j
     let to_json v = composed_to_json to_value v
   end
 module UpdateApplicationResponse =
@@ -2928,37 +4416,49 @@ module UpdateApplicationRequest =
       {
       configurationId: ApplicationId.t
         [@ocaml.doc "Configuration ID of the application to be updated."];
-      name: String_.t option
+      name: ApplicationName.t option
         [@ocaml.doc "New name of the application to be updated."];
-      description: String_.t option
-        [@ocaml.doc "New description of the application to be updated."]}
+      description: ApplicationDescription.t option
+        [@ocaml.doc "New description of the application to be updated."];
+      wave: ApplicationWave.t option
+        [@ocaml.doc
+          "The new migration wave of the application that you want to update."]}
     let context_ = "UpdateApplicationRequest"
     let make ?name =
       fun ?description ->
-        fun ~configurationId ->
-          fun () -> { name; description; configurationId }
+        fun ?wave ->
+          fun ~configurationId ->
+            fun () -> { name; description; wave; configurationId }
     let to_value x =
       structure_to_value
         [("configurationId",
            (Some (ApplicationId.to_value x.configurationId)));
-        ("name", (Option.map x.name ~f:String_.to_value));
-        ("description", (Option.map x.description ~f:String_.to_value))]
+        ("name", (Option.map x.name ~f:ApplicationName.to_value));
+        ("description",
+          (Option.map x.description ~f:ApplicationDescription.to_value));
+        ("wave", (Option.map x.wave ~f:ApplicationWave.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let wave =
+        (Option.map ~f:ApplicationWave.of_xml) (Xml.child xml_arg0 "wave") in
       let description =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
-      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+        (Option.map ~f:ApplicationDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let name =
+        (Option.map ~f:ApplicationName.of_xml) (Xml.child xml_arg0 "name") in
       let configurationId =
         ApplicationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configurationId") in
-      make ?description ?name ~configurationId ()
+      make ?wave ?description ?name ~configurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "description" String_.of_json in
-      let name = field_map json "name" String_.of_json in
+    let of_json json__ =
+      let wave = field_map json__ "wave" ApplicationWave.of_json in
+      let description =
+        field_map json__ "description" ApplicationDescription.of_json in
+      let name = field_map json__ "name" ApplicationName.of_json in
       let configurationId =
-        field_map_exn json "configurationId" ApplicationId.of_json in
-      make ?description ?name ~configurationId ()
+        field_map_exn json__ "configurationId" ApplicationId.of_json in
+      make ?wave ?description ?name ~configurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates metadata about an application."]
 module StopDataCollectionByAgentIdsResponse =
@@ -2967,7 +4467,7 @@ module StopDataCollectionByAgentIdsResponse =
       {
       agentsConfigurationStatus: AgentConfigurationStatusList.t option
         [@ocaml.doc
-          "Information about the agents or connector that were instructed to stop collecting data. Information includes the agent/connector ID, a description of the operation performed, and whether the agent/connector configuration was updated."]}
+          "Information about the agents that were instructed to stop collecting data. Information includes the agent ID, a description of the operation performed, and whether the agent configuration was updated."]}
     type nonrec error =
       [ `AuthorizationErrorException of AuthorizationErrorException.t 
       | `HomeRegionNotSetException of HomeRegionNotSetException.t 
@@ -3051,21 +4551,20 @@ module StopDataCollectionByAgentIdsResponse =
           (Xml.child xml_arg0 "agentsConfigurationStatus") in
       make ?agentsConfigurationStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let agentsConfigurationStatus =
-        field_map json "agentsConfigurationStatus"
+        field_map json__ "agentsConfigurationStatus"
           AgentConfigurationStatusList.of_json in
       make ?agentsConfigurationStatus ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Instructs the specified agents or connectors to stop collecting data."]
+  end[@@ocaml.doc "Instructs the specified agents to stop collecting data."]
 module StopDataCollectionByAgentIdsRequest =
   struct
     type nonrec t =
       {
       agentIds: AgentIds.t
         [@ocaml.doc
-          "The IDs of the agents or connectors from which to stop collecting data."]}
+          "The IDs of the agents from which to stop collecting data."]}
     let context_ = "StopDataCollectionByAgentIdsRequest"
     let make ~agentIds = fun () -> { agentIds }
     let to_value x =
@@ -3077,12 +4576,11 @@ module StopDataCollectionByAgentIdsRequest =
         AgentIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentIds") in
       make ~agentIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let agentIds = field_map_exn json "agentIds" AgentIds.of_json in
+    let of_json json__ =
+      let agentIds = field_map_exn json__ "agentIds" AgentIds.of_json in
       make ~agentIds ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Instructs the specified agents or connectors to stop collecting data."]
+  end[@@ocaml.doc "Instructs the specified agents to stop collecting data."]
 module StopContinuousExportResponse =
   struct
     type nonrec t =
@@ -3204,9 +4702,9 @@ module StopContinuousExportResponse =
         (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "startTime") in
       make ?stopTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stopTime = field_map json "stopTime" TimeStamp.of_json in
-      let startTime = field_map json "startTime" TimeStamp.of_json in
+    let of_json json__ =
+      let stopTime = field_map json__ "stopTime" TimeStamp.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
       make ?stopTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3229,9 +4727,9 @@ module StopContinuousExportRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "exportId") in
       make ~exportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exportId =
-        field_map_exn json "exportId" ConfigurationsExportId.of_json in
+        field_map_exn json__ "exportId" ConfigurationsExportId.of_json in
       make ~exportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3331,11 +4829,11 @@ module StartImportTaskResponse =
         (Option.map ~f:ImportTask.of_xml) (Xml.child xml_arg0 "task") in
       make ?task ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let task = field_map json "task" ImportTask.of_json in make ?task ()
+    let of_json json__ =
+      let task = field_map json__ "task" ImportTask.of_json in make ?task ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an import task, which allows you to import details of your on-premises environment directly into AWS Migration Hub without having to use the Application Discovery Service (ADS) tools such as the Discovery Connector or Discovery Agent. This gives you the option to perform migration assessment and planning directly from your imported data, including the ability to group your devices as applications and track their migration status. To start an import request, do this: Download the specially formatted comma separated value (CSV) import template, which you can find here: https://s3-us-west-2.amazonaws.com/templates-7cffcf56-bd96-4b1c-b45b-a5b42f282e46/import_template.csv. Fill out the template with your server and application data. Upload your import file to an Amazon S3 bucket, and make a note of it's Object URL. Your import file must be in the CSV format. Use the console or the StartImportTask command with the AWS CLI or one of the AWS SDKs to import the records from your file. For more information, including step-by-step procedures, see Migration Hub Import in the AWS Application Discovery Service User Guide. There are limits to the number of import tasks you can create (and delete) in an AWS account. For more information, see AWS Application Discovery Service Limits in the AWS Application Discovery Service User Guide."]
+       "Starts an import task, which allows you to import details of your on-premises environment directly into Amazon Web Services Migration Hub without having to use the Amazon Web Services Application Discovery Service (Application Discovery Service) tools such as the Amazon Web Services Application Discovery Service Agentless Collector or Application Discovery Agent. This gives you the option to perform migration assessment and planning directly from your imported data, including the ability to group your devices as applications and track their migration status. To start an import request, do this: Download the specially formatted comma separated value (CSV) import template, which you can find here: https://s3.us-west-2.amazonaws.com/templates-7cffcf56-bd96-4b1c-b45b-a5b42f282e46/import_template.csv. Fill out the template with your server and application data. Upload your import file to an Amazon S3 bucket, and make a note of it's Object URL. Your import file must be in the CSV format. Use the console or the StartImportTask command with the Amazon Web Services CLI or one of the Amazon Web Services SDKs to import the records from your file. For more information, including step-by-step procedures, see Migration Hub Import in the Amazon Web Services Application Discovery Service User Guide. There are limits to the number of import tasks you can create (and delete) in an Amazon Web Services account. For more information, see Amazon Web Services Application Discovery Service Limits in the Amazon Web Services Application Discovery Service User Guide."]
 module StartImportTaskRequest =
   struct
     type nonrec t =
@@ -3348,7 +4846,7 @@ module StartImportTaskRequest =
           "A descriptive name for this request. You can use this name to filter future requests related to this import task, such as identifying applications and servers that were included in this import task. We recommend that you use a meaningful name for each import task."];
       importUrl: ImportURL.t
         [@ocaml.doc
-          "The URL for your import file that you've uploaded to Amazon S3. If you're using the AWS CLI, this URL is structured as follows: s3://BucketName/ImportFileName.CSV"]}
+          "The URL for your import file that you've uploaded to Amazon S3. If you're using the Amazon Web Services CLI, this URL is structured as follows: s3://BucketName/ImportFileName.CSV"]}
     let context_ = "StartImportTaskRequest"
     let make ?clientRequestToken =
       fun ~name ->
@@ -3372,15 +4870,15 @@ module StartImportTaskRequest =
           (Xml.child xml_arg0 "clientRequestToken") in
       make ~importUrl ~name ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let importUrl = field_map_exn json "importUrl" ImportURL.of_json in
-      let name = field_map_exn json "name" ImportTaskName.of_json in
+    let of_json json__ =
+      let importUrl = field_map_exn json__ "importUrl" ImportURL.of_json in
+      let name = field_map_exn json__ "name" ImportTaskName.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
       make ~importUrl ~name ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an import task, which allows you to import details of your on-premises environment directly into AWS Migration Hub without having to use the Application Discovery Service (ADS) tools such as the Discovery Connector or Discovery Agent. This gives you the option to perform migration assessment and planning directly from your imported data, including the ability to group your devices as applications and track their migration status. To start an import request, do this: Download the specially formatted comma separated value (CSV) import template, which you can find here: https://s3-us-west-2.amazonaws.com/templates-7cffcf56-bd96-4b1c-b45b-a5b42f282e46/import_template.csv. Fill out the template with your server and application data. Upload your import file to an Amazon S3 bucket, and make a note of it's Object URL. Your import file must be in the CSV format. Use the console or the StartImportTask command with the AWS CLI or one of the AWS SDKs to import the records from your file. For more information, including step-by-step procedures, see Migration Hub Import in the AWS Application Discovery Service User Guide. There are limits to the number of import tasks you can create (and delete) in an AWS account. For more information, see AWS Application Discovery Service Limits in the AWS Application Discovery Service User Guide."]
+       "Starts an import task, which allows you to import details of your on-premises environment directly into Amazon Web Services Migration Hub without having to use the Amazon Web Services Application Discovery Service (Application Discovery Service) tools such as the Amazon Web Services Application Discovery Service Agentless Collector or Application Discovery Agent. This gives you the option to perform migration assessment and planning directly from your imported data, including the ability to group your devices as applications and track their migration status. To start an import request, do this: Download the specially formatted comma separated value (CSV) import template, which you can find here: https://s3.us-west-2.amazonaws.com/templates-7cffcf56-bd96-4b1c-b45b-a5b42f282e46/import_template.csv. Fill out the template with your server and application data. Upload your import file to an Amazon S3 bucket, and make a note of it's Object URL. Your import file must be in the CSV format. Use the console or the StartImportTask command with the Amazon Web Services CLI or one of the Amazon Web Services SDKs to import the records from your file. For more information, including step-by-step procedures, see Migration Hub Import in the Amazon Web Services Application Discovery Service User Guide. There are limits to the number of import tasks you can create (and delete) in an Amazon Web Services account. For more information, see Amazon Web Services Application Discovery Service Limits in the Amazon Web Services Application Discovery Service User Guide."]
 module StartExportTaskResponse =
   struct
     type nonrec t =
@@ -3480,12 +4978,13 @@ module StartExportTaskResponse =
           (Xml.child xml_arg0 "exportId") in
       make ?exportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let exportId = field_map json "exportId" ConfigurationsExportId.of_json in
+    let of_json json__ =
+      let exportId =
+        field_map json__ "exportId" ConfigurationsExportId.of_json in
       make ?exportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Begins the export of discovered data to an S3 bucket. If you specify agentIds in a filter, the task exports up to 72 hours of detailed data collected by the identified Application Discovery Agent, including network, process, and performance details. A time range for exported agent data may be set by using startTime and endTime. Export of detailed agent data is limited to five concurrently running exports. If you do not include an agentIds filter, summary data is exported that includes both AWS Agentless Discovery Connector data and summary data from AWS Discovery Agents. Export of summary data is limited to two exports per day."]
+       "Begins the export of a discovered data report to an Amazon S3 bucket managed by Amazon Web Services. Exports might provide an estimate of fees and savings based on certain information that you provide. Fee estimates do not include any taxes that might apply. Your actual fees and savings depend on a variety of factors, including your actual usage of Amazon Web Services services, which might vary from the estimates provided in this report. If you do not specify preferences or agentIds in the filter, a summary of all servers, applications, tags, and performance is generated. This data is an aggregation of all server data collected through on-premises tooling, file import, application grouping and applying tags. If you specify agentIds in a filter, the task exports up to 72 hours of detailed data collected by the identified Application Discovery Agent, including network, process, and performance details. A time range for exported agent data may be set by using startTime and endTime. Export of detailed agent data is limited to five concurrently running exports. Export of detailed agent data is limited to two exports per day. If you enable ec2RecommendationsPreferences in preferences , an Amazon EC2 instance matching the characteristics of each server in Application Discovery Service is generated. Changing the attributes of the ec2RecommendationsPreferences changes the criteria of the recommendation."]
 module StartExportTaskRequest =
   struct
     type nonrec t =
@@ -3495,27 +4994,38 @@ module StartExportTaskRequest =
           "The file format for the returned export data. Default value is CSV. Note: The GRAPHML option has been deprecated."];
       filters: ExportFilters.t option
         [@ocaml.doc
-          "If a filter is present, it selects the single agentId of the Application Discovery Agent for which data is exported. The agentId can be found in the results of the DescribeAgents API or CLI. If no filter is present, startTime and endTime are ignored and exported data includes both Agentless Discovery Connector data and summary data from Application Discovery agents."];
+          "If a filter is present, it selects the single agentId of the Application Discovery Agent for which data is exported. The agentId can be found in the results of the DescribeAgents API or CLI. If no filter is present, startTime and endTime are ignored and exported data includes both Amazon Web Services Application Discovery Service Agentless Collector collectors data and summary data from Application Discovery Agent agents."];
       startTime: TimeStamp.t option
         [@ocaml.doc
           "The start timestamp for exported data from the single Application Discovery Agent selected in the filters. If no value is specified, data is exported starting from the first data collected by the agent."];
       endTime: TimeStamp.t option
         [@ocaml.doc
-          "The end timestamp for exported data from the single Application Discovery Agent selected in the filters. If no value is specified, exported data includes the most recent data collected by the agent."]}
+          "The end timestamp for exported data from the single Application Discovery Agent selected in the filters. If no value is specified, exported data includes the most recent data collected by the agent."];
+      preferences: ExportPreferences.t option
+        [@ocaml.doc
+          "Indicates the type of data that needs to be exported. Only one ExportPreferences can be enabled at any time."]}
     let make ?exportDataFormat =
       fun ?filters ->
         fun ?startTime ->
           fun ?endTime ->
-            fun () -> { exportDataFormat; filters; startTime; endTime }
+            fun ?preferences ->
+              fun () ->
+                { exportDataFormat; filters; startTime; endTime; preferences
+                }
     let to_value x =
       structure_to_value
         [("exportDataFormat",
            (Option.map x.exportDataFormat ~f:ExportDataFormats.to_value));
         ("filters", (Option.map x.filters ~f:ExportFilters.to_value));
         ("startTime", (Option.map x.startTime ~f:TimeStamp.to_value));
-        ("endTime", (Option.map x.endTime ~f:TimeStamp.to_value))]
+        ("endTime", (Option.map x.endTime ~f:TimeStamp.to_value));
+        ("preferences",
+          (Option.map x.preferences ~f:ExportPreferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let preferences =
+        (Option.map ~f:ExportPreferences.of_xml)
+          (Xml.child xml_arg0 "preferences") in
       let endTime =
         (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "endTime") in
       let startTime =
@@ -3525,25 +5035,27 @@ module StartExportTaskRequest =
       let exportDataFormat =
         (Option.map ~f:ExportDataFormats.of_xml)
           (Xml.child xml_arg0 "exportDataFormat") in
-      make ?endTime ?startTime ?filters ?exportDataFormat ()
+      make ?preferences ?endTime ?startTime ?filters ?exportDataFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "endTime" TimeStamp.of_json in
-      let startTime = field_map json "startTime" TimeStamp.of_json in
-      let filters = field_map json "filters" ExportFilters.of_json in
+    let of_json json__ =
+      let preferences =
+        field_map json__ "preferences" ExportPreferences.of_json in
+      let endTime = field_map json__ "endTime" TimeStamp.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
+      let filters = field_map json__ "filters" ExportFilters.of_json in
       let exportDataFormat =
-        field_map json "exportDataFormat" ExportDataFormats.of_json in
-      make ?endTime ?startTime ?filters ?exportDataFormat ()
+        field_map json__ "exportDataFormat" ExportDataFormats.of_json in
+      make ?preferences ?endTime ?startTime ?filters ?exportDataFormat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Begins the export of discovered data to an S3 bucket. If you specify agentIds in a filter, the task exports up to 72 hours of detailed data collected by the identified Application Discovery Agent, including network, process, and performance details. A time range for exported agent data may be set by using startTime and endTime. Export of detailed agent data is limited to five concurrently running exports. If you do not include an agentIds filter, summary data is exported that includes both AWS Agentless Discovery Connector data and summary data from AWS Discovery Agents. Export of summary data is limited to two exports per day."]
+       "Begins the export of a discovered data report to an Amazon S3 bucket managed by Amazon Web Services. Exports might provide an estimate of fees and savings based on certain information that you provide. Fee estimates do not include any taxes that might apply. Your actual fees and savings depend on a variety of factors, including your actual usage of Amazon Web Services services, which might vary from the estimates provided in this report. If you do not specify preferences or agentIds in the filter, a summary of all servers, applications, tags, and performance is generated. This data is an aggregation of all server data collected through on-premises tooling, file import, application grouping and applying tags. If you specify agentIds in a filter, the task exports up to 72 hours of detailed data collected by the identified Application Discovery Agent, including network, process, and performance details. A time range for exported agent data may be set by using startTime and endTime. Export of detailed agent data is limited to five concurrently running exports. Export of detailed agent data is limited to two exports per day. If you enable ec2RecommendationsPreferences in preferences , an Amazon EC2 instance matching the characteristics of each server in Application Discovery Service is generated. Changing the attributes of the ec2RecommendationsPreferences changes the criteria of the recommendation."]
 module StartDataCollectionByAgentIdsResponse =
   struct
     type nonrec t =
       {
       agentsConfigurationStatus: AgentConfigurationStatusList.t option
         [@ocaml.doc
-          "Information about agents or the connector that were instructed to start collecting data. Information includes the agent/connector ID, a description of the operation performed, and whether the agent/connector configuration was updated."]}
+          "Information about agents that were instructed to start collecting data. Information includes the agent ID, a description of the operation performed, and whether the agent configuration was updated."]}
     type nonrec error =
       [ `AuthorizationErrorException of AuthorizationErrorException.t 
       | `HomeRegionNotSetException of HomeRegionNotSetException.t 
@@ -3627,21 +5139,20 @@ module StartDataCollectionByAgentIdsResponse =
           (Xml.child xml_arg0 "agentsConfigurationStatus") in
       make ?agentsConfigurationStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let agentsConfigurationStatus =
-        field_map json "agentsConfigurationStatus"
+        field_map json__ "agentsConfigurationStatus"
           AgentConfigurationStatusList.of_json in
       make ?agentsConfigurationStatus ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Instructs the specified agents or connectors to start collecting data."]
+  end[@@ocaml.doc "Instructs the specified agents to start collecting data."]
 module StartDataCollectionByAgentIdsRequest =
   struct
     type nonrec t =
       {
       agentIds: AgentIds.t
         [@ocaml.doc
-          "The IDs of the agents or connectors from which to start collecting data. If you send a request to an agent/connector ID that you do not have permission to contact, according to your AWS account, the service does not throw an exception. Instead, it returns the error in the Description field. If you send a request to multiple agents/connectors and you do not have permission to contact some of those agents/connectors, the system does not throw an exception. Instead, the system shows Failed in the Description field."]}
+          "The IDs of the agents from which to start collecting data. If you send a request to an agent ID that you do not have permission to contact, according to your Amazon Web Services account, the service does not throw an exception. Instead, it returns the error in the Description field. If you send a request to multiple agents and you do not have permission to contact some of those agents, the system does not throw an exception. Instead, the system shows Failed in the Description field."]}
     let context_ = "StartDataCollectionByAgentIdsRequest"
     let make ~agentIds = fun () -> { agentIds }
     let to_value x =
@@ -3653,12 +5164,11 @@ module StartDataCollectionByAgentIdsRequest =
         AgentIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentIds") in
       make ~agentIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let agentIds = field_map_exn json "agentIds" AgentIds.of_json in
+    let of_json json__ =
+      let agentIds = field_map_exn json__ "agentIds" AgentIds.of_json in
       make ~agentIds ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Instructs the specified agents or connectors to start collecting data."]
+  end[@@ocaml.doc "Instructs the specified agents to start collecting data."]
 module StartContinuousExportResponse =
   struct
     type nonrec t =
@@ -3813,13 +5323,14 @@ module StartContinuousExportResponse =
           (Xml.child xml_arg0 "exportId") in
       make ?schemaStorageConfig ?dataSource ?startTime ?s3Bucket ?exportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaStorageConfig =
-        field_map json "schemaStorageConfig" SchemaStorageConfig.of_json in
-      let dataSource = field_map json "dataSource" DataSource.of_json in
-      let startTime = field_map json "startTime" TimeStamp.of_json in
-      let s3Bucket = field_map json "s3Bucket" S3Bucket.of_json in
-      let exportId = field_map json "exportId" ConfigurationsExportId.of_json in
+        field_map json__ "schemaStorageConfig" SchemaStorageConfig.of_json in
+      let dataSource = field_map json__ "dataSource" DataSource.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
+      let s3Bucket = field_map json__ "s3Bucket" S3Bucket.of_json in
+      let exportId =
+        field_map json__ "exportId" ConfigurationsExportId.of_json in
       make ?schemaStorageConfig ?dataSource ?startTime ?s3Bucket ?exportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3837,11 +5348,160 @@ module StartContinuousExportRequest =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Start the continuous flow of agent's discovered data into Amazon Athena."]
+module StartBatchDeleteConfigurationTaskResponse =
+  struct
+    type nonrec t =
+      {
+      taskId: UUID.t option
+        [@ocaml.doc
+          "The unique identifier associated with the newly started deletion task."]}
+    type nonrec error =
+      [ `AuthorizationErrorException of AuthorizationErrorException.t 
+      | `HomeRegionNotSetException of HomeRegionNotSetException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ServerInternalErrorException of ServerInternalErrorException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?taskId = fun () -> { taskId }
+    let error_of_json name json =
+      match name with
+      | "AuthorizationErrorException" ->
+          `AuthorizationErrorException
+            (AuthorizationErrorException.of_json json)
+      | "HomeRegionNotSetException" ->
+          `HomeRegionNotSetException (HomeRegionNotSetException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "ServerInternalErrorException" ->
+          `ServerInternalErrorException
+            (ServerInternalErrorException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AuthorizationErrorException" ->
+          `AuthorizationErrorException
+            (AuthorizationErrorException.of_xml xml)
+      | "HomeRegionNotSetException" ->
+          `HomeRegionNotSetException (HomeRegionNotSetException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "ServerInternalErrorException" ->
+          `ServerInternalErrorException
+            (ServerInternalErrorException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AuthorizationErrorException e ->
+          `Assoc
+            [("error", (`String "AuthorizationErrorException"));
+            ("details", (AuthorizationErrorException.to_json e))]
+      | `HomeRegionNotSetException e ->
+          `Assoc
+            [("error", (`String "HomeRegionNotSetException"));
+            ("details", (HomeRegionNotSetException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `ServerInternalErrorException e ->
+          `Assoc
+            [("error", (`String "ServerInternalErrorException"));
+            ("details", (ServerInternalErrorException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("taskId", (Option.map x.taskId ~f:UUID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskId = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "taskId") in
+      make ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskId = field_map json__ "taskId" UUID.of_json in make ?taskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Takes a list of configurationId as input and starts an asynchronous deletion task to remove the configurationItems. Returns a unique deletion task identifier."]
+module StartBatchDeleteConfigurationTaskRequest =
+  struct
+    type nonrec t =
+      {
+      configurationType: DeletionConfigurationItemType.t
+        [@ocaml.doc
+          "The type of configuration item to delete. Supported types are: SERVER."];
+      configurationIds: ConfigurationIdList.t
+        [@ocaml.doc
+          "The list of configuration IDs that will be deleted by the task."]}
+    let context_ = "StartBatchDeleteConfigurationTaskRequest"
+    let make ~configurationType =
+      fun ~configurationIds ->
+        fun () -> { configurationType; configurationIds }
+    let to_value x =
+      structure_to_value
+        [("configurationType",
+           (Some (DeletionConfigurationItemType.to_value x.configurationType)));
+        ("configurationIds",
+          (Some (ConfigurationIdList.to_value x.configurationIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configurationIds =
+        ConfigurationIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "configurationIds") in
+      let configurationType =
+        DeletionConfigurationItemType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "configurationType") in
+      make ~configurationIds ~configurationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configurationIds =
+        field_map_exn json__ "configurationIds" ConfigurationIdList.of_json in
+      let configurationType =
+        field_map_exn json__ "configurationType"
+          DeletionConfigurationItemType.of_json in
+      make ~configurationIds ~configurationType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Takes a list of configurationId as input and starts an asynchronous deletion task to remove the configurationItems. Returns a unique deletion task identifier."]
 module ListServerNeighborsResponse =
   struct
     type nonrec t =
       {
-      neighbors: NeighborDetailsList.t
+      neighbors: NeighborDetailsList.t option
         [@ocaml.doc
           "List of distinct servers that are one hop away from the given server."];
       nextToken: String_.t option
@@ -3857,11 +5517,10 @@ module ListServerNeighborsResponse =
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `ServerInternalErrorException of ServerInternalErrorException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServerNeighborsResponse"
-    let make ?nextToken =
-      fun ?knownDependencyCount ->
-        fun ~neighbors ->
-          fun () -> { nextToken; knownDependencyCount; neighbors }
+    let make ?neighbors =
+      fun ?nextToken ->
+        fun ?knownDependencyCount ->
+          fun () -> { neighbors; nextToken; knownDependencyCount }
     let error_of_json name json =
       match name with
       | "AuthorizationErrorException" ->
@@ -3926,7 +5585,8 @@ module ListServerNeighborsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("neighbors", (Some (NeighborDetailsList.to_value x.neighbors)));
+        [("neighbors",
+           (Option.map x.neighbors ~f:NeighborDetailsList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("knownDependencyCount",
           (Option.map x.knownDependencyCount ~f:Long.to_value))]
@@ -3938,17 +5598,17 @@ module ListServerNeighborsResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let neighbors =
-        NeighborDetailsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "neighbors") in
-      make ?knownDependencyCount ?nextToken ~neighbors ()
+        (Option.map ~f:NeighborDetailsList.of_xml)
+          (Xml.child xml_arg0 "neighbors") in
+      make ?knownDependencyCount ?nextToken ?neighbors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knownDependencyCount =
-        field_map json "knownDependencyCount" Long.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+        field_map json__ "knownDependencyCount" Long.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let neighbors =
-        field_map_exn json "neighbors" NeighborDetailsList.of_json in
-      make ?knownDependencyCount ?nextToken ~neighbors ()
+        field_map json__ "neighbors" NeighborDetailsList.of_json in
+      make ?knownDependencyCount ?nextToken ?neighbors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of servers that are one network hop away from a specified server."]
@@ -4013,15 +5673,16 @@ module ListServerNeighborsRequest =
       make ?nextToken ?maxResults ?neighborConfigurationIds
         ?portInformationNeeded ~configurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
       let neighborConfigurationIds =
-        field_map json "neighborConfigurationIds" ConfigurationIdList.of_json in
+        field_map json__ "neighborConfigurationIds"
+          ConfigurationIdList.of_json in
       let portInformationNeeded =
-        field_map json "portInformationNeeded" Boolean.of_json in
+        field_map json__ "portInformationNeeded" Boolean.of_json in
       let configurationId =
-        field_map_exn json "configurationId" ConfigurationId.of_json in
+        field_map_exn json__ "configurationId" ConfigurationId.of_json in
       make ?nextToken ?maxResults ?neighborConfigurationIds
         ?portInformationNeeded ~configurationId ()
     let to_json v = composed_to_json to_value v
@@ -4131,10 +5792,10 @@ module ListConfigurationsResponse =
           (Xml.child xml_arg0 "configurations") in
       make ?nextToken ?configurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let configurations =
-        field_map json "configurations" Configurations.of_json in
+        field_map json__ "configurations" Configurations.of_json in
       make ?nextToken ?configurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4148,7 +5809,7 @@ module ListConfigurationsRequest =
           "A valid configuration identified by Application Discovery Service."];
       filters: Filters.t option
         [@ocaml.doc
-          "You can filter the request using various logical operators and a key-value format. For example: \\{\"key\": \"serverType\", \"value\": \"webServer\"\\} For a complete list of filter options and guidance about using them with this action, see Using the ListConfigurations Action in the AWS Application Discovery Service User Guide."];
+          "You can filter the request using various logical operators and a key-value format. For example: \\{\"key\": \"serverType\", \"value\": \"webServer\"\\} For a complete list of filter options and guidance about using them with this action, see Using the ListConfigurations Action in the Amazon Web Services Application Discovery Service User Guide."];
       maxResults: Integer.t option
         [@ocaml.doc
           "The total number of items to return. The maximum value is 100."];
@@ -4157,7 +5818,7 @@ module ListConfigurationsRequest =
           "Token to retrieve the next set of results. For example, if a previous call to ListConfigurations returned 100 items, but you set ListConfigurationsRequest$maxResults to 10, you received a set of 10 results along with a token. Use that token in this query to get the next set of 10."];
       orderBy: OrderByList.t option
         [@ocaml.doc
-          "Certain filter criteria return output that can be sorted in ascending or descending order. For a list of output characteristics for each filter, see Using the ListConfigurations Action in the AWS Application Discovery Service User Guide."]}
+          "Certain filter criteria return output that can be sorted in ascending or descending order. For a list of output characteristics for each filter, see Using the ListConfigurations Action in the Amazon Web Services Application Discovery Service User Guide."]}
     let context_ = "ListConfigurationsRequest"
     let make ?filters =
       fun ?maxResults ->
@@ -4190,13 +5851,14 @@ module ListConfigurationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "configurationType") in
       make ?orderBy ?nextToken ?maxResults ?filters ~configurationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map json "orderBy" OrderByList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let filters = field_map json "filters" Filters.of_json in
+    let of_json json__ =
+      let orderBy = field_map json__ "orderBy" OrderByList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let filters = field_map json__ "filters" Filters.of_json in
       let configurationType =
-        field_map_exn json "configurationType" ConfigurationItemType.of_json in
+        field_map_exn json__ "configurationType"
+          ConfigurationItemType.of_json in
       make ?orderBy ?nextToken ?maxResults ?filters ~configurationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4217,7 +5879,13 @@ module GetDiscoverySummaryResponse =
           "Details about discovered agents, including agent status and health."];
       connectorSummary: CustomerConnectorInfo.t option
         [@ocaml.doc
-          "Details about discovered connectors, including connector status and health."]}
+          "Details about discovered connectors, including connector status and health."];
+      meCollectorSummary: CustomerMeCollectorInfo.t option
+        [@ocaml.doc
+          "Details about Migration Evaluator collectors, including collector status and health."];
+      agentlessCollectorSummary: CustomerAgentlessCollectorInfo.t option
+        [@ocaml.doc
+          "Details about Agentless Collector collectors, including status."]}
     type nonrec error =
       [ `AuthorizationErrorException of AuthorizationErrorException.t 
       | `HomeRegionNotSetException of HomeRegionNotSetException.t 
@@ -4231,15 +5899,19 @@ module GetDiscoverySummaryResponse =
           fun ?serversMappedtoTags ->
             fun ?agentSummary ->
               fun ?connectorSummary ->
-                fun () ->
-                  {
-                    servers;
-                    applications;
-                    serversMappedToApplications;
-                    serversMappedtoTags;
-                    agentSummary;
-                    connectorSummary
-                  }
+                fun ?meCollectorSummary ->
+                  fun ?agentlessCollectorSummary ->
+                    fun () ->
+                      {
+                        servers;
+                        applications;
+                        serversMappedToApplications;
+                        serversMappedtoTags;
+                        agentSummary;
+                        connectorSummary;
+                        meCollectorSummary;
+                        agentlessCollectorSummary
+                      }
     let error_of_json name json =
       match name with
       | "AuthorizationErrorException" ->
@@ -4313,9 +5985,21 @@ module GetDiscoverySummaryResponse =
         ("agentSummary",
           (Option.map x.agentSummary ~f:CustomerAgentInfo.to_value));
         ("connectorSummary",
-          (Option.map x.connectorSummary ~f:CustomerConnectorInfo.to_value))]
+          (Option.map x.connectorSummary ~f:CustomerConnectorInfo.to_value));
+        ("meCollectorSummary",
+          (Option.map x.meCollectorSummary
+             ~f:CustomerMeCollectorInfo.to_value));
+        ("agentlessCollectorSummary",
+          (Option.map x.agentlessCollectorSummary
+             ~f:CustomerAgentlessCollectorInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let agentlessCollectorSummary =
+        (Option.map ~f:CustomerAgentlessCollectorInfo.of_xml)
+          (Xml.child xml_arg0 "agentlessCollectorSummary") in
+      let meCollectorSummary =
+        (Option.map ~f:CustomerMeCollectorInfo.of_xml)
+          (Xml.child xml_arg0 "meCollectorSummary") in
       let connectorSummary =
         (Option.map ~f:CustomerConnectorInfo.of_xml)
           (Xml.child xml_arg0 "connectorSummary") in
@@ -4332,22 +6016,29 @@ module GetDiscoverySummaryResponse =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "applications") in
       let servers =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "servers") in
-      make ?connectorSummary ?agentSummary ?serversMappedtoTags
-        ?serversMappedToApplications ?applications ?servers ()
+      make ?agentlessCollectorSummary ?meCollectorSummary ?connectorSummary
+        ?agentSummary ?serversMappedtoTags ?serversMappedToApplications
+        ?applications ?servers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let agentlessCollectorSummary =
+        field_map json__ "agentlessCollectorSummary"
+          CustomerAgentlessCollectorInfo.of_json in
+      let meCollectorSummary =
+        field_map json__ "meCollectorSummary" CustomerMeCollectorInfo.of_json in
       let connectorSummary =
-        field_map json "connectorSummary" CustomerConnectorInfo.of_json in
+        field_map json__ "connectorSummary" CustomerConnectorInfo.of_json in
       let agentSummary =
-        field_map json "agentSummary" CustomerAgentInfo.of_json in
+        field_map json__ "agentSummary" CustomerAgentInfo.of_json in
       let serversMappedtoTags =
-        field_map json "serversMappedtoTags" Long.of_json in
+        field_map json__ "serversMappedtoTags" Long.of_json in
       let serversMappedToApplications =
-        field_map json "serversMappedToApplications" Long.of_json in
-      let applications = field_map json "applications" Long.of_json in
-      let servers = field_map json "servers" Long.of_json in
-      make ?connectorSummary ?agentSummary ?serversMappedtoTags
-        ?serversMappedToApplications ?applications ?servers ()
+        field_map json__ "serversMappedToApplications" Long.of_json in
+      let applications = field_map json__ "applications" Long.of_json in
+      let servers = field_map json__ "servers" Long.of_json in
+      make ?agentlessCollectorSummary ?meCollectorSummary ?connectorSummary
+        ?agentSummary ?serversMappedtoTags ?serversMappedToApplications
+        ?applications ?servers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a short summary of discovered assets. This API operation takes no request parameters and is called as is at the command prompt as shown in the example."]
@@ -4463,8 +6154,9 @@ module ExportConfigurationsResponse =
           (Xml.child xml_arg0 "exportId") in
       make ?exportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let exportId = field_map json "exportId" ConfigurationsExportId.of_json in
+    let of_json json__ =
+      let exportId =
+        field_map json__ "exportId" ConfigurationsExportId.of_json in
       make ?exportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4582,11 +6274,12 @@ module DisassociateConfigurationItemsFromApplicationRequest =
              "applicationConfigurationId") in
       make ~configurationIds ~applicationConfigurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationIds =
-        field_map_exn json "configurationIds" ConfigurationIdList.of_json in
+        field_map_exn json__ "configurationIds" ConfigurationIdList.of_json in
       let applicationConfigurationId =
-        field_map_exn json "applicationConfigurationId" ApplicationId.of_json in
+        field_map_exn json__ "applicationConfigurationId"
+          ApplicationId.of_json in
       make ~configurationIds ~applicationConfigurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4693,13 +6386,13 @@ module DescribeTagsResponse =
           (Xml.child xml_arg0 "tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let tags = field_map json "tags" ConfigurationTagSet.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let tags = field_map json__ "tags" ConfigurationTagSet.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a list of configuration items that have tags as specified by the key-value pairs, name and value, passed to the optional parameter filters. There are three valid tag filter names: tagKey tagValue configurationId Also, all configuration items associated with your user account that have tags can be listed if you call DescribeTags as is without passing any parameters."]
+       "Retrieves a list of configuration items that have tags as specified by the key-value pairs, name and value, passed to the optional parameter filters. There are three valid tag filter names: tagKey tagValue configurationId Also, all configuration items associated with your user that have tags can be listed if you call DescribeTags as is without passing any parameters."]
 module DescribeTagsRequest =
   struct
     type nonrec t =
@@ -4731,14 +6424,14 @@ module DescribeTagsRequest =
         (Option.map ~f:TagFilters.of_xml) (Xml.child xml_arg0 "filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let filters = field_map json "filters" TagFilters.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let filters = field_map json__ "filters" TagFilters.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a list of configuration items that have tags as specified by the key-value pairs, name and value, passed to the optional parameter filters. There are three valid tag filter names: tagKey tagValue configurationId Also, all configuration items associated with your user account that have tags can be listed if you call DescribeTags as is without passing any parameters."]
+       "Retrieves a list of configuration items that have tags as specified by the key-value pairs, name and value, passed to the optional parameter filters. There are three valid tag filter names: tagKey tagValue configurationId Also, all configuration items associated with your user that have tags can be listed if you call DescribeTags as is without passing any parameters."]
 module DescribeImportTasksResponse =
   struct
     type nonrec t =
@@ -4830,9 +6523,9 @@ module DescribeImportTasksResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?tasks ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tasks = field_map json "tasks" ImportTaskList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let tasks = field_map json__ "tasks" ImportTaskList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?tasks ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4871,12 +6564,12 @@ module DescribeImportTasksRequest =
           (Xml.child xml_arg0 "filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let maxResults =
-        field_map json "maxResults" DescribeImportTasksMaxResults.of_json in
+        field_map json__ "maxResults" DescribeImportTasksMaxResults.of_json in
       let filters =
-        field_map json "filters" DescribeImportTasksFilterList.of_json in
+        field_map json__ "filters" DescribeImportTasksFilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4974,9 +6667,9 @@ module DescribeExportTasksResponse =
         (Option.map ~f:ExportsInfo.of_xml) (Xml.child xml_arg0 "exportsInfo") in
       make ?nextToken ?exportsInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let exportsInfo = field_map json "exportsInfo" ExportsInfo.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let exportsInfo = field_map json__ "exportsInfo" ExportsInfo.of_json in
       make ?nextToken ?exportsInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5020,11 +6713,11 @@ module DescribeExportTasksRequest =
         (Option.map ~f:ExportIds.of_xml) (Xml.child xml_arg0 "exportIds") in
       make ?nextToken ?maxResults ?filters ?exportIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let filters = field_map json "filters" ExportFilters.of_json in
-      let exportIds = field_map json "exportIds" ExportIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let filters = field_map json__ "filters" ExportFilters.of_json in
+      let exportIds = field_map json__ "exportIds" ExportIds.of_json in
       make ?nextToken ?maxResults ?filters ?exportIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5129,13 +6822,13 @@ module DescribeExportConfigurationsResponse =
         (Option.map ~f:ExportsInfo.of_xml) (Xml.child xml_arg0 "exportsInfo") in
       make ?nextToken ?exportsInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let exportsInfo = field_map json "exportsInfo" ExportsInfo.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let exportsInfo = field_map json__ "exportsInfo" ExportsInfo.of_json in
       make ?nextToken ?exportsInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "DescribeExportConfigurations is deprecated. Use DescribeImportTasks, instead."]
+       "DescribeExportConfigurations is deprecated. Use DescribeExportTasks, instead."]
 module DescribeExportConfigurationsRequest =
   struct
     type nonrec t =
@@ -5166,14 +6859,14 @@ module DescribeExportConfigurationsRequest =
         (Option.map ~f:ExportIds.of_xml) (Xml.child xml_arg0 "exportIds") in
       make ?nextToken ?maxResults ?exportIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let exportIds = field_map json "exportIds" ExportIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let exportIds = field_map json__ "exportIds" ExportIds.of_json in
       make ?nextToken ?maxResults ?exportIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "DescribeExportConfigurations is deprecated. Use DescribeImportTasks, instead."]
+       "DescribeExportConfigurations is deprecated. Use DescribeExportTasks, instead."]
 module DescribeContinuousExportsResponse =
   struct
     type nonrec t =
@@ -5289,14 +6982,14 @@ module DescribeContinuousExportsResponse =
           (Xml.child xml_arg0 "descriptions") in
       make ?nextToken ?descriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let descriptions =
-        field_map json "descriptions" ContinuousExportDescriptions.of_json in
+        field_map json__ "descriptions" ContinuousExportDescriptions.of_json in
       make ?nextToken ?descriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists exports as specified by ID. All continuous exports associated with your user account can be listed if you call DescribeContinuousExports as is without passing any parameters."]
+       "Lists exports as specified by ID. All continuous exports associated with your user can be listed if you call DescribeContinuousExports as is without passing any parameters."]
 module DescribeContinuousExportsRequest =
   struct
     type nonrec t =
@@ -5332,16 +7025,17 @@ module DescribeContinuousExportsRequest =
           (Xml.child xml_arg0 "exportIds") in
       make ?nextToken ?maxResults ?exportIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           DescribeContinuousExportsMaxResults.of_json in
-      let exportIds = field_map json "exportIds" ContinuousExportIds.of_json in
+      let exportIds =
+        field_map json__ "exportIds" ContinuousExportIds.of_json in
       make ?nextToken ?maxResults ?exportIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists exports as specified by ID. All continuous exports associated with your user account can be listed if you call DescribeContinuousExports as is without passing any parameters."]
+       "Lists exports as specified by ID. All continuous exports associated with your user can be listed if you call DescribeContinuousExports as is without passing any parameters."]
 module DescribeConfigurationsResponse =
   struct
     type nonrec t =
@@ -5431,14 +7125,14 @@ module DescribeConfigurationsResponse =
           (Xml.child xml_arg0 "configurations") in
       make ?configurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurations =
-        field_map json "configurations"
+        field_map json__ "configurations"
           DescribeConfigurationsAttributes.of_json in
       make ?configurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves attributes for a list of configuration item IDs. All of the supplied IDs must be for the same asset type from one of the following: server application process connection Output fields are specific to the asset type specified. For example, the output for a server configuration item includes a list of attributes about the server, such as host name, operating system, number of network cards, etc. For a complete list of outputs for each asset type, see Using the DescribeConfigurations Action in the AWS Application Discovery Service User Guide."]
+       "Retrieves attributes for a list of configuration item IDs. All of the supplied IDs must be for the same asset type from one of the following: server application process connection Output fields are specific to the asset type specified. For example, the output for a server configuration item includes a list of attributes about the server, such as host name, operating system, number of network cards, etc. For a complete list of outputs for each asset type, see Using the DescribeConfigurations Action in the Amazon Web Services Application Discovery Service User Guide."]
 module DescribeConfigurationsRequest =
   struct
     type nonrec t =
@@ -5458,20 +7152,126 @@ module DescribeConfigurationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "configurationIds") in
       make ~configurationIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationIds =
-        field_map_exn json "configurationIds" ConfigurationIdList.of_json in
+        field_map_exn json__ "configurationIds" ConfigurationIdList.of_json in
       make ~configurationIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves attributes for a list of configuration item IDs. All of the supplied IDs must be for the same asset type from one of the following: server application process connection Output fields are specific to the asset type specified. For example, the output for a server configuration item includes a list of attributes about the server, such as host name, operating system, number of network cards, etc. For a complete list of outputs for each asset type, see Using the DescribeConfigurations Action in the AWS Application Discovery Service User Guide."]
+       "Retrieves attributes for a list of configuration item IDs. All of the supplied IDs must be for the same asset type from one of the following: server application process connection Output fields are specific to the asset type specified. For example, the output for a server configuration item includes a list of attributes about the server, such as host name, operating system, number of network cards, etc. For a complete list of outputs for each asset type, see Using the DescribeConfigurations Action in the Amazon Web Services Application Discovery Service User Guide."]
+module DescribeBatchDeleteConfigurationTaskResponse =
+  struct
+    type nonrec t =
+      {
+      task: BatchDeleteConfigurationTask.t option
+        [@ocaml.doc
+          "The BatchDeleteConfigurationTask that represents the deletion task being executed."]}
+    type nonrec error =
+      [ `AuthorizationErrorException of AuthorizationErrorException.t 
+      | `HomeRegionNotSetException of HomeRegionNotSetException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ServerInternalErrorException of ServerInternalErrorException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?task = fun () -> { task }
+    let error_of_json name json =
+      match name with
+      | "AuthorizationErrorException" ->
+          `AuthorizationErrorException
+            (AuthorizationErrorException.of_json json)
+      | "HomeRegionNotSetException" ->
+          `HomeRegionNotSetException (HomeRegionNotSetException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ServerInternalErrorException" ->
+          `ServerInternalErrorException
+            (ServerInternalErrorException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AuthorizationErrorException" ->
+          `AuthorizationErrorException
+            (AuthorizationErrorException.of_xml xml)
+      | "HomeRegionNotSetException" ->
+          `HomeRegionNotSetException (HomeRegionNotSetException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ServerInternalErrorException" ->
+          `ServerInternalErrorException
+            (ServerInternalErrorException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AuthorizationErrorException e ->
+          `Assoc
+            [("error", (`String "AuthorizationErrorException"));
+            ("details", (AuthorizationErrorException.to_json e))]
+      | `HomeRegionNotSetException e ->
+          `Assoc
+            [("error", (`String "HomeRegionNotSetException"));
+            ("details", (HomeRegionNotSetException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ServerInternalErrorException e ->
+          `Assoc
+            [("error", (`String "ServerInternalErrorException"));
+            ("details", (ServerInternalErrorException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("task",
+           (Option.map x.task ~f:BatchDeleteConfigurationTask.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let task =
+        (Option.map ~f:BatchDeleteConfigurationTask.of_xml)
+          (Xml.child xml_arg0 "task") in
+      make ?task ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let task = field_map json__ "task" BatchDeleteConfigurationTask.of_json in
+      make ?task ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Takes a unique deletion task identifier as input and returns metadata about a configuration deletion task."]
+module DescribeBatchDeleteConfigurationTaskRequest =
+  struct
+    type nonrec t =
+      {
+      taskId: UUID.t [@ocaml.doc "The ID of the task to delete."]}
+    let context_ = "DescribeBatchDeleteConfigurationTaskRequest"
+    let make ~taskId = fun () -> { taskId }
+    let to_value x =
+      structure_to_value [("taskId", (Some (UUID.to_value x.taskId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskId =
+        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskId") in
+      make ~taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskId = field_map_exn json__ "taskId" UUID.of_json in
+      make ~taskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Takes a unique deletion task identifier as input and returns metadata about a configuration deletion task."]
 module DescribeAgentsResponse =
   struct
     type nonrec t =
       {
       agentsInfo: AgentsInfo.t option
         [@ocaml.doc
-          "Lists agents or the Connector by ID or lists all agents/Connectors associated with your user account if you did not specify an agent/Connector ID. The output includes agent/Connector IDs, IP addresses, media access control (MAC) addresses, agent/Connector health, host name where the agent/Connector resides, and the version number of each agent/Connector."];
+          "Lists agents or the collector by ID or lists all agents/collectors associated with your user, if you did not specify an agent/collector ID. The output includes agent/collector IDs, IP addresses, media access control (MAC) addresses, agent/collector health, host name where the agent/collector resides, and the version number of each agent/collector."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Token to retrieve the next set of results. For example, if you specified 100 IDs for DescribeAgentsRequest$agentIds but set DescribeAgentsRequest$maxResults to 10, you received a set of 10 results along with this token. Use this token in the next query to retrieve the next set of 10."]}
@@ -5558,26 +7358,26 @@ module DescribeAgentsResponse =
         (Option.map ~f:AgentsInfo.of_xml) (Xml.child xml_arg0 "agentsInfo") in
       make ?nextToken ?agentsInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let agentsInfo = field_map json "agentsInfo" AgentsInfo.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let agentsInfo = field_map json__ "agentsInfo" AgentsInfo.of_json in
       make ?nextToken ?agentsInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists agents or connectors as specified by ID or other filters. All agents/connectors associated with your user account can be listed if you call DescribeAgents as is without passing any parameters."]
+       "Lists agents or collectors as specified by ID or other filters. All agents/collectors associated with your user can be listed if you call DescribeAgents as is without passing any parameters."]
 module DescribeAgentsRequest =
   struct
     type nonrec t =
       {
       agentIds: AgentIds.t option
         [@ocaml.doc
-          "The agent or the Connector IDs for which you want information. If you specify no IDs, the system returns information about all agents/Connectors associated with your AWS user account."];
+          "The agent or the collector IDs for which you want information. If you specify no IDs, the system returns information about all agents/collectors associated with your user."];
       filters: Filters.t option
         [@ocaml.doc
           "You can filter the request using various logical operators and a key-value format. For example: \\{\"key\": \"collectionStatus\", \"value\": \"STARTED\"\\}"];
       maxResults: Integer.t option
         [@ocaml.doc
-          "The total number of agents/Connectors to return in a single page of output. The maximum value is 100."];
+          "The total number of agents/collectors to return in a single page of output. The maximum value is 100."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Token to retrieve the next set of results. For example, if you previously specified 100 IDs for DescribeAgentsRequest$agentIds but set DescribeAgentsRequest$maxResults to 10, you received a set of 10 results along with a token. Use that token in this query to get the next set of 10."]}
@@ -5604,15 +7404,15 @@ module DescribeAgentsRequest =
         (Option.map ~f:AgentIds.of_xml) (Xml.child xml_arg0 "agentIds") in
       make ?nextToken ?maxResults ?filters ?agentIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let filters = field_map json "filters" Filters.of_json in
-      let agentIds = field_map json "agentIds" AgentIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let filters = field_map json__ "filters" Filters.of_json in
+      let agentIds = field_map json__ "agentIds" AgentIds.of_json in
       make ?nextToken ?maxResults ?filters ?agentIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists agents or connectors as specified by ID or other filters. All agents/connectors associated with your user account can be listed if you call DescribeAgents as is without passing any parameters."]
+       "Lists agents or collectors as specified by ID or other filters. All agents/collectors associated with your user can be listed if you call DescribeAgents as is without passing any parameters."]
 module DeleteTagsResponse =
   struct
     type nonrec t = unit
@@ -5730,10 +7530,10 @@ module DeleteTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "configurationIds") in
       make ?tags ~configurationIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagSet.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagSet.of_json in
       let configurationIds =
-        field_map_exn json "configurationIds" ConfigurationIdList.of_json in
+        field_map_exn json__ "configurationIds" ConfigurationIdList.of_json in
       make ?tags ~configurationIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5839,9 +7639,9 @@ module DeleteApplicationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "configurationIds") in
       make ~configurationIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationIds =
-        field_map_exn json "configurationIds" ApplicationIdsList.of_json in
+        field_map_exn json__ "configurationIds" ApplicationIdsList.of_json in
       make ~configurationIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5936,7 +7736,7 @@ module CreateTagsResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates one or more tags for configuration items. Tags are metadata that help you categorize IT assets. This API accepts a list of multiple configuration items."]
+       "Creates one or more tags for configuration items. Tags are metadata that help you categorize IT assets. This API accepts a list of multiple configuration items. Do not store sensitive information (like personal data) in tags."]
 module CreateTagsRequest =
   struct
     type nonrec t =
@@ -5963,20 +7763,20 @@ module CreateTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "configurationIds") in
       make ~tags ~configurationIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagSet.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagSet.of_json in
       let configurationIds =
-        field_map_exn json "configurationIds" ConfigurationIdList.of_json in
+        field_map_exn json__ "configurationIds" ConfigurationIdList.of_json in
       make ~tags ~configurationIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates one or more tags for configuration items. Tags are metadata that help you categorize IT assets. This API accepts a list of multiple configuration items."]
+       "Creates one or more tags for configuration items. Tags are metadata that help you categorize IT assets. This API accepts a list of multiple configuration items. Do not store sensitive information (like personal data) in tags."]
 module CreateApplicationResponse =
   struct
     type nonrec t =
       {
       configurationId: String_.t option
-        [@ocaml.doc "Configuration ID of an application to be created."]}
+        [@ocaml.doc "The configuration ID of an application to be created."]}
     type nonrec error =
       [ `AuthorizationErrorException of AuthorizationErrorException.t 
       | `HomeRegionNotSetException of HomeRegionNotSetException.t 
@@ -6057,8 +7857,9 @@ module CreateApplicationResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "configurationId") in
       make ?configurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let configurationId = field_map json "configurationId" String_.of_json in
+    let of_json json__ =
+      let configurationId =
+        field_map json__ "configurationId" String_.of_json in
       make ?configurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6067,27 +7868,40 @@ module CreateApplicationRequest =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "Name of the application to be created."];
-      description: String_.t option
-        [@ocaml.doc "Description of the application to be created."]}
+      name: ApplicationName.t
+        [@ocaml.doc "The name of the application to be created."];
+      description: ApplicationDescription.t option
+        [@ocaml.doc "The description of the application to be created."];
+      wave: ApplicationWave.t option
+        [@ocaml.doc
+          "The name of the migration wave of the application to be created."]}
     let context_ = "CreateApplicationRequest"
-    let make ?description = fun ~name -> fun () -> { description; name }
+    let make ?description =
+      fun ?wave -> fun ~name -> fun () -> { description; wave; name }
     let to_value x =
       structure_to_value
-        [("name", (Some (String_.to_value x.name)));
-        ("description", (Option.map x.description ~f:String_.to_value))]
+        [("name", (Some (ApplicationName.to_value x.name)));
+        ("description",
+          (Option.map x.description ~f:ApplicationDescription.to_value));
+        ("wave", (Option.map x.wave ~f:ApplicationWave.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let wave =
+        (Option.map ~f:ApplicationWave.of_xml) (Xml.child xml_arg0 "wave") in
       let description =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
+        (Option.map ~f:ApplicationDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
       let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?description ~name ()
+        ApplicationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?wave ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "description" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ?description ~name ()
+    let of_json json__ =
+      let wave = field_map json__ "wave" ApplicationWave.of_json in
+      let description =
+        field_map json__ "description" ApplicationDescription.of_json in
+      let name = field_map_exn json__ "name" ApplicationName.of_json in
+      make ?wave ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an application with the given name and description."]
@@ -6179,39 +7993,156 @@ module BatchDeleteImportDataResponse =
           (Xml.child xml_arg0 "errors") in
       make ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "errors" BatchDeleteImportDataErrorList.of_json in
+        field_map json__ "errors" BatchDeleteImportDataErrorList.of_json in
       make ?errors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes one or more import tasks, each identified by their import ID. Each import task has a number of records that can identify servers or applications. AWS Application Discovery Service has built-in matching logic that will identify when discovered servers match existing entries that you've previously discovered, the information for the already-existing discovered server is updated. When you delete an import task that contains records that were used to match, the information in those matched records that comes from the deleted records will also be deleted."]
+       "Deletes one or more import tasks, each identified by their import ID. Each import task has a number of records that can identify servers or applications. Amazon Web Services Application Discovery Service has built-in matching logic that will identify when discovered servers match existing entries that you've previously discovered, the information for the already-existing discovered server is updated. When you delete an import task that contains records that were used to match, the information in those matched records that comes from the deleted records will also be deleted."]
 module BatchDeleteImportDataRequest =
   struct
     type nonrec t =
       {
       importTaskIds: ToDeleteIdentifierList.t
-        [@ocaml.doc "The IDs for the import tasks that you want to delete."]}
+        [@ocaml.doc "The IDs for the import tasks that you want to delete."];
+      deleteHistory: Boolean.t option
+        [@ocaml.doc
+          "Set to true to remove the deleted import task from DescribeImportTasks."]}
     let context_ = "BatchDeleteImportDataRequest"
-    let make ~importTaskIds = fun () -> { importTaskIds }
+    let make ?deleteHistory =
+      fun ~importTaskIds -> fun () -> { deleteHistory; importTaskIds }
     let to_value x =
       structure_to_value
         [("importTaskIds",
-           (Some (ToDeleteIdentifierList.to_value x.importTaskIds)))]
+           (Some (ToDeleteIdentifierList.to_value x.importTaskIds)));
+        ("deleteHistory", (Option.map x.deleteHistory ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deleteHistory =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "deleteHistory") in
       let importTaskIds =
         ToDeleteIdentifierList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "importTaskIds") in
-      make ~importTaskIds ()
+      make ?deleteHistory ~importTaskIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let deleteHistory = field_map json__ "deleteHistory" Boolean.of_json in
       let importTaskIds =
-        field_map_exn json "importTaskIds" ToDeleteIdentifierList.of_json in
-      make ~importTaskIds ()
+        field_map_exn json__ "importTaskIds" ToDeleteIdentifierList.of_json in
+      make ?deleteHistory ~importTaskIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes one or more import tasks, each identified by their import ID. Each import task has a number of records that can identify servers or applications. AWS Application Discovery Service has built-in matching logic that will identify when discovered servers match existing entries that you've previously discovered, the information for the already-existing discovered server is updated. When you delete an import task that contains records that were used to match, the information in those matched records that comes from the deleted records will also be deleted."]
+       "Deletes one or more import tasks, each identified by their import ID. Each import task has a number of records that can identify servers or applications. Amazon Web Services Application Discovery Service has built-in matching logic that will identify when discovered servers match existing entries that you've previously discovered, the information for the already-existing discovered server is updated. When you delete an import task that contains records that were used to match, the information in those matched records that comes from the deleted records will also be deleted."]
+module BatchDeleteAgentsResponse =
+  struct
+    type nonrec t =
+      {
+      errors: BatchDeleteAgentErrors.t option
+        [@ocaml.doc
+          "A list of agent IDs that failed to delete during the deletion task, each paired with an error message."]}
+    type nonrec error =
+      [ `AuthorizationErrorException of AuthorizationErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ServerInternalErrorException of ServerInternalErrorException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?errors = fun () -> { errors }
+    let error_of_json name json =
+      match name with
+      | "AuthorizationErrorException" ->
+          `AuthorizationErrorException
+            (AuthorizationErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ServerInternalErrorException" ->
+          `ServerInternalErrorException
+            (ServerInternalErrorException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AuthorizationErrorException" ->
+          `AuthorizationErrorException
+            (AuthorizationErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ServerInternalErrorException" ->
+          `ServerInternalErrorException
+            (ServerInternalErrorException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AuthorizationErrorException e ->
+          `Assoc
+            [("error", (`String "AuthorizationErrorException"));
+            ("details", (AuthorizationErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ServerInternalErrorException e ->
+          `Assoc
+            [("error", (`String "ServerInternalErrorException"));
+            ("details", (ServerInternalErrorException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("errors", (Option.map x.errors ~f:BatchDeleteAgentErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:BatchDeleteAgentErrors.of_xml)
+          (Xml.child xml_arg0 "errors") in
+      make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors = field_map json__ "errors" BatchDeleteAgentErrors.of_json in
+      make ?errors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes one or more agents or collectors as specified by ID. Deleting an agent or collector does not delete the previously discovered data. To delete the data collected, use StartBatchDeleteConfigurationTask."]
+module BatchDeleteAgentsRequest =
+  struct
+    type nonrec t =
+      {
+      deleteAgents: DeleteAgents.t
+        [@ocaml.doc "The list of agents to delete."]}
+    let context_ = "BatchDeleteAgentsRequest"
+    let make ~deleteAgents = fun () -> { deleteAgents }
+    let to_value x =
+      structure_to_value
+        [("deleteAgents", (Some (DeleteAgents.to_value x.deleteAgents)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deleteAgents =
+        DeleteAgents.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deleteAgents") in
+      make ~deleteAgents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deleteAgents =
+        field_map_exn json__ "deleteAgents" DeleteAgents.of_json in
+      make ~deleteAgents ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes one or more agents or collectors as specified by ID. Deleting an agent or collector does not delete the previously discovered data. To delete the data collected, use StartBatchDeleteConfigurationTask."]
 module AssociateConfigurationItemsToApplicationResponse =
   struct
     type nonrec t = unit
@@ -6325,11 +8256,12 @@ module AssociateConfigurationItemsToApplicationRequest =
              "applicationConfigurationId") in
       make ~configurationIds ~applicationConfigurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationIds =
-        field_map_exn json "configurationIds" ConfigurationIdList.of_json in
+        field_map_exn json__ "configurationIds" ConfigurationIdList.of_json in
       let applicationConfigurationId =
-        field_map_exn json "applicationConfigurationId" ApplicationId.of_json in
+        field_map_exn json__ "applicationConfigurationId"
+          ApplicationId.of_json in
       make ~configurationIds ~applicationConfigurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

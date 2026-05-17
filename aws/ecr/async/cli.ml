@@ -170,6 +170,16 @@ let create_pull_through_cache_rule =
            ~doc:"URL override endpoint url"
        and registryId =
          flag "registry-id" (optional string) ~doc:"STRING RegistryId"
+       and upstreamRegistry =
+         flag "upstream-registry" (optional json_arg)
+           ~doc:"JSON UpstreamRegistry"
+       and credentialArn =
+         flag "credential-arn" (optional string) ~doc:"STRING CredentialArn"
+       and customRoleArn =
+         flag "custom-role-arn" (optional string) ~doc:"STRING CustomRoleArn"
+       and upstreamRepositoryPrefix =
+         flag "upstream-repository-prefix" (optional string)
+           ~doc:"STRING PullThroughCacheRuleRepositoryPrefix"
        and ecrRepositoryPrefix =
          flag "ecr-repository-prefix" (required string)
            ~doc:"STRING PullThroughCacheRuleRepositoryPrefix"
@@ -179,7 +189,11 @@ let create_pull_through_cache_rule =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_pull_through_cache_rule
            (Values.CreatePullThroughCacheRuleRequest.make ?registryId
-              ~ecrRepositoryPrefix ~upstreamRegistryUrl ())
+              ?upstreamRegistry:(Option.map
+                                   ~f:Values.UpstreamRegistry.of_json
+                                   upstreamRegistry) ?credentialArn
+              ?customRoleArn ?upstreamRepositoryPrefix ~ecrRepositoryPrefix
+              ~upstreamRegistryUrl ())
            (Some Values.CreatePullThroughCacheRuleResponse.to_json)
            (Some Values.CreatePullThroughCacheRuleResponse.error_to_json)])
 let create_repository =
@@ -198,6 +212,9 @@ let create_repository =
        and imageTagMutability =
          flag "image-tag-mutability" (optional json_arg)
            ~doc:"JSON ImageTagMutability"
+       and imageTagMutabilityExclusionFilters =
+         flag "image-tag-mutability-exclusion-filters" (optional json_arg)
+           ~doc:"JSON ImageTagMutabilityExclusionFilters"
        and imageScanningConfiguration =
          flag "image-scanning-configuration" (optional json_arg)
            ~doc:"JSON ImageScanningConfiguration"
@@ -215,6 +232,9 @@ let create_repository =
               ?imageTagMutability:(Option.map
                                      ~f:Values.ImageTagMutability.of_json
                                      imageTagMutability)
+              ?imageTagMutabilityExclusionFilters:(Option.map
+                                                     ~f:Values.ImageTagMutabilityExclusionFilters.of_json
+                                                     imageTagMutabilityExclusionFilters)
               ?imageScanningConfiguration:(Option.map
                                              ~f:Values.ImageScanningConfiguration.of_json
                                              imageScanningConfiguration)
@@ -224,6 +244,61 @@ let create_repository =
               ~repositoryName ())
            (Some Values.CreateRepositoryResponse.to_json)
            (Some Values.CreateRepositoryResponse.error_to_json)])
+let create_repository_creation_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING RepositoryTemplateDescription"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfigurationForRepositoryCreationTemplate"
+       and resourceTags =
+         flag "resource-tags" (optional json_arg) ~doc:"JSON TagList"
+       and imageTagMutability =
+         flag "image-tag-mutability" (optional json_arg)
+           ~doc:"JSON ImageTagMutability"
+       and imageTagMutabilityExclusionFilters =
+         flag "image-tag-mutability-exclusion-filters" (optional json_arg)
+           ~doc:"JSON ImageTagMutabilityExclusionFilters"
+       and repositoryPolicy =
+         flag "repository-policy" (optional string)
+           ~doc:"STRING RepositoryPolicyText"
+       and lifecyclePolicy =
+         flag "lifecycle-policy" (optional string)
+           ~doc:"STRING LifecyclePolicyTextForRepositoryCreationTemplate"
+       and customRoleArn =
+         flag "custom-role-arn" (optional string) ~doc:"STRING CustomRoleArn"
+       and prefix = flag "prefix" (required string) ~doc:"STRING Prefix"
+       and appliedFor =
+         flag "applied-for" (required json_arg) ~doc:"JSON RCTAppliedForList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_repository_creation_template
+           (Values.CreateRepositoryCreationTemplateRequest.make ?description
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfigurationForRepositoryCreationTemplate.of_json
+                                          encryptionConfiguration)
+              ?resourceTags:(Option.map ~f:Values.TagList.of_json
+                               resourceTags)
+              ?imageTagMutability:(Option.map
+                                     ~f:Values.ImageTagMutability.of_json
+                                     imageTagMutability)
+              ?imageTagMutabilityExclusionFilters:(Option.map
+                                                     ~f:Values.ImageTagMutabilityExclusionFilters.of_json
+                                                     imageTagMutabilityExclusionFilters)
+              ?repositoryPolicy ?lifecyclePolicy ?customRoleArn ~prefix
+              ~appliedFor:(Values.RCTAppliedForList.of_json appliedFor) ())
+           (Some Values.CreateRepositoryCreationTemplateResponse.to_json)
+           (Some
+              Values.CreateRepositoryCreationTemplateResponse.error_to_json)])
 let delete_lifecycle_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -308,6 +383,24 @@ let delete_repository =
               ~repositoryName ())
            (Some Values.DeleteRepositoryResponse.to_json)
            (Some Values.DeleteRepositoryResponse.error_to_json)])
+let delete_repository_creation_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and prefix = flag "prefix" (required string) ~doc:"STRING Prefix" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_repository_creation_template
+           (Values.DeleteRepositoryCreationTemplateRequest.make ~prefix ())
+           (Some Values.DeleteRepositoryCreationTemplateResponse.to_json)
+           (Some
+              Values.DeleteRepositoryCreationTemplateResponse.error_to_json)])
 let delete_repository_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -330,6 +423,43 @@ let delete_repository_policy =
               ~repositoryName ())
            (Some Values.DeleteRepositoryPolicyResponse.to_json)
            (Some Values.DeleteRepositoryPolicyResponse.error_to_json)])
+let delete_signing_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_signing_configuration
+           (Values.DeleteSigningConfigurationRequest.make ())
+           (Some Values.DeleteSigningConfigurationResponse.to_json)
+           (Some Values.DeleteSigningConfigurationResponse.error_to_json)])
+let deregister_pull_time_update_exclusion =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING PrincipalArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.deregister_pull_time_update_exclusion
+           (Values.DeregisterPullTimeUpdateExclusionRequest.make
+              ~principalArn ())
+           (Some Values.DeregisterPullTimeUpdateExclusionResponse.to_json)
+           (Some
+              Values.DeregisterPullTimeUpdateExclusionResponse.error_to_json)])
 let describe_image_replication_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -384,6 +514,31 @@ let describe_image_scan_findings =
               ~imageId:(Values.ImageIdentifier.of_json imageId) ())
            (Some Values.DescribeImageScanFindingsResponse.to_json)
            (Some Values.DescribeImageScanFindingsResponse.error_to_json)])
+let describe_image_signing_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and registryId =
+         flag "registry-id" (optional string) ~doc:"STRING RegistryId"
+       and repositoryName =
+         flag "repository-name" (required string)
+           ~doc:"STRING RepositoryName"
+       and imageId =
+         flag "image-id" (required json_arg) ~doc:"JSON ImageIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_image_signing_status
+           (Values.DescribeImageSigningStatusRequest.make ?registryId
+              ~repositoryName
+              ~imageId:(Values.ImageIdentifier.of_json imageId) ())
+           (Some Values.DescribeImageSigningStatusResponse.to_json)
+           (Some Values.DescribeImageSigningStatusResponse.error_to_json)])
 let describe_images =
   Command.async ~summary:""
     ([%map_open.Command
@@ -490,6 +645,49 @@ let describe_repositories =
                                   repositoryNames) ?nextToken ?maxResults ())
            (Some Values.DescribeRepositoriesResponse.to_json)
            (Some Values.DescribeRepositoriesResponse.error_to_json)])
+let describe_repository_creation_templates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and prefixes =
+         flag "prefixes" (optional json_arg) ~doc:"JSON PrefixList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_repository_creation_templates
+           (Values.DescribeRepositoryCreationTemplatesRequest.make
+              ?prefixes:(Option.map ~f:Values.PrefixList.of_json prefixes)
+              ?nextToken ?maxResults ())
+           (Some Values.DescribeRepositoryCreationTemplatesResponse.to_json)
+           (Some
+              Values.DescribeRepositoryCreationTemplatesResponse.error_to_json)])
+let get_account_setting =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING AccountSettingName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_account_setting
+           (Values.GetAccountSettingRequest.make ~name ())
+           (Some Values.GetAccountSettingResponse.to_json)
+           (Some Values.GetAccountSettingResponse.error_to_json)])
 let get_authorization_token =
   Command.async ~summary:""
     ([%map_open.Command
@@ -649,6 +847,23 @@ let get_repository_policy =
               ~repositoryName ())
            (Some Values.GetRepositoryPolicyResponse.to_json)
            (Some Values.GetRepositoryPolicyResponse.error_to_json)])
+let get_signing_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_signing_configuration
+           (Values.GetSigningConfigurationRequest.make ())
+           (Some Values.GetSigningConfigurationResponse.to_json)
+           (Some Values.GetSigningConfigurationResponse.error_to_json)])
 let initiate_layer_upload =
   Command.async ~summary:""
     ([%map_open.Command
@@ -671,6 +886,39 @@ let initiate_layer_upload =
               ~repositoryName ())
            (Some Values.InitiateLayerUploadResponse.to_json)
            (Some Values.InitiateLayerUploadResponse.error_to_json)])
+let list_image_referrers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and registryId =
+         flag "registry-id" (optional string) ~doc:"STRING RegistryId"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON ListImageReferrersFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT FiftyMaxResults"
+       and repositoryName =
+         flag "repository-name" (required string)
+           ~doc:"STRING RepositoryName"
+       and subjectId =
+         flag "subject-id" (required json_arg) ~doc:"JSON SubjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_image_referrers
+           (Values.ListImageReferrersRequest.make ?registryId
+              ?filter:(Option.map ~f:Values.ListImageReferrersFilter.of_json
+                         filter) ?nextToken ?maxResults ~repositoryName
+              ~subjectId:(Values.SubjectIdentifier.of_json subjectId) ())
+           (Some Values.ListImageReferrersResponse.to_json)
+           (Some Values.ListImageReferrersResponse.error_to_json)])
 let list_images =
   Command.async ~summary:""
     ([%map_open.Command
@@ -699,6 +947,27 @@ let list_images =
               ?filter:(Option.map ~f:Values.ListImagesFilter.of_json filter)
               ~repositoryName ()) (Some Values.ListImagesResponse.to_json)
            (Some Values.ListImagesResponse.error_to_json)])
+let list_pull_time_update_exclusions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_pull_time_update_exclusions
+           (Values.ListPullTimeUpdateExclusionsRequest.make ?maxResults
+              ?nextToken ())
+           (Some Values.ListPullTimeUpdateExclusionsResponse.to_json)
+           (Some Values.ListPullTimeUpdateExclusionsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -717,6 +986,26 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let put_account_setting =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING AccountSettingName"
+       and value =
+         flag "value" (required string) ~doc:"STRING AccountSettingValue" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_account_setting
+           (Values.PutAccountSettingRequest.make ~name ~value ())
+           (Some Values.PutAccountSettingResponse.to_json)
+           (Some Values.PutAccountSettingResponse.error_to_json)])
 let put_image =
   Command.async ~summary:""
     ([%map_open.Command
@@ -787,6 +1076,9 @@ let put_image_tag_mutability =
            ~doc:"URL override endpoint url"
        and registryId =
          flag "registry-id" (optional string) ~doc:"STRING RegistryId"
+       and imageTagMutabilityExclusionFilters =
+         flag "image-tag-mutability-exclusion-filters" (optional json_arg)
+           ~doc:"JSON ImageTagMutabilityExclusionFilters"
        and repositoryName =
          flag "repository-name" (required string)
            ~doc:"STRING RepositoryName"
@@ -797,6 +1089,9 @@ let put_image_tag_mutability =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_image_tag_mutability
            (Values.PutImageTagMutabilityRequest.make ?registryId
+              ?imageTagMutabilityExclusionFilters:(Option.map
+                                                     ~f:Values.ImageTagMutabilityExclusionFilters.of_json
+                                                     imageTagMutabilityExclusionFilters)
               ~repositoryName
               ~imageTagMutability:(Values.ImageTagMutability.of_json
                                      imageTagMutability) ())
@@ -892,6 +1187,46 @@ let put_replication_configuration =
                                            replicationConfiguration) ())
            (Some Values.PutReplicationConfigurationResponse.to_json)
            (Some Values.PutReplicationConfigurationResponse.error_to_json)])
+let put_signing_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and signingConfiguration =
+         flag "signing-configuration" (required json_arg)
+           ~doc:"JSON SigningConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_signing_configuration
+           (Values.PutSigningConfigurationRequest.make
+              ~signingConfiguration:(Values.SigningConfiguration.of_json
+                                       signingConfiguration) ())
+           (Some Values.PutSigningConfigurationResponse.to_json)
+           (Some Values.PutSigningConfigurationResponse.error_to_json)])
+let register_pull_time_update_exclusion =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING PrincipalArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.register_pull_time_update_exclusion
+           (Values.RegisterPullTimeUpdateExclusionRequest.make ~principalArn
+              ())
+           (Some Values.RegisterPullTimeUpdateExclusionResponse.to_json)
+           (Some Values.RegisterPullTimeUpdateExclusionResponse.error_to_json)])
 let set_repository_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1008,6 +1343,118 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_image_storage_class =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and registryId =
+         flag "registry-id" (optional string) ~doc:"STRING RegistryId"
+       and repositoryName =
+         flag "repository-name" (required string)
+           ~doc:"STRING RepositoryName"
+       and imageId =
+         flag "image-id" (required json_arg) ~doc:"JSON ImageIdentifier"
+       and targetStorageClass =
+         flag "target-storage-class" (required json_arg)
+           ~doc:"JSON TargetStorageClass" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_image_storage_class
+           (Values.UpdateImageStorageClassRequest.make ?registryId
+              ~repositoryName
+              ~imageId:(Values.ImageIdentifier.of_json imageId)
+              ~targetStorageClass:(Values.TargetStorageClass.of_json
+                                     targetStorageClass) ())
+           (Some Values.UpdateImageStorageClassResponse.to_json)
+           (Some Values.UpdateImageStorageClassResponse.error_to_json)])
+let update_pull_through_cache_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and registryId =
+         flag "registry-id" (optional string) ~doc:"STRING RegistryId"
+       and credentialArn =
+         flag "credential-arn" (optional string) ~doc:"STRING CredentialArn"
+       and customRoleArn =
+         flag "custom-role-arn" (optional string) ~doc:"STRING CustomRoleArn"
+       and ecrRepositoryPrefix =
+         flag "ecr-repository-prefix" (required string)
+           ~doc:"STRING PullThroughCacheRuleRepositoryPrefix" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_pull_through_cache_rule
+           (Values.UpdatePullThroughCacheRuleRequest.make ?registryId
+              ?credentialArn ?customRoleArn ~ecrRepositoryPrefix ())
+           (Some Values.UpdatePullThroughCacheRuleResponse.to_json)
+           (Some Values.UpdatePullThroughCacheRuleResponse.error_to_json)])
+let update_repository_creation_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING RepositoryTemplateDescription"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfigurationForRepositoryCreationTemplate"
+       and resourceTags =
+         flag "resource-tags" (optional json_arg) ~doc:"JSON TagList"
+       and imageTagMutability =
+         flag "image-tag-mutability" (optional json_arg)
+           ~doc:"JSON ImageTagMutability"
+       and imageTagMutabilityExclusionFilters =
+         flag "image-tag-mutability-exclusion-filters" (optional json_arg)
+           ~doc:"JSON ImageTagMutabilityExclusionFilters"
+       and repositoryPolicy =
+         flag "repository-policy" (optional string)
+           ~doc:"STRING RepositoryPolicyText"
+       and lifecyclePolicy =
+         flag "lifecycle-policy" (optional string)
+           ~doc:"STRING LifecyclePolicyTextForRepositoryCreationTemplate"
+       and appliedFor =
+         flag "applied-for" (optional json_arg) ~doc:"JSON RCTAppliedForList"
+       and customRoleArn =
+         flag "custom-role-arn" (optional string) ~doc:"STRING CustomRoleArn"
+       and prefix = flag "prefix" (required string) ~doc:"STRING Prefix" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_repository_creation_template
+           (Values.UpdateRepositoryCreationTemplateRequest.make ?description
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfigurationForRepositoryCreationTemplate.of_json
+                                          encryptionConfiguration)
+              ?resourceTags:(Option.map ~f:Values.TagList.of_json
+                               resourceTags)
+              ?imageTagMutability:(Option.map
+                                     ~f:Values.ImageTagMutability.of_json
+                                     imageTagMutability)
+              ?imageTagMutabilityExclusionFilters:(Option.map
+                                                     ~f:Values.ImageTagMutabilityExclusionFilters.of_json
+                                                     imageTagMutabilityExclusionFilters)
+              ?repositoryPolicy ?lifecyclePolicy
+              ?appliedFor:(Option.map ~f:Values.RCTAppliedForList.of_json
+                             appliedFor) ?customRoleArn ~prefix ())
+           (Some Values.UpdateRepositoryCreationTemplateResponse.to_json)
+           (Some
+              Values.UpdateRepositoryCreationTemplateResponse.error_to_json)])
 let upload_layer_part =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1041,6 +1488,28 @@ let upload_layer_part =
               ~layerPartBlob:(Values.LayerPartBlob.of_json layerPartBlob) ())
            (Some Values.UploadLayerPartResponse.to_json)
            (Some Values.UploadLayerPartResponse.error_to_json)])
+let validate_pull_through_cache_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and registryId =
+         flag "registry-id" (optional string) ~doc:"STRING RegistryId"
+       and ecrRepositoryPrefix =
+         flag "ecr-repository-prefix" (required string)
+           ~doc:"STRING PullThroughCacheRuleRepositoryPrefix" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.validate_pull_through_cache_rule
+           (Values.ValidatePullThroughCacheRuleRequest.make ?registryId
+              ~ecrRepositoryPrefix ())
+           (Some Values.ValidatePullThroughCacheRuleResponse.to_json)
+           (Some Values.ValidatePullThroughCacheRuleResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -1052,17 +1521,28 @@ let main =
     ("complete-layer-upload", complete_layer_upload);
     ("create-pull-through-cache-rule", create_pull_through_cache_rule);
     ("create-repository", create_repository);
+    ("create-repository-creation-template",
+      create_repository_creation_template);
     ("delete-lifecycle-policy", delete_lifecycle_policy);
     ("delete-pull-through-cache-rule", delete_pull_through_cache_rule);
     ("delete-registry-policy", delete_registry_policy);
     ("delete-repository", delete_repository);
+    ("delete-repository-creation-template",
+      delete_repository_creation_template);
     ("delete-repository-policy", delete_repository_policy);
+    ("delete-signing-configuration", delete_signing_configuration);
+    ("deregister-pull-time-update-exclusion",
+      deregister_pull_time_update_exclusion);
     ("describe-image-replication-status", describe_image_replication_status);
     ("describe-image-scan-findings", describe_image_scan_findings);
+    ("describe-image-signing-status", describe_image_signing_status);
     ("describe-images", describe_images);
     ("describe-pull-through-cache-rules", describe_pull_through_cache_rules);
     ("describe-registry", describe_registry);
     ("describe-repositories", describe_repositories);
+    ("describe-repository-creation-templates",
+      describe_repository_creation_templates);
+    ("get-account-setting", get_account_setting);
     ("get-authorization-token", get_authorization_token);
     ("get-download-url-for-layer", get_download_url_for_layer);
     ("get-lifecycle-policy", get_lifecycle_policy);
@@ -1071,9 +1551,13 @@ let main =
     ("get-registry-scanning-configuration",
       get_registry_scanning_configuration);
     ("get-repository-policy", get_repository_policy);
+    ("get-signing-configuration", get_signing_configuration);
     ("initiate-layer-upload", initiate_layer_upload);
+    ("list-image-referrers", list_image_referrers);
     ("list-images", list_images);
+    ("list-pull-time-update-exclusions", list_pull_time_update_exclusions);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("put-account-setting", put_account_setting);
     ("put-image", put_image);
     ("put-image-scanning-configuration", put_image_scanning_configuration);
     ("put-image-tag-mutability", put_image_tag_mutability);
@@ -1082,9 +1566,17 @@ let main =
     ("put-registry-scanning-configuration",
       put_registry_scanning_configuration);
     ("put-replication-configuration", put_replication_configuration);
+    ("put-signing-configuration", put_signing_configuration);
+    ("register-pull-time-update-exclusion",
+      register_pull_time_update_exclusion);
     ("set-repository-policy", set_repository_policy);
     ("start-image-scan", start_image_scan);
     ("start-lifecycle-policy-preview", start_lifecycle_policy_preview);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("upload-layer-part", upload_layer_part)]
+    ("update-image-storage-class", update_image_storage_class);
+    ("update-pull-through-cache-rule", update_pull_through_cache_rule);
+    ("update-repository-creation-template",
+      update_repository_creation_template);
+    ("upload-layer-part", upload_layer_part);
+    ("validate-pull-through-cache-rule", validate_pull_through_cache_rule)]

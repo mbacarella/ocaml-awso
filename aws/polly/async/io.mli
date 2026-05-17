@@ -42,6 +42,12 @@ val put_lexicon :
       PutLexiconInput.t ->
         (PutLexiconOutput.t, PutLexiconOutput.error) Result.t
           Async.Deferred.t
+val start_speech_synthesis_stream :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartSpeechSynthesisStreamInput.t ->
+        (StartSpeechSynthesisStreamOutput.t,
+          StartSpeechSynthesisStreamOutput.error) Result.t Async.Deferred.t
 val start_speech_synthesis_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

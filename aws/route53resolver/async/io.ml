@@ -25,6 +25,8 @@ let create_firewall_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFirewallRule input
 let create_firewall_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFirewallRuleGroup input
+let create_outpost_resolver ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateOutpostResolver input
 let create_resolver_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateResolverEndpoint input
 let create_resolver_query_log_config ?endpoint_url ?cfg input =
@@ -37,6 +39,8 @@ let delete_firewall_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFirewallRule input
 let delete_firewall_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFirewallRuleGroup input
+let delete_outpost_resolver ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteOutpostResolver input
 let delete_resolver_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResolverEndpoint input
 let delete_resolver_query_log_config ?endpoint_url ?cfg input =
@@ -62,6 +66,8 @@ let get_firewall_rule_group_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFirewallRuleGroupAssociation input
 let get_firewall_rule_group_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFirewallRuleGroupPolicy input
+let get_outpost_resolver ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetOutpostResolver input
 let get_resolver_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResolverConfig input
 let get_resolver_dnssec_config ?endpoint_url ?cfg input =
@@ -95,6 +101,8 @@ let list_firewall_rule_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFirewallRuleGroups input
 let list_firewall_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFirewallRules input
+let list_outpost_resolvers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListOutpostResolvers input
 let list_resolver_configs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListResolverConfigs input
 let list_resolver_dnssec_configs ?endpoint_url ?cfg input =
@@ -132,6 +140,8 @@ let update_firewall_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFirewallRule input
 let update_firewall_rule_group_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFirewallRuleGroupAssociation input
+let update_outpost_resolver ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateOutpostResolver input
 let update_resolver_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateResolverConfig input
 let update_resolver_dnssec_config ?endpoint_url ?cfg input =

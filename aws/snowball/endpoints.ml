@@ -45,6 +45,10 @@ type ('i, 'o, 'e) t =
   | ListJobs: (ListJobsRequest.t, ListJobsResult.t, ListJobsResult.error) t 
   | ListLongTermPricing: (ListLongTermPricingRequest.t,
   ListLongTermPricingResult.t, ListLongTermPricingResult.error) t 
+  | ListPickupLocations: (ListPickupLocationsRequest.t,
+  ListPickupLocationsResult.t, ListPickupLocationsResult.error) t 
+  | ListServiceVersions: (ListServiceVersionsRequest.t,
+  ListServiceVersionsResult.t, ListServiceVersionsResult.error) t 
   | UpdateCluster: (UpdateClusterRequest.t, UpdateClusterResult.t,
   UpdateClusterResult.error) t 
   | UpdateJob: (UpdateJobRequest.t, UpdateJobResult.t, UpdateJobResult.error)
@@ -76,6 +80,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListCompatibleImages -> `POST
   | ListJobs -> `POST
   | ListLongTermPricing -> `POST
+  | ListPickupLocations -> `POST
+  | ListServiceVersions -> `POST
   | UpdateCluster -> `POST
   | UpdateJob -> `POST
   | UpdateJobShipmentState -> `POST
@@ -104,6 +110,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListCompatibleImages -> (Format.kasprintf Uri.of_string) "/"
       | ListJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListLongTermPricing -> (Format.kasprintf Uri.of_string) "/"
+      | ListPickupLocations -> (Format.kasprintf Uri.of_string) "/"
+      | ListServiceVersions -> (Format.kasprintf Uri.of_string) "/"
       | UpdateCluster -> (Format.kasprintf Uri.of_string) "/"
       | UpdateJob -> (Format.kasprintf Uri.of_string) "/"
       | UpdateJobShipmentState -> (Format.kasprintf Uri.of_string) "/"
@@ -291,6 +299,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSIESnowballJobManagementService.ListLongTermPricing")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListPickupLocations ->
+      let json = ListPickupLocationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSIESnowballJobManagementService.ListPickupLocations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListServiceVersions ->
+      let json = ListServiceVersionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSIESnowballJobManagementService.ListServiceVersions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateCluster ->
       let json = UpdateClusterRequest.to_json req in
@@ -490,6 +516,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListLongTermPricingResult.error_of_json))
+  | ListPickupLocations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPickupLocationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListPickupLocationsResult.error_of_json))
+  | ListServiceVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListServiceVersionsResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListServiceVersionsResult.error_of_json))
   | UpdateCluster ->
       if is_success
       then

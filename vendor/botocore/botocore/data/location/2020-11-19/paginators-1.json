@@ -15,7 +15,8 @@
     "ListGeofences": {
       "input_token": "NextToken",
       "output_token": "NextToken",
-      "result_key": "Entries"
+      "result_key": "Entries",
+      "limit_key": "MaxResults"
     },
     "ListMaps": {
       "input_token": "NextToken",
@@ -48,6 +49,24 @@
       "result_key": "Entries"
     },
     "ListRouteCalculators": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "Entries"
+    },
+    "ListKeys": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "Entries"
+    },
+    "ForecastGeofenceEvents": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "ForecastedEvents"
+    },
+    "ListJobs": {
       "input_token": "NextToken",
       "output_token": "NextToken",
       "limit_key": "MaxResults",

@@ -5,29 +5,60 @@ type ('i, 'o, 'e) t =
   | AcceptInboundConnection: (AcceptInboundConnectionRequest.t,
   AcceptInboundConnectionResponse.t, AcceptInboundConnectionResponse.error) t
   
+  | AddDataSource: (AddDataSourceRequest.t, AddDataSourceResponse.t,
+  AddDataSourceResponse.error) t 
+  | AddDirectQueryDataSource: (AddDirectQueryDataSourceRequest.t,
+  AddDirectQueryDataSourceResponse.t, AddDirectQueryDataSourceResponse.error)
+  t 
   | AddTags: (AddTagsRequest.t, unit, unit) t 
   | AssociatePackage: (AssociatePackageRequest.t, AssociatePackageResponse.t,
   AssociatePackageResponse.error) t 
+  | AssociatePackages: (AssociatePackagesRequest.t,
+  AssociatePackagesResponse.t, AssociatePackagesResponse.error) t 
+  | AuthorizeVpcEndpointAccess: (AuthorizeVpcEndpointAccessRequest.t,
+  AuthorizeVpcEndpointAccessResponse.t,
+  AuthorizeVpcEndpointAccessResponse.error) t 
+  | CancelDomainConfigChange: (CancelDomainConfigChangeRequest.t,
+  CancelDomainConfigChangeResponse.t, CancelDomainConfigChangeResponse.error)
+  t 
   | CancelServiceSoftwareUpdate: (CancelServiceSoftwareUpdateRequest.t,
   CancelServiceSoftwareUpdateResponse.t,
   CancelServiceSoftwareUpdateResponse.error) t 
+  | CreateApplication: (CreateApplicationRequest.t,
+  CreateApplicationResponse.t, CreateApplicationResponse.error) t 
   | CreateDomain: (CreateDomainRequest.t, CreateDomainResponse.t,
   CreateDomainResponse.error) t 
+  | CreateIndex: (CreateIndexRequest.t, CreateIndexResponse.t,
+  CreateIndexResponse.error) t 
   | CreateOutboundConnection: (CreateOutboundConnectionRequest.t,
   CreateOutboundConnectionResponse.t, CreateOutboundConnectionResponse.error)
   t 
   | CreatePackage: (CreatePackageRequest.t, CreatePackageResponse.t,
   CreatePackageResponse.error) t 
+  | CreateVpcEndpoint: (CreateVpcEndpointRequest.t,
+  CreateVpcEndpointResponse.t, CreateVpcEndpointResponse.error) t 
+  | DeleteApplication: (DeleteApplicationRequest.t,
+  DeleteApplicationResponse.t, DeleteApplicationResponse.error) t 
+  | DeleteDataSource: (DeleteDataSourceRequest.t, DeleteDataSourceResponse.t,
+  DeleteDataSourceResponse.error) t 
+  | DeleteDirectQueryDataSource: (DeleteDirectQueryDataSourceRequest.t, 
+  unit, unit) t 
   | DeleteDomain: (DeleteDomainRequest.t, DeleteDomainResponse.t,
   DeleteDomainResponse.error) t 
   | DeleteInboundConnection: (DeleteInboundConnectionRequest.t,
   DeleteInboundConnectionResponse.t, DeleteInboundConnectionResponse.error) t
   
+  | DeleteIndex: (DeleteIndexRequest.t, DeleteIndexResponse.t,
+  DeleteIndexResponse.error) t 
   | DeleteOutboundConnection: (DeleteOutboundConnectionRequest.t,
   DeleteOutboundConnectionResponse.t, DeleteOutboundConnectionResponse.error)
   t 
   | DeletePackage: (DeletePackageRequest.t, DeletePackageResponse.t,
   DeletePackageResponse.error) t 
+  | DeleteVpcEndpoint: (DeleteVpcEndpointRequest.t,
+  DeleteVpcEndpointResponse.t, DeleteVpcEndpointResponse.error) t 
+  | DeregisterCapability: (DeregisterCapabilityRequest.t,
+  DeregisterCapabilityResponse.t, DeregisterCapabilityResponse.error) t 
   | DescribeDomain: (DescribeDomainRequest.t, DescribeDomainResponse.t,
   DescribeDomainResponse.error) t 
   | DescribeDomainAutoTunes: (DescribeDomainAutoTunesRequest.t,
@@ -38,11 +69,19 @@ type ('i, 'o, 'e) t =
   DescribeDomainChangeProgressResponse.error) t 
   | DescribeDomainConfig: (DescribeDomainConfigRequest.t,
   DescribeDomainConfigResponse.t, DescribeDomainConfigResponse.error) t 
+  | DescribeDomainHealth: (DescribeDomainHealthRequest.t,
+  DescribeDomainHealthResponse.t, DescribeDomainHealthResponse.error) t 
+  | DescribeDomainNodes: (DescribeDomainNodesRequest.t,
+  DescribeDomainNodesResponse.t, DescribeDomainNodesResponse.error) t 
   | DescribeDomains: (DescribeDomainsRequest.t, DescribeDomainsResponse.t,
   DescribeDomainsResponse.error) t 
+  | DescribeDryRunProgress: (DescribeDryRunProgressRequest.t,
+  DescribeDryRunProgressResponse.t, DescribeDryRunProgressResponse.error) t 
   | DescribeInboundConnections: (DescribeInboundConnectionsRequest.t,
   DescribeInboundConnectionsResponse.t,
   DescribeInboundConnectionsResponse.error) t 
+  | DescribeInsightDetails: (DescribeInsightDetailsRequest.t,
+  DescribeInsightDetailsResponse.t, DescribeInsightDetailsResponse.error) t 
   | DescribeInstanceTypeLimits: (DescribeInstanceTypeLimitsRequest.t,
   DescribeInstanceTypeLimitsResponse.t,
   DescribeInstanceTypeLimitsResponse.error) t 
@@ -58,10 +97,31 @@ type ('i, 'o, 'e) t =
   | DescribeReservedInstances: (DescribeReservedInstancesRequest.t,
   DescribeReservedInstancesResponse.t,
   DescribeReservedInstancesResponse.error) t 
+  | DescribeVpcEndpoints: (DescribeVpcEndpointsRequest.t,
+  DescribeVpcEndpointsResponse.t, DescribeVpcEndpointsResponse.error) t 
   | DissociatePackage: (DissociatePackageRequest.t,
   DissociatePackageResponse.t, DissociatePackageResponse.error) t 
+  | DissociatePackages: (DissociatePackagesRequest.t,
+  DissociatePackagesResponse.t, DissociatePackagesResponse.error) t 
+  | GetApplication: (GetApplicationRequest.t, GetApplicationResponse.t,
+  GetApplicationResponse.error) t 
+  | GetCapability: (GetCapabilityRequest.t, GetCapabilityResponse.t,
+  GetCapabilityResponse.error) t 
   | GetCompatibleVersions: (GetCompatibleVersionsRequest.t,
   GetCompatibleVersionsResponse.t, GetCompatibleVersionsResponse.error) t 
+  | GetDataSource: (GetDataSourceRequest.t, GetDataSourceResponse.t,
+  GetDataSourceResponse.error) t 
+  | GetDefaultApplicationSetting: (GetDefaultApplicationSettingRequest.t,
+  GetDefaultApplicationSettingResponse.t,
+  GetDefaultApplicationSettingResponse.error) t 
+  | GetDirectQueryDataSource: (GetDirectQueryDataSourceRequest.t,
+  GetDirectQueryDataSourceResponse.t, GetDirectQueryDataSourceResponse.error)
+  t 
+  | GetDomainMaintenanceStatus: (GetDomainMaintenanceStatusRequest.t,
+  GetDomainMaintenanceStatusResponse.t,
+  GetDomainMaintenanceStatusResponse.error) t 
+  | GetIndex: (GetIndexRequest.t, GetIndexResponse.t, GetIndexResponse.error)
+  t 
   | GetPackageVersionHistory: (GetPackageVersionHistoryRequest.t,
   GetPackageVersionHistoryResponse.t, GetPackageVersionHistoryResponse.error)
   t 
@@ -69,77 +129,173 @@ type ('i, 'o, 'e) t =
   GetUpgradeHistoryResponse.t, GetUpgradeHistoryResponse.error) t 
   | GetUpgradeStatus: (GetUpgradeStatusRequest.t, GetUpgradeStatusResponse.t,
   GetUpgradeStatusResponse.error) t 
+  | ListApplications: (ListApplicationsRequest.t, ListApplicationsResponse.t,
+  ListApplicationsResponse.error) t 
+  | ListDataSources: (ListDataSourcesRequest.t, ListDataSourcesResponse.t,
+  ListDataSourcesResponse.error) t 
+  | ListDirectQueryDataSources: (ListDirectQueryDataSourcesRequest.t,
+  ListDirectQueryDataSourcesResponse.t,
+  ListDirectQueryDataSourcesResponse.error) t 
+  | ListDomainMaintenances: (ListDomainMaintenancesRequest.t,
+  ListDomainMaintenancesResponse.t, ListDomainMaintenancesResponse.error) t 
   | ListDomainNames: (ListDomainNamesRequest.t, ListDomainNamesResponse.t,
   ListDomainNamesResponse.error) t 
   | ListDomainsForPackage: (ListDomainsForPackageRequest.t,
   ListDomainsForPackageResponse.t, ListDomainsForPackageResponse.error) t 
+  | ListInsights: (ListInsightsRequest.t, ListInsightsResponse.t,
+  ListInsightsResponse.error) t 
   | ListInstanceTypeDetails: (ListInstanceTypeDetailsRequest.t,
   ListInstanceTypeDetailsResponse.t, ListInstanceTypeDetailsResponse.error) t
   
   | ListPackagesForDomain: (ListPackagesForDomainRequest.t,
   ListPackagesForDomainResponse.t, ListPackagesForDomainResponse.error) t 
+  | ListScheduledActions: (ListScheduledActionsRequest.t,
+  ListScheduledActionsResponse.t, ListScheduledActionsResponse.error) t 
   | ListTags: (ListTagsRequest.t, ListTagsResponse.t, ListTagsResponse.error)
   t 
   | ListVersions: (ListVersionsRequest.t, ListVersionsResponse.t,
   ListVersionsResponse.error) t 
+  | ListVpcEndpointAccess: (ListVpcEndpointAccessRequest.t,
+  ListVpcEndpointAccessResponse.t, ListVpcEndpointAccessResponse.error) t 
+  | ListVpcEndpoints: (ListVpcEndpointsRequest.t, ListVpcEndpointsResponse.t,
+  ListVpcEndpointsResponse.error) t 
+  | ListVpcEndpointsForDomain: (ListVpcEndpointsForDomainRequest.t,
+  ListVpcEndpointsForDomainResponse.t,
+  ListVpcEndpointsForDomainResponse.error) t 
   | PurchaseReservedInstanceOffering:
   (PurchaseReservedInstanceOfferingRequest.t,
   PurchaseReservedInstanceOfferingResponse.t,
   PurchaseReservedInstanceOfferingResponse.error) t 
+  | PutDefaultApplicationSetting: (PutDefaultApplicationSettingRequest.t,
+  PutDefaultApplicationSettingResponse.t,
+  PutDefaultApplicationSettingResponse.error) t 
+  | RegisterCapability: (RegisterCapabilityRequest.t,
+  RegisterCapabilityResponse.t, RegisterCapabilityResponse.error) t 
   | RejectInboundConnection: (RejectInboundConnectionRequest.t,
   RejectInboundConnectionResponse.t, RejectInboundConnectionResponse.error) t
   
   | RemoveTags: (RemoveTagsRequest.t, unit, unit) t 
+  | RevokeVpcEndpointAccess: (RevokeVpcEndpointAccessRequest.t,
+  RevokeVpcEndpointAccessResponse.t, RevokeVpcEndpointAccessResponse.error) t
+  
+  | RollbackServiceSoftwareUpdate: (RollbackServiceSoftwareUpdateRequest.t,
+  RollbackServiceSoftwareUpdateResponse.t,
+  RollbackServiceSoftwareUpdateResponse.error) t 
+  | StartDomainMaintenance: (StartDomainMaintenanceRequest.t,
+  StartDomainMaintenanceResponse.t, StartDomainMaintenanceResponse.error) t 
   | StartServiceSoftwareUpdate: (StartServiceSoftwareUpdateRequest.t,
   StartServiceSoftwareUpdateResponse.t,
   StartServiceSoftwareUpdateResponse.error) t 
+  | UpdateApplication: (UpdateApplicationRequest.t,
+  UpdateApplicationResponse.t, UpdateApplicationResponse.error) t 
+  | UpdateDataSource: (UpdateDataSourceRequest.t, UpdateDataSourceResponse.t,
+  UpdateDataSourceResponse.error) t 
+  | UpdateDirectQueryDataSource: (UpdateDirectQueryDataSourceRequest.t,
+  UpdateDirectQueryDataSourceResponse.t,
+  UpdateDirectQueryDataSourceResponse.error) t 
   | UpdateDomainConfig: (UpdateDomainConfigRequest.t,
   UpdateDomainConfigResponse.t, UpdateDomainConfigResponse.error) t 
+  | UpdateIndex: (UpdateIndexRequest.t, UpdateIndexResponse.t,
+  UpdateIndexResponse.error) t 
   | UpdatePackage: (UpdatePackageRequest.t, UpdatePackageResponse.t,
   UpdatePackageResponse.error) t 
+  | UpdatePackageScope: (UpdatePackageScopeRequest.t,
+  UpdatePackageScopeResponse.t, UpdatePackageScopeResponse.error) t 
+  | UpdateScheduledAction: (UpdateScheduledActionRequest.t,
+  UpdateScheduledActionResponse.t, UpdateScheduledActionResponse.error) t 
+  | UpdateVpcEndpoint: (UpdateVpcEndpointRequest.t,
+  UpdateVpcEndpointResponse.t, UpdateVpcEndpointResponse.error) t 
   | UpgradeDomain: (UpgradeDomainRequest.t, UpgradeDomainResponse.t,
   UpgradeDomainResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AcceptInboundConnection -> `PUT
+  | AddDataSource -> `POST
+  | AddDirectQueryDataSource -> `POST
   | AddTags -> `POST
   | AssociatePackage -> `POST
+  | AssociatePackages -> `POST
+  | AuthorizeVpcEndpointAccess -> `POST
+  | CancelDomainConfigChange -> `POST
   | CancelServiceSoftwareUpdate -> `POST
+  | CreateApplication -> `POST
   | CreateDomain -> `POST
+  | CreateIndex -> `POST
   | CreateOutboundConnection -> `POST
   | CreatePackage -> `POST
+  | CreateVpcEndpoint -> `POST
+  | DeleteApplication -> `DELETE
+  | DeleteDataSource -> `DELETE
+  | DeleteDirectQueryDataSource -> `DELETE
   | DeleteDomain -> `DELETE
   | DeleteInboundConnection -> `DELETE
+  | DeleteIndex -> `DELETE
   | DeleteOutboundConnection -> `DELETE
   | DeletePackage -> `DELETE
+  | DeleteVpcEndpoint -> `DELETE
+  | DeregisterCapability -> `DELETE
   | DescribeDomain -> `GET
   | DescribeDomainAutoTunes -> `GET
   | DescribeDomainChangeProgress -> `GET
   | DescribeDomainConfig -> `GET
+  | DescribeDomainHealth -> `GET
+  | DescribeDomainNodes -> `GET
   | DescribeDomains -> `POST
+  | DescribeDryRunProgress -> `GET
   | DescribeInboundConnections -> `POST
+  | DescribeInsightDetails -> `POST
   | DescribeInstanceTypeLimits -> `GET
   | DescribeOutboundConnections -> `POST
   | DescribePackages -> `POST
   | DescribeReservedInstanceOfferings -> `GET
   | DescribeReservedInstances -> `GET
+  | DescribeVpcEndpoints -> `POST
   | DissociatePackage -> `POST
+  | DissociatePackages -> `POST
+  | GetApplication -> `GET
+  | GetCapability -> `GET
   | GetCompatibleVersions -> `GET
+  | GetDataSource -> `GET
+  | GetDefaultApplicationSetting -> `GET
+  | GetDirectQueryDataSource -> `GET
+  | GetDomainMaintenanceStatus -> `GET
+  | GetIndex -> `GET
   | GetPackageVersionHistory -> `GET
   | GetUpgradeHistory -> `GET
   | GetUpgradeStatus -> `GET
+  | ListApplications -> `GET
+  | ListDataSources -> `GET
+  | ListDirectQueryDataSources -> `GET
+  | ListDomainMaintenances -> `GET
   | ListDomainNames -> `GET
   | ListDomainsForPackage -> `GET
+  | ListInsights -> `POST
   | ListInstanceTypeDetails -> `GET
   | ListPackagesForDomain -> `GET
+  | ListScheduledActions -> `GET
   | ListTags -> `GET
   | ListVersions -> `GET
+  | ListVpcEndpointAccess -> `GET
+  | ListVpcEndpoints -> `GET
+  | ListVpcEndpointsForDomain -> `GET
   | PurchaseReservedInstanceOffering -> `POST
+  | PutDefaultApplicationSetting -> `PUT
+  | RegisterCapability -> `POST
   | RejectInboundConnection -> `PUT
   | RemoveTags -> `POST
+  | RevokeVpcEndpointAccess -> `POST
+  | RollbackServiceSoftwareUpdate -> `POST
+  | StartDomainMaintenance -> `POST
   | StartServiceSoftwareUpdate -> `POST
+  | UpdateApplication -> `PUT
+  | UpdateDataSource -> `PUT
+  | UpdateDirectQueryDataSource -> `PUT
   | UpdateDomainConfig -> `POST
+  | UpdateIndex -> `PUT
   | UpdatePackage -> `POST
+  | UpdatePackageScope -> `POST
+  | UpdateScheduledAction -> `PUT
+  | UpdateVpcEndpoint -> `POST
   | UpgradeDomain -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -149,22 +305,66 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2021-01-01/opensearch/cc/inboundConnection/%s/accept"
             (ConnectionId.to_header
                x.AcceptInboundConnectionRequest.connectionId)
+      | AddDataSource ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/dataSource"
+            (DomainName.to_header x.AddDataSourceRequest.domainName)
+      | AddDirectQueryDataSource ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/directQueryDataSource"
       | AddTags -> (Format.kasprintf Uri.of_string) "/2021-01-01/tags"
       | AssociatePackage ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/packages/associate/%s/%s"
             (PackageID.to_header x.AssociatePackageRequest.packageID)
             (DomainName.to_header x.AssociatePackageRequest.domainName)
+      | AssociatePackages ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/packages/associateMultiple"
+      | AuthorizeVpcEndpointAccess ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/authorizeVpcEndpointAccess"
+            (DomainName.to_header
+               x.AuthorizeVpcEndpointAccessRequest.domainName)
+      | CancelDomainConfigChange ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/config/cancel"
+            (DomainName.to_header
+               x.CancelDomainConfigChangeRequest.domainName)
       | CancelServiceSoftwareUpdate ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/serviceSoftwareUpdate/cancel"
+      | CreateApplication ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/application"
       | CreateDomain ->
           (Format.kasprintf Uri.of_string) "/2021-01-01/opensearch/domain"
+      | CreateIndex ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/index"
+            (DomainName.to_header x.CreateIndexRequest.domainName)
       | CreateOutboundConnection ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/cc/outboundConnection"
       | CreatePackage ->
           (Format.kasprintf Uri.of_string) "/2021-01-01/packages"
+      | CreateVpcEndpoint ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/vpcEndpoints"
+      | DeleteApplication ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/application/%s"
+            (Id.to_header x.DeleteApplicationRequest.id)
+      | DeleteDataSource ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/dataSource/%s"
+            (DomainName.to_header x.DeleteDataSourceRequest.domainName)
+            (DataSourceName.to_header x.DeleteDataSourceRequest.name)
+      | DeleteDirectQueryDataSource ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/directQueryDataSource/%s"
+            (DirectQueryDataSourceName.to_header
+               x.DeleteDirectQueryDataSourceRequest.dataSourceName)
       | DeleteDomain ->
           (Format.kasprintf Uri.of_string) "/2021-01-01/opensearch/domain/%s"
             (DomainName.to_header x.DeleteDomainRequest.domainName)
@@ -173,6 +373,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2021-01-01/opensearch/cc/inboundConnection/%s"
             (ConnectionId.to_header
                x.DeleteInboundConnectionRequest.connectionId)
+      | DeleteIndex ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/index/%s"
+            (DomainName.to_header x.DeleteIndexRequest.domainName)
+            (IndexName.to_header x.DeleteIndexRequest.indexName)
       | DeleteOutboundConnection ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/cc/outboundConnection/%s"
@@ -181,13 +386,33 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeletePackage ->
           (Format.kasprintf Uri.of_string) "/2021-01-01/packages/%s"
             (PackageID.to_header x.DeletePackageRequest.packageID)
+      | DeleteVpcEndpoint ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/vpcEndpoints/%s"
+            (VpcEndpointId.to_header x.DeleteVpcEndpointRequest.vpcEndpointId)
+      | DeregisterCapability ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/application/%s/capability/deregister/%s"
+            (ApplicationId.to_header
+               x.DeregisterCapabilityRequest.applicationId)
+            (CapabilityName.to_header
+               x.DeregisterCapabilityRequest.capabilityName)
       | DescribeDomain ->
           (Format.kasprintf Uri.of_string) "/2021-01-01/opensearch/domain/%s"
             (DomainName.to_header x.DescribeDomainRequest.domainName)
       | DescribeDomainAutoTunes ->
-          (Format.kasprintf Uri.of_string)
-            "/2021-01-01/opensearch/domain/%s/autoTunes"
-            (DomainName.to_header x.DescribeDomainAutoTunesRequest.domainName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/domain/%s/autoTunes"
+               (DomainName.to_header
+                  x.DescribeDomainAutoTunesRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | DescribeDomainChangeProgress ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -201,12 +426,35 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/domain/%s/config"
             (DomainName.to_header x.DescribeDomainConfigRequest.domainName)
+      | DescribeDomainHealth ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/health"
+            (DomainName.to_header x.DescribeDomainHealthRequest.domainName)
+      | DescribeDomainNodes ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/nodes"
+            (DomainName.to_header x.DescribeDomainNodesRequest.domainName)
       | DescribeDomains ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/domain-info"
+      | DescribeDryRunProgress ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/domain/%s/dryRun"
+               (DomainName.to_header
+                  x.DescribeDryRunProgressRequest.domainName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("dryRunId", (GUID.to_header v)))
+                  x.dryRunId;
+               Option.map
+                 ~f:(fun v -> ("loadDryRunConfig", (Boolean.to_header v)))
+                 x.loadDryRunConfig])
       | DescribeInboundConnections ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/cc/inboundConnection/search"
+      | DescribeInsightDetails ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/insight-details"
       | DescribeInstanceTypeLimits ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -251,11 +499,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | DescribeVpcEndpoints ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/vpcEndpoints/describe"
       | DissociatePackage ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/packages/dissociate/%s/%s"
             (PackageID.to_header x.DissociatePackageRequest.packageID)
             (DomainName.to_header x.DissociatePackageRequest.domainName)
+      | DissociatePackages ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/packages/dissociateMultiple"
+      | GetApplication ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/application/%s"
+            (Id.to_header x.GetApplicationRequest.id)
+      | GetCapability ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/application/%s/capability/%s"
+            (ApplicationId.to_header x.GetCapabilityRequest.applicationId)
+            (CapabilityName.to_header x.GetCapabilityRequest.capabilityName)
       | GetCompatibleVersions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -264,6 +527,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("domainName", (DomainName.to_header v)))
                   x.domainName])
+      | GetDataSource ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/dataSource/%s"
+            (DomainName.to_header x.GetDataSourceRequest.domainName)
+            (DataSourceName.to_header x.GetDataSourceRequest.name)
+      | GetDefaultApplicationSetting ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/defaultApplicationSetting"
+      | GetDirectQueryDataSource ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/directQueryDataSource/%s"
+            (DirectQueryDataSourceName.to_header
+               x.GetDirectQueryDataSourceRequest.dataSourceName)
+      | GetDomainMaintenanceStatus ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/domain/%s/domainMaintenance"
+               (DomainName.to_header
+                  x.GetDomainMaintenanceStatusRequest.domainName))
+            (List.filter_opt
+               [Some ("maintenanceId", (RequestId.to_header x.maintenanceId))])
+      | GetIndex ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/index/%s"
+            (DomainName.to_header x.GetIndexRequest.domainName)
+            (IndexName.to_header x.GetIndexRequest.indexName)
       | GetPackageVersionHistory ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -293,6 +582,51 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/upgradeDomain/%s/status"
             (DomainName.to_header x.GetUpgradeStatusRequest.domainName)
+      | ListApplications ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/list-applications")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("statuses", (ApplicationStatuses.to_header v)))
+                 x.statuses;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListDataSources ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/dataSource"
+            (DomainName.to_header x.ListDataSourcesRequest.domainName)
+      | ListDirectQueryDataSources ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/directQueryDataSource")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nexttoken", (NextToken.to_header v)))
+                  x.nextToken])
+      | ListDomainMaintenances ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/domain/%s/domainMaintenances"
+               (DomainName.to_header
+                  x.ListDomainMaintenancesRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("action", (MaintenanceType.to_header v)))
+                  x.action;
+               Option.map
+                 ~f:(fun v -> ("status", (MaintenanceStatus.to_header v)))
+                 x.status;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListDomainNames ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2021-01-01/domain")
@@ -312,6 +646,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListInsights ->
+          (Format.kasprintf Uri.of_string) "/2021-01-01/opensearch/insights"
       | ListInstanceTypeDetails ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -327,13 +663,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("retrieveAZs", (Boolean.to_header v)))
+                 x.retrieveAZs;
+               Option.map
+                 ~f:(fun v ->
+                       ("instanceType", (InstanceTypeString.to_header v)))
+                 x.instanceType])
       | ListPackagesForDomain ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2021-01-01/domain/%s/packages"
                (DomainName.to_header
                   x.ListPackagesForDomainRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListScheduledActions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/domain/%s/scheduledActions"
+               (DomainName.to_header x.ListScheduledActionsRequest.domainName))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -356,9 +711,45 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListVpcEndpointAccess ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/domain/%s/listVpcEndpointAccess"
+               (DomainName.to_header
+                  x.ListVpcEndpointAccessRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken])
+      | ListVpcEndpoints ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/vpcEndpoints")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken])
+      | ListVpcEndpointsForDomain ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-01-01/opensearch/domain/%s/vpcEndpoints"
+               (DomainName.to_header
+                  x.ListVpcEndpointsForDomainRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken])
       | PurchaseReservedInstanceOffering ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/purchaseReservedInstanceOffering"
+      | PutDefaultApplicationSetting ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/defaultApplicationSetting"
+      | RegisterCapability ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/application/%s/capability/register"
+            (ApplicationId.to_header
+               x.RegisterCapabilityRequest.applicationId)
       | RejectInboundConnection ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/cc/inboundConnection/%s/reject"
@@ -366,15 +757,54 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.RejectInboundConnectionRequest.connectionId)
       | RemoveTags ->
           (Format.kasprintf Uri.of_string) "/2021-01-01/tags-removal"
+      | RevokeVpcEndpointAccess ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/revokeVpcEndpointAccess"
+            (DomainName.to_header x.RevokeVpcEndpointAccessRequest.domainName)
+      | RollbackServiceSoftwareUpdate ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/serviceSoftwareUpdate/rollback"
+      | StartDomainMaintenance ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/domainMaintenance"
+            (DomainName.to_header x.StartDomainMaintenanceRequest.domainName)
       | StartServiceSoftwareUpdate ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/serviceSoftwareUpdate/start"
+      | UpdateApplication ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/application/%s"
+            (Id.to_header x.UpdateApplicationRequest.id)
+      | UpdateDataSource ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/dataSource/%s"
+            (DomainName.to_header x.UpdateDataSourceRequest.domainName)
+            (DataSourceName.to_header x.UpdateDataSourceRequest.name)
+      | UpdateDirectQueryDataSource ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/directQueryDataSource/%s"
+            (DirectQueryDataSourceName.to_header
+               x.UpdateDirectQueryDataSourceRequest.dataSourceName)
       | UpdateDomainConfig ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/domain/%s/config"
             (DomainName.to_header x.UpdateDomainConfigRequest.domainName)
+      | UpdateIndex ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/index/%s"
+            (DomainName.to_header x.UpdateIndexRequest.domainName)
+            (IndexName.to_header x.UpdateIndexRequest.indexName)
       | UpdatePackage ->
           (Format.kasprintf Uri.of_string) "/2021-01-01/packages/update"
+      | UpdatePackageScope ->
+          (Format.kasprintf Uri.of_string) "/2021-01-01/packages/updateScope"
+      | UpdateScheduledAction ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/domain/%s/scheduledAction/update"
+            (DomainName.to_header x.UpdateScheduledActionRequest.domainName)
+      | UpdateVpcEndpoint ->
+          (Format.kasprintf Uri.of_string)
+            "/2021-01-01/opensearch/vpcEndpoints/update"
       | UpgradeDomain ->
           (Format.kasprintf Uri.of_string)
             "/2021-01-01/opensearch/upgradeDomain")
@@ -384,6 +814,75 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
   | AcceptInboundConnection ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | AddDataSource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (DataSourceName.to_value
+                              req.AddDataSourceRequest.name));
+                      Some
+                        ("DataSourceType",
+                          (DataSourceType.to_value
+                             req.AddDataSourceRequest.dataSourceType));
+                      Option.map req.AddDataSourceRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (DataSourceDescription.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AddDirectQueryDataSource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DataSourceName",
+                           (DirectQueryDataSourceName.to_value
+                              req.AddDirectQueryDataSourceRequest.dataSourceName));
+                      Some
+                        ("DataSourceType",
+                          (DirectQueryDataSourceType.to_value
+                             req.AddDirectQueryDataSourceRequest.dataSourceType));
+                      Option.map
+                        req.AddDirectQueryDataSourceRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (DirectQueryDataSourceDescription.to_value x)));
+                      Option.map
+                        req.AddDirectQueryDataSourceRequest.openSearchArns
+                        ~f:(fun x ->
+                              ("OpenSearchArns",
+                                (DirectQueryOpenSearchARNList.to_value x)));
+                      Option.map
+                        req.AddDirectQueryDataSourceRequest.dataSourceAccessPolicy
+                        ~f:(fun x ->
+                              ("DataSourceAccessPolicy",
+                                (PolicyDocument.to_value x)));
+                      Option.map req.AddDirectQueryDataSourceRequest.tagList
+                        ~f:(fun x -> ("TagList", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AddTags ->
       let (headers, body) =
         let headers =
@@ -405,7 +904,99 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AssociatePackage ->
-      let (headers, body) = (None, None) in
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.AssociatePackageRequest.prerequisitePackageIDList
+                         ~f:(fun x ->
+                               ("PrerequisitePackageIDList",
+                                 (PackageIDList.to_value x)));
+                      Option.map
+                        req.AssociatePackageRequest.associationConfiguration
+                        ~f:(fun x ->
+                              ("AssociationConfiguration",
+                                (PackageAssociationConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AssociatePackages ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("PackageList",
+                           (PackageDetailsForAssociationList.to_value
+                              req.AssociatePackagesRequest.packageList));
+                      Some
+                        ("DomainName",
+                          (DomainName.to_value
+                             req.AssociatePackagesRequest.domainName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AuthorizeVpcEndpointAccess ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.AuthorizeVpcEndpointAccessRequest.account
+                         ~f:(fun x -> ("Account", (AWSAccount.to_value x)));
+                      Option.map
+                        req.AuthorizeVpcEndpointAccessRequest.service
+                        ~f:(fun x ->
+                              ("Service", (AWSServicePrincipal.to_value x)));
+                      Option.map
+                        req.AuthorizeVpcEndpointAccessRequest.serviceOptions
+                        ~f:(fun x ->
+                              ("ServiceOptions", (ServiceOptions.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CancelDomainConfigChange ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CancelDomainConfigChangeRequest.dryRun
+                         ~f:(fun x -> ("DryRun", (DryRun.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CancelServiceSoftwareUpdate ->
       let (headers, body) =
@@ -420,6 +1011,43 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("DomainName",
                            (DomainName.to_value
                               req.CancelServiceSoftwareUpdateRequest.domainName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateApplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateApplicationRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken", (ClientToken.to_value x)));
+                      Some
+                        ("name",
+                          (ApplicationName.to_value
+                             req.CreateApplicationRequest.name));
+                      Option.map req.CreateApplicationRequest.dataSources
+                        ~f:(fun x ->
+                              ("dataSources", (DataSources.to_value x)));
+                      Option.map
+                        req.CreateApplicationRequest.iamIdentityCenterOptions
+                        ~f:(fun x ->
+                              ("iamIdentityCenterOptions",
+                                (IamIdentityCenterOptionsInput.to_value x)));
+                      Option.map req.CreateApplicationRequest.appConfigs
+                        ~f:(fun x -> ("appConfigs", (AppConfigs.to_value x)));
+                      Option.map req.CreateApplicationRequest.tagList
+                        ~f:(fun x -> ("tagList", (TagList.to_value x)));
+                      Option.map req.CreateApplicationRequest.kmsKeyArn
+                        ~f:(fun x -> ("kmsKeyArn", (KmsKeyArn.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -451,6 +1079,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateDomainRequest.accessPolicies
                         ~f:(fun x ->
                               ("AccessPolicies", (PolicyDocument.to_value x)));
+                      Option.map req.CreateDomainRequest.iPAddressType
+                        ~f:(fun x ->
+                              ("IPAddressType", (IPAddressType.to_value x)));
                       Option.map req.CreateDomainRequest.snapshotOptions
                         ~f:(fun x ->
                               ("SnapshotOptions",
@@ -488,12 +1119,64 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("AdvancedSecurityOptions",
                                 (AdvancedSecurityOptionsInput.to_value x)));
+                      Option.map
+                        req.CreateDomainRequest.identityCenterOptions
+                        ~f:(fun x ->
+                              ("IdentityCenterOptions",
+                                (IdentityCenterOptionsInput.to_value x)));
                       Option.map req.CreateDomainRequest.tagList
                         ~f:(fun x -> ("TagList", (TagList.to_value x)));
                       Option.map req.CreateDomainRequest.autoTuneOptions
                         ~f:(fun x ->
                               ("AutoTuneOptions",
-                                (AutoTuneOptionsInput.to_value x)))])
+                                (AutoTuneOptionsInput.to_value x)));
+                      Option.map req.CreateDomainRequest.offPeakWindowOptions
+                        ~f:(fun x ->
+                              ("OffPeakWindowOptions",
+                                (OffPeakWindowOptions.to_value x)));
+                      Option.map
+                        req.CreateDomainRequest.softwareUpdateOptions
+                        ~f:(fun x ->
+                              ("SoftwareUpdateOptions",
+                                (SoftwareUpdateOptions.to_value x)));
+                      Option.map req.CreateDomainRequest.aIMLOptions
+                        ~f:(fun x ->
+                              ("AIMLOptions", (AIMLOptionsInput.to_value x)));
+                      Option.map
+                        req.CreateDomainRequest.deploymentStrategyOptions
+                        ~f:(fun x ->
+                              ("DeploymentStrategyOptions",
+                                (DeploymentStrategyOptions.to_value x)));
+                      Option.map
+                        req.CreateDomainRequest.automatedSnapshotPauseOptions
+                        ~f:(fun x ->
+                              ("AutomatedSnapshotPauseOptions",
+                                (AutomatedSnapshotPauseRequestOptions.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateIndex ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("IndexName",
+                           (IndexName.to_value
+                              req.CreateIndexRequest.indexName));
+                      Some
+                        ("IndexSchema",
+                          (IndexSchema.to_value
+                             req.CreateIndexRequest.indexSchema))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -521,7 +1204,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("ConnectionAlias",
                           (ConnectionAlias.to_value
-                             req.CreateOutboundConnectionRequest.connectionAlias))])
+                             req.CreateOutboundConnectionRequest.connectionAlias));
+                      Option.map
+                        req.CreateOutboundConnectionRequest.connectionMode
+                        ~f:(fun x ->
+                              ("ConnectionMode", (ConnectionMode.to_value x)));
+                      Option.map
+                        req.CreateOutboundConnectionRequest.connectionProperties
+                        ~f:(fun x ->
+                              ("ConnectionProperties",
+                                (ConnectionProperties.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -553,7 +1245,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("PackageSource",
                           (PackageSource.to_value
-                             req.CreatePackageRequest.packageSource))])
+                             req.CreatePackageRequest.packageSource));
+                      Option.map
+                        req.CreatePackageRequest.packageConfiguration
+                        ~f:(fun x ->
+                              ("PackageConfiguration",
+                                (PackageConfiguration.to_value x)));
+                      Option.map req.CreatePackageRequest.engineVersion
+                        ~f:(fun x ->
+                              ("EngineVersion", (EngineVersion.to_value x)));
+                      Option.map
+                        req.CreatePackageRequest.packageVendingOptions
+                        ~f:(fun x ->
+                              ("PackageVendingOptions",
+                                (PackageVendingOptions.to_value x)));
+                      Option.map
+                        req.CreatePackageRequest.packageEncryptionOptions
+                        ~f:(fun x ->
+                              ("PackageEncryptionOptions",
+                                (PackageEncryptionOptions.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -561,16 +1271,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DeleteDomain -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteInboundConnection ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteOutboundConnection ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeletePackage -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DescribeDomain ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeDomainAutoTunes ->
+  | CreateVpcEndpoint ->
       let (headers, body) =
         let headers =
           Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
@@ -579,11 +1280,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.DescribeDomainAutoTunesRequest.maxResults
-                         ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)));
-                      Option.map req.DescribeDomainAutoTunesRequest.nextToken
-                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
+                      [Some
+                         ("DomainArn",
+                           (DomainArn.to_value
+                              req.CreateVpcEndpointRequest.domainArn));
+                      Some
+                        ("VpcOptions",
+                          (VPCOptions.to_value
+                             req.CreateVpcEndpointRequest.vpcOptions));
+                      Option.map req.CreateVpcEndpointRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -591,10 +1298,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteApplication -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDataSource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDirectQueryDataSource ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDomain -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteInboundConnection ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteIndex -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteOutboundConnection ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePackage -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteVpcEndpoint -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeregisterCapability -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DescribeDomain ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDomainAutoTunes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDomainChangeProgress ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDomainConfig ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDomainHealth ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDomainNodes ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDomains ->
@@ -617,6 +1349,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDryRunProgress ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeInboundConnections ->
       let (headers, body) =
         let headers =
@@ -635,6 +1370,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map
                         req.DescribeInboundConnectionsRequest.nextToken
                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeInsightDetails ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Entity",
+                           (InsightEntity.to_value
+                              req.DescribeInsightDetailsRequest.entity));
+                      Some
+                        ("InsightId",
+                          (GUID.to_value
+                             req.DescribeInsightDetailsRequest.insightId));
+                      Option.map
+                        req.DescribeInsightDetailsRequest.showHtmlContent
+                        ~f:(fun x ->
+                              ("ShowHtmlContent", (Boolean.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -700,10 +1463,75 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeReservedInstances ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeVpcEndpoints ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("VpcEndpointIds",
+                           (VpcEndpointIdList.to_value
+                              req.DescribeVpcEndpointsRequest.vpcEndpointIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DissociatePackage ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DissociatePackages ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("PackageList",
+                           (PackageIDList.to_value
+                              req.DissociatePackagesRequest.packageList));
+                      Some
+                        ("DomainName",
+                          (DomainName.to_value
+                             req.DissociatePackagesRequest.domainName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetApplication ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCapability ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetCompatibleVersions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDataSource ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDefaultApplicationSetting ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDirectQueryDataSource ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDomainMaintenanceStatus ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetIndex ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetPackageVersionHistory ->
@@ -715,11 +1543,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetUpgradeStatus ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListApplications ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDataSources ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDirectQueryDataSources ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDomainMaintenances ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDomainNames ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDomainsForPackage ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListInsights ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Entity",
+                           (InsightEntity.to_value
+                              req.ListInsightsRequest.entity));
+                      Option.map req.ListInsightsRequest.timeRange
+                        ~f:(fun x ->
+                              ("TimeRange", (InsightTimeRange.to_value x)));
+                      Option.map req.ListInsightsRequest.sortOrder
+                        ~f:(fun x ->
+                              ("SortOrder", (InsightSortOrder.to_value x)));
+                      Option.map req.ListInsightsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (InsightPageSize.to_value x)));
+                      Option.map req.ListInsightsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListInstanceTypeDetails ->
       let (headers, body) = (None, None) in
@@ -727,10 +1598,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListPackagesForDomain ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListScheduledActions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTags ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListVersions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVpcEndpointAccess ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVpcEndpoints ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVpcEndpointsForDomain ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PurchaseReservedInstanceOffering ->
@@ -761,6 +1644,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutDefaultApplicationSetting ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | RegisterCapability ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("capabilityName",
+                           (CapabilityName.to_value
+                              req.RegisterCapabilityRequest.capabilityName));
+                      Some
+                        ("capabilityConfig",
+                          (CapabilityBaseRequestConfig.to_value
+                             req.RegisterCapabilityRequest.capabilityConfig))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | RejectInboundConnection ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | RemoveTags ->
@@ -783,6 +1692,73 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RevokeVpcEndpointAccess ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.RevokeVpcEndpointAccessRequest.account
+                         ~f:(fun x -> ("Account", (AWSAccount.to_value x)));
+                      Option.map req.RevokeVpcEndpointAccessRequest.service
+                        ~f:(fun x ->
+                              ("Service", (AWSServicePrincipal.to_value x)));
+                      Option.map
+                        req.RevokeVpcEndpointAccessRequest.serviceOptions
+                        ~f:(fun x ->
+                              ("ServiceOptions", (ServiceOptions.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RollbackServiceSoftwareUpdate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DomainName",
+                           (DomainName.to_value
+                              req.RollbackServiceSoftwareUpdateRequest.domainName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartDomainMaintenance ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Action",
+                           (MaintenanceType.to_value
+                              req.StartDomainMaintenanceRequest.action));
+                      Option.map req.StartDomainMaintenanceRequest.nodeId
+                        ~f:(fun x -> ("NodeId", (NodeId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartServiceSoftwareUpdate ->
       let (headers, body) =
         let headers =
@@ -795,7 +1771,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("DomainName",
                            (DomainName.to_value
-                              req.StartServiceSoftwareUpdateRequest.domainName))])
+                              req.StartServiceSoftwareUpdateRequest.domainName));
+                      Option.map
+                        req.StartServiceSoftwareUpdateRequest.scheduleAt
+                        ~f:(fun x -> ("ScheduleAt", (ScheduleAt.to_value x)));
+                      Option.map
+                        req.StartServiceSoftwareUpdateRequest.desiredStartTime
+                        ~f:(fun x -> ("DesiredStartTime", (Long.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -803,6 +1785,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateApplication -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDataSource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDirectQueryDataSource ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDomainConfig ->
       let (headers, body) =
         let headers =
@@ -835,6 +1821,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdateDomainConfigRequest.accessPolicies
                         ~f:(fun x ->
                               ("AccessPolicies", (PolicyDocument.to_value x)));
+                      Option.map req.UpdateDomainConfigRequest.iPAddressType
+                        ~f:(fun x ->
+                              ("IPAddressType", (IPAddressType.to_value x)));
                       Option.map
                         req.UpdateDomainConfigRequest.logPublishingOptions
                         ~f:(fun x ->
@@ -861,12 +1850,43 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("AdvancedSecurityOptions",
                                 (AdvancedSecurityOptionsInput.to_value x)));
                       Option.map
+                        req.UpdateDomainConfigRequest.identityCenterOptions
+                        ~f:(fun x ->
+                              ("IdentityCenterOptions",
+                                (IdentityCenterOptionsInput.to_value x)));
+                      Option.map
                         req.UpdateDomainConfigRequest.autoTuneOptions
                         ~f:(fun x ->
                               ("AutoTuneOptions",
                                 (AutoTuneOptions.to_value x)));
                       Option.map req.UpdateDomainConfigRequest.dryRun
-                        ~f:(fun x -> ("DryRun", (DryRun.to_value x)))])
+                        ~f:(fun x -> ("DryRun", (DryRun.to_value x)));
+                      Option.map req.UpdateDomainConfigRequest.dryRunMode
+                        ~f:(fun x -> ("DryRunMode", (DryRunMode.to_value x)));
+                      Option.map
+                        req.UpdateDomainConfigRequest.offPeakWindowOptions
+                        ~f:(fun x ->
+                              ("OffPeakWindowOptions",
+                                (OffPeakWindowOptions.to_value x)));
+                      Option.map
+                        req.UpdateDomainConfigRequest.softwareUpdateOptions
+                        ~f:(fun x ->
+                              ("SoftwareUpdateOptions",
+                                (SoftwareUpdateOptions.to_value x)));
+                      Option.map req.UpdateDomainConfigRequest.aIMLOptions
+                        ~f:(fun x ->
+                              ("AIMLOptions", (AIMLOptionsInput.to_value x)));
+                      Option.map
+                        req.UpdateDomainConfigRequest.deploymentStrategyOptions
+                        ~f:(fun x ->
+                              ("DeploymentStrategyOptions",
+                                (DeploymentStrategyOptions.to_value x)));
+                      Option.map
+                        req.UpdateDomainConfigRequest.automatedSnapshotPauseOptions
+                        ~f:(fun x ->
+                              ("AutomatedSnapshotPauseOptions",
+                                (AutomatedSnapshotPauseRequestOptions.to_value
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -874,6 +1894,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateIndex -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdatePackage ->
       let (headers, body) =
         let headers =
@@ -897,7 +1918,70 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                 (PackageDescription.to_value x)));
                       Option.map req.UpdatePackageRequest.commitMessage
                         ~f:(fun x ->
-                              ("CommitMessage", (CommitMessage.to_value x)))])
+                              ("CommitMessage", (CommitMessage.to_value x)));
+                      Option.map
+                        req.UpdatePackageRequest.packageConfiguration
+                        ~f:(fun x ->
+                              ("PackageConfiguration",
+                                (PackageConfiguration.to_value x)));
+                      Option.map
+                        req.UpdatePackageRequest.packageEncryptionOptions
+                        ~f:(fun x ->
+                              ("PackageEncryptionOptions",
+                                (PackageEncryptionOptions.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdatePackageScope ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("PackageID",
+                           (PackageID.to_value
+                              req.UpdatePackageScopeRequest.packageID));
+                      Some
+                        ("Operation",
+                          (PackageScopeOperationEnum.to_value
+                             req.UpdatePackageScopeRequest.operation));
+                      Some
+                        ("PackageUserList",
+                          (PackageUserList.to_value
+                             req.UpdatePackageScopeRequest.packageUserList))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateScheduledAction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateVpcEndpoint ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("VpcEndpointId",
+                           (VpcEndpointId.to_value
+                              req.UpdateVpcEndpointRequest.vpcEndpointId));
+                      Some
+                        ("VpcOptions",
+                          (VPCOptions.to_value
+                             req.UpdateVpcEndpointRequest.vpcOptions))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -992,12 +2076,47 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AcceptInboundConnectionResponse.error_of_json))
+  | AddDataSource ->
+      if is_success
+      then Ok (AddDataSourceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some AddDataSourceResponse.error_of_json))
+  | AddDirectQueryDataSource ->
+      if is_success
+      then
+        Ok (AddDirectQueryDataSourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AddDirectQueryDataSourceResponse.error_of_json))
   | AddTags -> if is_success then Ok () else Error (parse_aws_error None)
   | AssociatePackage ->
       if is_success
       then Ok (AssociatePackageResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some AssociatePackageResponse.error_of_json))
+  | AssociatePackages ->
+      if is_success
+      then Ok (AssociatePackagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some AssociatePackagesResponse.error_of_json))
+  | AuthorizeVpcEndpointAccess ->
+      if is_success
+      then
+        Ok
+          (AuthorizeVpcEndpointAccessResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AuthorizeVpcEndpointAccessResponse.error_of_json))
+  | CancelDomainConfigChange ->
+      if is_success
+      then
+        Ok (CancelDomainConfigChangeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CancelDomainConfigChangeResponse.error_of_json))
   | CancelServiceSoftwareUpdate ->
       if is_success
       then
@@ -1008,10 +2127,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CancelServiceSoftwareUpdateResponse.error_of_json))
+  | CreateApplication ->
+      if is_success
+      then Ok (CreateApplicationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateApplicationResponse.error_of_json))
   | CreateDomain ->
       if is_success
       then Ok (CreateDomainResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateDomainResponse.error_of_json))
+  | CreateIndex ->
+      if is_success
+      then Ok (CreateIndexResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateIndexResponse.error_of_json))
   | CreateOutboundConnection ->
       if is_success
       then
@@ -1024,6 +2153,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreatePackageResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreatePackageResponse.error_of_json))
+  | CreateVpcEndpoint ->
+      if is_success
+      then Ok (CreateVpcEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateVpcEndpointResponse.error_of_json))
+  | DeleteApplication ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteApplicationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteApplicationResponse.error_of_json))
+  | DeleteDataSource ->
+      if is_success
+      then Ok (DeleteDataSourceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteDataSourceResponse.error_of_json))
+  | DeleteDirectQueryDataSource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteDomain ->
       if is_success
       then Ok (DeleteDomainResponse.of_json (response_to_json resp))
@@ -1036,6 +2187,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteInboundConnectionResponse.error_of_json))
+  | DeleteIndex ->
+      if is_success
+      then Ok (DeleteIndexResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteIndexResponse.error_of_json))
   | DeleteOutboundConnection ->
       if is_success
       then
@@ -1048,6 +2203,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DeletePackageResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DeletePackageResponse.error_of_json))
+  | DeleteVpcEndpoint ->
+      if is_success
+      then Ok (DeleteVpcEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteVpcEndpointResponse.error_of_json))
+  | DeregisterCapability ->
+      if is_success
+      then Ok (DeregisterCapabilityResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeregisterCapabilityResponse.error_of_json))
   | DescribeDomain ->
       if is_success
       then Ok (DescribeDomainResponse.of_json (response_to_json resp))
@@ -1077,11 +2244,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeDomainConfigResponse.error_of_json))
+  | DescribeDomainHealth ->
+      if is_success
+      then Ok (DescribeDomainHealthResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDomainHealthResponse.error_of_json))
+  | DescribeDomainNodes ->
+      if is_success
+      then Ok (DescribeDomainNodesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDomainNodesResponse.error_of_json))
   | DescribeDomains ->
       if is_success
       then Ok (DescribeDomainsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeDomainsResponse.error_of_json))
+  | DescribeDryRunProgress ->
+      if is_success
+      then
+        Ok (DescribeDryRunProgressResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDryRunProgressResponse.error_of_json))
   | DescribeInboundConnections ->
       if is_success
       then
@@ -1091,6 +2278,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeInboundConnectionsResponse.error_of_json))
+  | DescribeInsightDetails ->
+      if is_success
+      then
+        Ok (DescribeInsightDetailsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInsightDetailsResponse.error_of_json))
   | DescribeInstanceTypeLimits ->
       if is_success
       then
@@ -1134,18 +2329,74 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeReservedInstancesResponse.error_of_json))
+  | DescribeVpcEndpoints ->
+      if is_success
+      then Ok (DescribeVpcEndpointsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeVpcEndpointsResponse.error_of_json))
   | DissociatePackage ->
       if is_success
       then Ok (DissociatePackageResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DissociatePackageResponse.error_of_json))
+  | DissociatePackages ->
+      if is_success
+      then Ok (DissociatePackagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DissociatePackagesResponse.error_of_json))
+  | GetApplication ->
+      if is_success
+      then Ok (GetApplicationResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetApplicationResponse.error_of_json))
+  | GetCapability ->
+      if is_success
+      then Ok (GetCapabilityResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetCapabilityResponse.error_of_json))
   | GetCompatibleVersions ->
       if is_success
       then Ok (GetCompatibleVersionsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetCompatibleVersionsResponse.error_of_json))
+  | GetDataSource ->
+      if is_success
+      then Ok (GetDataSourceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetDataSourceResponse.error_of_json))
+  | GetDefaultApplicationSetting ->
+      if is_success
+      then
+        Ok
+          (GetDefaultApplicationSettingResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDefaultApplicationSettingResponse.error_of_json))
+  | GetDirectQueryDataSource ->
+      if is_success
+      then
+        Ok (GetDirectQueryDataSourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDirectQueryDataSourceResponse.error_of_json))
+  | GetDomainMaintenanceStatus ->
+      if is_success
+      then
+        Ok
+          (GetDomainMaintenanceStatusResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDomainMaintenanceStatusResponse.error_of_json))
+  | GetIndex ->
+      if is_success
+      then Ok (GetIndexResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetIndexResponse.error_of_json))
   | GetPackageVersionHistory ->
       if is_success
       then
@@ -1165,6 +2416,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetUpgradeStatusResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetUpgradeStatusResponse.error_of_json))
+  | ListApplications ->
+      if is_success
+      then Ok (ListApplicationsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListApplicationsResponse.error_of_json))
+  | ListDataSources ->
+      if is_success
+      then Ok (ListDataSourcesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDataSourcesResponse.error_of_json))
+  | ListDirectQueryDataSources ->
+      if is_success
+      then
+        Ok
+          (ListDirectQueryDataSourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDirectQueryDataSourcesResponse.error_of_json))
+  | ListDomainMaintenances ->
+      if is_success
+      then
+        Ok (ListDomainMaintenancesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDomainMaintenancesResponse.error_of_json))
   | ListDomainNames ->
       if is_success
       then Ok (ListDomainNamesResponse.of_json (response_to_json resp))
@@ -1176,6 +2454,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListDomainsForPackageResponse.error_of_json))
+  | ListInsights ->
+      if is_success
+      then Ok (ListInsightsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListInsightsResponse.error_of_json))
   | ListInstanceTypeDetails ->
       if is_success
       then
@@ -1190,6 +2472,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListPackagesForDomainResponse.error_of_json))
+  | ListScheduledActions ->
+      if is_success
+      then Ok (ListScheduledActionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListScheduledActionsResponse.error_of_json))
   | ListTags ->
       if is_success
       then Ok (ListTagsResponse.of_json (response_to_json resp))
@@ -1198,6 +2486,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListVersionsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListVersionsResponse.error_of_json))
+  | ListVpcEndpointAccess ->
+      if is_success
+      then Ok (ListVpcEndpointAccessResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListVpcEndpointAccessResponse.error_of_json))
+  | ListVpcEndpoints ->
+      if is_success
+      then Ok (ListVpcEndpointsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListVpcEndpointsResponse.error_of_json))
+  | ListVpcEndpointsForDomain ->
+      if is_success
+      then
+        Ok
+          (ListVpcEndpointsForDomainResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListVpcEndpointsForDomainResponse.error_of_json))
   | PurchaseReservedInstanceOffering ->
       if is_success
       then
@@ -1208,6 +2516,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PurchaseReservedInstanceOfferingResponse.error_of_json))
+  | PutDefaultApplicationSetting ->
+      if is_success
+      then
+        Ok
+          (PutDefaultApplicationSettingResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutDefaultApplicationSettingResponse.error_of_json))
+  | RegisterCapability ->
+      if is_success
+      then Ok (RegisterCapabilityResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RegisterCapabilityResponse.error_of_json))
   | RejectInboundConnection ->
       if is_success
       then
@@ -1217,6 +2541,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some RejectInboundConnectionResponse.error_of_json))
   | RemoveTags -> if is_success then Ok () else Error (parse_aws_error None)
+  | RevokeVpcEndpointAccess ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RevokeVpcEndpointAccessResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some RevokeVpcEndpointAccessResponse.error_of_json))
+  | RollbackServiceSoftwareUpdate ->
+      if is_success
+      then
+        Ok
+          (RollbackServiceSoftwareUpdateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RollbackServiceSoftwareUpdateResponse.error_of_json))
+  | StartDomainMaintenance ->
+      if is_success
+      then
+        Ok (StartDomainMaintenanceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartDomainMaintenanceResponse.error_of_json))
   | StartServiceSoftwareUpdate ->
       if is_success
       then
@@ -1226,16 +2578,59 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartServiceSoftwareUpdateResponse.error_of_json))
+  | UpdateApplication ->
+      if is_success
+      then Ok (UpdateApplicationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateApplicationResponse.error_of_json))
+  | UpdateDataSource ->
+      if is_success
+      then Ok (UpdateDataSourceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateDataSourceResponse.error_of_json))
+  | UpdateDirectQueryDataSource ->
+      if is_success
+      then
+        Ok
+          (UpdateDirectQueryDataSourceResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDirectQueryDataSourceResponse.error_of_json))
   | UpdateDomainConfig ->
       if is_success
       then Ok (UpdateDomainConfigResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some UpdateDomainConfigResponse.error_of_json))
+  | UpdateIndex ->
+      if is_success
+      then Ok (UpdateIndexResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateIndexResponse.error_of_json))
   | UpdatePackage ->
       if is_success
       then Ok (UpdatePackageResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdatePackageResponse.error_of_json))
+  | UpdatePackageScope ->
+      if is_success
+      then Ok (UpdatePackageScopeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdatePackageScopeResponse.error_of_json))
+  | UpdateScheduledAction ->
+      if is_success
+      then Ok (UpdateScheduledActionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateScheduledActionResponse.error_of_json))
+  | UpdateVpcEndpoint ->
+      if is_success
+      then Ok (UpdateVpcEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateVpcEndpointResponse.error_of_json))
   | UpgradeDomain ->
       if is_success
       then Ok (UpgradeDomainResponse.of_json (response_to_json resp))

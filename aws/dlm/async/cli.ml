@@ -38,7 +38,25 @@ let create_lifecycle_policy =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and policyDetails =
+         flag "policy-details" (optional json_arg) ~doc:"JSON PolicyDetails"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and defaultPolicy =
+         flag "default-policy" (optional json_arg)
+           ~doc:"JSON DefaultPolicyTypeValues"
+       and createInterval =
+         flag "create-interval" (optional int) ~doc:"INT CreateInterval"
+       and retainInterval =
+         flag "retain-interval" (optional int) ~doc:"INT RetainInterval"
+       and copyTags =
+         flag "copy-tags" (optional bool) ~doc:"BOOL CopyTagsNullable"
+       and extendDeletion =
+         flag "extend-deletion" (optional bool) ~doc:"BOOL ExtendDeletion"
+       and crossRegionCopyTargets =
+         flag "cross-region-copy-targets" (optional json_arg)
+           ~doc:"JSON CrossRegionCopyTargetList"
+       and exclusions =
+         flag "exclusions" (optional json_arg) ~doc:"JSON Exclusions"
        and executionRoleArn =
          flag "execution-role-arn" (required string)
            ~doc:"STRING ExecutionRoleArn"
@@ -46,17 +64,24 @@ let create_lifecycle_policy =
          flag "description" (required string) ~doc:"STRING PolicyDescription"
        and state =
          flag "state" (required json_arg)
-           ~doc:"JSON SettablePolicyStateValues"
-       and policyDetails =
-         flag "policy-details" (required json_arg) ~doc:"JSON PolicyDetails" in
+           ~doc:"JSON SettablePolicyStateValues" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_lifecycle_policy
            (Values.CreateLifecyclePolicyRequest.make
+              ?policyDetails:(Option.map ~f:Values.PolicyDetails.of_json
+                                policyDetails)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?defaultPolicy:(Option.map
+                                ~f:Values.DefaultPolicyTypeValues.of_json
+                                defaultPolicy) ?createInterval
+              ?retainInterval ?copyTags ?extendDeletion
+              ?crossRegionCopyTargets:(Option.map
+                                         ~f:Values.CrossRegionCopyTargetList.of_json
+                                         crossRegionCopyTargets)
+              ?exclusions:(Option.map ~f:Values.Exclusions.of_json exclusions)
               ~executionRoleArn ~description
-              ~state:(Values.SettablePolicyStateValues.of_json state)
-              ~policyDetails:(Values.PolicyDetails.of_json policyDetails) ())
+              ~state:(Values.SettablePolicyStateValues.of_json state) ())
            (Some Values.CreateLifecyclePolicyResponse.to_json)
            (Some Values.CreateLifecyclePolicyResponse.error_to_json)])
 let delete_lifecycle_policy =
@@ -100,7 +125,10 @@ let get_lifecycle_policies =
            ~doc:"JSON TargetTagsFilterList"
        and tagsToAdd =
          flag "tags-to-add" (optional json_arg)
-           ~doc:"JSON TagsToAddFilterList" in
+           ~doc:"JSON TagsToAddFilterList"
+       and defaultPolicyType =
+         flag "default-policy-type" (optional json_arg)
+           ~doc:"JSON DefaultPoliciesTypeValues" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_lifecycle_policies
@@ -114,7 +142,10 @@ let get_lifecycle_policies =
               ?targetTags:(Option.map ~f:Values.TargetTagsFilterList.of_json
                              targetTags)
               ?tagsToAdd:(Option.map ~f:Values.TagsToAddFilterList.of_json
-                            tagsToAdd) ())
+                            tagsToAdd)
+              ?defaultPolicyType:(Option.map
+                                    ~f:Values.DefaultPoliciesTypeValues.of_json
+                                    defaultPolicyType) ())
            (Some Values.GetLifecyclePoliciesResponse.to_json)
            (Some Values.GetLifecyclePoliciesResponse.error_to_json)])
 let get_lifecycle_policy =
@@ -214,6 +245,19 @@ let update_lifecycle_policy =
          flag "description" (optional string) ~doc:"STRING PolicyDescription"
        and policyDetails =
          flag "policy-details" (optional json_arg) ~doc:"JSON PolicyDetails"
+       and createInterval =
+         flag "create-interval" (optional int) ~doc:"INT CreateInterval"
+       and retainInterval =
+         flag "retain-interval" (optional int) ~doc:"INT RetainInterval"
+       and copyTags =
+         flag "copy-tags" (optional bool) ~doc:"BOOL CopyTagsNullable"
+       and extendDeletion =
+         flag "extend-deletion" (optional bool) ~doc:"BOOL ExtendDeletion"
+       and crossRegionCopyTargets =
+         flag "cross-region-copy-targets" (optional json_arg)
+           ~doc:"JSON CrossRegionCopyTargetList"
+       and exclusions =
+         flag "exclusions" (optional json_arg) ~doc:"JSON Exclusions"
        and policyId =
          flag "policy-id" (required string) ~doc:"STRING PolicyId" in
        fun () ->
@@ -223,7 +267,13 @@ let update_lifecycle_policy =
               ?state:(Option.map ~f:Values.SettablePolicyStateValues.of_json
                         state) ?description
               ?policyDetails:(Option.map ~f:Values.PolicyDetails.of_json
-                                policyDetails) ~policyId ())
+                                policyDetails) ?createInterval
+              ?retainInterval ?copyTags ?extendDeletion
+              ?crossRegionCopyTargets:(Option.map
+                                         ~f:Values.CrossRegionCopyTargetList.of_json
+                                         crossRegionCopyTargets)
+              ?exclusions:(Option.map ~f:Values.Exclusions.of_json exclusions)
+              ~policyId ())
            (Some Values.UpdateLifecyclePolicyResponse.to_json)
            (Some Values.UpdateLifecyclePolicyResponse.error_to_json)])
 let main =

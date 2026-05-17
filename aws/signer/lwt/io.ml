@@ -17,6 +17,8 @@ let cancel_signing_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelSigningProfile input
 let describe_signing_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSigningJob input
+let get_revocation_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRevocationStatus input
 let get_signing_platform ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSigningPlatform input
 let get_signing_profile ?endpoint_url ?cfg input =
@@ -39,6 +41,8 @@ let revoke_signature ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RevokeSignature input
 let revoke_signing_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RevokeSigningProfile input
+let sign_payload ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SignPayload input
 let start_signing_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartSigningJob input
 let tag_resource ?endpoint_url ?cfg input =

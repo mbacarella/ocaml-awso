@@ -6,23 +6,41 @@ type ('i, 'o, 'e) t =
   BatchGetChannelResponse.error) t 
   | BatchGetStreamKey: (BatchGetStreamKeyRequest.t,
   BatchGetStreamKeyResponse.t, BatchGetStreamKeyResponse.error) t 
+  | BatchStartViewerSessionRevocation:
+  (BatchStartViewerSessionRevocationRequest.t,
+  BatchStartViewerSessionRevocationResponse.t,
+  BatchStartViewerSessionRevocationResponse.error) t 
+  | CreateAdConfiguration: (CreateAdConfigurationRequest.t,
+  CreateAdConfigurationResponse.t, CreateAdConfigurationResponse.error) t 
   | CreateChannel: (CreateChannelRequest.t, CreateChannelResponse.t,
   CreateChannelResponse.error) t 
+  | CreatePlaybackRestrictionPolicy:
+  (CreatePlaybackRestrictionPolicyRequest.t,
+  CreatePlaybackRestrictionPolicyResponse.t,
+  CreatePlaybackRestrictionPolicyResponse.error) t 
   | CreateRecordingConfiguration: (CreateRecordingConfigurationRequest.t,
   CreateRecordingConfigurationResponse.t,
   CreateRecordingConfigurationResponse.error) t 
   | CreateStreamKey: (CreateStreamKeyRequest.t, CreateStreamKeyResponse.t,
   CreateStreamKeyResponse.error) t 
+  | DeleteAdConfiguration: (DeleteAdConfigurationRequest.t, unit, unit) t 
   | DeleteChannel: (DeleteChannelRequest.t, unit, unit) t 
   | DeletePlaybackKeyPair: (DeletePlaybackKeyPairRequest.t,
   DeletePlaybackKeyPairResponse.t, DeletePlaybackKeyPairResponse.error) t 
+  | DeletePlaybackRestrictionPolicy:
+  (DeletePlaybackRestrictionPolicyRequest.t, unit, unit) t 
   | DeleteRecordingConfiguration: (DeleteRecordingConfigurationRequest.t,
   unit, unit) t 
   | DeleteStreamKey: (DeleteStreamKeyRequest.t, unit, unit) t 
+  | GetAdConfiguration: (GetAdConfigurationRequest.t,
+  GetAdConfigurationResponse.t, GetAdConfigurationResponse.error) t 
   | GetChannel: (GetChannelRequest.t, GetChannelResponse.t,
   GetChannelResponse.error) t 
   | GetPlaybackKeyPair: (GetPlaybackKeyPairRequest.t,
   GetPlaybackKeyPairResponse.t, GetPlaybackKeyPairResponse.error) t 
+  | GetPlaybackRestrictionPolicy: (GetPlaybackRestrictionPolicyRequest.t,
+  GetPlaybackRestrictionPolicyResponse.t,
+  GetPlaybackRestrictionPolicyResponse.error) t 
   | GetRecordingConfiguration: (GetRecordingConfigurationRequest.t,
   GetRecordingConfigurationResponse.t,
   GetRecordingConfigurationResponse.error) t 
@@ -34,10 +52,18 @@ type ('i, 'o, 'e) t =
   GetStreamSessionResponse.error) t 
   | ImportPlaybackKeyPair: (ImportPlaybackKeyPairRequest.t,
   ImportPlaybackKeyPairResponse.t, ImportPlaybackKeyPairResponse.error) t 
+  | InsertAdBreak: (InsertAdBreakRequest.t, InsertAdBreakResponse.t,
+  InsertAdBreakResponse.error) t 
+  | ListAdConfigurations: (ListAdConfigurationsRequest.t,
+  ListAdConfigurationsResponse.t, ListAdConfigurationsResponse.error) t 
   | ListChannels: (ListChannelsRequest.t, ListChannelsResponse.t,
   ListChannelsResponse.error) t 
   | ListPlaybackKeyPairs: (ListPlaybackKeyPairsRequest.t,
   ListPlaybackKeyPairsResponse.t, ListPlaybackKeyPairsResponse.error) t 
+  | ListPlaybackRestrictionPolicies:
+  (ListPlaybackRestrictionPoliciesRequest.t,
+  ListPlaybackRestrictionPoliciesResponse.t,
+  ListPlaybackRestrictionPoliciesResponse.error) t 
   | ListRecordingConfigurations: (ListRecordingConfigurationsRequest.t,
   ListRecordingConfigurationsResponse.t,
   ListRecordingConfigurationsResponse.error) t 
@@ -50,6 +76,9 @@ type ('i, 'o, 'e) t =
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | PutMetadata: (PutMetadataRequest.t, unit, unit) t 
+  | StartViewerSessionRevocation: (StartViewerSessionRevocationRequest.t,
+  StartViewerSessionRevocationResponse.t,
+  StartViewerSessionRevocationResponse.error) t 
   | StopStream: (StopStreamRequest.t, StopStreamResponse.t,
   StopStreamResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -58,36 +87,52 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateChannel: (UpdateChannelRequest.t, UpdateChannelResponse.t,
   UpdateChannelResponse.error) t 
+  | UpdatePlaybackRestrictionPolicy:
+  (UpdatePlaybackRestrictionPolicyRequest.t,
+  UpdatePlaybackRestrictionPolicyResponse.t,
+  UpdatePlaybackRestrictionPolicyResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | BatchGetChannel -> `POST
   | BatchGetStreamKey -> `POST
+  | BatchStartViewerSessionRevocation -> `POST
+  | CreateAdConfiguration -> `POST
   | CreateChannel -> `POST
+  | CreatePlaybackRestrictionPolicy -> `POST
   | CreateRecordingConfiguration -> `POST
   | CreateStreamKey -> `POST
+  | DeleteAdConfiguration -> `POST
   | DeleteChannel -> `POST
   | DeletePlaybackKeyPair -> `POST
+  | DeletePlaybackRestrictionPolicy -> `POST
   | DeleteRecordingConfiguration -> `POST
   | DeleteStreamKey -> `POST
+  | GetAdConfiguration -> `POST
   | GetChannel -> `POST
   | GetPlaybackKeyPair -> `POST
+  | GetPlaybackRestrictionPolicy -> `POST
   | GetRecordingConfiguration -> `POST
   | GetStream -> `POST
   | GetStreamKey -> `POST
   | GetStreamSession -> `POST
   | ImportPlaybackKeyPair -> `POST
+  | InsertAdBreak -> `POST
+  | ListAdConfigurations -> `POST
   | ListChannels -> `POST
   | ListPlaybackKeyPairs -> `POST
+  | ListPlaybackRestrictionPolicies -> `POST
   | ListRecordingConfigurations -> `POST
   | ListStreamKeys -> `POST
   | ListStreamSessions -> `POST
   | ListStreams -> `POST
   | ListTagsForResource -> `GET
   | PutMetadata -> `POST
+  | StartViewerSessionRevocation -> `POST
   | StopStream -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateChannel -> `POST
+  | UpdatePlaybackRestrictionPolicy -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -95,21 +140,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/BatchGetChannel"
       | BatchGetStreamKey ->
           (Format.kasprintf Uri.of_string) "/BatchGetStreamKey"
+      | BatchStartViewerSessionRevocation ->
+          (Format.kasprintf Uri.of_string)
+            "/BatchStartViewerSessionRevocation"
+      | CreateAdConfiguration ->
+          (Format.kasprintf Uri.of_string) "/CreateAdConfiguration"
       | CreateChannel -> (Format.kasprintf Uri.of_string) "/CreateChannel"
+      | CreatePlaybackRestrictionPolicy ->
+          (Format.kasprintf Uri.of_string) "/CreatePlaybackRestrictionPolicy"
       | CreateRecordingConfiguration ->
           (Format.kasprintf Uri.of_string) "/CreateRecordingConfiguration"
       | CreateStreamKey ->
           (Format.kasprintf Uri.of_string) "/CreateStreamKey"
+      | DeleteAdConfiguration ->
+          (Format.kasprintf Uri.of_string) "/DeleteAdConfiguration"
       | DeleteChannel -> (Format.kasprintf Uri.of_string) "/DeleteChannel"
       | DeletePlaybackKeyPair ->
           (Format.kasprintf Uri.of_string) "/DeletePlaybackKeyPair"
+      | DeletePlaybackRestrictionPolicy ->
+          (Format.kasprintf Uri.of_string) "/DeletePlaybackRestrictionPolicy"
       | DeleteRecordingConfiguration ->
           (Format.kasprintf Uri.of_string) "/DeleteRecordingConfiguration"
       | DeleteStreamKey ->
           (Format.kasprintf Uri.of_string) "/DeleteStreamKey"
+      | GetAdConfiguration ->
+          (Format.kasprintf Uri.of_string) "/GetAdConfiguration"
       | GetChannel -> (Format.kasprintf Uri.of_string) "/GetChannel"
       | GetPlaybackKeyPair ->
           (Format.kasprintf Uri.of_string) "/GetPlaybackKeyPair"
+      | GetPlaybackRestrictionPolicy ->
+          (Format.kasprintf Uri.of_string) "/GetPlaybackRestrictionPolicy"
       | GetRecordingConfiguration ->
           (Format.kasprintf Uri.of_string) "/GetRecordingConfiguration"
       | GetStream -> (Format.kasprintf Uri.of_string) "/GetStream"
@@ -118,9 +178,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/GetStreamSession"
       | ImportPlaybackKeyPair ->
           (Format.kasprintf Uri.of_string) "/ImportPlaybackKeyPair"
+      | InsertAdBreak -> (Format.kasprintf Uri.of_string) "/InsertAdBreak"
+      | ListAdConfigurations ->
+          (Format.kasprintf Uri.of_string) "/ListAdConfigurations"
       | ListChannels -> (Format.kasprintf Uri.of_string) "/ListChannels"
       | ListPlaybackKeyPairs ->
           (Format.kasprintf Uri.of_string) "/ListPlaybackKeyPairs"
+      | ListPlaybackRestrictionPolicies ->
+          (Format.kasprintf Uri.of_string) "/ListPlaybackRestrictionPolicies"
       | ListRecordingConfigurations ->
           (Format.kasprintf Uri.of_string) "/ListRecordingConfigurations"
       | ListStreamKeys -> (Format.kasprintf Uri.of_string) "/ListStreamKeys"
@@ -131,6 +196,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ResourceArn.to_header x.ListTagsForResourceRequest.resourceArn)
       | PutMetadata -> (Format.kasprintf Uri.of_string) "/PutMetadata"
+      | StartViewerSessionRevocation ->
+          (Format.kasprintf Uri.of_string) "/StartViewerSessionRevocation"
       | StopStream -> (Format.kasprintf Uri.of_string) "/StopStream"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
@@ -141,7 +208,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (ResourceArn.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
-      | UpdateChannel -> (Format.kasprintf Uri.of_string) "/UpdateChannel")
+      | UpdateChannel -> (Format.kasprintf Uri.of_string) "/UpdateChannel"
+      | UpdatePlaybackRestrictionPolicy ->
+          (Format.kasprintf Uri.of_string) "/UpdatePlaybackRestrictionPolicy")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -186,6 +255,51 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchStartViewerSessionRevocation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("viewerSessions",
+                           (BatchStartViewerSessionRevocationViewerSessionList.to_value
+                              req.BatchStartViewerSessionRevocationRequest.viewerSessions))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAdConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateAdConfigurationRequest.name
+                         ~f:(fun x ->
+                               ("name", (AdConfigurationName.to_value x)));
+                      Some
+                        ("mediaTailorPlaybackConfigurations",
+                          (MediaTailorPlaybackConfigurationsList.to_value
+                             req.CreateAdConfigurationRequest.mediaTailorPlaybackConfigurations));
+                      Option.map req.CreateAdConfigurationRequest.tags
+                        ~f:(fun x -> ("tags", (Tags.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateChannel ->
       let (headers, body) =
         let headers =
@@ -195,14 +309,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.CreateChannelRequest.authorized
-                         ~f:(fun x -> ("authorized", (Boolean.to_value x)));
+                      [Option.map req.CreateChannelRequest.name
+                         ~f:(fun x -> ("name", (ChannelName.to_value x)));
                       Option.map req.CreateChannelRequest.latencyMode
                         ~f:(fun x ->
                               ("latencyMode",
                                 (ChannelLatencyMode.to_value x)));
-                      Option.map req.CreateChannelRequest.name
-                        ~f:(fun x -> ("name", (ChannelName.to_value x)));
+                      Option.map req.CreateChannelRequest.type_
+                        ~f:(fun x -> ("type", (ChannelType.to_value x)));
+                      Option.map req.CreateChannelRequest.authorized
+                        ~f:(fun x -> ("authorized", (Boolean.to_value x)));
                       Option.map
                         req.CreateChannelRequest.recordingConfigurationArn
                         ~f:(fun x ->
@@ -210,8 +326,71 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                 (ChannelRecordingConfigurationArn.to_value x)));
                       Option.map req.CreateChannelRequest.tags
                         ~f:(fun x -> ("tags", (Tags.to_value x)));
-                      Option.map req.CreateChannelRequest.type_
-                        ~f:(fun x -> ("type", (ChannelType.to_value x)))])
+                      Option.map req.CreateChannelRequest.insecureIngest
+                        ~f:(fun x -> ("insecureIngest", (Boolean.to_value x)));
+                      Option.map req.CreateChannelRequest.preset
+                        ~f:(fun x -> ("preset", (TranscodePreset.to_value x)));
+                      Option.map
+                        req.CreateChannelRequest.playbackRestrictionPolicyArn
+                        ~f:(fun x ->
+                              ("playbackRestrictionPolicyArn",
+                                (ChannelPlaybackRestrictionPolicyArn.to_value
+                                   x)));
+                      Option.map
+                        req.CreateChannelRequest.multitrackInputConfiguration
+                        ~f:(fun x ->
+                              ("multitrackInputConfiguration",
+                                (MultitrackInputConfiguration.to_value x)));
+                      Option.map req.CreateChannelRequest.containerFormat
+                        ~f:(fun x ->
+                              ("containerFormat",
+                                (ContainerFormat.to_value x)));
+                      Option.map req.CreateChannelRequest.adConfigurationArn
+                        ~f:(fun x ->
+                              ("adConfigurationArn",
+                                (ChannelAdConfigurationArn.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreatePlaybackRestrictionPolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreatePlaybackRestrictionPolicyRequest.allowedCountries
+                         ~f:(fun x ->
+                               ("allowedCountries",
+                                 (PlaybackRestrictionPolicyAllowedCountryList.to_value
+                                    x)));
+                      Option.map
+                        req.CreatePlaybackRestrictionPolicyRequest.allowedOrigins
+                        ~f:(fun x ->
+                              ("allowedOrigins",
+                                (PlaybackRestrictionPolicyAllowedOriginList.to_value
+                                   x)));
+                      Option.map
+                        req.CreatePlaybackRestrictionPolicyRequest.enableStrictOriginEnforcement
+                        ~f:(fun x ->
+                              ("enableStrictOriginEnforcement",
+                                (PlaybackRestrictionPolicyEnableStrictOriginEnforcement.to_value
+                                   x)));
+                      Option.map
+                        req.CreatePlaybackRestrictionPolicyRequest.name
+                        ~f:(fun x ->
+                              ("name",
+                                (PlaybackRestrictionPolicyName.to_value x)));
+                      Option.map
+                        req.CreatePlaybackRestrictionPolicyRequest.tags
+                        ~f:(fun x -> ("tags", (Tags.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -228,21 +407,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("destinationConfiguration",
-                           (DestinationConfiguration.to_value
-                              req.CreateRecordingConfigurationRequest.destinationConfiguration));
-                      Option.map req.CreateRecordingConfigurationRequest.name
-                        ~f:(fun x ->
-                              ("name",
-                                (RecordingConfigurationName.to_value x)));
+                      [Option.map
+                         req.CreateRecordingConfigurationRequest.name
+                         ~f:(fun x ->
+                               ("name",
+                                 (RecordingConfigurationName.to_value x)));
+                      Some
+                        ("destinationConfiguration",
+                          (DestinationConfiguration.to_value
+                             req.CreateRecordingConfigurationRequest.destinationConfiguration));
                       Option.map req.CreateRecordingConfigurationRequest.tags
                         ~f:(fun x -> ("tags", (Tags.to_value x)));
                       Option.map
                         req.CreateRecordingConfigurationRequest.thumbnailConfiguration
                         ~f:(fun x ->
                               ("thumbnailConfiguration",
-                                (ThumbnailConfiguration.to_value x)))])
+                                (ThumbnailConfiguration.to_value x)));
+                      Option.map
+                        req.CreateRecordingConfigurationRequest.recordingReconnectWindowSeconds
+                        ~f:(fun x ->
+                              ("recordingReconnectWindowSeconds",
+                                (RecordingReconnectWindowSeconds.to_value x)));
+                      Option.map
+                        req.CreateRecordingConfigurationRequest.renditionConfiguration
+                        ~f:(fun x ->
+                              ("renditionConfiguration",
+                                (RenditionConfiguration.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -265,6 +455,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               req.CreateStreamKeyRequest.channelArn));
                       Option.map req.CreateStreamKeyRequest.tags
                         ~f:(fun x -> ("tags", (Tags.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteAdConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("arn",
+                           (AdConfigurationArn.to_value
+                              req.DeleteAdConfigurationRequest.arn))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -304,6 +514,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("arn",
                            (PlaybackKeyPairArn.to_value
                               req.DeletePlaybackKeyPairRequest.arn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeletePlaybackRestrictionPolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("arn",
+                           (PlaybackRestrictionPolicyArn.to_value
+                              req.DeletePlaybackRestrictionPolicyRequest.arn))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -351,6 +581,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAdConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("arn",
+                           (AdConfigurationArn.to_value
+                              req.GetAdConfigurationRequest.arn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetChannel ->
       let (headers, body) =
         let headers =
@@ -383,6 +633,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("arn",
                            (PlaybackKeyPairArn.to_value
                               req.GetPlaybackKeyPairRequest.arn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPlaybackRestrictionPolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("arn",
+                           (PlaybackRestrictionPolicyArn.to_value
+                              req.GetPlaybackRestrictionPolicyRequest.arn))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -480,15 +750,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.ImportPlaybackKeyPairRequest.name
-                         ~f:(fun x ->
-                               ("name", (PlaybackKeyPairName.to_value x)));
-                      Some
-                        ("publicKeyMaterial",
-                          (PlaybackPublicKeyMaterial.to_value
-                             req.ImportPlaybackKeyPairRequest.publicKeyMaterial));
+                      [Some
+                         ("publicKeyMaterial",
+                           (PlaybackPublicKeyMaterial.to_value
+                              req.ImportPlaybackKeyPairRequest.publicKeyMaterial));
+                      Option.map req.ImportPlaybackKeyPairRequest.name
+                        ~f:(fun x ->
+                              ("name", (PlaybackKeyPairName.to_value x)));
                       Option.map req.ImportPlaybackKeyPairRequest.tags
                         ~f:(fun x -> ("tags", (Tags.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | InsertAdBreak ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("channelArn",
+                           (ChannelArn.to_value
+                              req.InsertAdBreakRequest.channelArn));
+                      Some
+                        ("durationSeconds",
+                          (AdDurationSeconds.to_value
+                             req.InsertAdBreakRequest.durationSeconds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAdConfigurations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListAdConfigurationsRequest.nextToken
+                         ~f:(fun x ->
+                               ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListAdConfigurationsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (MaxAdConfigurationResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -513,12 +830,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("filterByRecordingConfigurationArn",
                                 (ChannelRecordingConfigurationArn.to_value x)));
-                      Option.map req.ListChannelsRequest.maxResults
+                      Option.map
+                        req.ListChannelsRequest.filterByPlaybackRestrictionPolicyArn
                         ~f:(fun x ->
-                              ("maxResults", (MaxChannelResults.to_value x)));
+                              ("filterByPlaybackRestrictionPolicyArn",
+                                (ChannelPlaybackRestrictionPolicyArn.to_value
+                                   x)));
+                      Option.map
+                        req.ListChannelsRequest.filterByAdConfigurationArn
+                        ~f:(fun x ->
+                              ("filterByAdConfigurationArn",
+                                (ChannelAdConfigurationArn.to_value x)));
                       Option.map req.ListChannelsRequest.nextToken
                         ~f:(fun x ->
-                              ("nextToken", (PaginationToken.to_value x)))])
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListChannelsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxChannelResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -535,13 +863,39 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.ListPlaybackKeyPairsRequest.maxResults
+                      [Option.map req.ListPlaybackKeyPairsRequest.nextToken
                          ~f:(fun x ->
-                               ("maxResults",
-                                 (MaxPlaybackKeyPairResults.to_value x)));
-                      Option.map req.ListPlaybackKeyPairsRequest.nextToken
+                               ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListPlaybackKeyPairsRequest.maxResults
                         ~f:(fun x ->
-                              ("nextToken", (PaginationToken.to_value x)))])
+                              ("maxResults",
+                                (MaxPlaybackKeyPairResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPlaybackRestrictionPolicies ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListPlaybackRestrictionPoliciesRequest.nextToken
+                         ~f:(fun x ->
+                               ("nextToken", (PaginationToken.to_value x)));
+                      Option.map
+                        req.ListPlaybackRestrictionPoliciesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (MaxPlaybackRestrictionPolicyResults.to_value
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -559,14 +913,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Option.map
-                         req.ListRecordingConfigurationsRequest.maxResults
+                         req.ListRecordingConfigurationsRequest.nextToken
                          ~f:(fun x ->
-                               ("maxResults",
-                                 (MaxRecordingConfigurationResults.to_value x)));
+                               ("nextToken", (PaginationToken.to_value x)));
                       Option.map
-                        req.ListRecordingConfigurationsRequest.nextToken
+                        req.ListRecordingConfigurationsRequest.maxResults
                         ~f:(fun x ->
-                              ("nextToken", (PaginationToken.to_value x)))])
+                              ("maxResults",
+                                (MaxRecordingConfigurationResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -587,13 +941,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("channelArn",
                            (ChannelArn.to_value
                               req.ListStreamKeysRequest.channelArn));
+                      Option.map req.ListStreamKeysRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
                       Option.map req.ListStreamKeysRequest.maxResults
                         ~f:(fun x ->
                               ("maxResults",
-                                (MaxStreamKeyResults.to_value x)));
-                      Option.map req.ListStreamKeysRequest.nextToken
-                        ~f:(fun x ->
-                              ("nextToken", (PaginationToken.to_value x)))])
+                                (MaxStreamKeyResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -614,12 +968,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("channelArn",
                            (ChannelArn.to_value
                               req.ListStreamSessionsRequest.channelArn));
-                      Option.map req.ListStreamSessionsRequest.maxResults
-                        ~f:(fun x ->
-                              ("maxResults", (MaxStreamResults.to_value x)));
                       Option.map req.ListStreamSessionsRequest.nextToken
                         ~f:(fun x ->
-                              ("nextToken", (PaginationToken.to_value x)))])
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListStreamSessionsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxStreamResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -639,12 +993,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.ListStreamsRequest.filterBy
                          ~f:(fun x ->
                                ("filterBy", (StreamFilters.to_value x)));
-                      Option.map req.ListStreamsRequest.maxResults
-                        ~f:(fun x ->
-                              ("maxResults", (MaxStreamResults.to_value x)));
                       Option.map req.ListStreamsRequest.nextToken
                         ~f:(fun x ->
-                              ("nextToken", (PaginationToken.to_value x)))])
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListStreamsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxStreamResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -672,6 +1026,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("metadata",
                           (StreamMetadata.to_value
                              req.PutMetadataRequest.metadata))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartViewerSessionRevocation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("channelArn",
+                           (ChannelArn.to_value
+                              req.StartViewerSessionRevocationRequest.channelArn));
+                      Some
+                        ("viewerId",
+                          (ViewerId.to_value
+                             req.StartViewerSessionRevocationRequest.viewerId));
+                      Option.map
+                        req.StartViewerSessionRevocationRequest.viewerSessionVersionsLessThanOrEqualTo
+                        ~f:(fun x ->
+                              ("viewerSessionVersionsLessThanOrEqualTo",
+                                (ViewerSessionVersion.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -731,21 +1114,87 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("arn",
                            (ChannelArn.to_value req.UpdateChannelRequest.arn));
-                      Option.map req.UpdateChannelRequest.authorized
-                        ~f:(fun x -> ("authorized", (Boolean.to_value x)));
+                      Option.map req.UpdateChannelRequest.name
+                        ~f:(fun x -> ("name", (ChannelName.to_value x)));
                       Option.map req.UpdateChannelRequest.latencyMode
                         ~f:(fun x ->
                               ("latencyMode",
                                 (ChannelLatencyMode.to_value x)));
-                      Option.map req.UpdateChannelRequest.name
-                        ~f:(fun x -> ("name", (ChannelName.to_value x)));
+                      Option.map req.UpdateChannelRequest.type_
+                        ~f:(fun x -> ("type", (ChannelType.to_value x)));
+                      Option.map req.UpdateChannelRequest.authorized
+                        ~f:(fun x -> ("authorized", (Boolean.to_value x)));
                       Option.map
                         req.UpdateChannelRequest.recordingConfigurationArn
                         ~f:(fun x ->
                               ("recordingConfigurationArn",
                                 (ChannelRecordingConfigurationArn.to_value x)));
-                      Option.map req.UpdateChannelRequest.type_
-                        ~f:(fun x -> ("type", (ChannelType.to_value x)))])
+                      Option.map req.UpdateChannelRequest.insecureIngest
+                        ~f:(fun x -> ("insecureIngest", (Boolean.to_value x)));
+                      Option.map req.UpdateChannelRequest.preset
+                        ~f:(fun x -> ("preset", (TranscodePreset.to_value x)));
+                      Option.map
+                        req.UpdateChannelRequest.playbackRestrictionPolicyArn
+                        ~f:(fun x ->
+                              ("playbackRestrictionPolicyArn",
+                                (ChannelPlaybackRestrictionPolicyArn.to_value
+                                   x)));
+                      Option.map
+                        req.UpdateChannelRequest.multitrackInputConfiguration
+                        ~f:(fun x ->
+                              ("multitrackInputConfiguration",
+                                (MultitrackInputConfiguration.to_value x)));
+                      Option.map req.UpdateChannelRequest.containerFormat
+                        ~f:(fun x ->
+                              ("containerFormat",
+                                (ContainerFormat.to_value x)));
+                      Option.map req.UpdateChannelRequest.adConfigurationArn
+                        ~f:(fun x ->
+                              ("adConfigurationArn",
+                                (ChannelAdConfigurationArn.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdatePlaybackRestrictionPolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("arn",
+                           (PlaybackRestrictionPolicyArn.to_value
+                              req.UpdatePlaybackRestrictionPolicyRequest.arn));
+                      Option.map
+                        req.UpdatePlaybackRestrictionPolicyRequest.allowedCountries
+                        ~f:(fun x ->
+                              ("allowedCountries",
+                                (PlaybackRestrictionPolicyAllowedCountryList.to_value
+                                   x)));
+                      Option.map
+                        req.UpdatePlaybackRestrictionPolicyRequest.allowedOrigins
+                        ~f:(fun x ->
+                              ("allowedOrigins",
+                                (PlaybackRestrictionPolicyAllowedOriginList.to_value
+                                   x)));
+                      Option.map
+                        req.UpdatePlaybackRestrictionPolicyRequest.enableStrictOriginEnforcement
+                        ~f:(fun x ->
+                              ("enableStrictOriginEnforcement",
+                                (PlaybackRestrictionPolicyEnableStrictOriginEnforcement.to_value
+                                   x)));
+                      Option.map
+                        req.UpdatePlaybackRestrictionPolicyRequest.name
+                        ~f:(fun x ->
+                              ("name",
+                                (PlaybackRestrictionPolicyName.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -804,15 +1253,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | BatchGetChannel ->
       if is_success
       then Ok (BatchGetChannelResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error None)
+      else
+        Error (parse_aws_error (Some BatchGetChannelResponse.error_of_json))
   | BatchGetStreamKey ->
       if is_success
       then Ok (BatchGetStreamKeyResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error None)
+      else
+        Error
+          (parse_aws_error (Some BatchGetStreamKeyResponse.error_of_json))
+  | BatchStartViewerSessionRevocation ->
+      if is_success
+      then
+        Ok
+          (BatchStartViewerSessionRevocationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchStartViewerSessionRevocationResponse.error_of_json))
+  | CreateAdConfiguration ->
+      if is_success
+      then Ok (CreateAdConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAdConfigurationResponse.error_of_json))
   | CreateChannel ->
       if is_success
       then Ok (CreateChannelResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateChannelResponse.error_of_json))
+  | CreatePlaybackRestrictionPolicy ->
+      if is_success
+      then
+        Ok
+          (CreatePlaybackRestrictionPolicyResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePlaybackRestrictionPolicyResponse.error_of_json))
   | CreateRecordingConfiguration ->
       if is_success
       then
@@ -828,6 +1306,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (CreateStreamKeyResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateStreamKeyResponse.error_of_json))
+  | DeleteAdConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteChannel ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeletePlaybackKeyPair ->
@@ -839,10 +1319,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeletePlaybackKeyPairResponse.error_of_json))
+  | DeletePlaybackRestrictionPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteRecordingConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteStreamKey ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | GetAdConfiguration ->
+      if is_success
+      then Ok (GetAdConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetAdConfigurationResponse.error_of_json))
   | GetChannel ->
       if is_success
       then Ok (GetChannelResponse.of_json (response_to_json resp))
@@ -853,6 +1341,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetPlaybackKeyPairResponse.error_of_json))
+  | GetPlaybackRestrictionPolicy ->
+      if is_success
+      then
+        Ok
+          (GetPlaybackRestrictionPolicyResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPlaybackRestrictionPolicyResponse.error_of_json))
   | GetRecordingConfiguration ->
       if is_success
       then
@@ -881,6 +1379,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ImportPlaybackKeyPairResponse.error_of_json))
+  | InsertAdBreak ->
+      if is_success
+      then Ok (InsertAdBreakResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some InsertAdBreakResponse.error_of_json))
+  | ListAdConfigurations ->
+      if is_success
+      then Ok (ListAdConfigurationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAdConfigurationsResponse.error_of_json))
   | ListChannels ->
       if is_success
       then Ok (ListChannelsResponse.of_json (response_to_json resp))
@@ -891,6 +1399,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListPlaybackKeyPairsResponse.error_of_json))
+  | ListPlaybackRestrictionPolicies ->
+      if is_success
+      then
+        Ok
+          (ListPlaybackRestrictionPoliciesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPlaybackRestrictionPoliciesResponse.error_of_json))
   | ListRecordingConfigurations ->
       if is_success
       then
@@ -923,6 +1441,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutMetadata -> if is_success then Ok () else Error (parse_aws_error None)
+  | StartViewerSessionRevocation ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StartViewerSessionRevocationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some StartViewerSessionRevocationResponse.error_of_json))
   | StopStream ->
       if is_success
       then
@@ -948,3 +1478,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UpdateChannelResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateChannelResponse.error_of_json))
+  | UpdatePlaybackRestrictionPolicy ->
+      if is_success
+      then
+        Ok
+          (UpdatePlaybackRestrictionPolicyResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdatePlaybackRestrictionPolicyResponse.error_of_json))

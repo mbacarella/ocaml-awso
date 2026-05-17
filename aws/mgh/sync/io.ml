@@ -15,6 +15,8 @@ let associate_created_artifact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateCreatedArtifact input
 let associate_discovered_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateDiscoveredResource input
+let associate_source_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateSourceResource input
 let create_progress_update_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateProgressUpdateStream input
 let delete_progress_update_stream ?endpoint_url ?cfg input =
@@ -27,6 +29,8 @@ let disassociate_created_artifact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateCreatedArtifact input
 let disassociate_discovered_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateDiscoveredResource input
+let disassociate_source_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateSourceResource input
 let import_migration_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportMigrationTask input
 let list_application_states ?endpoint_url ?cfg input =
@@ -35,10 +39,14 @@ let list_created_artifacts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCreatedArtifacts input
 let list_discovered_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDiscoveredResources input
+let list_migration_task_updates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMigrationTaskUpdates input
 let list_migration_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMigrationTasks input
 let list_progress_update_streams ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProgressUpdateStreams input
+let list_source_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSourceResources input
 let notify_application_state ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.NotifyApplicationState input
 let notify_migration_task_state ?endpoint_url ?cfg input =

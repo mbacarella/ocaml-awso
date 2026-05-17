@@ -14,6 +14,9 @@ type ('i, 'o, 'e) t =
   UpdateActionResultsMessage.t, UpdateActionResultsMessage.error) t 
   | CompleteMigration: (CompleteMigrationMessage.t,
   CompleteMigrationResponse.t, CompleteMigrationResponse.error) t 
+  | CopyServerlessCacheSnapshot: (CopyServerlessCacheSnapshotRequest.t,
+  CopyServerlessCacheSnapshotResponse.t,
+  CopyServerlessCacheSnapshotResponse.error) t 
   | CopySnapshot: (CopySnapshotMessage.t, CopySnapshotResult.t,
   CopySnapshotResult.error) t 
   | CreateCacheCluster: (CreateCacheClusterMessage.t,
@@ -30,6 +33,11 @@ type ('i, 'o, 'e) t =
   CreateGlobalReplicationGroupResult.error) t 
   | CreateReplicationGroup: (CreateReplicationGroupMessage.t,
   CreateReplicationGroupResult.t, CreateReplicationGroupResult.error) t 
+  | CreateServerlessCache: (CreateServerlessCacheRequest.t,
+  CreateServerlessCacheResponse.t, CreateServerlessCacheResponse.error) t 
+  | CreateServerlessCacheSnapshot: (CreateServerlessCacheSnapshotRequest.t,
+  CreateServerlessCacheSnapshotResponse.t,
+  CreateServerlessCacheSnapshotResponse.error) t 
   | CreateSnapshot: (CreateSnapshotMessage.t, CreateSnapshotResult.t,
   CreateSnapshotResult.error) t 
   | CreateUser: (CreateUserMessage.t, User.t, User.error) t 
@@ -53,6 +61,11 @@ type ('i, 'o, 'e) t =
   DeleteGlobalReplicationGroupResult.error) t 
   | DeleteReplicationGroup: (DeleteReplicationGroupMessage.t,
   DeleteReplicationGroupResult.t, DeleteReplicationGroupResult.error) t 
+  | DeleteServerlessCache: (DeleteServerlessCacheRequest.t,
+  DeleteServerlessCacheResponse.t, DeleteServerlessCacheResponse.error) t 
+  | DeleteServerlessCacheSnapshot: (DeleteServerlessCacheSnapshotRequest.t,
+  DeleteServerlessCacheSnapshotResponse.t,
+  DeleteServerlessCacheSnapshotResponse.error) t 
   | DeleteSnapshot: (DeleteSnapshotMessage.t, DeleteSnapshotResult.t,
   DeleteSnapshotResult.error) t 
   | DeleteUser: (DeleteUserMessage.t, User.t, User.error) t 
@@ -88,6 +101,13 @@ type ('i, 'o, 'e) t =
   (DescribeReservedCacheNodesOfferingsMessage.t,
   ReservedCacheNodesOfferingMessage.t,
   ReservedCacheNodesOfferingMessage.error) t 
+  | DescribeServerlessCacheSnapshots:
+  (DescribeServerlessCacheSnapshotsRequest.t,
+  DescribeServerlessCacheSnapshotsResponse.t,
+  DescribeServerlessCacheSnapshotsResponse.error) t 
+  | DescribeServerlessCaches: (DescribeServerlessCachesRequest.t,
+  DescribeServerlessCachesResponse.t, DescribeServerlessCachesResponse.error)
+  t 
   | DescribeServiceUpdates: (DescribeServiceUpdatesMessage.t,
   ServiceUpdatesMessage.t, ServiceUpdatesMessage.error) t 
   | DescribeSnapshots: (DescribeSnapshotsMessage.t,
@@ -102,6 +122,9 @@ type ('i, 'o, 'e) t =
   (DisassociateGlobalReplicationGroupMessage.t,
   DisassociateGlobalReplicationGroupResult.t,
   DisassociateGlobalReplicationGroupResult.error) t 
+  | ExportServerlessCacheSnapshot: (ExportServerlessCacheSnapshotRequest.t,
+  ExportServerlessCacheSnapshotResponse.t,
+  ExportServerlessCacheSnapshotResponse.error) t 
   | FailoverGlobalReplicationGroup: (FailoverGlobalReplicationGroupMessage.t,
   FailoverGlobalReplicationGroupResult.t,
   FailoverGlobalReplicationGroupResult.error) t 
@@ -132,6 +155,8 @@ type ('i, 'o, 'e) t =
   (ModifyReplicationGroupShardConfigurationMessage.t,
   ModifyReplicationGroupShardConfigurationResult.t,
   ModifyReplicationGroupShardConfigurationResult.error) t 
+  | ModifyServerlessCache: (ModifyServerlessCacheRequest.t,
+  ModifyServerlessCacheResponse.t, ModifyServerlessCacheResponse.error) t 
   | ModifyUser: (ModifyUserMessage.t, User.t, User.error) t 
   | ModifyUserGroup: (ModifyUserGroupMessage.t, UserGroup.t, UserGroup.error)
   t 
@@ -157,6 +182,8 @@ type ('i, 'o, 'e) t =
   StartMigrationResponse.error) t 
   | TestFailover: (TestFailoverMessage.t, TestFailoverResult.t,
   TestFailoverResult.error) t 
+  | TestMigration: (TestMigrationMessage.t, TestMigrationResponse.t,
+  TestMigrationResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddTagsToResource -> `POST
@@ -164,6 +191,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | BatchApplyUpdateAction -> `POST
   | BatchStopUpdateAction -> `POST
   | CompleteMigration -> `POST
+  | CopyServerlessCacheSnapshot -> `POST
   | CopySnapshot -> `POST
   | CreateCacheCluster -> `POST
   | CreateCacheParameterGroup -> `POST
@@ -171,6 +199,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateCacheSubnetGroup -> `POST
   | CreateGlobalReplicationGroup -> `POST
   | CreateReplicationGroup -> `POST
+  | CreateServerlessCache -> `POST
+  | CreateServerlessCacheSnapshot -> `POST
   | CreateSnapshot -> `POST
   | CreateUser -> `POST
   | CreateUserGroup -> `POST
@@ -182,6 +212,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteCacheSubnetGroup -> `POST
   | DeleteGlobalReplicationGroup -> `POST
   | DeleteReplicationGroup -> `POST
+  | DeleteServerlessCache -> `POST
+  | DeleteServerlessCacheSnapshot -> `POST
   | DeleteSnapshot -> `POST
   | DeleteUser -> `POST
   | DeleteUserGroup -> `POST
@@ -197,12 +229,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeReplicationGroups -> `POST
   | DescribeReservedCacheNodes -> `POST
   | DescribeReservedCacheNodesOfferings -> `POST
+  | DescribeServerlessCacheSnapshots -> `POST
+  | DescribeServerlessCaches -> `POST
   | DescribeServiceUpdates -> `POST
   | DescribeSnapshots -> `POST
   | DescribeUpdateActions -> `POST
   | DescribeUserGroups -> `POST
   | DescribeUsers -> `POST
   | DisassociateGlobalReplicationGroup -> `POST
+  | ExportServerlessCacheSnapshot -> `POST
   | FailoverGlobalReplicationGroup -> `POST
   | IncreaseNodeGroupsInGlobalReplicationGroup -> `POST
   | IncreaseReplicaCount -> `POST
@@ -214,6 +249,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ModifyGlobalReplicationGroup -> `POST
   | ModifyReplicationGroup -> `POST
   | ModifyReplicationGroupShardConfiguration -> `POST
+  | ModifyServerlessCache -> `POST
   | ModifyUser -> `POST
   | ModifyUserGroup -> `POST
   | PurchaseReservedCacheNodesOffering -> `POST
@@ -224,6 +260,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RevokeCacheSecurityGroupIngress -> `POST
   | StartMigration -> `POST
   | TestFailover -> `POST
+  | TestMigration -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -233,6 +270,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | BatchApplyUpdateAction -> (Format.kasprintf Uri.of_string) "/"
       | BatchStopUpdateAction -> (Format.kasprintf Uri.of_string) "/"
       | CompleteMigration -> (Format.kasprintf Uri.of_string) "/"
+      | CopyServerlessCacheSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CopySnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateCacheCluster -> (Format.kasprintf Uri.of_string) "/"
       | CreateCacheParameterGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -240,6 +278,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateCacheSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateGlobalReplicationGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateReplicationGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateServerlessCache -> (Format.kasprintf Uri.of_string) "/"
+      | CreateServerlessCacheSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateUser -> (Format.kasprintf Uri.of_string) "/"
       | CreateUserGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -252,6 +292,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteCacheSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteGlobalReplicationGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteReplicationGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteServerlessCache -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteServerlessCacheSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUser -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUserGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -270,6 +312,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeReservedCacheNodes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeReservedCacheNodesOfferings ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeServerlessCacheSnapshots ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeServerlessCaches -> (Format.kasprintf Uri.of_string) "/"
       | DescribeServiceUpdates -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSnapshots -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUpdateActions -> (Format.kasprintf Uri.of_string) "/"
@@ -277,6 +322,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeUsers -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateGlobalReplicationGroup ->
           (Format.kasprintf Uri.of_string) "/"
+      | ExportServerlessCacheSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | FailoverGlobalReplicationGroup ->
           (Format.kasprintf Uri.of_string) "/"
       | IncreaseNodeGroupsInGlobalReplicationGroup ->
@@ -292,6 +338,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ModifyReplicationGroup -> (Format.kasprintf Uri.of_string) "/"
       | ModifyReplicationGroupShardConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
+      | ModifyServerlessCache -> (Format.kasprintf Uri.of_string) "/"
       | ModifyUser -> (Format.kasprintf Uri.of_string) "/"
       | ModifyUserGroup -> (Format.kasprintf Uri.of_string) "/"
       | PurchaseReservedCacheNodesOffering ->
@@ -304,7 +351,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RevokeCacheSecurityGroupIngress ->
           (Format.kasprintf Uri.of_string) "/"
       | StartMigration -> (Format.kasprintf Uri.of_string) "/"
-      | TestFailover -> (Format.kasprintf Uri.of_string) "/")
+      | TestFailover -> (Format.kasprintf Uri.of_string) "/"
+      | TestMigration -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -371,6 +419,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CompleteMigration"]); ("Version", [apiVersion])] in
         let query =
           (CompleteMigrationMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CopyServerlessCacheSnapshot ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CopyServerlessCacheSnapshot"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CopyServerlessCacheSnapshotRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CopySnapshot ->
@@ -462,6 +524,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CreateReplicationGroup"]); ("Version", [apiVersion])] in
         let query =
           (CreateReplicationGroupMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateServerlessCache ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateServerlessCache"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateServerlessCacheRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateServerlessCacheSnapshot ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateServerlessCacheSnapshot"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateServerlessCacheSnapshotRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -605,6 +694,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeleteReplicationGroup"]); ("Version", [apiVersion])] in
         let query =
           (DeleteReplicationGroupMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteServerlessCache ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteServerlessCache"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteServerlessCacheRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteServerlessCacheSnapshot ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteServerlessCacheSnapshot"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteServerlessCacheSnapshotRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -808,6 +924,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeServerlessCacheSnapshots ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeServerlessCacheSnapshots"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeServerlessCacheSnapshotsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeServerlessCaches ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeServerlessCaches"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeServerlessCachesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeServiceUpdates ->
       let headers =
         Awso.Http.Headers.of_list
@@ -881,6 +1025,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DisassociateGlobalReplicationGroupMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ExportServerlessCacheSnapshot ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ExportServerlessCacheSnapshot"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ExportServerlessCacheSnapshotRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1033,6 +1191,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyServerlessCache ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyServerlessCache"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyServerlessCacheRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyUser ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1161,6 +1332,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (TestFailoverMessage.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | TestMigration ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta = [("Action", ["TestMigration"]); ("Version", [apiVersion])] in
+        let query =
+          (TestMigrationMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -1230,6 +1412,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CompleteMigrationResponse.of_xml xml)
       else
         Error (parse_aws_error (Some CompleteMigrationResponse.error_of_xml))
+  | CopyServerlessCacheSnapshot ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CopyServerlessCacheSnapshotResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CopyServerlessCacheSnapshotResponse.error_of_xml))
   | CopySnapshot ->
       if is_success
       then
@@ -1285,6 +1476,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateReplicationGroupResult.error_of_xml))
+  | CreateServerlessCache ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateServerlessCacheResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateServerlessCacheResponse.error_of_xml))
+  | CreateServerlessCacheSnapshot ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateServerlessCacheSnapshotResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateServerlessCacheSnapshotResponse.error_of_xml))
   | CreateSnapshot ->
       if is_success
       then
@@ -1351,6 +1559,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteReplicationGroupResult.error_of_xml))
+  | DeleteServerlessCache ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteServerlessCacheResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteServerlessCacheResponse.error_of_xml))
+  | DeleteServerlessCacheSnapshot ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteServerlessCacheSnapshotResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteServerlessCacheSnapshotResponse.error_of_xml))
   | DeleteSnapshot ->
       if is_success
       then
@@ -1458,6 +1683,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ReservedCacheNodesOfferingMessage.error_of_xml))
+  | DescribeServerlessCacheSnapshots ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeServerlessCacheSnapshotsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeServerlessCacheSnapshotsResponse.error_of_xml))
+  | DescribeServerlessCaches ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeServerlessCachesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeServerlessCachesResponse.error_of_xml))
   | DescribeServiceUpdates ->
       if is_success
       then
@@ -1500,6 +1743,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateGlobalReplicationGroupResult.error_of_xml))
+  | ExportServerlessCacheSnapshot ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ExportServerlessCacheSnapshotResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ExportServerlessCacheSnapshotResponse.error_of_xml))
   | FailoverGlobalReplicationGroup ->
       if is_success
       then
@@ -1592,6 +1844,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ModifyReplicationGroupShardConfigurationResult.error_of_xml))
+  | ModifyServerlessCache ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyServerlessCacheResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ModifyServerlessCacheResponse.error_of_xml))
   | ModifyUser ->
       if is_success
       then
@@ -1664,3 +1924,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (TestFailoverResult.of_xml xml)
       else Error (parse_aws_error (Some TestFailoverResult.error_of_xml))
+  | TestMigration ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (TestMigrationResponse.of_xml xml)
+      else Error (parse_aws_error (Some TestMigrationResponse.error_of_xml))

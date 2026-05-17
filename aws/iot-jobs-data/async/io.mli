@@ -12,6 +12,12 @@ val get_pending_job_executions :
       GetPendingJobExecutionsRequest.t ->
         (GetPendingJobExecutionsResponse.t,
           GetPendingJobExecutionsResponse.error) Result.t Async.Deferred.t
+val start_command_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartCommandExecutionRequest.t ->
+        (StartCommandExecutionResponse.t,
+          StartCommandExecutionResponse.error) Result.t Async.Deferred.t
 val start_next_pending_job_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

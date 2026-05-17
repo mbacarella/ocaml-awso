@@ -225,6 +225,36 @@ let create_vpc_connector =
               ~vpcConnectorName ~subnets:(Values.StringList.of_json subnets)
               ()) (Some Values.CreateVpcConnectorResponse.to_json)
            (Some Values.CreateVpcConnectorResponse.error_to_json)])
+let create_vpc_ingress_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and serviceArn =
+         flag "service-arn" (required string)
+           ~doc:"STRING AppRunnerResourceArn"
+       and vpcIngressConnectionName =
+         flag "vpc-ingress-connection-name" (required string)
+           ~doc:"STRING VpcIngressConnectionName"
+       and ingressVpcConfiguration =
+         flag "ingress-vpc-configuration" (required json_arg)
+           ~doc:"JSON IngressVpcConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_vpc_ingress_connection
+           (Values.CreateVpcIngressConnectionRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~serviceArn
+              ~vpcIngressConnectionName
+              ~ingressVpcConfiguration:(Values.IngressVpcConfiguration.of_json
+                                          ingressVpcConfiguration) ())
+           (Some Values.CreateVpcIngressConnectionResponse.to_json)
+           (Some Values.CreateVpcIngressConnectionResponse.error_to_json)])
 let delete_auto_scaling_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -235,6 +265,8 @@ let delete_auto_scaling_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deleteAllRevisions =
+         flag "delete-all-revisions" (optional bool) ~doc:"BOOL Boolean"
        and autoScalingConfigurationArn =
          flag "auto-scaling-configuration-arn" (required string)
            ~doc:"STRING AppRunnerResourceArn" in
@@ -242,7 +274,7 @@ let delete_auto_scaling_configuration =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_auto_scaling_configuration
            (Values.DeleteAutoScalingConfigurationRequest.make
-              ~autoScalingConfigurationArn ())
+              ?deleteAllRevisions ~autoScalingConfigurationArn ())
            (Some Values.DeleteAutoScalingConfigurationResponse.to_json)
            (Some Values.DeleteAutoScalingConfigurationResponse.error_to_json)])
 let delete_connection =
@@ -323,6 +355,26 @@ let delete_vpc_connector =
            (Values.DeleteVpcConnectorRequest.make ~vpcConnectorArn ())
            (Some Values.DeleteVpcConnectorResponse.to_json)
            (Some Values.DeleteVpcConnectorResponse.error_to_json)])
+let delete_vpc_ingress_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcIngressConnectionArn =
+         flag "vpc-ingress-connection-arn" (required string)
+           ~doc:"STRING AppRunnerResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_ingress_connection
+           (Values.DeleteVpcIngressConnectionRequest.make
+              ~vpcIngressConnectionArn ())
+           (Some Values.DeleteVpcIngressConnectionResponse.to_json)
+           (Some Values.DeleteVpcIngressConnectionResponse.error_to_json)])
 let describe_auto_scaling_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -428,6 +480,26 @@ let describe_vpc_connector =
            (Values.DescribeVpcConnectorRequest.make ~vpcConnectorArn ())
            (Some Values.DescribeVpcConnectorResponse.to_json)
            (Some Values.DescribeVpcConnectorResponse.error_to_json)])
+let describe_vpc_ingress_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcIngressConnectionArn =
+         flag "vpc-ingress-connection-arn" (required string)
+           ~doc:"STRING AppRunnerResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_vpc_ingress_connection
+           (Values.DescribeVpcIngressConnectionRequest.make
+              ~vpcIngressConnectionArn ())
+           (Some Values.DescribeVpcIngressConnectionResponse.to_json)
+           (Some Values.DescribeVpcIngressConnectionResponse.error_to_json)])
 let disassociate_custom_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -571,6 +643,32 @@ let list_services =
            (Values.ListServicesRequest.make ?nextToken ?maxResults ())
            (Some Values.ListServicesResponse.to_json)
            (Some Values.ListServicesResponse.error_to_json)])
+let list_services_for_auto_scaling_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and autoScalingConfigurationArn =
+         flag "auto-scaling-configuration-arn" (required string)
+           ~doc:"STRING AppRunnerResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_services_for_auto_scaling_configuration
+           (Values.ListServicesForAutoScalingConfigurationRequest.make
+              ?maxResults ?nextToken ~autoScalingConfigurationArn ())
+           (Some
+              Values.ListServicesForAutoScalingConfigurationResponse.to_json)
+           (Some
+              Values.ListServicesForAutoScalingConfigurationResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -610,6 +708,32 @@ let list_vpc_connectors =
            (Values.ListVpcConnectorsRequest.make ?maxResults ?nextToken ())
            (Some Values.ListVpcConnectorsResponse.to_json)
            (Some Values.ListVpcConnectorsResponse.error_to_json)])
+let list_vpc_ingress_connections =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON ListVpcIngressConnectionsFilter"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_ingress_connections
+           (Values.ListVpcIngressConnectionsRequest.make
+              ?filter:(Option.map
+                         ~f:Values.ListVpcIngressConnectionsFilter.of_json
+                         filter) ?maxResults ?nextToken ())
+           (Some Values.ListVpcIngressConnectionsResponse.to_json)
+           (Some Values.ListVpcIngressConnectionsResponse.error_to_json)])
 let pause_service =
   Command.async ~summary:""
     ([%map_open.Command
@@ -709,6 +833,27 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_default_auto_scaling_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and autoScalingConfigurationArn =
+         flag "auto-scaling-configuration-arn" (required string)
+           ~doc:"STRING AppRunnerResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_default_auto_scaling_configuration
+           (Values.UpdateDefaultAutoScalingConfigurationRequest.make
+              ~autoScalingConfigurationArn ())
+           (Some Values.UpdateDefaultAutoScalingConfigurationResponse.to_json)
+           (Some
+              Values.UpdateDefaultAutoScalingConfigurationResponse.error_to_json)])
 let update_service =
   Command.async ~summary:""
     ([%map_open.Command
@@ -762,6 +907,31 @@ let update_service =
                                              observabilityConfiguration)
               ~serviceArn ()) (Some Values.UpdateServiceResponse.to_json)
            (Some Values.UpdateServiceResponse.error_to_json)])
+let update_vpc_ingress_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcIngressConnectionArn =
+         flag "vpc-ingress-connection-arn" (required string)
+           ~doc:"STRING AppRunnerResourceArn"
+       and ingressVpcConfiguration =
+         flag "ingress-vpc-configuration" (required json_arg)
+           ~doc:"JSON IngressVpcConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_vpc_ingress_connection
+           (Values.UpdateVpcIngressConnectionRequest.make
+              ~vpcIngressConnectionArn
+              ~ingressVpcConfiguration:(Values.IngressVpcConfiguration.of_json
+                                          ingressVpcConfiguration) ())
+           (Some Values.UpdateVpcIngressConnectionResponse.to_json)
+           (Some Values.UpdateVpcIngressConnectionResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -772,12 +942,14 @@ let main =
       create_observability_configuration);
     ("create-service", create_service);
     ("create-vpc-connector", create_vpc_connector);
+    ("create-vpc-ingress-connection", create_vpc_ingress_connection);
     ("delete-auto-scaling-configuration", delete_auto_scaling_configuration);
     ("delete-connection", delete_connection);
     ("delete-observability-configuration",
       delete_observability_configuration);
     ("delete-service", delete_service);
     ("delete-vpc-connector", delete_vpc_connector);
+    ("delete-vpc-ingress-connection", delete_vpc_ingress_connection);
     ("describe-auto-scaling-configuration",
       describe_auto_scaling_configuration);
     ("describe-custom-domains", describe_custom_domains);
@@ -785,17 +957,24 @@ let main =
       describe_observability_configuration);
     ("describe-service", describe_service);
     ("describe-vpc-connector", describe_vpc_connector);
+    ("describe-vpc-ingress-connection", describe_vpc_ingress_connection);
     ("disassociate-custom-domain", disassociate_custom_domain);
     ("list-auto-scaling-configurations", list_auto_scaling_configurations);
     ("list-connections", list_connections);
     ("list-observability-configurations", list_observability_configurations);
     ("list-operations", list_operations);
     ("list-services", list_services);
+    ("list-services-for-auto-scaling-configuration",
+      list_services_for_auto_scaling_configuration);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-vpc-connectors", list_vpc_connectors);
+    ("list-vpc-ingress-connections", list_vpc_ingress_connections);
     ("pause-service", pause_service);
     ("resume-service", resume_service);
     ("start-deployment", start_deployment);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-service", update_service)]
+    ("update-default-auto-scaling-configuration",
+      update_default_auto_scaling_configuration);
+    ("update-service", update_service);
+    ("update-vpc-ingress-connection", update_vpc_ingress_connection)]

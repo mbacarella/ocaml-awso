@@ -24,6 +24,24 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module WorkflowParameterValue =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowParameterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () -> check_pattern i ~pattern:"[^\\x00]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowParameterValue" j
+    let to_json = simple_to_json to_value
+  end
 module ComponentParameterValue =
   struct
     type nonrec t = string
@@ -145,6 +163,55 @@ module TargetResourceCount =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module WorkflowParameterName =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowParameterName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[^\\x00]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowParameterName" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowParameterValueList =
+  struct
+    type nonrec t = WorkflowParameterValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowParameterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowParameterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkflowParameterValueList"
+        ~of_json:WorkflowParameterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ImageStatus =
   struct
     type nonrec t =
@@ -159,6 +226,7 @@ module ImageStatus =
       | FAILED 
       | DEPRECATED 
       | DELETED 
+      | DISABLED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -174,6 +242,7 @@ module ImageStatus =
       | FAILED -> "FAILED"
       | DEPRECATED -> "DEPRECATED"
       | DELETED -> "DELETED"
+      | DISABLED -> "DISABLED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -188,6 +257,7 @@ module ImageStatus =
       | "FAILED" -> FAILED
       | "DEPRECATED" -> DEPRECATED
       | "DELETED" -> DELETED
+      | "DISABLED" -> DISABLED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -195,6 +265,95 @@ module ImageStatus =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration ImageStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ImageStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicyDetailExclusionRulesAmisLastLaunchedValue =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:365) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for LifecyclePolicyDetailExclusionRulesAmisLastLaunchedValue"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicyTimeUnit =
+  struct
+    type nonrec t =
+      | DAYS 
+      | WEEKS 
+      | MONTHS 
+      | YEARS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DAYS -> "DAYS"
+      | WEEKS -> "WEEKS"
+      | MONTHS -> "MONTHS"
+      | YEARS -> "YEARS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DAYS" -> DAYS
+      | "WEEKS" -> WEEKS
+      | "MONTHS" -> MONTHS
+      | "YEARS" -> YEARS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LifecyclePolicyTimeUnit" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LifecyclePolicyTimeUnit" j)
+    let to_json = simple_to_json to_value
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?!aws:)[a-zA-Z0-9\\s_.:/=+\\-@]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
 module ComponentParameterName =
@@ -221,6 +380,9 @@ module ComponentParameterValueList =
   struct
     type nonrec t = ComponentParameterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentParameterValue.to_value)) |>
         (fun x -> `List x)
@@ -362,6 +524,9 @@ module AccountList =
           ((check_list_max i ~max:1536) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -390,6 +555,9 @@ module OrganizationArnList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -419,6 +587,9 @@ module OrganizationalUnitArnList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationalUnitArn.to_value)) |>
         (fun x -> `List x)
@@ -445,6 +616,9 @@ module StringList =
   struct
     type nonrec t = NonEmptyString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -464,41 +638,6 @@ module StringList =
     let of_json j =
       list_of_json ~kind:"StringList" ~of_json:NonEmptyString.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module TagKey =
-  struct
-    type nonrec t = string
-    let context_ = "TagKey"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^(?!aws:)[a-zA-Z+-=._:/]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
-    let to_json = simple_to_json to_value
-  end
-module TagValue =
-  struct
-    type nonrec t = string
-    let context_ = "TagValue"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:256); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
-    let to_json = simple_to_json to_value
   end
 module ContainerRepositoryService =
   struct
@@ -571,13 +710,13 @@ module FastLaunchLaunchTemplateSpecification =
           (Xml.child xml_arg0 "launchTemplateId") in
       make ?launchTemplateVersion ?launchTemplateName ?launchTemplateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let launchTemplateVersion =
-        field_map json "launchTemplateVersion" NonEmptyString.of_json in
+        field_map json__ "launchTemplateVersion" NonEmptyString.of_json in
       let launchTemplateName =
-        field_map json "launchTemplateName" NonEmptyString.of_json in
+        field_map json__ "launchTemplateName" NonEmptyString.of_json in
       let launchTemplateId =
-        field_map json "launchTemplateId" LaunchTemplateId.of_json in
+        field_map json__ "launchTemplateId" LaunchTemplateId.of_json in
       make ?launchTemplateVersion ?launchTemplateName ?launchTemplateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -601,9 +740,9 @@ module FastLaunchSnapshotConfiguration =
           (Xml.child xml_arg0 "targetResourceCount") in
       make ?targetResourceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetResourceCount =
-        field_map json "targetResourceCount" TargetResourceCount.of_json in
+        field_map json__ "targetResourceCount" TargetResourceCount.of_json in
       make ?targetResourceCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -612,11 +751,7 @@ module MaxParallelLaunches =
   struct
     type nonrec t = int
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:10000) >>=
-             (fun () -> check_int_min i ~min:1));
-        i
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
     let of_string = Int.of_string
     let to_value x = `Integer x
     let to_query v = to_query to_value v
@@ -627,13 +762,209 @@ module MaxParallelLaunches =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module SsmParameterDataType =
+  struct
+    type nonrec t =
+      | Text 
+      | Aws_ec2_image 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Text -> "text"
+      | Aws_ec2_image -> "aws:ec2:image"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "text" -> Text
+      | "aws:ec2:image" -> Aws_ec2_image
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SsmParameterDataType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SsmParameterDataType" j)
+    let to_json = simple_to_json to_value
+  end
+module SsmParameterName =
+  struct
+    type nonrec t = string
+    let context_ = "SsmParameterName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9_.\\-\\/]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SsmParameterName" j
+    let to_json = simple_to_json to_value
+  end
+module LifecycleExecutionResourceStatus =
+  struct
+    type nonrec t =
+      | FAILED 
+      | IN_PROGRESS 
+      | SKIPPED 
+      | SUCCESS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FAILED -> "FAILED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SKIPPED -> "SKIPPED"
+      | SUCCESS -> "SUCCESS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FAILED" -> FAILED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SKIPPED" -> SKIPPED
+      | "SUCCESS" -> SUCCESS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LifecycleExecutionResourceStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LifecycleExecutionResourceStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CvssScoreAdjustment =
+  struct
+    type nonrec t =
+      {
+      metric: NonEmptyString.t option
+        [@ocaml.doc
+          "The metric that Amazon Inspector used to adjust the CVSS score."];
+      reason: NonEmptyString.t option
+        [@ocaml.doc "The reason for the CVSS score adjustment."]}
+    let make ?metric = fun ?reason -> fun () -> { metric; reason }
+    let to_value x =
+      structure_to_value
+        [("metric", (Option.map x.metric ~f:NonEmptyString.to_value));
+        ("reason", (Option.map x.reason ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "reason") in
+      let metric =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "metric") in
+      make ?reason ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" NonEmptyString.of_json in
+      let metric = field_map json__ "metric" NonEmptyString.of_json in
+      make ?reason ?metric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about an adjustment that Amazon Inspector made to the CVSS score for a finding."]
+module NonNegativeDouble =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module PackageArchitecture =
+  struct
+    type nonrec t = string
+    let context_ = "PackageArchitecture"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PackageArchitecture" j
+    let to_json = simple_to_json to_value
+  end
+module PackageEpoch =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PackageEpoch" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SourceLayerHash =
+  struct
+    type nonrec t = string
+    let context_ = "SourceLayerHash"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceLayerHash" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowParameter =
+  struct
+    type nonrec t =
+      {
+      name: WorkflowParameterName.t
+        [@ocaml.doc "The name of the workflow parameter to set."];
+      value: WorkflowParameterValueList.t
+        [@ocaml.doc "Sets the value for the named workflow parameter."]}
+    let context_ = "WorkflowParameter"
+    let make ~name = fun ~value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (WorkflowParameterName.to_value x.name)));
+        ("value", (Some (WorkflowParameterValueList.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        WorkflowParameterValueList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      let name =
+        WorkflowParameterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value =
+        field_map_exn json__ "value" WorkflowParameterValueList.of_json in
+      let name = field_map_exn json__ "name" WorkflowParameterName.of_json in
+      make ~value ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains a key/value pair that sets the named workflow parameter."]
 module ImageState =
   struct
     type nonrec t =
       {
       status: ImageStatus.t option [@ocaml.doc "The status of the image."];
       reason: NonEmptyString.t option
-        [@ocaml.doc "The reason for the image's status."]}
+        [@ocaml.doc "The reason for the status of the image."]}
     let make ?status = fun ?reason -> fun () -> { status; reason }
     let to_value x =
       structure_to_value
@@ -647,13 +978,84 @@ module ImageState =
         (Option.map ~f:ImageStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?reason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" NonEmptyString.of_json in
-      let status = field_map json "status" ImageStatus.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "reason" NonEmptyString.of_json in
+      let status = field_map json__ "status" ImageStatus.of_json in
       make ?reason ?status ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Image status and the reason for that status."]
+module LifecyclePolicyDetailExclusionRulesAmisLastLaunched =
+  struct
+    type nonrec t =
+      {
+      value: LifecyclePolicyDetailExclusionRulesAmisLastLaunchedValue.t
+        [@ocaml.doc
+          "The integer number of units for the time period. For example 6 (months)."];
+      unit: LifecyclePolicyTimeUnit.t
+        [@ocaml.doc
+          "Defines the unit of time that the lifecycle policy uses to calculate elapsed time since the last instance launched from the AMI. For example: days, weeks, months, or years."]}
+    let context_ = "LifecyclePolicyDetailExclusionRulesAmisLastLaunched"
+    let make ~value = fun ~unit -> fun () -> { value; unit }
+    let to_value x =
+      structure_to_value
+        [("value",
+           (Some
+              (LifecyclePolicyDetailExclusionRulesAmisLastLaunchedValue.to_value
+                 x.value)));
+        ("unit", (Some (LifecyclePolicyTimeUnit.to_value x.unit)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unit =
+        LifecyclePolicyTimeUnit.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "unit") in
+      let value =
+        LifecyclePolicyDetailExclusionRulesAmisLastLaunchedValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      make ~unit ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit = field_map_exn json__ "unit" LifecyclePolicyTimeUnit.of_json in
+      let value =
+        field_map_exn json__ "value"
+          LifecyclePolicyDetailExclusionRulesAmisLastLaunchedValue.of_json in
+      make ~unit ~value ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Image state shows the image status and the reason for that status."]
+       "Defines criteria to exclude AMIs from lifecycle actions based on the last time they were used to launch an instance."]
+module TagMap =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ComponentParameter =
   struct
     type nonrec t =
@@ -678,10 +1080,10 @@ module ComponentParameter =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let value =
-        field_map_exn json "value" ComponentParameterValueList.of_json in
-      let name = field_map_exn json "name" ComponentParameterName.of_json in
+        field_map_exn json__ "value" ComponentParameterValueList.of_json in
+      let name = field_map_exn json__ "name" ComponentParameterName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -699,7 +1101,7 @@ module EbsInstanceBlockDeviceSpecification =
         [@ocaml.doc "Use to configure device IOPS."];
       kmsKeyId: NonEmptyString.t option
         [@ocaml.doc
-          "Use to configure the KMS key to use when encrypting the device."];
+          "The Amazon Resource Name (ARN) that uniquely identifies the KMS key to use when encrypting the device. This can be either the Key ARN or the Alias ARN. For more information, see Key identifiers (KeyId) in the Key Management Service Developer Guide."];
       snapshotId: NonEmptyString.t option
         [@ocaml.doc "The snapshot that defines the device contents."];
       volumeSize: EbsVolumeSizeInteger.t option
@@ -768,18 +1170,18 @@ module EbsInstanceBlockDeviceSpecification =
       make ?throughput ?volumeType ?volumeSize ?snapshotId ?kmsKeyId ?iops
         ?deleteOnTermination ?encrypted ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let throughput =
-        field_map json "throughput" EbsVolumeThroughput.of_json in
-      let volumeType = field_map json "volumeType" EbsVolumeType.of_json in
+        field_map json__ "throughput" EbsVolumeThroughput.of_json in
+      let volumeType = field_map json__ "volumeType" EbsVolumeType.of_json in
       let volumeSize =
-        field_map json "volumeSize" EbsVolumeSizeInteger.of_json in
-      let snapshotId = field_map json "snapshotId" NonEmptyString.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
-      let iops = field_map json "iops" EbsIopsInteger.of_json in
+        field_map json__ "volumeSize" EbsVolumeSizeInteger.of_json in
+      let snapshotId = field_map json__ "snapshotId" NonEmptyString.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
+      let iops = field_map json__ "iops" EbsIopsInteger.of_json in
       let deleteOnTermination =
-        field_map json "deleteOnTermination" NullableBoolean.of_json in
-      let encrypted = field_map json "encrypted" NullableBoolean.of_json in
+        field_map json__ "deleteOnTermination" NullableBoolean.of_json in
+      let encrypted = field_map json__ "encrypted" NullableBoolean.of_json in
       make ?throughput ?volumeType ?volumeSize ?snapshotId ?kmsKeyId ?iops
         ?deleteOnTermination ?encrypted ()
     let to_json v = composed_to_json to_value v
@@ -867,50 +1269,18 @@ module LaunchPermissionConfiguration =
         (Option.map ~f:AccountList.of_xml) (Xml.child xml_arg0 "userIds") in
       make ?organizationalUnitArns ?organizationArns ?userGroups ?userIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationalUnitArns =
-        field_map json "organizationalUnitArns"
+        field_map json__ "organizationalUnitArns"
           OrganizationalUnitArnList.of_json in
       let organizationArns =
-        field_map json "organizationArns" OrganizationArnList.of_json in
-      let userGroups = field_map json "userGroups" StringList.of_json in
-      let userIds = field_map json "userIds" AccountList.of_json in
+        field_map json__ "organizationArns" OrganizationArnList.of_json in
+      let userGroups = field_map json__ "userGroups" StringList.of_json in
+      let userIds = field_map json__ "userIds" AccountList.of_json in
       make ?organizationalUnitArns ?organizationArns ?userGroups ?userIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration for a launch permission. The launch permission modification request is sent to the Amazon EC2 ModifyImageAttribute API on behalf of the user for each Region they have selected to distribute the AMI. To make an AMI public, set the launch permission authorized accounts to all. See the examples for making an AMI public at Amazon EC2 ModifyImageAttribute."]
-module TagMap =
-  struct
-    type nonrec t = (TagKey.t * TagValue.t) list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((TagKey.of_string chopped),
-                              (TagValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (TagKey.to_value x) |>
-                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:TagKey.of_string
-        ~of_json:TagValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module TargetContainerRepository =
   struct
     type nonrec t =
@@ -920,7 +1290,7 @@ module TargetContainerRepository =
           "Specifies the service in which this image was registered."];
       repositoryName: NonEmptyString.t
         [@ocaml.doc
-          "The name of the container repository where the output container image is stored. This name is prefixed by the repository location."]}
+          "The name of the container repository where the output container image is stored. This name is prefixed by the repository location. For example, <repository location url>/repository_name."]}
     let context_ = "TargetContainerRepository"
     let make ~service =
       fun ~repositoryName -> fun () -> { service; repositoryName }
@@ -938,11 +1308,11 @@ module TargetContainerRepository =
           (Xml.child_exn ~context:context_ xml_arg0 "service") in
       make ~repositoryName ~service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" NonEmptyString.of_json in
+        field_map_exn json__ "repositoryName" NonEmptyString.of_json in
       let service =
-        field_map_exn json "service" ContainerRepositoryService.of_json in
+        field_map_exn json__ "service" ContainerRepositoryService.of_json in
       make ~repositoryName ~service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1010,17 +1380,17 @@ module FastLaunchConfiguration =
       make ?accountId ?launchTemplate ?maxParallelLaunches
         ?snapshotConfiguration ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "accountId" AccountId.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       let launchTemplate =
-        field_map json "launchTemplate"
+        field_map json__ "launchTemplate"
           FastLaunchLaunchTemplateSpecification.of_json in
       let maxParallelLaunches =
-        field_map json "maxParallelLaunches" MaxParallelLaunches.of_json in
+        field_map json__ "maxParallelLaunches" MaxParallelLaunches.of_json in
       let snapshotConfiguration =
-        field_map json "snapshotConfiguration"
+        field_map json__ "snapshotConfiguration"
           FastLaunchSnapshotConfiguration.of_json in
-      let enabled = field_map_exn json "enabled" Boolean.of_json in
+      let enabled = field_map_exn json__ "enabled" Boolean.of_json in
       make ?accountId ?launchTemplate ?maxParallelLaunches
         ?snapshotConfiguration ~enabled ()
     let to_json v = composed_to_json to_value v
@@ -1061,12 +1431,12 @@ module LaunchTemplateConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "launchTemplateId") in
       make ?setDefaultVersion ?accountId ~launchTemplateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let setDefaultVersion =
-        field_map json "setDefaultVersion" Boolean.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
+        field_map json__ "setDefaultVersion" Boolean.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       let launchTemplateId =
-        field_map_exn json "launchTemplateId" LaunchTemplateId.of_json in
+        field_map_exn json__ "launchTemplateId" LaunchTemplateId.of_json in
       make ?setDefaultVersion ?accountId ~launchTemplateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1115,6 +1485,417 @@ module DiskImageFormat =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration DiskImageFormat" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"DiskImageFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module SsmParameterConfiguration =
+  struct
+    type nonrec t =
+      {
+      amiAccountId: AccountId.t option
+        [@ocaml.doc
+          "Specify the account that will own the Parameter in a given Region. During distribution, this account must be specified in distribution settings as a target account for the Region."];
+      parameterName: SsmParameterName.t
+        [@ocaml.doc
+          "This is the name of the Parameter in the target Region or account. The image distribution creates the Parameter if it doesn't already exist. Otherwise, it updates the parameter."];
+      dataType: SsmParameterDataType.t option
+        [@ocaml.doc
+          "The data type specifies what type of value the Parameter contains. We recommend that you use data type aws:ec2:image."]}
+    let context_ = "SsmParameterConfiguration"
+    let make ?amiAccountId =
+      fun ?dataType ->
+        fun ~parameterName ->
+          fun () -> { amiAccountId; dataType; parameterName }
+    let to_value x =
+      structure_to_value
+        [("amiAccountId", (Option.map x.amiAccountId ~f:AccountId.to_value));
+        ("parameterName", (Some (SsmParameterName.to_value x.parameterName)));
+        ("dataType",
+          (Option.map x.dataType ~f:SsmParameterDataType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataType =
+        (Option.map ~f:SsmParameterDataType.of_xml)
+          (Xml.child xml_arg0 "dataType") in
+      let parameterName =
+        SsmParameterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "parameterName") in
+      let amiAccountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "amiAccountId") in
+      make ?dataType ~parameterName ?amiAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataType = field_map json__ "dataType" SsmParameterDataType.of_json in
+      let parameterName =
+        field_map_exn json__ "parameterName" SsmParameterName.of_json in
+      let amiAccountId = field_map json__ "amiAccountId" AccountId.of_json in
+      make ?dataType ~parameterName ?amiAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for a single Parameter in the Amazon Web Services Systems Manager (SSM) Parameter Store in a given Region."]
+module LifecycleExecutionResourceState =
+  struct
+    type nonrec t =
+      {
+      status: LifecycleExecutionResourceStatus.t option
+        [@ocaml.doc
+          "The runtime status of the lifecycle action taken for the impacted resource."];
+      reason: NonEmptyString.t option
+        [@ocaml.doc
+          "Messaging that clarifies the reason for the assigned status."]}
+    let make ?status = fun ?reason -> fun () -> { status; reason }
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:LifecycleExecutionResourceStatus.to_value));
+        ("reason", (Option.map x.reason ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "reason") in
+      let status =
+        (Option.map ~f:LifecycleExecutionResourceStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" NonEmptyString.of_json in
+      let status =
+        field_map json__ "status" LifecycleExecutionResourceStatus.of_json in
+      make ?reason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the state of an impacted resource that the runtime instance of the lifecycle policy identified for action."]
+module CvssScoreAdjustmentList =
+  struct
+    type nonrec t = CvssScoreAdjustment.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CvssScoreAdjustment.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CvssScoreAdjustment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CvssScoreAdjustmentList"
+        ~of_json:CvssScoreAdjustment.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CvssScore =
+  struct
+    type nonrec t =
+      {
+      baseScore: NonNegativeDouble.t option
+        [@ocaml.doc "The CVSS base score."];
+      scoringVector: NonEmptyString.t option
+        [@ocaml.doc "The vector string of the CVSS score."];
+      version: NonEmptyString.t option
+        [@ocaml.doc "The CVSS version that generated the score."];
+      source: NonEmptyString.t option
+        [@ocaml.doc "The source of the CVSS score."]}
+    let make ?baseScore =
+      fun ?scoringVector ->
+        fun ?version ->
+          fun ?source ->
+            fun () -> { baseScore; scoringVector; version; source }
+    let to_value x =
+      structure_to_value
+        [("baseScore",
+           (Option.map x.baseScore ~f:NonNegativeDouble.to_value));
+        ("scoringVector",
+          (Option.map x.scoringVector ~f:NonEmptyString.to_value));
+        ("version", (Option.map x.version ~f:NonEmptyString.to_value));
+        ("source", (Option.map x.source ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let source =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "source") in
+      let version =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "version") in
+      let scoringVector =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "scoringVector") in
+      let baseScore =
+        (Option.map ~f:NonNegativeDouble.of_xml)
+          (Xml.child xml_arg0 "baseScore") in
+      make ?source ?version ?scoringVector ?baseScore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source = field_map json__ "source" NonEmptyString.of_json in
+      let version = field_map json__ "version" NonEmptyString.of_json in
+      let scoringVector =
+        field_map json__ "scoringVector" NonEmptyString.of_json in
+      let baseScore = field_map json__ "baseScore" NonNegativeDouble.of_json in
+      make ?source ?version ?scoringVector ?baseScore ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon Inspector generates a risk score for each finding. This score helps you to prioritize findings, to focus on the most critical findings and the most vulnerable resources. The score uses the Common Vulnerability Scoring System (CVSS) format. This format is a modification of the base CVSS score that the National Vulnerability Database (NVD) provides. For more information about severity levels, see Severity levels for Amazon Inspector findings in the Amazon Inspector User Guide."]
+module VulnerabilityId =
+  struct
+    type nonrec t = string
+    let context_ = "VulnerabilityId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VulnerabilityId" j
+    let to_json = simple_to_json to_value
+  end
+module VulnerablePackage =
+  struct
+    type nonrec t =
+      {
+      name: NonEmptyString.t option
+        [@ocaml.doc "The name of the vulnerable package."];
+      version: NonEmptyString.t option
+        [@ocaml.doc "The version of the vulnerable package."];
+      sourceLayerHash: SourceLayerHash.t option
+        [@ocaml.doc "The source layer hash of the vulnerable package."];
+      epoch: PackageEpoch.t option
+        [@ocaml.doc "The epoch of the vulnerable package."];
+      release: NonEmptyString.t option
+        [@ocaml.doc "The release of the vulnerable package."];
+      arch: PackageArchitecture.t option
+        [@ocaml.doc "The architecture of the vulnerable package."];
+      packageManager: NonEmptyString.t option
+        [@ocaml.doc "The package manager of the vulnerable package."];
+      filePath: NonEmptyString.t option
+        [@ocaml.doc "The file path of the vulnerable package."];
+      fixedInVersion: NonEmptyString.t option
+        [@ocaml.doc
+          "The version of the package that contains the vulnerability fix."];
+      remediation: NonEmptyString.t option
+        [@ocaml.doc
+          "The code to run in your environment to update packages with a fix available."]}
+    let make ?name =
+      fun ?version ->
+        fun ?sourceLayerHash ->
+          fun ?epoch ->
+            fun ?release ->
+              fun ?arch ->
+                fun ?packageManager ->
+                  fun ?filePath ->
+                    fun ?fixedInVersion ->
+                      fun ?remediation ->
+                        fun () ->
+                          {
+                            name;
+                            version;
+                            sourceLayerHash;
+                            epoch;
+                            release;
+                            arch;
+                            packageManager;
+                            filePath;
+                            fixedInVersion;
+                            remediation
+                          }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:NonEmptyString.to_value));
+        ("version", (Option.map x.version ~f:NonEmptyString.to_value));
+        ("sourceLayerHash",
+          (Option.map x.sourceLayerHash ~f:SourceLayerHash.to_value));
+        ("epoch", (Option.map x.epoch ~f:PackageEpoch.to_value));
+        ("release", (Option.map x.release ~f:NonEmptyString.to_value));
+        ("arch", (Option.map x.arch ~f:PackageArchitecture.to_value));
+        ("packageManager",
+          (Option.map x.packageManager ~f:NonEmptyString.to_value));
+        ("filePath", (Option.map x.filePath ~f:NonEmptyString.to_value));
+        ("fixedInVersion",
+          (Option.map x.fixedInVersion ~f:NonEmptyString.to_value));
+        ("remediation",
+          (Option.map x.remediation ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let remediation =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "remediation") in
+      let fixedInVersion =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "fixedInVersion") in
+      let filePath =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "filePath") in
+      let packageManager =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "packageManager") in
+      let arch =
+        (Option.map ~f:PackageArchitecture.of_xml)
+          (Xml.child xml_arg0 "arch") in
+      let release =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "release") in
+      let epoch =
+        (Option.map ~f:PackageEpoch.of_xml) (Xml.child xml_arg0 "epoch") in
+      let sourceLayerHash =
+        (Option.map ~f:SourceLayerHash.of_xml)
+          (Xml.child xml_arg0 "sourceLayerHash") in
+      let version =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "version") in
+      let name =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "name") in
+      make ?remediation ?fixedInVersion ?filePath ?packageManager ?arch
+        ?release ?epoch ?sourceLayerHash ?version ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let remediation = field_map json__ "remediation" NonEmptyString.of_json in
+      let fixedInVersion =
+        field_map json__ "fixedInVersion" NonEmptyString.of_json in
+      let filePath = field_map json__ "filePath" NonEmptyString.of_json in
+      let packageManager =
+        field_map json__ "packageManager" NonEmptyString.of_json in
+      let arch = field_map json__ "arch" PackageArchitecture.of_json in
+      let release = field_map json__ "release" NonEmptyString.of_json in
+      let epoch = field_map json__ "epoch" PackageEpoch.of_json in
+      let sourceLayerHash =
+        field_map json__ "sourceLayerHash" SourceLayerHash.of_json in
+      let version = field_map json__ "version" NonEmptyString.of_json in
+      let name = field_map json__ "name" NonEmptyString.of_json in
+      make ?remediation ?fixedInVersion ?filePath ?packageManager ?arch
+        ?release ?epoch ?sourceLayerHash ?version ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a vulnerable package that Amazon Inspector identifies in a finding."]
+module SeverityCountNumber =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module AutoDisableFailureCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AutoDisableFailureCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module OnWorkflowFailure =
+  struct
+    type nonrec t =
+      | CONTINUE 
+      | ABORT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONTINUE -> "CONTINUE"
+      | ABORT -> "ABORT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONTINUE" -> CONTINUE
+      | "ABORT" -> ABORT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OnWorkflowFailure" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OnWorkflowFailure" j)
+    let to_json = simple_to_json to_value
+  end
+module ParallelGroup =
+  struct
+    type nonrec t = string
+    let context_ = "ParallelGroup"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[A-Za-z0-9][A-Za-z0-9-_+#]{0,99}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ParallelGroup" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowParameterList =
+  struct
+    type nonrec t = WorkflowParameter.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowParameter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowParameter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkflowParameterList"
+        ~of_json:WorkflowParameter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkflowVersionArnOrBuildVersionArn =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowVersionArnOrBuildVersionArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:aws(?:-[a-z]+)*:imagebuilder:[a-z]{2,}(?:-[a-z]+)+-[0-9]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):workflow/(build|test|distribution)/[a-z0-9-_]+/(?:(?:([0-9]+|x)\\.([0-9]+|x)\\.([0-9]+|x))|(?:[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+))$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"WorkflowVersionArnOrBuildVersionArn" j
     let to_json = simple_to_json to_value
   end
 module Ami =
@@ -1168,13 +1949,13 @@ module Ami =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "region") in
       make ?accountId ?state ?description ?name ?image ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "accountId" NonEmptyString.of_json in
-      let state = field_map json "state" ImageState.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map json "name" NonEmptyString.of_json in
-      let image = field_map json "image" NonEmptyString.of_json in
-      let region = field_map json "region" NonEmptyString.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "accountId" NonEmptyString.of_json in
+      let state = field_map json__ "state" ImageState.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" NonEmptyString.of_json in
+      let image = field_map json__ "image" NonEmptyString.of_json in
+      let region = field_map json__ "region" NonEmptyString.of_json in
       make ?accountId ?state ?description ?name ?image ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of an Amazon EC2 AMI."]
@@ -1201,18 +1982,287 @@ module Container =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "region") in
       make ?imageUris ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let imageUris = field_map json "imageUris" StringList.of_json in
-      let region = field_map json "region" NonEmptyString.of_json in
+    let of_json json__ =
+      let imageUris = field_map json__ "imageUris" StringList.of_json in
+      let region = field_map json__ "region" NonEmptyString.of_json in
       make ?imageUris ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A container encapsulates the runtime environment for an application."]
+module ProductCodeId =
+  struct
+    type nonrec t = string
+    let context_ = "ProductCodeId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[A-Za-z0-9]{1,25}$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProductCodeId" j
+    let to_json = simple_to_json to_value
+  end
+module ProductCodeType =
+  struct
+    type nonrec t =
+      | Marketplace 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Marketplace -> "marketplace" | Non_static_id s -> s
+    let of_string =
+      function | "marketplace" -> Marketplace | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ProductCodeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ProductCodeType" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicyDetailActionIncludeResources =
+  struct
+    type nonrec t =
+      {
+      amis: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the lifecycle action should apply to distributed AMIs."];
+      snapshots: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the lifecycle action should apply to snapshots associated with distributed AMIs."];
+      containers: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the lifecycle action should apply to distributed containers."]}
+    let make ?amis =
+      fun ?snapshots ->
+        fun ?containers -> fun () -> { amis; snapshots; containers }
+    let to_value x =
+      structure_to_value
+        [("amis", (Option.map x.amis ~f:Boolean.to_value));
+        ("snapshots", (Option.map x.snapshots ~f:Boolean.to_value));
+        ("containers", (Option.map x.containers ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let containers =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "containers") in
+      let snapshots =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "snapshots") in
+      let amis = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "amis") in
+      make ?containers ?snapshots ?amis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let containers = field_map json__ "containers" Boolean.of_json in
+      let snapshots = field_map json__ "snapshots" Boolean.of_json in
+      let amis = field_map json__ "amis" Boolean.of_json in
+      make ?containers ?snapshots ?amis ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies how the lifecycle policy should apply actions to selected resources."]
+module LifecyclePolicyDetailActionType =
+  struct
+    type nonrec t =
+      | DELETE 
+      | DEPRECATE 
+      | DISABLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DELETE -> "DELETE"
+      | DEPRECATE -> "DEPRECATE"
+      | DISABLE -> "DISABLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DELETE" -> DELETE
+      | "DEPRECATE" -> DEPRECATE
+      | "DISABLE" -> DISABLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LifecyclePolicyDetailActionType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LifecyclePolicyDetailActionType" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicyDetailExclusionRulesAmis =
+  struct
+    type nonrec t =
+      {
+      isPublic: Boolean.t option
+        [@ocaml.doc
+          "Configures whether public AMIs are excluded from the lifecycle action."];
+      regions: StringList.t option
+        [@ocaml.doc
+          "Configures Amazon Web Services Regions that are excluded from the lifecycle action."];
+      sharedAccounts: AccountList.t option
+        [@ocaml.doc
+          "Specifies Amazon Web Services accounts whose resources are excluded from the lifecycle action."];
+      lastLaunched:
+        LifecyclePolicyDetailExclusionRulesAmisLastLaunched.t option
+        [@ocaml.doc
+          "Specifies configuration details for Image Builder to exclude the most recent resources from lifecycle actions."];
+      tagMap: TagMap.t option
+        [@ocaml.doc
+          "Lists tags that should be excluded from lifecycle actions for the AMIs that have them."]}
+    let make ?isPublic =
+      fun ?regions ->
+        fun ?sharedAccounts ->
+          fun ?lastLaunched ->
+            fun ?tagMap ->
+              fun () ->
+                { isPublic; regions; sharedAccounts; lastLaunched; tagMap }
+    let to_value x =
+      structure_to_value
+        [("isPublic", (Option.map x.isPublic ~f:Boolean.to_value));
+        ("regions", (Option.map x.regions ~f:StringList.to_value));
+        ("sharedAccounts",
+          (Option.map x.sharedAccounts ~f:AccountList.to_value));
+        ("lastLaunched",
+          (Option.map x.lastLaunched
+             ~f:LifecyclePolicyDetailExclusionRulesAmisLastLaunched.to_value));
+        ("tagMap", (Option.map x.tagMap ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagMap =
+        (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tagMap") in
+      let lastLaunched =
+        (Option.map
+           ~f:LifecyclePolicyDetailExclusionRulesAmisLastLaunched.of_xml)
+          (Xml.child xml_arg0 "lastLaunched") in
+      let sharedAccounts =
+        (Option.map ~f:AccountList.of_xml)
+          (Xml.child xml_arg0 "sharedAccounts") in
+      let regions =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "regions") in
+      let isPublic =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPublic") in
+      make ?tagMap ?lastLaunched ?sharedAccounts ?regions ?isPublic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagMap = field_map json__ "tagMap" TagMap.of_json in
+      let lastLaunched =
+        field_map json__ "lastLaunched"
+          LifecyclePolicyDetailExclusionRulesAmisLastLaunched.of_json in
+      let sharedAccounts =
+        field_map json__ "sharedAccounts" AccountList.of_json in
+      let regions = field_map json__ "regions" StringList.of_json in
+      let isPublic = field_map json__ "isPublic" Boolean.of_json in
+      make ?tagMap ?lastLaunched ?sharedAccounts ?regions ?isPublic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines criteria for AMIs that are excluded from lifecycle actions."]
+module LifecyclePolicyDetailFilterRetainAtLeast =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for LifecyclePolicyDetailFilterRetainAtLeast"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicyDetailFilterType =
+  struct
+    type nonrec t =
+      | AGE 
+      | COUNT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | AGE -> "AGE" | COUNT -> "COUNT" | Non_static_id s -> s
+    let of_string =
+      function | "AGE" -> AGE | "COUNT" -> COUNT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LifecyclePolicyDetailFilterType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LifecyclePolicyDetailFilterType" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicyDetailFilterValue =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for LifecyclePolicyDetailFilterValue" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^[-_A-Za-z-0-9][-_A-Za-z0-9 ]{1,126}[-_A-Za-z-0-9]$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module WildcardVersionNumber =
+  struct
+    type nonrec t = string
+    let context_ = "WildcardVersionNumber"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^(?:[0-9]+|x)\\.(?:[0-9]+|x)\\.(?:[0-9]+|x)$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WildcardVersionNumber" j
+    let to_json = simple_to_json to_value
+  end
 module ComponentParameterList =
   struct
     type nonrec t = ComponentParameter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1242,7 +2292,7 @@ module ComponentVersionArnOrBuildVersionArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):component/[a-z0-9-_]+/(?:(?:([0-9]+|x)\\.([0-9]+|x)\\.([0-9]+|x))|(?:[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+))$");
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):component/[a-z0-9-_]+/(?:(?:([0-9]+|x)\\.([0-9]+|x)\\.([0-9]+|x))|(?:[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+))$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -1294,12 +2344,12 @@ module InstanceBlockDeviceMapping =
           (Xml.child xml_arg0 "deviceName") in
       make ?noDevice ?virtualName ?ebs ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let noDevice = field_map json "noDevice" EmptyString.of_json in
-      let virtualName = field_map json "virtualName" NonEmptyString.of_json in
+    let of_json json__ =
+      let noDevice = field_map json__ "noDevice" EmptyString.of_json in
+      let virtualName = field_map json__ "virtualName" NonEmptyString.of_json in
       let ebs =
-        field_map json "ebs" EbsInstanceBlockDeviceSpecification.of_json in
-      let deviceName = field_map json "deviceName" NonEmptyString.of_json in
+        field_map json__ "ebs" EbsInstanceBlockDeviceSpecification.of_json in
+      let deviceName = field_map json__ "deviceName" NonEmptyString.of_json in
       make ?noDevice ?virtualName ?ebs ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1319,7 +2369,7 @@ module AmiDistributionConfiguration =
         [@ocaml.doc "The tags to apply to AMIs distributed to this Region."];
       kmsKeyId: NonEmptyString.t option
         [@ocaml.doc
-          "The KMS key identifier used to encrypt the distributed image."];
+          "The Amazon Resource Name (ARN) that uniquely identifies the KMS key used to encrypt the distributed image. This can be either the Key ARN or the Alias ARN. For more information, see Key identifiers (KeyId) in the Key Management Service Developer Guide."];
       launchPermission: LaunchPermissionConfiguration.t option
         [@ocaml.doc
           "Launch permissions can be used to configure which Amazon Web Services accounts can use the AMI to launch instances."]}
@@ -1370,16 +2420,16 @@ module AmiDistributionConfiguration =
       make ?launchPermission ?kmsKeyId ?amiTags ?targetAccountIds
         ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let launchPermission =
-        field_map json "launchPermission"
+        field_map json__ "launchPermission"
           LaunchPermissionConfiguration.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
-      let amiTags = field_map json "amiTags" TagMap.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
+      let amiTags = field_map json__ "amiTags" TagMap.of_json in
       let targetAccountIds =
-        field_map json "targetAccountIds" AccountList.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map json "name" AmiNameString.of_json in
+        field_map json__ "targetAccountIds" AccountList.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" AmiNameString.of_json in
       make ?launchPermission ?kmsKeyId ?amiTags ?targetAccountIds
         ?description ?name ()
     let to_json v = composed_to_json to_value v
@@ -1423,12 +2473,12 @@ module ContainerDistributionConfiguration =
           (Xml.child xml_arg0 "description") in
       make ~targetRepository ?containerTags ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetRepository =
-        field_map_exn json "targetRepository"
+        field_map_exn json__ "targetRepository"
           TargetContainerRepository.of_json in
-      let containerTags = field_map json "containerTags" StringList.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
+      let containerTags = field_map json__ "containerTags" StringList.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       make ~targetRepository ?containerTags ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1442,6 +2492,9 @@ module FastLaunchConfigurationList =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FastLaunchConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1473,6 +2526,9 @@ module LaunchTemplateConfigurationList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchTemplateConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1503,6 +2559,9 @@ module LicenseConfigurationArnList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LicenseConfigurationArn.to_value)) |>
         (fun x -> `List x)
@@ -1569,16 +2628,187 @@ module S3ExportConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "roleName") in
       make ?s3Prefix ~s3Bucket ~diskImageFormat ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Prefix = field_map json "s3Prefix" NonEmptyString.of_json in
-      let s3Bucket = field_map_exn json "s3Bucket" NonEmptyString.of_json in
+    let of_json json__ =
+      let s3Prefix = field_map json__ "s3Prefix" NonEmptyString.of_json in
+      let s3Bucket = field_map_exn json__ "s3Bucket" NonEmptyString.of_json in
       let diskImageFormat =
-        field_map_exn json "diskImageFormat" DiskImageFormat.of_json in
-      let roleName = field_map_exn json "roleName" NonEmptyString.of_json in
+        field_map_exn json__ "diskImageFormat" DiskImageFormat.of_json in
+      let roleName = field_map_exn json__ "roleName" NonEmptyString.of_json in
       make ?s3Prefix ~s3Bucket ~diskImageFormat ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Properties that configure export from your build instance to a compatible file format for your VM."]
+module SsmParameterConfigurationList =
+  struct
+    type nonrec t = SsmParameterConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SsmParameterConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SsmParameterConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SsmParameterConfigurationList"
+        ~of_json:SsmParameterConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "FilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^[0-9a-zA-Z./_ :,{}\"-]{1,1024}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStatus =
+  struct
+    type nonrec t =
+      | DEPRECATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | DEPRECATED -> "DEPRECATED" | Non_static_id s -> s
+    let of_string =
+      function | "DEPRECATED" -> DEPRECATED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration WorkflowStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WorkflowStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecycleExecutionStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | CANCELLED 
+      | CANCELLING 
+      | FAILED 
+      | SUCCESS 
+      | PENDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | CANCELLED -> "CANCELLED"
+      | CANCELLING -> "CANCELLING"
+      | FAILED -> "FAILED"
+      | SUCCESS -> "SUCCESS"
+      | PENDING -> "PENDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "CANCELLED" -> CANCELLED
+      | "CANCELLING" -> CANCELLING
+      | "FAILED" -> FAILED
+      | "SUCCESS" -> SUCCESS
+      | "PENDING" -> PENDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LifecycleExecutionStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LifecycleExecutionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecycleExecutionResourceActionName =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | DELETE 
+      | DEPRECATE 
+      | DISABLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | DELETE -> "DELETE"
+      | DEPRECATE -> "DEPRECATE"
+      | DISABLE -> "DISABLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "DELETE" -> DELETE
+      | "DEPRECATE" -> DEPRECATE
+      | "DISABLE" -> DISABLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration LifecycleExecutionResourceActionName" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"LifecycleExecutionResourceActionName" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecycleExecutionSnapshotResource =
+  struct
+    type nonrec t =
+      {
+      snapshotId: NonEmptyString.t option
+        [@ocaml.doc "Identifies the impacted snapshot resource."];
+      state: LifecycleExecutionResourceState.t option
+        [@ocaml.doc
+          "The runtime status of the lifecycle action taken for the snapshot."]}
+    let make ?snapshotId = fun ?state -> fun () -> { snapshotId; state }
+    let to_value x =
+      structure_to_value
+        [("snapshotId", (Option.map x.snapshotId ~f:NonEmptyString.to_value));
+        ("state",
+          (Option.map x.state ~f:LifecycleExecutionResourceState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:LifecycleExecutionResourceState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let snapshotId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "snapshotId") in
+      make ?state ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state =
+        field_map json__ "state" LifecycleExecutionResourceState.of_json in
+      let snapshotId = field_map json__ "snapshotId" NonEmptyString.of_json in
+      make ?state ?snapshotId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the state of an impacted snapshot resource that the runtime instance of the lifecycle policy identified for action."]
 module InstanceType =
   struct
     type nonrec t = string
@@ -1592,23 +2822,387 @@ module InstanceType =
     let of_json j = string_of_json ~kind:"InstanceType" j
     let to_json = simple_to_json to_value
   end
-module FilterValue =
+module TenancyType =
+  struct
+    type nonrec t =
+      | Default 
+      | Dedicated 
+      | Host 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Default -> "default"
+      | Dedicated -> "dedicated"
+      | Host -> "host"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "default" -> Default
+      | "dedicated" -> Dedicated
+      | "host" -> Host
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TenancyType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TenancyType" j)
+    let to_json = simple_to_json to_value
+  end
+module CvssScoreDetails =
+  struct
+    type nonrec t =
+      {
+      scoreSource: NonEmptyString.t option
+        [@ocaml.doc "The source for the CVSS score."];
+      cvssSource: NonEmptyString.t option
+        [@ocaml.doc "The source of the finding."];
+      version: NonEmptyString.t option
+        [@ocaml.doc "The CVSS version that generated the score."];
+      score: NonNegativeDouble.t option [@ocaml.doc "The CVSS score."];
+      scoringVector: NonEmptyString.t option
+        [@ocaml.doc
+          "A vector that measures the severity of the vulnerability."];
+      adjustments: CvssScoreAdjustmentList.t option
+        [@ocaml.doc
+          "An object that contains details about an adjustment that Amazon Inspector made to the CVSS score for the finding."]}
+    let make ?scoreSource =
+      fun ?cvssSource ->
+        fun ?version ->
+          fun ?score ->
+            fun ?scoringVector ->
+              fun ?adjustments ->
+                fun () ->
+                  {
+                    scoreSource;
+                    cvssSource;
+                    version;
+                    score;
+                    scoringVector;
+                    adjustments
+                  }
+    let to_value x =
+      structure_to_value
+        [("scoreSource",
+           (Option.map x.scoreSource ~f:NonEmptyString.to_value));
+        ("cvssSource", (Option.map x.cvssSource ~f:NonEmptyString.to_value));
+        ("version", (Option.map x.version ~f:NonEmptyString.to_value));
+        ("score", (Option.map x.score ~f:NonNegativeDouble.to_value));
+        ("scoringVector",
+          (Option.map x.scoringVector ~f:NonEmptyString.to_value));
+        ("adjustments",
+          (Option.map x.adjustments ~f:CvssScoreAdjustmentList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adjustments =
+        (Option.map ~f:CvssScoreAdjustmentList.of_xml)
+          (Xml.child xml_arg0 "adjustments") in
+      let scoringVector =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "scoringVector") in
+      let score =
+        (Option.map ~f:NonNegativeDouble.of_xml) (Xml.child xml_arg0 "score") in
+      let version =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "version") in
+      let cvssSource =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "cvssSource") in
+      let scoreSource =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "scoreSource") in
+      make ?adjustments ?scoringVector ?score ?version ?cvssSource
+        ?scoreSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adjustments =
+        field_map json__ "adjustments" CvssScoreAdjustmentList.of_json in
+      let scoringVector =
+        field_map json__ "scoringVector" NonEmptyString.of_json in
+      let score = field_map json__ "score" NonNegativeDouble.of_json in
+      let version = field_map json__ "version" NonEmptyString.of_json in
+      let cvssSource = field_map json__ "cvssSource" NonEmptyString.of_json in
+      let scoreSource = field_map json__ "scoreSource" NonEmptyString.of_json in
+      make ?adjustments ?scoringVector ?score ?version ?cvssSource
+        ?scoreSource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the source of the score, and the factors that determined the adjustments to create the final score."]
+module CvssScoreList =
+  struct
+    type nonrec t = CvssScore.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CvssScore.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CvssScore.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CvssScoreList" ~of_json:CvssScore.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DateTimeTimestamp =
   struct
     type nonrec t = string
-    let context_ = "FilterValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module NonEmptyStringList =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NonEmptyStringList" ~of_json:NonEmptyString.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module VulnerabilityIdList =
+  struct
+    type nonrec t = VulnerabilityId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VulnerabilityId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VulnerabilityId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VulnerabilityIdList"
+        ~of_json:VulnerabilityId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VulnerablePackageList =
+  struct
+    type nonrec t = VulnerablePackage.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VulnerablePackage.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VulnerablePackage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VulnerablePackageList"
+        ~of_json:VulnerablePackage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RemediationRecommendation =
+  struct
+    type nonrec t =
+      {
+      text: NonEmptyString.t option
+        [@ocaml.doc
+          "The recommended course of action to remediate the finding."];
+      url: NonEmptyString.t option
+        [@ocaml.doc
+          "A link to more information about the recommended remediation for this vulnerability."]}
+    let make ?text = fun ?url -> fun () -> { text; url }
+    let to_value x =
+      structure_to_value
+        [("text", (Option.map x.text ~f:NonEmptyString.to_value));
+        ("url", (Option.map x.url ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let url =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "url") in
+      let text =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "text") in
+      make ?url ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let url = field_map json__ "url" NonEmptyString.of_json in
+      let text = field_map json__ "text" NonEmptyString.of_json in
+      make ?url ?text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the recommended course of action to remediate the finding."]
+module SeverityCounts =
+  struct
+    type nonrec t =
+      {
+      all: SeverityCountNumber.t option
+        [@ocaml.doc
+          "The total number of findings across all severity levels for the specified filter."];
+      critical: SeverityCountNumber.t option
+        [@ocaml.doc
+          "The number of critical severity findings for the specified filter."];
+      high: SeverityCountNumber.t option
+        [@ocaml.doc
+          "The number of high severity findings for the specified filter."];
+      medium: SeverityCountNumber.t option
+        [@ocaml.doc
+          "The number of medium severity findings for the specified filter."]}
+    let make ?all =
+      fun ?critical ->
+        fun ?high -> fun ?medium -> fun () -> { all; critical; high; medium }
+    let to_value x =
+      structure_to_value
+        [("all", (Option.map x.all ~f:SeverityCountNumber.to_value));
+        ("critical", (Option.map x.critical ~f:SeverityCountNumber.to_value));
+        ("high", (Option.map x.high ~f:SeverityCountNumber.to_value));
+        ("medium", (Option.map x.medium ~f:SeverityCountNumber.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let medium =
+        (Option.map ~f:SeverityCountNumber.of_xml)
+          (Xml.child xml_arg0 "medium") in
+      let high =
+        (Option.map ~f:SeverityCountNumber.of_xml)
+          (Xml.child xml_arg0 "high") in
+      let critical =
+        (Option.map ~f:SeverityCountNumber.of_xml)
+          (Xml.child xml_arg0 "critical") in
+      let all =
+        (Option.map ~f:SeverityCountNumber.of_xml) (Xml.child xml_arg0 "all") in
+      make ?medium ?high ?critical ?all ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let medium = field_map json__ "medium" SeverityCountNumber.of_json in
+      let high = field_map json__ "high" SeverityCountNumber.of_json in
+      let critical = field_map json__ "critical" SeverityCountNumber.of_json in
+      let all = field_map json__ "all" SeverityCountNumber.of_json in
+      make ?medium ?high ?critical ?all ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Includes counts by severity level for medium severity and higher level findings, plus a total for all of the findings for the specified filter."]
+module ImageBuildVersionArn =
+  struct
+    type nonrec t = string
+    let context_ = "ImageBuildVersionArn"
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i ~pattern:"^[0-9a-zA-Z./_ :-]{1,1024}$");
+          (check_pattern i
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):image/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+$");
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FilterValue" j
+    let of_json j = string_of_json ~kind:"ImageBuildVersionArn" j
     let to_json = simple_to_json to_value
   end
+module ImagePipelineArn =
+  struct
+    type nonrec t = string
+    let context_ = "ImagePipelineArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):image-pipeline/[a-z0-9-_]+$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImagePipelineArn" j
+    let to_json = simple_to_json to_value
+  end
+module EcrConfiguration =
+  struct
+    type nonrec t =
+      {
+      repositoryName: NonEmptyString.t option
+        [@ocaml.doc
+          "The name of the container repository that Amazon Inspector scans to identify findings for your container images. The name includes the path for the repository location. If you don\226\128\153t provide this information, Image Builder creates a repository in your account named image-builder-image-scanning-repository for vulnerability scans of your output container images."];
+      containerTags: StringList.t option
+        [@ocaml.doc
+          "Tags for Image Builder to apply to the output container image that Amazon Inspector scans. Tags can help you identify and manage your scanned images."]}
+    let make ?repositoryName =
+      fun ?containerTags -> fun () -> { repositoryName; containerTags }
+    let to_value x =
+      structure_to_value
+        [("repositoryName",
+           (Option.map x.repositoryName ~f:NonEmptyString.to_value));
+        ("containerTags",
+          (Option.map x.containerTags ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let containerTags =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "containerTags") in
+      let repositoryName =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "repositoryName") in
+      make ?containerTags ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let containerTags = field_map json__ "containerTags" StringList.of_json in
+      let repositoryName =
+        field_map json__ "repositoryName" NonEmptyString.of_json in
+      make ?containerTags ?repositoryName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Settings that Image Builder uses to configure the ECR repository and the output container images that Amazon Inspector scans."]
 module ImageTestsTimeoutMinutes =
   struct
     type nonrec t = int
@@ -1629,6 +3223,54 @@ module ImageTestsTimeoutMinutes =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module LogGroupName =
+  struct
+    type nonrec t = string
+    let context_ = "LogGroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\-_/\\.]{1,512}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogGroupName" j
+    let to_json = simple_to_json to_value
+  end
+module AutoDisablePolicy =
+  struct
+    type nonrec t =
+      {
+      failureCount: AutoDisableFailureCount.t
+        [@ocaml.doc
+          "The number of consecutive scheduled image pipeline executions that must fail before Image Builder automatically disables the pipeline."]}
+    let context_ = "AutoDisablePolicy"
+    let make ~failureCount = fun () -> { failureCount }
+    let to_value x =
+      structure_to_value
+        [("failureCount",
+           (Some (AutoDisableFailureCount.to_value x.failureCount)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureCount =
+        AutoDisableFailureCount.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "failureCount") in
+      make ~failureCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureCount =
+        field_map_exn json__ "failureCount" AutoDisableFailureCount.of_json in
+      make ~failureCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the rules by which an image pipeline is automatically disabled when it fails."]
 module PipelineExecutionStartCondition =
   struct
     type nonrec t =
@@ -1671,7 +3313,7 @@ module Timezone =
                 (check_string_max i ~max:100) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"[a-zA-Z0-9]{2,}(?:\\/[a-zA-z0-9-_+]+)*")));
+                       ~pattern:"[a-zA-Z0-9]{2,}(?:\\/[a-zA-Z0-9-_+]+)*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1681,10 +3323,72 @@ module Timezone =
     let of_json j = string_of_json ~kind:"Timezone" j
     let to_json = simple_to_json to_value
   end
+module WorkflowConfiguration =
+  struct
+    type nonrec t =
+      {
+      workflowArn: WorkflowVersionArnOrBuildVersionArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource."];
+      parameters: WorkflowParameterList.t option
+        [@ocaml.doc
+          "Contains parameter values for each of the parameters that the workflow document defined for the workflow resource."];
+      parallelGroup: ParallelGroup.t option
+        [@ocaml.doc
+          "Test workflows are defined within named runtime groups called parallel groups. The parallel group is the named group that contains this test workflow. Test workflows within a parallel group can run at the same time. Image Builder starts up to five test workflows in the group at the same time, and starts additional workflows as others complete, until all workflows in the group have completed. This field only applies for test workflows."];
+      onFailure: OnWorkflowFailure.t option
+        [@ocaml.doc "The action to take if the workflow fails."]}
+    let context_ = "WorkflowConfiguration"
+    let make ?parameters =
+      fun ?parallelGroup ->
+        fun ?onFailure ->
+          fun ~workflowArn ->
+            fun () -> { parameters; parallelGroup; onFailure; workflowArn }
+    let to_value x =
+      structure_to_value
+        [("workflowArn",
+           (Some (WorkflowVersionArnOrBuildVersionArn.to_value x.workflowArn)));
+        ("parameters",
+          (Option.map x.parameters ~f:WorkflowParameterList.to_value));
+        ("parallelGroup",
+          (Option.map x.parallelGroup ~f:ParallelGroup.to_value));
+        ("onFailure", (Option.map x.onFailure ~f:OnWorkflowFailure.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let onFailure =
+        (Option.map ~f:OnWorkflowFailure.of_xml)
+          (Xml.child xml_arg0 "onFailure") in
+      let parallelGroup =
+        (Option.map ~f:ParallelGroup.of_xml)
+          (Xml.child xml_arg0 "parallelGroup") in
+      let parameters =
+        (Option.map ~f:WorkflowParameterList.of_xml)
+          (Xml.child xml_arg0 "parameters") in
+      let workflowArn =
+        WorkflowVersionArnOrBuildVersionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workflowArn") in
+      make ?onFailure ?parallelGroup ?parameters ~workflowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let onFailure = field_map json__ "onFailure" OnWorkflowFailure.of_json in
+      let parallelGroup =
+        field_map json__ "parallelGroup" ParallelGroup.of_json in
+      let parameters =
+        field_map json__ "parameters" WorkflowParameterList.of_json in
+      let workflowArn =
+        field_map_exn json__ "workflowArn"
+          WorkflowVersionArnOrBuildVersionArn.of_json in
+      make ?onFailure ?parallelGroup ?parameters ~workflowArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains control settings and configurable inputs for a workflow resource."]
 module AmiList =
   struct
     type nonrec t = Ami.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ami.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1708,6 +3412,9 @@ module ContainerList =
   struct
     type nonrec t = Container.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Container.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1742,16 +3449,62 @@ module OsVersion =
     let of_json j = string_of_json ~kind:"OsVersion" j
     let to_json = simple_to_json to_value
   end
+module ProductCodeListItem =
+  struct
+    type nonrec t =
+      {
+      productCodeId: ProductCodeId.t option
+        [@ocaml.doc
+          "For Amazon Web Services Marketplace components, this contains the product code ID that can be stamped onto an EC2 AMI to ensure that components are billed correctly. If this property is empty, it might mean that the component is not published."];
+      productCodeType: ProductCodeType.t option
+        [@ocaml.doc
+          "The owner of the product code that's billed. If this property is empty, it might mean that the component is not published."]}
+    let make ?productCodeId =
+      fun ?productCodeType -> fun () -> { productCodeId; productCodeType }
+    let to_value x =
+      structure_to_value
+        [("productCodeId",
+           (Option.map x.productCodeId ~f:ProductCodeId.to_value));
+        ("productCodeType",
+          (Option.map x.productCodeType ~f:ProductCodeType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let productCodeType =
+        (Option.map ~f:ProductCodeType.of_xml)
+          (Xml.child xml_arg0 "productCodeType") in
+      let productCodeId =
+        (Option.map ~f:ProductCodeId.of_xml)
+          (Xml.child xml_arg0 "productCodeId") in
+      make ?productCodeType ?productCodeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let productCodeType =
+        field_map json__ "productCodeType" ProductCodeType.of_json in
+      let productCodeId =
+        field_map json__ "productCodeId" ProductCodeId.of_json in
+      make ?productCodeType ?productCodeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a single product code."]
 module ComponentStatus =
   struct
     type nonrec t =
       | DEPRECATED 
+      | DISABLED 
+      | ACTIVE 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | DEPRECATED -> "DEPRECATED" | Non_static_id s -> s
+      function
+      | DEPRECATED -> "DEPRECATED"
+      | DISABLED -> "DISABLED"
+      | ACTIVE -> "ACTIVE"
+      | Non_static_id s -> s
     let of_string =
-      function | "DEPRECATED" -> DEPRECATED | x -> Non_static_id x
+      function
+      | "DEPRECATED" -> DEPRECATED
+      | "DISABLED" -> DISABLED
+      | "ACTIVE" -> ACTIVE
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -1760,6 +3513,212 @@ module ComponentStatus =
     let of_json j = of_string (string_of_json ~kind:"ComponentStatus" j)
     let to_json = simple_to_json to_value
   end
+module WorkflowParameterDescription =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowParameterDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[^\\x00]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowParameterDescription" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowParameterType =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowParameterType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^string|integer|boolean|stringList$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowParameterType" j
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicyDetailAction =
+  struct
+    type nonrec t =
+      {
+      type_: LifecyclePolicyDetailActionType.t
+        [@ocaml.doc "Specifies the lifecycle action to take."];
+      includeResources: LifecyclePolicyDetailActionIncludeResources.t option
+        [@ocaml.doc
+          "Specifies the resources that the lifecycle policy applies to."]}
+    let context_ = "LifecyclePolicyDetailAction"
+    let make ?includeResources =
+      fun ~type_ -> fun () -> { includeResources; type_ }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (LifecyclePolicyDetailActionType.to_value x.type_)));
+        ("includeResources",
+          (Option.map x.includeResources
+             ~f:LifecyclePolicyDetailActionIncludeResources.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let includeResources =
+        (Option.map ~f:LifecyclePolicyDetailActionIncludeResources.of_xml)
+          (Xml.child xml_arg0 "includeResources") in
+      let type_ =
+        LifecyclePolicyDetailActionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?includeResources ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let includeResources =
+        field_map json__ "includeResources"
+          LifecyclePolicyDetailActionIncludeResources.of_json in
+      let type_ =
+        field_map_exn json__ "type" LifecyclePolicyDetailActionType.of_json in
+      make ?includeResources ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains selection criteria for the lifecycle policy."]
+module LifecyclePolicyDetailExclusionRules =
+  struct
+    type nonrec t =
+      {
+      tagMap: TagMap.t option
+        [@ocaml.doc
+          "Contains a list of tags that Image Builder uses to skip lifecycle actions for Image Builder image resources that have them."];
+      amis: LifecyclePolicyDetailExclusionRulesAmis.t option
+        [@ocaml.doc
+          "Lists configuration values that apply to AMIs that Image Builder should exclude from the lifecycle action."]}
+    let make ?tagMap = fun ?amis -> fun () -> { tagMap; amis }
+    let to_value x =
+      structure_to_value
+        [("tagMap", (Option.map x.tagMap ~f:TagMap.to_value));
+        ("amis",
+          (Option.map x.amis
+             ~f:LifecyclePolicyDetailExclusionRulesAmis.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let amis =
+        (Option.map ~f:LifecyclePolicyDetailExclusionRulesAmis.of_xml)
+          (Xml.child xml_arg0 "amis") in
+      let tagMap =
+        (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tagMap") in
+      make ?amis ?tagMap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let amis =
+        field_map json__ "amis"
+          LifecyclePolicyDetailExclusionRulesAmis.of_json in
+      let tagMap = field_map json__ "tagMap" TagMap.of_json in
+      make ?amis ?tagMap ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies resources that lifecycle policy actions should not apply to."]
+module LifecyclePolicyDetailFilter =
+  struct
+    type nonrec t =
+      {
+      type_: LifecyclePolicyDetailFilterType.t
+        [@ocaml.doc "Filter resources based on either age or count."];
+      value: LifecyclePolicyDetailFilterValue.t
+        [@ocaml.doc
+          "The number of units for the time period or for the count. For example, a value of 6 might refer to six months or six AMIs. For count-based filters, this value represents the minimum number of resources to keep on hand. If you have fewer resources than this number, the resource is excluded from lifecycle actions."];
+      unit: LifecyclePolicyTimeUnit.t option
+        [@ocaml.doc
+          "Defines the unit of time that the lifecycle policy uses to determine impacted resources. This is required for age-based rules."];
+      retainAtLeast: LifecyclePolicyDetailFilterRetainAtLeast.t option
+        [@ocaml.doc
+          "For age-based filters, this is the number of resources to keep on hand after the lifecycle DELETE action is applied. Impacted resources are only deleted if you have more than this number of resources. If you have fewer resources than this number, the impacted resource is not deleted."]}
+    let context_ = "LifecyclePolicyDetailFilter"
+    let make ?unit =
+      fun ?retainAtLeast ->
+        fun ~type_ ->
+          fun ~value -> fun () -> { unit; retainAtLeast; type_; value }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (LifecyclePolicyDetailFilterType.to_value x.type_)));
+        ("value", (Some (LifecyclePolicyDetailFilterValue.to_value x.value)));
+        ("unit", (Option.map x.unit ~f:LifecyclePolicyTimeUnit.to_value));
+        ("retainAtLeast",
+          (Option.map x.retainAtLeast
+             ~f:LifecyclePolicyDetailFilterRetainAtLeast.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retainAtLeast =
+        (Option.map ~f:LifecyclePolicyDetailFilterRetainAtLeast.of_xml)
+          (Xml.child xml_arg0 "retainAtLeast") in
+      let unit =
+        (Option.map ~f:LifecyclePolicyTimeUnit.of_xml)
+          (Xml.child xml_arg0 "unit") in
+      let value =
+        LifecyclePolicyDetailFilterValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      let type_ =
+        LifecyclePolicyDetailFilterType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?retainAtLeast ?unit ~value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retainAtLeast =
+        field_map json__ "retainAtLeast"
+          LifecyclePolicyDetailFilterRetainAtLeast.of_json in
+      let unit = field_map json__ "unit" LifecyclePolicyTimeUnit.of_json in
+      let value =
+        field_map_exn json__ "value" LifecyclePolicyDetailFilterValue.of_json in
+      let type_ =
+        field_map_exn json__ "type" LifecyclePolicyDetailFilterType.of_json in
+      make ?retainAtLeast ?unit ~value ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines filters that the lifecycle policy uses to determine impacted resource."]
+module LifecyclePolicyResourceSelectionRecipe =
+  struct
+    type nonrec t =
+      {
+      name: ResourceName.t
+        [@ocaml.doc
+          "The name of an Image Builder recipe that the lifecycle policy uses for resource selection."];
+      semanticVersion: WildcardVersionNumber.t
+        [@ocaml.doc
+          "The version of the Image Builder recipe specified by the name field."]}
+    let context_ = "LifecyclePolicyResourceSelectionRecipe"
+    let make ~name =
+      fun ~semanticVersion -> fun () -> { name; semanticVersion }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (ResourceName.to_value x.name)));
+        ("semanticVersion",
+          (Some (WildcardVersionNumber.to_value x.semanticVersion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let semanticVersion =
+        WildcardVersionNumber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "semanticVersion") in
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~semanticVersion ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let semanticVersion =
+        field_map_exn json__ "semanticVersion" WildcardVersionNumber.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ~semanticVersion ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies an Image Builder recipe that the lifecycle policy uses for resource selection."]
 module ComponentConfiguration =
   struct
     type nonrec t =
@@ -1768,7 +3727,7 @@ module ComponentConfiguration =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the component."];
       parameters: ComponentParameterList.t option
         [@ocaml.doc
-          "A group of parameter settings that are used to configure the component for a specific recipe."]}
+          "A group of parameter settings that Image Builder uses to configure the component for a specific recipe."]}
     let context_ = "ComponentConfiguration"
     let make ?parameters =
       fun ~componentArn -> fun () -> { parameters; componentArn }
@@ -1789,11 +3748,11 @@ module ComponentConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "componentArn") in
       make ?parameters ~componentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "parameters" ComponentParameterList.of_json in
+        field_map json__ "parameters" ComponentParameterList.of_json in
       let componentArn =
-        field_map_exn json "componentArn"
+        field_map_exn json__ "componentArn"
           ComponentVersionArnOrBuildVersionArn.of_json in
       make ?parameters ~componentArn ()
     let to_json v = composed_to_json to_value v
@@ -1802,6 +3761,9 @@ module InstanceBlockDeviceMappings =
   struct
     type nonrec t = InstanceBlockDeviceMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceBlockDeviceMapping.to_value)) |>
         (fun x -> `List x)
@@ -1847,7 +3809,10 @@ module Distribution =
           "Configure export settings to deliver disk images created from your image build, using a file format that is compatible with your VMs in that Region."];
       fastLaunchConfigurations: FastLaunchConfigurationList.t option
         [@ocaml.doc
-          "The Windows faster-launching configurations to use for AMI distribution."]}
+          "The Windows faster-launching configurations to use for AMI distribution."];
+      ssmParameterConfigurations: SsmParameterConfigurationList.t option
+        [@ocaml.doc
+          "Contains settings to update Amazon Web Services Systems Manager (SSM) Parameter Store Parameters with output AMI IDs from the build by target Region."]}
     let context_ = "Distribution"
     let make ?amiDistributionConfiguration =
       fun ?containerDistributionConfiguration ->
@@ -1855,17 +3820,19 @@ module Distribution =
           fun ?launchTemplateConfigurations ->
             fun ?s3ExportConfiguration ->
               fun ?fastLaunchConfigurations ->
-                fun ~region ->
-                  fun () ->
-                    {
-                      amiDistributionConfiguration;
-                      containerDistributionConfiguration;
-                      licenseConfigurationArns;
-                      launchTemplateConfigurations;
-                      s3ExportConfiguration;
-                      fastLaunchConfigurations;
-                      region
-                    }
+                fun ?ssmParameterConfigurations ->
+                  fun ~region ->
+                    fun () ->
+                      {
+                        amiDistributionConfiguration;
+                        containerDistributionConfiguration;
+                        licenseConfigurationArns;
+                        launchTemplateConfigurations;
+                        s3ExportConfiguration;
+                        fastLaunchConfigurations;
+                        ssmParameterConfigurations;
+                        region
+                      }
     let to_value x =
       structure_to_value
         [("region", (Some (NonEmptyString.to_value x.region)));
@@ -1886,9 +3853,15 @@ module Distribution =
              ~f:S3ExportConfiguration.to_value));
         ("fastLaunchConfigurations",
           (Option.map x.fastLaunchConfigurations
-             ~f:FastLaunchConfigurationList.to_value))]
+             ~f:FastLaunchConfigurationList.to_value));
+        ("ssmParameterConfigurations",
+          (Option.map x.ssmParameterConfigurations
+             ~f:SsmParameterConfigurationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ssmParameterConfigurations =
+        (Option.map ~f:SsmParameterConfigurationList.of_xml)
+          (Xml.child xml_arg0 "ssmParameterConfigurations") in
       let fastLaunchConfigurations =
         (Option.map ~f:FastLaunchConfigurationList.of_xml)
           (Xml.child xml_arg0 "fastLaunchConfigurations") in
@@ -1910,34 +3883,38 @@ module Distribution =
       let region =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "region") in
-      make ?fastLaunchConfigurations ?s3ExportConfiguration
-        ?launchTemplateConfigurations ?licenseConfigurationArns
-        ?containerDistributionConfiguration ?amiDistributionConfiguration
-        ~region ()
+      make ?ssmParameterConfigurations ?fastLaunchConfigurations
+        ?s3ExportConfiguration ?launchTemplateConfigurations
+        ?licenseConfigurationArns ?containerDistributionConfiguration
+        ?amiDistributionConfiguration ~region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ssmParameterConfigurations =
+        field_map json__ "ssmParameterConfigurations"
+          SsmParameterConfigurationList.of_json in
       let fastLaunchConfigurations =
-        field_map json "fastLaunchConfigurations"
+        field_map json__ "fastLaunchConfigurations"
           FastLaunchConfigurationList.of_json in
       let s3ExportConfiguration =
-        field_map json "s3ExportConfiguration" S3ExportConfiguration.of_json in
+        field_map json__ "s3ExportConfiguration"
+          S3ExportConfiguration.of_json in
       let launchTemplateConfigurations =
-        field_map json "launchTemplateConfigurations"
+        field_map json__ "launchTemplateConfigurations"
           LaunchTemplateConfigurationList.of_json in
       let licenseConfigurationArns =
-        field_map json "licenseConfigurationArns"
+        field_map json__ "licenseConfigurationArns"
           LicenseConfigurationArnList.of_json in
       let containerDistributionConfiguration =
-        field_map json "containerDistributionConfiguration"
+        field_map json__ "containerDistributionConfiguration"
           ContainerDistributionConfiguration.of_json in
       let amiDistributionConfiguration =
-        field_map json "amiDistributionConfiguration"
+        field_map json__ "amiDistributionConfiguration"
           AmiDistributionConfiguration.of_json in
-      let region = field_map_exn json "region" NonEmptyString.of_json in
-      make ?fastLaunchConfigurations ?s3ExportConfiguration
-        ?launchTemplateConfigurations ?licenseConfigurationArns
-        ?containerDistributionConfiguration ?amiDistributionConfiguration
-        ~region ()
+      let region = field_map_exn json__ "region" NonEmptyString.of_json in
+      make ?ssmParameterConfigurations ?fastLaunchConfigurations
+        ?s3ExportConfiguration ?launchTemplateConfigurations
+        ?licenseConfigurationArns ?containerDistributionConfiguration
+        ?amiDistributionConfiguration ~region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines the settings for a specific Region."]
 module SystemsManagerAgent =
@@ -1946,7 +3923,7 @@ module SystemsManagerAgent =
       {
       uninstallAfterBuild: NullableBoolean.t option
         [@ocaml.doc
-          "Controls whether the Systems Manager agent is removed from your final build image, prior to creating the new AMI. If this is set to true, then the agent is removed from the final image. If it's set to false, then the agent is left in, so that it is included in the new AMI. The default value is false."]}
+          "Controls whether the Systems Manager agent is removed from your final build image, prior to creating the new AMI. If this is set to true, then the agent is removed from the final image. If it's set to false, then the agent is left in, so that it is included in the new AMI. default value is false. The default behavior of uninstallAfterBuild is to remove the SSM Agent if it was installed by EC2 Image Builder"]}
     let make ?uninstallAfterBuild = fun () -> { uninstallAfterBuild }
     let to_value x =
       structure_to_value
@@ -1959,9 +3936,9 @@ module SystemsManagerAgent =
           (Xml.child xml_arg0 "uninstallAfterBuild") in
       make ?uninstallAfterBuild ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uninstallAfterBuild =
-        field_map json "uninstallAfterBuild" NullableBoolean.of_json in
+        field_map json__ "uninstallAfterBuild" NullableBoolean.of_json in
       make ?uninstallAfterBuild ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2049,9 +4026,10 @@ module S3Logs =
           (Xml.child xml_arg0 "s3BucketName") in
       make ?s3KeyPrefix ?s3BucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3KeyPrefix = field_map json "s3KeyPrefix" NonEmptyString.of_json in
-      let s3BucketName = field_map json "s3BucketName" NonEmptyString.of_json in
+    let of_json json__ =
+      let s3KeyPrefix = field_map json__ "s3KeyPrefix" NonEmptyString.of_json in
+      let s3BucketName =
+        field_map json__ "s3BucketName" NonEmptyString.of_json in
       make ?s3KeyPrefix ?s3BucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Amazon S3 logging configuration."]
@@ -2110,6 +4088,699 @@ module DateTime =
     let of_json j = string_of_json ~kind:"DateTime" j
     let to_json = simple_to_json to_value
   end
+module VersionNumber =
+  struct
+    type nonrec t = string
+    let context_ = "VersionNumber"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^[0-9]+\\.[0-9]+\\.[0-9]+$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VersionNumber" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowType =
+  struct
+    type nonrec t =
+      | BUILD 
+      | TEST 
+      | DISTRIBUTION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BUILD -> "BUILD"
+      | TEST -> "TEST"
+      | DISTRIBUTION -> "DISTRIBUTION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BUILD" -> BUILD
+      | "TEST" -> TEST
+      | "DISTRIBUTION" -> DISTRIBUTION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration WorkflowType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WorkflowType" j)
+    let to_json = simple_to_json to_value
+  end
+module WorkflowVersionArn =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowVersionArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:aws(?:-[a-z]+)*:imagebuilder:[a-z]{2,}(?:-[a-z]+)+-[0-9]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):workflow/(build|test|distribution)/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowVersionArn" j
+    let to_json = simple_to_json to_value
+  end
+module FilterName =
+  struct
+    type nonrec t = string
+    let context_ = "FilterName"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[a-zA-Z]{1,1024}$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterName" j
+    let to_json = simple_to_json to_value
+  end
+module FilterValues =
+  struct
+    type nonrec t = FilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FilterValues" ~of_json:FilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkflowStepAction =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowStepAction"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^[A-Za-z][A-Za-z0-9-_]{1,99}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowStepAction" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepDescription =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowStepDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:500) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowStepDescription" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepExecutionId =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowStepExecutionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^step-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowStepExecutionId" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepExecutionRollbackStatus =
+  struct
+    type nonrec t =
+      | RUNNING 
+      | COMPLETED 
+      | SKIPPED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RUNNING -> "RUNNING"
+      | COMPLETED -> "COMPLETED"
+      | SKIPPED -> "SKIPPED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RUNNING" -> RUNNING
+      | "COMPLETED" -> COMPLETED
+      | "SKIPPED" -> SKIPPED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration WorkflowStepExecutionRollbackStatus" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"WorkflowStepExecutionRollbackStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepExecutionStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | SKIPPED 
+      | RUNNING 
+      | COMPLETED 
+      | FAILED 
+      | CANCELLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | SKIPPED -> "SKIPPED"
+      | RUNNING -> "RUNNING"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | CANCELLED -> "CANCELLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "SKIPPED" -> SKIPPED
+      | "RUNNING" -> RUNNING
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | "CANCELLED" -> CANCELLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WorkflowStepExecutionStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WorkflowStepExecutionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepInputs =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowStepInputs"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowStepInputs" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepMessage =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowStepMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:500) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowStepMessage" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepName =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowStepName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^[A-Za-z][A-Za-z0-9-_]{1,99}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowStepName" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepOutputs =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowStepOutputs"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowStepOutputs" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowBuildVersionArn =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowBuildVersionArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^arn:aws(?:-[a-z]+)*:imagebuilder:[a-z]{2,}(?:-[a-z]+)+-[0-9]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):workflow/(build|test|distribution)/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowBuildVersionArn" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowExecutionId =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowExecutionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^wf-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowExecutionId" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowExecutionMessage =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowExecutionMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:500) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowExecutionMessage" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowExecutionStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | SKIPPED 
+      | RUNNING 
+      | COMPLETED 
+      | FAILED 
+      | ROLLBACK_IN_PROGRESS 
+      | ROLLBACK_COMPLETED 
+      | CANCELLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | SKIPPED -> "SKIPPED"
+      | RUNNING -> "RUNNING"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | ROLLBACK_IN_PROGRESS -> "ROLLBACK_IN_PROGRESS"
+      | ROLLBACK_COMPLETED -> "ROLLBACK_COMPLETED"
+      | CANCELLED -> "CANCELLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "SKIPPED" -> SKIPPED
+      | "RUNNING" -> RUNNING
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | "ROLLBACK_IN_PROGRESS" -> ROLLBACK_IN_PROGRESS
+      | "ROLLBACK_COMPLETED" -> ROLLBACK_COMPLETED
+      | "CANCELLED" -> CANCELLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WorkflowExecutionStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WorkflowExecutionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for WorkflowStepCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module WorkflowNameArn =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowNameArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:aws(?:-[a-z]+)*:imagebuilder:[a-z]{2,}(?:-[a-z]+)+-[0-9]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):workflow/(build|test|distribution)/[a-z0-9-_]+/x\\.x\\.x$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowNameArn" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowState =
+  struct
+    type nonrec t =
+      {
+      status: WorkflowStatus.t option
+        [@ocaml.doc "The current state of the workflow."];
+      reason: NonEmptyString.t option
+        [@ocaml.doc "Describes how or why the workflow changed state."]}
+    let make ?status = fun ?reason -> fun () -> { status; reason }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:WorkflowStatus.to_value));
+        ("reason", (Option.map x.reason ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "reason") in
+      let status =
+        (Option.map ~f:WorkflowStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" NonEmptyString.of_json in
+      let status = field_map json__ "status" WorkflowStatus.of_json in
+      make ?reason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A group of fields that describe the current status of workflow."]
+module LifecyclePolicyArn =
+  struct
+    type nonrec t = string
+    let context_ = "LifecyclePolicyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^arn:aws(?:-[a-z]+)*:imagebuilder:[a-z]{2,}(?:-[a-z]+)+-[0-9]+:(?:[0-9]{12}|aws):lifecycle-policy/[a-z0-9-_]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LifecyclePolicyArn" j
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicyResourceType =
+  struct
+    type nonrec t =
+      | AMI_IMAGE 
+      | CONTAINER_IMAGE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AMI_IMAGE -> "AMI_IMAGE"
+      | CONTAINER_IMAGE -> "CONTAINER_IMAGE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AMI_IMAGE" -> AMI_IMAGE
+      | "CONTAINER_IMAGE" -> CONTAINER_IMAGE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LifecyclePolicyResourceType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LifecyclePolicyResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicyStatus =
+  struct
+    type nonrec t =
+      | DISABLED 
+      | ENABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DISABLED -> "DISABLED"
+      | ENABLED -> "ENABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DISABLED" -> DISABLED
+      | "ENABLED" -> ENABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LifecyclePolicyStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LifecyclePolicyStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module RoleNameOrArn =
+  struct
+    type nonrec t = string
+    let context_ = "RoleNameOrArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?:arn:aws(?:-[a-z]+)*:iam::[0-9]{12}:role/)?[a-zA-Z_0-9+=,.@\\-_/]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleNameOrArn" j
+    let to_json = simple_to_json to_value
+  end
+module LifecycleExecutionId =
+  struct
+    type nonrec t = string
+    let context_ = "LifecycleExecutionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^lce-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LifecycleExecutionId" j
+    let to_json = simple_to_json to_value
+  end
+module LifecycleExecutionResourcesImpactedSummary =
+  struct
+    type nonrec t =
+      {
+      hasImpactedResources: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether an image resource that was identified for a lifecycle action has associated resources that are also impacted."]}
+    let make ?hasImpactedResources = fun () -> { hasImpactedResources }
+    let to_value x =
+      structure_to_value
+        [("hasImpactedResources",
+           (Option.map x.hasImpactedResources ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hasImpactedResources =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "hasImpactedResources") in
+      make ?hasImpactedResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hasImpactedResources =
+        field_map json__ "hasImpactedResources" Boolean.of_json in
+      make ?hasImpactedResources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details for an image resource that was identified for a lifecycle action."]
+module LifecycleExecutionState =
+  struct
+    type nonrec t =
+      {
+      status: LifecycleExecutionStatus.t option
+        [@ocaml.doc "The runtime status of the lifecycle execution."];
+      reason: NonEmptyString.t option
+        [@ocaml.doc "The reason for the current status."]}
+    let make ?status = fun ?reason -> fun () -> { status; reason }
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:LifecycleExecutionStatus.to_value));
+        ("reason", (Option.map x.reason ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "reason") in
+      let status =
+        (Option.map ~f:LifecycleExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" NonEmptyString.of_json in
+      let status = field_map json__ "status" LifecycleExecutionStatus.of_json in
+      make ?reason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The current state of the runtime instance of the lifecycle policy."]
+module LifecycleExecutionResourceAction =
+  struct
+    type nonrec t =
+      {
+      name: LifecycleExecutionResourceActionName.t option
+        [@ocaml.doc
+          "The name of the resource that was identified for a lifecycle policy action."];
+      reason: NonEmptyString.t option
+        [@ocaml.doc "The reason why the lifecycle policy action is taken."]}
+    let make ?name = fun ?reason -> fun () -> { name; reason }
+    let to_value x =
+      structure_to_value
+        [("name",
+           (Option.map x.name
+              ~f:LifecycleExecutionResourceActionName.to_value));
+        ("reason", (Option.map x.reason ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "reason") in
+      let name =
+        (Option.map ~f:LifecycleExecutionResourceActionName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?reason ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" NonEmptyString.of_json in
+      let name =
+        field_map json__ "name" LifecycleExecutionResourceActionName.of_json in
+      make ?reason ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The lifecycle policy action that was identified for the impacted resource."]
+module LifecycleExecutionSnapshotResourceList =
+  struct
+    type nonrec t = LifecycleExecutionSnapshotResource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LifecycleExecutionSnapshotResource.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:LifecycleExecutionSnapshotResource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LifecycleExecutionSnapshotResourceList"
+        ~of_json:LifecycleExecutionSnapshotResource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ImageBuilderArn =
   struct
     type nonrec t = string
@@ -2118,7 +4789,7 @@ module ImageBuilderArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):(?:image-recipe|container-recipe|infrastructure-configuration|distribution-configuration|component|image|image-pipeline)/[a-z0-9-_]+(?:/(?:(?:x|[0-9]+)\\.(?:x|[0-9]+)\\.(?:x|[0-9]+))(?:/[0-9]+)?)?$");
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):(?:image-recipe|container-recipe|infrastructure-configuration|distribution-configuration|component|image|image-pipeline|lifecycle-policy|workflow\\/(?:build|test|distribution))/[a-z0-9-_]+(?:/(?:(?:x|[0-9]+)\\.(?:x|[0-9]+)\\.(?:x|[0-9]+))(?:/[0-9]+)?)?$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -2152,6 +4823,9 @@ module InstanceTypeList =
   struct
     type nonrec t = InstanceType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2172,24 +4846,61 @@ module InstanceTypeList =
       list_of_json ~kind:"InstanceTypeList" ~of_json:InstanceType.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ResourceName =
+module Placement =
   struct
-    type nonrec t = string
-    let context_ = "ResourceName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"^[-_A-Za-z-0-9][-_A-Za-z0-9 ]{1,126}[-_A-Za-z-0-9]$");
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      availabilityZone: NonEmptyString.t option
+        [@ocaml.doc
+          "The Availability Zone where your build and test instances will launch."];
+      tenancy: TenancyType.t option
+        [@ocaml.doc
+          "The tenancy of the instance. An instance with a tenancy of dedicated runs on single-tenant hardware. An instance with a tenancy of host runs on a Dedicated Host. If tenancy is set to host, then you can optionally specify one target for placement \226\128\147 either host ID or host resource group ARN. If automatic placement is enabled for your host, and you don't specify any placement target, Amazon EC2 will try to find an available host for your build and test instances."];
+      hostId: NonEmptyString.t option
+        [@ocaml.doc
+          "The ID of the Dedicated Host on which build and test instances run. This only applies if tenancy is host. If you specify the host ID, you must not specify the resource group ARN. If you specify both, Image Builder returns an error."];
+      hostResourceGroupArn: NonEmptyString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the host resource group in which to launch build and test instances. This only applies if tenancy is host. If you specify the resource group ARN, you must not specify the host ID. If you specify both, Image Builder returns an error."]}
+    let make ?availabilityZone =
+      fun ?tenancy ->
+        fun ?hostId ->
+          fun ?hostResourceGroupArn ->
+            fun () ->
+              { availabilityZone; tenancy; hostId; hostResourceGroupArn }
+    let to_value x =
+      structure_to_value
+        [("availabilityZone",
+           (Option.map x.availabilityZone ~f:NonEmptyString.to_value));
+        ("tenancy", (Option.map x.tenancy ~f:TenancyType.to_value));
+        ("hostId", (Option.map x.hostId ~f:NonEmptyString.to_value));
+        ("hostResourceGroupArn",
+          (Option.map x.hostResourceGroupArn ~f:NonEmptyString.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ResourceName" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let hostResourceGroupArn =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "hostResourceGroupArn") in
+      let hostId =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "hostId") in
+      let tenancy =
+        (Option.map ~f:TenancyType.of_xml) (Xml.child xml_arg0 "tenancy") in
+      let availabilityZone =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "availabilityZone") in
+      make ?hostResourceGroupArn ?hostId ?tenancy ?availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hostResourceGroupArn =
+        field_map json__ "hostResourceGroupArn" NonEmptyString.of_json in
+      let hostId = field_map json__ "hostId" NonEmptyString.of_json in
+      let tenancy = field_map json__ "tenancy" TenancyType.of_json in
+      let availabilityZone =
+        field_map json__ "availabilityZone" NonEmptyString.of_json in
+      make ?hostResourceGroupArn ?hostId ?tenancy ?availabilityZone ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "By default, EC2 instances run on shared tenancy hardware. This means that multiple Amazon Web Services accounts might share the same physical hardware. When you use dedicated hardware, the physical server that hosts your instances is dedicated to your Amazon Web Services account. Instance placement settings contain the details for the physical hardware where instances that Image Builder launches during image creation will run."]
 module ResourceTagMap =
   struct
     type nonrec t = (TagKey.t * TagValue.t) list
@@ -2215,54 +4926,13 @@ module ResourceTagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:TagKey.of_string
         ~of_json:TagValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module FilterName =
-  struct
-    type nonrec t = string
-    let context_ = "FilterName"
-    let make i =
-      let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^[a-zA-Z]{1,1024}$"); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FilterName" j
-    let to_json = simple_to_json to_value
-  end
-module FilterValues =
-  struct
-    type nonrec t = FilterValue.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:FilterValue.of_xml)
-    let of_json j =
-      list_of_json ~kind:"FilterValues" ~of_json:FilterValue.of_json j
     let to_json v = composed_to_json to_value v
   end
 module BuildType =
@@ -2271,6 +4941,7 @@ module BuildType =
       | USER_INITIATED 
       | SCHEDULED 
       | IMPORT 
+      | IMPORT_ISO 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2278,12 +4949,14 @@ module BuildType =
       | USER_INITIATED -> "USER_INITIATED"
       | SCHEDULED -> "SCHEDULED"
       | IMPORT -> "IMPORT"
+      | IMPORT_ISO -> "IMPORT_ISO"
       | Non_static_id s -> s
     let of_string =
       function
       | "USER_INITIATED" -> USER_INITIATED
       | "SCHEDULED" -> SCHEDULED
       | "IMPORT" -> IMPORT
+      | "IMPORT_ISO" -> IMPORT_ISO
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2291,6 +4964,37 @@ module BuildType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration BuildType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"BuildType" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageSource =
+  struct
+    type nonrec t =
+      | AMAZON_MANAGED 
+      | AWS_MARKETPLACE 
+      | IMPORTED 
+      | CUSTOM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AMAZON_MANAGED -> "AMAZON_MANAGED"
+      | AWS_MARKETPLACE -> "AWS_MARKETPLACE"
+      | IMPORTED -> "IMPORTED"
+      | CUSTOM -> "CUSTOM"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AMAZON_MANAGED" -> AMAZON_MANAGED
+      | "AWS_MARKETPLACE" -> AWS_MARKETPLACE
+      | "IMPORTED" -> IMPORTED
+      | "CUSTOM" -> CUSTOM
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImageSource" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImageSource" j)
     let to_json = simple_to_json to_value
   end
 module ImageType =
@@ -2317,17 +5021,20 @@ module Platform =
     type nonrec t =
       | Windows 
       | Linux 
+      | MacOS 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Windows -> "Windows"
       | Linux -> "Linux"
+      | MacOS -> "macOS"
       | Non_static_id s -> s
     let of_string =
       function
       | "Windows" -> Windows
       | "Linux" -> Linux
+      | "macOS" -> MacOS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2337,23 +5044,365 @@ module Platform =
     let of_json j = of_string (string_of_json ~kind:"Platform" j)
     let to_json = simple_to_json to_value
   end
-module VersionNumber =
+module InspectorScoreDetails =
   struct
-    type nonrec t = string
-    let context_ = "VersionNumber"
+    type nonrec t =
+      {
+      adjustedCvss: CvssScoreDetails.t option
+        [@ocaml.doc
+          "An object that contains details about an adjustment that Amazon Inspector made to the CVSS score for the finding."]}
+    let make ?adjustedCvss = fun () -> { adjustedCvss }
+    let to_value x =
+      structure_to_value
+        [("adjustedCvss",
+           (Option.map x.adjustedCvss ~f:CvssScoreDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adjustedCvss =
+        (Option.map ~f:CvssScoreDetails.of_xml)
+          (Xml.child xml_arg0 "adjustedCvss") in
+      make ?adjustedCvss ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adjustedCvss =
+        field_map json__ "adjustedCvss" CvssScoreDetails.of_json in
+      make ?adjustedCvss ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the factors that influenced the score that Amazon Inspector assigned for a finding."]
+module PackageVulnerabilityDetails =
+  struct
+    type nonrec t =
+      {
+      vulnerabilityId: VulnerabilityId.t option
+        [@ocaml.doc "A unique identifier for this vulnerability."];
+      vulnerablePackages: VulnerablePackageList.t option
+        [@ocaml.doc "The packages that this vulnerability impacts."];
+      source: NonEmptyString.t option
+        [@ocaml.doc "The source of the vulnerability information."];
+      cvss: CvssScoreList.t option
+        [@ocaml.doc
+          "CVSS scores for one or more vulnerabilities that Amazon Inspector identified for a package."];
+      relatedVulnerabilities: VulnerabilityIdList.t option
+        [@ocaml.doc
+          "Vulnerabilities that are often related to the findings for the package."];
+      sourceUrl: NonEmptyString.t option
+        [@ocaml.doc "A link to the source of the vulnerability information."];
+      vendorSeverity: NonEmptyString.t option
+        [@ocaml.doc
+          "The severity that the vendor assigned to this vulnerability type."];
+      vendorCreatedAt: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The date and time when this vulnerability was first added to the vendor's database."];
+      vendorUpdatedAt: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The date and time when the vendor last updated this vulnerability in their database."];
+      referenceUrls: NonEmptyStringList.t option
+        [@ocaml.doc
+          "Links to web pages that contain details about the vulnerabilities that Amazon Inspector identified for the package."]}
+    let make ?vulnerabilityId =
+      fun ?vulnerablePackages ->
+        fun ?source ->
+          fun ?cvss ->
+            fun ?relatedVulnerabilities ->
+              fun ?sourceUrl ->
+                fun ?vendorSeverity ->
+                  fun ?vendorCreatedAt ->
+                    fun ?vendorUpdatedAt ->
+                      fun ?referenceUrls ->
+                        fun () ->
+                          {
+                            vulnerabilityId;
+                            vulnerablePackages;
+                            source;
+                            cvss;
+                            relatedVulnerabilities;
+                            sourceUrl;
+                            vendorSeverity;
+                            vendorCreatedAt;
+                            vendorUpdatedAt;
+                            referenceUrls
+                          }
+    let to_value x =
+      structure_to_value
+        [("vulnerabilityId",
+           (Option.map x.vulnerabilityId ~f:VulnerabilityId.to_value));
+        ("vulnerablePackages",
+          (Option.map x.vulnerablePackages ~f:VulnerablePackageList.to_value));
+        ("source", (Option.map x.source ~f:NonEmptyString.to_value));
+        ("cvss", (Option.map x.cvss ~f:CvssScoreList.to_value));
+        ("relatedVulnerabilities",
+          (Option.map x.relatedVulnerabilities
+             ~f:VulnerabilityIdList.to_value));
+        ("sourceUrl", (Option.map x.sourceUrl ~f:NonEmptyString.to_value));
+        ("vendorSeverity",
+          (Option.map x.vendorSeverity ~f:NonEmptyString.to_value));
+        ("vendorCreatedAt",
+          (Option.map x.vendorCreatedAt ~f:DateTimeTimestamp.to_value));
+        ("vendorUpdatedAt",
+          (Option.map x.vendorUpdatedAt ~f:DateTimeTimestamp.to_value));
+        ("referenceUrls",
+          (Option.map x.referenceUrls ~f:NonEmptyStringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let referenceUrls =
+        (Option.map ~f:NonEmptyStringList.of_xml)
+          (Xml.child xml_arg0 "referenceUrls") in
+      let vendorUpdatedAt =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "vendorUpdatedAt") in
+      let vendorCreatedAt =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "vendorCreatedAt") in
+      let vendorSeverity =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "vendorSeverity") in
+      let sourceUrl =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "sourceUrl") in
+      let relatedVulnerabilities =
+        (Option.map ~f:VulnerabilityIdList.of_xml)
+          (Xml.child xml_arg0 "relatedVulnerabilities") in
+      let cvss =
+        (Option.map ~f:CvssScoreList.of_xml) (Xml.child xml_arg0 "cvss") in
+      let source =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "source") in
+      let vulnerablePackages =
+        (Option.map ~f:VulnerablePackageList.of_xml)
+          (Xml.child xml_arg0 "vulnerablePackages") in
+      let vulnerabilityId =
+        (Option.map ~f:VulnerabilityId.of_xml)
+          (Xml.child xml_arg0 "vulnerabilityId") in
+      make ?referenceUrls ?vendorUpdatedAt ?vendorCreatedAt ?vendorSeverity
+        ?sourceUrl ?relatedVulnerabilities ?cvss ?source ?vulnerablePackages
+        ?vulnerabilityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let referenceUrls =
+        field_map json__ "referenceUrls" NonEmptyStringList.of_json in
+      let vendorUpdatedAt =
+        field_map json__ "vendorUpdatedAt" DateTimeTimestamp.of_json in
+      let vendorCreatedAt =
+        field_map json__ "vendorCreatedAt" DateTimeTimestamp.of_json in
+      let vendorSeverity =
+        field_map json__ "vendorSeverity" NonEmptyString.of_json in
+      let sourceUrl = field_map json__ "sourceUrl" NonEmptyString.of_json in
+      let relatedVulnerabilities =
+        field_map json__ "relatedVulnerabilities" VulnerabilityIdList.of_json in
+      let cvss = field_map json__ "cvss" CvssScoreList.of_json in
+      let source = field_map json__ "source" NonEmptyString.of_json in
+      let vulnerablePackages =
+        field_map json__ "vulnerablePackages" VulnerablePackageList.of_json in
+      let vulnerabilityId =
+        field_map json__ "vulnerabilityId" VulnerabilityId.of_json in
+      make ?referenceUrls ?vendorUpdatedAt ?vendorCreatedAt ?vendorSeverity
+        ?sourceUrl ?relatedVulnerabilities ?cvss ?source ?vulnerablePackages
+        ?vulnerabilityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about package vulnerability findings."]
+module Remediation =
+  struct
+    type nonrec t =
+      {
+      recommendation: RemediationRecommendation.t option
+        [@ocaml.doc
+          "An object that contains information about the recommended course of action to remediate the finding."]}
+    let make ?recommendation = fun () -> { recommendation }
+    let to_value x =
+      structure_to_value
+        [("recommendation",
+           (Option.map x.recommendation ~f:RemediationRecommendation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendation =
+        (Option.map ~f:RemediationRecommendation.of_xml)
+          (Xml.child xml_arg0 "recommendation") in
+      make ?recommendation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendation =
+        field_map json__ "recommendation" RemediationRecommendation.of_json in
+      make ?recommendation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about how to remediate a finding."]
+module ImageScanFindingsFilterValues =
+  struct
+    type nonrec t = FilterValue.t list
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i ~pattern:"^[0-9]+\\.[0-9]+\\.[0-9]+$");
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VersionNumber" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageScanFindingsFilterValues"
+        ~of_json:FilterValue.of_json j
+    let to_json v = composed_to_json to_value v
   end
+module AccountAggregation =
+  struct
+    type nonrec t =
+      {
+      accountId: NonEmptyString.t option
+        [@ocaml.doc
+          "Identifies the account that owns the aggregated resource findings."];
+      severityCounts: SeverityCounts.t option
+        [@ocaml.doc
+          "Counts by severity level for medium severity and higher level findings, plus a total for all of the findings."]}
+    let make ?accountId =
+      fun ?severityCounts -> fun () -> { accountId; severityCounts }
+    let to_value x =
+      structure_to_value
+        [("accountId", (Option.map x.accountId ~f:NonEmptyString.to_value));
+        ("severityCounts",
+          (Option.map x.severityCounts ~f:SeverityCounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let severityCounts =
+        (Option.map ~f:SeverityCounts.of_xml)
+          (Xml.child xml_arg0 "severityCounts") in
+      let accountId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "accountId") in
+      make ?severityCounts ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let severityCounts =
+        field_map json__ "severityCounts" SeverityCounts.of_json in
+      let accountId = field_map json__ "accountId" NonEmptyString.of_json in
+      make ?severityCounts ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains counts of vulnerability findings from image scans that run when you create new Image Builder images, or build new versions of existing images. The vulnerability counts are grouped by severity level. The counts are aggregated across resources to create the final tally for the account that owns them."]
+module ImageAggregation =
+  struct
+    type nonrec t =
+      {
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the image for this aggregation."];
+      severityCounts: SeverityCounts.t option
+        [@ocaml.doc
+          "Counts by severity level for medium severity and higher level findings, plus a total for all of the findings for the specified image."]}
+    let make ?imageBuildVersionArn =
+      fun ?severityCounts ->
+        fun () -> { imageBuildVersionArn; severityCounts }
+    let to_value x =
+      structure_to_value
+        [("imageBuildVersionArn",
+           (Option.map x.imageBuildVersionArn
+              ~f:ImageBuildVersionArn.to_value));
+        ("severityCounts",
+          (Option.map x.severityCounts ~f:SeverityCounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let severityCounts =
+        (Option.map ~f:SeverityCounts.of_xml)
+          (Xml.child xml_arg0 "severityCounts") in
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      make ?severityCounts ?imageBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let severityCounts =
+        field_map json__ "severityCounts" SeverityCounts.of_json in
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      make ?severityCounts ?imageBuildVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains vulnerability counts for a specific image."]
+module ImagePipelineAggregation =
+  struct
+    type nonrec t =
+      {
+      imagePipelineArn: ImagePipelineArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the image pipeline for this aggregation."];
+      severityCounts: SeverityCounts.t option
+        [@ocaml.doc
+          "Counts by severity level for medium severity and higher level findings, plus a total for all of the findings for the specified image pipeline."]}
+    let make ?imagePipelineArn =
+      fun ?severityCounts -> fun () -> { imagePipelineArn; severityCounts }
+    let to_value x =
+      structure_to_value
+        [("imagePipelineArn",
+           (Option.map x.imagePipelineArn ~f:ImagePipelineArn.to_value));
+        ("severityCounts",
+          (Option.map x.severityCounts ~f:SeverityCounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let severityCounts =
+        (Option.map ~f:SeverityCounts.of_xml)
+          (Xml.child xml_arg0 "severityCounts") in
+      let imagePipelineArn =
+        (Option.map ~f:ImagePipelineArn.of_xml)
+          (Xml.child xml_arg0 "imagePipelineArn") in
+      make ?severityCounts ?imagePipelineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let severityCounts =
+        field_map json__ "severityCounts" SeverityCounts.of_json in
+      let imagePipelineArn =
+        field_map json__ "imagePipelineArn" ImagePipelineArn.of_json in
+      make ?severityCounts ?imagePipelineArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains vulnerability counts for a specific image pipeline."]
+module VulnerabilityIdAggregation =
+  struct
+    type nonrec t =
+      {
+      vulnerabilityId: NonEmptyString.t option
+        [@ocaml.doc "The vulnerability Id for this set of counts."];
+      severityCounts: SeverityCounts.t option
+        [@ocaml.doc
+          "Counts by severity level for medium severity and higher level findings, plus a total for all of the findings for the specified vulnerability."]}
+    let make ?vulnerabilityId =
+      fun ?severityCounts -> fun () -> { vulnerabilityId; severityCounts }
+    let to_value x =
+      structure_to_value
+        [("vulnerabilityId",
+           (Option.map x.vulnerabilityId ~f:NonEmptyString.to_value));
+        ("severityCounts",
+          (Option.map x.severityCounts ~f:SeverityCounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let severityCounts =
+        (Option.map ~f:SeverityCounts.of_xml)
+          (Xml.child xml_arg0 "severityCounts") in
+      let vulnerabilityId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "vulnerabilityId") in
+      make ?severityCounts ?vulnerabilityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let severityCounts =
+        field_map json__ "severityCounts" SeverityCounts.of_json in
+      let vulnerabilityId =
+        field_map json__ "vulnerabilityId" NonEmptyString.of_json in
+      make ?severityCounts ?vulnerabilityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Includes counts of image and pipeline resource findings by vulnerability."]
 module Arn =
   struct
     type nonrec t = string
@@ -2367,6 +5416,58 @@ module Arn =
     let of_json j = string_of_json ~kind:"Arn" j
     let to_json = simple_to_json to_value
   end
+module ConsecutiveFailures =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ConsecutiveFailures" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageScanningConfiguration =
+  struct
+    type nonrec t =
+      {
+      imageScanningEnabled: NullableBoolean.t option
+        [@ocaml.doc
+          "A setting that indicates whether Image Builder keeps a snapshot of the vulnerability scans that Amazon Inspector runs against the build instance when you create a new image."];
+      ecrConfiguration: EcrConfiguration.t option
+        [@ocaml.doc "Contains Amazon ECR settings for vulnerability scans."]}
+    let make ?imageScanningEnabled =
+      fun ?ecrConfiguration ->
+        fun () -> { imageScanningEnabled; ecrConfiguration }
+    let to_value x =
+      structure_to_value
+        [("imageScanningEnabled",
+           (Option.map x.imageScanningEnabled ~f:NullableBoolean.to_value));
+        ("ecrConfiguration",
+          (Option.map x.ecrConfiguration ~f:EcrConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ecrConfiguration =
+        (Option.map ~f:EcrConfiguration.of_xml)
+          (Xml.child xml_arg0 "ecrConfiguration") in
+      let imageScanningEnabled =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "imageScanningEnabled") in
+      make ?ecrConfiguration ?imageScanningEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ecrConfiguration =
+        field_map json__ "ecrConfiguration" EcrConfiguration.of_json in
+      let imageScanningEnabled =
+        field_map json__ "imageScanningEnabled" NullableBoolean.of_json in
+      make ?ecrConfiguration ?imageScanningEnabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains settings for Image Builder image resource and container image scans."]
 module ImageTestsConfiguration =
   struct
     type nonrec t =
@@ -2376,7 +5477,7 @@ module ImageTestsConfiguration =
           "Determines if tests should run after building the image. Image Builder defaults to enable tests to run following the image build, before image distribution."];
       timeoutMinutes: ImageTestsTimeoutMinutes.t option
         [@ocaml.doc
-          "The maximum time in minutes that tests are permitted to run."]}
+          "The maximum time in minutes that tests are permitted to run. The timeout property is not currently active. This value is ignored."]}
     let make ?imageTestsEnabled =
       fun ?timeoutMinutes -> fun () -> { imageTestsEnabled; timeoutMinutes }
     let to_value x =
@@ -2395,15 +5496,53 @@ module ImageTestsConfiguration =
           (Xml.child xml_arg0 "imageTestsEnabled") in
       make ?timeoutMinutes ?imageTestsEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeoutMinutes =
-        field_map json "timeoutMinutes" ImageTestsTimeoutMinutes.of_json in
+        field_map json__ "timeoutMinutes" ImageTestsTimeoutMinutes.of_json in
       let imageTestsEnabled =
-        field_map json "imageTestsEnabled" NullableBoolean.of_json in
+        field_map json__ "imageTestsEnabled" NullableBoolean.of_json in
       make ?timeoutMinutes ?imageTestsEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Configure image tests for your pipeline build. Tests run after building the image, to verify that the AMI or container image is valid before distributing it."]
+module PipelineLoggingConfiguration =
+  struct
+    type nonrec t =
+      {
+      imageLogGroupName: LogGroupName.t option
+        [@ocaml.doc
+          "The log group name that Image Builder uses for image creation. If not specified, the log group name defaults to /aws/imagebuilder/image-name."];
+      pipelineLogGroupName: LogGroupName.t option
+        [@ocaml.doc
+          "The log group name that Image Builder uses for the log output during creation of a new pipeline. If not specified, the pipeline log group name defaults to /aws/imagebuilder/pipeline/pipeline-name."]}
+    let make ?imageLogGroupName =
+      fun ?pipelineLogGroupName ->
+        fun () -> { imageLogGroupName; pipelineLogGroupName }
+    let to_value x =
+      structure_to_value
+        [("imageLogGroupName",
+           (Option.map x.imageLogGroupName ~f:LogGroupName.to_value));
+        ("pipelineLogGroupName",
+          (Option.map x.pipelineLogGroupName ~f:LogGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pipelineLogGroupName =
+        (Option.map ~f:LogGroupName.of_xml)
+          (Xml.child xml_arg0 "pipelineLogGroupName") in
+      let imageLogGroupName =
+        (Option.map ~f:LogGroupName.of_xml)
+          (Xml.child xml_arg0 "imageLogGroupName") in
+      make ?pipelineLogGroupName ?imageLogGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pipelineLogGroupName =
+        field_map json__ "pipelineLogGroupName" LogGroupName.of_json in
+      let imageLogGroupName =
+        field_map json__ "imageLogGroupName" LogGroupName.of_json in
+      make ?pipelineLogGroupName ?imageLogGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The logging configuration that's defined for pipeline execution."]
 module PipelineStatus =
   struct
     type nonrec t =
@@ -2442,12 +5581,21 @@ module Schedule =
       pipelineExecutionStartCondition:
         PipelineExecutionStartCondition.t option
         [@ocaml.doc
-          "The condition configures when the pipeline should trigger a new image build. When the pipelineExecutionStartCondition is set to EXPRESSION_MATCH_AND_DEPENDENCY_UPDATES_AVAILABLE, and you use semantic version filters on the base image or components in your image recipe, EC2 Image Builder will build a new image only when there are new versions of the image or components in your recipe that match the semantic version filter. When it is set to EXPRESSION_MATCH_ONLY, it will build a new image every time the CRON expression matches the current time. For semantic version syntax, see CreateComponent in the EC2 Image Builder API Reference."]}
+          "The start condition configures when the pipeline should trigger a new image build, as follows. If no value is set Image Builder defaults to EXPRESSION_MATCH_AND_DEPENDENCY_UPDATES_AVAILABLE. EXPRESSION_MATCH_AND_DEPENDENCY_UPDATES_AVAILABLE (default) \226\128\147 When you use semantic version filters on the base image or components in your image recipe, EC2 Image Builder builds a new image only when there are new versions of the base image or components in your recipe that match the filter. For semantic version syntax, see CreateComponent. EXPRESSION_MATCH_ONLY \226\128\147 This condition builds a new image every time the CRON expression matches the current time."];
+      autoDisablePolicy: AutoDisablePolicy.t option
+        [@ocaml.doc
+          "The policy that configures when Image Builder should automatically disable a pipeline that is failing."]}
     let make ?scheduleExpression =
       fun ?timezone ->
         fun ?pipelineExecutionStartCondition ->
-          fun () ->
-            { scheduleExpression; timezone; pipelineExecutionStartCondition }
+          fun ?autoDisablePolicy ->
+            fun () ->
+              {
+                scheduleExpression;
+                timezone;
+                pipelineExecutionStartCondition;
+                autoDisablePolicy
+              }
     let to_value x =
       structure_to_value
         [("scheduleExpression",
@@ -2455,9 +5603,14 @@ module Schedule =
         ("timezone", (Option.map x.timezone ~f:Timezone.to_value));
         ("pipelineExecutionStartCondition",
           (Option.map x.pipelineExecutionStartCondition
-             ~f:PipelineExecutionStartCondition.to_value))]
+             ~f:PipelineExecutionStartCondition.to_value));
+        ("autoDisablePolicy",
+          (Option.map x.autoDisablePolicy ~f:AutoDisablePolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let autoDisablePolicy =
+        (Option.map ~f:AutoDisablePolicy.of_xml)
+          (Xml.child xml_arg0 "autoDisablePolicy") in
       let pipelineExecutionStartCondition =
         (Option.map ~f:PipelineExecutionStartCondition.of_xml)
           (Xml.child xml_arg0 "pipelineExecutionStartCondition") in
@@ -2466,19 +5619,77 @@ module Schedule =
       let scheduleExpression =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "scheduleExpression") in
-      make ?pipelineExecutionStartCondition ?timezone ?scheduleExpression ()
+      make ?autoDisablePolicy ?pipelineExecutionStartCondition ?timezone
+        ?scheduleExpression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let autoDisablePolicy =
+        field_map json__ "autoDisablePolicy" AutoDisablePolicy.of_json in
       let pipelineExecutionStartCondition =
-        field_map json "pipelineExecutionStartCondition"
+        field_map json__ "pipelineExecutionStartCondition"
           PipelineExecutionStartCondition.of_json in
-      let timezone = field_map json "timezone" Timezone.of_json in
+      let timezone = field_map json__ "timezone" Timezone.of_json in
       let scheduleExpression =
-        field_map json "scheduleExpression" NonEmptyString.of_json in
-      make ?pipelineExecutionStartCondition ?timezone ?scheduleExpression ()
+        field_map json__ "scheduleExpression" NonEmptyString.of_json in
+      make ?autoDisablePolicy ?pipelineExecutionStartCondition ?timezone
+        ?scheduleExpression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A schedule configures how often and when a pipeline will automatically create a new image."]
+       "A schedule configures when and how often a pipeline will automatically create a new image."]
+module WorkflowConfigurationList =
+  struct
+    type nonrec t = WorkflowConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkflowConfigurationList"
+        ~of_json:WorkflowConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImageLoggingConfiguration =
+  struct
+    type nonrec t =
+      {
+      logGroupName: LogGroupName.t option
+        [@ocaml.doc
+          "The log group name that Image Builder uses for image creation. If not specified, the log group name defaults to /aws/imagebuilder/image-name."]}
+    let make ?logGroupName = fun () -> { logGroupName }
+    let to_value x =
+      structure_to_value
+        [("logGroupName",
+           (Option.map x.logGroupName ~f:LogGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logGroupName =
+        (Option.map ~f:LogGroupName.of_xml)
+          (Xml.child xml_arg0 "logGroupName") in
+      make ?logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logGroupName = field_map json__ "logGroupName" LogGroupName.of_json in
+      make ?logGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The logging configuration that's defined for the image. Image Builder uses the defined settings to direct execution log output during image creation."]
 module OutputResources =
   struct
     type nonrec t =
@@ -2501,9 +5712,9 @@ module OutputResources =
       let amis = (Option.map ~f:AmiList.of_xml) (Xml.child xml_arg0 "amis") in
       make ?containers ?amis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let containers = field_map json "containers" ContainerList.of_json in
-      let amis = field_map json "amis" AmiList.of_json in
+    let of_json json__ =
+      let containers = field_map json__ "containers" ContainerList.of_json in
+      let amis = field_map json__ "amis" AmiList.of_json in
       make ?containers ?amis ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resources produced by this image."]
@@ -2511,6 +5722,9 @@ module RegionList =
   struct
     type nonrec t = NonEmptyString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2574,6 +5788,9 @@ module OsVersionList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OsVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2592,6 +5809,35 @@ module OsVersionList =
                      | _ -> true))) ~f:OsVersion.of_xml)
     let of_json j =
       list_of_json ~kind:"OsVersionList" ~of_json:OsVersion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProductCodeList =
+  struct
+    type nonrec t = ProductCodeListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProductCodeListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProductCodeListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProductCodeList"
+        ~of_json:ProductCodeListItem.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ComponentState =
@@ -2615,18 +5861,157 @@ module ComponentState =
         (Option.map ~f:ComponentStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?reason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" NonEmptyString.of_json in
-      let status = field_map json "status" ComponentStatus.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "reason" NonEmptyString.of_json in
+      let status = field_map json__ "status" ComponentStatus.of_json in
       make ?reason ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A group of fields that describe the current status of components that are no longer active."]
+       "A group of fields that describe the current status of components."]
+module WorkflowParameterDetail =
+  struct
+    type nonrec t =
+      {
+      name: WorkflowParameterName.t option
+        [@ocaml.doc "The name of this input parameter."];
+      type_: WorkflowParameterType.t option
+        [@ocaml.doc
+          "The type of input this parameter provides. The currently supported value is \"string\"."];
+      defaultValue: WorkflowParameterValueList.t option
+        [@ocaml.doc
+          "The default value of this parameter if no input is provided."];
+      description: WorkflowParameterDescription.t option
+        [@ocaml.doc "Describes this parameter."]}
+    let make ?name =
+      fun ?type_ ->
+        fun ?defaultValue ->
+          fun ?description ->
+            fun () -> { name; type_; defaultValue; description }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:WorkflowParameterName.to_value));
+        ("type", (Option.map x.type_ ~f:WorkflowParameterType.to_value));
+        ("defaultValue",
+          (Option.map x.defaultValue ~f:WorkflowParameterValueList.to_value));
+        ("description",
+          (Option.map x.description ~f:WorkflowParameterDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:WorkflowParameterDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let defaultValue =
+        (Option.map ~f:WorkflowParameterValueList.of_xml)
+          (Xml.child xml_arg0 "defaultValue") in
+      let type_ =
+        (Option.map ~f:WorkflowParameterType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      let name =
+        (Option.map ~f:WorkflowParameterName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?description ?defaultValue ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description" WorkflowParameterDescription.of_json in
+      let defaultValue =
+        field_map json__ "defaultValue" WorkflowParameterValueList.of_json in
+      let type_ = field_map json__ "type" WorkflowParameterType.of_json in
+      let name = field_map json__ "name" WorkflowParameterName.of_json in
+      make ?description ?defaultValue ?type_ ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines a parameter that's used to provide configuration details for the workflow."]
+module LifecyclePolicyDetail =
+  struct
+    type nonrec t =
+      {
+      action: LifecyclePolicyDetailAction.t
+        [@ocaml.doc "Configuration details for the policy action."];
+      filter: LifecyclePolicyDetailFilter.t
+        [@ocaml.doc
+          "Specifies the resources that the lifecycle policy applies to."];
+      exclusionRules: LifecyclePolicyDetailExclusionRules.t option
+        [@ocaml.doc
+          "Additional rules to specify resources that should be exempt from policy actions."]}
+    let context_ = "LifecyclePolicyDetail"
+    let make ?exclusionRules =
+      fun ~action ->
+        fun ~filter -> fun () -> { exclusionRules; action; filter }
+    let to_value x =
+      structure_to_value
+        [("action", (Some (LifecyclePolicyDetailAction.to_value x.action)));
+        ("filter", (Some (LifecyclePolicyDetailFilter.to_value x.filter)));
+        ("exclusionRules",
+          (Option.map x.exclusionRules
+             ~f:LifecyclePolicyDetailExclusionRules.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exclusionRules =
+        (Option.map ~f:LifecyclePolicyDetailExclusionRules.of_xml)
+          (Xml.child xml_arg0 "exclusionRules") in
+      let filter =
+        LifecyclePolicyDetailFilter.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "filter") in
+      let action =
+        LifecyclePolicyDetailAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "action") in
+      make ?exclusionRules ~filter ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exclusionRules =
+        field_map json__ "exclusionRules"
+          LifecyclePolicyDetailExclusionRules.of_json in
+      let filter =
+        field_map_exn json__ "filter" LifecyclePolicyDetailFilter.of_json in
+      let action =
+        field_map_exn json__ "action" LifecyclePolicyDetailAction.of_json in
+      make ?exclusionRules ~filter ~action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration details for a lifecycle policy resource."]
+module LifecyclePolicyResourceSelectionRecipes =
+  struct
+    type nonrec t = LifecyclePolicyResourceSelectionRecipe.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LifecyclePolicyResourceSelectionRecipe.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:LifecyclePolicyResourceSelectionRecipe.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LifecyclePolicyResourceSelectionRecipes"
+        ~of_json:LifecyclePolicyResourceSelectionRecipe.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ComponentConfigurationList =
   struct
     type nonrec t = ComponentConfiguration.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2668,7 +6053,7 @@ module InstanceConfiguration =
       {
       image: NonEmptyString.t option
         [@ocaml.doc
-          "The AMI ID to use as the base image for a container build and test instance. If not specified, Image Builder will use the appropriate ECS-optimized AMI as a base image."];
+          "The base image for a container build and test instance. This can contain an AMI ID or it can specify an Amazon Web Services Systems Manager (SSM) Parameter Store Parameter, prefixed by ssm:, followed by the parameter name or ARN. If not specified, Image Builder uses the appropriate ECS-optimized AMI as a base image."];
       blockDeviceMappings: InstanceBlockDeviceMappings.t option
         [@ocaml.doc
           "Defines the block devices to attach for building an instance from this Image Builder AMI."]}
@@ -2689,11 +6074,11 @@ module InstanceConfiguration =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "image") in
       make ?blockDeviceMappings ?image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blockDeviceMappings =
-        field_map json "blockDeviceMappings"
+        field_map json__ "blockDeviceMappings"
           InstanceBlockDeviceMappings.of_json in
-      let image = field_map json "image" NonEmptyString.of_json in
+      let image = field_map json__ "image" NonEmptyString.of_json in
       make ?blockDeviceMappings ?image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2702,6 +6087,9 @@ module DistributionList =
   struct
     type nonrec t = Distribution.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Distribution.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2770,15 +6158,55 @@ module AdditionalInstanceConfiguration =
           (Xml.child xml_arg0 "systemsManagerAgent") in
       make ?userDataOverride ?systemsManagerAgent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userDataOverride =
-        field_map json "userDataOverride" UserDataOverride.of_json in
+        field_map json__ "userDataOverride" UserDataOverride.of_json in
       let systemsManagerAgent =
-        field_map json "systemsManagerAgent" SystemsManagerAgent.of_json in
+        field_map json__ "systemsManagerAgent" SystemsManagerAgent.of_json in
       make ?userDataOverride ?systemsManagerAgent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In addition to your infrastruction configuration, these settings provide an extra layer of control over your build instances. For instances where Image Builder installs the Systems Manager agent, you can choose whether to keep it for the AMI that you create. You can also specify commands to run on launch for all of your build instances."]
+       "In addition to your infrastructure configuration, these settings provide an extra layer of control over your build instances. You can also specify commands to run on launch for all of your build instances. Image Builder does not automatically install the Systems Manager agent on Windows instances. If your base image includes the Systems Manager agent, then the AMI that you create will also include the agent. For Linux instances, if the base image does not already include the Systems Manager agent, Image Builder installs it. For Linux instances where Image Builder installs the Systems Manager agent, you can choose whether to keep it for the AMI that you create."]
+module ImageScanStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | SCANNING 
+      | COLLECTING 
+      | COMPLETED 
+      | ABANDONED 
+      | FAILED 
+      | TIMED_OUT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | SCANNING -> "SCANNING"
+      | COLLECTING -> "COLLECTING"
+      | COMPLETED -> "COMPLETED"
+      | ABANDONED -> "ABANDONED"
+      | FAILED -> "FAILED"
+      | TIMED_OUT -> "TIMED_OUT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "SCANNING" -> SCANNING
+      | "COLLECTING" -> COLLECTING
+      | "COMPLETED" -> COMPLETED
+      | "ABANDONED" -> ABANDONED
+      | "FAILED" -> FAILED
+      | "TIMED_OUT" -> TIMED_OUT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImageScanStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImageScanStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module InstanceMetadataOptions =
   struct
     type nonrec t =
@@ -2788,7 +6216,7 @@ module InstanceMetadataOptions =
           "Indicates whether a signed token header is required for instance metadata retrieval requests. The values affect the response as follows: required \226\128\147 When you retrieve the IAM role credentials, version 2.0 credentials are returned in all cases. optional \226\128\147 You can include a signed token header in your request to retrieve instance metadata, or you can leave it out. If you include it, version 2.0 credentials are returned for the IAM role. Otherwise, version 1.0 credentials are returned. The default setting is optional."];
       httpPutResponseHopLimit: HttpPutResponseHopLimit.t option
         [@ocaml.doc
-          "Limit the number of hops that an instance metadata request can traverse to reach its destination."]}
+          "Limit the number of hops that an instance metadata request can traverse to reach its destination. The default is one hop. However, if HTTP tokens are required, container image builds need a minimum of two hops."]}
     let make ?httpTokens =
       fun ?httpPutResponseHopLimit ->
         fun () -> { httpTokens; httpPutResponseHopLimit }
@@ -2807,11 +6235,11 @@ module InstanceMetadataOptions =
         (Option.map ~f:HttpTokens.of_xml) (Xml.child xml_arg0 "httpTokens") in
       make ?httpPutResponseHopLimit ?httpTokens ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let httpPutResponseHopLimit =
-        field_map json "httpPutResponseHopLimit"
+        field_map json__ "httpPutResponseHopLimit"
           HttpPutResponseHopLimit.of_json in
-      let httpTokens = field_map json "httpTokens" HttpTokens.of_json in
+      let httpTokens = field_map json__ "httpTokens" HttpTokens.of_json in
       make ?httpPutResponseHopLimit ?httpTokens ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2832,8 +6260,9 @@ module Logging =
         (Option.map ~f:S3Logs.of_xml) (Xml.child xml_arg0 "s3Logs") in
       make ?s3Logs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Logs = field_map json "s3Logs" S3Logs.of_json in make ?s3Logs ()
+    let of_json json__ =
+      let s3Logs = field_map json__ "s3Logs" S3Logs.of_json in
+      make ?s3Logs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Logging configuration defines where Image Builder uploads your logs."]
@@ -2841,6 +6270,9 @@ module SecurityGroupIds =
   struct
     type nonrec t = NonEmptyString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2865,9 +6297,9 @@ module ComponentParameterDetail =
   struct
     type nonrec t =
       {
-      name: ComponentParameterName.t
+      name: ComponentParameterName.t option
         [@ocaml.doc "The name of this input parameter."];
-      type_: ComponentParameterType.t
+      type_: ComponentParameterType.t option
         [@ocaml.doc
           "The type of input this parameter provides. The currently supported value is \"string\"."];
       defaultValue: ComponentParameterValueList.t option
@@ -2875,15 +6307,15 @@ module ComponentParameterDetail =
           "The default value of this parameter if no input is provided."];
       description: ComponentParameterDescription.t option
         [@ocaml.doc "Describes this parameter."]}
-    let context_ = "ComponentParameterDetail"
-    let make ?defaultValue =
-      fun ?description ->
-        fun ~name ->
-          fun ~type_ -> fun () -> { defaultValue; description; name; type_ }
+    let make ?name =
+      fun ?type_ ->
+        fun ?defaultValue ->
+          fun ?description ->
+            fun () -> { name; type_; defaultValue; description }
     let to_value x =
       structure_to_value
-        [("name", (Some (ComponentParameterName.to_value x.name)));
-        ("type", (Some (ComponentParameterType.to_value x.type_)));
+        [("name", (Option.map x.name ~f:ComponentParameterName.to_value));
+        ("type", (Option.map x.type_ ~f:ComponentParameterType.to_value));
         ("defaultValue",
           (Option.map x.defaultValue ~f:ComponentParameterValueList.to_value));
         ("description",
@@ -2897,21 +6329,21 @@ module ComponentParameterDetail =
         (Option.map ~f:ComponentParameterValueList.of_xml)
           (Xml.child xml_arg0 "defaultValue") in
       let type_ =
-        ComponentParameterType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+        (Option.map ~f:ComponentParameterType.of_xml)
+          (Xml.child xml_arg0 "type") in
       let name =
-        ComponentParameterName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?description ?defaultValue ~type_ ~name ()
+        (Option.map ~f:ComponentParameterName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?description ?defaultValue ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "description" ComponentParameterDescription.of_json in
+        field_map json__ "description" ComponentParameterDescription.of_json in
       let defaultValue =
-        field_map json "defaultValue" ComponentParameterValueList.of_json in
-      let type_ = field_map_exn json "type" ComponentParameterType.of_json in
-      let name = field_map_exn json "name" ComponentParameterName.of_json in
-      make ?description ?defaultValue ~type_ ~name ()
+        field_map json__ "defaultValue" ComponentParameterValueList.of_json in
+      let type_ = field_map json__ "type" ComponentParameterType.of_json in
+      let name = field_map json__ "name" ComponentParameterName.of_json in
+      make ?description ?defaultValue ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines a parameter that is used to provide configuration details for the component."]
@@ -2928,6 +6360,964 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
+module ResourceStatus =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | DELETED 
+      | DEPRECATED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | DELETED -> "DELETED"
+      | DEPRECATED -> "DEPRECATED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "DELETED" -> DELETED
+      | "DEPRECATED" -> DEPRECATED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResourceStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module WorkflowVersion =
+  struct
+    type nonrec t =
+      {
+      arn: WorkflowVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource."];
+      name: ResourceName.t option [@ocaml.doc "The name of the workflow."];
+      version: VersionNumber.t option
+        [@ocaml.doc
+          "The semantic version of the workflow resource. The format includes three nodes: <major>.<minor>.<patch>."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "Describes the workflow."];
+      type_: WorkflowType.t option
+        [@ocaml.doc
+          "The image creation stage that this workflow applies to. Image Builder currently supports build and test stage workflows."];
+      owner: NonEmptyString.t option
+        [@ocaml.doc "The owner of the workflow resource."];
+      dateCreated: DateTime.t option
+        [@ocaml.doc
+          "The timestamp when Image Builder created the workflow version."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?version ->
+          fun ?description ->
+            fun ?type_ ->
+              fun ?owner ->
+                fun ?dateCreated ->
+                  fun () ->
+                    {
+                      arn;
+                      name;
+                      version;
+                      description;
+                      type_;
+                      owner;
+                      dateCreated
+                    }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:WorkflowVersionArn.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("version", (Option.map x.version ~f:VersionNumber.to_value));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("type", (Option.map x.type_ ~f:WorkflowType.to_value));
+        ("owner", (Option.map x.owner ~f:NonEmptyString.to_value));
+        ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateCreated =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateCreated") in
+      let owner =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "owner") in
+      let type_ =
+        (Option.map ~f:WorkflowType.of_xml) (Xml.child xml_arg0 "type") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let version =
+        (Option.map ~f:VersionNumber.of_xml) (Xml.child xml_arg0 "version") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:WorkflowVersionArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?dateCreated ?owner ?type_ ?description ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let type_ = field_map json__ "type" WorkflowType.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" WorkflowVersionArn.of_json in
+      make ?dateCreated ?owner ?type_ ?description ?version ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains details about this version of the workflow."]
+module Filter =
+  struct
+    type nonrec t =
+      {
+      name: FilterName.t option
+        [@ocaml.doc
+          "The name of the filter. Filter names are case-sensitive."];
+      values: FilterValues.t option
+        [@ocaml.doc "The filter values. Filter values are case-sensitive."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:FilterName.to_value));
+        ("values", (Option.map x.values ~f:FilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:FilterValues.of_xml) (Xml.child xml_arg0 "values") in
+      let name =
+        (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
+      let name = field_map json__ "name" FilterName.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A filter name and value pair that is used to return a more specific list of results from a list operation. Filters can be used to match a set of resources by specific criteria, such as tags, attributes, or IDs."]
+module WorkflowStepMetadata =
+  struct
+    type nonrec t =
+      {
+      stepExecutionId: WorkflowStepExecutionId.t option
+        [@ocaml.doc
+          "A unique identifier for the workflow step, assigned at runtime."];
+      name: WorkflowStepName.t option
+        [@ocaml.doc "The name of the workflow step."];
+      description: WorkflowStepDescription.t option
+        [@ocaml.doc "Description of the workflow step."];
+      action: WorkflowStepAction.t option
+        [@ocaml.doc "The step action name."];
+      status: WorkflowStepExecutionStatus.t option
+        [@ocaml.doc "Runtime status for the workflow step."];
+      rollbackStatus: WorkflowStepExecutionRollbackStatus.t option
+        [@ocaml.doc
+          "Reports on the rollback status of the step, if applicable."];
+      message: WorkflowStepMessage.t option
+        [@ocaml.doc
+          "Detailed output message that the workflow step provides at runtime."];
+      inputs: WorkflowStepInputs.t option
+        [@ocaml.doc
+          "Input parameters that Image Builder provides for the workflow step."];
+      outputs: WorkflowStepOutputs.t option
+        [@ocaml.doc
+          "The file names that the workflow step created as output for this runtime instance of the workflow."];
+      startTime: DateTime.t option
+        [@ocaml.doc "The timestamp when the workflow step started."];
+      endTime: DateTime.t option
+        [@ocaml.doc "The timestamp when the workflow step finished."]}
+    let make ?stepExecutionId =
+      fun ?name ->
+        fun ?description ->
+          fun ?action ->
+            fun ?status ->
+              fun ?rollbackStatus ->
+                fun ?message ->
+                  fun ?inputs ->
+                    fun ?outputs ->
+                      fun ?startTime ->
+                        fun ?endTime ->
+                          fun () ->
+                            {
+                              stepExecutionId;
+                              name;
+                              description;
+                              action;
+                              status;
+                              rollbackStatus;
+                              message;
+                              inputs;
+                              outputs;
+                              startTime;
+                              endTime
+                            }
+    let to_value x =
+      structure_to_value
+        [("stepExecutionId",
+           (Option.map x.stepExecutionId ~f:WorkflowStepExecutionId.to_value));
+        ("name", (Option.map x.name ~f:WorkflowStepName.to_value));
+        ("description",
+          (Option.map x.description ~f:WorkflowStepDescription.to_value));
+        ("action", (Option.map x.action ~f:WorkflowStepAction.to_value));
+        ("status",
+          (Option.map x.status ~f:WorkflowStepExecutionStatus.to_value));
+        ("rollbackStatus",
+          (Option.map x.rollbackStatus
+             ~f:WorkflowStepExecutionRollbackStatus.to_value));
+        ("message", (Option.map x.message ~f:WorkflowStepMessage.to_value));
+        ("inputs", (Option.map x.inputs ~f:WorkflowStepInputs.to_value));
+        ("outputs", (Option.map x.outputs ~f:WorkflowStepOutputs.to_value));
+        ("startTime", (Option.map x.startTime ~f:DateTime.to_value));
+        ("endTime", (Option.map x.endTime ~f:DateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "startTime") in
+      let outputs =
+        (Option.map ~f:WorkflowStepOutputs.of_xml)
+          (Xml.child xml_arg0 "outputs") in
+      let inputs =
+        (Option.map ~f:WorkflowStepInputs.of_xml)
+          (Xml.child xml_arg0 "inputs") in
+      let message =
+        (Option.map ~f:WorkflowStepMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      let rollbackStatus =
+        (Option.map ~f:WorkflowStepExecutionRollbackStatus.of_xml)
+          (Xml.child xml_arg0 "rollbackStatus") in
+      let status =
+        (Option.map ~f:WorkflowStepExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let action =
+        (Option.map ~f:WorkflowStepAction.of_xml)
+          (Xml.child xml_arg0 "action") in
+      let description =
+        (Option.map ~f:WorkflowStepDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let name =
+        (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "name") in
+      let stepExecutionId =
+        (Option.map ~f:WorkflowStepExecutionId.of_xml)
+          (Xml.child xml_arg0 "stepExecutionId") in
+      make ?endTime ?startTime ?outputs ?inputs ?message ?rollbackStatus
+        ?status ?action ?description ?name ?stepExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" DateTime.of_json in
+      let startTime = field_map json__ "startTime" DateTime.of_json in
+      let outputs = field_map json__ "outputs" WorkflowStepOutputs.of_json in
+      let inputs = field_map json__ "inputs" WorkflowStepInputs.of_json in
+      let message = field_map json__ "message" WorkflowStepMessage.of_json in
+      let rollbackStatus =
+        field_map json__ "rollbackStatus"
+          WorkflowStepExecutionRollbackStatus.of_json in
+      let status =
+        field_map json__ "status" WorkflowStepExecutionStatus.of_json in
+      let action = field_map json__ "action" WorkflowStepAction.of_json in
+      let description =
+        field_map json__ "description" WorkflowStepDescription.of_json in
+      let name = field_map json__ "name" WorkflowStepName.of_json in
+      let stepExecutionId =
+        field_map json__ "stepExecutionId" WorkflowStepExecutionId.of_json in
+      make ?endTime ?startTime ?outputs ?inputs ?message ?rollbackStatus
+        ?status ?action ?description ?name ?stepExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Runtime details and status for the workflow step."]
+module WorkflowExecutionMetadata =
+  struct
+    type nonrec t =
+      {
+      workflowBuildVersionArn: WorkflowBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource build version that ran."];
+      workflowExecutionId: WorkflowExecutionId.t option
+        [@ocaml.doc
+          "Unique identifier that Image Builder assigns to keep track of runtime resources each time it runs a workflow."];
+      type_: WorkflowType.t option
+        [@ocaml.doc
+          "Indicates what type of workflow that Image Builder ran for this runtime instance of the workflow."];
+      status: WorkflowExecutionStatus.t option
+        [@ocaml.doc "The current runtime status for this workflow."];
+      message: WorkflowExecutionMessage.t option
+        [@ocaml.doc
+          "The runtime output message from the workflow, if applicable."];
+      totalStepCount: WorkflowStepCount.t option
+        [@ocaml.doc
+          "The total number of steps in the workflow. This should equal the sum of the step counts for steps that succeeded, were skipped, and failed."];
+      totalStepsSucceeded: WorkflowStepCount.t option
+        [@ocaml.doc
+          "A runtime count for the number of steps in the workflow that ran successfully."];
+      totalStepsFailed: WorkflowStepCount.t option
+        [@ocaml.doc
+          "A runtime count for the number of steps in the workflow that failed."];
+      totalStepsSkipped: WorkflowStepCount.t option
+        [@ocaml.doc
+          "A runtime count for the number of steps in the workflow that were skipped."];
+      startTime: DateTime.t option
+        [@ocaml.doc
+          "The timestamp when the runtime instance of this workflow started."];
+      endTime: DateTime.t option
+        [@ocaml.doc
+          "The timestamp when this runtime instance of the workflow finished."];
+      parallelGroup: ParallelGroup.t option
+        [@ocaml.doc
+          "The name of the test group that included the test workflow resource at runtime."];
+      retried: NullableBoolean.t option
+        [@ocaml.doc
+          "Indicates retry status for this runtime instance of the workflow."]}
+    let make ?workflowBuildVersionArn =
+      fun ?workflowExecutionId ->
+        fun ?type_ ->
+          fun ?status ->
+            fun ?message ->
+              fun ?totalStepCount ->
+                fun ?totalStepsSucceeded ->
+                  fun ?totalStepsFailed ->
+                    fun ?totalStepsSkipped ->
+                      fun ?startTime ->
+                        fun ?endTime ->
+                          fun ?parallelGroup ->
+                            fun ?retried ->
+                              fun () ->
+                                {
+                                  workflowBuildVersionArn;
+                                  workflowExecutionId;
+                                  type_;
+                                  status;
+                                  message;
+                                  totalStepCount;
+                                  totalStepsSucceeded;
+                                  totalStepsFailed;
+                                  totalStepsSkipped;
+                                  startTime;
+                                  endTime;
+                                  parallelGroup;
+                                  retried
+                                }
+    let to_value x =
+      structure_to_value
+        [("workflowBuildVersionArn",
+           (Option.map x.workflowBuildVersionArn
+              ~f:WorkflowBuildVersionArn.to_value));
+        ("workflowExecutionId",
+          (Option.map x.workflowExecutionId ~f:WorkflowExecutionId.to_value));
+        ("type", (Option.map x.type_ ~f:WorkflowType.to_value));
+        ("status", (Option.map x.status ~f:WorkflowExecutionStatus.to_value));
+        ("message",
+          (Option.map x.message ~f:WorkflowExecutionMessage.to_value));
+        ("totalStepCount",
+          (Option.map x.totalStepCount ~f:WorkflowStepCount.to_value));
+        ("totalStepsSucceeded",
+          (Option.map x.totalStepsSucceeded ~f:WorkflowStepCount.to_value));
+        ("totalStepsFailed",
+          (Option.map x.totalStepsFailed ~f:WorkflowStepCount.to_value));
+        ("totalStepsSkipped",
+          (Option.map x.totalStepsSkipped ~f:WorkflowStepCount.to_value));
+        ("startTime", (Option.map x.startTime ~f:DateTime.to_value));
+        ("endTime", (Option.map x.endTime ~f:DateTime.to_value));
+        ("parallelGroup",
+          (Option.map x.parallelGroup ~f:ParallelGroup.to_value));
+        ("retried", (Option.map x.retried ~f:NullableBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retried =
+        (Option.map ~f:NullableBoolean.of_xml) (Xml.child xml_arg0 "retried") in
+      let parallelGroup =
+        (Option.map ~f:ParallelGroup.of_xml)
+          (Xml.child xml_arg0 "parallelGroup") in
+      let endTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "startTime") in
+      let totalStepsSkipped =
+        (Option.map ~f:WorkflowStepCount.of_xml)
+          (Xml.child xml_arg0 "totalStepsSkipped") in
+      let totalStepsFailed =
+        (Option.map ~f:WorkflowStepCount.of_xml)
+          (Xml.child xml_arg0 "totalStepsFailed") in
+      let totalStepsSucceeded =
+        (Option.map ~f:WorkflowStepCount.of_xml)
+          (Xml.child xml_arg0 "totalStepsSucceeded") in
+      let totalStepCount =
+        (Option.map ~f:WorkflowStepCount.of_xml)
+          (Xml.child xml_arg0 "totalStepCount") in
+      let message =
+        (Option.map ~f:WorkflowExecutionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      let status =
+        (Option.map ~f:WorkflowExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let type_ =
+        (Option.map ~f:WorkflowType.of_xml) (Xml.child xml_arg0 "type") in
+      let workflowExecutionId =
+        (Option.map ~f:WorkflowExecutionId.of_xml)
+          (Xml.child xml_arg0 "workflowExecutionId") in
+      let workflowBuildVersionArn =
+        (Option.map ~f:WorkflowBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "workflowBuildVersionArn") in
+      make ?retried ?parallelGroup ?endTime ?startTime ?totalStepsSkipped
+        ?totalStepsFailed ?totalStepsSucceeded ?totalStepCount ?message
+        ?status ?type_ ?workflowExecutionId ?workflowBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retried = field_map json__ "retried" NullableBoolean.of_json in
+      let parallelGroup =
+        field_map json__ "parallelGroup" ParallelGroup.of_json in
+      let endTime = field_map json__ "endTime" DateTime.of_json in
+      let startTime = field_map json__ "startTime" DateTime.of_json in
+      let totalStepsSkipped =
+        field_map json__ "totalStepsSkipped" WorkflowStepCount.of_json in
+      let totalStepsFailed =
+        field_map json__ "totalStepsFailed" WorkflowStepCount.of_json in
+      let totalStepsSucceeded =
+        field_map json__ "totalStepsSucceeded" WorkflowStepCount.of_json in
+      let totalStepCount =
+        field_map json__ "totalStepCount" WorkflowStepCount.of_json in
+      let message =
+        field_map json__ "message" WorkflowExecutionMessage.of_json in
+      let status = field_map json__ "status" WorkflowExecutionStatus.of_json in
+      let type_ = field_map json__ "type" WorkflowType.of_json in
+      let workflowExecutionId =
+        field_map json__ "workflowExecutionId" WorkflowExecutionId.of_json in
+      let workflowBuildVersionArn =
+        field_map json__ "workflowBuildVersionArn"
+          WorkflowBuildVersionArn.of_json in
+      make ?retried ?parallelGroup ?endTime ?startTime ?totalStepsSkipped
+        ?totalStepsFailed ?totalStepsSucceeded ?totalStepCount ?message
+        ?status ?type_ ?workflowExecutionId ?workflowBuildVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Metadata that includes details and status from this runtime instance of the workflow."]
+module WorkflowSummary =
+  struct
+    type nonrec t =
+      {
+      arn: WorkflowNameArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource."];
+      name: ResourceName.t option [@ocaml.doc "The name of the workflow."];
+      version: VersionNumber.t option
+        [@ocaml.doc "The version of the workflow."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "Describes the workflow."];
+      changeDescription: NonEmptyString.t option
+        [@ocaml.doc
+          "The change description for the current version of the workflow resource."];
+      type_: WorkflowType.t option
+        [@ocaml.doc
+          "The image creation stage that this workflow applies to. Image Builder currently supports build and test stage workflows."];
+      owner: NonEmptyString.t option
+        [@ocaml.doc "The owner of the workflow resource."];
+      state: WorkflowState.t option
+        [@ocaml.doc "Describes the current state of the workflow resource."];
+      dateCreated: DateTime.t option
+        [@ocaml.doc "The original creation date of the workflow resource."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Contains a list of tags that are defined for the workflow."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?version ->
+          fun ?description ->
+            fun ?changeDescription ->
+              fun ?type_ ->
+                fun ?owner ->
+                  fun ?state ->
+                    fun ?dateCreated ->
+                      fun ?tags ->
+                        fun () ->
+                          {
+                            arn;
+                            name;
+                            version;
+                            description;
+                            changeDescription;
+                            type_;
+                            owner;
+                            state;
+                            dateCreated;
+                            tags
+                          }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:WorkflowNameArn.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("version", (Option.map x.version ~f:VersionNumber.to_value));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("changeDescription",
+          (Option.map x.changeDescription ~f:NonEmptyString.to_value));
+        ("type", (Option.map x.type_ ~f:WorkflowType.to_value));
+        ("owner", (Option.map x.owner ~f:NonEmptyString.to_value));
+        ("state", (Option.map x.state ~f:WorkflowState.to_value));
+        ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let dateCreated =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateCreated") in
+      let state =
+        (Option.map ~f:WorkflowState.of_xml) (Xml.child xml_arg0 "state") in
+      let owner =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "owner") in
+      let type_ =
+        (Option.map ~f:WorkflowType.of_xml) (Xml.child xml_arg0 "type") in
+      let changeDescription =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "changeDescription") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let version =
+        (Option.map ~f:VersionNumber.of_xml) (Xml.child xml_arg0 "version") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:WorkflowNameArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?tags ?dateCreated ?state ?owner ?type_ ?changeDescription
+        ?description ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let state = field_map json__ "state" WorkflowState.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let type_ = field_map json__ "type" WorkflowType.of_json in
+      let changeDescription =
+        field_map json__ "changeDescription" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" WorkflowNameArn.of_json in
+      make ?tags ?dateCreated ?state ?owner ?type_ ?changeDescription
+        ?description ?version ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains metadata about the workflow resource."]
+module WorkflowStepExecution =
+  struct
+    type nonrec t =
+      {
+      stepExecutionId: WorkflowStepExecutionId.t option
+        [@ocaml.doc
+          "Uniquely identifies the workflow step that ran for the associated image build version."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image build version that ran the workflow."];
+      workflowExecutionId: WorkflowExecutionId.t option
+        [@ocaml.doc
+          "Uniquely identifies the runtime instance of the workflow that contains the workflow step that ran for the associated image build version."];
+      workflowBuildVersionArn: WorkflowBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource that ran."];
+      name: WorkflowStepName.t option
+        [@ocaml.doc "The name of the workflow step."];
+      action: WorkflowStepAction.t option
+        [@ocaml.doc "The name of the step action."];
+      startTime: DateTime.t option
+        [@ocaml.doc "The timestamp when the workflow step started."]}
+    let make ?stepExecutionId =
+      fun ?imageBuildVersionArn ->
+        fun ?workflowExecutionId ->
+          fun ?workflowBuildVersionArn ->
+            fun ?name ->
+              fun ?action ->
+                fun ?startTime ->
+                  fun () ->
+                    {
+                      stepExecutionId;
+                      imageBuildVersionArn;
+                      workflowExecutionId;
+                      workflowBuildVersionArn;
+                      name;
+                      action;
+                      startTime
+                    }
+    let to_value x =
+      structure_to_value
+        [("stepExecutionId",
+           (Option.map x.stepExecutionId ~f:WorkflowStepExecutionId.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value));
+        ("workflowExecutionId",
+          (Option.map x.workflowExecutionId ~f:WorkflowExecutionId.to_value));
+        ("workflowBuildVersionArn",
+          (Option.map x.workflowBuildVersionArn
+             ~f:WorkflowBuildVersionArn.to_value));
+        ("name", (Option.map x.name ~f:WorkflowStepName.to_value));
+        ("action", (Option.map x.action ~f:WorkflowStepAction.to_value));
+        ("startTime", (Option.map x.startTime ~f:DateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "startTime") in
+      let action =
+        (Option.map ~f:WorkflowStepAction.of_xml)
+          (Xml.child xml_arg0 "action") in
+      let name =
+        (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "name") in
+      let workflowBuildVersionArn =
+        (Option.map ~f:WorkflowBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "workflowBuildVersionArn") in
+      let workflowExecutionId =
+        (Option.map ~f:WorkflowExecutionId.of_xml)
+          (Xml.child xml_arg0 "workflowExecutionId") in
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let stepExecutionId =
+        (Option.map ~f:WorkflowStepExecutionId.of_xml)
+          (Xml.child xml_arg0 "stepExecutionId") in
+      make ?startTime ?action ?name ?workflowBuildVersionArn
+        ?workflowExecutionId ?imageBuildVersionArn ?stepExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let startTime = field_map json__ "startTime" DateTime.of_json in
+      let action = field_map json__ "action" WorkflowStepAction.of_json in
+      let name = field_map json__ "name" WorkflowStepName.of_json in
+      let workflowBuildVersionArn =
+        field_map json__ "workflowBuildVersionArn"
+          WorkflowBuildVersionArn.of_json in
+      let workflowExecutionId =
+        field_map json__ "workflowExecutionId" WorkflowExecutionId.of_json in
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let stepExecutionId =
+        field_map json__ "stepExecutionId" WorkflowStepExecutionId.of_json in
+      make ?startTime ?action ?name ?workflowBuildVersionArn
+        ?workflowExecutionId ?imageBuildVersionArn ?stepExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains runtime details for an instance of a workflow that ran for the associated image build version."]
+module LifecyclePolicySummary =
+  struct
+    type nonrec t =
+      {
+      arn: LifecyclePolicyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the lifecycle policy summary resource."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the lifecycle policy."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "Optional description for the lifecycle policy."];
+      status: LifecyclePolicyStatus.t option
+        [@ocaml.doc "The lifecycle policy resource status."];
+      executionRole: RoleNameOrArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) of the IAM role that Image Builder uses to run the lifecycle policy."];
+      resourceType: LifecyclePolicyResourceType.t option
+        [@ocaml.doc "The type of resources the lifecycle policy targets."];
+      dateCreated: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The timestamp when Image Builder created the lifecycle policy resource."];
+      dateUpdated: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The timestamp when Image Builder updated the lifecycle policy resource."];
+      dateLastRun: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The timestamp for the last time Image Builder ran the lifecycle policy."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "To help manage your lifecycle policy resources, you can assign your own metadata to each resource in the form of tags. Each tag consists of a key and an optional value, both of which you define."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?description ->
+          fun ?status ->
+            fun ?executionRole ->
+              fun ?resourceType ->
+                fun ?dateCreated ->
+                  fun ?dateUpdated ->
+                    fun ?dateLastRun ->
+                      fun ?tags ->
+                        fun () ->
+                          {
+                            arn;
+                            name;
+                            description;
+                            status;
+                            executionRole;
+                            resourceType;
+                            dateCreated;
+                            dateUpdated;
+                            dateLastRun;
+                            tags
+                          }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:LifecyclePolicyArn.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("status", (Option.map x.status ~f:LifecyclePolicyStatus.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:RoleNameOrArn.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:LifecyclePolicyResourceType.to_value));
+        ("dateCreated",
+          (Option.map x.dateCreated ~f:DateTimeTimestamp.to_value));
+        ("dateUpdated",
+          (Option.map x.dateUpdated ~f:DateTimeTimestamp.to_value));
+        ("dateLastRun",
+          (Option.map x.dateLastRun ~f:DateTimeTimestamp.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let dateLastRun =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "dateLastRun") in
+      let dateUpdated =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "dateUpdated") in
+      let dateCreated =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "dateCreated") in
+      let resourceType =
+        (Option.map ~f:LifecyclePolicyResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let executionRole =
+        (Option.map ~f:RoleNameOrArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let status =
+        (Option.map ~f:LifecyclePolicyStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:LifecyclePolicyArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?tags ?dateLastRun ?dateUpdated ?dateCreated ?resourceType
+        ?executionRole ?status ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateLastRun =
+        field_map json__ "dateLastRun" DateTimeTimestamp.of_json in
+      let dateUpdated =
+        field_map json__ "dateUpdated" DateTimeTimestamp.of_json in
+      let dateCreated =
+        field_map json__ "dateCreated" DateTimeTimestamp.of_json in
+      let resourceType =
+        field_map json__ "resourceType" LifecyclePolicyResourceType.of_json in
+      let executionRole =
+        field_map json__ "executionRole" RoleNameOrArn.of_json in
+      let status = field_map json__ "status" LifecyclePolicyStatus.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" LifecyclePolicyArn.of_json in
+      make ?tags ?dateLastRun ?dateUpdated ?dateCreated ?resourceType
+        ?executionRole ?status ?description ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains a summary of lifecycle policy resources."]
+module LifecycleExecution =
+  struct
+    type nonrec t =
+      {
+      lifecycleExecutionId: LifecycleExecutionId.t option
+        [@ocaml.doc "Identifies the lifecycle policy runtime instance."];
+      lifecyclePolicyArn: LifecyclePolicyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the lifecycle policy that ran."];
+      resourcesImpactedSummary:
+        LifecycleExecutionResourcesImpactedSummary.t option
+        [@ocaml.doc
+          "Contains information about associated resources that are identified for action by the runtime instance of the lifecycle policy."];
+      state: LifecycleExecutionState.t option
+        [@ocaml.doc
+          "Runtime state that reports if the policy action ran successfully, failed, or was skipped."];
+      startTime: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The timestamp when the lifecycle runtime instance started."];
+      endTime: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The timestamp when the lifecycle runtime instance completed."]}
+    let make ?lifecycleExecutionId =
+      fun ?lifecyclePolicyArn ->
+        fun ?resourcesImpactedSummary ->
+          fun ?state ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun () ->
+                  {
+                    lifecycleExecutionId;
+                    lifecyclePolicyArn;
+                    resourcesImpactedSummary;
+                    state;
+                    startTime;
+                    endTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("lifecycleExecutionId",
+           (Option.map x.lifecycleExecutionId
+              ~f:LifecycleExecutionId.to_value));
+        ("lifecyclePolicyArn",
+          (Option.map x.lifecyclePolicyArn ~f:LifecyclePolicyArn.to_value));
+        ("resourcesImpactedSummary",
+          (Option.map x.resourcesImpactedSummary
+             ~f:LifecycleExecutionResourcesImpactedSummary.to_value));
+        ("state", (Option.map x.state ~f:LifecycleExecutionState.to_value));
+        ("startTime", (Option.map x.startTime ~f:DateTimeTimestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:DateTimeTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "startTime") in
+      let state =
+        (Option.map ~f:LifecycleExecutionState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let resourcesImpactedSummary =
+        (Option.map ~f:LifecycleExecutionResourcesImpactedSummary.of_xml)
+          (Xml.child xml_arg0 "resourcesImpactedSummary") in
+      let lifecyclePolicyArn =
+        (Option.map ~f:LifecyclePolicyArn.of_xml)
+          (Xml.child xml_arg0 "lifecyclePolicyArn") in
+      let lifecycleExecutionId =
+        (Option.map ~f:LifecycleExecutionId.of_xml)
+          (Xml.child xml_arg0 "lifecycleExecutionId") in
+      make ?endTime ?startTime ?state ?resourcesImpactedSummary
+        ?lifecyclePolicyArn ?lifecycleExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" DateTimeTimestamp.of_json in
+      let startTime = field_map json__ "startTime" DateTimeTimestamp.of_json in
+      let state = field_map json__ "state" LifecycleExecutionState.of_json in
+      let resourcesImpactedSummary =
+        field_map json__ "resourcesImpactedSummary"
+          LifecycleExecutionResourcesImpactedSummary.of_json in
+      let lifecyclePolicyArn =
+        field_map json__ "lifecyclePolicyArn" LifecyclePolicyArn.of_json in
+      let lifecycleExecutionId =
+        field_map json__ "lifecycleExecutionId" LifecycleExecutionId.of_json in
+      make ?endTime ?startTime ?state ?resourcesImpactedSummary
+        ?lifecyclePolicyArn ?lifecycleExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata from a runtime instance of a lifecycle policy."]
+module LifecycleExecutionResource =
+  struct
+    type nonrec t =
+      {
+      accountId: NonEmptyString.t option
+        [@ocaml.doc "The account that owns the impacted resource."];
+      resourceId: NonEmptyString.t option
+        [@ocaml.doc
+          "Identifies the impacted resource. The resource ID depends on the type of resource, as follows. Image Builder image resources: Amazon Resource Name (ARN) Distributed AMIs: AMI ID Container images distributed to an ECR repository: image URI or SHA Digest"];
+      state: LifecycleExecutionResourceState.t option
+        [@ocaml.doc "The runtime state for the lifecycle execution."];
+      action: LifecycleExecutionResourceAction.t option
+        [@ocaml.doc "The action to take for the identified resource."];
+      region: NonEmptyString.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region where the lifecycle execution resource is stored."];
+      snapshots: LifecycleExecutionSnapshotResourceList.t option
+        [@ocaml.doc
+          "A list of associated resource snapshots for the impacted resource if it\226\128\153s an AMI."];
+      imageUris: StringList.t option
+        [@ocaml.doc
+          "For an impacted container image, this identifies a list of URIs for associated container images distributed to ECR repositories."];
+      startTime: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The starting timestamp from the lifecycle action that was applied to the resource."];
+      endTime: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The ending timestamp from the lifecycle action that was applied to the resource."]}
+    let make ?accountId =
+      fun ?resourceId ->
+        fun ?state ->
+          fun ?action ->
+            fun ?region ->
+              fun ?snapshots ->
+                fun ?imageUris ->
+                  fun ?startTime ->
+                    fun ?endTime ->
+                      fun () ->
+                        {
+                          accountId;
+                          resourceId;
+                          state;
+                          action;
+                          region;
+                          snapshots;
+                          imageUris;
+                          startTime;
+                          endTime
+                        }
+    let to_value x =
+      structure_to_value
+        [("accountId", (Option.map x.accountId ~f:NonEmptyString.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:NonEmptyString.to_value));
+        ("state",
+          (Option.map x.state ~f:LifecycleExecutionResourceState.to_value));
+        ("action",
+          (Option.map x.action ~f:LifecycleExecutionResourceAction.to_value));
+        ("region", (Option.map x.region ~f:NonEmptyString.to_value));
+        ("snapshots",
+          (Option.map x.snapshots
+             ~f:LifecycleExecutionSnapshotResourceList.to_value));
+        ("imageUris", (Option.map x.imageUris ~f:StringList.to_value));
+        ("startTime", (Option.map x.startTime ~f:DateTimeTimestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:DateTimeTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "startTime") in
+      let imageUris =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "imageUris") in
+      let snapshots =
+        (Option.map ~f:LifecycleExecutionSnapshotResourceList.of_xml)
+          (Xml.child xml_arg0 "snapshots") in
+      let region =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "region") in
+      let action =
+        (Option.map ~f:LifecycleExecutionResourceAction.of_xml)
+          (Xml.child xml_arg0 "action") in
+      let state =
+        (Option.map ~f:LifecycleExecutionResourceState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let resourceId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "resourceId") in
+      let accountId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "accountId") in
+      make ?endTime ?startTime ?imageUris ?snapshots ?region ?action ?state
+        ?resourceId ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" DateTimeTimestamp.of_json in
+      let startTime = field_map json__ "startTime" DateTimeTimestamp.of_json in
+      let imageUris = field_map json__ "imageUris" StringList.of_json in
+      let snapshots =
+        field_map json__ "snapshots"
+          LifecycleExecutionSnapshotResourceList.of_json in
+      let region = field_map json__ "region" NonEmptyString.of_json in
+      let action =
+        field_map json__ "action" LifecycleExecutionResourceAction.of_json in
+      let state =
+        field_map json__ "state" LifecycleExecutionResourceState.of_json in
+      let resourceId = field_map json__ "resourceId" NonEmptyString.of_json in
+      let accountId = field_map json__ "accountId" NonEmptyString.of_json in
+      make ?endTime ?startTime ?imageUris ?snapshots ?region ?action ?state
+        ?resourceId ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details for a resource that the runtime instance of the lifecycle policy identified for action."]
 module InfrastructureConfigurationSummary =
   struct
     type nonrec t =
@@ -2955,7 +7345,10 @@ module InfrastructureConfigurationSummary =
           "The instance types of the infrastructure configuration."];
       instanceProfileName: InstanceProfileNameType.t option
         [@ocaml.doc
-          "The instance profile of the infrastructure configuration."]}
+          "The instance profile of the infrastructure configuration."];
+      placement: Placement.t option
+        [@ocaml.doc
+          "The instance placement settings that define where the instances that are launched from your image will run."]}
     let make ?arn =
       fun ?name ->
         fun ?description ->
@@ -2965,18 +7358,20 @@ module InfrastructureConfigurationSummary =
                 fun ?tags ->
                   fun ?instanceTypes ->
                     fun ?instanceProfileName ->
-                      fun () ->
-                        {
-                          arn;
-                          name;
-                          description;
-                          dateCreated;
-                          dateUpdated;
-                          resourceTags;
-                          tags;
-                          instanceTypes;
-                          instanceProfileName
-                        }
+                      fun ?placement ->
+                        fun () ->
+                          {
+                            arn;
+                            name;
+                            description;
+                            dateCreated;
+                            dateUpdated;
+                            resourceTags;
+                            tags;
+                            instanceTypes;
+                            instanceProfileName;
+                            placement
+                          }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -2992,9 +7387,12 @@ module InfrastructureConfigurationSummary =
           (Option.map x.instanceTypes ~f:InstanceTypeList.to_value));
         ("instanceProfileName",
           (Option.map x.instanceProfileName
-             ~f:InstanceProfileNameType.to_value))]
+             ~f:InstanceProfileNameType.to_value));
+        ("placement", (Option.map x.placement ~f:Placement.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let placement =
+        (Option.map ~f:Placement.of_xml) (Xml.child xml_arg0 "placement") in
       let instanceProfileName =
         (Option.map ~f:InstanceProfileNameType.of_xml)
           (Xml.child xml_arg0 "instanceProfileName") in
@@ -3016,54 +7414,28 @@ module InfrastructureConfigurationSummary =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?instanceProfileName ?instanceTypes ?tags ?resourceTags
+      make ?placement ?instanceProfileName ?instanceTypes ?tags ?resourceTags
         ?dateUpdated ?dateCreated ?description ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let placement = field_map json__ "placement" Placement.of_json in
       let instanceProfileName =
-        field_map json "instanceProfileName" InstanceProfileNameType.of_json in
+        field_map json__ "instanceProfileName"
+          InstanceProfileNameType.of_json in
       let instanceTypes =
-        field_map json "instanceTypes" InstanceTypeList.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let resourceTags = field_map json "resourceTags" ResourceTagMap.of_json in
-      let dateUpdated = field_map json "dateUpdated" DateTime.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?instanceProfileName ?instanceTypes ?tags ?resourceTags
+        field_map json__ "instanceTypes" InstanceTypeList.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let resourceTags =
+        field_map json__ "resourceTags" ResourceTagMap.of_json in
+      let dateUpdated = field_map json__ "dateUpdated" DateTime.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?placement ?instanceProfileName ?instanceTypes ?tags ?resourceTags
         ?dateUpdated ?dateCreated ?description ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The infrastructure used when building Amazon EC2 AMIs."]
-module Filter =
-  struct
-    type nonrec t =
-      {
-      name: FilterName.t option
-        [@ocaml.doc
-          "The name of the filter. Filter names are case-sensitive."];
-      values: FilterValues.t option
-        [@ocaml.doc "The filter values. Filter values are case-sensitive."]}
-    let make ?name = fun ?values -> fun () -> { name; values }
-    let to_value x =
-      structure_to_value
-        [("name", (Option.map x.name ~f:FilterName.to_value));
-        ("values", (Option.map x.values ~f:FilterValues.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let values =
-        (Option.map ~f:FilterValues.of_xml) (Xml.child xml_arg0 "values") in
-      let name =
-        (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "name") in
-      make ?values ?name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" FilterValues.of_json in
-      let name = field_map json "name" FilterName.of_json in
-      make ?values ?name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A filter name and value pair that is used to return a more specific list of results from a list operation. Filters can be used to match a set of resources by specific criteria, such as tags, attributes, or IDs."]
 module ImageVersion =
   struct
     type nonrec t =
@@ -3076,13 +7448,13 @@ module ImageVersion =
           "The name of this specific version of an Image Builder image."];
       type_: ImageType.t option
         [@ocaml.doc
-          "Specifies whether this image is an AMI or a container image."];
+          "Specifies whether this image produces an AMI or a container image."];
       version: VersionNumber.t option
         [@ocaml.doc
           "Details for a specific version of an Image Builder image. This version follows the semantic version syntax. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Assignment: For the first three nodes you can assign any positive integer value, including zero, with an upper limit of 2^30-1, or 1073741823 for each node. Image Builder automatically assigns the build number to the fourth node. Patterns: You can use any numeric pattern that adheres to the assignment requirements for the nodes that you can assign. For example, you might choose a software version pattern, such as 1.0.0, or a date, such as 2021.01.01. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."];
       platform: Platform.t option
         [@ocaml.doc
-          "The platform of the image version, for example \"Windows\" or \"Linux\"."];
+          "The operating system platform of the image version, for example \"Windows\" or \"Linux\"."];
       osVersion: OsVersion.t option
         [@ocaml.doc
           "The operating system version of the Amazon EC2 build instance. For example, Amazon Linux 2, Ubuntu 18, or Microsoft Windows Server 2019."];
@@ -3093,7 +7465,10 @@ module ImageVersion =
           "The date on which this specific version of the Image Builder image was created."];
       buildType: BuildType.t option
         [@ocaml.doc
-          "Indicates the type of build that created this image. The build can be initiated in the following ways: USER_INITIATED \226\128\147 A manual pipeline build request. SCHEDULED \226\128\147 A pipeline build initiated by a cron expression in the Image Builder pipeline, or from EventBridge. IMPORT \226\128\147 A VM import created the image to use as the base image for the recipe."]}
+          "Indicates the type of build that created this image. The build can be initiated in the following ways: USER_INITIATED \226\128\147 A manual pipeline build request. SCHEDULED \226\128\147 A pipeline build initiated by a cron expression in the Image Builder pipeline, or from EventBridge. IMPORT \226\128\147 A VM import created the image to use as the base image for the recipe. IMPORT_ISO \226\128\147 An ISO disk import created the image."];
+      imageSource: ImageSource.t option
+        [@ocaml.doc
+          "The origin of the base image that Image Builder used to build this image."]}
     let make ?arn =
       fun ?name ->
         fun ?type_ ->
@@ -3103,18 +7478,20 @@ module ImageVersion =
                 fun ?owner ->
                   fun ?dateCreated ->
                     fun ?buildType ->
-                      fun () ->
-                        {
-                          arn;
-                          name;
-                          type_;
-                          version;
-                          platform;
-                          osVersion;
-                          owner;
-                          dateCreated;
-                          buildType
-                        }
+                      fun ?imageSource ->
+                        fun () ->
+                          {
+                            arn;
+                            name;
+                            type_;
+                            version;
+                            platform;
+                            osVersion;
+                            owner;
+                            dateCreated;
+                            buildType;
+                            imageSource
+                          }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -3125,9 +7502,12 @@ module ImageVersion =
         ("osVersion", (Option.map x.osVersion ~f:OsVersion.to_value));
         ("owner", (Option.map x.owner ~f:NonEmptyString.to_value));
         ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value));
-        ("buildType", (Option.map x.buildType ~f:BuildType.to_value))]
+        ("buildType", (Option.map x.buildType ~f:BuildType.to_value));
+        ("imageSource", (Option.map x.imageSource ~f:ImageSource.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let imageSource =
+        (Option.map ~f:ImageSource.of_xml) (Xml.child xml_arg0 "imageSource") in
       let buildType =
         (Option.map ~f:BuildType.of_xml) (Xml.child xml_arg0 "buildType") in
       let dateCreated =
@@ -3146,24 +7526,303 @@ module ImageVersion =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?buildType ?dateCreated ?owner ?osVersion ?platform ?version
-        ?type_ ?name ?arn ()
+      make ?imageSource ?buildType ?dateCreated ?owner ?osVersion ?platform
+        ?version ?type_ ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildType = field_map json "buildType" BuildType.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let owner = field_map json "owner" NonEmptyString.of_json in
-      let osVersion = field_map json "osVersion" OsVersion.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let version = field_map json "version" VersionNumber.of_json in
-      let type_ = field_map json "type" ImageType.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?buildType ?dateCreated ?owner ?osVersion ?platform ?version
-        ?type_ ?name ?arn ()
+    let of_json json__ =
+      let imageSource = field_map json__ "imageSource" ImageSource.of_json in
+      let buildType = field_map json__ "buildType" BuildType.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let osVersion = field_map json__ "osVersion" OsVersion.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let type_ = field_map json__ "type" ImageType.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?imageSource ?buildType ?dateCreated ?owner ?osVersion ?platform
+        ?version ?type_ ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The defining characteristics of a specific version of an Image Builder image."]
+module ImageScanFinding =
+  struct
+    type nonrec t =
+      {
+      awsAccountId: NonEmptyString.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that's associated with the finding."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image build version that's associated with the finding."];
+      imagePipelineArn: ImagePipelineArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image pipeline that's associated with the finding."];
+      type_: NonEmptyString.t option
+        [@ocaml.doc
+          "The type of the finding. Image Builder looks for findings of the type PACKAGE_VULNERABILITY that apply to output images, and excludes other types."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "The description of the finding."];
+      title: NonEmptyString.t option [@ocaml.doc "The title of the finding."];
+      remediation: Remediation.t option
+        [@ocaml.doc
+          "An object that contains the details about how to remediate the finding."];
+      severity: NonEmptyString.t option
+        [@ocaml.doc "The severity of the finding."];
+      firstObservedAt: DateTimeTimestamp.t option
+        [@ocaml.doc "The date and time when the finding was first observed."];
+      updatedAt: DateTimeTimestamp.t option
+        [@ocaml.doc "The timestamp when the finding was last updated."];
+      inspectorScore: NonNegativeDouble.t option
+        [@ocaml.doc
+          "The score that Amazon Inspector assigned for the finding."];
+      inspectorScoreDetails: InspectorScoreDetails.t option
+        [@ocaml.doc
+          "An object that contains details of the Amazon Inspector score."];
+      packageVulnerabilityDetails: PackageVulnerabilityDetails.t option
+        [@ocaml.doc
+          "An object that contains the details of a package vulnerability finding."];
+      fixAvailable: NonEmptyString.t option
+        [@ocaml.doc
+          "Details about whether a fix is available for any of the packages that are identified in the finding through a version update."]}
+    let make ?awsAccountId =
+      fun ?imageBuildVersionArn ->
+        fun ?imagePipelineArn ->
+          fun ?type_ ->
+            fun ?description ->
+              fun ?title ->
+                fun ?remediation ->
+                  fun ?severity ->
+                    fun ?firstObservedAt ->
+                      fun ?updatedAt ->
+                        fun ?inspectorScore ->
+                          fun ?inspectorScoreDetails ->
+                            fun ?packageVulnerabilityDetails ->
+                              fun ?fixAvailable ->
+                                fun () ->
+                                  {
+                                    awsAccountId;
+                                    imageBuildVersionArn;
+                                    imagePipelineArn;
+                                    type_;
+                                    description;
+                                    title;
+                                    remediation;
+                                    severity;
+                                    firstObservedAt;
+                                    updatedAt;
+                                    inspectorScore;
+                                    inspectorScoreDetails;
+                                    packageVulnerabilityDetails;
+                                    fixAvailable
+                                  }
+    let to_value x =
+      structure_to_value
+        [("awsAccountId",
+           (Option.map x.awsAccountId ~f:NonEmptyString.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value));
+        ("imagePipelineArn",
+          (Option.map x.imagePipelineArn ~f:ImagePipelineArn.to_value));
+        ("type", (Option.map x.type_ ~f:NonEmptyString.to_value));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("title", (Option.map x.title ~f:NonEmptyString.to_value));
+        ("remediation", (Option.map x.remediation ~f:Remediation.to_value));
+        ("severity", (Option.map x.severity ~f:NonEmptyString.to_value));
+        ("firstObservedAt",
+          (Option.map x.firstObservedAt ~f:DateTimeTimestamp.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:DateTimeTimestamp.to_value));
+        ("inspectorScore",
+          (Option.map x.inspectorScore ~f:NonNegativeDouble.to_value));
+        ("inspectorScoreDetails",
+          (Option.map x.inspectorScoreDetails
+             ~f:InspectorScoreDetails.to_value));
+        ("packageVulnerabilityDetails",
+          (Option.map x.packageVulnerabilityDetails
+             ~f:PackageVulnerabilityDetails.to_value));
+        ("fixAvailable",
+          (Option.map x.fixAvailable ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fixAvailable =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "fixAvailable") in
+      let packageVulnerabilityDetails =
+        (Option.map ~f:PackageVulnerabilityDetails.of_xml)
+          (Xml.child xml_arg0 "packageVulnerabilityDetails") in
+      let inspectorScoreDetails =
+        (Option.map ~f:InspectorScoreDetails.of_xml)
+          (Xml.child xml_arg0 "inspectorScoreDetails") in
+      let inspectorScore =
+        (Option.map ~f:NonNegativeDouble.of_xml)
+          (Xml.child xml_arg0 "inspectorScore") in
+      let updatedAt =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "updatedAt") in
+      let firstObservedAt =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "firstObservedAt") in
+      let severity =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "severity") in
+      let remediation =
+        (Option.map ~f:Remediation.of_xml) (Xml.child xml_arg0 "remediation") in
+      let title =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "title") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let type_ =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "type") in
+      let imagePipelineArn =
+        (Option.map ~f:ImagePipelineArn.of_xml)
+          (Xml.child xml_arg0 "imagePipelineArn") in
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let awsAccountId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "awsAccountId") in
+      make ?fixAvailable ?packageVulnerabilityDetails ?inspectorScoreDetails
+        ?inspectorScore ?updatedAt ?firstObservedAt ?severity ?remediation
+        ?title ?description ?type_ ?imagePipelineArn ?imageBuildVersionArn
+        ?awsAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fixAvailable =
+        field_map json__ "fixAvailable" NonEmptyString.of_json in
+      let packageVulnerabilityDetails =
+        field_map json__ "packageVulnerabilityDetails"
+          PackageVulnerabilityDetails.of_json in
+      let inspectorScoreDetails =
+        field_map json__ "inspectorScoreDetails"
+          InspectorScoreDetails.of_json in
+      let inspectorScore =
+        field_map json__ "inspectorScore" NonNegativeDouble.of_json in
+      let updatedAt = field_map json__ "updatedAt" DateTimeTimestamp.of_json in
+      let firstObservedAt =
+        field_map json__ "firstObservedAt" DateTimeTimestamp.of_json in
+      let severity = field_map json__ "severity" NonEmptyString.of_json in
+      let remediation = field_map json__ "remediation" Remediation.of_json in
+      let title = field_map json__ "title" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let type_ = field_map json__ "type" NonEmptyString.of_json in
+      let imagePipelineArn =
+        field_map json__ "imagePipelineArn" ImagePipelineArn.of_json in
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let awsAccountId =
+        field_map json__ "awsAccountId" NonEmptyString.of_json in
+      make ?fixAvailable ?packageVulnerabilityDetails ?inspectorScoreDetails
+        ?inspectorScore ?updatedAt ?firstObservedAt ?severity ?remediation
+        ?title ?description ?type_ ?imagePipelineArn ?imageBuildVersionArn
+        ?awsAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains details about a vulnerability scan finding."]
+module ImageScanFindingsFilter =
+  struct
+    type nonrec t =
+      {
+      name: FilterName.t option
+        [@ocaml.doc
+          "The name of the image scan finding filter. Filter names are case-sensitive."];
+      values: ImageScanFindingsFilterValues.t option
+        [@ocaml.doc "The filter values. Filter values are case-sensitive."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:FilterName.to_value));
+        ("values",
+          (Option.map x.values ~f:ImageScanFindingsFilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:ImageScanFindingsFilterValues.of_xml)
+          (Xml.child xml_arg0 "values") in
+      let name =
+        (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map json__ "values" ImageScanFindingsFilterValues.of_json in
+      let name = field_map json__ "name" FilterName.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A name value pair that Image Builder applies to streamline results from the vulnerability scan findings list action."]
+module ImageScanFindingAggregation =
+  struct
+    type nonrec t =
+      {
+      accountAggregation: AccountAggregation.t option
+        [@ocaml.doc
+          "Returns an object that contains severity counts based on an account ID."];
+      imageAggregation: ImageAggregation.t option
+        [@ocaml.doc
+          "Returns an object that contains severity counts based on the Amazon Resource Name (ARN) for a specific image."];
+      imagePipelineAggregation: ImagePipelineAggregation.t option
+        [@ocaml.doc
+          "Returns an object that contains severity counts based on an image pipeline ARN."];
+      vulnerabilityIdAggregation: VulnerabilityIdAggregation.t option
+        [@ocaml.doc
+          "Returns an object that contains severity counts based on vulnerability ID."]}
+    let make ?accountAggregation =
+      fun ?imageAggregation ->
+        fun ?imagePipelineAggregation ->
+          fun ?vulnerabilityIdAggregation ->
+            fun () ->
+              {
+                accountAggregation;
+                imageAggregation;
+                imagePipelineAggregation;
+                vulnerabilityIdAggregation
+              }
+    let to_value x =
+      structure_to_value
+        [("accountAggregation",
+           (Option.map x.accountAggregation ~f:AccountAggregation.to_value));
+        ("imageAggregation",
+          (Option.map x.imageAggregation ~f:ImageAggregation.to_value));
+        ("imagePipelineAggregation",
+          (Option.map x.imagePipelineAggregation
+             ~f:ImagePipelineAggregation.to_value));
+        ("vulnerabilityIdAggregation",
+          (Option.map x.vulnerabilityIdAggregation
+             ~f:VulnerabilityIdAggregation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vulnerabilityIdAggregation =
+        (Option.map ~f:VulnerabilityIdAggregation.of_xml)
+          (Xml.child xml_arg0 "vulnerabilityIdAggregation") in
+      let imagePipelineAggregation =
+        (Option.map ~f:ImagePipelineAggregation.of_xml)
+          (Xml.child xml_arg0 "imagePipelineAggregation") in
+      let imageAggregation =
+        (Option.map ~f:ImageAggregation.of_xml)
+          (Xml.child xml_arg0 "imageAggregation") in
+      let accountAggregation =
+        (Option.map ~f:AccountAggregation.of_xml)
+          (Xml.child xml_arg0 "accountAggregation") in
+      make ?vulnerabilityIdAggregation ?imagePipelineAggregation
+        ?imageAggregation ?accountAggregation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vulnerabilityIdAggregation =
+        field_map json__ "vulnerabilityIdAggregation"
+          VulnerabilityIdAggregation.of_json in
+      let imagePipelineAggregation =
+        field_map json__ "imagePipelineAggregation"
+          ImagePipelineAggregation.of_json in
+      let imageAggregation =
+        field_map json__ "imageAggregation" ImageAggregation.of_json in
+      let accountAggregation =
+        field_map json__ "accountAggregation" AccountAggregation.of_json in
+      make ?vulnerabilityIdAggregation ?imagePipelineAggregation
+        ?imageAggregation ?accountAggregation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This returns exactly one type of aggregation, based on the filter that Image Builder applies in its API action."]
 module ImageRecipeSummary =
   struct
     type nonrec t =
@@ -3226,14 +7885,14 @@ module ImageRecipeSummary =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?dateCreated ?parentImage ?owner ?platform ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let parentImage = field_map json "parentImage" NonEmptyString.of_json in
-      let owner = field_map json "owner" NonEmptyString.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let parentImage = field_map json__ "parentImage" NonEmptyString.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
       make ?tags ?dateCreated ?parentImage ?owner ?platform ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of an image recipe."]
@@ -3276,11 +7935,30 @@ module ImagePipeline =
         [@ocaml.doc
           "The date on which this image pipeline was last updated."];
       dateLastRun: DateTime.t option
-        [@ocaml.doc "The date on which this image pipeline was last run."];
-      dateNextRun: DateTime.t option
         [@ocaml.doc
-          "The date on which this image pipeline will next be run."];
-      tags: TagMap.t option [@ocaml.doc "The tags of this image pipeline."]}
+          "This is no longer supported, and does not return a value."];
+      lastRunStatus: ImageStatus.t option
+        [@ocaml.doc
+          "The status of the last image that this pipeline built, such as BUILDING, TESTING, FAILED, or AVAILABLE."];
+      dateNextRun: DateTime.t option
+        [@ocaml.doc "The next date when the pipeline is scheduled to run."];
+      tags: TagMap.t option [@ocaml.doc "The tags of this image pipeline."];
+      imageScanningConfiguration: ImageScanningConfiguration.t option
+        [@ocaml.doc "Contains settings for vulnerability scans."];
+      imageTags: TagMap.t option
+        [@ocaml.doc
+          "The tags to be applied to the images produced by this pipeline."];
+      executionRole: RoleNameOrArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) for the IAM role you create that grants Image Builder access to perform workflow actions."];
+      workflows: WorkflowConfigurationList.t option
+        [@ocaml.doc
+          "Contains the workflows that run for the image pipeline."];
+      loggingConfiguration: PipelineLoggingConfiguration.t option
+        [@ocaml.doc "Defines logging configuration for the output image."];
+      consecutiveFailures: ConsecutiveFailures.t option
+        [@ocaml.doc
+          "Image Builder tracks the number of consecutive failures for scheduled pipeline executions and takes one of the following actions each time it runs on a schedule: If the pipeline execution is successful, the number of consecutive failures resets to zero. If the pipeline execution fails, Image Builder increments the number of consecutive failures. If the failure count exceeds the limit defined in the AutoDisablePolicy, Image Builder disables the pipeline. The consecutive failure count is also reset to zero under the following conditions: The pipeline runs manually and succeeds. The pipeline configuration is updated. If the pipeline runs manually and fails, the count remains the same. The next scheduled run continues to increment where it left off before."]}
     let make ?arn =
       fun ?name ->
         fun ?description ->
@@ -3296,28 +7974,42 @@ module ImagePipeline =
                             fun ?dateCreated ->
                               fun ?dateUpdated ->
                                 fun ?dateLastRun ->
-                                  fun ?dateNextRun ->
-                                    fun ?tags ->
-                                      fun () ->
-                                        {
-                                          arn;
-                                          name;
-                                          description;
-                                          platform;
-                                          enhancedImageMetadataEnabled;
-                                          imageRecipeArn;
-                                          containerRecipeArn;
-                                          infrastructureConfigurationArn;
-                                          distributionConfigurationArn;
-                                          imageTestsConfiguration;
-                                          schedule;
-                                          status;
-                                          dateCreated;
-                                          dateUpdated;
-                                          dateLastRun;
-                                          dateNextRun;
-                                          tags
-                                        }
+                                  fun ?lastRunStatus ->
+                                    fun ?dateNextRun ->
+                                      fun ?tags ->
+                                        fun ?imageScanningConfiguration ->
+                                          fun ?imageTags ->
+                                            fun ?executionRole ->
+                                              fun ?workflows ->
+                                                fun ?loggingConfiguration ->
+                                                  fun ?consecutiveFailures ->
+                                                    fun () ->
+                                                      {
+                                                        arn;
+                                                        name;
+                                                        description;
+                                                        platform;
+                                                        enhancedImageMetadataEnabled;
+                                                        imageRecipeArn;
+                                                        containerRecipeArn;
+                                                        infrastructureConfigurationArn;
+                                                        distributionConfigurationArn;
+                                                        imageTestsConfiguration;
+                                                        schedule;
+                                                        status;
+                                                        dateCreated;
+                                                        dateUpdated;
+                                                        dateLastRun;
+                                                        lastRunStatus;
+                                                        dateNextRun;
+                                                        tags;
+                                                        imageScanningConfiguration;
+                                                        imageTags;
+                                                        executionRole;
+                                                        workflows;
+                                                        loggingConfiguration;
+                                                        consecutiveFailures
+                                                      }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -3343,13 +8035,48 @@ module ImagePipeline =
         ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value));
         ("dateUpdated", (Option.map x.dateUpdated ~f:DateTime.to_value));
         ("dateLastRun", (Option.map x.dateLastRun ~f:DateTime.to_value));
+        ("lastRunStatus",
+          (Option.map x.lastRunStatus ~f:ImageStatus.to_value));
         ("dateNextRun", (Option.map x.dateNextRun ~f:DateTime.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("imageScanningConfiguration",
+          (Option.map x.imageScanningConfiguration
+             ~f:ImageScanningConfiguration.to_value));
+        ("imageTags", (Option.map x.imageTags ~f:TagMap.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:RoleNameOrArn.to_value));
+        ("workflows",
+          (Option.map x.workflows ~f:WorkflowConfigurationList.to_value));
+        ("loggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:PipelineLoggingConfiguration.to_value));
+        ("consecutiveFailures",
+          (Option.map x.consecutiveFailures ~f:ConsecutiveFailures.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consecutiveFailures =
+        (Option.map ~f:ConsecutiveFailures.of_xml)
+          (Xml.child xml_arg0 "consecutiveFailures") in
+      let loggingConfiguration =
+        (Option.map ~f:PipelineLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
+      let workflows =
+        (Option.map ~f:WorkflowConfigurationList.of_xml)
+          (Xml.child xml_arg0 "workflows") in
+      let executionRole =
+        (Option.map ~f:RoleNameOrArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let imageTags =
+        (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "imageTags") in
+      let imageScanningConfiguration =
+        (Option.map ~f:ImageScanningConfiguration.of_xml)
+          (Xml.child xml_arg0 "imageScanningConfiguration") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let dateNextRun =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateNextRun") in
+      let lastRunStatus =
+        (Option.map ~f:ImageStatus.of_xml)
+          (Xml.child xml_arg0 "lastRunStatus") in
       let dateLastRun =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateLastRun") in
       let dateUpdated =
@@ -3385,39 +8112,61 @@ module ImagePipeline =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?dateNextRun ?dateLastRun ?dateUpdated ?dateCreated ?status
-        ?schedule ?imageTestsConfiguration ?distributionConfigurationArn
-        ?infrastructureConfigurationArn ?containerRecipeArn ?imageRecipeArn
-        ?enhancedImageMetadataEnabled ?platform ?description ?name ?arn ()
+      make ?consecutiveFailures ?loggingConfiguration ?workflows
+        ?executionRole ?imageTags ?imageScanningConfiguration ?tags
+        ?dateNextRun ?lastRunStatus ?dateLastRun ?dateUpdated ?dateCreated
+        ?status ?schedule ?imageTestsConfiguration
+        ?distributionConfigurationArn ?infrastructureConfigurationArn
+        ?containerRecipeArn ?imageRecipeArn ?enhancedImageMetadataEnabled
+        ?platform ?description ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let dateNextRun = field_map json "dateNextRun" DateTime.of_json in
-      let dateLastRun = field_map json "dateLastRun" DateTime.of_json in
-      let dateUpdated = field_map json "dateUpdated" DateTime.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let status = field_map json "status" PipelineStatus.of_json in
-      let schedule = field_map json "schedule" Schedule.of_json in
+    let of_json json__ =
+      let consecutiveFailures =
+        field_map json__ "consecutiveFailures" ConsecutiveFailures.of_json in
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          PipelineLoggingConfiguration.of_json in
+      let workflows =
+        field_map json__ "workflows" WorkflowConfigurationList.of_json in
+      let executionRole =
+        field_map json__ "executionRole" RoleNameOrArn.of_json in
+      let imageTags = field_map json__ "imageTags" TagMap.of_json in
+      let imageScanningConfiguration =
+        field_map json__ "imageScanningConfiguration"
+          ImageScanningConfiguration.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateNextRun = field_map json__ "dateNextRun" DateTime.of_json in
+      let lastRunStatus =
+        field_map json__ "lastRunStatus" ImageStatus.of_json in
+      let dateLastRun = field_map json__ "dateLastRun" DateTime.of_json in
+      let dateUpdated = field_map json__ "dateUpdated" DateTime.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let status = field_map json__ "status" PipelineStatus.of_json in
+      let schedule = field_map json__ "schedule" Schedule.of_json in
       let imageTestsConfiguration =
-        field_map json "imageTestsConfiguration"
+        field_map json__ "imageTestsConfiguration"
           ImageTestsConfiguration.of_json in
       let distributionConfigurationArn =
-        field_map json "distributionConfigurationArn" Arn.of_json in
+        field_map json__ "distributionConfigurationArn" Arn.of_json in
       let infrastructureConfigurationArn =
-        field_map json "infrastructureConfigurationArn" Arn.of_json in
+        field_map json__ "infrastructureConfigurationArn" Arn.of_json in
       let containerRecipeArn =
-        field_map json "containerRecipeArn" Arn.of_json in
-      let imageRecipeArn = field_map json "imageRecipeArn" Arn.of_json in
+        field_map json__ "containerRecipeArn" Arn.of_json in
+      let imageRecipeArn = field_map json__ "imageRecipeArn" Arn.of_json in
       let enhancedImageMetadataEnabled =
-        field_map json "enhancedImageMetadataEnabled" NullableBoolean.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?tags ?dateNextRun ?dateLastRun ?dateUpdated ?dateCreated ?status
-        ?schedule ?imageTestsConfiguration ?distributionConfigurationArn
-        ?infrastructureConfigurationArn ?containerRecipeArn ?imageRecipeArn
-        ?enhancedImageMetadataEnabled ?platform ?description ?name ?arn ()
+        field_map json__ "enhancedImageMetadataEnabled"
+          NullableBoolean.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?consecutiveFailures ?loggingConfiguration ?workflows
+        ?executionRole ?imageTags ?imageScanningConfiguration ?tags
+        ?dateNextRun ?lastRunStatus ?dateLastRun ?dateUpdated ?dateCreated
+        ?status ?schedule ?imageTestsConfiguration
+        ?distributionConfigurationArn ?infrastructureConfigurationArn
+        ?containerRecipeArn ?imageRecipeArn ?enhancedImageMetadataEnabled
+        ?platform ?description ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of an image pipeline."]
 module ImageSummary =
@@ -3428,24 +8177,39 @@ module ImageSummary =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the image."];
       name: ResourceName.t option [@ocaml.doc "The name of the image."];
       type_: ImageType.t option
-        [@ocaml.doc "Specifies whether this is an AMI or container image."];
+        [@ocaml.doc
+          "Specifies whether this image produces an AMI or a container image."];
       version: VersionNumber.t option
         [@ocaml.doc "The version of the image."];
-      platform: Platform.t option [@ocaml.doc "The platform of the image."];
+      platform: Platform.t option
+        [@ocaml.doc
+          "The image operating system platform, such as Linux or Windows."];
       osVersion: OsVersion.t option
         [@ocaml.doc
-          "The operating system version of the instance. For example, Amazon Linux 2, Ubuntu 18, or Microsoft Windows Server 2019."];
+          "The operating system version of the instances that launch from this image. For example, Amazon Linux 2, Ubuntu 18, or Microsoft Windows Server 2019."];
       state: ImageState.t option [@ocaml.doc "The state of the image."];
       owner: NonEmptyString.t option [@ocaml.doc "The owner of the image."];
       dateCreated: DateTime.t option
-        [@ocaml.doc "The date on which this image was created."];
+        [@ocaml.doc "The date on which Image Builder created this image."];
       outputResources: OutputResources.t option
         [@ocaml.doc
-          "The output resources produced when creating this image."];
-      tags: TagMap.t option [@ocaml.doc "The tags of the image."];
+          "The output resources that Image Builder produced when it created this image."];
+      tags: TagMap.t option [@ocaml.doc "The tags that apply to this image."];
       buildType: BuildType.t option
         [@ocaml.doc
-          "Indicates the type of build that created this image. The build can be initiated in the following ways: USER_INITIATED \226\128\147 A manual pipeline build request. SCHEDULED \226\128\147 A pipeline build initiated by a cron expression in the Image Builder pipeline, or from EventBridge. IMPORT \226\128\147 A VM import created the image to use as the base image for the recipe."]}
+          "Indicates the type of build that created this image. The build can be initiated in the following ways: USER_INITIATED \226\128\147 A manual pipeline build request. SCHEDULED \226\128\147 A pipeline build initiated by a cron expression in the Image Builder pipeline, or from EventBridge. IMPORT \226\128\147 A VM import created the image to use as the base image for the recipe. IMPORT_ISO \226\128\147 An ISO disk import created the image."];
+      imageSource: ImageSource.t option
+        [@ocaml.doc
+          "The origin of the base image that Image Builder used to build this image."];
+      deprecationTime: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The time when deprecation occurs for an image resource. This can be a past or future date."];
+      lifecycleExecutionId: LifecycleExecutionId.t option
+        [@ocaml.doc
+          "Identifies the last runtime instance of the lifecycle policy to take action on the image."];
+      loggingConfiguration: ImageLoggingConfiguration.t option
+        [@ocaml.doc
+          "The logging configuration that's defined for the image."]}
     let make ?arn =
       fun ?name ->
         fun ?type_ ->
@@ -3458,21 +8222,29 @@ module ImageSummary =
                       fun ?outputResources ->
                         fun ?tags ->
                           fun ?buildType ->
-                            fun () ->
-                              {
-                                arn;
-                                name;
-                                type_;
-                                version;
-                                platform;
-                                osVersion;
-                                state;
-                                owner;
-                                dateCreated;
-                                outputResources;
-                                tags;
-                                buildType
-                              }
+                            fun ?imageSource ->
+                              fun ?deprecationTime ->
+                                fun ?lifecycleExecutionId ->
+                                  fun ?loggingConfiguration ->
+                                    fun () ->
+                                      {
+                                        arn;
+                                        name;
+                                        type_;
+                                        version;
+                                        platform;
+                                        osVersion;
+                                        state;
+                                        owner;
+                                        dateCreated;
+                                        outputResources;
+                                        tags;
+                                        buildType;
+                                        imageSource;
+                                        deprecationTime;
+                                        lifecycleExecutionId;
+                                        loggingConfiguration
+                                      }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -3487,9 +8259,28 @@ module ImageSummary =
         ("outputResources",
           (Option.map x.outputResources ~f:OutputResources.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("buildType", (Option.map x.buildType ~f:BuildType.to_value))]
+        ("buildType", (Option.map x.buildType ~f:BuildType.to_value));
+        ("imageSource", (Option.map x.imageSource ~f:ImageSource.to_value));
+        ("deprecationTime",
+          (Option.map x.deprecationTime ~f:DateTimeTimestamp.to_value));
+        ("lifecycleExecutionId",
+          (Option.map x.lifecycleExecutionId ~f:LifecycleExecutionId.to_value));
+        ("loggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:ImageLoggingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let loggingConfiguration =
+        (Option.map ~f:ImageLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
+      let lifecycleExecutionId =
+        (Option.map ~f:LifecycleExecutionId.of_xml)
+          (Xml.child xml_arg0 "lifecycleExecutionId") in
+      let deprecationTime =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "deprecationTime") in
+      let imageSource =
+        (Option.map ~f:ImageSource.of_xml) (Xml.child xml_arg0 "imageSource") in
       let buildType =
         (Option.map ~f:BuildType.of_xml) (Xml.child xml_arg0 "buildType") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
@@ -3514,25 +8305,35 @@ module ImageSummary =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?buildType ?tags ?outputResources ?dateCreated ?owner ?state
-        ?osVersion ?platform ?version ?type_ ?name ?arn ()
+      make ?loggingConfiguration ?lifecycleExecutionId ?deprecationTime
+        ?imageSource ?buildType ?tags ?outputResources ?dateCreated ?owner
+        ?state ?osVersion ?platform ?version ?type_ ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildType = field_map json "buildType" BuildType.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          ImageLoggingConfiguration.of_json in
+      let lifecycleExecutionId =
+        field_map json__ "lifecycleExecutionId" LifecycleExecutionId.of_json in
+      let deprecationTime =
+        field_map json__ "deprecationTime" DateTimeTimestamp.of_json in
+      let imageSource = field_map json__ "imageSource" ImageSource.of_json in
+      let buildType = field_map json__ "buildType" BuildType.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let outputResources =
-        field_map json "outputResources" OutputResources.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let owner = field_map json "owner" NonEmptyString.of_json in
-      let state = field_map json "state" ImageState.of_json in
-      let osVersion = field_map json "osVersion" OsVersion.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let version = field_map json "version" VersionNumber.of_json in
-      let type_ = field_map json "type" ImageType.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?buildType ?tags ?outputResources ?dateCreated ?owner ?state
-        ?osVersion ?platform ?version ?type_ ?name ?arn ()
+        field_map json__ "outputResources" OutputResources.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let state = field_map json__ "state" ImageState.of_json in
+      let osVersion = field_map json__ "osVersion" OsVersion.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let type_ = field_map json__ "type" ImageType.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?loggingConfiguration ?lifecycleExecutionId ?deprecationTime
+        ?imageSource ?buildType ?tags ?outputResources ?dateCreated ?owner
+        ?state ?osVersion ?platform ?version ?type_ ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An image summary."]
 module ImagePackage =
@@ -3541,10 +8342,10 @@ module ImagePackage =
       {
       packageName: NonEmptyString.t option
         [@ocaml.doc
-          "The name of the package as reported to the operating system package manager."];
+          "The name of the package that's reported to the operating system package manager."];
       packageVersion: NonEmptyString.t option
         [@ocaml.doc
-          "The version of the package as reported to the operating system package manager."]}
+          "The version of the package that's reported to the operating system package manager."]}
     let make ?packageName =
       fun ?packageVersion -> fun () -> { packageName; packageVersion }
     let to_value x =
@@ -3563,14 +8364,14 @@ module ImagePackage =
           (Xml.child xml_arg0 "packageName") in
       make ?packageVersion ?packageName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageVersion =
-        field_map json "packageVersion" NonEmptyString.of_json in
-      let packageName = field_map json "packageName" NonEmptyString.of_json in
+        field_map json__ "packageVersion" NonEmptyString.of_json in
+      let packageName = field_map json__ "packageName" NonEmptyString.of_json in
       make ?packageVersion ?packageName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a package installed on an Image Builder image."]
+       "A software package that's installed on top of the base image to create a customized image."]
 module DistributionConfigurationSummary =
   struct
     type nonrec t =
@@ -3640,14 +8441,14 @@ module DistributionConfigurationSummary =
       make ?regions ?tags ?dateUpdated ?dateCreated ?description ?name ?arn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regions = field_map json "regions" RegionList.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let dateUpdated = field_map json "dateUpdated" DateTime.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
+    let of_json json__ =
+      let regions = field_map json__ "regions" RegionList.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateUpdated = field_map json__ "dateUpdated" DateTime.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
       make ?regions ?tags ?dateUpdated ?dateCreated ?description ?name ?arn
         ()
     let to_json v = composed_to_json to_value v
@@ -3672,6 +8473,9 @@ module ContainerRecipeSummary =
         [@ocaml.doc "The base image for the container recipe."];
       dateCreated: DateTime.t option
         [@ocaml.doc "The date when this container recipe was created."];
+      instanceImage: NonEmptyString.t option
+        [@ocaml.doc
+          "The base image for a container build and test instance. This can contain an AMI ID or it can specify an Amazon Web Services Systems Manager (SSM) Parameter Store Parameter, prefixed by ssm:, followed by the parameter name or ARN. If not specified, Image Builder uses the appropriate ECS-optimized AMI as a base image."];
       tags: TagMap.t option
         [@ocaml.doc "Tags that are attached to the container recipe."]}
     let make ?arn =
@@ -3681,18 +8485,20 @@ module ContainerRecipeSummary =
             fun ?owner ->
               fun ?parentImage ->
                 fun ?dateCreated ->
-                  fun ?tags ->
-                    fun () ->
-                      {
-                        arn;
-                        containerType;
-                        name;
-                        platform;
-                        owner;
-                        parentImage;
-                        dateCreated;
-                        tags
-                      }
+                  fun ?instanceImage ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          arn;
+                          containerType;
+                          name;
+                          platform;
+                          owner;
+                          parentImage;
+                          dateCreated;
+                          instanceImage;
+                          tags
+                        }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -3704,10 +8510,15 @@ module ContainerRecipeSummary =
         ("parentImage",
           (Option.map x.parentImage ~f:NonEmptyString.to_value));
         ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value));
+        ("instanceImage",
+          (Option.map x.instanceImage ~f:NonEmptyString.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let instanceImage =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "instanceImage") in
       let dateCreated =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateCreated") in
       let parentImage =
@@ -3724,21 +8535,23 @@ module ContainerRecipeSummary =
           (Xml.child xml_arg0 "containerType") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?dateCreated ?parentImage ?owner ?platform ?name
-        ?containerType ?arn ()
+      make ?tags ?instanceImage ?dateCreated ?parentImage ?owner ?platform
+        ?name ?containerType ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let parentImage = field_map json "parentImage" NonEmptyString.of_json in
-      let owner = field_map json "owner" NonEmptyString.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let name = field_map json "name" ResourceName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let instanceImage =
+        field_map json__ "instanceImage" NonEmptyString.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let parentImage = field_map json__ "parentImage" NonEmptyString.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let containerType =
-        field_map json "containerType" ContainerType.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?tags ?dateCreated ?parentImage ?owner ?platform ?name
-        ?containerType ?arn ()
+        field_map json__ "containerType" ContainerType.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?tags ?instanceImage ?dateCreated ?parentImage ?owner ?platform
+        ?name ?containerType ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of a container recipe"]
 module ComponentVersion =
@@ -3765,7 +8578,12 @@ module ComponentVersion =
       owner: NonEmptyString.t option
         [@ocaml.doc "The owner of the component."];
       dateCreated: DateTime.t option
-        [@ocaml.doc "The date that the component was created."]}
+        [@ocaml.doc "The date that the component was created."];
+      status: ComponentStatus.t option
+        [@ocaml.doc "Describes the current status of the component version."];
+      productCodes: ProductCodeList.t option
+        [@ocaml.doc
+          "Contains product codes that are used for billing purposes for Amazon Web Services Marketplace components."]}
     let make ?arn =
       fun ?name ->
         fun ?version ->
@@ -3775,18 +8593,22 @@ module ComponentVersion =
                 fun ?type_ ->
                   fun ?owner ->
                     fun ?dateCreated ->
-                      fun () ->
-                        {
-                          arn;
-                          name;
-                          version;
-                          description;
-                          platform;
-                          supportedOsVersions;
-                          type_;
-                          owner;
-                          dateCreated
-                        }
+                      fun ?status ->
+                        fun ?productCodes ->
+                          fun () ->
+                            {
+                              arn;
+                              name;
+                              version;
+                              description;
+                              platform;
+                              supportedOsVersions;
+                              type_;
+                              owner;
+                              dateCreated;
+                              status;
+                              productCodes
+                            }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -3799,9 +8621,17 @@ module ComponentVersion =
           (Option.map x.supportedOsVersions ~f:OsVersionList.to_value));
         ("type", (Option.map x.type_ ~f:ComponentType.to_value));
         ("owner", (Option.map x.owner ~f:NonEmptyString.to_value));
-        ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value))]
+        ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value));
+        ("status", (Option.map x.status ~f:ComponentStatus.to_value));
+        ("productCodes",
+          (Option.map x.productCodes ~f:ProductCodeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let productCodes =
+        (Option.map ~f:ProductCodeList.of_xml)
+          (Xml.child xml_arg0 "productCodes") in
+      let status =
+        (Option.map ~f:ComponentStatus.of_xml) (Xml.child xml_arg0 "status") in
       let dateCreated =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateCreated") in
       let owner =
@@ -3822,22 +8652,25 @@ module ComponentVersion =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?dateCreated ?owner ?type_ ?supportedOsVersions ?platform
-        ?description ?version ?name ?arn ()
+      make ?productCodes ?status ?dateCreated ?owner ?type_
+        ?supportedOsVersions ?platform ?description ?version ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let owner = field_map json "owner" NonEmptyString.of_json in
-      let type_ = field_map json "type" ComponentType.of_json in
+    let of_json json__ =
+      let productCodes =
+        field_map json__ "productCodes" ProductCodeList.of_json in
+      let status = field_map json__ "status" ComponentStatus.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let type_ = field_map json__ "type" ComponentType.of_json in
       let supportedOsVersions =
-        field_map json "supportedOsVersions" OsVersionList.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let version = field_map json "version" VersionNumber.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?dateCreated ?owner ?type_ ?supportedOsVersions ?platform
-        ?description ?version ?name ?arn ()
+        field_map json__ "supportedOsVersions" OsVersionList.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?productCodes ?status ?dateCreated ?owner ?type_
+        ?supportedOsVersions ?platform ?description ?version ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The defining characteristics of a specific version of an Amazon Web Services TOE component."]
@@ -3851,25 +8684,32 @@ module ComponentSummary =
       version: VersionNumber.t option
         [@ocaml.doc "The version of the component."];
       platform: Platform.t option
-        [@ocaml.doc "The platform of the component."];
+        [@ocaml.doc "The operating system platform of the component."];
       supportedOsVersions: OsVersionList.t option
         [@ocaml.doc
-          "The operating system (OS) version supported by the component. If the OS information is available, a prefix match is performed against the base image OS version during image recipe creation."];
+          "The operating system (OS) version that the component supports. If the OS information is available, Image Builder performs a prefix match against the base image OS version during image recipe creation."];
       state: ComponentState.t option
         [@ocaml.doc "Describes the current status of the component."];
       type_: ComponentType.t option
         [@ocaml.doc
-          "The type of the component denotes whether the component is used to build the image or only to test it."];
+          "The component type specifies whether Image Builder uses the component to build the image or only to test it."];
       owner: NonEmptyString.t option
         [@ocaml.doc "The owner of the component."];
       description: NonEmptyString.t option
         [@ocaml.doc "The description of the component."];
       changeDescription: NonEmptyString.t option
-        [@ocaml.doc "The change description of the component."];
+        [@ocaml.doc
+          "The change description for the current version of the component."];
       dateCreated: DateTime.t option
-        [@ocaml.doc "The date that the component was created."];
+        [@ocaml.doc "The original creation date of the component."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags associated with the component."]}
+        [@ocaml.doc "The tags that apply to the component."];
+      publisher: NonEmptyString.t option
+        [@ocaml.doc
+          "Contains the name of the publisher if this is a third-party component. Otherwise, this property is empty."];
+      obfuscate: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether component source is hidden from view in the console, and from component detail results for API, CLI, or SDK operations."]}
     let make ?arn =
       fun ?name ->
         fun ?version ->
@@ -3882,21 +8722,25 @@ module ComponentSummary =
                       fun ?changeDescription ->
                         fun ?dateCreated ->
                           fun ?tags ->
-                            fun () ->
-                              {
-                                arn;
-                                name;
-                                version;
-                                platform;
-                                supportedOsVersions;
-                                state;
-                                type_;
-                                owner;
-                                description;
-                                changeDescription;
-                                dateCreated;
-                                tags
-                              }
+                            fun ?publisher ->
+                              fun ?obfuscate ->
+                                fun () ->
+                                  {
+                                    arn;
+                                    name;
+                                    version;
+                                    platform;
+                                    supportedOsVersions;
+                                    state;
+                                    type_;
+                                    owner;
+                                    description;
+                                    changeDescription;
+                                    dateCreated;
+                                    tags;
+                                    publisher;
+                                    obfuscate
+                                  }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -3913,9 +8757,16 @@ module ComponentSummary =
         ("changeDescription",
           (Option.map x.changeDescription ~f:NonEmptyString.to_value));
         ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("publisher", (Option.map x.publisher ~f:NonEmptyString.to_value));
+        ("obfuscate", (Option.map x.obfuscate ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let obfuscate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "obfuscate") in
+      let publisher =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "publisher") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let dateCreated =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateCreated") in
@@ -3942,28 +8793,177 @@ module ComponentSummary =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?dateCreated ?changeDescription ?description ?owner ?type_
-        ?state ?supportedOsVersions ?platform ?version ?name ?arn ()
+      make ?obfuscate ?publisher ?tags ?dateCreated ?changeDescription
+        ?description ?owner ?type_ ?state ?supportedOsVersions ?platform
+        ?version ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
+    let of_json json__ =
+      let obfuscate = field_map json__ "obfuscate" Boolean.of_json in
+      let publisher = field_map json__ "publisher" NonEmptyString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
       let changeDescription =
-        field_map json "changeDescription" NonEmptyString.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let owner = field_map json "owner" NonEmptyString.of_json in
-      let type_ = field_map json "type" ComponentType.of_json in
-      let state = field_map json "state" ComponentState.of_json in
+        field_map json__ "changeDescription" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let type_ = field_map json__ "type" ComponentType.of_json in
+      let state = field_map json__ "state" ComponentState.of_json in
       let supportedOsVersions =
-        field_map json "supportedOsVersions" OsVersionList.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let version = field_map json "version" VersionNumber.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?tags ?dateCreated ?changeDescription ?description ?owner ?type_
-        ?state ?supportedOsVersions ?platform ?version ?name ?arn ()
+        field_map json__ "supportedOsVersions" OsVersionList.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?obfuscate ?publisher ?tags ?dateCreated ?changeDescription
+        ?description ?owner ?type_ ?state ?supportedOsVersions ?platform
+        ?version ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A high-level summary of a component."]
+module UefiData =
+  struct
+    type nonrec t = string
+    let context_ = "UefiData"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64000) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UefiData" j
+    let to_json = simple_to_json to_value
+  end
+module WindowsConfigurationImageIndex =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:4294967295L) >>=
+             (fun () -> check_int64_min i ~min:1L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module WorkflowData =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowData"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowData" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowParameterDetailList =
+  struct
+    type nonrec t = WorkflowParameterDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowParameterDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowParameterDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkflowParameterDetailList"
+        ~of_json:WorkflowParameterDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LifecyclePolicyDetails =
+  struct
+    type nonrec t = LifecyclePolicyDetail.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LifecyclePolicyDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LifecyclePolicyDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LifecyclePolicyDetails"
+        ~of_json:LifecyclePolicyDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LifecyclePolicyResourceSelection =
+  struct
+    type nonrec t =
+      {
+      recipes: LifecyclePolicyResourceSelectionRecipes.t option
+        [@ocaml.doc
+          "A list of recipes that are used as selection criteria for the output images that the lifecycle policy applies to."];
+      tagMap: TagMap.t option
+        [@ocaml.doc
+          "A list of tags that are used as selection criteria for the Image Builder image resources that the lifecycle policy applies to."]}
+    let make ?recipes = fun ?tagMap -> fun () -> { recipes; tagMap }
+    let to_value x =
+      structure_to_value
+        [("recipes",
+           (Option.map x.recipes
+              ~f:LifecyclePolicyResourceSelectionRecipes.to_value));
+        ("tagMap", (Option.map x.tagMap ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagMap =
+        (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tagMap") in
+      let recipes =
+        (Option.map ~f:LifecyclePolicyResourceSelectionRecipes.of_xml)
+          (Xml.child xml_arg0 "recipes") in
+      make ?tagMap ?recipes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagMap = field_map json__ "tagMap" TagMap.of_json in
+      let recipes =
+        field_map json__ "recipes"
+          LifecyclePolicyResourceSelectionRecipes.of_json in
+      make ?tagMap ?recipes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Resource selection criteria for the lifecycle policy."]
 module ContainerRecipe =
   struct
     type nonrec t =
@@ -3987,7 +8987,7 @@ module ContainerRecipe =
           "The semantic version of the container recipe. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Assignment: For the first three nodes you can assign any positive integer value, including zero, with an upper limit of 2^30-1, or 1073741823 for each node. Image Builder automatically assigns the build number to the fourth node. Patterns: You can use any numeric pattern that adheres to the assignment requirements for the nodes that you can assign. For example, you might choose a software version pattern, such as 1.0.0, or a date, such as 2021.01.01. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."];
       components: ComponentConfigurationList.t option
         [@ocaml.doc
-          "Components for build and test that are included in the container recipe."];
+          "Build and test components that are included in the container recipe. Recipes require a minimum of one build component, and can have a maximum of 20 build and test components in any combination."];
       instanceConfiguration: InstanceConfiguration.t option
         [@ocaml.doc
           "A group of options that can be used to configure an instance for building and testing container images."];
@@ -3996,12 +8996,13 @@ module ContainerRecipe =
           "Dockerfiles are text documents that are used to build Docker containers, and ensure that they contain all of the elements required by the application running inside. The template data consists of contextual variables where Image Builder places build information or scripts, based on your container image recipe."];
       kmsKeyId: NonEmptyString.t option
         [@ocaml.doc
-          "Identifies which KMS key is used to encrypt the container image for distribution to the target Region."];
+          "The Amazon Resource Name (ARN) that uniquely identifies which KMS key is used to encrypt the container image for distribution to the target Region. This can be either the Key ARN or the Alias ARN. For more information, see Key identifiers (KeyId) in the Key Management Service Developer Guide."];
       encrypted: NullableBoolean.t option
         [@ocaml.doc
           "A flag that indicates if the target container is encrypted."];
       parentImage: NonEmptyString.t option
-        [@ocaml.doc "The base image for the container recipe."];
+        [@ocaml.doc
+          "The base image for customizations specified in the container recipe. This can contain an Image Builder image resource ARN or a container image URI, for example amazonlinux:latest."];
       dateCreated: DateTime.t option
         [@ocaml.doc "The date when this container recipe was created."];
       tags: TagMap.t option
@@ -4126,30 +9127,31 @@ module ContainerRecipe =
         ?instanceConfiguration ?components ?version ?owner ?platform
         ?description ?name ?containerType ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetRepository =
-        field_map json "targetRepository" TargetContainerRepository.of_json in
+        field_map json__ "targetRepository" TargetContainerRepository.of_json in
       let workingDirectory =
-        field_map json "workingDirectory" NonEmptyString.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let parentImage = field_map json "parentImage" NonEmptyString.of_json in
-      let encrypted = field_map json "encrypted" NullableBoolean.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
+        field_map json__ "workingDirectory" NonEmptyString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let parentImage = field_map json__ "parentImage" NonEmptyString.of_json in
+      let encrypted = field_map json__ "encrypted" NullableBoolean.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
       let dockerfileTemplateData =
-        field_map json "dockerfileTemplateData" DockerFileTemplate.of_json in
+        field_map json__ "dockerfileTemplateData" DockerFileTemplate.of_json in
       let instanceConfiguration =
-        field_map json "instanceConfiguration" InstanceConfiguration.of_json in
+        field_map json__ "instanceConfiguration"
+          InstanceConfiguration.of_json in
       let components =
-        field_map json "components" ComponentConfigurationList.of_json in
-      let version = field_map json "version" VersionNumber.of_json in
-      let owner = field_map json "owner" NonEmptyString.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map json "name" ResourceName.of_json in
+        field_map json__ "components" ComponentConfigurationList.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
       let containerType =
-        field_map json "containerType" ContainerType.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
+        field_map json__ "containerType" ContainerType.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
       make ?targetRepository ?workingDirectory ?tags ?dateCreated
         ?parentImage ?encrypted ?kmsKeyId ?dockerfileTemplateData
         ?instanceConfiguration ?components ?version ?owner ?platform
@@ -4170,7 +9172,7 @@ module DistributionConfiguration =
       distributions: DistributionList.t option
         [@ocaml.doc
           "The distribution objects that apply Region-specific settings for the deployment of the image to targeted Regions."];
-      timeoutMinutes: DistributionTimeoutMinutes.t
+      timeoutMinutes: DistributionTimeoutMinutes.t option
         [@ocaml.doc
           "The maximum duration in minutes for this distribution configuration."];
       dateCreated: DateTime.t option
@@ -4181,25 +9183,24 @@ module DistributionConfiguration =
           "The date on which this distribution configuration was last updated."];
       tags: TagMap.t option
         [@ocaml.doc "The tags of the distribution configuration."]}
-    let context_ = "DistributionConfiguration"
     let make ?arn =
       fun ?name ->
         fun ?description ->
           fun ?distributions ->
-            fun ?dateCreated ->
-              fun ?dateUpdated ->
-                fun ?tags ->
-                  fun ~timeoutMinutes ->
+            fun ?timeoutMinutes ->
+              fun ?dateCreated ->
+                fun ?dateUpdated ->
+                  fun ?tags ->
                     fun () ->
                       {
                         arn;
                         name;
                         description;
                         distributions;
+                        timeoutMinutes;
                         dateCreated;
                         dateUpdated;
-                        tags;
-                        timeoutMinutes
+                        tags
                       }
     let to_value x =
       structure_to_value
@@ -4210,7 +9211,7 @@ module DistributionConfiguration =
         ("distributions",
           (Option.map x.distributions ~f:DistributionList.to_value));
         ("timeoutMinutes",
-          (Some (DistributionTimeoutMinutes.to_value x.timeoutMinutes)));
+          (Option.map x.timeoutMinutes ~f:DistributionTimeoutMinutes.to_value));
         ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value));
         ("dateUpdated", (Option.map x.dateUpdated ~f:DateTime.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
@@ -4222,8 +9223,8 @@ module DistributionConfiguration =
       let dateCreated =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateCreated") in
       let timeoutMinutes =
-        DistributionTimeoutMinutes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "timeoutMinutes") in
+        (Option.map ~f:DistributionTimeoutMinutes.of_xml)
+          (Xml.child xml_arg0 "timeoutMinutes") in
       let distributions =
         (Option.map ~f:DistributionList.of_xml)
           (Xml.child xml_arg0 "distributions") in
@@ -4234,22 +9235,21 @@ module DistributionConfiguration =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?dateUpdated ?dateCreated ~timeoutMinutes ?distributions
+      make ?tags ?dateUpdated ?dateCreated ?timeoutMinutes ?distributions
         ?description ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let dateUpdated = field_map json "dateUpdated" DateTime.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateUpdated = field_map json__ "dateUpdated" DateTime.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
       let timeoutMinutes =
-        field_map_exn json "timeoutMinutes"
-          DistributionTimeoutMinutes.of_json in
+        field_map json__ "timeoutMinutes" DistributionTimeoutMinutes.of_json in
       let distributions =
-        field_map json "distributions" DistributionList.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?tags ?dateUpdated ?dateCreated ~timeoutMinutes ?distributions
+        field_map json__ "distributions" DistributionList.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?tags ?dateUpdated ?dateCreated ?timeoutMinutes ?distributions
         ?description ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A distribution configuration."]
@@ -4273,9 +9273,11 @@ module ImageRecipe =
       version: VersionNumber.t option
         [@ocaml.doc "The version of the image recipe."];
       components: ComponentConfigurationList.t option
-        [@ocaml.doc "The components of the image recipe."];
+        [@ocaml.doc
+          "The components that are included in the image recipe. Recipes require a minimum of one build component, and can have a maximum of 20 build and test components in any combination."];
       parentImage: NonEmptyString.t option
-        [@ocaml.doc "The base image of the image recipe."];
+        [@ocaml.doc
+          "The base image for customizations specified in the image recipe. You can specify the parent image using one of the following options: AMI ID Image Builder image Amazon Resource Name (ARN) Amazon Web Services Systems Manager (SSM) Parameter Store Parameter, prefixed by ssm:, followed by the parameter name or ARN. Amazon Web Services Marketplace product ID"];
       blockDeviceMappings: InstanceBlockDeviceMappings.t option
         [@ocaml.doc
           "The block device mappings to apply when creating images from this recipe."];
@@ -4288,7 +9290,10 @@ module ImageRecipe =
       additionalInstanceConfiguration:
         AdditionalInstanceConfiguration.t option
         [@ocaml.doc
-          "Before you create a new AMI, Image Builder launches temporary Amazon EC2 instances to build and test your image configuration. Instance configuration adds a layer of control over those instances. You can define settings and add scripts to run when an instance is launched from your AMI."]}
+          "Before you create a new AMI, Image Builder launches temporary Amazon EC2 instances to build and test your image configuration. Instance configuration adds a layer of control over those instances. You can define settings and add scripts to run when an instance is launched from your AMI."];
+      amiTags: TagMap.t option
+        [@ocaml.doc
+          "Tags that are applied to the AMI that Image Builder creates during the Build phase prior to image distribution."]}
     let make ?arn =
       fun ?type_ ->
         fun ?name ->
@@ -4303,23 +9308,25 @@ module ImageRecipe =
                           fun ?tags ->
                             fun ?workingDirectory ->
                               fun ?additionalInstanceConfiguration ->
-                                fun () ->
-                                  {
-                                    arn;
-                                    type_;
-                                    name;
-                                    description;
-                                    platform;
-                                    owner;
-                                    version;
-                                    components;
-                                    parentImage;
-                                    blockDeviceMappings;
-                                    dateCreated;
-                                    tags;
-                                    workingDirectory;
-                                    additionalInstanceConfiguration
-                                  }
+                                fun ?amiTags ->
+                                  fun () ->
+                                    {
+                                      arn;
+                                      type_;
+                                      name;
+                                      description;
+                                      platform;
+                                      owner;
+                                      version;
+                                      components;
+                                      parentImage;
+                                      blockDeviceMappings;
+                                      dateCreated;
+                                      tags;
+                                      workingDirectory;
+                                      additionalInstanceConfiguration;
+                                      amiTags
+                                    }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -4343,9 +9350,12 @@ module ImageRecipe =
           (Option.map x.workingDirectory ~f:NonEmptyString.to_value));
         ("additionalInstanceConfiguration",
           (Option.map x.additionalInstanceConfiguration
-             ~f:AdditionalInstanceConfiguration.to_value))]
+             ~f:AdditionalInstanceConfiguration.to_value));
+        ("amiTags", (Option.map x.amiTags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let amiTags =
+        (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "amiTags") in
       let additionalInstanceConfiguration =
         (Option.map ~f:AdditionalInstanceConfiguration.of_xml)
           (Xml.child xml_arg0 "additionalInstanceConfiguration") in
@@ -4379,36 +9389,66 @@ module ImageRecipe =
         (Option.map ~f:ImageType.of_xml) (Xml.child xml_arg0 "type") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?additionalInstanceConfiguration ?workingDirectory ?tags
+      make ?amiTags ?additionalInstanceConfiguration ?workingDirectory ?tags
         ?dateCreated ?blockDeviceMappings ?parentImage ?components ?version
         ?owner ?platform ?description ?name ?type_ ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let amiTags = field_map json__ "amiTags" TagMap.of_json in
       let additionalInstanceConfiguration =
-        field_map json "additionalInstanceConfiguration"
+        field_map json__ "additionalInstanceConfiguration"
           AdditionalInstanceConfiguration.of_json in
       let workingDirectory =
-        field_map json "workingDirectory" NonEmptyString.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
+        field_map json__ "workingDirectory" NonEmptyString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
       let blockDeviceMappings =
-        field_map json "blockDeviceMappings"
+        field_map json__ "blockDeviceMappings"
           InstanceBlockDeviceMappings.of_json in
-      let parentImage = field_map json "parentImage" NonEmptyString.of_json in
+      let parentImage = field_map json__ "parentImage" NonEmptyString.of_json in
       let components =
-        field_map json "components" ComponentConfigurationList.of_json in
-      let version = field_map json "version" VersionNumber.of_json in
-      let owner = field_map json "owner" NonEmptyString.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let type_ = field_map json "type" ImageType.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?additionalInstanceConfiguration ?workingDirectory ?tags
+        field_map json__ "components" ComponentConfigurationList.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let type_ = field_map json__ "type" ImageType.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?amiTags ?additionalInstanceConfiguration ?workingDirectory ?tags
         ?dateCreated ?blockDeviceMappings ?parentImage ?components ?version
         ?owner ?platform ?description ?name ?type_ ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An image recipe."]
+module ImageScanState =
+  struct
+    type nonrec t =
+      {
+      status: ImageScanStatus.t option
+        [@ocaml.doc
+          "The current state of vulnerability scans for the image."];
+      reason: NonEmptyString.t option
+        [@ocaml.doc "The reason for the scan status for the image."]}
+    let make ?status = fun ?reason -> fun () -> { status; reason }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:ImageScanStatus.to_value));
+        ("reason", (Option.map x.reason ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "reason") in
+      let status =
+        (Option.map ~f:ImageScanStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" NonEmptyString.of_json in
+      let status = field_map json__ "status" ImageScanStatus.of_json in
+      make ?reason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Shows the vulnerability scan status for a specific image, and the reason for that status."]
 module InfrastructureConfiguration =
   struct
     type nonrec t =
@@ -4456,7 +9496,10 @@ module InfrastructureConfiguration =
         [@ocaml.doc
           "The instance metadata option settings for the infrastructure configuration."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags of the infrastructure configuration."]}
+        [@ocaml.doc "The tags of the infrastructure configuration."];
+      placement: Placement.t option
+        [@ocaml.doc
+          "The instance placement settings that define where the instances that are launched from your image will run."]}
     let make ?arn =
       fun ?name ->
         fun ?description ->
@@ -4473,25 +9516,27 @@ module InfrastructureConfiguration =
                               fun ?resourceTags ->
                                 fun ?instanceMetadataOptions ->
                                   fun ?tags ->
-                                    fun () ->
-                                      {
-                                        arn;
-                                        name;
-                                        description;
-                                        instanceTypes;
-                                        instanceProfileName;
-                                        securityGroupIds;
-                                        subnetId;
-                                        logging;
-                                        keyPair;
-                                        terminateInstanceOnFailure;
-                                        snsTopicArn;
-                                        dateCreated;
-                                        dateUpdated;
-                                        resourceTags;
-                                        instanceMetadataOptions;
-                                        tags
-                                      }
+                                    fun ?placement ->
+                                      fun () ->
+                                        {
+                                          arn;
+                                          name;
+                                          description;
+                                          instanceTypes;
+                                          instanceProfileName;
+                                          securityGroupIds;
+                                          subnetId;
+                                          logging;
+                                          keyPair;
+                                          terminateInstanceOnFailure;
+                                          snsTopicArn;
+                                          dateCreated;
+                                          dateUpdated;
+                                          resourceTags;
+                                          instanceMetadataOptions;
+                                          tags;
+                                          placement
+                                        }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -4520,9 +9565,12 @@ module InfrastructureConfiguration =
         ("instanceMetadataOptions",
           (Option.map x.instanceMetadataOptions
              ~f:InstanceMetadataOptions.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("placement", (Option.map x.placement ~f:Placement.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let placement =
+        (Option.map ~f:Placement.of_xml) (Xml.child xml_arg0 "placement") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let instanceMetadataOptions =
         (Option.map ~f:InstanceMetadataOptions.of_xml)
@@ -4562,37 +9610,40 @@ module InfrastructureConfiguration =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?instanceMetadataOptions ?resourceTags ?dateUpdated
-        ?dateCreated ?snsTopicArn ?terminateInstanceOnFailure ?keyPair
-        ?logging ?subnetId ?securityGroupIds ?instanceProfileName
+      make ?placement ?tags ?instanceMetadataOptions ?resourceTags
+        ?dateUpdated ?dateCreated ?snsTopicArn ?terminateInstanceOnFailure
+        ?keyPair ?logging ?subnetId ?securityGroupIds ?instanceProfileName
         ?instanceTypes ?description ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let placement = field_map json__ "placement" Placement.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let instanceMetadataOptions =
-        field_map json "instanceMetadataOptions"
+        field_map json__ "instanceMetadataOptions"
           InstanceMetadataOptions.of_json in
-      let resourceTags = field_map json "resourceTags" ResourceTagMap.of_json in
-      let dateUpdated = field_map json "dateUpdated" DateTime.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let snsTopicArn = field_map json "snsTopicArn" NonEmptyString.of_json in
+      let resourceTags =
+        field_map json__ "resourceTags" ResourceTagMap.of_json in
+      let dateUpdated = field_map json__ "dateUpdated" DateTime.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let snsTopicArn = field_map json__ "snsTopicArn" NonEmptyString.of_json in
       let terminateInstanceOnFailure =
-        field_map json "terminateInstanceOnFailure" NullableBoolean.of_json in
-      let keyPair = field_map json "keyPair" NonEmptyString.of_json in
-      let logging = field_map json "logging" Logging.of_json in
-      let subnetId = field_map json "subnetId" NonEmptyString.of_json in
+        field_map json__ "terminateInstanceOnFailure" NullableBoolean.of_json in
+      let keyPair = field_map json__ "keyPair" NonEmptyString.of_json in
+      let logging = field_map json__ "logging" Logging.of_json in
+      let subnetId = field_map json__ "subnetId" NonEmptyString.of_json in
       let securityGroupIds =
-        field_map json "securityGroupIds" SecurityGroupIds.of_json in
+        field_map json__ "securityGroupIds" SecurityGroupIds.of_json in
       let instanceProfileName =
-        field_map json "instanceProfileName" InstanceProfileNameType.of_json in
+        field_map json__ "instanceProfileName"
+          InstanceProfileNameType.of_json in
       let instanceTypes =
-        field_map json "instanceTypes" InstanceTypeList.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?tags ?instanceMetadataOptions ?resourceTags ?dateUpdated
-        ?dateCreated ?snsTopicArn ?terminateInstanceOnFailure ?keyPair
-        ?logging ?subnetId ?securityGroupIds ?instanceProfileName
+        field_map json__ "instanceTypes" InstanceTypeList.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?placement ?tags ?instanceMetadataOptions ?resourceTags
+        ?dateUpdated ?dateCreated ?snsTopicArn ?terminateInstanceOnFailure
+        ?keyPair ?logging ?subnetId ?securityGroupIds ?instanceProfileName
         ?instanceTypes ?description ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of the infrastructure configuration."]
@@ -4613,6 +9664,9 @@ module ComponentParameterDetailList =
   struct
     type nonrec t = ComponentParameterDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentParameterDetail.to_value)) |>
         (fun x -> `List x)
@@ -4649,8 +9703,8 @@ module CallRateLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4669,30 +9723,12 @@ module ClientException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "These errors are usually caused by a client action, such as using an action or resource on behalf of a user that doesn't have permissions to use the action or resource, or specifying an invalid resource identifier."]
-module ClientToken =
-  struct
-    type nonrec t = string
-    let context_ = "ClientToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:36) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ClientToken" j
-    let to_json = simple_to_json to_value
-  end
 module ForbiddenException =
   struct
     type nonrec t = {
@@ -4707,8 +9743,8 @@ module ForbiddenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4727,30 +9763,32 @@ module IdempotentParameterMismatchException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You have specified a client token for an operation using parameter values that differ from a previous request that used the same client token."]
-module InfrastructureConfigurationArn =
+module InvalidParameterCombinationException =
   struct
-    type nonrec t = string
-    let context_ = "InfrastructureConfigurationArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):infrastructure-configuration/[a-z0-9-_]+$");
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"InfrastructureConfigurationArn" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You have specified two or more mutually exclusive parameters. Review the error message for details."]
 module InvalidRequestException =
   struct
     type nonrec t = {
@@ -4765,12 +9803,12 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have made a request for an action that is not supported by the service."]
+       "You have requested an action that that the service doesn't support."]
 module ResourceInUseException =
   struct
     type nonrec t = {
@@ -4785,8 +9823,8 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4805,8 +9843,8 @@ module ServiceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4825,12 +9863,48 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The service is unable to process your request at this time."]
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
+module InfrastructureConfigurationArn =
+  struct
+    type nonrec t = string
+    let context_ = "InfrastructureConfigurationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):infrastructure-configuration/[a-z0-9-_]+$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InfrastructureConfigurationArn" j
+    let to_json = simple_to_json to_value
+  end
 module SnsTopicArn =
   struct
     type nonrec t = string
@@ -4849,24 +9923,6 @@ module SnsTopicArn =
     let of_json j = string_of_json ~kind:"SnsTopicArn" j
     let to_json = simple_to_json to_value
   end
-module ImagePipelineArn =
-  struct
-    type nonrec t = string
-    let context_ = "ImagePipelineArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):image-pipeline/[a-z0-9-_]+$");
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ImagePipelineArn" j
-    let to_json = simple_to_json to_value
-  end
 module ContainerRecipeArn =
   struct
     type nonrec t = string
@@ -4875,7 +9931,7 @@ module ContainerRecipeArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):container-recipe/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+$");
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):container-recipe/[a-z0-9-_]+/(?:[0-9]+|x)\\.(?:[0-9]+|x)\\.(?:[0-9]+|x)$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -4911,7 +9967,7 @@ module ImageRecipeArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):image-recipe/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+$");
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):image-recipe/[a-z0-9-_]+/(?:[0-9]+|x)\\.(?:[0-9]+|x)\\.(?:[0-9]+|x)$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -4921,26 +9977,6 @@ module ImageRecipeArn =
     let of_json j = string_of_json ~kind:"ImageRecipeArn" j
     let to_json = simple_to_json to_value
   end
-module InvalidParameterCombinationException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You have specified two or more mutually exclusive parameters. Review the error message for details."]
 module InvalidParameterException =
   struct
     type nonrec t = {
@@ -4955,8 +9991,8 @@ module InvalidParameterException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4975,8 +10011,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4989,6 +10025,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5008,24 +10047,91 @@ module TagKeyList =
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ImageBuildVersionArn =
+module ResourceState =
   struct
-    type nonrec t = string
-    let context_ = "ImageBuildVersionArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):image/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+$");
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      status: ResourceStatus.t option
+        [@ocaml.doc
+          "Shows the current lifecycle policy action that was applied to an impacted resource."]}
+    let make ?status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:ResourceStatus.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ImageBuildVersionArn" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ResourceStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" ResourceStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The current state of an impacted resource."]
+module ResourceStateUpdateExclusionRules =
+  struct
+    type nonrec t = {
+      amis: LifecyclePolicyDetailExclusionRulesAmis.t option }
+    let make ?amis = fun () -> { amis }
+    let to_value x =
+      structure_to_value
+        [("amis",
+           (Option.map x.amis
+              ~f:LifecyclePolicyDetailExclusionRulesAmis.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let amis =
+        (Option.map ~f:LifecyclePolicyDetailExclusionRulesAmis.of_xml)
+          (Xml.child xml_arg0 "amis") in
+      make ?amis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let amis =
+        field_map json__ "amis"
+          LifecyclePolicyDetailExclusionRulesAmis.of_json in
+      make ?amis ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Additional rules to specify resources that should be exempt from ad-hoc lifecycle actions."]
+module ResourceStateUpdateIncludeResources =
+  struct
+    type nonrec t =
+      {
+      amis: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the lifecycle action should apply to distributed AMIs"];
+      snapshots: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the lifecycle action should apply to snapshots associated with distributed AMIs."];
+      containers: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the lifecycle action should apply to distributed containers."]}
+    let make ?amis =
+      fun ?snapshots ->
+        fun ?containers -> fun () -> { amis; snapshots; containers }
+    let to_value x =
+      structure_to_value
+        [("amis", (Option.map x.amis ~f:Boolean.to_value));
+        ("snapshots", (Option.map x.snapshots ~f:Boolean.to_value));
+        ("containers", (Option.map x.containers ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let containers =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "containers") in
+      let snapshots =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "snapshots") in
+      let amis = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "amis") in
+      make ?containers ?snapshots ?amis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let containers = field_map json__ "containers" Boolean.of_json in
+      let snapshots = field_map json__ "snapshots" Boolean.of_json in
+      let amis = field_map json__ "amis" Boolean.of_json in
+      make ?containers ?snapshots ?amis ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies if the lifecycle policy should apply actions to selected resources."]
 module InvalidParameterValueException =
   struct
     type nonrec t = {
@@ -5040,12 +10146,33 @@ module InvalidParameterValueException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The value that you provided for the specified parameter is invalid."]
+module WorkflowStepActionType =
+  struct
+    type nonrec t =
+      | RESUME 
+      | STOP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | RESUME -> "RESUME" | STOP -> "STOP" | Non_static_id s -> s
+    let of_string =
+      function | "RESUME" -> RESUME | "STOP" -> STOP | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WorkflowStepActionType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WorkflowStepActionType" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourcePolicyDocument =
   struct
     type nonrec t = string
@@ -5072,7 +10199,7 @@ module ComponentBuildVersionArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):component/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+$");
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):component/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -5082,10 +10209,398 @@ module ComponentBuildVersionArn =
     let of_json j = string_of_json ~kind:"ComponentBuildVersionArn" j
     let to_json = simple_to_json to_value
   end
+module InvalidPaginationTokenException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You have provided an invalid pagination token in your request."]
+module PaginationToken =
+  struct
+    type nonrec t = string
+    let context_ = "PaginationToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:65535) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PaginationToken" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowVersionList =
+  struct
+    type nonrec t = WorkflowVersion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowVersion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowVersion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkflowVersionList"
+        ~of_json:WorkflowVersion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FilterList =
+  struct
+    type nonrec t = Filter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Filter.of_xml)
+    let of_json j = list_of_json ~kind:"FilterList" ~of_json:Filter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Ownership =
+  struct
+    type nonrec t =
+      | Self 
+      | Shared 
+      | Amazon 
+      | ThirdParty 
+      | AWSMarketplace 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Self -> "Self"
+      | Shared -> "Shared"
+      | Amazon -> "Amazon"
+      | ThirdParty -> "ThirdParty"
+      | AWSMarketplace -> "AWSMarketplace"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Self" -> Self
+      | "Shared" -> Shared
+      | "Amazon" -> Amazon
+      | "ThirdParty" -> ThirdParty
+      | "AWSMarketplace" -> AWSMarketplace
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Ownership" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Ownership" j)
+    let to_json = simple_to_json to_value
+  end
+module RestrictedInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RestrictedInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageBuildMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ImageBuildMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:500) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImageBuildMessage" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepExecutionsList =
+  struct
+    type nonrec t = WorkflowStepMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowStepMetadata.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowStepMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkflowStepExecutionsList"
+        ~of_json:WorkflowStepMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkflowExecutionsList =
+  struct
+    type nonrec t = WorkflowExecutionMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowExecutionMetadata.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowExecutionMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkflowExecutionsList"
+        ~of_json:WorkflowExecutionMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkflowSummaryList =
+  struct
+    type nonrec t = WorkflowSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkflowSummaryList"
+        ~of_json:WorkflowSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkflowWildcardVersionArn =
+  struct
+    type nonrec t = string
+    let context_ = "WorkflowWildcardVersionArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:aws(?:-[a-z]+)*:imagebuilder:[a-z]{2,}(?:-[a-z]+)+-[0-9]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):workflow/(build|test|distribution)/[a-z0-9-_]+/(?:[0-9]+|x)\\.(?:[0-9]+|x)\\.(?:[0-9]+|x)$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkflowWildcardVersionArn" j
+    let to_json = simple_to_json to_value
+  end
+module WorkflowStepExecutionList =
+  struct
+    type nonrec t = WorkflowStepExecution.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowStepExecution.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowStepExecution.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkflowStepExecutionList"
+        ~of_json:WorkflowStepExecution.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LifecyclePolicySummaryList =
+  struct
+    type nonrec t = LifecyclePolicySummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LifecyclePolicySummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LifecyclePolicySummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LifecyclePolicySummaryList"
+        ~of_json:LifecyclePolicySummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LifecycleExecutionsList =
+  struct
+    type nonrec t = LifecycleExecution.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LifecycleExecution.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LifecycleExecution.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LifecycleExecutionsList"
+        ~of_json:LifecycleExecution.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LifecycleExecutionResourceList =
+  struct
+    type nonrec t = LifecycleExecutionResource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LifecycleExecutionResource.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LifecycleExecutionResource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LifecycleExecutionResourceList"
+        ~of_json:LifecycleExecutionResource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InfrastructureConfigurationSummaryList =
   struct
     type nonrec t = InfrastructureConfigurationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InfrastructureConfigurationSummary.to_value)) |>
         (fun x -> `List x)
@@ -5109,93 +10624,13 @@ module InfrastructureConfigurationSummaryList =
         ~of_json:InfrastructureConfigurationSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module InvalidPaginationTokenException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You have provided an invalid pagination token in your request."]
-module PaginationToken =
-  struct
-    type nonrec t = string
-    let context_ = "PaginationToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:65535) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PaginationToken" j
-    let to_json = simple_to_json to_value
-  end
-module FilterList =
-  struct
-    type nonrec t = Filter.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Filter.of_xml)
-    let of_json j = list_of_json ~kind:"FilterList" ~of_json:Filter.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module RestrictedInteger =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for RestrictedInteger" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module ImageVersionList =
   struct
     type nonrec t = ImageVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5216,38 +10651,104 @@ module ImageVersionList =
       list_of_json ~kind:"ImageVersionList" ~of_json:ImageVersion.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Ownership =
+module ImageScanFindingsList =
   struct
-    type nonrec t =
-      | Self 
-      | Shared 
-      | Amazon 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | Self -> "Self"
-      | Shared -> "Shared"
-      | Amazon -> "Amazon"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "Self" -> Self
-      | "Shared" -> Shared
-      | "Amazon" -> Amazon
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    type nonrec t = ImageScanFinding.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:25); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageScanFinding.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration Ownership" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"Ownership" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageScanFinding.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageScanFindingsList"
+        ~of_json:ImageScanFinding.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImageScanFindingsFilterList =
+  struct
+    type nonrec t = ImageScanFindingsFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageScanFindingsFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageScanFindingsFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageScanFindingsFilterList"
+        ~of_json:ImageScanFindingsFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImageScanFindingAggregationsList =
+  struct
+    type nonrec t = ImageScanFindingAggregation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageScanFindingAggregation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageScanFindingAggregation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageScanFindingAggregationsList"
+        ~of_json:ImageScanFindingAggregation.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module ImageRecipeSummaryList =
   struct
     type nonrec t = ImageRecipeSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageRecipeSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5273,6 +10774,9 @@ module ImagePipelineList =
   struct
     type nonrec t = ImagePipeline.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImagePipeline.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5297,6 +10801,9 @@ module ImageSummaryList =
   struct
     type nonrec t = ImageSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5321,6 +10828,9 @@ module ImagePackageList =
   struct
     type nonrec t = ImagePackage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImagePackage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5349,7 +10859,7 @@ module ImageVersionArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):image/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+$");
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):image/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -5363,6 +10873,9 @@ module DistributionConfigurationSummaryList =
   struct
     type nonrec t = DistributionConfigurationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DistributionConfigurationSummary.to_value)) |>
         (fun x -> `List x)
@@ -5390,6 +10903,9 @@ module ContainerRecipeSummaryList =
   struct
     type nonrec t = ContainerRecipeSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContainerRecipeSummary.to_value)) |>
         (fun x -> `List x)
@@ -5416,6 +10932,9 @@ module ComponentVersionList =
   struct
     type nonrec t = ComponentVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5441,6 +10960,9 @@ module ComponentSummaryList =
   struct
     type nonrec t = ComponentSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5470,7 +10992,7 @@ module ComponentVersionArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):component/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+$");
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):component/[a-z0-9-_]+/[0-9]+\\.[0-9]+\\.[0-9]+$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -5480,6 +11002,121 @@ module ComponentVersionArn =
     let of_json j = string_of_json ~kind:"ComponentVersionArn" j
     let to_json = simple_to_json to_value
   end
+module AccessDeniedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You do not have permissions to perform the requested operation."]
+module TooManyRequestsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You have attempted too many requests for the specific operation."]
+module RegisterImageOptions =
+  struct
+    type nonrec t =
+      {
+      secureBootEnabled: NullableBoolean.t option
+        [@ocaml.doc
+          "Specifies whether Secure Boot is enabled for the output AMI. The default value is true. To disable Secure Boot for custom unsigned drivers, set this value to false."];
+      uefiData: UefiData.t option
+        [@ocaml.doc
+          "A Base64-encoded representation of the non-volatile UEFI variable store. You can specify this parameter only when secureBootEnabled is true or unspecified. You can inspect and modify the UEFI data by using the python-uefivars tool on GitHub. For more information, see UEFI variables for Amazon EC2 instances."]}
+    let make ?secureBootEnabled =
+      fun ?uefiData -> fun () -> { secureBootEnabled; uefiData }
+    let to_value x =
+      structure_to_value
+        [("secureBootEnabled",
+           (Option.map x.secureBootEnabled ~f:NullableBoolean.to_value));
+        ("uefiData", (Option.map x.uefiData ~f:UefiData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uefiData =
+        (Option.map ~f:UefiData.of_xml) (Xml.child xml_arg0 "uefiData") in
+      let secureBootEnabled =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "secureBootEnabled") in
+      make ?uefiData ?secureBootEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uefiData = field_map json__ "uefiData" UefiData.of_json in
+      let secureBootEnabled =
+        field_map json__ "secureBootEnabled" NullableBoolean.of_json in
+      make ?uefiData ?secureBootEnabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Controls Secure Boot and UEFI data settings for the resulting image during ISO imports. For more information, see UEFI Secure Boot for Amazon EC2 instances in the Amazon EC2 User Guide ."]
+module Uri_ =
+  struct
+    type nonrec t = string
+    let context_ = "Uri"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Uri" j
+    let to_json = simple_to_json to_value
+  end
+module WindowsConfiguration =
+  struct
+    type nonrec t =
+      {
+      imageIndex: WindowsConfigurationImageIndex.t
+        [@ocaml.doc
+          "The 1-based index that specifies which Windows edition to install from a multi-edition Windows ISO file. A Windows ISO can contain a .wim file with multiple image indexes, each representing a different edition."]}
+    let context_ = "WindowsConfiguration"
+    let make ~imageIndex = fun () -> { imageIndex }
+    let to_value x =
+      structure_to_value
+        [("imageIndex",
+           (Some (WindowsConfigurationImageIndex.to_value x.imageIndex)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageIndex =
+        WindowsConfigurationImageIndex.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "imageIndex") in
+      make ~imageIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageIndex =
+        field_map_exn json__ "imageIndex"
+          WindowsConfigurationImageIndex.of_json in
+      make ~imageIndex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Windows-specific configuration settings for an ISO import, including the edition to install from a multi-edition Windows ISO file."]
 module InvalidVersionNumberException =
   struct
     type nonrec t = {
@@ -5494,8 +11131,8 @@ module InvalidVersionNumberException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5516,19 +11153,431 @@ module ComponentFormat =
     let of_json j = of_string (string_of_json ~kind:"ComponentFormat" j)
     let to_json = simple_to_json to_value
   end
-module Uri_ =
+module WorkflowStepTimeoutSecondsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:43200) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for WorkflowStepTimeoutSecondsInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LatestVersionReferences =
+  struct
+    type nonrec t =
+      {
+      latestVersionArn: ImageBuilderArn.t option
+        [@ocaml.doc
+          "The latest version Amazon Resource Name (ARN) of the Image Builder resource."];
+      latestMajorVersionArn: ImageBuilderArn.t option
+        [@ocaml.doc
+          "The latest version Amazon Resource Name (ARN) with the same major version of the Image Builder resource."];
+      latestMinorVersionArn: ImageBuilderArn.t option
+        [@ocaml.doc
+          "The latest version Amazon Resource Name (ARN) with the same minor version of the Image Builder resource."];
+      latestPatchVersionArn: ImageBuilderArn.t option
+        [@ocaml.doc
+          "The latest version Amazon Resource Name (ARN) with the same patch version of the Image Builder resource."]}
+    let make ?latestVersionArn =
+      fun ?latestMajorVersionArn ->
+        fun ?latestMinorVersionArn ->
+          fun ?latestPatchVersionArn ->
+            fun () ->
+              {
+                latestVersionArn;
+                latestMajorVersionArn;
+                latestMinorVersionArn;
+                latestPatchVersionArn
+              }
+    let to_value x =
+      structure_to_value
+        [("latestVersionArn",
+           (Option.map x.latestVersionArn ~f:ImageBuilderArn.to_value));
+        ("latestMajorVersionArn",
+          (Option.map x.latestMajorVersionArn ~f:ImageBuilderArn.to_value));
+        ("latestMinorVersionArn",
+          (Option.map x.latestMinorVersionArn ~f:ImageBuilderArn.to_value));
+        ("latestPatchVersionArn",
+          (Option.map x.latestPatchVersionArn ~f:ImageBuilderArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestPatchVersionArn =
+        (Option.map ~f:ImageBuilderArn.of_xml)
+          (Xml.child xml_arg0 "latestPatchVersionArn") in
+      let latestMinorVersionArn =
+        (Option.map ~f:ImageBuilderArn.of_xml)
+          (Xml.child xml_arg0 "latestMinorVersionArn") in
+      let latestMajorVersionArn =
+        (Option.map ~f:ImageBuilderArn.of_xml)
+          (Xml.child xml_arg0 "latestMajorVersionArn") in
+      let latestVersionArn =
+        (Option.map ~f:ImageBuilderArn.of_xml)
+          (Xml.child xml_arg0 "latestVersionArn") in
+      make ?latestPatchVersionArn ?latestMinorVersionArn
+        ?latestMajorVersionArn ?latestVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestPatchVersionArn =
+        field_map json__ "latestPatchVersionArn" ImageBuilderArn.of_json in
+      let latestMinorVersionArn =
+        field_map json__ "latestMinorVersionArn" ImageBuilderArn.of_json in
+      let latestMajorVersionArn =
+        field_map json__ "latestMajorVersionArn" ImageBuilderArn.of_json in
+      let latestVersionArn =
+        field_map json__ "latestVersionArn" ImageBuilderArn.of_json in
+      make ?latestPatchVersionArn ?latestMinorVersionArn
+        ?latestMajorVersionArn ?latestVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The resource ARNs with different wildcard variations of semantic versioning."]
+module Workflow =
+  struct
+    type nonrec t =
+      {
+      arn: WorkflowBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the workflow resource."];
+      version: VersionNumber.t option
+        [@ocaml.doc
+          "The workflow resource version. Workflow resources are immutable. To make a change, you can clone a workflow or create a new version."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "The description of the workflow."];
+      changeDescription: NonEmptyString.t option
+        [@ocaml.doc
+          "Describes what change has been made in this version of the workflow, or what makes this version different from other versions of the workflow."];
+      type_: WorkflowType.t option
+        [@ocaml.doc
+          "Specifies the image creation stage that the workflow applies to. Image Builder currently supports build and test workflows."];
+      state: WorkflowState.t option
+        [@ocaml.doc
+          "Describes the current status of the workflow and the reason for that status."];
+      owner: NonEmptyString.t option
+        [@ocaml.doc "The owner of the workflow resource."];
+      data: WorkflowData.t option
+        [@ocaml.doc "Contains the YAML document content for the workflow."];
+      kmsKeyId: NonEmptyString.t option
+        [@ocaml.doc
+          "The KMS key identifier used to encrypt the workflow resource. This can be either the Key ARN or the Alias ARN. For more information, see Key identifiers (KeyId) in the Key Management Service Developer Guide."];
+      dateCreated: DateTime.t option
+        [@ocaml.doc
+          "The timestamp when Image Builder created the workflow resource."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags that apply to the workflow resource"];
+      parameters: WorkflowParameterDetailList.t option
+        [@ocaml.doc
+          "An array of input parameters that that the image workflow uses to control actions or configure settings."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?version ->
+          fun ?description ->
+            fun ?changeDescription ->
+              fun ?type_ ->
+                fun ?state ->
+                  fun ?owner ->
+                    fun ?data ->
+                      fun ?kmsKeyId ->
+                        fun ?dateCreated ->
+                          fun ?tags ->
+                            fun ?parameters ->
+                              fun () ->
+                                {
+                                  arn;
+                                  name;
+                                  version;
+                                  description;
+                                  changeDescription;
+                                  type_;
+                                  state;
+                                  owner;
+                                  data;
+                                  kmsKeyId;
+                                  dateCreated;
+                                  tags;
+                                  parameters
+                                }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:WorkflowBuildVersionArn.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("version", (Option.map x.version ~f:VersionNumber.to_value));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("changeDescription",
+          (Option.map x.changeDescription ~f:NonEmptyString.to_value));
+        ("type", (Option.map x.type_ ~f:WorkflowType.to_value));
+        ("state", (Option.map x.state ~f:WorkflowState.to_value));
+        ("owner", (Option.map x.owner ~f:NonEmptyString.to_value));
+        ("data", (Option.map x.data ~f:WorkflowData.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:NonEmptyString.to_value));
+        ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("parameters",
+          (Option.map x.parameters ~f:WorkflowParameterDetailList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let parameters =
+        (Option.map ~f:WorkflowParameterDetailList.of_xml)
+          (Xml.child xml_arg0 "parameters") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let dateCreated =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateCreated") in
+      let kmsKeyId =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let data =
+        (Option.map ~f:WorkflowData.of_xml) (Xml.child xml_arg0 "data") in
+      let owner =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "owner") in
+      let state =
+        (Option.map ~f:WorkflowState.of_xml) (Xml.child xml_arg0 "state") in
+      let type_ =
+        (Option.map ~f:WorkflowType.of_xml) (Xml.child xml_arg0 "type") in
+      let changeDescription =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "changeDescription") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let version =
+        (Option.map ~f:VersionNumber.of_xml) (Xml.child xml_arg0 "version") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:WorkflowBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?parameters ?tags ?dateCreated ?kmsKeyId ?data ?owner ?state
+        ?type_ ?changeDescription ?description ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let parameters =
+        field_map json__ "parameters" WorkflowParameterDetailList.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
+      let data = field_map json__ "data" WorkflowData.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
+      let state = field_map json__ "state" WorkflowState.of_json in
+      let type_ = field_map json__ "type" WorkflowType.of_json in
+      let changeDescription =
+        field_map json__ "changeDescription" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" WorkflowBuildVersionArn.of_json in
+      make ?parameters ?tags ?dateCreated ?kmsKeyId ?data ?owner ?state
+        ?type_ ?changeDescription ?description ?version ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines a process that Image Builder uses to build and test images during the image creation process."]
+module MarketplaceResourceLocation =
   struct
     type nonrec t = string
-    let context_ = "Uri"
-    let make i = i
+    let context_ = "MarketplaceResourceLocation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_pattern i ~pattern:"^s3://[^/]+/.+[^/]$"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Uri" j
+    let of_json j = string_of_json ~kind:"MarketplaceResourceLocation" j
     let to_json = simple_to_json to_value
   end
+module MarketplaceResourceType =
+  struct
+    type nonrec t =
+      | COMPONENT_DATA 
+      | COMPONENT_ARTIFACT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMPONENT_DATA -> "COMPONENT_DATA"
+      | COMPONENT_ARTIFACT -> "COMPONENT_ARTIFACT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMPONENT_DATA" -> COMPONENT_DATA
+      | "COMPONENT_ARTIFACT" -> COMPONENT_ARTIFACT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MarketplaceResourceType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MarketplaceResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module LifecyclePolicy =
+  struct
+    type nonrec t =
+      {
+      arn: LifecyclePolicyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the lifecycle policy resource."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the lifecycle policy."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "Optional description for the lifecycle policy."];
+      status: LifecyclePolicyStatus.t option
+        [@ocaml.doc
+          "Indicates whether the lifecycle policy resource is enabled."];
+      executionRole: RoleNameOrArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) of the IAM role that Image Builder uses to run the lifecycle policy. This is a custom role that you create."];
+      resourceType: LifecyclePolicyResourceType.t option
+        [@ocaml.doc "The type of resources the lifecycle policy targets."];
+      policyDetails: LifecyclePolicyDetails.t option
+        [@ocaml.doc
+          "The configuration details for a lifecycle policy resource."];
+      resourceSelection: LifecyclePolicyResourceSelection.t option
+        [@ocaml.doc
+          "Resource selection criteria used to run the lifecycle policy."];
+      dateCreated: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The timestamp when Image Builder created the lifecycle policy resource."];
+      dateUpdated: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The timestamp when Image Builder updated the lifecycle policy resource."];
+      dateLastRun: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The timestamp for the last time Image Builder ran the lifecycle policy."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "To help manage your lifecycle policy resources, you can assign your own metadata to each resource in the form of tags. Each tag consists of a key and an optional value, both of which you define."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?description ->
+          fun ?status ->
+            fun ?executionRole ->
+              fun ?resourceType ->
+                fun ?policyDetails ->
+                  fun ?resourceSelection ->
+                    fun ?dateCreated ->
+                      fun ?dateUpdated ->
+                        fun ?dateLastRun ->
+                          fun ?tags ->
+                            fun () ->
+                              {
+                                arn;
+                                name;
+                                description;
+                                status;
+                                executionRole;
+                                resourceType;
+                                policyDetails;
+                                resourceSelection;
+                                dateCreated;
+                                dateUpdated;
+                                dateLastRun;
+                                tags
+                              }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:LifecyclePolicyArn.to_value));
+        ("name", (Option.map x.name ~f:ResourceName.to_value));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("status", (Option.map x.status ~f:LifecyclePolicyStatus.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:RoleNameOrArn.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:LifecyclePolicyResourceType.to_value));
+        ("policyDetails",
+          (Option.map x.policyDetails ~f:LifecyclePolicyDetails.to_value));
+        ("resourceSelection",
+          (Option.map x.resourceSelection
+             ~f:LifecyclePolicyResourceSelection.to_value));
+        ("dateCreated",
+          (Option.map x.dateCreated ~f:DateTimeTimestamp.to_value));
+        ("dateUpdated",
+          (Option.map x.dateUpdated ~f:DateTimeTimestamp.to_value));
+        ("dateLastRun",
+          (Option.map x.dateLastRun ~f:DateTimeTimestamp.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let dateLastRun =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "dateLastRun") in
+      let dateUpdated =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "dateUpdated") in
+      let dateCreated =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "dateCreated") in
+      let resourceSelection =
+        (Option.map ~f:LifecyclePolicyResourceSelection.of_xml)
+          (Xml.child xml_arg0 "resourceSelection") in
+      let policyDetails =
+        (Option.map ~f:LifecyclePolicyDetails.of_xml)
+          (Xml.child xml_arg0 "policyDetails") in
+      let resourceType =
+        (Option.map ~f:LifecyclePolicyResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let executionRole =
+        (Option.map ~f:RoleNameOrArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let status =
+        (Option.map ~f:LifecyclePolicyStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:LifecyclePolicyArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?tags ?dateLastRun ?dateUpdated ?dateCreated ?resourceSelection
+        ?policyDetails ?resourceType ?executionRole ?status ?description
+        ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateLastRun =
+        field_map json__ "dateLastRun" DateTimeTimestamp.of_json in
+      let dateUpdated =
+        field_map json__ "dateUpdated" DateTimeTimestamp.of_json in
+      let dateCreated =
+        field_map json__ "dateCreated" DateTimeTimestamp.of_json in
+      let resourceSelection =
+        field_map json__ "resourceSelection"
+          LifecyclePolicyResourceSelection.of_json in
+      let policyDetails =
+        field_map json__ "policyDetails" LifecyclePolicyDetails.of_json in
+      let resourceType =
+        field_map json__ "resourceType" LifecyclePolicyResourceType.of_json in
+      let executionRole =
+        field_map json__ "executionRole" RoleNameOrArn.of_json in
+      let status = field_map json__ "status" LifecyclePolicyStatus.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" LifecyclePolicyArn.of_json in
+      make ?tags ?dateLastRun ?dateUpdated ?dateCreated ?resourceSelection
+        ?policyDetails ?resourceType ?executionRole ?status ?description
+        ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration details for a lifecycle policy resource."]
 module Image =
   struct
     type nonrec t =
@@ -5537,24 +11586,28 @@ module Image =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the image. Semantic versioning is included in each object's Amazon Resource Name (ARN), at the level that applies to that object as follows: Versionless ARNs and Name ARNs do not include specific values in any of the nodes. The nodes are either left off entirely, or they are specified as wildcards, for example: x.x.x. Version ARNs have only the first three nodes: <major>.<minor>.<patch> Build version ARNs have all four nodes, and point to a specific build for a specific version of an object."];
       type_: ImageType.t option
-        [@ocaml.doc "Specifies whether this is an AMI or container image."];
+        [@ocaml.doc
+          "Specifies whether this image produces an AMI or a container image."];
       name: ResourceName.t option [@ocaml.doc "The name of the image."];
       version: VersionNumber.t option
         [@ocaml.doc
           "The semantic version of the image. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Assignment: For the first three nodes you can assign any positive integer value, including zero, with an upper limit of 2^30-1, or 1073741823 for each node. Image Builder automatically assigns the build number to the fourth node. Patterns: You can use any numeric pattern that adheres to the assignment requirements for the nodes that you can assign. For example, you might choose a software version pattern, such as 1.0.0, or a date, such as 2021.01.01. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."];
-      platform: Platform.t option [@ocaml.doc "The platform of the image."];
+      platform: Platform.t option
+        [@ocaml.doc
+          "The image operating system platform, such as Linux or Windows."];
       enhancedImageMetadataEnabled: NullableBoolean.t option
         [@ocaml.doc
-          "Collects additional information about the image being created, including the operating system (OS) version and package list. This information is used to enhance the overall experience of using EC2 Image Builder. Enabled by default."];
+          "Indicates whether Image Builder collects additional information about the image, such as the operating system (OS) version and package list."];
       osVersion: OsVersion.t option
         [@ocaml.doc
-          "The operating system version of the instance. For example, Amazon Linux 2, Ubuntu 18, or Microsoft Windows Server 2019."];
+          "The operating system version for instances that launch from this image. For example, Amazon Linux 2, Ubuntu 18, or Microsoft Windows Server 2019."];
       state: ImageState.t option [@ocaml.doc "The state of the image."];
       imageRecipe: ImageRecipe.t option
-        [@ocaml.doc "The image recipe used when creating the image."];
+        [@ocaml.doc
+          "For images that distribute an AMI, this is the image recipe that Image Builder used to create the image. For container images, this is empty."];
       containerRecipe: ContainerRecipe.t option
         [@ocaml.doc
-          "The recipe that is used to create an Image Builder container image."];
+          "For container images, this is the container recipe that Image Builder used to create the image. For images that distribute an AMI, this is empty."];
       sourcePipelineName: ResourceName.t option
         [@ocaml.doc
           "The name of the image pipeline that created this image."];
@@ -5562,22 +11615,46 @@ module Image =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the image pipeline that created this image."];
       infrastructureConfiguration: InfrastructureConfiguration.t option
-        [@ocaml.doc "The infrastructure used when creating this image."];
+        [@ocaml.doc
+          "The infrastructure that Image Builder used to create this image."];
       distributionConfiguration: DistributionConfiguration.t option
         [@ocaml.doc
-          "The distribution configuration used when creating this image."];
+          "The distribution configuration that Image Builder used to create this image."];
       imageTestsConfiguration: ImageTestsConfiguration.t option
         [@ocaml.doc
-          "The image tests configuration used when creating this image."];
+          "The image tests that ran when that Image Builder created this image."];
       dateCreated: DateTime.t option
-        [@ocaml.doc "The date on which this image was created."];
+        [@ocaml.doc "The date on which Image Builder created this image."];
       outputResources: OutputResources.t option
         [@ocaml.doc
-          "The output resources produced when creating this image."];
-      tags: TagMap.t option [@ocaml.doc "The tags of the image."];
+          "The output resources that Image Builder produces for this image."];
+      tags: TagMap.t option [@ocaml.doc "The tags that apply to this image."];
       buildType: BuildType.t option
         [@ocaml.doc
-          "Indicates the type of build that created this image. The build can be initiated in the following ways: USER_INITIATED \226\128\147 A manual pipeline build request. SCHEDULED \226\128\147 A pipeline build initiated by a cron expression in the Image Builder pipeline, or from EventBridge. IMPORT \226\128\147 A VM import created the image to use as the base image for the recipe."]}
+          "Indicates the type of build that created this image. The build can be initiated in the following ways: USER_INITIATED \226\128\147 A manual pipeline build request. SCHEDULED \226\128\147 A pipeline build initiated by a cron expression in the Image Builder pipeline, or from EventBridge. IMPORT \226\128\147 A VM import created the image to use as the base image for the recipe. IMPORT_ISO \226\128\147 An ISO disk import created the image."];
+      imageSource: ImageSource.t option
+        [@ocaml.doc
+          "The origin of the base image that Image Builder used to build this image."];
+      scanState: ImageScanState.t option
+        [@ocaml.doc
+          "Contains information about the current state of scans for this image."];
+      imageScanningConfiguration: ImageScanningConfiguration.t option
+        [@ocaml.doc "Contains settings for vulnerability scans."];
+      deprecationTime: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The time when deprecation occurs for an image resource. This can be a past or future date."];
+      lifecycleExecutionId: LifecycleExecutionId.t option
+        [@ocaml.doc
+          "Identifies the last runtime instance of the lifecycle policy to take action on the image."];
+      executionRole: RoleNameOrArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) for the IAM role you create that grants Image Builder access to perform workflow actions."];
+      workflows: WorkflowConfigurationList.t option
+        [@ocaml.doc
+          "Contains the build and test workflows that are associated with the image."];
+      loggingConfiguration: ImageLoggingConfiguration.t option
+        [@ocaml.doc
+          "The logging configuration that's defined for the image. Image Builder uses the defined settings to direct execution log output during image creation."]}
     let make ?arn =
       fun ?type_ ->
         fun ?name ->
@@ -5597,28 +11674,48 @@ module Image =
                                     fun ?outputResources ->
                                       fun ?tags ->
                                         fun ?buildType ->
-                                          fun () ->
-                                            {
-                                              arn;
-                                              type_;
-                                              name;
-                                              version;
-                                              platform;
-                                              enhancedImageMetadataEnabled;
-                                              osVersion;
-                                              state;
-                                              imageRecipe;
-                                              containerRecipe;
-                                              sourcePipelineName;
-                                              sourcePipelineArn;
-                                              infrastructureConfiguration;
-                                              distributionConfiguration;
-                                              imageTestsConfiguration;
-                                              dateCreated;
-                                              outputResources;
-                                              tags;
-                                              buildType
-                                            }
+                                          fun ?imageSource ->
+                                            fun ?scanState ->
+                                              fun ?imageScanningConfiguration
+                                                ->
+                                                fun ?deprecationTime ->
+                                                  fun ?lifecycleExecutionId
+                                                    ->
+                                                    fun ?executionRole ->
+                                                      fun ?workflows ->
+                                                        fun
+                                                          ?loggingConfiguration
+                                                          ->
+                                                          fun () ->
+                                                            {
+                                                              arn;
+                                                              type_;
+                                                              name;
+                                                              version;
+                                                              platform;
+                                                              enhancedImageMetadataEnabled;
+                                                              osVersion;
+                                                              state;
+                                                              imageRecipe;
+                                                              containerRecipe;
+                                                              sourcePipelineName;
+                                                              sourcePipelineArn;
+                                                              infrastructureConfiguration;
+                                                              distributionConfiguration;
+                                                              imageTestsConfiguration;
+                                                              dateCreated;
+                                                              outputResources;
+                                                              tags;
+                                                              buildType;
+                                                              imageSource;
+                                                              scanState;
+                                                              imageScanningConfiguration;
+                                                              deprecationTime;
+                                                              lifecycleExecutionId;
+                                                              executionRole;
+                                                              workflows;
+                                                              loggingConfiguration
+                                                            }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -5651,9 +11748,48 @@ module Image =
         ("outputResources",
           (Option.map x.outputResources ~f:OutputResources.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("buildType", (Option.map x.buildType ~f:BuildType.to_value))]
+        ("buildType", (Option.map x.buildType ~f:BuildType.to_value));
+        ("imageSource", (Option.map x.imageSource ~f:ImageSource.to_value));
+        ("scanState", (Option.map x.scanState ~f:ImageScanState.to_value));
+        ("imageScanningConfiguration",
+          (Option.map x.imageScanningConfiguration
+             ~f:ImageScanningConfiguration.to_value));
+        ("deprecationTime",
+          (Option.map x.deprecationTime ~f:DateTimeTimestamp.to_value));
+        ("lifecycleExecutionId",
+          (Option.map x.lifecycleExecutionId ~f:LifecycleExecutionId.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:RoleNameOrArn.to_value));
+        ("workflows",
+          (Option.map x.workflows ~f:WorkflowConfigurationList.to_value));
+        ("loggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:ImageLoggingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let loggingConfiguration =
+        (Option.map ~f:ImageLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
+      let workflows =
+        (Option.map ~f:WorkflowConfigurationList.of_xml)
+          (Xml.child xml_arg0 "workflows") in
+      let executionRole =
+        (Option.map ~f:RoleNameOrArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let lifecycleExecutionId =
+        (Option.map ~f:LifecycleExecutionId.of_xml)
+          (Xml.child xml_arg0 "lifecycleExecutionId") in
+      let deprecationTime =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "deprecationTime") in
+      let imageScanningConfiguration =
+        (Option.map ~f:ImageScanningConfiguration.of_xml)
+          (Xml.child xml_arg0 "imageScanningConfiguration") in
+      let scanState =
+        (Option.map ~f:ImageScanState.of_xml)
+          (Xml.child xml_arg0 "scanState") in
+      let imageSource =
+        (Option.map ~f:ImageSource.of_xml) (Xml.child xml_arg0 "imageSource") in
       let buildType =
         (Option.map ~f:BuildType.of_xml) (Xml.child xml_arg0 "buildType") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
@@ -5698,50 +11834,72 @@ module Image =
         (Option.map ~f:ImageType.of_xml) (Xml.child xml_arg0 "type") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?buildType ?tags ?outputResources ?dateCreated
-        ?imageTestsConfiguration ?distributionConfiguration
+      make ?loggingConfiguration ?workflows ?executionRole
+        ?lifecycleExecutionId ?deprecationTime ?imageScanningConfiguration
+        ?scanState ?imageSource ?buildType ?tags ?outputResources
+        ?dateCreated ?imageTestsConfiguration ?distributionConfiguration
         ?infrastructureConfiguration ?sourcePipelineArn ?sourcePipelineName
         ?containerRecipe ?imageRecipe ?state ?osVersion
         ?enhancedImageMetadataEnabled ?platform ?version ?name ?type_ ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildType = field_map json "buildType" BuildType.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          ImageLoggingConfiguration.of_json in
+      let workflows =
+        field_map json__ "workflows" WorkflowConfigurationList.of_json in
+      let executionRole =
+        field_map json__ "executionRole" RoleNameOrArn.of_json in
+      let lifecycleExecutionId =
+        field_map json__ "lifecycleExecutionId" LifecycleExecutionId.of_json in
+      let deprecationTime =
+        field_map json__ "deprecationTime" DateTimeTimestamp.of_json in
+      let imageScanningConfiguration =
+        field_map json__ "imageScanningConfiguration"
+          ImageScanningConfiguration.of_json in
+      let scanState = field_map json__ "scanState" ImageScanState.of_json in
+      let imageSource = field_map json__ "imageSource" ImageSource.of_json in
+      let buildType = field_map json__ "buildType" BuildType.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let outputResources =
-        field_map json "outputResources" OutputResources.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
+        field_map json__ "outputResources" OutputResources.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
       let imageTestsConfiguration =
-        field_map json "imageTestsConfiguration"
+        field_map json__ "imageTestsConfiguration"
           ImageTestsConfiguration.of_json in
       let distributionConfiguration =
-        field_map json "distributionConfiguration"
+        field_map json__ "distributionConfiguration"
           DistributionConfiguration.of_json in
       let infrastructureConfiguration =
-        field_map json "infrastructureConfiguration"
+        field_map json__ "infrastructureConfiguration"
           InfrastructureConfiguration.of_json in
-      let sourcePipelineArn = field_map json "sourcePipelineArn" Arn.of_json in
+      let sourcePipelineArn =
+        field_map json__ "sourcePipelineArn" Arn.of_json in
       let sourcePipelineName =
-        field_map json "sourcePipelineName" ResourceName.of_json in
+        field_map json__ "sourcePipelineName" ResourceName.of_json in
       let containerRecipe =
-        field_map json "containerRecipe" ContainerRecipe.of_json in
-      let imageRecipe = field_map json "imageRecipe" ImageRecipe.of_json in
-      let state = field_map json "state" ImageState.of_json in
-      let osVersion = field_map json "osVersion" OsVersion.of_json in
+        field_map json__ "containerRecipe" ContainerRecipe.of_json in
+      let imageRecipe = field_map json__ "imageRecipe" ImageRecipe.of_json in
+      let state = field_map json__ "state" ImageState.of_json in
+      let osVersion = field_map json__ "osVersion" OsVersion.of_json in
       let enhancedImageMetadataEnabled =
-        field_map json "enhancedImageMetadataEnabled" NullableBoolean.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let version = field_map json "version" VersionNumber.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let type_ = field_map json "type" ImageType.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?buildType ?tags ?outputResources ?dateCreated
-        ?imageTestsConfiguration ?distributionConfiguration
+        field_map json__ "enhancedImageMetadataEnabled"
+          NullableBoolean.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let type_ = field_map json__ "type" ImageType.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?loggingConfiguration ?workflows ?executionRole
+        ?lifecycleExecutionId ?deprecationTime ?imageScanningConfiguration
+        ?scanState ?imageSource ?buildType ?tags ?outputResources
+        ?dateCreated ?imageTestsConfiguration ?distributionConfiguration
         ?infrastructureConfiguration ?sourcePipelineArn ?sourcePipelineName
         ?containerRecipe ?imageRecipe ?state ?osVersion
         ?enhancedImageMetadataEnabled ?platform ?version ?name ?type_ ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An Image Builder image. You must specify exactly one recipe for the image \226\128\147 either a container recipe (containerRecipe), which creates a container image, or an image recipe (imageRecipe), which creates an AMI."]
+       "An Image Builder image resource that keeps track of all of the settings used to create, configure, and distribute output for that image. You must specify exactly one recipe for the image \226\128\147 either a container recipe (containerRecipe), which creates a container image, or an image recipe (imageRecipe), which creates an AMI."]
 module ImageVersionArnOrBuildVersionArn =
   struct
     type nonrec t = string
@@ -5750,7 +11908,7 @@ module ImageVersionArnOrBuildVersionArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws):image/[a-z0-9-_]+/(?:(?:([0-9]+|x)\\.([0-9]+|x)\\.([0-9]+|x))|(?:[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+))$");
+             ~pattern:"^arn:aws[^:]*:imagebuilder:[^:]+:(?:[0-9]{12}|aws(?:-[a-z-]+)?):image/[a-z0-9-_]+/(?:(?:([0-9]+|x)\\.([0-9]+|x)\\.([0-9]+|x))|(?:[0-9]+\\.[0-9]+\\.[0-9]+/[0-9]+))$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -5772,34 +11930,44 @@ module Component =
       description: NonEmptyString.t option
         [@ocaml.doc "The description of the component."];
       changeDescription: NonEmptyString.t option
-        [@ocaml.doc "The change description of the component."];
+        [@ocaml.doc
+          "Describes what change has been made in this version of the component, or what makes this version different from other versions of the component."];
       type_: ComponentType.t option
         [@ocaml.doc
-          "The type of the component denotes whether the component is used to build the image or only to test it."];
+          "The component type specifies whether Image Builder uses the component to build the image or only to test it."];
       platform: Platform.t option
-        [@ocaml.doc "The platform of the component."];
+        [@ocaml.doc "The operating system platform of the component."];
       supportedOsVersions: OsVersionList.t option
         [@ocaml.doc
-          "The operating system (OS) version supported by the component. If the OS information is available, a prefix match is performed against the base image OS version during image recipe creation."];
+          "The operating system (OS) version supported by the component. If the OS information is available, Image Builder performs a prefix match against the base image OS version during image recipe creation."];
       state: ComponentState.t option
-        [@ocaml.doc
-          "Describes the current status of the component. This is used for components that are no longer active."];
+        [@ocaml.doc "Describes the current status of the component."];
       parameters: ComponentParameterDetailList.t option
         [@ocaml.doc
-          "Contains parameter details for each of the parameters that are defined for the component."];
+          "Contains parameter details for each of the parameters that the component document defined for the component."];
       owner: NonEmptyString.t option
         [@ocaml.doc "The owner of the component."];
       data: ComponentData.t option
         [@ocaml.doc
           "Component data contains the YAML document content for the component."];
       kmsKeyId: NonEmptyString.t option
-        [@ocaml.doc "The KMS key identifier used to encrypt the component."];
+        [@ocaml.doc
+          "The KMS key identifier used to encrypt the component. This can be either the Key ARN or the Alias ARN. For more information, see Key identifiers (KeyId) in the Key Management Service Developer Guide."];
       encrypted: NullableBoolean.t option
         [@ocaml.doc "The encryption status of the component."];
       dateCreated: DateTime.t option
-        [@ocaml.doc "The date that the component was created."];
+        [@ocaml.doc "The date that Image Builder created the component."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags associated with the component."]}
+        [@ocaml.doc "The tags that apply to the component."];
+      publisher: NonEmptyString.t option
+        [@ocaml.doc
+          "Contains the name of the publisher if this is a third-party component. Otherwise, this property is empty."];
+      obfuscate: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether component source is hidden from view in the console, and from component detail results for API, CLI, or SDK operations."];
+      productCodes: ProductCodeList.t option
+        [@ocaml.doc
+          "Contains product codes that are used for billing purposes for Amazon Web Services Marketplace components."]}
     let make ?arn =
       fun ?name ->
         fun ?version ->
@@ -5816,25 +11984,31 @@ module Component =
                               fun ?encrypted ->
                                 fun ?dateCreated ->
                                   fun ?tags ->
-                                    fun () ->
-                                      {
-                                        arn;
-                                        name;
-                                        version;
-                                        description;
-                                        changeDescription;
-                                        type_;
-                                        platform;
-                                        supportedOsVersions;
-                                        state;
-                                        parameters;
-                                        owner;
-                                        data;
-                                        kmsKeyId;
-                                        encrypted;
-                                        dateCreated;
-                                        tags
-                                      }
+                                    fun ?publisher ->
+                                      fun ?obfuscate ->
+                                        fun ?productCodes ->
+                                          fun () ->
+                                            {
+                                              arn;
+                                              name;
+                                              version;
+                                              description;
+                                              changeDescription;
+                                              type_;
+                                              platform;
+                                              supportedOsVersions;
+                                              state;
+                                              parameters;
+                                              owner;
+                                              data;
+                                              kmsKeyId;
+                                              encrypted;
+                                              dateCreated;
+                                              tags;
+                                              publisher;
+                                              obfuscate;
+                                              productCodes
+                                            }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ImageBuilderArn.to_value));
@@ -5856,9 +12030,21 @@ module Component =
         ("kmsKeyId", (Option.map x.kmsKeyId ~f:NonEmptyString.to_value));
         ("encrypted", (Option.map x.encrypted ~f:NullableBoolean.to_value));
         ("dateCreated", (Option.map x.dateCreated ~f:DateTime.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("publisher", (Option.map x.publisher ~f:NonEmptyString.to_value));
+        ("obfuscate", (Option.map x.obfuscate ~f:Boolean.to_value));
+        ("productCodes",
+          (Option.map x.productCodes ~f:ProductCodeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let productCodes =
+        (Option.map ~f:ProductCodeList.of_xml)
+          (Xml.child xml_arg0 "productCodes") in
+      let obfuscate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "obfuscate") in
+      let publisher =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "publisher") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let dateCreated =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "dateCreated") in
@@ -5895,75 +12081,41 @@ module Component =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?dateCreated ?encrypted ?kmsKeyId ?data ?owner ?parameters
-        ?state ?supportedOsVersions ?platform ?type_ ?changeDescription
-        ?description ?version ?name ?arn ()
+      make ?productCodes ?obfuscate ?publisher ?tags ?dateCreated ?encrypted
+        ?kmsKeyId ?data ?owner ?parameters ?state ?supportedOsVersions
+        ?platform ?type_ ?changeDescription ?description ?version ?name ?arn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let dateCreated = field_map json "dateCreated" DateTime.of_json in
-      let encrypted = field_map json "encrypted" NullableBoolean.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
-      let data = field_map json "data" ComponentData.of_json in
-      let owner = field_map json "owner" NonEmptyString.of_json in
+    let of_json json__ =
+      let productCodes =
+        field_map json__ "productCodes" ProductCodeList.of_json in
+      let obfuscate = field_map json__ "obfuscate" Boolean.of_json in
+      let publisher = field_map json__ "publisher" NonEmptyString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let dateCreated = field_map json__ "dateCreated" DateTime.of_json in
+      let encrypted = field_map json__ "encrypted" NullableBoolean.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
+      let data = field_map json__ "data" ComponentData.of_json in
+      let owner = field_map json__ "owner" NonEmptyString.of_json in
       let parameters =
-        field_map json "parameters" ComponentParameterDetailList.of_json in
-      let state = field_map json "state" ComponentState.of_json in
+        field_map json__ "parameters" ComponentParameterDetailList.of_json in
+      let state = field_map json__ "state" ComponentState.of_json in
       let supportedOsVersions =
-        field_map json "supportedOsVersions" OsVersionList.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let type_ = field_map json "type" ComponentType.of_json in
+        field_map json__ "supportedOsVersions" OsVersionList.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let type_ = field_map json__ "type" ComponentType.of_json in
       let changeDescription =
-        field_map json "changeDescription" NonEmptyString.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let version = field_map json "version" VersionNumber.of_json in
-      let name = field_map json "name" ResourceName.of_json in
-      let arn = field_map json "arn" ImageBuilderArn.of_json in
-      make ?tags ?dateCreated ?encrypted ?kmsKeyId ?data ?owner ?parameters
-        ?state ?supportedOsVersions ?platform ?type_ ?changeDescription
-        ?description ?version ?name ?arn ()
+        field_map json__ "changeDescription" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let version = field_map json__ "version" VersionNumber.of_json in
+      let name = field_map json__ "name" ResourceName.of_json in
+      let arn = field_map json__ "arn" ImageBuilderArn.of_json in
+      make ?productCodes ?obfuscate ?publisher ?tags ?dateCreated ?encrypted
+        ?kmsKeyId ?data ?owner ?parameters ?state ?supportedOsVersions
+        ?platform ?type_ ?changeDescription ?description ?version ?name ?arn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A detailed view of a component."]
-module ResourceDependencyException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You have attempted to mutate or delete a resource with a dependency that prohibits this action. See the error message for more details."]
-module ResourceAlreadyExistsException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The resource that you are trying to create already exists."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
@@ -5978,12 +12130,92 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You have exceeded the number of permitted resources or operations for this service. For service quotas, see EC2 Image Builder endpoints and quotas."]
+module ResourceDependencyException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You have attempted to mutate or delete a resource with a dependency that prohibits this action. See the error message for more details."]
+module DryRunOperationException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The dry run operation of the resource was successful, and no resources or mutations were actually performed due to the dry run flag in the request."]
+module InlineWorkflowData =
+  struct
+    type nonrec t = string
+    let context_ = "InlineWorkflowData"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:16000) >>=
+                  (fun () -> check_pattern i ~pattern:"[^\\x00]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InlineWorkflowData" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceAlreadyExistsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The resource that you are trying to create already exists."]
 module InlineDockerFileTemplate =
   struct
     type nonrec t = string
@@ -6024,6 +12256,250 @@ module InlineComponentData =
     let of_json j = string_of_json ~kind:"InlineComponentData" j
     let to_json = simple_to_json to_value
   end
+module UpdateLifecyclePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      lifecyclePolicyArn: LifecyclePolicyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image lifecycle policy resource that was updated."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecyclePolicyArn = fun () -> { lifecyclePolicyArn }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("lifecyclePolicyArn",
+           (Option.map x.lifecyclePolicyArn ~f:LifecyclePolicyArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecyclePolicyArn =
+        (Option.map ~f:LifecyclePolicyArn.of_xml)
+          (Xml.child xml_arg0 "lifecyclePolicyArn") in
+      make ?lifecyclePolicyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecyclePolicyArn =
+        field_map json__ "lifecyclePolicyArn" LifecyclePolicyArn.of_json in
+      make ?lifecyclePolicyArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the specified lifecycle policy."]
+module UpdateLifecyclePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      lifecyclePolicyArn: LifecyclePolicyArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the lifecycle policy resource."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "Optional description for the lifecycle policy."];
+      status: LifecyclePolicyStatus.t option
+        [@ocaml.doc
+          "Indicates whether the lifecycle policy resource is enabled."];
+      executionRole: RoleNameOrArn.t
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) of the IAM role that Image Builder uses to update the lifecycle policy."];
+      resourceType: LifecyclePolicyResourceType.t
+        [@ocaml.doc
+          "The type of image resource that the lifecycle policy applies to."];
+      policyDetails: LifecyclePolicyDetails.t
+        [@ocaml.doc
+          "The configuration details for a lifecycle policy resource."];
+      resourceSelection: LifecyclePolicyResourceSelection.t
+        [@ocaml.doc
+          "Selection criteria for resources that the lifecycle policy applies to."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
+    let context_ = "UpdateLifecyclePolicyRequest"
+    let make ?description =
+      fun ?status ->
+        fun ~lifecyclePolicyArn ->
+          fun ~executionRole ->
+            fun ~resourceType ->
+              fun ~policyDetails ->
+                fun ~resourceSelection ->
+                  fun ~clientToken ->
+                    fun () ->
+                      {
+                        description;
+                        status;
+                        lifecyclePolicyArn;
+                        executionRole;
+                        resourceType;
+                        policyDetails;
+                        resourceSelection;
+                        clientToken
+                      }
+    let to_value x =
+      structure_to_value
+        [("lifecyclePolicyArn",
+           (Some (LifecyclePolicyArn.to_value x.lifecyclePolicyArn)));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("status", (Option.map x.status ~f:LifecyclePolicyStatus.to_value));
+        ("executionRole", (Some (RoleNameOrArn.to_value x.executionRole)));
+        ("resourceType",
+          (Some (LifecyclePolicyResourceType.to_value x.resourceType)));
+        ("policyDetails",
+          (Some (LifecyclePolicyDetails.to_value x.policyDetails)));
+        ("resourceSelection",
+          (Some
+             (LifecyclePolicyResourceSelection.to_value x.resourceSelection)));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let resourceSelection =
+        LifecyclePolicyResourceSelection.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceSelection") in
+      let policyDetails =
+        LifecyclePolicyDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyDetails") in
+      let resourceType =
+        LifecyclePolicyResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let executionRole =
+        RoleNameOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "executionRole") in
+      let status =
+        (Option.map ~f:LifecyclePolicyStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let lifecyclePolicyArn =
+        LifecyclePolicyArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "lifecyclePolicyArn") in
+      make ~clientToken ~resourceSelection ~policyDetails ~resourceType
+        ~executionRole ?status ?description ~lifecyclePolicyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let resourceSelection =
+        field_map_exn json__ "resourceSelection"
+          LifecyclePolicyResourceSelection.of_json in
+      let policyDetails =
+        field_map_exn json__ "policyDetails" LifecyclePolicyDetails.of_json in
+      let resourceType =
+        field_map_exn json__ "resourceType"
+          LifecyclePolicyResourceType.of_json in
+      let executionRole =
+        field_map_exn json__ "executionRole" RoleNameOrArn.of_json in
+      let status = field_map json__ "status" LifecyclePolicyStatus.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let lifecyclePolicyArn =
+        field_map_exn json__ "lifecyclePolicyArn" LifecyclePolicyArn.of_json in
+      make ~clientToken ~resourceSelection ~policyDetails ~resourceType
+        ~executionRole ?status ?description ~lifecyclePolicyArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the specified lifecycle policy."]
 module UpdateInfrastructureConfigurationResponse =
   struct
     type nonrec t =
@@ -6031,8 +12507,7 @@ module UpdateInfrastructureConfigurationResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       infrastructureConfigurationArn: InfrastructureConfigurationArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the infrastructure configuration that was updated by this request."]}
@@ -6154,12 +12629,12 @@ module UpdateInfrastructureConfigurationResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?infrastructureConfigurationArn ?clientToken ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let infrastructureConfigurationArn =
-        field_map json "infrastructureConfigurationArn"
+        field_map json__ "infrastructureConfigurationArn"
           InfrastructureConfigurationArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?infrastructureConfigurationArn ?clientToken ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6197,15 +12672,18 @@ module UpdateInfrastructureConfigurationRequest =
       snsTopicArn: SnsTopicArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the SNS topic to which we send image build event notifications. EC2 Image Builder is unable to send notifications to SNS topics that are encrypted using keys from other accounts. The key that is used to encrypt the SNS topic must reside in the account that the Image Builder service runs under."];
-      clientToken: ClientToken.t
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
       resourceTags: ResourceTagMap.t option
         [@ocaml.doc
           "The tags attached to the resource created by Image Builder."];
       instanceMetadataOptions: InstanceMetadataOptions.t option
         [@ocaml.doc
-          "The instance metadata options that you can set for the HTTP requests that pipeline builds use to launch EC2 build and test instances. For more information about instance metadata options, see one of the following links: Configure the instance metadata options in the Amazon EC2 User Guide for Linux instances. Configure the instance metadata options in the Amazon EC2 Windows Guide for Windows instances."]}
+          "The instance metadata options that you can set for the HTTP requests that pipeline builds use to launch EC2 build and test instances. For more information about instance metadata options, see one of the following links: Configure the instance metadata options in the Amazon EC2 User Guide for Linux instances. Configure the instance metadata options in the Amazon EC2 Windows Guide for Windows instances."];
+      placement: Placement.t option
+        [@ocaml.doc
+          "The instance placement settings that define where the instances that are launched from your image will run."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
     let context_ = "UpdateInfrastructureConfigurationRequest"
     let make ?description =
       fun ?instanceTypes ->
@@ -6217,25 +12695,27 @@ module UpdateInfrastructureConfigurationRequest =
                   fun ?snsTopicArn ->
                     fun ?resourceTags ->
                       fun ?instanceMetadataOptions ->
-                        fun ~infrastructureConfigurationArn ->
-                          fun ~instanceProfileName ->
-                            fun ~clientToken ->
-                              fun () ->
-                                {
-                                  description;
-                                  instanceTypes;
-                                  securityGroupIds;
-                                  subnetId;
-                                  logging;
-                                  keyPair;
-                                  terminateInstanceOnFailure;
-                                  snsTopicArn;
-                                  resourceTags;
-                                  instanceMetadataOptions;
-                                  infrastructureConfigurationArn;
-                                  instanceProfileName;
-                                  clientToken
-                                }
+                        fun ?placement ->
+                          fun ~infrastructureConfigurationArn ->
+                            fun ~instanceProfileName ->
+                              fun ~clientToken ->
+                                fun () ->
+                                  {
+                                    description;
+                                    instanceTypes;
+                                    securityGroupIds;
+                                    subnetId;
+                                    logging;
+                                    keyPair;
+                                    terminateInstanceOnFailure;
+                                    snsTopicArn;
+                                    resourceTags;
+                                    instanceMetadataOptions;
+                                    placement;
+                                    infrastructureConfigurationArn;
+                                    instanceProfileName;
+                                    clientToken
+                                  }
     let to_value x =
       structure_to_value
         [("infrastructureConfigurationArn",
@@ -6257,23 +12737,26 @@ module UpdateInfrastructureConfigurationRequest =
           (Option.map x.terminateInstanceOnFailure
              ~f:NullableBoolean.to_value));
         ("snsTopicArn", (Option.map x.snsTopicArn ~f:SnsTopicArn.to_value));
-        ("clientToken", (Some (ClientToken.to_value x.clientToken)));
         ("resourceTags",
           (Option.map x.resourceTags ~f:ResourceTagMap.to_value));
         ("instanceMetadataOptions",
           (Option.map x.instanceMetadataOptions
-             ~f:InstanceMetadataOptions.to_value))]
+             ~f:InstanceMetadataOptions.to_value));
+        ("placement", (Option.map x.placement ~f:Placement.to_value));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let placement =
+        (Option.map ~f:Placement.of_xml) (Xml.child xml_arg0 "placement") in
       let instanceMetadataOptions =
         (Option.map ~f:InstanceMetadataOptions.of_xml)
           (Xml.child xml_arg0 "instanceMetadataOptions") in
       let resourceTags =
         (Option.map ~f:ResourceTagMap.of_xml)
           (Xml.child xml_arg0 "resourceTags") in
-      let clientToken =
-        ClientToken.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
       let snsTopicArn =
         (Option.map ~f:SnsTopicArn.of_xml) (Xml.child xml_arg0 "snsTopicArn") in
       let terminateInstanceOnFailure =
@@ -6301,36 +12784,39 @@ module UpdateInfrastructureConfigurationRequest =
         InfrastructureConfigurationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "infrastructureConfigurationArn") in
-      make ?instanceMetadataOptions ?resourceTags ~clientToken ?snsTopicArn
-        ?terminateInstanceOnFailure ?keyPair ?logging ?subnetId
+      make ~clientToken ?placement ?instanceMetadataOptions ?resourceTags
+        ?snsTopicArn ?terminateInstanceOnFailure ?keyPair ?logging ?subnetId
         ?securityGroupIds ~instanceProfileName ?instanceTypes ?description
         ~infrastructureConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let placement = field_map json__ "placement" Placement.of_json in
       let instanceMetadataOptions =
-        field_map json "instanceMetadataOptions"
+        field_map json__ "instanceMetadataOptions"
           InstanceMetadataOptions.of_json in
-      let resourceTags = field_map json "resourceTags" ResourceTagMap.of_json in
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let snsTopicArn = field_map json "snsTopicArn" SnsTopicArn.of_json in
+      let resourceTags =
+        field_map json__ "resourceTags" ResourceTagMap.of_json in
+      let snsTopicArn = field_map json__ "snsTopicArn" SnsTopicArn.of_json in
       let terminateInstanceOnFailure =
-        field_map json "terminateInstanceOnFailure" NullableBoolean.of_json in
-      let keyPair = field_map json "keyPair" NonEmptyString.of_json in
-      let logging = field_map json "logging" Logging.of_json in
-      let subnetId = field_map json "subnetId" NonEmptyString.of_json in
+        field_map json__ "terminateInstanceOnFailure" NullableBoolean.of_json in
+      let keyPair = field_map json__ "keyPair" NonEmptyString.of_json in
+      let logging = field_map json__ "logging" Logging.of_json in
+      let subnetId = field_map json__ "subnetId" NonEmptyString.of_json in
       let securityGroupIds =
-        field_map json "securityGroupIds" SecurityGroupIds.of_json in
+        field_map json__ "securityGroupIds" SecurityGroupIds.of_json in
       let instanceProfileName =
-        field_map_exn json "instanceProfileName"
+        field_map_exn json__ "instanceProfileName"
           InstanceProfileNameType.of_json in
       let instanceTypes =
-        field_map json "instanceTypes" InstanceTypeList.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
+        field_map json__ "instanceTypes" InstanceTypeList.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       let infrastructureConfigurationArn =
-        field_map_exn json "infrastructureConfigurationArn"
+        field_map_exn json__ "infrastructureConfigurationArn"
           InfrastructureConfigurationArn.of_json in
-      make ?instanceMetadataOptions ?resourceTags ~clientToken ?snsTopicArn
-        ?terminateInstanceOnFailure ?keyPair ?logging ?subnetId
+      make ~clientToken ?placement ?instanceMetadataOptions ?resourceTags
+        ?snsTopicArn ?terminateInstanceOnFailure ?keyPair ?logging ?subnetId
         ?securityGroupIds ~instanceProfileName ?instanceTypes ?description
         ~infrastructureConfigurationArn ()
     let to_json v = composed_to_json to_value v
@@ -6343,8 +12829,7 @@ module UpdateImagePipelineResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       imagePipelineArn: ImagePipelineArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the image pipeline that was updated by this request."]}
@@ -6464,15 +12949,15 @@ module UpdateImagePipelineResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imagePipelineArn ?clientToken ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imagePipelineArn =
-        field_map json "imagePipelineArn" ImagePipelineArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imagePipelineArn" ImagePipelineArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imagePipelineArn ?clientToken ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an image pipeline. Image pipelines enable you to automate the creation and distribution of images. UpdateImagePipeline does not support selective updates for the pipeline. You must specify all of the required properties in the update request, not just the properties that have changed."]
+       "Updates an image pipeline. Image pipelines enable you to automate the creation and distribution of images. You must specify exactly one recipe for your image, using either a containerRecipeArn or an imageRecipeArn. UpdateImagePipeline does not support selective updates for the pipeline. You must specify all of the required properties in the update request, not just the properties that have changed."]
 module UpdateImagePipelineRequest =
   struct
     type nonrec t =
@@ -6490,10 +12975,10 @@ module UpdateImagePipelineRequest =
           "The Amazon Resource Name (ARN) of the container pipeline to update."];
       infrastructureConfigurationArn: InfrastructureConfigurationArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the infrastructure configuration that will be used to build images updated by this image pipeline."];
+          "The Amazon Resource Name (ARN) of the infrastructure configuration that Image Builder uses to build images that this image pipeline has updated."];
       distributionConfigurationArn: DistributionConfigurationArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the distribution configuration that will be used to configure and distribute images updated by this image pipeline."];
+          "The Amazon Resource Name (ARN) of the distribution configuration that Image Builder uses to configure and distribute images that this image pipeline has updated."];
       imageTestsConfiguration: ImageTestsConfiguration.t option
         [@ocaml.doc "The image test configuration of the image pipeline."];
       enhancedImageMetadataEnabled: NullableBoolean.t option
@@ -6505,7 +12990,20 @@ module UpdateImagePipelineRequest =
         [@ocaml.doc "The status of the image pipeline."];
       clientToken: ClientToken.t
         [@ocaml.doc
-          "The idempotency token used to make this request idempotent."]}
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."];
+      imageScanningConfiguration: ImageScanningConfiguration.t option
+        [@ocaml.doc "Contains settings for vulnerability scans."];
+      workflows: WorkflowConfigurationList.t option
+        [@ocaml.doc "Contains the workflows to run for the pipeline."];
+      loggingConfiguration: PipelineLoggingConfiguration.t option
+        [@ocaml.doc
+          "Update logging configuration for the output image that's created when the pipeline runs."];
+      executionRole: RoleNameOrArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) for the IAM role you create that grants Image Builder access to perform workflow actions."];
+      imageTags: TagMap.t option
+        [@ocaml.doc
+          "The tags to be applied to the images produced by this pipeline."]}
     let context_ = "UpdateImagePipelineRequest"
     let make ?description =
       fun ?imageRecipeArn ->
@@ -6515,23 +13013,33 @@ module UpdateImagePipelineRequest =
               fun ?enhancedImageMetadataEnabled ->
                 fun ?schedule ->
                   fun ?status ->
-                    fun ~imagePipelineArn ->
-                      fun ~infrastructureConfigurationArn ->
-                        fun ~clientToken ->
-                          fun () ->
-                            {
-                              description;
-                              imageRecipeArn;
-                              containerRecipeArn;
-                              distributionConfigurationArn;
-                              imageTestsConfiguration;
-                              enhancedImageMetadataEnabled;
-                              schedule;
-                              status;
-                              imagePipelineArn;
-                              infrastructureConfigurationArn;
-                              clientToken
-                            }
+                    fun ?imageScanningConfiguration ->
+                      fun ?workflows ->
+                        fun ?loggingConfiguration ->
+                          fun ?executionRole ->
+                            fun ?imageTags ->
+                              fun ~imagePipelineArn ->
+                                fun ~infrastructureConfigurationArn ->
+                                  fun ~clientToken ->
+                                    fun () ->
+                                      {
+                                        description;
+                                        imageRecipeArn;
+                                        containerRecipeArn;
+                                        distributionConfigurationArn;
+                                        imageTestsConfiguration;
+                                        enhancedImageMetadataEnabled;
+                                        schedule;
+                                        status;
+                                        imageScanningConfiguration;
+                                        workflows;
+                                        loggingConfiguration;
+                                        executionRole;
+                                        imageTags;
+                                        imagePipelineArn;
+                                        infrastructureConfigurationArn;
+                                        clientToken
+                                      }
     let to_value x =
       structure_to_value
         [("imagePipelineArn",
@@ -6557,9 +13065,34 @@ module UpdateImagePipelineRequest =
              ~f:NullableBoolean.to_value));
         ("schedule", (Option.map x.schedule ~f:Schedule.to_value));
         ("status", (Option.map x.status ~f:PipelineStatus.to_value));
-        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("imageScanningConfiguration",
+          (Option.map x.imageScanningConfiguration
+             ~f:ImageScanningConfiguration.to_value));
+        ("workflows",
+          (Option.map x.workflows ~f:WorkflowConfigurationList.to_value));
+        ("loggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:PipelineLoggingConfiguration.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:RoleNameOrArn.to_value));
+        ("imageTags", (Option.map x.imageTags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let imageTags =
+        (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "imageTags") in
+      let executionRole =
+        (Option.map ~f:RoleNameOrArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let loggingConfiguration =
+        (Option.map ~f:PipelineLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
+      let workflows =
+        (Option.map ~f:WorkflowConfigurationList.of_xml)
+          (Xml.child xml_arg0 "workflows") in
+      let imageScanningConfiguration =
+        (Option.map ~f:ImageScanningConfiguration.of_xml)
+          (Xml.child xml_arg0 "imageScanningConfiguration") in
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
@@ -6592,40 +13125,55 @@ module UpdateImagePipelineRequest =
       let imagePipelineArn =
         ImagePipelineArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imagePipelineArn") in
-      make ~clientToken ?status ?schedule ?enhancedImageMetadataEnabled
-        ?imageTestsConfiguration ?distributionConfigurationArn
-        ~infrastructureConfigurationArn ?containerRecipeArn ?imageRecipeArn
-        ?description ~imagePipelineArn ()
+      make ?imageTags ?executionRole ?loggingConfiguration ?workflows
+        ?imageScanningConfiguration ~clientToken ?status ?schedule
+        ?enhancedImageMetadataEnabled ?imageTestsConfiguration
+        ?distributionConfigurationArn ~infrastructureConfigurationArn
+        ?containerRecipeArn ?imageRecipeArn ?description ~imagePipelineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let status = field_map json "status" PipelineStatus.of_json in
-      let schedule = field_map json "schedule" Schedule.of_json in
+    let of_json json__ =
+      let imageTags = field_map json__ "imageTags" TagMap.of_json in
+      let executionRole =
+        field_map json__ "executionRole" RoleNameOrArn.of_json in
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          PipelineLoggingConfiguration.of_json in
+      let workflows =
+        field_map json__ "workflows" WorkflowConfigurationList.of_json in
+      let imageScanningConfiguration =
+        field_map json__ "imageScanningConfiguration"
+          ImageScanningConfiguration.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let status = field_map json__ "status" PipelineStatus.of_json in
+      let schedule = field_map json__ "schedule" Schedule.of_json in
       let enhancedImageMetadataEnabled =
-        field_map json "enhancedImageMetadataEnabled" NullableBoolean.of_json in
+        field_map json__ "enhancedImageMetadataEnabled"
+          NullableBoolean.of_json in
       let imageTestsConfiguration =
-        field_map json "imageTestsConfiguration"
+        field_map json__ "imageTestsConfiguration"
           ImageTestsConfiguration.of_json in
       let distributionConfigurationArn =
-        field_map json "distributionConfigurationArn"
+        field_map json__ "distributionConfigurationArn"
           DistributionConfigurationArn.of_json in
       let infrastructureConfigurationArn =
-        field_map_exn json "infrastructureConfigurationArn"
+        field_map_exn json__ "infrastructureConfigurationArn"
           InfrastructureConfigurationArn.of_json in
       let containerRecipeArn =
-        field_map json "containerRecipeArn" ContainerRecipeArn.of_json in
+        field_map json__ "containerRecipeArn" ContainerRecipeArn.of_json in
       let imageRecipeArn =
-        field_map json "imageRecipeArn" ImageRecipeArn.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
+        field_map json__ "imageRecipeArn" ImageRecipeArn.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       let imagePipelineArn =
-        field_map_exn json "imagePipelineArn" ImagePipelineArn.of_json in
-      make ~clientToken ?status ?schedule ?enhancedImageMetadataEnabled
-        ?imageTestsConfiguration ?distributionConfigurationArn
-        ~infrastructureConfigurationArn ?containerRecipeArn ?imageRecipeArn
-        ?description ~imagePipelineArn ()
+        field_map_exn json__ "imagePipelineArn" ImagePipelineArn.of_json in
+      make ?imageTags ?executionRole ?loggingConfiguration ?workflows
+        ?imageScanningConfiguration ~clientToken ?status ?schedule
+        ?enhancedImageMetadataEnabled ?imageTestsConfiguration
+        ?distributionConfigurationArn ~infrastructureConfigurationArn
+        ?containerRecipeArn ?imageRecipeArn ?description ~imagePipelineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an image pipeline. Image pipelines enable you to automate the creation and distribution of images. UpdateImagePipeline does not support selective updates for the pipeline. You must specify all of the required properties in the update request, not just the properties that have changed."]
+       "Updates an image pipeline. Image pipelines enable you to automate the creation and distribution of images. You must specify exactly one recipe for your image, using either a containerRecipeArn or an imageRecipeArn. UpdateImagePipeline does not support selective updates for the pipeline. You must specify all of the required properties in the update request, not just the properties that have changed."]
 module UpdateDistributionConfigurationResponse =
   struct
     type nonrec t =
@@ -6633,8 +13181,7 @@ module UpdateDistributionConfigurationResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       distributionConfigurationArn: DistributionConfigurationArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the distribution configuration that was updated by this request."]}
@@ -6767,12 +13314,12 @@ module UpdateDistributionConfigurationResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?distributionConfigurationArn ?clientToken ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let distributionConfigurationArn =
-        field_map json "distributionConfigurationArn"
+        field_map json__ "distributionConfigurationArn"
           DistributionConfigurationArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?distributionConfigurationArn ?clientToken ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6790,7 +13337,7 @@ module UpdateDistributionConfigurationRequest =
         [@ocaml.doc "The distributions of the distribution configuration."];
       clientToken: ClientToken.t
         [@ocaml.doc
-          "The idempotency token of the distribution configuration."]}
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
     let context_ = "UpdateDistributionConfigurationRequest"
     let make ?description =
       fun ~distributionConfigurationArn ->
@@ -6831,13 +13378,14 @@ module UpdateDistributionConfigurationRequest =
       make ~clientToken ~distributions ?description
         ~distributionConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
       let distributions =
-        field_map_exn json "distributions" DistributionList.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
+        field_map_exn json__ "distributions" DistributionList.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       let distributionConfigurationArn =
-        field_map_exn json "distributionConfigurationArn"
+        field_map_exn json__ "distributionConfigurationArn"
           DistributionConfigurationArn.of_json in
       make ~clientToken ~distributions ?description
         ~distributionConfigurationArn ()
@@ -6926,10 +13474,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" ImageBuilderArn.of_json in
+        field_map_exn json__ "resourceArn" ImageBuilderArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a resource."]
@@ -7012,13 +13560,257 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" ImageBuilderArn.of_json in
+        field_map_exn json__ "resourceArn" ImageBuilderArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a tag to a resource."]
+module StartResourceStateUpdateResponse =
+  struct
+    type nonrec t =
+      {
+      lifecycleExecutionId: LifecycleExecutionId.t option
+        [@ocaml.doc
+          "Identifies the lifecycle runtime instance that started the resource state update."];
+      resourceArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The requested Amazon Resource Name (ARN) of the Image Builder resource for the asynchronous update."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecycleExecutionId =
+      fun ?resourceArn -> fun () -> { lifecycleExecutionId; resourceArn }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("lifecycleExecutionId",
+           (Option.map x.lifecycleExecutionId
+              ~f:LifecycleExecutionId.to_value));
+        ("resourceArn",
+          (Option.map x.resourceArn ~f:ImageBuildVersionArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "resourceArn") in
+      let lifecycleExecutionId =
+        (Option.map ~f:LifecycleExecutionId.of_xml)
+          (Xml.child xml_arg0 "lifecycleExecutionId") in
+      make ?resourceArn ?lifecycleExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map json__ "resourceArn" ImageBuildVersionArn.of_json in
+      let lifecycleExecutionId =
+        field_map json__ "lifecycleExecutionId" LifecycleExecutionId.of_json in
+      make ?resourceArn ?lifecycleExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Begin asynchronous resource state update for lifecycle changes to the specified image resources."]
+module StartResourceStateUpdateRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ImageBuildVersionArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Image Builder resource that is updated. The state update might also impact associated resources."];
+      state: ResourceState.t
+        [@ocaml.doc
+          "Indicates the lifecycle action to take for this request."];
+      executionRole: RoleNameOrArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) of the IAM role that\226\128\153s used to update image state."];
+      includeResources: ResourceStateUpdateIncludeResources.t option
+        [@ocaml.doc "A list of image resources to update state for."];
+      exclusionRules: ResourceStateUpdateExclusionRules.t option
+        [@ocaml.doc
+          "Skip action on the image resource and associated resources if specified exclusion rules are met."];
+      updateAt: DateTimeTimestamp.t option
+        [@ocaml.doc
+          "The timestamp that indicates when resources are updated by a lifecycle action."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
+    let context_ = "StartResourceStateUpdateRequest"
+    let make ?executionRole =
+      fun ?includeResources ->
+        fun ?exclusionRules ->
+          fun ?updateAt ->
+            fun ~resourceArn ->
+              fun ~state ->
+                fun ~clientToken ->
+                  fun () ->
+                    {
+                      executionRole;
+                      includeResources;
+                      exclusionRules;
+                      updateAt;
+                      resourceArn;
+                      state;
+                      clientToken
+                    }
+    let to_value x =
+      structure_to_value
+        [("resourceArn",
+           (Some (ImageBuildVersionArn.to_value x.resourceArn)));
+        ("state", (Some (ResourceState.to_value x.state)));
+        ("executionRole",
+          (Option.map x.executionRole ~f:RoleNameOrArn.to_value));
+        ("includeResources",
+          (Option.map x.includeResources
+             ~f:ResourceStateUpdateIncludeResources.to_value));
+        ("exclusionRules",
+          (Option.map x.exclusionRules
+             ~f:ResourceStateUpdateExclusionRules.to_value));
+        ("updateAt", (Option.map x.updateAt ~f:DateTimeTimestamp.to_value));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let updateAt =
+        (Option.map ~f:DateTimeTimestamp.of_xml)
+          (Xml.child xml_arg0 "updateAt") in
+      let exclusionRules =
+        (Option.map ~f:ResourceStateUpdateExclusionRules.of_xml)
+          (Xml.child xml_arg0 "exclusionRules") in
+      let includeResources =
+        (Option.map ~f:ResourceStateUpdateIncludeResources.of_xml)
+          (Xml.child xml_arg0 "includeResources") in
+      let executionRole =
+        (Option.map ~f:RoleNameOrArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let state =
+        ResourceState.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "state") in
+      let resourceArn =
+        ImageBuildVersionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~clientToken ?updateAt ?exclusionRules ?includeResources
+        ?executionRole ~state ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let updateAt = field_map json__ "updateAt" DateTimeTimestamp.of_json in
+      let exclusionRules =
+        field_map json__ "exclusionRules"
+          ResourceStateUpdateExclusionRules.of_json in
+      let includeResources =
+        field_map json__ "includeResources"
+          ResourceStateUpdateIncludeResources.of_json in
+      let executionRole =
+        field_map json__ "executionRole" RoleNameOrArn.of_json in
+      let state = field_map_exn json__ "state" ResourceState.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ImageBuildVersionArn.of_json in
+      make ~clientToken ?updateAt ?exclusionRules ?includeResources
+        ?executionRole ~state ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Begin asynchronous resource state update for lifecycle changes to the specified image resources."]
 module StartImagePipelineExecutionResponse =
   struct
     type nonrec t =
@@ -7026,11 +13818,10 @@ module StartImagePipelineExecutionResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       imageBuildVersionArn: ImageBuildVersionArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the image that was created by this request."]}
+          "The Amazon Resource Name (ARN) of the image that the request created."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -7156,11 +13947,11 @@ module StartImagePipelineExecutionResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imageBuildVersionArn ?clientToken ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageBuildVersionArn =
-        field_map json "imageBuildVersionArn" ImageBuildVersionArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imageBuildVersionArn ?clientToken ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Manually triggers a pipeline to create an image."]
@@ -7173,32 +13964,439 @@ module StartImagePipelineExecutionRequest =
           "The Amazon Resource Name (ARN) of the image pipeline that you want to manually invoke."];
       clientToken: ClientToken.t
         [@ocaml.doc
-          "The idempotency token used to make this request idempotent."]}
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Specify tags for Image Builder to apply to the image resource that's created When it starts pipeline execution."]}
     let context_ = "StartImagePipelineExecutionRequest"
-    let make ~imagePipelineArn =
-      fun ~clientToken -> fun () -> { imagePipelineArn; clientToken }
+    let make ?tags =
+      fun ~imagePipelineArn ->
+        fun ~clientToken -> fun () -> { tags; imagePipelineArn; clientToken }
     let to_value x =
       structure_to_value
         [("imagePipelineArn",
            (Some (ImagePipelineArn.to_value x.imagePipelineArn)));
-        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
       let imagePipelineArn =
         ImagePipelineArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imagePipelineArn") in
-      make ~clientToken ~imagePipelineArn ()
+      make ?tags ~clientToken ~imagePipelineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
       let imagePipelineArn =
-        field_map_exn json "imagePipelineArn" ImagePipelineArn.of_json in
-      make ~clientToken ~imagePipelineArn ()
+        field_map_exn json__ "imagePipelineArn" ImagePipelineArn.of_json in
+      make ?tags ~clientToken ~imagePipelineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Manually triggers a pipeline to create an image."]
+module SendWorkflowStepActionResponse =
+  struct
+    type nonrec t =
+      {
+      stepExecutionId: WorkflowStepExecutionId.t option
+        [@ocaml.doc "The workflow step that sent the step action."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image build version that received the action request."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token that uniquely identifies the request."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?stepExecutionId =
+      fun ?imageBuildVersionArn ->
+        fun ?clientToken ->
+          fun () -> { stepExecutionId; imageBuildVersionArn; clientToken }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("stepExecutionId",
+           (Option.map x.stepExecutionId ~f:WorkflowStepExecutionId.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let stepExecutionId =
+        (Option.map ~f:WorkflowStepExecutionId.of_xml)
+          (Xml.child xml_arg0 "stepExecutionId") in
+      make ?clientToken ?imageBuildVersionArn ?stepExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let stepExecutionId =
+        field_map json__ "stepExecutionId" WorkflowStepExecutionId.of_json in
+      make ?clientToken ?imageBuildVersionArn ?stepExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Pauses or resumes image creation when the associated workflow runs a WaitForAction step."]
+module SendWorkflowStepActionRequest =
+  struct
+    type nonrec t =
+      {
+      stepExecutionId: WorkflowStepExecutionId.t
+        [@ocaml.doc
+          "Uniquely identifies the workflow step that sent the step action."];
+      imageBuildVersionArn: ImageBuildVersionArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image build version to send action for."];
+      action: WorkflowStepActionType.t
+        [@ocaml.doc
+          "The action for the image creation process to take while a workflow WaitForAction step waits for an asynchronous action to complete."];
+      reason: NonEmptyString.t option
+        [@ocaml.doc "The reason why this action is sent."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
+    let context_ = "SendWorkflowStepActionRequest"
+    let make ?reason =
+      fun ~stepExecutionId ->
+        fun ~imageBuildVersionArn ->
+          fun ~action ->
+            fun ~clientToken ->
+              fun () ->
+                {
+                  reason;
+                  stepExecutionId;
+                  imageBuildVersionArn;
+                  action;
+                  clientToken
+                }
+    let to_value x =
+      structure_to_value
+        [("stepExecutionId",
+           (Some (WorkflowStepExecutionId.to_value x.stepExecutionId)));
+        ("imageBuildVersionArn",
+          (Some (ImageBuildVersionArn.to_value x.imageBuildVersionArn)));
+        ("action", (Some (WorkflowStepActionType.to_value x.action)));
+        ("reason", (Option.map x.reason ~f:NonEmptyString.to_value));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let reason =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "reason") in
+      let action =
+        WorkflowStepActionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "action") in
+      let imageBuildVersionArn =
+        ImageBuildVersionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
+      let stepExecutionId =
+        WorkflowStepExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stepExecutionId") in
+      make ~clientToken ?reason ~action ~imageBuildVersionArn
+        ~stepExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let reason = field_map json__ "reason" NonEmptyString.of_json in
+      let action =
+        field_map_exn json__ "action" WorkflowStepActionType.of_json in
+      let imageBuildVersionArn =
+        field_map_exn json__ "imageBuildVersionArn"
+          ImageBuildVersionArn.of_json in
+      let stepExecutionId =
+        field_map_exn json__ "stepExecutionId"
+          WorkflowStepExecutionId.of_json in
+      make ~clientToken ?reason ~action ~imageBuildVersionArn
+        ~stepExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Pauses or resumes image creation when the associated workflow runs a WaitForAction step."]
+module RetryImageResponse =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token that uniquely identifies the request."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc "The ARN of the image to be retried."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?clientToken =
+      fun ?imageBuildVersionArn ->
+        fun () -> { clientToken; imageBuildVersionArn }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?imageBuildVersionArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?imageBuildVersionArn ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "RetryImage retries an image distribution without rebuilding the image."]
+module RetryImageRequest =
+  struct
+    type nonrec t =
+      {
+      imageBuildVersionArn: ImageBuildVersionArn.t
+        [@ocaml.doc "The source image Amazon Resource Name (ARN) to retry."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
+    let context_ = "RetryImageRequest"
+    let make ~imageBuildVersionArn =
+      fun ~clientToken -> fun () -> { imageBuildVersionArn; clientToken }
+    let to_value x =
+      structure_to_value
+        [("imageBuildVersionArn",
+           (Some (ImageBuildVersionArn.to_value x.imageBuildVersionArn)));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let imageBuildVersionArn =
+        ImageBuildVersionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
+      make ~clientToken ~imageBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let imageBuildVersionArn =
+        field_map_exn json__ "imageBuildVersionArn"
+          ImageBuildVersionArn.of_json in
+      make ~clientToken ~imageBuildVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "RetryImage retries an image distribution without rebuilding the image."]
 module PutImageRecipePolicyResponse =
   struct
     type nonrec t =
@@ -7318,10 +14516,10 @@ module PutImageRecipePolicyResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imageRecipeArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageRecipeArn =
-        field_map json "imageRecipeArn" ImageRecipeArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imageRecipeArn" ImageRecipeArn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imageRecipeArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7352,10 +14550,11 @@ module PutImageRecipePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageRecipeArn") in
       make ~policy ~imageRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "policy" ResourcePolicyDocument.of_json in
+    let of_json json__ =
+      let policy =
+        field_map_exn json__ "policy" ResourcePolicyDocument.of_json in
       let imageRecipeArn =
-        field_map_exn json "imageRecipeArn" ImageRecipeArn.of_json in
+        field_map_exn json__ "imageRecipeArn" ImageRecipeArn.of_json in
       make ~policy ~imageRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7478,9 +14677,9 @@ module PutImagePolicyResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imageArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let imageArn = field_map json "imageArn" ImageBuildVersionArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+    let of_json json__ =
+      let imageArn = field_map json__ "imageArn" ImageBuildVersionArn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imageArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7509,10 +14708,11 @@ module PutImagePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageArn") in
       make ~policy ~imageArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "policy" ResourcePolicyDocument.of_json in
+    let of_json json__ =
+      let policy =
+        field_map_exn json__ "policy" ResourcePolicyDocument.of_json in
       let imageArn =
-        field_map_exn json "imageArn" ImageBuildVersionArn.of_json in
+        field_map_exn json__ "imageArn" ImageBuildVersionArn.of_json in
       make ~policy ~imageArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7636,10 +14836,10 @@ module PutContainerRecipePolicyResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?containerRecipeArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerRecipeArn =
-        field_map json "containerRecipeArn" ContainerRecipeArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "containerRecipeArn" ContainerRecipeArn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?containerRecipeArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7671,10 +14871,11 @@ module PutContainerRecipePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "containerRecipeArn") in
       make ~policy ~containerRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "policy" ResourcePolicyDocument.of_json in
+    let of_json json__ =
+      let policy =
+        field_map_exn json__ "policy" ResourcePolicyDocument.of_json in
       let containerRecipeArn =
-        field_map_exn json "containerRecipeArn" ContainerRecipeArn.of_json in
+        field_map_exn json__ "containerRecipeArn" ContainerRecipeArn.of_json in
       make ~policy ~containerRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7798,10 +14999,10 @@ module PutComponentPolicyResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?componentArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentArn =
-        field_map json "componentArn" ComponentBuildVersionArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "componentArn" ComponentBuildVersionArn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?componentArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7832,14 +15033,950 @@ module PutComponentPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "componentArn") in
       make ~policy ~componentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "policy" ResourcePolicyDocument.of_json in
+    let of_json json__ =
+      let policy =
+        field_map_exn json__ "policy" ResourcePolicyDocument.of_json in
       let componentArn =
-        field_map_exn json "componentArn" ComponentBuildVersionArn.of_json in
+        field_map_exn json__ "componentArn" ComponentBuildVersionArn.of_json in
       make ~policy ~componentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Applies a policy to a component. We recommend that you call the RAM API CreateResourceShare to share resources. If you call the Image Builder API PutComponentPolicy, you must also call the RAM API PromoteResourceShareCreatedFromPolicy in order for the resource to be visible to all principals with whom the resource is shared."]
+module ListWorkflowsResponse =
+  struct
+    type nonrec t =
+      {
+      workflowVersionList: WorkflowVersionList.t option
+        [@ocaml.doc
+          "A list of workflow build versions that match the request criteria."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workflowVersionList =
+      fun ?nextToken -> fun () -> { workflowVersionList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("workflowVersionList",
+           (Option.map x.workflowVersionList ~f:WorkflowVersionList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let workflowVersionList =
+        (Option.map ~f:WorkflowVersionList.of_xml)
+          (Xml.child xml_arg0 "workflowVersionList") in
+      make ?nextToken ?workflowVersionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let workflowVersionList =
+        field_map json__ "workflowVersionList" WorkflowVersionList.of_json in
+      make ?nextToken ?workflowVersionList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists workflow build versions based on filtering parameters."]
+module ListWorkflowsRequest =
+  struct
+    type nonrec t =
+      {
+      owner: Ownership.t option
+        [@ocaml.doc
+          "Used to get a list of workflow build version filtered by the identity of the creator."];
+      filters: FilterList.t option
+        [@ocaml.doc "Used to streamline search results."];
+      byName: Boolean.t option
+        [@ocaml.doc
+          "Specify all or part of the workflow name to streamline results."];
+      maxResults: RestrictedInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
+    let make ?owner =
+      fun ?filters ->
+        fun ?byName ->
+          fun ?maxResults ->
+            fun ?nextToken ->
+              fun () -> { owner; filters; byName; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("owner", (Option.map x.owner ~f:Ownership.to_value));
+        ("filters", (Option.map x.filters ~f:FilterList.to_value));
+        ("byName", (Option.map x.byName ~f:Boolean.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:RestrictedInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:RestrictedInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let byName =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "byName") in
+      let filters =
+        (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
+      let owner =
+        (Option.map ~f:Ownership.of_xml) (Xml.child xml_arg0 "owner") in
+      make ?nextToken ?maxResults ?byName ?filters ?owner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let byName = field_map json__ "byName" Boolean.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
+      let owner = field_map json__ "owner" Ownership.of_json in
+      make ?nextToken ?maxResults ?byName ?filters ?owner ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists workflow build versions based on filtering parameters."]
+module ListWorkflowStepExecutionsResponse =
+  struct
+    type nonrec t =
+      {
+      requestId: NonEmptyString.t option
+        [@ocaml.doc "The request ID that uniquely identifies this request."];
+      steps: WorkflowStepExecutionsList.t option
+        [@ocaml.doc
+          "Contains an array of runtime details that represents each step in this runtime instance of the workflow."];
+      workflowBuildVersionArn: WorkflowBuildVersionArn.t option
+        [@ocaml.doc
+          "The build version Amazon Resource Name (ARN) for the Image Builder workflow resource that defines the steps for this runtime instance of the workflow."];
+      workflowExecutionId: WorkflowExecutionId.t option
+        [@ocaml.doc
+          "The unique identifier that Image Builder assigned to keep track of runtime details when it ran the workflow."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The image build version resource Amazon Resource Name (ARN) that's associated with the specified runtime instance of the workflow."];
+      message: ImageBuildMessage.t option
+        [@ocaml.doc
+          "The output message from the list action, if applicable."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?requestId =
+      fun ?steps ->
+        fun ?workflowBuildVersionArn ->
+          fun ?workflowExecutionId ->
+            fun ?imageBuildVersionArn ->
+              fun ?message ->
+                fun ?nextToken ->
+                  fun () ->
+                    {
+                      requestId;
+                      steps;
+                      workflowBuildVersionArn;
+                      workflowExecutionId;
+                      imageBuildVersionArn;
+                      message;
+                      nextToken
+                    }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
+        ("steps",
+          (Option.map x.steps ~f:WorkflowStepExecutionsList.to_value));
+        ("workflowBuildVersionArn",
+          (Option.map x.workflowBuildVersionArn
+             ~f:WorkflowBuildVersionArn.to_value));
+        ("workflowExecutionId",
+          (Option.map x.workflowExecutionId ~f:WorkflowExecutionId.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value));
+        ("message", (Option.map x.message ~f:ImageBuildMessage.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let message =
+        (Option.map ~f:ImageBuildMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let workflowExecutionId =
+        (Option.map ~f:WorkflowExecutionId.of_xml)
+          (Xml.child xml_arg0 "workflowExecutionId") in
+      let workflowBuildVersionArn =
+        (Option.map ~f:WorkflowBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "workflowBuildVersionArn") in
+      let steps =
+        (Option.map ~f:WorkflowStepExecutionsList.of_xml)
+          (Xml.child xml_arg0 "steps") in
+      let requestId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "requestId") in
+      make ?nextToken ?message ?imageBuildVersionArn ?workflowExecutionId
+        ?workflowBuildVersionArn ?steps ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let message = field_map json__ "message" ImageBuildMessage.of_json in
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let workflowExecutionId =
+        field_map json__ "workflowExecutionId" WorkflowExecutionId.of_json in
+      let workflowBuildVersionArn =
+        field_map json__ "workflowBuildVersionArn"
+          WorkflowBuildVersionArn.of_json in
+      let steps = field_map json__ "steps" WorkflowStepExecutionsList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?nextToken ?message ?imageBuildVersionArn ?workflowExecutionId
+        ?workflowBuildVersionArn ?steps ?requestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns runtime data for each step in a runtime instance of the workflow that you specify in the request."]
+module ListWorkflowStepExecutionsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: RestrictedInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."];
+      workflowExecutionId: WorkflowExecutionId.t
+        [@ocaml.doc
+          "The unique identifier that Image Builder assigned to keep track of runtime details when it ran the workflow."]}
+    let context_ = "ListWorkflowStepExecutionsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~workflowExecutionId ->
+          fun () -> { maxResults; nextToken; workflowExecutionId }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults ~f:RestrictedInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("workflowExecutionId",
+          (Some (WorkflowExecutionId.to_value x.workflowExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workflowExecutionId =
+        WorkflowExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecutionId") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:RestrictedInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ~workflowExecutionId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workflowExecutionId =
+        field_map_exn json__ "workflowExecutionId"
+          WorkflowExecutionId.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      make ~workflowExecutionId ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns runtime data for each step in a runtime instance of the workflow that you specify in the request."]
+module ListWorkflowExecutionsResponse =
+  struct
+    type nonrec t =
+      {
+      requestId: NonEmptyString.t option
+        [@ocaml.doc "The request ID that uniquely identifies this request."];
+      workflowExecutions: WorkflowExecutionsList.t option
+        [@ocaml.doc
+          "Contains an array of runtime details that represents each time a workflow ran for the requested image build version."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The resource Amazon Resource Name (ARN) of the image build version for which you requested a list of workflow runtime details."];
+      message: ImageBuildMessage.t option
+        [@ocaml.doc
+          "The output message from the list action, if applicable."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?requestId =
+      fun ?workflowExecutions ->
+        fun ?imageBuildVersionArn ->
+          fun ?message ->
+            fun ?nextToken ->
+              fun () ->
+                {
+                  requestId;
+                  workflowExecutions;
+                  imageBuildVersionArn;
+                  message;
+                  nextToken
+                }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
+        ("workflowExecutions",
+          (Option.map x.workflowExecutions ~f:WorkflowExecutionsList.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value));
+        ("message", (Option.map x.message ~f:ImageBuildMessage.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let message =
+        (Option.map ~f:ImageBuildMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let workflowExecutions =
+        (Option.map ~f:WorkflowExecutionsList.of_xml)
+          (Xml.child xml_arg0 "workflowExecutions") in
+      let requestId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "requestId") in
+      make ?nextToken ?message ?imageBuildVersionArn ?workflowExecutions
+        ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let message = field_map json__ "message" ImageBuildMessage.of_json in
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let workflowExecutions =
+        field_map json__ "workflowExecutions" WorkflowExecutionsList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?nextToken ?message ?imageBuildVersionArn ?workflowExecutions
+        ?requestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of workflow runtime instance metadata objects for a specific image build version."]
+module ListWorkflowExecutionsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: RestrictedInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."];
+      imageBuildVersionArn: ImageBuildVersionArn.t
+        [@ocaml.doc
+          "List all workflow runtime instances for the specified image build version resource ARN."]}
+    let context_ = "ListWorkflowExecutionsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~imageBuildVersionArn ->
+          fun () -> { maxResults; nextToken; imageBuildVersionArn }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults ~f:RestrictedInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("imageBuildVersionArn",
+          (Some (ImageBuildVersionArn.to_value x.imageBuildVersionArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageBuildVersionArn =
+        ImageBuildVersionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:RestrictedInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ~imageBuildVersionArn ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageBuildVersionArn =
+        field_map_exn json__ "imageBuildVersionArn"
+          ImageBuildVersionArn.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      make ~imageBuildVersionArn ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of workflow runtime instance metadata objects for a specific image build version."]
+module ListWorkflowBuildVersionsResponse =
+  struct
+    type nonrec t =
+      {
+      workflowSummaryList: WorkflowSummaryList.t option
+        [@ocaml.doc
+          "A list that contains metadata for the workflow builds that have run for the workflow resource specified in the request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workflowSummaryList =
+      fun ?nextToken -> fun () -> { workflowSummaryList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("workflowSummaryList",
+           (Option.map x.workflowSummaryList ~f:WorkflowSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let workflowSummaryList =
+        (Option.map ~f:WorkflowSummaryList.of_xml)
+          (Xml.child xml_arg0 "workflowSummaryList") in
+      make ?nextToken ?workflowSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let workflowSummaryList =
+        field_map json__ "workflowSummaryList" WorkflowSummaryList.of_json in
+      make ?nextToken ?workflowSummaryList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of build versions for a specific workflow resource."]
+module ListWorkflowBuildVersionsRequest =
+  struct
+    type nonrec t =
+      {
+      workflowVersionArn: WorkflowWildcardVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource for which to get a list of build versions."];
+      maxResults: RestrictedInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
+    let make ?workflowVersionArn =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun () -> { workflowVersionArn; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("workflowVersionArn",
+           (Option.map x.workflowVersionArn
+              ~f:WorkflowWildcardVersionArn.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:RestrictedInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:RestrictedInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let workflowVersionArn =
+        (Option.map ~f:WorkflowWildcardVersionArn.of_xml)
+          (Xml.child xml_arg0 "workflowVersionArn") in
+      make ?nextToken ?maxResults ?workflowVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let workflowVersionArn =
+        field_map json__ "workflowVersionArn"
+          WorkflowWildcardVersionArn.of_json in
+      make ?nextToken ?maxResults ?workflowVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of build versions for a specific workflow resource."]
+module ListWaitingWorkflowStepsResponse =
+  struct
+    type nonrec t =
+      {
+      steps: WorkflowStepExecutionList.t option
+        [@ocaml.doc
+          "An array of the workflow steps that are waiting for action in your Amazon Web Services account."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?steps = fun ?nextToken -> fun () -> { steps; nextToken }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("steps",
+           (Option.map x.steps ~f:WorkflowStepExecutionList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let steps =
+        (Option.map ~f:WorkflowStepExecutionList.of_xml)
+          (Xml.child xml_arg0 "steps") in
+      make ?nextToken ?steps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let steps = field_map json__ "steps" WorkflowStepExecutionList.of_json in
+      make ?nextToken ?steps ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a list of workflow steps that are waiting for action for workflows in your Amazon Web Services account."]
+module ListWaitingWorkflowStepsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: RestrictedInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults ~f:RestrictedInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:RestrictedInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a list of workflow steps that are waiting for action for workflows in your Amazon Web Services account."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -7898,8 +16035,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the list of tags for the specified resource."]
 module ListTagsForResourceRequest =
@@ -7921,12 +16058,557 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" ImageBuilderArn.of_json in
+        field_map_exn json__ "resourceArn" ImageBuilderArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the list of tags for the specified resource."]
+module ListLifecyclePoliciesResponse =
+  struct
+    type nonrec t =
+      {
+      lifecyclePolicySummaryList: LifecyclePolicySummaryList.t option
+        [@ocaml.doc
+          "A list of lifecycle policies in your Amazon Web Services account that meet the criteria specified in the request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecyclePolicySummaryList =
+      fun ?nextToken -> fun () -> { lifecyclePolicySummaryList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("lifecyclePolicySummaryList",
+           (Option.map x.lifecyclePolicySummaryList
+              ~f:LifecyclePolicySummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let lifecyclePolicySummaryList =
+        (Option.map ~f:LifecyclePolicySummaryList.of_xml)
+          (Xml.child xml_arg0 "lifecyclePolicySummaryList") in
+      make ?nextToken ?lifecyclePolicySummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let lifecyclePolicySummaryList =
+        field_map json__ "lifecyclePolicySummaryList"
+          LifecyclePolicySummaryList.of_json in
+      make ?nextToken ?lifecyclePolicySummaryList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a list of lifecycle policies in your Amazon Web Services account."]
+module ListLifecyclePoliciesRequest =
+  struct
+    type nonrec t =
+      {
+      filters: FilterList.t option
+        [@ocaml.doc
+          "Streamline results based on one of the following values: Name, Status."];
+      maxResults: RestrictedInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("filters", (Option.map x.filters ~f:FilterList.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:RestrictedInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:RestrictedInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let filters =
+        (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
+      make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
+      make ?nextToken ?maxResults ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a list of lifecycle policies in your Amazon Web Services account."]
+module ListLifecycleExecutionsResponse =
+  struct
+    type nonrec t =
+      {
+      lifecycleExecutions: LifecycleExecutionsList.t option
+        [@ocaml.doc
+          "A list of lifecycle runtime instances for the specified resource."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecycleExecutions =
+      fun ?nextToken -> fun () -> { lifecycleExecutions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("lifecycleExecutions",
+           (Option.map x.lifecycleExecutions
+              ~f:LifecycleExecutionsList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let lifecycleExecutions =
+        (Option.map ~f:LifecycleExecutionsList.of_xml)
+          (Xml.child xml_arg0 "lifecycleExecutions") in
+      make ?nextToken ?lifecycleExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let lifecycleExecutions =
+        field_map json__ "lifecycleExecutions"
+          LifecycleExecutionsList.of_json in
+      make ?nextToken ?lifecycleExecutions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the lifecycle runtime history for the specified resource."]
+module ListLifecycleExecutionsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: RestrictedInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."];
+      resourceArn: ImageBuilderArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource for which to get a list of lifecycle runtime instances."]}
+    let context_ = "ListLifecycleExecutionsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~resourceArn -> fun () -> { maxResults; nextToken; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults ~f:RestrictedInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("resourceArn", (Some (ImageBuilderArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ImageBuilderArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:RestrictedInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ~resourceArn ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ImageBuilderArn.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      make ~resourceArn ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the lifecycle runtime history for the specified resource."]
+module ListLifecycleExecutionResourcesResponse =
+  struct
+    type nonrec t =
+      {
+      lifecycleExecutionId: LifecycleExecutionId.t option
+        [@ocaml.doc
+          "Runtime details for the specified runtime instance of the lifecycle policy."];
+      lifecycleExecutionState: LifecycleExecutionState.t option
+        [@ocaml.doc "The current state of the lifecycle runtime instance."];
+      resources: LifecycleExecutionResourceList.t option
+        [@ocaml.doc
+          "A list of resources that were identified for lifecycle actions."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecycleExecutionId =
+      fun ?lifecycleExecutionState ->
+        fun ?resources ->
+          fun ?nextToken ->
+            fun () ->
+              {
+                lifecycleExecutionId;
+                lifecycleExecutionState;
+                resources;
+                nextToken
+              }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("lifecycleExecutionId",
+           (Option.map x.lifecycleExecutionId
+              ~f:LifecycleExecutionId.to_value));
+        ("lifecycleExecutionState",
+          (Option.map x.lifecycleExecutionState
+             ~f:LifecycleExecutionState.to_value));
+        ("resources",
+          (Option.map x.resources ~f:LifecycleExecutionResourceList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let resources =
+        (Option.map ~f:LifecycleExecutionResourceList.of_xml)
+          (Xml.child xml_arg0 "resources") in
+      let lifecycleExecutionState =
+        (Option.map ~f:LifecycleExecutionState.of_xml)
+          (Xml.child xml_arg0 "lifecycleExecutionState") in
+      let lifecycleExecutionId =
+        (Option.map ~f:LifecycleExecutionId.of_xml)
+          (Xml.child xml_arg0 "lifecycleExecutionId") in
+      make ?nextToken ?resources ?lifecycleExecutionState
+        ?lifecycleExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let resources =
+        field_map json__ "resources" LifecycleExecutionResourceList.of_json in
+      let lifecycleExecutionState =
+        field_map json__ "lifecycleExecutionState"
+          LifecycleExecutionState.of_json in
+      let lifecycleExecutionId =
+        field_map json__ "lifecycleExecutionId" LifecycleExecutionId.of_json in
+      make ?nextToken ?resources ?lifecycleExecutionState
+        ?lifecycleExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List resources that the runtime instance of the image lifecycle identified for lifecycle actions."]
+module ListLifecycleExecutionResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      lifecycleExecutionId: LifecycleExecutionId.t
+        [@ocaml.doc
+          "Use the unique identifier for a runtime instance of the lifecycle policy to get runtime details."];
+      parentResourceId: NonEmptyString.t option
+        [@ocaml.doc
+          "You can leave this empty to get a list of Image Builder resources that were identified for lifecycle actions. To get a list of associated resources that are impacted for an individual resource (the parent), specify its Amazon Resource Name (ARN). Associated resources are produced from your image and distributed when you run a build, such as AMIs or container images stored in ECR repositories."];
+      maxResults: RestrictedInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
+    let context_ = "ListLifecycleExecutionResourcesRequest"
+    let make ?parentResourceId =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~lifecycleExecutionId ->
+            fun () ->
+              { parentResourceId; maxResults; nextToken; lifecycleExecutionId
+              }
+    let to_value x =
+      structure_to_value
+        [("lifecycleExecutionId",
+           (Some (LifecycleExecutionId.to_value x.lifecycleExecutionId)));
+        ("parentResourceId",
+          (Option.map x.parentResourceId ~f:NonEmptyString.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:RestrictedInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:RestrictedInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let parentResourceId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "parentResourceId") in
+      let lifecycleExecutionId =
+        LifecycleExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "lifecycleExecutionId") in
+      make ?nextToken ?maxResults ?parentResourceId ~lifecycleExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let parentResourceId =
+        field_map json__ "parentResourceId" NonEmptyString.of_json in
+      let lifecycleExecutionId =
+        field_map_exn json__ "lifecycleExecutionId"
+          LifecycleExecutionId.of_json in
+      make ?nextToken ?maxResults ?parentResourceId ~lifecycleExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List resources that the runtime instance of the image lifecycle identified for lifecycle actions."]
 module ListInfrastructureConfigurationsResponse =
   struct
     type nonrec t =
@@ -7938,7 +16620,7 @@ module ListInfrastructureConfigurationsResponse =
         [@ocaml.doc "The list of infrastructure configurations."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The next token used for paginated responses. When this is not empty, there are additional elements that the service has not included in this request. Use this token with the next request to retrieve additional objects."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -8048,12 +16730,12 @@ module ListInfrastructureConfigurationsResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?infrastructureConfigurationSummaryList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let infrastructureConfigurationSummaryList =
-        field_map json "infrastructureConfigurationSummaryList"
+        field_map json__ "infrastructureConfigurationSummaryList"
           InfrastructureConfigurationSummaryList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?infrastructureConfigurationSummaryList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of infrastructure configurations."]
@@ -8064,10 +16746,11 @@ module ListInfrastructureConfigurationsRequest =
       filters: FilterList.t option
         [@ocaml.doc "You can filter on name to streamline results."];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum items to return in a request."];
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
     let make ?filters =
       fun ?maxResults ->
         fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
@@ -8089,10 +16772,11 @@ module ListInfrastructureConfigurationsRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
-      let filters = field_map json "filters" FilterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of infrastructure configurations."]
@@ -8107,7 +16791,7 @@ module ListImagesResponse =
           "The list of image semantic versions. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The next token used for paginated responses. When this is not empty, there are additional elements that the service has not included in this request. Use this token with the next request to retrieve additional objects."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -8215,14 +16899,15 @@ module ListImagesResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imageVersionList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let imageVersionList =
-        field_map json "imageVersionList" ImageVersionList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imageVersionList" ImageVersionList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?imageVersionList ?requestId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns the list of images that you have access to."]
+  end[@@ocaml.doc
+       "Returns the list of images that you have access to. Newly created images can take up to two minutes to appear in the ListImages API Results."]
 module ListImagesRequest =
   struct
     type nonrec t =
@@ -8236,10 +16921,11 @@ module ListImagesRequest =
       byName: Boolean.t option
         [@ocaml.doc "Requests a list of images with a specific recipe name."];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum items to return in a request."];
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."];
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."];
       includeDeprecated: NullableBoolean.t option
         [@ocaml.doc "Includes deprecated images in the response list."]}
     let make ?owner =
@@ -8287,18 +16973,360 @@ module ListImagesRequest =
       make ?includeDeprecated ?nextToken ?maxResults ?byName ?filters ?owner
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeDeprecated =
-        field_map json "includeDeprecated" NullableBoolean.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
-      let byName = field_map json "byName" Boolean.of_json in
-      let filters = field_map json "filters" FilterList.of_json in
-      let owner = field_map json "owner" Ownership.of_json in
+        field_map json__ "includeDeprecated" NullableBoolean.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let byName = field_map json__ "byName" Boolean.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
+      let owner = field_map json__ "owner" Ownership.of_json in
       make ?includeDeprecated ?nextToken ?maxResults ?byName ?filters ?owner
         ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns the list of images that you have access to."]
+  end[@@ocaml.doc
+       "Returns the list of images that you have access to. Newly created images can take up to two minutes to appear in the ListImages API Results."]
+module ListImageScanFindingsResponse =
+  struct
+    type nonrec t =
+      {
+      requestId: NonEmptyString.t option
+        [@ocaml.doc "The request ID that uniquely identifies this request."];
+      findings: ImageScanFindingsList.t option
+        [@ocaml.doc
+          "The image scan findings for your account that meet your request filter criteria."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?requestId =
+      fun ?findings ->
+        fun ?nextToken -> fun () -> { requestId; findings; nextToken }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
+        ("findings",
+          (Option.map x.findings ~f:ImageScanFindingsList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let findings =
+        (Option.map ~f:ImageScanFindingsList.of_xml)
+          (Xml.child xml_arg0 "findings") in
+      let requestId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "requestId") in
+      make ?nextToken ?findings ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let findings =
+        field_map json__ "findings" ImageScanFindingsList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?nextToken ?findings ?requestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of image scan findings for your account."]
+module ListImageScanFindingsRequest =
+  struct
+    type nonrec t =
+      {
+      filters: ImageScanFindingsFilterList.t option
+        [@ocaml.doc
+          "An array of name value pairs that you can use to filter your results. You can use the following filters to streamline results: imageBuildVersionArn imagePipelineArn vulnerabilityId severity If you don't request a filter, then all findings in your account are listed."];
+      maxResults: RestrictedInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("filters",
+           (Option.map x.filters ~f:ImageScanFindingsFilterList.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:RestrictedInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:RestrictedInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let filters =
+        (Option.map ~f:ImageScanFindingsFilterList.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let filters =
+        field_map json__ "filters" ImageScanFindingsFilterList.of_json in
+      make ?nextToken ?maxResults ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of image scan findings for your account."]
+module ListImageScanFindingAggregationsResponse =
+  struct
+    type nonrec t =
+      {
+      requestId: NonEmptyString.t option
+        [@ocaml.doc "The request ID that uniquely identifies this request."];
+      aggregationType: NonEmptyString.t option
+        [@ocaml.doc
+          "The aggregation type specifies what type of key is used to group the image scan findings. Image Builder returns results based on the request filter. If you didn't specify a filter in the request, the type defaults to accountId. Aggregation types accountId imageBuildVersionArn imagePipelineArn vulnerabilityId Each aggregation includes counts by severity level for medium severity and higher level findings, plus a total for all of the findings for each key value."];
+      responses: ImageScanFindingAggregationsList.t option
+        [@ocaml.doc
+          "An array of image scan finding aggregations that match the filter criteria."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?requestId =
+      fun ?aggregationType ->
+        fun ?responses ->
+          fun ?nextToken ->
+            fun () -> { requestId; aggregationType; responses; nextToken }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
+        ("aggregationType",
+          (Option.map x.aggregationType ~f:NonEmptyString.to_value));
+        ("responses",
+          (Option.map x.responses
+             ~f:ImageScanFindingAggregationsList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let responses =
+        (Option.map ~f:ImageScanFindingAggregationsList.of_xml)
+          (Xml.child xml_arg0 "responses") in
+      let aggregationType =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "aggregationType") in
+      let requestId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "requestId") in
+      make ?nextToken ?responses ?aggregationType ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let responses =
+        field_map json__ "responses" ImageScanFindingAggregationsList.of_json in
+      let aggregationType =
+        field_map json__ "aggregationType" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?nextToken ?responses ?aggregationType ?requestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of image scan aggregations for your account. You can filter by the type of key that Image Builder uses to group results. For example, if you want to get a list of findings by severity level for one of your pipelines, you might specify your pipeline with the imagePipelineArn filter. If you don't specify a filter, Image Builder returns an aggregation for your account. To streamline results, you can use the following filters in your request: accountId imageBuildVersionArn imagePipelineArn vulnerabilityId"]
+module ListImageScanFindingAggregationsRequest =
+  struct
+    type nonrec t =
+      {
+      filter: Filter.t option ;
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
+    let make ?filter = fun ?nextToken -> fun () -> { filter; nextToken }
+    let to_value x =
+      structure_to_value
+        [("filter", (Option.map x.filter ~f:Filter.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let filter =
+        (Option.map ~f:Filter.of_xml) (Xml.child xml_arg0 "filter") in
+      make ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let filter = field_map json__ "filter" Filter.of_json in
+      make ?nextToken ?filter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of image scan aggregations for your account. You can filter by the type of key that Image Builder uses to group results. For example, if you want to get a list of findings by severity level for one of your pipelines, you might specify your pipeline with the imagePipelineArn filter. If you don't specify a filter, Image Builder returns an aggregation for your account. To streamline results, you can use the following filters in your request: accountId imageBuildVersionArn imagePipelineArn vulnerabilityId"]
 module ListImageRecipesResponse =
   struct
     type nonrec t =
@@ -8306,10 +17334,11 @@ module ListImageRecipesResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       imageRecipeSummaryList: ImageRecipeSummaryList.t option
-        [@ocaml.doc "The list of image pipelines."];
+        [@ocaml.doc
+          "A list of ImageRecipeSummary objects that contain identifying characteristics for the image recipe, such as the name, the Amazon Resource Name (ARN), and the date created, along with other key details."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The next token used for paginated responses. When this is not empty, there are additional elements that the service has not included in this request. Use this token with the next request to retrieve additional objects."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -8418,12 +17447,12 @@ module ListImageRecipesResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imageRecipeSummaryList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let imageRecipeSummaryList =
-        field_map json "imageRecipeSummaryList"
+        field_map json__ "imageRecipeSummaryList"
           ImageRecipeSummaryList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?imageRecipeSummaryList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of image recipes."]
@@ -8433,15 +17462,16 @@ module ListImageRecipesRequest =
       {
       owner: Ownership.t option
         [@ocaml.doc
-          "The owner defines which image recipes you want to list. By default, this request will only show image recipes owned by your account. You can use this field to specify if you want to view image recipes owned by yourself, by Amazon, or those image recipes that have been shared with you by other customers."];
+          "You can specify the recipe owner to filter results by that owner. By default, this request will only show image recipes owned by your account. To filter by a different owner, specify one of the Valid Values that are listed for this parameter."];
       filters: FilterList.t option
         [@ocaml.doc
           "Use the following filters to streamline results: name parentImage platform"];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum items to return in a request."];
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
     let make ?owner =
       fun ?filters ->
         fun ?maxResults ->
@@ -8468,11 +17498,12 @@ module ListImageRecipesRequest =
         (Option.map ~f:Ownership.of_xml) (Xml.child xml_arg0 "owner") in
       make ?nextToken ?maxResults ?filters ?owner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
-      let filters = field_map json "filters" FilterList.of_json in
-      let owner = field_map json "owner" Ownership.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
+      let owner = field_map json__ "owner" Ownership.of_json in
       make ?nextToken ?maxResults ?filters ?owner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of image recipes."]
@@ -8486,7 +17517,7 @@ module ListImagePipelinesResponse =
         [@ocaml.doc "The list of image pipelines."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The next token used for paginated responses. When this is not empty, there are additional elements that the service has not included in this request. Use this token with the next request to retrieve additional objects."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -8594,11 +17625,11 @@ module ListImagePipelinesResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imagePipelineList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let imagePipelineList =
-        field_map json "imagePipelineList" ImagePipelineList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imagePipelineList" ImagePipelineList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?imagePipelineList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of image pipelines."]
@@ -8610,10 +17641,11 @@ module ListImagePipelinesRequest =
         [@ocaml.doc
           "Use the following filters to streamline results: description distributionConfigurationArn imageRecipeArn infrastructureConfigurationArn name status"];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum items to return in a request."];
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
     let make ?filters =
       fun ?maxResults ->
         fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
@@ -8635,10 +17667,11 @@ module ListImagePipelinesRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
-      let filters = field_map json "filters" FilterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of image pipelines."]
@@ -8652,7 +17685,7 @@ module ListImagePipelineImagesResponse =
         [@ocaml.doc "The list of images built by this pipeline."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The next token used for paginated responses. When this is not empty, there are additional elements that the service has not included in this request. Use this token with the next request to retrieve additional objects."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -8769,11 +17802,11 @@ module ListImagePipelineImagesResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imageSummaryList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let imageSummaryList =
-        field_map json "imageSummaryList" ImageSummaryList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imageSummaryList" ImageSummaryList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?imageSummaryList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8789,10 +17822,11 @@ module ListImagePipelineImagesRequest =
         [@ocaml.doc
           "Use the following filters to streamline results: name version"];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum items to return in a request."];
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
     let context_ = "ListImagePipelineImagesRequest"
     let make ?filters =
       fun ?maxResults ->
@@ -8822,12 +17856,13 @@ module ListImagePipelineImagesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imagePipelineArn") in
       make ?nextToken ?maxResults ?filters ~imagePipelineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
-      let filters = field_map json "filters" FilterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
       let imagePipelineArn =
-        field_map_exn json "imagePipelineArn" ImagePipelineArn.of_json in
+        field_map_exn json__ "imagePipelineArn" ImagePipelineArn.of_json in
       make ?nextToken ?maxResults ?filters ~imagePipelineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8842,7 +17877,7 @@ module ListImagePackagesResponse =
         [@ocaml.doc "The list of Image Packages returned in the response."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -8959,11 +17994,11 @@ module ListImagePackagesResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imagePackageList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let imagePackageList =
-        field_map json "imagePackageList" ImagePackageList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imagePackageList" ImagePackageList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?imagePackageList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8977,10 +18012,10 @@ module ListImagePackagesRequest =
           "Filter results for the ListImagePackages request by the Image Build Version ARN"];
       maxResults: RestrictedInteger.t option
         [@ocaml.doc
-          "The maxiumum number of results to return from the ListImagePackages request."];
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
     let context_ = "ListImagePackagesRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -9006,11 +18041,12 @@ module ListImagePackagesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
       make ?nextToken ?maxResults ~imageBuildVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
       let imageBuildVersionArn =
-        field_map_exn json "imageBuildVersionArn"
+        field_map_exn json__ "imageBuildVersionArn"
           ImageBuildVersionArn.of_json in
       make ?nextToken ?maxResults ~imageBuildVersionArn ()
     let to_json v = composed_to_json to_value v
@@ -9026,7 +18062,7 @@ module ListImageBuildVersionsResponse =
         [@ocaml.doc "The list of image build versions."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The next token used for paginated responses. When this is not empty, there are additional elements that the service has not included in this request. Use this token with the next request to retrieve additional objects."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -9134,11 +18170,11 @@ module ListImageBuildVersionsResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imageSummaryList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let imageSummaryList =
-        field_map json "imageSummaryList" ImageSummaryList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imageSummaryList" ImageSummaryList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?imageSummaryList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of image build versions."]
@@ -9146,27 +18182,27 @@ module ListImageBuildVersionsRequest =
   struct
     type nonrec t =
       {
-      imageVersionArn: ImageVersionArn.t
+      imageVersionArn: ImageVersionArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the image whose build versions you want to retrieve."];
       filters: FilterList.t option
         [@ocaml.doc
           "Use the following filters to streamline results: name osVersion platform type version"];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum items to return in a request."];
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
-    let context_ = "ListImageBuildVersionsRequest"
-    let make ?filters =
-      fun ?maxResults ->
-        fun ?nextToken ->
-          fun ~imageVersionArn ->
-            fun () -> { filters; maxResults; nextToken; imageVersionArn }
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
+    let make ?imageVersionArn =
+      fun ?filters ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () -> { imageVersionArn; filters; maxResults; nextToken }
     let to_value x =
       structure_to_value
         [("imageVersionArn",
-           (Some (ImageVersionArn.to_value x.imageVersionArn)));
+           (Option.map x.imageVersionArn ~f:ImageVersionArn.to_value));
         ("filters", (Option.map x.filters ~f:FilterList.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:RestrictedInteger.to_value));
@@ -9182,17 +18218,18 @@ module ListImageBuildVersionsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
       let imageVersionArn =
-        ImageVersionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "imageVersionArn") in
-      make ?nextToken ?maxResults ?filters ~imageVersionArn ()
+        (Option.map ~f:ImageVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageVersionArn") in
+      make ?nextToken ?maxResults ?filters ?imageVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
-      let filters = field_map json "filters" FilterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
       let imageVersionArn =
-        field_map_exn json "imageVersionArn" ImageVersionArn.of_json in
-      make ?nextToken ?maxResults ?filters ~imageVersionArn ()
+        field_map json__ "imageVersionArn" ImageVersionArn.of_json in
+      make ?nextToken ?maxResults ?filters ?imageVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of image build versions."]
 module ListDistributionConfigurationsResponse =
@@ -9206,7 +18243,7 @@ module ListDistributionConfigurationsResponse =
         [@ocaml.doc "The list of distributions."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The next token used for paginated responses. When this is not empty, there are additional elements that the service has not included in this request. Use this token with the next request to retrieve additional objects."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -9316,12 +18353,12 @@ module ListDistributionConfigurationsResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?distributionConfigurationSummaryList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let distributionConfigurationSummaryList =
-        field_map json "distributionConfigurationSummaryList"
+        field_map json__ "distributionConfigurationSummaryList"
           DistributionConfigurationSummaryList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?distributionConfigurationSummaryList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of distribution configurations."]
@@ -9332,10 +18369,11 @@ module ListDistributionConfigurationsRequest =
       filters: FilterList.t option
         [@ocaml.doc "You can filter on name to streamline results."];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum items to return in a request."];
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
     let make ?filters =
       fun ?maxResults ->
         fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
@@ -9357,10 +18395,11 @@ module ListDistributionConfigurationsRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
-      let filters = field_map json "filters" FilterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of distribution configurations."]
@@ -9375,7 +18414,7 @@ module ListContainerRecipesResponse =
           "The list of container recipes returned for the request."];
       nextToken: NonEmptyString.t option
         [@ocaml.doc
-          "The next token field is used for paginated responses. When this is not empty, there are additional container recipes that the service has not included in this response. Use this token with the next request to retrieve additional list items."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -9484,12 +18523,12 @@ module ListContainerRecipesResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?containerRecipeSummaryList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NonEmptyString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
       let containerRecipeSummaryList =
-        field_map json "containerRecipeSummaryList"
+        field_map json__ "containerRecipeSummaryList"
           ContainerRecipeSummaryList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?containerRecipeSummaryList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of container recipes."]
@@ -9504,10 +18543,11 @@ module ListContainerRecipesRequest =
         [@ocaml.doc
           "Use the following filters to streamline results: containerType name parentImage platform"];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum number of results to return in the list."];
-      nextToken: NonEmptyString.t option
         [@ocaml.doc
-          "Provides a token for pagination, which determines where to begin the next set of results when the current set reaches the maximum for one request."]}
+          "Specify the maximum number of items to return in a request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
     let make ?owner =
       fun ?filters ->
         fun ?maxResults ->
@@ -9519,11 +18559,11 @@ module ListContainerRecipesRequest =
         ("filters", (Option.map x.filters ~f:FilterList.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:RestrictedInteger.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:NonEmptyString.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:NonEmptyString.of_xml)
+        (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:RestrictedInteger.of_xml)
@@ -9534,11 +18574,12 @@ module ListContainerRecipesRequest =
         (Option.map ~f:Ownership.of_xml) (Xml.child xml_arg0 "owner") in
       make ?nextToken ?maxResults ?filters ?owner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NonEmptyString.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
-      let filters = field_map json "filters" FilterList.of_json in
-      let owner = field_map json "owner" Ownership.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
+      let owner = field_map json__ "owner" Ownership.of_json in
       make ?nextToken ?maxResults ?filters ?owner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of container recipes."]
@@ -9553,7 +18594,7 @@ module ListComponentsResponse =
           "The list of component semantic versions. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The next token used for paginated responses. When this is not empty, there are additional elements that the service has not included in this request. Use this token with the next request to retrieve additional objects."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -9661,33 +18702,33 @@ module ListComponentsResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?componentVersionList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let componentVersionList =
-        field_map json "componentVersionList" ComponentVersionList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "componentVersionList" ComponentVersionList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?componentVersionList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the list of component build versions for the specified semantic version. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."]
+       "Returns the list of components that can be filtered by name, or by using the listed filters to streamline results. Newly created components can take up to two minutes to appear in the ListComponents API Results. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."]
 module ListComponentsRequest =
   struct
     type nonrec t =
       {
       owner: Ownership.t option
         [@ocaml.doc
-          "The owner defines which components you want to list. By default, this request will only show components owned by your account. You can use this field to specify if you want to view components owned by yourself, by Amazon, or those components that have been shared with you by other customers."];
+          "Filters results based on the type of owner for the component. By default, this request returns a list of components that your account owns. To see results for other types of owners, you can specify components that Amazon manages, third party components, or components that other accounts have shared with you."];
       filters: FilterList.t option
         [@ocaml.doc
           "Use the following filters to streamline results: description name platform supportedOsVersion type version"];
       byName: Boolean.t option
-        [@ocaml.doc
-          "Returns the list of component build versions for the specified name."];
+        [@ocaml.doc "Returns the list of components for the specified name."];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum items to return in a request."];
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
     let make ?owner =
       fun ?filters ->
         fun ?byName ->
@@ -9718,16 +18759,17 @@ module ListComponentsRequest =
         (Option.map ~f:Ownership.of_xml) (Xml.child xml_arg0 "owner") in
       make ?nextToken ?maxResults ?byName ?filters ?owner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
-      let byName = field_map json "byName" Boolean.of_json in
-      let filters = field_map json "filters" FilterList.of_json in
-      let owner = field_map json "owner" Ownership.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
+      let byName = field_map json__ "byName" Boolean.of_json in
+      let filters = field_map json__ "filters" FilterList.of_json in
+      let owner = field_map json__ "owner" Ownership.of_json in
       make ?nextToken ?maxResults ?byName ?filters ?owner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the list of component build versions for the specified semantic version. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."]
+       "Returns the list of components that can be filtered by name, or by using the listed filters to streamline results. Newly created components can take up to two minutes to appear in the ListComponents API Results. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."]
 module ListComponentBuildVersionsResponse =
   struct
     type nonrec t =
@@ -9739,7 +18781,7 @@ module ListComponentBuildVersionsResponse =
           "The list of component summaries for the specified semantic version."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The next token used for paginated responses. When this is not empty, there are additional elements that the service has not included in this request. Use this token with the next request to retrieve additional objects."]}
+          "The next token used for paginated responses. When this field isn't empty, there are additional elements that the service hasn't included in this request. Use this token with the next request to retrieve additional objects."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -9847,36 +18889,36 @@ module ListComponentBuildVersionsResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?componentSummaryList ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let componentSummaryList =
-        field_map json "componentSummaryList" ComponentSummaryList.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "componentSummaryList" ComponentSummaryList.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?nextToken ?componentSummaryList ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the list of component build versions for the specified semantic version. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."]
+       "Returns the list of component build versions for the specified component version Amazon Resource Name (ARN)."]
 module ListComponentBuildVersionsRequest =
   struct
     type nonrec t =
       {
-      componentVersionArn: ComponentVersionArn.t
+      componentVersionArn: ComponentVersionArn.t option
         [@ocaml.doc
           "The component version Amazon Resource Name (ARN) whose versions you want to list."];
       maxResults: RestrictedInteger.t option
-        [@ocaml.doc "The maximum items to return in a request."];
+        [@ocaml.doc
+          "Specify the maximum number of items to return in a request."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."]}
-    let context_ = "ListComponentBuildVersionsRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~componentVersionArn ->
-          fun () -> { maxResults; nextToken; componentVersionArn }
+          "A token to specify where to start paginating. This is the nextToken from a previously truncated response."]}
+    let make ?componentVersionArn =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun () -> { componentVersionArn; maxResults; nextToken }
     let to_value x =
       structure_to_value
         [("componentVersionArn",
-           (Some (ComponentVersionArn.to_value x.componentVersionArn)));
+           (Option.map x.componentVersionArn ~f:ComponentVersionArn.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:RestrictedInteger.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
@@ -9889,19 +18931,20 @@ module ListComponentBuildVersionsRequest =
         (Option.map ~f:RestrictedInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       let componentVersionArn =
-        ComponentVersionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "componentVersionArn") in
-      make ?nextToken ?maxResults ~componentVersionArn ()
+        (Option.map ~f:ComponentVersionArn.of_xml)
+          (Xml.child xml_arg0 "componentVersionArn") in
+      make ?nextToken ?maxResults ?componentVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" RestrictedInteger.of_json in
       let componentVersionArn =
-        field_map_exn json "componentVersionArn" ComponentVersionArn.of_json in
-      make ?nextToken ?maxResults ~componentVersionArn ()
+        field_map json__ "componentVersionArn" ComponentVersionArn.of_json in
+      make ?nextToken ?maxResults ?componentVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the list of component build versions for the specified semantic version. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Filtering: With semantic versioning, you have the flexibility to use wildcards (x) to specify the most recent versions or nodes when selecting the base image or components for your recipe. When you use a wildcard in any node, all nodes to the right of the first wildcard must also be wildcards."]
+       "Returns the list of component build versions for the specified component version Amazon Resource Name (ARN)."]
 module ImportVmImageResponse =
   struct
     type nonrec t =
@@ -9912,7 +18955,7 @@ module ImportVmImageResponse =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the AMI that was created during the VM import process. This AMI is used as the base image for the recipe that imported the VM."];
       clientToken: ClientToken.t option
-        [@ocaml.doc "The idempotency token that was used for this request."]}
+        [@ocaml.doc "The client token that uniquely identifies the request."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `ServiceException of ServiceException.t 
@@ -9976,10 +19019,10 @@ module ImportVmImageResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?clientToken ?imageArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let imageArn = field_map json "imageArn" Arn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let imageArn = field_map json__ "imageArn" Arn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?clientToken ?imageArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10004,6 +19047,9 @@ module ImportVmImageRequest =
       vmImportTaskId: NonEmptyString.t
         [@ocaml.doc
           "The importTaskId (API) or ImportTaskId (CLI) from the Amazon EC2 VM import process. Image Builder retrieves information from the import process to pull in the AMI that is created from the VM source as the base image for your recipe."];
+      loggingConfiguration: ImageLoggingConfiguration.t option
+        [@ocaml.doc
+          "Define logging configuration for the image build process."];
       tags: TagMap.t option
         [@ocaml.doc "Tags that are attached to the import resources."];
       clientToken: ClientToken.t
@@ -10012,23 +19058,25 @@ module ImportVmImageRequest =
     let context_ = "ImportVmImageRequest"
     let make ?description =
       fun ?osVersion ->
-        fun ?tags ->
-          fun ~name ->
-            fun ~semanticVersion ->
-              fun ~platform ->
-                fun ~vmImportTaskId ->
-                  fun ~clientToken ->
-                    fun () ->
-                      {
-                        description;
-                        osVersion;
-                        tags;
-                        name;
-                        semanticVersion;
-                        platform;
-                        vmImportTaskId;
-                        clientToken
-                      }
+        fun ?loggingConfiguration ->
+          fun ?tags ->
+            fun ~name ->
+              fun ~semanticVersion ->
+                fun ~platform ->
+                  fun ~vmImportTaskId ->
+                    fun ~clientToken ->
+                      fun () ->
+                        {
+                          description;
+                          osVersion;
+                          loggingConfiguration;
+                          tags;
+                          name;
+                          semanticVersion;
+                          platform;
+                          vmImportTaskId;
+                          clientToken
+                        }
     let to_value x =
       structure_to_value
         [("name", (Some (NonEmptyString.to_value x.name)));
@@ -10039,6 +19087,9 @@ module ImportVmImageRequest =
         ("platform", (Some (Platform.to_value x.platform)));
         ("osVersion", (Option.map x.osVersion ~f:OsVersion.to_value));
         ("vmImportTaskId", (Some (NonEmptyString.to_value x.vmImportTaskId)));
+        ("loggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:ImageLoggingConfiguration.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
         ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
     let to_query v = to_query to_value v
@@ -10047,6 +19098,9 @@ module ImportVmImageRequest =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let loggingConfiguration =
+        (Option.map ~f:ImageLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
       let vmImportTaskId =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "vmImportTaskId") in
@@ -10063,25 +19117,293 @@ module ImportVmImageRequest =
       let name =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~clientToken ?tags ~vmImportTaskId ?osVersion ~platform
-        ?description ~semanticVersion ~name ()
+      make ~clientToken ?tags ?loggingConfiguration ~vmImportTaskId
+        ?osVersion ~platform ?description ~semanticVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          ImageLoggingConfiguration.of_json in
       let vmImportTaskId =
-        field_map_exn json "vmImportTaskId" NonEmptyString.of_json in
-      let osVersion = field_map json "osVersion" OsVersion.of_json in
-      let platform = field_map_exn json "platform" Platform.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
+        field_map_exn json__ "vmImportTaskId" NonEmptyString.of_json in
+      let osVersion = field_map json__ "osVersion" OsVersion.of_json in
+      let platform = field_map_exn json__ "platform" Platform.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       let semanticVersion =
-        field_map_exn json "semanticVersion" VersionNumber.of_json in
-      let name = field_map_exn json "name" NonEmptyString.of_json in
-      make ~clientToken ?tags ~vmImportTaskId ?osVersion ~platform
-        ?description ~semanticVersion ~name ()
+        field_map_exn json__ "semanticVersion" VersionNumber.of_json in
+      let name = field_map_exn json__ "name" NonEmptyString.of_json in
+      make ~clientToken ?tags ?loggingConfiguration ~vmImportTaskId
+        ?osVersion ~platform ?description ~semanticVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "When you export your virtual machine (VM) from its virtualization environment, that process creates a set of one or more disk container files that act as snapshots of your VM\226\128\153s environment, settings, and data. The Amazon EC2 API ImportImage action uses those files to import your VM and create an AMI. To import using the CLI command, see import-image You can reference the task ID from the VM import to pull in the AMI that the import created as the base image for your Image Builder recipe."]
+module ImportDiskImageResponse =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token that uniquely identifies the request."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the output AMI that was created from the ISO disk file."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientException of ClientException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?clientToken =
+      fun ?imageBuildVersionArn ->
+        fun () -> { clientToken; imageBuildVersionArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?imageBuildVersionArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?imageBuildVersionArn ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Import a Windows operating system image from a verified Microsoft ISO disk file. The following disk images are supported: Windows 11 Enterprise"]
+module ImportDiskImageRequest =
+  struct
+    type nonrec t =
+      {
+      name: ResourceName.t
+        [@ocaml.doc
+          "The name of the image resource that's created from the import."];
+      semanticVersion: VersionNumber.t
+        [@ocaml.doc
+          "The semantic version to attach to the image that's created during the import process. This version follows the semantic version syntax."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "The description for your disk image import."];
+      platform: NonEmptyString.t
+        [@ocaml.doc
+          "The operating system platform for the imported image. Allowed values include the following: Windows."];
+      osVersion: OsVersion.t
+        [@ocaml.doc
+          "The operating system version for the imported image. Allowed values include the following: Microsoft Windows 11."];
+      executionRole: RoleNameOrArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) for the IAM role you create that grants Image Builder access to perform workflow actions to import an image from a Microsoft ISO file."];
+      infrastructureConfigurationArn: InfrastructureConfigurationArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the infrastructure configuration resource that's used for launching the EC2 instance on which the ISO image is built."];
+      uri: Uri_.t
+        [@ocaml.doc
+          "The uri of the ISO disk file that's stored in Amazon S3."];
+      loggingConfiguration: ImageLoggingConfiguration.t option
+        [@ocaml.doc
+          "Define logging configuration for the image build process."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Tags that are attached to image resources created from the import."];
+      registerImageOptions: RegisterImageOptions.t option
+        [@ocaml.doc
+          "Configures Secure Boot and UEFI settings for the imported image."];
+      windowsConfiguration: WindowsConfiguration.t option
+        [@ocaml.doc "Specifies Windows settings for ISO imports."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
+    let context_ = "ImportDiskImageRequest"
+    let make ?description =
+      fun ?executionRole ->
+        fun ?loggingConfiguration ->
+          fun ?tags ->
+            fun ?registerImageOptions ->
+              fun ?windowsConfiguration ->
+                fun ~name ->
+                  fun ~semanticVersion ->
+                    fun ~platform ->
+                      fun ~osVersion ->
+                        fun ~infrastructureConfigurationArn ->
+                          fun ~uri ->
+                            fun ~clientToken ->
+                              fun () ->
+                                {
+                                  description;
+                                  executionRole;
+                                  loggingConfiguration;
+                                  tags;
+                                  registerImageOptions;
+                                  windowsConfiguration;
+                                  name;
+                                  semanticVersion;
+                                  platform;
+                                  osVersion;
+                                  infrastructureConfigurationArn;
+                                  uri;
+                                  clientToken
+                                }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (ResourceName.to_value x.name)));
+        ("semanticVersion",
+          (Some (VersionNumber.to_value x.semanticVersion)));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("platform", (Some (NonEmptyString.to_value x.platform)));
+        ("osVersion", (Some (OsVersion.to_value x.osVersion)));
+        ("executionRole",
+          (Option.map x.executionRole ~f:RoleNameOrArn.to_value));
+        ("infrastructureConfigurationArn",
+          (Some
+             (InfrastructureConfigurationArn.to_value
+                x.infrastructureConfigurationArn)));
+        ("uri", (Some (Uri_.to_value x.uri)));
+        ("loggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:ImageLoggingConfiguration.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("registerImageOptions",
+          (Option.map x.registerImageOptions ~f:RegisterImageOptions.to_value));
+        ("windowsConfiguration",
+          (Option.map x.windowsConfiguration ~f:WindowsConfiguration.to_value));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let windowsConfiguration =
+        (Option.map ~f:WindowsConfiguration.of_xml)
+          (Xml.child xml_arg0 "windowsConfiguration") in
+      let registerImageOptions =
+        (Option.map ~f:RegisterImageOptions.of_xml)
+          (Xml.child xml_arg0 "registerImageOptions") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let loggingConfiguration =
+        (Option.map ~f:ImageLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
+      let uri = Uri_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uri") in
+      let infrastructureConfigurationArn =
+        InfrastructureConfigurationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "infrastructureConfigurationArn") in
+      let executionRole =
+        (Option.map ~f:RoleNameOrArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let osVersion =
+        OsVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "osVersion") in
+      let platform =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "platform") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let semanticVersion =
+        VersionNumber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "semanticVersion") in
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~clientToken ?windowsConfiguration ?registerImageOptions ?tags
+        ?loggingConfiguration ~uri ~infrastructureConfigurationArn
+        ?executionRole ~osVersion ~platform ?description ~semanticVersion
+        ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let windowsConfiguration =
+        field_map json__ "windowsConfiguration" WindowsConfiguration.of_json in
+      let registerImageOptions =
+        field_map json__ "registerImageOptions" RegisterImageOptions.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          ImageLoggingConfiguration.of_json in
+      let uri = field_map_exn json__ "uri" Uri_.of_json in
+      let infrastructureConfigurationArn =
+        field_map_exn json__ "infrastructureConfigurationArn"
+          InfrastructureConfigurationArn.of_json in
+      let executionRole =
+        field_map json__ "executionRole" RoleNameOrArn.of_json in
+      let osVersion = field_map_exn json__ "osVersion" OsVersion.of_json in
+      let platform = field_map_exn json__ "platform" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let semanticVersion =
+        field_map_exn json__ "semanticVersion" VersionNumber.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ~clientToken ?windowsConfiguration ?registerImageOptions ?tags
+        ?loggingConfiguration ~uri ~infrastructureConfigurationArn
+        ?executionRole ~osVersion ~platform ?description ~semanticVersion
+        ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Import a Windows operating system image from a verified Microsoft ISO disk file. The following disk images are supported: Windows 11 Enterprise"]
 module ImportComponentResponse =
   struct
     type nonrec t =
@@ -10089,8 +19411,7 @@ module ImportComponentResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       componentBuildVersionArn: ComponentBuildVersionArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the imported component."]}
@@ -10234,12 +19555,12 @@ module ImportComponentResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?componentBuildVersionArn ?clientToken ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentBuildVersionArn =
-        field_map json "componentBuildVersionArn"
+        field_map json__ "componentBuildVersionArn"
           ComponentBuildVersionArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?componentBuildVersionArn ?clientToken ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10257,7 +19578,7 @@ module ImportComponentRequest =
           "The description of the component. Describes the contents of the component."];
       changeDescription: NonEmptyString.t option
         [@ocaml.doc
-          "The change description of the component. Describes what change has been made in this version, or what makes this version different from other versions of this component."];
+          "The change description of the component. This description indicates the change that has been made in this version, or what makes this version different from other versions of the component."];
       type_: ComponentType.t
         [@ocaml.doc
           "The type of the component denotes whether the component is used to build the image, or only to test it."];
@@ -10273,10 +19594,11 @@ module ImportComponentRequest =
           "The uri of the component. Must be an Amazon S3 URL and the requester must have permission to access the Amazon S3 bucket. If you use Amazon S3, you can specify component content up to your service quota. Either data or uri can be used to specify the data within the component."];
       kmsKeyId: NonEmptyString.t option
         [@ocaml.doc
-          "The ID of the KMS key that should be used to encrypt this component."];
+          "The Amazon Resource Name (ARN) that uniquely identifies the KMS key used to encrypt this component. This can be either the Key ARN or the Alias ARN. For more information, see Key identifiers (KeyId) in the Key Management Service Developer Guide."];
       tags: TagMap.t option [@ocaml.doc "The tags of the component."];
       clientToken: ClientToken.t
-        [@ocaml.doc "The idempotency token of the component."]}
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
     let context_ = "ImportComponentRequest"
     let make ?description =
       fun ?changeDescription ->
@@ -10355,26 +19677,1172 @@ module ImportComponentRequest =
       make ~clientToken ?tags ?kmsKeyId ?uri ?data ~platform ~format ~type_
         ?changeDescription ?description ~semanticVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
-      let uri = field_map json "uri" Uri_.of_json in
-      let data = field_map json "data" NonEmptyString.of_json in
-      let platform = field_map_exn json "platform" Platform.of_json in
-      let format = field_map_exn json "format" ComponentFormat.of_json in
-      let type_ = field_map_exn json "type" ComponentType.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
+      let uri = field_map json__ "uri" Uri_.of_json in
+      let data = field_map json__ "data" NonEmptyString.of_json in
+      let platform = field_map_exn json__ "platform" Platform.of_json in
+      let format = field_map_exn json__ "format" ComponentFormat.of_json in
+      let type_ = field_map_exn json__ "type" ComponentType.of_json in
       let changeDescription =
-        field_map json "changeDescription" NonEmptyString.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
+        field_map json__ "changeDescription" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       let semanticVersion =
-        field_map_exn json "semanticVersion" VersionNumber.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map_exn json__ "semanticVersion" VersionNumber.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~clientToken ?tags ?kmsKeyId ?uri ?data ~platform ~format ~type_
         ?changeDescription ?description ~semanticVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Imports a component and transforms its data into a component document."]
+module GetWorkflowStepExecutionResponse =
+  struct
+    type nonrec t =
+      {
+      requestId: NonEmptyString.t option
+        [@ocaml.doc "The request ID that uniquely identifies this request."];
+      stepExecutionId: WorkflowStepExecutionId.t option
+        [@ocaml.doc
+          "The unique identifier for the runtime version of the workflow step that you specified in the request."];
+      workflowBuildVersionArn: WorkflowBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the build version for the Image Builder workflow resource that defines this workflow step."];
+      workflowExecutionId: WorkflowExecutionId.t option
+        [@ocaml.doc
+          "The unique identifier that Image Builder assigned to keep track of runtime details when it ran the workflow."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image resource build version that the specified runtime instance of the workflow step creates."];
+      name: WorkflowStepName.t option
+        [@ocaml.doc
+          "The name of the specified runtime instance of the workflow step."];
+      description: WorkflowStepDescription.t option
+        [@ocaml.doc "Describes the specified workflow step."];
+      action: WorkflowStepAction.t option
+        [@ocaml.doc
+          "The name of the action that the specified step performs."];
+      status: WorkflowStepExecutionStatus.t option
+        [@ocaml.doc
+          "The current status for the specified runtime version of the workflow step."];
+      rollbackStatus: WorkflowStepExecutionRollbackStatus.t option
+        [@ocaml.doc
+          "Reports on the rollback status of the specified runtime version of the workflow step, if applicable."];
+      message: WorkflowStepMessage.t option
+        [@ocaml.doc
+          "The output message from the specified runtime instance of the workflow step, if applicable."];
+      inputs: WorkflowStepInputs.t option
+        [@ocaml.doc
+          "Input parameters that Image Builder provided for the specified runtime instance of the workflow step."];
+      outputs: WorkflowStepOutputs.t option
+        [@ocaml.doc
+          "The file names that the specified runtime version of the workflow step created as output."];
+      startTime: DateTime.t option
+        [@ocaml.doc
+          "The timestamp when the specified runtime version of the workflow step started."];
+      endTime: DateTime.t option
+        [@ocaml.doc
+          "The timestamp when the specified runtime instance of the workflow step finished."];
+      onFailure: NonEmptyString.t option
+        [@ocaml.doc "The action to perform if the workflow step fails."];
+      timeoutSeconds: WorkflowStepTimeoutSecondsInteger.t option
+        [@ocaml.doc
+          "The maximum duration in seconds for this step to complete its action."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?requestId =
+      fun ?stepExecutionId ->
+        fun ?workflowBuildVersionArn ->
+          fun ?workflowExecutionId ->
+            fun ?imageBuildVersionArn ->
+              fun ?name ->
+                fun ?description ->
+                  fun ?action ->
+                    fun ?status ->
+                      fun ?rollbackStatus ->
+                        fun ?message ->
+                          fun ?inputs ->
+                            fun ?outputs ->
+                              fun ?startTime ->
+                                fun ?endTime ->
+                                  fun ?onFailure ->
+                                    fun ?timeoutSeconds ->
+                                      fun () ->
+                                        {
+                                          requestId;
+                                          stepExecutionId;
+                                          workflowBuildVersionArn;
+                                          workflowExecutionId;
+                                          imageBuildVersionArn;
+                                          name;
+                                          description;
+                                          action;
+                                          status;
+                                          rollbackStatus;
+                                          message;
+                                          inputs;
+                                          outputs;
+                                          startTime;
+                                          endTime;
+                                          onFailure;
+                                          timeoutSeconds
+                                        }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
+        ("stepExecutionId",
+          (Option.map x.stepExecutionId ~f:WorkflowStepExecutionId.to_value));
+        ("workflowBuildVersionArn",
+          (Option.map x.workflowBuildVersionArn
+             ~f:WorkflowBuildVersionArn.to_value));
+        ("workflowExecutionId",
+          (Option.map x.workflowExecutionId ~f:WorkflowExecutionId.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value));
+        ("name", (Option.map x.name ~f:WorkflowStepName.to_value));
+        ("description",
+          (Option.map x.description ~f:WorkflowStepDescription.to_value));
+        ("action", (Option.map x.action ~f:WorkflowStepAction.to_value));
+        ("status",
+          (Option.map x.status ~f:WorkflowStepExecutionStatus.to_value));
+        ("rollbackStatus",
+          (Option.map x.rollbackStatus
+             ~f:WorkflowStepExecutionRollbackStatus.to_value));
+        ("message", (Option.map x.message ~f:WorkflowStepMessage.to_value));
+        ("inputs", (Option.map x.inputs ~f:WorkflowStepInputs.to_value));
+        ("outputs", (Option.map x.outputs ~f:WorkflowStepOutputs.to_value));
+        ("startTime", (Option.map x.startTime ~f:DateTime.to_value));
+        ("endTime", (Option.map x.endTime ~f:DateTime.to_value));
+        ("onFailure", (Option.map x.onFailure ~f:NonEmptyString.to_value));
+        ("timeoutSeconds",
+          (Option.map x.timeoutSeconds
+             ~f:WorkflowStepTimeoutSecondsInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timeoutSeconds =
+        (Option.map ~f:WorkflowStepTimeoutSecondsInteger.of_xml)
+          (Xml.child xml_arg0 "timeoutSeconds") in
+      let onFailure =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "onFailure") in
+      let endTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "startTime") in
+      let outputs =
+        (Option.map ~f:WorkflowStepOutputs.of_xml)
+          (Xml.child xml_arg0 "outputs") in
+      let inputs =
+        (Option.map ~f:WorkflowStepInputs.of_xml)
+          (Xml.child xml_arg0 "inputs") in
+      let message =
+        (Option.map ~f:WorkflowStepMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      let rollbackStatus =
+        (Option.map ~f:WorkflowStepExecutionRollbackStatus.of_xml)
+          (Xml.child xml_arg0 "rollbackStatus") in
+      let status =
+        (Option.map ~f:WorkflowStepExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let action =
+        (Option.map ~f:WorkflowStepAction.of_xml)
+          (Xml.child xml_arg0 "action") in
+      let description =
+        (Option.map ~f:WorkflowStepDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let name =
+        (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "name") in
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let workflowExecutionId =
+        (Option.map ~f:WorkflowExecutionId.of_xml)
+          (Xml.child xml_arg0 "workflowExecutionId") in
+      let workflowBuildVersionArn =
+        (Option.map ~f:WorkflowBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "workflowBuildVersionArn") in
+      let stepExecutionId =
+        (Option.map ~f:WorkflowStepExecutionId.of_xml)
+          (Xml.child xml_arg0 "stepExecutionId") in
+      let requestId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "requestId") in
+      make ?timeoutSeconds ?onFailure ?endTime ?startTime ?outputs ?inputs
+        ?message ?rollbackStatus ?status ?action ?description ?name
+        ?imageBuildVersionArn ?workflowExecutionId ?workflowBuildVersionArn
+        ?stepExecutionId ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timeoutSeconds =
+        field_map json__ "timeoutSeconds"
+          WorkflowStepTimeoutSecondsInteger.of_json in
+      let onFailure = field_map json__ "onFailure" NonEmptyString.of_json in
+      let endTime = field_map json__ "endTime" DateTime.of_json in
+      let startTime = field_map json__ "startTime" DateTime.of_json in
+      let outputs = field_map json__ "outputs" WorkflowStepOutputs.of_json in
+      let inputs = field_map json__ "inputs" WorkflowStepInputs.of_json in
+      let message = field_map json__ "message" WorkflowStepMessage.of_json in
+      let rollbackStatus =
+        field_map json__ "rollbackStatus"
+          WorkflowStepExecutionRollbackStatus.of_json in
+      let status =
+        field_map json__ "status" WorkflowStepExecutionStatus.of_json in
+      let action = field_map json__ "action" WorkflowStepAction.of_json in
+      let description =
+        field_map json__ "description" WorkflowStepDescription.of_json in
+      let name = field_map json__ "name" WorkflowStepName.of_json in
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let workflowExecutionId =
+        field_map json__ "workflowExecutionId" WorkflowExecutionId.of_json in
+      let workflowBuildVersionArn =
+        field_map json__ "workflowBuildVersionArn"
+          WorkflowBuildVersionArn.of_json in
+      let stepExecutionId =
+        field_map json__ "stepExecutionId" WorkflowStepExecutionId.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?timeoutSeconds ?onFailure ?endTime ?startTime ?outputs ?inputs
+        ?message ?rollbackStatus ?status ?action ?description ?name
+        ?imageBuildVersionArn ?workflowExecutionId ?workflowBuildVersionArn
+        ?stepExecutionId ?requestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the runtime information that was logged for a specific runtime instance of the workflow step."]
+module GetWorkflowStepExecutionRequest =
+  struct
+    type nonrec t =
+      {
+      stepExecutionId: WorkflowStepExecutionId.t
+        [@ocaml.doc
+          "Use the unique identifier for a specific runtime instance of the workflow step to get runtime details for that step."]}
+    let context_ = "GetWorkflowStepExecutionRequest"
+    let make ~stepExecutionId = fun () -> { stepExecutionId }
+    let to_value x =
+      structure_to_value
+        [("stepExecutionId",
+           (Some (WorkflowStepExecutionId.to_value x.stepExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stepExecutionId =
+        WorkflowStepExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stepExecutionId") in
+      make ~stepExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stepExecutionId =
+        field_map_exn json__ "stepExecutionId"
+          WorkflowStepExecutionId.of_json in
+      make ~stepExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the runtime information that was logged for a specific runtime instance of the workflow step."]
+module GetWorkflowResponse =
+  struct
+    type nonrec t =
+      {
+      workflow: Workflow.t option
+        [@ocaml.doc "The workflow resource specified in the request."];
+      latestVersionReferences: LatestVersionReferences.t option
+        [@ocaml.doc
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workflow =
+      fun ?latestVersionReferences ->
+        fun () -> { workflow; latestVersionReferences }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("workflow", (Option.map x.workflow ~f:Workflow.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
+      let workflow =
+        (Option.map ~f:Workflow.of_xml) (Xml.child xml_arg0 "workflow") in
+      make ?latestVersionReferences ?workflow ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
+      let workflow = field_map json__ "workflow" Workflow.of_json in
+      make ?latestVersionReferences ?workflow ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get a workflow resource object."]
+module GetWorkflowRequest =
+  struct
+    type nonrec t =
+      {
+      workflowBuildVersionArn: WorkflowVersionArnOrBuildVersionArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource that you want to get."]}
+    let context_ = "GetWorkflowRequest"
+    let make ~workflowBuildVersionArn = fun () -> { workflowBuildVersionArn }
+    let to_value x =
+      structure_to_value
+        [("workflowBuildVersionArn",
+           (Some
+              (WorkflowVersionArnOrBuildVersionArn.to_value
+                 x.workflowBuildVersionArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workflowBuildVersionArn =
+        WorkflowVersionArnOrBuildVersionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workflowBuildVersionArn") in
+      make ~workflowBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workflowBuildVersionArn =
+        field_map_exn json__ "workflowBuildVersionArn"
+          WorkflowVersionArnOrBuildVersionArn.of_json in
+      make ~workflowBuildVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get a workflow resource object."]
+module GetWorkflowExecutionResponse =
+  struct
+    type nonrec t =
+      {
+      requestId: NonEmptyString.t option
+        [@ocaml.doc "The request ID that uniquely identifies this request."];
+      workflowBuildVersionArn: WorkflowBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the build version for the Image Builder workflow resource that defines the specified runtime instance of the workflow."];
+      workflowExecutionId: WorkflowExecutionId.t option
+        [@ocaml.doc
+          "The unique identifier that Image Builder assigned to keep track of runtime details when it ran the workflow."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image resource build version that the specified runtime instance of the workflow created."];
+      type_: WorkflowType.t option
+        [@ocaml.doc
+          "The type of workflow that Image Builder ran for the specified runtime instance of the workflow."];
+      status: WorkflowExecutionStatus.t option
+        [@ocaml.doc
+          "The current runtime status for the specified runtime instance of the workflow."];
+      message: WorkflowExecutionMessage.t option
+        [@ocaml.doc
+          "The output message from the specified runtime instance of the workflow, if applicable."];
+      totalStepCount: WorkflowStepCount.t option
+        [@ocaml.doc
+          "The total number of steps in the specified runtime instance of the workflow that ran. This number should equal the sum of the step counts for steps that succeeded, were skipped, and failed."];
+      totalStepsSucceeded: WorkflowStepCount.t option
+        [@ocaml.doc
+          "A runtime count for the number of steps that ran successfully in the specified runtime instance of the workflow."];
+      totalStepsFailed: WorkflowStepCount.t option
+        [@ocaml.doc
+          "A runtime count for the number of steps that failed in the specified runtime instance of the workflow."];
+      totalStepsSkipped: WorkflowStepCount.t option
+        [@ocaml.doc
+          "A runtime count for the number of steps that were skipped in the specified runtime instance of the workflow."];
+      startTime: DateTime.t option
+        [@ocaml.doc
+          "The timestamp when the specified runtime instance of the workflow started."];
+      endTime: DateTime.t option
+        [@ocaml.doc
+          "The timestamp when the specified runtime instance of the workflow finished."];
+      parallelGroup: ParallelGroup.t option
+        [@ocaml.doc
+          "Test workflows are defined within named runtime groups. The parallel group is a named group that contains one or more test workflows."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?requestId =
+      fun ?workflowBuildVersionArn ->
+        fun ?workflowExecutionId ->
+          fun ?imageBuildVersionArn ->
+            fun ?type_ ->
+              fun ?status ->
+                fun ?message ->
+                  fun ?totalStepCount ->
+                    fun ?totalStepsSucceeded ->
+                      fun ?totalStepsFailed ->
+                        fun ?totalStepsSkipped ->
+                          fun ?startTime ->
+                            fun ?endTime ->
+                              fun ?parallelGroup ->
+                                fun () ->
+                                  {
+                                    requestId;
+                                    workflowBuildVersionArn;
+                                    workflowExecutionId;
+                                    imageBuildVersionArn;
+                                    type_;
+                                    status;
+                                    message;
+                                    totalStepCount;
+                                    totalStepsSucceeded;
+                                    totalStepsFailed;
+                                    totalStepsSkipped;
+                                    startTime;
+                                    endTime;
+                                    parallelGroup
+                                  }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
+        ("workflowBuildVersionArn",
+          (Option.map x.workflowBuildVersionArn
+             ~f:WorkflowBuildVersionArn.to_value));
+        ("workflowExecutionId",
+          (Option.map x.workflowExecutionId ~f:WorkflowExecutionId.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value));
+        ("type", (Option.map x.type_ ~f:WorkflowType.to_value));
+        ("status", (Option.map x.status ~f:WorkflowExecutionStatus.to_value));
+        ("message",
+          (Option.map x.message ~f:WorkflowExecutionMessage.to_value));
+        ("totalStepCount",
+          (Option.map x.totalStepCount ~f:WorkflowStepCount.to_value));
+        ("totalStepsSucceeded",
+          (Option.map x.totalStepsSucceeded ~f:WorkflowStepCount.to_value));
+        ("totalStepsFailed",
+          (Option.map x.totalStepsFailed ~f:WorkflowStepCount.to_value));
+        ("totalStepsSkipped",
+          (Option.map x.totalStepsSkipped ~f:WorkflowStepCount.to_value));
+        ("startTime", (Option.map x.startTime ~f:DateTime.to_value));
+        ("endTime", (Option.map x.endTime ~f:DateTime.to_value));
+        ("parallelGroup",
+          (Option.map x.parallelGroup ~f:ParallelGroup.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let parallelGroup =
+        (Option.map ~f:ParallelGroup.of_xml)
+          (Xml.child xml_arg0 "parallelGroup") in
+      let endTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "startTime") in
+      let totalStepsSkipped =
+        (Option.map ~f:WorkflowStepCount.of_xml)
+          (Xml.child xml_arg0 "totalStepsSkipped") in
+      let totalStepsFailed =
+        (Option.map ~f:WorkflowStepCount.of_xml)
+          (Xml.child xml_arg0 "totalStepsFailed") in
+      let totalStepsSucceeded =
+        (Option.map ~f:WorkflowStepCount.of_xml)
+          (Xml.child xml_arg0 "totalStepsSucceeded") in
+      let totalStepCount =
+        (Option.map ~f:WorkflowStepCount.of_xml)
+          (Xml.child xml_arg0 "totalStepCount") in
+      let message =
+        (Option.map ~f:WorkflowExecutionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      let status =
+        (Option.map ~f:WorkflowExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let type_ =
+        (Option.map ~f:WorkflowType.of_xml) (Xml.child xml_arg0 "type") in
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let workflowExecutionId =
+        (Option.map ~f:WorkflowExecutionId.of_xml)
+          (Xml.child xml_arg0 "workflowExecutionId") in
+      let workflowBuildVersionArn =
+        (Option.map ~f:WorkflowBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "workflowBuildVersionArn") in
+      let requestId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "requestId") in
+      make ?parallelGroup ?endTime ?startTime ?totalStepsSkipped
+        ?totalStepsFailed ?totalStepsSucceeded ?totalStepCount ?message
+        ?status ?type_ ?imageBuildVersionArn ?workflowExecutionId
+        ?workflowBuildVersionArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let parallelGroup =
+        field_map json__ "parallelGroup" ParallelGroup.of_json in
+      let endTime = field_map json__ "endTime" DateTime.of_json in
+      let startTime = field_map json__ "startTime" DateTime.of_json in
+      let totalStepsSkipped =
+        field_map json__ "totalStepsSkipped" WorkflowStepCount.of_json in
+      let totalStepsFailed =
+        field_map json__ "totalStepsFailed" WorkflowStepCount.of_json in
+      let totalStepsSucceeded =
+        field_map json__ "totalStepsSucceeded" WorkflowStepCount.of_json in
+      let totalStepCount =
+        field_map json__ "totalStepCount" WorkflowStepCount.of_json in
+      let message =
+        field_map json__ "message" WorkflowExecutionMessage.of_json in
+      let status = field_map json__ "status" WorkflowExecutionStatus.of_json in
+      let type_ = field_map json__ "type" WorkflowType.of_json in
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let workflowExecutionId =
+        field_map json__ "workflowExecutionId" WorkflowExecutionId.of_json in
+      let workflowBuildVersionArn =
+        field_map json__ "workflowBuildVersionArn"
+          WorkflowBuildVersionArn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?parallelGroup ?endTime ?startTime ?totalStepsSkipped
+        ?totalStepsFailed ?totalStepsSucceeded ?totalStepCount ?message
+        ?status ?type_ ?imageBuildVersionArn ?workflowExecutionId
+        ?workflowBuildVersionArn ?requestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the runtime information that was logged for a specific runtime instance of the workflow."]
+module GetWorkflowExecutionRequest =
+  struct
+    type nonrec t =
+      {
+      workflowExecutionId: WorkflowExecutionId.t
+        [@ocaml.doc
+          "Use the unique identifier for a runtime instance of the workflow to get runtime details."]}
+    let context_ = "GetWorkflowExecutionRequest"
+    let make ~workflowExecutionId = fun () -> { workflowExecutionId }
+    let to_value x =
+      structure_to_value
+        [("workflowExecutionId",
+           (Some (WorkflowExecutionId.to_value x.workflowExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workflowExecutionId =
+        WorkflowExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecutionId") in
+      make ~workflowExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workflowExecutionId =
+        field_map_exn json__ "workflowExecutionId"
+          WorkflowExecutionId.of_json in
+      make ~workflowExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the runtime information that was logged for a specific runtime instance of the workflow."]
+module GetMarketplaceResourceResponse =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ImageBuilderArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the Amazon Web Services Marketplace resource that was requested."];
+      url: NonEmptyString.t option
+        [@ocaml.doc
+          "The obfuscated S3 URL to download the component artifact from."];
+      data: NonEmptyString.t option
+        [@ocaml.doc
+          "Returns obfuscated data that contains the YAML content of the component."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn =
+      fun ?url -> fun ?data -> fun () -> { resourceArn; url; data }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("resourceArn",
+           (Option.map x.resourceArn ~f:ImageBuilderArn.to_value));
+        ("url", (Option.map x.url ~f:NonEmptyString.to_value));
+        ("data", (Option.map x.data ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let data =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "data") in
+      let url =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "url") in
+      let resourceArn =
+        (Option.map ~f:ImageBuilderArn.of_xml)
+          (Xml.child xml_arg0 "resourceArn") in
+      make ?data ?url ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let data = field_map json__ "data" NonEmptyString.of_json in
+      let url = field_map json__ "url" NonEmptyString.of_json in
+      let resourceArn =
+        field_map json__ "resourceArn" ImageBuilderArn.of_json in
+      make ?data ?url ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Verify the subscription and perform resource dependency checks on the requested Amazon Web Services Marketplace resource. For Amazon Web Services Marketplace components, the response contains fields to download the components and their artifacts."]
+module GetMarketplaceResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceType: MarketplaceResourceType.t
+        [@ocaml.doc
+          "Specifies which type of Amazon Web Services Marketplace resource Image Builder retrieves."];
+      resourceArn: ImageBuilderArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies an Amazon Web Services Marketplace resource."];
+      resourceLocation: MarketplaceResourceLocation.t option
+        [@ocaml.doc
+          "The bucket path that you can specify to download the resource from Amazon S3."]}
+    let context_ = "GetMarketplaceResourceRequest"
+    let make ?resourceLocation =
+      fun ~resourceType ->
+        fun ~resourceArn ->
+          fun () -> { resourceLocation; resourceType; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("resourceType",
+           (Some (MarketplaceResourceType.to_value x.resourceType)));
+        ("resourceArn", (Some (ImageBuilderArn.to_value x.resourceArn)));
+        ("resourceLocation",
+          (Option.map x.resourceLocation
+             ~f:MarketplaceResourceLocation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceLocation =
+        (Option.map ~f:MarketplaceResourceLocation.of_xml)
+          (Xml.child xml_arg0 "resourceLocation") in
+      let resourceArn =
+        ImageBuilderArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      let resourceType =
+        MarketplaceResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      make ?resourceLocation ~resourceArn ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceLocation =
+        field_map json__ "resourceLocation"
+          MarketplaceResourceLocation.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ImageBuilderArn.of_json in
+      let resourceType =
+        field_map_exn json__ "resourceType" MarketplaceResourceType.of_json in
+      make ?resourceLocation ~resourceArn ~resourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Verify the subscription and perform resource dependency checks on the requested Amazon Web Services Marketplace resource. For Amazon Web Services Marketplace components, the response contains fields to download the components and their artifacts."]
+module GetLifecyclePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      lifecyclePolicy: LifecyclePolicy.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image lifecycle policy resource that was returned."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecyclePolicy = fun () -> { lifecyclePolicy }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("lifecyclePolicy",
+           (Option.map x.lifecyclePolicy ~f:LifecyclePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecyclePolicy =
+        (Option.map ~f:LifecyclePolicy.of_xml)
+          (Xml.child xml_arg0 "lifecyclePolicy") in
+      make ?lifecyclePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecyclePolicy =
+        field_map json__ "lifecyclePolicy" LifecyclePolicy.of_json in
+      make ?lifecyclePolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get details for the specified image lifecycle policy."]
+module GetLifecyclePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      lifecyclePolicyArn: LifecyclePolicyArn.t
+        [@ocaml.doc
+          "Specifies the Amazon Resource Name (ARN) of the image lifecycle policy resource to get."]}
+    let context_ = "GetLifecyclePolicyRequest"
+    let make ~lifecyclePolicyArn = fun () -> { lifecyclePolicyArn }
+    let to_value x =
+      structure_to_value
+        [("lifecyclePolicyArn",
+           (Some (LifecyclePolicyArn.to_value x.lifecyclePolicyArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecyclePolicyArn =
+        LifecyclePolicyArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "lifecyclePolicyArn") in
+      make ~lifecyclePolicyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecyclePolicyArn =
+        field_map_exn json__ "lifecyclePolicyArn" LifecyclePolicyArn.of_json in
+      make ~lifecyclePolicyArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get details for the specified image lifecycle policy."]
+module GetLifecycleExecutionResponse =
+  struct
+    type nonrec t =
+      {
+      lifecycleExecution: LifecycleExecution.t option
+        [@ocaml.doc
+          "Runtime details for the specified runtime instance of the lifecycle policy."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecycleExecution = fun () -> { lifecycleExecution }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("lifecycleExecution",
+           (Option.map x.lifecycleExecution ~f:LifecycleExecution.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecycleExecution =
+        (Option.map ~f:LifecycleExecution.of_xml)
+          (Xml.child xml_arg0 "lifecycleExecution") in
+      make ?lifecycleExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecycleExecution =
+        field_map json__ "lifecycleExecution" LifecycleExecution.of_json in
+      make ?lifecycleExecution ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the runtime information that was logged for a specific runtime instance of the lifecycle policy."]
+module GetLifecycleExecutionRequest =
+  struct
+    type nonrec t =
+      {
+      lifecycleExecutionId: LifecycleExecutionId.t
+        [@ocaml.doc
+          "Use the unique identifier for a runtime instance of the lifecycle policy to get runtime details."]}
+    let context_ = "GetLifecycleExecutionRequest"
+    let make ~lifecycleExecutionId = fun () -> { lifecycleExecutionId }
+    let to_value x =
+      structure_to_value
+        [("lifecycleExecutionId",
+           (Some (LifecycleExecutionId.to_value x.lifecycleExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecycleExecutionId =
+        LifecycleExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "lifecycleExecutionId") in
+      make ~lifecycleExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecycleExecutionId =
+        field_map_exn json__ "lifecycleExecutionId"
+          LifecycleExecutionId.of_json in
+      make ~lifecycleExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the runtime information that was logged for a specific runtime instance of the lifecycle policy."]
 module GetInfrastructureConfigurationResponse =
   struct
     type nonrec t =
@@ -10475,11 +20943,11 @@ module GetInfrastructureConfigurationResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?infrastructureConfiguration ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let infrastructureConfiguration =
-        field_map json "infrastructureConfiguration"
+        field_map json__ "infrastructureConfiguration"
           InfrastructureConfiguration.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?infrastructureConfiguration ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "GetInfrastructureConfiguration response object."]
@@ -10507,9 +20975,9 @@ module GetInfrastructureConfigurationRequest =
              "infrastructureConfigurationArn") in
       make ~infrastructureConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let infrastructureConfigurationArn =
-        field_map_exn json "infrastructureConfigurationArn"
+        field_map_exn json__ "infrastructureConfigurationArn"
           InfrastructureConfigurationArn.of_json in
       make ~infrastructureConfigurationArn ()
     let to_json v = composed_to_json to_value v
@@ -10520,7 +20988,10 @@ module GetImageResponse =
       {
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
-      image: Image.t option [@ocaml.doc "The image object."]}
+      image: Image.t option [@ocaml.doc "The image object."];
+      latestVersionReferences: LatestVersionReferences.t option
+        [@ocaml.doc
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -10529,7 +21000,10 @@ module GetImageResponse =
       | `ServiceException of ServiceException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?requestId = fun ?image -> fun () -> { requestId; image }
+    let make ?requestId =
+      fun ?image ->
+        fun ?latestVersionReferences ->
+          fun () -> { requestId; image; latestVersionReferences }
     let error_of_json name json =
       match name with
       | "CallRateLimitExceededException" ->
@@ -10598,19 +21072,28 @@ module GetImageResponse =
     let to_value x =
       structure_to_value
         [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
-        ("image", (Option.map x.image ~f:Image.to_value))]
+        ("image", (Option.map x.image ~f:Image.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
       let image = (Option.map ~f:Image.of_xml) (Xml.child xml_arg0 "image") in
       let requestId =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
-      make ?image ?requestId ()
+      make ?latestVersionReferences ?image ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let image = field_map json "image" Image.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
-      make ?image ?requestId ()
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
+      let image = field_map json__ "image" Image.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?latestVersionReferences ?image ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets an image."]
 module GetImageRequest =
@@ -10619,7 +21102,7 @@ module GetImageRequest =
       {
       imageBuildVersionArn: ImageVersionArnOrBuildVersionArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the image that you want to retrieve."]}
+          "The Amazon Resource Name (ARN) of the image that you want to get."]}
     let context_ = "GetImageRequest"
     let make ~imageBuildVersionArn = fun () -> { imageBuildVersionArn }
     let to_value x =
@@ -10635,9 +21118,9 @@ module GetImageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
       make ~imageBuildVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageBuildVersionArn =
-        field_map_exn json "imageBuildVersionArn"
+        field_map_exn json__ "imageBuildVersionArn"
           ImageVersionArnOrBuildVersionArn.of_json in
       make ~imageBuildVersionArn ()
     let to_json v = composed_to_json to_value v
@@ -10649,7 +21132,10 @@ module GetImageRecipeResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       imageRecipe: ImageRecipe.t option
-        [@ocaml.doc "The image recipe object."]}
+        [@ocaml.doc "The image recipe object."];
+      latestVersionReferences: LatestVersionReferences.t option
+        [@ocaml.doc
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -10659,7 +21145,9 @@ module GetImageRecipeResponse =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?requestId =
-      fun ?imageRecipe -> fun () -> { requestId; imageRecipe }
+      fun ?imageRecipe ->
+        fun ?latestVersionReferences ->
+          fun () -> { requestId; imageRecipe; latestVersionReferences }
     let error_of_json name json =
       match name with
       | "CallRateLimitExceededException" ->
@@ -10728,20 +21216,29 @@ module GetImageRecipeResponse =
     let to_value x =
       structure_to_value
         [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
-        ("imageRecipe", (Option.map x.imageRecipe ~f:ImageRecipe.to_value))]
+        ("imageRecipe", (Option.map x.imageRecipe ~f:ImageRecipe.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
       let imageRecipe =
         (Option.map ~f:ImageRecipe.of_xml) (Xml.child xml_arg0 "imageRecipe") in
       let requestId =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
-      make ?imageRecipe ?requestId ()
+      make ?latestVersionReferences ?imageRecipe ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let imageRecipe = field_map json "imageRecipe" ImageRecipe.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
-      make ?imageRecipe ?requestId ()
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
+      let imageRecipe = field_map json__ "imageRecipe" ImageRecipe.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?latestVersionReferences ?imageRecipe ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets an image recipe."]
 module GetImageRecipeRequest =
@@ -10764,9 +21261,9 @@ module GetImageRecipeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageRecipeArn") in
       make ~imageRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageRecipeArn =
-        field_map_exn json "imageRecipeArn" ImageRecipeArn.of_json in
+        field_map_exn json__ "imageRecipeArn" ImageRecipeArn.of_json in
       make ~imageRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets an image recipe."]
@@ -10868,9 +21365,9 @@ module GetImageRecipePolicyResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?policy ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicyDocument.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicyDocument.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?policy ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets an image recipe policy."]
@@ -10894,9 +21391,9 @@ module GetImageRecipePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageRecipeArn") in
       make ~imageRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageRecipeArn =
-        field_map_exn json "imageRecipeArn" ImageRecipeArn.of_json in
+        field_map_exn json__ "imageRecipeArn" ImageRecipeArn.of_json in
       make ~imageRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets an image recipe policy."]
@@ -10998,9 +21495,9 @@ module GetImagePolicyResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?policy ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicyDocument.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicyDocument.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?policy ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets an image policy."]
@@ -11023,9 +21520,9 @@ module GetImagePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageArn") in
       make ~imageArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageArn =
-        field_map_exn json "imageArn" ImageBuildVersionArn.of_json in
+        field_map_exn json__ "imageArn" ImageBuildVersionArn.of_json in
       make ~imageArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets an image policy."]
@@ -11127,10 +21624,10 @@ module GetImagePipelineResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imagePipeline ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imagePipeline =
-        field_map json "imagePipeline" ImagePipeline.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imagePipeline" ImagePipeline.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imagePipeline ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets an image pipeline."]
@@ -11154,9 +21651,9 @@ module GetImagePipelineRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imagePipelineArn") in
       make ~imagePipelineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imagePipelineArn =
-        field_map_exn json "imagePipelineArn" ImagePipelineArn.of_json in
+        field_map_exn json__ "imagePipelineArn" ImagePipelineArn.of_json in
       make ~imagePipelineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets an image pipeline."]
@@ -11260,11 +21757,11 @@ module GetDistributionConfigurationResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?distributionConfiguration ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let distributionConfiguration =
-        field_map json "distributionConfiguration"
+        field_map json__ "distributionConfiguration"
           DistributionConfiguration.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?distributionConfiguration ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets a distribution configuration."]
@@ -11292,9 +21789,9 @@ module GetDistributionConfigurationRequest =
              "distributionConfigurationArn") in
       make ~distributionConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let distributionConfigurationArn =
-        field_map_exn json "distributionConfigurationArn"
+        field_map_exn json__ "distributionConfigurationArn"
           DistributionConfigurationArn.of_json in
       make ~distributionConfigurationArn ()
     let to_json v = composed_to_json to_value v
@@ -11306,7 +21803,10 @@ module GetContainerRecipeResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       containerRecipe: ContainerRecipe.t option
-        [@ocaml.doc "The container recipe object that is returned."]}
+        [@ocaml.doc "The container recipe object that is returned."];
+      latestVersionReferences: LatestVersionReferences.t option
+        [@ocaml.doc
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -11316,7 +21816,9 @@ module GetContainerRecipeResponse =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?requestId =
-      fun ?containerRecipe -> fun () -> { requestId; containerRecipe }
+      fun ?containerRecipe ->
+        fun ?latestVersionReferences ->
+          fun () -> { requestId; containerRecipe; latestVersionReferences }
     let error_of_json name json =
       match name with
       | "CallRateLimitExceededException" ->
@@ -11386,22 +21888,31 @@ module GetContainerRecipeResponse =
       structure_to_value
         [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
         ("containerRecipe",
-          (Option.map x.containerRecipe ~f:ContainerRecipe.to_value))]
+          (Option.map x.containerRecipe ~f:ContainerRecipe.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
       let containerRecipe =
         (Option.map ~f:ContainerRecipe.of_xml)
           (Xml.child xml_arg0 "containerRecipe") in
       let requestId =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
-      make ?containerRecipe ?requestId ()
+      make ?latestVersionReferences ?containerRecipe ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
       let containerRecipe =
-        field_map json "containerRecipe" ContainerRecipe.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
-      make ?containerRecipe ?requestId ()
+        field_map json__ "containerRecipe" ContainerRecipe.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?latestVersionReferences ?containerRecipe ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a container recipe."]
 module GetContainerRecipeRequest =
@@ -11424,9 +21935,9 @@ module GetContainerRecipeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "containerRecipeArn") in
       make ~containerRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerRecipeArn =
-        field_map_exn json "containerRecipeArn" ContainerRecipeArn.of_json in
+        field_map_exn json__ "containerRecipeArn" ContainerRecipeArn.of_json in
       make ~containerRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a container recipe."]
@@ -11528,9 +22039,9 @@ module GetContainerRecipePolicyResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?policy ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicyDocument.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicyDocument.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?policy ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the policy for a container recipe."]
@@ -11554,9 +22065,9 @@ module GetContainerRecipePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "containerRecipeArn") in
       make ~containerRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerRecipeArn =
-        field_map_exn json "containerRecipeArn" ContainerRecipeArn.of_json in
+        field_map_exn json__ "containerRecipeArn" ContainerRecipeArn.of_json in
       make ~containerRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the policy for a container recipe."]
@@ -11567,8 +22078,10 @@ module GetComponentResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       component: Component.t option
+        [@ocaml.doc "The component object specified in the request."];
+      latestVersionReferences: LatestVersionReferences.t option
         [@ocaml.doc
-          "The component object associated with the specified ARN."]}
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -11578,7 +22091,9 @@ module GetComponentResponse =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?requestId =
-      fun ?component -> fun () -> { requestId; component }
+      fun ?component ->
+        fun ?latestVersionReferences ->
+          fun () -> { requestId; component; latestVersionReferences }
     let error_of_json name json =
       match name with
       | "CallRateLimitExceededException" ->
@@ -11647,20 +22162,29 @@ module GetComponentResponse =
     let to_value x =
       structure_to_value
         [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
-        ("component", (Option.map x.component ~f:Component.to_value))]
+        ("component", (Option.map x.component ~f:Component.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
       let component =
         (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "component") in
       let requestId =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
-      make ?component ?requestId ()
+      make ?latestVersionReferences ?component ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let component = field_map json "component" Component.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
-      make ?component ?requestId ()
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
+      let component = field_map json__ "component" Component.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?latestVersionReferences ?component ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets a component object."]
 module GetComponentRequest =
@@ -11669,7 +22193,7 @@ module GetComponentRequest =
       {
       componentBuildVersionArn: ComponentVersionArnOrBuildVersionArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the component that you want to retrieve. Regex requires \"/\\d+$\" suffix."]}
+          "The Amazon Resource Name (ARN) of the component that you want to get. Regex requires the suffix /\\d+$."]}
     let context_ = "GetComponentRequest"
     let make ~componentBuildVersionArn =
       fun () -> { componentBuildVersionArn }
@@ -11687,9 +22211,9 @@ module GetComponentRequest =
              "componentBuildVersionArn") in
       make ~componentBuildVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentBuildVersionArn =
-        field_map_exn json "componentBuildVersionArn"
+        field_map_exn json__ "componentBuildVersionArn"
           ComponentVersionArnOrBuildVersionArn.of_json in
       make ~componentBuildVersionArn ()
     let to_json v = composed_to_json to_value v
@@ -11792,9 +22316,9 @@ module GetComponentPolicyResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?policy ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicyDocument.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicyDocument.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?policy ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets a component policy."]
@@ -11818,12 +22342,540 @@ module GetComponentPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "componentArn") in
       make ~componentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentArn =
-        field_map_exn json "componentArn" ComponentBuildVersionArn.of_json in
+        field_map_exn json__ "componentArn" ComponentBuildVersionArn.of_json in
       make ~componentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets a component policy."]
+module DistributeImageResponse =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token that uniquely identifies the request."];
+      imageBuildVersionArn: ImageBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the image to be distributed."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?clientToken =
+      fun ?imageBuildVersionArn ->
+        fun () -> { clientToken; imageBuildVersionArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("imageBuildVersionArn",
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageBuildVersionArn =
+        (Option.map ~f:ImageBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "imageBuildVersionArn") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?imageBuildVersionArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageBuildVersionArn =
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?imageBuildVersionArn ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "DistributeImage distributes existing AMIs to additional regions and accounts without rebuilding the image."]
+module DistributeImageRequest =
+  struct
+    type nonrec t =
+      {
+      sourceImage: NonEmptyString.t
+        [@ocaml.doc
+          "The source image Amazon Resource Name (ARN) to distribute."];
+      distributionConfigurationArn: DistributionConfigurationArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the distribution configuration to use."];
+      executionRole: RoleNameOrArn.t
+        [@ocaml.doc "The IAM role to use for the distribution."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags to apply to the distributed image."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."];
+      loggingConfiguration: ImageLoggingConfiguration.t option
+        [@ocaml.doc "The logging configuration for the distribution."]}
+    let context_ = "DistributeImageRequest"
+    let make ?tags =
+      fun ?loggingConfiguration ->
+        fun ~sourceImage ->
+          fun ~distributionConfigurationArn ->
+            fun ~executionRole ->
+              fun ~clientToken ->
+                fun () ->
+                  {
+                    tags;
+                    loggingConfiguration;
+                    sourceImage;
+                    distributionConfigurationArn;
+                    executionRole;
+                    clientToken
+                  }
+    let to_value x =
+      structure_to_value
+        [("sourceImage", (Some (NonEmptyString.to_value x.sourceImage)));
+        ("distributionConfigurationArn",
+          (Some
+             (DistributionConfigurationArn.to_value
+                x.distributionConfigurationArn)));
+        ("executionRole", (Some (RoleNameOrArn.to_value x.executionRole)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("loggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:ImageLoggingConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let loggingConfiguration =
+        (Option.map ~f:ImageLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let executionRole =
+        RoleNameOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "executionRole") in
+      let distributionConfigurationArn =
+        DistributionConfigurationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "distributionConfigurationArn") in
+      let sourceImage =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceImage") in
+      make ?loggingConfiguration ~clientToken ?tags ~executionRole
+        ~distributionConfigurationArn ~sourceImage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          ImageLoggingConfiguration.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let executionRole =
+        field_map_exn json__ "executionRole" RoleNameOrArn.of_json in
+      let distributionConfigurationArn =
+        field_map_exn json__ "distributionConfigurationArn"
+          DistributionConfigurationArn.of_json in
+      let sourceImage =
+        field_map_exn json__ "sourceImage" NonEmptyString.of_json in
+      make ?loggingConfiguration ~clientToken ?tags ~executionRole
+        ~distributionConfigurationArn ~sourceImage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "DistributeImage distributes existing AMIs to additional regions and accounts without rebuilding the image."]
+module DeleteWorkflowResponse =
+  struct
+    type nonrec t =
+      {
+      workflowBuildVersionArn: WorkflowBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource that this request deleted."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceDependencyException of ResourceDependencyException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workflowBuildVersionArn = fun () -> { workflowBuildVersionArn }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceDependencyException" ->
+          `ResourceDependencyException
+            (ResourceDependencyException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceDependencyException" ->
+          `ResourceDependencyException
+            (ResourceDependencyException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceDependencyException e ->
+          `Assoc
+            [("error", (`String "ResourceDependencyException"));
+            ("details", (ResourceDependencyException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("workflowBuildVersionArn",
+           (Option.map x.workflowBuildVersionArn
+              ~f:WorkflowBuildVersionArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workflowBuildVersionArn =
+        (Option.map ~f:WorkflowBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "workflowBuildVersionArn") in
+      make ?workflowBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workflowBuildVersionArn =
+        field_map json__ "workflowBuildVersionArn"
+          WorkflowBuildVersionArn.of_json in
+      make ?workflowBuildVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a specific workflow resource."]
+module DeleteWorkflowRequest =
+  struct
+    type nonrec t =
+      {
+      workflowBuildVersionArn: WorkflowBuildVersionArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource to delete."]}
+    let context_ = "DeleteWorkflowRequest"
+    let make ~workflowBuildVersionArn = fun () -> { workflowBuildVersionArn }
+    let to_value x =
+      structure_to_value
+        [("workflowBuildVersionArn",
+           (Some (WorkflowBuildVersionArn.to_value x.workflowBuildVersionArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workflowBuildVersionArn =
+        WorkflowBuildVersionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workflowBuildVersionArn") in
+      make ~workflowBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workflowBuildVersionArn =
+        field_map_exn json__ "workflowBuildVersionArn"
+          WorkflowBuildVersionArn.of_json in
+      make ~workflowBuildVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a specific workflow resource."]
+module DeleteLifecyclePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      lifecyclePolicyArn: LifecyclePolicyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the lifecycle policy that was deleted."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceDependencyException of ResourceDependencyException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecyclePolicyArn = fun () -> { lifecyclePolicyArn }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceDependencyException" ->
+          `ResourceDependencyException
+            (ResourceDependencyException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceDependencyException" ->
+          `ResourceDependencyException
+            (ResourceDependencyException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceDependencyException e ->
+          `Assoc
+            [("error", (`String "ResourceDependencyException"));
+            ("details", (ResourceDependencyException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("lifecyclePolicyArn",
+           (Option.map x.lifecyclePolicyArn ~f:LifecyclePolicyArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecyclePolicyArn =
+        (Option.map ~f:LifecyclePolicyArn.of_xml)
+          (Xml.child xml_arg0 "lifecyclePolicyArn") in
+      make ?lifecyclePolicyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecyclePolicyArn =
+        field_map json__ "lifecyclePolicyArn" LifecyclePolicyArn.of_json in
+      make ?lifecyclePolicyArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete the specified lifecycle policy resource."]
+module DeleteLifecyclePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      lifecyclePolicyArn: LifecyclePolicyArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the lifecycle policy resource to delete."]}
+    let context_ = "DeleteLifecyclePolicyRequest"
+    let make ~lifecyclePolicyArn = fun () -> { lifecyclePolicyArn }
+    let to_value x =
+      structure_to_value
+        [("lifecyclePolicyArn",
+           (Some (LifecyclePolicyArn.to_value x.lifecyclePolicyArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecyclePolicyArn =
+        LifecyclePolicyArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "lifecyclePolicyArn") in
+      make ~lifecyclePolicyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecyclePolicyArn =
+        field_map_exn json__ "lifecyclePolicyArn" LifecyclePolicyArn.of_json in
+      make ~lifecyclePolicyArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete the specified lifecycle policy resource."]
 module DeleteInfrastructureConfigurationResponse =
   struct
     type nonrec t =
@@ -11936,11 +22988,11 @@ module DeleteInfrastructureConfigurationResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?infrastructureConfigurationArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let infrastructureConfigurationArn =
-        field_map json "infrastructureConfigurationArn"
+        field_map json__ "infrastructureConfigurationArn"
           InfrastructureConfigurationArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?infrastructureConfigurationArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an infrastructure configuration."]
@@ -11968,9 +23020,9 @@ module DeleteInfrastructureConfigurationRequest =
              "infrastructureConfigurationArn") in
       make ~infrastructureConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let infrastructureConfigurationArn =
-        field_map_exn json "infrastructureConfigurationArn"
+        field_map_exn json__ "infrastructureConfigurationArn"
           InfrastructureConfigurationArn.of_json in
       make ~infrastructureConfigurationArn ()
     let to_json v = composed_to_json to_value v
@@ -11983,7 +23035,7 @@ module DeleteImageResponse =
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       imageBuildVersionArn: ImageBuildVersionArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Image Builder image resource that was deleted."]}
+          "The Amazon Resource Name (ARN) of the Image Builder image resource that this request deleted."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -12086,10 +23138,10 @@ module DeleteImageResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imageBuildVersionArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageBuildVersionArn =
-        field_map json "imageBuildVersionArn" ImageBuildVersionArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imageBuildVersionArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12114,9 +23166,9 @@ module DeleteImageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
       make ~imageBuildVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageBuildVersionArn =
-        field_map_exn json "imageBuildVersionArn"
+        field_map_exn json__ "imageBuildVersionArn"
           ImageBuildVersionArn.of_json in
       make ~imageBuildVersionArn ()
     let to_json v = composed_to_json to_value v
@@ -12232,10 +23284,10 @@ module DeleteImageRecipeResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imageRecipeArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageRecipeArn =
-        field_map json "imageRecipeArn" ImageRecipeArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imageRecipeArn" ImageRecipeArn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imageRecipeArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an image recipe."]
@@ -12259,9 +23311,9 @@ module DeleteImageRecipeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageRecipeArn") in
       make ~imageRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageRecipeArn =
-        field_map_exn json "imageRecipeArn" ImageRecipeArn.of_json in
+        field_map_exn json__ "imageRecipeArn" ImageRecipeArn.of_json in
       make ~imageRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an image recipe."]
@@ -12375,10 +23427,10 @@ module DeleteImagePipelineResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imagePipelineArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imagePipelineArn =
-        field_map json "imagePipelineArn" ImagePipelineArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imagePipelineArn" ImagePipelineArn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imagePipelineArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an image pipeline."]
@@ -12402,9 +23454,9 @@ module DeleteImagePipelineRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imagePipelineArn") in
       make ~imagePipelineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imagePipelineArn =
-        field_map_exn json "imagePipelineArn" ImagePipelineArn.of_json in
+        field_map_exn json__ "imagePipelineArn" ImagePipelineArn.of_json in
       make ~imagePipelineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an image pipeline."]
@@ -12520,11 +23572,11 @@ module DeleteDistributionConfigurationResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?distributionConfigurationArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let distributionConfigurationArn =
-        field_map json "distributionConfigurationArn"
+        field_map json__ "distributionConfigurationArn"
           DistributionConfigurationArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?distributionConfigurationArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a distribution configuration."]
@@ -12552,9 +23604,9 @@ module DeleteDistributionConfigurationRequest =
              "distributionConfigurationArn") in
       make ~distributionConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let distributionConfigurationArn =
-        field_map_exn json "distributionConfigurationArn"
+        field_map_exn json__ "distributionConfigurationArn"
           DistributionConfigurationArn.of_json in
       make ~distributionConfigurationArn ()
     let to_json v = composed_to_json to_value v
@@ -12669,10 +23721,10 @@ module DeleteContainerRecipeResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?containerRecipeArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerRecipeArn =
-        field_map json "containerRecipeArn" ContainerRecipeArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "containerRecipeArn" ContainerRecipeArn.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?containerRecipeArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a container recipe."]
@@ -12696,9 +23748,9 @@ module DeleteContainerRecipeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "containerRecipeArn") in
       make ~containerRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerRecipeArn =
-        field_map_exn json "containerRecipeArn" ContainerRecipeArn.of_json in
+        field_map_exn json__ "containerRecipeArn" ContainerRecipeArn.of_json in
       make ~containerRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a container recipe."]
@@ -12710,7 +23762,7 @@ module DeleteComponentResponse =
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       componentBuildVersionArn: ComponentBuildVersionArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the component build version that was deleted."]}
+          "The Amazon Resource Name (ARN) of the component build version that this request deleted."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -12814,11 +23866,11 @@ module DeleteComponentResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?componentBuildVersionArn ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentBuildVersionArn =
-        field_map json "componentBuildVersionArn"
+        field_map json__ "componentBuildVersionArn"
           ComponentBuildVersionArn.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?componentBuildVersionArn ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a component build version."]
@@ -12845,13 +23897,588 @@ module DeleteComponentRequest =
              "componentBuildVersionArn") in
       make ~componentBuildVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentBuildVersionArn =
-        field_map_exn json "componentBuildVersionArn"
+        field_map_exn json__ "componentBuildVersionArn"
           ComponentBuildVersionArn.of_json in
       make ~componentBuildVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a component build version."]
+module CreateWorkflowResponse =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token that uniquely identifies the request."];
+      workflowBuildVersionArn: WorkflowBuildVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the workflow resource that the request created."];
+      latestVersionReferences: LatestVersionReferences.t option
+        [@ocaml.doc
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `DryRunOperationException of DryRunOperationException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `InvalidVersionNumberException of InvalidVersionNumberException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?clientToken =
+      fun ?workflowBuildVersionArn ->
+        fun ?latestVersionReferences ->
+          fun () ->
+            { clientToken; workflowBuildVersionArn; latestVersionReferences }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DryRunOperationException" ->
+          `DryRunOperationException (DryRunOperationException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "InvalidVersionNumberException" ->
+          `InvalidVersionNumberException
+            (InvalidVersionNumberException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DryRunOperationException" ->
+          `DryRunOperationException (DryRunOperationException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "InvalidVersionNumberException" ->
+          `InvalidVersionNumberException
+            (InvalidVersionNumberException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DryRunOperationException e ->
+          `Assoc
+            [("error", (`String "DryRunOperationException"));
+            ("details", (DryRunOperationException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `InvalidVersionNumberException e ->
+          `Assoc
+            [("error", (`String "InvalidVersionNumberException"));
+            ("details", (InvalidVersionNumberException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("workflowBuildVersionArn",
+          (Option.map x.workflowBuildVersionArn
+             ~f:WorkflowBuildVersionArn.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
+      let workflowBuildVersionArn =
+        (Option.map ~f:WorkflowBuildVersionArn.of_xml)
+          (Xml.child xml_arg0 "workflowBuildVersionArn") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?latestVersionReferences ?workflowBuildVersionArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
+      let workflowBuildVersionArn =
+        field_map json__ "workflowBuildVersionArn"
+          WorkflowBuildVersionArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?latestVersionReferences ?workflowBuildVersionArn ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a new workflow or a new version of an existing workflow."]
+module CreateWorkflowRequest =
+  struct
+    type nonrec t =
+      {
+      name: ResourceName.t [@ocaml.doc "The name of the workflow to create."];
+      semanticVersion: VersionNumber.t
+        [@ocaml.doc
+          "The semantic version of this workflow resource. The semantic version syntax adheres to the following rules. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Assignment: For the first three nodes you can assign any positive integer value, including zero, with an upper limit of 2^30-1, or 1073741823 for each node. Image Builder automatically assigns the build number to the fourth node. Patterns: You can use any numeric pattern that adheres to the assignment requirements for the nodes that you can assign. For example, you might choose a software version pattern, such as 1.0.0, or a date, such as 2021.01.01."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "Describes the workflow."];
+      changeDescription: NonEmptyString.t option
+        [@ocaml.doc
+          "Describes what change has been made in this version of the workflow, or what makes this version different from other versions of the workflow."];
+      data: InlineWorkflowData.t option
+        [@ocaml.doc
+          "Contains the UTF-8 encoded YAML document content for the workflow. Alternatively, you can specify the uri of a YAML document file stored in Amazon S3. However, you cannot specify both properties."];
+      uri: Uri_.t option
+        [@ocaml.doc
+          "The uri of a YAML component document file. This must be an S3 URL (s3://bucket/key), and the requester must have permission to access the S3 bucket it points to. If you use Amazon S3, you can specify component content up to your service quota. Alternatively, you can specify the YAML document inline, using the component data property. You cannot specify both properties."];
+      kmsKeyId: NonEmptyString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies the KMS key used to encrypt this workflow resource. This can be either the Key ARN or the Alias ARN. For more information, see Key identifiers (KeyId) in the Key Management Service Developer Guide."];
+      tags: TagMap.t option
+        [@ocaml.doc "Tags that apply to the workflow resource."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."];
+      type_: WorkflowType.t
+        [@ocaml.doc
+          "The phase in the image build process for which the workflow resource is responsible."];
+      dryRun: Boolean.t option
+        [@ocaml.doc
+          "Validates the required permissions for the operation and the request parameters, without actually making the request, and provides an error response. Upon a successful request, the error response is DryRunOperationException."]}
+    let context_ = "CreateWorkflowRequest"
+    let make ?description =
+      fun ?changeDescription ->
+        fun ?data ->
+          fun ?uri ->
+            fun ?kmsKeyId ->
+              fun ?tags ->
+                fun ?dryRun ->
+                  fun ~name ->
+                    fun ~semanticVersion ->
+                      fun ~clientToken ->
+                        fun ~type_ ->
+                          fun () ->
+                            {
+                              description;
+                              changeDescription;
+                              data;
+                              uri;
+                              kmsKeyId;
+                              tags;
+                              dryRun;
+                              name;
+                              semanticVersion;
+                              clientToken;
+                              type_
+                            }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (ResourceName.to_value x.name)));
+        ("semanticVersion",
+          (Some (VersionNumber.to_value x.semanticVersion)));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("changeDescription",
+          (Option.map x.changeDescription ~f:NonEmptyString.to_value));
+        ("data", (Option.map x.data ~f:InlineWorkflowData.to_value));
+        ("uri", (Option.map x.uri ~f:Uri_.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:NonEmptyString.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("type", (Some (WorkflowType.to_value x.type_)));
+        ("dryRun", (Option.map x.dryRun ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dryRun =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
+      let type_ =
+        WorkflowType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let kmsKeyId =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let uri = (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "uri") in
+      let data =
+        (Option.map ~f:InlineWorkflowData.of_xml) (Xml.child xml_arg0 "data") in
+      let changeDescription =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "changeDescription") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let semanticVersion =
+        VersionNumber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "semanticVersion") in
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?dryRun ~type_ ~clientToken ?tags ?kmsKeyId ?uri ?data
+        ?changeDescription ?description ~semanticVersion ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dryRun = field_map json__ "dryRun" Boolean.of_json in
+      let type_ = field_map_exn json__ "type" WorkflowType.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
+      let uri = field_map json__ "uri" Uri_.of_json in
+      let data = field_map json__ "data" InlineWorkflowData.of_json in
+      let changeDescription =
+        field_map json__ "changeDescription" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let semanticVersion =
+        field_map_exn json__ "semanticVersion" VersionNumber.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ?dryRun ~type_ ~clientToken ?tags ?kmsKeyId ?uri ?data
+        ?changeDescription ?description ~semanticVersion ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a new workflow or a new version of an existing workflow."]
+module CreateLifecyclePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token that uniquely identifies the request."];
+      lifecyclePolicyArn: LifecyclePolicyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the lifecycle policy that the request created."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?clientToken =
+      fun ?lifecyclePolicyArn ->
+        fun () -> { clientToken; lifecyclePolicyArn }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("lifecyclePolicyArn",
+          (Option.map x.lifecyclePolicyArn ~f:LifecyclePolicyArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecyclePolicyArn =
+        (Option.map ~f:LifecyclePolicyArn.of_xml)
+          (Xml.child xml_arg0 "lifecyclePolicyArn") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?lifecyclePolicyArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecyclePolicyArn =
+        field_map json__ "lifecyclePolicyArn" LifecyclePolicyArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?lifecyclePolicyArn ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create a lifecycle policy resource."]
+module CreateLifecyclePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      name: ResourceName.t
+        [@ocaml.doc "The name of the lifecycle policy to create."];
+      description: NonEmptyString.t option
+        [@ocaml.doc "Optional description for the lifecycle policy."];
+      status: LifecyclePolicyStatus.t option
+        [@ocaml.doc
+          "Indicates whether the lifecycle policy resource is enabled."];
+      executionRole: RoleNameOrArn.t
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) for the IAM role you create that grants Image Builder access to run lifecycle actions."];
+      resourceType: LifecyclePolicyResourceType.t
+        [@ocaml.doc
+          "The type of Image Builder resource that the lifecycle policy applies to."];
+      policyDetails: LifecyclePolicyDetails.t
+        [@ocaml.doc "Configuration details for the lifecycle policy rules."];
+      resourceSelection: LifecyclePolicyResourceSelection.t
+        [@ocaml.doc
+          "Selection criteria for the resources that the lifecycle policy applies to."];
+      tags: TagMap.t option
+        [@ocaml.doc "Tags to apply to the lifecycle policy resource."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
+    let context_ = "CreateLifecyclePolicyRequest"
+    let make ?description =
+      fun ?status ->
+        fun ?tags ->
+          fun ~name ->
+            fun ~executionRole ->
+              fun ~resourceType ->
+                fun ~policyDetails ->
+                  fun ~resourceSelection ->
+                    fun ~clientToken ->
+                      fun () ->
+                        {
+                          description;
+                          status;
+                          tags;
+                          name;
+                          executionRole;
+                          resourceType;
+                          policyDetails;
+                          resourceSelection;
+                          clientToken
+                        }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (ResourceName.to_value x.name)));
+        ("description",
+          (Option.map x.description ~f:NonEmptyString.to_value));
+        ("status", (Option.map x.status ~f:LifecyclePolicyStatus.to_value));
+        ("executionRole", (Some (RoleNameOrArn.to_value x.executionRole)));
+        ("resourceType",
+          (Some (LifecyclePolicyResourceType.to_value x.resourceType)));
+        ("policyDetails",
+          (Some (LifecyclePolicyDetails.to_value x.policyDetails)));
+        ("resourceSelection",
+          (Some
+             (LifecyclePolicyResourceSelection.to_value x.resourceSelection)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let resourceSelection =
+        LifecyclePolicyResourceSelection.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceSelection") in
+      let policyDetails =
+        LifecyclePolicyDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyDetails") in
+      let resourceType =
+        LifecyclePolicyResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let executionRole =
+        RoleNameOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "executionRole") in
+      let status =
+        (Option.map ~f:LifecyclePolicyStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let description =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~clientToken ?tags ~resourceSelection ~policyDetails ~resourceType
+        ~executionRole ?status ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let resourceSelection =
+        field_map_exn json__ "resourceSelection"
+          LifecyclePolicyResourceSelection.of_json in
+      let policyDetails =
+        field_map_exn json__ "policyDetails" LifecyclePolicyDetails.of_json in
+      let resourceType =
+        field_map_exn json__ "resourceType"
+          LifecyclePolicyResourceType.of_json in
+      let executionRole =
+        field_map_exn json__ "executionRole" RoleNameOrArn.of_json in
+      let status = field_map json__ "status" LifecyclePolicyStatus.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ~clientToken ?tags ~resourceSelection ~policyDetails ~resourceType
+        ~executionRole ?status ?description ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create a lifecycle policy resource."]
 module CreateInfrastructureConfigurationResponse =
   struct
     type nonrec t =
@@ -12859,8 +24486,7 @@ module CreateInfrastructureConfigurationResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       infrastructureConfigurationArn: InfrastructureConfigurationArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the infrastructure configuration that was created by this request."]}
@@ -13004,12 +24630,12 @@ module CreateInfrastructureConfigurationResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?infrastructureConfigurationArn ?clientToken ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let infrastructureConfigurationArn =
-        field_map json "infrastructureConfigurationArn"
+        field_map json__ "infrastructureConfigurationArn"
           InfrastructureConfigurationArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?infrastructureConfigurationArn ?clientToken ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13048,15 +24674,19 @@ module CreateInfrastructureConfigurationRequest =
           "The Amazon Resource Name (ARN) for the SNS topic to which we send image build event notifications. EC2 Image Builder is unable to send notifications to SNS topics that are encrypted using keys from other accounts. The key that is used to encrypt the SNS topic must reside in the account that the Image Builder service runs under."];
       resourceTags: ResourceTagMap.t option
         [@ocaml.doc
-          "The tags attached to the resource created by Image Builder."];
+          "The metadata tags to assign to the Amazon EC2 instance that Image Builder launches during the build process. Tags are formatted as key value pairs."];
       instanceMetadataOptions: InstanceMetadataOptions.t option
         [@ocaml.doc
           "The instance metadata options that you can set for the HTTP requests that pipeline builds use to launch EC2 build and test instances."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags of the infrastructure configuration."];
+        [@ocaml.doc
+          "The metadata tags to assign to the infrastructure configuration resource that Image Builder creates as output. Tags are formatted as key value pairs."];
+      placement: Placement.t option
+        [@ocaml.doc
+          "The instance placement settings that define where the instances that are launched from your image will run."];
       clientToken: ClientToken.t
         [@ocaml.doc
-          "The idempotency token used to make this request idempotent."]}
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
     let context_ = "CreateInfrastructureConfigurationRequest"
     let make ?description =
       fun ?instanceTypes ->
@@ -13069,26 +24699,28 @@ module CreateInfrastructureConfigurationRequest =
                     fun ?resourceTags ->
                       fun ?instanceMetadataOptions ->
                         fun ?tags ->
-                          fun ~name ->
-                            fun ~instanceProfileName ->
-                              fun ~clientToken ->
-                                fun () ->
-                                  {
-                                    description;
-                                    instanceTypes;
-                                    securityGroupIds;
-                                    subnetId;
-                                    logging;
-                                    keyPair;
-                                    terminateInstanceOnFailure;
-                                    snsTopicArn;
-                                    resourceTags;
-                                    instanceMetadataOptions;
-                                    tags;
-                                    name;
-                                    instanceProfileName;
-                                    clientToken
-                                  }
+                          fun ?placement ->
+                            fun ~name ->
+                              fun ~instanceProfileName ->
+                                fun ~clientToken ->
+                                  fun () ->
+                                    {
+                                      description;
+                                      instanceTypes;
+                                      securityGroupIds;
+                                      subnetId;
+                                      logging;
+                                      keyPair;
+                                      terminateInstanceOnFailure;
+                                      snsTopicArn;
+                                      resourceTags;
+                                      instanceMetadataOptions;
+                                      tags;
+                                      placement;
+                                      name;
+                                      instanceProfileName;
+                                      clientToken
+                                    }
     let to_value x =
       structure_to_value
         [("name", (Some (ResourceName.to_value x.name)));
@@ -13113,12 +24745,15 @@ module CreateInfrastructureConfigurationRequest =
           (Option.map x.instanceMetadataOptions
              ~f:InstanceMetadataOptions.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("placement", (Option.map x.placement ~f:Placement.to_value));
         ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let placement =
+        (Option.map ~f:Placement.of_xml) (Xml.child xml_arg0 "placement") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let instanceMetadataOptions =
         (Option.map ~f:InstanceMetadataOptions.of_xml)
@@ -13151,37 +24786,40 @@ module CreateInfrastructureConfigurationRequest =
           (Xml.child xml_arg0 "description") in
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~clientToken ?tags ?instanceMetadataOptions ?resourceTags
-        ?snsTopicArn ?terminateInstanceOnFailure ?keyPair ?logging ?subnetId
-        ?securityGroupIds ~instanceProfileName ?instanceTypes ?description
-        ~name ()
+      make ~clientToken ?placement ?tags ?instanceMetadataOptions
+        ?resourceTags ?snsTopicArn ?terminateInstanceOnFailure ?keyPair
+        ?logging ?subnetId ?securityGroupIds ~instanceProfileName
+        ?instanceTypes ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let placement = field_map json__ "placement" Placement.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let instanceMetadataOptions =
-        field_map json "instanceMetadataOptions"
+        field_map json__ "instanceMetadataOptions"
           InstanceMetadataOptions.of_json in
-      let resourceTags = field_map json "resourceTags" ResourceTagMap.of_json in
-      let snsTopicArn = field_map json "snsTopicArn" SnsTopicArn.of_json in
+      let resourceTags =
+        field_map json__ "resourceTags" ResourceTagMap.of_json in
+      let snsTopicArn = field_map json__ "snsTopicArn" SnsTopicArn.of_json in
       let terminateInstanceOnFailure =
-        field_map json "terminateInstanceOnFailure" NullableBoolean.of_json in
-      let keyPair = field_map json "keyPair" NonEmptyString.of_json in
-      let logging = field_map json "logging" Logging.of_json in
-      let subnetId = field_map json "subnetId" NonEmptyString.of_json in
+        field_map json__ "terminateInstanceOnFailure" NullableBoolean.of_json in
+      let keyPair = field_map json__ "keyPair" NonEmptyString.of_json in
+      let logging = field_map json__ "logging" Logging.of_json in
+      let subnetId = field_map json__ "subnetId" NonEmptyString.of_json in
       let securityGroupIds =
-        field_map json "securityGroupIds" SecurityGroupIds.of_json in
+        field_map json__ "securityGroupIds" SecurityGroupIds.of_json in
       let instanceProfileName =
-        field_map_exn json "instanceProfileName"
+        field_map_exn json__ "instanceProfileName"
           InstanceProfileNameType.of_json in
       let instanceTypes =
-        field_map json "instanceTypes" InstanceTypeList.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
-      make ~clientToken ?tags ?instanceMetadataOptions ?resourceTags
-        ?snsTopicArn ?terminateInstanceOnFailure ?keyPair ?logging ?subnetId
-        ?securityGroupIds ~instanceProfileName ?instanceTypes ?description
-        ~name ()
+        field_map json__ "instanceTypes" InstanceTypeList.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ~clientToken ?placement ?tags ?instanceMetadataOptions
+        ?resourceTags ?snsTopicArn ?terminateInstanceOnFailure ?keyPair
+        ?logging ?subnetId ?securityGroupIds ~instanceProfileName
+        ?instanceTypes ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new infrastructure configuration. An infrastructure configuration defines the environment in which your image will be built and tested."]
@@ -13192,11 +24830,13 @@ module CreateImageResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       imageBuildVersionArn: ImageBuildVersionArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the image that was created by this request."]}
+          "The Amazon Resource Name (ARN) of the image that the request created."];
+      latestVersionReferences: LatestVersionReferences.t option
+        [@ocaml.doc
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -13212,7 +24852,14 @@ module CreateImageResponse =
     let make ?requestId =
       fun ?clientToken ->
         fun ?imageBuildVersionArn ->
-          fun () -> { requestId; clientToken; imageBuildVersionArn }
+          fun ?latestVersionReferences ->
+            fun () ->
+              {
+                requestId;
+                clientToken;
+                imageBuildVersionArn;
+                latestVersionReferences
+              }
     let error_of_json name json =
       match name with
       | "CallRateLimitExceededException" ->
@@ -13311,9 +24958,15 @@ module CreateImageResponse =
         [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
         ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
         ("imageBuildVersionArn",
-          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value))]
+          (Option.map x.imageBuildVersionArn ~f:ImageBuildVersionArn.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
       let imageBuildVersionArn =
         (Option.map ~f:ImageBuildVersionArn.of_xml)
           (Xml.child xml_arg0 "imageBuildVersionArn") in
@@ -13322,14 +24975,19 @@ module CreateImageResponse =
       let requestId =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
-      make ?imageBuildVersionArn ?clientToken ?requestId ()
+      make ?latestVersionReferences ?imageBuildVersionArn ?clientToken
+        ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
       let imageBuildVersionArn =
-        field_map json "imageBuildVersionArn" ImageBuildVersionArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
-      make ?imageBuildVersionArn ?clientToken ?requestId ()
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?latestVersionReferences ?imageBuildVersionArn ?clientToken
+        ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new image. This request will create a new image along with all of the configured output resources defined in the distribution configuration. You must specify exactly one recipe for your image, using either a ContainerRecipeArn or an ImageRecipeArn."]
@@ -13357,7 +25015,17 @@ module CreateImageRequest =
       tags: TagMap.t option [@ocaml.doc "The tags of the image."];
       clientToken: ClientToken.t
         [@ocaml.doc
-          "The idempotency token used to make this request idempotent."]}
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."];
+      imageScanningConfiguration: ImageScanningConfiguration.t option
+        [@ocaml.doc "Contains settings for vulnerability scans."];
+      workflows: WorkflowConfigurationList.t option
+        [@ocaml.doc "Contains an array of workflow configuration objects."];
+      executionRole: RoleNameOrArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) for the IAM role you create that grants Image Builder access to perform workflow actions."];
+      loggingConfiguration: ImageLoggingConfiguration.t option
+        [@ocaml.doc
+          "Define logging configuration for the image build process."]}
     let context_ = "CreateImageRequest"
     let make ?imageRecipeArn =
       fun ?containerRecipeArn ->
@@ -13365,19 +25033,27 @@ module CreateImageRequest =
           fun ?imageTestsConfiguration ->
             fun ?enhancedImageMetadataEnabled ->
               fun ?tags ->
-                fun ~infrastructureConfigurationArn ->
-                  fun ~clientToken ->
-                    fun () ->
-                      {
-                        imageRecipeArn;
-                        containerRecipeArn;
-                        distributionConfigurationArn;
-                        imageTestsConfiguration;
-                        enhancedImageMetadataEnabled;
-                        tags;
-                        infrastructureConfigurationArn;
-                        clientToken
-                      }
+                fun ?imageScanningConfiguration ->
+                  fun ?workflows ->
+                    fun ?executionRole ->
+                      fun ?loggingConfiguration ->
+                        fun ~infrastructureConfigurationArn ->
+                          fun ~clientToken ->
+                            fun () ->
+                              {
+                                imageRecipeArn;
+                                containerRecipeArn;
+                                distributionConfigurationArn;
+                                imageTestsConfiguration;
+                                enhancedImageMetadataEnabled;
+                                tags;
+                                imageScanningConfiguration;
+                                workflows;
+                                executionRole;
+                                loggingConfiguration;
+                                infrastructureConfigurationArn;
+                                clientToken
+                              }
     let to_value x =
       structure_to_value
         [("imageRecipeArn",
@@ -13398,9 +25074,31 @@ module CreateImageRequest =
           (Option.map x.enhancedImageMetadataEnabled
              ~f:NullableBoolean.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("imageScanningConfiguration",
+          (Option.map x.imageScanningConfiguration
+             ~f:ImageScanningConfiguration.to_value));
+        ("workflows",
+          (Option.map x.workflows ~f:WorkflowConfigurationList.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:RoleNameOrArn.to_value));
+        ("loggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:ImageLoggingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let loggingConfiguration =
+        (Option.map ~f:ImageLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
+      let executionRole =
+        (Option.map ~f:RoleNameOrArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let workflows =
+        (Option.map ~f:WorkflowConfigurationList.of_xml)
+          (Xml.child xml_arg0 "workflows") in
+      let imageScanningConfiguration =
+        (Option.map ~f:ImageScanningConfiguration.of_xml)
+          (Xml.child xml_arg0 "imageScanningConfiguration") in
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
@@ -13424,31 +25122,47 @@ module CreateImageRequest =
       let imageRecipeArn =
         (Option.map ~f:ImageRecipeArn.of_xml)
           (Xml.child xml_arg0 "imageRecipeArn") in
-      make ~clientToken ?tags ?enhancedImageMetadataEnabled
-        ?imageTestsConfiguration ~infrastructureConfigurationArn
-        ?distributionConfigurationArn ?containerRecipeArn ?imageRecipeArn ()
+      make ?loggingConfiguration ?executionRole ?workflows
+        ?imageScanningConfiguration ~clientToken ?tags
+        ?enhancedImageMetadataEnabled ?imageTestsConfiguration
+        ~infrastructureConfigurationArn ?distributionConfigurationArn
+        ?containerRecipeArn ?imageRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          ImageLoggingConfiguration.of_json in
+      let executionRole =
+        field_map json__ "executionRole" RoleNameOrArn.of_json in
+      let workflows =
+        field_map json__ "workflows" WorkflowConfigurationList.of_json in
+      let imageScanningConfiguration =
+        field_map json__ "imageScanningConfiguration"
+          ImageScanningConfiguration.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let enhancedImageMetadataEnabled =
-        field_map json "enhancedImageMetadataEnabled" NullableBoolean.of_json in
+        field_map json__ "enhancedImageMetadataEnabled"
+          NullableBoolean.of_json in
       let imageTestsConfiguration =
-        field_map json "imageTestsConfiguration"
+        field_map json__ "imageTestsConfiguration"
           ImageTestsConfiguration.of_json in
       let infrastructureConfigurationArn =
-        field_map_exn json "infrastructureConfigurationArn"
+        field_map_exn json__ "infrastructureConfigurationArn"
           InfrastructureConfigurationArn.of_json in
       let distributionConfigurationArn =
-        field_map json "distributionConfigurationArn"
+        field_map json__ "distributionConfigurationArn"
           DistributionConfigurationArn.of_json in
       let containerRecipeArn =
-        field_map json "containerRecipeArn" ContainerRecipeArn.of_json in
+        field_map json__ "containerRecipeArn" ContainerRecipeArn.of_json in
       let imageRecipeArn =
-        field_map json "imageRecipeArn" ImageRecipeArn.of_json in
-      make ~clientToken ?tags ?enhancedImageMetadataEnabled
-        ?imageTestsConfiguration ~infrastructureConfigurationArn
-        ?distributionConfigurationArn ?containerRecipeArn ?imageRecipeArn ()
+        field_map json__ "imageRecipeArn" ImageRecipeArn.of_json in
+      make ?loggingConfiguration ?executionRole ?workflows
+        ?imageScanningConfiguration ~clientToken ?tags
+        ?enhancedImageMetadataEnabled ?imageTestsConfiguration
+        ~infrastructureConfigurationArn ?distributionConfigurationArn
+        ?containerRecipeArn ?imageRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new image. This request will create a new image along with all of the configured output resources defined in the distribution configuration. You must specify exactly one recipe for your image, using either a ContainerRecipeArn or an ImageRecipeArn."]
@@ -13459,11 +25173,13 @@ module CreateImageRecipeResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       imageRecipeArn: ImageRecipeArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the image recipe that was created by this request."]}
+          "The Amazon Resource Name (ARN) of the image recipe that was created by this request."];
+      latestVersionReferences: LatestVersionReferences.t option
+        [@ocaml.doc
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -13481,7 +25197,14 @@ module CreateImageRecipeResponse =
     let make ?requestId =
       fun ?clientToken ->
         fun ?imageRecipeArn ->
-          fun () -> { requestId; clientToken; imageRecipeArn }
+          fun ?latestVersionReferences ->
+            fun () ->
+              {
+                requestId;
+                clientToken;
+                imageRecipeArn;
+                latestVersionReferences
+              }
     let error_of_json name json =
       match name with
       | "CallRateLimitExceededException" ->
@@ -13600,9 +25323,15 @@ module CreateImageRecipeResponse =
         [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
         ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
         ("imageRecipeArn",
-          (Option.map x.imageRecipeArn ~f:ImageRecipeArn.to_value))]
+          (Option.map x.imageRecipeArn ~f:ImageRecipeArn.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
       let imageRecipeArn =
         (Option.map ~f:ImageRecipeArn.of_xml)
           (Xml.child xml_arg0 "imageRecipeArn") in
@@ -13611,14 +25340,19 @@ module CreateImageRecipeResponse =
       let requestId =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
-      make ?imageRecipeArn ?clientToken ?requestId ()
+      make ?latestVersionReferences ?imageRecipeArn ?clientToken ?requestId
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
       let imageRecipeArn =
-        field_map json "imageRecipeArn" ImageRecipeArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
-      make ?imageRecipeArn ?clientToken ?requestId ()
+        field_map json__ "imageRecipeArn" ImageRecipeArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?latestVersionReferences ?imageRecipeArn ?clientToken ?requestId
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new image recipe. Image recipes define how images are configured, tested, and assessed."]
@@ -13629,14 +25363,14 @@ module CreateImageRecipeRequest =
       name: ResourceName.t [@ocaml.doc "The name of the image recipe."];
       description: NonEmptyString.t option
         [@ocaml.doc "The description of the image recipe."];
-      semanticVersion: VersionNumber.t
+      semanticVersion: WildcardVersionNumber.t
         [@ocaml.doc
           "The semantic version of the image recipe. This version follows the semantic version syntax. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Assignment: For the first three nodes you can assign any positive integer value, including zero, with an upper limit of 2^30-1, or 1073741823 for each node. Image Builder automatically assigns the build number to the fourth node. Patterns: You can use any numeric pattern that adheres to the assignment requirements for the nodes that you can assign. For example, you might choose a software version pattern, such as 1.0.0, or a date, such as 2021.01.01."];
-      components: ComponentConfigurationList.t
-        [@ocaml.doc "The components of the image recipe."];
+      components: ComponentConfigurationList.t option
+        [@ocaml.doc "The components included in the image recipe."];
       parentImage: NonEmptyString.t
         [@ocaml.doc
-          "The base image of the image recipe. The value of the string can be the ARN of the base image or an AMI ID. The format for the ARN follows this example: arn:aws:imagebuilder:us-west-2:aws:image/windows-server-2016-english-full-base-x86/x.x.x. You can provide the specific version that you want to use, or you can use a wildcard in all of the fields. If you enter an AMI ID for the string value, you must have access to the AMI, and the AMI must be in the same Region in which you are using Image Builder."];
+          "The base image for customizations specified in the image recipe. You can specify the parent image using one of the following options: AMI ID Image Builder image Amazon Resource Name (ARN) Amazon Web Services Systems Manager (SSM) Parameter Store Parameter, prefixed by ssm:, followed by the parameter name or ARN. Amazon Web Services Marketplace product ID If you enter an AMI ID or an SSM parameter that contains the AMI ID, you must have access to the AMI, and the AMI must be in the source Region."];
       blockDeviceMappings: InstanceBlockDeviceMappings.t option
         [@ocaml.doc "The block device mappings of the image recipe."];
       tags: TagMap.t option [@ocaml.doc "The tags of the image recipe."];
@@ -13647,42 +25381,47 @@ module CreateImageRecipeRequest =
         AdditionalInstanceConfiguration.t option
         [@ocaml.doc
           "Specify additional settings and launch scripts for your build instances."];
+      amiTags: TagMap.t option
+        [@ocaml.doc
+          "Tags that are applied to the AMI that Image Builder creates during the Build phase prior to image distribution."];
       clientToken: ClientToken.t
         [@ocaml.doc
-          "The idempotency token used to make this request idempotent."]}
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
     let context_ = "CreateImageRecipeRequest"
     let make ?description =
-      fun ?blockDeviceMappings ->
-        fun ?tags ->
-          fun ?workingDirectory ->
-            fun ?additionalInstanceConfiguration ->
-              fun ~name ->
-                fun ~semanticVersion ->
-                  fun ~components ->
-                    fun ~parentImage ->
-                      fun ~clientToken ->
-                        fun () ->
-                          {
-                            description;
-                            blockDeviceMappings;
-                            tags;
-                            workingDirectory;
-                            additionalInstanceConfiguration;
-                            name;
-                            semanticVersion;
-                            components;
-                            parentImage;
-                            clientToken
-                          }
+      fun ?components ->
+        fun ?blockDeviceMappings ->
+          fun ?tags ->
+            fun ?workingDirectory ->
+              fun ?additionalInstanceConfiguration ->
+                fun ?amiTags ->
+                  fun ~name ->
+                    fun ~semanticVersion ->
+                      fun ~parentImage ->
+                        fun ~clientToken ->
+                          fun () ->
+                            {
+                              description;
+                              components;
+                              blockDeviceMappings;
+                              tags;
+                              workingDirectory;
+                              additionalInstanceConfiguration;
+                              amiTags;
+                              name;
+                              semanticVersion;
+                              parentImage;
+                              clientToken
+                            }
     let to_value x =
       structure_to_value
         [("name", (Some (ResourceName.to_value x.name)));
         ("description",
           (Option.map x.description ~f:NonEmptyString.to_value));
         ("semanticVersion",
-          (Some (VersionNumber.to_value x.semanticVersion)));
+          (Some (WildcardVersionNumber.to_value x.semanticVersion)));
         ("components",
-          (Some (ComponentConfigurationList.to_value x.components)));
+          (Option.map x.components ~f:ComponentConfigurationList.to_value));
         ("parentImage", (Some (NonEmptyString.to_value x.parentImage)));
         ("blockDeviceMappings",
           (Option.map x.blockDeviceMappings
@@ -13693,12 +25432,15 @@ module CreateImageRecipeRequest =
         ("additionalInstanceConfiguration",
           (Option.map x.additionalInstanceConfiguration
              ~f:AdditionalInstanceConfiguration.to_value));
+        ("amiTags", (Option.map x.amiTags ~f:TagMap.to_value));
         ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let amiTags =
+        (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "amiTags") in
       let additionalInstanceConfiguration =
         (Option.map ~f:AdditionalInstanceConfiguration.of_xml)
           (Xml.child xml_arg0 "additionalInstanceConfiguration") in
@@ -13713,42 +25455,44 @@ module CreateImageRecipeRequest =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "parentImage") in
       let components =
-        ComponentConfigurationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "components") in
+        (Option.map ~f:ComponentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "components") in
       let semanticVersion =
-        VersionNumber.of_xml
+        WildcardVersionNumber.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "semanticVersion") in
       let description =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "description") in
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~clientToken ?additionalInstanceConfiguration ?workingDirectory
-        ?tags ?blockDeviceMappings ~parentImage ~components ~semanticVersion
-        ?description ~name ()
+      make ~clientToken ?amiTags ?additionalInstanceConfiguration
+        ?workingDirectory ?tags ?blockDeviceMappings ~parentImage ?components
+        ~semanticVersion ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let amiTags = field_map json__ "amiTags" TagMap.of_json in
       let additionalInstanceConfiguration =
-        field_map json "additionalInstanceConfiguration"
+        field_map json__ "additionalInstanceConfiguration"
           AdditionalInstanceConfiguration.of_json in
       let workingDirectory =
-        field_map json "workingDirectory" NonEmptyString.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+        field_map json__ "workingDirectory" NonEmptyString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let blockDeviceMappings =
-        field_map json "blockDeviceMappings"
+        field_map json__ "blockDeviceMappings"
           InstanceBlockDeviceMappings.of_json in
       let parentImage =
-        field_map_exn json "parentImage" NonEmptyString.of_json in
+        field_map_exn json__ "parentImage" NonEmptyString.of_json in
       let components =
-        field_map_exn json "components" ComponentConfigurationList.of_json in
+        field_map json__ "components" ComponentConfigurationList.of_json in
       let semanticVersion =
-        field_map_exn json "semanticVersion" VersionNumber.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
-      make ~clientToken ?additionalInstanceConfiguration ?workingDirectory
-        ?tags ?blockDeviceMappings ~parentImage ~components ~semanticVersion
-        ?description ~name ()
+        field_map_exn json__ "semanticVersion" WildcardVersionNumber.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ~clientToken ?amiTags ?additionalInstanceConfiguration
+        ?workingDirectory ?tags ?blockDeviceMappings ~parentImage ?components
+        ~semanticVersion ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new image recipe. Image recipes define how images are configured, tested, and assessed."]
@@ -13759,8 +25503,7 @@ module CreateImagePipelineResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       imagePipelineArn: ImagePipelineArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the image pipeline that was created by this request."]}
@@ -13902,11 +25645,11 @@ module CreateImagePipelineResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imagePipelineArn ?clientToken ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imagePipelineArn =
-        field_map json "imagePipelineArn" ImagePipelineArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imagePipelineArn" ImagePipelineArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imagePipelineArn ?clientToken ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13940,9 +25683,22 @@ module CreateImagePipelineRequest =
       status: PipelineStatus.t option
         [@ocaml.doc "The status of the image pipeline."];
       tags: TagMap.t option [@ocaml.doc "The tags of the image pipeline."];
+      imageTags: TagMap.t option
+        [@ocaml.doc
+          "The tags to be applied to the images produced by this pipeline."];
       clientToken: ClientToken.t
         [@ocaml.doc
-          "The idempotency token used to make this request idempotent."]}
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."];
+      imageScanningConfiguration: ImageScanningConfiguration.t option
+        [@ocaml.doc "Contains settings for vulnerability scans."];
+      workflows: WorkflowConfigurationList.t option
+        [@ocaml.doc "Contains an array of workflow configuration objects."];
+      executionRole: RoleNameOrArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) for the IAM role you create that grants Image Builder access to perform workflow actions."];
+      loggingConfiguration: PipelineLoggingConfiguration.t option
+        [@ocaml.doc
+          "Define logging configuration for the image build process."]}
     let context_ = "CreateImagePipelineRequest"
     let make ?description =
       fun ?imageRecipeArn ->
@@ -13953,24 +25709,34 @@ module CreateImagePipelineRequest =
                 fun ?schedule ->
                   fun ?status ->
                     fun ?tags ->
-                      fun ~name ->
-                        fun ~infrastructureConfigurationArn ->
-                          fun ~clientToken ->
-                            fun () ->
-                              {
-                                description;
-                                imageRecipeArn;
-                                containerRecipeArn;
-                                distributionConfigurationArn;
-                                imageTestsConfiguration;
-                                enhancedImageMetadataEnabled;
-                                schedule;
-                                status;
-                                tags;
-                                name;
-                                infrastructureConfigurationArn;
-                                clientToken
-                              }
+                      fun ?imageTags ->
+                        fun ?imageScanningConfiguration ->
+                          fun ?workflows ->
+                            fun ?executionRole ->
+                              fun ?loggingConfiguration ->
+                                fun ~name ->
+                                  fun ~infrastructureConfigurationArn ->
+                                    fun ~clientToken ->
+                                      fun () ->
+                                        {
+                                          description;
+                                          imageRecipeArn;
+                                          containerRecipeArn;
+                                          distributionConfigurationArn;
+                                          imageTestsConfiguration;
+                                          enhancedImageMetadataEnabled;
+                                          schedule;
+                                          status;
+                                          tags;
+                                          imageTags;
+                                          imageScanningConfiguration;
+                                          workflows;
+                                          executionRole;
+                                          loggingConfiguration;
+                                          name;
+                                          infrastructureConfigurationArn;
+                                          clientToken
+                                        }
     let to_value x =
       structure_to_value
         [("name", (Some (ResourceName.to_value x.name)));
@@ -13996,12 +25762,37 @@ module CreateImagePipelineRequest =
         ("schedule", (Option.map x.schedule ~f:Schedule.to_value));
         ("status", (Option.map x.status ~f:PipelineStatus.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+        ("imageTags", (Option.map x.imageTags ~f:TagMap.to_value));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("imageScanningConfiguration",
+          (Option.map x.imageScanningConfiguration
+             ~f:ImageScanningConfiguration.to_value));
+        ("workflows",
+          (Option.map x.workflows ~f:WorkflowConfigurationList.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:RoleNameOrArn.to_value));
+        ("loggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:PipelineLoggingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let loggingConfiguration =
+        (Option.map ~f:PipelineLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
+      let executionRole =
+        (Option.map ~f:RoleNameOrArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let workflows =
+        (Option.map ~f:WorkflowConfigurationList.of_xml)
+          (Xml.child xml_arg0 "workflows") in
+      let imageScanningConfiguration =
+        (Option.map ~f:ImageScanningConfiguration.of_xml)
+          (Xml.child xml_arg0 "imageScanningConfiguration") in
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let imageTags =
+        (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "imageTags") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
         (Option.map ~f:PipelineStatus.of_xml) (Xml.child xml_arg0 "status") in
@@ -14031,37 +25822,52 @@ module CreateImagePipelineRequest =
           (Xml.child xml_arg0 "description") in
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~clientToken ?tags ?status ?schedule ?enhancedImageMetadataEnabled
-        ?imageTestsConfiguration ?distributionConfigurationArn
-        ~infrastructureConfigurationArn ?containerRecipeArn ?imageRecipeArn
-        ?description ~name ()
+      make ?loggingConfiguration ?executionRole ?workflows
+        ?imageScanningConfiguration ~clientToken ?imageTags ?tags ?status
+        ?schedule ?enhancedImageMetadataEnabled ?imageTestsConfiguration
+        ?distributionConfigurationArn ~infrastructureConfigurationArn
+        ?containerRecipeArn ?imageRecipeArn ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let status = field_map json "status" PipelineStatus.of_json in
-      let schedule = field_map json "schedule" Schedule.of_json in
+    let of_json json__ =
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          PipelineLoggingConfiguration.of_json in
+      let executionRole =
+        field_map json__ "executionRole" RoleNameOrArn.of_json in
+      let workflows =
+        field_map json__ "workflows" WorkflowConfigurationList.of_json in
+      let imageScanningConfiguration =
+        field_map json__ "imageScanningConfiguration"
+          ImageScanningConfiguration.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let imageTags = field_map json__ "imageTags" TagMap.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" PipelineStatus.of_json in
+      let schedule = field_map json__ "schedule" Schedule.of_json in
       let enhancedImageMetadataEnabled =
-        field_map json "enhancedImageMetadataEnabled" NullableBoolean.of_json in
+        field_map json__ "enhancedImageMetadataEnabled"
+          NullableBoolean.of_json in
       let imageTestsConfiguration =
-        field_map json "imageTestsConfiguration"
+        field_map json__ "imageTestsConfiguration"
           ImageTestsConfiguration.of_json in
       let distributionConfigurationArn =
-        field_map json "distributionConfigurationArn"
+        field_map json__ "distributionConfigurationArn"
           DistributionConfigurationArn.of_json in
       let infrastructureConfigurationArn =
-        field_map_exn json "infrastructureConfigurationArn"
+        field_map_exn json__ "infrastructureConfigurationArn"
           InfrastructureConfigurationArn.of_json in
       let containerRecipeArn =
-        field_map json "containerRecipeArn" ContainerRecipeArn.of_json in
+        field_map json__ "containerRecipeArn" ContainerRecipeArn.of_json in
       let imageRecipeArn =
-        field_map json "imageRecipeArn" ImageRecipeArn.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
-      make ~clientToken ?tags ?status ?schedule ?enhancedImageMetadataEnabled
-        ?imageTestsConfiguration ?distributionConfigurationArn
-        ~infrastructureConfigurationArn ?containerRecipeArn ?imageRecipeArn
-        ?description ~name ()
+        field_map json__ "imageRecipeArn" ImageRecipeArn.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ?loggingConfiguration ?executionRole ?workflows
+        ?imageScanningConfiguration ~clientToken ?imageTags ?tags ?status
+        ?schedule ?enhancedImageMetadataEnabled ?imageTestsConfiguration
+        ?distributionConfigurationArn ~infrastructureConfigurationArn
+        ?containerRecipeArn ?imageRecipeArn ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new image pipeline. Image pipelines enable you to automate the creation and distribution of images."]
@@ -14072,8 +25878,7 @@ module CreateDistributionConfigurationResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       distributionConfigurationArn: DistributionConfigurationArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the distribution configuration that was created by this request."]}
@@ -14228,12 +26033,12 @@ module CreateDistributionConfigurationResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?distributionConfigurationArn ?clientToken ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let distributionConfigurationArn =
-        field_map json "distributionConfigurationArn"
+        field_map json__ "distributionConfigurationArn"
           DistributionConfigurationArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?distributionConfigurationArn ?clientToken ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14252,7 +26057,7 @@ module CreateDistributionConfigurationRequest =
         [@ocaml.doc "The tags of the distribution configuration."];
       clientToken: ClientToken.t
         [@ocaml.doc
-          "The idempotency token of the distribution configuration."]}
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
     let context_ = "CreateDistributionConfigurationRequest"
     let make ?description =
       fun ?tags ->
@@ -14285,13 +26090,14 @@ module CreateDistributionConfigurationRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~clientToken ?tags ~distributions ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let distributions =
-        field_map_exn json "distributions" DistributionList.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map_exn json__ "distributions" DistributionList.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       make ~clientToken ?tags ~distributions ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14303,10 +26109,13 @@ module CreateContainerRecipeResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc "The client token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       containerRecipeArn: ContainerRecipeArn.t option
         [@ocaml.doc
-          "Returns the Amazon Resource Name (ARN) of the container recipe that the request created."]}
+          "Returns the Amazon Resource Name (ARN) of the container recipe that the request created."];
+      latestVersionReferences: LatestVersionReferences.t option
+        [@ocaml.doc
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -14324,7 +26133,14 @@ module CreateContainerRecipeResponse =
     let make ?requestId =
       fun ?clientToken ->
         fun ?containerRecipeArn ->
-          fun () -> { requestId; clientToken; containerRecipeArn }
+          fun ?latestVersionReferences ->
+            fun () ->
+              {
+                requestId;
+                clientToken;
+                containerRecipeArn;
+                latestVersionReferences
+              }
     let error_of_json name json =
       match name with
       | "CallRateLimitExceededException" ->
@@ -14443,9 +26259,15 @@ module CreateContainerRecipeResponse =
         [("requestId", (Option.map x.requestId ~f:NonEmptyString.to_value));
         ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
         ("containerRecipeArn",
-          (Option.map x.containerRecipeArn ~f:ContainerRecipeArn.to_value))]
+          (Option.map x.containerRecipeArn ~f:ContainerRecipeArn.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
       let containerRecipeArn =
         (Option.map ~f:ContainerRecipeArn.of_xml)
           (Xml.child xml_arg0 "containerRecipeArn") in
@@ -14454,14 +26276,19 @@ module CreateContainerRecipeResponse =
       let requestId =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
-      make ?containerRecipeArn ?clientToken ?requestId ()
+      make ?latestVersionReferences ?containerRecipeArn ?clientToken
+        ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
       let containerRecipeArn =
-        field_map json "containerRecipeArn" ContainerRecipeArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
-      make ?containerRecipeArn ?clientToken ?requestId ()
+        field_map json__ "containerRecipeArn" ContainerRecipeArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?latestVersionReferences ?containerRecipeArn ?clientToken
+        ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new container recipe. Container recipes define how images are configured, tested, and assessed."]
@@ -14474,12 +26301,11 @@ module CreateContainerRecipeRequest =
       name: ResourceName.t [@ocaml.doc "The name of the container recipe."];
       description: NonEmptyString.t option
         [@ocaml.doc "The description of the container recipe."];
-      semanticVersion: VersionNumber.t
+      semanticVersion: WildcardVersionNumber.t
         [@ocaml.doc
           "The semantic version of the container recipe. This version follows the semantic version syntax. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Assignment: For the first three nodes you can assign any positive integer value, including zero, with an upper limit of 2^30-1, or 1073741823 for each node. Image Builder automatically assigns the build number to the fourth node. Patterns: You can use any numeric pattern that adheres to the assignment requirements for the nodes that you can assign. For example, you might choose a software version pattern, such as 1.0.0, or a date, such as 2021.01.01."];
-      components: ComponentConfigurationList.t
-        [@ocaml.doc
-          "Components for build and test that are included in the container recipe."];
+      components: ComponentConfigurationList.t option
+        [@ocaml.doc "The components included in the container recipe."];
       instanceConfiguration: InstanceConfiguration.t option
         [@ocaml.doc
           "A group of options that can be used to configure an instance for building and testing container images."];
@@ -14506,29 +26332,31 @@ module CreateContainerRecipeRequest =
         [@ocaml.doc "The destination repository for the container image."];
       kmsKeyId: NonEmptyString.t option
         [@ocaml.doc
-          "Identifies which KMS key is used to encrypt the container image."];
+          "The Amazon Resource Name (ARN) that uniquely identifies which KMS key is used to encrypt the Dockerfile template. This can be either the Key ARN or the Alias ARN. For more information, see Key identifiers (KeyId) in the Key Management Service Developer Guide."];
       clientToken: ClientToken.t
-        [@ocaml.doc "The client token used to make this request idempotent."]}
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
     let context_ = "CreateContainerRecipeRequest"
     let make ?description =
-      fun ?instanceConfiguration ->
-        fun ?dockerfileTemplateData ->
-          fun ?dockerfileTemplateUri ->
-            fun ?platformOverride ->
-              fun ?imageOsVersionOverride ->
-                fun ?tags ->
-                  fun ?workingDirectory ->
-                    fun ?kmsKeyId ->
-                      fun ~containerType ->
-                        fun ~name ->
-                          fun ~semanticVersion ->
-                            fun ~components ->
+      fun ?components ->
+        fun ?instanceConfiguration ->
+          fun ?dockerfileTemplateData ->
+            fun ?dockerfileTemplateUri ->
+              fun ?platformOverride ->
+                fun ?imageOsVersionOverride ->
+                  fun ?tags ->
+                    fun ?workingDirectory ->
+                      fun ?kmsKeyId ->
+                        fun ~containerType ->
+                          fun ~name ->
+                            fun ~semanticVersion ->
                               fun ~parentImage ->
                                 fun ~targetRepository ->
                                   fun ~clientToken ->
                                     fun () ->
                                       {
                                         description;
+                                        components;
                                         instanceConfiguration;
                                         dockerfileTemplateData;
                                         dockerfileTemplateUri;
@@ -14540,7 +26368,6 @@ module CreateContainerRecipeRequest =
                                         containerType;
                                         name;
                                         semanticVersion;
-                                        components;
                                         parentImage;
                                         targetRepository;
                                         clientToken
@@ -14552,9 +26379,9 @@ module CreateContainerRecipeRequest =
         ("description",
           (Option.map x.description ~f:NonEmptyString.to_value));
         ("semanticVersion",
-          (Some (VersionNumber.to_value x.semanticVersion)));
+          (Some (WildcardVersionNumber.to_value x.semanticVersion)));
         ("components",
-          (Some (ComponentConfigurationList.to_value x.components)));
+          (Option.map x.components ~f:ComponentConfigurationList.to_value));
         ("instanceConfiguration",
           (Option.map x.instanceConfiguration
              ~f:InstanceConfiguration.to_value));
@@ -14608,10 +26435,10 @@ module CreateContainerRecipeRequest =
         (Option.map ~f:InstanceConfiguration.of_xml)
           (Xml.child xml_arg0 "instanceConfiguration") in
       let components =
-        ComponentConfigurationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "components") in
+        (Option.map ~f:ComponentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "components") in
       let semanticVersion =
-        VersionNumber.of_xml
+        WildcardVersionNumber.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "semanticVersion") in
       let description =
         (Option.map ~f:NonEmptyString.of_xml)
@@ -14624,42 +26451,44 @@ module CreateContainerRecipeRequest =
       make ~clientToken ?kmsKeyId ~targetRepository ?workingDirectory ?tags
         ~parentImage ?imageOsVersionOverride ?platformOverride
         ?dockerfileTemplateUri ?dockerfileTemplateData ?instanceConfiguration
-        ~components ~semanticVersion ?description ~name ~containerType ()
+        ?components ~semanticVersion ?description ~name ~containerType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
       let targetRepository =
-        field_map_exn json "targetRepository"
+        field_map_exn json__ "targetRepository"
           TargetContainerRepository.of_json in
       let workingDirectory =
-        field_map json "workingDirectory" NonEmptyString.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+        field_map json__ "workingDirectory" NonEmptyString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let parentImage =
-        field_map_exn json "parentImage" NonEmptyString.of_json in
+        field_map_exn json__ "parentImage" NonEmptyString.of_json in
       let imageOsVersionOverride =
-        field_map json "imageOsVersionOverride" NonEmptyString.of_json in
+        field_map json__ "imageOsVersionOverride" NonEmptyString.of_json in
       let platformOverride =
-        field_map json "platformOverride" Platform.of_json in
+        field_map json__ "platformOverride" Platform.of_json in
       let dockerfileTemplateUri =
-        field_map json "dockerfileTemplateUri" Uri_.of_json in
+        field_map json__ "dockerfileTemplateUri" Uri_.of_json in
       let dockerfileTemplateData =
-        field_map json "dockerfileTemplateData"
+        field_map json__ "dockerfileTemplateData"
           InlineDockerFileTemplate.of_json in
       let instanceConfiguration =
-        field_map json "instanceConfiguration" InstanceConfiguration.of_json in
+        field_map json__ "instanceConfiguration"
+          InstanceConfiguration.of_json in
       let components =
-        field_map_exn json "components" ComponentConfigurationList.of_json in
+        field_map json__ "components" ComponentConfigurationList.of_json in
       let semanticVersion =
-        field_map_exn json "semanticVersion" VersionNumber.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
+        field_map_exn json__ "semanticVersion" WildcardVersionNumber.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
       let containerType =
-        field_map_exn json "containerType" ContainerType.of_json in
+        field_map_exn json__ "containerType" ContainerType.of_json in
       make ~clientToken ?kmsKeyId ~targetRepository ?workingDirectory ?tags
         ~parentImage ?imageOsVersionOverride ?platformOverride
         ?dockerfileTemplateUri ?dockerfileTemplateData ?instanceConfiguration
-        ~components ~semanticVersion ?description ~name ~containerType ()
+        ?components ~semanticVersion ?description ~name ~containerType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new container recipe. Container recipes define how images are configured, tested, and assessed."]
@@ -14670,14 +26499,17 @@ module CreateComponentResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc
-          "The idempotency token used to make this request idempotent."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       componentBuildVersionArn: ComponentBuildVersionArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the component that was created by this request."]}
+          "The Amazon Resource Name (ARN) of the component that the request created."];
+      latestVersionReferences: LatestVersionReferences.t option
+        [@ocaml.doc
+          "The resource ARNs with different wildcard variations of semantic versioning."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
+      | `DryRunOperationException of DryRunOperationException.t 
       | `ForbiddenException of ForbiddenException.t 
       | `IdempotentParameterMismatchException of
           IdempotentParameterMismatchException.t 
@@ -14693,13 +26525,22 @@ module CreateComponentResponse =
     let make ?requestId =
       fun ?clientToken ->
         fun ?componentBuildVersionArn ->
-          fun () -> { requestId; clientToken; componentBuildVersionArn }
+          fun ?latestVersionReferences ->
+            fun () ->
+              {
+                requestId;
+                clientToken;
+                componentBuildVersionArn;
+                latestVersionReferences
+              }
     let error_of_json name json =
       match name with
       | "CallRateLimitExceededException" ->
           `CallRateLimitExceededException
             (CallRateLimitExceededException.of_json json)
       | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DryRunOperationException" ->
+          `DryRunOperationException (DryRunOperationException.of_json json)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_json json)
       | "IdempotentParameterMismatchException" ->
@@ -14732,6 +26573,8 @@ module CreateComponentResponse =
           `CallRateLimitExceededException
             (CallRateLimitExceededException.of_xml xml)
       | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DryRunOperationException" ->
+          `DryRunOperationException (DryRunOperationException.of_xml xml)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_xml xml)
       | "IdempotentParameterMismatchException" ->
@@ -14766,6 +26609,10 @@ module CreateComponentResponse =
           `Assoc
             [("error", (`String "ClientException"));
             ("details", (ClientException.to_json e))]
+      | `DryRunOperationException e ->
+          `Assoc
+            [("error", (`String "DryRunOperationException"));
+            ("details", (DryRunOperationException.to_json e))]
       | `ForbiddenException e ->
           `Assoc
             [("error", (`String "ForbiddenException"));
@@ -14813,9 +26660,15 @@ module CreateComponentResponse =
         ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
         ("componentBuildVersionArn",
           (Option.map x.componentBuildVersionArn
-             ~f:ComponentBuildVersionArn.to_value))]
+             ~f:ComponentBuildVersionArn.to_value));
+        ("latestVersionReferences",
+          (Option.map x.latestVersionReferences
+             ~f:LatestVersionReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestVersionReferences =
+        (Option.map ~f:LatestVersionReferences.of_xml)
+          (Xml.child xml_arg0 "latestVersionReferences") in
       let componentBuildVersionArn =
         (Option.map ~f:ComponentBuildVersionArn.of_xml)
           (Xml.child xml_arg0 "componentBuildVersionArn") in
@@ -14824,15 +26677,20 @@ module CreateComponentResponse =
       let requestId =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
-      make ?componentBuildVersionArn ?clientToken ?requestId ()
+      make ?latestVersionReferences ?componentBuildVersionArn ?clientToken
+        ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let latestVersionReferences =
+        field_map json__ "latestVersionReferences"
+          LatestVersionReferences.of_json in
       let componentBuildVersionArn =
-        field_map json "componentBuildVersionArn"
+        field_map json__ "componentBuildVersionArn"
           ComponentBuildVersionArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
-      make ?componentBuildVersionArn ?clientToken ?requestId ()
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
+      make ?latestVersionReferences ?componentBuildVersionArn ?clientToken
+        ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new component that can be used to build, validate, test, and assess your image. The component is based on a YAML document that you specify using exactly one of the following methods: Inline, using the data property in the request body. A URL that points to a YAML document file stored in Amazon S3, using the uri property in the request body."]
@@ -14845,12 +26703,12 @@ module CreateComponentRequest =
         [@ocaml.doc
           "The semantic version of the component. This version follows the semantic version syntax. The semantic version has four nodes: <major>.<minor>.<patch>/<build>. You can assign values for the first three, and can filter on all of them. Assignment: For the first three nodes you can assign any positive integer value, including zero, with an upper limit of 2^30-1, or 1073741823 for each node. Image Builder automatically assigns the build number to the fourth node. Patterns: You can use any numeric pattern that adheres to the assignment requirements for the nodes that you can assign. For example, you might choose a software version pattern, such as 1.0.0, or a date, such as 2021.01.01."];
       description: NonEmptyString.t option
-        [@ocaml.doc
-          "The description of the component. Describes the contents of the component."];
+        [@ocaml.doc "Describes the contents of the component."];
       changeDescription: NonEmptyString.t option
         [@ocaml.doc
-          "The change description of the component. Describes what change has been made in this version, or what makes this version different from other versions of this component."];
-      platform: Platform.t [@ocaml.doc "The platform of the component."];
+          "The change description of the component. Describes what change has been made in this version, or what makes this version different from other versions of the component."];
+      platform: Platform.t
+        [@ocaml.doc "The operating system platform of the component."];
       supportedOsVersions: OsVersionList.t option
         [@ocaml.doc
           "The operating system (OS) version supported by the component. If the OS information is available, a prefix match is performed against the base image OS version during image recipe creation."];
@@ -14862,10 +26720,15 @@ module CreateComponentRequest =
           "The uri of a YAML component document file. This must be an S3 URL (s3://bucket/key), and the requester must have permission to access the S3 bucket it points to. If you use Amazon S3, you can specify component content up to your service quota. Alternatively, you can specify the YAML document inline, using the component data property. You cannot specify both properties."];
       kmsKeyId: NonEmptyString.t option
         [@ocaml.doc
-          "The ID of the KMS key that should be used to encrypt this component."];
-      tags: TagMap.t option [@ocaml.doc "The tags of the component."];
+          "The Amazon Resource Name (ARN) that uniquely identifies the KMS key used to encrypt this component. This can be either the Key ARN or the Alias ARN. For more information, see Key identifiers (KeyId) in the Key Management Service Developer Guide."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags that apply to the component."];
       clientToken: ClientToken.t
-        [@ocaml.doc "The idempotency token of the component."]}
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."];
+      dryRun: Boolean.t option
+        [@ocaml.doc
+          "Validates the required permissions for the operation and the request parameters, without actually making the request, and provides an error response. Upon a successful request, the error response is DryRunOperationException."]}
     let context_ = "CreateComponentRequest"
     let make ?description =
       fun ?changeDescription ->
@@ -14874,24 +26737,26 @@ module CreateComponentRequest =
             fun ?uri ->
               fun ?kmsKeyId ->
                 fun ?tags ->
-                  fun ~name ->
-                    fun ~semanticVersion ->
-                      fun ~platform ->
-                        fun ~clientToken ->
-                          fun () ->
-                            {
-                              description;
-                              changeDescription;
-                              supportedOsVersions;
-                              data;
-                              uri;
-                              kmsKeyId;
-                              tags;
-                              name;
-                              semanticVersion;
-                              platform;
-                              clientToken
-                            }
+                  fun ?dryRun ->
+                    fun ~name ->
+                      fun ~semanticVersion ->
+                        fun ~platform ->
+                          fun ~clientToken ->
+                            fun () ->
+                              {
+                                description;
+                                changeDescription;
+                                supportedOsVersions;
+                                data;
+                                uri;
+                                kmsKeyId;
+                                tags;
+                                dryRun;
+                                name;
+                                semanticVersion;
+                                platform;
+                                clientToken
+                              }
     let to_value x =
       structure_to_value
         [("name", (Some (ResourceName.to_value x.name)));
@@ -14908,9 +26773,12 @@ module CreateComponentRequest =
         ("uri", (Option.map x.uri ~f:Uri_.to_value));
         ("kmsKeyId", (Option.map x.kmsKeyId ~f:NonEmptyString.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("dryRun", (Option.map x.dryRun ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dryRun =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
@@ -14937,29 +26805,192 @@ module CreateComponentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "semanticVersion") in
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~clientToken ?tags ?kmsKeyId ?uri ?data ?supportedOsVersions
-        ~platform ?changeDescription ?description ~semanticVersion ~name ()
+      make ?dryRun ~clientToken ?tags ?kmsKeyId ?uri ?data
+        ?supportedOsVersions ~platform ?changeDescription ?description
+        ~semanticVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
-      let uri = field_map json "uri" Uri_.of_json in
-      let data = field_map json "data" InlineComponentData.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "dryRun" Boolean.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
+      let uri = field_map json__ "uri" Uri_.of_json in
+      let data = field_map json__ "data" InlineComponentData.of_json in
       let supportedOsVersions =
-        field_map json "supportedOsVersions" OsVersionList.of_json in
-      let platform = field_map_exn json "platform" Platform.of_json in
+        field_map json__ "supportedOsVersions" OsVersionList.of_json in
+      let platform = field_map_exn json__ "platform" Platform.of_json in
       let changeDescription =
-        field_map json "changeDescription" NonEmptyString.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
+        field_map json__ "changeDescription" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       let semanticVersion =
-        field_map_exn json "semanticVersion" VersionNumber.of_json in
-      let name = field_map_exn json "name" ResourceName.of_json in
-      make ~clientToken ?tags ?kmsKeyId ?uri ?data ?supportedOsVersions
-        ~platform ?changeDescription ?description ~semanticVersion ~name ()
+        field_map_exn json__ "semanticVersion" VersionNumber.of_json in
+      let name = field_map_exn json__ "name" ResourceName.of_json in
+      make ?dryRun ~clientToken ?tags ?kmsKeyId ?uri ?data
+        ?supportedOsVersions ~platform ?changeDescription ?description
+        ~semanticVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new component that can be used to build, validate, test, and assess your image. The component is based on a YAML document that you specify using exactly one of the following methods: Inline, using the data property in the request body. A URL that points to a YAML document file stored in Amazon S3, using the uri property in the request body."]
+module CancelLifecycleExecutionResponse =
+  struct
+    type nonrec t =
+      {
+      lifecycleExecutionId: LifecycleExecutionId.t option
+        [@ocaml.doc
+          "The unique identifier for the image lifecycle runtime instance that was canceled."]}
+    type nonrec error =
+      [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ServiceException of ServiceException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecycleExecutionId = fun () -> { lifecycleExecutionId }
+    let error_of_json name json =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CallRateLimitExceededException" ->
+          `CallRateLimitExceededException
+            (CallRateLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CallRateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CallRateLimitExceededException"));
+            ("details", (CallRateLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("lifecycleExecutionId",
+           (Option.map x.lifecycleExecutionId
+              ~f:LifecycleExecutionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecycleExecutionId =
+        (Option.map ~f:LifecycleExecutionId.of_xml)
+          (Xml.child xml_arg0 "lifecycleExecutionId") in
+      make ?lifecycleExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecycleExecutionId =
+        field_map json__ "lifecycleExecutionId" LifecycleExecutionId.of_json in
+      make ?lifecycleExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancel a specific image lifecycle policy runtime instance."]
+module CancelLifecycleExecutionRequest =
+  struct
+    type nonrec t =
+      {
+      lifecycleExecutionId: LifecycleExecutionId.t
+        [@ocaml.doc
+          "Identifies the specific runtime instance of the image lifecycle to cancel."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
+    let context_ = "CancelLifecycleExecutionRequest"
+    let make ~lifecycleExecutionId =
+      fun ~clientToken -> fun () -> { lifecycleExecutionId; clientToken }
+    let to_value x =
+      structure_to_value
+        [("lifecycleExecutionId",
+           (Some (LifecycleExecutionId.to_value x.lifecycleExecutionId)));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let lifecycleExecutionId =
+        LifecycleExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "lifecycleExecutionId") in
+      make ~clientToken ~lifecycleExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let lifecycleExecutionId =
+        field_map_exn json__ "lifecycleExecutionId"
+          LifecycleExecutionId.of_json in
+      make ~clientToken ~lifecycleExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancel a specific image lifecycle policy runtime instance."]
 module CancelImageCreationResponse =
   struct
     type nonrec t =
@@ -14967,10 +26998,10 @@ module CancelImageCreationResponse =
       requestId: NonEmptyString.t option
         [@ocaml.doc "The request ID that uniquely identifies this request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc "The idempotency token that was used for this request."];
+        [@ocaml.doc "The client token that uniquely identifies the request."];
       imageBuildVersionArn: ImageBuildVersionArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the image whose creation has been cancelled."]}
+          "The Amazon Resource Name (ARN) of the image whose creation this request canceled."]}
     type nonrec error =
       [ `CallRateLimitExceededException of CallRateLimitExceededException.t 
       | `ClientException of ClientException.t 
@@ -15087,11 +27118,11 @@ module CancelImageCreationResponse =
           (Xml.child xml_arg0 "requestId") in
       make ?imageBuildVersionArn ?clientToken ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageBuildVersionArn =
-        field_map json "imageBuildVersionArn" ImageBuildVersionArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let requestId = field_map json "requestId" NonEmptyString.of_json in
+        field_map json__ "imageBuildVersionArn" ImageBuildVersionArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let requestId = field_map json__ "requestId" NonEmptyString.of_json in
       make ?imageBuildVersionArn ?clientToken ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15102,7 +27133,7 @@ module CancelImageCreationRequest =
       {
       imageBuildVersionArn: ImageBuildVersionArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the image whose creation you want to cancel."];
+          "The Amazon Resource Name (ARN) of the image that you want to cancel creation for."];
       clientToken: ClientToken.t
         [@ocaml.doc
           "Unique, case-sensitive identifier you provide to ensure idempotency of the request. For more information, see Ensuring idempotency in the Amazon EC2 API Reference."]}
@@ -15124,10 +27155,11 @@ module CancelImageCreationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
       make ~clientToken ~imageBuildVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
       let imageBuildVersionArn =
-        field_map_exn json "imageBuildVersionArn"
+        field_map_exn json__ "imageBuildVersionArn"
           ImageBuildVersionArn.of_json in
       make ~clientToken ~imageBuildVersionArn ()
     let to_json v = composed_to_json to_value v

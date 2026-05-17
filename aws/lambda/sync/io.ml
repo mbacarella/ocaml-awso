@@ -15,8 +15,12 @@ let add_layer_version_permission ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddLayerVersionPermission input
 let add_permission ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddPermission input
+let checkpoint_durable_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CheckpointDurableExecution input
 let create_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAlias input
+let create_capacity_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCapacityProvider input
 let create_code_signing_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCodeSigningConfig input
 let create_event_source_mapping ?endpoint_url ?cfg input =
@@ -27,6 +31,8 @@ let create_function_url_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFunctionUrlConfig input
 let delete_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAlias input
+let delete_capacity_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCapacityProvider input
 let delete_code_signing_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCodeSigningConfig input
 let delete_event_source_mapping ?endpoint_url ?cfg input =
@@ -49,8 +55,16 @@ let get_account_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAccountSettings input
 let get_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAlias input
+let get_capacity_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCapacityProvider input
 let get_code_signing_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCodeSigningConfig input
+let get_durable_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDurableExecution input
+let get_durable_execution_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDurableExecutionHistory input
+let get_durable_execution_state ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDurableExecutionState input
 let get_event_source_mapping ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEventSourceMapping input
 let get_function ?endpoint_url ?cfg input =
@@ -63,6 +77,10 @@ let get_function_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFunctionConfiguration input
 let get_function_event_invoke_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFunctionEventInvokeConfig input
+let get_function_recursion_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetFunctionRecursionConfig input
+let get_function_scaling_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetFunctionScalingConfig input
 let get_function_url_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFunctionUrlConfig input
 let get_layer_version ?endpoint_url ?cfg input =
@@ -75,20 +93,31 @@ let get_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPolicy input
 let get_provisioned_concurrency_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetProvisionedConcurrencyConfig input
+let get_runtime_management_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRuntimeManagementConfig input
 let invoke ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.Invoke input
 let invoke_async ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.InvokeAsync input
+let invoke_with_response_stream ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.InvokeWithResponseStream input
 let list_aliases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAliases input
+let list_capacity_providers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCapacityProviders input
 let list_code_signing_configs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCodeSigningConfigs input
+let list_durable_executions_by_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDurableExecutionsByFunction input
 let list_event_source_mappings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEventSourceMappings input
 let list_function_event_invoke_configs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFunctionEventInvokeConfigs input
 let list_function_url_configs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFunctionUrlConfigs input
+let list_function_versions_by_capacity_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFunctionVersionsByCapacityProvider
+    input
 let list_functions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFunctions input
 let list_functions_by_code_signing_config ?endpoint_url ?cfg input =
@@ -113,18 +142,35 @@ let put_function_concurrency ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutFunctionConcurrency input
 let put_function_event_invoke_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutFunctionEventInvokeConfig input
+let put_function_recursion_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutFunctionRecursionConfig input
+let put_function_scaling_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutFunctionScalingConfig input
 let put_provisioned_concurrency_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutProvisionedConcurrencyConfig input
+let put_runtime_management_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutRuntimeManagementConfig input
 let remove_layer_version_permission ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveLayerVersionPermission input
 let remove_permission ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemovePermission input
+let send_durable_execution_callback_failure ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SendDurableExecutionCallbackFailure input
+let send_durable_execution_callback_heartbeat ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SendDurableExecutionCallbackHeartbeat
+    input
+let send_durable_execution_callback_success ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SendDurableExecutionCallbackSuccess input
+let stop_durable_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopDurableExecution input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAlias input
+let update_capacity_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCapacityProvider input
 let update_code_signing_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCodeSigningConfig input
 let update_event_source_mapping ?endpoint_url ?cfg input =

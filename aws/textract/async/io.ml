@@ -17,17 +17,47 @@ let analyze_expense ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AnalyzeExpense input
 let analyze_i_d ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AnalyzeID input
+let create_adapter ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAdapter input
+let create_adapter_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAdapterVersion input
+let delete_adapter ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAdapter input
+let delete_adapter_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAdapterVersion input
 let detect_document_text ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetectDocumentText input
+let get_adapter ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAdapter input
+let get_adapter_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAdapterVersion input
 let get_document_analysis ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDocumentAnalysis input
 let get_document_text_detection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDocumentTextDetection input
 let get_expense_analysis ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetExpenseAnalysis input
+let get_lending_analysis ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLendingAnalysis input
+let get_lending_analysis_summary ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLendingAnalysisSummary input
+let list_adapter_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAdapterVersions input
+let list_adapters ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAdapters input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let start_document_analysis ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartDocumentAnalysis input
 let start_document_text_detection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartDocumentTextDetection input
 let start_expense_analysis ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartExpenseAnalysis input
+let start_lending_analysis ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartLendingAnalysis input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_adapter ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAdapter input

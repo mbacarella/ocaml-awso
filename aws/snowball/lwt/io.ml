@@ -53,6 +53,10 @@ let list_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListJobs input
 let list_long_term_pricing ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListLongTermPricing input
+let list_pickup_locations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPickupLocations input
+let list_service_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListServiceVersions input
 let update_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCluster input
 let update_job ?endpoint_url ?cfg input =

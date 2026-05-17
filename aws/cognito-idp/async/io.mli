@@ -6,6 +6,12 @@ val add_custom_attributes :
       AddCustomAttributesRequest.t ->
         (AddCustomAttributesResponse.t, AddCustomAttributesResponse.error)
           Result.t Async.Deferred.t
+val add_user_pool_client_secret :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AddUserPoolClientSecretRequest.t ->
+        (AddUserPoolClientSecretResponse.t,
+          AddUserPoolClientSecretResponse.error) Result.t Async.Deferred.t
 val admin_add_user_to_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -170,6 +176,13 @@ val change_password :
       ChangePasswordRequest.t ->
         (ChangePasswordResponse.t, ChangePasswordResponse.error) Result.t
           Async.Deferred.t
+val complete_web_authn_registration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CompleteWebAuthnRegistrationRequest.t ->
+        (CompleteWebAuthnRegistrationResponse.t,
+          CompleteWebAuthnRegistrationResponse.error) Result.t
+          Async.Deferred.t
 val confirm_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -200,12 +213,24 @@ val create_identity_provider :
       CreateIdentityProviderRequest.t ->
         (CreateIdentityProviderResponse.t,
           CreateIdentityProviderResponse.error) Result.t Async.Deferred.t
+val create_managed_login_branding :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateManagedLoginBrandingRequest.t ->
+        (CreateManagedLoginBrandingResponse.t,
+          CreateManagedLoginBrandingResponse.error) Result.t Async.Deferred.t
 val create_resource_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceServerRequest.t ->
         (CreateResourceServerResponse.t, CreateResourceServerResponse.error)
           Result.t Async.Deferred.t
+val create_terms :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTermsRequest.t ->
+        (CreateTermsResponse.t, CreateTermsResponse.error) Result.t
+          Async.Deferred.t
 val create_user_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -239,10 +264,19 @@ val delete_identity_provider :
     ?cfg:Awso.Cfg.t ->
       DeleteIdentityProviderRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
+val delete_managed_login_branding :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteManagedLoginBrandingRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val delete_resource_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourceServerRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_terms :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteTermsRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -261,18 +295,44 @@ val delete_user_pool_client :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUserPoolClientRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_user_pool_client_secret :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteUserPoolClientSecretRequest.t ->
+        (DeleteUserPoolClientSecretResponse.t,
+          DeleteUserPoolClientSecretResponse.error) Result.t Async.Deferred.t
 val delete_user_pool_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUserPoolDomainRequest.t ->
         (DeleteUserPoolDomainResponse.t, DeleteUserPoolDomainResponse.error)
           Result.t Async.Deferred.t
+val delete_web_authn_credential :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWebAuthnCredentialRequest.t ->
+        (DeleteWebAuthnCredentialResponse.t,
+          DeleteWebAuthnCredentialResponse.error) Result.t Async.Deferred.t
 val describe_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIdentityProviderRequest.t ->
         (DescribeIdentityProviderResponse.t,
           DescribeIdentityProviderResponse.error) Result.t Async.Deferred.t
+val describe_managed_login_branding :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeManagedLoginBrandingRequest.t ->
+        (DescribeManagedLoginBrandingResponse.t,
+          DescribeManagedLoginBrandingResponse.error) Result.t
+          Async.Deferred.t
+val describe_managed_login_branding_by_client :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeManagedLoginBrandingByClientRequest.t ->
+        (DescribeManagedLoginBrandingByClientResponse.t,
+          DescribeManagedLoginBrandingByClientResponse.error) Result.t
+          Async.Deferred.t
 val describe_resource_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -285,6 +345,12 @@ val describe_risk_configuration :
       DescribeRiskConfigurationRequest.t ->
         (DescribeRiskConfigurationResponse.t,
           DescribeRiskConfigurationResponse.error) Result.t Async.Deferred.t
+val describe_terms :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTermsRequest.t ->
+        (DescribeTermsResponse.t, DescribeTermsResponse.error) Result.t
+          Async.Deferred.t
 val describe_user_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -344,12 +410,25 @@ val get_identity_provider_by_identifier :
         (GetIdentityProviderByIdentifierResponse.t,
           GetIdentityProviderByIdentifierResponse.error) Result.t
           Async.Deferred.t
+val get_log_delivery_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLogDeliveryConfigurationRequest.t ->
+        (GetLogDeliveryConfigurationResponse.t,
+          GetLogDeliveryConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val get_signing_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSigningCertificateRequest.t ->
         (GetSigningCertificateResponse.t,
           GetSigningCertificateResponse.error) Result.t Async.Deferred.t
+val get_tokens_from_refresh_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTokensFromRefreshTokenRequest.t ->
+        (GetTokensFromRefreshTokenResponse.t,
+          GetTokensFromRefreshTokenResponse.error) Result.t Async.Deferred.t
 val get_u_i_customization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -368,6 +447,12 @@ val get_user_attribute_verification_code :
         (GetUserAttributeVerificationCodeResponse.t,
           GetUserAttributeVerificationCodeResponse.error) Result.t
           Async.Deferred.t
+val get_user_auth_factors :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetUserAuthFactorsRequest.t ->
+        (GetUserAuthFactorsResponse.t, GetUserAuthFactorsResponse.error)
+          Result.t Async.Deferred.t
 val get_user_pool_mfa_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -416,12 +501,24 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Async.Deferred.t
+val list_terms :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTermsRequest.t ->
+        (ListTermsResponse.t, ListTermsResponse.error) Result.t
+          Async.Deferred.t
 val list_user_import_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUserImportJobsRequest.t ->
         (ListUserImportJobsResponse.t, ListUserImportJobsResponse.error)
           Result.t Async.Deferred.t
+val list_user_pool_client_secrets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListUserPoolClientSecretsRequest.t ->
+        (ListUserPoolClientSecretsResponse.t,
+          ListUserPoolClientSecretsResponse.error) Result.t Async.Deferred.t
 val list_user_pool_clients :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -446,6 +543,12 @@ val list_users_in_group :
       ListUsersInGroupRequest.t ->
         (ListUsersInGroupResponse.t, ListUsersInGroupResponse.error) Result.t
           Async.Deferred.t
+val list_web_authn_credentials :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWebAuthnCredentialsRequest.t ->
+        (ListWebAuthnCredentialsResponse.t,
+          ListWebAuthnCredentialsResponse.error) Result.t Async.Deferred.t
 val resend_confirmation_code :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -463,6 +566,13 @@ val revoke_token :
     ?cfg:Awso.Cfg.t ->
       RevokeTokenRequest.t ->
         (RevokeTokenResponse.t, RevokeTokenResponse.error) Result.t
+          Async.Deferred.t
+val set_log_delivery_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SetLogDeliveryConfigurationRequest.t ->
+        (SetLogDeliveryConfigurationResponse.t,
+          SetLogDeliveryConfigurationResponse.error) Result.t
           Async.Deferred.t
 val set_risk_configuration :
   ?endpoint_url:string ->
@@ -505,6 +615,12 @@ val start_user_import_job :
       StartUserImportJobRequest.t ->
         (StartUserImportJobResponse.t, StartUserImportJobResponse.error)
           Result.t Async.Deferred.t
+val start_web_authn_registration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartWebAuthnRegistrationRequest.t ->
+        (StartWebAuthnRegistrationResponse.t,
+          StartWebAuthnRegistrationResponse.error) Result.t Async.Deferred.t
 val stop_user_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -547,12 +663,24 @@ val update_identity_provider :
       UpdateIdentityProviderRequest.t ->
         (UpdateIdentityProviderResponse.t,
           UpdateIdentityProviderResponse.error) Result.t Async.Deferred.t
+val update_managed_login_branding :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateManagedLoginBrandingRequest.t ->
+        (UpdateManagedLoginBrandingResponse.t,
+          UpdateManagedLoginBrandingResponse.error) Result.t Async.Deferred.t
 val update_resource_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceServerRequest.t ->
         (UpdateResourceServerResponse.t, UpdateResourceServerResponse.error)
           Result.t Async.Deferred.t
+val update_terms :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateTermsRequest.t ->
+        (UpdateTermsResponse.t, UpdateTermsResponse.error) Result.t
+          Async.Deferred.t
 val update_user_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

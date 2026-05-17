@@ -50,6 +50,9 @@ module Operator =
     type nonrec t = OperatorValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OperatorValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -109,7 +112,7 @@ module AdvancedFieldSelector =
       {
       field: SelectorField.t
         [@ocaml.doc
-          "A field in an event record on which to filter events to be logged. Supported fields include readOnly, eventCategory, eventSource (for management events), eventName, resources.type, and resources.ARN. readOnly - Optional. Can be set to Equals a value of true or false. If you do not add this field, CloudTrail logs both both read and write events. A value of true logs only read events. A value of false logs only write events. eventSource - For filtering management events only. This can be set only to NotEquals kms.amazonaws.com. eventName - Can use any operator. You can use it to \239\172\129lter in or \239\172\129lter out any data event logged to CloudTrail, such as PutBucket or GetSnapshotBlock. You can have multiple values for this \239\172\129eld, separated by commas. eventCategory - This is required. It must be set to Equals, and the value must be Management or Data. resources.type - This \239\172\129eld is required. resources.type can only use the Equals operator, and the value can be one of the following: AWS::S3::Object AWS::Lambda::Function AWS::DynamoDB::Table AWS::S3Outposts::Object AWS::ManagedBlockchain::Node AWS::S3ObjectLambda::AccessPoint AWS::EC2::Snapshot AWS::S3::AccessPoint AWS::DynamoDB::Stream AWS::Glue::Table You can have only one resources.type \239\172\129eld per selector. To log data events on more than one resource type, add another selector. resources.ARN - You can use any operator with resources.ARN, but if you use Equals or NotEquals, the value must exactly match the ARN of a valid resource of the type you've speci\239\172\129ed in the template as the value of resources.type. For example, if resources.type equals AWS::S3::Object, the ARN must be in one of the following formats. To log all data events for all objects in a specific S3 bucket, use the StartsWith operator, and include only the bucket ARN as the matching value. The trailing slash is intentional; do not exclude it. Replace the text between less than and greater than symbols (<>) with resource-specific information. arn:<partition>:s3:::<bucket_name>/ arn:<partition>:s3:::<bucket_name>/<object_path>/ When resources.type equals AWS::S3::AccessPoint, and the operator is set to Equals or NotEquals, the ARN must be in one of the following formats. To log events on all objects in an S3 access point, we recommend that you use only the access point ARN, don\226\128\153t include the object path, and use the StartsWith or NotStartsWith operators. arn:<partition>:s3:<region>:<account_ID>:accesspoint/<access_point_name> arn:<partition>:s3:<region>:<account_ID>:accesspoint/<access_point_name>/object/<object_path> When resources.type equals AWS::Lambda::Function, and the operator is set to Equals or NotEquals, the ARN must be in the following format: arn:<partition>:lambda:<region>:<account_ID>:function:<function_name> When resources.type equals AWS::DynamoDB::Table, and the operator is set to Equals or NotEquals, the ARN must be in the following format: arn:<partition>:dynamodb:<region>:<account_ID>:table/<table_name> When resources.type equals AWS::S3Outposts::Object, and the operator is set to Equals or NotEquals, the ARN must be in the following format: arn:<partition>:s3-outposts:<region>:<account_ID>:<object_path> When resources.type equals AWS::ManagedBlockchain::Node, and the operator is set to Equals or NotEquals, the ARN must be in the following format: arn:<partition>:managedblockchain:<region>:<account_ID>:nodes/<node_ID> When resources.type equals AWS::S3ObjectLambda::AccessPoint, and the operator is set to Equals or NotEquals, the ARN must be in the following format: arn:<partition>:s3-object-lambda:<region>:<account_ID>:accesspoint/<access_point_name> When resources.type equals AWS::EC2::Snapshot, and the operator is set to Equals or NotEquals, the ARN must be in the following format: arn:<partition>:ec2:<region>::snapshot/<snapshot_ID> When resources.type equals AWS::DynamoDB::Stream, and the operator is set to Equals or NotEquals, the ARN must be in the following format: arn:<partition>:dynamodb:<region>:<account_ID>:table/<table_name>/stream/<date_time> When resources.type equals AWS::Glue::Table, and the operator is set to Equals or NotEquals, the ARN must be in the following format: arn:<partition>:glue:<region>:<account_ID>:table/<database_name>/<table_name>"];
+          "A field in a CloudTrail event record on which to filter events to be logged. For event data stores for CloudTrail Insights events, Config configuration items, Audit Manager evidence, or events outside of Amazon Web Services, the field is used only for selecting events as filtering is not supported. For more information, see AdvancedFieldSelector in the CloudTrail API Reference. Selectors don't support the use of wildcards like * . To match multiple values with a single condition, you may use StartsWith, EndsWith, NotStartsWith, or NotEndsWith to explicitly match the beginning or end of the event field."];
       equals: Operator.t option
         [@ocaml.doc
           "An operator that includes events that match the exact value of the event record field specified as the value of Field. This is the only valid operator that you can use with the readOnly, eventCategory, and resources.type fields."];
@@ -175,14 +178,14 @@ module AdvancedFieldSelector =
       make ?notEndsWith ?notStartsWith ?notEquals ?endsWith ?startsWith
         ?equals ~field ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let notEndsWith = field_map json "NotEndsWith" Operator.of_json in
-      let notStartsWith = field_map json "NotStartsWith" Operator.of_json in
-      let notEquals = field_map json "NotEquals" Operator.of_json in
-      let endsWith = field_map json "EndsWith" Operator.of_json in
-      let startsWith = field_map json "StartsWith" Operator.of_json in
-      let equals = field_map json "Equals" Operator.of_json in
-      let field = field_map_exn json "Field" SelectorField.of_json in
+    let of_json json__ =
+      let notEndsWith = field_map json__ "NotEndsWith" Operator.of_json in
+      let notStartsWith = field_map json__ "NotStartsWith" Operator.of_json in
+      let notEquals = field_map json__ "NotEquals" Operator.of_json in
+      let endsWith = field_map json__ "EndsWith" Operator.of_json in
+      let startsWith = field_map json__ "StartsWith" Operator.of_json in
+      let equals = field_map json__ "Equals" Operator.of_json in
+      let field = field_map_exn json__ "Field" SelectorField.of_json in
       make ?notEndsWith ?notStartsWith ?notEquals ?endsWith ?startsWith
         ?equals ~field ()
     let to_json v = composed_to_json to_value v
@@ -192,6 +195,9 @@ module DataResourceValues =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -253,6 +259,9 @@ module AdvancedFieldSelectors =
     type nonrec t = AdvancedFieldSelector.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdvancedFieldSelector.to_value)) |>
         (fun x -> `List x)
@@ -295,16 +304,102 @@ module SelectorName =
     let of_json j = string_of_json ~kind:"SelectorName" j
     let to_json = simple_to_json to_value
   end
+module QueryParameter =
+  struct
+    type nonrec t = string
+    let context_ = "QueryParameter"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryParameter" j
+    let to_json = simple_to_json to_value
+  end
+module ViewPropertiesKey =
+  struct
+    type nonrec t = string
+    let context_ = "ViewPropertiesKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ViewPropertiesKey" j
+    let to_json = simple_to_json to_value
+  end
+module ViewPropertiesValue =
+  struct
+    type nonrec t = string
+    let context_ = "ViewPropertiesValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._\\- ]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ViewPropertiesValue" j
+    let to_json = simple_to_json to_value
+  end
+module SourceEventCategory =
+  struct
+    type nonrec t =
+      | Management 
+      | Data 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Management -> "Management"
+      | Data -> "Data"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Management" -> Management
+      | "Data" -> Data
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SourceEventCategory" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SourceEventCategory" j)
+    let to_json = simple_to_json to_value
+  end
 module DataResource =
   struct
     type nonrec t =
       {
       type_: String_.t option
         [@ocaml.doc
-          "The resource type in which you want to log data events. You can specify the following basic event selector resource types: AWS::S3::Object AWS::Lambda::Function AWS::DynamoDB::Table The following resource types are also availble through advanced event selectors. Basic event selector resource types are valid in advanced event selectors, but advanced event selector resource types are not valid in basic event selectors. For more information, see AdvancedFieldSelector$Field. AWS::S3Outposts::Object AWS::ManagedBlockchain::Node AWS::S3ObjectLambda::AccessPoint AWS::EC2::Snapshot AWS::S3::AccessPoint AWS::DynamoDB::Stream AWS::Glue::Table"];
+          "The resource type in which you want to log data events. You can specify the following basic event selector resource types: AWS::DynamoDB::Table AWS::Lambda::Function AWS::S3::Object Additional resource types are available through advanced event selectors. For more information, see AdvancedEventSelector."];
       values: DataResourceValues.t option
         [@ocaml.doc
-          "An array of Amazon Resource Name (ARN) strings or partial ARN strings for the specified objects. To log data events for all objects in all S3 buckets in your Amazon Web Services account, specify the prefix as arn:aws:s3:::. This also enables logging of data event activity performed by any user or role in your Amazon Web Services account, even if that activity is performed on a bucket that belongs to another Amazon Web Services account. To log data events for all objects in an S3 bucket, specify the bucket and an empty object prefix such as arn:aws:s3:::bucket-1/. The trail logs data events for all objects in this S3 bucket. To log data events for specific objects, specify the S3 bucket and object prefix such as arn:aws:s3:::bucket-1/example-images. The trail logs data events for objects in this S3 bucket that match the prefix. To log data events for all Lambda functions in your Amazon Web Services account, specify the prefix as arn:aws:lambda. This also enables logging of Invoke activity performed by any user or role in your Amazon Web Services account, even if that activity is performed on a function that belongs to another Amazon Web Services account. To log data events for a specific Lambda function, specify the function ARN. Lambda function ARNs are exact. For example, if you specify a function ARN arn:aws:lambda:us-west-2:111111111111:function:helloworld, data events will only be logged for arn:aws:lambda:us-west-2:111111111111:function:helloworld. They will not be logged for arn:aws:lambda:us-west-2:111111111111:function:helloworld2. To log data events for all DynamoDB tables in your Amazon Web Services account, specify the prefix as arn:aws:dynamodb."]}
+          "An array of Amazon Resource Name (ARN) strings or partial ARN strings for the specified resource type. To log data events for all objects in all S3 buckets in your Amazon Web Services account, specify the prefix as arn:aws:s3. This also enables logging of data event activity performed by any user or role in your Amazon Web Services account, even if that activity is performed on a bucket that belongs to another Amazon Web Services account. To log data events for all objects in an S3 bucket, specify the bucket and an empty object prefix such as arn:aws:s3:::amzn-s3-demo-bucket1/. The trail logs data events for all objects in this S3 bucket. To log data events for specific objects, specify the S3 bucket and object prefix such as arn:aws:s3:::amzn-s3-demo-bucket1/example-images. The trail logs data events for objects in this S3 bucket that match the prefix. To log data events for all Lambda functions in your Amazon Web Services account, specify the prefix as arn:aws:lambda. This also enables logging of Invoke activity performed by any user or role in your Amazon Web Services account, even if that activity is performed on a function that belongs to another Amazon Web Services account. To log data events for a specific Lambda function, specify the function ARN. Lambda function ARNs are exact. For example, if you specify a function ARN arn:aws:lambda:us-west-2:111111111111:function:helloworld, data events will only be logged for arn:aws:lambda:us-west-2:111111111111:function:helloworld. They will not be logged for arn:aws:lambda:us-west-2:111111111111:function:helloworld2. To log data events for all DynamoDB tables in your Amazon Web Services account, specify the prefix as arn:aws:dynamodb."]}
     let make ?type_ = fun ?values -> fun () -> { type_; values }
     let to_value x =
       structure_to_value
@@ -318,13 +413,59 @@ module DataResource =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Type") in
       make ?values ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" DataResourceValues.of_json in
-      let type_ = field_map json "Type" String_.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" DataResourceValues.of_json in
+      let type_ = field_map json__ "Type" String_.of_json in
       make ?values ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Amazon S3 buckets, Lambda functions, or Amazon DynamoDB tables that you specify in your event selectors for your trail to log data events. Data events provide information about the resource operations performed on or within a resource itself. These are also known as data plane operations. You can specify up to 250 data resources for a trail. The total number of allowed data resources is 250. This number can be distributed between 1 and 5 event selectors, but the total cannot exceed 250 across all selectors. If you are using advanced event selectors, the maximum total number of values for all conditions, across all advanced event selectors for the trail, is 500. The following example demonstrates how logging works when you configure logging of all data events for an S3 bucket named bucket-1. In this example, the CloudTrail user specified an empty prefix, and the option to log both Read and Write data events. A user uploads an image file to bucket-1. The PutObject API operation is an Amazon S3 object-level API. It is recorded as a data event in CloudTrail. Because the CloudTrail user specified an S3 bucket with an empty prefix, events that occur on any object in that bucket are logged. The trail processes and logs the event. A user uploads an object to an Amazon S3 bucket named arn:aws:s3:::bucket-2. The PutObject API operation occurred for an object in an S3 bucket that the CloudTrail user didn't specify for the trail. The trail doesn\226\128\153t log the event. The following example demonstrates how logging works when you configure logging of Lambda data events for a Lambda function named MyLambdaFunction, but not for all Lambda functions. A user runs a script that includes a call to the MyLambdaFunction function and the MyOtherLambdaFunction function. The Invoke API operation on MyLambdaFunction is an Lambda API. It is recorded as a data event in CloudTrail. Because the CloudTrail user specified logging data events for MyLambdaFunction, any invocations of that function are logged. The trail processes and logs the event. The Invoke API operation on MyOtherLambdaFunction is an Lambda API. Because the CloudTrail user did not specify logging data events for all Lambda functions, the Invoke operation for MyOtherLambdaFunction does not match the function specified for the trail. The trail doesn\226\128\153t log the event."]
+       "You can configure the DataResource in an EventSelector to log data events for the following three resource types: AWS::DynamoDB::Table AWS::Lambda::Function AWS::S3::Object To log data events for all other resource types including objects stored in directory buckets, you must use AdvancedEventSelectors. You must also use AdvancedEventSelectors if you want to filter on the eventName field. Configure the DataResource to specify the resource type and resource ARNs for which you want to log data events. The total number of allowed data resources is 250. This number can be distributed between 1 and 5 event selectors, but the total cannot exceed 250 across all selectors for the trail. The following example demonstrates how logging works when you configure logging of all data events for a general purpose bucket named amzn-s3-demo-bucket1. In this example, the CloudTrail user specified an empty prefix, and the option to log both Read and Write data events. A user uploads an image file to amzn-s3-demo-bucket1. The PutObject API operation is an Amazon S3 object-level API. It is recorded as a data event in CloudTrail. Because the CloudTrail user specified an S3 bucket with an empty prefix, events that occur on any object in that bucket are logged. The trail processes and logs the event. A user uploads an object to an Amazon S3 bucket named arn:aws:s3:::amzn-s3-demo-bucket1. The PutObject API operation occurred for an object in an S3 bucket that the CloudTrail user didn't specify for the trail. The trail doesn\226\128\153t log the event. The following example demonstrates how logging works when you configure logging of Lambda data events for a Lambda function named MyLambdaFunction, but not for all Lambda functions. A user runs a script that includes a call to the MyLambdaFunction function and the MyOtherLambdaFunction function. The Invoke API operation on MyLambdaFunction is an Lambda API. It is recorded as a data event in CloudTrail. Because the CloudTrail user specified logging data events for MyLambdaFunction, any invocations of that function are logged. The trail processes and logs the event. The Invoke API operation on MyOtherLambdaFunction is an Lambda API. Because the CloudTrail user did not specify logging data events for all Lambda functions, the Invoke operation for MyOtherLambdaFunction does not match the function specified for the trail. The trail doesn\226\128\153t log the event."]
+module Template =
+  struct
+    type nonrec t =
+      | API_ACTIVITY 
+      | RESOURCE_ACCESS 
+      | USER_ACTIONS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | API_ACTIVITY -> "API_ACTIVITY"
+      | RESOURCE_ACCESS -> "RESOURCE_ACCESS"
+      | USER_ACTIONS -> "USER_ACTIONS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "API_ACTIVITY" -> API_ACTIVITY
+      | "RESOURCE_ACCESS" -> RESOURCE_ACCESS
+      | "USER_ACTIONS" -> USER_ACTIONS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Template" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Template" j)
+    let to_json = simple_to_json to_value
+  end
+module OperatorTargetListMember =
+  struct
+    type nonrec t = string
+    let context_ = "OperatorTargetListMember"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OperatorTargetListMember" j
+    let to_json = simple_to_json to_value
+  end
 module Resource =
   struct
     type nonrec t =
@@ -349,9 +490,9 @@ module Resource =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       make ?resourceName ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" String_.of_json in
-      let resourceType = field_map json "ResourceType" String_.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
       make ?resourceName ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -380,13 +521,33 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A custom key-value pair associated with a resource such as a CloudTrail trail."]
+       "A custom key-value pair associated with a resource such as a CloudTrail trail, event data store, dashboard, or channel."]
+module EventDataStoreArn =
+  struct
+    type nonrec t = string
+    let context_ = "EventDataStoreArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._/\\-:]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventDataStoreArn" j
+    let to_json = simple_to_json to_value
+  end
 module AdvancedEventSelector =
   struct
     type nonrec t =
@@ -414,14 +575,14 @@ module AdvancedEventSelector =
         (Option.map ~f:SelectorName.of_xml) (Xml.child xml_arg0 "Name") in
       make ~fieldSelectors ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fieldSelectors =
-        field_map_exn json "FieldSelectors" AdvancedFieldSelectors.of_json in
-      let name = field_map json "Name" SelectorName.of_json in
+        field_map_exn json__ "FieldSelectors" AdvancedFieldSelectors.of_json in
+      let name = field_map json__ "Name" SelectorName.of_json in
       make ~fieldSelectors ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Advanced event selectors let you create fine-grained selectors for the following CloudTrail event record \239\172\129elds. They help you control costs by logging only those events that are important to you. For more information about advanced event selectors, see Logging data events for trails in the CloudTrail User Guide. readOnly eventSource eventName eventCategory resources.type resources.ARN You cannot apply both event selectors and advanced event selectors to a trail."]
+       "Advanced event selectors let you create fine-grained selectors for CloudTrail management, data, and network activity events. They help you control costs by logging only those events that are important to you. For more information about configuring advanced event selectors, see the Logging data events, Logging network activity events, and Logging management events topics in the CloudTrail User Guide. You cannot apply both event selectors and advanced event selectors to a trail. For information about configurable advanced event selector fields, see AdvancedEventSelector in the CloudTrail API Reference."]
 module QueryResultKey =
   struct
     type nonrec t = string
@@ -446,6 +607,244 @@ module QueryResultValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"QueryResultValue" j
+    let to_json = simple_to_json to_value
+  end
+module RefreshScheduleFrequencyUnit =
+  struct
+    type nonrec t =
+      | HOURS 
+      | DAYS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | HOURS -> "HOURS" | DAYS -> "DAYS" | Non_static_id s -> s
+    let of_string =
+      function | "HOURS" -> HOURS | "DAYS" -> DAYS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RefreshScheduleFrequencyUnit"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RefreshScheduleFrequencyUnit" j)
+    let to_json = simple_to_json to_value
+  end
+module RefreshScheduleFrequencyValue =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RefreshScheduleFrequencyValue"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module QueryAlias =
+  struct
+    type nonrec t = string
+    let context_ = "QueryAlias"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z][a-zA-Z0-9._\\-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryAlias" j
+    let to_json = simple_to_json to_value
+  end
+module QueryParameters =
+  struct
+    type nonrec t = QueryParameter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QueryParameter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QueryParameter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QueryParameters" ~of_json:QueryParameter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QueryStatement =
+  struct
+    type nonrec t = string
+    let context_ = "QueryStatement"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10000) >>=
+                  (fun () -> check_pattern i ~pattern:"(?s).*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryStatement" j
+    let to_json = simple_to_json to_value
+  end
+module ViewPropertiesMap =
+  struct
+    type nonrec t = (ViewPropertiesKey.t * ViewPropertiesValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ViewPropertiesKey.of_string chopped),
+                              (ViewPropertiesValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ViewPropertiesKey.to_value x) |>
+                    (fun x ->
+                       (ViewPropertiesValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ViewPropertiesKey.of_string
+        ~of_json:ViewPropertiesValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DestinationType =
+  struct
+    type nonrec t =
+      | EVENT_DATA_STORE 
+      | AWS_SERVICE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EVENT_DATA_STORE -> "EVENT_DATA_STORE"
+      | AWS_SERVICE -> "AWS_SERVICE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EVENT_DATA_STORE" -> EVENT_DATA_STORE
+      | "AWS_SERVICE" -> AWS_SERVICE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DestinationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DestinationType" j)
+    let to_json = simple_to_json to_value
+  end
+module Location =
+  struct
+    type nonrec t = string
+    let context_ = "Location"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9._/\\-:*]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Location" j
+    let to_json = simple_to_json to_value
+  end
+module SampleQueryDescription =
+  struct
+    type nonrec t = string
+    let context_ = "SampleQueryDescription"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SampleQueryDescription" j
+    let to_json = simple_to_json to_value
+  end
+module SampleQueryName =
+  struct
+    type nonrec t = string
+    let context_ = "SampleQueryName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SampleQueryName" j
+    let to_json = simple_to_json to_value
+  end
+module SampleQueryRelevance =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module SampleQuerySQL =
+  struct
+    type nonrec t = string
+    let context_ = "SampleQuerySQL"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SampleQuerySQL" j
     let to_json = simple_to_json to_value
   end
 module InsightType =
@@ -473,6 +872,35 @@ module InsightType =
     let of_json j = of_string (string_of_json ~kind:"InsightType" j)
     let to_json = simple_to_json to_value
   end
+module SourceEventCategories =
+  struct
+    type nonrec t = SourceEventCategory.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SourceEventCategory.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SourceEventCategory.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SourceEventCategories"
+        ~of_json:SourceEventCategory.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Boolean =
   struct
     type nonrec t = bool
@@ -490,6 +918,9 @@ module DataResources =
   struct
     type nonrec t = DataResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -514,6 +945,9 @@ module ExcludeManagementEventSources =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -563,6 +997,113 @@ module ReadWriteType =
     let of_json j = of_string (string_of_json ~kind:"ReadWriteType" j)
     let to_json = simple_to_json to_value
   end
+module EventCategoryAggregation =
+  struct
+    type nonrec t =
+      | Data 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Data -> "Data" | Non_static_id s -> s
+    let of_string = function | "Data" -> Data | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EventCategoryAggregation" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EventCategoryAggregation" j)
+    let to_json = simple_to_json to_value
+  end
+module Templates =
+  struct
+    type nonrec t = Template.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Template.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Template.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Templates" ~of_json:Template.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OperatorTargetList =
+  struct
+    type nonrec t = OperatorTargetListMember.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OperatorTargetListMember.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OperatorTargetListMember.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OperatorTargetList"
+        ~of_json:OperatorTargetListMember.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Type =
+  struct
+    type nonrec t =
+      | TagContext 
+      | RequestContext 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TagContext -> "TagContext"
+      | RequestContext -> "RequestContext"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TagContext" -> TagContext
+      | "RequestContext" -> RequestContext
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Type" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Type" j)
+    let to_json = simple_to_json to_value
+  end
 module Date =
   struct
     type nonrec t = string
@@ -579,6 +1120,9 @@ module ResourceList =
   struct
     type nonrec t = Resource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -643,11 +1187,32 @@ module LookupAttributeKey =
     let of_json j = of_string (string_of_json ~kind:"LookupAttributeKey" j)
     let to_json = simple_to_json to_value
   end
+module LookupAttributeValue =
+  struct
+    type nonrec t = string
+    let context_ = "LookupAttributeValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LookupAttributeValue" j
+    let to_json = simple_to_json to_value
+  end
 module TagsList =
   struct
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:200); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -736,10 +1301,108 @@ module ByteBuffer =
     let of_json j = string_of_json ~kind:"a blob" j
     let to_json = simple_to_json to_value
   end
+module ImportDestinations =
+  struct
+    type nonrec t = EventDataStoreArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EventDataStoreArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EventDataStoreArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImportDestinations"
+        ~of_json:EventDataStoreArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImportStatus =
+  struct
+    type nonrec t =
+      | INITIALIZING 
+      | IN_PROGRESS 
+      | FAILED 
+      | STOPPED 
+      | COMPLETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INITIALIZING -> "INITIALIZING"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | STOPPED -> "STOPPED"
+      | COMPLETED -> "COMPLETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INITIALIZING" -> INITIALIZING
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "FAILED" -> FAILED
+      | "STOPPED" -> STOPPED
+      | "COMPLETED" -> COMPLETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImportStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImportStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportFailureStatus =
+  struct
+    type nonrec t =
+      | FAILED 
+      | RETRY 
+      | SUCCEEDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FAILED -> "FAILED"
+      | RETRY -> "RETRY"
+      | SUCCEEDED -> "SUCCEEDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FAILED" -> FAILED
+      | "RETRY" -> RETRY
+      | "SUCCEEDED" -> SUCCEEDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImportFailureStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImportFailureStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module AdvancedEventSelectors =
   struct
     type nonrec t = AdvancedEventSelector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdvancedEventSelector.to_value)) |>
         (fun x -> `List x)
@@ -761,26 +1424,6 @@ module AdvancedEventSelectors =
       list_of_json ~kind:"AdvancedEventSelectors"
         ~of_json:AdvancedEventSelector.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module EventDataStoreArn =
-  struct
-    type nonrec t = string
-    let context_ = "EventDataStoreArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:3) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._/\\-:]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EventDataStoreArn" j
-    let to_json = simple_to_json to_value
   end
 module EventDataStoreName =
   struct
@@ -808,6 +1451,9 @@ module EventDataStoreStatus =
       | CREATED 
       | ENABLED 
       | PENDING_DELETION 
+      | STARTING_INGESTION 
+      | STOPPING_INGESTION 
+      | STOPPED_INGESTION 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -815,12 +1461,18 @@ module EventDataStoreStatus =
       | CREATED -> "CREATED"
       | ENABLED -> "ENABLED"
       | PENDING_DELETION -> "PENDING_DELETION"
+      | STARTING_INGESTION -> "STARTING_INGESTION"
+      | STOPPING_INGESTION -> "STOPPING_INGESTION"
+      | STOPPED_INGESTION -> "STOPPED_INGESTION"
       | Non_static_id s -> s
     let of_string =
       function
       | "CREATED" -> CREATED
       | "ENABLED" -> ENABLED
       | "PENDING_DELETION" -> PENDING_DELETION
+      | "STARTING_INGESTION" -> STARTING_INGESTION
+      | "STOPPING_INGESTION" -> STOPPING_INGESTION
+      | "STOPPED_INGESTION" -> STOPPED_INGESTION
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -837,7 +1489,7 @@ module RetentionPeriod =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:2555) >>= (fun () -> check_int_min i ~min:7));
+          ((check_int_max i ~max:3653) >>= (fun () -> check_int_min i ~min:7));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -862,6 +1514,86 @@ module TerminationProtectionEnabled =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module DashboardArn =
+  struct
+    type nonrec t = string
+    let context_ = "DashboardArn"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[a-zA-Z0-9._/\\-:]+$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DashboardArn" j
+    let to_json = simple_to_json to_value
+  end
+module DashboardType =
+  struct
+    type nonrec t =
+      | MANAGED 
+      | CUSTOM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MANAGED -> "MANAGED"
+      | CUSTOM -> "CUSTOM"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MANAGED" -> MANAGED
+      | "CUSTOM" -> CUSTOM
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DashboardType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DashboardType" j)
+    let to_json = simple_to_json to_value
+  end
+module ChannelArn =
+  struct
+    type nonrec t = string
+    let context_ = "ChannelArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._/\\-:]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChannelArn" j
+    let to_json = simple_to_json to_value
+  end
+module ChannelName =
+  struct
+    type nonrec t = string
+    let context_ = "ChannelName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChannelName" j
+    let to_json = simple_to_json to_value
+  end
 module QueryResultColumn =
   struct
     type nonrec t = (QueryResultKey.t * QueryResultValue.t) list
@@ -884,6 +1616,8 @@ module QueryResultColumn =
                        (QueryResultValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -891,29 +1625,446 @@ module QueryResultColumn =
         ~of_json:QueryResultValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PartitionKeyName =
+  struct
+    type nonrec t = string
+    let context_ = "PartitionKeyName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PartitionKeyName" j
+    let to_json = simple_to_json to_value
+  end
+module PartitionKeyType =
+  struct
+    type nonrec t = string
+    let context_ = "PartitionKeyType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PartitionKeyType" j
+    let to_json = simple_to_json to_value
+  end
+module RefreshScheduleFrequency =
+  struct
+    type nonrec t =
+      {
+      unit: RefreshScheduleFrequencyUnit.t option
+        [@ocaml.doc
+          "The unit to use for the refresh. For custom dashboards, the unit can be HOURS or DAYS. For the Highlights dashboard, the Unit must be HOURS."];
+      value: RefreshScheduleFrequencyValue.t option
+        [@ocaml.doc
+          "The value for the refresh schedule. For custom dashboards, the following values are valid when the unit is HOURS: 1, 6, 12, 24 For custom dashboards, the only valid value when the unit is DAYS is 1. For the Highlights dashboard, the Value must be 6."]}
+    let make ?unit = fun ?value -> fun () -> { unit; value }
+    let to_value x =
+      structure_to_value
+        [("Unit",
+           (Option.map x.unit ~f:RefreshScheduleFrequencyUnit.to_value));
+        ("Value",
+          (Option.map x.value ~f:RefreshScheduleFrequencyValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:RefreshScheduleFrequencyValue.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      let unit =
+        (Option.map ~f:RefreshScheduleFrequencyUnit.of_xml)
+          (Xml.child xml_arg0 "Unit") in
+      make ?value ?unit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value =
+        field_map json__ "Value" RefreshScheduleFrequencyValue.of_json in
+      let unit = field_map json__ "Unit" RefreshScheduleFrequencyUnit.of_json in
+      make ?value ?unit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the frequency for a dashboard refresh schedule. For a custom dashboard, you can schedule a refresh for every 1, 6, 12, or 24 hours, or every day."]
+module RefreshScheduleStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RefreshScheduleStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RefreshScheduleStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module TimeOfDay =
+  struct
+    type nonrec t = string
+    let context_ = "TimeOfDay"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[0-9]{2}:[0-9]{2}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TimeOfDay" j
+    let to_json = simple_to_json to_value
+  end
+module Widget =
+  struct
+    type nonrec t =
+      {
+      queryAlias: QueryAlias.t option
+        [@ocaml.doc
+          "The query alias used to identify the query for the widget."];
+      queryStatement: QueryStatement.t option
+        [@ocaml.doc "The SQL query statement for the widget."];
+      queryParameters: QueryParameters.t option
+        [@ocaml.doc "The query parameters for the widget."];
+      viewProperties: ViewPropertiesMap.t option
+        [@ocaml.doc
+          "The view properties for the widget. For more information about view properties, see View properties for widgets in the CloudTrail User Guide.."]}
+    let make ?queryAlias =
+      fun ?queryStatement ->
+        fun ?queryParameters ->
+          fun ?viewProperties ->
+            fun () ->
+              { queryAlias; queryStatement; queryParameters; viewProperties }
+    let to_value x =
+      structure_to_value
+        [("QueryAlias", (Option.map x.queryAlias ~f:QueryAlias.to_value));
+        ("QueryStatement",
+          (Option.map x.queryStatement ~f:QueryStatement.to_value));
+        ("QueryParameters",
+          (Option.map x.queryParameters ~f:QueryParameters.to_value));
+        ("ViewProperties",
+          (Option.map x.viewProperties ~f:ViewPropertiesMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let viewProperties =
+        (Option.map ~f:ViewPropertiesMap.of_xml)
+          (Xml.child xml_arg0 "ViewProperties") in
+      let queryParameters =
+        (Option.map ~f:QueryParameters.of_xml)
+          (Xml.child xml_arg0 "QueryParameters") in
+      let queryStatement =
+        (Option.map ~f:QueryStatement.of_xml)
+          (Xml.child xml_arg0 "QueryStatement") in
+      let queryAlias =
+        (Option.map ~f:QueryAlias.of_xml) (Xml.child xml_arg0 "QueryAlias") in
+      make ?viewProperties ?queryParameters ?queryStatement ?queryAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let viewProperties =
+        field_map json__ "ViewProperties" ViewPropertiesMap.of_json in
+      let queryParameters =
+        field_map json__ "QueryParameters" QueryParameters.of_json in
+      let queryStatement =
+        field_map json__ "QueryStatement" QueryStatement.of_json in
+      let queryAlias = field_map json__ "QueryAlias" QueryAlias.of_json in
+      make ?viewProperties ?queryParameters ?queryStatement ?queryAlias ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A widget on a CloudTrail Lake dashboard."]
+module RequestWidget =
+  struct
+    type nonrec t =
+      {
+      queryStatement: QueryStatement.t
+        [@ocaml.doc
+          "The query statement for the widget. For custom dashboard widgets, you can query across multiple event data stores as long as all event data stores exist in your account. When a query uses ? with eventTime, ? must be surrounded by single quotes as follows: '?'."];
+      queryParameters: QueryParameters.t option
+        [@ocaml.doc
+          "The optional query parameters. The following query parameters are valid: $StartTime$, $EndTime$, and $Period$."];
+      viewProperties: ViewPropertiesMap.t
+        [@ocaml.doc
+          "The view properties for the widget. For more information about view properties, see View properties for widgets in the CloudTrail User Guide."]}
+    let context_ = "RequestWidget"
+    let make ?queryParameters =
+      fun ~queryStatement ->
+        fun ~viewProperties ->
+          fun () -> { queryParameters; queryStatement; viewProperties }
+    let to_value x =
+      structure_to_value
+        [("QueryStatement",
+           (Some (QueryStatement.to_value x.queryStatement)));
+        ("QueryParameters",
+          (Option.map x.queryParameters ~f:QueryParameters.to_value));
+        ("ViewProperties",
+          (Some (ViewPropertiesMap.to_value x.viewProperties)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let viewProperties =
+        ViewPropertiesMap.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ViewProperties") in
+      let queryParameters =
+        (Option.map ~f:QueryParameters.of_xml)
+          (Xml.child xml_arg0 "QueryParameters") in
+      let queryStatement =
+        QueryStatement.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryStatement") in
+      make ~viewProperties ?queryParameters ~queryStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let viewProperties =
+        field_map_exn json__ "ViewProperties" ViewPropertiesMap.of_json in
+      let queryParameters =
+        field_map json__ "QueryParameters" QueryParameters.of_json in
+      let queryStatement =
+        field_map_exn json__ "QueryStatement" QueryStatement.of_json in
+      make ~viewProperties ?queryParameters ~queryStatement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a widget on a CloudTrail Lake dashboard."]
+module Destination =
+  struct
+    type nonrec t =
+      {
+      type_: DestinationType.t
+        [@ocaml.doc
+          "The type of destination for events arriving from a channel. For channels used for a CloudTrail Lake integration, the value is EVENT_DATA_STORE. For service-linked channels, the value is AWS_SERVICE."];
+      location: Location.t
+        [@ocaml.doc
+          "For channels used for a CloudTrail Lake integration, the location is the ARN of an event data store that receives events from a channel. For service-linked channels, the location is the name of the Amazon Web Services service."]}
+    let context_ = "Destination"
+    let make ~type_ = fun ~location -> fun () -> { type_; location }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (DestinationType.to_value x.type_)));
+        ("Location", (Some (Location.to_value x.location)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let location =
+        Location.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+      let type_ =
+        DestinationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ~location ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let location = field_map_exn json__ "Location" Location.of_json in
+      let type_ = field_map_exn json__ "Type" DestinationType.of_json in
+      make ~location ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the destination receiving events."]
+module S3ImportSource =
+  struct
+    type nonrec t =
+      {
+      s3LocationUri: String_.t
+        [@ocaml.doc "The URI for the source S3 bucket."];
+      s3BucketRegion: String_.t
+        [@ocaml.doc "The Region associated with the source S3 bucket."];
+      s3BucketAccessRoleArn: String_.t
+        [@ocaml.doc "The IAM ARN role used to access the source S3 bucket."]}
+    let context_ = "S3ImportSource"
+    let make ~s3LocationUri =
+      fun ~s3BucketRegion ->
+        fun ~s3BucketAccessRoleArn ->
+          fun () -> { s3LocationUri; s3BucketRegion; s3BucketAccessRoleArn }
+    let to_value x =
+      structure_to_value
+        [("S3LocationUri", (Some (String_.to_value x.s3LocationUri)));
+        ("S3BucketRegion", (Some (String_.to_value x.s3BucketRegion)));
+        ("S3BucketAccessRoleArn",
+          (Some (String_.to_value x.s3BucketAccessRoleArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3BucketAccessRoleArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3BucketAccessRoleArn") in
+      let s3BucketRegion =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3BucketRegion") in
+      let s3LocationUri =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3LocationUri") in
+      make ~s3BucketAccessRoleArn ~s3BucketRegion ~s3LocationUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3BucketAccessRoleArn =
+        field_map_exn json__ "S3BucketAccessRoleArn" String_.of_json in
+      let s3BucketRegion =
+        field_map_exn json__ "S3BucketRegion" String_.of_json in
+      let s3LocationUri =
+        field_map_exn json__ "S3LocationUri" String_.of_json in
+      make ~s3BucketAccessRoleArn ~s3BucketRegion ~s3LocationUri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The settings for the source S3 bucket."]
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module QueryParameterKey =
+  struct
+    type nonrec t = string
+    let context_ = "QueryParameterKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9._/\\-:$]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryParameterKey" j
+    let to_json = simple_to_json to_value
+  end
+module QueryParameterValue =
+  struct
+    type nonrec t = string
+    let context_ = "QueryParameterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._/\\-:]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryParameterValue" j
+    let to_json = simple_to_json to_value
+  end
+module SearchSampleQueriesSearchResult =
+  struct
+    type nonrec t =
+      {
+      name: SampleQueryName.t option
+        [@ocaml.doc "The name of a sample query."];
+      description: SampleQueryDescription.t option
+        [@ocaml.doc "A longer description of a sample query."];
+      sQL: SampleQuerySQL.t option
+        [@ocaml.doc "The SQL code of the sample query."];
+      relevance: SampleQueryRelevance.t option
+        [@ocaml.doc
+          "A value between 0 and 1 indicating the similarity between the search phrase and result."]}
+    let make ?name =
+      fun ?description ->
+        fun ?sQL ->
+          fun ?relevance -> fun () -> { name; description; sQL; relevance }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:SampleQueryName.to_value));
+        ("Description",
+          (Option.map x.description ~f:SampleQueryDescription.to_value));
+        ("SQL", (Option.map x.sQL ~f:SampleQuerySQL.to_value));
+        ("Relevance",
+          (Option.map x.relevance ~f:SampleQueryRelevance.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let relevance =
+        (Option.map ~f:SampleQueryRelevance.of_xml)
+          (Xml.child xml_arg0 "Relevance") in
+      let sQL =
+        (Option.map ~f:SampleQuerySQL.of_xml) (Xml.child xml_arg0 "SQL") in
+      let description =
+        (Option.map ~f:SampleQueryDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:SampleQueryName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?relevance ?sQL ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let relevance =
+        field_map json__ "Relevance" SampleQueryRelevance.of_json in
+      let sQL = field_map json__ "SQL" SampleQuerySQL.of_json in
+      let description =
+        field_map json__ "Description" SampleQueryDescription.of_json in
+      let name = field_map json__ "Name" SampleQueryName.of_json in
+      make ?relevance ?sQL ?description ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A search result returned by the SearchSampleQueries operation."]
 module InsightSelector =
   struct
     type nonrec t =
       {
       insightType: InsightType.t option
         [@ocaml.doc
-          "The type of insights to log on a trail. ApiCallRateInsight and ApiErrorRateInsight are valid insight types."]}
-    let make ?insightType = fun () -> { insightType }
+          "The type of Insights events to log on a trail or event data store. ApiCallRateInsight and ApiErrorRateInsight are valid Insight types. The ApiCallRateInsight Insights type analyzes write-only management API calls or read and write data API calls that are aggregated per minute against a baseline API call volume. The ApiErrorRateInsight Insights type analyzes management and data API calls that result in error codes. The error is shown if the API call is unsuccessful."];
+      eventCategories: SourceEventCategories.t option
+        [@ocaml.doc
+          "Select the event category on which Insights should be enabled. If EventCategories is not provided, the specified Insights types are enabled on management API calls by default. If EventCategories is provided, the given event categories will overwrite the existing ones. For example, if a trail already has Insights enabled on management events, and then a PutInsightSelectors request is made with only data events specified in EventCategories, Insights on management events will be disabled."]}
+    let make ?insightType =
+      fun ?eventCategories -> fun () -> { insightType; eventCategories }
     let to_value x =
       structure_to_value
-        [("InsightType", (Option.map x.insightType ~f:InsightType.to_value))]
+        [("InsightType", (Option.map x.insightType ~f:InsightType.to_value));
+        ("EventCategories",
+          (Option.map x.eventCategories ~f:SourceEventCategories.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eventCategories =
+        (Option.map ~f:SourceEventCategories.of_xml)
+          (Xml.child xml_arg0 "EventCategories") in
       let insightType =
         (Option.map ~f:InsightType.of_xml) (Xml.child xml_arg0 "InsightType") in
-      make ?insightType ()
+      make ?eventCategories ?insightType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let insightType = field_map json "InsightType" InsightType.of_json in
-      make ?insightType ()
+    let of_json json__ =
+      let eventCategories =
+        field_map json__ "EventCategories" SourceEventCategories.of_json in
+      let insightType = field_map json__ "InsightType" InsightType.of_json in
+      make ?eventCategories ?insightType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A JSON string that contains a list of insight types that are logged on a trail."]
+       "A JSON string that contains a list of Insights types that are logged on a trail or event data store."]
 module EventSelector =
   struct
     type nonrec t =
@@ -923,13 +2074,13 @@ module EventSelector =
           "Specify if you want your trail to log read-only events, write-only events, or all. For example, the EC2 GetConsoleOutput is a read-only API operation and RunInstances is a write-only API operation. By default, the value is All."];
       includeManagementEvents: Boolean.t option
         [@ocaml.doc
-          "Specify if you want your event selector to include management events for your trail. For more information, see Management Events in the CloudTrail User Guide. By default, the value is true. The first copy of management events is free. You are charged for additional copies of management events that you are logging on any subsequent trail in the same region. For more information about CloudTrail pricing, see CloudTrail Pricing."];
+          "Specify if you want your event selector to include management events for your trail. For more information, see Management Events in the CloudTrail User Guide. By default, the value is true. The first copy of management events is free. You are charged for additional copies of management events that you are logging on any subsequent trail in the same Region. For more information about CloudTrail pricing, see CloudTrail Pricing."];
       dataResources: DataResources.t option
         [@ocaml.doc
-          "CloudTrail supports data event logging for Amazon S3 objects, Lambda functions, and Amazon DynamoDB tables with basic event selectors. You can specify up to 250 resources for an individual event selector, but the total number of data resources cannot exceed 250 across all event selectors in a trail. This limit does not apply if you configure resource logging for all data events. For more information, see Data Events and Limits in CloudTrail in the CloudTrail User Guide."];
+          "CloudTrail supports data event logging for Amazon S3 objects in standard S3 buckets, Lambda functions, and Amazon DynamoDB tables with basic event selectors. You can specify up to 250 resources for an individual event selector, but the total number of data resources cannot exceed 250 across all event selectors in a trail. This limit does not apply if you configure resource logging for all data events. For more information, see Data Events and Limits in CloudTrail in the CloudTrail User Guide. To log data events for all other resource types including objects stored in directory buckets, you must use AdvancedEventSelectors. You must also use AdvancedEventSelectors if you want to filter on the eventName field."];
       excludeManagementEventSources: ExcludeManagementEventSources.t option
         [@ocaml.doc
-          "An optional list of service event sources from which you do not want management events to be logged on your trail. In this release, the list can be empty (disables the filter), or it can filter out Key Management Service or Amazon RDS Data API events by containing kms.amazonaws.com or rdsdata.amazonaws.com. By default, ExcludeManagementEventSources is empty, and KMS and Amazon RDS Data API events are logged to your trail. You can exclude management event sources only in regions that support the event source."]}
+          "An optional list of service event sources from which you do not want management events to be logged on your trail. In this release, the list can be empty (disables the filter), or it can filter out Key Management Service or Amazon RDS Data API events by containing kms.amazonaws.com or rdsdata.amazonaws.com. By default, ExcludeManagementEventSources is empty, and KMS and Amazon RDS Data API events are logged to your trail. You can exclude management event sources only in Regions that support the event source."]}
     let make ?readWriteType =
       fun ?includeManagementEvents ->
         fun ?dataResources ->
@@ -969,21 +2120,89 @@ module EventSelector =
       make ?excludeManagementEventSources ?dataResources
         ?includeManagementEvents ?readWriteType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let excludeManagementEventSources =
-        field_map json "ExcludeManagementEventSources"
+        field_map json__ "ExcludeManagementEventSources"
           ExcludeManagementEventSources.of_json in
       let dataResources =
-        field_map json "DataResources" DataResources.of_json in
+        field_map json__ "DataResources" DataResources.of_json in
       let includeManagementEvents =
-        field_map json "IncludeManagementEvents" Boolean.of_json in
+        field_map json__ "IncludeManagementEvents" Boolean.of_json in
       let readWriteType =
-        field_map json "ReadWriteType" ReadWriteType.of_json in
+        field_map json__ "ReadWriteType" ReadWriteType.of_json in
       make ?excludeManagementEventSources ?dataResources
         ?includeManagementEvents ?readWriteType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Use event selectors to further specify the management and data event settings for your trail. By default, trails created without specific event selectors will be configured to log all read and write management events, and no data events. When an event occurs in your account, CloudTrail evaluates the event selector for all trails. For each trail, if the event matches any event selector, the trail processes and logs the event. If the event doesn't match any event selector, the trail doesn't log the event. You can configure up to five event selectors for a trail. You cannot apply both event selectors and advanced event selectors to a trail."]
+module AggregationConfiguration =
+  struct
+    type nonrec t =
+      {
+      templates: Templates.t
+        [@ocaml.doc
+          "A list of aggregation templates that can be used to configure event aggregation."];
+      eventCategory: EventCategoryAggregation.t
+        [@ocaml.doc
+          "Specifies the event category for which aggregation should be performed."]}
+    let context_ = "AggregationConfiguration"
+    let make ~templates =
+      fun ~eventCategory -> fun () -> { templates; eventCategory }
+    let to_value x =
+      structure_to_value
+        [("Templates", (Some (Templates.to_value x.templates)));
+        ("EventCategory",
+          (Some (EventCategoryAggregation.to_value x.eventCategory)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventCategory =
+        EventCategoryAggregation.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EventCategory") in
+      let templates =
+        Templates.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Templates") in
+      make ~eventCategory ~templates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventCategory =
+        field_map_exn json__ "EventCategory" EventCategoryAggregation.of_json in
+      let templates = field_map_exn json__ "Templates" Templates.of_json in
+      make ~eventCategory ~templates ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains configuration settings for aggregating events."]
+module ContextKeySelector =
+  struct
+    type nonrec t =
+      {
+      type_: Type.t
+        [@ocaml.doc
+          "Specifies the type of the event record field in ContextKeySelector. Valid values include RequestContext, TagContext."];
+      equals: OperatorTargetList.t
+        [@ocaml.doc
+          "A list of keys defined by Type to be included in CloudTrail enriched events."]}
+    let context_ = "ContextKeySelector"
+    let make ~type_ = fun ~equals -> fun () -> { type_; equals }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (Type.to_value x.type_)));
+        ("Equals", (Some (OperatorTargetList.to_value x.equals)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let equals =
+        OperatorTargetList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Equals") in
+      let type_ =
+        Type.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ~equals ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let equals = field_map_exn json__ "Equals" OperatorTargetList.of_json in
+      let type_ = field_map_exn json__ "Type" Type.of_json in
+      make ~equals ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains information types to be included in CloudTrail enriched events."]
 module Event =
   struct
     type nonrec t =
@@ -1067,16 +2286,17 @@ module Event =
       make ?cloudTrailEvent ?resources ?username ?eventSource ?eventTime
         ?accessKeyId ?readOnly ?eventName ?eventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cloudTrailEvent = field_map json "CloudTrailEvent" String_.of_json in
-      let resources = field_map json "Resources" ResourceList.of_json in
-      let username = field_map json "Username" String_.of_json in
-      let eventSource = field_map json "EventSource" String_.of_json in
-      let eventTime = field_map json "EventTime" Date.of_json in
-      let accessKeyId = field_map json "AccessKeyId" String_.of_json in
-      let readOnly = field_map json "ReadOnly" String_.of_json in
-      let eventName = field_map json "EventName" String_.of_json in
-      let eventId = field_map json "EventId" String_.of_json in
+    let of_json json__ =
+      let cloudTrailEvent =
+        field_map json__ "CloudTrailEvent" String_.of_json in
+      let resources = field_map json__ "Resources" ResourceList.of_json in
+      let username = field_map json__ "Username" String_.of_json in
+      let eventSource = field_map json__ "EventSource" String_.of_json in
+      let eventTime = field_map json__ "EventTime" Date.of_json in
+      let accessKeyId = field_map json__ "AccessKeyId" String_.of_json in
+      let readOnly = field_map json__ "ReadOnly" String_.of_json in
+      let eventName = field_map json__ "EventName" String_.of_json in
+      let eventId = field_map json__ "EventId" String_.of_json in
       make ?cloudTrailEvent ?resources ?username ?eventSource ?eventTime
         ?accessKeyId ?readOnly ?eventName ?eventId ()
     let to_json v = composed_to_json to_value v
@@ -1089,8 +2309,9 @@ module LookupAttribute =
       attributeKey: LookupAttributeKey.t
         [@ocaml.doc
           "Specifies an attribute on which to filter the events returned."];
-      attributeValue: String_.t
-        [@ocaml.doc "Specifies a value for the specified AttributeKey."]}
+      attributeValue: LookupAttributeValue.t
+        [@ocaml.doc
+          "Specifies a value for the specified AttributeKey. The maximum length for the AttributeValue is 2000 characters. The following characters ('_', ' ', ',', '\\\\n') count as two characters towards the 2000 character limit."]}
     let context_ = "LookupAttribute"
     let make ~attributeKey =
       fun ~attributeValue -> fun () -> { attributeKey; attributeValue }
@@ -1098,22 +2319,23 @@ module LookupAttribute =
       structure_to_value
         [("AttributeKey",
            (Some (LookupAttributeKey.to_value x.attributeKey)));
-        ("AttributeValue", (Some (String_.to_value x.attributeValue)))]
+        ("AttributeValue",
+          (Some (LookupAttributeValue.to_value x.attributeValue)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let attributeValue =
-        String_.of_xml
+        LookupAttributeValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeValue") in
       let attributeKey =
         LookupAttributeKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeKey") in
       make ~attributeValue ~attributeKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValue =
-        field_map_exn json "AttributeValue" String_.of_json in
+        field_map_exn json__ "AttributeValue" LookupAttributeValue.of_json in
       let attributeKey =
-        field_map_exn json "AttributeKey" LookupAttributeKey.of_json in
+        field_map_exn json__ "AttributeKey" LookupAttributeKey.of_json in
       make ~attributeValue ~attributeKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1144,14 +2366,14 @@ module TrailInfo =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
       make ?homeRegion ?name ?trailARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let homeRegion = field_map json "HomeRegion" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let trailARN = field_map json "TrailARN" String_.of_json in
+    let of_json json__ =
+      let homeRegion = field_map json__ "HomeRegion" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
       make ?homeRegion ?name ?trailARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about a CloudTrail trail, including the trail's name, home region, and Amazon Resource Name (ARN)."]
+       "Information about a CloudTrail trail, including the trail's name, home Region, and Amazon Resource Name (ARN)."]
 module ResourceTag =
   struct
     type nonrec t =
@@ -1173,9 +2395,9 @@ module ResourceTag =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?tagsList ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagsList = field_map json "TagsList" TagsList.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
+    let of_json json__ =
+      let tagsList = field_map json__ "TagsList" TagsList.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
       make ?tagsList ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource tag."]
@@ -1207,10 +2429,10 @@ module Query =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "QueryId") in
       make ?creationTime ?queryStatus ?queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Date.of_json in
-      let queryStatus = field_map json "QueryStatus" QueryStatus.of_json in
-      let queryId = field_map json "QueryId" UUID.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let queryStatus = field_map json__ "QueryStatus" QueryStatus.of_json in
+      let queryId = field_map json__ "QueryId" UUID.of_json in
       make ?creationTime ?queryStatus ?queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1252,14 +2474,195 @@ module PublicKey =
         (Option.map ~f:ByteBuffer.of_xml) (Xml.child xml_arg0 "Value") in
       make ?fingerprint ?validityEndTime ?validityStartTime ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fingerprint = field_map json "Fingerprint" String_.of_json in
-      let validityEndTime = field_map json "ValidityEndTime" Date.of_json in
-      let validityStartTime = field_map json "ValidityStartTime" Date.of_json in
-      let value = field_map json "Value" ByteBuffer.of_json in
+    let of_json json__ =
+      let fingerprint = field_map json__ "Fingerprint" String_.of_json in
+      let validityEndTime = field_map json__ "ValidityEndTime" Date.of_json in
+      let validityStartTime =
+        field_map json__ "ValidityStartTime" Date.of_json in
+      let value = field_map json__ "Value" ByteBuffer.of_json in
       make ?fingerprint ?validityEndTime ?validityStartTime ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a returned public key."]
+module Double =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module ListInsightsDataDimensionKey =
+  struct
+    type nonrec t =
+      | EventId 
+      | EventName 
+      | EventSource 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EventId -> "EventId"
+      | EventName -> "EventName"
+      | EventSource -> "EventSource"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EventId" -> EventId
+      | "EventName" -> EventName
+      | "EventSource" -> EventSource
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ListInsightsDataDimensionKey"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ListInsightsDataDimensionKey" j)
+    let to_json = simple_to_json to_value
+  end
+module ListInsightsDataDimensionValue =
+  struct
+    type nonrec t = string
+    let context_ = "ListInsightsDataDimensionValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ListInsightsDataDimensionValue" j
+    let to_json = simple_to_json to_value
+  end
+module ImportsListItem =
+  struct
+    type nonrec t =
+      {
+      importId: UUID.t option [@ocaml.doc "The ID of the import."];
+      importStatus: ImportStatus.t option
+        [@ocaml.doc "The status of the import."];
+      destinations: ImportDestinations.t option
+        [@ocaml.doc "The ARN of the destination event data store."];
+      createdTimestamp: Date.t option
+        [@ocaml.doc "The timestamp of the import's creation."];
+      updatedTimestamp: Date.t option
+        [@ocaml.doc "The timestamp of the import's last update."]}
+    let make ?importId =
+      fun ?importStatus ->
+        fun ?destinations ->
+          fun ?createdTimestamp ->
+            fun ?updatedTimestamp ->
+              fun () ->
+                {
+                  importId;
+                  importStatus;
+                  destinations;
+                  createdTimestamp;
+                  updatedTimestamp
+                }
+    let to_value x =
+      structure_to_value
+        [("ImportId", (Option.map x.importId ~f:UUID.to_value));
+        ("ImportStatus",
+          (Option.map x.importStatus ~f:ImportStatus.to_value));
+        ("Destinations",
+          (Option.map x.destinations ~f:ImportDestinations.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Date.to_value));
+        ("UpdatedTimestamp",
+          (Option.map x.updatedTimestamp ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreatedTimestamp") in
+      let destinations =
+        (Option.map ~f:ImportDestinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      let importStatus =
+        (Option.map ~f:ImportStatus.of_xml)
+          (Xml.child xml_arg0 "ImportStatus") in
+      let importId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "ImportId") in
+      make ?updatedTimestamp ?createdTimestamp ?destinations ?importStatus
+        ?importId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
+      let destinations =
+        field_map json__ "Destinations" ImportDestinations.of_json in
+      let importStatus = field_map json__ "ImportStatus" ImportStatus.of_json in
+      let importId = field_map json__ "ImportId" UUID.of_json in
+      make ?updatedTimestamp ?createdTimestamp ?destinations ?importStatus
+        ?importId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about an import that was returned by a lookup request."]
+module ImportFailureListItem =
+  struct
+    type nonrec t =
+      {
+      location: String_.t option
+        [@ocaml.doc "The location of the failure in the S3 bucket."];
+      status: ImportFailureStatus.t option
+        [@ocaml.doc "The status of the import."];
+      errorType: String_.t option [@ocaml.doc "The type of import error."];
+      errorMessage: String_.t option
+        [@ocaml.doc "Provides the reason the import failed."];
+      lastUpdatedTime: Date.t option
+        [@ocaml.doc "When the import was last updated."]}
+    let make ?location =
+      fun ?status ->
+        fun ?errorType ->
+          fun ?errorMessage ->
+            fun ?lastUpdatedTime ->
+              fun () ->
+                { location; status; errorType; errorMessage; lastUpdatedTime
+                }
+    let to_value x =
+      structure_to_value
+        [("Location", (Option.map x.location ~f:String_.to_value));
+        ("Status", (Option.map x.status ~f:ImportFailureStatus.to_value));
+        ("ErrorType", (Option.map x.errorType ~f:String_.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value));
+        ("LastUpdatedTime", (Option.map x.lastUpdatedTime ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastUpdatedTime") in
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
+      let errorType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorType") in
+      let status =
+        (Option.map ~f:ImportFailureStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let location =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
+      make ?lastUpdatedTime ?errorMessage ?errorType ?status ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedTime = field_map json__ "LastUpdatedTime" Date.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorType = field_map json__ "ErrorType" String_.of_json in
+      let status = field_map json__ "Status" ImportFailureStatus.of_json in
+      let location = field_map json__ "Location" String_.of_json in
+      make ?lastUpdatedTime ?errorMessage ?errorType ?status ?location ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides information about an import failure."]
 module EventDataStore =
   struct
     type nonrec t =
@@ -1272,14 +2675,13 @@ module EventDataStore =
         [@ocaml.doc
           "Indicates whether the event data store is protected from termination."];
       status: EventDataStoreStatus.t option
-        [@ocaml.doc
-          "The status of an event data store. Values are ENABLED and PENDING_DELETION."];
+        [@ocaml.doc "The status of an event data store."];
       advancedEventSelectors: AdvancedEventSelectors.t option
         [@ocaml.doc
           "The advanced event selectors that were used to select events for the data store."];
       multiRegionEnabled: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the event data store includes events from all regions, or only from the region in which it was created."];
+          "Indicates whether the event data store includes events from all Regions, or only from the Region in which it was created."];
       organizationEnabled: Boolean.t option
         [@ocaml.doc
           "Indicates that an event data store is collecting logged events for an organization."];
@@ -1368,35 +2770,95 @@ module EventDataStore =
         ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
         ?status ?terminationProtectionEnabled ?name ?eventDataStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
-      let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
+    let of_json json__ =
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
       let organizationEnabled =
-        field_map json "OrganizationEnabled" Boolean.of_json in
+        field_map json__ "OrganizationEnabled" Boolean.of_json in
       let multiRegionEnabled =
-        field_map json "MultiRegionEnabled" Boolean.of_json in
+        field_map json__ "MultiRegionEnabled" Boolean.of_json in
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
-      let status = field_map json "Status" EventDataStoreStatus.of_json in
+      let status = field_map json__ "Status" EventDataStoreStatus.of_json in
       let terminationProtectionEnabled =
-        field_map json "TerminationProtectionEnabled"
+        field_map json__ "TerminationProtectionEnabled"
           TerminationProtectionEnabled.of_json in
-      let name = field_map json "Name" EventDataStoreName.of_json in
+      let name = field_map json__ "Name" EventDataStoreName.of_json in
       let eventDataStoreArn =
-        field_map json "EventDataStoreArn" EventDataStoreArn.of_json in
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
       make ?updatedTimestamp ?createdTimestamp ?retentionPeriod
         ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
         ?status ?terminationProtectionEnabled ?name ?eventDataStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A storage lake of event data against which you can run complex SQL-based queries. An event data store can include events that you have logged on your account from the last 90 to 2555 days (about three months to up to seven years). To select events for an event data store, use advanced event selectors."]
+       "A storage lake of event data against which you can run complex SQL-based queries. An event data store can include events that you have logged on your account. To select events for an event data store, use advanced event selectors."]
+module DashboardDetail =
+  struct
+    type nonrec t =
+      {
+      dashboardArn: DashboardArn.t option
+        [@ocaml.doc "The ARN for the dashboard."];
+      type_: DashboardType.t option [@ocaml.doc "The type of dashboard."]}
+    let make ?dashboardArn = fun ?type_ -> fun () -> { dashboardArn; type_ }
+    let to_value x =
+      structure_to_value
+        [("DashboardArn",
+           (Option.map x.dashboardArn ~f:DashboardArn.to_value));
+        ("Type", (Option.map x.type_ ~f:DashboardType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:DashboardType.of_xml) (Xml.child xml_arg0 "Type") in
+      let dashboardArn =
+        (Option.map ~f:DashboardArn.of_xml)
+          (Xml.child xml_arg0 "DashboardArn") in
+      make ?type_ ?dashboardArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" DashboardType.of_json in
+      let dashboardArn = field_map json__ "DashboardArn" DashboardArn.of_json in
+      make ?type_ ?dashboardArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides information about a CloudTrail Lake dashboard."]
+module Channel =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChannelArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of a channel."];
+      name: ChannelName.t option
+        [@ocaml.doc
+          "The name of the CloudTrail channel. For service-linked channels, the name is aws-service-channel/service-name/custom-suffix where service-name represents the name of the Amazon Web Services service that created the channel and custom-suffix represents the suffix created by the Amazon Web Services service."]}
+    let make ?channelArn = fun ?name -> fun () -> { channelArn; name }
+    let to_value x =
+      structure_to_value
+        [("ChannelArn", (Option.map x.channelArn ~f:ChannelArn.to_value));
+        ("Name", (Option.map x.name ~f:ChannelName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "Name") in
+      let channelArn =
+        (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
+      make ?name ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" ChannelName.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChannelArn.of_json in
+      make ?name ?channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a returned CloudTrail channel."]
 module QueryResultRow =
   struct
     type nonrec t = QueryResultColumn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QueryResultColumn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1431,17 +2893,53 @@ module Integer =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Long =
+module PartitionKey =
   struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
+    type nonrec t =
+      {
+      name: PartitionKeyName.t option
+        [@ocaml.doc "The name of the partition key."];
+      type_: PartitionKeyType.t option
+        [@ocaml.doc
+          "The data type of the partition key. For example, bigint or string."]}
+    let make ?name = fun ?type_ -> fun () -> { name; type_ }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:PartitionKeyName.to_value));
+        ("Type", (Option.map x.type_ ~f:PartitionKeyType.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
     let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+      let type_ =
+        (Option.map ~f:PartitionKeyType.of_xml) (Xml.child xml_arg0 "Type") in
+      let name =
+        (Option.map ~f:PartitionKeyName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" PartitionKeyType.of_json in
+      let name = field_map json__ "Name" PartitionKeyName.of_json in
+      make ?type_ ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a partition key for an event data store."]
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
 module Trail =
@@ -1453,7 +2951,7 @@ module Trail =
           "Name of the trail set by calling CreateTrail. The maximum length is 128 characters."];
       s3BucketName: String_.t option
         [@ocaml.doc
-          "Name of the Amazon S3 bucket into which CloudTrail delivers your trail files. See Amazon S3 Bucket Naming Requirements."];
+          "Name of the Amazon S3 bucket into which CloudTrail delivers your trail files. See Amazon S3 Bucket naming rules."];
       s3KeyPrefix: String_.t option
         [@ocaml.doc
           "Specifies the Amazon S3 key prefix that comes after the name of the bucket you have designated for log file delivery. For more information, see Finding Your CloudTrail Log Files. The maximum length is 200 characters."];
@@ -1467,9 +2965,9 @@ module Trail =
           "Set to True to include Amazon Web Services API calls from Amazon Web Services global services such as IAM. Otherwise, False."];
       isMultiRegionTrail: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the trail exists only in one region or exists in all regions."];
+          "Specifies whether the trail exists only in one Region or exists in all Regions."];
       homeRegion: String_.t option
-        [@ocaml.doc "The region in which the trail was created."];
+        [@ocaml.doc "The Region in which the trail was created."];
       trailARN: String_.t option
         [@ocaml.doc
           "Specifies the ARN of the trail. The following is the format of a trail ARN. arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"];
@@ -1483,7 +2981,7 @@ module Trail =
           "Specifies the role for the CloudWatch Logs endpoint to assume to write to a user's log group."];
       kmsKeyId: String_.t option
         [@ocaml.doc
-          "Specifies the KMS key ID that encrypts the logs delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
+          "Specifies the KMS key ID that encrypts the logs and digest files delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
       hasCustomEventSelectors: Boolean.t option
         [@ocaml.doc "Specifies if the trail has custom event selectors."];
       hasInsightSelectors: Boolean.t option
@@ -1599,31 +3097,31 @@ module Trail =
         ?includeGlobalServiceEvents ?snsTopicARN ?snsTopicName ?s3KeyPrefix
         ?s3BucketName ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let isOrganizationTrail =
-        field_map json "IsOrganizationTrail" Boolean.of_json in
+        field_map json__ "IsOrganizationTrail" Boolean.of_json in
       let hasInsightSelectors =
-        field_map json "HasInsightSelectors" Boolean.of_json in
+        field_map json__ "HasInsightSelectors" Boolean.of_json in
       let hasCustomEventSelectors =
-        field_map json "HasCustomEventSelectors" Boolean.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "HasCustomEventSelectors" Boolean.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let cloudWatchLogsRoleArn =
-        field_map json "CloudWatchLogsRoleArn" String_.of_json in
+        field_map json__ "CloudWatchLogsRoleArn" String_.of_json in
       let cloudWatchLogsLogGroupArn =
-        field_map json "CloudWatchLogsLogGroupArn" String_.of_json in
+        field_map json__ "CloudWatchLogsLogGroupArn" String_.of_json in
       let logFileValidationEnabled =
-        field_map json "LogFileValidationEnabled" Boolean.of_json in
-      let trailARN = field_map json "TrailARN" String_.of_json in
-      let homeRegion = field_map json "HomeRegion" String_.of_json in
+        field_map json__ "LogFileValidationEnabled" Boolean.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
+      let homeRegion = field_map json__ "HomeRegion" String_.of_json in
       let isMultiRegionTrail =
-        field_map json "IsMultiRegionTrail" Boolean.of_json in
+        field_map json__ "IsMultiRegionTrail" Boolean.of_json in
       let includeGlobalServiceEvents =
-        field_map json "IncludeGlobalServiceEvents" Boolean.of_json in
-      let snsTopicARN = field_map json "SnsTopicARN" String_.of_json in
-      let snsTopicName = field_map json "SnsTopicName" String_.of_json in
-      let s3KeyPrefix = field_map json "S3KeyPrefix" String_.of_json in
-      let s3BucketName = field_map json "S3BucketName" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "IncludeGlobalServiceEvents" Boolean.of_json in
+      let snsTopicARN = field_map json__ "SnsTopicARN" String_.of_json in
+      let snsTopicName = field_map json__ "SnsTopicName" String_.of_json in
+      let s3KeyPrefix = field_map json__ "S3KeyPrefix" String_.of_json in
+      let s3BucketName = field_map json__ "S3BucketName" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?isOrganizationTrail ?hasInsightSelectors ?hasCustomEventSelectors
         ?kmsKeyId ?cloudWatchLogsRoleArn ?cloudWatchLogsLogGroupArn
         ?logFileValidationEnabled ?trailARN ?homeRegion ?isMultiRegionTrail
@@ -1631,6 +3129,19 @@ module Trail =
         ?s3BucketName ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The settings for a trail."]
+module CloudTrailARNInvalidException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when an operation is called with an ARN that is not valid. The following is the format of a trail ARN: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail The following is the format of an event data store ARN: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE The following is the format of a dashboard ARN: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash The following is the format of a channel ARN: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"]
 module CloudTrailAccessNotEnabledException =
   struct
     type nonrec t = unit
@@ -1643,7 +3154,7 @@ module CloudTrailAccessNotEnabledException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when trusted access has not been enabled between CloudTrail and Organizations. For more information, see Enabling Trusted Access with Other Amazon Web Services Services and Prepare For Creating a Trail For Your Organization."]
+       "This exception is thrown when trusted access has not been enabled between CloudTrail and Organizations. For more information, see How to enable or disable trusted access in the Organizations User Guide and Prepare For Creating a Trail For Your Organization in the CloudTrail User Guide."]
 module CloudTrailInvalidClientTokenIdException =
   struct
     type nonrec t = unit
@@ -1668,7 +3179,20 @@ module CloudWatchLogsDeliveryUnavailableException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Cannot set a CloudWatch Logs delivery for this region."]
+  end[@@ocaml.doc "Cannot set a CloudWatch Logs delivery for this Region."]
+module ConflictException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the specified resource is not ready for an operation. This can occur when you try to run an operation on a resource before CloudTrail has time to fully load the resource, or because another operation is modifying the resource. If this exception occurs, wait a few minutes, and then try the operation again."]
 module InsufficientDependencyServiceAccessPermissionException =
   struct
     type nonrec t = unit
@@ -1681,7 +3205,7 @@ module InsufficientDependencyServiceAccessPermissionException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when the IAM user or role that is used to create the organization trail is lacking one or more required permissions for creating an organization trail in a required service. For more information, see Prepare For Creating a Trail For Your Organization."]
+       "This exception is thrown when the IAM identity that is used to create the organization resource lacks one or more required permissions for creating an organization resource in a required service."]
 module InsufficientEncryptionPolicyException =
   struct
     type nonrec t = unit
@@ -1694,7 +3218,7 @@ module InsufficientEncryptionPolicyException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when the policy on the S3 bucket or KMS key is not sufficient."]
+       "For the CreateTrail PutInsightSelectors, UpdateTrail, StartQuery, and StartImport operations, this exception is thrown when the policy on the S3 bucket or KMS key does not have sufficient permissions for the operation. For all other operations, this exception is thrown when the policy for the KMS key does not have sufficient permissions for the operation."]
 module InsufficientS3BucketPolicyException =
   struct
     type nonrec t = unit
@@ -1772,7 +3296,7 @@ module InvalidHomeRegionException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when an operation is called on a trail from a region other than the region in which the trail was created."]
+       "This exception is thrown when an operation is called on a trail from a Region other than the Region in which the trail was created."]
 module InvalidKmsKeyIdException =
   struct
     type nonrec t = unit
@@ -1799,6 +3323,18 @@ module InvalidParameterCombinationException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown when the combination of parameters provided is not valid."]
+module InvalidParameterException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request includes a parameter that is not valid."]
 module InvalidS3BucketNameException =
   struct
     type nonrec t = unit
@@ -1863,7 +3399,7 @@ module KmsException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when there is an issue with the specified KMS key and the trail can\226\128\153t be updated."]
+       "This exception is thrown when there is an issue with the specified KMS key and the trail or event data store can't be updated."]
 module KmsKeyDisabledException =
   struct
     type nonrec t = unit
@@ -1888,7 +3424,20 @@ module KmsKeyNotFoundException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when the KMS key does not exist, when the S3 bucket and the KMS key are not in the same region, or when the KMS key associated with the Amazon SNS topic either does not exist or is not in the same region."]
+       "This exception is thrown when the KMS key does not exist, when the S3 bucket and the KMS key are not in the same Region, or when the KMS key associated with the Amazon SNS topic either does not exist or is not in the same Region."]
+module NoManagementAccountSLRExistsException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the management account does not have a service-linked role."]
 module NotOrganizationMasterAccountException =
   struct
     type nonrec t = unit
@@ -1901,7 +3450,7 @@ module NotOrganizationMasterAccountException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when the Amazon Web Services account making the request to create or update an organization trail is not the management account for an organization in Organizations. For more information, see Prepare For Creating a Trail For Your Organization."]
+       "This exception is thrown when the Amazon Web Services account making the request to create or update an organization trail or event data store is not the management account for an organization in Organizations. For more information, see Prepare For Creating a Trail For Your Organization or Organization event data stores."]
 module OperationNotPermittedException =
   struct
     type nonrec t = unit
@@ -1927,7 +3476,7 @@ module OrganizationNotInAllFeaturesModeException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when Organizations is not configured to support all features. All features must be enabled in Organizations to support creating an organization trail. For more information, see Prepare For Creating a Trail For Your Organization."]
+       "This exception is thrown when Organizations is not configured to support all features. All features must be enabled in Organizations to support creating an organization trail or event data store."]
 module OrganizationsNotInUseException =
   struct
     type nonrec t = unit
@@ -1954,6 +3503,19 @@ module S3BucketDoesNotExistException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown when the specified S3 bucket does not exist."]
+module ThrottlingException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the request rate exceeds the limit."]
 module TrailNotFoundException =
   struct
     type nonrec t = unit
@@ -1992,6 +3554,31 @@ module UnsupportedOperationException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown when the requested operation is not supported."]
+module BillingMode =
+  struct
+    type nonrec t =
+      | EXTENDABLE_RETENTION_PRICING 
+      | FIXED_RETENTION_PRICING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EXTENDABLE_RETENTION_PRICING -> "EXTENDABLE_RETENTION_PRICING"
+      | FIXED_RETENTION_PRICING -> "FIXED_RETENTION_PRICING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EXTENDABLE_RETENTION_PRICING" -> EXTENDABLE_RETENTION_PRICING
+      | "FIXED_RETENTION_PRICING" -> FIXED_RETENTION_PRICING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BillingMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BillingMode" j)
+    let to_json = simple_to_json to_value
+  end
 module EventDataStoreARNInvalidException =
   struct
     type nonrec t = unit
@@ -2005,6 +3592,51 @@ module EventDataStoreARNInvalidException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified event data store ARN is not valid or does not map to an event data store in your account."]
+module EventDataStoreAlreadyExistsException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An event data store with that name already exists."]
+module EventDataStoreHasOngoingImportException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when you try to update or delete an event data store that currently has an import in progress."]
+module EventDataStoreKmsKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "EventDataStoreKmsKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:350) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._/\\-:]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventDataStoreKmsKeyId" j
+    let to_json = simple_to_json to_value
+  end
 module EventDataStoreNotFoundException =
   struct
     type nonrec t = unit
@@ -2017,6 +3649,59 @@ module EventDataStoreNotFoundException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified event data store was not found."]
+module FederationRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "FederationRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:125) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9._/\\-:@=\\+,\\.]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FederationRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module FederationStatus =
+  struct
+    type nonrec t =
+      | ENABLING 
+      | ENABLED 
+      | DISABLING 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLING -> "ENABLING"
+      | ENABLED -> "ENABLED"
+      | DISABLING -> "DISABLING"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLING" -> ENABLING
+      | "ENABLED" -> ENABLED
+      | "DISABLING" -> DISABLING
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FederationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FederationStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module InactiveEventDataStoreException =
   struct
     type nonrec t = unit
@@ -2028,9 +3713,8 @@ module InactiveEventDataStoreException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The event data store against which you ran your query is inactive."]
-module InvalidParameterException =
+  end[@@ocaml.doc "The event data store is inactive."]
+module InvalidInsightSelectorsException =
   struct
     type nonrec t = unit
     let make () = ()
@@ -2041,7 +3725,28 @@ module InvalidParameterException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The request includes a parameter that is not valid."]
+  end[@@ocaml.doc
+       "For PutInsightSelectors, this exception is thrown when the formatting or syntax of the InsightSelectors JSON statement is not valid, or the specified InsightType in the InsightSelectors statement is not valid. Valid values for InsightType are ApiCallRateInsight and ApiErrorRateInsight. To enable Insights on an event data store, the destination event data store specified by the InsightsDestination parameter must log Insights events and the source event data store specified by the EventDataStore parameter must log management events. For UpdateEventDataStore, this exception is thrown if Insights are enabled on the event data store and the updated advanced event selectors are not compatible with the configured InsightSelectors. If the InsightSelectors includes an InsightType of ApiCallRateInsight, the source event data store must log write management events. If the InsightSelectors includes an InsightType of ApiErrorRateInsight, the source event data store must log management events."]
+module DashboardName =
+  struct
+    type nonrec t = string
+    let context_ = "DashboardName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9_\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DashboardName" j
+    let to_json = simple_to_json to_value
+  end
 module InvalidQueryStatementException =
   struct
     type nonrec t = unit
@@ -2055,6 +3760,359 @@ module InvalidQueryStatementException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The query that was submitted has validation errors, or uses incorrect syntax or unsupported keywords. For more information about writing a query, see Create or edit a query in the CloudTrail User Guide."]
+module RefreshSchedule =
+  struct
+    type nonrec t =
+      {
+      frequency: RefreshScheduleFrequency.t option
+        [@ocaml.doc
+          "The frequency at which you want the dashboard refreshed."];
+      status: RefreshScheduleStatus.t option
+        [@ocaml.doc
+          "Specifies whether the refresh schedule is enabled. Set the value to ENABLED to enable the refresh schedule, or to DISABLED to turn off the refresh schedule."];
+      timeOfDay: TimeOfDay.t option
+        [@ocaml.doc
+          "The time of day in UTC to run the schedule; for hourly only refer to minutes; default is 00:00."]}
+    let make ?frequency =
+      fun ?status ->
+        fun ?timeOfDay -> fun () -> { frequency; status; timeOfDay }
+    let to_value x =
+      structure_to_value
+        [("Frequency",
+           (Option.map x.frequency ~f:RefreshScheduleFrequency.to_value));
+        ("Status", (Option.map x.status ~f:RefreshScheduleStatus.to_value));
+        ("TimeOfDay", (Option.map x.timeOfDay ~f:TimeOfDay.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timeOfDay =
+        (Option.map ~f:TimeOfDay.of_xml) (Xml.child xml_arg0 "TimeOfDay") in
+      let status =
+        (Option.map ~f:RefreshScheduleStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let frequency =
+        (Option.map ~f:RefreshScheduleFrequency.of_xml)
+          (Xml.child xml_arg0 "Frequency") in
+      make ?timeOfDay ?status ?frequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timeOfDay = field_map json__ "TimeOfDay" TimeOfDay.of_json in
+      let status = field_map json__ "Status" RefreshScheduleStatus.of_json in
+      let frequency =
+        field_map json__ "Frequency" RefreshScheduleFrequency.of_json in
+      make ?timeOfDay ?status ?frequency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The schedule for a dashboard refresh."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the specified resource is not found."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the quota is exceeded. For information about CloudTrail quotas, see Service quotas in the Amazon Web Services General Reference."]
+module WidgetList =
+  struct
+    type nonrec t = Widget.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Widget.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Widget.of_xml)
+    let of_json j = list_of_json ~kind:"WidgetList" ~of_json:Widget.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RequestWidgetList =
+  struct
+    type nonrec t = RequestWidget.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RequestWidget.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RequestWidget.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RequestWidgetList" ~of_json:RequestWidget.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ChannelARNInvalidException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the specified value of ChannelARN is not valid."]
+module ChannelAlreadyExistsException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the provided channel already exists."]
+module ChannelNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when CloudTrail cannot find the specified channel."]
+module Destinations =
+  struct
+    type nonrec t = Destination.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Destination.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Destination.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Destinations" ~of_json:Destination.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InvalidEventDataStoreCategoryException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when event categories of specified event data stores are not valid."]
+module Source =
+  struct
+    type nonrec t = string
+    let context_ = "Source"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Source" j
+    let to_json = simple_to_json to_value
+  end
+module ImportNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified import was not found."]
+module ImportSource =
+  struct
+    type nonrec t =
+      {
+      s3: S3ImportSource.t [@ocaml.doc "The source S3 bucket."]}
+    let context_ = "ImportSource"
+    let make ~s3 = fun () -> { s3 }
+    let to_value x =
+      structure_to_value [("S3", (Some (S3ImportSource.to_value x.s3)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3 =
+        S3ImportSource.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3") in
+      make ~s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3 = field_map_exn json__ "S3" S3ImportSource.of_json in
+      make ~s3 ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The import source."]
+module ImportStatistics =
+  struct
+    type nonrec t =
+      {
+      prefixesFound: Long.t option
+        [@ocaml.doc "The number of S3 prefixes found for the import."];
+      prefixesCompleted: Long.t option
+        [@ocaml.doc "The number of S3 prefixes that completed import."];
+      filesCompleted: Long.t option
+        [@ocaml.doc "The number of log files that completed import."];
+      eventsCompleted: Long.t option
+        [@ocaml.doc
+          "The number of trail events imported into the event data store."];
+      failedEntries: Long.t option
+        [@ocaml.doc "The number of failed entries."]}
+    let make ?prefixesFound =
+      fun ?prefixesCompleted ->
+        fun ?filesCompleted ->
+          fun ?eventsCompleted ->
+            fun ?failedEntries ->
+              fun () ->
+                {
+                  prefixesFound;
+                  prefixesCompleted;
+                  filesCompleted;
+                  eventsCompleted;
+                  failedEntries
+                }
+    let to_value x =
+      structure_to_value
+        [("PrefixesFound", (Option.map x.prefixesFound ~f:Long.to_value));
+        ("PrefixesCompleted",
+          (Option.map x.prefixesCompleted ~f:Long.to_value));
+        ("FilesCompleted", (Option.map x.filesCompleted ~f:Long.to_value));
+        ("EventsCompleted", (Option.map x.eventsCompleted ~f:Long.to_value));
+        ("FailedEntries", (Option.map x.failedEntries ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failedEntries =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "FailedEntries") in
+      let eventsCompleted =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "EventsCompleted") in
+      let filesCompleted =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "FilesCompleted") in
+      let prefixesCompleted =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "PrefixesCompleted") in
+      let prefixesFound =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "PrefixesFound") in
+      make ?failedEntries ?eventsCompleted ?filesCompleted ?prefixesCompleted
+        ?prefixesFound ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failedEntries = field_map json__ "FailedEntries" Long.of_json in
+      let eventsCompleted = field_map json__ "EventsCompleted" Long.of_json in
+      let filesCompleted = field_map json__ "FilesCompleted" Long.of_json in
+      let prefixesCompleted =
+        field_map json__ "PrefixesCompleted" Long.of_json in
+      let prefixesFound = field_map json__ "PrefixesFound" Long.of_json in
+      make ?failedEntries ?eventsCompleted ?filesCompleted ?prefixesCompleted
+        ?prefixesFound ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides statistics for the specified ImportID. CloudTrail does not update import statistics in real-time. Returned values for parameters such as EventsCompleted may be lower than the actual value, because CloudTrail updates statistics incrementally over the course of the import."]
+module InvalidEventDataStoreStatusException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The event data store is not in a status that supports the operation."]
+module AccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:16) >>=
+                  (fun () -> check_pattern i ~pattern:"\\d+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountId" j
+    let to_json = simple_to_json to_value
+  end
 module MaxConcurrentQueriesException =
   struct
     type nonrec t = unit
@@ -2067,25 +4125,190 @@ module MaxConcurrentQueriesException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You are already running the maximum number of concurrent queries. Wait a minute for some queries to finish, and then run the query again."]
-module QueryStatement =
+       "You are already running the maximum number of concurrent queries. The maximum number of concurrent queries is 10. Wait a minute for some queries to finish, and then run the query again."]
+module DeliveryS3Uri =
   struct
     type nonrec t = string
-    let context_ = "QueryStatement"
+    let context_ = "DeliveryS3Uri"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
+          ((check_string_max i ~max:1024) >>=
              (fun () ->
-                (check_string_max i ~max:10000) >>=
-                  (fun () -> check_pattern i ~pattern:"(?s).*")));
+                check_pattern i
+                  ~pattern:"s3://[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9](/.*)?"));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QueryStatement" j
+    let of_json j = string_of_json ~kind:"DeliveryS3Uri" j
+    let to_json = simple_to_json to_value
+  end
+module AccountHasOngoingImportException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when you start a new import and a previous import is still in progress."]
+module InvalidImportSourceException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the provided source S3 bucket is not valid for import."]
+module RefreshId =
+  struct
+    type nonrec t = string
+    let context_ = "RefreshId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:10) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"\\d+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RefreshId" j
+    let to_json = simple_to_json to_value
+  end
+module QueryParameterValues =
+  struct
+    type nonrec t = (QueryParameterKey.t * QueryParameterValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((QueryParameterKey.of_string chopped),
+                              (QueryParameterValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (QueryParameterKey.to_value x) |>
+                    (fun x ->
+                       (QueryParameterValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:QueryParameterKey.of_string
+        ~of_json:QueryParameterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PaginationToken =
+  struct
+    type nonrec t = string
+    let context_ = "PaginationToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PaginationToken" j
+    let to_json = simple_to_json to_value
+  end
+module SearchSampleQueriesSearchResults =
+  struct
+    type nonrec t = SearchSampleQueriesSearchResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchSampleQueriesSearchResult.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchSampleQueriesSearchResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchSampleQueriesSearchResults"
+        ~of_json:SearchSampleQueriesSearchResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchSampleQueriesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SearchSampleQueriesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchSampleQueriesSearchPhrase =
+  struct
+    type nonrec t = string
+    let context_ = "SearchSampleQueriesSearchPhrase"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"^[ -~\\n]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SearchSampleQueriesSearchPhrase" j
     let to_json = simple_to_json to_value
   end
 module EventDataStoreMaxLimitExceededException =
@@ -2101,32 +4324,6 @@ module EventDataStoreMaxLimitExceededException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Your account has used the maximum number of event data stores."]
-module InvalidEventDataStoreStatusException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The event data store is not in a status that supports the operation."]
-module CloudTrailARNInvalidException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "This exception is thrown when an operation is called with a trail ARN that is not valid. The following is the format of a trail ARN. arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"]
 module InvalidTagParameterException =
   struct
     type nonrec t = unit
@@ -2140,19 +4337,6 @@ module InvalidTagParameterException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown when the specified tag key or values are not valid. It can also occur if there are duplicate tags or too many tags on the resource."]
-module ResourceNotFoundException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "This exception is thrown when the specified resource is not found."]
 module ResourceTypeNotSupportedException =
   struct
     type nonrec t = unit
@@ -2166,10 +4350,155 @@ module ResourceTypeNotSupportedException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown when the specified resource type is not supported by CloudTrail."]
+module AccountNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the specified account is not found or not part of an organization."]
+module AccountRegisteredException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the account is already registered as the CloudTrail delegated administrator."]
+module CannotDelegateManagementAccountException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the management account of an organization is registered as the CloudTrail delegated administrator."]
+module DelegatedAdminAccountLimitExceededException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the maximum number of CloudTrail delegated administrators is reached."]
+module InsufficientIAMAccessPermissionException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The task can't be completed because you are signed in with an account that lacks permissions to view or create a service-linked role. Sign in with an account that has the required permissions and then try again."]
+module NotOrganizationManagementAccountException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the account making the request is not the organization's management account."]
+module ResourceARNNotValidException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the provided resource does not exist, or the ARN format of the resource is not valid. The following is the format of an event data store ARN: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE The following is the format of a dashboard ARN: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash The following is the format of a channel ARN: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"]
+module ResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._/\\-:]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_json = simple_to_json to_value
+  end
+module ResourcePolicy =
+  struct
+    type nonrec t = string
+    let context_ = "ResourcePolicy"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:8192) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourcePolicy" j
+    let to_json = simple_to_json to_value
+  end
+module ResourcePolicyNotValidException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the resouce-based policy has syntax errors, or contains a principal that is not valid."]
 module InsightSelectors =
   struct
     type nonrec t = InsightSelector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InsightSelector.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2191,23 +4520,13 @@ module InsightSelectors =
         j
     let to_json v = composed_to_json to_value v
   end
-module InvalidInsightSelectorsException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The formatting or syntax of the InsightSelectors JSON statement in your PutInsightSelectors or GetInsightSelectors request is not valid, or the specified insight type in the InsightSelectors statement is not a valid insight type."]
 module EventSelectors =
   struct
     type nonrec t = EventSelector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventSelector.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2228,10 +4547,97 @@ module EventSelectors =
       list_of_json ~kind:"EventSelectors" ~of_json:EventSelector.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AggregationConfigurations =
+  struct
+    type nonrec t = AggregationConfiguration.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AggregationConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AggregationConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AggregationConfigurations"
+        ~of_json:AggregationConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ContextKeySelectors =
+  struct
+    type nonrec t = ContextKeySelector.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContextKeySelector.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ContextKeySelector.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ContextKeySelectors"
+        ~of_json:ContextKeySelector.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxEventSize =
+  struct
+    type nonrec t =
+      | Standard 
+      | Large 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Standard -> "Standard"
+      | Large -> "Large"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Standard" -> Standard
+      | "Large" -> Large
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MaxEventSize" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MaxEventSize" j)
+    let to_json = simple_to_json to_value
+  end
 module EventsList =
   struct
     type nonrec t = Event.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Event.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2349,6 +4755,9 @@ module LookupAttributesList =
   struct
     type nonrec t = LookupAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LookupAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2392,6 +4801,9 @@ module Trails =
   struct
     type nonrec t = TrailInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrailInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2427,6 +4839,9 @@ module ResourceTagList =
   struct
     type nonrec t = ResourceTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2451,6 +4866,9 @@ module ResourceIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2483,7 +4901,7 @@ module InvalidDateRangeException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A date range for the query was specified that is not valid. For more information about writing a query, see Create or edit a query in the CloudTrail User Guide."]
+       "A date range for the query was specified that is not valid. Be sure that the start time is chronologically before the end time. For more information about writing a query, see Create or edit a query in the CloudTrail User Guide."]
 module InvalidQueryStatusException =
   struct
     type nonrec t = unit
@@ -2496,30 +4914,13 @@ module InvalidQueryStatusException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The query status is not valid for the operation."]
-module PaginationToken =
-  struct
-    type nonrec t = string
-    let context_ = "PaginationToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:4) >>=
-             (fun () ->
-                (check_string_max i ~max:1000) >>=
-                  (fun () -> check_pattern i ~pattern:".*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PaginationToken" j
-    let to_json = simple_to_json to_value
-  end
 module Queries =
   struct
     type nonrec t = Query.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Query.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2562,6 +4963,9 @@ module PublicKeyList =
   struct
     type nonrec t = PublicKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PublicKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2582,10 +4986,376 @@ module PublicKeyList =
       list_of_json ~kind:"PublicKeyList" ~of_json:PublicKey.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ErrorCode =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () ->
+                check_pattern i ~pattern:"^[\\w\\d\\s_.,\\-:\\[\\]]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorCode" j
+    let to_json = simple_to_json to_value
+  end
+module EventName =
+  struct
+    type nonrec t = string
+    let context_ = "EventName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_pattern i ~pattern:"^[A-Za-z0-9_]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventName" j
+    let to_json = simple_to_json to_value
+  end
+module EventSource =
+  struct
+    type nonrec t = string
+    let context_ = "EventSource"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i ~pattern:"^[a-z0-9_-]+\\.amazonaws\\.com$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventSource" j
+    let to_json = simple_to_json to_value
+  end
+module InsightsMetricNextToken =
+  struct
+    type nonrec t = string
+    let context_ = "InsightsMetricNextToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:5000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InsightsMetricNextToken" j
+    let to_json = simple_to_json to_value
+  end
+module InsightsMetricValues =
+  struct
+    type nonrec t = Double.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Double.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Double.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InsightsMetricValues" ~of_json:Double.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Timestamps =
+  struct
+    type nonrec t = Date.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Date.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Date.of_xml)
+    let of_json j = list_of_json ~kind:"Timestamps" ~of_json:Date.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightsMetricDataType =
+  struct
+    type nonrec t =
+      | FillWithZeros 
+      | NonZeroData 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FillWithZeros -> "FillWithZeros"
+      | NonZeroData -> "NonZeroData"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FillWithZeros" -> FillWithZeros
+      | "NonZeroData" -> NonZeroData
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InsightsMetricDataType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InsightsMetricDataType" j)
+    let to_json = simple_to_json to_value
+  end
+module InsightsMetricMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:21600) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InsightsMetricMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InsightsMetricPeriod =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3600) >>=
+             (fun () -> check_int_min i ~min:60));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InsightsMetricPeriod" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListInsightsDataDimensions =
+  struct
+    type nonrec t =
+      (ListInsightsDataDimensionKey.t * ListInsightsDataDimensionValue.t)
+        list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ListInsightsDataDimensionKey.of_string chopped),
+                              (ListInsightsDataDimensionValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ListInsightsDataDimensionKey.to_value x) |>
+                    (fun x ->
+                       (ListInsightsDataDimensionValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ListInsightsDataDimensionKey.of_string
+        ~of_json:ListInsightsDataDimensionValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListInsightsDataMaxResultsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListInsightsDataMaxResultsCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListInsightsDataType =
+  struct
+    type nonrec t =
+      | InsightsEvents 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | InsightsEvents -> "InsightsEvents" | Non_static_id s -> s
+    let of_string =
+      function | "InsightsEvents" -> InsightsEvents | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ListInsightsDataType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ListInsightsDataType" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportsList =
+  struct
+    type nonrec t = ImportsListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImportsListItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImportsListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImportsList" ~of_json:ImportsListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListImportsMaxResultsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListImportsMaxResultsCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportFailureList =
+  struct
+    type nonrec t = ImportFailureListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImportFailureListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImportFailureListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImportFailureList"
+        ~of_json:ImportFailureListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListImportFailuresMaxResultsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListImportFailuresMaxResultsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module EventDataStores =
   struct
     type nonrec t = EventDataStore.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventDataStore.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2625,26 +5395,110 @@ module ListEventDataStoresMaxResultsCount =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module ErrorMessage =
+module Dashboards =
   struct
-    type nonrec t = string
-    let context_ = "ErrorMessage"
+    type nonrec t = DashboardDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DashboardDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DashboardDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Dashboards" ~of_json:DashboardDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListDashboardsMaxResultsCount =
+  struct
+    type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:4) >>=
-             (fun () ->
-                (check_string_max i ~max:1000) >>=
-                  (fun () -> check_pattern i ~pattern:".*")));
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListDashboardsMaxResultsCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module Channels =
+  struct
+    type nonrec t = Channel.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Channel.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Channel.of_xml)
+    let of_json j = list_of_json ~kind:"Channels" ~of_json:Channel.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListChannelsMaxResultsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListChannelsMaxResultsCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourcePolicyNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the specified resource policy is not found."]
 module QueryIdNotFoundException =
   struct
     type nonrec t = unit
@@ -2661,6 +5515,9 @@ module QueryResultRows =
   struct
     type nonrec t = QueryResultRow.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QueryResultRow.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2713,11 +5570,11 @@ module QueryStatistics =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "ResultsCount") in
       make ?bytesScanned ?totalResultsCount ?resultsCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bytesScanned = field_map json "BytesScanned" Long.of_json in
+    let of_json json__ =
+      let bytesScanned = field_map json__ "BytesScanned" Long.of_json in
       let totalResultsCount =
-        field_map json "TotalResultsCount" Integer.of_json in
-      let resultsCount = field_map json "ResultsCount" Integer.of_json in
+        field_map json__ "TotalResultsCount" Integer.of_json in
+      let resultsCount = field_map json__ "ResultsCount" Integer.of_json in
       make ?bytesScanned ?totalResultsCount ?resultsCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Metadata about a query, such as the number of results."]
@@ -2751,11 +5608,301 @@ module InsightNotEnabledException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "If you run GetInsightSelectors on a trail that does not have Insights events enabled, the operation throws the exception InsightNotEnabledException."]
+       "If you run GetInsightSelectors on a trail or event data store that does not have Insights events enabled, the operation throws the exception InsightNotEnabledException."]
+module PartitionKeyList =
+  struct
+    type nonrec t = PartitionKey.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PartitionKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PartitionKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PartitionKeyList" ~of_json:PartitionKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DashboardStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATED 
+      | UPDATING 
+      | UPDATED 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATED -> "CREATED"
+      | UPDATING -> "UPDATING"
+      | UPDATED -> "UPDATED"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATED" -> CREATED
+      | "UPDATING" -> UPDATING
+      | "UPDATED" -> UPDATED
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DashboardStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DashboardStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module IngestionStatus =
+  struct
+    type nonrec t =
+      {
+      latestIngestionSuccessTime: Date.t option
+        [@ocaml.doc
+          "The time stamp of the most recent successful ingestion of events for the channel."];
+      latestIngestionSuccessEventID: UUID.t option
+        [@ocaml.doc
+          "The event ID of the most recent successful ingestion of events."];
+      latestIngestionErrorCode: ErrorMessage.t option
+        [@ocaml.doc
+          "The error code for the most recent failure to ingest events."];
+      latestIngestionAttemptTime: Date.t option
+        [@ocaml.doc
+          "The time stamp of the most recent attempt to ingest events on the channel."];
+      latestIngestionAttemptEventID: UUID.t option
+        [@ocaml.doc
+          "The event ID of the most recent attempt to ingest events."]}
+    let make ?latestIngestionSuccessTime =
+      fun ?latestIngestionSuccessEventID ->
+        fun ?latestIngestionErrorCode ->
+          fun ?latestIngestionAttemptTime ->
+            fun ?latestIngestionAttemptEventID ->
+              fun () ->
+                {
+                  latestIngestionSuccessTime;
+                  latestIngestionSuccessEventID;
+                  latestIngestionErrorCode;
+                  latestIngestionAttemptTime;
+                  latestIngestionAttemptEventID
+                }
+    let to_value x =
+      structure_to_value
+        [("LatestIngestionSuccessTime",
+           (Option.map x.latestIngestionSuccessTime ~f:Date.to_value));
+        ("LatestIngestionSuccessEventID",
+          (Option.map x.latestIngestionSuccessEventID ~f:UUID.to_value));
+        ("LatestIngestionErrorCode",
+          (Option.map x.latestIngestionErrorCode ~f:ErrorMessage.to_value));
+        ("LatestIngestionAttemptTime",
+          (Option.map x.latestIngestionAttemptTime ~f:Date.to_value));
+        ("LatestIngestionAttemptEventID",
+          (Option.map x.latestIngestionAttemptEventID ~f:UUID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestIngestionAttemptEventID =
+        (Option.map ~f:UUID.of_xml)
+          (Xml.child xml_arg0 "LatestIngestionAttemptEventID") in
+      let latestIngestionAttemptTime =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "LatestIngestionAttemptTime") in
+      let latestIngestionErrorCode =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "LatestIngestionErrorCode") in
+      let latestIngestionSuccessEventID =
+        (Option.map ~f:UUID.of_xml)
+          (Xml.child xml_arg0 "LatestIngestionSuccessEventID") in
+      let latestIngestionSuccessTime =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "LatestIngestionSuccessTime") in
+      make ?latestIngestionAttemptEventID ?latestIngestionAttemptTime
+        ?latestIngestionErrorCode ?latestIngestionSuccessEventID
+        ?latestIngestionSuccessTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestIngestionAttemptEventID =
+        field_map json__ "LatestIngestionAttemptEventID" UUID.of_json in
+      let latestIngestionAttemptTime =
+        field_map json__ "LatestIngestionAttemptTime" Date.of_json in
+      let latestIngestionErrorCode =
+        field_map json__ "LatestIngestionErrorCode" ErrorMessage.of_json in
+      let latestIngestionSuccessEventID =
+        field_map json__ "LatestIngestionSuccessEventID" UUID.of_json in
+      let latestIngestionSuccessTime =
+        field_map json__ "LatestIngestionSuccessTime" Date.of_json in
+      make ?latestIngestionAttemptEventID ?latestIngestionAttemptTime
+        ?latestIngestionErrorCode ?latestIngestionSuccessEventID
+        ?latestIngestionSuccessTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A table showing information about the most recent successful and failed attempts to ingest events."]
+module SourceConfig =
+  struct
+    type nonrec t =
+      {
+      applyToAllRegions: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the channel applies to a single Region or to all Regions."];
+      advancedEventSelectors: AdvancedEventSelectors.t option
+        [@ocaml.doc
+          "The advanced event selectors that are configured for the channel."]}
+    let make ?applyToAllRegions =
+      fun ?advancedEventSelectors ->
+        fun () -> { applyToAllRegions; advancedEventSelectors }
+    let to_value x =
+      structure_to_value
+        [("ApplyToAllRegions",
+           (Option.map x.applyToAllRegions ~f:Boolean.to_value));
+        ("AdvancedEventSelectors",
+          (Option.map x.advancedEventSelectors
+             ~f:AdvancedEventSelectors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let advancedEventSelectors =
+        (Option.map ~f:AdvancedEventSelectors.of_xml)
+          (Xml.child xml_arg0 "AdvancedEventSelectors") in
+      let applyToAllRegions =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ApplyToAllRegions") in
+      make ?advancedEventSelectors ?applyToAllRegions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let advancedEventSelectors =
+        field_map json__ "AdvancedEventSelectors"
+          AdvancedEventSelectors.of_json in
+      let applyToAllRegions =
+        field_map json__ "ApplyToAllRegions" Boolean.of_json in
+      make ?advancedEventSelectors ?applyToAllRegions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains configuration information about the channel."]
+module GenerateResponseException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when a valid query could not be generated for the provided prompt."]
+module EventDataStoreList =
+  struct
+    type nonrec t = EventDataStoreArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EventDataStoreArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EventDataStoreArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EventDataStoreList"
+        ~of_json:EventDataStoreArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Prompt =
+  struct
+    type nonrec t = string
+    let context_ = "Prompt"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"^[ -~\\n]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Prompt" j
+    let to_json = simple_to_json to_value
+  end
+module AccessDeniedException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You do not have sufficient access to perform this action."]
+module ConcurrentModificationException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You are trying to update a resource when another request is in progress. Allow sufficient wait time for the previous request to complete, then retry your request."]
+module EventDataStoreFederationEnabledException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You cannot delete the event data store because Lake query federation is enabled. To delete the event data store, run the DisableFederation operation to disable Lake query federation on the event data store."]
 module TrailList =
   struct
     type nonrec t = Trail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Trail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2779,6 +5926,9 @@ module TrailNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2798,6 +5948,52 @@ module TrailNameList =
     let of_json j =
       list_of_json ~kind:"TrailNameList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module DeliveryStatus =
+  struct
+    type nonrec t =
+      | SUCCESS 
+      | FAILED 
+      | FAILED_SIGNING_FILE 
+      | PENDING 
+      | RESOURCE_NOT_FOUND 
+      | ACCESS_DENIED 
+      | ACCESS_DENIED_SIGNING_FILE 
+      | CANCELLED 
+      | UNKNOWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCESS -> "SUCCESS"
+      | FAILED -> "FAILED"
+      | FAILED_SIGNING_FILE -> "FAILED_SIGNING_FILE"
+      | PENDING -> "PENDING"
+      | RESOURCE_NOT_FOUND -> "RESOURCE_NOT_FOUND"
+      | ACCESS_DENIED -> "ACCESS_DENIED"
+      | ACCESS_DENIED_SIGNING_FILE -> "ACCESS_DENIED_SIGNING_FILE"
+      | CANCELLED -> "CANCELLED"
+      | UNKNOWN -> "UNKNOWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCESS" -> SUCCESS
+      | "FAILED" -> FAILED
+      | "FAILED_SIGNING_FILE" -> FAILED_SIGNING_FILE
+      | "PENDING" -> PENDING
+      | "RESOURCE_NOT_FOUND" -> RESOURCE_NOT_FOUND
+      | "ACCESS_DENIED" -> ACCESS_DENIED
+      | "ACCESS_DENIED_SIGNING_FILE" -> ACCESS_DENIED_SIGNING_FILE
+      | "CANCELLED" -> CANCELLED
+      | "UNKNOWN" -> UNKNOWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DeliveryStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeliveryStatus" j)
+    let to_json = simple_to_json to_value
   end
 module QueryStatisticsForDescribeQuery =
   struct
@@ -2852,19 +6048,19 @@ module QueryStatisticsForDescribeQuery =
       make ?creationTime ?executionTimeInMillis ?bytesScanned ?eventsScanned
         ?eventsMatched ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Date.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
       let executionTimeInMillis =
-        field_map json "ExecutionTimeInMillis" Integer.of_json in
-      let bytesScanned = field_map json "BytesScanned" Long.of_json in
-      let eventsScanned = field_map json "EventsScanned" Long.of_json in
-      let eventsMatched = field_map json "EventsMatched" Long.of_json in
+        field_map json__ "ExecutionTimeInMillis" Integer.of_json in
+      let bytesScanned = field_map json__ "BytesScanned" Long.of_json in
+      let eventsScanned = field_map json__ "EventsScanned" Long.of_json in
+      let eventsMatched = field_map json__ "EventsMatched" Long.of_json in
       make ?creationTime ?executionTimeInMillis ?bytesScanned ?eventsScanned
         ?eventsMatched ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets metadata about a query, including the number of events that were matched, the total number of events scanned, the query run time in milliseconds, and the query's creation time."]
-module ConflictException =
+module AccountNotRegisteredException =
   struct
     type nonrec t = unit
     let make () = ()
@@ -2876,7 +6072,20 @@ module ConflictException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when the specified resource is not ready for an operation. This can occur when you try to run an operation on a trail before CloudTrail has time to fully load the trail. If this exception occurs, wait a few minutes, and then try the operation again."]
+       "This exception is thrown when the specified account is not registered as the CloudTrail delegated administrator."]
+module ChannelExistsForEDSException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the specified event data store cannot yet be deleted because it is in use by a channel."]
 module EventDataStoreTerminationProtectedException =
   struct
     type nonrec t = unit
@@ -2903,6 +6112,19 @@ module MaximumNumberOfTrailsExceededException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown when the maximum number of trails is reached."]
+module TagsLimitExceededException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of tags per trail, event data store, dashboard, or channel has exceeded the permitted amount. Currently, the limit is 50."]
 module TrailAlreadyExistsException =
   struct
     type nonrec t = unit
@@ -2916,7 +6138,7 @@ module TrailAlreadyExistsException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown when the specified trail already exists."]
-module EventDataStoreAlreadyExistsException =
+module ChannelMaxLimitExceededException =
   struct
     type nonrec t = unit
     let make () = ()
@@ -2927,7 +6149,21 @@ module EventDataStoreAlreadyExistsException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An event data store with that name already exists."]
+  end[@@ocaml.doc
+       "This exception is thrown when the maximum number of channels limit is exceeded."]
+module InvalidSourceException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the specified value of Source is not valid."]
 module InactiveQueryException =
   struct
     type nonrec t = unit
@@ -2941,19 +6177,6 @@ module InactiveQueryException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified query cannot be canceled because it is in the FINISHED, FAILED, TIMED_OUT, or CANCELLED state."]
-module TagsLimitExceededException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The number of tags per trail has exceeded the permitted amount. Currently, the limit is 50."]
 module UpdateTrailResponse =
   struct
     type nonrec t =
@@ -2966,8 +6189,7 @@ module UpdateTrailResponse =
         [@ocaml.doc
           "Specifies the Amazon S3 key prefix that comes after the name of the bucket you have designated for log file delivery. For more information, see Finding Your IAM Log Files."];
       snsTopicName: String_.t option
-        [@ocaml.doc
-          "This field is no longer in use. Use UpdateTrailResponse$SnsTopicARN."];
+        [@ocaml.doc "This field is no longer in use. Use SnsTopicARN."];
       snsTopicARN: String_.t option
         [@ocaml.doc
           "Specifies the ARN of the Amazon SNS topic that CloudTrail uses to send notifications when log files are delivered. The following is the format of a topic ARN. arn:aws:sns:us-east-2:123456789012:MyTopic"];
@@ -2976,7 +6198,7 @@ module UpdateTrailResponse =
           "Specifies whether the trail is publishing events from global services such as IAM to the log files."];
       isMultiRegionTrail: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the trail exists in one region or in all regions."];
+          "Specifies whether the trail exists in one Region or in all Regions."];
       trailARN: String_.t option
         [@ocaml.doc
           "Specifies the ARN of the trail that was updated. The following is the format of a trail ARN. arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"];
@@ -2991,17 +6213,18 @@ module UpdateTrailResponse =
           "Specifies the role for the CloudWatch Logs endpoint to assume to write to a user's log group."];
       kmsKeyId: String_.t option
         [@ocaml.doc
-          "Specifies the KMS key ID that encrypts the logs delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
+          "Specifies the KMS key ID that encrypts the logs and digest files delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
       isOrganizationTrail: Boolean.t option
         [@ocaml.doc "Specifies whether the trail is an organization trail."]}
     type nonrec error =
-      [
-        `CloudTrailAccessNotEnabledException of
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `CloudTrailAccessNotEnabledException of
           CloudTrailAccessNotEnabledException.t 
       | `CloudTrailInvalidClientTokenIdException of
           CloudTrailInvalidClientTokenIdException.t 
       | `CloudWatchLogsDeliveryUnavailableException of
           CloudWatchLogsDeliveryUnavailableException.t 
+      | `ConflictException of ConflictException.t 
       | `InsufficientDependencyServiceAccessPermissionException of
           InsufficientDependencyServiceAccessPermissionException.t 
       | `InsufficientEncryptionPolicyException of
@@ -3019,6 +6242,7 @@ module UpdateTrailResponse =
       | `InvalidKmsKeyIdException of InvalidKmsKeyIdException.t 
       | `InvalidParameterCombinationException of
           InvalidParameterCombinationException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidS3BucketNameException of InvalidS3BucketNameException.t 
       | `InvalidS3PrefixException of InvalidS3PrefixException.t 
       | `InvalidSnsTopicNameException of InvalidSnsTopicNameException.t 
@@ -3026,6 +6250,8 @@ module UpdateTrailResponse =
       | `KmsException of KmsException.t 
       | `KmsKeyDisabledException of KmsKeyDisabledException.t 
       | `KmsKeyNotFoundException of KmsKeyNotFoundException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
@@ -3033,6 +6259,7 @@ module UpdateTrailResponse =
           OrganizationNotInAllFeaturesModeException.t 
       | `OrganizationsNotInUseException of OrganizationsNotInUseException.t 
       | `S3BucketDoesNotExistException of S3BucketDoesNotExistException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `TrailNotProvidedException of TrailNotProvidedException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
@@ -3068,6 +6295,9 @@ module UpdateTrailResponse =
                                 }
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
       | "CloudTrailAccessNotEnabledException" ->
           `CloudTrailAccessNotEnabledException
             (CloudTrailAccessNotEnabledException.of_json json)
@@ -3077,6 +6307,8 @@ module UpdateTrailResponse =
       | "CloudWatchLogsDeliveryUnavailableException" ->
           `CloudWatchLogsDeliveryUnavailableException
             (CloudWatchLogsDeliveryUnavailableException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_json
@@ -3107,6 +6339,8 @@ module UpdateTrailResponse =
       | "InvalidParameterCombinationException" ->
           `InvalidParameterCombinationException
             (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
       | "InvalidS3BucketNameException" ->
           `InvalidS3BucketNameException
             (InvalidS3BucketNameException.of_json json)
@@ -3122,6 +6356,9 @@ module UpdateTrailResponse =
           `KmsKeyDisabledException (KmsKeyDisabledException.of_json json)
       | "KmsKeyNotFoundException" ->
           `KmsKeyNotFoundException (KmsKeyNotFoundException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
@@ -3137,6 +6374,8 @@ module UpdateTrailResponse =
       | "S3BucketDoesNotExistException" ->
           `S3BucketDoesNotExistException
             (S3BucketDoesNotExistException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_json json)
       | "TrailNotProvidedException" ->
@@ -3149,6 +6388,9 @@ module UpdateTrailResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
       | "CloudTrailAccessNotEnabledException" ->
           `CloudTrailAccessNotEnabledException
             (CloudTrailAccessNotEnabledException.of_xml xml)
@@ -3158,6 +6400,8 @@ module UpdateTrailResponse =
       | "CloudWatchLogsDeliveryUnavailableException" ->
           `CloudWatchLogsDeliveryUnavailableException
             (CloudWatchLogsDeliveryUnavailableException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_xml
@@ -3187,6 +6431,8 @@ module UpdateTrailResponse =
       | "InvalidParameterCombinationException" ->
           `InvalidParameterCombinationException
             (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "InvalidS3BucketNameException" ->
           `InvalidS3BucketNameException
             (InvalidS3BucketNameException.of_xml xml)
@@ -3202,6 +6448,9 @@ module UpdateTrailResponse =
           `KmsKeyDisabledException (KmsKeyDisabledException.of_xml xml)
       | "KmsKeyNotFoundException" ->
           `KmsKeyNotFoundException (KmsKeyNotFoundException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
@@ -3217,6 +6466,8 @@ module UpdateTrailResponse =
       | "S3BucketDoesNotExistException" ->
           `S3BucketDoesNotExistException
             (S3BucketDoesNotExistException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_xml xml)
       | "TrailNotProvidedException" ->
@@ -3228,6 +6479,10 @@ module UpdateTrailResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
       | `CloudTrailAccessNotEnabledException e ->
           `Assoc
             [("error", (`String "CloudTrailAccessNotEnabledException"));
@@ -3242,6 +6497,10 @@ module UpdateTrailResponse =
                (`String "CloudWatchLogsDeliveryUnavailableException"));
             ("details",
               (CloudWatchLogsDeliveryUnavailableException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InsufficientDependencyServiceAccessPermissionException e ->
           `Assoc
             [("error",
@@ -3287,6 +6546,10 @@ module UpdateTrailResponse =
           `Assoc
             [("error", (`String "InvalidParameterCombinationException"));
             ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
       | `InvalidS3BucketNameException e ->
           `Assoc
             [("error", (`String "InvalidS3BucketNameException"));
@@ -3315,6 +6578,10 @@ module UpdateTrailResponse =
           `Assoc
             [("error", (`String "KmsKeyNotFoundException"));
             ("details", (KmsKeyNotFoundException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -3336,6 +6603,10 @@ module UpdateTrailResponse =
           `Assoc
             [("error", (`String "S3BucketDoesNotExistException"));
             ("details", (S3BucketDoesNotExistException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TrailNotFoundException e ->
           `Assoc
             [("error", (`String "TrailNotFoundException"));
@@ -3412,26 +6683,26 @@ module UpdateTrailResponse =
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicARN
         ?snsTopicName ?s3KeyPrefix ?s3BucketName ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let isOrganizationTrail =
-        field_map json "IsOrganizationTrail" Boolean.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "IsOrganizationTrail" Boolean.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let cloudWatchLogsRoleArn =
-        field_map json "CloudWatchLogsRoleArn" String_.of_json in
+        field_map json__ "CloudWatchLogsRoleArn" String_.of_json in
       let cloudWatchLogsLogGroupArn =
-        field_map json "CloudWatchLogsLogGroupArn" String_.of_json in
+        field_map json__ "CloudWatchLogsLogGroupArn" String_.of_json in
       let logFileValidationEnabled =
-        field_map json "LogFileValidationEnabled" Boolean.of_json in
-      let trailARN = field_map json "TrailARN" String_.of_json in
+        field_map json__ "LogFileValidationEnabled" Boolean.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
       let isMultiRegionTrail =
-        field_map json "IsMultiRegionTrail" Boolean.of_json in
+        field_map json__ "IsMultiRegionTrail" Boolean.of_json in
       let includeGlobalServiceEvents =
-        field_map json "IncludeGlobalServiceEvents" Boolean.of_json in
-      let snsTopicARN = field_map json "SnsTopicARN" String_.of_json in
-      let snsTopicName = field_map json "SnsTopicName" String_.of_json in
-      let s3KeyPrefix = field_map json "S3KeyPrefix" String_.of_json in
-      let s3BucketName = field_map json "S3BucketName" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "IncludeGlobalServiceEvents" Boolean.of_json in
+      let snsTopicARN = field_map json__ "SnsTopicARN" String_.of_json in
+      let snsTopicName = field_map json__ "SnsTopicName" String_.of_json in
+      let s3KeyPrefix = field_map json__ "S3KeyPrefix" String_.of_json in
+      let s3BucketName = field_map json__ "S3BucketName" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?isOrganizationTrail ?kmsKeyId ?cloudWatchLogsRoleArn
         ?cloudWatchLogsLogGroupArn ?logFileValidationEnabled ?trailARN
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicARN
@@ -3448,34 +6719,34 @@ module UpdateTrailRequest =
           "Specifies the name of the trail or trail ARN. If Name is a trail name, the string must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), periods (.), underscores (_), or dashes (-) Start with a letter or number, and end with a letter or number Be between 3 and 128 characters Have no adjacent periods, underscores or dashes. Names like my-_namespace and my--namespace are not valid. Not be in IP address format (for example, 192.168.5.4) If Name is a trail ARN, it must be in the following format. arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"];
       s3BucketName: String_.t option
         [@ocaml.doc
-          "Specifies the name of the Amazon S3 bucket designated for publishing log files. See Amazon S3 Bucket Naming Requirements."];
+          "Specifies the name of the Amazon S3 bucket designated for publishing log files. See Amazon S3 Bucket naming rules."];
       s3KeyPrefix: String_.t option
         [@ocaml.doc
           "Specifies the Amazon S3 key prefix that comes after the name of the bucket you have designated for log file delivery. For more information, see Finding Your CloudTrail Log Files. The maximum length is 200 characters."];
       snsTopicName: String_.t option
         [@ocaml.doc
-          "Specifies the name of the Amazon SNS topic defined for notification of log file delivery. The maximum length is 256 characters."];
+          "Specifies the name or ARN of the Amazon SNS topic defined for notification of log file delivery. The maximum length is 256 characters."];
       includeGlobalServiceEvents: Boolean.t option
         [@ocaml.doc
           "Specifies whether the trail is publishing events from global services such as IAM to the log files."];
       isMultiRegionTrail: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the trail applies only to the current region or to all regions. The default is false. If the trail exists only in the current region and this value is set to true, shadow trails (replications of the trail) will be created in the other regions. If the trail exists in all regions and this value is set to false, the trail will remain in the region where it was created, and its shadow trails in other regions will be deleted. As a best practice, consider using trails that log events in all regions."];
+          "Specifies whether the trail applies only to the current Region or to all Regions. The default is false. If the trail exists only in the current Region and this value is set to true, shadow trails (replications of the trail) will be created in the other Regions. If the trail exists in all Regions and this value is set to false, the trail will remain in the Region where it was created, and its shadow trails in other Regions will be deleted. As a best practice, consider using trails that log events in all Regions."];
       enableLogFileValidation: Boolean.t option
         [@ocaml.doc
           "Specifies whether log file validation is enabled. The default is false. When you disable log file integrity validation, the chain of digest files is broken after one hour. CloudTrail does not create digest files for log files that were delivered during a period in which log file integrity validation was disabled. For example, if you enable log file integrity validation at noon on January 1, disable it at noon on January 2, and re-enable it at noon on January 10, digest files will not be created for the log files delivered from noon on January 2 to noon on January 10. The same applies whenever you stop CloudTrail logging or delete a trail."];
       cloudWatchLogsLogGroupArn: String_.t option
         [@ocaml.doc
-          "Specifies a log group name using an Amazon Resource Name (ARN), a unique identifier that represents the log group to which CloudTrail logs are delivered. Not required unless you specify CloudWatchLogsRoleArn."];
+          "Specifies a log group name using an Amazon Resource Name (ARN), a unique identifier that represents the log group to which CloudTrail logs are delivered. You must use a log group that exists in your account. Not required unless you specify CloudWatchLogsRoleArn."];
       cloudWatchLogsRoleArn: String_.t option
         [@ocaml.doc
-          "Specifies the role for the CloudWatch Logs endpoint to assume to write to a user's log group."];
+          "Specifies the role for the CloudWatch Logs endpoint to assume to write to a user's log group. You must use a role that exists in your account."];
       kmsKeyId: String_.t option
         [@ocaml.doc
-          "Specifies the KMS key ID to use to encrypt the logs delivered by CloudTrail. The value can be an alias name prefixed by \"alias/\", a fully specified ARN to an alias, a fully specified ARN to a key, or a globally unique identifier. CloudTrail also supports KMS multi-Region keys. For more information about multi-Region keys, see Using multi-Region keys in the Key Management Service Developer Guide. Examples: alias/MyAliasName arn:aws:kms:us-east-2:123456789012:alias/MyAliasName arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012 12345678-1234-1234-1234-123456789012"];
+          "Specifies the KMS key ID to use to encrypt the logs and digest files delivered by CloudTrail. The value can be an alias name prefixed by \"alias/\", a fully specified ARN to an alias, a fully specified ARN to a key, or a globally unique identifier. CloudTrail also supports KMS multi-Region keys. For more information about multi-Region keys, see Using multi-Region keys in the Key Management Service Developer Guide. Examples: alias/MyAliasName arn:aws:kms:us-east-2:123456789012:alias/MyAliasName arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012 12345678-1234-1234-1234-123456789012"];
       isOrganizationTrail: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the trail is applied to all accounts in an organization in Organizations, or only for the current Amazon Web Services account. The default is false, and cannot be true unless the call is made on behalf of an Amazon Web Services account that is the management account for an organization in Organizations. If the trail is not an organization trail and this is set to true, the trail will be created in all Amazon Web Services accounts that belong to the organization. If the trail is an organization trail and this is set to false, the trail will remain in the current Amazon Web Services account but be deleted from all member accounts in the organization."]}
+          "Specifies whether the trail is applied to all accounts in an organization in Organizations, or only for the current Amazon Web Services account. The default is false, and cannot be true unless the call is made on behalf of an Amazon Web Services account that is the management account for an organization in Organizations. If the trail is not an organization trail and this is set to true, the trail will be created in all Amazon Web Services accounts that belong to the organization. If the trail is an organization trail and this is set to false, the trail will remain in the current Amazon Web Services account but be deleted from all member accounts in the organization. Only the management account for the organization can convert an organization trail to a non-organization trail, or convert a non-organization trail to an organization trail."]}
     let context_ = "UpdateTrailRequest"
     let make ?s3BucketName =
       fun ?s3KeyPrefix ->
@@ -3556,24 +6827,24 @@ module UpdateTrailRequest =
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicName
         ?s3KeyPrefix ?s3BucketName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let isOrganizationTrail =
-        field_map json "IsOrganizationTrail" Boolean.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "IsOrganizationTrail" Boolean.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let cloudWatchLogsRoleArn =
-        field_map json "CloudWatchLogsRoleArn" String_.of_json in
+        field_map json__ "CloudWatchLogsRoleArn" String_.of_json in
       let cloudWatchLogsLogGroupArn =
-        field_map json "CloudWatchLogsLogGroupArn" String_.of_json in
+        field_map json__ "CloudWatchLogsLogGroupArn" String_.of_json in
       let enableLogFileValidation =
-        field_map json "EnableLogFileValidation" Boolean.of_json in
+        field_map json__ "EnableLogFileValidation" Boolean.of_json in
       let isMultiRegionTrail =
-        field_map json "IsMultiRegionTrail" Boolean.of_json in
+        field_map json__ "IsMultiRegionTrail" Boolean.of_json in
       let includeGlobalServiceEvents =
-        field_map json "IncludeGlobalServiceEvents" Boolean.of_json in
-      let snsTopicName = field_map json "SnsTopicName" String_.of_json in
-      let s3KeyPrefix = field_map json "S3KeyPrefix" String_.of_json in
-      let s3BucketName = field_map json "S3BucketName" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+        field_map json__ "IncludeGlobalServiceEvents" Boolean.of_json in
+      let snsTopicName = field_map json__ "SnsTopicName" String_.of_json in
+      let s3KeyPrefix = field_map json__ "S3KeyPrefix" String_.of_json in
+      let s3BucketName = field_map json__ "S3BucketName" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ?isOrganizationTrail ?kmsKeyId ?cloudWatchLogsRoleArn
         ?cloudWatchLogsLogGroupArn ?enableLogFileValidation
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicName
@@ -3589,14 +6860,13 @@ module UpdateEventDataStoreResponse =
       name: EventDataStoreName.t option
         [@ocaml.doc "The name of the event data store."];
       status: EventDataStoreStatus.t option
-        [@ocaml.doc
-          "The status of an event data store. Values can be ENABLED and PENDING_DELETION."];
+        [@ocaml.doc "The status of an event data store."];
       advancedEventSelectors: AdvancedEventSelectors.t option
         [@ocaml.doc
           "The advanced event selectors that are applied to the event data store."];
       multiRegionEnabled: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the event data store includes events from all regions, or only from the region in which it was created."];
+          "Indicates whether the event data store includes events from all Regions, or only from the Region in which it was created."];
       organizationEnabled: Boolean.t option
         [@ocaml.doc
           "Indicates whether an event data store is collecting logged events for an organization in Organizations."];
@@ -3610,24 +6880,51 @@ module UpdateEventDataStoreResponse =
           "The timestamp that shows when an event data store was first created."];
       updatedTimestamp: Date.t option
         [@ocaml.doc
-          "The timestamp that shows when the event data store was last updated. UpdatedTimestamp is always either the same or newer than the time shown in CreatedTimestamp."]}
+          "The timestamp that shows when the event data store was last updated. UpdatedTimestamp is always either the same or newer than the time shown in CreatedTimestamp."];
+      kmsKeyId: EventDataStoreKmsKeyId.t option
+        [@ocaml.doc
+          "Specifies the KMS key ID that encrypts the events delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
+      billingMode: BillingMode.t option
+        [@ocaml.doc "The billing mode for the event data store."];
+      federationStatus: FederationStatus.t option
+        [@ocaml.doc
+          "Indicates the Lake query federation status. The status is ENABLED if Lake query federation is enabled, or DISABLED if Lake query federation is disabled. You cannot delete an event data store if the FederationStatus is ENABLED."];
+      federationRoleArn: FederationRoleArn.t option
+        [@ocaml.doc
+          "If Lake query federation is enabled, provides the ARN of the federation role used to access the resources for the federated event data store."]}
     type nonrec error =
       [
         `CloudTrailAccessNotEnabledException of
           CloudTrailAccessNotEnabledException.t 
+      | `ConflictException of ConflictException.t 
       | `EventDataStoreARNInvalidException of
           EventDataStoreARNInvalidException.t 
+      | `EventDataStoreAlreadyExistsException of
+          EventDataStoreAlreadyExistsException.t 
+      | `EventDataStoreHasOngoingImportException of
+          EventDataStoreHasOngoingImportException.t 
       | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
       | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
       | `InsufficientDependencyServiceAccessPermissionException of
           InsufficientDependencyServiceAccessPermissionException.t 
+      | `InsufficientEncryptionPolicyException of
+          InsufficientEncryptionPolicyException.t 
+      | `InvalidEventSelectorsException of InvalidEventSelectorsException.t 
+      | `InvalidInsightSelectorsException of
+          InvalidInsightSelectorsException.t 
+      | `InvalidKmsKeyIdException of InvalidKmsKeyIdException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `KmsException of KmsException.t 
+      | `KmsKeyNotFoundException of KmsKeyNotFoundException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `OrganizationNotInAllFeaturesModeException of
           OrganizationNotInAllFeaturesModeException.t 
       | `OrganizationsNotInUseException of OrganizationsNotInUseException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?eventDataStoreArn =
@@ -3640,27 +6937,43 @@ module UpdateEventDataStoreResponse =
                   fun ?terminationProtectionEnabled ->
                     fun ?createdTimestamp ->
                       fun ?updatedTimestamp ->
-                        fun () ->
-                          {
-                            eventDataStoreArn;
-                            name;
-                            status;
-                            advancedEventSelectors;
-                            multiRegionEnabled;
-                            organizationEnabled;
-                            retentionPeriod;
-                            terminationProtectionEnabled;
-                            createdTimestamp;
-                            updatedTimestamp
-                          }
+                        fun ?kmsKeyId ->
+                          fun ?billingMode ->
+                            fun ?federationStatus ->
+                              fun ?federationRoleArn ->
+                                fun () ->
+                                  {
+                                    eventDataStoreArn;
+                                    name;
+                                    status;
+                                    advancedEventSelectors;
+                                    multiRegionEnabled;
+                                    organizationEnabled;
+                                    retentionPeriod;
+                                    terminationProtectionEnabled;
+                                    createdTimestamp;
+                                    updatedTimestamp;
+                                    kmsKeyId;
+                                    billingMode;
+                                    federationStatus;
+                                    federationRoleArn
+                                  }
     let error_of_json name json =
       match name with
       | "CloudTrailAccessNotEnabledException" ->
           `CloudTrailAccessNotEnabledException
             (CloudTrailAccessNotEnabledException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "EventDataStoreARNInvalidException" ->
           `EventDataStoreARNInvalidException
             (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreAlreadyExistsException" ->
+          `EventDataStoreAlreadyExistsException
+            (EventDataStoreAlreadyExistsException.of_json json)
+      | "EventDataStoreHasOngoingImportException" ->
+          `EventDataStoreHasOngoingImportException
+            (EventDataStoreHasOngoingImportException.of_json json)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_json json)
@@ -3671,8 +6984,25 @@ module UpdateEventDataStoreResponse =
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_json
                json)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_json json)
+      | "InvalidEventSelectorsException" ->
+          `InvalidEventSelectorsException
+            (InvalidEventSelectorsException.of_json json)
+      | "InvalidInsightSelectorsException" ->
+          `InvalidInsightSelectorsException
+            (InvalidInsightSelectorsException.of_json json)
+      | "InvalidKmsKeyIdException" ->
+          `InvalidKmsKeyIdException (InvalidKmsKeyIdException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "KmsException" -> `KmsException (KmsException.of_json json)
+      | "KmsKeyNotFoundException" ->
+          `KmsKeyNotFoundException (KmsKeyNotFoundException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
@@ -3685,6 +7015,8 @@ module UpdateEventDataStoreResponse =
       | "OrganizationsNotInUseException" ->
           `OrganizationsNotInUseException
             (OrganizationsNotInUseException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "UnsupportedOperationException" ->
           `UnsupportedOperationException
             (UnsupportedOperationException.of_json json)
@@ -3696,9 +7028,17 @@ module UpdateEventDataStoreResponse =
       | "CloudTrailAccessNotEnabledException" ->
           `CloudTrailAccessNotEnabledException
             (CloudTrailAccessNotEnabledException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "EventDataStoreARNInvalidException" ->
           `EventDataStoreARNInvalidException
             (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreAlreadyExistsException" ->
+          `EventDataStoreAlreadyExistsException
+            (EventDataStoreAlreadyExistsException.of_xml xml)
+      | "EventDataStoreHasOngoingImportException" ->
+          `EventDataStoreHasOngoingImportException
+            (EventDataStoreHasOngoingImportException.of_xml xml)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_xml xml)
@@ -3709,8 +7049,25 @@ module UpdateEventDataStoreResponse =
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_xml
                xml)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_xml xml)
+      | "InvalidEventSelectorsException" ->
+          `InvalidEventSelectorsException
+            (InvalidEventSelectorsException.of_xml xml)
+      | "InvalidInsightSelectorsException" ->
+          `InvalidInsightSelectorsException
+            (InvalidInsightSelectorsException.of_xml xml)
+      | "InvalidKmsKeyIdException" ->
+          `InvalidKmsKeyIdException (InvalidKmsKeyIdException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "KmsException" -> `KmsException (KmsException.of_xml xml)
+      | "KmsKeyNotFoundException" ->
+          `KmsKeyNotFoundException (KmsKeyNotFoundException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
@@ -3723,6 +7080,8 @@ module UpdateEventDataStoreResponse =
       | "OrganizationsNotInUseException" ->
           `OrganizationsNotInUseException
             (OrganizationsNotInUseException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "UnsupportedOperationException" ->
           `UnsupportedOperationException
             (UnsupportedOperationException.of_xml xml)
@@ -3734,10 +7093,22 @@ module UpdateEventDataStoreResponse =
           `Assoc
             [("error", (`String "CloudTrailAccessNotEnabledException"));
             ("details", (CloudTrailAccessNotEnabledException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `EventDataStoreARNInvalidException e ->
           `Assoc
             [("error", (`String "EventDataStoreARNInvalidException"));
             ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreAlreadyExistsException"));
+            ("details", (EventDataStoreAlreadyExistsException.to_json e))]
+      | `EventDataStoreHasOngoingImportException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreHasOngoingImportException"));
+            ("details", (EventDataStoreHasOngoingImportException.to_json e))]
       | `EventDataStoreNotFoundException e ->
           `Assoc
             [("error", (`String "EventDataStoreNotFoundException"));
@@ -3754,10 +7125,38 @@ module UpdateEventDataStoreResponse =
             ("details",
               (InsufficientDependencyServiceAccessPermissionException.to_json
                  e))]
+      | `InsufficientEncryptionPolicyException e ->
+          `Assoc
+            [("error", (`String "InsufficientEncryptionPolicyException"));
+            ("details", (InsufficientEncryptionPolicyException.to_json e))]
+      | `InvalidEventSelectorsException e ->
+          `Assoc
+            [("error", (`String "InvalidEventSelectorsException"));
+            ("details", (InvalidEventSelectorsException.to_json e))]
+      | `InvalidInsightSelectorsException e ->
+          `Assoc
+            [("error", (`String "InvalidInsightSelectorsException"));
+            ("details", (InvalidInsightSelectorsException.to_json e))]
+      | `InvalidKmsKeyIdException e ->
+          `Assoc
+            [("error", (`String "InvalidKmsKeyIdException"));
+            ("details", (InvalidKmsKeyIdException.to_json e))]
       | `InvalidParameterException e ->
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `KmsException e ->
+          `Assoc
+            [("error", (`String "KmsException"));
+            ("details", (KmsException.to_json e))]
+      | `KmsKeyNotFoundException e ->
+          `Assoc
+            [("error", (`String "KmsKeyNotFoundException"));
+            ("details", (KmsKeyNotFoundException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -3775,6 +7174,10 @@ module UpdateEventDataStoreResponse =
           `Assoc
             [("error", (`String "OrganizationsNotInUseException"));
             ("details", (OrganizationsNotInUseException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `UnsupportedOperationException e ->
           `Assoc
             [("error", (`String "UnsupportedOperationException"));
@@ -3805,9 +7208,27 @@ module UpdateEventDataStoreResponse =
         ("CreatedTimestamp",
           (Option.map x.createdTimestamp ~f:Date.to_value));
         ("UpdatedTimestamp",
-          (Option.map x.updatedTimestamp ~f:Date.to_value))]
+          (Option.map x.updatedTimestamp ~f:Date.to_value));
+        ("KmsKeyId",
+          (Option.map x.kmsKeyId ~f:EventDataStoreKmsKeyId.to_value));
+        ("BillingMode", (Option.map x.billingMode ~f:BillingMode.to_value));
+        ("FederationStatus",
+          (Option.map x.federationStatus ~f:FederationStatus.to_value));
+        ("FederationRoleArn",
+          (Option.map x.federationRoleArn ~f:FederationRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let federationRoleArn =
+        (Option.map ~f:FederationRoleArn.of_xml)
+          (Xml.child xml_arg0 "FederationRoleArn") in
+      let federationStatus =
+        (Option.map ~f:FederationStatus.of_xml)
+          (Xml.child xml_arg0 "FederationStatus") in
+      let billingMode =
+        (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
+      let kmsKeyId =
+        (Option.map ~f:EventDataStoreKmsKeyId.of_xml)
+          (Xml.child xml_arg0 "KmsKeyId") in
       let updatedTimestamp =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
       let createdTimestamp =
@@ -3835,35 +7256,44 @@ module UpdateEventDataStoreResponse =
       let eventDataStoreArn =
         (Option.map ~f:EventDataStoreArn.of_xml)
           (Xml.child xml_arg0 "EventDataStoreArn") in
-      make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
+      make ?federationRoleArn ?federationStatus ?billingMode ?kmsKeyId
+        ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
         ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
         ?advancedEventSelectors ?status ?name ?eventDataStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
-      let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
+    let of_json json__ =
+      let federationRoleArn =
+        field_map json__ "FederationRoleArn" FederationRoleArn.of_json in
+      let federationStatus =
+        field_map json__ "FederationStatus" FederationStatus.of_json in
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
+      let kmsKeyId =
+        field_map json__ "KmsKeyId" EventDataStoreKmsKeyId.of_json in
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
       let terminationProtectionEnabled =
-        field_map json "TerminationProtectionEnabled"
+        field_map json__ "TerminationProtectionEnabled"
           TerminationProtectionEnabled.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
       let organizationEnabled =
-        field_map json "OrganizationEnabled" Boolean.of_json in
+        field_map json__ "OrganizationEnabled" Boolean.of_json in
       let multiRegionEnabled =
-        field_map json "MultiRegionEnabled" Boolean.of_json in
+        field_map json__ "MultiRegionEnabled" Boolean.of_json in
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
-      let status = field_map json "Status" EventDataStoreStatus.of_json in
-      let name = field_map json "Name" EventDataStoreName.of_json in
+      let status = field_map json__ "Status" EventDataStoreStatus.of_json in
+      let name = field_map json__ "Name" EventDataStoreName.of_json in
       let eventDataStoreArn =
-        field_map json "EventDataStoreArn" EventDataStoreArn.of_json in
-      make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
+      make ?federationRoleArn ?federationStatus ?billingMode ?kmsKeyId
+        ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
         ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
         ?advancedEventSelectors ?status ?name ?eventDataStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an event data store. The required EventDataStore value is an ARN or the ID portion of the ARN. Other parameters are optional, but at least one optional parameter must be specified, or CloudTrail throws an error. RetentionPeriod is in days, and valid values are integers between 90 and 2555. By default, TerminationProtection is enabled. AdvancedEventSelectors includes or excludes management and data events in your event data store; for more information about AdvancedEventSelectors, see PutEventSelectorsRequest$AdvancedEventSelectors."]
+       "Updates an event data store. The required EventDataStore value is an ARN or the ID portion of the ARN. Other parameters are optional, but at least one optional parameter must be specified, or CloudTrail throws an error. RetentionPeriod is in days, and valid values are integers between 7 and 3653 if the BillingMode is set to EXTENDABLE_RETENTION_PRICING, or between 7 and 2557 if BillingMode is set to FIXED_RETENTION_PRICING. By default, TerminationProtection is enabled. For event data stores for CloudTrail events, AdvancedEventSelectors includes or excludes management, data, or network activity events in your event data store. For more information about AdvancedEventSelectors, see AdvancedEventSelectors. For event data stores for CloudTrail Insights events, Config configuration items, Audit Manager evidence, or non-Amazon Web Services events, AdvancedEventSelectors includes events of that type in your event data store."]
 module UpdateEventDataStoreRequest =
   struct
     type nonrec t =
@@ -3875,18 +7305,25 @@ module UpdateEventDataStoreRequest =
         [@ocaml.doc "The event data store name."];
       advancedEventSelectors: AdvancedEventSelectors.t option
         [@ocaml.doc
-          "The advanced event selectors used to select events for the event data store."];
+          "The advanced event selectors used to select events for the event data store. You can configure up to five advanced event selectors for each event data store."];
       multiRegionEnabled: Boolean.t option
         [@ocaml.doc
-          "Specifies whether an event data store collects events from all regions, or only from the region in which it was created."];
+          "Specifies whether an event data store collects events from all Regions, or only from the Region in which it was created."];
       organizationEnabled: Boolean.t option
         [@ocaml.doc
-          "Specifies whether an event data store collects events logged for an organization in Organizations."];
+          "Specifies whether an event data store collects events logged for an organization in Organizations. Only the management account for the organization can convert an organization event data store to a non-organization event data store, or convert a non-organization event data store to an organization event data store."];
       retentionPeriod: RetentionPeriod.t option
-        [@ocaml.doc "The retention period, in days."];
+        [@ocaml.doc
+          "The retention period of the event data store, in days. If BillingMode is set to EXTENDABLE_RETENTION_PRICING, you can set a retention period of up to 3653 days, the equivalent of 10 years. If BillingMode is set to FIXED_RETENTION_PRICING, you can set a retention period of up to 2557 days, the equivalent of seven years. CloudTrail Lake determines whether to retain an event by checking if the eventTime of the event is within the specified retention period. For example, if you set a retention period of 90 days, CloudTrail will remove events when the eventTime is older than 90 days. If you decrease the retention period of an event data store, CloudTrail will remove any events with an eventTime older than the new retention period. For example, if the previous retention period was 365 days and you decrease it to 100 days, CloudTrail will remove events with an eventTime older than 100 days."];
       terminationProtectionEnabled: TerminationProtectionEnabled.t option
         [@ocaml.doc
-          "Indicates that termination protection is enabled and the event data store cannot be automatically deleted."]}
+          "Indicates that termination protection is enabled and the event data store cannot be automatically deleted."];
+      kmsKeyId: EventDataStoreKmsKeyId.t option
+        [@ocaml.doc
+          "Specifies the KMS key ID to use to encrypt the events delivered by CloudTrail. The value can be an alias name prefixed by alias/, a fully specified ARN to an alias, a fully specified ARN to a key, or a globally unique identifier. Disabling or deleting the KMS key, or removing CloudTrail permissions on the key, prevents CloudTrail from logging events to the event data store, and prevents users from querying the data in the event data store that was encrypted with the key. After you associate an event data store with a KMS key, the KMS key cannot be removed or changed. Before you disable or delete a KMS key that you are using with an event data store, delete or back up your event data store. CloudTrail also supports KMS multi-Region keys. For more information about multi-Region keys, see Using multi-Region keys in the Key Management Service Developer Guide. Examples: alias/MyAliasName arn:aws:kms:us-east-2:123456789012:alias/MyAliasName arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012 12345678-1234-1234-1234-123456789012"];
+      billingMode: BillingMode.t option
+        [@ocaml.doc
+          "You can't change the billing mode from EXTENDABLE_RETENTION_PRICING to FIXED_RETENTION_PRICING. If BillingMode is set to EXTENDABLE_RETENTION_PRICING and you want to use FIXED_RETENTION_PRICING instead, you'll need to stop ingestion on the event data store and create a new event data store that uses FIXED_RETENTION_PRICING. The billing mode for the event data store determines the cost for ingesting events and the default and maximum retention period for the event data store. The following are the possible values: EXTENDABLE_RETENTION_PRICING - This billing mode is generally recommended if you want a flexible retention period of up to 3653 days (about 10 years). The default retention period for this billing mode is 366 days. FIXED_RETENTION_PRICING - This billing mode is recommended if you expect to ingest more than 25 TB of event data per month and need a retention period of up to 2557 days (about 7 years). The default retention period for this billing mode is 2557 days. For more information about CloudTrail pricing, see CloudTrail Pricing and Managing CloudTrail Lake costs."]}
     let context_ = "UpdateEventDataStoreRequest"
     let make ?name =
       fun ?advancedEventSelectors ->
@@ -3894,17 +7331,21 @@ module UpdateEventDataStoreRequest =
           fun ?organizationEnabled ->
             fun ?retentionPeriod ->
               fun ?terminationProtectionEnabled ->
-                fun ~eventDataStore ->
-                  fun () ->
-                    {
-                      name;
-                      advancedEventSelectors;
-                      multiRegionEnabled;
-                      organizationEnabled;
-                      retentionPeriod;
-                      terminationProtectionEnabled;
-                      eventDataStore
-                    }
+                fun ?kmsKeyId ->
+                  fun ?billingMode ->
+                    fun ~eventDataStore ->
+                      fun () ->
+                        {
+                          name;
+                          advancedEventSelectors;
+                          multiRegionEnabled;
+                          organizationEnabled;
+                          retentionPeriod;
+                          terminationProtectionEnabled;
+                          kmsKeyId;
+                          billingMode;
+                          eventDataStore
+                        }
     let to_value x =
       structure_to_value
         [("EventDataStore",
@@ -3921,9 +7362,17 @@ module UpdateEventDataStoreRequest =
           (Option.map x.retentionPeriod ~f:RetentionPeriod.to_value));
         ("TerminationProtectionEnabled",
           (Option.map x.terminationProtectionEnabled
-             ~f:TerminationProtectionEnabled.to_value))]
+             ~f:TerminationProtectionEnabled.to_value));
+        ("KmsKeyId",
+          (Option.map x.kmsKeyId ~f:EventDataStoreKmsKeyId.to_value));
+        ("BillingMode", (Option.map x.billingMode ~f:BillingMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let billingMode =
+        (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
+      let kmsKeyId =
+        (Option.map ~f:EventDataStoreKmsKeyId.of_xml)
+          (Xml.child xml_arg0 "KmsKeyId") in
       let terminationProtectionEnabled =
         (Option.map ~f:TerminationProtectionEnabled.of_xml)
           (Xml.child xml_arg0 "TerminationProtectionEnabled") in
@@ -3944,50 +7393,541 @@ module UpdateEventDataStoreRequest =
       let eventDataStore =
         EventDataStoreArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
-      make ?terminationProtectionEnabled ?retentionPeriod
-        ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
-        ?name ~eventDataStore ()
+      make ?billingMode ?kmsKeyId ?terminationProtectionEnabled
+        ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
+        ?advancedEventSelectors ?name ~eventDataStore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
+      let kmsKeyId =
+        field_map json__ "KmsKeyId" EventDataStoreKmsKeyId.of_json in
       let terminationProtectionEnabled =
-        field_map json "TerminationProtectionEnabled"
+        field_map json__ "TerminationProtectionEnabled"
           TerminationProtectionEnabled.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
       let organizationEnabled =
-        field_map json "OrganizationEnabled" Boolean.of_json in
+        field_map json__ "OrganizationEnabled" Boolean.of_json in
       let multiRegionEnabled =
-        field_map json "MultiRegionEnabled" Boolean.of_json in
+        field_map json__ "MultiRegionEnabled" Boolean.of_json in
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
-      let name = field_map json "Name" EventDataStoreName.of_json in
+      let name = field_map json__ "Name" EventDataStoreName.of_json in
       let eventDataStore =
-        field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
-      make ?terminationProtectionEnabled ?retentionPeriod
-        ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
-        ?name ~eventDataStore ()
+        field_map_exn json__ "EventDataStore" EventDataStoreArn.of_json in
+      make ?billingMode ?kmsKeyId ?terminationProtectionEnabled
+        ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
+        ?advancedEventSelectors ?name ~eventDataStore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an event data store. The required EventDataStore value is an ARN or the ID portion of the ARN. Other parameters are optional, but at least one optional parameter must be specified, or CloudTrail throws an error. RetentionPeriod is in days, and valid values are integers between 90 and 2555. By default, TerminationProtection is enabled. AdvancedEventSelectors includes or excludes management and data events in your event data store; for more information about AdvancedEventSelectors, see PutEventSelectorsRequest$AdvancedEventSelectors."]
+       "Updates an event data store. The required EventDataStore value is an ARN or the ID portion of the ARN. Other parameters are optional, but at least one optional parameter must be specified, or CloudTrail throws an error. RetentionPeriod is in days, and valid values are integers between 7 and 3653 if the BillingMode is set to EXTENDABLE_RETENTION_PRICING, or between 7 and 2557 if BillingMode is set to FIXED_RETENTION_PRICING. By default, TerminationProtection is enabled. For event data stores for CloudTrail events, AdvancedEventSelectors includes or excludes management, data, or network activity events in your event data store. For more information about AdvancedEventSelectors, see AdvancedEventSelectors. For event data stores for CloudTrail Insights events, Config configuration items, Audit Manager evidence, or non-Amazon Web Services events, AdvancedEventSelectors includes events of that type in your event data store."]
+module UpdateDashboardResponse =
+  struct
+    type nonrec t =
+      {
+      dashboardArn: DashboardArn.t option
+        [@ocaml.doc "The ARN for the dashboard."];
+      name: DashboardName.t option [@ocaml.doc "The name for the dashboard."];
+      type_: DashboardType.t option [@ocaml.doc "The type of dashboard."];
+      widgets: WidgetList.t option
+        [@ocaml.doc "An array of widgets for the dashboard."];
+      refreshSchedule: RefreshSchedule.t option
+        [@ocaml.doc "The refresh schedule for the dashboard, if configured."];
+      terminationProtectionEnabled: TerminationProtectionEnabled.t option
+        [@ocaml.doc
+          "Indicates whether termination protection is enabled for the dashboard."];
+      createdTimestamp: Date.t option
+        [@ocaml.doc
+          "The timestamp that shows when the dashboard was created."];
+      updatedTimestamp: Date.t option
+        [@ocaml.doc
+          "The timestamp that shows when the dashboard was updated."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InsufficientEncryptionPolicyException of
+          InsufficientEncryptionPolicyException.t 
+      | `InvalidQueryStatementException of InvalidQueryStatementException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dashboardArn =
+      fun ?name ->
+        fun ?type_ ->
+          fun ?widgets ->
+            fun ?refreshSchedule ->
+              fun ?terminationProtectionEnabled ->
+                fun ?createdTimestamp ->
+                  fun ?updatedTimestamp ->
+                    fun () ->
+                      {
+                        dashboardArn;
+                        name;
+                        type_;
+                        widgets;
+                        refreshSchedule;
+                        terminationProtectionEnabled;
+                        createdTimestamp;
+                        updatedTimestamp
+                      }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_json json)
+      | "InvalidQueryStatementException" ->
+          `InvalidQueryStatementException
+            (InvalidQueryStatementException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_xml xml)
+      | "InvalidQueryStatementException" ->
+          `InvalidQueryStatementException
+            (InvalidQueryStatementException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InsufficientEncryptionPolicyException e ->
+          `Assoc
+            [("error", (`String "InsufficientEncryptionPolicyException"));
+            ("details", (InsufficientEncryptionPolicyException.to_json e))]
+      | `InvalidQueryStatementException e ->
+          `Assoc
+            [("error", (`String "InvalidQueryStatementException"));
+            ("details", (InvalidQueryStatementException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DashboardArn",
+           (Option.map x.dashboardArn ~f:DashboardArn.to_value));
+        ("Name", (Option.map x.name ~f:DashboardName.to_value));
+        ("Type", (Option.map x.type_ ~f:DashboardType.to_value));
+        ("Widgets", (Option.map x.widgets ~f:WidgetList.to_value));
+        ("RefreshSchedule",
+          (Option.map x.refreshSchedule ~f:RefreshSchedule.to_value));
+        ("TerminationProtectionEnabled",
+          (Option.map x.terminationProtectionEnabled
+             ~f:TerminationProtectionEnabled.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Date.to_value));
+        ("UpdatedTimestamp",
+          (Option.map x.updatedTimestamp ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreatedTimestamp") in
+      let terminationProtectionEnabled =
+        (Option.map ~f:TerminationProtectionEnabled.of_xml)
+          (Xml.child xml_arg0 "TerminationProtectionEnabled") in
+      let refreshSchedule =
+        (Option.map ~f:RefreshSchedule.of_xml)
+          (Xml.child xml_arg0 "RefreshSchedule") in
+      let widgets =
+        (Option.map ~f:WidgetList.of_xml) (Xml.child xml_arg0 "Widgets") in
+      let type_ =
+        (Option.map ~f:DashboardType.of_xml) (Xml.child xml_arg0 "Type") in
+      let name =
+        (Option.map ~f:DashboardName.of_xml) (Xml.child xml_arg0 "Name") in
+      let dashboardArn =
+        (Option.map ~f:DashboardArn.of_xml)
+          (Xml.child xml_arg0 "DashboardArn") in
+      make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
+        ?refreshSchedule ?widgets ?type_ ?name ?dashboardArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
+      let terminationProtectionEnabled =
+        field_map json__ "TerminationProtectionEnabled"
+          TerminationProtectionEnabled.of_json in
+      let refreshSchedule =
+        field_map json__ "RefreshSchedule" RefreshSchedule.of_json in
+      let widgets = field_map json__ "Widgets" WidgetList.of_json in
+      let type_ = field_map json__ "Type" DashboardType.of_json in
+      let name = field_map json__ "Name" DashboardName.of_json in
+      let dashboardArn = field_map json__ "DashboardArn" DashboardArn.of_json in
+      make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
+        ?refreshSchedule ?widgets ?type_ ?name ?dashboardArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified dashboard. To set a refresh schedule, CloudTrail must be granted permissions to run the StartDashboardRefresh operation to refresh the dashboard on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to the dashboard. For more information, see Resource-based policy example for a dashboard in the CloudTrail User Guide. CloudTrail runs queries to populate the dashboard's widgets during a manual or scheduled refresh. CloudTrail must be granted permissions to run the StartQuery operation on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to each event data store. For more information, see Example: Allow CloudTrail to run queries to populate a dashboard in the CloudTrail User Guide."]
+module UpdateDashboardRequest =
+  struct
+    type nonrec t =
+      {
+      dashboardId: DashboardArn.t
+        [@ocaml.doc "The name or ARN of the dashboard."];
+      widgets: RequestWidgetList.t option
+        [@ocaml.doc
+          "An array of widgets for the dashboard. A custom dashboard can have a maximum of 10 widgets. To add new widgets, pass in an array that includes the existing widgets along with any new widgets. Run the GetDashboard operation to get the list of widgets for the dashboard. To remove widgets, pass in an array that includes the existing widgets minus the widgets you want removed."];
+      refreshSchedule: RefreshSchedule.t option
+        [@ocaml.doc "The refresh schedule configuration for the dashboard."];
+      terminationProtectionEnabled: TerminationProtectionEnabled.t option
+        [@ocaml.doc
+          "Specifies whether termination protection is enabled for the dashboard. If termination protection is enabled, you cannot delete the dashboard until termination protection is disabled."]}
+    let context_ = "UpdateDashboardRequest"
+    let make ?widgets =
+      fun ?refreshSchedule ->
+        fun ?terminationProtectionEnabled ->
+          fun ~dashboardId ->
+            fun () ->
+              {
+                widgets;
+                refreshSchedule;
+                terminationProtectionEnabled;
+                dashboardId
+              }
+    let to_value x =
+      structure_to_value
+        [("DashboardId", (Some (DashboardArn.to_value x.dashboardId)));
+        ("Widgets", (Option.map x.widgets ~f:RequestWidgetList.to_value));
+        ("RefreshSchedule",
+          (Option.map x.refreshSchedule ~f:RefreshSchedule.to_value));
+        ("TerminationProtectionEnabled",
+          (Option.map x.terminationProtectionEnabled
+             ~f:TerminationProtectionEnabled.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let terminationProtectionEnabled =
+        (Option.map ~f:TerminationProtectionEnabled.of_xml)
+          (Xml.child xml_arg0 "TerminationProtectionEnabled") in
+      let refreshSchedule =
+        (Option.map ~f:RefreshSchedule.of_xml)
+          (Xml.child xml_arg0 "RefreshSchedule") in
+      let widgets =
+        (Option.map ~f:RequestWidgetList.of_xml)
+          (Xml.child xml_arg0 "Widgets") in
+      let dashboardId =
+        DashboardArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DashboardId") in
+      make ?terminationProtectionEnabled ?refreshSchedule ?widgets
+        ~dashboardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let terminationProtectionEnabled =
+        field_map json__ "TerminationProtectionEnabled"
+          TerminationProtectionEnabled.of_json in
+      let refreshSchedule =
+        field_map json__ "RefreshSchedule" RefreshSchedule.of_json in
+      let widgets = field_map json__ "Widgets" RequestWidgetList.of_json in
+      let dashboardId =
+        field_map_exn json__ "DashboardId" DashboardArn.of_json in
+      make ?terminationProtectionEnabled ?refreshSchedule ?widgets
+        ~dashboardId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified dashboard. To set a refresh schedule, CloudTrail must be granted permissions to run the StartDashboardRefresh operation to refresh the dashboard on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to the dashboard. For more information, see Resource-based policy example for a dashboard in the CloudTrail User Guide. CloudTrail runs queries to populate the dashboard's widgets during a manual or scheduled refresh. CloudTrail must be granted permissions to run the StartQuery operation on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to each event data store. For more information, see Example: Allow CloudTrail to run queries to populate a dashboard in the CloudTrail User Guide."]
+module UpdateChannelResponse =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChannelArn.t option
+        [@ocaml.doc "The ARN of the channel that was updated."];
+      name: ChannelName.t option
+        [@ocaml.doc "The name of the channel that was updated."];
+      source: Source.t option
+        [@ocaml.doc "The event source of the channel that was updated."];
+      destinations: Destinations.t option
+        [@ocaml.doc
+          "The event data stores that log events arriving through the channel."]}
+    type nonrec error =
+      [ `ChannelARNInvalidException of ChannelARNInvalidException.t 
+      | `ChannelAlreadyExistsException of ChannelAlreadyExistsException.t 
+      | `ChannelNotFoundException of ChannelNotFoundException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InvalidEventDataStoreCategoryException of
+          InvalidEventDataStoreCategoryException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?channelArn =
+      fun ?name ->
+        fun ?source ->
+          fun ?destinations ->
+            fun () -> { channelArn; name; source; destinations }
+    let error_of_json name json =
+      match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException
+            (ChannelARNInvalidException.of_json json)
+      | "ChannelAlreadyExistsException" ->
+          `ChannelAlreadyExistsException
+            (ChannelAlreadyExistsException.of_json json)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException (ChannelARNInvalidException.of_xml xml)
+      | "ChannelAlreadyExistsException" ->
+          `ChannelAlreadyExistsException
+            (ChannelAlreadyExistsException.of_xml xml)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ChannelARNInvalidException e ->
+          `Assoc
+            [("error", (`String "ChannelARNInvalidException"));
+            ("details", (ChannelARNInvalidException.to_json e))]
+      | `ChannelAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ChannelAlreadyExistsException"));
+            ("details", (ChannelAlreadyExistsException.to_json e))]
+      | `ChannelNotFoundException e ->
+          `Assoc
+            [("error", (`String "ChannelNotFoundException"));
+            ("details", (ChannelNotFoundException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InvalidEventDataStoreCategoryException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreCategoryException"));
+            ("details", (InvalidEventDataStoreCategoryException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ChannelArn", (Option.map x.channelArn ~f:ChannelArn.to_value));
+        ("Name", (Option.map x.name ~f:ChannelName.to_value));
+        ("Source", (Option.map x.source ~f:Source.to_value));
+        ("Destinations",
+          (Option.map x.destinations ~f:Destinations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinations =
+        (Option.map ~f:Destinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      let source =
+        (Option.map ~f:Source.of_xml) (Xml.child xml_arg0 "Source") in
+      let name =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "Name") in
+      let channelArn =
+        (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
+      make ?destinations ?source ?name ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinations = field_map json__ "Destinations" Destinations.of_json in
+      let source = field_map json__ "Source" Source.of_json in
+      let name = field_map json__ "Name" ChannelName.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChannelArn.of_json in
+      make ?destinations ?source ?name ?channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a channel specified by a required channel ARN or UUID."]
+module UpdateChannelRequest =
+  struct
+    type nonrec t =
+      {
+      channel: ChannelArn.t
+        [@ocaml.doc
+          "The ARN or ID (the ARN suffix) of the channel that you want to update."];
+      destinations: Destinations.t option
+        [@ocaml.doc
+          "The ARNs of event data stores that you want to log events arriving through the channel."];
+      name: ChannelName.t option
+        [@ocaml.doc "Changes the name of the channel."]}
+    let context_ = "UpdateChannelRequest"
+    let make ?destinations =
+      fun ?name -> fun ~channel -> fun () -> { destinations; name; channel }
+    let to_value x =
+      structure_to_value
+        [("Channel", (Some (ChannelArn.to_value x.channel)));
+        ("Destinations",
+          (Option.map x.destinations ~f:Destinations.to_value));
+        ("Name", (Option.map x.name ~f:ChannelName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "Name") in
+      let destinations =
+        (Option.map ~f:Destinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      let channel =
+        ChannelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Channel") in
+      make ?name ?destinations ~channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" ChannelName.of_json in
+      let destinations = field_map json__ "Destinations" Destinations.of_json in
+      let channel = field_map_exn json__ "Channel" ChannelArn.of_json in
+      make ?name ?destinations ~channel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a channel specified by a required channel ARN or UUID."]
 module StopLoggingResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [
-        `InsufficientDependencyServiceAccessPermissionException of
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `ConflictException of ConflictException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
           InsufficientDependencyServiceAccessPermissionException.t 
       | `InvalidHomeRegionException of InvalidHomeRegionException.t 
       | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_json
@@ -3997,12 +7937,17 @@ module StopLoggingResponse =
             (InvalidHomeRegionException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_json json)
       | "UnsupportedOperationException" ->
@@ -4013,6 +7958,11 @@ module StopLoggingResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_xml
@@ -4021,12 +7971,17 @@ module StopLoggingResponse =
           `InvalidHomeRegionException (InvalidHomeRegionException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_xml xml)
       | "UnsupportedOperationException" ->
@@ -4036,6 +7991,14 @@ module StopLoggingResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InsufficientDependencyServiceAccessPermissionException e ->
           `Assoc
             [("error",
@@ -4052,6 +8015,10 @@ module StopLoggingResponse =
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -4060,6 +8027,10 @@ module StopLoggingResponse =
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
             ("details", (OperationNotPermittedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TrailNotFoundException e ->
           `Assoc
             [("error", (`String "TrailNotFoundException"));
@@ -4099,29 +8070,412 @@ module StopLoggingRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" String_.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Passes the request to CloudTrail to stop logging Amazon Web Services API calls for the specified account."]
+module StopImportResponse =
+  struct
+    type nonrec t =
+      {
+      importId: UUID.t option [@ocaml.doc "The ID for the import."];
+      importSource: ImportSource.t option
+        [@ocaml.doc "The source S3 bucket for the import."];
+      destinations: ImportDestinations.t option
+        [@ocaml.doc "The ARN of the destination event data store."];
+      importStatus: ImportStatus.t option
+        [@ocaml.doc "The status of the import."];
+      createdTimestamp: Date.t option
+        [@ocaml.doc "The timestamp of the import's creation."];
+      updatedTimestamp: Date.t option
+        [@ocaml.doc "The timestamp of the import's last update."];
+      startEventTime: Date.t option
+        [@ocaml.doc
+          "Used with EndEventTime to bound a StartImport request, and limit imported trail events to only those events logged within a specified time period."];
+      endEventTime: Date.t option
+        [@ocaml.doc
+          "Used with StartEventTime to bound a StartImport request, and limit imported trail events to only those events logged within a specified time period."];
+      importStatistics: ImportStatistics.t option
+        [@ocaml.doc "Returns information on the stopped import."]}
+    type nonrec error =
+      [ `ImportNotFoundException of ImportNotFoundException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?importId =
+      fun ?importSource ->
+        fun ?destinations ->
+          fun ?importStatus ->
+            fun ?createdTimestamp ->
+              fun ?updatedTimestamp ->
+                fun ?startEventTime ->
+                  fun ?endEventTime ->
+                    fun ?importStatistics ->
+                      fun () ->
+                        {
+                          importId;
+                          importSource;
+                          destinations;
+                          importStatus;
+                          createdTimestamp;
+                          updatedTimestamp;
+                          startEventTime;
+                          endEventTime;
+                          importStatistics
+                        }
+    let error_of_json name json =
+      match name with
+      | "ImportNotFoundException" ->
+          `ImportNotFoundException (ImportNotFoundException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ImportNotFoundException" ->
+          `ImportNotFoundException (ImportNotFoundException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ImportNotFoundException e ->
+          `Assoc
+            [("error", (`String "ImportNotFoundException"));
+            ("details", (ImportNotFoundException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ImportId", (Option.map x.importId ~f:UUID.to_value));
+        ("ImportSource",
+          (Option.map x.importSource ~f:ImportSource.to_value));
+        ("Destinations",
+          (Option.map x.destinations ~f:ImportDestinations.to_value));
+        ("ImportStatus",
+          (Option.map x.importStatus ~f:ImportStatus.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Date.to_value));
+        ("UpdatedTimestamp",
+          (Option.map x.updatedTimestamp ~f:Date.to_value));
+        ("StartEventTime", (Option.map x.startEventTime ~f:Date.to_value));
+        ("EndEventTime", (Option.map x.endEventTime ~f:Date.to_value));
+        ("ImportStatistics",
+          (Option.map x.importStatistics ~f:ImportStatistics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importStatistics =
+        (Option.map ~f:ImportStatistics.of_xml)
+          (Xml.child xml_arg0 "ImportStatistics") in
+      let endEventTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "EndEventTime") in
+      let startEventTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartEventTime") in
+      let updatedTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreatedTimestamp") in
+      let importStatus =
+        (Option.map ~f:ImportStatus.of_xml)
+          (Xml.child xml_arg0 "ImportStatus") in
+      let destinations =
+        (Option.map ~f:ImportDestinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      let importSource =
+        (Option.map ~f:ImportSource.of_xml)
+          (Xml.child xml_arg0 "ImportSource") in
+      let importId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "ImportId") in
+      make ?importStatistics ?endEventTime ?startEventTime ?updatedTimestamp
+        ?createdTimestamp ?importStatus ?destinations ?importSource ?importId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importStatistics =
+        field_map json__ "ImportStatistics" ImportStatistics.of_json in
+      let endEventTime = field_map json__ "EndEventTime" Date.of_json in
+      let startEventTime = field_map json__ "StartEventTime" Date.of_json in
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
+      let importStatus = field_map json__ "ImportStatus" ImportStatus.of_json in
+      let destinations =
+        field_map json__ "Destinations" ImportDestinations.of_json in
+      let importSource = field_map json__ "ImportSource" ImportSource.of_json in
+      let importId = field_map json__ "ImportId" UUID.of_json in
+      make ?importStatistics ?endEventTime ?startEventTime ?updatedTimestamp
+        ?createdTimestamp ?importStatus ?destinations ?importSource ?importId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Stops a specified import."]
+module StopImportRequest =
+  struct
+    type nonrec t = {
+      importId: UUID.t [@ocaml.doc "The ID of the import."]}
+    let context_ = "StopImportRequest"
+    let make ~importId = fun () -> { importId }
+    let to_value x =
+      structure_to_value [("ImportId", (Some (UUID.to_value x.importId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importId =
+        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ImportId") in
+      make ~importId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importId = field_map_exn json__ "ImportId" UUID.of_json in
+      make ~importId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Stops a specified import."]
+module StopEventDataStoreIngestionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
+          InsufficientDependencyServiceAccessPermissionException.t 
+      | `InvalidEventDataStoreCategoryException of
+          InvalidEventDataStoreCategoryException.t 
+      | `InvalidEventDataStoreStatusException of
+          InvalidEventDataStoreStatusException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
+      | `NotOrganizationMasterAccountException of
+          NotOrganizationMasterAccountException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_json
+               json)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_json json)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_xml
+               xml)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_xml xml)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InsufficientDependencyServiceAccessPermissionException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "InsufficientDependencyServiceAccessPermissionException"));
+            ("details",
+              (InsufficientDependencyServiceAccessPermissionException.to_json
+                 e))]
+      | `InvalidEventDataStoreCategoryException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreCategoryException"));
+            ("details", (InvalidEventDataStoreCategoryException.to_json e))]
+      | `InvalidEventDataStoreStatusException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreStatusException"));
+            ("details", (InvalidEventDataStoreStatusException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
+      | `NotOrganizationMasterAccountException e ->
+          `Assoc
+            [("error", (`String "NotOrganizationMasterAccountException"));
+            ("details", (NotOrganizationMasterAccountException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops the ingestion of live events on an event data store specified as either an ARN or the ID portion of the ARN. To stop ingestion, the event data store Status must be ENABLED and the eventCategory must be Management, Data, NetworkActivity, or ConfigurationItem."]
+module StopEventDataStoreIngestionRequest =
+  struct
+    type nonrec t =
+      {
+      eventDataStore: EventDataStoreArn.t
+        [@ocaml.doc
+          "The ARN (or ID suffix of the ARN) of the event data store for which you want to stop ingestion."]}
+    let context_ = "StopEventDataStoreIngestionRequest"
+    let make ~eventDataStore = fun () -> { eventDataStore }
+    let to_value x =
+      structure_to_value
+        [("EventDataStore",
+           (Some (EventDataStoreArn.to_value x.eventDataStore)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventDataStore =
+        EventDataStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
+      make ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventDataStore =
+        field_map_exn json__ "EventDataStore" EventDataStoreArn.of_json in
+      make ~eventDataStore ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops the ingestion of live events on an event data store specified as either an ARN or the ID portion of the ARN. To stop ingestion, the event data store Status must be ENABLED and the eventCategory must be Management, Data, NetworkActivity, or ConfigurationItem."]
 module StartQueryResponse =
   struct
     type nonrec t =
       {
-      queryId: UUID.t option [@ocaml.doc "The ID of the started query."]}
+      queryId: UUID.t option [@ocaml.doc "The ID of the started query."];
+      eventDataStoreOwnerAccountId: AccountId.t option
+        [@ocaml.doc "The account ID of the event data store owner."]}
     type nonrec error =
       [
         `EventDataStoreARNInvalidException of
           EventDataStoreARNInvalidException.t 
       | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
       | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InsufficientEncryptionPolicyException of
+          InsufficientEncryptionPolicyException.t 
+      | `InsufficientS3BucketPolicyException of
+          InsufficientS3BucketPolicyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidQueryStatementException of InvalidQueryStatementException.t 
+      | `InvalidS3BucketNameException of InvalidS3BucketNameException.t 
+      | `InvalidS3PrefixException of InvalidS3PrefixException.t 
       | `MaxConcurrentQueriesException of MaxConcurrentQueriesException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `S3BucketDoesNotExistException of S3BucketDoesNotExistException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?queryId = fun () -> { queryId }
+    let make ?queryId =
+      fun ?eventDataStoreOwnerAccountId ->
+        fun () -> { queryId; eventDataStoreOwnerAccountId }
     let error_of_json name json =
       match name with
       | "EventDataStoreARNInvalidException" ->
@@ -4133,17 +8487,34 @@ module StartQueryResponse =
       | "InactiveEventDataStoreException" ->
           `InactiveEventDataStoreException
             (InactiveEventDataStoreException.of_json json)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_json json)
+      | "InsufficientS3BucketPolicyException" ->
+          `InsufficientS3BucketPolicyException
+            (InsufficientS3BucketPolicyException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
       | "InvalidQueryStatementException" ->
           `InvalidQueryStatementException
             (InvalidQueryStatementException.of_json json)
+      | "InvalidS3BucketNameException" ->
+          `InvalidS3BucketNameException
+            (InvalidS3BucketNameException.of_json json)
+      | "InvalidS3PrefixException" ->
+          `InvalidS3PrefixException (InvalidS3PrefixException.of_json json)
       | "MaxConcurrentQueriesException" ->
           `MaxConcurrentQueriesException
             (MaxConcurrentQueriesException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
+      | "S3BucketDoesNotExistException" ->
+          `S3BucketDoesNotExistException
+            (S3BucketDoesNotExistException.of_json json)
       | "UnsupportedOperationException" ->
           `UnsupportedOperationException
             (UnsupportedOperationException.of_json json)
@@ -4161,17 +8532,34 @@ module StartQueryResponse =
       | "InactiveEventDataStoreException" ->
           `InactiveEventDataStoreException
             (InactiveEventDataStoreException.of_xml xml)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_xml xml)
+      | "InsufficientS3BucketPolicyException" ->
+          `InsufficientS3BucketPolicyException
+            (InsufficientS3BucketPolicyException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "InvalidQueryStatementException" ->
           `InvalidQueryStatementException
             (InvalidQueryStatementException.of_xml xml)
+      | "InvalidS3BucketNameException" ->
+          `InvalidS3BucketNameException
+            (InvalidS3BucketNameException.of_xml xml)
+      | "InvalidS3PrefixException" ->
+          `InvalidS3PrefixException (InvalidS3PrefixException.of_xml xml)
       | "MaxConcurrentQueriesException" ->
           `MaxConcurrentQueriesException
             (MaxConcurrentQueriesException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
+      | "S3BucketDoesNotExistException" ->
+          `S3BucketDoesNotExistException
+            (S3BucketDoesNotExistException.of_xml xml)
       | "UnsupportedOperationException" ->
           `UnsupportedOperationException
             (UnsupportedOperationException.of_xml xml)
@@ -4191,6 +8579,14 @@ module StartQueryResponse =
           `Assoc
             [("error", (`String "InactiveEventDataStoreException"));
             ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InsufficientEncryptionPolicyException e ->
+          `Assoc
+            [("error", (`String "InsufficientEncryptionPolicyException"));
+            ("details", (InsufficientEncryptionPolicyException.to_json e))]
+      | `InsufficientS3BucketPolicyException e ->
+          `Assoc
+            [("error", (`String "InsufficientS3BucketPolicyException"));
+            ("details", (InsufficientS3BucketPolicyException.to_json e))]
       | `InvalidParameterException e ->
           `Assoc
             [("error", (`String "InvalidParameterException"));
@@ -4199,14 +8595,30 @@ module StartQueryResponse =
           `Assoc
             [("error", (`String "InvalidQueryStatementException"));
             ("details", (InvalidQueryStatementException.to_json e))]
+      | `InvalidS3BucketNameException e ->
+          `Assoc
+            [("error", (`String "InvalidS3BucketNameException"));
+            ("details", (InvalidS3BucketNameException.to_json e))]
+      | `InvalidS3PrefixException e ->
+          `Assoc
+            [("error", (`String "InvalidS3PrefixException"));
+            ("details", (InvalidS3PrefixException.to_json e))]
       | `MaxConcurrentQueriesException e ->
           `Assoc
             [("error", (`String "MaxConcurrentQueriesException"));
             ("details", (MaxConcurrentQueriesException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
             ("details", (OperationNotPermittedException.to_json e))]
+      | `S3BucketDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "S3BucketDoesNotExistException"));
+            ("details", (S3BucketDoesNotExistException.to_json e))]
       | `UnsupportedOperationException e ->
           `Assoc
             [("error", (`String "UnsupportedOperationException"));
@@ -4218,62 +8630,126 @@ module StartQueryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("QueryId", (Option.map x.queryId ~f:UUID.to_value))]
+        [("QueryId", (Option.map x.queryId ~f:UUID.to_value));
+        ("EventDataStoreOwnerAccountId",
+          (Option.map x.eventDataStoreOwnerAccountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eventDataStoreOwnerAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreOwnerAccountId") in
       let queryId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "QueryId") in
-      make ?queryId ()
+      make ?eventDataStoreOwnerAccountId ?queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryId = field_map json "QueryId" UUID.of_json in make ?queryId ()
+    let of_json json__ =
+      let eventDataStoreOwnerAccountId =
+        field_map json__ "EventDataStoreOwnerAccountId" AccountId.of_json in
+      let queryId = field_map json__ "QueryId" UUID.of_json in
+      make ?eventDataStoreOwnerAccountId ?queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a CloudTrail Lake query. The required QueryStatement parameter provides your SQL query, enclosed in single quotation marks."]
+       "Starts a CloudTrail Lake query. Use the QueryStatement parameter to provide your SQL query, enclosed in single quotation marks. Use the optional DeliveryS3Uri parameter to deliver the query results to an S3 bucket. StartQuery requires you specify either the QueryStatement parameter, or a QueryAlias and any QueryParameters. In the current release, the QueryAlias and QueryParameters parameters are used only for the queries that populate the CloudTrail Lake dashboards."]
 module StartQueryRequest =
   struct
     type nonrec t =
       {
-      queryStatement: QueryStatement.t
-        [@ocaml.doc "The SQL code of your query."]}
-    let context_ = "StartQueryRequest"
-    let make ~queryStatement = fun () -> { queryStatement }
+      queryStatement: QueryStatement.t option
+        [@ocaml.doc "The SQL code of your query."];
+      deliveryS3Uri: DeliveryS3Uri.t option
+        [@ocaml.doc
+          "The URI for the S3 bucket where CloudTrail delivers the query results."];
+      queryAlias: QueryAlias.t option
+        [@ocaml.doc "The alias that identifies a query template."];
+      queryParameters: QueryParameters.t option
+        [@ocaml.doc "The query parameters for the specified QueryAlias."];
+      eventDataStoreOwnerAccountId: AccountId.t option
+        [@ocaml.doc "The account ID of the event data store owner."]}
+    let make ?queryStatement =
+      fun ?deliveryS3Uri ->
+        fun ?queryAlias ->
+          fun ?queryParameters ->
+            fun ?eventDataStoreOwnerAccountId ->
+              fun () ->
+                {
+                  queryStatement;
+                  deliveryS3Uri;
+                  queryAlias;
+                  queryParameters;
+                  eventDataStoreOwnerAccountId
+                }
     let to_value x =
       structure_to_value
         [("QueryStatement",
-           (Some (QueryStatement.to_value x.queryStatement)))]
+           (Option.map x.queryStatement ~f:QueryStatement.to_value));
+        ("DeliveryS3Uri",
+          (Option.map x.deliveryS3Uri ~f:DeliveryS3Uri.to_value));
+        ("QueryAlias", (Option.map x.queryAlias ~f:QueryAlias.to_value));
+        ("QueryParameters",
+          (Option.map x.queryParameters ~f:QueryParameters.to_value));
+        ("EventDataStoreOwnerAccountId",
+          (Option.map x.eventDataStoreOwnerAccountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eventDataStoreOwnerAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreOwnerAccountId") in
+      let queryParameters =
+        (Option.map ~f:QueryParameters.of_xml)
+          (Xml.child xml_arg0 "QueryParameters") in
+      let queryAlias =
+        (Option.map ~f:QueryAlias.of_xml) (Xml.child xml_arg0 "QueryAlias") in
+      let deliveryS3Uri =
+        (Option.map ~f:DeliveryS3Uri.of_xml)
+          (Xml.child xml_arg0 "DeliveryS3Uri") in
       let queryStatement =
-        QueryStatement.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryStatement") in
-      make ~queryStatement ()
+        (Option.map ~f:QueryStatement.of_xml)
+          (Xml.child xml_arg0 "QueryStatement") in
+      make ?eventDataStoreOwnerAccountId ?queryParameters ?queryAlias
+        ?deliveryS3Uri ?queryStatement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let eventDataStoreOwnerAccountId =
+        field_map json__ "EventDataStoreOwnerAccountId" AccountId.of_json in
+      let queryParameters =
+        field_map json__ "QueryParameters" QueryParameters.of_json in
+      let queryAlias = field_map json__ "QueryAlias" QueryAlias.of_json in
+      let deliveryS3Uri =
+        field_map json__ "DeliveryS3Uri" DeliveryS3Uri.of_json in
       let queryStatement =
-        field_map_exn json "QueryStatement" QueryStatement.of_json in
-      make ~queryStatement ()
+        field_map json__ "QueryStatement" QueryStatement.of_json in
+      make ?eventDataStoreOwnerAccountId ?queryParameters ?queryAlias
+        ?deliveryS3Uri ?queryStatement ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a CloudTrail Lake query. The required QueryStatement parameter provides your SQL query, enclosed in single quotation marks."]
+       "Starts a CloudTrail Lake query. Use the QueryStatement parameter to provide your SQL query, enclosed in single quotation marks. Use the optional DeliveryS3Uri parameter to deliver the query results to an S3 bucket. StartQuery requires you specify either the QueryStatement parameter, or a QueryAlias and any QueryParameters. In the current release, the QueryAlias and QueryParameters parameters are used only for the queries that populate the CloudTrail Lake dashboards."]
 module StartLoggingResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [
-        `InsufficientDependencyServiceAccessPermissionException of
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `ConflictException of ConflictException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
           InsufficientDependencyServiceAccessPermissionException.t 
       | `InvalidHomeRegionException of InvalidHomeRegionException.t 
       | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_json
@@ -4283,12 +8759,17 @@ module StartLoggingResponse =
             (InvalidHomeRegionException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_json json)
       | "UnsupportedOperationException" ->
@@ -4299,6 +8780,11 @@ module StartLoggingResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_xml
@@ -4307,12 +8793,17 @@ module StartLoggingResponse =
           `InvalidHomeRegionException (InvalidHomeRegionException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_xml xml)
       | "UnsupportedOperationException" ->
@@ -4322,6 +8813,14 @@ module StartLoggingResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InsufficientDependencyServiceAccessPermissionException e ->
           `Assoc
             [("error",
@@ -4338,6 +8837,10 @@ module StartLoggingResponse =
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -4346,6 +8849,10 @@ module StartLoggingResponse =
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
             ("details", (OperationNotPermittedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TrailNotFoundException e ->
           `Assoc
             [("error", (`String "TrailNotFoundException"));
@@ -4385,11 +8892,780 @@ module StartLoggingRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" String_.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request to CloudTrail to start logging Amazon Web Services API calls for an account."]
+module StartImportResponse =
+  struct
+    type nonrec t =
+      {
+      importId: UUID.t option [@ocaml.doc "The ID of the import."];
+      destinations: ImportDestinations.t option
+        [@ocaml.doc "The ARN of the destination event data store."];
+      importSource: ImportSource.t option
+        [@ocaml.doc "The source S3 bucket for the import."];
+      startEventTime: Date.t option
+        [@ocaml.doc
+          "Used with EndEventTime to bound a StartImport request, and limit imported trail events to only those events logged within a specified time period."];
+      endEventTime: Date.t option
+        [@ocaml.doc
+          "Used with StartEventTime to bound a StartImport request, and limit imported trail events to only those events logged within a specified time period."];
+      importStatus: ImportStatus.t option
+        [@ocaml.doc
+          "Shows the status of the import after a StartImport request. An import finishes with a status of COMPLETED if there were no failures, or FAILED if there were failures."];
+      createdTimestamp: Date.t option
+        [@ocaml.doc "The timestamp for the import's creation."];
+      updatedTimestamp: Date.t option
+        [@ocaml.doc
+          "The timestamp of the import's last update, if applicable."]}
+    type nonrec error =
+      [
+        `AccountHasOngoingImportException of
+          AccountHasOngoingImportException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `ImportNotFoundException of ImportNotFoundException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InsufficientEncryptionPolicyException of
+          InsufficientEncryptionPolicyException.t 
+      | `InvalidEventDataStoreCategoryException of
+          InvalidEventDataStoreCategoryException.t 
+      | `InvalidEventDataStoreStatusException of
+          InvalidEventDataStoreStatusException.t 
+      | `InvalidImportSourceException of InvalidImportSourceException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?importId =
+      fun ?destinations ->
+        fun ?importSource ->
+          fun ?startEventTime ->
+            fun ?endEventTime ->
+              fun ?importStatus ->
+                fun ?createdTimestamp ->
+                  fun ?updatedTimestamp ->
+                    fun () ->
+                      {
+                        importId;
+                        destinations;
+                        importSource;
+                        startEventTime;
+                        endEventTime;
+                        importStatus;
+                        createdTimestamp;
+                        updatedTimestamp
+                      }
+    let error_of_json name json =
+      match name with
+      | "AccountHasOngoingImportException" ->
+          `AccountHasOngoingImportException
+            (AccountHasOngoingImportException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "ImportNotFoundException" ->
+          `ImportNotFoundException (ImportNotFoundException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_json json)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_json json)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_json json)
+      | "InvalidImportSourceException" ->
+          `InvalidImportSourceException
+            (InvalidImportSourceException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountHasOngoingImportException" ->
+          `AccountHasOngoingImportException
+            (AccountHasOngoingImportException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "ImportNotFoundException" ->
+          `ImportNotFoundException (ImportNotFoundException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_xml xml)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_xml xml)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_xml xml)
+      | "InvalidImportSourceException" ->
+          `InvalidImportSourceException
+            (InvalidImportSourceException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountHasOngoingImportException e ->
+          `Assoc
+            [("error", (`String "AccountHasOngoingImportException"));
+            ("details", (AccountHasOngoingImportException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `ImportNotFoundException e ->
+          `Assoc
+            [("error", (`String "ImportNotFoundException"));
+            ("details", (ImportNotFoundException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InsufficientEncryptionPolicyException e ->
+          `Assoc
+            [("error", (`String "InsufficientEncryptionPolicyException"));
+            ("details", (InsufficientEncryptionPolicyException.to_json e))]
+      | `InvalidEventDataStoreCategoryException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreCategoryException"));
+            ("details", (InvalidEventDataStoreCategoryException.to_json e))]
+      | `InvalidEventDataStoreStatusException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreStatusException"));
+            ("details", (InvalidEventDataStoreStatusException.to_json e))]
+      | `InvalidImportSourceException e ->
+          `Assoc
+            [("error", (`String "InvalidImportSourceException"));
+            ("details", (InvalidImportSourceException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ImportId", (Option.map x.importId ~f:UUID.to_value));
+        ("Destinations",
+          (Option.map x.destinations ~f:ImportDestinations.to_value));
+        ("ImportSource",
+          (Option.map x.importSource ~f:ImportSource.to_value));
+        ("StartEventTime", (Option.map x.startEventTime ~f:Date.to_value));
+        ("EndEventTime", (Option.map x.endEventTime ~f:Date.to_value));
+        ("ImportStatus",
+          (Option.map x.importStatus ~f:ImportStatus.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Date.to_value));
+        ("UpdatedTimestamp",
+          (Option.map x.updatedTimestamp ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreatedTimestamp") in
+      let importStatus =
+        (Option.map ~f:ImportStatus.of_xml)
+          (Xml.child xml_arg0 "ImportStatus") in
+      let endEventTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "EndEventTime") in
+      let startEventTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartEventTime") in
+      let importSource =
+        (Option.map ~f:ImportSource.of_xml)
+          (Xml.child xml_arg0 "ImportSource") in
+      let destinations =
+        (Option.map ~f:ImportDestinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      let importId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "ImportId") in
+      make ?updatedTimestamp ?createdTimestamp ?importStatus ?endEventTime
+        ?startEventTime ?importSource ?destinations ?importId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
+      let importStatus = field_map json__ "ImportStatus" ImportStatus.of_json in
+      let endEventTime = field_map json__ "EndEventTime" Date.of_json in
+      let startEventTime = field_map json__ "StartEventTime" Date.of_json in
+      let importSource = field_map json__ "ImportSource" ImportSource.of_json in
+      let destinations =
+        field_map json__ "Destinations" ImportDestinations.of_json in
+      let importId = field_map json__ "ImportId" UUID.of_json in
+      make ?updatedTimestamp ?createdTimestamp ?importStatus ?endEventTime
+        ?startEventTime ?importSource ?destinations ?importId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts an import of logged trail events from a source S3 bucket to a destination event data store. By default, CloudTrail only imports events contained in the S3 bucket's CloudTrail prefix and the prefixes inside the CloudTrail prefix, and does not check prefixes for other Amazon Web Services services. If you want to import CloudTrail events contained in another prefix, you must include the prefix in the S3LocationUri. For more considerations about importing trail events, see Considerations for copying trail events in the CloudTrail User Guide. When you start a new import, the Destinations and ImportSource parameters are required. Before starting a new import, disable any access control lists (ACLs) attached to the source S3 bucket. For more information about disabling ACLs, see Controlling ownership of objects and disabling ACLs for your bucket. When you retry an import, the ImportID parameter is required. If the destination event data store is for an organization, you must use the management account to import trail events. You cannot use the delegated administrator account for the organization."]
+module StartImportRequest =
+  struct
+    type nonrec t =
+      {
+      destinations: ImportDestinations.t option
+        [@ocaml.doc
+          "The ARN of the destination event data store. Use this parameter for a new import."];
+      importSource: ImportSource.t option
+        [@ocaml.doc
+          "The source S3 bucket for the import. Use this parameter for a new import."];
+      startEventTime: Date.t option
+        [@ocaml.doc
+          "Use with EndEventTime to bound a StartImport request, and limit imported trail events to only those events logged within a specified time period. When you specify a time range, CloudTrail checks the prefix and log file names to verify the names contain a date between the specified StartEventTime and EndEventTime before attempting to import events."];
+      endEventTime: Date.t option
+        [@ocaml.doc
+          "Use with StartEventTime to bound a StartImport request, and limit imported trail events to only those events logged within a specified time period. When you specify a time range, CloudTrail checks the prefix and log file names to verify the names contain a date between the specified StartEventTime and EndEventTime before attempting to import events."];
+      importId: UUID.t option
+        [@ocaml.doc
+          "The ID of the import. Use this parameter when you are retrying an import."]}
+    let make ?destinations =
+      fun ?importSource ->
+        fun ?startEventTime ->
+          fun ?endEventTime ->
+            fun ?importId ->
+              fun () ->
+                {
+                  destinations;
+                  importSource;
+                  startEventTime;
+                  endEventTime;
+                  importId
+                }
+    let to_value x =
+      structure_to_value
+        [("Destinations",
+           (Option.map x.destinations ~f:ImportDestinations.to_value));
+        ("ImportSource",
+          (Option.map x.importSource ~f:ImportSource.to_value));
+        ("StartEventTime", (Option.map x.startEventTime ~f:Date.to_value));
+        ("EndEventTime", (Option.map x.endEventTime ~f:Date.to_value));
+        ("ImportId", (Option.map x.importId ~f:UUID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "ImportId") in
+      let endEventTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "EndEventTime") in
+      let startEventTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartEventTime") in
+      let importSource =
+        (Option.map ~f:ImportSource.of_xml)
+          (Xml.child xml_arg0 "ImportSource") in
+      let destinations =
+        (Option.map ~f:ImportDestinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      make ?importId ?endEventTime ?startEventTime ?importSource
+        ?destinations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importId = field_map json__ "ImportId" UUID.of_json in
+      let endEventTime = field_map json__ "EndEventTime" Date.of_json in
+      let startEventTime = field_map json__ "StartEventTime" Date.of_json in
+      let importSource = field_map json__ "ImportSource" ImportSource.of_json in
+      let destinations =
+        field_map json__ "Destinations" ImportDestinations.of_json in
+      make ?importId ?endEventTime ?startEventTime ?importSource
+        ?destinations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts an import of logged trail events from a source S3 bucket to a destination event data store. By default, CloudTrail only imports events contained in the S3 bucket's CloudTrail prefix and the prefixes inside the CloudTrail prefix, and does not check prefixes for other Amazon Web Services services. If you want to import CloudTrail events contained in another prefix, you must include the prefix in the S3LocationUri. For more considerations about importing trail events, see Considerations for copying trail events in the CloudTrail User Guide. When you start a new import, the Destinations and ImportSource parameters are required. Before starting a new import, disable any access control lists (ACLs) attached to the source S3 bucket. For more information about disabling ACLs, see Controlling ownership of objects and disabling ACLs for your bucket. When you retry an import, the ImportID parameter is required. If the destination event data store is for an organization, you must use the management account to import trail events. You cannot use the delegated administrator account for the organization."]
+module StartEventDataStoreIngestionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
+          InsufficientDependencyServiceAccessPermissionException.t 
+      | `InvalidEventDataStoreCategoryException of
+          InvalidEventDataStoreCategoryException.t 
+      | `InvalidEventDataStoreStatusException of
+          InvalidEventDataStoreStatusException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
+      | `NotOrganizationMasterAccountException of
+          NotOrganizationMasterAccountException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_json
+               json)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_json json)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_xml
+               xml)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_xml xml)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InsufficientDependencyServiceAccessPermissionException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "InsufficientDependencyServiceAccessPermissionException"));
+            ("details",
+              (InsufficientDependencyServiceAccessPermissionException.to_json
+                 e))]
+      | `InvalidEventDataStoreCategoryException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreCategoryException"));
+            ("details", (InvalidEventDataStoreCategoryException.to_json e))]
+      | `InvalidEventDataStoreStatusException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreStatusException"));
+            ("details", (InvalidEventDataStoreStatusException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
+      | `NotOrganizationMasterAccountException e ->
+          `Assoc
+            [("error", (`String "NotOrganizationMasterAccountException"));
+            ("details", (NotOrganizationMasterAccountException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the ingestion of live events on an event data store specified as either an ARN or the ID portion of the ARN. To start ingestion, the event data store Status must be STOPPED_INGESTION and the eventCategory must be Management, Data, NetworkActivity, or ConfigurationItem."]
+module StartEventDataStoreIngestionRequest =
+  struct
+    type nonrec t =
+      {
+      eventDataStore: EventDataStoreArn.t
+        [@ocaml.doc
+          "The ARN (or ID suffix of the ARN) of the event data store for which you want to start ingestion."]}
+    let context_ = "StartEventDataStoreIngestionRequest"
+    let make ~eventDataStore = fun () -> { eventDataStore }
+    let to_value x =
+      structure_to_value
+        [("EventDataStore",
+           (Some (EventDataStoreArn.to_value x.eventDataStore)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventDataStore =
+        EventDataStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
+      make ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventDataStore =
+        field_map_exn json__ "EventDataStore" EventDataStoreArn.of_json in
+      make ~eventDataStore ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the ingestion of live events on an event data store specified as either an ARN or the ID portion of the ARN. To start ingestion, the event data store Status must be STOPPED_INGESTION and the eventCategory must be Management, Data, NetworkActivity, or ConfigurationItem."]
+module StartDashboardRefreshResponse =
+  struct
+    type nonrec t =
+      {
+      refreshId: RefreshId.t option
+        [@ocaml.doc "The refresh ID for the dashboard."]}
+    type nonrec error =
+      [
+        `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?refreshId = fun () -> { refreshId }
+    let error_of_json name json =
+      match name with
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RefreshId", (Option.map x.refreshId ~f:RefreshId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let refreshId =
+        (Option.map ~f:RefreshId.of_xml) (Xml.child xml_arg0 "RefreshId") in
+      make ?refreshId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let refreshId = field_map json__ "RefreshId" RefreshId.of_json in
+      make ?refreshId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts a refresh of the specified dashboard. Each time a dashboard is refreshed, CloudTrail runs queries to populate the dashboard's widgets. CloudTrail must be granted permissions to run the StartQuery operation on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to each event data store. For more information, see Example: Allow CloudTrail to run queries to populate a dashboard in the CloudTrail User Guide."]
+module StartDashboardRefreshRequest =
+  struct
+    type nonrec t =
+      {
+      dashboardId: DashboardArn.t
+        [@ocaml.doc "The name or ARN of the dashboard."];
+      queryParameterValues: QueryParameterValues.t option
+        [@ocaml.doc
+          "The query parameter values for the dashboard For custom dashboards, the following query parameters are valid: $StartTime$, $EndTime$, and $Period$. For managed dashboards, the following query parameters are valid: $StartTime$, $EndTime$, $Period$, and $EventDataStoreId$. The $EventDataStoreId$ query parameter is required."]}
+    let context_ = "StartDashboardRefreshRequest"
+    let make ?queryParameterValues =
+      fun ~dashboardId -> fun () -> { queryParameterValues; dashboardId }
+    let to_value x =
+      structure_to_value
+        [("DashboardId", (Some (DashboardArn.to_value x.dashboardId)));
+        ("QueryParameterValues",
+          (Option.map x.queryParameterValues ~f:QueryParameterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryParameterValues =
+        (Option.map ~f:QueryParameterValues.of_xml)
+          (Xml.child xml_arg0 "QueryParameterValues") in
+      let dashboardId =
+        DashboardArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DashboardId") in
+      make ?queryParameterValues ~dashboardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryParameterValues =
+        field_map json__ "QueryParameterValues" QueryParameterValues.of_json in
+      let dashboardId =
+        field_map_exn json__ "DashboardId" DashboardArn.of_json in
+      make ?queryParameterValues ~dashboardId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts a refresh of the specified dashboard. Each time a dashboard is refreshed, CloudTrail runs queries to populate the dashboard's widgets. CloudTrail must be granted permissions to run the StartQuery operation on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to each event data store. For more information, see Example: Allow CloudTrail to run queries to populate a dashboard in the CloudTrail User Guide."]
+module SearchSampleQueriesResponse =
+  struct
+    type nonrec t =
+      {
+      searchResults: SearchSampleQueriesSearchResults.t option
+        [@ocaml.doc
+          "A list of objects containing the search results ordered from most relevant to least relevant."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "A token you can use to get the next page of results."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?searchResults =
+      fun ?nextToken -> fun () -> { searchResults; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SearchResults",
+           (Option.map x.searchResults
+              ~f:SearchSampleQueriesSearchResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let searchResults =
+        (Option.map ~f:SearchSampleQueriesSearchResults.of_xml)
+          (Xml.child xml_arg0 "SearchResults") in
+      make ?nextToken ?searchResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let searchResults =
+        field_map json__ "SearchResults"
+          SearchSampleQueriesSearchResults.of_json in
+      make ?nextToken ?searchResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches sample queries and returns a list of sample queries that are sorted by relevance. To search for sample queries, provide a natural language SearchPhrase in English."]
+module SearchSampleQueriesRequest =
+  struct
+    type nonrec t =
+      {
+      searchPhrase: SearchSampleQueriesSearchPhrase.t
+        [@ocaml.doc
+          "The natural language phrase to use for the semantic search. The phrase must be in English. The length constraint is in characters, not words."];
+      maxResults: SearchSampleQueriesMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return on a single page. The default value is 10."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token you can use to get the next page of results. The length constraint is in characters, not words."]}
+    let context_ = "SearchSampleQueriesRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~searchPhrase ->
+          fun () -> { maxResults; nextToken; searchPhrase }
+    let to_value x =
+      structure_to_value
+        [("SearchPhrase",
+           (Some (SearchSampleQueriesSearchPhrase.to_value x.searchPhrase)));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:SearchSampleQueriesMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:SearchSampleQueriesMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let searchPhrase =
+        SearchSampleQueriesSearchPhrase.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SearchPhrase") in
+      make ?nextToken ?maxResults ~searchPhrase ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" SearchSampleQueriesMaxResults.of_json in
+      let searchPhrase =
+        field_map_exn json__ "SearchPhrase"
+          SearchSampleQueriesSearchPhrase.of_json in
+      make ?nextToken ?maxResults ~searchPhrase ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches sample queries and returns a list of sample queries that are sorted by relevance. To search for sample queries, provide a natural language SearchPhrase in English."]
 module RestoreEventDataStoreResponse =
   struct
     type nonrec t =
@@ -4405,7 +9681,7 @@ module RestoreEventDataStoreResponse =
           "The advanced event selectors that were used to select events."];
       multiRegionEnabled: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the event data store is collecting events from all regions, or only from the region in which the event data store was created."];
+          "Indicates whether the event data store is collecting events from all Regions, or only from the Region in which the event data store was created."];
       organizationEnabled: Boolean.t option
         [@ocaml.doc
           "Indicates whether an event data store is collecting logged events for an organization in Organizations."];
@@ -4418,7 +9694,12 @@ module RestoreEventDataStoreResponse =
         [@ocaml.doc "The timestamp of an event data store's creation."];
       updatedTimestamp: Date.t option
         [@ocaml.doc
-          "The timestamp that shows when an event data store was updated, if applicable. UpdatedTimestamp is always either the same or newer than the time shown in CreatedTimestamp."]}
+          "The timestamp that shows when an event data store was updated, if applicable. UpdatedTimestamp is always either the same or newer than the time shown in CreatedTimestamp."];
+      kmsKeyId: EventDataStoreKmsKeyId.t option
+        [@ocaml.doc
+          "Specifies the KMS key ID that encrypts the events delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
+      billingMode: BillingMode.t option
+        [@ocaml.doc "The billing mode for the event data store."]}
     type nonrec error =
       [
         `CloudTrailAccessNotEnabledException of
@@ -4433,6 +9714,8 @@ module RestoreEventDataStoreResponse =
       | `InvalidEventDataStoreStatusException of
           InvalidEventDataStoreStatusException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
@@ -4451,19 +9734,23 @@ module RestoreEventDataStoreResponse =
                   fun ?terminationProtectionEnabled ->
                     fun ?createdTimestamp ->
                       fun ?updatedTimestamp ->
-                        fun () ->
-                          {
-                            eventDataStoreArn;
-                            name;
-                            status;
-                            advancedEventSelectors;
-                            multiRegionEnabled;
-                            organizationEnabled;
-                            retentionPeriod;
-                            terminationProtectionEnabled;
-                            createdTimestamp;
-                            updatedTimestamp
-                          }
+                        fun ?kmsKeyId ->
+                          fun ?billingMode ->
+                            fun () ->
+                              {
+                                eventDataStoreArn;
+                                name;
+                                status;
+                                advancedEventSelectors;
+                                multiRegionEnabled;
+                                organizationEnabled;
+                                retentionPeriod;
+                                terminationProtectionEnabled;
+                                createdTimestamp;
+                                updatedTimestamp;
+                                kmsKeyId;
+                                billingMode
+                              }
     let error_of_json name json =
       match name with
       | "CloudTrailAccessNotEnabledException" ->
@@ -4487,6 +9774,9 @@ module RestoreEventDataStoreResponse =
             (InvalidEventDataStoreStatusException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
@@ -4528,6 +9818,9 @@ module RestoreEventDataStoreResponse =
             (InvalidEventDataStoreStatusException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
@@ -4579,6 +9872,10 @@ module RestoreEventDataStoreResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -4626,9 +9923,17 @@ module RestoreEventDataStoreResponse =
         ("CreatedTimestamp",
           (Option.map x.createdTimestamp ~f:Date.to_value));
         ("UpdatedTimestamp",
-          (Option.map x.updatedTimestamp ~f:Date.to_value))]
+          (Option.map x.updatedTimestamp ~f:Date.to_value));
+        ("KmsKeyId",
+          (Option.map x.kmsKeyId ~f:EventDataStoreKmsKeyId.to_value));
+        ("BillingMode", (Option.map x.billingMode ~f:BillingMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let billingMode =
+        (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
+      let kmsKeyId =
+        (Option.map ~f:EventDataStoreKmsKeyId.of_xml)
+          (Xml.child xml_arg0 "KmsKeyId") in
       let updatedTimestamp =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
       let createdTimestamp =
@@ -4656,32 +9961,37 @@ module RestoreEventDataStoreResponse =
       let eventDataStoreArn =
         (Option.map ~f:EventDataStoreArn.of_xml)
           (Xml.child xml_arg0 "EventDataStoreArn") in
-      make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
-        ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
-        ?advancedEventSelectors ?status ?name ?eventDataStoreArn ()
+      make ?billingMode ?kmsKeyId ?updatedTimestamp ?createdTimestamp
+        ?terminationProtectionEnabled ?retentionPeriod ?organizationEnabled
+        ?multiRegionEnabled ?advancedEventSelectors ?status ?name
+        ?eventDataStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
-      let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
+    let of_json json__ =
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
+      let kmsKeyId =
+        field_map json__ "KmsKeyId" EventDataStoreKmsKeyId.of_json in
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
       let terminationProtectionEnabled =
-        field_map json "TerminationProtectionEnabled"
+        field_map json__ "TerminationProtectionEnabled"
           TerminationProtectionEnabled.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
       let organizationEnabled =
-        field_map json "OrganizationEnabled" Boolean.of_json in
+        field_map json__ "OrganizationEnabled" Boolean.of_json in
       let multiRegionEnabled =
-        field_map json "MultiRegionEnabled" Boolean.of_json in
+        field_map json__ "MultiRegionEnabled" Boolean.of_json in
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
-      let status = field_map json "Status" EventDataStoreStatus.of_json in
-      let name = field_map json "Name" EventDataStoreName.of_json in
+      let status = field_map json__ "Status" EventDataStoreStatus.of_json in
+      let name = field_map json__ "Name" EventDataStoreName.of_json in
       let eventDataStoreArn =
-        field_map json "EventDataStoreArn" EventDataStoreArn.of_json in
-      make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
-        ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
-        ?advancedEventSelectors ?status ?name ?eventDataStoreArn ()
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
+      make ?billingMode ?kmsKeyId ?updatedTimestamp ?createdTimestamp
+        ?terminationProtectionEnabled ?retentionPeriod ?organizationEnabled
+        ?multiRegionEnabled ?advancedEventSelectors ?status ?name
+        ?eventDataStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Restores a deleted event data store specified by EventDataStore, which accepts an event data store ARN. You can only restore a deleted event data store within the seven-day wait period after deletion. Restoring an event data store can take several minutes, depending on the size of the event data store."]
@@ -4705,9 +10015,9 @@ module RestoreEventDataStoreRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ~eventDataStore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDataStore =
-        field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
+        field_map_exn json__ "EventDataStore" EventDataStoreArn.of_json in
       make ~eventDataStore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4716,11 +10026,18 @@ module RemoveTagsResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      [ `ChannelARNInvalidException of ChannelARNInvalidException.t 
+      | `ChannelNotFoundException of ChannelNotFoundException.t 
+      | `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `ConflictException of ConflictException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
       | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
       | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
       | `InvalidTagParameterException of InvalidTagParameterException.t 
       | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
@@ -4732,9 +10049,19 @@ module RemoveTagsResponse =
     let make () = ()
     let error_of_json name json =
       match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException
+            (ChannelARNInvalidException.of_json json)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_json json)
       | "CloudTrailARNInvalidException" ->
           `CloudTrailARNInvalidException
             (CloudTrailARNInvalidException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_json json)
@@ -4746,6 +10073,9 @@ module RemoveTagsResponse =
             (InvalidTagParameterException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
@@ -4765,9 +10095,18 @@ module RemoveTagsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException (ChannelARNInvalidException.of_xml xml)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_xml xml)
       | "CloudTrailARNInvalidException" ->
           `CloudTrailARNInvalidException
             (CloudTrailARNInvalidException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_xml xml)
@@ -4779,6 +10118,9 @@ module RemoveTagsResponse =
             (InvalidTagParameterException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
@@ -4797,10 +10139,26 @@ module RemoveTagsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ChannelARNInvalidException e ->
+          `Assoc
+            [("error", (`String "ChannelARNInvalidException"));
+            ("details", (ChannelARNInvalidException.to_json e))]
+      | `ChannelNotFoundException e ->
+          `Assoc
+            [("error", (`String "ChannelNotFoundException"));
+            ("details", (ChannelNotFoundException.to_json e))]
       | `CloudTrailARNInvalidException e ->
           `Assoc
             [("error", (`String "CloudTrailARNInvalidException"));
             ("details", (CloudTrailARNInvalidException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
       | `EventDataStoreNotFoundException e ->
           `Assoc
             [("error", (`String "EventDataStoreNotFoundException"));
@@ -4817,6 +10175,10 @@ module RemoveTagsResponse =
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -4857,7 +10219,7 @@ module RemoveTagsRequest =
       {
       resourceId: String_.t
         [@ocaml.doc
-          "Specifies the ARN of the trail from which tags should be removed. The format of a trail ARN is: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"];
+          "Specifies the ARN of the trail, event data store, dashboard, or channel from which tags should be removed. Example trail ARN format: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail Example event data store ARN format: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE Example dashboard ARN format: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash Example channel ARN format: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"];
       tagsList: TagsList.t
         [@ocaml.doc "Specifies a list of tags to be removed."]}
     let context_ = "RemoveTagsRequest"
@@ -4876,12 +10238,411 @@ module RemoveTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagsList ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagsList = field_map_exn json "TagsList" TagsList.of_json in
-      let resourceId = field_map_exn json "ResourceId" String_.of_json in
+    let of_json json__ =
+      let tagsList = field_map_exn json__ "TagsList" TagsList.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" String_.of_json in
       make ~tagsList ~resourceId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies the tags to remove from a trail."]
+  end[@@ocaml.doc
+       "Specifies the tags to remove from a trail, event data store, dashboard, or channel."]
+module RegisterOrganizationDelegatedAdminResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccountNotFoundException of AccountNotFoundException.t 
+      | `AccountRegisteredException of AccountRegisteredException.t 
+      | `CannotDelegateManagementAccountException of
+          CannotDelegateManagementAccountException.t 
+      | `CloudTrailAccessNotEnabledException of
+          CloudTrailAccessNotEnabledException.t 
+      | `ConflictException of ConflictException.t 
+      | `DelegatedAdminAccountLimitExceededException of
+          DelegatedAdminAccountLimitExceededException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
+          InsufficientDependencyServiceAccessPermissionException.t 
+      | `InsufficientIAMAccessPermissionException of
+          InsufficientIAMAccessPermissionException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotOrganizationManagementAccountException of
+          NotOrganizationManagementAccountException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `OrganizationNotInAllFeaturesModeException of
+          OrganizationNotInAllFeaturesModeException.t 
+      | `OrganizationsNotInUseException of OrganizationsNotInUseException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccountNotFoundException" ->
+          `AccountNotFoundException (AccountNotFoundException.of_json json)
+      | "AccountRegisteredException" ->
+          `AccountRegisteredException
+            (AccountRegisteredException.of_json json)
+      | "CannotDelegateManagementAccountException" ->
+          `CannotDelegateManagementAccountException
+            (CannotDelegateManagementAccountException.of_json json)
+      | "CloudTrailAccessNotEnabledException" ->
+          `CloudTrailAccessNotEnabledException
+            (CloudTrailAccessNotEnabledException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "DelegatedAdminAccountLimitExceededException" ->
+          `DelegatedAdminAccountLimitExceededException
+            (DelegatedAdminAccountLimitExceededException.of_json json)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_json
+               json)
+      | "InsufficientIAMAccessPermissionException" ->
+          `InsufficientIAMAccessPermissionException
+            (InsufficientIAMAccessPermissionException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotOrganizationManagementAccountException" ->
+          `NotOrganizationManagementAccountException
+            (NotOrganizationManagementAccountException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_json json)
+      | "OrganizationsNotInUseException" ->
+          `OrganizationsNotInUseException
+            (OrganizationsNotInUseException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountNotFoundException" ->
+          `AccountNotFoundException (AccountNotFoundException.of_xml xml)
+      | "AccountRegisteredException" ->
+          `AccountRegisteredException (AccountRegisteredException.of_xml xml)
+      | "CannotDelegateManagementAccountException" ->
+          `CannotDelegateManagementAccountException
+            (CannotDelegateManagementAccountException.of_xml xml)
+      | "CloudTrailAccessNotEnabledException" ->
+          `CloudTrailAccessNotEnabledException
+            (CloudTrailAccessNotEnabledException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "DelegatedAdminAccountLimitExceededException" ->
+          `DelegatedAdminAccountLimitExceededException
+            (DelegatedAdminAccountLimitExceededException.of_xml xml)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_xml
+               xml)
+      | "InsufficientIAMAccessPermissionException" ->
+          `InsufficientIAMAccessPermissionException
+            (InsufficientIAMAccessPermissionException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotOrganizationManagementAccountException" ->
+          `NotOrganizationManagementAccountException
+            (NotOrganizationManagementAccountException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_xml xml)
+      | "OrganizationsNotInUseException" ->
+          `OrganizationsNotInUseException
+            (OrganizationsNotInUseException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountNotFoundException e ->
+          `Assoc
+            [("error", (`String "AccountNotFoundException"));
+            ("details", (AccountNotFoundException.to_json e))]
+      | `AccountRegisteredException e ->
+          `Assoc
+            [("error", (`String "AccountRegisteredException"));
+            ("details", (AccountRegisteredException.to_json e))]
+      | `CannotDelegateManagementAccountException e ->
+          `Assoc
+            [("error", (`String "CannotDelegateManagementAccountException"));
+            ("details", (CannotDelegateManagementAccountException.to_json e))]
+      | `CloudTrailAccessNotEnabledException e ->
+          `Assoc
+            [("error", (`String "CloudTrailAccessNotEnabledException"));
+            ("details", (CloudTrailAccessNotEnabledException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `DelegatedAdminAccountLimitExceededException e ->
+          `Assoc
+            [("error",
+               (`String "DelegatedAdminAccountLimitExceededException"));
+            ("details",
+              (DelegatedAdminAccountLimitExceededException.to_json e))]
+      | `InsufficientDependencyServiceAccessPermissionException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "InsufficientDependencyServiceAccessPermissionException"));
+            ("details",
+              (InsufficientDependencyServiceAccessPermissionException.to_json
+                 e))]
+      | `InsufficientIAMAccessPermissionException e ->
+          `Assoc
+            [("error", (`String "InsufficientIAMAccessPermissionException"));
+            ("details", (InsufficientIAMAccessPermissionException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotOrganizationManagementAccountException e ->
+          `Assoc
+            [("error", (`String "NotOrganizationManagementAccountException"));
+            ("details",
+              (NotOrganizationManagementAccountException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `OrganizationNotInAllFeaturesModeException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotInAllFeaturesModeException"));
+            ("details",
+              (OrganizationNotInAllFeaturesModeException.to_json e))]
+      | `OrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "OrganizationsNotInUseException"));
+            ("details", (OrganizationsNotInUseException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the following response if successful. Otherwise, returns an error."]
+module RegisterOrganizationDelegatedAdminRequest =
+  struct
+    type nonrec t =
+      {
+      memberAccountId: AccountId.t
+        [@ocaml.doc
+          "An organization member account ID that you want to designate as a delegated administrator."]}
+    let context_ = "RegisterOrganizationDelegatedAdminRequest"
+    let make ~memberAccountId = fun () -> { memberAccountId }
+    let to_value x =
+      structure_to_value
+        [("MemberAccountId", (Some (AccountId.to_value x.memberAccountId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let memberAccountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MemberAccountId") in
+      make ~memberAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let memberAccountId =
+        field_map_exn json__ "MemberAccountId" AccountId.of_json in
+      make ~memberAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies an organization member account ID as a CloudTrail delegated administrator."]
+module PutResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the CloudTrail event data store, dashboard, or channel attached to the resource-based policy. Example event data store ARN format: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE Example dashboard ARN format: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash Example channel ARN format: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"];
+      resourcePolicy: ResourcePolicy.t option
+        [@ocaml.doc
+          "The JSON-formatted string of the Amazon Web Services resource-based policy attached to the CloudTrail event data store, dashboard, or channel."];
+      delegatedAdminResourcePolicy: ResourcePolicy.t option
+        [@ocaml.doc
+          "The default resource-based policy that is automatically generated for the delegated administrator of an Organizations organization. This policy will be evaluated in tandem with any policy you submit for the resource. For more information about this policy, see Default resource policy for delegated administrators."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ResourceARNNotValidException of ResourceARNNotValidException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourcePolicyNotValidException of ResourcePolicyNotValidException.t 
+      | `ResourceTypeNotSupportedException of
+          ResourceTypeNotSupportedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn =
+      fun ?resourcePolicy ->
+        fun ?delegatedAdminResourcePolicy ->
+          fun () ->
+            { resourceArn; resourcePolicy; delegatedAdminResourcePolicy }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "ResourceARNNotValidException" ->
+          `ResourceARNNotValidException
+            (ResourceARNNotValidException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourcePolicyNotValidException" ->
+          `ResourcePolicyNotValidException
+            (ResourcePolicyNotValidException.of_json json)
+      | "ResourceTypeNotSupportedException" ->
+          `ResourceTypeNotSupportedException
+            (ResourceTypeNotSupportedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "ResourceARNNotValidException" ->
+          `ResourceARNNotValidException
+            (ResourceARNNotValidException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourcePolicyNotValidException" ->
+          `ResourcePolicyNotValidException
+            (ResourcePolicyNotValidException.of_xml xml)
+      | "ResourceTypeNotSupportedException" ->
+          `ResourceTypeNotSupportedException
+            (ResourceTypeNotSupportedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `ResourceARNNotValidException e ->
+          `Assoc
+            [("error", (`String "ResourceARNNotValidException"));
+            ("details", (ResourceARNNotValidException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourcePolicyNotValidException e ->
+          `Assoc
+            [("error", (`String "ResourcePolicyNotValidException"));
+            ("details", (ResourcePolicyNotValidException.to_json e))]
+      | `ResourceTypeNotSupportedException e ->
+          `Assoc
+            [("error", (`String "ResourceTypeNotSupportedException"));
+            ("details", (ResourceTypeNotSupportedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("ResourcePolicy",
+          (Option.map x.resourcePolicy ~f:ResourcePolicy.to_value));
+        ("DelegatedAdminResourcePolicy",
+          (Option.map x.delegatedAdminResourcePolicy
+             ~f:ResourcePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delegatedAdminResourcePolicy =
+        (Option.map ~f:ResourcePolicy.of_xml)
+          (Xml.child xml_arg0 "DelegatedAdminResourcePolicy") in
+      let resourcePolicy =
+        (Option.map ~f:ResourcePolicy.of_xml)
+          (Xml.child xml_arg0 "ResourcePolicy") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?delegatedAdminResourcePolicy ?resourcePolicy ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delegatedAdminResourcePolicy =
+        field_map json__ "DelegatedAdminResourcePolicy"
+          ResourcePolicy.of_json in
+      let resourcePolicy =
+        field_map json__ "ResourcePolicy" ResourcePolicy.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      make ?delegatedAdminResourcePolicy ?resourcePolicy ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attaches a resource-based permission policy to a CloudTrail event data store, dashboard, or channel. For more information about resource-based policies, see CloudTrail resource-based policy examples in the CloudTrail User Guide."]
+module PutResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the CloudTrail event data store, dashboard, or channel attached to the resource-based policy. Example event data store ARN format: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE Example dashboard ARN format: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash Example channel ARN format: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"];
+      resourcePolicy: ResourcePolicy.t
+        [@ocaml.doc
+          "A JSON-formatted string for an Amazon Web Services resource-based policy. For example resource-based policies, see CloudTrail resource-based policy examples in the CloudTrail User Guide."]}
+    let context_ = "PutResourcePolicyRequest"
+    let make ~resourceArn =
+      fun ~resourcePolicy -> fun () -> { resourceArn; resourcePolicy }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)));
+        ("ResourcePolicy", (Some (ResourcePolicy.to_value x.resourcePolicy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourcePolicy =
+        ResourcePolicy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourcePolicy") in
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourcePolicy ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourcePolicy =
+        field_map_exn json__ "ResourcePolicy" ResourcePolicy.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~resourcePolicy ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attaches a resource-based permission policy to a CloudTrail event data store, dashboard, or channel. For more information about resource-based policies, see CloudTrail resource-based policy examples in the CloudTrail User Guide."]
 module PutInsightSelectorsResponse =
   struct
     type nonrec t =
@@ -4891,29 +10652,53 @@ module PutInsightSelectorsResponse =
           "The Amazon Resource Name (ARN) of a trail for which you want to change or add Insights selectors."];
       insightSelectors: InsightSelectors.t option
         [@ocaml.doc
-          "A JSON string that contains the Insights event types that you want to log on a trail. The valid Insights types in this release are ApiErrorRateInsight and ApiCallRateInsight."]}
+          "Contains the Insights types you want to log on a specific category of events in a trail or event data store. ApiCallRateInsight and ApiErrorRateInsight are valid Insight types.The EventCategory field can specify Management or Data events or both. For event data store, you can only log Insights for management events only."];
+      eventDataStoreArn: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the source event data store for which you want to change or add Insights selectors."];
+      insightsDestination: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The ARN of the destination event data store that logs Insights events."]}
     type nonrec error =
-      [
-        `InsufficientEncryptionPolicyException of
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `InsufficientEncryptionPolicyException of
           InsufficientEncryptionPolicyException.t 
       | `InsufficientS3BucketPolicyException of
           InsufficientS3BucketPolicyException.t 
       | `InvalidHomeRegionException of InvalidHomeRegionException.t 
       | `InvalidInsightSelectorsException of
           InvalidInsightSelectorsException.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidTrailNameException of InvalidTrailNameException.t 
       | `KmsException of KmsException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `S3BucketDoesNotExistException of S3BucketDoesNotExistException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?trailARN =
-      fun ?insightSelectors -> fun () -> { trailARN; insightSelectors }
+      fun ?insightSelectors ->
+        fun ?eventDataStoreArn ->
+          fun ?insightsDestination ->
+            fun () ->
+              {
+                trailARN;
+                insightSelectors;
+                eventDataStoreArn;
+                insightsDestination
+              }
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
       | "InsufficientEncryptionPolicyException" ->
           `InsufficientEncryptionPolicyException
             (InsufficientEncryptionPolicyException.of_json json)
@@ -4926,9 +10711,17 @@ module PutInsightSelectorsResponse =
       | "InvalidInsightSelectorsException" ->
           `InvalidInsightSelectorsException
             (InvalidInsightSelectorsException.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
       | "KmsException" -> `KmsException (KmsException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
@@ -4938,6 +10731,8 @@ module PutInsightSelectorsResponse =
       | "S3BucketDoesNotExistException" ->
           `S3BucketDoesNotExistException
             (S3BucketDoesNotExistException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_json json)
       | "UnsupportedOperationException" ->
@@ -4948,6 +10743,9 @@ module PutInsightSelectorsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
       | "InsufficientEncryptionPolicyException" ->
           `InsufficientEncryptionPolicyException
             (InsufficientEncryptionPolicyException.of_xml xml)
@@ -4959,9 +10757,17 @@ module PutInsightSelectorsResponse =
       | "InvalidInsightSelectorsException" ->
           `InvalidInsightSelectorsException
             (InvalidInsightSelectorsException.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
       | "KmsException" -> `KmsException (KmsException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
@@ -4971,6 +10777,8 @@ module PutInsightSelectorsResponse =
       | "S3BucketDoesNotExistException" ->
           `S3BucketDoesNotExistException
             (S3BucketDoesNotExistException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_xml xml)
       | "UnsupportedOperationException" ->
@@ -4980,6 +10788,10 @@ module PutInsightSelectorsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
       | `InsufficientEncryptionPolicyException e ->
           `Assoc
             [("error", (`String "InsufficientEncryptionPolicyException"));
@@ -4996,6 +10808,14 @@ module PutInsightSelectorsResponse =
           `Assoc
             [("error", (`String "InvalidInsightSelectorsException"));
             ("details", (InvalidInsightSelectorsException.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
       | `InvalidTrailNameException e ->
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
@@ -5004,6 +10824,10 @@ module PutInsightSelectorsResponse =
           `Assoc
             [("error", (`String "KmsException"));
             ("details", (KmsException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -5016,6 +10840,10 @@ module PutInsightSelectorsResponse =
           `Assoc
             [("error", (`String "S3BucketDoesNotExistException"));
             ("details", (S3BucketDoesNotExistException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TrailNotFoundException e ->
           `Assoc
             [("error", (`String "TrailNotFoundException"));
@@ -5033,59 +10861,106 @@ module PutInsightSelectorsResponse =
       structure_to_value
         [("TrailARN", (Option.map x.trailARN ~f:String_.to_value));
         ("InsightSelectors",
-          (Option.map x.insightSelectors ~f:InsightSelectors.to_value))]
+          (Option.map x.insightSelectors ~f:InsightSelectors.to_value));
+        ("EventDataStoreArn",
+          (Option.map x.eventDataStoreArn ~f:EventDataStoreArn.to_value));
+        ("InsightsDestination",
+          (Option.map x.insightsDestination ~f:EventDataStoreArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let insightsDestination =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "InsightsDestination") in
+      let eventDataStoreArn =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreArn") in
       let insightSelectors =
         (Option.map ~f:InsightSelectors.of_xml)
           (Xml.child xml_arg0 "InsightSelectors") in
       let trailARN =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
-      make ?insightSelectors ?trailARN ()
+      make ?insightsDestination ?eventDataStoreArn ?insightSelectors
+        ?trailARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let insightsDestination =
+        field_map json__ "InsightsDestination" EventDataStoreArn.of_json in
+      let eventDataStoreArn =
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
       let insightSelectors =
-        field_map json "InsightSelectors" InsightSelectors.of_json in
-      let trailARN = field_map json "TrailARN" String_.of_json in
-      make ?insightSelectors ?trailARN ()
+        field_map json__ "InsightSelectors" InsightSelectors.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
+      make ?insightsDestination ?eventDataStoreArn ?insightSelectors
+        ?trailARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lets you enable Insights event logging by specifying the Insights selectors that you want to enable on an existing trail. You also use PutInsightSelectors to turn off Insights event logging, by passing an empty list of insight types. The valid Insights event types in this release are ApiErrorRateInsight and ApiCallRateInsight."]
+       "Lets you enable Insights event logging on specific event categories by specifying the Insights selectors that you want to enable on an existing trail or event data store. You also use PutInsightSelectors to turn off Insights event logging, by passing an empty list of Insights types. The valid Insights event types are ApiErrorRateInsight and ApiCallRateInsight, and valid EventCategories are Management and Data. Insights on data events are not supported on event data stores. For event data stores, you can only enable Insights on management events. To enable Insights on an event data store, you must specify the ARNs (or ID suffix of the ARNs) for the source event data store (EventDataStore) and the destination event data store (InsightsDestination). The source event data store logs management events and enables Insights. The destination event data store logs Insights events based upon the management event activity of the source event data store. The source and destination event data stores must belong to the same Amazon Web Services account. To log Insights events for a trail, you must specify the name (TrailName) of the CloudTrail trail for which you want to change or add Insights selectors. For Management events Insights: To log CloudTrail Insights on the API call rate, the trail or event data store must log write management events. To log CloudTrail Insights on the API error rate, the trail or event data store must log read or write management events. For Data events Insights: To log CloudTrail Insights on the API call rate or API error rate, the trail must log read or write data events. Data events Insights are not supported on event data store. To log CloudTrail Insights events on API call volume, the trail or event data store must log write management events. To log CloudTrail Insights events on API error rate, the trail or event data store must log read or write management events. You can call GetEventSelectors on a trail to check whether the trail logs management events. You can call GetEventDataStore on an event data store to check whether the event data store logs management events. For more information, see Working with CloudTrail Insights in the CloudTrail User Guide."]
 module PutInsightSelectorsRequest =
   struct
     type nonrec t =
       {
-      trailName: String_.t
+      trailName: String_.t option
         [@ocaml.doc
-          "The name of the CloudTrail trail for which you want to change or add Insights selectors."];
+          "The name of the CloudTrail trail for which you want to change or add Insights selectors. You cannot use this parameter with the EventDataStore and InsightsDestination parameters."];
       insightSelectors: InsightSelectors.t
         [@ocaml.doc
-          "A JSON string that contains the insight types you want to log on a trail. ApiCallRateInsight and ApiErrorRateInsight are valid insight types."]}
+          "Contains the Insights types you want to log on a specific category of events on a trail or event data store. ApiCallRateInsight and ApiErrorRateInsight are valid Insight types.The EventCategory field can specify Management or Data events or both. For event data store, you can log Insights for management events only. The ApiCallRateInsight Insights type analyzes write-only management API calls or read and write data API calls that are aggregated per minute against a baseline API call volume. The ApiErrorRateInsight Insights type analyzes management and data API calls that result in error codes. The error is shown if the API call is unsuccessful."];
+      eventDataStore: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The ARN (or ID suffix of the ARN) of the source event data store for which you want to change or add Insights selectors. To enable Insights on an event data store, you must provide both the EventDataStore and InsightsDestination parameters. You cannot use this parameter with the TrailName parameter."];
+      insightsDestination: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The ARN (or ID suffix of the ARN) of the destination event data store that logs Insights events. To enable Insights on an event data store, you must provide both the EventDataStore and InsightsDestination parameters. You cannot use this parameter with the TrailName parameter."]}
     let context_ = "PutInsightSelectorsRequest"
-    let make ~trailName =
-      fun ~insightSelectors -> fun () -> { trailName; insightSelectors }
+    let make ?trailName =
+      fun ?eventDataStore ->
+        fun ?insightsDestination ->
+          fun ~insightSelectors ->
+            fun () ->
+              {
+                trailName;
+                eventDataStore;
+                insightsDestination;
+                insightSelectors
+              }
     let to_value x =
       structure_to_value
-        [("TrailName", (Some (String_.to_value x.trailName)));
+        [("TrailName", (Option.map x.trailName ~f:String_.to_value));
         ("InsightSelectors",
-          (Some (InsightSelectors.to_value x.insightSelectors)))]
+          (Some (InsightSelectors.to_value x.insightSelectors)));
+        ("EventDataStore",
+          (Option.map x.eventDataStore ~f:EventDataStoreArn.to_value));
+        ("InsightsDestination",
+          (Option.map x.insightsDestination ~f:EventDataStoreArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let insightsDestination =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "InsightsDestination") in
+      let eventDataStore =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStore") in
       let insightSelectors =
         InsightSelectors.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InsightSelectors") in
       let trailName =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrailName") in
-      make ~insightSelectors ~trailName ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailName") in
+      make ?insightsDestination ?eventDataStore ~insightSelectors ?trailName
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let insightsDestination =
+        field_map json__ "InsightsDestination" EventDataStoreArn.of_json in
+      let eventDataStore =
+        field_map json__ "EventDataStore" EventDataStoreArn.of_json in
       let insightSelectors =
-        field_map_exn json "InsightSelectors" InsightSelectors.of_json in
-      let trailName = field_map_exn json "TrailName" String_.of_json in
-      make ~insightSelectors ~trailName ()
+        field_map_exn json__ "InsightSelectors" InsightSelectors.of_json in
+      let trailName = field_map json__ "TrailName" String_.of_json in
+      make ?insightsDestination ?eventDataStore ~insightSelectors ?trailName
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lets you enable Insights event logging by specifying the Insights selectors that you want to enable on an existing trail. You also use PutInsightSelectors to turn off Insights event logging, by passing an empty list of insight types. The valid Insights event types in this release are ApiErrorRateInsight and ApiCallRateInsight."]
+       "Lets you enable Insights event logging on specific event categories by specifying the Insights selectors that you want to enable on an existing trail or event data store. You also use PutInsightSelectors to turn off Insights event logging, by passing an empty list of Insights types. The valid Insights event types are ApiErrorRateInsight and ApiCallRateInsight, and valid EventCategories are Management and Data. Insights on data events are not supported on event data stores. For event data stores, you can only enable Insights on management events. To enable Insights on an event data store, you must specify the ARNs (or ID suffix of the ARNs) for the source event data store (EventDataStore) and the destination event data store (InsightsDestination). The source event data store logs management events and enables Insights. The destination event data store logs Insights events based upon the management event activity of the source event data store. The source and destination event data stores must belong to the same Amazon Web Services account. To log Insights events for a trail, you must specify the name (TrailName) of the CloudTrail trail for which you want to change or add Insights selectors. For Management events Insights: To log CloudTrail Insights on the API call rate, the trail or event data store must log write management events. To log CloudTrail Insights on the API error rate, the trail or event data store must log read or write management events. For Data events Insights: To log CloudTrail Insights on the API call rate or API error rate, the trail must log read or write data events. Data events Insights are not supported on event data store. To log CloudTrail Insights events on API call volume, the trail or event data store must log write management events. To log CloudTrail Insights events on API error rate, the trail or event data store must log read or write management events. You can call GetEventSelectors on a trail to check whether the trail logs management events. You can call GetEventDataStore on an event data store to check whether the event data store logs management events. For more information, see Working with CloudTrail Insights in the CloudTrail User Guide."]
 module PutEventSelectorsResponse =
   struct
     type nonrec t =
@@ -5100,15 +10975,19 @@ module PutEventSelectorsResponse =
         [@ocaml.doc
           "Specifies the advanced event selectors configured for your trail."]}
     type nonrec error =
-      [
-        `InsufficientDependencyServiceAccessPermissionException of
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `ConflictException of ConflictException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
           InsufficientDependencyServiceAccessPermissionException.t 
       | `InvalidEventSelectorsException of InvalidEventSelectorsException.t 
       | `InvalidHomeRegionException of InvalidHomeRegionException.t 
       | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -5118,6 +10997,11 @@ module PutEventSelectorsResponse =
           fun () -> { trailARN; eventSelectors; advancedEventSelectors }
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_json
@@ -5130,12 +11014,17 @@ module PutEventSelectorsResponse =
             (InvalidHomeRegionException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_json json)
       | "UnsupportedOperationException" ->
@@ -5146,6 +11035,11 @@ module PutEventSelectorsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_xml
@@ -5157,12 +11051,17 @@ module PutEventSelectorsResponse =
           `InvalidHomeRegionException (InvalidHomeRegionException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_xml xml)
       | "UnsupportedOperationException" ->
@@ -5172,6 +11071,14 @@ module PutEventSelectorsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InsufficientDependencyServiceAccessPermissionException e ->
           `Assoc
             [("error",
@@ -5192,6 +11099,10 @@ module PutEventSelectorsResponse =
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -5200,6 +11111,10 @@ module PutEventSelectorsResponse =
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
             ("details", (OperationNotPermittedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TrailNotFoundException e ->
           `Assoc
             [("error", (`String "TrailNotFoundException"));
@@ -5233,17 +11148,17 @@ module PutEventSelectorsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
       make ?advancedEventSelectors ?eventSelectors ?trailARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
       let eventSelectors =
-        field_map json "EventSelectors" EventSelectors.of_json in
-      let trailARN = field_map json "TrailARN" String_.of_json in
+        field_map json__ "EventSelectors" EventSelectors.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
       make ?advancedEventSelectors ?eventSelectors ?trailARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures an event selector or advanced event selectors for your trail. Use event selectors or advanced event selectors to specify management and data event settings for your trail. By default, trails created without specific event selectors are configured to log all read and write management events, and no data events. When an event occurs in your account, CloudTrail evaluates the event selectors or advanced event selectors in all trails. For each trail, if the event matches any event selector, the trail processes and logs the event. If the event doesn't match any event selector, the trail doesn't log the event. Example You create an event selector for a trail and specify that you want write-only events. The EC2 GetConsoleOutput and RunInstances API operations occur in your account. CloudTrail evaluates whether the events match your event selectors. The RunInstances is a write-only event and it matches your event selector. The trail logs the event. The GetConsoleOutput is a read-only event that doesn't match your event selector. The trail doesn't log the event. The PutEventSelectors operation must be called from the region in which the trail was created; otherwise, an InvalidHomeRegionException exception is thrown. You can configure up to five event selectors for each trail. For more information, see Logging data and management events for trails and Quotas in CloudTrail in the CloudTrail User Guide. You can add advanced event selectors, and conditions for your advanced event selectors, up to a maximum of 500 values for all conditions and selectors on a trail. You can use either AdvancedEventSelectors or EventSelectors, but not both. If you apply AdvancedEventSelectors to a trail, any existing EventSelectors are overwritten. For more information about advanced event selectors, see Logging data events for trails in the CloudTrail User Guide."]
+       "Configures event selectors (also referred to as basic event selectors) or advanced event selectors for your trail. You can use either AdvancedEventSelectors or EventSelectors, but not both. If you apply AdvancedEventSelectors to a trail, any existing EventSelectors are overwritten. You can use AdvancedEventSelectors to log management events, data events for all resource types, and network activity events. You can use EventSelectors to log management events and data events for the following resource types: AWS::DynamoDB::Table AWS::Lambda::Function AWS::S3::Object You can't use EventSelectors to log network activity events. If you want your trail to log Insights events, be sure the event selector or advanced event selector enables logging of the Insights event types you want configured for your trail. For more information about logging Insights events, see Working with CloudTrail Insights in the CloudTrail User Guide. By default, trails created without specific event selectors are configured to log all read and write management events, and no data events or network activity events. When an event occurs in your account, CloudTrail evaluates the event selectors or advanced event selectors in all trails. For each trail, if the event matches any event selector, the trail processes and logs the event. If the event doesn't match any event selector, the trail doesn't log the event. Example You create an event selector for a trail and specify that you want to log write-only events. The EC2 GetConsoleOutput and RunInstances API operations occur in your account. CloudTrail evaluates whether the events match your event selectors. The RunInstances is a write-only event and it matches your event selector. The trail logs the event. The GetConsoleOutput is a read-only event that doesn't match your event selector. The trail doesn't log the event. The PutEventSelectors operation must be called from the Region in which the trail was created; otherwise, an InvalidHomeRegionException exception is thrown. You can configure up to five event selectors for each trail. You can add advanced event selectors, and conditions for your advanced event selectors, up to a maximum of 500 values for all conditions and selectors on a trail. For more information, see Logging management events, Logging data events, Logging network activity events, and Quotas in CloudTrail in the CloudTrail User Guide."]
 module PutEventSelectorsRequest =
   struct
     type nonrec t =
@@ -5253,10 +11168,10 @@ module PutEventSelectorsRequest =
           "Specifies the name of the trail or trail ARN. If you specify a trail name, the string must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), periods (.), underscores (_), or dashes (-) Start with a letter or number, and end with a letter or number Be between 3 and 128 characters Have no adjacent periods, underscores or dashes. Names like my-_namespace and my--namespace are not valid. Not be in IP address format (for example, 192.168.5.4) If you specify a trail ARN, it must be in the following format. arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"];
       eventSelectors: EventSelectors.t option
         [@ocaml.doc
-          "Specifies the settings for your event selectors. You can configure up to five event selectors for a trail. You can use either EventSelectors or AdvancedEventSelectors in a PutEventSelectors request, but not both. If you apply EventSelectors to a trail, any existing AdvancedEventSelectors are overwritten."];
+          "Specifies the settings for your event selectors. You can use event selectors to log management events and data events for the following resource types: AWS::DynamoDB::Table AWS::Lambda::Function AWS::S3::Object You can't use event selectors to log network activity events. You can configure up to five event selectors for a trail. You can use either EventSelectors or AdvancedEventSelectors in a PutEventSelectors request, but not both. If you apply EventSelectors to a trail, any existing AdvancedEventSelectors are overwritten."];
       advancedEventSelectors: AdvancedEventSelectors.t option
         [@ocaml.doc
-          "Specifies the settings for advanced event selectors. You can add advanced event selectors, and conditions for your advanced event selectors, up to a maximum of 500 values for all conditions and selectors on a trail. You can use either AdvancedEventSelectors or EventSelectors, but not both. If you apply AdvancedEventSelectors to a trail, any existing EventSelectors are overwritten. For more information about advanced event selectors, see Logging data events for trails in the CloudTrail User Guide."]}
+          "Specifies the settings for advanced event selectors. You can use advanced event selectors to log management events, data events for all resource types, and network activity events. You can add advanced event selectors, and conditions for your advanced event selectors, up to a maximum of 500 values for all conditions and selectors on a trail. You can use either AdvancedEventSelectors or EventSelectors, but not both. If you apply AdvancedEventSelectors to a trail, any existing EventSelectors are overwritten. For more information about advanced event selectors, see Logging data events and Logging network activity events in the CloudTrail User Guide."]}
     let context_ = "PutEventSelectorsRequest"
     let make ?eventSelectors =
       fun ?advancedEventSelectors ->
@@ -5282,17 +11197,400 @@ module PutEventSelectorsRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrailName") in
       make ?advancedEventSelectors ?eventSelectors ~trailName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
       let eventSelectors =
-        field_map json "EventSelectors" EventSelectors.of_json in
-      let trailName = field_map_exn json "TrailName" String_.of_json in
+        field_map json__ "EventSelectors" EventSelectors.of_json in
+      let trailName = field_map_exn json__ "TrailName" String_.of_json in
       make ?advancedEventSelectors ?eventSelectors ~trailName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures an event selector or advanced event selectors for your trail. Use event selectors or advanced event selectors to specify management and data event settings for your trail. By default, trails created without specific event selectors are configured to log all read and write management events, and no data events. When an event occurs in your account, CloudTrail evaluates the event selectors or advanced event selectors in all trails. For each trail, if the event matches any event selector, the trail processes and logs the event. If the event doesn't match any event selector, the trail doesn't log the event. Example You create an event selector for a trail and specify that you want write-only events. The EC2 GetConsoleOutput and RunInstances API operations occur in your account. CloudTrail evaluates whether the events match your event selectors. The RunInstances is a write-only event and it matches your event selector. The trail logs the event. The GetConsoleOutput is a read-only event that doesn't match your event selector. The trail doesn't log the event. The PutEventSelectors operation must be called from the region in which the trail was created; otherwise, an InvalidHomeRegionException exception is thrown. You can configure up to five event selectors for each trail. For more information, see Logging data and management events for trails and Quotas in CloudTrail in the CloudTrail User Guide. You can add advanced event selectors, and conditions for your advanced event selectors, up to a maximum of 500 values for all conditions and selectors on a trail. You can use either AdvancedEventSelectors or EventSelectors, but not both. If you apply AdvancedEventSelectors to a trail, any existing EventSelectors are overwritten. For more information about advanced event selectors, see Logging data events for trails in the CloudTrail User Guide."]
+       "Configures event selectors (also referred to as basic event selectors) or advanced event selectors for your trail. You can use either AdvancedEventSelectors or EventSelectors, but not both. If you apply AdvancedEventSelectors to a trail, any existing EventSelectors are overwritten. You can use AdvancedEventSelectors to log management events, data events for all resource types, and network activity events. You can use EventSelectors to log management events and data events for the following resource types: AWS::DynamoDB::Table AWS::Lambda::Function AWS::S3::Object You can't use EventSelectors to log network activity events. If you want your trail to log Insights events, be sure the event selector or advanced event selector enables logging of the Insights event types you want configured for your trail. For more information about logging Insights events, see Working with CloudTrail Insights in the CloudTrail User Guide. By default, trails created without specific event selectors are configured to log all read and write management events, and no data events or network activity events. When an event occurs in your account, CloudTrail evaluates the event selectors or advanced event selectors in all trails. For each trail, if the event matches any event selector, the trail processes and logs the event. If the event doesn't match any event selector, the trail doesn't log the event. Example You create an event selector for a trail and specify that you want to log write-only events. The EC2 GetConsoleOutput and RunInstances API operations occur in your account. CloudTrail evaluates whether the events match your event selectors. The RunInstances is a write-only event and it matches your event selector. The trail logs the event. The GetConsoleOutput is a read-only event that doesn't match your event selector. The trail doesn't log the event. The PutEventSelectors operation must be called from the Region in which the trail was created; otherwise, an InvalidHomeRegionException exception is thrown. You can configure up to five event selectors for each trail. You can add advanced event selectors, and conditions for your advanced event selectors, up to a maximum of 500 values for all conditions and selectors on a trail. For more information, see Logging management events, Logging data events, Logging network activity events, and Quotas in CloudTrail in the CloudTrail User Guide."]
+module PutEventConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      trailARN: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the trail that has aggregation enabled."];
+      eventDataStoreArn: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) or ID suffix of the ARN of the event data store for which the event configuration settings were updated."];
+      maxEventSize: MaxEventSize.t option
+        [@ocaml.doc
+          "The maximum allowed size for events stored in the specified event data store."];
+      contextKeySelectors: ContextKeySelectors.t option
+        [@ocaml.doc
+          "The list of context key selectors that are configured for the event data store."];
+      aggregationConfigurations: AggregationConfigurations.t option
+        [@ocaml.doc
+          "A list of aggregation configurations that are configured for the trail."]}
+    type nonrec error =
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `ConflictException of ConflictException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
+          InsufficientDependencyServiceAccessPermissionException.t 
+      | `InsufficientIAMAccessPermissionException of
+          InsufficientIAMAccessPermissionException.t 
+      | `InvalidEventDataStoreCategoryException of
+          InvalidEventDataStoreCategoryException.t 
+      | `InvalidEventDataStoreStatusException of
+          InvalidEventDataStoreStatusException.t 
+      | `InvalidHomeRegionException of InvalidHomeRegionException.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
+      | `NotOrganizationMasterAccountException of
+          NotOrganizationMasterAccountException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `TrailNotFoundException of TrailNotFoundException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?trailARN =
+      fun ?eventDataStoreArn ->
+        fun ?maxEventSize ->
+          fun ?contextKeySelectors ->
+            fun ?aggregationConfigurations ->
+              fun () ->
+                {
+                  trailARN;
+                  eventDataStoreArn;
+                  maxEventSize;
+                  contextKeySelectors;
+                  aggregationConfigurations
+                }
+    let error_of_json name json =
+      match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_json
+               json)
+      | "InsufficientIAMAccessPermissionException" ->
+          `InsufficientIAMAccessPermissionException
+            (InsufficientIAMAccessPermissionException.of_json json)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_json json)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_json json)
+      | "InvalidHomeRegionException" ->
+          `InvalidHomeRegionException
+            (InvalidHomeRegionException.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidTrailNameException" ->
+          `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "TrailNotFoundException" ->
+          `TrailNotFoundException (TrailNotFoundException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_xml
+               xml)
+      | "InsufficientIAMAccessPermissionException" ->
+          `InsufficientIAMAccessPermissionException
+            (InsufficientIAMAccessPermissionException.of_xml xml)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_xml xml)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_xml xml)
+      | "InvalidHomeRegionException" ->
+          `InvalidHomeRegionException (InvalidHomeRegionException.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidTrailNameException" ->
+          `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "TrailNotFoundException" ->
+          `TrailNotFoundException (TrailNotFoundException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InsufficientDependencyServiceAccessPermissionException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "InsufficientDependencyServiceAccessPermissionException"));
+            ("details",
+              (InsufficientDependencyServiceAccessPermissionException.to_json
+                 e))]
+      | `InsufficientIAMAccessPermissionException e ->
+          `Assoc
+            [("error", (`String "InsufficientIAMAccessPermissionException"));
+            ("details", (InsufficientIAMAccessPermissionException.to_json e))]
+      | `InvalidEventDataStoreCategoryException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreCategoryException"));
+            ("details", (InvalidEventDataStoreCategoryException.to_json e))]
+      | `InvalidEventDataStoreStatusException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreStatusException"));
+            ("details", (InvalidEventDataStoreStatusException.to_json e))]
+      | `InvalidHomeRegionException e ->
+          `Assoc
+            [("error", (`String "InvalidHomeRegionException"));
+            ("details", (InvalidHomeRegionException.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidTrailNameException e ->
+          `Assoc
+            [("error", (`String "InvalidTrailNameException"));
+            ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
+      | `NotOrganizationMasterAccountException e ->
+          `Assoc
+            [("error", (`String "NotOrganizationMasterAccountException"));
+            ("details", (NotOrganizationMasterAccountException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `TrailNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrailNotFoundException"));
+            ("details", (TrailNotFoundException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TrailARN", (Option.map x.trailARN ~f:String_.to_value));
+        ("EventDataStoreArn",
+          (Option.map x.eventDataStoreArn ~f:EventDataStoreArn.to_value));
+        ("MaxEventSize",
+          (Option.map x.maxEventSize ~f:MaxEventSize.to_value));
+        ("ContextKeySelectors",
+          (Option.map x.contextKeySelectors ~f:ContextKeySelectors.to_value));
+        ("AggregationConfigurations",
+          (Option.map x.aggregationConfigurations
+             ~f:AggregationConfigurations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aggregationConfigurations =
+        (Option.map ~f:AggregationConfigurations.of_xml)
+          (Xml.child xml_arg0 "AggregationConfigurations") in
+      let contextKeySelectors =
+        (Option.map ~f:ContextKeySelectors.of_xml)
+          (Xml.child xml_arg0 "ContextKeySelectors") in
+      let maxEventSize =
+        (Option.map ~f:MaxEventSize.of_xml)
+          (Xml.child xml_arg0 "MaxEventSize") in
+      let eventDataStoreArn =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreArn") in
+      let trailARN =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
+      make ?aggregationConfigurations ?contextKeySelectors ?maxEventSize
+        ?eventDataStoreArn ?trailARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aggregationConfigurations =
+        field_map json__ "AggregationConfigurations"
+          AggregationConfigurations.of_json in
+      let contextKeySelectors =
+        field_map json__ "ContextKeySelectors" ContextKeySelectors.of_json in
+      let maxEventSize = field_map json__ "MaxEventSize" MaxEventSize.of_json in
+      let eventDataStoreArn =
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
+      make ?aggregationConfigurations ?contextKeySelectors ?maxEventSize
+        ?eventDataStoreArn ?trailARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the event configuration settings for the specified event data store or trail. This operation supports updating the maximum event size, adding or modifying context key selectors for event data store, and configuring aggregation settings for the trail."]
+module PutEventConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      trailName: String_.t option
+        [@ocaml.doc
+          "The name of the trail for which you want to update event configuration settings."];
+      eventDataStore: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) or ID suffix of the ARN of the event data store for which event configuration settings are updated."];
+      maxEventSize: MaxEventSize.t option
+        [@ocaml.doc
+          "The maximum allowed size for events to be stored in the specified event data store. If you are using context key selectors, MaxEventSize must be set to Large."];
+      contextKeySelectors: ContextKeySelectors.t option
+        [@ocaml.doc
+          "A list of context key selectors that will be included to provide enriched event data."];
+      aggregationConfigurations: AggregationConfigurations.t option
+        [@ocaml.doc
+          "The list of aggregation configurations that you want to configure for the trail."]}
+    let make ?trailName =
+      fun ?eventDataStore ->
+        fun ?maxEventSize ->
+          fun ?contextKeySelectors ->
+            fun ?aggregationConfigurations ->
+              fun () ->
+                {
+                  trailName;
+                  eventDataStore;
+                  maxEventSize;
+                  contextKeySelectors;
+                  aggregationConfigurations
+                }
+    let to_value x =
+      structure_to_value
+        [("TrailName", (Option.map x.trailName ~f:String_.to_value));
+        ("EventDataStore", (Option.map x.eventDataStore ~f:String_.to_value));
+        ("MaxEventSize",
+          (Option.map x.maxEventSize ~f:MaxEventSize.to_value));
+        ("ContextKeySelectors",
+          (Option.map x.contextKeySelectors ~f:ContextKeySelectors.to_value));
+        ("AggregationConfigurations",
+          (Option.map x.aggregationConfigurations
+             ~f:AggregationConfigurations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aggregationConfigurations =
+        (Option.map ~f:AggregationConfigurations.of_xml)
+          (Xml.child xml_arg0 "AggregationConfigurations") in
+      let contextKeySelectors =
+        (Option.map ~f:ContextKeySelectors.of_xml)
+          (Xml.child xml_arg0 "ContextKeySelectors") in
+      let maxEventSize =
+        (Option.map ~f:MaxEventSize.of_xml)
+          (Xml.child xml_arg0 "MaxEventSize") in
+      let eventDataStore =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EventDataStore") in
+      let trailName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailName") in
+      make ?aggregationConfigurations ?contextKeySelectors ?maxEventSize
+        ?eventDataStore ?trailName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aggregationConfigurations =
+        field_map json__ "AggregationConfigurations"
+          AggregationConfigurations.of_json in
+      let contextKeySelectors =
+        field_map json__ "ContextKeySelectors" ContextKeySelectors.of_json in
+      let maxEventSize = field_map json__ "MaxEventSize" MaxEventSize.of_json in
+      let eventDataStore = field_map json__ "EventDataStore" String_.of_json in
+      let trailName = field_map json__ "TrailName" String_.of_json in
+      make ?aggregationConfigurations ?contextKeySelectors ?maxEventSize
+        ?eventDataStore ?trailName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the event configuration settings for the specified event data store or trail. This operation supports updating the maximum event size, adding or modifying context key selectors for event data store, and configuring aggregation settings for the trail."]
 module LookupEventsResponse =
   struct
     type nonrec t =
@@ -5407,9 +11705,9 @@ module LookupEventsResponse =
         (Option.map ~f:EventsList.of_xml) (Xml.child xml_arg0 "Events") in
       make ?nextToken ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let events = field_map json "Events" EventsList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let events = field_map json__ "Events" EventsList.of_json in
       make ?nextToken ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains a response to a LookupEvents action."]
@@ -5434,7 +11732,7 @@ module LookupEventsRequest =
           "The number of events to return. Possible values are 1 through 50. The default is 50."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token to use to get the next page of results after a previous API call. This token must be passed in with the same parameters that were specified in the the original call. For example, if the original call specified an AttributeKey of 'Username' with a value of 'root', the call with NextToken should include those same parameters."]}
+          "The token to use to get the next page of results after a previous API call. This token must be passed in with the same parameters that were specified in the original call. For example, if the original call specified an AttributeKey of 'Username' with a value of 'root', the call with NextToken should include those same parameters."]}
     let make ?lookupAttributes =
       fun ?startTime ->
         fun ?endTime ->
@@ -5479,15 +11777,15 @@ module LookupEventsRequest =
       make ?nextToken ?maxResults ?eventCategory ?endTime ?startTime
         ?lookupAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let eventCategory =
-        field_map json "EventCategory" EventCategory.of_json in
-      let endTime = field_map json "EndTime" Date.of_json in
-      let startTime = field_map json "StartTime" Date.of_json in
+        field_map json__ "EventCategory" EventCategory.of_json in
+      let endTime = field_map json__ "EndTime" Date.of_json in
+      let startTime = field_map json__ "StartTime" Date.of_json in
       let lookupAttributes =
-        field_map json "LookupAttributes" LookupAttributesList.of_json in
+        field_map json__ "LookupAttributes" LookupAttributesList.of_json in
       make ?nextToken ?maxResults ?eventCategory ?endTime ?startTime
         ?lookupAttributes ()
     let to_json v = composed_to_json to_value v
@@ -5498,7 +11796,7 @@ module ListTrailsResponse =
       {
       trails: Trails.t option
         [@ocaml.doc
-          "Returns the name, ARN, and home region of trails in the current account."];
+          "Returns the name, ARN, and home Region of trails in the current account."];
       nextToken: String_.t option
         [@ocaml.doc
           "The token to use to get the next page of results after a previous API call. If the token does not appear, there are no more results to return. The token must be passed in with the same parameters as the previous call. For example, if the original call specified an AttributeKey of 'Username' with a value of 'root', the call with NextToken should include those same parameters."]}
@@ -5555,9 +11853,9 @@ module ListTrailsResponse =
         (Option.map ~f:Trails.of_xml) (Xml.child xml_arg0 "Trails") in
       make ?nextToken ?trails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let trails = field_map json "Trails" Trails.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let trails = field_map json__ "Trails" Trails.of_json in
       make ?nextToken ?trails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists trails that are in the current account."]
@@ -5567,7 +11865,7 @@ module ListTrailsRequest =
       {
       nextToken: String_.t option
         [@ocaml.doc
-          "The token to use to get the next page of results after a previous API call. This token must be passed in with the same parameters that were specified in the the original call. For example, if the original call specified an AttributeKey of 'Username' with a value of 'root', the call with NextToken should include those same parameters."]}
+          "The token to use to get the next page of results after a previous API call. This token must be passed in with the same parameters that were specified in the original call. For example, if the original call specified an AttributeKey of 'Username' with a value of 'root', the call with NextToken should include those same parameters."]}
     let make ?nextToken = fun () -> { nextToken }
     let to_value x =
       structure_to_value
@@ -5578,8 +11876,8 @@ module ListTrailsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists trails that are in the current account."]
@@ -5591,11 +11889,16 @@ module ListTagsResponse =
         [@ocaml.doc "A list of resource tags."];
       nextToken: String_.t option [@ocaml.doc "Reserved for future use."]}
     type nonrec error =
-      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      [ `ChannelARNInvalidException of ChannelARNInvalidException.t 
+      | `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
       | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
       | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
       | `InvalidTokenException of InvalidTokenException.t 
       | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ResourceTypeNotSupportedException of
@@ -5606,9 +11909,15 @@ module ListTagsResponse =
       fun ?nextToken -> fun () -> { resourceTagList; nextToken }
     let error_of_json name json =
       match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException
+            (ChannelARNInvalidException.of_json json)
       | "CloudTrailARNInvalidException" ->
           `CloudTrailARNInvalidException
             (CloudTrailARNInvalidException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_json json)
@@ -5619,6 +11928,9 @@ module ListTagsResponse =
           `InvalidTokenException (InvalidTokenException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
@@ -5635,9 +11947,14 @@ module ListTagsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException (ChannelARNInvalidException.of_xml xml)
       | "CloudTrailARNInvalidException" ->
           `CloudTrailARNInvalidException
             (CloudTrailARNInvalidException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_xml xml)
@@ -5648,6 +11965,9 @@ module ListTagsResponse =
           `InvalidTokenException (InvalidTokenException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
@@ -5663,10 +11983,18 @@ module ListTagsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ChannelARNInvalidException e ->
+          `Assoc
+            [("error", (`String "ChannelARNInvalidException"));
+            ("details", (ChannelARNInvalidException.to_json e))]
       | `CloudTrailARNInvalidException e ->
           `Assoc
             [("error", (`String "CloudTrailARNInvalidException"));
             ("details", (CloudTrailARNInvalidException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
       | `EventDataStoreNotFoundException e ->
           `Assoc
             [("error", (`String "EventDataStoreNotFoundException"));
@@ -5683,6 +12011,10 @@ module ListTagsResponse =
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
@@ -5718,10 +12050,10 @@ module ListTagsResponse =
           (Xml.child xml_arg0 "ResourceTagList") in
       make ?nextToken ?resourceTagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let resourceTagList =
-        field_map json "ResourceTagList" ResourceTagList.of_json in
+        field_map json__ "ResourceTagList" ResourceTagList.of_json in
       make ?nextToken ?resourceTagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5732,7 +12064,7 @@ module ListTagsRequest =
       {
       resourceIdList: ResourceIdList.t
         [@ocaml.doc
-          "Specifies a list of trail ARNs whose tags will be listed. The list has a limit of 20 ARNs. The following is the format of a trail ARN. arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"];
+          "Specifies a list of trail, event data store, dashboard, or channel ARNs whose tags will be listed. The list has a limit of 20 ARNs. Example trail ARN format: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail Example event data store ARN format: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE Example dashboard ARN format: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash Example channel ARN format: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"];
       nextToken: String_.t option [@ocaml.doc "Reserved for future use."]}
     let context_ = "ListTagsRequest"
     let make ?nextToken =
@@ -5751,13 +12083,13 @@ module ListTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdList") in
       make ?nextToken ~resourceIdList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let resourceIdList =
-        field_map_exn json "ResourceIdList" ResourceIdList.of_json in
+        field_map_exn json__ "ResourceIdList" ResourceIdList.of_json in
       make ?nextToken ~resourceIdList ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies a list of trail tags to return."]
+  end[@@ocaml.doc "Specifies a list of tags to return."]
 module ListQueriesResponse =
   struct
     type nonrec t =
@@ -5778,6 +12110,8 @@ module ListQueriesResponse =
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidQueryStatusException of InvalidQueryStatusException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -5805,6 +12139,9 @@ module ListQueriesResponse =
       | "InvalidQueryStatusException" ->
           `InvalidQueryStatusException
             (InvalidQueryStatusException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
@@ -5836,6 +12173,9 @@ module ListQueriesResponse =
       | "InvalidQueryStatusException" ->
           `InvalidQueryStatusException
             (InvalidQueryStatusException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
@@ -5878,6 +12218,10 @@ module ListQueriesResponse =
           `Assoc
             [("error", (`String "InvalidQueryStatusException"));
             ("details", (InvalidQueryStatusException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
@@ -5904,9 +12248,9 @@ module ListQueriesResponse =
         (Option.map ~f:Queries.of_xml) (Xml.child xml_arg0 "Queries") in
       make ?nextToken ?queries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let queries = field_map json "Queries" Queries.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let queries = field_map json__ "Queries" Queries.of_json in
       make ?nextToken ?queries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5977,15 +12321,15 @@ module ListQueriesRequest =
       make ?queryStatus ?endTime ?startTime ?maxResults ?nextToken
         ~eventDataStore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryStatus = field_map json "QueryStatus" QueryStatus.of_json in
-      let endTime = field_map json "EndTime" Date.of_json in
-      let startTime = field_map json "StartTime" Date.of_json in
+    let of_json json__ =
+      let queryStatus = field_map json__ "QueryStatus" QueryStatus.of_json in
+      let endTime = field_map json__ "EndTime" Date.of_json in
+      let startTime = field_map json__ "StartTime" Date.of_json in
       let maxResults =
-        field_map json "MaxResults" ListQueriesMaxResultsCount.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "MaxResults" ListQueriesMaxResultsCount.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let eventDataStore =
-        field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
+        field_map_exn json__ "EventDataStore" EventDataStoreArn.of_json in
       make ?queryStatus ?endTime ?startTime ?maxResults ?nextToken
         ~eventDataStore ()
     let to_json v = composed_to_json to_value v
@@ -6073,10 +12417,10 @@ module ListPublicKeysResponse =
           (Xml.child xml_arg0 "PublicKeyList") in
       make ?nextToken ?publicKeyList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let publicKeyList =
-        field_map json "PublicKeyList" PublicKeyList.of_json in
+        field_map json__ "PublicKeyList" PublicKeyList.of_json in
       make ?nextToken ?publicKeyList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6110,25 +12454,778 @@ module ListPublicKeysRequest =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?nextToken ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let endTime = field_map json "EndTime" Date.of_json in
-      let startTime = field_map json "StartTime" Date.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let endTime = field_map json__ "EndTime" Date.of_json in
+      let startTime = field_map json__ "StartTime" Date.of_json in
       make ?nextToken ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Requests the public keys for a specified time range."]
+module ListInsightsMetricDataResponse =
+  struct
+    type nonrec t =
+      {
+      trailARN: String_.t option
+        [@ocaml.doc
+          "Specifies the ARN of the trail. This is only returned when Insights is enabled on a trail logging data events."];
+      eventSource: EventSource.t option
+        [@ocaml.doc
+          "The Amazon Web Services service to which the request was made, such as iam.amazonaws.com or s3.amazonaws.com."];
+      eventName: EventName.t option
+        [@ocaml.doc
+          "The name of the event, typically the Amazon Web Services API on which unusual levels of activity were recorded."];
+      insightType: InsightType.t option
+        [@ocaml.doc
+          "The type of CloudTrail Insights event, which is either ApiCallRateInsight or ApiErrorRateInsight. The ApiCallRateInsight Insights type analyzes write-only management API calls that are aggregated per minute against a baseline API call volume. The ApiErrorRateInsight Insights type analyzes management API calls that result in error codes."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "Only returned if InsightType parameter was set to ApiErrorRateInsight. If returning metrics for the ApiErrorRateInsight Insights type, this is the error to retrieve data for. For example, AccessDenied."];
+      timestamps: Timestamps.t option
+        [@ocaml.doc
+          "List of timestamps at intervals corresponding to the specified time period."];
+      values: InsightsMetricValues.t option
+        [@ocaml.doc
+          "List of values representing the API call rate or error rate at each timestamp. The number of values is equal to the number of timestamps."];
+      nextToken: InsightsMetricNextToken.t option
+        [@ocaml.doc
+          "Only returned if the full results could not be returned in a single query. You can set the NextToken parameter in the next request to this value to continue retrieval."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?trailARN =
+      fun ?eventSource ->
+        fun ?eventName ->
+          fun ?insightType ->
+            fun ?errorCode ->
+              fun ?timestamps ->
+                fun ?values ->
+                  fun ?nextToken ->
+                    fun () ->
+                      {
+                        trailARN;
+                        eventSource;
+                        eventName;
+                        insightType;
+                        errorCode;
+                        timestamps;
+                        values;
+                        nextToken
+                      }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidTrailNameException" ->
+          `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidTrailNameException" ->
+          `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidTrailNameException e ->
+          `Assoc
+            [("error", (`String "InvalidTrailNameException"));
+            ("details", (InvalidTrailNameException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TrailARN", (Option.map x.trailARN ~f:String_.to_value));
+        ("EventSource", (Option.map x.eventSource ~f:EventSource.to_value));
+        ("EventName", (Option.map x.eventName ~f:EventName.to_value));
+        ("InsightType", (Option.map x.insightType ~f:InsightType.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Timestamps", (Option.map x.timestamps ~f:Timestamps.to_value));
+        ("Values", (Option.map x.values ~f:InsightsMetricValues.to_value));
+        ("NextToken",
+          (Option.map x.nextToken ~f:InsightsMetricNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:InsightsMetricNextToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let values =
+        (Option.map ~f:InsightsMetricValues.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      let timestamps =
+        (Option.map ~f:Timestamps.of_xml) (Xml.child xml_arg0 "Timestamps") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let insightType =
+        (Option.map ~f:InsightType.of_xml) (Xml.child xml_arg0 "InsightType") in
+      let eventName =
+        (Option.map ~f:EventName.of_xml) (Xml.child xml_arg0 "EventName") in
+      let eventSource =
+        (Option.map ~f:EventSource.of_xml) (Xml.child xml_arg0 "EventSource") in
+      let trailARN =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
+      make ?nextToken ?values ?timestamps ?errorCode ?insightType ?eventName
+        ?eventSource ?trailARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken =
+        field_map json__ "NextToken" InsightsMetricNextToken.of_json in
+      let values = field_map json__ "Values" InsightsMetricValues.of_json in
+      let timestamps = field_map json__ "Timestamps" Timestamps.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let insightType = field_map json__ "InsightType" InsightType.of_json in
+      let eventName = field_map json__ "EventName" EventName.of_json in
+      let eventSource = field_map json__ "EventSource" EventSource.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
+      make ?nextToken ?values ?timestamps ?errorCode ?insightType ?eventName
+        ?eventSource ?trailARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns Insights metrics data for trails that have enabled Insights. The request must include the EventSource, EventName, and InsightType parameters. If the InsightType is set to ApiErrorRateInsight, the request must also include the ErrorCode parameter. The following are the available time periods for ListInsightsMetricData. Each cutoff is inclusive. Data points with a period of 60 seconds (1-minute) are available for 15 days. Data points with a period of 300 seconds (5-minute) are available for 63 days. Data points with a period of 3600 seconds (1 hour) are available for 90 days. To use ListInsightsMetricData operation, you must have the following permissions: If ListInsightsMetricData is invoked with TrailName parameter, access to the ListInsightsMetricData API operation is linked to the cloudtrail:LookupEvents action and cloudtrail:ListInsightsData. To use this operation, you must have permissions to perform the cloudtrail:LookupEvents and cloudtrail:ListInsightsData action on the specific trail. If ListInsightsMetricData is invoked without TrailName parameter, access to the ListInsightsMetricData API operation is linked to the cloudtrail:LookupEvents action only. To use this operation, you must have permissions to perform the cloudtrail:LookupEvents action."]
+module ListInsightsMetricDataRequest =
+  struct
+    type nonrec t =
+      {
+      trailName: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name(ARN) or name of the trail for which you want to retrieve Insights metrics data. This parameter should only be provided to fetch Insights metrics data generated on trails logging data events. This parameter is not required for Insights metric data generated on trails logging management events."];
+      eventSource: EventSource.t
+        [@ocaml.doc
+          "The Amazon Web Services service to which the request was made, such as iam.amazonaws.com or s3.amazonaws.com."];
+      eventName: EventName.t
+        [@ocaml.doc
+          "The name of the event, typically the Amazon Web Services API on which unusual levels of activity were recorded."];
+      insightType: InsightType.t
+        [@ocaml.doc
+          "The type of CloudTrail Insights event, which is either ApiCallRateInsight or ApiErrorRateInsight. The ApiCallRateInsight Insights type analyzes write-only management API calls that are aggregated per minute against a baseline API call volume. The ApiErrorRateInsight Insights type analyzes management API calls that result in error codes."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "Conditionally required if the InsightType parameter is set to ApiErrorRateInsight. If returning metrics for the ApiErrorRateInsight Insights type, this is the error to retrieve data for. For example, AccessDenied."];
+      startTime: Date.t option
+        [@ocaml.doc
+          "Specifies, in UTC, the start time for time-series data. The value specified is inclusive; results include data points with the specified time stamp. The default is 90 days before the time of request."];
+      endTime: Date.t option
+        [@ocaml.doc
+          "Specifies, in UTC, the end time for time-series data. The value specified is exclusive; results include data points up to the specified time stamp. The default is the time of request."];
+      period: InsightsMetricPeriod.t option
+        [@ocaml.doc
+          "Granularity of data to retrieve, in seconds. Valid values are 60, 300, and 3600. If you specify any other value, you will get an error. The default is 3600 seconds."];
+      dataType: InsightsMetricDataType.t option
+        [@ocaml.doc
+          "Type of data points to return. Valid values are NonZeroData and FillWithZeros. The default is NonZeroData."];
+      maxResults: InsightsMetricMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of data points to return. Valid values are integers from 1 to 21600. The default value is 21600."];
+      nextToken: InsightsMetricNextToken.t option
+        [@ocaml.doc
+          "Returned if all datapoints can't be returned in a single call. For example, due to reaching MaxResults. Add this parameter to the request to continue retrieving results starting from the last evaluated point."]}
+    let context_ = "ListInsightsMetricDataRequest"
+    let make ?trailName =
+      fun ?errorCode ->
+        fun ?startTime ->
+          fun ?endTime ->
+            fun ?period ->
+              fun ?dataType ->
+                fun ?maxResults ->
+                  fun ?nextToken ->
+                    fun ~eventSource ->
+                      fun ~eventName ->
+                        fun ~insightType ->
+                          fun () ->
+                            {
+                              trailName;
+                              errorCode;
+                              startTime;
+                              endTime;
+                              period;
+                              dataType;
+                              maxResults;
+                              nextToken;
+                              eventSource;
+                              eventName;
+                              insightType
+                            }
+    let to_value x =
+      structure_to_value
+        [("TrailName", (Option.map x.trailName ~f:String_.to_value));
+        ("EventSource", (Some (EventSource.to_value x.eventSource)));
+        ("EventName", (Some (EventName.to_value x.eventName)));
+        ("InsightType", (Some (InsightType.to_value x.insightType)));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("StartTime", (Option.map x.startTime ~f:Date.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Date.to_value));
+        ("Period", (Option.map x.period ~f:InsightsMetricPeriod.to_value));
+        ("DataType",
+          (Option.map x.dataType ~f:InsightsMetricDataType.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:InsightsMetricMaxResults.to_value));
+        ("NextToken",
+          (Option.map x.nextToken ~f:InsightsMetricNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:InsightsMetricNextToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:InsightsMetricMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let dataType =
+        (Option.map ~f:InsightsMetricDataType.of_xml)
+          (Xml.child xml_arg0 "DataType") in
+      let period =
+        (Option.map ~f:InsightsMetricPeriod.of_xml)
+          (Xml.child xml_arg0 "Period") in
+      let endTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let insightType =
+        InsightType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InsightType") in
+      let eventName =
+        EventName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EventName") in
+      let eventSource =
+        EventSource.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EventSource") in
+      let trailName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailName") in
+      make ?nextToken ?maxResults ?dataType ?period ?endTime ?startTime
+        ?errorCode ~insightType ~eventName ~eventSource ?trailName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken =
+        field_map json__ "NextToken" InsightsMetricNextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" InsightsMetricMaxResults.of_json in
+      let dataType =
+        field_map json__ "DataType" InsightsMetricDataType.of_json in
+      let period = field_map json__ "Period" InsightsMetricPeriod.of_json in
+      let endTime = field_map json__ "EndTime" Date.of_json in
+      let startTime = field_map json__ "StartTime" Date.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let insightType =
+        field_map_exn json__ "InsightType" InsightType.of_json in
+      let eventName = field_map_exn json__ "EventName" EventName.of_json in
+      let eventSource =
+        field_map_exn json__ "EventSource" EventSource.of_json in
+      let trailName = field_map json__ "TrailName" String_.of_json in
+      make ?nextToken ?maxResults ?dataType ?period ?endTime ?startTime
+        ?errorCode ~insightType ~eventName ~eventSource ?trailName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns Insights metrics data for trails that have enabled Insights. The request must include the EventSource, EventName, and InsightType parameters. If the InsightType is set to ApiErrorRateInsight, the request must also include the ErrorCode parameter. The following are the available time periods for ListInsightsMetricData. Each cutoff is inclusive. Data points with a period of 60 seconds (1-minute) are available for 15 days. Data points with a period of 300 seconds (5-minute) are available for 63 days. Data points with a period of 3600 seconds (1 hour) are available for 90 days. To use ListInsightsMetricData operation, you must have the following permissions: If ListInsightsMetricData is invoked with TrailName parameter, access to the ListInsightsMetricData API operation is linked to the cloudtrail:LookupEvents action and cloudtrail:ListInsightsData. To use this operation, you must have permissions to perform the cloudtrail:LookupEvents and cloudtrail:ListInsightsData action on the specific trail. If ListInsightsMetricData is invoked without TrailName parameter, access to the ListInsightsMetricData API operation is linked to the cloudtrail:LookupEvents action only. To use this operation, you must have permissions to perform the cloudtrail:LookupEvents action."]
+module ListInsightsDataResponse =
+  struct
+    type nonrec t =
+      {
+      events: EventsList.t option
+        [@ocaml.doc
+          "A list of events returned based on the InsightSource, DataType or Dimensions specified. The events list is sorted by time. The most recent event is listed first."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use to get the next page of results after a previous API call. If the token does not appear, there are no more results to return. The token must be passed in with the same parameters as the previous call. For example, if the original call specified a EventName as a dimension with PutObject as a value, the call with NextToken should include those same parameters."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?events = fun ?nextToken -> fun () -> { events; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Events", (Option.map x.events ~f:EventsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let events =
+        (Option.map ~f:EventsList.of_xml) (Xml.child xml_arg0 "Events") in
+      make ?nextToken ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let events = field_map json__ "Events" EventsList.of_json in
+      make ?nextToken ?events ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns Insights events generated on a trail that logs data events. You can list Insights events that occurred in a Region within the last 90 days. ListInsightsData supports the following Dimensions for Insights events: Event ID Event name Event source All dimensions are optional. The default number of results returned is 50, with a maximum of 50 possible. The response includes a token that you can use to get the next page of results. The rate of ListInsightsData requests is limited to two per second, per account, per Region. If this limit is exceeded, a throttling error occurs."]
+module ListInsightsDataRequest =
+  struct
+    type nonrec t =
+      {
+      insightSource: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name(ARN) of the trail for which you want to retrieve Insights events."];
+      dataType: ListInsightsDataType.t
+        [@ocaml.doc
+          "Specifies the category of events returned. To fetch Insights events, specify InsightsEvents as the value of DataType"];
+      dimensions: ListInsightsDataDimensions.t option
+        [@ocaml.doc
+          "Contains a map of dimensions. Currently the map can contain only one item."];
+      startTime: Date.t option
+        [@ocaml.doc
+          "Specifies that only events that occur after or at the specified time are returned. If the specified start time is after the specified end time, an error is returned."];
+      endTime: Date.t option
+        [@ocaml.doc
+          "Specifies that only events that occur before or at the specified time are returned. If the specified end time is before the specified start time, an error is returned."];
+      maxResults: ListInsightsDataMaxResultsCount.t option
+        [@ocaml.doc
+          "The number of events to return. Possible values are 1 through 50. The default is 50."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use to get the next page of results after a previous API call. This token must be passed in with the same parameters that were specified in the original call. For example, if the original call specified a EventName as a dimension with PutObject as a value, the call with NextToken should include those same parameters."]}
+    let context_ = "ListInsightsDataRequest"
+    let make ?dimensions =
+      fun ?startTime ->
+        fun ?endTime ->
+          fun ?maxResults ->
+            fun ?nextToken ->
+              fun ~insightSource ->
+                fun ~dataType ->
+                  fun () ->
+                    {
+                      dimensions;
+                      startTime;
+                      endTime;
+                      maxResults;
+                      nextToken;
+                      insightSource;
+                      dataType
+                    }
+    let to_value x =
+      structure_to_value
+        [("InsightSource", (Some (ResourceArn.to_value x.insightSource)));
+        ("DataType", (Some (ListInsightsDataType.to_value x.dataType)));
+        ("Dimensions",
+          (Option.map x.dimensions ~f:ListInsightsDataDimensions.to_value));
+        ("StartTime", (Option.map x.startTime ~f:Date.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Date.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListInsightsDataMaxResultsCount.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListInsightsDataMaxResultsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let endTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let dimensions =
+        (Option.map ~f:ListInsightsDataDimensions.of_xml)
+          (Xml.child xml_arg0 "Dimensions") in
+      let dataType =
+        ListInsightsDataType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataType") in
+      let insightSource =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InsightSource") in
+      make ?nextToken ?maxResults ?endTime ?startTime ?dimensions ~dataType
+        ~insightSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" ListInsightsDataMaxResultsCount.of_json in
+      let endTime = field_map json__ "EndTime" Date.of_json in
+      let startTime = field_map json__ "StartTime" Date.of_json in
+      let dimensions =
+        field_map json__ "Dimensions" ListInsightsDataDimensions.of_json in
+      let dataType =
+        field_map_exn json__ "DataType" ListInsightsDataType.of_json in
+      let insightSource =
+        field_map_exn json__ "InsightSource" ResourceArn.of_json in
+      make ?nextToken ?maxResults ?endTime ?startTime ?dimensions ~dataType
+        ~insightSource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns Insights events generated on a trail that logs data events. You can list Insights events that occurred in a Region within the last 90 days. ListInsightsData supports the following Dimensions for Insights events: Event ID Event name Event source All dimensions are optional. The default number of results returned is 50, with a maximum of 50 possible. The response includes a token that you can use to get the next page of results. The rate of ListInsightsData requests is limited to two per second, per account, per Region. If this limit is exceeded, a throttling error occurs."]
+module ListImportsResponse =
+  struct
+    type nonrec t =
+      {
+      imports: ImportsList.t option
+        [@ocaml.doc "The list of returned imports."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token you can use to get the next page of import results."]}
+    type nonrec error =
+      [
+        `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?imports = fun ?nextToken -> fun () -> { imports; nextToken }
+    let error_of_json name json =
+      match name with
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Imports", (Option.map x.imports ~f:ImportsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let imports =
+        (Option.map ~f:ImportsList.of_xml) (Xml.child xml_arg0 "Imports") in
+      make ?nextToken ?imports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let imports = field_map json__ "Imports" ImportsList.of_json in
+      make ?nextToken ?imports ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information on all imports, or a select set of imports by ImportStatus or Destination."]
+module ListImportsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: ListImportsMaxResultsCount.t option
+        [@ocaml.doc
+          "The maximum number of imports to display on a single page."];
+      destination: EventDataStoreArn.t option
+        [@ocaml.doc "The ARN of the destination event data store."];
+      importStatus: ImportStatus.t option
+        [@ocaml.doc "The status of the import."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token you can use to get the next page of import results."]}
+    let make ?maxResults =
+      fun ?destination ->
+        fun ?importStatus ->
+          fun ?nextToken ->
+            fun () -> { maxResults; destination; importStatus; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults",
+           (Option.map x.maxResults ~f:ListImportsMaxResultsCount.to_value));
+        ("Destination",
+          (Option.map x.destination ~f:EventDataStoreArn.to_value));
+        ("ImportStatus",
+          (Option.map x.importStatus ~f:ImportStatus.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let importStatus =
+        (Option.map ~f:ImportStatus.of_xml)
+          (Xml.child xml_arg0 "ImportStatus") in
+      let destination =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      let maxResults =
+        (Option.map ~f:ListImportsMaxResultsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      make ?nextToken ?importStatus ?destination ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let importStatus = field_map json__ "ImportStatus" ImportStatus.of_json in
+      let destination =
+        field_map json__ "Destination" EventDataStoreArn.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" ListImportsMaxResultsCount.of_json in
+      make ?nextToken ?importStatus ?destination ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information on all imports, or a select set of imports by ImportStatus or Destination."]
+module ListImportFailuresResponse =
+  struct
+    type nonrec t =
+      {
+      failures: ImportFailureList.t option
+        [@ocaml.doc "Contains information about the import failures."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "A token you can use to get the next page of results."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?failures = fun ?nextToken -> fun () -> { failures; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Failures", (Option.map x.failures ~f:ImportFailureList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let failures =
+        (Option.map ~f:ImportFailureList.of_xml)
+          (Xml.child xml_arg0 "Failures") in
+      make ?nextToken ?failures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let failures = field_map json__ "Failures" ImportFailureList.of_json in
+      make ?nextToken ?failures ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of failures for the specified import."]
+module ListImportFailuresRequest =
+  struct
+    type nonrec t =
+      {
+      importId: UUID.t [@ocaml.doc "The ID of the import."];
+      maxResults: ListImportFailuresMaxResultsCount.t option
+        [@ocaml.doc
+          "The maximum number of failures to display on a single page."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token you can use to get the next page of import failures."]}
+    let context_ = "ListImportFailuresRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~importId -> fun () -> { maxResults; nextToken; importId }
+    let to_value x =
+      structure_to_value
+        [("ImportId", (Some (UUID.to_value x.importId)));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListImportFailuresMaxResultsCount.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListImportFailuresMaxResultsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let importId =
+        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ImportId") in
+      make ?nextToken ?maxResults ~importId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          ListImportFailuresMaxResultsCount.of_json in
+      let importId = field_map_exn json__ "ImportId" UUID.of_json in
+      make ?nextToken ?maxResults ~importId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of failures for the specified import."]
 module ListEventDataStoresResponse =
   struct
     type nonrec t =
       {
       eventDataStores: EventDataStores.t option
         [@ocaml.doc
-          "Contains information about event data stores in the account, in the current region."];
+          "Contains information about event data stores in the account, in the current Region."];
       nextToken: PaginationToken.t option
         [@ocaml.doc "A token you can use to get the next page of results."]}
     type nonrec error =
       [ `InvalidMaxResultsException of InvalidMaxResultsException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -6141,6 +13238,9 @@ module ListEventDataStoresResponse =
             (InvalidMaxResultsException.of_json json)
       | "InvalidNextTokenException" ->
           `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
@@ -6156,6 +13256,9 @@ module ListEventDataStoresResponse =
           `InvalidMaxResultsException (InvalidMaxResultsException.of_xml xml)
       | "InvalidNextTokenException" ->
           `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
@@ -6174,6 +13277,10 @@ module ListEventDataStoresResponse =
           `Assoc
             [("error", (`String "InvalidNextTokenException"));
             ("details", (InvalidNextTokenException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
@@ -6202,14 +13309,14 @@ module ListEventDataStoresResponse =
           (Xml.child xml_arg0 "EventDataStores") in
       make ?nextToken ?eventDataStores ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let eventDataStores =
-        field_map json "EventDataStores" EventDataStores.of_json in
+        field_map json__ "EventDataStores" EventDataStores.of_json in
       make ?nextToken ?eventDataStores ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about all event data stores in the account, in the current region."]
+       "Returns information about all event data stores in the account, in the current Region."]
 module ListEventDataStoresRequest =
   struct
     type nonrec t =
@@ -6238,15 +13345,242 @@ module ListEventDataStoresRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           ListEventDataStoresMaxResultsCount.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about all event data stores in the account, in the current region."]
+       "Returns information about all event data stores in the account, in the current Region."]
+module ListDashboardsResponse =
+  struct
+    type nonrec t =
+      {
+      dashboards: Dashboards.t option
+        [@ocaml.doc
+          "Contains information about dashboards in the account, in the current Region that match the applied filters."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token you can use to get the next page of dashboard results."]}
+    type nonrec error =
+      [ `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dashboards =
+      fun ?nextToken -> fun () -> { dashboards; nextToken }
+    let error_of_json name json =
+      match name with
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Dashboards", (Option.map x.dashboards ~f:Dashboards.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let dashboards =
+        (Option.map ~f:Dashboards.of_xml) (Xml.child xml_arg0 "Dashboards") in
+      make ?nextToken ?dashboards ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let dashboards = field_map json__ "Dashboards" Dashboards.of_json in
+      make ?nextToken ?dashboards ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about all dashboards in the account, in the current Region."]
+module ListDashboardsRequest =
+  struct
+    type nonrec t =
+      {
+      namePrefix: DashboardName.t option
+        [@ocaml.doc "Specify a name prefix to filter on."];
+      type_: DashboardType.t option
+        [@ocaml.doc
+          "Specify a dashboard type to filter on: CUSTOM or MANAGED."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token you can use to get the next page of dashboard results."];
+      maxResults: ListDashboardsMaxResultsCount.t option
+        [@ocaml.doc
+          "The maximum number of dashboards to display on a single page."]}
+    let make ?namePrefix =
+      fun ?type_ ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun () -> { namePrefix; type_; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NamePrefix", (Option.map x.namePrefix ~f:DashboardName.to_value));
+        ("Type", (Option.map x.type_ ~f:DashboardType.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:ListDashboardsMaxResultsCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListDashboardsMaxResultsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let type_ =
+        (Option.map ~f:DashboardType.of_xml) (Xml.child xml_arg0 "Type") in
+      let namePrefix =
+        (Option.map ~f:DashboardName.of_xml)
+          (Xml.child xml_arg0 "NamePrefix") in
+      make ?maxResults ?nextToken ?type_ ?namePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" ListDashboardsMaxResultsCount.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let type_ = field_map json__ "Type" DashboardType.of_json in
+      let namePrefix = field_map json__ "NamePrefix" DashboardName.of_json in
+      make ?maxResults ?nextToken ?type_ ?namePrefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about all dashboards in the account, in the current Region."]
+module ListChannelsResponse =
+  struct
+    type nonrec t =
+      {
+      channels: Channels.t option
+        [@ocaml.doc "The list of channels in the account."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use to get the next page of results after a previous API call."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?channels = fun ?nextToken -> fun () -> { channels; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Channels", (Option.map x.channels ~f:Channels.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let channels =
+        (Option.map ~f:Channels.of_xml) (Xml.child xml_arg0 "Channels") in
+      make ?nextToken ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let channels = field_map json__ "Channels" Channels.of_json in
+      make ?nextToken ?channels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the channels in the current account, and their source names."]
+module ListChannelsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: ListChannelsMaxResultsCount.t option
+        [@ocaml.doc
+          "The maximum number of CloudTrail channels to display on a single page."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use to get the next page of results after a previous API call. This token must be passed in with the same parameters that were specified in the original call. For example, if the original call specified an AttributeKey of 'Username' with a value of 'root', the call with NextToken should include those same parameters."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults",
+           (Option.map x.maxResults ~f:ListChannelsMaxResultsCount.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListChannelsMaxResultsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" ListChannelsMaxResultsCount.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the channels in the current account, and their source names."]
 module GetTrailStatusResponse =
   struct
     type nonrec t =
@@ -6256,7 +13590,7 @@ module GetTrailStatusResponse =
           "Whether the CloudTrail trail is currently logging Amazon Web Services API calls."];
       latestDeliveryError: String_.t option
         [@ocaml.doc
-          "Displays any Amazon S3 error that CloudTrail encountered when attempting to deliver log files to the designated bucket. For more information, see Error Responses in the Amazon S3 API Reference. This error occurs only when there is a problem with the destination S3 bucket, and does not occur for requests that time out. To resolve the issue, create a new bucket, and then call UpdateTrail to specify the new bucket; or fix the existing objects so that CloudTrail can again write to the bucket."];
+          "Displays any Amazon S3 error that CloudTrail encountered when attempting to deliver log files to the designated bucket. For more information, see Error Responses in the Amazon S3 API Reference. This error occurs only when there is a problem with the destination S3 bucket, and does not occur for requests that time out. To resolve the issue, fix the bucket policy so that CloudTrail can write to the bucket; or create a new bucket and call UpdateTrail to specify the new bucket."];
       latestNotificationError: String_.t option
         [@ocaml.doc
           "Displays any Amazon SNS error that CloudTrail encountered when attempting to send a notification. For more information about Amazon SNS errors, see the Amazon SNS Developer Guide."];
@@ -6283,7 +13617,7 @@ module GetTrailStatusResponse =
           "Specifies the date and time that CloudTrail last delivered a digest file to an account's Amazon S3 bucket."];
       latestDigestDeliveryError: String_.t option
         [@ocaml.doc
-          "Displays any Amazon S3 error that CloudTrail encountered when attempting to deliver a digest file to the designated bucket. For more information, see Error Responses in the Amazon S3 API Reference. This error occurs only when there is a problem with the destination S3 bucket, and does not occur for requests that time out. To resolve the issue, create a new bucket, and then call UpdateTrail to specify the new bucket; or fix the existing objects so that CloudTrail can again write to the bucket."];
+          "Displays any Amazon S3 error that CloudTrail encountered when attempting to deliver a digest file to the designated bucket. For more information, see Error Responses in the Amazon S3 API Reference. This error occurs only when there is a problem with the destination S3 bucket, and does not occur for requests that time out. To resolve the issue, fix the bucket policy so that CloudTrail can write to the bucket; or create a new bucket and call UpdateTrail to specify the new bucket."];
       latestDeliveryAttemptTime: String_.t option
         [@ocaml.doc "This field is no longer in use."];
       latestNotificationAttemptTime: String_.t option
@@ -6297,7 +13631,8 @@ module GetTrailStatusResponse =
       timeLoggingStopped: String_.t option
         [@ocaml.doc "This field is no longer in use."]}
     type nonrec error =
-      [ `InvalidTrailNameException of InvalidTrailNameException.t 
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `InvalidTrailNameException of InvalidTrailNameException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
@@ -6341,6 +13676,9 @@ module GetTrailStatusResponse =
                                         }
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
       | "OperationNotPermittedException" ->
@@ -6356,6 +13694,9 @@ module GetTrailStatusResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
       | "OperationNotPermittedException" ->
@@ -6370,6 +13711,10 @@ module GetTrailStatusResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
       | `InvalidTrailNameException e ->
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
@@ -6484,38 +13829,38 @@ module GetTrailStatusResponse =
         ?latestDeliveryTime ?latestNotificationError ?latestDeliveryError
         ?isLogging ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeLoggingStopped =
-        field_map json "TimeLoggingStopped" String_.of_json in
+        field_map json__ "TimeLoggingStopped" String_.of_json in
       let timeLoggingStarted =
-        field_map json "TimeLoggingStarted" String_.of_json in
+        field_map json__ "TimeLoggingStarted" String_.of_json in
       let latestDeliveryAttemptSucceeded =
-        field_map json "LatestDeliveryAttemptSucceeded" String_.of_json in
+        field_map json__ "LatestDeliveryAttemptSucceeded" String_.of_json in
       let latestNotificationAttemptSucceeded =
-        field_map json "LatestNotificationAttemptSucceeded" String_.of_json in
+        field_map json__ "LatestNotificationAttemptSucceeded" String_.of_json in
       let latestNotificationAttemptTime =
-        field_map json "LatestNotificationAttemptTime" String_.of_json in
+        field_map json__ "LatestNotificationAttemptTime" String_.of_json in
       let latestDeliveryAttemptTime =
-        field_map json "LatestDeliveryAttemptTime" String_.of_json in
+        field_map json__ "LatestDeliveryAttemptTime" String_.of_json in
       let latestDigestDeliveryError =
-        field_map json "LatestDigestDeliveryError" String_.of_json in
+        field_map json__ "LatestDigestDeliveryError" String_.of_json in
       let latestDigestDeliveryTime =
-        field_map json "LatestDigestDeliveryTime" Date.of_json in
+        field_map json__ "LatestDigestDeliveryTime" Date.of_json in
       let latestCloudWatchLogsDeliveryTime =
-        field_map json "LatestCloudWatchLogsDeliveryTime" Date.of_json in
+        field_map json__ "LatestCloudWatchLogsDeliveryTime" Date.of_json in
       let latestCloudWatchLogsDeliveryError =
-        field_map json "LatestCloudWatchLogsDeliveryError" String_.of_json in
-      let stopLoggingTime = field_map json "StopLoggingTime" Date.of_json in
-      let startLoggingTime = field_map json "StartLoggingTime" Date.of_json in
+        field_map json__ "LatestCloudWatchLogsDeliveryError" String_.of_json in
+      let stopLoggingTime = field_map json__ "StopLoggingTime" Date.of_json in
+      let startLoggingTime = field_map json__ "StartLoggingTime" Date.of_json in
       let latestNotificationTime =
-        field_map json "LatestNotificationTime" Date.of_json in
+        field_map json__ "LatestNotificationTime" Date.of_json in
       let latestDeliveryTime =
-        field_map json "LatestDeliveryTime" Date.of_json in
+        field_map json__ "LatestDeliveryTime" Date.of_json in
       let latestNotificationError =
-        field_map json "LatestNotificationError" String_.of_json in
+        field_map json__ "LatestNotificationError" String_.of_json in
       let latestDeliveryError =
-        field_map json "LatestDeliveryError" String_.of_json in
-      let isLogging = field_map json "IsLogging" Boolean.of_json in
+        field_map json__ "LatestDeliveryError" String_.of_json in
+      let isLogging = field_map json__ "IsLogging" Boolean.of_json in
       make ?timeLoggingStopped ?timeLoggingStarted
         ?latestDeliveryAttemptSucceeded ?latestNotificationAttemptSucceeded
         ?latestNotificationAttemptTime ?latestDeliveryAttemptTime
@@ -6533,7 +13878,7 @@ module GetTrailStatusRequest =
       {
       name: String_.t
         [@ocaml.doc
-          "Specifies the name or the CloudTrail ARN of the trail for which you are requesting status. To get the status of a shadow trail (a replication of the trail in another region), you must specify its ARN. The following is the format of a trail ARN. arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"]}
+          "Specifies the name or the CloudTrail ARN of the trail for which you are requesting status. To get the status of a shadow trail (a replication of the trail in another Region), you must specify its ARN. The following is the format of a trail ARN: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail If the trail is an organization trail and you are a member account in the organization in Organizations, you must provide the full ARN of that trail, and not just the name."]}
     let context_ = "GetTrailStatusRequest"
     let make ~name = fun () -> { name }
     let to_value x =
@@ -6544,8 +13889,8 @@ module GetTrailStatusRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" String_.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The name of a trail about which you want the current status."]
@@ -6554,7 +13899,8 @@ module GetTrailResponse =
     type nonrec t = {
       trail: Trail.t option }
     type nonrec error =
-      [ `InvalidTrailNameException of InvalidTrailNameException.t 
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `InvalidTrailNameException of InvalidTrailNameException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
@@ -6562,6 +13908,9 @@ module GetTrailResponse =
     let make ?trail = fun () -> { trail }
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
       | "OperationNotPermittedException" ->
@@ -6577,6 +13926,9 @@ module GetTrailResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
       | "OperationNotPermittedException" ->
@@ -6591,6 +13943,10 @@ module GetTrailResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
       | `InvalidTrailNameException e ->
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
@@ -6619,8 +13975,8 @@ module GetTrailResponse =
       let trail = (Option.map ~f:Trail.of_xml) (Xml.child xml_arg0 "Trail") in
       make ?trail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trail = field_map json "Trail" Trail.of_json in make ?trail ()
+    let of_json json__ =
+      let trail = field_map json__ "Trail" Trail.of_json in make ?trail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns settings information for a specified trail."]
 module GetTrailRequest =
@@ -6640,10 +13996,168 @@ module GetTrailRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" String_.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns settings information for a specified trail."]
+module GetResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the CloudTrail event data store, dashboard, or channel attached to resource-based policy. Example event data store ARN format: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE Example dashboard ARN format: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash Example channel ARN format: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"];
+      resourcePolicy: ResourcePolicy.t option
+        [@ocaml.doc
+          "A JSON-formatted string that contains the resource-based policy attached to the CloudTrail event data store, dashboard, or channel."];
+      delegatedAdminResourcePolicy: ResourcePolicy.t option
+        [@ocaml.doc
+          "The default resource-based policy that is automatically generated for the delegated administrator of an Organizations organization. This policy will be evaluated in tandem with any policy you submit for the resource. For more information about this policy, see Default resource policy for delegated administrators."]}
+    type nonrec error =
+      [ `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ResourceARNNotValidException of ResourceARNNotValidException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourcePolicyNotFoundException of ResourcePolicyNotFoundException.t 
+      | `ResourceTypeNotSupportedException of
+          ResourceTypeNotSupportedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn =
+      fun ?resourcePolicy ->
+        fun ?delegatedAdminResourcePolicy ->
+          fun () ->
+            { resourceArn; resourcePolicy; delegatedAdminResourcePolicy }
+    let error_of_json name json =
+      match name with
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "ResourceARNNotValidException" ->
+          `ResourceARNNotValidException
+            (ResourceARNNotValidException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourcePolicyNotFoundException" ->
+          `ResourcePolicyNotFoundException
+            (ResourcePolicyNotFoundException.of_json json)
+      | "ResourceTypeNotSupportedException" ->
+          `ResourceTypeNotSupportedException
+            (ResourceTypeNotSupportedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "ResourceARNNotValidException" ->
+          `ResourceARNNotValidException
+            (ResourceARNNotValidException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourcePolicyNotFoundException" ->
+          `ResourcePolicyNotFoundException
+            (ResourcePolicyNotFoundException.of_xml xml)
+      | "ResourceTypeNotSupportedException" ->
+          `ResourceTypeNotSupportedException
+            (ResourceTypeNotSupportedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `ResourceARNNotValidException e ->
+          `Assoc
+            [("error", (`String "ResourceARNNotValidException"));
+            ("details", (ResourceARNNotValidException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourcePolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourcePolicyNotFoundException"));
+            ("details", (ResourcePolicyNotFoundException.to_json e))]
+      | `ResourceTypeNotSupportedException e ->
+          `Assoc
+            [("error", (`String "ResourceTypeNotSupportedException"));
+            ("details", (ResourceTypeNotSupportedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("ResourcePolicy",
+          (Option.map x.resourcePolicy ~f:ResourcePolicy.to_value));
+        ("DelegatedAdminResourcePolicy",
+          (Option.map x.delegatedAdminResourcePolicy
+             ~f:ResourcePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delegatedAdminResourcePolicy =
+        (Option.map ~f:ResourcePolicy.of_xml)
+          (Xml.child xml_arg0 "DelegatedAdminResourcePolicy") in
+      let resourcePolicy =
+        (Option.map ~f:ResourcePolicy.of_xml)
+          (Xml.child xml_arg0 "ResourcePolicy") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?delegatedAdminResourcePolicy ?resourcePolicy ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delegatedAdminResourcePolicy =
+        field_map json__ "DelegatedAdminResourcePolicy"
+          ResourcePolicy.of_json in
+      let resourcePolicy =
+        field_map json__ "ResourcePolicy" ResourcePolicy.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      make ?delegatedAdminResourcePolicy ?resourcePolicy ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the JSON text of the resource-based policy document attached to the CloudTrail event data store, dashboard, or channel."]
+module GetResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the CloudTrail event data store, dashboard, or channel attached to the resource-based policy. Example event data store ARN format: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE Example dashboard ARN format: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash Example channel ARN format: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"]}
+    let context_ = "GetResourcePolicyRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the JSON text of the resource-based policy document attached to the CloudTrail event data store, dashboard, or channel."]
 module GetQueryResultsResponse =
   struct
     type nonrec t =
@@ -6666,9 +14180,13 @@ module GetQueryResultsResponse =
           EventDataStoreARNInvalidException.t 
       | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
       | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InsufficientEncryptionPolicyException of
+          InsufficientEncryptionPolicyException.t 
       | `InvalidMaxResultsException of InvalidMaxResultsException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `QueryIdNotFoundException of QueryIdNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
@@ -6697,6 +14215,9 @@ module GetQueryResultsResponse =
       | "InactiveEventDataStoreException" ->
           `InactiveEventDataStoreException
             (InactiveEventDataStoreException.of_json json)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_json json)
       | "InvalidMaxResultsException" ->
           `InvalidMaxResultsException
             (InvalidMaxResultsException.of_json json)
@@ -6704,6 +14225,9 @@ module GetQueryResultsResponse =
           `InvalidNextTokenException (InvalidNextTokenException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
@@ -6726,12 +14250,18 @@ module GetQueryResultsResponse =
       | "InactiveEventDataStoreException" ->
           `InactiveEventDataStoreException
             (InactiveEventDataStoreException.of_xml xml)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_xml xml)
       | "InvalidMaxResultsException" ->
           `InvalidMaxResultsException (InvalidMaxResultsException.of_xml xml)
       | "InvalidNextTokenException" ->
           `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
@@ -6756,6 +14286,10 @@ module GetQueryResultsResponse =
           `Assoc
             [("error", (`String "InactiveEventDataStoreException"));
             ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InsufficientEncryptionPolicyException e ->
+          `Assoc
+            [("error", (`String "InsufficientEncryptionPolicyException"));
+            ("details", (InsufficientEncryptionPolicyException.to_json e))]
       | `InvalidMaxResultsException e ->
           `Assoc
             [("error", (`String "InvalidMaxResultsException"));
@@ -6768,6 +14302,10 @@ module GetQueryResultsResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
@@ -6814,24 +14352,24 @@ module GetQueryResultsResponse =
       make ?errorMessage ?nextToken ?queryResultRows ?queryStatistics
         ?queryStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let queryResultRows =
-        field_map json "QueryResultRows" QueryResultRows.of_json in
+        field_map json__ "QueryResultRows" QueryResultRows.of_json in
       let queryStatistics =
-        field_map json "QueryStatistics" QueryStatistics.of_json in
-      let queryStatus = field_map json "QueryStatus" QueryStatus.of_json in
+        field_map json__ "QueryStatistics" QueryStatistics.of_json in
+      let queryStatus = field_map json__ "QueryStatus" QueryStatus.of_json in
       make ?errorMessage ?nextToken ?queryResultRows ?queryStatistics
         ?queryStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets event data results of a query. You must specify the QueryID value returned by the StartQuery operation, and an ARN for EventDataStore."]
+       "Gets event data results of a query. You must specify the QueryID value returned by the StartQuery operation."]
 module GetQueryResultsRequest =
   struct
     type nonrec t =
       {
-      eventDataStore: EventDataStoreArn.t
+      eventDataStore: EventDataStoreArn.t option
         [@ocaml.doc
           "The ARN (or ID suffix of the ARN) of the event data store against which the query was run."];
       queryId: UUID.t
@@ -6841,23 +14379,38 @@ module GetQueryResultsRequest =
           "A token you can use to get the next page of query results."];
       maxQueryResults: MaxQueryResults.t option
         [@ocaml.doc
-          "The maximum number of query results to display on a single page."]}
+          "The maximum number of query results to display on a single page."];
+      eventDataStoreOwnerAccountId: AccountId.t option
+        [@ocaml.doc "The account ID of the event data store owner."]}
     let context_ = "GetQueryResultsRequest"
-    let make ?nextToken =
-      fun ?maxQueryResults ->
-        fun ~eventDataStore ->
-          fun ~queryId ->
-            fun () -> { nextToken; maxQueryResults; eventDataStore; queryId }
+    let make ?eventDataStore =
+      fun ?nextToken ->
+        fun ?maxQueryResults ->
+          fun ?eventDataStoreOwnerAccountId ->
+            fun ~queryId ->
+              fun () ->
+                {
+                  eventDataStore;
+                  nextToken;
+                  maxQueryResults;
+                  eventDataStoreOwnerAccountId;
+                  queryId
+                }
     let to_value x =
       structure_to_value
         [("EventDataStore",
-           (Some (EventDataStoreArn.to_value x.eventDataStore)));
+           (Option.map x.eventDataStore ~f:EventDataStoreArn.to_value));
         ("QueryId", (Some (UUID.to_value x.queryId)));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("MaxQueryResults",
-          (Option.map x.maxQueryResults ~f:MaxQueryResults.to_value))]
+          (Option.map x.maxQueryResults ~f:MaxQueryResults.to_value));
+        ("EventDataStoreOwnerAccountId",
+          (Option.map x.eventDataStoreOwnerAccountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eventDataStoreOwnerAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreOwnerAccountId") in
       let maxQueryResults =
         (Option.map ~f:MaxQueryResults.of_xml)
           (Xml.child xml_arg0 "MaxQueryResults") in
@@ -6867,21 +14420,25 @@ module GetQueryResultsRequest =
       let queryId =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
       let eventDataStore =
-        EventDataStoreArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
-      make ?maxQueryResults ?nextToken ~queryId ~eventDataStore ()
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStore") in
+      make ?eventDataStoreOwnerAccountId ?maxQueryResults ?nextToken ~queryId
+        ?eventDataStore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let eventDataStoreOwnerAccountId =
+        field_map json__ "EventDataStoreOwnerAccountId" AccountId.of_json in
       let maxQueryResults =
-        field_map json "MaxQueryResults" MaxQueryResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let queryId = field_map_exn json "QueryId" UUID.of_json in
+        field_map json__ "MaxQueryResults" MaxQueryResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let queryId = field_map_exn json__ "QueryId" UUID.of_json in
       let eventDataStore =
-        field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
-      make ?maxQueryResults ?nextToken ~queryId ~eventDataStore ()
+        field_map json__ "EventDataStore" EventDataStoreArn.of_json in
+      make ?eventDataStoreOwnerAccountId ?maxQueryResults ?nextToken ~queryId
+        ?eventDataStore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets event data results of a query. You must specify the QueryID value returned by the StartQuery operation, and an ARN for EventDataStore."]
+       "Gets event data results of a query. You must specify the QueryID value returned by the StartQuery operation."]
 module GetInsightSelectorsResponse =
   struct
     type nonrec t =
@@ -6891,26 +14448,61 @@ module GetInsightSelectorsResponse =
           "The Amazon Resource Name (ARN) of a trail for which you want to get Insights selectors."];
       insightSelectors: InsightSelectors.t option
         [@ocaml.doc
-          "A JSON string that contains the insight types you want to log on a trail. In this release, ApiErrorRateInsight and ApiCallRateInsight are supported as insight types."]}
+          "Contains the Insights types that are enabled on a trail or event data store. It also specifies the event categories on which a particular Insight type is enabled. ApiCallRateInsight and ApiErrorRateInsight are valid Insight types.The EventCategory field can specify Management or Data events or both. For event data store, you can log Insights for management events only."];
+      eventDataStoreArn: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The ARN of the source event data store that enabled Insights events."];
+      insightsDestination: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The ARN of the destination event data store that logs Insights events."]}
     type nonrec error =
-      [ `InsightNotEnabledException of InsightNotEnabledException.t 
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `InsightNotEnabledException of InsightNotEnabledException.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?trailARN =
-      fun ?insightSelectors -> fun () -> { trailARN; insightSelectors }
+      fun ?insightSelectors ->
+        fun ?eventDataStoreArn ->
+          fun ?insightsDestination ->
+            fun () ->
+              {
+                trailARN;
+                insightSelectors;
+                eventDataStoreArn;
+                insightsDestination
+              }
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
       | "InsightNotEnabledException" ->
           `InsightNotEnabledException
             (InsightNotEnabledException.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_json json)
       | "UnsupportedOperationException" ->
@@ -6921,13 +14513,26 @@ module GetInsightSelectorsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
       | "InsightNotEnabledException" ->
           `InsightNotEnabledException (InsightNotEnabledException.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_xml xml)
       | "UnsupportedOperationException" ->
@@ -6937,18 +14542,38 @@ module GetInsightSelectorsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
       | `InsightNotEnabledException e ->
           `Assoc
             [("error", (`String "InsightNotEnabledException"));
             ("details", (InsightNotEnabledException.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
       | `InvalidTrailNameException e ->
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
             ("details", (OperationNotPermittedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TrailNotFoundException e ->
           `Assoc
             [("error", (`String "TrailNotFoundException"));
@@ -6966,48 +14591,258 @@ module GetInsightSelectorsResponse =
       structure_to_value
         [("TrailARN", (Option.map x.trailARN ~f:String_.to_value));
         ("InsightSelectors",
-          (Option.map x.insightSelectors ~f:InsightSelectors.to_value))]
+          (Option.map x.insightSelectors ~f:InsightSelectors.to_value));
+        ("EventDataStoreArn",
+          (Option.map x.eventDataStoreArn ~f:EventDataStoreArn.to_value));
+        ("InsightsDestination",
+          (Option.map x.insightsDestination ~f:EventDataStoreArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let insightsDestination =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "InsightsDestination") in
+      let eventDataStoreArn =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreArn") in
       let insightSelectors =
         (Option.map ~f:InsightSelectors.of_xml)
           (Xml.child xml_arg0 "InsightSelectors") in
       let trailARN =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
-      make ?insightSelectors ?trailARN ()
+      make ?insightsDestination ?eventDataStoreArn ?insightSelectors
+        ?trailARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let insightsDestination =
+        field_map json__ "InsightsDestination" EventDataStoreArn.of_json in
+      let eventDataStoreArn =
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
       let insightSelectors =
-        field_map json "InsightSelectors" InsightSelectors.of_json in
-      let trailARN = field_map json "TrailARN" String_.of_json in
-      make ?insightSelectors ?trailARN ()
+        field_map json__ "InsightSelectors" InsightSelectors.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
+      make ?insightsDestination ?eventDataStoreArn ?insightSelectors
+        ?trailARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the settings for the Insights event selectors that you configured for your trail. GetInsightSelectors shows if CloudTrail Insights event logging is enabled on the trail, and if it is, which insight types are enabled. If you run GetInsightSelectors on a trail that does not have Insights events enabled, the operation throws the exception InsightNotEnabledException For more information, see Logging CloudTrail Insights Events for Trails in the CloudTrail User Guide."]
+       "Describes the settings for the Insights event selectors that you configured for your trail or event data store. GetInsightSelectors shows if CloudTrail Insights logging is enabled and which Insights types are configured with corresponding event categories. If you run GetInsightSelectors on a trail or event data store that does not have Insights events enabled, the operation throws the exception InsightNotEnabledException Specify either the EventDataStore parameter to get Insights event selectors for an event data store, or the TrailName parameter to the get Insights event selectors for a trail. You cannot specify these parameters together. For more information, see Working with CloudTrail Insights in the CloudTrail User Guide."]
 module GetInsightSelectorsRequest =
   struct
     type nonrec t =
       {
-      trailName: String_.t
+      trailName: String_.t option
         [@ocaml.doc
-          "Specifies the name of the trail or trail ARN. If you specify a trail name, the string must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), periods (.), underscores (_), or dashes (-) Start with a letter or number, and end with a letter or number Be between 3 and 128 characters Have no adjacent periods, underscores or dashes. Names like my-_namespace and my--namespace are not valid. Not be in IP address format (for example, 192.168.5.4) If you specify a trail ARN, it must be in the format: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"]}
-    let context_ = "GetInsightSelectorsRequest"
-    let make ~trailName = fun () -> { trailName }
+          "Specifies the name of the trail or trail ARN. If you specify a trail name, the string must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), periods (.), underscores (_), or dashes (-) Start with a letter or number, and end with a letter or number Be between 3 and 128 characters Have no adjacent periods, underscores or dashes. Names like my-_namespace and my--namespace are not valid. Not be in IP address format (for example, 192.168.5.4) If you specify a trail ARN, it must be in the format: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail You cannot use this parameter with the EventDataStore parameter."];
+      eventDataStore: EventDataStoreArn.t option
+        [@ocaml.doc
+          "Specifies the ARN (or ID suffix of the ARN) of the event data store for which you want to get Insights selectors. You cannot use this parameter with the TrailName parameter."]}
+    let make ?trailName =
+      fun ?eventDataStore -> fun () -> { trailName; eventDataStore }
     let to_value x =
       structure_to_value
-        [("TrailName", (Some (String_.to_value x.trailName)))]
+        [("TrailName", (Option.map x.trailName ~f:String_.to_value));
+        ("EventDataStore",
+          (Option.map x.eventDataStore ~f:EventDataStoreArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eventDataStore =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStore") in
       let trailName =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrailName") in
-      make ~trailName ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailName") in
+      make ?eventDataStore ?trailName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trailName = field_map_exn json "TrailName" String_.of_json in
-      make ~trailName ()
+    let of_json json__ =
+      let eventDataStore =
+        field_map json__ "EventDataStore" EventDataStoreArn.of_json in
+      let trailName = field_map json__ "TrailName" String_.of_json in
+      make ?eventDataStore ?trailName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the settings for the Insights event selectors that you configured for your trail. GetInsightSelectors shows if CloudTrail Insights event logging is enabled on the trail, and if it is, which insight types are enabled. If you run GetInsightSelectors on a trail that does not have Insights events enabled, the operation throws the exception InsightNotEnabledException For more information, see Logging CloudTrail Insights Events for Trails in the CloudTrail User Guide."]
+       "Describes the settings for the Insights event selectors that you configured for your trail or event data store. GetInsightSelectors shows if CloudTrail Insights logging is enabled and which Insights types are configured with corresponding event categories. If you run GetInsightSelectors on a trail or event data store that does not have Insights events enabled, the operation throws the exception InsightNotEnabledException Specify either the EventDataStore parameter to get Insights event selectors for an event data store, or the TrailName parameter to the get Insights event selectors for a trail. You cannot specify these parameters together. For more information, see Working with CloudTrail Insights in the CloudTrail User Guide."]
+module GetImportResponse =
+  struct
+    type nonrec t =
+      {
+      importId: UUID.t option [@ocaml.doc "The ID of the import."];
+      destinations: ImportDestinations.t option
+        [@ocaml.doc "The ARN of the destination event data store."];
+      importSource: ImportSource.t option
+        [@ocaml.doc "The source S3 bucket."];
+      startEventTime: Date.t option
+        [@ocaml.doc
+          "Used with EndEventTime to bound a StartImport request, and limit imported trail events to only those events logged within a specified time period."];
+      endEventTime: Date.t option
+        [@ocaml.doc
+          "Used with StartEventTime to bound a StartImport request, and limit imported trail events to only those events logged within a specified time period."];
+      importStatus: ImportStatus.t option
+        [@ocaml.doc "The status of the import."];
+      createdTimestamp: Date.t option
+        [@ocaml.doc "The timestamp of the import's creation."];
+      updatedTimestamp: Date.t option
+        [@ocaml.doc "The timestamp of when the import was updated."];
+      importStatistics: ImportStatistics.t option
+        [@ocaml.doc
+          "Provides statistics for the import. CloudTrail does not update import statistics in real-time. Returned values for parameters such as EventsCompleted may be lower than the actual value, because CloudTrail updates statistics incrementally over the course of the import."]}
+    type nonrec error =
+      [ `ImportNotFoundException of ImportNotFoundException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?importId =
+      fun ?destinations ->
+        fun ?importSource ->
+          fun ?startEventTime ->
+            fun ?endEventTime ->
+              fun ?importStatus ->
+                fun ?createdTimestamp ->
+                  fun ?updatedTimestamp ->
+                    fun ?importStatistics ->
+                      fun () ->
+                        {
+                          importId;
+                          destinations;
+                          importSource;
+                          startEventTime;
+                          endEventTime;
+                          importStatus;
+                          createdTimestamp;
+                          updatedTimestamp;
+                          importStatistics
+                        }
+    let error_of_json name json =
+      match name with
+      | "ImportNotFoundException" ->
+          `ImportNotFoundException (ImportNotFoundException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ImportNotFoundException" ->
+          `ImportNotFoundException (ImportNotFoundException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ImportNotFoundException e ->
+          `Assoc
+            [("error", (`String "ImportNotFoundException"));
+            ("details", (ImportNotFoundException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ImportId", (Option.map x.importId ~f:UUID.to_value));
+        ("Destinations",
+          (Option.map x.destinations ~f:ImportDestinations.to_value));
+        ("ImportSource",
+          (Option.map x.importSource ~f:ImportSource.to_value));
+        ("StartEventTime", (Option.map x.startEventTime ~f:Date.to_value));
+        ("EndEventTime", (Option.map x.endEventTime ~f:Date.to_value));
+        ("ImportStatus",
+          (Option.map x.importStatus ~f:ImportStatus.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Date.to_value));
+        ("UpdatedTimestamp",
+          (Option.map x.updatedTimestamp ~f:Date.to_value));
+        ("ImportStatistics",
+          (Option.map x.importStatistics ~f:ImportStatistics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importStatistics =
+        (Option.map ~f:ImportStatistics.of_xml)
+          (Xml.child xml_arg0 "ImportStatistics") in
+      let updatedTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreatedTimestamp") in
+      let importStatus =
+        (Option.map ~f:ImportStatus.of_xml)
+          (Xml.child xml_arg0 "ImportStatus") in
+      let endEventTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "EndEventTime") in
+      let startEventTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartEventTime") in
+      let importSource =
+        (Option.map ~f:ImportSource.of_xml)
+          (Xml.child xml_arg0 "ImportSource") in
+      let destinations =
+        (Option.map ~f:ImportDestinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      let importId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "ImportId") in
+      make ?importStatistics ?updatedTimestamp ?createdTimestamp
+        ?importStatus ?endEventTime ?startEventTime ?importSource
+        ?destinations ?importId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importStatistics =
+        field_map json__ "ImportStatistics" ImportStatistics.of_json in
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
+      let importStatus = field_map json__ "ImportStatus" ImportStatus.of_json in
+      let endEventTime = field_map json__ "EndEventTime" Date.of_json in
+      let startEventTime = field_map json__ "StartEventTime" Date.of_json in
+      let importSource = field_map json__ "ImportSource" ImportSource.of_json in
+      let destinations =
+        field_map json__ "Destinations" ImportDestinations.of_json in
+      let importId = field_map json__ "ImportId" UUID.of_json in
+      make ?importStatistics ?updatedTimestamp ?createdTimestamp
+        ?importStatus ?endEventTime ?startEventTime ?importSource
+        ?destinations ?importId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a specific import."]
+module GetImportRequest =
+  struct
+    type nonrec t = {
+      importId: UUID.t [@ocaml.doc "The ID for the import."]}
+    let context_ = "GetImportRequest"
+    let make ~importId = fun () -> { importId }
+    let to_value x =
+      structure_to_value [("ImportId", (Some (UUID.to_value x.importId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importId =
+        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ImportId") in
+      make ~importId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importId = field_map_exn json__ "ImportId" UUID.of_json in
+      make ~importId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a specific import."]
 module GetEventSelectorsResponse =
   struct
     type nonrec t =
@@ -7020,7 +14855,10 @@ module GetEventSelectorsResponse =
         [@ocaml.doc
           "The advanced event selectors that are configured for the trail."]}
     type nonrec error =
-      [ `InvalidTrailNameException of InvalidTrailNameException.t 
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
@@ -7031,8 +14869,14 @@ module GetEventSelectorsResponse =
           fun () -> { trailARN; eventSelectors; advancedEventSelectors }
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
@@ -7046,8 +14890,14 @@ module GetEventSelectorsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
@@ -7060,10 +14910,18 @@ module GetEventSelectorsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
       | `InvalidTrailNameException e ->
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
@@ -7101,17 +14959,17 @@ module GetEventSelectorsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
       make ?advancedEventSelectors ?eventSelectors ?trailARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
       let eventSelectors =
-        field_map json "EventSelectors" EventSelectors.of_json in
-      let trailARN = field_map json "TrailARN" String_.of_json in
+        field_map json__ "EventSelectors" EventSelectors.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
       make ?advancedEventSelectors ?eventSelectors ?trailARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the settings for the event selectors that you configured for your trail. The information returned for your event selectors includes the following: If your event selector includes read-only events, write-only events, or all events. This applies to both management events and data events. If your event selector includes management events. If your event selector includes data events, the resources on which you are logging data events. For more information, see Logging Data and Management Events for Trails in the CloudTrail User Guide."]
+       "Describes the settings for the event selectors that you configured for your trail. The information returned for your event selectors includes the following: If your event selector includes read-only events, write-only events, or all events. This applies to management events, data events, and network activity events. If your event selector includes management events. If your event selector includes network activity events, the event sources for which you are logging network activity events. If your event selector includes data events, the resources on which you are logging data events. For more information about logging management, data, and network activity events, see the following topics in the CloudTrail User Guide: Logging management events Logging data events Logging network activity events"]
 module GetEventSelectorsRequest =
   struct
     type nonrec t =
@@ -7130,12 +14988,12 @@ module GetEventSelectorsRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrailName") in
       make ~trailName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trailName = field_map_exn json "TrailName" String_.of_json in
+    let of_json json__ =
+      let trailName = field_map_exn json__ "TrailName" String_.of_json in
       make ~trailName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the settings for the event selectors that you configured for your trail. The information returned for your event selectors includes the following: If your event selector includes read-only events, write-only events, or all events. This applies to both management events and data events. If your event selector includes management events. If your event selector includes data events, the resources on which you are logging data events. For more information, see Logging Data and Management Events for Trails in the CloudTrail User Guide."]
+       "Describes the settings for the event selectors that you configured for your trail. The information returned for your event selectors includes the following: If your event selector includes read-only events, write-only events, or all events. This applies to management events, data events, and network activity events. If your event selector includes management events. If your event selector includes network activity events, the event sources for which you are logging network activity events. If your event selector includes data events, the resources on which you are logging data events. For more information about logging management, data, and network activity events, see the following topics in the CloudTrail User Guide: Logging management events Logging data events Logging network activity events"]
 module GetEventDataStoreResponse =
   struct
     type nonrec t =
@@ -7145,14 +15003,13 @@ module GetEventDataStoreResponse =
       name: EventDataStoreName.t option
         [@ocaml.doc "The name of the event data store."];
       status: EventDataStoreStatus.t option
-        [@ocaml.doc
-          "The status of an event data store. Values can be ENABLED and PENDING_DELETION."];
+        [@ocaml.doc "The status of an event data store."];
       advancedEventSelectors: AdvancedEventSelectors.t option
         [@ocaml.doc
           "The advanced event selectors used to select events for the data store."];
       multiRegionEnabled: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the event data store includes events from all regions, or only from the region in which it was created."];
+          "Indicates whether the event data store includes events from all Regions, or only from the Region in which it was created."];
       organizationEnabled: Boolean.t option
         [@ocaml.doc
           "Indicates whether an event data store is collecting logged events for an organization in Organizations."];
@@ -7164,13 +15021,29 @@ module GetEventDataStoreResponse =
         [@ocaml.doc "The timestamp of the event data store's creation."];
       updatedTimestamp: Date.t option
         [@ocaml.doc
-          "Shows the time that an event data store was updated, if applicable. UpdatedTimestamp is always either the same or newer than the time shown in CreatedTimestamp."]}
+          "Shows the time that an event data store was updated, if applicable. UpdatedTimestamp is always either the same or newer than the time shown in CreatedTimestamp."];
+      kmsKeyId: EventDataStoreKmsKeyId.t option
+        [@ocaml.doc
+          "Specifies the KMS key ID that encrypts the events delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
+      billingMode: BillingMode.t option
+        [@ocaml.doc "The billing mode for the event data store."];
+      federationStatus: FederationStatus.t option
+        [@ocaml.doc
+          "Indicates the Lake query federation status. The status is ENABLED if Lake query federation is enabled, or DISABLED if Lake query federation is disabled. You cannot delete an event data store if the FederationStatus is ENABLED."];
+      federationRoleArn: FederationRoleArn.t option
+        [@ocaml.doc
+          "If Lake query federation is enabled, provides the ARN of the federation role used to access the resources for the federated event data store."];
+      partitionKeys: PartitionKeyList.t option
+        [@ocaml.doc
+          "The partition keys for the event data store. To improve query performance and efficiency, CloudTrail Lake organizes event data into partitions based on values derived from partition keys."]}
     type nonrec error =
       [
         `EventDataStoreARNInvalidException of
           EventDataStoreARNInvalidException.t 
       | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -7184,19 +15057,29 @@ module GetEventDataStoreResponse =
                   fun ?terminationProtectionEnabled ->
                     fun ?createdTimestamp ->
                       fun ?updatedTimestamp ->
-                        fun () ->
-                          {
-                            eventDataStoreArn;
-                            name;
-                            status;
-                            advancedEventSelectors;
-                            multiRegionEnabled;
-                            organizationEnabled;
-                            retentionPeriod;
-                            terminationProtectionEnabled;
-                            createdTimestamp;
-                            updatedTimestamp
-                          }
+                        fun ?kmsKeyId ->
+                          fun ?billingMode ->
+                            fun ?federationStatus ->
+                              fun ?federationRoleArn ->
+                                fun ?partitionKeys ->
+                                  fun () ->
+                                    {
+                                      eventDataStoreArn;
+                                      name;
+                                      status;
+                                      advancedEventSelectors;
+                                      multiRegionEnabled;
+                                      organizationEnabled;
+                                      retentionPeriod;
+                                      terminationProtectionEnabled;
+                                      createdTimestamp;
+                                      updatedTimestamp;
+                                      kmsKeyId;
+                                      billingMode;
+                                      federationStatus;
+                                      federationRoleArn;
+                                      partitionKeys
+                                    }
     let error_of_json name json =
       match name with
       | "EventDataStoreARNInvalidException" ->
@@ -7207,6 +15090,9 @@ module GetEventDataStoreResponse =
             (EventDataStoreNotFoundException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
@@ -7226,6 +15112,9 @@ module GetEventDataStoreResponse =
             (EventDataStoreNotFoundException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
@@ -7248,6 +15137,10 @@ module GetEventDataStoreResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
@@ -7282,9 +15175,32 @@ module GetEventDataStoreResponse =
         ("CreatedTimestamp",
           (Option.map x.createdTimestamp ~f:Date.to_value));
         ("UpdatedTimestamp",
-          (Option.map x.updatedTimestamp ~f:Date.to_value))]
+          (Option.map x.updatedTimestamp ~f:Date.to_value));
+        ("KmsKeyId",
+          (Option.map x.kmsKeyId ~f:EventDataStoreKmsKeyId.to_value));
+        ("BillingMode", (Option.map x.billingMode ~f:BillingMode.to_value));
+        ("FederationStatus",
+          (Option.map x.federationStatus ~f:FederationStatus.to_value));
+        ("FederationRoleArn",
+          (Option.map x.federationRoleArn ~f:FederationRoleArn.to_value));
+        ("PartitionKeys",
+          (Option.map x.partitionKeys ~f:PartitionKeyList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let partitionKeys =
+        (Option.map ~f:PartitionKeyList.of_xml)
+          (Xml.child xml_arg0 "PartitionKeys") in
+      let federationRoleArn =
+        (Option.map ~f:FederationRoleArn.of_xml)
+          (Xml.child xml_arg0 "FederationRoleArn") in
+      let federationStatus =
+        (Option.map ~f:FederationStatus.of_xml)
+          (Xml.child xml_arg0 "FederationStatus") in
+      let billingMode =
+        (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
+      let kmsKeyId =
+        (Option.map ~f:EventDataStoreKmsKeyId.of_xml)
+          (Xml.child xml_arg0 "KmsKeyId") in
       let updatedTimestamp =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
       let createdTimestamp =
@@ -7312,32 +15228,45 @@ module GetEventDataStoreResponse =
       let eventDataStoreArn =
         (Option.map ~f:EventDataStoreArn.of_xml)
           (Xml.child xml_arg0 "EventDataStoreArn") in
-      make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
-        ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
-        ?advancedEventSelectors ?status ?name ?eventDataStoreArn ()
+      make ?partitionKeys ?federationRoleArn ?federationStatus ?billingMode
+        ?kmsKeyId ?updatedTimestamp ?createdTimestamp
+        ?terminationProtectionEnabled ?retentionPeriod ?organizationEnabled
+        ?multiRegionEnabled ?advancedEventSelectors ?status ?name
+        ?eventDataStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
-      let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
+    let of_json json__ =
+      let partitionKeys =
+        field_map json__ "PartitionKeys" PartitionKeyList.of_json in
+      let federationRoleArn =
+        field_map json__ "FederationRoleArn" FederationRoleArn.of_json in
+      let federationStatus =
+        field_map json__ "FederationStatus" FederationStatus.of_json in
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
+      let kmsKeyId =
+        field_map json__ "KmsKeyId" EventDataStoreKmsKeyId.of_json in
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
       let terminationProtectionEnabled =
-        field_map json "TerminationProtectionEnabled"
+        field_map json__ "TerminationProtectionEnabled"
           TerminationProtectionEnabled.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
       let organizationEnabled =
-        field_map json "OrganizationEnabled" Boolean.of_json in
+        field_map json__ "OrganizationEnabled" Boolean.of_json in
       let multiRegionEnabled =
-        field_map json "MultiRegionEnabled" Boolean.of_json in
+        field_map json__ "MultiRegionEnabled" Boolean.of_json in
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
-      let status = field_map json "Status" EventDataStoreStatus.of_json in
-      let name = field_map json "Name" EventDataStoreName.of_json in
+      let status = field_map json__ "Status" EventDataStoreStatus.of_json in
+      let name = field_map json__ "Name" EventDataStoreName.of_json in
       let eventDataStoreArn =
-        field_map json "EventDataStoreArn" EventDataStoreArn.of_json in
-      make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
-        ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
-        ?advancedEventSelectors ?status ?name ?eventDataStoreArn ()
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
+      make ?partitionKeys ?federationRoleArn ?federationStatus ?billingMode
+        ?kmsKeyId ?updatedTimestamp ?createdTimestamp
+        ?terminationProtectionEnabled ?retentionPeriod ?organizationEnabled
+        ?multiRegionEnabled ?advancedEventSelectors ?status ?name
+        ?eventDataStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about an event data store specified as either an ARN or the ID portion of the ARN."]
@@ -7361,30 +15290,501 @@ module GetEventDataStoreRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ~eventDataStore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDataStore =
-        field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
+        field_map_exn json__ "EventDataStore" EventDataStoreArn.of_json in
       make ~eventDataStore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about an event data store specified as either an ARN or the ID portion of the ARN."]
-module DescribeTrailsResponse =
+module GetEventConfigurationResponse =
   struct
     type nonrec t =
       {
-      trailList: TrailList.t option
+      trailARN: String_.t option
         [@ocaml.doc
-          "The list of trail objects. Trail objects with string values are only returned if values for the objects exist in a trail's configuration. For example, SNSTopicName and SNSTopicARN are only returned in results if a trail is configured to send SNS notifications. Similarly, KMSKeyId only appears in results if a trail's log files are encrypted with KMS customer managed keys."]}
+          "The Amazon Resource Name (ARN) of the trail for which the event configuration settings are returned."];
+      eventDataStoreArn: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) or ID suffix of the ARN of the event data store for which the event configuration settings are returned."];
+      maxEventSize: MaxEventSize.t option
+        [@ocaml.doc
+          "The maximum allowed size for events stored in the specified event data store."];
+      contextKeySelectors: ContextKeySelectors.t option
+        [@ocaml.doc
+          "The list of context key selectors that are configured for the event data store."];
+      aggregationConfigurations: AggregationConfigurations.t option
+        [@ocaml.doc
+          "The list of aggregation configurations that are configured for the trail."]}
     type nonrec error =
-      [ `InvalidTrailNameException of InvalidTrailNameException.t 
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InvalidEventDataStoreCategoryException of
+          InvalidEventDataStoreCategoryException.t 
+      | `InvalidEventDataStoreStatusException of
+          InvalidEventDataStoreStatusException.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `TrailNotFoundException of TrailNotFoundException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?trailARN =
+      fun ?eventDataStoreArn ->
+        fun ?maxEventSize ->
+          fun ?contextKeySelectors ->
+            fun ?aggregationConfigurations ->
+              fun () ->
+                {
+                  trailARN;
+                  eventDataStoreArn;
+                  maxEventSize;
+                  contextKeySelectors;
+                  aggregationConfigurations
+                }
+    let error_of_json name json =
+      match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_json json)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidTrailNameException" ->
+          `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "TrailNotFoundException" ->
+          `TrailNotFoundException (TrailNotFoundException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_xml xml)
+      | "InvalidEventDataStoreStatusException" ->
+          `InvalidEventDataStoreStatusException
+            (InvalidEventDataStoreStatusException.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidTrailNameException" ->
+          `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "TrailNotFoundException" ->
+          `TrailNotFoundException (TrailNotFoundException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InvalidEventDataStoreCategoryException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreCategoryException"));
+            ("details", (InvalidEventDataStoreCategoryException.to_json e))]
+      | `InvalidEventDataStoreStatusException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreStatusException"));
+            ("details", (InvalidEventDataStoreStatusException.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidTrailNameException e ->
+          `Assoc
+            [("error", (`String "InvalidTrailNameException"));
+            ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `TrailNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrailNotFoundException"));
+            ("details", (TrailNotFoundException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TrailARN", (Option.map x.trailARN ~f:String_.to_value));
+        ("EventDataStoreArn",
+          (Option.map x.eventDataStoreArn ~f:EventDataStoreArn.to_value));
+        ("MaxEventSize",
+          (Option.map x.maxEventSize ~f:MaxEventSize.to_value));
+        ("ContextKeySelectors",
+          (Option.map x.contextKeySelectors ~f:ContextKeySelectors.to_value));
+        ("AggregationConfigurations",
+          (Option.map x.aggregationConfigurations
+             ~f:AggregationConfigurations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aggregationConfigurations =
+        (Option.map ~f:AggregationConfigurations.of_xml)
+          (Xml.child xml_arg0 "AggregationConfigurations") in
+      let contextKeySelectors =
+        (Option.map ~f:ContextKeySelectors.of_xml)
+          (Xml.child xml_arg0 "ContextKeySelectors") in
+      let maxEventSize =
+        (Option.map ~f:MaxEventSize.of_xml)
+          (Xml.child xml_arg0 "MaxEventSize") in
+      let eventDataStoreArn =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreArn") in
+      let trailARN =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
+      make ?aggregationConfigurations ?contextKeySelectors ?maxEventSize
+        ?eventDataStoreArn ?trailARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aggregationConfigurations =
+        field_map json__ "AggregationConfigurations"
+          AggregationConfigurations.of_json in
+      let contextKeySelectors =
+        field_map json__ "ContextKeySelectors" ContextKeySelectors.of_json in
+      let maxEventSize = field_map json__ "MaxEventSize" MaxEventSize.of_json in
+      let eventDataStoreArn =
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
+      make ?aggregationConfigurations ?contextKeySelectors ?maxEventSize
+        ?eventDataStoreArn ?trailARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the current event configuration settings for the specified event data store or trail. The response includes maximum event size configuration, the context key selectors configured for the event data store, and any aggregation settings configured for the trail."]
+module GetEventConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      trailName: String_.t option
+        [@ocaml.doc
+          "The name of the trail for which you want to retrieve event configuration settings."];
+      eventDataStore: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) or ID suffix of the ARN of the event data store for which you want to retrieve event configuration settings."]}
+    let make ?trailName =
+      fun ?eventDataStore -> fun () -> { trailName; eventDataStore }
+    let to_value x =
+      structure_to_value
+        [("TrailName", (Option.map x.trailName ~f:String_.to_value));
+        ("EventDataStore", (Option.map x.eventDataStore ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventDataStore =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EventDataStore") in
+      let trailName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailName") in
+      make ?eventDataStore ?trailName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventDataStore = field_map json__ "EventDataStore" String_.of_json in
+      let trailName = field_map json__ "TrailName" String_.of_json in
+      make ?eventDataStore ?trailName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the current event configuration settings for the specified event data store or trail. The response includes maximum event size configuration, the context key selectors configured for the event data store, and any aggregation settings configured for the trail."]
+module GetDashboardResponse =
+  struct
+    type nonrec t =
+      {
+      dashboardArn: DashboardArn.t option
+        [@ocaml.doc "The ARN for the dashboard."];
+      type_: DashboardType.t option [@ocaml.doc "The type of dashboard."];
+      status: DashboardStatus.t option
+        [@ocaml.doc "The status of the dashboard."];
+      widgets: WidgetList.t option
+        [@ocaml.doc "An array of widgets for the dashboard."];
+      refreshSchedule: RefreshSchedule.t option
+        [@ocaml.doc "The refresh schedule for the dashboard, if configured."];
+      createdTimestamp: Date.t option
+        [@ocaml.doc
+          "The timestamp that shows when the dashboard was created."];
+      updatedTimestamp: Date.t option
+        [@ocaml.doc
+          "The timestamp that shows when the dashboard was last updated."];
+      lastRefreshId: RefreshId.t option
+        [@ocaml.doc "The ID of the last dashboard refresh."];
+      lastRefreshFailureReason: ErrorMessage.t option
+        [@ocaml.doc
+          "Provides information about failures for the last scheduled refresh."];
+      terminationProtectionEnabled: TerminationProtectionEnabled.t option
+        [@ocaml.doc
+          "Indicates whether termination protection is enabled for the dashboard."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dashboardArn =
+      fun ?type_ ->
+        fun ?status ->
+          fun ?widgets ->
+            fun ?refreshSchedule ->
+              fun ?createdTimestamp ->
+                fun ?updatedTimestamp ->
+                  fun ?lastRefreshId ->
+                    fun ?lastRefreshFailureReason ->
+                      fun ?terminationProtectionEnabled ->
+                        fun () ->
+                          {
+                            dashboardArn;
+                            type_;
+                            status;
+                            widgets;
+                            refreshSchedule;
+                            createdTimestamp;
+                            updatedTimestamp;
+                            lastRefreshId;
+                            lastRefreshFailureReason;
+                            terminationProtectionEnabled
+                          }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DashboardArn",
+           (Option.map x.dashboardArn ~f:DashboardArn.to_value));
+        ("Type", (Option.map x.type_ ~f:DashboardType.to_value));
+        ("Status", (Option.map x.status ~f:DashboardStatus.to_value));
+        ("Widgets", (Option.map x.widgets ~f:WidgetList.to_value));
+        ("RefreshSchedule",
+          (Option.map x.refreshSchedule ~f:RefreshSchedule.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Date.to_value));
+        ("UpdatedTimestamp",
+          (Option.map x.updatedTimestamp ~f:Date.to_value));
+        ("LastRefreshId", (Option.map x.lastRefreshId ~f:RefreshId.to_value));
+        ("LastRefreshFailureReason",
+          (Option.map x.lastRefreshFailureReason ~f:ErrorMessage.to_value));
+        ("TerminationProtectionEnabled",
+          (Option.map x.terminationProtectionEnabled
+             ~f:TerminationProtectionEnabled.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let terminationProtectionEnabled =
+        (Option.map ~f:TerminationProtectionEnabled.of_xml)
+          (Xml.child xml_arg0 "TerminationProtectionEnabled") in
+      let lastRefreshFailureReason =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "LastRefreshFailureReason") in
+      let lastRefreshId =
+        (Option.map ~f:RefreshId.of_xml) (Xml.child xml_arg0 "LastRefreshId") in
+      let updatedTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreatedTimestamp") in
+      let refreshSchedule =
+        (Option.map ~f:RefreshSchedule.of_xml)
+          (Xml.child xml_arg0 "RefreshSchedule") in
+      let widgets =
+        (Option.map ~f:WidgetList.of_xml) (Xml.child xml_arg0 "Widgets") in
+      let status =
+        (Option.map ~f:DashboardStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let type_ =
+        (Option.map ~f:DashboardType.of_xml) (Xml.child xml_arg0 "Type") in
+      let dashboardArn =
+        (Option.map ~f:DashboardArn.of_xml)
+          (Xml.child xml_arg0 "DashboardArn") in
+      make ?terminationProtectionEnabled ?lastRefreshFailureReason
+        ?lastRefreshId ?updatedTimestamp ?createdTimestamp ?refreshSchedule
+        ?widgets ?status ?type_ ?dashboardArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let terminationProtectionEnabled =
+        field_map json__ "TerminationProtectionEnabled"
+          TerminationProtectionEnabled.of_json in
+      let lastRefreshFailureReason =
+        field_map json__ "LastRefreshFailureReason" ErrorMessage.of_json in
+      let lastRefreshId = field_map json__ "LastRefreshId" RefreshId.of_json in
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
+      let refreshSchedule =
+        field_map json__ "RefreshSchedule" RefreshSchedule.of_json in
+      let widgets = field_map json__ "Widgets" WidgetList.of_json in
+      let status = field_map json__ "Status" DashboardStatus.of_json in
+      let type_ = field_map json__ "Type" DashboardType.of_json in
+      let dashboardArn = field_map json__ "DashboardArn" DashboardArn.of_json in
+      make ?terminationProtectionEnabled ?lastRefreshFailureReason
+        ?lastRefreshId ?updatedTimestamp ?createdTimestamp ?refreshSchedule
+        ?widgets ?status ?type_ ?dashboardArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the specified dashboard."]
+module GetDashboardRequest =
+  struct
+    type nonrec t =
+      {
+      dashboardId: DashboardArn.t
+        [@ocaml.doc "The name or ARN for the dashboard."]}
+    let context_ = "GetDashboardRequest"
+    let make ~dashboardId = fun () -> { dashboardId }
+    let to_value x =
+      structure_to_value
+        [("DashboardId", (Some (DashboardArn.to_value x.dashboardId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dashboardId =
+        DashboardArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DashboardId") in
+      make ~dashboardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dashboardId =
+        field_map_exn json__ "DashboardId" DashboardArn.of_json in
+      make ~dashboardId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the specified dashboard."]
+module GetChannelResponse =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChannelArn.t option
+        [@ocaml.doc
+          "The ARN of an channel returned by a GetChannel request."];
+      name: ChannelName.t option
+        [@ocaml.doc
+          "The name of the CloudTrail channel. For service-linked channels, the name is aws-service-channel/service-name/custom-suffix where service-name represents the name of the Amazon Web Services service that created the channel and custom-suffix represents the suffix generated by the Amazon Web Services service."];
+      source: Source.t option
+        [@ocaml.doc "The source for the CloudTrail channel."];
+      sourceConfig: SourceConfig.t option
+        [@ocaml.doc
+          "Provides information about the advanced event selectors configured for the channel, and whether the channel applies to all Regions or a single Region."];
+      destinations: Destinations.t option
+        [@ocaml.doc
+          "The destinations for the channel. For channels created for integrations, the destinations are the event data stores that log events arriving through the channel. For service-linked channels, the destination is the Amazon Web Services service that created the service-linked channel to receive events."];
+      ingestionStatus: IngestionStatus.t option
+        [@ocaml.doc
+          "A table showing information about the most recent successful and failed attempts to ingest events."]}
+    type nonrec error =
+      [ `ChannelARNInvalidException of ChannelARNInvalidException.t 
+      | `ChannelNotFoundException of ChannelNotFoundException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?trailList = fun () -> { trailList }
+    let make ?channelArn =
+      fun ?name ->
+        fun ?source ->
+          fun ?sourceConfig ->
+            fun ?destinations ->
+              fun ?ingestionStatus ->
+                fun () ->
+                  {
+                    channelArn;
+                    name;
+                    source;
+                    sourceConfig;
+                    destinations;
+                    ingestionStatus
+                  }
     let error_of_json name json =
       match name with
-      | "InvalidTrailNameException" ->
-          `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException
+            (ChannelARNInvalidException.of_json json)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
@@ -7396,8 +15796,10 @@ module DescribeTrailsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
-      | "InvalidTrailNameException" ->
-          `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException (ChannelARNInvalidException.of_xml xml)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
@@ -7408,10 +15810,869 @@ module DescribeTrailsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ChannelARNInvalidException e ->
+          `Assoc
+            [("error", (`String "ChannelARNInvalidException"));
+            ("details", (ChannelARNInvalidException.to_json e))]
+      | `ChannelNotFoundException e ->
+          `Assoc
+            [("error", (`String "ChannelNotFoundException"));
+            ("details", (ChannelNotFoundException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ChannelArn", (Option.map x.channelArn ~f:ChannelArn.to_value));
+        ("Name", (Option.map x.name ~f:ChannelName.to_value));
+        ("Source", (Option.map x.source ~f:Source.to_value));
+        ("SourceConfig",
+          (Option.map x.sourceConfig ~f:SourceConfig.to_value));
+        ("Destinations",
+          (Option.map x.destinations ~f:Destinations.to_value));
+        ("IngestionStatus",
+          (Option.map x.ingestionStatus ~f:IngestionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ingestionStatus =
+        (Option.map ~f:IngestionStatus.of_xml)
+          (Xml.child xml_arg0 "IngestionStatus") in
+      let destinations =
+        (Option.map ~f:Destinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      let sourceConfig =
+        (Option.map ~f:SourceConfig.of_xml)
+          (Xml.child xml_arg0 "SourceConfig") in
+      let source =
+        (Option.map ~f:Source.of_xml) (Xml.child xml_arg0 "Source") in
+      let name =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "Name") in
+      let channelArn =
+        (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
+      make ?ingestionStatus ?destinations ?sourceConfig ?source ?name
+        ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ingestionStatus =
+        field_map json__ "IngestionStatus" IngestionStatus.of_json in
+      let destinations = field_map json__ "Destinations" Destinations.of_json in
+      let sourceConfig = field_map json__ "SourceConfig" SourceConfig.of_json in
+      let source = field_map json__ "Source" Source.of_json in
+      let name = field_map json__ "Name" ChannelName.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChannelArn.of_json in
+      make ?ingestionStatus ?destinations ?sourceConfig ?source ?name
+        ?channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a specific channel."]
+module GetChannelRequest =
+  struct
+    type nonrec t =
+      {
+      channel: ChannelArn.t [@ocaml.doc "The ARN or UUID of a channel."]}
+    let context_ = "GetChannelRequest"
+    let make ~channel = fun () -> { channel }
+    let to_value x =
+      structure_to_value
+        [("Channel", (Some (ChannelArn.to_value x.channel)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let channel =
+        ChannelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Channel") in
+      make ~channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let channel = field_map_exn json__ "Channel" ChannelArn.of_json in
+      make ~channel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a specific channel."]
+module GenerateQueryResponse =
+  struct
+    type nonrec t =
+      {
+      queryStatement: QueryStatement.t option
+        [@ocaml.doc "The SQL query statement generated from the prompt."];
+      queryAlias: QueryAlias.t option
+        [@ocaml.doc
+          "An alias that identifies the prompt. When you run the StartQuery operation, you can pass in either the QueryAlias or QueryStatement parameter."];
+      eventDataStoreOwnerAccountId: AccountId.t option
+        [@ocaml.doc "The account ID of the event data store owner."]}
+    type nonrec error =
+      [
+        `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `GenerateResponseException of GenerateResponseException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?queryStatement =
+      fun ?queryAlias ->
+        fun ?eventDataStoreOwnerAccountId ->
+          fun () ->
+            { queryStatement; queryAlias; eventDataStoreOwnerAccountId }
+    let error_of_json name json =
+      match name with
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "GenerateResponseException" ->
+          `GenerateResponseException (GenerateResponseException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "GenerateResponseException" ->
+          `GenerateResponseException (GenerateResponseException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `GenerateResponseException e ->
+          `Assoc
+            [("error", (`String "GenerateResponseException"));
+            ("details", (GenerateResponseException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("QueryStatement",
+           (Option.map x.queryStatement ~f:QueryStatement.to_value));
+        ("QueryAlias", (Option.map x.queryAlias ~f:QueryAlias.to_value));
+        ("EventDataStoreOwnerAccountId",
+          (Option.map x.eventDataStoreOwnerAccountId ~f:AccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventDataStoreOwnerAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreOwnerAccountId") in
+      let queryAlias =
+        (Option.map ~f:QueryAlias.of_xml) (Xml.child xml_arg0 "QueryAlias") in
+      let queryStatement =
+        (Option.map ~f:QueryStatement.of_xml)
+          (Xml.child xml_arg0 "QueryStatement") in
+      make ?eventDataStoreOwnerAccountId ?queryAlias ?queryStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventDataStoreOwnerAccountId =
+        field_map json__ "EventDataStoreOwnerAccountId" AccountId.of_json in
+      let queryAlias = field_map json__ "QueryAlias" QueryAlias.of_json in
+      let queryStatement =
+        field_map json__ "QueryStatement" QueryStatement.of_json in
+      make ?eventDataStoreOwnerAccountId ?queryAlias ?queryStatement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Generates a query from a natural language prompt. This operation uses generative artificial intelligence (generative AI) to produce a ready-to-use SQL query from the prompt. The prompt can be a question or a statement about the event data in your event data store. For example, you can enter prompts like \"What are my top errors in the past month?\" and \226\128\156Give me a list of users that used SNS.\226\128\157 The prompt must be in English. For information about limitations, permissions, and supported Regions, see Create CloudTrail Lake queries from natural language prompts in the CloudTrail user guide. Do not include any personally identifying, confidential, or sensitive information in your prompts. This feature uses generative AI large language models (LLMs); we recommend double-checking the LLM response."]
+module GenerateQueryRequest =
+  struct
+    type nonrec t =
+      {
+      eventDataStores: EventDataStoreList.t
+        [@ocaml.doc
+          "The ARN (or ID suffix of the ARN) of the event data store that you want to query. You can only specify one event data store."];
+      prompt: Prompt.t
+        [@ocaml.doc
+          "The prompt that you want to use to generate the query. The prompt must be in English. For example prompts, see Example prompts in the CloudTrail user guide."]}
+    let context_ = "GenerateQueryRequest"
+    let make ~eventDataStores =
+      fun ~prompt -> fun () -> { eventDataStores; prompt }
+    let to_value x =
+      structure_to_value
+        [("EventDataStores",
+           (Some (EventDataStoreList.to_value x.eventDataStores)));
+        ("Prompt", (Some (Prompt.to_value x.prompt)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prompt =
+        Prompt.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Prompt") in
+      let eventDataStores =
+        EventDataStoreList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EventDataStores") in
+      make ~prompt ~eventDataStores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prompt = field_map_exn json__ "Prompt" Prompt.of_json in
+      let eventDataStores =
+        field_map_exn json__ "EventDataStores" EventDataStoreList.of_json in
+      make ~prompt ~eventDataStores ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Generates a query from a natural language prompt. This operation uses generative artificial intelligence (generative AI) to produce a ready-to-use SQL query from the prompt. The prompt can be a question or a statement about the event data in your event data store. For example, you can enter prompts like \"What are my top errors in the past month?\" and \226\128\156Give me a list of users that used SNS.\226\128\157 The prompt must be in English. For information about limitations, permissions, and supported Regions, see Create CloudTrail Lake queries from natural language prompts in the CloudTrail user guide. Do not include any personally identifying, confidential, or sensitive information in your prompts. This feature uses generative AI large language models (LLMs); we recommend double-checking the LLM response."]
+module EnableFederationResponse =
+  struct
+    type nonrec t =
+      {
+      eventDataStoreArn: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The ARN of the event data store for which you enabled Lake query federation."];
+      federationStatus: FederationStatus.t option
+        [@ocaml.doc "The federation status."];
+      federationRoleArn: FederationRoleArn.t option
+        [@ocaml.doc "The ARN of the federation role."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `CloudTrailAccessNotEnabledException of
+          CloudTrailAccessNotEnabledException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreFederationEnabledException of
+          EventDataStoreFederationEnabledException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
+          InsufficientDependencyServiceAccessPermissionException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
+      | `NotOrganizationMasterAccountException of
+          NotOrganizationMasterAccountException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `OrganizationNotInAllFeaturesModeException of
+          OrganizationNotInAllFeaturesModeException.t 
+      | `OrganizationsNotInUseException of OrganizationsNotInUseException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?eventDataStoreArn =
+      fun ?federationStatus ->
+        fun ?federationRoleArn ->
+          fun () ->
+            { eventDataStoreArn; federationStatus; federationRoleArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "CloudTrailAccessNotEnabledException" ->
+          `CloudTrailAccessNotEnabledException
+            (CloudTrailAccessNotEnabledException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreFederationEnabledException" ->
+          `EventDataStoreFederationEnabledException
+            (EventDataStoreFederationEnabledException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_json
+               json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_json json)
+      | "OrganizationsNotInUseException" ->
+          `OrganizationsNotInUseException
+            (OrganizationsNotInUseException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "CloudTrailAccessNotEnabledException" ->
+          `CloudTrailAccessNotEnabledException
+            (CloudTrailAccessNotEnabledException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreFederationEnabledException" ->
+          `EventDataStoreFederationEnabledException
+            (EventDataStoreFederationEnabledException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_xml
+               xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_xml xml)
+      | "OrganizationsNotInUseException" ->
+          `OrganizationsNotInUseException
+            (OrganizationsNotInUseException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `CloudTrailAccessNotEnabledException e ->
+          `Assoc
+            [("error", (`String "CloudTrailAccessNotEnabledException"));
+            ("details", (CloudTrailAccessNotEnabledException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreFederationEnabledException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreFederationEnabledException"));
+            ("details", (EventDataStoreFederationEnabledException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InsufficientDependencyServiceAccessPermissionException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "InsufficientDependencyServiceAccessPermissionException"));
+            ("details",
+              (InsufficientDependencyServiceAccessPermissionException.to_json
+                 e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
+      | `NotOrganizationMasterAccountException e ->
+          `Assoc
+            [("error", (`String "NotOrganizationMasterAccountException"));
+            ("details", (NotOrganizationMasterAccountException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `OrganizationNotInAllFeaturesModeException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotInAllFeaturesModeException"));
+            ("details",
+              (OrganizationNotInAllFeaturesModeException.to_json e))]
+      | `OrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "OrganizationsNotInUseException"));
+            ("details", (OrganizationsNotInUseException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EventDataStoreArn",
+           (Option.map x.eventDataStoreArn ~f:EventDataStoreArn.to_value));
+        ("FederationStatus",
+          (Option.map x.federationStatus ~f:FederationStatus.to_value));
+        ("FederationRoleArn",
+          (Option.map x.federationRoleArn ~f:FederationRoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let federationRoleArn =
+        (Option.map ~f:FederationRoleArn.of_xml)
+          (Xml.child xml_arg0 "FederationRoleArn") in
+      let federationStatus =
+        (Option.map ~f:FederationStatus.of_xml)
+          (Xml.child xml_arg0 "FederationStatus") in
+      let eventDataStoreArn =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreArn") in
+      make ?federationRoleArn ?federationStatus ?eventDataStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let federationRoleArn =
+        field_map json__ "FederationRoleArn" FederationRoleArn.of_json in
+      let federationStatus =
+        field_map json__ "FederationStatus" FederationStatus.of_json in
+      let eventDataStoreArn =
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
+      make ?federationRoleArn ?federationStatus ?eventDataStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables Lake query federation on the specified event data store. Federating an event data store lets you view the metadata associated with the event data store in the Glue Data Catalog and run SQL queries against your event data using Amazon Athena. The table metadata stored in the Glue Data Catalog lets the Athena query engine know how to find, read, and process the data that you want to query. When you enable Lake query federation, CloudTrail creates a managed database named aws:cloudtrail (if the database doesn't already exist) and a managed federated table in the Glue Data Catalog. The event data store ID is used for the table name. CloudTrail registers the role ARN and event data store in Lake Formation, the service responsible for allowing fine-grained access control of the federated resources in the Glue Data Catalog. For more information about Lake query federation, see Federate an event data store."]
+module EnableFederationRequest =
+  struct
+    type nonrec t =
+      {
+      eventDataStore: EventDataStoreArn.t
+        [@ocaml.doc
+          "The ARN (or ID suffix of the ARN) of the event data store for which you want to enable Lake query federation."];
+      federationRoleArn: FederationRoleArn.t
+        [@ocaml.doc
+          "The ARN of the federation role to use for the event data store. Amazon Web Services services like Lake Formation use this federation role to access data for the federated event data store. The federation role must exist in your account and provide the required minimum permissions."]}
+    let context_ = "EnableFederationRequest"
+    let make ~eventDataStore =
+      fun ~federationRoleArn ->
+        fun () -> { eventDataStore; federationRoleArn }
+    let to_value x =
+      structure_to_value
+        [("EventDataStore",
+           (Some (EventDataStoreArn.to_value x.eventDataStore)));
+        ("FederationRoleArn",
+          (Some (FederationRoleArn.to_value x.federationRoleArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let federationRoleArn =
+        FederationRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FederationRoleArn") in
+      let eventDataStore =
+        EventDataStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
+      make ~federationRoleArn ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let federationRoleArn =
+        field_map_exn json__ "FederationRoleArn" FederationRoleArn.of_json in
+      let eventDataStore =
+        field_map_exn json__ "EventDataStore" EventDataStoreArn.of_json in
+      make ~federationRoleArn ~eventDataStore ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables Lake query federation on the specified event data store. Federating an event data store lets you view the metadata associated with the event data store in the Glue Data Catalog and run SQL queries against your event data using Amazon Athena. The table metadata stored in the Glue Data Catalog lets the Athena query engine know how to find, read, and process the data that you want to query. When you enable Lake query federation, CloudTrail creates a managed database named aws:cloudtrail (if the database doesn't already exist) and a managed federated table in the Glue Data Catalog. The event data store ID is used for the table name. CloudTrail registers the role ARN and event data store in Lake Formation, the service responsible for allowing fine-grained access control of the federated resources in the Glue Data Catalog. For more information about Lake query federation, see Federate an event data store."]
+module DisableFederationResponse =
+  struct
+    type nonrec t =
+      {
+      eventDataStoreArn: EventDataStoreArn.t option
+        [@ocaml.doc
+          "The ARN of the event data store for which you disabled Lake query federation."];
+      federationStatus: FederationStatus.t option
+        [@ocaml.doc "The federation status."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `CloudTrailAccessNotEnabledException of
+          CloudTrailAccessNotEnabledException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
+          InsufficientDependencyServiceAccessPermissionException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
+      | `NotOrganizationMasterAccountException of
+          NotOrganizationMasterAccountException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `OrganizationNotInAllFeaturesModeException of
+          OrganizationNotInAllFeaturesModeException.t 
+      | `OrganizationsNotInUseException of OrganizationsNotInUseException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?eventDataStoreArn =
+      fun ?federationStatus ->
+        fun () -> { eventDataStoreArn; federationStatus }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "CloudTrailAccessNotEnabledException" ->
+          `CloudTrailAccessNotEnabledException
+            (CloudTrailAccessNotEnabledException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_json
+               json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_json json)
+      | "OrganizationsNotInUseException" ->
+          `OrganizationsNotInUseException
+            (OrganizationsNotInUseException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "CloudTrailAccessNotEnabledException" ->
+          `CloudTrailAccessNotEnabledException
+            (CloudTrailAccessNotEnabledException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_xml
+               xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
+      | "NotOrganizationMasterAccountException" ->
+          `NotOrganizationMasterAccountException
+            (NotOrganizationMasterAccountException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_xml xml)
+      | "OrganizationsNotInUseException" ->
+          `OrganizationsNotInUseException
+            (OrganizationsNotInUseException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `CloudTrailAccessNotEnabledException e ->
+          `Assoc
+            [("error", (`String "CloudTrailAccessNotEnabledException"));
+            ("details", (CloudTrailAccessNotEnabledException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InsufficientDependencyServiceAccessPermissionException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "InsufficientDependencyServiceAccessPermissionException"));
+            ("details",
+              (InsufficientDependencyServiceAccessPermissionException.to_json
+                 e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
+      | `NotOrganizationMasterAccountException e ->
+          `Assoc
+            [("error", (`String "NotOrganizationMasterAccountException"));
+            ("details", (NotOrganizationMasterAccountException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `OrganizationNotInAllFeaturesModeException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotInAllFeaturesModeException"));
+            ("details",
+              (OrganizationNotInAllFeaturesModeException.to_json e))]
+      | `OrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "OrganizationsNotInUseException"));
+            ("details", (OrganizationsNotInUseException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EventDataStoreArn",
+           (Option.map x.eventDataStoreArn ~f:EventDataStoreArn.to_value));
+        ("FederationStatus",
+          (Option.map x.federationStatus ~f:FederationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let federationStatus =
+        (Option.map ~f:FederationStatus.of_xml)
+          (Xml.child xml_arg0 "FederationStatus") in
+      let eventDataStoreArn =
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreArn") in
+      make ?federationStatus ?eventDataStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let federationStatus =
+        field_map json__ "FederationStatus" FederationStatus.of_json in
+      let eventDataStoreArn =
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
+      make ?federationStatus ?eventDataStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables Lake query federation on the specified event data store. When you disable federation, CloudTrail disables the integration with Glue, Lake Formation, and Amazon Athena. After disabling Lake query federation, you can no longer query your event data in Amazon Athena. No CloudTrail Lake data is deleted when you disable federation and you can continue to run queries in CloudTrail Lake."]
+module DisableFederationRequest =
+  struct
+    type nonrec t =
+      {
+      eventDataStore: EventDataStoreArn.t
+        [@ocaml.doc
+          "The ARN (or ID suffix of the ARN) of the event data store for which you want to disable Lake query federation."]}
+    let context_ = "DisableFederationRequest"
+    let make ~eventDataStore = fun () -> { eventDataStore }
+    let to_value x =
+      structure_to_value
+        [("EventDataStore",
+           (Some (EventDataStoreArn.to_value x.eventDataStore)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventDataStore =
+        EventDataStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
+      make ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventDataStore =
+        field_map_exn json__ "EventDataStore" EventDataStoreArn.of_json in
+      make ~eventDataStore ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables Lake query federation on the specified event data store. When you disable federation, CloudTrail disables the integration with Glue, Lake Formation, and Amazon Athena. After disabling Lake query federation, you can no longer query your event data in Amazon Athena. No CloudTrail Lake data is deleted when you disable federation and you can continue to run queries in CloudTrail Lake."]
+module DescribeTrailsResponse =
+  struct
+    type nonrec t =
+      {
+      trailList: TrailList.t option
+        [@ocaml.doc
+          "The list of trail objects. Trail objects with string values are only returned if values for the objects exist in a trail's configuration. For example, SNSTopicName and SNSTopicARN are only returned in results if a trail is configured to send SNS notifications. Similarly, KMSKeyId only appears in results if a trail's log files are encrypted with KMS customer managed keys."]}
+    type nonrec error =
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?trailList = fun () -> { trailList }
+    let error_of_json name json =
+      match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
+      | "InvalidTrailNameException" ->
+          `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
+      | "InvalidTrailNameException" ->
+          `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
       | `InvalidTrailNameException e ->
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
@@ -7434,8 +16695,8 @@ module DescribeTrailsResponse =
         (Option.map ~f:TrailList.of_xml) (Xml.child xml_arg0 "trailList") in
       make ?trailList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trailList = field_map json "trailList" TrailList.of_json in
+    let of_json json__ =
+      let trailList = field_map json__ "trailList" TrailList.of_json in
       make ?trailList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7446,10 +16707,10 @@ module DescribeTrailsRequest =
       {
       trailNameList: TrailNameList.t option
         [@ocaml.doc
-          "Specifies a list of trail names, trail ARNs, or both, of the trails to describe. The format of a trail ARN is: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail If an empty list is specified, information for the trail in the current region is returned. If an empty list is specified and IncludeShadowTrails is false, then information for all trails in the current region is returned. If an empty list is specified and IncludeShadowTrails is null or true, then information for all trails in the current region and any associated shadow trails in other regions is returned. If one or more trail names are specified, information is returned only if the names match the names of trails belonging only to the current region. To return information about a trail in another region, you must specify its trail ARN."];
+          "Specifies a list of trail names, trail ARNs, or both, of the trails to describe. The format of a trail ARN is: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail If an empty list is specified, information for the trail in the current Region is returned. If an empty list is specified and IncludeShadowTrails is false, then information for all trails in the current Region is returned. If an empty list is specified and IncludeShadowTrails is null or true, then information for all trails in the current Region and any associated shadow trails in other Regions is returned. If one or more trail names are specified, information is returned only if the names match the names of trails belonging only to the current Region and current account. To return information about a trail in another Region, you must specify its trail ARN."];
       includeShadowTrails: Boolean.t option
         [@ocaml.doc
-          "Specifies whether to include shadow trails in the response. A shadow trail is the replication in a region of a trail that was created in a different region, or in the case of an organization trail, the replication of an organization trail in member accounts. If you do not include shadow trails, organization trails in a member account and region replication trails will not be returned. The default is true."]}
+          "Specifies whether to include shadow trails in the response. A shadow trail is the replication in a Region of a trail that was created in a different Region, or in the case of an organization trail, the replication of an organization trail in member accounts. If you do not include shadow trails, organization trails in a member account and Region replication trails will not be returned. The default is true."]}
     let make ?trailNameList =
       fun ?includeShadowTrails ->
         fun () -> { trailNameList; includeShadowTrails }
@@ -7469,11 +16730,11 @@ module DescribeTrailsRequest =
           (Xml.child xml_arg0 "trailNameList") in
       make ?includeShadowTrails ?trailNameList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeShadowTrails =
-        field_map json "includeShadowTrails" Boolean.of_json in
+        field_map json__ "includeShadowTrails" Boolean.of_json in
       let trailNameList =
-        field_map json "trailNameList" TrailNameList.of_json in
+        field_map json__ "trailNameList" TrailNameList.of_json in
       make ?includeShadowTrails ?trailNameList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about the trail."]
@@ -7491,7 +16752,17 @@ module DescribeQueryResponse =
         [@ocaml.doc
           "Metadata about a query, including the number of events that were matched, the total number of events scanned, the query run time in milliseconds, and the query's creation time."];
       errorMessage: ErrorMessage.t option
-        [@ocaml.doc "The error message returned if a query failed."]}
+        [@ocaml.doc "The error message returned if a query failed."];
+      deliveryS3Uri: DeliveryS3Uri.t option
+        [@ocaml.doc
+          "The URI for the S3 bucket where CloudTrail delivered query results, if applicable."];
+      deliveryStatus: DeliveryStatus.t option
+        [@ocaml.doc "The delivery status."];
+      prompt: Prompt.t option
+        [@ocaml.doc
+          "The prompt used for a generated query. For information about generated queries, see Create CloudTrail Lake queries from natural language prompts in the CloudTrail user guide."];
+      eventDataStoreOwnerAccountId: AccountId.t option
+        [@ocaml.doc "The account ID of the event data store owner."]}
     type nonrec error =
       [
         `EventDataStoreARNInvalidException of
@@ -7499,6 +16770,8 @@ module DescribeQueryResponse =
       | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
       | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `QueryIdNotFoundException of QueryIdNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
@@ -7508,14 +16781,22 @@ module DescribeQueryResponse =
         fun ?queryStatus ->
           fun ?queryStatistics ->
             fun ?errorMessage ->
-              fun () ->
-                {
-                  queryId;
-                  queryString;
-                  queryStatus;
-                  queryStatistics;
-                  errorMessage
-                }
+              fun ?deliveryS3Uri ->
+                fun ?deliveryStatus ->
+                  fun ?prompt ->
+                    fun ?eventDataStoreOwnerAccountId ->
+                      fun () ->
+                        {
+                          queryId;
+                          queryString;
+                          queryStatus;
+                          queryStatistics;
+                          errorMessage;
+                          deliveryS3Uri;
+                          deliveryStatus;
+                          prompt;
+                          eventDataStoreOwnerAccountId
+                        }
     let error_of_json name json =
       match name with
       | "EventDataStoreARNInvalidException" ->
@@ -7529,6 +16810,9 @@ module DescribeQueryResponse =
             (InactiveEventDataStoreException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
@@ -7553,6 +16837,9 @@ module DescribeQueryResponse =
             (InactiveEventDataStoreException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
@@ -7581,6 +16868,10 @@ module DescribeQueryResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
@@ -7608,9 +16899,27 @@ module DescribeQueryResponse =
           (Option.map x.queryStatistics
              ~f:QueryStatisticsForDescribeQuery.to_value));
         ("ErrorMessage",
-          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value));
+        ("DeliveryS3Uri",
+          (Option.map x.deliveryS3Uri ~f:DeliveryS3Uri.to_value));
+        ("DeliveryStatus",
+          (Option.map x.deliveryStatus ~f:DeliveryStatus.to_value));
+        ("Prompt", (Option.map x.prompt ~f:Prompt.to_value));
+        ("EventDataStoreOwnerAccountId",
+          (Option.map x.eventDataStoreOwnerAccountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eventDataStoreOwnerAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreOwnerAccountId") in
+      let prompt =
+        (Option.map ~f:Prompt.of_xml) (Xml.child xml_arg0 "Prompt") in
+      let deliveryStatus =
+        (Option.map ~f:DeliveryStatus.of_xml)
+          (Xml.child xml_arg0 "DeliveryStatus") in
+      let deliveryS3Uri =
+        (Option.map ~f:DeliveryS3Uri.of_xml)
+          (Xml.child xml_arg0 "DeliveryS3Uri") in
       let errorMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "ErrorMessage") in
@@ -7624,73 +16933,307 @@ module DescribeQueryResponse =
           (Xml.child xml_arg0 "QueryString") in
       let queryId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "QueryId") in
-      make ?errorMessage ?queryStatistics ?queryStatus ?queryString ?queryId
-        ()
+      make ?eventDataStoreOwnerAccountId ?prompt ?deliveryStatus
+        ?deliveryS3Uri ?errorMessage ?queryStatistics ?queryStatus
+        ?queryString ?queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
+    let of_json json__ =
+      let eventDataStoreOwnerAccountId =
+        field_map json__ "EventDataStoreOwnerAccountId" AccountId.of_json in
+      let prompt = field_map json__ "Prompt" Prompt.of_json in
+      let deliveryStatus =
+        field_map json__ "DeliveryStatus" DeliveryStatus.of_json in
+      let deliveryS3Uri =
+        field_map json__ "DeliveryS3Uri" DeliveryS3Uri.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
       let queryStatistics =
-        field_map json "QueryStatistics"
+        field_map json__ "QueryStatistics"
           QueryStatisticsForDescribeQuery.of_json in
-      let queryStatus = field_map json "QueryStatus" QueryStatus.of_json in
-      let queryString = field_map json "QueryString" QueryStatement.of_json in
-      let queryId = field_map json "QueryId" UUID.of_json in
-      make ?errorMessage ?queryStatistics ?queryStatus ?queryString ?queryId
-        ()
+      let queryStatus = field_map json__ "QueryStatus" QueryStatus.of_json in
+      let queryString = field_map json__ "QueryString" QueryStatement.of_json in
+      let queryId = field_map json__ "QueryId" UUID.of_json in
+      make ?eventDataStoreOwnerAccountId ?prompt ?deliveryStatus
+        ?deliveryS3Uri ?errorMessage ?queryStatistics ?queryStatus
+        ?queryString ?queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about a query, including query run time in milliseconds, number of events scanned and matched, and query status. You must specify an ARN for EventDataStore, and a value for QueryID."]
+       "Returns metadata about a query, including query run time in milliseconds, number of events scanned and matched, and query status. If the query results were delivered to an S3 bucket, the response also provides the S3 URI and the delivery status. You must specify either QueryId or QueryAlias. Specifying the QueryAlias parameter returns information about the last query run for the alias. You can provide RefreshId along with QueryAlias to view the query results of a dashboard query for the specified RefreshId."]
 module DescribeQueryRequest =
   struct
     type nonrec t =
       {
-      eventDataStore: EventDataStoreArn.t
+      eventDataStore: EventDataStoreArn.t option
         [@ocaml.doc
           "The ARN (or the ID suffix of the ARN) of an event data store on which the specified query was run."];
-      queryId: UUID.t [@ocaml.doc "The query ID."]}
-    let context_ = "DescribeQueryRequest"
-    let make ~eventDataStore =
-      fun ~queryId -> fun () -> { eventDataStore; queryId }
+      queryId: UUID.t option [@ocaml.doc "The query ID."];
+      queryAlias: QueryAlias.t option
+        [@ocaml.doc "The alias that identifies a query template."];
+      refreshId: RefreshId.t option
+        [@ocaml.doc "The ID of the dashboard refresh."];
+      eventDataStoreOwnerAccountId: AccountId.t option
+        [@ocaml.doc "The account ID of the event data store owner."]}
+    let make ?eventDataStore =
+      fun ?queryId ->
+        fun ?queryAlias ->
+          fun ?refreshId ->
+            fun ?eventDataStoreOwnerAccountId ->
+              fun () ->
+                {
+                  eventDataStore;
+                  queryId;
+                  queryAlias;
+                  refreshId;
+                  eventDataStoreOwnerAccountId
+                }
     let to_value x =
       structure_to_value
         [("EventDataStore",
-           (Some (EventDataStoreArn.to_value x.eventDataStore)));
-        ("QueryId", (Some (UUID.to_value x.queryId)))]
+           (Option.map x.eventDataStore ~f:EventDataStoreArn.to_value));
+        ("QueryId", (Option.map x.queryId ~f:UUID.to_value));
+        ("QueryAlias", (Option.map x.queryAlias ~f:QueryAlias.to_value));
+        ("RefreshId", (Option.map x.refreshId ~f:RefreshId.to_value));
+        ("EventDataStoreOwnerAccountId",
+          (Option.map x.eventDataStoreOwnerAccountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eventDataStoreOwnerAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreOwnerAccountId") in
+      let refreshId =
+        (Option.map ~f:RefreshId.of_xml) (Xml.child xml_arg0 "RefreshId") in
+      let queryAlias =
+        (Option.map ~f:QueryAlias.of_xml) (Xml.child xml_arg0 "QueryAlias") in
       let queryId =
-        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "QueryId") in
       let eventDataStore =
-        EventDataStoreArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
-      make ~queryId ~eventDataStore ()
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStore") in
+      make ?eventDataStoreOwnerAccountId ?refreshId ?queryAlias ?queryId
+        ?eventDataStore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryId = field_map_exn json "QueryId" UUID.of_json in
+    let of_json json__ =
+      let eventDataStoreOwnerAccountId =
+        field_map json__ "EventDataStoreOwnerAccountId" AccountId.of_json in
+      let refreshId = field_map json__ "RefreshId" RefreshId.of_json in
+      let queryAlias = field_map json__ "QueryAlias" QueryAlias.of_json in
+      let queryId = field_map json__ "QueryId" UUID.of_json in
       let eventDataStore =
-        field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
-      make ~queryId ~eventDataStore ()
+        field_map json__ "EventDataStore" EventDataStoreArn.of_json in
+      make ?eventDataStoreOwnerAccountId ?refreshId ?queryAlias ?queryId
+        ?eventDataStore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about a query, including query run time in milliseconds, number of events scanned and matched, and query status. You must specify an ARN for EventDataStore, and a value for QueryID."]
+       "Returns metadata about a query, including query run time in milliseconds, number of events scanned and matched, and query status. If the query results were delivered to an S3 bucket, the response also provides the S3 URI and the delivery status. You must specify either QueryId or QueryAlias. Specifying the QueryAlias parameter returns information about the last query run for the alias. You can provide RefreshId along with QueryAlias to view the query results of a dashboard query for the specified RefreshId."]
+module DeregisterOrganizationDelegatedAdminResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccountNotFoundException of AccountNotFoundException.t 
+      | `AccountNotRegisteredException of AccountNotRegisteredException.t 
+      | `CloudTrailAccessNotEnabledException of
+          CloudTrailAccessNotEnabledException.t 
+      | `ConflictException of ConflictException.t 
+      | `InsufficientDependencyServiceAccessPermissionException of
+          InsufficientDependencyServiceAccessPermissionException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotOrganizationManagementAccountException of
+          NotOrganizationManagementAccountException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `OrganizationNotInAllFeaturesModeException of
+          OrganizationNotInAllFeaturesModeException.t 
+      | `OrganizationsNotInUseException of OrganizationsNotInUseException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccountNotFoundException" ->
+          `AccountNotFoundException (AccountNotFoundException.of_json json)
+      | "AccountNotRegisteredException" ->
+          `AccountNotRegisteredException
+            (AccountNotRegisteredException.of_json json)
+      | "CloudTrailAccessNotEnabledException" ->
+          `CloudTrailAccessNotEnabledException
+            (CloudTrailAccessNotEnabledException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_json
+               json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotOrganizationManagementAccountException" ->
+          `NotOrganizationManagementAccountException
+            (NotOrganizationManagementAccountException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_json json)
+      | "OrganizationsNotInUseException" ->
+          `OrganizationsNotInUseException
+            (OrganizationsNotInUseException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountNotFoundException" ->
+          `AccountNotFoundException (AccountNotFoundException.of_xml xml)
+      | "AccountNotRegisteredException" ->
+          `AccountNotRegisteredException
+            (AccountNotRegisteredException.of_xml xml)
+      | "CloudTrailAccessNotEnabledException" ->
+          `CloudTrailAccessNotEnabledException
+            (CloudTrailAccessNotEnabledException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InsufficientDependencyServiceAccessPermissionException" ->
+          `InsufficientDependencyServiceAccessPermissionException
+            (InsufficientDependencyServiceAccessPermissionException.of_xml
+               xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotOrganizationManagementAccountException" ->
+          `NotOrganizationManagementAccountException
+            (NotOrganizationManagementAccountException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_xml xml)
+      | "OrganizationsNotInUseException" ->
+          `OrganizationsNotInUseException
+            (OrganizationsNotInUseException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountNotFoundException e ->
+          `Assoc
+            [("error", (`String "AccountNotFoundException"));
+            ("details", (AccountNotFoundException.to_json e))]
+      | `AccountNotRegisteredException e ->
+          `Assoc
+            [("error", (`String "AccountNotRegisteredException"));
+            ("details", (AccountNotRegisteredException.to_json e))]
+      | `CloudTrailAccessNotEnabledException e ->
+          `Assoc
+            [("error", (`String "CloudTrailAccessNotEnabledException"));
+            ("details", (CloudTrailAccessNotEnabledException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InsufficientDependencyServiceAccessPermissionException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "InsufficientDependencyServiceAccessPermissionException"));
+            ("details",
+              (InsufficientDependencyServiceAccessPermissionException.to_json
+                 e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotOrganizationManagementAccountException e ->
+          `Assoc
+            [("error", (`String "NotOrganizationManagementAccountException"));
+            ("details",
+              (NotOrganizationManagementAccountException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `OrganizationNotInAllFeaturesModeException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotInAllFeaturesModeException"));
+            ("details",
+              (OrganizationNotInAllFeaturesModeException.to_json e))]
+      | `OrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "OrganizationsNotInUseException"));
+            ("details", (OrganizationsNotInUseException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the following response if successful. Otherwise, returns an error."]
+module DeregisterOrganizationDelegatedAdminRequest =
+  struct
+    type nonrec t =
+      {
+      delegatedAdminAccountId: AccountId.t
+        [@ocaml.doc
+          "A delegated administrator account ID. This is a member account in an organization that is currently designated as a delegated administrator."]}
+    let context_ = "DeregisterOrganizationDelegatedAdminRequest"
+    let make ~delegatedAdminAccountId = fun () -> { delegatedAdminAccountId }
+    let to_value x =
+      structure_to_value
+        [("DelegatedAdminAccountId",
+           (Some (AccountId.to_value x.delegatedAdminAccountId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delegatedAdminAccountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DelegatedAdminAccountId") in
+      make ~delegatedAdminAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delegatedAdminAccountId =
+        field_map_exn json__ "DelegatedAdminAccountId" AccountId.of_json in
+      make ~delegatedAdminAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes CloudTrail delegated administrator permissions from a specified member account in an organization that is currently designated as a delegated administrator."]
 module DeleteTrailResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
+      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      | `ConflictException of ConflictException.t 
       | `InsufficientDependencyServiceAccessPermissionException of
           InsufficientDependencyServiceAccessPermissionException.t 
       | `InvalidHomeRegionException of InvalidHomeRegionException.t 
       | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TrailNotFoundException of TrailNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
       | "InsufficientDependencyServiceAccessPermissionException" ->
@@ -7702,12 +17245,17 @@ module DeleteTrailResponse =
             (InvalidHomeRegionException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_json json)
       | "UnsupportedOperationException" ->
@@ -7718,6 +17266,9 @@ module DeleteTrailResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "CloudTrailARNInvalidException" ->
+          `CloudTrailARNInvalidException
+            (CloudTrailARNInvalidException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
       | "InsufficientDependencyServiceAccessPermissionException" ->
@@ -7728,12 +17279,17 @@ module DeleteTrailResponse =
           `InvalidHomeRegionException (InvalidHomeRegionException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TrailNotFoundException" ->
           `TrailNotFoundException (TrailNotFoundException.of_xml xml)
       | "UnsupportedOperationException" ->
@@ -7743,6 +17299,10 @@ module DeleteTrailResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `CloudTrailARNInvalidException e ->
+          `Assoc
+            [("error", (`String "CloudTrailARNInvalidException"));
+            ("details", (CloudTrailARNInvalidException.to_json e))]
       | `ConflictException e ->
           `Assoc
             [("error", (`String "ConflictException"));
@@ -7763,6 +17323,10 @@ module DeleteTrailResponse =
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -7771,6 +17335,10 @@ module DeleteTrailResponse =
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
             ("details", (OperationNotPermittedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TrailNotFoundException e ->
           `Assoc
             [("error", (`String "TrailNotFoundException"));
@@ -7810,24 +17378,163 @@ module DeleteTrailRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" String_.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request that specifies the name of a trail to delete."]
+module DeleteResourcePolicyResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `ResourceARNNotValidException of ResourceARNNotValidException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourcePolicyNotFoundException of ResourcePolicyNotFoundException.t 
+      | `ResourceTypeNotSupportedException of
+          ResourceTypeNotSupportedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "ResourceARNNotValidException" ->
+          `ResourceARNNotValidException
+            (ResourceARNNotValidException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourcePolicyNotFoundException" ->
+          `ResourcePolicyNotFoundException
+            (ResourcePolicyNotFoundException.of_json json)
+      | "ResourceTypeNotSupportedException" ->
+          `ResourceTypeNotSupportedException
+            (ResourceTypeNotSupportedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "ResourceARNNotValidException" ->
+          `ResourceARNNotValidException
+            (ResourceARNNotValidException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourcePolicyNotFoundException" ->
+          `ResourcePolicyNotFoundException
+            (ResourcePolicyNotFoundException.of_xml xml)
+      | "ResourceTypeNotSupportedException" ->
+          `ResourceTypeNotSupportedException
+            (ResourceTypeNotSupportedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `ResourceARNNotValidException e ->
+          `Assoc
+            [("error", (`String "ResourceARNNotValidException"));
+            ("details", (ResourceARNNotValidException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourcePolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourcePolicyNotFoundException"));
+            ("details", (ResourcePolicyNotFoundException.to_json e))]
+      | `ResourceTypeNotSupportedException e ->
+          `Assoc
+            [("error", (`String "ResourceTypeNotSupportedException"));
+            ("details", (ResourceTypeNotSupportedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the resource-based policy attached to the CloudTrail event data store, dashboard, or channel."]
+module DeleteResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the CloudTrail event data store, dashboard, or channel you're deleting the resource-based policy from. Example event data store ARN format: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE Example dashboard ARN format: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash Example channel ARN format: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"]}
+    let context_ = "DeleteResourcePolicyRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the resource-based policy attached to the CloudTrail event data store, dashboard, or channel."]
 module DeleteEventDataStoreResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [
-        `EventDataStoreARNInvalidException of
+      [ `ChannelExistsForEDSException of ChannelExistsForEDSException.t 
+      | `ConflictException of ConflictException.t 
+      | `EventDataStoreARNInvalidException of
           EventDataStoreARNInvalidException.t 
+      | `EventDataStoreFederationEnabledException of
+          EventDataStoreFederationEnabledException.t 
+      | `EventDataStoreHasOngoingImportException of
+          EventDataStoreHasOngoingImportException.t 
       | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
       | `EventDataStoreTerminationProtectedException of
           EventDataStoreTerminationProtectedException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
       | `InsufficientDependencyServiceAccessPermissionException of
           InsufficientDependencyServiceAccessPermissionException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
@@ -7836,21 +17543,38 @@ module DeleteEventDataStoreResponse =
     let make () = ()
     let error_of_json name json =
       match name with
+      | "ChannelExistsForEDSException" ->
+          `ChannelExistsForEDSException
+            (ChannelExistsForEDSException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "EventDataStoreARNInvalidException" ->
           `EventDataStoreARNInvalidException
             (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreFederationEnabledException" ->
+          `EventDataStoreFederationEnabledException
+            (EventDataStoreFederationEnabledException.of_json json)
+      | "EventDataStoreHasOngoingImportException" ->
+          `EventDataStoreHasOngoingImportException
+            (EventDataStoreHasOngoingImportException.of_json json)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_json json)
       | "EventDataStoreTerminationProtectedException" ->
           `EventDataStoreTerminationProtectedException
             (EventDataStoreTerminationProtectedException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_json
                json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
@@ -7865,21 +17589,38 @@ module DeleteEventDataStoreResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ChannelExistsForEDSException" ->
+          `ChannelExistsForEDSException
+            (ChannelExistsForEDSException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "EventDataStoreARNInvalidException" ->
           `EventDataStoreARNInvalidException
             (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreFederationEnabledException" ->
+          `EventDataStoreFederationEnabledException
+            (EventDataStoreFederationEnabledException.of_xml xml)
+      | "EventDataStoreHasOngoingImportException" ->
+          `EventDataStoreHasOngoingImportException
+            (EventDataStoreHasOngoingImportException.of_xml xml)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_xml xml)
       | "EventDataStoreTerminationProtectedException" ->
           `EventDataStoreTerminationProtectedException
             (EventDataStoreTerminationProtectedException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
       | "InsufficientDependencyServiceAccessPermissionException" ->
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_xml
                xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
@@ -7893,10 +17634,26 @@ module DeleteEventDataStoreResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ChannelExistsForEDSException e ->
+          `Assoc
+            [("error", (`String "ChannelExistsForEDSException"));
+            ("details", (ChannelExistsForEDSException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `EventDataStoreARNInvalidException e ->
           `Assoc
             [("error", (`String "EventDataStoreARNInvalidException"));
             ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreFederationEnabledException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreFederationEnabledException"));
+            ("details", (EventDataStoreFederationEnabledException.to_json e))]
+      | `EventDataStoreHasOngoingImportException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreHasOngoingImportException"));
+            ("details", (EventDataStoreHasOngoingImportException.to_json e))]
       | `EventDataStoreNotFoundException e ->
           `Assoc
             [("error", (`String "EventDataStoreNotFoundException"));
@@ -7907,6 +17664,10 @@ module DeleteEventDataStoreResponse =
                (`String "EventDataStoreTerminationProtectedException"));
             ("details",
               (EventDataStoreTerminationProtectedException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
       | `InsufficientDependencyServiceAccessPermissionException e ->
           `Assoc
             [("error",
@@ -7919,6 +17680,10 @@ module DeleteEventDataStoreResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -7944,7 +17709,7 @@ module DeleteEventDataStoreResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables the event data store specified by EventDataStore, which accepts an event data store ARN. After you run DeleteEventDataStore, the event data store enters a PENDING_DELETION state, and is automatically deleted after a wait period of seven days. TerminationProtectionEnabled must be set to False on the event data store; this operation cannot work if TerminationProtectionEnabled is True. After you run DeleteEventDataStore on an event data store, you cannot run ListQueries, DescribeQuery, or GetQueryResults on queries that are using an event data store in a PENDING_DELETION state. An event data store in the PENDING_DELETION state does not incur costs."]
+       "Disables the event data store specified by EventDataStore, which accepts an event data store ARN. After you run DeleteEventDataStore, the event data store enters a PENDING_DELETION state, and is automatically deleted after a wait period of seven days. TerminationProtectionEnabled must be set to False on the event data store and the FederationStatus must be DISABLED. You cannot delete an event data store if TerminationProtectionEnabled is True or the FederationStatus is ENABLED. After you run DeleteEventDataStore on an event data store, you cannot run ListQueries, DescribeQuery, or GetQueryResults on queries that are using an event data store in a PENDING_DELETION state. An event data store in the PENDING_DELETION state does not incur costs."]
 module DeleteEventDataStoreRequest =
   struct
     type nonrec t =
@@ -7965,13 +17730,193 @@ module DeleteEventDataStoreRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ~eventDataStore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDataStore =
-        field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
+        field_map_exn json__ "EventDataStore" EventDataStoreArn.of_json in
       make ~eventDataStore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables the event data store specified by EventDataStore, which accepts an event data store ARN. After you run DeleteEventDataStore, the event data store enters a PENDING_DELETION state, and is automatically deleted after a wait period of seven days. TerminationProtectionEnabled must be set to False on the event data store; this operation cannot work if TerminationProtectionEnabled is True. After you run DeleteEventDataStore on an event data store, you cannot run ListQueries, DescribeQuery, or GetQueryResults on queries that are using an event data store in a PENDING_DELETION state. An event data store in the PENDING_DELETION state does not incur costs."]
+       "Disables the event data store specified by EventDataStore, which accepts an event data store ARN. After you run DeleteEventDataStore, the event data store enters a PENDING_DELETION state, and is automatically deleted after a wait period of seven days. TerminationProtectionEnabled must be set to False on the event data store and the FederationStatus must be DISABLED. You cannot delete an event data store if TerminationProtectionEnabled is True or the FederationStatus is ENABLED. After you run DeleteEventDataStore on an event data store, you cannot run ListQueries, DescribeQuery, or GetQueryResults on queries that are using an event data store in a PENDING_DELETION state. An event data store in the PENDING_DELETION state does not incur costs."]
+module DeleteDashboardResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified dashboard. You cannot delete a dashboard that has termination protection enabled."]
+module DeleteDashboardRequest =
+  struct
+    type nonrec t =
+      {
+      dashboardId: DashboardArn.t
+        [@ocaml.doc "The name or ARN for the dashboard."]}
+    let context_ = "DeleteDashboardRequest"
+    let make ~dashboardId = fun () -> { dashboardId }
+    let to_value x =
+      structure_to_value
+        [("DashboardId", (Some (DashboardArn.to_value x.dashboardId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dashboardId =
+        DashboardArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DashboardId") in
+      make ~dashboardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dashboardId =
+        field_map_exn json__ "DashboardId" DashboardArn.of_json in
+      make ~dashboardId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified dashboard. You cannot delete a dashboard that has termination protection enabled."]
+module DeleteChannelResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ChannelARNInvalidException of ChannelARNInvalidException.t 
+      | `ChannelNotFoundException of ChannelNotFoundException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException
+            (ChannelARNInvalidException.of_json json)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException (ChannelARNInvalidException.of_xml xml)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ChannelARNInvalidException e ->
+          `Assoc
+            [("error", (`String "ChannelARNInvalidException"));
+            ("details", (ChannelARNInvalidException.to_json e))]
+      | `ChannelNotFoundException e ->
+          `Assoc
+            [("error", (`String "ChannelNotFoundException"));
+            ("details", (ChannelNotFoundException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a channel."]
+module DeleteChannelRequest =
+  struct
+    type nonrec t =
+      {
+      channel: ChannelArn.t
+        [@ocaml.doc
+          "The ARN or the UUID value of the channel that you want to delete."]}
+    let context_ = "DeleteChannelRequest"
+    let make ~channel = fun () -> { channel }
+    let to_value x =
+      structure_to_value
+        [("Channel", (Some (ChannelArn.to_value x.channel)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let channel =
+        ChannelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Channel") in
+      make ~channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let channel = field_map_exn json__ "Channel" ChannelArn.of_json in
+      make ~channel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a channel."]
 module CreateTrailResponse =
   struct
     type nonrec t =
@@ -7993,7 +17938,7 @@ module CreateTrailResponse =
           "Specifies whether the trail is publishing events from global services such as IAM to the log files."];
       isMultiRegionTrail: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the trail exists in one region or in all regions."];
+          "Specifies whether the trail exists in one Region or in all Regions."];
       trailARN: String_.t option
         [@ocaml.doc
           "Specifies the ARN of the trail that was created. The format of a trail ARN is: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"];
@@ -8008,7 +17953,7 @@ module CreateTrailResponse =
           "Specifies the role for the CloudWatch Logs endpoint to assume to write to a user's log group."];
       kmsKeyId: String_.t option
         [@ocaml.doc
-          "Specifies the KMS key ID that encrypts the logs delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
+          "Specifies the KMS key ID that encrypts the events delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
       isOrganizationTrail: Boolean.t option
         [@ocaml.doc "Specifies whether the trail is an organization trail."]}
     type nonrec error =
@@ -8035,6 +17980,7 @@ module CreateTrailResponse =
       | `InvalidKmsKeyIdException of InvalidKmsKeyIdException.t 
       | `InvalidParameterCombinationException of
           InvalidParameterCombinationException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidS3BucketNameException of InvalidS3BucketNameException.t 
       | `InvalidS3PrefixException of InvalidS3PrefixException.t 
       | `InvalidSnsTopicNameException of InvalidSnsTopicNameException.t 
@@ -8045,6 +17991,8 @@ module CreateTrailResponse =
       | `KmsKeyNotFoundException of KmsKeyNotFoundException.t 
       | `MaximumNumberOfTrailsExceededException of
           MaximumNumberOfTrailsExceededException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
@@ -8052,6 +18000,8 @@ module CreateTrailResponse =
           OrganizationNotInAllFeaturesModeException.t 
       | `OrganizationsNotInUseException of OrganizationsNotInUseException.t 
       | `S3BucketDoesNotExistException of S3BucketDoesNotExistException.t 
+      | `TagsLimitExceededException of TagsLimitExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TrailAlreadyExistsException of TrailAlreadyExistsException.t 
       | `TrailNotProvidedException of TrailNotProvidedException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
@@ -8122,6 +18072,8 @@ module CreateTrailResponse =
       | "InvalidParameterCombinationException" ->
           `InvalidParameterCombinationException
             (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
       | "InvalidS3BucketNameException" ->
           `InvalidS3BucketNameException
             (InvalidS3BucketNameException.of_json json)
@@ -8143,6 +18095,9 @@ module CreateTrailResponse =
       | "MaximumNumberOfTrailsExceededException" ->
           `MaximumNumberOfTrailsExceededException
             (MaximumNumberOfTrailsExceededException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
@@ -8158,6 +18113,11 @@ module CreateTrailResponse =
       | "S3BucketDoesNotExistException" ->
           `S3BucketDoesNotExistException
             (S3BucketDoesNotExistException.of_json json)
+      | "TagsLimitExceededException" ->
+          `TagsLimitExceededException
+            (TagsLimitExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TrailAlreadyExistsException" ->
           `TrailAlreadyExistsException
             (TrailAlreadyExistsException.of_json json)
@@ -8206,6 +18166,8 @@ module CreateTrailResponse =
       | "InvalidParameterCombinationException" ->
           `InvalidParameterCombinationException
             (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "InvalidS3BucketNameException" ->
           `InvalidS3BucketNameException
             (InvalidS3BucketNameException.of_xml xml)
@@ -8227,6 +18189,9 @@ module CreateTrailResponse =
       | "MaximumNumberOfTrailsExceededException" ->
           `MaximumNumberOfTrailsExceededException
             (MaximumNumberOfTrailsExceededException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
@@ -8242,6 +18207,10 @@ module CreateTrailResponse =
       | "S3BucketDoesNotExistException" ->
           `S3BucketDoesNotExistException
             (S3BucketDoesNotExistException.of_xml xml)
+      | "TagsLimitExceededException" ->
+          `TagsLimitExceededException (TagsLimitExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TrailAlreadyExistsException" ->
           `TrailAlreadyExistsException
             (TrailAlreadyExistsException.of_xml xml)
@@ -8309,6 +18278,10 @@ module CreateTrailResponse =
           `Assoc
             [("error", (`String "InvalidParameterCombinationException"));
             ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
       | `InvalidS3BucketNameException e ->
           `Assoc
             [("error", (`String "InvalidS3BucketNameException"));
@@ -8345,6 +18318,10 @@ module CreateTrailResponse =
           `Assoc
             [("error", (`String "MaximumNumberOfTrailsExceededException"));
             ("details", (MaximumNumberOfTrailsExceededException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -8366,6 +18343,14 @@ module CreateTrailResponse =
           `Assoc
             [("error", (`String "S3BucketDoesNotExistException"));
             ("details", (S3BucketDoesNotExistException.to_json e))]
+      | `TagsLimitExceededException e ->
+          `Assoc
+            [("error", (`String "TagsLimitExceededException"));
+            ("details", (TagsLimitExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TrailAlreadyExistsException e ->
           `Assoc
             [("error", (`String "TrailAlreadyExistsException"));
@@ -8442,26 +18427,26 @@ module CreateTrailResponse =
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicARN
         ?snsTopicName ?s3KeyPrefix ?s3BucketName ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let isOrganizationTrail =
-        field_map json "IsOrganizationTrail" Boolean.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "IsOrganizationTrail" Boolean.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let cloudWatchLogsRoleArn =
-        field_map json "CloudWatchLogsRoleArn" String_.of_json in
+        field_map json__ "CloudWatchLogsRoleArn" String_.of_json in
       let cloudWatchLogsLogGroupArn =
-        field_map json "CloudWatchLogsLogGroupArn" String_.of_json in
+        field_map json__ "CloudWatchLogsLogGroupArn" String_.of_json in
       let logFileValidationEnabled =
-        field_map json "LogFileValidationEnabled" Boolean.of_json in
-      let trailARN = field_map json "TrailARN" String_.of_json in
+        field_map json__ "LogFileValidationEnabled" Boolean.of_json in
+      let trailARN = field_map json__ "TrailARN" String_.of_json in
       let isMultiRegionTrail =
-        field_map json "IsMultiRegionTrail" Boolean.of_json in
+        field_map json__ "IsMultiRegionTrail" Boolean.of_json in
       let includeGlobalServiceEvents =
-        field_map json "IncludeGlobalServiceEvents" Boolean.of_json in
-      let snsTopicARN = field_map json "SnsTopicARN" String_.of_json in
-      let snsTopicName = field_map json "SnsTopicName" String_.of_json in
-      let s3KeyPrefix = field_map json "S3KeyPrefix" String_.of_json in
-      let s3BucketName = field_map json "S3BucketName" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "IncludeGlobalServiceEvents" Boolean.of_json in
+      let snsTopicARN = field_map json__ "SnsTopicARN" String_.of_json in
+      let snsTopicName = field_map json__ "SnsTopicName" String_.of_json in
+      let s3KeyPrefix = field_map json__ "S3KeyPrefix" String_.of_json in
+      let s3BucketName = field_map json__ "S3BucketName" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?isOrganizationTrail ?kmsKeyId ?cloudWatchLogsRoleArn
         ?cloudWatchLogsLogGroupArn ?logFileValidationEnabled ?trailARN
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicARN
@@ -8478,34 +18463,34 @@ module CreateTrailRequest =
           "Specifies the name of the trail. The name must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), periods (.), underscores (_), or dashes (-) Start with a letter or number, and end with a letter or number Be between 3 and 128 characters Have no adjacent periods, underscores or dashes. Names like my-_namespace and my--namespace are not valid. Not be in IP address format (for example, 192.168.5.4)"];
       s3BucketName: String_.t
         [@ocaml.doc
-          "Specifies the name of the Amazon S3 bucket designated for publishing log files. See Amazon S3 Bucket Naming Requirements."];
+          "Specifies the name of the Amazon S3 bucket designated for publishing log files. For information about bucket naming rules, see Bucket naming rules in the Amazon Simple Storage Service User Guide."];
       s3KeyPrefix: String_.t option
         [@ocaml.doc
           "Specifies the Amazon S3 key prefix that comes after the name of the bucket you have designated for log file delivery. For more information, see Finding Your CloudTrail Log Files. The maximum length is 200 characters."];
       snsTopicName: String_.t option
         [@ocaml.doc
-          "Specifies the name of the Amazon SNS topic defined for notification of log file delivery. The maximum length is 256 characters."];
+          "Specifies the name or ARN of the Amazon SNS topic defined for notification of log file delivery. The maximum length is 256 characters."];
       includeGlobalServiceEvents: Boolean.t option
         [@ocaml.doc
           "Specifies whether the trail is publishing events from global services such as IAM to the log files."];
       isMultiRegionTrail: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the trail is created in the current region or in all regions. The default is false, which creates a trail only in the region where you are signed in. As a best practice, consider creating trails that log events in all regions."];
+          "Specifies whether the trail is created in the current Region or in all Regions. The default is false, which creates a trail only in the Region where you are signed in. As a best practice, consider creating trails that log events in all Regions."];
       enableLogFileValidation: Boolean.t option
         [@ocaml.doc
           "Specifies whether log file integrity validation is enabled. The default is false. When you disable log file integrity validation, the chain of digest files is broken after one hour. CloudTrail does not create digest files for log files that were delivered during a period in which log file integrity validation was disabled. For example, if you enable log file integrity validation at noon on January 1, disable it at noon on January 2, and re-enable it at noon on January 10, digest files will not be created for the log files delivered from noon on January 2 to noon on January 10. The same applies whenever you stop CloudTrail logging or delete a trail."];
       cloudWatchLogsLogGroupArn: String_.t option
         [@ocaml.doc
-          "Specifies a log group name using an Amazon Resource Name (ARN), a unique identifier that represents the log group to which CloudTrail logs will be delivered. Not required unless you specify CloudWatchLogsRoleArn."];
+          "Specifies a log group name using an Amazon Resource Name (ARN), a unique identifier that represents the log group to which CloudTrail logs will be delivered. You must use a log group that exists in your account. Not required unless you specify CloudWatchLogsRoleArn."];
       cloudWatchLogsRoleArn: String_.t option
         [@ocaml.doc
-          "Specifies the role for the CloudWatch Logs endpoint to assume to write to a user's log group."];
+          "Specifies the role for the CloudWatch Logs endpoint to assume to write to a user's log group. You must use a role that exists in your account."];
       kmsKeyId: String_.t option
         [@ocaml.doc
-          "Specifies the KMS key ID to use to encrypt the logs delivered by CloudTrail. The value can be an alias name prefixed by \"alias/\", a fully specified ARN to an alias, a fully specified ARN to a key, or a globally unique identifier. CloudTrail also supports KMS multi-Region keys. For more information about multi-Region keys, see Using multi-Region keys in the Key Management Service Developer Guide. Examples: alias/MyAliasName arn:aws:kms:us-east-2:123456789012:alias/MyAliasName arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012 12345678-1234-1234-1234-123456789012"];
+          "Specifies the KMS key ID to use to encrypt the logs and digest files delivered by CloudTrail. The value can be an alias name prefixed by alias/, a fully specified ARN to an alias, a fully specified ARN to a key, or a globally unique identifier. CloudTrail also supports KMS multi-Region keys. For more information about multi-Region keys, see Using multi-Region keys in the Key Management Service Developer Guide. Examples: alias/MyAliasName arn:aws:kms:us-east-2:123456789012:alias/MyAliasName arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012 12345678-1234-1234-1234-123456789012"];
       isOrganizationTrail: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the trail is created for all accounts in an organization in Organizations, or only for the current Amazon Web Services account. The default is false, and cannot be true unless the call is made on behalf of an Amazon Web Services account that is the management account for an organization in Organizations."];
+          "Specifies whether the trail is created for all accounts in an organization in Organizations, or only for the current Amazon Web Services account. The default is false, and cannot be true unless the call is made on behalf of an Amazon Web Services account that is the management account or delegated administrator account for an organization in Organizations."];
       tagsList: TagsList.t option }
     let context_ = "CreateTrailRequest"
     let make ?s3KeyPrefix =
@@ -8593,25 +18578,25 @@ module CreateTrailRequest =
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicName
         ?s3KeyPrefix ~s3BucketName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagsList = field_map json "TagsList" TagsList.of_json in
+    let of_json json__ =
+      let tagsList = field_map json__ "TagsList" TagsList.of_json in
       let isOrganizationTrail =
-        field_map json "IsOrganizationTrail" Boolean.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "IsOrganizationTrail" Boolean.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let cloudWatchLogsRoleArn =
-        field_map json "CloudWatchLogsRoleArn" String_.of_json in
+        field_map json__ "CloudWatchLogsRoleArn" String_.of_json in
       let cloudWatchLogsLogGroupArn =
-        field_map json "CloudWatchLogsLogGroupArn" String_.of_json in
+        field_map json__ "CloudWatchLogsLogGroupArn" String_.of_json in
       let enableLogFileValidation =
-        field_map json "EnableLogFileValidation" Boolean.of_json in
+        field_map json__ "EnableLogFileValidation" Boolean.of_json in
       let isMultiRegionTrail =
-        field_map json "IsMultiRegionTrail" Boolean.of_json in
+        field_map json__ "IsMultiRegionTrail" Boolean.of_json in
       let includeGlobalServiceEvents =
-        field_map json "IncludeGlobalServiceEvents" Boolean.of_json in
-      let snsTopicName = field_map json "SnsTopicName" String_.of_json in
-      let s3KeyPrefix = field_map json "S3KeyPrefix" String_.of_json in
-      let s3BucketName = field_map_exn json "S3BucketName" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+        field_map json__ "IncludeGlobalServiceEvents" Boolean.of_json in
+      let snsTopicName = field_map json__ "SnsTopicName" String_.of_json in
+      let s3KeyPrefix = field_map json__ "S3KeyPrefix" String_.of_json in
+      let s3BucketName = field_map_exn json__ "S3BucketName" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ?tagsList ?isOrganizationTrail ?kmsKeyId ?cloudWatchLogsRoleArn
         ?cloudWatchLogsLogGroupArn ?enableLogFileValidation
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicName
@@ -8633,7 +18618,7 @@ module CreateEventDataStoreResponse =
           "The advanced event selectors that were used to select the events for the data store."];
       multiRegionEnabled: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the event data store collects events from all regions, or only from the region in which it was created."];
+          "Indicates whether the event data store collects events from all Regions, or only from the Region in which it was created."];
       organizationEnabled: Boolean.t option
         [@ocaml.doc
           "Indicates whether an event data store is collecting logged events for an organization in Organizations."];
@@ -8648,7 +18633,12 @@ module CreateEventDataStoreResponse =
           "The timestamp that shows when the event data store was created."];
       updatedTimestamp: Date.t option
         [@ocaml.doc
-          "The timestamp that shows when an event data store was updated, if applicable. UpdatedTimestamp is always either the same or newer than the time shown in CreatedTimestamp."]}
+          "The timestamp that shows when an event data store was updated, if applicable. UpdatedTimestamp is always either the same or newer than the time shown in CreatedTimestamp."];
+      kmsKeyId: EventDataStoreKmsKeyId.t option
+        [@ocaml.doc
+          "Specifies the KMS key ID that encrypts the events delivered by CloudTrail. The value is a fully specified ARN to a KMS key in the following format. arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"];
+      billingMode: BillingMode.t option
+        [@ocaml.doc "The billing mode for the event data store."]}
     type nonrec error =
       [
         `CloudTrailAccessNotEnabledException of
@@ -8660,14 +18650,23 @@ module CreateEventDataStoreResponse =
           EventDataStoreMaxLimitExceededException.t 
       | `InsufficientDependencyServiceAccessPermissionException of
           InsufficientDependencyServiceAccessPermissionException.t 
+      | `InsufficientEncryptionPolicyException of
+          InsufficientEncryptionPolicyException.t 
+      | `InvalidEventSelectorsException of InvalidEventSelectorsException.t 
+      | `InvalidKmsKeyIdException of InvalidKmsKeyIdException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidTagParameterException of InvalidTagParameterException.t 
+      | `KmsException of KmsException.t 
+      | `KmsKeyNotFoundException of KmsKeyNotFoundException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `OrganizationNotInAllFeaturesModeException of
           OrganizationNotInAllFeaturesModeException.t 
       | `OrganizationsNotInUseException of OrganizationsNotInUseException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?eventDataStoreArn =
@@ -8681,20 +18680,24 @@ module CreateEventDataStoreResponse =
                     fun ?tagsList ->
                       fun ?createdTimestamp ->
                         fun ?updatedTimestamp ->
-                          fun () ->
-                            {
-                              eventDataStoreArn;
-                              name;
-                              status;
-                              advancedEventSelectors;
-                              multiRegionEnabled;
-                              organizationEnabled;
-                              retentionPeriod;
-                              terminationProtectionEnabled;
-                              tagsList;
-                              createdTimestamp;
-                              updatedTimestamp
-                            }
+                          fun ?kmsKeyId ->
+                            fun ?billingMode ->
+                              fun () ->
+                                {
+                                  eventDataStoreArn;
+                                  name;
+                                  status;
+                                  advancedEventSelectors;
+                                  multiRegionEnabled;
+                                  organizationEnabled;
+                                  retentionPeriod;
+                                  terminationProtectionEnabled;
+                                  tagsList;
+                                  createdTimestamp;
+                                  updatedTimestamp;
+                                  kmsKeyId;
+                                  billingMode
+                                }
     let error_of_json name json =
       match name with
       | "CloudTrailAccessNotEnabledException" ->
@@ -8712,11 +18715,25 @@ module CreateEventDataStoreResponse =
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_json
                json)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_json json)
+      | "InvalidEventSelectorsException" ->
+          `InvalidEventSelectorsException
+            (InvalidEventSelectorsException.of_json json)
+      | "InvalidKmsKeyIdException" ->
+          `InvalidKmsKeyIdException (InvalidKmsKeyIdException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
       | "InvalidTagParameterException" ->
           `InvalidTagParameterException
             (InvalidTagParameterException.of_json json)
+      | "KmsException" -> `KmsException (KmsException.of_json json)
+      | "KmsKeyNotFoundException" ->
+          `KmsKeyNotFoundException (KmsKeyNotFoundException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
@@ -8729,6 +18746,8 @@ module CreateEventDataStoreResponse =
       | "OrganizationsNotInUseException" ->
           `OrganizationsNotInUseException
             (OrganizationsNotInUseException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "UnsupportedOperationException" ->
           `UnsupportedOperationException
             (UnsupportedOperationException.of_json json)
@@ -8752,11 +18771,25 @@ module CreateEventDataStoreResponse =
           `InsufficientDependencyServiceAccessPermissionException
             (InsufficientDependencyServiceAccessPermissionException.of_xml
                xml)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_xml xml)
+      | "InvalidEventSelectorsException" ->
+          `InvalidEventSelectorsException
+            (InvalidEventSelectorsException.of_xml xml)
+      | "InvalidKmsKeyIdException" ->
+          `InvalidKmsKeyIdException (InvalidKmsKeyIdException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "InvalidTagParameterException" ->
           `InvalidTagParameterException
             (InvalidTagParameterException.of_xml xml)
+      | "KmsException" -> `KmsException (KmsException.of_xml xml)
+      | "KmsKeyNotFoundException" ->
+          `KmsKeyNotFoundException (KmsKeyNotFoundException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
@@ -8769,6 +18802,8 @@ module CreateEventDataStoreResponse =
       | "OrganizationsNotInUseException" ->
           `OrganizationsNotInUseException
             (OrganizationsNotInUseException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "UnsupportedOperationException" ->
           `UnsupportedOperationException
             (UnsupportedOperationException.of_xml xml)
@@ -8800,6 +18835,18 @@ module CreateEventDataStoreResponse =
             ("details",
               (InsufficientDependencyServiceAccessPermissionException.to_json
                  e))]
+      | `InsufficientEncryptionPolicyException e ->
+          `Assoc
+            [("error", (`String "InsufficientEncryptionPolicyException"));
+            ("details", (InsufficientEncryptionPolicyException.to_json e))]
+      | `InvalidEventSelectorsException e ->
+          `Assoc
+            [("error", (`String "InvalidEventSelectorsException"));
+            ("details", (InvalidEventSelectorsException.to_json e))]
+      | `InvalidKmsKeyIdException e ->
+          `Assoc
+            [("error", (`String "InvalidKmsKeyIdException"));
+            ("details", (InvalidKmsKeyIdException.to_json e))]
       | `InvalidParameterException e ->
           `Assoc
             [("error", (`String "InvalidParameterException"));
@@ -8808,6 +18855,18 @@ module CreateEventDataStoreResponse =
           `Assoc
             [("error", (`String "InvalidTagParameterException"));
             ("details", (InvalidTagParameterException.to_json e))]
+      | `KmsException e ->
+          `Assoc
+            [("error", (`String "KmsException"));
+            ("details", (KmsException.to_json e))]
+      | `KmsKeyNotFoundException e ->
+          `Assoc
+            [("error", (`String "KmsKeyNotFoundException"));
+            ("details", (KmsKeyNotFoundException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -8825,6 +18884,10 @@ module CreateEventDataStoreResponse =
           `Assoc
             [("error", (`String "OrganizationsNotInUseException"));
             ("details", (OrganizationsNotInUseException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `UnsupportedOperationException e ->
           `Assoc
             [("error", (`String "UnsupportedOperationException"));
@@ -8856,9 +18919,17 @@ module CreateEventDataStoreResponse =
         ("CreatedTimestamp",
           (Option.map x.createdTimestamp ~f:Date.to_value));
         ("UpdatedTimestamp",
-          (Option.map x.updatedTimestamp ~f:Date.to_value))]
+          (Option.map x.updatedTimestamp ~f:Date.to_value));
+        ("KmsKeyId",
+          (Option.map x.kmsKeyId ~f:EventDataStoreKmsKeyId.to_value));
+        ("BillingMode", (Option.map x.billingMode ~f:BillingMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let billingMode =
+        (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
+      let kmsKeyId =
+        (Option.map ~f:EventDataStoreKmsKeyId.of_xml)
+          (Xml.child xml_arg0 "KmsKeyId") in
       let updatedTimestamp =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "UpdatedTimestamp") in
       let createdTimestamp =
@@ -8888,35 +18959,38 @@ module CreateEventDataStoreResponse =
       let eventDataStoreArn =
         (Option.map ~f:EventDataStoreArn.of_xml)
           (Xml.child xml_arg0 "EventDataStoreArn") in
-      make ?updatedTimestamp ?createdTimestamp ?tagsList
-        ?terminationProtectionEnabled ?retentionPeriod ?organizationEnabled
-        ?multiRegionEnabled ?advancedEventSelectors ?status ?name
-        ?eventDataStoreArn ()
+      make ?billingMode ?kmsKeyId ?updatedTimestamp ?createdTimestamp
+        ?tagsList ?terminationProtectionEnabled ?retentionPeriod
+        ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
+        ?status ?name ?eventDataStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
-      let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
-      let tagsList = field_map json "TagsList" TagsList.of_json in
+    let of_json json__ =
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
+      let kmsKeyId =
+        field_map json__ "KmsKeyId" EventDataStoreKmsKeyId.of_json in
+      let updatedTimestamp = field_map json__ "UpdatedTimestamp" Date.of_json in
+      let createdTimestamp = field_map json__ "CreatedTimestamp" Date.of_json in
+      let tagsList = field_map json__ "TagsList" TagsList.of_json in
       let terminationProtectionEnabled =
-        field_map json "TerminationProtectionEnabled"
+        field_map json__ "TerminationProtectionEnabled"
           TerminationProtectionEnabled.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
       let organizationEnabled =
-        field_map json "OrganizationEnabled" Boolean.of_json in
+        field_map json__ "OrganizationEnabled" Boolean.of_json in
       let multiRegionEnabled =
-        field_map json "MultiRegionEnabled" Boolean.of_json in
+        field_map json__ "MultiRegionEnabled" Boolean.of_json in
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
-      let status = field_map json "Status" EventDataStoreStatus.of_json in
-      let name = field_map json "Name" EventDataStoreName.of_json in
+      let status = field_map json__ "Status" EventDataStoreStatus.of_json in
+      let name = field_map json__ "Name" EventDataStoreName.of_json in
       let eventDataStoreArn =
-        field_map json "EventDataStoreArn" EventDataStoreArn.of_json in
-      make ?updatedTimestamp ?createdTimestamp ?tagsList
-        ?terminationProtectionEnabled ?retentionPeriod ?organizationEnabled
-        ?multiRegionEnabled ?advancedEventSelectors ?status ?name
-        ?eventDataStoreArn ()
+        field_map json__ "EventDataStoreArn" EventDataStoreArn.of_json in
+      make ?billingMode ?kmsKeyId ?updatedTimestamp ?createdTimestamp
+        ?tagsList ?terminationProtectionEnabled ?retentionPeriod
+        ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
+        ?status ?name ?eventDataStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new event data store."]
 module CreateEventDataStoreRequest =
@@ -8927,20 +19001,29 @@ module CreateEventDataStoreRequest =
         [@ocaml.doc "The name of the event data store."];
       advancedEventSelectors: AdvancedEventSelectors.t option
         [@ocaml.doc
-          "The advanced event selectors to use to select the events for the data store. For more information about how to use advanced event selectors, see Log events by using advanced event selectors in the CloudTrail User Guide."];
+          "The advanced event selectors to use to select the events for the data store. You can configure up to five advanced event selectors for each event data store. For more information about how to use advanced event selectors to log CloudTrail events, see Log events by using advanced event selectors in the CloudTrail User Guide. For more information about how to use advanced event selectors to include Config configuration items in your event data store, see Create an event data store for Config configuration items in the CloudTrail User Guide. For more information about how to use advanced event selectors to include events outside of Amazon Web Services events in your event data store, see Create an integration to log events from outside Amazon Web Services in the CloudTrail User Guide."];
       multiRegionEnabled: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the event data store includes events from all regions, or only from the region in which the event data store is created."];
+          "Specifies whether the event data store includes events from all Regions, or only from the Region in which the event data store is created."];
       organizationEnabled: Boolean.t option
         [@ocaml.doc
           "Specifies whether an event data store collects events logged for an organization in Organizations."];
       retentionPeriod: RetentionPeriod.t option
         [@ocaml.doc
-          "The retention period of the event data store, in days. You can set a retention period of up to 2555 days, the equivalent of seven years."];
+          "The retention period of the event data store, in days. If BillingMode is set to EXTENDABLE_RETENTION_PRICING, you can set a retention period of up to 3653 days, the equivalent of 10 years. If BillingMode is set to FIXED_RETENTION_PRICING, you can set a retention period of up to 2557 days, the equivalent of seven years. CloudTrail Lake determines whether to retain an event by checking if the eventTime of the event is within the specified retention period. For example, if you set a retention period of 90 days, CloudTrail will remove events when the eventTime is older than 90 days. If you plan to copy trail events to this event data store, we recommend that you consider both the age of the events that you want to copy as well as how long you want to keep the copied events in your event data store. For example, if you copy trail events that are 5 years old and specify a retention period of 7 years, the event data store will retain those events for two years."];
       terminationProtectionEnabled: TerminationProtectionEnabled.t option
         [@ocaml.doc
           "Specifies whether termination protection is enabled for the event data store. If termination protection is enabled, you cannot delete the event data store until termination protection is disabled."];
-      tagsList: TagsList.t option }
+      tagsList: TagsList.t option ;
+      kmsKeyId: EventDataStoreKmsKeyId.t option
+        [@ocaml.doc
+          "Specifies the KMS key ID to use to encrypt the events delivered by CloudTrail. The value can be an alias name prefixed by alias/, a fully specified ARN to an alias, a fully specified ARN to a key, or a globally unique identifier. Disabling or deleting the KMS key, or removing CloudTrail permissions on the key, prevents CloudTrail from logging events to the event data store, and prevents users from querying the data in the event data store that was encrypted with the key. After you associate an event data store with a KMS key, the KMS key cannot be removed or changed. Before you disable or delete a KMS key that you are using with an event data store, delete or back up your event data store. CloudTrail also supports KMS multi-Region keys. For more information about multi-Region keys, see Using multi-Region keys in the Key Management Service Developer Guide. Examples: alias/MyAliasName arn:aws:kms:us-east-2:123456789012:alias/MyAliasName arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012 12345678-1234-1234-1234-123456789012"];
+      startIngestion: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the event data store should start ingesting live events. The default is true."];
+      billingMode: BillingMode.t option
+        [@ocaml.doc
+          "The billing mode for the event data store determines the cost for ingesting events and the default and maximum retention period for the event data store. The following are the possible values: EXTENDABLE_RETENTION_PRICING - This billing mode is generally recommended if you want a flexible retention period of up to 3653 days (about 10 years). The default retention period for this billing mode is 366 days. FIXED_RETENTION_PRICING - This billing mode is recommended if you expect to ingest more than 25 TB of event data per month and need a retention period of up to 2557 days (about 7 years). The default retention period for this billing mode is 2557 days. The default value is EXTENDABLE_RETENTION_PRICING. For more information about CloudTrail pricing, see CloudTrail Pricing and Managing CloudTrail Lake costs."]}
     let context_ = "CreateEventDataStoreRequest"
     let make ?advancedEventSelectors =
       fun ?multiRegionEnabled ->
@@ -8948,17 +19031,23 @@ module CreateEventDataStoreRequest =
           fun ?retentionPeriod ->
             fun ?terminationProtectionEnabled ->
               fun ?tagsList ->
-                fun ~name ->
-                  fun () ->
-                    {
-                      advancedEventSelectors;
-                      multiRegionEnabled;
-                      organizationEnabled;
-                      retentionPeriod;
-                      terminationProtectionEnabled;
-                      tagsList;
-                      name
-                    }
+                fun ?kmsKeyId ->
+                  fun ?startIngestion ->
+                    fun ?billingMode ->
+                      fun ~name ->
+                        fun () ->
+                          {
+                            advancedEventSelectors;
+                            multiRegionEnabled;
+                            organizationEnabled;
+                            retentionPeriod;
+                            terminationProtectionEnabled;
+                            tagsList;
+                            kmsKeyId;
+                            startIngestion;
+                            billingMode;
+                            name
+                          }
     let to_value x =
       structure_to_value
         [("Name", (Some (EventDataStoreName.to_value x.name)));
@@ -8974,9 +19063,20 @@ module CreateEventDataStoreRequest =
         ("TerminationProtectionEnabled",
           (Option.map x.terminationProtectionEnabled
              ~f:TerminationProtectionEnabled.to_value));
-        ("TagsList", (Option.map x.tagsList ~f:TagsList.to_value))]
+        ("TagsList", (Option.map x.tagsList ~f:TagsList.to_value));
+        ("KmsKeyId",
+          (Option.map x.kmsKeyId ~f:EventDataStoreKmsKeyId.to_value));
+        ("StartIngestion", (Option.map x.startIngestion ~f:Boolean.to_value));
+        ("BillingMode", (Option.map x.billingMode ~f:BillingMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let billingMode =
+        (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
+      let startIngestion =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "StartIngestion") in
+      let kmsKeyId =
+        (Option.map ~f:EventDataStoreKmsKeyId.of_xml)
+          (Xml.child xml_arg0 "KmsKeyId") in
       let tagsList =
         (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "TagsList") in
       let terminationProtectionEnabled =
@@ -8997,38 +19097,551 @@ module CreateEventDataStoreRequest =
       let name =
         EventDataStoreName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?tagsList ?terminationProtectionEnabled ?retentionPeriod
-        ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
-        ~name ()
+      make ?billingMode ?startIngestion ?kmsKeyId ?tagsList
+        ?terminationProtectionEnabled ?retentionPeriod ?organizationEnabled
+        ?multiRegionEnabled ?advancedEventSelectors ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagsList = field_map json "TagsList" TagsList.of_json in
+    let of_json json__ =
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
+      let startIngestion = field_map json__ "StartIngestion" Boolean.of_json in
+      let kmsKeyId =
+        field_map json__ "KmsKeyId" EventDataStoreKmsKeyId.of_json in
+      let tagsList = field_map json__ "TagsList" TagsList.of_json in
       let terminationProtectionEnabled =
-        field_map json "TerminationProtectionEnabled"
+        field_map json__ "TerminationProtectionEnabled"
           TerminationProtectionEnabled.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
       let organizationEnabled =
-        field_map json "OrganizationEnabled" Boolean.of_json in
+        field_map json__ "OrganizationEnabled" Boolean.of_json in
       let multiRegionEnabled =
-        field_map json "MultiRegionEnabled" Boolean.of_json in
+        field_map json__ "MultiRegionEnabled" Boolean.of_json in
       let advancedEventSelectors =
-        field_map json "AdvancedEventSelectors"
+        field_map json__ "AdvancedEventSelectors"
           AdvancedEventSelectors.of_json in
-      let name = field_map_exn json "Name" EventDataStoreName.of_json in
-      make ?tagsList ?terminationProtectionEnabled ?retentionPeriod
-        ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
-        ~name ()
+      let name = field_map_exn json__ "Name" EventDataStoreName.of_json in
+      make ?billingMode ?startIngestion ?kmsKeyId ?tagsList
+        ?terminationProtectionEnabled ?retentionPeriod ?organizationEnabled
+        ?multiRegionEnabled ?advancedEventSelectors ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new event data store."]
+module CreateDashboardResponse =
+  struct
+    type nonrec t =
+      {
+      dashboardArn: DashboardArn.t option
+        [@ocaml.doc "The ARN for the dashboard."];
+      name: DashboardName.t option [@ocaml.doc "The name of the dashboard."];
+      type_: DashboardType.t option [@ocaml.doc "The dashboard type."];
+      widgets: WidgetList.t option
+        [@ocaml.doc "An array of widgets for the dashboard."];
+      tagsList: TagsList.t option ;
+      refreshSchedule: RefreshSchedule.t option
+        [@ocaml.doc "The refresh schedule for the dashboard, if configured."];
+      terminationProtectionEnabled: TerminationProtectionEnabled.t option
+        [@ocaml.doc
+          "Indicates whether termination protection is enabled for the dashboard."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InsufficientEncryptionPolicyException of
+          InsufficientEncryptionPolicyException.t 
+      | `InvalidQueryStatementException of InvalidQueryStatementException.t 
+      | `InvalidTagParameterException of InvalidTagParameterException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dashboardArn =
+      fun ?name ->
+        fun ?type_ ->
+          fun ?widgets ->
+            fun ?tagsList ->
+              fun ?refreshSchedule ->
+                fun ?terminationProtectionEnabled ->
+                  fun () ->
+                    {
+                      dashboardArn;
+                      name;
+                      type_;
+                      widgets;
+                      tagsList;
+                      refreshSchedule;
+                      terminationProtectionEnabled
+                    }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_json json)
+      | "InvalidQueryStatementException" ->
+          `InvalidQueryStatementException
+            (InvalidQueryStatementException.of_json json)
+      | "InvalidTagParameterException" ->
+          `InvalidTagParameterException
+            (InvalidTagParameterException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "InsufficientEncryptionPolicyException" ->
+          `InsufficientEncryptionPolicyException
+            (InsufficientEncryptionPolicyException.of_xml xml)
+      | "InvalidQueryStatementException" ->
+          `InvalidQueryStatementException
+            (InvalidQueryStatementException.of_xml xml)
+      | "InvalidTagParameterException" ->
+          `InvalidTagParameterException
+            (InvalidTagParameterException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InsufficientEncryptionPolicyException e ->
+          `Assoc
+            [("error", (`String "InsufficientEncryptionPolicyException"));
+            ("details", (InsufficientEncryptionPolicyException.to_json e))]
+      | `InvalidQueryStatementException e ->
+          `Assoc
+            [("error", (`String "InvalidQueryStatementException"));
+            ("details", (InvalidQueryStatementException.to_json e))]
+      | `InvalidTagParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidTagParameterException"));
+            ("details", (InvalidTagParameterException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DashboardArn",
+           (Option.map x.dashboardArn ~f:DashboardArn.to_value));
+        ("Name", (Option.map x.name ~f:DashboardName.to_value));
+        ("Type", (Option.map x.type_ ~f:DashboardType.to_value));
+        ("Widgets", (Option.map x.widgets ~f:WidgetList.to_value));
+        ("TagsList", (Option.map x.tagsList ~f:TagsList.to_value));
+        ("RefreshSchedule",
+          (Option.map x.refreshSchedule ~f:RefreshSchedule.to_value));
+        ("TerminationProtectionEnabled",
+          (Option.map x.terminationProtectionEnabled
+             ~f:TerminationProtectionEnabled.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let terminationProtectionEnabled =
+        (Option.map ~f:TerminationProtectionEnabled.of_xml)
+          (Xml.child xml_arg0 "TerminationProtectionEnabled") in
+      let refreshSchedule =
+        (Option.map ~f:RefreshSchedule.of_xml)
+          (Xml.child xml_arg0 "RefreshSchedule") in
+      let tagsList =
+        (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "TagsList") in
+      let widgets =
+        (Option.map ~f:WidgetList.of_xml) (Xml.child xml_arg0 "Widgets") in
+      let type_ =
+        (Option.map ~f:DashboardType.of_xml) (Xml.child xml_arg0 "Type") in
+      let name =
+        (Option.map ~f:DashboardName.of_xml) (Xml.child xml_arg0 "Name") in
+      let dashboardArn =
+        (Option.map ~f:DashboardArn.of_xml)
+          (Xml.child xml_arg0 "DashboardArn") in
+      make ?terminationProtectionEnabled ?refreshSchedule ?tagsList ?widgets
+        ?type_ ?name ?dashboardArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let terminationProtectionEnabled =
+        field_map json__ "TerminationProtectionEnabled"
+          TerminationProtectionEnabled.of_json in
+      let refreshSchedule =
+        field_map json__ "RefreshSchedule" RefreshSchedule.of_json in
+      let tagsList = field_map json__ "TagsList" TagsList.of_json in
+      let widgets = field_map json__ "Widgets" WidgetList.of_json in
+      let type_ = field_map json__ "Type" DashboardType.of_json in
+      let name = field_map json__ "Name" DashboardName.of_json in
+      let dashboardArn = field_map json__ "DashboardArn" DashboardArn.of_json in
+      make ?terminationProtectionEnabled ?refreshSchedule ?tagsList ?widgets
+        ?type_ ?name ?dashboardArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a custom dashboard or the Highlights dashboard. Custom dashboards - Custom dashboards allow you to query events in any event data store type. You can add up to 10 widgets to a custom dashboard. You can manually refresh a custom dashboard, or you can set a refresh schedule. Highlights dashboard - You can create the Highlights dashboard to see a summary of key user activities and API usage across all your event data stores. CloudTrail Lake manages the Highlights dashboard and refreshes the dashboard every 6 hours. To create the Highlights dashboard, you must set and enable a refresh schedule. CloudTrail runs queries to populate the dashboard's widgets during a manual or scheduled refresh. CloudTrail must be granted permissions to run the StartQuery operation on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to each event data store. For more information, see Example: Allow CloudTrail to run queries to populate a dashboard in the CloudTrail User Guide. To set a refresh schedule, CloudTrail must be granted permissions to run the StartDashboardRefresh operation to refresh the dashboard on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to the dashboard. For more information, see Resource-based policy example for a dashboard in the CloudTrail User Guide. For more information about dashboards, see CloudTrail Lake dashboards in the CloudTrail User Guide."]
+module CreateDashboardRequest =
+  struct
+    type nonrec t =
+      {
+      name: DashboardName.t
+        [@ocaml.doc
+          "The name of the dashboard. The name must be unique to your account. To create the Highlights dashboard, the name must be AWSCloudTrail-Highlights."];
+      refreshSchedule: RefreshSchedule.t option
+        [@ocaml.doc
+          "The refresh schedule configuration for the dashboard. To create the Highlights dashboard, you must set a refresh schedule and set the Status to ENABLED. The Unit for the refresh schedule must be HOURS and the Value must be 6."];
+      tagsList: TagsList.t option ;
+      terminationProtectionEnabled: TerminationProtectionEnabled.t option
+        [@ocaml.doc
+          "Specifies whether termination protection is enabled for the dashboard. If termination protection is enabled, you cannot delete the dashboard until termination protection is disabled."];
+      widgets: RequestWidgetList.t option
+        [@ocaml.doc
+          "An array of widgets for a custom dashboard. A custom dashboard can have a maximum of ten widgets. You do not need to specify widgets for the Highlights dashboard."]}
+    let context_ = "CreateDashboardRequest"
+    let make ?refreshSchedule =
+      fun ?tagsList ->
+        fun ?terminationProtectionEnabled ->
+          fun ?widgets ->
+            fun ~name ->
+              fun () ->
+                {
+                  refreshSchedule;
+                  tagsList;
+                  terminationProtectionEnabled;
+                  widgets;
+                  name
+                }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (DashboardName.to_value x.name)));
+        ("RefreshSchedule",
+          (Option.map x.refreshSchedule ~f:RefreshSchedule.to_value));
+        ("TagsList", (Option.map x.tagsList ~f:TagsList.to_value));
+        ("TerminationProtectionEnabled",
+          (Option.map x.terminationProtectionEnabled
+             ~f:TerminationProtectionEnabled.to_value));
+        ("Widgets", (Option.map x.widgets ~f:RequestWidgetList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let widgets =
+        (Option.map ~f:RequestWidgetList.of_xml)
+          (Xml.child xml_arg0 "Widgets") in
+      let terminationProtectionEnabled =
+        (Option.map ~f:TerminationProtectionEnabled.of_xml)
+          (Xml.child xml_arg0 "TerminationProtectionEnabled") in
+      let tagsList =
+        (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "TagsList") in
+      let refreshSchedule =
+        (Option.map ~f:RefreshSchedule.of_xml)
+          (Xml.child xml_arg0 "RefreshSchedule") in
+      let name =
+        DashboardName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?widgets ?terminationProtectionEnabled ?tagsList ?refreshSchedule
+        ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let widgets = field_map json__ "Widgets" RequestWidgetList.of_json in
+      let terminationProtectionEnabled =
+        field_map json__ "TerminationProtectionEnabled"
+          TerminationProtectionEnabled.of_json in
+      let tagsList = field_map json__ "TagsList" TagsList.of_json in
+      let refreshSchedule =
+        field_map json__ "RefreshSchedule" RefreshSchedule.of_json in
+      let name = field_map_exn json__ "Name" DashboardName.of_json in
+      make ?widgets ?terminationProtectionEnabled ?tagsList ?refreshSchedule
+        ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a custom dashboard or the Highlights dashboard. Custom dashboards - Custom dashboards allow you to query events in any event data store type. You can add up to 10 widgets to a custom dashboard. You can manually refresh a custom dashboard, or you can set a refresh schedule. Highlights dashboard - You can create the Highlights dashboard to see a summary of key user activities and API usage across all your event data stores. CloudTrail Lake manages the Highlights dashboard and refreshes the dashboard every 6 hours. To create the Highlights dashboard, you must set and enable a refresh schedule. CloudTrail runs queries to populate the dashboard's widgets during a manual or scheduled refresh. CloudTrail must be granted permissions to run the StartQuery operation on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to each event data store. For more information, see Example: Allow CloudTrail to run queries to populate a dashboard in the CloudTrail User Guide. To set a refresh schedule, CloudTrail must be granted permissions to run the StartDashboardRefresh operation to refresh the dashboard on your behalf. To provide permissions, run the PutResourcePolicy operation to attach a resource-based policy to the dashboard. For more information, see Resource-based policy example for a dashboard in the CloudTrail User Guide. For more information about dashboards, see CloudTrail Lake dashboards in the CloudTrail User Guide."]
+module CreateChannelResponse =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChannelArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the new channel."];
+      name: ChannelName.t option [@ocaml.doc "The name of the new channel."];
+      source: Source.t option
+        [@ocaml.doc "The partner or external event source name."];
+      destinations: Destinations.t option
+        [@ocaml.doc
+          "The event data stores that log the events arriving through the channel."];
+      tags: TagsList.t option }
+    type nonrec error =
+      [ `ChannelAlreadyExistsException of ChannelAlreadyExistsException.t 
+      | `ChannelMaxLimitExceededException of
+          ChannelMaxLimitExceededException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
+      | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
+      | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
+      | `InvalidEventDataStoreCategoryException of
+          InvalidEventDataStoreCategoryException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidSourceException of InvalidSourceException.t 
+      | `InvalidTagParameterException of InvalidTagParameterException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `TagsLimitExceededException of TagsLimitExceededException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?channelArn =
+      fun ?name ->
+        fun ?source ->
+          fun ?destinations ->
+            fun ?tags ->
+              fun () -> { channelArn; name; source; destinations; tags }
+    let error_of_json name json =
+      match name with
+      | "ChannelAlreadyExistsException" ->
+          `ChannelAlreadyExistsException
+            (ChannelAlreadyExistsException.of_json json)
+      | "ChannelMaxLimitExceededException" ->
+          `ChannelMaxLimitExceededException
+            (ChannelMaxLimitExceededException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_json json)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_json json)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidSourceException" ->
+          `InvalidSourceException (InvalidSourceException.of_json json)
+      | "InvalidTagParameterException" ->
+          `InvalidTagParameterException
+            (InvalidTagParameterException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "TagsLimitExceededException" ->
+          `TagsLimitExceededException
+            (TagsLimitExceededException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ChannelAlreadyExistsException" ->
+          `ChannelAlreadyExistsException
+            (ChannelAlreadyExistsException.of_xml xml)
+      | "ChannelMaxLimitExceededException" ->
+          `ChannelMaxLimitExceededException
+            (ChannelMaxLimitExceededException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
+      | "EventDataStoreNotFoundException" ->
+          `EventDataStoreNotFoundException
+            (EventDataStoreNotFoundException.of_xml xml)
+      | "InactiveEventDataStoreException" ->
+          `InactiveEventDataStoreException
+            (InactiveEventDataStoreException.of_xml xml)
+      | "InvalidEventDataStoreCategoryException" ->
+          `InvalidEventDataStoreCategoryException
+            (InvalidEventDataStoreCategoryException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidSourceException" ->
+          `InvalidSourceException (InvalidSourceException.of_xml xml)
+      | "InvalidTagParameterException" ->
+          `InvalidTagParameterException
+            (InvalidTagParameterException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "TagsLimitExceededException" ->
+          `TagsLimitExceededException (TagsLimitExceededException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ChannelAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ChannelAlreadyExistsException"));
+            ("details", (ChannelAlreadyExistsException.to_json e))]
+      | `ChannelMaxLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ChannelMaxLimitExceededException"));
+            ("details", (ChannelMaxLimitExceededException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
+      | `EventDataStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreNotFoundException"));
+            ("details", (EventDataStoreNotFoundException.to_json e))]
+      | `InactiveEventDataStoreException e ->
+          `Assoc
+            [("error", (`String "InactiveEventDataStoreException"));
+            ("details", (InactiveEventDataStoreException.to_json e))]
+      | `InvalidEventDataStoreCategoryException e ->
+          `Assoc
+            [("error", (`String "InvalidEventDataStoreCategoryException"));
+            ("details", (InvalidEventDataStoreCategoryException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidSourceException e ->
+          `Assoc
+            [("error", (`String "InvalidSourceException"));
+            ("details", (InvalidSourceException.to_json e))]
+      | `InvalidTagParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidTagParameterException"));
+            ("details", (InvalidTagParameterException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `TagsLimitExceededException e ->
+          `Assoc
+            [("error", (`String "TagsLimitExceededException"));
+            ("details", (TagsLimitExceededException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ChannelArn", (Option.map x.channelArn ~f:ChannelArn.to_value));
+        ("Name", (Option.map x.name ~f:ChannelName.to_value));
+        ("Source", (Option.map x.source ~f:Source.to_value));
+        ("Destinations",
+          (Option.map x.destinations ~f:Destinations.to_value));
+        ("Tags", (Option.map x.tags ~f:TagsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let destinations =
+        (Option.map ~f:Destinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      let source =
+        (Option.map ~f:Source.of_xml) (Xml.child xml_arg0 "Source") in
+      let name =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "Name") in
+      let channelArn =
+        (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
+      make ?tags ?destinations ?source ?name ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagsList.of_json in
+      let destinations = field_map json__ "Destinations" Destinations.of_json in
+      let source = field_map json__ "Source" Source.of_json in
+      let name = field_map json__ "Name" ChannelName.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChannelArn.of_json in
+      make ?tags ?destinations ?source ?name ?channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a channel for CloudTrail to ingest events from a partner or external source. After you create a channel, a CloudTrail Lake event data store can log events from the partner or source that you specify."]
+module CreateChannelRequest =
+  struct
+    type nonrec t =
+      {
+      name: ChannelName.t [@ocaml.doc "The name of the channel."];
+      source: Source.t
+        [@ocaml.doc
+          "The name of the partner or external event source. You cannot change this name after you create the channel. A maximum of one channel is allowed per source. A source can be either Custom for all valid non-Amazon Web Services events, or the name of a partner event source. For information about the source names for available partners, see Additional information about integration partners in the CloudTrail User Guide."];
+      destinations: Destinations.t
+        [@ocaml.doc
+          "One or more event data stores to which events arriving through a channel will be logged."];
+      tags: TagsList.t option }
+    let context_ = "CreateChannelRequest"
+    let make ?tags =
+      fun ~name ->
+        fun ~source ->
+          fun ~destinations -> fun () -> { tags; name; source; destinations }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (ChannelName.to_value x.name)));
+        ("Source", (Some (Source.to_value x.source)));
+        ("Destinations", (Some (Destinations.to_value x.destinations)));
+        ("Tags", (Option.map x.tags ~f:TagsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let destinations =
+        Destinations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Destinations") in
+      let source =
+        Source.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Source") in
+      let name =
+        ChannelName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?tags ~destinations ~source ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagsList.of_json in
+      let destinations =
+        field_map_exn json__ "Destinations" Destinations.of_json in
+      let source = field_map_exn json__ "Source" Source.of_json in
+      let name = field_map_exn json__ "Name" ChannelName.of_json in
+      make ?tags ~destinations ~source ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a channel for CloudTrail to ingest events from a partner or external source. After you create a channel, a CloudTrail Lake event data store can log events from the partner or source that you specify."]
 module CancelQueryResponse =
   struct
     type nonrec t =
       {
-      queryId: UUID.t [@ocaml.doc "The ID of the canceled query."];
-      queryStatus: QueryStatus.t
+      queryId: UUID.t option [@ocaml.doc "The ID of the canceled query."];
+      queryStatus: QueryStatus.t option
         [@ocaml.doc
-          "Shows the status of a query after a CancelQuery request. Typically, the values shown are either RUNNING or CANCELLED."]}
+          "Shows the status of a query after a CancelQuery request. Typically, the values shown are either RUNNING or CANCELLED."];
+      eventDataStoreOwnerAccountId: AccountId.t option
+        [@ocaml.doc "The account ID of the event data store owner."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `EventDataStoreARNInvalidException of
@@ -9037,13 +19650,16 @@ module CancelQueryResponse =
       | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
       | `InactiveQueryException of InactiveQueryException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
       | `QueryIdNotFoundException of QueryIdNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CancelQueryResponse"
-    let make ~queryId =
-      fun ~queryStatus -> fun () -> { queryId; queryStatus }
+    let make ?queryId =
+      fun ?queryStatus ->
+        fun ?eventDataStoreOwnerAccountId ->
+          fun () -> { queryId; queryStatus; eventDataStoreOwnerAccountId }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -9061,6 +19677,9 @@ module CancelQueryResponse =
           `InactiveQueryException (InactiveQueryException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_json json)
@@ -9089,6 +19708,9 @@ module CancelQueryResponse =
           `InactiveQueryException (InactiveQueryException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "OperationNotPermittedException" ->
           `OperationNotPermittedException
             (OperationNotPermittedException.of_xml xml)
@@ -9125,6 +19747,10 @@ module CancelQueryResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `OperationNotPermittedException e ->
           `Assoc
             [("error", (`String "OperationNotPermittedException"));
@@ -9144,21 +19770,27 @@ module CancelQueryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("QueryId", (Some (UUID.to_value x.queryId)));
-        ("QueryStatus", (Some (QueryStatus.to_value x.queryStatus)))]
+        [("QueryId", (Option.map x.queryId ~f:UUID.to_value));
+        ("QueryStatus", (Option.map x.queryStatus ~f:QueryStatus.to_value));
+        ("EventDataStoreOwnerAccountId",
+          (Option.map x.eventDataStoreOwnerAccountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eventDataStoreOwnerAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreOwnerAccountId") in
       let queryStatus =
-        QueryStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryStatus") in
+        (Option.map ~f:QueryStatus.of_xml) (Xml.child xml_arg0 "QueryStatus") in
       let queryId =
-        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
-      make ~queryStatus ~queryId ()
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "QueryId") in
+      make ?eventDataStoreOwnerAccountId ?queryStatus ?queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryStatus = field_map_exn json "QueryStatus" QueryStatus.of_json in
-      let queryId = field_map_exn json "QueryId" UUID.of_json in
-      make ~queryStatus ~queryId ()
+    let of_json json__ =
+      let eventDataStoreOwnerAccountId =
+        field_map json__ "EventDataStoreOwnerAccountId" AccountId.of_json in
+      let queryStatus = field_map json__ "QueryStatus" QueryStatus.of_json in
+      let queryId = field_map json__ "QueryId" UUID.of_json in
+      make ?eventDataStoreOwnerAccountId ?queryStatus ?queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Cancels a query if the query is not in a terminated state, such as CANCELLED, FAILED, TIMED_OUT, or FINISHED. You must specify an ARN value for EventDataStore. The ID of the query that you want to cancel is also required. When you run CancelQuery, the query status might show as CANCELLED even if the operation is not yet finished."]
@@ -9166,34 +19798,45 @@ module CancelQueryRequest =
   struct
     type nonrec t =
       {
-      eventDataStore: EventDataStoreArn.t
+      eventDataStore: EventDataStoreArn.t option
         [@ocaml.doc
           "The ARN (or the ID suffix of the ARN) of an event data store on which the specified query is running."];
       queryId: UUID.t
         [@ocaml.doc
-          "The ID of the query that you want to cancel. The QueryId comes from the response of a StartQuery operation."]}
+          "The ID of the query that you want to cancel. The QueryId comes from the response of a StartQuery operation."];
+      eventDataStoreOwnerAccountId: AccountId.t option
+        [@ocaml.doc "The account ID of the event data store owner."]}
     let context_ = "CancelQueryRequest"
-    let make ~eventDataStore =
-      fun ~queryId -> fun () -> { eventDataStore; queryId }
+    let make ?eventDataStore =
+      fun ?eventDataStoreOwnerAccountId ->
+        fun ~queryId ->
+          fun () -> { eventDataStore; eventDataStoreOwnerAccountId; queryId }
     let to_value x =
       structure_to_value
         [("EventDataStore",
-           (Some (EventDataStoreArn.to_value x.eventDataStore)));
-        ("QueryId", (Some (UUID.to_value x.queryId)))]
+           (Option.map x.eventDataStore ~f:EventDataStoreArn.to_value));
+        ("QueryId", (Some (UUID.to_value x.queryId)));
+        ("EventDataStoreOwnerAccountId",
+          (Option.map x.eventDataStoreOwnerAccountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eventDataStoreOwnerAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "EventDataStoreOwnerAccountId") in
       let queryId =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
       let eventDataStore =
-        EventDataStoreArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
-      make ~queryId ~eventDataStore ()
+        (Option.map ~f:EventDataStoreArn.of_xml)
+          (Xml.child xml_arg0 "EventDataStore") in
+      make ?eventDataStoreOwnerAccountId ~queryId ?eventDataStore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryId = field_map_exn json "QueryId" UUID.of_json in
+    let of_json json__ =
+      let eventDataStoreOwnerAccountId =
+        field_map json__ "EventDataStoreOwnerAccountId" AccountId.of_json in
+      let queryId = field_map_exn json__ "QueryId" UUID.of_json in
       let eventDataStore =
-        field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
-      make ~queryId ~eventDataStore ()
+        field_map json__ "EventDataStore" EventDataStoreArn.of_json in
+      make ?eventDataStoreOwnerAccountId ~queryId ?eventDataStore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Cancels a query if the query is not in a terminated state, such as CANCELLED, FAILED, TIMED_OUT, or FINISHED. You must specify an ARN value for EventDataStore. The ID of the query that you want to cancel is also required. When you run CancelQuery, the query status might show as CANCELLED even if the operation is not yet finished."]
@@ -9201,12 +19844,18 @@ module AddTagsResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
+      [ `ChannelARNInvalidException of ChannelARNInvalidException.t 
+      | `ChannelNotFoundException of ChannelNotFoundException.t 
+      | `CloudTrailARNInvalidException of CloudTrailARNInvalidException.t 
       | `ConflictException of ConflictException.t 
+      | `EventDataStoreARNInvalidException of
+          EventDataStoreARNInvalidException.t 
       | `EventDataStoreNotFoundException of EventDataStoreNotFoundException.t 
       | `InactiveEventDataStoreException of InactiveEventDataStoreException.t 
       | `InvalidTagParameterException of InvalidTagParameterException.t 
       | `InvalidTrailNameException of InvalidTrailNameException.t 
+      | `NoManagementAccountSLRExistsException of
+          NoManagementAccountSLRExistsException.t 
       | `NotOrganizationMasterAccountException of
           NotOrganizationMasterAccountException.t 
       | `OperationNotPermittedException of OperationNotPermittedException.t 
@@ -9219,11 +19868,19 @@ module AddTagsResponse =
     let make () = ()
     let error_of_json name json =
       match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException
+            (ChannelARNInvalidException.of_json json)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_json json)
       | "CloudTrailARNInvalidException" ->
           `CloudTrailARNInvalidException
             (CloudTrailARNInvalidException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_json json)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_json json)
@@ -9235,6 +19892,9 @@ module AddTagsResponse =
             (InvalidTagParameterException.of_json json)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_json json)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_json json)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_json json)
@@ -9257,11 +19917,18 @@ module AddTagsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ChannelARNInvalidException" ->
+          `ChannelARNInvalidException (ChannelARNInvalidException.of_xml xml)
+      | "ChannelNotFoundException" ->
+          `ChannelNotFoundException (ChannelNotFoundException.of_xml xml)
       | "CloudTrailARNInvalidException" ->
           `CloudTrailARNInvalidException
             (CloudTrailARNInvalidException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
+      | "EventDataStoreARNInvalidException" ->
+          `EventDataStoreARNInvalidException
+            (EventDataStoreARNInvalidException.of_xml xml)
       | "EventDataStoreNotFoundException" ->
           `EventDataStoreNotFoundException
             (EventDataStoreNotFoundException.of_xml xml)
@@ -9273,6 +19940,9 @@ module AddTagsResponse =
             (InvalidTagParameterException.of_xml xml)
       | "InvalidTrailNameException" ->
           `InvalidTrailNameException (InvalidTrailNameException.of_xml xml)
+      | "NoManagementAccountSLRExistsException" ->
+          `NoManagementAccountSLRExistsException
+            (NoManagementAccountSLRExistsException.of_xml xml)
       | "NotOrganizationMasterAccountException" ->
           `NotOrganizationMasterAccountException
             (NotOrganizationMasterAccountException.of_xml xml)
@@ -9293,6 +19963,14 @@ module AddTagsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ChannelARNInvalidException e ->
+          `Assoc
+            [("error", (`String "ChannelARNInvalidException"));
+            ("details", (ChannelARNInvalidException.to_json e))]
+      | `ChannelNotFoundException e ->
+          `Assoc
+            [("error", (`String "ChannelNotFoundException"));
+            ("details", (ChannelNotFoundException.to_json e))]
       | `CloudTrailARNInvalidException e ->
           `Assoc
             [("error", (`String "CloudTrailARNInvalidException"));
@@ -9301,6 +19979,10 @@ module AddTagsResponse =
           `Assoc
             [("error", (`String "ConflictException"));
             ("details", (ConflictException.to_json e))]
+      | `EventDataStoreARNInvalidException e ->
+          `Assoc
+            [("error", (`String "EventDataStoreARNInvalidException"));
+            ("details", (EventDataStoreARNInvalidException.to_json e))]
       | `EventDataStoreNotFoundException e ->
           `Assoc
             [("error", (`String "EventDataStoreNotFoundException"));
@@ -9317,6 +19999,10 @@ module AddTagsResponse =
           `Assoc
             [("error", (`String "InvalidTrailNameException"));
             ("details", (InvalidTrailNameException.to_json e))]
+      | `NoManagementAccountSLRExistsException e ->
+          `Assoc
+            [("error", (`String "NoManagementAccountSLRExistsException"));
+            ("details", (NoManagementAccountSLRExistsException.to_json e))]
       | `NotOrganizationMasterAccountException e ->
           `Assoc
             [("error", (`String "NotOrganizationMasterAccountException"));
@@ -9361,7 +20047,7 @@ module AddTagsRequest =
       {
       resourceId: String_.t
         [@ocaml.doc
-          "Specifies the ARN of the trail to which one or more tags will be added. The format of a trail ARN is: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail"];
+          "Specifies the ARN of the trail, event data store, dashboard, or channel to which one or more tags will be added. The format of a trail ARN is: arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail The format of an event data store ARN is: arn:aws:cloudtrail:us-east-2:123456789012:eventdatastore/EXAMPLE-f852-4e8f-8bd1-bcf6cEXAMPLE The format of a dashboard ARN is: arn:aws:cloudtrail:us-east-1:123456789012:dashboard/exampleDash The format of a channel ARN is: arn:aws:cloudtrail:us-east-2:123456789012:channel/01234567890"];
       tagsList: TagsList.t
         [@ocaml.doc "Contains a list of tags, up to a limit of 50"]}
     let context_ = "AddTagsRequest"
@@ -9380,9 +20066,10 @@ module AddTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagsList ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagsList = field_map_exn json "TagsList" TagsList.of_json in
-      let resourceId = field_map_exn json "ResourceId" String_.of_json in
+    let of_json json__ =
+      let tagsList = field_map_exn json__ "TagsList" TagsList.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" String_.of_json in
       make ~tagsList ~resourceId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies the tags to add to a trail."]
+  end[@@ocaml.doc
+       "Specifies the tags to add to a trail, event data store, dashboard, or channel."]

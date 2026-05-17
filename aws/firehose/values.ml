@@ -37,6 +37,8 @@ module ProcessorParameterName =
       | BufferIntervalInSeconds 
       | SubRecordType 
       | Delimiter 
+      | CompressionFormat 
+      | DataMessageExtraction 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -50,6 +52,8 @@ module ProcessorParameterName =
       | BufferIntervalInSeconds -> "BufferIntervalInSeconds"
       | SubRecordType -> "SubRecordType"
       | Delimiter -> "Delimiter"
+      | CompressionFormat -> "CompressionFormat"
+      | DataMessageExtraction -> "DataMessageExtraction"
       | Non_static_id s -> s
     let of_string =
       function
@@ -62,6 +66,8 @@ module ProcessorParameterName =
       | "BufferIntervalInSeconds" -> BufferIntervalInSeconds
       | "SubRecordType" -> SubRecordType
       | "Delimiter" -> Delimiter
+      | "CompressionFormat" -> CompressionFormat
+      | "DataMessageExtraction" -> DataMessageExtraction
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -138,7 +144,8 @@ module ProcessorParameter =
     type nonrec t =
       {
       parameterName: ProcessorParameterName.t
-        [@ocaml.doc "The name of the parameter."];
+        [@ocaml.doc
+          "The name of the parameter. Currently the following default values are supported: 3 for NumberOfRetries and 60 for the BufferIntervalInSeconds. The BufferSizeInMBs ranges between 0.2 MB and up to 3MB. The default buffering hint is 1MB for all destinations, except Splunk. For Splunk, the default buffering hint is 256 KB."];
       parameterValue: ProcessorParameterValue.t
         [@ocaml.doc "The parameter value."]}
     let context_ = "ProcessorParameter"
@@ -160,11 +167,11 @@ module ProcessorParameter =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterName") in
       make ~parameterValue ~parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterValue =
-        field_map_exn json "ParameterValue" ProcessorParameterValue.of_json in
+        field_map_exn json__ "ParameterValue" ProcessorParameterValue.of_json in
       let parameterName =
-        field_map_exn json "ParameterName" ProcessorParameterName.of_json in
+        field_map_exn json__ "ParameterName" ProcessorParameterName.of_json in
       make ~parameterValue ~parameterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the processor parameter."]
@@ -172,6 +179,9 @@ module ListOfNonEmptyStrings =
   struct
     type nonrec t = NonEmptyString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -229,6 +239,8 @@ module ColumnToJsonKeyMappings =
                        (NonEmptyString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -255,6 +267,9 @@ module ListOfNonEmptyStringsWithoutWhitespace =
   struct
     type nonrec t = NonEmptyStringWithoutWhitespace.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyStringWithoutWhitespace.to_value)) |>
         (fun x -> `List x)
@@ -450,10 +465,41 @@ module ParquetWriterVersion =
     let of_json j = of_string (string_of_json ~kind:"ParquetWriterVersion" j)
     let to_json = simple_to_json to_value
   end
+module PartitionField =
+  struct
+    type nonrec t =
+      {
+      sourceName: NonEmptyStringWithoutWhitespace.t
+        [@ocaml.doc
+          "The column name to be configured in partition spec. Amazon Data Firehose is in preview release and is subject to change."]}
+    let context_ = "PartitionField"
+    let make ~sourceName = fun () -> { sourceName }
+    let to_value x =
+      structure_to_value
+        [("SourceName",
+           (Some (NonEmptyStringWithoutWhitespace.to_value x.sourceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceName =
+        NonEmptyStringWithoutWhitespace.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceName") in
+      make ~sourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceName =
+        field_map_exn json__ "SourceName"
+          NonEmptyStringWithoutWhitespace.of_json in
+      make ~sourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a single field in a PartitionSpec. Amazon Data Firehose is in preview release and is subject to change."]
 module ProcessorParameterList =
   struct
     type nonrec t = ProcessorParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProcessorParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -479,6 +525,8 @@ module ProcessorType =
   struct
     type nonrec t =
       | RecordDeAggregation 
+      | Decompression 
+      | CloudWatchLogProcessing 
       | Lambda 
       | MetadataExtraction 
       | AppendDelimiterToRecord 
@@ -487,6 +535,8 @@ module ProcessorType =
     let to_string =
       function
       | RecordDeAggregation -> "RecordDeAggregation"
+      | Decompression -> "Decompression"
+      | CloudWatchLogProcessing -> "CloudWatchLogProcessing"
       | Lambda -> "Lambda"
       | MetadataExtraction -> "MetadataExtraction"
       | AppendDelimiterToRecord -> "AppendDelimiterToRecord"
@@ -494,6 +544,8 @@ module ProcessorType =
     let of_string =
       function
       | "RecordDeAggregation" -> RecordDeAggregation
+      | "Decompression" -> Decompression
+      | "CloudWatchLogProcessing" -> CloudWatchLogProcessing
       | "Lambda" -> Lambda
       | "MetadataExtraction" -> MetadataExtraction
       | "AppendDelimiterToRecord" -> AppendDelimiterToRecord
@@ -516,7 +568,9 @@ module AWSKMSKeyARN =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:"arn:.*")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:.*:kms:[a-zA-Z0-9\\-]+:\\d{12}:(key|alias)/[a-zA-Z_0-9+=,.@\\-_/]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -532,7 +586,7 @@ module HiveJsonSerDe =
       {
       timestampFormats: ListOfNonEmptyStrings.t option
         [@ocaml.doc
-          "Indicates how you want Kinesis Data Firehose to parse the date and timestamps that may be present in your input data JSON. To specify these format strings, follow the pattern syntax of JodaTime's DateTimeFormat format strings. For more information, see Class DateTimeFormat. You can also use the special value millis to parse timestamps in epoch milliseconds. If you don't specify a format, Kinesis Data Firehose uses java.sql.Timestamp::valueOf by default."]}
+          "Indicates how you want Firehose to parse the date and timestamps that may be present in your input data JSON. To specify these format strings, follow the pattern syntax of JodaTime's DateTimeFormat format strings. For more information, see Class DateTimeFormat. You can also use the special value millis to parse timestamps in epoch milliseconds. If you don't specify a format, Firehose uses java.sql.Timestamp::valueOf by default."]}
     let make ?timestampFormats = fun () -> { timestampFormats }
     let to_value x =
       structure_to_value
@@ -545,23 +599,23 @@ module HiveJsonSerDe =
           (Xml.child xml_arg0 "TimestampFormats") in
       make ?timestampFormats ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timestampFormats =
-        field_map json "TimestampFormats" ListOfNonEmptyStrings.of_json in
+        field_map json__ "TimestampFormats" ListOfNonEmptyStrings.of_json in
       make ?timestampFormats ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The native Hive / HCatalog JsonSerDe. Used by Kinesis Data Firehose for deserializing data, which means converting it from the JSON format in preparation for serializing it to the Parquet or ORC format. This is one of two deserializers you can choose, depending on which one offers the functionality you need. The other option is the OpenX SerDe."]
+       "The native Hive / HCatalog JsonSerDe. Used by Firehose for deserializing data, which means converting it from the JSON format in preparation for serializing it to the Parquet or ORC format. This is one of two deserializers you can choose, depending on which one offers the functionality you need. The other option is the OpenX SerDe."]
 module OpenXJsonSerDe =
   struct
     type nonrec t =
       {
       convertDotsInJsonKeysToUnderscores: BooleanObject.t option
         [@ocaml.doc
-          "When set to true, specifies that the names of the keys include dots and that you want Kinesis Data Firehose to replace them with underscores. This is useful because Apache Hive does not allow dots in column names. For example, if the JSON contains a key whose name is \"a.b\", you can define the column name to be \"a_b\" when using this option. The default is false."];
+          "When set to true, specifies that the names of the keys include dots and that you want Firehose to replace them with underscores. This is useful because Apache Hive does not allow dots in column names. For example, if the JSON contains a key whose name is \"a.b\", you can define the column name to be \"a_b\" when using this option. The default is false."];
       caseInsensitive: BooleanObject.t option
         [@ocaml.doc
-          "When set to true, which is the default, Kinesis Data Firehose converts JSON keys to lowercase before deserializing them."];
+          "When set to true, which is the default, Firehose converts JSON keys to lowercase before deserializing them."];
       columnToJsonKeyMappings: ColumnToJsonKeyMappings.t option
         [@ocaml.doc
           "Maps column names to JSON keys that aren't identical to the column names. This is useful when the JSON contains keys that are Hive keywords. For example, timestamp is a Hive keyword. If you have a JSON key named timestamp, set this parameter to \\{\"ts\": \"timestamp\"\\} to map this key to a column named ts."]}
@@ -598,20 +652,20 @@ module OpenXJsonSerDe =
       make ?columnToJsonKeyMappings ?caseInsensitive
         ?convertDotsInJsonKeysToUnderscores ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let columnToJsonKeyMappings =
-        field_map json "ColumnToJsonKeyMappings"
+        field_map json__ "ColumnToJsonKeyMappings"
           ColumnToJsonKeyMappings.of_json in
       let caseInsensitive =
-        field_map json "CaseInsensitive" BooleanObject.of_json in
+        field_map json__ "CaseInsensitive" BooleanObject.of_json in
       let convertDotsInJsonKeysToUnderscores =
-        field_map json "ConvertDotsInJsonKeysToUnderscores"
+        field_map json__ "ConvertDotsInJsonKeysToUnderscores"
           BooleanObject.of_json in
       make ?columnToJsonKeyMappings ?caseInsensitive
         ?convertDotsInJsonKeysToUnderscores ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The OpenX SerDe. Used by Kinesis Data Firehose for deserializing data, which means converting it from the JSON format in preparation for serializing it to the Parquet or ORC format. This is one of two deserializers you can choose, depending on which one offers the functionality you need. The other option is the native Hive / HCatalog JsonSerDe."]
+       "The OpenX SerDe. Used by Firehose for deserializing data, which means converting it from the JSON format in preparation for serializing it to the Parquet or ORC format. This is one of two deserializers you can choose, depending on which one offers the functionality you need. The other option is the native Hive / HCatalog JsonSerDe."]
 module OrcSerDe =
   struct
     type nonrec t =
@@ -621,7 +675,7 @@ module OrcSerDe =
           "The number of bytes in each stripe. The default is 64 MiB and the minimum is 8 MiB."];
       blockSizeBytes: BlockSizeBytes.t option
         [@ocaml.doc
-          "The Hadoop Distributed File System (HDFS) block size. This is useful if you intend to copy the data from Amazon S3 to HDFS before querying. The default is 256 MiB and the minimum is 64 MiB. Kinesis Data Firehose uses this value for padding calculations."];
+          "The Hadoop Distributed File System (HDFS) block size. This is useful if you intend to copy the data from Amazon S3 to HDFS before querying. The default is 256 MiB and the minimum is 64 MiB. Firehose uses this value for padding calculations."];
       rowIndexStride: OrcRowIndexStride.t option
         [@ocaml.doc
           "The number of rows between index entries. The default is 10,000 and the minimum is 1,000."];
@@ -630,13 +684,13 @@ module OrcSerDe =
           "Set this to true to indicate that you want stripes to be padded to the HDFS block boundaries. This is useful if you intend to copy the data from Amazon S3 to HDFS before querying. The default is false."];
       paddingTolerance: Proportion.t option
         [@ocaml.doc
-          "A number between 0 and 1 that defines the tolerance for block padding as a decimal fraction of stripe size. The default value is 0.05, which means 5 percent of stripe size. For the default values of 64 MiB ORC stripes and 256 MiB HDFS blocks, the default block padding tolerance of 5 percent reserves a maximum of 3.2 MiB for padding within the 256 MiB block. In such a case, if the available size within the block is more than 3.2 MiB, a new, smaller stripe is inserted to fit within that space. This ensures that no stripe crosses block boundaries and causes remote reads within a node-local task. Kinesis Data Firehose ignores this parameter when OrcSerDe$EnablePadding is false."];
+          "A number between 0 and 1 that defines the tolerance for block padding as a decimal fraction of stripe size. The default value is 0.05, which means 5 percent of stripe size. For the default values of 64 MiB ORC stripes and 256 MiB HDFS blocks, the default block padding tolerance of 5 percent reserves a maximum of 3.2 MiB for padding within the 256 MiB block. In such a case, if the available size within the block is more than 3.2 MiB, a new, smaller stripe is inserted to fit within that space. This ensures that no stripe crosses block boundaries and causes remote reads within a node-local task. Firehose ignores this parameter when OrcSerDe$EnablePadding is false."];
       compression: OrcCompression.t option
         [@ocaml.doc
           "The compression code to use over data blocks. The default is SNAPPY."];
       bloomFilterColumns: ListOfNonEmptyStringsWithoutWhitespace.t option
         [@ocaml.doc
-          "The column names for which you want Kinesis Data Firehose to create bloom filters. The default is null."];
+          "The column names for which you want Firehose to create bloom filters. The default is null."];
       bloomFilterFalsePositiveProbability: Proportion.t option
         [@ocaml.doc
           "The Bloom filter false positive probability (FPP). The lower the FPP, the bigger the Bloom filter. The default value is 0.05, the minimum is 0, and the maximum is 1."];
@@ -730,28 +784,28 @@ module OrcSerDe =
         ?paddingTolerance ?enablePadding ?rowIndexStride ?blockSizeBytes
         ?stripeSizeBytes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let formatVersion =
-        field_map json "FormatVersion" OrcFormatVersion.of_json in
+        field_map json__ "FormatVersion" OrcFormatVersion.of_json in
       let dictionaryKeyThreshold =
-        field_map json "DictionaryKeyThreshold" Proportion.of_json in
+        field_map json__ "DictionaryKeyThreshold" Proportion.of_json in
       let bloomFilterFalsePositiveProbability =
-        field_map json "BloomFilterFalsePositiveProbability"
+        field_map json__ "BloomFilterFalsePositiveProbability"
           Proportion.of_json in
       let bloomFilterColumns =
-        field_map json "BloomFilterColumns"
+        field_map json__ "BloomFilterColumns"
           ListOfNonEmptyStringsWithoutWhitespace.of_json in
-      let compression = field_map json "Compression" OrcCompression.of_json in
+      let compression = field_map json__ "Compression" OrcCompression.of_json in
       let paddingTolerance =
-        field_map json "PaddingTolerance" Proportion.of_json in
+        field_map json__ "PaddingTolerance" Proportion.of_json in
       let enablePadding =
-        field_map json "EnablePadding" BooleanObject.of_json in
+        field_map json__ "EnablePadding" BooleanObject.of_json in
       let rowIndexStride =
-        field_map json "RowIndexStride" OrcRowIndexStride.of_json in
+        field_map json__ "RowIndexStride" OrcRowIndexStride.of_json in
       let blockSizeBytes =
-        field_map json "BlockSizeBytes" BlockSizeBytes.of_json in
+        field_map json__ "BlockSizeBytes" BlockSizeBytes.of_json in
       let stripeSizeBytes =
-        field_map json "StripeSizeBytes" OrcStripeSizeBytes.of_json in
+        field_map json__ "StripeSizeBytes" OrcStripeSizeBytes.of_json in
       make ?formatVersion ?dictionaryKeyThreshold
         ?bloomFilterFalsePositiveProbability ?bloomFilterColumns ?compression
         ?paddingTolerance ?enablePadding ?rowIndexStride ?blockSizeBytes
@@ -765,7 +819,7 @@ module ParquetSerDe =
       {
       blockSizeBytes: BlockSizeBytes.t option
         [@ocaml.doc
-          "The Hadoop Distributed File System (HDFS) block size. This is useful if you intend to copy the data from Amazon S3 to HDFS before querying. The default is 256 MiB and the minimum is 64 MiB. Kinesis Data Firehose uses this value for padding calculations."];
+          "The Hadoop Distributed File System (HDFS) block size. This is useful if you intend to copy the data from Amazon S3 to HDFS before querying. The default is 256 MiB and the minimum is 64 MiB. Firehose uses this value for padding calculations."];
       pageSizeBytes: ParquetPageSizeBytes.t option
         [@ocaml.doc
           "The Parquet page size. Column chunks are divided into pages. A page is conceptually an indivisible unit (in terms of compression and encoding). The minimum value is 64 KiB and the default is 1 MiB."];
@@ -832,19 +886,19 @@ module ParquetSerDe =
       make ?writerVersion ?maxPaddingBytes ?enableDictionaryCompression
         ?compression ?pageSizeBytes ?blockSizeBytes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let writerVersion =
-        field_map json "WriterVersion" ParquetWriterVersion.of_json in
+        field_map json__ "WriterVersion" ParquetWriterVersion.of_json in
       let maxPaddingBytes =
-        field_map json "MaxPaddingBytes" NonNegativeIntegerObject.of_json in
+        field_map json__ "MaxPaddingBytes" NonNegativeIntegerObject.of_json in
       let enableDictionaryCompression =
-        field_map json "EnableDictionaryCompression" BooleanObject.of_json in
+        field_map json__ "EnableDictionaryCompression" BooleanObject.of_json in
       let compression =
-        field_map json "Compression" ParquetCompression.of_json in
+        field_map json__ "Compression" ParquetCompression.of_json in
       let pageSizeBytes =
-        field_map json "PageSizeBytes" ParquetPageSizeBytes.of_json in
+        field_map json__ "PageSizeBytes" ParquetPageSizeBytes.of_json in
       let blockSizeBytes =
-        field_map json "BlockSizeBytes" BlockSizeBytes.of_json in
+        field_map json__ "BlockSizeBytes" BlockSizeBytes.of_json in
       make ?writerVersion ?maxPaddingBytes ?enableDictionaryCompression
         ?compression ?pageSizeBytes ?blockSizeBytes ()
     let to_json v = composed_to_json to_value v
@@ -890,6 +944,33 @@ module HttpEndpointAttributeValue =
     let of_json j = string_of_json ~kind:"HttpEndpointAttributeValue" j
     let to_json = simple_to_json to_value
   end
+module PartitionFields =
+  struct
+    type nonrec t = PartitionField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PartitionField.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PartitionField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PartitionFields" ~of_json:PartitionField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Processor =
   struct
     type nonrec t =
@@ -914,20 +995,21 @@ module Processor =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?parameters ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "Parameters" ProcessorParameterList.of_json in
-      let type_ = field_map_exn json "Type" ProcessorType.of_json in
+        field_map json__ "Parameters" ProcessorParameterList.of_json in
+      let type_ = field_map_exn json__ "Type" ProcessorType.of_json in
       make ?parameters ~type_ ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a data processor."]
+  end[@@ocaml.doc
+       "Describes a data processor. If you want to add a new line delimiter between records in objects that are delivered to Amazon S3, choose AppendDelimiterToRecord as a processor type. You don\226\128\153t have to put a processor parameter when you select AppendDelimiterToRecord."]
 module IntervalInSeconds =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:60));
+          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:0));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -1002,7 +1084,7 @@ module KMSEncryptionConfig =
       {
       aWSKMSKeyARN: AWSKMSKeyARN.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the encryption key. Must belong to the same AWS Region as the destination Amazon S3 bucket. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."]}
+          "The Amazon Resource Name (ARN) of the encryption key. Must belong to the same Amazon Web Services Region as the destination Amazon S3 bucket. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."]}
     let context_ = "KMSEncryptionConfig"
     let make ~aWSKMSKeyARN = fun () -> { aWSKMSKeyARN }
     let to_value x =
@@ -1015,9 +1097,9 @@ module KMSEncryptionConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "AWSKMSKeyARN") in
       make ~aWSKMSKeyARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let aWSKMSKeyARN =
-        field_map_exn json "AWSKMSKeyARN" AWSKMSKeyARN.of_json in
+        field_map_exn json__ "AWSKMSKeyARN" AWSKMSKeyARN.of_json in
       make ~aWSKMSKeyARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1047,10 +1129,10 @@ module Deserializer =
       {
       openXJsonSerDe: OpenXJsonSerDe.t option
         [@ocaml.doc
-          "The OpenX SerDe. Used by Kinesis Data Firehose for deserializing data, which means converting it from the JSON format in preparation for serializing it to the Parquet or ORC format. This is one of two deserializers you can choose, depending on which one offers the functionality you need. The other option is the native Hive / HCatalog JsonSerDe."];
+          "The OpenX SerDe. Used by Firehose for deserializing data, which means converting it from the JSON format in preparation for serializing it to the Parquet or ORC format. This is one of two deserializers you can choose, depending on which one offers the functionality you need. The other option is the native Hive / HCatalog JsonSerDe."];
       hiveJsonSerDe: HiveJsonSerDe.t option
         [@ocaml.doc
-          "The native Hive / HCatalog JsonSerDe. Used by Kinesis Data Firehose for deserializing data, which means converting it from the JSON format in preparation for serializing it to the Parquet or ORC format. This is one of two deserializers you can choose, depending on which one offers the functionality you need. The other option is the OpenX SerDe."]}
+          "The native Hive / HCatalog JsonSerDe. Used by Firehose for deserializing data, which means converting it from the JSON format in preparation for serializing it to the Parquet or ORC format. This is one of two deserializers you can choose, depending on which one offers the functionality you need. The other option is the OpenX SerDe."]}
     let make ?openXJsonSerDe =
       fun ?hiveJsonSerDe -> fun () -> { openXJsonSerDe; hiveJsonSerDe }
     let to_value x =
@@ -1069,15 +1151,15 @@ module Deserializer =
           (Xml.child xml_arg0 "OpenXJsonSerDe") in
       make ?hiveJsonSerDe ?openXJsonSerDe ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hiveJsonSerDe =
-        field_map json "HiveJsonSerDe" HiveJsonSerDe.of_json in
+        field_map json__ "HiveJsonSerDe" HiveJsonSerDe.of_json in
       let openXJsonSerDe =
-        field_map json "OpenXJsonSerDe" OpenXJsonSerDe.of_json in
+        field_map json__ "OpenXJsonSerDe" OpenXJsonSerDe.of_json in
       make ?hiveJsonSerDe ?openXJsonSerDe ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The deserializer you want Kinesis Data Firehose to use for converting the input data from JSON. Kinesis Data Firehose then serializes the data to its final format using the Serializer. Kinesis Data Firehose supports two types of deserializers: the Apache Hive JSON SerDe and the OpenX JSON SerDe."]
+       "The deserializer you want Firehose to use for converting the input data from JSON. Firehose then serializes the data to its final format using the Serializer. Firehose supports two types of deserializers: the Apache Hive JSON SerDe and the OpenX JSON SerDe."]
 module Serializer =
   struct
     type nonrec t =
@@ -1104,13 +1186,13 @@ module Serializer =
           (Xml.child xml_arg0 "ParquetSerDe") in
       make ?orcSerDe ?parquetSerDe ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orcSerDe = field_map json "OrcSerDe" OrcSerDe.of_json in
-      let parquetSerDe = field_map json "ParquetSerDe" ParquetSerDe.of_json in
+    let of_json json__ =
+      let orcSerDe = field_map json__ "OrcSerDe" OrcSerDe.of_json in
+      let parquetSerDe = field_map json__ "ParquetSerDe" ParquetSerDe.of_json in
       make ?orcSerDe ?parquetSerDe ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The serializer that you want Kinesis Data Firehose to use to convert data to the target format before writing it to Amazon S3. Kinesis Data Firehose supports two types of serializers: the ORC SerDe and the Parquet SerDe."]
+       "The serializer that you want Firehose to use to convert data to the target format before writing it to Amazon S3. Firehose supports two types of serializers: the ORC SerDe and the Parquet SerDe."]
 module RetryDurationInSeconds =
   struct
     type nonrec t = int
@@ -1156,23 +1238,165 @@ module HttpEndpointCommonAttribute =
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
       make ~attributeValue ~attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValue =
-        field_map_exn json "AttributeValue"
+        field_map_exn json__ "AttributeValue"
           HttpEndpointAttributeValue.of_json in
       let attributeName =
-        field_map_exn json "AttributeName" HttpEndpointAttributeName.of_json in
+        field_map_exn json__ "AttributeName"
+          HttpEndpointAttributeName.of_json in
       make ~attributeValue ~attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the metadata that's delivered to the specified HTTP endpoint destination."]
-module AmazonopensearchserviceBufferingIntervalInSeconds =
+module ErrorOutputPrefix =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorOutputPrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorOutputPrefix" j
+    let to_json = simple_to_json to_value
+  end
+module PartitionSpec =
+  struct
+    type nonrec t =
+      {
+      identity: PartitionFields.t option
+        [@ocaml.doc
+          "List of identity transforms that performs an identity transformation. The transform takes the source value, and does not modify it. Result type is the source type. Amazon Data Firehose is in preview release and is subject to change."]}
+    let make ?identity = fun () -> { identity }
+    let to_value x =
+      structure_to_value
+        [("Identity", (Option.map x.identity ~f:PartitionFields.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identity =
+        (Option.map ~f:PartitionFields.of_xml)
+          (Xml.child xml_arg0 "Identity") in
+      make ?identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identity = field_map json__ "Identity" PartitionFields.of_json in
+      make ?identity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents how to produce partition data for a table. Partition data is produced by transforming columns in a table. Each column transform is represented by a named PartitionField. Here is an example of the schema in JSON. \"partitionSpec\": \\{ \"identity\": \\[ \\{\"sourceName\": \"column1\"\\}, \\{\"sourceName\": \"column2\"\\}, \\{\"sourceName\": \"column3\"\\} \\] \\} Amazon Data Firehose is in preview release and is subject to change."]
+module StringWithLettersDigitsUnderscoresDots =
+  struct
+    type nonrec t = string
+    let context_ = "StringWithLettersDigitsUnderscoresDots"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\.\\_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"StringWithLettersDigitsUnderscoresDots" j
+    let to_json = simple_to_json to_value
+  end
+module DeliveryStreamFailureType =
+  struct
+    type nonrec t =
+      | VPC_ENDPOINT_SERVICE_NAME_NOT_FOUND 
+      | VPC_INTERFACE_ENDPOINT_SERVICE_ACCESS_DENIED 
+      | RETIRE_KMS_GRANT_FAILED 
+      | CREATE_KMS_GRANT_FAILED 
+      | KMS_ACCESS_DENIED 
+      | DISABLED_KMS_KEY 
+      | INVALID_KMS_KEY 
+      | KMS_KEY_NOT_FOUND 
+      | KMS_OPT_IN_REQUIRED 
+      | CREATE_ENI_FAILED 
+      | DELETE_ENI_FAILED 
+      | SUBNET_NOT_FOUND 
+      | SECURITY_GROUP_NOT_FOUND 
+      | ENI_ACCESS_DENIED 
+      | SUBNET_ACCESS_DENIED 
+      | SECURITY_GROUP_ACCESS_DENIED 
+      | UNKNOWN_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VPC_ENDPOINT_SERVICE_NAME_NOT_FOUND ->
+          "VPC_ENDPOINT_SERVICE_NAME_NOT_FOUND"
+      | VPC_INTERFACE_ENDPOINT_SERVICE_ACCESS_DENIED ->
+          "VPC_INTERFACE_ENDPOINT_SERVICE_ACCESS_DENIED"
+      | RETIRE_KMS_GRANT_FAILED -> "RETIRE_KMS_GRANT_FAILED"
+      | CREATE_KMS_GRANT_FAILED -> "CREATE_KMS_GRANT_FAILED"
+      | KMS_ACCESS_DENIED -> "KMS_ACCESS_DENIED"
+      | DISABLED_KMS_KEY -> "DISABLED_KMS_KEY"
+      | INVALID_KMS_KEY -> "INVALID_KMS_KEY"
+      | KMS_KEY_NOT_FOUND -> "KMS_KEY_NOT_FOUND"
+      | KMS_OPT_IN_REQUIRED -> "KMS_OPT_IN_REQUIRED"
+      | CREATE_ENI_FAILED -> "CREATE_ENI_FAILED"
+      | DELETE_ENI_FAILED -> "DELETE_ENI_FAILED"
+      | SUBNET_NOT_FOUND -> "SUBNET_NOT_FOUND"
+      | SECURITY_GROUP_NOT_FOUND -> "SECURITY_GROUP_NOT_FOUND"
+      | ENI_ACCESS_DENIED -> "ENI_ACCESS_DENIED"
+      | SUBNET_ACCESS_DENIED -> "SUBNET_ACCESS_DENIED"
+      | SECURITY_GROUP_ACCESS_DENIED -> "SECURITY_GROUP_ACCESS_DENIED"
+      | UNKNOWN_ERROR -> "UNKNOWN_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VPC_ENDPOINT_SERVICE_NAME_NOT_FOUND" ->
+          VPC_ENDPOINT_SERVICE_NAME_NOT_FOUND
+      | "VPC_INTERFACE_ENDPOINT_SERVICE_ACCESS_DENIED" ->
+          VPC_INTERFACE_ENDPOINT_SERVICE_ACCESS_DENIED
+      | "RETIRE_KMS_GRANT_FAILED" -> RETIRE_KMS_GRANT_FAILED
+      | "CREATE_KMS_GRANT_FAILED" -> CREATE_KMS_GRANT_FAILED
+      | "KMS_ACCESS_DENIED" -> KMS_ACCESS_DENIED
+      | "DISABLED_KMS_KEY" -> DISABLED_KMS_KEY
+      | "INVALID_KMS_KEY" -> INVALID_KMS_KEY
+      | "KMS_KEY_NOT_FOUND" -> KMS_KEY_NOT_FOUND
+      | "KMS_OPT_IN_REQUIRED" -> KMS_OPT_IN_REQUIRED
+      | "CREATE_ENI_FAILED" -> CREATE_ENI_FAILED
+      | "DELETE_ENI_FAILED" -> DELETE_ENI_FAILED
+      | "SUBNET_NOT_FOUND" -> SUBNET_NOT_FOUND
+      | "SECURITY_GROUP_NOT_FOUND" -> SECURITY_GROUP_NOT_FOUND
+      | "ENI_ACCESS_DENIED" -> ENI_ACCESS_DENIED
+      | "SUBNET_ACCESS_DENIED" -> SUBNET_ACCESS_DENIED
+      | "SECURITY_GROUP_ACCESS_DENIED" -> SECURITY_GROUP_ACCESS_DENIED
+      | "UNKNOWN_ERROR" -> UNKNOWN_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeliveryStreamFailureType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DeliveryStreamFailureType" j)
+    let to_json = simple_to_json to_value
+  end
+module AmazonOpenSearchServerlessBufferingIntervalInSeconds =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:60));
+          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:0));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -1181,12 +1405,12 @@ module AmazonopensearchserviceBufferingIntervalInSeconds =
     let of_xml xml_arg0 =
       Int.of_string
         (string_of_xml
-           ~kind:"an integer for AmazonopensearchserviceBufferingIntervalInSeconds"
+           ~kind:"an integer for AmazonOpenSearchServerlessBufferingIntervalInSeconds"
            xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module AmazonopensearchserviceBufferingSizeInMBs =
+module AmazonOpenSearchServerlessBufferingSizeInMBs =
   struct
     type nonrec t = int
     let make i =
@@ -1201,12 +1425,12 @@ module AmazonopensearchserviceBufferingSizeInMBs =
     let of_xml xml_arg0 =
       Int.of_string
         (string_of_xml
-           ~kind:"an integer for AmazonopensearchserviceBufferingSizeInMBs"
+           ~kind:"an integer for AmazonOpenSearchServerlessBufferingSizeInMBs"
            xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module AmazonopensearchserviceRetryDurationInSeconds =
+module AmazonOpenSearchServerlessRetryDurationInSeconds =
   struct
     type nonrec t = int
     let make i =
@@ -1221,7 +1445,7 @@ module AmazonopensearchserviceRetryDurationInSeconds =
     let of_xml xml_arg0 =
       Int.of_string
         (string_of_xml
-           ~kind:"an integer for AmazonopensearchserviceRetryDurationInSeconds"
+           ~kind:"an integer for AmazonOpenSearchServerlessRetryDurationInSeconds"
            xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
@@ -1230,6 +1454,9 @@ module ProcessorList =
   struct
     type nonrec t = Processor.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Processor.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1260,7 +1487,9 @@ module BucketARN =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:2048) >>=
-                  (fun () -> check_pattern i ~pattern:"arn:.*")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:.*:s3:::[\\w\\.\\-]{1,255}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1276,7 +1505,7 @@ module BufferingHints =
       {
       sizeInMBs: SizeInMBs.t option
         [@ocaml.doc
-          "Buffer incoming data to the specified size, in MiBs, before delivering it to the destination. The default value is 5. This parameter is optional but if you specify a value for it, you must also specify a value for IntervalInSeconds, and vice versa. We recommend setting this parameter to a value greater than the amount of data you typically ingest into the delivery stream in 10 seconds. For example, if you typically ingest data at 1 MiB/sec, the value should be 10 MiB or higher."];
+          "Buffer incoming data to the specified size, in MiBs, before delivering it to the destination. The default value is 5. This parameter is optional but if you specify a value for it, you must also specify a value for IntervalInSeconds, and vice versa. We recommend setting this parameter to a value greater than the amount of data you typically ingest into the Firehose stream in 10 seconds. For example, if you typically ingest data at 1 MiB/sec, the value should be 10 MiB or higher."];
       intervalInSeconds: IntervalInSeconds.t option
         [@ocaml.doc
           "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 300. This parameter is optional but if you specify a value for it, you must also specify a value for SizeInMBs, and vice versa."]}
@@ -1296,14 +1525,14 @@ module BufferingHints =
         (Option.map ~f:SizeInMBs.of_xml) (Xml.child xml_arg0 "SizeInMBs") in
       make ?intervalInSeconds ?sizeInMBs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let intervalInSeconds =
-        field_map json "IntervalInSeconds" IntervalInSeconds.of_json in
-      let sizeInMBs = field_map json "SizeInMBs" SizeInMBs.of_json in
+        field_map json__ "IntervalInSeconds" IntervalInSeconds.of_json in
+      let sizeInMBs = field_map json__ "SizeInMBs" SizeInMBs.of_json in
       make ?intervalInSeconds ?sizeInMBs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes hints for the buffering to perform before delivering data to the destination. These options are treated as hints, and therefore Kinesis Data Firehose might choose to use different values when it is optimal. The SizeInMBs and IntervalInSeconds parameters are optional. However, if specify a value for one of them, you must also provide a value for the other."]
+       "Describes hints for the buffering to perform before delivering data to the destination. These options are treated as hints, and therefore Firehose might choose to use different values when it is optimal. The SizeInMBs and IntervalInSeconds parameters are optional. However, if specify a value for one of them, you must also provide a value for the other."]
 module CloudWatchLoggingOptions =
   struct
     type nonrec t =
@@ -1339,15 +1568,15 @@ module CloudWatchLoggingOptions =
         (Option.map ~f:BooleanObject.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?logStreamName ?logGroupName ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logStreamName =
-        field_map json "LogStreamName" LogStreamName.of_json in
-      let logGroupName = field_map json "LogGroupName" LogGroupName.of_json in
-      let enabled = field_map json "Enabled" BooleanObject.of_json in
+        field_map json__ "LogStreamName" LogStreamName.of_json in
+      let logGroupName = field_map json__ "LogGroupName" LogGroupName.of_json in
+      let enabled = field_map json__ "Enabled" BooleanObject.of_json in
       make ?logStreamName ?logGroupName ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the Amazon CloudWatch logging options for your delivery stream."]
+       "Describes the Amazon CloudWatch logging options for your Firehose stream."]
 module CompressionFormat =
   struct
     type nonrec t =
@@ -1411,34 +1640,14 @@ module EncryptionConfiguration =
           (Xml.child xml_arg0 "NoEncryptionConfig") in
       make ?kMSEncryptionConfig ?noEncryptionConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let kMSEncryptionConfig =
-        field_map json "KMSEncryptionConfig" KMSEncryptionConfig.of_json in
+        field_map json__ "KMSEncryptionConfig" KMSEncryptionConfig.of_json in
       let noEncryptionConfig =
-        field_map json "NoEncryptionConfig" NoEncryptionConfig.of_json in
+        field_map json__ "NoEncryptionConfig" NoEncryptionConfig.of_json in
       make ?kMSEncryptionConfig ?noEncryptionConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the encryption for a destination in Amazon S3."]
-module ErrorOutputPrefix =
-  struct
-    type nonrec t = string
-    let context_ = "ErrorOutputPrefix"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:".*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorOutputPrefix" j
-    let to_json = simple_to_json to_value
-  end
 module Prefix =
   struct
     type nonrec t = string
@@ -1469,7 +1678,9 @@ module RoleARN =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:"arn:.*")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:.*:iam::\\d{12}:role/[a-zA-Z_0-9+=,.@\\-_/]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1487,6 +1698,9 @@ module SecurityGroupIdList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyStringWithoutWhitespace.to_value)) |>
         (fun x -> `List x)
@@ -1517,6 +1731,9 @@ module SubnetIdList =
         ok_or_failwith
           ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyStringWithoutWhitespace.to_value)) |>
         (fun x -> `List x)
@@ -1539,13 +1756,100 @@ module SubnetIdList =
         ~of_json:NonEmptyStringWithoutWhitespace.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AmazonopensearchserviceBufferingIntervalInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for AmazonopensearchserviceBufferingIntervalInSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AmazonopensearchserviceBufferingSizeInMBs =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for AmazonopensearchserviceBufferingSizeInMBs"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AmazonopensearchserviceRetryDurationInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:7200) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for AmazonopensearchserviceRetryDurationInSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DefaultDocumentIdFormat =
+  struct
+    type nonrec t =
+      | FIREHOSE_DEFAULT 
+      | NO_DOCUMENT_ID 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FIREHOSE_DEFAULT -> "FIREHOSE_DEFAULT"
+      | NO_DOCUMENT_ID -> "NO_DOCUMENT_ID"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FIREHOSE_DEFAULT" -> FIREHOSE_DEFAULT
+      | "NO_DOCUMENT_ID" -> NO_DOCUMENT_ID
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DefaultDocumentIdFormat" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DefaultDocumentIdFormat" j)
+    let to_json = simple_to_json to_value
+  end
 module ElasticsearchBufferingIntervalInSeconds =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:60));
+          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:0));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -1617,8 +1921,8 @@ module InputFormatConfiguration =
           (Xml.child xml_arg0 "Deserializer") in
       make ?deserializer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deserializer = field_map json "Deserializer" Deserializer.of_json in
+    let of_json json__ =
+      let deserializer = field_map json__ "Deserializer" Deserializer.of_json in
       make ?deserializer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1640,34 +1944,34 @@ module OutputFormatConfiguration =
         (Option.map ~f:Serializer.of_xml) (Xml.child xml_arg0 "Serializer") in
       make ?serializer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serializer = field_map json "Serializer" Serializer.of_json in
+    let of_json json__ =
+      let serializer = field_map json__ "Serializer" Serializer.of_json in
       make ?serializer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the serializer that you want Kinesis Data Firehose to use to convert the format of your data before it writes it to Amazon S3. This parameter is required if Enabled is set to true."]
+       "Specifies the serializer that you want Firehose to use to convert the format of your data before it writes it to Amazon S3. This parameter is required if Enabled is set to true."]
 module SchemaConfiguration =
   struct
     type nonrec t =
       {
       roleARN: NonEmptyStringWithoutWhitespace.t option
         [@ocaml.doc
-          "The role that Kinesis Data Firehose can use to access AWS Glue. This role must be in the same account you use for Kinesis Data Firehose. Cross-account roles aren't allowed. If the SchemaConfiguration request parameter is used as part of invoking the CreateDeliveryStream API, then the RoleARN property is required and its value must be specified."];
+          "The role that Firehose can use to access Amazon Web Services Glue. This role must be in the same account you use for Firehose. Cross-account roles aren't allowed. If the SchemaConfiguration request parameter is used as part of invoking the CreateDeliveryStream API, then the RoleARN property is required and its value must be specified."];
       catalogId: NonEmptyStringWithoutWhitespace.t option
         [@ocaml.doc
-          "The ID of the AWS Glue Data Catalog. If you don't supply this, the AWS account ID is used by default."];
+          "The ID of the Amazon Web Services Glue Data Catalog. If you don't supply this, the Amazon Web Services account ID is used by default."];
       databaseName: NonEmptyStringWithoutWhitespace.t option
         [@ocaml.doc
-          "Specifies the name of the AWS Glue database that contains the schema for the output data. If the SchemaConfiguration request parameter is used as part of invoking the CreateDeliveryStream API, then the DatabaseName property is required and its value must be specified."];
+          "Specifies the name of the Amazon Web Services Glue database that contains the schema for the output data. If the SchemaConfiguration request parameter is used as part of invoking the CreateDeliveryStream API, then the DatabaseName property is required and its value must be specified."];
       tableName: NonEmptyStringWithoutWhitespace.t option
         [@ocaml.doc
-          "Specifies the AWS Glue table that contains the column information that constitutes your data schema. If the SchemaConfiguration request parameter is used as part of invoking the CreateDeliveryStream API, then the TableName property is required and its value must be specified."];
+          "Specifies the Amazon Web Services Glue table that contains the column information that constitutes your data schema. If the SchemaConfiguration request parameter is used as part of invoking the CreateDeliveryStream API, then the TableName property is required and its value must be specified."];
       region: NonEmptyStringWithoutWhitespace.t option
         [@ocaml.doc
-          "If you don't specify an AWS Region, the default is the current Region."];
+          "If you don't specify an Amazon Web Services Region, the default is the current Region."];
       versionId: NonEmptyStringWithoutWhitespace.t option
         [@ocaml.doc
-          "Specifies the table version for the output data schema. If you don't specify this version ID, or if you set it to LATEST, Kinesis Data Firehose uses the most recent version. This means that any updates to the table are automatically picked up."]}
+          "Specifies the table version for the output data schema. If you don't specify this version ID, or if you set it to LATEST, Firehose uses the most recent version. This means that any updates to the table are automatically picked up."]}
     let make ?roleARN =
       fun ?catalogId ->
         fun ?databaseName ->
@@ -1720,30 +2024,31 @@ module SchemaConfiguration =
           (Xml.child xml_arg0 "RoleARN") in
       make ?versionId ?region ?tableName ?databaseName ?catalogId ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionId =
-        field_map json "VersionId" NonEmptyStringWithoutWhitespace.of_json in
+        field_map json__ "VersionId" NonEmptyStringWithoutWhitespace.of_json in
       let region =
-        field_map json "Region" NonEmptyStringWithoutWhitespace.of_json in
+        field_map json__ "Region" NonEmptyStringWithoutWhitespace.of_json in
       let tableName =
-        field_map json "TableName" NonEmptyStringWithoutWhitespace.of_json in
+        field_map json__ "TableName" NonEmptyStringWithoutWhitespace.of_json in
       let databaseName =
-        field_map json "DatabaseName" NonEmptyStringWithoutWhitespace.of_json in
+        field_map json__ "DatabaseName"
+          NonEmptyStringWithoutWhitespace.of_json in
       let catalogId =
-        field_map json "CatalogId" NonEmptyStringWithoutWhitespace.of_json in
+        field_map json__ "CatalogId" NonEmptyStringWithoutWhitespace.of_json in
       let roleARN =
-        field_map json "RoleARN" NonEmptyStringWithoutWhitespace.of_json in
+        field_map json__ "RoleARN" NonEmptyStringWithoutWhitespace.of_json in
       make ?versionId ?region ?tableName ?databaseName ?catalogId ?roleARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the schema to which you want Kinesis Data Firehose to configure your data before it writes it to Amazon S3. This parameter is required if Enabled is set to true."]
+       "Specifies the schema to which you want Firehose to configure your data before it writes it to Amazon S3. This parameter is required if Enabled is set to true."]
 module RetryOptions =
   struct
     type nonrec t =
       {
       durationInSeconds: RetryDurationInSeconds.t option
         [@ocaml.doc
-          "The period of time during which Kinesis Data Firehose retries to deliver data to the specified Amazon S3 prefix."]}
+          "The period of time during which Firehose retries to deliver data to the specified destination."]}
     let make ?durationInSeconds = fun () -> { durationInSeconds }
     let to_value x =
       structure_to_value
@@ -1756,20 +2061,20 @@ module RetryOptions =
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationInSeconds =
-        field_map json "DurationInSeconds" RetryDurationInSeconds.of_json in
+        field_map json__ "DurationInSeconds" RetryDurationInSeconds.of_json in
       make ?durationInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The retry behavior in case Kinesis Data Firehose is unable to deliver data to an Amazon S3 prefix."]
+       "The retry behavior in case Firehose is unable to deliver data to a destination."]
 module HttpEndpointBufferingIntervalInSeconds =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:60));
+          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:0));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -1869,6 +2174,9 @@ module HttpEndpointCommonAttributesList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HttpEndpointCommonAttribute.to_value)) |>
         (fun x -> `List x)
@@ -1910,6 +2218,157 @@ module HttpEndpointRetryDurationInSeconds =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module SecretARN =
+  struct
+    type nonrec t = string
+    let context_ = "SecretARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:.*:secretsmanager:[a-zA-Z0-9\\-]+:\\d{12}:secret:[a-zA-Z0-9\\-/_+=.@!]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretARN" j
+    let to_json = simple_to_json to_value
+  end
+module GlueDataCatalogARN =
+  struct
+    type nonrec t = string
+    let context_ = "GlueDataCatalogARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:.*:glue:.*:\\d{12}:catalog(?:(/[a-z0-9_-]+){1,2})?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GlueDataCatalogARN" j
+    let to_json = simple_to_json to_value
+  end
+module WarehouseLocation =
+  struct
+    type nonrec t = string
+    let context_ = "WarehouseLocation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"s3:\\/\\/.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WarehouseLocation" j
+    let to_json = simple_to_json to_value
+  end
+module DestinationTableConfiguration =
+  struct
+    type nonrec t =
+      {
+      destinationTableName: StringWithLettersDigitsUnderscoresDots.t
+        [@ocaml.doc "Specifies the name of the Apache Iceberg Table."];
+      destinationDatabaseName: StringWithLettersDigitsUnderscoresDots.t
+        [@ocaml.doc "The name of the Apache Iceberg database."];
+      uniqueKeys: ListOfNonEmptyStringsWithoutWhitespace.t option
+        [@ocaml.doc
+          "A list of unique keys for a given Apache Iceberg table. Firehose will use these for running Create, Update, or Delete operations on the given Iceberg table."];
+      partitionSpec: PartitionSpec.t option
+        [@ocaml.doc
+          "The partition spec configuration for a table that is used by automatic table creation. Amazon Data Firehose is in preview release and is subject to change."];
+      s3ErrorOutputPrefix: ErrorOutputPrefix.t option
+        [@ocaml.doc
+          "The table specific S3 error output prefix. All the errors that occurred while delivering to this table will be prefixed with this value in S3 destination."]}
+    let context_ = "DestinationTableConfiguration"
+    let make ?uniqueKeys =
+      fun ?partitionSpec ->
+        fun ?s3ErrorOutputPrefix ->
+          fun ~destinationTableName ->
+            fun ~destinationDatabaseName ->
+              fun () ->
+                {
+                  uniqueKeys;
+                  partitionSpec;
+                  s3ErrorOutputPrefix;
+                  destinationTableName;
+                  destinationDatabaseName
+                }
+    let to_value x =
+      structure_to_value
+        [("DestinationTableName",
+           (Some
+              (StringWithLettersDigitsUnderscoresDots.to_value
+                 x.destinationTableName)));
+        ("DestinationDatabaseName",
+          (Some
+             (StringWithLettersDigitsUnderscoresDots.to_value
+                x.destinationDatabaseName)));
+        ("UniqueKeys",
+          (Option.map x.uniqueKeys
+             ~f:ListOfNonEmptyStringsWithoutWhitespace.to_value));
+        ("PartitionSpec",
+          (Option.map x.partitionSpec ~f:PartitionSpec.to_value));
+        ("S3ErrorOutputPrefix",
+          (Option.map x.s3ErrorOutputPrefix ~f:ErrorOutputPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3ErrorOutputPrefix =
+        (Option.map ~f:ErrorOutputPrefix.of_xml)
+          (Xml.child xml_arg0 "S3ErrorOutputPrefix") in
+      let partitionSpec =
+        (Option.map ~f:PartitionSpec.of_xml)
+          (Xml.child xml_arg0 "PartitionSpec") in
+      let uniqueKeys =
+        (Option.map ~f:ListOfNonEmptyStringsWithoutWhitespace.of_xml)
+          (Xml.child xml_arg0 "UniqueKeys") in
+      let destinationDatabaseName =
+        StringWithLettersDigitsUnderscoresDots.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationDatabaseName") in
+      let destinationTableName =
+        StringWithLettersDigitsUnderscoresDots.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationTableName") in
+      make ?s3ErrorOutputPrefix ?partitionSpec ?uniqueKeys
+        ~destinationDatabaseName ~destinationTableName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3ErrorOutputPrefix =
+        field_map json__ "S3ErrorOutputPrefix" ErrorOutputPrefix.of_json in
+      let partitionSpec =
+        field_map json__ "PartitionSpec" PartitionSpec.of_json in
+      let uniqueKeys =
+        field_map json__ "UniqueKeys"
+          ListOfNonEmptyStringsWithoutWhitespace.of_json in
+      let destinationDatabaseName =
+        field_map_exn json__ "DestinationDatabaseName"
+          StringWithLettersDigitsUnderscoresDots.of_json in
+      let destinationTableName =
+        field_map_exn json__ "DestinationTableName"
+          StringWithLettersDigitsUnderscoresDots.of_json in
+      make ?s3ErrorOutputPrefix ?partitionSpec ?uniqueKeys
+        ~destinationDatabaseName ~destinationTableName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration of a destination in Apache Iceberg Tables."]
 module CopyOptions =
   struct
     type nonrec t = string
@@ -1919,7 +2378,7 @@ module CopyOptions =
         ok_or_failwith
           ((check_string_min i ~min:0) >>=
              (fun () ->
-                (check_string_max i ~max:204800) >>=
+                (check_string_max i ~max:10240) >>=
                   (fun () -> check_pattern i ~pattern:".*")));
         i
     let of_string x = x
@@ -1939,7 +2398,7 @@ module DataTableColumns =
         ok_or_failwith
           ((check_string_min i ~min:0) >>=
              (fun () ->
-                (check_string_max i ~max:204800) >>=
+                (check_string_max i ~max:10240) >>=
                   (fun () -> check_pattern i ~pattern:".*")));
         i
     let of_string x = x
@@ -1989,6 +2448,142 @@ module RedshiftRetryDurationInSeconds =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module SnowflakeBufferingIntervalInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for SnowflakeBufferingIntervalInSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeBufferingSizeInMBs =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:128) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SnowflakeBufferingSizeInMBs"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeRetryDurationInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:7200) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SnowflakeRetryDurationInSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeRole =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakeRole"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakeRole" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakePrivateLinkVpceId =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakePrivateLinkVpceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:47) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([a-zA-Z0-9\\-\\_]+\\.){2,3}vpce\\.[a-zA-Z0-9\\-]*\\.vpce-svc\\-[a-zA-Z0-9\\-]{17}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakePrivateLinkVpceId" j
+    let to_json = simple_to_json to_value
+  end
+module SplunkBufferingIntervalInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:60) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for SplunkBufferingIntervalInSeconds" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SplunkBufferingSizeInMBs =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:5) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SplunkBufferingSizeInMBs"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module SplunkRetryDurationInSeconds =
   struct
     type nonrec t = int
@@ -2008,13 +2603,511 @@ module SplunkRetryDurationInSeconds =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module DatabaseColumnName =
+  struct
+    type nonrec t = string
+    let context_ = "DatabaseColumnName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:194) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0001-\\uFFFF]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatabaseColumnName" j
+    let to_json = simple_to_json to_value
+  end
+module DatabaseName =
+  struct
+    type nonrec t = string
+    let context_ = "DatabaseName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0001-\\uFFFF]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatabaseName" j
+    let to_json = simple_to_json to_value
+  end
+module DatabaseTableName =
+  struct
+    type nonrec t = string
+    let context_ = "DatabaseTableName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:129) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0001-\\uFFFF]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatabaseTableName" j
+    let to_json = simple_to_json to_value
+  end
+module FailureDescription =
+  struct
+    type nonrec t =
+      {
+      type_: DeliveryStreamFailureType.t option
+        [@ocaml.doc "The type of error that caused the failure."];
+      details: NonEmptyString.t option
+        [@ocaml.doc
+          "A message providing details about the error that caused the failure."]}
+    let make ?type_ = fun ?details -> fun () -> { type_; details }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:DeliveryStreamFailureType.to_value));
+        ("Details", (Option.map x.details ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let details =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Details") in
+      let type_ =
+        (Option.map ~f:DeliveryStreamFailureType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      make ?details ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let details = field_map json__ "Details" NonEmptyString.of_json in
+      let type_ = field_map json__ "Type" DeliveryStreamFailureType.of_json in
+      make ?details ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details in case one of the following operations fails due to an error related to KMS: CreateDeliveryStream, DeleteDeliveryStream, StartDeliveryStreamEncryption, StopDeliveryStreamEncryption."]
+module SnapshotRequestedBy =
+  struct
+    type nonrec t =
+      | USER 
+      | FIREHOSE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | USER -> "USER"
+      | FIREHOSE -> "FIREHOSE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "USER" -> USER
+      | "FIREHOSE" -> FIREHOSE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SnapshotRequestedBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SnapshotRequestedBy" j)
+    let to_json = simple_to_json to_value
+  end
+module SnapshotStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | COMPLETE 
+      | SUSPENDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETE -> "COMPLETE"
+      | SUSPENDED -> "SUSPENDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETE" -> COMPLETE
+      | "SUSPENDED" -> SUSPENDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SnapshotStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SnapshotStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module AmazonOpenSearchServerlessBufferingHints =
+  struct
+    type nonrec t =
+      {
+      intervalInSeconds:
+        AmazonOpenSearchServerlessBufferingIntervalInSeconds.t option
+        [@ocaml.doc
+          "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 300 (5 minutes)."];
+      sizeInMBs: AmazonOpenSearchServerlessBufferingSizeInMBs.t option
+        [@ocaml.doc
+          "Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 5. We recommend setting this parameter to a value greater than the amount of data you typically ingest into the Firehose stream in 10 seconds. For example, if you typically ingest data at 1 MB/sec, the value should be 10 MB or higher."]}
+    let make ?intervalInSeconds =
+      fun ?sizeInMBs -> fun () -> { intervalInSeconds; sizeInMBs }
+    let to_value x =
+      structure_to_value
+        [("IntervalInSeconds",
+           (Option.map x.intervalInSeconds
+              ~f:AmazonOpenSearchServerlessBufferingIntervalInSeconds.to_value));
+        ("SizeInMBs",
+          (Option.map x.sizeInMBs
+             ~f:AmazonOpenSearchServerlessBufferingSizeInMBs.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sizeInMBs =
+        (Option.map ~f:AmazonOpenSearchServerlessBufferingSizeInMBs.of_xml)
+          (Xml.child xml_arg0 "SizeInMBs") in
+      let intervalInSeconds =
+        (Option.map
+           ~f:AmazonOpenSearchServerlessBufferingIntervalInSeconds.of_xml)
+          (Xml.child xml_arg0 "IntervalInSeconds") in
+      make ?sizeInMBs ?intervalInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sizeInMBs =
+        field_map json__ "SizeInMBs"
+          AmazonOpenSearchServerlessBufferingSizeInMBs.of_json in
+      let intervalInSeconds =
+        field_map json__ "IntervalInSeconds"
+          AmazonOpenSearchServerlessBufferingIntervalInSeconds.of_json in
+      make ?sizeInMBs ?intervalInSeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the buffering to perform before delivering data to the Serverless offering for Amazon OpenSearch Service destination."]
+module AmazonOpenSearchServerlessCollectionEndpoint =
+  struct
+    type nonrec t = string
+    let context_ = "AmazonOpenSearchServerlessCollectionEndpoint"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"https:.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"AmazonOpenSearchServerlessCollectionEndpoint" j
+    let to_json = simple_to_json to_value
+  end
+module AmazonOpenSearchServerlessIndexName =
+  struct
+    type nonrec t = string
+    let context_ = "AmazonOpenSearchServerlessIndexName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:80) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"AmazonOpenSearchServerlessIndexName" j
+    let to_json = simple_to_json to_value
+  end
+module AmazonOpenSearchServerlessRetryOptions =
+  struct
+    type nonrec t =
+      {
+      durationInSeconds:
+        AmazonOpenSearchServerlessRetryDurationInSeconds.t option
+        [@ocaml.doc
+          "After an initial failure to deliver to the Serverless offering for Amazon OpenSearch Service, the total amount of time during which Firehose retries delivery (including the first attempt). After this time has elapsed, the failed documents are written to Amazon S3. Default value is 300 seconds (5 minutes). A value of 0 (zero) results in no retries."]}
+    let make ?durationInSeconds = fun () -> { durationInSeconds }
+    let to_value x =
+      structure_to_value
+        [("DurationInSeconds",
+           (Option.map x.durationInSeconds
+              ~f:AmazonOpenSearchServerlessRetryDurationInSeconds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationInSeconds =
+        (Option.map
+           ~f:AmazonOpenSearchServerlessRetryDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "DurationInSeconds") in
+      make ?durationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationInSeconds =
+        field_map json__ "DurationInSeconds"
+          AmazonOpenSearchServerlessRetryDurationInSeconds.of_json in
+      make ?durationInSeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures retry behavior in case Firehose is unable to deliver documents to the Serverless offering for Amazon OpenSearch Service."]
+module AmazonOpenSearchServerlessS3BackupMode =
+  struct
+    type nonrec t =
+      | FailedDocumentsOnly 
+      | AllDocuments 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FailedDocumentsOnly -> "FailedDocumentsOnly"
+      | AllDocuments -> "AllDocuments"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FailedDocumentsOnly" -> FailedDocumentsOnly
+      | "AllDocuments" -> AllDocuments
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration AmazonOpenSearchServerlessS3BackupMode"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"AmazonOpenSearchServerlessS3BackupMode" j)
+    let to_json = simple_to_json to_value
+  end
+module ProcessingConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: BooleanObject.t option
+        [@ocaml.doc "Enables or disables data processing."];
+      processors: ProcessorList.t option [@ocaml.doc "The data processors."]}
+    let make ?enabled = fun ?processors -> fun () -> { enabled; processors }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Option.map x.enabled ~f:BooleanObject.to_value));
+        ("Processors", (Option.map x.processors ~f:ProcessorList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let processors =
+        (Option.map ~f:ProcessorList.of_xml)
+          (Xml.child xml_arg0 "Processors") in
+      let enabled =
+        (Option.map ~f:BooleanObject.of_xml) (Xml.child xml_arg0 "Enabled") in
+      make ?processors ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let processors = field_map json__ "Processors" ProcessorList.of_json in
+      let enabled = field_map json__ "Enabled" BooleanObject.of_json in
+      make ?processors ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a data processing configuration."]
+module S3DestinationDescription =
+  struct
+    type nonrec t =
+      {
+      roleARN: RoleARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
+      bucketARN: BucketARN.t option
+        [@ocaml.doc
+          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
+      prefix: Prefix.t option
+        [@ocaml.doc
+          "The \"YYYY/MM/DD/HH\" time format prefix is automatically used for delivered Amazon S3 files. You can also specify a custom prefix, as described in Custom Prefixes for Amazon S3 Objects."];
+      errorOutputPrefix: ErrorOutputPrefix.t option
+        [@ocaml.doc
+          "A prefix that Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
+      bufferingHints: BufferingHints.t option
+        [@ocaml.doc
+          "The buffering option. If no value is specified, BufferingHints object default values are used."];
+      compressionFormat: CompressionFormat.t option
+        [@ocaml.doc
+          "The compression format. If no value is specified, the default is UNCOMPRESSED."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc
+          "The encryption configuration. If no value is specified, the default is no encryption."];
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
+        [@ocaml.doc
+          "The Amazon CloudWatch logging options for your Firehose stream."]}
+    let make ?roleARN =
+      fun ?bucketARN ->
+        fun ?prefix ->
+          fun ?errorOutputPrefix ->
+            fun ?bufferingHints ->
+              fun ?compressionFormat ->
+                fun ?encryptionConfiguration ->
+                  fun ?cloudWatchLoggingOptions ->
+                    fun () ->
+                      {
+                        roleARN;
+                        bucketARN;
+                        prefix;
+                        errorOutputPrefix;
+                        bufferingHints;
+                        compressionFormat;
+                        encryptionConfiguration;
+                        cloudWatchLoggingOptions
+                      }
+    let to_value x =
+      structure_to_value
+        [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("BucketARN", (Option.map x.bucketARN ~f:BucketARN.to_value));
+        ("Prefix", (Option.map x.prefix ~f:Prefix.to_value));
+        ("ErrorOutputPrefix",
+          (Option.map x.errorOutputPrefix ~f:ErrorOutputPrefix.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:BufferingHints.to_value));
+        ("CompressionFormat",
+          (Option.map x.compressionFormat ~f:CompressionFormat.to_value));
+        ("EncryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "EncryptionConfiguration") in
+      let compressionFormat =
+        (Option.map ~f:CompressionFormat.of_xml)
+          (Xml.child xml_arg0 "CompressionFormat") in
+      let bufferingHints =
+        (Option.map ~f:BufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let errorOutputPrefix =
+        (Option.map ~f:ErrorOutputPrefix.of_xml)
+          (Xml.child xml_arg0 "ErrorOutputPrefix") in
+      let prefix =
+        (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
+      let bucketARN =
+        (Option.map ~f:BucketARN.of_xml) (Xml.child xml_arg0 "BucketARN") in
+      let roleARN =
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      make ?cloudWatchLoggingOptions ?encryptionConfiguration
+        ?compressionFormat ?bufferingHints ?errorOutputPrefix ?prefix
+        ?bucketARN ?roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let encryptionConfiguration =
+        field_map json__ "EncryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let compressionFormat =
+        field_map json__ "CompressionFormat" CompressionFormat.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints" BufferingHints.of_json in
+      let errorOutputPrefix =
+        field_map json__ "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
+      let prefix = field_map json__ "Prefix" Prefix.of_json in
+      let bucketARN = field_map json__ "BucketARN" BucketARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?cloudWatchLoggingOptions ?encryptionConfiguration
+        ?compressionFormat ?bufferingHints ?errorOutputPrefix ?prefix
+        ?bucketARN ?roleARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a destination in Amazon S3."]
+module VpcConfigurationDescription =
+  struct
+    type nonrec t =
+      {
+      subnetIds: SubnetIdList.t option
+        [@ocaml.doc
+          "The IDs of the subnets that Firehose uses to create ENIs in the VPC of the Amazon OpenSearch Service destination. Make sure that the routing tables and inbound and outbound rules allow traffic to flow from the subnets whose IDs are specified here to the subnets that have the destination Amazon OpenSearch Service endpoints. Firehose creates at least one ENI in each of the subnets that are specified here. Do not delete or modify these ENIs. The number of ENIs that Firehose creates in the subnets specified here scales up and down automatically based on throughput. To enable Firehose to scale up the number of ENIs to match throughput, ensure that you have sufficient quota. To help you calculate the quota you need, assume that Firehose can create up to three ENIs for this Firehose stream for each of the subnets specified here. For more information about ENI quota, see Network Interfaces in the Amazon VPC Quotas topic."];
+      roleARN: RoleARN.t option
+        [@ocaml.doc
+          "The ARN of the IAM role that the Firehose stream uses to create endpoints in the destination VPC. You can use your existing Firehose delivery role or you can specify a new role. In either case, make sure that the role trusts the Firehose service principal and that it grants the following permissions: ec2:DescribeVpcs ec2:DescribeVpcAttribute ec2:DescribeSubnets ec2:DescribeSecurityGroups ec2:DescribeNetworkInterfaces ec2:CreateNetworkInterface ec2:CreateNetworkInterfacePermission ec2:DeleteNetworkInterface If you revoke these permissions after you create the Firehose stream, Firehose can't scale out by creating more ENIs when necessary. You might therefore see a degradation in performance."];
+      securityGroupIds: SecurityGroupIdList.t option
+        [@ocaml.doc
+          "The IDs of the security groups that Firehose uses when it creates ENIs in the VPC of the Amazon OpenSearch Service destination. You can use the same security group that the Amazon ES domain uses or different ones. If you specify different security groups, ensure that they allow outbound HTTPS traffic to the Amazon OpenSearch Service domain's security group. Also ensure that the Amazon OpenSearch Service domain's security group allows HTTPS traffic from the security groups specified here. If you use the same security group for both your Firehose stream and the Amazon OpenSearch Service domain, make sure the security group inbound rule allows HTTPS traffic. For more information about security group rules, see Security group rules in the Amazon VPC documentation."];
+      vpcId: NonEmptyStringWithoutWhitespace.t option
+        [@ocaml.doc
+          "The ID of the Amazon OpenSearch Service destination's VPC."]}
+    let make ?subnetIds =
+      fun ?roleARN ->
+        fun ?securityGroupIds ->
+          fun ?vpcId ->
+            fun () -> { subnetIds; roleARN; securityGroupIds; vpcId }
+    let to_value x =
+      structure_to_value
+        [("SubnetIds", (Option.map x.subnetIds ~f:SubnetIdList.to_value));
+        ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIdList.to_value));
+        ("VpcId",
+          (Option.map x.vpcId ~f:NonEmptyStringWithoutWhitespace.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcId =
+        (Option.map ~f:NonEmptyStringWithoutWhitespace.of_xml)
+          (Xml.child xml_arg0 "VpcId") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIdList.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
+      let roleARN =
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      let subnetIds =
+        (Option.map ~f:SubnetIdList.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      make ?vpcId ?securityGroupIds ?roleARN ?subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcId =
+        field_map json__ "VpcId" NonEmptyStringWithoutWhitespace.of_json in
+      let securityGroupIds =
+        field_map json__ "SecurityGroupIds" SecurityGroupIdList.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIdList.of_json in
+      make ?vpcId ?securityGroupIds ?roleARN ?subnetIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The details of the VPC of the Amazon OpenSearch Service destination."]
 module AmazonopensearchserviceBufferingHints =
   struct
     type nonrec t =
       {
       intervalInSeconds:
-        AmazonopensearchserviceBufferingIntervalInSeconds.t option ;
-      sizeInMBs: AmazonopensearchserviceBufferingSizeInMBs.t option }
+        AmazonopensearchserviceBufferingIntervalInSeconds.t option
+        [@ocaml.doc
+          "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 300 (5 minutes)."];
+      sizeInMBs: AmazonopensearchserviceBufferingSizeInMBs.t option
+        [@ocaml.doc
+          "Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 5. We recommend setting this parameter to a value greater than the amount of data you typically ingest into the Firehose stream in 10 seconds. For example, if you typically ingest data at 1 MB/sec, the value should be 10 MB or higher."]}
     let make ?intervalInSeconds =
       fun ?sizeInMBs -> fun () -> { intervalInSeconds; sizeInMBs }
     let to_value x =
@@ -2036,16 +3129,17 @@ module AmazonopensearchserviceBufferingHints =
           (Xml.child xml_arg0 "IntervalInSeconds") in
       make ?sizeInMBs ?intervalInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sizeInMBs =
-        field_map json "SizeInMBs"
+        field_map json__ "SizeInMBs"
           AmazonopensearchserviceBufferingSizeInMBs.of_json in
       let intervalInSeconds =
-        field_map json "IntervalInSeconds"
+        field_map json__ "IntervalInSeconds"
           AmazonopensearchserviceBufferingIntervalInSeconds.of_json in
       make ?sizeInMBs ?intervalInSeconds ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Describes the buffering to perform before delivering data to the Amazon OpenSearch Service destination."]
 module AmazonopensearchserviceClusterEndpoint =
   struct
     type nonrec t = string
@@ -2077,7 +3171,9 @@ module AmazonopensearchserviceDomainARN =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:"arn:.*")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:.*:es:[a-zA-Z0-9\\-]+:\\d{12}:domain/[a-z][-0-9a-z]{2,27}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2151,7 +3247,9 @@ module AmazonopensearchserviceRetryOptions =
     type nonrec t =
       {
       durationInSeconds:
-        AmazonopensearchserviceRetryDurationInSeconds.t option }
+        AmazonopensearchserviceRetryDurationInSeconds.t option
+        [@ocaml.doc
+          "After an initial failure to deliver to Amazon OpenSearch Service, the total amount of time during which Firehose retries delivery (including the first attempt). After this time has elapsed, the failed documents are written to Amazon S3. Default value is 300 seconds (5 minutes). A value of 0 (zero) results in no retries."]}
     let make ?durationInSeconds = fun () -> { durationInSeconds }
     let to_value x =
       structure_to_value
@@ -2165,13 +3263,14 @@ module AmazonopensearchserviceRetryOptions =
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationInSeconds =
-        field_map json "DurationInSeconds"
+        field_map json__ "DurationInSeconds"
           AmazonopensearchserviceRetryDurationInSeconds.of_json in
       make ?durationInSeconds ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Configures retry behavior in case Firehose is unable to deliver documents to Amazon OpenSearch Service."]
 module AmazonopensearchserviceS3BackupMode =
   struct
     type nonrec t =
@@ -2221,198 +3320,34 @@ module AmazonopensearchserviceTypeName =
     let of_json j = string_of_json ~kind:"AmazonopensearchserviceTypeName" j
     let to_json = simple_to_json to_value
   end
-module ProcessingConfiguration =
+module DocumentIdOptions =
   struct
     type nonrec t =
       {
-      enabled: BooleanObject.t option
-        [@ocaml.doc "Enables or disables data processing."];
-      processors: ProcessorList.t option [@ocaml.doc "The data processors."]}
-    let make ?enabled = fun ?processors -> fun () -> { enabled; processors }
+      defaultDocumentIdFormat: DefaultDocumentIdFormat.t
+        [@ocaml.doc
+          "When the FIREHOSE_DEFAULT option is chosen, Firehose generates a unique document ID for each record based on a unique internal identifier. The generated document ID is stable across multiple delivery attempts, which helps prevent the same record from being indexed multiple times with different document IDs. When the NO_DOCUMENT_ID option is chosen, Firehose does not include any document IDs in the requests it sends to the Amazon OpenSearch Service. This causes the Amazon OpenSearch Service domain to generate document IDs. In case of multiple delivery attempts, this may cause the same record to be indexed more than once with different document IDs. This option enables write-heavy operations, such as the ingestion of logs and observability data, to consume less resources in the Amazon OpenSearch Service domain, resulting in improved performance."]}
+    let context_ = "DocumentIdOptions"
+    let make ~defaultDocumentIdFormat = fun () -> { defaultDocumentIdFormat }
     let to_value x =
       structure_to_value
-        [("Enabled", (Option.map x.enabled ~f:BooleanObject.to_value));
-        ("Processors", (Option.map x.processors ~f:ProcessorList.to_value))]
+        [("DefaultDocumentIdFormat",
+           (Some (DefaultDocumentIdFormat.to_value x.defaultDocumentIdFormat)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let processors =
-        (Option.map ~f:ProcessorList.of_xml)
-          (Xml.child xml_arg0 "Processors") in
-      let enabled =
-        (Option.map ~f:BooleanObject.of_xml) (Xml.child xml_arg0 "Enabled") in
-      make ?processors ?enabled ()
+      let defaultDocumentIdFormat =
+        DefaultDocumentIdFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DefaultDocumentIdFormat") in
+      make ~defaultDocumentIdFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let processors = field_map json "Processors" ProcessorList.of_json in
-      let enabled = field_map json "Enabled" BooleanObject.of_json in
-      make ?processors ?enabled ()
+    let of_json json__ =
+      let defaultDocumentIdFormat =
+        field_map_exn json__ "DefaultDocumentIdFormat"
+          DefaultDocumentIdFormat.of_json in
+      make ~defaultDocumentIdFormat ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a data processing configuration."]
-module S3DestinationDescription =
-  struct
-    type nonrec t =
-      {
-      roleARN: RoleARN.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
-      bucketARN: BucketARN.t
-        [@ocaml.doc
-          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
-      prefix: Prefix.t option
-        [@ocaml.doc
-          "The \"YYYY/MM/DD/HH\" time format prefix is automatically used for delivered Amazon S3 files. You can also specify a custom prefix, as described in Custom Prefixes for Amazon S3 Objects."];
-      errorOutputPrefix: ErrorOutputPrefix.t option
-        [@ocaml.doc
-          "A prefix that Kinesis Data Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
-      bufferingHints: BufferingHints.t
-        [@ocaml.doc
-          "The buffering option. If no value is specified, BufferingHints object default values are used."];
-      compressionFormat: CompressionFormat.t
-        [@ocaml.doc
-          "The compression format. If no value is specified, the default is UNCOMPRESSED."];
-      encryptionConfiguration: EncryptionConfiguration.t
-        [@ocaml.doc
-          "The encryption configuration. If no value is specified, the default is no encryption."];
-      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
-        [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."]}
-    let context_ = "S3DestinationDescription"
-    let make ?prefix =
-      fun ?errorOutputPrefix ->
-        fun ?cloudWatchLoggingOptions ->
-          fun ~roleARN ->
-            fun ~bucketARN ->
-              fun ~bufferingHints ->
-                fun ~compressionFormat ->
-                  fun ~encryptionConfiguration ->
-                    fun () ->
-                      {
-                        prefix;
-                        errorOutputPrefix;
-                        cloudWatchLoggingOptions;
-                        roleARN;
-                        bucketARN;
-                        bufferingHints;
-                        compressionFormat;
-                        encryptionConfiguration
-                      }
-    let to_value x =
-      structure_to_value
-        [("RoleARN", (Some (RoleARN.to_value x.roleARN)));
-        ("BucketARN", (Some (BucketARN.to_value x.bucketARN)));
-        ("Prefix", (Option.map x.prefix ~f:Prefix.to_value));
-        ("ErrorOutputPrefix",
-          (Option.map x.errorOutputPrefix ~f:ErrorOutputPrefix.to_value));
-        ("BufferingHints", (Some (BufferingHints.to_value x.bufferingHints)));
-        ("CompressionFormat",
-          (Some (CompressionFormat.to_value x.compressionFormat)));
-        ("EncryptionConfiguration",
-          (Some (EncryptionConfiguration.to_value x.encryptionConfiguration)));
-        ("CloudWatchLoggingOptions",
-          (Option.map x.cloudWatchLoggingOptions
-             ~f:CloudWatchLoggingOptions.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let cloudWatchLoggingOptions =
-        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
-          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
-      let encryptionConfiguration =
-        EncryptionConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EncryptionConfiguration") in
-      let compressionFormat =
-        CompressionFormat.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CompressionFormat") in
-      let bufferingHints =
-        BufferingHints.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BufferingHints") in
-      let errorOutputPrefix =
-        (Option.map ~f:ErrorOutputPrefix.of_xml)
-          (Xml.child xml_arg0 "ErrorOutputPrefix") in
-      let prefix =
-        (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
-      let bucketARN =
-        BucketARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
-      let roleARN =
-        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
-      make ?cloudWatchLoggingOptions ~encryptionConfiguration
-        ~compressionFormat ~bufferingHints ?errorOutputPrefix ?prefix
-        ~bucketARN ~roleARN ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
-          CloudWatchLoggingOptions.of_json in
-      let encryptionConfiguration =
-        field_map_exn json "EncryptionConfiguration"
-          EncryptionConfiguration.of_json in
-      let compressionFormat =
-        field_map_exn json "CompressionFormat" CompressionFormat.of_json in
-      let bufferingHints =
-        field_map_exn json "BufferingHints" BufferingHints.of_json in
-      let errorOutputPrefix =
-        field_map json "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
-      let prefix = field_map json "Prefix" Prefix.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      make ?cloudWatchLoggingOptions ~encryptionConfiguration
-        ~compressionFormat ~bufferingHints ?errorOutputPrefix ?prefix
-        ~bucketARN ~roleARN ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a destination in Amazon S3."]
-module VpcConfigurationDescription =
-  struct
-    type nonrec t =
-      {
-      subnetIds: SubnetIdList.t
-        [@ocaml.doc
-          "The IDs of the subnets that Kinesis Data Firehose uses to create ENIs in the VPC of the Amazon ES destination. Make sure that the routing tables and inbound and outbound rules allow traffic to flow from the subnets whose IDs are specified here to the subnets that have the destination Amazon ES endpoints. Kinesis Data Firehose creates at least one ENI in each of the subnets that are specified here. Do not delete or modify these ENIs. The number of ENIs that Kinesis Data Firehose creates in the subnets specified here scales up and down automatically based on throughput. To enable Kinesis Data Firehose to scale up the number of ENIs to match throughput, ensure that you have sufficient quota. To help you calculate the quota you need, assume that Kinesis Data Firehose can create up to three ENIs for this delivery stream for each of the subnets specified here. For more information about ENI quota, see Network Interfaces in the Amazon VPC Quotas topic."];
-      roleARN: RoleARN.t
-        [@ocaml.doc
-          "The ARN of the IAM role that the delivery stream uses to create endpoints in the destination VPC. You can use your existing Kinesis Data Firehose delivery role or you can specify a new role. In either case, make sure that the role trusts the Kinesis Data Firehose service principal and that it grants the following permissions: ec2:DescribeVpcs ec2:DescribeVpcAttribute ec2:DescribeSubnets ec2:DescribeSecurityGroups ec2:DescribeNetworkInterfaces ec2:CreateNetworkInterface ec2:CreateNetworkInterfacePermission ec2:DeleteNetworkInterface If you revoke these permissions after you create the delivery stream, Kinesis Data Firehose can't scale out by creating more ENIs when necessary. You might therefore see a degradation in performance."];
-      securityGroupIds: SecurityGroupIdList.t
-        [@ocaml.doc
-          "The IDs of the security groups that Kinesis Data Firehose uses when it creates ENIs in the VPC of the Amazon ES destination. You can use the same security group that the Amazon ES domain uses or different ones. If you specify different security groups, ensure that they allow outbound HTTPS traffic to the Amazon ES domain's security group. Also ensure that the Amazon ES domain's security group allows HTTPS traffic from the security groups specified here. If you use the same security group for both your delivery stream and the Amazon ES domain, make sure the security group inbound rule allows HTTPS traffic. For more information about security group rules, see Security group rules in the Amazon VPC documentation."];
-      vpcId: NonEmptyStringWithoutWhitespace.t
-        [@ocaml.doc "The ID of the Amazon ES destination's VPC."]}
-    let context_ = "VpcConfigurationDescription"
-    let make ~subnetIds =
-      fun ~roleARN ->
-        fun ~securityGroupIds ->
-          fun ~vpcId ->
-            fun () -> { subnetIds; roleARN; securityGroupIds; vpcId }
-    let to_value x =
-      structure_to_value
-        [("SubnetIds", (Some (SubnetIdList.to_value x.subnetIds)));
-        ("RoleARN", (Some (RoleARN.to_value x.roleARN)));
-        ("SecurityGroupIds",
-          (Some (SecurityGroupIdList.to_value x.securityGroupIds)));
-        ("VpcId", (Some (NonEmptyStringWithoutWhitespace.to_value x.vpcId)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let vpcId =
-        NonEmptyStringWithoutWhitespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
-      let securityGroupIds =
-        SecurityGroupIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupIds") in
-      let roleARN =
-        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
-      let subnetIds =
-        SubnetIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
-      make ~vpcId ~securityGroupIds ~roleARN ~subnetIds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId =
-        field_map_exn json "VpcId" NonEmptyStringWithoutWhitespace.of_json in
-      let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" SecurityGroupIdList.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIdList.of_json in
-      make ~vpcId ~securityGroupIds ~roleARN ~subnetIds ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The details of the VPC of the Amazon ES destination."]
+  end[@@ocaml.doc
+       "Indicates the method for setting up document ID. The supported methods are Firehose generated document ID and OpenSearch Service generated document ID."]
 module ElasticsearchBufferingHints =
   struct
     type nonrec t =
@@ -2422,7 +3357,7 @@ module ElasticsearchBufferingHints =
           "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 300 (5 minutes)."];
       sizeInMBs: ElasticsearchBufferingSizeInMBs.t option
         [@ocaml.doc
-          "Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 5. We recommend setting this parameter to a value greater than the amount of data you typically ingest into the delivery stream in 10 seconds. For example, if you typically ingest data at 1 MB/sec, the value should be 10 MB or higher."]}
+          "Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 5. We recommend setting this parameter to a value greater than the amount of data you typically ingest into the Firehose stream in 10 seconds. For example, if you typically ingest data at 1 MB/sec, the value should be 10 MB or higher."]}
     let make ?intervalInSeconds =
       fun ?sizeInMBs -> fun () -> { intervalInSeconds; sizeInMBs }
     let to_value x =
@@ -2442,16 +3377,16 @@ module ElasticsearchBufferingHints =
           (Xml.child xml_arg0 "IntervalInSeconds") in
       make ?sizeInMBs ?intervalInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sizeInMBs =
-        field_map json "SizeInMBs" ElasticsearchBufferingSizeInMBs.of_json in
+        field_map json__ "SizeInMBs" ElasticsearchBufferingSizeInMBs.of_json in
       let intervalInSeconds =
-        field_map json "IntervalInSeconds"
+        field_map json__ "IntervalInSeconds"
           ElasticsearchBufferingIntervalInSeconds.of_json in
       make ?sizeInMBs ?intervalInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the buffering to perform before delivering data to the Amazon ES destination."]
+       "Describes the buffering to perform before delivering data to the Amazon OpenSearch Service destination."]
 module ElasticsearchClusterEndpoint =
   struct
     type nonrec t = string
@@ -2482,7 +3417,9 @@ module ElasticsearchDomainARN =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:"arn:.*")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:.*:es:[a-zA-Z0-9\\-]+:\\d{12}:domain/[a-z][-0-9a-z]{2,27}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2555,7 +3492,7 @@ module ElasticsearchRetryOptions =
       {
       durationInSeconds: ElasticsearchRetryDurationInSeconds.t option
         [@ocaml.doc
-          "After an initial failure to deliver to Amazon ES, the total amount of time during which Kinesis Data Firehose retries delivery (including the first attempt). After this time has elapsed, the failed documents are written to Amazon S3. Default value is 300 seconds (5 minutes). A value of 0 (zero) results in no retries."]}
+          "After an initial failure to deliver to Amazon OpenSearch Service, the total amount of time during which Firehose retries delivery (including the first attempt). After this time has elapsed, the failed documents are written to Amazon S3. Default value is 300 seconds (5 minutes). A value of 0 (zero) results in no retries."]}
     let make ?durationInSeconds = fun () -> { durationInSeconds }
     let to_value x =
       structure_to_value
@@ -2569,14 +3506,14 @@ module ElasticsearchRetryOptions =
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationInSeconds =
-        field_map json "DurationInSeconds"
+        field_map json__ "DurationInSeconds"
           ElasticsearchRetryDurationInSeconds.of_json in
       make ?durationInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures retry behavior in case Kinesis Data Firehose is unable to deliver documents to Amazon ES."]
+       "Configures retry behavior in case Firehose is unable to deliver documents to Amazon OpenSearch Service."]
 module ElasticsearchS3BackupMode =
   struct
     type nonrec t =
@@ -2624,19 +3561,39 @@ module ElasticsearchTypeName =
     let of_json j = string_of_json ~kind:"ElasticsearchTypeName" j
     let to_json = simple_to_json to_value
   end
+module CustomTimeZone =
+  struct
+    type nonrec t = string
+    let context_ = "CustomTimeZone"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"^$|[a-zA-Z/_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomTimeZone" j
+    let to_json = simple_to_json to_value
+  end
 module DataFormatConversionConfiguration =
   struct
     type nonrec t =
       {
       schemaConfiguration: SchemaConfiguration.t option
         [@ocaml.doc
-          "Specifies the AWS Glue Data Catalog table that contains the column information. This parameter is required if Enabled is set to true."];
+          "Specifies the Amazon Web Services Glue Data Catalog table that contains the column information. This parameter is required if Enabled is set to true."];
       inputFormatConfiguration: InputFormatConfiguration.t option
         [@ocaml.doc
-          "Specifies the deserializer that you want Kinesis Data Firehose to use to convert the format of your data from JSON. This parameter is required if Enabled is set to true."];
+          "Specifies the deserializer that you want Firehose to use to convert the format of your data from JSON. This parameter is required if Enabled is set to true."];
       outputFormatConfiguration: OutputFormatConfiguration.t option
         [@ocaml.doc
-          "Specifies the serializer that you want Kinesis Data Firehose to use to convert the format of your data to the Parquet or ORC format. This parameter is required if Enabled is set to true."];
+          "Specifies the serializer that you want Firehose to use to convert the format of your data to the Parquet or ORC format. This parameter is required if Enabled is set to true."];
       enabled: BooleanObject.t option
         [@ocaml.doc
           "Defaults to true. Set it to false if you want to disable format conversion while preserving the configuration details."]}
@@ -2678,31 +3635,31 @@ module DataFormatConversionConfiguration =
       make ?enabled ?outputFormatConfiguration ?inputFormatConfiguration
         ?schemaConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" BooleanObject.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" BooleanObject.of_json in
       let outputFormatConfiguration =
-        field_map json "OutputFormatConfiguration"
+        field_map json__ "OutputFormatConfiguration"
           OutputFormatConfiguration.of_json in
       let inputFormatConfiguration =
-        field_map json "InputFormatConfiguration"
+        field_map json__ "InputFormatConfiguration"
           InputFormatConfiguration.of_json in
       let schemaConfiguration =
-        field_map json "SchemaConfiguration" SchemaConfiguration.of_json in
+        field_map json__ "SchemaConfiguration" SchemaConfiguration.of_json in
       make ?enabled ?outputFormatConfiguration ?inputFormatConfiguration
         ?schemaConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies that you want Kinesis Data Firehose to convert data from the JSON format to the Parquet or ORC format before writing it to Amazon S3. Kinesis Data Firehose uses the serializer and deserializer that you specify, in addition to the column information from the AWS Glue table, to deserialize your input data from JSON and then serialize it to the Parquet or ORC format. For more information, see Kinesis Data Firehose Record Format Conversion."]
+       "Specifies that you want Firehose to convert data from the JSON format to the Parquet or ORC format before writing it to Amazon S3. Firehose uses the serializer and deserializer that you specify, in addition to the column information from the Amazon Web Services Glue table, to deserialize your input data from JSON and then serialize it to the Parquet or ORC format. For more information, see Firehose Record Format Conversion."]
 module DynamicPartitioningConfiguration =
   struct
     type nonrec t =
       {
       retryOptions: RetryOptions.t option
         [@ocaml.doc
-          "The retry behavior in case Kinesis Data Firehose is unable to deliver data to an Amazon S3 prefix."];
+          "The retry behavior in case Firehose is unable to deliver data to an Amazon S3 prefix."];
       enabled: BooleanObject.t option
         [@ocaml.doc
-          "Specifies that the dynamic partitioning is enabled for this Kinesis Data Firehose delivery stream."]}
+          "Specifies that the dynamic partitioning is enabled for this Firehose stream."]}
     let make ?retryOptions =
       fun ?enabled -> fun () -> { retryOptions; enabled }
     let to_value x =
@@ -2719,13 +3676,34 @@ module DynamicPartitioningConfiguration =
           (Xml.child xml_arg0 "RetryOptions") in
       make ?enabled ?retryOptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" BooleanObject.of_json in
-      let retryOptions = field_map json "RetryOptions" RetryOptions.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" BooleanObject.of_json in
+      let retryOptions = field_map json__ "RetryOptions" RetryOptions.of_json in
       make ?enabled ?retryOptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration of the dynamic partitioning mechanism that creates smaller data sets from the streaming data by partitioning it based on partition keys. Currently, dynamic partitioning is only supported for Amazon S3 destinations. For more information, see https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html"]
+       "The configuration of the dynamic partitioning mechanism that creates smaller data sets from the streaming data by partitioning it based on partition keys. Currently, dynamic partitioning is only supported for Amazon S3 destinations."]
+module FileExtension =
+  struct
+    type nonrec t = string
+    let context_ = "FileExtension"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^$|\\.[0-9a-z!\\-_.*'()]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FileExtension" j
+    let to_json = simple_to_json to_value
+  end
 module S3BackupMode =
   struct
     type nonrec t =
@@ -2757,7 +3735,7 @@ module HttpEndpointBufferingHints =
       {
       sizeInMBs: HttpEndpointBufferingSizeInMBs.t option
         [@ocaml.doc
-          "Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 5. We recommend setting this parameter to a value greater than the amount of data you typically ingest into the delivery stream in 10 seconds. For example, if you typically ingest data at 1 MB/sec, the value should be 10 MB or higher."];
+          "Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 5. We recommend setting this parameter to a value greater than the amount of data you typically ingest into the Firehose stream in 10 seconds. For example, if you typically ingest data at 1 MB/sec, the value should be 10 MB or higher."];
       intervalInSeconds: HttpEndpointBufferingIntervalInSeconds.t option
         [@ocaml.doc
           "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 300 (5 minutes)."]}
@@ -2780,16 +3758,16 @@ module HttpEndpointBufferingHints =
           (Xml.child xml_arg0 "SizeInMBs") in
       make ?intervalInSeconds ?sizeInMBs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let intervalInSeconds =
-        field_map json "IntervalInSeconds"
+        field_map json__ "IntervalInSeconds"
           HttpEndpointBufferingIntervalInSeconds.of_json in
       let sizeInMBs =
-        field_map json "SizeInMBs" HttpEndpointBufferingSizeInMBs.of_json in
+        field_map json__ "SizeInMBs" HttpEndpointBufferingSizeInMBs.of_json in
       make ?intervalInSeconds ?sizeInMBs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the buffering options that can be applied before data is delivered to the HTTP endpoint destination. Kinesis Data Firehose treats these options as hints, and it might choose to use more optimal values. The SizeInMBs and IntervalInSeconds parameters are optional. However, if specify a value for one of them, you must also provide a value for the other."]
+       "Describes the buffering options that can be applied before data is delivered to the HTTP endpoint destination. Firehose treats these options as hints, and it might choose to use more optimal values. The SizeInMBs and IntervalInSeconds parameters are optional. However, if specify a value for one of them, you must also provide a value for the other."]
 module HttpEndpointDescription =
   struct
     type nonrec t =
@@ -2813,9 +3791,9 @@ module HttpEndpointDescription =
         (Option.map ~f:HttpEndpointUrl.of_xml) (Xml.child xml_arg0 "Url") in
       make ?name ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" HttpEndpointName.of_json in
-      let url = field_map json "Url" HttpEndpointUrl.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" HttpEndpointName.of_json in
+      let url = field_map json__ "Url" HttpEndpointUrl.of_json in
       make ?name ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the HTTP endpoint selected as the destination."]
@@ -2825,7 +3803,7 @@ module HttpEndpointRequestConfiguration =
       {
       contentEncoding: ContentEncoding.t option
         [@ocaml.doc
-          "Kinesis Data Firehose uses the content encoding to compress the body of a request before sending the request to the destination. For more information, see Content-Encoding in MDN Web Docs, the official Mozilla documentation."];
+          "Firehose uses the content encoding to compress the body of a request before sending the request to the destination. For more information, see Content-Encoding in MDN Web Docs, the official Mozilla documentation."];
       commonAttributes: HttpEndpointCommonAttributesList.t option
         [@ocaml.doc
           "Describes the metadata sent to the HTTP endpoint destination."]}
@@ -2849,12 +3827,12 @@ module HttpEndpointRequestConfiguration =
           (Xml.child xml_arg0 "ContentEncoding") in
       make ?commonAttributes ?contentEncoding ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let commonAttributes =
-        field_map json "CommonAttributes"
+        field_map json__ "CommonAttributes"
           HttpEndpointCommonAttributesList.of_json in
       let contentEncoding =
-        field_map json "ContentEncoding" ContentEncoding.of_json in
+        field_map json__ "ContentEncoding" ContentEncoding.of_json in
       make ?commonAttributes ?contentEncoding ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration of the HTTP endpoint request."]
@@ -2864,7 +3842,7 @@ module HttpEndpointRetryOptions =
       {
       durationInSeconds: HttpEndpointRetryDurationInSeconds.t option
         [@ocaml.doc
-          "The total amount of time that Kinesis Data Firehose spends on retries. This duration starts after the initial attempt to send data to the custom destination via HTTPS endpoint fails. It doesn't include the periods during which Kinesis Data Firehose waits for acknowledgment from the specified destination after each attempt."]}
+          "The total amount of time that Firehose spends on retries. This duration starts after the initial attempt to send data to the custom destination via HTTPS endpoint fails. It doesn't include the periods during which Firehose waits for acknowledgment from the specified destination after each attempt."]}
     let make ?durationInSeconds = fun () -> { durationInSeconds }
     let to_value x =
       structure_to_value
@@ -2878,14 +3856,14 @@ module HttpEndpointRetryOptions =
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationInSeconds =
-        field_map json "DurationInSeconds"
+        field_map json__ "DurationInSeconds"
           HttpEndpointRetryDurationInSeconds.of_json in
       make ?durationInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the retry behavior in case Kinesis Data Firehose is unable to deliver data to the specified HTTP endpoint destination, or if it doesn't receive a valid acknowledgment of receipt from the specified HTTP endpoint destination."]
+       "Describes the retry behavior in case Firehose is unable to deliver data to the specified HTTP endpoint destination, or if it doesn't receive a valid acknowledgment of receipt from the specified HTTP endpoint destination."]
 module HttpEndpointS3BackupMode =
   struct
     type nonrec t =
@@ -2913,6 +3891,189 @@ module HttpEndpointS3BackupMode =
       of_string (string_of_json ~kind:"HttpEndpointS3BackupMode" j)
     let to_json = simple_to_json to_value
   end
+module SecretsManagerConfiguration =
+  struct
+    type nonrec t =
+      {
+      secretARN: SecretARN.t option
+        [@ocaml.doc
+          "The ARN of the secret that stores your credentials. It must be in the same region as the Firehose stream and the role. The secret ARN can reside in a different account than the Firehose stream and role as Firehose supports cross-account secret access. This parameter is required when Enabled is set to True."];
+      roleARN: RoleARN.t option
+        [@ocaml.doc
+          "Specifies the role that Firehose assumes when calling the Secrets Manager API operation. When you provide the role, it overrides any destination specific role defined in the destination configuration. If you do not provide the then we use the destination specific role. This parameter is required for Splunk."];
+      enabled: BooleanObject.t
+        [@ocaml.doc
+          "Specifies whether you want to use the secrets manager feature. When set as True the secrets manager configuration overwrites the existing secrets in the destination configuration. When it's set to False Firehose falls back to the credentials in the destination configuration."]}
+    let context_ = "SecretsManagerConfiguration"
+    let make ?secretARN =
+      fun ?roleARN ->
+        fun ~enabled -> fun () -> { secretARN; roleARN; enabled }
+    let to_value x =
+      structure_to_value
+        [("SecretARN", (Option.map x.secretARN ~f:SecretARN.to_value));
+        ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("Enabled", (Some (BooleanObject.to_value x.enabled)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enabled =
+        BooleanObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      let roleARN =
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      let secretARN =
+        (Option.map ~f:SecretARN.of_xml) (Xml.child xml_arg0 "SecretARN") in
+      make ~enabled ?roleARN ?secretARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabled = field_map_exn json__ "Enabled" BooleanObject.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let secretARN = field_map json__ "SecretARN" SecretARN.of_json in
+      make ~enabled ?roleARN ?secretARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that defines how Firehose accesses the secret."]
+module CatalogConfiguration =
+  struct
+    type nonrec t =
+      {
+      catalogARN: GlueDataCatalogARN.t option
+        [@ocaml.doc
+          "Specifies the Glue catalog ARN identifier of the destination Apache Iceberg Tables. You must specify the ARN in the format arn:aws:glue:region:account-id:catalog."];
+      warehouseLocation: WarehouseLocation.t option
+        [@ocaml.doc
+          "The warehouse location for Apache Iceberg tables. You must configure this when schema evolution and table creation is enabled. Amazon Data Firehose is in preview release and is subject to change."]}
+    let make ?catalogARN =
+      fun ?warehouseLocation -> fun () -> { catalogARN; warehouseLocation }
+    let to_value x =
+      structure_to_value
+        [("CatalogARN",
+           (Option.map x.catalogARN ~f:GlueDataCatalogARN.to_value));
+        ("WarehouseLocation",
+          (Option.map x.warehouseLocation ~f:WarehouseLocation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let warehouseLocation =
+        (Option.map ~f:WarehouseLocation.of_xml)
+          (Xml.child xml_arg0 "WarehouseLocation") in
+      let catalogARN =
+        (Option.map ~f:GlueDataCatalogARN.of_xml)
+          (Xml.child xml_arg0 "CatalogARN") in
+      make ?warehouseLocation ?catalogARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let warehouseLocation =
+        field_map json__ "WarehouseLocation" WarehouseLocation.of_json in
+      let catalogARN =
+        field_map json__ "CatalogARN" GlueDataCatalogARN.of_json in
+      make ?warehouseLocation ?catalogARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the containers where the destination Apache Iceberg Tables are persisted."]
+module DestinationTableConfigurationList =
+  struct
+    type nonrec t = DestinationTableConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DestinationTableConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DestinationTableConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DestinationTableConfigurationList"
+        ~of_json:DestinationTableConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IcebergS3BackupMode =
+  struct
+    type nonrec t =
+      | FailedDataOnly 
+      | AllData 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FailedDataOnly -> "FailedDataOnly"
+      | AllData -> "AllData"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FailedDataOnly" -> FailedDataOnly
+      | "AllData" -> AllData
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IcebergS3BackupMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IcebergS3BackupMode" j)
+    let to_json = simple_to_json to_value
+  end
+module SchemaEvolutionConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: BooleanObject.t
+        [@ocaml.doc
+          "Specify whether you want to enable schema evolution. Amazon Data Firehose is in preview release and is subject to change."]}
+    let context_ = "SchemaEvolutionConfiguration"
+    let make ~enabled = fun () -> { enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (BooleanObject.to_value x.enabled)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enabled =
+        BooleanObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabled = field_map_exn json__ "Enabled" BooleanObject.of_json in
+      make ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration to enable schema evolution. Amazon Data Firehose is in preview release and is subject to change."]
+module TableCreationConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: BooleanObject.t
+        [@ocaml.doc
+          "Specify whether you want to enable automatic table creation. Amazon Data Firehose is in preview release and is subject to change."]}
+    let context_ = "TableCreationConfiguration"
+    let make ~enabled = fun () -> { enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (BooleanObject.to_value x.enabled)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enabled =
+        BooleanObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabled = field_map_exn json__ "Enabled" BooleanObject.of_json in
+      make ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration to enable automatic table creation. Amazon Data Firehose is in preview release and is subject to change."]
 module ClusterJDBCURL =
   struct
     type nonrec t = string
@@ -2925,7 +4086,7 @@ module ClusterJDBCURL =
                 (check_string_max i ~max:512) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"jdbc:(redshift|postgresql)://((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+redshift\\.([a-zA-Z0-9\\.]+):\\d{1,5}/[a-zA-Z0-9_$-]+")));
+                       ~pattern:"jdbc:(redshift|postgresql)://((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+(redshift(-serverless)?)\\.([a-zA-Z0-9\\.\\-]+):\\d{1,5}/[a-zA-Z0-9_$-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2946,7 +4107,7 @@ module CopyCommand =
         [@ocaml.doc "A comma-separated list of column names."];
       copyOptions: CopyOptions.t option
         [@ocaml.doc
-          "Optional parameters to use with the Amazon Redshift COPY command. For more information, see the \"Optional Parameters\" section of Amazon Redshift COPY command. Some possible examples that would apply to Kinesis Data Firehose are as follows: delimiter '\\t' lzop; - fields are delimited with \"\\t\" (TAB character) and compressed using lzop. delimiter '|' - fields are delimited with \"|\" (this is the default delimiter). delimiter '|' escape - the delimiter should be escaped. fixedwidth 'venueid:3,venuename:25,venuecity:12,venuestate:2,venueseats:6' - fields are fixed width in the source, with each width specified after every column in the table. JSON 's3://mybucket/jsonpaths.txt' - data is in JSON format, and the path specified is the format of the data. For more examples, see Amazon Redshift COPY command examples."]}
+          "Optional parameters to use with the Amazon Redshift COPY command. For more information, see the \"Optional Parameters\" section of Amazon Redshift COPY command. Some possible examples that would apply to Firehose are as follows: delimiter '\\t' lzop; - fields are delimited with \"\\t\" (TAB character) and compressed using lzop. delimiter '|' - fields are delimited with \"|\" (this is the default delimiter). delimiter '|' escape - the delimiter should be escaped. fixedwidth 'venueid:3,venuename:25,venuecity:12,venuestate:2,venueseats:6' - fields are fixed width in the source, with each width specified after every column in the table. JSON 's3://mybucket/jsonpaths.txt' - data is in JSON format, and the path specified is the format of the data. For more examples, see Amazon Redshift COPY command examples."]}
     let context_ = "CopyCommand"
     let make ?dataTableColumns =
       fun ?copyOptions ->
@@ -2970,12 +4131,12 @@ module CopyCommand =
           (Xml.child_exn ~context:context_ xml_arg0 "DataTableName") in
       make ?copyOptions ?dataTableColumns ~dataTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let copyOptions = field_map json "CopyOptions" CopyOptions.of_json in
+    let of_json json__ =
+      let copyOptions = field_map json__ "CopyOptions" CopyOptions.of_json in
       let dataTableColumns =
-        field_map json "DataTableColumns" DataTableColumns.of_json in
+        field_map json__ "DataTableColumns" DataTableColumns.of_json in
       let dataTableName =
-        field_map_exn json "DataTableName" DataTableName.of_json in
+        field_map_exn json__ "DataTableName" DataTableName.of_json in
       make ?copyOptions ?dataTableColumns ~dataTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a COPY command for Amazon Redshift."]
@@ -2985,7 +4146,7 @@ module RedshiftRetryOptions =
       {
       durationInSeconds: RedshiftRetryDurationInSeconds.t option
         [@ocaml.doc
-          "The length of time during which Kinesis Data Firehose retries delivery after a failure, starting from the initial request and including the first attempt. The default value is 3600 seconds (60 minutes). Kinesis Data Firehose does not retry if the value of DurationInSeconds is 0 (zero) or if the first delivery attempt takes longer than the current value."]}
+          "The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt. The default value is 3600 seconds (60 minutes). Firehose does not retry if the value of DurationInSeconds is 0 (zero) or if the first delivery attempt takes longer than the current value."]}
     let make ?durationInSeconds = fun () -> { durationInSeconds }
     let to_value x =
       structure_to_value
@@ -2999,14 +4160,14 @@ module RedshiftRetryOptions =
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationInSeconds =
-        field_map json "DurationInSeconds"
+        field_map json__ "DurationInSeconds"
           RedshiftRetryDurationInSeconds.of_json in
       make ?durationInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures retry behavior in case Kinesis Data Firehose is unable to deliver documents to Amazon Redshift."]
+       "Configures retry behavior in case Firehose is unable to deliver documents to Amazon Redshift."]
 module RedshiftS3BackupMode =
   struct
     type nonrec t =
@@ -3053,6 +4214,321 @@ module Username =
     let of_json j = string_of_json ~kind:"Username" j
     let to_json = simple_to_json to_value
   end
+module SnowflakeAccountUrl =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakeAccountUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:24) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:".+?\\.snowflakecomputing\\.com")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakeAccountUrl" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeBufferingHints =
+  struct
+    type nonrec t =
+      {
+      sizeInMBs: SnowflakeBufferingSizeInMBs.t option
+        [@ocaml.doc
+          "Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 128."];
+      intervalInSeconds: SnowflakeBufferingIntervalInSeconds.t option
+        [@ocaml.doc
+          "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 0."]}
+    let make ?sizeInMBs =
+      fun ?intervalInSeconds -> fun () -> { sizeInMBs; intervalInSeconds }
+    let to_value x =
+      structure_to_value
+        [("SizeInMBs",
+           (Option.map x.sizeInMBs ~f:SnowflakeBufferingSizeInMBs.to_value));
+        ("IntervalInSeconds",
+          (Option.map x.intervalInSeconds
+             ~f:SnowflakeBufferingIntervalInSeconds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let intervalInSeconds =
+        (Option.map ~f:SnowflakeBufferingIntervalInSeconds.of_xml)
+          (Xml.child xml_arg0 "IntervalInSeconds") in
+      let sizeInMBs =
+        (Option.map ~f:SnowflakeBufferingSizeInMBs.of_xml)
+          (Xml.child xml_arg0 "SizeInMBs") in
+      make ?intervalInSeconds ?sizeInMBs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let intervalInSeconds =
+        field_map json__ "IntervalInSeconds"
+          SnowflakeBufferingIntervalInSeconds.of_json in
+      let sizeInMBs =
+        field_map json__ "SizeInMBs" SnowflakeBufferingSizeInMBs.of_json in
+      make ?intervalInSeconds ?sizeInMBs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the buffering to perform before delivering data to the Snowflake destination. If you do not specify any value, Firehose uses the default values."]
+module SnowflakeContentColumnName =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakeContentColumnName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakeContentColumnName" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeDataLoadingOption =
+  struct
+    type nonrec t =
+      | JSON_MAPPING 
+      | VARIANT_CONTENT_MAPPING 
+      | VARIANT_CONTENT_AND_METADATA_MAPPING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | JSON_MAPPING -> "JSON_MAPPING"
+      | VARIANT_CONTENT_MAPPING -> "VARIANT_CONTENT_MAPPING"
+      | VARIANT_CONTENT_AND_METADATA_MAPPING ->
+          "VARIANT_CONTENT_AND_METADATA_MAPPING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "JSON_MAPPING" -> JSON_MAPPING
+      | "VARIANT_CONTENT_MAPPING" -> VARIANT_CONTENT_MAPPING
+      | "VARIANT_CONTENT_AND_METADATA_MAPPING" ->
+          VARIANT_CONTENT_AND_METADATA_MAPPING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SnowflakeDataLoadingOption"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SnowflakeDataLoadingOption" j)
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeDatabase =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakeDatabase"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakeDatabase" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeMetaDataColumnName =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakeMetaDataColumnName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakeMetaDataColumnName" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeRetryOptions =
+  struct
+    type nonrec t =
+      {
+      durationInSeconds: SnowflakeRetryDurationInSeconds.t option
+        [@ocaml.doc
+          "the time period where Firehose will retry sending data to the chosen HTTP endpoint."]}
+    let make ?durationInSeconds = fun () -> { durationInSeconds }
+    let to_value x =
+      structure_to_value
+        [("DurationInSeconds",
+           (Option.map x.durationInSeconds
+              ~f:SnowflakeRetryDurationInSeconds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationInSeconds =
+        (Option.map ~f:SnowflakeRetryDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "DurationInSeconds") in
+      make ?durationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationInSeconds =
+        field_map json__ "DurationInSeconds"
+          SnowflakeRetryDurationInSeconds.of_json in
+      make ?durationInSeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specify how long Firehose retries sending data to the New Relic HTTP endpoint. After sending data, Firehose first waits for an acknowledgment from the HTTP endpoint. If an error occurs or the acknowledgment doesn\226\128\153t arrive within the acknowledgment timeout period, Firehose starts the retry duration counter. It keeps retrying until the retry duration expires. After that, Firehose considers it a data delivery failure and backs up the data to your Amazon S3 bucket. Every time that Firehose sends data to the HTTP endpoint (either the initial attempt or a retry), it restarts the acknowledgement timeout counter and waits for an acknowledgement from the HTTP endpoint. Even if the retry duration expires, Firehose still waits for the acknowledgment until it receives it or the acknowledgement timeout period is reached. If the acknowledgment times out, Firehose determines whether there's time left in the retry counter. If there is time left, it retries again and repeats the logic until it receives an acknowledgment or determines that the retry time has expired. If you don't want Firehose to retry sending data, set this value to 0."]
+module SnowflakeRoleConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: BooleanObject.t option [@ocaml.doc "Enable Snowflake role"];
+      snowflakeRole: SnowflakeRole.t option
+        [@ocaml.doc "The Snowflake role you wish to configure"]}
+    let make ?enabled =
+      fun ?snowflakeRole -> fun () -> { enabled; snowflakeRole }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Option.map x.enabled ~f:BooleanObject.to_value));
+        ("SnowflakeRole",
+          (Option.map x.snowflakeRole ~f:SnowflakeRole.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let snowflakeRole =
+        (Option.map ~f:SnowflakeRole.of_xml)
+          (Xml.child xml_arg0 "SnowflakeRole") in
+      let enabled =
+        (Option.map ~f:BooleanObject.of_xml) (Xml.child xml_arg0 "Enabled") in
+      make ?snowflakeRole ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let snowflakeRole =
+        field_map json__ "SnowflakeRole" SnowflakeRole.of_json in
+      let enabled = field_map json__ "Enabled" BooleanObject.of_json in
+      make ?snowflakeRole ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Optionally configure a Snowflake role. Otherwise the default user role will be used."]
+module SnowflakeS3BackupMode =
+  struct
+    type nonrec t =
+      | FailedDataOnly 
+      | AllData 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FailedDataOnly -> "FailedDataOnly"
+      | AllData -> "AllData"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FailedDataOnly" -> FailedDataOnly
+      | "AllData" -> AllData
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SnowflakeS3BackupMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SnowflakeS3BackupMode" j)
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeSchema =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakeSchema"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakeSchema" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeTable =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakeTable"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakeTable" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeUser =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakeUser"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakeUser" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeVpcConfiguration =
+  struct
+    type nonrec t =
+      {
+      privateLinkVpceId: SnowflakePrivateLinkVpceId.t
+        [@ocaml.doc
+          "The VPCE ID for Firehose to privately connect with Snowflake. The ID format is com.amazonaws.vpce.\\[region\\].vpce-svc-<\\[id\\]>. For more information, see Amazon PrivateLink & Snowflake"]}
+    let context_ = "SnowflakeVpcConfiguration"
+    let make ~privateLinkVpceId = fun () -> { privateLinkVpceId }
+    let to_value x =
+      structure_to_value
+        [("PrivateLinkVpceId",
+           (Some (SnowflakePrivateLinkVpceId.to_value x.privateLinkVpceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let privateLinkVpceId =
+        SnowflakePrivateLinkVpceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PrivateLinkVpceId") in
+      make ~privateLinkVpceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let privateLinkVpceId =
+        field_map_exn json__ "PrivateLinkVpceId"
+          SnowflakePrivateLinkVpceId.of_json in
+      make ~privateLinkVpceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configure a Snowflake VPC"]
 module HECAcknowledgmentTimeoutInSeconds =
   struct
     type nonrec t = int
@@ -3132,13 +4608,52 @@ module HECToken =
     let of_json j = string_of_json ~kind:"HECToken" j
     let to_json = simple_to_json to_value
   end
+module SplunkBufferingHints =
+  struct
+    type nonrec t =
+      {
+      intervalInSeconds: SplunkBufferingIntervalInSeconds.t option
+        [@ocaml.doc
+          "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 60 (1 minute)."];
+      sizeInMBs: SplunkBufferingSizeInMBs.t option
+        [@ocaml.doc
+          "Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 5."]}
+    let make ?intervalInSeconds =
+      fun ?sizeInMBs -> fun () -> { intervalInSeconds; sizeInMBs }
+    let to_value x =
+      structure_to_value
+        [("IntervalInSeconds",
+           (Option.map x.intervalInSeconds
+              ~f:SplunkBufferingIntervalInSeconds.to_value));
+        ("SizeInMBs",
+          (Option.map x.sizeInMBs ~f:SplunkBufferingSizeInMBs.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sizeInMBs =
+        (Option.map ~f:SplunkBufferingSizeInMBs.of_xml)
+          (Xml.child xml_arg0 "SizeInMBs") in
+      let intervalInSeconds =
+        (Option.map ~f:SplunkBufferingIntervalInSeconds.of_xml)
+          (Xml.child xml_arg0 "IntervalInSeconds") in
+      make ?sizeInMBs ?intervalInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sizeInMBs =
+        field_map json__ "SizeInMBs" SplunkBufferingSizeInMBs.of_json in
+      let intervalInSeconds =
+        field_map json__ "IntervalInSeconds"
+          SplunkBufferingIntervalInSeconds.of_json in
+      make ?sizeInMBs ?intervalInSeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The buffering options. If no value is specified, the default values for Splunk are used."]
 module SplunkRetryOptions =
   struct
     type nonrec t =
       {
       durationInSeconds: SplunkRetryDurationInSeconds.t option
         [@ocaml.doc
-          "The total amount of time that Kinesis Data Firehose spends on retries. This duration starts after the initial attempt to send data to Splunk fails. It doesn't include the periods during which Kinesis Data Firehose waits for acknowledgment from Splunk after each attempt."]}
+          "The total amount of time that Firehose spends on retries. This duration starts after the initial attempt to send data to Splunk fails. It doesn't include the periods during which Firehose waits for acknowledgment from Splunk after each attempt."]}
     let make ?durationInSeconds = fun () -> { durationInSeconds }
     let to_value x =
       structure_to_value
@@ -3152,14 +4667,14 @@ module SplunkRetryOptions =
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationInSeconds =
-        field_map json "DurationInSeconds"
+        field_map json__ "DurationInSeconds"
           SplunkRetryDurationInSeconds.of_json in
       make ?durationInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures retry behavior in case Kinesis Data Firehose is unable to deliver documents to Splunk, or if it doesn't receive an acknowledgment from Splunk."]
+       "Configures retry behavior in case Firehose is unable to deliver documents to Splunk, or if it doesn't receive an acknowledgment from Splunk."]
 module SplunkS3BackupMode =
   struct
     type nonrec t =
@@ -3186,90 +4701,403 @@ module SplunkS3BackupMode =
     let of_json j = of_string (string_of_json ~kind:"SplunkS3BackupMode" j)
     let to_json = simple_to_json to_value
   end
-module DeliveryStreamFailureType =
+module DatabaseColumnIncludeOrExcludeList =
+  struct
+    type nonrec t = DatabaseColumnName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatabaseColumnName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DatabaseColumnName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatabaseColumnIncludeOrExcludeList"
+        ~of_json:DatabaseColumnName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DatabaseIncludeOrExcludeList =
+  struct
+    type nonrec t = DatabaseName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatabaseName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DatabaseName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatabaseIncludeOrExcludeList"
+        ~of_json:DatabaseName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DatabaseSnapshotInfo =
   struct
     type nonrec t =
-      | RETIRE_KMS_GRANT_FAILED 
-      | CREATE_KMS_GRANT_FAILED 
-      | KMS_ACCESS_DENIED 
-      | DISABLED_KMS_KEY 
-      | INVALID_KMS_KEY 
-      | KMS_KEY_NOT_FOUND 
-      | KMS_OPT_IN_REQUIRED 
-      | CREATE_ENI_FAILED 
-      | DELETE_ENI_FAILED 
-      | SUBNET_NOT_FOUND 
-      | SECURITY_GROUP_NOT_FOUND 
-      | ENI_ACCESS_DENIED 
-      | SUBNET_ACCESS_DENIED 
-      | SECURITY_GROUP_ACCESS_DENIED 
-      | UNKNOWN_ERROR 
+      {
+      id: NonEmptyStringWithoutWhitespace.t option
+        [@ocaml.doc
+          "The identifier of the current snapshot of the table in source database endpoint. Amazon Data Firehose is in preview release and is subject to change."];
+      table: DatabaseTableName.t option
+        [@ocaml.doc
+          "The fully qualified name of the table in source database endpoint that Firehose reads. Amazon Data Firehose is in preview release and is subject to change."];
+      requestTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the current snapshot is taken on the table. Amazon Data Firehose is in preview release and is subject to change."];
+      requestedBy: SnapshotRequestedBy.t option
+        [@ocaml.doc
+          "The principal that sent the request to take the current snapshot on the table. Amazon Data Firehose is in preview release and is subject to change."];
+      status: SnapshotStatus.t option
+        [@ocaml.doc
+          "The status of the current snapshot of the table. Amazon Data Firehose is in preview release and is subject to change."];
+      failureDescription: FailureDescription.t option }
+    let make ?id =
+      fun ?table ->
+        fun ?requestTimestamp ->
+          fun ?requestedBy ->
+            fun ?status ->
+              fun ?failureDescription ->
+                fun () ->
+                  {
+                    id;
+                    table;
+                    requestTimestamp;
+                    requestedBy;
+                    status;
+                    failureDescription
+                  }
+    let to_value x =
+      structure_to_value
+        [("Id",
+           (Option.map x.id ~f:NonEmptyStringWithoutWhitespace.to_value));
+        ("Table", (Option.map x.table ~f:DatabaseTableName.to_value));
+        ("RequestTimestamp",
+          (Option.map x.requestTimestamp ~f:Timestamp.to_value));
+        ("RequestedBy",
+          (Option.map x.requestedBy ~f:SnapshotRequestedBy.to_value));
+        ("Status", (Option.map x.status ~f:SnapshotStatus.to_value));
+        ("FailureDescription",
+          (Option.map x.failureDescription ~f:FailureDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureDescription =
+        (Option.map ~f:FailureDescription.of_xml)
+          (Xml.child xml_arg0 "FailureDescription") in
+      let status =
+        (Option.map ~f:SnapshotStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let requestedBy =
+        (Option.map ~f:SnapshotRequestedBy.of_xml)
+          (Xml.child xml_arg0 "RequestedBy") in
+      let requestTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "RequestTimestamp") in
+      let table =
+        (Option.map ~f:DatabaseTableName.of_xml) (Xml.child xml_arg0 "Table") in
+      let id =
+        (Option.map ~f:NonEmptyStringWithoutWhitespace.of_xml)
+          (Xml.child xml_arg0 "Id") in
+      make ?failureDescription ?status ?requestedBy ?requestTimestamp ?table
+        ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureDescription =
+        field_map json__ "FailureDescription" FailureDescription.of_json in
+      let status = field_map json__ "Status" SnapshotStatus.of_json in
+      let requestedBy =
+        field_map json__ "RequestedBy" SnapshotRequestedBy.of_json in
+      let requestTimestamp =
+        field_map json__ "RequestTimestamp" Timestamp.of_json in
+      let table = field_map json__ "Table" DatabaseTableName.of_json in
+      let id = field_map json__ "Id" NonEmptyStringWithoutWhitespace.of_json in
+      make ?failureDescription ?status ?requestedBy ?requestTimestamp ?table
+        ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that describes the snapshot information of a table in source database endpoint that Firehose reads. Amazon Data Firehose is in preview release and is subject to change."]
+module VpcEndpointServiceName =
+  struct
+    type nonrec t = string
+    let context_ = "VpcEndpointServiceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:47) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([a-zA-Z0-9\\-\\_]+\\.){2,3}vpce\\.[a-zA-Z0-9\\-]*\\.vpce-svc\\-[a-zA-Z0-9\\-]{17}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcEndpointServiceName" j
+    let to_json = simple_to_json to_value
+  end
+module DatabaseTableIncludeOrExcludeList =
+  struct
+    type nonrec t = DatabaseTableName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatabaseTableName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DatabaseTableName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatabaseTableIncludeOrExcludeList"
+        ~of_json:DatabaseTableName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Connectivity =
+  struct
+    type nonrec t =
+      | PUBLIC 
+      | PRIVATE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | RETIRE_KMS_GRANT_FAILED -> "RETIRE_KMS_GRANT_FAILED"
-      | CREATE_KMS_GRANT_FAILED -> "CREATE_KMS_GRANT_FAILED"
-      | KMS_ACCESS_DENIED -> "KMS_ACCESS_DENIED"
-      | DISABLED_KMS_KEY -> "DISABLED_KMS_KEY"
-      | INVALID_KMS_KEY -> "INVALID_KMS_KEY"
-      | KMS_KEY_NOT_FOUND -> "KMS_KEY_NOT_FOUND"
-      | KMS_OPT_IN_REQUIRED -> "KMS_OPT_IN_REQUIRED"
-      | CREATE_ENI_FAILED -> "CREATE_ENI_FAILED"
-      | DELETE_ENI_FAILED -> "DELETE_ENI_FAILED"
-      | SUBNET_NOT_FOUND -> "SUBNET_NOT_FOUND"
-      | SECURITY_GROUP_NOT_FOUND -> "SECURITY_GROUP_NOT_FOUND"
-      | ENI_ACCESS_DENIED -> "ENI_ACCESS_DENIED"
-      | SUBNET_ACCESS_DENIED -> "SUBNET_ACCESS_DENIED"
-      | SECURITY_GROUP_ACCESS_DENIED -> "SECURITY_GROUP_ACCESS_DENIED"
-      | UNKNOWN_ERROR -> "UNKNOWN_ERROR"
+      | PUBLIC -> "PUBLIC"
+      | PRIVATE -> "PRIVATE"
       | Non_static_id s -> s
     let of_string =
       function
-      | "RETIRE_KMS_GRANT_FAILED" -> RETIRE_KMS_GRANT_FAILED
-      | "CREATE_KMS_GRANT_FAILED" -> CREATE_KMS_GRANT_FAILED
-      | "KMS_ACCESS_DENIED" -> KMS_ACCESS_DENIED
-      | "DISABLED_KMS_KEY" -> DISABLED_KMS_KEY
-      | "INVALID_KMS_KEY" -> INVALID_KMS_KEY
-      | "KMS_KEY_NOT_FOUND" -> KMS_KEY_NOT_FOUND
-      | "KMS_OPT_IN_REQUIRED" -> KMS_OPT_IN_REQUIRED
-      | "CREATE_ENI_FAILED" -> CREATE_ENI_FAILED
-      | "DELETE_ENI_FAILED" -> DELETE_ENI_FAILED
-      | "SUBNET_NOT_FOUND" -> SUBNET_NOT_FOUND
-      | "SECURITY_GROUP_NOT_FOUND" -> SECURITY_GROUP_NOT_FOUND
-      | "ENI_ACCESS_DENIED" -> ENI_ACCESS_DENIED
-      | "SUBNET_ACCESS_DENIED" -> SUBNET_ACCESS_DENIED
-      | "SECURITY_GROUP_ACCESS_DENIED" -> SECURITY_GROUP_ACCESS_DENIED
-      | "UNKNOWN_ERROR" -> UNKNOWN_ERROR
+      | "PUBLIC" -> PUBLIC
+      | "PRIVATE" -> PRIVATE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration DeliveryStreamFailureType" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"DeliveryStreamFailureType" j)
+      of_string (string_of_xml ~kind:"enumeration Connectivity" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Connectivity" j)
     let to_json = simple_to_json to_value
   end
-module AmazonopensearchserviceDestinationDescription =
+module AmazonOpenSearchServerlessDestinationDescription =
   struct
     type nonrec t =
       {
-      roleARN: RoleARN.t option ;
-      domainARN: AmazonopensearchserviceDomainARN.t option ;
-      clusterEndpoint: AmazonopensearchserviceClusterEndpoint.t option ;
-      indexName: AmazonopensearchserviceIndexName.t option ;
-      typeName: AmazonopensearchserviceTypeName.t option ;
-      indexRotationPeriod:
-        AmazonopensearchserviceIndexRotationPeriod.t option ;
-      bufferingHints: AmazonopensearchserviceBufferingHints.t option ;
-      retryOptions: AmazonopensearchserviceRetryOptions.t option ;
-      s3BackupMode: AmazonopensearchserviceS3BackupMode.t option ;
+      roleARN: RoleARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials."];
+      collectionEndpoint:
+        AmazonOpenSearchServerlessCollectionEndpoint.t option
+        [@ocaml.doc
+          "The endpoint to use when communicating with the collection in the Serverless offering for Amazon OpenSearch Service."];
+      indexName: AmazonOpenSearchServerlessIndexName.t option
+        [@ocaml.doc
+          "The Serverless offering for Amazon OpenSearch Service index name."];
+      bufferingHints: AmazonOpenSearchServerlessBufferingHints.t option
+        [@ocaml.doc "The buffering options."];
+      retryOptions: AmazonOpenSearchServerlessRetryOptions.t option
+        [@ocaml.doc
+          "The Serverless offering for Amazon OpenSearch Service retry options."];
+      s3BackupMode: AmazonOpenSearchServerlessS3BackupMode.t option
+        [@ocaml.doc "The Amazon S3 backup mode."];
       s3DestinationDescription: S3DestinationDescription.t option ;
       processingConfiguration: ProcessingConfiguration.t option ;
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
       vpcConfigurationDescription: VpcConfigurationDescription.t option }
+    let make ?roleARN =
+      fun ?collectionEndpoint ->
+        fun ?indexName ->
+          fun ?bufferingHints ->
+            fun ?retryOptions ->
+              fun ?s3BackupMode ->
+                fun ?s3DestinationDescription ->
+                  fun ?processingConfiguration ->
+                    fun ?cloudWatchLoggingOptions ->
+                      fun ?vpcConfigurationDescription ->
+                        fun () ->
+                          {
+                            roleARN;
+                            collectionEndpoint;
+                            indexName;
+                            bufferingHints;
+                            retryOptions;
+                            s3BackupMode;
+                            s3DestinationDescription;
+                            processingConfiguration;
+                            cloudWatchLoggingOptions;
+                            vpcConfigurationDescription
+                          }
+    let to_value x =
+      structure_to_value
+        [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("CollectionEndpoint",
+          (Option.map x.collectionEndpoint
+             ~f:AmazonOpenSearchServerlessCollectionEndpoint.to_value));
+        ("IndexName",
+          (Option.map x.indexName
+             ~f:AmazonOpenSearchServerlessIndexName.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints
+             ~f:AmazonOpenSearchServerlessBufferingHints.to_value));
+        ("RetryOptions",
+          (Option.map x.retryOptions
+             ~f:AmazonOpenSearchServerlessRetryOptions.to_value));
+        ("S3BackupMode",
+          (Option.map x.s3BackupMode
+             ~f:AmazonOpenSearchServerlessS3BackupMode.to_value));
+        ("S3DestinationDescription",
+          (Option.map x.s3DestinationDescription
+             ~f:S3DestinationDescription.to_value));
+        ("ProcessingConfiguration",
+          (Option.map x.processingConfiguration
+             ~f:ProcessingConfiguration.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("VpcConfigurationDescription",
+          (Option.map x.vpcConfigurationDescription
+             ~f:VpcConfigurationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConfigurationDescription =
+        (Option.map ~f:VpcConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "VpcConfigurationDescription") in
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let processingConfiguration =
+        (Option.map ~f:ProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProcessingConfiguration") in
+      let s3DestinationDescription =
+        (Option.map ~f:S3DestinationDescription.of_xml)
+          (Xml.child xml_arg0 "S3DestinationDescription") in
+      let s3BackupMode =
+        (Option.map ~f:AmazonOpenSearchServerlessS3BackupMode.of_xml)
+          (Xml.child xml_arg0 "S3BackupMode") in
+      let retryOptions =
+        (Option.map ~f:AmazonOpenSearchServerlessRetryOptions.of_xml)
+          (Xml.child xml_arg0 "RetryOptions") in
+      let bufferingHints =
+        (Option.map ~f:AmazonOpenSearchServerlessBufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let indexName =
+        (Option.map ~f:AmazonOpenSearchServerlessIndexName.of_xml)
+          (Xml.child xml_arg0 "IndexName") in
+      let collectionEndpoint =
+        (Option.map ~f:AmazonOpenSearchServerlessCollectionEndpoint.of_xml)
+          (Xml.child xml_arg0 "CollectionEndpoint") in
+      let roleARN =
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      make ?vpcConfigurationDescription ?cloudWatchLoggingOptions
+        ?processingConfiguration ?s3DestinationDescription ?s3BackupMode
+        ?retryOptions ?bufferingHints ?indexName ?collectionEndpoint ?roleARN
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConfigurationDescription =
+        field_map json__ "VpcConfigurationDescription"
+          VpcConfigurationDescription.of_json in
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let processingConfiguration =
+        field_map json__ "ProcessingConfiguration"
+          ProcessingConfiguration.of_json in
+      let s3DestinationDescription =
+        field_map json__ "S3DestinationDescription"
+          S3DestinationDescription.of_json in
+      let s3BackupMode =
+        field_map json__ "S3BackupMode"
+          AmazonOpenSearchServerlessS3BackupMode.of_json in
+      let retryOptions =
+        field_map json__ "RetryOptions"
+          AmazonOpenSearchServerlessRetryOptions.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints"
+          AmazonOpenSearchServerlessBufferingHints.of_json in
+      let indexName =
+        field_map json__ "IndexName"
+          AmazonOpenSearchServerlessIndexName.of_json in
+      let collectionEndpoint =
+        field_map json__ "CollectionEndpoint"
+          AmazonOpenSearchServerlessCollectionEndpoint.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?vpcConfigurationDescription ?cloudWatchLoggingOptions
+        ?processingConfiguration ?s3DestinationDescription ?s3BackupMode
+        ?retryOptions ?bufferingHints ?indexName ?collectionEndpoint ?roleARN
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The destination description in the Serverless offering for Amazon OpenSearch Service."]
+module AmazonopensearchserviceDestinationDescription =
+  struct
+    type nonrec t =
+      {
+      roleARN: RoleARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials."];
+      domainARN: AmazonopensearchserviceDomainARN.t option
+        [@ocaml.doc "The ARN of the Amazon OpenSearch Service domain."];
+      clusterEndpoint: AmazonopensearchserviceClusterEndpoint.t option
+        [@ocaml.doc
+          "The endpoint to use when communicating with the cluster. Firehose uses either this ClusterEndpoint or the DomainARN field to send data to Amazon OpenSearch Service."];
+      indexName: AmazonopensearchserviceIndexName.t option
+        [@ocaml.doc "The Amazon OpenSearch Service index name."];
+      typeName: AmazonopensearchserviceTypeName.t option
+        [@ocaml.doc
+          "The Amazon OpenSearch Service type name. This applies to Elasticsearch 6.x and lower versions. For Elasticsearch 7.x and OpenSearch Service 1.x, there's no value for TypeName."];
+      indexRotationPeriod:
+        AmazonopensearchserviceIndexRotationPeriod.t option
+        [@ocaml.doc "The Amazon OpenSearch Service index rotation period"];
+      bufferingHints: AmazonopensearchserviceBufferingHints.t option
+        [@ocaml.doc "The buffering options."];
+      retryOptions: AmazonopensearchserviceRetryOptions.t option
+        [@ocaml.doc "The Amazon OpenSearch Service retry options."];
+      s3BackupMode: AmazonopensearchserviceS3BackupMode.t option
+        [@ocaml.doc "The Amazon S3 backup mode."];
+      s3DestinationDescription: S3DestinationDescription.t option ;
+      processingConfiguration: ProcessingConfiguration.t option ;
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
+      vpcConfigurationDescription: VpcConfigurationDescription.t option ;
+      documentIdOptions: DocumentIdOptions.t option
+        [@ocaml.doc
+          "Indicates the method for setting up document ID. The supported methods are Firehose generated document ID and OpenSearch Service generated document ID."]}
     let make ?roleARN =
       fun ?domainARN ->
         fun ?clusterEndpoint ->
@@ -3283,22 +5111,24 @@ module AmazonopensearchserviceDestinationDescription =
                         fun ?processingConfiguration ->
                           fun ?cloudWatchLoggingOptions ->
                             fun ?vpcConfigurationDescription ->
-                              fun () ->
-                                {
-                                  roleARN;
-                                  domainARN;
-                                  clusterEndpoint;
-                                  indexName;
-                                  typeName;
-                                  indexRotationPeriod;
-                                  bufferingHints;
-                                  retryOptions;
-                                  s3BackupMode;
-                                  s3DestinationDescription;
-                                  processingConfiguration;
-                                  cloudWatchLoggingOptions;
-                                  vpcConfigurationDescription
-                                }
+                              fun ?documentIdOptions ->
+                                fun () ->
+                                  {
+                                    roleARN;
+                                    domainARN;
+                                    clusterEndpoint;
+                                    indexName;
+                                    typeName;
+                                    indexRotationPeriod;
+                                    bufferingHints;
+                                    retryOptions;
+                                    s3BackupMode;
+                                    s3DestinationDescription;
+                                    processingConfiguration;
+                                    cloudWatchLoggingOptions;
+                                    vpcConfigurationDescription;
+                                    documentIdOptions
+                                  }
     let to_value x =
       structure_to_value
         [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
@@ -3336,9 +5166,14 @@ module AmazonopensearchserviceDestinationDescription =
              ~f:CloudWatchLoggingOptions.to_value));
         ("VpcConfigurationDescription",
           (Option.map x.vpcConfigurationDescription
-             ~f:VpcConfigurationDescription.to_value))]
+             ~f:VpcConfigurationDescription.to_value));
+        ("DocumentIdOptions",
+          (Option.map x.documentIdOptions ~f:DocumentIdOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentIdOptions =
+        (Option.map ~f:DocumentIdOptions.of_xml)
+          (Xml.child xml_arg0 "DocumentIdOptions") in
       let vpcConfigurationDescription =
         (Option.map ~f:VpcConfigurationDescription.of_xml)
           (Xml.child xml_arg0 "VpcConfigurationDescription") in
@@ -3377,52 +5212,57 @@ module AmazonopensearchserviceDestinationDescription =
           (Xml.child xml_arg0 "DomainARN") in
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
-      make ?vpcConfigurationDescription ?cloudWatchLoggingOptions
-        ?processingConfiguration ?s3DestinationDescription ?s3BackupMode
-        ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
-        ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+      make ?documentIdOptions ?vpcConfigurationDescription
+        ?cloudWatchLoggingOptions ?processingConfiguration
+        ?s3DestinationDescription ?s3BackupMode ?retryOptions ?bufferingHints
+        ?indexRotationPeriod ?typeName ?indexName ?clusterEndpoint ?domainARN
+        ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let documentIdOptions =
+        field_map json__ "DocumentIdOptions" DocumentIdOptions.of_json in
       let vpcConfigurationDescription =
-        field_map json "VpcConfigurationDescription"
+        field_map json__ "VpcConfigurationDescription"
           VpcConfigurationDescription.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let s3DestinationDescription =
-        field_map json "S3DestinationDescription"
+        field_map json__ "S3DestinationDescription"
           S3DestinationDescription.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode"
+        field_map json__ "S3BackupMode"
           AmazonopensearchserviceS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions"
+        field_map json__ "RetryOptions"
           AmazonopensearchserviceRetryOptions.of_json in
       let bufferingHints =
-        field_map json "BufferingHints"
+        field_map json__ "BufferingHints"
           AmazonopensearchserviceBufferingHints.of_json in
       let indexRotationPeriod =
-        field_map json "IndexRotationPeriod"
+        field_map json__ "IndexRotationPeriod"
           AmazonopensearchserviceIndexRotationPeriod.of_json in
       let typeName =
-        field_map json "TypeName" AmazonopensearchserviceTypeName.of_json in
+        field_map json__ "TypeName" AmazonopensearchserviceTypeName.of_json in
       let indexName =
-        field_map json "IndexName" AmazonopensearchserviceIndexName.of_json in
+        field_map json__ "IndexName" AmazonopensearchserviceIndexName.of_json in
       let clusterEndpoint =
-        field_map json "ClusterEndpoint"
+        field_map json__ "ClusterEndpoint"
           AmazonopensearchserviceClusterEndpoint.of_json in
       let domainARN =
-        field_map json "DomainARN" AmazonopensearchserviceDomainARN.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      make ?vpcConfigurationDescription ?cloudWatchLoggingOptions
-        ?processingConfiguration ?s3DestinationDescription ?s3BackupMode
-        ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
-        ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+        field_map json__ "DomainARN" AmazonopensearchserviceDomainARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?documentIdOptions ?vpcConfigurationDescription
+        ?cloudWatchLoggingOptions ?processingConfiguration
+        ?s3DestinationDescription ?s3BackupMode ?retryOptions ?bufferingHints
+        ?indexRotationPeriod ?typeName ?indexName ?clusterEndpoint ?domainARN
+        ?roleARN ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The destination description in Amazon OpenSearch Service."]
 module DestinationId =
   struct
     type nonrec t = string
@@ -3449,24 +5289,24 @@ module ElasticsearchDestinationDescription =
       {
       roleARN: RoleARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       domainARN: ElasticsearchDomainARN.t option
         [@ocaml.doc
-          "The ARN of the Amazon ES domain. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces. Kinesis Data Firehose uses either ClusterEndpoint or DomainARN to send data to Amazon ES."];
+          "The ARN of the Amazon OpenSearch Service domain. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces. Firehose uses either ClusterEndpoint or DomainARN to send data to Amazon OpenSearch Service."];
       clusterEndpoint: ElasticsearchClusterEndpoint.t option
         [@ocaml.doc
-          "The endpoint to use when communicating with the cluster. Kinesis Data Firehose uses either this ClusterEndpoint or the DomainARN field to send data to Amazon ES."];
+          "The endpoint to use when communicating with the cluster. Firehose uses either this ClusterEndpoint or the DomainARN field to send data to Amazon OpenSearch Service."];
       indexName: ElasticsearchIndexName.t option
         [@ocaml.doc "The Elasticsearch index name."];
       typeName: ElasticsearchTypeName.t option
         [@ocaml.doc
-          "The Elasticsearch type name. This applies to Elasticsearch 6.x and lower versions. For Elasticsearch 7.x, there's no value for TypeName."];
+          "The Elasticsearch type name. This applies to Elasticsearch 6.x and lower versions. For Elasticsearch 7.x and OpenSearch Service 1.x, there's no value for TypeName."];
       indexRotationPeriod: ElasticsearchIndexRotationPeriod.t option
         [@ocaml.doc "The Elasticsearch index rotation period"];
       bufferingHints: ElasticsearchBufferingHints.t option
         [@ocaml.doc "The buffering options."];
       retryOptions: ElasticsearchRetryOptions.t option
-        [@ocaml.doc "The Amazon ES retry options."];
+        [@ocaml.doc "The Amazon OpenSearch Service retry options."];
       s3BackupMode: ElasticsearchS3BackupMode.t option
         [@ocaml.doc "The Amazon S3 backup mode."];
       s3DestinationDescription: S3DestinationDescription.t option
@@ -3476,7 +5316,11 @@ module ElasticsearchDestinationDescription =
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc "The Amazon CloudWatch logging options."];
       vpcConfigurationDescription: VpcConfigurationDescription.t option
-        [@ocaml.doc "The details of the VPC of the Amazon ES destination."]}
+        [@ocaml.doc
+          "The details of the VPC of the Amazon OpenSearch or the Amazon OpenSearch Serverless destination."];
+      documentIdOptions: DocumentIdOptions.t option
+        [@ocaml.doc
+          "Indicates the method for setting up document ID. The supported methods are Firehose generated document ID and OpenSearch Service generated document ID."]}
     let make ?roleARN =
       fun ?domainARN ->
         fun ?clusterEndpoint ->
@@ -3490,22 +5334,24 @@ module ElasticsearchDestinationDescription =
                         fun ?processingConfiguration ->
                           fun ?cloudWatchLoggingOptions ->
                             fun ?vpcConfigurationDescription ->
-                              fun () ->
-                                {
-                                  roleARN;
-                                  domainARN;
-                                  clusterEndpoint;
-                                  indexName;
-                                  typeName;
-                                  indexRotationPeriod;
-                                  bufferingHints;
-                                  retryOptions;
-                                  s3BackupMode;
-                                  s3DestinationDescription;
-                                  processingConfiguration;
-                                  cloudWatchLoggingOptions;
-                                  vpcConfigurationDescription
-                                }
+                              fun ?documentIdOptions ->
+                                fun () ->
+                                  {
+                                    roleARN;
+                                    domainARN;
+                                    clusterEndpoint;
+                                    indexName;
+                                    typeName;
+                                    indexRotationPeriod;
+                                    bufferingHints;
+                                    retryOptions;
+                                    s3BackupMode;
+                                    s3DestinationDescription;
+                                    processingConfiguration;
+                                    cloudWatchLoggingOptions;
+                                    vpcConfigurationDescription;
+                                    documentIdOptions
+                                  }
     let to_value x =
       structure_to_value
         [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
@@ -3539,9 +5385,14 @@ module ElasticsearchDestinationDescription =
              ~f:CloudWatchLoggingOptions.to_value));
         ("VpcConfigurationDescription",
           (Option.map x.vpcConfigurationDescription
-             ~f:VpcConfigurationDescription.to_value))]
+             ~f:VpcConfigurationDescription.to_value));
+        ("DocumentIdOptions",
+          (Option.map x.documentIdOptions ~f:DocumentIdOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentIdOptions =
+        (Option.map ~f:DocumentIdOptions.of_xml)
+          (Xml.child xml_arg0 "DocumentIdOptions") in
       let vpcConfigurationDescription =
         (Option.map ~f:VpcConfigurationDescription.of_xml)
           (Xml.child xml_arg0 "VpcConfigurationDescription") in
@@ -3580,73 +5431,81 @@ module ElasticsearchDestinationDescription =
           (Xml.child xml_arg0 "DomainARN") in
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
-      make ?vpcConfigurationDescription ?cloudWatchLoggingOptions
-        ?processingConfiguration ?s3DestinationDescription ?s3BackupMode
-        ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
-        ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+      make ?documentIdOptions ?vpcConfigurationDescription
+        ?cloudWatchLoggingOptions ?processingConfiguration
+        ?s3DestinationDescription ?s3BackupMode ?retryOptions ?bufferingHints
+        ?indexRotationPeriod ?typeName ?indexName ?clusterEndpoint ?domainARN
+        ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let documentIdOptions =
+        field_map json__ "DocumentIdOptions" DocumentIdOptions.of_json in
       let vpcConfigurationDescription =
-        field_map json "VpcConfigurationDescription"
+        field_map json__ "VpcConfigurationDescription"
           VpcConfigurationDescription.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let s3DestinationDescription =
-        field_map json "S3DestinationDescription"
+        field_map json__ "S3DestinationDescription"
           S3DestinationDescription.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" ElasticsearchS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" ElasticsearchS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions" ElasticsearchRetryOptions.of_json in
+        field_map json__ "RetryOptions" ElasticsearchRetryOptions.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" ElasticsearchBufferingHints.of_json in
+        field_map json__ "BufferingHints" ElasticsearchBufferingHints.of_json in
       let indexRotationPeriod =
-        field_map json "IndexRotationPeriod"
+        field_map json__ "IndexRotationPeriod"
           ElasticsearchIndexRotationPeriod.of_json in
-      let typeName = field_map json "TypeName" ElasticsearchTypeName.of_json in
+      let typeName =
+        field_map json__ "TypeName" ElasticsearchTypeName.of_json in
       let indexName =
-        field_map json "IndexName" ElasticsearchIndexName.of_json in
+        field_map json__ "IndexName" ElasticsearchIndexName.of_json in
       let clusterEndpoint =
-        field_map json "ClusterEndpoint" ElasticsearchClusterEndpoint.of_json in
+        field_map json__ "ClusterEndpoint"
+          ElasticsearchClusterEndpoint.of_json in
       let domainARN =
-        field_map json "DomainARN" ElasticsearchDomainARN.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      make ?vpcConfigurationDescription ?cloudWatchLoggingOptions
-        ?processingConfiguration ?s3DestinationDescription ?s3BackupMode
-        ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
-        ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+        field_map json__ "DomainARN" ElasticsearchDomainARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?documentIdOptions ?vpcConfigurationDescription
+        ?cloudWatchLoggingOptions ?processingConfiguration
+        ?s3DestinationDescription ?s3BackupMode ?retryOptions ?bufferingHints
+        ?indexRotationPeriod ?typeName ?indexName ?clusterEndpoint ?domainARN
+        ?roleARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The destination description in Amazon ES."]
+  end[@@ocaml.doc
+       "The destination description in Amazon OpenSearch Service."]
 module ExtendedS3DestinationDescription =
   struct
     type nonrec t =
       {
-      roleARN: RoleARN.t
+      roleARN: RoleARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
-      bucketARN: BucketARN.t
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
+      bucketARN: BucketARN.t option
         [@ocaml.doc
-          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       prefix: Prefix.t option
         [@ocaml.doc
           "The \"YYYY/MM/DD/HH\" time format prefix is automatically used for delivered Amazon S3 files. You can also specify a custom prefix, as described in Custom Prefixes for Amazon S3 Objects."];
       errorOutputPrefix: ErrorOutputPrefix.t option
         [@ocaml.doc
-          "A prefix that Kinesis Data Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
-      bufferingHints: BufferingHints.t [@ocaml.doc "The buffering option."];
-      compressionFormat: CompressionFormat.t
+          "A prefix that Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
+      bufferingHints: BufferingHints.t option
+        [@ocaml.doc "The buffering option."];
+      compressionFormat: CompressionFormat.t option
         [@ocaml.doc
           "The compression format. If no value is specified, the default is UNCOMPRESSED."];
-      encryptionConfiguration: EncryptionConfiguration.t
+      encryptionConfiguration: EncryptionConfiguration.t option
         [@ocaml.doc
           "The encryption configuration. If no value is specified, the default is no encryption."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."];
+          "The Amazon CloudWatch logging options for your Firehose stream."];
       processingConfiguration: ProcessingConfiguration.t option
         [@ocaml.doc "The data processing configuration."];
       s3BackupMode: S3BackupMode.t option
@@ -3660,49 +5519,59 @@ module ExtendedS3DestinationDescription =
       dynamicPartitioningConfiguration:
         DynamicPartitioningConfiguration.t option
         [@ocaml.doc
-          "The configuration of the dynamic partitioning mechanism that creates smaller data sets from the streaming data by partitioning it based on partition keys. Currently, dynamic partitioning is only supported for Amazon S3 destinations. For more information, see https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html"]}
-    let context_ = "ExtendedS3DestinationDescription"
-    let make ?prefix =
-      fun ?errorOutputPrefix ->
-        fun ?cloudWatchLoggingOptions ->
-          fun ?processingConfiguration ->
-            fun ?s3BackupMode ->
-              fun ?s3BackupDescription ->
-                fun ?dataFormatConversionConfiguration ->
-                  fun ?dynamicPartitioningConfiguration ->
-                    fun ~roleARN ->
-                      fun ~bucketARN ->
-                        fun ~bufferingHints ->
-                          fun ~compressionFormat ->
-                            fun ~encryptionConfiguration ->
-                              fun () ->
-                                {
-                                  prefix;
-                                  errorOutputPrefix;
-                                  cloudWatchLoggingOptions;
-                                  processingConfiguration;
-                                  s3BackupMode;
-                                  s3BackupDescription;
-                                  dataFormatConversionConfiguration;
-                                  dynamicPartitioningConfiguration;
-                                  roleARN;
-                                  bucketARN;
-                                  bufferingHints;
-                                  compressionFormat;
-                                  encryptionConfiguration
-                                }
+          "The configuration of the dynamic partitioning mechanism that creates smaller data sets from the streaming data by partitioning it based on partition keys. Currently, dynamic partitioning is only supported for Amazon S3 destinations."];
+      fileExtension: FileExtension.t option
+        [@ocaml.doc
+          "Specify a file extension. It will override the default file extension"];
+      customTimeZone: CustomTimeZone.t option
+        [@ocaml.doc "The time zone you prefer. UTC is the default."]}
+    let make ?roleARN =
+      fun ?bucketARN ->
+        fun ?prefix ->
+          fun ?errorOutputPrefix ->
+            fun ?bufferingHints ->
+              fun ?compressionFormat ->
+                fun ?encryptionConfiguration ->
+                  fun ?cloudWatchLoggingOptions ->
+                    fun ?processingConfiguration ->
+                      fun ?s3BackupMode ->
+                        fun ?s3BackupDescription ->
+                          fun ?dataFormatConversionConfiguration ->
+                            fun ?dynamicPartitioningConfiguration ->
+                              fun ?fileExtension ->
+                                fun ?customTimeZone ->
+                                  fun () ->
+                                    {
+                                      roleARN;
+                                      bucketARN;
+                                      prefix;
+                                      errorOutputPrefix;
+                                      bufferingHints;
+                                      compressionFormat;
+                                      encryptionConfiguration;
+                                      cloudWatchLoggingOptions;
+                                      processingConfiguration;
+                                      s3BackupMode;
+                                      s3BackupDescription;
+                                      dataFormatConversionConfiguration;
+                                      dynamicPartitioningConfiguration;
+                                      fileExtension;
+                                      customTimeZone
+                                    }
     let to_value x =
       structure_to_value
-        [("RoleARN", (Some (RoleARN.to_value x.roleARN)));
-        ("BucketARN", (Some (BucketARN.to_value x.bucketARN)));
+        [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("BucketARN", (Option.map x.bucketARN ~f:BucketARN.to_value));
         ("Prefix", (Option.map x.prefix ~f:Prefix.to_value));
         ("ErrorOutputPrefix",
           (Option.map x.errorOutputPrefix ~f:ErrorOutputPrefix.to_value));
-        ("BufferingHints", (Some (BufferingHints.to_value x.bufferingHints)));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:BufferingHints.to_value));
         ("CompressionFormat",
-          (Some (CompressionFormat.to_value x.compressionFormat)));
+          (Option.map x.compressionFormat ~f:CompressionFormat.to_value));
         ("EncryptionConfiguration",
-          (Some (EncryptionConfiguration.to_value x.encryptionConfiguration)));
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value));
         ("CloudWatchLoggingOptions",
           (Option.map x.cloudWatchLoggingOptions
              ~f:CloudWatchLoggingOptions.to_value));
@@ -3719,9 +5588,19 @@ module ExtendedS3DestinationDescription =
              ~f:DataFormatConversionConfiguration.to_value));
         ("DynamicPartitioningConfiguration",
           (Option.map x.dynamicPartitioningConfiguration
-             ~f:DynamicPartitioningConfiguration.to_value))]
+             ~f:DynamicPartitioningConfiguration.to_value));
+        ("FileExtension",
+          (Option.map x.fileExtension ~f:FileExtension.to_value));
+        ("CustomTimeZone",
+          (Option.map x.customTimeZone ~f:CustomTimeZone.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customTimeZone =
+        (Option.map ~f:CustomTimeZone.of_xml)
+          (Xml.child xml_arg0 "CustomTimeZone") in
+      let fileExtension =
+        (Option.map ~f:FileExtension.of_xml)
+          (Xml.child xml_arg0 "FileExtension") in
       let dynamicPartitioningConfiguration =
         (Option.map ~f:DynamicPartitioningConfiguration.of_xml)
           (Xml.child xml_arg0 "DynamicPartitioningConfiguration") in
@@ -3741,63 +5620,67 @@ module ExtendedS3DestinationDescription =
         (Option.map ~f:CloudWatchLoggingOptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
       let encryptionConfiguration =
-        EncryptionConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EncryptionConfiguration") in
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "EncryptionConfiguration") in
       let compressionFormat =
-        CompressionFormat.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CompressionFormat") in
+        (Option.map ~f:CompressionFormat.of_xml)
+          (Xml.child xml_arg0 "CompressionFormat") in
       let bufferingHints =
-        BufferingHints.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BufferingHints") in
+        (Option.map ~f:BufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
       let errorOutputPrefix =
         (Option.map ~f:ErrorOutputPrefix.of_xml)
           (Xml.child xml_arg0 "ErrorOutputPrefix") in
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       let bucketARN =
-        BucketARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
+        (Option.map ~f:BucketARN.of_xml) (Xml.child xml_arg0 "BucketARN") in
       let roleARN =
-        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
-      make ?dynamicPartitioningConfiguration
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      make ?customTimeZone ?fileExtension ?dynamicPartitioningConfiguration
         ?dataFormatConversionConfiguration ?s3BackupDescription ?s3BackupMode
         ?processingConfiguration ?cloudWatchLoggingOptions
-        ~encryptionConfiguration ~compressionFormat ~bufferingHints
-        ?errorOutputPrefix ?prefix ~bucketARN ~roleARN ()
+        ?encryptionConfiguration ?compressionFormat ?bufferingHints
+        ?errorOutputPrefix ?prefix ?bucketARN ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let customTimeZone =
+        field_map json__ "CustomTimeZone" CustomTimeZone.of_json in
+      let fileExtension =
+        field_map json__ "FileExtension" FileExtension.of_json in
       let dynamicPartitioningConfiguration =
-        field_map json "DynamicPartitioningConfiguration"
+        field_map json__ "DynamicPartitioningConfiguration"
           DynamicPartitioningConfiguration.of_json in
       let dataFormatConversionConfiguration =
-        field_map json "DataFormatConversionConfiguration"
+        field_map json__ "DataFormatConversionConfiguration"
           DataFormatConversionConfiguration.of_json in
       let s3BackupDescription =
-        field_map json "S3BackupDescription" S3DestinationDescription.of_json in
-      let s3BackupMode = field_map json "S3BackupMode" S3BackupMode.of_json in
+        field_map json__ "S3BackupDescription"
+          S3DestinationDescription.of_json in
+      let s3BackupMode = field_map json__ "S3BackupMode" S3BackupMode.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let encryptionConfiguration =
-        field_map_exn json "EncryptionConfiguration"
+        field_map json__ "EncryptionConfiguration"
           EncryptionConfiguration.of_json in
       let compressionFormat =
-        field_map_exn json "CompressionFormat" CompressionFormat.of_json in
+        field_map json__ "CompressionFormat" CompressionFormat.of_json in
       let bufferingHints =
-        field_map_exn json "BufferingHints" BufferingHints.of_json in
+        field_map json__ "BufferingHints" BufferingHints.of_json in
       let errorOutputPrefix =
-        field_map json "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
-      let prefix = field_map json "Prefix" Prefix.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      make ?dynamicPartitioningConfiguration
+        field_map json__ "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
+      let prefix = field_map json__ "Prefix" Prefix.of_json in
+      let bucketARN = field_map json__ "BucketARN" BucketARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?customTimeZone ?fileExtension ?dynamicPartitioningConfiguration
         ?dataFormatConversionConfiguration ?s3BackupDescription ?s3BackupMode
         ?processingConfiguration ?cloudWatchLoggingOptions
-        ~encryptionConfiguration ~compressionFormat ~bufferingHints
-        ?errorOutputPrefix ?prefix ~bucketARN ~roleARN ()
+        ?encryptionConfiguration ?compressionFormat ?bufferingHints
+        ?errorOutputPrefix ?prefix ?bucketARN ?roleARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a destination in Amazon S3."]
 module HttpEndpointDestinationDescription =
@@ -3809,7 +5692,7 @@ module HttpEndpointDestinationDescription =
           "The configuration of the specified HTTP endpoint destination."];
       bufferingHints: HttpEndpointBufferingHints.t option
         [@ocaml.doc
-          "Describes buffering options that can be applied to the data before it is delivered to the HTTPS endpoint destination. Kinesis Data Firehose teats these options as hints, and it might choose to use more optimal values. The SizeInMBs and IntervalInSeconds parameters are optional. However, if specify a value for one of them, you must also provide a value for the other."];
+          "Describes buffering options that can be applied to the data before it is delivered to the HTTPS endpoint destination. Firehose teats these options as hints, and it might choose to use more optimal values. The SizeInMBs and IntervalInSeconds parameters are optional. However, if specify a value for one of them, you must also provide a value for the other."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
       requestConfiguration: HttpEndpointRequestConfiguration.t option
         [@ocaml.doc
@@ -3817,14 +5700,17 @@ module HttpEndpointDestinationDescription =
       processingConfiguration: ProcessingConfiguration.t option ;
       roleARN: RoleARN.t option
         [@ocaml.doc
-          "Kinesis Data Firehose uses this IAM role for all the permissions that the delivery stream needs."];
+          "Firehose uses this IAM role for all the permissions that the delivery stream needs."];
       retryOptions: HttpEndpointRetryOptions.t option
         [@ocaml.doc
-          "Describes the retry behavior in case Kinesis Data Firehose is unable to deliver data to the specified HTTP endpoint destination, or if it doesn't receive a valid acknowledgment of receipt from the specified HTTP endpoint destination."];
+          "Describes the retry behavior in case Firehose is unable to deliver data to the specified HTTP endpoint destination, or if it doesn't receive a valid acknowledgment of receipt from the specified HTTP endpoint destination."];
       s3BackupMode: HttpEndpointS3BackupMode.t option
         [@ocaml.doc
-          "Describes the S3 bucket backup options for the data that Kinesis Firehose delivers to the HTTP endpoint destination. You can back up all documents (AllData) or only the documents that Kinesis Data Firehose could not deliver to the specified HTTP endpoint destination (FailedDataOnly)."];
-      s3DestinationDescription: S3DestinationDescription.t option }
+          "Describes the S3 bucket backup options for the data that Kinesis Firehose delivers to the HTTP endpoint destination. You can back up all documents (AllData) or only the documents that Firehose could not deliver to the specified HTTP endpoint destination (FailedDataOnly)."];
+      s3DestinationDescription: S3DestinationDescription.t option ;
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for HTTP Endpoint destination."]}
     let make ?endpointConfiguration =
       fun ?bufferingHints ->
         fun ?cloudWatchLoggingOptions ->
@@ -3834,18 +5720,20 @@ module HttpEndpointDestinationDescription =
                 fun ?retryOptions ->
                   fun ?s3BackupMode ->
                     fun ?s3DestinationDescription ->
-                      fun () ->
-                        {
-                          endpointConfiguration;
-                          bufferingHints;
-                          cloudWatchLoggingOptions;
-                          requestConfiguration;
-                          processingConfiguration;
-                          roleARN;
-                          retryOptions;
-                          s3BackupMode;
-                          s3DestinationDescription
-                        }
+                      fun ?secretsManagerConfiguration ->
+                        fun () ->
+                          {
+                            endpointConfiguration;
+                            bufferingHints;
+                            cloudWatchLoggingOptions;
+                            requestConfiguration;
+                            processingConfiguration;
+                            roleARN;
+                            retryOptions;
+                            s3BackupMode;
+                            s3DestinationDescription;
+                            secretsManagerConfiguration
+                          }
     let to_value x =
       structure_to_value
         [("EndpointConfiguration",
@@ -3869,9 +5757,15 @@ module HttpEndpointDestinationDescription =
           (Option.map x.s3BackupMode ~f:HttpEndpointS3BackupMode.to_value));
         ("S3DestinationDescription",
           (Option.map x.s3DestinationDescription
-             ~f:S3DestinationDescription.to_value))]
+             ~f:S3DestinationDescription.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
       let s3DestinationDescription =
         (Option.map ~f:S3DestinationDescription.of_xml)
           (Xml.child xml_arg0 "S3DestinationDescription") in
@@ -3898,53 +5792,222 @@ module HttpEndpointDestinationDescription =
       let endpointConfiguration =
         (Option.map ~f:HttpEndpointDescription.of_xml)
           (Xml.child xml_arg0 "EndpointConfiguration") in
-      make ?s3DestinationDescription ?s3BackupMode ?retryOptions ?roleARN
-        ?processingConfiguration ?requestConfiguration
-        ?cloudWatchLoggingOptions ?bufferingHints ?endpointConfiguration ()
+      make ?secretsManagerConfiguration ?s3DestinationDescription
+        ?s3BackupMode ?retryOptions ?roleARN ?processingConfiguration
+        ?requestConfiguration ?cloudWatchLoggingOptions ?bufferingHints
+        ?endpointConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
       let s3DestinationDescription =
-        field_map json "S3DestinationDescription"
+        field_map json__ "S3DestinationDescription"
           S3DestinationDescription.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" HttpEndpointS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" HttpEndpointS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions" HttpEndpointRetryOptions.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
+        field_map json__ "RetryOptions" HttpEndpointRetryOptions.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let requestConfiguration =
-        field_map json "RequestConfiguration"
+        field_map json__ "RequestConfiguration"
           HttpEndpointRequestConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" HttpEndpointBufferingHints.of_json in
+        field_map json__ "BufferingHints" HttpEndpointBufferingHints.of_json in
       let endpointConfiguration =
-        field_map json "EndpointConfiguration"
+        field_map json__ "EndpointConfiguration"
           HttpEndpointDescription.of_json in
-      make ?s3DestinationDescription ?s3BackupMode ?retryOptions ?roleARN
-        ?processingConfiguration ?requestConfiguration
-        ?cloudWatchLoggingOptions ?bufferingHints ?endpointConfiguration ()
+      make ?secretsManagerConfiguration ?s3DestinationDescription
+        ?s3BackupMode ?retryOptions ?roleARN ?processingConfiguration
+        ?requestConfiguration ?cloudWatchLoggingOptions ?bufferingHints
+        ?endpointConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the HTTP endpoint destination."]
+module IcebergDestinationDescription =
+  struct
+    type nonrec t =
+      {
+      destinationTableConfigurationList:
+        DestinationTableConfigurationList.t option
+        [@ocaml.doc
+          "Provides a list of DestinationTableConfigurations which Firehose uses to deliver data to Apache Iceberg Tables. Firehose will write data with insert if table specific configuration is not provided here."];
+      schemaEvolutionConfiguration: SchemaEvolutionConfiguration.t option
+        [@ocaml.doc
+          "The description of automatic schema evolution configuration. Amazon Data Firehose is in preview release and is subject to change."];
+      tableCreationConfiguration: TableCreationConfiguration.t option
+        [@ocaml.doc
+          "The description of table creation configuration. Amazon Data Firehose is in preview release and is subject to change."];
+      bufferingHints: BufferingHints.t option ;
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
+      processingConfiguration: ProcessingConfiguration.t option ;
+      s3BackupMode: IcebergS3BackupMode.t option
+        [@ocaml.doc
+          "Describes how Firehose will backup records. Currently,Firehose only supports FailedDataOnly."];
+      retryOptions: RetryOptions.t option ;
+      roleARN: RoleARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Firehose for calling Apache Iceberg Tables."];
+      appendOnly: BooleanObject.t option
+        [@ocaml.doc
+          "Describes whether all incoming data for this delivery stream will be append only (inserts only and not for updates and deletes) for Iceberg delivery. This feature is only applicable for Apache Iceberg Tables. The default value is false. If you set this value to true, Firehose automatically increases the throughput limit of a stream based on the throttling levels of the stream. If you set this parameter to true for a stream with updates and deletes, you will see out of order delivery."];
+      catalogConfiguration: CatalogConfiguration.t option
+        [@ocaml.doc
+          "Configuration describing where the destination Iceberg tables are persisted."];
+      s3DestinationDescription: S3DestinationDescription.t option }
+    let make ?destinationTableConfigurationList =
+      fun ?schemaEvolutionConfiguration ->
+        fun ?tableCreationConfiguration ->
+          fun ?bufferingHints ->
+            fun ?cloudWatchLoggingOptions ->
+              fun ?processingConfiguration ->
+                fun ?s3BackupMode ->
+                  fun ?retryOptions ->
+                    fun ?roleARN ->
+                      fun ?appendOnly ->
+                        fun ?catalogConfiguration ->
+                          fun ?s3DestinationDescription ->
+                            fun () ->
+                              {
+                                destinationTableConfigurationList;
+                                schemaEvolutionConfiguration;
+                                tableCreationConfiguration;
+                                bufferingHints;
+                                cloudWatchLoggingOptions;
+                                processingConfiguration;
+                                s3BackupMode;
+                                retryOptions;
+                                roleARN;
+                                appendOnly;
+                                catalogConfiguration;
+                                s3DestinationDescription
+                              }
+    let to_value x =
+      structure_to_value
+        [("DestinationTableConfigurationList",
+           (Option.map x.destinationTableConfigurationList
+              ~f:DestinationTableConfigurationList.to_value));
+        ("SchemaEvolutionConfiguration",
+          (Option.map x.schemaEvolutionConfiguration
+             ~f:SchemaEvolutionConfiguration.to_value));
+        ("TableCreationConfiguration",
+          (Option.map x.tableCreationConfiguration
+             ~f:TableCreationConfiguration.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:BufferingHints.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("ProcessingConfiguration",
+          (Option.map x.processingConfiguration
+             ~f:ProcessingConfiguration.to_value));
+        ("S3BackupMode",
+          (Option.map x.s3BackupMode ~f:IcebergS3BackupMode.to_value));
+        ("RetryOptions",
+          (Option.map x.retryOptions ~f:RetryOptions.to_value));
+        ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("AppendOnly", (Option.map x.appendOnly ~f:BooleanObject.to_value));
+        ("CatalogConfiguration",
+          (Option.map x.catalogConfiguration ~f:CatalogConfiguration.to_value));
+        ("S3DestinationDescription",
+          (Option.map x.s3DestinationDescription
+             ~f:S3DestinationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3DestinationDescription =
+        (Option.map ~f:S3DestinationDescription.of_xml)
+          (Xml.child xml_arg0 "S3DestinationDescription") in
+      let catalogConfiguration =
+        (Option.map ~f:CatalogConfiguration.of_xml)
+          (Xml.child xml_arg0 "CatalogConfiguration") in
+      let appendOnly =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "AppendOnly") in
+      let roleARN =
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      let retryOptions =
+        (Option.map ~f:RetryOptions.of_xml)
+          (Xml.child xml_arg0 "RetryOptions") in
+      let s3BackupMode =
+        (Option.map ~f:IcebergS3BackupMode.of_xml)
+          (Xml.child xml_arg0 "S3BackupMode") in
+      let processingConfiguration =
+        (Option.map ~f:ProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProcessingConfiguration") in
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let bufferingHints =
+        (Option.map ~f:BufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let tableCreationConfiguration =
+        (Option.map ~f:TableCreationConfiguration.of_xml)
+          (Xml.child xml_arg0 "TableCreationConfiguration") in
+      let schemaEvolutionConfiguration =
+        (Option.map ~f:SchemaEvolutionConfiguration.of_xml)
+          (Xml.child xml_arg0 "SchemaEvolutionConfiguration") in
+      let destinationTableConfigurationList =
+        (Option.map ~f:DestinationTableConfigurationList.of_xml)
+          (Xml.child xml_arg0 "DestinationTableConfigurationList") in
+      make ?s3DestinationDescription ?catalogConfiguration ?appendOnly
+        ?roleARN ?retryOptions ?s3BackupMode ?processingConfiguration
+        ?cloudWatchLoggingOptions ?bufferingHints ?tableCreationConfiguration
+        ?schemaEvolutionConfiguration ?destinationTableConfigurationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3DestinationDescription =
+        field_map json__ "S3DestinationDescription"
+          S3DestinationDescription.of_json in
+      let catalogConfiguration =
+        field_map json__ "CatalogConfiguration" CatalogConfiguration.of_json in
+      let appendOnly = field_map json__ "AppendOnly" BooleanObject.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let retryOptions = field_map json__ "RetryOptions" RetryOptions.of_json in
+      let s3BackupMode =
+        field_map json__ "S3BackupMode" IcebergS3BackupMode.of_json in
+      let processingConfiguration =
+        field_map json__ "ProcessingConfiguration"
+          ProcessingConfiguration.of_json in
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints" BufferingHints.of_json in
+      let tableCreationConfiguration =
+        field_map json__ "TableCreationConfiguration"
+          TableCreationConfiguration.of_json in
+      let schemaEvolutionConfiguration =
+        field_map json__ "SchemaEvolutionConfiguration"
+          SchemaEvolutionConfiguration.of_json in
+      let destinationTableConfigurationList =
+        field_map json__ "DestinationTableConfigurationList"
+          DestinationTableConfigurationList.of_json in
+      make ?s3DestinationDescription ?catalogConfiguration ?appendOnly
+        ?roleARN ?retryOptions ?s3BackupMode ?processingConfiguration
+        ?cloudWatchLoggingOptions ?bufferingHints ?tableCreationConfiguration
+        ?schemaEvolutionConfiguration ?destinationTableConfigurationList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a destination in Apache Iceberg Tables."]
 module RedshiftDestinationDescription =
   struct
     type nonrec t =
       {
-      roleARN: RoleARN.t
+      roleARN: RoleARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
-      clusterJDBCURL: ClusterJDBCURL.t
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
+      clusterJDBCURL: ClusterJDBCURL.t option
         [@ocaml.doc "The database connection string."];
-      copyCommand: CopyCommand.t [@ocaml.doc "The COPY command."];
-      username: Username.t [@ocaml.doc "The name of the user."];
+      copyCommand: CopyCommand.t option [@ocaml.doc "The COPY command."];
+      username: Username.t option [@ocaml.doc "The name of the user."];
       retryOptions: RedshiftRetryOptions.t option
         [@ocaml.doc
-          "The retry behavior in case Kinesis Data Firehose is unable to deliver documents to Amazon Redshift. Default value is 3600 (60 minutes)."];
-      s3DestinationDescription: S3DestinationDescription.t
+          "The retry behavior in case Firehose is unable to deliver documents to Amazon Redshift. Default value is 3600 (60 minutes)."];
+      s3DestinationDescription: S3DestinationDescription.t option
         [@ocaml.doc "The Amazon S3 destination."];
       processingConfiguration: ProcessingConfiguration.t option
         [@ocaml.doc "The data processing configuration."];
@@ -3954,42 +6017,47 @@ module RedshiftDestinationDescription =
         [@ocaml.doc "The configuration for backup in Amazon S3."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."]}
-    let context_ = "RedshiftDestinationDescription"
-    let make ?retryOptions =
-      fun ?processingConfiguration ->
-        fun ?s3BackupMode ->
-          fun ?s3BackupDescription ->
-            fun ?cloudWatchLoggingOptions ->
-              fun ~roleARN ->
-                fun ~clusterJDBCURL ->
-                  fun ~copyCommand ->
-                    fun ~username ->
-                      fun ~s3DestinationDescription ->
-                        fun () ->
-                          {
-                            retryOptions;
-                            processingConfiguration;
-                            s3BackupMode;
-                            s3BackupDescription;
-                            cloudWatchLoggingOptions;
-                            roleARN;
-                            clusterJDBCURL;
-                            copyCommand;
-                            username;
-                            s3DestinationDescription
-                          }
+          "The Amazon CloudWatch logging options for your Firehose stream."];
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for Amazon Redshift."]}
+    let make ?roleARN =
+      fun ?clusterJDBCURL ->
+        fun ?copyCommand ->
+          fun ?username ->
+            fun ?retryOptions ->
+              fun ?s3DestinationDescription ->
+                fun ?processingConfiguration ->
+                  fun ?s3BackupMode ->
+                    fun ?s3BackupDescription ->
+                      fun ?cloudWatchLoggingOptions ->
+                        fun ?secretsManagerConfiguration ->
+                          fun () ->
+                            {
+                              roleARN;
+                              clusterJDBCURL;
+                              copyCommand;
+                              username;
+                              retryOptions;
+                              s3DestinationDescription;
+                              processingConfiguration;
+                              s3BackupMode;
+                              s3BackupDescription;
+                              cloudWatchLoggingOptions;
+                              secretsManagerConfiguration
+                            }
     let to_value x =
       structure_to_value
-        [("RoleARN", (Some (RoleARN.to_value x.roleARN)));
-        ("ClusterJDBCURL", (Some (ClusterJDBCURL.to_value x.clusterJDBCURL)));
-        ("CopyCommand", (Some (CopyCommand.to_value x.copyCommand)));
-        ("Username", (Some (Username.to_value x.username)));
+        [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("ClusterJDBCURL",
+          (Option.map x.clusterJDBCURL ~f:ClusterJDBCURL.to_value));
+        ("CopyCommand", (Option.map x.copyCommand ~f:CopyCommand.to_value));
+        ("Username", (Option.map x.username ~f:Username.to_value));
         ("RetryOptions",
           (Option.map x.retryOptions ~f:RedshiftRetryOptions.to_value));
         ("S3DestinationDescription",
-          (Some
-             (S3DestinationDescription.to_value x.s3DestinationDescription)));
+          (Option.map x.s3DestinationDescription
+             ~f:S3DestinationDescription.to_value));
         ("ProcessingConfiguration",
           (Option.map x.processingConfiguration
              ~f:ProcessingConfiguration.to_value));
@@ -4000,9 +6068,15 @@ module RedshiftDestinationDescription =
              ~f:S3DestinationDescription.to_value));
         ("CloudWatchLoggingOptions",
           (Option.map x.cloudWatchLoggingOptions
-             ~f:CloudWatchLoggingOptions.to_value))]
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
       let cloudWatchLoggingOptions =
         (Option.map ~f:CloudWatchLoggingOptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
@@ -4016,59 +6090,298 @@ module RedshiftDestinationDescription =
         (Option.map ~f:ProcessingConfiguration.of_xml)
           (Xml.child xml_arg0 "ProcessingConfiguration") in
       let s3DestinationDescription =
-        S3DestinationDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "S3DestinationDescription") in
+        (Option.map ~f:S3DestinationDescription.of_xml)
+          (Xml.child xml_arg0 "S3DestinationDescription") in
       let retryOptions =
         (Option.map ~f:RedshiftRetryOptions.of_xml)
           (Xml.child xml_arg0 "RetryOptions") in
       let username =
-        Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Username") in
+        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "Username") in
       let copyCommand =
-        CopyCommand.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CopyCommand") in
+        (Option.map ~f:CopyCommand.of_xml) (Xml.child xml_arg0 "CopyCommand") in
       let clusterJDBCURL =
-        ClusterJDBCURL.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ClusterJDBCURL") in
+        (Option.map ~f:ClusterJDBCURL.of_xml)
+          (Xml.child xml_arg0 "ClusterJDBCURL") in
       let roleARN =
-        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
-      make ?cloudWatchLoggingOptions ?s3BackupDescription ?s3BackupMode
-        ?processingConfiguration ~s3DestinationDescription ?retryOptions
-        ~username ~copyCommand ~clusterJDBCURL ~roleARN ()
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      make ?secretsManagerConfiguration ?cloudWatchLoggingOptions
+        ?s3BackupDescription ?s3BackupMode ?processingConfiguration
+        ?s3DestinationDescription ?retryOptions ?username ?copyCommand
+        ?clusterJDBCURL ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let s3BackupDescription =
-        field_map json "S3BackupDescription" S3DestinationDescription.of_json in
+        field_map json__ "S3BackupDescription"
+          S3DestinationDescription.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" RedshiftS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" RedshiftS3BackupMode.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let s3DestinationDescription =
-        field_map_exn json "S3DestinationDescription"
+        field_map json__ "S3DestinationDescription"
           S3DestinationDescription.of_json in
       let retryOptions =
-        field_map json "RetryOptions" RedshiftRetryOptions.of_json in
-      let username = field_map_exn json "Username" Username.of_json in
-      let copyCommand = field_map_exn json "CopyCommand" CopyCommand.of_json in
+        field_map json__ "RetryOptions" RedshiftRetryOptions.of_json in
+      let username = field_map json__ "Username" Username.of_json in
+      let copyCommand = field_map json__ "CopyCommand" CopyCommand.of_json in
       let clusterJDBCURL =
-        field_map_exn json "ClusterJDBCURL" ClusterJDBCURL.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      make ?cloudWatchLoggingOptions ?s3BackupDescription ?s3BackupMode
-        ?processingConfiguration ~s3DestinationDescription ?retryOptions
-        ~username ~copyCommand ~clusterJDBCURL ~roleARN ()
+        field_map json__ "ClusterJDBCURL" ClusterJDBCURL.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?secretsManagerConfiguration ?cloudWatchLoggingOptions
+        ?s3BackupDescription ?s3BackupMode ?processingConfiguration
+        ?s3DestinationDescription ?retryOptions ?username ?copyCommand
+        ?clusterJDBCURL ?roleARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a destination in Amazon Redshift."]
+module SnowflakeDestinationDescription =
+  struct
+    type nonrec t =
+      {
+      accountUrl: SnowflakeAccountUrl.t option
+        [@ocaml.doc
+          "URL for accessing your Snowflake account. This URL must include your account identifier. Note that the protocol (https://) and port number are optional."];
+      user: SnowflakeUser.t option
+        [@ocaml.doc "User login name for the Snowflake account."];
+      database: SnowflakeDatabase.t option
+        [@ocaml.doc "All data in Snowflake is maintained in databases."];
+      schema: SnowflakeSchema.t option
+        [@ocaml.doc
+          "Each database consists of one or more schemas, which are logical groupings of database objects, such as tables and views"];
+      table: SnowflakeTable.t option
+        [@ocaml.doc
+          "All data in Snowflake is stored in database tables, logically structured as collections of columns and rows."];
+      snowflakeRoleConfiguration: SnowflakeRoleConfiguration.t option
+        [@ocaml.doc
+          "Optionally configure a Snowflake role. Otherwise the default user role will be used."];
+      dataLoadingOption: SnowflakeDataLoadingOption.t option
+        [@ocaml.doc
+          "Choose to load JSON keys mapped to table column names or choose to split the JSON payload where content is mapped to a record content column and source metadata is mapped to a record metadata column."];
+      metaDataColumnName: SnowflakeMetaDataColumnName.t option
+        [@ocaml.doc "The name of the record metadata column"];
+      contentColumnName: SnowflakeContentColumnName.t option
+        [@ocaml.doc "The name of the record content column"];
+      snowflakeVpcConfiguration: SnowflakeVpcConfiguration.t option
+        [@ocaml.doc
+          "The VPCE ID for Firehose to privately connect with Snowflake. The ID format is com.amazonaws.vpce.\\[region\\].vpce-svc-<\\[id\\]>. For more information, see Amazon PrivateLink & Snowflake"];
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
+      processingConfiguration: ProcessingConfiguration.t option ;
+      roleARN: RoleARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Snowflake role"];
+      retryOptions: SnowflakeRetryOptions.t option
+        [@ocaml.doc
+          "The time period where Firehose will retry sending data to the chosen HTTP endpoint."];
+      s3BackupMode: SnowflakeS3BackupMode.t option
+        [@ocaml.doc "Choose an S3 backup mode"];
+      s3DestinationDescription: S3DestinationDescription.t option ;
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for Snowflake."];
+      bufferingHints: SnowflakeBufferingHints.t option
+        [@ocaml.doc
+          "Describes the buffering to perform before delivering data to the Snowflake destination. If you do not specify any value, Firehose uses the default values."]}
+    let make ?accountUrl =
+      fun ?user ->
+        fun ?database ->
+          fun ?schema ->
+            fun ?table ->
+              fun ?snowflakeRoleConfiguration ->
+                fun ?dataLoadingOption ->
+                  fun ?metaDataColumnName ->
+                    fun ?contentColumnName ->
+                      fun ?snowflakeVpcConfiguration ->
+                        fun ?cloudWatchLoggingOptions ->
+                          fun ?processingConfiguration ->
+                            fun ?roleARN ->
+                              fun ?retryOptions ->
+                                fun ?s3BackupMode ->
+                                  fun ?s3DestinationDescription ->
+                                    fun ?secretsManagerConfiguration ->
+                                      fun ?bufferingHints ->
+                                        fun () ->
+                                          {
+                                            accountUrl;
+                                            user;
+                                            database;
+                                            schema;
+                                            table;
+                                            snowflakeRoleConfiguration;
+                                            dataLoadingOption;
+                                            metaDataColumnName;
+                                            contentColumnName;
+                                            snowflakeVpcConfiguration;
+                                            cloudWatchLoggingOptions;
+                                            processingConfiguration;
+                                            roleARN;
+                                            retryOptions;
+                                            s3BackupMode;
+                                            s3DestinationDescription;
+                                            secretsManagerConfiguration;
+                                            bufferingHints
+                                          }
+    let to_value x =
+      structure_to_value
+        [("AccountUrl",
+           (Option.map x.accountUrl ~f:SnowflakeAccountUrl.to_value));
+        ("User", (Option.map x.user ~f:SnowflakeUser.to_value));
+        ("Database", (Option.map x.database ~f:SnowflakeDatabase.to_value));
+        ("Schema", (Option.map x.schema ~f:SnowflakeSchema.to_value));
+        ("Table", (Option.map x.table ~f:SnowflakeTable.to_value));
+        ("SnowflakeRoleConfiguration",
+          (Option.map x.snowflakeRoleConfiguration
+             ~f:SnowflakeRoleConfiguration.to_value));
+        ("DataLoadingOption",
+          (Option.map x.dataLoadingOption
+             ~f:SnowflakeDataLoadingOption.to_value));
+        ("MetaDataColumnName",
+          (Option.map x.metaDataColumnName
+             ~f:SnowflakeMetaDataColumnName.to_value));
+        ("ContentColumnName",
+          (Option.map x.contentColumnName
+             ~f:SnowflakeContentColumnName.to_value));
+        ("SnowflakeVpcConfiguration",
+          (Option.map x.snowflakeVpcConfiguration
+             ~f:SnowflakeVpcConfiguration.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("ProcessingConfiguration",
+          (Option.map x.processingConfiguration
+             ~f:ProcessingConfiguration.to_value));
+        ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("RetryOptions",
+          (Option.map x.retryOptions ~f:SnowflakeRetryOptions.to_value));
+        ("S3BackupMode",
+          (Option.map x.s3BackupMode ~f:SnowflakeS3BackupMode.to_value));
+        ("S3DestinationDescription",
+          (Option.map x.s3DestinationDescription
+             ~f:S3DestinationDescription.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:SnowflakeBufferingHints.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bufferingHints =
+        (Option.map ~f:SnowflakeBufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
+      let s3DestinationDescription =
+        (Option.map ~f:S3DestinationDescription.of_xml)
+          (Xml.child xml_arg0 "S3DestinationDescription") in
+      let s3BackupMode =
+        (Option.map ~f:SnowflakeS3BackupMode.of_xml)
+          (Xml.child xml_arg0 "S3BackupMode") in
+      let retryOptions =
+        (Option.map ~f:SnowflakeRetryOptions.of_xml)
+          (Xml.child xml_arg0 "RetryOptions") in
+      let roleARN =
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      let processingConfiguration =
+        (Option.map ~f:ProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProcessingConfiguration") in
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let snowflakeVpcConfiguration =
+        (Option.map ~f:SnowflakeVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnowflakeVpcConfiguration") in
+      let contentColumnName =
+        (Option.map ~f:SnowflakeContentColumnName.of_xml)
+          (Xml.child xml_arg0 "ContentColumnName") in
+      let metaDataColumnName =
+        (Option.map ~f:SnowflakeMetaDataColumnName.of_xml)
+          (Xml.child xml_arg0 "MetaDataColumnName") in
+      let dataLoadingOption =
+        (Option.map ~f:SnowflakeDataLoadingOption.of_xml)
+          (Xml.child xml_arg0 "DataLoadingOption") in
+      let snowflakeRoleConfiguration =
+        (Option.map ~f:SnowflakeRoleConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnowflakeRoleConfiguration") in
+      let table =
+        (Option.map ~f:SnowflakeTable.of_xml) (Xml.child xml_arg0 "Table") in
+      let schema =
+        (Option.map ~f:SnowflakeSchema.of_xml) (Xml.child xml_arg0 "Schema") in
+      let database =
+        (Option.map ~f:SnowflakeDatabase.of_xml)
+          (Xml.child xml_arg0 "Database") in
+      let user =
+        (Option.map ~f:SnowflakeUser.of_xml) (Xml.child xml_arg0 "User") in
+      let accountUrl =
+        (Option.map ~f:SnowflakeAccountUrl.of_xml)
+          (Xml.child xml_arg0 "AccountUrl") in
+      make ?bufferingHints ?secretsManagerConfiguration
+        ?s3DestinationDescription ?s3BackupMode ?retryOptions ?roleARN
+        ?processingConfiguration ?cloudWatchLoggingOptions
+        ?snowflakeVpcConfiguration ?contentColumnName ?metaDataColumnName
+        ?dataLoadingOption ?snowflakeRoleConfiguration ?table ?schema
+        ?database ?user ?accountUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bufferingHints =
+        field_map json__ "BufferingHints" SnowflakeBufferingHints.of_json in
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
+      let s3DestinationDescription =
+        field_map json__ "S3DestinationDescription"
+          S3DestinationDescription.of_json in
+      let s3BackupMode =
+        field_map json__ "S3BackupMode" SnowflakeS3BackupMode.of_json in
+      let retryOptions =
+        field_map json__ "RetryOptions" SnowflakeRetryOptions.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let processingConfiguration =
+        field_map json__ "ProcessingConfiguration"
+          ProcessingConfiguration.of_json in
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let snowflakeVpcConfiguration =
+        field_map json__ "SnowflakeVpcConfiguration"
+          SnowflakeVpcConfiguration.of_json in
+      let contentColumnName =
+        field_map json__ "ContentColumnName"
+          SnowflakeContentColumnName.of_json in
+      let metaDataColumnName =
+        field_map json__ "MetaDataColumnName"
+          SnowflakeMetaDataColumnName.of_json in
+      let dataLoadingOption =
+        field_map json__ "DataLoadingOption"
+          SnowflakeDataLoadingOption.of_json in
+      let snowflakeRoleConfiguration =
+        field_map json__ "SnowflakeRoleConfiguration"
+          SnowflakeRoleConfiguration.of_json in
+      let table = field_map json__ "Table" SnowflakeTable.of_json in
+      let schema = field_map json__ "Schema" SnowflakeSchema.of_json in
+      let database = field_map json__ "Database" SnowflakeDatabase.of_json in
+      let user = field_map json__ "User" SnowflakeUser.of_json in
+      let accountUrl =
+        field_map json__ "AccountUrl" SnowflakeAccountUrl.of_json in
+      make ?bufferingHints ?secretsManagerConfiguration
+        ?s3DestinationDescription ?s3BackupMode ?retryOptions ?roleARN
+        ?processingConfiguration ?cloudWatchLoggingOptions
+        ?snowflakeVpcConfiguration ?contentColumnName ?metaDataColumnName
+        ?dataLoadingOption ?snowflakeRoleConfiguration ?table ?schema
+        ?database ?user ?accountUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Optional Snowflake destination description"]
 module SplunkDestinationDescription =
   struct
     type nonrec t =
       {
       hECEndpoint: HECEndpoint.t option
         [@ocaml.doc
-          "The HTTP Event Collector (HEC) endpoint to which Kinesis Data Firehose sends your data."];
+          "The HTTP Event Collector (HEC) endpoint to which Firehose sends your data."];
       hECEndpointType: HECEndpointType.t option
         [@ocaml.doc "This type can be either \"Raw\" or \"Event.\""];
       hECToken: HECToken.t option
@@ -4077,20 +6390,26 @@ module SplunkDestinationDescription =
       hECAcknowledgmentTimeoutInSeconds:
         HECAcknowledgmentTimeoutInSeconds.t option
         [@ocaml.doc
-          "The amount of time that Kinesis Data Firehose waits to receive an acknowledgment from Splunk after it sends it data. At the end of the timeout period, Kinesis Data Firehose either tries to send the data again or considers it an error, based on your retry settings."];
+          "The amount of time that Firehose waits to receive an acknowledgment from Splunk after it sends it data. At the end of the timeout period, Firehose either tries to send the data again or considers it an error, based on your retry settings."];
       retryOptions: SplunkRetryOptions.t option
         [@ocaml.doc
-          "The retry behavior in case Kinesis Data Firehose is unable to deliver data to Splunk or if it doesn't receive an acknowledgment of receipt from Splunk."];
+          "The retry behavior in case Firehose is unable to deliver data to Splunk or if it doesn't receive an acknowledgment of receipt from Splunk."];
       s3BackupMode: SplunkS3BackupMode.t option
         [@ocaml.doc
-          "Defines how documents should be delivered to Amazon S3. When set to FailedDocumentsOnly, Kinesis Data Firehose writes any data that could not be indexed to the configured Amazon S3 destination. When set to AllDocuments, Kinesis Data Firehose delivers all incoming records to Amazon S3, and also writes failed documents to Amazon S3. Default value is FailedDocumentsOnly."];
+          "Defines how documents should be delivered to Amazon S3. When set to FailedDocumentsOnly, Firehose writes any data that could not be indexed to the configured Amazon S3 destination. When set to AllDocuments, Firehose delivers all incoming records to Amazon S3, and also writes failed documents to Amazon S3. Default value is FailedDocumentsOnly."];
       s3DestinationDescription: S3DestinationDescription.t option
         [@ocaml.doc "The Amazon S3 destination.>"];
       processingConfiguration: ProcessingConfiguration.t option
         [@ocaml.doc "The data processing configuration."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."]}
+          "The Amazon CloudWatch logging options for your Firehose stream."];
+      bufferingHints: SplunkBufferingHints.t option
+        [@ocaml.doc
+          "The buffering options. If no value is specified, the default values for Splunk are used."];
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for Splunk."]}
     let make ?hECEndpoint =
       fun ?hECEndpointType ->
         fun ?hECToken ->
@@ -4100,18 +6419,22 @@ module SplunkDestinationDescription =
                 fun ?s3DestinationDescription ->
                   fun ?processingConfiguration ->
                     fun ?cloudWatchLoggingOptions ->
-                      fun () ->
-                        {
-                          hECEndpoint;
-                          hECEndpointType;
-                          hECToken;
-                          hECAcknowledgmentTimeoutInSeconds;
-                          retryOptions;
-                          s3BackupMode;
-                          s3DestinationDescription;
-                          processingConfiguration;
-                          cloudWatchLoggingOptions
-                        }
+                      fun ?bufferingHints ->
+                        fun ?secretsManagerConfiguration ->
+                          fun () ->
+                            {
+                              hECEndpoint;
+                              hECEndpointType;
+                              hECToken;
+                              hECAcknowledgmentTimeoutInSeconds;
+                              retryOptions;
+                              s3BackupMode;
+                              s3DestinationDescription;
+                              processingConfiguration;
+                              cloudWatchLoggingOptions;
+                              bufferingHints;
+                              secretsManagerConfiguration
+                            }
     let to_value x =
       structure_to_value
         [("HECEndpoint", (Option.map x.hECEndpoint ~f:HECEndpoint.to_value));
@@ -4133,9 +6456,20 @@ module SplunkDestinationDescription =
              ~f:ProcessingConfiguration.to_value));
         ("CloudWatchLoggingOptions",
           (Option.map x.cloudWatchLoggingOptions
-             ~f:CloudWatchLoggingOptions.to_value))]
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:SplunkBufferingHints.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
+      let bufferingHints =
+        (Option.map ~f:SplunkBufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
       let cloudWatchLoggingOptions =
         (Option.map ~f:CloudWatchLoggingOptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
@@ -4161,38 +6495,350 @@ module SplunkDestinationDescription =
           (Xml.child xml_arg0 "HECEndpointType") in
       let hECEndpoint =
         (Option.map ~f:HECEndpoint.of_xml) (Xml.child xml_arg0 "HECEndpoint") in
-      make ?cloudWatchLoggingOptions ?processingConfiguration
+      make ?secretsManagerConfiguration ?bufferingHints
+        ?cloudWatchLoggingOptions ?processingConfiguration
         ?s3DestinationDescription ?s3BackupMode ?retryOptions
         ?hECAcknowledgmentTimeoutInSeconds ?hECToken ?hECEndpointType
         ?hECEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints" SplunkBufferingHints.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let s3DestinationDescription =
-        field_map json "S3DestinationDescription"
+        field_map json__ "S3DestinationDescription"
           S3DestinationDescription.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" SplunkS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" SplunkS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions" SplunkRetryOptions.of_json in
+        field_map json__ "RetryOptions" SplunkRetryOptions.of_json in
       let hECAcknowledgmentTimeoutInSeconds =
-        field_map json "HECAcknowledgmentTimeoutInSeconds"
+        field_map json__ "HECAcknowledgmentTimeoutInSeconds"
           HECAcknowledgmentTimeoutInSeconds.of_json in
-      let hECToken = field_map json "HECToken" HECToken.of_json in
+      let hECToken = field_map json__ "HECToken" HECToken.of_json in
       let hECEndpointType =
-        field_map json "HECEndpointType" HECEndpointType.of_json in
-      let hECEndpoint = field_map json "HECEndpoint" HECEndpoint.of_json in
-      make ?cloudWatchLoggingOptions ?processingConfiguration
+        field_map json__ "HECEndpointType" HECEndpointType.of_json in
+      let hECEndpoint = field_map json__ "HECEndpoint" HECEndpoint.of_json in
+      make ?secretsManagerConfiguration ?bufferingHints
+        ?cloudWatchLoggingOptions ?processingConfiguration
         ?s3DestinationDescription ?s3BackupMode ?retryOptions
         ?hECAcknowledgmentTimeoutInSeconds ?hECToken ?hECEndpointType
         ?hECEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a destination in Splunk."]
+module DatabaseColumnList =
+  struct
+    type nonrec t =
+      {
+      include_: DatabaseColumnIncludeOrExcludeList.t option
+        [@ocaml.doc
+          "The list of column patterns in source database to be included for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."];
+      exclude: DatabaseColumnIncludeOrExcludeList.t option
+        [@ocaml.doc
+          "The list of column patterns in source database to be excluded for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."]}
+    let make ?include_ = fun ?exclude -> fun () -> { include_; exclude }
+    let to_value x =
+      structure_to_value
+        [("Include",
+           (Option.map x.include_
+              ~f:DatabaseColumnIncludeOrExcludeList.to_value));
+        ("Exclude",
+          (Option.map x.exclude
+             ~f:DatabaseColumnIncludeOrExcludeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exclude =
+        (Option.map ~f:DatabaseColumnIncludeOrExcludeList.of_xml)
+          (Xml.child xml_arg0 "Exclude") in
+      let include_ =
+        (Option.map ~f:DatabaseColumnIncludeOrExcludeList.of_xml)
+          (Xml.child xml_arg0 "Include") in
+      make ?exclude ?include_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exclude =
+        field_map json__ "Exclude" DatabaseColumnIncludeOrExcludeList.of_json in
+      let include_ =
+        field_map json__ "Include" DatabaseColumnIncludeOrExcludeList.of_json in
+      make ?exclude ?include_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure used to configure the list of column patterns in source database endpoint for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."]
+module DatabaseEndpoint =
+  struct
+    type nonrec t = string
+    let context_ = "DatabaseEndpoint"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^(?!\\s*$).+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatabaseEndpoint" j
+    let to_json = simple_to_json to_value
+  end
+module DatabaseList =
+  struct
+    type nonrec t =
+      {
+      include_: DatabaseIncludeOrExcludeList.t option
+        [@ocaml.doc
+          "The list of database patterns in source database endpoint to be included for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."];
+      exclude: DatabaseIncludeOrExcludeList.t option
+        [@ocaml.doc
+          "The list of database patterns in source database endpoint to be excluded for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."]}
+    let make ?include_ = fun ?exclude -> fun () -> { include_; exclude }
+    let to_value x =
+      structure_to_value
+        [("Include",
+           (Option.map x.include_ ~f:DatabaseIncludeOrExcludeList.to_value));
+        ("Exclude",
+          (Option.map x.exclude ~f:DatabaseIncludeOrExcludeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exclude =
+        (Option.map ~f:DatabaseIncludeOrExcludeList.of_xml)
+          (Xml.child xml_arg0 "Exclude") in
+      let include_ =
+        (Option.map ~f:DatabaseIncludeOrExcludeList.of_xml)
+          (Xml.child xml_arg0 "Include") in
+      make ?exclude ?include_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exclude =
+        field_map json__ "Exclude" DatabaseIncludeOrExcludeList.of_json in
+      let include_ =
+        field_map json__ "Include" DatabaseIncludeOrExcludeList.of_json in
+      make ?exclude ?include_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure used to configure the list of database patterns in source database endpoint for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."]
+module DatabasePort =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DatabasePort" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DatabaseSnapshotInfoList =
+  struct
+    type nonrec t = DatabaseSnapshotInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatabaseSnapshotInfo.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DatabaseSnapshotInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatabaseSnapshotInfoList"
+        ~of_json:DatabaseSnapshotInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DatabaseSourceAuthenticationConfiguration =
+  struct
+    type nonrec t =
+      {
+      secretsManagerConfiguration: SecretsManagerConfiguration.t }
+    let context_ = "DatabaseSourceAuthenticationConfiguration"
+    let make ~secretsManagerConfiguration =
+      fun () -> { secretsManagerConfiguration }
+    let to_value x =
+      structure_to_value
+        [("SecretsManagerConfiguration",
+           (Some
+              (SecretsManagerConfiguration.to_value
+                 x.secretsManagerConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        SecretsManagerConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "SecretsManagerConfiguration") in
+      make ~secretsManagerConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map_exn json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
+      make ~secretsManagerConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure to configure the authentication methods for Firehose to connect to source database endpoint. Amazon Data Firehose is in preview release and is subject to change."]
+module DatabaseSourceVPCConfiguration =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointServiceName: VpcEndpointServiceName.t
+        [@ocaml.doc
+          "The VPC endpoint service name which Firehose uses to create a PrivateLink to the database. The endpoint service must have the Firehose service principle firehose.amazonaws.com as an allowed principal on the VPC endpoint service. The VPC endpoint service name is a string that looks like com.amazonaws.vpce.<region>.<vpc-endpoint-service-id>. Amazon Data Firehose is in preview release and is subject to change."]}
+    let context_ = "DatabaseSourceVPCConfiguration"
+    let make ~vpcEndpointServiceName = fun () -> { vpcEndpointServiceName }
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointServiceName",
+           (Some (VpcEndpointServiceName.to_value x.vpcEndpointServiceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpointServiceName =
+        VpcEndpointServiceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcEndpointServiceName") in
+      make ~vpcEndpointServiceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpointServiceName =
+        field_map_exn json__ "VpcEndpointServiceName"
+          VpcEndpointServiceName.of_json in
+      make ~vpcEndpointServiceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure for details of the VPC Endpoint Service which Firehose uses to create a PrivateLink to the database. Amazon Data Firehose is in preview release and is subject to change."]
+module DatabaseTableList =
+  struct
+    type nonrec t =
+      {
+      include_: DatabaseTableIncludeOrExcludeList.t option
+        [@ocaml.doc
+          "The list of table patterns in source database endpoint to be included for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."];
+      exclude: DatabaseTableIncludeOrExcludeList.t option
+        [@ocaml.doc
+          "The list of table patterns in source database endpoint to be excluded for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."]}
+    let make ?include_ = fun ?exclude -> fun () -> { include_; exclude }
+    let to_value x =
+      structure_to_value
+        [("Include",
+           (Option.map x.include_
+              ~f:DatabaseTableIncludeOrExcludeList.to_value));
+        ("Exclude",
+          (Option.map x.exclude ~f:DatabaseTableIncludeOrExcludeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exclude =
+        (Option.map ~f:DatabaseTableIncludeOrExcludeList.of_xml)
+          (Xml.child xml_arg0 "Exclude") in
+      let include_ =
+        (Option.map ~f:DatabaseTableIncludeOrExcludeList.of_xml)
+          (Xml.child xml_arg0 "Include") in
+      make ?exclude ?include_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exclude =
+        field_map json__ "Exclude" DatabaseTableIncludeOrExcludeList.of_json in
+      let include_ =
+        field_map json__ "Include" DatabaseTableIncludeOrExcludeList.of_json in
+      make ?exclude ?include_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure used to configure the list of table patterns in source database endpoint for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."]
+module DatabaseType =
+  struct
+    type nonrec t =
+      | MySQL 
+      | PostgreSQL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MySQL -> "MySQL"
+      | PostgreSQL -> "PostgreSQL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MySQL" -> MySQL
+      | "PostgreSQL" -> PostgreSQL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DatabaseType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DatabaseType" j)
+    let to_json = simple_to_json to_value
+  end
+module SSLMode =
+  struct
+    type nonrec t =
+      | Disabled 
+      | Enabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Disabled -> "Disabled"
+      | Enabled -> "Enabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Disabled" -> Disabled
+      | "Enabled" -> Enabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SSLMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SSLMode" j)
+    let to_json = simple_to_json to_value
+  end
+module ThroughputHintInMBs =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ThroughputHintInMBs" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module DeliveryStartTimestamp =
   struct
     type nonrec t = string
@@ -4215,7 +6861,9 @@ module KinesisStreamARN =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:"arn:.*")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:.*:kinesis:[a-zA-Z0-9\\-]+:\\d{12}:stream/[a-zA-Z0-9_.-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -4223,6 +6871,93 @@ module KinesisStreamARN =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"KinesisStreamARN" j
+    let to_json = simple_to_json to_value
+  end
+module AuthenticationConfiguration =
+  struct
+    type nonrec t =
+      {
+      roleARN: RoleARN.t
+        [@ocaml.doc
+          "The ARN of the role used to access the Amazon MSK cluster."];
+      connectivity: Connectivity.t
+        [@ocaml.doc
+          "The type of connectivity used to access the Amazon MSK cluster."]}
+    let context_ = "AuthenticationConfiguration"
+    let make ~roleARN =
+      fun ~connectivity -> fun () -> { roleARN; connectivity }
+    let to_value x =
+      structure_to_value
+        [("RoleARN", (Some (RoleARN.to_value x.roleARN)));
+        ("Connectivity", (Some (Connectivity.to_value x.connectivity)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectivity =
+        Connectivity.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Connectivity") in
+      let roleARN =
+        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
+      make ~connectivity ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectivity =
+        field_map_exn json__ "Connectivity" Connectivity.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      make ~connectivity ~roleARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The authentication configuration of the Amazon MSK cluster."]
+module MSKClusterARN =
+  struct
+    type nonrec t = string
+    let context_ = "MSKClusterARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"arn:.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MSKClusterARN" j
+    let to_json = simple_to_json to_value
+  end
+module ReadFromTimestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module TopicName =
+  struct
+    type nonrec t = string
+    let context_ = "TopicName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-zA-Z0-9\\\\._\\\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TopicName" j
     let to_json = simple_to_json to_value
   end
 module HttpEndpointAccessKey =
@@ -4381,38 +7116,6 @@ module DeliveryStreamEncryptionStatus =
       of_string (string_of_json ~kind:"DeliveryStreamEncryptionStatus" j)
     let to_json = simple_to_json to_value
   end
-module FailureDescription =
-  struct
-    type nonrec t =
-      {
-      type_: DeliveryStreamFailureType.t
-        [@ocaml.doc "The type of error that caused the failure."];
-      details: NonEmptyString.t
-        [@ocaml.doc
-          "A message providing details about the error that caused the failure."]}
-    let context_ = "FailureDescription"
-    let make ~type_ = fun ~details -> fun () -> { type_; details }
-    let to_value x =
-      structure_to_value
-        [("Type", (Some (DeliveryStreamFailureType.to_value x.type_)));
-        ("Details", (Some (NonEmptyString.to_value x.details)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let details =
-        NonEmptyString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Details") in
-      let type_ =
-        DeliveryStreamFailureType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ~details ~type_ ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map_exn json "Details" NonEmptyString.of_json in
-      let type_ = field_map_exn json "Type" DeliveryStreamFailureType.of_json in
-      make ~details ~type_ ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides details in case one of the following operations fails due to an error related to KMS: CreateDeliveryStream, DeleteDeliveryStream, StartDeliveryStreamEncryption, StopDeliveryStreamEncryption."]
 module KeyType =
   struct
     type nonrec t =
@@ -4442,7 +7145,7 @@ module DestinationDescription =
   struct
     type nonrec t =
       {
-      destinationId: DestinationId.t
+      destinationId: DestinationId.t option
         [@ocaml.doc "The ID of the destination."];
       s3DestinationDescription: S3DestinationDescription.t option
         [@ocaml.doc "\\[Deprecated\\] The destination in Amazon S3."];
@@ -4453,37 +7156,54 @@ module DestinationDescription =
         [@ocaml.doc "The destination in Amazon Redshift."];
       elasticsearchDestinationDescription:
         ElasticsearchDestinationDescription.t option
-        [@ocaml.doc "The destination in Amazon ES."];
+        [@ocaml.doc "The destination in Amazon OpenSearch Service."];
       amazonopensearchserviceDestinationDescription:
-        AmazonopensearchserviceDestinationDescription.t option ;
+        AmazonopensearchserviceDestinationDescription.t option
+        [@ocaml.doc "The destination in Amazon OpenSearch Service."];
       splunkDestinationDescription: SplunkDestinationDescription.t option
         [@ocaml.doc "The destination in Splunk."];
       httpEndpointDestinationDescription:
         HttpEndpointDestinationDescription.t option
-        [@ocaml.doc "Describes the specified HTTP endpoint destination."]}
-    let context_ = "DestinationDescription"
-    let make ?s3DestinationDescription =
-      fun ?extendedS3DestinationDescription ->
-        fun ?redshiftDestinationDescription ->
-          fun ?elasticsearchDestinationDescription ->
-            fun ?amazonopensearchserviceDestinationDescription ->
-              fun ?splunkDestinationDescription ->
-                fun ?httpEndpointDestinationDescription ->
-                  fun ~destinationId ->
-                    fun () ->
-                      {
-                        s3DestinationDescription;
-                        extendedS3DestinationDescription;
-                        redshiftDestinationDescription;
-                        elasticsearchDestinationDescription;
-                        amazonopensearchserviceDestinationDescription;
-                        splunkDestinationDescription;
-                        httpEndpointDestinationDescription;
-                        destinationId
-                      }
+        [@ocaml.doc "Describes the specified HTTP endpoint destination."];
+      snowflakeDestinationDescription:
+        SnowflakeDestinationDescription.t option
+        [@ocaml.doc "Optional description for the destination"];
+      amazonOpenSearchServerlessDestinationDescription:
+        AmazonOpenSearchServerlessDestinationDescription.t option
+        [@ocaml.doc
+          "The destination in the Serverless offering for Amazon OpenSearch Service."];
+      icebergDestinationDescription: IcebergDestinationDescription.t option
+        [@ocaml.doc "Describes a destination in Apache Iceberg Tables."]}
+    let make ?destinationId =
+      fun ?s3DestinationDescription ->
+        fun ?extendedS3DestinationDescription ->
+          fun ?redshiftDestinationDescription ->
+            fun ?elasticsearchDestinationDescription ->
+              fun ?amazonopensearchserviceDestinationDescription ->
+                fun ?splunkDestinationDescription ->
+                  fun ?httpEndpointDestinationDescription ->
+                    fun ?snowflakeDestinationDescription ->
+                      fun ?amazonOpenSearchServerlessDestinationDescription
+                        ->
+                        fun ?icebergDestinationDescription ->
+                          fun () ->
+                            {
+                              destinationId;
+                              s3DestinationDescription;
+                              extendedS3DestinationDescription;
+                              redshiftDestinationDescription;
+                              elasticsearchDestinationDescription;
+                              amazonopensearchserviceDestinationDescription;
+                              splunkDestinationDescription;
+                              httpEndpointDestinationDescription;
+                              snowflakeDestinationDescription;
+                              amazonOpenSearchServerlessDestinationDescription;
+                              icebergDestinationDescription
+                            }
     let to_value x =
       structure_to_value
-        [("DestinationId", (Some (DestinationId.to_value x.destinationId)));
+        [("DestinationId",
+           (Option.map x.destinationId ~f:DestinationId.to_value));
         ("S3DestinationDescription",
           (Option.map x.s3DestinationDescription
              ~f:S3DestinationDescription.to_value));
@@ -4504,9 +7224,29 @@ module DestinationDescription =
              ~f:SplunkDestinationDescription.to_value));
         ("HttpEndpointDestinationDescription",
           (Option.map x.httpEndpointDestinationDescription
-             ~f:HttpEndpointDestinationDescription.to_value))]
+             ~f:HttpEndpointDestinationDescription.to_value));
+        ("SnowflakeDestinationDescription",
+          (Option.map x.snowflakeDestinationDescription
+             ~f:SnowflakeDestinationDescription.to_value));
+        ("AmazonOpenSearchServerlessDestinationDescription",
+          (Option.map x.amazonOpenSearchServerlessDestinationDescription
+             ~f:AmazonOpenSearchServerlessDestinationDescription.to_value));
+        ("IcebergDestinationDescription",
+          (Option.map x.icebergDestinationDescription
+             ~f:IcebergDestinationDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let icebergDestinationDescription =
+        (Option.map ~f:IcebergDestinationDescription.of_xml)
+          (Xml.child xml_arg0 "IcebergDestinationDescription") in
+      let amazonOpenSearchServerlessDestinationDescription =
+        (Option.map
+           ~f:AmazonOpenSearchServerlessDestinationDescription.of_xml)
+          (Xml.child xml_arg0
+             "AmazonOpenSearchServerlessDestinationDescription") in
+      let snowflakeDestinationDescription =
+        (Option.map ~f:SnowflakeDestinationDescription.of_xml)
+          (Xml.child xml_arg0 "SnowflakeDestinationDescription") in
       let httpEndpointDestinationDescription =
         (Option.map ~f:HttpEndpointDestinationDescription.of_xml)
           (Xml.child xml_arg0 "HttpEndpointDestinationDescription") in
@@ -4529,45 +7269,243 @@ module DestinationDescription =
         (Option.map ~f:S3DestinationDescription.of_xml)
           (Xml.child xml_arg0 "S3DestinationDescription") in
       let destinationId =
-        DestinationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DestinationId") in
-      make ?httpEndpointDestinationDescription ?splunkDestinationDescription
+        (Option.map ~f:DestinationId.of_xml)
+          (Xml.child xml_arg0 "DestinationId") in
+      make ?icebergDestinationDescription
+        ?amazonOpenSearchServerlessDestinationDescription
+        ?snowflakeDestinationDescription ?httpEndpointDestinationDescription
+        ?splunkDestinationDescription
         ?amazonopensearchserviceDestinationDescription
         ?elasticsearchDestinationDescription ?redshiftDestinationDescription
         ?extendedS3DestinationDescription ?s3DestinationDescription
-        ~destinationId ()
+        ?destinationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let icebergDestinationDescription =
+        field_map json__ "IcebergDestinationDescription"
+          IcebergDestinationDescription.of_json in
+      let amazonOpenSearchServerlessDestinationDescription =
+        field_map json__ "AmazonOpenSearchServerlessDestinationDescription"
+          AmazonOpenSearchServerlessDestinationDescription.of_json in
+      let snowflakeDestinationDescription =
+        field_map json__ "SnowflakeDestinationDescription"
+          SnowflakeDestinationDescription.of_json in
       let httpEndpointDestinationDescription =
-        field_map json "HttpEndpointDestinationDescription"
+        field_map json__ "HttpEndpointDestinationDescription"
           HttpEndpointDestinationDescription.of_json in
       let splunkDestinationDescription =
-        field_map json "SplunkDestinationDescription"
+        field_map json__ "SplunkDestinationDescription"
           SplunkDestinationDescription.of_json in
       let amazonopensearchserviceDestinationDescription =
-        field_map json "AmazonopensearchserviceDestinationDescription"
+        field_map json__ "AmazonopensearchserviceDestinationDescription"
           AmazonopensearchserviceDestinationDescription.of_json in
       let elasticsearchDestinationDescription =
-        field_map json "ElasticsearchDestinationDescription"
+        field_map json__ "ElasticsearchDestinationDescription"
           ElasticsearchDestinationDescription.of_json in
       let redshiftDestinationDescription =
-        field_map json "RedshiftDestinationDescription"
+        field_map json__ "RedshiftDestinationDescription"
           RedshiftDestinationDescription.of_json in
       let extendedS3DestinationDescription =
-        field_map json "ExtendedS3DestinationDescription"
+        field_map json__ "ExtendedS3DestinationDescription"
           ExtendedS3DestinationDescription.of_json in
       let s3DestinationDescription =
-        field_map json "S3DestinationDescription"
+        field_map json__ "S3DestinationDescription"
           S3DestinationDescription.of_json in
       let destinationId =
-        field_map_exn json "DestinationId" DestinationId.of_json in
-      make ?httpEndpointDestinationDescription ?splunkDestinationDescription
+        field_map json__ "DestinationId" DestinationId.of_json in
+      make ?icebergDestinationDescription
+        ?amazonOpenSearchServerlessDestinationDescription
+        ?snowflakeDestinationDescription ?httpEndpointDestinationDescription
+        ?splunkDestinationDescription
         ?amazonopensearchserviceDestinationDescription
         ?elasticsearchDestinationDescription ?redshiftDestinationDescription
         ?extendedS3DestinationDescription ?s3DestinationDescription
-        ~destinationId ()
+        ?destinationId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the destination for a delivery stream."]
+  end[@@ocaml.doc "Describes the destination for a Firehose stream."]
+module DatabaseSourceDescription =
+  struct
+    type nonrec t =
+      {
+      type_: DatabaseType.t option
+        [@ocaml.doc
+          "The type of database engine. This can be one of the following values. MySQL PostgreSQL Amazon Data Firehose is in preview release and is subject to change."];
+      endpoint: DatabaseEndpoint.t option
+        [@ocaml.doc
+          "The endpoint of the database server. Amazon Data Firehose is in preview release and is subject to change."];
+      port: DatabasePort.t option
+        [@ocaml.doc
+          "The port of the database. This can be one of the following values. 3306 for MySQL database type 5432 for PostgreSQL database type Amazon Data Firehose is in preview release and is subject to change."];
+      sSLMode: SSLMode.t option
+        [@ocaml.doc
+          "The mode to enable or disable SSL when Firehose connects to the database endpoint. Amazon Data Firehose is in preview release and is subject to change."];
+      databases: DatabaseList.t option
+        [@ocaml.doc
+          "The list of database patterns in source database endpoint for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."];
+      tables: DatabaseTableList.t option
+        [@ocaml.doc
+          "The list of table patterns in source database endpoint for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."];
+      columns: DatabaseColumnList.t option
+        [@ocaml.doc
+          "The list of column patterns in source database endpoint for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."];
+      surrogateKeys: DatabaseColumnIncludeOrExcludeList.t option
+        [@ocaml.doc
+          "The optional list of table and column names used as unique key columns when taking snapshot if the tables don\226\128\153t have primary keys configured. Amazon Data Firehose is in preview release and is subject to change."];
+      snapshotWatermarkTable: DatabaseTableName.t option
+        [@ocaml.doc
+          "The fully qualified name of the table in source database endpoint that Firehose uses to track snapshot progress. Amazon Data Firehose is in preview release and is subject to change."];
+      snapshotInfo: DatabaseSnapshotInfoList.t option
+        [@ocaml.doc
+          "The structure that describes the snapshot information of a table in source database endpoint that Firehose reads. Amazon Data Firehose is in preview release and is subject to change."];
+      databaseSourceAuthenticationConfiguration:
+        DatabaseSourceAuthenticationConfiguration.t option
+        [@ocaml.doc
+          "The structure to configure the authentication methods for Firehose to connect to source database endpoint. Amazon Data Firehose is in preview release and is subject to change."];
+      databaseSourceVPCConfiguration: DatabaseSourceVPCConfiguration.t option
+        [@ocaml.doc
+          "The details of the VPC Endpoint Service which Firehose uses to create a PrivateLink to the database. Amazon Data Firehose is in preview release and is subject to change."]}
+    let make ?type_ =
+      fun ?endpoint ->
+        fun ?port ->
+          fun ?sSLMode ->
+            fun ?databases ->
+              fun ?tables ->
+                fun ?columns ->
+                  fun ?surrogateKeys ->
+                    fun ?snapshotWatermarkTable ->
+                      fun ?snapshotInfo ->
+                        fun ?databaseSourceAuthenticationConfiguration ->
+                          fun ?databaseSourceVPCConfiguration ->
+                            fun () ->
+                              {
+                                type_;
+                                endpoint;
+                                port;
+                                sSLMode;
+                                databases;
+                                tables;
+                                columns;
+                                surrogateKeys;
+                                snapshotWatermarkTable;
+                                snapshotInfo;
+                                databaseSourceAuthenticationConfiguration;
+                                databaseSourceVPCConfiguration
+                              }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:DatabaseType.to_value));
+        ("Endpoint", (Option.map x.endpoint ~f:DatabaseEndpoint.to_value));
+        ("Port", (Option.map x.port ~f:DatabasePort.to_value));
+        ("SSLMode", (Option.map x.sSLMode ~f:SSLMode.to_value));
+        ("Databases", (Option.map x.databases ~f:DatabaseList.to_value));
+        ("Tables", (Option.map x.tables ~f:DatabaseTableList.to_value));
+        ("Columns", (Option.map x.columns ~f:DatabaseColumnList.to_value));
+        ("SurrogateKeys",
+          (Option.map x.surrogateKeys
+             ~f:DatabaseColumnIncludeOrExcludeList.to_value));
+        ("SnapshotWatermarkTable",
+          (Option.map x.snapshotWatermarkTable ~f:DatabaseTableName.to_value));
+        ("SnapshotInfo",
+          (Option.map x.snapshotInfo ~f:DatabaseSnapshotInfoList.to_value));
+        ("DatabaseSourceAuthenticationConfiguration",
+          (Option.map x.databaseSourceAuthenticationConfiguration
+             ~f:DatabaseSourceAuthenticationConfiguration.to_value));
+        ("DatabaseSourceVPCConfiguration",
+          (Option.map x.databaseSourceVPCConfiguration
+             ~f:DatabaseSourceVPCConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let databaseSourceVPCConfiguration =
+        (Option.map ~f:DatabaseSourceVPCConfiguration.of_xml)
+          (Xml.child xml_arg0 "DatabaseSourceVPCConfiguration") in
+      let databaseSourceAuthenticationConfiguration =
+        (Option.map ~f:DatabaseSourceAuthenticationConfiguration.of_xml)
+          (Xml.child xml_arg0 "DatabaseSourceAuthenticationConfiguration") in
+      let snapshotInfo =
+        (Option.map ~f:DatabaseSnapshotInfoList.of_xml)
+          (Xml.child xml_arg0 "SnapshotInfo") in
+      let snapshotWatermarkTable =
+        (Option.map ~f:DatabaseTableName.of_xml)
+          (Xml.child xml_arg0 "SnapshotWatermarkTable") in
+      let surrogateKeys =
+        (Option.map ~f:DatabaseColumnIncludeOrExcludeList.of_xml)
+          (Xml.child xml_arg0 "SurrogateKeys") in
+      let columns =
+        (Option.map ~f:DatabaseColumnList.of_xml)
+          (Xml.child xml_arg0 "Columns") in
+      let tables =
+        (Option.map ~f:DatabaseTableList.of_xml)
+          (Xml.child xml_arg0 "Tables") in
+      let databases =
+        (Option.map ~f:DatabaseList.of_xml) (Xml.child xml_arg0 "Databases") in
+      let sSLMode =
+        (Option.map ~f:SSLMode.of_xml) (Xml.child xml_arg0 "SSLMode") in
+      let port =
+        (Option.map ~f:DatabasePort.of_xml) (Xml.child xml_arg0 "Port") in
+      let endpoint =
+        (Option.map ~f:DatabaseEndpoint.of_xml)
+          (Xml.child xml_arg0 "Endpoint") in
+      let type_ =
+        (Option.map ~f:DatabaseType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?databaseSourceVPCConfiguration
+        ?databaseSourceAuthenticationConfiguration ?snapshotInfo
+        ?snapshotWatermarkTable ?surrogateKeys ?columns ?tables ?databases
+        ?sSLMode ?port ?endpoint ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let databaseSourceVPCConfiguration =
+        field_map json__ "DatabaseSourceVPCConfiguration"
+          DatabaseSourceVPCConfiguration.of_json in
+      let databaseSourceAuthenticationConfiguration =
+        field_map json__ "DatabaseSourceAuthenticationConfiguration"
+          DatabaseSourceAuthenticationConfiguration.of_json in
+      let snapshotInfo =
+        field_map json__ "SnapshotInfo" DatabaseSnapshotInfoList.of_json in
+      let snapshotWatermarkTable =
+        field_map json__ "SnapshotWatermarkTable" DatabaseTableName.of_json in
+      let surrogateKeys =
+        field_map json__ "SurrogateKeys"
+          DatabaseColumnIncludeOrExcludeList.of_json in
+      let columns = field_map json__ "Columns" DatabaseColumnList.of_json in
+      let tables = field_map json__ "Tables" DatabaseTableList.of_json in
+      let databases = field_map json__ "Databases" DatabaseList.of_json in
+      let sSLMode = field_map json__ "SSLMode" SSLMode.of_json in
+      let port = field_map json__ "Port" DatabasePort.of_json in
+      let endpoint = field_map json__ "Endpoint" DatabaseEndpoint.of_json in
+      let type_ = field_map json__ "Type" DatabaseType.of_json in
+      make ?databaseSourceVPCConfiguration
+        ?databaseSourceAuthenticationConfiguration ?snapshotInfo
+        ?snapshotWatermarkTable ?surrogateKeys ?columns ?tables ?databases
+        ?sSLMode ?port ?endpoint ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The top level object for database source description. Amazon Data Firehose is in preview release and is subject to change."]
+module DirectPutSourceDescription =
+  struct
+    type nonrec t =
+      {
+      throughputHintInMBs: ThroughputHintInMBs.t option
+        [@ocaml.doc
+          "The value that you configure for this parameter is for information purpose only and does not affect Firehose delivery throughput limit. You can use the Firehose Limits form to request a throughput limit increase."]}
+    let make ?throughputHintInMBs = fun () -> { throughputHintInMBs }
+    let to_value x =
+      structure_to_value
+        [("ThroughputHintInMBs",
+           (Option.map x.throughputHintInMBs ~f:ThroughputHintInMBs.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let throughputHintInMBs =
+        (Option.map ~f:ThroughputHintInMBs.of_xml)
+          (Xml.child xml_arg0 "ThroughputHintInMBs") in
+      make ?throughputHintInMBs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let throughputHintInMBs =
+        field_map json__ "ThroughputHintInMBs" ThroughputHintInMBs.of_json in
+      make ?throughputHintInMBs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that configures parameters such as ThroughputHintInMBs for a stream configured with Direct PUT as a source."]
 module KinesisStreamSourceDescription =
   struct
     type nonrec t =
@@ -4577,10 +7515,10 @@ module KinesisStreamSourceDescription =
           "The Amazon Resource Name (ARN) of the source Kinesis data stream. For more information, see Amazon Kinesis Data Streams ARN Format."];
       roleARN: RoleARN.t option
         [@ocaml.doc
-          "The ARN of the role used by the source Kinesis data stream. For more information, see AWS Identity and Access Management (IAM) ARN Format."];
+          "The ARN of the role used by the source Kinesis data stream. For more information, see Amazon Web Services Identity and Access Management (IAM) ARN Format."];
       deliveryStartTimestamp: DeliveryStartTimestamp.t option
         [@ocaml.doc
-          "Kinesis Data Firehose starts retrieving records from the Kinesis data stream starting with this timestamp."]}
+          "Firehose starts retrieving records from the Kinesis data stream starting with this timestamp."]}
     let make ?kinesisStreamARN =
       fun ?roleARN ->
         fun ?deliveryStartTimestamp ->
@@ -4605,33 +7543,112 @@ module KinesisStreamSourceDescription =
           (Xml.child xml_arg0 "KinesisStreamARN") in
       make ?deliveryStartTimestamp ?roleARN ?kinesisStreamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryStartTimestamp =
-        field_map json "DeliveryStartTimestamp"
+        field_map json__ "DeliveryStartTimestamp"
           DeliveryStartTimestamp.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
       let kinesisStreamARN =
-        field_map json "KinesisStreamARN" KinesisStreamARN.of_json in
+        field_map json__ "KinesisStreamARN" KinesisStreamARN.of_json in
       make ?deliveryStartTimestamp ?roleARN ?kinesisStreamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details about a Kinesis data stream used as the source for a Kinesis Data Firehose delivery stream."]
+       "Details about a Kinesis data stream used as the source for a Firehose stream."]
+module MSKSourceDescription =
+  struct
+    type nonrec t =
+      {
+      mSKClusterARN: MSKClusterARN.t option
+        [@ocaml.doc "The ARN of the Amazon MSK cluster."];
+      topicName: TopicName.t option
+        [@ocaml.doc "The topic name within the Amazon MSK cluster."];
+      authenticationConfiguration: AuthenticationConfiguration.t option
+        [@ocaml.doc
+          "The authentication configuration of the Amazon MSK cluster."];
+      deliveryStartTimestamp: DeliveryStartTimestamp.t option
+        [@ocaml.doc
+          "Firehose starts retrieving records from the topic within the Amazon MSK cluster starting with this timestamp."];
+      readFromTimestamp: ReadFromTimestamp.t option
+        [@ocaml.doc
+          "The start date and time in UTC for the offset position within your MSK topic from where Firehose begins to read. By default, this is set to timestamp when Firehose becomes Active. If you want to create a Firehose stream with Earliest start position from SDK or CLI, you need to set the ReadFromTimestampUTC parameter to Epoch (1970-01-01T00:00:00Z)."]}
+    let make ?mSKClusterARN =
+      fun ?topicName ->
+        fun ?authenticationConfiguration ->
+          fun ?deliveryStartTimestamp ->
+            fun ?readFromTimestamp ->
+              fun () ->
+                {
+                  mSKClusterARN;
+                  topicName;
+                  authenticationConfiguration;
+                  deliveryStartTimestamp;
+                  readFromTimestamp
+                }
+    let to_value x =
+      structure_to_value
+        [("MSKClusterARN",
+           (Option.map x.mSKClusterARN ~f:MSKClusterARN.to_value));
+        ("TopicName", (Option.map x.topicName ~f:TopicName.to_value));
+        ("AuthenticationConfiguration",
+          (Option.map x.authenticationConfiguration
+             ~f:AuthenticationConfiguration.to_value));
+        ("DeliveryStartTimestamp",
+          (Option.map x.deliveryStartTimestamp
+             ~f:DeliveryStartTimestamp.to_value));
+        ("ReadFromTimestamp",
+          (Option.map x.readFromTimestamp ~f:ReadFromTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let readFromTimestamp =
+        (Option.map ~f:ReadFromTimestamp.of_xml)
+          (Xml.child xml_arg0 "ReadFromTimestamp") in
+      let deliveryStartTimestamp =
+        (Option.map ~f:DeliveryStartTimestamp.of_xml)
+          (Xml.child xml_arg0 "DeliveryStartTimestamp") in
+      let authenticationConfiguration =
+        (Option.map ~f:AuthenticationConfiguration.of_xml)
+          (Xml.child xml_arg0 "AuthenticationConfiguration") in
+      let topicName =
+        (Option.map ~f:TopicName.of_xml) (Xml.child xml_arg0 "TopicName") in
+      let mSKClusterARN =
+        (Option.map ~f:MSKClusterARN.of_xml)
+          (Xml.child xml_arg0 "MSKClusterARN") in
+      make ?readFromTimestamp ?deliveryStartTimestamp
+        ?authenticationConfiguration ?topicName ?mSKClusterARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let readFromTimestamp =
+        field_map json__ "ReadFromTimestamp" ReadFromTimestamp.of_json in
+      let deliveryStartTimestamp =
+        field_map json__ "DeliveryStartTimestamp"
+          DeliveryStartTimestamp.of_json in
+      let authenticationConfiguration =
+        field_map json__ "AuthenticationConfiguration"
+          AuthenticationConfiguration.of_json in
+      let topicName = field_map json__ "TopicName" TopicName.of_json in
+      let mSKClusterARN =
+        field_map json__ "MSKClusterARN" MSKClusterARN.of_json in
+      make ?readFromTimestamp ?deliveryStartTimestamp
+        ?authenticationConfiguration ?topicName ?mSKClusterARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the Amazon MSK cluster used as the source for a Firehose stream."]
 module S3DestinationUpdate =
   struct
     type nonrec t =
       {
       roleARN: RoleARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       bucketARN: BucketARN.t option
         [@ocaml.doc
-          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       prefix: Prefix.t option
         [@ocaml.doc
           "The \"YYYY/MM/DD/HH\" time format prefix is automatically used for delivered Amazon S3 files. You can also specify a custom prefix, as described in Custom Prefixes for Amazon S3 Objects."];
       errorOutputPrefix: ErrorOutputPrefix.t option
         [@ocaml.doc
-          "A prefix that Kinesis Data Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
+          "A prefix that Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
       bufferingHints: BufferingHints.t option
         [@ocaml.doc
           "The buffering option. If no value is specified, BufferingHints object default values are used."];
@@ -4643,7 +7660,7 @@ module S3DestinationUpdate =
           "The encryption configuration. If no value is specified, the default is no encryption."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The CloudWatch logging options for your delivery stream."]}
+          "The CloudWatch logging options for your Firehose stream."]}
     let make ?roleARN =
       fun ?bucketARN ->
         fun ?prefix ->
@@ -4707,22 +7724,22 @@ module S3DestinationUpdate =
         ?compressionFormat ?bufferingHints ?errorOutputPrefix ?prefix
         ?bucketARN ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let encryptionConfiguration =
-        field_map json "EncryptionConfiguration"
+        field_map json__ "EncryptionConfiguration"
           EncryptionConfiguration.of_json in
       let compressionFormat =
-        field_map json "CompressionFormat" CompressionFormat.of_json in
+        field_map json__ "CompressionFormat" CompressionFormat.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" BufferingHints.of_json in
+        field_map json__ "BufferingHints" BufferingHints.of_json in
       let errorOutputPrefix =
-        field_map json "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
-      let prefix = field_map json "Prefix" Prefix.of_json in
-      let bucketARN = field_map json "BucketARN" BucketARN.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
+        field_map json__ "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
+      let prefix = field_map json__ "Prefix" Prefix.of_json in
+      let bucketARN = field_map json__ "BucketARN" BucketARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
       make ?cloudWatchLoggingOptions ?encryptionConfiguration
         ?compressionFormat ?bufferingHints ?errorOutputPrefix ?prefix
         ?bucketARN ?roleARN ()
@@ -4762,387 +7779,31 @@ module HttpEndpointConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Url") in
       make ?accessKey ?name ~url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessKey =
-        field_map json "AccessKey" HttpEndpointAccessKey.of_json in
-      let name = field_map json "Name" HttpEndpointName.of_json in
-      let url = field_map_exn json "Url" HttpEndpointUrl.of_json in
+        field_map json__ "AccessKey" HttpEndpointAccessKey.of_json in
+      let name = field_map json__ "Name" HttpEndpointName.of_json in
+      let url = field_map_exn json__ "Url" HttpEndpointUrl.of_json in
       make ?accessKey ?name ~url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration of the HTTP endpoint to which Kinesis Firehose delivers data."]
-module Password =
-  struct
-    type nonrec t = string
-    let context_ = "Password"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:6) >>=
-             (fun () ->
-                (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:".*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Password" j
-    let to_json = simple_to_json to_value
-  end
-module Tag =
-  struct
-    type nonrec t =
-      {
-      key: TagKey.t
-        [@ocaml.doc
-          "A unique identifier for the tag. Maximum length: 128 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"];
-      value: TagValue.t option
-        [@ocaml.doc
-          "An optional string, which you can use to describe or define the tag. Maximum length: 256 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"]}
-    let context_ = "Tag"
-    let make ?value = fun ~key -> fun () -> { value; key }
-    let to_value x =
-      structure_to_value
-        [("Key", (Some (TagKey.to_value x.key)));
-        ("Value", (Option.map x.value ~f:TagValue.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
-      let key =
-        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ?value ~key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
-      make ?value ~key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Metadata that you can assign to a delivery stream, consisting of a key-value pair."]
-module PutRecordBatchResponseEntry =
-  struct
-    type nonrec t =
-      {
-      recordId: PutResponseRecordId.t option
-        [@ocaml.doc "The ID of the record."];
-      errorCode: ErrorCode.t option
-        [@ocaml.doc "The error code for an individual record result."];
-      errorMessage: ErrorMessage.t option
-        [@ocaml.doc "The error message for an individual record result."]}
-    let make ?recordId =
-      fun ?errorCode ->
-        fun ?errorMessage -> fun () -> { recordId; errorCode; errorMessage }
-    let to_value x =
-      structure_to_value
-        [("RecordId",
-           (Option.map x.recordId ~f:PutResponseRecordId.to_value));
-        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
-        ("ErrorMessage",
-          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let errorMessage =
-        (Option.map ~f:ErrorMessage.of_xml)
-          (Xml.child xml_arg0 "ErrorMessage") in
-      let errorCode =
-        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
-      let recordId =
-        (Option.map ~f:PutResponseRecordId.of_xml)
-          (Xml.child xml_arg0 "RecordId") in
-      make ?errorMessage ?errorCode ?recordId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let recordId = field_map json "RecordId" PutResponseRecordId.of_json in
-      make ?errorMessage ?errorCode ?recordId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains the result for an individual record from a PutRecordBatch request. If the record is successfully added to your delivery stream, it receives a record ID. If the record fails to be added to your delivery stream, the result includes an error code and an error message."]
-module Record =
-  struct
-    type nonrec t =
-      {
-      data: Data.t
-        [@ocaml.doc
-          "The data blob, which is base64-encoded when the blob is serialized. The maximum size of the data blob, before base64-encoding, is 1,000 KiB."]}
-    let context_ = "Record"
-    let make ~data = fun () -> { data }
-    let of_header_and_body = ((fun (xs, pipe) -> make ~data:pipe ())
-      [@warning "-27"])
-    let to_value x =
-      structure_to_value [("Data", (Some (Data.to_value x.data)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let data =
-        Data.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
-      make ~data ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map_exn json "Data" Data.of_json in make ~data ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The unit of data in a delivery stream."]
-module DeliveryStreamName =
-  struct
-    type nonrec t = string
-    let context_ = "DeliveryStreamName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_.-]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DeliveryStreamName" j
-    let to_json = simple_to_json to_value
-  end
-module DeliveryStreamARN =
-  struct
-    type nonrec t = string
-    let context_ = "DeliveryStreamARN"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:"arn:.*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DeliveryStreamARN" j
-    let to_json = simple_to_json to_value
-  end
-module DeliveryStreamEncryptionConfiguration =
-  struct
-    type nonrec t =
-      {
-      keyARN: AWSKMSKeyARN.t option
-        [@ocaml.doc
-          "If KeyType is CUSTOMER_MANAGED_CMK, this field contains the ARN of the customer managed CMK. If KeyType is AWS_OWNED_CMK, DeliveryStreamEncryptionConfiguration doesn't contain a value for KeyARN."];
-      keyType: KeyType.t option
-        [@ocaml.doc
-          "Indicates the type of customer master key (CMK) that is used for encryption. The default setting is AWS_OWNED_CMK. For more information about CMKs, see Customer Master Keys (CMKs)."];
-      status: DeliveryStreamEncryptionStatus.t option
-        [@ocaml.doc
-          "This is the server-side encryption (SSE) status for the delivery stream. For a full description of the different values of this status, see StartDeliveryStreamEncryption and StopDeliveryStreamEncryption. If this status is ENABLING_FAILED or DISABLING_FAILED, it is the status of the most recent attempt to enable or disable SSE, respectively."];
-      failureDescription: FailureDescription.t option
-        [@ocaml.doc
-          "Provides details in case one of the following operations fails due to an error related to KMS: CreateDeliveryStream, DeleteDeliveryStream, StartDeliveryStreamEncryption, StopDeliveryStreamEncryption."]}
-    let make ?keyARN =
-      fun ?keyType ->
-        fun ?status ->
-          fun ?failureDescription ->
-            fun () -> { keyARN; keyType; status; failureDescription }
-    let to_value x =
-      structure_to_value
-        [("KeyARN", (Option.map x.keyARN ~f:AWSKMSKeyARN.to_value));
-        ("KeyType", (Option.map x.keyType ~f:KeyType.to_value));
-        ("Status",
-          (Option.map x.status ~f:DeliveryStreamEncryptionStatus.to_value));
-        ("FailureDescription",
-          (Option.map x.failureDescription ~f:FailureDescription.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let failureDescription =
-        (Option.map ~f:FailureDescription.of_xml)
-          (Xml.child xml_arg0 "FailureDescription") in
-      let status =
-        (Option.map ~f:DeliveryStreamEncryptionStatus.of_xml)
-          (Xml.child xml_arg0 "Status") in
-      let keyType =
-        (Option.map ~f:KeyType.of_xml) (Xml.child xml_arg0 "KeyType") in
-      let keyARN =
-        (Option.map ~f:AWSKMSKeyARN.of_xml) (Xml.child xml_arg0 "KeyARN") in
-      make ?failureDescription ?status ?keyType ?keyARN ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failureDescription =
-        field_map json "FailureDescription" FailureDescription.of_json in
-      let status =
-        field_map json "Status" DeliveryStreamEncryptionStatus.of_json in
-      let keyType = field_map json "KeyType" KeyType.of_json in
-      let keyARN = field_map json "KeyARN" AWSKMSKeyARN.of_json in
-      make ?failureDescription ?status ?keyType ?keyARN ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains information about the server-side encryption (SSE) status for the delivery stream, the type customer master key (CMK) in use, if any, and the ARN of the CMK. You can get DeliveryStreamEncryptionConfiguration by invoking the DescribeDeliveryStream operation."]
-module DeliveryStreamStatus =
-  struct
-    type nonrec t =
-      | CREATING 
-      | CREATING_FAILED 
-      | DELETING 
-      | DELETING_FAILED 
-      | ACTIVE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | CREATING -> "CREATING"
-      | CREATING_FAILED -> "CREATING_FAILED"
-      | DELETING -> "DELETING"
-      | DELETING_FAILED -> "DELETING_FAILED"
-      | ACTIVE -> "ACTIVE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "CREATING" -> CREATING
-      | "CREATING_FAILED" -> CREATING_FAILED
-      | "DELETING" -> DELETING
-      | "DELETING_FAILED" -> DELETING_FAILED
-      | "ACTIVE" -> ACTIVE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration DeliveryStreamStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"DeliveryStreamStatus" j)
-    let to_json = simple_to_json to_value
-  end
-module DeliveryStreamType =
-  struct
-    type nonrec t =
-      | DirectPut 
-      | KinesisStreamAsSource 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | DirectPut -> "DirectPut"
-      | KinesisStreamAsSource -> "KinesisStreamAsSource"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "DirectPut" -> DirectPut
-      | "KinesisStreamAsSource" -> KinesisStreamAsSource
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration DeliveryStreamType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"DeliveryStreamType" j)
-    let to_json = simple_to_json to_value
-  end
-module DeliveryStreamVersionId =
-  struct
-    type nonrec t = string
-    let context_ = "DeliveryStreamVersionId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:50) >>=
-                  (fun () -> check_pattern i ~pattern:"[0-9]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DeliveryStreamVersionId" j
-    let to_json = simple_to_json to_value
-  end
-module DestinationDescriptionList =
-  struct
-    type nonrec t = DestinationDescription.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:DestinationDescription.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DestinationDescription.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DestinationDescriptionList"
-        ~of_json:DestinationDescription.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module SourceDescription =
-  struct
-    type nonrec t =
-      {
-      kinesisStreamSourceDescription: KinesisStreamSourceDescription.t option
-        [@ocaml.doc
-          "The KinesisStreamSourceDescription value for the source Kinesis data stream."]}
-    let make ?kinesisStreamSourceDescription =
-      fun () -> { kinesisStreamSourceDescription }
-    let to_value x =
-      structure_to_value
-        [("KinesisStreamSourceDescription",
-           (Option.map x.kinesisStreamSourceDescription
-              ~f:KinesisStreamSourceDescription.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let kinesisStreamSourceDescription =
-        (Option.map ~f:KinesisStreamSourceDescription.of_xml)
-          (Xml.child xml_arg0 "KinesisStreamSourceDescription") in
-      make ?kinesisStreamSourceDescription ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kinesisStreamSourceDescription =
-        field_map json "KinesisStreamSourceDescription"
-          KinesisStreamSourceDescription.of_json in
-      make ?kinesisStreamSourceDescription ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Details about a Kinesis data stream used as the source for a Kinesis Data Firehose delivery stream."]
-module Timestamp =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
 module S3DestinationConfiguration =
   struct
     type nonrec t =
       {
       roleARN: RoleARN.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       bucketARN: BucketARN.t
         [@ocaml.doc
-          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       prefix: Prefix.t option
         [@ocaml.doc
           "The \"YYYY/MM/DD/HH\" time format prefix is automatically used for delivered Amazon S3 files. You can also specify a custom prefix, as described in Custom Prefixes for Amazon S3 Objects."];
       errorOutputPrefix: ErrorOutputPrefix.t option
         [@ocaml.doc
-          "A prefix that Kinesis Data Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
+          "A prefix that Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
       bufferingHints: BufferingHints.t option
         [@ocaml.doc
           "The buffering option. If no value is specified, BufferingHints object default values are used."];
@@ -5154,7 +7815,7 @@ module S3DestinationConfiguration =
           "The encryption configuration. If no value is specified, the default is no encryption."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The CloudWatch logging options for your delivery stream."]}
+          "The CloudWatch logging options for your Firehose stream."]}
     let context_ = "S3DestinationConfiguration"
     let make ?prefix =
       fun ?errorOutputPrefix ->
@@ -5220,41 +7881,481 @@ module S3DestinationConfiguration =
         ?compressionFormat ?bufferingHints ?errorOutputPrefix ?prefix
         ~bucketARN ~roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let encryptionConfiguration =
-        field_map json "EncryptionConfiguration"
+        field_map json__ "EncryptionConfiguration"
           EncryptionConfiguration.of_json in
       let compressionFormat =
-        field_map json "CompressionFormat" CompressionFormat.of_json in
+        field_map json__ "CompressionFormat" CompressionFormat.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" BufferingHints.of_json in
+        field_map json__ "BufferingHints" BufferingHints.of_json in
       let errorOutputPrefix =
-        field_map json "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
-      let prefix = field_map json "Prefix" Prefix.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
+        field_map json__ "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
+      let prefix = field_map json__ "Prefix" Prefix.of_json in
+      let bucketARN = field_map_exn json__ "BucketARN" BucketARN.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
       make ?cloudWatchLoggingOptions ?encryptionConfiguration
         ?compressionFormat ?bufferingHints ?errorOutputPrefix ?prefix
         ~bucketARN ~roleARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration of a destination in Amazon S3."]
+module Password =
+  struct
+    type nonrec t = string
+    let context_ = "Password"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:6) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Password" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakeKeyPassphrase =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakeKeyPassphrase"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:7));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakeKeyPassphrase" j
+    let to_json = simple_to_json to_value
+  end
+module SnowflakePrivateKey =
+  struct
+    type nonrec t = string
+    let context_ = "SnowflakePrivateKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:256) >>=
+             (fun () ->
+                (check_string_max i ~max:4096) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=)?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnowflakePrivateKey" j
+    let to_json = simple_to_json to_value
+  end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t
+        [@ocaml.doc
+          "A unique identifier for the tag. Maximum length: 128 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"];
+      value: TagValue.t option
+        [@ocaml.doc
+          "An optional string, which you can use to describe or define the tag. Maximum length: 256 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"]}
+    let context_ = "Tag"
+    let make ?value = fun ~key -> fun () -> { value; key }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Option.map x.value ~f:TagValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ?value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Metadata that you can assign to a Firehose stream, consisting of a key-value pair."]
+module PutRecordBatchResponseEntry =
+  struct
+    type nonrec t =
+      {
+      recordId: PutResponseRecordId.t option
+        [@ocaml.doc "The ID of the record."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc "The error code for an individual record result."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc "The error message for an individual record result."]}
+    let make ?recordId =
+      fun ?errorCode ->
+        fun ?errorMessage -> fun () -> { recordId; errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("RecordId",
+           (Option.map x.recordId ~f:PutResponseRecordId.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let recordId =
+        (Option.map ~f:PutResponseRecordId.of_xml)
+          (Xml.child xml_arg0 "RecordId") in
+      make ?errorMessage ?errorCode ?recordId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let recordId = field_map json__ "RecordId" PutResponseRecordId.of_json in
+      make ?errorMessage ?errorCode ?recordId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the result for an individual record from a PutRecordBatch request. If the record is successfully added to your Firehose stream, it receives a record ID. If the record fails to be added to your Firehose stream, the result includes an error code and an error message."]
+module Record =
+  struct
+    type nonrec t =
+      {
+      data: Data.t
+        [@ocaml.doc
+          "The data blob, which is base64-encoded when the blob is serialized. The maximum size of the data blob, before base64-encoding, is 1,000 KiB."]}
+    let context_ = "Record"
+    let make ~data = fun () -> { data }
+    let of_header_and_body = ((fun (xs, pipe) -> make ~data:pipe ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value [("Data", (Some (Data.to_value x.data)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let data =
+        Data.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
+      make ~data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let data = field_map_exn json__ "Data" Data.of_json in make ~data ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The unit of data in a Firehose stream."]
+module DeliveryStreamName =
+  struct
+    type nonrec t = string
+    let context_ = "DeliveryStreamName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_.-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeliveryStreamName" j
+    let to_json = simple_to_json to_value
+  end
+module DeliveryStreamARN =
+  struct
+    type nonrec t = string
+    let context_ = "DeliveryStreamARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:.*:firehose:[a-zA-Z0-9\\-]+:\\d{12}:deliverystream/[a-zA-Z0-9._-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeliveryStreamARN" j
+    let to_json = simple_to_json to_value
+  end
+module DeliveryStreamEncryptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      keyARN: AWSKMSKeyARN.t option
+        [@ocaml.doc
+          "If KeyType is CUSTOMER_MANAGED_CMK, this field contains the ARN of the customer managed CMK. If KeyType is Amazon Web Services_OWNED_CMK, DeliveryStreamEncryptionConfiguration doesn't contain a value for KeyARN."];
+      keyType: KeyType.t option
+        [@ocaml.doc
+          "Indicates the type of customer master key (CMK) that is used for encryption. The default setting is Amazon Web Services_OWNED_CMK. For more information about CMKs, see Customer Master Keys (CMKs)."];
+      status: DeliveryStreamEncryptionStatus.t option
+        [@ocaml.doc
+          "This is the server-side encryption (SSE) status for the Firehose stream. For a full description of the different values of this status, see StartDeliveryStreamEncryption and StopDeliveryStreamEncryption. If this status is ENABLING_FAILED or DISABLING_FAILED, it is the status of the most recent attempt to enable or disable SSE, respectively."];
+      failureDescription: FailureDescription.t option
+        [@ocaml.doc
+          "Provides details in case one of the following operations fails due to an error related to KMS: CreateDeliveryStream, DeleteDeliveryStream, StartDeliveryStreamEncryption, StopDeliveryStreamEncryption."]}
+    let make ?keyARN =
+      fun ?keyType ->
+        fun ?status ->
+          fun ?failureDescription ->
+            fun () -> { keyARN; keyType; status; failureDescription }
+    let to_value x =
+      structure_to_value
+        [("KeyARN", (Option.map x.keyARN ~f:AWSKMSKeyARN.to_value));
+        ("KeyType", (Option.map x.keyType ~f:KeyType.to_value));
+        ("Status",
+          (Option.map x.status ~f:DeliveryStreamEncryptionStatus.to_value));
+        ("FailureDescription",
+          (Option.map x.failureDescription ~f:FailureDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureDescription =
+        (Option.map ~f:FailureDescription.of_xml)
+          (Xml.child xml_arg0 "FailureDescription") in
+      let status =
+        (Option.map ~f:DeliveryStreamEncryptionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let keyType =
+        (Option.map ~f:KeyType.of_xml) (Xml.child xml_arg0 "KeyType") in
+      let keyARN =
+        (Option.map ~f:AWSKMSKeyARN.of_xml) (Xml.child xml_arg0 "KeyARN") in
+      make ?failureDescription ?status ?keyType ?keyARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureDescription =
+        field_map json__ "FailureDescription" FailureDescription.of_json in
+      let status =
+        field_map json__ "Status" DeliveryStreamEncryptionStatus.of_json in
+      let keyType = field_map json__ "KeyType" KeyType.of_json in
+      let keyARN = field_map json__ "KeyARN" AWSKMSKeyARN.of_json in
+      make ?failureDescription ?status ?keyType ?keyARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the server-side encryption (SSE) status for the delivery stream, the type customer master key (CMK) in use, if any, and the ARN of the CMK. You can get DeliveryStreamEncryptionConfiguration by invoking the DescribeDeliveryStream operation."]
+module DeliveryStreamStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATING_FAILED 
+      | DELETING 
+      | DELETING_FAILED 
+      | ACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATING_FAILED -> "CREATING_FAILED"
+      | DELETING -> "DELETING"
+      | DELETING_FAILED -> "DELETING_FAILED"
+      | ACTIVE -> "ACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATING_FAILED" -> CREATING_FAILED
+      | "DELETING" -> DELETING
+      | "DELETING_FAILED" -> DELETING_FAILED
+      | "ACTIVE" -> ACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeliveryStreamStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeliveryStreamStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module DeliveryStreamType =
+  struct
+    type nonrec t =
+      | DirectPut 
+      | KinesisStreamAsSource 
+      | MSKAsSource 
+      | DatabaseAsSource 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DirectPut -> "DirectPut"
+      | KinesisStreamAsSource -> "KinesisStreamAsSource"
+      | MSKAsSource -> "MSKAsSource"
+      | DatabaseAsSource -> "DatabaseAsSource"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DirectPut" -> DirectPut
+      | "KinesisStreamAsSource" -> KinesisStreamAsSource
+      | "MSKAsSource" -> MSKAsSource
+      | "DatabaseAsSource" -> DatabaseAsSource
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeliveryStreamType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeliveryStreamType" j)
+    let to_json = simple_to_json to_value
+  end
+module DeliveryStreamVersionId =
+  struct
+    type nonrec t = string
+    let context_ = "DeliveryStreamVersionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeliveryStreamVersionId" j
+    let to_json = simple_to_json to_value
+  end
+module DestinationDescriptionList =
+  struct
+    type nonrec t = DestinationDescription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DestinationDescription.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DestinationDescription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DestinationDescriptionList"
+        ~of_json:DestinationDescription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SourceDescription =
+  struct
+    type nonrec t =
+      {
+      directPutSourceDescription: DirectPutSourceDescription.t option
+        [@ocaml.doc
+          "Details about Direct PUT used as the source for a Firehose stream."];
+      kinesisStreamSourceDescription: KinesisStreamSourceDescription.t option
+        [@ocaml.doc
+          "The KinesisStreamSourceDescription value for the source Kinesis data stream."];
+      mSKSourceDescription: MSKSourceDescription.t option
+        [@ocaml.doc
+          "The configuration description for the Amazon MSK cluster to be used as the source for a delivery stream."];
+      databaseSourceDescription: DatabaseSourceDescription.t option
+        [@ocaml.doc
+          "Details about a database used as the source for a Firehose stream. Amazon Data Firehose is in preview release and is subject to change."]}
+    let make ?directPutSourceDescription =
+      fun ?kinesisStreamSourceDescription ->
+        fun ?mSKSourceDescription ->
+          fun ?databaseSourceDescription ->
+            fun () ->
+              {
+                directPutSourceDescription;
+                kinesisStreamSourceDescription;
+                mSKSourceDescription;
+                databaseSourceDescription
+              }
+    let to_value x =
+      structure_to_value
+        [("DirectPutSourceDescription",
+           (Option.map x.directPutSourceDescription
+              ~f:DirectPutSourceDescription.to_value));
+        ("KinesisStreamSourceDescription",
+          (Option.map x.kinesisStreamSourceDescription
+             ~f:KinesisStreamSourceDescription.to_value));
+        ("MSKSourceDescription",
+          (Option.map x.mSKSourceDescription ~f:MSKSourceDescription.to_value));
+        ("DatabaseSourceDescription",
+          (Option.map x.databaseSourceDescription
+             ~f:DatabaseSourceDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let databaseSourceDescription =
+        (Option.map ~f:DatabaseSourceDescription.of_xml)
+          (Xml.child xml_arg0 "DatabaseSourceDescription") in
+      let mSKSourceDescription =
+        (Option.map ~f:MSKSourceDescription.of_xml)
+          (Xml.child xml_arg0 "MSKSourceDescription") in
+      let kinesisStreamSourceDescription =
+        (Option.map ~f:KinesisStreamSourceDescription.of_xml)
+          (Xml.child xml_arg0 "KinesisStreamSourceDescription") in
+      let directPutSourceDescription =
+        (Option.map ~f:DirectPutSourceDescription.of_xml)
+          (Xml.child xml_arg0 "DirectPutSourceDescription") in
+      make ?databaseSourceDescription ?mSKSourceDescription
+        ?kinesisStreamSourceDescription ?directPutSourceDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let databaseSourceDescription =
+        field_map json__ "DatabaseSourceDescription"
+          DatabaseSourceDescription.of_json in
+      let mSKSourceDescription =
+        field_map json__ "MSKSourceDescription" MSKSourceDescription.of_json in
+      let kinesisStreamSourceDescription =
+        field_map json__ "KinesisStreamSourceDescription"
+          KinesisStreamSourceDescription.of_json in
+      let directPutSourceDescription =
+        field_map json__ "DirectPutSourceDescription"
+          DirectPutSourceDescription.of_json in
+      make ?databaseSourceDescription ?mSKSourceDescription
+        ?kinesisStreamSourceDescription ?directPutSourceDescription ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about a Kinesis data stream used as the source for a Firehose stream."]
 module VpcConfiguration =
   struct
     type nonrec t =
       {
       subnetIds: SubnetIdList.t
         [@ocaml.doc
-          "The IDs of the subnets that you want Kinesis Data Firehose to use to create ENIs in the VPC of the Amazon ES destination. Make sure that the routing tables and inbound and outbound rules allow traffic to flow from the subnets whose IDs are specified here to the subnets that have the destination Amazon ES endpoints. Kinesis Data Firehose creates at least one ENI in each of the subnets that are specified here. Do not delete or modify these ENIs. The number of ENIs that Kinesis Data Firehose creates in the subnets specified here scales up and down automatically based on throughput. To enable Kinesis Data Firehose to scale up the number of ENIs to match throughput, ensure that you have sufficient quota. To help you calculate the quota you need, assume that Kinesis Data Firehose can create up to three ENIs for this delivery stream for each of the subnets specified here. For more information about ENI quota, see Network Interfaces in the Amazon VPC Quotas topic."];
+          "The IDs of the subnets that you want Firehose to use to create ENIs in the VPC of the Amazon OpenSearch Service destination. Make sure that the routing tables and inbound and outbound rules allow traffic to flow from the subnets whose IDs are specified here to the subnets that have the destination Amazon OpenSearch Service endpoints. Firehose creates at least one ENI in each of the subnets that are specified here. Do not delete or modify these ENIs. The number of ENIs that Firehose creates in the subnets specified here scales up and down automatically based on throughput. To enable Firehose to scale up the number of ENIs to match throughput, ensure that you have sufficient quota. To help you calculate the quota you need, assume that Firehose can create up to three ENIs for this Firehose stream for each of the subnets specified here. For more information about ENI quota, see Network Interfaces in the Amazon VPC Quotas topic."];
       roleARN: RoleARN.t
         [@ocaml.doc
-          "The ARN of the IAM role that you want the delivery stream to use to create endpoints in the destination VPC. You can use your existing Kinesis Data Firehose delivery role or you can specify a new role. In either case, make sure that the role trusts the Kinesis Data Firehose service principal and that it grants the following permissions: ec2:DescribeVpcs ec2:DescribeVpcAttribute ec2:DescribeSubnets ec2:DescribeSecurityGroups ec2:DescribeNetworkInterfaces ec2:CreateNetworkInterface ec2:CreateNetworkInterfacePermission ec2:DeleteNetworkInterface If you revoke these permissions after you create the delivery stream, Kinesis Data Firehose can't scale out by creating more ENIs when necessary. You might therefore see a degradation in performance."];
+          "The ARN of the IAM role that you want the Firehose stream to use to create endpoints in the destination VPC. You can use your existing Firehose delivery role or you can specify a new role. In either case, make sure that the role trusts the Firehose service principal and that it grants the following permissions: ec2:DescribeVpcs ec2:DescribeVpcAttribute ec2:DescribeSubnets ec2:DescribeSecurityGroups ec2:DescribeNetworkInterfaces ec2:CreateNetworkInterface ec2:CreateNetworkInterfacePermission ec2:DeleteNetworkInterface When you specify subnets for delivering data to the destination in a private VPC, make sure you have enough number of free IP addresses in chosen subnets. If there is no available free IP address in a specified subnet, Firehose cannot create or add ENIs for the data delivery in the private VPC, and the delivery will be degraded or fail."];
       securityGroupIds: SecurityGroupIdList.t
         [@ocaml.doc
-          "The IDs of the security groups that you want Kinesis Data Firehose to use when it creates ENIs in the VPC of the Amazon ES destination. You can use the same security group that the Amazon ES domain uses or different ones. If you specify different security groups here, ensure that they allow outbound HTTPS traffic to the Amazon ES domain's security group. Also ensure that the Amazon ES domain's security group allows HTTPS traffic from the security groups specified here. If you use the same security group for both your delivery stream and the Amazon ES domain, make sure the security group inbound rule allows HTTPS traffic. For more information about security group rules, see Security group rules in the Amazon VPC documentation."]}
+          "The IDs of the security groups that you want Firehose to use when it creates ENIs in the VPC of the Amazon OpenSearch Service destination. You can use the same security group that the Amazon OpenSearch Service domain uses or different ones. If you specify different security groups here, ensure that they allow outbound HTTPS traffic to the Amazon OpenSearch Service domain's security group. Also ensure that the Amazon OpenSearch Service domain's security group allows HTTPS traffic from the security groups specified here. If you use the same security group for both your delivery stream and the Amazon OpenSearch Service domain, make sure the security group inbound rule allows HTTPS traffic. For more information about security group rules, see Security group rules in the Amazon VPC documentation."]}
     let context_ = "VpcConfiguration"
     let make ~subnetIds =
       fun ~roleARN ->
@@ -5278,14 +8379,44 @@ module VpcConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
       make ~securityGroupIds ~roleARN ~subnetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" SecurityGroupIdList.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIdList.of_json in
+        field_map_exn json__ "SecurityGroupIds" SecurityGroupIdList.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIdList.of_json in
       make ~securityGroupIds ~roleARN ~subnetIds ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The details of the VPC of the Amazon ES destination."]
+  end[@@ocaml.doc
+       "The details of the VPC of the Amazon OpenSearch or Amazon OpenSearch Serverless destination."]
+module DatabaseSurrogateKeyList =
+  struct
+    type nonrec t = NonEmptyStringWithoutWhitespace.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyStringWithoutWhitespace.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyStringWithoutWhitespace.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatabaseSurrogateKeyList"
+        ~of_json:NonEmptyStringWithoutWhitespace.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ConcurrentModificationException =
   struct
     type nonrec t =
@@ -5302,8 +8433,8 @@ module ConcurrentModificationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5324,8 +8455,8 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5346,8 +8477,8 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5368,27 +8499,165 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource could not be found."]
+module AmazonOpenSearchServerlessDestinationUpdate =
+  struct
+    type nonrec t =
+      {
+      roleARN: RoleARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Firehose for calling the Serverless offering for Amazon OpenSearch Service Configuration API and for indexing documents."];
+      collectionEndpoint:
+        AmazonOpenSearchServerlessCollectionEndpoint.t option
+        [@ocaml.doc
+          "The endpoint to use when communicating with the collection in the Serverless offering for Amazon OpenSearch Service."];
+      indexName: AmazonOpenSearchServerlessIndexName.t option
+        [@ocaml.doc
+          "The Serverless offering for Amazon OpenSearch Service index name."];
+      bufferingHints: AmazonOpenSearchServerlessBufferingHints.t option
+        [@ocaml.doc
+          "The buffering options. If no value is specified, AmazonopensearchBufferingHints object default values are used."];
+      retryOptions: AmazonOpenSearchServerlessRetryOptions.t option
+        [@ocaml.doc
+          "The retry behavior in case Firehose is unable to deliver documents to the Serverless offering for Amazon OpenSearch Service. The default value is 300 (5 minutes)."];
+      s3Update: S3DestinationUpdate.t option ;
+      processingConfiguration: ProcessingConfiguration.t option ;
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option }
+    let make ?roleARN =
+      fun ?collectionEndpoint ->
+        fun ?indexName ->
+          fun ?bufferingHints ->
+            fun ?retryOptions ->
+              fun ?s3Update ->
+                fun ?processingConfiguration ->
+                  fun ?cloudWatchLoggingOptions ->
+                    fun () ->
+                      {
+                        roleARN;
+                        collectionEndpoint;
+                        indexName;
+                        bufferingHints;
+                        retryOptions;
+                        s3Update;
+                        processingConfiguration;
+                        cloudWatchLoggingOptions
+                      }
+    let to_value x =
+      structure_to_value
+        [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("CollectionEndpoint",
+          (Option.map x.collectionEndpoint
+             ~f:AmazonOpenSearchServerlessCollectionEndpoint.to_value));
+        ("IndexName",
+          (Option.map x.indexName
+             ~f:AmazonOpenSearchServerlessIndexName.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints
+             ~f:AmazonOpenSearchServerlessBufferingHints.to_value));
+        ("RetryOptions",
+          (Option.map x.retryOptions
+             ~f:AmazonOpenSearchServerlessRetryOptions.to_value));
+        ("S3Update", (Option.map x.s3Update ~f:S3DestinationUpdate.to_value));
+        ("ProcessingConfiguration",
+          (Option.map x.processingConfiguration
+             ~f:ProcessingConfiguration.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let processingConfiguration =
+        (Option.map ~f:ProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProcessingConfiguration") in
+      let s3Update =
+        (Option.map ~f:S3DestinationUpdate.of_xml)
+          (Xml.child xml_arg0 "S3Update") in
+      let retryOptions =
+        (Option.map ~f:AmazonOpenSearchServerlessRetryOptions.of_xml)
+          (Xml.child xml_arg0 "RetryOptions") in
+      let bufferingHints =
+        (Option.map ~f:AmazonOpenSearchServerlessBufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let indexName =
+        (Option.map ~f:AmazonOpenSearchServerlessIndexName.of_xml)
+          (Xml.child xml_arg0 "IndexName") in
+      let collectionEndpoint =
+        (Option.map ~f:AmazonOpenSearchServerlessCollectionEndpoint.of_xml)
+          (Xml.child xml_arg0 "CollectionEndpoint") in
+      let roleARN =
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
+        ?retryOptions ?bufferingHints ?indexName ?collectionEndpoint ?roleARN
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let processingConfiguration =
+        field_map json__ "ProcessingConfiguration"
+          ProcessingConfiguration.of_json in
+      let s3Update = field_map json__ "S3Update" S3DestinationUpdate.of_json in
+      let retryOptions =
+        field_map json__ "RetryOptions"
+          AmazonOpenSearchServerlessRetryOptions.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints"
+          AmazonOpenSearchServerlessBufferingHints.of_json in
+      let indexName =
+        field_map json__ "IndexName"
+          AmazonOpenSearchServerlessIndexName.of_json in
+      let collectionEndpoint =
+        field_map json__ "CollectionEndpoint"
+          AmazonOpenSearchServerlessCollectionEndpoint.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
+        ?retryOptions ?bufferingHints ?indexName ?collectionEndpoint ?roleARN
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an update for a destination in the Serverless offering for Amazon OpenSearch Service."]
 module AmazonopensearchserviceDestinationUpdate =
   struct
     type nonrec t =
       {
-      roleARN: RoleARN.t option ;
-      domainARN: AmazonopensearchserviceDomainARN.t option ;
-      clusterEndpoint: AmazonopensearchserviceClusterEndpoint.t option ;
-      indexName: AmazonopensearchserviceIndexName.t option ;
-      typeName: AmazonopensearchserviceTypeName.t option ;
+      roleARN: RoleARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Firehose for calling the Amazon OpenSearch Service Configuration API and for indexing documents."];
+      domainARN: AmazonopensearchserviceDomainARN.t option
+        [@ocaml.doc
+          "The ARN of the Amazon OpenSearch Service domain. The IAM role must have permissions for DescribeDomain, DescribeDomains, and DescribeDomainConfig after assuming the IAM role specified in RoleARN."];
+      clusterEndpoint: AmazonopensearchserviceClusterEndpoint.t option
+        [@ocaml.doc
+          "The endpoint to use when communicating with the cluster. Specify either this ClusterEndpoint or the DomainARN field."];
+      indexName: AmazonopensearchserviceIndexName.t option
+        [@ocaml.doc "The Amazon OpenSearch Service index name."];
+      typeName: AmazonopensearchserviceTypeName.t option
+        [@ocaml.doc
+          "The Amazon OpenSearch Service type name. For Elasticsearch 6.x, there can be only one type per index. If you try to specify a new type for an existing index that already has another type, Firehose returns an error during runtime. If you upgrade Elasticsearch from 6.x to 7.x and don\226\128\153t update your Firehose stream, Firehose still delivers data to Elasticsearch with the old index name and type name. If you want to update your Firehose stream with a new index name, provide an empty string for TypeName."];
       indexRotationPeriod:
-        AmazonopensearchserviceIndexRotationPeriod.t option ;
-      bufferingHints: AmazonopensearchserviceBufferingHints.t option ;
-      retryOptions: AmazonopensearchserviceRetryOptions.t option ;
+        AmazonopensearchserviceIndexRotationPeriod.t option
+        [@ocaml.doc
+          "The Amazon OpenSearch Service index rotation period. Index rotation appends a timestamp to IndexName to facilitate the expiration of old data."];
+      bufferingHints: AmazonopensearchserviceBufferingHints.t option
+        [@ocaml.doc
+          "The buffering options. If no value is specified, AmazonopensearchBufferingHints object default values are used."];
+      retryOptions: AmazonopensearchserviceRetryOptions.t option
+        [@ocaml.doc
+          "The retry behavior in case Firehose is unable to deliver documents to Amazon OpenSearch Service. The default value is 300 (5 minutes)."];
       s3Update: S3DestinationUpdate.t option ;
       processingConfiguration: ProcessingConfiguration.t option ;
-      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option }
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
+      documentIdOptions: DocumentIdOptions.t option
+        [@ocaml.doc
+          "Indicates the method for setting up document ID. The supported methods are Firehose generated document ID and OpenSearch Service generated document ID."]}
     let make ?roleARN =
       fun ?domainARN ->
         fun ?clusterEndpoint ->
@@ -5400,20 +8669,22 @@ module AmazonopensearchserviceDestinationUpdate =
                     fun ?s3Update ->
                       fun ?processingConfiguration ->
                         fun ?cloudWatchLoggingOptions ->
-                          fun () ->
-                            {
-                              roleARN;
-                              domainARN;
-                              clusterEndpoint;
-                              indexName;
-                              typeName;
-                              indexRotationPeriod;
-                              bufferingHints;
-                              retryOptions;
-                              s3Update;
-                              processingConfiguration;
-                              cloudWatchLoggingOptions
-                            }
+                          fun ?documentIdOptions ->
+                            fun () ->
+                              {
+                                roleARN;
+                                domainARN;
+                                clusterEndpoint;
+                                indexName;
+                                typeName;
+                                indexRotationPeriod;
+                                bufferingHints;
+                                retryOptions;
+                                s3Update;
+                                processingConfiguration;
+                                cloudWatchLoggingOptions;
+                                documentIdOptions
+                              }
     let to_value x =
       structure_to_value
         [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
@@ -5443,9 +8714,14 @@ module AmazonopensearchserviceDestinationUpdate =
              ~f:ProcessingConfiguration.to_value));
         ("CloudWatchLoggingOptions",
           (Option.map x.cloudWatchLoggingOptions
-             ~f:CloudWatchLoggingOptions.to_value))]
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("DocumentIdOptions",
+          (Option.map x.documentIdOptions ~f:DocumentIdOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentIdOptions =
+        (Option.map ~f:DocumentIdOptions.of_xml)
+          (Xml.child xml_arg0 "DocumentIdOptions") in
       let cloudWatchLoggingOptions =
         (Option.map ~f:CloudWatchLoggingOptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
@@ -5478,52 +8754,57 @@ module AmazonopensearchserviceDestinationUpdate =
           (Xml.child xml_arg0 "DomainARN") in
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
-      make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
-        ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
-        ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+      make ?documentIdOptions ?cloudWatchLoggingOptions
+        ?processingConfiguration ?s3Update ?retryOptions ?bufferingHints
+        ?indexRotationPeriod ?typeName ?indexName ?clusterEndpoint ?domainARN
+        ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let documentIdOptions =
+        field_map json__ "DocumentIdOptions" DocumentIdOptions.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
-      let s3Update = field_map json "S3Update" S3DestinationUpdate.of_json in
+      let s3Update = field_map json__ "S3Update" S3DestinationUpdate.of_json in
       let retryOptions =
-        field_map json "RetryOptions"
+        field_map json__ "RetryOptions"
           AmazonopensearchserviceRetryOptions.of_json in
       let bufferingHints =
-        field_map json "BufferingHints"
+        field_map json__ "BufferingHints"
           AmazonopensearchserviceBufferingHints.of_json in
       let indexRotationPeriod =
-        field_map json "IndexRotationPeriod"
+        field_map json__ "IndexRotationPeriod"
           AmazonopensearchserviceIndexRotationPeriod.of_json in
       let typeName =
-        field_map json "TypeName" AmazonopensearchserviceTypeName.of_json in
+        field_map json__ "TypeName" AmazonopensearchserviceTypeName.of_json in
       let indexName =
-        field_map json "IndexName" AmazonopensearchserviceIndexName.of_json in
+        field_map json__ "IndexName" AmazonopensearchserviceIndexName.of_json in
       let clusterEndpoint =
-        field_map json "ClusterEndpoint"
+        field_map json__ "ClusterEndpoint"
           AmazonopensearchserviceClusterEndpoint.of_json in
       let domainARN =
-        field_map json "DomainARN" AmazonopensearchserviceDomainARN.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
-        ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
-        ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+        field_map json__ "DomainARN" AmazonopensearchserviceDomainARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?documentIdOptions ?cloudWatchLoggingOptions
+        ?processingConfiguration ?s3Update ?retryOptions ?bufferingHints
+        ?indexRotationPeriod ?typeName ?indexName ?clusterEndpoint ?domainARN
+        ?roleARN ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Describes an update for a destination in Amazon OpenSearch Service."]
 module ElasticsearchDestinationUpdate =
   struct
     type nonrec t =
       {
       roleARN: RoleARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Kinesis Data Firehose for calling the Amazon ES Configuration API and for indexing documents. For more information, see Grant Kinesis Data Firehose Access to an Amazon S3 Destination and Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Firehose for calling the Amazon OpenSearch Service Configuration API and for indexing documents. For more information, see Grant Firehose Access to an Amazon S3 Destination and Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       domainARN: ElasticsearchDomainARN.t option
         [@ocaml.doc
-          "The ARN of the Amazon ES domain. The IAM role must have permissions for\194\160DescribeElasticsearchDomain, DescribeElasticsearchDomains, and DescribeElasticsearchDomainConfig\194\160after assuming the IAM role specified in RoleARN. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces. Specify either ClusterEndpoint or DomainARN."];
+          "The ARN of the Amazon OpenSearch Service domain. The IAM role must have permissions for\194\160DescribeDomain, DescribeDomains, and DescribeDomainConfig\194\160after assuming the IAM role specified in RoleARN. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces. Specify either ClusterEndpoint or DomainARN."];
       clusterEndpoint: ElasticsearchClusterEndpoint.t option
         [@ocaml.doc
           "The endpoint to use when communicating with the cluster. Specify either this ClusterEndpoint or the DomainARN field."];
@@ -5531,23 +8812,26 @@ module ElasticsearchDestinationUpdate =
         [@ocaml.doc "The Elasticsearch index name."];
       typeName: ElasticsearchTypeName.t option
         [@ocaml.doc
-          "The Elasticsearch type name. For Elasticsearch 6.x, there can be only one type per index. If you try to specify a new type for an existing index that already has another type, Kinesis Data Firehose returns an error during runtime. If you upgrade Elasticsearch from 6.x to 7.x and don\226\128\153t update your delivery stream, Kinesis Data Firehose still delivers data to Elasticsearch with the old index name and type name. If you want to update your delivery stream with a new index name, provide an empty string for TypeName."];
+          "The Elasticsearch type name. For Elasticsearch 6.x, there can be only one type per index. If you try to specify a new type for an existing index that already has another type, Firehose returns an error during runtime. If you upgrade Elasticsearch from 6.x to 7.x and don\226\128\153t update your Firehose stream, Firehose still delivers data to Elasticsearch with the old index name and type name. If you want to update your Firehose stream with a new index name, provide an empty string for TypeName."];
       indexRotationPeriod: ElasticsearchIndexRotationPeriod.t option
         [@ocaml.doc
-          "The Elasticsearch index rotation period. Index rotation appends a timestamp to IndexName to facilitate the expiration of old data. For more information, see Index Rotation for the Amazon ES Destination. Default value is\194\160OneDay."];
+          "The Elasticsearch index rotation period. Index rotation appends a timestamp to IndexName to facilitate the expiration of old data. For more information, see Index Rotation for the Amazon OpenSearch Service Destination. Default value is\194\160OneDay."];
       bufferingHints: ElasticsearchBufferingHints.t option
         [@ocaml.doc
           "The buffering options. If no value is specified, ElasticsearchBufferingHints object default values are used."];
       retryOptions: ElasticsearchRetryOptions.t option
         [@ocaml.doc
-          "The retry behavior in case Kinesis Data Firehose is unable to deliver documents to Amazon ES. The default value is 300 (5 minutes)."];
+          "The retry behavior in case Firehose is unable to deliver documents to Amazon OpenSearch Service. The default value is 300 (5 minutes)."];
       s3Update: S3DestinationUpdate.t option
         [@ocaml.doc "The Amazon S3 destination."];
       processingConfiguration: ProcessingConfiguration.t option
         [@ocaml.doc "The data processing configuration."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The CloudWatch logging options for your delivery stream."]}
+          "The CloudWatch logging options for your Firehose stream."];
+      documentIdOptions: DocumentIdOptions.t option
+        [@ocaml.doc
+          "Indicates the method for setting up document ID. The supported methods are Firehose generated document ID and OpenSearch Service generated document ID."]}
     let make ?roleARN =
       fun ?domainARN ->
         fun ?clusterEndpoint ->
@@ -5559,20 +8843,22 @@ module ElasticsearchDestinationUpdate =
                     fun ?s3Update ->
                       fun ?processingConfiguration ->
                         fun ?cloudWatchLoggingOptions ->
-                          fun () ->
-                            {
-                              roleARN;
-                              domainARN;
-                              clusterEndpoint;
-                              indexName;
-                              typeName;
-                              indexRotationPeriod;
-                              bufferingHints;
-                              retryOptions;
-                              s3Update;
-                              processingConfiguration;
-                              cloudWatchLoggingOptions
-                            }
+                          fun ?documentIdOptions ->
+                            fun () ->
+                              {
+                                roleARN;
+                                domainARN;
+                                clusterEndpoint;
+                                indexName;
+                                typeName;
+                                indexRotationPeriod;
+                                bufferingHints;
+                                retryOptions;
+                                s3Update;
+                                processingConfiguration;
+                                cloudWatchLoggingOptions;
+                                documentIdOptions
+                              }
     let to_value x =
       structure_to_value
         [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
@@ -5599,9 +8885,14 @@ module ElasticsearchDestinationUpdate =
              ~f:ProcessingConfiguration.to_value));
         ("CloudWatchLoggingOptions",
           (Option.map x.cloudWatchLoggingOptions
-             ~f:CloudWatchLoggingOptions.to_value))]
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("DocumentIdOptions",
+          (Option.map x.documentIdOptions ~f:DocumentIdOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentIdOptions =
+        (Option.map ~f:DocumentIdOptions.of_xml)
+          (Xml.child xml_arg0 "DocumentIdOptions") in
       let cloudWatchLoggingOptions =
         (Option.map ~f:CloudWatchLoggingOptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
@@ -5634,54 +8925,61 @@ module ElasticsearchDestinationUpdate =
           (Xml.child xml_arg0 "DomainARN") in
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
-      make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
-        ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
-        ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+      make ?documentIdOptions ?cloudWatchLoggingOptions
+        ?processingConfiguration ?s3Update ?retryOptions ?bufferingHints
+        ?indexRotationPeriod ?typeName ?indexName ?clusterEndpoint ?domainARN
+        ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let documentIdOptions =
+        field_map json__ "DocumentIdOptions" DocumentIdOptions.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
-      let s3Update = field_map json "S3Update" S3DestinationUpdate.of_json in
+      let s3Update = field_map json__ "S3Update" S3DestinationUpdate.of_json in
       let retryOptions =
-        field_map json "RetryOptions" ElasticsearchRetryOptions.of_json in
+        field_map json__ "RetryOptions" ElasticsearchRetryOptions.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" ElasticsearchBufferingHints.of_json in
+        field_map json__ "BufferingHints" ElasticsearchBufferingHints.of_json in
       let indexRotationPeriod =
-        field_map json "IndexRotationPeriod"
+        field_map json__ "IndexRotationPeriod"
           ElasticsearchIndexRotationPeriod.of_json in
-      let typeName = field_map json "TypeName" ElasticsearchTypeName.of_json in
+      let typeName =
+        field_map json__ "TypeName" ElasticsearchTypeName.of_json in
       let indexName =
-        field_map json "IndexName" ElasticsearchIndexName.of_json in
+        field_map json__ "IndexName" ElasticsearchIndexName.of_json in
       let clusterEndpoint =
-        field_map json "ClusterEndpoint" ElasticsearchClusterEndpoint.of_json in
+        field_map json__ "ClusterEndpoint"
+          ElasticsearchClusterEndpoint.of_json in
       let domainARN =
-        field_map json "DomainARN" ElasticsearchDomainARN.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
-        ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
-        ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+        field_map json__ "DomainARN" ElasticsearchDomainARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?documentIdOptions ?cloudWatchLoggingOptions
+        ?processingConfiguration ?s3Update ?retryOptions ?bufferingHints
+        ?indexRotationPeriod ?typeName ?indexName ?clusterEndpoint ?domainARN
+        ?roleARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an update for a destination in Amazon ES."]
+  end[@@ocaml.doc
+       "Describes an update for a destination in Amazon OpenSearch Service."]
 module ExtendedS3DestinationUpdate =
   struct
     type nonrec t =
       {
       roleARN: RoleARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       bucketARN: BucketARN.t option
         [@ocaml.doc
-          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       prefix: Prefix.t option
         [@ocaml.doc
           "The \"YYYY/MM/DD/HH\" time format prefix is automatically used for delivered Amazon S3 files. You can also specify a custom prefix, as described in Custom Prefixes for Amazon S3 Objects."];
       errorOutputPrefix: ErrorOutputPrefix.t option
         [@ocaml.doc
-          "A prefix that Kinesis Data Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
+          "A prefix that Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
       bufferingHints: BufferingHints.t option
         [@ocaml.doc "The buffering option."];
       compressionFormat: CompressionFormat.t option
@@ -5692,12 +8990,12 @@ module ExtendedS3DestinationUpdate =
           "The encryption configuration. If no value is specified, the default is no encryption."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."];
+          "The Amazon CloudWatch logging options for your Firehose stream."];
       processingConfiguration: ProcessingConfiguration.t option
         [@ocaml.doc "The data processing configuration."];
       s3BackupMode: S3BackupMode.t option
         [@ocaml.doc
-          "You can update a delivery stream to enable Amazon S3 backup if it is disabled. If backup is enabled, you can't update the delivery stream to disable it."];
+          "You can update a Firehose stream to enable Amazon S3 backup if it is disabled. If backup is enabled, you can't update the Firehose stream to disable it."];
       s3BackupUpdate: S3DestinationUpdate.t option
         [@ocaml.doc "The Amazon S3 destination for backup."];
       dataFormatConversionConfiguration:
@@ -5707,7 +9005,12 @@ module ExtendedS3DestinationUpdate =
       dynamicPartitioningConfiguration:
         DynamicPartitioningConfiguration.t option
         [@ocaml.doc
-          "The configuration of the dynamic partitioning mechanism that creates smaller data sets from the streaming data by partitioning it based on partition keys. Currently, dynamic partitioning is only supported for Amazon S3 destinations. For more information, see https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html"]}
+          "The configuration of the dynamic partitioning mechanism that creates smaller data sets from the streaming data by partitioning it based on partition keys. Currently, dynamic partitioning is only supported for Amazon S3 destinations."];
+      fileExtension: FileExtension.t option
+        [@ocaml.doc
+          "Specify a file extension. It will override the default file extension"];
+      customTimeZone: CustomTimeZone.t option
+        [@ocaml.doc "The time zone you prefer. UTC is the default."]}
     let make ?roleARN =
       fun ?bucketARN ->
         fun ?prefix ->
@@ -5721,22 +9024,26 @@ module ExtendedS3DestinationUpdate =
                         fun ?s3BackupUpdate ->
                           fun ?dataFormatConversionConfiguration ->
                             fun ?dynamicPartitioningConfiguration ->
-                              fun () ->
-                                {
-                                  roleARN;
-                                  bucketARN;
-                                  prefix;
-                                  errorOutputPrefix;
-                                  bufferingHints;
-                                  compressionFormat;
-                                  encryptionConfiguration;
-                                  cloudWatchLoggingOptions;
-                                  processingConfiguration;
-                                  s3BackupMode;
-                                  s3BackupUpdate;
-                                  dataFormatConversionConfiguration;
-                                  dynamicPartitioningConfiguration
-                                }
+                              fun ?fileExtension ->
+                                fun ?customTimeZone ->
+                                  fun () ->
+                                    {
+                                      roleARN;
+                                      bucketARN;
+                                      prefix;
+                                      errorOutputPrefix;
+                                      bufferingHints;
+                                      compressionFormat;
+                                      encryptionConfiguration;
+                                      cloudWatchLoggingOptions;
+                                      processingConfiguration;
+                                      s3BackupMode;
+                                      s3BackupUpdate;
+                                      dataFormatConversionConfiguration;
+                                      dynamicPartitioningConfiguration;
+                                      fileExtension;
+                                      customTimeZone
+                                    }
     let to_value x =
       structure_to_value
         [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
@@ -5766,9 +9073,19 @@ module ExtendedS3DestinationUpdate =
              ~f:DataFormatConversionConfiguration.to_value));
         ("DynamicPartitioningConfiguration",
           (Option.map x.dynamicPartitioningConfiguration
-             ~f:DynamicPartitioningConfiguration.to_value))]
+             ~f:DynamicPartitioningConfiguration.to_value));
+        ("FileExtension",
+          (Option.map x.fileExtension ~f:FileExtension.to_value));
+        ("CustomTimeZone",
+          (Option.map x.customTimeZone ~f:CustomTimeZone.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customTimeZone =
+        (Option.map ~f:CustomTimeZone.of_xml)
+          (Xml.child xml_arg0 "CustomTimeZone") in
+      let fileExtension =
+        (Option.map ~f:FileExtension.of_xml)
+          (Xml.child xml_arg0 "FileExtension") in
       let dynamicPartitioningConfiguration =
         (Option.map ~f:DynamicPartitioningConfiguration.of_xml)
           (Xml.child xml_arg0 "DynamicPartitioningConfiguration") in
@@ -5805,41 +9122,45 @@ module ExtendedS3DestinationUpdate =
         (Option.map ~f:BucketARN.of_xml) (Xml.child xml_arg0 "BucketARN") in
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
-      make ?dynamicPartitioningConfiguration
+      make ?customTimeZone ?fileExtension ?dynamicPartitioningConfiguration
         ?dataFormatConversionConfiguration ?s3BackupUpdate ?s3BackupMode
         ?processingConfiguration ?cloudWatchLoggingOptions
         ?encryptionConfiguration ?compressionFormat ?bufferingHints
         ?errorOutputPrefix ?prefix ?bucketARN ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let customTimeZone =
+        field_map json__ "CustomTimeZone" CustomTimeZone.of_json in
+      let fileExtension =
+        field_map json__ "FileExtension" FileExtension.of_json in
       let dynamicPartitioningConfiguration =
-        field_map json "DynamicPartitioningConfiguration"
+        field_map json__ "DynamicPartitioningConfiguration"
           DynamicPartitioningConfiguration.of_json in
       let dataFormatConversionConfiguration =
-        field_map json "DataFormatConversionConfiguration"
+        field_map json__ "DataFormatConversionConfiguration"
           DataFormatConversionConfiguration.of_json in
       let s3BackupUpdate =
-        field_map json "S3BackupUpdate" S3DestinationUpdate.of_json in
-      let s3BackupMode = field_map json "S3BackupMode" S3BackupMode.of_json in
+        field_map json__ "S3BackupUpdate" S3DestinationUpdate.of_json in
+      let s3BackupMode = field_map json__ "S3BackupMode" S3BackupMode.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let encryptionConfiguration =
-        field_map json "EncryptionConfiguration"
+        field_map json__ "EncryptionConfiguration"
           EncryptionConfiguration.of_json in
       let compressionFormat =
-        field_map json "CompressionFormat" CompressionFormat.of_json in
+        field_map json__ "CompressionFormat" CompressionFormat.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" BufferingHints.of_json in
+        field_map json__ "BufferingHints" BufferingHints.of_json in
       let errorOutputPrefix =
-        field_map json "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
-      let prefix = field_map json "Prefix" Prefix.of_json in
-      let bucketARN = field_map json "BucketARN" BucketARN.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      make ?dynamicPartitioningConfiguration
+        field_map json__ "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
+      let prefix = field_map json__ "Prefix" Prefix.of_json in
+      let bucketARN = field_map json__ "BucketARN" BucketARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?customTimeZone ?fileExtension ?dynamicPartitioningConfiguration
         ?dataFormatConversionConfiguration ?s3BackupUpdate ?s3BackupMode
         ?processingConfiguration ?cloudWatchLoggingOptions
         ?encryptionConfiguration ?compressionFormat ?bufferingHints
@@ -5855,7 +9176,7 @@ module HttpEndpointDestinationUpdate =
           "Describes the configuration of the HTTP endpoint destination."];
       bufferingHints: HttpEndpointBufferingHints.t option
         [@ocaml.doc
-          "Describes buffering options that can be applied to the data before it is delivered to the HTTPS endpoint destination. Kinesis Data Firehose teats these options as hints, and it might choose to use more optimal values. The SizeInMBs and IntervalInSeconds parameters are optional. However, if specify a value for one of them, you must also provide a value for the other."];
+          "Describes buffering options that can be applied to the data before it is delivered to the HTTPS endpoint destination. Firehose teats these options as hints, and it might choose to use more optimal values. The SizeInMBs and IntervalInSeconds parameters are optional. However, if specify a value for one of them, you must also provide a value for the other."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
       requestConfiguration: HttpEndpointRequestConfiguration.t option
         [@ocaml.doc
@@ -5863,14 +9184,17 @@ module HttpEndpointDestinationUpdate =
       processingConfiguration: ProcessingConfiguration.t option ;
       roleARN: RoleARN.t option
         [@ocaml.doc
-          "Kinesis Data Firehose uses this IAM role for all the permissions that the delivery stream needs."];
+          "Firehose uses this IAM role for all the permissions that the delivery stream needs."];
       retryOptions: HttpEndpointRetryOptions.t option
         [@ocaml.doc
-          "Describes the retry behavior in case Kinesis Data Firehose is unable to deliver data to the specified HTTP endpoint destination, or if it doesn't receive a valid acknowledgment of receipt from the specified HTTP endpoint destination."];
+          "Describes the retry behavior in case Firehose is unable to deliver data to the specified HTTP endpoint destination, or if it doesn't receive a valid acknowledgment of receipt from the specified HTTP endpoint destination."];
       s3BackupMode: HttpEndpointS3BackupMode.t option
         [@ocaml.doc
-          "Describes the S3 bucket backup options for the data that Kinesis Firehose delivers to the HTTP endpoint destination. You can back up all documents (AllData) or only the documents that Kinesis Data Firehose could not deliver to the specified HTTP endpoint destination (FailedDataOnly)."];
-      s3Update: S3DestinationUpdate.t option }
+          "Describes the S3 bucket backup options for the data that Kinesis Firehose delivers to the HTTP endpoint destination. You can back up all documents (AllData) or only the documents that Firehose could not deliver to the specified HTTP endpoint destination (FailedDataOnly)."];
+      s3Update: S3DestinationUpdate.t option ;
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for HTTP Endpoint destination."]}
     let make ?endpointConfiguration =
       fun ?bufferingHints ->
         fun ?cloudWatchLoggingOptions ->
@@ -5880,18 +9204,20 @@ module HttpEndpointDestinationUpdate =
                 fun ?retryOptions ->
                   fun ?s3BackupMode ->
                     fun ?s3Update ->
-                      fun () ->
-                        {
-                          endpointConfiguration;
-                          bufferingHints;
-                          cloudWatchLoggingOptions;
-                          requestConfiguration;
-                          processingConfiguration;
-                          roleARN;
-                          retryOptions;
-                          s3BackupMode;
-                          s3Update
-                        }
+                      fun ?secretsManagerConfiguration ->
+                        fun () ->
+                          {
+                            endpointConfiguration;
+                            bufferingHints;
+                            cloudWatchLoggingOptions;
+                            requestConfiguration;
+                            processingConfiguration;
+                            roleARN;
+                            retryOptions;
+                            s3BackupMode;
+                            s3Update;
+                            secretsManagerConfiguration
+                          }
     let to_value x =
       structure_to_value
         [("EndpointConfiguration",
@@ -5913,9 +9239,15 @@ module HttpEndpointDestinationUpdate =
           (Option.map x.retryOptions ~f:HttpEndpointRetryOptions.to_value));
         ("S3BackupMode",
           (Option.map x.s3BackupMode ~f:HttpEndpointS3BackupMode.to_value));
-        ("S3Update", (Option.map x.s3Update ~f:S3DestinationUpdate.to_value))]
+        ("S3Update", (Option.map x.s3Update ~f:S3DestinationUpdate.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
       let s3Update =
         (Option.map ~f:S3DestinationUpdate.of_xml)
           (Xml.child xml_arg0 "S3Update") in
@@ -5942,43 +9274,210 @@ module HttpEndpointDestinationUpdate =
       let endpointConfiguration =
         (Option.map ~f:HttpEndpointConfiguration.of_xml)
           (Xml.child xml_arg0 "EndpointConfiguration") in
-      make ?s3Update ?s3BackupMode ?retryOptions ?roleARN
-        ?processingConfiguration ?requestConfiguration
+      make ?secretsManagerConfiguration ?s3Update ?s3BackupMode ?retryOptions
+        ?roleARN ?processingConfiguration ?requestConfiguration
         ?cloudWatchLoggingOptions ?bufferingHints ?endpointConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Update = field_map json "S3Update" S3DestinationUpdate.of_json in
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
+      let s3Update = field_map json__ "S3Update" S3DestinationUpdate.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" HttpEndpointS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" HttpEndpointS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions" HttpEndpointRetryOptions.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
+        field_map json__ "RetryOptions" HttpEndpointRetryOptions.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let requestConfiguration =
-        field_map json "RequestConfiguration"
+        field_map json__ "RequestConfiguration"
           HttpEndpointRequestConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" HttpEndpointBufferingHints.of_json in
+        field_map json__ "BufferingHints" HttpEndpointBufferingHints.of_json in
       let endpointConfiguration =
-        field_map json "EndpointConfiguration"
+        field_map json__ "EndpointConfiguration"
           HttpEndpointConfiguration.of_json in
-      make ?s3Update ?s3BackupMode ?retryOptions ?roleARN
-        ?processingConfiguration ?requestConfiguration
+      make ?secretsManagerConfiguration ?s3Update ?s3BackupMode ?retryOptions
+        ?roleARN ?processingConfiguration ?requestConfiguration
         ?cloudWatchLoggingOptions ?bufferingHints ?endpointConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified HTTP endpoint destination."]
+module IcebergDestinationUpdate =
+  struct
+    type nonrec t =
+      {
+      destinationTableConfigurationList:
+        DestinationTableConfigurationList.t option
+        [@ocaml.doc
+          "Provides a list of DestinationTableConfigurations which Firehose uses to deliver data to Apache Iceberg Tables. Firehose will write data with insert if table specific configuration is not provided here."];
+      schemaEvolutionConfiguration: SchemaEvolutionConfiguration.t option
+        [@ocaml.doc
+          "The configuration to enable automatic schema evolution. Amazon Data Firehose is in preview release and is subject to change."];
+      tableCreationConfiguration: TableCreationConfiguration.t option
+        [@ocaml.doc
+          "The configuration to enable automatic table creation. Amazon Data Firehose is in preview release and is subject to change."];
+      bufferingHints: BufferingHints.t option ;
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
+      processingConfiguration: ProcessingConfiguration.t option ;
+      s3BackupMode: IcebergS3BackupMode.t option
+        [@ocaml.doc
+          "Describes how Firehose will backup records. Currently,Firehose only supports FailedDataOnly."];
+      retryOptions: RetryOptions.t option ;
+      roleARN: RoleARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Firehose for calling Apache Iceberg Tables."];
+      appendOnly: BooleanObject.t option
+        [@ocaml.doc
+          "Describes whether all incoming data for this delivery stream will be append only (inserts only and not for updates and deletes) for Iceberg delivery. This feature is only applicable for Apache Iceberg Tables. The default value is false. If you set this value to true, Firehose automatically increases the throughput limit of a stream based on the throttling levels of the stream. If you set this parameter to true for a stream with updates and deletes, you will see out of order delivery."];
+      catalogConfiguration: CatalogConfiguration.t option
+        [@ocaml.doc
+          "Configuration describing where the destination Iceberg tables are persisted."];
+      s3Configuration: S3DestinationConfiguration.t option }
+    let make ?destinationTableConfigurationList =
+      fun ?schemaEvolutionConfiguration ->
+        fun ?tableCreationConfiguration ->
+          fun ?bufferingHints ->
+            fun ?cloudWatchLoggingOptions ->
+              fun ?processingConfiguration ->
+                fun ?s3BackupMode ->
+                  fun ?retryOptions ->
+                    fun ?roleARN ->
+                      fun ?appendOnly ->
+                        fun ?catalogConfiguration ->
+                          fun ?s3Configuration ->
+                            fun () ->
+                              {
+                                destinationTableConfigurationList;
+                                schemaEvolutionConfiguration;
+                                tableCreationConfiguration;
+                                bufferingHints;
+                                cloudWatchLoggingOptions;
+                                processingConfiguration;
+                                s3BackupMode;
+                                retryOptions;
+                                roleARN;
+                                appendOnly;
+                                catalogConfiguration;
+                                s3Configuration
+                              }
+    let to_value x =
+      structure_to_value
+        [("DestinationTableConfigurationList",
+           (Option.map x.destinationTableConfigurationList
+              ~f:DestinationTableConfigurationList.to_value));
+        ("SchemaEvolutionConfiguration",
+          (Option.map x.schemaEvolutionConfiguration
+             ~f:SchemaEvolutionConfiguration.to_value));
+        ("TableCreationConfiguration",
+          (Option.map x.tableCreationConfiguration
+             ~f:TableCreationConfiguration.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:BufferingHints.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("ProcessingConfiguration",
+          (Option.map x.processingConfiguration
+             ~f:ProcessingConfiguration.to_value));
+        ("S3BackupMode",
+          (Option.map x.s3BackupMode ~f:IcebergS3BackupMode.to_value));
+        ("RetryOptions",
+          (Option.map x.retryOptions ~f:RetryOptions.to_value));
+        ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("AppendOnly", (Option.map x.appendOnly ~f:BooleanObject.to_value));
+        ("CatalogConfiguration",
+          (Option.map x.catalogConfiguration ~f:CatalogConfiguration.to_value));
+        ("S3Configuration",
+          (Option.map x.s3Configuration
+             ~f:S3DestinationConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Configuration =
+        (Option.map ~f:S3DestinationConfiguration.of_xml)
+          (Xml.child xml_arg0 "S3Configuration") in
+      let catalogConfiguration =
+        (Option.map ~f:CatalogConfiguration.of_xml)
+          (Xml.child xml_arg0 "CatalogConfiguration") in
+      let appendOnly =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "AppendOnly") in
+      let roleARN =
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      let retryOptions =
+        (Option.map ~f:RetryOptions.of_xml)
+          (Xml.child xml_arg0 "RetryOptions") in
+      let s3BackupMode =
+        (Option.map ~f:IcebergS3BackupMode.of_xml)
+          (Xml.child xml_arg0 "S3BackupMode") in
+      let processingConfiguration =
+        (Option.map ~f:ProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProcessingConfiguration") in
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let bufferingHints =
+        (Option.map ~f:BufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let tableCreationConfiguration =
+        (Option.map ~f:TableCreationConfiguration.of_xml)
+          (Xml.child xml_arg0 "TableCreationConfiguration") in
+      let schemaEvolutionConfiguration =
+        (Option.map ~f:SchemaEvolutionConfiguration.of_xml)
+          (Xml.child xml_arg0 "SchemaEvolutionConfiguration") in
+      let destinationTableConfigurationList =
+        (Option.map ~f:DestinationTableConfigurationList.of_xml)
+          (Xml.child xml_arg0 "DestinationTableConfigurationList") in
+      make ?s3Configuration ?catalogConfiguration ?appendOnly ?roleARN
+        ?retryOptions ?s3BackupMode ?processingConfiguration
+        ?cloudWatchLoggingOptions ?bufferingHints ?tableCreationConfiguration
+        ?schemaEvolutionConfiguration ?destinationTableConfigurationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Configuration =
+        field_map json__ "S3Configuration" S3DestinationConfiguration.of_json in
+      let catalogConfiguration =
+        field_map json__ "CatalogConfiguration" CatalogConfiguration.of_json in
+      let appendOnly = field_map json__ "AppendOnly" BooleanObject.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let retryOptions = field_map json__ "RetryOptions" RetryOptions.of_json in
+      let s3BackupMode =
+        field_map json__ "S3BackupMode" IcebergS3BackupMode.of_json in
+      let processingConfiguration =
+        field_map json__ "ProcessingConfiguration"
+          ProcessingConfiguration.of_json in
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints" BufferingHints.of_json in
+      let tableCreationConfiguration =
+        field_map json__ "TableCreationConfiguration"
+          TableCreationConfiguration.of_json in
+      let schemaEvolutionConfiguration =
+        field_map json__ "SchemaEvolutionConfiguration"
+          SchemaEvolutionConfiguration.of_json in
+      let destinationTableConfigurationList =
+        field_map json__ "DestinationTableConfigurationList"
+          DestinationTableConfigurationList.of_json in
+      make ?s3Configuration ?catalogConfiguration ?appendOnly ?roleARN
+        ?retryOptions ?s3BackupMode ?processingConfiguration
+        ?cloudWatchLoggingOptions ?bufferingHints ?tableCreationConfiguration
+        ?schemaEvolutionConfiguration ?destinationTableConfigurationList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an update for a destination in Apache Iceberg Tables."]
 module RedshiftDestinationUpdate =
   struct
     type nonrec t =
       {
       roleARN: RoleARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       clusterJDBCURL: ClusterJDBCURL.t option
         [@ocaml.doc "The database connection string."];
       copyCommand: CopyCommand.t option [@ocaml.doc "The COPY command."];
@@ -5986,7 +9485,7 @@ module RedshiftDestinationUpdate =
       password: Password.t option [@ocaml.doc "The user password."];
       retryOptions: RedshiftRetryOptions.t option
         [@ocaml.doc
-          "The retry behavior in case Kinesis Data Firehose is unable to deliver documents to Amazon Redshift. Default value is 3600 (60 minutes)."];
+          "The retry behavior in case Firehose is unable to deliver documents to Amazon Redshift. Default value is 3600 (60 minutes)."];
       s3Update: S3DestinationUpdate.t option
         [@ocaml.doc
           "The Amazon S3 destination. The compression formats SNAPPY or ZIP cannot be specified in RedshiftDestinationUpdate.S3Update because the Amazon Redshift COPY operation that reads from the S3 bucket doesn't support these compression formats."];
@@ -5994,12 +9493,15 @@ module RedshiftDestinationUpdate =
         [@ocaml.doc "The data processing configuration."];
       s3BackupMode: RedshiftS3BackupMode.t option
         [@ocaml.doc
-          "You can update a delivery stream to enable Amazon S3 backup if it is disabled. If backup is enabled, you can't update the delivery stream to disable it."];
+          "You can update a Firehose stream to enable Amazon S3 backup if it is disabled. If backup is enabled, you can't update the Firehose stream to disable it."];
       s3BackupUpdate: S3DestinationUpdate.t option
         [@ocaml.doc "The Amazon S3 destination for backup."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."]}
+          "The Amazon CloudWatch logging options for your Firehose stream."];
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for Amazon Redshift."]}
     let make ?roleARN =
       fun ?clusterJDBCURL ->
         fun ?copyCommand ->
@@ -6011,20 +9513,22 @@ module RedshiftDestinationUpdate =
                     fun ?s3BackupMode ->
                       fun ?s3BackupUpdate ->
                         fun ?cloudWatchLoggingOptions ->
-                          fun () ->
-                            {
-                              roleARN;
-                              clusterJDBCURL;
-                              copyCommand;
-                              username;
-                              password;
-                              retryOptions;
-                              s3Update;
-                              processingConfiguration;
-                              s3BackupMode;
-                              s3BackupUpdate;
-                              cloudWatchLoggingOptions
-                            }
+                          fun ?secretsManagerConfiguration ->
+                            fun () ->
+                              {
+                                roleARN;
+                                clusterJDBCURL;
+                                copyCommand;
+                                username;
+                                password;
+                                retryOptions;
+                                s3Update;
+                                processingConfiguration;
+                                s3BackupMode;
+                                s3BackupUpdate;
+                                cloudWatchLoggingOptions;
+                                secretsManagerConfiguration
+                              }
     let to_value x =
       structure_to_value
         [("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
@@ -6045,9 +9549,15 @@ module RedshiftDestinationUpdate =
           (Option.map x.s3BackupUpdate ~f:S3DestinationUpdate.to_value));
         ("CloudWatchLoggingOptions",
           (Option.map x.cloudWatchLoggingOptions
-             ~f:CloudWatchLoggingOptions.to_value))]
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
       let cloudWatchLoggingOptions =
         (Option.map ~f:CloudWatchLoggingOptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
@@ -6077,43 +9587,288 @@ module RedshiftDestinationUpdate =
           (Xml.child xml_arg0 "ClusterJDBCURL") in
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
-      make ?cloudWatchLoggingOptions ?s3BackupUpdate ?s3BackupMode
-        ?processingConfiguration ?s3Update ?retryOptions ?password ?username
-        ?copyCommand ?clusterJDBCURL ?roleARN ()
+      make ?secretsManagerConfiguration ?cloudWatchLoggingOptions
+        ?s3BackupUpdate ?s3BackupMode ?processingConfiguration ?s3Update
+        ?retryOptions ?password ?username ?copyCommand ?clusterJDBCURL
+        ?roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let s3BackupUpdate =
-        field_map json "S3BackupUpdate" S3DestinationUpdate.of_json in
+        field_map json__ "S3BackupUpdate" S3DestinationUpdate.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" RedshiftS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" RedshiftS3BackupMode.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
-      let s3Update = field_map json "S3Update" S3DestinationUpdate.of_json in
+      let s3Update = field_map json__ "S3Update" S3DestinationUpdate.of_json in
       let retryOptions =
-        field_map json "RetryOptions" RedshiftRetryOptions.of_json in
-      let password = field_map json "Password" Password.of_json in
-      let username = field_map json "Username" Username.of_json in
-      let copyCommand = field_map json "CopyCommand" CopyCommand.of_json in
+        field_map json__ "RetryOptions" RedshiftRetryOptions.of_json in
+      let password = field_map json__ "Password" Password.of_json in
+      let username = field_map json__ "Username" Username.of_json in
+      let copyCommand = field_map json__ "CopyCommand" CopyCommand.of_json in
       let clusterJDBCURL =
-        field_map json "ClusterJDBCURL" ClusterJDBCURL.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      make ?cloudWatchLoggingOptions ?s3BackupUpdate ?s3BackupMode
-        ?processingConfiguration ?s3Update ?retryOptions ?password ?username
-        ?copyCommand ?clusterJDBCURL ?roleARN ()
+        field_map json__ "ClusterJDBCURL" ClusterJDBCURL.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      make ?secretsManagerConfiguration ?cloudWatchLoggingOptions
+        ?s3BackupUpdate ?s3BackupMode ?processingConfiguration ?s3Update
+        ?retryOptions ?password ?username ?copyCommand ?clusterJDBCURL
+        ?roleARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an update for a destination in Amazon Redshift."]
+module SnowflakeDestinationUpdate =
+  struct
+    type nonrec t =
+      {
+      accountUrl: SnowflakeAccountUrl.t option
+        [@ocaml.doc
+          "URL for accessing your Snowflake account. This URL must include your account identifier. Note that the protocol (https://) and port number are optional."];
+      privateKey: SnowflakePrivateKey.t option
+        [@ocaml.doc
+          "The private key used to encrypt your Snowflake client. For information, see Using Key Pair Authentication & Key Rotation."];
+      keyPassphrase: SnowflakeKeyPassphrase.t option
+        [@ocaml.doc
+          "Passphrase to decrypt the private key when the key is encrypted. For information, see Using Key Pair Authentication & Key Rotation."];
+      user: SnowflakeUser.t option
+        [@ocaml.doc "User login name for the Snowflake account."];
+      database: SnowflakeDatabase.t option
+        [@ocaml.doc "All data in Snowflake is maintained in databases."];
+      schema: SnowflakeSchema.t option
+        [@ocaml.doc
+          "Each database consists of one or more schemas, which are logical groupings of database objects, such as tables and views"];
+      table: SnowflakeTable.t option
+        [@ocaml.doc
+          "All data in Snowflake is stored in database tables, logically structured as collections of columns and rows."];
+      snowflakeRoleConfiguration: SnowflakeRoleConfiguration.t option
+        [@ocaml.doc
+          "Optionally configure a Snowflake role. Otherwise the default user role will be used."];
+      dataLoadingOption: SnowflakeDataLoadingOption.t option
+        [@ocaml.doc
+          "JSON keys mapped to table column names or choose to split the JSON payload where content is mapped to a record content column and source metadata is mapped to a record metadata column."];
+      metaDataColumnName: SnowflakeMetaDataColumnName.t option
+        [@ocaml.doc "The name of the record metadata column"];
+      contentColumnName: SnowflakeContentColumnName.t option
+        [@ocaml.doc "The name of the content metadata column"];
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
+      processingConfiguration: ProcessingConfiguration.t option ;
+      roleARN: RoleARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Snowflake role"];
+      retryOptions: SnowflakeRetryOptions.t option
+        [@ocaml.doc
+          "Specify how long Firehose retries sending data to the New Relic HTTP endpoint. After sending data, Firehose first waits for an acknowledgment from the HTTP endpoint. If an error occurs or the acknowledgment doesn\226\128\153t arrive within the acknowledgment timeout period, Firehose starts the retry duration counter. It keeps retrying until the retry duration expires. After that, Firehose considers it a data delivery failure and backs up the data to your Amazon S3 bucket. Every time that Firehose sends data to the HTTP endpoint (either the initial attempt or a retry), it restarts the acknowledgement timeout counter and waits for an acknowledgement from the HTTP endpoint. Even if the retry duration expires, Firehose still waits for the acknowledgment until it receives it or the acknowledgement timeout period is reached. If the acknowledgment times out, Firehose determines whether there's time left in the retry counter. If there is time left, it retries again and repeats the logic until it receives an acknowledgment or determines that the retry time has expired. If you don't want Firehose to retry sending data, set this value to 0."];
+      s3BackupMode: SnowflakeS3BackupMode.t option
+        [@ocaml.doc
+          "Choose an S3 backup mode. Once you set the mode as AllData, you can not change it to FailedDataOnly."];
+      s3Update: S3DestinationUpdate.t option ;
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "Describes the Secrets Manager configuration in Snowflake."];
+      bufferingHints: SnowflakeBufferingHints.t option
+        [@ocaml.doc
+          "Describes the buffering to perform before delivering data to the Snowflake destination."]}
+    let make ?accountUrl =
+      fun ?privateKey ->
+        fun ?keyPassphrase ->
+          fun ?user ->
+            fun ?database ->
+              fun ?schema ->
+                fun ?table ->
+                  fun ?snowflakeRoleConfiguration ->
+                    fun ?dataLoadingOption ->
+                      fun ?metaDataColumnName ->
+                        fun ?contentColumnName ->
+                          fun ?cloudWatchLoggingOptions ->
+                            fun ?processingConfiguration ->
+                              fun ?roleARN ->
+                                fun ?retryOptions ->
+                                  fun ?s3BackupMode ->
+                                    fun ?s3Update ->
+                                      fun ?secretsManagerConfiguration ->
+                                        fun ?bufferingHints ->
+                                          fun () ->
+                                            {
+                                              accountUrl;
+                                              privateKey;
+                                              keyPassphrase;
+                                              user;
+                                              database;
+                                              schema;
+                                              table;
+                                              snowflakeRoleConfiguration;
+                                              dataLoadingOption;
+                                              metaDataColumnName;
+                                              contentColumnName;
+                                              cloudWatchLoggingOptions;
+                                              processingConfiguration;
+                                              roleARN;
+                                              retryOptions;
+                                              s3BackupMode;
+                                              s3Update;
+                                              secretsManagerConfiguration;
+                                              bufferingHints
+                                            }
+    let to_value x =
+      structure_to_value
+        [("AccountUrl",
+           (Option.map x.accountUrl ~f:SnowflakeAccountUrl.to_value));
+        ("PrivateKey",
+          (Option.map x.privateKey ~f:SnowflakePrivateKey.to_value));
+        ("KeyPassphrase",
+          (Option.map x.keyPassphrase ~f:SnowflakeKeyPassphrase.to_value));
+        ("User", (Option.map x.user ~f:SnowflakeUser.to_value));
+        ("Database", (Option.map x.database ~f:SnowflakeDatabase.to_value));
+        ("Schema", (Option.map x.schema ~f:SnowflakeSchema.to_value));
+        ("Table", (Option.map x.table ~f:SnowflakeTable.to_value));
+        ("SnowflakeRoleConfiguration",
+          (Option.map x.snowflakeRoleConfiguration
+             ~f:SnowflakeRoleConfiguration.to_value));
+        ("DataLoadingOption",
+          (Option.map x.dataLoadingOption
+             ~f:SnowflakeDataLoadingOption.to_value));
+        ("MetaDataColumnName",
+          (Option.map x.metaDataColumnName
+             ~f:SnowflakeMetaDataColumnName.to_value));
+        ("ContentColumnName",
+          (Option.map x.contentColumnName
+             ~f:SnowflakeContentColumnName.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("ProcessingConfiguration",
+          (Option.map x.processingConfiguration
+             ~f:ProcessingConfiguration.to_value));
+        ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
+        ("RetryOptions",
+          (Option.map x.retryOptions ~f:SnowflakeRetryOptions.to_value));
+        ("S3BackupMode",
+          (Option.map x.s3BackupMode ~f:SnowflakeS3BackupMode.to_value));
+        ("S3Update", (Option.map x.s3Update ~f:S3DestinationUpdate.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:SnowflakeBufferingHints.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bufferingHints =
+        (Option.map ~f:SnowflakeBufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
+      let s3Update =
+        (Option.map ~f:S3DestinationUpdate.of_xml)
+          (Xml.child xml_arg0 "S3Update") in
+      let s3BackupMode =
+        (Option.map ~f:SnowflakeS3BackupMode.of_xml)
+          (Xml.child xml_arg0 "S3BackupMode") in
+      let retryOptions =
+        (Option.map ~f:SnowflakeRetryOptions.of_xml)
+          (Xml.child xml_arg0 "RetryOptions") in
+      let roleARN =
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
+      let processingConfiguration =
+        (Option.map ~f:ProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProcessingConfiguration") in
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let contentColumnName =
+        (Option.map ~f:SnowflakeContentColumnName.of_xml)
+          (Xml.child xml_arg0 "ContentColumnName") in
+      let metaDataColumnName =
+        (Option.map ~f:SnowflakeMetaDataColumnName.of_xml)
+          (Xml.child xml_arg0 "MetaDataColumnName") in
+      let dataLoadingOption =
+        (Option.map ~f:SnowflakeDataLoadingOption.of_xml)
+          (Xml.child xml_arg0 "DataLoadingOption") in
+      let snowflakeRoleConfiguration =
+        (Option.map ~f:SnowflakeRoleConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnowflakeRoleConfiguration") in
+      let table =
+        (Option.map ~f:SnowflakeTable.of_xml) (Xml.child xml_arg0 "Table") in
+      let schema =
+        (Option.map ~f:SnowflakeSchema.of_xml) (Xml.child xml_arg0 "Schema") in
+      let database =
+        (Option.map ~f:SnowflakeDatabase.of_xml)
+          (Xml.child xml_arg0 "Database") in
+      let user =
+        (Option.map ~f:SnowflakeUser.of_xml) (Xml.child xml_arg0 "User") in
+      let keyPassphrase =
+        (Option.map ~f:SnowflakeKeyPassphrase.of_xml)
+          (Xml.child xml_arg0 "KeyPassphrase") in
+      let privateKey =
+        (Option.map ~f:SnowflakePrivateKey.of_xml)
+          (Xml.child xml_arg0 "PrivateKey") in
+      let accountUrl =
+        (Option.map ~f:SnowflakeAccountUrl.of_xml)
+          (Xml.child xml_arg0 "AccountUrl") in
+      make ?bufferingHints ?secretsManagerConfiguration ?s3Update
+        ?s3BackupMode ?retryOptions ?roleARN ?processingConfiguration
+        ?cloudWatchLoggingOptions ?contentColumnName ?metaDataColumnName
+        ?dataLoadingOption ?snowflakeRoleConfiguration ?table ?schema
+        ?database ?user ?keyPassphrase ?privateKey ?accountUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bufferingHints =
+        field_map json__ "BufferingHints" SnowflakeBufferingHints.of_json in
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
+      let s3Update = field_map json__ "S3Update" S3DestinationUpdate.of_json in
+      let s3BackupMode =
+        field_map json__ "S3BackupMode" SnowflakeS3BackupMode.of_json in
+      let retryOptions =
+        field_map json__ "RetryOptions" SnowflakeRetryOptions.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let processingConfiguration =
+        field_map json__ "ProcessingConfiguration"
+          ProcessingConfiguration.of_json in
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let contentColumnName =
+        field_map json__ "ContentColumnName"
+          SnowflakeContentColumnName.of_json in
+      let metaDataColumnName =
+        field_map json__ "MetaDataColumnName"
+          SnowflakeMetaDataColumnName.of_json in
+      let dataLoadingOption =
+        field_map json__ "DataLoadingOption"
+          SnowflakeDataLoadingOption.of_json in
+      let snowflakeRoleConfiguration =
+        field_map json__ "SnowflakeRoleConfiguration"
+          SnowflakeRoleConfiguration.of_json in
+      let table = field_map json__ "Table" SnowflakeTable.of_json in
+      let schema = field_map json__ "Schema" SnowflakeSchema.of_json in
+      let database = field_map json__ "Database" SnowflakeDatabase.of_json in
+      let user = field_map json__ "User" SnowflakeUser.of_json in
+      let keyPassphrase =
+        field_map json__ "KeyPassphrase" SnowflakeKeyPassphrase.of_json in
+      let privateKey =
+        field_map json__ "PrivateKey" SnowflakePrivateKey.of_json in
+      let accountUrl =
+        field_map json__ "AccountUrl" SnowflakeAccountUrl.of_json in
+      make ?bufferingHints ?secretsManagerConfiguration ?s3Update
+        ?s3BackupMode ?retryOptions ?roleARN ?processingConfiguration
+        ?cloudWatchLoggingOptions ?contentColumnName ?metaDataColumnName
+        ?dataLoadingOption ?snowflakeRoleConfiguration ?table ?schema
+        ?database ?user ?keyPassphrase ?privateKey ?accountUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update to configuration settings"]
 module SplunkDestinationUpdate =
   struct
     type nonrec t =
       {
       hECEndpoint: HECEndpoint.t option
         [@ocaml.doc
-          "The HTTP Event Collector (HEC) endpoint to which Kinesis Data Firehose sends your data."];
+          "The HTTP Event Collector (HEC) endpoint to which Firehose sends your data."];
       hECEndpointType: HECEndpointType.t option
         [@ocaml.doc "This type can be either \"Raw\" or \"Event.\""];
       hECToken: HECToken.t option
@@ -6122,13 +9877,13 @@ module SplunkDestinationUpdate =
       hECAcknowledgmentTimeoutInSeconds:
         HECAcknowledgmentTimeoutInSeconds.t option
         [@ocaml.doc
-          "The amount of time that Kinesis Data Firehose waits to receive an acknowledgment from Splunk after it sends data. At the end of the timeout period, Kinesis Data Firehose either tries to send the data again or considers it an error, based on your retry settings."];
+          "The amount of time that Firehose waits to receive an acknowledgment from Splunk after it sends data. At the end of the timeout period, Firehose either tries to send the data again or considers it an error, based on your retry settings."];
       retryOptions: SplunkRetryOptions.t option
         [@ocaml.doc
-          "The retry behavior in case Kinesis Data Firehose is unable to deliver data to Splunk or if it doesn't receive an acknowledgment of receipt from Splunk."];
+          "The retry behavior in case Firehose is unable to deliver data to Splunk or if it doesn't receive an acknowledgment of receipt from Splunk."];
       s3BackupMode: SplunkS3BackupMode.t option
         [@ocaml.doc
-          "Specifies how you want Kinesis Data Firehose to back up documents to Amazon S3. When set to FailedDocumentsOnly, Kinesis Data Firehose writes any data that could not be indexed to the configured Amazon S3 destination. When set to AllEvents, Kinesis Data Firehose delivers all incoming records to Amazon S3, and also writes failed documents to Amazon S3. The default value is FailedEventsOnly. You can update this backup mode from FailedEventsOnly to AllEvents. You can't update it from AllEvents to FailedEventsOnly."];
+          "Specifies how you want Firehose to back up documents to Amazon S3. When set to FailedDocumentsOnly, Firehose writes any data that could not be indexed to the configured Amazon S3 destination. When set to AllEvents, Firehose delivers all incoming records to Amazon S3, and also writes failed documents to Amazon S3. The default value is FailedEventsOnly. You can update this backup mode from FailedEventsOnly to AllEvents. You can't update it from AllEvents to FailedEventsOnly."];
       s3Update: S3DestinationUpdate.t option
         [@ocaml.doc
           "Your update to the configuration of the backup Amazon S3 location."];
@@ -6136,7 +9891,13 @@ module SplunkDestinationUpdate =
         [@ocaml.doc "The data processing configuration."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."]}
+          "The Amazon CloudWatch logging options for your Firehose stream."];
+      bufferingHints: SplunkBufferingHints.t option
+        [@ocaml.doc
+          "The buffering options. If no value is specified, the default values for Splunk are used."];
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for Splunk."]}
     let make ?hECEndpoint =
       fun ?hECEndpointType ->
         fun ?hECToken ->
@@ -6146,18 +9907,22 @@ module SplunkDestinationUpdate =
                 fun ?s3Update ->
                   fun ?processingConfiguration ->
                     fun ?cloudWatchLoggingOptions ->
-                      fun () ->
-                        {
-                          hECEndpoint;
-                          hECEndpointType;
-                          hECToken;
-                          hECAcknowledgmentTimeoutInSeconds;
-                          retryOptions;
-                          s3BackupMode;
-                          s3Update;
-                          processingConfiguration;
-                          cloudWatchLoggingOptions
-                        }
+                      fun ?bufferingHints ->
+                        fun ?secretsManagerConfiguration ->
+                          fun () ->
+                            {
+                              hECEndpoint;
+                              hECEndpointType;
+                              hECToken;
+                              hECAcknowledgmentTimeoutInSeconds;
+                              retryOptions;
+                              s3BackupMode;
+                              s3Update;
+                              processingConfiguration;
+                              cloudWatchLoggingOptions;
+                              bufferingHints;
+                              secretsManagerConfiguration
+                            }
     let to_value x =
       structure_to_value
         [("HECEndpoint", (Option.map x.hECEndpoint ~f:HECEndpoint.to_value));
@@ -6177,9 +9942,20 @@ module SplunkDestinationUpdate =
              ~f:ProcessingConfiguration.to_value));
         ("CloudWatchLoggingOptions",
           (Option.map x.cloudWatchLoggingOptions
-             ~f:CloudWatchLoggingOptions.to_value))]
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:SplunkBufferingHints.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
+      let bufferingHints =
+        (Option.map ~f:SplunkBufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
       let cloudWatchLoggingOptions =
         (Option.map ~f:CloudWatchLoggingOptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
@@ -6205,30 +9981,37 @@ module SplunkDestinationUpdate =
           (Xml.child xml_arg0 "HECEndpointType") in
       let hECEndpoint =
         (Option.map ~f:HECEndpoint.of_xml) (Xml.child xml_arg0 "HECEndpoint") in
-      make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
+      make ?secretsManagerConfiguration ?bufferingHints
+        ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
         ?s3BackupMode ?retryOptions ?hECAcknowledgmentTimeoutInSeconds
         ?hECToken ?hECEndpointType ?hECEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints" SplunkBufferingHints.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
-      let s3Update = field_map json "S3Update" S3DestinationUpdate.of_json in
+      let s3Update = field_map json__ "S3Update" S3DestinationUpdate.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" SplunkS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" SplunkS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions" SplunkRetryOptions.of_json in
+        field_map json__ "RetryOptions" SplunkRetryOptions.of_json in
       let hECAcknowledgmentTimeoutInSeconds =
-        field_map json "HECAcknowledgmentTimeoutInSeconds"
+        field_map json__ "HECAcknowledgmentTimeoutInSeconds"
           HECAcknowledgmentTimeoutInSeconds.of_json in
-      let hECToken = field_map json "HECToken" HECToken.of_json in
+      let hECToken = field_map json__ "HECToken" HECToken.of_json in
       let hECEndpointType =
-        field_map json "HECEndpointType" HECEndpointType.of_json in
-      let hECEndpoint = field_map json "HECEndpoint" HECEndpoint.of_json in
-      make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
+        field_map json__ "HECEndpointType" HECEndpointType.of_json in
+      let hECEndpoint = field_map json__ "HECEndpoint" HECEndpoint.of_json in
+      make ?secretsManagerConfiguration ?bufferingHints
+        ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
         ?s3BackupMode ?retryOptions ?hECAcknowledgmentTimeoutInSeconds
         ?hECToken ?hECEndpointType ?hECEndpoint ()
     let to_json v = composed_to_json to_value v
@@ -6249,8 +10032,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6263,6 +10046,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6290,6 +10076,9 @@ module TagDeliveryStreamInputTagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6329,23 +10118,23 @@ module InvalidKMSResourceException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      let code = field_map json "code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      let code = field_map json__ "code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Kinesis Data Firehose throws this exception when an attempt to put records or to start or stop delivery stream encryption fails. This happens when the KMS service throws one of the following exception types: AccessDeniedException, InvalidStateException, DisabledException, or NotFoundException."]
+       "Firehose throws this exception when an attempt to put records or to start or stop Firehose stream encryption fails. This happens when the KMS service throws one of the following exception types: AccessDeniedException, InvalidStateException, DisabledException, or NotFoundException."]
 module DeliveryStreamEncryptionConfigurationInput =
   struct
     type nonrec t =
       {
       keyARN: AWSKMSKeyARN.t option
         [@ocaml.doc
-          "If you set KeyType to CUSTOMER_MANAGED_CMK, you must specify the Amazon Resource Name (ARN) of the CMK. If you set KeyType to AWS_OWNED_CMK, Kinesis Data Firehose uses a service-account CMK."];
+          "If you set KeyType to CUSTOMER_MANAGED_CMK, you must specify the Amazon Resource Name (ARN) of the CMK. If you set KeyType to Amazon Web Services_OWNED_CMK, Firehose uses a service-account CMK."];
       keyType: KeyType.t
         [@ocaml.doc
-          "Indicates the type of customer master key (CMK) to use for encryption. The default setting is AWS_OWNED_CMK. For more information about CMKs, see Customer Master Keys (CMKs). When you invoke CreateDeliveryStream or StartDeliveryStreamEncryption with KeyType set to CUSTOMER_MANAGED_CMK, Kinesis Data Firehose invokes the Amazon KMS operation CreateGrant to create a grant that allows the Kinesis Data Firehose service to use the customer managed CMK to perform encryption and decryption. Kinesis Data Firehose manages that grant. When you invoke StartDeliveryStreamEncryption to change the CMK for a delivery stream that is encrypted with a customer managed CMK, Kinesis Data Firehose schedules the grant it had on the old CMK for retirement. You can use a CMK of type CUSTOMER_MANAGED_CMK to encrypt up to 500 delivery streams. If a CreateDeliveryStream or StartDeliveryStreamEncryption operation exceeds this limit, Kinesis Data Firehose throws a LimitExceededException. To encrypt your delivery stream, use symmetric CMKs. Kinesis Data Firehose doesn't support asymmetric CMKs. For information about symmetric and asymmetric CMKs, see About Symmetric and Asymmetric CMKs in the AWS Key Management Service developer guide."]}
+          "Indicates the type of customer master key (CMK) to use for encryption. The default setting is Amazon Web Services_OWNED_CMK. For more information about CMKs, see Customer Master Keys (CMKs). When you invoke CreateDeliveryStream or StartDeliveryStreamEncryption with KeyType set to CUSTOMER_MANAGED_CMK, Firehose invokes the Amazon KMS operation CreateGrant to create a grant that allows the Firehose service to use the customer managed CMK to perform encryption and decryption. Firehose manages that grant. When you invoke StartDeliveryStreamEncryption to change the CMK for a Firehose stream that is encrypted with a customer managed CMK, Firehose schedules the grant it had on the old CMK for retirement. You can use a CMK of type CUSTOMER_MANAGED_CMK to encrypt up to 500 Firehose streams. If a CreateDeliveryStream or StartDeliveryStreamEncryption operation exceeds this limit, Firehose throws a LimitExceededException. To encrypt your Firehose stream, use symmetric CMKs. Firehose doesn't support asymmetric CMKs. For information about symmetric and asymmetric CMKs, see About Symmetric and Asymmetric CMKs in the Amazon Web Services Key Management Service developer guide."]}
     let context_ = "DeliveryStreamEncryptionConfigurationInput"
     let make ?keyARN = fun ~keyType -> fun () -> { keyARN; keyType }
     let to_value x =
@@ -6360,13 +10149,38 @@ module DeliveryStreamEncryptionConfigurationInput =
         (Option.map ~f:AWSKMSKeyARN.of_xml) (Xml.child xml_arg0 "KeyARN") in
       make ~keyType ?keyARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyType = field_map_exn json "KeyType" KeyType.of_json in
-      let keyARN = field_map json "KeyARN" AWSKMSKeyARN.of_json in
+    let of_json json__ =
+      let keyType = field_map_exn json__ "KeyType" KeyType.of_json in
+      let keyARN = field_map json__ "KeyARN" AWSKMSKeyARN.of_json in
       make ~keyType ?keyARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the type and Amazon Resource Name (ARN) of the CMK to use for Server-Side Encryption (SSE)."]
+module InvalidSourceException =
+  struct
+    type nonrec t =
+      {
+      code: ErrorCode.t option ;
+      message: ErrorMessage.t option }
+    let make ?code = fun ?message -> fun () -> { code; message }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:ErrorCode.to_value));
+        ("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "code") in
+      make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      let code = field_map json__ "code" ErrorCode.of_json in
+      make ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Only requests from CloudWatch Logs are supported when CloudWatch Logs decompression is enabled."]
 module ServiceUnavailableException =
   struct
     type nonrec t =
@@ -6383,12 +10197,12 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The service is unavailable. Back off and retry the operation. If you continue to see the exception, throughput limits for the delivery stream may have been exceeded. For more information about limits and how to request an increase, see Amazon Kinesis Data Firehose Limits."]
+       "The service is unavailable. Back off and retry the operation. If you continue to see the exception, throughput limits for the Firehose stream may have been exceeded. For more information about limits and how to request an increase, see Amazon Firehose Limits."]
 module PutRecordBatchResponseEntryList =
   struct
     type nonrec t = PutRecordBatchResponseEntry.t list
@@ -6398,6 +10212,9 @@ module PutRecordBatchResponseEntryList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PutRecordBatchResponseEntry.to_value)) |>
         (fun x -> `List x)
@@ -6429,6 +10246,9 @@ module PutRecordBatchRequestEntryList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Record.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6458,6 +10278,9 @@ module ListTagsForDeliveryStreamOutputTagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6503,6 +10326,9 @@ module DeliveryStreamNameList =
   struct
     type nonrec t = DeliveryStreamName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeliveryStreamName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6548,102 +10374,102 @@ module DeliveryStreamDescription =
   struct
     type nonrec t =
       {
-      deliveryStreamName: DeliveryStreamName.t
-        [@ocaml.doc "The name of the delivery stream."];
-      deliveryStreamARN: DeliveryStreamARN.t
+      deliveryStreamName: DeliveryStreamName.t option
+        [@ocaml.doc "The name of the Firehose stream."];
+      deliveryStreamARN: DeliveryStreamARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the delivery stream. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
-      deliveryStreamStatus: DeliveryStreamStatus.t
+          "The Amazon Resource Name (ARN) of the Firehose stream. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
+      deliveryStreamStatus: DeliveryStreamStatus.t option
         [@ocaml.doc
-          "The status of the delivery stream. If the status of a delivery stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it."];
+          "The status of the Firehose stream. If the status of a Firehose stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it."];
       failureDescription: FailureDescription.t option
         [@ocaml.doc
           "Provides details in case one of the following operations fails due to an error related to KMS: CreateDeliveryStream, DeleteDeliveryStream, StartDeliveryStreamEncryption, StopDeliveryStreamEncryption."];
       deliveryStreamEncryptionConfiguration:
         DeliveryStreamEncryptionConfiguration.t option
         [@ocaml.doc
-          "Indicates the server-side encryption (SSE) status for the delivery stream."];
-      deliveryStreamType: DeliveryStreamType.t
+          "Indicates the server-side encryption (SSE) status for the Firehose stream."];
+      deliveryStreamType: DeliveryStreamType.t option
         [@ocaml.doc
-          "The delivery stream type. This can be one of the following values: DirectPut: Provider applications access the delivery stream directly. KinesisStreamAsSource: The delivery stream uses a Kinesis data stream as a source."];
-      versionId: DeliveryStreamVersionId.t
+          "The Firehose stream type. This can be one of the following values: DirectPut: Provider applications access the Firehose stream directly. KinesisStreamAsSource: The Firehose stream uses a Kinesis data stream as a source."];
+      versionId: DeliveryStreamVersionId.t option
         [@ocaml.doc
-          "Each time the destination is updated for a delivery stream, the version ID is changed, and the current version ID is required when updating the destination. This is so that the service knows it is applying the changes to the correct version of the delivery stream."];
+          "Each time the destination is updated for a Firehose stream, the version ID is changed, and the current version ID is required when updating the destination. This is so that the service knows it is applying the changes to the correct version of the delivery stream."];
       createTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The date and time that the delivery stream was created."];
+          "The date and time that the Firehose stream was created."];
       lastUpdateTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The date and time that the delivery stream was last updated."];
+          "The date and time that the Firehose stream was last updated."];
       source: SourceDescription.t option
         [@ocaml.doc
           "If the DeliveryStreamType parameter is KinesisStreamAsSource, a SourceDescription object describing the source Kinesis data stream."];
-      destinations: DestinationDescriptionList.t
+      destinations: DestinationDescriptionList.t option
         [@ocaml.doc "The destinations."];
-      hasMoreDestinations: BooleanObject.t
+      hasMoreDestinations: BooleanObject.t option
         [@ocaml.doc
           "Indicates whether there are more destinations available to list."]}
-    let context_ = "DeliveryStreamDescription"
-    let make ?failureDescription =
-      fun ?deliveryStreamEncryptionConfiguration ->
-        fun ?createTimestamp ->
-          fun ?lastUpdateTimestamp ->
-            fun ?source ->
-              fun ~deliveryStreamName ->
-                fun ~deliveryStreamARN ->
-                  fun ~deliveryStreamStatus ->
-                    fun ~deliveryStreamType ->
-                      fun ~versionId ->
-                        fun ~destinations ->
-                          fun ~hasMoreDestinations ->
+    let make ?deliveryStreamName =
+      fun ?deliveryStreamARN ->
+        fun ?deliveryStreamStatus ->
+          fun ?failureDescription ->
+            fun ?deliveryStreamEncryptionConfiguration ->
+              fun ?deliveryStreamType ->
+                fun ?versionId ->
+                  fun ?createTimestamp ->
+                    fun ?lastUpdateTimestamp ->
+                      fun ?source ->
+                        fun ?destinations ->
+                          fun ?hasMoreDestinations ->
                             fun () ->
                               {
-                                failureDescription;
-                                deliveryStreamEncryptionConfiguration;
-                                createTimestamp;
-                                lastUpdateTimestamp;
-                                source;
                                 deliveryStreamName;
                                 deliveryStreamARN;
                                 deliveryStreamStatus;
+                                failureDescription;
+                                deliveryStreamEncryptionConfiguration;
                                 deliveryStreamType;
                                 versionId;
+                                createTimestamp;
+                                lastUpdateTimestamp;
+                                source;
                                 destinations;
                                 hasMoreDestinations
                               }
     let to_value x =
       structure_to_value
         [("DeliveryStreamName",
-           (Some (DeliveryStreamName.to_value x.deliveryStreamName)));
+           (Option.map x.deliveryStreamName ~f:DeliveryStreamName.to_value));
         ("DeliveryStreamARN",
-          (Some (DeliveryStreamARN.to_value x.deliveryStreamARN)));
+          (Option.map x.deliveryStreamARN ~f:DeliveryStreamARN.to_value));
         ("DeliveryStreamStatus",
-          (Some (DeliveryStreamStatus.to_value x.deliveryStreamStatus)));
+          (Option.map x.deliveryStreamStatus ~f:DeliveryStreamStatus.to_value));
         ("FailureDescription",
           (Option.map x.failureDescription ~f:FailureDescription.to_value));
         ("DeliveryStreamEncryptionConfiguration",
           (Option.map x.deliveryStreamEncryptionConfiguration
              ~f:DeliveryStreamEncryptionConfiguration.to_value));
         ("DeliveryStreamType",
-          (Some (DeliveryStreamType.to_value x.deliveryStreamType)));
-        ("VersionId", (Some (DeliveryStreamVersionId.to_value x.versionId)));
+          (Option.map x.deliveryStreamType ~f:DeliveryStreamType.to_value));
+        ("VersionId",
+          (Option.map x.versionId ~f:DeliveryStreamVersionId.to_value));
         ("CreateTimestamp",
           (Option.map x.createTimestamp ~f:Timestamp.to_value));
         ("LastUpdateTimestamp",
           (Option.map x.lastUpdateTimestamp ~f:Timestamp.to_value));
         ("Source", (Option.map x.source ~f:SourceDescription.to_value));
         ("Destinations",
-          (Some (DestinationDescriptionList.to_value x.destinations)));
+          (Option.map x.destinations ~f:DestinationDescriptionList.to_value));
         ("HasMoreDestinations",
-          (Some (BooleanObject.to_value x.hasMoreDestinations)))]
+          (Option.map x.hasMoreDestinations ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let hasMoreDestinations =
-        BooleanObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HasMoreDestinations") in
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HasMoreDestinations") in
       let destinations =
-        DestinationDescriptionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Destinations") in
+        (Option.map ~f:DestinationDescriptionList.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
       let source =
         (Option.map ~f:SourceDescription.of_xml)
           (Xml.child xml_arg0 "Source") in
@@ -6654,11 +10480,11 @@ module DeliveryStreamDescription =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "CreateTimestamp") in
       let versionId =
-        DeliveryStreamVersionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VersionId") in
+        (Option.map ~f:DeliveryStreamVersionId.of_xml)
+          (Xml.child xml_arg0 "VersionId") in
       let deliveryStreamType =
-        DeliveryStreamType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamType") in
+        (Option.map ~f:DeliveryStreamType.of_xml)
+          (Xml.child xml_arg0 "DeliveryStreamType") in
       let deliveryStreamEncryptionConfiguration =
         (Option.map ~f:DeliveryStreamEncryptionConfiguration.of_xml)
           (Xml.child xml_arg0 "DeliveryStreamEncryptionConfiguration") in
@@ -6666,51 +10492,50 @@ module DeliveryStreamDescription =
         (Option.map ~f:FailureDescription.of_xml)
           (Xml.child xml_arg0 "FailureDescription") in
       let deliveryStreamStatus =
-        DeliveryStreamStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamStatus") in
+        (Option.map ~f:DeliveryStreamStatus.of_xml)
+          (Xml.child xml_arg0 "DeliveryStreamStatus") in
       let deliveryStreamARN =
-        DeliveryStreamARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamARN") in
+        (Option.map ~f:DeliveryStreamARN.of_xml)
+          (Xml.child xml_arg0 "DeliveryStreamARN") in
       let deliveryStreamName =
-        DeliveryStreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
-      make ~hasMoreDestinations ~destinations ?source ?lastUpdateTimestamp
-        ?createTimestamp ~versionId ~deliveryStreamType
+        (Option.map ~f:DeliveryStreamName.of_xml)
+          (Xml.child xml_arg0 "DeliveryStreamName") in
+      make ?hasMoreDestinations ?destinations ?source ?lastUpdateTimestamp
+        ?createTimestamp ?versionId ?deliveryStreamType
         ?deliveryStreamEncryptionConfiguration ?failureDescription
-        ~deliveryStreamStatus ~deliveryStreamARN ~deliveryStreamName ()
+        ?deliveryStreamStatus ?deliveryStreamARN ?deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hasMoreDestinations =
-        field_map_exn json "HasMoreDestinations" BooleanObject.of_json in
+        field_map json__ "HasMoreDestinations" BooleanObject.of_json in
       let destinations =
-        field_map_exn json "Destinations" DestinationDescriptionList.of_json in
-      let source = field_map json "Source" SourceDescription.of_json in
+        field_map json__ "Destinations" DestinationDescriptionList.of_json in
+      let source = field_map json__ "Source" SourceDescription.of_json in
       let lastUpdateTimestamp =
-        field_map json "LastUpdateTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdateTimestamp" Timestamp.of_json in
       let createTimestamp =
-        field_map json "CreateTimestamp" Timestamp.of_json in
+        field_map json__ "CreateTimestamp" Timestamp.of_json in
       let versionId =
-        field_map_exn json "VersionId" DeliveryStreamVersionId.of_json in
+        field_map json__ "VersionId" DeliveryStreamVersionId.of_json in
       let deliveryStreamType =
-        field_map_exn json "DeliveryStreamType" DeliveryStreamType.of_json in
+        field_map json__ "DeliveryStreamType" DeliveryStreamType.of_json in
       let deliveryStreamEncryptionConfiguration =
-        field_map json "DeliveryStreamEncryptionConfiguration"
+        field_map json__ "DeliveryStreamEncryptionConfiguration"
           DeliveryStreamEncryptionConfiguration.of_json in
       let failureDescription =
-        field_map json "FailureDescription" FailureDescription.of_json in
+        field_map json__ "FailureDescription" FailureDescription.of_json in
       let deliveryStreamStatus =
-        field_map_exn json "DeliveryStreamStatus"
-          DeliveryStreamStatus.of_json in
+        field_map json__ "DeliveryStreamStatus" DeliveryStreamStatus.of_json in
       let deliveryStreamARN =
-        field_map_exn json "DeliveryStreamARN" DeliveryStreamARN.of_json in
+        field_map json__ "DeliveryStreamARN" DeliveryStreamARN.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
-      make ~hasMoreDestinations ~destinations ?source ?lastUpdateTimestamp
-        ?createTimestamp ~versionId ~deliveryStreamType
+        field_map json__ "DeliveryStreamName" DeliveryStreamName.of_json in
+      make ?hasMoreDestinations ?destinations ?source ?lastUpdateTimestamp
+        ?createTimestamp ?versionId ?deliveryStreamType
         ?deliveryStreamEncryptionConfiguration ?failureDescription
-        ~deliveryStreamStatus ~deliveryStreamARN ~deliveryStreamName ()
+        ?deliveryStreamStatus ?deliveryStreamARN ?deliveryStreamName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains information about a delivery stream."]
+  end[@@ocaml.doc "Contains information about a Firehose stream."]
 module DescribeDeliveryStreamInputLimit =
   struct
     type nonrec t = int
@@ -6731,24 +10556,191 @@ module DescribeDeliveryStreamInputLimit =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module AmazonopensearchserviceDestinationConfiguration =
+module AmazonOpenSearchServerlessDestinationConfiguration =
   struct
     type nonrec t =
       {
-      roleARN: RoleARN.t ;
-      domainARN: AmazonopensearchserviceDomainARN.t option ;
-      clusterEndpoint: AmazonopensearchserviceClusterEndpoint.t option ;
-      indexName: AmazonopensearchserviceIndexName.t ;
-      typeName: AmazonopensearchserviceTypeName.t option ;
-      indexRotationPeriod:
-        AmazonopensearchserviceIndexRotationPeriod.t option ;
-      bufferingHints: AmazonopensearchserviceBufferingHints.t option ;
-      retryOptions: AmazonopensearchserviceRetryOptions.t option ;
-      s3BackupMode: AmazonopensearchserviceS3BackupMode.t option ;
+      roleARN: RoleARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Firehose for calling the Serverless offering for Amazon OpenSearch Service Configuration API and for indexing documents."];
+      collectionEndpoint:
+        AmazonOpenSearchServerlessCollectionEndpoint.t option
+        [@ocaml.doc
+          "The endpoint to use when communicating with the collection in the Serverless offering for Amazon OpenSearch Service."];
+      indexName: AmazonOpenSearchServerlessIndexName.t
+        [@ocaml.doc
+          "The Serverless offering for Amazon OpenSearch Service index name."];
+      bufferingHints: AmazonOpenSearchServerlessBufferingHints.t option
+        [@ocaml.doc
+          "The buffering options. If no value is specified, the default values for AmazonopensearchserviceBufferingHints are used."];
+      retryOptions: AmazonOpenSearchServerlessRetryOptions.t option
+        [@ocaml.doc
+          "The retry behavior in case Firehose is unable to deliver documents to the Serverless offering for Amazon OpenSearch Service. The default value is 300 (5 minutes)."];
+      s3BackupMode: AmazonOpenSearchServerlessS3BackupMode.t option
+        [@ocaml.doc
+          "Defines how documents should be delivered to Amazon S3. When it is set to FailedDocumentsOnly, Firehose writes any documents that could not be indexed to the configured Amazon S3 destination, with AmazonOpenSearchService-failed/ appended to the key prefix. When set to AllDocuments, Firehose delivers all incoming records to Amazon S3, and also writes failed documents with AmazonOpenSearchService-failed/ appended to the prefix."];
       s3Configuration: S3DestinationConfiguration.t ;
       processingConfiguration: ProcessingConfiguration.t option ;
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
       vpcConfiguration: VpcConfiguration.t option }
+    let context_ = "AmazonOpenSearchServerlessDestinationConfiguration"
+    let make ?collectionEndpoint =
+      fun ?bufferingHints ->
+        fun ?retryOptions ->
+          fun ?s3BackupMode ->
+            fun ?processingConfiguration ->
+              fun ?cloudWatchLoggingOptions ->
+                fun ?vpcConfiguration ->
+                  fun ~roleARN ->
+                    fun ~indexName ->
+                      fun ~s3Configuration ->
+                        fun () ->
+                          {
+                            collectionEndpoint;
+                            bufferingHints;
+                            retryOptions;
+                            s3BackupMode;
+                            processingConfiguration;
+                            cloudWatchLoggingOptions;
+                            vpcConfiguration;
+                            roleARN;
+                            indexName;
+                            s3Configuration
+                          }
+    let to_value x =
+      structure_to_value
+        [("RoleARN", (Some (RoleARN.to_value x.roleARN)));
+        ("CollectionEndpoint",
+          (Option.map x.collectionEndpoint
+             ~f:AmazonOpenSearchServerlessCollectionEndpoint.to_value));
+        ("IndexName",
+          (Some (AmazonOpenSearchServerlessIndexName.to_value x.indexName)));
+        ("BufferingHints",
+          (Option.map x.bufferingHints
+             ~f:AmazonOpenSearchServerlessBufferingHints.to_value));
+        ("RetryOptions",
+          (Option.map x.retryOptions
+             ~f:AmazonOpenSearchServerlessRetryOptions.to_value));
+        ("S3BackupMode",
+          (Option.map x.s3BackupMode
+             ~f:AmazonOpenSearchServerlessS3BackupMode.to_value));
+        ("S3Configuration",
+          (Some (S3DestinationConfiguration.to_value x.s3Configuration)));
+        ("ProcessingConfiguration",
+          (Option.map x.processingConfiguration
+             ~f:ProcessingConfiguration.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("VpcConfiguration",
+          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConfiguration =
+        (Option.map ~f:VpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let processingConfiguration =
+        (Option.map ~f:ProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProcessingConfiguration") in
+      let s3Configuration =
+        S3DestinationConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3Configuration") in
+      let s3BackupMode =
+        (Option.map ~f:AmazonOpenSearchServerlessS3BackupMode.of_xml)
+          (Xml.child xml_arg0 "S3BackupMode") in
+      let retryOptions =
+        (Option.map ~f:AmazonOpenSearchServerlessRetryOptions.of_xml)
+          (Xml.child xml_arg0 "RetryOptions") in
+      let bufferingHints =
+        (Option.map ~f:AmazonOpenSearchServerlessBufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let indexName =
+        AmazonOpenSearchServerlessIndexName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
+      let collectionEndpoint =
+        (Option.map ~f:AmazonOpenSearchServerlessCollectionEndpoint.of_xml)
+          (Xml.child xml_arg0 "CollectionEndpoint") in
+      let roleARN =
+        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
+      make ?vpcConfiguration ?cloudWatchLoggingOptions
+        ?processingConfiguration ~s3Configuration ?s3BackupMode ?retryOptions
+        ?bufferingHints ~indexName ?collectionEndpoint ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration" VpcConfiguration.of_json in
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let processingConfiguration =
+        field_map json__ "ProcessingConfiguration"
+          ProcessingConfiguration.of_json in
+      let s3Configuration =
+        field_map_exn json__ "S3Configuration"
+          S3DestinationConfiguration.of_json in
+      let s3BackupMode =
+        field_map json__ "S3BackupMode"
+          AmazonOpenSearchServerlessS3BackupMode.of_json in
+      let retryOptions =
+        field_map json__ "RetryOptions"
+          AmazonOpenSearchServerlessRetryOptions.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints"
+          AmazonOpenSearchServerlessBufferingHints.of_json in
+      let indexName =
+        field_map_exn json__ "IndexName"
+          AmazonOpenSearchServerlessIndexName.of_json in
+      let collectionEndpoint =
+        field_map json__ "CollectionEndpoint"
+          AmazonOpenSearchServerlessCollectionEndpoint.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      make ?vpcConfiguration ?cloudWatchLoggingOptions
+        ?processingConfiguration ~s3Configuration ?s3BackupMode ?retryOptions
+        ?bufferingHints ~indexName ?collectionEndpoint ~roleARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration of a destination in the Serverless offering for Amazon OpenSearch Service."]
+module AmazonopensearchserviceDestinationConfiguration =
+  struct
+    type nonrec t =
+      {
+      roleARN: RoleARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Firehose for calling the Amazon OpenSearch Service Configuration API and for indexing documents."];
+      domainARN: AmazonopensearchserviceDomainARN.t option
+        [@ocaml.doc
+          "The ARN of the Amazon OpenSearch Service domain. The IAM role must have permissions for DescribeElasticsearchDomain, DescribeElasticsearchDomains, and DescribeElasticsearchDomainConfig after assuming the role specified in RoleARN."];
+      clusterEndpoint: AmazonopensearchserviceClusterEndpoint.t option
+        [@ocaml.doc
+          "The endpoint to use when communicating with the cluster. Specify either this ClusterEndpoint or the DomainARN field."];
+      indexName: AmazonopensearchserviceIndexName.t
+        [@ocaml.doc "The ElasticsearAmazon OpenSearch Service index name."];
+      typeName: AmazonopensearchserviceTypeName.t option
+        [@ocaml.doc
+          "The Amazon OpenSearch Service type name. For Elasticsearch 6.x, there can be only one type per index. If you try to specify a new type for an existing index that already has another type, Firehose returns an error during run time."];
+      indexRotationPeriod:
+        AmazonopensearchserviceIndexRotationPeriod.t option
+        [@ocaml.doc
+          "The Amazon OpenSearch Service index rotation period. Index rotation appends a timestamp to the IndexName to facilitate the expiration of old data."];
+      bufferingHints: AmazonopensearchserviceBufferingHints.t option
+        [@ocaml.doc
+          "The buffering options. If no value is specified, the default values for AmazonopensearchserviceBufferingHints are used."];
+      retryOptions: AmazonopensearchserviceRetryOptions.t option
+        [@ocaml.doc
+          "The retry behavior in case Firehose is unable to deliver documents to Amazon OpenSearch Service. The default value is 300 (5 minutes)."];
+      s3BackupMode: AmazonopensearchserviceS3BackupMode.t option
+        [@ocaml.doc
+          "Defines how documents should be delivered to Amazon S3. When it is set to FailedDocumentsOnly, Firehose writes any documents that could not be indexed to the configured Amazon S3 destination, with AmazonOpenSearchService-failed/ appended to the key prefix. When set to AllDocuments, Firehose delivers all incoming records to Amazon S3, and also writes failed documents with AmazonOpenSearchService-failed/ appended to the prefix."];
+      s3Configuration: S3DestinationConfiguration.t ;
+      processingConfiguration: ProcessingConfiguration.t option ;
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
+      vpcConfiguration: VpcConfiguration.t option ;
+      documentIdOptions: DocumentIdOptions.t option
+        [@ocaml.doc
+          "Indicates the method for setting up document ID. The supported methods are Firehose generated document ID and OpenSearch Service generated document ID."]}
     let context_ = "AmazonopensearchserviceDestinationConfiguration"
     let make ?domainARN =
       fun ?clusterEndpoint ->
@@ -6760,25 +10752,27 @@ module AmazonopensearchserviceDestinationConfiguration =
                   fun ?processingConfiguration ->
                     fun ?cloudWatchLoggingOptions ->
                       fun ?vpcConfiguration ->
-                        fun ~roleARN ->
-                          fun ~indexName ->
-                            fun ~s3Configuration ->
-                              fun () ->
-                                {
-                                  domainARN;
-                                  clusterEndpoint;
-                                  typeName;
-                                  indexRotationPeriod;
-                                  bufferingHints;
-                                  retryOptions;
-                                  s3BackupMode;
-                                  processingConfiguration;
-                                  cloudWatchLoggingOptions;
-                                  vpcConfiguration;
-                                  roleARN;
-                                  indexName;
-                                  s3Configuration
-                                }
+                        fun ?documentIdOptions ->
+                          fun ~roleARN ->
+                            fun ~indexName ->
+                              fun ~s3Configuration ->
+                                fun () ->
+                                  {
+                                    domainARN;
+                                    clusterEndpoint;
+                                    typeName;
+                                    indexRotationPeriod;
+                                    bufferingHints;
+                                    retryOptions;
+                                    s3BackupMode;
+                                    processingConfiguration;
+                                    cloudWatchLoggingOptions;
+                                    vpcConfiguration;
+                                    documentIdOptions;
+                                    roleARN;
+                                    indexName;
+                                    s3Configuration
+                                  }
     let to_value x =
       structure_to_value
         [("RoleARN", (Some (RoleARN.to_value x.roleARN)));
@@ -6813,9 +10807,14 @@ module AmazonopensearchserviceDestinationConfiguration =
           (Option.map x.cloudWatchLoggingOptions
              ~f:CloudWatchLoggingOptions.to_value));
         ("VpcConfiguration",
-          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value))]
+          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value));
+        ("DocumentIdOptions",
+          (Option.map x.documentIdOptions ~f:DocumentIdOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentIdOptions =
+        (Option.map ~f:DocumentIdOptions.of_xml)
+          (Xml.child xml_arg0 "DocumentIdOptions") in
       let vpcConfiguration =
         (Option.map ~f:VpcConfiguration.of_xml)
           (Xml.child xml_arg0 "VpcConfiguration") in
@@ -6854,62 +10853,243 @@ module AmazonopensearchserviceDestinationConfiguration =
           (Xml.child xml_arg0 "DomainARN") in
       let roleARN =
         RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
-      make ?vpcConfiguration ?cloudWatchLoggingOptions
+      make ?documentIdOptions ?vpcConfiguration ?cloudWatchLoggingOptions
         ?processingConfiguration ~s3Configuration ?s3BackupMode ?retryOptions
         ?bufferingHints ?indexRotationPeriod ?typeName ~indexName
         ?clusterEndpoint ?domainARN ~roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let documentIdOptions =
+        field_map json__ "DocumentIdOptions" DocumentIdOptions.of_json in
       let vpcConfiguration =
-        field_map json "VpcConfiguration" VpcConfiguration.of_json in
+        field_map json__ "VpcConfiguration" VpcConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let s3Configuration =
-        field_map_exn json "S3Configuration"
+        field_map_exn json__ "S3Configuration"
           S3DestinationConfiguration.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode"
+        field_map json__ "S3BackupMode"
           AmazonopensearchserviceS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions"
+        field_map json__ "RetryOptions"
           AmazonopensearchserviceRetryOptions.of_json in
       let bufferingHints =
-        field_map json "BufferingHints"
+        field_map json__ "BufferingHints"
           AmazonopensearchserviceBufferingHints.of_json in
       let indexRotationPeriod =
-        field_map json "IndexRotationPeriod"
+        field_map json__ "IndexRotationPeriod"
           AmazonopensearchserviceIndexRotationPeriod.of_json in
       let typeName =
-        field_map json "TypeName" AmazonopensearchserviceTypeName.of_json in
+        field_map json__ "TypeName" AmazonopensearchserviceTypeName.of_json in
       let indexName =
-        field_map_exn json "IndexName"
+        field_map_exn json__ "IndexName"
           AmazonopensearchserviceIndexName.of_json in
       let clusterEndpoint =
-        field_map json "ClusterEndpoint"
+        field_map json__ "ClusterEndpoint"
           AmazonopensearchserviceClusterEndpoint.of_json in
       let domainARN =
-        field_map json "DomainARN" AmazonopensearchserviceDomainARN.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      make ?vpcConfiguration ?cloudWatchLoggingOptions
+        field_map json__ "DomainARN" AmazonopensearchserviceDomainARN.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      make ?documentIdOptions ?vpcConfiguration ?cloudWatchLoggingOptions
         ?processingConfiguration ~s3Configuration ?s3BackupMode ?retryOptions
         ?bufferingHints ?indexRotationPeriod ?typeName ~indexName
         ?clusterEndpoint ?domainARN ~roleARN ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Describes the configuration of a destination in Amazon OpenSearch Service"]
+module DatabaseSourceConfiguration =
+  struct
+    type nonrec t =
+      {
+      type_: DatabaseType.t
+        [@ocaml.doc
+          "The type of database engine. This can be one of the following values. MySQL PostgreSQL Amazon Data Firehose is in preview release and is subject to change."];
+      endpoint: DatabaseEndpoint.t
+        [@ocaml.doc
+          "The endpoint of the database server. Amazon Data Firehose is in preview release and is subject to change."];
+      port: DatabasePort.t
+        [@ocaml.doc
+          "The port of the database. This can be one of the following values. 3306 for MySQL database type 5432 for PostgreSQL database type Amazon Data Firehose is in preview release and is subject to change."];
+      sSLMode: SSLMode.t option
+        [@ocaml.doc
+          "The mode to enable or disable SSL when Firehose connects to the database endpoint. Amazon Data Firehose is in preview release and is subject to change."];
+      databases: DatabaseList.t
+        [@ocaml.doc
+          "The list of database patterns in source database endpoint for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."];
+      tables: DatabaseTableList.t
+        [@ocaml.doc
+          "The list of table patterns in source database endpoint for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."];
+      columns: DatabaseColumnList.t option
+        [@ocaml.doc
+          "The list of column patterns in source database endpoint for Firehose to read from. Amazon Data Firehose is in preview release and is subject to change."];
+      surrogateKeys: DatabaseSurrogateKeyList.t option
+        [@ocaml.doc
+          "The optional list of table and column names used as unique key columns when taking snapshot if the tables don\226\128\153t have primary keys configured. Amazon Data Firehose is in preview release and is subject to change."];
+      snapshotWatermarkTable: DatabaseTableName.t
+        [@ocaml.doc
+          "The fully qualified name of the table in source database endpoint that Firehose uses to track snapshot progress. Amazon Data Firehose is in preview release and is subject to change."];
+      databaseSourceAuthenticationConfiguration:
+        DatabaseSourceAuthenticationConfiguration.t
+        [@ocaml.doc
+          "The structure to configure the authentication methods for Firehose to connect to source database endpoint. Amazon Data Firehose is in preview release and is subject to change."];
+      databaseSourceVPCConfiguration: DatabaseSourceVPCConfiguration.t
+        [@ocaml.doc
+          "The details of the VPC Endpoint Service which Firehose uses to create a PrivateLink to the database. Amazon Data Firehose is in preview release and is subject to change."]}
+    let context_ = "DatabaseSourceConfiguration"
+    let make ?sSLMode =
+      fun ?columns ->
+        fun ?surrogateKeys ->
+          fun ~type_ ->
+            fun ~endpoint ->
+              fun ~port ->
+                fun ~databases ->
+                  fun ~tables ->
+                    fun ~snapshotWatermarkTable ->
+                      fun ~databaseSourceAuthenticationConfiguration ->
+                        fun ~databaseSourceVPCConfiguration ->
+                          fun () ->
+                            {
+                              sSLMode;
+                              columns;
+                              surrogateKeys;
+                              type_;
+                              endpoint;
+                              port;
+                              databases;
+                              tables;
+                              snapshotWatermarkTable;
+                              databaseSourceAuthenticationConfiguration;
+                              databaseSourceVPCConfiguration
+                            }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (DatabaseType.to_value x.type_)));
+        ("Endpoint", (Some (DatabaseEndpoint.to_value x.endpoint)));
+        ("Port", (Some (DatabasePort.to_value x.port)));
+        ("SSLMode", (Option.map x.sSLMode ~f:SSLMode.to_value));
+        ("Databases", (Some (DatabaseList.to_value x.databases)));
+        ("Tables", (Some (DatabaseTableList.to_value x.tables)));
+        ("Columns", (Option.map x.columns ~f:DatabaseColumnList.to_value));
+        ("SurrogateKeys",
+          (Option.map x.surrogateKeys ~f:DatabaseSurrogateKeyList.to_value));
+        ("SnapshotWatermarkTable",
+          (Some (DatabaseTableName.to_value x.snapshotWatermarkTable)));
+        ("DatabaseSourceAuthenticationConfiguration",
+          (Some
+             (DatabaseSourceAuthenticationConfiguration.to_value
+                x.databaseSourceAuthenticationConfiguration)));
+        ("DatabaseSourceVPCConfiguration",
+          (Some
+             (DatabaseSourceVPCConfiguration.to_value
+                x.databaseSourceVPCConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let databaseSourceVPCConfiguration =
+        DatabaseSourceVPCConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "DatabaseSourceVPCConfiguration") in
+      let databaseSourceAuthenticationConfiguration =
+        DatabaseSourceAuthenticationConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "DatabaseSourceAuthenticationConfiguration") in
+      let snapshotWatermarkTable =
+        DatabaseTableName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SnapshotWatermarkTable") in
+      let surrogateKeys =
+        (Option.map ~f:DatabaseSurrogateKeyList.of_xml)
+          (Xml.child xml_arg0 "SurrogateKeys") in
+      let columns =
+        (Option.map ~f:DatabaseColumnList.of_xml)
+          (Xml.child xml_arg0 "Columns") in
+      let tables =
+        DatabaseTableList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Tables") in
+      let databases =
+        DatabaseList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Databases") in
+      let sSLMode =
+        (Option.map ~f:SSLMode.of_xml) (Xml.child xml_arg0 "SSLMode") in
+      let port =
+        DatabasePort.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Port") in
+      let endpoint =
+        DatabaseEndpoint.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Endpoint") in
+      let type_ =
+        DatabaseType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ~databaseSourceVPCConfiguration
+        ~databaseSourceAuthenticationConfiguration ~snapshotWatermarkTable
+        ?surrogateKeys ?columns ~tables ~databases ?sSLMode ~port ~endpoint
+        ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let databaseSourceVPCConfiguration =
+        field_map_exn json__ "DatabaseSourceVPCConfiguration"
+          DatabaseSourceVPCConfiguration.of_json in
+      let databaseSourceAuthenticationConfiguration =
+        field_map_exn json__ "DatabaseSourceAuthenticationConfiguration"
+          DatabaseSourceAuthenticationConfiguration.of_json in
+      let snapshotWatermarkTable =
+        field_map_exn json__ "SnapshotWatermarkTable"
+          DatabaseTableName.of_json in
+      let surrogateKeys =
+        field_map json__ "SurrogateKeys" DatabaseSurrogateKeyList.of_json in
+      let columns = field_map json__ "Columns" DatabaseColumnList.of_json in
+      let tables = field_map_exn json__ "Tables" DatabaseTableList.of_json in
+      let databases = field_map_exn json__ "Databases" DatabaseList.of_json in
+      let sSLMode = field_map json__ "SSLMode" SSLMode.of_json in
+      let port = field_map_exn json__ "Port" DatabasePort.of_json in
+      let endpoint = field_map_exn json__ "Endpoint" DatabaseEndpoint.of_json in
+      let type_ = field_map_exn json__ "Type" DatabaseType.of_json in
+      make ~databaseSourceVPCConfiguration
+        ~databaseSourceAuthenticationConfiguration ~snapshotWatermarkTable
+        ?surrogateKeys ?columns ~tables ~databases ?sSLMode ~port ~endpoint
+        ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The top level object for configuring streams with database as a source. Amazon Data Firehose is in preview release and is subject to change."]
+module DirectPutSourceConfiguration =
+  struct
+    type nonrec t =
+      {
+      throughputHintInMBs: ThroughputHintInMBs.t
+        [@ocaml.doc
+          "The value that you configure for this parameter is for information purpose only and does not affect Firehose delivery throughput limit. You can use the Firehose Limits form to request a throughput limit increase."]}
+    let context_ = "DirectPutSourceConfiguration"
+    let make ~throughputHintInMBs = fun () -> { throughputHintInMBs }
+    let to_value x =
+      structure_to_value
+        [("ThroughputHintInMBs",
+           (Some (ThroughputHintInMBs.to_value x.throughputHintInMBs)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let throughputHintInMBs =
+        ThroughputHintInMBs.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ThroughputHintInMBs") in
+      make ~throughputHintInMBs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let throughputHintInMBs =
+        field_map_exn json__ "ThroughputHintInMBs"
+          ThroughputHintInMBs.of_json in
+      make ~throughputHintInMBs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that configures parameters such as ThroughputHintInMBs for a stream configured with Direct PUT as a source."]
 module ElasticsearchDestinationConfiguration =
   struct
     type nonrec t =
       {
       roleARN: RoleARN.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Kinesis Data Firehose for calling the Amazon ES Configuration API and for indexing documents. For more information, see Grant Kinesis Data Firehose Access to an Amazon S3 Destination and Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Firehose for calling the Amazon OpenSearch Service Configuration API and for indexing documents. For more information, see Grant Firehose Access to an Amazon S3 Destination and Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       domainARN: ElasticsearchDomainARN.t option
         [@ocaml.doc
-          "The ARN of the Amazon ES domain. The IAM role must have permissions for\194\160DescribeElasticsearchDomain, DescribeElasticsearchDomains, and DescribeElasticsearchDomainConfig\194\160after assuming the role specified in RoleARN. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces. Specify either ClusterEndpoint or DomainARN."];
+          "The ARN of the Amazon OpenSearch Service domain. The IAM role must have permissions for\194\160DescribeDomain, DescribeDomains, and DescribeDomainConfig\194\160after assuming the role specified in RoleARN. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces. Specify either ClusterEndpoint or DomainARN."];
       clusterEndpoint: ElasticsearchClusterEndpoint.t option
         [@ocaml.doc
           "The endpoint to use when communicating with the cluster. Specify either this ClusterEndpoint or the DomainARN field."];
@@ -6917,28 +11097,31 @@ module ElasticsearchDestinationConfiguration =
         [@ocaml.doc "The Elasticsearch index name."];
       typeName: ElasticsearchTypeName.t option
         [@ocaml.doc
-          "The Elasticsearch type name. For Elasticsearch 6.x, there can be only one type per index. If you try to specify a new type for an existing index that already has another type, Kinesis Data Firehose returns an error during run time. For Elasticsearch 7.x, don't specify a TypeName."];
+          "The Elasticsearch type name. For Elasticsearch 6.x, there can be only one type per index. If you try to specify a new type for an existing index that already has another type, Firehose returns an error during run time. For Elasticsearch 7.x, don't specify a TypeName."];
       indexRotationPeriod: ElasticsearchIndexRotationPeriod.t option
         [@ocaml.doc
-          "The Elasticsearch index rotation period. Index rotation appends a timestamp to the IndexName to facilitate the expiration of old data. For more information, see Index Rotation for the Amazon ES Destination. The default value is\194\160OneDay."];
+          "The Elasticsearch index rotation period. Index rotation appends a timestamp to the IndexName to facilitate the expiration of old data. For more information, see Index Rotation for the Amazon OpenSearch Service Destination. The default value is\194\160OneDay."];
       bufferingHints: ElasticsearchBufferingHints.t option
         [@ocaml.doc
           "The buffering options. If no value is specified, the default values for ElasticsearchBufferingHints are used."];
       retryOptions: ElasticsearchRetryOptions.t option
         [@ocaml.doc
-          "The retry behavior in case Kinesis Data Firehose is unable to deliver documents to Amazon ES. The default value is 300 (5 minutes)."];
+          "The retry behavior in case Firehose is unable to deliver documents to Amazon OpenSearch Service. The default value is 300 (5 minutes)."];
       s3BackupMode: ElasticsearchS3BackupMode.t option
         [@ocaml.doc
-          "Defines how documents should be delivered to Amazon S3. When it is set to FailedDocumentsOnly, Kinesis Data Firehose writes any documents that could not be indexed to the configured Amazon S3 destination, with elasticsearch-failed/ appended to the key prefix. When set to AllDocuments, Kinesis Data Firehose delivers all incoming records to Amazon S3, and also writes failed documents with elasticsearch-failed/ appended to the prefix. For more information, see Amazon S3 Backup for the Amazon ES Destination. Default value is FailedDocumentsOnly. You can't change this backup mode after you create the delivery stream."];
+          "Defines how documents should be delivered to Amazon S3. When it is set to FailedDocumentsOnly, Firehose writes any documents that could not be indexed to the configured Amazon S3 destination, with AmazonOpenSearchService-failed/ appended to the key prefix. When set to AllDocuments, Firehose delivers all incoming records to Amazon S3, and also writes failed documents with AmazonOpenSearchService-failed/ appended to the prefix. For more information, see Amazon S3 Backup for the Amazon OpenSearch Service Destination. Default value is FailedDocumentsOnly. You can't change this backup mode after you create the Firehose stream."];
       s3Configuration: S3DestinationConfiguration.t
         [@ocaml.doc "The configuration for the backup Amazon S3 location."];
       processingConfiguration: ProcessingConfiguration.t option
         [@ocaml.doc "The data processing configuration."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."];
+          "The Amazon CloudWatch logging options for your Firehose stream."];
       vpcConfiguration: VpcConfiguration.t option
-        [@ocaml.doc "The details of the VPC of the Amazon ES destination."]}
+        [@ocaml.doc "The details of the VPC of the Amazon destination."];
+      documentIdOptions: DocumentIdOptions.t option
+        [@ocaml.doc
+          "Indicates the method for setting up document ID. The supported methods are Firehose generated document ID and OpenSearch Service generated document ID."]}
     let context_ = "ElasticsearchDestinationConfiguration"
     let make ?domainARN =
       fun ?clusterEndpoint ->
@@ -6950,25 +11133,27 @@ module ElasticsearchDestinationConfiguration =
                   fun ?processingConfiguration ->
                     fun ?cloudWatchLoggingOptions ->
                       fun ?vpcConfiguration ->
-                        fun ~roleARN ->
-                          fun ~indexName ->
-                            fun ~s3Configuration ->
-                              fun () ->
-                                {
-                                  domainARN;
-                                  clusterEndpoint;
-                                  typeName;
-                                  indexRotationPeriod;
-                                  bufferingHints;
-                                  retryOptions;
-                                  s3BackupMode;
-                                  processingConfiguration;
-                                  cloudWatchLoggingOptions;
-                                  vpcConfiguration;
-                                  roleARN;
-                                  indexName;
-                                  s3Configuration
-                                }
+                        fun ?documentIdOptions ->
+                          fun ~roleARN ->
+                            fun ~indexName ->
+                              fun ~s3Configuration ->
+                                fun () ->
+                                  {
+                                    domainARN;
+                                    clusterEndpoint;
+                                    typeName;
+                                    indexRotationPeriod;
+                                    bufferingHints;
+                                    retryOptions;
+                                    s3BackupMode;
+                                    processingConfiguration;
+                                    cloudWatchLoggingOptions;
+                                    vpcConfiguration;
+                                    documentIdOptions;
+                                    roleARN;
+                                    indexName;
+                                    s3Configuration
+                                  }
     let to_value x =
       structure_to_value
         [("RoleARN", (Some (RoleARN.to_value x.roleARN)));
@@ -6999,9 +11184,14 @@ module ElasticsearchDestinationConfiguration =
           (Option.map x.cloudWatchLoggingOptions
              ~f:CloudWatchLoggingOptions.to_value));
         ("VpcConfiguration",
-          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value))]
+          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value));
+        ("DocumentIdOptions",
+          (Option.map x.documentIdOptions ~f:DocumentIdOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentIdOptions =
+        (Option.map ~f:DocumentIdOptions.of_xml)
+          (Xml.child xml_arg0 "DocumentIdOptions") in
       let vpcConfiguration =
         (Option.map ~f:VpcConfiguration.of_xml)
           (Xml.child xml_arg0 "VpcConfiguration") in
@@ -7040,63 +11230,67 @@ module ElasticsearchDestinationConfiguration =
           (Xml.child xml_arg0 "DomainARN") in
       let roleARN =
         RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
-      make ?vpcConfiguration ?cloudWatchLoggingOptions
+      make ?documentIdOptions ?vpcConfiguration ?cloudWatchLoggingOptions
         ?processingConfiguration ~s3Configuration ?s3BackupMode ?retryOptions
         ?bufferingHints ?indexRotationPeriod ?typeName ~indexName
         ?clusterEndpoint ?domainARN ~roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let documentIdOptions =
+        field_map json__ "DocumentIdOptions" DocumentIdOptions.of_json in
       let vpcConfiguration =
-        field_map json "VpcConfiguration" VpcConfiguration.of_json in
+        field_map json__ "VpcConfiguration" VpcConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let s3Configuration =
-        field_map_exn json "S3Configuration"
+        field_map_exn json__ "S3Configuration"
           S3DestinationConfiguration.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" ElasticsearchS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" ElasticsearchS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions" ElasticsearchRetryOptions.of_json in
+        field_map json__ "RetryOptions" ElasticsearchRetryOptions.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" ElasticsearchBufferingHints.of_json in
+        field_map json__ "BufferingHints" ElasticsearchBufferingHints.of_json in
       let indexRotationPeriod =
-        field_map json "IndexRotationPeriod"
+        field_map json__ "IndexRotationPeriod"
           ElasticsearchIndexRotationPeriod.of_json in
-      let typeName = field_map json "TypeName" ElasticsearchTypeName.of_json in
+      let typeName =
+        field_map json__ "TypeName" ElasticsearchTypeName.of_json in
       let indexName =
-        field_map_exn json "IndexName" ElasticsearchIndexName.of_json in
+        field_map_exn json__ "IndexName" ElasticsearchIndexName.of_json in
       let clusterEndpoint =
-        field_map json "ClusterEndpoint" ElasticsearchClusterEndpoint.of_json in
+        field_map json__ "ClusterEndpoint"
+          ElasticsearchClusterEndpoint.of_json in
       let domainARN =
-        field_map json "DomainARN" ElasticsearchDomainARN.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      make ?vpcConfiguration ?cloudWatchLoggingOptions
+        field_map json__ "DomainARN" ElasticsearchDomainARN.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      make ?documentIdOptions ?vpcConfiguration ?cloudWatchLoggingOptions
         ?processingConfiguration ~s3Configuration ?s3BackupMode ?retryOptions
         ?bufferingHints ?indexRotationPeriod ?typeName ~indexName
         ?clusterEndpoint ?domainARN ~roleARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the configuration of a destination in Amazon ES."]
+       "Describes the configuration of a destination in Amazon OpenSearch Service."]
 module ExtendedS3DestinationConfiguration =
   struct
     type nonrec t =
       {
       roleARN: RoleARN.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       bucketARN: BucketARN.t
         [@ocaml.doc
-          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The ARN of the S3 bucket. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       prefix: Prefix.t option
         [@ocaml.doc
           "The \"YYYY/MM/DD/HH\" time format prefix is automatically used for delivered Amazon S3 files. You can also specify a custom prefix, as described in Custom Prefixes for Amazon S3 Objects."];
       errorOutputPrefix: ErrorOutputPrefix.t option
         [@ocaml.doc
-          "A prefix that Kinesis Data Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
+          "A prefix that Firehose evaluates and adds to failed records before writing them to S3. This prefix appears immediately following the bucket name. For information about how to specify this prefix, see Custom Prefixes for Amazon S3 Objects."];
       bufferingHints: BufferingHints.t option
         [@ocaml.doc "The buffering option."];
       compressionFormat: CompressionFormat.t option
@@ -7107,12 +11301,12 @@ module ExtendedS3DestinationConfiguration =
           "The encryption configuration. If no value is specified, the default is no encryption."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."];
+          "The Amazon CloudWatch logging options for your Firehose stream."];
       processingConfiguration: ProcessingConfiguration.t option
         [@ocaml.doc "The data processing configuration."];
       s3BackupMode: S3BackupMode.t option
         [@ocaml.doc
-          "The Amazon S3 backup mode. After you create a delivery stream, you can update it to enable Amazon S3 backup if it is disabled. If backup is enabled, you can't update the delivery stream to disable it."];
+          "The Amazon S3 backup mode. After you create a Firehose stream, you can update it to enable Amazon S3 backup if it is disabled. If backup is enabled, you can't update the Firehose stream to disable it."];
       s3BackupConfiguration: S3DestinationConfiguration.t option
         [@ocaml.doc "The configuration for backup in Amazon S3."];
       dataFormatConversionConfiguration:
@@ -7122,7 +11316,12 @@ module ExtendedS3DestinationConfiguration =
       dynamicPartitioningConfiguration:
         DynamicPartitioningConfiguration.t option
         [@ocaml.doc
-          "The configuration of the dynamic partitioning mechanism that creates smaller data sets from the streaming data by partitioning it based on partition keys. Currently, dynamic partitioning is only supported for Amazon S3 destinations. For more information, see https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html"]}
+          "The configuration of the dynamic partitioning mechanism that creates smaller data sets from the streaming data by partitioning it based on partition keys. Currently, dynamic partitioning is only supported for Amazon S3 destinations."];
+      fileExtension: FileExtension.t option
+        [@ocaml.doc
+          "Specify a file extension. It will override the default file extension"];
+      customTimeZone: CustomTimeZone.t option
+        [@ocaml.doc "The time zone you prefer. UTC is the default."]}
     let context_ = "ExtendedS3DestinationConfiguration"
     let make ?prefix =
       fun ?errorOutputPrefix ->
@@ -7135,24 +11334,28 @@ module ExtendedS3DestinationConfiguration =
                     fun ?s3BackupConfiguration ->
                       fun ?dataFormatConversionConfiguration ->
                         fun ?dynamicPartitioningConfiguration ->
-                          fun ~roleARN ->
-                            fun ~bucketARN ->
-                              fun () ->
-                                {
-                                  prefix;
-                                  errorOutputPrefix;
-                                  bufferingHints;
-                                  compressionFormat;
-                                  encryptionConfiguration;
-                                  cloudWatchLoggingOptions;
-                                  processingConfiguration;
-                                  s3BackupMode;
-                                  s3BackupConfiguration;
-                                  dataFormatConversionConfiguration;
-                                  dynamicPartitioningConfiguration;
-                                  roleARN;
-                                  bucketARN
-                                }
+                          fun ?fileExtension ->
+                            fun ?customTimeZone ->
+                              fun ~roleARN ->
+                                fun ~bucketARN ->
+                                  fun () ->
+                                    {
+                                      prefix;
+                                      errorOutputPrefix;
+                                      bufferingHints;
+                                      compressionFormat;
+                                      encryptionConfiguration;
+                                      cloudWatchLoggingOptions;
+                                      processingConfiguration;
+                                      s3BackupMode;
+                                      s3BackupConfiguration;
+                                      dataFormatConversionConfiguration;
+                                      dynamicPartitioningConfiguration;
+                                      fileExtension;
+                                      customTimeZone;
+                                      roleARN;
+                                      bucketARN
+                                    }
     let to_value x =
       structure_to_value
         [("RoleARN", (Some (RoleARN.to_value x.roleARN)));
@@ -7183,9 +11386,19 @@ module ExtendedS3DestinationConfiguration =
              ~f:DataFormatConversionConfiguration.to_value));
         ("DynamicPartitioningConfiguration",
           (Option.map x.dynamicPartitioningConfiguration
-             ~f:DynamicPartitioningConfiguration.to_value))]
+             ~f:DynamicPartitioningConfiguration.to_value));
+        ("FileExtension",
+          (Option.map x.fileExtension ~f:FileExtension.to_value));
+        ("CustomTimeZone",
+          (Option.map x.customTimeZone ~f:CustomTimeZone.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customTimeZone =
+        (Option.map ~f:CustomTimeZone.of_xml)
+          (Xml.child xml_arg0 "CustomTimeZone") in
+      let fileExtension =
+        (Option.map ~f:FileExtension.of_xml)
+          (Xml.child xml_arg0 "FileExtension") in
       let dynamicPartitioningConfiguration =
         (Option.map ~f:DynamicPartitioningConfiguration.of_xml)
           (Xml.child xml_arg0 "DynamicPartitioningConfiguration") in
@@ -7223,42 +11436,46 @@ module ExtendedS3DestinationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
       let roleARN =
         RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
-      make ?dynamicPartitioningConfiguration
+      make ?customTimeZone ?fileExtension ?dynamicPartitioningConfiguration
         ?dataFormatConversionConfiguration ?s3BackupConfiguration
         ?s3BackupMode ?processingConfiguration ?cloudWatchLoggingOptions
         ?encryptionConfiguration ?compressionFormat ?bufferingHints
         ?errorOutputPrefix ?prefix ~bucketARN ~roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let customTimeZone =
+        field_map json__ "CustomTimeZone" CustomTimeZone.of_json in
+      let fileExtension =
+        field_map json__ "FileExtension" FileExtension.of_json in
       let dynamicPartitioningConfiguration =
-        field_map json "DynamicPartitioningConfiguration"
+        field_map json__ "DynamicPartitioningConfiguration"
           DynamicPartitioningConfiguration.of_json in
       let dataFormatConversionConfiguration =
-        field_map json "DataFormatConversionConfiguration"
+        field_map json__ "DataFormatConversionConfiguration"
           DataFormatConversionConfiguration.of_json in
       let s3BackupConfiguration =
-        field_map json "S3BackupConfiguration"
+        field_map json__ "S3BackupConfiguration"
           S3DestinationConfiguration.of_json in
-      let s3BackupMode = field_map json "S3BackupMode" S3BackupMode.of_json in
+      let s3BackupMode = field_map json__ "S3BackupMode" S3BackupMode.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let encryptionConfiguration =
-        field_map json "EncryptionConfiguration"
+        field_map json__ "EncryptionConfiguration"
           EncryptionConfiguration.of_json in
       let compressionFormat =
-        field_map json "CompressionFormat" CompressionFormat.of_json in
+        field_map json__ "CompressionFormat" CompressionFormat.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" BufferingHints.of_json in
+        field_map json__ "BufferingHints" BufferingHints.of_json in
       let errorOutputPrefix =
-        field_map json "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
-      let prefix = field_map json "Prefix" Prefix.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      make ?dynamicPartitioningConfiguration
+        field_map json__ "ErrorOutputPrefix" ErrorOutputPrefix.of_json in
+      let prefix = field_map json__ "Prefix" Prefix.of_json in
+      let bucketARN = field_map_exn json__ "BucketARN" BucketARN.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      make ?customTimeZone ?fileExtension ?dynamicPartitioningConfiguration
         ?dataFormatConversionConfiguration ?s3BackupConfiguration
         ?s3BackupMode ?processingConfiguration ?cloudWatchLoggingOptions
         ?encryptionConfiguration ?compressionFormat ?bufferingHints
@@ -7275,22 +11492,25 @@ module HttpEndpointDestinationConfiguration =
           "The configuration of the HTTP endpoint selected as the destination."];
       bufferingHints: HttpEndpointBufferingHints.t option
         [@ocaml.doc
-          "The buffering options that can be used before data is delivered to the specified destination. Kinesis Data Firehose treats these options as hints, and it might choose to use more optimal values. The SizeInMBs and IntervalInSeconds parameters are optional. However, if you specify a value for one of them, you must also provide a value for the other."];
+          "The buffering options that can be used before data is delivered to the specified destination. Firehose treats these options as hints, and it might choose to use more optimal values. The SizeInMBs and IntervalInSeconds parameters are optional. However, if you specify a value for one of them, you must also provide a value for the other."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
       requestConfiguration: HttpEndpointRequestConfiguration.t option
         [@ocaml.doc
-          "The configuration of the requeste sent to the HTTP endpoint specified as the destination."];
+          "The configuration of the request sent to the HTTP endpoint that is specified as the destination."];
       processingConfiguration: ProcessingConfiguration.t option ;
       roleARN: RoleARN.t option
         [@ocaml.doc
-          "Kinesis Data Firehose uses this IAM role for all the permissions that the delivery stream needs."];
+          "Firehose uses this IAM role for all the permissions that the delivery stream needs."];
       retryOptions: HttpEndpointRetryOptions.t option
         [@ocaml.doc
-          "Describes the retry behavior in case Kinesis Data Firehose is unable to deliver data to the specified HTTP endpoint destination, or if it doesn't receive a valid acknowledgment of receipt from the specified HTTP endpoint destination."];
+          "Describes the retry behavior in case Firehose is unable to deliver data to the specified HTTP endpoint destination, or if it doesn't receive a valid acknowledgment of receipt from the specified HTTP endpoint destination."];
       s3BackupMode: HttpEndpointS3BackupMode.t option
         [@ocaml.doc
-          "Describes the S3 bucket backup options for the data that Kinesis Data Firehose delivers to the HTTP endpoint destination. You can back up all documents (AllData) or only the documents that Kinesis Data Firehose could not deliver to the specified HTTP endpoint destination (FailedDataOnly)."];
-      s3Configuration: S3DestinationConfiguration.t }
+          "Describes the S3 bucket backup options for the data that Firehose delivers to the HTTP endpoint destination. You can back up all documents (AllData) or only the documents that Firehose could not deliver to the specified HTTP endpoint destination (FailedDataOnly)."];
+      s3Configuration: S3DestinationConfiguration.t ;
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for HTTP Endpoint destination."]}
     let context_ = "HttpEndpointDestinationConfiguration"
     let make ?bufferingHints =
       fun ?cloudWatchLoggingOptions ->
@@ -7299,20 +11519,22 @@ module HttpEndpointDestinationConfiguration =
             fun ?roleARN ->
               fun ?retryOptions ->
                 fun ?s3BackupMode ->
-                  fun ~endpointConfiguration ->
-                    fun ~s3Configuration ->
-                      fun () ->
-                        {
-                          bufferingHints;
-                          cloudWatchLoggingOptions;
-                          requestConfiguration;
-                          processingConfiguration;
-                          roleARN;
-                          retryOptions;
-                          s3BackupMode;
-                          endpointConfiguration;
-                          s3Configuration
-                        }
+                  fun ?secretsManagerConfiguration ->
+                    fun ~endpointConfiguration ->
+                      fun ~s3Configuration ->
+                        fun () ->
+                          {
+                            bufferingHints;
+                            cloudWatchLoggingOptions;
+                            requestConfiguration;
+                            processingConfiguration;
+                            roleARN;
+                            retryOptions;
+                            s3BackupMode;
+                            secretsManagerConfiguration;
+                            endpointConfiguration;
+                            s3Configuration
+                          }
     let to_value x =
       structure_to_value
         [("EndpointConfiguration",
@@ -7334,9 +11556,15 @@ module HttpEndpointDestinationConfiguration =
         ("S3BackupMode",
           (Option.map x.s3BackupMode ~f:HttpEndpointS3BackupMode.to_value));
         ("S3Configuration",
-          (Some (S3DestinationConfiguration.to_value x.s3Configuration)))]
+          (Some (S3DestinationConfiguration.to_value x.s3Configuration)));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
       let s3Configuration =
         S3DestinationConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "S3Configuration") in
@@ -7363,39 +11591,208 @@ module HttpEndpointDestinationConfiguration =
       let endpointConfiguration =
         HttpEndpointConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointConfiguration") in
-      make ~s3Configuration ?s3BackupMode ?retryOptions ?roleARN
-        ?processingConfiguration ?requestConfiguration
+      make ?secretsManagerConfiguration ~s3Configuration ?s3BackupMode
+        ?retryOptions ?roleARN ?processingConfiguration ?requestConfiguration
         ?cloudWatchLoggingOptions ?bufferingHints ~endpointConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
       let s3Configuration =
-        field_map_exn json "S3Configuration"
+        field_map_exn json__ "S3Configuration"
           S3DestinationConfiguration.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" HttpEndpointS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" HttpEndpointS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions" HttpEndpointRetryOptions.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
+        field_map json__ "RetryOptions" HttpEndpointRetryOptions.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let requestConfiguration =
-        field_map json "RequestConfiguration"
+        field_map json__ "RequestConfiguration"
           HttpEndpointRequestConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let bufferingHints =
-        field_map json "BufferingHints" HttpEndpointBufferingHints.of_json in
+        field_map json__ "BufferingHints" HttpEndpointBufferingHints.of_json in
       let endpointConfiguration =
-        field_map_exn json "EndpointConfiguration"
+        field_map_exn json__ "EndpointConfiguration"
           HttpEndpointConfiguration.of_json in
-      make ~s3Configuration ?s3BackupMode ?retryOptions ?roleARN
-        ?processingConfiguration ?requestConfiguration
+      make ?secretsManagerConfiguration ~s3Configuration ?s3BackupMode
+        ?retryOptions ?roleARN ?processingConfiguration ?requestConfiguration
         ?cloudWatchLoggingOptions ?bufferingHints ~endpointConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration of the HTTP endpoint destination."]
+module IcebergDestinationConfiguration =
+  struct
+    type nonrec t =
+      {
+      destinationTableConfigurationList:
+        DestinationTableConfigurationList.t option
+        [@ocaml.doc
+          "Provides a list of DestinationTableConfigurations which Firehose uses to deliver data to Apache Iceberg Tables. Firehose will write data with insert if table specific configuration is not provided here."];
+      schemaEvolutionConfiguration: SchemaEvolutionConfiguration.t option
+        [@ocaml.doc
+          "The configuration to enable automatic schema evolution. Amazon Data Firehose is in preview release and is subject to change."];
+      tableCreationConfiguration: TableCreationConfiguration.t option
+        [@ocaml.doc
+          "The configuration to enable automatic table creation. Amazon Data Firehose is in preview release and is subject to change."];
+      bufferingHints: BufferingHints.t option ;
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
+      processingConfiguration: ProcessingConfiguration.t option ;
+      s3BackupMode: IcebergS3BackupMode.t option
+        [@ocaml.doc
+          "Describes how Firehose will backup records. Currently,S3 backup only supports FailedDataOnly."];
+      retryOptions: RetryOptions.t option ;
+      roleARN: RoleARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to be assumed by Firehose for calling Apache Iceberg Tables."];
+      appendOnly: BooleanObject.t option
+        [@ocaml.doc
+          "Describes whether all incoming data for this delivery stream will be append only (inserts only and not for updates and deletes) for Iceberg delivery. This feature is only applicable for Apache Iceberg Tables. The default value is false. If you set this value to true, Firehose automatically increases the throughput limit of a stream based on the throttling levels of the stream. If you set this parameter to true for a stream with updates and deletes, you will see out of order delivery."];
+      catalogConfiguration: CatalogConfiguration.t
+        [@ocaml.doc
+          "Configuration describing where the destination Apache Iceberg Tables are persisted."];
+      s3Configuration: S3DestinationConfiguration.t }
+    let context_ = "IcebergDestinationConfiguration"
+    let make ?destinationTableConfigurationList =
+      fun ?schemaEvolutionConfiguration ->
+        fun ?tableCreationConfiguration ->
+          fun ?bufferingHints ->
+            fun ?cloudWatchLoggingOptions ->
+              fun ?processingConfiguration ->
+                fun ?s3BackupMode ->
+                  fun ?retryOptions ->
+                    fun ?appendOnly ->
+                      fun ~roleARN ->
+                        fun ~catalogConfiguration ->
+                          fun ~s3Configuration ->
+                            fun () ->
+                              {
+                                destinationTableConfigurationList;
+                                schemaEvolutionConfiguration;
+                                tableCreationConfiguration;
+                                bufferingHints;
+                                cloudWatchLoggingOptions;
+                                processingConfiguration;
+                                s3BackupMode;
+                                retryOptions;
+                                appendOnly;
+                                roleARN;
+                                catalogConfiguration;
+                                s3Configuration
+                              }
+    let to_value x =
+      structure_to_value
+        [("DestinationTableConfigurationList",
+           (Option.map x.destinationTableConfigurationList
+              ~f:DestinationTableConfigurationList.to_value));
+        ("SchemaEvolutionConfiguration",
+          (Option.map x.schemaEvolutionConfiguration
+             ~f:SchemaEvolutionConfiguration.to_value));
+        ("TableCreationConfiguration",
+          (Option.map x.tableCreationConfiguration
+             ~f:TableCreationConfiguration.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:BufferingHints.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("ProcessingConfiguration",
+          (Option.map x.processingConfiguration
+             ~f:ProcessingConfiguration.to_value));
+        ("S3BackupMode",
+          (Option.map x.s3BackupMode ~f:IcebergS3BackupMode.to_value));
+        ("RetryOptions",
+          (Option.map x.retryOptions ~f:RetryOptions.to_value));
+        ("RoleARN", (Some (RoleARN.to_value x.roleARN)));
+        ("AppendOnly", (Option.map x.appendOnly ~f:BooleanObject.to_value));
+        ("CatalogConfiguration",
+          (Some (CatalogConfiguration.to_value x.catalogConfiguration)));
+        ("S3Configuration",
+          (Some (S3DestinationConfiguration.to_value x.s3Configuration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Configuration =
+        S3DestinationConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3Configuration") in
+      let catalogConfiguration =
+        CatalogConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CatalogConfiguration") in
+      let appendOnly =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "AppendOnly") in
+      let roleARN =
+        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
+      let retryOptions =
+        (Option.map ~f:RetryOptions.of_xml)
+          (Xml.child xml_arg0 "RetryOptions") in
+      let s3BackupMode =
+        (Option.map ~f:IcebergS3BackupMode.of_xml)
+          (Xml.child xml_arg0 "S3BackupMode") in
+      let processingConfiguration =
+        (Option.map ~f:ProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProcessingConfiguration") in
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let bufferingHints =
+        (Option.map ~f:BufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let tableCreationConfiguration =
+        (Option.map ~f:TableCreationConfiguration.of_xml)
+          (Xml.child xml_arg0 "TableCreationConfiguration") in
+      let schemaEvolutionConfiguration =
+        (Option.map ~f:SchemaEvolutionConfiguration.of_xml)
+          (Xml.child xml_arg0 "SchemaEvolutionConfiguration") in
+      let destinationTableConfigurationList =
+        (Option.map ~f:DestinationTableConfigurationList.of_xml)
+          (Xml.child xml_arg0 "DestinationTableConfigurationList") in
+      make ~s3Configuration ~catalogConfiguration ?appendOnly ~roleARN
+        ?retryOptions ?s3BackupMode ?processingConfiguration
+        ?cloudWatchLoggingOptions ?bufferingHints ?tableCreationConfiguration
+        ?schemaEvolutionConfiguration ?destinationTableConfigurationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Configuration =
+        field_map_exn json__ "S3Configuration"
+          S3DestinationConfiguration.of_json in
+      let catalogConfiguration =
+        field_map_exn json__ "CatalogConfiguration"
+          CatalogConfiguration.of_json in
+      let appendOnly = field_map json__ "AppendOnly" BooleanObject.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let retryOptions = field_map json__ "RetryOptions" RetryOptions.of_json in
+      let s3BackupMode =
+        field_map json__ "S3BackupMode" IcebergS3BackupMode.of_json in
+      let processingConfiguration =
+        field_map json__ "ProcessingConfiguration"
+          ProcessingConfiguration.of_json in
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints" BufferingHints.of_json in
+      let tableCreationConfiguration =
+        field_map json__ "TableCreationConfiguration"
+          TableCreationConfiguration.of_json in
+      let schemaEvolutionConfiguration =
+        field_map json__ "SchemaEvolutionConfiguration"
+          SchemaEvolutionConfiguration.of_json in
+      let destinationTableConfigurationList =
+        field_map json__ "DestinationTableConfigurationList"
+          DestinationTableConfigurationList.of_json in
+      make ~s3Configuration ~catalogConfiguration ?appendOnly ~roleARN
+        ?retryOptions ?s3BackupMode ?processingConfiguration
+        ?cloudWatchLoggingOptions ?bufferingHints ?tableCreationConfiguration
+        ?schemaEvolutionConfiguration ?destinationTableConfigurationList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the destination configure settings for Apache Iceberg Table."]
 module KinesisStreamSourceConfiguration =
   struct
     type nonrec t =
@@ -7405,7 +11802,7 @@ module KinesisStreamSourceConfiguration =
           "The ARN of the source Kinesis data stream. For more information, see Amazon Kinesis Data Streams ARN Format."];
       roleARN: RoleARN.t
         [@ocaml.doc
-          "The ARN of the role that provides access to the source Kinesis data stream. For more information, see AWS Identity and Access Management (IAM) ARN Format."]}
+          "The ARN of the role that provides access to the source Kinesis data stream. For more information, see Amazon Web Services Identity and Access Management (IAM) ARN Format."]}
     let context_ = "KinesisStreamSourceConfiguration"
     let make ~kinesisStreamARN =
       fun ~roleARN -> fun () -> { kinesisStreamARN; roleARN }
@@ -7423,29 +11820,97 @@ module KinesisStreamSourceConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "KinesisStreamARN") in
       make ~roleARN ~kinesisStreamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
       let kinesisStreamARN =
-        field_map_exn json "KinesisStreamARN" KinesisStreamARN.of_json in
+        field_map_exn json__ "KinesisStreamARN" KinesisStreamARN.of_json in
       make ~roleARN ~kinesisStreamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The stream and role Amazon Resource Names (ARNs) for a Kinesis data stream used as the source for a delivery stream."]
+       "The stream and role Amazon Resource Names (ARNs) for a Kinesis data stream used as the source for a Firehose stream."]
+module MSKSourceConfiguration =
+  struct
+    type nonrec t =
+      {
+      mSKClusterARN: MSKClusterARN.t
+        [@ocaml.doc "The ARN of the Amazon MSK cluster."];
+      topicName: TopicName.t
+        [@ocaml.doc "The topic name within the Amazon MSK cluster."];
+      authenticationConfiguration: AuthenticationConfiguration.t
+        [@ocaml.doc
+          "The authentication configuration of the Amazon MSK cluster."];
+      readFromTimestamp: ReadFromTimestamp.t option
+        [@ocaml.doc
+          "The start date and time in UTC for the offset position within your MSK topic from where Firehose begins to read. By default, this is set to timestamp when Firehose becomes Active. If you want to create a Firehose stream with Earliest start position from SDK or CLI, you need to set the ReadFromTimestamp parameter to Epoch (1970-01-01T00:00:00Z)."]}
+    let context_ = "MSKSourceConfiguration"
+    let make ?readFromTimestamp =
+      fun ~mSKClusterARN ->
+        fun ~topicName ->
+          fun ~authenticationConfiguration ->
+            fun () ->
+              {
+                readFromTimestamp;
+                mSKClusterARN;
+                topicName;
+                authenticationConfiguration
+              }
+    let to_value x =
+      structure_to_value
+        [("MSKClusterARN", (Some (MSKClusterARN.to_value x.mSKClusterARN)));
+        ("TopicName", (Some (TopicName.to_value x.topicName)));
+        ("AuthenticationConfiguration",
+          (Some
+             (AuthenticationConfiguration.to_value
+                x.authenticationConfiguration)));
+        ("ReadFromTimestamp",
+          (Option.map x.readFromTimestamp ~f:ReadFromTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let readFromTimestamp =
+        (Option.map ~f:ReadFromTimestamp.of_xml)
+          (Xml.child xml_arg0 "ReadFromTimestamp") in
+      let authenticationConfiguration =
+        AuthenticationConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "AuthenticationConfiguration") in
+      let topicName =
+        TopicName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TopicName") in
+      let mSKClusterARN =
+        MSKClusterARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MSKClusterARN") in
+      make ?readFromTimestamp ~authenticationConfiguration ~topicName
+        ~mSKClusterARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let readFromTimestamp =
+        field_map json__ "ReadFromTimestamp" ReadFromTimestamp.of_json in
+      let authenticationConfiguration =
+        field_map_exn json__ "AuthenticationConfiguration"
+          AuthenticationConfiguration.of_json in
+      let topicName = field_map_exn json__ "TopicName" TopicName.of_json in
+      let mSKClusterARN =
+        field_map_exn json__ "MSKClusterARN" MSKClusterARN.of_json in
+      make ?readFromTimestamp ~authenticationConfiguration ~topicName
+        ~mSKClusterARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for the Amazon MSK cluster to be used as the source for a delivery stream."]
 module RedshiftDestinationConfiguration =
   struct
     type nonrec t =
       {
       roleARN: RoleARN.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS credentials. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces."];
+          "The Amazon Resource Name (ARN) of the Amazon Web Services credentials. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       clusterJDBCURL: ClusterJDBCURL.t
         [@ocaml.doc "The database connection string."];
       copyCommand: CopyCommand.t [@ocaml.doc "The COPY command."];
-      username: Username.t [@ocaml.doc "The name of the user."];
-      password: Password.t [@ocaml.doc "The user password."];
+      username: Username.t option [@ocaml.doc "The name of the user."];
+      password: Password.t option [@ocaml.doc "The user password."];
       retryOptions: RedshiftRetryOptions.t option
         [@ocaml.doc
-          "The retry behavior in case Kinesis Data Firehose is unable to deliver documents to Amazon Redshift. Default value is 3600 (60 minutes)."];
+          "The retry behavior in case Firehose is unable to deliver documents to Amazon Redshift. Default value is 3600 (60 minutes)."];
       s3Configuration: S3DestinationConfiguration.t
         [@ocaml.doc
           "The configuration for the intermediate Amazon S3 location from which Amazon Redshift obtains data. Restrictions are described in the topic for CreateDeliveryStream. The compression formats SNAPPY or ZIP cannot be specified in RedshiftDestinationConfiguration.S3Configuration because the Amazon Redshift COPY operation that reads from the S3 bucket doesn't support these compression formats."];
@@ -7453,45 +11918,50 @@ module RedshiftDestinationConfiguration =
         [@ocaml.doc "The data processing configuration."];
       s3BackupMode: RedshiftS3BackupMode.t option
         [@ocaml.doc
-          "The Amazon S3 backup mode. After you create a delivery stream, you can update it to enable Amazon S3 backup if it is disabled. If backup is enabled, you can't update the delivery stream to disable it."];
+          "The Amazon S3 backup mode. After you create a Firehose stream, you can update it to enable Amazon S3 backup if it is disabled. If backup is enabled, you can't update the Firehose stream to disable it."];
       s3BackupConfiguration: S3DestinationConfiguration.t option
         [@ocaml.doc "The configuration for backup in Amazon S3."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The CloudWatch logging options for your delivery stream."]}
+          "The CloudWatch logging options for your Firehose stream."];
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for Amazon Redshift."]}
     let context_ = "RedshiftDestinationConfiguration"
-    let make ?retryOptions =
-      fun ?processingConfiguration ->
-        fun ?s3BackupMode ->
-          fun ?s3BackupConfiguration ->
-            fun ?cloudWatchLoggingOptions ->
-              fun ~roleARN ->
-                fun ~clusterJDBCURL ->
-                  fun ~copyCommand ->
-                    fun ~username ->
-                      fun ~password ->
-                        fun ~s3Configuration ->
-                          fun () ->
-                            {
-                              retryOptions;
-                              processingConfiguration;
-                              s3BackupMode;
-                              s3BackupConfiguration;
-                              cloudWatchLoggingOptions;
-                              roleARN;
-                              clusterJDBCURL;
-                              copyCommand;
-                              username;
-                              password;
-                              s3Configuration
-                            }
+    let make ?username =
+      fun ?password ->
+        fun ?retryOptions ->
+          fun ?processingConfiguration ->
+            fun ?s3BackupMode ->
+              fun ?s3BackupConfiguration ->
+                fun ?cloudWatchLoggingOptions ->
+                  fun ?secretsManagerConfiguration ->
+                    fun ~roleARN ->
+                      fun ~clusterJDBCURL ->
+                        fun ~copyCommand ->
+                          fun ~s3Configuration ->
+                            fun () ->
+                              {
+                                username;
+                                password;
+                                retryOptions;
+                                processingConfiguration;
+                                s3BackupMode;
+                                s3BackupConfiguration;
+                                cloudWatchLoggingOptions;
+                                secretsManagerConfiguration;
+                                roleARN;
+                                clusterJDBCURL;
+                                copyCommand;
+                                s3Configuration
+                              }
     let to_value x =
       structure_to_value
         [("RoleARN", (Some (RoleARN.to_value x.roleARN)));
         ("ClusterJDBCURL", (Some (ClusterJDBCURL.to_value x.clusterJDBCURL)));
         ("CopyCommand", (Some (CopyCommand.to_value x.copyCommand)));
-        ("Username", (Some (Username.to_value x.username)));
-        ("Password", (Some (Password.to_value x.password)));
+        ("Username", (Option.map x.username ~f:Username.to_value));
+        ("Password", (Option.map x.password ~f:Password.to_value));
         ("RetryOptions",
           (Option.map x.retryOptions ~f:RedshiftRetryOptions.to_value));
         ("S3Configuration",
@@ -7506,9 +11976,15 @@ module RedshiftDestinationConfiguration =
              ~f:S3DestinationConfiguration.to_value));
         ("CloudWatchLoggingOptions",
           (Option.map x.cloudWatchLoggingOptions
-             ~f:CloudWatchLoggingOptions.to_value))]
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
       let cloudWatchLoggingOptions =
         (Option.map ~f:CloudWatchLoggingOptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
@@ -7528,9 +12004,9 @@ module RedshiftDestinationConfiguration =
         (Option.map ~f:RedshiftRetryOptions.of_xml)
           (Xml.child xml_arg0 "RetryOptions") in
       let password =
-        Password.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Password") in
+        (Option.map ~f:Password.of_xml) (Xml.child xml_arg0 "Password") in
       let username =
-        Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Username") in
+        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "Username") in
       let copyCommand =
         CopyCommand.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CopyCommand") in
@@ -7539,96 +12015,374 @@ module RedshiftDestinationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterJDBCURL") in
       let roleARN =
         RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
-      make ?cloudWatchLoggingOptions ?s3BackupConfiguration ?s3BackupMode
-        ?processingConfiguration ~s3Configuration ?retryOptions ~password
-        ~username ~copyCommand ~clusterJDBCURL ~roleARN ()
+      make ?secretsManagerConfiguration ?cloudWatchLoggingOptions
+        ?s3BackupConfiguration ?s3BackupMode ?processingConfiguration
+        ~s3Configuration ?retryOptions ?password ?username ~copyCommand
+        ~clusterJDBCURL ~roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let s3BackupConfiguration =
-        field_map json "S3BackupConfiguration"
+        field_map json__ "S3BackupConfiguration"
           S3DestinationConfiguration.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" RedshiftS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" RedshiftS3BackupMode.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let s3Configuration =
-        field_map_exn json "S3Configuration"
+        field_map_exn json__ "S3Configuration"
           S3DestinationConfiguration.of_json in
       let retryOptions =
-        field_map json "RetryOptions" RedshiftRetryOptions.of_json in
-      let password = field_map_exn json "Password" Password.of_json in
-      let username = field_map_exn json "Username" Username.of_json in
-      let copyCommand = field_map_exn json "CopyCommand" CopyCommand.of_json in
+        field_map json__ "RetryOptions" RedshiftRetryOptions.of_json in
+      let password = field_map json__ "Password" Password.of_json in
+      let username = field_map json__ "Username" Username.of_json in
+      let copyCommand =
+        field_map_exn json__ "CopyCommand" CopyCommand.of_json in
       let clusterJDBCURL =
-        field_map_exn json "ClusterJDBCURL" ClusterJDBCURL.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      make ?cloudWatchLoggingOptions ?s3BackupConfiguration ?s3BackupMode
-        ?processingConfiguration ~s3Configuration ?retryOptions ~password
-        ~username ~copyCommand ~clusterJDBCURL ~roleARN ()
+        field_map_exn json__ "ClusterJDBCURL" ClusterJDBCURL.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      make ?secretsManagerConfiguration ?cloudWatchLoggingOptions
+        ?s3BackupConfiguration ?s3BackupMode ?processingConfiguration
+        ~s3Configuration ?retryOptions ?password ?username ~copyCommand
+        ~clusterJDBCURL ~roleARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration of a destination in Amazon Redshift."]
+module SnowflakeDestinationConfiguration =
+  struct
+    type nonrec t =
+      {
+      accountUrl: SnowflakeAccountUrl.t
+        [@ocaml.doc
+          "URL for accessing your Snowflake account. This URL must include your account identifier. Note that the protocol (https://) and port number are optional."];
+      privateKey: SnowflakePrivateKey.t option
+        [@ocaml.doc
+          "The private key used to encrypt your Snowflake client. For information, see Using Key Pair Authentication & Key Rotation."];
+      keyPassphrase: SnowflakeKeyPassphrase.t option
+        [@ocaml.doc
+          "Passphrase to decrypt the private key when the key is encrypted. For information, see Using Key Pair Authentication & Key Rotation."];
+      user: SnowflakeUser.t option
+        [@ocaml.doc "User login name for the Snowflake account."];
+      database: SnowflakeDatabase.t
+        [@ocaml.doc "All data in Snowflake is maintained in databases."];
+      schema: SnowflakeSchema.t
+        [@ocaml.doc
+          "Each database consists of one or more schemas, which are logical groupings of database objects, such as tables and views"];
+      table: SnowflakeTable.t
+        [@ocaml.doc
+          "All data in Snowflake is stored in database tables, logically structured as collections of columns and rows."];
+      snowflakeRoleConfiguration: SnowflakeRoleConfiguration.t option
+        [@ocaml.doc
+          "Optionally configure a Snowflake role. Otherwise the default user role will be used."];
+      dataLoadingOption: SnowflakeDataLoadingOption.t option
+        [@ocaml.doc
+          "Choose to load JSON keys mapped to table column names or choose to split the JSON payload where content is mapped to a record content column and source metadata is mapped to a record metadata column."];
+      metaDataColumnName: SnowflakeMetaDataColumnName.t option
+        [@ocaml.doc
+          "Specify a column name in the table, where the metadata information has to be loaded. When you enable this field, you will see the following column in the snowflake table, which differs based on the source type. For Direct PUT as source \\{ \"firehoseDeliveryStreamName\" : \"streamname\", \"IngestionTime\" : \"timestamp\" \\} For Kinesis Data Stream as source \"kinesisStreamName\" : \"streamname\", \"kinesisShardId\" : \"Id\", \"kinesisPartitionKey\" : \"key\", \"kinesisSequenceNumber\" : \"1234\", \"subsequenceNumber\" : \"2334\", \"IngestionTime\" : \"timestamp\" \\}"];
+      contentColumnName: SnowflakeContentColumnName.t option
+        [@ocaml.doc "The name of the record content column."];
+      snowflakeVpcConfiguration: SnowflakeVpcConfiguration.t option
+        [@ocaml.doc
+          "The VPCE ID for Firehose to privately connect with Snowflake. The ID format is com.amazonaws.vpce.\\[region\\].vpce-svc-<\\[id\\]>. For more information, see Amazon PrivateLink & Snowflake"];
+      cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option ;
+      processingConfiguration: ProcessingConfiguration.t option ;
+      roleARN: RoleARN.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Snowflake role"];
+      retryOptions: SnowflakeRetryOptions.t option
+        [@ocaml.doc
+          "The time period where Firehose will retry sending data to the chosen HTTP endpoint."];
+      s3BackupMode: SnowflakeS3BackupMode.t option
+        [@ocaml.doc "Choose an S3 backup mode"];
+      s3Configuration: S3DestinationConfiguration.t ;
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for Snowflake."];
+      bufferingHints: SnowflakeBufferingHints.t option
+        [@ocaml.doc
+          "Describes the buffering to perform before delivering data to the Snowflake destination. If you do not specify any value, Firehose uses the default values."]}
+    let context_ = "SnowflakeDestinationConfiguration"
+    let make ?privateKey =
+      fun ?keyPassphrase ->
+        fun ?user ->
+          fun ?snowflakeRoleConfiguration ->
+            fun ?dataLoadingOption ->
+              fun ?metaDataColumnName ->
+                fun ?contentColumnName ->
+                  fun ?snowflakeVpcConfiguration ->
+                    fun ?cloudWatchLoggingOptions ->
+                      fun ?processingConfiguration ->
+                        fun ?retryOptions ->
+                          fun ?s3BackupMode ->
+                            fun ?secretsManagerConfiguration ->
+                              fun ?bufferingHints ->
+                                fun ~accountUrl ->
+                                  fun ~database ->
+                                    fun ~schema ->
+                                      fun ~table ->
+                                        fun ~roleARN ->
+                                          fun ~s3Configuration ->
+                                            fun () ->
+                                              {
+                                                privateKey;
+                                                keyPassphrase;
+                                                user;
+                                                snowflakeRoleConfiguration;
+                                                dataLoadingOption;
+                                                metaDataColumnName;
+                                                contentColumnName;
+                                                snowflakeVpcConfiguration;
+                                                cloudWatchLoggingOptions;
+                                                processingConfiguration;
+                                                retryOptions;
+                                                s3BackupMode;
+                                                secretsManagerConfiguration;
+                                                bufferingHints;
+                                                accountUrl;
+                                                database;
+                                                schema;
+                                                table;
+                                                roleARN;
+                                                s3Configuration
+                                              }
+    let to_value x =
+      structure_to_value
+        [("AccountUrl", (Some (SnowflakeAccountUrl.to_value x.accountUrl)));
+        ("PrivateKey",
+          (Option.map x.privateKey ~f:SnowflakePrivateKey.to_value));
+        ("KeyPassphrase",
+          (Option.map x.keyPassphrase ~f:SnowflakeKeyPassphrase.to_value));
+        ("User", (Option.map x.user ~f:SnowflakeUser.to_value));
+        ("Database", (Some (SnowflakeDatabase.to_value x.database)));
+        ("Schema", (Some (SnowflakeSchema.to_value x.schema)));
+        ("Table", (Some (SnowflakeTable.to_value x.table)));
+        ("SnowflakeRoleConfiguration",
+          (Option.map x.snowflakeRoleConfiguration
+             ~f:SnowflakeRoleConfiguration.to_value));
+        ("DataLoadingOption",
+          (Option.map x.dataLoadingOption
+             ~f:SnowflakeDataLoadingOption.to_value));
+        ("MetaDataColumnName",
+          (Option.map x.metaDataColumnName
+             ~f:SnowflakeMetaDataColumnName.to_value));
+        ("ContentColumnName",
+          (Option.map x.contentColumnName
+             ~f:SnowflakeContentColumnName.to_value));
+        ("SnowflakeVpcConfiguration",
+          (Option.map x.snowflakeVpcConfiguration
+             ~f:SnowflakeVpcConfiguration.to_value));
+        ("CloudWatchLoggingOptions",
+          (Option.map x.cloudWatchLoggingOptions
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("ProcessingConfiguration",
+          (Option.map x.processingConfiguration
+             ~f:ProcessingConfiguration.to_value));
+        ("RoleARN", (Some (RoleARN.to_value x.roleARN)));
+        ("RetryOptions",
+          (Option.map x.retryOptions ~f:SnowflakeRetryOptions.to_value));
+        ("S3BackupMode",
+          (Option.map x.s3BackupMode ~f:SnowflakeS3BackupMode.to_value));
+        ("S3Configuration",
+          (Some (S3DestinationConfiguration.to_value x.s3Configuration)));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:SnowflakeBufferingHints.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bufferingHints =
+        (Option.map ~f:SnowflakeBufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
+      let s3Configuration =
+        S3DestinationConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3Configuration") in
+      let s3BackupMode =
+        (Option.map ~f:SnowflakeS3BackupMode.of_xml)
+          (Xml.child xml_arg0 "S3BackupMode") in
+      let retryOptions =
+        (Option.map ~f:SnowflakeRetryOptions.of_xml)
+          (Xml.child xml_arg0 "RetryOptions") in
+      let roleARN =
+        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
+      let processingConfiguration =
+        (Option.map ~f:ProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProcessingConfiguration") in
+      let cloudWatchLoggingOptions =
+        (Option.map ~f:CloudWatchLoggingOptions.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
+      let snowflakeVpcConfiguration =
+        (Option.map ~f:SnowflakeVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnowflakeVpcConfiguration") in
+      let contentColumnName =
+        (Option.map ~f:SnowflakeContentColumnName.of_xml)
+          (Xml.child xml_arg0 "ContentColumnName") in
+      let metaDataColumnName =
+        (Option.map ~f:SnowflakeMetaDataColumnName.of_xml)
+          (Xml.child xml_arg0 "MetaDataColumnName") in
+      let dataLoadingOption =
+        (Option.map ~f:SnowflakeDataLoadingOption.of_xml)
+          (Xml.child xml_arg0 "DataLoadingOption") in
+      let snowflakeRoleConfiguration =
+        (Option.map ~f:SnowflakeRoleConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnowflakeRoleConfiguration") in
+      let table =
+        SnowflakeTable.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Table") in
+      let schema =
+        SnowflakeSchema.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Schema") in
+      let database =
+        SnowflakeDatabase.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let user =
+        (Option.map ~f:SnowflakeUser.of_xml) (Xml.child xml_arg0 "User") in
+      let keyPassphrase =
+        (Option.map ~f:SnowflakeKeyPassphrase.of_xml)
+          (Xml.child xml_arg0 "KeyPassphrase") in
+      let privateKey =
+        (Option.map ~f:SnowflakePrivateKey.of_xml)
+          (Xml.child xml_arg0 "PrivateKey") in
+      let accountUrl =
+        SnowflakeAccountUrl.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountUrl") in
+      make ?bufferingHints ?secretsManagerConfiguration ~s3Configuration
+        ?s3BackupMode ?retryOptions ~roleARN ?processingConfiguration
+        ?cloudWatchLoggingOptions ?snowflakeVpcConfiguration
+        ?contentColumnName ?metaDataColumnName ?dataLoadingOption
+        ?snowflakeRoleConfiguration ~table ~schema ~database ?user
+        ?keyPassphrase ?privateKey ~accountUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bufferingHints =
+        field_map json__ "BufferingHints" SnowflakeBufferingHints.of_json in
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
+      let s3Configuration =
+        field_map_exn json__ "S3Configuration"
+          S3DestinationConfiguration.of_json in
+      let s3BackupMode =
+        field_map json__ "S3BackupMode" SnowflakeS3BackupMode.of_json in
+      let retryOptions =
+        field_map json__ "RetryOptions" SnowflakeRetryOptions.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let processingConfiguration =
+        field_map json__ "ProcessingConfiguration"
+          ProcessingConfiguration.of_json in
+      let cloudWatchLoggingOptions =
+        field_map json__ "CloudWatchLoggingOptions"
+          CloudWatchLoggingOptions.of_json in
+      let snowflakeVpcConfiguration =
+        field_map json__ "SnowflakeVpcConfiguration"
+          SnowflakeVpcConfiguration.of_json in
+      let contentColumnName =
+        field_map json__ "ContentColumnName"
+          SnowflakeContentColumnName.of_json in
+      let metaDataColumnName =
+        field_map json__ "MetaDataColumnName"
+          SnowflakeMetaDataColumnName.of_json in
+      let dataLoadingOption =
+        field_map json__ "DataLoadingOption"
+          SnowflakeDataLoadingOption.of_json in
+      let snowflakeRoleConfiguration =
+        field_map json__ "SnowflakeRoleConfiguration"
+          SnowflakeRoleConfiguration.of_json in
+      let table = field_map_exn json__ "Table" SnowflakeTable.of_json in
+      let schema = field_map_exn json__ "Schema" SnowflakeSchema.of_json in
+      let database =
+        field_map_exn json__ "Database" SnowflakeDatabase.of_json in
+      let user = field_map json__ "User" SnowflakeUser.of_json in
+      let keyPassphrase =
+        field_map json__ "KeyPassphrase" SnowflakeKeyPassphrase.of_json in
+      let privateKey =
+        field_map json__ "PrivateKey" SnowflakePrivateKey.of_json in
+      let accountUrl =
+        field_map_exn json__ "AccountUrl" SnowflakeAccountUrl.of_json in
+      make ?bufferingHints ?secretsManagerConfiguration ~s3Configuration
+        ?s3BackupMode ?retryOptions ~roleARN ?processingConfiguration
+        ?cloudWatchLoggingOptions ?snowflakeVpcConfiguration
+        ?contentColumnName ?metaDataColumnName ?dataLoadingOption
+        ?snowflakeRoleConfiguration ~table ~schema ~database ?user
+        ?keyPassphrase ?privateKey ~accountUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configure Snowflake destination"]
 module SplunkDestinationConfiguration =
   struct
     type nonrec t =
       {
       hECEndpoint: HECEndpoint.t
         [@ocaml.doc
-          "The HTTP Event Collector (HEC) endpoint to which Kinesis Data Firehose sends your data."];
+          "The HTTP Event Collector (HEC) endpoint to which Firehose sends your data."];
       hECEndpointType: HECEndpointType.t
         [@ocaml.doc "This type can be either \"Raw\" or \"Event.\""];
-      hECToken: HECToken.t
+      hECToken: HECToken.t option
         [@ocaml.doc
           "This is a GUID that you obtain from your Splunk cluster when you create a new HEC endpoint."];
       hECAcknowledgmentTimeoutInSeconds:
         HECAcknowledgmentTimeoutInSeconds.t option
         [@ocaml.doc
-          "The amount of time that Kinesis Data Firehose waits to receive an acknowledgment from Splunk after it sends it data. At the end of the timeout period, Kinesis Data Firehose either tries to send the data again or considers it an error, based on your retry settings."];
+          "The amount of time that Firehose waits to receive an acknowledgment from Splunk after it sends it data. At the end of the timeout period, Firehose either tries to send the data again or considers it an error, based on your retry settings."];
       retryOptions: SplunkRetryOptions.t option
         [@ocaml.doc
-          "The retry behavior in case Kinesis Data Firehose is unable to deliver data to Splunk, or if it doesn't receive an acknowledgment of receipt from Splunk."];
+          "The retry behavior in case Firehose is unable to deliver data to Splunk, or if it doesn't receive an acknowledgment of receipt from Splunk."];
       s3BackupMode: SplunkS3BackupMode.t option
         [@ocaml.doc
-          "Defines how documents should be delivered to Amazon S3. When set to FailedEventsOnly, Kinesis Data Firehose writes any data that could not be indexed to the configured Amazon S3 destination. When set to AllEvents, Kinesis Data Firehose delivers all incoming records to Amazon S3, and also writes failed documents to Amazon S3. The default value is FailedEventsOnly. You can update this backup mode from FailedEventsOnly to AllEvents. You can't update it from AllEvents to FailedEventsOnly."];
+          "Defines how documents should be delivered to Amazon S3. When set to FailedEventsOnly, Firehose writes any data that could not be indexed to the configured Amazon S3 destination. When set to AllEvents, Firehose delivers all incoming records to Amazon S3, and also writes failed documents to Amazon S3. The default value is FailedEventsOnly. You can update this backup mode from FailedEventsOnly to AllEvents. You can't update it from AllEvents to FailedEventsOnly."];
       s3Configuration: S3DestinationConfiguration.t
         [@ocaml.doc "The configuration for the backup Amazon S3 location."];
       processingConfiguration: ProcessingConfiguration.t option
         [@ocaml.doc "The data processing configuration."];
       cloudWatchLoggingOptions: CloudWatchLoggingOptions.t option
         [@ocaml.doc
-          "The Amazon CloudWatch logging options for your delivery stream."]}
+          "The Amazon CloudWatch logging options for your Firehose stream."];
+      bufferingHints: SplunkBufferingHints.t option
+        [@ocaml.doc
+          "The buffering options. If no value is specified, the default values for Splunk are used."];
+      secretsManagerConfiguration: SecretsManagerConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how you access secrets for Splunk."]}
     let context_ = "SplunkDestinationConfiguration"
-    let make ?hECAcknowledgmentTimeoutInSeconds =
-      fun ?retryOptions ->
-        fun ?s3BackupMode ->
-          fun ?processingConfiguration ->
-            fun ?cloudWatchLoggingOptions ->
-              fun ~hECEndpoint ->
-                fun ~hECEndpointType ->
-                  fun ~hECToken ->
-                    fun ~s3Configuration ->
-                      fun () ->
-                        {
-                          hECAcknowledgmentTimeoutInSeconds;
-                          retryOptions;
-                          s3BackupMode;
-                          processingConfiguration;
-                          cloudWatchLoggingOptions;
-                          hECEndpoint;
-                          hECEndpointType;
-                          hECToken;
-                          s3Configuration
-                        }
+    let make ?hECToken =
+      fun ?hECAcknowledgmentTimeoutInSeconds ->
+        fun ?retryOptions ->
+          fun ?s3BackupMode ->
+            fun ?processingConfiguration ->
+              fun ?cloudWatchLoggingOptions ->
+                fun ?bufferingHints ->
+                  fun ?secretsManagerConfiguration ->
+                    fun ~hECEndpoint ->
+                      fun ~hECEndpointType ->
+                        fun ~s3Configuration ->
+                          fun () ->
+                            {
+                              hECToken;
+                              hECAcknowledgmentTimeoutInSeconds;
+                              retryOptions;
+                              s3BackupMode;
+                              processingConfiguration;
+                              cloudWatchLoggingOptions;
+                              bufferingHints;
+                              secretsManagerConfiguration;
+                              hECEndpoint;
+                              hECEndpointType;
+                              s3Configuration
+                            }
     let to_value x =
       structure_to_value
         [("HECEndpoint", (Some (HECEndpoint.to_value x.hECEndpoint)));
         ("HECEndpointType",
           (Some (HECEndpointType.to_value x.hECEndpointType)));
-        ("HECToken", (Some (HECToken.to_value x.hECToken)));
+        ("HECToken", (Option.map x.hECToken ~f:HECToken.to_value));
         ("HECAcknowledgmentTimeoutInSeconds",
           (Option.map x.hECAcknowledgmentTimeoutInSeconds
              ~f:HECAcknowledgmentTimeoutInSeconds.to_value));
@@ -7643,9 +12397,20 @@ module SplunkDestinationConfiguration =
              ~f:ProcessingConfiguration.to_value));
         ("CloudWatchLoggingOptions",
           (Option.map x.cloudWatchLoggingOptions
-             ~f:CloudWatchLoggingOptions.to_value))]
+             ~f:CloudWatchLoggingOptions.to_value));
+        ("BufferingHints",
+          (Option.map x.bufferingHints ~f:SplunkBufferingHints.to_value));
+        ("SecretsManagerConfiguration",
+          (Option.map x.secretsManagerConfiguration
+             ~f:SecretsManagerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secretsManagerConfiguration =
+        (Option.map ~f:SecretsManagerConfiguration.of_xml)
+          (Xml.child xml_arg0 "SecretsManagerConfiguration") in
+      let bufferingHints =
+        (Option.map ~f:SplunkBufferingHints.of_xml)
+          (Xml.child xml_arg0 "BufferingHints") in
       let cloudWatchLoggingOptions =
         (Option.map ~f:CloudWatchLoggingOptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptions") in
@@ -7665,43 +12430,49 @@ module SplunkDestinationConfiguration =
         (Option.map ~f:HECAcknowledgmentTimeoutInSeconds.of_xml)
           (Xml.child xml_arg0 "HECAcknowledgmentTimeoutInSeconds") in
       let hECToken =
-        HECToken.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HECToken") in
+        (Option.map ~f:HECToken.of_xml) (Xml.child xml_arg0 "HECToken") in
       let hECEndpointType =
         HECEndpointType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HECEndpointType") in
       let hECEndpoint =
         HECEndpoint.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HECEndpoint") in
-      make ?cloudWatchLoggingOptions ?processingConfiguration
-        ~s3Configuration ?s3BackupMode ?retryOptions
-        ?hECAcknowledgmentTimeoutInSeconds ~hECToken ~hECEndpointType
-        ~hECEndpoint ()
+      make ?secretsManagerConfiguration ?bufferingHints
+        ?cloudWatchLoggingOptions ?processingConfiguration ~s3Configuration
+        ?s3BackupMode ?retryOptions ?hECAcknowledgmentTimeoutInSeconds
+        ?hECToken ~hECEndpointType ~hECEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secretsManagerConfiguration =
+        field_map json__ "SecretsManagerConfiguration"
+          SecretsManagerConfiguration.of_json in
+      let bufferingHints =
+        field_map json__ "BufferingHints" SplunkBufferingHints.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let processingConfiguration =
-        field_map json "ProcessingConfiguration"
+        field_map json__ "ProcessingConfiguration"
           ProcessingConfiguration.of_json in
       let s3Configuration =
-        field_map_exn json "S3Configuration"
+        field_map_exn json__ "S3Configuration"
           S3DestinationConfiguration.of_json in
       let s3BackupMode =
-        field_map json "S3BackupMode" SplunkS3BackupMode.of_json in
+        field_map json__ "S3BackupMode" SplunkS3BackupMode.of_json in
       let retryOptions =
-        field_map json "RetryOptions" SplunkRetryOptions.of_json in
+        field_map json__ "RetryOptions" SplunkRetryOptions.of_json in
       let hECAcknowledgmentTimeoutInSeconds =
-        field_map json "HECAcknowledgmentTimeoutInSeconds"
+        field_map json__ "HECAcknowledgmentTimeoutInSeconds"
           HECAcknowledgmentTimeoutInSeconds.of_json in
-      let hECToken = field_map_exn json "HECToken" HECToken.of_json in
+      let hECToken = field_map json__ "HECToken" HECToken.of_json in
       let hECEndpointType =
-        field_map_exn json "HECEndpointType" HECEndpointType.of_json in
-      let hECEndpoint = field_map_exn json "HECEndpoint" HECEndpoint.of_json in
-      make ?cloudWatchLoggingOptions ?processingConfiguration
-        ~s3Configuration ?s3BackupMode ?retryOptions
-        ?hECAcknowledgmentTimeoutInSeconds ~hECToken ~hECEndpointType
-        ~hECEndpoint ()
+        field_map_exn json__ "HECEndpointType" HECEndpointType.of_json in
+      let hECEndpoint =
+        field_map_exn json__ "HECEndpoint" HECEndpoint.of_json in
+      make ?secretsManagerConfiguration ?bufferingHints
+        ?cloudWatchLoggingOptions ?processingConfiguration ~s3Configuration
+        ?s3BackupMode ?retryOptions ?hECAcknowledgmentTimeoutInSeconds
+        ?hECToken ~hECEndpointType ~hECEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the configuration of a destination in Splunk."]
 module UpdateDestinationOutput =
@@ -7773,13 +12544,13 @@ module UpdateDestinationOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified destination of the specified delivery stream. Use this operation to change the destination type (for example, to replace the Amazon S3 destination with Amazon Redshift) or change the parameters associated with a destination (for example, to change the bucket name of the Amazon S3 destination). The update might not occur immediately. The target delivery stream remains active while the configurations are updated, so data writes to the delivery stream can continue during this process. The updated configurations are usually effective within a few minutes. Switching between Amazon ES and other services is not supported. For an Amazon ES destination, you can only update to another Amazon ES destination. If the destination type is the same, Kinesis Data Firehose merges the configuration parameters specified with the destination configuration that already exists on the delivery stream. If any of the parameters are not specified in the call, the existing values are retained. For example, in the Amazon S3 destination, if EncryptionConfiguration is not specified, then the existing EncryptionConfiguration is maintained on the destination. If the destination type is not the same, for example, changing the destination from Amazon S3 to Amazon Redshift, Kinesis Data Firehose does not merge any parameters. In this case, all parameters must be specified. Kinesis Data Firehose uses CurrentDeliveryStreamVersionId to avoid race conditions and conflicting merges. This is a required field, and the service updates the configuration only if the existing configuration has a version ID that matches. After the update is applied successfully, the version ID is updated, and can be retrieved using DescribeDeliveryStream. Use the new version ID to set CurrentDeliveryStreamVersionId in the next call."]
+       "Updates the specified destination of the specified Firehose stream. Use this operation to change the destination type (for example, to replace the Amazon S3 destination with Amazon Redshift) or change the parameters associated with a destination (for example, to change the bucket name of the Amazon S3 destination). The update might not occur immediately. The target Firehose stream remains active while the configurations are updated, so data writes to the Firehose stream can continue during this process. The updated configurations are usually effective within a few minutes. Switching between Amazon OpenSearch Service and other services is not supported. For an Amazon OpenSearch Service destination, you can only update to another Amazon OpenSearch Service destination. If the destination type is the same, Firehose merges the configuration parameters specified with the destination configuration that already exists on the delivery stream. If any of the parameters are not specified in the call, the existing values are retained. For example, in the Amazon S3 destination, if EncryptionConfiguration is not specified, then the existing EncryptionConfiguration is maintained on the destination. If the destination type is not the same, for example, changing the destination from Amazon S3 to Amazon Redshift, Firehose does not merge any parameters. In this case, all parameters must be specified. Firehose uses CurrentDeliveryStreamVersionId to avoid race conditions and conflicting merges. This is a required field, and the service updates the configuration only if the existing configuration has a version ID that matches. After the update is applied successfully, the version ID is updated, and can be retrieved using DescribeDeliveryStream. Use the new version ID to set CurrentDeliveryStreamVersionId in the next call."]
 module UpdateDestinationInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
-        [@ocaml.doc "The name of the delivery stream."];
+        [@ocaml.doc "The name of the Firehose stream."];
       currentDeliveryStreamVersionId: DeliveryStreamVersionId.t
         [@ocaml.doc
           "Obtain this value from the VersionId result of DeliveryStreamDescription. This value is required, and helps the service perform conditional operations. For example, if there is an interleaving update and this value is null, then the update destination fails. After the update is successful, the VersionId value is updated. The service then performs a merge of the old configuration with the new configuration."];
@@ -7794,14 +12565,27 @@ module UpdateDestinationInput =
         [@ocaml.doc
           "Describes an update for a destination in Amazon Redshift."];
       elasticsearchDestinationUpdate: ElasticsearchDestinationUpdate.t option
-        [@ocaml.doc "Describes an update for a destination in Amazon ES."];
+        [@ocaml.doc
+          "Describes an update for a destination in Amazon OpenSearch Service."];
       amazonopensearchserviceDestinationUpdate:
-        AmazonopensearchserviceDestinationUpdate.t option ;
+        AmazonopensearchserviceDestinationUpdate.t option
+        [@ocaml.doc
+          "Describes an update for a destination in Amazon OpenSearch Service."];
       splunkDestinationUpdate: SplunkDestinationUpdate.t option
         [@ocaml.doc "Describes an update for a destination in Splunk."];
       httpEndpointDestinationUpdate: HttpEndpointDestinationUpdate.t option
         [@ocaml.doc
-          "Describes an update to the specified HTTP endpoint destination."]}
+          "Describes an update to the specified HTTP endpoint destination."];
+      amazonOpenSearchServerlessDestinationUpdate:
+        AmazonOpenSearchServerlessDestinationUpdate.t option
+        [@ocaml.doc
+          "Describes an update for a destination in the Serverless offering for Amazon OpenSearch Service."];
+      snowflakeDestinationUpdate: SnowflakeDestinationUpdate.t option
+        [@ocaml.doc
+          "Update to the Snowflake destination configuration settings."];
+      icebergDestinationUpdate: IcebergDestinationUpdate.t option
+        [@ocaml.doc
+          "Describes an update for a destination in Apache Iceberg Tables."]}
     let context_ = "UpdateDestinationInput"
     let make ?s3DestinationUpdate =
       fun ?extendedS3DestinationUpdate ->
@@ -7810,22 +12594,28 @@ module UpdateDestinationInput =
             fun ?amazonopensearchserviceDestinationUpdate ->
               fun ?splunkDestinationUpdate ->
                 fun ?httpEndpointDestinationUpdate ->
-                  fun ~deliveryStreamName ->
-                    fun ~currentDeliveryStreamVersionId ->
-                      fun ~destinationId ->
-                        fun () ->
-                          {
-                            s3DestinationUpdate;
-                            extendedS3DestinationUpdate;
-                            redshiftDestinationUpdate;
-                            elasticsearchDestinationUpdate;
-                            amazonopensearchserviceDestinationUpdate;
-                            splunkDestinationUpdate;
-                            httpEndpointDestinationUpdate;
-                            deliveryStreamName;
-                            currentDeliveryStreamVersionId;
-                            destinationId
-                          }
+                  fun ?amazonOpenSearchServerlessDestinationUpdate ->
+                    fun ?snowflakeDestinationUpdate ->
+                      fun ?icebergDestinationUpdate ->
+                        fun ~deliveryStreamName ->
+                          fun ~currentDeliveryStreamVersionId ->
+                            fun ~destinationId ->
+                              fun () ->
+                                {
+                                  s3DestinationUpdate;
+                                  extendedS3DestinationUpdate;
+                                  redshiftDestinationUpdate;
+                                  elasticsearchDestinationUpdate;
+                                  amazonopensearchserviceDestinationUpdate;
+                                  splunkDestinationUpdate;
+                                  httpEndpointDestinationUpdate;
+                                  amazonOpenSearchServerlessDestinationUpdate;
+                                  snowflakeDestinationUpdate;
+                                  icebergDestinationUpdate;
+                                  deliveryStreamName;
+                                  currentDeliveryStreamVersionId;
+                                  destinationId
+                                }
     let to_value x =
       structure_to_value
         [("DeliveryStreamName",
@@ -7854,9 +12644,27 @@ module UpdateDestinationInput =
              ~f:SplunkDestinationUpdate.to_value));
         ("HttpEndpointDestinationUpdate",
           (Option.map x.httpEndpointDestinationUpdate
-             ~f:HttpEndpointDestinationUpdate.to_value))]
+             ~f:HttpEndpointDestinationUpdate.to_value));
+        ("AmazonOpenSearchServerlessDestinationUpdate",
+          (Option.map x.amazonOpenSearchServerlessDestinationUpdate
+             ~f:AmazonOpenSearchServerlessDestinationUpdate.to_value));
+        ("SnowflakeDestinationUpdate",
+          (Option.map x.snowflakeDestinationUpdate
+             ~f:SnowflakeDestinationUpdate.to_value));
+        ("IcebergDestinationUpdate",
+          (Option.map x.icebergDestinationUpdate
+             ~f:IcebergDestinationUpdate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let icebergDestinationUpdate =
+        (Option.map ~f:IcebergDestinationUpdate.of_xml)
+          (Xml.child xml_arg0 "IcebergDestinationUpdate") in
+      let snowflakeDestinationUpdate =
+        (Option.map ~f:SnowflakeDestinationUpdate.of_xml)
+          (Xml.child xml_arg0 "SnowflakeDestinationUpdate") in
+      let amazonOpenSearchServerlessDestinationUpdate =
+        (Option.map ~f:AmazonOpenSearchServerlessDestinationUpdate.of_xml)
+          (Xml.child xml_arg0 "AmazonOpenSearchServerlessDestinationUpdate") in
       let httpEndpointDestinationUpdate =
         (Option.map ~f:HttpEndpointDestinationUpdate.of_xml)
           (Xml.child xml_arg0 "HttpEndpointDestinationUpdate") in
@@ -7888,48 +12696,61 @@ module UpdateDestinationInput =
       let deliveryStreamName =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
-      make ?httpEndpointDestinationUpdate ?splunkDestinationUpdate
+      make ?icebergDestinationUpdate ?snowflakeDestinationUpdate
+        ?amazonOpenSearchServerlessDestinationUpdate
+        ?httpEndpointDestinationUpdate ?splunkDestinationUpdate
         ?amazonopensearchserviceDestinationUpdate
         ?elasticsearchDestinationUpdate ?redshiftDestinationUpdate
         ?extendedS3DestinationUpdate ?s3DestinationUpdate ~destinationId
         ~currentDeliveryStreamVersionId ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let icebergDestinationUpdate =
+        field_map json__ "IcebergDestinationUpdate"
+          IcebergDestinationUpdate.of_json in
+      let snowflakeDestinationUpdate =
+        field_map json__ "SnowflakeDestinationUpdate"
+          SnowflakeDestinationUpdate.of_json in
+      let amazonOpenSearchServerlessDestinationUpdate =
+        field_map json__ "AmazonOpenSearchServerlessDestinationUpdate"
+          AmazonOpenSearchServerlessDestinationUpdate.of_json in
       let httpEndpointDestinationUpdate =
-        field_map json "HttpEndpointDestinationUpdate"
+        field_map json__ "HttpEndpointDestinationUpdate"
           HttpEndpointDestinationUpdate.of_json in
       let splunkDestinationUpdate =
-        field_map json "SplunkDestinationUpdate"
+        field_map json__ "SplunkDestinationUpdate"
           SplunkDestinationUpdate.of_json in
       let amazonopensearchserviceDestinationUpdate =
-        field_map json "AmazonopensearchserviceDestinationUpdate"
+        field_map json__ "AmazonopensearchserviceDestinationUpdate"
           AmazonopensearchserviceDestinationUpdate.of_json in
       let elasticsearchDestinationUpdate =
-        field_map json "ElasticsearchDestinationUpdate"
+        field_map json__ "ElasticsearchDestinationUpdate"
           ElasticsearchDestinationUpdate.of_json in
       let redshiftDestinationUpdate =
-        field_map json "RedshiftDestinationUpdate"
+        field_map json__ "RedshiftDestinationUpdate"
           RedshiftDestinationUpdate.of_json in
       let extendedS3DestinationUpdate =
-        field_map json "ExtendedS3DestinationUpdate"
+        field_map json__ "ExtendedS3DestinationUpdate"
           ExtendedS3DestinationUpdate.of_json in
       let s3DestinationUpdate =
-        field_map json "S3DestinationUpdate" S3DestinationUpdate.of_json in
+        field_map json__ "S3DestinationUpdate" S3DestinationUpdate.of_json in
       let destinationId =
-        field_map_exn json "DestinationId" DestinationId.of_json in
+        field_map_exn json__ "DestinationId" DestinationId.of_json in
       let currentDeliveryStreamVersionId =
-        field_map_exn json "CurrentDeliveryStreamVersionId"
+        field_map_exn json__ "CurrentDeliveryStreamVersionId"
           DeliveryStreamVersionId.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
-      make ?httpEndpointDestinationUpdate ?splunkDestinationUpdate
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
+      make ?icebergDestinationUpdate ?snowflakeDestinationUpdate
+        ?amazonOpenSearchServerlessDestinationUpdate
+        ?httpEndpointDestinationUpdate ?splunkDestinationUpdate
         ?amazonopensearchserviceDestinationUpdate
         ?elasticsearchDestinationUpdate ?redshiftDestinationUpdate
         ?extendedS3DestinationUpdate ?s3DestinationUpdate ~destinationId
         ~currentDeliveryStreamVersionId ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified destination of the specified delivery stream. Use this operation to change the destination type (for example, to replace the Amazon S3 destination with Amazon Redshift) or change the parameters associated with a destination (for example, to change the bucket name of the Amazon S3 destination). The update might not occur immediately. The target delivery stream remains active while the configurations are updated, so data writes to the delivery stream can continue during this process. The updated configurations are usually effective within a few minutes. Switching between Amazon ES and other services is not supported. For an Amazon ES destination, you can only update to another Amazon ES destination. If the destination type is the same, Kinesis Data Firehose merges the configuration parameters specified with the destination configuration that already exists on the delivery stream. If any of the parameters are not specified in the call, the existing values are retained. For example, in the Amazon S3 destination, if EncryptionConfiguration is not specified, then the existing EncryptionConfiguration is maintained on the destination. If the destination type is not the same, for example, changing the destination from Amazon S3 to Amazon Redshift, Kinesis Data Firehose does not merge any parameters. In this case, all parameters must be specified. Kinesis Data Firehose uses CurrentDeliveryStreamVersionId to avoid race conditions and conflicting merges. This is a required field, and the service updates the configuration only if the existing configuration has a version ID that matches. After the update is applied successfully, the version ID is updated, and can be retrieved using DescribeDeliveryStream. Use the new version ID to set CurrentDeliveryStreamVersionId in the next call."]
+       "Updates the specified destination of the specified Firehose stream. Use this operation to change the destination type (for example, to replace the Amazon S3 destination with Amazon Redshift) or change the parameters associated with a destination (for example, to change the bucket name of the Amazon S3 destination). The update might not occur immediately. The target Firehose stream remains active while the configurations are updated, so data writes to the Firehose stream can continue during this process. The updated configurations are usually effective within a few minutes. Switching between Amazon OpenSearch Service and other services is not supported. For an Amazon OpenSearch Service destination, you can only update to another Amazon OpenSearch Service destination. If the destination type is the same, Firehose merges the configuration parameters specified with the destination configuration that already exists on the delivery stream. If any of the parameters are not specified in the call, the existing values are retained. For example, in the Amazon S3 destination, if EncryptionConfiguration is not specified, then the existing EncryptionConfiguration is maintained on the destination. If the destination type is not the same, for example, changing the destination from Amazon S3 to Amazon Redshift, Firehose does not merge any parameters. In this case, all parameters must be specified. Firehose uses CurrentDeliveryStreamVersionId to avoid race conditions and conflicting merges. This is a required field, and the service updates the configuration only if the existing configuration has a version ID that matches. After the update is applied successfully, the version ID is updated, and can be retrieved using DescribeDeliveryStream. Use the new version ID to set CurrentDeliveryStreamVersionId in the next call."]
 module UntagDeliveryStreamOutput =
   struct
     type nonrec t = unit
@@ -7996,13 +12817,13 @@ module UntagDeliveryStreamOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes tags from the specified delivery stream. Removed tags are deleted, and you can't recover them after this operation successfully completes. If you specify a tag that doesn't exist, the operation ignores it. This operation has a limit of five transactions per second per account."]
+       "Removes tags from the specified Firehose stream. Removed tags are deleted, and you can't recover them after this operation successfully completes. If you specify a tag that doesn't exist, the operation ignores it. This operation has a limit of five transactions per second per account."]
 module UntagDeliveryStreamInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
-        [@ocaml.doc "The name of the delivery stream."];
+        [@ocaml.doc "The name of the Firehose stream."];
       tagKeys: TagKeyList.t
         [@ocaml.doc
           "A list of tag keys. Each corresponding tag is removed from the delivery stream."]}
@@ -8024,14 +12845,14 @@ module UntagDeliveryStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~tagKeys ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
       make ~tagKeys ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes tags from the specified delivery stream. Removed tags are deleted, and you can't recover them after this operation successfully completes. If you specify a tag that doesn't exist, the operation ignores it. This operation has a limit of five transactions per second per account."]
+       "Removes tags from the specified Firehose stream. Removed tags are deleted, and you can't recover them after this operation successfully completes. If you specify a tag that doesn't exist, the operation ignores it. This operation has a limit of five transactions per second per account."]
 module TagDeliveryStreamOutput =
   struct
     type nonrec t = unit
@@ -8098,14 +12919,14 @@ module TagDeliveryStreamOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates tags for the specified delivery stream. A tag is a key-value pair that you can define and assign to AWS resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. Tags are metadata. For example, you can add friendly names and descriptions or other types of information that can help you distinguish the delivery stream. For more information about tags, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide. Each delivery stream can have up to 50 tags. This operation has a limit of five transactions per second per account."]
+       "Adds or updates tags for the specified Firehose stream. A tag is a key-value pair that you can define and assign to Amazon Web Services resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. Tags are metadata. For example, you can add friendly names and descriptions or other types of information that can help you distinguish the Firehose stream. For more information about tags, see Using Cost Allocation Tags in the Amazon Web Services Billing and Cost Management User Guide. Each Firehose stream can have up to 50 tags. This operation has a limit of five transactions per second per account."]
 module TagDeliveryStreamInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
         [@ocaml.doc
-          "The name of the delivery stream to which you want to add the tags."];
+          "The name of the Firehose stream to which you want to add the tags."];
       tags: TagDeliveryStreamInputTagList.t
         [@ocaml.doc "A set of key-value pairs to use to create the tags."]}
     let context_ = "TagDeliveryStreamInput"
@@ -8126,15 +12947,15 @@ module TagDeliveryStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~tags ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tags =
-        field_map_exn json "Tags" TagDeliveryStreamInputTagList.of_json in
+        field_map_exn json__ "Tags" TagDeliveryStreamInputTagList.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
       make ~tags ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates tags for the specified delivery stream. A tag is a key-value pair that you can define and assign to AWS resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. Tags are metadata. For example, you can add friendly names and descriptions or other types of information that can help you distinguish the delivery stream. For more information about tags, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide. Each delivery stream can have up to 50 tags. This operation has a limit of five transactions per second per account."]
+       "Adds or updates tags for the specified Firehose stream. A tag is a key-value pair that you can define and assign to Amazon Web Services resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. Tags are metadata. For example, you can add friendly names and descriptions or other types of information that can help you distinguish the Firehose stream. For more information about tags, see Using Cost Allocation Tags in the Amazon Web Services Billing and Cost Management User Guide. Each Firehose stream can have up to 50 tags. This operation has a limit of five transactions per second per account."]
 module StopDeliveryStreamEncryptionOutput =
   struct
     type nonrec t = unit
@@ -8201,14 +13022,14 @@ module StopDeliveryStreamEncryptionOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables server-side encryption (SSE) for the delivery stream. This operation is asynchronous. It returns immediately. When you invoke it, Kinesis Data Firehose first sets the encryption status of the stream to DISABLING, and then to DISABLED. You can continue to read and write data to your stream while its status is DISABLING. It can take up to 5 seconds after the encryption status changes to DISABLED before all records written to the delivery stream are no longer subject to encryption. To find out whether a record or a batch of records was encrypted, check the response elements PutRecordOutput$Encrypted and PutRecordBatchOutput$Encrypted, respectively. To check the encryption state of a delivery stream, use DescribeDeliveryStream. If SSE is enabled using a customer managed CMK and then you invoke StopDeliveryStreamEncryption, Kinesis Data Firehose schedules the related KMS grant for retirement and then retires it after it ensures that it is finished delivering records to the destination. The StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations have a combined limit of 25 calls per delivery stream per 24 hours. For example, you reach the limit if you call StartDeliveryStreamEncryption 13 times and StopDeliveryStreamEncryption 12 times for the same delivery stream in a 24-hour period."]
+       "Disables server-side encryption (SSE) for the Firehose stream. This operation is asynchronous. It returns immediately. When you invoke it, Firehose first sets the encryption status of the stream to DISABLING, and then to DISABLED. You can continue to read and write data to your stream while its status is DISABLING. It can take up to 5 seconds after the encryption status changes to DISABLED before all records written to the Firehose stream are no longer subject to encryption. To find out whether a record or a batch of records was encrypted, check the response elements PutRecordOutput$Encrypted and PutRecordBatchOutput$Encrypted, respectively. To check the encryption state of a Firehose stream, use DescribeDeliveryStream. If SSE is enabled using a customer managed CMK and then you invoke StopDeliveryStreamEncryption, Firehose schedules the related KMS grant for retirement and then retires it after it ensures that it is finished delivering records to the destination. The StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations have a combined limit of 25 calls per Firehose stream per 24 hours. For example, you reach the limit if you call StartDeliveryStreamEncryption 13 times and StopDeliveryStreamEncryption 12 times for the same Firehose stream in a 24-hour period."]
 module StopDeliveryStreamEncryptionInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
         [@ocaml.doc
-          "The name of the delivery stream for which you want to disable server-side encryption (SSE)."]}
+          "The name of the Firehose stream for which you want to disable server-side encryption (SSE)."]}
     let context_ = "StopDeliveryStreamEncryptionInput"
     let make ~deliveryStreamName = fun () -> { deliveryStreamName }
     let to_value x =
@@ -8222,13 +13043,13 @@ module StopDeliveryStreamEncryptionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
       make ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables server-side encryption (SSE) for the delivery stream. This operation is asynchronous. It returns immediately. When you invoke it, Kinesis Data Firehose first sets the encryption status of the stream to DISABLING, and then to DISABLED. You can continue to read and write data to your stream while its status is DISABLING. It can take up to 5 seconds after the encryption status changes to DISABLED before all records written to the delivery stream are no longer subject to encryption. To find out whether a record or a batch of records was encrypted, check the response elements PutRecordOutput$Encrypted and PutRecordBatchOutput$Encrypted, respectively. To check the encryption state of a delivery stream, use DescribeDeliveryStream. If SSE is enabled using a customer managed CMK and then you invoke StopDeliveryStreamEncryption, Kinesis Data Firehose schedules the related KMS grant for retirement and then retires it after it ensures that it is finished delivering records to the destination. The StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations have a combined limit of 25 calls per delivery stream per 24 hours. For example, you reach the limit if you call StartDeliveryStreamEncryption 13 times and StopDeliveryStreamEncryption 12 times for the same delivery stream in a 24-hour period."]
+       "Disables server-side encryption (SSE) for the Firehose stream. This operation is asynchronous. It returns immediately. When you invoke it, Firehose first sets the encryption status of the stream to DISABLING, and then to DISABLED. You can continue to read and write data to your stream while its status is DISABLING. It can take up to 5 seconds after the encryption status changes to DISABLED before all records written to the Firehose stream are no longer subject to encryption. To find out whether a record or a batch of records was encrypted, check the response elements PutRecordOutput$Encrypted and PutRecordBatchOutput$Encrypted, respectively. To check the encryption state of a Firehose stream, use DescribeDeliveryStream. If SSE is enabled using a customer managed CMK and then you invoke StopDeliveryStreamEncryption, Firehose schedules the related KMS grant for retirement and then retires it after it ensures that it is finished delivering records to the destination. The StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations have a combined limit of 25 calls per Firehose stream per 24 hours. For example, you reach the limit if you call StartDeliveryStreamEncryption 13 times and StopDeliveryStreamEncryption 12 times for the same Firehose stream in a 24-hour period."]
 module StartDeliveryStreamEncryptionOutput =
   struct
     type nonrec t = unit
@@ -8306,14 +13127,14 @@ module StartDeliveryStreamEncryptionOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables server-side encryption (SSE) for the delivery stream. This operation is asynchronous. It returns immediately. When you invoke it, Kinesis Data Firehose first sets the encryption status of the stream to ENABLING, and then to ENABLED. The encryption status of a delivery stream is the Status property in DeliveryStreamEncryptionConfiguration. If the operation fails, the encryption status changes to ENABLING_FAILED. You can continue to read and write data to your delivery stream while the encryption status is ENABLING, but the data is not encrypted. It can take up to 5 seconds after the encryption status changes to ENABLED before all records written to the delivery stream are encrypted. To find out whether a record or a batch of records was encrypted, check the response elements PutRecordOutput$Encrypted and PutRecordBatchOutput$Encrypted, respectively. To check the encryption status of a delivery stream, use DescribeDeliveryStream. Even if encryption is currently enabled for a delivery stream, you can still invoke this operation on it to change the ARN of the CMK or both its type and ARN. If you invoke this method to change the CMK, and the old CMK is of type CUSTOMER_MANAGED_CMK, Kinesis Data Firehose schedules the grant it had on the old CMK for retirement. If the new CMK is of type CUSTOMER_MANAGED_CMK, Kinesis Data Firehose creates a grant that enables it to use the new CMK to encrypt and decrypt data and to manage the grant. If a delivery stream already has encryption enabled and then you invoke this operation to change the ARN of the CMK or both its type and ARN and you get ENABLING_FAILED, this only means that the attempt to change the CMK failed. In this case, encryption remains enabled with the old CMK. If the encryption status of your delivery stream is ENABLING_FAILED, you can invoke this operation again with a valid CMK. The CMK must be enabled and the key policy mustn't explicitly deny the permission for Kinesis Data Firehose to invoke KMS encrypt and decrypt operations. You can enable SSE for a delivery stream only if it's a delivery stream that uses DirectPut as its source. The StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations have a combined limit of 25 calls per delivery stream per 24 hours. For example, you reach the limit if you call StartDeliveryStreamEncryption 13 times and StopDeliveryStreamEncryption 12 times for the same delivery stream in a 24-hour period."]
+       "Enables server-side encryption (SSE) for the Firehose stream. This operation is asynchronous. It returns immediately. When you invoke it, Firehose first sets the encryption status of the stream to ENABLING, and then to ENABLED. The encryption status of a Firehose stream is the Status property in DeliveryStreamEncryptionConfiguration. If the operation fails, the encryption status changes to ENABLING_FAILED. You can continue to read and write data to your Firehose stream while the encryption status is ENABLING, but the data is not encrypted. It can take up to 5 seconds after the encryption status changes to ENABLED before all records written to the Firehose stream are encrypted. To find out whether a record or a batch of records was encrypted, check the response elements PutRecordOutput$Encrypted and PutRecordBatchOutput$Encrypted, respectively. To check the encryption status of a Firehose stream, use DescribeDeliveryStream. Even if encryption is currently enabled for a Firehose stream, you can still invoke this operation on it to change the ARN of the CMK or both its type and ARN. If you invoke this method to change the CMK, and the old CMK is of type CUSTOMER_MANAGED_CMK, Firehose schedules the grant it had on the old CMK for retirement. If the new CMK is of type CUSTOMER_MANAGED_CMK, Firehose creates a grant that enables it to use the new CMK to encrypt and decrypt data and to manage the grant. For the KMS grant creation to be successful, the Firehose API operations StartDeliveryStreamEncryption and CreateDeliveryStream should not be called with session credentials that are more than 6 hours old. If a Firehose stream already has encryption enabled and then you invoke this operation to change the ARN of the CMK or both its type and ARN and you get ENABLING_FAILED, this only means that the attempt to change the CMK failed. In this case, encryption remains enabled with the old CMK. If the encryption status of your Firehose stream is ENABLING_FAILED, you can invoke this operation again with a valid CMK. The CMK must be enabled and the key policy mustn't explicitly deny the permission for Firehose to invoke KMS encrypt and decrypt operations. You can enable SSE for a Firehose stream only if it's a Firehose stream that uses DirectPut as its source. The StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations have a combined limit of 25 calls per Firehose stream per 24 hours. For example, you reach the limit if you call StartDeliveryStreamEncryption 13 times and StopDeliveryStreamEncryption 12 times for the same Firehose stream in a 24-hour period."]
 module StartDeliveryStreamEncryptionInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
         [@ocaml.doc
-          "The name of the delivery stream for which you want to enable server-side encryption (SSE)."];
+          "The name of the Firehose stream for which you want to enable server-side encryption (SSE)."];
       deliveryStreamEncryptionConfigurationInput:
         DeliveryStreamEncryptionConfigurationInput.t option
         [@ocaml.doc
@@ -8340,32 +13161,33 @@ module StartDeliveryStreamEncryptionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ?deliveryStreamEncryptionConfigurationInput ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryStreamEncryptionConfigurationInput =
-        field_map json "DeliveryStreamEncryptionConfigurationInput"
+        field_map json__ "DeliveryStreamEncryptionConfigurationInput"
           DeliveryStreamEncryptionConfigurationInput.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
       make ?deliveryStreamEncryptionConfigurationInput ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables server-side encryption (SSE) for the delivery stream. This operation is asynchronous. It returns immediately. When you invoke it, Kinesis Data Firehose first sets the encryption status of the stream to ENABLING, and then to ENABLED. The encryption status of a delivery stream is the Status property in DeliveryStreamEncryptionConfiguration. If the operation fails, the encryption status changes to ENABLING_FAILED. You can continue to read and write data to your delivery stream while the encryption status is ENABLING, but the data is not encrypted. It can take up to 5 seconds after the encryption status changes to ENABLED before all records written to the delivery stream are encrypted. To find out whether a record or a batch of records was encrypted, check the response elements PutRecordOutput$Encrypted and PutRecordBatchOutput$Encrypted, respectively. To check the encryption status of a delivery stream, use DescribeDeliveryStream. Even if encryption is currently enabled for a delivery stream, you can still invoke this operation on it to change the ARN of the CMK or both its type and ARN. If you invoke this method to change the CMK, and the old CMK is of type CUSTOMER_MANAGED_CMK, Kinesis Data Firehose schedules the grant it had on the old CMK for retirement. If the new CMK is of type CUSTOMER_MANAGED_CMK, Kinesis Data Firehose creates a grant that enables it to use the new CMK to encrypt and decrypt data and to manage the grant. If a delivery stream already has encryption enabled and then you invoke this operation to change the ARN of the CMK or both its type and ARN and you get ENABLING_FAILED, this only means that the attempt to change the CMK failed. In this case, encryption remains enabled with the old CMK. If the encryption status of your delivery stream is ENABLING_FAILED, you can invoke this operation again with a valid CMK. The CMK must be enabled and the key policy mustn't explicitly deny the permission for Kinesis Data Firehose to invoke KMS encrypt and decrypt operations. You can enable SSE for a delivery stream only if it's a delivery stream that uses DirectPut as its source. The StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations have a combined limit of 25 calls per delivery stream per 24 hours. For example, you reach the limit if you call StartDeliveryStreamEncryption 13 times and StopDeliveryStreamEncryption 12 times for the same delivery stream in a 24-hour period."]
+       "Enables server-side encryption (SSE) for the Firehose stream. This operation is asynchronous. It returns immediately. When you invoke it, Firehose first sets the encryption status of the stream to ENABLING, and then to ENABLED. The encryption status of a Firehose stream is the Status property in DeliveryStreamEncryptionConfiguration. If the operation fails, the encryption status changes to ENABLING_FAILED. You can continue to read and write data to your Firehose stream while the encryption status is ENABLING, but the data is not encrypted. It can take up to 5 seconds after the encryption status changes to ENABLED before all records written to the Firehose stream are encrypted. To find out whether a record or a batch of records was encrypted, check the response elements PutRecordOutput$Encrypted and PutRecordBatchOutput$Encrypted, respectively. To check the encryption status of a Firehose stream, use DescribeDeliveryStream. Even if encryption is currently enabled for a Firehose stream, you can still invoke this operation on it to change the ARN of the CMK or both its type and ARN. If you invoke this method to change the CMK, and the old CMK is of type CUSTOMER_MANAGED_CMK, Firehose schedules the grant it had on the old CMK for retirement. If the new CMK is of type CUSTOMER_MANAGED_CMK, Firehose creates a grant that enables it to use the new CMK to encrypt and decrypt data and to manage the grant. For the KMS grant creation to be successful, the Firehose API operations StartDeliveryStreamEncryption and CreateDeliveryStream should not be called with session credentials that are more than 6 hours old. If a Firehose stream already has encryption enabled and then you invoke this operation to change the ARN of the CMK or both its type and ARN and you get ENABLING_FAILED, this only means that the attempt to change the CMK failed. In this case, encryption remains enabled with the old CMK. If the encryption status of your Firehose stream is ENABLING_FAILED, you can invoke this operation again with a valid CMK. The CMK must be enabled and the key policy mustn't explicitly deny the permission for Firehose to invoke KMS encrypt and decrypt operations. You can enable SSE for a Firehose stream only if it's a Firehose stream that uses DirectPut as its source. The StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations have a combined limit of 25 calls per Firehose stream per 24 hours. For example, you reach the limit if you call StartDeliveryStreamEncryption 13 times and StopDeliveryStreamEncryption 12 times for the same Firehose stream in a 24-hour period."]
 module PutRecordOutput =
   struct
     type nonrec t =
       {
-      recordId: PutResponseRecordId.t [@ocaml.doc "The ID of the record."];
+      recordId: PutResponseRecordId.t option
+        [@ocaml.doc "The ID of the record."];
       encrypted: BooleanObject.t option
         [@ocaml.doc
           "Indicates whether server-side encryption (SSE) was enabled during this operation."]}
     type nonrec error =
       [ `InvalidArgumentException of InvalidArgumentException.t 
       | `InvalidKMSResourceException of InvalidKMSResourceException.t 
+      | `InvalidSourceException of InvalidSourceException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutRecordOutput"
-    let make ?encrypted = fun ~recordId -> fun () -> { encrypted; recordId }
+    let make ?recordId = fun ?encrypted -> fun () -> { recordId; encrypted }
     let error_of_json name json =
       match name with
       | "InvalidArgumentException" ->
@@ -8373,6 +13195,8 @@ module PutRecordOutput =
       | "InvalidKMSResourceException" ->
           `InvalidKMSResourceException
             (InvalidKMSResourceException.of_json json)
+      | "InvalidSourceException" ->
+          `InvalidSourceException (InvalidSourceException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -8388,6 +13212,8 @@ module PutRecordOutput =
       | "InvalidKMSResourceException" ->
           `InvalidKMSResourceException
             (InvalidKMSResourceException.of_xml xml)
+      | "InvalidSourceException" ->
+          `InvalidSourceException (InvalidSourceException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -8405,6 +13231,10 @@ module PutRecordOutput =
           `Assoc
             [("error", (`String "InvalidKMSResourceException"));
             ("details", (InvalidKMSResourceException.to_json e))]
+      | `InvalidSourceException e ->
+          `Assoc
+            [("error", (`String "InvalidSourceException"));
+            ("details", (InvalidSourceException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -8420,31 +13250,31 @@ module PutRecordOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("RecordId", (Some (PutResponseRecordId.to_value x.recordId)));
+        [("RecordId",
+           (Option.map x.recordId ~f:PutResponseRecordId.to_value));
         ("Encrypted", (Option.map x.encrypted ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let encrypted =
         (Option.map ~f:BooleanObject.of_xml) (Xml.child xml_arg0 "Encrypted") in
       let recordId =
-        PutResponseRecordId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RecordId") in
-      make ?encrypted ~recordId ()
+        (Option.map ~f:PutResponseRecordId.of_xml)
+          (Xml.child xml_arg0 "RecordId") in
+      make ?encrypted ?recordId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let encrypted = field_map json "Encrypted" BooleanObject.of_json in
-      let recordId =
-        field_map_exn json "RecordId" PutResponseRecordId.of_json in
-      make ?encrypted ~recordId ()
+    let of_json json__ =
+      let encrypted = field_map json__ "Encrypted" BooleanObject.of_json in
+      let recordId = field_map json__ "RecordId" PutResponseRecordId.of_json in
+      make ?encrypted ?recordId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Writes a single data record into an Amazon Kinesis Data Firehose delivery stream. To write multiple data records into a delivery stream, use PutRecordBatch. Applications using these operations are referred to as producers. By default, each delivery stream can take in up to 2,000 transactions per second, 5,000 records per second, or 5 MB per second. If you use PutRecord and PutRecordBatch, the limits are an aggregate across these two operations for each delivery stream. For more information about limits and how to request an increase, see Amazon Kinesis Data Firehose Limits. You must specify the name of the delivery stream and the data record when using PutRecord. The data record consists of a data blob that can be up to 1,000 KiB in size, and any kind of data. For example, it can be a segment from a log file, geographic location data, website clickstream data, and so on. Kinesis Data Firehose buffers records before delivering them to the destination. To disambiguate the data blobs at the destination, a common solution is to use delimiters in the data, such as a newline (\\n) or some other character unique within the data. This allows the consumer application to parse individual data items when reading the data from the destination. The PutRecord operation returns a RecordId, which is a unique string assigned to each record. Producer applications can use this ID for purposes such as auditability and investigation. If the PutRecord operation throws a ServiceUnavailableException, back off and retry. If the exception persists, it is possible that the throughput limits have been exceeded for the delivery stream. Data records sent to Kinesis Data Firehose are stored for 24 hours from the time they are added to a delivery stream as it tries to send the records to the destination. If the destination is unreachable for more than 24 hours, the data is no longer available. Don't concatenate two or more base64 strings to form the data fields of your records. Instead, concatenate the raw data, then perform base64 encoding."]
+       "Writes a single data record into an Firehose stream. To write multiple data records into a Firehose stream, use PutRecordBatch. Applications using these operations are referred to as producers. By default, each Firehose stream can take in up to 2,000 transactions per second, 5,000 records per second, or 5 MB per second. If you use PutRecord and PutRecordBatch, the limits are an aggregate across these two operations for each Firehose stream. For more information about limits and how to request an increase, see Amazon Firehose Limits. Firehose accumulates and publishes a particular metric for a customer account in one minute intervals. It is possible that the bursts of incoming bytes/records ingested to a Firehose stream last only for a few seconds. Due to this, the actual spikes in the traffic might not be fully visible in the customer's 1 minute CloudWatch metrics. You must specify the name of the Firehose stream and the data record when using PutRecord. The data record consists of a data blob that can be up to 1,000 KiB in size, and any kind of data. For example, it can be a segment from a log file, geographic location data, website clickstream data, and so on. For multi record de-aggregation, you can not put more than 500 records even if the data blob length is less than 1000 KiB. If you include more than 500 records, the request succeeds but the record de-aggregation doesn't work as expected and transformation lambda is invoked with the complete base64 encoded data blob instead of de-aggregated base64 decoded records. Firehose buffers records before delivering them to the destination. To disambiguate the data blobs at the destination, a common solution is to use delimiters in the data, such as a newline (\\n) or some other character unique within the data. This allows the consumer application to parse individual data items when reading the data from the destination. The PutRecord operation returns a RecordId, which is a unique string assigned to each record. Producer applications can use this ID for purposes such as auditability and investigation. If the PutRecord operation throws a ServiceUnavailableException, the API is automatically reinvoked (retried) 3 times. If the exception persists, it is possible that the throughput limits have been exceeded for the Firehose stream. Re-invoking the Put API operations (for example, PutRecord and PutRecordBatch) can result in data duplicates. For larger data assets, allow for a longer time out before retrying Put API operations. Data records sent to Firehose are stored for 24 hours from the time they are added to a Firehose stream as it tries to send the records to the destination. If the destination is unreachable for more than 24 hours, the data is no longer available. Don't concatenate two or more base64 strings to form the data fields of your records. Instead, concatenate the raw data, then perform base64 encoding."]
 module PutRecordInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
-        [@ocaml.doc "The name of the delivery stream."];
+        [@ocaml.doc "The name of the Firehose stream."];
       record: Record.t [@ocaml.doc "The record."]}
     let context_ = "PutRecordInput"
     let make ~deliveryStreamName =
@@ -8463,38 +13293,38 @@ module PutRecordInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~record ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let record = field_map_exn json "Record" Record.of_json in
+    let of_json json__ =
+      let record = field_map_exn json__ "Record" Record.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
       make ~record ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Writes a single data record into an Amazon Kinesis Data Firehose delivery stream. To write multiple data records into a delivery stream, use PutRecordBatch. Applications using these operations are referred to as producers. By default, each delivery stream can take in up to 2,000 transactions per second, 5,000 records per second, or 5 MB per second. If you use PutRecord and PutRecordBatch, the limits are an aggregate across these two operations for each delivery stream. For more information about limits and how to request an increase, see Amazon Kinesis Data Firehose Limits. You must specify the name of the delivery stream and the data record when using PutRecord. The data record consists of a data blob that can be up to 1,000 KiB in size, and any kind of data. For example, it can be a segment from a log file, geographic location data, website clickstream data, and so on. Kinesis Data Firehose buffers records before delivering them to the destination. To disambiguate the data blobs at the destination, a common solution is to use delimiters in the data, such as a newline (\\n) or some other character unique within the data. This allows the consumer application to parse individual data items when reading the data from the destination. The PutRecord operation returns a RecordId, which is a unique string assigned to each record. Producer applications can use this ID for purposes such as auditability and investigation. If the PutRecord operation throws a ServiceUnavailableException, back off and retry. If the exception persists, it is possible that the throughput limits have been exceeded for the delivery stream. Data records sent to Kinesis Data Firehose are stored for 24 hours from the time they are added to a delivery stream as it tries to send the records to the destination. If the destination is unreachable for more than 24 hours, the data is no longer available. Don't concatenate two or more base64 strings to form the data fields of your records. Instead, concatenate the raw data, then perform base64 encoding."]
+       "Writes a single data record into an Firehose stream. To write multiple data records into a Firehose stream, use PutRecordBatch. Applications using these operations are referred to as producers. By default, each Firehose stream can take in up to 2,000 transactions per second, 5,000 records per second, or 5 MB per second. If you use PutRecord and PutRecordBatch, the limits are an aggregate across these two operations for each Firehose stream. For more information about limits and how to request an increase, see Amazon Firehose Limits. Firehose accumulates and publishes a particular metric for a customer account in one minute intervals. It is possible that the bursts of incoming bytes/records ingested to a Firehose stream last only for a few seconds. Due to this, the actual spikes in the traffic might not be fully visible in the customer's 1 minute CloudWatch metrics. You must specify the name of the Firehose stream and the data record when using PutRecord. The data record consists of a data blob that can be up to 1,000 KiB in size, and any kind of data. For example, it can be a segment from a log file, geographic location data, website clickstream data, and so on. For multi record de-aggregation, you can not put more than 500 records even if the data blob length is less than 1000 KiB. If you include more than 500 records, the request succeeds but the record de-aggregation doesn't work as expected and transformation lambda is invoked with the complete base64 encoded data blob instead of de-aggregated base64 decoded records. Firehose buffers records before delivering them to the destination. To disambiguate the data blobs at the destination, a common solution is to use delimiters in the data, such as a newline (\\n) or some other character unique within the data. This allows the consumer application to parse individual data items when reading the data from the destination. The PutRecord operation returns a RecordId, which is a unique string assigned to each record. Producer applications can use this ID for purposes such as auditability and investigation. If the PutRecord operation throws a ServiceUnavailableException, the API is automatically reinvoked (retried) 3 times. If the exception persists, it is possible that the throughput limits have been exceeded for the Firehose stream. Re-invoking the Put API operations (for example, PutRecord and PutRecordBatch) can result in data duplicates. For larger data assets, allow for a longer time out before retrying Put API operations. Data records sent to Firehose are stored for 24 hours from the time they are added to a Firehose stream as it tries to send the records to the destination. If the destination is unreachable for more than 24 hours, the data is no longer available. Don't concatenate two or more base64 strings to form the data fields of your records. Instead, concatenate the raw data, then perform base64 encoding."]
 module PutRecordBatchOutput =
   struct
     type nonrec t =
       {
-      failedPutCount: NonNegativeIntegerObject.t
+      failedPutCount: NonNegativeIntegerObject.t option
         [@ocaml.doc
           "The number of records that might have failed processing. This number might be greater than 0 even if the PutRecordBatch call succeeds. Check FailedPutCount to determine whether there are records that you need to resend."];
       encrypted: BooleanObject.t option
         [@ocaml.doc
           "Indicates whether server-side encryption (SSE) was enabled during this operation."];
-      requestResponses: PutRecordBatchResponseEntryList.t
+      requestResponses: PutRecordBatchResponseEntryList.t option
         [@ocaml.doc
           "The results array. For each record, the index of the response element is the same as the index used in the request array."]}
     type nonrec error =
       [ `InvalidArgumentException of InvalidArgumentException.t 
       | `InvalidKMSResourceException of InvalidKMSResourceException.t 
+      | `InvalidSourceException of InvalidSourceException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutRecordBatchOutput"
-    let make ?encrypted =
-      fun ~failedPutCount ->
-        fun ~requestResponses ->
-          fun () -> { encrypted; failedPutCount; requestResponses }
+    let make ?failedPutCount =
+      fun ?encrypted ->
+        fun ?requestResponses ->
+          fun () -> { failedPutCount; encrypted; requestResponses }
     let error_of_json name json =
       match name with
       | "InvalidArgumentException" ->
@@ -8502,6 +13332,8 @@ module PutRecordBatchOutput =
       | "InvalidKMSResourceException" ->
           `InvalidKMSResourceException
             (InvalidKMSResourceException.of_json json)
+      | "InvalidSourceException" ->
+          `InvalidSourceException (InvalidSourceException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -8517,6 +13349,8 @@ module PutRecordBatchOutput =
       | "InvalidKMSResourceException" ->
           `InvalidKMSResourceException
             (InvalidKMSResourceException.of_xml xml)
+      | "InvalidSourceException" ->
+          `InvalidSourceException (InvalidSourceException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -8534,6 +13368,10 @@ module PutRecordBatchOutput =
           `Assoc
             [("error", (`String "InvalidKMSResourceException"));
             ("details", (InvalidKMSResourceException.to_json e))]
+      | `InvalidSourceException e ->
+          `Assoc
+            [("error", (`String "InvalidSourceException"));
+            ("details", (InvalidSourceException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -8550,39 +13388,40 @@ module PutRecordBatchOutput =
     let to_value x =
       structure_to_value
         [("FailedPutCount",
-           (Some (NonNegativeIntegerObject.to_value x.failedPutCount)));
+           (Option.map x.failedPutCount ~f:NonNegativeIntegerObject.to_value));
         ("Encrypted", (Option.map x.encrypted ~f:BooleanObject.to_value));
         ("RequestResponses",
-          (Some (PutRecordBatchResponseEntryList.to_value x.requestResponses)))]
+          (Option.map x.requestResponses
+             ~f:PutRecordBatchResponseEntryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let requestResponses =
-        PutRecordBatchResponseEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RequestResponses") in
+        (Option.map ~f:PutRecordBatchResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "RequestResponses") in
       let encrypted =
         (Option.map ~f:BooleanObject.of_xml) (Xml.child xml_arg0 "Encrypted") in
       let failedPutCount =
-        NonNegativeIntegerObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FailedPutCount") in
-      make ~requestResponses ?encrypted ~failedPutCount ()
+        (Option.map ~f:NonNegativeIntegerObject.of_xml)
+          (Xml.child xml_arg0 "FailedPutCount") in
+      make ?requestResponses ?encrypted ?failedPutCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestResponses =
-        field_map_exn json "RequestResponses"
+        field_map json__ "RequestResponses"
           PutRecordBatchResponseEntryList.of_json in
-      let encrypted = field_map json "Encrypted" BooleanObject.of_json in
+      let encrypted = field_map json__ "Encrypted" BooleanObject.of_json in
       let failedPutCount =
-        field_map_exn json "FailedPutCount" NonNegativeIntegerObject.of_json in
-      make ~requestResponses ?encrypted ~failedPutCount ()
+        field_map json__ "FailedPutCount" NonNegativeIntegerObject.of_json in
+      make ?requestResponses ?encrypted ?failedPutCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Writes multiple data records into a delivery stream in a single call, which can achieve higher throughput per producer than when writing single records. To write single data records into a delivery stream, use PutRecord. Applications using these operations are referred to as producers. For information about service quota, see Amazon Kinesis Data Firehose Quota. Each PutRecordBatch request supports up to 500 records. Each record in the request can be as large as 1,000 KB (before base64 encoding), up to a limit of 4 MB for the entire request. These limits cannot be changed. You must specify the name of the delivery stream and the data record when using PutRecord. The data record consists of a data blob that can be up to 1,000 KB in size, and any kind of data. For example, it could be a segment from a log file, geographic location data, website clickstream data, and so on. Kinesis Data Firehose buffers records before delivering them to the destination. To disambiguate the data blobs at the destination, a common solution is to use delimiters in the data, such as a newline (\\n) or some other character unique within the data. This allows the consumer application to parse individual data items when reading the data from the destination. The PutRecordBatch response includes a count of failed records, FailedPutCount, and an array of responses, RequestResponses. Even if the PutRecordBatch call succeeds, the value of FailedPutCount may be greater than 0, indicating that there are records for which the operation didn't succeed. Each entry in the RequestResponses array provides additional information about the processed record. It directly correlates with a record in the request array using the same ordering, from the top to the bottom. The response array always includes the same number of records as the request array. RequestResponses includes both successfully and unsuccessfully processed records. Kinesis Data Firehose tries to process all records in each PutRecordBatch request. A single record failure does not stop the processing of subsequent records. A successfully processed record includes a RecordId value, which is unique for the record. An unsuccessfully processed record includes ErrorCode and ErrorMessage values. ErrorCode reflects the type of error, and is one of the following values: ServiceUnavailableException or InternalFailure. ErrorMessage provides more detailed information about the error. If there is an internal server error or a timeout, the write might have completed or it might have failed. If FailedPutCount is greater than 0, retry the request, resending only those records that might have failed processing. This minimizes the possible duplicate records and also reduces the total bytes sent (and corresponding charges). We recommend that you handle any duplicates at the destination. If PutRecordBatch throws ServiceUnavailableException, back off and retry. If the exception persists, it is possible that the throughput limits have been exceeded for the delivery stream. Data records sent to Kinesis Data Firehose are stored for 24 hours from the time they are added to a delivery stream as it attempts to send the records to the destination. If the destination is unreachable for more than 24 hours, the data is no longer available. Don't concatenate two or more base64 strings to form the data fields of your records. Instead, concatenate the raw data, then perform base64 encoding."]
+       "Writes multiple data records into a Firehose stream in a single call, which can achieve higher throughput per producer than when writing single records. To write single data records into a Firehose stream, use PutRecord. Applications using these operations are referred to as producers. Firehose accumulates and publishes a particular metric for a customer account in one minute intervals. It is possible that the bursts of incoming bytes/records ingested to a Firehose stream last only for a few seconds. Due to this, the actual spikes in the traffic might not be fully visible in the customer's 1 minute CloudWatch metrics. For information about service quota, see Amazon Firehose Quota. Each PutRecordBatch request supports up to 500 records. Each record in the request can be as large as 1,000 KB (before base64 encoding), up to a limit of 4 MB for the entire request. These limits cannot be changed. You must specify the name of the Firehose stream and the data record when using PutRecord. The data record consists of a data blob that can be up to 1,000 KB in size, and any kind of data. For example, it could be a segment from a log file, geographic location data, website clickstream data, and so on. For multi record de-aggregation, you can not put more than 500 records even if the data blob length is less than 1000 KiB. If you include more than 500 records, the request succeeds but the record de-aggregation doesn't work as expected and transformation lambda is invoked with the complete base64 encoded data blob instead of de-aggregated base64 decoded records. Firehose buffers records before delivering them to the destination. To disambiguate the data blobs at the destination, a common solution is to use delimiters in the data, such as a newline (\\n) or some other character unique within the data. This allows the consumer application to parse individual data items when reading the data from the destination. The PutRecordBatch response includes a count of failed records, FailedPutCount, and an array of responses, RequestResponses. Even if the PutRecordBatch call succeeds, the value of FailedPutCount may be greater than 0, indicating that there are records for which the operation didn't succeed. Each entry in the RequestResponses array provides additional information about the processed record. It directly correlates with a record in the request array using the same ordering, from the top to the bottom. The response array always includes the same number of records as the request array. RequestResponses includes both successfully and unsuccessfully processed records. Firehose tries to process all records in each PutRecordBatch request. A single record failure does not stop the processing of subsequent records. A successfully processed record includes a RecordId value, which is unique for the record. An unsuccessfully processed record includes ErrorCode and ErrorMessage values. ErrorCode reflects the type of error, and is one of the following values: ServiceUnavailableException or InternalFailure. ErrorMessage provides more detailed information about the error. If there is an internal server error or a timeout, the write might have completed or it might have failed. If FailedPutCount is greater than 0, retry the request, resending only those records that might have failed processing. This minimizes the possible duplicate records and also reduces the total bytes sent (and corresponding charges). We recommend that you handle any duplicates at the destination. If PutRecordBatch throws ServiceUnavailableException, the API is automatically reinvoked (retried) 3 times. If the exception persists, it is possible that the throughput limits have been exceeded for the Firehose stream. Re-invoking the Put API operations (for example, PutRecord and PutRecordBatch) can result in data duplicates. For larger data assets, allow for a longer time out before retrying Put API operations. Data records sent to Firehose are stored for 24 hours from the time they are added to a Firehose stream as it attempts to send the records to the destination. If the destination is unreachable for more than 24 hours, the data is no longer available. Don't concatenate two or more base64 strings to form the data fields of your records. Instead, concatenate the raw data, then perform base64 encoding."]
 module PutRecordBatchInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
-        [@ocaml.doc "The name of the delivery stream."];
+        [@ocaml.doc "The name of the Firehose stream."];
       records: PutRecordBatchRequestEntryList.t
         [@ocaml.doc "One or more records."]}
     let context_ = "PutRecordBatchInput"
@@ -8604,23 +13443,23 @@ module PutRecordBatchInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~records ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let records =
-        field_map_exn json "Records" PutRecordBatchRequestEntryList.of_json in
+        field_map_exn json__ "Records" PutRecordBatchRequestEntryList.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
       make ~records ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Writes multiple data records into a delivery stream in a single call, which can achieve higher throughput per producer than when writing single records. To write single data records into a delivery stream, use PutRecord. Applications using these operations are referred to as producers. For information about service quota, see Amazon Kinesis Data Firehose Quota. Each PutRecordBatch request supports up to 500 records. Each record in the request can be as large as 1,000 KB (before base64 encoding), up to a limit of 4 MB for the entire request. These limits cannot be changed. You must specify the name of the delivery stream and the data record when using PutRecord. The data record consists of a data blob that can be up to 1,000 KB in size, and any kind of data. For example, it could be a segment from a log file, geographic location data, website clickstream data, and so on. Kinesis Data Firehose buffers records before delivering them to the destination. To disambiguate the data blobs at the destination, a common solution is to use delimiters in the data, such as a newline (\\n) or some other character unique within the data. This allows the consumer application to parse individual data items when reading the data from the destination. The PutRecordBatch response includes a count of failed records, FailedPutCount, and an array of responses, RequestResponses. Even if the PutRecordBatch call succeeds, the value of FailedPutCount may be greater than 0, indicating that there are records for which the operation didn't succeed. Each entry in the RequestResponses array provides additional information about the processed record. It directly correlates with a record in the request array using the same ordering, from the top to the bottom. The response array always includes the same number of records as the request array. RequestResponses includes both successfully and unsuccessfully processed records. Kinesis Data Firehose tries to process all records in each PutRecordBatch request. A single record failure does not stop the processing of subsequent records. A successfully processed record includes a RecordId value, which is unique for the record. An unsuccessfully processed record includes ErrorCode and ErrorMessage values. ErrorCode reflects the type of error, and is one of the following values: ServiceUnavailableException or InternalFailure. ErrorMessage provides more detailed information about the error. If there is an internal server error or a timeout, the write might have completed or it might have failed. If FailedPutCount is greater than 0, retry the request, resending only those records that might have failed processing. This minimizes the possible duplicate records and also reduces the total bytes sent (and corresponding charges). We recommend that you handle any duplicates at the destination. If PutRecordBatch throws ServiceUnavailableException, back off and retry. If the exception persists, it is possible that the throughput limits have been exceeded for the delivery stream. Data records sent to Kinesis Data Firehose are stored for 24 hours from the time they are added to a delivery stream as it attempts to send the records to the destination. If the destination is unreachable for more than 24 hours, the data is no longer available. Don't concatenate two or more base64 strings to form the data fields of your records. Instead, concatenate the raw data, then perform base64 encoding."]
+       "Writes multiple data records into a Firehose stream in a single call, which can achieve higher throughput per producer than when writing single records. To write single data records into a Firehose stream, use PutRecord. Applications using these operations are referred to as producers. Firehose accumulates and publishes a particular metric for a customer account in one minute intervals. It is possible that the bursts of incoming bytes/records ingested to a Firehose stream last only for a few seconds. Due to this, the actual spikes in the traffic might not be fully visible in the customer's 1 minute CloudWatch metrics. For information about service quota, see Amazon Firehose Quota. Each PutRecordBatch request supports up to 500 records. Each record in the request can be as large as 1,000 KB (before base64 encoding), up to a limit of 4 MB for the entire request. These limits cannot be changed. You must specify the name of the Firehose stream and the data record when using PutRecord. The data record consists of a data blob that can be up to 1,000 KB in size, and any kind of data. For example, it could be a segment from a log file, geographic location data, website clickstream data, and so on. For multi record de-aggregation, you can not put more than 500 records even if the data blob length is less than 1000 KiB. If you include more than 500 records, the request succeeds but the record de-aggregation doesn't work as expected and transformation lambda is invoked with the complete base64 encoded data blob instead of de-aggregated base64 decoded records. Firehose buffers records before delivering them to the destination. To disambiguate the data blobs at the destination, a common solution is to use delimiters in the data, such as a newline (\\n) or some other character unique within the data. This allows the consumer application to parse individual data items when reading the data from the destination. The PutRecordBatch response includes a count of failed records, FailedPutCount, and an array of responses, RequestResponses. Even if the PutRecordBatch call succeeds, the value of FailedPutCount may be greater than 0, indicating that there are records for which the operation didn't succeed. Each entry in the RequestResponses array provides additional information about the processed record. It directly correlates with a record in the request array using the same ordering, from the top to the bottom. The response array always includes the same number of records as the request array. RequestResponses includes both successfully and unsuccessfully processed records. Firehose tries to process all records in each PutRecordBatch request. A single record failure does not stop the processing of subsequent records. A successfully processed record includes a RecordId value, which is unique for the record. An unsuccessfully processed record includes ErrorCode and ErrorMessage values. ErrorCode reflects the type of error, and is one of the following values: ServiceUnavailableException or InternalFailure. ErrorMessage provides more detailed information about the error. If there is an internal server error or a timeout, the write might have completed or it might have failed. If FailedPutCount is greater than 0, retry the request, resending only those records that might have failed processing. This minimizes the possible duplicate records and also reduces the total bytes sent (and corresponding charges). We recommend that you handle any duplicates at the destination. If PutRecordBatch throws ServiceUnavailableException, the API is automatically reinvoked (retried) 3 times. If the exception persists, it is possible that the throughput limits have been exceeded for the Firehose stream. Re-invoking the Put API operations (for example, PutRecord and PutRecordBatch) can result in data duplicates. For larger data assets, allow for a longer time out before retrying Put API operations. Data records sent to Firehose are stored for 24 hours from the time they are added to a Firehose stream as it attempts to send the records to the destination. If the destination is unreachable for more than 24 hours, the data is no longer available. Don't concatenate two or more base64 strings to form the data fields of your records. Instead, concatenate the raw data, then perform base64 encoding."]
 module ListTagsForDeliveryStreamOutput =
   struct
     type nonrec t =
       {
-      tags: ListTagsForDeliveryStreamOutputTagList.t
+      tags: ListTagsForDeliveryStreamOutputTagList.t option
         [@ocaml.doc
           "A list of tags associated with DeliveryStreamName, starting with the first tag after ExclusiveStartTagKey and up to the specified Limit."];
-      hasMoreTags: BooleanObject.t
+      hasMoreTags: BooleanObject.t option
         [@ocaml.doc
           "If this is true in the response, more tags are available. To list the remaining tags, set ExclusiveStartTagKey to the key of the last tag returned and call ListTagsForDeliveryStream again."]}
     type nonrec error =
@@ -8628,8 +13467,7 @@ module ListTagsForDeliveryStreamOutput =
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForDeliveryStreamOutput"
-    let make ~tags = fun ~hasMoreTags -> fun () -> { tags; hasMoreTags }
+    let make ?tags = fun ?hasMoreTags -> fun () -> { tags; hasMoreTags }
     let error_of_json name json =
       match name with
       | "InvalidArgumentException" ->
@@ -8673,41 +13511,41 @@ module ListTagsForDeliveryStreamOutput =
     let to_value x =
       structure_to_value
         [("Tags",
-           (Some (ListTagsForDeliveryStreamOutputTagList.to_value x.tags)));
-        ("HasMoreTags", (Some (BooleanObject.to_value x.hasMoreTags)))]
+           (Option.map x.tags
+              ~f:ListTagsForDeliveryStreamOutputTagList.to_value));
+        ("HasMoreTags", (Option.map x.hasMoreTags ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let hasMoreTags =
-        BooleanObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HasMoreTags") in
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HasMoreTags") in
       let tags =
-        ListTagsForDeliveryStreamOutputTagList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ~hasMoreTags ~tags ()
+        (Option.map ~f:ListTagsForDeliveryStreamOutputTagList.of_xml)
+          (Xml.child xml_arg0 "Tags") in
+      make ?hasMoreTags ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hasMoreTags =
-        field_map_exn json "HasMoreTags" BooleanObject.of_json in
+    let of_json json__ =
+      let hasMoreTags = field_map json__ "HasMoreTags" BooleanObject.of_json in
       let tags =
-        field_map_exn json "Tags"
+        field_map json__ "Tags"
           ListTagsForDeliveryStreamOutputTagList.of_json in
-      make ~hasMoreTags ~tags ()
+      make ?hasMoreTags ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the tags for the specified delivery stream. This operation has a limit of five transactions per second per account."]
+       "Lists the tags for the specified Firehose stream. This operation has a limit of five transactions per second per account."]
 module ListTagsForDeliveryStreamInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
         [@ocaml.doc
-          "The name of the delivery stream whose tags you want to list."];
+          "The name of the Firehose stream whose tags you want to list."];
       exclusiveStartTagKey: TagKey.t option
         [@ocaml.doc
           "The key to use as the starting point for the list of tags. If you set this parameter, ListTagsForDeliveryStream gets all tags that occur after ExclusiveStartTagKey."];
       limit: ListTagsForDeliveryStreamInputLimit.t option
         [@ocaml.doc
-          "The number of tags to return. If this number is less than the total number of tags associated with the delivery stream, HasMoreTags is set to true in the response. To list additional tags, set ExclusiveStartTagKey to the last key in the response."]}
+          "The number of tags to return. If this number is less than the total number of tags associated with the Firehose stream, HasMoreTags is set to true in the response. To list additional tags, set ExclusiveStartTagKey to the last key in the response."]}
     let context_ = "ListTagsForDeliveryStreamInput"
     let make ?exclusiveStartTagKey =
       fun ?limit ->
@@ -8734,31 +13572,30 @@ module ListTagsForDeliveryStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ?limit ?exclusiveStartTagKey ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let limit =
-        field_map json "Limit" ListTagsForDeliveryStreamInputLimit.of_json in
+        field_map json__ "Limit" ListTagsForDeliveryStreamInputLimit.of_json in
       let exclusiveStartTagKey =
-        field_map json "ExclusiveStartTagKey" TagKey.of_json in
+        field_map json__ "ExclusiveStartTagKey" TagKey.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
       make ?limit ?exclusiveStartTagKey ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the tags for the specified delivery stream. This operation has a limit of five transactions per second per account."]
+       "Lists the tags for the specified Firehose stream. This operation has a limit of five transactions per second per account."]
 module ListDeliveryStreamsOutput =
   struct
     type nonrec t =
       {
-      deliveryStreamNames: DeliveryStreamNameList.t
-        [@ocaml.doc "The names of the delivery streams."];
-      hasMoreDeliveryStreams: BooleanObject.t
+      deliveryStreamNames: DeliveryStreamNameList.t option
+        [@ocaml.doc "The names of the Firehose streams."];
+      hasMoreDeliveryStreams: BooleanObject.t option
         [@ocaml.doc
-          "Indicates whether there are more delivery streams available to list."]}
+          "Indicates whether there are more Firehose streams available to list."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDeliveryStreamsOutput"
-    let make ~deliveryStreamNames =
-      fun ~hasMoreDeliveryStreams ->
+    let make ?deliveryStreamNames =
+      fun ?hasMoreDeliveryStreams ->
         fun () -> { deliveryStreamNames; hasMoreDeliveryStreams }
     let error_of_json name json =
       match name with
@@ -8779,42 +13616,42 @@ module ListDeliveryStreamsOutput =
     let to_value x =
       structure_to_value
         [("DeliveryStreamNames",
-           (Some (DeliveryStreamNameList.to_value x.deliveryStreamNames)));
+           (Option.map x.deliveryStreamNames
+              ~f:DeliveryStreamNameList.to_value));
         ("HasMoreDeliveryStreams",
-          (Some (BooleanObject.to_value x.hasMoreDeliveryStreams)))]
+          (Option.map x.hasMoreDeliveryStreams ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let hasMoreDeliveryStreams =
-        BooleanObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HasMoreDeliveryStreams") in
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HasMoreDeliveryStreams") in
       let deliveryStreamNames =
-        DeliveryStreamNameList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamNames") in
-      make ~hasMoreDeliveryStreams ~deliveryStreamNames ()
+        (Option.map ~f:DeliveryStreamNameList.of_xml)
+          (Xml.child xml_arg0 "DeliveryStreamNames") in
+      make ?hasMoreDeliveryStreams ?deliveryStreamNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hasMoreDeliveryStreams =
-        field_map_exn json "HasMoreDeliveryStreams" BooleanObject.of_json in
+        field_map json__ "HasMoreDeliveryStreams" BooleanObject.of_json in
       let deliveryStreamNames =
-        field_map_exn json "DeliveryStreamNames"
-          DeliveryStreamNameList.of_json in
-      make ~hasMoreDeliveryStreams ~deliveryStreamNames ()
+        field_map json__ "DeliveryStreamNames" DeliveryStreamNameList.of_json in
+      make ?hasMoreDeliveryStreams ?deliveryStreamNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists your delivery streams in alphabetical order of their names. The number of delivery streams might be too large to return using a single call to ListDeliveryStreams. You can limit the number of delivery streams returned, using the Limit parameter. To determine whether there are more delivery streams to list, check the value of HasMoreDeliveryStreams in the output. If there are more delivery streams to list, you can request them by calling this operation again and setting the ExclusiveStartDeliveryStreamName parameter to the name of the last delivery stream returned in the last call."]
+       "Lists your Firehose streams in alphabetical order of their names. The number of Firehose streams might be too large to return using a single call to ListDeliveryStreams. You can limit the number of Firehose streams returned, using the Limit parameter. To determine whether there are more delivery streams to list, check the value of HasMoreDeliveryStreams in the output. If there are more Firehose streams to list, you can request them by calling this operation again and setting the ExclusiveStartDeliveryStreamName parameter to the name of the last Firehose stream returned in the last call."]
 module ListDeliveryStreamsInput =
   struct
     type nonrec t =
       {
       limit: ListDeliveryStreamsInputLimit.t option
         [@ocaml.doc
-          "The maximum number of delivery streams to list. The default value is 10."];
+          "The maximum number of Firehose streams to list. The default value is 10."];
       deliveryStreamType: DeliveryStreamType.t option
         [@ocaml.doc
-          "The delivery stream type. This can be one of the following values: DirectPut: Provider applications access the delivery stream directly. KinesisStreamAsSource: The delivery stream uses a Kinesis data stream as a source. This parameter is optional. If this parameter is omitted, delivery streams of all types are returned."];
+          "The Firehose stream type. This can be one of the following values: DirectPut: Provider applications access the Firehose stream directly. KinesisStreamAsSource: The Firehose stream uses a Kinesis data stream as a source. This parameter is optional. If this parameter is omitted, Firehose streams of all types are returned."];
       exclusiveStartDeliveryStreamName: DeliveryStreamName.t option
         [@ocaml.doc
-          "The list of delivery streams returned by this call to ListDeliveryStreams will start with the delivery stream whose name comes alphabetically immediately after the name you specify in ExclusiveStartDeliveryStreamName."]}
+          "The list of Firehose streams returned by this call to ListDeliveryStreams will start with the Firehose stream whose name comes alphabetically immediately after the name you specify in ExclusiveStartDeliveryStreamName."]}
     let make ?limit =
       fun ?deliveryStreamType ->
         fun ?exclusiveStartDeliveryStreamName ->
@@ -8842,29 +13679,28 @@ module ListDeliveryStreamsInput =
           (Xml.child xml_arg0 "Limit") in
       make ?exclusiveStartDeliveryStreamName ?deliveryStreamType ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exclusiveStartDeliveryStreamName =
-        field_map json "ExclusiveStartDeliveryStreamName"
+        field_map json__ "ExclusiveStartDeliveryStreamName"
           DeliveryStreamName.of_json in
       let deliveryStreamType =
-        field_map json "DeliveryStreamType" DeliveryStreamType.of_json in
+        field_map json__ "DeliveryStreamType" DeliveryStreamType.of_json in
       let limit =
-        field_map json "Limit" ListDeliveryStreamsInputLimit.of_json in
+        field_map json__ "Limit" ListDeliveryStreamsInputLimit.of_json in
       make ?exclusiveStartDeliveryStreamName ?deliveryStreamType ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists your delivery streams in alphabetical order of their names. The number of delivery streams might be too large to return using a single call to ListDeliveryStreams. You can limit the number of delivery streams returned, using the Limit parameter. To determine whether there are more delivery streams to list, check the value of HasMoreDeliveryStreams in the output. If there are more delivery streams to list, you can request them by calling this operation again and setting the ExclusiveStartDeliveryStreamName parameter to the name of the last delivery stream returned in the last call."]
+       "Lists your Firehose streams in alphabetical order of their names. The number of Firehose streams might be too large to return using a single call to ListDeliveryStreams. You can limit the number of Firehose streams returned, using the Limit parameter. To determine whether there are more delivery streams to list, check the value of HasMoreDeliveryStreams in the output. If there are more Firehose streams to list, you can request them by calling this operation again and setting the ExclusiveStartDeliveryStreamName parameter to the name of the last Firehose stream returned in the last call."]
 module DescribeDeliveryStreamOutput =
   struct
     type nonrec t =
       {
-      deliveryStreamDescription: DeliveryStreamDescription.t
-        [@ocaml.doc "Information about the delivery stream."]}
+      deliveryStreamDescription: DeliveryStreamDescription.t option
+        [@ocaml.doc "Information about the Firehose stream."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeDeliveryStreamOutput"
-    let make ~deliveryStreamDescription =
+    let make ?deliveryStreamDescription =
       fun () -> { deliveryStreamDescription }
     let error_of_json name json =
       match name with
@@ -8893,36 +13729,35 @@ module DescribeDeliveryStreamOutput =
     let to_value x =
       structure_to_value
         [("DeliveryStreamDescription",
-           (Some
-              (DeliveryStreamDescription.to_value x.deliveryStreamDescription)))]
+           (Option.map x.deliveryStreamDescription
+              ~f:DeliveryStreamDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let deliveryStreamDescription =
-        DeliveryStreamDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DeliveryStreamDescription") in
-      make ~deliveryStreamDescription ()
+        (Option.map ~f:DeliveryStreamDescription.of_xml)
+          (Xml.child xml_arg0 "DeliveryStreamDescription") in
+      make ?deliveryStreamDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryStreamDescription =
-        field_map_exn json "DeliveryStreamDescription"
+        field_map json__ "DeliveryStreamDescription"
           DeliveryStreamDescription.of_json in
-      make ~deliveryStreamDescription ()
+      make ?deliveryStreamDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the specified delivery stream and its status. For example, after your delivery stream is created, call DescribeDeliveryStream to see whether the delivery stream is ACTIVE and therefore ready for data to be sent to it. If the status of a delivery stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it. If the status is DELETING_FAILED, you can force deletion by invoking DeleteDeliveryStream again but with DeleteDeliveryStreamInput$AllowForceDelete set to true."]
+       "Describes the specified Firehose stream and its status. For example, after your Firehose stream is created, call DescribeDeliveryStream to see whether the Firehose stream is ACTIVE and therefore ready for data to be sent to it. If the status of a Firehose stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it. If the status is DELETING_FAILED, you can force deletion by invoking DeleteDeliveryStream again but with DeleteDeliveryStreamInput$AllowForceDelete set to true."]
 module DescribeDeliveryStreamInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
-        [@ocaml.doc "The name of the delivery stream."];
+        [@ocaml.doc "The name of the Firehose stream."];
       limit: DescribeDeliveryStreamInputLimit.t option
         [@ocaml.doc
-          "The limit on the number of destinations to return. You can have one destination per delivery stream."];
+          "The limit on the number of destinations to return. You can have one destination per Firehose stream."];
       exclusiveStartDestinationId: DestinationId.t option
         [@ocaml.doc
-          "The ID of the destination to start returning the destination information. Kinesis Data Firehose supports one destination per delivery stream."]}
+          "The ID of the destination to start returning the destination information. Firehose supports one destination per Firehose stream."]}
     let context_ = "DescribeDeliveryStreamInput"
     let make ?limit =
       fun ?exclusiveStartDestinationId ->
@@ -8950,17 +13785,17 @@ module DescribeDeliveryStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ?exclusiveStartDestinationId ?limit ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exclusiveStartDestinationId =
-        field_map json "ExclusiveStartDestinationId" DestinationId.of_json in
+        field_map json__ "ExclusiveStartDestinationId" DestinationId.of_json in
       let limit =
-        field_map json "Limit" DescribeDeliveryStreamInputLimit.of_json in
+        field_map json__ "Limit" DescribeDeliveryStreamInputLimit.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
       make ?exclusiveStartDestinationId ?limit ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the specified delivery stream and its status. For example, after your delivery stream is created, call DescribeDeliveryStream to see whether the delivery stream is ACTIVE and therefore ready for data to be sent to it. If the status of a delivery stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it. If the status is DELETING_FAILED, you can force deletion by invoking DeleteDeliveryStream again but with DeleteDeliveryStreamInput$AllowForceDelete set to true."]
+       "Describes the specified Firehose stream and its status. For example, after your Firehose stream is created, call DescribeDeliveryStream to see whether the Firehose stream is ACTIVE and therefore ready for data to be sent to it. If the status of a Firehose stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it. If the status is DELETING_FAILED, you can force deletion by invoking DeleteDeliveryStream again but with DeleteDeliveryStreamInput$AllowForceDelete set to true."]
 module DeleteDeliveryStreamOutput =
   struct
     type nonrec t = unit
@@ -9009,16 +13844,16 @@ module DeleteDeliveryStreamOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a delivery stream and its data. To check the state of a delivery stream, use DescribeDeliveryStream. You can delete a delivery stream only if it is in one of the following states: ACTIVE, DELETING, CREATING_FAILED, or DELETING_FAILED. You can't delete a delivery stream that is in the CREATING state. While the deletion request is in process, the delivery stream is in the DELETING state. While the delivery stream is in the DELETING state, the service might continue to accept records, but it doesn't make any guarantees with respect to delivering the data. Therefore, as a best practice, first stop any applications that are sending records before you delete a delivery stream."]
+       "Deletes a Firehose stream and its data. You can delete a Firehose stream only if it is in one of the following states: ACTIVE, DELETING, CREATING_FAILED, or DELETING_FAILED. You can't delete a Firehose stream that is in the CREATING state. To check the state of a Firehose stream, use DescribeDeliveryStream. DeleteDeliveryStream is an asynchronous API. When an API request to DeleteDeliveryStream succeeds, the Firehose stream is marked for deletion, and it goes into the DELETING state.While the Firehose stream is in the DELETING state, the service might continue to accept records, but it doesn't make any guarantees with respect to delivering the data. Therefore, as a best practice, first stop any applications that are sending records before you delete a Firehose stream. Removal of a Firehose stream that is in the DELETING state is a low priority operation for the service. A stream may remain in the DELETING state for several minutes. Therefore, as a best practice, applications should not wait for streams in the DELETING state to be removed."]
 module DeleteDeliveryStreamInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
-        [@ocaml.doc "The name of the delivery stream."];
+        [@ocaml.doc "The name of the Firehose stream."];
       allowForceDelete: BooleanObject.t option
         [@ocaml.doc
-          "Set this to true if you want to delete the delivery stream even if Kinesis Data Firehose is unable to retire the grant for the CMK. Kinesis Data Firehose might be unable to retire the grant due to a customer error, such as when the CMK or the grant are in an invalid state. If you force deletion, you can then use the RevokeGrant operation to revoke the grant you gave to Kinesis Data Firehose. If a failure to retire the grant happens due to an AWS KMS issue, Kinesis Data Firehose keeps retrying the delete operation. The default value is false."]}
+          "Set this to true if you want to delete the Firehose stream even if Firehose is unable to retire the grant for the CMK. Firehose might be unable to retire the grant due to a customer error, such as when the CMK or the grant are in an invalid state. If you force deletion, you can then use the RevokeGrant operation to revoke the grant you gave to Firehose. If a failure to retire the grant happens due to an Amazon Web Services KMS issue, Firehose keeps retrying the delete operation. The default value is false."]}
     let context_ = "DeleteDeliveryStreamInput"
     let make ?allowForceDelete =
       fun ~deliveryStreamName ->
@@ -9039,21 +13874,21 @@ module DeleteDeliveryStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ?allowForceDelete ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowForceDelete =
-        field_map json "AllowForceDelete" BooleanObject.of_json in
+        field_map json__ "AllowForceDelete" BooleanObject.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
       make ?allowForceDelete ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a delivery stream and its data. To check the state of a delivery stream, use DescribeDeliveryStream. You can delete a delivery stream only if it is in one of the following states: ACTIVE, DELETING, CREATING_FAILED, or DELETING_FAILED. You can't delete a delivery stream that is in the CREATING state. While the deletion request is in process, the delivery stream is in the DELETING state. While the delivery stream is in the DELETING state, the service might continue to accept records, but it doesn't make any guarantees with respect to delivering the data. Therefore, as a best practice, first stop any applications that are sending records before you delete a delivery stream."]
+       "Deletes a Firehose stream and its data. You can delete a Firehose stream only if it is in one of the following states: ACTIVE, DELETING, CREATING_FAILED, or DELETING_FAILED. You can't delete a Firehose stream that is in the CREATING state. To check the state of a Firehose stream, use DescribeDeliveryStream. DeleteDeliveryStream is an asynchronous API. When an API request to DeleteDeliveryStream succeeds, the Firehose stream is marked for deletion, and it goes into the DELETING state.While the Firehose stream is in the DELETING state, the service might continue to accept records, but it doesn't make any guarantees with respect to delivering the data. Therefore, as a best practice, first stop any applications that are sending records before you delete a Firehose stream. Removal of a Firehose stream that is in the DELETING state is a low priority operation for the service. A stream may remain in the DELETING state for several minutes. Therefore, as a best practice, applications should not wait for streams in the DELETING state to be removed."]
 module CreateDeliveryStreamOutput =
   struct
     type nonrec t =
       {
       deliveryStreamARN: DeliveryStreamARN.t option
-        [@ocaml.doc "The ARN of the delivery stream."]}
+        [@ocaml.doc "The ARN of the Firehose stream."]}
     type nonrec error =
       [ `InvalidArgumentException of InvalidArgumentException.t 
       | `InvalidKMSResourceException of InvalidKMSResourceException.t 
@@ -9122,27 +13957,30 @@ module CreateDeliveryStreamOutput =
           (Xml.child xml_arg0 "DeliveryStreamARN") in
       make ?deliveryStreamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryStreamARN =
-        field_map json "DeliveryStreamARN" DeliveryStreamARN.of_json in
+        field_map json__ "DeliveryStreamARN" DeliveryStreamARN.of_json in
       make ?deliveryStreamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a Kinesis Data Firehose delivery stream. By default, you can create up to 50 delivery streams per AWS Region. This is an asynchronous operation that immediately returns. The initial status of the delivery stream is CREATING. After the delivery stream is created, its status is ACTIVE and it now accepts data. If the delivery stream creation fails, the status transitions to CREATING_FAILED. Attempts to send data to a delivery stream that is not in the ACTIVE state cause an exception. To check the state of a delivery stream, use DescribeDeliveryStream. If the status of a delivery stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it. A Kinesis Data Firehose delivery stream can be configured to receive records directly from providers using PutRecord or PutRecordBatch, or it can be configured to use an existing Kinesis stream as its source. To specify a Kinesis data stream as input, set the DeliveryStreamType parameter to KinesisStreamAsSource, and provide the Kinesis stream Amazon Resource Name (ARN) and role ARN in the KinesisStreamSourceConfiguration parameter. To create a delivery stream with server-side encryption (SSE) enabled, include DeliveryStreamEncryptionConfigurationInput in your request. This is optional. You can also invoke StartDeliveryStreamEncryption to turn on SSE for an existing delivery stream that doesn't have SSE enabled. A delivery stream is configured with a single destination: Amazon S3, Amazon ES, Amazon Redshift, or Splunk. You must specify only one of the following destination configuration parameters: ExtendedS3DestinationConfiguration, S3DestinationConfiguration, ElasticsearchDestinationConfiguration, RedshiftDestinationConfiguration, or SplunkDestinationConfiguration. When you specify S3DestinationConfiguration, you can also provide the following optional values: BufferingHints, EncryptionConfiguration, and CompressionFormat. By default, if no BufferingHints value is provided, Kinesis Data Firehose buffers data up to 5 MB or for 5 minutes, whichever condition is satisfied first. BufferingHints is a hint, so there are some cases where the service cannot adhere to these conditions strictly. For example, record boundaries might be such that the size is a little over or under the configured buffering size. By default, no encryption is performed. We strongly recommend that you enable encryption to ensure secure data storage in Amazon S3. A few notes about Amazon Redshift as a destination: An Amazon Redshift destination requires an S3 bucket as intermediate location. Kinesis Data Firehose first delivers data to Amazon S3 and then uses COPY syntax to load data into an Amazon Redshift table. This is specified in the RedshiftDestinationConfiguration.S3Configuration parameter. The compression formats SNAPPY or ZIP cannot be specified in RedshiftDestinationConfiguration.S3Configuration because the Amazon Redshift COPY operation that reads from the S3 bucket doesn't support these compression formats. We strongly recommend that you use the user name and password you provide exclusively with Kinesis Data Firehose, and that the permissions for the account are restricted for Amazon Redshift INSERT permissions. Kinesis Data Firehose assumes the IAM role that is configured as part of the destination. The role should allow the Kinesis Data Firehose principal to assume the role, and the role should have permissions that allow the service to deliver the data. For more information, see Grant Kinesis Data Firehose Access to an Amazon S3 Destination in the Amazon Kinesis Data Firehose Developer Guide."]
+       "Creates a Firehose stream. By default, you can create up to 5,000 Firehose streams per Amazon Web Services Region. This is an asynchronous operation that immediately returns. The initial status of the Firehose stream is CREATING. After the Firehose stream is created, its status is ACTIVE and it now accepts data. If the Firehose stream creation fails, the status transitions to CREATING_FAILED. Attempts to send data to a delivery stream that is not in the ACTIVE state cause an exception. To check the state of a Firehose stream, use DescribeDeliveryStream. If the status of a Firehose stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it. A Firehose stream can be configured to receive records directly from providers using PutRecord or PutRecordBatch, or it can be configured to use an existing Kinesis stream as its source. To specify a Kinesis data stream as input, set the DeliveryStreamType parameter to KinesisStreamAsSource, and provide the Kinesis stream Amazon Resource Name (ARN) and role ARN in the KinesisStreamSourceConfiguration parameter. To create a Firehose stream with server-side encryption (SSE) enabled, include DeliveryStreamEncryptionConfigurationInput in your request. This is optional. You can also invoke StartDeliveryStreamEncryption to turn on SSE for an existing Firehose stream that doesn't have SSE enabled. A Firehose stream is configured with a single destination, such as Amazon Simple Storage Service (Amazon S3), Amazon Redshift, Amazon OpenSearch Service, Amazon OpenSearch Serverless, Splunk, and any custom HTTP endpoint or HTTP endpoints owned by or supported by third-party service providers, including Datadog, Dynatrace, LogicMonitor, MongoDB, New Relic, and Sumo Logic. You must specify only one of the following destination configuration parameters: ExtendedS3DestinationConfiguration, S3DestinationConfiguration, ElasticsearchDestinationConfiguration, RedshiftDestinationConfiguration, or SplunkDestinationConfiguration. When you specify S3DestinationConfiguration, you can also provide the following optional values: BufferingHints, EncryptionConfiguration, and CompressionFormat. By default, if no BufferingHints value is provided, Firehose buffers data up to 5 MB or for 5 minutes, whichever condition is satisfied first. BufferingHints is a hint, so there are some cases where the service cannot adhere to these conditions strictly. For example, record boundaries might be such that the size is a little over or under the configured buffering size. By default, no encryption is performed. We strongly recommend that you enable encryption to ensure secure data storage in Amazon S3. A few notes about Amazon Redshift as a destination: An Amazon Redshift destination requires an S3 bucket as intermediate location. Firehose first delivers data to Amazon S3 and then uses COPY syntax to load data into an Amazon Redshift table. This is specified in the RedshiftDestinationConfiguration.S3Configuration parameter. The compression formats SNAPPY or ZIP cannot be specified in RedshiftDestinationConfiguration.S3Configuration because the Amazon Redshift COPY operation that reads from the S3 bucket doesn't support these compression formats. We strongly recommend that you use the user name and password you provide exclusively with Firehose, and that the permissions for the account are restricted for Amazon Redshift INSERT permissions. Firehose assumes the IAM role that is configured as part of the destination. The role should allow the Firehose principal to assume the role, and the role should have permissions that allow the service to deliver the data. For more information, see Grant Firehose Access to an Amazon S3 Destination in the Amazon Firehose Developer Guide."]
 module CreateDeliveryStreamInput =
   struct
     type nonrec t =
       {
       deliveryStreamName: DeliveryStreamName.t
         [@ocaml.doc
-          "The name of the delivery stream. This name must be unique per AWS account in the same AWS Region. If the delivery streams are in different accounts or different Regions, you can have multiple delivery streams with the same name."];
+          "The name of the Firehose stream. This name must be unique per Amazon Web Services account in the same Amazon Web Services Region. If the Firehose streams are in different accounts or different Regions, you can have multiple Firehose streams with the same name."];
       deliveryStreamType: DeliveryStreamType.t option
         [@ocaml.doc
-          "The delivery stream type. This parameter can be one of the following values: DirectPut: Provider applications access the delivery stream directly. KinesisStreamAsSource: The delivery stream uses a Kinesis data stream as a source."];
+          "The Firehose stream type. This parameter can be one of the following values: DirectPut: Provider applications access the Firehose stream directly. KinesisStreamAsSource: The Firehose stream uses a Kinesis data stream as a source."];
+      directPutSourceConfiguration: DirectPutSourceConfiguration.t option
+        [@ocaml.doc
+          "The structure that configures parameters such as ThroughputHintInMBs for a stream configured with Direct PUT as a source."];
       kinesisStreamSourceConfiguration:
         KinesisStreamSourceConfiguration.t option
         [@ocaml.doc
-          "When a Kinesis data stream is used as the source for the delivery stream, a KinesisStreamSourceConfiguration containing the Kinesis data stream Amazon Resource Name (ARN) and the role ARN for the source stream."];
+          "When a Kinesis data stream is used as the source for the Firehose stream, a KinesisStreamSourceConfiguration containing the Kinesis data stream Amazon Resource Name (ARN) and the role ARN for the source stream."];
       deliveryStreamEncryptionConfigurationInput:
         DeliveryStreamEncryptionConfigurationInput.t option
         [@ocaml.doc
@@ -9161,9 +13999,11 @@ module CreateDeliveryStreamInput =
       elasticsearchDestinationConfiguration:
         ElasticsearchDestinationConfiguration.t option
         [@ocaml.doc
-          "The destination in Amazon ES. You can specify only one destination."];
+          "The destination in Amazon OpenSearch Service. You can specify only one destination."];
       amazonopensearchserviceDestinationConfiguration:
-        AmazonopensearchserviceDestinationConfiguration.t option ;
+        AmazonopensearchserviceDestinationConfiguration.t option
+        [@ocaml.doc
+          "The destination in Amazon OpenSearch Service. You can specify only one destination."];
       splunkDestinationConfiguration: SplunkDestinationConfiguration.t option
         [@ocaml.doc
           "The destination in Splunk. You can specify only one destination."];
@@ -9173,41 +14013,72 @@ module CreateDeliveryStreamInput =
           "Enables configuring Kinesis Firehose to deliver data to any HTTP endpoint destination. You can specify only one destination."];
       tags: TagDeliveryStreamInputTagList.t option
         [@ocaml.doc
-          "A set of tags to assign to the delivery stream. A tag is a key-value pair that you can define and assign to AWS resources. Tags are metadata. For example, you can add friendly names and descriptions or other types of information that can help you distinguish the delivery stream. For more information about tags, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide. You can specify up to 50 tags when creating a delivery stream."]}
+          "A set of tags to assign to the Firehose stream. A tag is a key-value pair that you can define and assign to Amazon Web Services resources. Tags are metadata. For example, you can add friendly names and descriptions or other types of information that can help you distinguish the Firehose stream. For more information about tags, see Using Cost Allocation Tags in the Amazon Web Services Billing and Cost Management User Guide. You can specify up to 50 tags when creating a Firehose stream. If you specify tags in the CreateDeliveryStream action, Amazon Data Firehose performs an additional authorization on the firehose:TagDeliveryStream action to verify if users have permissions to create tags. If you do not provide this permission, requests to create new Firehose streams with IAM resource tags will fail with an AccessDeniedException such as following. AccessDeniedException User: arn:aws:sts::x:assumed-role/x/x is not authorized to perform: firehose:TagDeliveryStream on resource: arn:aws:firehose:us-east-1:x:deliverystream/x with an explicit deny in an identity-based policy. For an example IAM policy, see Tag example."];
+      amazonOpenSearchServerlessDestinationConfiguration:
+        AmazonOpenSearchServerlessDestinationConfiguration.t option
+        [@ocaml.doc
+          "The destination in the Serverless offering for Amazon OpenSearch Service. You can specify only one destination."];
+      mSKSourceConfiguration: MSKSourceConfiguration.t option ;
+      snowflakeDestinationConfiguration:
+        SnowflakeDestinationConfiguration.t option
+        [@ocaml.doc "Configure Snowflake destination"];
+      icebergDestinationConfiguration:
+        IcebergDestinationConfiguration.t option
+        [@ocaml.doc "Configure Apache Iceberg Tables destination."];
+      databaseSourceConfiguration: DatabaseSourceConfiguration.t option
+        [@ocaml.doc
+          "The top level object for configuring streams with database as a source. Amazon Data Firehose is in preview release and is subject to change."]}
     let context_ = "CreateDeliveryStreamInput"
     let make ?deliveryStreamType =
-      fun ?kinesisStreamSourceConfiguration ->
-        fun ?deliveryStreamEncryptionConfigurationInput ->
-          fun ?s3DestinationConfiguration ->
-            fun ?extendedS3DestinationConfiguration ->
-              fun ?redshiftDestinationConfiguration ->
-                fun ?elasticsearchDestinationConfiguration ->
-                  fun ?amazonopensearchserviceDestinationConfiguration ->
-                    fun ?splunkDestinationConfiguration ->
-                      fun ?httpEndpointDestinationConfiguration ->
-                        fun ?tags ->
-                          fun ~deliveryStreamName ->
-                            fun () ->
-                              {
-                                deliveryStreamType;
-                                kinesisStreamSourceConfiguration;
-                                deliveryStreamEncryptionConfigurationInput;
-                                s3DestinationConfiguration;
-                                extendedS3DestinationConfiguration;
-                                redshiftDestinationConfiguration;
-                                elasticsearchDestinationConfiguration;
-                                amazonopensearchserviceDestinationConfiguration;
-                                splunkDestinationConfiguration;
-                                httpEndpointDestinationConfiguration;
-                                tags;
-                                deliveryStreamName
-                              }
+      fun ?directPutSourceConfiguration ->
+        fun ?kinesisStreamSourceConfiguration ->
+          fun ?deliveryStreamEncryptionConfigurationInput ->
+            fun ?s3DestinationConfiguration ->
+              fun ?extendedS3DestinationConfiguration ->
+                fun ?redshiftDestinationConfiguration ->
+                  fun ?elasticsearchDestinationConfiguration ->
+                    fun ?amazonopensearchserviceDestinationConfiguration ->
+                      fun ?splunkDestinationConfiguration ->
+                        fun ?httpEndpointDestinationConfiguration ->
+                          fun ?tags ->
+                            fun
+                              ?amazonOpenSearchServerlessDestinationConfiguration
+                              ->
+                              fun ?mSKSourceConfiguration ->
+                                fun ?snowflakeDestinationConfiguration ->
+                                  fun ?icebergDestinationConfiguration ->
+                                    fun ?databaseSourceConfiguration ->
+                                      fun ~deliveryStreamName ->
+                                        fun () ->
+                                          {
+                                            deliveryStreamType;
+                                            directPutSourceConfiguration;
+                                            kinesisStreamSourceConfiguration;
+                                            deliveryStreamEncryptionConfigurationInput;
+                                            s3DestinationConfiguration;
+                                            extendedS3DestinationConfiguration;
+                                            redshiftDestinationConfiguration;
+                                            elasticsearchDestinationConfiguration;
+                                            amazonopensearchserviceDestinationConfiguration;
+                                            splunkDestinationConfiguration;
+                                            httpEndpointDestinationConfiguration;
+                                            tags;
+                                            amazonOpenSearchServerlessDestinationConfiguration;
+                                            mSKSourceConfiguration;
+                                            snowflakeDestinationConfiguration;
+                                            icebergDestinationConfiguration;
+                                            databaseSourceConfiguration;
+                                            deliveryStreamName
+                                          }
     let to_value x =
       structure_to_value
         [("DeliveryStreamName",
            (Some (DeliveryStreamName.to_value x.deliveryStreamName)));
         ("DeliveryStreamType",
           (Option.map x.deliveryStreamType ~f:DeliveryStreamType.to_value));
+        ("DirectPutSourceConfiguration",
+          (Option.map x.directPutSourceConfiguration
+             ~f:DirectPutSourceConfiguration.to_value));
         ("KinesisStreamSourceConfiguration",
           (Option.map x.kinesisStreamSourceConfiguration
              ~f:KinesisStreamSourceConfiguration.to_value));
@@ -9236,9 +14107,41 @@ module CreateDeliveryStreamInput =
           (Option.map x.httpEndpointDestinationConfiguration
              ~f:HttpEndpointDestinationConfiguration.to_value));
         ("Tags",
-          (Option.map x.tags ~f:TagDeliveryStreamInputTagList.to_value))]
+          (Option.map x.tags ~f:TagDeliveryStreamInputTagList.to_value));
+        ("AmazonOpenSearchServerlessDestinationConfiguration",
+          (Option.map x.amazonOpenSearchServerlessDestinationConfiguration
+             ~f:AmazonOpenSearchServerlessDestinationConfiguration.to_value));
+        ("MSKSourceConfiguration",
+          (Option.map x.mSKSourceConfiguration
+             ~f:MSKSourceConfiguration.to_value));
+        ("SnowflakeDestinationConfiguration",
+          (Option.map x.snowflakeDestinationConfiguration
+             ~f:SnowflakeDestinationConfiguration.to_value));
+        ("IcebergDestinationConfiguration",
+          (Option.map x.icebergDestinationConfiguration
+             ~f:IcebergDestinationConfiguration.to_value));
+        ("DatabaseSourceConfiguration",
+          (Option.map x.databaseSourceConfiguration
+             ~f:DatabaseSourceConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let databaseSourceConfiguration =
+        (Option.map ~f:DatabaseSourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "DatabaseSourceConfiguration") in
+      let icebergDestinationConfiguration =
+        (Option.map ~f:IcebergDestinationConfiguration.of_xml)
+          (Xml.child xml_arg0 "IcebergDestinationConfiguration") in
+      let snowflakeDestinationConfiguration =
+        (Option.map ~f:SnowflakeDestinationConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnowflakeDestinationConfiguration") in
+      let mSKSourceConfiguration =
+        (Option.map ~f:MSKSourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "MSKSourceConfiguration") in
+      let amazonOpenSearchServerlessDestinationConfiguration =
+        (Option.map
+           ~f:AmazonOpenSearchServerlessDestinationConfiguration.of_xml)
+          (Xml.child xml_arg0
+             "AmazonOpenSearchServerlessDestinationConfiguration") in
       let tags =
         (Option.map ~f:TagDeliveryStreamInputTagList.of_xml)
           (Xml.child xml_arg0 "Tags") in
@@ -9270,64 +14173,90 @@ module CreateDeliveryStreamInput =
       let kinesisStreamSourceConfiguration =
         (Option.map ~f:KinesisStreamSourceConfiguration.of_xml)
           (Xml.child xml_arg0 "KinesisStreamSourceConfiguration") in
+      let directPutSourceConfiguration =
+        (Option.map ~f:DirectPutSourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "DirectPutSourceConfiguration") in
       let deliveryStreamType =
         (Option.map ~f:DeliveryStreamType.of_xml)
           (Xml.child xml_arg0 "DeliveryStreamType") in
       let deliveryStreamName =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
-      make ?tags ?httpEndpointDestinationConfiguration
-        ?splunkDestinationConfiguration
+      make ?databaseSourceConfiguration ?icebergDestinationConfiguration
+        ?snowflakeDestinationConfiguration ?mSKSourceConfiguration
+        ?amazonOpenSearchServerlessDestinationConfiguration ?tags
+        ?httpEndpointDestinationConfiguration ?splunkDestinationConfiguration
         ?amazonopensearchserviceDestinationConfiguration
         ?elasticsearchDestinationConfiguration
         ?redshiftDestinationConfiguration ?extendedS3DestinationConfiguration
         ?s3DestinationConfiguration
         ?deliveryStreamEncryptionConfigurationInput
-        ?kinesisStreamSourceConfiguration ?deliveryStreamType
-        ~deliveryStreamName ()
+        ?kinesisStreamSourceConfiguration ?directPutSourceConfiguration
+        ?deliveryStreamType ~deliveryStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagDeliveryStreamInputTagList.of_json in
+    let of_json json__ =
+      let databaseSourceConfiguration =
+        field_map json__ "DatabaseSourceConfiguration"
+          DatabaseSourceConfiguration.of_json in
+      let icebergDestinationConfiguration =
+        field_map json__ "IcebergDestinationConfiguration"
+          IcebergDestinationConfiguration.of_json in
+      let snowflakeDestinationConfiguration =
+        field_map json__ "SnowflakeDestinationConfiguration"
+          SnowflakeDestinationConfiguration.of_json in
+      let mSKSourceConfiguration =
+        field_map json__ "MSKSourceConfiguration"
+          MSKSourceConfiguration.of_json in
+      let amazonOpenSearchServerlessDestinationConfiguration =
+        field_map json__ "AmazonOpenSearchServerlessDestinationConfiguration"
+          AmazonOpenSearchServerlessDestinationConfiguration.of_json in
+      let tags =
+        field_map json__ "Tags" TagDeliveryStreamInputTagList.of_json in
       let httpEndpointDestinationConfiguration =
-        field_map json "HttpEndpointDestinationConfiguration"
+        field_map json__ "HttpEndpointDestinationConfiguration"
           HttpEndpointDestinationConfiguration.of_json in
       let splunkDestinationConfiguration =
-        field_map json "SplunkDestinationConfiguration"
+        field_map json__ "SplunkDestinationConfiguration"
           SplunkDestinationConfiguration.of_json in
       let amazonopensearchserviceDestinationConfiguration =
-        field_map json "AmazonopensearchserviceDestinationConfiguration"
+        field_map json__ "AmazonopensearchserviceDestinationConfiguration"
           AmazonopensearchserviceDestinationConfiguration.of_json in
       let elasticsearchDestinationConfiguration =
-        field_map json "ElasticsearchDestinationConfiguration"
+        field_map json__ "ElasticsearchDestinationConfiguration"
           ElasticsearchDestinationConfiguration.of_json in
       let redshiftDestinationConfiguration =
-        field_map json "RedshiftDestinationConfiguration"
+        field_map json__ "RedshiftDestinationConfiguration"
           RedshiftDestinationConfiguration.of_json in
       let extendedS3DestinationConfiguration =
-        field_map json "ExtendedS3DestinationConfiguration"
+        field_map json__ "ExtendedS3DestinationConfiguration"
           ExtendedS3DestinationConfiguration.of_json in
       let s3DestinationConfiguration =
-        field_map json "S3DestinationConfiguration"
+        field_map json__ "S3DestinationConfiguration"
           S3DestinationConfiguration.of_json in
       let deliveryStreamEncryptionConfigurationInput =
-        field_map json "DeliveryStreamEncryptionConfigurationInput"
+        field_map json__ "DeliveryStreamEncryptionConfigurationInput"
           DeliveryStreamEncryptionConfigurationInput.of_json in
       let kinesisStreamSourceConfiguration =
-        field_map json "KinesisStreamSourceConfiguration"
+        field_map json__ "KinesisStreamSourceConfiguration"
           KinesisStreamSourceConfiguration.of_json in
+      let directPutSourceConfiguration =
+        field_map json__ "DirectPutSourceConfiguration"
+          DirectPutSourceConfiguration.of_json in
       let deliveryStreamType =
-        field_map json "DeliveryStreamType" DeliveryStreamType.of_json in
+        field_map json__ "DeliveryStreamType" DeliveryStreamType.of_json in
       let deliveryStreamName =
-        field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
-      make ?tags ?httpEndpointDestinationConfiguration
-        ?splunkDestinationConfiguration
+        field_map_exn json__ "DeliveryStreamName" DeliveryStreamName.of_json in
+      make ?databaseSourceConfiguration ?icebergDestinationConfiguration
+        ?snowflakeDestinationConfiguration ?mSKSourceConfiguration
+        ?amazonOpenSearchServerlessDestinationConfiguration ?tags
+        ?httpEndpointDestinationConfiguration ?splunkDestinationConfiguration
         ?amazonopensearchserviceDestinationConfiguration
         ?elasticsearchDestinationConfiguration
         ?redshiftDestinationConfiguration ?extendedS3DestinationConfiguration
         ?s3DestinationConfiguration
         ?deliveryStreamEncryptionConfigurationInput
-        ?kinesisStreamSourceConfiguration ?deliveryStreamType
-        ~deliveryStreamName ()
+        ?kinesisStreamSourceConfiguration ?directPutSourceConfiguration
+        ?deliveryStreamType ~deliveryStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a Kinesis Data Firehose delivery stream. By default, you can create up to 50 delivery streams per AWS Region. This is an asynchronous operation that immediately returns. The initial status of the delivery stream is CREATING. After the delivery stream is created, its status is ACTIVE and it now accepts data. If the delivery stream creation fails, the status transitions to CREATING_FAILED. Attempts to send data to a delivery stream that is not in the ACTIVE state cause an exception. To check the state of a delivery stream, use DescribeDeliveryStream. If the status of a delivery stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it. A Kinesis Data Firehose delivery stream can be configured to receive records directly from providers using PutRecord or PutRecordBatch, or it can be configured to use an existing Kinesis stream as its source. To specify a Kinesis data stream as input, set the DeliveryStreamType parameter to KinesisStreamAsSource, and provide the Kinesis stream Amazon Resource Name (ARN) and role ARN in the KinesisStreamSourceConfiguration parameter. To create a delivery stream with server-side encryption (SSE) enabled, include DeliveryStreamEncryptionConfigurationInput in your request. This is optional. You can also invoke StartDeliveryStreamEncryption to turn on SSE for an existing delivery stream that doesn't have SSE enabled. A delivery stream is configured with a single destination: Amazon S3, Amazon ES, Amazon Redshift, or Splunk. You must specify only one of the following destination configuration parameters: ExtendedS3DestinationConfiguration, S3DestinationConfiguration, ElasticsearchDestinationConfiguration, RedshiftDestinationConfiguration, or SplunkDestinationConfiguration. When you specify S3DestinationConfiguration, you can also provide the following optional values: BufferingHints, EncryptionConfiguration, and CompressionFormat. By default, if no BufferingHints value is provided, Kinesis Data Firehose buffers data up to 5 MB or for 5 minutes, whichever condition is satisfied first. BufferingHints is a hint, so there are some cases where the service cannot adhere to these conditions strictly. For example, record boundaries might be such that the size is a little over or under the configured buffering size. By default, no encryption is performed. We strongly recommend that you enable encryption to ensure secure data storage in Amazon S3. A few notes about Amazon Redshift as a destination: An Amazon Redshift destination requires an S3 bucket as intermediate location. Kinesis Data Firehose first delivers data to Amazon S3 and then uses COPY syntax to load data into an Amazon Redshift table. This is specified in the RedshiftDestinationConfiguration.S3Configuration parameter. The compression formats SNAPPY or ZIP cannot be specified in RedshiftDestinationConfiguration.S3Configuration because the Amazon Redshift COPY operation that reads from the S3 bucket doesn't support these compression formats. We strongly recommend that you use the user name and password you provide exclusively with Kinesis Data Firehose, and that the permissions for the account are restricted for Amazon Redshift INSERT permissions. Kinesis Data Firehose assumes the IAM role that is configured as part of the destination. The role should allow the Kinesis Data Firehose principal to assume the role, and the role should have permissions that allow the service to deliver the data. For more information, see Grant Kinesis Data Firehose Access to an Amazon S3 Destination in the Amazon Kinesis Data Firehose Developer Guide."]
+       "Creates a Firehose stream. By default, you can create up to 5,000 Firehose streams per Amazon Web Services Region. This is an asynchronous operation that immediately returns. The initial status of the Firehose stream is CREATING. After the Firehose stream is created, its status is ACTIVE and it now accepts data. If the Firehose stream creation fails, the status transitions to CREATING_FAILED. Attempts to send data to a delivery stream that is not in the ACTIVE state cause an exception. To check the state of a Firehose stream, use DescribeDeliveryStream. If the status of a Firehose stream is CREATING_FAILED, this status doesn't change, and you can't invoke CreateDeliveryStream again on it. However, you can invoke the DeleteDeliveryStream operation to delete it. A Firehose stream can be configured to receive records directly from providers using PutRecord or PutRecordBatch, or it can be configured to use an existing Kinesis stream as its source. To specify a Kinesis data stream as input, set the DeliveryStreamType parameter to KinesisStreamAsSource, and provide the Kinesis stream Amazon Resource Name (ARN) and role ARN in the KinesisStreamSourceConfiguration parameter. To create a Firehose stream with server-side encryption (SSE) enabled, include DeliveryStreamEncryptionConfigurationInput in your request. This is optional. You can also invoke StartDeliveryStreamEncryption to turn on SSE for an existing Firehose stream that doesn't have SSE enabled. A Firehose stream is configured with a single destination, such as Amazon Simple Storage Service (Amazon S3), Amazon Redshift, Amazon OpenSearch Service, Amazon OpenSearch Serverless, Splunk, and any custom HTTP endpoint or HTTP endpoints owned by or supported by third-party service providers, including Datadog, Dynatrace, LogicMonitor, MongoDB, New Relic, and Sumo Logic. You must specify only one of the following destination configuration parameters: ExtendedS3DestinationConfiguration, S3DestinationConfiguration, ElasticsearchDestinationConfiguration, RedshiftDestinationConfiguration, or SplunkDestinationConfiguration. When you specify S3DestinationConfiguration, you can also provide the following optional values: BufferingHints, EncryptionConfiguration, and CompressionFormat. By default, if no BufferingHints value is provided, Firehose buffers data up to 5 MB or for 5 minutes, whichever condition is satisfied first. BufferingHints is a hint, so there are some cases where the service cannot adhere to these conditions strictly. For example, record boundaries might be such that the size is a little over or under the configured buffering size. By default, no encryption is performed. We strongly recommend that you enable encryption to ensure secure data storage in Amazon S3. A few notes about Amazon Redshift as a destination: An Amazon Redshift destination requires an S3 bucket as intermediate location. Firehose first delivers data to Amazon S3 and then uses COPY syntax to load data into an Amazon Redshift table. This is specified in the RedshiftDestinationConfiguration.S3Configuration parameter. The compression formats SNAPPY or ZIP cannot be specified in RedshiftDestinationConfiguration.S3Configuration because the Amazon Redshift COPY operation that reads from the S3 bucket doesn't support these compression formats. We strongly recommend that you use the user name and password you provide exclusively with Firehose, and that the permissions for the account are restricted for Amazon Redshift INSERT permissions. Firehose assumes the IAM role that is configured as part of the destination. The role should allow the Firehose principal to assume the role, and the role should have permissions that allow the service to deliver the data. For more information, see Grant Firehose Access to an Amazon S3 Destination in the Amazon Firehose Developer Guide."]

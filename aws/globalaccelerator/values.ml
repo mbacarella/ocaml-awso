@@ -153,6 +153,9 @@ module Protocols =
   struct
     type nonrec t = Protocol.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Protocol.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -173,6 +176,25 @@ module Protocols =
       list_of_json ~kind:"Protocols" ~of_json:Protocol.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IpAddressFamily =
+  struct
+    type nonrec t =
+      | IPv4 
+      | IPv6 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | IPv4 -> "IPv4" | IPv6 -> "IPv6" | Non_static_id s -> s
+    let of_string =
+      function | "IPv4" -> IPv4 | "IPv6" -> IPv6 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IpAddressFamily" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpAddressFamily" j)
+    let to_json = simple_to_json to_value
+  end
 module IpAddresses =
   struct
     type nonrec t = IpAddress.t list
@@ -181,6 +203,9 @@ module IpAddresses =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -234,9 +259,9 @@ module PortRange =
         (Option.map ~f:PortNumber.of_xml) (Xml.child xml_arg0 "FromPort") in
       make ?toPort ?fromPort ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let toPort = field_map json "ToPort" PortNumber.of_json in
-      let fromPort = field_map json "FromPort" PortNumber.of_json in
+    let of_json json__ =
+      let toPort = field_map json__ "ToPort" PortNumber.of_json in
+      let fromPort = field_map json__ "FromPort" PortNumber.of_json in
       make ?toPort ?fromPort ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A complex type for a range of ports for a listener."]
@@ -249,14 +274,14 @@ module EndpointDescription =
           "An ID for the endpoint. If the endpoint is a Network Load Balancer or Application Load Balancer, this is the Amazon Resource Name (ARN) of the resource. If the endpoint is an Elastic IP address, this is the Elastic IP address allocation ID. For Amazon EC2 instances, this is the EC2 instance ID. An Application Load Balancer can be either internal or internet-facing."];
       weight: EndpointWeight.t option
         [@ocaml.doc
-          "The weight associated with the endpoint. When you add weights to endpoints, you configure AWS Global Accelerator to route traffic based on proportions that you specify. For example, you might specify endpoint weights of 4, 5, 5, and 6 (sum=20). The result is that 4/20 of your traffic, on average, is routed to the first endpoint, 5/20 is routed both to the second and third endpoints, and 6/20 is routed to the last endpoint. For more information, see Endpoint Weights in the AWS Global Accelerator Developer Guide."];
+          "The weight associated with the endpoint. When you add weights to endpoints, you configure Global Accelerator to route traffic based on proportions that you specify. For example, you might specify endpoint weights of 4, 5, 5, and 6 (sum=20). The result is that 4/20 of your traffic, on average, is routed to the first endpoint, 5/20 is routed both to the second and third endpoints, and 6/20 is routed to the last endpoint. For more information, see Endpoint weights in the Global Accelerator Developer Guide."];
       healthState: HealthState.t option
         [@ocaml.doc "The health status of the endpoint."];
       healthReason: GenericString.t option
         [@ocaml.doc "Returns a null result."];
       clientIPPreservationEnabled: GenericBoolean.t option
         [@ocaml.doc
-          "Indicates whether client IP address preservation is enabled for an Application Load Balancer endpoint. The value is true or false. The default value is true for new accelerators. If the value is set to true, the client's IP address is preserved in the X-Forwarded-For request header as traffic travels to applications on the Application Load Balancer endpoint fronted by the accelerator. For more information, see Viewing Client IP Addresses in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]}
+          "Indicates whether client IP address preservation is enabled for an endpoint. The value is true or false. The default value is true for Application Load Balancers endpoints. If the value is set to true, the client's IP address is preserved in the X-Forwarded-For request header as traffic travels to applications on the endpoint fronted by the accelerator. Client IP address preservation is supported, in specific Amazon Web Services Regions, for endpoints that are Application Load Balancers, Amazon EC2 instances, and Network Load Balancers with security groups. IMPORTANT: You cannot use client IP address preservation with Network Load Balancers with TLS listeners. For more information, see Preserve client IP addresses in Global Accelerator in the Global Accelerator Developer Guide."]}
     let make ?endpointId =
       fun ?weight ->
         fun ?healthState ->
@@ -298,13 +323,14 @@ module EndpointDescription =
       make ?clientIPPreservationEnabled ?healthReason ?healthState ?weight
         ?endpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientIPPreservationEnabled =
-        field_map json "ClientIPPreservationEnabled" GenericBoolean.of_json in
-      let healthReason = field_map json "HealthReason" GenericString.of_json in
-      let healthState = field_map json "HealthState" HealthState.of_json in
-      let weight = field_map json "Weight" EndpointWeight.of_json in
-      let endpointId = field_map json "EndpointId" GenericString.of_json in
+        field_map json__ "ClientIPPreservationEnabled" GenericBoolean.of_json in
+      let healthReason =
+        field_map json__ "HealthReason" GenericString.of_json in
+      let healthState = field_map json__ "HealthState" HealthState.of_json in
+      let weight = field_map json__ "Weight" EndpointWeight.of_json in
+      let endpointId = field_map json__ "EndpointId" GenericString.of_json in
       make ?clientIPPreservationEnabled ?healthReason ?healthState ?weight
         ?endpointId ()
     let to_json v = composed_to_json to_value v
@@ -334,13 +360,13 @@ module PortOverride =
         (Option.map ~f:PortNumber.of_xml) (Xml.child xml_arg0 "ListenerPort") in
       make ?endpointPort ?listenerPort ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointPort = field_map json "EndpointPort" PortNumber.of_json in
-      let listenerPort = field_map json "ListenerPort" PortNumber.of_json in
+    let of_json json__ =
+      let endpointPort = field_map json__ "EndpointPort" PortNumber.of_json in
+      let listenerPort = field_map json__ "ListenerPort" PortNumber.of_json in
       make ?endpointPort ?listenerPort ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Override specific listener ports used to route traffic to endpoints that are part of an endpoint group. For example, you can create a port override in which the listener receives user traffic on ports 80 and 443, but your accelerator routes that traffic to ports 1080 and 1443, respectively, on the endpoints. For more information, see Port overrides in the AWS Global Accelerator Developer Guide."]
+       "Override specific listener ports used to route traffic to endpoints that are part of an endpoint group. For example, you can create a port override in which the listener receives user traffic on ports 80 and 443, but your accelerator routes that traffic to ports 1080 and 1443, respectively, on the endpoints. For more information, see Overriding listener ports in the Global Accelerator Developer Guide."]
 module CustomRoutingProtocol =
   struct
     type nonrec t =
@@ -383,9 +409,9 @@ module SocketAddress =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "IpAddress") in
       make ?port ?ipAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map json "Port" PortNumber.of_json in
-      let ipAddress = field_map json "IpAddress" GenericString.of_json in
+    let of_json json__ =
+      let port = field_map json__ "Port" PortNumber.of_json in
+      let ipAddress = field_map json__ "IpAddress" GenericString.of_json in
       make ?port ?ipAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An IP address/port combination."]
@@ -420,10 +446,10 @@ module CustomRoutingDestinationDescription =
         (Option.map ~f:PortNumber.of_xml) (Xml.child xml_arg0 "FromPort") in
       make ?protocols ?toPort ?fromPort ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let protocols = field_map json "Protocols" Protocols.of_json in
-      let toPort = field_map json "ToPort" PortNumber.of_json in
-      let fromPort = field_map json "FromPort" PortNumber.of_json in
+    let of_json json__ =
+      let protocols = field_map json__ "Protocols" Protocols.of_json in
+      let toPort = field_map json__ "ToPort" PortNumber.of_json in
+      let fromPort = field_map json__ "FromPort" PortNumber.of_json in
       make ?protocols ?toPort ?fromPort ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -446,8 +472,8 @@ module CustomRoutingEndpointDescription =
           (Xml.child xml_arg0 "EndpointId") in
       make ?endpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointId = field_map json "EndpointId" GenericString.of_json in
+    let of_json json__ =
+      let endpointId = field_map json__ "EndpointId" GenericString.of_json in
       make ?endpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -457,41 +483,110 @@ module IpSet =
     type nonrec t =
       {
       ipFamily: GenericString.t option
-        [@ocaml.doc "The types of IP addresses included in this IP set."];
+        [@ocaml.doc
+          "IpFamily is deprecated and has been replaced by IpAddressFamily."];
       ipAddresses: IpAddresses.t option
         [@ocaml.doc
-          "The array of IP addresses in the IP address set. An IP address set can have a maximum of two IP addresses."]}
+          "The array of IP addresses in the IP address set. An IP address set can have a maximum of two IP addresses."];
+      ipAddressFamily: IpAddressFamily.t option
+        [@ocaml.doc "The types of IP addresses included in this IP set."]}
     let make ?ipFamily =
-      fun ?ipAddresses -> fun () -> { ipFamily; ipAddresses }
+      fun ?ipAddresses ->
+        fun ?ipAddressFamily ->
+          fun () -> { ipFamily; ipAddresses; ipAddressFamily }
     let to_value x =
       structure_to_value
         [("IpFamily", (Option.map x.ipFamily ~f:GenericString.to_value));
-        ("IpAddresses", (Option.map x.ipAddresses ~f:IpAddresses.to_value))]
+        ("IpAddresses", (Option.map x.ipAddresses ~f:IpAddresses.to_value));
+        ("IpAddressFamily",
+          (Option.map x.ipAddressFamily ~f:IpAddressFamily.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipAddressFamily =
+        (Option.map ~f:IpAddressFamily.of_xml)
+          (Xml.child xml_arg0 "IpAddressFamily") in
       let ipAddresses =
         (Option.map ~f:IpAddresses.of_xml) (Xml.child xml_arg0 "IpAddresses") in
       let ipFamily =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "IpFamily") in
-      make ?ipAddresses ?ipFamily ()
+      make ?ipAddressFamily ?ipAddresses ?ipFamily ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipAddresses = field_map json "IpAddresses" IpAddresses.of_json in
-      let ipFamily = field_map json "IpFamily" GenericString.of_json in
-      make ?ipAddresses ?ipFamily ()
+    let of_json json__ =
+      let ipAddressFamily =
+        field_map json__ "IpAddressFamily" IpAddressFamily.of_json in
+      let ipAddresses = field_map json__ "IpAddresses" IpAddresses.of_json in
+      let ipFamily = field_map json__ "IpFamily" GenericString.of_json in
+      make ?ipAddressFamily ?ipAddresses ?ipFamily ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type for the set of IP addresses for an accelerator."]
+module Principal =
+  struct
+    type nonrec t = string
+    let context_ = "Principal"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_pattern i ~pattern:"(^\\d{12}$|arn:.*)"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Principal" j
+    let to_json = simple_to_json to_value
+  end
+module Resource =
+  struct
+    type nonrec t =
+      {
+      endpointId: GenericString.t option
+        [@ocaml.doc
+          "The endpoint ID for the endpoint that is specified as a Amazon Web Services resource. An endpoint ID for the cross-account feature is the ARN of an Amazon Web Services resource, such as a Network Load Balancer, that Global Accelerator supports as an endpoint for an accelerator."];
+      cidr: GenericString.t option
+        [@ocaml.doc
+          "An IP address range, in CIDR format, that is specified as resource. The address must be provisioned and advertised in Global Accelerator by following the bring your own IP address (BYOIP) process for Global Accelerator For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."];
+      region: GenericString.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region where a shared endpoint resource is located."]}
+    let make ?endpointId =
+      fun ?cidr -> fun ?region -> fun () -> { endpointId; cidr; region }
+    let to_value x =
+      structure_to_value
+        [("EndpointId", (Option.map x.endpointId ~f:GenericString.to_value));
+        ("Cidr", (Option.map x.cidr ~f:GenericString.to_value));
+        ("Region", (Option.map x.region ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let region =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Region") in
+      let cidr =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Cidr") in
+      let endpointId =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EndpointId") in
+      make ?region ?cidr ?endpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let region = field_map json__ "Region" GenericString.of_json in
+      let cidr = field_map json__ "Cidr" GenericString.of_json in
+      let endpointId = field_map json__ "EndpointId" GenericString.of_json in
+      make ?region ?cidr ?endpointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A resource is one of the following: the ARN for an Amazon Web Services resource that is supported by Global Accelerator to be added as an endpoint, or a CIDR range that specifies a bring your own IP (BYOIP) address pool."]
 module ByoipCidrEvent =
   struct
     type nonrec t =
       {
       message: GenericString.t option
         [@ocaml.doc
-          "A string that contains an Event message describing changes that you make in the status of an IP address range that you bring to AWS Global Accelerator through bring your own IP address (BYOIP)."];
+          "A string that contains an Event message describing changes that you make in the status of an IP address range that you bring to Global Accelerator through bring your own IP address (BYOIP)."];
       timestamp: Timestamp.t option
         [@ocaml.doc
-          "A timestamp when you make a status change for an IP address range that you bring to AWS Global Accelerator through bring your own IP address (BYOIP)."]}
+          "A timestamp for when you make a status change for an IP address range that you bring to Global Accelerator through bring your own IP address (BYOIP)."]}
     let make ?message = fun ?timestamp -> fun () -> { message; timestamp }
     let to_value x =
       structure_to_value
@@ -505,13 +600,43 @@ module ByoipCidrEvent =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?timestamp ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
-      let message = field_map json "Message" GenericString.of_json in
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      let message = field_map json__ "Message" GenericString.of_json in
       make ?timestamp ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type that contains a Message and a Timestamp value for changes that you make in the status an IP address range that you bring to AWS Global Accelerator through bring your own IP address (BYOIP)."]
+       "A complex type that contains a Message and a Timestamp value for changes that you make in the status of an IP address range that you bring to Global Accelerator through bring your own IP address (BYOIP)."]
+module AcceleratorEvent =
+  struct
+    type nonrec t =
+      {
+      message: GenericString.t option
+        [@ocaml.doc
+          "A string that contains an Event message describing changes or errors when you update an accelerator in Global Accelerator from IPv4 to dual-stack, or dual-stack to IPv4."];
+      timestamp: Timestamp.t option
+        [@ocaml.doc
+          "A timestamp for when you update an accelerator in Global Accelerator from IPv4 to dual-stack, or dual-stack to IPv4."]}
+    let make ?message = fun ?timestamp -> fun () -> { message; timestamp }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:GenericString.to_value));
+        ("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timestamp =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
+      let message =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?timestamp ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      let message = field_map json__ "Message" GenericString.of_json in
+      make ?timestamp ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A complex type that contains a Timestamp value and Message for changes that you make to an accelerator in Global Accelerator. Messages stored here provide progress or error information when you update an accelerator from IPv4 to dual-stack, or from dual-stack to IPv4. Global Accelerator stores a maximum of ten event messages."]
 module TagKey =
   struct
     type nonrec t = string
@@ -581,6 +706,9 @@ module PortRanges =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortRange.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -605,6 +733,9 @@ module EndpointDescriptions =
   struct
     type nonrec t = EndpointDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointDescription.to_value)) |>
         (fun x -> `List x)
@@ -721,6 +852,9 @@ module PortOverrides =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortOverride.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -808,6 +942,9 @@ module CustomRoutingProtocols =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomRoutingProtocol.to_value)) |>
         (fun x -> `List x)
@@ -834,10 +971,19 @@ module IpAddressType =
   struct
     type nonrec t =
       | IPV4 
+      | DUAL_STACK 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | IPV4 -> "IPV4" | Non_static_id s -> s
-    let of_string = function | "IPV4" -> IPV4 | x -> Non_static_id x
+    let to_string =
+      function
+      | IPV4 -> "IPV4"
+      | DUAL_STACK -> "DUAL_STACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV4" -> IPV4
+      | "DUAL_STACK" -> DUAL_STACK
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -850,6 +996,9 @@ module SocketAddresses =
   struct
     type nonrec t = SocketAddress.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SocketAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -874,6 +1023,9 @@ module CustomRoutingDestinationDescriptions =
   struct
     type nonrec t = CustomRoutingDestinationDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomRoutingDestinationDescription.to_value)) |>
         (fun x -> `List x)
@@ -901,6 +1053,9 @@ module CustomRoutingEndpointDescriptions =
   struct
     type nonrec t = CustomRoutingEndpointDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomRoutingEndpointDescription.to_value)) |>
         (fun x -> `List x)
@@ -956,6 +1111,9 @@ module IpSets =
   struct
     type nonrec t = IpSet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpSet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -975,10 +1133,85 @@ module IpSets =
     let of_json j = list_of_json ~kind:"IpSets" ~of_json:IpSet.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AttachmentName =
+  struct
+    type nonrec t = string
+    let context_ = "AttachmentName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_pattern i ~pattern:"[\\S\\s]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttachmentName" j
+    let to_json = simple_to_json to_value
+  end
+module Principals =
+  struct
+    type nonrec t = Principal.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Principal.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Principal.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Principals" ~of_json:Principal.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Resources =
+  struct
+    type nonrec t = Resource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Resource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Resources" ~of_json:Resource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ByoipCidrEvents =
   struct
     type nonrec t = ByoipCidrEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ByoipCidrEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1051,6 +1284,34 @@ module ByoipCidrState =
     let of_json j = of_string (string_of_json ~kind:"ByoipCidrState" j)
     let to_json = simple_to_json to_value
   end
+module AcceleratorEvents =
+  struct
+    type nonrec t = AcceleratorEvent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AcceleratorEvent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AcceleratorEvent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AcceleratorEvents"
+        ~of_json:AcceleratorEvent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AcceleratorStatus =
   struct
     type nonrec t =
@@ -1096,26 +1357,41 @@ module EndpointConfiguration =
       {
       endpointId: GenericString.t option
         [@ocaml.doc
-          "An ID for the endpoint. If the endpoint is a Network Load Balancer or Application Load Balancer, this is the Amazon Resource Name (ARN) of the resource. If the endpoint is an Elastic IP address, this is the Elastic IP address allocation ID. For Amazon EC2 instances, this is the EC2 instance ID. A resource must be valid and active when you add it as an endpoint. An Application Load Balancer can be either internal or internet-facing."];
+          "An ID for the endpoint. If the endpoint is a Network Load Balancer or Application Load Balancer, this is the Amazon Resource Name (ARN) of the resource. If the endpoint is an Elastic IP address, this is the Elastic IP address allocation ID. For Amazon EC2 instances, this is the EC2 instance ID. A resource must be valid and active when you add it as an endpoint. For cross-account endpoints, this must be the ARN of the resource."];
       weight: EndpointWeight.t option
         [@ocaml.doc
-          "The weight associated with the endpoint. When you add weights to endpoints, you configure AWS Global Accelerator to route traffic based on proportions that you specify. For example, you might specify endpoint weights of 4, 5, 5, and 6 (sum=20). The result is that 4/20 of your traffic, on average, is routed to the first endpoint, 5/20 is routed both to the second and third endpoints, and 6/20 is routed to the last endpoint. For more information, see Endpoint Weights in the AWS Global Accelerator Developer Guide."];
+          "The weight associated with the endpoint. When you add weights to endpoints, you configure Global Accelerator to route traffic based on proportions that you specify. For example, you might specify endpoint weights of 4, 5, 5, and 6 (sum=20). The result is that 4/20 of your traffic, on average, is routed to the first endpoint, 5/20 is routed both to the second and third endpoints, and 6/20 is routed to the last endpoint. For more information, see Endpoint weights in the Global Accelerator Developer Guide."];
       clientIPPreservationEnabled: GenericBoolean.t option
         [@ocaml.doc
-          "Indicates whether client IP address preservation is enabled for an Application Load Balancer endpoint. The value is true or false. The default value is true for new accelerators. If the value is set to true, the client's IP address is preserved in the X-Forwarded-For request header as traffic travels to applications on the Application Load Balancer endpoint fronted by the accelerator. For more information, see Preserve Client IP Addresses in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]}
+          "Indicates whether client IP address preservation is enabled for an endpoint. The value is true or false. The default value is true for Application Load Balancer endpoints. If the value is set to true, the client's IP address is preserved in the X-Forwarded-For request header as traffic travels to applications on the endpoint fronted by the accelerator. Client IP address preservation is supported, in specific Amazon Web Services Regions, for endpoints that are Application Load Balancers, Amazon EC2 instances, and Network Load Balancers with security groups. IMPORTANT: You cannot use client IP address preservation with Network Load Balancers with TLS listeners. For more information, see Preserve client IP addresses in Global Accelerator in the Global Accelerator Developer Guide."];
+      attachmentArn: GenericString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cross-account attachment that specifies the endpoints (resources) that can be added to accelerators and principals that have permission to add the endpoints."]}
     let make ?endpointId =
       fun ?weight ->
         fun ?clientIPPreservationEnabled ->
-          fun () -> { endpointId; weight; clientIPPreservationEnabled }
+          fun ?attachmentArn ->
+            fun () ->
+              {
+                endpointId;
+                weight;
+                clientIPPreservationEnabled;
+                attachmentArn
+              }
     let to_value x =
       structure_to_value
         [("EndpointId", (Option.map x.endpointId ~f:GenericString.to_value));
         ("Weight", (Option.map x.weight ~f:EndpointWeight.to_value));
         ("ClientIPPreservationEnabled",
           (Option.map x.clientIPPreservationEnabled
-             ~f:GenericBoolean.to_value))]
+             ~f:GenericBoolean.to_value));
+        ("AttachmentArn",
+          (Option.map x.attachmentArn ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attachmentArn =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "AttachmentArn") in
       let clientIPPreservationEnabled =
         (Option.map ~f:GenericBoolean.of_xml)
           (Xml.child xml_arg0 "ClientIPPreservationEnabled") in
@@ -1124,14 +1400,16 @@ module EndpointConfiguration =
       let endpointId =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "EndpointId") in
-      make ?clientIPPreservationEnabled ?weight ?endpointId ()
+      make ?attachmentArn ?clientIPPreservationEnabled ?weight ?endpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let attachmentArn =
+        field_map json__ "AttachmentArn" GenericString.of_json in
       let clientIPPreservationEnabled =
-        field_map json "ClientIPPreservationEnabled" GenericBoolean.of_json in
-      let weight = field_map json "Weight" EndpointWeight.of_json in
-      let endpointId = field_map json "EndpointId" GenericString.of_json in
-      make ?clientIPPreservationEnabled ?weight ?endpointId ()
+        field_map json__ "ClientIPPreservationEnabled" GenericBoolean.of_json in
+      let weight = field_map json__ "Weight" EndpointWeight.of_json in
+      let endpointId = field_map json__ "EndpointId" GenericString.of_json in
+      make ?attachmentArn ?clientIPPreservationEnabled ?weight ?endpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type for endpoints. A resource must be valid and active when you add it as an endpoint."]
@@ -1155,12 +1433,51 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A complex type that contains a Tag key and Tag value."]
+module EndpointIdentifier =
+  struct
+    type nonrec t =
+      {
+      endpointId: GenericString.t
+        [@ocaml.doc
+          "An ID for the endpoint. If the endpoint is a Network Load Balancer or Application Load Balancer, this is the Amazon Resource Name (ARN) of the resource. If the endpoint is an Elastic IP address, this is the Elastic IP address allocation ID. For Amazon EC2 instances, this is the EC2 instance ID. An Application Load Balancer can be either internal or internet-facing."];
+      clientIPPreservationEnabled: GenericBoolean.t option
+        [@ocaml.doc
+          "Indicates whether client IP address preservation is enabled for an endpoint. The value is true or false. If the value is set to true, the client's IP address is preserved in the X-Forwarded-For request header as traffic travels to applications on the endpoint fronted by the accelerator."]}
+    let context_ = "EndpointIdentifier"
+    let make ?clientIPPreservationEnabled =
+      fun ~endpointId ->
+        fun () -> { clientIPPreservationEnabled; endpointId }
+    let to_value x =
+      structure_to_value
+        [("EndpointId", (Some (GenericString.to_value x.endpointId)));
+        ("ClientIPPreservationEnabled",
+          (Option.map x.clientIPPreservationEnabled
+             ~f:GenericBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientIPPreservationEnabled =
+        (Option.map ~f:GenericBoolean.of_xml)
+          (Xml.child xml_arg0 "ClientIPPreservationEnabled") in
+      let endpointId =
+        GenericString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndpointId") in
+      make ?clientIPPreservationEnabled ~endpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientIPPreservationEnabled =
+        field_map json__ "ClientIPPreservationEnabled" GenericBoolean.of_json in
+      let endpointId =
+        field_map_exn json__ "EndpointId" GenericString.of_json in
+      make ?clientIPPreservationEnabled ~endpointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A complex type for an endpoint. Specifies information about the endpoint to remove from the endpoint group."]
 module Listener =
   struct
     type nonrec t =
@@ -1175,7 +1492,7 @@ module Listener =
           "The protocol for the connections from clients to the accelerator."];
       clientAffinity: ClientAffinity.t option
         [@ocaml.doc
-          "Client affinity lets you direct all requests from a user to the same endpoint, if you have stateful applications, regardless of the port and protocol of the client request. Client affinity gives you control over whether to always route each client to the same specific endpoint. AWS Global Accelerator uses a consistent-flow hashing algorithm to choose the optimal endpoint for a connection. If client affinity is NONE, Global Accelerator uses the \"five-tuple\" (5-tuple) properties\226\128\148source IP address, source port, destination IP address, destination port, and protocol\226\128\148to select the hash value, and then chooses the best endpoint. However, with this setting, if someone uses different ports to connect to Global Accelerator, their connections might not be always routed to the same endpoint because the hash value changes. If you want a given client to always be routed to the same endpoint, set client affinity to SOURCE_IP instead. When you use the SOURCE_IP setting, Global Accelerator uses the \"two-tuple\" (2-tuple) properties\226\128\148 source (client) IP address and destination IP address\226\128\148to select the hash value. The default value is NONE."]}
+          "Client affinity lets you direct all requests from a user to the same endpoint, if you have stateful applications, regardless of the port and protocol of the client request. Client affinity gives you control over whether to always route each client to the same specific endpoint. Global Accelerator uses a consistent-flow hashing algorithm to choose the optimal endpoint for a connection. If client affinity is NONE, Global Accelerator uses the \"five-tuple\" (5-tuple) properties\226\128\148source IP address, source port, destination IP address, destination port, and protocol\226\128\148to select the hash value, and then chooses the best endpoint. However, with this setting, if someone uses different ports to connect to Global Accelerator, their connections might not be always routed to the same endpoint because the hash value changes. If you want a given client to always be routed to the same endpoint, set client affinity to SOURCE_IP instead. When you use the SOURCE_IP setting, Global Accelerator uses the \"two-tuple\" (2-tuple) properties\226\128\148 source (client) IP address and destination IP address\226\128\148to select the hash value. The default value is NONE."]}
     let make ?listenerArn =
       fun ?portRanges ->
         fun ?protocol ->
@@ -1203,12 +1520,12 @@ module Listener =
           (Xml.child xml_arg0 "ListenerArn") in
       make ?clientAffinity ?protocol ?portRanges ?listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientAffinity =
-        field_map json "ClientAffinity" ClientAffinity.of_json in
-      let protocol = field_map json "Protocol" Protocol.of_json in
-      let portRanges = field_map json "PortRanges" PortRanges.of_json in
-      let listenerArn = field_map json "ListenerArn" GenericString.of_json in
+        field_map json__ "ClientAffinity" ClientAffinity.of_json in
+      let protocol = field_map json__ "Protocol" Protocol.of_json in
+      let portRanges = field_map json__ "PortRanges" PortRanges.of_json in
+      let listenerArn = field_map json__ "ListenerArn" GenericString.of_json in
       make ?clientAffinity ?protocol ?portRanges ?listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A complex type for a listener."]
@@ -1219,12 +1536,13 @@ module EndpointGroup =
       endpointGroupArn: GenericString.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the endpoint group."];
       endpointGroupRegion: GenericString.t option
-        [@ocaml.doc "The AWS Region where the endpoint group is located."];
+        [@ocaml.doc
+          "The Amazon Web Services Region where the endpoint group is located."];
       endpointDescriptions: EndpointDescriptions.t option
         [@ocaml.doc "The list of endpoint objects."];
       trafficDialPercentage: TrafficDialPercentage.t option
         [@ocaml.doc
-          "The percentage of traffic to send to an AWS Region. Additional traffic is distributed to other endpoint groups for this listener. Use this action to increase (dial up) or decrease (dial down) traffic to a specific Region. The percentage is applied to the traffic that would otherwise have been routed to the Region based on optimal routing. The default value is 100."];
+          "The percentage of traffic to send to an Amazon Web Services Region. Additional traffic is distributed to other endpoint groups for this listener. Use this action to increase (dial up) or decrease (dial down) traffic to a specific Region. The percentage is applied to the traffic that would otherwise have been routed to the Region based on optimal routing. The default value is 100."];
       healthCheckPort: HealthCheckPort.t option
         [@ocaml.doc
           "The port that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group. The default port is the port for the listener that this endpoint group is associated with. If the listener port is a list, Global Accelerator uses the first specified port in the list of ports."];
@@ -1242,7 +1560,7 @@ module EndpointGroup =
           "The number of consecutive health checks required to set the state of a healthy endpoint to unhealthy, or to set an unhealthy endpoint to healthy. The default value is 3."];
       portOverrides: PortOverrides.t option
         [@ocaml.doc
-          "Allows you to override the destination ports used to route traffic to an endpoint. Using a port override lets you to map a list of external destination ports (that your users send traffic to) to a list of internal destination ports that you want an application endpoint to receive traffic on."]}
+          "Allows you to override the destination ports used to route traffic to an endpoint. Using a port override lets you map a list of external destination ports (that your users send traffic to) to a list of internal destination ports that you want an application endpoint to receive traffic on."]}
     let make ?endpointGroupArn =
       fun ?endpointGroupRegion ->
         fun ?endpointDescriptions ->
@@ -1327,35 +1645,36 @@ module EndpointGroup =
         ?trafficDialPercentage ?endpointDescriptions ?endpointGroupRegion
         ?endpointGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portOverrides =
-        field_map json "PortOverrides" PortOverrides.of_json in
+        field_map json__ "PortOverrides" PortOverrides.of_json in
       let thresholdCount =
-        field_map json "ThresholdCount" ThresholdCount.of_json in
+        field_map json__ "ThresholdCount" ThresholdCount.of_json in
       let healthCheckIntervalSeconds =
-        field_map json "HealthCheckIntervalSeconds"
+        field_map json__ "HealthCheckIntervalSeconds"
           HealthCheckIntervalSeconds.of_json in
       let healthCheckPath =
-        field_map json "HealthCheckPath" HealthCheckPath.of_json in
+        field_map json__ "HealthCheckPath" HealthCheckPath.of_json in
       let healthCheckProtocol =
-        field_map json "HealthCheckProtocol" HealthCheckProtocol.of_json in
+        field_map json__ "HealthCheckProtocol" HealthCheckProtocol.of_json in
       let healthCheckPort =
-        field_map json "HealthCheckPort" HealthCheckPort.of_json in
+        field_map json__ "HealthCheckPort" HealthCheckPort.of_json in
       let trafficDialPercentage =
-        field_map json "TrafficDialPercentage" TrafficDialPercentage.of_json in
+        field_map json__ "TrafficDialPercentage"
+          TrafficDialPercentage.of_json in
       let endpointDescriptions =
-        field_map json "EndpointDescriptions" EndpointDescriptions.of_json in
+        field_map json__ "EndpointDescriptions" EndpointDescriptions.of_json in
       let endpointGroupRegion =
-        field_map json "EndpointGroupRegion" GenericString.of_json in
+        field_map json__ "EndpointGroupRegion" GenericString.of_json in
       let endpointGroupArn =
-        field_map json "EndpointGroupArn" GenericString.of_json in
+        field_map json__ "EndpointGroupArn" GenericString.of_json in
       make ?portOverrides ?thresholdCount ?healthCheckIntervalSeconds
         ?healthCheckPath ?healthCheckProtocol ?healthCheckPort
         ?trafficDialPercentage ?endpointDescriptions ?endpointGroupRegion
         ?endpointGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type for the endpoint group. An AWS Region can have only one endpoint group for a specific listener."]
+       "A complex type for the endpoint group. An Amazon Web Services Region can have only one endpoint group for a specific listener."]
 module PortMapping =
   struct
     type nonrec t =
@@ -1426,24 +1745,24 @@ module PortMapping =
       make ?destinationTrafficState ?protocols ?destinationSocketAddress
         ?endpointId ?endpointGroupArn ?acceleratorPort ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationTrafficState =
-        field_map json "DestinationTrafficState"
+        field_map json__ "DestinationTrafficState"
           CustomRoutingDestinationTrafficState.of_json in
       let protocols =
-        field_map json "Protocols" CustomRoutingProtocols.of_json in
+        field_map json__ "Protocols" CustomRoutingProtocols.of_json in
       let destinationSocketAddress =
-        field_map json "DestinationSocketAddress" SocketAddress.of_json in
-      let endpointId = field_map json "EndpointId" GenericString.of_json in
+        field_map json__ "DestinationSocketAddress" SocketAddress.of_json in
+      let endpointId = field_map json__ "EndpointId" GenericString.of_json in
       let endpointGroupArn =
-        field_map json "EndpointGroupArn" GenericString.of_json in
+        field_map json__ "EndpointGroupArn" GenericString.of_json in
       let acceleratorPort =
-        field_map json "AcceleratorPort" PortNumber.of_json in
+        field_map json__ "AcceleratorPort" PortNumber.of_json in
       make ?destinationTrafficState ?protocols ?destinationSocketAddress
         ?endpointId ?endpointGroupArn ?acceleratorPort ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the ports and associated IP addresses and ports of Amazon EC2 instances in your virtual private cloud (VPC) subnets. Custom routing is a port mapping protocol in AWS Global Accelerator that statically associates port ranges with VPC subnets, which allows Global Accelerator to route to specific instances and ports within one or more subnets."]
+       "Returns the ports and associated IP addresses and ports of Amazon EC2 instances in your virtual private cloud (VPC) subnets. Custom routing is a port mapping protocol in Global Accelerator that statically associates port ranges with VPC subnets, which allows Global Accelerator to route to specific instances and ports within one or more subnets."]
 module DestinationPortMapping =
   struct
     type nonrec t =
@@ -1459,12 +1778,13 @@ module DestinationPortMapping =
       endpointId: GenericString.t option
         [@ocaml.doc "The ID for the virtual private cloud (VPC) subnet."];
       endpointGroupRegion: GenericString.t option
-        [@ocaml.doc "The AWS Region for the endpoint group."];
+        [@ocaml.doc "The Amazon Web Services Region for the endpoint group."];
       destinationSocketAddress: SocketAddress.t option
         [@ocaml.doc
           "The endpoint IP address/port combination for traffic received on the accelerator socket address."];
       ipAddressType: IpAddressType.t option
-        [@ocaml.doc "The IP address type, which must be IPv4."];
+        [@ocaml.doc
+          "The IP address type that an accelerator supports. For a custom routing accelerator, the value must be IPV4."];
       destinationTrafficState: CustomRoutingDestinationTrafficState.t option
         [@ocaml.doc
           "Indicates whether or not a port mapping destination can receive traffic. The value is either ALLOW, if traffic is allowed to the destination, or DENY, if traffic is not allowed to the destination."]}
@@ -1536,23 +1856,23 @@ module DestinationPortMapping =
         ?endpointGroupRegion ?endpointId ?endpointGroupArn
         ?acceleratorSocketAddresses ?acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationTrafficState =
-        field_map json "DestinationTrafficState"
+        field_map json__ "DestinationTrafficState"
           CustomRoutingDestinationTrafficState.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
       let destinationSocketAddress =
-        field_map json "DestinationSocketAddress" SocketAddress.of_json in
+        field_map json__ "DestinationSocketAddress" SocketAddress.of_json in
       let endpointGroupRegion =
-        field_map json "EndpointGroupRegion" GenericString.of_json in
-      let endpointId = field_map json "EndpointId" GenericString.of_json in
+        field_map json__ "EndpointGroupRegion" GenericString.of_json in
+      let endpointId = field_map json__ "EndpointId" GenericString.of_json in
       let endpointGroupArn =
-        field_map json "EndpointGroupArn" GenericString.of_json in
+        field_map json__ "EndpointGroupArn" GenericString.of_json in
       let acceleratorSocketAddresses =
-        field_map json "AcceleratorSocketAddresses" SocketAddresses.of_json in
+        field_map json__ "AcceleratorSocketAddresses" SocketAddresses.of_json in
       let acceleratorArn =
-        field_map json "AcceleratorArn" GenericString.of_json in
+        field_map json__ "AcceleratorArn" GenericString.of_json in
       make ?destinationTrafficState ?ipAddressType ?destinationSocketAddress
         ?endpointGroupRegion ?endpointId ?endpointGroupArn
         ?acceleratorSocketAddresses ?acceleratorArn ()
@@ -1584,9 +1904,9 @@ module CustomRoutingListener =
           (Xml.child xml_arg0 "ListenerArn") in
       make ?portRanges ?listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portRanges = field_map json "PortRanges" PortRanges.of_json in
-      let listenerArn = field_map json "ListenerArn" GenericString.of_json in
+    let of_json json__ =
+      let portRanges = field_map json__ "PortRanges" PortRanges.of_json in
+      let listenerArn = field_map json__ "ListenerArn" GenericString.of_json in
       make ?portRanges ?listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1598,7 +1918,8 @@ module CustomRoutingEndpointGroup =
       endpointGroupArn: GenericString.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the endpoint group."];
       endpointGroupRegion: GenericString.t option
-        [@ocaml.doc "The AWS Region where the endpoint group is located."];
+        [@ocaml.doc
+          "The Amazon Web Services Region where the endpoint group is located."];
       destinationDescriptions: CustomRoutingDestinationDescriptions.t option
         [@ocaml.doc
           "For a custom routing accelerator, describes the port range and protocol for all endpoints (virtual private cloud subnets) in an endpoint group to accept client traffic on."];
@@ -1645,22 +1966,22 @@ module CustomRoutingEndpointGroup =
       make ?endpointDescriptions ?destinationDescriptions
         ?endpointGroupRegion ?endpointGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointDescriptions =
-        field_map json "EndpointDescriptions"
+        field_map json__ "EndpointDescriptions"
           CustomRoutingEndpointDescriptions.of_json in
       let destinationDescriptions =
-        field_map json "DestinationDescriptions"
+        field_map json__ "DestinationDescriptions"
           CustomRoutingDestinationDescriptions.of_json in
       let endpointGroupRegion =
-        field_map json "EndpointGroupRegion" GenericString.of_json in
+        field_map json__ "EndpointGroupRegion" GenericString.of_json in
       let endpointGroupArn =
-        field_map json "EndpointGroupArn" GenericString.of_json in
+        field_map json__ "EndpointGroupArn" GenericString.of_json in
       make ?endpointDescriptions ?destinationDescriptions
         ?endpointGroupRegion ?endpointGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type for the endpoint group for a custom routing accelerator. An AWS Region can have only one endpoint group for a specific listener."]
+       "A complex type for the endpoint group for a custom routing accelerator. An Amazon Web Services Region can have only one endpoint group for a specific listener."]
 module CustomRoutingAccelerator =
   struct
     type nonrec t =
@@ -1672,7 +1993,8 @@ module CustomRoutingAccelerator =
         [@ocaml.doc
           "The name of the accelerator. The name must contain only alphanumeric characters or hyphens (-), and must not begin or end with a hyphen."];
       ipAddressType: IpAddressType.t option
-        [@ocaml.doc "The value for the address type must be IPv4."];
+        [@ocaml.doc
+          "The IP address type that an accelerator supports. For a custom routing accelerator, the value must be IPV4."];
       enabled: GenericBoolean.t option
         [@ocaml.doc
           "Indicates whether the accelerator is enabled. The value is true or false. The default value is true. If the value is set to true, the accelerator cannot be deleted. If set to false, accelerator can be deleted."];
@@ -1681,7 +2003,7 @@ module CustomRoutingAccelerator =
           "The static IP addresses that Global Accelerator associates with the accelerator."];
       dnsName: GenericString.t option
         [@ocaml.doc
-          "The Domain Name System (DNS) name that Global Accelerator creates that points to your accelerator's static IP addresses. The naming convention for the DNS name is the following: A lowercase letter a, followed by a 16-bit random hex string, followed by .awsglobalaccelerator.com. For example: a1234567890abcdef.awsglobalaccelerator.com. For more information about the default DNS name, see Support for DNS Addressing in Global Accelerator in the AWS Global Accelerator Developer Guide."];
+          "The Domain Name System (DNS) name that Global Accelerator creates that points to an accelerator's static IPv4 addresses. The naming convention for the DNS name is the following: A lowercase letter a, followed by a 16-bit random hex string, followed by .awsglobalaccelerator.com. For example: a1234567890abcdef.awsglobalaccelerator.com. If you have a dual-stack accelerator, you also have a second DNS name, DualStackDnsName, that points to both the A record and the AAAA record for all four static addresses for the accelerator: two IPv4 addresses and two IPv6 addresses. For more information about the default DNS name, see Support for DNS addressing in Global Accelerator in the Global Accelerator Developer Guide."];
       status: CustomRoutingAcceleratorStatus.t option
         [@ocaml.doc "Describes the deployment status of the accelerator."];
       createdTime: Timestamp.t option
@@ -1752,35 +2074,178 @@ module CustomRoutingAccelerator =
       make ?lastModifiedTime ?createdTime ?status ?dnsName ?ipSets ?enabled
         ?ipAddressType ?name ?acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let status =
-        field_map json "Status" CustomRoutingAcceleratorStatus.of_json in
-      let dnsName = field_map json "DnsName" GenericString.of_json in
-      let ipSets = field_map json "IpSets" IpSets.of_json in
-      let enabled = field_map json "Enabled" GenericBoolean.of_json in
+        field_map json__ "Status" CustomRoutingAcceleratorStatus.of_json in
+      let dnsName = field_map json__ "DnsName" GenericString.of_json in
+      let ipSets = field_map json__ "IpSets" IpSets.of_json in
+      let enabled = field_map json__ "Enabled" GenericBoolean.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
-      let name = field_map json "Name" GenericString.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let name = field_map json__ "Name" GenericString.of_json in
       let acceleratorArn =
-        field_map json "AcceleratorArn" GenericString.of_json in
+        field_map json__ "AcceleratorArn" GenericString.of_json in
       make ?lastModifiedTime ?createdTime ?status ?dnsName ?ipSets ?enabled
         ?ipAddressType ?name ?acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attributes of a custom routing accelerator."]
+module CrossAccountResource =
+  struct
+    type nonrec t =
+      {
+      endpointId: GenericString.t option
+        [@ocaml.doc
+          "The endpoint ID for the endpoint that is listed in a cross-account attachment and can be added to an accelerator by specified principals."];
+      cidr: GenericString.t option
+        [@ocaml.doc
+          "An IP address range, in CIDR format, that is specified as an Amazon Web Services resource. The address must be provisioned and advertised in Global Accelerator by following the bring your own IP address (BYOIP) process for Global Accelerator. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."];
+      attachmentArn: GenericString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cross-account attachment that specifies the resources (endpoints or CIDR range) that can be added to accelerators and principals that have permission to add them."]}
+    let make ?endpointId =
+      fun ?cidr ->
+        fun ?attachmentArn -> fun () -> { endpointId; cidr; attachmentArn }
+    let to_value x =
+      structure_to_value
+        [("EndpointId", (Option.map x.endpointId ~f:GenericString.to_value));
+        ("Cidr", (Option.map x.cidr ~f:GenericString.to_value));
+        ("AttachmentArn",
+          (Option.map x.attachmentArn ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachmentArn =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "AttachmentArn") in
+      let cidr =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Cidr") in
+      let endpointId =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EndpointId") in
+      make ?attachmentArn ?cidr ?endpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachmentArn =
+        field_map json__ "AttachmentArn" GenericString.of_json in
+      let cidr = field_map json__ "Cidr" GenericString.of_json in
+      let endpointId = field_map json__ "EndpointId" GenericString.of_json in
+      make ?attachmentArn ?cidr ?endpointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An endpoint (Amazon Web Services resource) or an IP address range, in CIDR format, that is listed in a cross-account attachment. A cross-account resource can be added to an accelerator by specified principals, which are also listed in the attachment. For more information, see Working with cross-account attachments and resources in Global Accelerator in the Global Accelerator Developer Guide."]
+module AwsAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AwsAccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\d{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AwsAccountId" j
+    let to_json = simple_to_json to_value
+  end
+module Attachment =
+  struct
+    type nonrec t =
+      {
+      attachmentArn: GenericString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cross-account attachment."];
+      name: AttachmentName.t option
+        [@ocaml.doc "The name of the cross-account attachment."];
+      principals: Principals.t option
+        [@ocaml.doc
+          "The principals included in the cross-account attachment."];
+      resources: Resources.t option
+        [@ocaml.doc
+          "The resources included in the cross-account attachment."];
+      lastModifiedTime: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the cross-account attachment was last modified."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the cross-account attachment was created."]}
+    let make ?attachmentArn =
+      fun ?name ->
+        fun ?principals ->
+          fun ?resources ->
+            fun ?lastModifiedTime ->
+              fun ?createdTime ->
+                fun () ->
+                  {
+                    attachmentArn;
+                    name;
+                    principals;
+                    resources;
+                    lastModifiedTime;
+                    createdTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("AttachmentArn",
+           (Option.map x.attachmentArn ~f:GenericString.to_value));
+        ("Name", (Option.map x.name ~f:AttachmentName.to_value));
+        ("Principals", (Option.map x.principals ~f:Principals.to_value));
+        ("Resources", (Option.map x.resources ~f:Resources.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value));
+        ("CreatedTime", (Option.map x.createdTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedTime") in
+      let lastModifiedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let resources =
+        (Option.map ~f:Resources.of_xml) (Xml.child xml_arg0 "Resources") in
+      let principals =
+        (Option.map ~f:Principals.of_xml) (Xml.child xml_arg0 "Principals") in
+      let name =
+        (Option.map ~f:AttachmentName.of_xml) (Xml.child xml_arg0 "Name") in
+      let attachmentArn =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "AttachmentArn") in
+      make ?createdTime ?lastModifiedTime ?resources ?principals ?name
+        ?attachmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let resources = field_map json__ "Resources" Resources.of_json in
+      let principals = field_map json__ "Principals" Principals.of_json in
+      let name = field_map json__ "Name" AttachmentName.of_json in
+      let attachmentArn =
+        field_map json__ "AttachmentArn" GenericString.of_json in
+      make ?createdTime ?lastModifiedTime ?resources ?principals ?name
+        ?attachmentArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A cross-account attachment in Global Accelerator. A cross-account attachment specifies the principals who have permission to work with resources in your account, which you also list in the attachment."]
 module ByoipCidr =
   struct
     type nonrec t =
       {
       cidr: GenericString.t option
-        [@ocaml.doc "The address range, in CIDR notation."];
+        [@ocaml.doc
+          "The address range, in CIDR notation. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."];
       state: ByoipCidrState.t option
         [@ocaml.doc "The state of the address pool."];
       events: ByoipCidrEvents.t option
         [@ocaml.doc
-          "A history of status changes for an IP address range that you bring to AWS Global Accelerator through bring your own IP address (BYOIP)."]}
+          "A history of status changes for an IP address range that you bring to Global Accelerator through bring your own IP address (BYOIP)."]}
     let make ?cidr =
       fun ?state -> fun ?events -> fun () -> { cidr; state; events }
     let to_value x =
@@ -1798,14 +2263,14 @@ module ByoipCidr =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Cidr") in
       make ?events ?state ?cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" ByoipCidrEvents.of_json in
-      let state = field_map json "State" ByoipCidrState.of_json in
-      let cidr = field_map json "Cidr" GenericString.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" ByoipCidrEvents.of_json in
+      let state = field_map json__ "State" ByoipCidrState.of_json in
+      let cidr = field_map json__ "Cidr" GenericString.of_json in
       make ?events ?state ?cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about an IP address range that is provisioned for use with your AWS resources through bring your own IP address (BYOIP). The following describes each BYOIP State that your IP address range can be in. PENDING_PROVISIONING \226\128\148 You\226\128\153ve submitted a request to provision an IP address range but it is not yet provisioned with AWS Global Accelerator. READY \226\128\148 The address range is provisioned with AWS Global Accelerator and can be advertised. PENDING_ADVERTISING \226\128\148 You\226\128\153ve submitted a request for AWS Global Accelerator to advertise an address range but it is not yet being advertised. ADVERTISING \226\128\148 The address range is being advertised by AWS Global Accelerator. PENDING_WITHDRAWING \226\128\148 You\226\128\153ve submitted a request to withdraw an address range from being advertised but it is still being advertised by AWS Global Accelerator. PENDING_DEPROVISIONING \226\128\148 You\226\128\153ve submitted a request to deprovision an address range from AWS Global Accelerator but it is still provisioned. DEPROVISIONED \226\128\148 The address range is deprovisioned from AWS Global Accelerator. FAILED_PROVISION \226\128\148 The request to provision the address range from AWS Global Accelerator was not successful. Please make sure that you provide all of the correct information, and try again. If the request fails a second time, contact AWS support. FAILED_ADVERTISING \226\128\148 The request for AWS Global Accelerator to advertise the address range was not successful. Please make sure that you provide all of the correct information, and try again. If the request fails a second time, contact AWS support. FAILED_WITHDRAW \226\128\148 The request to withdraw the address range from advertising by AWS Global Accelerator was not successful. Please make sure that you provide all of the correct information, and try again. If the request fails a second time, contact AWS support. FAILED_DEPROVISION \226\128\148 The request to deprovision the address range from AWS Global Accelerator was not successful. Please make sure that you provide all of the correct information, and try again. If the request fails a second time, contact AWS support."]
+       "Information about an IP address range that is provisioned for use with your Amazon Web Services resources through bring your own IP address (BYOIP). The following describes each BYOIP State that your IP address range can be in. PENDING_PROVISIONING \226\128\148 You\226\128\153ve submitted a request to provision an IP address range but it is not yet provisioned with Global Accelerator. READY \226\128\148 The address range is provisioned with Global Accelerator and can be advertised. PENDING_ADVERTISING \226\128\148 You\226\128\153ve submitted a request for Global Accelerator to advertise an address range but it is not yet being advertised. ADVERTISING \226\128\148 The address range is being advertised by Global Accelerator. PENDING_WITHDRAWING \226\128\148 You\226\128\153ve submitted a request to withdraw an address range from being advertised but it is still being advertised by Global Accelerator. PENDING_DEPROVISIONING \226\128\148 You\226\128\153ve submitted a request to deprovision an address range from Global Accelerator but it is still provisioned. DEPROVISIONED \226\128\148 The address range is deprovisioned from Global Accelerator. FAILED_PROVISION \226\128\148 The request to provision the address range from Global Accelerator was not successful. Please make sure that you provide all of the correct information, and try again. If the request fails a second time, contact Amazon Web Services support. FAILED_ADVERTISING \226\128\148 The request for Global Accelerator to advertise the address range was not successful. Please make sure that you provide all of the correct information, and try again. If the request fails a second time, contact Amazon Web Services support. FAILED_WITHDRAW \226\128\148 The request to withdraw the address range from advertising by Global Accelerator was not successful. Please make sure that you provide all of the correct information, and try again. If the request fails a second time, contact Amazon Web Services support. FAILED_DEPROVISION \226\128\148 The request to deprovision the address range from Global Accelerator was not successful. Please make sure that you provide all of the correct information, and try again. If the request fails a second time, contact Amazon Web Services support."]
 module Accelerator =
   struct
     type nonrec t =
@@ -1816,7 +2281,8 @@ module Accelerator =
         [@ocaml.doc
           "The name of the accelerator. The name must contain only alphanumeric characters or hyphens (-), and must not begin or end with a hyphen."];
       ipAddressType: IpAddressType.t option
-        [@ocaml.doc "The value for the address type must be IPv4."];
+        [@ocaml.doc
+          "The IP address type that an accelerator supports. For a standard accelerator, the value can be IPV4 or DUAL_STACK."];
       enabled: GenericBoolean.t option
         [@ocaml.doc
           "Indicates whether the accelerator is enabled. The value is true or false. The default value is true. If the value is set to true, the accelerator cannot be deleted. If set to false, accelerator can be deleted."];
@@ -1825,14 +2291,20 @@ module Accelerator =
           "The static IP addresses that Global Accelerator associates with the accelerator."];
       dnsName: GenericString.t option
         [@ocaml.doc
-          "The Domain Name System (DNS) name that Global Accelerator creates that points to your accelerator's static IP addresses. The naming convention for the DNS name is the following: A lowercase letter a, followed by a 16-bit random hex string, followed by .awsglobalaccelerator.com. For example: a1234567890abcdef.awsglobalaccelerator.com. For more information about the default DNS name, see Support for DNS Addressing in Global Accelerator in the AWS Global Accelerator Developer Guide."];
+          "The Domain Name System (DNS) name that Global Accelerator creates that points to an accelerator's static IPv4 addresses. The naming convention for the DNS name for an accelerator is the following: A lowercase letter a, followed by a 16-bit random hex string, followed by .awsglobalaccelerator.com. For example: a1234567890abcdef.awsglobalaccelerator.com. If you have a dual-stack accelerator, you also have a second DNS name, DualStackDnsName, that points to both the A record and the AAAA record for all four static addresses for the accelerator: two IPv4 addresses and two IPv6 addresses. For more information about the default DNS name, see Support for DNS addressing in Global Accelerator in the Global Accelerator Developer Guide."];
       status: AcceleratorStatus.t option
         [@ocaml.doc "Describes the deployment status of the accelerator."];
       createdTime: Timestamp.t option
         [@ocaml.doc "The date and time that the accelerator was created."];
       lastModifiedTime: Timestamp.t option
         [@ocaml.doc
-          "The date and time that the accelerator was last modified."]}
+          "The date and time that the accelerator was last modified."];
+      dualStackDnsName: GenericString.t option
+        [@ocaml.doc
+          "The Domain Name System (DNS) name that Global Accelerator creates that points to a dual-stack accelerator's four static IP addresses: two IPv4 addresses and two IPv6 addresses. The naming convention for the dual-stack DNS name is the following: A lowercase letter a, followed by a 16-bit random hex string, followed by .dualstack.awsglobalaccelerator.com. For example: a1234567890abcdef.dualstack.awsglobalaccelerator.com. Note: Global Accelerator also assigns a default DNS name, DnsName, to your accelerator that points just to the static IPv4 addresses. For more information, see Support for DNS addressing in Global Accelerator in the Global Accelerator Developer Guide."];
+      events: AcceleratorEvents.t option
+        [@ocaml.doc
+          "A history of changes that you make to an accelerator in Global Accelerator."]}
     let make ?acceleratorArn =
       fun ?name ->
         fun ?ipAddressType ->
@@ -1842,18 +2314,22 @@ module Accelerator =
                 fun ?status ->
                   fun ?createdTime ->
                     fun ?lastModifiedTime ->
-                      fun () ->
-                        {
-                          acceleratorArn;
-                          name;
-                          ipAddressType;
-                          enabled;
-                          ipSets;
-                          dnsName;
-                          status;
-                          createdTime;
-                          lastModifiedTime
-                        }
+                      fun ?dualStackDnsName ->
+                        fun ?events ->
+                          fun () ->
+                            {
+                              acceleratorArn;
+                              name;
+                              ipAddressType;
+                              enabled;
+                              ipSets;
+                              dnsName;
+                              status;
+                              createdTime;
+                              lastModifiedTime;
+                              dualStackDnsName;
+                              events
+                            }
     let to_value x =
       structure_to_value
         [("AcceleratorArn",
@@ -1867,9 +2343,18 @@ module Accelerator =
         ("Status", (Option.map x.status ~f:AcceleratorStatus.to_value));
         ("CreatedTime", (Option.map x.createdTime ~f:Timestamp.to_value));
         ("LastModifiedTime",
-          (Option.map x.lastModifiedTime ~f:Timestamp.to_value))]
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value));
+        ("DualStackDnsName",
+          (Option.map x.dualStackDnsName ~f:GenericString.to_value));
+        ("Events", (Option.map x.events ~f:AcceleratorEvents.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let events =
+        (Option.map ~f:AcceleratorEvents.of_xml)
+          (Xml.child xml_arg0 "Events") in
+      let dualStackDnsName =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "DualStackDnsName") in
       let lastModifiedTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastModifiedTime") in
@@ -1892,24 +2377,27 @@ module Accelerator =
       let acceleratorArn =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "AcceleratorArn") in
-      make ?lastModifiedTime ?createdTime ?status ?dnsName ?ipSets ?enabled
-        ?ipAddressType ?name ?acceleratorArn ()
+      make ?events ?dualStackDnsName ?lastModifiedTime ?createdTime ?status
+        ?dnsName ?ipSets ?enabled ?ipAddressType ?name ?acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let events = field_map json__ "Events" AcceleratorEvents.of_json in
+      let dualStackDnsName =
+        field_map json__ "DualStackDnsName" GenericString.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
-      let status = field_map json "Status" AcceleratorStatus.of_json in
-      let dnsName = field_map json "DnsName" GenericString.of_json in
-      let ipSets = field_map json "IpSets" IpSets.of_json in
-      let enabled = field_map json "Enabled" GenericBoolean.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let status = field_map json__ "Status" AcceleratorStatus.of_json in
+      let dnsName = field_map json__ "DnsName" GenericString.of_json in
+      let ipSets = field_map json__ "IpSets" IpSets.of_json in
+      let enabled = field_map json__ "Enabled" GenericBoolean.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
-      let name = field_map json "Name" GenericString.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let name = field_map json__ "Name" GenericString.of_json in
       let acceleratorArn =
-        field_map json "AcceleratorArn" GenericString.of_json in
-      make ?lastModifiedTime ?createdTime ?status ?dnsName ?ipSets ?enabled
-        ?ipAddressType ?name ?acceleratorArn ()
+        field_map json__ "AcceleratorArn" GenericString.of_json in
+      make ?events ?dualStackDnsName ?lastModifiedTime ?createdTime ?status
+        ?dnsName ?ipSets ?enabled ?ipAddressType ?name ?acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An accelerator is a complex type that includes one or more listeners that process inbound connections and then direct traffic to one or more endpoint groups, each of which includes endpoints, such as load balancers."]
@@ -1947,11 +2435,11 @@ module CustomRoutingDestinationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "FromPort") in
       make ~protocols ~toPort ~fromPort ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protocols =
-        field_map_exn json "Protocols" CustomRoutingProtocols.of_json in
-      let toPort = field_map_exn json "ToPort" PortNumber.of_json in
-      let fromPort = field_map_exn json "FromPort" PortNumber.of_json in
+        field_map_exn json__ "Protocols" CustomRoutingProtocols.of_json in
+      let toPort = field_map_exn json__ "ToPort" PortNumber.of_json in
+      let fromPort = field_map_exn json__ "FromPort" PortNumber.of_json in
       make ~protocols ~toPort ~fromPort ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1962,21 +2450,32 @@ module CustomRoutingEndpointConfiguration =
       {
       endpointId: GenericString.t option
         [@ocaml.doc
-          "An ID for the endpoint. For custom routing accelerators, this is the virtual private cloud (VPC) subnet ID."]}
-    let make ?endpointId = fun () -> { endpointId }
+          "An ID for the endpoint. For custom routing accelerators, this is the virtual private cloud (VPC) subnet ID."];
+      attachmentArn: GenericString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cross-account attachment that specifies the endpoints (resources) that can be added to accelerators and principals that have permission to add the endpoints."]}
+    let make ?endpointId =
+      fun ?attachmentArn -> fun () -> { endpointId; attachmentArn }
     let to_value x =
       structure_to_value
-        [("EndpointId", (Option.map x.endpointId ~f:GenericString.to_value))]
+        [("EndpointId", (Option.map x.endpointId ~f:GenericString.to_value));
+        ("AttachmentArn",
+          (Option.map x.attachmentArn ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attachmentArn =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "AttachmentArn") in
       let endpointId =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "EndpointId") in
-      make ?endpointId ()
+      make ?attachmentArn ?endpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointId = field_map json "EndpointId" GenericString.of_json in
-      make ?endpointId ()
+    let of_json json__ =
+      let attachmentArn =
+        field_map json__ "AttachmentArn" GenericString.of_json in
+      let endpointId = field_map json__ "EndpointId" GenericString.of_json in
+      make ?attachmentArn ?endpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The list of endpoint objects. For custom routing, this is a list of virtual private cloud (VPC) subnet IDs."]
@@ -1994,8 +2493,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You don't have access permission."]
@@ -2013,8 +2512,8 @@ module ByoipCidrNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2033,8 +2532,8 @@ module IncorrectCidrStateException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2053,11 +2552,11 @@ module InternalServiceErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "There was an internal error for AWS Global Accelerator."]
+  end[@@ocaml.doc "There was an internal error for Global Accelerator."]
 module InvalidArgumentException =
   struct
     type nonrec t = {
@@ -2072,8 +2571,8 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An argument that you specified is invalid."]
@@ -2091,8 +2590,8 @@ module InvalidPortRangeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2111,12 +2610,12 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Processing your request would cause you to exceed an AWS Global Accelerator limit."]
+       "Processing your request would cause you to exceed an Global Accelerator limit."]
 module ListenerNotFoundException =
   struct
     type nonrec t = {
@@ -2131,8 +2630,8 @@ module ListenerNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The listener that you specified doesn't exist."]
@@ -2150,8 +2649,8 @@ module EndpointGroupNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The endpoint group that you specified doesn't exist."]
@@ -2163,6 +2662,9 @@ module EndpointConfigurations =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2199,21 +2701,60 @@ module AcceleratorNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The accelerator that you specified doesn't exist."]
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "You can't use both of those options."]
+module TransactionInProgressException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There's already a transaction in progress. Another transaction can't be processed."]
 module CustomRoutingAcceleratorAttributes =
   struct
     type nonrec t =
       {
       flowLogsEnabled: GenericBoolean.t option
         [@ocaml.doc
-          "Indicates whether flow logs are enabled. The default value is false. If the value is true, FlowLogsS3Bucket and FlowLogsS3Prefix must be specified. For more information, see Flow Logs in the AWS Global Accelerator Developer Guide."];
+          "Indicates whether flow logs are enabled. The default value is false. If the value is true, FlowLogsS3Bucket and FlowLogsS3Prefix must be specified. For more information, see Flow logs in the Global Accelerator Developer Guide."];
       flowLogsS3Bucket: GenericString.t option
         [@ocaml.doc
-          "The name of the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. The bucket must exist and have a bucket policy that grants AWS Global Accelerator permission to write to the bucket."];
+          "The name of the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. The bucket must exist and have a bucket policy that grants Global Accelerator permission to write to the bucket."];
       flowLogsS3Prefix: GenericString.t option
         [@ocaml.doc
           "The prefix for the location in the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. If you don\226\128\153t specify a prefix, the flow logs are stored in the root of the bucket. If you specify slash (/) for the S3 bucket prefix, the log file bucket folder structure will include a double slash (//), like the following: DOC-EXAMPLE-BUCKET//AWSLogs/aws_account_id"]}
@@ -2242,29 +2783,48 @@ module CustomRoutingAcceleratorAttributes =
           (Xml.child xml_arg0 "FlowLogsEnabled") in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let flowLogsS3Prefix =
-        field_map json "FlowLogsS3Prefix" GenericString.of_json in
+        field_map json__ "FlowLogsS3Prefix" GenericString.of_json in
       let flowLogsS3Bucket =
-        field_map json "FlowLogsS3Bucket" GenericString.of_json in
+        field_map json__ "FlowLogsS3Bucket" GenericString.of_json in
       let flowLogsEnabled =
-        field_map json "FlowLogsEnabled" GenericBoolean.of_json in
+        field_map json__ "FlowLogsEnabled" GenericBoolean.of_json in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attributes of a custom routing accelerator."]
+module AttachmentNotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "No cross-account attachment was found."]
 module AcceleratorAttributes =
   struct
     type nonrec t =
       {
       flowLogsEnabled: GenericBoolean.t option
         [@ocaml.doc
-          "Indicates whether flow logs are enabled. The default value is false. If the value is true, FlowLogsS3Bucket and FlowLogsS3Prefix must be specified. For more information, see Flow Logs in the AWS Global Accelerator Developer Guide."];
+          "Indicates whether flow logs are enabled. The default value is false. If the value is true, FlowLogsS3Bucket and FlowLogsS3Prefix must be specified. For more information, see Flow logs in the Global Accelerator Developer Guide."];
       flowLogsS3Bucket: GenericString.t option
         [@ocaml.doc
-          "The name of the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. The bucket must exist and have a bucket policy that grants AWS Global Accelerator permission to write to the bucket."];
+          "The name of the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. The bucket must exist and have a bucket policy that grants Global Accelerator permission to write to the bucket."];
       flowLogsS3Prefix: GenericString.t option
         [@ocaml.doc
-          "The prefix for the location in the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. If you don\226\128\153t specify a prefix, the flow logs are stored in the root of the bucket. If you specify slash (/) for the S3 bucket prefix, the log file bucket folder structure will include a double slash (//), like the following: s3-bucket_name//AWSLogs/aws_account_id"]}
+          "The prefix for the location in the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. If you specify slash (/) for the S3 bucket prefix, the log file bucket folder structure will include a double slash (//), like the following: s3-bucket_name//AWSLogs/aws_account_id"]}
     let make ?flowLogsEnabled =
       fun ?flowLogsS3Bucket ->
         fun ?flowLogsS3Prefix ->
@@ -2290,13 +2850,13 @@ module AcceleratorAttributes =
           (Xml.child xml_arg0 "FlowLogsEnabled") in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let flowLogsS3Prefix =
-        field_map json "FlowLogsS3Prefix" GenericString.of_json in
+        field_map json__ "FlowLogsS3Prefix" GenericString.of_json in
       let flowLogsS3Bucket =
-        field_map json "FlowLogsS3Bucket" GenericString.of_json in
+        field_map json__ "FlowLogsS3Bucket" GenericString.of_json in
       let flowLogsEnabled =
-        field_map json "FlowLogsEnabled" GenericBoolean.of_json in
+        field_map json__ "FlowLogsEnabled" GenericBoolean.of_json in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attributes of an accelerator."]
@@ -2327,6 +2887,9 @@ module TagKeys =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2350,6 +2913,9 @@ module Tags =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2369,10 +2935,45 @@ module Tags =
     let of_json j = list_of_json ~kind:"Tags" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
+module EndpointIdentifiers =
+  struct
+    type nonrec t = EndpointIdentifier.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EndpointIdentifier.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EndpointIdentifier.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EndpointIdentifiers"
+        ~of_json:EndpointIdentifier.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module EndpointIds =
   struct
     type nonrec t = GenericString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GenericString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2419,13 +3020,13 @@ module CidrAuthorizationContext =
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~signature ~message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let signature = field_map_exn json "Signature" GenericString.of_json in
-      let message = field_map_exn json "Message" GenericString.of_json in
+    let of_json json__ =
+      let signature = field_map_exn json__ "Signature" GenericString.of_json in
+      let message = field_map_exn json__ "Message" GenericString.of_json in
       make ~signature ~message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides authorization for Amazon to bring a specific IP address range to a specific AWS account using bring your own IP addresses (BYOIP). For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."]
+       "Provides authorization for Amazon to bring a specific IP address range to a specific Amazon Web Services account using bring your own IP addresses (BYOIP). For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]
 module InvalidNextTokenException =
   struct
     type nonrec t = {
@@ -2440,8 +3041,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There isn't another item to return."]
@@ -2449,6 +3050,9 @@ module Listeners =
   struct
     type nonrec t = Listener.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Listener.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2491,6 +3095,9 @@ module EndpointGroups =
   struct
     type nonrec t = EndpointGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2515,6 +3122,9 @@ module PortMappings =
   struct
     type nonrec t = PortMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortMapping.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2558,6 +3168,9 @@ module DestinationPortMappings =
   struct
     type nonrec t = DestinationPortMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DestinationPortMapping.to_value)) |>
         (fun x -> `List x)
@@ -2594,8 +3207,8 @@ module EndpointNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The endpoint that you specified doesn't exist."]
@@ -2603,6 +3216,9 @@ module CustomRoutingListeners =
   struct
     type nonrec t = CustomRoutingListener.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomRoutingListener.to_value)) |>
         (fun x -> `List x)
@@ -2629,6 +3245,9 @@ module CustomRoutingEndpointGroups =
   struct
     type nonrec t = CustomRoutingEndpointGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomRoutingEndpointGroup.to_value)) |>
         (fun x -> `List x)
@@ -2655,6 +3274,9 @@ module CustomRoutingAccelerators =
   struct
     type nonrec t = CustomRoutingAccelerator.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomRoutingAccelerator.to_value)) |>
         (fun x -> `List x)
@@ -2677,10 +3299,96 @@ module CustomRoutingAccelerators =
         ~of_json:CustomRoutingAccelerator.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CrossAccountResources =
+  struct
+    type nonrec t = CrossAccountResource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CrossAccountResource.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CrossAccountResource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CrossAccountResources"
+        ~of_json:CrossAccountResource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AwsAccountIds =
+  struct
+    type nonrec t = AwsAccountId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AwsAccountId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AwsAccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AwsAccountIds" ~of_json:AwsAccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Attachments =
+  struct
+    type nonrec t = Attachment.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Attachment.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Attachment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Attachments" ~of_json:Attachment.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ByoipCidrs =
   struct
     type nonrec t = ByoipCidr.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ByoipCidr.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2705,6 +3413,9 @@ module Accelerators =
   struct
     type nonrec t = Accelerator.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Accelerator.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2730,6 +3441,9 @@ module DestinationAddresses =
     type nonrec t = IpAddress.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2755,6 +3469,9 @@ module DestinationPorts =
     type nonrec t = PortNumber.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortNumber.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2803,8 +3520,8 @@ module EndpointGroupAlreadyExistsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The endpoint group that you specified already exists."]
@@ -2817,6 +3534,9 @@ module CustomRoutingDestinationConfigurations =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomRoutingDestinationConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2840,25 +3560,6 @@ module CustomRoutingDestinationConfigurations =
         ~of_json:CustomRoutingDestinationConfiguration.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ConflictException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "You can't use both of those options."]
 module EndpointAlreadyExistsException =
   struct
     type nonrec t = {
@@ -2873,8 +3574,8 @@ module EndpointAlreadyExistsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The endpoint that you specified doesn't exist."]
@@ -2886,6 +3587,9 @@ module CustomRoutingEndpointConfigurations =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomRoutingEndpointConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2914,7 +3618,7 @@ module WithdrawByoipCidrResponse =
     type nonrec t =
       {
       byoipCidr: ByoipCidr.t option
-        [@ocaml.doc "Information about the address pool."]}
+        [@ocaml.doc "Information about the BYOIP address pool."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ByoipCidrNotFoundException of ByoipCidrNotFoundException.t 
@@ -2993,18 +3697,19 @@ module WithdrawByoipCidrResponse =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "ByoipCidr") in
       make ?byoipCidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
+    let of_json json__ =
+      let byoipCidr = field_map json__ "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops advertising an address range that is provisioned as an address pool. You can perform this operation at most once every 10 seconds, even if you specify different address ranges each time. It can take a few minutes before traffic to the specified addresses stops routing to AWS because of propagation delays. For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."]
+       "Stops advertising an address range that is provisioned as an address pool. You can perform this operation at most once every 10 seconds, even if you specify different address ranges each time. It can take a few minutes before traffic to the specified addresses stops routing to Amazon Web Services because of propagation delays. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]
 module WithdrawByoipCidrRequest =
   struct
     type nonrec t =
       {
       cidr: GenericString.t
-        [@ocaml.doc "The address range, in CIDR notation."]}
+        [@ocaml.doc
+          "The address range, in CIDR notation. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]}
     let context_ = "WithdrawByoipCidrRequest"
     let make ~cidr = fun () -> { cidr }
     let to_value x =
@@ -3016,12 +3721,12 @@ module WithdrawByoipCidrRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cidr = field_map_exn json "Cidr" GenericString.of_json in
+    let of_json json__ =
+      let cidr = field_map_exn json__ "Cidr" GenericString.of_json in
       make ~cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops advertising an address range that is provisioned as an address pool. You can perform this operation at most once every 10 seconds, even if you specify different address ranges each time. It can take a few minutes before traffic to the specified addresses stops routing to AWS because of propagation delays. For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."]
+       "Stops advertising an address range that is provisioned as an address pool. You can perform this operation at most once every 10 seconds, even if you specify different address ranges each time. It can take a few minutes before traffic to the specified addresses stops routing to Amazon Web Services because of propagation delays. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]
 module UpdateListenerResponse =
   struct
     type nonrec t =
@@ -3103,8 +3808,8 @@ module UpdateListenerResponse =
         (Option.map ~f:Listener.of_xml) (Xml.child xml_arg0 "Listener") in
       make ?listener ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listener = field_map json "Listener" Listener.of_json in
+    let of_json json__ =
+      let listener = field_map json__ "Listener" Listener.of_json in
       make ?listener ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a listener."]
@@ -3123,7 +3828,7 @@ module UpdateListenerRequest =
           "The updated protocol for the connections from clients to the accelerator."];
       clientAffinity: ClientAffinity.t option
         [@ocaml.doc
-          "Client affinity lets you direct all requests from a user to the same endpoint, if you have stateful applications, regardless of the port and protocol of the client request. Client affinity gives you control over whether to always route each client to the same specific endpoint. AWS Global Accelerator uses a consistent-flow hashing algorithm to choose the optimal endpoint for a connection. If client affinity is NONE, Global Accelerator uses the \"five-tuple\" (5-tuple) properties\226\128\148source IP address, source port, destination IP address, destination port, and protocol\226\128\148to select the hash value, and then chooses the best endpoint. However, with this setting, if someone uses different ports to connect to Global Accelerator, their connections might not be always routed to the same endpoint because the hash value changes. If you want a given client to always be routed to the same endpoint, set client affinity to SOURCE_IP instead. When you use the SOURCE_IP setting, Global Accelerator uses the \"two-tuple\" (2-tuple) properties\226\128\148 source (client) IP address and destination IP address\226\128\148to select the hash value. The default value is NONE."]}
+          "Client affinity lets you direct all requests from a user to the same endpoint, if you have stateful applications, regardless of the port and protocol of the client request. Client affinity gives you control over whether to always route each client to the same specific endpoint. Global Accelerator uses a consistent-flow hashing algorithm to choose the optimal endpoint for a connection. If client affinity is NONE, Global Accelerator uses the \"five-tuple\" (5-tuple) properties\226\128\148source IP address, source port, destination IP address, destination port, and protocol\226\128\148to select the hash value, and then chooses the best endpoint. However, with this setting, if someone uses different ports to connect to Global Accelerator, their connections might not be always routed to the same endpoint because the hash value changes. If you want a given client to always be routed to the same endpoint, set client affinity to SOURCE_IP instead. When you use the SOURCE_IP setting, Global Accelerator uses the \"two-tuple\" (2-tuple) properties\226\128\148 source (client) IP address and destination IP address\226\128\148to select the hash value. The default value is NONE."]}
     let context_ = "UpdateListenerRequest"
     let make ?portRanges =
       fun ?protocol ->
@@ -3151,13 +3856,13 @@ module UpdateListenerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ?clientAffinity ?protocol ?portRanges ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientAffinity =
-        field_map json "ClientAffinity" ClientAffinity.of_json in
-      let protocol = field_map json "Protocol" Protocol.of_json in
-      let portRanges = field_map json "PortRanges" PortRanges.of_json in
+        field_map json__ "ClientAffinity" ClientAffinity.of_json in
+      let protocol = field_map json__ "Protocol" Protocol.of_json in
+      let portRanges = field_map json__ "PortRanges" PortRanges.of_json in
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ?clientAffinity ?protocol ?portRanges ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a listener."]
@@ -3247,9 +3952,9 @@ module UpdateEndpointGroupResponse =
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroup =
-        field_map json "EndpointGroup" EndpointGroup.of_json in
+        field_map json__ "EndpointGroup" EndpointGroup.of_json in
       make ?endpointGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3265,13 +3970,13 @@ module UpdateEndpointGroupRequest =
           "The list of endpoint objects. A resource must be valid and active when you add it as an endpoint."];
       trafficDialPercentage: TrafficDialPercentage.t option
         [@ocaml.doc
-          "The percentage of traffic to send to an AWS Region. Additional traffic is distributed to other endpoint groups for this listener. Use this action to increase (dial up) or decrease (dial down) traffic to a specific Region. The percentage is applied to the traffic that would otherwise have been routed to the Region based on optimal routing. The default value is 100."];
+          "The percentage of traffic to send to an Amazon Web Services Region. Additional traffic is distributed to other endpoint groups for this listener. Use this action to increase (dial up) or decrease (dial down) traffic to a specific Region. The percentage is applied to the traffic that would otherwise have been routed to the Region based on optimal routing. The default value is 100."];
       healthCheckPort: HealthCheckPort.t option
         [@ocaml.doc
-          "The port that AWS Global Accelerator uses to check the health of endpoints that are part of this endpoint group. The default port is the listener port that this endpoint group is associated with. If the listener port is a list of ports, Global Accelerator uses the first port in the list."];
+          "The port that Global Accelerator uses to check the health of endpoints that are part of this endpoint group. The default port is the listener port that this endpoint group is associated with. If the listener port is a list of ports, Global Accelerator uses the first port in the list."];
       healthCheckProtocol: HealthCheckProtocol.t option
         [@ocaml.doc
-          "The protocol that AWS Global Accelerator uses to check the health of endpoints that are part of this endpoint group. The default value is TCP."];
+          "The protocol that Global Accelerator uses to check the health of endpoints that are part of this endpoint group. The default value is TCP."];
       healthCheckPath: HealthCheckPath.t option
         [@ocaml.doc
           "If the protocol is HTTP/S, then this specifies the path that is the destination for health check targets. The default value is slash (/)."];
@@ -3283,7 +3988,7 @@ module UpdateEndpointGroupRequest =
           "The number of consecutive health checks required to set the state of a healthy endpoint to unhealthy, or to set an unhealthy endpoint to healthy. The default value is 3."];
       portOverrides: PortOverrides.t option
         [@ocaml.doc
-          "Override specific listener ports used to route traffic to endpoints that are part of this endpoint group. For example, you can create a port override in which the listener receives user traffic on ports 80 and 443, but your accelerator routes that traffic to ports 1080 and 1443, respectively, on the endpoints. For more information, see Port overrides in the AWS Global Accelerator Developer Guide."]}
+          "Override specific listener ports used to route traffic to endpoints that are part of this endpoint group. For example, you can create a port override in which the listener receives user traffic on ports 80 and 443, but your accelerator routes that traffic to ports 1080 and 1443, respectively, on the endpoints. For more information, see Overriding listener ports in the Global Accelerator Developer Guide."]}
     let context_ = "UpdateEndpointGroupRequest"
     let make ?endpointConfigurations =
       fun ?trafficDialPercentage ->
@@ -3362,27 +4067,28 @@ module UpdateEndpointGroupRequest =
         ?healthCheckPath ?healthCheckProtocol ?healthCheckPort
         ?trafficDialPercentage ?endpointConfigurations ~endpointGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portOverrides =
-        field_map json "PortOverrides" PortOverrides.of_json in
+        field_map json__ "PortOverrides" PortOverrides.of_json in
       let thresholdCount =
-        field_map json "ThresholdCount" ThresholdCount.of_json in
+        field_map json__ "ThresholdCount" ThresholdCount.of_json in
       let healthCheckIntervalSeconds =
-        field_map json "HealthCheckIntervalSeconds"
+        field_map json__ "HealthCheckIntervalSeconds"
           HealthCheckIntervalSeconds.of_json in
       let healthCheckPath =
-        field_map json "HealthCheckPath" HealthCheckPath.of_json in
+        field_map json__ "HealthCheckPath" HealthCheckPath.of_json in
       let healthCheckProtocol =
-        field_map json "HealthCheckProtocol" HealthCheckProtocol.of_json in
+        field_map json__ "HealthCheckProtocol" HealthCheckProtocol.of_json in
       let healthCheckPort =
-        field_map json "HealthCheckPort" HealthCheckPort.of_json in
+        field_map json__ "HealthCheckPort" HealthCheckPort.of_json in
       let trafficDialPercentage =
-        field_map json "TrafficDialPercentage" TrafficDialPercentage.of_json in
+        field_map json__ "TrafficDialPercentage"
+          TrafficDialPercentage.of_json in
       let endpointConfigurations =
-        field_map json "EndpointConfigurations"
+        field_map json__ "EndpointConfigurations"
           EndpointConfigurations.of_json in
       let endpointGroupArn =
-        field_map_exn json "EndpointGroupArn" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
       make ?portOverrides ?thresholdCount ?healthCheckIntervalSeconds
         ?healthCheckPath ?healthCheckProtocol ?healthCheckPort
         ?trafficDialPercentage ?endpointConfigurations ~endpointGroupArn ()
@@ -3473,8 +4179,9 @@ module UpdateCustomRoutingListenerResponse =
           (Xml.child xml_arg0 "Listener") in
       make ?listener ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listener = field_map json "Listener" CustomRoutingListener.of_json in
+    let of_json json__ =
+      let listener =
+        field_map json__ "Listener" CustomRoutingListener.of_json in
       make ?listener ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a listener for a custom routing accelerator."]
@@ -3505,10 +4212,10 @@ module UpdateCustomRoutingListenerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~portRanges ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portRanges = field_map_exn json "PortRanges" PortRanges.of_json in
+    let of_json json__ =
+      let portRanges = field_map_exn json__ "PortRanges" PortRanges.of_json in
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ~portRanges ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a listener for a custom routing accelerator."]
@@ -3521,8 +4228,10 @@ module UpdateCustomRoutingAcceleratorResponse =
           "Information about the updated custom routing accelerator."]}
     type nonrec error =
       [ `AcceleratorNotFoundException of AcceleratorNotFoundException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
+      | `TransactionInProgressException of TransactionInProgressException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?accelerator = fun () -> { accelerator }
     let error_of_json name json =
@@ -3530,11 +4239,16 @@ module UpdateCustomRoutingAcceleratorResponse =
       | "AcceleratorNotFoundException" ->
           `AcceleratorNotFoundException
             (AcceleratorNotFoundException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3543,11 +4257,16 @@ module UpdateCustomRoutingAcceleratorResponse =
       | "AcceleratorNotFoundException" ->
           `AcceleratorNotFoundException
             (AcceleratorNotFoundException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3556,6 +4275,10 @@ module UpdateCustomRoutingAcceleratorResponse =
           `Assoc
             [("error", (`String "AcceleratorNotFoundException"));
             ("details", (AcceleratorNotFoundException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -3564,6 +4287,10 @@ module UpdateCustomRoutingAcceleratorResponse =
           `Assoc
             [("error", (`String "InvalidArgumentException"));
             ("details", (InvalidArgumentException.to_json e))]
+      | `TransactionInProgressException e ->
+          `Assoc
+            [("error", (`String "TransactionInProgressException"));
+            ("details", (TransactionInProgressException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3580,9 +4307,9 @@ module UpdateCustomRoutingAcceleratorResponse =
           (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accelerator =
-        field_map json "Accelerator" CustomRoutingAccelerator.of_json in
+        field_map json__ "Accelerator" CustomRoutingAccelerator.of_json in
       make ?accelerator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a custom routing accelerator."]
@@ -3595,29 +4322,37 @@ module UpdateCustomRoutingAcceleratorRequest =
           "The Amazon Resource Name (ARN) of the accelerator to update."];
       name: GenericString.t option
         [@ocaml.doc
-          "The name of the accelerator. The name can have a maximum of 32 characters, must contain only alphanumeric characters or hyphens (-), and must not begin or end with a hyphen."];
+          "The name of the accelerator. The name can have a maximum of 64 characters, must contain only alphanumeric characters, periods (.), or hyphens (-), and must not begin or end with a hyphen or period."];
       ipAddressType: IpAddressType.t option
-        [@ocaml.doc "The value for the address type must be IPv4."];
+        [@ocaml.doc
+          "The IP address type that an accelerator supports. For a custom routing accelerator, the value must be IPV4."];
+      ipAddresses: IpAddresses.t option
+        [@ocaml.doc "The IP addresses for an accelerator."];
       enabled: GenericBoolean.t option
         [@ocaml.doc
           "Indicates whether an accelerator is enabled. The value is true or false. The default value is true. If the value is set to true, the accelerator cannot be deleted. If set to false, the accelerator can be deleted."]}
     let context_ = "UpdateCustomRoutingAcceleratorRequest"
     let make ?name =
       fun ?ipAddressType ->
-        fun ?enabled ->
-          fun ~acceleratorArn ->
-            fun () -> { name; ipAddressType; enabled; acceleratorArn }
+        fun ?ipAddresses ->
+          fun ?enabled ->
+            fun ~acceleratorArn ->
+              fun () ->
+                { name; ipAddressType; ipAddresses; enabled; acceleratorArn }
     let to_value x =
       structure_to_value
         [("AcceleratorArn", (Some (GenericString.to_value x.acceleratorArn)));
         ("Name", (Option.map x.name ~f:GenericString.to_value));
         ("IpAddressType",
           (Option.map x.ipAddressType ~f:IpAddressType.to_value));
+        ("IpAddresses", (Option.map x.ipAddresses ~f:IpAddresses.to_value));
         ("Enabled", (Option.map x.enabled ~f:GenericBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let enabled =
         (Option.map ~f:GenericBoolean.of_xml) (Xml.child xml_arg0 "Enabled") in
+      let ipAddresses =
+        (Option.map ~f:IpAddresses.of_xml) (Xml.child xml_arg0 "IpAddresses") in
       let ipAddressType =
         (Option.map ~f:IpAddressType.of_xml)
           (Xml.child xml_arg0 "IpAddressType") in
@@ -3626,16 +4361,17 @@ module UpdateCustomRoutingAcceleratorRequest =
       let acceleratorArn =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
-      make ?enabled ?ipAddressType ?name ~acceleratorArn ()
+      make ?enabled ?ipAddresses ?ipAddressType ?name ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" GenericBoolean.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" GenericBoolean.of_json in
+      let ipAddresses = field_map json__ "IpAddresses" IpAddresses.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
-      let name = field_map json "Name" GenericString.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let name = field_map json__ "Name" GenericString.of_json in
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
-      make ?enabled ?ipAddressType ?name ~acceleratorArn ()
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
+      make ?enabled ?ipAddresses ?ipAddressType ?name ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a custom routing accelerator."]
 module UpdateCustomRoutingAcceleratorAttributesResponse =
@@ -3649,6 +4385,7 @@ module UpdateCustomRoutingAcceleratorAttributesResponse =
       | `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
+      | `TransactionInProgressException of TransactionInProgressException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?acceleratorAttributes = fun () -> { acceleratorAttributes }
     let error_of_json name json =
@@ -3663,6 +4400,9 @@ module UpdateCustomRoutingAcceleratorAttributesResponse =
             (InternalServiceErrorException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3678,6 +4418,9 @@ module UpdateCustomRoutingAcceleratorAttributesResponse =
             (InternalServiceErrorException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3698,6 +4441,10 @@ module UpdateCustomRoutingAcceleratorAttributesResponse =
           `Assoc
             [("error", (`String "InvalidArgumentException"));
             ("details", (InvalidArgumentException.to_json e))]
+      | `TransactionInProgressException e ->
+          `Assoc
+            [("error", (`String "TransactionInProgressException"));
+            ("details", (TransactionInProgressException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3715,9 +4462,9 @@ module UpdateCustomRoutingAcceleratorAttributesResponse =
           (Xml.child xml_arg0 "AcceleratorAttributes") in
       make ?acceleratorAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorAttributes =
-        field_map json "AcceleratorAttributes"
+        field_map json__ "AcceleratorAttributes"
           CustomRoutingAcceleratorAttributes.of_json in
       make ?acceleratorAttributes ()
     let to_json v = composed_to_json to_value v
@@ -3731,10 +4478,10 @@ module UpdateCustomRoutingAcceleratorAttributesRequest =
           "The Amazon Resource Name (ARN) of the custom routing accelerator to update attributes for."];
       flowLogsEnabled: GenericBoolean.t option
         [@ocaml.doc
-          "Update whether flow logs are enabled. The default value is false. If the value is true, FlowLogsS3Bucket and FlowLogsS3Prefix must be specified. For more information, see Flow Logs in the AWS Global Accelerator Developer Guide."];
+          "Update whether flow logs are enabled. The default value is false. If the value is true, FlowLogsS3Bucket and FlowLogsS3Prefix must be specified. For more information, see Flow logs in the Global Accelerator Developer Guide."];
       flowLogsS3Bucket: GenericString.t option
         [@ocaml.doc
-          "The name of the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. The bucket must exist and have a bucket policy that grants AWS Global Accelerator permission to write to the bucket."];
+          "The name of the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. The bucket must exist and have a bucket policy that grants Global Accelerator permission to write to the bucket."];
       flowLogsS3Prefix: GenericString.t option
         [@ocaml.doc
           "Update the prefix for the location in the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. If you don\226\128\153t specify a prefix, the flow logs are stored in the root of the bucket. If you specify slash (/) for the S3 bucket prefix, the log file bucket folder structure will include a double slash (//), like the following: DOC-EXAMPLE-BUCKET//AWSLogs/aws_account_id"]}
@@ -3776,62 +4523,84 @@ module UpdateCustomRoutingAcceleratorAttributesRequest =
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled
         ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let flowLogsS3Prefix =
-        field_map json "FlowLogsS3Prefix" GenericString.of_json in
+        field_map json__ "FlowLogsS3Prefix" GenericString.of_json in
       let flowLogsS3Bucket =
-        field_map json "FlowLogsS3Bucket" GenericString.of_json in
+        field_map json__ "FlowLogsS3Bucket" GenericString.of_json in
       let flowLogsEnabled =
-        field_map json "FlowLogsEnabled" GenericBoolean.of_json in
+        field_map json__ "FlowLogsEnabled" GenericBoolean.of_json in
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled
         ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update the attributes for a custom routing accelerator."]
-module UpdateAcceleratorResponse =
+module UpdateCrossAccountAttachmentResponse =
   struct
     type nonrec t =
       {
-      accelerator: Accelerator.t option
-        [@ocaml.doc "Information about the updated accelerator."]}
+      crossAccountAttachment: Attachment.t option
+        [@ocaml.doc
+          "Information about the updated cross-account attachment."]}
     type nonrec error =
-      [ `AcceleratorNotFoundException of AcceleratorNotFoundException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AttachmentNotFoundException of AttachmentNotFoundException.t 
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `TransactionInProgressException of TransactionInProgressException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?accelerator = fun () -> { accelerator }
+    let make ?crossAccountAttachment = fun () -> { crossAccountAttachment }
     let error_of_json name json =
       match name with
-      | "AcceleratorNotFoundException" ->
-          `AcceleratorNotFoundException
-            (AcceleratorNotFoundException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AttachmentNotFoundException" ->
+          `AttachmentNotFoundException
+            (AttachmentNotFoundException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
-      | "AcceleratorNotFoundException" ->
-          `AcceleratorNotFoundException
-            (AcceleratorNotFoundException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AttachmentNotFoundException" ->
+          `AttachmentNotFoundException
+            (AttachmentNotFoundException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
-      | `AcceleratorNotFoundException e ->
+      | `AccessDeniedException e ->
           `Assoc
-            [("error", (`String "AcceleratorNotFoundException"));
-            ("details", (AcceleratorNotFoundException.to_json e))]
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AttachmentNotFoundException e ->
+          `Assoc
+            [("error", (`String "AttachmentNotFoundException"));
+            ("details", (AttachmentNotFoundException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -3840,6 +4609,201 @@ module UpdateAcceleratorResponse =
           `Assoc
             [("error", (`String "InvalidArgumentException"));
             ("details", (InvalidArgumentException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `TransactionInProgressException e ->
+          `Assoc
+            [("error", (`String "TransactionInProgressException"));
+            ("details", (TransactionInProgressException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CrossAccountAttachment",
+           (Option.map x.crossAccountAttachment ~f:Attachment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let crossAccountAttachment =
+        (Option.map ~f:Attachment.of_xml)
+          (Xml.child xml_arg0 "CrossAccountAttachment") in
+      make ?crossAccountAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let crossAccountAttachment =
+        field_map json__ "CrossAccountAttachment" Attachment.of_json in
+      make ?crossAccountAttachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update a cross-account attachment to add or remove principals or resources. When you update an attachment to remove a principal (account ID or accelerator) or a resource, Global Accelerator revokes the permission for specific resources. For more information, see Working with cross-account attachments and resources in Global Accelerator in the Global Accelerator Developer Guide."]
+module UpdateCrossAccountAttachmentRequest =
+  struct
+    type nonrec t =
+      {
+      attachmentArn: GenericString.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cross-account attachment to update."];
+      name: AttachmentName.t option
+        [@ocaml.doc "The name of the cross-account attachment."];
+      addPrincipals: Principals.t option
+        [@ocaml.doc
+          "The principals to add to the cross-account attachment. A principal is an account or the Amazon Resource Name (ARN) of an accelerator that the attachment gives permission to work with resources from another account. The resources are also listed in the attachment. To add more than one principal, separate the account numbers or accelerator ARNs, or both, with commas."];
+      removePrincipals: Principals.t option
+        [@ocaml.doc
+          "The principals to remove from the cross-account attachment. A principal is an account or the Amazon Resource Name (ARN) of an accelerator that the attachment gives permission to work with resources from another account. The resources are also listed in the attachment. To remove more than one principal, separate the account numbers or accelerator ARNs, or both, with commas."];
+      addResources: Resources.t option
+        [@ocaml.doc
+          "The resources to add to the cross-account attachment. A resource listed in a cross-account attachment can be used with an accelerator by the principals that are listed in the attachment. To add more than one resource, separate the resource ARNs with commas."];
+      removeResources: Resources.t option
+        [@ocaml.doc
+          "The resources to remove from the cross-account attachment. A resource listed in a cross-account attachment can be used with an accelerator by the principals that are listed in the attachment. To remove more than one resource, separate the resource ARNs with commas."]}
+    let context_ = "UpdateCrossAccountAttachmentRequest"
+    let make ?name =
+      fun ?addPrincipals ->
+        fun ?removePrincipals ->
+          fun ?addResources ->
+            fun ?removeResources ->
+              fun ~attachmentArn ->
+                fun () ->
+                  {
+                    name;
+                    addPrincipals;
+                    removePrincipals;
+                    addResources;
+                    removeResources;
+                    attachmentArn
+                  }
+    let to_value x =
+      structure_to_value
+        [("AttachmentArn", (Some (GenericString.to_value x.attachmentArn)));
+        ("Name", (Option.map x.name ~f:AttachmentName.to_value));
+        ("AddPrincipals",
+          (Option.map x.addPrincipals ~f:Principals.to_value));
+        ("RemovePrincipals",
+          (Option.map x.removePrincipals ~f:Principals.to_value));
+        ("AddResources", (Option.map x.addResources ~f:Resources.to_value));
+        ("RemoveResources",
+          (Option.map x.removeResources ~f:Resources.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let removeResources =
+        (Option.map ~f:Resources.of_xml)
+          (Xml.child xml_arg0 "RemoveResources") in
+      let addResources =
+        (Option.map ~f:Resources.of_xml) (Xml.child xml_arg0 "AddResources") in
+      let removePrincipals =
+        (Option.map ~f:Principals.of_xml)
+          (Xml.child xml_arg0 "RemovePrincipals") in
+      let addPrincipals =
+        (Option.map ~f:Principals.of_xml)
+          (Xml.child xml_arg0 "AddPrincipals") in
+      let name =
+        (Option.map ~f:AttachmentName.of_xml) (Xml.child xml_arg0 "Name") in
+      let attachmentArn =
+        GenericString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttachmentArn") in
+      make ?removeResources ?addResources ?removePrincipals ?addPrincipals
+        ?name ~attachmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let removeResources =
+        field_map json__ "RemoveResources" Resources.of_json in
+      let addResources = field_map json__ "AddResources" Resources.of_json in
+      let removePrincipals =
+        field_map json__ "RemovePrincipals" Principals.of_json in
+      let addPrincipals = field_map json__ "AddPrincipals" Principals.of_json in
+      let name = field_map json__ "Name" AttachmentName.of_json in
+      let attachmentArn =
+        field_map_exn json__ "AttachmentArn" GenericString.of_json in
+      make ?removeResources ?addResources ?removePrincipals ?addPrincipals
+        ?name ~attachmentArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update a cross-account attachment to add or remove principals or resources. When you update an attachment to remove a principal (account ID or accelerator) or a resource, Global Accelerator revokes the permission for specific resources. For more information, see Working with cross-account attachments and resources in Global Accelerator in the Global Accelerator Developer Guide."]
+module UpdateAcceleratorResponse =
+  struct
+    type nonrec t =
+      {
+      accelerator: Accelerator.t option
+        [@ocaml.doc "Information about the updated accelerator."]}
+    type nonrec error =
+      [ `AcceleratorNotFoundException of AcceleratorNotFoundException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `TransactionInProgressException of TransactionInProgressException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accelerator = fun () -> { accelerator }
+    let error_of_json name json =
+      match name with
+      | "AcceleratorNotFoundException" ->
+          `AcceleratorNotFoundException
+            (AcceleratorNotFoundException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AcceleratorNotFoundException" ->
+          `AcceleratorNotFoundException
+            (AcceleratorNotFoundException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AcceleratorNotFoundException e ->
+          `Assoc
+            [("error", (`String "AcceleratorNotFoundException"));
+            ("details", (AcceleratorNotFoundException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `TransactionInProgressException e ->
+          `Assoc
+            [("error", (`String "TransactionInProgressException"));
+            ("details", (TransactionInProgressException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3854,12 +4818,12 @@ module UpdateAcceleratorResponse =
         (Option.map ~f:Accelerator.of_xml) (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accelerator = field_map json "Accelerator" Accelerator.of_json in
+    let of_json json__ =
+      let accelerator = field_map json__ "Accelerator" Accelerator.of_json in
       make ?accelerator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update an accelerator. Global Accelerator is a global service that supports endpoints in multiple AWS Regions but you must specify the US West (Oregon) Region to create or update accelerators."]
+       "Update an accelerator to make changes, such as the following: Change the name of the accelerator. Disable the accelerator so that it no longer accepts or routes traffic, or so that you can delete it. Enable the accelerator, if it is disabled. Change the IP address type to dual-stack if it is IPv4, or change the IP address type to IPv4 if it's dual-stack. Be aware that static IP addresses remain assigned to your accelerator for as long as it exists, even if you disable the accelerator and it no longer accepts or routes traffic. However, when you delete the accelerator, you lose the static IP addresses that are assigned to it, so you can no longer route traffic by using them. Global Accelerator is a global service that supports endpoints in multiple Amazon Web Services Regions but you must specify the US West (Oregon) Region to create, update, or otherwise work with accelerators. That is, for example, specify --region us-west-2 on Amazon Web Services CLI commands."]
 module UpdateAcceleratorRequest =
   struct
     type nonrec t =
@@ -3869,29 +4833,37 @@ module UpdateAcceleratorRequest =
           "The Amazon Resource Name (ARN) of the accelerator to update."];
       name: GenericString.t option
         [@ocaml.doc
-          "The name of the accelerator. The name can have a maximum of 32 characters, must contain only alphanumeric characters or hyphens (-), and must not begin or end with a hyphen."];
+          "The name of the accelerator. The name can have a maximum of 64 characters, must contain only alphanumeric characters, periods (.), or hyphens (-), and must not begin or end with a hyphen or period."];
       ipAddressType: IpAddressType.t option
-        [@ocaml.doc "The IP address type, which must be IPv4."];
+        [@ocaml.doc
+          "The IP address type that an accelerator supports. For a standard accelerator, the value can be IPV4 or DUAL_STACK."];
+      ipAddresses: IpAddresses.t option
+        [@ocaml.doc "The IP addresses for an accelerator."];
       enabled: GenericBoolean.t option
         [@ocaml.doc
           "Indicates whether an accelerator is enabled. The value is true or false. The default value is true. If the value is set to true, the accelerator cannot be deleted. If set to false, the accelerator can be deleted."]}
     let context_ = "UpdateAcceleratorRequest"
     let make ?name =
       fun ?ipAddressType ->
-        fun ?enabled ->
-          fun ~acceleratorArn ->
-            fun () -> { name; ipAddressType; enabled; acceleratorArn }
+        fun ?ipAddresses ->
+          fun ?enabled ->
+            fun ~acceleratorArn ->
+              fun () ->
+                { name; ipAddressType; ipAddresses; enabled; acceleratorArn }
     let to_value x =
       structure_to_value
         [("AcceleratorArn", (Some (GenericString.to_value x.acceleratorArn)));
         ("Name", (Option.map x.name ~f:GenericString.to_value));
         ("IpAddressType",
           (Option.map x.ipAddressType ~f:IpAddressType.to_value));
+        ("IpAddresses", (Option.map x.ipAddresses ~f:IpAddresses.to_value));
         ("Enabled", (Option.map x.enabled ~f:GenericBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let enabled =
         (Option.map ~f:GenericBoolean.of_xml) (Xml.child xml_arg0 "Enabled") in
+      let ipAddresses =
+        (Option.map ~f:IpAddresses.of_xml) (Xml.child xml_arg0 "IpAddresses") in
       let ipAddressType =
         (Option.map ~f:IpAddressType.of_xml)
           (Xml.child xml_arg0 "IpAddressType") in
@@ -3900,19 +4872,20 @@ module UpdateAcceleratorRequest =
       let acceleratorArn =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
-      make ?enabled ?ipAddressType ?name ~acceleratorArn ()
+      make ?enabled ?ipAddresses ?ipAddressType ?name ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" GenericBoolean.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" GenericBoolean.of_json in
+      let ipAddresses = field_map json__ "IpAddresses" IpAddresses.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
-      let name = field_map json "Name" GenericString.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let name = field_map json__ "Name" GenericString.of_json in
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
-      make ?enabled ?ipAddressType ?name ~acceleratorArn ()
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
+      make ?enabled ?ipAddresses ?ipAddressType ?name ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update an accelerator. Global Accelerator is a global service that supports endpoints in multiple AWS Regions but you must specify the US West (Oregon) Region to create or update accelerators."]
+       "Update an accelerator to make changes, such as the following: Change the name of the accelerator. Disable the accelerator so that it no longer accepts or routes traffic, or so that you can delete it. Enable the accelerator, if it is disabled. Change the IP address type to dual-stack if it is IPv4, or change the IP address type to IPv4 if it's dual-stack. Be aware that static IP addresses remain assigned to your accelerator for as long as it exists, even if you disable the accelerator and it no longer accepts or routes traffic. However, when you delete the accelerator, you lose the static IP addresses that are assigned to it, so you can no longer route traffic by using them. Global Accelerator is a global service that supports endpoints in multiple Amazon Web Services Regions but you must specify the US West (Oregon) Region to create, update, or otherwise work with accelerators. That is, for example, specify --region us-west-2 on Amazon Web Services CLI commands."]
 module UpdateAcceleratorAttributesResponse =
   struct
     type nonrec t =
@@ -3924,6 +4897,7 @@ module UpdateAcceleratorAttributesResponse =
       | `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
+      | `TransactionInProgressException of TransactionInProgressException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?acceleratorAttributes = fun () -> { acceleratorAttributes }
     let error_of_json name json =
@@ -3938,6 +4912,9 @@ module UpdateAcceleratorAttributesResponse =
             (InternalServiceErrorException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3953,6 +4930,9 @@ module UpdateAcceleratorAttributesResponse =
             (InternalServiceErrorException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3973,6 +4953,10 @@ module UpdateAcceleratorAttributesResponse =
           `Assoc
             [("error", (`String "InvalidArgumentException"));
             ("details", (InvalidArgumentException.to_json e))]
+      | `TransactionInProgressException e ->
+          `Assoc
+            [("error", (`String "TransactionInProgressException"));
+            ("details", (TransactionInProgressException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3990,9 +4974,10 @@ module UpdateAcceleratorAttributesResponse =
           (Xml.child xml_arg0 "AcceleratorAttributes") in
       make ?acceleratorAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorAttributes =
-        field_map json "AcceleratorAttributes" AcceleratorAttributes.of_json in
+        field_map json__ "AcceleratorAttributes"
+          AcceleratorAttributes.of_json in
       make ?acceleratorAttributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update the attributes for an accelerator."]
@@ -4005,13 +4990,13 @@ module UpdateAcceleratorAttributesRequest =
           "The Amazon Resource Name (ARN) of the accelerator that you want to update."];
       flowLogsEnabled: GenericBoolean.t option
         [@ocaml.doc
-          "Update whether flow logs are enabled. The default value is false. If the value is true, FlowLogsS3Bucket and FlowLogsS3Prefix must be specified. For more information, see Flow Logs in the AWS Global Accelerator Developer Guide."];
+          "Update whether flow logs are enabled. The default value is false. If the value is true, FlowLogsS3Bucket and FlowLogsS3Prefix must be specified. For more information, see Flow Logs in the Global Accelerator Developer Guide."];
       flowLogsS3Bucket: GenericString.t option
         [@ocaml.doc
-          "The name of the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. The bucket must exist and have a bucket policy that grants AWS Global Accelerator permission to write to the bucket."];
+          "The name of the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. The bucket must exist and have a bucket policy that grants Global Accelerator permission to write to the bucket."];
       flowLogsS3Prefix: GenericString.t option
         [@ocaml.doc
-          "Update the prefix for the location in the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. If you don\226\128\153t specify a prefix, the flow logs are stored in the root of the bucket. If you specify slash (/) for the S3 bucket prefix, the log file bucket folder structure will include a double slash (//), like the following: s3-bucket_name//AWSLogs/aws_account_id"]}
+          "Update the prefix for the location in the Amazon S3 bucket for the flow logs. Attribute is required if FlowLogsEnabled is true. If you specify slash (/) for the S3 bucket prefix, the log file bucket folder structure will include a double slash (//), like the following: s3-bucket_name//AWSLogs/aws_account_id"]}
     let context_ = "UpdateAcceleratorAttributesRequest"
     let make ?flowLogsEnabled =
       fun ?flowLogsS3Bucket ->
@@ -4050,15 +5035,15 @@ module UpdateAcceleratorAttributesRequest =
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled
         ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let flowLogsS3Prefix =
-        field_map json "FlowLogsS3Prefix" GenericString.of_json in
+        field_map json__ "FlowLogsS3Prefix" GenericString.of_json in
       let flowLogsS3Bucket =
-        field_map json "FlowLogsS3Bucket" GenericString.of_json in
+        field_map json__ "FlowLogsS3Bucket" GenericString.of_json in
       let flowLogsEnabled =
-        field_map json "FlowLogsEnabled" GenericBoolean.of_json in
+        field_map json__ "FlowLogsEnabled" GenericBoolean.of_json in
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled
         ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
@@ -4124,7 +5109,7 @@ module UntagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Remove tags from a Global Accelerator resource. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from an accelerator that was already removed. For more information, see Tagging in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]
+       "Remove tags from a Global Accelerator resource. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from an accelerator that was already removed. For more information, see Tagging in Global Accelerator in the Global Accelerator Developer Guide."]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -4151,13 +5136,14 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Remove tags from a Global Accelerator resource. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from an accelerator that was already removed. For more information, see Tagging in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]
+       "Remove tags from a Global Accelerator resource. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from an accelerator that was already removed. For more information, see Tagging in Global Accelerator in the Global Accelerator Developer Guide."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -4219,7 +5205,7 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Add tags to an accelerator resource. For more information, see Tagging in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]
+       "Add tags to an accelerator resource. For more information, see Tagging in Global Accelerator in the Global Accelerator Developer Guide."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -4245,13 +5231,53 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Add tags to an accelerator resource. For more information, see Tagging in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]
+       "Add tags to an accelerator resource. For more information, see Tagging in Global Accelerator in the Global Accelerator Developer Guide."]
+module RemoveEndpointsRequest =
+  struct
+    type nonrec t =
+      {
+      endpointIdentifiers: EndpointIdentifiers.t
+        [@ocaml.doc
+          "The identifiers of the endpoints that you want to remove."];
+      endpointGroupArn: GenericString.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the endpoint group."]}
+    let context_ = "RemoveEndpointsRequest"
+    let make ~endpointIdentifiers =
+      fun ~endpointGroupArn ->
+        fun () -> { endpointIdentifiers; endpointGroupArn }
+    let to_value x =
+      structure_to_value
+        [("EndpointIdentifiers",
+           (Some (EndpointIdentifiers.to_value x.endpointIdentifiers)));
+        ("EndpointGroupArn",
+          (Some (GenericString.to_value x.endpointGroupArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpointGroupArn =
+        GenericString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
+      let endpointIdentifiers =
+        EndpointIdentifiers.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndpointIdentifiers") in
+      make ~endpointGroupArn ~endpointIdentifiers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpointGroupArn =
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
+      let endpointIdentifiers =
+        field_map_exn json__ "EndpointIdentifiers"
+          EndpointIdentifiers.of_json in
+      make ~endpointGroupArn ~endpointIdentifiers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Remove endpoints from an endpoint group. The RemoveEndpoints API operation is the recommended option for removing endpoints. The alternative is to remove endpoints by updating an endpoint group by using the UpdateEndpointGroup API operation. There are two advantages to using AddEndpoints to remove endpoints instead: It's more convenient, because you only need to specify the endpoints that you want to remove. With the UpdateEndpointGroup API operation, you must specify all of the endpoints in the endpoint group except the ones that you want to remove from the group. It's faster, because Global Accelerator doesn't need to resolve any endpoints. With the UpdateEndpointGroup API operation, Global Accelerator must resolve all of the endpoints that remain in the group."]
 module RemoveCustomRoutingEndpointsRequest =
   struct
     type nonrec t =
@@ -4280,10 +5306,11 @@ module RemoveCustomRoutingEndpointsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointIds") in
       make ~endpointGroupArn ~endpointIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroupArn =
-        field_map_exn json "EndpointGroupArn" GenericString.of_json in
-      let endpointIds = field_map_exn json "EndpointIds" EndpointIds.of_json in
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
+      let endpointIds =
+        field_map_exn json__ "EndpointIds" EndpointIds.of_json in
       make ~endpointGroupArn ~endpointIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Remove endpoints from a custom routing accelerator."]
@@ -4370,19 +5397,19 @@ module ProvisionByoipCidrResponse =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "ByoipCidr") in
       make ?byoipCidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
+    let of_json json__ =
+      let byoipCidr = field_map json__ "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provisions an IP address range to use with your AWS resources through bring your own IP addresses (BYOIP) and creates a corresponding address pool. After the address range is provisioned, it is ready to be advertised using AdvertiseByoipCidr. For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."]
+       "Provisions an IP address range to use with your Amazon Web Services resources through bring your own IP addresses (BYOIP) and creates a corresponding address pool. After the address range is provisioned, it is ready to be advertised using AdvertiseByoipCidr. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]
 module ProvisionByoipCidrRequest =
   struct
     type nonrec t =
       {
       cidr: GenericString.t
         [@ocaml.doc
-          "The public IPv4 address range, in CIDR notation. The most specific IP prefix that you can specify is /24. The address range cannot overlap with another address range that you've brought to this or another Region."];
+          "The public IPv4 address range, in CIDR notation. The most specific IP prefix that you can specify is /24. The address range cannot overlap with another address range that you've brought to this Amazon Web Services Region or another Region. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."];
       cidrAuthorizationContext: CidrAuthorizationContext.t
         [@ocaml.doc
           "A signed document that proves that you are authorized to bring the specified IP address range to Amazon using BYOIP."]}
@@ -4407,15 +5434,15 @@ module ProvisionByoipCidrRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidrAuthorizationContext ~cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cidrAuthorizationContext =
-        field_map_exn json "CidrAuthorizationContext"
+        field_map_exn json__ "CidrAuthorizationContext"
           CidrAuthorizationContext.of_json in
-      let cidr = field_map_exn json "Cidr" GenericString.of_json in
+      let cidr = field_map_exn json__ "Cidr" GenericString.of_json in
       make ~cidrAuthorizationContext ~cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provisions an IP address range to use with your AWS resources through bring your own IP addresses (BYOIP) and creates a corresponding address pool. After the address range is provisioned, it is ready to be advertised using AdvertiseByoipCidr. For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."]
+       "Provisions an IP address range to use with your Amazon Web Services resources through bring your own IP addresses (BYOIP) and creates a corresponding address pool. After the address range is provisioned, it is ready to be advertised using AdvertiseByoipCidr. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -4424,8 +5451,11 @@ module ListTagsForResourceResponse =
         [@ocaml.doc "Root level tag for the Tags parameters."]}
     type nonrec error =
       [ `AcceleratorNotFoundException of AcceleratorNotFoundException.t 
+      | `AttachmentNotFoundException of AttachmentNotFoundException.t 
+      | `EndpointGroupNotFoundException of EndpointGroupNotFoundException.t 
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ListenerNotFoundException of ListenerNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?tags = fun () -> { tags }
     let error_of_json name json =
@@ -4433,11 +5463,19 @@ module ListTagsForResourceResponse =
       | "AcceleratorNotFoundException" ->
           `AcceleratorNotFoundException
             (AcceleratorNotFoundException.of_json json)
+      | "AttachmentNotFoundException" ->
+          `AttachmentNotFoundException
+            (AttachmentNotFoundException.of_json json)
+      | "EndpointGroupNotFoundException" ->
+          `EndpointGroupNotFoundException
+            (EndpointGroupNotFoundException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ListenerNotFoundException" ->
+          `ListenerNotFoundException (ListenerNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4446,11 +5484,19 @@ module ListTagsForResourceResponse =
       | "AcceleratorNotFoundException" ->
           `AcceleratorNotFoundException
             (AcceleratorNotFoundException.of_xml xml)
+      | "AttachmentNotFoundException" ->
+          `AttachmentNotFoundException
+            (AttachmentNotFoundException.of_xml xml)
+      | "EndpointGroupNotFoundException" ->
+          `EndpointGroupNotFoundException
+            (EndpointGroupNotFoundException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ListenerNotFoundException" ->
+          `ListenerNotFoundException (ListenerNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4459,6 +5505,14 @@ module ListTagsForResourceResponse =
           `Assoc
             [("error", (`String "AcceleratorNotFoundException"));
             ("details", (AcceleratorNotFoundException.to_json e))]
+      | `AttachmentNotFoundException e ->
+          `Assoc
+            [("error", (`String "AttachmentNotFoundException"));
+            ("details", (AttachmentNotFoundException.to_json e))]
+      | `EndpointGroupNotFoundException e ->
+          `Assoc
+            [("error", (`String "EndpointGroupNotFoundException"));
+            ("details", (EndpointGroupNotFoundException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -4467,6 +5521,10 @@ module ListTagsForResourceResponse =
           `Assoc
             [("error", (`String "InvalidArgumentException"));
             ("details", (InvalidArgumentException.to_json e))]
+      | `ListenerNotFoundException e ->
+          `Assoc
+            [("error", (`String "ListenerNotFoundException"));
+            ("details", (ListenerNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4479,11 +5537,11 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all tags for an accelerator. For more information, see Tagging in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]
+       "List all tags for an accelerator. For more information, see Tagging in Global Accelerator in the Global Accelerator Developer Guide."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
@@ -4503,12 +5561,13 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all tags for an accelerator. For more information, see Tagging in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]
+       "List all tags for an accelerator. For more information, see Tagging in Global Accelerator in the Global Accelerator Developer Guide."]
 module ListListenersResponse =
   struct
     type nonrec t =
@@ -4590,9 +5649,9 @@ module ListListenersResponse =
         (Option.map ~f:Listeners.of_xml) (Xml.child xml_arg0 "Listeners") in
       make ?nextToken ?listeners ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let listeners = field_map json "Listeners" Listeners.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let listeners = field_map json__ "Listeners" Listeners.of_json in
       make ?nextToken ?listeners ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the listeners for an accelerator."]
@@ -4630,11 +5689,11 @@ module ListListenersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?nextToken ?maxResults ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ?nextToken ?maxResults ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the listeners for an accelerator."]
@@ -4720,10 +5779,10 @@ module ListEndpointGroupsResponse =
           (Xml.child xml_arg0 "EndpointGroups") in
       make ?nextToken ?endpointGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
       let endpointGroups =
-        field_map json "EndpointGroups" EndpointGroups.of_json in
+        field_map json__ "EndpointGroups" EndpointGroups.of_json in
       make ?nextToken ?endpointGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4760,11 +5819,11 @@ module ListEndpointGroupsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ?nextToken ?maxResults ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ?nextToken ?maxResults ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4863,9 +5922,9 @@ module ListCustomRoutingPortMappingsResponse =
           (Xml.child xml_arg0 "PortMappings") in
       make ?nextToken ?portMappings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let portMappings = field_map json "PortMappings" PortMappings.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let portMappings = field_map json__ "PortMappings" PortMappings.of_json in
       make ?nextToken ?portMappings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4916,14 +5975,14 @@ module ListCustomRoutingPortMappingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?nextToken ?maxResults ?endpointGroupArn ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
       let maxResults =
-        field_map json "MaxResults" PortMappingsMaxResults.of_json in
+        field_map json__ "MaxResults" PortMappingsMaxResults.of_json in
       let endpointGroupArn =
-        field_map json "EndpointGroupArn" GenericString.of_json in
+        field_map json__ "EndpointGroupArn" GenericString.of_json in
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ?nextToken ?maxResults ?endpointGroupArn ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5011,10 +6070,10 @@ module ListCustomRoutingPortMappingsByDestinationResponse =
           (Xml.child xml_arg0 "DestinationPortMappings") in
       make ?nextToken ?destinationPortMappings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
       let destinationPortMappings =
-        field_map json "DestinationPortMappings"
+        field_map json__ "DestinationPortMappings"
           DestinationPortMappings.of_json in
       make ?nextToken ?destinationPortMappings ()
     let to_json v = composed_to_json to_value v
@@ -5065,13 +6124,14 @@ module ListCustomRoutingPortMappingsByDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointId") in
       make ?nextToken ?maxResults ~destinationAddress ~endpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
       let maxResults =
-        field_map json "MaxResults" PortMappingsMaxResults.of_json in
+        field_map json__ "MaxResults" PortMappingsMaxResults.of_json in
       let destinationAddress =
-        field_map_exn json "DestinationAddress" GenericString.of_json in
-      let endpointId = field_map_exn json "EndpointId" GenericString.of_json in
+        field_map_exn json__ "DestinationAddress" GenericString.of_json in
+      let endpointId =
+        field_map_exn json__ "EndpointId" GenericString.of_json in
       make ?nextToken ?maxResults ~destinationAddress ~endpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5160,10 +6220,10 @@ module ListCustomRoutingListenersResponse =
           (Xml.child xml_arg0 "Listeners") in
       make ?nextToken ?listeners ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
       let listeners =
-        field_map json "Listeners" CustomRoutingListeners.of_json in
+        field_map json__ "Listeners" CustomRoutingListeners.of_json in
       make ?nextToken ?listeners ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the listeners for a custom routing accelerator."]
@@ -5201,11 +6261,11 @@ module ListCustomRoutingListenersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?nextToken ?maxResults ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ?nextToken ?maxResults ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the listeners for a custom routing accelerator."]
@@ -5292,10 +6352,10 @@ module ListCustomRoutingEndpointGroupsResponse =
           (Xml.child xml_arg0 "EndpointGroups") in
       make ?nextToken ?endpointGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
       let endpointGroups =
-        field_map json "EndpointGroups" CustomRoutingEndpointGroups.of_json in
+        field_map json__ "EndpointGroups" CustomRoutingEndpointGroups.of_json in
       make ?nextToken ?endpointGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5333,11 +6393,11 @@ module ListCustomRoutingEndpointGroupsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ?nextToken ?maxResults ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ?nextToken ?maxResults ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5415,13 +6475,14 @@ module ListCustomRoutingAcceleratorsResponse =
           (Xml.child xml_arg0 "Accelerators") in
       make ?nextToken ?accelerators ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
       let accelerators =
-        field_map json "Accelerators" CustomRoutingAccelerators.of_json in
+        field_map json__ "Accelerators" CustomRoutingAccelerators.of_json in
       make ?nextToken ?accelerators ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List the custom routing accelerators for an AWS account."]
+  end[@@ocaml.doc
+       "List the custom routing accelerators for an Amazon Web Services account."]
 module ListCustomRoutingAcceleratorsRequest =
   struct
     type nonrec t =
@@ -5446,12 +6507,375 @@ module ListCustomRoutingAcceleratorsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List the custom routing accelerators for an AWS account."]
+  end[@@ocaml.doc
+       "List the custom routing accelerators for an Amazon Web Services account."]
+module ListCrossAccountResourcesResponse =
+  struct
+    type nonrec t =
+      {
+      crossAccountResources: CrossAccountResources.t option
+        [@ocaml.doc "The cross-account resources used with an accelerator."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The token for the next set of results. You receive this token from a previous call."]}
+    type nonrec error =
+      [ `AcceleratorNotFoundException of AcceleratorNotFoundException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?crossAccountResources =
+      fun ?nextToken -> fun () -> { crossAccountResources; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AcceleratorNotFoundException" ->
+          `AcceleratorNotFoundException
+            (AcceleratorNotFoundException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AcceleratorNotFoundException" ->
+          `AcceleratorNotFoundException
+            (AcceleratorNotFoundException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AcceleratorNotFoundException e ->
+          `Assoc
+            [("error", (`String "AcceleratorNotFoundException"));
+            ("details", (AcceleratorNotFoundException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CrossAccountResources",
+           (Option.map x.crossAccountResources
+              ~f:CrossAccountResources.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let crossAccountResources =
+        (Option.map ~f:CrossAccountResources.of_xml)
+          (Xml.child xml_arg0 "CrossAccountResources") in
+      make ?nextToken ?crossAccountResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let crossAccountResources =
+        field_map json__ "CrossAccountResources"
+          CrossAccountResources.of_json in
+      make ?nextToken ?crossAccountResources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List the cross-account resources available to work with."]
+module ListCrossAccountResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      acceleratorArn: GenericString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an accelerator in a cross-account attachment."];
+      resourceOwnerAwsAccountId: AwsAccountId.t
+        [@ocaml.doc
+          "The account ID of a resource owner in a cross-account attachment."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The number of cross-account resource objects that you want to return with this call. The default value is 10."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The token for the next set of results. You receive this token from a previous call."]}
+    let context_ = "ListCrossAccountResourcesRequest"
+    let make ?acceleratorArn =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~resourceOwnerAwsAccountId ->
+            fun () ->
+              {
+                acceleratorArn;
+                maxResults;
+                nextToken;
+                resourceOwnerAwsAccountId
+              }
+    let to_value x =
+      structure_to_value
+        [("AcceleratorArn",
+           (Option.map x.acceleratorArn ~f:GenericString.to_value));
+        ("ResourceOwnerAwsAccountId",
+          (Some (AwsAccountId.to_value x.resourceOwnerAwsAccountId)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let resourceOwnerAwsAccountId =
+        AwsAccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ResourceOwnerAwsAccountId") in
+      let acceleratorArn =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "AcceleratorArn") in
+      make ?nextToken ?maxResults ~resourceOwnerAwsAccountId ?acceleratorArn
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let resourceOwnerAwsAccountId =
+        field_map_exn json__ "ResourceOwnerAwsAccountId" AwsAccountId.of_json in
+      let acceleratorArn =
+        field_map json__ "AcceleratorArn" GenericString.of_json in
+      make ?nextToken ?maxResults ~resourceOwnerAwsAccountId ?acceleratorArn
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List the cross-account resources available to work with."]
+module ListCrossAccountResourceAccountsResponse =
+  struct
+    type nonrec t =
+      {
+      resourceOwnerAwsAccountIds: AwsAccountIds.t option
+        [@ocaml.doc
+          "The account IDs of principals (resource owners) in a cross-account attachment who can work with resources listed in the same attachment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceOwnerAwsAccountIds =
+      fun () -> { resourceOwnerAwsAccountIds }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceOwnerAwsAccountIds",
+           (Option.map x.resourceOwnerAwsAccountIds ~f:AwsAccountIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceOwnerAwsAccountIds =
+        (Option.map ~f:AwsAccountIds.of_xml)
+          (Xml.child xml_arg0 "ResourceOwnerAwsAccountIds") in
+      make ?resourceOwnerAwsAccountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceOwnerAwsAccountIds =
+        field_map json__ "ResourceOwnerAwsAccountIds" AwsAccountIds.of_json in
+      make ?resourceOwnerAwsAccountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the accounts that have cross-account resources. For more information, see Working with cross-account attachments and resources in Global Accelerator in the Global Accelerator Developer Guide."]
+module ListCrossAccountResourceAccountsRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the accounts that have cross-account resources. For more information, see Working with cross-account attachments and resources in Global Accelerator in the Global Accelerator Developer Guide."]
+module ListCrossAccountAttachmentsResponse =
+  struct
+    type nonrec t =
+      {
+      crossAccountAttachments: Attachments.t option
+        [@ocaml.doc "Information about the cross-account attachments."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The token for the next set of results. You receive this token from a previous call."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?crossAccountAttachments =
+      fun ?nextToken -> fun () -> { crossAccountAttachments; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CrossAccountAttachments",
+           (Option.map x.crossAccountAttachments ~f:Attachments.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let crossAccountAttachments =
+        (Option.map ~f:Attachments.of_xml)
+          (Xml.child xml_arg0 "CrossAccountAttachments") in
+      make ?nextToken ?crossAccountAttachments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let crossAccountAttachments =
+        field_map json__ "CrossAccountAttachments" Attachments.of_json in
+      make ?nextToken ?crossAccountAttachments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the cross-account attachments that have been created in Global Accelerator."]
+module ListCrossAccountAttachmentsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The number of cross-account attachment objects that you want to return with this call. The default value is 10."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The token for the next set of results. You receive this token from a previous call."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the cross-account attachments that have been created in Global Accelerator."]
 module ListByoipCidrsResponse =
   struct
     type nonrec t =
@@ -5530,9 +6954,9 @@ module ListByoipCidrsResponse =
         (Option.map ~f:ByoipCidrs.of_xml) (Xml.child xml_arg0 "ByoipCidrs") in
       make ?nextToken ?byoipCidrs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let byoipCidrs = field_map json "ByoipCidrs" ByoipCidrs.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let byoipCidrs = field_map json__ "ByoipCidrs" ByoipCidrs.of_json in
       make ?nextToken ?byoipCidrs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5560,9 +6984,9 @@ module ListByoipCidrsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5639,12 +7063,13 @@ module ListAcceleratorsResponse =
           (Xml.child xml_arg0 "Accelerators") in
       make ?nextToken ?accelerators ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let accelerators = field_map json "Accelerators" Accelerators.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let accelerators = field_map json__ "Accelerators" Accelerators.of_json in
       make ?nextToken ?accelerators ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List the accelerators for an AWS account."]
+  end[@@ocaml.doc
+       "List the accelerators for an Amazon Web Services account."]
 module ListAcceleratorsRequest =
   struct
     type nonrec t =
@@ -5669,12 +7094,13 @@ module ListAcceleratorsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List the accelerators for an AWS account."]
+  end[@@ocaml.doc
+       "List the accelerators for an Amazon Web Services account."]
 module DescribeListenerResponse =
   struct
     type nonrec t =
@@ -5738,8 +7164,8 @@ module DescribeListenerResponse =
         (Option.map ~f:Listener.of_xml) (Xml.child xml_arg0 "Listener") in
       make ?listener ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listener = field_map json "Listener" Listener.of_json in
+    let of_json json__ =
+      let listener = field_map json__ "Listener" Listener.of_json in
       make ?listener ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe a listener."]
@@ -5762,9 +7188,9 @@ module DescribeListenerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe a listener."]
@@ -5835,9 +7261,9 @@ module DescribeEndpointGroupResponse =
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroup =
-        field_map json "EndpointGroup" EndpointGroup.of_json in
+        field_map json__ "EndpointGroup" EndpointGroup.of_json in
       make ?endpointGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe an endpoint group."]
@@ -5861,9 +7287,9 @@ module DescribeEndpointGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ~endpointGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroupArn =
-        field_map_exn json "EndpointGroupArn" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
       make ~endpointGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe an endpoint group."]
@@ -5933,8 +7359,9 @@ module DescribeCustomRoutingListenerResponse =
           (Xml.child xml_arg0 "Listener") in
       make ?listener ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listener = field_map json "Listener" CustomRoutingListener.of_json in
+    let of_json json__ =
+      let listener =
+        field_map json__ "Listener" CustomRoutingListener.of_json in
       make ?listener ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5958,9 +7385,9 @@ module DescribeCustomRoutingListenerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6033,9 +7460,9 @@ module DescribeCustomRoutingEndpointGroupResponse =
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroup =
-        field_map json "EndpointGroup" CustomRoutingEndpointGroup.of_json in
+        field_map json__ "EndpointGroup" CustomRoutingEndpointGroup.of_json in
       make ?endpointGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6060,9 +7487,9 @@ module DescribeCustomRoutingEndpointGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ~endpointGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroupArn =
-        field_map_exn json "EndpointGroupArn" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
       make ~endpointGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6134,9 +7561,9 @@ module DescribeCustomRoutingAcceleratorResponse =
           (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accelerator =
-        field_map json "Accelerator" CustomRoutingAccelerator.of_json in
+        field_map json__ "Accelerator" CustomRoutingAccelerator.of_json in
       make ?accelerator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe a custom routing accelerator."]
@@ -6159,9 +7586,9 @@ module DescribeCustomRoutingAcceleratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe a custom routing accelerator."]
@@ -6233,9 +7660,9 @@ module DescribeCustomRoutingAcceleratorAttributesResponse =
           (Xml.child xml_arg0 "AcceleratorAttributes") in
       make ?acceleratorAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorAttributes =
-        field_map json "AcceleratorAttributes"
+        field_map json__ "AcceleratorAttributes"
           CustomRoutingAcceleratorAttributes.of_json in
       make ?acceleratorAttributes ()
     let to_json v = composed_to_json to_value v
@@ -6259,12 +7686,121 @@ module DescribeCustomRoutingAcceleratorAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe the attributes of a custom routing accelerator."]
+module DescribeCrossAccountAttachmentResponse =
+  struct
+    type nonrec t =
+      {
+      crossAccountAttachment: Attachment.t option
+        [@ocaml.doc "Information about the cross-account attachment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AttachmentNotFoundException of AttachmentNotFoundException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?crossAccountAttachment = fun () -> { crossAccountAttachment }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AttachmentNotFoundException" ->
+          `AttachmentNotFoundException
+            (AttachmentNotFoundException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AttachmentNotFoundException" ->
+          `AttachmentNotFoundException
+            (AttachmentNotFoundException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AttachmentNotFoundException e ->
+          `Assoc
+            [("error", (`String "AttachmentNotFoundException"));
+            ("details", (AttachmentNotFoundException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CrossAccountAttachment",
+           (Option.map x.crossAccountAttachment ~f:Attachment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let crossAccountAttachment =
+        (Option.map ~f:Attachment.of_xml)
+          (Xml.child xml_arg0 "CrossAccountAttachment") in
+      make ?crossAccountAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let crossAccountAttachment =
+        field_map json__ "CrossAccountAttachment" Attachment.of_json in
+      make ?crossAccountAttachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets configuration information about a cross-account attachment."]
+module DescribeCrossAccountAttachmentRequest =
+  struct
+    type nonrec t =
+      {
+      attachmentArn: GenericString.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the cross-account attachment to describe."]}
+    let context_ = "DescribeCrossAccountAttachmentRequest"
+    let make ~attachmentArn = fun () -> { attachmentArn }
+    let to_value x =
+      structure_to_value
+        [("AttachmentArn", (Some (GenericString.to_value x.attachmentArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachmentArn =
+        GenericString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttachmentArn") in
+      make ~attachmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachmentArn =
+        field_map_exn json__ "AttachmentArn" GenericString.of_json in
+      make ~attachmentArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets configuration information about a cross-account attachment."]
 module DescribeAcceleratorResponse =
   struct
     type nonrec t =
@@ -6330,8 +7866,8 @@ module DescribeAcceleratorResponse =
         (Option.map ~f:Accelerator.of_xml) (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accelerator = field_map json "Accelerator" Accelerator.of_json in
+    let of_json json__ =
+      let accelerator = field_map json__ "Accelerator" Accelerator.of_json in
       make ?accelerator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe an accelerator."]
@@ -6354,9 +7890,9 @@ module DescribeAcceleratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe an accelerator."]
@@ -6428,9 +7964,10 @@ module DescribeAcceleratorAttributesResponse =
           (Xml.child xml_arg0 "AcceleratorAttributes") in
       make ?acceleratorAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorAttributes =
-        field_map json "AcceleratorAttributes" AcceleratorAttributes.of_json in
+        field_map json__ "AcceleratorAttributes"
+          AcceleratorAttributes.of_json in
       make ?acceleratorAttributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe the attributes of an accelerator."]
@@ -6453,9 +7990,9 @@ module DescribeAcceleratorAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe the attributes of an accelerator."]
@@ -6543,19 +8080,19 @@ module DeprovisionByoipCidrResponse =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "ByoipCidr") in
       make ?byoipCidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
+    let of_json json__ =
+      let byoipCidr = field_map json__ "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Releases the specified address range that you provisioned to use with your AWS resources through bring your own IP addresses (BYOIP) and deletes the corresponding address pool. Before you can release an address range, you must stop advertising it by using WithdrawByoipCidr and you must not have any accelerators that are using static IP addresses allocated from its address range. For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."]
+       "Releases the specified address range that you provisioned to use with your Amazon Web Services resources through bring your own IP addresses (BYOIP) and deletes the corresponding address pool. Before you can release an address range, you must stop advertising it by using WithdrawByoipCidr and you must not have any accelerators that are using static IP addresses allocated from its address range. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]
 module DeprovisionByoipCidrRequest =
   struct
     type nonrec t =
       {
       cidr: GenericString.t
         [@ocaml.doc
-          "The address range, in CIDR notation. The prefix must be the same prefix that you specified when you provisioned the address range."]}
+          "The address range, in CIDR notation. The prefix must be the same prefix that you specified when you provisioned the address range. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]}
     let context_ = "DeprovisionByoipCidrRequest"
     let make ~cidr = fun () -> { cidr }
     let to_value x =
@@ -6567,12 +8104,12 @@ module DeprovisionByoipCidrRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cidr = field_map_exn json "Cidr" GenericString.of_json in
+    let of_json json__ =
+      let cidr = field_map_exn json__ "Cidr" GenericString.of_json in
       make ~cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Releases the specified address range that you provisioned to use with your AWS resources through bring your own IP addresses (BYOIP) and deletes the corresponding address pool. Before you can release an address range, you must stop advertising it by using WithdrawByoipCidr and you must not have any accelerators that are using static IP addresses allocated from its address range. For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."]
+       "Releases the specified address range that you provisioned to use with your Amazon Web Services resources through bring your own IP addresses (BYOIP) and deletes the corresponding address pool. Before you can release an address range, you must stop advertising it by using WithdrawByoipCidr and you must not have any accelerators that are using static IP addresses allocated from its address range. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]
 module DenyCustomRoutingTrafficRequest =
   struct
     type nonrec t =
@@ -6636,16 +8173,17 @@ module DenyCustomRoutingTrafficRequest =
       make ?denyAllTrafficToEndpoint ?destinationPorts ?destinationAddresses
         ~endpointId ~endpointGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let denyAllTrafficToEndpoint =
-        field_map json "DenyAllTrafficToEndpoint" GenericBoolean.of_json in
+        field_map json__ "DenyAllTrafficToEndpoint" GenericBoolean.of_json in
       let destinationPorts =
-        field_map json "DestinationPorts" DestinationPorts.of_json in
+        field_map json__ "DestinationPorts" DestinationPorts.of_json in
       let destinationAddresses =
-        field_map json "DestinationAddresses" DestinationAddresses.of_json in
-      let endpointId = field_map_exn json "EndpointId" GenericString.of_json in
+        field_map json__ "DestinationAddresses" DestinationAddresses.of_json in
+      let endpointId =
+        field_map_exn json__ "EndpointId" GenericString.of_json in
       let endpointGroupArn =
-        field_map_exn json "EndpointGroupArn" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
       make ?denyAllTrafficToEndpoint ?destinationPorts ?destinationAddresses
         ~endpointId ~endpointGroupArn ()
     let to_json v = composed_to_json to_value v
@@ -6669,9 +8207,9 @@ module DeleteListenerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete a listener from an accelerator."]
@@ -6695,9 +8233,9 @@ module DeleteEndpointGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ~endpointGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroupArn =
-        field_map_exn json "EndpointGroupArn" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
       make ~endpointGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete an endpoint group from a listener."]
@@ -6720,9 +8258,9 @@ module DeleteCustomRoutingListenerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete a listener for a custom routing accelerator."]
@@ -6746,9 +8284,9 @@ module DeleteCustomRoutingEndpointGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ~endpointGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroupArn =
-        field_map_exn json "EndpointGroupArn" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
       make ~endpointGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6772,13 +8310,39 @@ module DeleteCustomRoutingAcceleratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete a custom routing accelerator. Before you can delete an accelerator, you must disable it and remove all dependent resources (listeners and endpoint groups). To disable the accelerator, update the accelerator to set Enabled to false. When you create a custom routing accelerator, by default, Global Accelerator provides you with a set of two static IP addresses. The IP addresses are assigned to your accelerator for as long as it exists, even if you disable the accelerator and it no longer accepts or routes traffic. However, when you delete an accelerator, you lose the static IP addresses that are assigned to the accelerator, so you can no longer route traffic by using them. As a best practice, ensure that you have permissions in place to avoid inadvertently deleting accelerators. You can use IAM policies with Global Accelerator to limit the users who have permissions to delete an accelerator. For more information, see Authentication and Access Control in the AWS Global Accelerator Developer Guide."]
+       "Delete a custom routing accelerator. Before you can delete an accelerator, you must disable it and remove all dependent resources (listeners and endpoint groups). To disable the accelerator, update the accelerator to set Enabled to false. When you create a custom routing accelerator, by default, Global Accelerator provides you with a set of two static IP addresses. The IP addresses are assigned to your accelerator for as long as it exists, even if you disable the accelerator and it no longer accepts or routes traffic. However, when you delete an accelerator, you lose the static IP addresses that are assigned to the accelerator, so you can no longer route traffic by using them. As a best practice, ensure that you have permissions in place to avoid inadvertently deleting accelerators. You can use IAM policies with Global Accelerator to limit the users who have permissions to delete an accelerator. For more information, see Identity and access management in the Global Accelerator Developer Guide."]
+module DeleteCrossAccountAttachmentRequest =
+  struct
+    type nonrec t =
+      {
+      attachmentArn: GenericString.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the cross-account attachment to delete."]}
+    let context_ = "DeleteCrossAccountAttachmentRequest"
+    let make ~attachmentArn = fun () -> { attachmentArn }
+    let to_value x =
+      structure_to_value
+        [("AttachmentArn", (Some (GenericString.to_value x.attachmentArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachmentArn =
+        GenericString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttachmentArn") in
+      make ~attachmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachmentArn =
+        field_map_exn json__ "AttachmentArn" GenericString.of_json in
+      make ~attachmentArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete a cross-account attachment. When you delete an attachment, Global Accelerator revokes the permission to use the resources in the attachment from all principals in the list of principals. Global Accelerator revokes the permission for specific resources. For more information, see Working with cross-account attachments and resources in Global Accelerator in the Global Accelerator Developer Guide."]
 module DeleteAcceleratorRequest =
   struct
     type nonrec t =
@@ -6797,13 +8361,13 @@ module DeleteAcceleratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an accelerator. Before you can delete an accelerator, you must disable it and remove all dependent resources (listeners and endpoint groups). To disable the accelerator, update the accelerator to set Enabled to false. When you create an accelerator, by default, Global Accelerator provides you with a set of two static IP addresses. Alternatively, you can bring your own IP address ranges to Global Accelerator and assign IP addresses from those ranges. The IP addresses are assigned to your accelerator for as long as it exists, even if you disable the accelerator and it no longer accepts or routes traffic. However, when you delete an accelerator, you lose the static IP addresses that are assigned to the accelerator, so you can no longer route traffic by using them. As a best practice, ensure that you have permissions in place to avoid inadvertently deleting accelerators. You can use IAM policies with Global Accelerator to limit the users who have permissions to delete an accelerator. For more information, see Authentication and Access Control in the AWS Global Accelerator Developer Guide."]
+       "Delete an accelerator. Before you can delete an accelerator, you must disable it and remove all dependent resources (listeners and endpoint groups). To disable the accelerator, update the accelerator to set Enabled to false. When you create an accelerator, by default, Global Accelerator provides you with a set of two static IP addresses. Alternatively, you can bring your own IP address ranges to Global Accelerator and assign IP addresses from those ranges. The IP addresses are assigned to your accelerator for as long as it exists, even if you disable the accelerator and it no longer accepts or routes traffic. However, when you delete an accelerator, you lose the static IP addresses that are assigned to the accelerator, so you can no longer route traffic by using them. As a best practice, ensure that you have permissions in place to avoid inadvertently deleting accelerators. You can use IAM policies with Global Accelerator to limit the users who have permissions to delete an accelerator. For more information, see Identity and access management in the Global Accelerator Developer Guide."]
 module CreateListenerResponse =
   struct
     type nonrec t =
@@ -6887,8 +8451,8 @@ module CreateListenerResponse =
         (Option.map ~f:Listener.of_xml) (Xml.child xml_arg0 "Listener") in
       make ?listener ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listener = field_map json "Listener" Listener.of_json in
+    let of_json json__ =
+      let listener = field_map json__ "Listener" Listener.of_json in
       make ?listener ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6907,7 +8471,7 @@ module CreateListenerRequest =
           "The protocol for connections from clients to your accelerator."];
       clientAffinity: ClientAffinity.t option
         [@ocaml.doc
-          "Client affinity lets you direct all requests from a user to the same endpoint, if you have stateful applications, regardless of the port and protocol of the client request. Client affinity gives you control over whether to always route each client to the same specific endpoint. AWS Global Accelerator uses a consistent-flow hashing algorithm to choose the optimal endpoint for a connection. If client affinity is NONE, Global Accelerator uses the \"five-tuple\" (5-tuple) properties\226\128\148source IP address, source port, destination IP address, destination port, and protocol\226\128\148to select the hash value, and then chooses the best endpoint. However, with this setting, if someone uses different ports to connect to Global Accelerator, their connections might not be always routed to the same endpoint because the hash value changes. If you want a given client to always be routed to the same endpoint, set client affinity to SOURCE_IP instead. When you use the SOURCE_IP setting, Global Accelerator uses the \"two-tuple\" (2-tuple) properties\226\128\148 source (client) IP address and destination IP address\226\128\148to select the hash value. The default value is NONE."];
+          "Client affinity lets you direct all requests from a user to the same endpoint, if you have stateful applications, regardless of the port and protocol of the client request. Client affinity gives you control over whether to always route each client to the same specific endpoint. Global Accelerator uses a consistent-flow hashing algorithm to choose the optimal endpoint for a connection. If client affinity is NONE, Global Accelerator uses the \"five-tuple\" (5-tuple) properties\226\128\148source IP address, source port, destination IP address, destination port, and protocol\226\128\148to select the hash value, and then chooses the best endpoint. However, with this setting, if someone uses different ports to connect to Global Accelerator, their connections might not be always routed to the same endpoint because the hash value changes. If you want a given client to always be routed to the same endpoint, set client affinity to SOURCE_IP instead. When you use the SOURCE_IP setting, Global Accelerator uses the \"two-tuple\" (2-tuple) properties\226\128\148 source (client) IP address and destination IP address\226\128\148to select the hash value. The default value is NONE."];
       idempotencyToken: IdempotencyToken.t
         [@ocaml.doc
           "A unique, case-sensitive identifier that you provide to ensure the idempotency\226\128\148that is, the uniqueness\226\128\148of the request."]}
@@ -6953,15 +8517,15 @@ module CreateListenerRequest =
       make ~idempotencyToken ?clientAffinity ~protocol ~portRanges
         ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
       let clientAffinity =
-        field_map json "ClientAffinity" ClientAffinity.of_json in
-      let protocol = field_map_exn json "Protocol" Protocol.of_json in
-      let portRanges = field_map_exn json "PortRanges" PortRanges.of_json in
+        field_map json__ "ClientAffinity" ClientAffinity.of_json in
+      let protocol = field_map_exn json__ "Protocol" Protocol.of_json in
+      let portRanges = field_map_exn json__ "PortRanges" PortRanges.of_json in
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ~idempotencyToken ?clientAffinity ~protocol ~portRanges
         ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
@@ -7074,13 +8638,13 @@ module CreateEndpointGroupResponse =
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroup =
-        field_map json "EndpointGroup" EndpointGroup.of_json in
+        field_map json__ "EndpointGroup" EndpointGroup.of_json in
       make ?endpointGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an endpoint group for the specified listener. An endpoint group is a collection of endpoints in one AWS Region. A resource must be valid and active when you add it as an endpoint."]
+       "Create an endpoint group for the specified listener. An endpoint group is a collection of endpoints in one Amazon Web Services Region. A resource must be valid and active when you add it as an endpoint. For more information about endpoint types and requirements for endpoints that you can add to Global Accelerator, see Endpoints for standard accelerators in the Global Accelerator Developer Guide."]
 module CreateEndpointGroupRequest =
   struct
     type nonrec t =
@@ -7089,18 +8653,18 @@ module CreateEndpointGroupRequest =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the listener."];
       endpointGroupRegion: GenericString.t
         [@ocaml.doc
-          "The AWS Region where the endpoint group is located. A listener can have only one endpoint group in a specific Region."];
+          "The Amazon Web Services Region where the endpoint group is located. A listener can have only one endpoint group in a specific Region."];
       endpointConfigurations: EndpointConfigurations.t option
         [@ocaml.doc "The list of endpoint objects."];
       trafficDialPercentage: TrafficDialPercentage.t option
         [@ocaml.doc
-          "The percentage of traffic to send to an AWS Region. Additional traffic is distributed to other endpoint groups for this listener. Use this action to increase (dial up) or decrease (dial down) traffic to a specific Region. The percentage is applied to the traffic that would otherwise have been routed to the Region based on optimal routing. The default value is 100."];
+          "The percentage of traffic to send to an Amazon Web Services Region. Additional traffic is distributed to other endpoint groups for this listener. Use this action to increase (dial up) or decrease (dial down) traffic to a specific Region. The percentage is applied to the traffic that would otherwise have been routed to the Region based on optimal routing. The default value is 100."];
       healthCheckPort: HealthCheckPort.t option
         [@ocaml.doc
-          "The port that AWS Global Accelerator uses to check the health of endpoints that are part of this endpoint group. The default port is the listener port that this endpoint group is associated with. If listener port is a list of ports, Global Accelerator uses the first port in the list."];
+          "The port that Global Accelerator uses to check the health of endpoints that are part of this endpoint group. The default port is the listener port that this endpoint group is associated with. If listener port is a list of ports, Global Accelerator uses the first port in the list."];
       healthCheckProtocol: HealthCheckProtocol.t option
         [@ocaml.doc
-          "The protocol that AWS Global Accelerator uses to check the health of endpoints that are part of this endpoint group. The default value is TCP."];
+          "The protocol that Global Accelerator uses to check the health of endpoints that are part of this endpoint group. The default value is TCP."];
       healthCheckPath: HealthCheckPath.t option
         [@ocaml.doc
           "If the protocol is HTTP/S, then this specifies the path that is the destination for health check targets. The default value is slash (/)."];
@@ -7115,7 +8679,7 @@ module CreateEndpointGroupRequest =
           "A unique, case-sensitive identifier that you provide to ensure the idempotency\226\128\148that is, the uniqueness\226\128\148of the request."];
       portOverrides: PortOverrides.t option
         [@ocaml.doc
-          "Override specific listener ports used to route traffic to endpoints that are part of this endpoint group. For example, you can create a port override in which the listener receives user traffic on ports 80 and 443, but your accelerator routes that traffic to ports 1080 and 1443, respectively, on the endpoints. For more information, see Port overrides in the AWS Global Accelerator Developer Guide."]}
+          "Override specific listener ports used to route traffic to endpoints that are part of this endpoint group. For example, you can create a port override in which the listener receives user traffic on ports 80 and 443, but your accelerator routes that traffic to ports 1080 and 1443, respectively, on the endpoints. For more information, see Overriding listener ports in the Global Accelerator Developer Guide."]}
     let context_ = "CreateEndpointGroupRequest"
     let make ?endpointConfigurations =
       fun ?trafficDialPercentage ->
@@ -7208,38 +8772,39 @@ module CreateEndpointGroupRequest =
         ?healthCheckPort ?trafficDialPercentage ?endpointConfigurations
         ~endpointGroupRegion ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portOverrides =
-        field_map json "PortOverrides" PortOverrides.of_json in
+        field_map json__ "PortOverrides" PortOverrides.of_json in
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
       let thresholdCount =
-        field_map json "ThresholdCount" ThresholdCount.of_json in
+        field_map json__ "ThresholdCount" ThresholdCount.of_json in
       let healthCheckIntervalSeconds =
-        field_map json "HealthCheckIntervalSeconds"
+        field_map json__ "HealthCheckIntervalSeconds"
           HealthCheckIntervalSeconds.of_json in
       let healthCheckPath =
-        field_map json "HealthCheckPath" HealthCheckPath.of_json in
+        field_map json__ "HealthCheckPath" HealthCheckPath.of_json in
       let healthCheckProtocol =
-        field_map json "HealthCheckProtocol" HealthCheckProtocol.of_json in
+        field_map json__ "HealthCheckProtocol" HealthCheckProtocol.of_json in
       let healthCheckPort =
-        field_map json "HealthCheckPort" HealthCheckPort.of_json in
+        field_map json__ "HealthCheckPort" HealthCheckPort.of_json in
       let trafficDialPercentage =
-        field_map json "TrafficDialPercentage" TrafficDialPercentage.of_json in
+        field_map json__ "TrafficDialPercentage"
+          TrafficDialPercentage.of_json in
       let endpointConfigurations =
-        field_map json "EndpointConfigurations"
+        field_map json__ "EndpointConfigurations"
           EndpointConfigurations.of_json in
       let endpointGroupRegion =
-        field_map_exn json "EndpointGroupRegion" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupRegion" GenericString.of_json in
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ?portOverrides ~idempotencyToken ?thresholdCount
         ?healthCheckIntervalSeconds ?healthCheckPath ?healthCheckProtocol
         ?healthCheckPort ?trafficDialPercentage ?endpointConfigurations
         ~endpointGroupRegion ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an endpoint group for the specified listener. An endpoint group is a collection of endpoints in one AWS Region. A resource must be valid and active when you add it as an endpoint."]
+       "Create an endpoint group for the specified listener. An endpoint group is a collection of endpoints in one Amazon Web Services Region. A resource must be valid and active when you add it as an endpoint. For more information about endpoint types and requirements for endpoints that you can add to Global Accelerator, see Endpoints for standard accelerators in the Global Accelerator Developer Guide."]
 module CreateCustomRoutingListenerResponse =
   struct
     type nonrec t =
@@ -7326,8 +8891,9 @@ module CreateCustomRoutingListenerResponse =
           (Xml.child xml_arg0 "Listener") in
       make ?listener ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listener = field_map json "Listener" CustomRoutingListener.of_json in
+    let of_json json__ =
+      let listener =
+        field_map json__ "Listener" CustomRoutingListener.of_json in
       make ?listener ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7369,12 +8935,12 @@ module CreateCustomRoutingListenerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~idempotencyToken ~portRanges ~acceleratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
-      let portRanges = field_map_exn json "PortRanges" PortRanges.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let portRanges = field_map_exn json__ "PortRanges" PortRanges.of_json in
       let acceleratorArn =
-        field_map_exn json "AcceleratorArn" GenericString.of_json in
+        field_map_exn json__ "AcceleratorArn" GenericString.of_json in
       make ~idempotencyToken ~portRanges ~acceleratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7495,13 +9061,13 @@ module CreateCustomRoutingEndpointGroupResponse =
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroup =
-        field_map json "EndpointGroup" CustomRoutingEndpointGroup.of_json in
+        field_map json__ "EndpointGroup" CustomRoutingEndpointGroup.of_json in
       make ?endpointGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an endpoint group for the specified listener for a custom routing accelerator. An endpoint group is a collection of endpoints in one AWS Region."]
+       "Create an endpoint group for the specified listener for a custom routing accelerator. An endpoint group is a collection of endpoints in one Amazon Web Services Region."]
 module CreateCustomRoutingEndpointGroupRequest =
   struct
     type nonrec t =
@@ -7511,7 +9077,7 @@ module CreateCustomRoutingEndpointGroupRequest =
           "The Amazon Resource Name (ARN) of the listener for a custom routing endpoint."];
       endpointGroupRegion: GenericString.t
         [@ocaml.doc
-          "The AWS Region where the endpoint group is located. A listener can have only one endpoint group in a specific Region."];
+          "The Amazon Web Services Region where the endpoint group is located. A listener can have only one endpoint group in a specific Region."];
       destinationConfigurations: CustomRoutingDestinationConfigurations.t
         [@ocaml.doc
           "Sets the port range and protocol for all endpoints (virtual private cloud subnets) in a custom routing endpoint group to accept client traffic on."];
@@ -7559,21 +9125,21 @@ module CreateCustomRoutingEndpointGroupRequest =
       make ~idempotencyToken ~destinationConfigurations ~endpointGroupRegion
         ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
       let destinationConfigurations =
-        field_map_exn json "DestinationConfigurations"
+        field_map_exn json__ "DestinationConfigurations"
           CustomRoutingDestinationConfigurations.of_json in
       let endpointGroupRegion =
-        field_map_exn json "EndpointGroupRegion" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupRegion" GenericString.of_json in
       let listenerArn =
-        field_map_exn json "ListenerArn" GenericString.of_json in
+        field_map_exn json__ "ListenerArn" GenericString.of_json in
       make ~idempotencyToken ~destinationConfigurations ~endpointGroupRegion
         ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an endpoint group for the specified listener for a custom routing accelerator. An endpoint group is a collection of endpoints in one AWS Region."]
+       "Create an endpoint group for the specified listener for a custom routing accelerator. An endpoint group is a collection of endpoints in one Amazon Web Services Region."]
 module CreateCustomRoutingAcceleratorResponse =
   struct
     type nonrec t =
@@ -7585,6 +9151,7 @@ module CreateCustomRoutingAcceleratorResponse =
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
       | `LimitExceededException of LimitExceededException.t 
+      | `TransactionInProgressException of TransactionInProgressException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?accelerator = fun () -> { accelerator }
     let error_of_json name json =
@@ -7598,6 +9165,9 @@ module CreateCustomRoutingAcceleratorResponse =
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -7612,6 +9182,9 @@ module CreateCustomRoutingAcceleratorResponse =
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -7632,6 +9205,10 @@ module CreateCustomRoutingAcceleratorResponse =
           `Assoc
             [("error", (`String "LimitExceededException"));
             ("details", (LimitExceededException.to_json e))]
+      | `TransactionInProgressException e ->
+          `Assoc
+            [("error", (`String "TransactionInProgressException"));
+            ("details", (TransactionInProgressException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -7648,13 +9225,13 @@ module CreateCustomRoutingAcceleratorResponse =
           (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accelerator =
-        field_map json "Accelerator" CustomRoutingAccelerator.of_json in
+        field_map json__ "Accelerator" CustomRoutingAccelerator.of_json in
       make ?accelerator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a custom routing accelerator. A custom routing accelerator directs traffic to one of possibly thousands of Amazon EC2 instance destinations running in a single or multiple virtual private clouds (VPC) subnet endpoints. Be aware that, by default, all destination EC2 instances in a VPC subnet endpoint cannot receive traffic. To enable all destinations to receive traffic, or to specify individual port mappings that can receive traffic, see the AllowCustomRoutingTraffic operation. Global Accelerator is a global service that supports endpoints in multiple AWS Regions but you must specify the US West (Oregon) Region to create or update accelerators."]
+       "Create a custom routing accelerator. A custom routing accelerator directs traffic to one of possibly thousands of Amazon EC2 instance destinations running in a single or multiple virtual private clouds (VPC) subnet endpoints. Be aware that, by default, all destination EC2 instances in a VPC subnet endpoint cannot receive traffic. To enable all destinations to receive traffic, or to specify individual port mappings that can receive traffic, see the AllowCustomRoutingTraffic operation. Global Accelerator is a global service that supports endpoints in multiple Amazon Web Services Regions but you must specify the US West (Oregon) Region to create, update, or otherwise work with accelerators. That is, for example, specify --region us-west-2 on Amazon Web Services CLI commands."]
 module CreateCustomRoutingAcceleratorRequest =
   struct
     type nonrec t =
@@ -7663,10 +9240,11 @@ module CreateCustomRoutingAcceleratorRequest =
         [@ocaml.doc
           "The name of a custom routing accelerator. The name can have a maximum of 64 characters, must contain only alphanumeric characters or hyphens (-), and must not begin or end with a hyphen."];
       ipAddressType: IpAddressType.t option
-        [@ocaml.doc "The value for the address type must be IPv4."];
+        [@ocaml.doc
+          "The IP address type that an accelerator supports. For a custom routing accelerator, the value must be IPV4."];
       ipAddresses: IpAddresses.t option
         [@ocaml.doc
-          "Optionally, if you've added your own IP address pool to Global Accelerator (BYOIP), you can choose IP addresses from your own pool to use for the accelerator's static IP addresses when you create an accelerator. You can specify one or two addresses, separated by a space. Do not include the /32 suffix. Only one IP address from each of your IP address ranges can be used for each accelerator. If you specify only one IP address from your IP address range, Global Accelerator assigns a second static IP address for the accelerator from the AWS IP address pool. Note that you can't update IP addresses for an existing accelerator. To change them, you must create a new accelerator with the new addresses. For more information, see Bring your own IP addresses (BYOIP) in the AWS Global Accelerator Developer Guide."];
+          "Optionally, if you've added your own IP address pool to Global Accelerator (BYOIP), you can choose an IPv4 address from your own pool to use for the accelerator's static IPv4 address when you create an accelerator. After you bring an address range to Amazon Web Services, it appears in your account as an address pool. When you create an accelerator, you can assign one IPv4 address from your range to it. Global Accelerator assigns you a second static IPv4 address from an Amazon IP address range. If you bring two IPv4 address ranges to Amazon Web Services, you can assign one IPv4 address from each range to your accelerator. This restriction is because Global Accelerator assigns each address range to a different network zone, for high availability. You can specify one or two addresses, separated by a space. Do not include the /32 suffix. Note that you can't update IP addresses for an existing accelerator. To change them, you must create a new accelerator with the new addresses. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."];
       enabled: GenericBoolean.t option
         [@ocaml.doc
           "Indicates whether an accelerator is enabled. The value is true or false. The default value is true. If the value is set to true, an accelerator cannot be deleted. If set to false, the accelerator can be deleted."];
@@ -7675,7 +9253,7 @@ module CreateCustomRoutingAcceleratorRequest =
           "A unique, case-sensitive identifier that you provide to ensure the idempotency\226\128\148that is, the uniqueness\226\128\148of the request."];
       tags: Tags.t option
         [@ocaml.doc
-          "Create tags for an accelerator. For more information, see Tagging in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]}
+          "Create tags for an accelerator. For more information, see Tagging in Global Accelerator in the Global Accelerator Developer Guide."]}
     let context_ = "CreateCustomRoutingAcceleratorRequest"
     let make ?ipAddressType =
       fun ?ipAddresses ->
@@ -7721,35 +9299,38 @@ module CreateCustomRoutingAcceleratorRequest =
       make ?tags ~idempotencyToken ?enabled ?ipAddresses ?ipAddressType ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
-      let enabled = field_map json "Enabled" GenericBoolean.of_json in
-      let ipAddresses = field_map json "IpAddresses" IpAddresses.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let enabled = field_map json__ "Enabled" GenericBoolean.of_json in
+      let ipAddresses = field_map json__ "IpAddresses" IpAddresses.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
-      let name = field_map_exn json "Name" GenericString.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let name = field_map_exn json__ "Name" GenericString.of_json in
       make ?tags ~idempotencyToken ?enabled ?ipAddresses ?ipAddressType ~name
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a custom routing accelerator. A custom routing accelerator directs traffic to one of possibly thousands of Amazon EC2 instance destinations running in a single or multiple virtual private clouds (VPC) subnet endpoints. Be aware that, by default, all destination EC2 instances in a VPC subnet endpoint cannot receive traffic. To enable all destinations to receive traffic, or to specify individual port mappings that can receive traffic, see the AllowCustomRoutingTraffic operation. Global Accelerator is a global service that supports endpoints in multiple AWS Regions but you must specify the US West (Oregon) Region to create or update accelerators."]
-module CreateAcceleratorResponse =
+       "Create a custom routing accelerator. A custom routing accelerator directs traffic to one of possibly thousands of Amazon EC2 instance destinations running in a single or multiple virtual private clouds (VPC) subnet endpoints. Be aware that, by default, all destination EC2 instances in a VPC subnet endpoint cannot receive traffic. To enable all destinations to receive traffic, or to specify individual port mappings that can receive traffic, see the AllowCustomRoutingTraffic operation. Global Accelerator is a global service that supports endpoints in multiple Amazon Web Services Regions but you must specify the US West (Oregon) Region to create, update, or otherwise work with accelerators. That is, for example, specify --region us-west-2 on Amazon Web Services CLI commands."]
+module CreateCrossAccountAttachmentResponse =
   struct
     type nonrec t =
       {
-      accelerator: Accelerator.t option
-        [@ocaml.doc
-          "The accelerator that is created by specifying a listener and the supported IP address types."]}
+      crossAccountAttachment: Attachment.t option
+        [@ocaml.doc "Information about the cross-account attachment."]}
     type nonrec error =
-      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
       | `LimitExceededException of LimitExceededException.t 
+      | `TransactionInProgressException of TransactionInProgressException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?accelerator = fun () -> { accelerator }
+    let make ?crossAccountAttachment = fun () -> { crossAccountAttachment }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
@@ -7757,11 +9338,16 @@ module CreateAcceleratorResponse =
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
@@ -7769,10 +9355,17 @@ module CreateAcceleratorResponse =
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -7785,6 +9378,163 @@ module CreateAcceleratorResponse =
           `Assoc
             [("error", (`String "LimitExceededException"));
             ("details", (LimitExceededException.to_json e))]
+      | `TransactionInProgressException e ->
+          `Assoc
+            [("error", (`String "TransactionInProgressException"));
+            ("details", (TransactionInProgressException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CrossAccountAttachment",
+           (Option.map x.crossAccountAttachment ~f:Attachment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let crossAccountAttachment =
+        (Option.map ~f:Attachment.of_xml)
+          (Xml.child xml_arg0 "CrossAccountAttachment") in
+      make ?crossAccountAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let crossAccountAttachment =
+        field_map json__ "CrossAccountAttachment" Attachment.of_json in
+      make ?crossAccountAttachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a cross-account attachment in Global Accelerator. You create a cross-account attachment to specify the principals who have permission to work with resources in accelerators in their own account. You specify, in the same attachment, the resources that are shared. A principal can be an Amazon Web Services account number or the Amazon Resource Name (ARN) for an accelerator. For account numbers that are listed as principals, to work with a resource listed in the attachment, you must sign in to an account specified as a principal. Then, you can work with resources that are listed, with any of your accelerators. If an accelerator ARN is listed in the cross-account attachment as a principal, anyone with permission to make updates to the accelerator can work with resources that are listed in the attachment. Specify each principal and resource separately. To specify two CIDR address pools, list them individually under Resources, and so on. For a command line operation, for example, you might use a statement like the following: \"Resources\": \\[\\{\"Cidr\": \"169.254.60.0/24\"\\},\\{\"Cidr\": \"169.254.59.0/24\"\\}\\] For more information, see Working with cross-account attachments and resources in Global Accelerator in the Global Accelerator Developer Guide."]
+module CreateCrossAccountAttachmentRequest =
+  struct
+    type nonrec t =
+      {
+      name: AttachmentName.t
+        [@ocaml.doc "The name of the cross-account attachment."];
+      principals: Principals.t option
+        [@ocaml.doc
+          "The principals to include in the cross-account attachment. A principal can be an Amazon Web Services account number or the Amazon Resource Name (ARN) for an accelerator."];
+      resources: Resources.t option
+        [@ocaml.doc
+          "The Amazon Resource Names (ARNs) for the resources to include in the cross-account attachment. A resource can be any supported Amazon Web Services resource type for Global Accelerator or a CIDR range for a bring your own IP address (BYOIP) address pool."];
+      idempotencyToken: IdempotencyToken.t
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency\226\128\148that is, the uniqueness\226\128\148of the request."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Add tags for a cross-account attachment. For more information, see Tagging in Global Accelerator in the Global Accelerator Developer Guide."]}
+    let context_ = "CreateCrossAccountAttachmentRequest"
+    let make ?principals =
+      fun ?resources ->
+        fun ?tags ->
+          fun ~name ->
+            fun ~idempotencyToken ->
+              fun () ->
+                { principals; resources; tags; name; idempotencyToken }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (AttachmentName.to_value x.name)));
+        ("Principals", (Option.map x.principals ~f:Principals.to_value));
+        ("Resources", (Option.map x.resources ~f:Resources.to_value));
+        ("IdempotencyToken",
+          (Some (IdempotencyToken.to_value x.idempotencyToken)));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let idempotencyToken =
+        IdempotencyToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdempotencyToken") in
+      let resources =
+        (Option.map ~f:Resources.of_xml) (Xml.child xml_arg0 "Resources") in
+      let principals =
+        (Option.map ~f:Principals.of_xml) (Xml.child xml_arg0 "Principals") in
+      let name =
+        AttachmentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?tags ~idempotencyToken ?resources ?principals ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let idempotencyToken =
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let resources = field_map json__ "Resources" Resources.of_json in
+      let principals = field_map json__ "Principals" Principals.of_json in
+      let name = field_map_exn json__ "Name" AttachmentName.of_json in
+      make ?tags ~idempotencyToken ?resources ?principals ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a cross-account attachment in Global Accelerator. You create a cross-account attachment to specify the principals who have permission to work with resources in accelerators in their own account. You specify, in the same attachment, the resources that are shared. A principal can be an Amazon Web Services account number or the Amazon Resource Name (ARN) for an accelerator. For account numbers that are listed as principals, to work with a resource listed in the attachment, you must sign in to an account specified as a principal. Then, you can work with resources that are listed, with any of your accelerators. If an accelerator ARN is listed in the cross-account attachment as a principal, anyone with permission to make updates to the accelerator can work with resources that are listed in the attachment. Specify each principal and resource separately. To specify two CIDR address pools, list them individually under Resources, and so on. For a command line operation, for example, you might use a statement like the following: \"Resources\": \\[\\{\"Cidr\": \"169.254.60.0/24\"\\},\\{\"Cidr\": \"169.254.59.0/24\"\\}\\] For more information, see Working with cross-account attachments and resources in Global Accelerator in the Global Accelerator Developer Guide."]
+module CreateAcceleratorResponse =
+  struct
+    type nonrec t =
+      {
+      accelerator: Accelerator.t option
+        [@ocaml.doc
+          "The accelerator that is created by specifying a listener and the supported IP address types."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `TransactionInProgressException of TransactionInProgressException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accelerator = fun () -> { accelerator }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `TransactionInProgressException e ->
+          `Assoc
+            [("error", (`String "TransactionInProgressException"));
+            ("details", (TransactionInProgressException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -7799,24 +9549,25 @@ module CreateAcceleratorResponse =
         (Option.map ~f:Accelerator.of_xml) (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accelerator = field_map json "Accelerator" Accelerator.of_json in
+    let of_json json__ =
+      let accelerator = field_map json__ "Accelerator" Accelerator.of_json in
       make ?accelerator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an accelerator. An accelerator includes one or more listeners that process inbound connections and direct traffic to one or more endpoint groups, each of which includes endpoints, such as Network Load Balancers. Global Accelerator is a global service that supports endpoints in multiple AWS Regions but you must specify the US West (Oregon) Region to create or update accelerators."]
+       "Create an accelerator. An accelerator includes one or more listeners that process inbound connections and direct traffic to one or more endpoint groups, each of which includes endpoints, such as Network Load Balancers. Global Accelerator is a global service that supports endpoints in multiple Amazon Web Services Regions but you must specify the US West (Oregon) Region to create, update, or otherwise work with accelerators. That is, for example, specify --region us-west-2 on Amazon Web Services CLI commands."]
 module CreateAcceleratorRequest =
   struct
     type nonrec t =
       {
       name: GenericString.t
         [@ocaml.doc
-          "The name of an accelerator. The name can have a maximum of 32 characters, must contain only alphanumeric characters or hyphens (-), and must not begin or end with a hyphen."];
+          "The name of the accelerator. The name can have a maximum of 64 characters, must contain only alphanumeric characters, periods (.), or hyphens (-), and must not begin or end with a hyphen or period."];
       ipAddressType: IpAddressType.t option
-        [@ocaml.doc "The value for the address type must be IPv4."];
+        [@ocaml.doc
+          "The IP address type that an accelerator supports. For a standard accelerator, the value can be IPV4 or DUAL_STACK."];
       ipAddresses: IpAddresses.t option
         [@ocaml.doc
-          "Optionally, if you've added your own IP address pool to Global Accelerator (BYOIP), you can choose IP addresses from your own pool to use for the accelerator's static IP addresses when you create an accelerator. You can specify one or two addresses, separated by a space. Do not include the /32 suffix. Only one IP address from each of your IP address ranges can be used for each accelerator. If you specify only one IP address from your IP address range, Global Accelerator assigns a second static IP address for the accelerator from the AWS IP address pool. Note that you can't update IP addresses for an existing accelerator. To change them, you must create a new accelerator with the new addresses. For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."];
+          "Optionally, if you've added your own IP address pool to Global Accelerator (BYOIP), you can choose an IPv4 address from your own pool to use for the accelerator's static IPv4 address when you create an accelerator. After you bring an address range to Amazon Web Services, it appears in your account as an address pool. When you create an accelerator, you can assign one IPv4 address from your range to it. Global Accelerator assigns you a second static IPv4 address from an Amazon IP address range. If you bring two IPv4 address ranges to Amazon Web Services, you can assign one IPv4 address from each range to your accelerator. This restriction is because Global Accelerator assigns each address range to a different network zone, for high availability. You can specify one or two addresses, separated by a space. Do not include the /32 suffix. Note that you can't update IP addresses for an existing accelerator. To change them, you must create a new accelerator with the new addresses. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."];
       enabled: GenericBoolean.t option
         [@ocaml.doc
           "Indicates whether an accelerator is enabled. The value is true or false. The default value is true. If the value is set to true, an accelerator cannot be deleted. If set to false, the accelerator can be deleted."];
@@ -7825,7 +9576,7 @@ module CreateAcceleratorRequest =
           "A unique, case-sensitive identifier that you provide to ensure the idempotency\226\128\148that is, the uniqueness\226\128\148of an accelerator."];
       tags: Tags.t option
         [@ocaml.doc
-          "Create tags for an accelerator. For more information, see Tagging in AWS Global Accelerator in the AWS Global Accelerator Developer Guide."]}
+          "Create tags for an accelerator. For more information, see Tagging in Global Accelerator in the Global Accelerator Developer Guide."]}
     let context_ = "CreateAcceleratorRequest"
     let make ?ipAddressType =
       fun ?ipAddresses ->
@@ -7871,20 +9622,20 @@ module CreateAcceleratorRequest =
       make ?tags ~idempotencyToken ?enabled ?ipAddresses ?ipAddressType ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
-      let enabled = field_map json "Enabled" GenericBoolean.of_json in
-      let ipAddresses = field_map json "IpAddresses" IpAddresses.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let enabled = field_map json__ "Enabled" GenericBoolean.of_json in
+      let ipAddresses = field_map json__ "IpAddresses" IpAddresses.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
-      let name = field_map_exn json "Name" GenericString.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let name = field_map_exn json__ "Name" GenericString.of_json in
       make ?tags ~idempotencyToken ?enabled ?ipAddresses ?ipAddressType ~name
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an accelerator. An accelerator includes one or more listeners that process inbound connections and direct traffic to one or more endpoint groups, each of which includes endpoints, such as Network Load Balancers. Global Accelerator is a global service that supports endpoints in multiple AWS Regions but you must specify the US West (Oregon) Region to create or update accelerators."]
+       "Create an accelerator. An accelerator includes one or more listeners that process inbound connections and direct traffic to one or more endpoint groups, each of which includes endpoints, such as Network Load Balancers. Global Accelerator is a global service that supports endpoints in multiple Amazon Web Services Regions but you must specify the US West (Oregon) Region to create, update, or otherwise work with accelerators. That is, for example, specify --region us-west-2 on Amazon Web Services CLI commands."]
 module AssociatedListenerFoundException =
   struct
     type nonrec t = {
@@ -7899,8 +9650,8 @@ module AssociatedListenerFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7919,8 +9670,8 @@ module AssociatedEndpointGroupFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7988,16 +9739,17 @@ module AllowCustomRoutingTrafficRequest =
       make ?allowAllTrafficToEndpoint ?destinationPorts ?destinationAddresses
         ~endpointId ~endpointGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowAllTrafficToEndpoint =
-        field_map json "AllowAllTrafficToEndpoint" GenericBoolean.of_json in
+        field_map json__ "AllowAllTrafficToEndpoint" GenericBoolean.of_json in
       let destinationPorts =
-        field_map json "DestinationPorts" DestinationPorts.of_json in
+        field_map json__ "DestinationPorts" DestinationPorts.of_json in
       let destinationAddresses =
-        field_map json "DestinationAddresses" DestinationAddresses.of_json in
-      let endpointId = field_map_exn json "EndpointId" GenericString.of_json in
+        field_map json__ "DestinationAddresses" DestinationAddresses.of_json in
+      let endpointId =
+        field_map_exn json__ "EndpointId" GenericString.of_json in
       let endpointGroupArn =
-        field_map_exn json "EndpointGroupArn" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
       make ?allowAllTrafficToEndpoint ?destinationPorts ?destinationAddresses
         ~endpointId ~endpointGroupArn ()
     let to_json v = composed_to_json to_value v
@@ -8087,19 +9839,19 @@ module AdvertiseByoipCidrResponse =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "ByoipCidr") in
       make ?byoipCidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
+    let of_json json__ =
+      let byoipCidr = field_map json__ "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Advertises an IPv4 address range that is provisioned for use with your AWS resources through bring your own IP addresses (BYOIP). It can take a few minutes before traffic to the specified addresses starts routing to AWS because of propagation delays. To stop advertising the BYOIP address range, use WithdrawByoipCidr. For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."]
+       "Advertises an IPv4 address range that is provisioned for use with your Amazon Web Services resources through bring your own IP addresses (BYOIP). It can take a few minutes before traffic to the specified addresses starts routing to Amazon Web Services because of propagation delays. To stop advertising the BYOIP address range, use WithdrawByoipCidr. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]
 module AdvertiseByoipCidrRequest =
   struct
     type nonrec t =
       {
       cidr: GenericString.t
         [@ocaml.doc
-          "The address range, in CIDR notation. This must be the exact range that you provisioned. You can't advertise only a portion of the provisioned range."]}
+          "The address range, in CIDR notation. This must be the exact range that you provisioned. You can't advertise only a portion of the provisioned range. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]}
     let context_ = "AdvertiseByoipCidrRequest"
     let make ~cidr = fun () -> { cidr }
     let to_value x =
@@ -8111,12 +9863,165 @@ module AdvertiseByoipCidrRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cidr = field_map_exn json "Cidr" GenericString.of_json in
+    let of_json json__ =
+      let cidr = field_map_exn json__ "Cidr" GenericString.of_json in
       make ~cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Advertises an IPv4 address range that is provisioned for use with your AWS resources through bring your own IP addresses (BYOIP). It can take a few minutes before traffic to the specified addresses starts routing to AWS because of propagation delays. To stop advertising the BYOIP address range, use WithdrawByoipCidr. For more information, see Bring Your Own IP Addresses (BYOIP) in the AWS Global Accelerator Developer Guide."]
+       "Advertises an IPv4 address range that is provisioned for use with your Amazon Web Services resources through bring your own IP addresses (BYOIP). It can take a few minutes before traffic to the specified addresses starts routing to Amazon Web Services because of propagation delays. To stop advertising the BYOIP address range, use WithdrawByoipCidr. For more information, see Bring your own IP addresses (BYOIP) in the Global Accelerator Developer Guide."]
+module AddEndpointsResponse =
+  struct
+    type nonrec t =
+      {
+      endpointDescriptions: EndpointDescriptions.t option
+        [@ocaml.doc "The list of endpoint objects."];
+      endpointGroupArn: GenericString.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the endpoint group."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `EndpointGroupNotFoundException of EndpointGroupNotFoundException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `TransactionInProgressException of TransactionInProgressException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?endpointDescriptions =
+      fun ?endpointGroupArn ->
+        fun () -> { endpointDescriptions; endpointGroupArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "EndpointGroupNotFoundException" ->
+          `EndpointGroupNotFoundException
+            (EndpointGroupNotFoundException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "EndpointGroupNotFoundException" ->
+          `EndpointGroupNotFoundException
+            (EndpointGroupNotFoundException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "TransactionInProgressException" ->
+          `TransactionInProgressException
+            (TransactionInProgressException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `EndpointGroupNotFoundException e ->
+          `Assoc
+            [("error", (`String "EndpointGroupNotFoundException"));
+            ("details", (EndpointGroupNotFoundException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `TransactionInProgressException e ->
+          `Assoc
+            [("error", (`String "TransactionInProgressException"));
+            ("details", (TransactionInProgressException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EndpointDescriptions",
+           (Option.map x.endpointDescriptions
+              ~f:EndpointDescriptions.to_value));
+        ("EndpointGroupArn",
+          (Option.map x.endpointGroupArn ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpointGroupArn =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EndpointGroupArn") in
+      let endpointDescriptions =
+        (Option.map ~f:EndpointDescriptions.of_xml)
+          (Xml.child xml_arg0 "EndpointDescriptions") in
+      make ?endpointGroupArn ?endpointDescriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpointGroupArn =
+        field_map json__ "EndpointGroupArn" GenericString.of_json in
+      let endpointDescriptions =
+        field_map json__ "EndpointDescriptions" EndpointDescriptions.of_json in
+      make ?endpointGroupArn ?endpointDescriptions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Add endpoints to an endpoint group. The AddEndpoints API operation is the recommended option for adding endpoints. The alternative options are to add endpoints when you create an endpoint group (with the CreateEndpointGroup API) or when you update an endpoint group (with the UpdateEndpointGroup API). There are two advantages to using AddEndpoints to add endpoints in Global Accelerator: It's faster, because Global Accelerator only has to resolve the new endpoints that you're adding, rather than resolving new and existing endpoints. It's more convenient, because you don't need to specify the current endpoints that are already in the endpoint group, in addition to the new endpoints that you want to add. For information about endpoint types and requirements for endpoints that you can add to Global Accelerator, see Endpoints for standard accelerators in the Global Accelerator Developer Guide."]
+module AddEndpointsRequest =
+  struct
+    type nonrec t =
+      {
+      endpointConfigurations: EndpointConfigurations.t
+        [@ocaml.doc "The list of endpoint objects."];
+      endpointGroupArn: GenericString.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the endpoint group."]}
+    let context_ = "AddEndpointsRequest"
+    let make ~endpointConfigurations =
+      fun ~endpointGroupArn ->
+        fun () -> { endpointConfigurations; endpointGroupArn }
+    let to_value x =
+      structure_to_value
+        [("EndpointConfigurations",
+           (Some (EndpointConfigurations.to_value x.endpointConfigurations)));
+        ("EndpointGroupArn",
+          (Some (GenericString.to_value x.endpointGroupArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpointGroupArn =
+        GenericString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
+      let endpointConfigurations =
+        EndpointConfigurations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndpointConfigurations") in
+      make ~endpointGroupArn ~endpointConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpointGroupArn =
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
+      let endpointConfigurations =
+        field_map_exn json__ "EndpointConfigurations"
+          EndpointConfigurations.of_json in
+      make ~endpointGroupArn ~endpointConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Add endpoints to an endpoint group. The AddEndpoints API operation is the recommended option for adding endpoints. The alternative options are to add endpoints when you create an endpoint group (with the CreateEndpointGroup API) or when you update an endpoint group (with the UpdateEndpointGroup API). There are two advantages to using AddEndpoints to add endpoints in Global Accelerator: It's faster, because Global Accelerator only has to resolve the new endpoints that you're adding, rather than resolving new and existing endpoints. It's more convenient, because you don't need to specify the current endpoints that are already in the endpoint group, in addition to the new endpoints that you want to add. For information about endpoint types and requirements for endpoints that you can add to Global Accelerator, see Endpoints for standard accelerators in the Global Accelerator Developer Guide."]
 module AddCustomRoutingEndpointsResponse =
   struct
     type nonrec t =
@@ -8234,11 +10139,11 @@ module AddCustomRoutingEndpointsResponse =
           (Xml.child xml_arg0 "EndpointDescriptions") in
       make ?endpointGroupArn ?endpointDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroupArn =
-        field_map json "EndpointGroupArn" GenericString.of_json in
+        field_map json__ "EndpointGroupArn" GenericString.of_json in
       let endpointDescriptions =
-        field_map json "EndpointDescriptions"
+        field_map json__ "EndpointDescriptions"
           CustomRoutingEndpointDescriptions.of_json in
       make ?endpointGroupArn ?endpointDescriptions ()
     let to_json v = composed_to_json to_value v
@@ -8276,11 +10181,11 @@ module AddCustomRoutingEndpointsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointConfigurations") in
       make ~endpointGroupArn ~endpointConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointGroupArn =
-        field_map_exn json "EndpointGroupArn" GenericString.of_json in
+        field_map_exn json__ "EndpointGroupArn" GenericString.of_json in
       let endpointConfigurations =
-        field_map_exn json "EndpointConfigurations"
+        field_map_exn json__ "EndpointConfigurations"
           CustomRoutingEndpointConfigurations.of_json in
       make ~endpointGroupArn ~endpointConfigurations ()
     let to_json v = composed_to_json to_value v
@@ -8300,8 +10205,8 @@ module AcceleratorNotDisabledException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

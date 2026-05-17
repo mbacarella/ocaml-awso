@@ -17,12 +17,18 @@ let cancel_data_repository_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelDataRepositoryTask input
 let copy_backup ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopyBackup input
+let copy_snapshot_and_update_volume ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CopySnapshotAndUpdateVolume input
+let create_and_attach_s3_access_point ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAndAttachS3AccessPoint input
 let create_backup ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBackup input
 let create_data_repository_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDataRepositoryAssociation input
 let create_data_repository_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDataRepositoryTask input
+let create_file_cache ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateFileCache input
 let create_file_system ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFileSystem input
 let create_file_system_from_backup ?endpoint_url ?cfg input =
@@ -39,6 +45,8 @@ let delete_backup ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBackup input
 let delete_data_repository_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDataRepositoryAssociation input
+let delete_file_cache ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteFileCache input
 let delete_file_system ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFileSystem input
 let delete_snapshot ?endpoint_url ?cfg input =
@@ -53,16 +61,24 @@ let describe_data_repository_associations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDataRepositoryAssociations input
 let describe_data_repository_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDataRepositoryTasks input
+let describe_file_caches ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeFileCaches input
 let describe_file_system_aliases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFileSystemAliases input
 let describe_file_systems ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFileSystems input
+let describe_s3_access_point_attachments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeS3AccessPointAttachments input
+let describe_shared_vpc_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSharedVpcConfiguration input
 let describe_snapshots ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSnapshots input
 let describe_storage_virtual_machines ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStorageVirtualMachines input
 let describe_volumes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVolumes input
+let detach_and_delete_s3_access_point ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DetachAndDeleteS3AccessPoint input
 let disassociate_file_system_aliases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateFileSystemAliases input
 let list_tags_for_resource ?endpoint_url ?cfg input =
@@ -71,14 +87,20 @@ let release_file_system_nfs_v3_locks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ReleaseFileSystemNfsV3Locks input
 let restore_volume_from_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RestoreVolumeFromSnapshot input
+let start_misconfigured_state_recovery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartMisconfiguredStateRecovery input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_data_repository_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDataRepositoryAssociation input
+let update_file_cache ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateFileCache input
 let update_file_system ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFileSystem input
+let update_shared_vpc_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSharedVpcConfiguration input
 let update_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSnapshot input
 let update_storage_virtual_machine ?endpoint_url ?cfg input =

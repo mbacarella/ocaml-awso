@@ -16,8 +16,12 @@ type ('i, 'o, 'e) t =
   GetTerminologyResponse.error) t 
   | ImportTerminology: (ImportTerminologyRequest.t,
   ImportTerminologyResponse.t, ImportTerminologyResponse.error) t 
+  | ListLanguages: (ListLanguagesRequest.t, ListLanguagesResponse.t,
+  ListLanguagesResponse.error) t 
   | ListParallelData: (ListParallelDataRequest.t, ListParallelDataResponse.t,
   ListParallelDataResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListTerminologies: (ListTerminologiesRequest.t,
   ListTerminologiesResponse.t, ListTerminologiesResponse.error) t 
   | ListTextTranslationJobs: (ListTextTranslationJobsRequest.t,
@@ -28,8 +32,14 @@ type ('i, 'o, 'e) t =
   
   | StopTextTranslationJob: (StopTextTranslationJobRequest.t,
   StopTextTranslationJobResponse.t, StopTextTranslationJobResponse.error) t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | TranslateDocument: (TranslateDocumentRequest.t,
+  TranslateDocumentResponse.t, TranslateDocumentResponse.error) t 
   | TranslateText: (TranslateTextRequest.t, TranslateTextResponse.t,
   TranslateTextResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
   | UpdateParallelData: (UpdateParallelDataRequest.t,
   UpdateParallelDataResponse.t, UpdateParallelDataResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
@@ -41,12 +51,17 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetParallelData -> `POST
   | GetTerminology -> `POST
   | ImportTerminology -> `POST
+  | ListLanguages -> `POST
   | ListParallelData -> `POST
+  | ListTagsForResource -> `POST
   | ListTerminologies -> `POST
   | ListTextTranslationJobs -> `POST
   | StartTextTranslationJob -> `POST
   | StopTextTranslationJob -> `POST
+  | TagResource -> `POST
+  | TranslateDocument -> `POST
   | TranslateText -> `POST
+  | UntagResource -> `POST
   | UpdateParallelData -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -58,12 +73,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetParallelData -> (Format.kasprintf Uri.of_string) "/"
       | GetTerminology -> (Format.kasprintf Uri.of_string) "/"
       | ImportTerminology -> (Format.kasprintf Uri.of_string) "/"
+      | ListLanguages -> (Format.kasprintf Uri.of_string) "/"
       | ListParallelData -> (Format.kasprintf Uri.of_string) "/"
+      | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListTerminologies -> (Format.kasprintf Uri.of_string) "/"
       | ListTextTranslationJobs -> (Format.kasprintf Uri.of_string) "/"
       | StartTextTranslationJob -> (Format.kasprintf Uri.of_string) "/"
       | StopTextTranslationJob -> (Format.kasprintf Uri.of_string) "/"
+      | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | TranslateDocument -> (Format.kasprintf Uri.of_string) "/"
       | TranslateText -> (Format.kasprintf Uri.of_string) "/"
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateParallelData -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
@@ -130,6 +150,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSShineFrontendService_20170701.ImportTerminology")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLanguages ->
+      let json = ListLanguagesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSShineFrontendService_20170701.ListLanguages")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListParallelData ->
       let json = ListParallelDataRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -138,6 +166,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSShineFrontendService_20170701.ListParallelData")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let json = ListTagsForResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSShineFrontendService_20170701.ListTagsForResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTerminologies ->
       let json = ListTerminologiesRequest.to_json req in
@@ -175,6 +212,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSShineFrontendService_20170701.StopTextTranslationJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TagResource ->
+      let json = TagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSShineFrontendService_20170701.TagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TranslateDocument ->
+      let json = TranslateDocumentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSShineFrontendService_20170701.TranslateDocument")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TranslateText ->
       let json = TranslateTextRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -182,6 +236,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSShineFrontendService_20170701.TranslateText")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UntagResource ->
+      let json = UntagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSShineFrontendService_20170701.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateParallelData ->
       let json = UpdateParallelDataRequest.to_json req in
@@ -264,6 +326,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ImportTerminologyResponse.error_of_json))
+  | ListLanguages ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLanguagesResponse.of_json json)
+      else Error (parse_aws_error (Some ListLanguagesResponse.error_of_json))
   | ListParallelData ->
       if is_success
       then
@@ -271,6 +339,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListParallelDataResponse.of_json json)
       else
         Error (parse_aws_error (Some ListParallelDataResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTerminologies ->
       if is_success
       then
@@ -306,12 +382,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StopTextTranslationJobResponse.error_of_json))
+  | TagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | TranslateDocument ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TranslateDocumentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some TranslateDocumentResponse.error_of_json))
   | TranslateText ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (TranslateTextResponse.of_json json)
       else Error (parse_aws_error (Some TranslateTextResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateParallelData ->
       if is_success
       then

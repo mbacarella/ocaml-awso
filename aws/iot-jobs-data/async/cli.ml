@@ -75,6 +75,42 @@ let get_pending_job_executions =
            (Values.GetPendingJobExecutionsRequest.make ~thingName ())
            (Some Values.GetPendingJobExecutionsResponse.to_json)
            (Some Values.GetPendingJobExecutionsResponse.error_to_json)])
+let start_command_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and parameters =
+         flag "parameters" (optional json_arg)
+           ~doc:"JSON CommandExecutionParameterMap"
+       and executionTimeoutSeconds =
+         flag "execution-timeout-seconds" (optional json_arg)
+           ~doc:"JSON CommandExecutionTimeoutInSeconds"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientRequestTokenV2"
+       and targetArn =
+         flag "target-arn" (required string) ~doc:"STRING TargetArn"
+       and commandArn =
+         flag "command-arn" (required string) ~doc:"STRING CommandArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_command_execution
+           (Values.StartCommandExecutionRequest.make
+              ?parameters:(Option.map
+                             ~f:Values.CommandExecutionParameterMap.of_json
+                             parameters)
+              ?executionTimeoutSeconds:(Option.map
+                                          ~f:Values.CommandExecutionTimeoutInSeconds.of_json
+                                          executionTimeoutSeconds)
+              ?clientToken ~targetArn ~commandArn ())
+           (Some Values.StartCommandExecutionResponse.to_json)
+           (Some Values.StartCommandExecutionResponse.error_to_json)])
 let start_next_pending_job_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -157,5 +193,6 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-job-execution", describe_job_execution);
     ("get-pending-job-executions", get_pending_job_executions);
+    ("start-command-execution", start_command_execution);
     ("start-next-pending-job-execution", start_next_pending_job_execution);
     ("update-job-execution", update_job_execution)]

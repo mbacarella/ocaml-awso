@@ -19,6 +19,10 @@ let count_pending_activity_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CountPendingActivityTasks input
 let count_pending_decision_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CountPendingDecisionTasks input
+let delete_activity_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteActivityType input
+let delete_workflow_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWorkflowType input
 let deprecate_activity_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeprecateActivityType input
 let deprecate_domain ?endpoint_url ?cfg input =

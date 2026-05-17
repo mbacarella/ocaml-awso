@@ -198,10 +198,12 @@ module EnvironmentLifecycle =
           (Xml.child xml_arg0 "status") in
       make ?failureResource ?reason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failureResource = field_map json "failureResource" String_.of_json in
-      let reason = field_map json "reason" String_.of_json in
-      let status = field_map json "status" EnvironmentLifecycleStatus.of_json in
+    let of_json json__ =
+      let failureResource =
+        field_map json__ "failureResource" String_.of_json in
+      let reason = field_map json__ "reason" String_.of_json in
+      let status =
+        field_map json__ "status" EnvironmentLifecycleStatus.of_json in
       make ?failureResource ?reason ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -377,9 +379,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -393,15 +395,15 @@ module Environment =
         [@ocaml.doc "The name of the environment."];
       description: EnvironmentDescription.t option
         [@ocaml.doc "The description for the environment."];
-      type_: EnvironmentType.t
+      type_: EnvironmentType.t option
         [@ocaml.doc
           "The type of environment. Valid values include the following: ec2: An Amazon Elastic Compute Cloud (Amazon EC2) instance connects to the environment. ssh: Your own server connects to the environment."];
       connectionType: ConnectionType.t option
         [@ocaml.doc
           "The connection type used for connecting to an Amazon EC2 environment. CONNECT_SSH is selected by default."];
-      arn: String_.t
+      arn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the environment."];
-      ownerArn: String_.t
+      ownerArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the environment owner."];
       lifecycle: EnvironmentLifecycle.t option
@@ -410,27 +412,26 @@ module Environment =
       managedCredentialsStatus: ManagedCredentialsStatus.t option
         [@ocaml.doc
           "Describes the status of Amazon Web Services managed temporary credentials for the Cloud9 environment. Available values are: ENABLED_ON_CREATE ENABLED_BY_OWNER DISABLED_BY_DEFAULT DISABLED_BY_OWNER DISABLED_BY_COLLABORATOR PENDING_REMOVAL_BY_COLLABORATOR PENDING_REMOVAL_BY_OWNER FAILED_REMOVAL_BY_COLLABORATOR ENABLED_BY_OWNER DISABLED_BY_DEFAULT"]}
-    let context_ = "Environment"
     let make ?id =
       fun ?name ->
         fun ?description ->
-          fun ?connectionType ->
-            fun ?lifecycle ->
-              fun ?managedCredentialsStatus ->
-                fun ~type_ ->
-                  fun ~arn ->
-                    fun ~ownerArn ->
+          fun ?type_ ->
+            fun ?connectionType ->
+              fun ?arn ->
+                fun ?ownerArn ->
+                  fun ?lifecycle ->
+                    fun ?managedCredentialsStatus ->
                       fun () ->
                         {
                           id;
                           name;
                           description;
-                          connectionType;
-                          lifecycle;
-                          managedCredentialsStatus;
                           type_;
+                          connectionType;
                           arn;
-                          ownerArn
+                          ownerArn;
+                          lifecycle;
+                          managedCredentialsStatus
                         }
     let to_value x =
       structure_to_value
@@ -438,11 +439,11 @@ module Environment =
         ("name", (Option.map x.name ~f:EnvironmentName.to_value));
         ("description",
           (Option.map x.description ~f:EnvironmentDescription.to_value));
-        ("type", (Some (EnvironmentType.to_value x.type_)));
+        ("type", (Option.map x.type_ ~f:EnvironmentType.to_value));
         ("connectionType",
           (Option.map x.connectionType ~f:ConnectionType.to_value));
-        ("arn", (Some (String_.to_value x.arn)));
-        ("ownerArn", (Some (String_.to_value x.ownerArn)));
+        ("arn", (Option.map x.arn ~f:String_.to_value));
+        ("ownerArn", (Option.map x.ownerArn ~f:String_.to_value));
         ("lifecycle",
           (Option.map x.lifecycle ~f:EnvironmentLifecycle.to_value));
         ("managedCredentialsStatus",
@@ -457,99 +458,97 @@ module Environment =
         (Option.map ~f:EnvironmentLifecycle.of_xml)
           (Xml.child xml_arg0 "lifecycle") in
       let ownerArn =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ownerArn") in
-      let arn =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerArn") in
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       let connectionType =
         (Option.map ~f:ConnectionType.of_xml)
           (Xml.child xml_arg0 "connectionType") in
       let type_ =
-        EnvironmentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+        (Option.map ~f:EnvironmentType.of_xml) (Xml.child xml_arg0 "type") in
       let description =
         (Option.map ~f:EnvironmentDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       let name =
         (Option.map ~f:EnvironmentName.of_xml) (Xml.child xml_arg0 "name") in
       let id = (Option.map ~f:EnvironmentId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?managedCredentialsStatus ?lifecycle ~ownerArn ~arn
-        ?connectionType ~type_ ?description ?name ?id ()
+      make ?managedCredentialsStatus ?lifecycle ?ownerArn ?arn
+        ?connectionType ?type_ ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedCredentialsStatus =
-        field_map json "managedCredentialsStatus"
+        field_map json__ "managedCredentialsStatus"
           ManagedCredentialsStatus.of_json in
-      let lifecycle = field_map json "lifecycle" EnvironmentLifecycle.of_json in
-      let ownerArn = field_map_exn json "ownerArn" String_.of_json in
-      let arn = field_map_exn json "arn" String_.of_json in
+      let lifecycle =
+        field_map json__ "lifecycle" EnvironmentLifecycle.of_json in
+      let ownerArn = field_map json__ "ownerArn" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
       let connectionType =
-        field_map json "connectionType" ConnectionType.of_json in
-      let type_ = field_map_exn json "type" EnvironmentType.of_json in
+        field_map json__ "connectionType" ConnectionType.of_json in
+      let type_ = field_map json__ "type" EnvironmentType.of_json in
       let description =
-        field_map json "description" EnvironmentDescription.of_json in
-      let name = field_map json "name" EnvironmentName.of_json in
-      let id = field_map json "id" EnvironmentId.of_json in
-      make ?managedCredentialsStatus ?lifecycle ~ownerArn ~arn
-        ?connectionType ~type_ ?description ?name ?id ()
+        field_map json__ "description" EnvironmentDescription.of_json in
+      let name = field_map json__ "name" EnvironmentName.of_json in
+      let id = field_map json__ "id" EnvironmentId.of_json in
+      make ?managedCredentialsStatus ?lifecycle ?ownerArn ?arn
+        ?connectionType ?type_ ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an Cloud9 development environment."]
 module EnvironmentMember =
   struct
     type nonrec t =
       {
-      permissions: Permissions.t
+      permissions: Permissions.t option
         [@ocaml.doc
           "The type of environment member permissions associated with this environment member. Available values include: owner: Owns the environment. read-only: Has read-only access to the environment. read-write: Has read-write access to the environment."];
-      userId: String_.t
+      userId: String_.t option
         [@ocaml.doc
           "The user ID in Identity and Access Management (IAM) of the environment member."];
-      userArn: UserArn.t
+      userArn: UserArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the environment member."];
-      environmentId: EnvironmentId.t
+      environmentId: EnvironmentId.t option
         [@ocaml.doc "The ID of the environment for the environment member."];
       lastAccess: Timestamp.t option
         [@ocaml.doc
           "The time, expressed in epoch time format, when the environment member last opened the environment."]}
-    let context_ = "EnvironmentMember"
-    let make ?lastAccess =
-      fun ~permissions ->
-        fun ~userId ->
-          fun ~userArn ->
-            fun ~environmentId ->
+    let make ?permissions =
+      fun ?userId ->
+        fun ?userArn ->
+          fun ?environmentId ->
+            fun ?lastAccess ->
               fun () ->
-                { lastAccess; permissions; userId; userArn; environmentId }
+                { permissions; userId; userArn; environmentId; lastAccess }
     let to_value x =
       structure_to_value
-        [("permissions", (Some (Permissions.to_value x.permissions)));
-        ("userId", (Some (String_.to_value x.userId)));
-        ("userArn", (Some (UserArn.to_value x.userArn)));
-        ("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        [("permissions", (Option.map x.permissions ~f:Permissions.to_value));
+        ("userId", (Option.map x.userId ~f:String_.to_value));
+        ("userArn", (Option.map x.userArn ~f:UserArn.to_value));
+        ("environmentId",
+          (Option.map x.environmentId ~f:EnvironmentId.to_value));
         ("lastAccess", (Option.map x.lastAccess ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let lastAccess =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastAccess") in
       let environmentId =
-        EnvironmentId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
       let userArn =
-        UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
+        (Option.map ~f:UserArn.of_xml) (Xml.child xml_arg0 "userArn") in
       let userId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "userId") in
       let permissions =
-        Permissions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "permissions") in
-      make ?lastAccess ~environmentId ~userArn ~userId ~permissions ()
+        (Option.map ~f:Permissions.of_xml) (Xml.child xml_arg0 "permissions") in
+      make ?lastAccess ?environmentId ?userArn ?userId ?permissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastAccess = field_map json "lastAccess" Timestamp.of_json in
+    let of_json json__ =
+      let lastAccess = field_map json__ "lastAccess" Timestamp.of_json in
       let environmentId =
-        field_map_exn json "environmentId" EnvironmentId.of_json in
-      let userArn = field_map_exn json "userArn" UserArn.of_json in
-      let userId = field_map_exn json "userId" String_.of_json in
-      let permissions = field_map_exn json "permissions" Permissions.of_json in
-      make ?lastAccess ~environmentId ~userArn ~userId ~permissions ()
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      let userArn = field_map json__ "userArn" UserArn.of_json in
+      let userId = field_map json__ "userId" String_.of_json in
+      let permissions = field_map json__ "permissions" Permissions.of_json in
+      make ?lastAccess ?environmentId ?userArn ?userId ?permissions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an environment member for an Cloud9 development environment."]
@@ -730,6 +729,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -758,6 +760,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -781,6 +786,9 @@ module EnvironmentIdList =
   struct
     type nonrec t = EnvironmentId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -823,6 +831,9 @@ module EnvironmentList =
   struct
     type nonrec t = Environment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Environment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -851,6 +862,9 @@ module BoundedEnvironmentIdList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -917,6 +931,9 @@ module EnvironmentMembersList =
   struct
     type nonrec t = EnvironmentMember.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentMember.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -942,6 +959,9 @@ module PermissionsList =
   struct
     type nonrec t = Permissions.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Permissions.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -966,7 +986,11 @@ module AutomaticStopTimeMinutes =
   struct
     type nonrec t = int
     let make i =
-      let open Result in ok_or_failwith (check_int_max i ~max:20160); i
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:20160) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
     let of_string = Int.of_string
     let to_value x = `Integer x
     let to_query v = to_query to_value v
@@ -1018,7 +1042,7 @@ module InstanceType =
              (fun () ->
                 (check_string_max i ~max:20) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^[a-z][1-9][.][a-z0-9]+$")));
+                     check_pattern i ~pattern:"^[a-z]+[1-9][.][a-z0-9]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1158,7 +1182,7 @@ module UpdateEnvironmentResult =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the settings of an existing Cloud9 development environment."]
+       "Changes the settings of an existing Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module UpdateEnvironmentRequest =
   struct
     type nonrec t =
@@ -1204,19 +1228,19 @@ module UpdateEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ?managedCredentialsAction ?description ?name ~environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedCredentialsAction =
-        field_map json "managedCredentialsAction"
+        field_map json__ "managedCredentialsAction"
           ManagedCredentialsAction.of_json in
       let description =
-        field_map json "description" EnvironmentDescription.of_json in
-      let name = field_map json "name" EnvironmentName.of_json in
+        field_map json__ "description" EnvironmentDescription.of_json in
+      let name = field_map json__ "name" EnvironmentName.of_json in
       let environmentId =
-        field_map_exn json "environmentId" EnvironmentId.of_json in
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
       make ?managedCredentialsAction ?description ?name ~environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the settings of an existing Cloud9 development environment."]
+       "Changes the settings of an existing Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module UpdateEnvironmentMembershipResult =
   struct
     type nonrec t =
@@ -1319,12 +1343,13 @@ module UpdateEnvironmentMembershipResult =
           (Xml.child xml_arg0 "membership") in
       make ?membership ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let membership = field_map json "membership" EnvironmentMember.of_json in
+    let of_json json__ =
+      let membership =
+        field_map json__ "membership" EnvironmentMember.of_json in
       make ?membership ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the settings of an existing environment member for an Cloud9 development environment."]
+       "Changes the settings of an existing environment member for an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module UpdateEnvironmentMembershipRequest =
   struct
     type nonrec t =
@@ -1359,16 +1384,16 @@ module UpdateEnvironmentMembershipRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~permissions ~userArn ~environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissions =
-        field_map_exn json "permissions" MemberPermissions.of_json in
-      let userArn = field_map_exn json "userArn" UserArn.of_json in
+        field_map_exn json__ "permissions" MemberPermissions.of_json in
+      let userArn = field_map_exn json__ "userArn" UserArn.of_json in
       let environmentId =
-        field_map_exn json "environmentId" EnvironmentId.of_json in
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
       make ~permissions ~userArn ~environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the settings of an existing environment member for an Cloud9 development environment."]
+       "Changes the settings of an existing environment member for an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -1436,7 +1461,8 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from an Cloud9 development environment."]
+  end[@@ocaml.doc
+       "Removes tags from an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -1464,13 +1490,14 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" EnvironmentArn.of_json in
+        field_map_exn json__ "ResourceARN" EnvironmentArn.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from an Cloud9 development environment."]
+  end[@@ocaml.doc
+       "Removes tags from an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -1539,7 +1566,7 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds tags to an Cloud9 development environment. Tags that you add to an Cloud9 environment by using this method will NOT be automatically propagated to underlying resources."]
+       "Adds tags to an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\" Tags that you add to an Cloud9 environment by using this method will NOT be automatically propagated to underlying resources."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -1565,14 +1592,14 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" EnvironmentArn.of_json in
+        field_map_exn json__ "ResourceARN" EnvironmentArn.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds tags to an Cloud9 development environment. Tags that you add to an Cloud9 environment by using this method will NOT be automatically propagated to underlying resources."]
+       "Adds tags to an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\" Tags that you add to an Cloud9 environment by using this method will NOT be automatically propagated to underlying resources."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -1635,11 +1662,11 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of the tags associated with an Cloud9 development environment."]
+       "Gets a list of the tags associated with an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
@@ -1659,13 +1686,13 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" EnvironmentArn.of_json in
+        field_map_exn json__ "ResourceARN" EnvironmentArn.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of the tags associated with an Cloud9 development environment."]
+       "Gets a list of the tags associated with an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module ListEnvironmentsResult =
   struct
     type nonrec t =
@@ -1774,14 +1801,14 @@ module ListEnvironmentsResult =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?environmentIds ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentIds =
-        field_map json "environmentIds" EnvironmentIdList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+        field_map json__ "environmentIds" EnvironmentIdList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?environmentIds ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of Cloud9 development environment identifiers."]
+       "Gets a list of Cloud9 development environment identifiers. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\" Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module ListEnvironmentsRequest =
   struct
     type nonrec t =
@@ -1806,13 +1833,13 @@ module ListEnvironmentsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of Cloud9 development environment identifiers."]
+       "Gets a list of Cloud9 development environment identifiers. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\" Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DescribeEnvironmentsResult =
   struct
     type nonrec t =
@@ -1914,12 +1941,13 @@ module DescribeEnvironmentsResult =
           (Xml.child xml_arg0 "environments") in
       make ?environments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environments =
-        field_map json "environments" EnvironmentList.of_json in
+        field_map json__ "environments" EnvironmentList.of_json in
       make ?environments ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about Cloud9 development environments."]
+  end[@@ocaml.doc
+       "Gets information about Cloud9 development environments. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DescribeEnvironmentsRequest =
   struct
     type nonrec t =
@@ -1940,20 +1968,22 @@ module DescribeEnvironmentsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentIds") in
       make ~environmentIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentIds =
-        field_map_exn json "environmentIds" BoundedEnvironmentIdList.of_json in
+        field_map_exn json__ "environmentIds"
+          BoundedEnvironmentIdList.of_json in
       make ~environmentIds ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about Cloud9 development environments."]
+  end[@@ocaml.doc
+       "Gets information about Cloud9 development environments. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DescribeEnvironmentStatusResult =
   struct
     type nonrec t =
       {
-      status: EnvironmentStatus.t
+      status: EnvironmentStatus.t option
         [@ocaml.doc
           "The status of the environment. Available values include: connecting: The environment is connecting. creating: The environment is being created. deleting: The environment is being deleted. error: The environment is in an error state. ready: The environment is ready. stopped: The environment is stopped. stopping: The environment is stopping."];
-      message: String_.t
+      message: String_.t option
         [@ocaml.doc
           "Any informational message about the status of the environment."]}
     type nonrec error =
@@ -1965,8 +1995,7 @@ module DescribeEnvironmentStatusResult =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeEnvironmentStatusResult"
-    let make ~status = fun ~message -> fun () -> { status; message }
+    let make ?status = fun ?message -> fun () -> { status; message }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -2043,24 +2072,24 @@ module DescribeEnvironmentStatusResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("status", (Some (EnvironmentStatus.to_value x.status)));
-        ("message", (Some (String_.to_value x.message)))]
+        [("status", (Option.map x.status ~f:EnvironmentStatus.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       let status =
-        EnvironmentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~message ~status ()
+        (Option.map ~f:EnvironmentStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?message ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      let status = field_map_exn json "status" EnvironmentStatus.of_json in
-      make ~message ~status ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let status = field_map json__ "status" EnvironmentStatus.of_json in
+      make ?message ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets status information for an Cloud9 development environment."]
+       "Gets status information for an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DescribeEnvironmentStatusRequest =
   struct
     type nonrec t =
@@ -2080,13 +2109,13 @@ module DescribeEnvironmentStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentId =
-        field_map_exn json "environmentId" EnvironmentId.of_json in
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
       make ~environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets status information for an Cloud9 development environment."]
+       "Gets status information for an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DescribeEnvironmentMembershipsResult =
   struct
     type nonrec t =
@@ -2196,14 +2225,14 @@ module DescribeEnvironmentMembershipsResult =
           (Xml.child xml_arg0 "memberships") in
       make ?nextToken ?memberships ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let memberships =
-        field_map json "memberships" EnvironmentMembersList.of_json in
+        field_map json__ "memberships" EnvironmentMembersList.of_json in
       make ?nextToken ?memberships ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about environment members for an Cloud9 development environment."]
+       "Gets information about environment members for an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DescribeEnvironmentMembershipsRequest =
   struct
     type nonrec t =
@@ -2256,17 +2285,18 @@ module DescribeEnvironmentMembershipsRequest =
         (Option.map ~f:UserArn.of_xml) (Xml.child xml_arg0 "userArn") in
       make ?maxResults ?nextToken ?permissions ?environmentId ?userArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let permissions = field_map json "permissions" PermissionsList.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let permissions =
+        field_map json__ "permissions" PermissionsList.of_json in
       let environmentId =
-        field_map json "environmentId" EnvironmentId.of_json in
-      let userArn = field_map json "userArn" UserArn.of_json in
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      let userArn = field_map json__ "userArn" UserArn.of_json in
       make ?maxResults ?nextToken ?permissions ?environmentId ?userArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about environment members for an Cloud9 development environment."]
+       "Gets information about environment members for an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DeleteEnvironmentResult =
   struct
     type nonrec t = unit
@@ -2362,7 +2392,7 @@ module DeleteEnvironmentResult =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Cloud9 development environment. If an Amazon EC2 instance is connected to the environment, also terminates the instance."]
+       "Deletes an Cloud9 development environment. If an Amazon EC2 instance is connected to the environment, also terminates the instance. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DeleteEnvironmentRequest =
   struct
     type nonrec t =
@@ -2381,13 +2411,13 @@ module DeleteEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentId =
-        field_map_exn json "environmentId" EnvironmentId.of_json in
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
       make ~environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Cloud9 development environment. If an Amazon EC2 instance is connected to the environment, also terminates the instance."]
+       "Deletes an Cloud9 development environment. If an Amazon EC2 instance is connected to the environment, also terminates the instance. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DeleteEnvironmentMembershipResult =
   struct
     type nonrec t = unit
@@ -2483,7 +2513,7 @@ module DeleteEnvironmentMembershipResult =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an environment member from an Cloud9 development environment."]
+       "Deletes an environment member from a development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module DeleteEnvironmentMembershipRequest =
   struct
     type nonrec t =
@@ -2510,19 +2540,19 @@ module DeleteEnvironmentMembershipRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~userArn ~environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userArn = field_map_exn json "userArn" UserArn.of_json in
+    let of_json json__ =
+      let userArn = field_map_exn json__ "userArn" UserArn.of_json in
       let environmentId =
-        field_map_exn json "environmentId" EnvironmentId.of_json in
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
       make ~userArn ~environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an environment member from an Cloud9 development environment."]
+       "Deletes an environment member from a development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module CreateEnvironmentMembershipResult =
   struct
     type nonrec t =
       {
-      membership: EnvironmentMember.t
+      membership: EnvironmentMember.t option
         [@ocaml.doc
           "Information about the environment member that was added."]}
     type nonrec error =
@@ -2534,8 +2564,7 @@ module CreateEnvironmentMembershipResult =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateEnvironmentMembershipResult"
-    let make ~membership = fun () -> { membership }
+    let make ?membership = fun () -> { membership }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -2612,21 +2641,22 @@ module CreateEnvironmentMembershipResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("membership", (Some (EnvironmentMember.to_value x.membership)))]
+        [("membership",
+           (Option.map x.membership ~f:EnvironmentMember.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let membership =
-        EnvironmentMember.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "membership") in
-      make ~membership ()
+        (Option.map ~f:EnvironmentMember.of_xml)
+          (Xml.child xml_arg0 "membership") in
+      make ?membership ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let membership =
-        field_map_exn json "membership" EnvironmentMember.of_json in
-      make ~membership ()
+        field_map json__ "membership" EnvironmentMember.of_json in
+      make ?membership ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds an environment member to an Cloud9 development environment."]
+       "Adds an environment member to an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module CreateEnvironmentMembershipRequest =
   struct
     type nonrec t =
@@ -2661,16 +2691,16 @@ module CreateEnvironmentMembershipRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~permissions ~userArn ~environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissions =
-        field_map_exn json "permissions" MemberPermissions.of_json in
-      let userArn = field_map_exn json "userArn" UserArn.of_json in
+        field_map_exn json__ "permissions" MemberPermissions.of_json in
+      let userArn = field_map_exn json__ "userArn" UserArn.of_json in
       let environmentId =
-        field_map_exn json "environmentId" EnvironmentId.of_json in
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
       make ~permissions ~userArn ~environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds an environment member to an Cloud9 development environment."]
+       "Adds an environment member to an Cloud9 development environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module CreateEnvironmentEC2Result =
   struct
     type nonrec t =
@@ -2772,13 +2802,13 @@ module CreateEnvironmentEC2Result =
           (Xml.child xml_arg0 "environmentId") in
       make ?environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentId =
-        field_map json "environmentId" EnvironmentId.of_json in
+        field_map json__ "environmentId" EnvironmentId.of_json in
       make ?environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Cloud9 development environment, launches an Amazon Elastic Compute Cloud (Amazon EC2) instance, and then connects from the instance to the environment."]
+       "Creates an Cloud9 development environment, launches an Amazon Elastic Compute Cloud (Amazon EC2) instance, and then connects from the instance to the environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]
 module CreateEnvironmentEC2Request =
   struct
     type nonrec t =
@@ -2797,9 +2827,9 @@ module CreateEnvironmentEC2Request =
       subnetId: SubnetId.t option
         [@ocaml.doc
           "The ID of the subnet in Amazon VPC that Cloud9 will use to communicate with the Amazon EC2 instance."];
-      imageId: ImageId.t option
+      imageId: ImageId.t
         [@ocaml.doc
-          "The identifier for the Amazon Machine Image (AMI) that's used to create the EC2 instance. To choose an AMI for the instance, you must specify a valid AMI alias or a valid Amazon EC2 Systems Manager (SSM) path. The default AMI is used if the parameter isn't explicitly assigned a value in the request. Because Amazon Linux AMI has ended standard support as of December 31, 2020, we recommend you choose Amazon Linux 2, which includes long term support through 2023. AMI aliases Amazon Linux (default): amazonlinux-1-x86_64 Amazon Linux 2: amazonlinux-2-x86_64 Ubuntu 18.04: ubuntu-18.04-x86_64 SSM paths Amazon Linux (default): resolve:ssm:/aws/service/cloud9/amis/amazonlinux-1-x86_64 Amazon Linux 2: resolve:ssm:/aws/service/cloud9/amis/amazonlinux-2-x86_64 Ubuntu 18.04: resolve:ssm:/aws/service/cloud9/amis/ubuntu-18.04-x86_64"];
+          "The identifier for the Amazon Machine Image (AMI) that's used to create the EC2 instance. To choose an AMI for the instance, you must specify a valid AMI alias or a valid Amazon EC2 Systems Manager (SSM) path. We recommend using Amazon Linux 2023 as the AMI to create your environment as it is fully supported. From December 16, 2024, Ubuntu 18.04 will be removed from the list of available imageIds for Cloud9. This change is necessary as Ubuntu 18.04 has ended standard support on May 31, 2023. This change will only affect direct API consumers, and not Cloud9 console users. Since Ubuntu 18.04 has ended standard support as of May 31, 2023, we recommend you choose Ubuntu 22.04. AMI aliases Amazon Linux 2: amazonlinux-2-x86_64 Amazon Linux 2023 (recommended): amazonlinux-2023-x86_64 Ubuntu 18.04: ubuntu-18.04-x86_64 Ubuntu 22.04: ubuntu-22.04-x86_64 SSM paths Amazon Linux 2: resolve:ssm:/aws/service/cloud9/amis/amazonlinux-2-x86_64 Amazon Linux 2023 (recommended): resolve:ssm:/aws/service/cloud9/amis/amazonlinux-2023-x86_64 Ubuntu 18.04: resolve:ssm:/aws/service/cloud9/amis/ubuntu-18.04-x86_64 Ubuntu 22.04: resolve:ssm:/aws/service/cloud9/amis/ubuntu-22.04-x86_64"];
       automaticStopTimeMinutes: AutomaticStopTimeMinutes.t option
         [@ocaml.doc
           "The number of minutes until the running instance is shut down after the environment has last been used."];
@@ -2819,27 +2849,27 @@ module CreateEnvironmentEC2Request =
     let make ?description =
       fun ?clientRequestToken ->
         fun ?subnetId ->
-          fun ?imageId ->
-            fun ?automaticStopTimeMinutes ->
-              fun ?ownerArn ->
-                fun ?tags ->
-                  fun ?connectionType ->
-                    fun ?dryRun ->
-                      fun ~name ->
-                        fun ~instanceType ->
+          fun ?automaticStopTimeMinutes ->
+            fun ?ownerArn ->
+              fun ?tags ->
+                fun ?connectionType ->
+                  fun ?dryRun ->
+                    fun ~name ->
+                      fun ~instanceType ->
+                        fun ~imageId ->
                           fun () ->
                             {
                               description;
                               clientRequestToken;
                               subnetId;
-                              imageId;
                               automaticStopTimeMinutes;
                               ownerArn;
                               tags;
                               connectionType;
                               dryRun;
                               name;
-                              instanceType
+                              instanceType;
+                              imageId
                             }
     let to_value x =
       structure_to_value
@@ -2850,7 +2880,7 @@ module CreateEnvironmentEC2Request =
           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
         ("instanceType", (Some (InstanceType.to_value x.instanceType)));
         ("subnetId", (Option.map x.subnetId ~f:SubnetId.to_value));
-        ("imageId", (Option.map x.imageId ~f:ImageId.to_value));
+        ("imageId", (Some (ImageId.to_value x.imageId)));
         ("automaticStopTimeMinutes",
           (Option.map x.automaticStopTimeMinutes
              ~f:AutomaticStopTimeMinutes.to_value));
@@ -2873,7 +2903,7 @@ module CreateEnvironmentEC2Request =
         (Option.map ~f:AutomaticStopTimeMinutes.of_xml)
           (Xml.child xml_arg0 "automaticStopTimeMinutes") in
       let imageId =
-        (Option.map ~f:ImageId.of_xml) (Xml.child xml_arg0 "imageId") in
+        ImageId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "imageId") in
       let subnetId =
         (Option.map ~f:SubnetId.of_xml) (Xml.child xml_arg0 "subnetId") in
       let instanceType =
@@ -2889,30 +2919,30 @@ module CreateEnvironmentEC2Request =
         EnvironmentName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?dryRun ?connectionType ?tags ?ownerArn ?automaticStopTimeMinutes
-        ?imageId ?subnetId ~instanceType ?clientRequestToken ?description
+        ~imageId ?subnetId ~instanceType ?clientRequestToken ?description
         ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "dryRun" NullableBoolean.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "dryRun" NullableBoolean.of_json in
       let connectionType =
-        field_map json "connectionType" ConnectionType.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let ownerArn = field_map json "ownerArn" UserArn.of_json in
+        field_map json__ "connectionType" ConnectionType.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let ownerArn = field_map json__ "ownerArn" UserArn.of_json in
       let automaticStopTimeMinutes =
-        field_map json "automaticStopTimeMinutes"
+        field_map json__ "automaticStopTimeMinutes"
           AutomaticStopTimeMinutes.of_json in
-      let imageId = field_map json "imageId" ImageId.of_json in
-      let subnetId = field_map json "subnetId" SubnetId.of_json in
+      let imageId = field_map_exn json__ "imageId" ImageId.of_json in
+      let subnetId = field_map json__ "subnetId" SubnetId.of_json in
       let instanceType =
-        field_map_exn json "instanceType" InstanceType.of_json in
+        field_map_exn json__ "instanceType" InstanceType.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
       let description =
-        field_map json "description" EnvironmentDescription.of_json in
-      let name = field_map_exn json "name" EnvironmentName.of_json in
+        field_map json__ "description" EnvironmentDescription.of_json in
+      let name = field_map_exn json__ "name" EnvironmentName.of_json in
       make ?dryRun ?connectionType ?tags ?ownerArn ?automaticStopTimeMinutes
-        ?imageId ?subnetId ~instanceType ?clientRequestToken ?description
+        ~imageId ?subnetId ~instanceType ?clientRequestToken ?description
         ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Cloud9 development environment, launches an Amazon Elastic Compute Cloud (Amazon EC2) instance, and then connects from the instance to the environment."]
+       "Creates an Cloud9 development environment, launches an Amazon Elastic Compute Cloud (Amazon EC2) instance, and then connects from the instance to the environment. Cloud9 is no longer available to new customers. Existing customers of Cloud9 can continue to use the service as normal. Learn more\""]

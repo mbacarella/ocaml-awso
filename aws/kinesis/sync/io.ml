@@ -17,10 +17,14 @@ let create_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStream input
 let decrease_stream_retention_period ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DecreaseStreamRetentionPeriod input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let delete_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStream input
 let deregister_stream_consumer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterStreamConsumer input
+let describe_account_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAccountSettings input
 let describe_limits ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLimits input
 let describe_stream ?endpoint_url ?cfg input =
@@ -35,6 +39,8 @@ let enable_enhanced_monitoring ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableEnhancedMonitoring input
 let get_records ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRecords input
+let get_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicy input
 let get_shard_iterator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetShardIterator input
 let increase_stream_retention_period ?endpoint_url ?cfg input =
@@ -45,6 +51,8 @@ let list_stream_consumers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStreamConsumers input
 let list_streams ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStreams input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_tags_for_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForStream input
 let merge_shards ?endpoint_url ?cfg input =
@@ -53,6 +61,8 @@ let put_record ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutRecord input
 let put_records ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutRecords input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let register_stream_consumer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterStreamConsumer input
 let remove_tags_from_stream ?endpoint_url ?cfg input =
@@ -65,7 +75,17 @@ let stop_stream_encryption ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopStreamEncryption input
 let subscribe_to_shard ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SubscribeToShard input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_account_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAccountSettings input
+let update_max_record_size ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateMaxRecordSize input
 let update_shard_count ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateShardCount input
 let update_stream_mode ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateStreamMode input
+let update_stream_warm_throughput ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateStreamWarmThroughput input

@@ -23,6 +23,80 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ColumnName =
+  struct
+    type nonrec t = string
+    let context_ = "ColumnName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:150); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ColumnName" j
+    let to_json = simple_to_json to_value
+  end
+module ColumnValue =
+  struct
+    type nonrec t = string
+    let context_ = "ColumnValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:20000); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ColumnValue" j
+    let to_json = simple_to_json to_value
+  end
+module Reason =
+  struct
+    type nonrec t = string
+    let context_ = "Reason"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Reason" j
+    let to_json = simple_to_json to_value
+  end
+module FilterAttributeName =
+  struct
+    type nonrec t = string
+    let context_ = "FilterAttributeName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_pattern i ~pattern:"[A-Za-z0-9_]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterAttributeName" j
+    let to_json = simple_to_json to_value
+  end
+module FilterAttributeValue =
+  struct
+    type nonrec t = string
+    let context_ = "FilterAttributeValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1000); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterAttributeValue" j
+    let to_json = simple_to_json to_value
+  end
 module ItemID =
   struct
     type nonrec t = string
@@ -37,6 +111,83 @@ module ItemID =
     let of_json j = string_of_json ~kind:"ItemID" j
     let to_json = simple_to_json to_value
   end
+module Metadata =
+  struct
+    type nonrec t = (ColumnName.t * ColumnValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ColumnName.of_string chopped),
+                              (ColumnValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ColumnName.to_value x) |>
+                    (fun x -> (ColumnValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ColumnName.of_string
+        ~of_json:ColumnValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Name =
+  struct
+    type nonrec t = string
+    let context_ = "Name"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9\\-_]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Name" j
+    let to_json = simple_to_json to_value
+  end
+module ReasonList =
+  struct
+    type nonrec t = Reason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Reason.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Reason.of_xml)
+    let of_json j = list_of_json ~kind:"ReasonList" ~of_json:Reason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Score =
   struct
     type nonrec t = float
@@ -48,6 +199,90 @@ module Score =
     let of_xml xml_arg0 =
       Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
     let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module Arn =
+  struct
+    type nonrec t = string
+    let context_ = "Arn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"arn:([a-z\\d-]+):personalize:.*:.*:.+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Arn" j
+    let to_json = simple_to_json to_value
+  end
+module FilterValues =
+  struct
+    type nonrec t = (FilterAttributeName.t * FilterAttributeValue.t) list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:25); i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((FilterAttributeName.of_string chopped),
+                              (FilterAttributeValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (FilterAttributeName.to_value x) |>
+                    (fun x ->
+                       (FilterAttributeValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:FilterAttributeName.of_string
+        ~of_json:FilterAttributeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PercentPromotedItems =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PercentPromotedItems" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ActionID =
+  struct
+    type nonrec t = string
+    let context_ = "ActionID"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ActionID" j
     let to_json = simple_to_json to_value
   end
 module ErrorMessage =
@@ -70,23 +305,48 @@ module PredictedItem =
       itemId: ItemID.t option [@ocaml.doc "The recommended item ID."];
       score: Score.t option
         [@ocaml.doc
-          "A numeric representation of the model's certainty that the item will be the next user selection. For more information on scoring logic, see how-scores-work."]}
-    let make ?itemId = fun ?score -> fun () -> { itemId; score }
+          "A numeric representation of the model's certainty that the item will be the next user selection. For more information on scoring logic, see how-scores-work."];
+      promotionName: Name.t option
+        [@ocaml.doc
+          "The name of the promotion that included the predicted item."];
+      metadata: Metadata.t option
+        [@ocaml.doc "Metadata about the item from your Items dataset."];
+      reason: ReasonList.t option
+        [@ocaml.doc
+          "If you use User-Personalization-v2, a list of reasons for why the item was included in recommendations. Possible reasons include the following: Promoted item - Indicates the item was included as part of a promotion that you applied in your recommendation request. Exploration - Indicates the item was included with exploration. With exploration, recommendations include items with less interactions data or relevance for the user. For more information about exploration, see Exploration. Popular item - Indicates the item was included as a placeholder popular item. If you use a filter, depending on how many recommendations the filter removes, Amazon Personalize might add placeholder items to meet the numResults for your recommendation request. These items are popular items, based on interactions data, that satisfy your filter criteria. They don't have a relevance score for the user."]}
+    let make ?itemId =
+      fun ?score ->
+        fun ?promotionName ->
+          fun ?metadata ->
+            fun ?reason ->
+              fun () -> { itemId; score; promotionName; metadata; reason }
     let to_value x =
       structure_to_value
         [("itemId", (Option.map x.itemId ~f:ItemID.to_value));
-        ("score", (Option.map x.score ~f:Score.to_value))]
+        ("score", (Option.map x.score ~f:Score.to_value));
+        ("promotionName", (Option.map x.promotionName ~f:Name.to_value));
+        ("metadata", (Option.map x.metadata ~f:Metadata.to_value));
+        ("reason", (Option.map x.reason ~f:ReasonList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ReasonList.of_xml) (Xml.child xml_arg0 "reason") in
+      let metadata =
+        (Option.map ~f:Metadata.of_xml) (Xml.child xml_arg0 "metadata") in
+      let promotionName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "promotionName") in
       let score = (Option.map ~f:Score.of_xml) (Xml.child xml_arg0 "score") in
       let itemId =
         (Option.map ~f:ItemID.of_xml) (Xml.child xml_arg0 "itemId") in
-      make ?score ?itemId ()
+      make ?reason ?metadata ?promotionName ?score ?itemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "score" Score.of_json in
-      let itemId = field_map json "itemId" ItemID.of_json in
-      make ?score ?itemId ()
+    let of_json json__ =
+      let reason = field_map json__ "reason" ReasonList.of_json in
+      let metadata = field_map json__ "metadata" Metadata.of_json in
+      let promotionName = field_map json__ "promotionName" Name.of_json in
+      let score = field_map json__ "score" Score.of_json in
+      let itemId = field_map json__ "itemId" ItemID.of_json in
+      make ?reason ?metadata ?promotionName ?score ?itemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that identifies an item. The and APIs return a list of PredictedItems."]
@@ -122,38 +382,126 @@ module AttributeValue =
     let of_json j = string_of_json ~kind:"AttributeValue" j
     let to_json = simple_to_json to_value
   end
-module FilterAttributeName =
+module ColumnNamesList =
+  struct
+    type nonrec t = ColumnName.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:99); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ColumnName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ColumnName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ColumnNamesList" ~of_json:ColumnName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DatasetType =
   struct
     type nonrec t = string
-    let context_ = "FilterAttributeName"
+    let context_ = "DatasetType"
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:50) >>=
-             (fun () -> check_pattern i ~pattern:"[A-Za-z0-9_]+"));
-        i
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FilterAttributeName" j
+    let of_json j = string_of_json ~kind:"DatasetType" j
     let to_json = simple_to_json to_value
   end
-module FilterAttributeValue =
+module Promotion =
   struct
-    type nonrec t = string
-    let context_ = "FilterAttributeValue"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1000); i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      name: Name.t option [@ocaml.doc "The name of the promotion."];
+      percentPromotedItems: PercentPromotedItems.t option
+        [@ocaml.doc
+          "The percentage of recommended items to apply the promotion to."];
+      filterArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the filter used by the promotion. This filter defines the criteria for promoted items. For more information, see Promotion filters."];
+      filterValues: FilterValues.t option
+        [@ocaml.doc
+          "The values to use when promoting items. For each placeholder parameter in your promotion's filter expression, provide the parameter name (in matching case) as a key and the filter value(s) as the corresponding value. Separate multiple values for one parameter with a comma. For filter expressions that use an INCLUDE element to include items, you must provide values for all parameters that are defined in the expression. For filters with expressions that use an EXCLUDE element to exclude items, you can omit the filter-values. In this case, Amazon Personalize doesn't use that portion of the expression to filter recommendations. For more information on creating filters, see Filtering recommendations and user segments."]}
+    let make ?name =
+      fun ?percentPromotedItems ->
+        fun ?filterArn ->
+          fun ?filterValues ->
+            fun () -> { name; percentPromotedItems; filterArn; filterValues }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:Name.to_value));
+        ("percentPromotedItems",
+          (Option.map x.percentPromotedItems ~f:PercentPromotedItems.to_value));
+        ("filterArn", (Option.map x.filterArn ~f:Arn.to_value));
+        ("filterValues",
+          (Option.map x.filterValues ~f:FilterValues.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FilterAttributeValue" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let filterValues =
+        (Option.map ~f:FilterValues.of_xml)
+          (Xml.child xml_arg0 "filterValues") in
+      let filterArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "filterArn") in
+      let percentPromotedItems =
+        (Option.map ~f:PercentPromotedItems.of_xml)
+          (Xml.child xml_arg0 "percentPromotedItems") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      make ?filterValues ?filterArn ?percentPromotedItems ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filterValues = field_map json__ "filterValues" FilterValues.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
+      let percentPromotedItems =
+        field_map json__ "percentPromotedItems" PercentPromotedItems.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?filterValues ?filterArn ?percentPromotedItems ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information on a promotion. A promotion defines additional business rules that apply to a configurable subset of recommended items."]
+module PredictedAction =
+  struct
+    type nonrec t =
+      {
+      actionId: ActionID.t option
+        [@ocaml.doc "The ID of the recommended action."];
+      score: Score.t option
+        [@ocaml.doc
+          "The score of the recommended action. For information about action scores, see How action recommendation scoring works."]}
+    let make ?actionId = fun ?score -> fun () -> { actionId; score }
+    let to_value x =
+      structure_to_value
+        [("actionId", (Option.map x.actionId ~f:ActionID.to_value));
+        ("score", (Option.map x.score ~f:Score.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let score = (Option.map ~f:Score.of_xml) (Xml.child xml_arg0 "score") in
+      let actionId =
+        (Option.map ~f:ActionID.of_xml) (Xml.child xml_arg0 "actionId") in
+      make ?score ?actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let score = field_map json__ "score" Score.of_json in
+      let actionId = field_map json__ "actionId" ActionID.of_json in
+      make ?score ?actionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that identifies an action. The API returns a list of PredictedActions."]
 module InvalidInputException =
   struct
     type nonrec t = {
@@ -168,8 +516,8 @@ module InvalidInputException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provide a valid value for the field or parameter."]
@@ -177,6 +525,9 @@ module ItemList =
   struct
     type nonrec t = PredictedItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PredictedItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -224,31 +575,11 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource does not exist."]
-module Arn =
-  struct
-    type nonrec t = string
-    let context_ = "Arn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"arn:([a-z\\d-]+):personalize:.*:.*:.+"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Arn" j
-    let to_json = simple_to_json to_value
-  end
 module Context =
   struct
     type nonrec t = (AttributeName.t * AttributeValue.t) list
@@ -272,6 +603,8 @@ module Context =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -279,11 +612,11 @@ module Context =
         ~of_json:AttributeValue.of_json j
     let to_json v = composed_to_json to_value v
   end
-module FilterValues =
+module MetadataColumns =
   struct
-    type nonrec t = (FilterAttributeName.t * FilterAttributeValue.t) list
+    type nonrec t = (DatasetType.t * ColumnNamesList.t) list
     let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:25); i
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
     let of_header xs =
       make
         (List.filter_map xs
@@ -291,22 +624,26 @@ module FilterValues =
                  (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
                    (Option.map
                       ~f:(fun chopped ->
-                            ((FilterAttributeName.of_string chopped),
-                              (FilterAttributeValue.of_string v))))))
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types DatasetType ColumnNamesList"))))
     let to_value xs =
       (xs |>
          (List.map
             ~f:(fun (x, y) ->
-                  (FilterAttributeName.to_value x) |>
+                  (DatasetType.to_value x) |>
                     (fun x ->
-                       (FilterAttributeValue.to_value y) |> (fun y -> (x, y))))))
+                       (ColumnNamesList.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
-      object_of_json ~key_of_string:FilterAttributeName.of_string
-        ~of_json:FilterAttributeValue.of_json j
+      object_of_json ~key_of_string:DatasetType.of_string
+        ~of_json:ColumnNamesList.of_json j
     let to_json v = composed_to_json to_value v
   end
 module NumResults =
@@ -323,6 +660,34 @@ module NumResults =
         (string_of_xml ~kind:"an integer for NumResults" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
+  end
+module PromotionList =
+  struct
+    type nonrec t = Promotion.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Promotion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Promotion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PromotionList" ~of_json:Promotion.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module UserID =
   struct
@@ -342,6 +707,9 @@ module InputList =
   struct
     type nonrec t = ItemID.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ItemID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -359,6 +727,33 @@ module InputList =
                           | _ -> true)
                      | _ -> true))) ~f:ItemID.of_xml)
     let of_json j = list_of_json ~kind:"InputList" ~of_json:ItemID.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ActionList =
+  struct
+    type nonrec t = PredictedAction.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PredictedAction.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PredictedAction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ActionList" ~of_json:PredictedAction.of_json j
     let to_json v = composed_to_json to_value v
   end
 module GetRecommendationsResponse =
@@ -422,10 +817,10 @@ module GetRecommendationsResponse =
         (Option.map ~f:ItemList.of_xml) (Xml.child xml_arg0 "itemList") in
       make ?recommendationId ?itemList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationId =
-        field_map json "recommendationId" RecommendationID.of_json in
-      let itemList = field_map json "itemList" ItemList.of_json in
+        field_map json__ "recommendationId" RecommendationID.of_json in
+      let itemList = field_map json__ "itemList" ItemList.of_json in
       make ?recommendationId ?itemList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -445,7 +840,7 @@ module GetRecommendationsRequest =
           "The user ID to provide recommendations for. Required for USER_PERSONALIZATION recipe type."];
       numResults: NumResults.t option
         [@ocaml.doc
-          "The number of results to return. The default is 25. The maximum is 500."];
+          "The number of results to return. The default is 25. If you are including metadata in recommendations, the maximum is 50. Otherwise, the maximum is 500."];
       context: Context.t option
         [@ocaml.doc
           "The contextual metadata to use when getting recommendations. Contextual metadata includes any interaction information that might be relevant when getting a user's recommendations, such as the user's current location or device type."];
@@ -454,10 +849,16 @@ module GetRecommendationsRequest =
           "The ARN of the filter to apply to the returned recommendations. For more information, see Filtering Recommendations. When using this parameter, be sure the filter resource is ACTIVE."];
       filterValues: FilterValues.t option
         [@ocaml.doc
-          "The values to use when filtering recommendations. For each placeholder parameter in your filter expression, provide the parameter name (in matching case) as a key and the filter value(s) as the corresponding value. Separate multiple values for one parameter with a comma. For filter expressions that use an INCLUDE element to include items, you must provide values for all parameters that are defined in the expression. For filters with expressions that use an EXCLUDE element to exclude items, you can omit the filter-values.In this case, Amazon Personalize doesn't use that portion of the expression to filter recommendations. For more information, see Filtering Recommendations."];
+          "The values to use when filtering recommendations. For each placeholder parameter in your filter expression, provide the parameter name (in matching case) as a key and the filter value(s) as the corresponding value. Separate multiple values for one parameter with a comma. For filter expressions that use an INCLUDE element to include items, you must provide values for all parameters that are defined in the expression. For filters with expressions that use an EXCLUDE element to exclude items, you can omit the filter-values.In this case, Amazon Personalize doesn't use that portion of the expression to filter recommendations. For more information, see Filtering recommendations and user segments."];
       recommenderArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the recommender to use to get recommendations. Provide a recommender ARN if you created a Domain dataset group with a recommender for a domain use case."]}
+          "The Amazon Resource Name (ARN) of the recommender to use to get recommendations. Provide a recommender ARN if you created a Domain dataset group with a recommender for a domain use case."];
+      promotions: PromotionList.t option
+        [@ocaml.doc
+          "The promotions to apply to the recommendation request. A promotion defines additional business rules that apply to a configurable subset of recommended items."];
+      metadataColumns: MetadataColumns.t option
+        [@ocaml.doc
+          "If you enabled metadata in recommendations when you created or updated the campaign or recommender, specify the metadata columns from your Items dataset to include in item recommendations. The map key is ITEMS and the value is a list of column names from your Items dataset. The maximum number of columns you can provide is 10. For information about enabling metadata for a campaign, see Enabling metadata in recommendations for a campaign. For information about enabling metadata for a recommender, see Enabling metadata in recommendations for a recommender."]}
     let make ?campaignArn =
       fun ?itemId ->
         fun ?userId ->
@@ -466,17 +867,21 @@ module GetRecommendationsRequest =
               fun ?filterArn ->
                 fun ?filterValues ->
                   fun ?recommenderArn ->
-                    fun () ->
-                      {
-                        campaignArn;
-                        itemId;
-                        userId;
-                        numResults;
-                        context;
-                        filterArn;
-                        filterValues;
-                        recommenderArn
-                      }
+                    fun ?promotions ->
+                      fun ?metadataColumns ->
+                        fun () ->
+                          {
+                            campaignArn;
+                            itemId;
+                            userId;
+                            numResults;
+                            context;
+                            filterArn;
+                            filterValues;
+                            recommenderArn;
+                            promotions;
+                            metadataColumns
+                          }
     let to_value x =
       structure_to_value
         [("campaignArn", (Option.map x.campaignArn ~f:Arn.to_value));
@@ -487,9 +892,18 @@ module GetRecommendationsRequest =
         ("filterArn", (Option.map x.filterArn ~f:Arn.to_value));
         ("filterValues",
           (Option.map x.filterValues ~f:FilterValues.to_value));
-        ("recommenderArn", (Option.map x.recommenderArn ~f:Arn.to_value))]
+        ("recommenderArn", (Option.map x.recommenderArn ~f:Arn.to_value));
+        ("promotions", (Option.map x.promotions ~f:PromotionList.to_value));
+        ("metadataColumns",
+          (Option.map x.metadataColumns ~f:MetadataColumns.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let metadataColumns =
+        (Option.map ~f:MetadataColumns.of_xml)
+          (Xml.child xml_arg0 "metadataColumns") in
+      let promotions =
+        (Option.map ~f:PromotionList.of_xml)
+          (Xml.child xml_arg0 "promotions") in
       let recommenderArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recommenderArn") in
       let filterValues =
@@ -507,20 +921,23 @@ module GetRecommendationsRequest =
         (Option.map ~f:ItemID.of_xml) (Xml.child xml_arg0 "itemId") in
       let campaignArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "campaignArn") in
-      make ?recommenderArn ?filterValues ?filterArn ?context ?numResults
-        ?userId ?itemId ?campaignArn ()
+      make ?metadataColumns ?promotions ?recommenderArn ?filterValues
+        ?filterArn ?context ?numResults ?userId ?itemId ?campaignArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recommenderArn = field_map json "recommenderArn" Arn.of_json in
-      let filterValues = field_map json "filterValues" FilterValues.of_json in
-      let filterArn = field_map json "filterArn" Arn.of_json in
-      let context = field_map json "context" Context.of_json in
-      let numResults = field_map json "numResults" NumResults.of_json in
-      let userId = field_map json "userId" UserID.of_json in
-      let itemId = field_map json "itemId" ItemID.of_json in
-      let campaignArn = field_map json "campaignArn" Arn.of_json in
-      make ?recommenderArn ?filterValues ?filterArn ?context ?numResults
-        ?userId ?itemId ?campaignArn ()
+    let of_json json__ =
+      let metadataColumns =
+        field_map json__ "metadataColumns" MetadataColumns.of_json in
+      let promotions = field_map json__ "promotions" PromotionList.of_json in
+      let recommenderArn = field_map json__ "recommenderArn" Arn.of_json in
+      let filterValues = field_map json__ "filterValues" FilterValues.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
+      let context = field_map json__ "context" Context.of_json in
+      let numResults = field_map json__ "numResults" NumResults.of_json in
+      let userId = field_map json__ "userId" UserID.of_json in
+      let itemId = field_map json__ "itemId" ItemID.of_json in
+      let campaignArn = field_map json__ "campaignArn" Arn.of_json in
+      make ?metadataColumns ?promotions ?recommenderArn ?filterValues
+        ?filterArn ?context ?numResults ?userId ?itemId ?campaignArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of recommended items. For campaigns, the campaign's Amazon Resource Name (ARN) is required and the required user and item input depends on the recipe type used to create the solution backing the campaign as follows: USER_PERSONALIZATION - userId required, itemId not used RELATED_ITEMS - itemId required, userId not used Campaigns that are backed by a solution created using a recipe of type PERSONALIZED_RANKING use the API. For recommenders, the recommender's ARN is required and the required item and user input depends on the use case (domain-based recipe) backing the recommender. For information on use case requirements see Choosing recommender use cases."]
@@ -588,11 +1005,11 @@ module GetPersonalizedRankingResponse =
           (Xml.child xml_arg0 "personalizedRanking") in
       make ?recommendationId ?personalizedRanking ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationId =
-        field_map json "recommendationId" RecommendationID.of_json in
+        field_map json__ "recommendationId" RecommendationID.of_json in
       let personalizedRanking =
-        field_map json "personalizedRanking" ItemList.of_json in
+        field_map json__ "personalizedRanking" ItemList.of_json in
       make ?recommendationId ?personalizedRanking ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -606,7 +1023,7 @@ module GetPersonalizedRankingRequest =
           "The Amazon Resource Name (ARN) of the campaign to use for generating the personalized ranking."];
       inputList: InputList.t
         [@ocaml.doc
-          "A list of items (by itemId) to rank. If an item was not included in the training dataset, the item is appended to the end of the reranked list. The maximum is 500."];
+          "A list of items (by itemId) to rank. If an item was not included in the training dataset, the item is appended to the end of the reranked list. If you are including metadata in recommendations, the maximum is 50. Otherwise, the maximum is 500."];
       userId: UserID.t
         [@ocaml.doc
           "The user for which you want the campaign to provide a personalized ranking."];
@@ -618,23 +1035,28 @@ module GetPersonalizedRankingRequest =
           "The Amazon Resource Name (ARN) of a filter you created to include items or exclude items from recommendations for a given user. For more information, see Filtering Recommendations."];
       filterValues: FilterValues.t option
         [@ocaml.doc
-          "The values to use when filtering recommendations. For each placeholder parameter in your filter expression, provide the parameter name (in matching case) as a key and the filter value(s) as the corresponding value. Separate multiple values for one parameter with a comma. For filter expressions that use an INCLUDE element to include items, you must provide values for all parameters that are defined in the expression. For filters with expressions that use an EXCLUDE element to exclude items, you can omit the filter-values.In this case, Amazon Personalize doesn't use that portion of the expression to filter recommendations. For more information, see Filtering Recommendations."]}
+          "The values to use when filtering recommendations. For each placeholder parameter in your filter expression, provide the parameter name (in matching case) as a key and the filter value(s) as the corresponding value. Separate multiple values for one parameter with a comma. For filter expressions that use an INCLUDE element to include items, you must provide values for all parameters that are defined in the expression. For filters with expressions that use an EXCLUDE element to exclude items, you can omit the filter-values.In this case, Amazon Personalize doesn't use that portion of the expression to filter recommendations. For more information, see Filtering Recommendations."];
+      metadataColumns: MetadataColumns.t option
+        [@ocaml.doc
+          "If you enabled metadata in recommendations when you created or updated the campaign, specify metadata columns from your Items dataset to include in the personalized ranking. The map key is ITEMS and the value is a list of column names from your Items dataset. The maximum number of columns you can provide is 10. For information about enabling metadata for a campaign, see Enabling metadata in recommendations for a campaign."]}
     let context_ = "GetPersonalizedRankingRequest"
     let make ?context =
       fun ?filterArn ->
         fun ?filterValues ->
-          fun ~campaignArn ->
-            fun ~inputList ->
-              fun ~userId ->
-                fun () ->
-                  {
-                    context;
-                    filterArn;
-                    filterValues;
-                    campaignArn;
-                    inputList;
-                    userId
-                  }
+          fun ?metadataColumns ->
+            fun ~campaignArn ->
+              fun ~inputList ->
+                fun ~userId ->
+                  fun () ->
+                    {
+                      context;
+                      filterArn;
+                      filterValues;
+                      metadataColumns;
+                      campaignArn;
+                      inputList;
+                      userId
+                    }
     let to_value x =
       structure_to_value
         [("campaignArn", (Some (Arn.to_value x.campaignArn)));
@@ -643,9 +1065,14 @@ module GetPersonalizedRankingRequest =
         ("context", (Option.map x.context ~f:Context.to_value));
         ("filterArn", (Option.map x.filterArn ~f:Arn.to_value));
         ("filterValues",
-          (Option.map x.filterValues ~f:FilterValues.to_value))]
+          (Option.map x.filterValues ~f:FilterValues.to_value));
+        ("metadataColumns",
+          (Option.map x.metadataColumns ~f:MetadataColumns.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let metadataColumns =
+        (Option.map ~f:MetadataColumns.of_xml)
+          (Xml.child xml_arg0 "metadataColumns") in
       let filterValues =
         (Option.map ~f:FilterValues.of_xml)
           (Xml.child xml_arg0 "filterValues") in
@@ -660,18 +1087,148 @@ module GetPersonalizedRankingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "inputList") in
       let campaignArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "campaignArn") in
-      make ?filterValues ?filterArn ?context ~userId ~inputList ~campaignArn
-        ()
+      make ?metadataColumns ?filterValues ?filterArn ?context ~userId
+        ~inputList ~campaignArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filterValues = field_map json "filterValues" FilterValues.of_json in
-      let filterArn = field_map json "filterArn" Arn.of_json in
-      let context = field_map json "context" Context.of_json in
-      let userId = field_map_exn json "userId" UserID.of_json in
-      let inputList = field_map_exn json "inputList" InputList.of_json in
-      let campaignArn = field_map_exn json "campaignArn" Arn.of_json in
-      make ?filterValues ?filterArn ?context ~userId ~inputList ~campaignArn
-        ()
+    let of_json json__ =
+      let metadataColumns =
+        field_map json__ "metadataColumns" MetadataColumns.of_json in
+      let filterValues = field_map json__ "filterValues" FilterValues.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
+      let context = field_map json__ "context" Context.of_json in
+      let userId = field_map_exn json__ "userId" UserID.of_json in
+      let inputList = field_map_exn json__ "inputList" InputList.of_json in
+      let campaignArn = field_map_exn json__ "campaignArn" Arn.of_json in
+      make ?metadataColumns ?filterValues ?filterArn ?context ~userId
+        ~inputList ~campaignArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Re-ranks a list of recommended items for the given user. The first item in the list is deemed the most likely item to be of interest to the user. The solution backing the campaign must have been created using a recipe of type PERSONALIZED_RANKING."]
+module GetActionRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      actionList: ActionList.t option
+        [@ocaml.doc
+          "A list of action recommendations sorted in descending order by prediction score. There can be a maximum of 100 actions in the list. For information about action scores, see How action recommendation scoring works."];
+      recommendationId: RecommendationID.t option
+        [@ocaml.doc "The ID of the recommendation."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?actionList =
+      fun ?recommendationId -> fun () -> { actionList; recommendationId }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("actionList", (Option.map x.actionList ~f:ActionList.to_value));
+        ("recommendationId",
+          (Option.map x.recommendationId ~f:RecommendationID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendationId =
+        (Option.map ~f:RecommendationID.of_xml)
+          (Xml.child xml_arg0 "recommendationId") in
+      let actionList =
+        (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "actionList") in
+      make ?recommendationId ?actionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendationId =
+        field_map json__ "recommendationId" RecommendationID.of_json in
+      let actionList = field_map json__ "actionList" ActionList.of_json in
+      make ?recommendationId ?actionList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of recommended actions in sorted in descending order by prediction score. Use the GetActionRecommendations API if you have a custom campaign that deploys a solution version trained with a PERSONALIZED_ACTIONS recipe. For more information about PERSONALIZED_ACTIONS recipes, see PERSONALIZED_ACTIONS recipes. For more information about getting action recommendations, see Getting action recommendations."]
+module GetActionRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      campaignArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the campaign to use for getting action recommendations. This campaign must deploy a solution version trained with a PERSONALIZED_ACTIONS recipe."];
+      userId: UserID.t option
+        [@ocaml.doc
+          "The user ID of the user to provide action recommendations for."];
+      numResults: NumResults.t option
+        [@ocaml.doc
+          "The number of results to return. The default is 5. The maximum is 100."];
+      filterArn: Arn.t option
+        [@ocaml.doc
+          "The ARN of the filter to apply to the returned recommendations. For more information, see Filtering Recommendations. When using this parameter, be sure the filter resource is ACTIVE."];
+      filterValues: FilterValues.t option
+        [@ocaml.doc
+          "The values to use when filtering recommendations. For each placeholder parameter in your filter expression, provide the parameter name (in matching case) as a key and the filter value(s) as the corresponding value. Separate multiple values for one parameter with a comma. For filter expressions that use an INCLUDE element to include actions, you must provide values for all parameters that are defined in the expression. For filters with expressions that use an EXCLUDE element to exclude actions, you can omit the filter-values. In this case, Amazon Personalize doesn't use that portion of the expression to filter recommendations. For more information, see Filtering recommendations and user segments."]}
+    let make ?campaignArn =
+      fun ?userId ->
+        fun ?numResults ->
+          fun ?filterArn ->
+            fun ?filterValues ->
+              fun () ->
+                { campaignArn; userId; numResults; filterArn; filterValues }
+    let to_value x =
+      structure_to_value
+        [("campaignArn", (Option.map x.campaignArn ~f:Arn.to_value));
+        ("userId", (Option.map x.userId ~f:UserID.to_value));
+        ("numResults", (Option.map x.numResults ~f:NumResults.to_value));
+        ("filterArn", (Option.map x.filterArn ~f:Arn.to_value));
+        ("filterValues",
+          (Option.map x.filterValues ~f:FilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filterValues =
+        (Option.map ~f:FilterValues.of_xml)
+          (Xml.child xml_arg0 "filterValues") in
+      let filterArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "filterArn") in
+      let numResults =
+        (Option.map ~f:NumResults.of_xml) (Xml.child xml_arg0 "numResults") in
+      let userId =
+        (Option.map ~f:UserID.of_xml) (Xml.child xml_arg0 "userId") in
+      let campaignArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "campaignArn") in
+      make ?filterValues ?filterArn ?numResults ?userId ?campaignArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filterValues = field_map json__ "filterValues" FilterValues.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
+      let numResults = field_map json__ "numResults" NumResults.of_json in
+      let userId = field_map json__ "userId" UserID.of_json in
+      let campaignArn = field_map json__ "campaignArn" Arn.of_json in
+      make ?filterValues ?filterArn ?numResults ?userId ?campaignArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of recommended actions in sorted in descending order by prediction score. Use the GetActionRecommendations API if you have a custom campaign that deploys a solution version trained with a PERSONALIZED_ACTIONS recipe. For more information about PERSONALIZED_ACTIONS recipes, see PERSONALIZED_ACTIONS recipes. For more information about getting action recommendations, see Getting action recommendations."]

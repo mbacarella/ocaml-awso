@@ -8,9 +8,30 @@ type ('i, 'o, 'e) t =
   | AssociateTrialComponent: (AssociateTrialComponentRequest.t,
   AssociateTrialComponentResponse.t, AssociateTrialComponentResponse.error) t
   
+  | AttachClusterNodeVolume: (AttachClusterNodeVolumeRequest.t,
+  AttachClusterNodeVolumeResponse.t, AttachClusterNodeVolumeResponse.error) t
+  
+  | BatchAddClusterNodes: (BatchAddClusterNodesRequest.t,
+  BatchAddClusterNodesResponse.t, BatchAddClusterNodesResponse.error) t 
+  | BatchDeleteClusterNodes: (BatchDeleteClusterNodesRequest.t,
+  BatchDeleteClusterNodesResponse.t, BatchDeleteClusterNodesResponse.error) t
+  
   | BatchDescribeModelPackage: (BatchDescribeModelPackageInput.t,
   BatchDescribeModelPackageOutput.t, BatchDescribeModelPackageOutput.error) t
   
+  | BatchRebootClusterNodes: (BatchRebootClusterNodesRequest.t,
+  BatchRebootClusterNodesResponse.t, BatchRebootClusterNodesResponse.error) t
+  
+  | BatchReplaceClusterNodes: (BatchReplaceClusterNodesRequest.t,
+  BatchReplaceClusterNodesResponse.t, BatchReplaceClusterNodesResponse.error)
+  t 
+  | CreateAIBenchmarkJob: (CreateAIBenchmarkJobRequest.t,
+  CreateAIBenchmarkJobResponse.t, CreateAIBenchmarkJobResponse.error) t 
+  | CreateAIRecommendationJob: (CreateAIRecommendationJobRequest.t,
+  CreateAIRecommendationJobResponse.t,
+  CreateAIRecommendationJobResponse.error) t 
+  | CreateAIWorkloadConfig: (CreateAIWorkloadConfigRequest.t,
+  CreateAIWorkloadConfigResponse.t, CreateAIWorkloadConfigResponse.error) t 
   | CreateAction: (CreateActionRequest.t, CreateActionResponse.t,
   CreateActionResponse.error) t 
   | CreateAlgorithm: (CreateAlgorithmInput.t, CreateAlgorithmOutput.t,
@@ -23,10 +44,19 @@ type ('i, 'o, 'e) t =
   CreateArtifactResponse.error) t 
   | CreateAutoMLJob: (CreateAutoMLJobRequest.t, CreateAutoMLJobResponse.t,
   CreateAutoMLJobResponse.error) t 
+  | CreateAutoMLJobV2: (CreateAutoMLJobV2Request.t,
+  CreateAutoMLJobV2Response.t, CreateAutoMLJobV2Response.error) t 
+  | CreateCluster: (CreateClusterRequest.t, CreateClusterResponse.t,
+  CreateClusterResponse.error) t 
+  | CreateClusterSchedulerConfig: (CreateClusterSchedulerConfigRequest.t,
+  CreateClusterSchedulerConfigResponse.t,
+  CreateClusterSchedulerConfigResponse.error) t 
   | CreateCodeRepository: (CreateCodeRepositoryInput.t,
   CreateCodeRepositoryOutput.t, CreateCodeRepositoryOutput.error) t 
   | CreateCompilationJob: (CreateCompilationJobRequest.t,
   CreateCompilationJobResponse.t, CreateCompilationJobResponse.error) t 
+  | CreateComputeQuota: (CreateComputeQuotaRequest.t,
+  CreateComputeQuotaResponse.t, CreateComputeQuotaResponse.error) t 
   | CreateContext: (CreateContextRequest.t, CreateContextResponse.t,
   CreateContextResponse.error) t 
   | CreateDataQualityJobDefinition: (CreateDataQualityJobDefinitionRequest.t,
@@ -35,6 +65,11 @@ type ('i, 'o, 'e) t =
   | CreateDeviceFleet: (CreateDeviceFleetRequest.t, unit, unit) t 
   | CreateDomain: (CreateDomainRequest.t, CreateDomainResponse.t,
   CreateDomainResponse.error) t 
+  | CreateEdgeDeploymentPlan: (CreateEdgeDeploymentPlanRequest.t,
+  CreateEdgeDeploymentPlanResponse.t, CreateEdgeDeploymentPlanResponse.error)
+  t 
+  | CreateEdgeDeploymentStage: (CreateEdgeDeploymentStageRequest.t, unit,
+  unit) t 
   | CreateEdgePackagingJob: (CreateEdgePackagingJobRequest.t, unit, unit) t 
   | CreateEndpoint: (CreateEndpointInput.t, CreateEndpointOutput.t,
   CreateEndpointOutput.error) t 
@@ -46,6 +81,14 @@ type ('i, 'o, 'e) t =
   CreateFeatureGroupResponse.t, CreateFeatureGroupResponse.error) t 
   | CreateFlowDefinition: (CreateFlowDefinitionRequest.t,
   CreateFlowDefinitionResponse.t, CreateFlowDefinitionResponse.error) t 
+  | CreateHub: (CreateHubRequest.t, CreateHubResponse.t,
+  CreateHubResponse.error) t 
+  | CreateHubContentPresignedUrls: (CreateHubContentPresignedUrlsRequest.t,
+  CreateHubContentPresignedUrlsResponse.t,
+  CreateHubContentPresignedUrlsResponse.error) t 
+  | CreateHubContentReference: (CreateHubContentReferenceRequest.t,
+  CreateHubContentReferenceResponse.t,
+  CreateHubContentReferenceResponse.error) t 
   | CreateHumanTaskUi: (CreateHumanTaskUiRequest.t,
   CreateHumanTaskUiResponse.t, CreateHumanTaskUiResponse.error) t 
   | CreateHyperParameterTuningJob: (CreateHyperParameterTuningJobRequest.t,
@@ -55,17 +98,32 @@ type ('i, 'o, 'e) t =
   CreateImageResponse.error) t 
   | CreateImageVersion: (CreateImageVersionRequest.t,
   CreateImageVersionResponse.t, CreateImageVersionResponse.error) t 
+  | CreateInferenceComponent: (CreateInferenceComponentInput.t,
+  CreateInferenceComponentOutput.t, CreateInferenceComponentOutput.error) t 
+  | CreateInferenceExperiment: (CreateInferenceExperimentRequest.t,
+  CreateInferenceExperimentResponse.t,
+  CreateInferenceExperimentResponse.error) t 
   | CreateInferenceRecommendationsJob:
   (CreateInferenceRecommendationsJobRequest.t,
   CreateInferenceRecommendationsJobResponse.t,
   CreateInferenceRecommendationsJobResponse.error) t 
   | CreateLabelingJob: (CreateLabelingJobRequest.t,
   CreateLabelingJobResponse.t, CreateLabelingJobResponse.error) t 
+  | CreateMlflowApp: (CreateMlflowAppRequest.t, CreateMlflowAppResponse.t,
+  CreateMlflowAppResponse.error) t 
+  | CreateMlflowTrackingServer: (CreateMlflowTrackingServerRequest.t,
+  CreateMlflowTrackingServerResponse.t,
+  CreateMlflowTrackingServerResponse.error) t 
   | CreateModel: (CreateModelInput.t, CreateModelOutput.t,
   CreateModelOutput.error) t 
   | CreateModelBiasJobDefinition: (CreateModelBiasJobDefinitionRequest.t,
   CreateModelBiasJobDefinitionResponse.t,
   CreateModelBiasJobDefinitionResponse.error) t 
+  | CreateModelCard: (CreateModelCardRequest.t, CreateModelCardResponse.t,
+  CreateModelCardResponse.error) t 
+  | CreateModelCardExportJob: (CreateModelCardExportJobRequest.t,
+  CreateModelCardExportJobResponse.t, CreateModelCardExportJobResponse.error)
+  t 
   | CreateModelExplainabilityJobDefinition:
   (CreateModelExplainabilityJobDefinitionRequest.t,
   CreateModelExplainabilityJobDefinitionResponse.t,
@@ -87,11 +145,25 @@ type ('i, 'o, 'e) t =
   (CreateNotebookInstanceLifecycleConfigInput.t,
   CreateNotebookInstanceLifecycleConfigOutput.t,
   CreateNotebookInstanceLifecycleConfigOutput.error) t 
+  | CreateOptimizationJob: (CreateOptimizationJobRequest.t,
+  CreateOptimizationJobResponse.t, CreateOptimizationJobResponse.error) t 
+  | CreatePartnerApp: (CreatePartnerAppRequest.t, CreatePartnerAppResponse.t,
+  CreatePartnerAppResponse.error) t 
+  | CreatePartnerAppPresignedUrl: (CreatePartnerAppPresignedUrlRequest.t,
+  CreatePartnerAppPresignedUrlResponse.t,
+  CreatePartnerAppPresignedUrlResponse.error) t 
   | CreatePipeline: (CreatePipelineRequest.t, CreatePipelineResponse.t,
   CreatePipelineResponse.error) t 
   | CreatePresignedDomainUrl: (CreatePresignedDomainUrlRequest.t,
   CreatePresignedDomainUrlResponse.t, CreatePresignedDomainUrlResponse.error)
   t 
+  | CreatePresignedMlflowAppUrl: (CreatePresignedMlflowAppUrlRequest.t,
+  CreatePresignedMlflowAppUrlResponse.t,
+  CreatePresignedMlflowAppUrlResponse.error) t 
+  | CreatePresignedMlflowTrackingServerUrl:
+  (CreatePresignedMlflowTrackingServerUrlRequest.t,
+  CreatePresignedMlflowTrackingServerUrlResponse.t,
+  CreatePresignedMlflowTrackingServerUrlResponse.error) t 
   | CreatePresignedNotebookInstanceUrl:
   (CreatePresignedNotebookInstanceUrlInput.t,
   CreatePresignedNotebookInstanceUrlOutput.t,
@@ -100,11 +172,15 @@ type ('i, 'o, 'e) t =
   CreateProcessingJobResponse.t, CreateProcessingJobResponse.error) t 
   | CreateProject: (CreateProjectInput.t, CreateProjectOutput.t,
   CreateProjectOutput.error) t 
+  | CreateSpace: (CreateSpaceRequest.t, CreateSpaceResponse.t,
+  CreateSpaceResponse.error) t 
   | CreateStudioLifecycleConfig: (CreateStudioLifecycleConfigRequest.t,
   CreateStudioLifecycleConfigResponse.t,
   CreateStudioLifecycleConfigResponse.error) t 
   | CreateTrainingJob: (CreateTrainingJobRequest.t,
   CreateTrainingJobResponse.t, CreateTrainingJobResponse.error) t 
+  | CreateTrainingPlan: (CreateTrainingPlanRequest.t,
+  CreateTrainingPlanResponse.t, CreateTrainingPlanResponse.error) t 
   | CreateTransformJob: (CreateTransformJobRequest.t,
   CreateTransformJobResponse.t, CreateTransformJobResponse.error) t 
   | CreateTrial: (CreateTrialRequest.t, CreateTrialResponse.t,
@@ -117,6 +193,13 @@ type ('i, 'o, 'e) t =
   CreateWorkforceResponse.error) t 
   | CreateWorkteam: (CreateWorkteamRequest.t, CreateWorkteamResponse.t,
   CreateWorkteamResponse.error) t 
+  | DeleteAIBenchmarkJob: (DeleteAIBenchmarkJobRequest.t,
+  DeleteAIBenchmarkJobResponse.t, DeleteAIBenchmarkJobResponse.error) t 
+  | DeleteAIRecommendationJob: (DeleteAIRecommendationJobRequest.t,
+  DeleteAIRecommendationJobResponse.t,
+  DeleteAIRecommendationJobResponse.error) t 
+  | DeleteAIWorkloadConfig: (DeleteAIWorkloadConfigRequest.t,
+  DeleteAIWorkloadConfigResponse.t, DeleteAIWorkloadConfigResponse.error) t 
   | DeleteAction: (DeleteActionRequest.t, DeleteActionResponse.t,
   DeleteActionResponse.error) t 
   | DeleteAlgorithm: (DeleteAlgorithmInput.t, unit, unit) t 
@@ -126,13 +209,23 @@ type ('i, 'o, 'e) t =
   DeleteArtifactResponse.error) t 
   | DeleteAssociation: (DeleteAssociationRequest.t,
   DeleteAssociationResponse.t, DeleteAssociationResponse.error) t 
+  | DeleteCluster: (DeleteClusterRequest.t, DeleteClusterResponse.t,
+  DeleteClusterResponse.error) t 
+  | DeleteClusterSchedulerConfig: (DeleteClusterSchedulerConfigRequest.t,
+  unit, unit) t 
   | DeleteCodeRepository: (DeleteCodeRepositoryInput.t, unit, unit) t 
+  | DeleteCompilationJob: (DeleteCompilationJobRequest.t, unit, unit) t 
+  | DeleteComputeQuota: (DeleteComputeQuotaRequest.t, unit, unit) t 
   | DeleteContext: (DeleteContextRequest.t, DeleteContextResponse.t,
   DeleteContextResponse.error) t 
   | DeleteDataQualityJobDefinition: (DeleteDataQualityJobDefinitionRequest.t,
   unit, unit) t 
   | DeleteDeviceFleet: (DeleteDeviceFleetRequest.t, unit, unit) t 
   | DeleteDomain: (DeleteDomainRequest.t, unit, unit) t 
+  | DeleteEdgeDeploymentPlan: (DeleteEdgeDeploymentPlanRequest.t, unit, 
+  unit) t 
+  | DeleteEdgeDeploymentStage: (DeleteEdgeDeploymentStageRequest.t, unit,
+  unit) t 
   | DeleteEndpoint: (DeleteEndpointInput.t, unit, unit) t 
   | DeleteEndpointConfig: (DeleteEndpointConfigInput.t, unit, unit) t 
   | DeleteExperiment: (DeleteExperimentRequest.t, DeleteExperimentResponse.t,
@@ -140,15 +233,32 @@ type ('i, 'o, 'e) t =
   | DeleteFeatureGroup: (DeleteFeatureGroupRequest.t, unit, unit) t 
   | DeleteFlowDefinition: (DeleteFlowDefinitionRequest.t,
   DeleteFlowDefinitionResponse.t, DeleteFlowDefinitionResponse.error) t 
+  | DeleteHub: (DeleteHubRequest.t, unit, unit) t 
+  | DeleteHubContent: (DeleteHubContentRequest.t, unit, unit) t 
+  | DeleteHubContentReference: (DeleteHubContentReferenceRequest.t, unit,
+  unit) t 
   | DeleteHumanTaskUi: (DeleteHumanTaskUiRequest.t,
   DeleteHumanTaskUiResponse.t, DeleteHumanTaskUiResponse.error) t 
+  | DeleteHyperParameterTuningJob: (DeleteHyperParameterTuningJobRequest.t,
+  unit, unit) t 
   | DeleteImage: (DeleteImageRequest.t, DeleteImageResponse.t,
   DeleteImageResponse.error) t 
   | DeleteImageVersion: (DeleteImageVersionRequest.t,
   DeleteImageVersionResponse.t, DeleteImageVersionResponse.error) t 
+  | DeleteInferenceComponent: (DeleteInferenceComponentInput.t, unit, 
+  unit) t 
+  | DeleteInferenceExperiment: (DeleteInferenceExperimentRequest.t,
+  DeleteInferenceExperimentResponse.t,
+  DeleteInferenceExperimentResponse.error) t 
+  | DeleteMlflowApp: (DeleteMlflowAppRequest.t, DeleteMlflowAppResponse.t,
+  DeleteMlflowAppResponse.error) t 
+  | DeleteMlflowTrackingServer: (DeleteMlflowTrackingServerRequest.t,
+  DeleteMlflowTrackingServerResponse.t,
+  DeleteMlflowTrackingServerResponse.error) t 
   | DeleteModel: (DeleteModelInput.t, unit, unit) t 
   | DeleteModelBiasJobDefinition: (DeleteModelBiasJobDefinitionRequest.t,
   unit, unit) t 
+  | DeleteModelCard: (DeleteModelCardRequest.t, unit, unit) t 
   | DeleteModelExplainabilityJobDefinition:
   (DeleteModelExplainabilityJobDefinitionRequest.t, unit, unit) t 
   | DeleteModelPackage: (DeleteModelPackageInput.t, unit, unit) t 
@@ -162,13 +272,19 @@ type ('i, 'o, 'e) t =
   | DeleteNotebookInstance: (DeleteNotebookInstanceInput.t, unit, unit) t 
   | DeleteNotebookInstanceLifecycleConfig:
   (DeleteNotebookInstanceLifecycleConfigInput.t, unit, unit) t 
+  | DeleteOptimizationJob: (DeleteOptimizationJobRequest.t, unit, unit) t 
+  | DeletePartnerApp: (DeletePartnerAppRequest.t, DeletePartnerAppResponse.t,
+  DeletePartnerAppResponse.error) t 
   | DeletePipeline: (DeletePipelineRequest.t, DeletePipelineResponse.t,
   DeletePipelineResponse.error) t 
+  | DeleteProcessingJob: (DeleteProcessingJobRequest.t, unit, unit) t 
   | DeleteProject: (DeleteProjectInput.t, unit, unit) t 
+  | DeleteSpace: (DeleteSpaceRequest.t, unit, unit) t 
   | DeleteStudioLifecycleConfig: (DeleteStudioLifecycleConfigRequest.t, 
   unit, unit) t 
   | DeleteTags: (DeleteTagsInput.t, DeleteTagsOutput.t,
   DeleteTagsOutput.error) t 
+  | DeleteTrainingJob: (DeleteTrainingJobRequest.t, unit, unit) t 
   | DeleteTrial: (DeleteTrialRequest.t, DeleteTrialResponse.t,
   DeleteTrialResponse.error) t 
   | DeleteTrialComponent: (DeleteTrialComponentRequest.t,
@@ -179,6 +295,14 @@ type ('i, 'o, 'e) t =
   | DeleteWorkteam: (DeleteWorkteamRequest.t, DeleteWorkteamResponse.t,
   DeleteWorkteamResponse.error) t 
   | DeregisterDevices: (DeregisterDevicesRequest.t, unit, unit) t 
+  | DescribeAIBenchmarkJob: (DescribeAIBenchmarkJobRequest.t,
+  DescribeAIBenchmarkJobResponse.t, DescribeAIBenchmarkJobResponse.error) t 
+  | DescribeAIRecommendationJob: (DescribeAIRecommendationJobRequest.t,
+  DescribeAIRecommendationJobResponse.t,
+  DescribeAIRecommendationJobResponse.error) t 
+  | DescribeAIWorkloadConfig: (DescribeAIWorkloadConfigRequest.t,
+  DescribeAIWorkloadConfigResponse.t, DescribeAIWorkloadConfigResponse.error)
+  t 
   | DescribeAction: (DescribeActionRequest.t, DescribeActionResponse.t,
   DescribeActionResponse.error) t 
   | DescribeAlgorithm: (DescribeAlgorithmInput.t, DescribeAlgorithmOutput.t,
@@ -191,10 +315,23 @@ type ('i, 'o, 'e) t =
   DescribeArtifactResponse.error) t 
   | DescribeAutoMLJob: (DescribeAutoMLJobRequest.t,
   DescribeAutoMLJobResponse.t, DescribeAutoMLJobResponse.error) t 
+  | DescribeAutoMLJobV2: (DescribeAutoMLJobV2Request.t,
+  DescribeAutoMLJobV2Response.t, DescribeAutoMLJobV2Response.error) t 
+  | DescribeCluster: (DescribeClusterRequest.t, DescribeClusterResponse.t,
+  DescribeClusterResponse.error) t 
+  | DescribeClusterEvent: (DescribeClusterEventRequest.t,
+  DescribeClusterEventResponse.t, DescribeClusterEventResponse.error) t 
+  | DescribeClusterNode: (DescribeClusterNodeRequest.t,
+  DescribeClusterNodeResponse.t, DescribeClusterNodeResponse.error) t 
+  | DescribeClusterSchedulerConfig: (DescribeClusterSchedulerConfigRequest.t,
+  DescribeClusterSchedulerConfigResponse.t,
+  DescribeClusterSchedulerConfigResponse.error) t 
   | DescribeCodeRepository: (DescribeCodeRepositoryInput.t,
   DescribeCodeRepositoryOutput.t, DescribeCodeRepositoryOutput.error) t 
   | DescribeCompilationJob: (DescribeCompilationJobRequest.t,
   DescribeCompilationJobResponse.t, DescribeCompilationJobResponse.error) t 
+  | DescribeComputeQuota: (DescribeComputeQuotaRequest.t,
+  DescribeComputeQuotaResponse.t, DescribeComputeQuotaResponse.error) t 
   | DescribeContext: (DescribeContextRequest.t, DescribeContextResponse.t,
   DescribeContextResponse.error) t 
   | DescribeDataQualityJobDefinition:
@@ -207,6 +344,9 @@ type ('i, 'o, 'e) t =
   DescribeDeviceFleetResponse.t, DescribeDeviceFleetResponse.error) t 
   | DescribeDomain: (DescribeDomainRequest.t, DescribeDomainResponse.t,
   DescribeDomainResponse.error) t 
+  | DescribeEdgeDeploymentPlan: (DescribeEdgeDeploymentPlanRequest.t,
+  DescribeEdgeDeploymentPlanResponse.t,
+  DescribeEdgeDeploymentPlanResponse.error) t 
   | DescribeEdgePackagingJob: (DescribeEdgePackagingJobRequest.t,
   DescribeEdgePackagingJobResponse.t, DescribeEdgePackagingJobResponse.error)
   t 
@@ -218,8 +358,15 @@ type ('i, 'o, 'e) t =
   DescribeExperimentResponse.t, DescribeExperimentResponse.error) t 
   | DescribeFeatureGroup: (DescribeFeatureGroupRequest.t,
   DescribeFeatureGroupResponse.t, DescribeFeatureGroupResponse.error) t 
+  | DescribeFeatureMetadata: (DescribeFeatureMetadataRequest.t,
+  DescribeFeatureMetadataResponse.t, DescribeFeatureMetadataResponse.error) t
+  
   | DescribeFlowDefinition: (DescribeFlowDefinitionRequest.t,
   DescribeFlowDefinitionResponse.t, DescribeFlowDefinitionResponse.error) t 
+  | DescribeHub: (DescribeHubRequest.t, DescribeHubResponse.t,
+  DescribeHubResponse.error) t 
+  | DescribeHubContent: (DescribeHubContentRequest.t,
+  DescribeHubContentResponse.t, DescribeHubContentResponse.error) t 
   | DescribeHumanTaskUi: (DescribeHumanTaskUiRequest.t,
   DescribeHumanTaskUiResponse.t, DescribeHumanTaskUiResponse.error) t 
   | DescribeHyperParameterTuningJob:
@@ -230,6 +377,12 @@ type ('i, 'o, 'e) t =
   DescribeImageResponse.error) t 
   | DescribeImageVersion: (DescribeImageVersionRequest.t,
   DescribeImageVersionResponse.t, DescribeImageVersionResponse.error) t 
+  | DescribeInferenceComponent: (DescribeInferenceComponentInput.t,
+  DescribeInferenceComponentOutput.t, DescribeInferenceComponentOutput.error)
+  t 
+  | DescribeInferenceExperiment: (DescribeInferenceExperimentRequest.t,
+  DescribeInferenceExperimentResponse.t,
+  DescribeInferenceExperimentResponse.error) t 
   | DescribeInferenceRecommendationsJob:
   (DescribeInferenceRecommendationsJobRequest.t,
   DescribeInferenceRecommendationsJobResponse.t,
@@ -238,11 +391,21 @@ type ('i, 'o, 'e) t =
   DescribeLabelingJobResponse.t, DescribeLabelingJobResponse.error) t 
   | DescribeLineageGroup: (DescribeLineageGroupRequest.t,
   DescribeLineageGroupResponse.t, DescribeLineageGroupResponse.error) t 
+  | DescribeMlflowApp: (DescribeMlflowAppRequest.t,
+  DescribeMlflowAppResponse.t, DescribeMlflowAppResponse.error) t 
+  | DescribeMlflowTrackingServer: (DescribeMlflowTrackingServerRequest.t,
+  DescribeMlflowTrackingServerResponse.t,
+  DescribeMlflowTrackingServerResponse.error) t 
   | DescribeModel: (DescribeModelInput.t, DescribeModelOutput.t,
   DescribeModelOutput.error) t 
   | DescribeModelBiasJobDefinition: (DescribeModelBiasJobDefinitionRequest.t,
   DescribeModelBiasJobDefinitionResponse.t,
   DescribeModelBiasJobDefinitionResponse.error) t 
+  | DescribeModelCard: (DescribeModelCardRequest.t,
+  DescribeModelCardResponse.t, DescribeModelCardResponse.error) t 
+  | DescribeModelCardExportJob: (DescribeModelCardExportJobRequest.t,
+  DescribeModelCardExportJobResponse.t,
+  DescribeModelCardExportJobResponse.error) t 
   | DescribeModelExplainabilityJobDefinition:
   (DescribeModelExplainabilityJobDefinitionRequest.t,
   DescribeModelExplainabilityJobDefinitionResponse.t,
@@ -265,6 +428,11 @@ type ('i, 'o, 'e) t =
   (DescribeNotebookInstanceLifecycleConfigInput.t,
   DescribeNotebookInstanceLifecycleConfigOutput.t,
   DescribeNotebookInstanceLifecycleConfigOutput.error) t 
+  | DescribeOptimizationJob: (DescribeOptimizationJobRequest.t,
+  DescribeOptimizationJobResponse.t, DescribeOptimizationJobResponse.error) t
+  
+  | DescribePartnerApp: (DescribePartnerAppRequest.t,
+  DescribePartnerAppResponse.t, DescribePartnerAppResponse.error) t 
   | DescribePipeline: (DescribePipelineRequest.t, DescribePipelineResponse.t,
   DescribePipelineResponse.error) t 
   | DescribePipelineDefinitionForExecution:
@@ -278,6 +446,11 @@ type ('i, 'o, 'e) t =
   DescribeProcessingJobResponse.t, DescribeProcessingJobResponse.error) t 
   | DescribeProject: (DescribeProjectInput.t, DescribeProjectOutput.t,
   DescribeProjectOutput.error) t 
+  | DescribeReservedCapacity: (DescribeReservedCapacityRequest.t,
+  DescribeReservedCapacityResponse.t, DescribeReservedCapacityResponse.error)
+  t 
+  | DescribeSpace: (DescribeSpaceRequest.t, DescribeSpaceResponse.t,
+  DescribeSpaceResponse.error) t 
   | DescribeStudioLifecycleConfig: (DescribeStudioLifecycleConfigRequest.t,
   DescribeStudioLifecycleConfigResponse.t,
   DescribeStudioLifecycleConfigResponse.error) t 
@@ -286,6 +459,12 @@ type ('i, 'o, 'e) t =
   DescribeSubscribedWorkteamResponse.error) t 
   | DescribeTrainingJob: (DescribeTrainingJobRequest.t,
   DescribeTrainingJobResponse.t, DescribeTrainingJobResponse.error) t 
+  | DescribeTrainingPlan: (DescribeTrainingPlanRequest.t,
+  DescribeTrainingPlanResponse.t, DescribeTrainingPlanResponse.error) t 
+  | DescribeTrainingPlanExtensionHistory:
+  (DescribeTrainingPlanExtensionHistoryRequest.t,
+  DescribeTrainingPlanExtensionHistoryResponse.t,
+  DescribeTrainingPlanExtensionHistoryResponse.error) t 
   | DescribeTransformJob: (DescribeTransformJobRequest.t,
   DescribeTransformJobResponse.t, DescribeTransformJobResponse.error) t 
   | DescribeTrial: (DescribeTrialRequest.t, DescribeTrialResponse.t,
@@ -298,6 +477,9 @@ type ('i, 'o, 'e) t =
   DescribeWorkforceResponse.t, DescribeWorkforceResponse.error) t 
   | DescribeWorkteam: (DescribeWorkteamRequest.t, DescribeWorkteamResponse.t,
   DescribeWorkteamResponse.error) t 
+  | DetachClusterNodeVolume: (DetachClusterNodeVolumeRequest.t,
+  DetachClusterNodeVolumeResponse.t, DetachClusterNodeVolumeResponse.error) t
+  
   | DisableSagemakerServicecatalogPortfolio:
   (DisableSagemakerServicecatalogPortfolioInput.t,
   DisableSagemakerServicecatalogPortfolioOutput.t,
@@ -309,6 +491,8 @@ type ('i, 'o, 'e) t =
   (EnableSagemakerServicecatalogPortfolioInput.t,
   EnableSagemakerServicecatalogPortfolioOutput.t,
   EnableSagemakerServicecatalogPortfolioOutput.error) t 
+  | ExtendTrainingPlan: (ExtendTrainingPlanRequest.t,
+  ExtendTrainingPlanResponse.t, ExtendTrainingPlanResponse.error) t 
   | GetDeviceFleetReport: (GetDeviceFleetReportRequest.t,
   GetDeviceFleetReportResponse.t, GetDeviceFleetReportResponse.error) t 
   | GetLineageGroupPolicy: (GetLineageGroupPolicyRequest.t,
@@ -320,12 +504,27 @@ type ('i, 'o, 'e) t =
   (GetSagemakerServicecatalogPortfolioStatusInput.t,
   GetSagemakerServicecatalogPortfolioStatusOutput.t,
   GetSagemakerServicecatalogPortfolioStatusOutput.error) t 
+  | GetScalingConfigurationRecommendation:
+  (GetScalingConfigurationRecommendationRequest.t,
+  GetScalingConfigurationRecommendationResponse.t,
+  GetScalingConfigurationRecommendationResponse.error) t 
   | GetSearchSuggestions: (GetSearchSuggestionsRequest.t,
   GetSearchSuggestionsResponse.t, GetSearchSuggestionsResponse.error) t 
+  | ImportHubContent: (ImportHubContentRequest.t, ImportHubContentResponse.t,
+  ImportHubContentResponse.error) t 
+  | ListAIBenchmarkJobs: (ListAIBenchmarkJobsRequest.t,
+  ListAIBenchmarkJobsResponse.t, ListAIBenchmarkJobsResponse.error) t 
+  | ListAIRecommendationJobs: (ListAIRecommendationJobsRequest.t,
+  ListAIRecommendationJobsResponse.t, ListAIRecommendationJobsResponse.error)
+  t 
+  | ListAIWorkloadConfigs: (ListAIWorkloadConfigsRequest.t,
+  ListAIWorkloadConfigsResponse.t, ListAIWorkloadConfigsResponse.error) t 
   | ListActions: (ListActionsRequest.t, ListActionsResponse.t,
   ListActionsResponse.error) t 
   | ListAlgorithms: (ListAlgorithmsInput.t, ListAlgorithmsOutput.t,
   ListAlgorithmsOutput.error) t 
+  | ListAliases: (ListAliasesRequest.t, ListAliasesResponse.t,
+  ListAliasesResponse.error) t 
   | ListAppImageConfigs: (ListAppImageConfigsRequest.t,
   ListAppImageConfigsResponse.t, ListAppImageConfigsResponse.error) t 
   | ListApps: (ListAppsRequest.t, ListAppsResponse.t, ListAppsResponse.error)
@@ -339,10 +538,21 @@ type ('i, 'o, 'e) t =
   | ListCandidatesForAutoMLJob: (ListCandidatesForAutoMLJobRequest.t,
   ListCandidatesForAutoMLJobResponse.t,
   ListCandidatesForAutoMLJobResponse.error) t 
+  | ListClusterEvents: (ListClusterEventsRequest.t,
+  ListClusterEventsResponse.t, ListClusterEventsResponse.error) t 
+  | ListClusterNodes: (ListClusterNodesRequest.t, ListClusterNodesResponse.t,
+  ListClusterNodesResponse.error) t 
+  | ListClusterSchedulerConfigs: (ListClusterSchedulerConfigsRequest.t,
+  ListClusterSchedulerConfigsResponse.t,
+  ListClusterSchedulerConfigsResponse.error) t 
+  | ListClusters: (ListClustersRequest.t, ListClustersResponse.t,
+  ListClustersResponse.error) t 
   | ListCodeRepositories: (ListCodeRepositoriesInput.t,
   ListCodeRepositoriesOutput.t, ListCodeRepositoriesOutput.error) t 
   | ListCompilationJobs: (ListCompilationJobsRequest.t,
   ListCompilationJobsResponse.t, ListCompilationJobsResponse.error) t 
+  | ListComputeQuotas: (ListComputeQuotasRequest.t,
+  ListComputeQuotasResponse.t, ListComputeQuotasResponse.error) t 
   | ListContexts: (ListContextsRequest.t, ListContextsResponse.t,
   ListContextsResponse.error) t 
   | ListDataQualityJobDefinitions: (ListDataQualityJobDefinitionsRequest.t,
@@ -354,6 +564,9 @@ type ('i, 'o, 'e) t =
   ListDevicesResponse.error) t 
   | ListDomains: (ListDomainsRequest.t, ListDomainsResponse.t,
   ListDomainsResponse.error) t 
+  | ListEdgeDeploymentPlans: (ListEdgeDeploymentPlansRequest.t,
+  ListEdgeDeploymentPlansResponse.t, ListEdgeDeploymentPlansResponse.error) t
+  
   | ListEdgePackagingJobs: (ListEdgePackagingJobsRequest.t,
   ListEdgePackagingJobsResponse.t, ListEdgePackagingJobsResponse.error) t 
   | ListEndpointConfigs: (ListEndpointConfigsInput.t,
@@ -366,6 +579,12 @@ type ('i, 'o, 'e) t =
   ListFeatureGroupsResponse.t, ListFeatureGroupsResponse.error) t 
   | ListFlowDefinitions: (ListFlowDefinitionsRequest.t,
   ListFlowDefinitionsResponse.t, ListFlowDefinitionsResponse.error) t 
+  | ListHubContentVersions: (ListHubContentVersionsRequest.t,
+  ListHubContentVersionsResponse.t, ListHubContentVersionsResponse.error) t 
+  | ListHubContents: (ListHubContentsRequest.t, ListHubContentsResponse.t,
+  ListHubContentsResponse.error) t 
+  | ListHubs: (ListHubsRequest.t, ListHubsResponse.t, ListHubsResponse.error)
+  t 
   | ListHumanTaskUis: (ListHumanTaskUisRequest.t, ListHumanTaskUisResponse.t,
   ListHumanTaskUisResponse.error) t 
   | ListHyperParameterTuningJobs: (ListHyperParameterTuningJobsRequest.t,
@@ -375,6 +594,15 @@ type ('i, 'o, 'e) t =
   ListImageVersionsResponse.t, ListImageVersionsResponse.error) t 
   | ListImages: (ListImagesRequest.t, ListImagesResponse.t,
   ListImagesResponse.error) t 
+  | ListInferenceComponents: (ListInferenceComponentsInput.t,
+  ListInferenceComponentsOutput.t, ListInferenceComponentsOutput.error) t 
+  | ListInferenceExperiments: (ListInferenceExperimentsRequest.t,
+  ListInferenceExperimentsResponse.t, ListInferenceExperimentsResponse.error)
+  t 
+  | ListInferenceRecommendationsJobSteps:
+  (ListInferenceRecommendationsJobStepsRequest.t,
+  ListInferenceRecommendationsJobStepsResponse.t,
+  ListInferenceRecommendationsJobStepsResponse.error) t 
   | ListInferenceRecommendationsJobs:
   (ListInferenceRecommendationsJobsRequest.t,
   ListInferenceRecommendationsJobsResponse.t,
@@ -386,9 +614,21 @@ type ('i, 'o, 'e) t =
   ListLabelingJobsForWorkteamResponse.error) t 
   | ListLineageGroups: (ListLineageGroupsRequest.t,
   ListLineageGroupsResponse.t, ListLineageGroupsResponse.error) t 
+  | ListMlflowApps: (ListMlflowAppsRequest.t, ListMlflowAppsResponse.t,
+  ListMlflowAppsResponse.error) t 
+  | ListMlflowTrackingServers: (ListMlflowTrackingServersRequest.t,
+  ListMlflowTrackingServersResponse.t,
+  ListMlflowTrackingServersResponse.error) t 
   | ListModelBiasJobDefinitions: (ListModelBiasJobDefinitionsRequest.t,
   ListModelBiasJobDefinitionsResponse.t,
   ListModelBiasJobDefinitionsResponse.error) t 
+  | ListModelCardExportJobs: (ListModelCardExportJobsRequest.t,
+  ListModelCardExportJobsResponse.t, ListModelCardExportJobsResponse.error) t
+  
+  | ListModelCardVersions: (ListModelCardVersionsRequest.t,
+  ListModelCardVersionsResponse.t, ListModelCardVersionsResponse.error) t 
+  | ListModelCards: (ListModelCardsRequest.t, ListModelCardsResponse.t,
+  ListModelCardsResponse.error) t 
   | ListModelExplainabilityJobDefinitions:
   (ListModelExplainabilityJobDefinitionsRequest.t,
   ListModelExplainabilityJobDefinitionsResponse.t,
@@ -404,6 +644,11 @@ type ('i, 'o, 'e) t =
   ListModelQualityJobDefinitionsResponse.error) t 
   | ListModels: (ListModelsInput.t, ListModelsOutput.t,
   ListModelsOutput.error) t 
+  | ListMonitoringAlertHistory: (ListMonitoringAlertHistoryRequest.t,
+  ListMonitoringAlertHistoryResponse.t,
+  ListMonitoringAlertHistoryResponse.error) t 
+  | ListMonitoringAlerts: (ListMonitoringAlertsRequest.t,
+  ListMonitoringAlertsResponse.t, ListMonitoringAlertsResponse.error) t 
   | ListMonitoringExecutions: (ListMonitoringExecutionsRequest.t,
   ListMonitoringExecutionsResponse.t, ListMonitoringExecutionsResponse.error)
   t 
@@ -416,6 +661,10 @@ type ('i, 'o, 'e) t =
   ListNotebookInstanceLifecycleConfigsOutput.error) t 
   | ListNotebookInstances: (ListNotebookInstancesInput.t,
   ListNotebookInstancesOutput.t, ListNotebookInstancesOutput.error) t 
+  | ListOptimizationJobs: (ListOptimizationJobsRequest.t,
+  ListOptimizationJobsResponse.t, ListOptimizationJobsResponse.error) t 
+  | ListPartnerApps: (ListPartnerAppsRequest.t, ListPartnerAppsResponse.t,
+  ListPartnerAppsResponse.error) t 
   | ListPipelineExecutionSteps: (ListPipelineExecutionStepsRequest.t,
   ListPipelineExecutionStepsResponse.t,
   ListPipelineExecutionStepsResponse.error) t 
@@ -425,12 +674,20 @@ type ('i, 'o, 'e) t =
   (ListPipelineParametersForExecutionRequest.t,
   ListPipelineParametersForExecutionResponse.t,
   ListPipelineParametersForExecutionResponse.error) t 
+  | ListPipelineVersions: (ListPipelineVersionsRequest.t,
+  ListPipelineVersionsResponse.t, ListPipelineVersionsResponse.error) t 
   | ListPipelines: (ListPipelinesRequest.t, ListPipelinesResponse.t,
   ListPipelinesResponse.error) t 
   | ListProcessingJobs: (ListProcessingJobsRequest.t,
   ListProcessingJobsResponse.t, ListProcessingJobsResponse.error) t 
   | ListProjects: (ListProjectsInput.t, ListProjectsOutput.t,
   ListProjectsOutput.error) t 
+  | ListResourceCatalogs: (ListResourceCatalogsRequest.t,
+  ListResourceCatalogsResponse.t, ListResourceCatalogsResponse.error) t 
+  | ListSpaces: (ListSpacesRequest.t, ListSpacesResponse.t,
+  ListSpacesResponse.error) t 
+  | ListStageDevices: (ListStageDevicesRequest.t, ListStageDevicesResponse.t,
+  ListStageDevicesResponse.error) t 
   | ListStudioLifecycleConfigs: (ListStudioLifecycleConfigsRequest.t,
   ListStudioLifecycleConfigsResponse.t,
   ListStudioLifecycleConfigsResponse.error) t 
@@ -444,12 +701,18 @@ type ('i, 'o, 'e) t =
   (ListTrainingJobsForHyperParameterTuningJobRequest.t,
   ListTrainingJobsForHyperParameterTuningJobResponse.t,
   ListTrainingJobsForHyperParameterTuningJobResponse.error) t 
+  | ListTrainingPlans: (ListTrainingPlansRequest.t,
+  ListTrainingPlansResponse.t, ListTrainingPlansResponse.error) t 
   | ListTransformJobs: (ListTransformJobsRequest.t,
   ListTransformJobsResponse.t, ListTransformJobsResponse.error) t 
   | ListTrialComponents: (ListTrialComponentsRequest.t,
   ListTrialComponentsResponse.t, ListTrialComponentsResponse.error) t 
   | ListTrials: (ListTrialsRequest.t, ListTrialsResponse.t,
   ListTrialsResponse.error) t 
+  | ListUltraServersByReservedCapacity:
+  (ListUltraServersByReservedCapacityRequest.t,
+  ListUltraServersByReservedCapacityResponse.t,
+  ListUltraServersByReservedCapacityResponse.error) t 
   | ListUserProfiles: (ListUserProfilesRequest.t, ListUserProfilesResponse.t,
   ListUserProfilesResponse.error) t 
   | ListWorkforces: (ListWorkforcesRequest.t, ListWorkforcesResponse.t,
@@ -467,6 +730,9 @@ type ('i, 'o, 'e) t =
   | RetryPipelineExecution: (RetryPipelineExecutionRequest.t,
   RetryPipelineExecutionResponse.t, RetryPipelineExecutionResponse.error) t 
   | Search: (SearchRequest.t, SearchResponse.t, SearchResponse.error) t 
+  | SearchTrainingPlanOfferings: (SearchTrainingPlanOfferingsRequest.t,
+  SearchTrainingPlanOfferingsResponse.t,
+  SearchTrainingPlanOfferingsResponse.error) t 
   | SendPipelineExecutionStepFailure:
   (SendPipelineExecutionStepFailureRequest.t,
   SendPipelineExecutionStepFailureResponse.t,
@@ -475,21 +741,48 @@ type ('i, 'o, 'e) t =
   (SendPipelineExecutionStepSuccessRequest.t,
   SendPipelineExecutionStepSuccessResponse.t,
   SendPipelineExecutionStepSuccessResponse.error) t 
+  | StartClusterHealthCheck: (StartClusterHealthCheckRequest.t,
+  StartClusterHealthCheckResponse.t, StartClusterHealthCheckResponse.error) t
+  
+  | StartEdgeDeploymentStage: (StartEdgeDeploymentStageRequest.t, unit, 
+  unit) t 
+  | StartInferenceExperiment: (StartInferenceExperimentRequest.t,
+  StartInferenceExperimentResponse.t, StartInferenceExperimentResponse.error)
+  t 
+  | StartMlflowTrackingServer: (StartMlflowTrackingServerRequest.t,
+  StartMlflowTrackingServerResponse.t,
+  StartMlflowTrackingServerResponse.error) t 
   | StartMonitoringSchedule: (StartMonitoringScheduleRequest.t, unit, 
   unit) t 
   | StartNotebookInstance: (StartNotebookInstanceInput.t, unit, unit) t 
   | StartPipelineExecution: (StartPipelineExecutionRequest.t,
   StartPipelineExecutionResponse.t, StartPipelineExecutionResponse.error) t 
+  | StartSession: (StartSessionRequest.t, StartSessionResponse.t,
+  StartSessionResponse.error) t 
+  | StopAIBenchmarkJob: (StopAIBenchmarkJobRequest.t,
+  StopAIBenchmarkJobResponse.t, StopAIBenchmarkJobResponse.error) t 
+  | StopAIRecommendationJob: (StopAIRecommendationJobRequest.t,
+  StopAIRecommendationJobResponse.t, StopAIRecommendationJobResponse.error) t
+  
   | StopAutoMLJob: (StopAutoMLJobRequest.t, unit, unit) t 
   | StopCompilationJob: (StopCompilationJobRequest.t, unit, unit) t 
+  | StopEdgeDeploymentStage: (StopEdgeDeploymentStageRequest.t, unit, 
+  unit) t 
   | StopEdgePackagingJob: (StopEdgePackagingJobRequest.t, unit, unit) t 
   | StopHyperParameterTuningJob: (StopHyperParameterTuningJobRequest.t, 
   unit, unit) t 
+  | StopInferenceExperiment: (StopInferenceExperimentRequest.t,
+  StopInferenceExperimentResponse.t, StopInferenceExperimentResponse.error) t
+  
   | StopInferenceRecommendationsJob:
   (StopInferenceRecommendationsJobRequest.t, unit, unit) t 
   | StopLabelingJob: (StopLabelingJobRequest.t, unit, unit) t 
+  | StopMlflowTrackingServer: (StopMlflowTrackingServerRequest.t,
+  StopMlflowTrackingServerResponse.t, StopMlflowTrackingServerResponse.error)
+  t 
   | StopMonitoringSchedule: (StopMonitoringScheduleRequest.t, unit, unit) t 
   | StopNotebookInstance: (StopNotebookInstanceInput.t, unit, unit) t 
+  | StopOptimizationJob: (StopOptimizationJobRequest.t, unit, unit) t 
   | StopPipelineExecution: (StopPipelineExecutionRequest.t,
   StopPipelineExecutionResponse.t, StopPipelineExecutionResponse.error) t 
   | StopProcessingJob: (StopProcessingJobRequest.t, unit, unit) t 
@@ -501,8 +794,17 @@ type ('i, 'o, 'e) t =
   UpdateAppImageConfigResponse.t, UpdateAppImageConfigResponse.error) t 
   | UpdateArtifact: (UpdateArtifactRequest.t, UpdateArtifactResponse.t,
   UpdateArtifactResponse.error) t 
+  | UpdateCluster: (UpdateClusterRequest.t, UpdateClusterResponse.t,
+  UpdateClusterResponse.error) t 
+  | UpdateClusterSchedulerConfig: (UpdateClusterSchedulerConfigRequest.t,
+  UpdateClusterSchedulerConfigResponse.t,
+  UpdateClusterSchedulerConfigResponse.error) t 
+  | UpdateClusterSoftware: (UpdateClusterSoftwareRequest.t,
+  UpdateClusterSoftwareResponse.t, UpdateClusterSoftwareResponse.error) t 
   | UpdateCodeRepository: (UpdateCodeRepositoryInput.t,
   UpdateCodeRepositoryOutput.t, UpdateCodeRepositoryOutput.error) t 
+  | UpdateComputeQuota: (UpdateComputeQuotaRequest.t,
+  UpdateComputeQuotaResponse.t, UpdateComputeQuotaResponse.error) t 
   | UpdateContext: (UpdateContextRequest.t, UpdateContextResponse.t,
   UpdateContextResponse.error) t 
   | UpdateDeviceFleet: (UpdateDeviceFleetRequest.t, unit, unit) t 
@@ -517,10 +819,40 @@ type ('i, 'o, 'e) t =
   UpdateEndpointWeightsAndCapacitiesOutput.error) t 
   | UpdateExperiment: (UpdateExperimentRequest.t, UpdateExperimentResponse.t,
   UpdateExperimentResponse.error) t 
+  | UpdateFeatureGroup: (UpdateFeatureGroupRequest.t,
+  UpdateFeatureGroupResponse.t, UpdateFeatureGroupResponse.error) t 
+  | UpdateFeatureMetadata: (UpdateFeatureMetadataRequest.t, unit, unit) t 
+  | UpdateHub: (UpdateHubRequest.t, UpdateHubResponse.t,
+  UpdateHubResponse.error) t 
+  | UpdateHubContent: (UpdateHubContentRequest.t, UpdateHubContentResponse.t,
+  UpdateHubContentResponse.error) t 
+  | UpdateHubContentReference: (UpdateHubContentReferenceRequest.t,
+  UpdateHubContentReferenceResponse.t,
+  UpdateHubContentReferenceResponse.error) t 
   | UpdateImage: (UpdateImageRequest.t, UpdateImageResponse.t,
   UpdateImageResponse.error) t 
+  | UpdateImageVersion: (UpdateImageVersionRequest.t,
+  UpdateImageVersionResponse.t, UpdateImageVersionResponse.error) t 
+  | UpdateInferenceComponent: (UpdateInferenceComponentInput.t,
+  UpdateInferenceComponentOutput.t, UpdateInferenceComponentOutput.error) t 
+  | UpdateInferenceComponentRuntimeConfig:
+  (UpdateInferenceComponentRuntimeConfigInput.t,
+  UpdateInferenceComponentRuntimeConfigOutput.t,
+  UpdateInferenceComponentRuntimeConfigOutput.error) t 
+  | UpdateInferenceExperiment: (UpdateInferenceExperimentRequest.t,
+  UpdateInferenceExperimentResponse.t,
+  UpdateInferenceExperimentResponse.error) t 
+  | UpdateMlflowApp: (UpdateMlflowAppRequest.t, UpdateMlflowAppResponse.t,
+  UpdateMlflowAppResponse.error) t 
+  | UpdateMlflowTrackingServer: (UpdateMlflowTrackingServerRequest.t,
+  UpdateMlflowTrackingServerResponse.t,
+  UpdateMlflowTrackingServerResponse.error) t 
+  | UpdateModelCard: (UpdateModelCardRequest.t, UpdateModelCardResponse.t,
+  UpdateModelCardResponse.error) t 
   | UpdateModelPackage: (UpdateModelPackageInput.t,
   UpdateModelPackageOutput.t, UpdateModelPackageOutput.error) t 
+  | UpdateMonitoringAlert: (UpdateMonitoringAlertRequest.t,
+  UpdateMonitoringAlertResponse.t, UpdateMonitoringAlertResponse.error) t 
   | UpdateMonitoringSchedule: (UpdateMonitoringScheduleRequest.t,
   UpdateMonitoringScheduleResponse.t, UpdateMonitoringScheduleResponse.error)
   t 
@@ -530,13 +862,19 @@ type ('i, 'o, 'e) t =
   (UpdateNotebookInstanceLifecycleConfigInput.t,
   UpdateNotebookInstanceLifecycleConfigOutput.t,
   UpdateNotebookInstanceLifecycleConfigOutput.error) t 
+  | UpdatePartnerApp: (UpdatePartnerAppRequest.t, UpdatePartnerAppResponse.t,
+  UpdatePartnerAppResponse.error) t 
   | UpdatePipeline: (UpdatePipelineRequest.t, UpdatePipelineResponse.t,
   UpdatePipelineResponse.error) t 
   | UpdatePipelineExecution: (UpdatePipelineExecutionRequest.t,
   UpdatePipelineExecutionResponse.t, UpdatePipelineExecutionResponse.error) t
   
+  | UpdatePipelineVersion: (UpdatePipelineVersionRequest.t,
+  UpdatePipelineVersionResponse.t, UpdatePipelineVersionResponse.error) t 
   | UpdateProject: (UpdateProjectInput.t, UpdateProjectOutput.t,
   UpdateProjectOutput.error) t 
+  | UpdateSpace: (UpdateSpaceRequest.t, UpdateSpaceResponse.t,
+  UpdateSpaceResponse.error) t 
   | UpdateTrainingJob: (UpdateTrainingJobRequest.t,
   UpdateTrainingJobResponse.t, UpdateTrainingJobResponse.error) t 
   | UpdateTrial: (UpdateTrialRequest.t, UpdateTrialResponse.t,
@@ -554,33 +892,56 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AddAssociation -> `POST
   | AddTags -> `POST
   | AssociateTrialComponent -> `POST
+  | AttachClusterNodeVolume -> `POST
+  | BatchAddClusterNodes -> `POST
+  | BatchDeleteClusterNodes -> `POST
   | BatchDescribeModelPackage -> `POST
+  | BatchRebootClusterNodes -> `POST
+  | BatchReplaceClusterNodes -> `POST
+  | CreateAIBenchmarkJob -> `POST
+  | CreateAIRecommendationJob -> `POST
+  | CreateAIWorkloadConfig -> `POST
   | CreateAction -> `POST
   | CreateAlgorithm -> `POST
   | CreateApp -> `POST
   | CreateAppImageConfig -> `POST
   | CreateArtifact -> `POST
   | CreateAutoMLJob -> `POST
+  | CreateAutoMLJobV2 -> `POST
+  | CreateCluster -> `POST
+  | CreateClusterSchedulerConfig -> `POST
   | CreateCodeRepository -> `POST
   | CreateCompilationJob -> `POST
+  | CreateComputeQuota -> `POST
   | CreateContext -> `POST
   | CreateDataQualityJobDefinition -> `POST
   | CreateDeviceFleet -> `POST
   | CreateDomain -> `POST
+  | CreateEdgeDeploymentPlan -> `POST
+  | CreateEdgeDeploymentStage -> `POST
   | CreateEdgePackagingJob -> `POST
   | CreateEndpoint -> `POST
   | CreateEndpointConfig -> `POST
   | CreateExperiment -> `POST
   | CreateFeatureGroup -> `POST
   | CreateFlowDefinition -> `POST
+  | CreateHub -> `POST
+  | CreateHubContentPresignedUrls -> `POST
+  | CreateHubContentReference -> `POST
   | CreateHumanTaskUi -> `POST
   | CreateHyperParameterTuningJob -> `POST
   | CreateImage -> `POST
   | CreateImageVersion -> `POST
+  | CreateInferenceComponent -> `POST
+  | CreateInferenceExperiment -> `POST
   | CreateInferenceRecommendationsJob -> `POST
   | CreateLabelingJob -> `POST
+  | CreateMlflowApp -> `POST
+  | CreateMlflowTrackingServer -> `POST
   | CreateModel -> `POST
   | CreateModelBiasJobDefinition -> `POST
+  | CreateModelCard -> `POST
+  | CreateModelCardExportJob -> `POST
   | CreateModelExplainabilityJobDefinition -> `POST
   | CreateModelPackage -> `POST
   | CreateModelPackageGroup -> `POST
@@ -588,40 +949,65 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateMonitoringSchedule -> `POST
   | CreateNotebookInstance -> `POST
   | CreateNotebookInstanceLifecycleConfig -> `POST
+  | CreateOptimizationJob -> `POST
+  | CreatePartnerApp -> `POST
+  | CreatePartnerAppPresignedUrl -> `POST
   | CreatePipeline -> `POST
   | CreatePresignedDomainUrl -> `POST
+  | CreatePresignedMlflowAppUrl -> `POST
+  | CreatePresignedMlflowTrackingServerUrl -> `POST
   | CreatePresignedNotebookInstanceUrl -> `POST
   | CreateProcessingJob -> `POST
   | CreateProject -> `POST
+  | CreateSpace -> `POST
   | CreateStudioLifecycleConfig -> `POST
   | CreateTrainingJob -> `POST
+  | CreateTrainingPlan -> `POST
   | CreateTransformJob -> `POST
   | CreateTrial -> `POST
   | CreateTrialComponent -> `POST
   | CreateUserProfile -> `POST
   | CreateWorkforce -> `POST
   | CreateWorkteam -> `POST
+  | DeleteAIBenchmarkJob -> `POST
+  | DeleteAIRecommendationJob -> `POST
+  | DeleteAIWorkloadConfig -> `POST
   | DeleteAction -> `POST
   | DeleteAlgorithm -> `POST
   | DeleteApp -> `POST
   | DeleteAppImageConfig -> `POST
   | DeleteArtifact -> `POST
   | DeleteAssociation -> `POST
+  | DeleteCluster -> `POST
+  | DeleteClusterSchedulerConfig -> `POST
   | DeleteCodeRepository -> `POST
+  | DeleteCompilationJob -> `POST
+  | DeleteComputeQuota -> `POST
   | DeleteContext -> `POST
   | DeleteDataQualityJobDefinition -> `POST
   | DeleteDeviceFleet -> `POST
   | DeleteDomain -> `POST
+  | DeleteEdgeDeploymentPlan -> `POST
+  | DeleteEdgeDeploymentStage -> `POST
   | DeleteEndpoint -> `POST
   | DeleteEndpointConfig -> `POST
   | DeleteExperiment -> `POST
   | DeleteFeatureGroup -> `POST
   | DeleteFlowDefinition -> `POST
+  | DeleteHub -> `POST
+  | DeleteHubContent -> `POST
+  | DeleteHubContentReference -> `POST
   | DeleteHumanTaskUi -> `POST
+  | DeleteHyperParameterTuningJob -> `POST
   | DeleteImage -> `POST
   | DeleteImageVersion -> `POST
+  | DeleteInferenceComponent -> `POST
+  | DeleteInferenceExperiment -> `POST
+  | DeleteMlflowApp -> `POST
+  | DeleteMlflowTrackingServer -> `POST
   | DeleteModel -> `POST
   | DeleteModelBiasJobDefinition -> `POST
+  | DeleteModelCard -> `POST
   | DeleteModelExplainabilityJobDefinition -> `POST
   | DeleteModelPackage -> `POST
   | DeleteModelPackageGroup -> `POST
@@ -630,44 +1016,68 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteMonitoringSchedule -> `POST
   | DeleteNotebookInstance -> `POST
   | DeleteNotebookInstanceLifecycleConfig -> `POST
+  | DeleteOptimizationJob -> `POST
+  | DeletePartnerApp -> `POST
   | DeletePipeline -> `POST
+  | DeleteProcessingJob -> `POST
   | DeleteProject -> `POST
+  | DeleteSpace -> `POST
   | DeleteStudioLifecycleConfig -> `POST
   | DeleteTags -> `POST
+  | DeleteTrainingJob -> `POST
   | DeleteTrial -> `POST
   | DeleteTrialComponent -> `POST
   | DeleteUserProfile -> `POST
   | DeleteWorkforce -> `POST
   | DeleteWorkteam -> `POST
   | DeregisterDevices -> `POST
+  | DescribeAIBenchmarkJob -> `POST
+  | DescribeAIRecommendationJob -> `POST
+  | DescribeAIWorkloadConfig -> `POST
   | DescribeAction -> `POST
   | DescribeAlgorithm -> `POST
   | DescribeApp -> `POST
   | DescribeAppImageConfig -> `POST
   | DescribeArtifact -> `POST
   | DescribeAutoMLJob -> `POST
+  | DescribeAutoMLJobV2 -> `POST
+  | DescribeCluster -> `POST
+  | DescribeClusterEvent -> `POST
+  | DescribeClusterNode -> `POST
+  | DescribeClusterSchedulerConfig -> `POST
   | DescribeCodeRepository -> `POST
   | DescribeCompilationJob -> `POST
+  | DescribeComputeQuota -> `POST
   | DescribeContext -> `POST
   | DescribeDataQualityJobDefinition -> `POST
   | DescribeDevice -> `POST
   | DescribeDeviceFleet -> `POST
   | DescribeDomain -> `POST
+  | DescribeEdgeDeploymentPlan -> `POST
   | DescribeEdgePackagingJob -> `POST
   | DescribeEndpoint -> `POST
   | DescribeEndpointConfig -> `POST
   | DescribeExperiment -> `POST
   | DescribeFeatureGroup -> `POST
+  | DescribeFeatureMetadata -> `POST
   | DescribeFlowDefinition -> `POST
+  | DescribeHub -> `POST
+  | DescribeHubContent -> `POST
   | DescribeHumanTaskUi -> `POST
   | DescribeHyperParameterTuningJob -> `POST
   | DescribeImage -> `POST
   | DescribeImageVersion -> `POST
+  | DescribeInferenceComponent -> `POST
+  | DescribeInferenceExperiment -> `POST
   | DescribeInferenceRecommendationsJob -> `POST
   | DescribeLabelingJob -> `POST
   | DescribeLineageGroup -> `POST
+  | DescribeMlflowApp -> `POST
+  | DescribeMlflowTrackingServer -> `POST
   | DescribeModel -> `POST
   | DescribeModelBiasJobDefinition -> `POST
+  | DescribeModelCard -> `POST
+  | DescribeModelCardExportJob -> `POST
   | DescribeModelExplainabilityJobDefinition -> `POST
   | DescribeModelPackage -> `POST
   | DescribeModelPackageGroup -> `POST
@@ -675,82 +1085,123 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeMonitoringSchedule -> `POST
   | DescribeNotebookInstance -> `POST
   | DescribeNotebookInstanceLifecycleConfig -> `POST
+  | DescribeOptimizationJob -> `POST
+  | DescribePartnerApp -> `POST
   | DescribePipeline -> `POST
   | DescribePipelineDefinitionForExecution -> `POST
   | DescribePipelineExecution -> `POST
   | DescribeProcessingJob -> `POST
   | DescribeProject -> `POST
+  | DescribeReservedCapacity -> `POST
+  | DescribeSpace -> `POST
   | DescribeStudioLifecycleConfig -> `POST
   | DescribeSubscribedWorkteam -> `POST
   | DescribeTrainingJob -> `POST
+  | DescribeTrainingPlan -> `POST
+  | DescribeTrainingPlanExtensionHistory -> `POST
   | DescribeTransformJob -> `POST
   | DescribeTrial -> `POST
   | DescribeTrialComponent -> `POST
   | DescribeUserProfile -> `POST
   | DescribeWorkforce -> `POST
   | DescribeWorkteam -> `POST
+  | DetachClusterNodeVolume -> `POST
   | DisableSagemakerServicecatalogPortfolio -> `POST
   | DisassociateTrialComponent -> `POST
   | EnableSagemakerServicecatalogPortfolio -> `POST
+  | ExtendTrainingPlan -> `POST
   | GetDeviceFleetReport -> `POST
   | GetLineageGroupPolicy -> `POST
   | GetModelPackageGroupPolicy -> `POST
   | GetSagemakerServicecatalogPortfolioStatus -> `POST
+  | GetScalingConfigurationRecommendation -> `POST
   | GetSearchSuggestions -> `POST
+  | ImportHubContent -> `POST
+  | ListAIBenchmarkJobs -> `POST
+  | ListAIRecommendationJobs -> `POST
+  | ListAIWorkloadConfigs -> `POST
   | ListActions -> `POST
   | ListAlgorithms -> `POST
+  | ListAliases -> `POST
   | ListAppImageConfigs -> `POST
   | ListApps -> `POST
   | ListArtifacts -> `POST
   | ListAssociations -> `POST
   | ListAutoMLJobs -> `POST
   | ListCandidatesForAutoMLJob -> `POST
+  | ListClusterEvents -> `POST
+  | ListClusterNodes -> `POST
+  | ListClusterSchedulerConfigs -> `POST
+  | ListClusters -> `POST
   | ListCodeRepositories -> `POST
   | ListCompilationJobs -> `POST
+  | ListComputeQuotas -> `POST
   | ListContexts -> `POST
   | ListDataQualityJobDefinitions -> `POST
   | ListDeviceFleets -> `POST
   | ListDevices -> `POST
   | ListDomains -> `POST
+  | ListEdgeDeploymentPlans -> `POST
   | ListEdgePackagingJobs -> `POST
   | ListEndpointConfigs -> `POST
   | ListEndpoints -> `POST
   | ListExperiments -> `POST
   | ListFeatureGroups -> `POST
   | ListFlowDefinitions -> `POST
+  | ListHubContentVersions -> `POST
+  | ListHubContents -> `POST
+  | ListHubs -> `POST
   | ListHumanTaskUis -> `POST
   | ListHyperParameterTuningJobs -> `POST
   | ListImageVersions -> `POST
   | ListImages -> `POST
+  | ListInferenceComponents -> `POST
+  | ListInferenceExperiments -> `POST
+  | ListInferenceRecommendationsJobSteps -> `POST
   | ListInferenceRecommendationsJobs -> `POST
   | ListLabelingJobs -> `POST
   | ListLabelingJobsForWorkteam -> `POST
   | ListLineageGroups -> `POST
+  | ListMlflowApps -> `POST
+  | ListMlflowTrackingServers -> `POST
   | ListModelBiasJobDefinitions -> `POST
+  | ListModelCardExportJobs -> `POST
+  | ListModelCardVersions -> `POST
+  | ListModelCards -> `POST
   | ListModelExplainabilityJobDefinitions -> `POST
   | ListModelMetadata -> `POST
   | ListModelPackageGroups -> `POST
   | ListModelPackages -> `POST
   | ListModelQualityJobDefinitions -> `POST
   | ListModels -> `POST
+  | ListMonitoringAlertHistory -> `POST
+  | ListMonitoringAlerts -> `POST
   | ListMonitoringExecutions -> `POST
   | ListMonitoringSchedules -> `POST
   | ListNotebookInstanceLifecycleConfigs -> `POST
   | ListNotebookInstances -> `POST
+  | ListOptimizationJobs -> `POST
+  | ListPartnerApps -> `POST
   | ListPipelineExecutionSteps -> `POST
   | ListPipelineExecutions -> `POST
   | ListPipelineParametersForExecution -> `POST
+  | ListPipelineVersions -> `POST
   | ListPipelines -> `POST
   | ListProcessingJobs -> `POST
   | ListProjects -> `POST
+  | ListResourceCatalogs -> `POST
+  | ListSpaces -> `POST
+  | ListStageDevices -> `POST
   | ListStudioLifecycleConfigs -> `POST
   | ListSubscribedWorkteams -> `POST
   | ListTags -> `POST
   | ListTrainingJobs -> `POST
   | ListTrainingJobsForHyperParameterTuningJob -> `POST
+  | ListTrainingPlans -> `POST
   | ListTransformJobs -> `POST
   | ListTrialComponents -> `POST
   | ListTrials -> `POST
+  | ListUltraServersByReservedCapacity -> `POST
   | ListUserProfiles -> `POST
   | ListWorkforces -> `POST
   | ListWorkteams -> `POST
@@ -760,19 +1211,31 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RenderUiTemplate -> `POST
   | RetryPipelineExecution -> `POST
   | Search -> `POST
+  | SearchTrainingPlanOfferings -> `POST
   | SendPipelineExecutionStepFailure -> `POST
   | SendPipelineExecutionStepSuccess -> `POST
+  | StartClusterHealthCheck -> `POST
+  | StartEdgeDeploymentStage -> `POST
+  | StartInferenceExperiment -> `POST
+  | StartMlflowTrackingServer -> `POST
   | StartMonitoringSchedule -> `POST
   | StartNotebookInstance -> `POST
   | StartPipelineExecution -> `POST
+  | StartSession -> `POST
+  | StopAIBenchmarkJob -> `POST
+  | StopAIRecommendationJob -> `POST
   | StopAutoMLJob -> `POST
   | StopCompilationJob -> `POST
+  | StopEdgeDeploymentStage -> `POST
   | StopEdgePackagingJob -> `POST
   | StopHyperParameterTuningJob -> `POST
+  | StopInferenceExperiment -> `POST
   | StopInferenceRecommendationsJob -> `POST
   | StopLabelingJob -> `POST
+  | StopMlflowTrackingServer -> `POST
   | StopMonitoringSchedule -> `POST
   | StopNotebookInstance -> `POST
+  | StopOptimizationJob -> `POST
   | StopPipelineExecution -> `POST
   | StopProcessingJob -> `POST
   | StopTrainingJob -> `POST
@@ -780,7 +1243,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateAction -> `POST
   | UpdateAppImageConfig -> `POST
   | UpdateArtifact -> `POST
+  | UpdateCluster -> `POST
+  | UpdateClusterSchedulerConfig -> `POST
+  | UpdateClusterSoftware -> `POST
   | UpdateCodeRepository -> `POST
+  | UpdateComputeQuota -> `POST
   | UpdateContext -> `POST
   | UpdateDeviceFleet -> `POST
   | UpdateDevices -> `POST
@@ -788,14 +1255,30 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateEndpoint -> `POST
   | UpdateEndpointWeightsAndCapacities -> `POST
   | UpdateExperiment -> `POST
+  | UpdateFeatureGroup -> `POST
+  | UpdateFeatureMetadata -> `POST
+  | UpdateHub -> `POST
+  | UpdateHubContent -> `POST
+  | UpdateHubContentReference -> `POST
   | UpdateImage -> `POST
+  | UpdateImageVersion -> `POST
+  | UpdateInferenceComponent -> `POST
+  | UpdateInferenceComponentRuntimeConfig -> `POST
+  | UpdateInferenceExperiment -> `POST
+  | UpdateMlflowApp -> `POST
+  | UpdateMlflowTrackingServer -> `POST
+  | UpdateModelCard -> `POST
   | UpdateModelPackage -> `POST
+  | UpdateMonitoringAlert -> `POST
   | UpdateMonitoringSchedule -> `POST
   | UpdateNotebookInstance -> `POST
   | UpdateNotebookInstanceLifecycleConfig -> `POST
+  | UpdatePartnerApp -> `POST
   | UpdatePipeline -> `POST
   | UpdatePipelineExecution -> `POST
+  | UpdatePipelineVersion -> `POST
   | UpdateProject -> `POST
+  | UpdateSpace -> `POST
   | UpdateTrainingJob -> `POST
   | UpdateTrial -> `POST
   | UpdateTrialComponent -> `POST
@@ -808,35 +1291,58 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AddAssociation -> (Format.kasprintf Uri.of_string) "/"
       | AddTags -> (Format.kasprintf Uri.of_string) "/"
       | AssociateTrialComponent -> (Format.kasprintf Uri.of_string) "/"
+      | AttachClusterNodeVolume -> (Format.kasprintf Uri.of_string) "/"
+      | BatchAddClusterNodes -> (Format.kasprintf Uri.of_string) "/"
+      | BatchDeleteClusterNodes -> (Format.kasprintf Uri.of_string) "/"
       | BatchDescribeModelPackage -> (Format.kasprintf Uri.of_string) "/"
+      | BatchRebootClusterNodes -> (Format.kasprintf Uri.of_string) "/"
+      | BatchReplaceClusterNodes -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAIBenchmarkJob -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAIRecommendationJob -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAIWorkloadConfig -> (Format.kasprintf Uri.of_string) "/"
       | CreateAction -> (Format.kasprintf Uri.of_string) "/"
       | CreateAlgorithm -> (Format.kasprintf Uri.of_string) "/"
       | CreateApp -> (Format.kasprintf Uri.of_string) "/"
       | CreateAppImageConfig -> (Format.kasprintf Uri.of_string) "/"
       | CreateArtifact -> (Format.kasprintf Uri.of_string) "/"
       | CreateAutoMLJob -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAutoMLJobV2 -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCluster -> (Format.kasprintf Uri.of_string) "/"
+      | CreateClusterSchedulerConfig -> (Format.kasprintf Uri.of_string) "/"
       | CreateCodeRepository -> (Format.kasprintf Uri.of_string) "/"
       | CreateCompilationJob -> (Format.kasprintf Uri.of_string) "/"
+      | CreateComputeQuota -> (Format.kasprintf Uri.of_string) "/"
       | CreateContext -> (Format.kasprintf Uri.of_string) "/"
       | CreateDataQualityJobDefinition ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateDeviceFleet -> (Format.kasprintf Uri.of_string) "/"
       | CreateDomain -> (Format.kasprintf Uri.of_string) "/"
+      | CreateEdgeDeploymentPlan -> (Format.kasprintf Uri.of_string) "/"
+      | CreateEdgeDeploymentStage -> (Format.kasprintf Uri.of_string) "/"
       | CreateEdgePackagingJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | CreateEndpointConfig -> (Format.kasprintf Uri.of_string) "/"
       | CreateExperiment -> (Format.kasprintf Uri.of_string) "/"
       | CreateFeatureGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateFlowDefinition -> (Format.kasprintf Uri.of_string) "/"
+      | CreateHub -> (Format.kasprintf Uri.of_string) "/"
+      | CreateHubContentPresignedUrls -> (Format.kasprintf Uri.of_string) "/"
+      | CreateHubContentReference -> (Format.kasprintf Uri.of_string) "/"
       | CreateHumanTaskUi -> (Format.kasprintf Uri.of_string) "/"
       | CreateHyperParameterTuningJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateImage -> (Format.kasprintf Uri.of_string) "/"
       | CreateImageVersion -> (Format.kasprintf Uri.of_string) "/"
+      | CreateInferenceComponent -> (Format.kasprintf Uri.of_string) "/"
+      | CreateInferenceExperiment -> (Format.kasprintf Uri.of_string) "/"
       | CreateInferenceRecommendationsJob ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateLabelingJob -> (Format.kasprintf Uri.of_string) "/"
+      | CreateMlflowApp -> (Format.kasprintf Uri.of_string) "/"
+      | CreateMlflowTrackingServer -> (Format.kasprintf Uri.of_string) "/"
       | CreateModel -> (Format.kasprintf Uri.of_string) "/"
       | CreateModelBiasJobDefinition -> (Format.kasprintf Uri.of_string) "/"
+      | CreateModelCard -> (Format.kasprintf Uri.of_string) "/"
+      | CreateModelCardExportJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateModelExplainabilityJobDefinition ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateModelPackage -> (Format.kasprintf Uri.of_string) "/"
@@ -847,42 +1353,68 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateNotebookInstance -> (Format.kasprintf Uri.of_string) "/"
       | CreateNotebookInstanceLifecycleConfig ->
           (Format.kasprintf Uri.of_string) "/"
+      | CreateOptimizationJob -> (Format.kasprintf Uri.of_string) "/"
+      | CreatePartnerApp -> (Format.kasprintf Uri.of_string) "/"
+      | CreatePartnerAppPresignedUrl -> (Format.kasprintf Uri.of_string) "/"
       | CreatePipeline -> (Format.kasprintf Uri.of_string) "/"
       | CreatePresignedDomainUrl -> (Format.kasprintf Uri.of_string) "/"
+      | CreatePresignedMlflowAppUrl -> (Format.kasprintf Uri.of_string) "/"
+      | CreatePresignedMlflowTrackingServerUrl ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreatePresignedNotebookInstanceUrl ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateProcessingJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateProject -> (Format.kasprintf Uri.of_string) "/"
+      | CreateSpace -> (Format.kasprintf Uri.of_string) "/"
       | CreateStudioLifecycleConfig -> (Format.kasprintf Uri.of_string) "/"
       | CreateTrainingJob -> (Format.kasprintf Uri.of_string) "/"
+      | CreateTrainingPlan -> (Format.kasprintf Uri.of_string) "/"
       | CreateTransformJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateTrial -> (Format.kasprintf Uri.of_string) "/"
       | CreateTrialComponent -> (Format.kasprintf Uri.of_string) "/"
       | CreateUserProfile -> (Format.kasprintf Uri.of_string) "/"
       | CreateWorkforce -> (Format.kasprintf Uri.of_string) "/"
       | CreateWorkteam -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAIBenchmarkJob -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAIRecommendationJob -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAIWorkloadConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAction -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAlgorithm -> (Format.kasprintf Uri.of_string) "/"
       | DeleteApp -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAppImageConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteArtifact -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAssociation -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCluster -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteClusterSchedulerConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCodeRepository -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCompilationJob -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteComputeQuota -> (Format.kasprintf Uri.of_string) "/"
       | DeleteContext -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDataQualityJobDefinition ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteDeviceFleet -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDomain -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteEdgeDeploymentPlan -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteEdgeDeploymentStage -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEndpointConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteExperiment -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFeatureGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFlowDefinition -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteHub -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteHubContent -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteHubContentReference -> (Format.kasprintf Uri.of_string) "/"
       | DeleteHumanTaskUi -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteHyperParameterTuningJob -> (Format.kasprintf Uri.of_string) "/"
       | DeleteImage -> (Format.kasprintf Uri.of_string) "/"
       | DeleteImageVersion -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteInferenceComponent -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteInferenceExperiment -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteMlflowApp -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteMlflowTrackingServer -> (Format.kasprintf Uri.of_string) "/"
       | DeleteModel -> (Format.kasprintf Uri.of_string) "/"
       | DeleteModelBiasJobDefinition -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteModelCard -> (Format.kasprintf Uri.of_string) "/"
       | DeleteModelExplainabilityJobDefinition ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteModelPackage -> (Format.kasprintf Uri.of_string) "/"
@@ -894,48 +1426,73 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteNotebookInstance -> (Format.kasprintf Uri.of_string) "/"
       | DeleteNotebookInstanceLifecycleConfig ->
           (Format.kasprintf Uri.of_string) "/"
+      | DeleteOptimizationJob -> (Format.kasprintf Uri.of_string) "/"
+      | DeletePartnerApp -> (Format.kasprintf Uri.of_string) "/"
       | DeletePipeline -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteProcessingJob -> (Format.kasprintf Uri.of_string) "/"
       | DeleteProject -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteSpace -> (Format.kasprintf Uri.of_string) "/"
       | DeleteStudioLifecycleConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTags -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteTrainingJob -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTrial -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTrialComponent -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUserProfile -> (Format.kasprintf Uri.of_string) "/"
       | DeleteWorkforce -> (Format.kasprintf Uri.of_string) "/"
       | DeleteWorkteam -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterDevices -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAIBenchmarkJob -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAIRecommendationJob -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAIWorkloadConfig -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAction -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAlgorithm -> (Format.kasprintf Uri.of_string) "/"
       | DescribeApp -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAppImageConfig -> (Format.kasprintf Uri.of_string) "/"
       | DescribeArtifact -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAutoMLJob -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAutoMLJobV2 -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCluster -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeClusterEvent -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeClusterNode -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeClusterSchedulerConfig ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeCodeRepository -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCompilationJob -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeComputeQuota -> (Format.kasprintf Uri.of_string) "/"
       | DescribeContext -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDataQualityJobDefinition ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeDevice -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDeviceFleet -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDomain -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeEdgeDeploymentPlan -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEdgePackagingJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEndpointConfig -> (Format.kasprintf Uri.of_string) "/"
       | DescribeExperiment -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFeatureGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFeatureMetadata -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFlowDefinition -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeHub -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeHubContent -> (Format.kasprintf Uri.of_string) "/"
       | DescribeHumanTaskUi -> (Format.kasprintf Uri.of_string) "/"
       | DescribeHyperParameterTuningJob ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeImage -> (Format.kasprintf Uri.of_string) "/"
       | DescribeImageVersion -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInferenceComponent -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInferenceExperiment -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInferenceRecommendationsJob ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeLabelingJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLineageGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMlflowApp -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMlflowTrackingServer -> (Format.kasprintf Uri.of_string) "/"
       | DescribeModel -> (Format.kasprintf Uri.of_string) "/"
       | DescribeModelBiasJobDefinition ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeModelCard -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeModelCardExportJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeModelExplainabilityJobDefinition ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeModelPackage -> (Format.kasprintf Uri.of_string) "/"
@@ -946,63 +1503,97 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeNotebookInstance -> (Format.kasprintf Uri.of_string) "/"
       | DescribeNotebookInstanceLifecycleConfig ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeOptimizationJob -> (Format.kasprintf Uri.of_string) "/"
+      | DescribePartnerApp -> (Format.kasprintf Uri.of_string) "/"
       | DescribePipeline -> (Format.kasprintf Uri.of_string) "/"
       | DescribePipelineDefinitionForExecution ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribePipelineExecution -> (Format.kasprintf Uri.of_string) "/"
       | DescribeProcessingJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeProject -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeReservedCapacity -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeSpace -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStudioLifecycleConfig -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSubscribedWorkteam -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTrainingJob -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeTrainingPlan -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeTrainingPlanExtensionHistory ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeTransformJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTrial -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTrialComponent -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUserProfile -> (Format.kasprintf Uri.of_string) "/"
       | DescribeWorkforce -> (Format.kasprintf Uri.of_string) "/"
       | DescribeWorkteam -> (Format.kasprintf Uri.of_string) "/"
+      | DetachClusterNodeVolume -> (Format.kasprintf Uri.of_string) "/"
       | DisableSagemakerServicecatalogPortfolio ->
           (Format.kasprintf Uri.of_string) "/"
       | DisassociateTrialComponent -> (Format.kasprintf Uri.of_string) "/"
       | EnableSagemakerServicecatalogPortfolio ->
           (Format.kasprintf Uri.of_string) "/"
+      | ExtendTrainingPlan -> (Format.kasprintf Uri.of_string) "/"
       | GetDeviceFleetReport -> (Format.kasprintf Uri.of_string) "/"
       | GetLineageGroupPolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetModelPackageGroupPolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetSagemakerServicecatalogPortfolioStatus ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetScalingConfigurationRecommendation ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetSearchSuggestions -> (Format.kasprintf Uri.of_string) "/"
+      | ImportHubContent -> (Format.kasprintf Uri.of_string) "/"
+      | ListAIBenchmarkJobs -> (Format.kasprintf Uri.of_string) "/"
+      | ListAIRecommendationJobs -> (Format.kasprintf Uri.of_string) "/"
+      | ListAIWorkloadConfigs -> (Format.kasprintf Uri.of_string) "/"
       | ListActions -> (Format.kasprintf Uri.of_string) "/"
       | ListAlgorithms -> (Format.kasprintf Uri.of_string) "/"
+      | ListAliases -> (Format.kasprintf Uri.of_string) "/"
       | ListAppImageConfigs -> (Format.kasprintf Uri.of_string) "/"
       | ListApps -> (Format.kasprintf Uri.of_string) "/"
       | ListArtifacts -> (Format.kasprintf Uri.of_string) "/"
       | ListAssociations -> (Format.kasprintf Uri.of_string) "/"
       | ListAutoMLJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListCandidatesForAutoMLJob -> (Format.kasprintf Uri.of_string) "/"
+      | ListClusterEvents -> (Format.kasprintf Uri.of_string) "/"
+      | ListClusterNodes -> (Format.kasprintf Uri.of_string) "/"
+      | ListClusterSchedulerConfigs -> (Format.kasprintf Uri.of_string) "/"
+      | ListClusters -> (Format.kasprintf Uri.of_string) "/"
       | ListCodeRepositories -> (Format.kasprintf Uri.of_string) "/"
       | ListCompilationJobs -> (Format.kasprintf Uri.of_string) "/"
+      | ListComputeQuotas -> (Format.kasprintf Uri.of_string) "/"
       | ListContexts -> (Format.kasprintf Uri.of_string) "/"
       | ListDataQualityJobDefinitions -> (Format.kasprintf Uri.of_string) "/"
       | ListDeviceFleets -> (Format.kasprintf Uri.of_string) "/"
       | ListDevices -> (Format.kasprintf Uri.of_string) "/"
       | ListDomains -> (Format.kasprintf Uri.of_string) "/"
+      | ListEdgeDeploymentPlans -> (Format.kasprintf Uri.of_string) "/"
       | ListEdgePackagingJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListEndpointConfigs -> (Format.kasprintf Uri.of_string) "/"
       | ListEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | ListExperiments -> (Format.kasprintf Uri.of_string) "/"
       | ListFeatureGroups -> (Format.kasprintf Uri.of_string) "/"
       | ListFlowDefinitions -> (Format.kasprintf Uri.of_string) "/"
+      | ListHubContentVersions -> (Format.kasprintf Uri.of_string) "/"
+      | ListHubContents -> (Format.kasprintf Uri.of_string) "/"
+      | ListHubs -> (Format.kasprintf Uri.of_string) "/"
       | ListHumanTaskUis -> (Format.kasprintf Uri.of_string) "/"
       | ListHyperParameterTuningJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListImageVersions -> (Format.kasprintf Uri.of_string) "/"
       | ListImages -> (Format.kasprintf Uri.of_string) "/"
+      | ListInferenceComponents -> (Format.kasprintf Uri.of_string) "/"
+      | ListInferenceExperiments -> (Format.kasprintf Uri.of_string) "/"
+      | ListInferenceRecommendationsJobSteps ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListInferenceRecommendationsJobs ->
           (Format.kasprintf Uri.of_string) "/"
       | ListLabelingJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListLabelingJobsForWorkteam -> (Format.kasprintf Uri.of_string) "/"
       | ListLineageGroups -> (Format.kasprintf Uri.of_string) "/"
+      | ListMlflowApps -> (Format.kasprintf Uri.of_string) "/"
+      | ListMlflowTrackingServers -> (Format.kasprintf Uri.of_string) "/"
       | ListModelBiasJobDefinitions -> (Format.kasprintf Uri.of_string) "/"
+      | ListModelCardExportJobs -> (Format.kasprintf Uri.of_string) "/"
+      | ListModelCardVersions -> (Format.kasprintf Uri.of_string) "/"
+      | ListModelCards -> (Format.kasprintf Uri.of_string) "/"
       | ListModelExplainabilityJobDefinitions ->
           (Format.kasprintf Uri.of_string) "/"
       | ListModelMetadata -> (Format.kasprintf Uri.of_string) "/"
@@ -1011,27 +1602,38 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListModelQualityJobDefinitions ->
           (Format.kasprintf Uri.of_string) "/"
       | ListModels -> (Format.kasprintf Uri.of_string) "/"
+      | ListMonitoringAlertHistory -> (Format.kasprintf Uri.of_string) "/"
+      | ListMonitoringAlerts -> (Format.kasprintf Uri.of_string) "/"
       | ListMonitoringExecutions -> (Format.kasprintf Uri.of_string) "/"
       | ListMonitoringSchedules -> (Format.kasprintf Uri.of_string) "/"
       | ListNotebookInstanceLifecycleConfigs ->
           (Format.kasprintf Uri.of_string) "/"
       | ListNotebookInstances -> (Format.kasprintf Uri.of_string) "/"
+      | ListOptimizationJobs -> (Format.kasprintf Uri.of_string) "/"
+      | ListPartnerApps -> (Format.kasprintf Uri.of_string) "/"
       | ListPipelineExecutionSteps -> (Format.kasprintf Uri.of_string) "/"
       | ListPipelineExecutions -> (Format.kasprintf Uri.of_string) "/"
       | ListPipelineParametersForExecution ->
           (Format.kasprintf Uri.of_string) "/"
+      | ListPipelineVersions -> (Format.kasprintf Uri.of_string) "/"
       | ListPipelines -> (Format.kasprintf Uri.of_string) "/"
       | ListProcessingJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListProjects -> (Format.kasprintf Uri.of_string) "/"
+      | ListResourceCatalogs -> (Format.kasprintf Uri.of_string) "/"
+      | ListSpaces -> (Format.kasprintf Uri.of_string) "/"
+      | ListStageDevices -> (Format.kasprintf Uri.of_string) "/"
       | ListStudioLifecycleConfigs -> (Format.kasprintf Uri.of_string) "/"
       | ListSubscribedWorkteams -> (Format.kasprintf Uri.of_string) "/"
       | ListTags -> (Format.kasprintf Uri.of_string) "/"
       | ListTrainingJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListTrainingJobsForHyperParameterTuningJob ->
           (Format.kasprintf Uri.of_string) "/"
+      | ListTrainingPlans -> (Format.kasprintf Uri.of_string) "/"
       | ListTransformJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListTrialComponents -> (Format.kasprintf Uri.of_string) "/"
       | ListTrials -> (Format.kasprintf Uri.of_string) "/"
+      | ListUltraServersByReservedCapacity ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListUserProfiles -> (Format.kasprintf Uri.of_string) "/"
       | ListWorkforces -> (Format.kasprintf Uri.of_string) "/"
       | ListWorkteams -> (Format.kasprintf Uri.of_string) "/"
@@ -1041,22 +1643,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RenderUiTemplate -> (Format.kasprintf Uri.of_string) "/"
       | RetryPipelineExecution -> (Format.kasprintf Uri.of_string) "/"
       | Search -> (Format.kasprintf Uri.of_string) "/"
+      | SearchTrainingPlanOfferings -> (Format.kasprintf Uri.of_string) "/"
       | SendPipelineExecutionStepFailure ->
           (Format.kasprintf Uri.of_string) "/"
       | SendPipelineExecutionStepSuccess ->
           (Format.kasprintf Uri.of_string) "/"
+      | StartClusterHealthCheck -> (Format.kasprintf Uri.of_string) "/"
+      | StartEdgeDeploymentStage -> (Format.kasprintf Uri.of_string) "/"
+      | StartInferenceExperiment -> (Format.kasprintf Uri.of_string) "/"
+      | StartMlflowTrackingServer -> (Format.kasprintf Uri.of_string) "/"
       | StartMonitoringSchedule -> (Format.kasprintf Uri.of_string) "/"
       | StartNotebookInstance -> (Format.kasprintf Uri.of_string) "/"
       | StartPipelineExecution -> (Format.kasprintf Uri.of_string) "/"
+      | StartSession -> (Format.kasprintf Uri.of_string) "/"
+      | StopAIBenchmarkJob -> (Format.kasprintf Uri.of_string) "/"
+      | StopAIRecommendationJob -> (Format.kasprintf Uri.of_string) "/"
       | StopAutoMLJob -> (Format.kasprintf Uri.of_string) "/"
       | StopCompilationJob -> (Format.kasprintf Uri.of_string) "/"
+      | StopEdgeDeploymentStage -> (Format.kasprintf Uri.of_string) "/"
       | StopEdgePackagingJob -> (Format.kasprintf Uri.of_string) "/"
       | StopHyperParameterTuningJob -> (Format.kasprintf Uri.of_string) "/"
+      | StopInferenceExperiment -> (Format.kasprintf Uri.of_string) "/"
       | StopInferenceRecommendationsJob ->
           (Format.kasprintf Uri.of_string) "/"
       | StopLabelingJob -> (Format.kasprintf Uri.of_string) "/"
+      | StopMlflowTrackingServer -> (Format.kasprintf Uri.of_string) "/"
       | StopMonitoringSchedule -> (Format.kasprintf Uri.of_string) "/"
       | StopNotebookInstance -> (Format.kasprintf Uri.of_string) "/"
+      | StopOptimizationJob -> (Format.kasprintf Uri.of_string) "/"
       | StopPipelineExecution -> (Format.kasprintf Uri.of_string) "/"
       | StopProcessingJob -> (Format.kasprintf Uri.of_string) "/"
       | StopTrainingJob -> (Format.kasprintf Uri.of_string) "/"
@@ -1064,7 +1678,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateAction -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAppImageConfig -> (Format.kasprintf Uri.of_string) "/"
       | UpdateArtifact -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateCluster -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateClusterSchedulerConfig -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateClusterSoftware -> (Format.kasprintf Uri.of_string) "/"
       | UpdateCodeRepository -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateComputeQuota -> (Format.kasprintf Uri.of_string) "/"
       | UpdateContext -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDeviceFleet -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDevices -> (Format.kasprintf Uri.of_string) "/"
@@ -1073,15 +1691,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateEndpointWeightsAndCapacities ->
           (Format.kasprintf Uri.of_string) "/"
       | UpdateExperiment -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateFeatureGroup -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateFeatureMetadata -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateHub -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateHubContent -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateHubContentReference -> (Format.kasprintf Uri.of_string) "/"
       | UpdateImage -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateImageVersion -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateInferenceComponent -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateInferenceComponentRuntimeConfig ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateInferenceExperiment -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateMlflowApp -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateMlflowTrackingServer -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateModelCard -> (Format.kasprintf Uri.of_string) "/"
       | UpdateModelPackage -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateMonitoringAlert -> (Format.kasprintf Uri.of_string) "/"
       | UpdateMonitoringSchedule -> (Format.kasprintf Uri.of_string) "/"
       | UpdateNotebookInstance -> (Format.kasprintf Uri.of_string) "/"
       | UpdateNotebookInstanceLifecycleConfig ->
           (Format.kasprintf Uri.of_string) "/"
+      | UpdatePartnerApp -> (Format.kasprintf Uri.of_string) "/"
       | UpdatePipeline -> (Format.kasprintf Uri.of_string) "/"
       | UpdatePipelineExecution -> (Format.kasprintf Uri.of_string) "/"
+      | UpdatePipelineVersion -> (Format.kasprintf Uri.of_string) "/"
       | UpdateProject -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateSpace -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTrainingJob -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTrial -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTrialComponent -> (Format.kasprintf Uri.of_string) "/"
@@ -1115,6 +1750,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.AssociateTrialComponent")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AttachClusterNodeVolume ->
+      let json = AttachClusterNodeVolumeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.AttachClusterNodeVolume")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchAddClusterNodes ->
+      let json = BatchAddClusterNodesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.BatchAddClusterNodes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchDeleteClusterNodes ->
+      let json = BatchDeleteClusterNodesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.BatchDeleteClusterNodes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchDescribeModelPackage ->
       let json = BatchDescribeModelPackageInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1122,6 +1781,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.BatchDescribeModelPackage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchRebootClusterNodes ->
+      let json = BatchRebootClusterNodesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.BatchRebootClusterNodes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchReplaceClusterNodes ->
+      let json = BatchReplaceClusterNodesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.BatchReplaceClusterNodes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAIBenchmarkJob ->
+      let json = CreateAIBenchmarkJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateAIBenchmarkJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAIRecommendationJob ->
+      let json = CreateAIRecommendationJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateAIRecommendationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAIWorkloadConfig ->
+      let json = CreateAIWorkloadConfigRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateAIWorkloadConfig")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateAction ->
       let json = CreateActionRequest.to_json req in
@@ -1171,6 +1870,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateAutoMLJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAutoMLJobV2 ->
+      let json = CreateAutoMLJobV2Request.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateAutoMLJobV2")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateCluster ->
+      let json = CreateClusterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateCluster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateClusterSchedulerConfig ->
+      let json = CreateClusterSchedulerConfigRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateClusterSchedulerConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateCodeRepository ->
       let json = CreateCodeRepositoryInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1186,6 +1909,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateCompilationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateComputeQuota ->
+      let json = CreateComputeQuotaRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateComputeQuota")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateContext ->
       let json = CreateContextRequest.to_json req in
@@ -1218,6 +1949,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateDomain")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateEdgeDeploymentPlan ->
+      let json = CreateEdgeDeploymentPlanRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateEdgeDeploymentPlan")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateEdgeDeploymentStage ->
+      let json = CreateEdgeDeploymentStageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateEdgeDeploymentStage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateEdgePackagingJob ->
       let json = CreateEdgePackagingJobRequest.to_json req in
@@ -1267,6 +2014,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateFlowDefinition")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateHub ->
+      let json = CreateHubRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateHub")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateHubContentPresignedUrls ->
+      let json = CreateHubContentPresignedUrlsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateHubContentPresignedUrls")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateHubContentReference ->
+      let json = CreateHubContentReferenceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateHubContentReference")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateHumanTaskUi ->
       let json = CreateHumanTaskUiRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1299,6 +2070,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateImageVersion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateInferenceComponent ->
+      let json = CreateInferenceComponentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateInferenceComponent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateInferenceExperiment ->
+      let json = CreateInferenceExperimentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateInferenceExperiment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateInferenceRecommendationsJob ->
       let json = CreateInferenceRecommendationsJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1315,6 +2102,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateLabelingJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateMlflowApp ->
+      let json = CreateMlflowAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateMlflowApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateMlflowTrackingServer ->
+      let json = CreateMlflowTrackingServerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateMlflowTrackingServer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateModel ->
       let json = CreateModelInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1330,6 +2133,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateModelBiasJobDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateModelCard ->
+      let json = CreateModelCardRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateModelCard")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateModelCardExportJob ->
+      let json = CreateModelCardExportJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateModelCardExportJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateModelExplainabilityJobDefinition ->
       let json = CreateModelExplainabilityJobDefinitionRequest.to_json req in
@@ -1388,6 +2207,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateNotebookInstanceLifecycleConfig")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateOptimizationJob ->
+      let json = CreateOptimizationJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateOptimizationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreatePartnerApp ->
+      let json = CreatePartnerAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreatePartnerApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreatePartnerAppPresignedUrl ->
+      let json = CreatePartnerAppPresignedUrlRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreatePartnerAppPresignedUrl")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreatePipeline ->
       let json = CreatePipelineRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1403,6 +2246,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreatePresignedDomainUrl")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreatePresignedMlflowAppUrl ->
+      let json = CreatePresignedMlflowAppUrlRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreatePresignedMlflowAppUrl")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreatePresignedMlflowTrackingServerUrl ->
+      let json = CreatePresignedMlflowTrackingServerUrlRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SageMaker.CreatePresignedMlflowTrackingServerUrl")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreatePresignedNotebookInstanceUrl ->
       let json = CreatePresignedNotebookInstanceUrlInput.to_json req in
@@ -1428,6 +2288,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateProject")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateSpace ->
+      let json = CreateSpaceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateSpace")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateStudioLifecycleConfig ->
       let json = CreateStudioLifecycleConfigRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1443,6 +2311,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateTrainingJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateTrainingPlan ->
+      let json = CreateTrainingPlanRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.CreateTrainingPlan")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateTransformJob ->
       let json = CreateTransformJobRequest.to_json req in
@@ -1492,6 +2368,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.CreateWorkteam")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAIBenchmarkJob ->
+      let json = DeleteAIBenchmarkJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteAIBenchmarkJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAIRecommendationJob ->
+      let json = DeleteAIRecommendationJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteAIRecommendationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAIWorkloadConfig ->
+      let json = DeleteAIWorkloadConfigRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteAIWorkloadConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteAction ->
       let json = DeleteActionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1540,6 +2440,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteAssociation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteCluster ->
+      let json = DeleteClusterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteCluster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteClusterSchedulerConfig ->
+      let json = DeleteClusterSchedulerConfigRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteClusterSchedulerConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteCodeRepository ->
       let json = DeleteCodeRepositoryInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1547,6 +2463,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteCodeRepository")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteCompilationJob ->
+      let json = DeleteCompilationJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteCompilationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteComputeQuota ->
+      let json = DeleteComputeQuotaRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteComputeQuota")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteContext ->
       let json = DeleteContextRequest.to_json req in
@@ -1579,6 +2511,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteDomain")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteEdgeDeploymentPlan ->
+      let json = DeleteEdgeDeploymentPlanRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteEdgeDeploymentPlan")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteEdgeDeploymentStage ->
+      let json = DeleteEdgeDeploymentStageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteEdgeDeploymentStage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteEndpoint ->
       let json = DeleteEndpointInput.to_json req in
@@ -1620,6 +2568,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteFlowDefinition")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteHub ->
+      let json = DeleteHubRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteHub")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteHubContent ->
+      let json = DeleteHubContentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteHubContent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteHubContentReference ->
+      let json = DeleteHubContentReferenceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteHubContentReference")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteHumanTaskUi ->
       let json = DeleteHumanTaskUiRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1627,6 +2599,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteHumanTaskUi")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteHyperParameterTuningJob ->
+      let json = DeleteHyperParameterTuningJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteHyperParameterTuningJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteImage ->
       let json = DeleteImageRequest.to_json req in
@@ -1644,6 +2624,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteImageVersion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteInferenceComponent ->
+      let json = DeleteInferenceComponentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteInferenceComponent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteInferenceExperiment ->
+      let json = DeleteInferenceExperimentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteInferenceExperiment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteMlflowApp ->
+      let json = DeleteMlflowAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteMlflowApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteMlflowTrackingServer ->
+      let json = DeleteMlflowTrackingServerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteMlflowTrackingServer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteModel ->
       let json = DeleteModelInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1659,6 +2671,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteModelBiasJobDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteModelCard ->
+      let json = DeleteModelCardRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteModelCard")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteModelExplainabilityJobDefinition ->
       let json = DeleteModelExplainabilityJobDefinitionRequest.to_json req in
@@ -1725,6 +2745,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteNotebookInstanceLifecycleConfig")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteOptimizationJob ->
+      let json = DeleteOptimizationJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteOptimizationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeletePartnerApp ->
+      let json = DeletePartnerAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeletePartnerApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeletePipeline ->
       let json = DeletePipelineRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1733,6 +2769,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeletePipeline")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteProcessingJob ->
+      let json = DeleteProcessingJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteProcessingJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteProject ->
       let json = DeleteProjectInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1740,6 +2784,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteProject")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteSpace ->
+      let json = DeleteSpaceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteSpace")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteStudioLifecycleConfig ->
       let json = DeleteStudioLifecycleConfigRequest.to_json req in
@@ -1756,6 +2808,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeleteTags")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteTrainingJob ->
+      let json = DeleteTrainingJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DeleteTrainingJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteTrial ->
       let json = DeleteTrialRequest.to_json req in
@@ -1805,6 +2865,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DeregisterDevices")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAIBenchmarkJob ->
+      let json = DescribeAIBenchmarkJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeAIBenchmarkJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAIRecommendationJob ->
+      let json = DescribeAIRecommendationJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeAIRecommendationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAIWorkloadConfig ->
+      let json = DescribeAIWorkloadConfigRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeAIWorkloadConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeAction ->
       let json = DescribeActionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1853,6 +2937,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeAutoMLJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAutoMLJobV2 ->
+      let json = DescribeAutoMLJobV2Request.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeAutoMLJobV2")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeCluster ->
+      let json = DescribeClusterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeCluster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeClusterEvent ->
+      let json = DescribeClusterEventRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeClusterEvent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeClusterNode ->
+      let json = DescribeClusterNodeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeClusterNode")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeClusterSchedulerConfig ->
+      let json = DescribeClusterSchedulerConfigRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeClusterSchedulerConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeCodeRepository ->
       let json = DescribeCodeRepositoryInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1868,6 +2992,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeCompilationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeComputeQuota ->
+      let json = DescribeComputeQuotaRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeComputeQuota")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeContext ->
       let json = DescribeContextRequest.to_json req in
@@ -1909,6 +3041,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeDomain")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeEdgeDeploymentPlan ->
+      let json = DescribeEdgeDeploymentPlanRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeEdgeDeploymentPlan")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeEdgePackagingJob ->
       let json = DescribeEdgePackagingJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1949,6 +3089,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeFeatureGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFeatureMetadata ->
+      let json = DescribeFeatureMetadataRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeFeatureMetadata")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeFlowDefinition ->
       let json = DescribeFlowDefinitionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1956,6 +3104,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeFlowDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeHub ->
+      let json = DescribeHubRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeHub")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeHubContent ->
+      let json = DescribeHubContentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeHubContent")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeHumanTaskUi ->
       let json = DescribeHumanTaskUiRequest.to_json req in
@@ -1989,6 +3153,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeImageVersion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeInferenceComponent ->
+      let json = DescribeInferenceComponentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeInferenceComponent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeInferenceExperiment ->
+      let json = DescribeInferenceExperimentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeInferenceExperiment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeInferenceRecommendationsJob ->
       let json = DescribeInferenceRecommendationsJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2013,6 +3193,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeLineageGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMlflowApp ->
+      let json = DescribeMlflowAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeMlflowApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMlflowTrackingServer ->
+      let json = DescribeMlflowTrackingServerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeMlflowTrackingServer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeModel ->
       let json = DescribeModelInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2028,6 +3224,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeModelBiasJobDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeModelCard ->
+      let json = DescribeModelCardRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeModelCard")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeModelCardExportJob ->
+      let json = DescribeModelCardExportJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeModelCardExportJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeModelExplainabilityJobDefinition ->
       let json = DescribeModelExplainabilityJobDefinitionRequest.to_json req in
@@ -2087,6 +3299,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "SageMaker.DescribeNotebookInstanceLifecycleConfig")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeOptimizationJob ->
+      let json = DescribeOptimizationJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeOptimizationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribePartnerApp ->
+      let json = DescribePartnerAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribePartnerApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribePipeline ->
       let json = DescribePipelineRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2128,6 +3356,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeProject")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeReservedCapacity ->
+      let json = DescribeReservedCapacityRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeReservedCapacity")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeSpace ->
+      let json = DescribeSpaceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeSpace")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeStudioLifecycleConfig ->
       let json = DescribeStudioLifecycleConfigRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2151,6 +3395,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeTrainingJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeTrainingPlan ->
+      let json = DescribeTrainingPlanRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeTrainingPlan")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeTrainingPlanExtensionHistory ->
+      let json = DescribeTrainingPlanExtensionHistoryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DescribeTrainingPlanExtensionHistory")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeTransformJob ->
       let json = DescribeTransformJobRequest.to_json req in
@@ -2200,6 +3460,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.DescribeWorkteam")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DetachClusterNodeVolume ->
+      let json = DetachClusterNodeVolumeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.DetachClusterNodeVolume")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisableSagemakerServicecatalogPortfolio ->
       let json = DisableSagemakerServicecatalogPortfolioInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2225,6 +3493,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "SageMaker.EnableSagemakerServicecatalogPortfolio")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ExtendTrainingPlan ->
+      let json = ExtendTrainingPlanRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ExtendTrainingPlan")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetDeviceFleetReport ->
       let json = GetDeviceFleetReportRequest.to_json req in
@@ -2259,6 +3535,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "SageMaker.GetSagemakerServicecatalogPortfolioStatus")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetScalingConfigurationRecommendation ->
+      let json = GetScalingConfigurationRecommendationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.GetScalingConfigurationRecommendation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetSearchSuggestions ->
       let json = GetSearchSuggestionsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2266,6 +3550,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.GetSearchSuggestions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ImportHubContent ->
+      let json = ImportHubContentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ImportHubContent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAIBenchmarkJobs ->
+      let json = ListAIBenchmarkJobsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListAIBenchmarkJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAIRecommendationJobs ->
+      let json = ListAIRecommendationJobsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListAIRecommendationJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAIWorkloadConfigs ->
+      let json = ListAIWorkloadConfigsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListAIWorkloadConfigs")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListActions ->
       let json = ListActionsRequest.to_json req in
@@ -2282,6 +3598,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListAlgorithms")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAliases ->
+      let json = ListAliasesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListAliases")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAppImageConfigs ->
       let json = ListAppImageConfigsRequest.to_json req in
@@ -2331,6 +3655,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListCandidatesForAutoMLJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListClusterEvents ->
+      let json = ListClusterEventsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListClusterEvents")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListClusterNodes ->
+      let json = ListClusterNodesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListClusterNodes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListClusterSchedulerConfigs ->
+      let json = ListClusterSchedulerConfigsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListClusterSchedulerConfigs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListClusters ->
+      let json = ListClustersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListClusters")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListCodeRepositories ->
       let json = ListCodeRepositoriesInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2346,6 +3702,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListCompilationJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListComputeQuotas ->
+      let json = ListComputeQuotasRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListComputeQuotas")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListContexts ->
       let json = ListContextsRequest.to_json req in
@@ -2386,6 +3750,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListDomains")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListEdgeDeploymentPlans ->
+      let json = ListEdgeDeploymentPlansRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListEdgeDeploymentPlans")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListEdgePackagingJobs ->
       let json = ListEdgePackagingJobsRequest.to_json req in
@@ -2435,6 +3807,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListFlowDefinitions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListHubContentVersions ->
+      let json = ListHubContentVersionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListHubContentVersions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListHubContents ->
+      let json = ListHubContentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListHubContents")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListHubs ->
+      let json = ListHubsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListHubs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListHumanTaskUis ->
       let json = ListHumanTaskUisRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2466,6 +3862,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListImages")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListInferenceComponents ->
+      let json = ListInferenceComponentsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListInferenceComponents")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListInferenceExperiments ->
+      let json = ListInferenceExperimentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListInferenceExperiments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListInferenceRecommendationsJobSteps ->
+      let json = ListInferenceRecommendationsJobStepsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListInferenceRecommendationsJobSteps")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListInferenceRecommendationsJobs ->
       let json = ListInferenceRecommendationsJobsRequest.to_json req in
@@ -2499,6 +3919,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListLineageGroups")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMlflowApps ->
+      let json = ListMlflowAppsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListMlflowApps")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMlflowTrackingServers ->
+      let json = ListMlflowTrackingServersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListMlflowTrackingServers")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListModelBiasJobDefinitions ->
       let json = ListModelBiasJobDefinitionsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2506,6 +3942,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListModelBiasJobDefinitions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListModelCardExportJobs ->
+      let json = ListModelCardExportJobsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListModelCardExportJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListModelCardVersions ->
+      let json = ListModelCardVersionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListModelCardVersions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListModelCards ->
+      let json = ListModelCardsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListModelCards")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListModelExplainabilityJobDefinitions ->
       let json = ListModelExplainabilityJobDefinitionsRequest.to_json req in
@@ -2555,6 +4015,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListModels")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMonitoringAlertHistory ->
+      let json = ListMonitoringAlertHistoryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListMonitoringAlertHistory")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMonitoringAlerts ->
+      let json = ListMonitoringAlertsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListMonitoringAlerts")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListMonitoringExecutions ->
       let json = ListMonitoringExecutionsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2587,6 +4063,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListNotebookInstances")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListOptimizationJobs ->
+      let json = ListOptimizationJobsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListOptimizationJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListPartnerApps ->
+      let json = ListPartnerAppsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListPartnerApps")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListPipelineExecutionSteps ->
       let json = ListPipelineExecutionStepsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2611,6 +4103,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListPipelineParametersForExecution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListPipelineVersions ->
+      let json = ListPipelineVersionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListPipelineVersions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListPipelines ->
       let json = ListPipelinesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2634,6 +4134,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListProjects")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListResourceCatalogs ->
+      let json = ListResourceCatalogsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListResourceCatalogs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSpaces ->
+      let json = ListSpacesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListSpaces")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListStageDevices ->
+      let json = ListStageDevicesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListStageDevices")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListStudioLifecycleConfigs ->
       let json = ListStudioLifecycleConfigsRequest.to_json req in
@@ -2677,6 +4201,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "SageMaker.ListTrainingJobsForHyperParameterTuningJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTrainingPlans ->
+      let json = ListTrainingPlansRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListTrainingPlans")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTransformJobs ->
       let json = ListTransformJobsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2700,6 +4232,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.ListTrials")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListUltraServersByReservedCapacity ->
+      let json = ListUltraServersByReservedCapacityRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.ListUltraServersByReservedCapacity")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListUserProfiles ->
       let json = ListUserProfilesRequest.to_json req in
@@ -2773,6 +4313,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.Search")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SearchTrainingPlanOfferings ->
+      let json = SearchTrainingPlanOfferingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.SearchTrainingPlanOfferings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SendPipelineExecutionStepFailure ->
       let json = SendPipelineExecutionStepFailureRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2788,6 +4336,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.SendPipelineExecutionStepSuccess")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartClusterHealthCheck ->
+      let json = StartClusterHealthCheckRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StartClusterHealthCheck")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartEdgeDeploymentStage ->
+      let json = StartEdgeDeploymentStageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StartEdgeDeploymentStage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartInferenceExperiment ->
+      let json = StartInferenceExperimentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StartInferenceExperiment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMlflowTrackingServer ->
+      let json = StartMlflowTrackingServerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StartMlflowTrackingServer")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartMonitoringSchedule ->
       let json = StartMonitoringScheduleRequest.to_json req in
@@ -2813,6 +4393,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.StartPipelineExecution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartSession ->
+      let json = StartSessionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StartSession")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopAIBenchmarkJob ->
+      let json = StopAIBenchmarkJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StopAIBenchmarkJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopAIRecommendationJob ->
+      let json = StopAIRecommendationJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StopAIRecommendationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopAutoMLJob ->
       let json = StopAutoMLJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2828,6 +4432,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.StopCompilationJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopEdgeDeploymentStage ->
+      let json = StopEdgeDeploymentStageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StopEdgeDeploymentStage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopEdgePackagingJob ->
       let json = StopEdgePackagingJobRequest.to_json req in
@@ -2845,6 +4457,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.StopHyperParameterTuningJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopInferenceExperiment ->
+      let json = StopInferenceExperimentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StopInferenceExperiment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopInferenceRecommendationsJob ->
       let json = StopInferenceRecommendationsJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2861,6 +4481,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.StopLabelingJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopMlflowTrackingServer ->
+      let json = StopMlflowTrackingServerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StopMlflowTrackingServer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopMonitoringSchedule ->
       let json = StopMonitoringScheduleRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2876,6 +4504,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.StopNotebookInstance")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopOptimizationJob ->
+      let json = StopOptimizationJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.StopOptimizationJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopPipelineExecution ->
       let json = StopPipelineExecutionRequest.to_json req in
@@ -2933,6 +4569,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.UpdateArtifact")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateCluster ->
+      let json = UpdateClusterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateCluster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateClusterSchedulerConfig ->
+      let json = UpdateClusterSchedulerConfigRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateClusterSchedulerConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateClusterSoftware ->
+      let json = UpdateClusterSoftwareRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateClusterSoftware")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateCodeRepository ->
       let json = UpdateCodeRepositoryInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2940,6 +4600,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.UpdateCodeRepository")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateComputeQuota ->
+      let json = UpdateComputeQuotaRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateComputeQuota")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateContext ->
       let json = UpdateContextRequest.to_json req in
@@ -2997,6 +4665,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.UpdateExperiment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateFeatureGroup ->
+      let json = UpdateFeatureGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateFeatureGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateFeatureMetadata ->
+      let json = UpdateFeatureMetadataRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateFeatureMetadata")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateHub ->
+      let json = UpdateHubRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateHub")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateHubContent ->
+      let json = UpdateHubContentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateHubContent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateHubContentReference ->
+      let json = UpdateHubContentReferenceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateHubContentReference")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateImage ->
       let json = UpdateImageRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -3005,6 +4713,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.UpdateImage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateImageVersion ->
+      let json = UpdateImageVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateImageVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateInferenceComponent ->
+      let json = UpdateInferenceComponentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateInferenceComponent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateInferenceComponentRuntimeConfig ->
+      let json = UpdateInferenceComponentRuntimeConfigInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateInferenceComponentRuntimeConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateInferenceExperiment ->
+      let json = UpdateInferenceExperimentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateInferenceExperiment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateMlflowApp ->
+      let json = UpdateMlflowAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateMlflowApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateMlflowTrackingServer ->
+      let json = UpdateMlflowTrackingServerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateMlflowTrackingServer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateModelCard ->
+      let json = UpdateModelCardRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateModelCard")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateModelPackage ->
       let json = UpdateModelPackageInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -3012,6 +4776,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.UpdateModelPackage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateMonitoringAlert ->
+      let json = UpdateMonitoringAlertRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateMonitoringAlert")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateMonitoringSchedule ->
       let json = UpdateMonitoringScheduleRequest.to_json req in
@@ -3037,6 +4809,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.UpdateNotebookInstanceLifecycleConfig")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdatePartnerApp ->
+      let json = UpdatePartnerAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdatePartnerApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdatePipeline ->
       let json = UpdatePipelineRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -3053,6 +4833,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.UpdatePipelineExecution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdatePipelineVersion ->
+      let json = UpdatePipelineVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdatePipelineVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateProject ->
       let json = UpdateProjectInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -3060,6 +4848,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SageMaker.UpdateProject")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateSpace ->
+      let json = UpdateSpaceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SageMaker.UpdateSpace")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateTrainingJob ->
       let json = UpdateTrainingJobRequest.to_json req in
@@ -3154,12 +4950,82 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateTrialComponentResponse.error_of_json))
+  | AttachClusterNodeVolume ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AttachClusterNodeVolumeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AttachClusterNodeVolumeResponse.error_of_json))
+  | BatchAddClusterNodes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchAddClusterNodesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some BatchAddClusterNodesResponse.error_of_json))
+  | BatchDeleteClusterNodes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchDeleteClusterNodesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteClusterNodesResponse.error_of_json))
   | BatchDescribeModelPackage ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (BatchDescribeModelPackageOutput.of_json json)
       else Error (parse_aws_error None)
+  | BatchRebootClusterNodes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchRebootClusterNodesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchRebootClusterNodesResponse.error_of_json))
+  | BatchReplaceClusterNodes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchReplaceClusterNodesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchReplaceClusterNodesResponse.error_of_json))
+  | CreateAIBenchmarkJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAIBenchmarkJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateAIBenchmarkJobResponse.error_of_json))
+  | CreateAIRecommendationJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAIRecommendationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAIRecommendationJobResponse.error_of_json))
+  | CreateAIWorkloadConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAIWorkloadConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAIWorkloadConfigResponse.error_of_json))
   | CreateAction ->
       if is_success
       then
@@ -3200,6 +5066,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateAutoMLJobResponse.of_json json)
       else
         Error (parse_aws_error (Some CreateAutoMLJobResponse.error_of_json))
+  | CreateAutoMLJobV2 ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAutoMLJobV2Response.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateAutoMLJobV2Response.error_of_json))
+  | CreateCluster ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateClusterResponse.of_json json)
+      else Error (parse_aws_error (Some CreateClusterResponse.error_of_json))
+  | CreateClusterSchedulerConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateClusterSchedulerConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateClusterSchedulerConfigResponse.error_of_json))
   | CreateCodeRepository ->
       if is_success
       then
@@ -3214,6 +5103,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateCompilationJobResponse.error_of_json))
+  | CreateComputeQuota ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateComputeQuotaResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateComputeQuotaResponse.error_of_json))
   | CreateContext ->
       if is_success
       then
@@ -3237,6 +5134,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateDomainResponse.of_json json)
       else Error (parse_aws_error (Some CreateDomainResponse.error_of_json))
+  | CreateEdgeDeploymentPlan ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateEdgeDeploymentPlanResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateEdgeDeploymentPlanResponse.error_of_json))
+  | CreateEdgeDeploymentStage ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateEdgePackagingJob ->
       if is_success then Ok () else Error (parse_aws_error None)
   | CreateEndpoint ->
@@ -3276,6 +5184,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateFlowDefinitionResponse.error_of_json))
+  | CreateHub ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateHubResponse.of_json json)
+      else Error (parse_aws_error (Some CreateHubResponse.error_of_json))
+  | CreateHubContentPresignedUrls ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateHubContentPresignedUrlsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | CreateHubContentReference ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateHubContentReferenceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateHubContentReferenceResponse.error_of_json))
   | CreateHumanTaskUi ->
       if is_success
       then
@@ -3307,6 +5236,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateImageVersionResponse.error_of_json))
+  | CreateInferenceComponent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateInferenceComponentOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateInferenceComponentOutput.error_of_json))
+  | CreateInferenceExperiment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateInferenceExperimentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateInferenceExperimentResponse.error_of_json))
   | CreateInferenceRecommendationsJob ->
       if is_success
       then
@@ -3324,6 +5271,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateLabelingJobResponse.error_of_json))
+  | CreateMlflowApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateMlflowAppResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateMlflowAppResponse.error_of_json))
+  | CreateMlflowTrackingServer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateMlflowTrackingServerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMlflowTrackingServerResponse.error_of_json))
   | CreateModel ->
       if is_success
       then
@@ -3339,6 +5302,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateModelBiasJobDefinitionResponse.error_of_json))
+  | CreateModelCard ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateModelCardResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateModelCardResponse.error_of_json))
+  | CreateModelCardExportJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateModelCardExportJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateModelCardExportJobResponse.error_of_json))
   | CreateModelExplainabilityJobDefinition ->
       if is_success
       then
@@ -3399,6 +5378,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateNotebookInstanceLifecycleConfigOutput.error_of_json))
+  | CreateOptimizationJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateOptimizationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateOptimizationJobResponse.error_of_json))
+  | CreatePartnerApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePartnerAppResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreatePartnerAppResponse.error_of_json))
+  | CreatePartnerAppPresignedUrl ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePartnerAppPresignedUrlResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePartnerAppPresignedUrlResponse.error_of_json))
   | CreatePipeline ->
       if is_success
       then
@@ -3415,6 +5418,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreatePresignedDomainUrlResponse.error_of_json))
+  | CreatePresignedMlflowAppUrl ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePresignedMlflowAppUrlResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePresignedMlflowAppUrlResponse.error_of_json))
+  | CreatePresignedMlflowTrackingServerUrl ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePresignedMlflowTrackingServerUrlResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                CreatePresignedMlflowTrackingServerUrlResponse.error_of_json))
   | CreatePresignedNotebookInstanceUrl ->
       if is_success
       then
@@ -3435,6 +5457,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateProjectOutput.of_json json)
       else Error (parse_aws_error (Some CreateProjectOutput.error_of_json))
+  | CreateSpace ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateSpaceResponse.of_json json)
+      else Error (parse_aws_error (Some CreateSpaceResponse.error_of_json))
   | CreateStudioLifecycleConfig ->
       if is_success
       then
@@ -3452,6 +5480,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateTrainingJobResponse.error_of_json))
+  | CreateTrainingPlan ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateTrainingPlanResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateTrainingPlanResponse.error_of_json))
   | CreateTransformJob ->
       if is_success
       then
@@ -3495,6 +5531,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateWorkteamResponse.of_json json)
       else
         Error (parse_aws_error (Some CreateWorkteamResponse.error_of_json))
+  | DeleteAIBenchmarkJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAIBenchmarkJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteAIBenchmarkJobResponse.error_of_json))
+  | DeleteAIRecommendationJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAIRecommendationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAIRecommendationJobResponse.error_of_json))
+  | DeleteAIWorkloadConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAIWorkloadConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAIWorkloadConfigResponse.error_of_json))
   | DeleteAction ->
       if is_success
       then
@@ -3521,7 +5583,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteAssociationResponse.error_of_json))
+  | DeleteCluster ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteClusterResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteClusterResponse.error_of_json))
+  | DeleteClusterSchedulerConfig ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCodeRepository ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCompilationJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteComputeQuota ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteContext ->
       if is_success
@@ -3534,6 +5608,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteDeviceFleet ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteDomain ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteEdgeDeploymentPlan ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteEdgeDeploymentStage ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteEndpoint ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -3556,6 +5634,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteFlowDefinitionResponse.error_of_json))
+  | DeleteHub -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteHubContent ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteHubContentReference ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteHumanTaskUi ->
       if is_success
       then
@@ -3564,6 +5647,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteHumanTaskUiResponse.error_of_json))
+  | DeleteHyperParameterTuningJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteImage ->
       if is_success
       then
@@ -3578,8 +5663,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteImageVersionResponse.error_of_json))
+  | DeleteInferenceComponent ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteInferenceExperiment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteInferenceExperimentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteInferenceExperimentResponse.error_of_json))
+  | DeleteMlflowApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteMlflowAppResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteMlflowAppResponse.error_of_json))
+  | DeleteMlflowTrackingServer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteMlflowTrackingServerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteMlflowTrackingServerResponse.error_of_json))
   | DeleteModel -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteModelBiasJobDefinition ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteModelCard ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteModelExplainabilityJobDefinition ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -3597,6 +5711,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteNotebookInstanceLifecycleConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteOptimizationJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePartnerApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeletePartnerAppResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeletePartnerAppResponse.error_of_json))
   | DeletePipeline ->
       if is_success
       then
@@ -3604,8 +5727,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeletePipelineResponse.of_json json)
       else
         Error (parse_aws_error (Some DeletePipelineResponse.error_of_json))
+  | DeleteProcessingJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteProject ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSpace -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteStudioLifecycleConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteTags ->
@@ -3614,6 +5740,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteTagsOutput.of_json json)
       else Error (parse_aws_error None)
+  | DeleteTrainingJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteTrial ->
       if is_success
       then
@@ -3645,6 +5773,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some DeleteWorkteamResponse.error_of_json))
   | DeregisterDevices ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DescribeAIBenchmarkJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAIBenchmarkJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAIBenchmarkJobResponse.error_of_json))
+  | DescribeAIRecommendationJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAIRecommendationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAIRecommendationJobResponse.error_of_json))
+  | DescribeAIWorkloadConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAIWorkloadConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAIWorkloadConfigResponse.error_of_json))
   | DescribeAction ->
       if is_success
       then
@@ -3688,6 +5843,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeAutoMLJobResponse.error_of_json))
+  | DescribeAutoMLJobV2 ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAutoMLJobV2Response.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeAutoMLJobV2Response.error_of_json))
+  | DescribeCluster ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeClusterResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeClusterResponse.error_of_json))
+  | DescribeClusterEvent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeClusterEventResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeClusterEventResponse.error_of_json))
+  | DescribeClusterNode ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeClusterNodeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeClusterNodeResponse.error_of_json))
+  | DescribeClusterSchedulerConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeClusterSchedulerConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeClusterSchedulerConfigResponse.error_of_json))
   | DescribeCodeRepository ->
       if is_success
       then
@@ -3703,6 +5898,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeCompilationJobResponse.error_of_json))
+  | DescribeComputeQuota ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeComputeQuotaResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeComputeQuotaResponse.error_of_json))
   | DescribeContext ->
       if is_success
       then
@@ -3741,6 +5944,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeDomainResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeDomainResponse.error_of_json))
+  | DescribeEdgeDeploymentPlan ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeEdgeDeploymentPlanResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEdgeDeploymentPlanResponse.error_of_json))
   | DescribeEdgePackagingJob ->
       if is_success
       then
@@ -3778,6 +5990,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeFeatureGroupResponse.error_of_json))
+  | DescribeFeatureMetadata ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFeatureMetadataResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFeatureMetadataResponse.error_of_json))
   | DescribeFlowDefinition ->
       if is_success
       then
@@ -3787,6 +6008,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeFlowDefinitionResponse.error_of_json))
+  | DescribeHub ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeHubResponse.of_json json)
+      else Error (parse_aws_error (Some DescribeHubResponse.error_of_json))
+  | DescribeHubContent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeHubContentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeHubContentResponse.error_of_json))
   | DescribeHumanTaskUi ->
       if is_success
       then
@@ -3818,6 +6053,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeImageVersionResponse.error_of_json))
+  | DescribeInferenceComponent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeInferenceComponentOutput.of_json json)
+      else Error (parse_aws_error None)
+  | DescribeInferenceExperiment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeInferenceExperimentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInferenceExperimentResponse.error_of_json))
   | DescribeInferenceRecommendationsJob ->
       if is_success
       then
@@ -3843,6 +6093,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeLineageGroupResponse.error_of_json))
+  | DescribeMlflowApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMlflowAppResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeMlflowAppResponse.error_of_json))
+  | DescribeMlflowTrackingServer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMlflowTrackingServerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMlflowTrackingServerResponse.error_of_json))
   | DescribeModel ->
       if is_success
       then
@@ -3858,6 +6125,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeModelBiasJobDefinitionResponse.error_of_json))
+  | DescribeModelCard ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeModelCardResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeModelCardResponse.error_of_json))
+  | DescribeModelCardExportJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeModelCardExportJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeModelCardExportJobResponse.error_of_json))
   | DescribeModelExplainabilityJobDefinition ->
       if is_success
       then
@@ -3910,6 +6194,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeNotebookInstanceLifecycleConfigOutput.of_json json)
       else Error (parse_aws_error None)
+  | DescribeOptimizationJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeOptimizationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeOptimizationJobResponse.error_of_json))
+  | DescribePartnerApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribePartnerAppResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribePartnerAppResponse.error_of_json))
   | DescribePipeline ->
       if is_success
       then
@@ -3950,6 +6251,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeProjectOutput.of_json json)
       else Error (parse_aws_error None)
+  | DescribeReservedCapacity ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeReservedCapacityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeReservedCapacityResponse.error_of_json))
+  | DescribeSpace ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeSpaceResponse.of_json json)
+      else Error (parse_aws_error (Some DescribeSpaceResponse.error_of_json))
   | DescribeStudioLifecycleConfig ->
       if is_success
       then
@@ -3973,6 +6289,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeTrainingJobResponse.error_of_json))
+  | DescribeTrainingPlan ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeTrainingPlanResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeTrainingPlanResponse.error_of_json))
+  | DescribeTrainingPlanExtensionHistory ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeTrainingPlanExtensionHistoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTrainingPlanExtensionHistoryResponse.error_of_json))
   | DescribeTransformJob ->
       if is_success
       then
@@ -4016,6 +6349,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeWorkteamResponse.of_json json)
       else Error (parse_aws_error None)
+  | DetachClusterNodeVolume ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetachClusterNodeVolumeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DetachClusterNodeVolumeResponse.error_of_json))
   | DisableSagemakerServicecatalogPortfolio ->
       if is_success
       then
@@ -4037,6 +6379,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (EnableSagemakerServicecatalogPortfolioOutput.of_json json)
       else Error (parse_aws_error None)
+  | ExtendTrainingPlan ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExtendTrainingPlanResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ExtendTrainingPlanResponse.error_of_json))
   | GetDeviceFleetReport ->
       if is_success
       then
@@ -4063,11 +6413,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetSagemakerServicecatalogPortfolioStatusOutput.of_json json)
       else Error (parse_aws_error None)
+  | GetScalingConfigurationRecommendation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetScalingConfigurationRecommendationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetScalingConfigurationRecommendationResponse.error_of_json))
   | GetSearchSuggestions ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetSearchSuggestionsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ImportHubContent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportHubContentResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ImportHubContentResponse.error_of_json))
+  | ListAIBenchmarkJobs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAIBenchmarkJobsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListAIRecommendationJobs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAIRecommendationJobsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListAIWorkloadConfigs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAIWorkloadConfigsResponse.of_json json)
       else Error (parse_aws_error None)
   | ListActions ->
       if is_success
@@ -4081,6 +6466,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListAlgorithmsOutput.of_json json)
       else Error (parse_aws_error None)
+  | ListAliases ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAliasesResponse.of_json json)
+      else Error (parse_aws_error (Some ListAliasesResponse.error_of_json))
   | ListAppImageConfigs ->
       if is_success
       then
@@ -4121,6 +6512,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListCandidatesForAutoMLJobResponse.error_of_json))
+  | ListClusterEvents ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListClusterEventsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListClusterEventsResponse.error_of_json))
+  | ListClusterNodes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListClusterNodesResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListClusterNodesResponse.error_of_json))
+  | ListClusterSchedulerConfigs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListClusterSchedulerConfigsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListClusters ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListClustersResponse.of_json json)
+      else Error (parse_aws_error None)
   | ListCodeRepositories ->
       if is_success
       then
@@ -4132,6 +6550,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListCompilationJobsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListComputeQuotas ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListComputeQuotasResponse.of_json json)
       else Error (parse_aws_error None)
   | ListContexts ->
       if is_success
@@ -4162,6 +6586,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListDomainsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListEdgeDeploymentPlans ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListEdgeDeploymentPlansResponse.of_json json)
       else Error (parse_aws_error None)
   | ListEdgePackagingJobs ->
       if is_success
@@ -4199,6 +6629,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListFlowDefinitionsResponse.of_json json)
       else Error (parse_aws_error None)
+  | ListHubContentVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListHubContentVersionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListHubContentVersionsResponse.error_of_json))
+  | ListHubContents ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListHubContentsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListHubContentsResponse.error_of_json))
+  | ListHubs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListHubsResponse.of_json json)
+      else Error (parse_aws_error None)
   | ListHumanTaskUis ->
       if is_success
       then
@@ -4225,6 +6677,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListImagesResponse.of_json json)
       else Error (parse_aws_error None)
+  | ListInferenceComponents ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInferenceComponentsOutput.of_json json)
+      else Error (parse_aws_error None)
+  | ListInferenceExperiments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInferenceExperimentsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListInferenceRecommendationsJobSteps ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInferenceRecommendationsJobStepsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListInferenceRecommendationsJobStepsResponse.error_of_json))
   | ListInferenceRecommendationsJobs ->
       if is_success
       then
@@ -4252,11 +6725,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListLineageGroupsResponse.of_json json)
       else Error (parse_aws_error None)
+  | ListMlflowApps ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMlflowAppsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListMlflowTrackingServers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMlflowTrackingServersResponse.of_json json)
+      else Error (parse_aws_error None)
   | ListModelBiasJobDefinitions ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListModelBiasJobDefinitionsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListModelCardExportJobs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListModelCardExportJobsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListModelCardVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListModelCardVersionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListModelCardVersionsResponse.error_of_json))
+  | ListModelCards ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListModelCardsResponse.of_json json)
       else Error (parse_aws_error None)
   | ListModelExplainabilityJobDefinitions ->
       if is_success
@@ -4294,6 +6799,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListModelsOutput.of_json json)
       else Error (parse_aws_error None)
+  | ListMonitoringAlertHistory ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMonitoringAlertHistoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMonitoringAlertHistoryResponse.error_of_json))
+  | ListMonitoringAlerts ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMonitoringAlertsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListMonitoringAlertsResponse.error_of_json))
   | ListMonitoringExecutions ->
       if is_success
       then
@@ -4317,6 +6839,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListNotebookInstancesOutput.of_json json)
+      else Error (parse_aws_error None)
+  | ListOptimizationJobs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListOptimizationJobsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListPartnerApps ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPartnerAppsResponse.of_json json)
       else Error (parse_aws_error None)
   | ListPipelineExecutionSteps ->
       if is_success
@@ -4345,6 +6879,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListPipelineParametersForExecutionResponse.error_of_json))
+  | ListPipelineVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPipelineVersionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListPipelineVersionsResponse.error_of_json))
   | ListPipelines ->
       if is_success
       then
@@ -4362,6 +6904,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListProjectsOutput.of_json json)
+      else Error (parse_aws_error None)
+  | ListResourceCatalogs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListResourceCatalogsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListSpaces ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSpacesResponse.of_json json)
+      else Error (parse_aws_error None)
+  | ListStageDevices ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListStageDevicesResponse.of_json json)
       else Error (parse_aws_error None)
   | ListStudioLifecycleConfigs ->
       if is_success
@@ -4400,6 +6960,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListTrainingJobsForHyperParameterTuningJobResponse.error_of_json))
+  | ListTrainingPlans ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTrainingPlansResponse.of_json json)
+      else Error (parse_aws_error None)
   | ListTransformJobs ->
       if is_success
       then
@@ -4420,6 +6986,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListTrialsResponse.of_json json)
       else Error (parse_aws_error (Some ListTrialsResponse.error_of_json))
+  | ListUltraServersByReservedCapacity ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListUltraServersByReservedCapacityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListUltraServersByReservedCapacityResponse.error_of_json))
   | ListUserProfiles ->
       if is_success
       then
@@ -4443,7 +7018,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (PutModelPackageGroupPolicyOutput.of_json json)
-      else Error (parse_aws_error None)
+      else
+        Error
+          (parse_aws_error
+             (Some PutModelPackageGroupPolicyOutput.error_of_json))
   | QueryLineage ->
       if is_success
       then
@@ -4474,6 +7052,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (SearchResponse.of_json json)
       else Error (parse_aws_error None)
+  | SearchTrainingPlanOfferings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SearchTrainingPlanOfferingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some SearchTrainingPlanOfferingsResponse.error_of_json))
   | SendPipelineExecutionStepFailure ->
       if is_success
       then
@@ -4492,6 +7079,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some SendPipelineExecutionStepSuccessResponse.error_of_json))
+  | StartClusterHealthCheck ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartClusterHealthCheckResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartClusterHealthCheckResponse.error_of_json))
+  | StartEdgeDeploymentStage ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | StartInferenceExperiment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartInferenceExperimentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartInferenceExperimentResponse.error_of_json))
+  | StartMlflowTrackingServer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMlflowTrackingServerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMlflowTrackingServerResponse.error_of_json))
   | StartMonitoringSchedule ->
       if is_success then Ok () else Error (parse_aws_error None)
   | StartNotebookInstance ->
@@ -4505,21 +7121,66 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartPipelineExecutionResponse.error_of_json))
+  | StartSession ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartSessionResponse.of_json json)
+      else Error (parse_aws_error (Some StartSessionResponse.error_of_json))
+  | StopAIBenchmarkJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopAIBenchmarkJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StopAIBenchmarkJobResponse.error_of_json))
+  | StopAIRecommendationJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopAIRecommendationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopAIRecommendationJobResponse.error_of_json))
   | StopAutoMLJob ->
       if is_success then Ok () else Error (parse_aws_error None)
   | StopCompilationJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | StopEdgeDeploymentStage ->
       if is_success then Ok () else Error (parse_aws_error None)
   | StopEdgePackagingJob ->
       if is_success then Ok () else Error (parse_aws_error None)
   | StopHyperParameterTuningJob ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | StopInferenceExperiment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopInferenceExperimentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopInferenceExperimentResponse.error_of_json))
   | StopInferenceRecommendationsJob ->
       if is_success then Ok () else Error (parse_aws_error None)
   | StopLabelingJob ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | StopMlflowTrackingServer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopMlflowTrackingServerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopMlflowTrackingServerResponse.error_of_json))
   | StopMonitoringSchedule ->
       if is_success then Ok () else Error (parse_aws_error None)
   | StopNotebookInstance ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | StopOptimizationJob ->
       if is_success then Ok () else Error (parse_aws_error None)
   | StopPipelineExecution ->
       if is_success
@@ -4556,12 +7217,45 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateArtifactResponse.of_json json)
       else
         Error (parse_aws_error (Some UpdateArtifactResponse.error_of_json))
+  | UpdateCluster ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateClusterResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateClusterResponse.error_of_json))
+  | UpdateClusterSchedulerConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateClusterSchedulerConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateClusterSchedulerConfigResponse.error_of_json))
+  | UpdateClusterSoftware ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateClusterSoftwareResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateClusterSoftwareResponse.error_of_json))
   | UpdateCodeRepository ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateCodeRepositoryOutput.of_json json)
-      else Error (parse_aws_error None)
+      else
+        Error
+          (parse_aws_error (Some UpdateCodeRepositoryOutput.error_of_json))
+  | UpdateComputeQuota ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateComputeQuotaResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateComputeQuotaResponse.error_of_json))
   | UpdateContext ->
       if is_success
       then
@@ -4600,18 +7294,117 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateExperimentResponse.of_json json)
       else
         Error (parse_aws_error (Some UpdateExperimentResponse.error_of_json))
+  | UpdateFeatureGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateFeatureGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateFeatureGroupResponse.error_of_json))
+  | UpdateFeatureMetadata ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateHub ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateHubResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateHubResponse.error_of_json))
+  | UpdateHubContent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateHubContentResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateHubContentResponse.error_of_json))
+  | UpdateHubContentReference ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateHubContentReferenceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateHubContentReferenceResponse.error_of_json))
   | UpdateImage ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateImageResponse.of_json json)
       else Error (parse_aws_error (Some UpdateImageResponse.error_of_json))
+  | UpdateImageVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateImageVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateImageVersionResponse.error_of_json))
+  | UpdateInferenceComponent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateInferenceComponentOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateInferenceComponentOutput.error_of_json))
+  | UpdateInferenceComponentRuntimeConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateInferenceComponentRuntimeConfigOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateInferenceComponentRuntimeConfigOutput.error_of_json))
+  | UpdateInferenceExperiment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateInferenceExperimentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateInferenceExperimentResponse.error_of_json))
+  | UpdateMlflowApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateMlflowAppResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateMlflowAppResponse.error_of_json))
+  | UpdateMlflowTrackingServer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateMlflowTrackingServerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateMlflowTrackingServerResponse.error_of_json))
+  | UpdateModelCard ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateModelCardResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateModelCardResponse.error_of_json))
   | UpdateModelPackage ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateModelPackageOutput.of_json json)
-      else Error (parse_aws_error None)
+      else
+        Error (parse_aws_error (Some UpdateModelPackageOutput.error_of_json))
+  | UpdateMonitoringAlert ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateMonitoringAlertResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateMonitoringAlertResponse.error_of_json))
   | UpdateMonitoringSchedule ->
       if is_success
       then
@@ -4638,6 +7431,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateNotebookInstanceLifecycleConfigOutput.error_of_json))
+  | UpdatePartnerApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdatePartnerAppResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdatePartnerAppResponse.error_of_json))
   | UpdatePipeline ->
       if is_success
       then
@@ -4654,12 +7454,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdatePipelineExecutionResponse.error_of_json))
+  | UpdatePipelineVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdatePipelineVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdatePipelineVersionResponse.error_of_json))
   | UpdateProject ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateProjectOutput.of_json json)
-      else Error (parse_aws_error None)
+      else Error (parse_aws_error (Some UpdateProjectOutput.error_of_json))
+  | UpdateSpace ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSpaceResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateSpaceResponse.error_of_json))
   | UpdateTrainingJob ->
       if is_success
       then
@@ -4695,7 +7509,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateWorkforceResponse.of_json json)
-      else Error (parse_aws_error None)
+      else
+        Error (parse_aws_error (Some UpdateWorkforceResponse.error_of_json))
   | UpdateWorkteam ->
       if is_success
       then

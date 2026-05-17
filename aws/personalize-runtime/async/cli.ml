@@ -28,6 +28,33 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let get_action_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and campaignArn =
+         flag "campaign-arn" (optional string) ~doc:"STRING Arn"
+       and userId = flag "user-id" (optional string) ~doc:"STRING UserID"
+       and numResults =
+         flag "num-results" (optional int) ~doc:"INT NumResults"
+       and filterArn = flag "filter-arn" (optional string) ~doc:"STRING Arn"
+       and filterValues =
+         flag "filter-values" (optional json_arg) ~doc:"JSON FilterValues" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_action_recommendations
+           (Values.GetActionRecommendationsRequest.make ?campaignArn ?userId
+              ?numResults ?filterArn
+              ?filterValues:(Option.map ~f:Values.FilterValues.of_json
+                               filterValues) ())
+           (Some Values.GetActionRecommendationsResponse.to_json)
+           (Some Values.GetActionRecommendationsResponse.error_to_json)])
 let get_personalized_ranking =
   Command.async ~summary:""
     ([%map_open.Command
@@ -42,6 +69,9 @@ let get_personalized_ranking =
        and filterArn = flag "filter-arn" (optional string) ~doc:"STRING Arn"
        and filterValues =
          flag "filter-values" (optional json_arg) ~doc:"JSON FilterValues"
+       and metadataColumns =
+         flag "metadata-columns" (optional json_arg)
+           ~doc:"JSON MetadataColumns"
        and campaignArn =
          flag "campaign-arn" (required string) ~doc:"STRING Arn"
        and inputList =
@@ -54,7 +84,9 @@ let get_personalized_ranking =
               ?context:(Option.map ~f:Values.Context.of_json context)
               ?filterArn
               ?filterValues:(Option.map ~f:Values.FilterValues.of_json
-                               filterValues) ~campaignArn
+                               filterValues)
+              ?metadataColumns:(Option.map ~f:Values.MetadataColumns.of_json
+                                  metadataColumns) ~campaignArn
               ~inputList:(Values.InputList.of_json inputList) ~userId ())
            (Some Values.GetPersonalizedRankingResponse.to_json)
            (Some Values.GetPersonalizedRankingResponse.error_to_json)])
@@ -79,7 +111,12 @@ let get_recommendations =
        and filterValues =
          flag "filter-values" (optional json_arg) ~doc:"JSON FilterValues"
        and recommenderArn =
-         flag "recommender-arn" (optional string) ~doc:"STRING Arn" in
+         flag "recommender-arn" (optional string) ~doc:"STRING Arn"
+       and promotions =
+         flag "promotions" (optional json_arg) ~doc:"JSON PromotionList"
+       and metadataColumns =
+         flag "metadata-columns" (optional json_arg)
+           ~doc:"JSON MetadataColumns" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_recommendations
@@ -88,11 +125,16 @@ let get_recommendations =
               ?context:(Option.map ~f:Values.Context.of_json context)
               ?filterArn
               ?filterValues:(Option.map ~f:Values.FilterValues.of_json
-                               filterValues) ?recommenderArn ())
+                               filterValues) ?recommenderArn
+              ?promotions:(Option.map ~f:Values.PromotionList.of_json
+                             promotions)
+              ?metadataColumns:(Option.map ~f:Values.MetadataColumns.of_json
+                                  metadataColumns) ())
            (Some Values.GetRecommendationsResponse.to_json)
            (Some Values.GetRecommendationsResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("get-personalized-ranking", get_personalized_ranking);
+    [("get-action-recommendations", get_action_recommendations);
+    ("get-personalized-ranking", get_personalized_ranking);
     ("get-recommendations", get_recommendations)]

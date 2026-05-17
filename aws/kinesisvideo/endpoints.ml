@@ -6,19 +6,47 @@ type ('i, 'o, 'e) t =
   CreateSignalingChannelOutput.t, CreateSignalingChannelOutput.error) t 
   | CreateStream: (CreateStreamInput.t, CreateStreamOutput.t,
   CreateStreamOutput.error) t 
+  | DeleteEdgeConfiguration: (DeleteEdgeConfigurationInput.t,
+  DeleteEdgeConfigurationOutput.t, DeleteEdgeConfigurationOutput.error) t 
   | DeleteSignalingChannel: (DeleteSignalingChannelInput.t,
   DeleteSignalingChannelOutput.t, DeleteSignalingChannelOutput.error) t 
   | DeleteStream: (DeleteStreamInput.t, DeleteStreamOutput.t,
   DeleteStreamOutput.error) t 
+  | DescribeEdgeConfiguration: (DescribeEdgeConfigurationInput.t,
+  DescribeEdgeConfigurationOutput.t, DescribeEdgeConfigurationOutput.error) t
+  
+  | DescribeImageGenerationConfiguration:
+  (DescribeImageGenerationConfigurationInput.t,
+  DescribeImageGenerationConfigurationOutput.t,
+  DescribeImageGenerationConfigurationOutput.error) t 
+  | DescribeMappedResourceConfiguration:
+  (DescribeMappedResourceConfigurationInput.t,
+  DescribeMappedResourceConfigurationOutput.t,
+  DescribeMappedResourceConfigurationOutput.error) t 
+  | DescribeMediaStorageConfiguration:
+  (DescribeMediaStorageConfigurationInput.t,
+  DescribeMediaStorageConfigurationOutput.t,
+  DescribeMediaStorageConfigurationOutput.error) t 
+  | DescribeNotificationConfiguration:
+  (DescribeNotificationConfigurationInput.t,
+  DescribeNotificationConfigurationOutput.t,
+  DescribeNotificationConfigurationOutput.error) t 
   | DescribeSignalingChannel: (DescribeSignalingChannelInput.t,
   DescribeSignalingChannelOutput.t, DescribeSignalingChannelOutput.error) t 
   | DescribeStream: (DescribeStreamInput.t, DescribeStreamOutput.t,
   DescribeStreamOutput.error) t 
+  | DescribeStreamStorageConfiguration:
+  (DescribeStreamStorageConfigurationInput.t,
+  DescribeStreamStorageConfigurationOutput.t,
+  DescribeStreamStorageConfigurationOutput.error) t 
   | GetDataEndpoint: (GetDataEndpointInput.t, GetDataEndpointOutput.t,
   GetDataEndpointOutput.error) t 
   | GetSignalingChannelEndpoint: (GetSignalingChannelEndpointInput.t,
   GetSignalingChannelEndpointOutput.t,
   GetSignalingChannelEndpointOutput.error) t 
+  | ListEdgeAgentConfigurations: (ListEdgeAgentConfigurationsInput.t,
+  ListEdgeAgentConfigurationsOutput.t,
+  ListEdgeAgentConfigurationsOutput.error) t 
   | ListSignalingChannels: (ListSignalingChannelsInput.t,
   ListSignalingChannelsOutput.t, ListSignalingChannelsOutput.error) t 
   | ListStreams: (ListStreamsInput.t, ListStreamsOutput.t,
@@ -27,6 +55,9 @@ type ('i, 'o, 'e) t =
   ListTagsForResourceOutput.t, ListTagsForResourceOutput.error) t 
   | ListTagsForStream: (ListTagsForStreamInput.t, ListTagsForStreamOutput.t,
   ListTagsForStreamOutput.error) t 
+  | StartEdgeConfigurationUpdate: (StartEdgeConfigurationUpdateInput.t,
+  StartEdgeConfigurationUpdateOutput.t,
+  StartEdgeConfigurationUpdateOutput.error) t 
   | TagResource: (TagResourceInput.t, TagResourceOutput.t,
   TagResourceOutput.error) t 
   | TagStream: (TagStreamInput.t, TagStreamOutput.t, TagStreamOutput.error) t
@@ -37,47 +68,95 @@ type ('i, 'o, 'e) t =
   UntagStreamOutput.error) t 
   | UpdateDataRetention: (UpdateDataRetentionInput.t,
   UpdateDataRetentionOutput.t, UpdateDataRetentionOutput.error) t 
+  | UpdateImageGenerationConfiguration:
+  (UpdateImageGenerationConfigurationInput.t,
+  UpdateImageGenerationConfigurationOutput.t,
+  UpdateImageGenerationConfigurationOutput.error) t 
+  | UpdateMediaStorageConfiguration: (UpdateMediaStorageConfigurationInput.t,
+  UpdateMediaStorageConfigurationOutput.t,
+  UpdateMediaStorageConfigurationOutput.error) t 
+  | UpdateNotificationConfiguration: (UpdateNotificationConfigurationInput.t,
+  UpdateNotificationConfigurationOutput.t,
+  UpdateNotificationConfigurationOutput.error) t 
   | UpdateSignalingChannel: (UpdateSignalingChannelInput.t,
   UpdateSignalingChannelOutput.t, UpdateSignalingChannelOutput.error) t 
   | UpdateStream: (UpdateStreamInput.t, UpdateStreamOutput.t,
   UpdateStreamOutput.error) t 
+  | UpdateStreamStorageConfiguration:
+  (UpdateStreamStorageConfigurationInput.t,
+  UpdateStreamStorageConfigurationOutput.t,
+  UpdateStreamStorageConfigurationOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateSignalingChannel -> `POST
   | CreateStream -> `POST
+  | DeleteEdgeConfiguration -> `POST
   | DeleteSignalingChannel -> `POST
   | DeleteStream -> `POST
+  | DescribeEdgeConfiguration -> `POST
+  | DescribeImageGenerationConfiguration -> `POST
+  | DescribeMappedResourceConfiguration -> `POST
+  | DescribeMediaStorageConfiguration -> `POST
+  | DescribeNotificationConfiguration -> `POST
   | DescribeSignalingChannel -> `POST
   | DescribeStream -> `POST
+  | DescribeStreamStorageConfiguration -> `POST
   | GetDataEndpoint -> `POST
   | GetSignalingChannelEndpoint -> `POST
+  | ListEdgeAgentConfigurations -> `POST
   | ListSignalingChannels -> `POST
   | ListStreams -> `POST
   | ListTagsForResource -> `POST
   | ListTagsForStream -> `POST
+  | StartEdgeConfigurationUpdate -> `POST
   | TagResource -> `POST
   | TagStream -> `POST
   | UntagResource -> `POST
   | UntagStream -> `POST
   | UpdateDataRetention -> `POST
+  | UpdateImageGenerationConfiguration -> `POST
+  | UpdateMediaStorageConfiguration -> `POST
+  | UpdateNotificationConfiguration -> `POST
   | UpdateSignalingChannel -> `POST
   | UpdateStream -> `POST
+  | UpdateStreamStorageConfiguration -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateSignalingChannel ->
           (Format.kasprintf Uri.of_string) "/createSignalingChannel"
       | CreateStream -> (Format.kasprintf Uri.of_string) "/createStream"
+      | DeleteEdgeConfiguration ->
+          (Format.kasprintf Uri.of_string) "/deleteEdgeConfiguration"
       | DeleteSignalingChannel ->
           (Format.kasprintf Uri.of_string) "/deleteSignalingChannel"
       | DeleteStream -> (Format.kasprintf Uri.of_string) "/deleteStream"
+      | DescribeEdgeConfiguration ->
+          (Format.kasprintf Uri.of_string) "/describeEdgeConfiguration"
+      | DescribeImageGenerationConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/describeImageGenerationConfiguration"
+      | DescribeMappedResourceConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/describeMappedResourceConfiguration"
+      | DescribeMediaStorageConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/describeMediaStorageConfiguration"
+      | DescribeNotificationConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/describeNotificationConfiguration"
       | DescribeSignalingChannel ->
           (Format.kasprintf Uri.of_string) "/describeSignalingChannel"
       | DescribeStream -> (Format.kasprintf Uri.of_string) "/describeStream"
+      | DescribeStreamStorageConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/describeStreamStorageConfiguration"
       | GetDataEndpoint ->
           (Format.kasprintf Uri.of_string) "/getDataEndpoint"
       | GetSignalingChannelEndpoint ->
           (Format.kasprintf Uri.of_string) "/getSignalingChannelEndpoint"
+      | ListEdgeAgentConfigurations ->
+          (Format.kasprintf Uri.of_string) "/listEdgeAgentConfigurations"
       | ListSignalingChannels ->
           (Format.kasprintf Uri.of_string) "/listSignalingChannels"
       | ListStreams -> (Format.kasprintf Uri.of_string) "/listStreams"
@@ -85,15 +164,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/ListTagsForResource"
       | ListTagsForStream ->
           (Format.kasprintf Uri.of_string) "/listTagsForStream"
+      | StartEdgeConfigurationUpdate ->
+          (Format.kasprintf Uri.of_string) "/startEdgeConfigurationUpdate"
       | TagResource -> (Format.kasprintf Uri.of_string) "/TagResource"
       | TagStream -> (Format.kasprintf Uri.of_string) "/tagStream"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/UntagResource"
       | UntagStream -> (Format.kasprintf Uri.of_string) "/untagStream"
       | UpdateDataRetention ->
           (Format.kasprintf Uri.of_string) "/updateDataRetention"
+      | UpdateImageGenerationConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/updateImageGenerationConfiguration"
+      | UpdateMediaStorageConfiguration ->
+          (Format.kasprintf Uri.of_string) "/updateMediaStorageConfiguration"
+      | UpdateNotificationConfiguration ->
+          (Format.kasprintf Uri.of_string) "/updateNotificationConfiguration"
       | UpdateSignalingChannel ->
           (Format.kasprintf Uri.of_string) "/updateSignalingChannel"
-      | UpdateStream -> (Format.kasprintf Uri.of_string) "/updateStream")
+      | UpdateStream -> (Format.kasprintf Uri.of_string) "/updateStream"
+      | UpdateStreamStorageConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/updateStreamStorageConfiguration")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -152,7 +243,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("DataRetentionInHours",
                                 (DataRetentionInHours.to_value x)));
                       Option.map req.CreateStreamInput.tags
-                        ~f:(fun x -> ("Tags", (ResourceTags.to_value x)))])
+                        ~f:(fun x -> ("Tags", (ResourceTags.to_value x)));
+                      Option.map
+                        req.CreateStreamInput.streamStorageConfiguration
+                        ~f:(fun x ->
+                              ("StreamStorageConfiguration",
+                                (StreamStorageConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteEdgeConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.DeleteEdgeConfigurationInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map req.DeleteEdgeConfigurationInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -205,6 +321,125 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeEdgeConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeEdgeConfigurationInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map req.DescribeEdgeConfigurationInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeImageGenerationConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeImageGenerationConfigurationInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map
+                        req.DescribeImageGenerationConfigurationInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeMappedResourceConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeMappedResourceConfigurationInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map
+                        req.DescribeMappedResourceConfigurationInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)));
+                      Option.map
+                        req.DescribeMappedResourceConfigurationInput.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (MappedResourceConfigurationListLimit.to_value
+                                   x)));
+                      Option.map
+                        req.DescribeMappedResourceConfigurationInput.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeMediaStorageConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeMediaStorageConfigurationInput.channelName
+                         ~f:(fun x ->
+                               ("ChannelName", (ChannelName.to_value x)));
+                      Option.map
+                        req.DescribeMediaStorageConfigurationInput.channelARN
+                        ~f:(fun x -> ("ChannelARN", (ResourceARN.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeNotificationConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeNotificationConfigurationInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map
+                        req.DescribeNotificationConfigurationInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeSignalingChannel ->
       let (headers, body) =
         let headers =
@@ -239,6 +474,28 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.DescribeStreamInput.streamName
                          ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
                       Option.map req.DescribeStreamInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeStreamStorageConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeStreamStorageConfigurationInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map
+                        req.DescribeStreamStorageConfigurationInput.streamARN
                         ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -289,6 +546,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("SingleMasterChannelEndpointConfiguration",
                                 (SingleMasterChannelEndpointConfiguration.to_value
                                    x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListEdgeAgentConfigurations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("HubDeviceArn",
+                           (HubDeviceArn.to_value
+                              req.ListEdgeAgentConfigurationsInput.hubDeviceArn));
+                      Option.map
+                        req.ListEdgeAgentConfigurationsInput.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (ListEdgeAgentConfigurationsInputLimit.to_value
+                                   x)));
+                      Option.map
+                        req.ListEdgeAgentConfigurationsInput.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -386,6 +672,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)));
                       Option.map req.ListTagsForStreamInput.streamName
                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartEdgeConfigurationUpdate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.StartEdgeConfigurationUpdateInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map
+                        req.StartEdgeConfigurationUpdateInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)));
+                      Some
+                        ("EdgeConfig",
+                          (EdgeConfig.to_value
+                             req.StartEdgeConfigurationUpdateInput.edgeConfig))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -519,6 +831,84 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateImageGenerationConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateImageGenerationConfigurationInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map
+                        req.UpdateImageGenerationConfigurationInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)));
+                      Option.map
+                        req.UpdateImageGenerationConfigurationInput.imageGenerationConfiguration
+                        ~f:(fun x ->
+                              ("ImageGenerationConfiguration",
+                                (ImageGenerationConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateMediaStorageConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ChannelARN",
+                           (ResourceARN.to_value
+                              req.UpdateMediaStorageConfigurationInput.channelARN));
+                      Some
+                        ("MediaStorageConfiguration",
+                          (MediaStorageConfiguration.to_value
+                             req.UpdateMediaStorageConfigurationInput.mediaStorageConfiguration))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateNotificationConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateNotificationConfigurationInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map
+                        req.UpdateNotificationConfigurationInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)));
+                      Option.map
+                        req.UpdateNotificationConfigurationInput.notificationConfiguration
+                        ~f:(fun x ->
+                              ("NotificationConfiguration",
+                                (NotificationConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateSignalingChannel ->
       let (headers, body) =
         let headers =
@@ -569,6 +959,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("DeviceName", (DeviceName.to_value x)));
                       Option.map req.UpdateStreamInput.mediaType
                         ~f:(fun x -> ("MediaType", (MediaType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateStreamStorageConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateStreamStorageConfigurationInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map
+                        req.UpdateStreamStorageConfigurationInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)));
+                      Some
+                        ("CurrentVersion",
+                          (Version.to_value
+                             req.UpdateStreamStorageConfigurationInput.currentVersion));
+                      Some
+                        ("StreamStorageConfiguration",
+                          (StreamStorageConfiguration.to_value
+                             req.UpdateStreamStorageConfigurationInput.streamStorageConfiguration))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -634,6 +1054,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateStreamOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateStreamOutput.error_of_json))
+  | DeleteEdgeConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteEdgeConfigurationOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteEdgeConfigurationOutput.error_of_json))
   | DeleteSignalingChannel ->
       if is_success
       then
@@ -650,6 +1079,54 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteStreamOutput.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeleteStreamOutput.error_of_json))
+  | DescribeEdgeConfiguration ->
+      if is_success
+      then
+        Ok (DescribeEdgeConfigurationOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEdgeConfigurationOutput.error_of_json))
+  | DescribeImageGenerationConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeImageGenerationConfigurationOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeImageGenerationConfigurationOutput.error_of_json))
+  | DescribeMappedResourceConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeMappedResourceConfigurationOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMappedResourceConfigurationOutput.error_of_json))
+  | DescribeMediaStorageConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeMediaStorageConfigurationOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMediaStorageConfigurationOutput.error_of_json))
+  | DescribeNotificationConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeNotificationConfigurationOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeNotificationConfigurationOutput.error_of_json))
   | DescribeSignalingChannel ->
       if is_success
       then
@@ -662,6 +1139,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DescribeStreamOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DescribeStreamOutput.error_of_json))
+  | DescribeStreamStorageConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeStreamStorageConfigurationOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeStreamStorageConfigurationOutput.error_of_json))
   | GetDataEndpoint ->
       if is_success
       then Ok (GetDataEndpointOutput.of_json (response_to_json resp))
@@ -675,6 +1162,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetSignalingChannelEndpointOutput.error_of_json))
+  | ListEdgeAgentConfigurations ->
+      if is_success
+      then
+        Ok
+          (ListEdgeAgentConfigurationsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListEdgeAgentConfigurationsOutput.error_of_json))
   | ListSignalingChannels ->
       if is_success
       then Ok (ListSignalingChannelsOutput.of_json (response_to_json resp))
@@ -696,6 +1192,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListTagsForStreamOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListTagsForStreamOutput.error_of_json))
+  | StartEdgeConfigurationUpdate ->
+      if is_success
+      then
+        Ok
+          (StartEdgeConfigurationUpdateOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartEdgeConfigurationUpdateOutput.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -733,6 +1238,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateDataRetentionOutput.error_of_json))
+  | UpdateImageGenerationConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateImageGenerationConfigurationOutput.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateImageGenerationConfigurationOutput.error_of_json))
+  | UpdateMediaStorageConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateMediaStorageConfigurationOutput.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateMediaStorageConfigurationOutput.error_of_json))
+  | UpdateNotificationConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateNotificationConfigurationOutput.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateNotificationConfigurationOutput.error_of_json))
   | UpdateSignalingChannel ->
       if is_success
       then
@@ -749,3 +1290,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UpdateStreamOutput.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UpdateStreamOutput.error_of_json))
+  | UpdateStreamStorageConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateStreamStorageConfigurationOutput.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateStreamStorageConfigurationOutput.error_of_json))

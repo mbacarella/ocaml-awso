@@ -46,6 +46,88 @@ module AWSAccountId =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "An Amazon Web Services account ID. This ID is a 12-digit number that you use to construct Amazon Resource Names (ARNs) for resources."]
+module ErrorMessage =
+  struct
+    type nonrec t = string[@@ocaml.doc "A detailed error message."]
+    let context_ = "ErrorMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "A detailed error message."]
+module ErrorCode =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorCode" j
+    let to_json = simple_to_json to_value
+  end
+module AccessPointAlreadyOwnedByYou =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "An error code indicating that an access point with that name already exists in the Amazon Web Services Region in your Amazon Web Services account."];
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An access point with that name already exists in the Amazon Web Services Region in your Amazon Web Services account."]
+module AccessPointPolicy =
+  struct
+    type nonrec t = string
+    let context_ = "AccessPointPolicy"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccessPointPolicy" j
+    let to_json = simple_to_json to_value
+  end
 module ResourceARN =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -148,40 +230,24 @@ module ActiveDirectoryBackupAttributes =
           (Xml.child xml_arg0 "DomainName") in
       make ?resourceARN ?activeDirectoryId ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       let activeDirectoryId =
-        field_map json "ActiveDirectoryId" DirectoryId.of_json in
+        field_map json__ "ActiveDirectoryId" DirectoryId.of_json in
       let domainName =
-        field_map json "DomainName" ActiveDirectoryFullyQualifiedName.of_json in
+        field_map json__ "DomainName"
+          ActiveDirectoryFullyQualifiedName.of_json in
       make ?resourceARN ?activeDirectoryId ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Microsoft Active Directory attributes of the Amazon FSx for Windows File Server file system."]
-module ErrorMessage =
-  struct
-    type nonrec t = string[@@ocaml.doc "A detailed error message."]
-    let context_ = "ErrorMessage"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "A detailed error message."]
 module ActiveDirectoryErrorType =
   struct
     type nonrec t =
       | DOMAIN_NOT_FOUND 
       | INCOMPATIBLE_DOMAIN_MODE 
       | WRONG_VPC 
+      | INVALID_NETWORK_TYPE 
       | INVALID_DOMAIN_STAGE 
       | Non_static_id of string 
     let make i = i
@@ -190,6 +256,7 @@ module ActiveDirectoryErrorType =
       | DOMAIN_NOT_FOUND -> "DOMAIN_NOT_FOUND"
       | INCOMPATIBLE_DOMAIN_MODE -> "INCOMPATIBLE_DOMAIN_MODE"
       | WRONG_VPC -> "WRONG_VPC"
+      | INVALID_NETWORK_TYPE -> "INVALID_NETWORK_TYPE"
       | INVALID_DOMAIN_STAGE -> "INVALID_DOMAIN_STAGE"
       | Non_static_id s -> s
     let of_string =
@@ -197,6 +264,7 @@ module ActiveDirectoryErrorType =
       | "DOMAIN_NOT_FOUND" -> DOMAIN_NOT_FOUND
       | "INCOMPATIBLE_DOMAIN_MODE" -> INCOMPATIBLE_DOMAIN_MODE
       | "WRONG_VPC" -> WRONG_VPC
+      | "INVALID_NETWORK_TYPE" -> INVALID_NETWORK_TYPE
       | "INVALID_DOMAIN_STAGE" -> INVALID_DOMAIN_STAGE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
@@ -213,21 +281,19 @@ module ActiveDirectoryError =
   struct
     type nonrec t =
       {
-      activeDirectoryId: DirectoryId.t
+      activeDirectoryId: DirectoryId.t option
         [@ocaml.doc
           "The directory ID of the directory that an error pertains to."];
       type_: ActiveDirectoryErrorType.t option
         [@ocaml.doc "The type of Active Directory error."];
       message: ErrorMessage.t option }
-    let context_ = "ActiveDirectoryError"
-    let make ?type_ =
-      fun ?message ->
-        fun ~activeDirectoryId ->
-          fun () -> { type_; message; activeDirectoryId }
+    let make ?activeDirectoryId =
+      fun ?type_ ->
+        fun ?message -> fun () -> { activeDirectoryId; type_; message }
     let to_value x =
       structure_to_value
         [("ActiveDirectoryId",
-           (Some (DirectoryId.to_value x.activeDirectoryId)));
+           (Option.map x.activeDirectoryId ~f:DirectoryId.to_value));
         ("Type", (Option.map x.type_ ~f:ActiveDirectoryErrorType.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
@@ -238,16 +304,16 @@ module ActiveDirectoryError =
         (Option.map ~f:ActiveDirectoryErrorType.of_xml)
           (Xml.child xml_arg0 "Type") in
       let activeDirectoryId =
-        DirectoryId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActiveDirectoryId") in
-      make ?message ?type_ ~activeDirectoryId ()
+        (Option.map ~f:DirectoryId.of_xml)
+          (Xml.child xml_arg0 "ActiveDirectoryId") in
+      make ?message ?type_ ?activeDirectoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let type_ = field_map json "Type" ActiveDirectoryErrorType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let type_ = field_map json__ "Type" ActiveDirectoryErrorType.of_json in
       let activeDirectoryId =
-        field_map_exn json "ActiveDirectoryId" DirectoryId.of_json in
-      make ?message ?type_ ~activeDirectoryId ()
+        field_map json__ "ActiveDirectoryId" DirectoryId.of_json in
+      make ?message ?type_ ?activeDirectoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An Active Directory error."]
 module AdminPassword =
@@ -452,9 +518,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies a key-value pair for a resource tag."]
@@ -466,6 +532,9 @@ module Tags =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -504,6 +573,27 @@ module VolumePath =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"VolumePath" j
+    let to_json = simple_to_json to_value
+  end
+module SnapshotId =
+  struct
+    type nonrec t = string
+    let context_ = "SnapshotId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:11) >>=
+             (fun () ->
+                (check_string_max i ~max:28) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^((fs)?volsnap-[0-9a-f]{8,})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnapshotId" j
     let to_json = simple_to_json to_value
   end
 module ReadOnly =
@@ -563,11 +653,11 @@ module OpenZFSUserOrGroupQuota =
       {
       type_: OpenZFSQuotaType.t
         [@ocaml.doc
-          "A value that specifies whether the quota applies to a user or group."];
-      id: IntegerNoMax.t [@ocaml.doc "The ID of the user or group."];
+          "Specifies whether the quota applies to a user or group."];
+      id: IntegerNoMax.t
+        [@ocaml.doc "The ID of the user or group that the quota applies to."];
       storageCapacityQuotaGiB: IntegerNoMax.t
-        [@ocaml.doc
-          "The amount of storage that the user or group can use in gibibytes (GiB)."]}
+        [@ocaml.doc "The user or group's storage quota, in gibibytes (GiB)."]}
     let context_ = "OpenZFSUserOrGroupQuota"
     let make ~type_ =
       fun ~id ->
@@ -591,20 +681,23 @@ module OpenZFSUserOrGroupQuota =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~storageCapacityQuotaGiB ~id ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let storageCapacityQuotaGiB =
-        field_map_exn json "StorageCapacityQuotaGiB" IntegerNoMax.of_json in
-      let id = field_map_exn json "Id" IntegerNoMax.of_json in
-      let type_ = field_map_exn json "Type" OpenZFSQuotaType.of_json in
+        field_map_exn json__ "StorageCapacityQuotaGiB" IntegerNoMax.of_json in
+      let id = field_map_exn json__ "Id" IntegerNoMax.of_json in
+      let type_ = field_map_exn json__ "Type" OpenZFSQuotaType.of_json in
       make ~storageCapacityQuotaGiB ~id ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration for how much storage a user or group can use on the volume."]
+       "Used to configure quotas that define how much storage a user or group can use on an FSx for OpenZFS volume. For more information, see Volume properties in the FSx for OpenZFS User Guide."]
 module OpenZFSUserAndGroupQuotas =
   struct
     type nonrec t = OpenZFSUserOrGroupQuota.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+      let open Result in ok_or_failwith (check_list_max i ~max:500); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpenZFSUserOrGroupQuota.to_value)) |>
         (fun x -> `List x)
@@ -632,17 +725,20 @@ module OpenZFSCopyStrategy =
     type nonrec t =
       | CLONE 
       | FULL_COPY 
+      | INCREMENTAL_COPY 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | CLONE -> "CLONE"
       | FULL_COPY -> "FULL_COPY"
+      | INCREMENTAL_COPY -> "INCREMENTAL_COPY"
       | Non_static_id s -> s
     let of_string =
       function
       | "CLONE" -> CLONE
       | "FULL_COPY" -> FULL_COPY
+      | "INCREMENTAL_COPY" -> INCREMENTAL_COPY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -660,7 +756,7 @@ module OpenZFSOriginSnapshotConfiguration =
       snapshotARN: ResourceARN.t option ;
       copyStrategy: OpenZFSCopyStrategy.t option
         [@ocaml.doc
-          "The strategy used when copying data from the snapshot to the new volume. CLONE - The new volume references the data in the origin snapshot. Cloning a snapshot is faster than copying the data from a snapshot to a new volume and doesn't consume disk throughput. However, the origin snapshot can't be deleted if there is a volume using its copied data. FULL_COPY - Copies all data from the snapshot to the new volume."]}
+          "The strategy used when copying data from the snapshot to the new volume. CLONE - The new volume references the data in the origin snapshot. Cloning a snapshot is faster than copying the data from a snapshot to a new volume and doesn't consume disk throughput. However, the origin snapshot can't be deleted if there is a volume using its copied data. FULL_COPY - Copies all data from the snapshot to the new volume. The INCREMENTAL_COPY option is only for updating an existing volume by using a snapshot from another FSx for OpenZFS file system. For more information, see CopySnapshotAndUpdateVolume."]}
     let make ?snapshotARN =
       fun ?copyStrategy -> fun () -> { snapshotARN; copyStrategy }
     let to_value x =
@@ -677,14 +773,14 @@ module OpenZFSOriginSnapshotConfiguration =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "SnapshotARN") in
       make ?copyStrategy ?snapshotARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let copyStrategy =
-        field_map json "CopyStrategy" OpenZFSCopyStrategy.of_json in
-      let snapshotARN = field_map json "SnapshotARN" ResourceARN.of_json in
+        field_map json__ "CopyStrategy" OpenZFSCopyStrategy.of_json in
+      let snapshotARN = field_map json__ "SnapshotARN" ResourceARN.of_json in
       make ?copyStrategy ?snapshotARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The snapshot configuration to use when creating an OpenZFS volume from a snapshot."]
+       "The snapshot configuration used when creating an Amazon FSx for OpenZFS volume from a snapshot."]
 module OpenZFSNfsExportOption =
   struct
     type nonrec t = string
@@ -713,6 +809,9 @@ module OpenZFSNfsExportOptions =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpenZFSNfsExportOption.to_value)) |>
         (fun x -> `List x)
@@ -781,10 +880,10 @@ module OpenZFSClientConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Clients") in
       make ~options ~clients ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let options =
-        field_map_exn json "Options" OpenZFSNfsExportOptions.of_json in
-      let clients = field_map_exn json "Clients" OpenZFSClients.of_json in
+        field_map_exn json__ "Options" OpenZFSNfsExportOptions.of_json in
+      let clients = field_map_exn json__ "Clients" OpenZFSClients.of_json in
       make ~options ~clients ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -794,6 +893,9 @@ module OpenZFSClientConfigurations =
     type nonrec t = OpenZFSClientConfiguration.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:25); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpenZFSClientConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -837,9 +939,9 @@ module OpenZFSNfsExport =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientConfigurations") in
       make ~clientConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientConfigurations =
-        field_map_exn json "ClientConfigurations"
+        field_map_exn json__ "ClientConfigurations"
           OpenZFSClientConfigurations.of_json in
       make ~clientConfigurations ()
     let to_json v = composed_to_json to_value v
@@ -850,6 +952,9 @@ module OpenZFSNfsExports =
     type nonrec t = OpenZFSNfsExport.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpenZFSNfsExport.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -908,7 +1013,7 @@ module IntegerRecordSizeKiB =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:1024) >>= (fun () -> check_int_min i ~min:4));
+          ((check_int_max i ~max:4096) >>= (fun () -> check_int_min i ~min:4));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -947,7 +1052,7 @@ module OpenZFSVolumeConfiguration =
           "The amount of storage in gibibytes (GiB) to reserve from the parent volume. You can't reserve more storage than the parent volume has reserved."];
       storageCapacityQuotaGiB: IntegerNoMax.t option
         [@ocaml.doc
-          "The maximum amount of storage in gibibtyes (GiB) that the volume can use from its parent. You can specify a quota larger than the storage on the parent volume."];
+          "The maximum amount of storage in gibibytes (GiB) that the volume can use from its parent. You can specify a quota larger than the storage on the parent volume."];
       recordSizeKiB: IntegerRecordSizeKiB.t option
         [@ocaml.doc
           "The record size of an OpenZFS volume, in kibibytes (KiB). Valid values are 4, 8, 16, 32, 64, 128, 256, 512, or 1024 KiB. The default is 128 KiB. Most workloads should use the default record size. For guidance on when to set a custom record size, see the Amazon FSx for OpenZFS User Guide."];
@@ -968,7 +1073,26 @@ module OpenZFSVolumeConfiguration =
           "The configuration object for mounting a Network File System (NFS) file system."];
       userAndGroupQuotas: OpenZFSUserAndGroupQuotas.t option
         [@ocaml.doc
-          "An object specifying how much storage users or groups can use on the volume."]}
+          "An object specifying how much storage users or groups can use on the volume."];
+      restoreToSnapshot: SnapshotId.t option
+        [@ocaml.doc
+          "Specifies the ID of the snapshot to which the volume was restored."];
+      deleteIntermediateSnaphots: Flag.t option
+        [@ocaml.doc
+          "A Boolean value indicating whether snapshots between the current state and the specified snapshot should be deleted when a volume is restored from snapshot."];
+      deleteClonedVolumes: Flag.t option
+        [@ocaml.doc
+          "A Boolean value indicating whether dependent clone volumes created from intermediate snapshots should be deleted when a volume is restored from snapshot."];
+      deleteIntermediateData: Flag.t option
+        [@ocaml.doc
+          "A Boolean value indicating whether snapshot data that differs between the current state and the specified snapshot should be overwritten when a volume is restored from a snapshot."];
+      sourceSnapshotARN: ResourceARN.t option ;
+      destinationSnapshot: SnapshotId.t option
+        [@ocaml.doc
+          "The ID of the snapshot that's being copied or was most recently copied to the destination volume."];
+      copyStrategy: OpenZFSCopyStrategy.t option
+        [@ocaml.doc
+          "Specifies the strategy used when copying data from the snapshot to the new volume. CLONE - The new volume references the data in the origin snapshot. Cloning a snapshot is faster than copying data from the snapshot to a new volume and doesn't consume disk throughput. However, the origin snapshot can't be deleted if there is a volume using its copied data. FULL_COPY - Copies all data from the snapshot to the new volume. Specify this option to create the volume from a snapshot on another FSx for OpenZFS file system. The INCREMENTAL_COPY option is only for updating an existing volume by using a snapshot from another FSx for OpenZFS file system. For more information, see CopySnapshotAndUpdateVolume."]}
     let make ?parentVolumeId =
       fun ?volumePath ->
         fun ?storageCapacityReservationGiB ->
@@ -980,20 +1104,34 @@ module OpenZFSVolumeConfiguration =
                     fun ?readOnly ->
                       fun ?nfsExports ->
                         fun ?userAndGroupQuotas ->
-                          fun () ->
-                            {
-                              parentVolumeId;
-                              volumePath;
-                              storageCapacityReservationGiB;
-                              storageCapacityQuotaGiB;
-                              recordSizeKiB;
-                              dataCompressionType;
-                              copyTagsToSnapshots;
-                              originSnapshot;
-                              readOnly;
-                              nfsExports;
-                              userAndGroupQuotas
-                            }
+                          fun ?restoreToSnapshot ->
+                            fun ?deleteIntermediateSnaphots ->
+                              fun ?deleteClonedVolumes ->
+                                fun ?deleteIntermediateData ->
+                                  fun ?sourceSnapshotARN ->
+                                    fun ?destinationSnapshot ->
+                                      fun ?copyStrategy ->
+                                        fun () ->
+                                          {
+                                            parentVolumeId;
+                                            volumePath;
+                                            storageCapacityReservationGiB;
+                                            storageCapacityQuotaGiB;
+                                            recordSizeKiB;
+                                            dataCompressionType;
+                                            copyTagsToSnapshots;
+                                            originSnapshot;
+                                            readOnly;
+                                            nfsExports;
+                                            userAndGroupQuotas;
+                                            restoreToSnapshot;
+                                            deleteIntermediateSnaphots;
+                                            deleteClonedVolumes;
+                                            deleteIntermediateData;
+                                            sourceSnapshotARN;
+                                            destinationSnapshot;
+                                            copyStrategy
+                                          }
     let to_value x =
       structure_to_value
         [("ParentVolumeId",
@@ -1019,9 +1157,44 @@ module OpenZFSVolumeConfiguration =
           (Option.map x.nfsExports ~f:OpenZFSNfsExports.to_value));
         ("UserAndGroupQuotas",
           (Option.map x.userAndGroupQuotas
-             ~f:OpenZFSUserAndGroupQuotas.to_value))]
+             ~f:OpenZFSUserAndGroupQuotas.to_value));
+        ("RestoreToSnapshot",
+          (Option.map x.restoreToSnapshot ~f:SnapshotId.to_value));
+        ("DeleteIntermediateSnaphots",
+          (Option.map x.deleteIntermediateSnaphots ~f:Flag.to_value));
+        ("DeleteClonedVolumes",
+          (Option.map x.deleteClonedVolumes ~f:Flag.to_value));
+        ("DeleteIntermediateData",
+          (Option.map x.deleteIntermediateData ~f:Flag.to_value));
+        ("SourceSnapshotARN",
+          (Option.map x.sourceSnapshotARN ~f:ResourceARN.to_value));
+        ("DestinationSnapshot",
+          (Option.map x.destinationSnapshot ~f:SnapshotId.to_value));
+        ("CopyStrategy",
+          (Option.map x.copyStrategy ~f:OpenZFSCopyStrategy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let copyStrategy =
+        (Option.map ~f:OpenZFSCopyStrategy.of_xml)
+          (Xml.child xml_arg0 "CopyStrategy") in
+      let destinationSnapshot =
+        (Option.map ~f:SnapshotId.of_xml)
+          (Xml.child xml_arg0 "DestinationSnapshot") in
+      let sourceSnapshotARN =
+        (Option.map ~f:ResourceARN.of_xml)
+          (Xml.child xml_arg0 "SourceSnapshotARN") in
+      let deleteIntermediateData =
+        (Option.map ~f:Flag.of_xml)
+          (Xml.child xml_arg0 "DeleteIntermediateData") in
+      let deleteClonedVolumes =
+        (Option.map ~f:Flag.of_xml)
+          (Xml.child xml_arg0 "DeleteClonedVolumes") in
+      let deleteIntermediateSnaphots =
+        (Option.map ~f:Flag.of_xml)
+          (Xml.child xml_arg0 "DeleteIntermediateSnaphots") in
+      let restoreToSnapshot =
+        (Option.map ~f:SnapshotId.of_xml)
+          (Xml.child xml_arg0 "RestoreToSnapshot") in
       let userAndGroupQuotas =
         (Option.map ~f:OpenZFSUserAndGroupQuotas.of_xml)
           (Xml.child xml_arg0 "UserAndGroupQuotas") in
@@ -1052,38 +1225,101 @@ module OpenZFSVolumeConfiguration =
         (Option.map ~f:VolumePath.of_xml) (Xml.child xml_arg0 "VolumePath") in
       let parentVolumeId =
         (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "ParentVolumeId") in
-      make ?userAndGroupQuotas ?nfsExports ?readOnly ?originSnapshot
-        ?copyTagsToSnapshots ?dataCompressionType ?recordSizeKiB
-        ?storageCapacityQuotaGiB ?storageCapacityReservationGiB ?volumePath
-        ?parentVolumeId ()
+      make ?copyStrategy ?destinationSnapshot ?sourceSnapshotARN
+        ?deleteIntermediateData ?deleteClonedVolumes
+        ?deleteIntermediateSnaphots ?restoreToSnapshot ?userAndGroupQuotas
+        ?nfsExports ?readOnly ?originSnapshot ?copyTagsToSnapshots
+        ?dataCompressionType ?recordSizeKiB ?storageCapacityQuotaGiB
+        ?storageCapacityReservationGiB ?volumePath ?parentVolumeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let copyStrategy =
+        field_map json__ "CopyStrategy" OpenZFSCopyStrategy.of_json in
+      let destinationSnapshot =
+        field_map json__ "DestinationSnapshot" SnapshotId.of_json in
+      let sourceSnapshotARN =
+        field_map json__ "SourceSnapshotARN" ResourceARN.of_json in
+      let deleteIntermediateData =
+        field_map json__ "DeleteIntermediateData" Flag.of_json in
+      let deleteClonedVolumes =
+        field_map json__ "DeleteClonedVolumes" Flag.of_json in
+      let deleteIntermediateSnaphots =
+        field_map json__ "DeleteIntermediateSnaphots" Flag.of_json in
+      let restoreToSnapshot =
+        field_map json__ "RestoreToSnapshot" SnapshotId.of_json in
       let userAndGroupQuotas =
-        field_map json "UserAndGroupQuotas" OpenZFSUserAndGroupQuotas.of_json in
-      let nfsExports = field_map json "NfsExports" OpenZFSNfsExports.of_json in
-      let readOnly = field_map json "ReadOnly" ReadOnly.of_json in
+        field_map json__ "UserAndGroupQuotas"
+          OpenZFSUserAndGroupQuotas.of_json in
+      let nfsExports =
+        field_map json__ "NfsExports" OpenZFSNfsExports.of_json in
+      let readOnly = field_map json__ "ReadOnly" ReadOnly.of_json in
       let originSnapshot =
-        field_map json "OriginSnapshot"
+        field_map json__ "OriginSnapshot"
           OpenZFSOriginSnapshotConfiguration.of_json in
       let copyTagsToSnapshots =
-        field_map json "CopyTagsToSnapshots" Flag.of_json in
+        field_map json__ "CopyTagsToSnapshots" Flag.of_json in
       let dataCompressionType =
-        field_map json "DataCompressionType"
+        field_map json__ "DataCompressionType"
           OpenZFSDataCompressionType.of_json in
       let recordSizeKiB =
-        field_map json "RecordSizeKiB" IntegerRecordSizeKiB.of_json in
+        field_map json__ "RecordSizeKiB" IntegerRecordSizeKiB.of_json in
       let storageCapacityQuotaGiB =
-        field_map json "StorageCapacityQuotaGiB" IntegerNoMax.of_json in
+        field_map json__ "StorageCapacityQuotaGiB" IntegerNoMax.of_json in
       let storageCapacityReservationGiB =
-        field_map json "StorageCapacityReservationGiB" IntegerNoMax.of_json in
-      let volumePath = field_map json "VolumePath" VolumePath.of_json in
-      let parentVolumeId = field_map json "ParentVolumeId" VolumeId.of_json in
-      make ?userAndGroupQuotas ?nfsExports ?readOnly ?originSnapshot
-        ?copyTagsToSnapshots ?dataCompressionType ?recordSizeKiB
-        ?storageCapacityQuotaGiB ?storageCapacityReservationGiB ?volumePath
-        ?parentVolumeId ()
+        field_map json__ "StorageCapacityReservationGiB" IntegerNoMax.of_json in
+      let volumePath = field_map json__ "VolumePath" VolumePath.of_json in
+      let parentVolumeId = field_map json__ "ParentVolumeId" VolumeId.of_json in
+      make ?copyStrategy ?destinationSnapshot ?sourceSnapshotARN
+        ?deleteIntermediateData ?deleteClonedVolumes
+        ?deleteIntermediateSnaphots ?restoreToSnapshot ?userAndGroupQuotas
+        ?nfsExports ?readOnly ?originSnapshot ?copyTagsToSnapshots
+        ?dataCompressionType ?recordSizeKiB ?storageCapacityQuotaGiB
+        ?storageCapacityReservationGiB ?volumePath ?parentVolumeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration of an Amazon FSx for OpenZFS volume."]
+module VolumeStyle =
+  struct
+    type nonrec t =
+      | FLEXVOL 
+      | FLEXGROUP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FLEXVOL -> "FLEXVOL"
+      | FLEXGROUP -> "FLEXGROUP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FLEXVOL" -> FLEXVOL
+      | "FLEXGROUP" -> FLEXGROUP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration VolumeStyle" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VolumeStyle" j)
+    let to_json = simple_to_json to_value
+  end
+module VolumeCapacityBytes =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:22517998000000000L) >>=
+             (fun () -> check_int64_min i ~min:0L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module VolumeCapacity =
   struct
     type nonrec t = int
@@ -1198,10 +1434,10 @@ module TieringPolicy =
           (Xml.child xml_arg0 "CoolingPeriod") in
       make ?name ?coolingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" TieringPolicyName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" TieringPolicyName.of_json in
       let coolingPeriod =
-        field_map json "CoolingPeriod" CoolingPeriod.of_json in
+        field_map json__ "CoolingPeriod" CoolingPeriod.of_json in
       make ?name ?coolingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1226,6 +1462,401 @@ module StorageVirtualMachineId =
     let of_json j = string_of_json ~kind:"StorageVirtualMachineId" j
     let to_json = simple_to_json to_value
   end
+module SnapshotPolicy =
+  struct
+    type nonrec t = string
+    let context_ = "SnapshotPolicy"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnapshotPolicy" j
+    let to_json = simple_to_json to_value
+  end
+module SnaplockType =
+  struct
+    type nonrec t =
+      | COMPLIANCE 
+      | ENTERPRISE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMPLIANCE -> "COMPLIANCE"
+      | ENTERPRISE -> "ENTERPRISE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMPLIANCE" -> COMPLIANCE
+      | "ENTERPRISE" -> ENTERPRISE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SnaplockType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SnaplockType" j)
+    let to_json = simple_to_json to_value
+  end
+module RetentionPeriodValue =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RetentionPeriodValue" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RetentionPeriodType =
+  struct
+    type nonrec t =
+      | SECONDS 
+      | MINUTES 
+      | HOURS 
+      | DAYS 
+      | MONTHS 
+      | YEARS 
+      | INFINITE 
+      | UNSPECIFIED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SECONDS -> "SECONDS"
+      | MINUTES -> "MINUTES"
+      | HOURS -> "HOURS"
+      | DAYS -> "DAYS"
+      | MONTHS -> "MONTHS"
+      | YEARS -> "YEARS"
+      | INFINITE -> "INFINITE"
+      | UNSPECIFIED -> "UNSPECIFIED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SECONDS" -> SECONDS
+      | "MINUTES" -> MINUTES
+      | "HOURS" -> HOURS
+      | "DAYS" -> DAYS
+      | "MONTHS" -> MONTHS
+      | "YEARS" -> YEARS
+      | "INFINITE" -> INFINITE
+      | "UNSPECIFIED" -> UNSPECIFIED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RetentionPeriodType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RetentionPeriodType" j)
+    let to_json = simple_to_json to_value
+  end
+module RetentionPeriod =
+  struct
+    type nonrec t =
+      {
+      type_: RetentionPeriodType.t
+        [@ocaml.doc
+          "Defines the type of time for the retention period of an FSx for ONTAP SnapLock volume. Set it to one of the valid types. If you set it to INFINITE, the files are retained forever. If you set it to UNSPECIFIED, the files are retained until you set an explicit retention period."];
+      value: RetentionPeriodValue.t option
+        [@ocaml.doc
+          "Defines the amount of time for the retention period of an FSx for ONTAP SnapLock volume. You can't set a value for INFINITE or UNSPECIFIED. For all other options, the following ranges are valid: Seconds: 0 - 65,535 Minutes: 0 - 65,535 Hours: 0 - 24 Days: 0 - 365 Months: 0 - 12 Years: 0 - 100"]}
+    let context_ = "RetentionPeriod"
+    let make ?value = fun ~type_ -> fun () -> { value; type_ }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (RetentionPeriodType.to_value x.type_)));
+        ("Value", (Option.map x.value ~f:RetentionPeriodValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:RetentionPeriodValue.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      let type_ =
+        RetentionPeriodType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" RetentionPeriodValue.of_json in
+      let type_ = field_map_exn json__ "Type" RetentionPeriodType.of_json in
+      make ?value ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the retention period of an FSx for ONTAP SnapLock volume. After it is set, it can't be changed. Files can't be deleted or modified during the retention period. For more information, see Working with the retention period in SnapLock."]
+module SnaplockRetentionPeriod =
+  struct
+    type nonrec t =
+      {
+      defaultRetention: RetentionPeriod.t
+        [@ocaml.doc
+          "The retention period assigned to a write once, read many (WORM) file by default if an explicit retention period is not set for an FSx for ONTAP SnapLock volume. The default retention period must be greater than or equal to the minimum retention period and less than or equal to the maximum retention period."];
+      minimumRetention: RetentionPeriod.t
+        [@ocaml.doc
+          "The shortest retention period that can be assigned to a WORM file on an FSx for ONTAP SnapLock volume."];
+      maximumRetention: RetentionPeriod.t
+        [@ocaml.doc
+          "The longest retention period that can be assigned to a WORM file on an FSx for ONTAP SnapLock volume."]}
+    let context_ = "SnaplockRetentionPeriod"
+    let make ~defaultRetention =
+      fun ~minimumRetention ->
+        fun ~maximumRetention ->
+          fun () -> { defaultRetention; minimumRetention; maximumRetention }
+    let to_value x =
+      structure_to_value
+        [("DefaultRetention",
+           (Some (RetentionPeriod.to_value x.defaultRetention)));
+        ("MinimumRetention",
+          (Some (RetentionPeriod.to_value x.minimumRetention)));
+        ("MaximumRetention",
+          (Some (RetentionPeriod.to_value x.maximumRetention)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maximumRetention =
+        RetentionPeriod.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MaximumRetention") in
+      let minimumRetention =
+        RetentionPeriod.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MinimumRetention") in
+      let defaultRetention =
+        RetentionPeriod.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DefaultRetention") in
+      make ~maximumRetention ~minimumRetention ~defaultRetention ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maximumRetention =
+        field_map_exn json__ "MaximumRetention" RetentionPeriod.of_json in
+      let minimumRetention =
+        field_map_exn json__ "MinimumRetention" RetentionPeriod.of_json in
+      let defaultRetention =
+        field_map_exn json__ "DefaultRetention" RetentionPeriod.of_json in
+      make ~maximumRetention ~minimumRetention ~defaultRetention ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration to set the retention period of an FSx for ONTAP SnapLock volume. The retention period includes default, maximum, and minimum settings. For more information, see Working with the retention period in SnapLock."]
+module PrivilegedDelete =
+  struct
+    type nonrec t =
+      | DISABLED 
+      | ENABLED 
+      | PERMANENTLY_DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DISABLED -> "DISABLED"
+      | ENABLED -> "ENABLED"
+      | PERMANENTLY_DISABLED -> "PERMANENTLY_DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DISABLED" -> DISABLED
+      | "ENABLED" -> ENABLED
+      | "PERMANENTLY_DISABLED" -> PERMANENTLY_DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PrivilegedDelete" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PrivilegedDelete" j)
+    let to_json = simple_to_json to_value
+  end
+module AutocommitPeriodValue =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AutocommitPeriodValue" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AutocommitPeriodType =
+  struct
+    type nonrec t =
+      | MINUTES 
+      | HOURS 
+      | DAYS 
+      | MONTHS 
+      | YEARS 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MINUTES -> "MINUTES"
+      | HOURS -> "HOURS"
+      | DAYS -> "DAYS"
+      | MONTHS -> "MONTHS"
+      | YEARS -> "YEARS"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MINUTES" -> MINUTES
+      | "HOURS" -> HOURS
+      | "DAYS" -> DAYS
+      | "MONTHS" -> MONTHS
+      | "YEARS" -> YEARS
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutocommitPeriodType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AutocommitPeriodType" j)
+    let to_json = simple_to_json to_value
+  end
+module AutocommitPeriod =
+  struct
+    type nonrec t =
+      {
+      type_: AutocommitPeriodType.t
+        [@ocaml.doc
+          "Defines the type of time for the autocommit period of a file in an FSx for ONTAP SnapLock volume. Setting this value to NONE disables autocommit. The default value is NONE."];
+      value: AutocommitPeriodValue.t option
+        [@ocaml.doc
+          "Defines the amount of time for the autocommit period of a file in an FSx for ONTAP SnapLock volume. The following ranges are valid: Minutes: 5 - 65,535 Hours: 1 - 65,535 Days: 1 - 3,650 Months: 1 - 120 Years: 1 - 10"]}
+    let context_ = "AutocommitPeriod"
+    let make ?value = fun ~type_ -> fun () -> { value; type_ }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (AutocommitPeriodType.to_value x.type_)));
+        ("Value", (Option.map x.value ~f:AutocommitPeriodValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:AutocommitPeriodValue.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      let type_ =
+        AutocommitPeriodType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" AutocommitPeriodValue.of_json in
+      let type_ = field_map_exn json__ "Type" AutocommitPeriodType.of_json in
+      make ?value ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the autocommit period of files in an FSx for ONTAP SnapLock volume, which determines how long the files must remain unmodified before they're automatically transitioned to the write once, read many (WORM) state. For more information, see Autocommit."]
+module SnaplockConfiguration =
+  struct
+    type nonrec t =
+      {
+      auditLogVolume: Flag.t option
+        [@ocaml.doc
+          "Enables or disables the audit log volume for an FSx for ONTAP SnapLock volume. The default value is false. If you set AuditLogVolume to true, the SnapLock volume is created as an audit log volume. The minimum retention period for an audit log volume is six months. For more information, see SnapLock audit log volumes."];
+      autocommitPeriod: AutocommitPeriod.t option
+        [@ocaml.doc
+          "The configuration object for setting the autocommit period of files in an FSx for ONTAP SnapLock volume."];
+      privilegedDelete: PrivilegedDelete.t option
+        [@ocaml.doc
+          "Enables, disables, or permanently disables privileged delete on an FSx for ONTAP SnapLock Enterprise volume. Enabling privileged delete allows SnapLock administrators to delete write once, read many (WORM) files even if they have active retention periods. PERMANENTLY_DISABLED is a terminal state. If privileged delete is permanently disabled on a SnapLock volume, you can't re-enable it. The default value is DISABLED. For more information, see Privileged delete."];
+      retentionPeriod: SnaplockRetentionPeriod.t option
+        [@ocaml.doc
+          "Specifies the retention period of an FSx for ONTAP SnapLock volume."];
+      snaplockType: SnaplockType.t option
+        [@ocaml.doc
+          "Specifies the retention mode of an FSx for ONTAP SnapLock volume. After it is set, it can't be changed. You can choose one of the following retention modes: COMPLIANCE: Files transitioned to write once, read many (WORM) on a Compliance volume can't be deleted until their retention periods expire. This retention mode is used to address government or industry-specific mandates or to protect against ransomware attacks. For more information, see SnapLock Compliance. ENTERPRISE: Files transitioned to WORM on an Enterprise volume can be deleted by authorized users before their retention periods expire using privileged delete. This retention mode is used to advance an organization's data integrity and internal compliance or to test retention settings before using SnapLock Compliance. For more information, see SnapLock Enterprise."];
+      volumeAppendModeEnabled: Flag.t option
+        [@ocaml.doc
+          "Enables or disables volume-append mode on an FSx for ONTAP SnapLock volume. Volume-append mode allows you to create WORM-appendable files and write data to them incrementally. The default value is false. For more information, see Volume-append mode."]}
+    let make ?auditLogVolume =
+      fun ?autocommitPeriod ->
+        fun ?privilegedDelete ->
+          fun ?retentionPeriod ->
+            fun ?snaplockType ->
+              fun ?volumeAppendModeEnabled ->
+                fun () ->
+                  {
+                    auditLogVolume;
+                    autocommitPeriod;
+                    privilegedDelete;
+                    retentionPeriod;
+                    snaplockType;
+                    volumeAppendModeEnabled
+                  }
+    let to_value x =
+      structure_to_value
+        [("AuditLogVolume", (Option.map x.auditLogVolume ~f:Flag.to_value));
+        ("AutocommitPeriod",
+          (Option.map x.autocommitPeriod ~f:AutocommitPeriod.to_value));
+        ("PrivilegedDelete",
+          (Option.map x.privilegedDelete ~f:PrivilegedDelete.to_value));
+        ("RetentionPeriod",
+          (Option.map x.retentionPeriod ~f:SnaplockRetentionPeriod.to_value));
+        ("SnaplockType",
+          (Option.map x.snaplockType ~f:SnaplockType.to_value));
+        ("VolumeAppendModeEnabled",
+          (Option.map x.volumeAppendModeEnabled ~f:Flag.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let volumeAppendModeEnabled =
+        (Option.map ~f:Flag.of_xml)
+          (Xml.child xml_arg0 "VolumeAppendModeEnabled") in
+      let snaplockType =
+        (Option.map ~f:SnaplockType.of_xml)
+          (Xml.child xml_arg0 "SnaplockType") in
+      let retentionPeriod =
+        (Option.map ~f:SnaplockRetentionPeriod.of_xml)
+          (Xml.child xml_arg0 "RetentionPeriod") in
+      let privilegedDelete =
+        (Option.map ~f:PrivilegedDelete.of_xml)
+          (Xml.child xml_arg0 "PrivilegedDelete") in
+      let autocommitPeriod =
+        (Option.map ~f:AutocommitPeriod.of_xml)
+          (Xml.child xml_arg0 "AutocommitPeriod") in
+      let auditLogVolume =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "AuditLogVolume") in
+      make ?volumeAppendModeEnabled ?snaplockType ?retentionPeriod
+        ?privilegedDelete ?autocommitPeriod ?auditLogVolume ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let volumeAppendModeEnabled =
+        field_map json__ "VolumeAppendModeEnabled" Flag.of_json in
+      let snaplockType = field_map json__ "SnaplockType" SnaplockType.of_json in
+      let retentionPeriod =
+        field_map json__ "RetentionPeriod" SnaplockRetentionPeriod.of_json in
+      let privilegedDelete =
+        field_map json__ "PrivilegedDelete" PrivilegedDelete.of_json in
+      let autocommitPeriod =
+        field_map json__ "AutocommitPeriod" AutocommitPeriod.of_json in
+      let auditLogVolume = field_map json__ "AuditLogVolume" Flag.of_json in
+      make ?volumeAppendModeEnabled ?snaplockType ?retentionPeriod
+        ?privilegedDelete ?autocommitPeriod ?auditLogVolume ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the SnapLock configuration for an FSx for ONTAP SnapLock volume."]
 module SecurityStyle =
   struct
     type nonrec t =
@@ -1326,6 +1957,106 @@ module FlexCacheEndpointType =
       of_string (string_of_json ~kind:"FlexCacheEndpointType" j)
     let to_json = simple_to_json to_value
   end
+module TotalConstituents =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:200) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TotalConstituents" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Aggregate =
+  struct
+    type nonrec t = string
+    let context_ = "Aggregate"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:6) >>=
+                  (fun () -> check_pattern i ~pattern:"^(aggr[0-9]{1,2})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Aggregate" j
+    let to_json = simple_to_json to_value
+  end
+module Aggregates =
+  struct
+    type nonrec t = Aggregate.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:6); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Aggregate.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Aggregate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Aggregates" ~of_json:Aggregate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AggregateConfiguration =
+  struct
+    type nonrec t =
+      {
+      aggregates: Aggregates.t option
+        [@ocaml.doc
+          "The list of aggregates that this volume resides on. Aggregates are storage pools which make up your primary storage tier. Each high-availability (HA) pair has one aggregate. The names of the aggregates map to the names of the aggregates in the ONTAP CLI and REST API. For FlexVols, there will always be a single entry. Amazon FSx responds with an HTTP status code 400 (Bad Request) for the following conditions: The strings in the value of Aggregates are not are not formatted as aggrX, where X is a number between 1 and 12. The value of Aggregates contains aggregates that are not present. One or more of the aggregates supplied are too close to the volume limit to support adding more volumes."];
+      totalConstituents: TotalConstituents.t option
+        [@ocaml.doc
+          "The total number of constituents this FlexGroup volume has. Not applicable for FlexVols."]}
+    let make ?aggregates =
+      fun ?totalConstituents -> fun () -> { aggregates; totalConstituents }
+    let to_value x =
+      structure_to_value
+        [("Aggregates", (Option.map x.aggregates ~f:Aggregates.to_value));
+        ("TotalConstituents",
+          (Option.map x.totalConstituents ~f:TotalConstituents.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalConstituents =
+        (Option.map ~f:TotalConstituents.of_xml)
+          (Xml.child xml_arg0 "TotalConstituents") in
+      let aggregates =
+        (Option.map ~f:Aggregates.of_xml) (Xml.child xml_arg0 "Aggregates") in
+      make ?totalConstituents ?aggregates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalConstituents =
+        field_map json__ "TotalConstituents" TotalConstituents.of_json in
+      let aggregates = field_map json__ "Aggregates" Aggregates.of_json in
+      make ?totalConstituents ?aggregates ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Used to specify configuration options for a volume\226\128\153s storage aggregate or aggregates."]
 module OntapVolumeConfiguration =
   struct
     type nonrec t =
@@ -1354,7 +2085,24 @@ module OntapVolumeConfiguration =
         [@ocaml.doc "The volume's universally unique identifier (UUID)."];
       ontapVolumeType: OntapVolumeType.t option
         [@ocaml.doc
-          "Specifies the type of volume. Valid values are the following: RW specifies a read/write volume. RW is the default. DP specifies a data-protection volume. You can protect data by replicating it to data-protection mirror copies. If a disaster occurs, you can use these data-protection mirror copies to recover data. LS specifies a load-sharing mirror volume. A load-sharing mirror reduces the network traffic to a FlexVol volume by providing additional read-only access to clients."]}
+          "Specifies the type of volume. Valid values are the following: RW specifies a read/write volume. RW is the default. DP specifies a data-protection volume. You can protect data by replicating it to data-protection mirror copies. If a disaster occurs, you can use these data-protection mirror copies to recover data. LS specifies a load-sharing mirror volume. A load-sharing mirror reduces the network traffic to a FlexVol volume by providing additional read-only access to clients."];
+      snapshotPolicy: SnapshotPolicy.t option
+        [@ocaml.doc
+          "Specifies the snapshot policy for the volume. There are three built-in snapshot policies: default: This is the default policy. A maximum of six hourly snapshots taken five minutes past the hour. A maximum of two daily snapshots taken Monday through Saturday at 10 minutes after midnight. A maximum of two weekly snapshots taken every Sunday at 15 minutes after midnight. default-1weekly: This policy is the same as the default policy except that it only retains one snapshot from the weekly schedule. none: This policy does not take any snapshots. This policy can be assigned to volumes to prevent automatic snapshots from being taken. You can also provide the name of a custom policy that you created with the ONTAP CLI or REST API. For more information, see Snapshot policies in the Amazon FSx for NetApp ONTAP User Guide."];
+      copyTagsToBackups: Flag.t option
+        [@ocaml.doc
+          "A boolean flag indicating whether tags for the volume should be copied to backups. This value defaults to false. If it's set to true, all tags for the volume are copied to all automatic and user-initiated backups where the user doesn't specify tags. If this value is true, and you specify one or more tags, only the specified tags are copied to backups. If you specify one or more tags when creating a user-initiated backup, no tags are copied from the volume, regardless of this value."];
+      snaplockConfiguration: SnaplockConfiguration.t option
+        [@ocaml.doc
+          "The SnapLock configuration object for an FSx for ONTAP SnapLock volume."];
+      volumeStyle: VolumeStyle.t option
+        [@ocaml.doc
+          "Use to specify the style of an ONTAP volume. For more information about FlexVols and FlexGroups, see Volume types in Amazon FSx for NetApp ONTAP User Guide."];
+      aggregateConfiguration: AggregateConfiguration.t option
+        [@ocaml.doc
+          "This structure specifies configuration options for a volume\226\128\153s storage aggregate or aggregates."];
+      sizeInBytes: VolumeCapacityBytes.t option
+        [@ocaml.doc "The configured size of the volume, in bytes."]}
     let make ?flexCacheEndpointType =
       fun ?junctionPath ->
         fun ?securityStyle ->
@@ -1365,19 +2113,31 @@ module OntapVolumeConfiguration =
                   fun ?tieringPolicy ->
                     fun ?uUID ->
                       fun ?ontapVolumeType ->
-                        fun () ->
-                          {
-                            flexCacheEndpointType;
-                            junctionPath;
-                            securityStyle;
-                            sizeInMegabytes;
-                            storageEfficiencyEnabled;
-                            storageVirtualMachineId;
-                            storageVirtualMachineRoot;
-                            tieringPolicy;
-                            uUID;
-                            ontapVolumeType
-                          }
+                        fun ?snapshotPolicy ->
+                          fun ?copyTagsToBackups ->
+                            fun ?snaplockConfiguration ->
+                              fun ?volumeStyle ->
+                                fun ?aggregateConfiguration ->
+                                  fun ?sizeInBytes ->
+                                    fun () ->
+                                      {
+                                        flexCacheEndpointType;
+                                        junctionPath;
+                                        securityStyle;
+                                        sizeInMegabytes;
+                                        storageEfficiencyEnabled;
+                                        storageVirtualMachineId;
+                                        storageVirtualMachineRoot;
+                                        tieringPolicy;
+                                        uUID;
+                                        ontapVolumeType;
+                                        snapshotPolicy;
+                                        copyTagsToBackups;
+                                        snaplockConfiguration;
+                                        volumeStyle;
+                                        aggregateConfiguration;
+                                        sizeInBytes
+                                      }
     let to_value x =
       structure_to_value
         [("FlexCacheEndpointType",
@@ -1400,9 +2160,38 @@ module OntapVolumeConfiguration =
           (Option.map x.tieringPolicy ~f:TieringPolicy.to_value));
         ("UUID", (Option.map x.uUID ~f:UUID.to_value));
         ("OntapVolumeType",
-          (Option.map x.ontapVolumeType ~f:OntapVolumeType.to_value))]
+          (Option.map x.ontapVolumeType ~f:OntapVolumeType.to_value));
+        ("SnapshotPolicy",
+          (Option.map x.snapshotPolicy ~f:SnapshotPolicy.to_value));
+        ("CopyTagsToBackups",
+          (Option.map x.copyTagsToBackups ~f:Flag.to_value));
+        ("SnaplockConfiguration",
+          (Option.map x.snaplockConfiguration
+             ~f:SnaplockConfiguration.to_value));
+        ("VolumeStyle", (Option.map x.volumeStyle ~f:VolumeStyle.to_value));
+        ("AggregateConfiguration",
+          (Option.map x.aggregateConfiguration
+             ~f:AggregateConfiguration.to_value));
+        ("SizeInBytes",
+          (Option.map x.sizeInBytes ~f:VolumeCapacityBytes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sizeInBytes =
+        (Option.map ~f:VolumeCapacityBytes.of_xml)
+          (Xml.child xml_arg0 "SizeInBytes") in
+      let aggregateConfiguration =
+        (Option.map ~f:AggregateConfiguration.of_xml)
+          (Xml.child xml_arg0 "AggregateConfiguration") in
+      let volumeStyle =
+        (Option.map ~f:VolumeStyle.of_xml) (Xml.child xml_arg0 "VolumeStyle") in
+      let snaplockConfiguration =
+        (Option.map ~f:SnaplockConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnaplockConfiguration") in
+      let copyTagsToBackups =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "CopyTagsToBackups") in
+      let snapshotPolicy =
+        (Option.map ~f:SnapshotPolicy.of_xml)
+          (Xml.child xml_arg0 "SnapshotPolicy") in
       let ontapVolumeType =
         (Option.map ~f:OntapVolumeType.of_xml)
           (Xml.child xml_arg0 "OntapVolumeType") in
@@ -1431,31 +2220,49 @@ module OntapVolumeConfiguration =
       let flexCacheEndpointType =
         (Option.map ~f:FlexCacheEndpointType.of_xml)
           (Xml.child xml_arg0 "FlexCacheEndpointType") in
-      make ?ontapVolumeType ?uUID ?tieringPolicy ?storageVirtualMachineRoot
+      make ?sizeInBytes ?aggregateConfiguration ?volumeStyle
+        ?snaplockConfiguration ?copyTagsToBackups ?snapshotPolicy
+        ?ontapVolumeType ?uUID ?tieringPolicy ?storageVirtualMachineRoot
         ?storageVirtualMachineId ?storageEfficiencyEnabled ?sizeInMegabytes
         ?securityStyle ?junctionPath ?flexCacheEndpointType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sizeInBytes =
+        field_map json__ "SizeInBytes" VolumeCapacityBytes.of_json in
+      let aggregateConfiguration =
+        field_map json__ "AggregateConfiguration"
+          AggregateConfiguration.of_json in
+      let volumeStyle = field_map json__ "VolumeStyle" VolumeStyle.of_json in
+      let snaplockConfiguration =
+        field_map json__ "SnaplockConfiguration"
+          SnaplockConfiguration.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
+      let snapshotPolicy =
+        field_map json__ "SnapshotPolicy" SnapshotPolicy.of_json in
       let ontapVolumeType =
-        field_map json "OntapVolumeType" OntapVolumeType.of_json in
-      let uUID = field_map json "UUID" UUID.of_json in
+        field_map json__ "OntapVolumeType" OntapVolumeType.of_json in
+      let uUID = field_map json__ "UUID" UUID.of_json in
       let tieringPolicy =
-        field_map json "TieringPolicy" TieringPolicy.of_json in
+        field_map json__ "TieringPolicy" TieringPolicy.of_json in
       let storageVirtualMachineRoot =
-        field_map json "StorageVirtualMachineRoot" Flag.of_json in
+        field_map json__ "StorageVirtualMachineRoot" Flag.of_json in
       let storageVirtualMachineId =
-        field_map json "StorageVirtualMachineId"
+        field_map json__ "StorageVirtualMachineId"
           StorageVirtualMachineId.of_json in
       let storageEfficiencyEnabled =
-        field_map json "StorageEfficiencyEnabled" Flag.of_json in
+        field_map json__ "StorageEfficiencyEnabled" Flag.of_json in
       let sizeInMegabytes =
-        field_map json "SizeInMegabytes" VolumeCapacity.of_json in
+        field_map json__ "SizeInMegabytes" VolumeCapacity.of_json in
       let securityStyle =
-        field_map json "SecurityStyle" SecurityStyle.of_json in
-      let junctionPath = field_map json "JunctionPath" JunctionPath.of_json in
+        field_map json__ "SecurityStyle" SecurityStyle.of_json in
+      let junctionPath = field_map json__ "JunctionPath" JunctionPath.of_json in
       let flexCacheEndpointType =
-        field_map json "FlexCacheEndpointType" FlexCacheEndpointType.of_json in
-      make ?ontapVolumeType ?uUID ?tieringPolicy ?storageVirtualMachineRoot
+        field_map json__ "FlexCacheEndpointType"
+          FlexCacheEndpointType.of_json in
+      make ?sizeInBytes ?aggregateConfiguration ?volumeStyle
+        ?snaplockConfiguration ?copyTagsToBackups ?snapshotPolicy
+        ?ontapVolumeType ?uUID ?tieringPolicy ?storageVirtualMachineRoot
         ?storageVirtualMachineId ?storageEfficiencyEnabled ?sizeInMegabytes
         ?securityStyle ?junctionPath ?flexCacheEndpointType ()
     let to_json v = composed_to_json to_value v
@@ -1475,8 +2282,8 @@ module LifecycleTransitionReason =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes why a resource lifecycle state changed."]
@@ -1516,6 +2323,20 @@ module CreationTime =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The time that the resource was created, in seconds (since 1970-01-01T00:00:00Z), also known as Unix time."]
+module TotalTransferBytes =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module Status =
   struct
     type nonrec t =
@@ -1524,6 +2345,9 @@ module Status =
       | PENDING 
       | COMPLETED 
       | UPDATED_OPTIMIZING 
+      | OPTIMIZING 
+      | PAUSED 
+      | CANCELLED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1533,6 +2357,9 @@ module Status =
       | PENDING -> "PENDING"
       | COMPLETED -> "COMPLETED"
       | UPDATED_OPTIMIZING -> "UPDATED_OPTIMIZING"
+      | OPTIMIZING -> "OPTIMIZING"
+      | PAUSED -> "PAUSED"
+      | CANCELLED -> "CANCELLED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1541,6 +2368,9 @@ module Status =
       | "PENDING" -> PENDING
       | "COMPLETED" -> COMPLETED
       | "UPDATED_OPTIMIZING" -> UPDATED_OPTIMIZING
+      | "OPTIMIZING" -> OPTIMIZING
+      | "PAUSED" -> PAUSED
+      | "CANCELLED" -> CANCELLED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1603,27 +2433,6 @@ module SnapshotLifecycle =
     let of_json j = of_string (string_of_json ~kind:"SnapshotLifecycle" j)
     let to_json = simple_to_json to_value
   end
-module SnapshotId =
-  struct
-    type nonrec t = string
-    let context_ = "SnapshotId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:11) >>=
-             (fun () ->
-                (check_string_max i ~max:28) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^((fs)?volsnap-[0-9a-f]{8,})$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SnapshotId" j
-    let to_json = simple_to_json to_value
-  end
 module RequestTime =
   struct
     type nonrec t = string
@@ -1636,10 +2445,24 @@ module RequestTime =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module RemainingTransferBytes =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module ProgressPercent =
   struct
     type nonrec t = int[@@ocaml.doc
-                         "The current percent of progress of an asynchronous task."]
+                         "Displays the current percent of progress of an asynchronous task."]
     let make i =
       let open Result in
         ok_or_failwith
@@ -1654,7 +2477,68 @@ module ProgressPercent =
         (string_of_xml ~kind:"an integer for ProgressPercent" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The current percent of progress of an asynchronous task."]
+  end[@@ocaml.doc
+       "Displays the current percent of progress of an asynchronous task."]
+module GeneralARN =
+  struct
+    type nonrec t = string
+    let context_ = "GeneralARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:8) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:[^:]{1,63}:[^:]{0,63}:[^:]{0,63}:(?:|\\d{12}):[^/].{0,1023}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GeneralARN" j
+    let to_json = simple_to_json to_value
+  end
+module WindowsFsrmConfiguration =
+  struct
+    type nonrec t =
+      {
+      fsrmServiceEnabled: Flag.t
+        [@ocaml.doc
+          "Specifies whether FSRM is enabled or disabled on the file system. When TRUE, the FSRM service is enabled and monitor file operations according to configured policies. When FALSE or omitted, FSRM is disabled. The default value is FALSE."];
+      eventLogDestination: GeneralARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the destination of the FSRM event logs. The destination can be any Amazon CloudWatch Logs log group ARN or Amazon Kinesis Data Firehose delivery stream ARN. The name of the Amazon CloudWatch Logs log group must begin with the /aws/fsx prefix. The name of the Amazon Kinesis Data Firehose delivery stream must begin with the aws-fsx prefix. The destination ARN (either CloudWatch Logs log group or Kinesis Data Firehose delivery stream) must be in the same Amazon Web Services partition, Amazon Web Services Region, and Amazon Web Services account as your Amazon FSx file system."]}
+    let context_ = "WindowsFsrmConfiguration"
+    let make ?eventLogDestination =
+      fun ~fsrmServiceEnabled ->
+        fun () -> { eventLogDestination; fsrmServiceEnabled }
+    let to_value x =
+      structure_to_value
+        [("FsrmServiceEnabled", (Some (Flag.to_value x.fsrmServiceEnabled)));
+        ("EventLogDestination",
+          (Option.map x.eventLogDestination ~f:GeneralARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventLogDestination =
+        (Option.map ~f:GeneralARN.of_xml)
+          (Xml.child xml_arg0 "EventLogDestination") in
+      let fsrmServiceEnabled =
+        Flag.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FsrmServiceEnabled") in
+      make ?eventLogDestination ~fsrmServiceEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventLogDestination =
+        field_map json__ "EventLogDestination" GeneralARN.of_json in
+      let fsrmServiceEnabled =
+        field_map_exn json__ "FsrmServiceEnabled" Flag.of_json in
+      make ?eventLogDestination ~fsrmServiceEnabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The File Server Resource Manager (FSRM) configuration that Amazon FSx for Windows File Server uses for the file system. When FSRM is enabled, you can manage and monitor storage quotas, file screening, storage reports, and file classification."]
 module WindowsDeploymentType =
   struct
     type nonrec t =
@@ -1719,60 +2603,36 @@ module WindowsAccessAuditLogLevel =
       of_string (string_of_json ~kind:"WindowsAccessAuditLogLevel" j)
     let to_json = simple_to_json to_value
   end
-module GeneralARN =
-  struct
-    type nonrec t = string
-    let context_ = "GeneralARN"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:8) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^arn:[^:]{1,63}:[^:]{0,63}:[^:]{0,63}:(?:|\\d{12}):[^/].{0,1023}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"GeneralARN" j
-    let to_json = simple_to_json to_value
-  end
 module WindowsAuditLogConfiguration =
   struct
     type nonrec t =
       {
-      fileAccessAuditLogLevel: WindowsAccessAuditLogLevel.t
+      fileAccessAuditLogLevel: WindowsAccessAuditLogLevel.t option
         [@ocaml.doc
           "Sets which attempt type is logged by Amazon FSx for file and folder accesses. SUCCESS_ONLY - only successful attempts to access files or folders are logged. FAILURE_ONLY - only failed attempts to access files or folders are logged. SUCCESS_AND_FAILURE - both successful attempts and failed attempts to access files or folders are logged. DISABLED - access auditing of files and folders is turned off."];
-      fileShareAccessAuditLogLevel: WindowsAccessAuditLogLevel.t
+      fileShareAccessAuditLogLevel: WindowsAccessAuditLogLevel.t option
         [@ocaml.doc
           "Sets which attempt type is logged by Amazon FSx for file share accesses. SUCCESS_ONLY - only successful attempts to access file shares are logged. FAILURE_ONLY - only failed attempts to access file shares are logged. SUCCESS_AND_FAILURE - both successful attempts and failed attempts to access file shares are logged. DISABLED - access auditing of file shares is turned off."];
       auditLogDestination: GeneralARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the destination of the audit logs. The destination can be any Amazon CloudWatch Logs log group ARN or Amazon Kinesis Data Firehose delivery stream ARN. The name of the Amazon CloudWatch Logs log group must begin with the /aws/fsx prefix. The name of the Amazon Kinesis Data Firehouse delivery stream must begin with the aws-fsx prefix. The destination ARN (either CloudWatch Logs log group or Kinesis Data Firehose delivery stream) must be in the same Amazon Web Services partition, Amazon Web Services Region, and Amazon Web Services account as your Amazon FSx file system."]}
-    let context_ = "WindowsAuditLogConfiguration"
-    let make ?auditLogDestination =
-      fun ~fileAccessAuditLogLevel ->
-        fun ~fileShareAccessAuditLogLevel ->
+          "The Amazon Resource Name (ARN) for the destination of the audit logs. The destination can be any Amazon CloudWatch Logs log group ARN or Amazon Kinesis Data Firehose delivery stream ARN. The name of the Amazon CloudWatch Logs log group must begin with the /aws/fsx prefix. The name of the Amazon Kinesis Data Firehose delivery stream must begin with the aws-fsx prefix. The destination ARN (either CloudWatch Logs log group or Kinesis Data Firehose delivery stream) must be in the same Amazon Web Services partition, Amazon Web Services Region, and Amazon Web Services account as your Amazon FSx file system."]}
+    let make ?fileAccessAuditLogLevel =
+      fun ?fileShareAccessAuditLogLevel ->
+        fun ?auditLogDestination ->
           fun () ->
             {
-              auditLogDestination;
               fileAccessAuditLogLevel;
-              fileShareAccessAuditLogLevel
+              fileShareAccessAuditLogLevel;
+              auditLogDestination
             }
     let to_value x =
       structure_to_value
         [("FileAccessAuditLogLevel",
-           (Some
-              (WindowsAccessAuditLogLevel.to_value x.fileAccessAuditLogLevel)));
+           (Option.map x.fileAccessAuditLogLevel
+              ~f:WindowsAccessAuditLogLevel.to_value));
         ("FileShareAccessAuditLogLevel",
-          (Some
-             (WindowsAccessAuditLogLevel.to_value
-                x.fileShareAccessAuditLogLevel)));
+          (Option.map x.fileShareAccessAuditLogLevel
+             ~f:WindowsAccessAuditLogLevel.to_value));
         ("AuditLogDestination",
           (Option.map x.auditLogDestination ~f:GeneralARN.to_value))]
     let to_query v = to_query to_value v
@@ -1781,33 +2641,32 @@ module WindowsAuditLogConfiguration =
         (Option.map ~f:GeneralARN.of_xml)
           (Xml.child xml_arg0 "AuditLogDestination") in
       let fileShareAccessAuditLogLevel =
-        WindowsAccessAuditLogLevel.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "FileShareAccessAuditLogLevel") in
+        (Option.map ~f:WindowsAccessAuditLogLevel.of_xml)
+          (Xml.child xml_arg0 "FileShareAccessAuditLogLevel") in
       let fileAccessAuditLogLevel =
-        WindowsAccessAuditLogLevel.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FileAccessAuditLogLevel") in
-      make ?auditLogDestination ~fileShareAccessAuditLogLevel
-        ~fileAccessAuditLogLevel ()
+        (Option.map ~f:WindowsAccessAuditLogLevel.of_xml)
+          (Xml.child xml_arg0 "FileAccessAuditLogLevel") in
+      make ?auditLogDestination ?fileShareAccessAuditLogLevel
+        ?fileAccessAuditLogLevel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let auditLogDestination =
-        field_map json "AuditLogDestination" GeneralARN.of_json in
+        field_map json__ "AuditLogDestination" GeneralARN.of_json in
       let fileShareAccessAuditLogLevel =
-        field_map_exn json "FileShareAccessAuditLogLevel"
+        field_map json__ "FileShareAccessAuditLogLevel"
           WindowsAccessAuditLogLevel.of_json in
       let fileAccessAuditLogLevel =
-        field_map_exn json "FileAccessAuditLogLevel"
+        field_map json__ "FileAccessAuditLogLevel"
           WindowsAccessAuditLogLevel.of_json in
-      make ?auditLogDestination ~fileShareAccessAuditLogLevel
-        ~fileAccessAuditLogLevel ()
+      make ?auditLogDestination ?fileShareAccessAuditLogLevel
+        ?fileAccessAuditLogLevel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration that Amazon FSx for Windows File Server uses to audit and log user accesses of files, folders, and file shares on the Amazon FSx for Windows File Server file system. For more information, see File access auditing."]
 module WeeklyTime =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "A recurring weekly time, in the format D:HH:MM. D is the day of the week, for which 1 represents Monday and 7 represents Sunday. For further details, see the ISO-8601 spec as described on Wikipedia. HH is the zero-padded hour of the day (0-23), and MM is the zero-padded minute of the hour. For example, 1:05:00 specifies maintenance at 5 AM Monday."]
+                            "The preferred start time to perform weekly maintenance, formatted d:HH:MM in the UTC time zone, where d is the weekday number, from 1 through 7, beginning with Monday and ending with Sunday. For example, 1:05:00 specifies maintenance at 5 AM Monday."]
     let context_ = "WeeklyTime"
     let make i =
       let open Result in
@@ -1827,7 +2686,7 @@ module WeeklyTime =
     let of_json j = string_of_json ~kind:"WeeklyTime" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "A recurring weekly time, in the format D:HH:MM. D is the day of the week, for which 1 represents Monday and 7 represents Sunday. For further details, see the ISO-8601 spec as described on Wikipedia. HH is the zero-padded hour of the day (0-23), and MM is the zero-padded minute of the hour. For example, 1:05:00 specifies maintenance at 5 AM Monday."]
+       "The preferred start time to perform weekly maintenance, formatted d:HH:MM in the UTC time zone, where d is the weekday number, from 1 through 7, beginning with Monday and ending with Sunday. For example, 1:05:00 specifies maintenance at 5 AM Monday."]
 module SubnetId =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -1904,12 +2763,12 @@ module IpAddress =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:7) >>=
+          ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:15) >>=
+                (check_string_max i ~max:45) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")));
+                       ~pattern:"(^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))$|^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1927,6 +2786,9 @@ module DnsIps =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1968,6 +2830,28 @@ module DirectoryUserName =
     let of_json j = string_of_json ~kind:"DirectoryUserName" j
     let to_json = simple_to_json to_value
   end
+module CustomerSecretsManagerARN =
+  struct
+    type nonrec t = string
+    let context_ = "CustomerSecretsManagerARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:64) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:[^:]{1,63}:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9/_+=.@-]+-[a-zA-Z0-9]{6}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomerSecretsManagerARN" j
+    let to_json = simple_to_json to_value
+  end
 module SelfManagedActiveDirectoryAttributes =
   struct
     type nonrec t =
@@ -1988,20 +2872,25 @@ module SelfManagedActiveDirectoryAttributes =
           "The user name for the service account on your self-managed AD domain that FSx uses to join to your AD domain."];
       dnsIps: DnsIps.t option
         [@ocaml.doc
-          "A list of up to three IP addresses of DNS servers or domain controllers in the self-managed AD directory."]}
+          "A list of up to three IP addresses of DNS servers or domain controllers in the self-managed AD directory."];
+      domainJoinServiceAccountSecret: CustomerSecretsManagerARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret containing the service account credentials used to join the file system to your self-managed Active Directory domain."]}
     let make ?domainName =
       fun ?organizationalUnitDistinguishedName ->
         fun ?fileSystemAdministratorsGroup ->
           fun ?userName ->
             fun ?dnsIps ->
-              fun () ->
-                {
-                  domainName;
-                  organizationalUnitDistinguishedName;
-                  fileSystemAdministratorsGroup;
-                  userName;
-                  dnsIps
-                }
+              fun ?domainJoinServiceAccountSecret ->
+                fun () ->
+                  {
+                    domainName;
+                    organizationalUnitDistinguishedName;
+                    fileSystemAdministratorsGroup;
+                    userName;
+                    dnsIps;
+                    domainJoinServiceAccountSecret
+                  }
     let to_value x =
       structure_to_value
         [("DomainName",
@@ -2014,9 +2903,15 @@ module SelfManagedActiveDirectoryAttributes =
           (Option.map x.fileSystemAdministratorsGroup
              ~f:FileSystemAdministratorsGroupName.to_value));
         ("UserName", (Option.map x.userName ~f:DirectoryUserName.to_value));
-        ("DnsIps", (Option.map x.dnsIps ~f:DnsIps.to_value))]
+        ("DnsIps", (Option.map x.dnsIps ~f:DnsIps.to_value));
+        ("DomainJoinServiceAccountSecret",
+          (Option.map x.domainJoinServiceAccountSecret
+             ~f:CustomerSecretsManagerARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let domainJoinServiceAccountSecret =
+        (Option.map ~f:CustomerSecretsManagerARN.of_xml)
+          (Xml.child xml_arg0 "DomainJoinServiceAccountSecret") in
       let dnsIps =
         (Option.map ~f:DnsIps.of_xml) (Xml.child xml_arg0 "DnsIps") in
       let userName =
@@ -2031,22 +2926,28 @@ module SelfManagedActiveDirectoryAttributes =
       let domainName =
         (Option.map ~f:ActiveDirectoryFullyQualifiedName.of_xml)
           (Xml.child xml_arg0 "DomainName") in
-      make ?dnsIps ?userName ?fileSystemAdministratorsGroup
-        ?organizationalUnitDistinguishedName ?domainName ()
+      make ?domainJoinServiceAccountSecret ?dnsIps ?userName
+        ?fileSystemAdministratorsGroup ?organizationalUnitDistinguishedName
+        ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dnsIps = field_map json "DnsIps" DnsIps.of_json in
-      let userName = field_map json "UserName" DirectoryUserName.of_json in
+    let of_json json__ =
+      let domainJoinServiceAccountSecret =
+        field_map json__ "DomainJoinServiceAccountSecret"
+          CustomerSecretsManagerARN.of_json in
+      let dnsIps = field_map json__ "DnsIps" DnsIps.of_json in
+      let userName = field_map json__ "UserName" DirectoryUserName.of_json in
       let fileSystemAdministratorsGroup =
-        field_map json "FileSystemAdministratorsGroup"
+        field_map json__ "FileSystemAdministratorsGroup"
           FileSystemAdministratorsGroupName.of_json in
       let organizationalUnitDistinguishedName =
-        field_map json "OrganizationalUnitDistinguishedName"
+        field_map json__ "OrganizationalUnitDistinguishedName"
           OrganizationalUnitDistinguishedName.of_json in
       let domainName =
-        field_map json "DomainName" ActiveDirectoryFullyQualifiedName.of_json in
-      make ?dnsIps ?userName ?fileSystemAdministratorsGroup
-        ?organizationalUnitDistinguishedName ?domainName ()
+        field_map json__ "DomainName"
+          ActiveDirectoryFullyQualifiedName.of_json in
+      make ?domainJoinServiceAccountSecret ?dnsIps ?userName
+        ?fileSystemAdministratorsGroup ?organizationalUnitDistinguishedName
+        ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration of the self-managed Microsoft Active Directory (AD) directory to which the Windows File Server or ONTAP storage virtual machine (SVM) instance is joined."]
@@ -2057,7 +2958,8 @@ module MegabytesPerSecond =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:4096) >>= (fun () -> check_int_min i ~min:8));
+          ((check_int_max i ~max:100000) >>=
+             (fun () -> check_int_min i ~min:8));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -2103,6 +3005,9 @@ module FileSystemMaintenanceOperations =
     type nonrec t = FileSystemMaintenanceOperation.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileSystemMaintenanceOperation.to_value)) |>
         (fun x -> `List x)
@@ -2125,6 +3030,81 @@ module FileSystemMaintenanceOperations =
         ~of_json:FileSystemMaintenanceOperation.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Iops =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:2400000L) >>=
+             (fun () -> check_int64_min i ~min:0L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module DiskIopsConfigurationMode =
+  struct
+    type nonrec t =
+      | AUTOMATIC 
+      | USER_PROVISIONED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AUTOMATIC -> "AUTOMATIC"
+      | USER_PROVISIONED -> "USER_PROVISIONED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AUTOMATIC" -> AUTOMATIC
+      | "USER_PROVISIONED" -> USER_PROVISIONED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DiskIopsConfigurationMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DiskIopsConfigurationMode" j)
+    let to_json = simple_to_json to_value
+  end
+module DiskIopsConfiguration =
+  struct
+    type nonrec t =
+      {
+      mode: DiskIopsConfigurationMode.t option
+        [@ocaml.doc
+          "Specifies whether the file system is using the AUTOMATIC setting of SSD IOPS of 3 IOPS per GB of storage capacity, or if it using a USER_PROVISIONED value."];
+      iops: Iops.t option
+        [@ocaml.doc
+          "The total number of SSD IOPS provisioned for the file system. The minimum and maximum values for this property depend on the value of HAPairs and StorageCapacity. The minimum value is calculated as StorageCapacity * 3 * HAPairs (3 IOPS per GB of StorageCapacity). The maximum value is calculated as 200,000 * HAPairs. Amazon FSx responds with an HTTP status code 400 (Bad Request) if the value of Iops is outside of the minimum or maximum values."]}
+    let make ?mode = fun ?iops -> fun () -> { mode; iops }
+    let to_value x =
+      structure_to_value
+        [("Mode", (Option.map x.mode ~f:DiskIopsConfigurationMode.to_value));
+        ("Iops", (Option.map x.iops ~f:Iops.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let iops = (Option.map ~f:Iops.of_xml) (Xml.child xml_arg0 "Iops") in
+      let mode =
+        (Option.map ~f:DiskIopsConfigurationMode.of_xml)
+          (Xml.child xml_arg0 "Mode") in
+      make ?iops ?mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let iops = field_map json__ "Iops" Iops.of_json in
+      let mode = field_map json__ "Mode" DiskIopsConfigurationMode.of_json in
+      make ?iops ?mode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The SSD IOPS (input/output operations per second) configuration for an Amazon FSx for NetApp ONTAP, Amazon FSx for Windows File Server, or FSx for OpenZFS file system. By default, Amazon FSx automatically provisions 3 IOPS per GB of storage capacity. You can provision additional IOPS per GB of storage. The configuration consists of the total number of provisioned SSD IOPS and how it is was provisioned, or the mode (by the customer or by Amazon FSx)."]
 module DailyTime =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -2152,7 +3132,7 @@ module DailyTime =
 module DNSName =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The Domain Name Service (DNS) name for the file system. You can mount your file system using its DNS name."]
+                            "The file system's DNS name. You can mount your file system using its DNS name."]
     let context_ = "DNSName"
     let make i =
       let open Result in
@@ -2162,7 +3142,7 @@ module DNSName =
                 (check_string_max i ~max:275) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^(fsi?-[0-9a-f]{8,}\\..{4,253})$")));
+                       ~pattern:"^((fs|fc)i?-[0-9a-f]{8,}\\..{4,253})$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2172,11 +3152,11 @@ module DNSName =
     let of_json j = string_of_json ~kind:"DNSName" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The Domain Name Service (DNS) name for the file system. You can mount your file system using its DNS name."]
+       "The file system's DNS name. You can mount your file system using its DNS name."]
 module AutomaticBackupRetentionDays =
   struct
     type nonrec t = int[@@ocaml.doc
-                         "The number of days to retain automatic backups. Setting this property to 0 disables automatic backups. You can retain automatic backups for a maximum of 90 days. The default is 0."]
+                         "The number of days to retain automatic backups. Setting this property to 0 disables automatic backups. You can retain automatic backups for a maximum of 90 days. The default is 30."]
     let make i =
       let open Result in
         ok_or_failwith
@@ -2193,7 +3173,7 @@ module AutomaticBackupRetentionDays =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The number of days to retain automatic backups. Setting this property to 0 disables automatic backups. You can retain automatic backups for a maximum of 90 days. The default is 0."]
+       "The number of days to retain automatic backups. Setting this property to 0 disables automatic backups. You can retain automatic backups for a maximum of 90 days. The default is 30."]
 module AlternateDNSName =
   struct
     type nonrec t = string
@@ -2274,9 +3254,9 @@ module Alias =
         (Option.map ~f:AlternateDNSName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?lifecycle ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lifecycle = field_map json "Lifecycle" AliasLifecycle.of_json in
-      let name = field_map json "Name" AlternateDNSName.of_json in
+    let of_json json__ =
+      let lifecycle = field_map json__ "Lifecycle" AliasLifecycle.of_json in
+      let name = field_map json__ "Name" AlternateDNSName.of_json in
       make ?lifecycle ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2286,6 +3266,9 @@ module Aliases =
     type nonrec t = Alias.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Alias.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2325,7 +3308,7 @@ module WindowsFileSystemConfiguration =
           "For MULTI_AZ_1 deployment types, it specifies the ID of the subnet where the preferred file server is located. Must be one of the two subnet IDs specified in SubnetIds property. Amazon FSx serves traffic from this subnet except in the event of a failover to the secondary file server. For SINGLE_AZ_1 and SINGLE_AZ_2 deployment types, this value is the same as that for SubnetIDs. For more information, see Availability and durability: Single-AZ and Multi-AZ file systems."];
       preferredFileServerIp: IpAddress.t option
         [@ocaml.doc
-          "For MULTI_AZ_1 deployment types, the IP address of the primary, or preferred, file server. Use this IP address when mounting the file system on Linux SMB clients or Windows SMB clients that are not joined to a Microsoft Active Directory. Applicable for all Windows file system deployment types. This IP address is temporarily unavailable when the file system is undergoing maintenance. For Linux and Windows SMB clients that are joined to an Active Directory, use the file system's DNSName instead. For more information on mapping and mounting file shares, see Accessing File Shares."];
+          "For MULTI_AZ_1 deployment types, the IPv4 address of the primary, or preferred, file server. Use this IP address when mounting the file system on Linux SMB clients or Windows SMB clients that are not joined to a Microsoft Active Directory. Applicable for all Windows file system deployment types. This IPv4 address is temporarily unavailable when the file system is undergoing maintenance. For Linux and Windows SMB clients that are joined to an Active Directory, use the file system's DNSName instead. For more information on mapping and mounting file shares, see Accessing data using file shares."];
       throughputCapacity: MegabytesPerSecond.t option
         [@ocaml.doc
           "The throughput of the Amazon FSx file system, measured in megabytes per second."];
@@ -2348,7 +3331,16 @@ module WindowsFileSystemConfiguration =
       aliases: Aliases.t option ;
       auditLogConfiguration: WindowsAuditLogConfiguration.t option
         [@ocaml.doc
-          "The configuration that Amazon FSx for Windows File Server uses to audit and log user accesses of files, folders, and file shares on the Amazon FSx for Windows File Server file system."]}
+          "The configuration that Amazon FSx for Windows File Server uses to audit and log user accesses of files, folders, and file shares on the Amazon FSx for Windows File Server file system."];
+      diskIopsConfiguration: DiskIopsConfiguration.t option
+        [@ocaml.doc
+          "The SSD IOPS (input/output operations per second) configuration for an Amazon FSx for Windows file system. By default, Amazon FSx automatically provisions 3 IOPS per GiB of storage capacity. You can provision additional IOPS per GiB of storage, up to the maximum limit associated with your chosen throughput capacity."];
+      preferredFileServerIpv6: IpAddress.t option
+        [@ocaml.doc
+          "For MULTI_AZ_1 deployment types, the IPv6 address of the primary, or preferred, file server. Use this IP address when mounting the file system on Linux SMB clients or Windows SMB clients that are not joined to a Microsoft Active Directory. Applicable for all Windows file system deployment types. This IPv6 address is temporarily unavailable when the file system is undergoing maintenance. For Linux and Windows SMB clients that are joined to an Active Directory, use the file system's DNSName instead."];
+      fsrmConfiguration: WindowsFsrmConfiguration.t option
+        [@ocaml.doc
+          "The File Server Resource Manager (FSRM) configuration that Amazon FSx for Windows File Server uses for the file system. FSRM is disabled by default."]}
     let make ?activeDirectoryId =
       fun ?selfManagedActiveDirectoryConfiguration ->
         fun ?deploymentType ->
@@ -2363,23 +3355,29 @@ module WindowsFileSystemConfiguration =
                           fun ?copyTagsToBackups ->
                             fun ?aliases ->
                               fun ?auditLogConfiguration ->
-                                fun () ->
-                                  {
-                                    activeDirectoryId;
-                                    selfManagedActiveDirectoryConfiguration;
-                                    deploymentType;
-                                    remoteAdministrationEndpoint;
-                                    preferredSubnetId;
-                                    preferredFileServerIp;
-                                    throughputCapacity;
-                                    maintenanceOperationsInProgress;
-                                    weeklyMaintenanceStartTime;
-                                    dailyAutomaticBackupStartTime;
-                                    automaticBackupRetentionDays;
-                                    copyTagsToBackups;
-                                    aliases;
-                                    auditLogConfiguration
-                                  }
+                                fun ?diskIopsConfiguration ->
+                                  fun ?preferredFileServerIpv6 ->
+                                    fun ?fsrmConfiguration ->
+                                      fun () ->
+                                        {
+                                          activeDirectoryId;
+                                          selfManagedActiveDirectoryConfiguration;
+                                          deploymentType;
+                                          remoteAdministrationEndpoint;
+                                          preferredSubnetId;
+                                          preferredFileServerIp;
+                                          throughputCapacity;
+                                          maintenanceOperationsInProgress;
+                                          weeklyMaintenanceStartTime;
+                                          dailyAutomaticBackupStartTime;
+                                          automaticBackupRetentionDays;
+                                          copyTagsToBackups;
+                                          aliases;
+                                          auditLogConfiguration;
+                                          diskIopsConfiguration;
+                                          preferredFileServerIpv6;
+                                          fsrmConfiguration
+                                        }
     let to_value x =
       structure_to_value
         [("ActiveDirectoryId",
@@ -2412,9 +3410,26 @@ module WindowsFileSystemConfiguration =
         ("Aliases", (Option.map x.aliases ~f:Aliases.to_value));
         ("AuditLogConfiguration",
           (Option.map x.auditLogConfiguration
-             ~f:WindowsAuditLogConfiguration.to_value))]
+             ~f:WindowsAuditLogConfiguration.to_value));
+        ("DiskIopsConfiguration",
+          (Option.map x.diskIopsConfiguration
+             ~f:DiskIopsConfiguration.to_value));
+        ("PreferredFileServerIpv6",
+          (Option.map x.preferredFileServerIpv6 ~f:IpAddress.to_value));
+        ("FsrmConfiguration",
+          (Option.map x.fsrmConfiguration
+             ~f:WindowsFsrmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fsrmConfiguration =
+        (Option.map ~f:WindowsFsrmConfiguration.of_xml)
+          (Xml.child xml_arg0 "FsrmConfiguration") in
+      let preferredFileServerIpv6 =
+        (Option.map ~f:IpAddress.of_xml)
+          (Xml.child xml_arg0 "PreferredFileServerIpv6") in
+      let diskIopsConfiguration =
+        (Option.map ~f:DiskIopsConfiguration.of_xml)
+          (Xml.child xml_arg0 "DiskIopsConfiguration") in
       let auditLogConfiguration =
         (Option.map ~f:WindowsAuditLogConfiguration.of_xml)
           (Xml.child xml_arg0 "AuditLogConfiguration") in
@@ -2455,45 +3470,55 @@ module WindowsFileSystemConfiguration =
       let activeDirectoryId =
         (Option.map ~f:DirectoryId.of_xml)
           (Xml.child xml_arg0 "ActiveDirectoryId") in
-      make ?auditLogConfiguration ?aliases ?copyTagsToBackups
+      make ?fsrmConfiguration ?preferredFileServerIpv6 ?diskIopsConfiguration
+        ?auditLogConfiguration ?aliases ?copyTagsToBackups
         ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
         ?weeklyMaintenanceStartTime ?maintenanceOperationsInProgress
         ?throughputCapacity ?preferredFileServerIp ?preferredSubnetId
         ?remoteAdministrationEndpoint ?deploymentType
         ?selfManagedActiveDirectoryConfiguration ?activeDirectoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let fsrmConfiguration =
+        field_map json__ "FsrmConfiguration" WindowsFsrmConfiguration.of_json in
+      let preferredFileServerIpv6 =
+        field_map json__ "PreferredFileServerIpv6" IpAddress.of_json in
+      let diskIopsConfiguration =
+        field_map json__ "DiskIopsConfiguration"
+          DiskIopsConfiguration.of_json in
       let auditLogConfiguration =
-        field_map json "AuditLogConfiguration"
+        field_map json__ "AuditLogConfiguration"
           WindowsAuditLogConfiguration.of_json in
-      let aliases = field_map json "Aliases" Aliases.of_json in
-      let copyTagsToBackups = field_map json "CopyTagsToBackups" Flag.of_json in
+      let aliases = field_map json__ "Aliases" Aliases.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
       let maintenanceOperationsInProgress =
-        field_map json "MaintenanceOperationsInProgress"
+        field_map json__ "MaintenanceOperationsInProgress"
           FileSystemMaintenanceOperations.of_json in
       let throughputCapacity =
-        field_map json "ThroughputCapacity" MegabytesPerSecond.of_json in
+        field_map json__ "ThroughputCapacity" MegabytesPerSecond.of_json in
       let preferredFileServerIp =
-        field_map json "PreferredFileServerIp" IpAddress.of_json in
+        field_map json__ "PreferredFileServerIp" IpAddress.of_json in
       let preferredSubnetId =
-        field_map json "PreferredSubnetId" SubnetId.of_json in
+        field_map json__ "PreferredSubnetId" SubnetId.of_json in
       let remoteAdministrationEndpoint =
-        field_map json "RemoteAdministrationEndpoint" DNSName.of_json in
+        field_map json__ "RemoteAdministrationEndpoint" DNSName.of_json in
       let deploymentType =
-        field_map json "DeploymentType" WindowsDeploymentType.of_json in
+        field_map json__ "DeploymentType" WindowsDeploymentType.of_json in
       let selfManagedActiveDirectoryConfiguration =
-        field_map json "SelfManagedActiveDirectoryConfiguration"
+        field_map json__ "SelfManagedActiveDirectoryConfiguration"
           SelfManagedActiveDirectoryAttributes.of_json in
       let activeDirectoryId =
-        field_map json "ActiveDirectoryId" DirectoryId.of_json in
-      make ?auditLogConfiguration ?aliases ?copyTagsToBackups
+        field_map json__ "ActiveDirectoryId" DirectoryId.of_json in
+      make ?fsrmConfiguration ?preferredFileServerIpv6 ?diskIopsConfiguration
+        ?auditLogConfiguration ?aliases ?copyTagsToBackups
         ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
         ?weeklyMaintenanceStartTime ?maintenanceOperationsInProgress
         ?throughputCapacity ?preferredFileServerIp ?preferredSubnetId
@@ -2529,6 +3554,9 @@ module SubnetIds =
     type nonrec t = SubnetId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2554,12 +3582,21 @@ module StorageType =
     type nonrec t =
       | SSD 
       | HDD 
+      | INTELLIGENT_TIERING 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | SSD -> "SSD" | HDD -> "HDD" | Non_static_id s -> s
+      function
+      | SSD -> "SSD"
+      | HDD -> "HDD"
+      | INTELLIGENT_TIERING -> "INTELLIGENT_TIERING"
+      | Non_static_id s -> s
     let of_string =
-      function | "SSD" -> SSD | "HDD" -> HDD | x -> Non_static_id x
+      function
+      | "SSD" -> SSD
+      | "HDD" -> HDD
+      | "INTELLIGENT_TIERING" -> INTELLIGENT_TIERING
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -2571,7 +3608,7 @@ module StorageType =
 module StorageCapacity =
   struct
     type nonrec t = int[@@ocaml.doc
-                         "The storage capacity for your Amazon FSx file system, in gibibytes."]
+                         "Specifies the file system's storage capacity, in gibibytes (GiB)."]
     let make i =
       let open Result in
         ok_or_failwith
@@ -2588,221 +3625,7 @@ module StorageCapacity =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The storage capacity for your Amazon FSx file system, in gibibytes."]
-module OpenZFSDeploymentType =
-  struct
-    type nonrec t =
-      | SINGLE_AZ_1 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | SINGLE_AZ_1 -> "SINGLE_AZ_1" | Non_static_id s -> s
-    let of_string =
-      function | "SINGLE_AZ_1" -> SINGLE_AZ_1 | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration OpenZFSDeploymentType" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"OpenZFSDeploymentType" j)
-    let to_json = simple_to_json to_value
-  end
-module Iops =
-  struct
-    type nonrec t = Int64.t
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int64_max i ~max:160000L) >>=
-             (fun () -> check_int64_min i ~min:0L));
-        i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
-module DiskIopsConfigurationMode =
-  struct
-    type nonrec t =
-      | AUTOMATIC 
-      | USER_PROVISIONED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | AUTOMATIC -> "AUTOMATIC"
-      | USER_PROVISIONED -> "USER_PROVISIONED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "AUTOMATIC" -> AUTOMATIC
-      | "USER_PROVISIONED" -> USER_PROVISIONED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration DiskIopsConfigurationMode" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"DiskIopsConfigurationMode" j)
-    let to_json = simple_to_json to_value
-  end
-module DiskIopsConfiguration =
-  struct
-    type nonrec t =
-      {
-      mode: DiskIopsConfigurationMode.t option
-        [@ocaml.doc
-          "Specifies whether the number of IOPS for the file system is using the system default (AUTOMATIC) or was provisioned by the customer (USER_PROVISIONED)."];
-      iops: Iops.t option
-        [@ocaml.doc
-          "The total number of SSD IOPS provisioned for the file system."]}
-    let make ?mode = fun ?iops -> fun () -> { mode; iops }
-    let to_value x =
-      structure_to_value
-        [("Mode", (Option.map x.mode ~f:DiskIopsConfigurationMode.to_value));
-        ("Iops", (Option.map x.iops ~f:Iops.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let iops = (Option.map ~f:Iops.of_xml) (Xml.child xml_arg0 "Iops") in
-      let mode =
-        (Option.map ~f:DiskIopsConfigurationMode.of_xml)
-          (Xml.child xml_arg0 "Mode") in
-      make ?iops ?mode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iops = field_map json "Iops" Iops.of_json in
-      let mode = field_map json "Mode" DiskIopsConfigurationMode.of_json in
-      make ?iops ?mode ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The SSD IOPS (input/output operations per second) configuration for an Amazon FSx for NetApp ONTAP or Amazon FSx for OpenZFS file system. The default is 3 IOPS per GB of storage capacity, but you can provision additional IOPS per GB of storage. The configuration consists of the total number of provisioned SSD IOPS and how the amount was provisioned (by the customer or by the system)."]
-module OpenZFSFileSystemConfiguration =
-  struct
-    type nonrec t =
-      {
-      automaticBackupRetentionDays: AutomaticBackupRetentionDays.t option ;
-      copyTagsToBackups: Flag.t option
-        [@ocaml.doc
-          "A Boolean value indicating whether tags on the file system should be copied to backups. If it's set to true, all tags on the file system are copied to all automatic backups and any user-initiated backups where the user doesn't specify any tags. If this value is true and you specify one or more tags, only the specified tags are copied to backups. If you specify one or more tags when creating a user-initiated backup, no tags are copied from the file system, regardless of this value."];
-      copyTagsToVolumes: Flag.t option
-        [@ocaml.doc
-          "A Boolean value indicating whether tags for the volume should be copied to snapshots. This value defaults to false. If it's set to true, all tags for the volume are copied to snapshots where the user doesn't specify tags. If this value is true and you specify one or more tags, only the specified tags are copied to snapshots. If you specify one or more tags when creating the snapshot, no tags are copied from the volume, regardless of this value."];
-      dailyAutomaticBackupStartTime: DailyTime.t option ;
-      deploymentType: OpenZFSDeploymentType.t option
-        [@ocaml.doc
-          "Specifies the file-system deployment type. Amazon FSx for OpenZFS supports SINGLE_AZ_1. SINGLE_AZ_1 is a file system configured for a single Availability Zone (AZ) of redundancy."];
-      throughputCapacity: MegabytesPerSecond.t option
-        [@ocaml.doc
-          "The throughput of an Amazon FSx file system, measured in megabytes per second (MBps). Valid values are 64, 128, 256, 512, 1024, 2048, 3072, or 4096 MB/s."];
-      weeklyMaintenanceStartTime: WeeklyTime.t option ;
-      diskIopsConfiguration: DiskIopsConfiguration.t option ;
-      rootVolumeId: VolumeId.t option
-        [@ocaml.doc "The ID of the root volume of the OpenZFS file system."]}
-    let make ?automaticBackupRetentionDays =
-      fun ?copyTagsToBackups ->
-        fun ?copyTagsToVolumes ->
-          fun ?dailyAutomaticBackupStartTime ->
-            fun ?deploymentType ->
-              fun ?throughputCapacity ->
-                fun ?weeklyMaintenanceStartTime ->
-                  fun ?diskIopsConfiguration ->
-                    fun ?rootVolumeId ->
-                      fun () ->
-                        {
-                          automaticBackupRetentionDays;
-                          copyTagsToBackups;
-                          copyTagsToVolumes;
-                          dailyAutomaticBackupStartTime;
-                          deploymentType;
-                          throughputCapacity;
-                          weeklyMaintenanceStartTime;
-                          diskIopsConfiguration;
-                          rootVolumeId
-                        }
-    let to_value x =
-      structure_to_value
-        [("AutomaticBackupRetentionDays",
-           (Option.map x.automaticBackupRetentionDays
-              ~f:AutomaticBackupRetentionDays.to_value));
-        ("CopyTagsToBackups",
-          (Option.map x.copyTagsToBackups ~f:Flag.to_value));
-        ("CopyTagsToVolumes",
-          (Option.map x.copyTagsToVolumes ~f:Flag.to_value));
-        ("DailyAutomaticBackupStartTime",
-          (Option.map x.dailyAutomaticBackupStartTime ~f:DailyTime.to_value));
-        ("DeploymentType",
-          (Option.map x.deploymentType ~f:OpenZFSDeploymentType.to_value));
-        ("ThroughputCapacity",
-          (Option.map x.throughputCapacity ~f:MegabytesPerSecond.to_value));
-        ("WeeklyMaintenanceStartTime",
-          (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value));
-        ("DiskIopsConfiguration",
-          (Option.map x.diskIopsConfiguration
-             ~f:DiskIopsConfiguration.to_value));
-        ("RootVolumeId", (Option.map x.rootVolumeId ~f:VolumeId.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let rootVolumeId =
-        (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "RootVolumeId") in
-      let diskIopsConfiguration =
-        (Option.map ~f:DiskIopsConfiguration.of_xml)
-          (Xml.child xml_arg0 "DiskIopsConfiguration") in
-      let weeklyMaintenanceStartTime =
-        (Option.map ~f:WeeklyTime.of_xml)
-          (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
-      let throughputCapacity =
-        (Option.map ~f:MegabytesPerSecond.of_xml)
-          (Xml.child xml_arg0 "ThroughputCapacity") in
-      let deploymentType =
-        (Option.map ~f:OpenZFSDeploymentType.of_xml)
-          (Xml.child xml_arg0 "DeploymentType") in
-      let dailyAutomaticBackupStartTime =
-        (Option.map ~f:DailyTime.of_xml)
-          (Xml.child xml_arg0 "DailyAutomaticBackupStartTime") in
-      let copyTagsToVolumes =
-        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "CopyTagsToVolumes") in
-      let copyTagsToBackups =
-        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "CopyTagsToBackups") in
-      let automaticBackupRetentionDays =
-        (Option.map ~f:AutomaticBackupRetentionDays.of_xml)
-          (Xml.child xml_arg0 "AutomaticBackupRetentionDays") in
-      make ?rootVolumeId ?diskIopsConfiguration ?weeklyMaintenanceStartTime
-        ?throughputCapacity ?deploymentType ?dailyAutomaticBackupStartTime
-        ?copyTagsToVolumes ?copyTagsToBackups ?automaticBackupRetentionDays
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rootVolumeId = field_map json "RootVolumeId" VolumeId.of_json in
-      let diskIopsConfiguration =
-        field_map json "DiskIopsConfiguration" DiskIopsConfiguration.of_json in
-      let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
-      let throughputCapacity =
-        field_map json "ThroughputCapacity" MegabytesPerSecond.of_json in
-      let deploymentType =
-        field_map json "DeploymentType" OpenZFSDeploymentType.of_json in
-      let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
-      let copyTagsToVolumes = field_map json "CopyTagsToVolumes" Flag.of_json in
-      let copyTagsToBackups = field_map json "CopyTagsToBackups" Flag.of_json in
-      let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
-          AutomaticBackupRetentionDays.of_json in
-      make ?rootVolumeId ?diskIopsConfiguration ?weeklyMaintenanceStartTime
-        ?throughputCapacity ?deploymentType ?dailyAutomaticBackupStartTime
-        ?copyTagsToVolumes ?copyTagsToBackups ?automaticBackupRetentionDays
-        ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The configuration for the Amazon FSx for OpenZFS file system."]
+       "Specifies the file system's storage capacity, in gibibytes (GiB)."]
 module RouteTableId =
   struct
     type nonrec t = string
@@ -2828,6 +3651,9 @@ module RouteTableIds =
     type nonrec t = RouteTableId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteTableId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2848,30 +3674,128 @@ module RouteTableIds =
       list_of_json ~kind:"RouteTableIds" ~of_json:RouteTableId.of_json j
     let to_json v = composed_to_json to_value v
   end
-module OntapDeploymentType =
+module OpenZFSReadCacheSizingMode =
   struct
     type nonrec t =
-      | MULTI_AZ_1 
-      | SINGLE_AZ_1 
+      | NO_CACHE 
+      | USER_PROVISIONED 
+      | PROPORTIONAL_TO_THROUGHPUT_CAPACITY 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | MULTI_AZ_1 -> "MULTI_AZ_1"
-      | SINGLE_AZ_1 -> "SINGLE_AZ_1"
+      | NO_CACHE -> "NO_CACHE"
+      | USER_PROVISIONED -> "USER_PROVISIONED"
+      | PROPORTIONAL_TO_THROUGHPUT_CAPACITY ->
+          "PROPORTIONAL_TO_THROUGHPUT_CAPACITY"
       | Non_static_id s -> s
     let of_string =
       function
-      | "MULTI_AZ_1" -> MULTI_AZ_1
-      | "SINGLE_AZ_1" -> SINGLE_AZ_1
+      | "NO_CACHE" -> NO_CACHE
+      | "USER_PROVISIONED" -> USER_PROVISIONED
+      | "PROPORTIONAL_TO_THROUGHPUT_CAPACITY" ->
+          PROPORTIONAL_TO_THROUGHPUT_CAPACITY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string
-        (string_of_xml ~kind:"enumeration OntapDeploymentType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"OntapDeploymentType" j)
+        (string_of_xml ~kind:"enumeration OpenZFSReadCacheSizingMode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"OpenZFSReadCacheSizingMode" j)
+    let to_json = simple_to_json to_value
+  end
+module OpenZFSReadCacheConfiguration =
+  struct
+    type nonrec t =
+      {
+      sizingMode: OpenZFSReadCacheSizingMode.t option
+        [@ocaml.doc
+          "Specifies how the provisioned SSD read cache is sized, as follows: Set to NO_CACHE if you do not want to use an SSD read cache with your Intelligent-Tiering file system. Set to USER_PROVISIONED to specify the exact size of your SSD read cache. Set to PROPORTIONAL_TO_THROUGHPUT_CAPACITY to have your SSD read cache automatically sized based on your throughput capacity."];
+      sizeGiB: StorageCapacity.t option
+        [@ocaml.doc
+          "Required if SizingMode is set to USER_PROVISIONED. Specifies the size of the file system's SSD read cache, in gibibytes (GiB)."]}
+    let make ?sizingMode = fun ?sizeGiB -> fun () -> { sizingMode; sizeGiB }
+    let to_value x =
+      structure_to_value
+        [("SizingMode",
+           (Option.map x.sizingMode ~f:OpenZFSReadCacheSizingMode.to_value));
+        ("SizeGiB", (Option.map x.sizeGiB ~f:StorageCapacity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sizeGiB =
+        (Option.map ~f:StorageCapacity.of_xml) (Xml.child xml_arg0 "SizeGiB") in
+      let sizingMode =
+        (Option.map ~f:OpenZFSReadCacheSizingMode.of_xml)
+          (Xml.child xml_arg0 "SizingMode") in
+      make ?sizeGiB ?sizingMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sizeGiB = field_map json__ "SizeGiB" StorageCapacity.of_json in
+      let sizingMode =
+        field_map json__ "SizingMode" OpenZFSReadCacheSizingMode.of_json in
+      make ?sizeGiB ?sizingMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for the optional provisioned SSD read cache on Amazon FSx for OpenZFS file systems that use the Intelligent-Tiering storage class."]
+module OpenZFSDeploymentType =
+  struct
+    type nonrec t =
+      | SINGLE_AZ_1 
+      | SINGLE_AZ_2 
+      | SINGLE_AZ_HA_1 
+      | SINGLE_AZ_HA_2 
+      | MULTI_AZ_1 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SINGLE_AZ_1 -> "SINGLE_AZ_1"
+      | SINGLE_AZ_2 -> "SINGLE_AZ_2"
+      | SINGLE_AZ_HA_1 -> "SINGLE_AZ_HA_1"
+      | SINGLE_AZ_HA_2 -> "SINGLE_AZ_HA_2"
+      | MULTI_AZ_1 -> "MULTI_AZ_1"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SINGLE_AZ_1" -> SINGLE_AZ_1
+      | "SINGLE_AZ_2" -> SINGLE_AZ_2
+      | "SINGLE_AZ_HA_1" -> SINGLE_AZ_HA_1
+      | "SINGLE_AZ_HA_2" -> SINGLE_AZ_HA_2
+      | "MULTI_AZ_1" -> MULTI_AZ_1
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OpenZFSDeploymentType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"OpenZFSDeploymentType" j)
+    let to_json = simple_to_json to_value
+  end
+module Ipv6AddressRange =
+  struct
+    type nonrec t = string
+    let context_ = "Ipv6AddressRange"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:43) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[^\\u0000\\u0085\\u2028\\u2029\\r\\n]{4,43}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Ipv6AddressRange" j
     let to_json = simple_to_json to_value
   end
 module IpAddressRange =
@@ -2896,14 +3820,298 @@ module IpAddressRange =
     let of_json j = string_of_json ~kind:"IpAddressRange" j
     let to_json = simple_to_json to_value
   end
+module OpenZFSFileSystemConfiguration =
+  struct
+    type nonrec t =
+      {
+      automaticBackupRetentionDays: AutomaticBackupRetentionDays.t option ;
+      copyTagsToBackups: Flag.t option
+        [@ocaml.doc
+          "A Boolean value indicating whether tags on the file system should be copied to backups. If it's set to true, all tags on the file system are copied to all automatic backups and any user-initiated backups where the user doesn't specify any tags. If this value is true and you specify one or more tags, only the specified tags are copied to backups. If you specify one or more tags when creating a user-initiated backup, no tags are copied from the file system, regardless of this value."];
+      copyTagsToVolumes: Flag.t option
+        [@ocaml.doc
+          "A Boolean value indicating whether tags for the volume should be copied to snapshots. This value defaults to false. If it's set to true, all tags for the volume are copied to snapshots where the user doesn't specify tags. If this value is true and you specify one or more tags, only the specified tags are copied to snapshots. If you specify one or more tags when creating the snapshot, no tags are copied from the volume, regardless of this value."];
+      dailyAutomaticBackupStartTime: DailyTime.t option ;
+      deploymentType: OpenZFSDeploymentType.t option
+        [@ocaml.doc
+          "Specifies the file-system deployment type. Amazon FSx for OpenZFS supports&#x2028; MULTI_AZ_1, SINGLE_AZ_HA_2, SINGLE_AZ_HA_1, SINGLE_AZ_2, and SINGLE_AZ_1."];
+      throughputCapacity: MegabytesPerSecond.t option
+        [@ocaml.doc
+          "The throughput of an Amazon FSx file system, measured in megabytes per second (MBps)."];
+      weeklyMaintenanceStartTime: WeeklyTime.t option ;
+      diskIopsConfiguration: DiskIopsConfiguration.t option ;
+      rootVolumeId: VolumeId.t option
+        [@ocaml.doc "The ID of the root volume of the OpenZFS file system."];
+      preferredSubnetId: SubnetId.t option
+        [@ocaml.doc
+          "Required when DeploymentType is set to MULTI_AZ_1. This specifies the subnet in which you want the preferred file server to be located."];
+      endpointIpAddressRange: IpAddressRange.t option
+        [@ocaml.doc
+          "(Multi-AZ only) Specifies the IPv4 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API and Amazon FSx console, Amazon FSx selects an available /28 IP address range for you from one of the VPC's CIDR ranges. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables."];
+      endpointIpv6AddressRange: Ipv6AddressRange.t option
+        [@ocaml.doc
+          "(Multi-AZ only) Specifies the IPv6 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API and Amazon FSx console, Amazon FSx selects an available /118 IP address range for you from one of the VPC's CIDR ranges. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables, as long as they don't overlap with any subnet."];
+      routeTableIds: RouteTableIds.t option
+        [@ocaml.doc
+          "(Multi-AZ only) The VPC route tables in which your file system's endpoints are created."];
+      endpointIpAddress: IpAddress.t option
+        [@ocaml.doc
+          "The IPv4 address of the endpoint that is used to access data or to manage the file system."];
+      endpointIpv6Address: IpAddress.t option
+        [@ocaml.doc
+          "The IPv6 address of the endpoint that is used to access data or to manage the file system."];
+      readCacheConfiguration: OpenZFSReadCacheConfiguration.t option
+        [@ocaml.doc
+          "Required when StorageType is set to INTELLIGENT_TIERING. Specifies the optional provisioned SSD read cache."]}
+    let make ?automaticBackupRetentionDays =
+      fun ?copyTagsToBackups ->
+        fun ?copyTagsToVolumes ->
+          fun ?dailyAutomaticBackupStartTime ->
+            fun ?deploymentType ->
+              fun ?throughputCapacity ->
+                fun ?weeklyMaintenanceStartTime ->
+                  fun ?diskIopsConfiguration ->
+                    fun ?rootVolumeId ->
+                      fun ?preferredSubnetId ->
+                        fun ?endpointIpAddressRange ->
+                          fun ?endpointIpv6AddressRange ->
+                            fun ?routeTableIds ->
+                              fun ?endpointIpAddress ->
+                                fun ?endpointIpv6Address ->
+                                  fun ?readCacheConfiguration ->
+                                    fun () ->
+                                      {
+                                        automaticBackupRetentionDays;
+                                        copyTagsToBackups;
+                                        copyTagsToVolumes;
+                                        dailyAutomaticBackupStartTime;
+                                        deploymentType;
+                                        throughputCapacity;
+                                        weeklyMaintenanceStartTime;
+                                        diskIopsConfiguration;
+                                        rootVolumeId;
+                                        preferredSubnetId;
+                                        endpointIpAddressRange;
+                                        endpointIpv6AddressRange;
+                                        routeTableIds;
+                                        endpointIpAddress;
+                                        endpointIpv6Address;
+                                        readCacheConfiguration
+                                      }
+    let to_value x =
+      structure_to_value
+        [("AutomaticBackupRetentionDays",
+           (Option.map x.automaticBackupRetentionDays
+              ~f:AutomaticBackupRetentionDays.to_value));
+        ("CopyTagsToBackups",
+          (Option.map x.copyTagsToBackups ~f:Flag.to_value));
+        ("CopyTagsToVolumes",
+          (Option.map x.copyTagsToVolumes ~f:Flag.to_value));
+        ("DailyAutomaticBackupStartTime",
+          (Option.map x.dailyAutomaticBackupStartTime ~f:DailyTime.to_value));
+        ("DeploymentType",
+          (Option.map x.deploymentType ~f:OpenZFSDeploymentType.to_value));
+        ("ThroughputCapacity",
+          (Option.map x.throughputCapacity ~f:MegabytesPerSecond.to_value));
+        ("WeeklyMaintenanceStartTime",
+          (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value));
+        ("DiskIopsConfiguration",
+          (Option.map x.diskIopsConfiguration
+             ~f:DiskIopsConfiguration.to_value));
+        ("RootVolumeId", (Option.map x.rootVolumeId ~f:VolumeId.to_value));
+        ("PreferredSubnetId",
+          (Option.map x.preferredSubnetId ~f:SubnetId.to_value));
+        ("EndpointIpAddressRange",
+          (Option.map x.endpointIpAddressRange ~f:IpAddressRange.to_value));
+        ("EndpointIpv6AddressRange",
+          (Option.map x.endpointIpv6AddressRange ~f:Ipv6AddressRange.to_value));
+        ("RouteTableIds",
+          (Option.map x.routeTableIds ~f:RouteTableIds.to_value));
+        ("EndpointIpAddress",
+          (Option.map x.endpointIpAddress ~f:IpAddress.to_value));
+        ("EndpointIpv6Address",
+          (Option.map x.endpointIpv6Address ~f:IpAddress.to_value));
+        ("ReadCacheConfiguration",
+          (Option.map x.readCacheConfiguration
+             ~f:OpenZFSReadCacheConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let readCacheConfiguration =
+        (Option.map ~f:OpenZFSReadCacheConfiguration.of_xml)
+          (Xml.child xml_arg0 "ReadCacheConfiguration") in
+      let endpointIpv6Address =
+        (Option.map ~f:IpAddress.of_xml)
+          (Xml.child xml_arg0 "EndpointIpv6Address") in
+      let endpointIpAddress =
+        (Option.map ~f:IpAddress.of_xml)
+          (Xml.child xml_arg0 "EndpointIpAddress") in
+      let routeTableIds =
+        (Option.map ~f:RouteTableIds.of_xml)
+          (Xml.child xml_arg0 "RouteTableIds") in
+      let endpointIpv6AddressRange =
+        (Option.map ~f:Ipv6AddressRange.of_xml)
+          (Xml.child xml_arg0 "EndpointIpv6AddressRange") in
+      let endpointIpAddressRange =
+        (Option.map ~f:IpAddressRange.of_xml)
+          (Xml.child xml_arg0 "EndpointIpAddressRange") in
+      let preferredSubnetId =
+        (Option.map ~f:SubnetId.of_xml)
+          (Xml.child xml_arg0 "PreferredSubnetId") in
+      let rootVolumeId =
+        (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "RootVolumeId") in
+      let diskIopsConfiguration =
+        (Option.map ~f:DiskIopsConfiguration.of_xml)
+          (Xml.child xml_arg0 "DiskIopsConfiguration") in
+      let weeklyMaintenanceStartTime =
+        (Option.map ~f:WeeklyTime.of_xml)
+          (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
+      let throughputCapacity =
+        (Option.map ~f:MegabytesPerSecond.of_xml)
+          (Xml.child xml_arg0 "ThroughputCapacity") in
+      let deploymentType =
+        (Option.map ~f:OpenZFSDeploymentType.of_xml)
+          (Xml.child xml_arg0 "DeploymentType") in
+      let dailyAutomaticBackupStartTime =
+        (Option.map ~f:DailyTime.of_xml)
+          (Xml.child xml_arg0 "DailyAutomaticBackupStartTime") in
+      let copyTagsToVolumes =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "CopyTagsToVolumes") in
+      let copyTagsToBackups =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "CopyTagsToBackups") in
+      let automaticBackupRetentionDays =
+        (Option.map ~f:AutomaticBackupRetentionDays.of_xml)
+          (Xml.child xml_arg0 "AutomaticBackupRetentionDays") in
+      make ?readCacheConfiguration ?endpointIpv6Address ?endpointIpAddress
+        ?routeTableIds ?endpointIpv6AddressRange ?endpointIpAddressRange
+        ?preferredSubnetId ?rootVolumeId ?diskIopsConfiguration
+        ?weeklyMaintenanceStartTime ?throughputCapacity ?deploymentType
+        ?dailyAutomaticBackupStartTime ?copyTagsToVolumes ?copyTagsToBackups
+        ?automaticBackupRetentionDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let readCacheConfiguration =
+        field_map json__ "ReadCacheConfiguration"
+          OpenZFSReadCacheConfiguration.of_json in
+      let endpointIpv6Address =
+        field_map json__ "EndpointIpv6Address" IpAddress.of_json in
+      let endpointIpAddress =
+        field_map json__ "EndpointIpAddress" IpAddress.of_json in
+      let routeTableIds =
+        field_map json__ "RouteTableIds" RouteTableIds.of_json in
+      let endpointIpv6AddressRange =
+        field_map json__ "EndpointIpv6AddressRange" Ipv6AddressRange.of_json in
+      let endpointIpAddressRange =
+        field_map json__ "EndpointIpAddressRange" IpAddressRange.of_json in
+      let preferredSubnetId =
+        field_map json__ "PreferredSubnetId" SubnetId.of_json in
+      let rootVolumeId = field_map json__ "RootVolumeId" VolumeId.of_json in
+      let diskIopsConfiguration =
+        field_map json__ "DiskIopsConfiguration"
+          DiskIopsConfiguration.of_json in
+      let weeklyMaintenanceStartTime =
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+      let throughputCapacity =
+        field_map json__ "ThroughputCapacity" MegabytesPerSecond.of_json in
+      let deploymentType =
+        field_map json__ "DeploymentType" OpenZFSDeploymentType.of_json in
+      let dailyAutomaticBackupStartTime =
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
+      let copyTagsToVolumes =
+        field_map json__ "CopyTagsToVolumes" Flag.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
+      let automaticBackupRetentionDays =
+        field_map json__ "AutomaticBackupRetentionDays"
+          AutomaticBackupRetentionDays.of_json in
+      make ?readCacheConfiguration ?endpointIpv6Address ?endpointIpAddress
+        ?routeTableIds ?endpointIpv6AddressRange ?endpointIpAddressRange
+        ?preferredSubnetId ?rootVolumeId ?diskIopsConfiguration
+        ?weeklyMaintenanceStartTime ?throughputCapacity ?deploymentType
+        ?dailyAutomaticBackupStartTime ?copyTagsToVolumes ?copyTagsToBackups
+        ?automaticBackupRetentionDays ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for the Amazon FSx for OpenZFS file system."]
+module ThroughputCapacityPerHAPair =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:6144) >>=
+             (fun () -> check_int_min i ~min:128));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ThroughputCapacityPerHAPair"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module OntapDeploymentType =
+  struct
+    type nonrec t =
+      | MULTI_AZ_1 
+      | SINGLE_AZ_1 
+      | SINGLE_AZ_2 
+      | MULTI_AZ_2 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MULTI_AZ_1 -> "MULTI_AZ_1"
+      | SINGLE_AZ_1 -> "SINGLE_AZ_1"
+      | SINGLE_AZ_2 -> "SINGLE_AZ_2"
+      | MULTI_AZ_2 -> "MULTI_AZ_2"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MULTI_AZ_1" -> MULTI_AZ_1
+      | "SINGLE_AZ_1" -> SINGLE_AZ_1
+      | "SINGLE_AZ_2" -> SINGLE_AZ_2
+      | "MULTI_AZ_2" -> MULTI_AZ_2
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OntapDeploymentType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OntapDeploymentType" j)
+    let to_json = simple_to_json to_value
+  end
+module HAPairs =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:12) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for HAPairs" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module OntapEndpointIpAddresses =
   struct
     type nonrec t = IpAddress.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:24) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2931,28 +4139,39 @@ module FileSystemEndpoint =
       {
       dNSName: DNSName.t option ;
       ipAddresses: OntapEndpointIpAddresses.t option
-        [@ocaml.doc "IP addresses of the file system endpoint."]}
+        [@ocaml.doc "The IPv4 addresses of the file system endpoint."];
+      ipv6Addresses: OntapEndpointIpAddresses.t option
+        [@ocaml.doc "The IPv6 addresses of the file system endpoint."]}
     let make ?dNSName =
-      fun ?ipAddresses -> fun () -> { dNSName; ipAddresses }
+      fun ?ipAddresses ->
+        fun ?ipv6Addresses ->
+          fun () -> { dNSName; ipAddresses; ipv6Addresses }
     let to_value x =
       structure_to_value
         [("DNSName", (Option.map x.dNSName ~f:DNSName.to_value));
         ("IpAddresses",
-          (Option.map x.ipAddresses ~f:OntapEndpointIpAddresses.to_value))]
+          (Option.map x.ipAddresses ~f:OntapEndpointIpAddresses.to_value));
+        ("Ipv6Addresses",
+          (Option.map x.ipv6Addresses ~f:OntapEndpointIpAddresses.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6Addresses =
+        (Option.map ~f:OntapEndpointIpAddresses.of_xml)
+          (Xml.child xml_arg0 "Ipv6Addresses") in
       let ipAddresses =
         (Option.map ~f:OntapEndpointIpAddresses.of_xml)
           (Xml.child xml_arg0 "IpAddresses") in
       let dNSName =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "DNSName") in
-      make ?ipAddresses ?dNSName ()
+      make ?ipv6Addresses ?ipAddresses ?dNSName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipv6Addresses =
+        field_map json__ "Ipv6Addresses" OntapEndpointIpAddresses.of_json in
       let ipAddresses =
-        field_map json "IpAddresses" OntapEndpointIpAddresses.of_json in
-      let dNSName = field_map json "DNSName" DNSName.of_json in
-      make ?ipAddresses ?dNSName ()
+        field_map json__ "IpAddresses" OntapEndpointIpAddresses.of_json in
+      let dNSName = field_map json__ "DNSName" DNSName.of_json in
+      make ?ipv6Addresses ?ipAddresses ?dNSName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An Amazon FSx for NetApp ONTAP file system has two endpoints that are used to access data or to manage the file system using the NetApp ONTAP CLI, REST API, or NetApp SnapMirror. They are the Management and Intercluster endpoints."]
@@ -2984,10 +4203,11 @@ module FileSystemEndpoints =
           (Xml.child xml_arg0 "Intercluster") in
       make ?management ?intercluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let management = field_map json "Management" FileSystemEndpoint.of_json in
+    let of_json json__ =
+      let management =
+        field_map json__ "Management" FileSystemEndpoint.of_json in
       let intercluster =
-        field_map json "Intercluster" FileSystemEndpoint.of_json in
+        field_map json__ "Intercluster" FileSystemEndpoint.of_json in
       make ?management ?intercluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3000,10 +4220,10 @@ module OntapFileSystemConfiguration =
       dailyAutomaticBackupStartTime: DailyTime.t option ;
       deploymentType: OntapDeploymentType.t option
         [@ocaml.doc
-          "Specifies the FSx for ONTAP file system deployment type in use in the file system. MULTI_AZ_1 - (Default) A high availability file system configured for Multi-AZ redundancy to tolerate temporary Availability Zone (AZ) unavailability. SINGLE_AZ_1 - A file system configured for Single-AZ redundancy. For information about the use cases for Multi-AZ and Single-AZ deployments, refer to Choosing Multi-AZ or Single-AZ file system deployment."];
+          "Specifies the FSx for ONTAP file system deployment type in use in the file system. MULTI_AZ_1 - A high availability file system configured for Multi-AZ redundancy to tolerate temporary Availability Zone (AZ) unavailability. This is a first-generation FSx for ONTAP file system. MULTI_AZ_2 - A high availability file system configured for Multi-AZ redundancy to tolerate temporary AZ unavailability. This is a second-generation FSx for ONTAP file system. SINGLE_AZ_1 - A file system configured for Single-AZ redundancy. This is a first-generation FSx for ONTAP file system. SINGLE_AZ_2 - A file system configured with multiple high-availability (HA) pairs for Single-AZ redundancy. This is a second-generation FSx for ONTAP file system. For information about the use cases for Multi-AZ and Single-AZ deployments, refer to Choosing Multi-AZ or Single-AZ file system deployment."];
       endpointIpAddressRange: IpAddressRange.t option
         [@ocaml.doc
-          "(Multi-AZ only) The IP address range in which the endpoints to access your file system are created. The Endpoint IP address range you select for your file system must exist outside the VPC's CIDR range and must be at least /30 or larger. If you do not specify this optional parameter, Amazon FSx will automatically select a CIDR block for you."];
+          "(Multi-AZ only) Specifies the IPv4 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API, Amazon FSx selects an unused IP address range for you from the 198.19.* range. By default in the Amazon FSx console, Amazon FSx chooses the last 64 IP addresses from the VPC\226\128\153s primary CIDR range to use as the endpoint IP address range for the file system. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables."];
       endpoints: FileSystemEndpoints.t option
         [@ocaml.doc
           "The Management and Intercluster endpoints that are used to access data or to manage the file system using the NetApp ONTAP CLI, REST API, or NetApp SnapMirror."];
@@ -3015,7 +4235,19 @@ module OntapFileSystemConfiguration =
         [@ocaml.doc
           "(Multi-AZ only) The VPC route tables in which your file system's endpoints are created."];
       throughputCapacity: MegabytesPerSecond.t option ;
-      weeklyMaintenanceStartTime: WeeklyTime.t option }
+      weeklyMaintenanceStartTime: WeeklyTime.t option ;
+      fsxAdminPassword: AdminPassword.t option
+        [@ocaml.doc
+          "You can use the fsxadmin user account to access the NetApp ONTAP CLI and REST API. The password value is always redacted in the response."];
+      hAPairs: HAPairs.t option
+        [@ocaml.doc
+          "Specifies how many high-availability (HA) file server pairs the file system will have. The default value is 1. The value of this property affects the values of StorageCapacity, Iops, and ThroughputCapacity. For more information, see High-availability (HA) pairs in the FSx for ONTAP user guide. Amazon FSx responds with an HTTP status code 400 (Bad Request) for the following conditions: The value of HAPairs is less than 1 or greater than 12. The value of HAPairs is greater than 1 and the value of DeploymentType is SINGLE_AZ_1, MULTI_AZ_1, or MULTI_AZ_2."];
+      throughputCapacityPerHAPair: ThroughputCapacityPerHAPair.t option
+        [@ocaml.doc
+          "Use to choose the throughput capacity per HA pair. When the value of HAPairs is equal to 1, the value of ThroughputCapacityPerHAPair is the total throughput for the file system. This field and ThroughputCapacity cannot be defined in the same API call, but one is required. This field and ThroughputCapacity are the same for file systems with one HA pair. For SINGLE_AZ_1 and MULTI_AZ_1 file systems, valid values are 128, 256, 512, 1024, 2048, or 4096 MBps. For SINGLE_AZ_2, valid values are 1536, 3072, or 6144 MBps. For MULTI_AZ_2, valid values are 384, 768, 1536, 3072, or 6144 MBps. Amazon FSx responds with an HTTP status code 400 (Bad Request) for the following conditions: The value of ThroughputCapacity and ThroughputCapacityPerHAPair are not the same value. The value of deployment type is SINGLE_AZ_2 and ThroughputCapacity / ThroughputCapacityPerHAPair is not a valid HA pair (a value between 1 and 12). The value of ThroughputCapacityPerHAPair is not a valid value."];
+      endpointIpv6AddressRange: Ipv6AddressRange.t option
+        [@ocaml.doc
+          "(Multi-AZ only) Specifies the IPv6 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API and Amazon FSx console, Amazon FSx selects an available /118 IP address range for you from one of the VPC's CIDR ranges. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables, as long as they don't overlap with any subnet."]}
     let make ?automaticBackupRetentionDays =
       fun ?dailyAutomaticBackupStartTime ->
         fun ?deploymentType ->
@@ -3026,19 +4258,27 @@ module OntapFileSystemConfiguration =
                   fun ?routeTableIds ->
                     fun ?throughputCapacity ->
                       fun ?weeklyMaintenanceStartTime ->
-                        fun () ->
-                          {
-                            automaticBackupRetentionDays;
-                            dailyAutomaticBackupStartTime;
-                            deploymentType;
-                            endpointIpAddressRange;
-                            endpoints;
-                            diskIopsConfiguration;
-                            preferredSubnetId;
-                            routeTableIds;
-                            throughputCapacity;
-                            weeklyMaintenanceStartTime
-                          }
+                        fun ?fsxAdminPassword ->
+                          fun ?hAPairs ->
+                            fun ?throughputCapacityPerHAPair ->
+                              fun ?endpointIpv6AddressRange ->
+                                fun () ->
+                                  {
+                                    automaticBackupRetentionDays;
+                                    dailyAutomaticBackupStartTime;
+                                    deploymentType;
+                                    endpointIpAddressRange;
+                                    endpoints;
+                                    diskIopsConfiguration;
+                                    preferredSubnetId;
+                                    routeTableIds;
+                                    throughputCapacity;
+                                    weeklyMaintenanceStartTime;
+                                    fsxAdminPassword;
+                                    hAPairs;
+                                    throughputCapacityPerHAPair;
+                                    endpointIpv6AddressRange
+                                  }
     let to_value x =
       structure_to_value
         [("AutomaticBackupRetentionDays",
@@ -3062,9 +4302,28 @@ module OntapFileSystemConfiguration =
         ("ThroughputCapacity",
           (Option.map x.throughputCapacity ~f:MegabytesPerSecond.to_value));
         ("WeeklyMaintenanceStartTime",
-          (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value))]
+          (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value));
+        ("FsxAdminPassword",
+          (Option.map x.fsxAdminPassword ~f:AdminPassword.to_value));
+        ("HAPairs", (Option.map x.hAPairs ~f:HAPairs.to_value));
+        ("ThroughputCapacityPerHAPair",
+          (Option.map x.throughputCapacityPerHAPair
+             ~f:ThroughputCapacityPerHAPair.to_value));
+        ("EndpointIpv6AddressRange",
+          (Option.map x.endpointIpv6AddressRange ~f:Ipv6AddressRange.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let endpointIpv6AddressRange =
+        (Option.map ~f:Ipv6AddressRange.of_xml)
+          (Xml.child xml_arg0 "EndpointIpv6AddressRange") in
+      let throughputCapacityPerHAPair =
+        (Option.map ~f:ThroughputCapacityPerHAPair.of_xml)
+          (Xml.child xml_arg0 "ThroughputCapacityPerHAPair") in
+      let hAPairs =
+        (Option.map ~f:HAPairs.of_xml) (Xml.child xml_arg0 "HAPairs") in
+      let fsxAdminPassword =
+        (Option.map ~f:AdminPassword.of_xml)
+          (Xml.child xml_arg0 "FsxAdminPassword") in
       let weeklyMaintenanceStartTime =
         (Option.map ~f:WeeklyTime.of_xml)
           (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
@@ -3095,38 +4354,69 @@ module OntapFileSystemConfiguration =
       let automaticBackupRetentionDays =
         (Option.map ~f:AutomaticBackupRetentionDays.of_xml)
           (Xml.child xml_arg0 "AutomaticBackupRetentionDays") in
-      make ?weeklyMaintenanceStartTime ?throughputCapacity ?routeTableIds
-        ?preferredSubnetId ?diskIopsConfiguration ?endpoints
+      make ?endpointIpv6AddressRange ?throughputCapacityPerHAPair ?hAPairs
+        ?fsxAdminPassword ?weeklyMaintenanceStartTime ?throughputCapacity
+        ?routeTableIds ?preferredSubnetId ?diskIopsConfiguration ?endpoints
         ?endpointIpAddressRange ?deploymentType
         ?dailyAutomaticBackupStartTime ?automaticBackupRetentionDays ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let endpointIpv6AddressRange =
+        field_map json__ "EndpointIpv6AddressRange" Ipv6AddressRange.of_json in
+      let throughputCapacityPerHAPair =
+        field_map json__ "ThroughputCapacityPerHAPair"
+          ThroughputCapacityPerHAPair.of_json in
+      let hAPairs = field_map json__ "HAPairs" HAPairs.of_json in
+      let fsxAdminPassword =
+        field_map json__ "FsxAdminPassword" AdminPassword.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
       let throughputCapacity =
-        field_map json "ThroughputCapacity" MegabytesPerSecond.of_json in
+        field_map json__ "ThroughputCapacity" MegabytesPerSecond.of_json in
       let routeTableIds =
-        field_map json "RouteTableIds" RouteTableIds.of_json in
+        field_map json__ "RouteTableIds" RouteTableIds.of_json in
       let preferredSubnetId =
-        field_map json "PreferredSubnetId" SubnetId.of_json in
+        field_map json__ "PreferredSubnetId" SubnetId.of_json in
       let diskIopsConfiguration =
-        field_map json "DiskIopsConfiguration" DiskIopsConfiguration.of_json in
-      let endpoints = field_map json "Endpoints" FileSystemEndpoints.of_json in
+        field_map json__ "DiskIopsConfiguration"
+          DiskIopsConfiguration.of_json in
+      let endpoints =
+        field_map json__ "Endpoints" FileSystemEndpoints.of_json in
       let endpointIpAddressRange =
-        field_map json "EndpointIpAddressRange" IpAddressRange.of_json in
+        field_map json__ "EndpointIpAddressRange" IpAddressRange.of_json in
       let deploymentType =
-        field_map json "DeploymentType" OntapDeploymentType.of_json in
+        field_map json__ "DeploymentType" OntapDeploymentType.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
-      make ?weeklyMaintenanceStartTime ?throughputCapacity ?routeTableIds
-        ?preferredSubnetId ?diskIopsConfiguration ?endpoints
+      make ?endpointIpv6AddressRange ?throughputCapacityPerHAPair ?hAPairs
+        ?fsxAdminPassword ?weeklyMaintenanceStartTime ?throughputCapacity
+        ?routeTableIds ?preferredSubnetId ?diskIopsConfiguration ?endpoints
         ?endpointIpAddressRange ?deploymentType
         ?dailyAutomaticBackupStartTime ?automaticBackupRetentionDays ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration for the FSx for NetApp ONTAP file system."]
+module NetworkType =
+  struct
+    type nonrec t =
+      | IPV4 
+      | DUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | IPV4 -> "IPV4" | DUAL -> "DUAL" | Non_static_id s -> s
+    let of_string =
+      function | "IPV4" -> IPV4 | "DUAL" -> DUAL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkType" j)
+    let to_json = simple_to_json to_value
+  end
 module NetworkInterfaceId =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -3154,6 +4444,9 @@ module NetworkInterfaceIds =
     type nonrec t = NetworkInterfaceId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterfaceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3175,6 +4468,25 @@ module NetworkInterfaceIds =
         ~of_json:NetworkInterfaceId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ThroughputCapacityMbps =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2000000) >>=
+             (fun () -> check_int_min i ~min:4000));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ThroughputCapacityMbps" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module PerUnitStorageThroughput =
   struct
     type nonrec t = int
@@ -3195,6 +4507,179 @@ module PerUnitStorageThroughput =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module LustreRootSquash =
+  struct
+    type nonrec t = string
+    let context_ = "LustreRootSquash"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:21) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^([0-9]{1,10}):([0-9]{1,10})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LustreRootSquash" j
+    let to_json = simple_to_json to_value
+  end
+module LustreNoSquashNid =
+  struct
+    type nonrec t = string
+    let context_ = "LustreNoSquashNid"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:11) >>=
+             (fun () ->
+                (check_string_max i ~max:43) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([0-9\\[\\]\\-]*\\.){3}([0-9\\[\\]\\-]*)@tcp$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LustreNoSquashNid" j
+    let to_json = simple_to_json to_value
+  end
+module LustreNoSquashNids =
+  struct
+    type nonrec t = LustreNoSquashNid.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:64); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LustreNoSquashNid.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LustreNoSquashNid.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LustreNoSquashNids"
+        ~of_json:LustreNoSquashNid.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LustreRootSquashConfiguration =
+  struct
+    type nonrec t =
+      {
+      rootSquash: LustreRootSquash.t option
+        [@ocaml.doc
+          "You enable root squash by setting a user ID (UID) and group ID (GID) for the file system in the format UID:GID (for example, 365534:65534). The UID and GID values can range from 0 to 4294967294: A non-zero value for UID and GID enables root squash. The UID and GID values can be different, but each must be a non-zero value. A value of 0 (zero) for UID and GID indicates root, and therefore disables root squash. When root squash is enabled, the user ID and group ID of a root user accessing the file system are re-mapped to the UID and GID you provide."];
+      noSquashNids: LustreNoSquashNids.t option
+        [@ocaml.doc
+          "When root squash is enabled, you can optionally specify an array of NIDs of clients for which root squash does not apply. A client NID is a Lustre Network Identifier used to uniquely identify a client. You can specify the NID as either a single address or a range of addresses: A single address is described in standard Lustre NID format by specifying the client\226\128\153s IP address followed by the Lustre network ID (for example, 10.0.1.6\\@tcp). An address range is described using a dash to separate the range (for example, 10.0.\\[2-10\\].\\[1-255\\]\\@tcp)."]}
+    let make ?rootSquash =
+      fun ?noSquashNids -> fun () -> { rootSquash; noSquashNids }
+    let to_value x =
+      structure_to_value
+        [("RootSquash",
+           (Option.map x.rootSquash ~f:LustreRootSquash.to_value));
+        ("NoSquashNids",
+          (Option.map x.noSquashNids ~f:LustreNoSquashNids.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let noSquashNids =
+        (Option.map ~f:LustreNoSquashNids.of_xml)
+          (Xml.child xml_arg0 "NoSquashNids") in
+      let rootSquash =
+        (Option.map ~f:LustreRootSquash.of_xml)
+          (Xml.child xml_arg0 "RootSquash") in
+      make ?noSquashNids ?rootSquash ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let noSquashNids =
+        field_map json__ "NoSquashNids" LustreNoSquashNids.of_json in
+      let rootSquash = field_map json__ "RootSquash" LustreRootSquash.of_json in
+      make ?noSquashNids ?rootSquash ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for Lustre root squash used to restrict root-level access from clients that try to access your FSx for Lustre file system as root. Use the RootSquash parameter to enable root squash. To learn more about Lustre root squash, see Lustre root squash. You can also use the NoSquashNids parameter to provide an array of clients who are not affected by the root squash setting. These clients will access the file system as root, with unrestricted privileges."]
+module LustreReadCacheSizingMode =
+  struct
+    type nonrec t =
+      | NO_CACHE 
+      | USER_PROVISIONED 
+      | PROPORTIONAL_TO_THROUGHPUT_CAPACITY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NO_CACHE -> "NO_CACHE"
+      | USER_PROVISIONED -> "USER_PROVISIONED"
+      | PROPORTIONAL_TO_THROUGHPUT_CAPACITY ->
+          "PROPORTIONAL_TO_THROUGHPUT_CAPACITY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NO_CACHE" -> NO_CACHE
+      | "USER_PROVISIONED" -> USER_PROVISIONED
+      | "PROPORTIONAL_TO_THROUGHPUT_CAPACITY" ->
+          PROPORTIONAL_TO_THROUGHPUT_CAPACITY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LustreReadCacheSizingMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LustreReadCacheSizingMode" j)
+    let to_json = simple_to_json to_value
+  end
+module LustreReadCacheConfiguration =
+  struct
+    type nonrec t =
+      {
+      sizingMode: LustreReadCacheSizingMode.t option
+        [@ocaml.doc
+          "Specifies how the provisioned SSD read cache is sized, as follows: Set to NO_CACHE if you do not want to use an SSD read cache with your Intelligent-Tiering file system. Set to USER_PROVISIONED to specify the exact size of your SSD read cache. Set to PROPORTIONAL_TO_THROUGHPUT_CAPACITY to have your SSD read cache automatically sized based on your throughput capacity."];
+      sizeGiB: StorageCapacity.t option
+        [@ocaml.doc
+          "Required if SizingMode is set to USER_PROVISIONED. Specifies the size of the file system's SSD read cache, in gibibytes (GiB). The SSD read cache size is distributed across provisioned file servers in your file system. Intelligent-Tiering file systems support a minimum of 32 GiB and maximum of 131072 GiB for SSD read cache size for every 4,000 MB/s of throughput capacity provisioned."]}
+    let make ?sizingMode = fun ?sizeGiB -> fun () -> { sizingMode; sizeGiB }
+    let to_value x =
+      structure_to_value
+        [("SizingMode",
+           (Option.map x.sizingMode ~f:LustreReadCacheSizingMode.to_value));
+        ("SizeGiB", (Option.map x.sizeGiB ~f:StorageCapacity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sizeGiB =
+        (Option.map ~f:StorageCapacity.of_xml) (Xml.child xml_arg0 "SizeGiB") in
+      let sizingMode =
+        (Option.map ~f:LustreReadCacheSizingMode.of_xml)
+          (Xml.child xml_arg0 "SizingMode") in
+      make ?sizeGiB ?sizingMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sizeGiB = field_map json__ "SizeGiB" StorageCapacity.of_json in
+      let sizingMode =
+        field_map json__ "SizingMode" LustreReadCacheSizingMode.of_json in
+      make ?sizeGiB ?sizingMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for the optional provisioned SSD read cache on Amazon FSx for Lustre file systems that use the Intelligent-Tiering storage class."]
 module LustreAccessAuditLogLevel =
   struct
     type nonrec t =
@@ -3232,35 +4717,34 @@ module LustreLogConfiguration =
   struct
     type nonrec t =
       {
-      level: LustreAccessAuditLogLevel.t
+      level: LustreAccessAuditLogLevel.t option
         [@ocaml.doc
-          "The data repository events that are logged by Amazon FSx. WARN_ONLY - only warning events are logged. ERROR_ONLY - only error events are logged. WARN_ERROR - both warning events and error events are logged. DISABLED - logging of data repository events is turned off."];
+          "The data repository events that are logged by Amazon FSx. WARN_ONLY - only warning events are logged. ERROR_ONLY - only error events are logged. WARN_ERROR - both warning events and error events are logged. DISABLED - logging of data repository events is turned off. Note that Amazon File Cache uses a default setting of WARN_ERROR, which can't be changed."];
       destination: GeneralARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that specifies the destination of the logs. The destination can be any Amazon CloudWatch Logs log group ARN. The destination ARN must be in the same Amazon Web Services partition, Amazon Web Services Region, and Amazon Web Services account as your Amazon FSx file system."]}
-    let context_ = "LustreLogConfiguration"
-    let make ?destination = fun ~level -> fun () -> { destination; level }
+    let make ?level = fun ?destination -> fun () -> { level; destination }
     let to_value x =
       structure_to_value
-        [("Level", (Some (LustreAccessAuditLogLevel.to_value x.level)));
+        [("Level",
+           (Option.map x.level ~f:LustreAccessAuditLogLevel.to_value));
         ("Destination", (Option.map x.destination ~f:GeneralARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let destination =
         (Option.map ~f:GeneralARN.of_xml) (Xml.child xml_arg0 "Destination") in
       let level =
-        LustreAccessAuditLogLevel.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Level") in
-      make ?destination ~level ()
+        (Option.map ~f:LustreAccessAuditLogLevel.of_xml)
+          (Xml.child xml_arg0 "Level") in
+      make ?destination ?level ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let destination = field_map json "Destination" GeneralARN.of_json in
-      let level =
-        field_map_exn json "Level" LustreAccessAuditLogLevel.of_json in
-      make ?destination ~level ()
+    let of_json json__ =
+      let destination = field_map json__ "Destination" GeneralARN.of_json in
+      let level = field_map json__ "Level" LustreAccessAuditLogLevel.of_json in
+      make ?destination ?level ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration for Lustre logging used to write the enabled logging events for your file system to Amazon CloudWatch Logs. When logging is enabled, Lustre logs error and warning events from data repository operations such as automatic export and data repository tasks. To learn more about Lustre logging, see Logging with Amazon CloudWatch Logs."]
+       "The configuration for Lustre logging used to write the enabled logging events for your Amazon FSx for Lustre file system or Amazon File Cache resource to Amazon CloudWatch Logs."]
 module LustreFileSystemMountName =
   struct
     type nonrec t = string
@@ -3314,6 +4798,83 @@ module LustreDeploymentType =
     let of_json j = of_string (string_of_json ~kind:"LustreDeploymentType" j)
     let to_json = simple_to_json to_value
   end
+module MetadataIops =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:192000) >>=
+             (fun () -> check_int_min i ~min:1500));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MetadataIops" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MetadataConfigurationMode =
+  struct
+    type nonrec t =
+      | AUTOMATIC 
+      | USER_PROVISIONED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AUTOMATIC -> "AUTOMATIC"
+      | USER_PROVISIONED -> "USER_PROVISIONED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AUTOMATIC" -> AUTOMATIC
+      | "USER_PROVISIONED" -> USER_PROVISIONED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MetadataConfigurationMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MetadataConfigurationMode" j)
+    let to_json = simple_to_json to_value
+  end
+module FileSystemLustreMetadataConfiguration =
+  struct
+    type nonrec t =
+      {
+      iops: MetadataIops.t option
+        [@ocaml.doc
+          "The number of Metadata IOPS provisioned for the file system. For SSD file systems, valid values are 1500, 3000, 6000, 12000, and multiples of 12000 up to a maximum of 192000. For Intelligent-Tiering file systems, valid values are 6000 and 12000."];
+      mode: MetadataConfigurationMode.t option
+        [@ocaml.doc
+          "The metadata configuration mode for provisioning Metadata IOPS for the file system. In AUTOMATIC mode (supported only on SSD file systems), FSx for Lustre automatically provisions and scales the number of Metadata IOPS on your file system based on your file system storage capacity. In USER_PROVISIONED mode, you can choose to specify the number of Metadata IOPS to provision for your file system."]}
+    let make ?iops = fun ?mode -> fun () -> { iops; mode }
+    let to_value x =
+      structure_to_value
+        [("Iops", (Option.map x.iops ~f:MetadataIops.to_value));
+        ("Mode", (Option.map x.mode ~f:MetadataConfigurationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mode =
+        (Option.map ~f:MetadataConfigurationMode.of_xml)
+          (Xml.child xml_arg0 "Mode") in
+      let iops =
+        (Option.map ~f:MetadataIops.of_xml) (Xml.child xml_arg0 "Iops") in
+      make ?mode ?iops ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mode = field_map json__ "Mode" MetadataConfigurationMode.of_json in
+      let iops = field_map json__ "Iops" MetadataIops.of_json in
+      make ?mode ?iops ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Lustre metadata performance configuration of an Amazon FSx for Lustre file system using a PERSISTENT_2 deployment type. The configuration enables the file system to support increasing metadata performance."]
 module DriveCacheType =
   struct
     type nonrec t =
@@ -3404,12 +4965,12 @@ module DataRepositoryFailureDetails =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides detailed information about the data respository if its Lifecycle is set to MISCONFIGURED or FAILED."]
+       "Provides detailed information about the data repository if its Lifecycle is set to MISCONFIGURED or FAILED."]
 module AutoImportPolicyType =
   struct
     type nonrec t =
@@ -3533,22 +5094,23 @@ module DataRepositoryConfiguration =
       make ?failureDetails ?autoImportPolicy ?importedFileChunkSize
         ?exportPath ?importPath ?lifecycle ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureDetails =
-        field_map json "FailureDetails" DataRepositoryFailureDetails.of_json in
+        field_map json__ "FailureDetails"
+          DataRepositoryFailureDetails.of_json in
       let autoImportPolicy =
-        field_map json "AutoImportPolicy" AutoImportPolicyType.of_json in
+        field_map json__ "AutoImportPolicy" AutoImportPolicyType.of_json in
       let importedFileChunkSize =
-        field_map json "ImportedFileChunkSize" Megabytes.of_json in
-      let exportPath = field_map json "ExportPath" ArchivePath.of_json in
-      let importPath = field_map json "ImportPath" ArchivePath.of_json in
+        field_map json__ "ImportedFileChunkSize" Megabytes.of_json in
+      let exportPath = field_map json__ "ExportPath" ArchivePath.of_json in
+      let importPath = field_map json__ "ImportPath" ArchivePath.of_json in
       let lifecycle =
-        field_map json "Lifecycle" DataRepositoryLifecycle.of_json in
+        field_map json__ "Lifecycle" DataRepositoryLifecycle.of_json in
       make ?failureDetails ?autoImportPolicy ?importedFileChunkSize
         ?exportPath ?importPath ?lifecycle ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The data repository configuration object for Lustre file systems returned in the response of the CreateFileSystem operation. This data type is not supported for file systems with the Persistent_2 deployment type. Instead, use ."]
+       "The data repository configuration object for Lustre file systems returned in the response of the CreateFileSystem operation. This data type is not supported on file systems with a data repository association. For file systems with a data repository association, see ."]
 module DataCompressionType =
   struct
     type nonrec t =
@@ -3579,7 +5141,7 @@ module LustreFileSystemConfiguration =
       dataRepositoryConfiguration: DataRepositoryConfiguration.t option ;
       deploymentType: LustreDeploymentType.t option
         [@ocaml.doc
-          "The deployment type of the FSx for Lustre file system. Scratch deployment type is designed for temporary storage and shorter-term processing of data. SCRATCH_1 and SCRATCH_2 deployment types are best suited for when you need temporary storage and shorter-term processing of data. The SCRATCH_2 deployment type provides in-transit encryption of data and higher burst throughput capacity than SCRATCH_1. The PERSISTENT_1 and PERSISTENT_2 deployment type is used for longer-term storage and workloads and encryption of data in transit. PERSISTENT_2 is built on Lustre v2.12 and offers higher PerUnitStorageThroughput (up to 1000 MB/s/TiB) along with a lower minimum storage capacity requirement (600 GiB). To learn more about FSx for Lustre deployment types, see FSx for Lustre deployment options. The default is SCRATCH_1."];
+          "The deployment type of the FSx for Lustre file system. Scratch deployment type is designed for temporary storage and shorter-term processing of data. SCRATCH_1 and SCRATCH_2 deployment types are best suited for when you need temporary storage and shorter-term processing of data. The SCRATCH_2 deployment type provides in-transit encryption of data and higher burst throughput capacity than SCRATCH_1. The PERSISTENT_1 and PERSISTENT_2 deployment type is used for longer-term storage and workloads and encryption of data in transit. PERSISTENT_2 offers higher PerUnitStorageThroughput (up to 1000 MB/s/TiB) along with a lower minimum storage capacity requirement (600 GiB). To learn more about FSx for Lustre deployment types, see Deployment and storage class options for FSx for Lustre file systems. The default is SCRATCH_1."];
       perUnitStorageThroughput: PerUnitStorageThroughput.t option
         [@ocaml.doc
           "Per unit storage throughput represents the megabytes per second of read or write throughput per 1 tebibyte of storage provisioned. File system throughput capacity is equal to Storage capacity (TiB) * PerUnitStorageThroughput (MB/s/TiB). This option is only valid for PERSISTENT_1 and PERSISTENT_2 deployment types. Valid values: For PERSISTENT_1 SSD storage: 50, 100, 200. For PERSISTENT_1 HDD storage: 12, 40. For PERSISTENT_2 SSD storage: 125, 250, 500, 1000."];
@@ -3599,7 +5161,22 @@ module LustreFileSystemConfiguration =
           "The data compression configuration for the file system. DataCompressionType can have the following values: NONE - Data compression is turned off for the file system. LZ4 - Data compression is turned on with the LZ4 algorithm. For more information, see Lustre data compression."];
       logConfiguration: LustreLogConfiguration.t option
         [@ocaml.doc
-          "The Lustre logging configuration. Lustre logging writes the enabled log events for your file system to Amazon CloudWatch Logs."]}
+          "The Lustre logging configuration. Lustre logging writes the enabled log events for your file system to Amazon CloudWatch Logs."];
+      rootSquashConfiguration: LustreRootSquashConfiguration.t option
+        [@ocaml.doc
+          "The Lustre root squash configuration for an Amazon FSx for Lustre file system. When enabled, root squash restricts root-level access from clients that try to access your file system as a root user."];
+      metadataConfiguration: FileSystemLustreMetadataConfiguration.t option
+        [@ocaml.doc
+          "The Lustre metadata performance configuration for an Amazon FSx for Lustre file system using a PERSISTENT_2 deployment type."];
+      efaEnabled: Flag.t option
+        [@ocaml.doc
+          "Specifies whether Elastic Fabric Adapter (EFA) and GPUDirect Storage (GDS) support is enabled for the Amazon FSx for Lustre file system."];
+      throughputCapacity: ThroughputCapacityMbps.t option
+        [@ocaml.doc
+          "The throughput of an Amazon FSx for Lustre file system using the Intelligent-Tiering storage class, measured in megabytes per second (MBps)."];
+      dataReadCacheConfiguration: LustreReadCacheConfiguration.t option
+        [@ocaml.doc
+          "Required when StorageType is set to INTELLIGENT_TIERING. Specifies the optional provisioned SSD read cache."]}
     let make ?weeklyMaintenanceStartTime =
       fun ?dataRepositoryConfiguration ->
         fun ?deploymentType ->
@@ -3611,20 +5188,30 @@ module LustreFileSystemConfiguration =
                     fun ?driveCacheType ->
                       fun ?dataCompressionType ->
                         fun ?logConfiguration ->
-                          fun () ->
-                            {
-                              weeklyMaintenanceStartTime;
-                              dataRepositoryConfiguration;
-                              deploymentType;
-                              perUnitStorageThroughput;
-                              mountName;
-                              dailyAutomaticBackupStartTime;
-                              automaticBackupRetentionDays;
-                              copyTagsToBackups;
-                              driveCacheType;
-                              dataCompressionType;
-                              logConfiguration
-                            }
+                          fun ?rootSquashConfiguration ->
+                            fun ?metadataConfiguration ->
+                              fun ?efaEnabled ->
+                                fun ?throughputCapacity ->
+                                  fun ?dataReadCacheConfiguration ->
+                                    fun () ->
+                                      {
+                                        weeklyMaintenanceStartTime;
+                                        dataRepositoryConfiguration;
+                                        deploymentType;
+                                        perUnitStorageThroughput;
+                                        mountName;
+                                        dailyAutomaticBackupStartTime;
+                                        automaticBackupRetentionDays;
+                                        copyTagsToBackups;
+                                        driveCacheType;
+                                        dataCompressionType;
+                                        logConfiguration;
+                                        rootSquashConfiguration;
+                                        metadataConfiguration;
+                                        efaEnabled;
+                                        throughputCapacity;
+                                        dataReadCacheConfiguration
+                                      }
     let to_value x =
       structure_to_value
         [("WeeklyMaintenanceStartTime",
@@ -3651,9 +5238,35 @@ module LustreFileSystemConfiguration =
         ("DataCompressionType",
           (Option.map x.dataCompressionType ~f:DataCompressionType.to_value));
         ("LogConfiguration",
-          (Option.map x.logConfiguration ~f:LustreLogConfiguration.to_value))]
+          (Option.map x.logConfiguration ~f:LustreLogConfiguration.to_value));
+        ("RootSquashConfiguration",
+          (Option.map x.rootSquashConfiguration
+             ~f:LustreRootSquashConfiguration.to_value));
+        ("MetadataConfiguration",
+          (Option.map x.metadataConfiguration
+             ~f:FileSystemLustreMetadataConfiguration.to_value));
+        ("EfaEnabled", (Option.map x.efaEnabled ~f:Flag.to_value));
+        ("ThroughputCapacity",
+          (Option.map x.throughputCapacity ~f:ThroughputCapacityMbps.to_value));
+        ("DataReadCacheConfiguration",
+          (Option.map x.dataReadCacheConfiguration
+             ~f:LustreReadCacheConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataReadCacheConfiguration =
+        (Option.map ~f:LustreReadCacheConfiguration.of_xml)
+          (Xml.child xml_arg0 "DataReadCacheConfiguration") in
+      let throughputCapacity =
+        (Option.map ~f:ThroughputCapacityMbps.of_xml)
+          (Xml.child xml_arg0 "ThroughputCapacity") in
+      let efaEnabled =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "EfaEnabled") in
+      let metadataConfiguration =
+        (Option.map ~f:FileSystemLustreMetadataConfiguration.of_xml)
+          (Xml.child xml_arg0 "MetadataConfiguration") in
+      let rootSquashConfiguration =
+        (Option.map ~f:LustreRootSquashConfiguration.of_xml)
+          (Xml.child xml_arg0 "RootSquashConfiguration") in
       let logConfiguration =
         (Option.map ~f:LustreLogConfiguration.of_xml)
           (Xml.child xml_arg0 "LogConfiguration") in
@@ -3686,42 +5299,57 @@ module LustreFileSystemConfiguration =
       let weeklyMaintenanceStartTime =
         (Option.map ~f:WeeklyTime.of_xml)
           (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
-      make ?logConfiguration ?dataCompressionType ?driveCacheType
-        ?copyTagsToBackups ?automaticBackupRetentionDays
-        ?dailyAutomaticBackupStartTime ?mountName ?perUnitStorageThroughput
-        ?deploymentType ?dataRepositoryConfiguration
-        ?weeklyMaintenanceStartTime ()
+      make ?dataReadCacheConfiguration ?throughputCapacity ?efaEnabled
+        ?metadataConfiguration ?rootSquashConfiguration ?logConfiguration
+        ?dataCompressionType ?driveCacheType ?copyTagsToBackups
+        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
+        ?mountName ?perUnitStorageThroughput ?deploymentType
+        ?dataRepositoryConfiguration ?weeklyMaintenanceStartTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dataReadCacheConfiguration =
+        field_map json__ "DataReadCacheConfiguration"
+          LustreReadCacheConfiguration.of_json in
+      let throughputCapacity =
+        field_map json__ "ThroughputCapacity" ThroughputCapacityMbps.of_json in
+      let efaEnabled = field_map json__ "EfaEnabled" Flag.of_json in
+      let metadataConfiguration =
+        field_map json__ "MetadataConfiguration"
+          FileSystemLustreMetadataConfiguration.of_json in
+      let rootSquashConfiguration =
+        field_map json__ "RootSquashConfiguration"
+          LustreRootSquashConfiguration.of_json in
       let logConfiguration =
-        field_map json "LogConfiguration" LustreLogConfiguration.of_json in
+        field_map json__ "LogConfiguration" LustreLogConfiguration.of_json in
       let dataCompressionType =
-        field_map json "DataCompressionType" DataCompressionType.of_json in
+        field_map json__ "DataCompressionType" DataCompressionType.of_json in
       let driveCacheType =
-        field_map json "DriveCacheType" DriveCacheType.of_json in
-      let copyTagsToBackups = field_map json "CopyTagsToBackups" Flag.of_json in
+        field_map json__ "DriveCacheType" DriveCacheType.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
       let mountName =
-        field_map json "MountName" LustreFileSystemMountName.of_json in
+        field_map json__ "MountName" LustreFileSystemMountName.of_json in
       let perUnitStorageThroughput =
-        field_map json "PerUnitStorageThroughput"
+        field_map json__ "PerUnitStorageThroughput"
           PerUnitStorageThroughput.of_json in
       let deploymentType =
-        field_map json "DeploymentType" LustreDeploymentType.of_json in
+        field_map json__ "DeploymentType" LustreDeploymentType.of_json in
       let dataRepositoryConfiguration =
-        field_map json "DataRepositoryConfiguration"
+        field_map json__ "DataRepositoryConfiguration"
           DataRepositoryConfiguration.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
-      make ?logConfiguration ?dataCompressionType ?driveCacheType
-        ?copyTagsToBackups ?automaticBackupRetentionDays
-        ?dailyAutomaticBackupStartTime ?mountName ?perUnitStorageThroughput
-        ?deploymentType ?dataRepositoryConfiguration
-        ?weeklyMaintenanceStartTime ()
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+      make ?dataReadCacheConfiguration ?throughputCapacity ?efaEnabled
+        ?metadataConfiguration ?rootSquashConfiguration ?logConfiguration
+        ?dataCompressionType ?driveCacheType ?copyTagsToBackups
+        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
+        ?mountName ?perUnitStorageThroughput ?deploymentType
+        ?dataRepositoryConfiguration ?weeklyMaintenanceStartTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration for the Amazon FSx for Lustre file system."]
@@ -3844,8 +5472,7 @@ module FileSystemFailureDetails =
     type nonrec t =
       {
       message: ErrorMessage.t option
-        [@ocaml.doc
-          "A message describing any failures that occurred during file system creation."]}
+        [@ocaml.doc "A message describing any failures that occurred."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -3856,12 +5483,12 @@ module FileSystemFailureDetails =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A structure providing details of any failures that occurred when creating a file system."]
+       "A structure providing details of any failures that occurred."]
 module AdministrativeActionType =
   struct
     type nonrec t =
@@ -3872,6 +5499,14 @@ module AdministrativeActionType =
       | VOLUME_UPDATE 
       | SNAPSHOT_UPDATE 
       | RELEASE_NFS_V3_LOCKS 
+      | VOLUME_RESTORE 
+      | THROUGHPUT_OPTIMIZATION 
+      | IOPS_OPTIMIZATION 
+      | STORAGE_TYPE_OPTIMIZATION 
+      | MISCONFIGURED_STATE_RECOVERY 
+      | VOLUME_UPDATE_WITH_SNAPSHOT 
+      | VOLUME_INITIALIZE_WITH_SNAPSHOT 
+      | DOWNLOAD_DATA_FROM_BACKUP 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3884,6 +5519,14 @@ module AdministrativeActionType =
       | VOLUME_UPDATE -> "VOLUME_UPDATE"
       | SNAPSHOT_UPDATE -> "SNAPSHOT_UPDATE"
       | RELEASE_NFS_V3_LOCKS -> "RELEASE_NFS_V3_LOCKS"
+      | VOLUME_RESTORE -> "VOLUME_RESTORE"
+      | THROUGHPUT_OPTIMIZATION -> "THROUGHPUT_OPTIMIZATION"
+      | IOPS_OPTIMIZATION -> "IOPS_OPTIMIZATION"
+      | STORAGE_TYPE_OPTIMIZATION -> "STORAGE_TYPE_OPTIMIZATION"
+      | MISCONFIGURED_STATE_RECOVERY -> "MISCONFIGURED_STATE_RECOVERY"
+      | VOLUME_UPDATE_WITH_SNAPSHOT -> "VOLUME_UPDATE_WITH_SNAPSHOT"
+      | VOLUME_INITIALIZE_WITH_SNAPSHOT -> "VOLUME_INITIALIZE_WITH_SNAPSHOT"
+      | DOWNLOAD_DATA_FROM_BACKUP -> "DOWNLOAD_DATA_FROM_BACKUP"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3895,6 +5538,14 @@ module AdministrativeActionType =
       | "VOLUME_UPDATE" -> VOLUME_UPDATE
       | "SNAPSHOT_UPDATE" -> SNAPSHOT_UPDATE
       | "RELEASE_NFS_V3_LOCKS" -> RELEASE_NFS_V3_LOCKS
+      | "VOLUME_RESTORE" -> VOLUME_RESTORE
+      | "THROUGHPUT_OPTIMIZATION" -> THROUGHPUT_OPTIMIZATION
+      | "IOPS_OPTIMIZATION" -> IOPS_OPTIMIZATION
+      | "STORAGE_TYPE_OPTIMIZATION" -> STORAGE_TYPE_OPTIMIZATION
+      | "MISCONFIGURED_STATE_RECOVERY" -> MISCONFIGURED_STATE_RECOVERY
+      | "VOLUME_UPDATE_WITH_SNAPSHOT" -> VOLUME_UPDATE_WITH_SNAPSHOT
+      | "VOLUME_INITIALIZE_WITH_SNAPSHOT" -> VOLUME_INITIALIZE_WITH_SNAPSHOT
+      | "DOWNLOAD_DATA_FROM_BACKUP" -> DOWNLOAD_DATA_FROM_BACKUP
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3923,8 +5574,8 @@ module AdministrativeActionFailureDetails =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3937,20 +5588,28 @@ module rec
                              AdministrativeActionType.t option ;
                            progressPercent: ProgressPercent.t option
                              [@ocaml.doc
-                               "The percentage-complete status of a STORAGE_OPTIMIZATION administrative action. Does not apply to any other administrative action type."];
+                               "The percentage-complete status of a STORAGE_OPTIMIZATION or DOWNLOAD_DATA_FROM_BACKUP administrative action. Does not apply to any other administrative action type."];
                            requestTime: RequestTime.t option
                              [@ocaml.doc
                                "The time that the administrative action request was received."];
                            status: Status.t option
                              [@ocaml.doc
-                               "Describes the status of the administrative action, as follows: FAILED - Amazon FSx failed to process the administrative action successfully. IN_PROGRESS - Amazon FSx is processing the administrative action. PENDING - Amazon FSx is waiting to process the administrative action. COMPLETED - Amazon FSx has finished processing the administrative task. UPDATED_OPTIMIZING - For a storage-capacity increase update, Amazon FSx has updated the file system with the new storage capacity, and is now performing the storage-optimization process."];
+                               "The status of the administrative action, as follows: FAILED - Amazon FSx failed to process the administrative action successfully. IN_PROGRESS - Amazon FSx is processing the administrative action. PENDING - Amazon FSx is waiting to process the administrative action. COMPLETED - Amazon FSx has finished processing the administrative task. For a backup restore to a second-generation FSx for ONTAP file system, indicates that all data has been downloaded to the volume, and clients now have read-write access to volume. UPDATED_OPTIMIZING - For a storage-capacity increase update, Amazon FSx has updated the file system with the new storage capacity, and is now performing the storage-optimization process. PENDING - For a backup restore to a second-generation FSx for ONTAP file system, indicates that the file metadata is being downloaded onto the volume. The volume's Lifecycle state is CREATING. IN_PROGRESS - For a backup restore to a second-generation FSx for ONTAP file system, indicates that all metadata has been downloaded to the new volume and client can access data with read-only access while Amazon FSx downloads the file data to the volume. Track the progress of this process with the ProgressPercent element."];
                            targetFileSystemValues: FileSystem.t option
                              [@ocaml.doc
-                               "Describes the target value for the administration action, provided in the UpdateFileSystem operation. Returned for FILE_SYSTEM_UPDATE administrative actions."];
+                               "The target value for the administration action, provided in the UpdateFileSystem operation. Returned for FILE_SYSTEM_UPDATE administrative actions."];
                            failureDetails:
                              AdministrativeActionFailureDetails.t option ;
                            targetVolumeValues: Volume.t option ;
-                           targetSnapshotValues: Snapshot.t option }
+                           targetSnapshotValues: Snapshot.t option ;
+                           totalTransferBytes: TotalTransferBytes.t option
+                             [@ocaml.doc
+                               "The number of bytes that have transferred for the FSx for OpenZFS snapshot that you're copying."];
+                           remainingTransferBytes:
+                             RemainingTransferBytes.t option
+                             [@ocaml.doc
+                               "The remaining bytes to transfer for the FSx for OpenZFS snapshot that you're copying."];
+                           message: ErrorMessage.t option }
                          val make :
                            ?administrativeActionType:AdministrativeActionType.t
                              ->
@@ -3962,7 +5621,12 @@ module rec
                                        ->
                                        ?targetVolumeValues:Volume.t ->
                                          ?targetSnapshotValues:Snapshot.t ->
-                                           unit -> t
+                                           ?totalTransferBytes:TotalTransferBytes.t
+                                             ->
+                                             ?remainingTransferBytes:RemainingTransferBytes.t
+                                               ->
+                                               ?message:ErrorMessage.t ->
+                                                 unit -> t
                          val to_value : t -> Botodata.value
                          val to_query : t -> Client.Query.t
                          val of_xml : Xml.t -> t
@@ -3975,19 +5639,26 @@ module rec
       administrativeActionType: AdministrativeActionType.t option ;
       progressPercent: ProgressPercent.t option
         [@ocaml.doc
-          "The percentage-complete status of a STORAGE_OPTIMIZATION administrative action. Does not apply to any other administrative action type."];
+          "The percentage-complete status of a STORAGE_OPTIMIZATION or DOWNLOAD_DATA_FROM_BACKUP administrative action. Does not apply to any other administrative action type."];
       requestTime: RequestTime.t option
         [@ocaml.doc
           "The time that the administrative action request was received."];
       status: Status.t option
         [@ocaml.doc
-          "Describes the status of the administrative action, as follows: FAILED - Amazon FSx failed to process the administrative action successfully. IN_PROGRESS - Amazon FSx is processing the administrative action. PENDING - Amazon FSx is waiting to process the administrative action. COMPLETED - Amazon FSx has finished processing the administrative task. UPDATED_OPTIMIZING - For a storage-capacity increase update, Amazon FSx has updated the file system with the new storage capacity, and is now performing the storage-optimization process."];
+          "The status of the administrative action, as follows: FAILED - Amazon FSx failed to process the administrative action successfully. IN_PROGRESS - Amazon FSx is processing the administrative action. PENDING - Amazon FSx is waiting to process the administrative action. COMPLETED - Amazon FSx has finished processing the administrative task. For a backup restore to a second-generation FSx for ONTAP file system, indicates that all data has been downloaded to the volume, and clients now have read-write access to volume. UPDATED_OPTIMIZING - For a storage-capacity increase update, Amazon FSx has updated the file system with the new storage capacity, and is now performing the storage-optimization process. PENDING - For a backup restore to a second-generation FSx for ONTAP file system, indicates that the file metadata is being downloaded onto the volume. The volume's Lifecycle state is CREATING. IN_PROGRESS - For a backup restore to a second-generation FSx for ONTAP file system, indicates that all metadata has been downloaded to the new volume and client can access data with read-only access while Amazon FSx downloads the file data to the volume. Track the progress of this process with the ProgressPercent element."];
       targetFileSystemValues: FileSystem.t option
         [@ocaml.doc
-          "Describes the target value for the administration action, provided in the UpdateFileSystem operation. Returned for FILE_SYSTEM_UPDATE administrative actions."];
+          "The target value for the administration action, provided in the UpdateFileSystem operation. Returned for FILE_SYSTEM_UPDATE administrative actions."];
       failureDetails: AdministrativeActionFailureDetails.t option ;
       targetVolumeValues: Volume.t option ;
-      targetSnapshotValues: Snapshot.t option }
+      targetSnapshotValues: Snapshot.t option ;
+      totalTransferBytes: TotalTransferBytes.t option
+        [@ocaml.doc
+          "The number of bytes that have transferred for the FSx for OpenZFS snapshot that you're copying."];
+      remainingTransferBytes: RemainingTransferBytes.t option
+        [@ocaml.doc
+          "The remaining bytes to transfer for the FSx for OpenZFS snapshot that you're copying."];
+      message: ErrorMessage.t option }
     let make ?administrativeActionType =
       fun ?progressPercent ->
         fun ?requestTime ->
@@ -3996,17 +5667,23 @@ module rec
               fun ?failureDetails ->
                 fun ?targetVolumeValues ->
                   fun ?targetSnapshotValues ->
-                    fun () ->
-                      {
-                        administrativeActionType;
-                        progressPercent;
-                        requestTime;
-                        status;
-                        targetFileSystemValues;
-                        failureDetails;
-                        targetVolumeValues;
-                        targetSnapshotValues
-                      }
+                    fun ?totalTransferBytes ->
+                      fun ?remainingTransferBytes ->
+                        fun ?message ->
+                          fun () ->
+                            {
+                              administrativeActionType;
+                              progressPercent;
+                              requestTime;
+                              status;
+                              targetFileSystemValues;
+                              failureDetails;
+                              targetVolumeValues;
+                              targetSnapshotValues;
+                              totalTransferBytes;
+                              remainingTransferBytes;
+                              message
+                            }
     let to_value x =
       structure_to_value
         [("AdministrativeActionType",
@@ -4024,9 +5701,23 @@ module rec
         ("TargetVolumeValues",
           (Option.map x.targetVolumeValues ~f:Volume.to_value));
         ("TargetSnapshotValues",
-          (Option.map x.targetSnapshotValues ~f:Snapshot.to_value))]
+          (Option.map x.targetSnapshotValues ~f:Snapshot.to_value));
+        ("TotalTransferBytes",
+          (Option.map x.totalTransferBytes ~f:TotalTransferBytes.to_value));
+        ("RemainingTransferBytes",
+          (Option.map x.remainingTransferBytes
+             ~f:RemainingTransferBytes.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let remainingTransferBytes =
+        (Option.map ~f:RemainingTransferBytes.of_xml)
+          (Xml.child xml_arg0 "RemainingTransferBytes") in
+      let totalTransferBytes =
+        (Option.map ~f:TotalTransferBytes.of_xml)
+          (Xml.child xml_arg0 "TotalTransferBytes") in
       let targetSnapshotValues =
         (Option.map ~f:Snapshot.of_xml)
           (Xml.child xml_arg0 "TargetSnapshotValues") in
@@ -4049,33 +5740,41 @@ module rec
       let administrativeActionType =
         (Option.map ~f:AdministrativeActionType.of_xml)
           (Xml.child xml_arg0 "AdministrativeActionType") in
-      make ?targetSnapshotValues ?targetVolumeValues ?failureDetails
+      make ?message ?remainingTransferBytes ?totalTransferBytes
+        ?targetSnapshotValues ?targetVolumeValues ?failureDetails
         ?targetFileSystemValues ?status ?requestTime ?progressPercent
         ?administrativeActionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let remainingTransferBytes =
+        field_map json__ "RemainingTransferBytes"
+          RemainingTransferBytes.of_json in
+      let totalTransferBytes =
+        field_map json__ "TotalTransferBytes" TotalTransferBytes.of_json in
       let targetSnapshotValues =
-        field_map json "TargetSnapshotValues" Snapshot.of_json in
+        field_map json__ "TargetSnapshotValues" Snapshot.of_json in
       let targetVolumeValues =
-        field_map json "TargetVolumeValues" Volume.of_json in
+        field_map json__ "TargetVolumeValues" Volume.of_json in
       let failureDetails =
-        field_map json "FailureDetails"
+        field_map json__ "FailureDetails"
           AdministrativeActionFailureDetails.of_json in
       let targetFileSystemValues =
-        field_map json "TargetFileSystemValues" FileSystem.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let requestTime = field_map json "RequestTime" RequestTime.of_json in
+        field_map json__ "TargetFileSystemValues" FileSystem.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let requestTime = field_map json__ "RequestTime" RequestTime.of_json in
       let progressPercent =
-        field_map json "ProgressPercent" ProgressPercent.of_json in
+        field_map json__ "ProgressPercent" ProgressPercent.of_json in
       let administrativeActionType =
-        field_map json "AdministrativeActionType"
+        field_map json__ "AdministrativeActionType"
           AdministrativeActionType.of_json in
-      make ?targetSnapshotValues ?targetVolumeValues ?failureDetails
+      make ?message ?remainingTransferBytes ?totalTransferBytes
+        ?targetSnapshotValues ?targetVolumeValues ?failureDetails
         ?targetFileSystemValues ?status ?requestTime ?progressPercent
         ?administrativeActionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a specific Amazon FSx administrative action for the current Windows, Lustre, or OpenZFS file system."]
+       "Describes a specific Amazon FSx administrative action for the current Windows, Lustre, OpenZFS, or ONTAP file system or volume."]
  and
   AdministrativeActions:sig
                           type nonrec t = AdministrativeAction.t list
@@ -4091,6 +5790,9 @@ module rec
     type nonrec t = AdministrativeAction.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdministrativeAction.to_value)) |>
         (fun x -> `List x)
@@ -4118,7 +5820,7 @@ module rec
                       {
                       ownerId: AWSAccountId.t option
                         [@ocaml.doc
-                          "The Amazon Web Services account that created the file system. If the file system was created by an Identity and Access Management (IAM) user, the Amazon Web Services account to which the IAM user belongs is the owner."];
+                          "The Amazon Web Services account that created the file system. If the file system was created by a user in IAM Identity Center, the Amazon Web Services account to which the IAM user belongs is the owner."];
                       creationTime: CreationTime.t option
                         [@ocaml.doc
                           "The time that the file system was created, in seconds (since 1970-01-01T00:00:00Z), also known as Unix time."];
@@ -4134,10 +5836,10 @@ module rec
                       failureDetails: FileSystemFailureDetails.t option ;
                       storageCapacity: StorageCapacity.t option
                         [@ocaml.doc
-                          "The storage capacity of the file system in gibibytes (GiB)."];
+                          "The storage capacity of the file system in gibibytes (GiB). Amazon FSx responds with an HTTP status code 400 (Bad Request) if the value of StorageCapacity is outside of the minimum or maximum values."];
                       storageType: StorageType.t option
                         [@ocaml.doc
-                          "The type of storage the file system is using. If set to SSD, the file system uses solid state drive storage. If set to HDD, the file system uses hard disk drive storage."];
+                          "The type of storage the file system is using. If set to SSD, the file system uses solid state drive storage. If set to HDD, the file system uses hard disk drive storage. If set to INTELLIGENT_TIERING, the file system uses fully elastic, intelligently-tiered storage."];
                       vpcId: VpcId.t option
                         [@ocaml.doc
                           "The ID of the primary virtual private cloud (VPC) for the file system."];
@@ -4158,7 +5860,7 @@ module rec
                           "The Amazon Resource Name (ARN) of the file system resource."];
                       tags: Tags.t option
                         [@ocaml.doc
-                          "The tags to associate with the file system. For more information, see Tagging your Amazon EC2 resources in the Amazon EC2 User Guide."];
+                          "The tags to associate with the file system. For more information, see Tagging your Amazon FSx resources in the Amazon FSx for Lustre User Guide."];
                       windowsConfiguration:
                         WindowsFileSystemConfiguration.t option
                         [@ocaml.doc
@@ -4174,11 +5876,13 @@ module rec
                           "The configuration for this Amazon FSx for NetApp ONTAP file system."];
                       fileSystemTypeVersion: FileSystemTypeVersion.t option
                         [@ocaml.doc
-                          "The Lustre version of the Amazon FSx for Lustre file system, either 2.10 or 2.12."];
+                          "The Lustre version of the Amazon FSx for Lustre file system, which can be 2.10, 2.12, or 2.15."];
                       openZFSConfiguration:
                         OpenZFSFileSystemConfiguration.t option
                         [@ocaml.doc
-                          "The configuration for this Amazon FSx for OpenZFS file system."]}
+                          "The configuration for this Amazon FSx for OpenZFS file system."];
+                      networkType: NetworkType.t option
+                        [@ocaml.doc "The network type of the file system."]}
                     val make :
                       ?ownerId:AWSAccountId.t ->
                         ?creationTime:CreationTime.t ->
@@ -4207,7 +5911,10 @@ module rec
                                                             ?fileSystemTypeVersion:FileSystemTypeVersion.t
                                                               ->
                                                               ?openZFSConfiguration:OpenZFSFileSystemConfiguration.t
-                                                                -> unit -> t
+                                                                ->
+                                                                ?networkType:NetworkType.t
+                                                                  ->
+                                                                  unit -> t
                     val to_value : t -> Botodata.value
                     val to_query : t -> Client.Query.t
                     val of_xml : Xml.t -> t
@@ -4219,7 +5926,7 @@ module rec
            {
            ownerId: AWSAccountId.t option
              [@ocaml.doc
-               "The Amazon Web Services account that created the file system. If the file system was created by an Identity and Access Management (IAM) user, the Amazon Web Services account to which the IAM user belongs is the owner."];
+               "The Amazon Web Services account that created the file system. If the file system was created by a user in IAM Identity Center, the Amazon Web Services account to which the IAM user belongs is the owner."];
            creationTime: CreationTime.t option
              [@ocaml.doc
                "The time that the file system was created, in seconds (since 1970-01-01T00:00:00Z), also known as Unix time."];
@@ -4235,10 +5942,10 @@ module rec
            failureDetails: FileSystemFailureDetails.t option ;
            storageCapacity: StorageCapacity.t option
              [@ocaml.doc
-               "The storage capacity of the file system in gibibytes (GiB)."];
+               "The storage capacity of the file system in gibibytes (GiB). Amazon FSx responds with an HTTP status code 400 (Bad Request) if the value of StorageCapacity is outside of the minimum or maximum values."];
            storageType: StorageType.t option
              [@ocaml.doc
-               "The type of storage the file system is using. If set to SSD, the file system uses solid state drive storage. If set to HDD, the file system uses hard disk drive storage."];
+               "The type of storage the file system is using. If set to SSD, the file system uses solid state drive storage. If set to HDD, the file system uses hard disk drive storage. If set to INTELLIGENT_TIERING, the file system uses fully elastic, intelligently-tiered storage."];
            vpcId: VpcId.t option
              [@ocaml.doc
                "The ID of the primary virtual private cloud (VPC) for the file system."];
@@ -4259,7 +5966,7 @@ module rec
                "The Amazon Resource Name (ARN) of the file system resource."];
            tags: Tags.t option
              [@ocaml.doc
-               "The tags to associate with the file system. For more information, see Tagging your Amazon EC2 resources in the Amazon EC2 User Guide."];
+               "The tags to associate with the file system. For more information, see Tagging your Amazon FSx resources in the Amazon FSx for Lustre User Guide."];
            windowsConfiguration: WindowsFileSystemConfiguration.t option
              [@ocaml.doc
                "The configuration for this Amazon FSx for Windows File Server file system."];
@@ -4272,10 +5979,12 @@ module rec
                "The configuration for this Amazon FSx for NetApp ONTAP file system."];
            fileSystemTypeVersion: FileSystemTypeVersion.t option
              [@ocaml.doc
-               "The Lustre version of the Amazon FSx for Lustre file system, either 2.10 or 2.12."];
+               "The Lustre version of the Amazon FSx for Lustre file system, which can be 2.10, 2.12, or 2.15."];
            openZFSConfiguration: OpenZFSFileSystemConfiguration.t option
              [@ocaml.doc
-               "The configuration for this Amazon FSx for OpenZFS file system."]}
+               "The configuration for this Amazon FSx for OpenZFS file system."];
+           networkType: NetworkType.t option
+             [@ocaml.doc "The network type of the file system."]}
          let make ?ownerId =
            fun ?creationTime ->
              fun ?fileSystemId ->
@@ -4297,30 +6006,32 @@ module rec
                                              fun ?ontapConfiguration ->
                                                fun ?fileSystemTypeVersion ->
                                                  fun ?openZFSConfiguration ->
-                                                   fun () ->
-                                                     {
-                                                       ownerId;
-                                                       creationTime;
-                                                       fileSystemId;
-                                                       fileSystemType;
-                                                       lifecycle;
-                                                       failureDetails;
-                                                       storageCapacity;
-                                                       storageType;
-                                                       vpcId;
-                                                       subnetIds;
-                                                       networkInterfaceIds;
-                                                       dNSName;
-                                                       kmsKeyId;
-                                                       resourceARN;
-                                                       tags;
-                                                       windowsConfiguration;
-                                                       lustreConfiguration;
-                                                       administrativeActions;
-                                                       ontapConfiguration;
-                                                       fileSystemTypeVersion;
-                                                       openZFSConfiguration
-                                                     }
+                                                   fun ?networkType ->
+                                                     fun () ->
+                                                       {
+                                                         ownerId;
+                                                         creationTime;
+                                                         fileSystemId;
+                                                         fileSystemType;
+                                                         lifecycle;
+                                                         failureDetails;
+                                                         storageCapacity;
+                                                         storageType;
+                                                         vpcId;
+                                                         subnetIds;
+                                                         networkInterfaceIds;
+                                                         dNSName;
+                                                         kmsKeyId;
+                                                         resourceARN;
+                                                         tags;
+                                                         windowsConfiguration;
+                                                         lustreConfiguration;
+                                                         administrativeActions;
+                                                         ontapConfiguration;
+                                                         fileSystemTypeVersion;
+                                                         openZFSConfiguration;
+                                                         networkType
+                                                       }
          let to_value x =
            structure_to_value
              [("OwnerId", (Option.map x.ownerId ~f:AWSAccountId.to_value));
@@ -4366,9 +6077,14 @@ module rec
                   ~f:FileSystemTypeVersion.to_value));
              ("OpenZFSConfiguration",
                (Option.map x.openZFSConfiguration
-                  ~f:OpenZFSFileSystemConfiguration.to_value))]
+                  ~f:OpenZFSFileSystemConfiguration.to_value));
+             ("NetworkType",
+               (Option.map x.networkType ~f:NetworkType.to_value))]
          let to_query v = to_query to_value v
          let of_xml xml_arg0 =
+           let networkType =
+             (Option.map ~f:NetworkType.of_xml)
+               (Xml.child xml_arg0 "NetworkType") in
            let openZFSConfiguration =
              (Option.map ~f:OpenZFSFileSystemConfiguration.of_xml)
                (Xml.child xml_arg0 "OpenZFSConfiguration") in
@@ -4427,7 +6143,7 @@ module rec
            let ownerId =
              (Option.map ~f:AWSAccountId.of_xml)
                (Xml.child xml_arg0 "OwnerId") in
-           make ?openZFSConfiguration ?fileSystemTypeVersion
+           make ?networkType ?openZFSConfiguration ?fileSystemTypeVersion
              ?ontapConfiguration ?administrativeActions ?lustreConfiguration
              ?windowsConfiguration ?tags ?resourceARN ?kmsKeyId ?dNSName
              ?networkInterfaceIds ?subnetIds ?vpcId ?storageType
@@ -4435,48 +6151,54 @@ module rec
              ?fileSystemId ?creationTime ?ownerId ()
          let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning
                                                                "-32"]
-         let of_json json =
+         let of_json json__ =
+           let networkType =
+             field_map json__ "NetworkType" NetworkType.of_json in
            let openZFSConfiguration =
-             field_map json "OpenZFSConfiguration"
+             field_map json__ "OpenZFSConfiguration"
                OpenZFSFileSystemConfiguration.of_json in
            let fileSystemTypeVersion =
-             field_map json "FileSystemTypeVersion"
+             field_map json__ "FileSystemTypeVersion"
                FileSystemTypeVersion.of_json in
            let ontapConfiguration =
-             field_map json "OntapConfiguration"
+             field_map json__ "OntapConfiguration"
                OntapFileSystemConfiguration.of_json in
            let administrativeActions =
-             field_map json "AdministrativeActions"
+             field_map json__ "AdministrativeActions"
                AdministrativeActions.of_json in
            let lustreConfiguration =
-             field_map json "LustreConfiguration"
+             field_map json__ "LustreConfiguration"
                LustreFileSystemConfiguration.of_json in
            let windowsConfiguration =
-             field_map json "WindowsConfiguration"
+             field_map json__ "WindowsConfiguration"
                WindowsFileSystemConfiguration.of_json in
-           let tags = field_map json "Tags" Tags.of_json in
-           let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
-           let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-           let dNSName = field_map json "DNSName" DNSName.of_json in
+           let tags = field_map json__ "Tags" Tags.of_json in
+           let resourceARN =
+             field_map json__ "ResourceARN" ResourceARN.of_json in
+           let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+           let dNSName = field_map json__ "DNSName" DNSName.of_json in
            let networkInterfaceIds =
-             field_map json "NetworkInterfaceIds" NetworkInterfaceIds.of_json in
-           let subnetIds = field_map json "SubnetIds" SubnetIds.of_json in
-           let vpcId = field_map json "VpcId" VpcId.of_json in
-           let storageType = field_map json "StorageType" StorageType.of_json in
+             field_map json__ "NetworkInterfaceIds"
+               NetworkInterfaceIds.of_json in
+           let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+           let vpcId = field_map json__ "VpcId" VpcId.of_json in
+           let storageType =
+             field_map json__ "StorageType" StorageType.of_json in
            let storageCapacity =
-             field_map json "StorageCapacity" StorageCapacity.of_json in
+             field_map json__ "StorageCapacity" StorageCapacity.of_json in
            let failureDetails =
-             field_map json "FailureDetails" FileSystemFailureDetails.of_json in
+             field_map json__ "FailureDetails"
+               FileSystemFailureDetails.of_json in
            let lifecycle =
-             field_map json "Lifecycle" FileSystemLifecycle.of_json in
+             field_map json__ "Lifecycle" FileSystemLifecycle.of_json in
            let fileSystemType =
-             field_map json "FileSystemType" FileSystemType.of_json in
+             field_map json__ "FileSystemType" FileSystemType.of_json in
            let fileSystemId =
-             field_map json "FileSystemId" FileSystemId.of_json in
+             field_map json__ "FileSystemId" FileSystemId.of_json in
            let creationTime =
-             field_map json "CreationTime" CreationTime.of_json in
-           let ownerId = field_map json "OwnerId" AWSAccountId.of_json in
-           make ?openZFSConfiguration ?fileSystemTypeVersion
+             field_map json__ "CreationTime" CreationTime.of_json in
+           let ownerId = field_map json__ "OwnerId" AWSAccountId.of_json in
+           make ?networkType ?openZFSConfiguration ?fileSystemTypeVersion
              ?ontapConfiguration ?administrativeActions ?lustreConfiguration
              ?windowsConfiguration ?tags ?resourceARN ?kmsKeyId ?dNSName
              ?networkInterfaceIds ?subnetIds ?vpcId ?storageType
@@ -4602,19 +6324,20 @@ module rec
       make ?administrativeActions ?tags ?lifecycleTransitionReason ?lifecycle
         ?creationTime ?volumeId ?name ?snapshotId ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let administrativeActions =
-        field_map json "AdministrativeActions" AdministrativeActions.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "AdministrativeActions"
+          AdministrativeActions.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let lifecycleTransitionReason =
-        field_map json "LifecycleTransitionReason"
+        field_map json__ "LifecycleTransitionReason"
           LifecycleTransitionReason.of_json in
-      let lifecycle = field_map json "Lifecycle" SnapshotLifecycle.of_json in
-      let creationTime = field_map json "CreationTime" CreationTime.of_json in
-      let volumeId = field_map json "VolumeId" VolumeId.of_json in
-      let name = field_map json "Name" SnapshotName.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+      let lifecycle = field_map json__ "Lifecycle" SnapshotLifecycle.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      let name = field_map json__ "Name" SnapshotName.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?administrativeActions ?tags ?lifecycleTransitionReason ?lifecycle
         ?creationTime ?volumeId ?name ?snapshotId ?resourceARN ()
     let to_json v = composed_to_json to_value v
@@ -4667,7 +6390,7 @@ module rec
                                                                     AdministrativeActions.t
                                                                     option
                                                                     [@ocaml.doc
-                                                                    "A list of administrative actions for the file system that are in process or waiting to be processed. Administrative actions describe changes to the Amazon FSx system that you initiated."];
+                                                                    "A list of administrative actions for the volume that are in process or waiting to be processed. Administrative actions describe changes to the volume that you have initiated using the UpdateVolume action."];
                                                                     openZFSConfiguration:
                                                                     OpenZFSVolumeConfiguration.t
                                                                     option
@@ -4771,7 +6494,7 @@ module rec
                                                                     AdministrativeActions.t
                                                                     option
                                                                     [@ocaml.doc
-                                                                    "A list of administrative actions for the file system that are in process or waiting to be processed. Administrative actions describe changes to the Amazon FSx system that you initiated."];
+                                                                    "A list of administrative actions for the volume that are in process or waiting to be processed. Administrative actions describe changes to the volume that you have initiated using the UpdateVolume action."];
                                                                     openZFSConfiguration:
                                                                     OpenZFSVolumeConfiguration.t
                                                                     option
@@ -4991,77 +6714,77 @@ module rec
                                                                     s)[@@warning
                                                                     "-32"]
                                                                     let of_json
-                                                                    json =
+                                                                    json__ =
                                                                     let openZFSConfiguration
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "OpenZFSConfiguration"
                                                                     OpenZFSVolumeConfiguration.of_json in
                                                                     let administrativeActions
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "AdministrativeActions"
                                                                     AdministrativeActions.of_json in
                                                                     let lifecycleTransitionReason
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "LifecycleTransitionReason"
                                                                     LifecycleTransitionReason.of_json in
                                                                     let volumeType
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "VolumeType"
                                                                     VolumeType.of_json in
                                                                     let volumeId
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "VolumeId"
                                                                     VolumeId.of_json in
                                                                     let tags
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "Tags"
                                                                     Tags.of_json in
                                                                     let resourceARN
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "ResourceARN"
                                                                     ResourceARN.of_json in
                                                                     let ontapConfiguration
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "OntapConfiguration"
                                                                     OntapVolumeConfiguration.of_json in
                                                                     let name
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "Name"
                                                                     VolumeName.of_json in
                                                                     let lifecycle
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "Lifecycle"
                                                                     VolumeLifecycle.of_json in
                                                                     let fileSystemId
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "FileSystemId"
                                                                     FileSystemId.of_json in
                                                                     let creationTime
                                                                     =
                                                                     field_map
-                                                                    json
+                                                                    json__
                                                                     "CreationTime"
                                                                     CreationTime.of_json in
                                                                     make
@@ -5084,13 +6807,34 @@ module rec
                                                                     to_value
                                                                     v
                                                                     end
-[@@ocaml.doc
-  "Describes an Amazon FSx for NetApp ONTAP or Amazon FSx for OpenZFS volume."]
+[@@ocaml.doc "Describes an Amazon FSx volume."]
+module AggregateListMultiplier =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:200) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AggregateListMultiplier"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module AlternateDNSNames =
   struct
     type nonrec t = AlternateDNSName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AlternateDNSName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5115,7 +6859,7 @@ module AlternateDNSNames =
 module ClientRequestToken =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "(Optional) An idempotency token for resource creation, in a string of up to 64 ASCII characters. This token is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."]
+                            "(Optional) An idempotency token for resource creation, in a string of up to 63 ASCII characters. This token is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."]
     let context_ = "ClientRequestToken"
     let make i =
       let open Result in
@@ -5133,7 +6877,7 @@ module ClientRequestToken =
     let of_json j = string_of_json ~kind:"ClientRequestToken" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "(Optional) An idempotency token for resource creation, in a string of up to 64 ASCII characters. This token is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."]
+       "(Optional) An idempotency token for resource creation, in a string of up to 63 ASCII characters. This token is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."]
 module AssociateFileSystemAliasesRequest =
   struct
     type nonrec t =
@@ -5169,12 +6913,12 @@ module AssociateFileSystemAliasesRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~aliases ~fileSystemId ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aliases = field_map_exn json "Aliases" AlternateDNSNames.of_json in
+    let of_json json__ =
+      let aliases = field_map_exn json__ "Aliases" AlternateDNSNames.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ~aliases ~fileSystemId ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5193,8 +6937,8 @@ module InternalServerError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A generic error indicating a server-side failure."]
@@ -5212,8 +6956,8 @@ module FileSystemNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5232,8 +6976,8 @@ module BadRequest =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5298,8 +7042,8 @@ module AssociateFileSystemAliasesResponse =
         (Option.map ~f:Aliases.of_xml) (Xml.child xml_arg0 "Aliases") in
       make ?aliases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aliases = field_map json "Aliases" Aliases.of_json in
+    let of_json json__ =
+      let aliases = field_map json__ "Aliases" Aliases.of_json in
       make ?aliases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5337,6 +7081,9 @@ module EventTypes =
     type nonrec t = EventType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:3); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5363,7 +7110,7 @@ module AutoExportPolicy =
       {
       events: EventTypes.t option
         [@ocaml.doc
-          "The AutoExportPolicy can have the following event values: NEW - Amazon FSx automatically exports new files and directories to the data repository as they are added to the file system. CHANGED - Amazon FSx automatically exports changes to files and directories on the file system to the data repository. DELETED - Files and directories are automatically deleted on the data repository when they are deleted on the file system. You can define any combination of event types for your AutoExportPolicy."]}
+          "The AutoExportPolicy can have the following event values: NEW - New files and directories are automatically exported to the data repository as they are added to the file system. CHANGED - Changes to files and directories on the file system are automatically exported to the data repository. DELETED - Files and directories are automatically deleted on the data repository when they are deleted on the file system. You can define any combination of event types for your AutoExportPolicy."]}
     let make ?events = fun () -> { events }
     let to_value x =
       structure_to_value
@@ -5374,12 +7121,12 @@ module AutoExportPolicy =
         (Option.map ~f:EventTypes.of_xml) (Xml.child xml_arg0 "Events") in
       make ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" EventTypes.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" EventTypes.of_json in
       make ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a data repository association's automatic export policy. The AutoExportPolicy defines the types of updated objects on the file system that will be automatically exported to the data repository. As you create, modify, or delete files, Amazon FSx automatically exports the defined changes asynchronously once your application finishes modifying the file. This AutoExportPolicy is supported only for file systems with the Persistent_2 deployment type."]
+       "Describes a data repository association's automatic export policy. The AutoExportPolicy defines the types of updated objects on the file system that will be automatically exported to the data repository. As you create, modify, or delete files, Amazon FSx for Lustre automatically exports the defined changes asynchronously once your application finishes modifying the file. The AutoExportPolicy is only supported on Amazon FSx for Lustre file systems with a data repository association."]
 module AutoImportPolicy =
   struct
     type nonrec t =
@@ -5397,12 +7144,26 @@ module AutoImportPolicy =
         (Option.map ~f:EventTypes.of_xml) (Xml.child xml_arg0 "Events") in
       make ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" EventTypes.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" EventTypes.of_json in
       make ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the data repository association's automatic import policy. The AutoImportPolicy defines how Amazon FSx keeps your file metadata and directory listings up to date by importing changes to your file system as you modify objects in a linked S3 bucket. This AutoImportPolicy is supported only for file systems with the Persistent_2 deployment type."]
+       "Describes the data repository association's automatic import policy. The AutoImportPolicy defines how Amazon FSx keeps your file metadata and directory listings up to date by importing changes to your Amazon FSx for Lustre file system as you modify objects in a linked S3 bucket. The AutoImportPolicy is only supported on Amazon FSx for Lustre file systems with a data repository association."]
+module SizeInBytes =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourceType =
   struct
     type nonrec t =
@@ -5555,8 +7316,8 @@ module BackupFailureDetails =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5565,16 +7326,17 @@ module Backup =
   struct
     type nonrec t =
       {
-      backupId: BackupId.t [@ocaml.doc "The ID of the backup."];
-      lifecycle: BackupLifecycle.t
+      backupId: BackupId.t option [@ocaml.doc "The ID of the backup."];
+      lifecycle: BackupLifecycle.t option
         [@ocaml.doc
           "The lifecycle status of the backup. AVAILABLE - The backup is fully available. PENDING - For user-initiated backups on Lustre file systems only; Amazon FSx hasn't started creating the backup. CREATING - Amazon FSx is creating the backup. TRANSFERRING - For user-initiated backups on Lustre file systems only; Amazon FSx is transferring the backup to Amazon S3. COPYING - Amazon FSx is copying the backup. DELETED - Amazon FSx deleted the backup and it's no longer available. FAILED - Amazon FSx couldn't finish the backup."];
       failureDetails: BackupFailureDetails.t option
         [@ocaml.doc
           "Details explaining any failures that occurred when creating a backup."];
-      type_: BackupType.t [@ocaml.doc "The type of the file-system backup."];
+      type_: BackupType.t option
+        [@ocaml.doc "The type of the file-system backup."];
       progressPercent: ProgressPercent.t option ;
-      creationTime: CreationTime.t
+      creationTime: CreationTime.t option
         [@ocaml.doc "The time when a particular backup was created."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
@@ -5584,7 +7346,7 @@ module Backup =
           "The Amazon Resource Name (ARN) for the backup resource."];
       tags: Tags.t option
         [@ocaml.doc "The tags associated with a particular file system."];
-      fileSystem: FileSystem.t
+      fileSystem: FileSystem.t option
         [@ocaml.doc
           "The metadata of the file system associated with the backup. This metadata is persisted even if the file system is deleted."];
       directoryInformation: ActiveDirectoryBackupAttributes.t option
@@ -5597,57 +7359,62 @@ module Backup =
           "The source Region of the backup. Specifies the Region from where this backup is copied."];
       resourceType: ResourceType.t option
         [@ocaml.doc "Specifies the resource type that's backed up."];
-      volume: Volume.t option }
-    let context_ = "Backup"
-    let make ?failureDetails =
-      fun ?progressPercent ->
-        fun ?kmsKeyId ->
-          fun ?resourceARN ->
-            fun ?tags ->
-              fun ?directoryInformation ->
-                fun ?ownerId ->
-                  fun ?sourceBackupId ->
-                    fun ?sourceBackupRegion ->
-                      fun ?resourceType ->
-                        fun ?volume ->
-                          fun ~backupId ->
-                            fun ~lifecycle ->
-                              fun ~type_ ->
-                                fun ~creationTime ->
-                                  fun ~fileSystem ->
-                                    fun () ->
-                                      {
-                                        failureDetails;
-                                        progressPercent;
-                                        kmsKeyId;
-                                        resourceARN;
-                                        tags;
-                                        directoryInformation;
-                                        ownerId;
-                                        sourceBackupId;
-                                        sourceBackupRegion;
-                                        resourceType;
-                                        volume;
-                                        backupId;
-                                        lifecycle;
-                                        type_;
-                                        creationTime;
-                                        fileSystem
-                                      }
+      volume: Volume.t option ;
+      sizeInBytes: SizeInBytes.t option
+        [@ocaml.doc
+          "The size of the backup in bytes. This represents the amount of data that the file system would contain if you restore this backup."]}
+    let make ?backupId =
+      fun ?lifecycle ->
+        fun ?failureDetails ->
+          fun ?type_ ->
+            fun ?progressPercent ->
+              fun ?creationTime ->
+                fun ?kmsKeyId ->
+                  fun ?resourceARN ->
+                    fun ?tags ->
+                      fun ?fileSystem ->
+                        fun ?directoryInformation ->
+                          fun ?ownerId ->
+                            fun ?sourceBackupId ->
+                              fun ?sourceBackupRegion ->
+                                fun ?resourceType ->
+                                  fun ?volume ->
+                                    fun ?sizeInBytes ->
+                                      fun () ->
+                                        {
+                                          backupId;
+                                          lifecycle;
+                                          failureDetails;
+                                          type_;
+                                          progressPercent;
+                                          creationTime;
+                                          kmsKeyId;
+                                          resourceARN;
+                                          tags;
+                                          fileSystem;
+                                          directoryInformation;
+                                          ownerId;
+                                          sourceBackupId;
+                                          sourceBackupRegion;
+                                          resourceType;
+                                          volume;
+                                          sizeInBytes
+                                        }
     let to_value x =
       structure_to_value
-        [("BackupId", (Some (BackupId.to_value x.backupId)));
-        ("Lifecycle", (Some (BackupLifecycle.to_value x.lifecycle)));
+        [("BackupId", (Option.map x.backupId ~f:BackupId.to_value));
+        ("Lifecycle", (Option.map x.lifecycle ~f:BackupLifecycle.to_value));
         ("FailureDetails",
           (Option.map x.failureDetails ~f:BackupFailureDetails.to_value));
-        ("Type", (Some (BackupType.to_value x.type_)));
+        ("Type", (Option.map x.type_ ~f:BackupType.to_value));
         ("ProgressPercent",
           (Option.map x.progressPercent ~f:ProgressPercent.to_value));
-        ("CreationTime", (Some (CreationTime.to_value x.creationTime)));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:CreationTime.to_value));
         ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
         ("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("Tags", (Option.map x.tags ~f:Tags.to_value));
-        ("FileSystem", (Some (FileSystem.to_value x.fileSystem)));
+        ("FileSystem", (Option.map x.fileSystem ~f:FileSystem.to_value));
         ("DirectoryInformation",
           (Option.map x.directoryInformation
              ~f:ActiveDirectoryBackupAttributes.to_value));
@@ -5658,9 +7425,12 @@ module Backup =
           (Option.map x.sourceBackupRegion ~f:Region.to_value));
         ("ResourceType",
           (Option.map x.resourceType ~f:ResourceType.to_value));
-        ("Volume", (Option.map x.volume ~f:Volume.to_value))]
+        ("Volume", (Option.map x.volume ~f:Volume.to_value));
+        ("SizeInBytes", (Option.map x.sizeInBytes ~f:SizeInBytes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sizeInBytes =
+        (Option.map ~f:SizeInBytes.of_xml) (Xml.child xml_arg0 "SizeInBytes") in
       let volume =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "Volume") in
       let resourceType =
@@ -5677,61 +7447,60 @@ module Backup =
         (Option.map ~f:ActiveDirectoryBackupAttributes.of_xml)
           (Xml.child xml_arg0 "DirectoryInformation") in
       let fileSystem =
-        FileSystem.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FileSystem") in
+        (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let resourceARN =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       let kmsKeyId =
         (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let creationTime =
-        CreationTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationTime") in
+        (Option.map ~f:CreationTime.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
       let progressPercent =
         (Option.map ~f:ProgressPercent.of_xml)
           (Xml.child xml_arg0 "ProgressPercent") in
       let type_ =
-        BackupType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+        (Option.map ~f:BackupType.of_xml) (Xml.child xml_arg0 "Type") in
       let failureDetails =
         (Option.map ~f:BackupFailureDetails.of_xml)
           (Xml.child xml_arg0 "FailureDetails") in
       let lifecycle =
-        BackupLifecycle.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Lifecycle") in
+        (Option.map ~f:BackupLifecycle.of_xml)
+          (Xml.child xml_arg0 "Lifecycle") in
       let backupId =
-        BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
-      make ?volume ?resourceType ?sourceBackupRegion ?sourceBackupId ?ownerId
-        ?directoryInformation ~fileSystem ?tags ?resourceARN ?kmsKeyId
-        ~creationTime ?progressPercent ~type_ ?failureDetails ~lifecycle
-        ~backupId ()
+        (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "BackupId") in
+      make ?sizeInBytes ?volume ?resourceType ?sourceBackupRegion
+        ?sourceBackupId ?ownerId ?directoryInformation ?fileSystem ?tags
+        ?resourceARN ?kmsKeyId ?creationTime ?progressPercent ?type_
+        ?failureDetails ?lifecycle ?backupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volume = field_map json "Volume" Volume.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+    let of_json json__ =
+      let sizeInBytes = field_map json__ "SizeInBytes" SizeInBytes.of_json in
+      let volume = field_map json__ "Volume" Volume.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       let sourceBackupRegion =
-        field_map json "SourceBackupRegion" Region.of_json in
-      let sourceBackupId = field_map json "SourceBackupId" BackupId.of_json in
-      let ownerId = field_map json "OwnerId" AWSAccountId.of_json in
+        field_map json__ "SourceBackupRegion" Region.of_json in
+      let sourceBackupId = field_map json__ "SourceBackupId" BackupId.of_json in
+      let ownerId = field_map json__ "OwnerId" AWSAccountId.of_json in
       let directoryInformation =
-        field_map json "DirectoryInformation"
+        field_map json__ "DirectoryInformation"
           ActiveDirectoryBackupAttributes.of_json in
-      let fileSystem = field_map_exn json "FileSystem" FileSystem.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let creationTime =
-        field_map_exn json "CreationTime" CreationTime.of_json in
+      let fileSystem = field_map json__ "FileSystem" FileSystem.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
       let progressPercent =
-        field_map json "ProgressPercent" ProgressPercent.of_json in
-      let type_ = field_map_exn json "Type" BackupType.of_json in
+        field_map json__ "ProgressPercent" ProgressPercent.of_json in
+      let type_ = field_map json__ "Type" BackupType.of_json in
       let failureDetails =
-        field_map json "FailureDetails" BackupFailureDetails.of_json in
-      let lifecycle = field_map_exn json "Lifecycle" BackupLifecycle.of_json in
-      let backupId = field_map_exn json "BackupId" BackupId.of_json in
-      make ?volume ?resourceType ?sourceBackupRegion ?sourceBackupId ?ownerId
-        ?directoryInformation ~fileSystem ?tags ?resourceARN ?kmsKeyId
-        ~creationTime ?progressPercent ~type_ ?failureDetails ~lifecycle
-        ~backupId ()
+        field_map json__ "FailureDetails" BackupFailureDetails.of_json in
+      let lifecycle = field_map json__ "Lifecycle" BackupLifecycle.of_json in
+      let backupId = field_map json__ "BackupId" BackupId.of_json in
+      make ?sizeInBytes ?volume ?resourceType ?sourceBackupRegion
+        ?sourceBackupId ?ownerId ?directoryInformation ?fileSystem ?tags
+        ?resourceARN ?kmsKeyId ?creationTime ?progressPercent ?type_
+        ?failureDetails ?lifecycle ?backupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A backup of an Amazon FSx for Windows File Server, Amazon FSx for Lustre file system, Amazon FSx for NetApp ONTAP volume, or Amazon FSx for OpenZFS file system."]
@@ -5754,9 +7523,9 @@ module BackupBeingCopied =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?backupId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backupId = field_map json "BackupId" BackupId.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let backupId = field_map json__ "BackupId" BackupId.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?backupId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You can't delete a backup while it's being copied."]
@@ -5765,6 +7534,9 @@ module BackupIds =
     type nonrec t = BackupId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BackupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5799,8 +7571,8 @@ module BackupInProgress =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5819,8 +7591,8 @@ module BackupNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5849,9 +7621,9 @@ module BackupRestoring =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?fileSystemId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?fileSystemId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5861,6 +7633,9 @@ module Backups =
     type nonrec t = Backup.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Backup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5930,8 +7705,8 @@ module CancelDataRepositoryTaskRequest =
         TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskId") in
       make ~taskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map_exn json "TaskId" TaskId.of_json in
+    let of_json json__ =
+      let taskId = field_map_exn json__ "TaskId" TaskId.of_json in
       make ~taskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels a data repository task."]
@@ -5949,8 +7724,8 @@ module UnsupportedOperation =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5969,8 +7744,8 @@ module DataRepositoryTaskNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6029,8 +7804,8 @@ module DataRepositoryTaskEnded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6121,14 +7896,32 @@ module CancelDataRepositoryTaskResponse =
           (Xml.child xml_arg0 "Lifecycle") in
       make ?taskId ?lifecycle ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map json "TaskId" TaskId.of_json in
+    let of_json json__ =
+      let taskId = field_map json__ "TaskId" TaskId.of_json in
       let lifecycle =
-        field_map json "Lifecycle" DataRepositoryTaskLifecycle.of_json in
+        field_map json__ "Lifecycle" DataRepositoryTaskLifecycle.of_json in
       make ?taskId ?lifecycle ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels an existing Amazon FSx for Lustre data repository task if that task is in either the PENDING or EXECUTING state. When you cancel a task, Amazon FSx does the following. Any files that FSx has already exported are not reverted. FSx continues to export any files that are \"in-flight\" when the cancel operation is received. FSx does not export any files that have not yet been exported."]
+       "Cancels an existing Amazon FSx for Lustre data repository task if that task is in either the PENDING or EXECUTING state. When you cancel an export task, Amazon FSx does the following. Any files that FSx has already exported are not reverted. FSx continues to export any files that are in-flight when the cancel operation is received. FSx does not export any files that have not yet been exported. For a release task, Amazon FSx will stop releasing files upon cancellation. Any files that have already been released will remain in the released state."]
+module CapacityToRelease =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:2147483647L) >>=
+             (fun () -> check_int64_min i ~min:1L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module ReportScope =
   struct
     type nonrec t =
@@ -6182,7 +7975,7 @@ module CompletionReport =
           "Set Enabled to True to generate a CompletionReport when the task completes. If set to true, then you need to provide a report Scope, Path, and Format. Set Enabled to False if you do not want a CompletionReport generated when the task completes."];
       path: ArchivePath.t option
         [@ocaml.doc
-          "Required if Enabled is set to true. Specifies the location of the report on the file system's linked S3 data repository. An absolute path that defines where the completion report will be stored in the destination location. The Path you provide must be located within the file system\226\128\153s ExportPath. An example Path value is \"s3://myBucket/myExportPath/optionalPrefix\". The report provides the following information for each file in the report: FilePath, FileStatus, and ErrorCode. To learn more about a file system's ExportPath, see ."];
+          "Required if Enabled is set to true. Specifies the location of the report on the file system's linked S3 data repository. An absolute path that defines where the completion report will be stored in the destination location. The Path you provide must be located within the file system\226\128\153s ExportPath. An example Path value is \"s3://amzn-s3-demo-bucket/myExportPath/optionalPrefix\". The report provides the following information for each file in the report: FilePath, FileStatus, and ErrorCode."];
       format: ReportFormat.t option
         [@ocaml.doc
           "Required if Enabled is set to true. Specifies the format of the CompletionReport. REPORT_CSV_20191124 is the only format currently supported. When Format is set to REPORT_CSV_20191124, the CompletionReport is provided in CSV format, and is delivered to \\{path\\}/task-\\{id\\}/failures.csv."];
@@ -6212,11 +8005,11 @@ module CompletionReport =
         Flag.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?scope ?format ?path ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scope = field_map json "Scope" ReportScope.of_json in
-      let format = field_map json "Format" ReportFormat.of_json in
-      let path = field_map json "Path" ArchivePath.of_json in
-      let enabled = field_map_exn json "Enabled" Flag.of_json in
+    let of_json json__ =
+      let scope = field_map json__ "Scope" ReportScope.of_json in
+      let format = field_map json__ "Format" ReportFormat.of_json in
+      let path = field_map json__ "Path" ArchivePath.of_json in
+      let enabled = field_map_exn json__ "Enabled" Flag.of_json in
       make ?scope ?format ?path ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6301,15 +8094,15 @@ module CopyBackupRequest =
       make ?tags ?copyTags ?kmsKeyId ?sourceRegion ~sourceBackupId
         ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let copyTags = field_map json "CopyTags" Flag.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let sourceRegion = field_map json "SourceRegion" Region.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let copyTags = field_map json__ "CopyTags" Flag.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let sourceRegion = field_map json__ "SourceRegion" Region.of_json in
       let sourceBackupId =
-        field_map_exn json "SourceBackupId" SourceBackupId.of_json in
+        field_map_exn json__ "SourceBackupId" SourceBackupId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ?tags ?copyTags ?kmsKeyId ?sourceRegion ~sourceBackupId
         ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
@@ -6334,9 +8127,9 @@ module SourceBackupUnavailable =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?backupId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backupId = field_map json "BackupId" BackupId.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let backupId = field_map json__ "BackupId" BackupId.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?backupId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6353,6 +8146,7 @@ module ServiceLimit =
       | STORAGE_VIRTUAL_MACHINES_PER_FILE_SYSTEM 
       | VOLUMES_PER_FILE_SYSTEM 
       | TOTAL_SSD_IOPS 
+      | FILE_CACHE_COUNT 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -6367,6 +8161,7 @@ module ServiceLimit =
           "STORAGE_VIRTUAL_MACHINES_PER_FILE_SYSTEM"
       | VOLUMES_PER_FILE_SYSTEM -> "VOLUMES_PER_FILE_SYSTEM"
       | TOTAL_SSD_IOPS -> "TOTAL_SSD_IOPS"
+      | FILE_CACHE_COUNT -> "FILE_CACHE_COUNT"
       | Non_static_id s -> s
     let of_string =
       function
@@ -6380,6 +8175,7 @@ module ServiceLimit =
           STORAGE_VIRTUAL_MACHINES_PER_FILE_SYSTEM
       | "VOLUMES_PER_FILE_SYSTEM" -> VOLUMES_PER_FILE_SYSTEM
       | "TOTAL_SSD_IOPS" -> TOTAL_SSD_IOPS
+      | "FILE_CACHE_COUNT" -> FILE_CACHE_COUNT
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -6393,28 +8189,26 @@ module ServiceLimitExceeded =
   struct
     type nonrec t =
       {
-      limit: ServiceLimit.t
+      limit: ServiceLimit.t option
         [@ocaml.doc "Enumeration of the service limit that was exceeded."];
       message: ErrorMessage.t option }
-    let context_ = "ServiceLimitExceeded"
-    let make ?message = fun ~limit -> fun () -> { message; limit }
+    let make ?limit = fun ?message -> fun () -> { limit; message }
     let to_value x =
       structure_to_value
-        [("Limit", (Some (ServiceLimit.to_value x.limit)));
+        [("Limit", (Option.map x.limit ~f:ServiceLimit.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let limit =
-        ServiceLimit.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
-      make ?message ~limit ()
+        (Option.map ~f:ServiceLimit.of_xml) (Xml.child xml_arg0 "Limit") in
+      make ?message ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let limit = field_map_exn json "Limit" ServiceLimit.of_json in
-      make ?message ~limit ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let limit = field_map json__ "Limit" ServiceLimit.of_json in
+      make ?message ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An error indicating that a particular service limit was exceeded. You can increase some service limits by contacting Amazon Web Services Support."]
@@ -6432,8 +8226,8 @@ module InvalidSourceKmsKey =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6452,8 +8246,8 @@ module InvalidRegion =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6472,8 +8266,8 @@ module InvalidDestinationKmsKey =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6492,8 +8286,8 @@ module IncompatibleRegionForMultiAZ =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6518,29 +8312,27 @@ module IncompatibleParameterError =
   struct
     type nonrec t =
       {
-      parameter: Parameter.t
+      parameter: Parameter.t option
         [@ocaml.doc
           "A parameter that is incompatible with the earlier request."];
       message: ErrorMessage.t option }
-    let context_ = "IncompatibleParameterError"
-    let make ?message = fun ~parameter -> fun () -> { message; parameter }
+    let make ?parameter = fun ?message -> fun () -> { parameter; message }
     let to_value x =
       structure_to_value
-        [("Parameter", (Some (Parameter.to_value x.parameter)));
+        [("Parameter", (Option.map x.parameter ~f:Parameter.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let parameter =
-        Parameter.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Parameter") in
-      make ?message ~parameter ()
+        (Option.map ~f:Parameter.of_xml) (Xml.child xml_arg0 "Parameter") in
+      make ?message ?parameter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let parameter = field_map_exn json "Parameter" Parameter.of_json in
-      make ?message ~parameter ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let parameter = field_map json__ "Parameter" Parameter.of_json in
+      make ?message ?parameter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The error returned when a second request is received with the same client request token but different parameters settings. A client request token should always uniquely identify a single request."]
@@ -6671,11 +8463,1378 @@ module CopyBackupResponse =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backup = field_map json "Backup" Backup.of_json in make ?backup ()
+    let of_json json__ =
+      let backup = field_map json__ "Backup" Backup.of_json in
+      make ?backup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Copies an existing backup within the same Amazon Web Services account to another Amazon Web Services Region (cross-Region copy) or within the same Amazon Web Services Region (in-Region copy). You can have up to five backup copy requests in progress to a single destination Region per account. You can use cross-Region backup copies for cross-Region disaster recovery. You can periodically take backups and copy them to another Region so that in the event of a disaster in the primary Region, you can restore from backup and recover availability quickly in the other Region. You can make cross-Region copies only within your Amazon Web Services partition. A partition is a grouping of Regions. Amazon Web Services currently has three partitions: aws (Standard Regions), aws-cn (China Regions), and aws-us-gov (Amazon Web Services GovCloud \\[US\\] Regions). You can also use backup copies to clone your file dataset to another Region or within the same Region. You can use the SourceRegion parameter to specify the Amazon Web Services Region from which the backup will be copied. For example, if you make the call from the us-west-1 Region and want to copy a backup from the us-east-2 Region, you specify us-east-2 in the SourceRegion parameter to make a cross-Region copy. If you don't specify a Region, the backup copy is created in the same Region where the request is sent from (in-Region copy). For more information about creating backup copies, see Copying backups in the Amazon FSx for Windows User Guide, Copying backups in the Amazon FSx for Lustre User Guide, and Copying backups in the Amazon FSx for OpenZFS User Guide."]
+module UpdateOpenZFSVolumeOption =
+  struct
+    type nonrec t =
+      | DELETE_INTERMEDIATE_SNAPSHOTS 
+      | DELETE_CLONED_VOLUMES 
+      | DELETE_INTERMEDIATE_DATA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DELETE_INTERMEDIATE_SNAPSHOTS -> "DELETE_INTERMEDIATE_SNAPSHOTS"
+      | DELETE_CLONED_VOLUMES -> "DELETE_CLONED_VOLUMES"
+      | DELETE_INTERMEDIATE_DATA -> "DELETE_INTERMEDIATE_DATA"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DELETE_INTERMEDIATE_SNAPSHOTS" -> DELETE_INTERMEDIATE_SNAPSHOTS
+      | "DELETE_CLONED_VOLUMES" -> DELETE_CLONED_VOLUMES
+      | "DELETE_INTERMEDIATE_DATA" -> DELETE_INTERMEDIATE_DATA
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration UpdateOpenZFSVolumeOption" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"UpdateOpenZFSVolumeOption" j)
+    let to_json = simple_to_json to_value
+  end
+module UpdateOpenZFSVolumeOptions =
+  struct
+    type nonrec t = UpdateOpenZFSVolumeOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UpdateOpenZFSVolumeOption.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UpdateOpenZFSVolumeOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UpdateOpenZFSVolumeOptions"
+        ~of_json:UpdateOpenZFSVolumeOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CopySnapshotAndUpdateVolumeRequest =
+  struct
+    type nonrec t =
+      {
+      clientRequestToken: ClientRequestToken.t option ;
+      volumeId: VolumeId.t
+        [@ocaml.doc
+          "Specifies the ID of the volume that you are copying the snapshot to."];
+      sourceSnapshotARN: ResourceARN.t ;
+      copyStrategy: OpenZFSCopyStrategy.t option
+        [@ocaml.doc
+          "Specifies the strategy to use when copying data from a snapshot to the volume. FULL_COPY - Copies all data from the snapshot to the volume. INCREMENTAL_COPY - Copies only the snapshot data that's changed since the previous replication. CLONE isn't a valid copy strategy option for the CopySnapshotAndUpdateVolume operation."];
+      options: UpdateOpenZFSVolumeOptions.t option
+        [@ocaml.doc
+          "Confirms that you want to delete data on the destination volume that wasn\226\128\153t there during the previous snapshot replication. Your replication will fail if you don\226\128\153t include an option for a specific type of data and that data is on your destination. For example, if you don\226\128\153t include DELETE_INTERMEDIATE_SNAPSHOTS and there are intermediate snapshots on the destination, you can\226\128\153t copy the snapshot. DELETE_INTERMEDIATE_SNAPSHOTS - Deletes snapshots on the destination volume that aren\226\128\153t on the source volume. DELETE_CLONED_VOLUMES - Deletes snapshot clones on the destination volume that aren't on the source volume. DELETE_INTERMEDIATE_DATA - Overwrites snapshots on the destination volume that don\226\128\153t match the source snapshot that you\226\128\153re copying."]}
+    let context_ = "CopySnapshotAndUpdateVolumeRequest"
+    let make ?clientRequestToken =
+      fun ?copyStrategy ->
+        fun ?options ->
+          fun ~volumeId ->
+            fun ~sourceSnapshotARN ->
+              fun () ->
+                {
+                  clientRequestToken;
+                  copyStrategy;
+                  options;
+                  volumeId;
+                  sourceSnapshotARN
+                }
+    let to_value x =
+      structure_to_value
+        [("ClientRequestToken",
+           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("VolumeId", (Some (VolumeId.to_value x.volumeId)));
+        ("SourceSnapshotARN",
+          (Some (ResourceARN.to_value x.sourceSnapshotARN)));
+        ("CopyStrategy",
+          (Option.map x.copyStrategy ~f:OpenZFSCopyStrategy.to_value));
+        ("Options",
+          (Option.map x.options ~f:UpdateOpenZFSVolumeOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let options =
+        (Option.map ~f:UpdateOpenZFSVolumeOptions.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      let copyStrategy =
+        (Option.map ~f:OpenZFSCopyStrategy.of_xml)
+          (Xml.child xml_arg0 "CopyStrategy") in
+      let sourceSnapshotARN =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceSnapshotARN") in
+      let volumeId =
+        VolumeId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VolumeId") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      make ?options ?copyStrategy ~sourceSnapshotARN ~volumeId
+        ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let options =
+        field_map json__ "Options" UpdateOpenZFSVolumeOptions.of_json in
+      let copyStrategy =
+        field_map json__ "CopyStrategy" OpenZFSCopyStrategy.of_json in
+      let sourceSnapshotARN =
+        field_map_exn json__ "SourceSnapshotARN" ResourceARN.of_json in
+      let volumeId = field_map_exn json__ "VolumeId" VolumeId.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      make ?options ?copyStrategy ~sourceSnapshotARN ~volumeId
+        ?clientRequestToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing volume by using a snapshot from another Amazon FSx for OpenZFS file system. For more information, see on-demand data replication in the Amazon FSx for OpenZFS User Guide."]
+module CopySnapshotAndUpdateVolumeResponse =
+  struct
+    type nonrec t =
+      {
+      volumeId: VolumeId.t option
+        [@ocaml.doc "The ID of the volume that you copied the snapshot to."];
+      lifecycle: VolumeLifecycle.t option
+        [@ocaml.doc "The lifecycle state of the destination volume."];
+      administrativeActions: AdministrativeActions.t option
+        [@ocaml.doc
+          "A list of administrative actions for the file system that are in process or waiting to be processed. Administrative actions describe changes to the Amazon FSx system."]}
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `IncompatibleParameterError of IncompatibleParameterError.t 
+      | `InternalServerError of InternalServerError.t 
+      | `ServiceLimitExceeded of ServiceLimitExceeded.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?volumeId =
+      fun ?lifecycle ->
+        fun ?administrativeActions ->
+          fun () -> { volumeId; lifecycle; administrativeActions }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError
+            (IncompatibleParameterError.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError (IncompatibleParameterError.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `IncompatibleParameterError e ->
+          `Assoc
+            [("error", (`String "IncompatibleParameterError"));
+            ("details", (IncompatibleParameterError.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ServiceLimitExceeded e ->
+          `Assoc
+            [("error", (`String "ServiceLimitExceeded"));
+            ("details", (ServiceLimitExceeded.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VolumeId", (Option.map x.volumeId ~f:VolumeId.to_value));
+        ("Lifecycle", (Option.map x.lifecycle ~f:VolumeLifecycle.to_value));
+        ("AdministrativeActions",
+          (Option.map x.administrativeActions
+             ~f:AdministrativeActions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let administrativeActions =
+        (Option.map ~f:AdministrativeActions.of_xml)
+          (Xml.child xml_arg0 "AdministrativeActions") in
+      let lifecycle =
+        (Option.map ~f:VolumeLifecycle.of_xml)
+          (Xml.child xml_arg0 "Lifecycle") in
+      let volumeId =
+        (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "VolumeId") in
+      make ?administrativeActions ?lifecycle ?volumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let administrativeActions =
+        field_map json__ "AdministrativeActions"
+          AdministrativeActions.of_json in
+      let lifecycle = field_map json__ "Lifecycle" VolumeLifecycle.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      make ?administrativeActions ?lifecycle ?volumeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing volume by using a snapshot from another Amazon FSx for OpenZFS file system. For more information, see on-demand data replication in the Amazon FSx for OpenZFS User Guide."]
+module CopyTagsToDataRepositoryAssociations =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module CreateAggregateConfiguration =
+  struct
+    type nonrec t =
+      {
+      aggregates: Aggregates.t option
+        [@ocaml.doc
+          "Used to specify the names of aggregates on which the volume will be created."];
+      constituentsPerAggregate: AggregateListMultiplier.t option
+        [@ocaml.doc
+          "Used to explicitly set the number of constituents within the FlexGroup per storage aggregate. This field is optional when creating a FlexGroup volume. If unspecified, the default value will be 8. This field cannot be provided when creating a FlexVol volume."]}
+    let make ?aggregates =
+      fun ?constituentsPerAggregate ->
+        fun () -> { aggregates; constituentsPerAggregate }
+    let to_value x =
+      structure_to_value
+        [("Aggregates", (Option.map x.aggregates ~f:Aggregates.to_value));
+        ("ConstituentsPerAggregate",
+          (Option.map x.constituentsPerAggregate
+             ~f:AggregateListMultiplier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let constituentsPerAggregate =
+        (Option.map ~f:AggregateListMultiplier.of_xml)
+          (Xml.child xml_arg0 "ConstituentsPerAggregate") in
+      let aggregates =
+        (Option.map ~f:Aggregates.of_xml) (Xml.child xml_arg0 "Aggregates") in
+      make ?constituentsPerAggregate ?aggregates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let constituentsPerAggregate =
+        field_map json__ "ConstituentsPerAggregate"
+          AggregateListMultiplier.of_json in
+      let aggregates = field_map json__ "Aggregates" Aggregates.of_json in
+      make ?constituentsPerAggregate ?aggregates ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Used to specify the configuration options for an FSx for ONTAP volume's storage aggregate or aggregates."]
+module OntapFileSystemUserName =
+  struct
+    type nonrec t = string
+    let context_ = "OntapFileSystemUserName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[^\\u0000\\u0085\\u2028\\u2029\\r\\n]{1,256}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OntapFileSystemUserName" j
+    let to_json = simple_to_json to_value
+  end
+module OntapWindowsFileSystemUser =
+  struct
+    type nonrec t =
+      {
+      name: OntapFileSystemUserName.t
+        [@ocaml.doc
+          "The name of the Windows user. The name can be up to 256 characters long and supports Active Directory users."]}
+    let context_ = "OntapWindowsFileSystemUser"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (OntapFileSystemUserName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        OntapFileSystemUserName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" OntapFileSystemUserName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The FSx for ONTAP Windows file system user that is used for authorizing all file access requests that are made using the S3 access point."]
+module OntapUnixFileSystemUser =
+  struct
+    type nonrec t =
+      {
+      name: OntapFileSystemUserName.t
+        [@ocaml.doc
+          "The name of the UNIX user. The name can be up to 256 characters long."]}
+    let context_ = "OntapUnixFileSystemUser"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (OntapFileSystemUserName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        OntapFileSystemUserName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" OntapFileSystemUserName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The FSx for ONTAP UNIX file system user that is used for authorizing all file access requests that are made using the S3 access point."]
+module OntapFileSystemUserType =
+  struct
+    type nonrec t =
+      | UNIX 
+      | WINDOWS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | UNIX -> "UNIX" | WINDOWS -> "WINDOWS" | Non_static_id s -> s
+    let of_string =
+      function | "UNIX" -> UNIX | "WINDOWS" -> WINDOWS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OntapFileSystemUserType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"OntapFileSystemUserType" j)
+    let to_json = simple_to_json to_value
+  end
+module OntapFileSystemIdentity =
+  struct
+    type nonrec t =
+      {
+      type_: OntapFileSystemUserType.t
+        [@ocaml.doc
+          "Specifies the FSx for ONTAP user identity type. Valid values are UNIX and WINDOWS."];
+      unixUser: OntapUnixFileSystemUser.t option
+        [@ocaml.doc
+          "Specifies the UNIX user identity for file system operations."];
+      windowsUser: OntapWindowsFileSystemUser.t option
+        [@ocaml.doc
+          "Specifies the Windows user identity for file system operations."]}
+    let context_ = "OntapFileSystemIdentity"
+    let make ?unixUser =
+      fun ?windowsUser ->
+        fun ~type_ -> fun () -> { unixUser; windowsUser; type_ }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (OntapFileSystemUserType.to_value x.type_)));
+        ("UnixUser",
+          (Option.map x.unixUser ~f:OntapUnixFileSystemUser.to_value));
+        ("WindowsUser",
+          (Option.map x.windowsUser ~f:OntapWindowsFileSystemUser.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let windowsUser =
+        (Option.map ~f:OntapWindowsFileSystemUser.of_xml)
+          (Xml.child xml_arg0 "WindowsUser") in
+      let unixUser =
+        (Option.map ~f:OntapUnixFileSystemUser.of_xml)
+          (Xml.child xml_arg0 "UnixUser") in
+      let type_ =
+        OntapFileSystemUserType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?windowsUser ?unixUser ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let windowsUser =
+        field_map json__ "WindowsUser" OntapWindowsFileSystemUser.of_json in
+      let unixUser =
+        field_map json__ "UnixUser" OntapUnixFileSystemUser.of_json in
+      let type_ = field_map_exn json__ "Type" OntapFileSystemUserType.of_json in
+      make ?windowsUser ?unixUser ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the file system user identity that will be used for authorizing all file access requests that are made using the S3 access point. The identity can be either a UNIX user or a Windows user."]
+module CreateAndAttachS3AccessPointOntapConfiguration =
+  struct
+    type nonrec t =
+      {
+      volumeId: VolumeId.t
+        [@ocaml.doc
+          "The ID of the FSx for ONTAP volume to which you want the S3 access point attached."];
+      fileSystemIdentity: OntapFileSystemIdentity.t
+        [@ocaml.doc
+          "Specifies the file system user identity to use for authorizing file read and write requests that are made using this S3 access point."]}
+    let context_ = "CreateAndAttachS3AccessPointOntapConfiguration"
+    let make ~volumeId =
+      fun ~fileSystemIdentity -> fun () -> { volumeId; fileSystemIdentity }
+    let to_value x =
+      structure_to_value
+        [("VolumeId", (Some (VolumeId.to_value x.volumeId)));
+        ("FileSystemIdentity",
+          (Some (OntapFileSystemIdentity.to_value x.fileSystemIdentity)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileSystemIdentity =
+        OntapFileSystemIdentity.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemIdentity") in
+      let volumeId =
+        VolumeId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VolumeId") in
+      make ~fileSystemIdentity ~volumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileSystemIdentity =
+        field_map_exn json__ "FileSystemIdentity"
+          OntapFileSystemIdentity.of_json in
+      let volumeId = field_map_exn json__ "VolumeId" VolumeId.of_json in
+      make ~fileSystemIdentity ~volumeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the FSx for ONTAP volume that the S3 access point will be attached to, and the file system user identity."]
+module FileSystemUID =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:4294967295L) >>=
+             (fun () -> check_int64_min i ~min:0L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module FileSystemGID =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:4294967295L) >>=
+             (fun () -> check_int64_min i ~min:0L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module FileSystemSecondaryGIDs =
+  struct
+    type nonrec t = FileSystemGID.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:15); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FileSystemGID.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FileSystemGID.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FileSystemSecondaryGIDs"
+        ~of_json:FileSystemGID.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OpenZFSPosixFileSystemUser =
+  struct
+    type nonrec t =
+      {
+      uid: FileSystemUID.t [@ocaml.doc "The UID of the file system user."];
+      gid: FileSystemGID.t [@ocaml.doc "The GID of the file system user."];
+      secondaryGids: FileSystemSecondaryGIDs.t option
+        [@ocaml.doc "The list of secondary GIDs for the file system user."]}
+    let context_ = "OpenZFSPosixFileSystemUser"
+    let make ?secondaryGids =
+      fun ~uid -> fun ~gid -> fun () -> { secondaryGids; uid; gid }
+    let to_value x =
+      structure_to_value
+        [("Uid", (Some (FileSystemUID.to_value x.uid)));
+        ("Gid", (Some (FileSystemGID.to_value x.gid)));
+        ("SecondaryGids",
+          (Option.map x.secondaryGids ~f:FileSystemSecondaryGIDs.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let secondaryGids =
+        (Option.map ~f:FileSystemSecondaryGIDs.of_xml)
+          (Xml.child xml_arg0 "SecondaryGids") in
+      let gid =
+        FileSystemGID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Gid") in
+      let uid =
+        FileSystemUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uid") in
+      make ?secondaryGids ~gid ~uid ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let secondaryGids =
+        field_map json__ "SecondaryGids" FileSystemSecondaryGIDs.of_json in
+      let gid = field_map_exn json__ "Gid" FileSystemGID.of_json in
+      let uid = field_map_exn json__ "Uid" FileSystemUID.of_json in
+      make ?secondaryGids ~gid ~uid ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The FSx for OpenZFS file system user that is used for authorizing all file access requests that are made using the S3 access point."]
+module OpenZFSFileSystemUserType =
+  struct
+    type nonrec t =
+      | POSIX 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | POSIX -> "POSIX" | Non_static_id s -> s
+    let of_string = function | "POSIX" -> POSIX | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OpenZFSFileSystemUserType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"OpenZFSFileSystemUserType" j)
+    let to_json = simple_to_json to_value
+  end
+module OpenZFSFileSystemIdentity =
+  struct
+    type nonrec t =
+      {
+      type_: OpenZFSFileSystemUserType.t
+        [@ocaml.doc
+          "Specifies the FSx for OpenZFS user identity type, accepts only POSIX."];
+      posixUser: OpenZFSPosixFileSystemUser.t option
+        [@ocaml.doc
+          "Specifies the UID and GIDs of the file system POSIX user."]}
+    let context_ = "OpenZFSFileSystemIdentity"
+    let make ?posixUser = fun ~type_ -> fun () -> { posixUser; type_ }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (OpenZFSFileSystemUserType.to_value x.type_)));
+        ("PosixUser",
+          (Option.map x.posixUser ~f:OpenZFSPosixFileSystemUser.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let posixUser =
+        (Option.map ~f:OpenZFSPosixFileSystemUser.of_xml)
+          (Xml.child xml_arg0 "PosixUser") in
+      let type_ =
+        OpenZFSFileSystemUserType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?posixUser ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let posixUser =
+        field_map json__ "PosixUser" OpenZFSPosixFileSystemUser.of_json in
+      let type_ =
+        field_map_exn json__ "Type" OpenZFSFileSystemUserType.of_json in
+      make ?posixUser ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the file system user identity that will be used for authorizing all file access requests that are made using the S3 access point."]
+module CreateAndAttachS3AccessPointOpenZFSConfiguration =
+  struct
+    type nonrec t =
+      {
+      volumeId: VolumeId.t
+        [@ocaml.doc
+          "The ID of the FSx for OpenZFS volume to which you want the S3 access point attached."];
+      fileSystemIdentity: OpenZFSFileSystemIdentity.t
+        [@ocaml.doc
+          "Specifies the file system user identity to use for authorizing file read and write requests that are made using this S3 access point."]}
+    let context_ = "CreateAndAttachS3AccessPointOpenZFSConfiguration"
+    let make ~volumeId =
+      fun ~fileSystemIdentity -> fun () -> { volumeId; fileSystemIdentity }
+    let to_value x =
+      structure_to_value
+        [("VolumeId", (Some (VolumeId.to_value x.volumeId)));
+        ("FileSystemIdentity",
+          (Some (OpenZFSFileSystemIdentity.to_value x.fileSystemIdentity)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileSystemIdentity =
+        OpenZFSFileSystemIdentity.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemIdentity") in
+      let volumeId =
+        VolumeId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VolumeId") in
+      make ~fileSystemIdentity ~volumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileSystemIdentity =
+        field_map_exn json__ "FileSystemIdentity"
+          OpenZFSFileSystemIdentity.of_json in
+      let volumeId = field_map_exn json__ "VolumeId" VolumeId.of_json in
+      make ~fileSystemIdentity ~volumeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the FSx for OpenZFS volume that the S3 access point will be attached to, and the file system user identity."]
+module S3AccessPointAttachmentType =
+  struct
+    type nonrec t =
+      | OPENZFS 
+      | ONTAP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OPENZFS -> "OPENZFS"
+      | ONTAP -> "ONTAP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OPENZFS" -> OPENZFS
+      | "ONTAP" -> ONTAP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration S3AccessPointAttachmentType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"S3AccessPointAttachmentType" j)
+    let to_json = simple_to_json to_value
+  end
+module S3AccessPointAttachmentName =
+  struct
+    type nonrec t = string
+    let context_ = "S3AccessPointAttachmentName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?=[a-z0-9])[a-z0-9-]{1,48}[a-z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3AccessPointAttachmentName" j
+    let to_json = simple_to_json to_value
+  end
+module S3AccessPointVpcConfiguration =
+  struct
+    type nonrec t =
+      {
+      vpcId: VpcId.t option
+        [@ocaml.doc
+          "Specifies the virtual private cloud (VPC) for the S3 access point VPC configuration, if one exists."]}
+    let make ?vpcId = fun () -> { vpcId }
+    let to_value x =
+      structure_to_value [("VpcId", (Option.map x.vpcId ~f:VpcId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
+      make ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in make ?vpcId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If included, Amazon S3 restricts access to this access point to requests from the specified virtual private cloud (VPC)."]
+module CreateAndAttachS3AccessPointS3Configuration =
+  struct
+    type nonrec t =
+      {
+      vpcConfiguration: S3AccessPointVpcConfiguration.t option
+        [@ocaml.doc
+          "If included, Amazon S3 restricts access to this S3 access point to requests made from the specified virtual private cloud (VPC)."];
+      policy: AccessPointPolicy.t option
+        [@ocaml.doc
+          "Specifies an access policy to associate with the S3 access point configuration. For more information, see Configuring IAM policies for using access points in the Amazon Simple Storage Service User Guide."]}
+    let make ?vpcConfiguration =
+      fun ?policy -> fun () -> { vpcConfiguration; policy }
+    let to_value x =
+      structure_to_value
+        [("VpcConfiguration",
+           (Option.map x.vpcConfiguration
+              ~f:S3AccessPointVpcConfiguration.to_value));
+        ("Policy", (Option.map x.policy ~f:AccessPointPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:AccessPointPolicy.of_xml)
+          (Xml.child xml_arg0 "Policy") in
+      let vpcConfiguration =
+        (Option.map ~f:S3AccessPointVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
+      make ?policy ?vpcConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" AccessPointPolicy.of_json in
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration"
+          S3AccessPointVpcConfiguration.of_json in
+      make ?policy ?vpcConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Used to create an S3 access point that accepts requests only from a virtual private cloud (VPC) to restrict data access to a private network."]
+module CreateAndAttachS3AccessPointRequest =
+  struct
+    type nonrec t =
+      {
+      clientRequestToken: ClientRequestToken.t option ;
+      name: S3AccessPointAttachmentName.t
+        [@ocaml.doc "The name you want to assign to this S3 access point."];
+      type_: S3AccessPointAttachmentType.t
+        [@ocaml.doc
+          "The type of S3 access point you want to create. Only OpenZFS is supported."];
+      openZFSConfiguration:
+        CreateAndAttachS3AccessPointOpenZFSConfiguration.t option
+        [@ocaml.doc
+          "Specifies the configuration to use when creating and attaching an S3 access point to an FSx for OpenZFS volume."];
+      ontapConfiguration:
+        CreateAndAttachS3AccessPointOntapConfiguration.t option ;
+      s3AccessPoint: CreateAndAttachS3AccessPointS3Configuration.t option
+        [@ocaml.doc
+          "Specifies the virtual private cloud (VPC) configuration if you're creating an access point that is restricted to a VPC. For more information, see Creating access points restricted to a virtual private cloud."]}
+    let context_ = "CreateAndAttachS3AccessPointRequest"
+    let make ?clientRequestToken =
+      fun ?openZFSConfiguration ->
+        fun ?ontapConfiguration ->
+          fun ?s3AccessPoint ->
+            fun ~name ->
+              fun ~type_ ->
+                fun () ->
+                  {
+                    clientRequestToken;
+                    openZFSConfiguration;
+                    ontapConfiguration;
+                    s3AccessPoint;
+                    name;
+                    type_
+                  }
+    let to_value x =
+      structure_to_value
+        [("ClientRequestToken",
+           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("Name", (Some (S3AccessPointAttachmentName.to_value x.name)));
+        ("Type", (Some (S3AccessPointAttachmentType.to_value x.type_)));
+        ("OpenZFSConfiguration",
+          (Option.map x.openZFSConfiguration
+             ~f:CreateAndAttachS3AccessPointOpenZFSConfiguration.to_value));
+        ("OntapConfiguration",
+          (Option.map x.ontapConfiguration
+             ~f:CreateAndAttachS3AccessPointOntapConfiguration.to_value));
+        ("S3AccessPoint",
+          (Option.map x.s3AccessPoint
+             ~f:CreateAndAttachS3AccessPointS3Configuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3AccessPoint =
+        (Option.map ~f:CreateAndAttachS3AccessPointS3Configuration.of_xml)
+          (Xml.child xml_arg0 "S3AccessPoint") in
+      let ontapConfiguration =
+        (Option.map ~f:CreateAndAttachS3AccessPointOntapConfiguration.of_xml)
+          (Xml.child xml_arg0 "OntapConfiguration") in
+      let openZFSConfiguration =
+        (Option.map
+           ~f:CreateAndAttachS3AccessPointOpenZFSConfiguration.of_xml)
+          (Xml.child xml_arg0 "OpenZFSConfiguration") in
+      let type_ =
+        S3AccessPointAttachmentType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      let name =
+        S3AccessPointAttachmentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      make ?s3AccessPoint ?ontapConfiguration ?openZFSConfiguration ~type_
+        ~name ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3AccessPoint =
+        field_map json__ "S3AccessPoint"
+          CreateAndAttachS3AccessPointS3Configuration.of_json in
+      let ontapConfiguration =
+        field_map json__ "OntapConfiguration"
+          CreateAndAttachS3AccessPointOntapConfiguration.of_json in
+      let openZFSConfiguration =
+        field_map json__ "OpenZFSConfiguration"
+          CreateAndAttachS3AccessPointOpenZFSConfiguration.of_json in
+      let type_ =
+        field_map_exn json__ "Type" S3AccessPointAttachmentType.of_json in
+      let name =
+        field_map_exn json__ "Name" S3AccessPointAttachmentName.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      make ?s3AccessPoint ?ontapConfiguration ?openZFSConfiguration ~type_
+        ~name ?clientRequestToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an S3 access point and attaches it to an Amazon FSx volume. For FSx for OpenZFS file systems, the volume must be hosted on a high-availability file system, either Single-AZ or Multi-AZ. For more information, see Accessing your data using Amazon S3 access points. in the Amazon FSx for OpenZFS User Guide. The requester requires the following permissions to perform these actions: fsx:CreateAndAttachS3AccessPoint s3:CreateAccessPoint s3:GetAccessPoint s3:PutAccessPointPolicy s3:DeleteAccessPoint The following actions are related to CreateAndAttachS3AccessPoint: DescribeS3AccessPointAttachments DetachAndDeleteS3AccessPoint"]
+module VolumeNotFound =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "No Amazon FSx volumes were found based upon the supplied parameters."]
+module TooManyAccessPoints =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "An error code indicating that you have reached the maximum number of S3 access points attachments allowed for your account in this Amazon Web Services Region, or for the file system."];
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You have reached the maximum number of S3 access points attachments allowed for your account in this Amazon Web Services Region, or for the file system. For more information, or to request an increase, see Service quotas on FSx resources in the FSx for OpenZFS User Guide."]
+module S3AccessPointOpenZFSConfiguration =
+  struct
+    type nonrec t =
+      {
+      volumeId: VolumeId.t option
+        [@ocaml.doc
+          "The ID of the FSx for OpenZFS volume that the S3 access point is attached to."];
+      fileSystemIdentity: OpenZFSFileSystemIdentity.t option
+        [@ocaml.doc
+          "The file system identity used to authorize file access requests made using the S3 access point."]}
+    let make ?volumeId =
+      fun ?fileSystemIdentity -> fun () -> { volumeId; fileSystemIdentity }
+    let to_value x =
+      structure_to_value
+        [("VolumeId", (Option.map x.volumeId ~f:VolumeId.to_value));
+        ("FileSystemIdentity",
+          (Option.map x.fileSystemIdentity
+             ~f:OpenZFSFileSystemIdentity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileSystemIdentity =
+        (Option.map ~f:OpenZFSFileSystemIdentity.of_xml)
+          (Xml.child xml_arg0 "FileSystemIdentity") in
+      let volumeId =
+        (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "VolumeId") in
+      make ?fileSystemIdentity ?volumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileSystemIdentity =
+        field_map json__ "FileSystemIdentity"
+          OpenZFSFileSystemIdentity.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      make ?fileSystemIdentity ?volumeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the FSx for OpenZFS attachment configuration of an S3 access point attachment."]
+module S3AccessPointOntapConfiguration =
+  struct
+    type nonrec t =
+      {
+      volumeId: VolumeId.t option
+        [@ocaml.doc
+          "The ID of the FSx for ONTAP volume that the S3 access point is attached to."];
+      fileSystemIdentity: OntapFileSystemIdentity.t option
+        [@ocaml.doc
+          "The file system identity used to authorize file access requests made using the S3 access point."]}
+    let make ?volumeId =
+      fun ?fileSystemIdentity -> fun () -> { volumeId; fileSystemIdentity }
+    let to_value x =
+      structure_to_value
+        [("VolumeId", (Option.map x.volumeId ~f:VolumeId.to_value));
+        ("FileSystemIdentity",
+          (Option.map x.fileSystemIdentity
+             ~f:OntapFileSystemIdentity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileSystemIdentity =
+        (Option.map ~f:OntapFileSystemIdentity.of_xml)
+          (Xml.child xml_arg0 "FileSystemIdentity") in
+      let volumeId =
+        (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "VolumeId") in
+      make ?fileSystemIdentity ?volumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileSystemIdentity =
+        field_map json__ "FileSystemIdentity" OntapFileSystemIdentity.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      make ?fileSystemIdentity ?volumeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the FSx for ONTAP attachment configuration of an S3 access point attachment."]
+module S3AccessPointAttachmentLifecycle =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | CREATING 
+      | DELETING 
+      | UPDATING 
+      | FAILED 
+      | MISCONFIGURED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | CREATING -> "CREATING"
+      | DELETING -> "DELETING"
+      | UPDATING -> "UPDATING"
+      | FAILED -> "FAILED"
+      | MISCONFIGURED -> "MISCONFIGURED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "CREATING" -> CREATING
+      | "DELETING" -> DELETING
+      | "UPDATING" -> UPDATING
+      | "FAILED" -> FAILED
+      | "MISCONFIGURED" -> MISCONFIGURED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration S3AccessPointAttachmentLifecycle"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"S3AccessPointAttachmentLifecycle" j)
+    let to_json = simple_to_json to_value
+  end
+module S3AccessPointAlias =
+  struct
+    type nonrec t = string
+    let context_ = "S3AccessPointAlias"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9a-z\\\\-]{1,63}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3AccessPointAlias" j
+    let to_json = simple_to_json to_value
+  end
+module S3AccessPoint =
+  struct
+    type nonrec t =
+      {
+      resourceARN: GeneralARN.t option
+        [@ocaml.doc "he S3 access point's ARN."];
+      alias: S3AccessPointAlias.t option
+        [@ocaml.doc "The S3 access point's alias."];
+      vpcConfiguration: S3AccessPointVpcConfiguration.t option
+        [@ocaml.doc
+          "The S3 access point's virtual private cloud (VPC) configuration."]}
+    let make ?resourceARN =
+      fun ?alias ->
+        fun ?vpcConfiguration ->
+          fun () -> { resourceARN; alias; vpcConfiguration }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Option.map x.resourceARN ~f:GeneralARN.to_value));
+        ("Alias", (Option.map x.alias ~f:S3AccessPointAlias.to_value));
+        ("VpcConfiguration",
+          (Option.map x.vpcConfiguration
+             ~f:S3AccessPointVpcConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConfiguration =
+        (Option.map ~f:S3AccessPointVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
+      let alias =
+        (Option.map ~f:S3AccessPointAlias.of_xml)
+          (Xml.child xml_arg0 "Alias") in
+      let resourceARN =
+        (Option.map ~f:GeneralARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?vpcConfiguration ?alias ?resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration"
+          S3AccessPointVpcConfiguration.of_json in
+      let alias = field_map json__ "Alias" S3AccessPointAlias.of_json in
+      let resourceARN = field_map json__ "ResourceARN" GeneralARN.of_json in
+      make ?vpcConfiguration ?alias ?resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the S3 access point configuration of the S3 access point attachment."]
+module S3AccessPointAttachment =
+  struct
+    type nonrec t =
+      {
+      lifecycle: S3AccessPointAttachmentLifecycle.t option
+        [@ocaml.doc
+          "The lifecycle status of the S3 access point attachment. The lifecycle can have the following values: AVAILABLE - the S3 access point attachment is available for use CREATING - Amazon FSx is creating the S3 access point and attachment DELETING - Amazon FSx is deleting the S3 access point and attachment FAILED - The S3 access point attachment is in a failed state. Delete and detach the S3 access point attachment, and create a new one. UPDATING - Amazon FSx is updating the S3 access point attachment"];
+      lifecycleTransitionReason: LifecycleTransitionReason.t option ;
+      creationTime: CreationTime.t option ;
+      name: S3AccessPointAttachmentName.t option
+        [@ocaml.doc
+          "The name of the S3 access point attachment; also used for the name of the S3 access point."];
+      type_: S3AccessPointAttachmentType.t option
+        [@ocaml.doc
+          "The type of Amazon FSx volume that the S3 access point is attached to."];
+      openZFSConfiguration: S3AccessPointOpenZFSConfiguration.t option
+        [@ocaml.doc
+          "The OpenZFSConfiguration of the S3 access point attachment."];
+      ontapConfiguration: S3AccessPointOntapConfiguration.t option
+        [@ocaml.doc
+          "The ONTAP configuration of the S3 access point attachment."];
+      s3AccessPoint: S3AccessPoint.t option
+        [@ocaml.doc
+          "The S3 access point configuration of the S3 access point attachment."]}
+    let make ?lifecycle =
+      fun ?lifecycleTransitionReason ->
+        fun ?creationTime ->
+          fun ?name ->
+            fun ?type_ ->
+              fun ?openZFSConfiguration ->
+                fun ?ontapConfiguration ->
+                  fun ?s3AccessPoint ->
+                    fun () ->
+                      {
+                        lifecycle;
+                        lifecycleTransitionReason;
+                        creationTime;
+                        name;
+                        type_;
+                        openZFSConfiguration;
+                        ontapConfiguration;
+                        s3AccessPoint
+                      }
+    let to_value x =
+      structure_to_value
+        [("Lifecycle",
+           (Option.map x.lifecycle
+              ~f:S3AccessPointAttachmentLifecycle.to_value));
+        ("LifecycleTransitionReason",
+          (Option.map x.lifecycleTransitionReason
+             ~f:LifecycleTransitionReason.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:CreationTime.to_value));
+        ("Name", (Option.map x.name ~f:S3AccessPointAttachmentName.to_value));
+        ("Type",
+          (Option.map x.type_ ~f:S3AccessPointAttachmentType.to_value));
+        ("OpenZFSConfiguration",
+          (Option.map x.openZFSConfiguration
+             ~f:S3AccessPointOpenZFSConfiguration.to_value));
+        ("OntapConfiguration",
+          (Option.map x.ontapConfiguration
+             ~f:S3AccessPointOntapConfiguration.to_value));
+        ("S3AccessPoint",
+          (Option.map x.s3AccessPoint ~f:S3AccessPoint.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3AccessPoint =
+        (Option.map ~f:S3AccessPoint.of_xml)
+          (Xml.child xml_arg0 "S3AccessPoint") in
+      let ontapConfiguration =
+        (Option.map ~f:S3AccessPointOntapConfiguration.of_xml)
+          (Xml.child xml_arg0 "OntapConfiguration") in
+      let openZFSConfiguration =
+        (Option.map ~f:S3AccessPointOpenZFSConfiguration.of_xml)
+          (Xml.child xml_arg0 "OpenZFSConfiguration") in
+      let type_ =
+        (Option.map ~f:S3AccessPointAttachmentType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let name =
+        (Option.map ~f:S3AccessPointAttachmentName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let creationTime =
+        (Option.map ~f:CreationTime.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let lifecycleTransitionReason =
+        (Option.map ~f:LifecycleTransitionReason.of_xml)
+          (Xml.child xml_arg0 "LifecycleTransitionReason") in
+      let lifecycle =
+        (Option.map ~f:S3AccessPointAttachmentLifecycle.of_xml)
+          (Xml.child xml_arg0 "Lifecycle") in
+      make ?s3AccessPoint ?ontapConfiguration ?openZFSConfiguration ?type_
+        ?name ?creationTime ?lifecycleTransitionReason ?lifecycle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3AccessPoint =
+        field_map json__ "S3AccessPoint" S3AccessPoint.of_json in
+      let ontapConfiguration =
+        field_map json__ "OntapConfiguration"
+          S3AccessPointOntapConfiguration.of_json in
+      let openZFSConfiguration =
+        field_map json__ "OpenZFSConfiguration"
+          S3AccessPointOpenZFSConfiguration.of_json in
+      let type_ = field_map json__ "Type" S3AccessPointAttachmentType.of_json in
+      let name = field_map json__ "Name" S3AccessPointAttachmentName.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
+      let lifecycleTransitionReason =
+        field_map json__ "LifecycleTransitionReason"
+          LifecycleTransitionReason.of_json in
+      let lifecycle =
+        field_map json__ "Lifecycle" S3AccessPointAttachmentLifecycle.of_json in
+      make ?s3AccessPoint ?ontapConfiguration ?openZFSConfiguration ?type_
+        ?name ?creationTime ?lifecycleTransitionReason ?lifecycle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An S3 access point attached to an Amazon FSx volume."]
+module InvalidRequest =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "An error code indicating that the action or operation requested is invalid."];
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The action or operation requested is invalid. Verify that the action is typed correctly."]
+module InvalidAccessPoint =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "An error code indicating that the access point specified doesn't exist."];
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The access point specified doesn't exist."]
+module CreateAndAttachS3AccessPointResponse =
+  struct
+    type nonrec t =
+      {
+      s3AccessPointAttachment: S3AccessPointAttachment.t option
+        [@ocaml.doc
+          "Describes the configuration of the S3 access point created."]}
+    type nonrec error =
+      [ `AccessPointAlreadyOwnedByYou of AccessPointAlreadyOwnedByYou.t 
+      | `BadRequest of BadRequest.t 
+      | `IncompatibleParameterError of IncompatibleParameterError.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidAccessPoint of InvalidAccessPoint.t 
+      | `InvalidRequest of InvalidRequest.t 
+      | `TooManyAccessPoints of TooManyAccessPoints.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
+      | `VolumeNotFound of VolumeNotFound.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?s3AccessPointAttachment = fun () -> { s3AccessPointAttachment }
+    let error_of_json name json =
+      match name with
+      | "AccessPointAlreadyOwnedByYou" ->
+          `AccessPointAlreadyOwnedByYou
+            (AccessPointAlreadyOwnedByYou.of_json json)
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError
+            (IncompatibleParameterError.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidAccessPoint" ->
+          `InvalidAccessPoint (InvalidAccessPoint.of_json json)
+      | "InvalidRequest" -> `InvalidRequest (InvalidRequest.of_json json)
+      | "TooManyAccessPoints" ->
+          `TooManyAccessPoints (TooManyAccessPoints.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
+      | "VolumeNotFound" -> `VolumeNotFound (VolumeNotFound.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessPointAlreadyOwnedByYou" ->
+          `AccessPointAlreadyOwnedByYou
+            (AccessPointAlreadyOwnedByYou.of_xml xml)
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError (IncompatibleParameterError.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidAccessPoint" ->
+          `InvalidAccessPoint (InvalidAccessPoint.of_xml xml)
+      | "InvalidRequest" -> `InvalidRequest (InvalidRequest.of_xml xml)
+      | "TooManyAccessPoints" ->
+          `TooManyAccessPoints (TooManyAccessPoints.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
+      | "VolumeNotFound" -> `VolumeNotFound (VolumeNotFound.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessPointAlreadyOwnedByYou e ->
+          `Assoc
+            [("error", (`String "AccessPointAlreadyOwnedByYou"));
+            ("details", (AccessPointAlreadyOwnedByYou.to_json e))]
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `IncompatibleParameterError e ->
+          `Assoc
+            [("error", (`String "IncompatibleParameterError"));
+            ("details", (IncompatibleParameterError.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidAccessPoint e ->
+          `Assoc
+            [("error", (`String "InvalidAccessPoint"));
+            ("details", (InvalidAccessPoint.to_json e))]
+      | `InvalidRequest e ->
+          `Assoc
+            [("error", (`String "InvalidRequest"));
+            ("details", (InvalidRequest.to_json e))]
+      | `TooManyAccessPoints e ->
+          `Assoc
+            [("error", (`String "TooManyAccessPoints"));
+            ("details", (TooManyAccessPoints.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
+      | `VolumeNotFound e ->
+          `Assoc
+            [("error", (`String "VolumeNotFound"));
+            ("details", (VolumeNotFound.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("S3AccessPointAttachment",
+           (Option.map x.s3AccessPointAttachment
+              ~f:S3AccessPointAttachment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3AccessPointAttachment =
+        (Option.map ~f:S3AccessPointAttachment.of_xml)
+          (Xml.child xml_arg0 "S3AccessPointAttachment") in
+      make ?s3AccessPointAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3AccessPointAttachment =
+        field_map json__ "S3AccessPointAttachment"
+          S3AccessPointAttachment.of_json in
+      make ?s3AccessPointAttachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an S3 access point and attaches it to an Amazon FSx volume. For FSx for OpenZFS file systems, the volume must be hosted on a high-availability file system, either Single-AZ or Multi-AZ. For more information, see Accessing your data using Amazon S3 access points. in the Amazon FSx for OpenZFS User Guide. The requester requires the following permissions to perform these actions: fsx:CreateAndAttachS3AccessPoint s3:CreateAccessPoint s3:GetAccessPoint s3:PutAccessPointPolicy s3:DeleteAccessPoint The following actions are related to CreateAndAttachS3AccessPoint: DescribeS3AccessPointAttachments DetachAndDeleteS3AccessPoint"]
 module CreateBackupRequest =
   struct
     type nonrec t =
@@ -6684,7 +9843,7 @@ module CreateBackupRequest =
         [@ocaml.doc "The ID of the file system to back up."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "(Optional) A string of up to 64 ASCII characters that Amazon FSx uses to ensure idempotent creation. This string is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."];
+          "(Optional) A string of up to 63 ASCII characters that Amazon FSx uses to ensure idempotent creation. This string is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."];
       tags: Tags.t option
         [@ocaml.doc
           "(Optional) The tags to apply to the backup at backup creation. The key value of the Name tag appears in the console as the backup name. If you have set CopyTagsToBackups to true, and you specify one or more tags using the CreateBackup operation, no existing file system tags are copied from the file system to the backup."];
@@ -6717,35 +9876,15 @@ module CreateBackupRequest =
           (Xml.child xml_arg0 "FileSystemId") in
       make ?volumeId ?tags ?clientRequestToken ?fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeId = field_map json "VolumeId" VolumeId.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
       make ?volumeId ?tags ?clientRequestToken ?fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for the CreateBackup operation."]
-module VolumeNotFound =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "No Amazon FSx volumes were found based upon the supplied parameters."]
 module CreateBackupResponse =
   struct
     type nonrec t =
@@ -6847,8 +9986,9 @@ module CreateBackupResponse =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backup = field_map json "Backup" Backup.of_json in make ?backup ()
+    let of_json json__ =
+      let backup = field_map json__ "Backup" Backup.of_json in
+      make ?backup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for the CreateBackup operation."]
 module S3DataRepositoryConfiguration =
@@ -6880,15 +10020,15 @@ module S3DataRepositoryConfiguration =
           (Xml.child xml_arg0 "AutoImportPolicy") in
       make ?autoExportPolicy ?autoImportPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoExportPolicy =
-        field_map json "AutoExportPolicy" AutoExportPolicy.of_json in
+        field_map json__ "AutoExportPolicy" AutoExportPolicy.of_json in
       let autoImportPolicy =
-        field_map json "AutoImportPolicy" AutoImportPolicy.of_json in
+        field_map json__ "AutoImportPolicy" AutoImportPolicy.of_json in
       make ?autoExportPolicy ?autoImportPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration for an Amazon S3 data repository linked to an Amazon FSx Lustre file system with a data repository association. The configuration consists of an AutoImportPolicy that defines file events on the data repository are automatically imported to the file system and an AutoExportPolicy that defines which file events on the file system are automatically exported to the data repository. File events are when files or directories are added, changed, or deleted on the file system or the data repository."]
+       "The configuration for an Amazon S3 data repository linked to an Amazon FSx for Lustre file system with a data repository association. The configuration consists of an AutoImportPolicy that defines which file events on the data repository are automatically imported to the file system and an AutoExportPolicy that defines which file events on the file system are automatically exported to the data repository. File events are when files or directories are added, changed, or deleted on the file system or the data repository. Data repository associations on Amazon File Cache don't use S3DataRepositoryConfiguration because they don't support automatic import or automatic export."]
 module Namespace =
   struct
     type nonrec t = string
@@ -6916,12 +10056,12 @@ module CreateDataRepositoryAssociationRequest =
     type nonrec t =
       {
       fileSystemId: FileSystemId.t ;
-      fileSystemPath: Namespace.t
+      fileSystemPath: Namespace.t option
         [@ocaml.doc
-          "A path on the file system that points to a high-level directory (such as /ns1/) or subdirectory (such as /ns1/subdir/) that will be mapped 1-1 with DataRepositoryPath. The leading forward slash in the name is required. Two data repository associations cannot have overlapping file system paths. For example, if a data repository is associated with file system path /ns1/, then you cannot link another data repository with file system path /ns1/ns2. This path specifies where in your file system files will be exported from or imported to. This file system directory can be linked to only one Amazon S3 bucket, and no other S3 bucket can be linked to the directory. If you specify only a forward slash (/) as the file system path, you can link only 1 data repository to the file system. You can only specify \"/\" as the file system path for the first data repository associated with a file system."];
+          "A path on the file system that points to a high-level directory (such as /ns1/) or subdirectory (such as /ns1/subdir/) that will be mapped 1-1 with DataRepositoryPath. The leading forward slash in the name is required. Two data repository associations cannot have overlapping file system paths. For example, if a data repository is associated with file system path /ns1/, then you cannot link another data repository with file system path /ns1/ns2. This path specifies where in your file system files will be exported from or imported to. This file system directory can be linked to only one Amazon S3 bucket, and no other S3 bucket can be linked to the directory. If you specify only a forward slash (/) as the file system path, you can link only one data repository to the file system. You can only specify \"/\" as the file system path for the first data repository associated with a file system."];
       dataRepositoryPath: ArchivePath.t
         [@ocaml.doc
-          "The path to the Amazon S3 data repository that will be linked to the file system. The path can be an S3 bucket or prefix in the format s3://myBucket/myPrefix/. This path specifies where in the S3 data repository files will be imported from or exported to."];
+          "The path to the Amazon S3 data repository that will be linked to the file system. The path can be an S3 bucket or prefix in the format s3://bucket-name/prefix/ (where prefix is optional). This path specifies where in the S3 data repository files will be imported from or exported to."];
       batchImportMetaDataOnCreate: BatchImportMetaDataOnCreate.t option
         [@ocaml.doc
           "Set to true to run an import data repository task to import metadata from the data repository to the file system after the data repository association is created. Default is false."];
@@ -6934,29 +10074,30 @@ module CreateDataRepositoryAssociationRequest =
       clientRequestToken: ClientRequestToken.t option ;
       tags: Tags.t option }
     let context_ = "CreateDataRepositoryAssociationRequest"
-    let make ?batchImportMetaDataOnCreate =
-      fun ?importedFileChunkSize ->
-        fun ?s3 ->
-          fun ?clientRequestToken ->
-            fun ?tags ->
-              fun ~fileSystemId ->
-                fun ~fileSystemPath ->
+    let make ?fileSystemPath =
+      fun ?batchImportMetaDataOnCreate ->
+        fun ?importedFileChunkSize ->
+          fun ?s3 ->
+            fun ?clientRequestToken ->
+              fun ?tags ->
+                fun ~fileSystemId ->
                   fun ~dataRepositoryPath ->
                     fun () ->
                       {
+                        fileSystemPath;
                         batchImportMetaDataOnCreate;
                         importedFileChunkSize;
                         s3;
                         clientRequestToken;
                         tags;
                         fileSystemId;
-                        fileSystemPath;
                         dataRepositoryPath
                       }
     let to_value x =
       structure_to_value
         [("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)));
-        ("FileSystemPath", (Some (Namespace.to_value x.fileSystemPath)));
+        ("FileSystemPath",
+          (Option.map x.fileSystemPath ~f:Namespace.to_value));
         ("DataRepositoryPath",
           (Some (ArchivePath.to_value x.dataRepositoryPath)));
         ("BatchImportMetaDataOnCreate",
@@ -6987,37 +10128,171 @@ module CreateDataRepositoryAssociationRequest =
         ArchivePath.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataRepositoryPath") in
       let fileSystemPath =
-        Namespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemPath") in
+        (Option.map ~f:Namespace.of_xml)
+          (Xml.child xml_arg0 "FileSystemPath") in
       let fileSystemId =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ?tags ?clientRequestToken ?s3 ?importedFileChunkSize
-        ?batchImportMetaDataOnCreate ~dataRepositoryPath ~fileSystemPath
+        ?batchImportMetaDataOnCreate ~dataRepositoryPath ?fileSystemPath
         ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let s3 = field_map json "S3" S3DataRepositoryConfiguration.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let s3 = field_map json__ "S3" S3DataRepositoryConfiguration.of_json in
       let importedFileChunkSize =
-        field_map json "ImportedFileChunkSize" Megabytes.of_json in
+        field_map json__ "ImportedFileChunkSize" Megabytes.of_json in
       let batchImportMetaDataOnCreate =
-        field_map json "BatchImportMetaDataOnCreate"
+        field_map json__ "BatchImportMetaDataOnCreate"
           BatchImportMetaDataOnCreate.of_json in
       let dataRepositoryPath =
-        field_map_exn json "DataRepositoryPath" ArchivePath.of_json in
+        field_map_exn json__ "DataRepositoryPath" ArchivePath.of_json in
       let fileSystemPath =
-        field_map_exn json "FileSystemPath" Namespace.of_json in
+        field_map json__ "FileSystemPath" Namespace.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ?tags ?clientRequestToken ?s3 ?importedFileChunkSize
-        ?batchImportMetaDataOnCreate ~dataRepositoryPath ~fileSystemPath
+        ?batchImportMetaDataOnCreate ~dataRepositoryPath ?fileSystemPath
         ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon FSx for Lustre data repository association (DRA). A data repository association is a link between a directory on the file system and an Amazon S3 bucket or prefix. You can have a maximum of 8 data repository associations on a file system. Data repository associations are supported only for file systems with the Persistent_2 deployment type. Each data repository association must have a unique Amazon FSx file system directory and a unique S3 bucket or prefix associated with it. You can configure a data repository association for automatic import only, for automatic export only, or for both. To learn more about linking a data repository to your file system, see Linking your file system to an S3 bucket."]
+       "Creates an Amazon FSx for Lustre data repository association (DRA). A data repository association is a link between a directory on the file system and an Amazon S3 bucket or prefix. You can have a maximum of 8 data repository associations on a file system. Data repository associations are supported on all FSx for Lustre 2.12 and 2.15 file systems, excluding scratch_1 deployment type. Each data repository association must have a unique Amazon FSx file system directory and a unique S3 bucket or prefix associated with it. You can configure a data repository association for automatic import only, for automatic export only, or for both. To learn more about linking a data repository to your file system, see Linking your file system to an S3 bucket. CreateDataRepositoryAssociation isn't supported on Amazon File Cache resources. To create a DRA on Amazon File Cache, use the CreateFileCache operation."]
+module SubDirectoriesPaths =
+  struct
+    type nonrec t = Namespace.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:500); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Namespace.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Namespace.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubDirectoriesPaths" ~of_json:Namespace.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RepositoryDnsIps =
+  struct
+    type nonrec t = IpAddress.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpAddress.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpAddress.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RepositoryDnsIps" ~of_json:IpAddress.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NfsVersion =
+  struct
+    type nonrec t =
+      | NFS3 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | NFS3 -> "NFS3" | Non_static_id s -> s
+    let of_string = function | "NFS3" -> NFS3 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NfsVersion" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NfsVersion" j)
+    let to_json = simple_to_json to_value
+  end
+module NFSDataRepositoryConfiguration =
+  struct
+    type nonrec t =
+      {
+      version: NfsVersion.t option
+        [@ocaml.doc
+          "The version of the NFS (Network File System) protocol of the NFS data repository. Currently, the only supported value is NFS3, which indicates that the data repository must support the NFSv3 protocol."];
+      dnsIps: RepositoryDnsIps.t option
+        [@ocaml.doc
+          "A list of up to 2 IP addresses of DNS servers used to resolve the NFS file system domain name. The provided IP addresses can either be the IP addresses of a DNS forwarder or resolver that the customer manages and runs inside the customer VPC, or the IP addresses of the on-premises DNS servers."];
+      autoExportPolicy: AutoExportPolicy.t option
+        [@ocaml.doc "This parameter is not supported for Amazon File Cache."]}
+    let make ?version =
+      fun ?dnsIps ->
+        fun ?autoExportPolicy ->
+          fun () -> { version; dnsIps; autoExportPolicy }
+    let to_value x =
+      structure_to_value
+        [("Version", (Option.map x.version ~f:NfsVersion.to_value));
+        ("DnsIps", (Option.map x.dnsIps ~f:RepositoryDnsIps.to_value));
+        ("AutoExportPolicy",
+          (Option.map x.autoExportPolicy ~f:AutoExportPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let autoExportPolicy =
+        (Option.map ~f:AutoExportPolicy.of_xml)
+          (Xml.child xml_arg0 "AutoExportPolicy") in
+      let dnsIps =
+        (Option.map ~f:RepositoryDnsIps.of_xml) (Xml.child xml_arg0 "DnsIps") in
+      let version =
+        (Option.map ~f:NfsVersion.of_xml) (Xml.child xml_arg0 "Version") in
+      make ?autoExportPolicy ?dnsIps ?version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let autoExportPolicy =
+        field_map json__ "AutoExportPolicy" AutoExportPolicy.of_json in
+      let dnsIps = field_map json__ "DnsIps" RepositoryDnsIps.of_json in
+      let version = field_map json__ "Version" NfsVersion.of_json in
+      make ?autoExportPolicy ?dnsIps ?version ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for a data repository association that links an Amazon File Cache resource to an NFS data repository."]
+module FileCacheId =
+  struct
+    type nonrec t = string
+    let context_ = "FileCacheId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:11) >>=
+             (fun () ->
+                (check_string_max i ~max:21) >>=
+                  (fun () -> check_pattern i ~pattern:"^(fc-[0-9a-f]{8,})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FileCacheId" j
+    let to_json = simple_to_json to_value
+  end
 module DataRepositoryAssociationId =
   struct
     type nonrec t = string
@@ -7049,25 +10324,37 @@ module DataRepositoryAssociation =
       fileSystemId: FileSystemId.t option ;
       lifecycle: DataRepositoryLifecycle.t option
         [@ocaml.doc
-          "Describes the state of a data repository association. The lifecycle can have the following values: CREATING - The data repository association between the FSx file system and the S3 data repository is being created. The data repository is unavailable. AVAILABLE - The data repository association is available for use. MISCONFIGURED - Amazon FSx cannot automatically import updates from the S3 bucket or automatically export updates to the S3 bucket until the data repository association configuration is corrected. UPDATING - The data repository association is undergoing a customer initiated update that might affect its availability. DELETING - The data repository association is undergoing a customer initiated deletion. FAILED - The data repository association is in a terminal state that cannot be recovered."];
+          "Describes the state of a data repository association. The lifecycle can have the following values: CREATING - The data repository association between the file system or cache and the data repository is being created. The data repository is unavailable. AVAILABLE - The data repository association is available for use. MISCONFIGURED - The data repository association is misconfigured. Until the configuration is corrected, automatic import and automatic export will not work (only for Amazon FSx for Lustre). UPDATING - The data repository association is undergoing a customer initiated update that might affect its availability. DELETING - The data repository association is undergoing a customer initiated deletion. FAILED - The data repository association is in a terminal state that cannot be recovered."];
       failureDetails: DataRepositoryFailureDetails.t option ;
       fileSystemPath: Namespace.t option
         [@ocaml.doc
-          "A path on the file system that points to a high-level directory (such as /ns1/) or subdirectory (such as /ns1/subdir/) that will be mapped 1-1 with DataRepositoryPath. The leading forward slash in the name is required. Two data repository associations cannot have overlapping file system paths. For example, if a data repository is associated with file system path /ns1/, then you cannot link another data repository with file system path /ns1/ns2. This path specifies where in your file system files will be exported from or imported to. This file system directory can be linked to only one Amazon S3 bucket, and no other S3 bucket can be linked to the directory. If you specify only a forward slash (/) as the file system path, you can link only 1 data repository to the file system. You can only specify \"/\" as the file system path for the first data repository associated with a file system."];
+          "A path on the Amazon FSx for Lustre file system that points to a high-level directory (such as /ns1/) or subdirectory (such as /ns1/subdir/) that will be mapped 1-1 with DataRepositoryPath. The leading forward slash in the name is required. Two data repository associations cannot have overlapping file system paths. For example, if a data repository is associated with file system path /ns1/, then you cannot link another data repository with file system path /ns1/ns2. This path specifies where in your file system files will be exported from or imported to. This file system directory can be linked to only one Amazon S3 bucket, and no other S3 bucket can be linked to the directory. If you specify only a forward slash (/) as the file system path, you can link only one data repository to the file system. You can only specify \"/\" as the file system path for the first data repository associated with a file system."];
       dataRepositoryPath: ArchivePath.t option
         [@ocaml.doc
-          "The path to the Amazon S3 data repository that will be linked to the file system. The path can be an S3 bucket or prefix in the format s3://myBucket/myPrefix/. This path specifies where in the S3 data repository files will be imported from or exported to."];
+          "The path to the data repository that will be linked to the cache or file system. For Amazon File Cache, the path can be an NFS data repository that will be linked to the cache. The path can be in one of two formats: If you are not using the DataRepositorySubdirectories parameter, the path is to an NFS Export directory (or one of its subdirectories) in the format nsf://nfs-domain-name/exportpath. You can therefore link a single NFS Export to a single data repository association. If you are using the DataRepositorySubdirectories parameter, the path is the domain name of the NFS file system in the format nfs://filer-domain-name, which indicates the root of the subdirectories specified with the DataRepositorySubdirectories parameter. For Amazon File Cache, the path can be an S3 bucket or prefix in the format s3://bucket-name/prefix/ (where prefix is optional). For Amazon FSx for Lustre, the path can be an S3 bucket or prefix in the format s3://bucket-name/prefix/ (where prefix is optional)."];
       batchImportMetaDataOnCreate: BatchImportMetaDataOnCreate.t option
         [@ocaml.doc
-          "A boolean flag indicating whether an import data repository task to import metadata should run after the data repository association is created. The task runs if this flag is set to true."];
+          "A boolean flag indicating whether an import data repository task to import metadata should run after the data repository association is created. The task runs if this flag is set to true. BatchImportMetaDataOnCreate is not supported for data repositories linked to an Amazon File Cache resource."];
       importedFileChunkSize: Megabytes.t option
         [@ocaml.doc
-          "For files imported from a data repository, this value determines the stripe count and maximum amount of data per file (in MiB) stored on a single physical disk. The maximum number of disks that a single file can be striped across is limited by the total number of disks that make up the file system. The default chunk size is 1,024 MiB (1 GiB) and can go as high as 512,000 MiB (500 GiB). Amazon S3 objects have a maximum size of 5 TB."];
+          "For files imported from a data repository, this value determines the stripe count and maximum amount of data per file (in MiB) stored on a single physical disk. The maximum number of disks that a single file can be striped across is limited by the total number of disks that make up the file system or cache. The default chunk size is 1,024 MiB (1 GiB) and can go as high as 512,000 MiB (500 GiB). Amazon S3 objects have a maximum size of 5 TB."];
       s3: S3DataRepositoryConfiguration.t option
         [@ocaml.doc
-          "The configuration for an Amazon S3 data repository linked to an Amazon FSx Lustre file system with a data repository association. The configuration defines which file events (new, changed, or deleted files or directories) are automatically imported from the linked data repository to the file system or automatically exported from the file system to the data repository."];
+          "The configuration for an Amazon S3 data repository linked to an Amazon FSx for Lustre file system with a data repository association."];
       tags: Tags.t option ;
-      creationTime: CreationTime.t option }
+      creationTime: CreationTime.t option ;
+      fileCacheId: FileCacheId.t option
+        [@ocaml.doc
+          "The globally unique ID of the Amazon File Cache resource."];
+      fileCachePath: Namespace.t option
+        [@ocaml.doc
+          "A path on the Amazon File Cache that points to a high-level directory (such as /ns1/) or subdirectory (such as /ns1/subdir/) that will be mapped 1-1 with DataRepositoryPath. The leading forward slash in the path is required. Two data repository associations cannot have overlapping cache paths. For example, if a data repository is associated with cache path /ns1/, then you cannot link another data repository with cache path /ns1/ns2. This path specifies the directory in your cache where files will be exported from. This cache directory can be linked to only one data repository (S3 or NFS) and no other data repository can be linked to the directory. The cache path can only be set to root (/) on an NFS DRA when DataRepositorySubdirectories is specified. If you specify root (/) as the cache path, you can create only one DRA on the cache. The cache path cannot be set to root (/) for an S3 DRA."];
+      dataRepositorySubdirectories: SubDirectoriesPaths.t option
+        [@ocaml.doc
+          "For Amazon File Cache, a list of NFS Exports that will be linked with an NFS data repository association. All the subdirectories must be on a single NFS file system. The Export paths are in the format /exportpath1. To use this parameter, you must configure DataRepositoryPath as the domain name of the NFS file system. The NFS file system domain name in effect is the root of the subdirectories. Note that DataRepositorySubdirectories is not supported for S3 data repositories."];
+      nFS: NFSDataRepositoryConfiguration.t option
+        [@ocaml.doc
+          "The configuration for an NFS data repository linked to an Amazon File Cache resource with a data repository association."]}
     let make ?associationId =
       fun ?resourceARN ->
         fun ?fileSystemId ->
@@ -7080,21 +10367,29 @@ module DataRepositoryAssociation =
                       fun ?s3 ->
                         fun ?tags ->
                           fun ?creationTime ->
-                            fun () ->
-                              {
-                                associationId;
-                                resourceARN;
-                                fileSystemId;
-                                lifecycle;
-                                failureDetails;
-                                fileSystemPath;
-                                dataRepositoryPath;
-                                batchImportMetaDataOnCreate;
-                                importedFileChunkSize;
-                                s3;
-                                tags;
-                                creationTime
-                              }
+                            fun ?fileCacheId ->
+                              fun ?fileCachePath ->
+                                fun ?dataRepositorySubdirectories ->
+                                  fun ?nFS ->
+                                    fun () ->
+                                      {
+                                        associationId;
+                                        resourceARN;
+                                        fileSystemId;
+                                        lifecycle;
+                                        failureDetails;
+                                        fileSystemPath;
+                                        dataRepositoryPath;
+                                        batchImportMetaDataOnCreate;
+                                        importedFileChunkSize;
+                                        s3;
+                                        tags;
+                                        creationTime;
+                                        fileCacheId;
+                                        fileCachePath;
+                                        dataRepositorySubdirectories;
+                                        nFS
+                                      }
     let to_value x =
       structure_to_value
         [("AssociationId",
@@ -7120,9 +10415,26 @@ module DataRepositoryAssociation =
         ("S3", (Option.map x.s3 ~f:S3DataRepositoryConfiguration.to_value));
         ("Tags", (Option.map x.tags ~f:Tags.to_value));
         ("CreationTime",
-          (Option.map x.creationTime ~f:CreationTime.to_value))]
+          (Option.map x.creationTime ~f:CreationTime.to_value));
+        ("FileCacheId", (Option.map x.fileCacheId ~f:FileCacheId.to_value));
+        ("FileCachePath", (Option.map x.fileCachePath ~f:Namespace.to_value));
+        ("DataRepositorySubdirectories",
+          (Option.map x.dataRepositorySubdirectories
+             ~f:SubDirectoriesPaths.to_value));
+        ("NFS",
+          (Option.map x.nFS ~f:NFSDataRepositoryConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nFS =
+        (Option.map ~f:NFSDataRepositoryConfiguration.of_xml)
+          (Xml.child xml_arg0 "NFS") in
+      let dataRepositorySubdirectories =
+        (Option.map ~f:SubDirectoriesPaths.of_xml)
+          (Xml.child xml_arg0 "DataRepositorySubdirectories") in
+      let fileCachePath =
+        (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "FileCachePath") in
+      let fileCacheId =
+        (Option.map ~f:FileCacheId.of_xml) (Xml.child xml_arg0 "FileCacheId") in
       let creationTime =
         (Option.map ~f:CreationTime.of_xml)
           (Xml.child xml_arg0 "CreationTime") in
@@ -7156,38 +10468,48 @@ module DataRepositoryAssociation =
       let associationId =
         (Option.map ~f:DataRepositoryAssociationId.of_xml)
           (Xml.child xml_arg0 "AssociationId") in
-      make ?creationTime ?tags ?s3 ?importedFileChunkSize
+      make ?nFS ?dataRepositorySubdirectories ?fileCachePath ?fileCacheId
+        ?creationTime ?tags ?s3 ?importedFileChunkSize
         ?batchImportMetaDataOnCreate ?dataRepositoryPath ?fileSystemPath
         ?failureDetails ?lifecycle ?fileSystemId ?resourceARN ?associationId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" CreationTime.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let s3 = field_map json "S3" S3DataRepositoryConfiguration.of_json in
+    let of_json json__ =
+      let nFS = field_map json__ "NFS" NFSDataRepositoryConfiguration.of_json in
+      let dataRepositorySubdirectories =
+        field_map json__ "DataRepositorySubdirectories"
+          SubDirectoriesPaths.of_json in
+      let fileCachePath = field_map json__ "FileCachePath" Namespace.of_json in
+      let fileCacheId = field_map json__ "FileCacheId" FileCacheId.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let s3 = field_map json__ "S3" S3DataRepositoryConfiguration.of_json in
       let importedFileChunkSize =
-        field_map json "ImportedFileChunkSize" Megabytes.of_json in
+        field_map json__ "ImportedFileChunkSize" Megabytes.of_json in
       let batchImportMetaDataOnCreate =
-        field_map json "BatchImportMetaDataOnCreate"
+        field_map json__ "BatchImportMetaDataOnCreate"
           BatchImportMetaDataOnCreate.of_json in
       let dataRepositoryPath =
-        field_map json "DataRepositoryPath" ArchivePath.of_json in
-      let fileSystemPath = field_map json "FileSystemPath" Namespace.of_json in
+        field_map json__ "DataRepositoryPath" ArchivePath.of_json in
+      let fileSystemPath =
+        field_map json__ "FileSystemPath" Namespace.of_json in
       let failureDetails =
-        field_map json "FailureDetails" DataRepositoryFailureDetails.of_json in
+        field_map json__ "FailureDetails"
+          DataRepositoryFailureDetails.of_json in
       let lifecycle =
-        field_map json "Lifecycle" DataRepositoryLifecycle.of_json in
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+        field_map json__ "Lifecycle" DataRepositoryLifecycle.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       let associationId =
-        field_map json "AssociationId" DataRepositoryAssociationId.of_json in
-      make ?creationTime ?tags ?s3 ?importedFileChunkSize
+        field_map json__ "AssociationId" DataRepositoryAssociationId.of_json in
+      make ?nFS ?dataRepositorySubdirectories ?fileCachePath ?fileCacheId
+        ?creationTime ?tags ?s3 ?importedFileChunkSize
         ?batchImportMetaDataOnCreate ?dataRepositoryPath ?fileSystemPath
         ?failureDetails ?lifecycle ?fileSystemId ?resourceARN ?associationId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration of a data repository association that links an Amazon FSx for Lustre file system to an Amazon S3 bucket. The data repository association configuration object is returned in the response of the following operations: CreateDataRepositoryAssociation UpdateDataRepositoryAssociation DescribeDataRepositoryAssociations Data repository associations are supported only for file systems with the Persistent_2 deployment type."]
+       "The configuration of a data repository association that links an Amazon FSx for Lustre file system to an Amazon S3 bucket or an Amazon File Cache resource to an Amazon S3 bucket or an NFS file system. The data repository association configuration object is returned in the response of the following operations: CreateDataRepositoryAssociation UpdateDataRepositoryAssociation DescribeDataRepositoryAssociations Data repository associations are supported on Amazon File Cache resources and all FSx for Lustre 2.12 and 2.15 file systems, excluding Intelligent-Tiering and scratch_1 file systems."]
 module CreateDataRepositoryAssociationResponse =
   struct
     type nonrec t =
@@ -7278,29 +10600,120 @@ module CreateDataRepositoryAssociationResponse =
           (Xml.child xml_arg0 "Association") in
       make ?association ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let association =
-        field_map json "Association" DataRepositoryAssociation.of_json in
+        field_map json__ "Association" DataRepositoryAssociation.of_json in
       make ?association ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon FSx for Lustre data repository association (DRA). A data repository association is a link between a directory on the file system and an Amazon S3 bucket or prefix. You can have a maximum of 8 data repository associations on a file system. Data repository associations are supported only for file systems with the Persistent_2 deployment type. Each data repository association must have a unique Amazon FSx file system directory and a unique S3 bucket or prefix associated with it. You can configure a data repository association for automatic import only, for automatic export only, or for both. To learn more about linking a data repository to your file system, see Linking your file system to an S3 bucket."]
+       "Creates an Amazon FSx for Lustre data repository association (DRA). A data repository association is a link between a directory on the file system and an Amazon S3 bucket or prefix. You can have a maximum of 8 data repository associations on a file system. Data repository associations are supported on all FSx for Lustre 2.12 and 2.15 file systems, excluding scratch_1 deployment type. Each data repository association must have a unique Amazon FSx file system directory and a unique S3 bucket or prefix associated with it. You can configure a data repository association for automatic import only, for automatic export only, or for both. To learn more about linking a data repository to your file system, see Linking your file system to an S3 bucket. CreateDataRepositoryAssociation isn't supported on Amazon File Cache resources. To create a DRA on Amazon File Cache, use the CreateFileCache operation."]
+module Value =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module Unit =
+  struct
+    type nonrec t =
+      | DAYS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | DAYS -> "DAYS" | Non_static_id s -> s
+    let of_string = function | "DAYS" -> DAYS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Unit" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Unit" j)
+    let to_json = simple_to_json to_value
+  end
+module DurationSinceLastAccess =
+  struct
+    type nonrec t =
+      {
+      unit: Unit.t option
+        [@ocaml.doc
+          "The unit of time used by the Value parameter to determine if a file can be released, based on when it was last accessed. DAYS is the only supported value. This is a required parameter."];
+      value: Value.t option
+        [@ocaml.doc
+          "An integer that represents the minimum amount of time (in days) since a file was last accessed in the file system. Only exported files with a MAX(atime, ctime, mtime) timestamp that is more than this amount of time in the past (relative to the task create time) will be released. The default of Value is 0. This is a required parameter. If an exported file meets the last accessed time criteria, its file or directory path must also be specified in the Paths parameter of the operation in order for the file to be released."]}
+    let make ?unit = fun ?value -> fun () -> { unit; value }
+    let to_value x =
+      structure_to_value
+        [("Unit", (Option.map x.unit ~f:Unit.to_value));
+        ("Value", (Option.map x.value ~f:Value.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "Value") in
+      let unit = (Option.map ~f:Unit.of_xml) (Xml.child xml_arg0 "Unit") in
+      make ?value ?unit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" Value.of_json in
+      let unit = field_map json__ "Unit" Unit.of_json in make ?value ?unit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the minimum amount of time since last access for a file to be eligible for release. Only files that have been exported to S3 and that were last accessed or modified before this point-in-time are eligible to be released from the Amazon FSx for Lustre file system."]
+module ReleaseConfiguration =
+  struct
+    type nonrec t =
+      {
+      durationSinceLastAccess: DurationSinceLastAccess.t option
+        [@ocaml.doc
+          "Defines the point-in-time since an exported file was last accessed, in order for that file to be eligible for release. Only files that were last accessed before this point-in-time are eligible to be released from the file system."]}
+    let make ?durationSinceLastAccess = fun () -> { durationSinceLastAccess }
+    let to_value x =
+      structure_to_value
+        [("DurationSinceLastAccess",
+           (Option.map x.durationSinceLastAccess
+              ~f:DurationSinceLastAccess.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationSinceLastAccess =
+        (Option.map ~f:DurationSinceLastAccess.of_xml)
+          (Xml.child xml_arg0 "DurationSinceLastAccess") in
+      make ?durationSinceLastAccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationSinceLastAccess =
+        field_map json__ "DurationSinceLastAccess"
+          DurationSinceLastAccess.of_json in
+      make ?durationSinceLastAccess ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that specifies a minimum amount of time since last access for an exported file to be eligible for release from an Amazon FSx for Lustre file system. Only files that were last accessed before this point-in-time can be released. For example, if you specify a last accessed time criteria of 9 days, only files that were last accessed 9.00001 or more days ago can be released. Only file data that has been exported to S3 can be released. Files that have not yet been exported to S3, such as new or changed files that have not been exported, are not eligible for release. When files are released, their metadata stays on the file system, so they can still be accessed later. Users and applications can access a released file by reading the file again, which restores data from Amazon S3 to the FSx for Lustre file system. If a file meets the last accessed time criteria, its file or directory path must also be specified with the Paths parameter of the operation in order for the file to be released."]
 module DataRepositoryTaskType =
   struct
     type nonrec t =
       | EXPORT_TO_REPOSITORY 
       | IMPORT_METADATA_FROM_REPOSITORY 
+      | RELEASE_DATA_FROM_FILESYSTEM 
+      | AUTO_RELEASE_DATA 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | EXPORT_TO_REPOSITORY -> "EXPORT_TO_REPOSITORY"
       | IMPORT_METADATA_FROM_REPOSITORY -> "IMPORT_METADATA_FROM_REPOSITORY"
+      | RELEASE_DATA_FROM_FILESYSTEM -> "RELEASE_DATA_FROM_FILESYSTEM"
+      | AUTO_RELEASE_DATA -> "AUTO_RELEASE_DATA"
       | Non_static_id s -> s
     let of_string =
       function
       | "EXPORT_TO_REPOSITORY" -> EXPORT_TO_REPOSITORY
       | "IMPORT_METADATA_FROM_REPOSITORY" -> IMPORT_METADATA_FROM_REPOSITORY
+      | "RELEASE_DATA_FROM_FILESYSTEM" -> RELEASE_DATA_FROM_FILESYSTEM
+      | "AUTO_RELEASE_DATA" -> AUTO_RELEASE_DATA
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -7339,6 +10752,9 @@ module DataRepositoryTaskPaths =
     type nonrec t = DataRepositoryTaskPath.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataRepositoryTaskPath.to_value)) |>
         (fun x -> `List x)
@@ -7366,32 +10782,43 @@ module CreateDataRepositoryTaskRequest =
     type nonrec t =
       {
       type_: DataRepositoryTaskType.t
-        [@ocaml.doc "Specifies the type of data repository task to create."];
+        [@ocaml.doc
+          "Specifies the type of data repository task to create. EXPORT_TO_REPOSITORY tasks export from your Amazon FSx for Lustre file system to a linked data repository. IMPORT_METADATA_FROM_REPOSITORY tasks import metadata changes from a linked S3 bucket to your Amazon FSx for Lustre file system. RELEASE_DATA_FROM_FILESYSTEM tasks release files in your Amazon FSx for Lustre file system that have been exported to a linked S3 bucket and that meet your specified release criteria. AUTO_RELEASE_DATA tasks automatically release files from an Amazon File Cache resource."];
       paths: DataRepositoryTaskPaths.t option
         [@ocaml.doc
-          "(Optional) The path or paths on the Amazon FSx file system to use when the data repository task is processed. The default path is the file system root directory. The paths you provide need to be relative to the mount point of the file system. If the mount point is /mnt/fsx and /mnt/fsx/path1 is a directory or file on the file system you want to export, then the path to provide is path1. If a path that you provide isn't valid, the task fails."];
+          "A list of paths for the data repository task to use when the task is processed. If a path that you provide isn't valid, the task fails. If you don't provide paths, the default behavior is to export all files to S3 (for export tasks), import all files from S3 (for import tasks), or release all exported files that meet the last accessed time criteria (for release tasks). For export tasks, the list contains paths on the FSx for Lustre file system from which the files are exported to the Amazon S3 bucket. The default path is the file system root directory. The paths you provide need to be relative to the mount point of the file system. If the mount point is /mnt/fsx and /mnt/fsx/path1 is a directory or file on the file system you want to export, then the path to provide is path1. For import tasks, the list contains paths in the Amazon S3 bucket from which POSIX metadata changes are imported to the FSx for Lustre file system. The path can be an S3 bucket or prefix in the format s3://bucket-name/prefix (where prefix is optional). For release tasks, the list contains directory or file paths on the FSx for Lustre file system from which to release exported files. If a directory is specified, files within the directory are released. If a file path is specified, only that file is released. To release all exported files in the file system, specify a forward slash (/) as the path. A file must also meet the last accessed time criteria specified in for the file to be released."];
       fileSystemId: FileSystemId.t ;
       report: CompletionReport.t
         [@ocaml.doc
           "Defines whether or not Amazon FSx provides a CompletionReport once the task has completed. A CompletionReport provides a detailed report on the files that Amazon FSx processed that meet the criteria specified by the Scope parameter. For more information, see Working with Task Completion Reports."];
       clientRequestToken: ClientRequestToken.t option ;
-      tags: Tags.t option }
+      tags: Tags.t option ;
+      capacityToRelease: CapacityToRelease.t option
+        [@ocaml.doc
+          "Specifies the amount of data to release, in GiB, by an Amazon File Cache AUTO_RELEASE_DATA task that automatically releases files from the cache."];
+      releaseConfiguration: ReleaseConfiguration.t option
+        [@ocaml.doc
+          "The configuration that specifies the last accessed time criteria for files that will be released from an Amazon FSx for Lustre file system."]}
     let context_ = "CreateDataRepositoryTaskRequest"
     let make ?paths =
       fun ?clientRequestToken ->
         fun ?tags ->
-          fun ~type_ ->
-            fun ~fileSystemId ->
-              fun ~report ->
-                fun () ->
-                  {
-                    paths;
-                    clientRequestToken;
-                    tags;
-                    type_;
-                    fileSystemId;
-                    report
-                  }
+          fun ?capacityToRelease ->
+            fun ?releaseConfiguration ->
+              fun ~type_ ->
+                fun ~fileSystemId ->
+                  fun ~report ->
+                    fun () ->
+                      {
+                        paths;
+                        clientRequestToken;
+                        tags;
+                        capacityToRelease;
+                        releaseConfiguration;
+                        type_;
+                        fileSystemId;
+                        report
+                      }
     let to_value x =
       structure_to_value
         [("Type", (Some (DataRepositoryTaskType.to_value x.type_)));
@@ -7400,9 +10827,19 @@ module CreateDataRepositoryTaskRequest =
         ("Report", (Some (CompletionReport.to_value x.report)));
         ("ClientRequestToken",
           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("CapacityToRelease",
+          (Option.map x.capacityToRelease ~f:CapacityToRelease.to_value));
+        ("ReleaseConfiguration",
+          (Option.map x.releaseConfiguration ~f:ReleaseConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let releaseConfiguration =
+        (Option.map ~f:ReleaseConfiguration.of_xml)
+          (Xml.child xml_arg0 "ReleaseConfiguration") in
+      let capacityToRelease =
+        (Option.map ~f:CapacityToRelease.of_xml)
+          (Xml.child xml_arg0 "CapacityToRelease") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let clientRequestToken =
         (Option.map ~f:ClientRequestToken.of_xml)
@@ -7419,21 +10856,27 @@ module CreateDataRepositoryTaskRequest =
       let type_ =
         DataRepositoryTaskType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ?tags ?clientRequestToken ~report ~fileSystemId ?paths ~type_ ()
+      make ?releaseConfiguration ?capacityToRelease ?tags ?clientRequestToken
+        ~report ~fileSystemId ?paths ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let releaseConfiguration =
+        field_map json__ "ReleaseConfiguration" ReleaseConfiguration.of_json in
+      let capacityToRelease =
+        field_map json__ "CapacityToRelease" CapacityToRelease.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let report = field_map_exn json "Report" CompletionReport.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let report = field_map_exn json__ "Report" CompletionReport.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
-      let paths = field_map json "Paths" DataRepositoryTaskPaths.of_json in
-      let type_ = field_map_exn json "Type" DataRepositoryTaskType.of_json in
-      make ?tags ?clientRequestToken ~report ~fileSystemId ?paths ~type_ ()
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
+      let paths = field_map json__ "Paths" DataRepositoryTaskPaths.of_json in
+      let type_ = field_map_exn json__ "Type" DataRepositoryTaskType.of_json in
+      make ?releaseConfiguration ?capacityToRelease ?tags ?clientRequestToken
+        ~report ~fileSystemId ?paths ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon FSx for Lustre data repository task. You use data repository tasks to perform bulk operations between your Amazon FSx file system and its linked data repositories. An example of a data repository task is exporting any data and metadata changes, including POSIX metadata, to files, directories, and symbolic links (symlinks) from your FSx file system to a linked data repository. A CreateDataRepositoryTask operation will fail if a data repository is not linked to the FSx file system. To learn more about data repository tasks, see Data Repository Tasks. To learn more about linking a data repository to your file system, see Linking your file system to an S3 bucket."]
+       "Creates an Amazon FSx for Lustre data repository task. A CreateDataRepositoryTask operation will fail if a data repository is not linked to the FSx file system. You use import and export data repository tasks to perform bulk operations between your FSx for Lustre file system and its linked data repositories. An example of a data repository task is exporting any data and metadata changes, including POSIX metadata, to files, directories, and symbolic links (symlinks) from your FSx file system to a linked data repository. You use release data repository tasks to release data from your file system for files that are exported to S3. The metadata of released files remains on the file system so users or applications can still access released files by reading the files again, which will restore data from Amazon S3 to the FSx for Lustre file system. To learn more about data repository tasks, see Data Repository Tasks. To learn more about linking a data repository to your file system, see Linking your file system to an S3 bucket."]
 module DataRepositoryTaskExecuting =
   struct
     type nonrec t = {
@@ -7448,8 +10891,8 @@ module DataRepositoryTaskExecuting =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7504,6 +10947,19 @@ module SucceededCount =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module ReleasedCapacity =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module LastUpdatedTime =
   struct
     type nonrec t = string
@@ -7543,13 +10999,23 @@ module DataRepositoryTaskStatus =
         [@ocaml.doc
           "A running total of the number of files that the task failed to process."];
       lastUpdatedTime: LastUpdatedTime.t option
-        [@ocaml.doc "The time at which the task status was last updated."]}
+        [@ocaml.doc "The time at which the task status was last updated."];
+      releasedCapacity: ReleasedCapacity.t option
+        [@ocaml.doc
+          "The total amount of data, in GiB, released by an Amazon File Cache AUTO_RELEASE_DATA task that automatically releases files from the cache."]}
     let make ?totalCount =
       fun ?succeededCount ->
         fun ?failedCount ->
           fun ?lastUpdatedTime ->
-            fun () ->
-              { totalCount; succeededCount; failedCount; lastUpdatedTime }
+            fun ?releasedCapacity ->
+              fun () ->
+                {
+                  totalCount;
+                  succeededCount;
+                  failedCount;
+                  lastUpdatedTime;
+                  releasedCapacity
+                }
     let to_value x =
       structure_to_value
         [("TotalCount", (Option.map x.totalCount ~f:TotalCount.to_value));
@@ -7557,9 +11023,14 @@ module DataRepositoryTaskStatus =
           (Option.map x.succeededCount ~f:SucceededCount.to_value));
         ("FailedCount", (Option.map x.failedCount ~f:FailedCount.to_value));
         ("LastUpdatedTime",
-          (Option.map x.lastUpdatedTime ~f:LastUpdatedTime.to_value))]
+          (Option.map x.lastUpdatedTime ~f:LastUpdatedTime.to_value));
+        ("ReleasedCapacity",
+          (Option.map x.releasedCapacity ~f:ReleasedCapacity.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let releasedCapacity =
+        (Option.map ~f:ReleasedCapacity.of_xml)
+          (Xml.child xml_arg0 "ReleasedCapacity") in
       let lastUpdatedTime =
         (Option.map ~f:LastUpdatedTime.of_xml)
           (Xml.child xml_arg0 "LastUpdatedTime") in
@@ -7570,16 +11041,20 @@ module DataRepositoryTaskStatus =
           (Xml.child xml_arg0 "SucceededCount") in
       let totalCount =
         (Option.map ~f:TotalCount.of_xml) (Xml.child xml_arg0 "TotalCount") in
-      make ?lastUpdatedTime ?failedCount ?succeededCount ?totalCount ()
+      make ?releasedCapacity ?lastUpdatedTime ?failedCount ?succeededCount
+        ?totalCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let releasedCapacity =
+        field_map json__ "ReleasedCapacity" ReleasedCapacity.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" LastUpdatedTime.of_json in
-      let failedCount = field_map json "FailedCount" FailedCount.of_json in
+        field_map json__ "LastUpdatedTime" LastUpdatedTime.of_json in
+      let failedCount = field_map json__ "FailedCount" FailedCount.of_json in
       let succeededCount =
-        field_map json "SucceededCount" SucceededCount.of_json in
-      let totalCount = field_map json "TotalCount" TotalCount.of_json in
-      make ?lastUpdatedTime ?failedCount ?succeededCount ?totalCount ()
+        field_map json__ "SucceededCount" SucceededCount.of_json in
+      let totalCount = field_map json__ "TotalCount" TotalCount.of_json in
+      make ?releasedCapacity ?lastUpdatedTime ?failedCount ?succeededCount
+        ?totalCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the task status showing a running total of the total number of files to be processed, the number successfully processed, and the number of files the task failed to process."]
@@ -7597,8 +11072,8 @@ module DataRepositoryTaskFailureDetails =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7607,85 +11082,114 @@ module DataRepositoryTask =
   struct
     type nonrec t =
       {
-      taskId: TaskId.t
+      taskId: TaskId.t option
         [@ocaml.doc
           "The system-generated, unique 17-digit ID of the data repository task."];
-      lifecycle: DataRepositoryTaskLifecycle.t
+      lifecycle: DataRepositoryTaskLifecycle.t option
         [@ocaml.doc
-          "The lifecycle status of the data repository task, as follows: PENDING - Amazon FSx has not started the task. EXECUTING - Amazon FSx is processing the task. FAILED - Amazon FSx was not able to complete the task. For example, there may be files the task failed to process. The DataRepositoryTaskFailureDetails property provides more information about task failures. SUCCEEDED - FSx completed the task successfully. CANCELED - Amazon FSx canceled the task and it did not complete. CANCELING - FSx is in process of canceling the task. You cannot delete an FSx for Lustre file system if there are data repository tasks for the file system in the PENDING or EXECUTING states. Please retry when the data repository task is finished (with a status of CANCELED, SUCCEEDED, or FAILED). You can use the DescribeDataRepositoryTask action to monitor the task status. Contact the FSx team if you need to delete your file system immediately."];
-      type_: DataRepositoryTaskType.t
+          "The lifecycle status of the data repository task, as follows: PENDING - The task has not started. EXECUTING - The task is in process. FAILED - The task was not able to be completed. For example, there may be files the task failed to process. The DataRepositoryTaskFailureDetails property provides more information about task failures. SUCCEEDED - The task has completed successfully. CANCELED - The task was canceled and it did not complete. CANCELING - The task is in process of being canceled. You cannot delete an FSx for Lustre file system if there are data repository tasks for the file system in the PENDING or EXECUTING states. Please retry when the data repository task is finished (with a status of CANCELED, SUCCEEDED, or FAILED). You can use the DescribeDataRepositoryTask action to monitor the task status. Contact the FSx team if you need to delete your file system immediately."];
+      type_: DataRepositoryTaskType.t option
         [@ocaml.doc
-          "The type of data repository task. The EXPORT_TO_REPOSITORY data repository task exports from your Lustre file system from to a linked S3 bucket. The IMPORT_METADATA_FROM_REPOSITORY data repository task imports metadata changes from a linked S3 bucket to your Lustre file system."];
-      creationTime: CreationTime.t ;
+          "The type of data repository task. EXPORT_TO_REPOSITORY tasks export from your Amazon FSx for Lustre file system to a linked data repository. IMPORT_METADATA_FROM_REPOSITORY tasks import metadata changes from a linked S3 bucket to your Amazon FSx for Lustre file system. RELEASE_DATA_FROM_FILESYSTEM tasks release files in your Amazon FSx for Lustre file system that have been exported to a linked S3 bucket and that meet your specified release criteria. AUTO_RELEASE_DATA tasks automatically release files from an Amazon File Cache resource."];
+      creationTime: CreationTime.t option ;
       startTime: StartTime.t option
-        [@ocaml.doc "The time that Amazon FSx began processing the task."];
+        [@ocaml.doc "The time the system began processing the task."];
       endTime: EndTime.t option
         [@ocaml.doc
-          "The time that Amazon FSx completed processing the task, populated after the task is complete."];
+          "The time the system completed processing the task, populated after the task is complete."];
       resourceARN: ResourceARN.t option ;
       tags: Tags.t option ;
-      fileSystemId: FileSystemId.t ;
+      fileSystemId: FileSystemId.t option
+        [@ocaml.doc "The globally unique ID of the file system."];
       paths: DataRepositoryTaskPaths.t option
         [@ocaml.doc
-          "An array of paths on the Amazon FSx for Lustre file system that specify the data for the data repository task to process. For example, in an EXPORT_TO_REPOSITORY task, the paths specify which data to export to the linked data repository. (Default) If Paths is not specified, Amazon FSx uses the file system root directory."];
+          "An array of paths that specify the data for the data repository task to process. For example, in an EXPORT_TO_REPOSITORY task, the paths specify which data to export to the linked data repository. (Default) If Paths is not specified, Amazon FSx uses the file system root directory."];
       failureDetails: DataRepositoryTaskFailureDetails.t option
         [@ocaml.doc
           "Failure message describing why the task failed, it is populated only when Lifecycle is set to FAILED."];
       status: DataRepositoryTaskStatus.t option
         [@ocaml.doc
           "Provides the status of the number of files that the task has processed successfully and failed to process."];
-      report: CompletionReport.t option }
-    let context_ = "DataRepositoryTask"
-    let make ?startTime =
-      fun ?endTime ->
-        fun ?resourceARN ->
-          fun ?tags ->
-            fun ?paths ->
-              fun ?failureDetails ->
-                fun ?status ->
-                  fun ?report ->
-                    fun ~taskId ->
-                      fun ~lifecycle ->
-                        fun ~type_ ->
-                          fun ~creationTime ->
-                            fun ~fileSystemId ->
-                              fun () ->
-                                {
-                                  startTime;
-                                  endTime;
-                                  resourceARN;
-                                  tags;
-                                  paths;
-                                  failureDetails;
-                                  status;
-                                  report;
-                                  taskId;
-                                  lifecycle;
-                                  type_;
-                                  creationTime;
-                                  fileSystemId
-                                }
+      report: CompletionReport.t option ;
+      capacityToRelease: CapacityToRelease.t option
+        [@ocaml.doc
+          "Specifies the amount of data to release, in GiB, by an Amazon File Cache AUTO_RELEASE_DATA task that automatically releases files from the cache."];
+      fileCacheId: FileCacheId.t option
+        [@ocaml.doc "The system-generated, unique ID of the cache."];
+      releaseConfiguration: ReleaseConfiguration.t option
+        [@ocaml.doc
+          "The configuration that specifies the last accessed time criteria for files that will be released from an Amazon FSx for Lustre file system."]}
+    let make ?taskId =
+      fun ?lifecycle ->
+        fun ?type_ ->
+          fun ?creationTime ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun ?resourceARN ->
+                  fun ?tags ->
+                    fun ?fileSystemId ->
+                      fun ?paths ->
+                        fun ?failureDetails ->
+                          fun ?status ->
+                            fun ?report ->
+                              fun ?capacityToRelease ->
+                                fun ?fileCacheId ->
+                                  fun ?releaseConfiguration ->
+                                    fun () ->
+                                      {
+                                        taskId;
+                                        lifecycle;
+                                        type_;
+                                        creationTime;
+                                        startTime;
+                                        endTime;
+                                        resourceARN;
+                                        tags;
+                                        fileSystemId;
+                                        paths;
+                                        failureDetails;
+                                        status;
+                                        report;
+                                        capacityToRelease;
+                                        fileCacheId;
+                                        releaseConfiguration
+                                      }
     let to_value x =
       structure_to_value
-        [("TaskId", (Some (TaskId.to_value x.taskId)));
+        [("TaskId", (Option.map x.taskId ~f:TaskId.to_value));
         ("Lifecycle",
-          (Some (DataRepositoryTaskLifecycle.to_value x.lifecycle)));
-        ("Type", (Some (DataRepositoryTaskType.to_value x.type_)));
-        ("CreationTime", (Some (CreationTime.to_value x.creationTime)));
+          (Option.map x.lifecycle ~f:DataRepositoryTaskLifecycle.to_value));
+        ("Type", (Option.map x.type_ ~f:DataRepositoryTaskType.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:CreationTime.to_value));
         ("StartTime", (Option.map x.startTime ~f:StartTime.to_value));
         ("EndTime", (Option.map x.endTime ~f:EndTime.to_value));
         ("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("Tags", (Option.map x.tags ~f:Tags.to_value));
-        ("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)));
+        ("FileSystemId",
+          (Option.map x.fileSystemId ~f:FileSystemId.to_value));
         ("Paths", (Option.map x.paths ~f:DataRepositoryTaskPaths.to_value));
         ("FailureDetails",
           (Option.map x.failureDetails
              ~f:DataRepositoryTaskFailureDetails.to_value));
         ("Status",
           (Option.map x.status ~f:DataRepositoryTaskStatus.to_value));
-        ("Report", (Option.map x.report ~f:CompletionReport.to_value))]
+        ("Report", (Option.map x.report ~f:CompletionReport.to_value));
+        ("CapacityToRelease",
+          (Option.map x.capacityToRelease ~f:CapacityToRelease.to_value));
+        ("FileCacheId", (Option.map x.fileCacheId ~f:FileCacheId.to_value));
+        ("ReleaseConfiguration",
+          (Option.map x.releaseConfiguration ~f:ReleaseConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let releaseConfiguration =
+        (Option.map ~f:ReleaseConfiguration.of_xml)
+          (Xml.child xml_arg0 "ReleaseConfiguration") in
+      let fileCacheId =
+        (Option.map ~f:FileCacheId.of_xml) (Xml.child xml_arg0 "FileCacheId") in
+      let capacityToRelease =
+        (Option.map ~f:CapacityToRelease.of_xml)
+          (Xml.child xml_arg0 "CapacityToRelease") in
       let report =
         (Option.map ~f:CompletionReport.of_xml) (Xml.child xml_arg0 "Report") in
       let status =
@@ -7698,8 +11202,8 @@ module DataRepositoryTask =
         (Option.map ~f:DataRepositoryTaskPaths.of_xml)
           (Xml.child xml_arg0 "Paths") in
       let fileSystemId =
-        FileSystemId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
+        (Option.map ~f:FileSystemId.of_xml)
+          (Xml.child xml_arg0 "FileSystemId") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let resourceARN =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
@@ -7708,45 +11212,48 @@ module DataRepositoryTask =
       let startTime =
         (Option.map ~f:StartTime.of_xml) (Xml.child xml_arg0 "StartTime") in
       let creationTime =
-        CreationTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationTime") in
+        (Option.map ~f:CreationTime.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
       let type_ =
-        DataRepositoryTaskType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+        (Option.map ~f:DataRepositoryTaskType.of_xml)
+          (Xml.child xml_arg0 "Type") in
       let lifecycle =
-        DataRepositoryTaskLifecycle.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Lifecycle") in
+        (Option.map ~f:DataRepositoryTaskLifecycle.of_xml)
+          (Xml.child xml_arg0 "Lifecycle") in
       let taskId =
-        TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskId") in
-      make ?report ?status ?failureDetails ?paths ~fileSystemId ?tags
-        ?resourceARN ?endTime ?startTime ~creationTime ~type_ ~lifecycle
-        ~taskId ()
+        (Option.map ~f:TaskId.of_xml) (Xml.child xml_arg0 "TaskId") in
+      make ?releaseConfiguration ?fileCacheId ?capacityToRelease ?report
+        ?status ?failureDetails ?paths ?fileSystemId ?tags ?resourceARN
+        ?endTime ?startTime ?creationTime ?type_ ?lifecycle ?taskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let report = field_map json "Report" CompletionReport.of_json in
-      let status = field_map json "Status" DataRepositoryTaskStatus.of_json in
+    let of_json json__ =
+      let releaseConfiguration =
+        field_map json__ "ReleaseConfiguration" ReleaseConfiguration.of_json in
+      let fileCacheId = field_map json__ "FileCacheId" FileCacheId.of_json in
+      let capacityToRelease =
+        field_map json__ "CapacityToRelease" CapacityToRelease.of_json in
+      let report = field_map json__ "Report" CompletionReport.of_json in
+      let status = field_map json__ "Status" DataRepositoryTaskStatus.of_json in
       let failureDetails =
-        field_map json "FailureDetails"
+        field_map json__ "FailureDetails"
           DataRepositoryTaskFailureDetails.of_json in
-      let paths = field_map json "Paths" DataRepositoryTaskPaths.of_json in
-      let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
-      let endTime = field_map json "EndTime" EndTime.of_json in
-      let startTime = field_map json "StartTime" StartTime.of_json in
-      let creationTime =
-        field_map_exn json "CreationTime" CreationTime.of_json in
-      let type_ = field_map_exn json "Type" DataRepositoryTaskType.of_json in
+      let paths = field_map json__ "Paths" DataRepositoryTaskPaths.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      let endTime = field_map json__ "EndTime" EndTime.of_json in
+      let startTime = field_map json__ "StartTime" StartTime.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
+      let type_ = field_map json__ "Type" DataRepositoryTaskType.of_json in
       let lifecycle =
-        field_map_exn json "Lifecycle" DataRepositoryTaskLifecycle.of_json in
-      let taskId = field_map_exn json "TaskId" TaskId.of_json in
-      make ?report ?status ?failureDetails ?paths ~fileSystemId ?tags
-        ?resourceARN ?endTime ?startTime ~creationTime ~type_ ~lifecycle
-        ~taskId ()
+        field_map json__ "Lifecycle" DataRepositoryTaskLifecycle.of_json in
+      let taskId = field_map json__ "TaskId" TaskId.of_json in
+      make ?releaseConfiguration ?fileCacheId ?capacityToRelease ?report
+        ?status ?failureDetails ?paths ?fileSystemId ?tags ?resourceARN
+        ?endTime ?startTime ?creationTime ?type_ ?lifecycle ?taskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A description of the data repository task. You use data repository tasks to perform bulk transfer operations between your Amazon FSx file system and a linked data repository."]
+       "A description of the data repository task. You use import and export data repository tasks to perform bulk transfer operations between an Amazon FSx for Lustre file system and a linked data repository. You use release data repository tasks to release files that have been exported to a linked S3 bucket from your Amazon FSx for Lustre file system. An Amazon File Cache resource uses a task to automatically release files from the cache. To learn more about data repository tasks, see Data Repository Tasks."]
 module CreateDataRepositoryTaskResponse =
   struct
     type nonrec t =
@@ -7848,13 +11355,285 @@ module CreateDataRepositoryTaskResponse =
           (Xml.child xml_arg0 "DataRepositoryTask") in
       make ?dataRepositoryTask ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataRepositoryTask =
-        field_map json "DataRepositoryTask" DataRepositoryTask.of_json in
+        field_map json__ "DataRepositoryTask" DataRepositoryTask.of_json in
       make ?dataRepositoryTask ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon FSx for Lustre data repository task. You use data repository tasks to perform bulk operations between your Amazon FSx file system and its linked data repositories. An example of a data repository task is exporting any data and metadata changes, including POSIX metadata, to files, directories, and symbolic links (symlinks) from your FSx file system to a linked data repository. A CreateDataRepositoryTask operation will fail if a data repository is not linked to the FSx file system. To learn more about data repository tasks, see Data Repository Tasks. To learn more about linking a data repository to your file system, see Linking your file system to an S3 bucket."]
+       "Creates an Amazon FSx for Lustre data repository task. A CreateDataRepositoryTask operation will fail if a data repository is not linked to the FSx file system. You use import and export data repository tasks to perform bulk operations between your FSx for Lustre file system and its linked data repositories. An example of a data repository task is exporting any data and metadata changes, including POSIX metadata, to files, directories, and symbolic links (symlinks) from your FSx file system to a linked data repository. You use release data repository tasks to release data from your file system for files that are exported to S3. The metadata of released files remains on the file system so users or applications can still access released files by reading the files again, which will restore data from Amazon S3 to the FSx for Lustre file system. To learn more about data repository tasks, see Data Repository Tasks. To learn more about linking a data repository to your file system, see Linking your file system to an S3 bucket."]
+module FileCacheNFSConfiguration =
+  struct
+    type nonrec t =
+      {
+      version: NfsVersion.t
+        [@ocaml.doc
+          "The version of the NFS (Network File System) protocol of the NFS data repository. The only supported value is NFS3, which indicates that the data repository must support the NFSv3 protocol."];
+      dnsIps: RepositoryDnsIps.t option
+        [@ocaml.doc
+          "A list of up to 2 IP addresses of DNS servers used to resolve the NFS file system domain name. The provided IP addresses can either be the IP addresses of a DNS forwarder or resolver that the customer manages and runs inside the customer VPC, or the IP addresses of the on-premises DNS servers."]}
+    let context_ = "FileCacheNFSConfiguration"
+    let make ?dnsIps = fun ~version -> fun () -> { dnsIps; version }
+    let to_value x =
+      structure_to_value
+        [("Version", (Some (NfsVersion.to_value x.version)));
+        ("DnsIps", (Option.map x.dnsIps ~f:RepositoryDnsIps.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dnsIps =
+        (Option.map ~f:RepositoryDnsIps.of_xml) (Xml.child xml_arg0 "DnsIps") in
+      let version =
+        NfsVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Version") in
+      make ?dnsIps ~version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dnsIps = field_map json__ "DnsIps" RepositoryDnsIps.of_json in
+      let version = field_map_exn json__ "Version" NfsVersion.of_json in
+      make ?dnsIps ~version ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for an NFS data repository association (DRA) created during the creation of the Amazon File Cache resource."]
+module FileCacheDataRepositoryAssociation =
+  struct
+    type nonrec t =
+      {
+      fileCachePath: Namespace.t
+        [@ocaml.doc
+          "A path on the cache that points to a high-level directory (such as /ns1/) or subdirectory (such as /ns1/subdir/) that will be mapped 1-1 with DataRepositoryPath. The leading forward slash in the name is required. Two data repository associations cannot have overlapping cache paths. For example, if a data repository is associated with cache path /ns1/, then you cannot link another data repository with cache path /ns1/ns2. This path specifies where in your cache files will be exported from. This cache directory can be linked to only one data repository, and no data repository other can be linked to the directory. The cache path can only be set to root (/) on an NFS DRA when DataRepositorySubdirectories is specified. If you specify root (/) as the cache path, you can create only one DRA on the cache. The cache path cannot be set to root (/) for an S3 DRA."];
+      dataRepositoryPath: ArchivePath.t
+        [@ocaml.doc
+          "The path to the S3 or NFS data repository that links to the cache. You must provide one of the following paths: The path can be an NFS data repository that links to the cache. The path can be in one of two formats: If you are not using the DataRepositorySubdirectories parameter, the path is to an NFS Export directory (or one of its subdirectories) in the format nfs://nfs-domain-name/exportpath. You can therefore link a single NFS Export to a single data repository association. If you are using the DataRepositorySubdirectories parameter, the path is the domain name of the NFS file system in the format nfs://filer-domain-name, which indicates the root of the subdirectories specified with the DataRepositorySubdirectories parameter. The path can be an S3 bucket or prefix in the format s3://bucket-name/prefix/ (where prefix is optional)."];
+      dataRepositorySubdirectories: SubDirectoriesPaths.t option
+        [@ocaml.doc
+          "A list of NFS Exports that will be linked with this data repository association. The Export paths are in the format /exportpath1. To use this parameter, you must configure DataRepositoryPath as the domain name of the NFS file system. The NFS file system domain name in effect is the root of the subdirectories. Note that DataRepositorySubdirectories is not supported for S3 data repositories."];
+      nFS: FileCacheNFSConfiguration.t option
+        [@ocaml.doc
+          "The configuration for a data repository association that links an Amazon File Cache resource to an NFS data repository."]}
+    let context_ = "FileCacheDataRepositoryAssociation"
+    let make ?dataRepositorySubdirectories =
+      fun ?nFS ->
+        fun ~fileCachePath ->
+          fun ~dataRepositoryPath ->
+            fun () ->
+              {
+                dataRepositorySubdirectories;
+                nFS;
+                fileCachePath;
+                dataRepositoryPath
+              }
+    let to_value x =
+      structure_to_value
+        [("FileCachePath", (Some (Namespace.to_value x.fileCachePath)));
+        ("DataRepositoryPath",
+          (Some (ArchivePath.to_value x.dataRepositoryPath)));
+        ("DataRepositorySubdirectories",
+          (Option.map x.dataRepositorySubdirectories
+             ~f:SubDirectoriesPaths.to_value));
+        ("NFS", (Option.map x.nFS ~f:FileCacheNFSConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nFS =
+        (Option.map ~f:FileCacheNFSConfiguration.of_xml)
+          (Xml.child xml_arg0 "NFS") in
+      let dataRepositorySubdirectories =
+        (Option.map ~f:SubDirectoriesPaths.of_xml)
+          (Xml.child xml_arg0 "DataRepositorySubdirectories") in
+      let dataRepositoryPath =
+        ArchivePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataRepositoryPath") in
+      let fileCachePath =
+        Namespace.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileCachePath") in
+      make ?nFS ?dataRepositorySubdirectories ~dataRepositoryPath
+        ~fileCachePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nFS = field_map json__ "NFS" FileCacheNFSConfiguration.of_json in
+      let dataRepositorySubdirectories =
+        field_map json__ "DataRepositorySubdirectories"
+          SubDirectoriesPaths.of_json in
+      let dataRepositoryPath =
+        field_map_exn json__ "DataRepositoryPath" ArchivePath.of_json in
+      let fileCachePath =
+        field_map_exn json__ "FileCachePath" Namespace.of_json in
+      make ?nFS ?dataRepositorySubdirectories ~dataRepositoryPath
+        ~fileCachePath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for a data repository association (DRA) to be created during the Amazon File Cache resource creation. The DRA links the cache to either an Amazon S3 bucket or prefix, or a Network File System (NFS) data repository that supports the NFSv3 protocol. The DRA does not support automatic import or automatic export."]
+module CreateFileCacheDataRepositoryAssociations =
+  struct
+    type nonrec t = FileCacheDataRepositoryAssociation.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:8); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FileCacheDataRepositoryAssociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:FileCacheDataRepositoryAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CreateFileCacheDataRepositoryAssociations"
+        ~of_json:FileCacheDataRepositoryAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetadataStorageCapacity =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2147483647) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MetadataStorageCapacity"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module FileCacheLustreMetadataConfiguration =
+  struct
+    type nonrec t =
+      {
+      storageCapacity: MetadataStorageCapacity.t
+        [@ocaml.doc
+          "The storage capacity of the Lustre MDT (Metadata Target) storage volume in gibibytes (GiB). The only supported value is 2400 GiB."]}
+    let context_ = "FileCacheLustreMetadataConfiguration"
+    let make ~storageCapacity = fun () -> { storageCapacity }
+    let to_value x =
+      structure_to_value
+        [("StorageCapacity",
+           (Some (MetadataStorageCapacity.to_value x.storageCapacity)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let storageCapacity =
+        MetadataStorageCapacity.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StorageCapacity") in
+      make ~storageCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let storageCapacity =
+        field_map_exn json__ "StorageCapacity"
+          MetadataStorageCapacity.of_json in
+      make ~storageCapacity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for a Lustre MDT (Metadata Target) storage volume. The metadata on Amazon File Cache is managed by a Lustre Metadata Server (MDS) while the actual metadata is persisted on an MDT."]
+module FileCacheLustreDeploymentType =
+  struct
+    type nonrec t =
+      | CACHE_1 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | CACHE_1 -> "CACHE_1" | Non_static_id s -> s
+    let of_string = function | "CACHE_1" -> CACHE_1 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FileCacheLustreDeploymentType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FileCacheLustreDeploymentType" j)
+    let to_json = simple_to_json to_value
+  end
+module CreateFileCacheLustreConfiguration =
+  struct
+    type nonrec t =
+      {
+      perUnitStorageThroughput: PerUnitStorageThroughput.t
+        [@ocaml.doc
+          "Provisions the amount of read and write throughput for each 1 tebibyte (TiB) of cache storage capacity, in MB/s/TiB. The only supported value is 1000."];
+      deploymentType: FileCacheLustreDeploymentType.t
+        [@ocaml.doc
+          "Specifies the cache deployment type, which must be CACHE_1."];
+      weeklyMaintenanceStartTime: WeeklyTime.t option ;
+      metadataConfiguration: FileCacheLustreMetadataConfiguration.t
+        [@ocaml.doc
+          "The configuration for a Lustre MDT (Metadata Target) storage volume."]}
+    let context_ = "CreateFileCacheLustreConfiguration"
+    let make ?weeklyMaintenanceStartTime =
+      fun ~perUnitStorageThroughput ->
+        fun ~deploymentType ->
+          fun ~metadataConfiguration ->
+            fun () ->
+              {
+                weeklyMaintenanceStartTime;
+                perUnitStorageThroughput;
+                deploymentType;
+                metadataConfiguration
+              }
+    let to_value x =
+      structure_to_value
+        [("PerUnitStorageThroughput",
+           (Some
+              (PerUnitStorageThroughput.to_value x.perUnitStorageThroughput)));
+        ("DeploymentType",
+          (Some (FileCacheLustreDeploymentType.to_value x.deploymentType)));
+        ("WeeklyMaintenanceStartTime",
+          (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value));
+        ("MetadataConfiguration",
+          (Some
+             (FileCacheLustreMetadataConfiguration.to_value
+                x.metadataConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metadataConfiguration =
+        FileCacheLustreMetadataConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetadataConfiguration") in
+      let weeklyMaintenanceStartTime =
+        (Option.map ~f:WeeklyTime.of_xml)
+          (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
+      let deploymentType =
+        FileCacheLustreDeploymentType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DeploymentType") in
+      let perUnitStorageThroughput =
+        PerUnitStorageThroughput.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "PerUnitStorageThroughput") in
+      make ~metadataConfiguration ?weeklyMaintenanceStartTime ~deploymentType
+        ~perUnitStorageThroughput ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metadataConfiguration =
+        field_map_exn json__ "MetadataConfiguration"
+          FileCacheLustreMetadataConfiguration.of_json in
+      let weeklyMaintenanceStartTime =
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+      let deploymentType =
+        field_map_exn json__ "DeploymentType"
+          FileCacheLustreDeploymentType.of_json in
+      let perUnitStorageThroughput =
+        field_map_exn json__ "PerUnitStorageThroughput"
+          PerUnitStorageThroughput.of_json in
+      make ~metadataConfiguration ?weeklyMaintenanceStartTime ~deploymentType
+        ~perUnitStorageThroughput ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon File Cache configuration for the cache that you are creating."]
 module SecurityGroupId =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -7882,6 +11661,9 @@ module SecurityGroupIds =
     type nonrec t = SecurityGroupId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7903,6 +11685,773 @@ module SecurityGroupIds =
         j
     let to_json v = composed_to_json to_value v
   end
+module FileCacheType =
+  struct
+    type nonrec t =
+      | LUSTRE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | LUSTRE -> "LUSTRE" | Non_static_id s -> s
+    let of_string = function | "LUSTRE" -> LUSTRE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FileCacheType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FileCacheType" j)
+    let to_json = simple_to_json to_value
+  end
+module CreateFileCacheRequest =
+  struct
+    type nonrec t =
+      {
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "An idempotency token for resource creation, in a string of up to 63 ASCII characters. This token is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK. By using the idempotent operation, you can retry a CreateFileCache operation without the risk of creating an extra cache. This approach can be useful when an initial call fails in a way that makes it unclear whether a cache was created. Examples are if a transport level timeout occurred, or your connection was reset. If you use the same client request token and the initial call created a cache, the client receives success as long as the parameters are the same."];
+      fileCacheType: FileCacheType.t
+        [@ocaml.doc
+          "The type of cache that you're creating, which must be LUSTRE."];
+      fileCacheTypeVersion: FileSystemTypeVersion.t
+        [@ocaml.doc
+          "Sets the Lustre version for the cache that you're creating, which must be 2.12."];
+      storageCapacity: StorageCapacity.t
+        [@ocaml.doc
+          "The storage capacity of the cache in gibibytes (GiB). Valid values are 1200 GiB, 2400 GiB, and increments of 2400 GiB."];
+      subnetIds: SubnetIds.t ;
+      securityGroupIds: SecurityGroupIds.t option
+        [@ocaml.doc
+          "A list of IDs specifying the security groups to apply to all network interfaces created for Amazon File Cache access. This list isn't returned in later requests to describe the cache."];
+      tags: Tags.t option ;
+      copyTagsToDataRepositoryAssociations:
+        CopyTagsToDataRepositoryAssociations.t option
+        [@ocaml.doc
+          "A boolean flag indicating whether tags for the cache should be copied to data repository associations. This value defaults to false."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "Specifies the ID of the Key Management Service (KMS) key to use for encrypting data on an Amazon File Cache. If a KmsKeyId isn't specified, the Amazon FSx-managed KMS key for your account is used. For more information, see Encrypt in the Key Management Service API Reference."];
+      lustreConfiguration: CreateFileCacheLustreConfiguration.t option
+        [@ocaml.doc
+          "The configuration for the Amazon File Cache resource being created."];
+      dataRepositoryAssociations:
+        CreateFileCacheDataRepositoryAssociations.t option
+        [@ocaml.doc
+          "A list of up to 8 configurations for data repository associations (DRAs) to be created during the cache creation. The DRAs link the cache to either an Amazon S3 data repository or a Network File System (NFS) data repository that supports the NFSv3 protocol. The DRA configurations must meet the following requirements: All configurations on the list must be of the same data repository type, either all S3 or all NFS. A cache can't link to different data repository types at the same time. An NFS DRA must link to an NFS file system that supports the NFSv3 protocol. DRA automatic import and automatic export is not supported."]}
+    let context_ = "CreateFileCacheRequest"
+    let make ?clientRequestToken =
+      fun ?securityGroupIds ->
+        fun ?tags ->
+          fun ?copyTagsToDataRepositoryAssociations ->
+            fun ?kmsKeyId ->
+              fun ?lustreConfiguration ->
+                fun ?dataRepositoryAssociations ->
+                  fun ~fileCacheType ->
+                    fun ~fileCacheTypeVersion ->
+                      fun ~storageCapacity ->
+                        fun ~subnetIds ->
+                          fun () ->
+                            {
+                              clientRequestToken;
+                              securityGroupIds;
+                              tags;
+                              copyTagsToDataRepositoryAssociations;
+                              kmsKeyId;
+                              lustreConfiguration;
+                              dataRepositoryAssociations;
+                              fileCacheType;
+                              fileCacheTypeVersion;
+                              storageCapacity;
+                              subnetIds
+                            }
+    let to_value x =
+      structure_to_value
+        [("ClientRequestToken",
+           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("FileCacheType", (Some (FileCacheType.to_value x.fileCacheType)));
+        ("FileCacheTypeVersion",
+          (Some (FileSystemTypeVersion.to_value x.fileCacheTypeVersion)));
+        ("StorageCapacity",
+          (Some (StorageCapacity.to_value x.storageCapacity)));
+        ("SubnetIds", (Some (SubnetIds.to_value x.subnetIds)));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("CopyTagsToDataRepositoryAssociations",
+          (Option.map x.copyTagsToDataRepositoryAssociations
+             ~f:CopyTagsToDataRepositoryAssociations.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("LustreConfiguration",
+          (Option.map x.lustreConfiguration
+             ~f:CreateFileCacheLustreConfiguration.to_value));
+        ("DataRepositoryAssociations",
+          (Option.map x.dataRepositoryAssociations
+             ~f:CreateFileCacheDataRepositoryAssociations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataRepositoryAssociations =
+        (Option.map ~f:CreateFileCacheDataRepositoryAssociations.of_xml)
+          (Xml.child xml_arg0 "DataRepositoryAssociations") in
+      let lustreConfiguration =
+        (Option.map ~f:CreateFileCacheLustreConfiguration.of_xml)
+          (Xml.child xml_arg0 "LustreConfiguration") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let copyTagsToDataRepositoryAssociations =
+        (Option.map ~f:CopyTagsToDataRepositoryAssociations.of_xml)
+          (Xml.child xml_arg0 "CopyTagsToDataRepositoryAssociations") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIds.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
+      let subnetIds =
+        SubnetIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
+      let storageCapacity =
+        StorageCapacity.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StorageCapacity") in
+      let fileCacheTypeVersion =
+        FileSystemTypeVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileCacheTypeVersion") in
+      let fileCacheType =
+        FileCacheType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileCacheType") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      make ?dataRepositoryAssociations ?lustreConfiguration ?kmsKeyId
+        ?copyTagsToDataRepositoryAssociations ?tags ?securityGroupIds
+        ~subnetIds ~storageCapacity ~fileCacheTypeVersion ~fileCacheType
+        ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataRepositoryAssociations =
+        field_map json__ "DataRepositoryAssociations"
+          CreateFileCacheDataRepositoryAssociations.of_json in
+      let lustreConfiguration =
+        field_map json__ "LustreConfiguration"
+          CreateFileCacheLustreConfiguration.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let copyTagsToDataRepositoryAssociations =
+        field_map json__ "CopyTagsToDataRepositoryAssociations"
+          CopyTagsToDataRepositoryAssociations.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let securityGroupIds =
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIds.of_json in
+      let storageCapacity =
+        field_map_exn json__ "StorageCapacity" StorageCapacity.of_json in
+      let fileCacheTypeVersion =
+        field_map_exn json__ "FileCacheTypeVersion"
+          FileSystemTypeVersion.of_json in
+      let fileCacheType =
+        field_map_exn json__ "FileCacheType" FileCacheType.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      make ?dataRepositoryAssociations ?lustreConfiguration ?kmsKeyId
+        ?copyTagsToDataRepositoryAssociations ?tags ?securityGroupIds
+        ~subnetIds ~storageCapacity ~fileCacheTypeVersion ~fileCacheType
+        ?clientRequestToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new Amazon File Cache resource. You can use this operation with a client request token in the request that Amazon File Cache uses to ensure idempotent creation. If a cache with the specified client request token exists and the parameters match, CreateFileCache returns the description of the existing cache. If a cache with the specified client request token exists and the parameters don't match, this call returns IncompatibleParameterError. If a file cache with the specified client request token doesn't exist, CreateFileCache does the following: Creates a new, empty Amazon File Cache resource with an assigned ID, and an initial lifecycle state of CREATING. Returns the description of the cache in JSON format. The CreateFileCache call returns while the cache's lifecycle state is still CREATING. You can check the cache creation status by calling the DescribeFileCaches operation, which returns the cache state along with other information."]
+module MissingFileCacheConfiguration =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A cache configuration is required for this operation."]
+module InvalidPerUnitStorageThroughput =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An invalid value for PerUnitStorageThroughput was provided. Please create your file system again, using a valid value."]
+module InvalidNetworkSettings =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option
+        [@ocaml.doc
+          "Error message explaining what's wrong with network settings."];
+      invalidSubnetId: SubnetId.t option
+        [@ocaml.doc
+          "The subnet ID that is either invalid or not part of the VPC specified."];
+      invalidSecurityGroupId: SecurityGroupId.t option
+        [@ocaml.doc
+          "The security group ID is either invalid or not part of the VPC specified."];
+      invalidRouteTableId: RouteTableId.t option
+        [@ocaml.doc
+          "The route table ID is either invalid or not part of the VPC specified."]}
+    let make ?message =
+      fun ?invalidSubnetId ->
+        fun ?invalidSecurityGroupId ->
+          fun ?invalidRouteTableId ->
+            fun () ->
+              {
+                message;
+                invalidSubnetId;
+                invalidSecurityGroupId;
+                invalidRouteTableId
+              }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("InvalidSubnetId",
+          (Option.map x.invalidSubnetId ~f:SubnetId.to_value));
+        ("InvalidSecurityGroupId",
+          (Option.map x.invalidSecurityGroupId ~f:SecurityGroupId.to_value));
+        ("InvalidRouteTableId",
+          (Option.map x.invalidRouteTableId ~f:RouteTableId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let invalidRouteTableId =
+        (Option.map ~f:RouteTableId.of_xml)
+          (Xml.child xml_arg0 "InvalidRouteTableId") in
+      let invalidSecurityGroupId =
+        (Option.map ~f:SecurityGroupId.of_xml)
+          (Xml.child xml_arg0 "InvalidSecurityGroupId") in
+      let invalidSubnetId =
+        (Option.map ~f:SubnetId.of_xml)
+          (Xml.child xml_arg0 "InvalidSubnetId") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?invalidRouteTableId ?invalidSecurityGroupId ?invalidSubnetId
+        ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let invalidRouteTableId =
+        field_map json__ "InvalidRouteTableId" RouteTableId.of_json in
+      let invalidSecurityGroupId =
+        field_map json__ "InvalidSecurityGroupId" SecurityGroupId.of_json in
+      let invalidSubnetId =
+        field_map json__ "InvalidSubnetId" SubnetId.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?invalidRouteTableId ?invalidSecurityGroupId ?invalidSubnetId
+        ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One or more network settings specified in the request are invalid."]
+module FileCacheLustreConfiguration =
+  struct
+    type nonrec t =
+      {
+      perUnitStorageThroughput: PerUnitStorageThroughput.t option
+        [@ocaml.doc
+          "Per unit storage throughput represents the megabytes per second of read or write throughput per 1 tebibyte of storage provisioned. Cache throughput capacity is equal to Storage capacity (TiB) * PerUnitStorageThroughput (MB/s/TiB). The only supported value is 1000."];
+      deploymentType: FileCacheLustreDeploymentType.t option
+        [@ocaml.doc
+          "The deployment type of the Amazon File Cache resource, which must be CACHE_1."];
+      mountName: LustreFileSystemMountName.t option
+        [@ocaml.doc
+          "You use the MountName value when mounting the cache. If you pass a cache ID to the DescribeFileCaches operation, it returns the the MountName value as part of the cache's description."];
+      weeklyMaintenanceStartTime: WeeklyTime.t option ;
+      metadataConfiguration: FileCacheLustreMetadataConfiguration.t option
+        [@ocaml.doc
+          "The configuration for a Lustre MDT (Metadata Target) storage volume."];
+      logConfiguration: LustreLogConfiguration.t option
+        [@ocaml.doc
+          "The configuration for Lustre logging used to write the enabled logging events for your Amazon File Cache resource to Amazon CloudWatch Logs."]}
+    let make ?perUnitStorageThroughput =
+      fun ?deploymentType ->
+        fun ?mountName ->
+          fun ?weeklyMaintenanceStartTime ->
+            fun ?metadataConfiguration ->
+              fun ?logConfiguration ->
+                fun () ->
+                  {
+                    perUnitStorageThroughput;
+                    deploymentType;
+                    mountName;
+                    weeklyMaintenanceStartTime;
+                    metadataConfiguration;
+                    logConfiguration
+                  }
+    let to_value x =
+      structure_to_value
+        [("PerUnitStorageThroughput",
+           (Option.map x.perUnitStorageThroughput
+              ~f:PerUnitStorageThroughput.to_value));
+        ("DeploymentType",
+          (Option.map x.deploymentType
+             ~f:FileCacheLustreDeploymentType.to_value));
+        ("MountName",
+          (Option.map x.mountName ~f:LustreFileSystemMountName.to_value));
+        ("WeeklyMaintenanceStartTime",
+          (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value));
+        ("MetadataConfiguration",
+          (Option.map x.metadataConfiguration
+             ~f:FileCacheLustreMetadataConfiguration.to_value));
+        ("LogConfiguration",
+          (Option.map x.logConfiguration ~f:LustreLogConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logConfiguration =
+        (Option.map ~f:LustreLogConfiguration.of_xml)
+          (Xml.child xml_arg0 "LogConfiguration") in
+      let metadataConfiguration =
+        (Option.map ~f:FileCacheLustreMetadataConfiguration.of_xml)
+          (Xml.child xml_arg0 "MetadataConfiguration") in
+      let weeklyMaintenanceStartTime =
+        (Option.map ~f:WeeklyTime.of_xml)
+          (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
+      let mountName =
+        (Option.map ~f:LustreFileSystemMountName.of_xml)
+          (Xml.child xml_arg0 "MountName") in
+      let deploymentType =
+        (Option.map ~f:FileCacheLustreDeploymentType.of_xml)
+          (Xml.child xml_arg0 "DeploymentType") in
+      let perUnitStorageThroughput =
+        (Option.map ~f:PerUnitStorageThroughput.of_xml)
+          (Xml.child xml_arg0 "PerUnitStorageThroughput") in
+      make ?logConfiguration ?metadataConfiguration
+        ?weeklyMaintenanceStartTime ?mountName ?deploymentType
+        ?perUnitStorageThroughput ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logConfiguration =
+        field_map json__ "LogConfiguration" LustreLogConfiguration.of_json in
+      let metadataConfiguration =
+        field_map json__ "MetadataConfiguration"
+          FileCacheLustreMetadataConfiguration.of_json in
+      let weeklyMaintenanceStartTime =
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+      let mountName =
+        field_map json__ "MountName" LustreFileSystemMountName.of_json in
+      let deploymentType =
+        field_map json__ "DeploymentType"
+          FileCacheLustreDeploymentType.of_json in
+      let perUnitStorageThroughput =
+        field_map json__ "PerUnitStorageThroughput"
+          PerUnitStorageThroughput.of_json in
+      make ?logConfiguration ?metadataConfiguration
+        ?weeklyMaintenanceStartTime ?mountName ?deploymentType
+        ?perUnitStorageThroughput ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration for the Amazon File Cache resource."]
+module FileCacheLifecycle =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | CREATING 
+      | DELETING 
+      | UPDATING 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | CREATING -> "CREATING"
+      | DELETING -> "DELETING"
+      | UPDATING -> "UPDATING"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "CREATING" -> CREATING
+      | "DELETING" -> DELETING
+      | "UPDATING" -> UPDATING
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FileCacheLifecycle" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FileCacheLifecycle" j)
+    let to_json = simple_to_json to_value
+  end
+module FileCacheFailureDetails =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option
+        [@ocaml.doc "A message describing any failures that occurred."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure providing details of any failures that occurred."]
+module DataRepositoryAssociationIds =
+  struct
+    type nonrec t = DataRepositoryAssociationId.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataRepositoryAssociationId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataRepositoryAssociationId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataRepositoryAssociationIds"
+        ~of_json:DataRepositoryAssociationId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FileCacheCreating =
+  struct
+    type nonrec t =
+      {
+      ownerId: AWSAccountId.t option ;
+      creationTime: CreationTime.t option ;
+      fileCacheId: FileCacheId.t option
+        [@ocaml.doc "The system-generated, unique ID of the cache."];
+      fileCacheType: FileCacheType.t option
+        [@ocaml.doc "The type of cache, which must be LUSTRE."];
+      fileCacheTypeVersion: FileSystemTypeVersion.t option
+        [@ocaml.doc "The Lustre version of the cache, which must be 2.12."];
+      lifecycle: FileCacheLifecycle.t option
+        [@ocaml.doc
+          "The lifecycle status of the cache. The following are the possible values and what they mean: AVAILABLE - The cache is in a healthy state, and is reachable and available for use. CREATING - The new cache is being created. DELETING - An existing cache is being deleted. UPDATING - The cache is undergoing a customer-initiated update. FAILED - An existing cache has experienced an unrecoverable failure. When creating a new cache, the cache was unable to be created."];
+      failureDetails: FileCacheFailureDetails.t option
+        [@ocaml.doc
+          "A structure providing details of any failures that occurred in creating a cache."];
+      storageCapacity: StorageCapacity.t option
+        [@ocaml.doc "The storage capacity of the cache in gibibytes (GiB)."];
+      vpcId: VpcId.t option ;
+      subnetIds: SubnetIds.t option ;
+      networkInterfaceIds: NetworkInterfaceIds.t option ;
+      dNSName: DNSName.t option
+        [@ocaml.doc "The Domain Name System (DNS) name for the cache."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "Specifies the ID of the Key Management Service (KMS) key to use for encrypting data on an Amazon File Cache. If a KmsKeyId isn't specified, the Amazon FSx-managed KMS key for your account is used. For more information, see Encrypt in the Key Management Service API Reference."];
+      resourceARN: ResourceARN.t option ;
+      tags: Tags.t option ;
+      copyTagsToDataRepositoryAssociations:
+        CopyTagsToDataRepositoryAssociations.t option
+        [@ocaml.doc
+          "A boolean flag indicating whether tags for the cache should be copied to data repository associations."];
+      lustreConfiguration: FileCacheLustreConfiguration.t option
+        [@ocaml.doc "The configuration for the Amazon File Cache resource."];
+      dataRepositoryAssociationIds: DataRepositoryAssociationIds.t option
+        [@ocaml.doc
+          "A list of IDs of data repository associations that are associated with this cache."]}
+    let make ?ownerId =
+      fun ?creationTime ->
+        fun ?fileCacheId ->
+          fun ?fileCacheType ->
+            fun ?fileCacheTypeVersion ->
+              fun ?lifecycle ->
+                fun ?failureDetails ->
+                  fun ?storageCapacity ->
+                    fun ?vpcId ->
+                      fun ?subnetIds ->
+                        fun ?networkInterfaceIds ->
+                          fun ?dNSName ->
+                            fun ?kmsKeyId ->
+                              fun ?resourceARN ->
+                                fun ?tags ->
+                                  fun ?copyTagsToDataRepositoryAssociations
+                                    ->
+                                    fun ?lustreConfiguration ->
+                                      fun ?dataRepositoryAssociationIds ->
+                                        fun () ->
+                                          {
+                                            ownerId;
+                                            creationTime;
+                                            fileCacheId;
+                                            fileCacheType;
+                                            fileCacheTypeVersion;
+                                            lifecycle;
+                                            failureDetails;
+                                            storageCapacity;
+                                            vpcId;
+                                            subnetIds;
+                                            networkInterfaceIds;
+                                            dNSName;
+                                            kmsKeyId;
+                                            resourceARN;
+                                            tags;
+                                            copyTagsToDataRepositoryAssociations;
+                                            lustreConfiguration;
+                                            dataRepositoryAssociationIds
+                                          }
+    let to_value x =
+      structure_to_value
+        [("OwnerId", (Option.map x.ownerId ~f:AWSAccountId.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:CreationTime.to_value));
+        ("FileCacheId", (Option.map x.fileCacheId ~f:FileCacheId.to_value));
+        ("FileCacheType",
+          (Option.map x.fileCacheType ~f:FileCacheType.to_value));
+        ("FileCacheTypeVersion",
+          (Option.map x.fileCacheTypeVersion
+             ~f:FileSystemTypeVersion.to_value));
+        ("Lifecycle",
+          (Option.map x.lifecycle ~f:FileCacheLifecycle.to_value));
+        ("FailureDetails",
+          (Option.map x.failureDetails ~f:FileCacheFailureDetails.to_value));
+        ("StorageCapacity",
+          (Option.map x.storageCapacity ~f:StorageCapacity.to_value));
+        ("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
+        ("SubnetIds", (Option.map x.subnetIds ~f:SubnetIds.to_value));
+        ("NetworkInterfaceIds",
+          (Option.map x.networkInterfaceIds ~f:NetworkInterfaceIds.to_value));
+        ("DNSName", (Option.map x.dNSName ~f:DNSName.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("CopyTagsToDataRepositoryAssociations",
+          (Option.map x.copyTagsToDataRepositoryAssociations
+             ~f:CopyTagsToDataRepositoryAssociations.to_value));
+        ("LustreConfiguration",
+          (Option.map x.lustreConfiguration
+             ~f:FileCacheLustreConfiguration.to_value));
+        ("DataRepositoryAssociationIds",
+          (Option.map x.dataRepositoryAssociationIds
+             ~f:DataRepositoryAssociationIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataRepositoryAssociationIds =
+        (Option.map ~f:DataRepositoryAssociationIds.of_xml)
+          (Xml.child xml_arg0 "DataRepositoryAssociationIds") in
+      let lustreConfiguration =
+        (Option.map ~f:FileCacheLustreConfiguration.of_xml)
+          (Xml.child xml_arg0 "LustreConfiguration") in
+      let copyTagsToDataRepositoryAssociations =
+        (Option.map ~f:CopyTagsToDataRepositoryAssociations.of_xml)
+          (Xml.child xml_arg0 "CopyTagsToDataRepositoryAssociations") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let resourceARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let dNSName =
+        (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "DNSName") in
+      let networkInterfaceIds =
+        (Option.map ~f:NetworkInterfaceIds.of_xml)
+          (Xml.child xml_arg0 "NetworkInterfaceIds") in
+      let subnetIds =
+        (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
+      let storageCapacity =
+        (Option.map ~f:StorageCapacity.of_xml)
+          (Xml.child xml_arg0 "StorageCapacity") in
+      let failureDetails =
+        (Option.map ~f:FileCacheFailureDetails.of_xml)
+          (Xml.child xml_arg0 "FailureDetails") in
+      let lifecycle =
+        (Option.map ~f:FileCacheLifecycle.of_xml)
+          (Xml.child xml_arg0 "Lifecycle") in
+      let fileCacheTypeVersion =
+        (Option.map ~f:FileSystemTypeVersion.of_xml)
+          (Xml.child xml_arg0 "FileCacheTypeVersion") in
+      let fileCacheType =
+        (Option.map ~f:FileCacheType.of_xml)
+          (Xml.child xml_arg0 "FileCacheType") in
+      let fileCacheId =
+        (Option.map ~f:FileCacheId.of_xml) (Xml.child xml_arg0 "FileCacheId") in
+      let creationTime =
+        (Option.map ~f:CreationTime.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let ownerId =
+        (Option.map ~f:AWSAccountId.of_xml) (Xml.child xml_arg0 "OwnerId") in
+      make ?dataRepositoryAssociationIds ?lustreConfiguration
+        ?copyTagsToDataRepositoryAssociations ?tags ?resourceARN ?kmsKeyId
+        ?dNSName ?networkInterfaceIds ?subnetIds ?vpcId ?storageCapacity
+        ?failureDetails ?lifecycle ?fileCacheTypeVersion ?fileCacheType
+        ?fileCacheId ?creationTime ?ownerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataRepositoryAssociationIds =
+        field_map json__ "DataRepositoryAssociationIds"
+          DataRepositoryAssociationIds.of_json in
+      let lustreConfiguration =
+        field_map json__ "LustreConfiguration"
+          FileCacheLustreConfiguration.of_json in
+      let copyTagsToDataRepositoryAssociations =
+        field_map json__ "CopyTagsToDataRepositoryAssociations"
+          CopyTagsToDataRepositoryAssociations.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let dNSName = field_map json__ "DNSName" DNSName.of_json in
+      let networkInterfaceIds =
+        field_map json__ "NetworkInterfaceIds" NetworkInterfaceIds.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let storageCapacity =
+        field_map json__ "StorageCapacity" StorageCapacity.of_json in
+      let failureDetails =
+        field_map json__ "FailureDetails" FileCacheFailureDetails.of_json in
+      let lifecycle = field_map json__ "Lifecycle" FileCacheLifecycle.of_json in
+      let fileCacheTypeVersion =
+        field_map json__ "FileCacheTypeVersion" FileSystemTypeVersion.of_json in
+      let fileCacheType =
+        field_map json__ "FileCacheType" FileCacheType.of_json in
+      let fileCacheId = field_map json__ "FileCacheId" FileCacheId.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
+      let ownerId = field_map json__ "OwnerId" AWSAccountId.of_json in
+      make ?dataRepositoryAssociationIds ?lustreConfiguration
+        ?copyTagsToDataRepositoryAssociations ?tags ?resourceARN ?kmsKeyId
+        ?dNSName ?networkInterfaceIds ?subnetIds ?vpcId ?storageCapacity
+        ?failureDetails ?lifecycle ?fileCacheTypeVersion ?fileCacheType
+        ?fileCacheId ?creationTime ?ownerId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The response object for the Amazon File Cache resource being created in the CreateFileCache operation."]
+module CreateFileCacheResponse =
+  struct
+    type nonrec t =
+      {
+      fileCache: FileCacheCreating.t option
+        [@ocaml.doc "A description of the cache that was created."]}
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `IncompatibleParameterError of IncompatibleParameterError.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidNetworkSettings of InvalidNetworkSettings.t 
+      | `InvalidPerUnitStorageThroughput of InvalidPerUnitStorageThroughput.t 
+      | `MissingFileCacheConfiguration of MissingFileCacheConfiguration.t 
+      | `ServiceLimitExceeded of ServiceLimitExceeded.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fileCache = fun () -> { fileCache }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError
+            (IncompatibleParameterError.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidNetworkSettings" ->
+          `InvalidNetworkSettings (InvalidNetworkSettings.of_json json)
+      | "InvalidPerUnitStorageThroughput" ->
+          `InvalidPerUnitStorageThroughput
+            (InvalidPerUnitStorageThroughput.of_json json)
+      | "MissingFileCacheConfiguration" ->
+          `MissingFileCacheConfiguration
+            (MissingFileCacheConfiguration.of_json json)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError (IncompatibleParameterError.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidNetworkSettings" ->
+          `InvalidNetworkSettings (InvalidNetworkSettings.of_xml xml)
+      | "InvalidPerUnitStorageThroughput" ->
+          `InvalidPerUnitStorageThroughput
+            (InvalidPerUnitStorageThroughput.of_xml xml)
+      | "MissingFileCacheConfiguration" ->
+          `MissingFileCacheConfiguration
+            (MissingFileCacheConfiguration.of_xml xml)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `IncompatibleParameterError e ->
+          `Assoc
+            [("error", (`String "IncompatibleParameterError"));
+            ("details", (IncompatibleParameterError.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidNetworkSettings e ->
+          `Assoc
+            [("error", (`String "InvalidNetworkSettings"));
+            ("details", (InvalidNetworkSettings.to_json e))]
+      | `InvalidPerUnitStorageThroughput e ->
+          `Assoc
+            [("error", (`String "InvalidPerUnitStorageThroughput"));
+            ("details", (InvalidPerUnitStorageThroughput.to_json e))]
+      | `MissingFileCacheConfiguration e ->
+          `Assoc
+            [("error", (`String "MissingFileCacheConfiguration"));
+            ("details", (MissingFileCacheConfiguration.to_json e))]
+      | `ServiceLimitExceeded e ->
+          `Assoc
+            [("error", (`String "ServiceLimitExceeded"));
+            ("details", (ServiceLimitExceeded.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FileCache",
+           (Option.map x.fileCache ~f:FileCacheCreating.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileCache =
+        (Option.map ~f:FileCacheCreating.of_xml)
+          (Xml.child xml_arg0 "FileCache") in
+      make ?fileCache ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileCache = field_map json__ "FileCache" FileCacheCreating.of_json in
+      make ?fileCache ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new Amazon File Cache resource. You can use this operation with a client request token in the request that Amazon File Cache uses to ensure idempotent creation. If a cache with the specified client request token exists and the parameters match, CreateFileCache returns the description of the existing cache. If a cache with the specified client request token exists and the parameters don't match, this call returns IncompatibleParameterError. If a file cache with the specified client request token doesn't exist, CreateFileCache does the following: Creates a new, empty Amazon File Cache resource with an assigned ID, and an initial lifecycle state of CREATING. Returns the description of the cache in JSON format. The CreateFileCache call returns while the cache's lifecycle state is still CREATING. You can check the cache creation status by calling the DescribeFileCaches operation, which returns the cache state along with other information."]
 module WindowsAuditLogCreateConfiguration =
   struct
     type nonrec t =
@@ -7915,7 +12464,7 @@ module WindowsAuditLogCreateConfiguration =
           "Sets which attempt type is logged by Amazon FSx for file share accesses. SUCCESS_ONLY - only successful attempts to access file shares are logged. FAILURE_ONLY - only failed attempts to access file shares are logged. SUCCESS_AND_FAILURE - both successful attempts and failed attempts to access file shares are logged. DISABLED - access auditing of file shares is turned off."];
       auditLogDestination: GeneralARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that specifies the destination of the audit logs. The destination can be any Amazon CloudWatch Logs log group ARN or Amazon Kinesis Data Firehose delivery stream ARN, with the following requirements: The destination ARN that you provide (either CloudWatch Logs log group or Kinesis Data Firehose delivery stream) must be in the same Amazon Web Services partition, Amazon Web Services Region, and Amazon Web Services account as your Amazon FSx file system. The name of the Amazon CloudWatch Logs log group must begin with the /aws/fsx prefix. The name of the Amazon Kinesis Data Firehouse delivery stream must begin with the aws-fsx prefix. If you do not provide a destination in AuditLogDestination, Amazon FSx will create and use a log stream in the CloudWatch Logs /aws/fsx/windows log group. If AuditLogDestination is provided and the resource does not exist, the request will fail with a BadRequest error. If FileAccessAuditLogLevel and FileShareAccessAuditLogLevel are both set to DISABLED, you cannot specify a destination in AuditLogDestination."]}
+          "The Amazon Resource Name (ARN) that specifies the destination of the audit logs. The destination can be any Amazon CloudWatch Logs log group ARN or Amazon Kinesis Data Firehose delivery stream ARN, with the following requirements: The destination ARN that you provide (either CloudWatch Logs log group or Kinesis Data Firehose delivery stream) must be in the same Amazon Web Services partition, Amazon Web Services Region, and Amazon Web Services account as your Amazon FSx file system. The name of the Amazon CloudWatch Logs log group must begin with the /aws/fsx prefix. The name of the Amazon Kinesis Data Firehose delivery stream must begin with the aws-fsx prefix. If you do not provide a destination in AuditLogDestination, Amazon FSx will create and use a log stream in the CloudWatch Logs /aws/fsx/windows log group. If AuditLogDestination is provided and the resource does not exist, the request will fail with a BadRequest error. If FileAccessAuditLogLevel and FileShareAccessAuditLogLevel are both set to DISABLED, you cannot specify a destination in AuditLogDestination."]}
     let context_ = "WindowsAuditLogCreateConfiguration"
     let make ?auditLogDestination =
       fun ~fileAccessAuditLogLevel ->
@@ -7952,14 +12501,14 @@ module WindowsAuditLogCreateConfiguration =
       make ?auditLogDestination ~fileShareAccessAuditLogLevel
         ~fileAccessAuditLogLevel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let auditLogDestination =
-        field_map json "AuditLogDestination" GeneralARN.of_json in
+        field_map json__ "AuditLogDestination" GeneralARN.of_json in
       let fileShareAccessAuditLogLevel =
-        field_map_exn json "FileShareAccessAuditLogLevel"
+        field_map_exn json__ "FileShareAccessAuditLogLevel"
           WindowsAccessAuditLogLevel.of_json in
       let fileAccessAuditLogLevel =
-        field_map_exn json "FileAccessAuditLogLevel"
+        field_map_exn json__ "FileAccessAuditLogLevel"
           WindowsAccessAuditLogLevel.of_json in
       make ?auditLogDestination ~fileShareAccessAuditLogLevel
         ~fileAccessAuditLogLevel ()
@@ -8001,31 +12550,36 @@ module SelfManagedActiveDirectoryConfiguration =
         FileSystemAdministratorsGroupName.t option
         [@ocaml.doc
           "(Optional) The name of the domain group whose members are granted administrative privileges for the file system. Administrative privileges include taking ownership of files and folders, setting audit controls (audit ACLs) on files and folders, and administering the file system remotely by using the FSx Remote PowerShell. The group that you specify must already exist in your domain. If you don't provide one, your AD domain's Domain Admins group is used."];
-      userName: DirectoryUserName.t
+      userName: DirectoryUserName.t option
         [@ocaml.doc
           "The user name for the service account on your self-managed AD domain that Amazon FSx will use to join to your AD domain. This account must have the permission to join computers to the domain in the organizational unit provided in OrganizationalUnitDistinguishedName, or in the default location of your AD domain."];
-      password: DirectoryPassword.t
+      password: DirectoryPassword.t option
         [@ocaml.doc
           "The password for the service account on your self-managed AD domain that Amazon FSx will use to join to your AD domain."];
       dnsIps: DnsIps.t
         [@ocaml.doc
-          "A list of up to three IP addresses of DNS servers or domain controllers in the self-managed AD directory."]}
+          "A list of up to three IP addresses of DNS servers or domain controllers in the self-managed AD directory."];
+      domainJoinServiceAccountSecret: CustomerSecretsManagerARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret containing the self-managed Active Directory domain join service account credentials. When provided, Amazon FSx uses the credentials stored in this secret to join the file system to your self-managed Active Directory domain. The secret must contain two key-value pairs: CUSTOMER_MANAGED_ACTIVE_DIRECTORY_USERNAME - The username for the service account CUSTOMER_MANAGED_ACTIVE_DIRECTORY_PASSWORD - The password for the service account For more information, see Using Amazon FSx for Windows with your self-managed Microsoft Active Directory or Using Amazon FSx for ONTAP with your self-managed Microsoft Active Directory."]}
     let context_ = "SelfManagedActiveDirectoryConfiguration"
     let make ?organizationalUnitDistinguishedName =
       fun ?fileSystemAdministratorsGroup ->
-        fun ~domainName ->
-          fun ~userName ->
-            fun ~password ->
-              fun ~dnsIps ->
-                fun () ->
-                  {
-                    organizationalUnitDistinguishedName;
-                    fileSystemAdministratorsGroup;
-                    domainName;
-                    userName;
-                    password;
-                    dnsIps
-                  }
+        fun ?userName ->
+          fun ?password ->
+            fun ?domainJoinServiceAccountSecret ->
+              fun ~domainName ->
+                fun ~dnsIps ->
+                  fun () ->
+                    {
+                      organizationalUnitDistinguishedName;
+                      fileSystemAdministratorsGroup;
+                      userName;
+                      password;
+                      domainJoinServiceAccountSecret;
+                      domainName;
+                      dnsIps
+                    }
     let to_value x =
       structure_to_value
         [("DomainName",
@@ -8036,19 +12590,25 @@ module SelfManagedActiveDirectoryConfiguration =
         ("FileSystemAdministratorsGroup",
           (Option.map x.fileSystemAdministratorsGroup
              ~f:FileSystemAdministratorsGroupName.to_value));
-        ("UserName", (Some (DirectoryUserName.to_value x.userName)));
-        ("Password", (Some (DirectoryPassword.to_value x.password)));
-        ("DnsIps", (Some (DnsIps.to_value x.dnsIps)))]
+        ("UserName", (Option.map x.userName ~f:DirectoryUserName.to_value));
+        ("Password", (Option.map x.password ~f:DirectoryPassword.to_value));
+        ("DnsIps", (Some (DnsIps.to_value x.dnsIps)));
+        ("DomainJoinServiceAccountSecret",
+          (Option.map x.domainJoinServiceAccountSecret
+             ~f:CustomerSecretsManagerARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let domainJoinServiceAccountSecret =
+        (Option.map ~f:CustomerSecretsManagerARN.of_xml)
+          (Xml.child xml_arg0 "DomainJoinServiceAccountSecret") in
       let dnsIps =
         DnsIps.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DnsIps") in
       let password =
-        DirectoryPassword.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Password") in
+        (Option.map ~f:DirectoryPassword.of_xml)
+          (Xml.child xml_arg0 "Password") in
       let userName =
-        DirectoryUserName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
+        (Option.map ~f:DirectoryUserName.of_xml)
+          (Xml.child xml_arg0 "UserName") in
       let fileSystemAdministratorsGroup =
         (Option.map ~f:FileSystemAdministratorsGroupName.of_xml)
           (Xml.child xml_arg0 "FileSystemAdministratorsGroup") in
@@ -8058,27 +12618,32 @@ module SelfManagedActiveDirectoryConfiguration =
       let domainName =
         ActiveDirectoryFullyQualifiedName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ~dnsIps ~password ~userName ?fileSystemAdministratorsGroup
-        ?organizationalUnitDistinguishedName ~domainName ()
+      make ?domainJoinServiceAccountSecret ~dnsIps ?password ?userName
+        ?fileSystemAdministratorsGroup ?organizationalUnitDistinguishedName
+        ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dnsIps = field_map_exn json "DnsIps" DnsIps.of_json in
-      let password = field_map_exn json "Password" DirectoryPassword.of_json in
-      let userName = field_map_exn json "UserName" DirectoryUserName.of_json in
+    let of_json json__ =
+      let domainJoinServiceAccountSecret =
+        field_map json__ "DomainJoinServiceAccountSecret"
+          CustomerSecretsManagerARN.of_json in
+      let dnsIps = field_map_exn json__ "DnsIps" DnsIps.of_json in
+      let password = field_map json__ "Password" DirectoryPassword.of_json in
+      let userName = field_map json__ "UserName" DirectoryUserName.of_json in
       let fileSystemAdministratorsGroup =
-        field_map json "FileSystemAdministratorsGroup"
+        field_map json__ "FileSystemAdministratorsGroup"
           FileSystemAdministratorsGroupName.of_json in
       let organizationalUnitDistinguishedName =
-        field_map json "OrganizationalUnitDistinguishedName"
+        field_map json__ "OrganizationalUnitDistinguishedName"
           OrganizationalUnitDistinguishedName.of_json in
       let domainName =
-        field_map_exn json "DomainName"
+        field_map_exn json__ "DomainName"
           ActiveDirectoryFullyQualifiedName.of_json in
-      make ~dnsIps ~password ~userName ?fileSystemAdministratorsGroup
-        ?organizationalUnitDistinguishedName ~domainName ()
+      make ?domainJoinServiceAccountSecret ~dnsIps ?password ?userName
+        ?fileSystemAdministratorsGroup ?organizationalUnitDistinguishedName
+        ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration that Amazon FSx uses to join a FSx for Windows File Server file system or an ONTAP storage virtual machine (SVM) to a self-managed (including on-premises) Microsoft Active Directory (AD) directory. For more information, see Using Amazon FSx with your self-managed Microsoft Active Directory or Managing SVMs."]
+       "The configuration that Amazon FSx uses to join a FSx for Windows File Server file system or an FSx for ONTAP storage virtual machine (SVM) to a self-managed (including on-premises) Microsoft Active Directory (AD) directory. For more information, see Using Amazon FSx for Windows with your self-managed Microsoft Active Directory or Managing FSx for ONTAP SVMs."]
 module CreateFileSystemWindowsConfiguration =
   struct
     type nonrec t =
@@ -8105,16 +12670,22 @@ module CreateFileSystemWindowsConfiguration =
           "The preferred time to take daily automatic backups, formatted HH:MM in the UTC time zone."];
       automaticBackupRetentionDays: AutomaticBackupRetentionDays.t option
         [@ocaml.doc
-          "The number of days to retain automatic backups. The default is to retain backups for 7 days. Setting this value to 0 disables the creation of automatic backups. The maximum retention period for backups is 90 days."];
+          "The number of days to retain automatic backups. Setting this property to 0 disables automatic backups. You can retain automatic backups for a maximum of 90 days. The default is 30."];
       copyTagsToBackups: Flag.t option
         [@ocaml.doc
           "A boolean flag indicating whether tags for the file system should be copied to backups. This value defaults to false. If it's set to true, all tags for the file system are copied to all automatic and user-initiated backups where the user doesn't specify tags. If this value is true, and you specify one or more tags, only the specified tags are copied to backups. If you specify one or more tags when creating a user-initiated backup, no tags are copied from the file system, regardless of this value."];
       aliases: AlternateDNSNames.t option
         [@ocaml.doc
-          "An array of one or more DNS alias names that you want to associate with the Amazon FSx file system. Aliases allow you to use existing DNS names to access the data in your Amazon FSx file system. You can associate up to 50 aliases with a file system at any time. You can associate additional DNS aliases after you create the file system using the AssociateFileSystemAliases operation. You can remove DNS aliases from the file system after it is created using the DisassociateFileSystemAliases operation. You only need to specify the alias name in the request payload. For more information, see Working with DNS Aliases and Walkthrough 5: Using DNS aliases to access your file system, including additional steps you must take to be able to access your file system using a DNS alias. An alias name has to meet the following requirements: Formatted as a fully-qualified domain name (FQDN), hostname.domain, for example, accounting.example.com. Can contain alphanumeric characters, the underscore (_), and the hyphen (-). Cannot start or end with a hyphen. Can start with a numeric. For DNS alias names, Amazon FSx stores alphabetic characters as lowercase letters (a-z), regardless of how you specify them: as uppercase letters, lowercase letters, or the corresponding letters in escape codes."];
+          "An array of one or more DNS alias names that you want to associate with the Amazon FSx file system. Aliases allow you to use existing DNS names to access the data in your Amazon FSx file system. You can associate up to 50 aliases with a file system at any time. You can associate additional DNS aliases after you create the file system using the AssociateFileSystemAliases operation. You can remove DNS aliases from the file system after it is created using the DisassociateFileSystemAliases operation. You only need to specify the alias name in the request payload. For more information, see Managing DNS aliases and Accessing data using DNS aliases. An alias name has to meet the following requirements: Formatted as a fully-qualified domain name (FQDN), hostname.domain, for example, accounting.example.com. Can contain alphanumeric characters, the underscore (_), and the hyphen (-). Cannot start or end with a hyphen. Can start with a numeric. For DNS alias names, Amazon FSx stores alphabetic characters as lowercase letters (a-z), regardless of how you specify them: as uppercase letters, lowercase letters, or the corresponding letters in escape codes."];
       auditLogConfiguration: WindowsAuditLogCreateConfiguration.t option
         [@ocaml.doc
-          "The configuration that Amazon FSx for Windows File Server uses to audit and log user accesses of files, folders, and file shares on the Amazon FSx for Windows File Server file system."]}
+          "The configuration that Amazon FSx for Windows File Server uses to audit and log user accesses of files, folders, and file shares on the Amazon FSx for Windows File Server file system."];
+      diskIopsConfiguration: DiskIopsConfiguration.t option
+        [@ocaml.doc
+          "The SSD IOPS (input/output operations per second) configuration for an Amazon FSx for Windows file system. By default, Amazon FSx automatically provisions 3 IOPS per GiB of storage capacity. You can provision additional IOPS per GiB of storage, up to the maximum limit associated with your chosen throughput capacity."];
+      fsrmConfiguration: WindowsFsrmConfiguration.t option
+        [@ocaml.doc
+          "The File Server Resource Manager (FSRM) configuration that Amazon FSx for Windows File Server uses for the file system. FSRM is disabled by default."]}
     let context_ = "CreateFileSystemWindowsConfiguration"
     let make ?activeDirectoryId =
       fun ?selfManagedActiveDirectoryConfiguration ->
@@ -8126,21 +12697,25 @@ module CreateFileSystemWindowsConfiguration =
                   fun ?copyTagsToBackups ->
                     fun ?aliases ->
                       fun ?auditLogConfiguration ->
-                        fun ~throughputCapacity ->
-                          fun () ->
-                            {
-                              activeDirectoryId;
-                              selfManagedActiveDirectoryConfiguration;
-                              deploymentType;
-                              preferredSubnetId;
-                              weeklyMaintenanceStartTime;
-                              dailyAutomaticBackupStartTime;
-                              automaticBackupRetentionDays;
-                              copyTagsToBackups;
-                              aliases;
-                              auditLogConfiguration;
-                              throughputCapacity
-                            }
+                        fun ?diskIopsConfiguration ->
+                          fun ?fsrmConfiguration ->
+                            fun ~throughputCapacity ->
+                              fun () ->
+                                {
+                                  activeDirectoryId;
+                                  selfManagedActiveDirectoryConfiguration;
+                                  deploymentType;
+                                  preferredSubnetId;
+                                  weeklyMaintenanceStartTime;
+                                  dailyAutomaticBackupStartTime;
+                                  automaticBackupRetentionDays;
+                                  copyTagsToBackups;
+                                  aliases;
+                                  auditLogConfiguration;
+                                  diskIopsConfiguration;
+                                  fsrmConfiguration;
+                                  throughputCapacity
+                                }
     let to_value x =
       structure_to_value
         [("ActiveDirectoryId",
@@ -8166,9 +12741,21 @@ module CreateFileSystemWindowsConfiguration =
         ("Aliases", (Option.map x.aliases ~f:AlternateDNSNames.to_value));
         ("AuditLogConfiguration",
           (Option.map x.auditLogConfiguration
-             ~f:WindowsAuditLogCreateConfiguration.to_value))]
+             ~f:WindowsAuditLogCreateConfiguration.to_value));
+        ("DiskIopsConfiguration",
+          (Option.map x.diskIopsConfiguration
+             ~f:DiskIopsConfiguration.to_value));
+        ("FsrmConfiguration",
+          (Option.map x.fsrmConfiguration
+             ~f:WindowsFsrmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fsrmConfiguration =
+        (Option.map ~f:WindowsFsrmConfiguration.of_xml)
+          (Xml.child xml_arg0 "FsrmConfiguration") in
+      let diskIopsConfiguration =
+        (Option.map ~f:DiskIopsConfiguration.of_xml)
+          (Xml.child xml_arg0 "DiskIopsConfiguration") in
       let auditLogConfiguration =
         (Option.map ~f:WindowsAuditLogCreateConfiguration.of_xml)
           (Xml.child xml_arg0 "AuditLogConfiguration") in
@@ -8201,41 +12788,47 @@ module CreateFileSystemWindowsConfiguration =
       let activeDirectoryId =
         (Option.map ~f:DirectoryId.of_xml)
           (Xml.child xml_arg0 "ActiveDirectoryId") in
-      make ?auditLogConfiguration ?aliases ?copyTagsToBackups
-        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
-        ?weeklyMaintenanceStartTime ~throughputCapacity ?preferredSubnetId
-        ?deploymentType ?selfManagedActiveDirectoryConfiguration
-        ?activeDirectoryId ()
+      make ?fsrmConfiguration ?diskIopsConfiguration ?auditLogConfiguration
+        ?aliases ?copyTagsToBackups ?automaticBackupRetentionDays
+        ?dailyAutomaticBackupStartTime ?weeklyMaintenanceStartTime
+        ~throughputCapacity ?preferredSubnetId ?deploymentType
+        ?selfManagedActiveDirectoryConfiguration ?activeDirectoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let fsrmConfiguration =
+        field_map json__ "FsrmConfiguration" WindowsFsrmConfiguration.of_json in
+      let diskIopsConfiguration =
+        field_map json__ "DiskIopsConfiguration"
+          DiskIopsConfiguration.of_json in
       let auditLogConfiguration =
-        field_map json "AuditLogConfiguration"
+        field_map json__ "AuditLogConfiguration"
           WindowsAuditLogCreateConfiguration.of_json in
-      let aliases = field_map json "Aliases" AlternateDNSNames.of_json in
-      let copyTagsToBackups = field_map json "CopyTagsToBackups" Flag.of_json in
+      let aliases = field_map json__ "Aliases" AlternateDNSNames.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
       let throughputCapacity =
-        field_map_exn json "ThroughputCapacity" MegabytesPerSecond.of_json in
+        field_map_exn json__ "ThroughputCapacity" MegabytesPerSecond.of_json in
       let preferredSubnetId =
-        field_map json "PreferredSubnetId" SubnetId.of_json in
+        field_map json__ "PreferredSubnetId" SubnetId.of_json in
       let deploymentType =
-        field_map json "DeploymentType" WindowsDeploymentType.of_json in
+        field_map json__ "DeploymentType" WindowsDeploymentType.of_json in
       let selfManagedActiveDirectoryConfiguration =
-        field_map json "SelfManagedActiveDirectoryConfiguration"
+        field_map json__ "SelfManagedActiveDirectoryConfiguration"
           SelfManagedActiveDirectoryConfiguration.of_json in
       let activeDirectoryId =
-        field_map json "ActiveDirectoryId" DirectoryId.of_json in
-      make ?auditLogConfiguration ?aliases ?copyTagsToBackups
-        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
-        ?weeklyMaintenanceStartTime ~throughputCapacity ?preferredSubnetId
-        ?deploymentType ?selfManagedActiveDirectoryConfiguration
-        ?activeDirectoryId ()
+        field_map json__ "ActiveDirectoryId" DirectoryId.of_json in
+      make ?fsrmConfiguration ?diskIopsConfiguration ?auditLogConfiguration
+        ?aliases ?copyTagsToBackups ?automaticBackupRetentionDays
+        ?dailyAutomaticBackupStartTime ?weeklyMaintenanceStartTime
+        ~throughputCapacity ?preferredSubnetId ?deploymentType
+        ?selfManagedActiveDirectoryConfiguration ?activeDirectoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration object for the Microsoft Windows file system used in CreateFileSystem and CreateFileSystemFromBackup operations."]
@@ -8312,18 +12905,20 @@ module OpenZFSCreateRootVolumeConfiguration =
       make ?readOnly ?copyTagsToSnapshots ?userAndGroupQuotas ?nfsExports
         ?dataCompressionType ?recordSizeKiB ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let readOnly = field_map json "ReadOnly" ReadOnly.of_json in
+    let of_json json__ =
+      let readOnly = field_map json__ "ReadOnly" ReadOnly.of_json in
       let copyTagsToSnapshots =
-        field_map json "CopyTagsToSnapshots" Flag.of_json in
+        field_map json__ "CopyTagsToSnapshots" Flag.of_json in
       let userAndGroupQuotas =
-        field_map json "UserAndGroupQuotas" OpenZFSUserAndGroupQuotas.of_json in
-      let nfsExports = field_map json "NfsExports" OpenZFSNfsExports.of_json in
+        field_map json__ "UserAndGroupQuotas"
+          OpenZFSUserAndGroupQuotas.of_json in
+      let nfsExports =
+        field_map json__ "NfsExports" OpenZFSNfsExports.of_json in
       let dataCompressionType =
-        field_map json "DataCompressionType"
+        field_map json__ "DataCompressionType"
           OpenZFSDataCompressionType.of_json in
       let recordSizeKiB =
-        field_map json "RecordSizeKiB" IntegerRecordSizeKiB.of_json in
+        field_map json__ "RecordSizeKiB" IntegerRecordSizeKiB.of_json in
       make ?readOnly ?copyTagsToSnapshots ?userAndGroupQuotas ?nfsExports
         ?dataCompressionType ?recordSizeKiB ()
     let to_json v = composed_to_json to_value v
@@ -8339,19 +12934,34 @@ module CreateFileSystemOpenZFSConfiguration =
           "A Boolean value indicating whether tags for the file system should be copied to backups. This value defaults to false. If it's set to true, all tags for the file system are copied to all automatic and user-initiated backups where the user doesn't specify tags. If this value is true, and you specify one or more tags, only the specified tags are copied to backups. If you specify one or more tags when creating a user-initiated backup, no tags are copied from the file system, regardless of this value."];
       copyTagsToVolumes: Flag.t option
         [@ocaml.doc
-          "A Boolean value indicating whether tags for the volume should be copied to snapshots. This value defaults to false. If it's set to true, all tags for the volume are copied to snapshots where the user doesn't specify tags. If this value is true, and you specify one or more tags, only the specified tags are copied to snapshots. If you specify one or more tags when creating the snapshot, no tags are copied from the volume, regardless of this value."];
+          "A Boolean value indicating whether tags for the file system should be copied to volumes. This value defaults to false. If it's set to true, all tags for the file system are copied to volumes where the user doesn't specify tags. If this value is true, and you specify one or more tags, only the specified tags are copied to volumes. If you specify one or more tags when creating the volume, no tags are copied from the file system, regardless of this value."];
       dailyAutomaticBackupStartTime: DailyTime.t option ;
       deploymentType: OpenZFSDeploymentType.t
         [@ocaml.doc
-          "Specifies the file system deployment type. Amazon FSx for OpenZFS supports SINGLE_AZ_1. SINGLE_AZ_1 deployment type is configured for redundancy within a single Availability Zone."];
+          "Specifies the file system deployment type. Valid values are the following: MULTI_AZ_1- Creates file systems with high availability and durability by replicating your data and supporting failover across multiple Availability Zones in the same Amazon Web Services Region. SINGLE_AZ_HA_2- Creates file systems with high availability and throughput capacities of 160 - 10,240 MB/s using an NVMe L2ARC cache by deploying a primary and standby file system within the same Availability Zone. SINGLE_AZ_HA_1- Creates file systems with high availability and throughput capacities of 64 - 4,096 MB/s by deploying a primary and standby file system within the same Availability Zone. SINGLE_AZ_2- Creates file systems with throughput capacities of 160 - 10,240 MB/s using an NVMe L2ARC cache that automatically recover within a single Availability Zone. SINGLE_AZ_1- Creates file systems with throughput capacities of 64 - 4,096 MBs that automatically recover within a single Availability Zone. For a list of which Amazon Web Services Regions each deployment type is available in, see Deployment type availability. For more information on the differences in performance between deployment types, see File system performance in the Amazon FSx for OpenZFS User Guide."];
       throughputCapacity: MegabytesPerSecond.t
         [@ocaml.doc
-          "Specifies the throughput of an Amazon FSx for OpenZFS file system, measured in megabytes per second (MB/s). Valid values are 64, 128, 256, 512, 1024, 2048, 3072, or 4096 MB/s. You pay for additional throughput capacity that you provision."];
+          "Specifies the throughput of an Amazon FSx for OpenZFS file system, measured in megabytes per second (MBps). Valid values depend on the DeploymentType that you choose, as follows: For MULTI_AZ_1 and SINGLE_AZ_2, valid values are 160, 320, 640, 1280, 2560, 3840, 5120, 7680, or 10240 MBps. For SINGLE_AZ_1, valid values are 64, 128, 256, 512, 1024, 2048, 3072, or 4096 MBps. You pay for additional throughput capacity that you provision."];
       weeklyMaintenanceStartTime: WeeklyTime.t option ;
       diskIopsConfiguration: DiskIopsConfiguration.t option ;
       rootVolumeConfiguration: OpenZFSCreateRootVolumeConfiguration.t option
         [@ocaml.doc
-          "The configuration Amazon FSx uses when creating the root value of the Amazon FSx for OpenZFS file system. All volumes are children of the root volume."]}
+          "The configuration Amazon FSx uses when creating the root value of the Amazon FSx for OpenZFS file system. All volumes are children of the root volume."];
+      preferredSubnetId: SubnetId.t option
+        [@ocaml.doc
+          "Required when DeploymentType is set to MULTI_AZ_1. This specifies the subnet in which you want the preferred file server to be located."];
+      endpointIpAddressRange: IpAddressRange.t option
+        [@ocaml.doc
+          "(Multi-AZ only) Specifies the IPv4 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API and Amazon FSx console, Amazon FSx selects an available /28 IP address range for you from one of the VPC's CIDR ranges. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables, as long as they don't overlap with any subnet."];
+      endpointIpv6AddressRange: Ipv6AddressRange.t option
+        [@ocaml.doc
+          "(Multi-AZ only) Specifies the IPv6 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API and Amazon FSx console, Amazon FSx selects an available /118 IP address range for you from one of the VPC's CIDR ranges. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables, as long as they don't overlap with any subnet."];
+      routeTableIds: RouteTableIds.t option
+        [@ocaml.doc
+          "(Multi-AZ only) Specifies the route tables in which Amazon FSx creates the rules for routing traffic to the correct file server. You should specify all virtual private cloud (VPC) route tables associated with the subnets in which your clients are located. By default, Amazon FSx selects your VPC's default route table."];
+      readCacheConfiguration: OpenZFSReadCacheConfiguration.t option
+        [@ocaml.doc
+          "Specifies the optional provisioned SSD read cache on file systems that use the Intelligent-Tiering storage class."]}
     let context_ = "CreateFileSystemOpenZFSConfiguration"
     let make ?automaticBackupRetentionDays =
       fun ?copyTagsToBackups ->
@@ -8360,20 +12970,30 @@ module CreateFileSystemOpenZFSConfiguration =
             fun ?weeklyMaintenanceStartTime ->
               fun ?diskIopsConfiguration ->
                 fun ?rootVolumeConfiguration ->
-                  fun ~deploymentType ->
-                    fun ~throughputCapacity ->
-                      fun () ->
-                        {
-                          automaticBackupRetentionDays;
-                          copyTagsToBackups;
-                          copyTagsToVolumes;
-                          dailyAutomaticBackupStartTime;
-                          weeklyMaintenanceStartTime;
-                          diskIopsConfiguration;
-                          rootVolumeConfiguration;
-                          deploymentType;
-                          throughputCapacity
-                        }
+                  fun ?preferredSubnetId ->
+                    fun ?endpointIpAddressRange ->
+                      fun ?endpointIpv6AddressRange ->
+                        fun ?routeTableIds ->
+                          fun ?readCacheConfiguration ->
+                            fun ~deploymentType ->
+                              fun ~throughputCapacity ->
+                                fun () ->
+                                  {
+                                    automaticBackupRetentionDays;
+                                    copyTagsToBackups;
+                                    copyTagsToVolumes;
+                                    dailyAutomaticBackupStartTime;
+                                    weeklyMaintenanceStartTime;
+                                    diskIopsConfiguration;
+                                    rootVolumeConfiguration;
+                                    preferredSubnetId;
+                                    endpointIpAddressRange;
+                                    endpointIpv6AddressRange;
+                                    routeTableIds;
+                                    readCacheConfiguration;
+                                    deploymentType;
+                                    throughputCapacity
+                                  }
     let to_value x =
       structure_to_value
         [("AutomaticBackupRetentionDays",
@@ -8396,9 +13016,35 @@ module CreateFileSystemOpenZFSConfiguration =
              ~f:DiskIopsConfiguration.to_value));
         ("RootVolumeConfiguration",
           (Option.map x.rootVolumeConfiguration
-             ~f:OpenZFSCreateRootVolumeConfiguration.to_value))]
+             ~f:OpenZFSCreateRootVolumeConfiguration.to_value));
+        ("PreferredSubnetId",
+          (Option.map x.preferredSubnetId ~f:SubnetId.to_value));
+        ("EndpointIpAddressRange",
+          (Option.map x.endpointIpAddressRange ~f:IpAddressRange.to_value));
+        ("EndpointIpv6AddressRange",
+          (Option.map x.endpointIpv6AddressRange ~f:Ipv6AddressRange.to_value));
+        ("RouteTableIds",
+          (Option.map x.routeTableIds ~f:RouteTableIds.to_value));
+        ("ReadCacheConfiguration",
+          (Option.map x.readCacheConfiguration
+             ~f:OpenZFSReadCacheConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let readCacheConfiguration =
+        (Option.map ~f:OpenZFSReadCacheConfiguration.of_xml)
+          (Xml.child xml_arg0 "ReadCacheConfiguration") in
+      let routeTableIds =
+        (Option.map ~f:RouteTableIds.of_xml)
+          (Xml.child xml_arg0 "RouteTableIds") in
+      let endpointIpv6AddressRange =
+        (Option.map ~f:Ipv6AddressRange.of_xml)
+          (Xml.child xml_arg0 "EndpointIpv6AddressRange") in
+      let endpointIpAddressRange =
+        (Option.map ~f:IpAddressRange.of_xml)
+          (Xml.child xml_arg0 "EndpointIpAddressRange") in
+      let preferredSubnetId =
+        (Option.map ~f:SubnetId.of_xml)
+          (Xml.child xml_arg0 "PreferredSubnetId") in
       let rootVolumeConfiguration =
         (Option.map ~f:OpenZFSCreateRootVolumeConfiguration.of_xml)
           (Xml.child xml_arg0 "RootVolumeConfiguration") in
@@ -8424,34 +13070,52 @@ module CreateFileSystemOpenZFSConfiguration =
       let automaticBackupRetentionDays =
         (Option.map ~f:AutomaticBackupRetentionDays.of_xml)
           (Xml.child xml_arg0 "AutomaticBackupRetentionDays") in
-      make ?rootVolumeConfiguration ?diskIopsConfiguration
-        ?weeklyMaintenanceStartTime ~throughputCapacity ~deploymentType
-        ?dailyAutomaticBackupStartTime ?copyTagsToVolumes ?copyTagsToBackups
-        ?automaticBackupRetentionDays ()
+      make ?readCacheConfiguration ?routeTableIds ?endpointIpv6AddressRange
+        ?endpointIpAddressRange ?preferredSubnetId ?rootVolumeConfiguration
+        ?diskIopsConfiguration ?weeklyMaintenanceStartTime
+        ~throughputCapacity ~deploymentType ?dailyAutomaticBackupStartTime
+        ?copyTagsToVolumes ?copyTagsToBackups ?automaticBackupRetentionDays
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let readCacheConfiguration =
+        field_map json__ "ReadCacheConfiguration"
+          OpenZFSReadCacheConfiguration.of_json in
+      let routeTableIds =
+        field_map json__ "RouteTableIds" RouteTableIds.of_json in
+      let endpointIpv6AddressRange =
+        field_map json__ "EndpointIpv6AddressRange" Ipv6AddressRange.of_json in
+      let endpointIpAddressRange =
+        field_map json__ "EndpointIpAddressRange" IpAddressRange.of_json in
+      let preferredSubnetId =
+        field_map json__ "PreferredSubnetId" SubnetId.of_json in
       let rootVolumeConfiguration =
-        field_map json "RootVolumeConfiguration"
+        field_map json__ "RootVolumeConfiguration"
           OpenZFSCreateRootVolumeConfiguration.of_json in
       let diskIopsConfiguration =
-        field_map json "DiskIopsConfiguration" DiskIopsConfiguration.of_json in
+        field_map json__ "DiskIopsConfiguration"
+          DiskIopsConfiguration.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
       let throughputCapacity =
-        field_map_exn json "ThroughputCapacity" MegabytesPerSecond.of_json in
+        field_map_exn json__ "ThroughputCapacity" MegabytesPerSecond.of_json in
       let deploymentType =
-        field_map_exn json "DeploymentType" OpenZFSDeploymentType.of_json in
+        field_map_exn json__ "DeploymentType" OpenZFSDeploymentType.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
-      let copyTagsToVolumes = field_map json "CopyTagsToVolumes" Flag.of_json in
-      let copyTagsToBackups = field_map json "CopyTagsToBackups" Flag.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
+      let copyTagsToVolumes =
+        field_map json__ "CopyTagsToVolumes" Flag.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
-      make ?rootVolumeConfiguration ?diskIopsConfiguration
-        ?weeklyMaintenanceStartTime ~throughputCapacity ~deploymentType
-        ?dailyAutomaticBackupStartTime ?copyTagsToVolumes ?copyTagsToBackups
-        ?automaticBackupRetentionDays ()
+      make ?readCacheConfiguration ?routeTableIds ?endpointIpv6AddressRange
+        ?endpointIpAddressRange ?preferredSubnetId ?rootVolumeConfiguration
+        ?diskIopsConfiguration ?weeklyMaintenanceStartTime
+        ~throughputCapacity ~deploymentType ?dailyAutomaticBackupStartTime
+        ?copyTagsToVolumes ?copyTagsToBackups ?automaticBackupRetentionDays
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon FSx for OpenZFS configuration properties for the file system that you are creating."]
@@ -8464,7 +13128,7 @@ module LustreLogCreateConfiguration =
           "Sets which data repository events are logged by Amazon FSx. WARN_ONLY - only warning events are logged. ERROR_ONLY - only error events are logged. WARN_ERROR - both warning events and error events are logged. DISABLED - logging of data repository events is turned off."];
       destination: GeneralARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that specifies the destination of the logs. The destination can be any Amazon CloudWatch Logs log group ARN, with the following requirements: The destination ARN that you provide must be in the same Amazon Web Services partition, Amazon Web Services Region, and Amazon Web Services account as your Amazon FSx file system. The name of the Amazon CloudWatch Logs log group must begin with the /aws/fsx prefix. If you do not provide a destination, Amazon FSx will create and use a log stream in the CloudWatch Logs /aws/fsx/lustre log group. If Destination is provided and the resource does not exist, the request will fail with a BadRequest error. If Level is set to DISABLED, you cannot specify a destination in Destination."]}
+          "The Amazon Resource Name (ARN) that specifies the destination of the logs. The destination can be any Amazon CloudWatch Logs log group ARN, with the following requirements: The destination ARN that you provide must be in the same Amazon Web Services partition, Amazon Web Services Region, and Amazon Web Services account as your Amazon FSx file system. The name of the Amazon CloudWatch Logs log group must begin with the /aws/fsx prefix. If you do not provide a destination, Amazon FSx will create and use a log stream in the CloudWatch Logs /aws/fsx/lustre log group (for Amazon FSx for Lustre) or /aws/fsx/filecache (for Amazon File Cache). If Destination is provided and the resource does not exist, the request will fail with a BadRequest error. If Level is set to DISABLED, you cannot specify a destination in Destination."]}
     let context_ = "LustreLogCreateConfiguration"
     let make ?destination = fun ~level -> fun () -> { destination; level }
     let to_value x =
@@ -8480,14 +13144,47 @@ module LustreLogCreateConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Level") in
       make ?destination ~level ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let destination = field_map json "Destination" GeneralARN.of_json in
+    let of_json json__ =
+      let destination = field_map json__ "Destination" GeneralARN.of_json in
       let level =
-        field_map_exn json "Level" LustreAccessAuditLogLevel.of_json in
+        field_map_exn json__ "Level" LustreAccessAuditLogLevel.of_json in
       make ?destination ~level ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Lustre logging configuration used when creating or updating an Amazon FSx for Lustre file system. Lustre logging writes the enabled logging events for your file system to Amazon CloudWatch Logs. Error and warning events can be logged from the following data repository operations: Automatic export Data repository tasks To learn more about Lustre logging, see Logging to Amazon CloudWatch Logs."]
+       "The Lustre logging configuration used when creating or updating an Amazon FSx for Lustre file system. An Amazon File Cache is created with Lustre logging enabled by default, with a setting of WARN_ERROR for the logging events. which can't be changed. Lustre logging writes the enabled logging events for your file system or cache to Amazon CloudWatch Logs."]
+module CreateFileSystemLustreMetadataConfiguration =
+  struct
+    type nonrec t =
+      {
+      iops: MetadataIops.t option
+        [@ocaml.doc
+          "(USER_PROVISIONED mode only) Specifies the number of Metadata IOPS to provision for the file system. This parameter sets the maximum rate of metadata disk IOPS supported by the file system. For SSD file systems, valid values are 1500, 3000, 6000, 12000, and multiples of 12000 up to a maximum of 192000. For Intelligent-Tiering file systems, valid values are 6000 and 12000. Iops doesn\226\128\153t have a default value. If you're using USER_PROVISIONED mode, you can choose to specify a valid value. If you're using AUTOMATIC mode, you cannot specify a value because FSx for Lustre automatically sets the value based on your file system storage capacity."];
+      mode: MetadataConfigurationMode.t
+        [@ocaml.doc
+          "The metadata configuration mode for provisioning Metadata IOPS for an FSx for Lustre file system using a PERSISTENT_2 deployment type. In AUTOMATIC mode (supported only on SSD file systems), FSx for Lustre automatically provisions and scales the number of Metadata IOPS for your file system based on your file system storage capacity. In USER_PROVISIONED mode, you specify the number of Metadata IOPS to provision for your file system."]}
+    let context_ = "CreateFileSystemLustreMetadataConfiguration"
+    let make ?iops = fun ~mode -> fun () -> { iops; mode }
+    let to_value x =
+      structure_to_value
+        [("Iops", (Option.map x.iops ~f:MetadataIops.to_value));
+        ("Mode", (Some (MetadataConfigurationMode.to_value x.mode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mode =
+        MetadataConfigurationMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Mode") in
+      let iops =
+        (Option.map ~f:MetadataIops.of_xml) (Xml.child xml_arg0 "Iops") in
+      make ~mode ?iops ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mode =
+        field_map_exn json__ "Mode" MetadataConfigurationMode.of_json in
+      let iops = field_map json__ "Iops" MetadataIops.of_json in
+      make ~mode ?iops ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Lustre metadata performance configuration for the creation of an Amazon FSx for Lustre file system using a PERSISTENT_2 deployment type. The configuration uses a Metadata IOPS value to set the maximum rate of metadata disk IOPS supported by the file system. After creation, the file system supports increasing metadata performance. For more information on Metadata IOPS, see Lustre metadata performance configuration in the Amazon FSx for Lustre User Guide."]
 module CreateFileSystemLustreConfiguration =
   struct
     type nonrec t =
@@ -8497,24 +13194,26 @@ module CreateFileSystemLustreConfiguration =
           "(Optional) The preferred start time to perform weekly maintenance, formatted d:HH:MM in the UTC time zone, where d is the weekday number, from 1 through 7, beginning with Monday and ending with Sunday."];
       importPath: ArchivePath.t option
         [@ocaml.doc
-          "(Optional) The path to the Amazon S3 bucket (including the optional prefix) that you're using as the data repository for your Amazon FSx for Lustre file system. The root of your FSx for Lustre file system will be mapped to the root of the Amazon S3 bucket you select. An example is s3://import-bucket/optional-prefix. If you specify a prefix after the Amazon S3 bucket name, only object keys with that prefix are loaded into the file system. This parameter is not supported for file systems with the Persistent_2 deployment type. Instead, use CreateDataRepositoryAssociation to create a data repository association to link your Lustre file system to a data repository."];
+          "(Optional) The path to the Amazon S3 bucket (including the optional prefix) that you're using as the data repository for your Amazon FSx for Lustre file system. The root of your FSx for Lustre file system will be mapped to the root of the Amazon S3 bucket you select. An example is s3://import-bucket/optional-prefix. If you specify a prefix after the Amazon S3 bucket name, only object keys with that prefix are loaded into the file system. This parameter is not supported for file systems with a data repository association."];
       exportPath: ArchivePath.t option
         [@ocaml.doc
-          "(Optional) Available with Scratch and Persistent_1 deployment types. Specifies the path in the Amazon S3 bucket where the root of your Amazon FSx file system is exported. The path must use the same Amazon S3 bucket as specified in ImportPath. You can provide an optional prefix to which new and changed data is to be exported from your Amazon FSx for Lustre file system. If an ExportPath value is not provided, Amazon FSx sets a default export path, s3://import-bucket/FSxLustre\\[creation-timestamp\\]. The timestamp is in UTC format, for example s3://import-bucket/FSxLustre20181105T222312Z. The Amazon S3 export bucket must be the same as the import bucket specified by ImportPath. If you specify only a bucket name, such as s3://import-bucket, you get a 1:1 mapping of file system objects to S3 bucket objects. This mapping means that the input data in S3 is overwritten on export. If you provide a custom prefix in the export path, such as s3://import-bucket/\\[custom-optional-prefix\\], Amazon FSx exports the contents of your file system to that export prefix in the Amazon S3 bucket. This parameter is not supported for file systems with the Persistent_2 deployment type. Instead, use CreateDataRepositoryAssociation to create a data repository association to link your Lustre file system to a data repository."];
+          "(Optional) Specifies the path in the Amazon S3 bucket where the root of your Amazon FSx file system is exported. The path must use the same Amazon S3 bucket as specified in ImportPath. You can provide an optional prefix to which new and changed data is to be exported from your Amazon FSx for Lustre file system. If an ExportPath value is not provided, Amazon FSx sets a default export path, s3://import-bucket/FSxLustre\\[creation-timestamp\\]. The timestamp is in UTC format, for example s3://import-bucket/FSxLustre20181105T222312Z. The Amazon S3 export bucket must be the same as the import bucket specified by ImportPath. If you specify only a bucket name, such as s3://import-bucket, you get a 1:1 mapping of file system objects to S3 bucket objects. This mapping means that the input data in S3 is overwritten on export. If you provide a custom prefix in the export path, such as s3://import-bucket/\\[custom-optional-prefix\\], Amazon FSx exports the contents of your file system to that export prefix in the Amazon S3 bucket. This parameter is not supported for file systems with a data repository association."];
       importedFileChunkSize: Megabytes.t option
         [@ocaml.doc
-          "(Optional) For files imported from a data repository, this value determines the stripe count and maximum amount of data per file (in MiB) stored on a single physical disk. The maximum number of disks that a single file can be striped across is limited by the total number of disks that make up the file system. The default chunk size is 1,024 MiB (1 GiB) and can go as high as 512,000 MiB (500 GiB). Amazon S3 objects have a maximum size of 5 TB. This parameter is not supported for file systems with the Persistent_2 deployment type. Instead, use CreateDataRepositoryAssociation to create a data repository association to link your Lustre file system to a data repository."];
+          "(Optional) For files imported from a data repository, this value determines the stripe count and maximum amount of data per file (in MiB) stored on a single physical disk. The maximum number of disks that a single file can be striped across is limited by the total number of disks that make up the file system. The default chunk size is 1,024 MiB (1 GiB) and can go as high as 512,000 MiB (500 GiB). Amazon S3 objects have a maximum size of 5 TB. This parameter is not supported for file systems with a data repository association."];
       deploymentType: LustreDeploymentType.t option
         [@ocaml.doc
-          "(Optional) Choose SCRATCH_1 and SCRATCH_2 deployment types when you need temporary storage and shorter-term processing of data. The SCRATCH_2 deployment type provides in-transit encryption of data and higher burst throughput capacity than SCRATCH_1. Choose PERSISTENT_1 for longer-term storage and for throughput-focused workloads that aren\226\128\153t latency-sensitive. PERSISTENT_1 supports encryption of data in transit, and is available in all Amazon Web Services Regions in which FSx for Lustre is available. Choose PERSISTENT_2 for longer-term storage and for latency-sensitive workloads that require the highest levels of IOPS/throughput. PERSISTENT_2 supports SSD storage, and offers higher PerUnitStorageThroughput (up to 1000 MB/s/TiB). PERSISTENT_2 is available in a limited number of Amazon Web Services Regions. For more information, and an up-to-date list of Amazon Web Services Regions in which PERSISTENT_2 is available, see File system deployment options for FSx for Lustre in the Amazon FSx for Lustre User Guide. If you choose PERSISTENT_2, and you set FileSystemTypeVersion to 2.10, the CreateFileSystem operation fails. Encryption of data in transit is automatically turned on when you access SCRATCH_2, PERSISTENT_1 and PERSISTENT_2 file systems from Amazon EC2 instances that support automatic encryption in the Amazon Web Services Regions where they are available. For more information about encryption in transit for FSx for Lustre file systems, see Encrypting data in transit in the Amazon FSx for Lustre User Guide. (Default = SCRATCH_1)"];
+          "(Optional) Choose SCRATCH_1 and SCRATCH_2 deployment types when you need temporary storage and shorter-term processing of data. The SCRATCH_2 deployment type provides in-transit encryption of data and higher burst throughput capacity than SCRATCH_1. Choose PERSISTENT_1 for longer-term storage and for throughput-focused workloads that aren\226\128\153t latency-sensitive. PERSISTENT_1 supports encryption of data in transit, and is available in all Amazon Web Services Regions in which FSx for Lustre is available. Choose PERSISTENT_2 for longer-term storage and for latency-sensitive workloads that require the highest levels of IOPS/throughput. PERSISTENT_2 supports the SSD and Intelligent-Tiering storage classes. You can optionally specify a metadata configuration mode for PERSISTENT_2 which supports increasing metadata performance. PERSISTENT_2 is available in a limited number of Amazon Web Services Regions. For more information, and an up-to-date list of Amazon Web Services Regions in which PERSISTENT_2 is available, see Deployment and storage class options for FSx for Lustre file systems in the Amazon FSx for Lustre User Guide. If you choose PERSISTENT_2, and you set FileSystemTypeVersion to 2.10, the CreateFileSystem operation fails. Encryption of data in transit is automatically turned on when you access SCRATCH_2, PERSISTENT_1, and PERSISTENT_2 file systems from Amazon EC2 instances that support automatic encryption in the Amazon Web Services Regions where they are available. For more information about encryption in transit for FSx for Lustre file systems, see Encrypting data in transit in the Amazon FSx for Lustre User Guide. (Default = SCRATCH_1)"];
       autoImportPolicy: AutoImportPolicyType.t option
         [@ocaml.doc
-          "(Optional) Available with Scratch and Persistent_1 deployment types. When you create your file system, your existing S3 objects appear as file and directory listings. Use this property to choose how Amazon FSx keeps your file and directory listings up to date as you add or modify objects in your linked S3 bucket. AutoImportPolicy can have the following values: NONE - (Default) AutoImport is off. Amazon FSx only updates file and directory listings from the linked S3 bucket when the file system is created. FSx does not update file and directory listings for any new or changed objects after choosing this option. NEW - AutoImport is on. Amazon FSx automatically imports directory listings of any new objects added to the linked S3 bucket that do not currently exist in the FSx file system. NEW_CHANGED - AutoImport is on. Amazon FSx automatically imports file and directory listings of any new objects added to the S3 bucket and any existing objects that are changed in the S3 bucket after you choose this option. NEW_CHANGED_DELETED - AutoImport is on. Amazon FSx automatically imports file and directory listings of any new objects added to the S3 bucket, any existing objects that are changed in the S3 bucket, and any objects that were deleted in the S3 bucket. For more information, see Automatically import updates from your S3 bucket. This parameter is not supported for file systems with the Persistent_2 deployment type. Instead, use CreateDataRepositoryAssociation to create a data repository association to link your Lustre file system to a data repository."];
+          "(Optional) When you create your file system, your existing S3 objects appear as file and directory listings. Use this parameter to choose how Amazon FSx keeps your file and directory listings up to date as you add or modify objects in your linked S3 bucket. AutoImportPolicy can have the following values: NONE - (Default) AutoImport is off. Amazon FSx only updates file and directory listings from the linked S3 bucket when the file system is created. FSx does not update file and directory listings for any new or changed objects after choosing this option. NEW - AutoImport is on. Amazon FSx automatically imports directory listings of any new objects added to the linked S3 bucket that do not currently exist in the FSx file system. NEW_CHANGED - AutoImport is on. Amazon FSx automatically imports file and directory listings of any new objects added to the S3 bucket and any existing objects that are changed in the S3 bucket after you choose this option. NEW_CHANGED_DELETED - AutoImport is on. Amazon FSx automatically imports file and directory listings of any new objects added to the S3 bucket, any existing objects that are changed in the S3 bucket, and any objects that were deleted in the S3 bucket. For more information, see Automatically import updates from your S3 bucket. This parameter is not supported for file systems with a data repository association."];
       perUnitStorageThroughput: PerUnitStorageThroughput.t option
         [@ocaml.doc
-          "Required with PERSISTENT_1 and PERSISTENT_2 deployment types, provisions the amount of read and write throughput for each 1 tebibyte (TiB) of file system storage capacity, in MB/s/TiB. File system throughput capacity is calculated by multiplying \239\172\129le system storage capacity (TiB) by the PerUnitStorageThroughput (MB/s/TiB). For a 2.4-TiB \239\172\129le system, provisioning 50 MB/s/TiB of PerUnitStorageThroughput yields 120 MB/s of \239\172\129le system throughput. You pay for the amount of throughput that you provision. Valid values: For PERSISTENT_1 SSD storage: 50, 100, 200 MB/s/TiB. For PERSISTENT_1 HDD storage: 12, 40 MB/s/TiB. For PERSISTENT_2 SSD storage: 125, 250, 500, 1000 MB/s/TiB."];
+          "Required with PERSISTENT_1 and PERSISTENT_2 deployment types using an SSD or HDD storage class, provisions the amount of read and write throughput for each 1 tebibyte (TiB) of file system storage capacity, in MB/s/TiB. File system throughput capacity is calculated by multiplying \239\172\129le system storage capacity (TiB) by the PerUnitStorageThroughput (MB/s/TiB). For a 2.4-TiB \239\172\129le system, provisioning 50 MB/s/TiB of PerUnitStorageThroughput yields 120 MB/s of \239\172\129le system throughput. You pay for the amount of throughput that you provision. Valid values: For PERSISTENT_1 SSD storage: 50, 100, 200 MB/s/TiB. For PERSISTENT_1 HDD storage: 12, 40 MB/s/TiB. For PERSISTENT_2 SSD storage: 125, 250, 500, 1000 MB/s/TiB."];
       dailyAutomaticBackupStartTime: DailyTime.t option ;
-      automaticBackupRetentionDays: AutomaticBackupRetentionDays.t option ;
+      automaticBackupRetentionDays: AutomaticBackupRetentionDays.t option
+        [@ocaml.doc
+          "The number of days to retain automatic backups. Setting this property to 0 disables automatic backups. You can retain automatic backups for a maximum of 90 days. The default is 0."];
       copyTagsToBackups: Flag.t option
         [@ocaml.doc
           "(Optional) Not available for use with file systems that are linked to a data repository. A boolean flag indicating whether tags for the file system should be copied to backups. The default value is false. If CopyTagsToBackups is set to true, all file system tags are copied to all automatic and user-initiated backups when the user doesn't specify any backup-specific tags. If CopyTagsToBackups is set to true and you specify one or more backup tags, only the specified tags are copied to backups. If you specify one or more tags when creating a user-initiated backup, no tags are copied from the file system, regardless of this value. (Default = false) For more information, see Working with backups in the Amazon FSx for Lustre User Guide."];
@@ -8524,9 +13223,25 @@ module CreateFileSystemLustreConfiguration =
       dataCompressionType: DataCompressionType.t option
         [@ocaml.doc
           "Sets the data compression configuration for the file system. DataCompressionType can have the following values: NONE - (Default) Data compression is turned off when the file system is created. LZ4 - Data compression is turned on with the LZ4 algorithm. For more information, see Lustre data compression in the Amazon FSx for Lustre User Guide."];
+      efaEnabled: Flag.t option
+        [@ocaml.doc
+          "(Optional) Specifies whether Elastic Fabric Adapter (EFA) and GPUDirect Storage (GDS) support is enabled for the Amazon FSx for Lustre file system. (Default = false)"];
       logConfiguration: LustreLogCreateConfiguration.t option
         [@ocaml.doc
-          "The Lustre logging configuration used when creating an Amazon FSx for Lustre file system. When logging is enabled, Lustre logs error and warning events for data repositories associated with your file system to Amazon CloudWatch Logs."]}
+          "The Lustre logging configuration used when creating an Amazon FSx for Lustre file system. When logging is enabled, Lustre logs error and warning events for data repositories associated with your file system to Amazon CloudWatch Logs."];
+      rootSquashConfiguration: LustreRootSquashConfiguration.t option
+        [@ocaml.doc
+          "The Lustre root squash configuration used when creating an Amazon FSx for Lustre file system. When enabled, root squash restricts root-level access from clients that try to access your file system as a root user."];
+      metadataConfiguration:
+        CreateFileSystemLustreMetadataConfiguration.t option
+        [@ocaml.doc
+          "The Lustre metadata performance configuration for the creation of an FSx for Lustre file system using a PERSISTENT_2 deployment type."];
+      throughputCapacity: ThroughputCapacityMbps.t option
+        [@ocaml.doc
+          "Specifies the throughput of an FSx for Lustre file system using the Intelligent-Tiering storage class, measured in megabytes per second (MBps). Valid values are 4000 MBps or multiples of 4000 MBps. You pay for the amount of throughput that you provision."];
+      dataReadCacheConfiguration: LustreReadCacheConfiguration.t option
+        [@ocaml.doc
+          "Specifies the optional provisioned SSD read cache on FSx for Lustre file systems that use the Intelligent-Tiering storage class. Required when StorageType is set to INTELLIGENT_TIERING."]}
     let make ?weeklyMaintenanceStartTime =
       fun ?importPath ->
         fun ?exportPath ->
@@ -8539,23 +13254,33 @@ module CreateFileSystemLustreConfiguration =
                       fun ?copyTagsToBackups ->
                         fun ?driveCacheType ->
                           fun ?dataCompressionType ->
-                            fun ?logConfiguration ->
-                              fun () ->
-                                {
-                                  weeklyMaintenanceStartTime;
-                                  importPath;
-                                  exportPath;
-                                  importedFileChunkSize;
-                                  deploymentType;
-                                  autoImportPolicy;
-                                  perUnitStorageThroughput;
-                                  dailyAutomaticBackupStartTime;
-                                  automaticBackupRetentionDays;
-                                  copyTagsToBackups;
-                                  driveCacheType;
-                                  dataCompressionType;
-                                  logConfiguration
-                                }
+                            fun ?efaEnabled ->
+                              fun ?logConfiguration ->
+                                fun ?rootSquashConfiguration ->
+                                  fun ?metadataConfiguration ->
+                                    fun ?throughputCapacity ->
+                                      fun ?dataReadCacheConfiguration ->
+                                        fun () ->
+                                          {
+                                            weeklyMaintenanceStartTime;
+                                            importPath;
+                                            exportPath;
+                                            importedFileChunkSize;
+                                            deploymentType;
+                                            autoImportPolicy;
+                                            perUnitStorageThroughput;
+                                            dailyAutomaticBackupStartTime;
+                                            automaticBackupRetentionDays;
+                                            copyTagsToBackups;
+                                            driveCacheType;
+                                            dataCompressionType;
+                                            efaEnabled;
+                                            logConfiguration;
+                                            rootSquashConfiguration;
+                                            metadataConfiguration;
+                                            throughputCapacity;
+                                            dataReadCacheConfiguration
+                                          }
     let to_value x =
       structure_to_value
         [("WeeklyMaintenanceStartTime",
@@ -8582,14 +13307,40 @@ module CreateFileSystemLustreConfiguration =
           (Option.map x.driveCacheType ~f:DriveCacheType.to_value));
         ("DataCompressionType",
           (Option.map x.dataCompressionType ~f:DataCompressionType.to_value));
+        ("EfaEnabled", (Option.map x.efaEnabled ~f:Flag.to_value));
         ("LogConfiguration",
           (Option.map x.logConfiguration
-             ~f:LustreLogCreateConfiguration.to_value))]
+             ~f:LustreLogCreateConfiguration.to_value));
+        ("RootSquashConfiguration",
+          (Option.map x.rootSquashConfiguration
+             ~f:LustreRootSquashConfiguration.to_value));
+        ("MetadataConfiguration",
+          (Option.map x.metadataConfiguration
+             ~f:CreateFileSystemLustreMetadataConfiguration.to_value));
+        ("ThroughputCapacity",
+          (Option.map x.throughputCapacity ~f:ThroughputCapacityMbps.to_value));
+        ("DataReadCacheConfiguration",
+          (Option.map x.dataReadCacheConfiguration
+             ~f:LustreReadCacheConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataReadCacheConfiguration =
+        (Option.map ~f:LustreReadCacheConfiguration.of_xml)
+          (Xml.child xml_arg0 "DataReadCacheConfiguration") in
+      let throughputCapacity =
+        (Option.map ~f:ThroughputCapacityMbps.of_xml)
+          (Xml.child xml_arg0 "ThroughputCapacity") in
+      let metadataConfiguration =
+        (Option.map ~f:CreateFileSystemLustreMetadataConfiguration.of_xml)
+          (Xml.child xml_arg0 "MetadataConfiguration") in
+      let rootSquashConfiguration =
+        (Option.map ~f:LustreRootSquashConfiguration.of_xml)
+          (Xml.child xml_arg0 "RootSquashConfiguration") in
       let logConfiguration =
         (Option.map ~f:LustreLogCreateConfiguration.of_xml)
           (Xml.child xml_arg0 "LogConfiguration") in
+      let efaEnabled =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "EfaEnabled") in
       let dataCompressionType =
         (Option.map ~f:DataCompressionType.of_xml)
           (Xml.child xml_arg0 "DataCompressionType") in
@@ -8623,47 +13374,64 @@ module CreateFileSystemLustreConfiguration =
       let weeklyMaintenanceStartTime =
         (Option.map ~f:WeeklyTime.of_xml)
           (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
-      make ?logConfiguration ?dataCompressionType ?driveCacheType
-        ?copyTagsToBackups ?automaticBackupRetentionDays
-        ?dailyAutomaticBackupStartTime ?perUnitStorageThroughput
-        ?autoImportPolicy ?deploymentType ?importedFileChunkSize ?exportPath
-        ?importPath ?weeklyMaintenanceStartTime ()
+      make ?dataReadCacheConfiguration ?throughputCapacity
+        ?metadataConfiguration ?rootSquashConfiguration ?logConfiguration
+        ?efaEnabled ?dataCompressionType ?driveCacheType ?copyTagsToBackups
+        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
+        ?perUnitStorageThroughput ?autoImportPolicy ?deploymentType
+        ?importedFileChunkSize ?exportPath ?importPath
+        ?weeklyMaintenanceStartTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dataReadCacheConfiguration =
+        field_map json__ "DataReadCacheConfiguration"
+          LustreReadCacheConfiguration.of_json in
+      let throughputCapacity =
+        field_map json__ "ThroughputCapacity" ThroughputCapacityMbps.of_json in
+      let metadataConfiguration =
+        field_map json__ "MetadataConfiguration"
+          CreateFileSystemLustreMetadataConfiguration.of_json in
+      let rootSquashConfiguration =
+        field_map json__ "RootSquashConfiguration"
+          LustreRootSquashConfiguration.of_json in
       let logConfiguration =
-        field_map json "LogConfiguration"
+        field_map json__ "LogConfiguration"
           LustreLogCreateConfiguration.of_json in
+      let efaEnabled = field_map json__ "EfaEnabled" Flag.of_json in
       let dataCompressionType =
-        field_map json "DataCompressionType" DataCompressionType.of_json in
+        field_map json__ "DataCompressionType" DataCompressionType.of_json in
       let driveCacheType =
-        field_map json "DriveCacheType" DriveCacheType.of_json in
-      let copyTagsToBackups = field_map json "CopyTagsToBackups" Flag.of_json in
+        field_map json__ "DriveCacheType" DriveCacheType.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
       let perUnitStorageThroughput =
-        field_map json "PerUnitStorageThroughput"
+        field_map json__ "PerUnitStorageThroughput"
           PerUnitStorageThroughput.of_json in
       let autoImportPolicy =
-        field_map json "AutoImportPolicy" AutoImportPolicyType.of_json in
+        field_map json__ "AutoImportPolicy" AutoImportPolicyType.of_json in
       let deploymentType =
-        field_map json "DeploymentType" LustreDeploymentType.of_json in
+        field_map json__ "DeploymentType" LustreDeploymentType.of_json in
       let importedFileChunkSize =
-        field_map json "ImportedFileChunkSize" Megabytes.of_json in
-      let exportPath = field_map json "ExportPath" ArchivePath.of_json in
-      let importPath = field_map json "ImportPath" ArchivePath.of_json in
+        field_map json__ "ImportedFileChunkSize" Megabytes.of_json in
+      let exportPath = field_map json__ "ExportPath" ArchivePath.of_json in
+      let importPath = field_map json__ "ImportPath" ArchivePath.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
-      make ?logConfiguration ?dataCompressionType ?driveCacheType
-        ?copyTagsToBackups ?automaticBackupRetentionDays
-        ?dailyAutomaticBackupStartTime ?perUnitStorageThroughput
-        ?autoImportPolicy ?deploymentType ?importedFileChunkSize ?exportPath
-        ?importPath ?weeklyMaintenanceStartTime ()
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+      make ?dataReadCacheConfiguration ?throughputCapacity
+        ?metadataConfiguration ?rootSquashConfiguration ?logConfiguration
+        ?efaEnabled ?dataCompressionType ?driveCacheType ?copyTagsToBackups
+        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
+        ?perUnitStorageThroughput ?autoImportPolicy ?deploymentType
+        ?importedFileChunkSize ?exportPath ?importPath
+        ?weeklyMaintenanceStartTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Lustre configuration for the file system being created. The following parameters are not supported for file systems with the Persistent_2 deployment type. Instead, use CreateDataRepositoryAssociation to create a data repository association to link your Lustre file system to a data repository. AutoImportPolicy ExportPath ImportedChunkSize ImportPath"]
+       "The Lustre configuration for the file system being created. The following parameters are not supported for file systems with a data repository association created with . AutoImportPolicy ExportPath ImportedFileChunkSize ImportPath"]
 module CreateFileSystemFromBackupRequest =
   struct
     type nonrec t =
@@ -8671,7 +13439,7 @@ module CreateFileSystemFromBackupRequest =
       backupId: BackupId.t ;
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "A string of up to 64 ASCII characters that Amazon FSx uses to ensure idempotent creation. This string is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."];
+          "A string of up to 63 ASCII characters that Amazon FSx uses to ensure idempotent creation. This string is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."];
       subnetIds: SubnetIds.t
         [@ocaml.doc
           "Specifies the IDs of the subnets that the file system will be accessible from. For Windows MULTI_AZ_1 file system deployment types, provide exactly two subnet IDs, one for the preferred file server and one for the standby file server. You specify one of these subnets as the preferred subnet using the WindowsConfiguration > PreferredSubnetID property. Windows SINGLE_AZ_1 and SINGLE_AZ_2 file system deployment types, Lustre file systems, and OpenZFS file systems provide exactly one subnet ID. The file server is launched in that subnet's Availability Zone."];
@@ -8687,14 +13455,20 @@ module CreateFileSystemFromBackupRequest =
       lustreConfiguration: CreateFileSystemLustreConfiguration.t option ;
       storageType: StorageType.t option
         [@ocaml.doc
-          "Sets the storage type for the Windows or OpenZFS file system that you're creating from a backup. Valid values are SSD and HDD. Set to SSD to use solid state drive storage. SSD is supported on all Windows and OpenZFS deployment types. Set to HDD to use hard disk drive storage. HDD is supported on SINGLE_AZ_2 and MULTI_AZ_1 FSx for Windows File Server file system deployment types. The default value is SSD. HDD and SSD storage types have different minimum storage capacity requirements. A restored file system's storage capacity is tied to the file system that was backed up. You can create a file system that uses HDD storage from a backup of a file system that used SSD storage if the original SSD file system had a storage capacity of at least 2000 GiB."];
+          "Sets the storage type for the Windows, OpenZFS, or Lustre file system that you're creating from a backup. Valid values are SSD, HDD, and INTELLIGENT_TIERING. Set to SSD to use solid state drive storage. SSD is supported on all Windows and OpenZFS deployment types. Set to HDD to use hard disk drive storage. HDD is supported on SINGLE_AZ_2 and MULTI_AZ_1 FSx for Windows File Server file system deployment types. Set to INTELLIGENT_TIERING to use fully elastic, intelligently-tiered storage. Intelligent-Tiering is only available for OpenZFS file systems with the Multi-AZ deployment type and for Lustre file systems with the Persistent_2 deployment type. The default value is SSD. HDD and SSD storage types have different minimum storage capacity requirements. A restored file system's storage capacity is tied to the file system that was backed up. You can create a file system that uses HDD storage from a backup of a file system that used SSD storage if the original SSD file system had a storage capacity of at least 2000 GiB."];
       kmsKeyId: KmsKeyId.t option ;
       fileSystemTypeVersion: FileSystemTypeVersion.t option
         [@ocaml.doc
-          "Sets the version for the Amazon FSx for Lustre file system that you're creating from a backup. Valid values are 2.10 and 2.12. You don't need to specify FileSystemTypeVersion because it will be applied using the backup's FileSystemTypeVersion setting. If you choose to specify FileSystemTypeVersion when creating from backup, the value must match the backup's FileSystemTypeVersion setting."];
+          "Sets the version for the Amazon FSx for Lustre file system that you're creating from a backup. Valid values are 2.10, 2.12, and 2.15. You can enter a Lustre version that is newer than the backup's FileSystemTypeVersion setting. If you don't enter a newer Lustre version, it defaults to the backup's setting."];
       openZFSConfiguration: CreateFileSystemOpenZFSConfiguration.t option
         [@ocaml.doc
-          "The OpenZFS configuration for the file system that's being created."]}
+          "The OpenZFS configuration for the file system that's being created."];
+      storageCapacity: StorageCapacity.t option
+        [@ocaml.doc
+          "Sets the storage capacity of the OpenZFS file system that you're creating from a backup, in gibibytes (GiB). Valid values are from 64 GiB up to 524,288 GiB (512 TiB). However, the value that you specify must be equal to or greater than the backup's storage capacity value. If you don't use the StorageCapacity parameter, the default is the backup's StorageCapacity value. If used to create a file system other than OpenZFS, you must provide a value that matches the backup's StorageCapacity value. If you provide any other value, Amazon FSx responds with an HTTP status code 400 Bad Request."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "Sets the network type for the Amazon FSx for OpenZFS file system that you're creating from a backup."]}
     let context_ = "CreateFileSystemFromBackupRequest"
     let make ?clientRequestToken =
       fun ?securityGroupIds ->
@@ -8705,22 +13479,26 @@ module CreateFileSystemFromBackupRequest =
                 fun ?kmsKeyId ->
                   fun ?fileSystemTypeVersion ->
                     fun ?openZFSConfiguration ->
-                      fun ~backupId ->
-                        fun ~subnetIds ->
-                          fun () ->
-                            {
-                              clientRequestToken;
-                              securityGroupIds;
-                              tags;
-                              windowsConfiguration;
-                              lustreConfiguration;
-                              storageType;
-                              kmsKeyId;
-                              fileSystemTypeVersion;
-                              openZFSConfiguration;
-                              backupId;
-                              subnetIds
-                            }
+                      fun ?storageCapacity ->
+                        fun ?networkType ->
+                          fun ~backupId ->
+                            fun ~subnetIds ->
+                              fun () ->
+                                {
+                                  clientRequestToken;
+                                  securityGroupIds;
+                                  tags;
+                                  windowsConfiguration;
+                                  lustreConfiguration;
+                                  storageType;
+                                  kmsKeyId;
+                                  fileSystemTypeVersion;
+                                  openZFSConfiguration;
+                                  storageCapacity;
+                                  networkType;
+                                  backupId;
+                                  subnetIds
+                                }
     let to_value x =
       structure_to_value
         [("BackupId", (Some (BackupId.to_value x.backupId)));
@@ -8743,9 +13521,17 @@ module CreateFileSystemFromBackupRequest =
              ~f:FileSystemTypeVersion.to_value));
         ("OpenZFSConfiguration",
           (Option.map x.openZFSConfiguration
-             ~f:CreateFileSystemOpenZFSConfiguration.to_value))]
+             ~f:CreateFileSystemOpenZFSConfiguration.to_value));
+        ("StorageCapacity",
+          (Option.map x.storageCapacity ~f:StorageCapacity.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let storageCapacity =
+        (Option.map ~f:StorageCapacity.of_xml)
+          (Xml.child xml_arg0 "StorageCapacity") in
       let openZFSConfiguration =
         (Option.map ~f:CreateFileSystemOpenZFSConfiguration.of_xml)
           (Xml.child xml_arg0 "OpenZFSConfiguration") in
@@ -8774,34 +13560,40 @@ module CreateFileSystemFromBackupRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       let backupId =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
-      make ?openZFSConfiguration ?fileSystemTypeVersion ?kmsKeyId
-        ?storageType ?lustreConfiguration ?windowsConfiguration ?tags
-        ?securityGroupIds ~subnetIds ?clientRequestToken ~backupId ()
+      make ?networkType ?storageCapacity ?openZFSConfiguration
+        ?fileSystemTypeVersion ?kmsKeyId ?storageType ?lustreConfiguration
+        ?windowsConfiguration ?tags ?securityGroupIds ~subnetIds
+        ?clientRequestToken ~backupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let storageCapacity =
+        field_map json__ "StorageCapacity" StorageCapacity.of_json in
       let openZFSConfiguration =
-        field_map json "OpenZFSConfiguration"
+        field_map json__ "OpenZFSConfiguration"
           CreateFileSystemOpenZFSConfiguration.of_json in
       let fileSystemTypeVersion =
-        field_map json "FileSystemTypeVersion" FileSystemTypeVersion.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let storageType = field_map json "StorageType" StorageType.of_json in
+        field_map json__ "FileSystemTypeVersion"
+          FileSystemTypeVersion.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let storageType = field_map json__ "StorageType" StorageType.of_json in
       let lustreConfiguration =
-        field_map json "LustreConfiguration"
+        field_map json__ "LustreConfiguration"
           CreateFileSystemLustreConfiguration.of_json in
       let windowsConfiguration =
-        field_map json "WindowsConfiguration"
+        field_map json__ "WindowsConfiguration"
           CreateFileSystemWindowsConfiguration.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIds.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let backupId = field_map_exn json "BackupId" BackupId.of_json in
-      make ?openZFSConfiguration ?fileSystemTypeVersion ?kmsKeyId
-        ?storageType ?lustreConfiguration ?windowsConfiguration ?tags
-        ?securityGroupIds ~subnetIds ?clientRequestToken ~backupId ()
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let backupId = field_map_exn json__ "BackupId" BackupId.of_json in
+      make ?networkType ?storageCapacity ?openZFSConfiguration
+        ?fileSystemTypeVersion ?kmsKeyId ?storageType ?lustreConfiguration
+        ?windowsConfiguration ?tags ?securityGroupIds ~subnetIds
+        ?clientRequestToken ~backupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request object for the CreateFileSystemFromBackup operation."]
@@ -8819,96 +13611,12 @@ module MissingFileSystemConfiguration =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A file system configuration is required for this operation."]
-module InvalidPerUnitStorageThroughput =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An invalid value for PerUnitStorageThroughput was provided. Please create your file system again, using a valid value."]
-module InvalidNetworkSettings =
-  struct
-    type nonrec t =
-      {
-      message: ErrorMessage.t option
-        [@ocaml.doc
-          "Error message explaining what's wrong with network settings."];
-      invalidSubnetId: SubnetId.t option
-        [@ocaml.doc
-          "The subnet ID that is either invalid or not part of the VPC specified."];
-      invalidSecurityGroupId: SecurityGroupId.t option
-        [@ocaml.doc
-          "The security group ID is either invalid or not part of the VPC specified."];
-      invalidRouteTableId: RouteTableId.t option
-        [@ocaml.doc
-          "The route table ID is either invalid or not part of the VPC specified."]}
-    let make ?message =
-      fun ?invalidSubnetId ->
-        fun ?invalidSecurityGroupId ->
-          fun ?invalidRouteTableId ->
-            fun () ->
-              {
-                message;
-                invalidSubnetId;
-                invalidSecurityGroupId;
-                invalidRouteTableId
-              }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
-        ("InvalidSubnetId",
-          (Option.map x.invalidSubnetId ~f:SubnetId.to_value));
-        ("InvalidSecurityGroupId",
-          (Option.map x.invalidSecurityGroupId ~f:SecurityGroupId.to_value));
-        ("InvalidRouteTableId",
-          (Option.map x.invalidRouteTableId ~f:RouteTableId.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let invalidRouteTableId =
-        (Option.map ~f:RouteTableId.of_xml)
-          (Xml.child xml_arg0 "InvalidRouteTableId") in
-      let invalidSecurityGroupId =
-        (Option.map ~f:SecurityGroupId.of_xml)
-          (Xml.child xml_arg0 "InvalidSecurityGroupId") in
-      let invalidSubnetId =
-        (Option.map ~f:SubnetId.of_xml)
-          (Xml.child xml_arg0 "InvalidSubnetId") in
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?invalidRouteTableId ?invalidSecurityGroupId ?invalidSubnetId
-        ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let invalidRouteTableId =
-        field_map json "InvalidRouteTableId" RouteTableId.of_json in
-      let invalidSecurityGroupId =
-        field_map json "InvalidSecurityGroupId" SecurityGroupId.of_json in
-      let invalidSubnetId = field_map json "InvalidSubnetId" SubnetId.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?invalidRouteTableId ?invalidSecurityGroupId ?invalidSubnetId
-        ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "One or more network settings specified in the request are invalid."]
 module CreateFileSystemFromBackupResponse =
   struct
     type nonrec t =
@@ -9024,8 +13732,8 @@ module CreateFileSystemFromBackupResponse =
         (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
       make ?fileSystem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileSystem = field_map json "FileSystem" FileSystem.of_json in
+    let of_json json__ =
+      let fileSystem = field_map json__ "FileSystem" FileSystem.of_json in
       make ?fileSystem ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9038,10 +13746,10 @@ module CreateFileSystemOntapConfiguration =
       dailyAutomaticBackupStartTime: DailyTime.t option ;
       deploymentType: OntapDeploymentType.t
         [@ocaml.doc
-          "Specifies the FSx for ONTAP file system deployment type to use in creating the file system. MULTI_AZ_1 - (Default) A high availability file system configured for Multi-AZ redundancy to tolerate temporary Availability Zone (AZ) unavailability. SINGLE_AZ_1 - A file system configured for Single-AZ redundancy. For information about the use cases for Multi-AZ and Single-AZ deployments, refer to Choosing Multi-AZ or Single-AZ file system deployment."];
+          "Specifies the FSx for ONTAP file system deployment type to use in creating the file system. MULTI_AZ_1 - A high availability file system configured for Multi-AZ redundancy to tolerate temporary Availability Zone (AZ) unavailability. This is a first-generation FSx for ONTAP file system. MULTI_AZ_2 - A high availability file system configured for Multi-AZ redundancy to tolerate temporary AZ unavailability. This is a second-generation FSx for ONTAP file system. SINGLE_AZ_1 - A file system configured for Single-AZ redundancy. This is a first-generation FSx for ONTAP file system. SINGLE_AZ_2 - A file system configured with multiple high-availability (HA) pairs for Single-AZ redundancy. This is a second-generation FSx for ONTAP file system. For information about the use cases for Multi-AZ and Single-AZ deployments, refer to Choosing a file system deployment type."];
       endpointIpAddressRange: IpAddressRange.t option
         [@ocaml.doc
-          "(Multi-AZ only) Specifies the IP address range in which the endpoints to access your file system will be created. By default, Amazon FSx selects an unused IP address range for you from the 198.19.* range. The Endpoint IP address range you select for your file system must exist outside the VPC's CIDR range and must be at least /30 or larger."];
+          "(Multi-AZ only) Specifies the IPv4 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API, Amazon FSx selects an unused IP address range for you from the 198.19.* range. By default in the Amazon FSx console, Amazon FSx chooses the last 64 IP addresses from the VPC\226\128\153s primary CIDR range to use as the endpoint IP address range for the file system. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables, as long as they don't overlap with any subnet."];
       fsxAdminPassword: AdminPassword.t option
         [@ocaml.doc
           "The ONTAP administrative password for the fsxadmin user with which you administer your file system using the NetApp ONTAP CLI and REST API."];
@@ -9050,14 +13758,23 @@ module CreateFileSystemOntapConfiguration =
           "The SSD IOPS configuration for the FSx for ONTAP file system."];
       preferredSubnetId: SubnetId.t option
         [@ocaml.doc
-          "Required when DeploymentType is set to MULTI_AZ_1. This specifies the subnet in which you want the preferred file server to be located."];
+          "Required when DeploymentType is set to MULTI_AZ_1 or MULTI_AZ_2. This specifies the subnet in which you want the preferred file server to be located."];
       routeTableIds: RouteTableIds.t option
         [@ocaml.doc
-          "(Multi-AZ only) Specifies the virtual private cloud (VPC) route tables in which your file system's endpoints will be created. You should specify all VPC route tables associated with the subnets in which your clients are located. By default, Amazon FSx selects your VPC's default route table."];
-      throughputCapacity: MegabytesPerSecond.t
+          "(Multi-AZ only) Specifies the route tables in which Amazon FSx creates the rules for routing traffic to the correct file server. You should specify all virtual private cloud (VPC) route tables associated with the subnets in which your clients are located. By default, Amazon FSx selects your VPC's default route table. Amazon FSx manages these route tables for Multi-AZ file systems using tag-based authentication. These route tables are tagged with Key: AmazonFSx; Value: ManagedByAmazonFSx. When creating FSx for ONTAP Multi-AZ file systems using CloudFormation we recommend that you add the Key: AmazonFSx; Value: ManagedByAmazonFSx tag manually."];
+      throughputCapacity: MegabytesPerSecond.t option
         [@ocaml.doc
-          "Sets the throughput capacity for the file system that you're creating. Valid values are 128, 256, 512, 1024, and 2048 MBps."];
-      weeklyMaintenanceStartTime: WeeklyTime.t option }
+          "Sets the throughput capacity for the file system that you're creating in megabytes per second (MBps). For more information, see Managing throughput capacity in the FSx for ONTAP User Guide. Amazon FSx responds with an HTTP status code 400 (Bad Request) for the following conditions: The value of ThroughputCapacity and ThroughputCapacityPerHAPair are not the same value. The value of ThroughputCapacity when divided by the value of HAPairs is outside of the valid range for ThroughputCapacity."];
+      weeklyMaintenanceStartTime: WeeklyTime.t option ;
+      hAPairs: HAPairs.t option
+        [@ocaml.doc
+          "Specifies how many high-availability (HA) pairs of file servers will power your file system. First-generation file systems are powered by 1 HA pair. Second-generation multi-AZ file systems are powered by 1 HA pair. Second generation single-AZ file systems are powered by up to 12 HA pairs. The default value is 1. The value of this property affects the values of StorageCapacity, Iops, and ThroughputCapacity. For more information, see High-availability (HA) pairs in the FSx for ONTAP user guide. Block storage protocol support (iSCSI and NVMe over TCP) is disabled on file systems with more than 6 HA pairs. For more information, see Using block storage protocols. Amazon FSx responds with an HTTP status code 400 (Bad Request) for the following conditions: The value of HAPairs is less than 1 or greater than 12. The value of HAPairs is greater than 1 and the value of DeploymentType is SINGLE_AZ_1, MULTI_AZ_1, or MULTI_AZ_2."];
+      throughputCapacityPerHAPair: ThroughputCapacityPerHAPair.t option
+        [@ocaml.doc
+          "Use to choose the throughput capacity per HA pair, rather than the total throughput for the file system. You can define either the ThroughputCapacityPerHAPair or the ThroughputCapacity when creating a file system, but not both. This field and ThroughputCapacity are the same for file systems powered by one HA pair. For SINGLE_AZ_1 and MULTI_AZ_1 file systems, valid values are 128, 256, 512, 1024, 2048, or 4096 MBps. For SINGLE_AZ_2, valid values are 1536, 3072, or 6144 MBps. For MULTI_AZ_2, valid values are 384, 768, 1536, 3072, or 6144 MBps. Amazon FSx responds with an HTTP status code 400 (Bad Request) for the following conditions: The value of ThroughputCapacity and ThroughputCapacityPerHAPair are not the same value for file systems with one HA pair. The value of deployment type is SINGLE_AZ_2 and ThroughputCapacity / ThroughputCapacityPerHAPair is not a valid HA pair (a value between 1 and 12). The value of ThroughputCapacityPerHAPair is not a valid value."];
+      endpointIpv6AddressRange: Ipv6AddressRange.t option
+        [@ocaml.doc
+          "(Multi-AZ only) Specifies the IPv6 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API and Amazon FSx console, Amazon FSx selects an available /118 IP address range for you from one of the VPC's CIDR ranges. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables, as long as they don't overlap with any subnet."]}
     let context_ = "CreateFileSystemOntapConfiguration"
     let make ?automaticBackupRetentionDays =
       fun ?dailyAutomaticBackupStartTime ->
@@ -9066,22 +13783,28 @@ module CreateFileSystemOntapConfiguration =
             fun ?diskIopsConfiguration ->
               fun ?preferredSubnetId ->
                 fun ?routeTableIds ->
-                  fun ?weeklyMaintenanceStartTime ->
-                    fun ~deploymentType ->
-                      fun ~throughputCapacity ->
-                        fun () ->
-                          {
-                            automaticBackupRetentionDays;
-                            dailyAutomaticBackupStartTime;
-                            endpointIpAddressRange;
-                            fsxAdminPassword;
-                            diskIopsConfiguration;
-                            preferredSubnetId;
-                            routeTableIds;
-                            weeklyMaintenanceStartTime;
-                            deploymentType;
-                            throughputCapacity
-                          }
+                  fun ?throughputCapacity ->
+                    fun ?weeklyMaintenanceStartTime ->
+                      fun ?hAPairs ->
+                        fun ?throughputCapacityPerHAPair ->
+                          fun ?endpointIpv6AddressRange ->
+                            fun ~deploymentType ->
+                              fun () ->
+                                {
+                                  automaticBackupRetentionDays;
+                                  dailyAutomaticBackupStartTime;
+                                  endpointIpAddressRange;
+                                  fsxAdminPassword;
+                                  diskIopsConfiguration;
+                                  preferredSubnetId;
+                                  routeTableIds;
+                                  throughputCapacity;
+                                  weeklyMaintenanceStartTime;
+                                  hAPairs;
+                                  throughputCapacityPerHAPair;
+                                  endpointIpv6AddressRange;
+                                  deploymentType
+                                }
     let to_value x =
       structure_to_value
         [("AutomaticBackupRetentionDays",
@@ -9103,17 +13826,31 @@ module CreateFileSystemOntapConfiguration =
         ("RouteTableIds",
           (Option.map x.routeTableIds ~f:RouteTableIds.to_value));
         ("ThroughputCapacity",
-          (Some (MegabytesPerSecond.to_value x.throughputCapacity)));
+          (Option.map x.throughputCapacity ~f:MegabytesPerSecond.to_value));
         ("WeeklyMaintenanceStartTime",
-          (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value))]
+          (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value));
+        ("HAPairs", (Option.map x.hAPairs ~f:HAPairs.to_value));
+        ("ThroughputCapacityPerHAPair",
+          (Option.map x.throughputCapacityPerHAPair
+             ~f:ThroughputCapacityPerHAPair.to_value));
+        ("EndpointIpv6AddressRange",
+          (Option.map x.endpointIpv6AddressRange ~f:Ipv6AddressRange.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let endpointIpv6AddressRange =
+        (Option.map ~f:Ipv6AddressRange.of_xml)
+          (Xml.child xml_arg0 "EndpointIpv6AddressRange") in
+      let throughputCapacityPerHAPair =
+        (Option.map ~f:ThroughputCapacityPerHAPair.of_xml)
+          (Xml.child xml_arg0 "ThroughputCapacityPerHAPair") in
+      let hAPairs =
+        (Option.map ~f:HAPairs.of_xml) (Xml.child xml_arg0 "HAPairs") in
       let weeklyMaintenanceStartTime =
         (Option.map ~f:WeeklyTime.of_xml)
           (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
       let throughputCapacity =
-        MegabytesPerSecond.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ThroughputCapacity") in
+        (Option.map ~f:MegabytesPerSecond.of_xml)
+          (Xml.child xml_arg0 "ThroughputCapacity") in
       let routeTableIds =
         (Option.map ~f:RouteTableIds.of_xml)
           (Xml.child xml_arg0 "RouteTableIds") in
@@ -9138,34 +13875,43 @@ module CreateFileSystemOntapConfiguration =
       let automaticBackupRetentionDays =
         (Option.map ~f:AutomaticBackupRetentionDays.of_xml)
           (Xml.child xml_arg0 "AutomaticBackupRetentionDays") in
-      make ?weeklyMaintenanceStartTime ~throughputCapacity ?routeTableIds
+      make ?endpointIpv6AddressRange ?throughputCapacityPerHAPair ?hAPairs
+        ?weeklyMaintenanceStartTime ?throughputCapacity ?routeTableIds
         ?preferredSubnetId ?diskIopsConfiguration ?fsxAdminPassword
         ?endpointIpAddressRange ~deploymentType
         ?dailyAutomaticBackupStartTime ?automaticBackupRetentionDays ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let endpointIpv6AddressRange =
+        field_map json__ "EndpointIpv6AddressRange" Ipv6AddressRange.of_json in
+      let throughputCapacityPerHAPair =
+        field_map json__ "ThroughputCapacityPerHAPair"
+          ThroughputCapacityPerHAPair.of_json in
+      let hAPairs = field_map json__ "HAPairs" HAPairs.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
       let throughputCapacity =
-        field_map_exn json "ThroughputCapacity" MegabytesPerSecond.of_json in
+        field_map json__ "ThroughputCapacity" MegabytesPerSecond.of_json in
       let routeTableIds =
-        field_map json "RouteTableIds" RouteTableIds.of_json in
+        field_map json__ "RouteTableIds" RouteTableIds.of_json in
       let preferredSubnetId =
-        field_map json "PreferredSubnetId" SubnetId.of_json in
+        field_map json__ "PreferredSubnetId" SubnetId.of_json in
       let diskIopsConfiguration =
-        field_map json "DiskIopsConfiguration" DiskIopsConfiguration.of_json in
+        field_map json__ "DiskIopsConfiguration"
+          DiskIopsConfiguration.of_json in
       let fsxAdminPassword =
-        field_map json "FsxAdminPassword" AdminPassword.of_json in
+        field_map json__ "FsxAdminPassword" AdminPassword.of_json in
       let endpointIpAddressRange =
-        field_map json "EndpointIpAddressRange" IpAddressRange.of_json in
+        field_map json__ "EndpointIpAddressRange" IpAddressRange.of_json in
       let deploymentType =
-        field_map_exn json "DeploymentType" OntapDeploymentType.of_json in
+        field_map_exn json__ "DeploymentType" OntapDeploymentType.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
-      make ?weeklyMaintenanceStartTime ~throughputCapacity ?routeTableIds
+      make ?endpointIpv6AddressRange ?throughputCapacityPerHAPair ?hAPairs
+        ?weeklyMaintenanceStartTime ?throughputCapacity ?routeTableIds
         ?preferredSubnetId ?diskIopsConfiguration ?fsxAdminPassword
         ?endpointIpAddressRange ~deploymentType
         ?dailyAutomaticBackupStartTime ?automaticBackupRetentionDays ()
@@ -9178,22 +13924,22 @@ module CreateFileSystemRequest =
       {
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "A string of up to 64 ASCII characters that Amazon FSx uses to ensure idempotent creation. This string is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."];
+          "A string of up to 63 ASCII characters that Amazon FSx uses to ensure idempotent creation. This string is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."];
       fileSystemType: FileSystemType.t
         [@ocaml.doc
           "The type of Amazon FSx file system to create. Valid values are WINDOWS, LUSTRE, ONTAP, and OPENZFS."];
-      storageCapacity: StorageCapacity.t
+      storageCapacity: StorageCapacity.t option
         [@ocaml.doc
-          "Sets the storage capacity of the file system that you're creating, in gibibytes (GiB). FSx for Lustre file systems - The amount of storage capacity that you can configure depends on the value that you set for StorageType and the Lustre DeploymentType, as follows: For SCRATCH_2, PERSISTENT_2 and PERSISTENT_1 deployment types using SSD storage type, the valid values are 1200 GiB, 2400 GiB, and increments of 2400 GiB. For PERSISTENT_1 HDD file systems, valid values are increments of 6000 GiB for 12 MB/s/TiB file systems and increments of 1800 GiB for 40 MB/s/TiB file systems. For SCRATCH_1 deployment type, valid values are 1200 GiB, 2400 GiB, and increments of 3600 GiB. FSx for ONTAP file systems - The amount of storage capacity that you can configure is from 1024 GiB up to 196,608 GiB (192 TiB). FSx for OpenZFS file systems - The amount of storage capacity that you can configure is from 64 GiB up to 524,288 GiB (512 TiB). FSx for Windows File Server file systems - The amount of storage capacity that you can configure depends on the value that you set for StorageType as follows: For SSD storage, valid values are 32 GiB-65,536 GiB (64 TiB). For HDD storage, valid values are 2000 GiB-65,536 GiB (64 TiB)."];
+          "Sets the storage capacity of the file system that you're creating, in gibibytes (GiB). FSx for Lustre file systems - The amount of storage capacity that you can configure depends on the value that you set for StorageType and the Lustre DeploymentType, as follows: For SCRATCH_2, PERSISTENT_2, and PERSISTENT_1 deployment types using SSD storage type, the valid values are 1200 GiB, 2400 GiB, and increments of 2400 GiB. For PERSISTENT_1 HDD file systems, valid values are increments of 6000 GiB for 12 MB/s/TiB file systems and increments of 1800 GiB for 40 MB/s/TiB file systems. For SCRATCH_1 deployment type, valid values are 1200 GiB, 2400 GiB, and increments of 3600 GiB. FSx for ONTAP file systems - The amount of storage capacity that you can configure depends on the value of the HAPairs property. The minimum value is calculated as 1,024 * HAPairs and the maximum is calculated as 524,288 * HAPairs. FSx for OpenZFS file systems - The amount of storage capacity that you can configure is from 64 GiB up to 524,288 GiB (512 TiB). FSx for Windows File Server file systems - The amount of storage capacity that you can configure depends on the value that you set for StorageType as follows: For SSD storage, valid values are 32 GiB-65,536 GiB (64 TiB). For HDD storage, valid values are 2000 GiB-65,536 GiB (64 TiB)."];
       storageType: StorageType.t option
         [@ocaml.doc
-          "Sets the storage type for the file system that you're creating. Valid values are SSD and HDD. Set to SSD to use solid state drive storage. SSD is supported on all Windows, Lustre, ONTAP, and OpenZFS deployment types. Set to HDD to use hard disk drive storage. HDD is supported on SINGLE_AZ_2 and MULTI_AZ_1 Windows file system deployment types, and on PERSISTENT_1 Lustre file system deployment types. Default value is SSD. For more information, see Storage type options in the FSx for Windows File Server User Guide and Multiple storage options in the FSx for Lustre User Guide."];
+          "Sets the storage class for the file system that you're creating. Valid values are SSD, HDD, and INTELLIGENT_TIERING. Set to SSD to use solid state drive storage. SSD is supported on all Windows, Lustre, ONTAP, and OpenZFS deployment types. Set to HDD to use hard disk drive storage, which is supported on SINGLE_AZ_2 and MULTI_AZ_1 Windows file system deployment types, and on PERSISTENT_1 Lustre file system deployment types. Set to INTELLIGENT_TIERING to use fully elastic, intelligently-tiered storage. Intelligent-Tiering is only available for OpenZFS file systems with the Multi-AZ deployment type and for Lustre file systems with the Persistent_2 deployment type. Default value is SSD. For more information, see Storage type options in the FSx for Windows File Server User Guide, FSx for Lustre storage classes in the FSx for Lustre User Guide, and Working with Intelligent-Tiering in the Amazon FSx for OpenZFS User Guide."];
       subnetIds: SubnetIds.t
         [@ocaml.doc
           "Specifies the IDs of the subnets that the file system will be accessible from. For Windows and ONTAP MULTI_AZ_1 deployment types,provide exactly two subnet IDs, one for the preferred file server and one for the standby file server. You specify one of these subnets as the preferred subnet using the WindowsConfiguration > PreferredSubnetID or OntapConfiguration > PreferredSubnetID properties. For more information about Multi-AZ file system configuration, see Availability and durability: Single-AZ and Multi-AZ file systems in the Amazon FSx for Windows User Guide and Availability and durability in the Amazon FSx for ONTAP User Guide. For Windows SINGLE_AZ_1 and SINGLE_AZ_2 and all Lustre deployment types, provide exactly one subnet ID. The file server is launched in that subnet's Availability Zone."];
       securityGroupIds: SecurityGroupIds.t option
         [@ocaml.doc
-          "A list of IDs specifying the security groups to apply to all network interfaces created for file system access. This list isn't returned in later requests to describe the file system."];
+          "A list of IDs specifying the security groups to apply to all network interfaces created for file system access. This list isn't returned in later requests to describe the file system. You must specify a security group if you are creating a Multi-AZ FSx for ONTAP file system in a VPC subnet that has been shared with you."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags to apply to the file system that's being created. The key value of the Name tag appears in the console as the file system name."];
@@ -9205,47 +13951,52 @@ module CreateFileSystemRequest =
       ontapConfiguration: CreateFileSystemOntapConfiguration.t option ;
       fileSystemTypeVersion: FileSystemTypeVersion.t option
         [@ocaml.doc
-          "(Optional) For FSx for Lustre file systems, sets the Lustre version for the file system that you're creating. Valid values are 2.10 and 2.12: 2.10 is supported by the Scratch and Persistent_1 Lustre deployment types. 2.12 is supported by all Lustre deployment types. 2.12 is required when setting FSx for Lustre DeploymentType to PERSISTENT_2. Default value = 2.10, except when DeploymentType is set to PERSISTENT_2, then the default is 2.12. If you set FileSystemTypeVersion to 2.10 for a PERSISTENT_2 Lustre deployment type, the CreateFileSystem operation fails."];
+          "For FSx for Lustre file systems, sets the Lustre version for the file system that you're creating. Valid values are 2.10, 2.12, and 2.15: 2.10 is supported by the Scratch and Persistent_1 Lustre deployment types. 2.12 is supported by all Lustre deployment types, except for PERSISTENT_2 with a metadata configuration mode. 2.15 is supported by all Lustre deployment types and is recommended for all new file systems. Default value is 2.10, except for the following deployments: Default value is 2.12 when DeploymentType is set to PERSISTENT_2 without a metadata configuration mode. Default value is 2.15 when DeploymentType is set to PERSISTENT_2 with a metadata configuration mode."];
       openZFSConfiguration: CreateFileSystemOpenZFSConfiguration.t option
         [@ocaml.doc
-          "The OpenZFS configuration for the file system that's being created."]}
+          "The OpenZFS configuration for the file system that's being created."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The network type of the Amazon FSx file system that you are creating. Valid values are IPV4 (which supports IPv4 only) and DUAL (for dual-stack mode, which supports both IPv4 and IPv6). The default is IPV4. Supported for FSx for OpenZFS, FSx for ONTAP, and FSx for Windows File Server file systems."]}
     let context_ = "CreateFileSystemRequest"
     let make ?clientRequestToken =
-      fun ?storageType ->
-        fun ?securityGroupIds ->
-          fun ?tags ->
-            fun ?kmsKeyId ->
-              fun ?windowsConfiguration ->
-                fun ?lustreConfiguration ->
-                  fun ?ontapConfiguration ->
-                    fun ?fileSystemTypeVersion ->
-                      fun ?openZFSConfiguration ->
-                        fun ~fileSystemType ->
-                          fun ~storageCapacity ->
-                            fun ~subnetIds ->
-                              fun () ->
-                                {
-                                  clientRequestToken;
-                                  storageType;
-                                  securityGroupIds;
-                                  tags;
-                                  kmsKeyId;
-                                  windowsConfiguration;
-                                  lustreConfiguration;
-                                  ontapConfiguration;
-                                  fileSystemTypeVersion;
-                                  openZFSConfiguration;
-                                  fileSystemType;
-                                  storageCapacity;
-                                  subnetIds
-                                }
+      fun ?storageCapacity ->
+        fun ?storageType ->
+          fun ?securityGroupIds ->
+            fun ?tags ->
+              fun ?kmsKeyId ->
+                fun ?windowsConfiguration ->
+                  fun ?lustreConfiguration ->
+                    fun ?ontapConfiguration ->
+                      fun ?fileSystemTypeVersion ->
+                        fun ?openZFSConfiguration ->
+                          fun ?networkType ->
+                            fun ~fileSystemType ->
+                              fun ~subnetIds ->
+                                fun () ->
+                                  {
+                                    clientRequestToken;
+                                    storageCapacity;
+                                    storageType;
+                                    securityGroupIds;
+                                    tags;
+                                    kmsKeyId;
+                                    windowsConfiguration;
+                                    lustreConfiguration;
+                                    ontapConfiguration;
+                                    fileSystemTypeVersion;
+                                    openZFSConfiguration;
+                                    networkType;
+                                    fileSystemType;
+                                    subnetIds
+                                  }
     let to_value x =
       structure_to_value
         [("ClientRequestToken",
            (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
         ("FileSystemType", (Some (FileSystemType.to_value x.fileSystemType)));
         ("StorageCapacity",
-          (Some (StorageCapacity.to_value x.storageCapacity)));
+          (Option.map x.storageCapacity ~f:StorageCapacity.to_value));
         ("StorageType", (Option.map x.storageType ~f:StorageType.to_value));
         ("SubnetIds", (Some (SubnetIds.to_value x.subnetIds)));
         ("SecurityGroupIds",
@@ -9266,9 +14017,12 @@ module CreateFileSystemRequest =
              ~f:FileSystemTypeVersion.to_value));
         ("OpenZFSConfiguration",
           (Option.map x.openZFSConfiguration
-             ~f:CreateFileSystemOpenZFSConfiguration.to_value))]
+             ~f:CreateFileSystemOpenZFSConfiguration.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let openZFSConfiguration =
         (Option.map ~f:CreateFileSystemOpenZFSConfiguration.of_xml)
           (Xml.child xml_arg0 "OpenZFSConfiguration") in
@@ -9296,50 +14050,52 @@ module CreateFileSystemRequest =
       let storageType =
         (Option.map ~f:StorageType.of_xml) (Xml.child xml_arg0 "StorageType") in
       let storageCapacity =
-        StorageCapacity.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StorageCapacity") in
+        (Option.map ~f:StorageCapacity.of_xml)
+          (Xml.child xml_arg0 "StorageCapacity") in
       let fileSystemType =
         FileSystemType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemType") in
       let clientRequestToken =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
-      make ?openZFSConfiguration ?fileSystemTypeVersion ?ontapConfiguration
-        ?lustreConfiguration ?windowsConfiguration ?kmsKeyId ?tags
-        ?securityGroupIds ~subnetIds ?storageType ~storageCapacity
-        ~fileSystemType ?clientRequestToken ()
+      make ?networkType ?openZFSConfiguration ?fileSystemTypeVersion
+        ?ontapConfiguration ?lustreConfiguration ?windowsConfiguration
+        ?kmsKeyId ?tags ?securityGroupIds ~subnetIds ?storageType
+        ?storageCapacity ~fileSystemType ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
       let openZFSConfiguration =
-        field_map json "OpenZFSConfiguration"
+        field_map json__ "OpenZFSConfiguration"
           CreateFileSystemOpenZFSConfiguration.of_json in
       let fileSystemTypeVersion =
-        field_map json "FileSystemTypeVersion" FileSystemTypeVersion.of_json in
+        field_map json__ "FileSystemTypeVersion"
+          FileSystemTypeVersion.of_json in
       let ontapConfiguration =
-        field_map json "OntapConfiguration"
+        field_map json__ "OntapConfiguration"
           CreateFileSystemOntapConfiguration.of_json in
       let lustreConfiguration =
-        field_map json "LustreConfiguration"
+        field_map json__ "LustreConfiguration"
           CreateFileSystemLustreConfiguration.of_json in
       let windowsConfiguration =
-        field_map json "WindowsConfiguration"
+        field_map json__ "WindowsConfiguration"
           CreateFileSystemWindowsConfiguration.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
-      let storageType = field_map json "StorageType" StorageType.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIds.of_json in
+      let storageType = field_map json__ "StorageType" StorageType.of_json in
       let storageCapacity =
-        field_map_exn json "StorageCapacity" StorageCapacity.of_json in
+        field_map json__ "StorageCapacity" StorageCapacity.of_json in
       let fileSystemType =
-        field_map_exn json "FileSystemType" FileSystemType.of_json in
+        field_map_exn json__ "FileSystemType" FileSystemType.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      make ?openZFSConfiguration ?fileSystemTypeVersion ?ontapConfiguration
-        ?lustreConfiguration ?windowsConfiguration ?kmsKeyId ?tags
-        ?securityGroupIds ~subnetIds ?storageType ~storageCapacity
-        ~fileSystemType ?clientRequestToken ()
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      make ?networkType ?openZFSConfiguration ?fileSystemTypeVersion
+        ?ontapConfiguration ?lustreConfiguration ?windowsConfiguration
+        ?kmsKeyId ?tags ?securityGroupIds ~subnetIds ?storageType
+        ?storageCapacity ~fileSystemType ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request object used to create a new Amazon FSx file system."]
@@ -9357,8 +14113,8 @@ module InvalidImportPath =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9377,8 +14133,8 @@ module InvalidExportPath =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9510,62 +14266,238 @@ module CreateFileSystemResponse =
         (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
       make ?fileSystem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileSystem = field_map json "FileSystem" FileSystem.of_json in
+    let of_json json__ =
+      let fileSystem = field_map json__ "FileSystem" FileSystem.of_json in
       make ?fileSystem ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The response object returned after the file system is created."]
+module InputOntapVolumeType =
+  struct
+    type nonrec t =
+      | RW 
+      | DP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | RW -> "RW" | DP -> "DP" | Non_static_id s -> s
+    let of_string = function | "RW" -> RW | "DP" -> DP | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InputOntapVolumeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InputOntapVolumeType" j)
+    let to_json = simple_to_json to_value
+  end
+module CreateSnaplockConfiguration =
+  struct
+    type nonrec t =
+      {
+      auditLogVolume: Flag.t option
+        [@ocaml.doc
+          "Enables or disables the audit log volume for an FSx for ONTAP SnapLock volume. The default value is false. If you set AuditLogVolume to true, the SnapLock volume is created as an audit log volume. The minimum retention period for an audit log volume is six months. For more information, see SnapLock audit log volumes."];
+      autocommitPeriod: AutocommitPeriod.t option
+        [@ocaml.doc
+          "The configuration object for setting the autocommit period of files in an FSx for ONTAP SnapLock volume."];
+      privilegedDelete: PrivilegedDelete.t option
+        [@ocaml.doc
+          "Enables, disables, or permanently disables privileged delete on an FSx for ONTAP SnapLock Enterprise volume. Enabling privileged delete allows SnapLock administrators to delete WORM files even if they have active retention periods. PERMANENTLY_DISABLED is a terminal state. If privileged delete is permanently disabled on a SnapLock volume, you can't re-enable it. The default value is DISABLED. For more information, see Privileged delete."];
+      retentionPeriod: SnaplockRetentionPeriod.t option
+        [@ocaml.doc
+          "Specifies the retention period of an FSx for ONTAP SnapLock volume."];
+      snaplockType: SnaplockType.t
+        [@ocaml.doc
+          "Specifies the retention mode of an FSx for ONTAP SnapLock volume. After it is set, it can't be changed. You can choose one of the following retention modes: COMPLIANCE: Files transitioned to write once, read many (WORM) on a Compliance volume can't be deleted until their retention periods expire. This retention mode is used to address government or industry-specific mandates or to protect against ransomware attacks. For more information, see SnapLock Compliance. ENTERPRISE: Files transitioned to WORM on an Enterprise volume can be deleted by authorized users before their retention periods expire using privileged delete. This retention mode is used to advance an organization's data integrity and internal compliance or to test retention settings before using SnapLock Compliance. For more information, see SnapLock Enterprise."];
+      volumeAppendModeEnabled: Flag.t option
+        [@ocaml.doc
+          "Enables or disables volume-append mode on an FSx for ONTAP SnapLock volume. Volume-append mode allows you to create WORM-appendable files and write data to them incrementally. The default value is false. For more information, see Volume-append mode."]}
+    let context_ = "CreateSnaplockConfiguration"
+    let make ?auditLogVolume =
+      fun ?autocommitPeriod ->
+        fun ?privilegedDelete ->
+          fun ?retentionPeriod ->
+            fun ?volumeAppendModeEnabled ->
+              fun ~snaplockType ->
+                fun () ->
+                  {
+                    auditLogVolume;
+                    autocommitPeriod;
+                    privilegedDelete;
+                    retentionPeriod;
+                    volumeAppendModeEnabled;
+                    snaplockType
+                  }
+    let to_value x =
+      structure_to_value
+        [("AuditLogVolume", (Option.map x.auditLogVolume ~f:Flag.to_value));
+        ("AutocommitPeriod",
+          (Option.map x.autocommitPeriod ~f:AutocommitPeriod.to_value));
+        ("PrivilegedDelete",
+          (Option.map x.privilegedDelete ~f:PrivilegedDelete.to_value));
+        ("RetentionPeriod",
+          (Option.map x.retentionPeriod ~f:SnaplockRetentionPeriod.to_value));
+        ("SnaplockType", (Some (SnaplockType.to_value x.snaplockType)));
+        ("VolumeAppendModeEnabled",
+          (Option.map x.volumeAppendModeEnabled ~f:Flag.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let volumeAppendModeEnabled =
+        (Option.map ~f:Flag.of_xml)
+          (Xml.child xml_arg0 "VolumeAppendModeEnabled") in
+      let snaplockType =
+        SnaplockType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SnaplockType") in
+      let retentionPeriod =
+        (Option.map ~f:SnaplockRetentionPeriod.of_xml)
+          (Xml.child xml_arg0 "RetentionPeriod") in
+      let privilegedDelete =
+        (Option.map ~f:PrivilegedDelete.of_xml)
+          (Xml.child xml_arg0 "PrivilegedDelete") in
+      let autocommitPeriod =
+        (Option.map ~f:AutocommitPeriod.of_xml)
+          (Xml.child xml_arg0 "AutocommitPeriod") in
+      let auditLogVolume =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "AuditLogVolume") in
+      make ?volumeAppendModeEnabled ~snaplockType ?retentionPeriod
+        ?privilegedDelete ?autocommitPeriod ?auditLogVolume ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let volumeAppendModeEnabled =
+        field_map json__ "VolumeAppendModeEnabled" Flag.of_json in
+      let snaplockType =
+        field_map_exn json__ "SnaplockType" SnaplockType.of_json in
+      let retentionPeriod =
+        field_map json__ "RetentionPeriod" SnaplockRetentionPeriod.of_json in
+      let privilegedDelete =
+        field_map json__ "PrivilegedDelete" PrivilegedDelete.of_json in
+      let autocommitPeriod =
+        field_map json__ "AutocommitPeriod" AutocommitPeriod.of_json in
+      let auditLogVolume = field_map json__ "AuditLogVolume" Flag.of_json in
+      make ?volumeAppendModeEnabled ~snaplockType ?retentionPeriod
+        ?privilegedDelete ?autocommitPeriod ?auditLogVolume ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the SnapLock configuration when creating an FSx for ONTAP SnapLock volume."]
 module CreateOntapVolumeConfiguration =
   struct
     type nonrec t =
       {
-      junctionPath: JunctionPath.t
+      junctionPath: JunctionPath.t option
         [@ocaml.doc
-          "Specifies the location in the SVM's namespace where the volume is mounted. The JunctionPath must have a leading forward slash, such as /vol3."];
+          "Specifies the location in the SVM's namespace where the volume is mounted. This parameter is required. The JunctionPath must have a leading forward slash, such as /vol3."];
       securityStyle: SecurityStyle.t option
         [@ocaml.doc
-          "The security style for the volume. Specify one of the following values: UNIX if the file system is managed by a UNIX administrator, the majority of users are NFS clients, and an application accessing the data uses a UNIX user as the service account. UNIX is the default. NTFS if the file system is managed by a Windows administrator, the majority of users are SMB clients, and an application accessing the data uses a Windows user as the service account. MIXED if the file system is managed by both UNIX and Windows administrators and users consist of both NFS and SMB clients."];
-      sizeInMegabytes: VolumeCapacity.t
+          "Specifies the security style for the volume. If a volume's security style is not specified, it is automatically set to the root volume's security style. The security style determines the type of permissions that FSx for ONTAP uses to control data access. Specify one of the following values: UNIX if the file system is managed by a UNIX administrator, the majority of users are NFS clients, and an application accessing the data uses a UNIX user as the service account. NTFS if the file system is managed by a Windows administrator, the majority of users are SMB clients, and an application accessing the data uses a Windows user as the service account. MIXED This is an advanced setting. For more information, see the topic What the security styles and their effects are in the NetApp Documentation Center. For more information, see Volume security style in the FSx for ONTAP User Guide."];
+      sizeInMegabytes: VolumeCapacity.t option
         [@ocaml.doc
-          "Specifies the size of the volume, in megabytes (MB), that you are creating."];
-      storageEfficiencyEnabled: Flag.t
+          "Use SizeInBytes instead. Specifies the size of the volume, in megabytes (MB), that you are creating."];
+      storageEfficiencyEnabled: Flag.t option
         [@ocaml.doc
-          "Set to true to enable deduplication, compression, and compaction storage efficiency features on the volume."];
+          "Set to true to enable deduplication, compression, and compaction storage efficiency features on the volume, or set to false to disable them. StorageEfficiencyEnabled is required when creating a RW volume (OntapVolumeType set to RW)."];
       storageVirtualMachineId: StorageVirtualMachineId.t
         [@ocaml.doc "Specifies the ONTAP SVM in which to create the volume."];
-      tieringPolicy: TieringPolicy.t option }
+      tieringPolicy: TieringPolicy.t option ;
+      ontapVolumeType: InputOntapVolumeType.t option
+        [@ocaml.doc
+          "Specifies the type of volume you are creating. Valid values are the following: RW specifies a read/write volume. RW is the default. DP specifies a data-protection volume. A DP volume is read-only and can be used as the destination of a NetApp SnapMirror relationship. For more information, see Volume types in the Amazon FSx for NetApp ONTAP User Guide."];
+      snapshotPolicy: SnapshotPolicy.t option
+        [@ocaml.doc
+          "Specifies the snapshot policy for the volume. There are three built-in snapshot policies: default: This is the default policy. A maximum of six hourly snapshots taken five minutes past the hour. A maximum of two daily snapshots taken Monday through Saturday at 10 minutes after midnight. A maximum of two weekly snapshots taken every Sunday at 15 minutes after midnight. default-1weekly: This policy is the same as the default policy except that it only retains one snapshot from the weekly schedule. none: This policy does not take any snapshots. This policy can be assigned to volumes to prevent automatic snapshots from being taken. You can also provide the name of a custom policy that you created with the ONTAP CLI or REST API. For more information, see Snapshot policies in the Amazon FSx for NetApp ONTAP User Guide."];
+      copyTagsToBackups: Flag.t option
+        [@ocaml.doc
+          "A boolean flag indicating whether tags for the volume should be copied to backups. This value defaults to false. If it's set to true, all tags for the volume are copied to all automatic and user-initiated backups where the user doesn't specify tags. If this value is true, and you specify one or more tags, only the specified tags are copied to backups. If you specify one or more tags when creating a user-initiated backup, no tags are copied from the volume, regardless of this value."];
+      snaplockConfiguration: CreateSnaplockConfiguration.t option
+        [@ocaml.doc
+          "Specifies the SnapLock configuration for an FSx for ONTAP volume."];
+      volumeStyle: VolumeStyle.t option
+        [@ocaml.doc
+          "Use to specify the style of an ONTAP volume. FSx for ONTAP offers two styles of volumes that you can use for different purposes, FlexVol and FlexGroup volumes. For more information, see Volume styles in the Amazon FSx for NetApp ONTAP User Guide."];
+      aggregateConfiguration: CreateAggregateConfiguration.t option
+        [@ocaml.doc
+          "Use to specify configuration options for a volume\226\128\153s storage aggregate or aggregates."];
+      sizeInBytes: VolumeCapacityBytes.t option
+        [@ocaml.doc "Specifies the configured size of the volume, in bytes."]}
     let context_ = "CreateOntapVolumeConfiguration"
-    let make ?securityStyle =
-      fun ?tieringPolicy ->
-        fun ~junctionPath ->
-          fun ~sizeInMegabytes ->
-            fun ~storageEfficiencyEnabled ->
-              fun ~storageVirtualMachineId ->
-                fun () ->
-                  {
-                    securityStyle;
-                    tieringPolicy;
-                    junctionPath;
-                    sizeInMegabytes;
-                    storageEfficiencyEnabled;
-                    storageVirtualMachineId
-                  }
+    let make ?junctionPath =
+      fun ?securityStyle ->
+        fun ?sizeInMegabytes ->
+          fun ?storageEfficiencyEnabled ->
+            fun ?tieringPolicy ->
+              fun ?ontapVolumeType ->
+                fun ?snapshotPolicy ->
+                  fun ?copyTagsToBackups ->
+                    fun ?snaplockConfiguration ->
+                      fun ?volumeStyle ->
+                        fun ?aggregateConfiguration ->
+                          fun ?sizeInBytes ->
+                            fun ~storageVirtualMachineId ->
+                              fun () ->
+                                {
+                                  junctionPath;
+                                  securityStyle;
+                                  sizeInMegabytes;
+                                  storageEfficiencyEnabled;
+                                  tieringPolicy;
+                                  ontapVolumeType;
+                                  snapshotPolicy;
+                                  copyTagsToBackups;
+                                  snaplockConfiguration;
+                                  volumeStyle;
+                                  aggregateConfiguration;
+                                  sizeInBytes;
+                                  storageVirtualMachineId
+                                }
     let to_value x =
       structure_to_value
-        [("JunctionPath", (Some (JunctionPath.to_value x.junctionPath)));
+        [("JunctionPath",
+           (Option.map x.junctionPath ~f:JunctionPath.to_value));
         ("SecurityStyle",
           (Option.map x.securityStyle ~f:SecurityStyle.to_value));
         ("SizeInMegabytes",
-          (Some (VolumeCapacity.to_value x.sizeInMegabytes)));
+          (Option.map x.sizeInMegabytes ~f:VolumeCapacity.to_value));
         ("StorageEfficiencyEnabled",
-          (Some (Flag.to_value x.storageEfficiencyEnabled)));
+          (Option.map x.storageEfficiencyEnabled ~f:Flag.to_value));
         ("StorageVirtualMachineId",
           (Some (StorageVirtualMachineId.to_value x.storageVirtualMachineId)));
         ("TieringPolicy",
-          (Option.map x.tieringPolicy ~f:TieringPolicy.to_value))]
+          (Option.map x.tieringPolicy ~f:TieringPolicy.to_value));
+        ("OntapVolumeType",
+          (Option.map x.ontapVolumeType ~f:InputOntapVolumeType.to_value));
+        ("SnapshotPolicy",
+          (Option.map x.snapshotPolicy ~f:SnapshotPolicy.to_value));
+        ("CopyTagsToBackups",
+          (Option.map x.copyTagsToBackups ~f:Flag.to_value));
+        ("SnaplockConfiguration",
+          (Option.map x.snaplockConfiguration
+             ~f:CreateSnaplockConfiguration.to_value));
+        ("VolumeStyle", (Option.map x.volumeStyle ~f:VolumeStyle.to_value));
+        ("AggregateConfiguration",
+          (Option.map x.aggregateConfiguration
+             ~f:CreateAggregateConfiguration.to_value));
+        ("SizeInBytes",
+          (Option.map x.sizeInBytes ~f:VolumeCapacityBytes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sizeInBytes =
+        (Option.map ~f:VolumeCapacityBytes.of_xml)
+          (Xml.child xml_arg0 "SizeInBytes") in
+      let aggregateConfiguration =
+        (Option.map ~f:CreateAggregateConfiguration.of_xml)
+          (Xml.child xml_arg0 "AggregateConfiguration") in
+      let volumeStyle =
+        (Option.map ~f:VolumeStyle.of_xml) (Xml.child xml_arg0 "VolumeStyle") in
+      let snaplockConfiguration =
+        (Option.map ~f:CreateSnaplockConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnaplockConfiguration") in
+      let copyTagsToBackups =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "CopyTagsToBackups") in
+      let snapshotPolicy =
+        (Option.map ~f:SnapshotPolicy.of_xml)
+          (Xml.child xml_arg0 "SnapshotPolicy") in
+      let ontapVolumeType =
+        (Option.map ~f:InputOntapVolumeType.of_xml)
+          (Xml.child xml_arg0 "OntapVolumeType") in
       let tieringPolicy =
         (Option.map ~f:TieringPolicy.of_xml)
           (Xml.child xml_arg0 "TieringPolicy") in
@@ -9573,37 +14505,56 @@ module CreateOntapVolumeConfiguration =
         StorageVirtualMachineId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StorageVirtualMachineId") in
       let storageEfficiencyEnabled =
-        Flag.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "StorageEfficiencyEnabled") in
+        (Option.map ~f:Flag.of_xml)
+          (Xml.child xml_arg0 "StorageEfficiencyEnabled") in
       let sizeInMegabytes =
-        VolumeCapacity.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SizeInMegabytes") in
+        (Option.map ~f:VolumeCapacity.of_xml)
+          (Xml.child xml_arg0 "SizeInMegabytes") in
       let securityStyle =
         (Option.map ~f:SecurityStyle.of_xml)
           (Xml.child xml_arg0 "SecurityStyle") in
       let junctionPath =
-        JunctionPath.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JunctionPath") in
-      make ?tieringPolicy ~storageVirtualMachineId ~storageEfficiencyEnabled
-        ~sizeInMegabytes ?securityStyle ~junctionPath ()
+        (Option.map ~f:JunctionPath.of_xml)
+          (Xml.child xml_arg0 "JunctionPath") in
+      make ?sizeInBytes ?aggregateConfiguration ?volumeStyle
+        ?snaplockConfiguration ?copyTagsToBackups ?snapshotPolicy
+        ?ontapVolumeType ?tieringPolicy ~storageVirtualMachineId
+        ?storageEfficiencyEnabled ?sizeInMegabytes ?securityStyle
+        ?junctionPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sizeInBytes =
+        field_map json__ "SizeInBytes" VolumeCapacityBytes.of_json in
+      let aggregateConfiguration =
+        field_map json__ "AggregateConfiguration"
+          CreateAggregateConfiguration.of_json in
+      let volumeStyle = field_map json__ "VolumeStyle" VolumeStyle.of_json in
+      let snaplockConfiguration =
+        field_map json__ "SnaplockConfiguration"
+          CreateSnaplockConfiguration.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
+      let snapshotPolicy =
+        field_map json__ "SnapshotPolicy" SnapshotPolicy.of_json in
+      let ontapVolumeType =
+        field_map json__ "OntapVolumeType" InputOntapVolumeType.of_json in
       let tieringPolicy =
-        field_map json "TieringPolicy" TieringPolicy.of_json in
+        field_map json__ "TieringPolicy" TieringPolicy.of_json in
       let storageVirtualMachineId =
-        field_map_exn json "StorageVirtualMachineId"
+        field_map_exn json__ "StorageVirtualMachineId"
           StorageVirtualMachineId.of_json in
       let storageEfficiencyEnabled =
-        field_map_exn json "StorageEfficiencyEnabled" Flag.of_json in
+        field_map json__ "StorageEfficiencyEnabled" Flag.of_json in
       let sizeInMegabytes =
-        field_map_exn json "SizeInMegabytes" VolumeCapacity.of_json in
+        field_map json__ "SizeInMegabytes" VolumeCapacity.of_json in
       let securityStyle =
-        field_map json "SecurityStyle" SecurityStyle.of_json in
-      let junctionPath =
-        field_map_exn json "JunctionPath" JunctionPath.of_json in
-      make ?tieringPolicy ~storageVirtualMachineId ~storageEfficiencyEnabled
-        ~sizeInMegabytes ?securityStyle ~junctionPath ()
+        field_map json__ "SecurityStyle" SecurityStyle.of_json in
+      let junctionPath = field_map json__ "JunctionPath" JunctionPath.of_json in
+      make ?sizeInBytes ?aggregateConfiguration ?volumeStyle
+        ?snaplockConfiguration ?copyTagsToBackups ?snapshotPolicy
+        ?ontapVolumeType ?tieringPolicy ~storageVirtualMachineId
+        ?storageEfficiencyEnabled ?sizeInMegabytes ?securityStyle
+        ?junctionPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the configuration of the ONTAP volume that you are creating."]
@@ -9614,7 +14565,7 @@ module CreateOpenZFSOriginSnapshotConfiguration =
       snapshotARN: ResourceARN.t ;
       copyStrategy: OpenZFSCopyStrategy.t
         [@ocaml.doc
-          "The strategy used when copying data from the snapshot to the new volume. CLONE - The new volume references the data in the origin snapshot. Cloning a snapshot is faster than copying data from the snapshot to a new volume and doesn't consume disk throughput. However, the origin snapshot can't be deleted if there is a volume using its copied data. FULL_COPY - Copies all data from the snapshot to the new volume."]}
+          "Specifies the strategy used when copying data from the snapshot to the new volume. CLONE - The new volume references the data in the origin snapshot. Cloning a snapshot is faster than copying data from the snapshot to a new volume and doesn't consume disk throughput. However, the origin snapshot can't be deleted if there is a volume using its copied data. FULL_COPY - Copies all data from the snapshot to the new volume. Specify this option to create the volume from a snapshot on another FSx for OpenZFS file system. The INCREMENTAL_COPY option is only for updating an existing volume by using a snapshot from another FSx for OpenZFS file system. For more information, see CopySnapshotAndUpdateVolume."]}
     let context_ = "CreateOpenZFSOriginSnapshotConfiguration"
     let make ~snapshotARN =
       fun ~copyStrategy -> fun () -> { snapshotARN; copyStrategy }
@@ -9633,14 +14584,15 @@ module CreateOpenZFSOriginSnapshotConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotARN") in
       make ~copyStrategy ~snapshotARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let copyStrategy =
-        field_map_exn json "CopyStrategy" OpenZFSCopyStrategy.of_json in
-      let snapshotARN = field_map_exn json "SnapshotARN" ResourceARN.of_json in
+        field_map_exn json__ "CopyStrategy" OpenZFSCopyStrategy.of_json in
+      let snapshotARN =
+        field_map_exn json__ "SnapshotARN" ResourceARN.of_json in
       make ~copyStrategy ~snapshotARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The snapshot configuration to use when creating an OpenZFS volume from a snapshot."]
+       "The snapshot configuration to use when creating an Amazon FSx for OpenZFS volume from a snapshot."]
 module IntegerNoMaxFromNegativeOne =
   struct
     type nonrec t = int
@@ -9676,13 +14628,13 @@ module CreateOpenZFSVolumeConfiguration =
           "Sets the maximum storage size in gibibytes (GiB) for the volume. You can specify a quota that is larger than the storage on the parent volume. A volume quota limits the amount of storage that the volume can consume to the configured amount, but does not guarantee the space will be available on the parent volume. To guarantee quota space, you must also set StorageCapacityReservationGiB. To not specify a storage capacity quota, set this to -1. For more information, see Volume properties in the Amazon FSx for OpenZFS User Guide."];
       recordSizeKiB: IntegerRecordSizeKiB.t option
         [@ocaml.doc
-          "Specifies the suggested block size for a volume in a ZFS dataset, in kibibytes (KiB). Valid values are 4, 8, 16, 32, 64, 128, 256, 512, or 1024 KiB. The default is 128 KiB. We recommend using the default setting for the majority of use cases. Generally, workloads that write in fixed small or large record sizes may benefit from setting a custom record size, like database workloads (small record size) or media streaming workloads (large record size). For additional guidance on when to set a custom record size, see ZFS Record size in the Amazon FSx for OpenZFS User Guide."];
+          "Specifies the suggested block size for a volume in a ZFS dataset, in kibibytes (KiB). For file systems using the Intelligent-Tiering storage class, valid values are 128, 256, 512, 1024, 2048, or 4096 KiB, with a default of 1024 KiB. For all other file systems, valid values are 4, 8, 16, 32, 64, 128, 256, 512, or 1024 KiB, with a default of 128 KiB. We recommend using the default setting for the majority of use cases. Generally, workloads that write in fixed small or large record sizes may benefit from setting a custom record size, like database workloads (small record size) or media streaming workloads (large record size). For additional guidance on when to set a custom record size, see ZFS Record size in the Amazon FSx for OpenZFS User Guide."];
       dataCompressionType: OpenZFSDataCompressionType.t option
         [@ocaml.doc
           "Specifies the method used to compress the data on the volume. The compression type is NONE by default. NONE - Doesn't compress the data on the volume. NONE is the default. ZSTD - Compresses the data in the volume using the Zstandard (ZSTD) compression algorithm. ZSTD compression provides a higher level of data compression and higher read throughput performance than LZ4 compression. LZ4 - Compresses the data in the volume using the LZ4 compression algorithm. LZ4 compression provides a lower level of compression and higher write throughput performance than ZSTD compression. For more information about volume compression types and the performance of your Amazon FSx for OpenZFS file system, see Tips for maximizing performance File system and volume settings in the Amazon FSx for OpenZFS User Guide."];
       copyTagsToSnapshots: Flag.t option
         [@ocaml.doc
-          "A Boolean value indicating whether tags for the volume should be copied to snapshots. This value defaults to false. If it's set to true, all tags for the volume are copied to snapshots where the user doesn't specify tags. If this value is true, and you specify one or more tags, only the specified tags are copied to snapshots. If you specify one or more tags when creating the snapshot, no tags are copied from the volume, regardless of this value."];
+          "A Boolean value indicating whether tags for the volume should be copied to snapshots. This value defaults to false. If this value is set to\194\160true, and you do not specify any tags, all tags for the original volume are copied over to snapshots. If this value is\194\160set to true, and you do specify one or more tags, only the specified tags for the original volume are copied over to snapshots. If you specify one or more tags when creating a new snapshot, no tags are copied over from the original volume, regardless of this value."];
       originSnapshot: CreateOpenZFSOriginSnapshotConfiguration.t option
         [@ocaml.doc
           "The configuration object that specifies the snapshot to use as the origin of the data for the volume."];
@@ -9694,7 +14646,7 @@ module CreateOpenZFSVolumeConfiguration =
           "The configuration object for mounting a Network File System (NFS) file system."];
       userAndGroupQuotas: OpenZFSUserAndGroupQuotas.t option
         [@ocaml.doc
-          "An object specifying how much storage users or groups can use on the volume."]}
+          "Configures how much storage users and groups can use on the volume."]}
     let context_ = "CreateOpenZFSVolumeConfiguration"
     let make ?storageCapacityReservationGiB =
       fun ?storageCapacityQuotaGiB ->
@@ -9780,29 +14732,31 @@ module CreateOpenZFSVolumeConfiguration =
         ?storageCapacityQuotaGiB ?storageCapacityReservationGiB
         ~parentVolumeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userAndGroupQuotas =
-        field_map json "UserAndGroupQuotas" OpenZFSUserAndGroupQuotas.of_json in
-      let nfsExports = field_map json "NfsExports" OpenZFSNfsExports.of_json in
-      let readOnly = field_map json "ReadOnly" ReadOnly.of_json in
+        field_map json__ "UserAndGroupQuotas"
+          OpenZFSUserAndGroupQuotas.of_json in
+      let nfsExports =
+        field_map json__ "NfsExports" OpenZFSNfsExports.of_json in
+      let readOnly = field_map json__ "ReadOnly" ReadOnly.of_json in
       let originSnapshot =
-        field_map json "OriginSnapshot"
+        field_map json__ "OriginSnapshot"
           CreateOpenZFSOriginSnapshotConfiguration.of_json in
       let copyTagsToSnapshots =
-        field_map json "CopyTagsToSnapshots" Flag.of_json in
+        field_map json__ "CopyTagsToSnapshots" Flag.of_json in
       let dataCompressionType =
-        field_map json "DataCompressionType"
+        field_map json__ "DataCompressionType"
           OpenZFSDataCompressionType.of_json in
       let recordSizeKiB =
-        field_map json "RecordSizeKiB" IntegerRecordSizeKiB.of_json in
+        field_map json__ "RecordSizeKiB" IntegerRecordSizeKiB.of_json in
       let storageCapacityQuotaGiB =
-        field_map json "StorageCapacityQuotaGiB"
+        field_map json__ "StorageCapacityQuotaGiB"
           IntegerNoMaxFromNegativeOne.of_json in
       let storageCapacityReservationGiB =
-        field_map json "StorageCapacityReservationGiB"
+        field_map json__ "StorageCapacityReservationGiB"
           IntegerNoMaxFromNegativeOne.of_json in
       let parentVolumeId =
-        field_map_exn json "ParentVolumeId" VolumeId.of_json in
+        field_map_exn json__ "ParentVolumeId" VolumeId.of_json in
       make ?userAndGroupQuotas ?nfsExports ?readOnly ?originSnapshot
         ?copyTagsToSnapshots ?dataCompressionType ?recordSizeKiB
         ?storageCapacityQuotaGiB ?storageCapacityReservationGiB
@@ -9845,12 +14799,12 @@ module CreateSnapshotRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?tags ~volumeId ~name ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let volumeId = field_map_exn json "VolumeId" VolumeId.of_json in
-      let name = field_map_exn json "Name" SnapshotName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let volumeId = field_map_exn json__ "VolumeId" VolumeId.of_json in
+      let name = field_map_exn json__ "Name" SnapshotName.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ?tags ~volumeId ~name ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9921,8 +14875,8 @@ module CreateSnapshotResponse =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10034,15 +14988,16 @@ module CreateSvmActiveDirectoryConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "NetBiosName") in
       make ?selfManagedActiveDirectoryConfiguration ~netBiosName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let selfManagedActiveDirectoryConfiguration =
-        field_map json "SelfManagedActiveDirectoryConfiguration"
+        field_map json__ "SelfManagedActiveDirectoryConfiguration"
           SelfManagedActiveDirectoryConfiguration.of_json in
-      let netBiosName = field_map_exn json "NetBiosName" NetBiosAlias.of_json in
+      let netBiosName =
+        field_map_exn json__ "NetBiosName" NetBiosAlias.of_json in
       make ?selfManagedActiveDirectoryConfiguration ~netBiosName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration that Amazon FSx uses to join the ONTAP storage virtual machine (SVM) to your self-managed (including on-premises) Microsoft Active Directory (AD) directory."]
+       "The configuration that Amazon FSx uses to join the ONTAP storage virtual machine (SVM) to your self-managed (including on-premises) Microsoft Active Directory directory."]
 module CreateStorageVirtualMachineRequest =
   struct
     type nonrec t =
@@ -10050,7 +15005,7 @@ module CreateStorageVirtualMachineRequest =
       activeDirectoryConfiguration:
         CreateSvmActiveDirectoryConfiguration.t option
         [@ocaml.doc
-          "Describes the self-managed Microsoft Active Directory to which you want to join the SVM. Joining an Active Directory provides user authentication and access control for SMB clients, including Microsoft Windows and macOS client accessing the file system."];
+          "Describes the self-managed Microsoft Active Directory to which you want to join the SVM. Joining an Active Directory provides user authentication and access control for SMB clients, including Microsoft Windows and macOS clients accessing the file system."];
       clientRequestToken: ClientRequestToken.t option ;
       fileSystemId: FileSystemId.t ;
       name: StorageVirtualMachineName.t [@ocaml.doc "The name of the SVM."];
@@ -10061,7 +15016,7 @@ module CreateStorageVirtualMachineRequest =
       rootVolumeSecurityStyle:
         StorageVirtualMachineRootVolumeSecurityStyle.t option
         [@ocaml.doc
-          "The security style of the root volume of the SVM. Specify one of the following values: UNIX if the file system is managed by a UNIX administrator, the majority of users are NFS clients, and an application accessing the data uses a UNIX user as the service account. NTFS if the file system is managed by a Windows administrator, the majority of users are SMB clients, and an application accessing the data uses a Windows user as the service account. MIXED if the file system is managed by both UNIX and Windows administrators and users consist of both NFS and SMB clients."]}
+          "The security style of the root volume of the SVM. Specify one of the following values: UNIX if the file system is managed by a UNIX administrator, the majority of users are NFS clients, and an application accessing the data uses a UNIX user as the service account. NTFS if the file system is managed by a Microsoft Windows administrator, the majority of users are SMB clients, and an application accessing the data uses a Microsoft Windows user as the service account. MIXED This is an advanced setting. For more information, see Volume security style in the Amazon FSx for NetApp ONTAP User Guide."]}
     let context_ = "CreateStorageVirtualMachineRequest"
     let make ?activeDirectoryConfiguration =
       fun ?clientRequestToken ->
@@ -10119,20 +15074,21 @@ module CreateStorageVirtualMachineRequest =
       make ?rootVolumeSecurityStyle ?tags ?svmAdminPassword ~name
         ~fileSystemId ?clientRequestToken ?activeDirectoryConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rootVolumeSecurityStyle =
-        field_map json "RootVolumeSecurityStyle"
+        field_map json__ "RootVolumeSecurityStyle"
           StorageVirtualMachineRootVolumeSecurityStyle.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let svmAdminPassword =
-        field_map json "SvmAdminPassword" AdminPassword.of_json in
-      let name = field_map_exn json "Name" StorageVirtualMachineName.of_json in
+        field_map json__ "SvmAdminPassword" AdminPassword.of_json in
+      let name =
+        field_map_exn json__ "Name" StorageVirtualMachineName.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let activeDirectoryConfiguration =
-        field_map json "ActiveDirectoryConfiguration"
+        field_map json__ "ActiveDirectoryConfiguration"
           CreateSvmActiveDirectoryConfiguration.of_json in
       make ?rootVolumeSecurityStyle ?tags ?svmAdminPassword ~name
         ~fileSystemId ?clientRequestToken ?activeDirectoryConfiguration ()
@@ -10145,28 +15101,39 @@ module SvmEndpoint =
       {
       dNSName: DNSName.t option ;
       ipAddresses: OntapEndpointIpAddresses.t option
-        [@ocaml.doc "The SVM endpoint's IP addresses."]}
+        [@ocaml.doc "The SVM endpoint's IPv4 addresses."];
+      ipv6Addresses: OntapEndpointIpAddresses.t option
+        [@ocaml.doc "The SVM endpoint's IPv6 addresses."]}
     let make ?dNSName =
-      fun ?ipAddresses -> fun () -> { dNSName; ipAddresses }
+      fun ?ipAddresses ->
+        fun ?ipv6Addresses ->
+          fun () -> { dNSName; ipAddresses; ipv6Addresses }
     let to_value x =
       structure_to_value
         [("DNSName", (Option.map x.dNSName ~f:DNSName.to_value));
         ("IpAddresses",
-          (Option.map x.ipAddresses ~f:OntapEndpointIpAddresses.to_value))]
+          (Option.map x.ipAddresses ~f:OntapEndpointIpAddresses.to_value));
+        ("Ipv6Addresses",
+          (Option.map x.ipv6Addresses ~f:OntapEndpointIpAddresses.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6Addresses =
+        (Option.map ~f:OntapEndpointIpAddresses.of_xml)
+          (Xml.child xml_arg0 "Ipv6Addresses") in
       let ipAddresses =
         (Option.map ~f:OntapEndpointIpAddresses.of_xml)
           (Xml.child xml_arg0 "IpAddresses") in
       let dNSName =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "DNSName") in
-      make ?ipAddresses ?dNSName ()
+      make ?ipv6Addresses ?ipAddresses ?dNSName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipv6Addresses =
+        field_map json__ "Ipv6Addresses" OntapEndpointIpAddresses.of_json in
       let ipAddresses =
-        field_map json "IpAddresses" OntapEndpointIpAddresses.of_json in
-      let dNSName = field_map json "DNSName" DNSName.of_json in
-      make ?ipAddresses ?dNSName ()
+        field_map json__ "IpAddresses" OntapEndpointIpAddresses.of_json in
+      let dNSName = field_map json__ "DNSName" DNSName.of_json in
+      make ?ipv6Addresses ?ipAddresses ?dNSName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An Amazon FSx for NetApp ONTAP storage virtual machine (SVM) has four endpoints that are used to access data or to manage the SVM using the NetApp ONTAP CLI, REST API, or NetApp CloudManager. They are the Iscsi, Management, Nfs, and Smb endpoints."]
@@ -10205,11 +15172,11 @@ module SvmEndpoints =
         (Option.map ~f:SvmEndpoint.of_xml) (Xml.child xml_arg0 "Iscsi") in
       make ?smb ?nfs ?management ?iscsi ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let smb = field_map json "Smb" SvmEndpoint.of_json in
-      let nfs = field_map json "Nfs" SvmEndpoint.of_json in
-      let management = field_map json "Management" SvmEndpoint.of_json in
-      let iscsi = field_map json "Iscsi" SvmEndpoint.of_json in
+    let of_json json__ =
+      let smb = field_map json__ "Smb" SvmEndpoint.of_json in
+      let nfs = field_map json__ "Nfs" SvmEndpoint.of_json in
+      let management = field_map json__ "Management" SvmEndpoint.of_json in
+      let iscsi = field_map json__ "Iscsi" SvmEndpoint.of_json in
       make ?smb ?nfs ?management ?iscsi ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10220,7 +15187,7 @@ module SvmActiveDirectoryConfiguration =
       {
       netBiosName: NetBiosAlias.t option
         [@ocaml.doc
-          "The NetBIOS name of the Active Directory computer object that is joined to your SVM."];
+          "The NetBIOS name of the AD computer object to which the SVM is joined."];
       selfManagedActiveDirectoryConfiguration:
         SelfManagedActiveDirectoryAttributes.t option }
     let make ?netBiosName =
@@ -10242,15 +15209,15 @@ module SvmActiveDirectoryConfiguration =
           (Xml.child xml_arg0 "NetBiosName") in
       make ?selfManagedActiveDirectoryConfiguration ?netBiosName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let selfManagedActiveDirectoryConfiguration =
-        field_map json "SelfManagedActiveDirectoryConfiguration"
+        field_map json__ "SelfManagedActiveDirectoryConfiguration"
           SelfManagedActiveDirectoryAttributes.of_json in
-      let netBiosName = field_map json "NetBiosName" NetBiosAlias.of_json in
+      let netBiosName = field_map json__ "NetBiosName" NetBiosAlias.of_json in
       make ?selfManagedActiveDirectoryConfiguration ?netBiosName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the configuration of the Microsoft Active Directory (AD) directory to which the Amazon FSx for ONTAP storage virtual machine (SVM) is joined. Pleae note, account credentials are not returned in the response payload."]
+       "Describes the Microsoft Active Directory (AD) directory configuration to which the FSx for ONTAP storage virtual machine (SVM) is joined. Note that account credentials are not returned in the response payload."]
 module StorageVirtualMachineSubtype =
   struct
     type nonrec t =
@@ -10451,29 +15418,29 @@ module StorageVirtualMachine =
         ?fileSystemId ?endpoints ?creationTime ?activeDirectoryConfiguration
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rootVolumeSecurityStyle =
-        field_map json "RootVolumeSecurityStyle"
+        field_map json__ "RootVolumeSecurityStyle"
           StorageVirtualMachineRootVolumeSecurityStyle.of_json in
       let lifecycleTransitionReason =
-        field_map json "LifecycleTransitionReason"
+        field_map json__ "LifecycleTransitionReason"
           LifecycleTransitionReason.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let uUID = field_map json "UUID" UUID.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let uUID = field_map json__ "UUID" UUID.of_json in
       let subtype =
-        field_map json "Subtype" StorageVirtualMachineSubtype.of_json in
+        field_map json__ "Subtype" StorageVirtualMachineSubtype.of_json in
       let storageVirtualMachineId =
-        field_map json "StorageVirtualMachineId"
+        field_map json__ "StorageVirtualMachineId"
           StorageVirtualMachineId.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
-      let name = field_map json "Name" StorageVirtualMachineName.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      let name = field_map json__ "Name" StorageVirtualMachineName.of_json in
       let lifecycle =
-        field_map json "Lifecycle" StorageVirtualMachineLifecycle.of_json in
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
-      let endpoints = field_map json "Endpoints" SvmEndpoints.of_json in
-      let creationTime = field_map json "CreationTime" CreationTime.of_json in
+        field_map json__ "Lifecycle" StorageVirtualMachineLifecycle.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
+      let endpoints = field_map json__ "Endpoints" SvmEndpoints.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
       let activeDirectoryConfiguration =
-        field_map json "ActiveDirectoryConfiguration"
+        field_map json__ "ActiveDirectoryConfiguration"
           SvmActiveDirectoryConfiguration.of_json in
       make ?rootVolumeSecurityStyle ?lifecycleTransitionReason ?tags ?uUID
         ?subtype ?storageVirtualMachineId ?resourceARN ?name ?lifecycle
@@ -10582,9 +15549,10 @@ module CreateStorageVirtualMachineResponse =
           (Xml.child xml_arg0 "StorageVirtualMachine") in
       make ?storageVirtualMachine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let storageVirtualMachine =
-        field_map json "StorageVirtualMachine" StorageVirtualMachine.of_json in
+        field_map json__ "StorageVirtualMachine"
+          StorageVirtualMachine.of_json in
       make ?storageVirtualMachine ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10640,15 +15608,15 @@ module CreateVolumeFromBackupRequest =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ?tags ?ontapConfiguration ~name ?clientRequestToken ~backupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ontapConfiguration =
-        field_map json "OntapConfiguration"
+        field_map json__ "OntapConfiguration"
           CreateOntapVolumeConfiguration.of_json in
-      let name = field_map_exn json "Name" VolumeName.of_json in
+      let name = field_map_exn json__ "Name" VolumeName.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let backupId = field_map_exn json "BackupId" BackupId.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let backupId = field_map_exn json__ "BackupId" BackupId.of_json in
       make ?tags ?ontapConfiguration ~name ?clientRequestToken ~backupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10667,8 +15635,8 @@ module StorageVirtualMachineNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10687,8 +15655,8 @@ module MissingVolumeConfiguration =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A volume configuration is required for this operation."]
@@ -10798,8 +15766,9 @@ module CreateVolumeFromBackupResponse =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "Volume") in
       make ?volume ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volume = field_map json "Volume" Volume.of_json in make ?volume ()
+    let of_json json__ =
+      let volume = field_map json__ "Volume" Volume.of_json in
+      make ?volume ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new Amazon FSx for NetApp ONTAP volume from an existing Amazon FSx volume backup."]
@@ -10869,18 +15838,18 @@ module CreateVolumeRequest =
       make ?openZFSConfiguration ?tags ?ontapConfiguration ~name ~volumeType
         ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openZFSConfiguration =
-        field_map json "OpenZFSConfiguration"
+        field_map json__ "OpenZFSConfiguration"
           CreateOpenZFSVolumeConfiguration.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ontapConfiguration =
-        field_map json "OntapConfiguration"
+        field_map json__ "OntapConfiguration"
           CreateOntapVolumeConfiguration.of_json in
-      let name = field_map_exn json "Name" VolumeName.of_json in
-      let volumeType = field_map_exn json "VolumeType" VolumeType.of_json in
+      let name = field_map_exn json__ "Name" VolumeName.of_json in
+      let volumeType = field_map_exn json__ "VolumeType" VolumeType.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ?openZFSConfiguration ?tags ?ontapConfiguration ~name ~volumeType
         ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
@@ -10995,38 +15964,12 @@ module CreateVolumeResponse =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "Volume") in
       make ?volume ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volume = field_map json "Volume" Volume.of_json in make ?volume ()
+    let of_json json__ =
+      let volume = field_map json__ "Volume" Volume.of_json in
+      make ?volume ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an FSx for ONTAP or Amazon FSx for OpenZFS storage volume."]
-module DataRepositoryAssociationIds =
-  struct
-    type nonrec t = DataRepositoryAssociationId.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:50); i
-    let to_value xs =
-      (xs |> (List.map ~f:DataRepositoryAssociationId.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DataRepositoryAssociationId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DataRepositoryAssociationIds"
-        ~of_json:DataRepositoryAssociationId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module DataRepositoryAssociationNotFound =
   struct
     type nonrec t = {
@@ -11041,8 +15984,8 @@ module DataRepositoryAssociationNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11052,6 +15995,9 @@ module DataRepositoryAssociations =
     type nonrec t = DataRepositoryAssociation.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataRepositoryAssociation.to_value)) |>
         (fun x -> `List x)
@@ -11101,6 +16047,9 @@ module DataRepositoryTaskFilterValues =
     type nonrec t = DataRepositoryTaskFilterValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataRepositoryTaskFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -11129,6 +16078,7 @@ module DataRepositoryTaskFilterName =
       | File_system_id 
       | Task_lifecycle 
       | Data_repository_association_id 
+      | File_cache_id 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -11136,12 +16086,14 @@ module DataRepositoryTaskFilterName =
       | File_system_id -> "file-system-id"
       | Task_lifecycle -> "task-lifecycle"
       | Data_repository_association_id -> "data-repository-association-id"
+      | File_cache_id -> "file-cache-id"
       | Non_static_id s -> s
     let of_string =
       function
       | "file-system-id" -> File_system_id
       | "task-lifecycle" -> Task_lifecycle
       | "data-repository-association-id" -> Data_repository_association_id
+      | "file-cache-id" -> File_cache_id
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -11181,19 +16133,22 @@ module DataRepositoryTaskFilter =
           (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "Values" DataRepositoryTaskFilterValues.of_json in
-      let name = field_map json "Name" DataRepositoryTaskFilterName.of_json in
+        field_map json__ "Values" DataRepositoryTaskFilterValues.of_json in
+      let name = field_map json__ "Name" DataRepositoryTaskFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "(Optional) An array of filter objects you can use to filter the response of data repository tasks you will see in the the response. You can filter the tasks returned in the response by one or more file system IDs, task lifecycles, and by task type. A filter object consists of a filter Name, and one or more Values for the filter."]
+       "(Optional) An array of filter objects you can use to filter the response of data repository tasks you will see in the response. You can filter the tasks returned in the response by one or more file system IDs, task lifecycles, and by task type. A filter object consists of a filter Name, and one or more Values for the filter."]
 module DataRepositoryTaskFilters =
   struct
     type nonrec t = DataRepositoryTaskFilter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:3); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataRepositoryTaskFilter.to_value)) |>
         (fun x -> `List x)
@@ -11221,6 +16176,9 @@ module DataRepositoryTasks =
     type nonrec t = DataRepositoryTask.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataRepositoryTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11250,7 +16208,7 @@ module DeleteBackupRequest =
         [@ocaml.doc "The ID of the backup that you want to delete."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "A string of up to 64 ASCII characters that Amazon FSx uses to ensure idempotent deletion. This parameter is automatically filled on your behalf when using the CLI or SDK."]}
+          "A string of up to 63 ASCII characters that Amazon FSx uses to ensure idempotent deletion. This parameter is automatically filled on your behalf when using the CLI or SDK."]}
     let context_ = "DeleteBackupRequest"
     let make ?clientRequestToken =
       fun ~backupId -> fun () -> { clientRequestToken; backupId }
@@ -11268,10 +16226,10 @@ module DeleteBackupRequest =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ?clientRequestToken ~backupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let backupId = field_map_exn json "BackupId" BackupId.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let backupId = field_map_exn json__ "BackupId" BackupId.of_json in
       make ?clientRequestToken ~backupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for the DeleteBackup operation."]
@@ -11372,9 +16330,9 @@ module DeleteBackupResponse =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "BackupId") in
       make ?lifecycle ?backupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lifecycle = field_map json "Lifecycle" BackupLifecycle.of_json in
-      let backupId = field_map json "BackupId" BackupId.of_json in
+    let of_json json__ =
+      let lifecycle = field_map json__ "Lifecycle" BackupLifecycle.of_json in
+      let backupId = field_map json__ "BackupId" BackupId.of_json in
       make ?lifecycle ?backupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for the DeleteBackup operation."]
@@ -11399,15 +16357,15 @@ module DeleteDataRepositoryAssociationRequest =
         [@ocaml.doc
           "The ID of the data repository association that you want to delete."];
       clientRequestToken: ClientRequestToken.t option ;
-      deleteDataInFileSystem: DeleteDataInFileSystem.t
+      deleteDataInFileSystem: DeleteDataInFileSystem.t option
         [@ocaml.doc
           "Set to true to delete the data in the file system that corresponds to the data repository association."]}
     let context_ = "DeleteDataRepositoryAssociationRequest"
     let make ?clientRequestToken =
-      fun ~associationId ->
-        fun ~deleteDataInFileSystem ->
+      fun ?deleteDataInFileSystem ->
+        fun ~associationId ->
           fun () ->
-            { clientRequestToken; associationId; deleteDataInFileSystem }
+            { clientRequestToken; deleteDataInFileSystem; associationId }
     let to_value x =
       structure_to_value
         [("AssociationId",
@@ -11415,33 +16373,34 @@ module DeleteDataRepositoryAssociationRequest =
         ("ClientRequestToken",
           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
         ("DeleteDataInFileSystem",
-          (Some (DeleteDataInFileSystem.to_value x.deleteDataInFileSystem)))]
+          (Option.map x.deleteDataInFileSystem
+             ~f:DeleteDataInFileSystem.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let deleteDataInFileSystem =
-        DeleteDataInFileSystem.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeleteDataInFileSystem") in
+        (Option.map ~f:DeleteDataInFileSystem.of_xml)
+          (Xml.child xml_arg0 "DeleteDataInFileSystem") in
       let clientRequestToken =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
       let associationId =
         DataRepositoryAssociationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationId") in
-      make ~deleteDataInFileSystem ?clientRequestToken ~associationId ()
+      make ?deleteDataInFileSystem ?clientRequestToken ~associationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deleteDataInFileSystem =
-        field_map_exn json "DeleteDataInFileSystem"
+        field_map json__ "DeleteDataInFileSystem"
           DeleteDataInFileSystem.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let associationId =
-        field_map_exn json "AssociationId"
+        field_map_exn json__ "AssociationId"
           DataRepositoryAssociationId.of_json in
-      make ~deleteDataInFileSystem ?clientRequestToken ~associationId ()
+      make ?deleteDataInFileSystem ?clientRequestToken ~associationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a data repository association on an Amazon FSx for Lustre file system. Deleting the data repository association unlinks the file system from the Amazon S3 bucket. When deleting a data repository association, you have the option of deleting the data in the file system that corresponds to the data repository association. Data repository associations are supported only for file systems with the Persistent_2 deployment type."]
+       "Deletes a data repository association on an Amazon FSx for Lustre file system. Deleting the data repository association unlinks the file system from the Amazon S3 bucket. When deleting a data repository association, you have the option of deleting the data in the file system that corresponds to the data repository association. Data repository associations are supported on all FSx for Lustre 2.12 and 2.15 file systems, excluding scratch_1 deployment type."]
 module DeleteDataRepositoryAssociationResponse =
   struct
     type nonrec t =
@@ -11547,18 +16506,165 @@ module DeleteDataRepositoryAssociationResponse =
           (Xml.child xml_arg0 "AssociationId") in
       make ?deleteDataInFileSystem ?lifecycle ?associationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deleteDataInFileSystem =
-        field_map json "DeleteDataInFileSystem"
+        field_map json__ "DeleteDataInFileSystem"
           DeleteDataInFileSystem.of_json in
       let lifecycle =
-        field_map json "Lifecycle" DataRepositoryLifecycle.of_json in
+        field_map json__ "Lifecycle" DataRepositoryLifecycle.of_json in
       let associationId =
-        field_map json "AssociationId" DataRepositoryAssociationId.of_json in
+        field_map json__ "AssociationId" DataRepositoryAssociationId.of_json in
       make ?deleteDataInFileSystem ?lifecycle ?associationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a data repository association on an Amazon FSx for Lustre file system. Deleting the data repository association unlinks the file system from the Amazon S3 bucket. When deleting a data repository association, you have the option of deleting the data in the file system that corresponds to the data repository association. Data repository associations are supported only for file systems with the Persistent_2 deployment type."]
+       "Deletes a data repository association on an Amazon FSx for Lustre file system. Deleting the data repository association unlinks the file system from the Amazon S3 bucket. When deleting a data repository association, you have the option of deleting the data in the file system that corresponds to the data repository association. Data repository associations are supported on all FSx for Lustre 2.12 and 2.15 file systems, excluding scratch_1 deployment type."]
+module DeleteFileCacheRequest =
+  struct
+    type nonrec t =
+      {
+      fileCacheId: FileCacheId.t
+        [@ocaml.doc "The ID of the cache that's being deleted."];
+      clientRequestToken: ClientRequestToken.t option }
+    let context_ = "DeleteFileCacheRequest"
+    let make ?clientRequestToken =
+      fun ~fileCacheId -> fun () -> { clientRequestToken; fileCacheId }
+    let to_value x =
+      structure_to_value
+        [("FileCacheId", (Some (FileCacheId.to_value x.fileCacheId)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let fileCacheId =
+        FileCacheId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileCacheId") in
+      make ?clientRequestToken ~fileCacheId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let fileCacheId =
+        field_map_exn json__ "FileCacheId" FileCacheId.of_json in
+      make ?clientRequestToken ~fileCacheId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Amazon File Cache resource. After deletion, the cache no longer exists, and its data is gone. The DeleteFileCache operation returns while the cache has the DELETING status. You can check the cache deletion status by calling the DescribeFileCaches operation, which returns a list of caches in your account. If you pass the cache ID for a deleted cache, the DescribeFileCaches operation returns a FileCacheNotFound error. The data in a deleted cache is also deleted and can't be recovered by any means."]
+module FileCacheNotFound =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "No caches were found based upon supplied parameters."]
+module DeleteFileCacheResponse =
+  struct
+    type nonrec t =
+      {
+      fileCacheId: FileCacheId.t option
+        [@ocaml.doc "The ID of the cache that's being deleted."];
+      lifecycle: FileCacheLifecycle.t option
+        [@ocaml.doc
+          "The cache lifecycle for the deletion request. If the DeleteFileCache operation is successful, this status is DELETING."]}
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `FileCacheNotFound of FileCacheNotFound.t 
+      | `IncompatibleParameterError of IncompatibleParameterError.t 
+      | `InternalServerError of InternalServerError.t 
+      | `ServiceLimitExceeded of ServiceLimitExceeded.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fileCacheId =
+      fun ?lifecycle -> fun () -> { fileCacheId; lifecycle }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "FileCacheNotFound" ->
+          `FileCacheNotFound (FileCacheNotFound.of_json json)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError
+            (IncompatibleParameterError.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "FileCacheNotFound" ->
+          `FileCacheNotFound (FileCacheNotFound.of_xml xml)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError (IncompatibleParameterError.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `FileCacheNotFound e ->
+          `Assoc
+            [("error", (`String "FileCacheNotFound"));
+            ("details", (FileCacheNotFound.to_json e))]
+      | `IncompatibleParameterError e ->
+          `Assoc
+            [("error", (`String "IncompatibleParameterError"));
+            ("details", (IncompatibleParameterError.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ServiceLimitExceeded e ->
+          `Assoc
+            [("error", (`String "ServiceLimitExceeded"));
+            ("details", (ServiceLimitExceeded.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FileCacheId", (Option.map x.fileCacheId ~f:FileCacheId.to_value));
+        ("Lifecycle",
+          (Option.map x.lifecycle ~f:FileCacheLifecycle.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifecycle =
+        (Option.map ~f:FileCacheLifecycle.of_xml)
+          (Xml.child xml_arg0 "Lifecycle") in
+      let fileCacheId =
+        (Option.map ~f:FileCacheId.of_xml) (Xml.child xml_arg0 "FileCacheId") in
+      make ?lifecycle ?fileCacheId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifecycle = field_map json__ "Lifecycle" FileCacheLifecycle.of_json in
+      let fileCacheId = field_map json__ "FileCacheId" FileCacheId.of_json in
+      make ?lifecycle ?fileCacheId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Amazon File Cache resource. After deletion, the cache no longer exists, and its data is gone. The DeleteFileCache operation returns while the cache has the DELETING status. You can check the cache deletion status by calling the DescribeFileCaches operation, which returns a list of caches in your account. If you pass the cache ID for a deleted cache, the DescribeFileCaches operation returns a FileCacheNotFound error. The data in a deleted cache is also deleted and can't be recovered by any means."]
 module DeleteFileSystemLustreConfiguration =
   struct
     type nonrec t =
@@ -11583,9 +16689,9 @@ module DeleteFileSystemLustreConfiguration =
         (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "SkipFinalBackup") in
       make ?finalBackupTags ?skipFinalBackup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
-      let skipFinalBackup = field_map json "SkipFinalBackup" Flag.of_json in
+    let of_json json__ =
+      let finalBackupTags = field_map json__ "FinalBackupTags" Tags.of_json in
+      let skipFinalBackup = field_map json__ "SkipFinalBackup" Flag.of_json in
       make ?finalBackupTags ?skipFinalBackup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11612,9 +16718,9 @@ module DeleteFileSystemLustreResponse =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "FinalBackupId") in
       make ?finalBackupTags ?finalBackupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
-      let finalBackupId = field_map json "FinalBackupId" BackupId.of_json in
+    let of_json json__ =
+      let finalBackupTags = field_map json__ "FinalBackupTags" Tags.of_json in
+      let finalBackupId = field_map json__ "FinalBackupId" BackupId.of_json in
       make ?finalBackupTags ?finalBackupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11651,6 +16757,9 @@ module DeleteFileSystemOpenZFSOptions =
     type nonrec t = DeleteFileSystemOpenZFSOption.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeleteFileSystemOpenZFSOption.to_value)) |>
         (fun x -> `List x)
@@ -11707,11 +16816,11 @@ module DeleteFileSystemOpenZFSConfiguration =
         (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "SkipFinalBackup") in
       make ?options ?finalBackupTags ?skipFinalBackup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let options =
-        field_map json "Options" DeleteFileSystemOpenZFSOptions.of_json in
-      let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
-      let skipFinalBackup = field_map json "SkipFinalBackup" Flag.of_json in
+        field_map json__ "Options" DeleteFileSystemOpenZFSOptions.of_json in
+      let finalBackupTags = field_map json__ "FinalBackupTags" Tags.of_json in
+      let skipFinalBackup = field_map json__ "SkipFinalBackup" Flag.of_json in
       make ?options ?finalBackupTags ?skipFinalBackup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11736,9 +16845,9 @@ module DeleteFileSystemOpenZFSResponse =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "FinalBackupId") in
       make ?finalBackupTags ?finalBackupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
-      let finalBackupId = field_map json "FinalBackupId" BackupId.of_json in
+    let of_json json__ =
+      let finalBackupTags = field_map json__ "FinalBackupTags" Tags.of_json in
+      let finalBackupId = field_map json__ "FinalBackupId" BackupId.of_json in
       make ?finalBackupTags ?finalBackupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11766,9 +16875,9 @@ module DeleteFileSystemWindowsConfiguration =
         (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "SkipFinalBackup") in
       make ?finalBackupTags ?skipFinalBackup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
-      let skipFinalBackup = field_map json "SkipFinalBackup" Flag.of_json in
+    let of_json json__ =
+      let finalBackupTags = field_map json__ "FinalBackupTags" Tags.of_json in
+      let skipFinalBackup = field_map json__ "SkipFinalBackup" Flag.of_json in
       make ?finalBackupTags ?skipFinalBackup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11781,7 +16890,7 @@ module DeleteFileSystemRequest =
         [@ocaml.doc "The ID of the file system that you want to delete."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "A string of up to 64 ASCII characters that Amazon FSx uses to ensure idempotent deletion. This token is automatically filled on your behalf when using the Command Line Interface (CLI) or an Amazon Web Services SDK."];
+          "A string of up to 63 ASCII characters that Amazon FSx uses to ensure idempotent deletion. This token is automatically filled on your behalf when using the Command Line Interface (CLI) or an Amazon Web Services SDK."];
       windowsConfiguration: DeleteFileSystemWindowsConfiguration.t option ;
       lustreConfiguration: DeleteFileSystemLustreConfiguration.t option ;
       openZFSConfiguration: DeleteFileSystemOpenZFSConfiguration.t option
@@ -11835,20 +16944,20 @@ module DeleteFileSystemRequest =
       make ?openZFSConfiguration ?lustreConfiguration ?windowsConfiguration
         ?clientRequestToken ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openZFSConfiguration =
-        field_map json "OpenZFSConfiguration"
+        field_map json__ "OpenZFSConfiguration"
           DeleteFileSystemOpenZFSConfiguration.of_json in
       let lustreConfiguration =
-        field_map json "LustreConfiguration"
+        field_map json__ "LustreConfiguration"
           DeleteFileSystemLustreConfiguration.of_json in
       let windowsConfiguration =
-        field_map json "WindowsConfiguration"
+        field_map json__ "WindowsConfiguration"
           DeleteFileSystemWindowsConfiguration.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ?openZFSConfiguration ?lustreConfiguration ?windowsConfiguration
         ?clientRequestToken ~fileSystemId ()
     let to_json v = composed_to_json to_value v
@@ -11875,9 +16984,9 @@ module DeleteFileSystemWindowsResponse =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "FinalBackupId") in
       make ?finalBackupTags ?finalBackupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
-      let finalBackupId = field_map json "FinalBackupId" BackupId.of_json in
+    let of_json json__ =
+      let finalBackupTags = field_map json__ "FinalBackupTags" Tags.of_json in
+      let finalBackupId = field_map json__ "FinalBackupId" BackupId.of_json in
       make ?finalBackupTags ?finalBackupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12006,18 +17115,19 @@ module DeleteFileSystemResponse =
       make ?openZFSResponse ?lustreResponse ?windowsResponse ?lifecycle
         ?fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openZFSResponse =
-        field_map json "OpenZFSResponse"
+        field_map json__ "OpenZFSResponse"
           DeleteFileSystemOpenZFSResponse.of_json in
       let lustreResponse =
-        field_map json "LustreResponse"
+        field_map json__ "LustreResponse"
           DeleteFileSystemLustreResponse.of_json in
       let windowsResponse =
-        field_map json "WindowsResponse"
+        field_map json__ "WindowsResponse"
           DeleteFileSystemWindowsResponse.of_json in
-      let lifecycle = field_map json "Lifecycle" FileSystemLifecycle.of_json in
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
+      let lifecycle =
+        field_map json__ "Lifecycle" FileSystemLifecycle.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
       make ?openZFSResponse ?lustreResponse ?windowsResponse ?lifecycle
         ?fileSystemId ()
     let to_json v = composed_to_json to_value v
@@ -12053,6 +17163,9 @@ module DeleteOpenZFSVolumeOptions =
     type nonrec t = DeleteOpenZFSVolumeOption.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeleteOpenZFSVolumeOption.to_value)) |>
         (fun x -> `List x)
@@ -12100,10 +17213,10 @@ module DeleteSnapshotRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~snapshotId ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
+    let of_json json__ =
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ~snapshotId ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12122,8 +17235,8 @@ module SnapshotNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12194,9 +17307,9 @@ module DeleteSnapshotResponse =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       make ?lifecycle ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lifecycle = field_map json "Lifecycle" SnapshotLifecycle.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
+    let of_json json__ =
+      let lifecycle = field_map json__ "Lifecycle" SnapshotLifecycle.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
       make ?lifecycle ?snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12228,12 +17341,12 @@ module DeleteStorageVirtualMachineRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~storageVirtualMachineId ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let storageVirtualMachineId =
-        field_map_exn json "StorageVirtualMachineId"
+        field_map_exn json__ "StorageVirtualMachineId"
           StorageVirtualMachineId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ~storageVirtualMachineId ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12321,11 +17434,11 @@ module DeleteStorageVirtualMachineResponse =
           (Xml.child xml_arg0 "StorageVirtualMachineId") in
       make ?lifecycle ?storageVirtualMachineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecycle =
-        field_map json "Lifecycle" StorageVirtualMachineLifecycle.of_json in
+        field_map json__ "Lifecycle" StorageVirtualMachineLifecycle.of_json in
       let storageVirtualMachineId =
-        field_map json "StorageVirtualMachineId"
+        field_map json__ "StorageVirtualMachineId"
           StorageVirtualMachineId.of_json in
       make ?lifecycle ?storageVirtualMachineId ()
     let to_json v = composed_to_json to_value v
@@ -12338,28 +17451,47 @@ module DeleteVolumeOntapConfiguration =
       skipFinalBackup: Flag.t option
         [@ocaml.doc
           "Set to true if you want to skip taking a final backup of the volume you are deleting."];
-      finalBackupTags: Tags.t option }
+      finalBackupTags: Tags.t option ;
+      bypassSnaplockEnterpriseRetention: Flag.t option
+        [@ocaml.doc
+          "Setting this to true allows a SnapLock administrator to delete an FSx for ONTAP SnapLock Enterprise volume with unexpired write once, read many (WORM) files. The IAM permission fsx:BypassSnaplockEnterpriseRetention is also required to delete SnapLock Enterprise volumes with unexpired WORM files. The default value is false. For more information, see Deleting a SnapLock volume."]}
     let make ?skipFinalBackup =
-      fun ?finalBackupTags -> fun () -> { skipFinalBackup; finalBackupTags }
+      fun ?finalBackupTags ->
+        fun ?bypassSnaplockEnterpriseRetention ->
+          fun () ->
+            {
+              skipFinalBackup;
+              finalBackupTags;
+              bypassSnaplockEnterpriseRetention
+            }
     let to_value x =
       structure_to_value
         [("SkipFinalBackup", (Option.map x.skipFinalBackup ~f:Flag.to_value));
-        ("FinalBackupTags", (Option.map x.finalBackupTags ~f:Tags.to_value))]
+        ("FinalBackupTags", (Option.map x.finalBackupTags ~f:Tags.to_value));
+        ("BypassSnaplockEnterpriseRetention",
+          (Option.map x.bypassSnaplockEnterpriseRetention ~f:Flag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let bypassSnaplockEnterpriseRetention =
+        (Option.map ~f:Flag.of_xml)
+          (Xml.child xml_arg0 "BypassSnaplockEnterpriseRetention") in
       let finalBackupTags =
         (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "FinalBackupTags") in
       let skipFinalBackup =
         (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "SkipFinalBackup") in
-      make ?finalBackupTags ?skipFinalBackup ()
+      make ?bypassSnaplockEnterpriseRetention ?finalBackupTags
+        ?skipFinalBackup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
-      let skipFinalBackup = field_map json "SkipFinalBackup" Flag.of_json in
-      make ?finalBackupTags ?skipFinalBackup ()
+    let of_json json__ =
+      let bypassSnaplockEnterpriseRetention =
+        field_map json__ "BypassSnaplockEnterpriseRetention" Flag.of_json in
+      let finalBackupTags = field_map json__ "FinalBackupTags" Tags.of_json in
+      let skipFinalBackup = field_map json__ "SkipFinalBackup" Flag.of_json in
+      make ?bypassSnaplockEnterpriseRetention ?finalBackupTags
+        ?skipFinalBackup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use to specify skipping a final backup, or to add tags to a final backup."]
+       "Use to specify skipping a final backup, adding tags to a final backup, or bypassing the retention period of an FSx for ONTAP SnapLock Enterprise volume when deleting an FSx for ONTAP volume."]
 module DeleteVolumeOntapResponse =
   struct
     type nonrec t =
@@ -12380,9 +17512,9 @@ module DeleteVolumeOntapResponse =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "FinalBackupId") in
       make ?finalBackupTags ?finalBackupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
-      let finalBackupId = field_map json "FinalBackupId" BackupId.of_json in
+    let of_json json__ =
+      let finalBackupTags = field_map json__ "FinalBackupTags" Tags.of_json in
+      let finalBackupId = field_map json__ "FinalBackupId" BackupId.of_json in
       make ?finalBackupTags ?finalBackupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12406,9 +17538,9 @@ module DeleteVolumeOpenZFSConfiguration =
           (Xml.child xml_arg0 "Options") in
       make ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let options =
-        field_map json "Options" DeleteOpenZFSVolumeOptions.of_json in
+        field_map json__ "Options" DeleteOpenZFSVolumeOptions.of_json in
       make ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12465,16 +17597,16 @@ module DeleteVolumeRequest =
       make ?openZFSConfiguration ?ontapConfiguration ~volumeId
         ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openZFSConfiguration =
-        field_map json "OpenZFSConfiguration"
+        field_map json__ "OpenZFSConfiguration"
           DeleteVolumeOpenZFSConfiguration.of_json in
       let ontapConfiguration =
-        field_map json "OntapConfiguration"
+        field_map json__ "OntapConfiguration"
           DeleteVolumeOntapConfiguration.of_json in
-      let volumeId = field_map_exn json "VolumeId" VolumeId.of_json in
+      let volumeId = field_map_exn json__ "VolumeId" VolumeId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ?openZFSConfiguration ?ontapConfiguration ~volumeId
         ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
@@ -12496,6 +17628,7 @@ module DeleteVolumeResponse =
       [ `BadRequest of BadRequest.t 
       | `IncompatibleParameterError of IncompatibleParameterError.t 
       | `InternalServerError of InternalServerError.t 
+      | `ServiceLimitExceeded of ServiceLimitExceeded.t 
       | `VolumeNotFound of VolumeNotFound.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?volumeId =
@@ -12510,6 +17643,8 @@ module DeleteVolumeResponse =
             (IncompatibleParameterError.of_json json)
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_json json)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_json json)
       | "VolumeNotFound" -> `VolumeNotFound (VolumeNotFound.of_json json)
       | name ->
           `Unknown_operation_error
@@ -12521,6 +17656,8 @@ module DeleteVolumeResponse =
           `IncompatibleParameterError (IncompatibleParameterError.of_xml xml)
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_xml xml)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_xml xml)
       | "VolumeNotFound" -> `VolumeNotFound (VolumeNotFound.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
@@ -12538,6 +17675,10 @@ module DeleteVolumeResponse =
           `Assoc
             [("error", (`String "InternalServerError"));
             ("details", (InternalServerError.to_json e))]
+      | `ServiceLimitExceeded e ->
+          `Assoc
+            [("error", (`String "ServiceLimitExceeded"));
+            ("details", (ServiceLimitExceeded.to_json e))]
       | `VolumeNotFound e ->
           `Assoc
             [("error", (`String "VolumeNotFound"));
@@ -12565,11 +17706,11 @@ module DeleteVolumeResponse =
         (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "VolumeId") in
       make ?ontapResponse ?lifecycle ?volumeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ontapResponse =
-        field_map json "OntapResponse" DeleteVolumeOntapResponse.of_json in
-      let lifecycle = field_map json "Lifecycle" VolumeLifecycle.of_json in
-      let volumeId = field_map json "VolumeId" VolumeId.of_json in
+        field_map json__ "OntapResponse" DeleteVolumeOntapResponse.of_json in
+      let lifecycle = field_map json__ "Lifecycle" VolumeLifecycle.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
       make ?ontapResponse ?lifecycle ?volumeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12646,6 +17787,9 @@ module FilterValues =
     type nonrec t = FilterValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12674,6 +17818,8 @@ module FilterName =
       | File_system_type 
       | Volume_id 
       | Data_repository_type 
+      | File_cache_id 
+      | File_cache_type 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -12683,6 +17829,8 @@ module FilterName =
       | File_system_type -> "file-system-type"
       | Volume_id -> "volume-id"
       | Data_repository_type -> "data-repository-type"
+      | File_cache_id -> "file-cache-id"
+      | File_cache_type -> "file-cache-type"
       | Non_static_id s -> s
     let of_string =
       function
@@ -12691,6 +17839,8 @@ module FilterName =
       | "file-system-type" -> File_system_type
       | "volume-id" -> Volume_id
       | "data-repository-type" -> Data_repository_type
+      | "file-cache-id" -> File_cache_id
+      | "file-cache-type" -> File_cache_type
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -12721,9 +17871,9 @@ module Filter =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" FilterValues.of_json in
-      let name = field_map json "Name" FilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" FilterValues.of_json in
+      let name = field_map json__ "Name" FilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12733,6 +17883,9 @@ module Filters =
     type nonrec t = Filter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12791,11 +17944,11 @@ module DescribeBackupsRequest =
         (Option.map ~f:BackupIds.of_xml) (Xml.child xml_arg0 "BackupIds") in
       make ?nextToken ?maxResults ?filters ?backupIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let filters = field_map json "Filters" Filters.of_json in
-      let backupIds = field_map json "BackupIds" BackupIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let backupIds = field_map json__ "BackupIds" BackupIds.of_json in
       make ?nextToken ?maxResults ?filters ?backupIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for the DescribeBackups operation."]
@@ -12876,9 +18029,9 @@ module DescribeBackupsResponse =
         (Option.map ~f:Backups.of_xml) (Xml.child xml_arg0 "Backups") in
       make ?nextToken ?backups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let backups = field_map json "Backups" Backups.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let backups = field_map json__ "Backups" Backups.of_json in
       make ?nextToken ?backups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response object for the DescribeBackups operation."]
@@ -12940,16 +18093,18 @@ module DescribeDataRepositoryAssociationsRequest =
           (Xml.child xml_arg0 "AssociationIds") in
       make ?nextToken ?maxResults ?filters ?associationIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" LimitedMaxResults.of_json in
-      let filters = field_map json "Filters" Filters.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" LimitedMaxResults.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
       let associationIds =
-        field_map json "AssociationIds" DataRepositoryAssociationIds.of_json in
+        field_map json__ "AssociationIds"
+          DataRepositoryAssociationIds.of_json in
       make ?nextToken ?maxResults ?filters ?associationIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the description of specific Amazon FSx for Lustre data repository associations, if one or more AssociationIds values are provided in the request, or if filters are used in the request. Data repository associations are supported only for file systems with the Persistent_2 deployment type. You can use filters to narrow the response to include just data repository associations for specific file systems (use the file-system-id filter with the ID of the file system) or data repository associations for a specific repository type (use the data-repository-type filter with a value of S3). If you don't use filters, the response returns all data repository associations owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all data repository associations, you can paginate the response by using the optional MaxResults parameter to limit the number of data repository associations returned in a response. If more data repository associations remain, Amazon FSx returns a NextToken value in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response."]
+       "Returns the description of specific Amazon FSx for Lustre or Amazon File Cache data repository associations, if one or more AssociationIds values are provided in the request, or if filters are used in the request. Data repository associations are supported on Amazon File Cache resources and all FSx for Lustre 2.12 and 2,15 file systems, excluding scratch_1 deployment type. You can use filters to narrow the response to include just data repository associations for specific file systems (use the file-system-id filter with the ID of the file system) or caches (use the file-cache-id filter with the ID of the cache), or data repository associations for a specific repository type (use the data-repository-type filter with a value of S3 or NFS). If you don't use filters, the response returns all data repository associations owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all data repository associations, you can paginate the response by using the optional MaxResults parameter to limit the number of data repository associations returned in a response. If more data repository associations remain, a NextToken value is returned in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response."]
 module InvalidDataRepositoryType =
   struct
     type nonrec t = {
@@ -12964,8 +18119,8 @@ module InvalidDataRepositoryType =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12976,7 +18131,7 @@ module DescribeDataRepositoryAssociationsResponse =
       {
       associations: DataRepositoryAssociations.t option
         [@ocaml.doc
-          "An array of one ore more data repository association descriptions."];
+          "An array of one or more data repository association descriptions."];
       nextToken: NextToken.t option }
     type nonrec error =
       [ `BadRequest of BadRequest.t 
@@ -13058,19 +18213,22 @@ module DescribeDataRepositoryAssociationsResponse =
           (Xml.child xml_arg0 "Associations") in
       make ?nextToken ?associations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let associations =
-        field_map json "Associations" DataRepositoryAssociations.of_json in
+        field_map json__ "Associations" DataRepositoryAssociations.of_json in
       make ?nextToken ?associations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the description of specific Amazon FSx for Lustre data repository associations, if one or more AssociationIds values are provided in the request, or if filters are used in the request. Data repository associations are supported only for file systems with the Persistent_2 deployment type. You can use filters to narrow the response to include just data repository associations for specific file systems (use the file-system-id filter with the ID of the file system) or data repository associations for a specific repository type (use the data-repository-type filter with a value of S3). If you don't use filters, the response returns all data repository associations owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all data repository associations, you can paginate the response by using the optional MaxResults parameter to limit the number of data repository associations returned in a response. If more data repository associations remain, Amazon FSx returns a NextToken value in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response."]
+       "Returns the description of specific Amazon FSx for Lustre or Amazon File Cache data repository associations, if one or more AssociationIds values are provided in the request, or if filters are used in the request. Data repository associations are supported on Amazon File Cache resources and all FSx for Lustre 2.12 and 2,15 file systems, excluding scratch_1 deployment type. You can use filters to narrow the response to include just data repository associations for specific file systems (use the file-system-id filter with the ID of the file system) or caches (use the file-cache-id filter with the ID of the cache), or data repository associations for a specific repository type (use the data-repository-type filter with a value of S3 or NFS). If you don't use filters, the response returns all data repository associations owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all data repository associations, you can paginate the response by using the optional MaxResults parameter to limit the number of data repository associations returned in a response. If more data repository associations remain, a NextToken value is returned in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response."]
 module TaskIds =
   struct
     type nonrec t = TaskId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TaskId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -13127,16 +18285,16 @@ module DescribeDataRepositoryTasksRequest =
         (Option.map ~f:TaskIds.of_xml) (Xml.child xml_arg0 "TaskIds") in
       make ?nextToken ?maxResults ?filters ?taskIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let filters =
-        field_map json "Filters" DataRepositoryTaskFilters.of_json in
-      let taskIds = field_map json "TaskIds" TaskIds.of_json in
+        field_map json__ "Filters" DataRepositoryTaskFilters.of_json in
+      let taskIds = field_map json__ "TaskIds" TaskIds.of_json in
       make ?nextToken ?maxResults ?filters ?taskIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the description of specific Amazon FSx for Lustre data repository tasks, if one or more TaskIds values are provided in the request, or if filters are used in the request. You can use filters to narrow the response to include just tasks for specific file systems, or tasks in a specific lifecycle state. Otherwise, it returns all data repository tasks owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all tasks, you can paginate the response by using the optional MaxResults parameter to limit the number of tasks returned in a response. If more tasks remain, Amazon FSx returns a NextToken value in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response."]
+       "Returns the description of specific Amazon FSx for Lustre or Amazon File Cache data repository tasks, if one or more TaskIds values are provided in the request, or if filters are used in the request. You can use filters to narrow the response to include just tasks for specific file systems or caches, or tasks in a specific lifecycle state. Otherwise, it returns all data repository tasks owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all tasks, you can paginate the response by using the optional MaxResults parameter to limit the number of tasks returned in a response. If more tasks remain, a NextToken value is returned in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response."]
 module DescribeDataRepositoryTasksResponse =
   struct
     type nonrec t =
@@ -13214,14 +18372,358 @@ module DescribeDataRepositoryTasksResponse =
           (Xml.child xml_arg0 "DataRepositoryTasks") in
       make ?nextToken ?dataRepositoryTasks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dataRepositoryTasks =
-        field_map json "DataRepositoryTasks" DataRepositoryTasks.of_json in
+        field_map json__ "DataRepositoryTasks" DataRepositoryTasks.of_json in
       make ?nextToken ?dataRepositoryTasks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the description of specific Amazon FSx for Lustre data repository tasks, if one or more TaskIds values are provided in the request, or if filters are used in the request. You can use filters to narrow the response to include just tasks for specific file systems, or tasks in a specific lifecycle state. Otherwise, it returns all data repository tasks owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all tasks, you can paginate the response by using the optional MaxResults parameter to limit the number of tasks returned in a response. If more tasks remain, Amazon FSx returns a NextToken value in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response."]
+       "Returns the description of specific Amazon FSx for Lustre or Amazon File Cache data repository tasks, if one or more TaskIds values are provided in the request, or if filters are used in the request. You can use filters to narrow the response to include just tasks for specific file systems or caches, or tasks in a specific lifecycle state. Otherwise, it returns all data repository tasks owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all tasks, you can paginate the response by using the optional MaxResults parameter to limit the number of tasks returned in a response. If more tasks remain, a NextToken value is returned in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response."]
+module FileCacheIds =
+  struct
+    type nonrec t = FileCacheId.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FileCacheId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FileCacheId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FileCacheIds" ~of_json:FileCacheId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeFileCachesRequest =
+  struct
+    type nonrec t =
+      {
+      fileCacheIds: FileCacheIds.t option
+        [@ocaml.doc
+          "IDs of the caches whose descriptions you want to retrieve (String)."];
+      maxResults: MaxResults.t option ;
+      nextToken: NextToken.t option }
+    let make ?fileCacheIds =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { fileCacheIds; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("FileCacheIds",
+           (Option.map x.fileCacheIds ~f:FileCacheIds.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let fileCacheIds =
+        (Option.map ~f:FileCacheIds.of_xml)
+          (Xml.child xml_arg0 "FileCacheIds") in
+      make ?nextToken ?maxResults ?fileCacheIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let fileCacheIds = field_map json__ "FileCacheIds" FileCacheIds.of_json in
+      make ?nextToken ?maxResults ?fileCacheIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the description of a specific Amazon File Cache resource, if a FileCacheIds value is provided for that cache. Otherwise, it returns descriptions of all caches owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all cache descriptions, you can optionally specify the MaxResults parameter to limit the number of descriptions in a response. If more cache descriptions remain, the operation returns a NextToken value in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response. This operation is used in an iterative process to retrieve a list of your cache descriptions. DescribeFileCaches is called first without a NextTokenvalue. Then the operation continues to be called with the NextToken parameter set to the value of the last NextToken value until a response has no NextToken. When using this operation, keep the following in mind: The implementation might return fewer than MaxResults cache descriptions while still including a NextToken value. The order of caches returned in the response of one DescribeFileCaches call and the order of caches returned across the responses of a multicall iteration is unspecified."]
+module FileCache =
+  struct
+    type nonrec t =
+      {
+      ownerId: AWSAccountId.t option ;
+      creationTime: CreationTime.t option ;
+      fileCacheId: FileCacheId.t option
+        [@ocaml.doc "The system-generated, unique ID of the cache."];
+      fileCacheType: FileCacheType.t option
+        [@ocaml.doc "The type of cache, which must be LUSTRE."];
+      fileCacheTypeVersion: FileSystemTypeVersion.t option
+        [@ocaml.doc "The Lustre version of the cache, which must be 2.12."];
+      lifecycle: FileCacheLifecycle.t option
+        [@ocaml.doc
+          "The lifecycle status of the cache. The following are the possible values and what they mean: AVAILABLE - The cache is in a healthy state, and is reachable and available for use. CREATING - The new cache is being created. DELETING - An existing cache is being deleted. UPDATING - The cache is undergoing a customer-initiated update. FAILED - An existing cache has experienced an unrecoverable failure. When creating a new cache, the cache was unable to be created."];
+      failureDetails: FileCacheFailureDetails.t option
+        [@ocaml.doc
+          "A structure providing details of any failures that occurred."];
+      storageCapacity: StorageCapacity.t option
+        [@ocaml.doc "The storage capacity of the cache in gibibytes (GiB)."];
+      vpcId: VpcId.t option ;
+      subnetIds: SubnetIds.t option ;
+      networkInterfaceIds: NetworkInterfaceIds.t option ;
+      dNSName: DNSName.t option
+        [@ocaml.doc "The Domain Name System (DNS) name for the cache."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "Specifies the ID of the Key Management Service (KMS) key to use for encrypting data on an Amazon File Cache. If a KmsKeyId isn't specified, the Amazon FSx-managed KMS key for your account is used. For more information, see Encrypt in the Key Management Service API Reference."];
+      resourceARN: ResourceARN.t option ;
+      lustreConfiguration: FileCacheLustreConfiguration.t option
+        [@ocaml.doc "The configuration for the Amazon File Cache resource."];
+      dataRepositoryAssociationIds: DataRepositoryAssociationIds.t option
+        [@ocaml.doc
+          "A list of IDs of data repository associations that are associated with this cache."]}
+    let make ?ownerId =
+      fun ?creationTime ->
+        fun ?fileCacheId ->
+          fun ?fileCacheType ->
+            fun ?fileCacheTypeVersion ->
+              fun ?lifecycle ->
+                fun ?failureDetails ->
+                  fun ?storageCapacity ->
+                    fun ?vpcId ->
+                      fun ?subnetIds ->
+                        fun ?networkInterfaceIds ->
+                          fun ?dNSName ->
+                            fun ?kmsKeyId ->
+                              fun ?resourceARN ->
+                                fun ?lustreConfiguration ->
+                                  fun ?dataRepositoryAssociationIds ->
+                                    fun () ->
+                                      {
+                                        ownerId;
+                                        creationTime;
+                                        fileCacheId;
+                                        fileCacheType;
+                                        fileCacheTypeVersion;
+                                        lifecycle;
+                                        failureDetails;
+                                        storageCapacity;
+                                        vpcId;
+                                        subnetIds;
+                                        networkInterfaceIds;
+                                        dNSName;
+                                        kmsKeyId;
+                                        resourceARN;
+                                        lustreConfiguration;
+                                        dataRepositoryAssociationIds
+                                      }
+    let to_value x =
+      structure_to_value
+        [("OwnerId", (Option.map x.ownerId ~f:AWSAccountId.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:CreationTime.to_value));
+        ("FileCacheId", (Option.map x.fileCacheId ~f:FileCacheId.to_value));
+        ("FileCacheType",
+          (Option.map x.fileCacheType ~f:FileCacheType.to_value));
+        ("FileCacheTypeVersion",
+          (Option.map x.fileCacheTypeVersion
+             ~f:FileSystemTypeVersion.to_value));
+        ("Lifecycle",
+          (Option.map x.lifecycle ~f:FileCacheLifecycle.to_value));
+        ("FailureDetails",
+          (Option.map x.failureDetails ~f:FileCacheFailureDetails.to_value));
+        ("StorageCapacity",
+          (Option.map x.storageCapacity ~f:StorageCapacity.to_value));
+        ("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
+        ("SubnetIds", (Option.map x.subnetIds ~f:SubnetIds.to_value));
+        ("NetworkInterfaceIds",
+          (Option.map x.networkInterfaceIds ~f:NetworkInterfaceIds.to_value));
+        ("DNSName", (Option.map x.dNSName ~f:DNSName.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
+        ("LustreConfiguration",
+          (Option.map x.lustreConfiguration
+             ~f:FileCacheLustreConfiguration.to_value));
+        ("DataRepositoryAssociationIds",
+          (Option.map x.dataRepositoryAssociationIds
+             ~f:DataRepositoryAssociationIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataRepositoryAssociationIds =
+        (Option.map ~f:DataRepositoryAssociationIds.of_xml)
+          (Xml.child xml_arg0 "DataRepositoryAssociationIds") in
+      let lustreConfiguration =
+        (Option.map ~f:FileCacheLustreConfiguration.of_xml)
+          (Xml.child xml_arg0 "LustreConfiguration") in
+      let resourceARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let dNSName =
+        (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "DNSName") in
+      let networkInterfaceIds =
+        (Option.map ~f:NetworkInterfaceIds.of_xml)
+          (Xml.child xml_arg0 "NetworkInterfaceIds") in
+      let subnetIds =
+        (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
+      let storageCapacity =
+        (Option.map ~f:StorageCapacity.of_xml)
+          (Xml.child xml_arg0 "StorageCapacity") in
+      let failureDetails =
+        (Option.map ~f:FileCacheFailureDetails.of_xml)
+          (Xml.child xml_arg0 "FailureDetails") in
+      let lifecycle =
+        (Option.map ~f:FileCacheLifecycle.of_xml)
+          (Xml.child xml_arg0 "Lifecycle") in
+      let fileCacheTypeVersion =
+        (Option.map ~f:FileSystemTypeVersion.of_xml)
+          (Xml.child xml_arg0 "FileCacheTypeVersion") in
+      let fileCacheType =
+        (Option.map ~f:FileCacheType.of_xml)
+          (Xml.child xml_arg0 "FileCacheType") in
+      let fileCacheId =
+        (Option.map ~f:FileCacheId.of_xml) (Xml.child xml_arg0 "FileCacheId") in
+      let creationTime =
+        (Option.map ~f:CreationTime.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let ownerId =
+        (Option.map ~f:AWSAccountId.of_xml) (Xml.child xml_arg0 "OwnerId") in
+      make ?dataRepositoryAssociationIds ?lustreConfiguration ?resourceARN
+        ?kmsKeyId ?dNSName ?networkInterfaceIds ?subnetIds ?vpcId
+        ?storageCapacity ?failureDetails ?lifecycle ?fileCacheTypeVersion
+        ?fileCacheType ?fileCacheId ?creationTime ?ownerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataRepositoryAssociationIds =
+        field_map json__ "DataRepositoryAssociationIds"
+          DataRepositoryAssociationIds.of_json in
+      let lustreConfiguration =
+        field_map json__ "LustreConfiguration"
+          FileCacheLustreConfiguration.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let dNSName = field_map json__ "DNSName" DNSName.of_json in
+      let networkInterfaceIds =
+        field_map json__ "NetworkInterfaceIds" NetworkInterfaceIds.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let storageCapacity =
+        field_map json__ "StorageCapacity" StorageCapacity.of_json in
+      let failureDetails =
+        field_map json__ "FailureDetails" FileCacheFailureDetails.of_json in
+      let lifecycle = field_map json__ "Lifecycle" FileCacheLifecycle.of_json in
+      let fileCacheTypeVersion =
+        field_map json__ "FileCacheTypeVersion" FileSystemTypeVersion.of_json in
+      let fileCacheType =
+        field_map json__ "FileCacheType" FileCacheType.of_json in
+      let fileCacheId = field_map json__ "FileCacheId" FileCacheId.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
+      let ownerId = field_map json__ "OwnerId" AWSAccountId.of_json in
+      make ?dataRepositoryAssociationIds ?lustreConfiguration ?resourceARN
+        ?kmsKeyId ?dNSName ?networkInterfaceIds ?subnetIds ?vpcId
+        ?storageCapacity ?failureDetails ?lifecycle ?fileCacheTypeVersion
+        ?fileCacheType ?fileCacheId ?creationTime ?ownerId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A description of a specific Amazon File Cache resource, which is a response object from the DescribeFileCaches operation."]
+module FileCaches =
+  struct
+    type nonrec t = FileCache.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FileCache.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FileCache.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FileCaches" ~of_json:FileCache.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeFileCachesResponse =
+  struct
+    type nonrec t =
+      {
+      fileCaches: FileCaches.t option
+        [@ocaml.doc
+          "The response object for the DescribeFileCaches operation."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `FileCacheNotFound of FileCacheNotFound.t 
+      | `InternalServerError of InternalServerError.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fileCaches =
+      fun ?nextToken -> fun () -> { fileCaches; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "FileCacheNotFound" ->
+          `FileCacheNotFound (FileCacheNotFound.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "FileCacheNotFound" ->
+          `FileCacheNotFound (FileCacheNotFound.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `FileCacheNotFound e ->
+          `Assoc
+            [("error", (`String "FileCacheNotFound"));
+            ("details", (FileCacheNotFound.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FileCaches", (Option.map x.fileCaches ~f:FileCaches.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let fileCaches =
+        (Option.map ~f:FileCaches.of_xml) (Xml.child xml_arg0 "FileCaches") in
+      make ?nextToken ?fileCaches ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let fileCaches = field_map json__ "FileCaches" FileCaches.of_json in
+      make ?nextToken ?fileCaches ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the description of a specific Amazon File Cache resource, if a FileCacheIds value is provided for that cache. Otherwise, it returns descriptions of all caches owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all cache descriptions, you can optionally specify the MaxResults parameter to limit the number of descriptions in a response. If more cache descriptions remain, the operation returns a NextToken value in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response. This operation is used in an iterative process to retrieve a list of your cache descriptions. DescribeFileCaches is called first without a NextTokenvalue. Then the operation continues to be called with the NextToken parameter set to the value of the last NextToken value until a response has no NextToken. When using this operation, keep the following in mind: The implementation might return fewer than MaxResults cache descriptions while still including a NextToken value. The order of caches returned in the response of one DescribeFileCaches call and the order of caches returned across the responses of a multicall iteration is unspecified."]
 module DescribeFileSystemAliasesRequest =
   struct
     type nonrec t =
@@ -13264,13 +18766,13 @@ module DescribeFileSystemAliasesRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?nextToken ?maxResults ~fileSystemId ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ?nextToken ?maxResults ~fileSystemId ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13341,9 +18843,9 @@ module DescribeFileSystemAliasesResponse =
         (Option.map ~f:Aliases.of_xml) (Xml.child xml_arg0 "Aliases") in
       make ?nextToken ?aliases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let aliases = field_map json "Aliases" Aliases.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let aliases = field_map json__ "Aliases" Aliases.of_json in
       make ?nextToken ?aliases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13353,6 +18855,9 @@ module FileSystemIds =
     type nonrec t = FileSystemId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileSystemId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -13406,11 +18911,11 @@ module DescribeFileSystemsRequest =
           (Xml.child xml_arg0 "FileSystemIds") in
       make ?nextToken ?maxResults ?fileSystemIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let fileSystemIds =
-        field_map json "FileSystemIds" FileSystemIds.of_json in
+        field_map json__ "FileSystemIds" FileSystemIds.of_json in
       make ?nextToken ?maxResults ?fileSystemIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for DescribeFileSystems operation."]
@@ -13419,6 +18924,9 @@ module FileSystems =
     type nonrec t = FileSystem.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileSystem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -13505,17 +19013,485 @@ module DescribeFileSystemsResponse =
         (Option.map ~f:FileSystems.of_xml) (Xml.child xml_arg0 "FileSystems") in
       make ?nextToken ?fileSystems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let fileSystems = field_map json "FileSystems" FileSystems.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let fileSystems = field_map json__ "FileSystems" FileSystems.of_json in
       make ?nextToken ?fileSystems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for DescribeFileSystems operation."]
+module S3AccessPointAttachmentsFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "S3AccessPointAttachmentsFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[0-9a-zA-Z\\*\\.\\\\/\\?\\-\\_]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"S3AccessPointAttachmentsFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module S3AccessPointAttachmentsFilterValues =
+  struct
+    type nonrec t = S3AccessPointAttachmentsFilterValue.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:S3AccessPointAttachmentsFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:S3AccessPointAttachmentsFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"S3AccessPointAttachmentsFilterValues"
+        ~of_json:S3AccessPointAttachmentsFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module S3AccessPointAttachmentsFilterName =
+  struct
+    type nonrec t =
+      | File_system_id 
+      | Volume_id 
+      | Type 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | File_system_id -> "file-system-id"
+      | Volume_id -> "volume-id"
+      | Type -> "type"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "file-system-id" -> File_system_id
+      | "volume-id" -> Volume_id
+      | "type" -> Type
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration S3AccessPointAttachmentsFilterName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"S3AccessPointAttachmentsFilterName" j)
+    let to_json = simple_to_json to_value
+  end
+module S3AccessPointAttachmentsFilter =
+  struct
+    type nonrec t =
+      {
+      name: S3AccessPointAttachmentsFilterName.t option
+        [@ocaml.doc "The name of the filter."];
+      values: S3AccessPointAttachmentsFilterValues.t option
+        [@ocaml.doc "The values of the filter."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("Name",
+           (Option.map x.name ~f:S3AccessPointAttachmentsFilterName.to_value));
+        ("Values",
+          (Option.map x.values
+             ~f:S3AccessPointAttachmentsFilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:S3AccessPointAttachmentsFilterValues.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      let name =
+        (Option.map ~f:S3AccessPointAttachmentsFilterName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map json__ "Values"
+          S3AccessPointAttachmentsFilterValues.of_json in
+      let name =
+        field_map json__ "Name" S3AccessPointAttachmentsFilterName.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A set of Name and Values pairs used to view a select set of S3 access point attachments."]
+module S3AccessPointAttachmentsFilters =
+  struct
+    type nonrec t = S3AccessPointAttachmentsFilter.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:S3AccessPointAttachmentsFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:S3AccessPointAttachmentsFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"S3AccessPointAttachmentsFilters"
+        ~of_json:S3AccessPointAttachmentsFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module S3AccessPointAttachmentNames =
+  struct
+    type nonrec t = S3AccessPointAttachmentName.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:S3AccessPointAttachmentName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:S3AccessPointAttachmentName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"S3AccessPointAttachmentNames"
+        ~of_json:S3AccessPointAttachmentName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeS3AccessPointAttachmentsRequest =
+  struct
+    type nonrec t =
+      {
+      names: S3AccessPointAttachmentNames.t option
+        [@ocaml.doc
+          "The names of the S3 access point attachments whose descriptions you want to retrieve."];
+      filters: S3AccessPointAttachmentsFilters.t option
+        [@ocaml.doc
+          "Enter a filter Name and Values pair to view a select set of S3 access point attachments."];
+      maxResults: MaxResults.t option ;
+      nextToken: NextToken.t option }
+    let make ?names =
+      fun ?filters ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () -> { names; filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Names",
+           (Option.map x.names ~f:S3AccessPointAttachmentNames.to_value));
+        ("Filters",
+          (Option.map x.filters ~f:S3AccessPointAttachmentsFilters.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:S3AccessPointAttachmentsFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let names =
+        (Option.map ~f:S3AccessPointAttachmentNames.of_xml)
+          (Xml.child xml_arg0 "Names") in
+      make ?nextToken ?maxResults ?filters ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" S3AccessPointAttachmentsFilters.of_json in
+      let names =
+        field_map json__ "Names" S3AccessPointAttachmentNames.of_json in
+      make ?nextToken ?maxResults ?filters ?names ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes one or more S3 access points attached to Amazon FSx volumes. The requester requires the following permission to perform this action: fsx:DescribeS3AccessPointAttachments"]
+module S3AccessPointAttachments =
+  struct
+    type nonrec t = S3AccessPointAttachment.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1000); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:S3AccessPointAttachment.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:S3AccessPointAttachment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"S3AccessPointAttachments"
+        ~of_json:S3AccessPointAttachment.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module S3AccessPointAttachmentNotFound =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The access point specified was not found."]
+module DescribeS3AccessPointAttachmentsResponse =
+  struct
+    type nonrec t =
+      {
+      s3AccessPointAttachments: S3AccessPointAttachments.t option
+        [@ocaml.doc
+          "Array of S3 access point attachments returned after a successful DescribeS3AccessPointAttachments operation."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `InternalServerError of InternalServerError.t 
+      | `S3AccessPointAttachmentNotFound of S3AccessPointAttachmentNotFound.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?s3AccessPointAttachments =
+      fun ?nextToken -> fun () -> { s3AccessPointAttachments; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "S3AccessPointAttachmentNotFound" ->
+          `S3AccessPointAttachmentNotFound
+            (S3AccessPointAttachmentNotFound.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "S3AccessPointAttachmentNotFound" ->
+          `S3AccessPointAttachmentNotFound
+            (S3AccessPointAttachmentNotFound.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `S3AccessPointAttachmentNotFound e ->
+          `Assoc
+            [("error", (`String "S3AccessPointAttachmentNotFound"));
+            ("details", (S3AccessPointAttachmentNotFound.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("S3AccessPointAttachments",
+           (Option.map x.s3AccessPointAttachments
+              ~f:S3AccessPointAttachments.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let s3AccessPointAttachments =
+        (Option.map ~f:S3AccessPointAttachments.of_xml)
+          (Xml.child xml_arg0 "S3AccessPointAttachments") in
+      make ?nextToken ?s3AccessPointAttachments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let s3AccessPointAttachments =
+        field_map json__ "S3AccessPointAttachments"
+          S3AccessPointAttachments.of_json in
+      make ?nextToken ?s3AccessPointAttachments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes one or more S3 access points attached to Amazon FSx volumes. The requester requires the following permission to perform this action: fsx:DescribeS3AccessPointAttachments"]
+module DescribeSharedVpcConfigurationRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates whether participant accounts in your organization can create Amazon FSx for NetApp ONTAP Multi-AZ file systems in subnets that are shared by a virtual private cloud (VPC) owner. For more information, see Creating FSx for ONTAP file systems in shared subnets."]
+module VerboseFlag =
+  struct
+    type nonrec t = string
+    let context_ = "VerboseFlag"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:5) >>=
+                  (fun () -> check_pattern i ~pattern:"^(?i)(true|false)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VerboseFlag" j
+    let to_json = simple_to_json to_value
+  end
+module DescribeSharedVpcConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      enableFsxRouteTableUpdatesFromParticipantAccounts: VerboseFlag.t option
+        [@ocaml.doc
+          "Indicates whether participant accounts can create FSx for ONTAP Multi-AZ file systems in shared subnets."]}
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `InternalServerError of InternalServerError.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?enableFsxRouteTableUpdatesFromParticipantAccounts =
+      fun () -> { enableFsxRouteTableUpdatesFromParticipantAccounts }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EnableFsxRouteTableUpdatesFromParticipantAccounts",
+           (Option.map x.enableFsxRouteTableUpdatesFromParticipantAccounts
+              ~f:VerboseFlag.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enableFsxRouteTableUpdatesFromParticipantAccounts =
+        (Option.map ~f:VerboseFlag.of_xml)
+          (Xml.child xml_arg0
+             "EnableFsxRouteTableUpdatesFromParticipantAccounts") in
+      make ?enableFsxRouteTableUpdatesFromParticipantAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableFsxRouteTableUpdatesFromParticipantAccounts =
+        field_map json__ "EnableFsxRouteTableUpdatesFromParticipantAccounts"
+          VerboseFlag.of_json in
+      make ?enableFsxRouteTableUpdatesFromParticipantAccounts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates whether participant accounts in your organization can create Amazon FSx for NetApp ONTAP Multi-AZ file systems in subnets that are shared by a virtual private cloud (VPC) owner. For more information, see Creating FSx for ONTAP file systems in shared subnets."]
 module SnapshotIds =
   struct
     type nonrec t = SnapshotId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -13563,6 +19539,9 @@ module SnapshotFilterValues =
     type nonrec t = SnapshotFilterValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -13635,9 +19614,9 @@ module SnapshotFilter =
         (Option.map ~f:SnapshotFilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" SnapshotFilterValues.of_json in
-      let name = field_map json "Name" SnapshotFilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" SnapshotFilterValues.of_json in
+      let name = field_map json__ "Name" SnapshotFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13647,6 +19626,9 @@ module SnapshotFilters =
     type nonrec t = SnapshotFilter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -13667,6 +19649,19 @@ module SnapshotFilters =
       list_of_json ~kind:"SnapshotFilters" ~of_json:SnapshotFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IncludeShared =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module DescribeSnapshotsRequest =
   struct
     type nonrec t =
@@ -13678,20 +19673,31 @@ module DescribeSnapshotsRequest =
         [@ocaml.doc
           "The filters structure. The supported names are file-system-id or volume-id."];
       maxResults: MaxResults.t option ;
-      nextToken: NextToken.t option }
+      nextToken: NextToken.t option ;
+      includeShared: IncludeShared.t option
+        [@ocaml.doc
+          "Set to false (default) if you want to only see the snapshots owned by your Amazon Web Services account. Set to true if you want to see the snapshots in your account and the ones shared with you from another account."]}
     let make ?snapshotIds =
       fun ?filters ->
         fun ?maxResults ->
           fun ?nextToken ->
-            fun () -> { snapshotIds; filters; maxResults; nextToken }
+            fun ?includeShared ->
+              fun () ->
+                { snapshotIds; filters; maxResults; nextToken; includeShared
+                }
     let to_value x =
       structure_to_value
         [("SnapshotIds", (Option.map x.snapshotIds ~f:SnapshotIds.to_value));
         ("Filters", (Option.map x.filters ~f:SnapshotFilters.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("IncludeShared",
+          (Option.map x.includeShared ~f:IncludeShared.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let includeShared =
+        (Option.map ~f:IncludeShared.of_xml)
+          (Xml.child xml_arg0 "IncludeShared") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
@@ -13700,14 +19706,16 @@ module DescribeSnapshotsRequest =
         (Option.map ~f:SnapshotFilters.of_xml) (Xml.child xml_arg0 "Filters") in
       let snapshotIds =
         (Option.map ~f:SnapshotIds.of_xml) (Xml.child xml_arg0 "SnapshotIds") in
-      make ?nextToken ?maxResults ?filters ?snapshotIds ()
+      make ?includeShared ?nextToken ?maxResults ?filters ?snapshotIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let filters = field_map json "Filters" SnapshotFilters.of_json in
-      let snapshotIds = field_map json "SnapshotIds" SnapshotIds.of_json in
-      make ?nextToken ?maxResults ?filters ?snapshotIds ()
+    let of_json json__ =
+      let includeShared =
+        field_map json__ "IncludeShared" IncludeShared.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters = field_map json__ "Filters" SnapshotFilters.of_json in
+      let snapshotIds = field_map json__ "SnapshotIds" SnapshotIds.of_json in
+      make ?includeShared ?nextToken ?maxResults ?filters ?snapshotIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the description of specific Amazon FSx for OpenZFS snapshots, if a SnapshotIds value is provided. Otherwise, this operation returns all snapshots owned by your Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all snapshots, you can optionally specify the MaxResults parameter to limit the number of snapshots in a response. If more backups remain, Amazon FSx returns a NextToken value in the response. In this case, send a later request with the NextToken request parameter set to the value of NextToken from the last response. Use this operation in an iterative process to retrieve a list of your snapshots. DescribeSnapshots is called first without a NextToken value. Then the operation continues to be called with the NextToken parameter set to the value of the last NextToken value until a response has no NextToken value. When using this operation, keep the following in mind: The operation might return fewer than the MaxResults value of snapshot descriptions while still including a NextToken value. The order of snapshots returned in the response of one DescribeSnapshots call and the order of backups returned across the responses of a multi-call iteration is unspecified."]
@@ -13716,6 +19724,9 @@ module Snapshots =
     type nonrec t = Snapshot.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Snapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -13798,9 +19809,9 @@ module DescribeSnapshotsResponse =
         (Option.map ~f:Snapshots.of_xml) (Xml.child xml_arg0 "Snapshots") in
       make ?nextToken ?snapshots ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let snapshots = field_map json "Snapshots" Snapshots.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let snapshots = field_map json__ "Snapshots" Snapshots.of_json in
       make ?nextToken ?snapshots ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13810,6 +19821,9 @@ module StorageVirtualMachineIds =
     type nonrec t = StorageVirtualMachineId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StorageVirtualMachineId.to_value)) |>
         (fun x -> `List x)
@@ -13859,6 +19873,9 @@ module StorageVirtualMachineFilterValues =
     type nonrec t = StorageVirtualMachineFilterValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StorageVirtualMachineFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -13929,11 +19946,11 @@ module StorageVirtualMachineFilter =
           (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "Values" StorageVirtualMachineFilterValues.of_json in
+        field_map json__ "Values" StorageVirtualMachineFilterValues.of_json in
       let name =
-        field_map json "Name" StorageVirtualMachineFilterName.of_json in
+        field_map json__ "Name" StorageVirtualMachineFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13943,6 +19960,9 @@ module StorageVirtualMachineFilters =
     type nonrec t = StorageVirtualMachineFilter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StorageVirtualMachineFilter.to_value)) |>
         (fun x -> `List x)
@@ -14006,13 +20026,13 @@ module DescribeStorageVirtualMachinesRequest =
           (Xml.child xml_arg0 "StorageVirtualMachineIds") in
       make ?nextToken ?maxResults ?filters ?storageVirtualMachineIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let filters =
-        field_map json "Filters" StorageVirtualMachineFilters.of_json in
+        field_map json__ "Filters" StorageVirtualMachineFilters.of_json in
       let storageVirtualMachineIds =
-        field_map json "StorageVirtualMachineIds"
+        field_map json__ "StorageVirtualMachineIds"
           StorageVirtualMachineIds.of_json in
       make ?nextToken ?maxResults ?filters ?storageVirtualMachineIds ()
     let to_json v = composed_to_json to_value v
@@ -14023,6 +20043,9 @@ module StorageVirtualMachines =
     type nonrec t = StorageVirtualMachine.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StorageVirtualMachine.to_value)) |>
         (fun x -> `List x)
@@ -14115,10 +20138,10 @@ module DescribeStorageVirtualMachinesResponse =
           (Xml.child xml_arg0 "StorageVirtualMachines") in
       make ?nextToken ?storageVirtualMachines ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let storageVirtualMachines =
-        field_map json "StorageVirtualMachines"
+        field_map json__ "StorageVirtualMachines"
           StorageVirtualMachines.of_json in
       make ?nextToken ?storageVirtualMachines ()
     let to_json v = composed_to_json to_value v
@@ -14129,6 +20152,9 @@ module VolumeIds =
     type nonrec t = VolumeId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -14176,6 +20202,9 @@ module VolumeFilterValues =
     type nonrec t = VolumeFilterValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeFilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -14245,9 +20274,9 @@ module VolumeFilter =
         (Option.map ~f:VolumeFilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" VolumeFilterValues.of_json in
-      let name = field_map json "Name" VolumeFilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" VolumeFilterValues.of_json in
+      let name = field_map json__ "Name" VolumeFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14257,6 +20286,9 @@ module VolumeFilters =
     type nonrec t = VolumeFilter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -14312,11 +20344,11 @@ module DescribeVolumesRequest =
         (Option.map ~f:VolumeIds.of_xml) (Xml.child xml_arg0 "VolumeIds") in
       make ?nextToken ?maxResults ?filters ?volumeIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let filters = field_map json "Filters" VolumeFilters.of_json in
-      let volumeIds = field_map json "VolumeIds" VolumeIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters = field_map json__ "Filters" VolumeFilters.of_json in
+      let volumeIds = field_map json__ "VolumeIds" VolumeIds.of_json in
       make ?nextToken ?maxResults ?filters ?volumeIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14326,6 +20358,9 @@ module Volumes =
     type nonrec t = Volume.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Volume.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -14407,13 +20442,147 @@ module DescribeVolumesResponse =
         (Option.map ~f:Volumes.of_xml) (Xml.child xml_arg0 "Volumes") in
       make ?nextToken ?volumes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let volumes = field_map json "Volumes" Volumes.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let volumes = field_map json__ "Volumes" Volumes.of_json in
       make ?nextToken ?volumes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes one or more Amazon FSx for NetApp ONTAP or Amazon FSx for OpenZFS volumes."]
+module DetachAndDeleteS3AccessPointRequest =
+  struct
+    type nonrec t =
+      {
+      clientRequestToken: ClientRequestToken.t option ;
+      name: S3AccessPointAttachmentName.t
+        [@ocaml.doc
+          "The name of the S3 access point attachment that you want to delete."]}
+    let context_ = "DetachAndDeleteS3AccessPointRequest"
+    let make ?clientRequestToken =
+      fun ~name -> fun () -> { clientRequestToken; name }
+    let to_value x =
+      structure_to_value
+        [("ClientRequestToken",
+           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("Name", (Some (S3AccessPointAttachmentName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        S3AccessPointAttachmentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      make ~name ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name =
+        field_map_exn json__ "Name" S3AccessPointAttachmentName.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      make ~name ?clientRequestToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detaches an S3 access point from an Amazon FSx volume and deletes the S3 access point. The requester requires the following permission to perform this action: fsx:DetachAndDeleteS3AccessPoint s3:DeleteAccessPoint"]
+module DetachAndDeleteS3AccessPointResponse =
+  struct
+    type nonrec t =
+      {
+      lifecycle: S3AccessPointAttachmentLifecycle.t option
+        [@ocaml.doc
+          "The lifecycle status of the S3 access point attachment."];
+      name: S3AccessPointAttachmentName.t option
+        [@ocaml.doc
+          "The name of the S3 access point attachment being deleted."]}
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `IncompatibleParameterError of IncompatibleParameterError.t 
+      | `InternalServerError of InternalServerError.t 
+      | `S3AccessPointAttachmentNotFound of S3AccessPointAttachmentNotFound.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lifecycle = fun ?name -> fun () -> { lifecycle; name }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError
+            (IncompatibleParameterError.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "S3AccessPointAttachmentNotFound" ->
+          `S3AccessPointAttachmentNotFound
+            (S3AccessPointAttachmentNotFound.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError (IncompatibleParameterError.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "S3AccessPointAttachmentNotFound" ->
+          `S3AccessPointAttachmentNotFound
+            (S3AccessPointAttachmentNotFound.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `IncompatibleParameterError e ->
+          `Assoc
+            [("error", (`String "IncompatibleParameterError"));
+            ("details", (IncompatibleParameterError.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `S3AccessPointAttachmentNotFound e ->
+          `Assoc
+            [("error", (`String "S3AccessPointAttachmentNotFound"));
+            ("details", (S3AccessPointAttachmentNotFound.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Lifecycle",
+           (Option.map x.lifecycle
+              ~f:S3AccessPointAttachmentLifecycle.to_value));
+        ("Name", (Option.map x.name ~f:S3AccessPointAttachmentName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:S3AccessPointAttachmentName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let lifecycle =
+        (Option.map ~f:S3AccessPointAttachmentLifecycle.of_xml)
+          (Xml.child xml_arg0 "Lifecycle") in
+      make ?name ?lifecycle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" S3AccessPointAttachmentName.of_json in
+      let lifecycle =
+        field_map json__ "Lifecycle" S3AccessPointAttachmentLifecycle.of_json in
+      make ?name ?lifecycle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detaches an S3 access point from an Amazon FSx volume and deletes the S3 access point. The requester requires the following permission to perform this action: fsx:DetachAndDeleteS3AccessPoint s3:DeleteAccessPoint"]
 module DisassociateFileSystemAliasesRequest =
   struct
     type nonrec t =
@@ -14449,12 +20618,12 @@ module DisassociateFileSystemAliasesRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~aliases ~fileSystemId ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aliases = field_map_exn json "Aliases" AlternateDNSNames.of_json in
+    let of_json json__ =
+      let aliases = field_map_exn json__ "Aliases" AlternateDNSNames.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ~aliases ~fileSystemId ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14519,8 +20688,8 @@ module DisassociateFileSystemAliasesResponse =
         (Option.map ~f:Aliases.of_xml) (Xml.child xml_arg0 "Aliases") in
       make ?aliases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aliases = field_map json "Aliases" Aliases.of_json in
+    let of_json json__ =
+      let aliases = field_map json__ "Aliases" Aliases.of_json in
       make ?aliases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14558,10 +20727,11 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ?nextToken ?maxResults ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ?nextToken ?maxResults ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for ListTagsForResource operation."]
@@ -14569,29 +20739,27 @@ module ResourceNotFound =
   struct
     type nonrec t =
       {
-      resourceARN: ResourceARN.t
+      resourceARN: ResourceARN.t option
         [@ocaml.doc "The resource ARN of the resource that can't be found."];
       message: ErrorMessage.t option }
-    let context_ = "ResourceNotFound"
-    let make ?message =
-      fun ~resourceARN -> fun () -> { message; resourceARN }
+    let make ?resourceARN =
+      fun ?message -> fun () -> { resourceARN; message }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        [("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let resourceARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?message ~resourceARN ()
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?message ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      make ?message ~resourceARN ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      make ?message ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The resource specified by the Amazon Resource Name (ARN) can't be found."]
@@ -14599,60 +20767,56 @@ module ResourceDoesNotSupportTagging =
   struct
     type nonrec t =
       {
-      resourceARN: ResourceARN.t
+      resourceARN: ResourceARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the resource that doesn't support tagging."];
       message: ErrorMessage.t option }
-    let context_ = "ResourceDoesNotSupportTagging"
-    let make ?message =
-      fun ~resourceARN -> fun () -> { message; resourceARN }
+    let make ?resourceARN =
+      fun ?message -> fun () -> { resourceARN; message }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        [("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let resourceARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?message ~resourceARN ()
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?message ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      make ?message ~resourceARN ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      make ?message ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource specified does not support tagging."]
 module NotServiceResourceError =
   struct
     type nonrec t =
       {
-      resourceARN: ResourceARN.t
+      resourceARN: ResourceARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the non-Amazon FSx resource."];
       message: ErrorMessage.t option }
-    let context_ = "NotServiceResourceError"
-    let make ?message =
-      fun ~resourceARN -> fun () -> { message; resourceARN }
+    let make ?resourceARN =
+      fun ?message -> fun () -> { resourceARN; message }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        [("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let resourceARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?message ~resourceARN ()
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?message ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      make ?message ~resourceARN ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      make ?message ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The resource specified for the tagging operation is not a resource type owned by Amazon FSx. Use the API of the relevant service to perform the operation."]
@@ -14738,9 +20902,9 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for ListTagsForResource operation."]
@@ -14768,11 +20932,11 @@ module ReleaseFileSystemNfsV3LocksRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ?clientRequestToken ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ?clientRequestToken ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14853,8 +21017,8 @@ module ReleaseFileSystemNfsV3LocksResponse =
         (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
       make ?fileSystem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileSystem = field_map json "FileSystem" FileSystem.of_json in
+    let of_json json__ =
+      let fileSystem = field_map json__ "FileSystem" FileSystem.of_json in
       make ?fileSystem ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14892,6 +21056,9 @@ module RestoreOpenZFSVolumeOptions =
     type nonrec t = RestoreOpenZFSVolumeOption.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RestoreOpenZFSVolumeOption.to_value)) |>
         (fun x -> `List x)
@@ -14956,13 +21123,13 @@ module RestoreVolumeFromSnapshotRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?options ~snapshotId ~volumeId ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let options =
-        field_map json "Options" RestoreOpenZFSVolumeOptions.of_json in
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
-      let volumeId = field_map_exn json "VolumeId" VolumeId.of_json in
+        field_map json__ "Options" RestoreOpenZFSVolumeOptions.of_json in
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
+      let volumeId = field_map_exn json__ "VolumeId" VolumeId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ?options ~snapshotId ~volumeId ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14974,13 +21141,19 @@ module RestoreVolumeFromSnapshotResponse =
       volumeId: VolumeId.t option
         [@ocaml.doc "The ID of the volume that you restored."];
       lifecycle: VolumeLifecycle.t option
-        [@ocaml.doc "The lifecycle state of the volume being restored."]}
+        [@ocaml.doc "The lifecycle state of the volume being restored."];
+      administrativeActions: AdministrativeActions.t option
+        [@ocaml.doc
+          "A list of administrative actions for the file system that are in process or waiting to be processed. Administrative actions describe changes to the Amazon FSx system."]}
     type nonrec error =
       [ `BadRequest of BadRequest.t 
       | `InternalServerError of InternalServerError.t 
       | `VolumeNotFound of VolumeNotFound.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?volumeId = fun ?lifecycle -> fun () -> { volumeId; lifecycle }
+    let make ?volumeId =
+      fun ?lifecycle ->
+        fun ?administrativeActions ->
+          fun () -> { volumeId; lifecycle; administrativeActions }
     let error_of_json name json =
       match name with
       | "BadRequest" -> `BadRequest (BadRequest.of_json json)
@@ -15020,20 +21193,29 @@ module RestoreVolumeFromSnapshotResponse =
     let to_value x =
       structure_to_value
         [("VolumeId", (Option.map x.volumeId ~f:VolumeId.to_value));
-        ("Lifecycle", (Option.map x.lifecycle ~f:VolumeLifecycle.to_value))]
+        ("Lifecycle", (Option.map x.lifecycle ~f:VolumeLifecycle.to_value));
+        ("AdministrativeActions",
+          (Option.map x.administrativeActions
+             ~f:AdministrativeActions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let administrativeActions =
+        (Option.map ~f:AdministrativeActions.of_xml)
+          (Xml.child xml_arg0 "AdministrativeActions") in
       let lifecycle =
         (Option.map ~f:VolumeLifecycle.of_xml)
           (Xml.child xml_arg0 "Lifecycle") in
       let volumeId =
         (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "VolumeId") in
-      make ?lifecycle ?volumeId ()
+      make ?administrativeActions ?lifecycle ?volumeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lifecycle = field_map json "Lifecycle" VolumeLifecycle.of_json in
-      let volumeId = field_map json "VolumeId" VolumeId.of_json in
-      make ?lifecycle ?volumeId ()
+    let of_json json__ =
+      let administrativeActions =
+        field_map json__ "AdministrativeActions"
+          AdministrativeActions.of_json in
+      let lifecycle = field_map json__ "Lifecycle" VolumeLifecycle.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      make ?administrativeActions ?lifecycle ?volumeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns an Amazon FSx for OpenZFS volume to the state saved by the specified snapshot."]
@@ -15043,23 +21225,75 @@ module SelfManagedActiveDirectoryConfigurationUpdates =
       {
       userName: DirectoryUserName.t option
         [@ocaml.doc
-          "The user name for the service account on your self-managed AD domain that Amazon FSx will use to join to your AD domain. This account must have the permission to join computers to the domain in the organizational unit provided in OrganizationalUnitDistinguishedName."];
+          "Specifies the updated user name for the service account on your self-managed Active Directory domain. Amazon FSx uses this account to join to your self-managed Active Directory domain. This account must have the permissions required to join computers to the domain in the organizational unit provided in OrganizationalUnitDistinguishedName."];
       password: DirectoryPassword.t option
         [@ocaml.doc
-          "The password for the service account on your self-managed AD domain that Amazon FSx will use to join to your AD domain."];
+          "Specifies the updated password for the service account on your self-managed Active Directory domain. Amazon FSx uses this account to join to your self-managed Active Directory domain."];
       dnsIps: DnsIps.t option
         [@ocaml.doc
-          "A list of up to three IP addresses of DNS servers or domain controllers in the self-managed AD directory."]}
+          "A list of up to three DNS server or domain controller IP addresses in your self-managed Active Directory domain."];
+      domainName: ActiveDirectoryFullyQualifiedName.t option
+        [@ocaml.doc
+          "Specifies an updated fully qualified domain name of your self-managed Active Directory configuration."];
+      organizationalUnitDistinguishedName:
+        OrganizationalUnitDistinguishedName.t option
+        [@ocaml.doc
+          "Specifies an updated fully qualified distinguished name of the organization unit within your self-managed Active Directory."];
+      fileSystemAdministratorsGroup:
+        FileSystemAdministratorsGroupName.t option
+        [@ocaml.doc
+          "For FSx for ONTAP file systems only - Specifies the updated name of the self-managed Active Directory domain group whose members are granted administrative privileges for the Amazon FSx resource."];
+      domainJoinServiceAccountSecret: CustomerSecretsManagerARN.t option
+        [@ocaml.doc
+          "Specifies the updated Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret containing the self-managed Active Directory domain join service account credentials. Amazon FSx uses this account to join to your self-managed Active Directory domain."]}
     let make ?userName =
       fun ?password ->
-        fun ?dnsIps -> fun () -> { userName; password; dnsIps }
+        fun ?dnsIps ->
+          fun ?domainName ->
+            fun ?organizationalUnitDistinguishedName ->
+              fun ?fileSystemAdministratorsGroup ->
+                fun ?domainJoinServiceAccountSecret ->
+                  fun () ->
+                    {
+                      userName;
+                      password;
+                      dnsIps;
+                      domainName;
+                      organizationalUnitDistinguishedName;
+                      fileSystemAdministratorsGroup;
+                      domainJoinServiceAccountSecret
+                    }
     let to_value x =
       structure_to_value
         [("UserName", (Option.map x.userName ~f:DirectoryUserName.to_value));
         ("Password", (Option.map x.password ~f:DirectoryPassword.to_value));
-        ("DnsIps", (Option.map x.dnsIps ~f:DnsIps.to_value))]
+        ("DnsIps", (Option.map x.dnsIps ~f:DnsIps.to_value));
+        ("DomainName",
+          (Option.map x.domainName
+             ~f:ActiveDirectoryFullyQualifiedName.to_value));
+        ("OrganizationalUnitDistinguishedName",
+          (Option.map x.organizationalUnitDistinguishedName
+             ~f:OrganizationalUnitDistinguishedName.to_value));
+        ("FileSystemAdministratorsGroup",
+          (Option.map x.fileSystemAdministratorsGroup
+             ~f:FileSystemAdministratorsGroupName.to_value));
+        ("DomainJoinServiceAccountSecret",
+          (Option.map x.domainJoinServiceAccountSecret
+             ~f:CustomerSecretsManagerARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let domainJoinServiceAccountSecret =
+        (Option.map ~f:CustomerSecretsManagerARN.of_xml)
+          (Xml.child xml_arg0 "DomainJoinServiceAccountSecret") in
+      let fileSystemAdministratorsGroup =
+        (Option.map ~f:FileSystemAdministratorsGroupName.of_xml)
+          (Xml.child xml_arg0 "FileSystemAdministratorsGroup") in
+      let organizationalUnitDistinguishedName =
+        (Option.map ~f:OrganizationalUnitDistinguishedName.of_xml)
+          (Xml.child xml_arg0 "OrganizationalUnitDistinguishedName") in
+      let domainName =
+        (Option.map ~f:ActiveDirectoryFullyQualifiedName.of_xml)
+          (Xml.child xml_arg0 "DomainName") in
       let dnsIps =
         (Option.map ~f:DnsIps.of_xml) (Xml.child xml_arg0 "DnsIps") in
       let password =
@@ -15068,16 +21302,128 @@ module SelfManagedActiveDirectoryConfigurationUpdates =
       let userName =
         (Option.map ~f:DirectoryUserName.of_xml)
           (Xml.child xml_arg0 "UserName") in
-      make ?dnsIps ?password ?userName ()
+      make ?domainJoinServiceAccountSecret ?fileSystemAdministratorsGroup
+        ?organizationalUnitDistinguishedName ?domainName ?dnsIps ?password
+        ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dnsIps = field_map json "DnsIps" DnsIps.of_json in
-      let password = field_map json "Password" DirectoryPassword.of_json in
-      let userName = field_map json "UserName" DirectoryUserName.of_json in
-      make ?dnsIps ?password ?userName ()
+    let of_json json__ =
+      let domainJoinServiceAccountSecret =
+        field_map json__ "DomainJoinServiceAccountSecret"
+          CustomerSecretsManagerARN.of_json in
+      let fileSystemAdministratorsGroup =
+        field_map json__ "FileSystemAdministratorsGroup"
+          FileSystemAdministratorsGroupName.of_json in
+      let organizationalUnitDistinguishedName =
+        field_map json__ "OrganizationalUnitDistinguishedName"
+          OrganizationalUnitDistinguishedName.of_json in
+      let domainName =
+        field_map json__ "DomainName"
+          ActiveDirectoryFullyQualifiedName.of_json in
+      let dnsIps = field_map json__ "DnsIps" DnsIps.of_json in
+      let password = field_map json__ "Password" DirectoryPassword.of_json in
+      let userName = field_map json__ "UserName" DirectoryUserName.of_json in
+      make ?domainJoinServiceAccountSecret ?fileSystemAdministratorsGroup
+        ?organizationalUnitDistinguishedName ?domainName ?dnsIps ?password
+        ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration that Amazon FSx uses to join the Windows File Server instance to a self-managed Microsoft Active Directory (AD) directory."]
+       "Specifies changes you are making to the self-managed Microsoft Active Directory configuration to which an FSx for Windows File Server file system or an FSx for ONTAP SVM is joined."]
+module StartMisconfiguredStateRecoveryRequest =
+  struct
+    type nonrec t =
+      {
+      clientRequestToken: ClientRequestToken.t option ;
+      fileSystemId: FileSystemId.t }
+    let context_ = "StartMisconfiguredStateRecoveryRequest"
+    let make ?clientRequestToken =
+      fun ~fileSystemId -> fun () -> { clientRequestToken; fileSystemId }
+    let to_value x =
+      structure_to_value
+        [("ClientRequestToken",
+           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileSystemId =
+        FileSystemId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      make ~fileSystemId ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileSystemId =
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      make ~fileSystemId ?clientRequestToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "After performing steps to repair the Active Directory configuration of an FSx for Windows File Server file system, use this action to initiate the process of Amazon FSx attempting to reconnect to the file system."]
+module StartMisconfiguredStateRecoveryResponse =
+  struct
+    type nonrec t = {
+      fileSystem: FileSystem.t option }
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `FileSystemNotFound of FileSystemNotFound.t 
+      | `InternalServerError of InternalServerError.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fileSystem = fun () -> { fileSystem }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "FileSystemNotFound" ->
+          `FileSystemNotFound (FileSystemNotFound.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "FileSystemNotFound" ->
+          `FileSystemNotFound (FileSystemNotFound.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `FileSystemNotFound e ->
+          `Assoc
+            [("error", (`String "FileSystemNotFound"));
+            ("details", (FileSystemNotFound.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FileSystem", (Option.map x.fileSystem ~f:FileSystem.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileSystem =
+        (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
+      make ?fileSystem ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileSystem = field_map json__ "FileSystem" FileSystem.of_json in
+      make ?fileSystem ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "After performing steps to repair the Active Directory configuration of an FSx for Windows File Server file system, use this action to initiate the process of Amazon FSx attempting to reconnect to the file system."]
 module TagKeys =
   struct
     type nonrec t = TagKey.t list
@@ -15086,6 +21432,9 @@ module TagKeys =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15130,9 +21479,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for the TagResource operation."]
@@ -15235,9 +21585,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request object for UntagResource action."]
@@ -15362,19 +21713,19 @@ module UpdateDataRepositoryAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationId") in
       make ?s3 ?importedFileChunkSize ?clientRequestToken ~associationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "S3" S3DataRepositoryConfiguration.of_json in
+    let of_json json__ =
+      let s3 = field_map json__ "S3" S3DataRepositoryConfiguration.of_json in
       let importedFileChunkSize =
-        field_map json "ImportedFileChunkSize" Megabytes.of_json in
+        field_map json__ "ImportedFileChunkSize" Megabytes.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let associationId =
-        field_map_exn json "AssociationId"
+        field_map_exn json__ "AssociationId"
           DataRepositoryAssociationId.of_json in
       make ?s3 ?importedFileChunkSize ?clientRequestToken ~associationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the configuration of an existing data repository association on an Amazon FSx for Lustre file system. Data repository associations are supported only for file systems with the Persistent_2 deployment type."]
+       "Updates the configuration of an existing data repository association on an Amazon FSx for Lustre file system. Data repository associations are supported on all FSx for Lustre 2.12 and 2.15 file systems, excluding scratch_1 deployment type."]
 module UpdateDataRepositoryAssociationResponse =
   struct
     type nonrec t =
@@ -15459,13 +21810,220 @@ module UpdateDataRepositoryAssociationResponse =
           (Xml.child xml_arg0 "Association") in
       make ?association ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let association =
-        field_map json "Association" DataRepositoryAssociation.of_json in
+        field_map json__ "Association" DataRepositoryAssociation.of_json in
       make ?association ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the configuration of an existing data repository association on an Amazon FSx for Lustre file system. Data repository associations are supported only for file systems with the Persistent_2 deployment type."]
+       "Updates the configuration of an existing data repository association on an Amazon FSx for Lustre file system. Data repository associations are supported on all FSx for Lustre 2.12 and 2.15 file systems, excluding scratch_1 deployment type."]
+module UpdateFileCacheLustreConfiguration =
+  struct
+    type nonrec t = {
+      weeklyMaintenanceStartTime: WeeklyTime.t option }
+    let make ?weeklyMaintenanceStartTime =
+      fun () -> { weeklyMaintenanceStartTime }
+    let to_value x =
+      structure_to_value
+        [("WeeklyMaintenanceStartTime",
+           (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let weeklyMaintenanceStartTime =
+        (Option.map ~f:WeeklyTime.of_xml)
+          (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
+      make ?weeklyMaintenanceStartTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let weeklyMaintenanceStartTime =
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+      make ?weeklyMaintenanceStartTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration update for an Amazon File Cache resource."]
+module UpdateFileCacheRequest =
+  struct
+    type nonrec t =
+      {
+      fileCacheId: FileCacheId.t
+        [@ocaml.doc "The ID of the cache that you are updating."];
+      clientRequestToken: ClientRequestToken.t option ;
+      lustreConfiguration: UpdateFileCacheLustreConfiguration.t option
+        [@ocaml.doc
+          "The configuration updates for an Amazon File Cache resource."]}
+    let context_ = "UpdateFileCacheRequest"
+    let make ?clientRequestToken =
+      fun ?lustreConfiguration ->
+        fun ~fileCacheId ->
+          fun () -> { clientRequestToken; lustreConfiguration; fileCacheId }
+    let to_value x =
+      structure_to_value
+        [("FileCacheId", (Some (FileCacheId.to_value x.fileCacheId)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("LustreConfiguration",
+          (Option.map x.lustreConfiguration
+             ~f:UpdateFileCacheLustreConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lustreConfiguration =
+        (Option.map ~f:UpdateFileCacheLustreConfiguration.of_xml)
+          (Xml.child xml_arg0 "LustreConfiguration") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let fileCacheId =
+        FileCacheId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileCacheId") in
+      make ?lustreConfiguration ?clientRequestToken ~fileCacheId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lustreConfiguration =
+        field_map json__ "LustreConfiguration"
+          UpdateFileCacheLustreConfiguration.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let fileCacheId =
+        field_map_exn json__ "FileCacheId" FileCacheId.of_json in
+      make ?lustreConfiguration ?clientRequestToken ~fileCacheId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of an existing Amazon File Cache resource. You can update multiple properties in a single request."]
+module UpdateFileCacheResponse =
+  struct
+    type nonrec t =
+      {
+      fileCache: FileCache.t option
+        [@ocaml.doc "A description of the cache that was updated."]}
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `FileCacheNotFound of FileCacheNotFound.t 
+      | `IncompatibleParameterError of IncompatibleParameterError.t 
+      | `InternalServerError of InternalServerError.t 
+      | `MissingFileCacheConfiguration of MissingFileCacheConfiguration.t 
+      | `ServiceLimitExceeded of ServiceLimitExceeded.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fileCache = fun () -> { fileCache }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "FileCacheNotFound" ->
+          `FileCacheNotFound (FileCacheNotFound.of_json json)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError
+            (IncompatibleParameterError.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "MissingFileCacheConfiguration" ->
+          `MissingFileCacheConfiguration
+            (MissingFileCacheConfiguration.of_json json)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "FileCacheNotFound" ->
+          `FileCacheNotFound (FileCacheNotFound.of_xml xml)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError (IncompatibleParameterError.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "MissingFileCacheConfiguration" ->
+          `MissingFileCacheConfiguration
+            (MissingFileCacheConfiguration.of_xml xml)
+      | "ServiceLimitExceeded" ->
+          `ServiceLimitExceeded (ServiceLimitExceeded.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `FileCacheNotFound e ->
+          `Assoc
+            [("error", (`String "FileCacheNotFound"));
+            ("details", (FileCacheNotFound.to_json e))]
+      | `IncompatibleParameterError e ->
+          `Assoc
+            [("error", (`String "IncompatibleParameterError"));
+            ("details", (IncompatibleParameterError.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `MissingFileCacheConfiguration e ->
+          `Assoc
+            [("error", (`String "MissingFileCacheConfiguration"));
+            ("details", (MissingFileCacheConfiguration.to_json e))]
+      | `ServiceLimitExceeded e ->
+          `Assoc
+            [("error", (`String "ServiceLimitExceeded"));
+            ("details", (ServiceLimitExceeded.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FileCache", (Option.map x.fileCache ~f:FileCache.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileCache =
+        (Option.map ~f:FileCache.of_xml) (Xml.child xml_arg0 "FileCache") in
+      make ?fileCache ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileCache = field_map json__ "FileCache" FileCache.of_json in
+      make ?fileCache ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of an existing Amazon File Cache resource. You can update multiple properties in a single request."]
+module UpdateFileSystemLustreMetadataConfiguration =
+  struct
+    type nonrec t =
+      {
+      iops: MetadataIops.t option
+        [@ocaml.doc
+          "(USER_PROVISIONED mode only) Specifies the number of Metadata IOPS to provision for your file system. For SSD file systems, valid values are 1500, 3000, 6000, 12000, and multiples of 12000 up to a maximum of 192000. For Intelligent-Tiering file systems, valid values are 6000 and 12000. The value you provide must be greater than or equal to the current number of Metadata IOPS provisioned for the file system."];
+      mode: MetadataConfigurationMode.t option
+        [@ocaml.doc
+          "The metadata configuration mode for provisioning Metadata IOPS for an FSx for Lustre file system using a PERSISTENT_2 deployment type. To increase the Metadata IOPS or to switch an SSD file system from AUTOMATIC, specify USER_PROVISIONED as the value for this parameter. Then use the Iops parameter to provide a Metadata IOPS value that is greater than or equal to the current number of Metadata IOPS provisioned for the file system. To switch from USER_PROVISIONED mode on an SSD file system, specify AUTOMATIC as the value for this parameter, but do not input a value for Iops. If you request to switch from USER_PROVISIONED to AUTOMATIC mode and the current Metadata IOPS value is greater than the automated default, FSx for Lustre rejects the request because downscaling Metadata IOPS is not supported. AUTOMATIC mode is not supported on Intelligent-Tiering file systems. For Intelligent-Tiering file systems, use USER_PROVISIONED mode."]}
+    let make ?iops = fun ?mode -> fun () -> { iops; mode }
+    let to_value x =
+      structure_to_value
+        [("Iops", (Option.map x.iops ~f:MetadataIops.to_value));
+        ("Mode", (Option.map x.mode ~f:MetadataConfigurationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mode =
+        (Option.map ~f:MetadataConfigurationMode.of_xml)
+          (Xml.child xml_arg0 "Mode") in
+      let iops =
+        (Option.map ~f:MetadataIops.of_xml) (Xml.child xml_arg0 "Iops") in
+      make ?mode ?iops ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mode = field_map json__ "Mode" MetadataConfigurationMode.of_json in
+      let iops = field_map json__ "Iops" MetadataIops.of_json in
+      make ?mode ?iops ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Lustre metadata performance configuration update for an Amazon FSx for Lustre file system using a PERSISTENT_2 deployment type. You can request an increase in your file system's Metadata IOPS and/or switch your file system's metadata configuration mode. For more information, see Managing metadata performance in the Amazon FSx for Lustre User Guide."]
 module UpdateFileSystemLustreConfiguration =
   struct
     type nonrec t =
@@ -15474,31 +22032,59 @@ module UpdateFileSystemLustreConfiguration =
         [@ocaml.doc
           "(Optional) The preferred start time to perform weekly maintenance, formatted d:HH:MM in the UTC time zone. d is the weekday number, from 1 through 7, beginning with Monday and ending with Sunday."];
       dailyAutomaticBackupStartTime: DailyTime.t option ;
-      automaticBackupRetentionDays: AutomaticBackupRetentionDays.t option ;
+      automaticBackupRetentionDays: AutomaticBackupRetentionDays.t option
+        [@ocaml.doc
+          "The number of days to retain automatic backups. Setting this property to 0 disables automatic backups. You can retain automatic backups for a maximum of 90 days. The default is 0."];
       autoImportPolicy: AutoImportPolicyType.t option
         [@ocaml.doc
-          "(Optional) When you create your file system, your existing S3 objects appear as file and directory listings. Use this property to choose how Amazon FSx keeps your file and directory listing up to date as you add or modify objects in your linked S3 bucket. AutoImportPolicy can have the following values: NONE - (Default) AutoImport is off. Amazon FSx only updates file and directory listings from the linked S3 bucket when the file system is created. FSx does not update the file and directory listing for any new or changed objects after choosing this option. NEW - AutoImport is on. Amazon FSx automatically imports directory listings of any new objects added to the linked S3 bucket that do not currently exist in the FSx file system. NEW_CHANGED - AutoImport is on. Amazon FSx automatically imports file and directory listings of any new objects added to the S3 bucket and any existing objects that are changed in the S3 bucket after you choose this option. NEW_CHANGED_DELETED - AutoImport is on. Amazon FSx automatically imports file and directory listings of any new objects added to the S3 bucket, any existing objects that are changed in the S3 bucket, and any objects that were deleted in the S3 bucket. The AutoImportPolicy parameter is not supported for Lustre file systems with the Persistent_2 deployment type. Instead, use to update a data repository association on your Persistent_2 file system."];
+          "(Optional) When you create your file system, your existing S3 objects appear as file and directory listings. Use this property to choose how Amazon FSx keeps your file and directory listing up to date as you add or modify objects in your linked S3 bucket. AutoImportPolicy can have the following values: NONE - (Default) AutoImport is off. Amazon FSx only updates file and directory listings from the linked S3 bucket when the file system is created. FSx does not update the file and directory listing for any new or changed objects after choosing this option. NEW - AutoImport is on. Amazon FSx automatically imports directory listings of any new objects added to the linked S3 bucket that do not currently exist in the FSx file system. NEW_CHANGED - AutoImport is on. Amazon FSx automatically imports file and directory listings of any new objects added to the S3 bucket and any existing objects that are changed in the S3 bucket after you choose this option. NEW_CHANGED_DELETED - AutoImport is on. Amazon FSx automatically imports file and directory listings of any new objects added to the S3 bucket, any existing objects that are changed in the S3 bucket, and any objects that were deleted in the S3 bucket. This parameter is not supported for file systems with a data repository association."];
       dataCompressionType: DataCompressionType.t option
         [@ocaml.doc
           "Sets the data compression configuration for the file system. DataCompressionType can have the following values: NONE - Data compression is turned off for the file system. LZ4 - Data compression is turned on with the LZ4 algorithm. If you don't use DataCompressionType, the file system retains its current data compression configuration. For more information, see Lustre data compression."];
       logConfiguration: LustreLogCreateConfiguration.t option
         [@ocaml.doc
-          "The Lustre logging configuration used when updating an Amazon FSx for Lustre file system. When logging is enabled, Lustre logs error and warning events for data repositories associated with your file system to Amazon CloudWatch Logs."]}
+          "The Lustre logging configuration used when updating an Amazon FSx for Lustre file system. When logging is enabled, Lustre logs error and warning events for data repositories associated with your file system to Amazon CloudWatch Logs."];
+      rootSquashConfiguration: LustreRootSquashConfiguration.t option
+        [@ocaml.doc
+          "The Lustre root squash configuration used when updating an Amazon FSx for Lustre file system. When enabled, root squash restricts root-level access from clients that try to access your file system as a root user."];
+      perUnitStorageThroughput: PerUnitStorageThroughput.t option
+        [@ocaml.doc
+          "The throughput of an Amazon FSx for Lustre Persistent SSD-based file system, measured in megabytes per second per tebibyte (MB/s/TiB). You can increase or decrease your file system's throughput. Valid values depend on the deployment type of the file system, as follows: For PERSISTENT_1 SSD-based deployment types, valid values are 50, 100, and 200 MB/s/TiB. For PERSISTENT_2 SSD-based deployment types, valid values are 125, 250, 500, and 1000 MB/s/TiB. For more information, see Managing throughput capacity."];
+      metadataConfiguration:
+        UpdateFileSystemLustreMetadataConfiguration.t option
+        [@ocaml.doc
+          "The Lustre metadata performance configuration for an Amazon FSx for Lustre file system using a PERSISTENT_2 deployment type. When this configuration is enabled, the file system supports increasing metadata performance."];
+      throughputCapacity: ThroughputCapacityMbps.t option
+        [@ocaml.doc
+          "The throughput of an Amazon FSx for Lustre file system using an Intelligent-Tiering storage class, measured in megabytes per second (MBps). You can only increase your file system's throughput. Valid values are 4000 MBps or multiples of 4000 MBps."];
+      dataReadCacheConfiguration: LustreReadCacheConfiguration.t option
+        [@ocaml.doc
+          "Specifies the optional provisioned SSD read cache on Amazon FSx for Lustre file systems that use the Intelligent-Tiering storage class."]}
     let make ?weeklyMaintenanceStartTime =
       fun ?dailyAutomaticBackupStartTime ->
         fun ?automaticBackupRetentionDays ->
           fun ?autoImportPolicy ->
             fun ?dataCompressionType ->
               fun ?logConfiguration ->
-                fun () ->
-                  {
-                    weeklyMaintenanceStartTime;
-                    dailyAutomaticBackupStartTime;
-                    automaticBackupRetentionDays;
-                    autoImportPolicy;
-                    dataCompressionType;
-                    logConfiguration
-                  }
+                fun ?rootSquashConfiguration ->
+                  fun ?perUnitStorageThroughput ->
+                    fun ?metadataConfiguration ->
+                      fun ?throughputCapacity ->
+                        fun ?dataReadCacheConfiguration ->
+                          fun () ->
+                            {
+                              weeklyMaintenanceStartTime;
+                              dailyAutomaticBackupStartTime;
+                              automaticBackupRetentionDays;
+                              autoImportPolicy;
+                              dataCompressionType;
+                              logConfiguration;
+                              rootSquashConfiguration;
+                              perUnitStorageThroughput;
+                              metadataConfiguration;
+                              throughputCapacity;
+                              dataReadCacheConfiguration
+                            }
     let to_value x =
       structure_to_value
         [("WeeklyMaintenanceStartTime",
@@ -15514,9 +22100,38 @@ module UpdateFileSystemLustreConfiguration =
           (Option.map x.dataCompressionType ~f:DataCompressionType.to_value));
         ("LogConfiguration",
           (Option.map x.logConfiguration
-             ~f:LustreLogCreateConfiguration.to_value))]
+             ~f:LustreLogCreateConfiguration.to_value));
+        ("RootSquashConfiguration",
+          (Option.map x.rootSquashConfiguration
+             ~f:LustreRootSquashConfiguration.to_value));
+        ("PerUnitStorageThroughput",
+          (Option.map x.perUnitStorageThroughput
+             ~f:PerUnitStorageThroughput.to_value));
+        ("MetadataConfiguration",
+          (Option.map x.metadataConfiguration
+             ~f:UpdateFileSystemLustreMetadataConfiguration.to_value));
+        ("ThroughputCapacity",
+          (Option.map x.throughputCapacity ~f:ThroughputCapacityMbps.to_value));
+        ("DataReadCacheConfiguration",
+          (Option.map x.dataReadCacheConfiguration
+             ~f:LustreReadCacheConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataReadCacheConfiguration =
+        (Option.map ~f:LustreReadCacheConfiguration.of_xml)
+          (Xml.child xml_arg0 "DataReadCacheConfiguration") in
+      let throughputCapacity =
+        (Option.map ~f:ThroughputCapacityMbps.of_xml)
+          (Xml.child xml_arg0 "ThroughputCapacity") in
+      let metadataConfiguration =
+        (Option.map ~f:UpdateFileSystemLustreMetadataConfiguration.of_xml)
+          (Xml.child xml_arg0 "MetadataConfiguration") in
+      let perUnitStorageThroughput =
+        (Option.map ~f:PerUnitStorageThroughput.of_xml)
+          (Xml.child xml_arg0 "PerUnitStorageThroughput") in
+      let rootSquashConfiguration =
+        (Option.map ~f:LustreRootSquashConfiguration.of_xml)
+          (Xml.child xml_arg0 "RootSquashConfiguration") in
       let logConfiguration =
         (Option.map ~f:LustreLogCreateConfiguration.of_xml)
           (Xml.child xml_arg0 "LogConfiguration") in
@@ -15535,28 +22150,46 @@ module UpdateFileSystemLustreConfiguration =
       let weeklyMaintenanceStartTime =
         (Option.map ~f:WeeklyTime.of_xml)
           (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
-      make ?logConfiguration ?dataCompressionType ?autoImportPolicy
-        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
-        ?weeklyMaintenanceStartTime ()
+      make ?dataReadCacheConfiguration ?throughputCapacity
+        ?metadataConfiguration ?perUnitStorageThroughput
+        ?rootSquashConfiguration ?logConfiguration ?dataCompressionType
+        ?autoImportPolicy ?automaticBackupRetentionDays
+        ?dailyAutomaticBackupStartTime ?weeklyMaintenanceStartTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dataReadCacheConfiguration =
+        field_map json__ "DataReadCacheConfiguration"
+          LustreReadCacheConfiguration.of_json in
+      let throughputCapacity =
+        field_map json__ "ThroughputCapacity" ThroughputCapacityMbps.of_json in
+      let metadataConfiguration =
+        field_map json__ "MetadataConfiguration"
+          UpdateFileSystemLustreMetadataConfiguration.of_json in
+      let perUnitStorageThroughput =
+        field_map json__ "PerUnitStorageThroughput"
+          PerUnitStorageThroughput.of_json in
+      let rootSquashConfiguration =
+        field_map json__ "RootSquashConfiguration"
+          LustreRootSquashConfiguration.of_json in
       let logConfiguration =
-        field_map json "LogConfiguration"
+        field_map json__ "LogConfiguration"
           LustreLogCreateConfiguration.of_json in
       let dataCompressionType =
-        field_map json "DataCompressionType" DataCompressionType.of_json in
+        field_map json__ "DataCompressionType" DataCompressionType.of_json in
       let autoImportPolicy =
-        field_map json "AutoImportPolicy" AutoImportPolicyType.of_json in
+        field_map json__ "AutoImportPolicy" AutoImportPolicyType.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
-      make ?logConfiguration ?dataCompressionType ?autoImportPolicy
-        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
-        ?weeklyMaintenanceStartTime ()
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+      make ?dataReadCacheConfiguration ?throughputCapacity
+        ?metadataConfiguration ?perUnitStorageThroughput
+        ?rootSquashConfiguration ?logConfiguration ?dataCompressionType
+        ?autoImportPolicy ?automaticBackupRetentionDays
+        ?dailyAutomaticBackupStartTime ?weeklyMaintenanceStartTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration object for Amazon FSx for Lustre file systems used in the UpdateFileSystem operation."]
@@ -15568,29 +22201,54 @@ module UpdateFileSystemOntapConfiguration =
       dailyAutomaticBackupStartTime: DailyTime.t option ;
       fsxAdminPassword: AdminPassword.t option
         [@ocaml.doc
-          "The ONTAP administrative password for the fsxadmin user."];
+          "Update the password for the fsxadmin user by entering a new password. You use the fsxadmin user to access the NetApp ONTAP CLI and REST API to manage your file system resources. For more information, see Managing resources using NetApp Application."];
       weeklyMaintenanceStartTime: WeeklyTime.t option ;
       diskIopsConfiguration: DiskIopsConfiguration.t option
         [@ocaml.doc
-          "The SSD IOPS (input/output operations per second) configuration for an Amazon FSx for NetApp ONTAP file system. The default is 3 IOPS per GB of storage capacity, but you can provision additional IOPS per GB of storage. The configuration consists of an IOPS mode (AUTOMATIC or USER_PROVISIONED), and in the case of USER_PROVISIONED IOPS, the total number of SSD IOPS provisioned."];
+          "The SSD IOPS (input output operations per second) configuration for an Amazon FSx for NetApp ONTAP file system. The default is 3 IOPS per GB of storage capacity, but you can provision additional IOPS per GB of storage. The configuration consists of an IOPS mode (AUTOMATIC or USER_PROVISIONED), and in the case of USER_PROVISIONED IOPS, the total number of SSD IOPS provisioned. For more information, see File system storage capacity and IOPS."];
       throughputCapacity: MegabytesPerSecond.t option
         [@ocaml.doc
-          "Specifies the throughput of an FSx for NetApp ONTAP file system, measured in megabytes per second (MBps). Valid values are 128, 256, 512, 1024, or 2048 MB/s."]}
+          "Enter a new value to change the amount of throughput capacity for the file system in megabytes per second (MBps). For more information, see Managing throughput capacity in the FSx for ONTAP User Guide. Amazon FSx responds with an HTTP status code 400 (Bad Request) for the following conditions: The value of ThroughputCapacity and ThroughputCapacityPerHAPair are not the same value. The value of ThroughputCapacity when divided by the value of HAPairs is outside of the valid range for ThroughputCapacity."];
+      addRouteTableIds: RouteTableIds.t option
+        [@ocaml.doc
+          "(Multi-AZ only) A list of IDs of new virtual private cloud (VPC) route tables to associate (add) with your Amazon FSx for NetApp ONTAP file system."];
+      removeRouteTableIds: RouteTableIds.t option
+        [@ocaml.doc
+          "(Multi-AZ only) A list of IDs of existing virtual private cloud (VPC) route tables to disassociate (remove) from your Amazon FSx for NetApp ONTAP file system. You can use the API operation to retrieve the list of VPC route table IDs for a file system."];
+      throughputCapacityPerHAPair: ThroughputCapacityPerHAPair.t option
+        [@ocaml.doc
+          "Use to choose the throughput capacity per HA pair, rather than the total throughput for the file system. This field and ThroughputCapacity cannot be defined in the same API call, but one is required. This field and ThroughputCapacity are the same for file systems with one HA pair. For SINGLE_AZ_1 and MULTI_AZ_1 file systems, valid values are 128, 256, 512, 1024, 2048, or 4096 MBps. For SINGLE_AZ_2, valid values are 1536, 3072, or 6144 MBps. For MULTI_AZ_2, valid values are 384, 768, 1536, 3072, or 6144 MBps. Amazon FSx responds with an HTTP status code 400 (Bad Request) for the following conditions: The value of ThroughputCapacity and ThroughputCapacityPerHAPair are not the same value for file systems with one HA pair. The value of deployment type is SINGLE_AZ_2 and ThroughputCapacity / ThroughputCapacityPerHAPair is not a valid HA pair (a value between 1 and 12). The value of ThroughputCapacityPerHAPair is not a valid value."];
+      hAPairs: HAPairs.t option
+        [@ocaml.doc
+          "Use to update the number of high-availability (HA) pairs for a second-generation single-AZ file system. If you increase the number of HA pairs for your file system, you must specify proportional increases for StorageCapacity, Iops, and ThroughputCapacity. For more information, see High-availability (HA) pairs in the FSx for ONTAP user guide. Block storage protocol support (iSCSI and NVMe over TCP) is disabled on file systems with more than 6 HA pairs. For more information, see Using block storage protocols."];
+      endpointIpv6AddressRange: Ipv6AddressRange.t option
+        [@ocaml.doc
+          "(Multi-AZ only) Specifies the IPv6 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API and Amazon FSx console, Amazon FSx selects an available /118 IP address range for you from one of the VPC's CIDR ranges. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables, as long as they don't overlap with any subnet."]}
     let make ?automaticBackupRetentionDays =
       fun ?dailyAutomaticBackupStartTime ->
         fun ?fsxAdminPassword ->
           fun ?weeklyMaintenanceStartTime ->
             fun ?diskIopsConfiguration ->
               fun ?throughputCapacity ->
-                fun () ->
-                  {
-                    automaticBackupRetentionDays;
-                    dailyAutomaticBackupStartTime;
-                    fsxAdminPassword;
-                    weeklyMaintenanceStartTime;
-                    diskIopsConfiguration;
-                    throughputCapacity
-                  }
+                fun ?addRouteTableIds ->
+                  fun ?removeRouteTableIds ->
+                    fun ?throughputCapacityPerHAPair ->
+                      fun ?hAPairs ->
+                        fun ?endpointIpv6AddressRange ->
+                          fun () ->
+                            {
+                              automaticBackupRetentionDays;
+                              dailyAutomaticBackupStartTime;
+                              fsxAdminPassword;
+                              weeklyMaintenanceStartTime;
+                              diskIopsConfiguration;
+                              throughputCapacity;
+                              addRouteTableIds;
+                              removeRouteTableIds;
+                              throughputCapacityPerHAPair;
+                              hAPairs;
+                              endpointIpv6AddressRange
+                            }
     let to_value x =
       structure_to_value
         [("AutomaticBackupRetentionDays",
@@ -15606,9 +22264,33 @@ module UpdateFileSystemOntapConfiguration =
           (Option.map x.diskIopsConfiguration
              ~f:DiskIopsConfiguration.to_value));
         ("ThroughputCapacity",
-          (Option.map x.throughputCapacity ~f:MegabytesPerSecond.to_value))]
+          (Option.map x.throughputCapacity ~f:MegabytesPerSecond.to_value));
+        ("AddRouteTableIds",
+          (Option.map x.addRouteTableIds ~f:RouteTableIds.to_value));
+        ("RemoveRouteTableIds",
+          (Option.map x.removeRouteTableIds ~f:RouteTableIds.to_value));
+        ("ThroughputCapacityPerHAPair",
+          (Option.map x.throughputCapacityPerHAPair
+             ~f:ThroughputCapacityPerHAPair.to_value));
+        ("HAPairs", (Option.map x.hAPairs ~f:HAPairs.to_value));
+        ("EndpointIpv6AddressRange",
+          (Option.map x.endpointIpv6AddressRange ~f:Ipv6AddressRange.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let endpointIpv6AddressRange =
+        (Option.map ~f:Ipv6AddressRange.of_xml)
+          (Xml.child xml_arg0 "EndpointIpv6AddressRange") in
+      let hAPairs =
+        (Option.map ~f:HAPairs.of_xml) (Xml.child xml_arg0 "HAPairs") in
+      let throughputCapacityPerHAPair =
+        (Option.map ~f:ThroughputCapacityPerHAPair.of_xml)
+          (Xml.child xml_arg0 "ThroughputCapacityPerHAPair") in
+      let removeRouteTableIds =
+        (Option.map ~f:RouteTableIds.of_xml)
+          (Xml.child xml_arg0 "RemoveRouteTableIds") in
+      let addRouteTableIds =
+        (Option.map ~f:RouteTableIds.of_xml)
+          (Xml.child xml_arg0 "AddRouteTableIds") in
       let throughputCapacity =
         (Option.map ~f:MegabytesPerSecond.of_xml)
           (Xml.child xml_arg0 "ThroughputCapacity") in
@@ -15627,26 +22309,39 @@ module UpdateFileSystemOntapConfiguration =
       let automaticBackupRetentionDays =
         (Option.map ~f:AutomaticBackupRetentionDays.of_xml)
           (Xml.child xml_arg0 "AutomaticBackupRetentionDays") in
-      make ?throughputCapacity ?diskIopsConfiguration
-        ?weeklyMaintenanceStartTime ?fsxAdminPassword
+      make ?endpointIpv6AddressRange ?hAPairs ?throughputCapacityPerHAPair
+        ?removeRouteTableIds ?addRouteTableIds ?throughputCapacity
+        ?diskIopsConfiguration ?weeklyMaintenanceStartTime ?fsxAdminPassword
         ?dailyAutomaticBackupStartTime ?automaticBackupRetentionDays ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let endpointIpv6AddressRange =
+        field_map json__ "EndpointIpv6AddressRange" Ipv6AddressRange.of_json in
+      let hAPairs = field_map json__ "HAPairs" HAPairs.of_json in
+      let throughputCapacityPerHAPair =
+        field_map json__ "ThroughputCapacityPerHAPair"
+          ThroughputCapacityPerHAPair.of_json in
+      let removeRouteTableIds =
+        field_map json__ "RemoveRouteTableIds" RouteTableIds.of_json in
+      let addRouteTableIds =
+        field_map json__ "AddRouteTableIds" RouteTableIds.of_json in
       let throughputCapacity =
-        field_map json "ThroughputCapacity" MegabytesPerSecond.of_json in
+        field_map json__ "ThroughputCapacity" MegabytesPerSecond.of_json in
       let diskIopsConfiguration =
-        field_map json "DiskIopsConfiguration" DiskIopsConfiguration.of_json in
+        field_map json__ "DiskIopsConfiguration"
+          DiskIopsConfiguration.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
       let fsxAdminPassword =
-        field_map json "FsxAdminPassword" AdminPassword.of_json in
+        field_map json__ "FsxAdminPassword" AdminPassword.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
-      make ?throughputCapacity ?diskIopsConfiguration
-        ?weeklyMaintenanceStartTime ?fsxAdminPassword
+      make ?endpointIpv6AddressRange ?hAPairs ?throughputCapacityPerHAPair
+        ?removeRouteTableIds ?addRouteTableIds ?throughputCapacity
+        ?diskIopsConfiguration ?weeklyMaintenanceStartTime ?fsxAdminPassword
         ?dailyAutomaticBackupStartTime ?automaticBackupRetentionDays ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15665,9 +22360,21 @@ module UpdateFileSystemOpenZFSConfiguration =
       dailyAutomaticBackupStartTime: DailyTime.t option ;
       throughputCapacity: MegabytesPerSecond.t option
         [@ocaml.doc
-          "The throughput of an Amazon FSx file system, measured in megabytes per second (MBps). Valid values are 64, 128, 256, 512, 1024, 2048, 3072, or 4096 MB/s."];
+          "The throughput of an Amazon FSx for OpenZFS file system, measured in megabytes per second&#x2028; (MB/s). Valid values depend on the DeploymentType you choose, as follows: For MULTI_AZ_1 and SINGLE_AZ_2, valid values are 160, 320, 640, 1280, 2560, 3840, 5120, 7680, or 10240 MB/s. For SINGLE_AZ_1, valid values are 64, 128, 256, 512, 1024, 2048, 3072, or 4096 MB/s."];
       weeklyMaintenanceStartTime: WeeklyTime.t option ;
-      diskIopsConfiguration: DiskIopsConfiguration.t option }
+      diskIopsConfiguration: DiskIopsConfiguration.t option ;
+      addRouteTableIds: RouteTableIds.t option
+        [@ocaml.doc
+          "(Multi-AZ only) A list of IDs of new virtual private cloud (VPC) route tables to associate (add) with your Amazon FSx for OpenZFS file system."];
+      removeRouteTableIds: RouteTableIds.t option
+        [@ocaml.doc
+          "(Multi-AZ only) A list of IDs of existing virtual private cloud (VPC) route tables to disassociate (remove) from your Amazon FSx for OpenZFS file system. You can use the API operation to retrieve the list of VPC route table IDs for a file system."];
+      readCacheConfiguration: OpenZFSReadCacheConfiguration.t option
+        [@ocaml.doc
+          "The configuration for the optional provisioned SSD read cache on file systems that use the Intelligent-Tiering storage class."];
+      endpointIpv6AddressRange: Ipv6AddressRange.t option
+        [@ocaml.doc
+          "(Multi-AZ only) Specifies the IPv6 address range in which the endpoints to access your file system will be created. By default in the Amazon FSx API and Amazon FSx console, Amazon FSx selects an available /118 IP address range for you from one of the VPC's CIDR ranges. You can have overlapping endpoint IP addresses for file systems deployed in the same VPC/route tables, as long as they don't overlap with any subnet."]}
     let make ?automaticBackupRetentionDays =
       fun ?copyTagsToBackups ->
         fun ?copyTagsToVolumes ->
@@ -15675,16 +22382,24 @@ module UpdateFileSystemOpenZFSConfiguration =
             fun ?throughputCapacity ->
               fun ?weeklyMaintenanceStartTime ->
                 fun ?diskIopsConfiguration ->
-                  fun () ->
-                    {
-                      automaticBackupRetentionDays;
-                      copyTagsToBackups;
-                      copyTagsToVolumes;
-                      dailyAutomaticBackupStartTime;
-                      throughputCapacity;
-                      weeklyMaintenanceStartTime;
-                      diskIopsConfiguration
-                    }
+                  fun ?addRouteTableIds ->
+                    fun ?removeRouteTableIds ->
+                      fun ?readCacheConfiguration ->
+                        fun ?endpointIpv6AddressRange ->
+                          fun () ->
+                            {
+                              automaticBackupRetentionDays;
+                              copyTagsToBackups;
+                              copyTagsToVolumes;
+                              dailyAutomaticBackupStartTime;
+                              throughputCapacity;
+                              weeklyMaintenanceStartTime;
+                              diskIopsConfiguration;
+                              addRouteTableIds;
+                              removeRouteTableIds;
+                              readCacheConfiguration;
+                              endpointIpv6AddressRange
+                            }
     let to_value x =
       structure_to_value
         [("AutomaticBackupRetentionDays",
@@ -15702,9 +22417,30 @@ module UpdateFileSystemOpenZFSConfiguration =
           (Option.map x.weeklyMaintenanceStartTime ~f:WeeklyTime.to_value));
         ("DiskIopsConfiguration",
           (Option.map x.diskIopsConfiguration
-             ~f:DiskIopsConfiguration.to_value))]
+             ~f:DiskIopsConfiguration.to_value));
+        ("AddRouteTableIds",
+          (Option.map x.addRouteTableIds ~f:RouteTableIds.to_value));
+        ("RemoveRouteTableIds",
+          (Option.map x.removeRouteTableIds ~f:RouteTableIds.to_value));
+        ("ReadCacheConfiguration",
+          (Option.map x.readCacheConfiguration
+             ~f:OpenZFSReadCacheConfiguration.to_value));
+        ("EndpointIpv6AddressRange",
+          (Option.map x.endpointIpv6AddressRange ~f:Ipv6AddressRange.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let endpointIpv6AddressRange =
+        (Option.map ~f:Ipv6AddressRange.of_xml)
+          (Xml.child xml_arg0 "EndpointIpv6AddressRange") in
+      let readCacheConfiguration =
+        (Option.map ~f:OpenZFSReadCacheConfiguration.of_xml)
+          (Xml.child xml_arg0 "ReadCacheConfiguration") in
+      let removeRouteTableIds =
+        (Option.map ~f:RouteTableIds.of_xml)
+          (Xml.child xml_arg0 "RemoveRouteTableIds") in
+      let addRouteTableIds =
+        (Option.map ~f:RouteTableIds.of_xml)
+          (Xml.child xml_arg0 "AddRouteTableIds") in
       let diskIopsConfiguration =
         (Option.map ~f:DiskIopsConfiguration.of_xml)
           (Xml.child xml_arg0 "DiskIopsConfiguration") in
@@ -15724,27 +22460,43 @@ module UpdateFileSystemOpenZFSConfiguration =
       let automaticBackupRetentionDays =
         (Option.map ~f:AutomaticBackupRetentionDays.of_xml)
           (Xml.child xml_arg0 "AutomaticBackupRetentionDays") in
-      make ?diskIopsConfiguration ?weeklyMaintenanceStartTime
-        ?throughputCapacity ?dailyAutomaticBackupStartTime ?copyTagsToVolumes
-        ?copyTagsToBackups ?automaticBackupRetentionDays ()
+      make ?endpointIpv6AddressRange ?readCacheConfiguration
+        ?removeRouteTableIds ?addRouteTableIds ?diskIopsConfiguration
+        ?weeklyMaintenanceStartTime ?throughputCapacity
+        ?dailyAutomaticBackupStartTime ?copyTagsToVolumes ?copyTagsToBackups
+        ?automaticBackupRetentionDays ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let endpointIpv6AddressRange =
+        field_map json__ "EndpointIpv6AddressRange" Ipv6AddressRange.of_json in
+      let readCacheConfiguration =
+        field_map json__ "ReadCacheConfiguration"
+          OpenZFSReadCacheConfiguration.of_json in
+      let removeRouteTableIds =
+        field_map json__ "RemoveRouteTableIds" RouteTableIds.of_json in
+      let addRouteTableIds =
+        field_map json__ "AddRouteTableIds" RouteTableIds.of_json in
       let diskIopsConfiguration =
-        field_map json "DiskIopsConfiguration" DiskIopsConfiguration.of_json in
+        field_map json__ "DiskIopsConfiguration"
+          DiskIopsConfiguration.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
       let throughputCapacity =
-        field_map json "ThroughputCapacity" MegabytesPerSecond.of_json in
+        field_map json__ "ThroughputCapacity" MegabytesPerSecond.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
-      let copyTagsToVolumes = field_map json "CopyTagsToVolumes" Flag.of_json in
-      let copyTagsToBackups = field_map json "CopyTagsToBackups" Flag.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
+      let copyTagsToVolumes =
+        field_map json__ "CopyTagsToVolumes" Flag.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
-      make ?diskIopsConfiguration ?weeklyMaintenanceStartTime
-        ?throughputCapacity ?dailyAutomaticBackupStartTime ?copyTagsToVolumes
-        ?copyTagsToBackups ?automaticBackupRetentionDays ()
+      make ?endpointIpv6AddressRange ?readCacheConfiguration
+        ?removeRouteTableIds ?addRouteTableIds ?diskIopsConfiguration
+        ?weeklyMaintenanceStartTime ?throughputCapacity
+        ?dailyAutomaticBackupStartTime ?copyTagsToVolumes ?copyTagsToBackups
+        ?automaticBackupRetentionDays ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration updates for an Amazon FSx for OpenZFS file system."]
@@ -15760,7 +22512,7 @@ module UpdateFileSystemWindowsConfiguration =
           "The preferred time to start the daily automatic backup, in the UTC time zone, for example, 02:00"];
       automaticBackupRetentionDays: AutomaticBackupRetentionDays.t option
         [@ocaml.doc
-          "The number of days to retain automatic daily backups. Setting this to zero (0) disables automatic daily backups. You can retain automatic daily backups for a maximum of 90 days. For more information, see Working with Automatic Daily Backups."];
+          "The number of days to retain automatic backups. Setting this property to 0 disables automatic backups. You can retain automatic backups for a maximum of 90 days. The default is 30. For more information, see Working with Automatic Daily Backups."];
       throughputCapacity: MegabytesPerSecond.t option
         [@ocaml.doc
           "Sets the target value for a file system's throughput capacity, in MB/s, that you are updating the file system to. Valid values are 8, 16, 32, 64, 128, 256, 512, 1024, 2048. You cannot make a throughput capacity update request if there is an existing throughput capacity update request in progress. For more information, see Managing Throughput Capacity."];
@@ -15770,22 +22522,32 @@ module UpdateFileSystemWindowsConfiguration =
           "The configuration Amazon FSx uses to join the Windows File Server instance to the self-managed Microsoft AD directory. You cannot make a self-managed Microsoft AD update request if there is an existing self-managed Microsoft AD update request in progress."];
       auditLogConfiguration: WindowsAuditLogCreateConfiguration.t option
         [@ocaml.doc
-          "The configuration that Amazon FSx for Windows File Server uses to audit and log user accesses of files, folders, and file shares on the Amazon FSx for Windows File Server file system.."]}
+          "The configuration that Amazon FSx for Windows File Server uses to audit and log user accesses of files, folders, and file shares on the Amazon FSx for Windows File Server file system.."];
+      diskIopsConfiguration: DiskIopsConfiguration.t option
+        [@ocaml.doc
+          "The SSD IOPS (input/output operations per second) configuration for an Amazon FSx for Windows file system. By default, Amazon FSx automatically provisions 3 IOPS per GiB of storage capacity. You can provision additional IOPS per GiB of storage, up to the maximum limit associated with your chosen throughput capacity."];
+      fsrmConfiguration: WindowsFsrmConfiguration.t option
+        [@ocaml.doc
+          "The File Server Resource Manager (FSRM) configuration that Amazon FSx for Windows File Server uses for the file system. FSRM is disabled by default."]}
     let make ?weeklyMaintenanceStartTime =
       fun ?dailyAutomaticBackupStartTime ->
         fun ?automaticBackupRetentionDays ->
           fun ?throughputCapacity ->
             fun ?selfManagedActiveDirectoryConfiguration ->
               fun ?auditLogConfiguration ->
-                fun () ->
-                  {
-                    weeklyMaintenanceStartTime;
-                    dailyAutomaticBackupStartTime;
-                    automaticBackupRetentionDays;
-                    throughputCapacity;
-                    selfManagedActiveDirectoryConfiguration;
-                    auditLogConfiguration
-                  }
+                fun ?diskIopsConfiguration ->
+                  fun ?fsrmConfiguration ->
+                    fun () ->
+                      {
+                        weeklyMaintenanceStartTime;
+                        dailyAutomaticBackupStartTime;
+                        automaticBackupRetentionDays;
+                        throughputCapacity;
+                        selfManagedActiveDirectoryConfiguration;
+                        auditLogConfiguration;
+                        diskIopsConfiguration;
+                        fsrmConfiguration
+                      }
     let to_value x =
       structure_to_value
         [("WeeklyMaintenanceStartTime",
@@ -15802,9 +22564,21 @@ module UpdateFileSystemWindowsConfiguration =
              ~f:SelfManagedActiveDirectoryConfigurationUpdates.to_value));
         ("AuditLogConfiguration",
           (Option.map x.auditLogConfiguration
-             ~f:WindowsAuditLogCreateConfiguration.to_value))]
+             ~f:WindowsAuditLogCreateConfiguration.to_value));
+        ("DiskIopsConfiguration",
+          (Option.map x.diskIopsConfiguration
+             ~f:DiskIopsConfiguration.to_value));
+        ("FsrmConfiguration",
+          (Option.map x.fsrmConfiguration
+             ~f:WindowsFsrmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fsrmConfiguration =
+        (Option.map ~f:WindowsFsrmConfiguration.of_xml)
+          (Xml.child xml_arg0 "FsrmConfiguration") in
+      let diskIopsConfiguration =
+        (Option.map ~f:DiskIopsConfiguration.of_xml)
+          (Xml.child xml_arg0 "DiskIopsConfiguration") in
       let auditLogConfiguration =
         (Option.map ~f:WindowsAuditLogCreateConfiguration.of_xml)
           (Xml.child xml_arg0 "AuditLogConfiguration") in
@@ -15823,29 +22597,36 @@ module UpdateFileSystemWindowsConfiguration =
       let weeklyMaintenanceStartTime =
         (Option.map ~f:WeeklyTime.of_xml)
           (Xml.child xml_arg0 "WeeklyMaintenanceStartTime") in
-      make ?auditLogConfiguration ?selfManagedActiveDirectoryConfiguration
-        ?throughputCapacity ?automaticBackupRetentionDays
-        ?dailyAutomaticBackupStartTime ?weeklyMaintenanceStartTime ()
+      make ?fsrmConfiguration ?diskIopsConfiguration ?auditLogConfiguration
+        ?selfManagedActiveDirectoryConfiguration ?throughputCapacity
+        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
+        ?weeklyMaintenanceStartTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let fsrmConfiguration =
+        field_map json__ "FsrmConfiguration" WindowsFsrmConfiguration.of_json in
+      let diskIopsConfiguration =
+        field_map json__ "DiskIopsConfiguration"
+          DiskIopsConfiguration.of_json in
       let auditLogConfiguration =
-        field_map json "AuditLogConfiguration"
+        field_map json__ "AuditLogConfiguration"
           WindowsAuditLogCreateConfiguration.of_json in
       let selfManagedActiveDirectoryConfiguration =
-        field_map json "SelfManagedActiveDirectoryConfiguration"
+        field_map json__ "SelfManagedActiveDirectoryConfiguration"
           SelfManagedActiveDirectoryConfigurationUpdates.of_json in
       let throughputCapacity =
-        field_map json "ThroughputCapacity" MegabytesPerSecond.of_json in
+        field_map json__ "ThroughputCapacity" MegabytesPerSecond.of_json in
       let automaticBackupRetentionDays =
-        field_map json "AutomaticBackupRetentionDays"
+        field_map json__ "AutomaticBackupRetentionDays"
           AutomaticBackupRetentionDays.of_json in
       let dailyAutomaticBackupStartTime =
-        field_map json "DailyAutomaticBackupStartTime" DailyTime.of_json in
+        field_map json__ "DailyAutomaticBackupStartTime" DailyTime.of_json in
       let weeklyMaintenanceStartTime =
-        field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
-      make ?auditLogConfiguration ?selfManagedActiveDirectoryConfiguration
-        ?throughputCapacity ?automaticBackupRetentionDays
-        ?dailyAutomaticBackupStartTime ?weeklyMaintenanceStartTime ()
+        field_map json__ "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
+      make ?fsrmConfiguration ?diskIopsConfiguration ?auditLogConfiguration
+        ?selfManagedActiveDirectoryConfiguration ?throughputCapacity
+        ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
+        ?weeklyMaintenanceStartTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the configuration for an existing Amazon FSx for Windows File Server file system. Amazon FSx only overwrites existing properties with non-null values provided in the request."]
@@ -15857,10 +22638,10 @@ module UpdateFileSystemRequest =
         [@ocaml.doc "The ID of the file system that you are updating."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "A string of up to 64 ASCII characters that Amazon FSx uses to ensure idempotent updates. This string is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."];
+          "A string of up to 63 ASCII characters that Amazon FSx uses to ensure idempotent updates. This string is automatically filled on your behalf when you use the Command Line Interface (CLI) or an Amazon Web Services SDK."];
       storageCapacity: StorageCapacity.t option
         [@ocaml.doc
-          "Use this parameter to increase the storage capacity of an Amazon FSx for Windows File Server, Amazon FSx for Lustre, or Amazon FSx for NetApp ONTAP file system. Specifies the storage capacity target value, in GiB, to increase the storage capacity for the file system that you're updating. You can't make a storage capacity increase request if there is an existing storage capacity increase request in progress. For Windows file systems, the storage capacity target value must be at least 10 percent greater than the current storage capacity value. To increase storage capacity, the file system must have at least 16 MBps of throughput capacity. For more information, see Managing storage capacity in the Amazon FSx for Windows File Server User Guide. For Lustre file systems, the storage capacity target value can be the following: For SCRATCH_2, PERSISTENT_1, and PERSISTENT_2 SSD deployment types, valid values are in multiples of 2400 GiB. The value must be greater than the current storage capacity. For PERSISTENT HDD file systems, valid values are multiples of 6000 GiB for 12-MBps throughput per TiB file systems and multiples of 1800 GiB for 40-MBps throughput per TiB file systems. The values must be greater than the current storage capacity. For SCRATCH_1 file systems, you can't increase the storage capacity. For more information, see Managing storage and throughput capacity in the Amazon FSx for Lustre User Guide. For ONTAP file systems, the storage capacity target value must be at least 10 percent greater than the current storage capacity value. For more information, see Managing storage capacity and provisioned IOPS in the Amazon FSx for NetApp ONTAP User Guide."];
+          "Use this parameter to increase the storage capacity of an FSx for Windows File Server, FSx for Lustre, FSx for OpenZFS, or FSx for ONTAP file system. For second-generation FSx for ONTAP file systems, you can also decrease the storage capacity. Specifies the storage capacity target value, in GiB, for the file system that you're updating. You can't make a storage capacity increase request if there is an existing storage capacity increase request in progress. For Lustre file systems, the storage capacity target value can be the following: For SCRATCH_2, PERSISTENT_1, and PERSISTENT_2 SSD deployment types, valid values are in multiples of 2400 GiB. The value must be greater than the current storage capacity. For PERSISTENT HDD file systems, valid values are multiples of 6000 GiB for 12-MBps throughput per TiB file systems and multiples of 1800 GiB for 40-MBps throughput per TiB file systems. The values must be greater than the current storage capacity. For SCRATCH_1 file systems, you can't increase the storage capacity. For more information, see Managing storage and throughput capacity in the FSx for Lustre User Guide. For FSx for OpenZFS file systems, the storage capacity target value must be at least 10 percent greater than the current storage capacity value. For more information, see Managing storage capacity in the FSx for OpenZFS User Guide. For Windows file systems, the storage capacity target value must be at least 10 percent greater than the current storage capacity value. To increase storage capacity, the file system must have at least 16 MBps of throughput capacity. For more information, see Managing storage capacity in the Amazon FSxfor Windows File Server User Guide. For ONTAP file systems, when increasing storage capacity, the storage capacity target value must be at least 10 percent greater than the current storage capacity value. When decreasing storage capacity on second-generation file systems, the target value must be at least 9 percent smaller than the current SSD storage capacity. For more information, see File system storage capacity and IOPS in the Amazon FSx for NetApp ONTAP User Guide."];
       windowsConfiguration: UpdateFileSystemWindowsConfiguration.t option
         [@ocaml.doc
           "The configuration updates for an Amazon FSx for Windows File Server file system."];
@@ -15868,7 +22649,14 @@ module UpdateFileSystemRequest =
       ontapConfiguration: UpdateFileSystemOntapConfiguration.t option ;
       openZFSConfiguration: UpdateFileSystemOpenZFSConfiguration.t option
         [@ocaml.doc
-          "The configuration updates for an Amazon FSx for OpenZFS file system."]}
+          "The configuration updates for an FSx for OpenZFS file system."];
+      storageType: StorageType.t option ;
+      fileSystemTypeVersion: FileSystemTypeVersion.t option
+        [@ocaml.doc
+          "The Lustre version you are updating an FSx for Lustre file system to. Valid values are 2.12 and 2.15. The value you choose must be newer than the file system's current Lustre version."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "Changes the network type of an FSx for OpenZFS file system."]}
     let context_ = "UpdateFileSystemRequest"
     let make ?clientRequestToken =
       fun ?storageCapacity ->
@@ -15876,17 +22664,23 @@ module UpdateFileSystemRequest =
           fun ?lustreConfiguration ->
             fun ?ontapConfiguration ->
               fun ?openZFSConfiguration ->
-                fun ~fileSystemId ->
-                  fun () ->
-                    {
-                      clientRequestToken;
-                      storageCapacity;
-                      windowsConfiguration;
-                      lustreConfiguration;
-                      ontapConfiguration;
-                      openZFSConfiguration;
-                      fileSystemId
-                    }
+                fun ?storageType ->
+                  fun ?fileSystemTypeVersion ->
+                    fun ?networkType ->
+                      fun ~fileSystemId ->
+                        fun () ->
+                          {
+                            clientRequestToken;
+                            storageCapacity;
+                            windowsConfiguration;
+                            lustreConfiguration;
+                            ontapConfiguration;
+                            openZFSConfiguration;
+                            storageType;
+                            fileSystemTypeVersion;
+                            networkType;
+                            fileSystemId
+                          }
     let to_value x =
       structure_to_value
         [("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)));
@@ -15905,9 +22699,21 @@ module UpdateFileSystemRequest =
              ~f:UpdateFileSystemOntapConfiguration.to_value));
         ("OpenZFSConfiguration",
           (Option.map x.openZFSConfiguration
-             ~f:UpdateFileSystemOpenZFSConfiguration.to_value))]
+             ~f:UpdateFileSystemOpenZFSConfiguration.to_value));
+        ("StorageType", (Option.map x.storageType ~f:StorageType.to_value));
+        ("FileSystemTypeVersion",
+          (Option.map x.fileSystemTypeVersion
+             ~f:FileSystemTypeVersion.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let fileSystemTypeVersion =
+        (Option.map ~f:FileSystemTypeVersion.of_xml)
+          (Xml.child xml_arg0 "FileSystemTypeVersion") in
+      let storageType =
+        (Option.map ~f:StorageType.of_xml) (Xml.child xml_arg0 "StorageType") in
       let openZFSConfiguration =
         (Option.map ~f:UpdateFileSystemOpenZFSConfiguration.of_xml)
           (Xml.child xml_arg0 "OpenZFSConfiguration") in
@@ -15929,30 +22735,37 @@ module UpdateFileSystemRequest =
       let fileSystemId =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
-      make ?openZFSConfiguration ?ontapConfiguration ?lustreConfiguration
+      make ?networkType ?fileSystemTypeVersion ?storageType
+        ?openZFSConfiguration ?ontapConfiguration ?lustreConfiguration
         ?windowsConfiguration ?storageCapacity ?clientRequestToken
         ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let fileSystemTypeVersion =
+        field_map json__ "FileSystemTypeVersion"
+          FileSystemTypeVersion.of_json in
+      let storageType = field_map json__ "StorageType" StorageType.of_json in
       let openZFSConfiguration =
-        field_map json "OpenZFSConfiguration"
+        field_map json__ "OpenZFSConfiguration"
           UpdateFileSystemOpenZFSConfiguration.of_json in
       let ontapConfiguration =
-        field_map json "OntapConfiguration"
+        field_map json__ "OntapConfiguration"
           UpdateFileSystemOntapConfiguration.of_json in
       let lustreConfiguration =
-        field_map json "LustreConfiguration"
+        field_map json__ "LustreConfiguration"
           UpdateFileSystemLustreConfiguration.of_json in
       let windowsConfiguration =
-        field_map json "WindowsConfiguration"
+        field_map json__ "WindowsConfiguration"
           UpdateFileSystemWindowsConfiguration.of_json in
       let storageCapacity =
-        field_map json "StorageCapacity" StorageCapacity.of_json in
+        field_map json__ "StorageCapacity" StorageCapacity.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
-      make ?openZFSConfiguration ?ontapConfiguration ?lustreConfiguration
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
+      make ?networkType ?fileSystemTypeVersion ?storageType
+        ?openZFSConfiguration ?ontapConfiguration ?lustreConfiguration
         ?windowsConfiguration ?storageCapacity ?clientRequestToken
         ~fileSystemId ()
     let to_json v = composed_to_json to_value v
@@ -15968,6 +22781,7 @@ module UpdateFileSystemResponse =
       | `FileSystemNotFound of FileSystemNotFound.t 
       | `IncompatibleParameterError of IncompatibleParameterError.t 
       | `InternalServerError of InternalServerError.t 
+      | `InvalidNetworkSettings of InvalidNetworkSettings.t 
       | `MissingFileSystemConfiguration of MissingFileSystemConfiguration.t 
       | `ServiceLimitExceeded of ServiceLimitExceeded.t 
       | `UnsupportedOperation of UnsupportedOperation.t 
@@ -15983,6 +22797,8 @@ module UpdateFileSystemResponse =
             (IncompatibleParameterError.of_json json)
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_json json)
+      | "InvalidNetworkSettings" ->
+          `InvalidNetworkSettings (InvalidNetworkSettings.of_json json)
       | "MissingFileSystemConfiguration" ->
           `MissingFileSystemConfiguration
             (MissingFileSystemConfiguration.of_json json)
@@ -16002,6 +22818,8 @@ module UpdateFileSystemResponse =
           `IncompatibleParameterError (IncompatibleParameterError.of_xml xml)
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidNetworkSettings" ->
+          `InvalidNetworkSettings (InvalidNetworkSettings.of_xml xml)
       | "MissingFileSystemConfiguration" ->
           `MissingFileSystemConfiguration
             (MissingFileSystemConfiguration.of_xml xml)
@@ -16029,6 +22847,10 @@ module UpdateFileSystemResponse =
           `Assoc
             [("error", (`String "InternalServerError"));
             ("details", (InternalServerError.to_json e))]
+      | `InvalidNetworkSettings e ->
+          `Assoc
+            [("error", (`String "InvalidNetworkSettings"));
+            ("details", (InvalidNetworkSettings.to_json e))]
       | `MissingFileSystemConfiguration e ->
           `Assoc
             [("error", (`String "MissingFileSystemConfiguration"));
@@ -16055,11 +22877,88 @@ module UpdateFileSystemResponse =
         (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
       make ?fileSystem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileSystem = field_map json "FileSystem" FileSystem.of_json in
+    let of_json json__ =
+      let fileSystem = field_map json__ "FileSystem" FileSystem.of_json in
       make ?fileSystem ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for the UpdateFileSystem operation."]
+module UpdateSnaplockConfiguration =
+  struct
+    type nonrec t =
+      {
+      auditLogVolume: Flag.t option
+        [@ocaml.doc
+          "Enables or disables the audit log volume for an FSx for ONTAP SnapLock volume. The default value is false. If you set AuditLogVolume to true, the SnapLock volume is created as an audit log volume. The minimum retention period for an audit log volume is six months. For more information, see SnapLock audit log volumes."];
+      autocommitPeriod: AutocommitPeriod.t option
+        [@ocaml.doc
+          "The configuration object for setting the autocommit period of files in an FSx for ONTAP SnapLock volume."];
+      privilegedDelete: PrivilegedDelete.t option
+        [@ocaml.doc
+          "Enables, disables, or permanently disables privileged delete on an FSx for ONTAP SnapLock Enterprise volume. Enabling privileged delete allows SnapLock administrators to delete write once, read many (WORM) files even if they have active retention periods. PERMANENTLY_DISABLED is a terminal state. If privileged delete is permanently disabled on a SnapLock volume, you can't re-enable it. The default value is DISABLED. For more information, see Privileged delete."];
+      retentionPeriod: SnaplockRetentionPeriod.t option
+        [@ocaml.doc
+          "Specifies the retention period of an FSx for ONTAP SnapLock volume."];
+      volumeAppendModeEnabled: Flag.t option
+        [@ocaml.doc
+          "Enables or disables volume-append mode on an FSx for ONTAP SnapLock volume. Volume-append mode allows you to create WORM-appendable files and write data to them incrementally. The default value is false. For more information, see Volume-append mode."]}
+    let make ?auditLogVolume =
+      fun ?autocommitPeriod ->
+        fun ?privilegedDelete ->
+          fun ?retentionPeriod ->
+            fun ?volumeAppendModeEnabled ->
+              fun () ->
+                {
+                  auditLogVolume;
+                  autocommitPeriod;
+                  privilegedDelete;
+                  retentionPeriod;
+                  volumeAppendModeEnabled
+                }
+    let to_value x =
+      structure_to_value
+        [("AuditLogVolume", (Option.map x.auditLogVolume ~f:Flag.to_value));
+        ("AutocommitPeriod",
+          (Option.map x.autocommitPeriod ~f:AutocommitPeriod.to_value));
+        ("PrivilegedDelete",
+          (Option.map x.privilegedDelete ~f:PrivilegedDelete.to_value));
+        ("RetentionPeriod",
+          (Option.map x.retentionPeriod ~f:SnaplockRetentionPeriod.to_value));
+        ("VolumeAppendModeEnabled",
+          (Option.map x.volumeAppendModeEnabled ~f:Flag.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let volumeAppendModeEnabled =
+        (Option.map ~f:Flag.of_xml)
+          (Xml.child xml_arg0 "VolumeAppendModeEnabled") in
+      let retentionPeriod =
+        (Option.map ~f:SnaplockRetentionPeriod.of_xml)
+          (Xml.child xml_arg0 "RetentionPeriod") in
+      let privilegedDelete =
+        (Option.map ~f:PrivilegedDelete.of_xml)
+          (Xml.child xml_arg0 "PrivilegedDelete") in
+      let autocommitPeriod =
+        (Option.map ~f:AutocommitPeriod.of_xml)
+          (Xml.child xml_arg0 "AutocommitPeriod") in
+      let auditLogVolume =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "AuditLogVolume") in
+      make ?volumeAppendModeEnabled ?retentionPeriod ?privilegedDelete
+        ?autocommitPeriod ?auditLogVolume ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let volumeAppendModeEnabled =
+        field_map json__ "VolumeAppendModeEnabled" Flag.of_json in
+      let retentionPeriod =
+        field_map json__ "RetentionPeriod" SnaplockRetentionPeriod.of_json in
+      let privilegedDelete =
+        field_map json__ "PrivilegedDelete" PrivilegedDelete.of_json in
+      let autocommitPeriod =
+        field_map json__ "AutocommitPeriod" AutocommitPeriod.of_json in
+      let auditLogVolume = field_map json__ "AuditLogVolume" Flag.of_json in
+      make ?volumeAppendModeEnabled ?retentionPeriod ?privilegedDelete
+        ?autocommitPeriod ?auditLogVolume ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the SnapLock configuration for an existing FSx for ONTAP volume."]
 module UpdateOntapVolumeConfiguration =
   struct
     type nonrec t =
@@ -16069,27 +22968,46 @@ module UpdateOntapVolumeConfiguration =
           "Specifies the location in the SVM's namespace where the volume is mounted. The JunctionPath must have a leading forward slash, such as /vol3."];
       securityStyle: SecurityStyle.t option
         [@ocaml.doc
-          "The security style for the volume, which can be UNIX. NTFS, or MIXED."];
+          "The security style for the volume, which can be UNIX, NTFS, or MIXED."];
       sizeInMegabytes: VolumeCapacity.t option
         [@ocaml.doc "Specifies the size of the volume in megabytes."];
       storageEfficiencyEnabled: Flag.t option
         [@ocaml.doc
           "Default is false. Set to true to enable the deduplication, compression, and compaction storage efficiency features on the volume."];
       tieringPolicy: TieringPolicy.t option
-        [@ocaml.doc "Update the volume's data tiering policy."]}
+        [@ocaml.doc "Update the volume's data tiering policy."];
+      snapshotPolicy: SnapshotPolicy.t option
+        [@ocaml.doc
+          "Specifies the snapshot policy for the volume. There are three built-in snapshot policies: default: This is the default policy. A maximum of six hourly snapshots taken five minutes past the hour. A maximum of two daily snapshots taken Monday through Saturday at 10 minutes after midnight. A maximum of two weekly snapshots taken every Sunday at 15 minutes after midnight. default-1weekly: This policy is the same as the default policy except that it only retains one snapshot from the weekly schedule. none: This policy does not take any snapshots. This policy can be assigned to volumes to prevent automatic snapshots from being taken. You can also provide the name of a custom policy that you created with the ONTAP CLI or REST API. For more information, see Snapshot policies in the Amazon FSx for NetApp ONTAP User Guide."];
+      copyTagsToBackups: Flag.t option
+        [@ocaml.doc
+          "A boolean flag indicating whether tags for the volume should be copied to backups. This value defaults to false. If it's set to true, all tags for the volume are copied to all automatic and user-initiated backups where the user doesn't specify tags. If this value is true, and you specify one or more tags, only the specified tags are copied to backups. If you specify one or more tags when creating a user-initiated backup, no tags are copied from the volume, regardless of this value."];
+      snaplockConfiguration: UpdateSnaplockConfiguration.t option
+        [@ocaml.doc
+          "The configuration object for updating the SnapLock configuration of an FSx for ONTAP SnapLock volume."];
+      sizeInBytes: VolumeCapacityBytes.t option
+        [@ocaml.doc "The configured size of the volume, in bytes."]}
     let make ?junctionPath =
       fun ?securityStyle ->
         fun ?sizeInMegabytes ->
           fun ?storageEfficiencyEnabled ->
             fun ?tieringPolicy ->
-              fun () ->
-                {
-                  junctionPath;
-                  securityStyle;
-                  sizeInMegabytes;
-                  storageEfficiencyEnabled;
-                  tieringPolicy
-                }
+              fun ?snapshotPolicy ->
+                fun ?copyTagsToBackups ->
+                  fun ?snaplockConfiguration ->
+                    fun ?sizeInBytes ->
+                      fun () ->
+                        {
+                          junctionPath;
+                          securityStyle;
+                          sizeInMegabytes;
+                          storageEfficiencyEnabled;
+                          tieringPolicy;
+                          snapshotPolicy;
+                          copyTagsToBackups;
+                          snaplockConfiguration;
+                          sizeInBytes
+                        }
     let to_value x =
       structure_to_value
         [("JunctionPath",
@@ -16101,9 +23019,29 @@ module UpdateOntapVolumeConfiguration =
         ("StorageEfficiencyEnabled",
           (Option.map x.storageEfficiencyEnabled ~f:Flag.to_value));
         ("TieringPolicy",
-          (Option.map x.tieringPolicy ~f:TieringPolicy.to_value))]
+          (Option.map x.tieringPolicy ~f:TieringPolicy.to_value));
+        ("SnapshotPolicy",
+          (Option.map x.snapshotPolicy ~f:SnapshotPolicy.to_value));
+        ("CopyTagsToBackups",
+          (Option.map x.copyTagsToBackups ~f:Flag.to_value));
+        ("SnaplockConfiguration",
+          (Option.map x.snaplockConfiguration
+             ~f:UpdateSnaplockConfiguration.to_value));
+        ("SizeInBytes",
+          (Option.map x.sizeInBytes ~f:VolumeCapacityBytes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sizeInBytes =
+        (Option.map ~f:VolumeCapacityBytes.of_xml)
+          (Xml.child xml_arg0 "SizeInBytes") in
+      let snaplockConfiguration =
+        (Option.map ~f:UpdateSnaplockConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnaplockConfiguration") in
+      let copyTagsToBackups =
+        (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "CopyTagsToBackups") in
+      let snapshotPolicy =
+        (Option.map ~f:SnapshotPolicy.of_xml)
+          (Xml.child xml_arg0 "SnapshotPolicy") in
       let tieringPolicy =
         (Option.map ~f:TieringPolicy.of_xml)
           (Xml.child xml_arg0 "TieringPolicy") in
@@ -16119,21 +23057,32 @@ module UpdateOntapVolumeConfiguration =
       let junctionPath =
         (Option.map ~f:JunctionPath.of_xml)
           (Xml.child xml_arg0 "JunctionPath") in
-      make ?tieringPolicy ?storageEfficiencyEnabled ?sizeInMegabytes
-        ?securityStyle ?junctionPath ()
+      make ?sizeInBytes ?snaplockConfiguration ?copyTagsToBackups
+        ?snapshotPolicy ?tieringPolicy ?storageEfficiencyEnabled
+        ?sizeInMegabytes ?securityStyle ?junctionPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sizeInBytes =
+        field_map json__ "SizeInBytes" VolumeCapacityBytes.of_json in
+      let snaplockConfiguration =
+        field_map json__ "SnaplockConfiguration"
+          UpdateSnaplockConfiguration.of_json in
+      let copyTagsToBackups =
+        field_map json__ "CopyTagsToBackups" Flag.of_json in
+      let snapshotPolicy =
+        field_map json__ "SnapshotPolicy" SnapshotPolicy.of_json in
       let tieringPolicy =
-        field_map json "TieringPolicy" TieringPolicy.of_json in
+        field_map json__ "TieringPolicy" TieringPolicy.of_json in
       let storageEfficiencyEnabled =
-        field_map json "StorageEfficiencyEnabled" Flag.of_json in
+        field_map json__ "StorageEfficiencyEnabled" Flag.of_json in
       let sizeInMegabytes =
-        field_map json "SizeInMegabytes" VolumeCapacity.of_json in
+        field_map json__ "SizeInMegabytes" VolumeCapacity.of_json in
       let securityStyle =
-        field_map json "SecurityStyle" SecurityStyle.of_json in
-      let junctionPath = field_map json "JunctionPath" JunctionPath.of_json in
-      make ?tieringPolicy ?storageEfficiencyEnabled ?sizeInMegabytes
-        ?securityStyle ?junctionPath ()
+        field_map json__ "SecurityStyle" SecurityStyle.of_json in
+      let junctionPath = field_map json__ "JunctionPath" JunctionPath.of_json in
+      make ?sizeInBytes ?snaplockConfiguration ?copyTagsToBackups
+        ?snapshotPolicy ?tieringPolicy ?storageEfficiencyEnabled
+        ?sizeInMegabytes ?securityStyle ?junctionPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used to specify changes to the ONTAP configuration for the volume you are updating."]
@@ -16224,21 +23173,23 @@ module UpdateOpenZFSVolumeConfiguration =
         ?recordSizeKiB ?storageCapacityQuotaGiB
         ?storageCapacityReservationGiB ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let readOnly = field_map json "ReadOnly" ReadOnly.of_json in
+    let of_json json__ =
+      let readOnly = field_map json__ "ReadOnly" ReadOnly.of_json in
       let userAndGroupQuotas =
-        field_map json "UserAndGroupQuotas" OpenZFSUserAndGroupQuotas.of_json in
-      let nfsExports = field_map json "NfsExports" OpenZFSNfsExports.of_json in
+        field_map json__ "UserAndGroupQuotas"
+          OpenZFSUserAndGroupQuotas.of_json in
+      let nfsExports =
+        field_map json__ "NfsExports" OpenZFSNfsExports.of_json in
       let dataCompressionType =
-        field_map json "DataCompressionType"
+        field_map json__ "DataCompressionType"
           OpenZFSDataCompressionType.of_json in
       let recordSizeKiB =
-        field_map json "RecordSizeKiB" IntegerRecordSizeKiB.of_json in
+        field_map json__ "RecordSizeKiB" IntegerRecordSizeKiB.of_json in
       let storageCapacityQuotaGiB =
-        field_map json "StorageCapacityQuotaGiB"
+        field_map json__ "StorageCapacityQuotaGiB"
           IntegerNoMaxFromNegativeOne.of_json in
       let storageCapacityReservationGiB =
-        field_map json "StorageCapacityReservationGiB"
+        field_map json__ "StorageCapacityReservationGiB"
           IntegerNoMaxFromNegativeOne.of_json in
       make ?readOnly ?userAndGroupQuotas ?nfsExports ?dataCompressionType
         ?recordSizeKiB ?storageCapacityQuotaGiB
@@ -16246,6 +23197,125 @@ module UpdateOpenZFSVolumeConfiguration =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used to specify changes to the OpenZFS configuration for the volume that you are updating."]
+module UpdateSharedVpcConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      enableFsxRouteTableUpdatesFromParticipantAccounts: VerboseFlag.t option
+        [@ocaml.doc
+          "Specifies whether participant accounts can create FSx for ONTAP Multi-AZ file systems in shared subnets. Set to true to enable or false to disable."];
+      clientRequestToken: ClientRequestToken.t option }
+    let make ?enableFsxRouteTableUpdatesFromParticipantAccounts =
+      fun ?clientRequestToken ->
+        fun () ->
+          {
+            enableFsxRouteTableUpdatesFromParticipantAccounts;
+            clientRequestToken
+          }
+    let to_value x =
+      structure_to_value
+        [("EnableFsxRouteTableUpdatesFromParticipantAccounts",
+           (Option.map x.enableFsxRouteTableUpdatesFromParticipantAccounts
+              ~f:VerboseFlag.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let enableFsxRouteTableUpdatesFromParticipantAccounts =
+        (Option.map ~f:VerboseFlag.of_xml)
+          (Xml.child xml_arg0
+             "EnableFsxRouteTableUpdatesFromParticipantAccounts") in
+      make ?clientRequestToken
+        ?enableFsxRouteTableUpdatesFromParticipantAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let enableFsxRouteTableUpdatesFromParticipantAccounts =
+        field_map json__ "EnableFsxRouteTableUpdatesFromParticipantAccounts"
+          VerboseFlag.of_json in
+      make ?clientRequestToken
+        ?enableFsxRouteTableUpdatesFromParticipantAccounts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures whether participant accounts in your organization can create Amazon FSx for NetApp ONTAP Multi-AZ file systems in subnets that are shared by a virtual private cloud (VPC) owner. For more information, see the Amazon FSx for NetApp ONTAP User Guide. We strongly recommend that participant-created Multi-AZ file systems in the shared VPC are deleted before you disable this feature. Once the feature is disabled, these file systems will enter a MISCONFIGURED state and behave like Single-AZ file systems. For more information, see Important considerations before disabling shared VPC support for Multi-AZ file systems."]
+module UpdateSharedVpcConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      enableFsxRouteTableUpdatesFromParticipantAccounts: VerboseFlag.t option
+        [@ocaml.doc
+          "Indicates whether participant accounts can create FSx for ONTAP Multi-AZ file systems in shared subnets."]}
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `IncompatibleParameterError of IncompatibleParameterError.t 
+      | `InternalServerError of InternalServerError.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?enableFsxRouteTableUpdatesFromParticipantAccounts =
+      fun () -> { enableFsxRouteTableUpdatesFromParticipantAccounts }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError
+            (IncompatibleParameterError.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "IncompatibleParameterError" ->
+          `IncompatibleParameterError (IncompatibleParameterError.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `IncompatibleParameterError e ->
+          `Assoc
+            [("error", (`String "IncompatibleParameterError"));
+            ("details", (IncompatibleParameterError.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EnableFsxRouteTableUpdatesFromParticipantAccounts",
+           (Option.map x.enableFsxRouteTableUpdatesFromParticipantAccounts
+              ~f:VerboseFlag.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enableFsxRouteTableUpdatesFromParticipantAccounts =
+        (Option.map ~f:VerboseFlag.of_xml)
+          (Xml.child xml_arg0
+             "EnableFsxRouteTableUpdatesFromParticipantAccounts") in
+      make ?enableFsxRouteTableUpdatesFromParticipantAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableFsxRouteTableUpdatesFromParticipantAccounts =
+        field_map json__ "EnableFsxRouteTableUpdatesFromParticipantAccounts"
+          VerboseFlag.of_json in
+      make ?enableFsxRouteTableUpdatesFromParticipantAccounts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures whether participant accounts in your organization can create Amazon FSx for NetApp ONTAP Multi-AZ file systems in subnets that are shared by a virtual private cloud (VPC) owner. For more information, see the Amazon FSx for NetApp ONTAP User Guide. We strongly recommend that participant-created Multi-AZ file systems in the shared VPC are deleted before you disable this feature. Once the feature is disabled, these file systems will enter a MISCONFIGURED state and behave like Single-AZ file systems. For more information, see Important considerations before disabling shared VPC support for Multi-AZ file systems."]
 module UpdateSnapshotRequest =
   struct
     type nonrec t =
@@ -16277,11 +23347,11 @@ module UpdateSnapshotRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~snapshotId ~name ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
-      let name = field_map_exn json "Name" SnapshotName.of_json in
+    let of_json json__ =
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
+      let name = field_map_exn json__ "Name" SnapshotName.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ~snapshotId ~name ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the name of an Amazon FSx for OpenZFS snapshot."]
@@ -16344,8 +23414,8 @@ module UpdateSnapshotResponse =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the name of an Amazon FSx for OpenZFS snapshot."]
@@ -16354,29 +23424,38 @@ module UpdateSvmActiveDirectoryConfiguration =
     type nonrec t =
       {
       selfManagedActiveDirectoryConfiguration:
-        SelfManagedActiveDirectoryConfigurationUpdates.t option }
+        SelfManagedActiveDirectoryConfigurationUpdates.t option ;
+      netBiosName: NetBiosAlias.t option
+        [@ocaml.doc
+          "Specifies an updated NetBIOS name of the AD computer object NetBiosName to which an SVM is joined."]}
     let make ?selfManagedActiveDirectoryConfiguration =
-      fun () -> { selfManagedActiveDirectoryConfiguration }
+      fun ?netBiosName ->
+        fun () -> { selfManagedActiveDirectoryConfiguration; netBiosName }
     let to_value x =
       structure_to_value
         [("SelfManagedActiveDirectoryConfiguration",
            (Option.map x.selfManagedActiveDirectoryConfiguration
-              ~f:SelfManagedActiveDirectoryConfigurationUpdates.to_value))]
+              ~f:SelfManagedActiveDirectoryConfigurationUpdates.to_value));
+        ("NetBiosName", (Option.map x.netBiosName ~f:NetBiosAlias.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let netBiosName =
+        (Option.map ~f:NetBiosAlias.of_xml)
+          (Xml.child xml_arg0 "NetBiosName") in
       let selfManagedActiveDirectoryConfiguration =
         (Option.map ~f:SelfManagedActiveDirectoryConfigurationUpdates.of_xml)
           (Xml.child xml_arg0 "SelfManagedActiveDirectoryConfiguration") in
-      make ?selfManagedActiveDirectoryConfiguration ()
+      make ?netBiosName ?selfManagedActiveDirectoryConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let netBiosName = field_map json__ "NetBiosName" NetBiosAlias.of_json in
       let selfManagedActiveDirectoryConfiguration =
-        field_map json "SelfManagedActiveDirectoryConfiguration"
+        field_map json__ "SelfManagedActiveDirectoryConfiguration"
           SelfManagedActiveDirectoryConfigurationUpdates.of_json in
-      make ?selfManagedActiveDirectoryConfiguration ()
+      make ?netBiosName ?selfManagedActiveDirectoryConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the Microsoft Active Directory (AD) configuration of an SVM joined to an AD. Please note, account credentials are not returned in the response payload."]
+       "Specifies updates to an FSx for ONTAP storage virtual machine's (SVM) Microsoft Active Directory (AD) configuration. Note that account credentials are not returned in the response payload."]
 module UpdateStorageVirtualMachineRequest =
   struct
     type nonrec t =
@@ -16384,13 +23463,13 @@ module UpdateStorageVirtualMachineRequest =
       activeDirectoryConfiguration:
         UpdateSvmActiveDirectoryConfiguration.t option
         [@ocaml.doc
-          "Updates the Microsoft Active Directory (AD) configuration for an SVM that is joined to an AD."];
+          "Specifies updates to an SVM's Microsoft Active Directory (AD) configuration."];
       clientRequestToken: ClientRequestToken.t option ;
       storageVirtualMachineId: StorageVirtualMachineId.t
         [@ocaml.doc
           "The ID of the SVM that you want to update, in the format svm-0123456789abcdef0."];
       svmAdminPassword: AdminPassword.t option
-        [@ocaml.doc "Enter a new SvmAdminPassword if you are updating it."]}
+        [@ocaml.doc "Specifies a new SvmAdminPassword."]}
     let context_ = "UpdateStorageVirtualMachineRequest"
     let make ?activeDirectoryConfiguration =
       fun ?clientRequestToken ->
@@ -16431,22 +23510,21 @@ module UpdateStorageVirtualMachineRequest =
       make ?svmAdminPassword ~storageVirtualMachineId ?clientRequestToken
         ?activeDirectoryConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let svmAdminPassword =
-        field_map json "SvmAdminPassword" AdminPassword.of_json in
+        field_map json__ "SvmAdminPassword" AdminPassword.of_json in
       let storageVirtualMachineId =
-        field_map_exn json "StorageVirtualMachineId"
+        field_map_exn json__ "StorageVirtualMachineId"
           StorageVirtualMachineId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let activeDirectoryConfiguration =
-        field_map json "ActiveDirectoryConfiguration"
+        field_map json__ "ActiveDirectoryConfiguration"
           UpdateSvmActiveDirectoryConfiguration.of_json in
       make ?svmAdminPassword ~storageVirtualMachineId ?clientRequestToken
         ?activeDirectoryConfiguration ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates an Amazon FSx for ONTAP storage virtual machine (SVM)."]
+  end[@@ocaml.doc "Updates an FSx for ONTAP storage virtual machine (SVM)."]
 module UpdateStorageVirtualMachineResponse =
   struct
     type nonrec t = {
@@ -16528,13 +23606,13 @@ module UpdateStorageVirtualMachineResponse =
           (Xml.child xml_arg0 "StorageVirtualMachine") in
       make ?storageVirtualMachine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let storageVirtualMachine =
-        field_map json "StorageVirtualMachine" StorageVirtualMachine.of_json in
+        field_map json__ "StorageVirtualMachine"
+          StorageVirtualMachine.of_json in
       make ?storageVirtualMachine ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates an Amazon FSx for ONTAP storage virtual machine (SVM)."]
+  end[@@ocaml.doc "Updates an FSx for ONTAP storage virtual machine (SVM)."]
 module UpdateVolumeRequest =
   struct
     type nonrec t =
@@ -16596,17 +23674,17 @@ module UpdateVolumeRequest =
       make ?openZFSConfiguration ?name ?ontapConfiguration ~volumeId
         ?clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openZFSConfiguration =
-        field_map json "OpenZFSConfiguration"
+        field_map json__ "OpenZFSConfiguration"
           UpdateOpenZFSVolumeConfiguration.of_json in
-      let name = field_map json "Name" VolumeName.of_json in
+      let name = field_map json__ "Name" VolumeName.of_json in
       let ontapConfiguration =
-        field_map json "OntapConfiguration"
+        field_map json__ "OntapConfiguration"
           UpdateOntapVolumeConfiguration.of_json in
-      let volumeId = field_map_exn json "VolumeId" VolumeId.of_json in
+      let volumeId = field_map_exn json__ "VolumeId" VolumeId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       make ?openZFSConfiguration ?name ?ontapConfiguration ~volumeId
         ?clientRequestToken ()
     let to_json v = composed_to_json to_value v
@@ -16690,8 +23768,9 @@ module UpdateVolumeResponse =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "Volume") in
       make ?volume ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volume = field_map json "Volume" Volume.of_json in make ?volume ()
+    let of_json json__ =
+      let volume = field_map json__ "Volume" Volume.of_json in
+      make ?volume ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the configuration of an Amazon FSx for NetApp ONTAP or Amazon FSx for OpenZFS volume."]

@@ -6,6 +6,8 @@ type ('i, 'o, 'e) t =
   (AssociateConfigurationItemsToApplicationRequest.t,
   AssociateConfigurationItemsToApplicationResponse.t,
   AssociateConfigurationItemsToApplicationResponse.error) t 
+  | BatchDeleteAgents: (BatchDeleteAgentsRequest.t,
+  BatchDeleteAgentsResponse.t, BatchDeleteAgentsResponse.error) t 
   | BatchDeleteImportData: (BatchDeleteImportDataRequest.t,
   BatchDeleteImportDataResponse.t, BatchDeleteImportDataResponse.error) t 
   | CreateApplication: (CreateApplicationRequest.t,
@@ -18,6 +20,10 @@ type ('i, 'o, 'e) t =
   DeleteTagsResponse.error) t 
   | DescribeAgents: (DescribeAgentsRequest.t, DescribeAgentsResponse.t,
   DescribeAgentsResponse.error) t 
+  | DescribeBatchDeleteConfigurationTask:
+  (DescribeBatchDeleteConfigurationTaskRequest.t,
+  DescribeBatchDeleteConfigurationTaskResponse.t,
+  DescribeBatchDeleteConfigurationTaskResponse.error) t 
   | DescribeConfigurations: (DescribeConfigurationsRequest.t,
   DescribeConfigurationsResponse.t, DescribeConfigurationsResponse.error) t 
   | DescribeContinuousExports: (DescribeContinuousExportsRequest.t,
@@ -44,6 +50,10 @@ type ('i, 'o, 'e) t =
   ListConfigurationsResponse.t, ListConfigurationsResponse.error) t 
   | ListServerNeighbors: (ListServerNeighborsRequest.t,
   ListServerNeighborsResponse.t, ListServerNeighborsResponse.error) t 
+  | StartBatchDeleteConfigurationTask:
+  (StartBatchDeleteConfigurationTaskRequest.t,
+  StartBatchDeleteConfigurationTaskResponse.t,
+  StartBatchDeleteConfigurationTaskResponse.error) t 
   | StartContinuousExport: (StartContinuousExportRequest.t,
   StartContinuousExportResponse.t, StartContinuousExportResponse.error) t 
   | StartDataCollectionByAgentIds: (StartDataCollectionByAgentIdsRequest.t,
@@ -63,12 +73,14 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateConfigurationItemsToApplication -> `POST
+  | BatchDeleteAgents -> `POST
   | BatchDeleteImportData -> `POST
   | CreateApplication -> `POST
   | CreateTags -> `POST
   | DeleteApplications -> `POST
   | DeleteTags -> `POST
   | DescribeAgents -> `POST
+  | DescribeBatchDeleteConfigurationTask -> `POST
   | DescribeConfigurations -> `POST
   | DescribeContinuousExports -> `POST
   | DescribeExportConfigurations -> `POST
@@ -80,6 +92,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetDiscoverySummary -> `POST
   | ListConfigurations -> `POST
   | ListServerNeighbors -> `POST
+  | StartBatchDeleteConfigurationTask -> `POST
   | StartContinuousExport -> `POST
   | StartDataCollectionByAgentIds -> `POST
   | StartExportTask -> `POST
@@ -92,12 +105,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AssociateConfigurationItemsToApplication ->
           (Format.kasprintf Uri.of_string) "/"
+      | BatchDeleteAgents -> (Format.kasprintf Uri.of_string) "/"
       | BatchDeleteImportData -> (Format.kasprintf Uri.of_string) "/"
       | CreateApplication -> (Format.kasprintf Uri.of_string) "/"
       | CreateTags -> (Format.kasprintf Uri.of_string) "/"
       | DeleteApplications -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTags -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAgents -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeBatchDeleteConfigurationTask ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeConfigurations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeContinuousExports -> (Format.kasprintf Uri.of_string) "/"
       | DescribeExportConfigurations -> (Format.kasprintf Uri.of_string) "/"
@@ -110,6 +126,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetDiscoverySummary -> (Format.kasprintf Uri.of_string) "/"
       | ListConfigurations -> (Format.kasprintf Uri.of_string) "/"
       | ListServerNeighbors -> (Format.kasprintf Uri.of_string) "/"
+      | StartBatchDeleteConfigurationTask ->
+          (Format.kasprintf Uri.of_string) "/"
       | StartContinuousExport -> (Format.kasprintf Uri.of_string) "/"
       | StartDataCollectionByAgentIds -> (Format.kasprintf Uri.of_string) "/"
       | StartExportTask -> (Format.kasprintf Uri.of_string) "/"
@@ -128,6 +146,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSPoseidonService_V2015_11_01.AssociateConfigurationItemsToApplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchDeleteAgents ->
+      let json = BatchDeleteAgentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSPoseidonService_V2015_11_01.BatchDeleteAgents")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchDeleteImportData ->
       let json = BatchDeleteImportDataRequest.to_json req in
@@ -179,6 +206,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSPoseidonService_V2015_11_01.DescribeAgents")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeBatchDeleteConfigurationTask ->
+      let json = DescribeBatchDeleteConfigurationTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSPoseidonService_V2015_11_01.DescribeBatchDeleteConfigurationTask")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeConfigurations ->
       let json = DescribeConfigurationsRequest.to_json req in
@@ -279,6 +315,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSPoseidonService_V2015_11_01.ListServerNeighbors")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartBatchDeleteConfigurationTask ->
+      let json = StartBatchDeleteConfigurationTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSPoseidonService_V2015_11_01.StartBatchDeleteConfigurationTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartContinuousExport ->
       let json = StartContinuousExportRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -373,6 +418,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 AssociateConfigurationItemsToApplicationResponse.error_of_json))
+  | BatchDeleteAgents ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchDeleteAgentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some BatchDeleteAgentsResponse.error_of_json))
   | BatchDeleteImportData ->
       if is_success
       then
@@ -416,6 +469,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeAgentsResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeAgentsResponse.error_of_json))
+  | DescribeBatchDeleteConfigurationTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeBatchDeleteConfigurationTaskResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeBatchDeleteConfigurationTaskResponse.error_of_json))
   | DescribeConfigurations ->
       if is_success
       then
@@ -508,6 +570,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListServerNeighborsResponse.error_of_json))
+  | StartBatchDeleteConfigurationTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartBatchDeleteConfigurationTaskResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartBatchDeleteConfigurationTaskResponse.error_of_json))
   | StartContinuousExport ->
       if is_success
       then

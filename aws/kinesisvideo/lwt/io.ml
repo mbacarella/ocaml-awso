@@ -15,18 +15,35 @@ let create_signaling_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSignalingChannel input
 let create_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStream input
+let delete_edge_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteEdgeConfiguration input
 let delete_signaling_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSignalingChannel input
 let delete_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStream input
+let describe_edge_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeEdgeConfiguration input
+let describe_image_generation_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeImageGenerationConfiguration
+    input
+let describe_mapped_resource_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMappedResourceConfiguration input
+let describe_media_storage_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMediaStorageConfiguration input
+let describe_notification_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeNotificationConfiguration input
 let describe_signaling_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSignalingChannel input
 let describe_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStream input
+let describe_stream_storage_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeStreamStorageConfiguration input
 let get_data_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDataEndpoint input
 let get_signaling_channel_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSignalingChannelEndpoint input
+let list_edge_agent_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListEdgeAgentConfigurations input
 let list_signaling_channels ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSignalingChannels input
 let list_streams ?endpoint_url ?cfg input =
@@ -35,6 +52,8 @@ let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_tags_for_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForStream input
+let start_edge_configuration_update ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartEdgeConfigurationUpdate input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let tag_stream ?endpoint_url ?cfg input =
@@ -45,7 +64,15 @@ let untag_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagStream input
 let update_data_retention ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDataRetention input
+let update_image_generation_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateImageGenerationConfiguration input
+let update_media_storage_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateMediaStorageConfiguration input
+let update_notification_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateNotificationConfiguration input
 let update_signaling_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSignalingChannel input
 let update_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateStream input
+let update_stream_storage_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateStreamStorageConfiguration input

@@ -21,6 +21,8 @@ let batch_stop_update_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchStopUpdateAction input
 let complete_migration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CompleteMigration input
+let copy_serverless_cache_snapshot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CopyServerlessCacheSnapshot input
 let copy_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopySnapshot input
 let create_cache_cluster ?endpoint_url ?cfg input =
@@ -35,6 +37,10 @@ let create_global_replication_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGlobalReplicationGroup input
 let create_replication_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateReplicationGroup input
+let create_serverless_cache ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateServerlessCache input
+let create_serverless_cache_snapshot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateServerlessCacheSnapshot input
 let create_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSnapshot input
 let create_user ?endpoint_url ?cfg input =
@@ -59,6 +65,10 @@ let delete_global_replication_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGlobalReplicationGroup input
 let delete_replication_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteReplicationGroup input
+let delete_serverless_cache ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteServerlessCache input
+let delete_serverless_cache_snapshot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteServerlessCacheSnapshot input
 let delete_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSnapshot input
 let delete_user ?endpoint_url ?cfg input =
@@ -89,6 +99,10 @@ let describe_reserved_cache_nodes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReservedCacheNodes input
 let describe_reserved_cache_nodes_offerings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReservedCacheNodesOfferings input
+let describe_serverless_cache_snapshots ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeServerlessCacheSnapshots input
+let describe_serverless_caches ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeServerlessCaches input
 let describe_service_updates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeServiceUpdates input
 let describe_snapshots ?endpoint_url ?cfg input =
@@ -101,6 +115,8 @@ let describe_users ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeUsers input
 let disassociate_global_replication_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateGlobalReplicationGroup input
+let export_serverless_cache_snapshot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExportServerlessCacheSnapshot input
 let failover_global_replication_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.FailoverGlobalReplicationGroup input
 let increase_node_groups_in_global_replication_group ?endpoint_url ?cfg input
@@ -126,6 +142,8 @@ let modify_replication_group ?endpoint_url ?cfg input =
 let modify_replication_group_shard_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyReplicationGroupShardConfiguration
     input
+let modify_serverless_cache ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyServerlessCache input
 let modify_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyUser input
 let modify_user_group ?endpoint_url ?cfg input =
@@ -147,3 +165,5 @@ let start_migration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMigration input
 let test_failover ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TestFailover input
+let test_migration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TestMigration input

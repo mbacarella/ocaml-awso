@@ -42,6 +42,12 @@ val create_repository :
       CreateRepositoryRequest.t ->
         (CreateRepositoryResponse.t, CreateRepositoryResponse.error) Result.t
           Lwt.t
+val create_repository_creation_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRepositoryCreationTemplateRequest.t ->
+        (CreateRepositoryCreationTemplateResponse.t,
+          CreateRepositoryCreationTemplateResponse.error) Result.t Lwt.t
 val delete_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -66,12 +72,30 @@ val delete_repository :
       DeleteRepositoryRequest.t ->
         (DeleteRepositoryResponse.t, DeleteRepositoryResponse.error) Result.t
           Lwt.t
+val delete_repository_creation_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRepositoryCreationTemplateRequest.t ->
+        (DeleteRepositoryCreationTemplateResponse.t,
+          DeleteRepositoryCreationTemplateResponse.error) Result.t Lwt.t
 val delete_repository_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRepositoryPolicyRequest.t ->
         (DeleteRepositoryPolicyResponse.t,
           DeleteRepositoryPolicyResponse.error) Result.t Lwt.t
+val delete_signing_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteSigningConfigurationRequest.t ->
+        (DeleteSigningConfigurationResponse.t,
+          DeleteSigningConfigurationResponse.error) Result.t Lwt.t
+val deregister_pull_time_update_exclusion :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeregisterPullTimeUpdateExclusionRequest.t ->
+        (DeregisterPullTimeUpdateExclusionResponse.t,
+          DeregisterPullTimeUpdateExclusionResponse.error) Result.t Lwt.t
 val describe_image_replication_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -84,6 +108,12 @@ val describe_image_scan_findings :
       DescribeImageScanFindingsRequest.t ->
         (DescribeImageScanFindingsResponse.t,
           DescribeImageScanFindingsResponse.error) Result.t Lwt.t
+val describe_image_signing_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeImageSigningStatusRequest.t ->
+        (DescribeImageSigningStatusResponse.t,
+          DescribeImageSigningStatusResponse.error) Result.t Lwt.t
 val describe_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -107,6 +137,18 @@ val describe_repositories :
     ?cfg:Awso.Cfg.t ->
       DescribeRepositoriesRequest.t ->
         (DescribeRepositoriesResponse.t, DescribeRepositoriesResponse.error)
+          Result.t Lwt.t
+val describe_repository_creation_templates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRepositoryCreationTemplatesRequest.t ->
+        (DescribeRepositoryCreationTemplatesResponse.t,
+          DescribeRepositoryCreationTemplatesResponse.error) Result.t Lwt.t
+val get_account_setting :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAccountSettingRequest.t ->
+        (GetAccountSettingResponse.t, GetAccountSettingResponse.error)
           Result.t Lwt.t
 val get_authorization_token :
   ?endpoint_url:string ->
@@ -150,22 +192,46 @@ val get_repository_policy :
       GetRepositoryPolicyRequest.t ->
         (GetRepositoryPolicyResponse.t, GetRepositoryPolicyResponse.error)
           Result.t Lwt.t
+val get_signing_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSigningConfigurationRequest.t ->
+        (GetSigningConfigurationResponse.t,
+          GetSigningConfigurationResponse.error) Result.t Lwt.t
 val initiate_layer_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateLayerUploadRequest.t ->
         (InitiateLayerUploadResponse.t, InitiateLayerUploadResponse.error)
           Result.t Lwt.t
+val list_image_referrers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListImageReferrersRequest.t ->
+        (ListImageReferrersResponse.t, ListImageReferrersResponse.error)
+          Result.t Lwt.t
 val list_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImagesRequest.t ->
         (ListImagesResponse.t, ListImagesResponse.error) Result.t Lwt.t
+val list_pull_time_update_exclusions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPullTimeUpdateExclusionsRequest.t ->
+        (ListPullTimeUpdateExclusionsResponse.t,
+          ListPullTimeUpdateExclusionsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
+val put_account_setting :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutAccountSettingRequest.t ->
+        (PutAccountSettingResponse.t, PutAccountSettingResponse.error)
           Result.t Lwt.t
 val put_image :
   ?endpoint_url:string ->
@@ -208,6 +274,18 @@ val put_replication_configuration :
       PutReplicationConfigurationRequest.t ->
         (PutReplicationConfigurationResponse.t,
           PutReplicationConfigurationResponse.error) Result.t Lwt.t
+val put_signing_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutSigningConfigurationRequest.t ->
+        (PutSigningConfigurationResponse.t,
+          PutSigningConfigurationResponse.error) Result.t Lwt.t
+val register_pull_time_update_exclusion :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RegisterPullTimeUpdateExclusionRequest.t ->
+        (RegisterPullTimeUpdateExclusionResponse.t,
+          RegisterPullTimeUpdateExclusionResponse.error) Result.t Lwt.t
 val set_repository_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -236,9 +314,33 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
+val update_image_storage_class :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateImageStorageClassRequest.t ->
+        (UpdateImageStorageClassResponse.t,
+          UpdateImageStorageClassResponse.error) Result.t Lwt.t
+val update_pull_through_cache_rule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePullThroughCacheRuleRequest.t ->
+        (UpdatePullThroughCacheRuleResponse.t,
+          UpdatePullThroughCacheRuleResponse.error) Result.t Lwt.t
+val update_repository_creation_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRepositoryCreationTemplateRequest.t ->
+        (UpdateRepositoryCreationTemplateResponse.t,
+          UpdateRepositoryCreationTemplateResponse.error) Result.t Lwt.t
 val upload_layer_part :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadLayerPartRequest.t ->
         (UploadLayerPartResponse.t, UploadLayerPartResponse.error) Result.t
           Lwt.t
+val validate_pull_through_cache_rule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ValidatePullThroughCacheRuleRequest.t ->
+        (ValidatePullThroughCacheRuleResponse.t,
+          ValidatePullThroughCacheRuleResponse.error) Result.t Lwt.t

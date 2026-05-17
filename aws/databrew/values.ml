@@ -117,6 +117,8 @@ module ParameterMap =
                        (ParameterValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -360,6 +362,8 @@ module ValuesMap =
                        (ConditionValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -410,9 +414,9 @@ module StatisticOverride =
           (Xml.child_exn ~context:context_ xml_arg0 "Statistic") in
       make ~parameters ~statistic ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map_exn json "Parameters" ParameterMap.of_json in
-      let statistic = field_map_exn json "Statistic" Statistic.of_json in
+    let of_json json__ =
+      let parameters = field_map_exn json__ "Parameters" ParameterMap.of_json in
+      let statistic = field_map_exn json__ "Statistic" Statistic.of_json in
       make ~parameters ~statistic ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Override of a particular evaluation for a profile job."]
@@ -449,11 +453,11 @@ module ConditionExpression =
           (Xml.child_exn ~context:context_ xml_arg0 "Condition") in
       make ~targetColumn ?value ~condition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetColumn =
-        field_map_exn json "TargetColumn" TargetColumn.of_json in
-      let value = field_map json "Value" ConditionValue.of_json in
-      let condition = field_map_exn json "Condition" Condition.of_json in
+        field_map_exn json__ "TargetColumn" TargetColumn.of_json in
+      let value = field_map json__ "Value" ConditionValue.of_json in
+      let condition = field_map_exn json__ "Condition" Condition.of_json in
       make ~targetColumn ?value ~condition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -524,10 +528,10 @@ module S3Location =
         Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?bucketOwner ?key ~bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bucketOwner = field_map json "BucketOwner" BucketOwner.of_json in
-      let key = field_map json "Key" Key.of_json in
-      let bucket = field_map_exn json "Bucket" Bucket.of_json in
+    let of_json json__ =
+      let bucketOwner = field_map json__ "BucketOwner" BucketOwner.of_json in
+      let key = field_map json__ "Key" Key.of_json in
+      let bucket = field_map_exn json__ "Bucket" Bucket.of_json in
       make ?bucketOwner ?key ~bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -549,8 +553,8 @@ module CsvOutputOptions =
         (Option.map ~f:Delimiter.of_xml) (Xml.child xml_arg0 "Delimiter") in
       make ?delimiter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let delimiter = field_map json "Delimiter" Delimiter.of_json in
+    let of_json json__ =
+      let delimiter = field_map json__ "Delimiter" Delimiter.of_json in
       make ?delimiter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -639,11 +643,11 @@ module DatetimeOptions =
           (Xml.child_exn ~context:context_ xml_arg0 "Format") in
       make ?localeCode ?timezoneOffset ~format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let localeCode = field_map json "LocaleCode" LocaleCode.of_json in
+    let of_json json__ =
+      let localeCode = field_map json__ "LocaleCode" LocaleCode.of_json in
       let timezoneOffset =
-        field_map json "TimezoneOffset" TimezoneOffset.of_json in
-      let format = field_map_exn json "Format" DatetimeFormat.of_json in
+        field_map json__ "TimezoneOffset" TimezoneOffset.of_json in
+      let format = field_map_exn json__ "Format" DatetimeFormat.of_json in
       make ?localeCode ?timezoneOffset ~format ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -675,9 +679,9 @@ module FilterExpression =
           (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
       make ~valuesMap ~expression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let valuesMap = field_map_exn json "ValuesMap" ValuesMap.of_json in
-      let expression = field_map_exn json "Expression" Expression.of_json in
+    let of_json json__ =
+      let valuesMap = field_map_exn json__ "ValuesMap" ValuesMap.of_json in
+      let expression = field_map_exn json__ "Expression" Expression.of_json in
       make ~valuesMap ~expression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -750,9 +754,9 @@ module ColumnSelector =
         (Option.map ~f:ColumnName.of_xml) (Xml.child xml_arg0 "Regex") in
       make ?name ?regex ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" ColumnName.of_json in
-      let regex = field_map json "Regex" ColumnName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" ColumnName.of_json in
+      let regex = field_map json__ "Regex" ColumnName.of_json in
       make ?name ?regex ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -762,6 +766,9 @@ module StatisticList =
     type nonrec t = Statistic.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Statistic.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -787,6 +794,9 @@ module StatisticOverrideList =
     type nonrec t = StatisticOverride.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StatisticOverride.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -812,6 +822,9 @@ module ConditionExpressionList =
   struct
     type nonrec t = ConditionExpression.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConditionExpression.to_value)) |>
         (fun x -> `List x)
@@ -859,9 +872,9 @@ module RecipeAction =
           (Xml.child_exn ~context:context_ xml_arg0 "Operation") in
       make ?parameters ~operation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParameterMap.of_json in
-      let operation = field_map_exn json "Operation" Operation.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParameterMap.of_json in
+      let operation = field_map_exn json__ "Operation" Operation.of_json in
       make ?parameters ~operation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -930,10 +943,10 @@ module DatabaseTableOutputOptions =
           (Xml.child xml_arg0 "TempDirectory") in
       make ~tableName ?tempDirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableName =
-        field_map_exn json "TableName" DatabaseTableName.of_json in
-      let tempDirectory = field_map json "TempDirectory" S3Location.of_json in
+        field_map_exn json__ "TableName" DatabaseTableName.of_json in
+      let tempDirectory = field_map json__ "TempDirectory" S3Location.of_json in
       make ~tableName ?tempDirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -970,8 +983,8 @@ module S3TableOutputOptions =
           (Xml.child_exn ~context:context_ xml_arg0 "Location") in
       make ~location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" S3Location.of_json in
+    let of_json json__ =
+      let location = field_map_exn json__ "Location" S3Location.of_json in
       make ~location ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1036,6 +1049,9 @@ module ColumnNameList =
     type nonrec t = ColumnName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:200); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1181,8 +1197,9 @@ module OutputFormatOptions =
         (Option.map ~f:CsvOutputOptions.of_xml) (Xml.child xml_arg0 "Csv") in
       make ?csv ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let csv = field_map json "Csv" CsvOutputOptions.of_json in make ?csv ()
+    let of_json json__ =
+      let csv = field_map json__ "Csv" CsvOutputOptions.of_json in
+      make ?csv ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a set of options that define the structure of comma-separated (CSV) job output."]
@@ -1243,6 +1260,9 @@ module SheetIndexList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SheetIndex.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1271,6 +1291,9 @@ module SheetNameList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SheetName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1437,13 +1460,13 @@ module DatasetParameter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?filter ?createColumn ?datetimeOptions ~type_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map json "Filter" FilterExpression.of_json in
-      let createColumn = field_map json "CreateColumn" CreateColumn.of_json in
+    let of_json json__ =
+      let filter = field_map json__ "Filter" FilterExpression.of_json in
+      let createColumn = field_map json__ "CreateColumn" CreateColumn.of_json in
       let datetimeOptions =
-        field_map json "DatetimeOptions" DatetimeOptions.of_json in
-      let type_ = field_map_exn json "Type" ParameterType.of_json in
-      let name = field_map_exn json "Name" PathParameterName.of_json in
+        field_map json__ "DatetimeOptions" DatetimeOptions.of_json in
+      let type_ = field_map_exn json__ "Type" ParameterType.of_json in
+      let name = field_map_exn json__ "Name" PathParameterName.of_json in
       make ?filter ?createColumn ?datetimeOptions ~type_ ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1523,6 +1546,9 @@ module ColumnSelectorList =
     type nonrec t = ColumnSelector.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnSelector.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1571,11 +1597,11 @@ module StatisticsConfiguration =
           (Xml.child xml_arg0 "IncludedStatistics") in
       make ?overrides ?includedStatistics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let overrides =
-        field_map json "Overrides" StatisticOverrideList.of_json in
+        field_map json__ "Overrides" StatisticOverrideList.of_json in
       let includedStatistics =
-        field_map json "IncludedStatistics" StatisticList.of_json in
+        field_map json__ "IncludedStatistics" StatisticList.of_json in
       make ?overrides ?includedStatistics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1599,8 +1625,9 @@ module AllowedStatistics =
           (Xml.child_exn ~context:context_ xml_arg0 "Statistics") in
       make ~statistics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statistics = field_map_exn json "Statistics" StatisticList.of_json in
+    let of_json json__ =
+      let statistics =
+        field_map_exn json__ "Statistics" StatisticList.of_json in
       make ~statistics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1704,10 +1731,11 @@ module RecipeStep =
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ?conditionExpressions ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conditionExpressions =
-        field_map json "ConditionExpressions" ConditionExpressionList.of_json in
-      let action = field_map_exn json "Action" RecipeAction.of_json in
+        field_map json__ "ConditionExpressions"
+          ConditionExpressionList.of_json in
+      let action = field_map_exn json__ "Action" RecipeAction.of_json in
       make ?conditionExpressions ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1827,15 +1855,16 @@ module DataCatalogOutput =
       make ?overwrite ?databaseOptions ?s3Options ~tableName ~databaseName
         ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let overwrite = field_map json "Overwrite" OverwriteOutput.of_json in
+    let of_json json__ =
+      let overwrite = field_map json__ "Overwrite" OverwriteOutput.of_json in
       let databaseOptions =
-        field_map json "DatabaseOptions" DatabaseTableOutputOptions.of_json in
-      let s3Options = field_map json "S3Options" S3TableOutputOptions.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+        field_map json__ "DatabaseOptions" DatabaseTableOutputOptions.of_json in
+      let s3Options =
+        field_map json__ "S3Options" S3TableOutputOptions.of_json in
+      let tableName = field_map_exn json__ "TableName" TableName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" DatabaseName.of_json in
-      let catalogId = field_map json "CatalogId" CatalogId.of_json in
+        field_map_exn json__ "DatabaseName" DatabaseName.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogId.of_json in
       make ?overwrite ?databaseOptions ?s3Options ~tableName ~databaseName
         ?catalogId ()
     let to_json v = composed_to_json to_value v
@@ -1881,14 +1910,14 @@ module DatabaseOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "GlueConnectionName") in
       make ?databaseOutputMode ~databaseOptions ~glueConnectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let databaseOutputMode =
-        field_map json "DatabaseOutputMode" DatabaseOutputMode.of_json in
+        field_map json__ "DatabaseOutputMode" DatabaseOutputMode.of_json in
       let databaseOptions =
-        field_map_exn json "DatabaseOptions"
+        field_map_exn json__ "DatabaseOptions"
           DatabaseTableOutputOptions.of_json in
       let glueConnectionName =
-        field_map_exn json "GlueConnectionName" GlueConnectionName.of_json in
+        field_map_exn json__ "GlueConnectionName" GlueConnectionName.of_json in
       make ?databaseOutputMode ~databaseOptions ~glueConnectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2011,18 +2040,18 @@ module Output =
       make ?maxOutputFiles ?formatOptions ?overwrite ~location
         ?partitionColumns ?format ?compressionFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxOutputFiles =
-        field_map json "MaxOutputFiles" MaxOutputFiles.of_json in
+        field_map json__ "MaxOutputFiles" MaxOutputFiles.of_json in
       let formatOptions =
-        field_map json "FormatOptions" OutputFormatOptions.of_json in
-      let overwrite = field_map json "Overwrite" OverwriteOutput.of_json in
-      let location = field_map_exn json "Location" S3Location.of_json in
+        field_map json__ "FormatOptions" OutputFormatOptions.of_json in
+      let overwrite = field_map json__ "Overwrite" OverwriteOutput.of_json in
+      let location = field_map_exn json__ "Location" S3Location.of_json in
       let partitionColumns =
-        field_map json "PartitionColumns" ColumnNameList.of_json in
-      let format = field_map json "Format" OutputFormat.of_json in
+        field_map json__ "PartitionColumns" ColumnNameList.of_json in
+      let format = field_map json__ "Format" OutputFormat.of_json in
       let compressionFormat =
-        field_map json "CompressionFormat" CompressionFormat.of_json in
+        field_map json__ "CompressionFormat" CompressionFormat.of_json in
       make ?maxOutputFiles ?formatOptions ?overwrite ~location
         ?partitionColumns ?format ?compressionFormat ()
     let to_json v = composed_to_json to_value v
@@ -2091,10 +2120,10 @@ module ValidationConfiguration =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RulesetArn") in
       make ?validationMode ~rulesetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validationMode =
-        field_map json "ValidationMode" ValidationMode.of_json in
-      let rulesetArn = field_map_exn json "RulesetArn" Arn.of_json in
+        field_map json__ "ValidationMode" ValidationMode.of_json in
+      let rulesetArn = field_map_exn json__ "RulesetArn" Arn.of_json in
       make ?validationMode ~rulesetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2123,9 +2152,9 @@ module CsvOptions =
         (Option.map ~f:Delimiter.of_xml) (Xml.child xml_arg0 "Delimiter") in
       make ?headerRow ?delimiter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let headerRow = field_map json "HeaderRow" HeaderRow.of_json in
-      let delimiter = field_map json "Delimiter" Delimiter.of_json in
+    let of_json json__ =
+      let headerRow = field_map json__ "HeaderRow" HeaderRow.of_json in
+      let delimiter = field_map json__ "Delimiter" Delimiter.of_json in
       make ?headerRow ?delimiter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2164,10 +2193,11 @@ module ExcelOptions =
           (Xml.child xml_arg0 "SheetNames") in
       make ?headerRow ?sheetIndexes ?sheetNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let headerRow = field_map json "HeaderRow" HeaderRow.of_json in
-      let sheetIndexes = field_map json "SheetIndexes" SheetIndexList.of_json in
-      let sheetNames = field_map json "SheetNames" SheetNameList.of_json in
+    let of_json json__ =
+      let headerRow = field_map json__ "HeaderRow" HeaderRow.of_json in
+      let sheetIndexes =
+        field_map json__ "SheetIndexes" SheetIndexList.of_json in
+      let sheetNames = field_map json__ "SheetNames" SheetNameList.of_json in
       make ?headerRow ?sheetIndexes ?sheetNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2189,8 +2219,8 @@ module JsonOptions =
         (Option.map ~f:MultiLine.of_xml) (Xml.child xml_arg0 "MultiLine") in
       make ?multiLine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let multiLine = field_map json "MultiLine" MultiLine.of_json in
+    let of_json json__ =
+      let multiLine = field_map json__ "MultiLine" MultiLine.of_json in
       make ?multiLine ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2238,12 +2268,12 @@ module DataCatalogInputDefinition =
         (Option.map ~f:CatalogId.of_xml) (Xml.child xml_arg0 "CatalogId") in
       make ?tempDirectory ~tableName ~databaseName ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tempDirectory = field_map json "TempDirectory" S3Location.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let tempDirectory = field_map json__ "TempDirectory" S3Location.of_json in
+      let tableName = field_map_exn json__ "TableName" TableName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" DatabaseName.of_json in
-      let catalogId = field_map json "CatalogId" CatalogId.of_json in
+        field_map_exn json__ "DatabaseName" DatabaseName.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogId.of_json in
       make ?tempDirectory ~tableName ~databaseName ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2298,13 +2328,13 @@ module DatabaseInputDefinition =
       make ?queryString ?tempDirectory ?databaseTableName ~glueConnectionName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryString = field_map json "QueryString" QueryString.of_json in
-      let tempDirectory = field_map json "TempDirectory" S3Location.of_json in
+    let of_json json__ =
+      let queryString = field_map json__ "QueryString" QueryString.of_json in
+      let tempDirectory = field_map json__ "TempDirectory" S3Location.of_json in
       let databaseTableName =
-        field_map json "DatabaseTableName" DatabaseTableName.of_json in
+        field_map json__ "DatabaseTableName" DatabaseTableName.of_json in
       let glueConnectionName =
-        field_map_exn json "GlueConnectionName" GlueConnectionName.of_json in
+        field_map_exn json__ "GlueConnectionName" GlueConnectionName.of_json in
       make ?queryString ?tempDirectory ?databaseTableName ~glueConnectionName
         ()
     let to_json v = composed_to_json to_value v
@@ -2327,8 +2357,8 @@ module Metadata =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SourceArn") in
       make ?sourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceArn = field_map json "SourceArn" Arn.of_json in
+    let of_json json__ =
+      let sourceArn = field_map json__ "SourceArn" Arn.of_json in
       make ?sourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2362,10 +2392,10 @@ module FilesLimit =
         MaxFiles.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MaxFiles") in
       make ?order ?orderedBy ~maxFiles ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let order = field_map json "Order" Order.of_json in
-      let orderedBy = field_map json "OrderedBy" OrderedBy.of_json in
-      let maxFiles = field_map_exn json "MaxFiles" MaxFiles.of_json in
+    let of_json json__ =
+      let order = field_map json__ "Order" Order.of_json in
+      let orderedBy = field_map json__ "OrderedBy" OrderedBy.of_json in
+      let maxFiles = field_map_exn json__ "MaxFiles" MaxFiles.of_json in
       make ?order ?orderedBy ~maxFiles ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2398,6 +2428,8 @@ module PathParametersMap =
                        (DatasetParameter.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2466,10 +2498,10 @@ module Threshold =
           (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       make ?unit ?type_ ~value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" ThresholdUnit.of_json in
-      let type_ = field_map json "Type" ThresholdType.of_json in
-      let value = field_map_exn json "Value" ThresholdValue.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" ThresholdUnit.of_json in
+      let type_ = field_map json__ "Type" ThresholdType.of_json in
+      let value = field_map_exn json__ "Value" ThresholdValue.of_json in
       make ?unit ?type_ ~value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2503,10 +2535,10 @@ module ColumnStatisticsConfiguration =
           (Xml.child xml_arg0 "Selectors") in
       make ~statistics ?selectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statistics =
-        field_map_exn json "Statistics" StatisticsConfiguration.of_json in
-      let selectors = field_map json "Selectors" ColumnSelectorList.of_json in
+        field_map_exn json__ "Statistics" StatisticsConfiguration.of_json in
+      let selectors = field_map json__ "Selectors" ColumnSelectorList.of_json in
       make ~statistics ?selectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2516,6 +2548,9 @@ module AllowedStatisticList =
     type nonrec t = AllowedStatistics.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AllowedStatistics.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2542,6 +2577,9 @@ module EntityTypeList =
     type nonrec t = EntityType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2624,6 +2662,9 @@ module JobNameList =
     type nonrec t = JobName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2701,6 +2742,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2803,6 +2846,9 @@ module RecipeStepList =
   struct
     type nonrec t = RecipeStep.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecipeStep.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2876,9 +2922,9 @@ module Sample =
         (Option.map ~f:SampleSize.of_xml) (Xml.child xml_arg0 "Size") in
       make ~type_ ?size ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" SampleType.of_json in
-      let size = field_map json "Size" SampleSize.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" SampleType.of_json in
+      let size = field_map json__ "Size" SampleSize.of_json in
       make ~type_ ?size ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2888,6 +2934,9 @@ module DataCatalogOutputList =
     type nonrec t = DataCatalogOutput.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataCatalogOutput.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2914,6 +2963,9 @@ module DatabaseOutputList =
     type nonrec t = DatabaseOutput.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatabaseOutput.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3000,9 +3052,9 @@ module JobSample =
         (Option.map ~f:SampleMode.of_xml) (Xml.child xml_arg0 "Mode") in
       make ?size ?mode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let size = field_map json "Size" JobSize.of_json in
-      let mode = field_map json "Mode" SampleMode.of_json in
+    let of_json json__ =
+      let size = field_map json__ "Size" JobSize.of_json in
+      let mode = field_map json__ "Mode" SampleMode.of_json in
       make ?size ?mode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3091,6 +3143,9 @@ module OutputList =
     type nonrec t = Output.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Output.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3133,10 +3188,10 @@ module RecipeReference =
         RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?recipeVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipeVersion =
-        field_map json "RecipeVersion" RecipeVersion.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
+        field_map json__ "RecipeVersion" RecipeVersion.of_json in
+      let name = field_map_exn json__ "Name" RecipeName.of_json in
       make ?recipeVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the name and version of a DataBrew recipe."]
@@ -3159,6 +3214,9 @@ module ValidationConfigurationList =
     type nonrec t = ValidationConfiguration.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -3338,10 +3396,10 @@ module FormatOptions =
         (Option.map ~f:JsonOptions.of_xml) (Xml.child xml_arg0 "Json") in
       make ?csv ?excel ?json ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let csv = field_map json "Csv" CsvOptions.of_json in
-      let excel = field_map json "Excel" ExcelOptions.of_json in
-      let json = field_map json "Json" JsonOptions.of_json in
+    let of_json json__ =
+      let csv = field_map json__ "Csv" CsvOptions.of_json in
+      let excel = field_map json__ "Excel" ExcelOptions.of_json in
+      let json = field_map json__ "Json" JsonOptions.of_json in
       make ?csv ?excel ?json ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3398,16 +3456,16 @@ module Input =
       make ?metadata ?databaseInputDefinition ?dataCatalogInputDefinition
         ?s3InputDefinition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map json "Metadata" Metadata.of_json in
+    let of_json json__ =
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
       let databaseInputDefinition =
-        field_map json "DatabaseInputDefinition"
+        field_map json__ "DatabaseInputDefinition"
           DatabaseInputDefinition.of_json in
       let dataCatalogInputDefinition =
-        field_map json "DataCatalogInputDefinition"
+        field_map json__ "DataCatalogInputDefinition"
           DataCatalogInputDefinition.of_json in
       let s3InputDefinition =
-        field_map json "S3InputDefinition" S3Location.of_json in
+        field_map json__ "S3InputDefinition" S3Location.of_json in
       make ?metadata ?databaseInputDefinition ?dataCatalogInputDefinition
         ?s3InputDefinition ()
     let to_json v = composed_to_json to_value v
@@ -3484,11 +3542,12 @@ module PathOptions =
           (Xml.child xml_arg0 "LastModifiedDateCondition") in
       make ?parameters ?filesLimit ?lastModifiedDateCondition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" PathParametersMap.of_json in
-      let filesLimit = field_map json "FilesLimit" FilesLimit.of_json in
+    let of_json json__ =
+      let parameters =
+        field_map json__ "Parameters" PathParametersMap.of_json in
+      let filesLimit = field_map json__ "FilesLimit" FilesLimit.of_json in
       let lastModifiedDateCondition =
-        field_map json "LastModifiedDateCondition" FilterExpression.of_json in
+        field_map json__ "LastModifiedDateCondition" FilterExpression.of_json in
       make ?parameters ?filesLimit ?lastModifiedDateCondition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3628,16 +3687,16 @@ module Rule =
       make ?columnSelectors ?threshold ?substitutionMap ~checkExpression
         ?disabled ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let columnSelectors =
-        field_map json "ColumnSelectors" ColumnSelectorList.of_json in
-      let threshold = field_map json "Threshold" Threshold.of_json in
+        field_map json__ "ColumnSelectors" ColumnSelectorList.of_json in
+      let threshold = field_map json__ "Threshold" Threshold.of_json in
       let substitutionMap =
-        field_map json "SubstitutionMap" ValuesMap.of_json in
+        field_map json__ "SubstitutionMap" ValuesMap.of_json in
       let checkExpression =
-        field_map_exn json "CheckExpression" Expression.of_json in
-      let disabled = field_map json "Disabled" Disabled.of_json in
-      let name = field_map_exn json "Name" RuleName.of_json in
+        field_map_exn json__ "CheckExpression" Expression.of_json in
+      let disabled = field_map json__ "Disabled" Disabled.of_json in
+      let name = field_map_exn json__ "Name" RuleName.of_json in
       make ?columnSelectors ?threshold ?substitutionMap ~checkExpression
         ?disabled ~name ()
     let to_json v = composed_to_json to_value v
@@ -3648,6 +3707,9 @@ module ColumnStatisticsConfigurationList =
     type nonrec t = ColumnStatisticsConfiguration.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnStatisticsConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -3698,11 +3760,11 @@ module EntityDetectorConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "EntityTypes") in
       make ?allowedStatistics ~entityTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowedStatistics =
-        field_map json "AllowedStatistics" AllowedStatisticList.of_json in
+        field_map json__ "AllowedStatistics" AllowedStatisticList.of_json in
       let entityTypes =
-        field_map_exn json "EntityTypes" EntityTypeList.of_json in
+        field_map_exn json__ "EntityTypes" EntityTypeList.of_json in
       make ?allowedStatistics ~entityTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3754,6 +3816,9 @@ module HiddenColumnList =
   struct
     type nonrec t = ColumnName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3843,8 +3908,7 @@ module Schedule =
           "The dates and times when the job is to run. For more information, see Cron expressions in the Glue DataBrew Developer Guide."];
       tags: TagMap.t option
         [@ocaml.doc "Metadata tags that have been applied to the schedule."];
-      name: ScheduleName.t [@ocaml.doc "The name of the schedule."]}
-    let context_ = "Schedule"
+      name: ScheduleName.t option [@ocaml.doc "The name of the schedule."]}
     let make ?accountId =
       fun ?createdBy ->
         fun ?createDate ->
@@ -3854,7 +3918,7 @@ module Schedule =
                 fun ?resourceArn ->
                   fun ?cronExpression ->
                     fun ?tags ->
-                      fun ~name ->
+                      fun ?name ->
                         fun () ->
                           {
                             accountId;
@@ -3882,11 +3946,11 @@ module Schedule =
         ("CronExpression",
           (Option.map x.cronExpression ~f:CronExpression.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("Name", (Some (ScheduleName.to_value x.name)))]
+        ("Name", (Option.map x.name ~f:ScheduleName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        ScheduleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:ScheduleName.of_xml) (Xml.child xml_arg0 "Name") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let cronExpression =
         (Option.map ~f:CronExpression.of_xml)
@@ -3906,23 +3970,23 @@ module Schedule =
         (Option.map ~f:CreatedBy.of_xml) (Xml.child xml_arg0 "CreatedBy") in
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
-      make ~name ?tags ?cronExpression ?resourceArn ?lastModifiedDate
+      make ?name ?tags ?cronExpression ?resourceArn ?lastModifiedDate
         ?lastModifiedBy ?jobNames ?createDate ?createdBy ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ScheduleName.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" ScheduleName.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let cronExpression =
-        field_map json "CronExpression" CronExpression.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
+        field_map json__ "CronExpression" CronExpression.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let jobNames = field_map json "JobNames" JobNameList.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      make ~name ?tags ?cronExpression ?resourceArn ?lastModifiedDate
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let jobNames = field_map json__ "JobNames" JobNameList.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?name ?tags ?cronExpression ?resourceArn ?lastModifiedDate
         ?lastModifiedBy ?jobNames ?createDate ?createdBy ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3946,28 +4010,27 @@ module RulesetItem =
           "The Amazon Resource Name (ARN) of the user who last modified the ruleset."];
       lastModifiedDate: Date.t option
         [@ocaml.doc "The modification date and time of the ruleset."];
-      name: RulesetName.t [@ocaml.doc "The name of the ruleset."];
+      name: RulesetName.t option [@ocaml.doc "The name of the ruleset."];
       resourceArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the ruleset."];
       ruleCount: RuleCount.t option
         [@ocaml.doc "The number of rules that are defined in the ruleset."];
       tags: TagMap.t option
         [@ocaml.doc "Metadata tags that have been applied to the ruleset."];
-      targetArn: Arn.t
+      targetArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of a resource (dataset) that the ruleset is associated with."]}
-    let context_ = "RulesetItem"
     let make ?accountId =
       fun ?createdBy ->
         fun ?createDate ->
           fun ?description ->
             fun ?lastModifiedBy ->
               fun ?lastModifiedDate ->
-                fun ?resourceArn ->
-                  fun ?ruleCount ->
-                    fun ?tags ->
-                      fun ~name ->
-                        fun ~targetArn ->
+                fun ?name ->
+                  fun ?resourceArn ->
+                    fun ?ruleCount ->
+                      fun ?tags ->
+                        fun ?targetArn ->
                           fun () ->
                             {
                               accountId;
@@ -3976,10 +4039,10 @@ module RulesetItem =
                               description;
                               lastModifiedBy;
                               lastModifiedDate;
+                              name;
                               resourceArn;
                               ruleCount;
                               tags;
-                              name;
                               targetArn
                             }
     let to_value x =
@@ -3993,22 +4056,22 @@ module RulesetItem =
           (Option.map x.lastModifiedBy ~f:LastModifiedBy.to_value));
         ("LastModifiedDate",
           (Option.map x.lastModifiedDate ~f:Date.to_value));
-        ("Name", (Some (RulesetName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:RulesetName.to_value));
         ("ResourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
         ("RuleCount", (Option.map x.ruleCount ~f:RuleCount.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("TargetArn", (Some (Arn.to_value x.targetArn)))]
+        ("TargetArn", (Option.map x.targetArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let targetArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TargetArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "TargetArn") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let ruleCount =
         (Option.map ~f:RuleCount.of_xml) (Xml.child xml_arg0 "RuleCount") in
       let resourceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       let name =
-        RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:RulesetName.of_xml) (Xml.child xml_arg0 "Name") in
       let lastModifiedDate =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastModifiedDate") in
       let lastModifiedBy =
@@ -4023,24 +4086,24 @@ module RulesetItem =
         (Option.map ~f:CreatedBy.of_xml) (Xml.child xml_arg0 "CreatedBy") in
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
-      make ~targetArn ?tags ?ruleCount ?resourceArn ~name ?lastModifiedDate
+      make ?targetArn ?tags ?ruleCount ?resourceArn ?name ?lastModifiedDate
         ?lastModifiedBy ?description ?createDate ?createdBy ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetArn = field_map_exn json "TargetArn" Arn.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let ruleCount = field_map json "RuleCount" RuleCount.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let name = field_map_exn json "Name" RulesetName.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
+    let of_json json__ =
+      let targetArn = field_map json__ "TargetArn" Arn.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let ruleCount = field_map json__ "RuleCount" RuleCount.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let name = field_map json__ "Name" RulesetName.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
       let description =
-        field_map json "Description" RulesetDescription.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      make ~targetArn ?tags ?ruleCount ?resourceArn ~name ?lastModifiedDate
+        field_map json__ "Description" RulesetDescription.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?targetArn ?tags ?ruleCount ?resourceArn ?name ?lastModifiedDate
         ?lastModifiedBy ?description ?createDate ?createdBy ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains metadata about the ruleset."]
@@ -4068,7 +4131,8 @@ module Recipe =
         [@ocaml.doc "The date and time when the recipe was published."];
       description: RecipeDescription.t option
         [@ocaml.doc "The description of the recipe."];
-      name: RecipeName.t [@ocaml.doc "The unique name for the recipe."];
+      name: RecipeName.t option
+        [@ocaml.doc "The unique name for the recipe."];
       resourceArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the recipe."];
       steps: RecipeStepList.t option
@@ -4078,7 +4142,6 @@ module Recipe =
       recipeVersion: RecipeVersion.t option
         [@ocaml.doc
           "The identifier for the version for the recipe. Must be one of the following: Numeric version (X.Y) - X and Y stand for major and minor version numbers. The maximum length of each is 6 digits, and neither can be negative values. Both X and Y are required, and \"0.0\" isn't a valid version. LATEST_WORKING - the most recent valid version being developed in a DataBrew project. LATEST_PUBLISHED - the most recent published version."]}
-    let context_ = "Recipe"
     let make ?createdBy =
       fun ?createDate ->
         fun ?lastModifiedBy ->
@@ -4087,11 +4150,11 @@ module Recipe =
               fun ?publishedBy ->
                 fun ?publishedDate ->
                   fun ?description ->
-                    fun ?resourceArn ->
-                      fun ?steps ->
-                        fun ?tags ->
-                          fun ?recipeVersion ->
-                            fun ~name ->
+                    fun ?name ->
+                      fun ?resourceArn ->
+                        fun ?steps ->
+                          fun ?tags ->
+                            fun ?recipeVersion ->
                               fun () ->
                                 {
                                   createdBy;
@@ -4102,11 +4165,11 @@ module Recipe =
                                   publishedBy;
                                   publishedDate;
                                   description;
+                                  name;
                                   resourceArn;
                                   steps;
                                   tags;
-                                  recipeVersion;
-                                  name
+                                  recipeVersion
                                 }
     let to_value x =
       structure_to_value
@@ -4121,7 +4184,7 @@ module Recipe =
         ("PublishedDate", (Option.map x.publishedDate ~f:Date.to_value));
         ("Description",
           (Option.map x.description ~f:RecipeDescription.to_value));
-        ("Name", (Some (RecipeName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:RecipeName.to_value));
         ("ResourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
         ("Steps", (Option.map x.steps ~f:RecipeStepList.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
@@ -4138,7 +4201,7 @@ module Recipe =
       let resourceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       let name =
-        RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:RecipeName.of_xml) (Xml.child xml_arg0 "Name") in
       let description =
         (Option.map ~f:RecipeDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
@@ -4157,28 +4220,28 @@ module Recipe =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreateDate") in
       let createdBy =
         (Option.map ~f:CreatedBy.of_xml) (Xml.child xml_arg0 "CreatedBy") in
-      make ?recipeVersion ?tags ?steps ?resourceArn ~name ?description
+      make ?recipeVersion ?tags ?steps ?resourceArn ?name ?description
         ?publishedDate ?publishedBy ?projectName ?lastModifiedDate
         ?lastModifiedBy ?createDate ?createdBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipeVersion =
-        field_map json "RecipeVersion" RecipeVersion.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let steps = field_map json "Steps" RecipeStepList.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
+        field_map json__ "RecipeVersion" RecipeVersion.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let steps = field_map json__ "Steps" RecipeStepList.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let name = field_map json__ "Name" RecipeName.of_json in
       let description =
-        field_map json "Description" RecipeDescription.of_json in
-      let publishedDate = field_map json "PublishedDate" Date.of_json in
-      let publishedBy = field_map json "PublishedBy" PublishedBy.of_json in
-      let projectName = field_map json "ProjectName" ProjectName.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
+        field_map json__ "Description" RecipeDescription.of_json in
+      let publishedDate = field_map json__ "PublishedDate" Date.of_json in
+      let publishedBy = field_map json__ "PublishedBy" PublishedBy.of_json in
+      let projectName = field_map json__ "ProjectName" ProjectName.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      make ?recipeVersion ?tags ?steps ?resourceArn ~name ?description
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      make ?recipeVersion ?tags ?steps ?resourceArn ?name ?description
         ?publishedDate ?publishedBy ?projectName ?lastModifiedDate
         ?lastModifiedBy ?createDate ?createdBy ()
     let to_json v = composed_to_json to_value v
@@ -4203,8 +4266,8 @@ module Project =
       lastModifiedBy: LastModifiedBy.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the user who last modified the project."];
-      name: ProjectName.t [@ocaml.doc "The unique name of a project."];
-      recipeName: RecipeName.t
+      name: ProjectName.t option [@ocaml.doc "The unique name of a project."];
+      recipeName: RecipeName.t option
         [@ocaml.doc
           "The name of a recipe that will be developed during a project session."];
       resourceArn: Arn.t option
@@ -4222,21 +4285,20 @@ module Project =
           "The Amazon Resource Name (ARN) of the user that opened the project for use."];
       openDate: Date.t option
         [@ocaml.doc "The date and time when the project was opened."]}
-    let context_ = "Project"
     let make ?accountId =
       fun ?createDate ->
         fun ?createdBy ->
           fun ?datasetName ->
             fun ?lastModifiedDate ->
               fun ?lastModifiedBy ->
-                fun ?resourceArn ->
-                  fun ?sample ->
-                    fun ?tags ->
-                      fun ?roleArn ->
-                        fun ?openedBy ->
-                          fun ?openDate ->
-                            fun ~name ->
-                              fun ~recipeName ->
+                fun ?name ->
+                  fun ?recipeName ->
+                    fun ?resourceArn ->
+                      fun ?sample ->
+                        fun ?tags ->
+                          fun ?roleArn ->
+                            fun ?openedBy ->
+                              fun ?openDate ->
                                 fun () ->
                                   {
                                     accountId;
@@ -4245,14 +4307,14 @@ module Project =
                                     datasetName;
                                     lastModifiedDate;
                                     lastModifiedBy;
+                                    name;
+                                    recipeName;
                                     resourceArn;
                                     sample;
                                     tags;
                                     roleArn;
                                     openedBy;
-                                    openDate;
-                                    name;
-                                    recipeName
+                                    openDate
                                   }
     let to_value x =
       structure_to_value
@@ -4264,8 +4326,8 @@ module Project =
           (Option.map x.lastModifiedDate ~f:Date.to_value));
         ("LastModifiedBy",
           (Option.map x.lastModifiedBy ~f:LastModifiedBy.to_value));
-        ("Name", (Some (ProjectName.to_value x.name)));
-        ("RecipeName", (Some (RecipeName.to_value x.recipeName)));
+        ("Name", (Option.map x.name ~f:ProjectName.to_value));
+        ("RecipeName", (Option.map x.recipeName ~f:RecipeName.to_value));
         ("ResourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
         ("Sample", (Option.map x.sample ~f:Sample.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
@@ -4285,10 +4347,9 @@ module Project =
       let resourceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       let recipeName =
-        RecipeName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RecipeName") in
+        (Option.map ~f:RecipeName.of_xml) (Xml.child xml_arg0 "RecipeName") in
       let name =
-        ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "Name") in
       let lastModifiedBy =
         (Option.map ~f:LastModifiedBy.of_xml)
           (Xml.child xml_arg0 "LastModifiedBy") in
@@ -4303,27 +4364,27 @@ module Project =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?openDate ?openedBy ?roleArn ?tags ?sample ?resourceArn
-        ~recipeName ~name ?lastModifiedBy ?lastModifiedDate ?datasetName
+        ?recipeName ?name ?lastModifiedBy ?lastModifiedDate ?datasetName
         ?createdBy ?createDate ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let openDate = field_map json "OpenDate" Date.of_json in
-      let openedBy = field_map json "OpenedBy" OpenedBy.of_json in
-      let roleArn = field_map json "RoleArn" Arn.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let sample = field_map json "Sample" Sample.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let recipeName = field_map_exn json "RecipeName" RecipeName.of_json in
-      let name = field_map_exn json "Name" ProjectName.of_json in
+    let of_json json__ =
+      let openDate = field_map json__ "OpenDate" Date.of_json in
+      let openedBy = field_map json__ "OpenedBy" OpenedBy.of_json in
+      let roleArn = field_map json__ "RoleArn" Arn.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let sample = field_map json__ "Sample" Sample.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let recipeName = field_map json__ "RecipeName" RecipeName.of_json in
+      let name = field_map json__ "Name" ProjectName.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?openDate ?openedBy ?roleArn ?tags ?sample ?resourceArn
-        ~recipeName ~name ?lastModifiedBy ?lastModifiedDate ?datasetName
+        ?recipeName ?name ?lastModifiedBy ?lastModifiedDate ?datasetName
         ?createdBy ?createDate ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents all of the attributes of a DataBrew project."]
@@ -4347,7 +4408,7 @@ module Job =
       encryptionMode: EncryptionMode.t option
         [@ocaml.doc
           "The encryption mode for the job, which can be one of the following: SSE-KMS - Server-side encryption with keys managed by KMS. SSE-S3 - Server-side encryption with keys managed by Amazon S3."];
-      name: JobName.t [@ocaml.doc "The unique name of the job."];
+      name: JobName.t option [@ocaml.doc "The unique name of the job."];
       type_: JobType.t option
         [@ocaml.doc
           "The job type of the job, which must be one of the following: PROFILE - A job to analyze a dataset, to determine its size, data types, data distribution, and more. RECIPE - A job to apply one or more transformations to a dataset."];
@@ -4395,32 +4456,32 @@ module Job =
       validationConfigurations: ValidationConfigurationList.t option
         [@ocaml.doc
           "List of validation configurations that are applied to the profile job."]}
-    let context_ = "Job"
     let make ?accountId =
       fun ?createdBy ->
         fun ?createDate ->
           fun ?datasetName ->
             fun ?encryptionKeyArn ->
               fun ?encryptionMode ->
-                fun ?type_ ->
-                  fun ?lastModifiedBy ->
-                    fun ?lastModifiedDate ->
-                      fun ?logSubscription ->
-                        fun ?maxCapacity ->
-                          fun ?maxRetries ->
-                            fun ?outputs ->
-                              fun ?dataCatalogOutputs ->
-                                fun ?databaseOutputs ->
-                                  fun ?projectName ->
-                                    fun ?recipeReference ->
-                                      fun ?resourceArn ->
-                                        fun ?roleArn ->
-                                          fun ?timeout ->
-                                            fun ?tags ->
-                                              fun ?jobSample ->
-                                                fun ?validationConfigurations
-                                                  ->
-                                                  fun ~name ->
+                fun ?name ->
+                  fun ?type_ ->
+                    fun ?lastModifiedBy ->
+                      fun ?lastModifiedDate ->
+                        fun ?logSubscription ->
+                          fun ?maxCapacity ->
+                            fun ?maxRetries ->
+                              fun ?outputs ->
+                                fun ?dataCatalogOutputs ->
+                                  fun ?databaseOutputs ->
+                                    fun ?projectName ->
+                                      fun ?recipeReference ->
+                                        fun ?resourceArn ->
+                                          fun ?roleArn ->
+                                            fun ?timeout ->
+                                              fun ?tags ->
+                                                fun ?jobSample ->
+                                                  fun
+                                                    ?validationConfigurations
+                                                    ->
                                                     fun () ->
                                                       {
                                                         accountId;
@@ -4429,6 +4490,7 @@ module Job =
                                                         datasetName;
                                                         encryptionKeyArn;
                                                         encryptionMode;
+                                                        name;
                                                         type_;
                                                         lastModifiedBy;
                                                         lastModifiedDate;
@@ -4445,8 +4507,7 @@ module Job =
                                                         timeout;
                                                         tags;
                                                         jobSample;
-                                                        validationConfigurations;
-                                                        name
+                                                        validationConfigurations
                                                       }
     let to_value x =
       structure_to_value
@@ -4458,7 +4519,7 @@ module Job =
           (Option.map x.encryptionKeyArn ~f:EncryptionKeyArn.to_value));
         ("EncryptionMode",
           (Option.map x.encryptionMode ~f:EncryptionMode.to_value));
-        ("Name", (Some (JobName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:JobName.to_value));
         ("Type", (Option.map x.type_ ~f:JobType.to_value));
         ("LastModifiedBy",
           (Option.map x.lastModifiedBy ~f:LastModifiedBy.to_value));
@@ -4523,8 +4584,7 @@ module Job =
         (Option.map ~f:LastModifiedBy.of_xml)
           (Xml.child xml_arg0 "LastModifiedBy") in
       let type_ = (Option.map ~f:JobType.of_xml) (Xml.child xml_arg0 "Type") in
-      let name =
-        JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let name = (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "Name") in
       let encryptionMode =
         (Option.map ~f:EncryptionMode.of_xml)
           (Xml.child xml_arg0 "EncryptionMode") in
@@ -4542,48 +4602,48 @@ module Job =
       make ?validationConfigurations ?jobSample ?tags ?timeout ?roleArn
         ?resourceArn ?recipeReference ?projectName ?databaseOutputs
         ?dataCatalogOutputs ?outputs ?maxRetries ?maxCapacity
-        ?logSubscription ?lastModifiedDate ?lastModifiedBy ?type_ ~name
+        ?logSubscription ?lastModifiedDate ?lastModifiedBy ?type_ ?name
         ?encryptionMode ?encryptionKeyArn ?datasetName ?createDate ?createdBy
         ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validationConfigurations =
-        field_map json "ValidationConfigurations"
+        field_map json__ "ValidationConfigurations"
           ValidationConfigurationList.of_json in
-      let jobSample = field_map json "JobSample" JobSample.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let timeout = field_map json "Timeout" Timeout.of_json in
-      let roleArn = field_map json "RoleArn" Arn.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
+      let jobSample = field_map json__ "JobSample" JobSample.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let timeout = field_map json__ "Timeout" Timeout.of_json in
+      let roleArn = field_map json__ "RoleArn" Arn.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
       let recipeReference =
-        field_map json "RecipeReference" RecipeReference.of_json in
-      let projectName = field_map json "ProjectName" ProjectName.of_json in
+        field_map json__ "RecipeReference" RecipeReference.of_json in
+      let projectName = field_map json__ "ProjectName" ProjectName.of_json in
       let databaseOutputs =
-        field_map json "DatabaseOutputs" DatabaseOutputList.of_json in
+        field_map json__ "DatabaseOutputs" DatabaseOutputList.of_json in
       let dataCatalogOutputs =
-        field_map json "DataCatalogOutputs" DataCatalogOutputList.of_json in
-      let outputs = field_map json "Outputs" OutputList.of_json in
-      let maxRetries = field_map json "MaxRetries" MaxRetries.of_json in
-      let maxCapacity = field_map json "MaxCapacity" MaxCapacity.of_json in
+        field_map json__ "DataCatalogOutputs" DataCatalogOutputList.of_json in
+      let outputs = field_map json__ "Outputs" OutputList.of_json in
+      let maxRetries = field_map json__ "MaxRetries" MaxRetries.of_json in
+      let maxCapacity = field_map json__ "MaxCapacity" MaxCapacity.of_json in
       let logSubscription =
-        field_map json "LogSubscription" LogSubscription.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
+        field_map json__ "LogSubscription" LogSubscription.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let type_ = field_map json "Type" JobType.of_json in
-      let name = field_map_exn json "Name" JobName.of_json in
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let type_ = field_map json__ "Type" JobType.of_json in
+      let name = field_map json__ "Name" JobName.of_json in
       let encryptionMode =
-        field_map json "EncryptionMode" EncryptionMode.of_json in
+        field_map json__ "EncryptionMode" EncryptionMode.of_json in
       let encryptionKeyArn =
-        field_map json "EncryptionKeyArn" EncryptionKeyArn.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+        field_map json__ "EncryptionKeyArn" EncryptionKeyArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?validationConfigurations ?jobSample ?tags ?timeout ?roleArn
         ?resourceArn ?recipeReference ?projectName ?databaseOutputs
         ?dataCatalogOutputs ?outputs ?maxRetries ?maxCapacity
-        ?logSubscription ?lastModifiedDate ?lastModifiedBy ?type_ ~name
+        ?logSubscription ?lastModifiedDate ?lastModifiedBy ?type_ ?name
         ?encryptionMode ?encryptionKeyArn ?datasetName ?createDate ?createdBy
         ?accountId ()
     let to_json v = composed_to_json to_value v
@@ -4757,33 +4817,33 @@ module JobRun =
         ?logGroupName ?logSubscription ?state ?runId ?jobName ?executionTime
         ?errorMessage ?datasetName ?completedOn ?attempt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validationConfigurations =
-        field_map json "ValidationConfigurations"
+        field_map json__ "ValidationConfigurations"
           ValidationConfigurationList.of_json in
-      let jobSample = field_map json "JobSample" JobSample.of_json in
-      let startedOn = field_map json "StartedOn" Date.of_json in
-      let startedBy = field_map json "StartedBy" StartedBy.of_json in
+      let jobSample = field_map json__ "JobSample" JobSample.of_json in
+      let startedOn = field_map json__ "StartedOn" Date.of_json in
+      let startedBy = field_map json__ "StartedBy" StartedBy.of_json in
       let recipeReference =
-        field_map json "RecipeReference" RecipeReference.of_json in
+        field_map json__ "RecipeReference" RecipeReference.of_json in
       let databaseOutputs =
-        field_map json "DatabaseOutputs" DatabaseOutputList.of_json in
+        field_map json__ "DatabaseOutputs" DatabaseOutputList.of_json in
       let dataCatalogOutputs =
-        field_map json "DataCatalogOutputs" DataCatalogOutputList.of_json in
-      let outputs = field_map json "Outputs" OutputList.of_json in
-      let logGroupName = field_map json "LogGroupName" LogGroupName.of_json in
+        field_map json__ "DataCatalogOutputs" DataCatalogOutputList.of_json in
+      let outputs = field_map json__ "Outputs" OutputList.of_json in
+      let logGroupName = field_map json__ "LogGroupName" LogGroupName.of_json in
       let logSubscription =
-        field_map json "LogSubscription" LogSubscription.of_json in
-      let state = field_map json "State" JobRunState.of_json in
-      let runId = field_map json "RunId" JobRunId.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "LogSubscription" LogSubscription.of_json in
+      let state = field_map json__ "State" JobRunState.of_json in
+      let runId = field_map json__ "RunId" JobRunId.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let executionTime =
-        field_map json "ExecutionTime" ExecutionTime.of_json in
+        field_map json__ "ExecutionTime" ExecutionTime.of_json in
       let errorMessage =
-        field_map json "ErrorMessage" JobRunErrorMessage.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let completedOn = field_map json "CompletedOn" Date.of_json in
-      let attempt = field_map json "Attempt" Attempt.of_json in
+        field_map json__ "ErrorMessage" JobRunErrorMessage.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let completedOn = field_map json__ "CompletedOn" Date.of_json in
+      let attempt = field_map json__ "Attempt" Attempt.of_json in
       make ?validationConfigurations ?jobSample ?startedOn ?startedBy
         ?recipeReference ?databaseOutputs ?dataCatalogOutputs ?outputs
         ?logGroupName ?logSubscription ?state ?runId ?jobName ?executionTime
@@ -4802,14 +4862,15 @@ module Dataset =
           "The Amazon Resource Name (ARN) of the user who created the dataset."];
       createDate: Date.t option
         [@ocaml.doc "The date and time that the dataset was created."];
-      name: DatasetName.t [@ocaml.doc "The unique name of the dataset."];
+      name: DatasetName.t option
+        [@ocaml.doc "The unique name of the dataset."];
       format: InputFormat.t option
         [@ocaml.doc
           "The file format of a dataset that is created from an Amazon S3 file or folder."];
       formatOptions: FormatOptions.t option
         [@ocaml.doc
           "A set of options that define how DataBrew interprets the data in the dataset."];
-      input: Input.t
+      input: Input.t option
         [@ocaml.doc
           "Information on how DataBrew can find the dataset, in either the Glue Data Catalog or Amazon S3."];
       lastModifiedDate: Date.t option
@@ -4827,46 +4888,45 @@ module Dataset =
         [@ocaml.doc "Metadata tags that have been applied to the dataset."];
       resourceArn: Arn.t option
         [@ocaml.doc "The unique Amazon Resource Name (ARN) for the dataset."]}
-    let context_ = "Dataset"
     let make ?accountId =
       fun ?createdBy ->
         fun ?createDate ->
-          fun ?format ->
-            fun ?formatOptions ->
-              fun ?lastModifiedDate ->
-                fun ?lastModifiedBy ->
-                  fun ?source ->
-                    fun ?pathOptions ->
-                      fun ?tags ->
-                        fun ?resourceArn ->
-                          fun ~name ->
-                            fun ~input ->
+          fun ?name ->
+            fun ?format ->
+              fun ?formatOptions ->
+                fun ?input ->
+                  fun ?lastModifiedDate ->
+                    fun ?lastModifiedBy ->
+                      fun ?source ->
+                        fun ?pathOptions ->
+                          fun ?tags ->
+                            fun ?resourceArn ->
                               fun () ->
                                 {
                                   accountId;
                                   createdBy;
                                   createDate;
+                                  name;
                                   format;
                                   formatOptions;
+                                  input;
                                   lastModifiedDate;
                                   lastModifiedBy;
                                   source;
                                   pathOptions;
                                   tags;
-                                  resourceArn;
-                                  name;
-                                  input
+                                  resourceArn
                                 }
     let to_value x =
       structure_to_value
         [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
         ("CreatedBy", (Option.map x.createdBy ~f:CreatedBy.to_value));
         ("CreateDate", (Option.map x.createDate ~f:Date.to_value));
-        ("Name", (Some (DatasetName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:DatasetName.to_value));
         ("Format", (Option.map x.format ~f:InputFormat.to_value));
         ("FormatOptions",
           (Option.map x.formatOptions ~f:FormatOptions.to_value));
-        ("Input", (Some (Input.to_value x.input)));
+        ("Input", (Option.map x.input ~f:Input.to_value));
         ("LastModifiedDate",
           (Option.map x.lastModifiedDate ~f:Date.to_value));
         ("LastModifiedBy",
@@ -4889,15 +4949,14 @@ module Dataset =
           (Xml.child xml_arg0 "LastModifiedBy") in
       let lastModifiedDate =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastModifiedDate") in
-      let input =
-        Input.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Input") in
+      let input = (Option.map ~f:Input.of_xml) (Xml.child xml_arg0 "Input") in
       let formatOptions =
         (Option.map ~f:FormatOptions.of_xml)
           (Xml.child xml_arg0 "FormatOptions") in
       let format =
         (Option.map ~f:InputFormat.of_xml) (Xml.child xml_arg0 "Format") in
       let name =
-        DatasetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "Name") in
       let createDate =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreateDate") in
       let createdBy =
@@ -4905,27 +4964,27 @@ module Dataset =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?resourceArn ?tags ?pathOptions ?source ?lastModifiedBy
-        ?lastModifiedDate ~input ?formatOptions ?format ~name ?createDate
+        ?lastModifiedDate ?input ?formatOptions ?format ?name ?createDate
         ?createdBy ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pathOptions = field_map json "PathOptions" PathOptions.of_json in
-      let source = field_map json "Source" Source.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let pathOptions = field_map json__ "PathOptions" PathOptions.of_json in
+      let source = field_map json__ "Source" Source.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
-      let input = field_map_exn json "Input" Input.of_json in
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
+      let input = field_map json__ "Input" Input.of_json in
       let formatOptions =
-        field_map json "FormatOptions" FormatOptions.of_json in
-      let format = field_map json "Format" InputFormat.of_json in
-      let name = field_map_exn json "Name" DatasetName.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+        field_map json__ "FormatOptions" FormatOptions.of_json in
+      let format = field_map json__ "Format" InputFormat.of_json in
+      let name = field_map json__ "Name" DatasetName.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?resourceArn ?tags ?pathOptions ?source ?lastModifiedBy
-        ?lastModifiedDate ~input ?formatOptions ?format ~name ?createDate
+        ?lastModifiedDate ?input ?formatOptions ?format ?name ?createDate
         ?createdBy ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a dataset that can be processed by DataBrew."]
@@ -4963,12 +5022,12 @@ module RecipeVersionErrorDetail =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?recipeVersion ?errorMessage ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipeVersion =
-        field_map json "RecipeVersion" RecipeVersion.of_json in
+        field_map json__ "RecipeVersion" RecipeVersion.of_json in
       let errorMessage =
-        field_map json "ErrorMessage" RecipeErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+        field_map json__ "ErrorMessage" RecipeErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?recipeVersion ?errorMessage ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4987,8 +5046,8 @@ module ResourceNotFoundException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more resources can't be found."]
@@ -5006,8 +5065,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A service quota is exceeded."]
@@ -5025,8 +5084,8 @@ module ValidationException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input parameters for this request failed validation."]
@@ -5035,6 +5094,9 @@ module RuleList =
     type nonrec t = Rule.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Rule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5068,8 +5130,8 @@ module AccessDeniedException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Access to the specified resource was denied."]
@@ -5131,17 +5193,17 @@ module ProfileConfiguration =
       make ?entityDetectorConfiguration ?columnStatisticsConfigurations
         ?profileColumns ?datasetStatisticsConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entityDetectorConfiguration =
-        field_map json "EntityDetectorConfiguration"
+        field_map json__ "EntityDetectorConfiguration"
           EntityDetectorConfiguration.of_json in
       let columnStatisticsConfigurations =
-        field_map json "ColumnStatisticsConfigurations"
+        field_map json__ "ColumnStatisticsConfigurations"
           ColumnStatisticsConfigurationList.of_json in
       let profileColumns =
-        field_map json "ProfileColumns" ColumnSelectorList.of_json in
+        field_map json__ "ProfileColumns" ColumnSelectorList.of_json in
       let datasetStatisticsConfiguration =
-        field_map json "DatasetStatisticsConfiguration"
+        field_map json__ "DatasetStatisticsConfiguration"
           StatisticsConfiguration.of_json in
       make ?entityDetectorConfiguration ?columnStatisticsConfigurations
         ?profileColumns ?datasetStatisticsConfiguration ()
@@ -5162,8 +5224,8 @@ module InternalServerException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal service failure occurred."]
@@ -5176,6 +5238,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5230,8 +5295,8 @@ module ConflictException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5370,16 +5435,16 @@ module ViewFrame =
       make ?analytics ?rowRange ?startRowIndex ?hiddenColumns ?columnRange
         ~startColumnIndex ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let analytics = field_map json "Analytics" AnalyticsMode.of_json in
-      let rowRange = field_map json "RowRange" RowRange.of_json in
+    let of_json json__ =
+      let analytics = field_map json__ "Analytics" AnalyticsMode.of_json in
+      let rowRange = field_map json__ "RowRange" RowRange.of_json in
       let startRowIndex =
-        field_map json "StartRowIndex" StartRowIndex.of_json in
+        field_map json__ "StartRowIndex" StartRowIndex.of_json in
       let hiddenColumns =
-        field_map json "HiddenColumns" HiddenColumnList.of_json in
-      let columnRange = field_map json "ColumnRange" ColumnRange.of_json in
+        field_map json__ "HiddenColumns" HiddenColumnList.of_json in
+      let columnRange = field_map json__ "ColumnRange" ColumnRange.of_json in
       let startColumnIndex =
-        field_map_exn json "StartColumnIndex" StartColumnIndex.of_json in
+        field_map_exn json__ "StartColumnIndex" StartColumnIndex.of_json in
       make ?analytics ?rowRange ?startRowIndex ?hiddenColumns ?columnRange
         ~startColumnIndex ()
     let to_json v = composed_to_json to_value v
@@ -5406,6 +5471,9 @@ module ScheduleList =
   struct
     type nonrec t = Schedule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Schedule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5448,6 +5516,9 @@ module RulesetItemList =
   struct
     type nonrec t = RulesetItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RulesetItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5472,6 +5543,9 @@ module RecipeList =
   struct
     type nonrec t = Recipe.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Recipe.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5495,6 +5569,9 @@ module ProjectList =
   struct
     type nonrec t = Project.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Project.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5519,6 +5596,9 @@ module JobList =
   struct
     type nonrec t = Job.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Job.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5542,6 +5622,9 @@ module JobRunList =
   struct
     type nonrec t = JobRun.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobRun.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5565,6 +5648,9 @@ module DatasetList =
   struct
     type nonrec t = Dataset.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Dataset.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5638,6 +5724,9 @@ module RecipeErrorList =
   struct
     type nonrec t = RecipeVersionErrorDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecipeVersionErrorDetail.to_value)) |>
         (fun x -> `List x)
@@ -5668,6 +5757,9 @@ module RecipeVersionList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecipeVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5692,15 +5784,14 @@ module UpdateScheduleResponse =
   struct
     type nonrec t =
       {
-      name: ScheduleName.t
+      name: ScheduleName.t option
         [@ocaml.doc "The name of the schedule that was updated."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateScheduleResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -5744,16 +5835,17 @@ module UpdateScheduleResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (ScheduleName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:ScheduleName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        ScheduleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:ScheduleName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ScheduleName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" ScheduleName.of_json in
+      make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the definition of an existing DataBrew schedule."]
@@ -5788,11 +5880,11 @@ module UpdateScheduleRequest =
         (Option.map ~f:JobNameList.of_xml) (Xml.child xml_arg0 "JobNames") in
       make ~name ~cronExpression ?jobNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ScheduleName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ScheduleName.of_json in
       let cronExpression =
-        field_map_exn json "CronExpression" CronExpression.of_json in
-      let jobNames = field_map json "JobNames" JobNameList.of_json in
+        field_map_exn json__ "CronExpression" CronExpression.of_json in
+      let jobNames = field_map json__ "JobNames" JobNameList.of_json in
       make ~name ~cronExpression ?jobNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5801,13 +5893,13 @@ module UpdateRulesetResponse =
   struct
     type nonrec t =
       {
-      name: RulesetName.t [@ocaml.doc "The name of the updated ruleset."]}
+      name: RulesetName.t option
+        [@ocaml.doc "The name of the updated ruleset."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateRulesetResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -5841,16 +5933,16 @@ module UpdateRulesetResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (RulesetName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:RulesetName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:RulesetName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RulesetName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" RulesetName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates specified ruleset."]
 module UpdateRulesetRequest =
@@ -5884,11 +5976,11 @@ module UpdateRulesetRequest =
         RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~rules ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map_exn json "Rules" RuleList.of_json in
+    let of_json json__ =
+      let rules = field_map_exn json__ "Rules" RuleList.of_json in
       let description =
-        field_map json "Description" RulesetDescription.of_json in
-      let name = field_map_exn json "Name" RulesetName.of_json in
+        field_map json__ "Description" RulesetDescription.of_json in
+      let name = field_map_exn json__ "Name" RulesetName.of_json in
       make ~rules ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates specified ruleset."]
@@ -5896,14 +5988,13 @@ module UpdateRecipeResponse =
   struct
     type nonrec t =
       {
-      name: RecipeName.t
+      name: RecipeName.t option
         [@ocaml.doc "The name of the recipe that was updated."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateRecipeResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -5937,16 +6028,16 @@ module UpdateRecipeResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (RecipeName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:RecipeName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:RecipeName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RecipeName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" RecipeName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the definition of the LATEST_WORKING version of a DataBrew recipe."]
@@ -5980,11 +6071,11 @@ module UpdateRecipeRequest =
           (Xml.child xml_arg0 "Description") in
       make ?steps ~name ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let steps = field_map json "Steps" RecipeStepList.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
+    let of_json json__ =
+      let steps = field_map json__ "Steps" RecipeStepList.of_json in
+      let name = field_map_exn json__ "Name" RecipeName.of_json in
       let description =
-        field_map json "Description" RecipeDescription.of_json in
+        field_map json__ "Description" RecipeDescription.of_json in
       make ?steps ~name ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5993,14 +6084,14 @@ module UpdateRecipeJobResponse =
   struct
     type nonrec t =
       {
-      name: JobName.t [@ocaml.doc "The name of the job that you updated."]}
+      name: JobName.t option
+        [@ocaml.doc "The name of the job that you updated."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateRecipeJobResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6042,15 +6133,14 @@ module UpdateRecipeJobResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (JobName.to_value x.name)))]
+      structure_to_value [("Name", (Option.map x.name ~f:JobName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+      let name = (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" JobName.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" JobName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the definition of an existing DataBrew recipe job."]
@@ -6166,23 +6256,23 @@ module UpdateRecipeJobRequest =
         ?maxRetries ?maxCapacity ?logSubscription ~name ?encryptionMode
         ?encryptionKeyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeout = field_map json "Timeout" Timeout.of_json in
-      let roleArn = field_map_exn json "RoleArn" Arn.of_json in
+    let of_json json__ =
+      let timeout = field_map json__ "Timeout" Timeout.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Arn.of_json in
       let databaseOutputs =
-        field_map json "DatabaseOutputs" DatabaseOutputList.of_json in
+        field_map json__ "DatabaseOutputs" DatabaseOutputList.of_json in
       let dataCatalogOutputs =
-        field_map json "DataCatalogOutputs" DataCatalogOutputList.of_json in
-      let outputs = field_map json "Outputs" OutputList.of_json in
-      let maxRetries = field_map json "MaxRetries" MaxRetries.of_json in
-      let maxCapacity = field_map json "MaxCapacity" MaxCapacity.of_json in
+        field_map json__ "DataCatalogOutputs" DataCatalogOutputList.of_json in
+      let outputs = field_map json__ "Outputs" OutputList.of_json in
+      let maxRetries = field_map json__ "MaxRetries" MaxRetries.of_json in
+      let maxCapacity = field_map json__ "MaxCapacity" MaxCapacity.of_json in
       let logSubscription =
-        field_map json "LogSubscription" LogSubscription.of_json in
-      let name = field_map_exn json "Name" JobName.of_json in
+        field_map json__ "LogSubscription" LogSubscription.of_json in
+      let name = field_map_exn json__ "Name" JobName.of_json in
       let encryptionMode =
-        field_map json "EncryptionMode" EncryptionMode.of_json in
+        field_map json__ "EncryptionMode" EncryptionMode.of_json in
       let encryptionKeyArn =
-        field_map json "EncryptionKeyArn" EncryptionKeyArn.of_json in
+        field_map json__ "EncryptionKeyArn" EncryptionKeyArn.of_json in
       make ?timeout ~roleArn ?databaseOutputs ?dataCatalogOutputs ?outputs
         ?maxRetries ?maxCapacity ?logSubscription ~name ?encryptionMode
         ?encryptionKeyArn ()
@@ -6195,15 +6285,14 @@ module UpdateProjectResponse =
       {
       lastModifiedDate: Date.t option
         [@ocaml.doc "The date and time that the project was last modified."];
-      name: ProjectName.t
+      name: ProjectName.t option
         [@ocaml.doc "The name of the project that you updated."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateProjectResponse"
     let make ?lastModifiedDate =
-      fun ~name -> fun () -> { lastModifiedDate; name }
+      fun ?name -> fun () -> { lastModifiedDate; name }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -6240,19 +6329,19 @@ module UpdateProjectResponse =
       structure_to_value
         [("LastModifiedDate",
            (Option.map x.lastModifiedDate ~f:Date.to_value));
-        ("Name", (Some (ProjectName.to_value x.name)))]
+        ("Name", (Option.map x.name ~f:ProjectName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "Name") in
       let lastModifiedDate =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastModifiedDate") in
-      make ~name ?lastModifiedDate ()
+      make ?name ?lastModifiedDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ProjectName.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
-      make ~name ?lastModifiedDate ()
+    let of_json json__ =
+      let name = field_map json__ "Name" ProjectName.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
+      make ?name ?lastModifiedDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the definition of an existing DataBrew project."]
 module UpdateProjectRequest =
@@ -6283,10 +6372,10 @@ module UpdateProjectRequest =
         (Option.map ~f:Sample.of_xml) (Xml.child xml_arg0 "Sample") in
       make ~name ~roleArn ?sample ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ProjectName.of_json in
-      let roleArn = field_map_exn json "RoleArn" Arn.of_json in
-      let sample = field_map json "Sample" Sample.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ProjectName.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Arn.of_json in
+      let sample = field_map json__ "Sample" Sample.of_json in
       make ~name ~roleArn ?sample ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the definition of an existing DataBrew project."]
@@ -6294,14 +6383,14 @@ module UpdateProfileJobResponse =
   struct
     type nonrec t =
       {
-      name: JobName.t [@ocaml.doc "The name of the job that was updated."]}
+      name: JobName.t option
+        [@ocaml.doc "The name of the job that was updated."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateProfileJobResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6343,15 +6432,14 @@ module UpdateProfileJobResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (JobName.to_value x.name)))]
+      structure_to_value [("Name", (Option.map x.name ~f:JobName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+      let name = (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" JobName.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" JobName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the definition of an existing profile job."]
 module UpdateProfileJobRequest =
@@ -6474,26 +6562,26 @@ module UpdateProfileJobRequest =
         ~outputLocation ?maxRetries ?maxCapacity ?logSubscription ~name
         ?encryptionMode ?encryptionKeyArn ?configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobSample = field_map json "JobSample" JobSample.of_json in
-      let timeout = field_map json "Timeout" Timeout.of_json in
-      let roleArn = field_map_exn json "RoleArn" Arn.of_json in
+    let of_json json__ =
+      let jobSample = field_map json__ "JobSample" JobSample.of_json in
+      let timeout = field_map json__ "Timeout" Timeout.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Arn.of_json in
       let validationConfigurations =
-        field_map json "ValidationConfigurations"
+        field_map json__ "ValidationConfigurations"
           ValidationConfigurationList.of_json in
       let outputLocation =
-        field_map_exn json "OutputLocation" S3Location.of_json in
-      let maxRetries = field_map json "MaxRetries" MaxRetries.of_json in
-      let maxCapacity = field_map json "MaxCapacity" MaxCapacity.of_json in
+        field_map_exn json__ "OutputLocation" S3Location.of_json in
+      let maxRetries = field_map json__ "MaxRetries" MaxRetries.of_json in
+      let maxCapacity = field_map json__ "MaxCapacity" MaxCapacity.of_json in
       let logSubscription =
-        field_map json "LogSubscription" LogSubscription.of_json in
-      let name = field_map_exn json "Name" JobName.of_json in
+        field_map json__ "LogSubscription" LogSubscription.of_json in
+      let name = field_map_exn json__ "Name" JobName.of_json in
       let encryptionMode =
-        field_map json "EncryptionMode" EncryptionMode.of_json in
+        field_map json__ "EncryptionMode" EncryptionMode.of_json in
       let encryptionKeyArn =
-        field_map json "EncryptionKeyArn" EncryptionKeyArn.of_json in
+        field_map json__ "EncryptionKeyArn" EncryptionKeyArn.of_json in
       let configuration =
-        field_map json "Configuration" ProfileConfiguration.of_json in
+        field_map json__ "Configuration" ProfileConfiguration.of_json in
       make ?jobSample ?timeout ~roleArn ?validationConfigurations
         ~outputLocation ?maxRetries ?maxCapacity ?logSubscription ~name
         ?encryptionMode ?encryptionKeyArn ?configuration ()
@@ -6503,15 +6591,14 @@ module UpdateDatasetResponse =
   struct
     type nonrec t =
       {
-      name: DatasetName.t
+      name: DatasetName.t option
         [@ocaml.doc "The name of the dataset that you updated."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateDatasetResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6553,16 +6640,16 @@ module UpdateDatasetResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (DatasetName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:DatasetName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        DatasetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" DatasetName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" DatasetName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the definition of an existing DataBrew dataset."]
 module UpdateDatasetRequest =
@@ -6609,13 +6696,13 @@ module UpdateDatasetRequest =
         DatasetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?pathOptions ~input ?formatOptions ?format ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pathOptions = field_map json "PathOptions" PathOptions.of_json in
-      let input = field_map_exn json "Input" Input.of_json in
+    let of_json json__ =
+      let pathOptions = field_map json__ "PathOptions" PathOptions.of_json in
+      let input = field_map_exn json__ "Input" Input.of_json in
       let formatOptions =
-        field_map json "FormatOptions" FormatOptions.of_json in
-      let format = field_map json "Format" InputFormat.of_json in
-      let name = field_map_exn json "Name" DatasetName.of_json in
+        field_map json__ "FormatOptions" FormatOptions.of_json in
+      let format = field_map json__ "Format" InputFormat.of_json in
+      let name = field_map_exn json__ "Name" DatasetName.of_json in
       make ?pathOptions ~input ?formatOptions ?format ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the definition of an existing DataBrew dataset."]
@@ -6702,9 +6789,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes metadata tags from a DataBrew resource."]
@@ -6789,9 +6876,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6800,14 +6887,13 @@ module StopJobRunResponse =
   struct
     type nonrec t =
       {
-      runId: JobRunId.t
+      runId: JobRunId.t option
         [@ocaml.doc "The ID of the job run that you stopped."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StopJobRunResponse"
-    let make ~runId = fun () -> { runId }
+    let make ?runId = fun () -> { runId }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -6841,16 +6927,16 @@ module StopJobRunResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("RunId", (Some (JobRunId.to_value x.runId)))]
+      structure_to_value
+        [("RunId", (Option.map x.runId ~f:JobRunId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let runId =
-        JobRunId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RunId") in
-      make ~runId ()
+        (Option.map ~f:JobRunId.of_xml) (Xml.child xml_arg0 "RunId") in
+      make ?runId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runId = field_map_exn json "RunId" JobRunId.of_json in
-      make ~runId ()
+    let of_json json__ =
+      let runId = field_map json__ "RunId" JobRunId.of_json in make ?runId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a particular run of a job."]
 module StopJobRunRequest =
@@ -6873,9 +6959,9 @@ module StopJobRunRequest =
         JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~runId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runId = field_map_exn json "RunId" JobRunId.of_json in
-      let name = field_map_exn json "Name" JobName.of_json in
+    let of_json json__ =
+      let runId = field_map_exn json__ "RunId" JobRunId.of_json in
+      let name = field_map_exn json__ "Name" JobName.of_json in
       make ~runId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a particular run of a job."]
@@ -6883,7 +6969,7 @@ module StartProjectSessionResponse =
   struct
     type nonrec t =
       {
-      name: ProjectName.t
+      name: ProjectName.t option
         [@ocaml.doc "The name of the project to be acted upon."];
       clientSessionId: ClientSessionId.t option
         [@ocaml.doc "A system-generated identifier for the session."]}
@@ -6893,9 +6979,8 @@ module StartProjectSessionResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartProjectSessionResponse"
-    let make ?clientSessionId =
-      fun ~name -> fun () -> { clientSessionId; name }
+    let make ?name =
+      fun ?clientSessionId -> fun () -> { name; clientSessionId }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -6948,7 +7033,7 @@ module StartProjectSessionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Name", (Some (ProjectName.to_value x.name)));
+        [("Name", (Option.map x.name ~f:ProjectName.to_value));
         ("ClientSessionId",
           (Option.map x.clientSessionId ~f:ClientSessionId.to_value))]
     let to_query v = to_query to_value v
@@ -6957,14 +7042,14 @@ module StartProjectSessionResponse =
         (Option.map ~f:ClientSessionId.of_xml)
           (Xml.child xml_arg0 "ClientSessionId") in
       let name =
-        ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?clientSessionId ~name ()
+        (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?clientSessionId ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientSessionId =
-        field_map json "ClientSessionId" ClientSessionId.of_json in
-      let name = field_map_exn json "Name" ProjectName.of_json in
-      make ?clientSessionId ~name ()
+        field_map json__ "ClientSessionId" ClientSessionId.of_json in
+      let name = field_map json__ "Name" ProjectName.of_json in
+      make ?clientSessionId ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an interactive session, enabling you to manipulate data in a DataBrew project."]
@@ -6992,10 +7077,10 @@ module StartProjectSessionRequest =
         ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?assumeControl ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assumeControl =
-        field_map json "AssumeControl" AssumeControl.of_json in
-      let name = field_map_exn json "Name" ProjectName.of_json in
+        field_map json__ "AssumeControl" AssumeControl.of_json in
+      let name = field_map_exn json__ "Name" ProjectName.of_json in
       make ?assumeControl ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7004,7 +7089,7 @@ module StartJobRunResponse =
   struct
     type nonrec t =
       {
-      runId: JobRunId.t
+      runId: JobRunId.t option
         [@ocaml.doc
           "A system-generated identifier for this particular job run."]}
     type nonrec error =
@@ -7013,8 +7098,7 @@ module StartJobRunResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartJobRunResponse"
-    let make ~runId = fun () -> { runId }
+    let make ?runId = fun () -> { runId }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -7066,16 +7150,16 @@ module StartJobRunResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("RunId", (Some (JobRunId.to_value x.runId)))]
+      structure_to_value
+        [("RunId", (Option.map x.runId ~f:JobRunId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let runId =
-        JobRunId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RunId") in
-      make ~runId ()
+        (Option.map ~f:JobRunId.of_xml) (Xml.child xml_arg0 "RunId") in
+      make ?runId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runId = field_map_exn json "RunId" JobRunId.of_json in
-      make ~runId ()
+    let of_json json__ =
+      let runId = field_map json__ "RunId" JobRunId.of_json in make ?runId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Runs a DataBrew job."]
 module StartJobRunRequest =
@@ -7093,8 +7177,8 @@ module StartJobRunRequest =
         JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" JobName.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" JobName.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Runs a DataBrew job."]
 module SendProjectSessionActionResponse =
@@ -7104,7 +7188,7 @@ module SendProjectSessionActionResponse =
       result: Result_.t option
         [@ocaml.doc
           "A message indicating the result of performing the action."];
-      name: ProjectName.t
+      name: ProjectName.t option
         [@ocaml.doc
           "The name of the project that was affected by the action."];
       actionId: ActionId.t option
@@ -7114,9 +7198,8 @@ module SendProjectSessionActionResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SendProjectSessionActionResponse"
     let make ?result =
-      fun ?actionId -> fun ~name -> fun () -> { result; actionId; name }
+      fun ?name -> fun ?actionId -> fun () -> { result; name; actionId }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -7160,23 +7243,23 @@ module SendProjectSessionActionResponse =
     let to_value x =
       structure_to_value
         [("Result", (Option.map x.result ~f:Result_.to_value));
-        ("Name", (Some (ProjectName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:ProjectName.to_value));
         ("ActionId", (Option.map x.actionId ~f:ActionId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let actionId =
         (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "ActionId") in
       let name =
-        ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "Name") in
       let result =
         (Option.map ~f:Result_.of_xml) (Xml.child xml_arg0 "Result") in
-      make ?actionId ~name ?result ()
+      make ?actionId ?name ?result ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actionId = field_map json "ActionId" ActionId.of_json in
-      let name = field_map_exn json "Name" ProjectName.of_json in
-      let result = field_map json "Result" Result_.of_json in
-      make ?actionId ~name ?result ()
+    let of_json json__ =
+      let actionId = field_map json__ "ActionId" ActionId.of_json in
+      let name = field_map json__ "Name" ProjectName.of_json in
+      let result = field_map json__ "Result" Result_.of_json in
+      make ?actionId ?name ?result ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Performs a recipe step within an interactive DataBrew session that's currently open."]
@@ -7240,14 +7323,14 @@ module SendProjectSessionActionRequest =
       make ?viewFrame ?clientSessionId ?stepIndex ?recipeStep ~name ?preview
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let viewFrame = field_map json "ViewFrame" ViewFrame.of_json in
+    let of_json json__ =
+      let viewFrame = field_map json__ "ViewFrame" ViewFrame.of_json in
       let clientSessionId =
-        field_map json "ClientSessionId" ClientSessionId.of_json in
-      let stepIndex = field_map json "StepIndex" StepIndex.of_json in
-      let recipeStep = field_map json "RecipeStep" RecipeStep.of_json in
-      let name = field_map_exn json "Name" ProjectName.of_json in
-      let preview = field_map json "Preview" Preview.of_json in
+        field_map json__ "ClientSessionId" ClientSessionId.of_json in
+      let stepIndex = field_map json__ "StepIndex" StepIndex.of_json in
+      let recipeStep = field_map json__ "RecipeStep" RecipeStep.of_json in
+      let name = field_map_exn json__ "Name" ProjectName.of_json in
+      let preview = field_map json__ "Preview" Preview.of_json in
       make ?viewFrame ?clientSessionId ?stepIndex ?recipeStep ~name ?preview
         ()
     let to_json v = composed_to_json to_value v
@@ -7257,15 +7340,14 @@ module PublishRecipeResponse =
   struct
     type nonrec t =
       {
-      name: RecipeName.t
+      name: RecipeName.t option
         [@ocaml.doc "The name of the recipe that you published."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PublishRecipeResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -7309,16 +7391,16 @@ module PublishRecipeResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (RecipeName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:RecipeName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:RecipeName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RecipeName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" RecipeName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Publishes a new version of a DataBrew recipe."]
 module PublishRecipeRequest =
@@ -7346,10 +7428,10 @@ module PublishRecipeRequest =
           (Xml.child xml_arg0 "Description") in
       make ~name ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RecipeName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" RecipeName.of_json in
       let description =
-        field_map json "Description" RecipeDescription.of_json in
+        field_map json__ "Description" RecipeDescription.of_json in
       make ~name ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Publishes a new version of a DataBrew recipe."]
@@ -7412,8 +7494,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all the tags for a DataBrew resource."]
 module ListTagsForResourceRequest =
@@ -7434,8 +7516,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all the tags for a DataBrew resource."]
@@ -7443,7 +7525,7 @@ module ListSchedulesResponse =
   struct
     type nonrec t =
       {
-      schedules: ScheduleList.t
+      schedules: ScheduleList.t option
         [@ocaml.doc "A list of schedules that are defined."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -7451,9 +7533,8 @@ module ListSchedulesResponse =
     type nonrec error =
       [ `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListSchedulesResponse"
-    let make ?nextToken =
-      fun ~schedules -> fun () -> { nextToken; schedules }
+    let make ?schedules =
+      fun ?nextToken -> fun () -> { schedules; nextToken }
     let error_of_json name json =
       match name with
       | "ValidationException" ->
@@ -7480,21 +7561,20 @@ module ListSchedulesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Schedules", (Some (ScheduleList.to_value x.schedules)));
+        [("Schedules", (Option.map x.schedules ~f:ScheduleList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let schedules =
-        ScheduleList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Schedules") in
-      make ?nextToken ~schedules ()
+        (Option.map ~f:ScheduleList.of_xml) (Xml.child xml_arg0 "Schedules") in
+      make ?nextToken ?schedules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schedules = field_map_exn json "Schedules" ScheduleList.of_json in
-      make ?nextToken ~schedules ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schedules = field_map json__ "Schedules" ScheduleList.of_json in
+      make ?nextToken ?schedules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the DataBrew schedules that are defined."]
 module ListSchedulesRequest =
@@ -7528,10 +7608,10 @@ module ListSchedulesRequest =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "jobName") in
       make ?nextToken ?maxResults ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults100.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults100.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?nextToken ?maxResults ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the DataBrew schedules that are defined."]
@@ -7539,7 +7619,7 @@ module ListRulesetsResponse =
   struct
     type nonrec t =
       {
-      rulesets: RulesetItemList.t
+      rulesets: RulesetItemList.t option
         [@ocaml.doc
           "A list of RulesetItem. RulesetItem contains meta data of a ruleset."];
       nextToken: NextToken.t option
@@ -7549,8 +7629,7 @@ module ListRulesetsResponse =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRulesetsResponse"
-    let make ?nextToken = fun ~rulesets -> fun () -> { nextToken; rulesets }
+    let make ?rulesets = fun ?nextToken -> fun () -> { rulesets; nextToken }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -7585,21 +7664,21 @@ module ListRulesetsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Rulesets", (Some (RulesetItemList.to_value x.rulesets)));
+        [("Rulesets", (Option.map x.rulesets ~f:RulesetItemList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let rulesets =
-        RulesetItemList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Rulesets") in
-      make ?nextToken ~rulesets ()
+        (Option.map ~f:RulesetItemList.of_xml)
+          (Xml.child xml_arg0 "Rulesets") in
+      make ?nextToken ?rulesets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let rulesets = field_map_exn json "Rulesets" RulesetItemList.of_json in
-      make ?nextToken ~rulesets ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let rulesets = field_map json__ "Rulesets" RulesetItemList.of_json in
+      make ?nextToken ?rulesets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List all rulesets available in the current account or rulesets associated with a specific resource (dataset)."]
@@ -7635,10 +7714,10 @@ module ListRulesetsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "targetArn") in
       make ?nextToken ?maxResults ?targetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults100.of_json in
-      let targetArn = field_map json "TargetArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults100.of_json in
+      let targetArn = field_map json__ "TargetArn" Arn.of_json in
       make ?nextToken ?maxResults ?targetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7647,7 +7726,7 @@ module ListRecipesResponse =
   struct
     type nonrec t =
       {
-      recipes: RecipeList.t
+      recipes: RecipeList.t option
         [@ocaml.doc "A list of recipes that are defined."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -7655,8 +7734,7 @@ module ListRecipesResponse =
     type nonrec error =
       [ `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRecipesResponse"
-    let make ?nextToken = fun ~recipes -> fun () -> { nextToken; recipes }
+    let make ?recipes = fun ?nextToken -> fun () -> { recipes; nextToken }
     let error_of_json name json =
       match name with
       | "ValidationException" ->
@@ -7683,21 +7761,20 @@ module ListRecipesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Recipes", (Some (RecipeList.to_value x.recipes)));
+        [("Recipes", (Option.map x.recipes ~f:RecipeList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let recipes =
-        RecipeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Recipes") in
-      make ?nextToken ~recipes ()
+        (Option.map ~f:RecipeList.of_xml) (Xml.child xml_arg0 "Recipes") in
+      make ?nextToken ?recipes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let recipes = field_map_exn json "Recipes" RecipeList.of_json in
-      make ?nextToken ~recipes ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let recipes = field_map json__ "Recipes" RecipeList.of_json in
+      make ?nextToken ?recipes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the DataBrew recipes that are defined."]
 module ListRecipesRequest =
@@ -7735,11 +7812,11 @@ module ListRecipesRequest =
           (Xml.child xml_arg0 "maxResults") in
       make ?recipeVersion ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipeVersion =
-        field_map json "RecipeVersion" RecipeVersion.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults100.of_json in
+        field_map json__ "RecipeVersion" RecipeVersion.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults100.of_json in
       make ?recipeVersion ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the DataBrew recipes that are defined."]
@@ -7750,13 +7827,12 @@ module ListRecipeVersionsResponse =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token that you can use in a subsequent call to retrieve the next set of results."];
-      recipes: RecipeList.t
+      recipes: RecipeList.t option
         [@ocaml.doc "A list of versions for the specified recipe."]}
     type nonrec error =
       [ `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRecipeVersionsResponse"
-    let make ?nextToken = fun ~recipes -> fun () -> { nextToken; recipes }
+    let make ?nextToken = fun ?recipes -> fun () -> { nextToken; recipes }
     let error_of_json name json =
       match name with
       | "ValidationException" ->
@@ -7784,20 +7860,19 @@ module ListRecipeVersionsResponse =
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("Recipes", (Some (RecipeList.to_value x.recipes)))]
+        ("Recipes", (Option.map x.recipes ~f:RecipeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let recipes =
-        RecipeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Recipes") in
+        (Option.map ~f:RecipeList.of_xml) (Xml.child xml_arg0 "Recipes") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ~recipes ?nextToken ()
+      make ?recipes ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recipes = field_map_exn json "Recipes" RecipeList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ~recipes ?nextToken ()
+    let of_json json__ =
+      let recipes = field_map json__ "Recipes" RecipeList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?recipes ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the versions of a particular DataBrew recipe, except for LATEST_WORKING."]
@@ -7834,10 +7909,10 @@ module ListRecipeVersionsRequest =
           (Xml.child xml_arg0 "maxResults") in
       make ~name ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RecipeName.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults100.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" RecipeName.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults100.of_json in
       make ~name ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7846,7 +7921,7 @@ module ListProjectsResponse =
   struct
     type nonrec t =
       {
-      projects: ProjectList.t
+      projects: ProjectList.t option
         [@ocaml.doc "A list of projects that are defined ."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -7854,8 +7929,7 @@ module ListProjectsResponse =
     type nonrec error =
       [ `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListProjectsResponse"
-    let make ?nextToken = fun ~projects -> fun () -> { nextToken; projects }
+    let make ?projects = fun ?nextToken -> fun () -> { projects; nextToken }
     let error_of_json name json =
       match name with
       | "ValidationException" ->
@@ -7882,21 +7956,20 @@ module ListProjectsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Projects", (Some (ProjectList.to_value x.projects)));
+        [("Projects", (Option.map x.projects ~f:ProjectList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let projects =
-        ProjectList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Projects") in
-      make ?nextToken ~projects ()
+        (Option.map ~f:ProjectList.of_xml) (Xml.child xml_arg0 "Projects") in
+      make ?nextToken ?projects ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let projects = field_map_exn json "Projects" ProjectList.of_json in
-      make ?nextToken ~projects ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let projects = field_map json__ "Projects" ProjectList.of_json in
+      make ?nextToken ?projects ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the DataBrew projects that are defined."]
 module ListProjectsRequest =
@@ -7924,9 +7997,9 @@ module ListProjectsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the DataBrew projects that are defined."]
@@ -7934,15 +8007,14 @@ module ListJobsResponse =
   struct
     type nonrec t =
       {
-      jobs: JobList.t [@ocaml.doc "A list of jobs that are defined."];
+      jobs: JobList.t option [@ocaml.doc "A list of jobs that are defined."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token that you can use in a subsequent call to retrieve the next set of results."]}
     type nonrec error =
       [ `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListJobsResponse"
-    let make ?nextToken = fun ~jobs -> fun () -> { nextToken; jobs }
+    let make ?jobs = fun ?nextToken -> fun () -> { jobs; nextToken }
     let error_of_json name json =
       match name with
       | "ValidationException" ->
@@ -7969,20 +8041,19 @@ module ListJobsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Jobs", (Some (JobList.to_value x.jobs)));
+        [("Jobs", (Option.map x.jobs ~f:JobList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let jobs =
-        JobList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Jobs") in
-      make ?nextToken ~jobs ()
+      let jobs = (Option.map ~f:JobList.of_xml) (Xml.child xml_arg0 "Jobs") in
+      make ?nextToken ?jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let jobs = field_map_exn json "Jobs" JobList.of_json in
-      make ?nextToken ~jobs ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let jobs = field_map json__ "Jobs" JobList.of_json in
+      make ?nextToken ?jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the DataBrew jobs that are defined."]
 module ListJobsRequest =
@@ -8025,11 +8096,11 @@ module ListJobsRequest =
         (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "datasetName") in
       make ?projectName ?nextToken ?maxResults ?datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projectName = field_map json "ProjectName" ProjectName.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults100.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
+    let of_json json__ =
+      let projectName = field_map json__ "ProjectName" ProjectName.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults100.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
       make ?projectName ?nextToken ?maxResults ?datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the DataBrew jobs that are defined."]
@@ -8037,7 +8108,7 @@ module ListJobRunsResponse =
   struct
     type nonrec t =
       {
-      jobRuns: JobRunList.t
+      jobRuns: JobRunList.t option
         [@ocaml.doc
           "A list of job runs that have occurred for the specified job."];
       nextToken: NextToken.t option
@@ -8047,8 +8118,7 @@ module ListJobRunsResponse =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListJobRunsResponse"
-    let make ?nextToken = fun ~jobRuns -> fun () -> { nextToken; jobRuns }
+    let make ?jobRuns = fun ?nextToken -> fun () -> { jobRuns; nextToken }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -8083,21 +8153,20 @@ module ListJobRunsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("JobRuns", (Some (JobRunList.to_value x.jobRuns)));
+        [("JobRuns", (Option.map x.jobRuns ~f:JobRunList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let jobRuns =
-        JobRunList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobRuns") in
-      make ?nextToken ~jobRuns ()
+        (Option.map ~f:JobRunList.of_xml) (Xml.child xml_arg0 "JobRuns") in
+      make ?nextToken ?jobRuns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let jobRuns = field_map_exn json "JobRuns" JobRunList.of_json in
-      make ?nextToken ~jobRuns ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let jobRuns = field_map json__ "JobRuns" JobRunList.of_json in
+      make ?nextToken ?jobRuns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all of the previous runs of a particular DataBrew job."]
@@ -8132,10 +8201,10 @@ module ListJobRunsRequest =
         JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?nextToken ?maxResults ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults100.of_json in
-      let name = field_map_exn json "Name" JobName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults100.of_json in
+      let name = field_map_exn json__ "Name" JobName.of_json in
       make ?nextToken ?maxResults ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8144,7 +8213,7 @@ module ListDatasetsResponse =
   struct
     type nonrec t =
       {
-      datasets: DatasetList.t
+      datasets: DatasetList.t option
         [@ocaml.doc "A list of datasets that are defined."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -8152,8 +8221,7 @@ module ListDatasetsResponse =
     type nonrec error =
       [ `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDatasetsResponse"
-    let make ?nextToken = fun ~datasets -> fun () -> { nextToken; datasets }
+    let make ?datasets = fun ?nextToken -> fun () -> { datasets; nextToken }
     let error_of_json name json =
       match name with
       | "ValidationException" ->
@@ -8180,21 +8248,20 @@ module ListDatasetsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Datasets", (Some (DatasetList.to_value x.datasets)));
+        [("Datasets", (Option.map x.datasets ~f:DatasetList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let datasets =
-        DatasetList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Datasets") in
-      make ?nextToken ~datasets ()
+        (Option.map ~f:DatasetList.of_xml) (Xml.child xml_arg0 "Datasets") in
+      make ?nextToken ?datasets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let datasets = field_map_exn json "Datasets" DatasetList.of_json in
-      make ?nextToken ~datasets ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let datasets = field_map json__ "Datasets" DatasetList.of_json in
+      make ?nextToken ?datasets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the DataBrew datasets."]
 module ListDatasetsRequest =
@@ -8222,9 +8289,9 @@ module ListDatasetsRequest =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults100.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults100.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the DataBrew datasets."]
@@ -8252,12 +8319,11 @@ module DescribeScheduleResponse =
           "The date or dates and time or times when the jobs are to be run for the schedule. For more information, see Cron expressions in the Glue DataBrew Developer Guide."];
       tags: TagMap.t option
         [@ocaml.doc "Metadata tags associated with this schedule."];
-      name: ScheduleName.t [@ocaml.doc "The name of the schedule."]}
+      name: ScheduleName.t option [@ocaml.doc "The name of the schedule."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeScheduleResponse"
     let make ?createDate =
       fun ?createdBy ->
         fun ?jobNames ->
@@ -8266,7 +8332,7 @@ module DescribeScheduleResponse =
               fun ?resourceArn ->
                 fun ?cronExpression ->
                   fun ?tags ->
-                    fun ~name ->
+                    fun ?name ->
                       fun () ->
                         {
                           createDate;
@@ -8324,11 +8390,11 @@ module DescribeScheduleResponse =
         ("CronExpression",
           (Option.map x.cronExpression ~f:CronExpression.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("Name", (Some (ScheduleName.to_value x.name)))]
+        ("Name", (Option.map x.name ~f:ScheduleName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        ScheduleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:ScheduleName.of_xml) (Xml.child xml_arg0 "Name") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let cronExpression =
         (Option.map ~f:CronExpression.of_xml)
@@ -8346,22 +8412,22 @@ module DescribeScheduleResponse =
         (Option.map ~f:CreatedBy.of_xml) (Xml.child xml_arg0 "CreatedBy") in
       let createDate =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreateDate") in
-      make ~name ?tags ?cronExpression ?resourceArn ?lastModifiedDate
+      make ?name ?tags ?cronExpression ?resourceArn ?lastModifiedDate
         ?lastModifiedBy ?jobNames ?createdBy ?createDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ScheduleName.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" ScheduleName.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let cronExpression =
-        field_map json "CronExpression" CronExpression.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
+        field_map json__ "CronExpression" CronExpression.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let jobNames = field_map json "JobNames" JobNameList.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      make ~name ?tags ?cronExpression ?resourceArn ?lastModifiedDate
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let jobNames = field_map json__ "JobNames" JobNameList.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      make ?name ?tags ?cronExpression ?resourceArn ?lastModifiedDate
         ?lastModifiedBy ?jobNames ?createdBy ?createDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the definition of a specific DataBrew schedule."]
@@ -8381,8 +8447,8 @@ module DescribeScheduleRequest =
         ScheduleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ScheduleName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ScheduleName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the definition of a specific DataBrew schedule."]
@@ -8390,7 +8456,7 @@ module DescribeRulesetResponse =
   struct
     type nonrec t =
       {
-      name: RulesetName.t [@ocaml.doc "The name of the ruleset."];
+      name: RulesetName.t option [@ocaml.doc "The name of the ruleset."];
       description: RulesetDescription.t option
         [@ocaml.doc "The description of the ruleset."];
       targetArn: Arn.t option
@@ -8417,19 +8483,19 @@ module DescribeRulesetResponse =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeRulesetResponse"
-    let make ?description =
-      fun ?targetArn ->
-        fun ?rules ->
-          fun ?createDate ->
-            fun ?createdBy ->
-              fun ?lastModifiedBy ->
-                fun ?lastModifiedDate ->
-                  fun ?resourceArn ->
-                    fun ?tags ->
-                      fun ~name ->
+    let make ?name =
+      fun ?description ->
+        fun ?targetArn ->
+          fun ?rules ->
+            fun ?createDate ->
+              fun ?createdBy ->
+                fun ?lastModifiedBy ->
+                  fun ?lastModifiedDate ->
+                    fun ?resourceArn ->
+                      fun ?tags ->
                         fun () ->
                           {
+                            name;
                             description;
                             targetArn;
                             rules;
@@ -8438,8 +8504,7 @@ module DescribeRulesetResponse =
                             lastModifiedBy;
                             lastModifiedDate;
                             resourceArn;
-                            tags;
-                            name
+                            tags
                           }
     let error_of_json name json =
       match name with
@@ -8475,7 +8540,7 @@ module DescribeRulesetResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Name", (Some (RulesetName.to_value x.name)));
+        [("Name", (Option.map x.name ~f:RulesetName.to_value));
         ("Description",
           (Option.map x.description ~f:RulesetDescription.to_value));
         ("TargetArn", (Option.map x.targetArn ~f:Arn.to_value));
@@ -8510,25 +8575,25 @@ module DescribeRulesetResponse =
         (Option.map ~f:RulesetDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       let name =
-        RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:RulesetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?tags ?resourceArn ?lastModifiedDate ?lastModifiedBy ?createdBy
-        ?createDate ?rules ?targetArn ?description ~name ()
+        ?createDate ?rules ?targetArn ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      let rules = field_map json "Rules" RuleList.of_json in
-      let targetArn = field_map json "TargetArn" Arn.of_json in
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      let rules = field_map json__ "Rules" RuleList.of_json in
+      let targetArn = field_map json__ "TargetArn" Arn.of_json in
       let description =
-        field_map json "Description" RulesetDescription.of_json in
-      let name = field_map_exn json "Name" RulesetName.of_json in
+        field_map json__ "Description" RulesetDescription.of_json in
+      let name = field_map json__ "Name" RulesetName.of_json in
       make ?tags ?resourceArn ?lastModifiedDate ?lastModifiedBy ?createdBy
-        ?createDate ?rules ?targetArn ?description ~name ()
+        ?createDate ?rules ?targetArn ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves detailed information about the ruleset."]
 module DescribeRulesetRequest =
@@ -8547,8 +8612,8 @@ module DescribeRulesetRequest =
         RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RulesetName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" RulesetName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves detailed information about the ruleset."]
@@ -8575,7 +8640,7 @@ module DescribeRecipeResponse =
         [@ocaml.doc "The date and time when the recipe was last published."];
       description: RecipeDescription.t option
         [@ocaml.doc "The description of the recipe."];
-      name: RecipeName.t [@ocaml.doc "The name of the recipe."];
+      name: RecipeName.t option [@ocaml.doc "The name of the recipe."];
       steps: RecipeStepList.t option
         [@ocaml.doc
           "One or more steps to be performed by the recipe. Each step consists of an action, and the conditions under which the action should succeed."];
@@ -8588,7 +8653,6 @@ module DescribeRecipeResponse =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeRecipeResponse"
     let make ?createdBy =
       fun ?createDate ->
         fun ?lastModifiedBy ->
@@ -8597,11 +8661,11 @@ module DescribeRecipeResponse =
               fun ?publishedBy ->
                 fun ?publishedDate ->
                   fun ?description ->
-                    fun ?steps ->
-                      fun ?tags ->
-                        fun ?resourceArn ->
-                          fun ?recipeVersion ->
-                            fun ~name ->
+                    fun ?name ->
+                      fun ?steps ->
+                        fun ?tags ->
+                          fun ?resourceArn ->
+                            fun ?recipeVersion ->
                               fun () ->
                                 {
                                   createdBy;
@@ -8612,11 +8676,11 @@ module DescribeRecipeResponse =
                                   publishedBy;
                                   publishedDate;
                                   description;
+                                  name;
                                   steps;
                                   tags;
                                   resourceArn;
-                                  recipeVersion;
-                                  name
+                                  recipeVersion
                                 }
     let error_of_json name json =
       match name with
@@ -8663,7 +8727,7 @@ module DescribeRecipeResponse =
         ("PublishedDate", (Option.map x.publishedDate ~f:Date.to_value));
         ("Description",
           (Option.map x.description ~f:RecipeDescription.to_value));
-        ("Name", (Some (RecipeName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:RecipeName.to_value));
         ("Steps", (Option.map x.steps ~f:RecipeStepList.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
         ("ResourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
@@ -8680,7 +8744,7 @@ module DescribeRecipeResponse =
       let steps =
         (Option.map ~f:RecipeStepList.of_xml) (Xml.child xml_arg0 "Steps") in
       let name =
-        RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:RecipeName.of_xml) (Xml.child xml_arg0 "Name") in
       let description =
         (Option.map ~f:RecipeDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
@@ -8699,28 +8763,28 @@ module DescribeRecipeResponse =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreateDate") in
       let createdBy =
         (Option.map ~f:CreatedBy.of_xml) (Xml.child xml_arg0 "CreatedBy") in
-      make ?recipeVersion ?resourceArn ?tags ?steps ~name ?description
+      make ?recipeVersion ?resourceArn ?tags ?steps ?name ?description
         ?publishedDate ?publishedBy ?projectName ?lastModifiedDate
         ?lastModifiedBy ?createDate ?createdBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipeVersion =
-        field_map json "RecipeVersion" RecipeVersion.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let steps = field_map json "Steps" RecipeStepList.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
+        field_map json__ "RecipeVersion" RecipeVersion.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let steps = field_map json__ "Steps" RecipeStepList.of_json in
+      let name = field_map json__ "Name" RecipeName.of_json in
       let description =
-        field_map json "Description" RecipeDescription.of_json in
-      let publishedDate = field_map json "PublishedDate" Date.of_json in
-      let publishedBy = field_map json "PublishedBy" PublishedBy.of_json in
-      let projectName = field_map json "ProjectName" ProjectName.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
+        field_map json__ "Description" RecipeDescription.of_json in
+      let publishedDate = field_map json__ "PublishedDate" Date.of_json in
+      let publishedBy = field_map json__ "PublishedBy" PublishedBy.of_json in
+      let projectName = field_map json__ "ProjectName" ProjectName.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      make ?recipeVersion ?resourceArn ?tags ?steps ~name ?description
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      make ?recipeVersion ?resourceArn ?tags ?steps ?name ?description
         ?publishedDate ?publishedBy ?projectName ?lastModifiedDate
         ?lastModifiedBy ?createDate ?createdBy ()
     let to_json v = composed_to_json to_value v
@@ -8751,10 +8815,10 @@ module DescribeRecipeRequest =
         RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?recipeVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipeVersion =
-        field_map json "RecipeVersion" RecipeVersion.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
+        field_map json__ "RecipeVersion" RecipeVersion.of_json in
+      let name = field_map_exn json__ "Name" RecipeName.of_json in
       make ?recipeVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8775,7 +8839,7 @@ module DescribeProjectResponse =
       lastModifiedBy: LastModifiedBy.t option
         [@ocaml.doc
           "The identifier (user name) of the user who last modified the project."];
-      name: ProjectName.t [@ocaml.doc "The name of the project."];
+      name: ProjectName.t option [@ocaml.doc "The name of the project."];
       recipeName: RecipeName.t option
         [@ocaml.doc "The recipe associated with this job."];
       resourceArn: Arn.t option
@@ -8798,21 +8862,20 @@ module DescribeProjectResponse =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeProjectResponse"
     let make ?createDate =
       fun ?createdBy ->
         fun ?datasetName ->
           fun ?lastModifiedDate ->
             fun ?lastModifiedBy ->
-              fun ?recipeName ->
-                fun ?resourceArn ->
-                  fun ?sample ->
-                    fun ?roleArn ->
-                      fun ?tags ->
-                        fun ?sessionStatus ->
-                          fun ?openedBy ->
-                            fun ?openDate ->
-                              fun ~name ->
+              fun ?name ->
+                fun ?recipeName ->
+                  fun ?resourceArn ->
+                    fun ?sample ->
+                      fun ?roleArn ->
+                        fun ?tags ->
+                          fun ?sessionStatus ->
+                            fun ?openedBy ->
+                              fun ?openDate ->
                                 fun () ->
                                   {
                                     createDate;
@@ -8820,6 +8883,7 @@ module DescribeProjectResponse =
                                     datasetName;
                                     lastModifiedDate;
                                     lastModifiedBy;
+                                    name;
                                     recipeName;
                                     resourceArn;
                                     sample;
@@ -8827,8 +8891,7 @@ module DescribeProjectResponse =
                                     tags;
                                     sessionStatus;
                                     openedBy;
-                                    openDate;
-                                    name
+                                    openDate
                                   }
     let error_of_json name json =
       match name with
@@ -8871,7 +8934,7 @@ module DescribeProjectResponse =
           (Option.map x.lastModifiedDate ~f:Date.to_value));
         ("LastModifiedBy",
           (Option.map x.lastModifiedBy ~f:LastModifiedBy.to_value));
-        ("Name", (Some (ProjectName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:ProjectName.to_value));
         ("RecipeName", (Option.map x.recipeName ~f:RecipeName.to_value));
         ("ResourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
         ("Sample", (Option.map x.sample ~f:Sample.to_value));
@@ -8899,7 +8962,7 @@ module DescribeProjectResponse =
       let recipeName =
         (Option.map ~f:RecipeName.of_xml) (Xml.child xml_arg0 "RecipeName") in
       let name =
-        ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "Name") in
       let lastModifiedBy =
         (Option.map ~f:LastModifiedBy.of_xml)
           (Xml.child xml_arg0 "LastModifiedBy") in
@@ -8912,28 +8975,28 @@ module DescribeProjectResponse =
       let createDate =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreateDate") in
       make ?openDate ?openedBy ?sessionStatus ?tags ?roleArn ?sample
-        ?resourceArn ?recipeName ~name ?lastModifiedBy ?lastModifiedDate
+        ?resourceArn ?recipeName ?name ?lastModifiedBy ?lastModifiedDate
         ?datasetName ?createdBy ?createDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let openDate = field_map json "OpenDate" Date.of_json in
-      let openedBy = field_map json "OpenedBy" OpenedBy.of_json in
+    let of_json json__ =
+      let openDate = field_map json__ "OpenDate" Date.of_json in
+      let openedBy = field_map json__ "OpenedBy" OpenedBy.of_json in
       let sessionStatus =
-        field_map json "SessionStatus" SessionStatus.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let roleArn = field_map json "RoleArn" Arn.of_json in
-      let sample = field_map json "Sample" Sample.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let recipeName = field_map json "RecipeName" RecipeName.of_json in
-      let name = field_map_exn json "Name" ProjectName.of_json in
+        field_map json__ "SessionStatus" SessionStatus.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let roleArn = field_map json__ "RoleArn" Arn.of_json in
+      let sample = field_map json__ "Sample" Sample.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let recipeName = field_map json__ "RecipeName" RecipeName.of_json in
+      let name = field_map json__ "Name" ProjectName.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
       make ?openDate ?openedBy ?sessionStatus ?tags ?roleArn ?sample
-        ?resourceArn ?recipeName ~name ?lastModifiedBy ?lastModifiedDate
+        ?resourceArn ?recipeName ?name ?lastModifiedBy ?lastModifiedDate
         ?datasetName ?createdBy ?createDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the definition of a specific DataBrew project."]
@@ -8953,8 +9016,8 @@ module DescribeProjectRequest =
         ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ProjectName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ProjectName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the definition of a specific DataBrew project."]
@@ -8975,7 +9038,7 @@ module DescribeJobRunResponse =
       executionTime: ExecutionTime.t option
         [@ocaml.doc
           "The amount of time, in seconds, during which the job run consumed resources."];
-      jobName: JobName.t
+      jobName: JobName.t option
         [@ocaml.doc "The name of the job being processed during this run."];
       profileConfiguration: ProfileConfiguration.t option
         [@ocaml.doc
@@ -9014,26 +9077,25 @@ module DescribeJobRunResponse =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeJobRunResponse"
     let make ?attempt =
       fun ?completedOn ->
         fun ?datasetName ->
           fun ?errorMessage ->
             fun ?executionTime ->
-              fun ?profileConfiguration ->
-                fun ?validationConfigurations ->
-                  fun ?runId ->
-                    fun ?state ->
-                      fun ?logSubscription ->
-                        fun ?logGroupName ->
-                          fun ?outputs ->
-                            fun ?dataCatalogOutputs ->
-                              fun ?databaseOutputs ->
-                                fun ?recipeReference ->
-                                  fun ?startedBy ->
-                                    fun ?startedOn ->
-                                      fun ?jobSample ->
-                                        fun ~jobName ->
+              fun ?jobName ->
+                fun ?profileConfiguration ->
+                  fun ?validationConfigurations ->
+                    fun ?runId ->
+                      fun ?state ->
+                        fun ?logSubscription ->
+                          fun ?logGroupName ->
+                            fun ?outputs ->
+                              fun ?dataCatalogOutputs ->
+                                fun ?databaseOutputs ->
+                                  fun ?recipeReference ->
+                                    fun ?startedBy ->
+                                      fun ?startedOn ->
+                                        fun ?jobSample ->
                                           fun () ->
                                             {
                                               attempt;
@@ -9041,6 +9103,7 @@ module DescribeJobRunResponse =
                                               datasetName;
                                               errorMessage;
                                               executionTime;
+                                              jobName;
                                               profileConfiguration;
                                               validationConfigurations;
                                               runId;
@@ -9053,8 +9116,7 @@ module DescribeJobRunResponse =
                                               recipeReference;
                                               startedBy;
                                               startedOn;
-                                              jobSample;
-                                              jobName
+                                              jobSample
                                             }
     let error_of_json name json =
       match name with
@@ -9097,7 +9159,7 @@ module DescribeJobRunResponse =
           (Option.map x.errorMessage ~f:JobRunErrorMessage.to_value));
         ("ExecutionTime",
           (Option.map x.executionTime ~f:ExecutionTime.to_value));
-        ("JobName", (Some (JobName.to_value x.jobName)));
+        ("JobName", (Option.map x.jobName ~f:JobName.to_value));
         ("ProfileConfiguration",
           (Option.map x.profileConfiguration ~f:ProfileConfiguration.to_value));
         ("ValidationConfigurations",
@@ -9155,7 +9217,7 @@ module DescribeJobRunResponse =
         (Option.map ~f:ProfileConfiguration.of_xml)
           (Xml.child xml_arg0 "ProfileConfiguration") in
       let jobName =
-        JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobName") in
+        (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       let executionTime =
         (Option.map ~f:ExecutionTime.of_xml)
           (Xml.child xml_arg0 "ExecutionTime") in
@@ -9170,41 +9232,41 @@ module DescribeJobRunResponse =
         (Option.map ~f:Attempt.of_xml) (Xml.child xml_arg0 "Attempt") in
       make ?jobSample ?startedOn ?startedBy ?recipeReference ?databaseOutputs
         ?dataCatalogOutputs ?outputs ?logGroupName ?logSubscription ?state
-        ?runId ?validationConfigurations ?profileConfiguration ~jobName
+        ?runId ?validationConfigurations ?profileConfiguration ?jobName
         ?executionTime ?errorMessage ?datasetName ?completedOn ?attempt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobSample = field_map json "JobSample" JobSample.of_json in
-      let startedOn = field_map json "StartedOn" Date.of_json in
-      let startedBy = field_map json "StartedBy" StartedBy.of_json in
+    let of_json json__ =
+      let jobSample = field_map json__ "JobSample" JobSample.of_json in
+      let startedOn = field_map json__ "StartedOn" Date.of_json in
+      let startedBy = field_map json__ "StartedBy" StartedBy.of_json in
       let recipeReference =
-        field_map json "RecipeReference" RecipeReference.of_json in
+        field_map json__ "RecipeReference" RecipeReference.of_json in
       let databaseOutputs =
-        field_map json "DatabaseOutputs" DatabaseOutputList.of_json in
+        field_map json__ "DatabaseOutputs" DatabaseOutputList.of_json in
       let dataCatalogOutputs =
-        field_map json "DataCatalogOutputs" DataCatalogOutputList.of_json in
-      let outputs = field_map json "Outputs" OutputList.of_json in
-      let logGroupName = field_map json "LogGroupName" LogGroupName.of_json in
+        field_map json__ "DataCatalogOutputs" DataCatalogOutputList.of_json in
+      let outputs = field_map json__ "Outputs" OutputList.of_json in
+      let logGroupName = field_map json__ "LogGroupName" LogGroupName.of_json in
       let logSubscription =
-        field_map json "LogSubscription" LogSubscription.of_json in
-      let state = field_map json "State" JobRunState.of_json in
-      let runId = field_map json "RunId" JobRunId.of_json in
+        field_map json__ "LogSubscription" LogSubscription.of_json in
+      let state = field_map json__ "State" JobRunState.of_json in
+      let runId = field_map json__ "RunId" JobRunId.of_json in
       let validationConfigurations =
-        field_map json "ValidationConfigurations"
+        field_map json__ "ValidationConfigurations"
           ValidationConfigurationList.of_json in
       let profileConfiguration =
-        field_map json "ProfileConfiguration" ProfileConfiguration.of_json in
-      let jobName = field_map_exn json "JobName" JobName.of_json in
+        field_map json__ "ProfileConfiguration" ProfileConfiguration.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let executionTime =
-        field_map json "ExecutionTime" ExecutionTime.of_json in
+        field_map json__ "ExecutionTime" ExecutionTime.of_json in
       let errorMessage =
-        field_map json "ErrorMessage" JobRunErrorMessage.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let completedOn = field_map json "CompletedOn" Date.of_json in
-      let attempt = field_map json "Attempt" Attempt.of_json in
+        field_map json__ "ErrorMessage" JobRunErrorMessage.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let completedOn = field_map json__ "CompletedOn" Date.of_json in
+      let attempt = field_map json__ "Attempt" Attempt.of_json in
       make ?jobSample ?startedOn ?startedBy ?recipeReference ?databaseOutputs
         ?dataCatalogOutputs ?outputs ?logGroupName ?logSubscription ?state
-        ?runId ?validationConfigurations ?profileConfiguration ~jobName
+        ?runId ?validationConfigurations ?profileConfiguration ?jobName
         ?executionTime ?errorMessage ?datasetName ?completedOn ?attempt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents one run of a DataBrew job."]
@@ -9229,9 +9291,9 @@ module DescribeJobRunRequest =
         JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~runId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runId = field_map_exn json "RunId" JobRunId.of_json in
-      let name = field_map_exn json "Name" JobName.of_json in
+    let of_json json__ =
+      let runId = field_map_exn json__ "RunId" JobRunId.of_json in
+      let name = field_map_exn json__ "Name" JobName.of_json in
       make ~runId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents one run of a DataBrew job."]
@@ -9252,7 +9314,7 @@ module DescribeJobResponse =
       encryptionMode: EncryptionMode.t option
         [@ocaml.doc
           "The encryption mode for the job, which can be one of the following: SSE-KMS - Server-side encryption with keys managed by KMS. SSE-S3 - Server-side encryption with keys managed by Amazon S3."];
-      name: JobName.t [@ocaml.doc "The name of the job."];
+      name: JobName.t option [@ocaml.doc "The name of the job."];
       type_: JobType.t option
         [@ocaml.doc
           "The job type, which must be one of the following: PROFILE - The job analyzes the dataset to determine its size, data types, data distribution, and more. RECIPE - The job applies one or more transformations to a dataset."];
@@ -9305,31 +9367,30 @@ module DescribeJobResponse =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeJobResponse"
     let make ?createDate =
       fun ?createdBy ->
         fun ?datasetName ->
           fun ?encryptionKeyArn ->
             fun ?encryptionMode ->
-              fun ?type_ ->
-                fun ?lastModifiedBy ->
-                  fun ?lastModifiedDate ->
-                    fun ?logSubscription ->
-                      fun ?maxCapacity ->
-                        fun ?maxRetries ->
-                          fun ?outputs ->
-                            fun ?dataCatalogOutputs ->
-                              fun ?databaseOutputs ->
-                                fun ?projectName ->
-                                  fun ?profileConfiguration ->
-                                    fun ?validationConfigurations ->
-                                      fun ?recipeReference ->
-                                        fun ?resourceArn ->
-                                          fun ?roleArn ->
-                                            fun ?tags ->
-                                              fun ?timeout ->
-                                                fun ?jobSample ->
-                                                  fun ~name ->
+              fun ?name ->
+                fun ?type_ ->
+                  fun ?lastModifiedBy ->
+                    fun ?lastModifiedDate ->
+                      fun ?logSubscription ->
+                        fun ?maxCapacity ->
+                          fun ?maxRetries ->
+                            fun ?outputs ->
+                              fun ?dataCatalogOutputs ->
+                                fun ?databaseOutputs ->
+                                  fun ?projectName ->
+                                    fun ?profileConfiguration ->
+                                      fun ?validationConfigurations ->
+                                        fun ?recipeReference ->
+                                          fun ?resourceArn ->
+                                            fun ?roleArn ->
+                                              fun ?tags ->
+                                                fun ?timeout ->
+                                                  fun ?jobSample ->
                                                     fun () ->
                                                       {
                                                         createDate;
@@ -9337,6 +9398,7 @@ module DescribeJobResponse =
                                                         datasetName;
                                                         encryptionKeyArn;
                                                         encryptionMode;
+                                                        name;
                                                         type_;
                                                         lastModifiedBy;
                                                         lastModifiedDate;
@@ -9354,8 +9416,7 @@ module DescribeJobResponse =
                                                         roleArn;
                                                         tags;
                                                         timeout;
-                                                        jobSample;
-                                                        name
+                                                        jobSample
                                                       }
     let error_of_json name json =
       match name with
@@ -9398,7 +9459,7 @@ module DescribeJobResponse =
           (Option.map x.encryptionKeyArn ~f:EncryptionKeyArn.to_value));
         ("EncryptionMode",
           (Option.map x.encryptionMode ~f:EncryptionMode.to_value));
-        ("Name", (Some (JobName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:JobName.to_value));
         ("Type", (Option.map x.type_ ~f:JobType.to_value));
         ("LastModifiedBy",
           (Option.map x.lastModifiedBy ~f:LastModifiedBy.to_value));
@@ -9468,8 +9529,7 @@ module DescribeJobResponse =
         (Option.map ~f:LastModifiedBy.of_xml)
           (Xml.child xml_arg0 "LastModifiedBy") in
       let type_ = (Option.map ~f:JobType.of_xml) (Xml.child xml_arg0 "Type") in
-      let name =
-        JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let name = (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "Name") in
       let encryptionMode =
         (Option.map ~f:EncryptionMode.of_xml)
           (Xml.child xml_arg0 "EncryptionMode") in
@@ -9486,49 +9546,49 @@ module DescribeJobResponse =
         ?validationConfigurations ?profileConfiguration ?projectName
         ?databaseOutputs ?dataCatalogOutputs ?outputs ?maxRetries
         ?maxCapacity ?logSubscription ?lastModifiedDate ?lastModifiedBy
-        ?type_ ~name ?encryptionMode ?encryptionKeyArn ?datasetName
+        ?type_ ?name ?encryptionMode ?encryptionKeyArn ?datasetName
         ?createdBy ?createDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobSample = field_map json "JobSample" JobSample.of_json in
-      let timeout = field_map json "Timeout" Timeout.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let roleArn = field_map json "RoleArn" Arn.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let jobSample = field_map json__ "JobSample" JobSample.of_json in
+      let timeout = field_map json__ "Timeout" Timeout.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let roleArn = field_map json__ "RoleArn" Arn.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
       let recipeReference =
-        field_map json "RecipeReference" RecipeReference.of_json in
+        field_map json__ "RecipeReference" RecipeReference.of_json in
       let validationConfigurations =
-        field_map json "ValidationConfigurations"
+        field_map json__ "ValidationConfigurations"
           ValidationConfigurationList.of_json in
       let profileConfiguration =
-        field_map json "ProfileConfiguration" ProfileConfiguration.of_json in
-      let projectName = field_map json "ProjectName" ProjectName.of_json in
+        field_map json__ "ProfileConfiguration" ProfileConfiguration.of_json in
+      let projectName = field_map json__ "ProjectName" ProjectName.of_json in
       let databaseOutputs =
-        field_map json "DatabaseOutputs" DatabaseOutputList.of_json in
+        field_map json__ "DatabaseOutputs" DatabaseOutputList.of_json in
       let dataCatalogOutputs =
-        field_map json "DataCatalogOutputs" DataCatalogOutputList.of_json in
-      let outputs = field_map json "Outputs" OutputList.of_json in
-      let maxRetries = field_map json "MaxRetries" MaxRetries.of_json in
-      let maxCapacity = field_map json "MaxCapacity" MaxCapacity.of_json in
+        field_map json__ "DataCatalogOutputs" DataCatalogOutputList.of_json in
+      let outputs = field_map json__ "Outputs" OutputList.of_json in
+      let maxRetries = field_map json__ "MaxRetries" MaxRetries.of_json in
+      let maxCapacity = field_map json__ "MaxCapacity" MaxCapacity.of_json in
       let logSubscription =
-        field_map json "LogSubscription" LogSubscription.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
+        field_map json__ "LogSubscription" LogSubscription.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let type_ = field_map json "Type" JobType.of_json in
-      let name = field_map_exn json "Name" JobName.of_json in
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let type_ = field_map json__ "Type" JobType.of_json in
+      let name = field_map json__ "Name" JobName.of_json in
       let encryptionMode =
-        field_map json "EncryptionMode" EncryptionMode.of_json in
+        field_map json__ "EncryptionMode" EncryptionMode.of_json in
       let encryptionKeyArn =
-        field_map json "EncryptionKeyArn" EncryptionKeyArn.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
+        field_map json__ "EncryptionKeyArn" EncryptionKeyArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
       make ?jobSample ?timeout ?tags ?roleArn ?resourceArn ?recipeReference
         ?validationConfigurations ?profileConfiguration ?projectName
         ?databaseOutputs ?dataCatalogOutputs ?outputs ?maxRetries
         ?maxCapacity ?logSubscription ?lastModifiedDate ?lastModifiedBy
-        ?type_ ~name ?encryptionMode ?encryptionKeyArn ?datasetName
+        ?type_ ?name ?encryptionMode ?encryptionKeyArn ?datasetName
         ?createdBy ?createDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the definition of a specific DataBrew job."]
@@ -9547,8 +9607,8 @@ module DescribeJobRequest =
         JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" JobName.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" JobName.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the definition of a specific DataBrew job."]
 module DescribeDatasetResponse =
@@ -9560,12 +9620,12 @@ module DescribeDatasetResponse =
           "The identifier (user name) of the user who created the dataset."];
       createDate: Date.t option
         [@ocaml.doc "The date and time that the dataset was created."];
-      name: DatasetName.t [@ocaml.doc "The name of the dataset."];
+      name: DatasetName.t option [@ocaml.doc "The name of the dataset."];
       format: InputFormat.t option
         [@ocaml.doc
           "The file format of a dataset that is created from an Amazon S3 file or folder."];
       formatOptions: FormatOptions.t option ;
-      input: Input.t ;
+      input: Input.t option ;
       lastModifiedDate: Date.t option
         [@ocaml.doc "The date and time that the dataset was last modified."];
       lastModifiedBy: LastModifiedBy.t option
@@ -9585,33 +9645,32 @@ module DescribeDatasetResponse =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeDatasetResponse"
     let make ?createdBy =
       fun ?createDate ->
-        fun ?format ->
-          fun ?formatOptions ->
-            fun ?lastModifiedDate ->
-              fun ?lastModifiedBy ->
-                fun ?source ->
-                  fun ?pathOptions ->
-                    fun ?tags ->
-                      fun ?resourceArn ->
-                        fun ~name ->
-                          fun ~input ->
+        fun ?name ->
+          fun ?format ->
+            fun ?formatOptions ->
+              fun ?input ->
+                fun ?lastModifiedDate ->
+                  fun ?lastModifiedBy ->
+                    fun ?source ->
+                      fun ?pathOptions ->
+                        fun ?tags ->
+                          fun ?resourceArn ->
                             fun () ->
                               {
                                 createdBy;
                                 createDate;
+                                name;
                                 format;
                                 formatOptions;
+                                input;
                                 lastModifiedDate;
                                 lastModifiedBy;
                                 source;
                                 pathOptions;
                                 tags;
-                                resourceArn;
-                                name;
-                                input
+                                resourceArn
                               }
     let error_of_json name json =
       match name with
@@ -9649,11 +9708,11 @@ module DescribeDatasetResponse =
       structure_to_value
         [("CreatedBy", (Option.map x.createdBy ~f:CreatedBy.to_value));
         ("CreateDate", (Option.map x.createDate ~f:Date.to_value));
-        ("Name", (Some (DatasetName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:DatasetName.to_value));
         ("Format", (Option.map x.format ~f:InputFormat.to_value));
         ("FormatOptions",
           (Option.map x.formatOptions ~f:FormatOptions.to_value));
-        ("Input", (Some (Input.to_value x.input)));
+        ("Input", (Option.map x.input ~f:Input.to_value));
         ("LastModifiedDate",
           (Option.map x.lastModifiedDate ~f:Date.to_value));
         ("LastModifiedBy",
@@ -9676,40 +9735,39 @@ module DescribeDatasetResponse =
           (Xml.child xml_arg0 "LastModifiedBy") in
       let lastModifiedDate =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastModifiedDate") in
-      let input =
-        Input.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Input") in
+      let input = (Option.map ~f:Input.of_xml) (Xml.child xml_arg0 "Input") in
       let formatOptions =
         (Option.map ~f:FormatOptions.of_xml)
           (Xml.child xml_arg0 "FormatOptions") in
       let format =
         (Option.map ~f:InputFormat.of_xml) (Xml.child xml_arg0 "Format") in
       let name =
-        DatasetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "Name") in
       let createDate =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreateDate") in
       let createdBy =
         (Option.map ~f:CreatedBy.of_xml) (Xml.child xml_arg0 "CreatedBy") in
       make ?resourceArn ?tags ?pathOptions ?source ?lastModifiedBy
-        ?lastModifiedDate ~input ?formatOptions ?format ~name ?createDate
+        ?lastModifiedDate ?input ?formatOptions ?format ?name ?createDate
         ?createdBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pathOptions = field_map json "PathOptions" PathOptions.of_json in
-      let source = field_map json "Source" Source.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let pathOptions = field_map json__ "PathOptions" PathOptions.of_json in
+      let source = field_map json__ "Source" Source.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" LastModifiedBy.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
-      let input = field_map_exn json "Input" Input.of_json in
+        field_map json__ "LastModifiedBy" LastModifiedBy.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
+      let input = field_map json__ "Input" Input.of_json in
       let formatOptions =
-        field_map json "FormatOptions" FormatOptions.of_json in
-      let format = field_map json "Format" InputFormat.of_json in
-      let name = field_map_exn json "Name" DatasetName.of_json in
-      let createDate = field_map json "CreateDate" Date.of_json in
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
+        field_map json__ "FormatOptions" FormatOptions.of_json in
+      let format = field_map json__ "Format" InputFormat.of_json in
+      let name = field_map json__ "Name" DatasetName.of_json in
+      let createDate = field_map json__ "CreateDate" Date.of_json in
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
       make ?resourceArn ?tags ?pathOptions ?source ?lastModifiedBy
-        ?lastModifiedDate ~input ?formatOptions ?format ~name ?createDate
+        ?lastModifiedDate ?input ?formatOptions ?format ?name ?createDate
         ?createdBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the definition of a specific DataBrew dataset."]
@@ -9729,8 +9787,8 @@ module DescribeDatasetRequest =
         DatasetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" DatasetName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" DatasetName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the definition of a specific DataBrew dataset."]
@@ -9738,14 +9796,13 @@ module DeleteScheduleResponse =
   struct
     type nonrec t =
       {
-      name: ScheduleName.t
+      name: ScheduleName.t option
         [@ocaml.doc "The name of the schedule that was deleted."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteScheduleResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -9779,16 +9836,17 @@ module DeleteScheduleResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (ScheduleName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:ScheduleName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        ScheduleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:ScheduleName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ScheduleName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" ScheduleName.of_json in
+      make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified DataBrew schedule."]
 module DeleteScheduleRequest =
@@ -9807,8 +9865,8 @@ module DeleteScheduleRequest =
         ScheduleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ScheduleName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ScheduleName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified DataBrew schedule."]
@@ -9816,103 +9874,14 @@ module DeleteRulesetResponse =
   struct
     type nonrec t =
       {
-      name: RulesetName.t [@ocaml.doc "The name of the deleted ruleset."]}
+      name: RulesetName.t option
+        [@ocaml.doc "The name of the deleted ruleset."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteRulesetResponse"
-    let make ~name = fun () -> { name }
-    let error_of_json name json =
-      match name with
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `ConflictException e ->
-          `Assoc
-            [("error", (`String "ConflictException"));
-            ("details", (ConflictException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `ValidationException e ->
-          `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value [("Name", (Some (RulesetName.to_value x.name)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let name =
-        RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RulesetName.of_json in
-      make ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a ruleset."]
-module DeleteRulesetRequest =
-  struct
-    type nonrec t =
-      {
-      name: RulesetName.t
-        [@ocaml.doc "The name of the ruleset to be deleted."]}
-    let context_ = "DeleteRulesetRequest"
-    let make ~name = fun () -> { name }
-    let to_value x =
-      structure_to_value [("name", (Some (RulesetName.to_value x.name)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let name =
-        RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RulesetName.of_json in
-      make ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a ruleset."]
-module DeleteRecipeVersionResponse =
-  struct
-    type nonrec t =
-      {
-      name: RecipeName.t
-        [@ocaml.doc "The name of the recipe that was deleted."];
-      recipeVersion: RecipeVersion.t
-        [@ocaml.doc "The version of the recipe that was deleted."]}
-    type nonrec error =
-      [ `ConflictException of ConflictException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `ValidationException of ValidationException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteRecipeVersionResponse"
-    let make ~name = fun ~recipeVersion -> fun () -> { name; recipeVersion }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -9955,22 +9924,111 @@ module DeleteRecipeVersionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Name", (Some (RecipeName.to_value x.name)));
-        ("RecipeVersion", (Some (RecipeVersion.to_value x.recipeVersion)))]
+        [("Name", (Option.map x.name ~f:RulesetName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:RulesetName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" RulesetName.of_json in make ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a ruleset."]
+module DeleteRulesetRequest =
+  struct
+    type nonrec t =
+      {
+      name: RulesetName.t
+        [@ocaml.doc "The name of the ruleset to be deleted."]}
+    let context_ = "DeleteRulesetRequest"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value [("name", (Some (RulesetName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" RulesetName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a ruleset."]
+module DeleteRecipeVersionResponse =
+  struct
+    type nonrec t =
+      {
+      name: RecipeName.t option
+        [@ocaml.doc "The name of the recipe that was deleted."];
+      recipeVersion: RecipeVersion.t option
+        [@ocaml.doc "The version of the recipe that was deleted."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name = fun ?recipeVersion -> fun () -> { name; recipeVersion }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:RecipeName.to_value));
+        ("RecipeVersion",
+          (Option.map x.recipeVersion ~f:RecipeVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let recipeVersion =
-        RecipeVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RecipeVersion") in
+        (Option.map ~f:RecipeVersion.of_xml)
+          (Xml.child xml_arg0 "RecipeVersion") in
       let name =
-        RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~recipeVersion ~name ()
+        (Option.map ~f:RecipeName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?recipeVersion ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipeVersion =
-        field_map_exn json "RecipeVersion" RecipeVersion.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
-      make ~recipeVersion ~name ()
+        field_map json__ "RecipeVersion" RecipeVersion.of_json in
+      let name = field_map json__ "Name" RecipeName.of_json in
+      make ?recipeVersion ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a single version of a DataBrew recipe."]
 module DeleteRecipeVersionRequest =
@@ -9996,10 +10054,10 @@ module DeleteRecipeVersionRequest =
         RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~recipeVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipeVersion =
-        field_map_exn json "RecipeVersion" RecipeVersion.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
+        field_map_exn json__ "RecipeVersion" RecipeVersion.of_json in
+      let name = field_map_exn json__ "Name" RecipeName.of_json in
       make ~recipeVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a single version of a DataBrew recipe."]
@@ -10007,15 +10065,14 @@ module DeleteProjectResponse =
   struct
     type nonrec t =
       {
-      name: ProjectName.t
+      name: ProjectName.t option
         [@ocaml.doc "The name of the project that you deleted."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteProjectResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -10057,16 +10114,16 @@ module DeleteProjectResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (ProjectName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:ProjectName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ProjectName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" ProjectName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an existing DataBrew project."]
 module DeleteProjectRequest =
@@ -10085,8 +10142,8 @@ module DeleteProjectRequest =
         ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ProjectName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ProjectName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an existing DataBrew project."]
@@ -10094,14 +10151,14 @@ module DeleteJobResponse =
   struct
     type nonrec t =
       {
-      name: JobName.t [@ocaml.doc "The name of the job that you deleted."]}
+      name: JobName.t option
+        [@ocaml.doc "The name of the job that you deleted."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteJobResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -10143,15 +10200,14 @@ module DeleteJobResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (JobName.to_value x.name)))]
+      structure_to_value [("Name", (Option.map x.name ~f:JobName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+      let name = (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" JobName.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" JobName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified DataBrew job."]
 module DeleteJobRequest =
@@ -10169,23 +10225,22 @@ module DeleteJobRequest =
         JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" JobName.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" JobName.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified DataBrew job."]
 module DeleteDatasetResponse =
   struct
     type nonrec t =
       {
-      name: DatasetName.t
+      name: DatasetName.t option
         [@ocaml.doc "The name of the dataset that you deleted."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteDatasetResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -10227,16 +10282,16 @@ module DeleteDatasetResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (DatasetName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:DatasetName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        DatasetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" DatasetName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" DatasetName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a dataset from DataBrew."]
 module DeleteDatasetRequest =
@@ -10255,8 +10310,8 @@ module DeleteDatasetRequest =
         DatasetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" DatasetName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" DatasetName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a dataset from DataBrew."]
@@ -10264,15 +10319,14 @@ module CreateScheduleResponse =
   struct
     type nonrec t =
       {
-      name: ScheduleName.t
+      name: ScheduleName.t option
         [@ocaml.doc "The name of the schedule that was created."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateScheduleResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -10316,16 +10370,17 @@ module CreateScheduleResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (ScheduleName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:ScheduleName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        ScheduleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:ScheduleName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ScheduleName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" ScheduleName.of_json in
+      make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new schedule for one or more DataBrew jobs. Jobs can be run at a specific date and time, or at regular intervals."]
@@ -10366,12 +10421,12 @@ module CreateScheduleRequest =
         (Option.map ~f:JobNameList.of_xml) (Xml.child xml_arg0 "JobNames") in
       make ~name ?tags ~cronExpression ?jobNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ScheduleName.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ScheduleName.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let cronExpression =
-        field_map_exn json "CronExpression" CronExpression.of_json in
-      let jobNames = field_map json "JobNames" JobNameList.of_json in
+        field_map_exn json__ "CronExpression" CronExpression.of_json in
+      let jobNames = field_map json__ "JobNames" JobNameList.of_json in
       make ~name ?tags ~cronExpression ?jobNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10380,15 +10435,14 @@ module CreateRulesetResponse =
   struct
     type nonrec t =
       {
-      name: RulesetName.t
+      name: RulesetName.t option
         [@ocaml.doc "The unique name of the created ruleset."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateRulesetResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -10432,16 +10486,16 @@ module CreateRulesetResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (RulesetName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:RulesetName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:RulesetName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RulesetName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" RulesetName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new ruleset that can be used in a profile job to validate the data quality of a dataset."]
@@ -10491,13 +10545,13 @@ module CreateRulesetRequest =
         RulesetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~rules ~targetArn ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let rules = field_map_exn json "Rules" RuleList.of_json in
-      let targetArn = field_map_exn json "TargetArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let rules = field_map_exn json__ "Rules" RuleList.of_json in
+      let targetArn = field_map_exn json__ "TargetArn" Arn.of_json in
       let description =
-        field_map json "Description" RulesetDescription.of_json in
-      let name = field_map_exn json "Name" RulesetName.of_json in
+        field_map json__ "Description" RulesetDescription.of_json in
+      let name = field_map_exn json__ "Name" RulesetName.of_json in
       make ?tags ~rules ~targetArn ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10506,15 +10560,14 @@ module CreateRecipeResponse =
   struct
     type nonrec t =
       {
-      name: RecipeName.t
+      name: RecipeName.t option
         [@ocaml.doc "The name of the recipe that you created."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateRecipeResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -10558,16 +10611,16 @@ module CreateRecipeResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (RecipeName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:RecipeName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:RecipeName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" RecipeName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" RecipeName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new DataBrew recipe."]
 module CreateRecipeRequest =
@@ -10609,12 +10662,12 @@ module CreateRecipeRequest =
           (Xml.child xml_arg0 "Description") in
       make ?tags ~steps ~name ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let steps = field_map_exn json "Steps" RecipeStepList.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let steps = field_map_exn json__ "Steps" RecipeStepList.of_json in
+      let name = field_map_exn json__ "Name" RecipeName.of_json in
       let description =
-        field_map json "Description" RecipeDescription.of_json in
+        field_map json__ "Description" RecipeDescription.of_json in
       make ?tags ~steps ~name ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new DataBrew recipe."]
@@ -10622,7 +10675,8 @@ module CreateRecipeJobResponse =
   struct
     type nonrec t =
       {
-      name: JobName.t [@ocaml.doc "The name of the job that you created."]}
+      name: JobName.t option
+        [@ocaml.doc "The name of the job that you created."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -10630,8 +10684,7 @@ module CreateRecipeJobResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateRecipeJobResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10691,15 +10744,14 @@ module CreateRecipeJobResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (JobName.to_value x.name)))]
+      structure_to_value [("Name", (Option.map x.name ~f:JobName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+      let name = (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" JobName.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" JobName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new job to transform input data, using steps defined in an existing Glue DataBrew recipe"]
@@ -10847,28 +10899,28 @@ module CreateRecipeJobRequest =
         ?maxCapacity ?logSubscription ~name ?encryptionMode ?encryptionKeyArn
         ?datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeout = field_map json "Timeout" Timeout.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let roleArn = field_map_exn json "RoleArn" Arn.of_json in
+    let of_json json__ =
+      let timeout = field_map json__ "Timeout" Timeout.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Arn.of_json in
       let recipeReference =
-        field_map json "RecipeReference" RecipeReference.of_json in
-      let projectName = field_map json "ProjectName" ProjectName.of_json in
+        field_map json__ "RecipeReference" RecipeReference.of_json in
+      let projectName = field_map json__ "ProjectName" ProjectName.of_json in
       let databaseOutputs =
-        field_map json "DatabaseOutputs" DatabaseOutputList.of_json in
+        field_map json__ "DatabaseOutputs" DatabaseOutputList.of_json in
       let dataCatalogOutputs =
-        field_map json "DataCatalogOutputs" DataCatalogOutputList.of_json in
-      let outputs = field_map json "Outputs" OutputList.of_json in
-      let maxRetries = field_map json "MaxRetries" MaxRetries.of_json in
-      let maxCapacity = field_map json "MaxCapacity" MaxCapacity.of_json in
+        field_map json__ "DataCatalogOutputs" DataCatalogOutputList.of_json in
+      let outputs = field_map json__ "Outputs" OutputList.of_json in
+      let maxRetries = field_map json__ "MaxRetries" MaxRetries.of_json in
+      let maxCapacity = field_map json__ "MaxCapacity" MaxCapacity.of_json in
       let logSubscription =
-        field_map json "LogSubscription" LogSubscription.of_json in
-      let name = field_map_exn json "Name" JobName.of_json in
+        field_map json__ "LogSubscription" LogSubscription.of_json in
+      let name = field_map_exn json__ "Name" JobName.of_json in
       let encryptionMode =
-        field_map json "EncryptionMode" EncryptionMode.of_json in
+        field_map json__ "EncryptionMode" EncryptionMode.of_json in
       let encryptionKeyArn =
-        field_map json "EncryptionKeyArn" EncryptionKeyArn.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
+        field_map json__ "EncryptionKeyArn" EncryptionKeyArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
       make ?timeout ?tags ~roleArn ?recipeReference ?projectName
         ?databaseOutputs ?dataCatalogOutputs ?outputs ?maxRetries
         ?maxCapacity ?logSubscription ~name ?encryptionMode ?encryptionKeyArn
@@ -10880,7 +10932,7 @@ module CreateProjectResponse =
   struct
     type nonrec t =
       {
-      name: ProjectName.t
+      name: ProjectName.t option
         [@ocaml.doc "The name of the project that you created."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
@@ -10888,8 +10940,7 @@ module CreateProjectResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateProjectResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -10941,16 +10992,16 @@ module CreateProjectResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (ProjectName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:ProjectName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ProjectName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" ProjectName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new DataBrew project."]
 module CreateProjectRequest =
@@ -11006,13 +11057,14 @@ module CreateProjectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
       make ?tags ~roleArn ?sample ~recipeName ~name ~datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let roleArn = field_map_exn json "RoleArn" Arn.of_json in
-      let sample = field_map json "Sample" Sample.of_json in
-      let recipeName = field_map_exn json "RecipeName" RecipeName.of_json in
-      let name = field_map_exn json "Name" ProjectName.of_json in
-      let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Arn.of_json in
+      let sample = field_map json__ "Sample" Sample.of_json in
+      let recipeName = field_map_exn json__ "RecipeName" RecipeName.of_json in
+      let name = field_map_exn json__ "Name" ProjectName.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
       make ?tags ~roleArn ?sample ~recipeName ~name ~datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new DataBrew project."]
@@ -11020,7 +11072,8 @@ module CreateProfileJobResponse =
   struct
     type nonrec t =
       {
-      name: JobName.t [@ocaml.doc "The name of the job that was created."]}
+      name: JobName.t option
+        [@ocaml.doc "The name of the job that was created."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11028,8 +11081,7 @@ module CreateProfileJobResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateProfileJobResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -11089,15 +11141,14 @@ module CreateProfileJobResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (JobName.to_value x.name)))]
+      structure_to_value [("Name", (Option.map x.name ~f:JobName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        JobName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+      let name = (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" JobName.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" JobName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new job to analyze a dataset and create its data profile."]
@@ -11238,28 +11289,29 @@ module CreateProfileJobRequest =
         ?logSubscription ~name ?encryptionMode ?encryptionKeyArn ~datasetName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobSample = field_map json "JobSample" JobSample.of_json in
-      let timeout = field_map json "Timeout" Timeout.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let roleArn = field_map_exn json "RoleArn" Arn.of_json in
+    let of_json json__ =
+      let jobSample = field_map json__ "JobSample" JobSample.of_json in
+      let timeout = field_map json__ "Timeout" Timeout.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Arn.of_json in
       let validationConfigurations =
-        field_map json "ValidationConfigurations"
+        field_map json__ "ValidationConfigurations"
           ValidationConfigurationList.of_json in
       let configuration =
-        field_map json "Configuration" ProfileConfiguration.of_json in
+        field_map json__ "Configuration" ProfileConfiguration.of_json in
       let outputLocation =
-        field_map_exn json "OutputLocation" S3Location.of_json in
-      let maxRetries = field_map json "MaxRetries" MaxRetries.of_json in
-      let maxCapacity = field_map json "MaxCapacity" MaxCapacity.of_json in
+        field_map_exn json__ "OutputLocation" S3Location.of_json in
+      let maxRetries = field_map json__ "MaxRetries" MaxRetries.of_json in
+      let maxCapacity = field_map json__ "MaxCapacity" MaxCapacity.of_json in
       let logSubscription =
-        field_map json "LogSubscription" LogSubscription.of_json in
-      let name = field_map_exn json "Name" JobName.of_json in
+        field_map json__ "LogSubscription" LogSubscription.of_json in
+      let name = field_map_exn json__ "Name" JobName.of_json in
       let encryptionMode =
-        field_map json "EncryptionMode" EncryptionMode.of_json in
+        field_map json__ "EncryptionMode" EncryptionMode.of_json in
       let encryptionKeyArn =
-        field_map json "EncryptionKeyArn" EncryptionKeyArn.of_json in
-      let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
+        field_map json__ "EncryptionKeyArn" EncryptionKeyArn.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
       make ?jobSample ?timeout ?tags ~roleArn ?validationConfigurations
         ?configuration ~outputLocation ?maxRetries ?maxCapacity
         ?logSubscription ~name ?encryptionMode ?encryptionKeyArn ~datasetName
@@ -11271,7 +11323,7 @@ module CreateDatasetResponse =
   struct
     type nonrec t =
       {
-      name: DatasetName.t
+      name: DatasetName.t option
         [@ocaml.doc "The name of the dataset that you created."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -11279,8 +11331,7 @@ module CreateDatasetResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateDatasetResponse"
-    let make ~name = fun () -> { name }
+    let make ?name = fun () -> { name }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -11332,16 +11383,16 @@ module CreateDatasetResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Name", (Some (DatasetName.to_value x.name)))]
+      structure_to_value
+        [("Name", (Option.map x.name ~f:DatasetName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name =
-        DatasetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+        (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" DatasetName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" DatasetName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new DataBrew dataset."]
 module CreateDatasetRequest =
@@ -11395,14 +11446,14 @@ module CreateDatasetRequest =
         DatasetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?pathOptions ~input ?formatOptions ?format ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pathOptions = field_map json "PathOptions" PathOptions.of_json in
-      let input = field_map_exn json "Input" Input.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let pathOptions = field_map json__ "PathOptions" PathOptions.of_json in
+      let input = field_map_exn json__ "Input" Input.of_json in
       let formatOptions =
-        field_map json "FormatOptions" FormatOptions.of_json in
-      let format = field_map json "Format" InputFormat.of_json in
-      let name = field_map_exn json "Name" DatasetName.of_json in
+        field_map json__ "FormatOptions" FormatOptions.of_json in
+      let format = field_map json__ "Format" InputFormat.of_json in
+      let name = field_map_exn json__ "Name" DatasetName.of_json in
       make ?tags ?pathOptions ~input ?formatOptions ?format ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new DataBrew dataset."]
@@ -11410,7 +11461,7 @@ module BatchDeleteRecipeVersionResponse =
   struct
     type nonrec t =
       {
-      name: RecipeName.t
+      name: RecipeName.t option
         [@ocaml.doc "The name of the recipe that was modified."];
       errors: RecipeErrorList.t option
         [@ocaml.doc
@@ -11420,8 +11471,7 @@ module BatchDeleteRecipeVersionResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchDeleteRecipeVersionResponse"
-    let make ?errors = fun ~name -> fun () -> { errors; name }
+    let make ?name = fun ?errors -> fun () -> { name; errors }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -11464,20 +11514,20 @@ module BatchDeleteRecipeVersionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Name", (Some (RecipeName.to_value x.name)));
+        [("Name", (Option.map x.name ~f:RecipeName.to_value));
         ("Errors", (Option.map x.errors ~f:RecipeErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errors =
         (Option.map ~f:RecipeErrorList.of_xml) (Xml.child xml_arg0 "Errors") in
       let name =
-        RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?errors ~name ()
+        (Option.map ~f:RecipeName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?errors ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "Errors" RecipeErrorList.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
-      make ?errors ~name ()
+    let of_json json__ =
+      let errors = field_map json__ "Errors" RecipeErrorList.of_json in
+      let name = field_map json__ "Name" RecipeName.of_json in
+      make ?errors ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes one or more versions of a recipe at a time. The entire request will be rejected if: The recipe does not exist. There is an invalid version identifier in the list of versions. The version list is empty. The version list size exceeds 50. The version list contains duplicate entries. The request will complete successfully, but with partial failures, if: A version does not exist. A version is being used by a job. You specify LATEST_WORKING, but it's being used by a project. The version fails to be deleted. The LATEST_WORKING version will only be deleted if the recipe has no other versions. If you try to delete LATEST_WORKING while other versions exist (or if they can't be deleted), then LATEST_WORKING will be listed as partial failure in the response."]
@@ -11508,10 +11558,10 @@ module BatchDeleteRecipeVersionRequest =
         RecipeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~recipeVersions ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipeVersions =
-        field_map_exn json "RecipeVersions" RecipeVersionList.of_json in
-      let name = field_map_exn json "Name" RecipeName.of_json in
+        field_map_exn json__ "RecipeVersions" RecipeVersionList.of_json in
+      let name = field_map_exn json__ "Name" RecipeName.of_json in
       make ~recipeVersions ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

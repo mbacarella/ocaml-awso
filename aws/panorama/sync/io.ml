@@ -72,6 +72,9 @@ let register_package_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterPackageVersion input
 let remove_application_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveApplicationInstance input
+let signal_application_instance_node_instances ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SignalApplicationInstanceNodeInstances
+    input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =

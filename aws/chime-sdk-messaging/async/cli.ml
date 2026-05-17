@@ -61,6 +61,8 @@ let batch_create_channel_membership =
            ~doc:"URL override endpoint url"
        and type_ =
          flag "type-" (optional json_arg) ~doc:"JSON ChannelMembershipType"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and memberArns =
@@ -72,7 +74,7 @@ let batch_create_channel_membership =
            Io.batch_create_channel_membership
            (Values.BatchCreateChannelMembershipRequest.make
               ?type_:(Option.map ~f:Values.ChannelMembershipType.of_json
-                        type_) ~channelArn
+                        type_) ?subChannelId ~channelArn
               ~memberArns:(Values.MemberArns.of_json memberArns) ~chimeBearer
               ()) (Some Values.BatchCreateChannelMembershipResponse.to_json)
            (Some Values.BatchCreateChannelMembershipResponse.error_to_json)])
@@ -121,6 +123,19 @@ let create_channel =
        and metadata =
          flag "metadata" (optional string) ~doc:"STRING Metadata"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and channelId =
+         flag "channel-id" (optional string) ~doc:"STRING ChannelId"
+       and memberArns =
+         flag "member-arns" (optional json_arg) ~doc:"JSON ChannelMemberArns"
+       and moderatorArns =
+         flag "moderator-arns" (optional json_arg)
+           ~doc:"JSON ChannelModeratorArns"
+       and elasticChannelConfiguration =
+         flag "elastic-channel-configuration" (optional json_arg)
+           ~doc:"JSON ElasticChannelConfiguration"
+       and expirationSettings =
+         flag "expiration-settings" (optional json_arg)
+           ~doc:"JSON ExpirationSettings"
        and appInstanceArn =
          flag "app-instance-arn" (required string) ~doc:"STRING ChimeArn"
        and name =
@@ -137,7 +152,19 @@ let create_channel =
               ?mode:(Option.map ~f:Values.ChannelMode.of_json mode)
               ?privacy:(Option.map ~f:Values.ChannelPrivacy.of_json privacy)
               ?metadata ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~appInstanceArn ~name ~clientRequestToken ~chimeBearer ())
+              ?channelId
+              ?memberArns:(Option.map ~f:Values.ChannelMemberArns.of_json
+                             memberArns)
+              ?moderatorArns:(Option.map
+                                ~f:Values.ChannelModeratorArns.of_json
+                                moderatorArns)
+              ?elasticChannelConfiguration:(Option.map
+                                              ~f:Values.ElasticChannelConfiguration.of_json
+                                              elasticChannelConfiguration)
+              ?expirationSettings:(Option.map
+                                     ~f:Values.ExpirationSettings.of_json
+                                     expirationSettings) ~appInstanceArn
+              ~name ~clientRequestToken ~chimeBearer ())
            (Some Values.CreateChannelResponse.to_json)
            (Some Values.CreateChannelResponse.error_to_json)])
 let create_channel_ban =
@@ -202,6 +229,8 @@ let create_channel_membership =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and memberArn =
@@ -213,7 +242,8 @@ let create_channel_membership =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_channel_membership
-           (Values.CreateChannelMembershipRequest.make ~channelArn ~memberArn
+           (Values.CreateChannelMembershipRequest.make ?subChannelId
+              ~channelArn ~memberArn
               ~type_:(Values.ChannelMembershipType.of_json type_)
               ~chimeBearer ())
            (Some Values.CreateChannelMembershipResponse.to_json)
@@ -309,6 +339,8 @@ let delete_channel_membership =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and memberArn =
@@ -318,8 +350,8 @@ let delete_channel_membership =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_channel_membership
-           (Values.DeleteChannelMembershipRequest.make ~channelArn ~memberArn
-              ~chimeBearer ()) None None])
+           (Values.DeleteChannelMembershipRequest.make ?subChannelId
+              ~channelArn ~memberArn ~chimeBearer ()) None None])
 let delete_channel_message =
   Command.async ~summary:""
     ([%map_open.Command
@@ -330,6 +362,8 @@ let delete_channel_message =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and messageId =
@@ -339,8 +373,8 @@ let delete_channel_message =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_channel_message
-           (Values.DeleteChannelMessageRequest.make ~channelArn ~messageId
-              ~chimeBearer ()) None None])
+           (Values.DeleteChannelMessageRequest.make ?subChannelId ~channelArn
+              ~messageId ~chimeBearer ()) None None])
 let delete_channel_moderator =
   Command.async ~summary:""
     ([%map_open.Command
@@ -363,6 +397,23 @@ let delete_channel_moderator =
            Io.delete_channel_moderator
            (Values.DeleteChannelModeratorRequest.make ~channelArn
               ~channelModeratorArn ~chimeBearer ()) None None])
+let delete_messaging_streaming_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appInstanceArn =
+         flag "app-instance-arn" (required string) ~doc:"STRING ChimeArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_messaging_streaming_configurations
+           (Values.DeleteMessagingStreamingConfigurationsRequest.make
+              ~appInstanceArn ()) None None])
 let describe_channel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -434,6 +485,8 @@ let describe_channel_membership =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and memberArn =
@@ -443,8 +496,8 @@ let describe_channel_membership =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_channel_membership
-           (Values.DescribeChannelMembershipRequest.make ~channelArn
-              ~memberArn ~chimeBearer ())
+           (Values.DescribeChannelMembershipRequest.make ?subChannelId
+              ~channelArn ~memberArn ~chimeBearer ())
            (Some Values.DescribeChannelMembershipResponse.to_json)
            (Some Values.DescribeChannelMembershipResponse.error_to_json)])
 let describe_channel_membership_for_app_instance_user =
@@ -577,6 +630,8 @@ let get_channel_message =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and messageId =
@@ -586,8 +641,8 @@ let get_channel_message =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_channel_message
-           (Values.GetChannelMessageRequest.make ~channelArn ~messageId
-              ~chimeBearer ())
+           (Values.GetChannelMessageRequest.make ?subChannelId ~channelArn
+              ~messageId ~chimeBearer ())
            (Some Values.GetChannelMessageResponse.to_json)
            (Some Values.GetChannelMessageResponse.error_to_json)])
 let get_channel_message_status =
@@ -600,6 +655,8 @@ let get_channel_message_status =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and messageId =
@@ -609,8 +666,8 @@ let get_channel_message_status =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_channel_message_status
-           (Values.GetChannelMessageStatusRequest.make ~channelArn ~messageId
-              ~chimeBearer ())
+           (Values.GetChannelMessageStatusRequest.make ?subChannelId
+              ~channelArn ~messageId ~chimeBearer ())
            (Some Values.GetChannelMessageStatusResponse.to_json)
            (Some Values.GetChannelMessageStatusResponse.error_to_json)])
 let get_messaging_session_endpoint =
@@ -623,13 +680,36 @@ let get_messaging_session_endpoint =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and () = return () in
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_messaging_session_endpoint
-           (Values.GetMessagingSessionEndpointRequest.make ())
+           (Values.GetMessagingSessionEndpointRequest.make
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType) ())
            (Some Values.GetMessagingSessionEndpointResponse.to_json)
            (Some Values.GetMessagingSessionEndpointResponse.error_to_json)])
+let get_messaging_streaming_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appInstanceArn =
+         flag "app-instance-arn" (required string) ~doc:"STRING ChimeArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_messaging_streaming_configurations
+           (Values.GetMessagingStreamingConfigurationsRequest.make
+              ~appInstanceArn ())
+           (Some Values.GetMessagingStreamingConfigurationsResponse.to_json)
+           (Some
+              Values.GetMessagingStreamingConfigurationsResponse.error_to_json)])
 let list_channel_bans =
   Command.async ~summary:""
     ([%map_open.Command
@@ -694,6 +774,8 @@ let list_channel_memberships =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and chimeBearer =
@@ -703,8 +785,8 @@ let list_channel_memberships =
            Io.list_channel_memberships
            (Values.ListChannelMembershipsRequest.make
               ?type_:(Option.map ~f:Values.ChannelMembershipType.of_json
-                        type_) ?maxResults ?nextToken ~channelArn
-              ~chimeBearer ())
+                        type_) ?maxResults ?nextToken ?subChannelId
+              ~channelArn ~chimeBearer ())
            (Some Values.ListChannelMembershipsResponse.to_json)
            (Some Values.ListChannelMembershipsResponse.error_to_json)])
 let list_channel_memberships_for_app_instance_user =
@@ -755,6 +837,8 @@ let list_channel_messages =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and chimeBearer =
@@ -766,8 +850,8 @@ let list_channel_messages =
               ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
               ?notBefore:(Option.map ~f:Values.Timestamp.of_json notBefore)
               ?notAfter:(Option.map ~f:Values.Timestamp.of_json notAfter)
-              ?maxResults ?nextToken ~channelArn ~chimeBearer ())
-           (Some Values.ListChannelMessagesResponse.to_json)
+              ?maxResults ?nextToken ?subChannelId ~channelArn ~chimeBearer
+              ()) (Some Values.ListChannelMessagesResponse.to_json)
            (Some Values.ListChannelMessagesResponse.error_to_json)])
 let list_channel_moderators =
   Command.async ~summary:""
@@ -874,6 +958,31 @@ let list_channels_moderated_by_app_instance_user =
               Values.ListChannelsModeratedByAppInstanceUserResponse.to_json)
            (Some
               Values.ListChannelsModeratedByAppInstanceUserResponse.error_to_json)])
+let list_sub_channels =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and channelArn =
+         flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
+       and chimeBearer =
+         flag "chime-bearer" (required string) ~doc:"STRING ChimeArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sub_channels
+           (Values.ListSubChannelsRequest.make ?maxResults ?nextToken
+              ~channelArn ~chimeBearer ())
+           (Some Values.ListSubChannelsResponse.to_json)
+           (Some Values.ListSubChannelsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -892,6 +1001,32 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceARN ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let put_channel_expiration_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and chimeBearer =
+         flag "chime-bearer" (optional string) ~doc:"STRING ChimeArn"
+       and expirationSettings =
+         flag "expiration-settings" (optional json_arg)
+           ~doc:"JSON ExpirationSettings"
+       and channelArn =
+         flag "channel-arn" (required string) ~doc:"STRING ChimeArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_channel_expiration_settings
+           (Values.PutChannelExpirationSettingsRequest.make ?chimeBearer
+              ?expirationSettings:(Option.map
+                                     ~f:Values.ExpirationSettings.of_json
+                                     expirationSettings) ~channelArn ())
+           (Some Values.PutChannelExpirationSettingsResponse.to_json)
+           (Some Values.PutChannelExpirationSettingsResponse.error_to_json)])
 let put_channel_membership_preferences =
   Command.async ~summary:""
     ([%map_open.Command
@@ -920,6 +1055,31 @@ let put_channel_membership_preferences =
                               preferences) ())
            (Some Values.PutChannelMembershipPreferencesResponse.to_json)
            (Some Values.PutChannelMembershipPreferencesResponse.error_to_json)])
+let put_messaging_streaming_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appInstanceArn =
+         flag "app-instance-arn" (required string) ~doc:"STRING ChimeArn"
+       and streamingConfigurations =
+         flag "streaming-configurations" (required json_arg)
+           ~doc:"JSON StreamingConfigurationList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_messaging_streaming_configurations
+           (Values.PutMessagingStreamingConfigurationsRequest.make
+              ~appInstanceArn
+              ~streamingConfigurations:(Values.StreamingConfigurationList.of_json
+                                          streamingConfigurations) ())
+           (Some Values.PutMessagingStreamingConfigurationsResponse.to_json)
+           (Some
+              Values.PutMessagingStreamingConfigurationsResponse.error_to_json)])
 let redact_channel_message =
   Command.async ~summary:""
     ([%map_open.Command
@@ -930,6 +1090,8 @@ let redact_channel_message =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and messageId =
@@ -939,10 +1101,35 @@ let redact_channel_message =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.redact_channel_message
-           (Values.RedactChannelMessageRequest.make ~channelArn ~messageId
-              ~chimeBearer ())
+           (Values.RedactChannelMessageRequest.make ?subChannelId ~channelArn
+              ~messageId ~chimeBearer ())
            (Some Values.RedactChannelMessageResponse.to_json)
            (Some Values.RedactChannelMessageResponse.error_to_json)])
+let search_channels =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and chimeBearer =
+         flag "chime-bearer" (optional string) ~doc:"STRING ChimeArn"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and fields =
+         flag "fields" (required json_arg) ~doc:"JSON SearchFields" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_channels
+           (Values.SearchChannelsRequest.make ?chimeBearer ?maxResults
+              ?nextToken ~fields:(Values.SearchFields.of_json fields) ())
+           (Some Values.SearchChannelsResponse.to_json)
+           (Some Values.SearchChannelsResponse.error_to_json)])
 let send_channel_message =
   Command.async ~summary:""
     ([%map_open.Command
@@ -961,6 +1148,11 @@ let send_channel_message =
        and messageAttributes =
          flag "message-attributes" (optional json_arg)
            ~doc:"JSON MessageAttributeMap"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
+       and contentType =
+         flag "content-type" (optional string) ~doc:"STRING ContentType"
+       and target = flag "target" (optional json_arg) ~doc:"JSON TargetList"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and content =
@@ -984,7 +1176,10 @@ let send_channel_message =
                                    pushNotification)
               ?messageAttributes:(Option.map
                                     ~f:Values.MessageAttributeMap.of_json
-                                    messageAttributes) ~channelArn ~content
+                                    messageAttributes) ?subChannelId
+              ?contentType
+              ?target:(Option.map ~f:Values.TargetList.of_json target)
+              ~channelArn ~content
               ~type_:(Values.ChannelMessageType.of_json type_)
               ~persistence:(Values.ChannelMessagePersistenceType.of_json
                               persistence) ~clientRequestToken ~chimeBearer
@@ -1037,20 +1232,21 @@ let update_channel =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING NonEmptyResourceName"
+       and mode = flag "mode" (optional json_arg) ~doc:"JSON ChannelMode"
        and metadata =
          flag "metadata" (optional string) ~doc:"STRING Metadata"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
-       and name =
-         flag "name" (required string) ~doc:"STRING NonEmptyResourceName"
-       and mode = flag "mode" (required json_arg) ~doc:"JSON ChannelMode"
        and chimeBearer =
          flag "chime-bearer" (required string) ~doc:"STRING ChimeArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_channel
-           (Values.UpdateChannelRequest.make ?metadata ~channelArn ~name
-              ~mode:(Values.ChannelMode.of_json mode) ~chimeBearer ())
+           (Values.UpdateChannelRequest.make ?name
+              ?mode:(Option.map ~f:Values.ChannelMode.of_json mode) ?metadata
+              ~channelArn ~chimeBearer ())
            (Some Values.UpdateChannelResponse.to_json)
            (Some Values.UpdateChannelResponse.error_to_json)])
 let update_channel_flow =
@@ -1086,20 +1282,25 @@ let update_channel_message =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and content = flag "content" (optional string) ~doc:"STRING Content"
        and metadata =
          flag "metadata" (optional string) ~doc:"STRING Metadata"
+       and subChannelId =
+         flag "sub-channel-id" (optional string) ~doc:"STRING SubChannelId"
+       and contentType =
+         flag "content-type" (optional string) ~doc:"STRING ContentType"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChimeArn"
        and messageId =
          flag "message-id" (required string) ~doc:"STRING MessageId"
+       and content =
+         flag "content" (required string) ~doc:"STRING NonEmptyContent"
        and chimeBearer =
          flag "chime-bearer" (required string) ~doc:"STRING ChimeArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_channel_message
-           (Values.UpdateChannelMessageRequest.make ?content ?metadata
-              ~channelArn ~messageId ~chimeBearer ())
+           (Values.UpdateChannelMessageRequest.make ?metadata ?subChannelId
+              ?contentType ~channelArn ~messageId ~content ~chimeBearer ())
            (Some Values.UpdateChannelMessageResponse.to_json)
            (Some Values.UpdateChannelMessageResponse.error_to_json)])
 let update_channel_read_marker =
@@ -1140,6 +1341,8 @@ let main =
     ("delete-channel-membership", delete_channel_membership);
     ("delete-channel-message", delete_channel_message);
     ("delete-channel-moderator", delete_channel_moderator);
+    ("delete-messaging-streaming-configurations",
+      delete_messaging_streaming_configurations);
     ("describe-channel", describe_channel);
     ("describe-channel-ban", describe_channel_ban);
     ("describe-channel-flow", describe_channel_flow);
@@ -1155,6 +1358,8 @@ let main =
     ("get-channel-message", get_channel_message);
     ("get-channel-message-status", get_channel_message_status);
     ("get-messaging-session-endpoint", get_messaging_session_endpoint);
+    ("get-messaging-streaming-configurations",
+      get_messaging_streaming_configurations);
     ("list-channel-bans", list_channel_bans);
     ("list-channel-flows", list_channel_flows);
     ("list-channel-memberships", list_channel_memberships);
@@ -1167,10 +1372,15 @@ let main =
       list_channels_associated_with_channel_flow);
     ("list-channels-moderated-by-app-instance-user",
       list_channels_moderated_by_app_instance_user);
+    ("list-sub-channels", list_sub_channels);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("put-channel-expiration-settings", put_channel_expiration_settings);
     ("put-channel-membership-preferences",
       put_channel_membership_preferences);
+    ("put-messaging-streaming-configurations",
+      put_messaging_streaming_configurations);
     ("redact-channel-message", redact_channel_message);
+    ("search-channels", search_channels);
     ("send-channel-message", send_channel_message);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);

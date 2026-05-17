@@ -22,12 +22,26 @@ val create_bucket :
     ?cfg:Awso.Cfg.t ->
       CreateBucketRequest.t ->
         (CreateBucketOutput.t, CreateBucketOutput.error) Result.t
+val create_bucket_metadata_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateBucketMetadataConfigurationRequest.t -> (unit, unit) Result.t
+val create_bucket_metadata_table_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateBucketMetadataTableConfigurationRequest.t ->
+        (unit, unit) Result.t
 val create_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMultipartUploadRequest.t ->
         (CreateMultipartUploadOutput.t, CreateMultipartUploadOutput.error)
           Result.t
+val create_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSessionRequest.t ->
+        (CreateSessionOutput.t, CreateSessionOutput.error) Result.t
 val delete_bucket :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteBucketRequest.t -> (unit, unit) Result.t
@@ -55,6 +69,15 @@ val delete_bucket_lifecycle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBucketLifecycleRequest.t -> (unit, unit) Result.t
+val delete_bucket_metadata_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteBucketMetadataConfigurationRequest.t -> (unit, unit) Result.t
+val delete_bucket_metadata_table_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteBucketMetadataTableConfigurationRequest.t ->
+        (unit, unit) Result.t
 val delete_bucket_metrics_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -96,6 +119,11 @@ val delete_public_access_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePublicAccessBlockRequest.t -> (unit, unit) Result.t
+val get_bucket_abac :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetBucketAbacRequest.t ->
+        (GetBucketAbacOutput.t, GetBucketAbacOutput.error) Result.t
 val get_bucket_accelerate_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -157,6 +185,18 @@ val get_bucket_logging :
     ?cfg:Awso.Cfg.t ->
       GetBucketLoggingRequest.t ->
         (GetBucketLoggingOutput.t, GetBucketLoggingOutput.error) Result.t
+val get_bucket_metadata_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetBucketMetadataConfigurationRequest.t ->
+        (GetBucketMetadataConfigurationOutput.t,
+          GetBucketMetadataConfigurationOutput.error) Result.t
+val get_bucket_metadata_table_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetBucketMetadataTableConfigurationRequest.t ->
+        (GetBucketMetadataTableConfigurationOutput.t,
+          GetBucketMetadataTableConfigurationOutput.error) Result.t
 val get_bucket_metrics_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -270,7 +310,9 @@ val get_public_access_block :
           Result.t
 val head_bucket :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> HeadBucketRequest.t -> (unit, unit) Result.t
+    ?cfg:Awso.Cfg.t ->
+      HeadBucketRequest.t ->
+        (HeadBucketOutput.t, HeadBucketOutput.error) Result.t
 val head_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -303,7 +345,14 @@ val list_bucket_metrics_configurations :
 val list_buckets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      unit -> (ListBucketsOutput.t, ListBucketsOutput.error) Result.t
+      ListBucketsRequest.t ->
+        (ListBucketsOutput.t, ListBucketsOutput.error) Result.t
+val list_directory_buckets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDirectoryBucketsRequest.t ->
+        (ListDirectoryBucketsOutput.t, ListDirectoryBucketsOutput.error)
+          Result.t
 val list_multipart_uploads :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -330,6 +379,9 @@ val list_parts :
     ?cfg:Awso.Cfg.t ->
       ListPartsRequest.t ->
         (ListPartsOutput.t, ListPartsOutput.error) Result.t
+val put_bucket_abac :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> PutBucketAbacRequest.t -> (unit, unit) Result.t
 val put_bucket_accelerate_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -362,7 +414,9 @@ val put_bucket_lifecycle :
 val put_bucket_lifecycle_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketLifecycleConfigurationRequest.t -> (unit, unit) Result.t
+      PutBucketLifecycleConfigurationRequest.t ->
+        (PutBucketLifecycleConfigurationOutput.t,
+          PutBucketLifecycleConfigurationOutput.error) Result.t
 val put_bucket_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> PutBucketLoggingRequest.t -> (unit, unit) Result.t
@@ -435,6 +489,11 @@ val put_object_tagging :
 val put_public_access_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> PutPublicAccessBlockRequest.t -> (unit, unit) Result.t
+val rename_object :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RenameObjectRequest.t ->
+        (RenameObjectOutput.t, RenameObjectOutput.error) Result.t
 val restore_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -446,6 +505,22 @@ val select_object_content :
       SelectObjectContentRequest.t ->
         (SelectObjectContentOutput.t, SelectObjectContentOutput.error)
           Result.t
+val update_bucket_metadata_inventory_table_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateBucketMetadataInventoryTableConfigurationRequest.t ->
+        (unit, unit) Result.t
+val update_bucket_metadata_journal_table_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateBucketMetadataJournalTableConfigurationRequest.t ->
+        (unit, unit) Result.t
+val update_object_encryption :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateObjectEncryptionRequest.t ->
+        (UpdateObjectEncryptionResponse.t,
+          UpdateObjectEncryptionResponse.error) Result.t
 val upload_part :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

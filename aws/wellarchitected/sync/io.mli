@@ -3,6 +3,9 @@ open Awso_wellarchitected.Values
 val associate_lenses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> AssociateLensesInput.t -> (unit, unit) Result.t
+val associate_profiles :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> AssociateProfilesInput.t -> (unit, unit) Result.t
 val create_lens_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -18,6 +21,28 @@ val create_milestone :
     ?cfg:Awso.Cfg.t ->
       CreateMilestoneInput.t ->
         (CreateMilestoneOutput.t, CreateMilestoneOutput.error) Result.t
+val create_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateProfileInput.t ->
+        (CreateProfileOutput.t, CreateProfileOutput.error) Result.t
+val create_profile_share :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateProfileShareInput.t ->
+        (CreateProfileShareOutput.t, CreateProfileShareOutput.error) Result.t
+val create_review_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateReviewTemplateInput.t ->
+        (CreateReviewTemplateOutput.t, CreateReviewTemplateOutput.error)
+          Result.t
+val create_template_share :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTemplateShareInput.t ->
+        (CreateTemplateShareOutput.t, CreateTemplateShareOutput.error)
+          Result.t
 val create_workload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -35,6 +60,18 @@ val delete_lens :
 val delete_lens_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteLensShareInput.t -> (unit, unit) Result.t
+val delete_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteProfileInput.t -> (unit, unit) Result.t
+val delete_profile_share :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteProfileShareInput.t -> (unit, unit) Result.t
+val delete_review_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteReviewTemplateInput.t -> (unit, unit) Result.t
+val delete_template_share :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteTemplateShareInput.t -> (unit, unit) Result.t
 val delete_workload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteWorkloadInput.t -> (unit, unit) Result.t
@@ -44,6 +81,9 @@ val delete_workload_share :
 val disassociate_lenses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DisassociateLensesInput.t -> (unit, unit) Result.t
+val disassociate_profiles :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DisassociateProfilesInput.t -> (unit, unit) Result.t
 val export_lens :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -53,6 +93,17 @@ val get_answer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAnswerInput.t -> (GetAnswerOutput.t, GetAnswerOutput.error) Result.t
+val get_consolidated_report :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetConsolidatedReportInput.t ->
+        (GetConsolidatedReportOutput.t, GetConsolidatedReportOutput.error)
+          Result.t
+val get_global_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      unit ->
+        (GetGlobalSettingsOutput.t, GetGlobalSettingsOutput.error) Result.t
 val get_lens :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -79,6 +130,33 @@ val get_milestone :
     ?cfg:Awso.Cfg.t ->
       GetMilestoneInput.t ->
         (GetMilestoneOutput.t, GetMilestoneOutput.error) Result.t
+val get_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetProfileInput.t ->
+        (GetProfileOutput.t, GetProfileOutput.error) Result.t
+val get_profile_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetProfileTemplateInput.t ->
+        (GetProfileTemplateOutput.t, GetProfileTemplateOutput.error) Result.t
+val get_review_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetReviewTemplateInput.t ->
+        (GetReviewTemplateOutput.t, GetReviewTemplateOutput.error) Result.t
+val get_review_template_answer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetReviewTemplateAnswerInput.t ->
+        (GetReviewTemplateAnswerOutput.t,
+          GetReviewTemplateAnswerOutput.error) Result.t
+val get_review_template_lens_review :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetReviewTemplateLensReviewInput.t ->
+        (GetReviewTemplateLensReviewOutput.t,
+          GetReviewTemplateLensReviewOutput.error) Result.t
 val get_workload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -94,6 +172,16 @@ val list_answers :
     ?cfg:Awso.Cfg.t ->
       ListAnswersInput.t ->
         (ListAnswersOutput.t, ListAnswersOutput.error) Result.t
+val list_check_details :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCheckDetailsInput.t ->
+        (ListCheckDetailsOutput.t, ListCheckDetailsOutput.error) Result.t
+val list_check_summaries :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCheckSummariesInput.t ->
+        (ListCheckSummariesOutput.t, ListCheckSummariesOutput.error) Result.t
 val list_lens_review_improvements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -125,6 +213,34 @@ val list_notifications :
     ?cfg:Awso.Cfg.t ->
       ListNotificationsInput.t ->
         (ListNotificationsOutput.t, ListNotificationsOutput.error) Result.t
+val list_profile_notifications :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListProfileNotificationsInput.t ->
+        (ListProfileNotificationsOutput.t,
+          ListProfileNotificationsOutput.error) Result.t
+val list_profile_shares :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListProfileSharesInput.t ->
+        (ListProfileSharesOutput.t, ListProfileSharesOutput.error) Result.t
+val list_profiles :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListProfilesInput.t ->
+        (ListProfilesOutput.t, ListProfilesOutput.error) Result.t
+val list_review_template_answers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListReviewTemplateAnswersInput.t ->
+        (ListReviewTemplateAnswersOutput.t,
+          ListReviewTemplateAnswersOutput.error) Result.t
+val list_review_templates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListReviewTemplatesInput.t ->
+        (ListReviewTemplatesOutput.t, ListReviewTemplatesOutput.error)
+          Result.t
 val list_share_invitations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -137,6 +253,11 @@ val list_tags_for_resource :
       ListTagsForResourceInput.t ->
         (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
           Result.t
+val list_template_shares :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTemplateSharesInput.t ->
+        (ListTemplateSharesOutput.t, ListTemplateSharesOutput.error) Result.t
 val list_workload_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -162,11 +283,40 @@ val update_answer :
     ?cfg:Awso.Cfg.t ->
       UpdateAnswerInput.t ->
         (UpdateAnswerOutput.t, UpdateAnswerOutput.error) Result.t
+val update_global_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> UpdateGlobalSettingsInput.t -> (unit, unit) Result.t
+val update_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> UpdateIntegrationInput.t -> (unit, unit) Result.t
 val update_lens_review :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLensReviewInput.t ->
         (UpdateLensReviewOutput.t, UpdateLensReviewOutput.error) Result.t
+val update_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateProfileInput.t ->
+        (UpdateProfileOutput.t, UpdateProfileOutput.error) Result.t
+val update_review_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateReviewTemplateInput.t ->
+        (UpdateReviewTemplateOutput.t, UpdateReviewTemplateOutput.error)
+          Result.t
+val update_review_template_answer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateReviewTemplateAnswerInput.t ->
+        (UpdateReviewTemplateAnswerOutput.t,
+          UpdateReviewTemplateAnswerOutput.error) Result.t
+val update_review_template_lens_review :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateReviewTemplateLensReviewInput.t ->
+        (UpdateReviewTemplateLensReviewOutput.t,
+          UpdateReviewTemplateLensReviewOutput.error) Result.t
 val update_share_invitation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -187,3 +337,10 @@ val update_workload_share :
 val upgrade_lens_review :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UpgradeLensReviewInput.t -> (unit, unit) Result.t
+val upgrade_profile_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> UpgradeProfileVersionInput.t -> (unit, unit) Result.t
+val upgrade_review_template_lens_review :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpgradeReviewTemplateLensReviewInput.t -> (unit, unit) Result.t

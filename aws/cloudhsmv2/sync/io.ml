@@ -23,10 +23,14 @@ let delete_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCluster input
 let delete_hsm ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteHsm input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let describe_backups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBackups input
 let describe_clusters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeClusters input
+let get_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicy input
 let initialize_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.InitializeCluster input
 let list_tags ?endpoint_url ?cfg input =
@@ -35,6 +39,8 @@ let modify_backup_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyBackupAttributes input
 let modify_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyCluster input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let restore_backup ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RestoreBackup input
 let tag_resource ?endpoint_url ?cfg input =

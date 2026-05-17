@@ -41,11 +41,12 @@ let describe_services =
        and serviceCode =
          flag "service-code" (optional string) ~doc:"STRING String"
        and formatVersion =
-         flag "format-version" (optional string) ~doc:"STRING String"
+         flag "format-version" (optional string) ~doc:"STRING FormatVersion"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT BoxedInteger" in
+         flag "max-results" (optional int)
+           ~doc:"INT DescribeServicesMaxResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_services
@@ -66,7 +67,8 @@ let get_attribute_values =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT BoxedInteger"
+         flag "max-results" (optional int)
+           ~doc:"INT GetAttributeValuesMaxResults"
        and serviceCode =
          flag "service-code" (required string) ~doc:"STRING String"
        and attributeName =
@@ -78,6 +80,26 @@ let get_attribute_values =
               ~serviceCode ~attributeName ())
            (Some Values.GetAttributeValuesResponse.to_json)
            (Some Values.GetAttributeValuesResponse.error_to_json)])
+let get_price_list_file_url =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and priceListArn =
+         flag "price-list-arn" (required string) ~doc:"STRING PriceListArn"
+       and fileFormat =
+         flag "file-format" (required string) ~doc:"STRING FileFormat" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_price_list_file_url
+           (Values.GetPriceListFileUrlRequest.make ~priceListArn ~fileFormat
+              ()) (Some Values.GetPriceListFileUrlResponse.to_json)
+           (Some Values.GetPriceListFileUrlResponse.error_to_json)])
 let get_products =
   Command.async ~summary:""
     ([%map_open.Command
@@ -88,26 +110,58 @@ let get_products =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and serviceCode =
-         flag "service-code" (optional string) ~doc:"STRING String"
        and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters"
        and formatVersion =
-         flag "format-version" (optional string) ~doc:"STRING String"
+         flag "format-version" (optional string) ~doc:"STRING FormatVersion"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT BoxedInteger" in
+         flag "max-results" (optional int) ~doc:"INT GetProductsMaxResults"
+       and serviceCode =
+         flag "service-code" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_products
-           (Values.GetProductsRequest.make ?serviceCode
+           (Values.GetProductsRequest.make
               ?filters:(Option.map ~f:Values.Filters.of_json filters)
-              ?formatVersion ?nextToken ?maxResults ())
+              ?formatVersion ?nextToken ?maxResults ~serviceCode ())
            (Some Values.GetProductsResponse.to_json)
            (Some Values.GetProductsResponse.error_to_json)])
+let list_price_lists =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and regionCode =
+         flag "region-code" (optional string) ~doc:"STRING RegionCode"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and serviceCode =
+         flag "service-code" (required string) ~doc:"STRING ServiceCode"
+       and effectiveDate =
+         flag "effective-date" (required json_arg) ~doc:"JSON EffectiveDate"
+       and currencyCode =
+         flag "currency-code" (required string) ~doc:"STRING CurrencyCode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_price_lists
+           (Values.ListPriceListsRequest.make ?regionCode ?nextToken
+              ?maxResults ~serviceCode
+              ~effectiveDate:(Values.EffectiveDate.of_json effectiveDate)
+              ~currencyCode ()) (Some Values.ListPriceListsResponse.to_json)
+           (Some Values.ListPriceListsResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-services", describe_services);
     ("get-attribute-values", get_attribute_values);
-    ("get-products", get_products)]
+    ("get-price-list-file-url", get_price_list_file_url);
+    ("get-products", get_products);
+    ("list-price-lists", list_price_lists)]

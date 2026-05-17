@@ -37,8 +37,8 @@ let copy_d_b_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopyDBSnapshot input
 let copy_option_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopyOptionGroup input
-let create_custom_availability_zone ?endpoint_url ?cfg input =
-  eval ?endpoint_url ?cfg Endpoints.CreateCustomAvailabilityZone input
+let create_blue_green_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateBlueGreenDeployment input
 let create_custom_d_b_engine_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCustomDBEngineVersion input
 let create_d_b_cluster ?endpoint_url ?cfg input =
@@ -61,6 +61,8 @@ let create_d_b_proxy_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDBProxyEndpoint input
 let create_d_b_security_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDBSecurityGroup input
+let create_d_b_shard_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDBShardGroup input
 let create_d_b_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDBSnapshot input
 let create_d_b_subnet_group ?endpoint_url ?cfg input =
@@ -69,14 +71,20 @@ let create_event_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEventSubscription input
 let create_global_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGlobalCluster input
+let create_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIntegration input
 let create_option_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateOptionGroup input
-let delete_custom_availability_zone ?endpoint_url ?cfg input =
-  eval ?endpoint_url ?cfg Endpoints.DeleteCustomAvailabilityZone input
+let create_tenant_database ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTenantDatabase input
+let delete_blue_green_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteBlueGreenDeployment input
 let delete_custom_d_b_engine_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCustomDBEngineVersion input
 let delete_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDBCluster input
+let delete_d_b_cluster_automated_backup ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDBClusterAutomatedBackup input
 let delete_d_b_cluster_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDBClusterEndpoint input
 let delete_d_b_cluster_parameter_group ?endpoint_url ?cfg input =
@@ -95,6 +103,8 @@ let delete_d_b_proxy_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDBProxyEndpoint input
 let delete_d_b_security_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDBSecurityGroup input
+let delete_d_b_shard_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDBShardGroup input
 let delete_d_b_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDBSnapshot input
 let delete_d_b_subnet_group ?endpoint_url ?cfg input =
@@ -103,18 +113,22 @@ let delete_event_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEventSubscription input
 let delete_global_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGlobalCluster input
-let delete_installation_media ?endpoint_url ?cfg input =
-  eval ?endpoint_url ?cfg Endpoints.DeleteInstallationMedia input
+let delete_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIntegration input
 let delete_option_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteOptionGroup input
+let delete_tenant_database ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTenantDatabase input
 let deregister_d_b_proxy_targets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterDBProxyTargets input
 let describe_account_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAccountAttributes input
+let describe_blue_green_deployments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeBlueGreenDeployments input
 let describe_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCertificates input
-let describe_custom_availability_zones ?endpoint_url ?cfg input =
-  eval ?endpoint_url ?cfg Endpoints.DescribeCustomAvailabilityZones input
+let describe_d_b_cluster_automated_backups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDBClusterAutomatedBackups input
 let describe_d_b_cluster_backtracks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBClusterBacktracks input
 let describe_d_b_cluster_endpoints ?endpoint_url ?cfg input =
@@ -137,6 +151,8 @@ let describe_d_b_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBInstances input
 let describe_d_b_log_files ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBLogFiles input
+let describe_d_b_major_engine_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDBMajorEngineVersions input
 let describe_d_b_parameter_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBParameterGroups input
 let describe_d_b_parameters ?endpoint_url ?cfg input =
@@ -149,10 +165,16 @@ let describe_d_b_proxy_target_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBProxyTargetGroups input
 let describe_d_b_proxy_targets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBProxyTargets input
+let describe_d_b_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDBRecommendations input
 let describe_d_b_security_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBSecurityGroups input
+let describe_d_b_shard_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDBShardGroups input
 let describe_d_b_snapshot_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBSnapshotAttributes input
+let describe_d_b_snapshot_tenant_databases ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDBSnapshotTenantDatabases input
 let describe_d_b_snapshots ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBSnapshots input
 let describe_d_b_subnet_groups ?endpoint_url ?cfg input =
@@ -172,8 +194,8 @@ let describe_export_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeExportTasks input
 let describe_global_clusters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeGlobalClusters input
-let describe_installation_media ?endpoint_url ?cfg input =
-  eval ?endpoint_url ?cfg Endpoints.DescribeInstallationMedia input
+let describe_integrations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIntegrations input
 let describe_option_group_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeOptionGroupOptions input
 let describe_option_groups ?endpoint_url ?cfg input =
@@ -187,21 +209,30 @@ let describe_reserved_d_b_instances ?endpoint_url ?cfg input =
 let describe_reserved_d_b_instances_offerings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReservedDBInstancesOfferings
     input
+let describe_serverless_v2_platform_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeServerlessV2PlatformVersions
+    input
 let describe_source_regions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSourceRegions input
+let describe_tenant_databases ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTenantDatabases input
 let describe_valid_d_b_instance_modifications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeValidDBInstanceModifications
     input
+let disable_http_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableHttpEndpoint input
 let download_d_b_log_file_portion ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DownloadDBLogFilePortion input
+let enable_http_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableHttpEndpoint input
 let failover_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.FailoverDBCluster input
 let failover_global_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.FailoverGlobalCluster input
-let import_installation_media ?endpoint_url ?cfg input =
-  eval ?endpoint_url ?cfg Endpoints.ImportInstallationMedia input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let modify_activity_stream ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyActivityStream input
 let modify_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyCertificates input
 let modify_current_d_b_cluster_capacity ?endpoint_url ?cfg input =
@@ -226,6 +257,10 @@ let modify_d_b_proxy_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyDBProxyEndpoint input
 let modify_d_b_proxy_target_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyDBProxyTargetGroup input
+let modify_d_b_recommendation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyDBRecommendation input
+let modify_d_b_shard_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyDBShardGroup input
 let modify_d_b_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyDBSnapshot input
 let modify_d_b_snapshot_attribute ?endpoint_url ?cfg input =
@@ -236,8 +271,12 @@ let modify_event_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyEventSubscription input
 let modify_global_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyGlobalCluster input
+let modify_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyIntegration input
 let modify_option_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyOptionGroup input
+let modify_tenant_database ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyTenantDatabase input
 let promote_read_replica ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PromoteReadReplica input
 let promote_read_replica_d_b_cluster ?endpoint_url ?cfg input =
@@ -248,6 +287,8 @@ let reboot_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RebootDBCluster input
 let reboot_d_b_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RebootDBInstance input
+let reboot_d_b_shard_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RebootDBShardGroup input
 let register_d_b_proxy_targets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterDBProxyTargets input
 let remove_from_global_cluster ?endpoint_url ?cfg input =
@@ -301,3 +342,9 @@ let stop_d_b_instance_automated_backups_replication ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg Endpoints.StopDBInstanceAutomatedBackupsReplication
     input
+let switchover_blue_green_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SwitchoverBlueGreenDeployment input
+let switchover_global_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SwitchoverGlobalCluster input
+let switchover_read_replica ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SwitchoverReadReplica input

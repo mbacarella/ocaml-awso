@@ -65,6 +65,85 @@ let cancel_policy_generation =
            (Values.CancelPolicyGenerationRequest.make ~jobId ())
            (Some Values.CancelPolicyGenerationResponse.to_json)
            (Some Values.CancelPolicyGenerationResponse.error_to_json)])
+let check_access_not_granted =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyDocument =
+         flag "policy-document" (required string)
+           ~doc:"STRING AccessCheckPolicyDocument"
+       and access =
+         flag "access" (required json_arg)
+           ~doc:"JSON CheckAccessNotGrantedRequestAccessList"
+       and policyType =
+         flag "policy-type" (required json_arg)
+           ~doc:"JSON AccessCheckPolicyType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.check_access_not_granted
+           (Values.CheckAccessNotGrantedRequest.make ~policyDocument
+              ~access:(Values.CheckAccessNotGrantedRequestAccessList.of_json
+                         access)
+              ~policyType:(Values.AccessCheckPolicyType.of_json policyType)
+              ()) (Some Values.CheckAccessNotGrantedResponse.to_json)
+           (Some Values.CheckAccessNotGrantedResponse.error_to_json)])
+let check_no_new_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and newPolicyDocument =
+         flag "new-policy-document" (required string)
+           ~doc:"STRING AccessCheckPolicyDocument"
+       and existingPolicyDocument =
+         flag "existing-policy-document" (required string)
+           ~doc:"STRING AccessCheckPolicyDocument"
+       and policyType =
+         flag "policy-type" (required json_arg)
+           ~doc:"JSON AccessCheckPolicyType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.check_no_new_access
+           (Values.CheckNoNewAccessRequest.make ~newPolicyDocument
+              ~existingPolicyDocument
+              ~policyType:(Values.AccessCheckPolicyType.of_json policyType)
+              ()) (Some Values.CheckNoNewAccessResponse.to_json)
+           (Some Values.CheckNoNewAccessResponse.error_to_json)])
+let check_no_public_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyDocument =
+         flag "policy-document" (required string)
+           ~doc:"STRING AccessCheckPolicyDocument"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON AccessCheckResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.check_no_public_access
+           (Values.CheckNoPublicAccessRequest.make ~policyDocument
+              ~resourceType:(Values.AccessCheckResourceType.of_json
+                               resourceType) ())
+           (Some Values.CheckNoPublicAccessResponse.to_json)
+           (Some Values.CheckNoPublicAccessResponse.error_to_json)])
 let create_access_preview =
   Command.async ~summary:""
     ([%map_open.Command
@@ -103,9 +182,12 @@ let create_analyzer =
        and archiveRules =
          flag "archive-rules" (optional json_arg)
            ~doc:"JSON InlineArchiveRulesList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING String"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and configuration =
+         flag "configuration" (optional json_arg)
+           ~doc:"JSON AnalyzerConfiguration"
        and analyzerName =
          flag "analyzer-name" (required string) ~doc:"STRING Name"
        and type_ = flag "type-" (required json_arg) ~doc:"JSON Type" in
@@ -115,8 +197,11 @@ let create_analyzer =
            (Values.CreateAnalyzerRequest.make
               ?archiveRules:(Option.map
                                ~f:Values.InlineArchiveRulesList.of_json
-                               archiveRules) ?clientToken
-              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~analyzerName
+                               archiveRules)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ?clientToken
+              ?configuration:(Option.map
+                                ~f:Values.AnalyzerConfiguration.of_json
+                                configuration) ~analyzerName
               ~type_:(Values.Type.of_json type_) ())
            (Some Values.CreateAnalyzerResponse.to_json)
            (Some Values.CreateAnalyzerResponse.error_to_json)])
@@ -134,14 +219,14 @@ let create_archive_rule =
          flag "client-token" (optional string) ~doc:"STRING String"
        and analyzerName =
          flag "analyzer-name" (required string) ~doc:"STRING Name"
+       and ruleName = flag "rule-name" (required string) ~doc:"STRING Name"
        and filter =
-         flag "filter" (required json_arg) ~doc:"JSON FilterCriteriaMap"
-       and ruleName = flag "rule-name" (required string) ~doc:"STRING Name" in
+         flag "filter" (required json_arg) ~doc:"JSON FilterCriteriaMap" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_archive_rule
            (Values.CreateArchiveRuleRequest.make ?clientToken ~analyzerName
-              ~filter:(Values.FilterCriteriaMap.of_json filter) ~ruleName ())
+              ~ruleName ~filter:(Values.FilterCriteriaMap.of_json filter) ())
            None None])
 let delete_analyzer =
   Command.async ~summary:""
@@ -182,6 +267,26 @@ let delete_archive_rule =
            Io.delete_archive_rule
            (Values.DeleteArchiveRuleRequest.make ?clientToken ~analyzerName
               ~ruleName ()) None None])
+let generate_finding_recommendation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and analyzerArn =
+         flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn"
+       and id =
+         flag "id" (required string)
+           ~doc:"STRING GenerateFindingRecommendationRequestIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.generate_finding_recommendation
+           (Values.GenerateFindingRecommendationRequest.make ~analyzerArn ~id
+              ()) None None])
 let get_access_preview =
   Command.async ~summary:""
     ([%map_open.Command
@@ -277,6 +382,73 @@ let get_finding =
            Io.get_finding (Values.GetFindingRequest.make ~analyzerArn ~id ())
            (Some Values.GetFindingResponse.to_json)
            (Some Values.GetFindingResponse.error_to_json)])
+let get_finding_recommendation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetFindingRecommendationRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and analyzerArn =
+         flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn"
+       and id =
+         flag "id" (required string)
+           ~doc:"STRING GetFindingRecommendationRequestIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_finding_recommendation
+           (Values.GetFindingRecommendationRequest.make ?maxResults
+              ?nextToken ~analyzerArn ~id ())
+           (Some Values.GetFindingRecommendationResponse.to_json)
+           (Some Values.GetFindingRecommendationResponse.error_to_json)])
+let get_finding_v2 =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and analyzerArn =
+         flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn"
+       and id = flag "id" (required string) ~doc:"STRING FindingId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_finding_v2
+           (Values.GetFindingV2Request.make ?maxResults ?nextToken
+              ~analyzerArn ~id ()) (Some Values.GetFindingV2Response.to_json)
+           (Some Values.GetFindingV2Response.error_to_json)])
+let get_findings_statistics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and analyzerArn =
+         flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_findings_statistics
+           (Values.GetFindingsStatisticsRequest.make ~analyzerArn ())
+           (Some Values.GetFindingsStatisticsResponse.to_json)
+           (Some Values.GetFindingsStatisticsResponse.error_to_json)])
 let get_generated_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -313,9 +485,9 @@ let list_access_preview_findings =
            ~doc:"URL override endpoint url"
        and filter =
          flag "filter" (optional json_arg) ~doc:"JSON FilterCriteriaMap"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and accessPreviewId =
          flag "access-preview-id" (required string)
            ~doc:"STRING AccessPreviewId"
@@ -326,7 +498,7 @@ let list_access_preview_findings =
            Io.list_access_preview_findings
            (Values.ListAccessPreviewFindingsRequest.make
               ?filter:(Option.map ~f:Values.FilterCriteriaMap.of_json filter)
-              ?maxResults ?nextToken ~accessPreviewId ~analyzerArn ())
+              ?nextToken ?maxResults ~accessPreviewId ~analyzerArn ())
            (Some Values.ListAccessPreviewFindingsResponse.to_json)
            (Some Values.ListAccessPreviewFindingsResponse.error_to_json)])
 let list_access_previews =
@@ -339,15 +511,15 @@ let list_access_previews =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and analyzerArn =
          flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_access_previews
-           (Values.ListAccessPreviewsRequest.make ?maxResults ?nextToken
+           (Values.ListAccessPreviewsRequest.make ?nextToken ?maxResults
               ~analyzerArn ())
            (Some Values.ListAccessPreviewsResponse.to_json)
            (Some Values.ListAccessPreviewsResponse.error_to_json)])
@@ -361,19 +533,20 @@ let list_analyzed_resources =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING Token"
        and resourceType =
          flag "resource-type" (optional json_arg) ~doc:"JSON ResourceType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and analyzerArn =
          flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_analyzed_resources
-           (Values.ListAnalyzedResourcesRequest.make ?maxResults ?nextToken
+           (Values.ListAnalyzedResourcesRequest.make
               ?resourceType:(Option.map ~f:Values.ResourceType.of_json
-                               resourceType) ~analyzerArn ())
+                               resourceType) ?nextToken ?maxResults
+              ~analyzerArn ())
            (Some Values.ListAnalyzedResourcesResponse.to_json)
            (Some Values.ListAnalyzedResourcesResponse.error_to_json)])
 let list_analyzers =
@@ -386,14 +559,14 @@ let list_analyzers =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and type_ = flag "type-" (optional json_arg) ~doc:"JSON Type" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_analyzers
-           (Values.ListAnalyzersRequest.make ?maxResults ?nextToken
+           (Values.ListAnalyzersRequest.make ?nextToken ?maxResults
               ?type_:(Option.map ~f:Values.Type.of_json type_) ())
            (Some Values.ListAnalyzersResponse.to_json)
            (Some Values.ListAnalyzersResponse.error_to_json)])
@@ -407,19 +580,46 @@ let list_archive_rules =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and analyzerName =
          flag "analyzer-name" (required string) ~doc:"STRING Name" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_archive_rules
-           (Values.ListArchiveRulesRequest.make ?maxResults ?nextToken
+           (Values.ListArchiveRulesRequest.make ?nextToken ?maxResults
               ~analyzerName ())
            (Some Values.ListArchiveRulesResponse.to_json)
            (Some Values.ListArchiveRulesResponse.error_to_json)])
 let list_findings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg) ~doc:"JSON FilterCriteriaMap"
+       and sort = flag "sort" (optional json_arg) ~doc:"JSON SortCriteria"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and analyzerArn =
+         flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_findings
+           (Values.ListFindingsRequest.make
+              ?filter:(Option.map ~f:Values.FilterCriteriaMap.of_json filter)
+              ?sort:(Option.map ~f:Values.SortCriteria.of_json sort)
+              ?nextToken ?maxResults ~analyzerArn ())
+           (Some Values.ListFindingsResponse.to_json)
+           (Some Values.ListFindingsResponse.error_to_json)])
+let list_findings_v2 =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -439,13 +639,13 @@ let list_findings =
          flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_findings
-           (Values.ListFindingsRequest.make
+           Io.list_findings_v2
+           (Values.ListFindingsV2Request.make
               ?filter:(Option.map ~f:Values.FilterCriteriaMap.of_json filter)
               ?maxResults ?nextToken
               ?sort:(Option.map ~f:Values.SortCriteria.of_json sort)
-              ~analyzerArn ()) (Some Values.ListFindingsResponse.to_json)
-           (Some Values.ListFindingsResponse.error_to_json)])
+              ~analyzerArn ()) (Some Values.ListFindingsV2Response.to_json)
+           (Some Values.ListFindingsV2Response.error_to_json)])
 let list_policy_generations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -456,18 +656,18 @@ let list_policy_generations =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and principalArn =
+         flag "principal-arn" (optional string) ~doc:"STRING PrincipalArn"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT ListPolicyGenerationsRequestMaxResultsInteger"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING Token"
-       and principalArn =
-         flag "principal-arn" (optional string) ~doc:"STRING PrincipalArn" in
+         flag "next-token" (optional string) ~doc:"STRING Token" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_policy_generations
-           (Values.ListPolicyGenerationsRequest.make ?maxResults ?nextToken
-              ?principalArn ())
+           (Values.ListPolicyGenerationsRequest.make ?principalArn
+              ?maxResults ?nextToken ())
            (Some Values.ListPolicyGenerationsResponse.to_json)
            (Some Values.ListPolicyGenerationsResponse.error_to_json)])
 let list_tags_for_resource =
@@ -498,21 +698,21 @@ let start_policy_generation =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING String"
        and cloudTrailDetails =
          flag "cloud-trail-details" (optional json_arg)
            ~doc:"JSON CloudTrailDetails"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
        and policyGenerationDetails =
          flag "policy-generation-details" (required json_arg)
            ~doc:"JSON PolicyGenerationDetails" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_policy_generation
-           (Values.StartPolicyGenerationRequest.make ?clientToken
+           (Values.StartPolicyGenerationRequest.make
               ?cloudTrailDetails:(Option.map
                                     ~f:Values.CloudTrailDetails.of_json
-                                    cloudTrailDetails)
+                                    cloudTrailDetails) ?clientToken
               ~policyGenerationDetails:(Values.PolicyGenerationDetails.of_json
                                           policyGenerationDetails) ())
            (Some Values.StartPolicyGenerationResponse.to_json)
@@ -527,6 +727,8 @@ let start_resource_scan =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and resourceOwnerAccount =
+         flag "resource-owner-account" (optional string) ~doc:"STRING String"
        and analyzerArn =
          flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn"
        and resourceArn =
@@ -534,8 +736,8 @@ let start_resource_scan =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_resource_scan
-           (Values.StartResourceScanRequest.make ~analyzerArn ~resourceArn ())
-           None None])
+           (Values.StartResourceScanRequest.make ?resourceOwnerAccount
+              ~analyzerArn ~resourceArn ()) None None])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -576,6 +778,30 @@ let untag_resource =
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_analyzer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and configuration =
+         flag "configuration" (optional json_arg)
+           ~doc:"JSON AnalyzerConfiguration"
+       and analyzerName =
+         flag "analyzer-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_analyzer
+           (Values.UpdateAnalyzerRequest.make
+              ?configuration:(Option.map
+                                ~f:Values.AnalyzerConfiguration.of_json
+                                configuration) ~analyzerName ())
+           (Some Values.UpdateAnalyzerResponse.to_json)
+           (Some Values.UpdateAnalyzerResponse.error_to_json)])
 let update_archive_rule =
   Command.async ~summary:""
     ([%map_open.Command
@@ -590,14 +816,14 @@ let update_archive_rule =
          flag "client-token" (optional string) ~doc:"STRING String"
        and analyzerName =
          flag "analyzer-name" (required string) ~doc:"STRING Name"
+       and ruleName = flag "rule-name" (required string) ~doc:"STRING Name"
        and filter =
-         flag "filter" (required json_arg) ~doc:"JSON FilterCriteriaMap"
-       and ruleName = flag "rule-name" (required string) ~doc:"STRING Name" in
+         flag "filter" (required json_arg) ~doc:"JSON FilterCriteriaMap" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_archive_rule
            (Values.UpdateArchiveRuleRequest.make ?clientToken ~analyzerName
-              ~filter:(Values.FilterCriteriaMap.of_json filter) ~ruleName ())
+              ~ruleName ~filter:(Values.FilterCriteriaMap.of_json filter) ())
            None None])
 let update_findings =
   Command.async ~summary:""
@@ -609,11 +835,11 @@ let update_findings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING String"
        and ids = flag "ids" (optional json_arg) ~doc:"JSON FindingIdList"
        and resourceArn =
          flag "resource-arn" (optional string) ~doc:"STRING ResourceArn"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
        and analyzerArn =
          flag "analyzer-arn" (required string) ~doc:"STRING AnalyzerArn"
        and status =
@@ -621,9 +847,9 @@ let update_findings =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_findings
-           (Values.UpdateFindingsRequest.make ?clientToken
+           (Values.UpdateFindingsRequest.make
               ?ids:(Option.map ~f:Values.FindingIdList.of_json ids)
-              ?resourceArn ~analyzerArn
+              ?resourceArn ?clientToken ~analyzerArn
               ~status:(Values.FindingStatusUpdate.of_json status) ()) None
            None])
 let validate_policy =
@@ -666,16 +892,23 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("apply-archive-rule", apply_archive_rule);
     ("cancel-policy-generation", cancel_policy_generation);
+    ("check-access-not-granted", check_access_not_granted);
+    ("check-no-new-access", check_no_new_access);
+    ("check-no-public-access", check_no_public_access);
     ("create-access-preview", create_access_preview);
     ("create-analyzer", create_analyzer);
     ("create-archive-rule", create_archive_rule);
     ("delete-analyzer", delete_analyzer);
     ("delete-archive-rule", delete_archive_rule);
+    ("generate-finding-recommendation", generate_finding_recommendation);
     ("get-access-preview", get_access_preview);
     ("get-analyzed-resource", get_analyzed_resource);
     ("get-analyzer", get_analyzer);
     ("get-archive-rule", get_archive_rule);
     ("get-finding", get_finding);
+    ("get-finding-recommendation", get_finding_recommendation);
+    ("get-finding-v2", get_finding_v2);
+    ("get-findings-statistics", get_findings_statistics);
     ("get-generated-policy", get_generated_policy);
     ("list-access-preview-findings", list_access_preview_findings);
     ("list-access-previews", list_access_previews);
@@ -683,12 +916,14 @@ let main =
     ("list-analyzers", list_analyzers);
     ("list-archive-rules", list_archive_rules);
     ("list-findings", list_findings);
+    ("list-findings-v2", list_findings_v2);
     ("list-policy-generations", list_policy_generations);
     ("list-tags-for-resource", list_tags_for_resource);
     ("start-policy-generation", start_policy_generation);
     ("start-resource-scan", start_resource_scan);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-analyzer", update_analyzer);
     ("update-archive-rule", update_archive_rule);
     ("update-findings", update_findings);
     ("validate-policy", validate_policy)]

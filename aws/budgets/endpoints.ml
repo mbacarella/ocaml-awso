@@ -51,6 +51,12 @@ type ('i, 'o, 'e) t =
   DescribeSubscribersForNotificationResponse.error) t 
   | ExecuteBudgetAction: (ExecuteBudgetActionRequest.t,
   ExecuteBudgetActionResponse.t, ExecuteBudgetActionResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
   | UpdateBudget: (UpdateBudgetRequest.t, UpdateBudgetResponse.t,
   UpdateBudgetResponse.error) t 
   | UpdateBudgetAction: (UpdateBudgetActionRequest.t,
@@ -80,6 +86,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeNotificationsForBudget -> `POST
   | DescribeSubscribersForNotification -> `POST
   | ExecuteBudgetAction -> `POST
+  | ListTagsForResource -> `POST
+  | TagResource -> `POST
+  | UntagResource -> `POST
   | UpdateBudget -> `POST
   | UpdateBudgetAction -> `POST
   | UpdateNotification -> `POST
@@ -112,6 +121,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeSubscribersForNotification ->
           (Format.kasprintf Uri.of_string) "/"
       | ExecuteBudgetAction -> (Format.kasprintf Uri.of_string) "/"
+      | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateBudget -> (Format.kasprintf Uri.of_string) "/"
       | UpdateBudgetAction -> (Format.kasprintf Uri.of_string) "/"
       | UpdateNotification -> (Format.kasprintf Uri.of_string) "/"
@@ -277,6 +289,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSBudgetServiceGateway.ExecuteBudgetAction")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let json = ListTagsForResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSBudgetServiceGateway.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TagResource ->
+      let json = TagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSBudgetServiceGateway.TagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UntagResource ->
+      let json = UntagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSBudgetServiceGateway.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateBudget ->
       let json = UpdateBudgetRequest.to_json req in
@@ -485,6 +521,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ExecuteBudgetActionResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | TagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateBudget ->
       if is_success
       then

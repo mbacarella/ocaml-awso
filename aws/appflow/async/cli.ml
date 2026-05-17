@@ -28,6 +28,28 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let cancel_flow_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and executionIds =
+         flag "execution-ids" (optional json_arg) ~doc:"JSON ExecutionIds"
+       and flowName =
+         flag "flow-name" (required string) ~doc:"STRING FlowName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_flow_executions
+           (Values.CancelFlowExecutionsRequest.make
+              ?executionIds:(Option.map ~f:Values.ExecutionIds.of_json
+                               executionIds) ~flowName ())
+           (Some Values.CancelFlowExecutionsResponse.to_json)
+           (Some Values.CancelFlowExecutionsResponse.error_to_json)])
 let create_connector_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -42,6 +64,8 @@ let create_connector_profile =
        and connectorLabel =
          flag "connector-label" (optional string)
            ~doc:"STRING ConnectorLabel"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and connectorProfileName =
          flag "connector-profile-name" (required string)
            ~doc:"STRING ConnectorProfileName"
@@ -57,7 +81,7 @@ let create_connector_profile =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_connector_profile
            (Values.CreateConnectorProfileRequest.make ?kmsArn ?connectorLabel
-              ~connectorProfileName
+              ?clientToken ~connectorProfileName
               ~connectorType:(Values.ConnectorType.of_json connectorType)
               ~connectionMode:(Values.ConnectionMode.of_json connectionMode)
               ~connectorProfileConfig:(Values.ConnectorProfileConfig.of_json
@@ -78,6 +102,11 @@ let create_flow =
          flag "description" (optional string) ~doc:"STRING FlowDescription"
        and kmsArn = flag "kms-arn" (optional string) ~doc:"STRING KMSArn"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and metadataCatalogConfig =
+         flag "metadata-catalog-config" (optional json_arg)
+           ~doc:"JSON MetadataCatalogConfig"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and flowName =
          flag "flow-name" (required string) ~doc:"STRING FlowName"
        and triggerConfig =
@@ -93,7 +122,11 @@ let create_flow =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_flow
            (Values.CreateFlowRequest.make ?description ?kmsArn
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~flowName
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?metadataCatalogConfig:(Option.map
+                                        ~f:Values.MetadataCatalogConfig.of_json
+                                        metadataCatalogConfig) ?clientToken
+              ~flowName
               ~triggerConfig:(Values.TriggerConfig.of_json triggerConfig)
               ~sourceFlowConfig:(Values.SourceFlowConfig.of_json
                                    sourceFlowConfig)
@@ -312,13 +345,18 @@ let list_connector_entities =
        and entitiesPath =
          flag "entities-path" (optional string) ~doc:"STRING EntitiesPath"
        and apiVersion =
-         flag "api-version" (optional string) ~doc:"STRING ApiVersion" in
+         flag "api-version" (optional string) ~doc:"STRING ApiVersion"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListEntitiesMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_connector_entities
            (Values.ListConnectorEntitiesRequest.make ?connectorProfileName
               ?connectorType:(Option.map ~f:Values.ConnectorType.of_json
-                                connectorType) ?entitiesPath ?apiVersion ())
+                                connectorType) ?entitiesPath ?apiVersion
+              ?maxResults ?nextToken ())
            (Some Values.ListConnectorEntitiesResponse.to_json)
            (Some Values.ListConnectorEntitiesResponse.error_to_json)])
 let list_connectors =
@@ -399,7 +437,9 @@ let register_connector =
            ~doc:"JSON ConnectorProvisioningType"
        and connectorProvisioningConfig =
          flag "connector-provisioning-config" (optional json_arg)
-           ~doc:"JSON ConnectorProvisioningConfig" in
+           ~doc:"JSON ConnectorProvisioningConfig"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.register_connector
@@ -409,9 +449,42 @@ let register_connector =
                                             connectorProvisioningType)
               ?connectorProvisioningConfig:(Option.map
                                               ~f:Values.ConnectorProvisioningConfig.of_json
-                                              connectorProvisioningConfig) ())
+                                              connectorProvisioningConfig)
+              ?clientToken ())
            (Some Values.RegisterConnectorResponse.to_json)
            (Some Values.RegisterConnectorResponse.error_to_json)])
+let reset_connector_metadata_cache =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectorProfileName =
+         flag "connector-profile-name" (optional string)
+           ~doc:"STRING ConnectorProfileName"
+       and connectorType =
+         flag "connector-type" (optional json_arg) ~doc:"JSON ConnectorType"
+       and connectorEntityName =
+         flag "connector-entity-name" (optional string)
+           ~doc:"STRING EntityName"
+       and entitiesPath =
+         flag "entities-path" (optional string) ~doc:"STRING EntitiesPath"
+       and apiVersion =
+         flag "api-version" (optional string) ~doc:"STRING ApiVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reset_connector_metadata_cache
+           (Values.ResetConnectorMetadataCacheRequest.make
+              ?connectorProfileName
+              ?connectorType:(Option.map ~f:Values.ConnectorType.of_json
+                                connectorType) ?connectorEntityName
+              ?entitiesPath ?apiVersion ())
+           (Some Values.ResetConnectorMetadataCacheResponse.to_json)
+           (Some Values.ResetConnectorMetadataCacheResponse.error_to_json)])
 let start_flow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -422,11 +495,14 @@ let start_flow =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and flowName =
          flag "flow-name" (required string) ~doc:"STRING FlowName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.start_flow (Values.StartFlowRequest.make ~flowName ())
+           Io.start_flow
+           (Values.StartFlowRequest.make ?clientToken ~flowName ())
            (Some Values.StartFlowResponse.to_json)
            (Some Values.StartFlowResponse.error_to_json)])
 let stop_flow =
@@ -519,6 +595,8 @@ let update_connector_profile =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and connectorProfileName =
          flag "connector-profile-name" (required string)
            ~doc:"STRING ConnectorProfileName"
@@ -531,12 +609,43 @@ let update_connector_profile =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_connector_profile
-           (Values.UpdateConnectorProfileRequest.make ~connectorProfileName
+           (Values.UpdateConnectorProfileRequest.make ?clientToken
+              ~connectorProfileName
               ~connectionMode:(Values.ConnectionMode.of_json connectionMode)
               ~connectorProfileConfig:(Values.ConnectorProfileConfig.of_json
                                          connectorProfileConfig) ())
            (Some Values.UpdateConnectorProfileResponse.to_json)
            (Some Values.UpdateConnectorProfileResponse.error_to_json)])
+let update_connector_registration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and connectorProvisioningConfig =
+         flag "connector-provisioning-config" (optional json_arg)
+           ~doc:"JSON ConnectorProvisioningConfig"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and connectorLabel =
+         flag "connector-label" (required string)
+           ~doc:"STRING ConnectorLabel" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_connector_registration
+           (Values.UpdateConnectorRegistrationRequest.make ?description
+              ?connectorProvisioningConfig:(Option.map
+                                              ~f:Values.ConnectorProvisioningConfig.of_json
+                                              connectorProvisioningConfig)
+              ?clientToken ~connectorLabel ())
+           (Some Values.UpdateConnectorRegistrationResponse.to_json)
+           (Some Values.UpdateConnectorRegistrationResponse.error_to_json)])
 let update_flow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -549,6 +658,11 @@ let update_flow =
            ~doc:"URL override endpoint url"
        and description =
          flag "description" (optional string) ~doc:"STRING FlowDescription"
+       and metadataCatalogConfig =
+         flag "metadata-catalog-config" (optional json_arg)
+           ~doc:"JSON MetadataCatalogConfig"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and flowName =
          flag "flow-name" (required string) ~doc:"STRING FlowName"
        and triggerConfig =
@@ -563,7 +677,11 @@ let update_flow =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_flow
-           (Values.UpdateFlowRequest.make ?description ~flowName
+           (Values.UpdateFlowRequest.make ?description
+              ?metadataCatalogConfig:(Option.map
+                                        ~f:Values.MetadataCatalogConfig.of_json
+                                        metadataCatalogConfig) ?clientToken
+              ~flowName
               ~triggerConfig:(Values.TriggerConfig.of_json triggerConfig)
               ~sourceFlowConfig:(Values.SourceFlowConfig.of_json
                                    sourceFlowConfig)
@@ -575,7 +693,8 @@ let update_flow =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-connector-profile", create_connector_profile);
+    [("cancel-flow-executions", cancel_flow_executions);
+    ("create-connector-profile", create_connector_profile);
     ("create-flow", create_flow);
     ("delete-connector-profile", delete_connector_profile);
     ("delete-flow", delete_flow);
@@ -590,10 +709,12 @@ let main =
     ("list-flows", list_flows);
     ("list-tags-for-resource", list_tags_for_resource);
     ("register-connector", register_connector);
+    ("reset-connector-metadata-cache", reset_connector_metadata_cache);
     ("start-flow", start_flow);
     ("stop-flow", stop_flow);
     ("tag-resource", tag_resource);
     ("unregister-connector", unregister_connector);
     ("untag-resource", untag_resource);
     ("update-connector-profile", update_connector_profile);
+    ("update-connector-registration", update_connector_registration);
     ("update-flow", update_flow)]

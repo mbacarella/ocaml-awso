@@ -136,6 +136,33 @@ let open_tunnel =
                                 timeoutConfig) ())
            (Some Values.OpenTunnelResponse.to_json)
            (Some Values.OpenTunnelResponse.error_to_json)])
+let rotate_tunnel_access_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationConfig =
+         flag "destination-config" (optional json_arg)
+           ~doc:"JSON DestinationConfig"
+       and tunnelId =
+         flag "tunnel-id" (required string) ~doc:"STRING TunnelId"
+       and clientMode =
+         flag "client-mode" (required json_arg) ~doc:"JSON ClientMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.rotate_tunnel_access_token
+           (Values.RotateTunnelAccessTokenRequest.make
+              ?destinationConfig:(Option.map
+                                    ~f:Values.DestinationConfig.of_json
+                                    destinationConfig) ~tunnelId
+              ~clientMode:(Values.ClientMode.of_json clientMode) ())
+           (Some Values.RotateTunnelAccessTokenResponse.to_json)
+           (Some Values.RotateTunnelAccessTokenResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -187,5 +214,6 @@ let main =
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-tunnels", list_tunnels);
     ("open-tunnel", open_tunnel);
+    ("rotate-tunnel-access-token", rotate_tunnel_access_token);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource)]

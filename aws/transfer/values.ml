@@ -32,10 +32,12 @@ module EfsFileSystemId =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:128) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
-                check_pattern i
-                  ~pattern:"^(arn:aws[-a-z]*:elasticfilesystem:[0-9a-z-:]+:(access-point/fsap|file-system/fs)-[0-9a-f]{8,40}|fs(ap)?-[0-9a-f]{8,40})$"));
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(arn:aws[-a-z]*:elasticfilesystem:[0-9a-z-:]+:(access-point/fsap|file-system/fs)-[0-9a-f]{8,40}|fs(ap)?-[0-9a-f]{8,40})")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -55,7 +57,7 @@ module EfsPath =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:65536) >>=
-                  (fun () -> check_pattern i ~pattern:"^[^\\x00]+$")));
+                  (fun () -> check_pattern i ~pattern:"[^\\x00]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -77,7 +79,7 @@ module S3Bucket =
                 (check_string_max i ~max:63) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]$")));
+                       ~pattern:"[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -94,8 +96,10 @@ module S3Key =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_pattern i ~pattern:"[\\P{M}\\p{M}]*"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\P{M}\\p{M}]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -117,7 +121,7 @@ module S3TagKey =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -134,10 +138,12 @@ module S3TagValue =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
-                check_pattern i
-                  ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"));
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -152,7 +158,8 @@ module EfsFileLocation =
     type nonrec t =
       {
       fileSystemId: EfsFileSystemId.t option
-        [@ocaml.doc "The ID of the file system, assigned by Amazon EFS."];
+        [@ocaml.doc
+          "The identifier of the file system, assigned by Amazon EFS."];
       path: EfsPath.t option
         [@ocaml.doc "The pathname for the folder being used by a workflow."]}
     let make ?fileSystemId = fun ?path -> fun () -> { fileSystemId; path }
@@ -169,13 +176,14 @@ module EfsFileLocation =
           (Xml.child xml_arg0 "FileSystemId") in
       make ?path ?fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map json "Path" EfsPath.of_json in
+    let of_json json__ =
+      let path = field_map json__ "Path" EfsPath.of_json in
       let fileSystemId =
-        field_map json "FileSystemId" EfsFileSystemId.of_json in
+        field_map json__ "FileSystemId" EfsFileSystemId.of_json in
       make ?path ?fileSystemId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Reserved for future use."]
+  end[@@ocaml.doc
+       "Specifies the details for the file location for the file that's being used in the workflow. Only applicable if you are using Amazon Elastic File Systems (Amazon EFS) for storage."]
 module S3InputFileLocation =
   struct
     type nonrec t =
@@ -184,7 +192,7 @@ module S3InputFileLocation =
         [@ocaml.doc "Specifies the S3 bucket for the customer input file."];
       key: S3Key.t option
         [@ocaml.doc
-          "The name assigned to the file when it was created in S3. You use the object key to retrieve the object."]}
+          "The name assigned to the file when it was created in Amazon S3. You use the object key to retrieve the object."]}
     let make ?bucket = fun ?key -> fun () -> { bucket; key }
     let to_value x =
       structure_to_value
@@ -197,13 +205,13 @@ module S3InputFileLocation =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?key ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map json "Key" S3Key.of_json in
-      let bucket = field_map json "Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let key = field_map json__ "Key" S3Key.of_json in
+      let bucket = field_map json__ "Bucket" S3Bucket.of_json in
       make ?key ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the customer input S3 file location. If it is used inside copyStepDetails.DestinationFileLocation, it should be the S3 copy destination. You need to provide the bucket and key. The key can represent either a path or a file. This is determined by whether or not you end the key value with the forward slash (/) character. If the final character is \"/\", then your file is copied to the folder, and its name does not change. If, rather, the final character is alphanumeric, your uploaded file is renamed to the path value. In this case, if a file with that name already exists, it is overwritten. For example, if your path is shared-files/bob/, your uploaded files are copied to the shared-files/bob/, folder. If your path is shared-files/today, each uploaded file is copied to the shared-files folder and named today: each upload overwrites the previous version of the bob file."]
+       "Specifies the customer input Amazon S3 file location. If it is used inside copyStepDetails.DestinationFileLocation, it should be the S3 copy destination. You need to provide the bucket and key. The key can represent either a path or a file. This is determined by whether or not you end the key value with the forward slash (/) character. If the final character is \"/\", then your file is copied to the folder, and its name does not change. If, rather, the final character is alphanumeric, your uploaded file is renamed to the path value. In this case, if a file with that name already exists, it is overwritten. For example, if your path is shared-files/bob/, your uploaded files are copied to the shared-files/bob/, folder. If your path is shared-files/today, each uploaded file is copied to the shared-files folder and named today: each upload overwrites the previous version of the bob file."]
 module S3Tag =
   struct
     type nonrec t =
@@ -226,9 +234,9 @@ module S3Tag =
         S3TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" S3TagValue.of_json in
-      let key = field_map_exn json "Key" S3TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" S3TagValue.of_json in
+      let key = field_map_exn json__ "Key" S3TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -300,7 +308,7 @@ module S3Etag =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:65536) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -320,7 +328,7 @@ module S3VersionId =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -340,7 +348,7 @@ module ServerId =
           ((check_string_min i ~min:19) >>=
              (fun () ->
                 (check_string_max i ~max:19) >>=
-                  (fun () -> check_pattern i ~pattern:"^s-([0-9a-f]{17})$")));
+                  (fun () -> check_pattern i ~pattern:"s-([0-9a-f]{17})")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -360,7 +368,7 @@ module SessionId =
           ((check_string_min i ~min:3) >>=
              (fun () ->
                 (check_string_max i ~max:32) >>=
-                  (fun () -> check_pattern i ~pattern:"^[\\w-]*$")));
+                  (fun () -> check_pattern i ~pattern:"[\\w-]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -380,7 +388,7 @@ module UserName =
           ((check_string_min i ~min:3) >>=
              (fun () ->
                 (check_string_max i ~max:100) >>=
-                  (fun () -> check_pattern i ~pattern:"^[\\w][\\w@.-]{2,99}$")));
+                  (fun () -> check_pattern i ~pattern:"[\\w][\\w@.-]{2,99}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -395,9 +403,11 @@ module InputFileLocation =
     type nonrec t =
       {
       s3FileLocation: S3InputFileLocation.t option
-        [@ocaml.doc "Specifies the details for the S3 file being copied."];
+        [@ocaml.doc
+          "Specifies the details for the Amazon S3 file that's being copied or decrypted."];
       efsFileLocation: EfsFileLocation.t option
-        [@ocaml.doc "Reserved for future use."]}
+        [@ocaml.doc
+          "Specifies the details for the Amazon Elastic File System (Amazon EFS) file that's being decrypted."]}
     let make ?s3FileLocation =
       fun ?efsFileLocation -> fun () -> { s3FileLocation; efsFileLocation }
     let to_value x =
@@ -416,15 +426,15 @@ module InputFileLocation =
           (Xml.child xml_arg0 "S3FileLocation") in
       make ?efsFileLocation ?s3FileLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let efsFileLocation =
-        field_map json "EfsFileLocation" EfsFileLocation.of_json in
+        field_map json__ "EfsFileLocation" EfsFileLocation.of_json in
       let s3FileLocation =
-        field_map json "S3FileLocation" S3InputFileLocation.of_json in
+        field_map json__ "S3FileLocation" S3InputFileLocation.of_json in
       make ?efsFileLocation ?s3FileLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the location for the file being copied. Only applicable for the Copy type of workflow steps."]
+       "Specifies the location for the file that's being processed."]
 module OverwriteExisting =
   struct
     type nonrec t =
@@ -452,8 +462,10 @@ module SourceFileLocation =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_pattern i ~pattern:"^\\$\\{(\\w+.)+\\w+\\}$"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"\\$\\{(\\w+.)+\\w+\\}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -470,8 +482,10 @@ module WorkflowStepName =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:30) >>=
-             (fun () -> check_pattern i ~pattern:"^[\\w-]*$"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:30) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w-]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -488,8 +502,10 @@ module CustomStepTarget =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:170) >>=
-             (fun () -> check_pattern i ~pattern:"arn:[a-z-]+:lambda:.*$"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:170) >>=
+                  (fun () -> check_pattern i ~pattern:"arn:[a-z-]+:lambda:.*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -518,6 +534,22 @@ module CustomStepTimeoutSeconds =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module EncryptionType =
+  struct
+    type nonrec t =
+      | PGP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | PGP -> "PGP" | Non_static_id s -> s
+    let of_string = function | "PGP" -> PGP | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EncryptionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EncryptionType" j)
+    let to_json = simple_to_json to_value
+  end
 module S3Tags =
   struct
     type nonrec t = S3Tag.t list
@@ -526,6 +558,9 @@ module S3Tags =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:S3Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -545,6 +580,19 @@ module S3Tags =
     let of_json j = list_of_json ~kind:"S3Tags" ~of_json:S3Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SubnetId =
+  struct
+    type nonrec t = string
+    let context_ = "SubnetId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubnetId" j
+    let to_json = simple_to_json to_value
+  end
 module Role =
   struct
     type nonrec t = string
@@ -555,7 +603,7 @@ module Role =
           ((check_string_min i ~min:20) >>=
              (fun () ->
                 (check_string_max i ~max:2048) >>=
-                  (fun () -> check_pattern i ~pattern:"arn:.*role/.*")));
+                  (fun () -> check_pattern i ~pattern:"arn:.*role/\\S+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -575,7 +623,7 @@ module WorkflowId =
           ((check_string_min i ~min:19) >>=
              (fun () ->
                 (check_string_max i ~max:19) >>=
-                  (fun () -> check_pattern i ~pattern:"^w-([a-z0-9]{17})$")));
+                  (fun () -> check_pattern i ~pattern:"w-([a-z0-9]{17})")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -589,33 +637,30 @@ module ExecutionError =
   struct
     type nonrec t =
       {
-      type_: ExecutionErrorType.t
+      type_: ExecutionErrorType.t option
         [@ocaml.doc
           "Specifies the error type. ALREADY_EXISTS: occurs for a copy step, if the overwrite option is not selected and a file with the same name already exists in the target location. BAD_REQUEST: a general bad request: for example, a step that attempts to tag an EFS file returns BAD_REQUEST, as only S3 files can be tagged. CUSTOM_STEP_FAILED: occurs when the custom step provided a callback that indicates failure. INTERNAL_SERVER_ERROR: a catch-all error that can occur for a variety of reasons. NOT_FOUND: occurs when a requested entity, for example a source file for a copy step, does not exist. PERMISSION_DENIED: occurs if your policy does not contain the correct permissions to complete one or more of the steps in the workflow. TIMEOUT: occurs when the execution times out. You can set the TimeoutSeconds for a custom step, anywhere from 1 second to 1800 seconds (30 minutes). THROTTLED: occurs if you exceed the new execution refill rate of one workflow per second."];
-      message: ExecutionErrorMessage.t
+      message: ExecutionErrorMessage.t option
         [@ocaml.doc
           "Specifies the descriptive message that corresponds to the ErrorType."]}
-    let context_ = "ExecutionError"
-    let make ~type_ = fun ~message -> fun () -> { type_; message }
+    let make ?type_ = fun ?message -> fun () -> { type_; message }
     let to_value x =
       structure_to_value
-        [("Type", (Some (ExecutionErrorType.to_value x.type_)));
-        ("Message", (Some (ExecutionErrorMessage.to_value x.message)))]
+        [("Type", (Option.map x.type_ ~f:ExecutionErrorType.to_value));
+        ("Message", (Option.map x.message ~f:ExecutionErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExecutionErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:ExecutionErrorMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
       let type_ =
-        ExecutionErrorType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ~message ~type_ ()
+        (Option.map ~f:ExecutionErrorType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?message ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message =
-        field_map_exn json "Message" ExecutionErrorMessage.of_json in
-      let type_ = field_map_exn json "Type" ExecutionErrorType.of_json in
-      make ~message ~type_ ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ExecutionErrorMessage.of_json in
+      let type_ = field_map json__ "Type" ExecutionErrorType.of_json in
+      make ?message ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the error message and type, for an error that occurs during the execution of the workflow."]
@@ -624,7 +669,11 @@ module StepResultOutputsJson =
     type nonrec t = string
     let context_ = "StepResultOutputsJson"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:65536); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:65536) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -640,6 +689,7 @@ module WorkflowStepType =
       | CUSTOM 
       | TAG 
       | DELETE 
+      | DECRYPT 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -648,6 +698,7 @@ module WorkflowStepType =
       | CUSTOM -> "CUSTOM"
       | TAG -> "TAG"
       | DELETE -> "DELETE"
+      | DECRYPT -> "DECRYPT"
       | Non_static_id s -> s
     let of_string =
       function
@@ -655,6 +706,7 @@ module WorkflowStepType =
       | "CUSTOM" -> CUSTOM
       | "TAG" -> TAG
       | "DELETE" -> DELETE
+      | "DECRYPT" -> DECRYPT
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -673,7 +725,7 @@ module S3FileLocation =
           "Specifies the S3 bucket that contains the file being used."];
       key: S3Key.t option
         [@ocaml.doc
-          "The name assigned to the file when it was created in S3. You use the object key to retrieve the object."];
+          "The name assigned to the file when it was created in Amazon S3. You use the object key to retrieve the object."];
       versionId: S3VersionId.t option
         [@ocaml.doc "Specifies the file version."];
       etag: S3Etag.t option
@@ -699,52 +751,51 @@ module S3FileLocation =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?etag ?versionId ?key ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let etag = field_map json "Etag" S3Etag.of_json in
-      let versionId = field_map json "VersionId" S3VersionId.of_json in
-      let key = field_map json "Key" S3Key.of_json in
-      let bucket = field_map json "Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let etag = field_map json__ "Etag" S3Etag.of_json in
+      let versionId = field_map json__ "VersionId" S3VersionId.of_json in
+      let key = field_map json__ "Key" S3Key.of_json in
+      let bucket = field_map json__ "Bucket" S3Bucket.of_json in
       make ?etag ?versionId ?key ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the details for the file location for the file being used in the workflow. Only applicable if you are using S3 storage."]
+       "Specifies the details for the file location for the file that's being used in the workflow. Only applicable if you are using S3 storage."]
 module UserDetails =
   struct
     type nonrec t =
       {
-      userName: UserName.t
+      userName: UserName.t option
         [@ocaml.doc
-          "A unique string that identifies a user account associated with a server."];
-      serverId: ServerId.t
+          "A unique string that identifies a Transfer Family user associated with a server."];
+      serverId: ServerId.t option
         [@ocaml.doc
           "The system-assigned unique identifier for a Transfer server instance."];
       sessionId: SessionId.t option
         [@ocaml.doc
           "The system-assigned unique identifier for a session that corresponds to the workflow."]}
-    let context_ = "UserDetails"
-    let make ?sessionId =
-      fun ~userName ->
-        fun ~serverId -> fun () -> { sessionId; userName; serverId }
+    let make ?userName =
+      fun ?serverId ->
+        fun ?sessionId -> fun () -> { userName; serverId; sessionId }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserName.to_value x.userName)));
-        ("ServerId", (Some (ServerId.to_value x.serverId)));
+        [("UserName", (Option.map x.userName ~f:UserName.to_value));
+        ("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
         ("SessionId", (Option.map x.sessionId ~f:SessionId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sessionId =
         (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
       let userName =
-        UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ?sessionId ~serverId ~userName ()
+        (Option.map ~f:UserName.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?sessionId ?serverId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionId = field_map json "SessionId" SessionId.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      make ?sessionId ~serverId ~userName ()
+    let of_json json__ =
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      let userName = field_map json__ "UserName" UserName.of_json in
+      make ?sessionId ?serverId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the user name, server ID, and session ID for a workflow."]
@@ -753,7 +804,11 @@ module TagKey =
     type nonrec t = string
     let context_ = "TagKey"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:128); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -767,7 +822,11 @@ module TagValue =
     type nonrec t = string
     let context_ = "TagValue"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -784,13 +843,13 @@ module CopyStepDetails =
         [@ocaml.doc "The name of the step, used as an identifier."];
       destinationFileLocation: InputFileLocation.t option
         [@ocaml.doc
-          "Specifies the location for the file being copied. Only applicable for Copy type workflow steps. Use $\\{Transfer:username\\} in this field to parametrize the destination prefix by username."];
+          "Specifies the location for the file being copied. Use $\\{Transfer:UserName\\} or $\\{Transfer:UploadDate\\} in this field to parametrize the destination prefix by username or uploaded date. Set the value of DestinationFileLocation to $\\{Transfer:UserName\\} to copy uploaded files to an Amazon S3 bucket that is prefixed with the name of the Transfer Family user that uploaded the file. Set the value of DestinationFileLocation to $\\{Transfer:UploadDate\\} to copy uploaded files to an Amazon S3 bucket that is prefixed with the date of the upload. The system resolves UploadDate to a date format of YYYY-MM-DD, based on the date the file is uploaded in UTC."];
       overwriteExisting: OverwriteExisting.t option
         [@ocaml.doc
-          "A flag that indicates whether or not to overwrite an existing file of the same name. The default is FALSE."];
+          "A flag that indicates whether to overwrite an existing file of the same name. The default is FALSE. If the workflow is processing a file that has the same name as an existing file, the behavior is as follows: If OverwriteExisting is TRUE, the existing file is replaced with the file being processed. If OverwriteExisting is FALSE, nothing happens, and the workflow processing stops."];
       sourceFileLocation: SourceFileLocation.t option
         [@ocaml.doc
-          "Specifies which file to use as input to the workflow step: either the output from the previous step, or the originally uploaded file for the workflow. Enter $\\{previous.file\\} to use the previous file as the input. In this case, this workflow step uses the output file from the previous workflow step as input. This is the default value. Enter $\\{original.file\\} to use the originally-uploaded file location as input for this step."]}
+          "Specifies which file to use as input to the workflow step: either the output from the previous step, or the originally uploaded file for the workflow. To use the previous file as the input, enter $\\{previous.file\\}. In this case, this workflow step uses the output file from the previous workflow step as input. This is the default value. To use the originally uploaded file location as input for this step, enter $\\{original.file\\}."]}
     let make ?name =
       fun ?destinationFileLocation ->
         fun ?overwriteExisting ->
@@ -827,14 +886,14 @@ module CopyStepDetails =
       make ?sourceFileLocation ?overwriteExisting ?destinationFileLocation
         ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceFileLocation =
-        field_map json "SourceFileLocation" SourceFileLocation.of_json in
+        field_map json__ "SourceFileLocation" SourceFileLocation.of_json in
       let overwriteExisting =
-        field_map json "OverwriteExisting" OverwriteExisting.of_json in
+        field_map json__ "OverwriteExisting" OverwriteExisting.of_json in
       let destinationFileLocation =
-        field_map json "DestinationFileLocation" InputFileLocation.of_json in
-      let name = field_map json "Name" WorkflowStepName.of_json in
+        field_map json__ "DestinationFileLocation" InputFileLocation.of_json in
+      let name = field_map json__ "Name" WorkflowStepName.of_json in
       make ?sourceFileLocation ?overwriteExisting ?destinationFileLocation
         ?name ()
     let to_json v = composed_to_json to_value v
@@ -846,12 +905,12 @@ module CustomStepDetails =
       name: WorkflowStepName.t option
         [@ocaml.doc "The name of the step, used as an identifier."];
       target: CustomStepTarget.t option
-        [@ocaml.doc "The ARN for the lambda function that is being called."];
+        [@ocaml.doc "The ARN for the Lambda function that is being called."];
       timeoutSeconds: CustomStepTimeoutSeconds.t option
         [@ocaml.doc "Timeout, in seconds, for the step."];
       sourceFileLocation: SourceFileLocation.t option
         [@ocaml.doc
-          "Specifies which file to use as input to the workflow step: either the output from the previous step, or the originally uploaded file for the workflow. Enter $\\{previous.file\\} to use the previous file as the input. In this case, this workflow step uses the output file from the previous workflow step as input. This is the default value. Enter $\\{original.file\\} to use the originally-uploaded file location as input for this step."]}
+          "Specifies which file to use as input to the workflow step: either the output from the previous step, or the originally uploaded file for the workflow. To use the previous file as the input, enter $\\{previous.file\\}. In this case, this workflow step uses the output file from the previous workflow step as input. This is the default value. To use the originally uploaded file location as input for this step, enter $\\{original.file\\}."]}
     let make ?name =
       fun ?target ->
         fun ?timeoutSeconds ->
@@ -879,14 +938,89 @@ module CustomStepDetails =
         (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?sourceFileLocation ?timeoutSeconds ?target ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceFileLocation =
-        field_map json "SourceFileLocation" SourceFileLocation.of_json in
+        field_map json__ "SourceFileLocation" SourceFileLocation.of_json in
       let timeoutSeconds =
-        field_map json "TimeoutSeconds" CustomStepTimeoutSeconds.of_json in
-      let target = field_map json "Target" CustomStepTarget.of_json in
-      let name = field_map json "Name" WorkflowStepName.of_json in
+        field_map json__ "TimeoutSeconds" CustomStepTimeoutSeconds.of_json in
+      let target = field_map json__ "Target" CustomStepTarget.of_json in
+      let name = field_map json__ "Name" WorkflowStepName.of_json in
       make ?sourceFileLocation ?timeoutSeconds ?target ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Each step type has its own StepDetails structure."]
+module DecryptStepDetails =
+  struct
+    type nonrec t =
+      {
+      name: WorkflowStepName.t option
+        [@ocaml.doc "The name of the step, used as an identifier."];
+      type_: EncryptionType.t
+        [@ocaml.doc
+          "The type of encryption used. Currently, this value must be PGP."];
+      sourceFileLocation: SourceFileLocation.t option
+        [@ocaml.doc
+          "Specifies which file to use as input to the workflow step: either the output from the previous step, or the originally uploaded file for the workflow. To use the previous file as the input, enter $\\{previous.file\\}. In this case, this workflow step uses the output file from the previous workflow step as input. This is the default value. To use the originally uploaded file location as input for this step, enter $\\{original.file\\}."];
+      overwriteExisting: OverwriteExisting.t option
+        [@ocaml.doc
+          "A flag that indicates whether to overwrite an existing file of the same name. The default is FALSE. If the workflow is processing a file that has the same name as an existing file, the behavior is as follows: If OverwriteExisting is TRUE, the existing file is replaced with the file being processed. If OverwriteExisting is FALSE, nothing happens, and the workflow processing stops."];
+      destinationFileLocation: InputFileLocation.t
+        [@ocaml.doc
+          "Specifies the location for the file being decrypted. Use $\\{Transfer:UserName\\} or $\\{Transfer:UploadDate\\} in this field to parametrize the destination prefix by username or uploaded date. Set the value of DestinationFileLocation to $\\{Transfer:UserName\\} to decrypt uploaded files to an Amazon S3 bucket that is prefixed with the name of the Transfer Family user that uploaded the file. Set the value of DestinationFileLocation to $\\{Transfer:UploadDate\\} to decrypt uploaded files to an Amazon S3 bucket that is prefixed with the date of the upload. The system resolves UploadDate to a date format of YYYY-MM-DD, based on the date the file is uploaded in UTC."]}
+    let context_ = "DecryptStepDetails"
+    let make ?name =
+      fun ?sourceFileLocation ->
+        fun ?overwriteExisting ->
+          fun ~type_ ->
+            fun ~destinationFileLocation ->
+              fun () ->
+                {
+                  name;
+                  sourceFileLocation;
+                  overwriteExisting;
+                  type_;
+                  destinationFileLocation
+                }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:WorkflowStepName.to_value));
+        ("Type", (Some (EncryptionType.to_value x.type_)));
+        ("SourceFileLocation",
+          (Option.map x.sourceFileLocation ~f:SourceFileLocation.to_value));
+        ("OverwriteExisting",
+          (Option.map x.overwriteExisting ~f:OverwriteExisting.to_value));
+        ("DestinationFileLocation",
+          (Some (InputFileLocation.to_value x.destinationFileLocation)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationFileLocation =
+        InputFileLocation.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationFileLocation") in
+      let overwriteExisting =
+        (Option.map ~f:OverwriteExisting.of_xml)
+          (Xml.child xml_arg0 "OverwriteExisting") in
+      let sourceFileLocation =
+        (Option.map ~f:SourceFileLocation.of_xml)
+          (Xml.child xml_arg0 "SourceFileLocation") in
+      let type_ =
+        EncryptionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      let name =
+        (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ~destinationFileLocation ?overwriteExisting ?sourceFileLocation
+        ~type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationFileLocation =
+        field_map_exn json__ "DestinationFileLocation"
+          InputFileLocation.of_json in
+      let overwriteExisting =
+        field_map json__ "OverwriteExisting" OverwriteExisting.of_json in
+      let sourceFileLocation =
+        field_map json__ "SourceFileLocation" SourceFileLocation.of_json in
+      let type_ = field_map_exn json__ "Type" EncryptionType.of_json in
+      let name = field_map json__ "Name" WorkflowStepName.of_json in
+      make ~destinationFileLocation ?overwriteExisting ?sourceFileLocation
+        ~type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Each step type has its own StepDetails structure."]
 module DeleteStepDetails =
@@ -897,7 +1031,7 @@ module DeleteStepDetails =
         [@ocaml.doc "The name of the step, used as an identifier."];
       sourceFileLocation: SourceFileLocation.t option
         [@ocaml.doc
-          "Specifies which file to use as input to the workflow step: either the output from the previous step, or the originally uploaded file for the workflow. Enter $\\{previous.file\\} to use the previous file as the input. In this case, this workflow step uses the output file from the previous workflow step as input. This is the default value. Enter $\\{original.file\\} to use the originally-uploaded file location as input for this step."]}
+          "Specifies which file to use as input to the workflow step: either the output from the previous step, or the originally uploaded file for the workflow. To use the previous file as the input, enter $\\{previous.file\\}. In this case, this workflow step uses the output file from the previous workflow step as input. This is the default value. To use the originally uploaded file location as input for this step, enter $\\{original.file\\}."]}
     let make ?name =
       fun ?sourceFileLocation -> fun () -> { name; sourceFileLocation }
     let to_value x =
@@ -914,10 +1048,10 @@ module DeleteStepDetails =
         (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?sourceFileLocation ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceFileLocation =
-        field_map json "SourceFileLocation" SourceFileLocation.of_json in
-      let name = field_map json "Name" WorkflowStepName.of_json in
+        field_map json__ "SourceFileLocation" SourceFileLocation.of_json in
+      let name = field_map json__ "Name" WorkflowStepName.of_json in
       make ?sourceFileLocation ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The name of the step, used to identify the delete step."]
@@ -931,7 +1065,7 @@ module TagStepDetails =
         [@ocaml.doc "Array that contains from 1 to 10 key/value pairs."];
       sourceFileLocation: SourceFileLocation.t option
         [@ocaml.doc
-          "Specifies which file to use as input to the workflow step: either the output from the previous step, or the originally uploaded file for the workflow. Enter $\\{previous.file\\} to use the previous file as the input. In this case, this workflow step uses the output file from the previous workflow step as input. This is the default value. Enter $\\{original.file\\} to use the originally-uploaded file location as input for this step."]}
+          "Specifies which file to use as input to the workflow step: either the output from the previous step, or the originally uploaded file for the workflow. To use the previous file as the input, enter $\\{previous.file\\}. In this case, this workflow step uses the output file from the previous workflow step as input. This is the default value. To use the originally uploaded file location as input for this step, enter $\\{original.file\\}."]}
     let make ?name =
       fun ?tags ->
         fun ?sourceFileLocation ->
@@ -952,15 +1086,119 @@ module TagStepDetails =
         (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?sourceFileLocation ?tags ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceFileLocation =
-        field_map json "SourceFileLocation" SourceFileLocation.of_json in
-      let tags = field_map json "Tags" S3Tags.of_json in
-      let name = field_map json "Name" WorkflowStepName.of_json in
+        field_map json__ "SourceFileLocation" SourceFileLocation.of_json in
+      let tags = field_map json__ "Tags" S3Tags.of_json in
+      let name = field_map json__ "Name" WorkflowStepName.of_json in
       make ?sourceFileLocation ?tags ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Each step type has its own StepDetails structure. The key/value pairs used to tag a file during the execution of a workflow step."]
+module SubnetIds =
+  struct
+    type nonrec t = SubnetId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SubnetId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubnetIds" ~of_json:SubnetId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VpcEndpointId =
+  struct
+    type nonrec t = string
+    let context_ = "VpcEndpointId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:22) >>=
+             (fun () ->
+                (check_string_max i ~max:22) >>=
+                  (fun () -> check_pattern i ~pattern:"vpce-[0-9a-f]{17}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcEndpointId" j
+    let to_json = simple_to_json to_value
+  end
+module VpcId =
+  struct
+    type nonrec t = string
+    let context_ = "VpcId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcId" j
+    let to_json = simple_to_json to_value
+  end
+module IdentityCenterApplicationArn =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityCenterApplicationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:10) >>=
+             (fun () ->
+                (check_string_max i ~max:1224) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[\\w-]+:sso::\\d{12}:application/(sso)?ins-[a-zA-Z0-9-.]{16}/apl-[a-zA-Z0-9]{16}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityCenterApplicationArn" j
+    let to_json = simple_to_json to_value
+  end
+module IdentityCenterInstanceArn =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityCenterInstanceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:10) >>=
+             (fun () ->
+                (check_string_max i ~max:1224) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[\\w-]+:sso:::instance/(sso)?ins-[a-zA-Z0-9-.]{16}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityCenterInstanceArn" j
+    let to_json = simple_to_json to_value
+  end
 module MapEntry =
   struct
     type nonrec t = string
@@ -968,8 +1206,10 @@ module MapEntry =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_pattern i ~pattern:"^/.*"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"/.*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -986,8 +1226,10 @@ module MapTarget =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_pattern i ~pattern:"^/.*"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"/.*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -995,6 +1237,31 @@ module MapTarget =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"MapTarget" j
+    let to_json = simple_to_json to_value
+  end
+module MapType =
+  struct
+    type nonrec t =
+      | FILE 
+      | DIRECTORY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FILE -> "FILE"
+      | DIRECTORY -> "DIRECTORY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FILE" -> FILE
+      | "DIRECTORY" -> DIRECTORY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MapType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MapType" j)
     let to_json = simple_to_json to_value
   end
 module PosixId =
@@ -1034,10 +1301,12 @@ module SshPublicKeyBody =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
-                check_pattern i
-                  ~pattern:"^ssh-rsa\\s+[A-Za-z0-9+/]+[=]{0,3}(\\s+.+)?\\s*$"));
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"\\s*(ssh|ecdsa)-[a-z0-9-]+[ \\t]+(([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{1,3})?(={0,3})?)(\\s*|[ \\t]+[\\S \\t]*\\s*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1057,7 +1326,7 @@ module SshPublicKeyId =
           ((check_string_min i ~min:21) >>=
              (fun () ->
                 (check_string_max i ~max:21) >>=
-                  (fun () -> check_pattern i ~pattern:"^key-[0-9a-f]{17}$")));
+                  (fun () -> check_pattern i ~pattern:"key-[0-9a-f]{17}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1090,7 +1359,7 @@ module SecurityGroupId =
           ((check_string_min i ~min:11) >>=
              (fun () ->
                 (check_string_max i ~max:20) >>=
-                  (fun () -> check_pattern i ~pattern:"^sg-[0-9a-f]{8,17}$")));
+                  (fun () -> check_pattern i ~pattern:"sg-[0-9a-f]{8,17}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1100,17 +1369,20 @@ module SecurityGroupId =
     let of_json j = string_of_json ~kind:"SecurityGroupId" j
     let to_json = simple_to_json to_value
   end
-module SubnetId =
+module As2Transport =
   struct
-    type nonrec t = string
-    let context_ = "SubnetId"
+    type nonrec t =
+      | HTTP 
+      | Non_static_id of string 
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let to_string = function | HTTP -> "HTTP" | Non_static_id s -> s
+    let of_string = function | "HTTP" -> HTTP | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SubnetId" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration As2Transport" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"As2Transport" j)
     let to_json = simple_to_json to_value
   end
 module WorkflowDetail =
@@ -1139,26 +1411,26 @@ module WorkflowDetail =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~executionRole ~workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let executionRole = field_map_exn json "ExecutionRole" Role.of_json in
-      let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
+    let of_json json__ =
+      let executionRole = field_map_exn json__ "ExecutionRole" Role.of_json in
+      let workflowId = field_map_exn json__ "WorkflowId" WorkflowId.of_json in
       make ~executionRole ~workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the workflow ID for the workflow to assign and the execution role used for executing the workflow."]
+       "Specifies the workflow ID for the workflow to assign and the execution role that's used for executing the workflow. In addition to a workflow to execute when a file is uploaded completely, WorkflowDetails can also contain a workflow ID (and execution role) for a workflow to execute on partial upload. A partial upload occurs when the server session disconnects while the file is still being uploaded."]
 module ExecutionStepResult =
   struct
     type nonrec t =
       {
       stepType: WorkflowStepType.t option
         [@ocaml.doc
-          "One of the available step types. Copy: copy the file to another location Custom: custom step with a lambda target Delete: delete the file Tag: add a tag to the file"];
+          "One of the available step types. COPY - Copy the file to another location. CUSTOM - Perform a custom step with an Lambda function target. DECRYPT - Decrypt a file that was encrypted before it was uploaded. DELETE - Delete the file. TAG - Add a tag to the file."];
       outputs: StepResultOutputsJson.t option
         [@ocaml.doc
           "The values for the key/value pair applied as a tag to the file. Only applicable if the step type is TAG."];
       error: ExecutionError.t option
         [@ocaml.doc
-          "Specifies the details for an error, if it occurred during execution of the specified workfow step."]}
+          "Specifies the details for an error, if it occurred during execution of the specified workflow step."]}
     let make ?stepType =
       fun ?outputs -> fun ?error -> fun () -> { stepType; outputs; error }
     let to_value x =
@@ -1178,14 +1450,191 @@ module ExecutionStepResult =
           (Xml.child xml_arg0 "StepType") in
       make ?error ?outputs ?stepType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" ExecutionError.of_json in
-      let outputs = field_map json "Outputs" StepResultOutputsJson.of_json in
-      let stepType = field_map json "StepType" WorkflowStepType.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" ExecutionError.of_json in
+      let outputs = field_map json__ "Outputs" StepResultOutputsJson.of_json in
+      let stepType = field_map json__ "StepType" WorkflowStepType.of_json in
       make ?error ?outputs ?stepType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the following details for the step: error (if any), outputs (if any), and the step type."]
+module As2AsyncMdnServerIds =
+  struct
+    type nonrec t = ServerId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServerId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServerId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"As2AsyncMdnServerIds" ~of_json:ServerId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Url =
+  struct
+    type nonrec t = string
+    let context_ = "Url"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Url" j
+    let to_json = simple_to_json to_value
+  end
+module SftpPort =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for SftpPort" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VpcLatticeResourceConfigurationArn =
+  struct
+    type nonrec t = string
+    let context_ = "VpcLatticeResourceConfigurationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:resourceconfiguration/rcfg-[0-9a-z]{17}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"VpcLatticeResourceConfigurationArn" j
+    let to_json = simple_to_json to_value
+  end
+module SftpConnectorTrustedHostKey =
+  struct
+    type nonrec t = string
+    let context_ = "SftpConnectorTrustedHostKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SftpConnectorTrustedHostKey" j
+    let to_json = simple_to_json to_value
+  end
+module WebAppVpcEndpointIpAddressType =
+  struct
+    type nonrec t =
+      | IPV4 
+      | DUALSTACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPV4 -> "IPV4"
+      | DUALSTACK -> "DUALSTACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV4" -> IPV4
+      | "DUALSTACK" -> DUALSTACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WebAppVpcEndpointIpAddressType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WebAppVpcEndpointIpAddressType" j)
+    let to_json = simple_to_json to_value
+  end
+module CustomHttpHeaderKeyType =
+  struct
+    type nonrec t = string
+    let context_ = "CustomHttpHeaderKeyType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomHttpHeaderKeyType" j
+    let to_json = simple_to_json to_value
+  end
+module CustomHttpHeaderValueType =
+  struct
+    type nonrec t = string
+    let context_ = "CustomHttpHeaderValueType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-zA-Z0-9 +\\-./:=@_]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomHttpHeaderValueType" j
+    let to_json = simple_to_json to_value
+  end
 module Arn =
   struct
     type nonrec t = string
@@ -1196,7 +1645,7 @@ module Arn =
           ((check_string_min i ~min:20) >>=
              (fun () ->
                 (check_string_max i ~max:1600) >>=
-                  (fun () -> check_pattern i ~pattern:"arn:.*")));
+                  (fun () -> check_pattern i ~pattern:"arn:\\S+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1213,8 +1662,10 @@ module WorkflowDescription =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_pattern i ~pattern:"^[\\w- ]*$"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w- ]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1224,6 +1675,82 @@ module WorkflowDescription =
     let of_json j = string_of_json ~kind:"WorkflowDescription" j
     let to_json = simple_to_json to_value
   end
+module WebAppAccessEndpoint =
+  struct
+    type nonrec t = string
+    let context_ = "WebAppAccessEndpoint"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WebAppAccessEndpoint" j
+    let to_json = simple_to_json to_value
+  end
+module WebAppEndpoint =
+  struct
+    type nonrec t = string
+    let context_ = "WebAppEndpoint"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WebAppEndpoint" j
+    let to_json = simple_to_json to_value
+  end
+module WebAppEndpointType =
+  struct
+    type nonrec t =
+      | PUBLIC 
+      | VPC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | PUBLIC -> "PUBLIC" | VPC -> "VPC" | Non_static_id s -> s
+    let of_string =
+      function | "PUBLIC" -> PUBLIC | "VPC" -> VPC | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WebAppEndpointType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WebAppEndpointType" j)
+    let to_json = simple_to_json to_value
+  end
+module WebAppId =
+  struct
+    type nonrec t = string
+    let context_ = "WebAppId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:24) >>=
+             (fun () ->
+                (check_string_max i ~max:24) >>=
+                  (fun () -> check_pattern i ~pattern:"webapp-[0-9a-f]{17}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WebAppId" j
+    let to_json = simple_to_json to_value
+  end
 module HomeDirectory =
   struct
     type nonrec t = string
@@ -1231,8 +1758,10 @@ module HomeDirectory =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_pattern i ~pattern:"^$|/.*"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"(|/.*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1405,6 +1934,215 @@ module UserCount =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module As2Id =
+  struct
+    type nonrec t = string
+    let context_ = "As2Id"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0020-\\u007E\\s]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"As2Id" j
+    let to_json = simple_to_json to_value
+  end
+module ProfileId =
+  struct
+    type nonrec t = string
+    let context_ = "ProfileId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:19) >>=
+             (fun () ->
+                (check_string_max i ~max:19) >>=
+                  (fun () -> check_pattern i ~pattern:"p-([0-9a-f]{17})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProfileId" j
+    let to_json = simple_to_json to_value
+  end
+module ProfileType =
+  struct
+    type nonrec t =
+      | LOCAL 
+      | PARTNER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LOCAL -> "LOCAL"
+      | PARTNER -> "PARTNER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LOCAL" -> LOCAL
+      | "PARTNER" -> PARTNER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ProfileType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ProfileType" j)
+    let to_json = simple_to_json to_value
+  end
+module HostKeyDescription =
+  struct
+    type nonrec t = string
+    let context_ = "HostKeyDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\p{Print}]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HostKeyDescription" j
+    let to_json = simple_to_json to_value
+  end
+module HostKeyFingerprint =
+  struct
+    type nonrec t = string
+    let context_ = "HostKeyFingerprint"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HostKeyFingerprint" j
+    let to_json = simple_to_json to_value
+  end
+module HostKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "HostKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:25) >>=
+             (fun () ->
+                (check_string_max i ~max:25) >>=
+                  (fun () -> check_pattern i ~pattern:"hostkey-[0-9a-f]{17}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HostKeyId" j
+    let to_json = simple_to_json to_value
+  end
+module HostKeyType =
+  struct
+    type nonrec t = string
+    let context_ = "HostKeyType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HostKeyType" j
+    let to_json = simple_to_json to_value
+  end
+module FailureCode =
+  struct
+    type nonrec t = string
+    let context_ = "FailureCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FailureCode" j
+    let to_json = simple_to_json to_value
+  end
+module FilePath =
+  struct
+    type nonrec t = string
+    let context_ = "FilePath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"(.)+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilePath" j
+    let to_json = simple_to_json to_value
+  end
+module Message =
+  struct
+    type nonrec t = string
+    let context_ = "Message"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Message" j
+    let to_json = simple_to_json to_value
+  end
+module TransferTableStatus =
+  struct
+    type nonrec t =
+      | QUEUED 
+      | IN_PROGRESS 
+      | COMPLETED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | QUEUED -> "QUEUED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "QUEUED" -> QUEUED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransferTableStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TransferTableStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ExecutionId =
   struct
     type nonrec t = string
@@ -1417,7 +2155,7 @@ module ExecutionId =
                 (check_string_max i ~max:36) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}$")));
+                       ~pattern:"[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1464,10 +2202,10 @@ module FileLocation =
       {
       s3FileLocation: S3FileLocation.t option
         [@ocaml.doc
-          "Specifies the S3 details for the file being used, such as bucket, Etag, and so forth."];
+          "Specifies the S3 details for the file being used, such as bucket, ETag, and so forth."];
       efsFileLocation: EfsFileLocation.t option
         [@ocaml.doc
-          "Specifies the Amazon EFS ID and the path for the file being used."]}
+          "Specifies the Amazon EFS identifier and the path for the file being used."]}
     let make ?s3FileLocation =
       fun ?efsFileLocation -> fun () -> { s3FileLocation; efsFileLocation }
     let to_value x =
@@ -1486,11 +2224,11 @@ module FileLocation =
           (Xml.child xml_arg0 "S3FileLocation") in
       make ?efsFileLocation ?s3FileLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let efsFileLocation =
-        field_map json "EfsFileLocation" EfsFileLocation.of_json in
+        field_map json__ "EfsFileLocation" EfsFileLocation.of_json in
       let s3FileLocation =
-        field_map json "S3FileLocation" S3FileLocation.of_json in
+        field_map json__ "S3FileLocation" S3FileLocation.of_json in
       make ?efsFileLocation ?s3FileLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1499,27 +2237,227 @@ module ServiceMetadata =
   struct
     type nonrec t =
       {
-      userDetails: UserDetails.t
+      userDetails: UserDetails.t option
         [@ocaml.doc
           "The Server ID (ServerId), Session ID (SessionId) and user (UserName) make up the UserDetails."]}
-    let context_ = "ServiceMetadata"
-    let make ~userDetails = fun () -> { userDetails }
+    let make ?userDetails = fun () -> { userDetails }
     let to_value x =
       structure_to_value
-        [("UserDetails", (Some (UserDetails.to_value x.userDetails)))]
+        [("UserDetails", (Option.map x.userDetails ~f:UserDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userDetails =
-        UserDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserDetails") in
-      make ~userDetails ()
+        (Option.map ~f:UserDetails.of_xml) (Xml.child xml_arg0 "UserDetails") in
+      make ?userDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userDetails = field_map_exn json "UserDetails" UserDetails.of_json in
-      make ~userDetails ()
+    let of_json json__ =
+      let userDetails = field_map json__ "UserDetails" UserDetails.of_json in
+      make ?userDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A container object for the session details associated with a workflow."]
+       "A container object for the session details that are associated with a workflow."]
+module ConnectorId =
+  struct
+    type nonrec t = string
+    let context_ = "ConnectorId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:19) >>=
+             (fun () ->
+                (check_string_max i ~max:19) >>=
+                  (fun () -> check_pattern i ~pattern:"c-([0-9a-f]{17})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConnectorId" j
+    let to_json = simple_to_json to_value
+  end
+module CertDate =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module CertificateId =
+  struct
+    type nonrec t = string
+    let context_ = "CertificateId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:22) >>=
+             (fun () ->
+                (check_string_max i ~max:22) >>=
+                  (fun () -> check_pattern i ~pattern:"cert-([0-9a-f]{17})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificateId" j
+    let to_json = simple_to_json to_value
+  end
+module CertificateStatusType =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | PENDING_ROTATION 
+      | INACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | PENDING_ROTATION -> "PENDING_ROTATION"
+      | INACTIVE -> "INACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "PENDING_ROTATION" -> PENDING_ROTATION
+      | "INACTIVE" -> INACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CertificateStatusType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CertificateStatusType" j)
+    let to_json = simple_to_json to_value
+  end
+module CertificateType =
+  struct
+    type nonrec t =
+      | CERTIFICATE 
+      | CERTIFICATE_WITH_PRIVATE_KEY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CERTIFICATE -> "CERTIFICATE"
+      | CERTIFICATE_WITH_PRIVATE_KEY -> "CERTIFICATE_WITH_PRIVATE_KEY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CERTIFICATE" -> CERTIFICATE
+      | "CERTIFICATE_WITH_PRIVATE_KEY" -> CERTIFICATE_WITH_PRIVATE_KEY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CertificateType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CertificateType" j)
+    let to_json = simple_to_json to_value
+  end
+module CertificateUsageType =
+  struct
+    type nonrec t =
+      | SIGNING 
+      | ENCRYPTION 
+      | TLS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SIGNING -> "SIGNING"
+      | ENCRYPTION -> "ENCRYPTION"
+      | TLS -> "TLS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SIGNING" -> SIGNING
+      | "ENCRYPTION" -> ENCRYPTION
+      | "TLS" -> TLS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CertificateUsageType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CertificateUsageType" j)
+    let to_json = simple_to_json to_value
+  end
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0021-\\u007E]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module AgreementId =
+  struct
+    type nonrec t = string
+    let context_ = "AgreementId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:19) >>=
+             (fun () ->
+                (check_string_max i ~max:19) >>=
+                  (fun () -> check_pattern i ~pattern:"a-([0-9a-f]{17})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AgreementId" j
+    let to_json = simple_to_json to_value
+  end
+module AgreementStatusType =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | INACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | INACTIVE -> "INACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "INACTIVE" -> INACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AgreementStatusType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AgreementStatusType" j)
+    let to_json = simple_to_json to_value
+  end
 module ExternalId =
   struct
     type nonrec t = string
@@ -1530,7 +2468,7 @@ module ExternalId =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"^S-1-[\\d-]+$")));
+                  (fun () -> check_pattern i ~pattern:"S-1-[\\d-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1563,9 +2501,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1576,31 +2514,36 @@ module WorkflowStep =
       {
       type_: WorkflowStepType.t option
         [@ocaml.doc
-          "Currently, the following step types are supported. Copy: copy the file to another location Custom: custom step with a lambda target Delete: delete the file Tag: add a tag to the file"];
+          "Currently, the following step types are supported. COPY - Copy the file to another location. CUSTOM - Perform a custom step with an Lambda function target. DECRYPT - Decrypt a file that was encrypted before it was uploaded. DELETE - Delete the file. TAG - Add a tag to the file."];
       copyStepDetails: CopyStepDetails.t option
         [@ocaml.doc
-          "Details for a step that performs a file copy. Consists of the following values: A description An S3 location for the destination of the file copy. A flag that indicates whether or not to overwrite an existing file of the same name. The default is FALSE."];
+          "Details for a step that performs a file copy. Consists of the following values: A description An Amazon S3 location for the destination of the file copy. A flag that indicates whether to overwrite an existing file of the same name. The default is FALSE."];
       customStepDetails: CustomStepDetails.t option
         [@ocaml.doc
-          "Details for a step that invokes a lambda function. Consists of the lambda function name, target, and timeout (in seconds)."];
+          "Details for a step that invokes an Lambda function. Consists of the Lambda function's name, target, and timeout (in seconds)."];
       deleteStepDetails: DeleteStepDetails.t option
         [@ocaml.doc "Details for a step that deletes the file."];
       tagStepDetails: TagStepDetails.t option
         [@ocaml.doc
-          "Details for a step that creates one or more tags. You specify one or more tags: each tag contains a key/value pair."]}
+          "Details for a step that creates one or more tags. You specify one or more tags. Each tag contains a key-value pair."];
+      decryptStepDetails: DecryptStepDetails.t option
+        [@ocaml.doc
+          "Details for a step that decrypts an encrypted file. Consists of the following values: A descriptive name An Amazon S3 or Amazon Elastic File System (Amazon EFS) location for the source file to decrypt. An S3 or Amazon EFS location for the destination of the file decryption. A flag that indicates whether to overwrite an existing file of the same name. The default is FALSE. The type of encryption that's used. Currently, only PGP encryption is supported."]}
     let make ?type_ =
       fun ?copyStepDetails ->
         fun ?customStepDetails ->
           fun ?deleteStepDetails ->
             fun ?tagStepDetails ->
-              fun () ->
-                {
-                  type_;
-                  copyStepDetails;
-                  customStepDetails;
-                  deleteStepDetails;
-                  tagStepDetails
-                }
+              fun ?decryptStepDetails ->
+                fun () ->
+                  {
+                    type_;
+                    copyStepDetails;
+                    customStepDetails;
+                    deleteStepDetails;
+                    tagStepDetails;
+                    decryptStepDetails
+                  }
     let to_value x =
       structure_to_value
         [("Type", (Option.map x.type_ ~f:WorkflowStepType.to_value));
@@ -1611,9 +2554,14 @@ module WorkflowStep =
         ("DeleteStepDetails",
           (Option.map x.deleteStepDetails ~f:DeleteStepDetails.to_value));
         ("TagStepDetails",
-          (Option.map x.tagStepDetails ~f:TagStepDetails.to_value))]
+          (Option.map x.tagStepDetails ~f:TagStepDetails.to_value));
+        ("DecryptStepDetails",
+          (Option.map x.decryptStepDetails ~f:DecryptStepDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let decryptStepDetails =
+        (Option.map ~f:DecryptStepDetails.of_xml)
+          (Xml.child xml_arg0 "DecryptStepDetails") in
       let tagStepDetails =
         (Option.map ~f:TagStepDetails.of_xml)
           (Xml.child xml_arg0 "TagStepDetails") in
@@ -1628,23 +2576,127 @@ module WorkflowStep =
           (Xml.child xml_arg0 "CopyStepDetails") in
       let type_ =
         (Option.map ~f:WorkflowStepType.of_xml) (Xml.child xml_arg0 "Type") in
-      make ?tagStepDetails ?deleteStepDetails ?customStepDetails
-        ?copyStepDetails ?type_ ()
+      make ?decryptStepDetails ?tagStepDetails ?deleteStepDetails
+        ?customStepDetails ?copyStepDetails ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let decryptStepDetails =
+        field_map json__ "DecryptStepDetails" DecryptStepDetails.of_json in
       let tagStepDetails =
-        field_map json "TagStepDetails" TagStepDetails.of_json in
+        field_map json__ "TagStepDetails" TagStepDetails.of_json in
       let deleteStepDetails =
-        field_map json "DeleteStepDetails" DeleteStepDetails.of_json in
+        field_map json__ "DeleteStepDetails" DeleteStepDetails.of_json in
       let customStepDetails =
-        field_map json "CustomStepDetails" CustomStepDetails.of_json in
+        field_map json__ "CustomStepDetails" CustomStepDetails.of_json in
       let copyStepDetails =
-        field_map json "CopyStepDetails" CopyStepDetails.of_json in
-      let type_ = field_map json "Type" WorkflowStepType.of_json in
-      make ?tagStepDetails ?deleteStepDetails ?customStepDetails
-        ?copyStepDetails ?type_ ()
+        field_map json__ "CopyStepDetails" CopyStepDetails.of_json in
+      let type_ = field_map json__ "Type" WorkflowStepType.of_json in
+      make ?decryptStepDetails ?tagStepDetails ?deleteStepDetails
+        ?customStepDetails ?copyStepDetails ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The basic building block of a workflow."]
+module DescribedWebAppVpcConfig =
+  struct
+    type nonrec t =
+      {
+      subnetIds: SubnetIds.t option
+        [@ocaml.doc
+          "The list of subnet IDs within the VPC where the web app endpoint is deployed. These subnets must be in the same VPC and provide network connectivity for the endpoint."];
+      vpcId: VpcId.t option
+        [@ocaml.doc
+          "The identifier of the VPC where the web app endpoint is hosted."];
+      vpcEndpointId: VpcEndpointId.t option
+        [@ocaml.doc
+          "The identifier of the VPC endpoint created for the web app."]}
+    let make ?subnetIds =
+      fun ?vpcId ->
+        fun ?vpcEndpointId -> fun () -> { subnetIds; vpcId; vpcEndpointId }
+    let to_value x =
+      structure_to_value
+        [("SubnetIds", (Option.map x.subnetIds ~f:SubnetIds.to_value));
+        ("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
+        ("VpcEndpointId",
+          (Option.map x.vpcEndpointId ~f:VpcEndpointId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpointId =
+        (Option.map ~f:VpcEndpointId.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointId") in
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
+      let subnetIds =
+        (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      make ?vpcEndpointId ?vpcId ?subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpointId =
+        field_map json__ "VpcEndpointId" VpcEndpointId.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      make ?vpcEndpointId ?vpcId ?subnetIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the VPC configuration details for a web app endpoint, including the VPC identifier, subnet IDs, and VPC endpoint ID used for hosting the endpoint."]
+module DescribedIdentityCenterConfig =
+  struct
+    type nonrec t =
+      {
+      applicationArn: IdentityCenterApplicationArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the IAM Identity Center application: this value is set automatically when you create your web app."];
+      instanceArn: IdentityCenterInstanceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the IAM Identity Center used for the web app."];
+      role: Role.t option
+        [@ocaml.doc
+          "The IAM role in IAM Identity Center used for the web app."]}
+    let make ?applicationArn =
+      fun ?instanceArn ->
+        fun ?role -> fun () -> { applicationArn; instanceArn; role }
+    let to_value x =
+      structure_to_value
+        [("ApplicationArn",
+           (Option.map x.applicationArn
+              ~f:IdentityCenterApplicationArn.to_value));
+        ("InstanceArn",
+          (Option.map x.instanceArn ~f:IdentityCenterInstanceArn.to_value));
+        ("Role", (Option.map x.role ~f:Role.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
+      let instanceArn =
+        (Option.map ~f:IdentityCenterInstanceArn.of_xml)
+          (Xml.child xml_arg0 "InstanceArn") in
+      let applicationArn =
+        (Option.map ~f:IdentityCenterApplicationArn.of_xml)
+          (Xml.child xml_arg0 "ApplicationArn") in
+      make ?role ?instanceArn ?applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let role = field_map json__ "Role" Role.of_json in
+      let instanceArn =
+        field_map json__ "InstanceArn" IdentityCenterInstanceArn.of_json in
+      let applicationArn =
+        field_map json__ "ApplicationArn"
+          IdentityCenterApplicationArn.of_json in
+      make ?role ?instanceArn ?applicationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the details of the IAM Identity Center used for your web app. Returned during a call to DescribeWebApp."]
+module WebAppUnitCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for WebAppUnitCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module HomeDirectoryMapEntry =
   struct
     type nonrec t =
@@ -1653,28 +2705,35 @@ module HomeDirectoryMapEntry =
         [@ocaml.doc "Represents an entry for HomeDirectoryMappings."];
       target: MapTarget.t
         [@ocaml.doc
-          "Represents the map target that is used in a HomeDirectorymapEntry."]}
+          "Represents the map target that is used in a HomeDirectoryMapEntry."];
+      type_: MapType.t option
+        [@ocaml.doc
+          "Specifies the type of mapping. Set the type to FILE if you want the mapping to point to a file, or DIRECTORY for the directory to point to a directory. By default, home directory mappings have a Type of DIRECTORY when you create a Transfer Family server. You would need to explicitly set Type to FILE if you want a mapping to have a file target."]}
     let context_ = "HomeDirectoryMapEntry"
-    let make ~entry = fun ~target -> fun () -> { entry; target }
+    let make ?type_ =
+      fun ~entry -> fun ~target -> fun () -> { type_; entry; target }
     let to_value x =
       structure_to_value
         [("Entry", (Some (MapEntry.to_value x.entry)));
-        ("Target", (Some (MapTarget.to_value x.target)))]
+        ("Target", (Some (MapTarget.to_value x.target)));
+        ("Type", (Option.map x.type_ ~f:MapType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let type_ = (Option.map ~f:MapType.of_xml) (Xml.child xml_arg0 "Type") in
       let target =
         MapTarget.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Target") in
       let entry =
         MapEntry.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Entry") in
-      make ~target ~entry ()
+      make ?type_ ~target ~entry ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let target = field_map_exn json "Target" MapTarget.of_json in
-      let entry = field_map_exn json "Entry" MapEntry.of_json in
-      make ~target ~entry ()
+    let of_json json__ =
+      let type_ = field_map json__ "Type" MapType.of_json in
+      let target = field_map_exn json__ "Target" MapTarget.of_json in
+      let entry = field_map_exn json__ "Entry" MapEntry.of_json in
+      make ?type_ ~target ~entry ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents an object that contains entries and targets for HomeDirectoryMappings. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry:\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"]
+       "Represents an object that contains entries and targets for HomeDirectoryMappings. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"]
 module SecondaryGids =
   struct
     type nonrec t = PosixId.t list
@@ -1683,6 +2742,9 @@ module SecondaryGids =
         ok_or_failwith
           ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PosixId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1707,54 +2769,57 @@ module SshPublicKey =
   struct
     type nonrec t =
       {
-      dateImported: DateImported.t
+      dateImported: DateImported.t option
         [@ocaml.doc
-          "Specifies the date that the public key was added to the user account."];
-      sshPublicKeyBody: SshPublicKeyBody.t
+          "Specifies the date that the public key was added to the Transfer Family user."];
+      sshPublicKeyBody: SshPublicKeyBody.t option
         [@ocaml.doc
-          "Specifies the content of the SSH public key as specified by the PublicKeyId."];
-      sshPublicKeyId: SshPublicKeyId.t
+          "Specifies the content of the SSH public key as specified by the PublicKeyId. Transfer Family accepts RSA, ECDSA, and ED25519 keys."];
+      sshPublicKeyId: SshPublicKeyId.t option
         [@ocaml.doc
           "Specifies the SshPublicKeyId parameter contains the identifier of the public key."]}
-    let context_ = "SshPublicKey"
-    let make ~dateImported =
-      fun ~sshPublicKeyBody ->
-        fun ~sshPublicKeyId ->
+    let make ?dateImported =
+      fun ?sshPublicKeyBody ->
+        fun ?sshPublicKeyId ->
           fun () -> { dateImported; sshPublicKeyBody; sshPublicKeyId }
     let to_value x =
       structure_to_value
-        [("DateImported", (Some (DateImported.to_value x.dateImported)));
+        [("DateImported",
+           (Option.map x.dateImported ~f:DateImported.to_value));
         ("SshPublicKeyBody",
-          (Some (SshPublicKeyBody.to_value x.sshPublicKeyBody)));
-        ("SshPublicKeyId", (Some (SshPublicKeyId.to_value x.sshPublicKeyId)))]
+          (Option.map x.sshPublicKeyBody ~f:SshPublicKeyBody.to_value));
+        ("SshPublicKeyId",
+          (Option.map x.sshPublicKeyId ~f:SshPublicKeyId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sshPublicKeyId =
-        SshPublicKeyId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SshPublicKeyId") in
+        (Option.map ~f:SshPublicKeyId.of_xml)
+          (Xml.child xml_arg0 "SshPublicKeyId") in
       let sshPublicKeyBody =
-        SshPublicKeyBody.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SshPublicKeyBody") in
+        (Option.map ~f:SshPublicKeyBody.of_xml)
+          (Xml.child xml_arg0 "SshPublicKeyBody") in
       let dateImported =
-        DateImported.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DateImported") in
-      make ~sshPublicKeyId ~sshPublicKeyBody ~dateImported ()
+        (Option.map ~f:DateImported.of_xml)
+          (Xml.child xml_arg0 "DateImported") in
+      make ?sshPublicKeyId ?sshPublicKeyBody ?dateImported ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sshPublicKeyId =
-        field_map_exn json "SshPublicKeyId" SshPublicKeyId.of_json in
+        field_map json__ "SshPublicKeyId" SshPublicKeyId.of_json in
       let sshPublicKeyBody =
-        field_map_exn json "SshPublicKeyBody" SshPublicKeyBody.of_json in
-      let dateImported =
-        field_map_exn json "DateImported" DateImported.of_json in
-      make ~sshPublicKeyId ~sshPublicKeyBody ~dateImported ()
+        field_map json__ "SshPublicKeyBody" SshPublicKeyBody.of_json in
+      let dateImported = field_map json__ "DateImported" DateImported.of_json in
+      make ?sshPublicKeyId ?sshPublicKeyBody ?dateImported ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the public Secure Shell (SSH) key that is associated with a user account for the specific file transfer protocol-enabled server (as identified by ServerId). The information returned includes the date the key was imported, the public key contents, and the public key ID. A user can store more than one SSH public key associated with their user name on a specific server."]
+       "Provides information about the public Secure Shell (SSH) key that is associated with a Transfer Family user for the specific file transfer protocol-enabled server (as identified by ServerId). The information returned includes the date the key was imported, the public key contents, and the public key ID. A user can store more than one SSH public key associated with their user name on a specific server."]
 module AddressAllocationIds =
   struct
     type nonrec t = AddressAllocationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AddressAllocationId.to_value)) |>
         (fun x -> `List x)
@@ -1781,6 +2846,9 @@ module SecurityGroupIds =
   struct
     type nonrec t = SecurityGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1802,63 +2870,6 @@ module SecurityGroupIds =
         j
     let to_json v = composed_to_json to_value v
   end
-module SubnetIds =
-  struct
-    type nonrec t = SubnetId.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:SubnetId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"SubnetIds" ~of_json:SubnetId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module VpcEndpointId =
-  struct
-    type nonrec t = string
-    let context_ = "VpcEndpointId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:22) >>=
-             (fun () ->
-                (check_string_max i ~max:22) >>=
-                  (fun () -> check_pattern i ~pattern:"^vpce-[0-9a-f]{17}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VpcEndpointId" j
-    let to_json = simple_to_json to_value
-  end
-module VpcId =
-  struct
-    type nonrec t = string
-    let context_ = "VpcId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VpcId" j
-    let to_json = simple_to_json to_value
-  end
 module DirectoryId =
   struct
     type nonrec t = string
@@ -1869,7 +2880,7 @@ module DirectoryId =
           ((check_string_min i ~min:12) >>=
              (fun () ->
                 (check_string_max i ~max:12) >>=
-                  (fun () -> check_pattern i ~pattern:"^d-[0-9a-f]{10}$")));
+                  (fun () -> check_pattern i ~pattern:"d-[0-9a-f]{10}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1889,8 +2900,7 @@ module Function =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:170) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^arn:[a-z-]+:lambda:.*$")));
+                  (fun () -> check_pattern i ~pattern:"arn:[a-z-]+:lambda:.*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1900,32 +2910,111 @@ module Function =
     let of_json j = string_of_json ~kind:"Function" j
     let to_json = simple_to_json to_value
   end
-module Url =
+module SftpAuthenticationMethods =
   struct
-    type nonrec t = string
-    let context_ = "Url"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:255); i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | PASSWORD 
+      | PUBLIC_KEY 
+      | PUBLIC_KEY_OR_PASSWORD 
+      | PUBLIC_KEY_AND_PASSWORD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PASSWORD -> "PASSWORD"
+      | PUBLIC_KEY -> "PUBLIC_KEY"
+      | PUBLIC_KEY_OR_PASSWORD -> "PUBLIC_KEY_OR_PASSWORD"
+      | PUBLIC_KEY_AND_PASSWORD -> "PUBLIC_KEY_AND_PASSWORD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PASSWORD" -> PASSWORD
+      | "PUBLIC_KEY" -> PUBLIC_KEY
+      | "PUBLIC_KEY_OR_PASSWORD" -> PUBLIC_KEY_OR_PASSWORD
+      | "PUBLIC_KEY_AND_PASSWORD" -> PUBLIC_KEY_AND_PASSWORD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Url" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SftpAuthenticationMethods" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SftpAuthenticationMethods" j)
     let to_json = simple_to_json to_value
+  end
+module As2Transports =
+  struct
+    type nonrec t = As2Transport.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:As2Transport.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:As2Transport.of_xml)
+    let of_json j =
+      list_of_json ~kind:"As2Transports" ~of_json:As2Transport.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module PassiveIp =
   struct
     type nonrec t = string
     let context_ = "PassiveIp"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:15); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:15) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"PassiveIp" j
+    let to_json = simple_to_json to_value
+  end
+module SetStatOption =
+  struct
+    type nonrec t =
+      | DEFAULT 
+      | ENABLE_NO_OP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DEFAULT -> "DEFAULT"
+      | ENABLE_NO_OP -> "ENABLE_NO_OP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DEFAULT" -> DEFAULT
+      | "ENABLE_NO_OP" -> ENABLE_NO_OP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SetStatOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SetStatOption" j)
     let to_json = simple_to_json to_value
   end
 module TlsSessionResumptionMode =
@@ -1964,6 +3053,7 @@ module Protocol =
       | SFTP 
       | FTP 
       | FTPS 
+      | AS2 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1971,12 +3061,14 @@ module Protocol =
       | SFTP -> "SFTP"
       | FTP -> "FTP"
       | FTPS -> "FTPS"
+      | AS2 -> "AS2"
       | Non_static_id s -> s
     let of_string =
       function
       | "SFTP" -> SFTP
       | "FTP" -> FTP
       | "FTPS" -> FTPS
+      | "AS2" -> AS2
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1986,11 +3078,95 @@ module Protocol =
     let of_json j = of_string (string_of_json ~kind:"Protocol" j)
     let to_json = simple_to_json to_value
   end
+module DirectoryListingOptimization =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DirectoryListingOptimization"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DirectoryListingOptimization" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceManagedEgressIpAddress =
+  struct
+    type nonrec t = string
+    let context_ = "ServiceManagedEgressIpAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServiceManagedEgressIpAddress" j
+    let to_json = simple_to_json to_value
+  end
+module OnPartialUploadWorkflowDetails =
+  struct
+    type nonrec t = WorkflowDetail.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkflowDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkflowDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OnPartialUploadWorkflowDetails"
+        ~of_json:WorkflowDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module OnUploadWorkflowDetails =
   struct
     type nonrec t = WorkflowDetail.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkflowDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2017,13 +3193,38 @@ module SecurityPolicyOption =
     type nonrec t = string
     let context_ = "SecurityPolicyOption"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:50); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"SecurityPolicyOption" j
+    let to_json = simple_to_json to_value
+  end
+module SecurityPolicyProtocol =
+  struct
+    type nonrec t =
+      | SFTP 
+      | FTPS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SFTP -> "SFTP" | FTPS -> "FTPS" | Non_static_id s -> s
+    let of_string =
+      function | "SFTP" -> SFTP | "FTPS" -> FTPS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SecurityPolicyProtocol" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SecurityPolicyProtocol" j)
     let to_json = simple_to_json to_value
   end
 module ExecutionStepResults =
@@ -2034,6 +3235,9 @@ module ExecutionStepResults =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExecutionStepResult.to_value)) |>
         (fun x -> `List x)
@@ -2076,17 +3280,375 @@ module LogGroupName =
     let of_json j = string_of_json ~kind:"LogGroupName" j
     let to_json = simple_to_json to_value
   end
-module Message =
+module As2AsyncMdnConnectorConfig =
+  struct
+    type nonrec t =
+      {
+      url: Url.t option
+        [@ocaml.doc
+          "The URL endpoint where asynchronous MDN responses should be sent."];
+      serverIds: As2AsyncMdnServerIds.t option
+        [@ocaml.doc
+          "A list of server identifiers that can handle asynchronous MDN responses. You can specify between 1 and 10 server IDs."]}
+    let make ?url = fun ?serverIds -> fun () -> { url; serverIds }
+    let to_value x =
+      structure_to_value
+        [("Url", (Option.map x.url ~f:Url.to_value));
+        ("ServerIds",
+          (Option.map x.serverIds ~f:As2AsyncMdnServerIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serverIds =
+        (Option.map ~f:As2AsyncMdnServerIds.of_xml)
+          (Xml.child xml_arg0 "ServerIds") in
+      let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "Url") in
+      make ?serverIds ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverIds =
+        field_map json__ "ServerIds" As2AsyncMdnServerIds.of_json in
+      let url = field_map json__ "Url" Url.of_json in make ?serverIds ?url ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the configuration details for asynchronous Message Disposition Notification (MDN) responses in AS2 connectors. This configuration specifies where asynchronous MDN responses should be sent and which servers should handle them."]
+module As2ConnectorSecretId =
   struct
     type nonrec t = string
-    let context_ = "Message"
+    let context_ = "As2ConnectorSecretId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"As2ConnectorSecretId" j
+    let to_json = simple_to_json to_value
+  end
+module CompressionEnum =
+  struct
+    type nonrec t =
+      | ZLIB 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ZLIB -> "ZLIB"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ZLIB" -> ZLIB
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CompressionEnum" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CompressionEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module EncryptionAlg =
+  struct
+    type nonrec t =
+      | AES128_CBC 
+      | AES192_CBC 
+      | AES256_CBC 
+      | DES_EDE3_CBC 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AES128_CBC -> "AES128_CBC"
+      | AES192_CBC -> "AES192_CBC"
+      | AES256_CBC -> "AES256_CBC"
+      | DES_EDE3_CBC -> "DES_EDE3_CBC"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AES128_CBC" -> AES128_CBC
+      | "AES192_CBC" -> AES192_CBC
+      | "AES256_CBC" -> AES256_CBC
+      | "DES_EDE3_CBC" -> DES_EDE3_CBC
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EncryptionAlg" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EncryptionAlg" j)
+    let to_json = simple_to_json to_value
+  end
+module MdnResponse =
+  struct
+    type nonrec t =
+      | SYNC 
+      | NONE 
+      | ASYNC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SYNC -> "SYNC"
+      | NONE -> "NONE"
+      | ASYNC -> "ASYNC"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SYNC" -> SYNC
+      | "NONE" -> NONE
+      | "ASYNC" -> ASYNC
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MdnResponse" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MdnResponse" j)
+    let to_json = simple_to_json to_value
+  end
+module MdnSigningAlg =
+  struct
+    type nonrec t =
+      | SHA256 
+      | SHA384 
+      | SHA512 
+      | SHA1 
+      | NONE 
+      | DEFAULT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SHA256 -> "SHA256"
+      | SHA384 -> "SHA384"
+      | SHA512 -> "SHA512"
+      | SHA1 -> "SHA1"
+      | NONE -> "NONE"
+      | DEFAULT -> "DEFAULT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SHA256" -> SHA256
+      | "SHA384" -> SHA384
+      | "SHA512" -> SHA512
+      | "SHA1" -> SHA1
+      | "NONE" -> NONE
+      | "DEFAULT" -> DEFAULT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MdnSigningAlg" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MdnSigningAlg" j)
+    let to_json = simple_to_json to_value
+  end
+module MessageSubject =
+  struct
+    type nonrec t = string
+    let context_ = "MessageSubject"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0020-\\u007E\\t]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MessageSubject" j
+    let to_json = simple_to_json to_value
+  end
+module PreserveContentType =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PreserveContentType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PreserveContentType" j)
+    let to_json = simple_to_json to_value
+  end
+module SigningAlg =
+  struct
+    type nonrec t =
+      | SHA256 
+      | SHA384 
+      | SHA512 
+      | SHA1 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SHA256 -> "SHA256"
+      | SHA384 -> "SHA384"
+      | SHA512 -> "SHA512"
+      | SHA1 -> "SHA1"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SHA256" -> SHA256
+      | "SHA384" -> SHA384
+      | "SHA512" -> SHA512
+      | "SHA1" -> SHA1
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SigningAlg" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SigningAlg" j)
+    let to_json = simple_to_json to_value
+  end
+module DescribedConnectorVpcLatticeEgressConfig =
+  struct
+    type nonrec t =
+      {
+      resourceConfigurationArn: VpcLatticeResourceConfigurationArn.t option
+        [@ocaml.doc
+          "ARN of the VPC_LATTICE Resource Configuration currently used by the connector. This Resource Configuration defines the network path to the SFTP server through the customer's VPC."];
+      portNumber: SftpPort.t option
+        [@ocaml.doc
+          "Port number currently configured for SFTP connections through VPC_LATTICE. Shows the port on which the connector attempts to connect to the target SFTP server."]}
+    let make ?resourceConfigurationArn =
+      fun ?portNumber -> fun () -> { resourceConfigurationArn; portNumber }
+    let to_value x =
+      structure_to_value
+        [("ResourceConfigurationArn",
+           (Option.map x.resourceConfigurationArn
+              ~f:VpcLatticeResourceConfigurationArn.to_value));
+        ("PortNumber", (Option.map x.portNumber ~f:SftpPort.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portNumber =
+        (Option.map ~f:SftpPort.of_xml) (Xml.child xml_arg0 "PortNumber") in
+      let resourceConfigurationArn =
+        (Option.map ~f:VpcLatticeResourceConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "ResourceConfigurationArn") in
+      make ?portNumber ?resourceConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portNumber = field_map json__ "PortNumber" SftpPort.of_json in
+      let resourceConfigurationArn =
+        field_map json__ "ResourceConfigurationArn"
+          VpcLatticeResourceConfigurationArn.of_json in
+      make ?portNumber ?resourceConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "VPC_LATTICE egress configuration details in the response, containing the Resource Configuration ARN and port number currently configured for the connector."]
+module MaxConcurrentConnections =
+  struct
+    type nonrec t = int[@@ocaml.doc
+                         "The number of concurrent connections that the connector will create to the remote server."]
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxConcurrentConnections"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The number of concurrent connections that the connector will create to the remote server."]
+module SecretId =
+  struct
+    type nonrec t = string
+    let context_ = "SecretId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretId" j
+    let to_json = simple_to_json to_value
+  end
+module SftpConnectorTrustedHostKeyList =
+  struct
+    type nonrec t = SftpConnectorTrustedHostKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SftpConnectorTrustedHostKey.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SftpConnectorTrustedHostKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SftpConnectorTrustedHostKeyList"
+        ~of_json:SftpConnectorTrustedHostKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ServiceErrorMessage"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Message" j
+    let of_json j = string_of_json ~kind:"ServiceErrorMessage" j
     let to_json = simple_to_json to_value
   end
 module Resource =
@@ -2115,19 +3677,6 @@ module ResourceType =
     let of_json j = string_of_json ~kind:"ResourceType" j
     let to_json = simple_to_json to_value
   end
-module ServiceErrorMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ServiceErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ServiceErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
 module RetryAfterSeconds =
   struct
     type nonrec t = string
@@ -2141,6 +3690,145 @@ module RetryAfterSeconds =
     let of_json j = string_of_json ~kind:"RetryAfterSeconds" j
     let to_json = simple_to_json to_value
   end
+module UpdateWebAppVpcConfig =
+  struct
+    type nonrec t =
+      {
+      subnetIds: SubnetIds.t option
+        [@ocaml.doc
+          "The list of subnet IDs within the VPC where the web app endpoint should be deployed during the update operation."];
+      ipAddressType: WebAppVpcEndpointIpAddressType.t option
+        [@ocaml.doc
+          "The IP address type for the web app's VPC endpoint. This determines whether the endpoint is accessible over IPv4 only, or over both IPv4 and IPv6."]}
+    let make ?subnetIds =
+      fun ?ipAddressType -> fun () -> { subnetIds; ipAddressType }
+    let to_value x =
+      structure_to_value
+        [("SubnetIds", (Option.map x.subnetIds ~f:SubnetIds.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType
+             ~f:WebAppVpcEndpointIpAddressType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:WebAppVpcEndpointIpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let subnetIds =
+        (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      make ?ipAddressType ?subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "IpAddressType"
+          WebAppVpcEndpointIpAddressType.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      make ?ipAddressType ?subnetIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the VPC configuration settings for updating a web app endpoint, including the subnet IDs where the endpoint should be deployed."]
+module UpdateWebAppIdentityCenterConfig =
+  struct
+    type nonrec t =
+      {
+      role: Role.t option
+        [@ocaml.doc "The IAM role used to access IAM Identity Center."]}
+    let make ?role = fun () -> { role }
+    let to_value x =
+      structure_to_value [("Role", (Option.map x.role ~f:Role.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
+      make ?role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let role = field_map json__ "Role" Role.of_json in make ?role ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that describes the values to use for the IAM Identity Center settings when you update a web app."]
+module UpdateConnectorVpcLatticeEgressConfig =
+  struct
+    type nonrec t =
+      {
+      resourceConfigurationArn: VpcLatticeResourceConfigurationArn.t option
+        [@ocaml.doc
+          "Updated ARN of the VPC_LATTICE Resource Configuration. Use this to change the target SFTP server location or modify the network path through the customer's VPC infrastructure."];
+      portNumber: SftpPort.t option
+        [@ocaml.doc
+          "Updated port number for SFTP connections through VPC_LATTICE. Change this if the target SFTP server port has been modified or if connecting to a different server endpoint."]}
+    let make ?resourceConfigurationArn =
+      fun ?portNumber -> fun () -> { resourceConfigurationArn; portNumber }
+    let to_value x =
+      structure_to_value
+        [("ResourceConfigurationArn",
+           (Option.map x.resourceConfigurationArn
+              ~f:VpcLatticeResourceConfigurationArn.to_value));
+        ("PortNumber", (Option.map x.portNumber ~f:SftpPort.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portNumber =
+        (Option.map ~f:SftpPort.of_xml) (Xml.child xml_arg0 "PortNumber") in
+      let resourceConfigurationArn =
+        (Option.map ~f:VpcLatticeResourceConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "ResourceConfigurationArn") in
+      make ?portNumber ?resourceConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portNumber = field_map json__ "PortNumber" SftpPort.of_json in
+      let resourceConfigurationArn =
+        field_map json__ "ResourceConfigurationArn"
+          VpcLatticeResourceConfigurationArn.of_json in
+      make ?portNumber ?resourceConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "VPC_LATTICE egress configuration updates for modifying how the connector routes traffic through customer VPCs. Changes to these settings may require connector restart to take effect."]
+module SftpConnectorHostKey =
+  struct
+    type nonrec t = string
+    let context_ = "SftpConnectorHostKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SftpConnectorHostKey" j
+    let to_json = simple_to_json to_value
+  end
+module CustomHttpHeader =
+  struct
+    type nonrec t =
+      {
+      key: CustomHttpHeaderKeyType.t option
+        [@ocaml.doc "The name of the custom HTTP header."];
+      value: CustomHttpHeaderValueType.t option
+        [@ocaml.doc "The value of the custom HTTP header."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:CustomHttpHeaderKeyType.to_value));
+        ("Value", (Option.map x.value ~f:CustomHttpHeaderValueType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:CustomHttpHeaderValueType.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      let key =
+        (Option.map ~f:CustomHttpHeaderKeyType.of_xml)
+          (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" CustomHttpHeaderValueType.of_json in
+      let key = field_map json__ "Key" CustomHttpHeaderKeyType.of_json in
+      make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a custom HTTP header that can be included in AS2 messages. Each header consists of a key-value pair."]
 module ListedWorkflow =
   struct
     type nonrec t =
@@ -2171,56 +3859,118 @@ module ListedWorkflow =
         (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "WorkflowId") in
       make ?arn ?description ?workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" Arn.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" Arn.of_json in
       let description =
-        field_map json "Description" WorkflowDescription.of_json in
-      let workflowId = field_map json "WorkflowId" WorkflowId.of_json in
+        field_map json__ "Description" WorkflowDescription.of_json in
+      let workflowId = field_map json__ "WorkflowId" WorkflowId.of_json in
       make ?arn ?description ?workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the ID, text description, and Amazon Resource Name (ARN) for the workflow."]
+       "Contains the identifier, text description, and Amazon Resource Name (ARN) for the workflow."]
+module ListedWebApp =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) for the web app."];
+      webAppId: WebAppId.t option
+        [@ocaml.doc "The unique identifier for the web app."];
+      accessEndpoint: WebAppAccessEndpoint.t option
+        [@ocaml.doc
+          "The AccessEndpoint is the URL that you provide to your users for them to interact with the Transfer Family web app. You can specify a custom URL or use the default value."];
+      webAppEndpoint: WebAppEndpoint.t option
+        [@ocaml.doc
+          "The WebAppEndpoint is the unique URL for your Transfer Family web app. This is the value that you use when you configure Origins on CloudFront."];
+      endpointType: WebAppEndpointType.t option
+        [@ocaml.doc
+          "The type of endpoint hosting the web app. Valid values are PUBLIC for publicly accessible endpoints and VPC for VPC-hosted endpoints."]}
+    let make ?arn =
+      fun ?webAppId ->
+        fun ?accessEndpoint ->
+          fun ?webAppEndpoint ->
+            fun ?endpointType ->
+              fun () ->
+                { arn; webAppId; accessEndpoint; webAppEndpoint; endpointType
+                }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("WebAppId", (Option.map x.webAppId ~f:WebAppId.to_value));
+        ("AccessEndpoint",
+          (Option.map x.accessEndpoint ~f:WebAppAccessEndpoint.to_value));
+        ("WebAppEndpoint",
+          (Option.map x.webAppEndpoint ~f:WebAppEndpoint.to_value));
+        ("EndpointType",
+          (Option.map x.endpointType ~f:WebAppEndpointType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpointType =
+        (Option.map ~f:WebAppEndpointType.of_xml)
+          (Xml.child xml_arg0 "EndpointType") in
+      let webAppEndpoint =
+        (Option.map ~f:WebAppEndpoint.of_xml)
+          (Xml.child xml_arg0 "WebAppEndpoint") in
+      let accessEndpoint =
+        (Option.map ~f:WebAppAccessEndpoint.of_xml)
+          (Xml.child xml_arg0 "AccessEndpoint") in
+      let webAppId =
+        (Option.map ~f:WebAppId.of_xml) (Xml.child xml_arg0 "WebAppId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?endpointType ?webAppEndpoint ?accessEndpoint ?webAppId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpointType =
+        field_map json__ "EndpointType" WebAppEndpointType.of_json in
+      let webAppEndpoint =
+        field_map json__ "WebAppEndpoint" WebAppEndpoint.of_json in
+      let accessEndpoint =
+        field_map json__ "AccessEndpoint" WebAppAccessEndpoint.of_json in
+      let webAppId = field_map json__ "WebAppId" WebAppId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?endpointType ?webAppEndpoint ?accessEndpoint ?webAppId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "a structure that contains details for the web app."]
 module ListedUser =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "Provides the unique Amazon Resource Name (ARN) for the user that you want to learn about."];
       homeDirectory: HomeDirectory.t option
         [@ocaml.doc
-          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory."];
+          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory. You can use the HomeDirectory parameter for HomeDirectoryType when it is set to either PATH or LOGICAL."];
       homeDirectoryType: HomeDirectoryType.t option
         [@ocaml.doc
-          "The type of landing directory (folder) you want your users' home directory to be when they log into the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If you set it LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or EFS paths visible to your users."];
+          "The type of landing directory (folder) that you want your users' home directory to be when they log in to the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or Amazon EFS path as is in their file transfer protocol clients. If you set it to LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or Amazon EFS paths visible to your users. If HomeDirectoryType is LOGICAL, you must provide mappings, using the HomeDirectoryMappings parameter. If, on the other hand, HomeDirectoryType is PATH, you provide an absolute path using the HomeDirectory parameter. You cannot have both HomeDirectory and HomeDirectoryMappings in your template."];
       role: Role.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the IAM role that controls your users' access to your Amazon S3 bucket or EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests. The IAM role that controls your users' access to your Amazon S3 bucket for servers with Domain=S3, or your EFS file system for servers with Domain=EFS. The policies attached to this role determine the level of access you want to provide your users when transferring files into and out of your S3 buckets or EFS file systems."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that controls your users' access to your Amazon S3 bucket or Amazon EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or Amazon EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests. The IAM role that controls your users' access to your Amazon S3 bucket for servers with Domain=S3, or your EFS file system for servers with Domain=EFS. The policies attached to this role determine the level of access you want to provide your users when transferring files into and out of your S3 buckets or EFS file systems."];
       sshPublicKeyCount: SshPublicKeyCount.t option
         [@ocaml.doc
           "Specifies the number of SSH public keys stored for the user you specified."];
       userName: UserName.t option
         [@ocaml.doc
           "Specifies the name of the user whose ARN was specified. User names are used for authentication purposes."]}
-    let context_ = "ListedUser"
-    let make ?homeDirectory =
-      fun ?homeDirectoryType ->
-        fun ?role ->
-          fun ?sshPublicKeyCount ->
-            fun ?userName ->
-              fun ~arn ->
+    let make ?arn =
+      fun ?homeDirectory ->
+        fun ?homeDirectoryType ->
+          fun ?role ->
+            fun ?sshPublicKeyCount ->
+              fun ?userName ->
                 fun () ->
                   {
+                    arn;
                     homeDirectory;
                     homeDirectoryType;
                     role;
                     sshPublicKeyCount;
-                    userName;
-                    arn
+                    userName
                   }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (Arn.to_value x.arn)));
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
         ("HomeDirectory",
           (Option.map x.homeDirectory ~f:HomeDirectory.to_value));
         ("HomeDirectoryType",
@@ -2243,75 +3993,74 @@ module ListedUser =
       let homeDirectory =
         (Option.map ~f:HomeDirectory.of_xml)
           (Xml.child xml_arg0 "HomeDirectory") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?userName ?sshPublicKeyCount ?role ?homeDirectoryType
-        ?homeDirectory ~arn ()
+        ?homeDirectory ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map json "UserName" UserName.of_json in
+    let of_json json__ =
+      let userName = field_map json__ "UserName" UserName.of_json in
       let sshPublicKeyCount =
-        field_map json "SshPublicKeyCount" SshPublicKeyCount.of_json in
-      let role = field_map json "Role" Role.of_json in
+        field_map json__ "SshPublicKeyCount" SshPublicKeyCount.of_json in
+      let role = field_map json__ "Role" Role.of_json in
       let homeDirectoryType =
-        field_map json "HomeDirectoryType" HomeDirectoryType.of_json in
+        field_map json__ "HomeDirectoryType" HomeDirectoryType.of_json in
       let homeDirectory =
-        field_map json "HomeDirectory" HomeDirectory.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
+        field_map json__ "HomeDirectory" HomeDirectory.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
       make ?userName ?sshPublicKeyCount ?role ?homeDirectoryType
-        ?homeDirectory ~arn ()
+        ?homeDirectory ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns properties of the user that you specify."]
 module ListedServer =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "Specifies the unique Amazon Resource Name (ARN) for a server to be listed."];
       domain: Domain.t option
         [@ocaml.doc
-          "Specifies the domain of the storage system that is used for file transfers."];
+          "Specifies the domain of the storage system that is used for file transfers. There are two domains available: Amazon Simple Storage Service (Amazon S3) and Amazon Elastic File System (Amazon EFS). The default value is S3."];
       identityProviderType: IdentityProviderType.t option
         [@ocaml.doc
-          "Specifies the mode of authentication for a server. The default value is SERVICE_MANAGED, which allows you to store and access user credentials within the Amazon Web Services Transfer Family service. Use AWS_DIRECTORY_SERVICE to provide access to Active Directory groups in Amazon Web Services Managed Active Directory or Microsoft Active Directory in your on-premises environment or in Amazon Web Services using AD Connectors. This option also requires you to provide a Directory ID using the IdentityProviderDetails parameter. Use the API_GATEWAY value to integrate with an identity provider of your choosing. The API_GATEWAY setting requires you to provide an API Gateway endpoint URL to call for authentication using the IdentityProviderDetails parameter. Use the AWS_LAMBDA value to directly use a Lambda function as your identity provider. If you choose this value, you must specify the ARN for the lambda function in the Function parameter for the IdentityProviderDetails data type."];
+          "The mode of authentication for a server. The default value is SERVICE_MANAGED, which allows you to store and access user credentials within the Transfer Family service. Use AWS_DIRECTORY_SERVICE to provide access to Active Directory groups in Directory Service for Microsoft Active Directory or Microsoft Active Directory in your on-premises environment or in Amazon Web Services using AD Connector. This option also requires you to provide a Directory ID by using the IdentityProviderDetails parameter. Use the API_GATEWAY value to integrate with an identity provider of your choosing. The API_GATEWAY setting requires you to provide an Amazon API Gateway endpoint URL to call for authentication by using the IdentityProviderDetails parameter. Use the AWS_LAMBDA value to directly use an Lambda function as your identity provider. If you choose this value, you must specify the ARN for the Lambda function in the Function parameter for the IdentityProviderDetails data type."];
       endpointType: EndpointType.t option
         [@ocaml.doc
           "Specifies the type of VPC endpoint that your server is connected to. If your server is connected to a VPC endpoint, your server isn't accessible over the public internet."];
       loggingRole: Role.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the Amazon Web Services Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, user activity can be viewed in your CloudWatch logs."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, you can view user activity in your CloudWatch logs."];
       serverId: ServerId.t option
         [@ocaml.doc
           "Specifies the unique system assigned identifier for the servers that were listed."];
       state: State.t option
         [@ocaml.doc
-          "Specifies the condition of a server for the server that was described. A value of ONLINE indicates that the server can accept jobs and transfer files. A State value of OFFLINE means that the server cannot perform file transfer operations. The states of STARTING and STOPPING indicate that the server is in an intermediate state, either not fully able to respond, or not fully offline. The values of START_FAILED or STOP_FAILED can indicate an error condition."];
+          "The condition of the server that was described. A value of ONLINE indicates that the server can accept jobs and transfer files. A State value of OFFLINE means that the server cannot perform file transfer operations. The states of STARTING and STOPPING indicate that the server is in an intermediate state, either not fully able to respond, or not fully offline. The values of START_FAILED or STOP_FAILED can indicate an error condition."];
       userCount: UserCount.t option
         [@ocaml.doc
           "Specifies the number of users that are assigned to a server you specified with the ServerId."]}
-    let context_ = "ListedServer"
-    let make ?domain =
-      fun ?identityProviderType ->
-        fun ?endpointType ->
-          fun ?loggingRole ->
-            fun ?serverId ->
-              fun ?state ->
-                fun ?userCount ->
-                  fun ~arn ->
+    let make ?arn =
+      fun ?domain ->
+        fun ?identityProviderType ->
+          fun ?endpointType ->
+            fun ?loggingRole ->
+              fun ?serverId ->
+                fun ?state ->
+                  fun ?userCount ->
                     fun () ->
                       {
+                        arn;
                         domain;
                         identityProviderType;
                         endpointType;
                         loggingRole;
                         serverId;
                         state;
-                        userCount;
-                        arn
+                        userCount
                       }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (Arn.to_value x.arn)));
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
         ("Domain", (Option.map x.domain ~f:Domain.to_value));
         ("IdentityProviderType",
           (Option.map x.identityProviderType ~f:IdentityProviderType.to_value));
@@ -2338,22 +4087,22 @@ module ListedServer =
           (Xml.child xml_arg0 "IdentityProviderType") in
       let domain =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?userCount ?state ?serverId ?loggingRole ?endpointType
-        ?identityProviderType ?domain ~arn ()
+        ?identityProviderType ?domain ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userCount = field_map json "UserCount" UserCount.of_json in
-      let state = field_map json "State" State.of_json in
-      let serverId = field_map json "ServerId" ServerId.of_json in
-      let loggingRole = field_map json "LoggingRole" Role.of_json in
-      let endpointType = field_map json "EndpointType" EndpointType.of_json in
+    let of_json json__ =
+      let userCount = field_map json__ "UserCount" UserCount.of_json in
+      let state = field_map json__ "State" State.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      let loggingRole = field_map json__ "LoggingRole" Role.of_json in
+      let endpointType = field_map json__ "EndpointType" EndpointType.of_json in
       let identityProviderType =
-        field_map json "IdentityProviderType" IdentityProviderType.of_json in
-      let domain = field_map json "Domain" Domain.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
+        field_map json__ "IdentityProviderType" IdentityProviderType.of_json in
+      let domain = field_map json__ "Domain" Domain.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
       make ?userCount ?state ?serverId ?loggingRole ?endpointType
-        ?identityProviderType ?domain ~arn ()
+        ?identityProviderType ?domain ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns properties of a file transfer protocol-enabled server that was specified."]
@@ -2364,8 +4113,12 @@ module SecurityPolicyName =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:100) >>=
-             (fun () -> check_pattern i ~pattern:"TransferSecurityPolicy-.+"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"Transfer[A-Za-z0-9]*SecurityPolicy-[A-Za-z0-9-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2375,6 +4128,178 @@ module SecurityPolicyName =
     let of_json j = string_of_json ~kind:"SecurityPolicyName" j
     let to_json = simple_to_json to_value
   end
+module ListedProfile =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the specified profile."];
+      profileId: ProfileId.t option
+        [@ocaml.doc
+          "A unique identifier for the local or partner AS2 profile."];
+      as2Id: As2Id.t option
+        [@ocaml.doc
+          "The As2Id is the AS2-name, as defined in the RFC 4130. For inbound transfers, this is the AS2-From header for the AS2 messages sent from the partner. For outbound connectors, this is the AS2-To header for the AS2 messages sent to the partner using the StartFileTransfer API operation. This ID cannot include spaces."];
+      profileType: ProfileType.t option
+        [@ocaml.doc
+          "Indicates whether to list only LOCAL type profiles or only PARTNER type profiles. If not supplied in the request, the command lists all types of profiles."]}
+    let make ?arn =
+      fun ?profileId ->
+        fun ?as2Id ->
+          fun ?profileType ->
+            fun () -> { arn; profileId; as2Id; profileType }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("ProfileId", (Option.map x.profileId ~f:ProfileId.to_value));
+        ("As2Id", (Option.map x.as2Id ~f:As2Id.to_value));
+        ("ProfileType", (Option.map x.profileType ~f:ProfileType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileType =
+        (Option.map ~f:ProfileType.of_xml) (Xml.child xml_arg0 "ProfileType") in
+      let as2Id = (Option.map ~f:As2Id.of_xml) (Xml.child xml_arg0 "As2Id") in
+      let profileId =
+        (Option.map ~f:ProfileId.of_xml) (Xml.child xml_arg0 "ProfileId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?profileType ?as2Id ?profileId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileType = field_map json__ "ProfileType" ProfileType.of_json in
+      let as2Id = field_map json__ "As2Id" As2Id.of_json in
+      let profileId = field_map json__ "ProfileId" ProfileId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?profileType ?as2Id ?profileId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the properties of the profile that was specified."]
+module ListedHostKey =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc "The unique Amazon Resource Name (ARN) of the host key."];
+      hostKeyId: HostKeyId.t option
+        [@ocaml.doc "A unique identifier for the host key."];
+      fingerprint: HostKeyFingerprint.t option
+        [@ocaml.doc
+          "The public key fingerprint, which is a short sequence of bytes used to identify the longer public key."];
+      description: HostKeyDescription.t option
+        [@ocaml.doc
+          "The current description for the host key. You can change it by calling the UpdateHostKey operation and providing a new description."];
+      type_: HostKeyType.t option
+        [@ocaml.doc
+          "The encryption algorithm that is used for the host key. The Type parameter is specified by using one of the following values: ssh-rsa ssh-ed25519 ecdsa-sha2-nistp256 ecdsa-sha2-nistp384 ecdsa-sha2-nistp521"];
+      dateImported: DateImported.t option
+        [@ocaml.doc
+          "The date on which the host key was added to the server."]}
+    let make ?arn =
+      fun ?hostKeyId ->
+        fun ?fingerprint ->
+          fun ?description ->
+            fun ?type_ ->
+              fun ?dateImported ->
+                fun () ->
+                  {
+                    arn;
+                    hostKeyId;
+                    fingerprint;
+                    description;
+                    type_;
+                    dateImported
+                  }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("HostKeyId", (Option.map x.hostKeyId ~f:HostKeyId.to_value));
+        ("Fingerprint",
+          (Option.map x.fingerprint ~f:HostKeyFingerprint.to_value));
+        ("Description",
+          (Option.map x.description ~f:HostKeyDescription.to_value));
+        ("Type", (Option.map x.type_ ~f:HostKeyType.to_value));
+        ("DateImported",
+          (Option.map x.dateImported ~f:DateImported.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateImported =
+        (Option.map ~f:DateImported.of_xml)
+          (Xml.child xml_arg0 "DateImported") in
+      let type_ =
+        (Option.map ~f:HostKeyType.of_xml) (Xml.child xml_arg0 "Type") in
+      let description =
+        (Option.map ~f:HostKeyDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let fingerprint =
+        (Option.map ~f:HostKeyFingerprint.of_xml)
+          (Xml.child xml_arg0 "Fingerprint") in
+      let hostKeyId =
+        (Option.map ~f:HostKeyId.of_xml) (Xml.child xml_arg0 "HostKeyId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?dateImported ?type_ ?description ?fingerprint ?hostKeyId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateImported = field_map json__ "DateImported" DateImported.of_json in
+      let type_ = field_map json__ "Type" HostKeyType.of_json in
+      let description =
+        field_map json__ "Description" HostKeyDescription.of_json in
+      let fingerprint =
+        field_map json__ "Fingerprint" HostKeyFingerprint.of_json in
+      let hostKeyId = field_map json__ "HostKeyId" HostKeyId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?dateImported ?type_ ?description ?fingerprint ?hostKeyId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns properties of the host key that's specified."]
+module ConnectorFileTransferResult =
+  struct
+    type nonrec t =
+      {
+      filePath: FilePath.t option
+        [@ocaml.doc
+          "The filename and path to where the file was sent to or retrieved from."];
+      statusCode: TransferTableStatus.t option
+        [@ocaml.doc "The current status for the transfer."];
+      failureCode: FailureCode.t option
+        [@ocaml.doc
+          "For transfers that fail, this parameter contains a code indicating the reason. For example, RETRIEVE_FILE_NOT_FOUND"];
+      failureMessage: Message.t option
+        [@ocaml.doc
+          "For transfers that fail, this parameter describes the reason for the failure."]}
+    let make ?filePath =
+      fun ?statusCode ->
+        fun ?failureCode ->
+          fun ?failureMessage ->
+            fun () -> { filePath; statusCode; failureCode; failureMessage }
+    let to_value x =
+      structure_to_value
+        [("FilePath", (Option.map x.filePath ~f:FilePath.to_value));
+        ("StatusCode",
+          (Option.map x.statusCode ~f:TransferTableStatus.to_value));
+        ("FailureCode", (Option.map x.failureCode ~f:FailureCode.to_value));
+        ("FailureMessage", (Option.map x.failureMessage ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureMessage =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "FailureMessage") in
+      let failureCode =
+        (Option.map ~f:FailureCode.of_xml) (Xml.child xml_arg0 "FailureCode") in
+      let statusCode =
+        (Option.map ~f:TransferTableStatus.of_xml)
+          (Xml.child xml_arg0 "StatusCode") in
+      let filePath =
+        (Option.map ~f:FilePath.of_xml) (Xml.child xml_arg0 "FilePath") in
+      make ?failureMessage ?failureCode ?statusCode ?filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureMessage = field_map json__ "FailureMessage" Message.of_json in
+      let failureCode = field_map json__ "FailureCode" FailureCode.of_json in
+      let statusCode =
+        field_map json__ "StatusCode" TransferTableStatus.of_json in
+      let filePath = field_map json__ "FilePath" FilePath.of_json in
+      make ?failureMessage ?failureCode ?statusCode ?filePath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the details for files transferred using an SFTP connector, during a single transfer."]
 module ListedExecution =
   struct
     type nonrec t =
@@ -2386,7 +4311,7 @@ module ListedExecution =
           "A structure that describes the Amazon S3 or EFS file location. This is the file location when the execution begins: if the file is being copied, this is the initial (as opposed to destination) file location."];
       serviceMetadata: ServiceMetadata.t option
         [@ocaml.doc
-          "A container object for the session details associated with a workflow."];
+          "A container object for the session details that are associated with a workflow."];
       status: ExecutionStatus.t option
         [@ocaml.doc
           "The status is one of the execution. Can be in progress, completed, exception encountered, or handling the exception."]}
@@ -2418,32 +4343,245 @@ module ListedExecution =
         (Option.map ~f:ExecutionId.of_xml) (Xml.child xml_arg0 "ExecutionId") in
       make ?status ?serviceMetadata ?initialFileLocation ?executionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ExecutionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ExecutionStatus.of_json in
       let serviceMetadata =
-        field_map json "ServiceMetadata" ServiceMetadata.of_json in
+        field_map json__ "ServiceMetadata" ServiceMetadata.of_json in
       let initialFileLocation =
-        field_map json "InitialFileLocation" FileLocation.of_json in
-      let executionId = field_map json "ExecutionId" ExecutionId.of_json in
+        field_map json__ "InitialFileLocation" FileLocation.of_json in
+      let executionId = field_map json__ "ExecutionId" ExecutionId.of_json in
       make ?status ?serviceMetadata ?initialFileLocation ?executionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns properties of the execution that is specified."]
+module ListedConnector =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the specified connector."];
+      connectorId: ConnectorId.t option
+        [@ocaml.doc "The unique identifier for the connector."];
+      url: Url.t option
+        [@ocaml.doc
+          "The URL of the partner's AS2 or SFTP endpoint. When creating AS2 connectors or service-managed SFTP connectors (connectors without egress configuration), you must provide a URL to specify the remote server endpoint. For VPC Lattice type connectors, the URL must be null."]}
+    let make ?arn =
+      fun ?connectorId -> fun ?url -> fun () -> { arn; connectorId; url }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("ConnectorId", (Option.map x.connectorId ~f:ConnectorId.to_value));
+        ("Url", (Option.map x.url ~f:Url.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "Url") in
+      let connectorId =
+        (Option.map ~f:ConnectorId.of_xml) (Xml.child xml_arg0 "ConnectorId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?url ?connectorId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let url = field_map json__ "Url" Url.of_json in
+      let connectorId = field_map json__ "ConnectorId" ConnectorId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?url ?connectorId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns details of the connector that is specified."]
+module ListedCertificate =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the specified certificate."];
+      certificateId: CertificateId.t option
+        [@ocaml.doc
+          "An array of identifiers for the imported certificates. You use this identifier for working with profiles and partner profiles."];
+      usage: CertificateUsageType.t option
+        [@ocaml.doc
+          "Specifies how this certificate is used. It can be used in the following ways: SIGNING: For signing AS2 messages ENCRYPTION: For encrypting AS2 messages TLS: For securing AS2 communications sent over HTTPS"];
+      status: CertificateStatusType.t option
+        [@ocaml.doc
+          "The certificate can be either ACTIVE, PENDING_ROTATION, or INACTIVE. PENDING_ROTATION means that this certificate will replace the current certificate when it expires."];
+      activeDate: CertDate.t option
+        [@ocaml.doc
+          "An optional date that specifies when the certificate becomes active. If you do not specify a value, ActiveDate takes the same value as NotBeforeDate, which is specified by the CA."];
+      inactiveDate: CertDate.t option
+        [@ocaml.doc
+          "An optional date that specifies when the certificate becomes inactive. If you do not specify a value, InactiveDate takes the same value as NotAfterDate, which is specified by the CA."];
+      type_: CertificateType.t option
+        [@ocaml.doc
+          "The type for the certificate. If a private key has been specified for the certificate, its type is CERTIFICATE_WITH_PRIVATE_KEY. If there is no private key, the type is CERTIFICATE."];
+      description: Description.t option
+        [@ocaml.doc
+          "The name or short description that's used to identify the certificate."]}
+    let make ?arn =
+      fun ?certificateId ->
+        fun ?usage ->
+          fun ?status ->
+            fun ?activeDate ->
+              fun ?inactiveDate ->
+                fun ?type_ ->
+                  fun ?description ->
+                    fun () ->
+                      {
+                        arn;
+                        certificateId;
+                        usage;
+                        status;
+                        activeDate;
+                        inactiveDate;
+                        type_;
+                        description
+                      }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("CertificateId",
+          (Option.map x.certificateId ~f:CertificateId.to_value));
+        ("Usage", (Option.map x.usage ~f:CertificateUsageType.to_value));
+        ("Status", (Option.map x.status ~f:CertificateStatusType.to_value));
+        ("ActiveDate", (Option.map x.activeDate ~f:CertDate.to_value));
+        ("InactiveDate", (Option.map x.inactiveDate ~f:CertDate.to_value));
+        ("Type", (Option.map x.type_ ~f:CertificateType.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let type_ =
+        (Option.map ~f:CertificateType.of_xml) (Xml.child xml_arg0 "Type") in
+      let inactiveDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "InactiveDate") in
+      let activeDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "ActiveDate") in
+      let status =
+        (Option.map ~f:CertificateStatusType.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let usage =
+        (Option.map ~f:CertificateUsageType.of_xml)
+          (Xml.child xml_arg0 "Usage") in
+      let certificateId =
+        (Option.map ~f:CertificateId.of_xml)
+          (Xml.child xml_arg0 "CertificateId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?description ?type_ ?inactiveDate ?activeDate ?status ?usage
+        ?certificateId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let type_ = field_map json__ "Type" CertificateType.of_json in
+      let inactiveDate = field_map json__ "InactiveDate" CertDate.of_json in
+      let activeDate = field_map json__ "ActiveDate" CertDate.of_json in
+      let status = field_map json__ "Status" CertificateStatusType.of_json in
+      let usage = field_map json__ "Usage" CertificateUsageType.of_json in
+      let certificateId =
+        field_map json__ "CertificateId" CertificateId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?description ?type_ ?inactiveDate ?activeDate ?status ?usage
+        ?certificateId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the properties of a certificate."]
+module ListedAgreement =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the specified agreement."];
+      agreementId: AgreementId.t option
+        [@ocaml.doc
+          "A unique identifier for the agreement. This identifier is returned when you create an agreement."];
+      description: Description.t option
+        [@ocaml.doc
+          "The current description for the agreement. You can change it by calling the UpdateAgreement operation and providing a new description."];
+      status: AgreementStatusType.t option
+        [@ocaml.doc "The agreement can be either ACTIVE or INACTIVE."];
+      serverId: ServerId.t option
+        [@ocaml.doc "The unique identifier for the agreement."];
+      localProfileId: ProfileId.t option
+        [@ocaml.doc "A unique identifier for the AS2 local profile."];
+      partnerProfileId: ProfileId.t option
+        [@ocaml.doc "A unique identifier for the partner profile."]}
+    let make ?arn =
+      fun ?agreementId ->
+        fun ?description ->
+          fun ?status ->
+            fun ?serverId ->
+              fun ?localProfileId ->
+                fun ?partnerProfileId ->
+                  fun () ->
+                    {
+                      arn;
+                      agreementId;
+                      description;
+                      status;
+                      serverId;
+                      localProfileId;
+                      partnerProfileId
+                    }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("AgreementId", (Option.map x.agreementId ~f:AgreementId.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Status", (Option.map x.status ~f:AgreementStatusType.to_value));
+        ("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("LocalProfileId",
+          (Option.map x.localProfileId ~f:ProfileId.to_value));
+        ("PartnerProfileId",
+          (Option.map x.partnerProfileId ~f:ProfileId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let partnerProfileId =
+        (Option.map ~f:ProfileId.of_xml)
+          (Xml.child xml_arg0 "PartnerProfileId") in
+      let localProfileId =
+        (Option.map ~f:ProfileId.of_xml)
+          (Xml.child xml_arg0 "LocalProfileId") in
+      let serverId =
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      let status =
+        (Option.map ~f:AgreementStatusType.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let agreementId =
+        (Option.map ~f:AgreementId.of_xml) (Xml.child xml_arg0 "AgreementId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?partnerProfileId ?localProfileId ?serverId ?status ?description
+        ?agreementId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let partnerProfileId =
+        field_map json__ "PartnerProfileId" ProfileId.of_json in
+      let localProfileId =
+        field_map json__ "LocalProfileId" ProfileId.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      let status = field_map json__ "Status" AgreementStatusType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let agreementId = field_map json__ "AgreementId" AgreementId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?partnerProfileId ?localProfileId ?serverId ?status ?description
+        ?agreementId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the properties of an agreement."]
 module ListedAccess =
   struct
     type nonrec t =
       {
       homeDirectory: HomeDirectory.t option
         [@ocaml.doc
-          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory."];
+          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory. You can use the HomeDirectory parameter for HomeDirectoryType when it is set to either PATH or LOGICAL."];
       homeDirectoryType: HomeDirectoryType.t option
         [@ocaml.doc
-          "The type of landing directory (folder) you want your users' home directory to be when they log into the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If you set it LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or EFS paths visible to your users."];
+          "The type of landing directory (folder) that you want your users' home directory to be when they log in to the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or Amazon EFS path as is in their file transfer protocol clients. If you set it to LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or Amazon EFS paths visible to your users. If HomeDirectoryType is LOGICAL, you must provide mappings, using the HomeDirectoryMappings parameter. If, on the other hand, HomeDirectoryType is PATH, you provide an absolute path using the HomeDirectory parameter. You cannot have both HomeDirectory and HomeDirectoryMappings in your template."];
       role: Role.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the IAM role that controls your users' access to your Amazon S3 bucket or EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that controls your users' access to your Amazon S3 bucket or Amazon EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or Amazon EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
       externalId: ExternalId.t option
         [@ocaml.doc
-          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Amazon Web Services Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regex used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
+          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regular expression used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
     let make ?homeDirectory =
       fun ?homeDirectoryType ->
         fun ?role ->
@@ -2470,13 +4608,13 @@ module ListedAccess =
           (Xml.child xml_arg0 "HomeDirectory") in
       make ?externalId ?role ?homeDirectoryType ?homeDirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let externalId = field_map json "ExternalId" ExternalId.of_json in
-      let role = field_map json "Role" Role.of_json in
+    let of_json json__ =
+      let externalId = field_map json__ "ExternalId" ExternalId.of_json in
+      let role = field_map json__ "Role" Role.of_json in
       let homeDirectoryType =
-        field_map json "HomeDirectoryType" HomeDirectoryType.of_json in
+        field_map json__ "HomeDirectoryType" HomeDirectoryType.of_json in
       let homeDirectory =
-        field_map json "HomeDirectory" HomeDirectory.of_json in
+        field_map json__ "HomeDirectory" HomeDirectory.of_json in
       make ?externalId ?role ?homeDirectoryType ?homeDirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2489,6 +4627,9 @@ module Tags =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2512,7 +4653,13 @@ module WorkflowSteps =
   struct
     type nonrec t = WorkflowStep.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:8); i
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkflowStep.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2533,14 +4680,164 @@ module WorkflowSteps =
       list_of_json ~kind:"WorkflowSteps" ~of_json:WorkflowStep.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DescribedWebAppEndpointDetails =
+  struct
+    type nonrec t =
+      {
+      vpc: DescribedWebAppVpcConfig.t option
+        [@ocaml.doc
+          "The VPC configuration details when the web app endpoint is hosted within a VPC. This includes the VPC ID, subnet IDs, and VPC endpoint ID."]}
+    let make ?vpc = fun () -> { vpc }
+    let to_value x =
+      structure_to_value
+        [("Vpc", (Option.map x.vpc ~f:DescribedWebAppVpcConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpc =
+        (Option.map ~f:DescribedWebAppVpcConfig.of_xml)
+          (Xml.child xml_arg0 "Vpc") in
+      make ?vpc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpc = field_map json__ "Vpc" DescribedWebAppVpcConfig.of_json in
+      make ?vpc ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the endpoint configuration details for a web app, including VPC configuration when the endpoint is hosted within a VPC."]
+module DescribedWebAppIdentityProviderDetails =
+  struct
+    type nonrec t =
+      {
+      identityCenterConfig: DescribedIdentityCenterConfig.t option
+        [@ocaml.doc
+          "Returns a structure for your identity provider details. This structure contains the instance ARN and role being used for the web app."]}
+    let make ?identityCenterConfig = fun () -> { identityCenterConfig }
+    let to_value x =
+      structure_to_value
+        [("IdentityCenterConfig",
+           (Option.map x.identityCenterConfig
+              ~f:DescribedIdentityCenterConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityCenterConfig =
+        (Option.map ~f:DescribedIdentityCenterConfig.of_xml)
+          (Xml.child xml_arg0 "IdentityCenterConfig") in
+      make ?identityCenterConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityCenterConfig =
+        field_map json__ "IdentityCenterConfig"
+          DescribedIdentityCenterConfig.of_json in
+      make ?identityCenterConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a structure that contains the identity provider details for your web app."]
+module WebAppEndpointPolicy =
+  struct
+    type nonrec t =
+      | FIPS 
+      | STANDARD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FIPS -> "FIPS"
+      | STANDARD -> "STANDARD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FIPS" -> FIPS
+      | "STANDARD" -> STANDARD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WebAppEndpointPolicy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WebAppEndpointPolicy" j)
+    let to_json = simple_to_json to_value
+  end
+module WebAppUnits =
+  struct
+    type nonrec t =
+      {
+      provisioned: WebAppUnitCount.t option
+        [@ocaml.doc
+          "An integer that represents the number of units for your desired number of concurrent connections, or the number of user sessions on your web app at the same time. Each increment allows an additional 250 concurrent sessions: a value of 1 sets the number of concurrent sessions to 250; 2 sets a value of 500, and so on."]}
+    let make ?provisioned = fun () -> { provisioned }
+    let to_value x =
+      structure_to_value
+        [("Provisioned",
+           (Option.map x.provisioned ~f:WebAppUnitCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let provisioned =
+        (Option.map ~f:WebAppUnitCount.of_xml)
+          (Xml.child xml_arg0 "Provisioned") in
+      make ?provisioned ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let provisioned =
+        field_map json__ "Provisioned" WebAppUnitCount.of_json in
+      make ?provisioned ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains an integer value that represents the value for number of concurrent connections or the user sessions on your web app."]
+module WebAppFaviconFile =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module WebAppLogoFile =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module WebAppTitle =
+  struct
+    type nonrec t = string
+    let context_ = "WebAppTitle"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WebAppTitle" j
+    let to_json = simple_to_json to_value
+  end
 module HomeDirectoryMappings =
   struct
     type nonrec t = HomeDirectoryMapEntry.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:50000) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HomeDirectoryMapEntry.to_value)) |>
         (fun x -> `List x)
@@ -2568,7 +4865,11 @@ module Policy =
     type nonrec t = string
     let context_ = "Policy"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -2610,11 +4911,11 @@ module PosixProfile =
         PosixId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uid") in
       make ?secondaryGids ~gid ~uid ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secondaryGids =
-        field_map json "SecondaryGids" SecondaryGids.of_json in
-      let gid = field_map_exn json "Gid" PosixId.of_json in
-      let uid = field_map_exn json "Uid" PosixId.of_json in
+        field_map json__ "SecondaryGids" SecondaryGids.of_json in
+      let gid = field_map_exn json__ "Gid" PosixId.of_json in
+      let uid = field_map_exn json__ "Uid" PosixId.of_json in
       make ?secondaryGids ~gid ~uid ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2623,7 +4924,13 @@ module SshPublicKeys =
   struct
     type nonrec t = SshPublicKey.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:5); i
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SshPublicKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2649,7 +4956,11 @@ module Certificate =
     type nonrec t = string
     let context_ = "Certificate"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1600); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1600) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -2664,19 +4975,19 @@ module EndpointDetails =
       {
       addressAllocationIds: AddressAllocationIds.t option
         [@ocaml.doc
-          "A list of address allocation IDs that are required to attach an Elastic IP address to your server's endpoint. This property can only be set when EndpointType is set to VPC and it is only valid in the UpdateServer API."];
+          "A list of address allocation IDs that are required to attach an Elastic IP address to your server's endpoint. An address allocation ID corresponds to the allocation ID of an Elastic IP address. This value can be retrieved from the allocationId field from the Amazon EC2 Address data type. One way to retrieve this value is by calling the EC2 DescribeAddresses API. This parameter is optional. Set this parameter if you want to make your VPC endpoint public-facing. For details, see Create an internet-facing endpoint for your server. This property can only be set as follows: EndpointType must be set to VPC The Transfer Family server must be offline. You cannot set this parameter for Transfer Family servers that use the FTP protocol. The server must already have SubnetIds populated (SubnetIds and AddressAllocationIds cannot be updated simultaneously). AddressAllocationIds can't contain duplicates, and must be equal in length to SubnetIds. For example, if you have three subnet IDs, you must also specify three address allocation IDs. Call the UpdateServer API to set or change this parameter. You can't set address allocation IDs for servers that have an IpAddressType set to DUALSTACK You can only set this property if IpAddressType is set to IPV4."];
       subnetIds: SubnetIds.t option
         [@ocaml.doc
           "A list of subnet IDs that are required to host your server endpoint in your VPC. This property can only be set when EndpointType is set to VPC."];
       vpcEndpointId: VpcEndpointId.t option
         [@ocaml.doc
-          "The ID of the VPC endpoint. This property can only be set when EndpointType is set to VPC_ENDPOINT. For more information, see https://docs.aws.amazon.com/transfer/latest/userguide/create-server-in-vpc.html#deprecate-vpc-endpoint."];
+          "The identifier of the VPC endpoint. This property can only be set when EndpointType is set to VPC_ENDPOINT. For more information, see https://docs.aws.amazon.com/transfer/latest/userguide/create-server-in-vpc.html#deprecate-vpc-endpoint."];
       vpcId: VpcId.t option
         [@ocaml.doc
-          "The VPC ID of the VPC in which a server's endpoint will be hosted. This property can only be set when EndpointType is set to VPC."];
+          "The VPC identifier of the VPC in which a server's endpoint will be hosted. This property can only be set when EndpointType is set to VPC."];
       securityGroupIds: SecurityGroupIds.t option
         [@ocaml.doc
-          "A list of security groups IDs that are available to attach to your server's endpoint. This property can only be set when EndpointType is set to VPC. You can edit the SecurityGroupIds property in the UpdateServer API only if you are changing the EndpointType from PUBLIC or VPC_ENDPOINT to VPC. To change security groups associated with your server's VPC endpoint after creation, use the Amazon EC2 ModifyVpcEndpoint API."]}
+          "A list of security groups IDs that are available to attach to your server's endpoint. While SecurityGroupIds appears in the response syntax for consistency with CreateServer and UpdateServer operations, this field is not populated in DescribeServer responses. Security groups are managed at the VPC endpoint level and can be modified outside of the Transfer Family service. To retrieve current security group information, use the EC2 DescribeVpcEndpoints API with the VpcEndpointId returned in the response. This property can only be set when EndpointType is set to VPC. You can edit the SecurityGroupIds property in the UpdateServer API only if you are changing the EndpointType from PUBLIC or VPC_ENDPOINT to VPC. To change security groups associated with your server's VPC endpoint after creation, use the Amazon EC2 ModifyVpcEndpoint API."]}
     let make ?addressAllocationIds =
       fun ?subnetIds ->
         fun ?vpcEndpointId ->
@@ -2718,33 +5029,20 @@ module EndpointDetails =
       make ?securityGroupIds ?vpcId ?vpcEndpointId ?subnetIds
         ?addressAllocationIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
       let vpcEndpointId =
-        field_map json "VpcEndpointId" VpcEndpointId.of_json in
-      let subnetIds = field_map json "SubnetIds" SubnetIds.of_json in
+        field_map json__ "VpcEndpointId" VpcEndpointId.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
       let addressAllocationIds =
-        field_map json "AddressAllocationIds" AddressAllocationIds.of_json in
+        field_map json__ "AddressAllocationIds" AddressAllocationIds.of_json in
       make ?securityGroupIds ?vpcId ?vpcEndpointId ?subnetIds
         ?addressAllocationIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The virtual private cloud (VPC) endpoint settings that are configured for your file transfer protocol-enabled server. With a VPC endpoint, you can restrict access to your server and resources only within your VPC. To control incoming internet traffic, invoke the UpdateServer API and attach an Elastic IP address to your server's endpoint. After May 19, 2021, you won't be able to create a server using EndpointType=VPC_ENDPOINT in your Amazon Web Servicesaccount if your account hasn't already done so before May 19, 2021. If you have already created servers with EndpointType=VPC_ENDPOINT in your Amazon Web Servicesaccount on or before May 19, 2021, you will not be affected. After this date, use EndpointType=VPC. For more information, see https://docs.aws.amazon.com/transfer/latest/userguide/create-server-in-vpc.html#deprecate-vpc-endpoint."]
-module HostKeyFingerprint =
-  struct
-    type nonrec t = string
-    let context_ = "HostKeyFingerprint"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"HostKeyFingerprint" j
-    let to_json = simple_to_json to_value
-  end
+       "The virtual private cloud (VPC) endpoint settings that are configured for your file transfer protocol-enabled server. With a VPC endpoint, you can restrict access to your server and resources only within your VPC. To control incoming internet traffic, invoke the UpdateServer API and attach an Elastic IP address to your server's endpoint. After May 19, 2021, you won't be able to create a server using EndpointType=VPC_ENDPOINT in your Amazon Web Services account if your account hasn't already done so before May 19, 2021. If you have already created servers with EndpointType=VPC_ENDPOINT in your Amazon Web Services account on or before May 19, 2021, you will not be affected. After this date, use EndpointType=VPC. For more information, see https://docs.aws.amazon.com/transfer/latest/userguide/create-server-in-vpc.html#deprecate-vpc-endpoint. It is recommended that you use VPC as the EndpointType. With this endpoint type, you have the option to directly associate up to three Elastic IPv4 addresses (BYO IP included) with your server's endpoint and use VPC security groups to restrict traffic by the client's public IP address. This is not possible with EndpointType set to VPC_ENDPOINT."]
 module IdentityProviderDetails =
   struct
     type nonrec t =
@@ -2754,26 +5052,43 @@ module IdentityProviderDetails =
           "Provides the location of the service endpoint used to authenticate users."];
       invocationRole: Role.t option
         [@ocaml.doc
-          "Provides the type of InvocationRole used to authenticate the user account."];
+          "This parameter is only applicable if your IdentityProviderType is API_GATEWAY. Provides the type of InvocationRole used to authenticate the user account."];
       directoryId: DirectoryId.t option
         [@ocaml.doc
-          "The identifier of the Amazon Web Services Directory Service directory that you want to stop sharing."];
+          "The identifier of the Directory Service directory that you want to use as your identity provider."];
       function_: Function.t option
         [@ocaml.doc
-          "The ARN for a lambda function to use for the Identity provider."]}
+          "The ARN for a Lambda function to use for the Identity provider."];
+      sftpAuthenticationMethods: SftpAuthenticationMethods.t option
+        [@ocaml.doc
+          "For SFTP-enabled servers, and for custom identity providers only, you can specify whether to authenticate using a password, SSH key pair, or both. PASSWORD - users must provide their password to connect. PUBLIC_KEY - users must provide their private key to connect. PUBLIC_KEY_OR_PASSWORD - users can authenticate with either their password or their key. This is the default value. PUBLIC_KEY_AND_PASSWORD - users must provide both their private key and their password to connect. The server checks the key first, and then if the key is valid, the system prompts for a password. If the private key provided does not match the public key that is stored, authentication fails."]}
     let make ?url =
       fun ?invocationRole ->
         fun ?directoryId ->
           fun ?function_ ->
-            fun () -> { url; invocationRole; directoryId; function_ }
+            fun ?sftpAuthenticationMethods ->
+              fun () ->
+                {
+                  url;
+                  invocationRole;
+                  directoryId;
+                  function_;
+                  sftpAuthenticationMethods
+                }
     let to_value x =
       structure_to_value
         [("Url", (Option.map x.url ~f:Url.to_value));
         ("InvocationRole", (Option.map x.invocationRole ~f:Role.to_value));
         ("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
-        ("Function", (Option.map x.function_ ~f:Function.to_value))]
+        ("Function", (Option.map x.function_ ~f:Function.to_value));
+        ("SftpAuthenticationMethods",
+          (Option.map x.sftpAuthenticationMethods
+             ~f:SftpAuthenticationMethods.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sftpAuthenticationMethods =
+        (Option.map ~f:SftpAuthenticationMethods.of_xml)
+          (Xml.child xml_arg0 "SftpAuthenticationMethods") in
       let function_ =
         (Option.map ~f:Function.of_xml) (Xml.child xml_arg0 "Function") in
       let directoryId =
@@ -2781,17 +5096,67 @@ module IdentityProviderDetails =
       let invocationRole =
         (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "InvocationRole") in
       let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "Url") in
-      make ?function_ ?directoryId ?invocationRole ?url ()
+      make ?sftpAuthenticationMethods ?function_ ?directoryId ?invocationRole
+        ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let function_ = field_map json "Function" Function.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
-      let invocationRole = field_map json "InvocationRole" Role.of_json in
-      let url = field_map json "Url" Url.of_json in
-      make ?function_ ?directoryId ?invocationRole ?url ()
+    let of_json json__ =
+      let sftpAuthenticationMethods =
+        field_map json__ "SftpAuthenticationMethods"
+          SftpAuthenticationMethods.of_json in
+      let function_ = field_map json__ "Function" Function.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      let invocationRole = field_map json__ "InvocationRole" Role.of_json in
+      let url = field_map json__ "Url" Url.of_json in
+      make ?sftpAuthenticationMethods ?function_ ?directoryId ?invocationRole
+        ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information related to the type of user authentication that is in use for a file transfer protocol-enabled server's users. A server can have only one method of authentication."]
+module IpAddressType =
+  struct
+    type nonrec t =
+      | IPV4 
+      | DUALSTACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPV4 -> "IPV4"
+      | DUALSTACK -> "DUALSTACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV4" -> IPV4
+      | "DUALSTACK" -> DUALSTACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IpAddressType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpAddressType" j)
+    let to_json = simple_to_json to_value
+  end
+module NullableRole =
+  struct
+    type nonrec t = string
+    let context_ = "NullableRole"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"(|arn:.*role/\\S+)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NullableRole" j
+    let to_json = simple_to_json to_value
+  end
 module PostAuthenticationLoginBanner =
   struct
     type nonrec t = string
@@ -2799,8 +5164,11 @@ module PostAuthenticationLoginBanner =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:512) >>=
-             (fun () -> check_pattern i ~pattern:"[\\x09-\\x0D\\x20-\\x7E]*"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:4096) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[\\x09-\\x0D\\x20-\\x7E]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2817,8 +5185,11 @@ module PreAuthenticationLoginBanner =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:512) >>=
-             (fun () -> check_pattern i ~pattern:"[\\x09-\\x0D\\x20-\\x7E]*"));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:4096) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[\\x09-\\x0D\\x20-\\x7E]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2834,34 +5205,64 @@ module ProtocolDetails =
       {
       passiveIp: PassiveIp.t option
         [@ocaml.doc
-          "Indicates passive mode, for FTP and FTPS protocols. Enter a single dotted-quad IPv4 address, such as the external IP address of a firewall, router, or load balancer. For example: aws transfer update-server --protocol-details PassiveIp=0.0.0.0 Replace 0.0.0.0 in the example above with the actual IP address you want to use. If you change the PassiveIp value, you must stop and then restart your Transfer server for the change to take effect. For details on using Passive IP (PASV) in a NAT environment, see Configuring your FTPS server behind a firewall or NAT with Amazon Web Services Transfer Family."];
+          "Indicates passive mode, for FTP and FTPS protocols. Enter a single IPv4 address, such as the public IP address of a firewall, router, or load balancer. For example: aws transfer update-server --protocol-details PassiveIp=0.0.0.0 Replace 0.0.0.0 in the example above with the actual IP address you want to use. If you change the PassiveIp value, you must stop and then restart your Transfer Family server for the change to take effect. For details on using passive mode (PASV) in a NAT environment, see Configuring your FTPS server behind a firewall or NAT with Transfer Family. Additionally, avoid placing Network Load Balancers (NLBs) or NAT gateways in front of Transfer Family servers. This configuration increases costs and can cause performance issues. When NLBs or NATs are in the communication path, Transfer Family cannot accurately recognize client IP addresses, which impacts connection sharding and limits FTPS servers to only 300 simultaneous connections instead of 10,000. If you must use an NLB, use port 21 for health checks and enable TLS session resumption by setting TlsSessionResumptionMode = ENFORCED. For optimal performance, migrate to VPC endpoints with Elastic IP addresses instead of using NLBs. For more details, see Avoid placing NLBs and NATs in front of Transfer Family. Special values The AUTO and 0.0.0.0 are special values for the PassiveIp parameter. The value PassiveIp=AUTO is assigned by default to FTP and FTPS type servers. In this case, the server automatically responds with one of the endpoint IPs within the PASV response. PassiveIp=0.0.0.0 has a more unique application for its usage. For example, if you have a High Availability (HA) Network Load Balancer (NLB) environment, where you have 3 subnets, you can only specify a single IP address using the PassiveIp parameter. This reduces the effectiveness of having High Availability. In this case, you can specify PassiveIp=0.0.0.0. This tells the client to use the same IP address as the Control connection and utilize all AZs for their connections. Note, however, that not all FTP clients support the PassiveIp=0.0.0.0 response. FileZilla and WinSCP do support it. If you are using other clients, check to see if your client supports the PassiveIp=0.0.0.0 response."];
       tlsSessionResumptionMode: TlsSessionResumptionMode.t option
         [@ocaml.doc
-          "A property used with Transfer servers that use the FTPS protocol. TLS Session Resumption provides a mechanism to resume or share a negotiated secret key between the control and data connection for an FTPS session. TlsSessionResumptionMode determines whether or not the server resumes recent, negotiated sessions through a unique session ID. This property is available during CreateServer and UpdateServer calls. If a TlsSessionResumptionMode value is not specified during CreateServer, it is set to ENFORCED by default. DISABLED: the server does not process TLS session resumption client requests and creates a new TLS session for each request. ENABLED: the server processes and accepts clients that are performing TLS session resumption. The server doesn't reject client data connections that do not perform the TLS session resumption client processing. ENFORCED: the server processes and accepts clients that are performing TLS session resumption. The server rejects client data connections that do not perform the TLS session resumption client processing. Before you set the value to ENFORCED, test your clients. Not all FTPS clients perform TLS session resumption. So, if you choose to enforce TLS session resumption, you prevent any connections from FTPS clients that don't perform the protocol negotiation. To determine whether or not you can use the ENFORCED value, you need to test your clients."]}
+          "A property used with Transfer Family servers that use the FTPS protocol. TLS Session Resumption provides a mechanism to resume or share a negotiated secret key between the control and data connection for an FTPS session. TlsSessionResumptionMode determines whether or not the server resumes recent, negotiated sessions through a unique session ID. This property is available during CreateServer and UpdateServer calls. If a TlsSessionResumptionMode value is not specified during CreateServer, it is set to ENFORCED by default. DISABLED: the server does not process TLS session resumption client requests and creates a new TLS session for each request. ENABLED: the server processes and accepts clients that are performing TLS session resumption. The server doesn't reject client data connections that do not perform the TLS session resumption client processing. ENFORCED: the server processes and accepts clients that are performing TLS session resumption. The server rejects client data connections that do not perform the TLS session resumption client processing. Before you set the value to ENFORCED, test your clients. Not all FTPS clients perform TLS session resumption. So, if you choose to enforce TLS session resumption, you prevent any connections from FTPS clients that don't perform the protocol negotiation. To determine whether or not you can use the ENFORCED value, you need to test your clients."];
+      setStatOption: SetStatOption.t option
+        [@ocaml.doc
+          "Use the SetStatOption to ignore the error that is generated when the client attempts to use SETSTAT on a file you are uploading to an S3 bucket. Some SFTP file transfer clients can attempt to change the attributes of remote files, including timestamp and permissions, using commands, such as SETSTAT when uploading the file. However, these commands are not compatible with object storage systems, such as Amazon S3. Due to this incompatibility, file uploads from these clients can result in errors even when the file is otherwise successfully uploaded. Set the value to ENABLE_NO_OP to have the Transfer Family server ignore the SETSTAT command, and upload files without needing to make any changes to your SFTP client. While the SetStatOption ENABLE_NO_OP setting ignores the error, it does generate a log entry in Amazon CloudWatch Logs, so you can determine when the client is making a SETSTAT call. If you want to preserve the original timestamp for your file, and modify other file attributes using SETSTAT, you can use Amazon EFS as backend storage with Transfer Family."];
+      as2Transports: As2Transports.t option
+        [@ocaml.doc
+          "Indicates the transport method for the AS2 messages. Currently, only HTTP is supported."]}
     let make ?passiveIp =
       fun ?tlsSessionResumptionMode ->
-        fun () -> { passiveIp; tlsSessionResumptionMode }
+        fun ?setStatOption ->
+          fun ?as2Transports ->
+            fun () ->
+              {
+                passiveIp;
+                tlsSessionResumptionMode;
+                setStatOption;
+                as2Transports
+              }
     let to_value x =
       structure_to_value
         [("PassiveIp", (Option.map x.passiveIp ~f:PassiveIp.to_value));
         ("TlsSessionResumptionMode",
           (Option.map x.tlsSessionResumptionMode
-             ~f:TlsSessionResumptionMode.to_value))]
+             ~f:TlsSessionResumptionMode.to_value));
+        ("SetStatOption",
+          (Option.map x.setStatOption ~f:SetStatOption.to_value));
+        ("As2Transports",
+          (Option.map x.as2Transports ~f:As2Transports.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let as2Transports =
+        (Option.map ~f:As2Transports.of_xml)
+          (Xml.child xml_arg0 "As2Transports") in
+      let setStatOption =
+        (Option.map ~f:SetStatOption.of_xml)
+          (Xml.child xml_arg0 "SetStatOption") in
       let tlsSessionResumptionMode =
         (Option.map ~f:TlsSessionResumptionMode.of_xml)
           (Xml.child xml_arg0 "TlsSessionResumptionMode") in
       let passiveIp =
         (Option.map ~f:PassiveIp.of_xml) (Xml.child xml_arg0 "PassiveIp") in
-      make ?tlsSessionResumptionMode ?passiveIp ()
+      make ?as2Transports ?setStatOption ?tlsSessionResumptionMode ?passiveIp
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let as2Transports =
+        field_map json__ "As2Transports" As2Transports.of_json in
+      let setStatOption =
+        field_map json__ "SetStatOption" SetStatOption.of_json in
       let tlsSessionResumptionMode =
-        field_map json "TlsSessionResumptionMode"
+        field_map json__ "TlsSessionResumptionMode"
           TlsSessionResumptionMode.of_json in
-      let passiveIp = field_map json "PassiveIp" PassiveIp.of_json in
-      make ?tlsSessionResumptionMode ?passiveIp ()
+      let passiveIp = field_map json__ "PassiveIp" PassiveIp.of_json in
+      make ?as2Transports ?setStatOption ?tlsSessionResumptionMode ?passiveIp
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The protocol settings that are configured for your server."]
@@ -2871,8 +5272,11 @@ module Protocols =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Protocol.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2893,29 +5297,131 @@ module Protocols =
       list_of_json ~kind:"Protocols" ~of_json:Protocol.of_json j
     let to_json v = composed_to_json to_value v
   end
+module S3StorageOptions =
+  struct
+    type nonrec t =
+      {
+      directoryListingOptimization: DirectoryListingOptimization.t option
+        [@ocaml.doc
+          "Specifies whether or not performance for your Amazon S3 directories is optimized. If using the console, this is enabled by default. If using the API or CLI, this is disabled by default. By default, home directory mappings have a TYPE of DIRECTORY. If you enable this option, you would then need to explicitly set the HomeDirectoryMapEntry Type to FILE if you want a mapping to have a file target."]}
+    let make ?directoryListingOptimization =
+      fun () -> { directoryListingOptimization }
+    let to_value x =
+      structure_to_value
+        [("DirectoryListingOptimization",
+           (Option.map x.directoryListingOptimization
+              ~f:DirectoryListingOptimization.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directoryListingOptimization =
+        (Option.map ~f:DirectoryListingOptimization.of_xml)
+          (Xml.child xml_arg0 "DirectoryListingOptimization") in
+      make ?directoryListingOptimization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directoryListingOptimization =
+        field_map json__ "DirectoryListingOptimization"
+          DirectoryListingOptimization.of_json in
+      make ?directoryListingOptimization ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon S3 storage options that are configured for your server."]
+module ServiceManagedEgressIpAddresses =
+  struct
+    type nonrec t = ServiceManagedEgressIpAddress.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceManagedEgressIpAddress.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceManagedEgressIpAddress.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceManagedEgressIpAddresses"
+        ~of_json:ServiceManagedEgressIpAddress.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StructuredLogDestinations =
+  struct
+    type nonrec t = Arn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Arn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StructuredLogDestinations" ~of_json:Arn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module WorkflowDetails =
   struct
     type nonrec t =
       {
-      onUpload: OnUploadWorkflowDetails.t
+      onUpload: OnUploadWorkflowDetails.t option
         [@ocaml.doc
-          "A trigger that starts a workflow: the workflow begins to execute after a file is uploaded. To remove an associated workflow from a server, you can provide an empty OnUpload object, as in the following example. aws transfer update-server --server-id s-01234567890abcdef --workflow-details '\\{\"OnUpload\":\\[\\]\\}'"]}
-    let context_ = "WorkflowDetails"
-    let make ~onUpload = fun () -> { onUpload }
+          "A trigger that starts a workflow: the workflow begins to execute after a file is uploaded. To remove an associated workflow from a server, you can provide an empty OnUpload object, as in the following example. aws transfer update-server --server-id s-01234567890abcdef --workflow-details '\\{\"OnUpload\":\\[\\]\\}' OnUpload can contain a maximum of one WorkflowDetail object."];
+      onPartialUpload: OnPartialUploadWorkflowDetails.t option
+        [@ocaml.doc
+          "A trigger that starts a workflow if a file is only partially uploaded. You can attach a workflow to a server that executes whenever there is a partial upload. A partial upload occurs when a file is open when the session disconnects. OnPartialUpload can contain a maximum of one WorkflowDetail object."]}
+    let make ?onUpload =
+      fun ?onPartialUpload -> fun () -> { onUpload; onPartialUpload }
     let to_value x =
       structure_to_value
-        [("OnUpload", (Some (OnUploadWorkflowDetails.to_value x.onUpload)))]
+        [("OnUpload",
+           (Option.map x.onUpload ~f:OnUploadWorkflowDetails.to_value));
+        ("OnPartialUpload",
+          (Option.map x.onPartialUpload
+             ~f:OnPartialUploadWorkflowDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let onPartialUpload =
+        (Option.map ~f:OnPartialUploadWorkflowDetails.of_xml)
+          (Xml.child xml_arg0 "OnPartialUpload") in
       let onUpload =
-        OnUploadWorkflowDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OnUpload") in
-      make ~onUpload ()
+        (Option.map ~f:OnUploadWorkflowDetails.of_xml)
+          (Xml.child xml_arg0 "OnUpload") in
+      make ?onPartialUpload ?onUpload ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let onPartialUpload =
+        field_map json__ "OnPartialUpload"
+          OnPartialUploadWorkflowDetails.of_json in
       let onUpload =
-        field_map_exn json "OnUpload" OnUploadWorkflowDetails.of_json in
-      make ~onUpload ()
+        field_map json__ "OnUpload" OnUploadWorkflowDetails.of_json in
+      make ?onPartialUpload ?onUpload ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for the WorkflowDetail data type. It is used by actions that trigger a workflow to begin execution."]
@@ -2936,6 +5442,9 @@ module SecurityPolicyOptions =
   struct
     type nonrec t = SecurityPolicyOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityPolicyOption.to_value)) |>
         (fun x -> `List x)
@@ -2956,6 +5465,94 @@ module SecurityPolicyOptions =
     let of_json j =
       list_of_json ~kind:"SecurityPolicyOptions"
         ~of_json:SecurityPolicyOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecurityPolicyProtocols =
+  struct
+    type nonrec t = SecurityPolicyProtocol.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecurityPolicyProtocol.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecurityPolicyProtocol.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityPolicyProtocols"
+        ~of_json:SecurityPolicyProtocol.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecurityPolicyResourceType =
+  struct
+    type nonrec t =
+      | SERVER 
+      | CONNECTOR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SERVER -> "SERVER"
+      | CONNECTOR -> "CONNECTOR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SERVER" -> SERVER
+      | "CONNECTOR" -> CONNECTOR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SecurityPolicyResourceType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SecurityPolicyResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module CertificateIds =
+  struct
+    type nonrec t = CertificateId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CertificateId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CertificateId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CertificateIds" ~of_json:CertificateId.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ExecutionResults =
@@ -2985,10 +5582,10 @@ module ExecutionResults =
           (Xml.child xml_arg0 "Steps") in
       make ?onExceptionSteps ?steps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let onExceptionSteps =
-        field_map json "OnExceptionSteps" ExecutionStepResults.of_json in
-      let steps = field_map json "Steps" ExecutionStepResults.of_json in
+        field_map json__ "OnExceptionSteps" ExecutionStepResults.of_json in
+      let steps = field_map json__ "Steps" ExecutionStepResults.of_json in
       make ?onExceptionSteps ?steps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2999,10 +5596,10 @@ module LoggingConfiguration =
       {
       loggingRole: Role.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the Amazon Web Services Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, user activity can be viewed in your CloudWatch logs."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, you can view user activity in your CloudWatch logs."];
       logGroupName: LogGroupName.t option
         [@ocaml.doc
-          "The name of the CloudWatch logging group for the Amazon Web Services Transfer server to which this workflow belongs."]}
+          "The name of the CloudWatch logging group for the Transfer Family server to which this workflow belongs."]}
     let make ?loggingRole =
       fun ?logGroupName -> fun () -> { loggingRole; logGroupName }
     let to_value x =
@@ -3019,89 +5616,680 @@ module LoggingConfiguration =
         (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "LoggingRole") in
       make ?logGroupName ?loggingRole ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroupName = field_map json "LogGroupName" LogGroupName.of_json in
-      let loggingRole = field_map json "LoggingRole" Role.of_json in
+    let of_json json__ =
+      let logGroupName = field_map json__ "LogGroupName" LogGroupName.of_json in
+      let loggingRole = field_map json__ "LoggingRole" Role.of_json in
       make ?logGroupName ?loggingRole ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Consists of the logging role and the log group name."]
-module InternalServiceError =
-  struct
-    type nonrec t = {
-      message: Message.t }
-    let context_ = "InternalServiceError"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "This exception is thrown when an error occurs in the Amazon Web ServicesTransfer Family service."]
-module InvalidRequestException =
-  struct
-    type nonrec t = {
-      message: Message.t }
-    let context_ = "InvalidRequestException"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "This exception is thrown when the client submits a malformed request."]
-module ResourceNotFoundException =
+module As2ConnectorConfig =
   struct
     type nonrec t =
       {
-      message: Message.t ;
-      resource: Resource.t ;
-      resourceType: ResourceType.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resource ->
-        fun ~resourceType -> fun () -> { message; resource; resourceType }
+      localProfileId: ProfileId.t option
+        [@ocaml.doc "A unique identifier for the AS2 local profile."];
+      partnerProfileId: ProfileId.t option
+        [@ocaml.doc
+          "A unique identifier for the partner profile for the connector."];
+      messageSubject: MessageSubject.t option
+        [@ocaml.doc
+          "Used as the Subject HTTP header attribute in AS2 messages that are being sent with the connector."];
+      compression: CompressionEnum.t option
+        [@ocaml.doc "Specifies whether the AS2 file is compressed."];
+      encryptionAlgorithm: EncryptionAlg.t option
+        [@ocaml.doc
+          "The algorithm that is used to encrypt the file. Note the following: Do not use the DES_EDE3_CBC algorithm unless you must support a legacy client that requires it, as it is a weak encryption algorithm. You can only specify NONE if the URL for your connector uses HTTPS. Using HTTPS ensures that no traffic is sent in clear text."];
+      signingAlgorithm: SigningAlg.t option
+        [@ocaml.doc
+          "The algorithm that is used to sign the AS2 messages sent with the connector."];
+      mdnSigningAlgorithm: MdnSigningAlg.t option
+        [@ocaml.doc
+          "The signing algorithm for the MDN response. If set to DEFAULT (or not set at all), the value for SigningAlgorithm is used."];
+      mdnResponse: MdnResponse.t option
+        [@ocaml.doc
+          "Used for outbound requests (from an Transfer Family connector to a partner AS2 server) to determine whether the partner response for transfers is synchronous or asynchronous. Specify either of the following values: ASYNC: The system expects an asynchronous MDN response, confirming that the file was transferred successfully (or not). SYNC: The system expects a synchronous MDN response, confirming that the file was transferred successfully (or not). NONE: Specifies that no MDN response is required."];
+      basicAuthSecretId: As2ConnectorSecretId.t option
+        [@ocaml.doc
+          "Provides Basic authentication support to the AS2 Connectors API. To use Basic authentication, you must provide the name or Amazon Resource Name (ARN) of a secret in Secrets Manager. The default value for this parameter is null, which indicates that Basic authentication is not enabled for the connector. If the connector should use Basic authentication, the secret needs to be in the following format: \\{ \"Username\": \"user-name\", \"Password\": \"user-password\" \\} Replace user-name and user-password with the credentials for the actual user that is being authenticated. Note the following: You are storing these credentials in Secrets Manager, not passing them directly into this API. If you are using the API, SDKs, or CloudFormation to configure your connector, then you must create the secret before you can enable Basic authentication. However, if you are using the Amazon Web Services management console, you can have the system create the secret for you. If you have previously enabled Basic authentication for a connector, you can disable it by using the UpdateConnector API call. For example, if you are using the CLI, you can run the following command to remove Basic authentication: update-connector --connector-id my-connector-id --as2-config 'BasicAuthSecretId=\"\"'"];
+      preserveContentType: PreserveContentType.t option
+        [@ocaml.doc
+          "Allows you to use the Amazon S3 Content-Type that is associated with objects in S3 instead of having the content type mapped based on the file extension. This parameter is enabled by default when you create an AS2 connector from the console, but disabled by default when you create an AS2 connector by calling the API directly."];
+      asyncMdnConfig: As2AsyncMdnConnectorConfig.t option
+        [@ocaml.doc
+          "Configuration settings for asynchronous Message Disposition Notification (MDN) responses. This allows you to configure where asynchronous MDN responses should be sent and which servers should handle them."]}
+    let make ?localProfileId =
+      fun ?partnerProfileId ->
+        fun ?messageSubject ->
+          fun ?compression ->
+            fun ?encryptionAlgorithm ->
+              fun ?signingAlgorithm ->
+                fun ?mdnSigningAlgorithm ->
+                  fun ?mdnResponse ->
+                    fun ?basicAuthSecretId ->
+                      fun ?preserveContentType ->
+                        fun ?asyncMdnConfig ->
+                          fun () ->
+                            {
+                              localProfileId;
+                              partnerProfileId;
+                              messageSubject;
+                              compression;
+                              encryptionAlgorithm;
+                              signingAlgorithm;
+                              mdnSigningAlgorithm;
+                              mdnResponse;
+                              basicAuthSecretId;
+                              preserveContentType;
+                              asyncMdnConfig
+                            }
     let to_value x =
       structure_to_value
-        [("Message", (Some (Message.to_value x.message)));
-        ("Resource", (Some (Resource.to_value x.resource)));
-        ("ResourceType", (Some (ResourceType.to_value x.resourceType)))]
+        [("LocalProfileId",
+           (Option.map x.localProfileId ~f:ProfileId.to_value));
+        ("PartnerProfileId",
+          (Option.map x.partnerProfileId ~f:ProfileId.to_value));
+        ("MessageSubject",
+          (Option.map x.messageSubject ~f:MessageSubject.to_value));
+        ("Compression",
+          (Option.map x.compression ~f:CompressionEnum.to_value));
+        ("EncryptionAlgorithm",
+          (Option.map x.encryptionAlgorithm ~f:EncryptionAlg.to_value));
+        ("SigningAlgorithm",
+          (Option.map x.signingAlgorithm ~f:SigningAlg.to_value));
+        ("MdnSigningAlgorithm",
+          (Option.map x.mdnSigningAlgorithm ~f:MdnSigningAlg.to_value));
+        ("MdnResponse", (Option.map x.mdnResponse ~f:MdnResponse.to_value));
+        ("BasicAuthSecretId",
+          (Option.map x.basicAuthSecretId ~f:As2ConnectorSecretId.to_value));
+        ("PreserveContentType",
+          (Option.map x.preserveContentType ~f:PreserveContentType.to_value));
+        ("AsyncMdnConfig",
+          (Option.map x.asyncMdnConfig ~f:As2AsyncMdnConnectorConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let resourceType =
-        ResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
-      let resource =
-        Resource.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
-      let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resource ~message ()
+      let asyncMdnConfig =
+        (Option.map ~f:As2AsyncMdnConnectorConfig.of_xml)
+          (Xml.child xml_arg0 "AsyncMdnConfig") in
+      let preserveContentType =
+        (Option.map ~f:PreserveContentType.of_xml)
+          (Xml.child xml_arg0 "PreserveContentType") in
+      let basicAuthSecretId =
+        (Option.map ~f:As2ConnectorSecretId.of_xml)
+          (Xml.child xml_arg0 "BasicAuthSecretId") in
+      let mdnResponse =
+        (Option.map ~f:MdnResponse.of_xml) (Xml.child xml_arg0 "MdnResponse") in
+      let mdnSigningAlgorithm =
+        (Option.map ~f:MdnSigningAlg.of_xml)
+          (Xml.child xml_arg0 "MdnSigningAlgorithm") in
+      let signingAlgorithm =
+        (Option.map ~f:SigningAlg.of_xml)
+          (Xml.child xml_arg0 "SigningAlgorithm") in
+      let encryptionAlgorithm =
+        (Option.map ~f:EncryptionAlg.of_xml)
+          (Xml.child xml_arg0 "EncryptionAlgorithm") in
+      let compression =
+        (Option.map ~f:CompressionEnum.of_xml)
+          (Xml.child xml_arg0 "Compression") in
+      let messageSubject =
+        (Option.map ~f:MessageSubject.of_xml)
+          (Xml.child xml_arg0 "MessageSubject") in
+      let partnerProfileId =
+        (Option.map ~f:ProfileId.of_xml)
+          (Xml.child xml_arg0 "PartnerProfileId") in
+      let localProfileId =
+        (Option.map ~f:ProfileId.of_xml)
+          (Xml.child xml_arg0 "LocalProfileId") in
+      make ?asyncMdnConfig ?preserveContentType ?basicAuthSecretId
+        ?mdnResponse ?mdnSigningAlgorithm ?signingAlgorithm
+        ?encryptionAlgorithm ?compression ?messageSubject ?partnerProfileId
+        ?localProfileId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
-      let resource = field_map_exn json "Resource" Resource.of_json in
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~resourceType ~resource ~message ()
+    let of_json json__ =
+      let asyncMdnConfig =
+        field_map json__ "AsyncMdnConfig" As2AsyncMdnConnectorConfig.of_json in
+      let preserveContentType =
+        field_map json__ "PreserveContentType" PreserveContentType.of_json in
+      let basicAuthSecretId =
+        field_map json__ "BasicAuthSecretId" As2ConnectorSecretId.of_json in
+      let mdnResponse = field_map json__ "MdnResponse" MdnResponse.of_json in
+      let mdnSigningAlgorithm =
+        field_map json__ "MdnSigningAlgorithm" MdnSigningAlg.of_json in
+      let signingAlgorithm =
+        field_map json__ "SigningAlgorithm" SigningAlg.of_json in
+      let encryptionAlgorithm =
+        field_map json__ "EncryptionAlgorithm" EncryptionAlg.of_json in
+      let compression =
+        field_map json__ "Compression" CompressionEnum.of_json in
+      let messageSubject =
+        field_map json__ "MessageSubject" MessageSubject.of_json in
+      let partnerProfileId =
+        field_map json__ "PartnerProfileId" ProfileId.of_json in
+      let localProfileId =
+        field_map json__ "LocalProfileId" ProfileId.of_json in
+      make ?asyncMdnConfig ?preserveContentType ?basicAuthSecretId
+        ?mdnResponse ?mdnSigningAlgorithm ?signingAlgorithm
+        ?encryptionAlgorithm ?compression ?messageSubject ?partnerProfileId
+        ?localProfileId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception is thrown when a resource is not found by the Amazon Web ServicesTransfer Family service."]
-module ServiceUnavailableException =
+       "Contains the details for an AS2 connector object. The connector object is used for AS2 outbound processes, to connect the Transfer Family customer with the trading partner."]
+module ConnectorEgressType =
+  struct
+    type nonrec t =
+      | SERVICE_MANAGED 
+      | VPC_LATTICE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SERVICE_MANAGED -> "SERVICE_MANAGED"
+      | VPC_LATTICE -> "VPC_LATTICE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SERVICE_MANAGED" -> SERVICE_MANAGED
+      | "VPC_LATTICE" -> VPC_LATTICE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConnectorEgressType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ConnectorEgressType" j)
+    let to_json = simple_to_json to_value
+  end
+module ConnectorErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ConnectorErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConnectorErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ConnectorSecurityPolicyName =
+  struct
+    type nonrec t = string
+    let context_ = "ConnectorSecurityPolicyName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"TransferSFTPConnectorSecurityPolicy-[A-Za-z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConnectorSecurityPolicyName" j
+    let to_json = simple_to_json to_value
+  end
+module ConnectorStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | ERRORED 
+      | PENDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | ERRORED -> "ERRORED"
+      | PENDING -> "PENDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "ERRORED" -> ERRORED
+      | "PENDING" -> PENDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ConnectorStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ConnectorStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ConnectorsIpAddressType =
+  struct
+    type nonrec t =
+      | IPV4 
+      | DUALSTACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPV4 -> "IPV4"
+      | DUALSTACK -> "DUALSTACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV4" -> IPV4
+      | "DUALSTACK" -> DUALSTACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConnectorsIpAddressType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConnectorsIpAddressType" j)
+    let to_json = simple_to_json to_value
+  end
+module DescribedConnectorEgressConfig =
+  struct
+    type nonrec t =
+      {
+      vpcLattice: DescribedConnectorVpcLatticeEgressConfig.t option
+        [@ocaml.doc
+          "VPC_LATTICE configuration details in the response, showing the current Resource Configuration ARN and port settings for VPC-based connectivity."]}
+    let make ?vpcLattice = fun () -> { vpcLattice }
+    let to_value x =
+      structure_to_value
+        [("VpcLattice",
+           (Option.map x.vpcLattice
+              ~f:DescribedConnectorVpcLatticeEgressConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcLattice =
+        (Option.map ~f:DescribedConnectorVpcLatticeEgressConfig.of_xml)
+          (Xml.child xml_arg0 "VpcLattice") in
+      make ?vpcLattice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcLattice =
+        field_map json__ "VpcLattice"
+          DescribedConnectorVpcLatticeEgressConfig.of_json in
+      make ?vpcLattice ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Response structure containing the current egress configuration details for the connector. Shows how traffic is currently routed from the connector to the SFTP server."]
+module SftpConnectorConfig =
+  struct
+    type nonrec t =
+      {
+      userSecretId: SecretId.t option
+        [@ocaml.doc
+          "The identifier for the secret (in Amazon Web Services Secrets Manager) that contains the SFTP user's private key, password, or both. The identifier must be the Amazon Resource Name (ARN) of the secret. Required when creating an SFTP connector Optional when updating an existing SFTP connector"];
+      trustedHostKeys: SftpConnectorTrustedHostKeyList.t option
+        [@ocaml.doc
+          "The public portion of the host key, or keys, that are used to identify the external server to which you are connecting. You can use the ssh-keyscan command against the SFTP server to retrieve the necessary key. TrustedHostKeys is optional for CreateConnector. If not provided, you can use TestConnection to retrieve the server host key during the initial connection attempt, and subsequently update the connector with the observed host key. When creating connectors with egress config (VPC_LATTICE type connectors), since host name is not something we can verify, the only accepted trusted host key format is key-type key-body without the host name. For example: ssh-rsa AAAAB3Nza...<long-string-for-public-key> The three standard SSH public key format elements are <key type>, <body base64>, and an optional <comment>, with spaces between each element. Specify only the <key type> and <body base64>: do not enter the <comment> portion of the key. For the trusted host key, Transfer Family accepts RSA and ECDSA keys. For RSA keys, the <key type> string is ssh-rsa. For ECDSA keys, the <key type> string is either ecdsa-sha2-nistp256, ecdsa-sha2-nistp384, or ecdsa-sha2-nistp521, depending on the size of the key you generated. Run this command to retrieve the SFTP server host key, where your SFTP server name is ftp.host.com. ssh-keyscan ftp.host.com This prints the public host key to standard output. ftp.host.com ssh-rsa AAAAB3Nza...<long-string-for-public-key> Copy and paste this string into the TrustedHostKeys field for the create-connector command or into the Trusted host keys field in the console. For VPC Lattice type connectors (VPC_LATTICE), remove the hostname from the key and use only the key-type key-body format. In this example, it should be: ssh-rsa AAAAB3Nza...<long-string-for-public-key>"];
+      maxConcurrentConnections: MaxConcurrentConnections.t option
+        [@ocaml.doc
+          "Specify the number of concurrent connections that your connector creates to the remote server. The default value is 1. The maximum values is 5. If you are using the Amazon Web Services Management Console, the default value is 5. This parameter specifies the number of active connections that your connector can establish with the remote server at the same time. Increasing this value can enhance connector performance when transferring large file batches by enabling parallel operations."]}
+    let make ?userSecretId =
+      fun ?trustedHostKeys ->
+        fun ?maxConcurrentConnections ->
+          fun () ->
+            { userSecretId; trustedHostKeys; maxConcurrentConnections }
+    let to_value x =
+      structure_to_value
+        [("UserSecretId", (Option.map x.userSecretId ~f:SecretId.to_value));
+        ("TrustedHostKeys",
+          (Option.map x.trustedHostKeys
+             ~f:SftpConnectorTrustedHostKeyList.to_value));
+        ("MaxConcurrentConnections",
+          (Option.map x.maxConcurrentConnections
+             ~f:MaxConcurrentConnections.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxConcurrentConnections =
+        (Option.map ~f:MaxConcurrentConnections.of_xml)
+          (Xml.child xml_arg0 "MaxConcurrentConnections") in
+      let trustedHostKeys =
+        (Option.map ~f:SftpConnectorTrustedHostKeyList.of_xml)
+          (Xml.child xml_arg0 "TrustedHostKeys") in
+      let userSecretId =
+        (Option.map ~f:SecretId.of_xml) (Xml.child xml_arg0 "UserSecretId") in
+      make ?maxConcurrentConnections ?trustedHostKeys ?userSecretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxConcurrentConnections =
+        field_map json__ "MaxConcurrentConnections"
+          MaxConcurrentConnections.of_json in
+      let trustedHostKeys =
+        field_map json__ "TrustedHostKeys"
+          SftpConnectorTrustedHostKeyList.of_json in
+      let userSecretId = field_map json__ "UserSecretId" SecretId.of_json in
+      make ?maxConcurrentConnections ?trustedHostKeys ?userSecretId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the details for an SFTP connector object. The connector object is used for transferring files to and from a partner's SFTP server."]
+module CertSerial =
+  struct
+    type nonrec t = string
+    let context_ = "CertSerial"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:48) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9a-fA-F{}:?]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertSerial" j
+    let to_json = simple_to_json to_value
+  end
+module CertificateBodyType =
+  struct
+    type nonrec t = string
+    let context_ = "CertificateBodyType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:16384) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[\\t\\n\\r\\u0020-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificateBodyType" j
+    let to_json = simple_to_json to_value
+  end
+module CertificateChainType =
+  struct
+    type nonrec t = string
+    let context_ = "CertificateChainType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2097152) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[\\t\\n\\r\\u0020-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificateChainType" j
+    let to_json = simple_to_json to_value
+  end
+module CustomDirectoriesType =
+  struct
+    type nonrec t =
+      {
+      failedFilesDirectory: HomeDirectory.t
+        [@ocaml.doc
+          "Specifies a location to store failed AS2 message files."];
+      mdnFilesDirectory: HomeDirectory.t
+        [@ocaml.doc "Specifies a location to store MDN files."];
+      payloadFilesDirectory: HomeDirectory.t
+        [@ocaml.doc
+          "Specifies a location to store the payload for AS2 message files."];
+      statusFilesDirectory: HomeDirectory.t
+        [@ocaml.doc "Specifies a location to store AS2 status messages."];
+      temporaryFilesDirectory: HomeDirectory.t
+        [@ocaml.doc
+          "Specifies a location to store temporary AS2 message files."]}
+    let context_ = "CustomDirectoriesType"
+    let make ~failedFilesDirectory =
+      fun ~mdnFilesDirectory ->
+        fun ~payloadFilesDirectory ->
+          fun ~statusFilesDirectory ->
+            fun ~temporaryFilesDirectory ->
+              fun () ->
+                {
+                  failedFilesDirectory;
+                  mdnFilesDirectory;
+                  payloadFilesDirectory;
+                  statusFilesDirectory;
+                  temporaryFilesDirectory
+                }
+    let to_value x =
+      structure_to_value
+        [("FailedFilesDirectory",
+           (Some (HomeDirectory.to_value x.failedFilesDirectory)));
+        ("MdnFilesDirectory",
+          (Some (HomeDirectory.to_value x.mdnFilesDirectory)));
+        ("PayloadFilesDirectory",
+          (Some (HomeDirectory.to_value x.payloadFilesDirectory)));
+        ("StatusFilesDirectory",
+          (Some (HomeDirectory.to_value x.statusFilesDirectory)));
+        ("TemporaryFilesDirectory",
+          (Some (HomeDirectory.to_value x.temporaryFilesDirectory)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let temporaryFilesDirectory =
+        HomeDirectory.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemporaryFilesDirectory") in
+      let statusFilesDirectory =
+        HomeDirectory.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StatusFilesDirectory") in
+      let payloadFilesDirectory =
+        HomeDirectory.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PayloadFilesDirectory") in
+      let mdnFilesDirectory =
+        HomeDirectory.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MdnFilesDirectory") in
+      let failedFilesDirectory =
+        HomeDirectory.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FailedFilesDirectory") in
+      make ~temporaryFilesDirectory ~statusFilesDirectory
+        ~payloadFilesDirectory ~mdnFilesDirectory ~failedFilesDirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let temporaryFilesDirectory =
+        field_map_exn json__ "TemporaryFilesDirectory" HomeDirectory.of_json in
+      let statusFilesDirectory =
+        field_map_exn json__ "StatusFilesDirectory" HomeDirectory.of_json in
+      let payloadFilesDirectory =
+        field_map_exn json__ "PayloadFilesDirectory" HomeDirectory.of_json in
+      let mdnFilesDirectory =
+        field_map_exn json__ "MdnFilesDirectory" HomeDirectory.of_json in
+      let failedFilesDirectory =
+        field_map_exn json__ "FailedFilesDirectory" HomeDirectory.of_json in
+      make ~temporaryFilesDirectory ~statusFilesDirectory
+        ~payloadFilesDirectory ~mdnFilesDirectory ~failedFilesDirectory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains Amazon S3 locations for storing specific types of AS2 message files."]
+module EnforceMessageSigningType =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EnforceMessageSigningType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EnforceMessageSigningType" j)
+    let to_json = simple_to_json to_value
+  end
+module PreserveFilenameType =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PreserveFilenameType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PreserveFilenameType" j)
+    let to_json = simple_to_json to_value
+  end
+module WebAppVpcConfig =
+  struct
+    type nonrec t =
+      {
+      subnetIds: SubnetIds.t option
+        [@ocaml.doc
+          "The list of subnet IDs within the VPC where the web app endpoint will be deployed. These subnets must be in the same VPC specified in the VpcId parameter."];
+      vpcId: VpcId.t option
+        [@ocaml.doc
+          "The identifier of the VPC where the web app endpoint will be hosted."];
+      securityGroupIds: SecurityGroupIds.t option
+        [@ocaml.doc
+          "The list of security group IDs that control access to the web app endpoint. These security groups determine which sources can access the endpoint based on IP addresses and port configurations."];
+      ipAddressType: WebAppVpcEndpointIpAddressType.t option
+        [@ocaml.doc
+          "The IP address type for the web app's VPC endpoint. This determines whether the endpoint is accessible over IPv4 only, or over both IPv4 and IPv6."]}
+    let make ?subnetIds =
+      fun ?vpcId ->
+        fun ?securityGroupIds ->
+          fun ?ipAddressType ->
+            fun () -> { subnetIds; vpcId; securityGroupIds; ipAddressType }
+    let to_value x =
+      structure_to_value
+        [("SubnetIds", (Option.map x.subnetIds ~f:SubnetIds.to_value));
+        ("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType
+             ~f:WebAppVpcEndpointIpAddressType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:WebAppVpcEndpointIpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIds.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
+      let subnetIds =
+        (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      make ?ipAddressType ?securityGroupIds ?vpcId ?subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "IpAddressType"
+          WebAppVpcEndpointIpAddressType.of_json in
+      let securityGroupIds =
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      make ?ipAddressType ?securityGroupIds ?vpcId ?subnetIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the VPC configuration settings for hosting a web app endpoint, including the VPC ID, subnet IDs, and security group IDs for access control."]
+module IdentityCenterConfig =
+  struct
+    type nonrec t =
+      {
+      instanceArn: IdentityCenterInstanceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the IAM Identity Center used for the web app."];
+      role: Role.t option
+        [@ocaml.doc
+          "The IAM role in IAM Identity Center used for the web app."]}
+    let make ?instanceArn = fun ?role -> fun () -> { instanceArn; role }
+    let to_value x =
+      structure_to_value
+        [("InstanceArn",
+           (Option.map x.instanceArn ~f:IdentityCenterInstanceArn.to_value));
+        ("Role", (Option.map x.role ~f:Role.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
+      let instanceArn =
+        (Option.map ~f:IdentityCenterInstanceArn.of_xml)
+          (Xml.child xml_arg0 "InstanceArn") in
+      make ?role ?instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let role = field_map json__ "Role" Role.of_json in
+      let instanceArn =
+        field_map json__ "InstanceArn" IdentityCenterInstanceArn.of_json in
+      make ?role ?instanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that describes the values to use for the IAM Identity Center settings when you create or update a web app."]
+module ConnectorVpcLatticeEgressConfig =
+  struct
+    type nonrec t =
+      {
+      resourceConfigurationArn: VpcLatticeResourceConfigurationArn.t
+        [@ocaml.doc
+          "ARN of the VPC_LATTICE Resource Configuration that defines the target SFTP server location. Must point to a valid Resource Configuration in the customer's VPC with appropriate network connectivity to the SFTP server."];
+      portNumber: SftpPort.t option
+        [@ocaml.doc
+          "Port number for connecting to the SFTP server through VPC_LATTICE. Defaults to 22 if not specified. Must match the port on which the target SFTP server is listening."]}
+    let context_ = "ConnectorVpcLatticeEgressConfig"
+    let make ?portNumber =
+      fun ~resourceConfigurationArn ->
+        fun () -> { portNumber; resourceConfigurationArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceConfigurationArn",
+           (Some
+              (VpcLatticeResourceConfigurationArn.to_value
+                 x.resourceConfigurationArn)));
+        ("PortNumber", (Option.map x.portNumber ~f:SftpPort.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portNumber =
+        (Option.map ~f:SftpPort.of_xml) (Xml.child xml_arg0 "PortNumber") in
+      let resourceConfigurationArn =
+        VpcLatticeResourceConfigurationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ResourceConfigurationArn") in
+      make ?portNumber ~resourceConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portNumber = field_map json__ "PortNumber" SftpPort.of_json in
+      let resourceConfigurationArn =
+        field_map_exn json__ "ResourceConfigurationArn"
+          VpcLatticeResourceConfigurationArn.of_json in
+      make ?portNumber ~resourceConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "VPC_LATTICE egress configuration that specifies the Resource Configuration ARN and port for connecting to SFTP servers through customer VPCs. Requires a valid Resource Configuration with appropriate network access."]
+module AccessDeniedException =
   struct
     type nonrec t = {
       message: ServiceErrorMessage.t option }
@@ -3116,12 +6304,107 @@ module ServiceUnavailableException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ServiceErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ServiceErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request has failed because the Amazon Web ServicesTransfer Family service is not available."]
+       "You do not have sufficient access to perform this action."]
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the UpdateServer is called for a file transfer protocol-enabled server that has VPC as the endpoint type and the server's VpcEndpointID is not in the available state."]
+module InternalServiceError =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when an error occurs in the Transfer Family service."]
+module InvalidRequestException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when the client submits a malformed request."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t =
+      {
+      message: Message.t option ;
+      resource: Resource.t option ;
+      resourceType: ResourceType.t option }
+    let make ?message =
+      fun ?resource ->
+        fun ?resourceType -> fun () -> { message; resource; resourceType }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value));
+        ("Resource", (Option.map x.resource ~f:Resource.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let resource =
+        (Option.map ~f:Resource.of_xml) (Xml.child xml_arg0 "Resource") in
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resource ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resource = field_map json__ "Resource" Resource.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      make ?resourceType ?resource ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception is thrown when a resource is not found by the Amazon Web ServicesTransfer Family service."]
 module ThrottlingException =
   struct
     type nonrec t = {
@@ -3138,14 +6421,65 @@ module ThrottlingException =
           (Xml.child xml_arg0 "RetryAfterSeconds") in
       make ?retryAfterSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
       make ?retryAfterSeconds ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was denied due to request throttling."]
+module UpdateWebAppEndpointDetails =
+  struct
+    type nonrec t =
+      {
+      vpc: UpdateWebAppVpcConfig.t option
+        [@ocaml.doc
+          "The VPC configuration details for updating a web app endpoint hosted within a VPC. This includes the subnet IDs for endpoint deployment."]}
+    let make ?vpc = fun () -> { vpc }
+    let to_value x =
+      structure_to_value
+        [("Vpc", (Option.map x.vpc ~f:UpdateWebAppVpcConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpc =
+        (Option.map ~f:UpdateWebAppVpcConfig.of_xml)
+          (Xml.child xml_arg0 "Vpc") in
+      make ?vpc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpc = field_map json__ "Vpc" UpdateWebAppVpcConfig.of_json in
+      make ?vpc ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request was denied due to request throttling. HTTP Status Code: 400"]
-module AccessDeniedException =
+       "Contains the endpoint configuration details for updating a web app, including VPC settings for endpoints hosted within a VPC."]
+module UpdateWebAppIdentityProviderDetails =
+  struct
+    type nonrec t =
+      {
+      identityCenterConfig: UpdateWebAppIdentityCenterConfig.t option
+        [@ocaml.doc
+          "A structure that describes the values to use for the IAM Identity Center settings when you update a web app."]}
+    let make ?identityCenterConfig = fun () -> { identityCenterConfig }
+    let to_value x =
+      structure_to_value
+        [("IdentityCenterConfig",
+           (Option.map x.identityCenterConfig
+              ~f:UpdateWebAppIdentityCenterConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityCenterConfig =
+        (Option.map ~f:UpdateWebAppIdentityCenterConfig.of_xml)
+          (Xml.child xml_arg0 "IdentityCenterConfig") in
+      make ?identityCenterConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityCenterConfig =
+        field_map json__ "IdentityCenterConfig"
+          UpdateWebAppIdentityCenterConfig.of_json in
+      make ?identityCenterConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A union that contains the UpdateWebAppIdentityCenterConfig object."]
+module ServiceUnavailableException =
   struct
     type nonrec t = {
       message: ServiceErrorMessage.t option }
@@ -3160,73 +6494,57 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ServiceErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ServiceErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You do not have sufficient access to perform this action."]
-module ConflictException =
-  struct
-    type nonrec t = {
-      message: Message.t }
-    let context_ = "ConflictException"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "This exception is thrown when the UpdateServer is called for a file transfer protocol-enabled server that has VPC as the endpoint type and the server's VpcEndpointID is not in the available state."]
+       "The request has failed because the Amazon Web ServicesTransfer Family service is not available."]
 module ResourceExistsException =
   struct
     type nonrec t =
       {
-      message: Message.t ;
-      resource: Resource.t ;
-      resourceType: ResourceType.t }
-    let context_ = "ResourceExistsException"
-    let make ~message =
-      fun ~resource ->
-        fun ~resourceType -> fun () -> { message; resource; resourceType }
+      message: Message.t option ;
+      resource: Resource.t option ;
+      resourceType: ResourceType.t option }
+    let make ?message =
+      fun ?resource ->
+        fun ?resourceType -> fun () -> { message; resource; resourceType }
     let to_value x =
       structure_to_value
-        [("Message", (Some (Message.to_value x.message)));
-        ("Resource", (Some (Resource.to_value x.resource)));
-        ("ResourceType", (Some (ResourceType.to_value x.resourceType)))]
+        [("Message", (Option.map x.message ~f:Message.to_value));
+        ("Resource", (Option.map x.resource ~f:Resource.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        ResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
       let resource =
-        Resource.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
+        (Option.map ~f:Resource.of_xml) (Xml.child xml_arg0 "Resource") in
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resource ~message ()
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resource ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
-      let resource = field_map_exn json "Resource" Resource.of_json in
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~resourceType ~resource ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resource = field_map json__ "Resource" Resource.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      make ?resourceType ?resource ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The requested resource does not exist."]
+  end[@@ocaml.doc
+       "The requested resource does not exist, or exists in a region other than the one specified for the command."]
 module HostKey =
   struct
     type nonrec t = string
     let context_ = "HostKey"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:4096); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4096) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3235,24 +6553,34 @@ module HostKey =
     let of_json j = string_of_json ~kind:"HostKey" j
     let to_json = simple_to_json to_value
   end
-module NullableRole =
+module UpdateConnectorEgressConfig =
   struct
-    type nonrec t = string
-    let context_ = "NullableRole"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_pattern i ~pattern:"^$|arn:.*role/.*"));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      vpcLattice: UpdateConnectorVpcLatticeEgressConfig.t option
+        [@ocaml.doc
+          "VPC_LATTICE configuration updates for the connector. Use this to modify the Resource Configuration ARN or port number for VPC-based connectivity."]}
+    let make ?vpcLattice = fun () -> { vpcLattice }
+    let to_value x =
+      structure_to_value
+        [("VpcLattice",
+           (Option.map x.vpcLattice
+              ~f:UpdateConnectorVpcLatticeEgressConfig.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NullableRole" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let vpcLattice =
+        (Option.map ~f:UpdateConnectorVpcLatticeEgressConfig.of_xml)
+          (Xml.child xml_arg0 "VpcLattice") in
+      make ?vpcLattice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcLattice =
+        field_map json__ "VpcLattice"
+          UpdateConnectorVpcLatticeEgressConfig.of_json in
+      make ?vpcLattice ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Structure for updating the egress configuration of an existing connector. Allows modification of how traffic is routed from the connector to the SFTP server, including VPC_LATTICE settings."]
 module TagKeys =
   struct
     type nonrec t = TagKey.t list
@@ -3261,6 +6589,9 @@ module TagKeys =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3314,10 +6645,10 @@ module SourceIp =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:32) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
-                check_pattern i
-                  ~pattern:"^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$"));
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9a-fA-F\\.\\:]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3332,13 +6663,228 @@ module UserPassword =
     type nonrec t = string
     let context_ = "UserPassword"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"UserPassword" j
+    let to_json = simple_to_json to_value
+  end
+module SftpConnectorConnectionDetails =
+  struct
+    type nonrec t =
+      {
+      hostKey: SftpConnectorHostKey.t option
+        [@ocaml.doc
+          "The SSH public key of the remote SFTP server. This is returned during the initial connection attempt when you call TestConnection. It allows you to retrieve the valid server host key to update the connector when you are unable to obtain it in advance."]}
+    let make ?hostKey = fun () -> { hostKey }
+    let to_value x =
+      structure_to_value
+        [("HostKey", (Option.map x.hostKey ~f:SftpConnectorHostKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hostKey =
+        (Option.map ~f:SftpConnectorHostKey.of_xml)
+          (Xml.child xml_arg0 "HostKey") in
+      make ?hostKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hostKey = field_map json__ "HostKey" SftpConnectorHostKey.of_json in
+      make ?hostKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains the details for an SFTP connector connection."]
+module Status =
+  struct
+    type nonrec t = string
+    let context_ = "Status"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Status" j
+    let to_json = simple_to_json to_value
+  end
+module MoveId =
+  struct
+    type nonrec t = string
+    let context_ = "MoveId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9a-zA-Z./-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MoveId" j
+    let to_json = simple_to_json to_value
+  end
+module DeleteId =
+  struct
+    type nonrec t = string
+    let context_ = "DeleteId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9a-zA-Z./-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeleteId" j
+    let to_json = simple_to_json to_value
+  end
+module TransferId =
+  struct
+    type nonrec t = string
+    let context_ = "TransferId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9a-zA-Z./-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TransferId" j
+    let to_json = simple_to_json to_value
+  end
+module CustomHttpHeaders =
+  struct
+    type nonrec t = CustomHttpHeader.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CustomHttpHeader.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CustomHttpHeader.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CustomHttpHeaders"
+        ~of_json:CustomHttpHeader.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FilePaths =
+  struct
+    type nonrec t = FilePath.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FilePath.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FilePath.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FilePaths" ~of_json:FilePath.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListingId =
+  struct
+    type nonrec t = string
+    let context_ = "ListingId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9a-zA-Z./-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ListingId" j
+    let to_json = simple_to_json to_value
+  end
+module OutputFileName =
+  struct
+    type nonrec t = string
+    let context_ = "OutputFileName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:26) >>=
+             (fun () ->
+                (check_string_max i ~max:537) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"c-([0-9a-f]{17})-[0-9a-zA-Z./-]+.json")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutputFileName" j
+    let to_json = simple_to_json to_value
+  end
+module MaxItems =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for MaxItems" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module CallbackToken =
@@ -3389,26 +6935,29 @@ module CustomStepStatus =
 module InvalidNextTokenException =
   struct
     type nonrec t = {
-      message: Message.t }
-    let context_ = "InvalidNextTokenException"
-    let make ~message = fun () -> { message }
+      message: Message.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The NextToken parameter that was passed is invalid."]
 module ListedWorkflows =
   struct
     type nonrec t = ListedWorkflow.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListedWorkflow.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3465,10 +7014,40 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ListedWebApps =
+  struct
+    type nonrec t = ListedWebApp.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListedWebApp.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListedWebApp.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListedWebApps" ~of_json:ListedWebApp.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ListedUsers =
   struct
     type nonrec t = ListedUser.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListedUser.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3493,6 +7072,9 @@ module ListedServers =
   struct
     type nonrec t = ListedServer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListedServer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3517,6 +7099,9 @@ module SecurityPolicyNames =
   struct
     type nonrec t = SecurityPolicyName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityPolicyName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3538,10 +7123,101 @@ module SecurityPolicyNames =
         ~of_json:SecurityPolicyName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListedProfiles =
+  struct
+    type nonrec t = ListedProfile.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListedProfile.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListedProfile.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListedProfiles" ~of_json:ListedProfile.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListedHostKeys =
+  struct
+    type nonrec t = ListedHostKey.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListedHostKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListedHostKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListedHostKeys" ~of_json:ListedHostKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConnectorFileTransferResults =
+  struct
+    type nonrec t = ConnectorFileTransferResult.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1000) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConnectorFileTransferResult.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConnectorFileTransferResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConnectorFileTransferResults"
+        ~of_json:ConnectorFileTransferResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ListedExecutions =
   struct
     type nonrec t = ListedExecution.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListedExecution.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3563,10 +7239,97 @@ module ListedExecutions =
         j
     let to_json v = composed_to_json to_value v
   end
+module ListedConnectors =
+  struct
+    type nonrec t = ListedConnector.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListedConnector.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListedConnector.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListedConnectors" ~of_json:ListedConnector.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ListedCertificates =
+  struct
+    type nonrec t = ListedCertificate.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListedCertificate.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListedCertificate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListedCertificates"
+        ~of_json:ListedCertificate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListedAgreements =
+  struct
+    type nonrec t = ListedAgreement.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListedAgreement.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListedAgreement.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListedAgreements" ~of_json:ListedAgreement.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module ListedAccesses =
   struct
     type nonrec t = ListedAccess.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListedAccess.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3587,11 +7350,32 @@ module ListedAccesses =
       list_of_json ~kind:"ListedAccesses" ~of_json:ListedAccess.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PrivateKeyType =
+  struct
+    type nonrec t = string
+    let context_ = "PrivateKeyType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:16384) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[\\t\\n\\r\\u0020-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrivateKeyType" j
+    let to_json = simple_to_json to_value
+  end
 module DescribedWorkflow =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "Specifies the unique Amazon Resource Name (ARN) for the workflow."];
       description: WorkflowDescription.t option
@@ -3607,25 +7391,24 @@ module DescribedWorkflow =
       tags: Tags.t option
         [@ocaml.doc
           "Key-value pairs that can be used to group and search for workflows. Tags are metadata attached to workflows for any purpose."]}
-    let context_ = "DescribedWorkflow"
-    let make ?description =
-      fun ?steps ->
-        fun ?onExceptionSteps ->
-          fun ?workflowId ->
-            fun ?tags ->
-              fun ~arn ->
+    let make ?arn =
+      fun ?description ->
+        fun ?steps ->
+          fun ?onExceptionSteps ->
+            fun ?workflowId ->
+              fun ?tags ->
                 fun () ->
                   {
+                    arn;
                     description;
                     steps;
                     onExceptionSteps;
                     workflowId;
-                    tags;
-                    arn
+                    tags
                   }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (Arn.to_value x.arn)));
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
         ("Description",
           (Option.map x.description ~f:WorkflowDescription.to_value));
         ("Steps", (Option.map x.steps ~f:WorkflowSteps.to_value));
@@ -3646,68 +7429,254 @@ module DescribedWorkflow =
       let description =
         (Option.map ~f:WorkflowDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ?tags ?workflowId ?onExceptionSteps ?steps ?description ~arn ()
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?tags ?workflowId ?onExceptionSteps ?steps ?description ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let workflowId = field_map json "WorkflowId" WorkflowId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let workflowId = field_map json__ "WorkflowId" WorkflowId.of_json in
       let onExceptionSteps =
-        field_map json "OnExceptionSteps" WorkflowSteps.of_json in
-      let steps = field_map json "Steps" WorkflowSteps.of_json in
+        field_map json__ "OnExceptionSteps" WorkflowSteps.of_json in
+      let steps = field_map json__ "Steps" WorkflowSteps.of_json in
       let description =
-        field_map json "Description" WorkflowDescription.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
-      make ?tags ?workflowId ?onExceptionSteps ?steps ?description ~arn ()
+        field_map json__ "Description" WorkflowDescription.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?tags ?workflowId ?onExceptionSteps ?steps ?description ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the properties of the specified workflow"]
+module DescribedWebApp =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the web app."];
+      webAppId: WebAppId.t option
+        [@ocaml.doc "The unique identifier for the web app."];
+      describedIdentityProviderDetails:
+        DescribedWebAppIdentityProviderDetails.t option
+        [@ocaml.doc
+          "A structure that contains the details for the identity provider used by the web app."];
+      accessEndpoint: WebAppAccessEndpoint.t option
+        [@ocaml.doc
+          "The AccessEndpoint is the URL that you provide to your users for them to interact with the Transfer Family web app. You can specify a custom URL or use the default value."];
+      webAppEndpoint: WebAppEndpoint.t option
+        [@ocaml.doc
+          "The WebAppEndpoint is the unique URL for your Transfer Family web app. This is the value that you use when you configure Origins on CloudFront."];
+      webAppUnits: WebAppUnits.t option
+        [@ocaml.doc
+          "A union that contains the value for number of concurrent connections or the user sessions on your web app."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for web apps. Tags are metadata attached to web apps for any purpose."];
+      webAppEndpointPolicy: WebAppEndpointPolicy.t option
+        [@ocaml.doc
+          "Setting for the type of endpoint policy for the web app. The default value is STANDARD. If your web app was created in an Amazon Web Services GovCloud (US) Region, the value of this parameter can be FIPS, which indicates the web app endpoint is FIPS-compliant."];
+      endpointType: WebAppEndpointType.t option
+        [@ocaml.doc
+          "The type of endpoint hosting the web app. Valid values are PUBLIC for publicly accessible endpoints and VPC for VPC-hosted endpoints that provide network isolation."];
+      describedEndpointDetails: DescribedWebAppEndpointDetails.t option
+        [@ocaml.doc
+          "The endpoint configuration details for the web app, including VPC settings if the endpoint is hosted within a VPC."]}
+    let make ?arn =
+      fun ?webAppId ->
+        fun ?describedIdentityProviderDetails ->
+          fun ?accessEndpoint ->
+            fun ?webAppEndpoint ->
+              fun ?webAppUnits ->
+                fun ?tags ->
+                  fun ?webAppEndpointPolicy ->
+                    fun ?endpointType ->
+                      fun ?describedEndpointDetails ->
+                        fun () ->
+                          {
+                            arn;
+                            webAppId;
+                            describedIdentityProviderDetails;
+                            accessEndpoint;
+                            webAppEndpoint;
+                            webAppUnits;
+                            tags;
+                            webAppEndpointPolicy;
+                            endpointType;
+                            describedEndpointDetails
+                          }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("WebAppId", (Option.map x.webAppId ~f:WebAppId.to_value));
+        ("DescribedIdentityProviderDetails",
+          (Option.map x.describedIdentityProviderDetails
+             ~f:DescribedWebAppIdentityProviderDetails.to_value));
+        ("AccessEndpoint",
+          (Option.map x.accessEndpoint ~f:WebAppAccessEndpoint.to_value));
+        ("WebAppEndpoint",
+          (Option.map x.webAppEndpoint ~f:WebAppEndpoint.to_value));
+        ("WebAppUnits", (Option.map x.webAppUnits ~f:WebAppUnits.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("WebAppEndpointPolicy",
+          (Option.map x.webAppEndpointPolicy ~f:WebAppEndpointPolicy.to_value));
+        ("EndpointType",
+          (Option.map x.endpointType ~f:WebAppEndpointType.to_value));
+        ("DescribedEndpointDetails",
+          (Option.map x.describedEndpointDetails
+             ~f:DescribedWebAppEndpointDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let describedEndpointDetails =
+        (Option.map ~f:DescribedWebAppEndpointDetails.of_xml)
+          (Xml.child xml_arg0 "DescribedEndpointDetails") in
+      let endpointType =
+        (Option.map ~f:WebAppEndpointType.of_xml)
+          (Xml.child xml_arg0 "EndpointType") in
+      let webAppEndpointPolicy =
+        (Option.map ~f:WebAppEndpointPolicy.of_xml)
+          (Xml.child xml_arg0 "WebAppEndpointPolicy") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let webAppUnits =
+        (Option.map ~f:WebAppUnits.of_xml) (Xml.child xml_arg0 "WebAppUnits") in
+      let webAppEndpoint =
+        (Option.map ~f:WebAppEndpoint.of_xml)
+          (Xml.child xml_arg0 "WebAppEndpoint") in
+      let accessEndpoint =
+        (Option.map ~f:WebAppAccessEndpoint.of_xml)
+          (Xml.child xml_arg0 "AccessEndpoint") in
+      let describedIdentityProviderDetails =
+        (Option.map ~f:DescribedWebAppIdentityProviderDetails.of_xml)
+          (Xml.child xml_arg0 "DescribedIdentityProviderDetails") in
+      let webAppId =
+        (Option.map ~f:WebAppId.of_xml) (Xml.child xml_arg0 "WebAppId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?describedEndpointDetails ?endpointType ?webAppEndpointPolicy
+        ?tags ?webAppUnits ?webAppEndpoint ?accessEndpoint
+        ?describedIdentityProviderDetails ?webAppId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let describedEndpointDetails =
+        field_map json__ "DescribedEndpointDetails"
+          DescribedWebAppEndpointDetails.of_json in
+      let endpointType =
+        field_map json__ "EndpointType" WebAppEndpointType.of_json in
+      let webAppEndpointPolicy =
+        field_map json__ "WebAppEndpointPolicy" WebAppEndpointPolicy.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let webAppUnits = field_map json__ "WebAppUnits" WebAppUnits.of_json in
+      let webAppEndpoint =
+        field_map json__ "WebAppEndpoint" WebAppEndpoint.of_json in
+      let accessEndpoint =
+        field_map json__ "AccessEndpoint" WebAppAccessEndpoint.of_json in
+      let describedIdentityProviderDetails =
+        field_map json__ "DescribedIdentityProviderDetails"
+          DescribedWebAppIdentityProviderDetails.of_json in
+      let webAppId = field_map json__ "WebAppId" WebAppId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?describedEndpointDetails ?endpointType ?webAppEndpointPolicy
+        ?tags ?webAppUnits ?webAppEndpoint ?accessEndpoint
+        ?describedIdentityProviderDetails ?webAppId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that describes the parameters for the web app, as identified by the WebAppId."]
+module DescribedWebAppCustomization =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "Returns the Amazon Resource Name (ARN) for the web app."];
+      webAppId: WebAppId.t option
+        [@ocaml.doc "Returns the unique identifier for your web app."];
+      title: WebAppTitle.t option
+        [@ocaml.doc
+          "Returns the page title that you defined for your web app."];
+      logoFile: WebAppLogoFile.t option
+        [@ocaml.doc "Returns a logo file data string (in base64 encoding)."];
+      faviconFile: WebAppFaviconFile.t option
+        [@ocaml.doc "Returns an icon file data string (in base64 encoding)."]}
+    let make ?arn =
+      fun ?webAppId ->
+        fun ?title ->
+          fun ?logoFile ->
+            fun ?faviconFile ->
+              fun () -> { arn; webAppId; title; logoFile; faviconFile }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("WebAppId", (Option.map x.webAppId ~f:WebAppId.to_value));
+        ("Title", (Option.map x.title ~f:WebAppTitle.to_value));
+        ("LogoFile", (Option.map x.logoFile ~f:WebAppLogoFile.to_value));
+        ("FaviconFile",
+          (Option.map x.faviconFile ~f:WebAppFaviconFile.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let faviconFile =
+        (Option.map ~f:WebAppFaviconFile.of_xml)
+          (Xml.child xml_arg0 "FaviconFile") in
+      let logoFile =
+        (Option.map ~f:WebAppLogoFile.of_xml) (Xml.child xml_arg0 "LogoFile") in
+      let title =
+        (Option.map ~f:WebAppTitle.of_xml) (Xml.child xml_arg0 "Title") in
+      let webAppId =
+        (Option.map ~f:WebAppId.of_xml) (Xml.child xml_arg0 "WebAppId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?faviconFile ?logoFile ?title ?webAppId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let faviconFile =
+        field_map json__ "FaviconFile" WebAppFaviconFile.of_json in
+      let logoFile = field_map json__ "LogoFile" WebAppLogoFile.of_json in
+      let title = field_map json__ "Title" WebAppTitle.of_json in
+      let webAppId = field_map json__ "WebAppId" WebAppId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?faviconFile ?logoFile ?title ?webAppId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the customization fields for the web app. You can provide a title, logo, and icon to customize the appearance of your web app."]
 module DescribedUser =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "Specifies the unique Amazon Resource Name (ARN) for the user that was requested to be described."];
       homeDirectory: HomeDirectory.t option
         [@ocaml.doc
-          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory."];
+          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory. You can use the HomeDirectory parameter for HomeDirectoryType when it is set to either PATH or LOGICAL."];
       homeDirectoryMappings: HomeDirectoryMappings.t option
         [@ocaml.doc
-          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Amazon Web Services Identity and Access Management (IAM) role provides access to paths in Target. This value can only be set when HomeDirectoryType is set to LOGICAL. In most cases, you can use this value instead of the session policy to lock your user down to the designated home directory (\"chroot\"). To do this, you can set Entry to '/' and set Target to the HomeDirectory parameter value."];
+          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Identity and Access Management (IAM) role provides access to paths in Target. This value can be set only when HomeDirectoryType is set to LOGICAL. In most cases, you can use this value instead of the session policy to lock your user down to the designated home directory (\"chroot\"). To do this, you can set Entry to '/' and set Target to the HomeDirectory parameter value."];
       homeDirectoryType: HomeDirectoryType.t option
         [@ocaml.doc
-          "The type of landing directory (folder) you want your users' home directory to be when they log into the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If you set it LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or EFS paths visible to your users."];
+          "The type of landing directory (folder) that you want your users' home directory to be when they log in to the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or Amazon EFS path as is in their file transfer protocol clients. If you set it to LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or Amazon EFS paths visible to your users. If HomeDirectoryType is LOGICAL, you must provide mappings, using the HomeDirectoryMappings parameter. If, on the other hand, HomeDirectoryType is PATH, you provide an absolute path using the HomeDirectory parameter. You cannot have both HomeDirectory and HomeDirectoryMappings in your template."];
       policy: Policy.t option
         [@ocaml.doc
-          "A session policy for your user so that you can use the same IAM role across multiple users. This policy scopes down user access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}."];
+          "A session policy for your user so that you can use the same Identity and Access Management (IAM) role across multiple users. This policy scopes down a user's access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}."];
       posixProfile: PosixProfile.t option
         [@ocaml.doc
           "Specifies the full POSIX identity, including user ID (Uid), group ID (Gid), and any secondary groups IDs (SecondaryGids), that controls your users' access to your Amazon Elastic File System (Amazon EFS) file systems. The POSIX permissions that are set on files and directories in your file system determine the level of access your users get when transferring files into and out of your Amazon EFS file systems."];
       role: Role.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the IAM role that controls your users' access to your Amazon S3 bucket or EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that controls your users' access to your Amazon S3 bucket or Amazon EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or Amazon EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
       sshPublicKeys: SshPublicKeys.t option
         [@ocaml.doc
-          "Specifies the public key portion of the Secure Shell (SSH) keys stored for the described user."];
+          "Specifies the public key portion of the Secure Shell (SSH) keys stored for the described user. To delete the public key body, set its value to zero keys, as shown here: SshPublicKeys: \\[\\]"];
       tags: Tags.t option
         [@ocaml.doc
           "Specifies the key-value pairs for the user requested. Tag can be used to search for and group users for a variety of purposes."];
       userName: UserName.t option
         [@ocaml.doc
           "Specifies the name of the user that was requested to be described. User names are used for authentication purposes. This is the string that will be used by your user when they log in to your server."]}
-    let context_ = "DescribedUser"
-    let make ?homeDirectory =
-      fun ?homeDirectoryMappings ->
-        fun ?homeDirectoryType ->
-          fun ?policy ->
-            fun ?posixProfile ->
-              fun ?role ->
-                fun ?sshPublicKeys ->
-                  fun ?tags ->
-                    fun ?userName ->
-                      fun ~arn ->
+    let make ?arn =
+      fun ?homeDirectory ->
+        fun ?homeDirectoryMappings ->
+          fun ?homeDirectoryType ->
+            fun ?policy ->
+              fun ?posixProfile ->
+                fun ?role ->
+                  fun ?sshPublicKeys ->
+                    fun ?tags ->
+                      fun ?userName ->
                         fun () ->
                           {
+                            arn;
                             homeDirectory;
                             homeDirectoryMappings;
                             homeDirectoryType;
@@ -3716,12 +7685,11 @@ module DescribedUser =
                             role;
                             sshPublicKeys;
                             tags;
-                            userName;
-                            arn
+                            userName
                           }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (Arn.to_value x.arn)));
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
         ("HomeDirectory",
           (Option.map x.homeDirectory ~f:HomeDirectory.to_value));
         ("HomeDirectoryMappings",
@@ -3760,34 +7728,35 @@ module DescribedUser =
       let homeDirectory =
         (Option.map ~f:HomeDirectory.of_xml)
           (Xml.child xml_arg0 "HomeDirectory") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?userName ?tags ?sshPublicKeys ?role ?posixProfile ?policy
-        ?homeDirectoryType ?homeDirectoryMappings ?homeDirectory ~arn ()
+        ?homeDirectoryType ?homeDirectoryMappings ?homeDirectory ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map json "UserName" UserName.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let userName = field_map json__ "UserName" UserName.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let sshPublicKeys =
-        field_map json "SshPublicKeys" SshPublicKeys.of_json in
-      let role = field_map json "Role" Role.of_json in
-      let posixProfile = field_map json "PosixProfile" PosixProfile.of_json in
-      let policy = field_map json "Policy" Policy.of_json in
+        field_map json__ "SshPublicKeys" SshPublicKeys.of_json in
+      let role = field_map json__ "Role" Role.of_json in
+      let posixProfile = field_map json__ "PosixProfile" PosixProfile.of_json in
+      let policy = field_map json__ "Policy" Policy.of_json in
       let homeDirectoryType =
-        field_map json "HomeDirectoryType" HomeDirectoryType.of_json in
+        field_map json__ "HomeDirectoryType" HomeDirectoryType.of_json in
       let homeDirectoryMappings =
-        field_map json "HomeDirectoryMappings" HomeDirectoryMappings.of_json in
+        field_map json__ "HomeDirectoryMappings"
+          HomeDirectoryMappings.of_json in
       let homeDirectory =
-        field_map json "HomeDirectory" HomeDirectory.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
+        field_map json__ "HomeDirectory" HomeDirectory.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
       make ?userName ?tags ?sshPublicKeys ?role ?posixProfile ?policy
-        ?homeDirectoryType ?homeDirectoryMappings ?homeDirectory ~arn ()
+        ?homeDirectoryType ?homeDirectoryMappings ?homeDirectory ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the properties of a user that was specified."]
 module DescribedServer =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "Specifies the unique Amazon Resource Name (ARN) of the server."];
       certificate: Certificate.t option
@@ -3795,13 +7764,13 @@ module DescribedServer =
           "Specifies the ARN of the Amazon Web ServicesCertificate Manager (ACM) certificate. Required when Protocols is set to FTPS."];
       protocolDetails: ProtocolDetails.t option
         [@ocaml.doc
-          "The protocol settings that are configured for your server. Use the PassiveIp parameter to indicate passive mode. Enter a single dotted-quad IPv4 address, such as the external IP address of a firewall, router, or load balancer."];
+          "The protocol settings that are configured for your server. Avoid placing Network Load Balancers (NLBs) or NAT gateways in front of Transfer Family servers, as this increases costs and can cause performance issues, including reduced connection limits for FTPS. For more details, see Avoid placing NLBs and NATs in front of Transfer Family. To indicate passive mode (for FTP and FTPS protocols), use the PassiveIp parameter. Enter a single dotted-quad IPv4 address, such as the external IP address of a firewall, router, or load balancer. To ignore the error that is generated when the client attempts to use the SETSTAT command on a file that you are uploading to an Amazon S3 bucket, use the SetStatOption parameter. To have the Transfer Family server ignore the SETSTAT command and upload files without needing to make any changes to your SFTP client, set the value to ENABLE_NO_OP. If you set the SetStatOption parameter to ENABLE_NO_OP, Transfer Family generates a log entry to Amazon CloudWatch Logs, so that you can determine when the client is making a SETSTAT call. To determine whether your Transfer Family server resumes recent, negotiated sessions through a unique session ID, use the TlsSessionResumptionMode parameter. As2Transports indicates the transport method for the AS2 messages. Currently, only HTTP is supported."];
       domain: Domain.t option
         [@ocaml.doc
-          "Specifies the domain of the storage system that is used for file transfers."];
+          "Specifies the domain of the storage system that is used for file transfers. There are two domains available: Amazon Simple Storage Service (Amazon S3) and Amazon Elastic File System (Amazon EFS). The default value is S3."];
       endpointDetails: EndpointDetails.t option
         [@ocaml.doc
-          "The virtual private cloud (VPC) endpoint settings that are configured for your server. When you host your endpoint within your VPC, you can make it accessible only to resources within your VPC, or you can attach Elastic IP addresses and make it accessible to clients over the internet. Your VPC's default security groups are automatically assigned to your endpoint."];
+          "The virtual private cloud (VPC) endpoint settings that are configured for your server. When you host your endpoint within your VPC, you can make your endpoint accessible only to resources within your VPC, or you can attach Elastic IP addresses and make your endpoint accessible to clients over the internet. Your VPC's default security groups are automatically assigned to your endpoint."];
       endpointType: EndpointType.t option
         [@ocaml.doc
           "Defines the type of endpoint that your server is connected to. If your server is connected to a VPC endpoint, your server isn't accessible over the public internet."];
@@ -3813,28 +7782,28 @@ module DescribedServer =
           "Specifies information to call a customer-supplied authentication API. This field is not populated when the IdentityProviderType of a server is AWS_DIRECTORY_SERVICE or SERVICE_MANAGED."];
       identityProviderType: IdentityProviderType.t option
         [@ocaml.doc
-          "Specifies the mode of authentication for a server. The default value is SERVICE_MANAGED, which allows you to store and access user credentials within the Amazon Web Services Transfer Family service. Use AWS_DIRECTORY_SERVICE to provide access to Active Directory groups in Amazon Web Services Managed Active Directory or Microsoft Active Directory in your on-premises environment or in Amazon Web Services using AD Connectors. This option also requires you to provide a Directory ID using the IdentityProviderDetails parameter. Use the API_GATEWAY value to integrate with an identity provider of your choosing. The API_GATEWAY setting requires you to provide an API Gateway endpoint URL to call for authentication using the IdentityProviderDetails parameter. Use the AWS_LAMBDA value to directly use a Lambda function as your identity provider. If you choose this value, you must specify the ARN for the lambda function in the Function parameter for the IdentityProviderDetails data type."];
-      loggingRole: Role.t option
+          "The mode of authentication for a server. The default value is SERVICE_MANAGED, which allows you to store and access user credentials within the Transfer Family service. Use AWS_DIRECTORY_SERVICE to provide access to Active Directory groups in Directory Service for Microsoft Active Directory or Microsoft Active Directory in your on-premises environment or in Amazon Web Services using AD Connector. This option also requires you to provide a Directory ID by using the IdentityProviderDetails parameter. Use the API_GATEWAY value to integrate with an identity provider of your choosing. The API_GATEWAY setting requires you to provide an Amazon API Gateway endpoint URL to call for authentication by using the IdentityProviderDetails parameter. Use the AWS_LAMBDA value to directly use an Lambda function as your identity provider. If you choose this value, you must specify the ARN for the Lambda function in the Function parameter for the IdentityProviderDetails data type."];
+      loggingRole: NullableRole.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the Amazon Web Services Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, user activity can be viewed in your CloudWatch logs."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, you can view user activity in your CloudWatch logs."];
       postAuthenticationLoginBanner: PostAuthenticationLoginBanner.t option
         [@ocaml.doc
-          "Specify a string to display when users connect to a server. This string is displayed after the user authenticates. The SFTP protocol does not support post-authentication display banners."];
+          "Specifies a string to display when users connect to a server. This string is displayed after the user authenticates. The SFTP protocol does not support post-authentication display banners."];
       preAuthenticationLoginBanner: PreAuthenticationLoginBanner.t option
         [@ocaml.doc
-          "Specify a string to display when users connect to a server. This string is displayed before the user authenticates. For example, the following banner displays details about using the system. This system is for the use of authorized users only. Individuals using this computer system without authority, or in excess of their authority, are subject to having all of their activities on this system monitored and recorded by system personnel."];
+          "Specifies a string to display when users connect to a server. This string is displayed before the user authenticates. For example, the following banner displays details about using the system: This system is for the use of authorized users only. Individuals using this computer system without authority, or in excess of their authority, are subject to having all of their activities on this system monitored and recorded by system personnel."];
       protocols: Protocols.t option
         [@ocaml.doc
-          "Specifies the file transfer protocol or protocols over which your file transfer protocol client can connect to your server's endpoint. The available protocols are: SFTP (Secure Shell (SSH) File Transfer Protocol): File transfer over SSH FTPS (File Transfer Protocol Secure): File transfer with TLS encryption FTP (File Transfer Protocol): Unencrypted file transfer"];
+          "Specifies the file transfer protocol or protocols over which your file transfer protocol client can connect to your server's endpoint. The available protocols are: SFTP (Secure Shell (SSH) File Transfer Protocol): File transfer over SSH FTPS (File Transfer Protocol Secure): File transfer with TLS encryption FTP (File Transfer Protocol): Unencrypted file transfer AS2 (Applicability Statement 2): used for transporting structured business-to-business data If you select FTPS, you must choose a certificate stored in Certificate Manager (ACM) which is used to identify your server when clients connect to it over FTPS. If Protocol includes either FTP or FTPS, then the EndpointType must be VPC and the IdentityProviderType must be either AWS_DIRECTORY_SERVICE, AWS_LAMBDA, or API_GATEWAY. If Protocol includes FTP, then AddressAllocationIds cannot be associated. If Protocol is set only to SFTP, the EndpointType can be set to PUBLIC and the IdentityProviderType can be set any of the supported identity types: SERVICE_MANAGED, AWS_DIRECTORY_SERVICE, AWS_LAMBDA, or API_GATEWAY. If Protocol includes AS2, then the EndpointType must be VPC, and domain must be Amazon S3."];
       securityPolicyName: SecurityPolicyName.t option
         [@ocaml.doc
-          "Specifies the name of the security policy that is attached to the server."];
+          "Specifies the name of the security policy for the server."];
       serverId: ServerId.t option
         [@ocaml.doc
           "Specifies the unique system-assigned identifier for a server that you instantiate."];
       state: State.t option
         [@ocaml.doc
-          "Specifies the condition of a server for the server that was described. A value of ONLINE indicates that the server can accept jobs and transfer files. A State value of OFFLINE means that the server cannot perform file transfer operations. The states of STARTING and STOPPING indicate that the server is in an intermediate state, either not fully able to respond, or not fully offline. The values of START_FAILED or STOP_FAILED can indicate an error condition."];
+          "The condition of the server that was described. A value of ONLINE indicates that the server can accept jobs and transfer files. A State value of OFFLINE means that the server cannot perform file transfer operations. The states of STARTING and STOPPING indicate that the server is in an intermediate state, either not fully able to respond, or not fully offline. The values of START_FAILED or STOP_FAILED can indicate an error condition."];
       tags: Tags.t option
         [@ocaml.doc
           "Specifies the key-value pairs that you can use to search for and group servers that were assigned to the server that was described."];
@@ -3843,52 +7812,74 @@ module DescribedServer =
           "Specifies the number of users that are assigned to a server you specified with the ServerId."];
       workflowDetails: WorkflowDetails.t option
         [@ocaml.doc
-          "Specifies the workflow ID for the workflow to assign and the execution role used for executing the workflow."]}
-    let context_ = "DescribedServer"
-    let make ?certificate =
-      fun ?protocolDetails ->
-        fun ?domain ->
-          fun ?endpointDetails ->
-            fun ?endpointType ->
-              fun ?hostKeyFingerprint ->
-                fun ?identityProviderDetails ->
-                  fun ?identityProviderType ->
-                    fun ?loggingRole ->
-                      fun ?postAuthenticationLoginBanner ->
-                        fun ?preAuthenticationLoginBanner ->
-                          fun ?protocols ->
-                            fun ?securityPolicyName ->
-                              fun ?serverId ->
-                                fun ?state ->
-                                  fun ?tags ->
-                                    fun ?userCount ->
-                                      fun ?workflowDetails ->
-                                        fun ~arn ->
-                                          fun () ->
-                                            {
-                                              certificate;
-                                              protocolDetails;
-                                              domain;
-                                              endpointDetails;
-                                              endpointType;
-                                              hostKeyFingerprint;
-                                              identityProviderDetails;
-                                              identityProviderType;
-                                              loggingRole;
-                                              postAuthenticationLoginBanner;
-                                              preAuthenticationLoginBanner;
-                                              protocols;
-                                              securityPolicyName;
-                                              serverId;
-                                              state;
-                                              tags;
-                                              userCount;
-                                              workflowDetails;
-                                              arn
-                                            }
+          "Specifies the workflow ID for the workflow to assign and the execution role that's used for executing the workflow. In addition to a workflow to execute when a file is uploaded completely, WorkflowDetails can also contain a workflow ID (and execution role) for a workflow to execute on partial upload. A partial upload occurs when the server session disconnects while the file is still being uploaded."];
+      structuredLogDestinations: StructuredLogDestinations.t option
+        [@ocaml.doc
+          "Specifies the log groups to which your server logs are sent. To specify a log group, you must provide the ARN for an existing log group. In this case, the format of the log group is as follows: arn:aws:logs:region-name:amazon-account-id:log-group:log-group-name:* For example, arn:aws:logs:us-east-1:111122223333:log-group:mytestgroup:* If you have previously specified a log group for a server, you can clear it, and in effect turn off structured logging, by providing an empty value for this parameter in an update-server call. For example: update-server --server-id s-1234567890abcdef0 --structured-log-destinations"];
+      s3StorageOptions: S3StorageOptions.t option
+        [@ocaml.doc
+          "Specifies whether or not performance for your Amazon S3 directories is optimized. If using the console, this is enabled by default. If using the API or CLI, this is disabled by default. By default, home directory mappings have a TYPE of DIRECTORY. If you enable this option, you would then need to explicitly set the HomeDirectoryMapEntry Type to FILE if you want a mapping to have a file target."];
+      as2ServiceManagedEgressIpAddresses:
+        ServiceManagedEgressIpAddresses.t option
+        [@ocaml.doc
+          "The list of egress IP addresses of this server. These IP addresses are only relevant for servers that use the AS2 protocol. They are used for sending asynchronous MDNs. These IP addresses are assigned automatically when you create an AS2 server. Additionally, if you update an existing server and add the AS2 protocol, static IP addresses are assigned as well."];
+      ipAddressType: IpAddressType.t option
+        [@ocaml.doc
+          "Specifies whether to use IPv4 only, or to use dual-stack (IPv4 and IPv6) for your Transfer Family endpoint. The default value is IPV4. The IpAddressType parameter has the following limitations: It cannot be changed while the server is online. You must stop the server before modifying this parameter. It cannot be updated to DUALSTACK if the server has AddressAllocationIds specified. When using DUALSTACK as the IpAddressType, you cannot set the AddressAllocationIds parameter for the EndpointDetails for the server."]}
+    let make ?arn =
+      fun ?certificate ->
+        fun ?protocolDetails ->
+          fun ?domain ->
+            fun ?endpointDetails ->
+              fun ?endpointType ->
+                fun ?hostKeyFingerprint ->
+                  fun ?identityProviderDetails ->
+                    fun ?identityProviderType ->
+                      fun ?loggingRole ->
+                        fun ?postAuthenticationLoginBanner ->
+                          fun ?preAuthenticationLoginBanner ->
+                            fun ?protocols ->
+                              fun ?securityPolicyName ->
+                                fun ?serverId ->
+                                  fun ?state ->
+                                    fun ?tags ->
+                                      fun ?userCount ->
+                                        fun ?workflowDetails ->
+                                          fun ?structuredLogDestinations ->
+                                            fun ?s3StorageOptions ->
+                                              fun
+                                                ?as2ServiceManagedEgressIpAddresses
+                                                ->
+                                                fun ?ipAddressType ->
+                                                  fun () ->
+                                                    {
+                                                      arn;
+                                                      certificate;
+                                                      protocolDetails;
+                                                      domain;
+                                                      endpointDetails;
+                                                      endpointType;
+                                                      hostKeyFingerprint;
+                                                      identityProviderDetails;
+                                                      identityProviderType;
+                                                      loggingRole;
+                                                      postAuthenticationLoginBanner;
+                                                      preAuthenticationLoginBanner;
+                                                      protocols;
+                                                      securityPolicyName;
+                                                      serverId;
+                                                      state;
+                                                      tags;
+                                                      userCount;
+                                                      workflowDetails;
+                                                      structuredLogDestinations;
+                                                      s3StorageOptions;
+                                                      as2ServiceManagedEgressIpAddresses;
+                                                      ipAddressType
+                                                    }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (Arn.to_value x.arn)));
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
         ("Certificate", (Option.map x.certificate ~f:Certificate.to_value));
         ("ProtocolDetails",
           (Option.map x.protocolDetails ~f:ProtocolDetails.to_value));
@@ -3904,7 +7895,7 @@ module DescribedServer =
              ~f:IdentityProviderDetails.to_value));
         ("IdentityProviderType",
           (Option.map x.identityProviderType ~f:IdentityProviderType.to_value));
-        ("LoggingRole", (Option.map x.loggingRole ~f:Role.to_value));
+        ("LoggingRole", (Option.map x.loggingRole ~f:NullableRole.to_value));
         ("PostAuthenticationLoginBanner",
           (Option.map x.postAuthenticationLoginBanner
              ~f:PostAuthenticationLoginBanner.to_value));
@@ -3919,9 +7910,31 @@ module DescribedServer =
         ("Tags", (Option.map x.tags ~f:Tags.to_value));
         ("UserCount", (Option.map x.userCount ~f:UserCount.to_value));
         ("WorkflowDetails",
-          (Option.map x.workflowDetails ~f:WorkflowDetails.to_value))]
+          (Option.map x.workflowDetails ~f:WorkflowDetails.to_value));
+        ("StructuredLogDestinations",
+          (Option.map x.structuredLogDestinations
+             ~f:StructuredLogDestinations.to_value));
+        ("S3StorageOptions",
+          (Option.map x.s3StorageOptions ~f:S3StorageOptions.to_value));
+        ("As2ServiceManagedEgressIpAddresses",
+          (Option.map x.as2ServiceManagedEgressIpAddresses
+             ~f:ServiceManagedEgressIpAddresses.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType ~f:IpAddressType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:IpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let as2ServiceManagedEgressIpAddresses =
+        (Option.map ~f:ServiceManagedEgressIpAddresses.of_xml)
+          (Xml.child xml_arg0 "As2ServiceManagedEgressIpAddresses") in
+      let s3StorageOptions =
+        (Option.map ~f:S3StorageOptions.of_xml)
+          (Xml.child xml_arg0 "S3StorageOptions") in
+      let structuredLogDestinations =
+        (Option.map ~f:StructuredLogDestinations.of_xml)
+          (Xml.child xml_arg0 "StructuredLogDestinations") in
       let workflowDetails =
         (Option.map ~f:WorkflowDetails.of_xml)
           (Xml.child xml_arg0 "WorkflowDetails") in
@@ -3943,7 +7956,8 @@ module DescribedServer =
         (Option.map ~f:PostAuthenticationLoginBanner.of_xml)
           (Xml.child xml_arg0 "PostAuthenticationLoginBanner") in
       let loggingRole =
-        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "LoggingRole") in
+        (Option.map ~f:NullableRole.of_xml)
+          (Xml.child xml_arg0 "LoggingRole") in
       let identityProviderType =
         (Option.map ~f:IdentityProviderType.of_xml)
           (Xml.child xml_arg0 "IdentityProviderType") in
@@ -3966,50 +7980,64 @@ module DescribedServer =
           (Xml.child xml_arg0 "ProtocolDetails") in
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "Certificate") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ?workflowDetails ?userCount ?tags ?state ?serverId
-        ?securityPolicyName ?protocols ?preAuthenticationLoginBanner
-        ?postAuthenticationLoginBanner ?loggingRole ?identityProviderType
-        ?identityProviderDetails ?hostKeyFingerprint ?endpointType
-        ?endpointDetails ?domain ?protocolDetails ?certificate ~arn ()
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?ipAddressType ?as2ServiceManagedEgressIpAddresses
+        ?s3StorageOptions ?structuredLogDestinations ?workflowDetails
+        ?userCount ?tags ?state ?serverId ?securityPolicyName ?protocols
+        ?preAuthenticationLoginBanner ?postAuthenticationLoginBanner
+        ?loggingRole ?identityProviderType ?identityProviderDetails
+        ?hostKeyFingerprint ?endpointType ?endpointDetails ?domain
+        ?protocolDetails ?certificate ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let as2ServiceManagedEgressIpAddresses =
+        field_map json__ "As2ServiceManagedEgressIpAddresses"
+          ServiceManagedEgressIpAddresses.of_json in
+      let s3StorageOptions =
+        field_map json__ "S3StorageOptions" S3StorageOptions.of_json in
+      let structuredLogDestinations =
+        field_map json__ "StructuredLogDestinations"
+          StructuredLogDestinations.of_json in
       let workflowDetails =
-        field_map json "WorkflowDetails" WorkflowDetails.of_json in
-      let userCount = field_map json "UserCount" UserCount.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let state = field_map json "State" State.of_json in
-      let serverId = field_map json "ServerId" ServerId.of_json in
+        field_map json__ "WorkflowDetails" WorkflowDetails.of_json in
+      let userCount = field_map json__ "UserCount" UserCount.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let state = field_map json__ "State" State.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
       let securityPolicyName =
-        field_map json "SecurityPolicyName" SecurityPolicyName.of_json in
-      let protocols = field_map json "Protocols" Protocols.of_json in
+        field_map json__ "SecurityPolicyName" SecurityPolicyName.of_json in
+      let protocols = field_map json__ "Protocols" Protocols.of_json in
       let preAuthenticationLoginBanner =
-        field_map json "PreAuthenticationLoginBanner"
+        field_map json__ "PreAuthenticationLoginBanner"
           PreAuthenticationLoginBanner.of_json in
       let postAuthenticationLoginBanner =
-        field_map json "PostAuthenticationLoginBanner"
+        field_map json__ "PostAuthenticationLoginBanner"
           PostAuthenticationLoginBanner.of_json in
-      let loggingRole = field_map json "LoggingRole" Role.of_json in
+      let loggingRole = field_map json__ "LoggingRole" NullableRole.of_json in
       let identityProviderType =
-        field_map json "IdentityProviderType" IdentityProviderType.of_json in
+        field_map json__ "IdentityProviderType" IdentityProviderType.of_json in
       let identityProviderDetails =
-        field_map json "IdentityProviderDetails"
+        field_map json__ "IdentityProviderDetails"
           IdentityProviderDetails.of_json in
       let hostKeyFingerprint =
-        field_map json "HostKeyFingerprint" HostKeyFingerprint.of_json in
-      let endpointType = field_map json "EndpointType" EndpointType.of_json in
+        field_map json__ "HostKeyFingerprint" HostKeyFingerprint.of_json in
+      let endpointType = field_map json__ "EndpointType" EndpointType.of_json in
       let endpointDetails =
-        field_map json "EndpointDetails" EndpointDetails.of_json in
-      let domain = field_map json "Domain" Domain.of_json in
+        field_map json__ "EndpointDetails" EndpointDetails.of_json in
+      let domain = field_map json__ "Domain" Domain.of_json in
       let protocolDetails =
-        field_map json "ProtocolDetails" ProtocolDetails.of_json in
-      let certificate = field_map json "Certificate" Certificate.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
-      make ?workflowDetails ?userCount ?tags ?state ?serverId
-        ?securityPolicyName ?protocols ?preAuthenticationLoginBanner
-        ?postAuthenticationLoginBanner ?loggingRole ?identityProviderType
-        ?identityProviderDetails ?hostKeyFingerprint ?endpointType
-        ?endpointDetails ?domain ?protocolDetails ?certificate ~arn ()
+        field_map json__ "ProtocolDetails" ProtocolDetails.of_json in
+      let certificate = field_map json__ "Certificate" Certificate.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?ipAddressType ?as2ServiceManagedEgressIpAddresses
+        ?s3StorageOptions ?structuredLogDestinations ?workflowDetails
+        ?userCount ?tags ?state ?serverId ?securityPolicyName ?protocols
+        ?preAuthenticationLoginBanner ?postAuthenticationLoginBanner
+        ?loggingRole ?identityProviderType ?identityProviderDetails
+        ?hostKeyFingerprint ?endpointType ?endpointDetails ?domain
+        ?protocolDetails ?certificate ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the properties of a file transfer protocol-enabled server that was specified."]
@@ -4019,51 +8047,79 @@ module DescribedSecurityPolicy =
       {
       fips: Fips.t option
         [@ocaml.doc
-          "Specifies whether this policy enables Federal Information Processing Standards (FIPS)."];
-      securityPolicyName: SecurityPolicyName.t
-        [@ocaml.doc
-          "Specifies the name of the security policy that is attached to the server."];
+          "Specifies whether this policy enables Federal Information Processing Standards (FIPS). This parameter applies to both server and connector security policies."];
+      securityPolicyName: SecurityPolicyName.t option
+        [@ocaml.doc "The text name of the specified security policy."];
       sshCiphers: SecurityPolicyOptions.t option
         [@ocaml.doc
-          "Specifies the enabled Secure Shell (SSH) cipher encryption algorithms in the security policy that is attached to the server."];
+          "Lists the enabled Secure Shell (SSH) cipher encryption algorithms in the security policy that is attached to the server or connector. This parameter applies to both server and connector security policies."];
       sshKexs: SecurityPolicyOptions.t option
         [@ocaml.doc
-          "Specifies the enabled SSH key exchange (KEX) encryption algorithms in the security policy that is attached to the server."];
+          "Lists the enabled SSH key exchange (KEX) encryption algorithms in the security policy that is attached to the server or connector. This parameter applies to both server and connector security policies."];
       sshMacs: SecurityPolicyOptions.t option
         [@ocaml.doc
-          "Specifies the enabled SSH message authentication code (MAC) encryption algorithms in the security policy that is attached to the server."];
+          "Lists the enabled SSH message authentication code (MAC) encryption algorithms in the security policy that is attached to the server or connector. This parameter applies to both server and connector security policies."];
       tlsCiphers: SecurityPolicyOptions.t option
         [@ocaml.doc
-          "Specifies the enabled Transport Layer Security (TLS) cipher encryption algorithms in the security policy that is attached to the server."]}
-    let context_ = "DescribedSecurityPolicy"
+          "Lists the enabled Transport Layer Security (TLS) cipher encryption algorithms in the security policy that is attached to the server. This parameter only applies to security policies for servers."];
+      sshHostKeyAlgorithms: SecurityPolicyOptions.t option
+        [@ocaml.doc
+          "Lists the host key algorithms for the security policy. This parameter only applies to security policies for connectors."];
+      type_: SecurityPolicyResourceType.t option
+        [@ocaml.doc
+          "The resource type to which the security policy applies, either server or connector."];
+      protocols: SecurityPolicyProtocols.t option
+        [@ocaml.doc
+          "Lists the file transfer protocols that the security policy applies to."]}
     let make ?fips =
-      fun ?sshCiphers ->
-        fun ?sshKexs ->
-          fun ?sshMacs ->
-            fun ?tlsCiphers ->
-              fun ~securityPolicyName ->
-                fun () ->
-                  {
-                    fips;
-                    sshCiphers;
-                    sshKexs;
-                    sshMacs;
-                    tlsCiphers;
-                    securityPolicyName
-                  }
+      fun ?securityPolicyName ->
+        fun ?sshCiphers ->
+          fun ?sshKexs ->
+            fun ?sshMacs ->
+              fun ?tlsCiphers ->
+                fun ?sshHostKeyAlgorithms ->
+                  fun ?type_ ->
+                    fun ?protocols ->
+                      fun () ->
+                        {
+                          fips;
+                          securityPolicyName;
+                          sshCiphers;
+                          sshKexs;
+                          sshMacs;
+                          tlsCiphers;
+                          sshHostKeyAlgorithms;
+                          type_;
+                          protocols
+                        }
     let to_value x =
       structure_to_value
         [("Fips", (Option.map x.fips ~f:Fips.to_value));
         ("SecurityPolicyName",
-          (Some (SecurityPolicyName.to_value x.securityPolicyName)));
+          (Option.map x.securityPolicyName ~f:SecurityPolicyName.to_value));
         ("SshCiphers",
           (Option.map x.sshCiphers ~f:SecurityPolicyOptions.to_value));
         ("SshKexs", (Option.map x.sshKexs ~f:SecurityPolicyOptions.to_value));
         ("SshMacs", (Option.map x.sshMacs ~f:SecurityPolicyOptions.to_value));
         ("TlsCiphers",
-          (Option.map x.tlsCiphers ~f:SecurityPolicyOptions.to_value))]
+          (Option.map x.tlsCiphers ~f:SecurityPolicyOptions.to_value));
+        ("SshHostKeyAlgorithms",
+          (Option.map x.sshHostKeyAlgorithms
+             ~f:SecurityPolicyOptions.to_value));
+        ("Type", (Option.map x.type_ ~f:SecurityPolicyResourceType.to_value));
+        ("Protocols",
+          (Option.map x.protocols ~f:SecurityPolicyProtocols.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let protocols =
+        (Option.map ~f:SecurityPolicyProtocols.of_xml)
+          (Xml.child xml_arg0 "Protocols") in
+      let type_ =
+        (Option.map ~f:SecurityPolicyResourceType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let sshHostKeyAlgorithms =
+        (Option.map ~f:SecurityPolicyOptions.of_xml)
+          (Xml.child xml_arg0 "SshHostKeyAlgorithms") in
       let tlsCiphers =
         (Option.map ~f:SecurityPolicyOptions.of_xml)
           (Xml.child xml_arg0 "TlsCiphers") in
@@ -4077,27 +8133,182 @@ module DescribedSecurityPolicy =
         (Option.map ~f:SecurityPolicyOptions.of_xml)
           (Xml.child xml_arg0 "SshCiphers") in
       let securityPolicyName =
-        SecurityPolicyName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecurityPolicyName") in
+        (Option.map ~f:SecurityPolicyName.of_xml)
+          (Xml.child xml_arg0 "SecurityPolicyName") in
       let fips = (Option.map ~f:Fips.of_xml) (Xml.child xml_arg0 "Fips") in
-      make ?tlsCiphers ?sshMacs ?sshKexs ?sshCiphers ~securityPolicyName
-        ?fips ()
+      make ?protocols ?type_ ?sshHostKeyAlgorithms ?tlsCiphers ?sshMacs
+        ?sshKexs ?sshCiphers ?securityPolicyName ?fips ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let protocols =
+        field_map json__ "Protocols" SecurityPolicyProtocols.of_json in
+      let type_ = field_map json__ "Type" SecurityPolicyResourceType.of_json in
+      let sshHostKeyAlgorithms =
+        field_map json__ "SshHostKeyAlgorithms" SecurityPolicyOptions.of_json in
       let tlsCiphers =
-        field_map json "TlsCiphers" SecurityPolicyOptions.of_json in
-      let sshMacs = field_map json "SshMacs" SecurityPolicyOptions.of_json in
-      let sshKexs = field_map json "SshKexs" SecurityPolicyOptions.of_json in
+        field_map json__ "TlsCiphers" SecurityPolicyOptions.of_json in
+      let sshMacs = field_map json__ "SshMacs" SecurityPolicyOptions.of_json in
+      let sshKexs = field_map json__ "SshKexs" SecurityPolicyOptions.of_json in
       let sshCiphers =
-        field_map json "SshCiphers" SecurityPolicyOptions.of_json in
+        field_map json__ "SshCiphers" SecurityPolicyOptions.of_json in
       let securityPolicyName =
-        field_map_exn json "SecurityPolicyName" SecurityPolicyName.of_json in
-      let fips = field_map json "Fips" Fips.of_json in
-      make ?tlsCiphers ?sshMacs ?sshKexs ?sshCiphers ~securityPolicyName
-        ?fips ()
+        field_map json__ "SecurityPolicyName" SecurityPolicyName.of_json in
+      let fips = field_map json__ "Fips" Fips.of_json in
+      make ?protocols ?type_ ?sshHostKeyAlgorithms ?tlsCiphers ?sshMacs
+        ?sshKexs ?sshCiphers ?securityPolicyName ?fips ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the properties of a security policy that was specified. For more information about security policies, see Working with security policies."]
+       "Describes the properties of a security policy that you specify. For more information about security policies, see Working with security policies for servers or Working with security policies for SFTP connectors."]
+module DescribedProfile =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc "The unique Amazon Resource Name (ARN) for the profile."];
+      profileId: ProfileId.t option
+        [@ocaml.doc
+          "A unique identifier for the local or partner AS2 profile."];
+      profileType: ProfileType.t option
+        [@ocaml.doc
+          "Indicates whether to list only LOCAL type profiles or only PARTNER type profiles. If not supplied in the request, the command lists all types of profiles."];
+      as2Id: As2Id.t option
+        [@ocaml.doc
+          "The As2Id is the AS2-name, as defined in the RFC 4130. For inbound transfers, this is the AS2-From header for the AS2 messages sent from the partner. For outbound connectors, this is the AS2-To header for the AS2 messages sent to the partner using the StartFileTransfer API operation. This ID cannot include spaces."];
+      certificateIds: CertificateIds.t option
+        [@ocaml.doc
+          "An array of identifiers for the imported certificates. You use this identifier for working with profiles and partner profiles."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for profiles."]}
+    let make ?arn =
+      fun ?profileId ->
+        fun ?profileType ->
+          fun ?as2Id ->
+            fun ?certificateIds ->
+              fun ?tags ->
+                fun () ->
+                  { arn; profileId; profileType; as2Id; certificateIds; tags
+                  }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("ProfileId", (Option.map x.profileId ~f:ProfileId.to_value));
+        ("ProfileType", (Option.map x.profileType ~f:ProfileType.to_value));
+        ("As2Id", (Option.map x.as2Id ~f:As2Id.to_value));
+        ("CertificateIds",
+          (Option.map x.certificateIds ~f:CertificateIds.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let certificateIds =
+        (Option.map ~f:CertificateIds.of_xml)
+          (Xml.child xml_arg0 "CertificateIds") in
+      let as2Id = (Option.map ~f:As2Id.of_xml) (Xml.child xml_arg0 "As2Id") in
+      let profileType =
+        (Option.map ~f:ProfileType.of_xml) (Xml.child xml_arg0 "ProfileType") in
+      let profileId =
+        (Option.map ~f:ProfileId.of_xml) (Xml.child xml_arg0 "ProfileId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?tags ?certificateIds ?as2Id ?profileType ?profileId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let certificateIds =
+        field_map json__ "CertificateIds" CertificateIds.of_json in
+      let as2Id = field_map json__ "As2Id" As2Id.of_json in
+      let profileType = field_map json__ "ProfileType" ProfileType.of_json in
+      let profileId = field_map json__ "ProfileId" ProfileId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?tags ?certificateIds ?as2Id ?profileType ?profileId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details for a local or partner AS2 profile."]
+module DescribedHostKey =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "The unique Amazon Resource Name (ARN) for the host key."];
+      hostKeyId: HostKeyId.t option
+        [@ocaml.doc "A unique identifier for the host key."];
+      hostKeyFingerprint: HostKeyFingerprint.t option
+        [@ocaml.doc
+          "The public key fingerprint, which is a short sequence of bytes used to identify the longer public key."];
+      description: HostKeyDescription.t option
+        [@ocaml.doc "The text description for this host key."];
+      type_: HostKeyType.t option
+        [@ocaml.doc
+          "The encryption algorithm that is used for the host key. The Type parameter is specified by using one of the following values: ssh-rsa ssh-ed25519 ecdsa-sha2-nistp256 ecdsa-sha2-nistp384 ecdsa-sha2-nistp521"];
+      dateImported: DateImported.t option
+        [@ocaml.doc
+          "The date on which the host key was added to the server."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for host keys."]}
+    let make ?arn =
+      fun ?hostKeyId ->
+        fun ?hostKeyFingerprint ->
+          fun ?description ->
+            fun ?type_ ->
+              fun ?dateImported ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      arn;
+                      hostKeyId;
+                      hostKeyFingerprint;
+                      description;
+                      type_;
+                      dateImported;
+                      tags
+                    }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("HostKeyId", (Option.map x.hostKeyId ~f:HostKeyId.to_value));
+        ("HostKeyFingerprint",
+          (Option.map x.hostKeyFingerprint ~f:HostKeyFingerprint.to_value));
+        ("Description",
+          (Option.map x.description ~f:HostKeyDescription.to_value));
+        ("Type", (Option.map x.type_ ~f:HostKeyType.to_value));
+        ("DateImported",
+          (Option.map x.dateImported ~f:DateImported.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let dateImported =
+        (Option.map ~f:DateImported.of_xml)
+          (Xml.child xml_arg0 "DateImported") in
+      let type_ =
+        (Option.map ~f:HostKeyType.of_xml) (Xml.child xml_arg0 "Type") in
+      let description =
+        (Option.map ~f:HostKeyDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let hostKeyFingerprint =
+        (Option.map ~f:HostKeyFingerprint.of_xml)
+          (Xml.child xml_arg0 "HostKeyFingerprint") in
+      let hostKeyId =
+        (Option.map ~f:HostKeyId.of_xml) (Xml.child xml_arg0 "HostKeyId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?tags ?dateImported ?type_ ?description ?hostKeyFingerprint
+        ?hostKeyId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let dateImported = field_map json__ "DateImported" DateImported.of_json in
+      let type_ = field_map json__ "Type" HostKeyType.of_json in
+      let description =
+        field_map json__ "Description" HostKeyDescription.of_json in
+      let hostKeyFingerprint =
+        field_map json__ "HostKeyFingerprint" HostKeyFingerprint.of_json in
+      let hostKeyId = field_map json__ "HostKeyId" HostKeyId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?tags ?dateImported ?type_ ?description ?hostKeyFingerprint
+        ?hostKeyId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details for a server host key."]
 module DescribedExecution =
   struct
     type nonrec t =
@@ -4109,7 +8320,7 @@ module DescribedExecution =
           "A structure that describes the Amazon S3 or EFS file location. This is the file location when the execution begins: if the file is being copied, this is the initial (as opposed to destination) file location."];
       serviceMetadata: ServiceMetadata.t option
         [@ocaml.doc
-          "A container object for the session details associated with a workflow."];
+          "A container object for the session details that are associated with a workflow."];
       executionRole: Role.t option
         [@ocaml.doc "The IAM role associated with the execution."];
       loggingConfiguration: LoggingConfiguration.t option
@@ -4180,45 +8391,536 @@ module DescribedExecution =
       make ?results ?status ?posixProfile ?loggingConfiguration
         ?executionRole ?serviceMetadata ?initialFileLocation ?executionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let results = field_map json "Results" ExecutionResults.of_json in
-      let status = field_map json "Status" ExecutionStatus.of_json in
-      let posixProfile = field_map json "PosixProfile" PosixProfile.of_json in
+    let of_json json__ =
+      let results = field_map json__ "Results" ExecutionResults.of_json in
+      let status = field_map json__ "Status" ExecutionStatus.of_json in
+      let posixProfile = field_map json__ "PosixProfile" PosixProfile.of_json in
       let loggingConfiguration =
-        field_map json "LoggingConfiguration" LoggingConfiguration.of_json in
-      let executionRole = field_map json "ExecutionRole" Role.of_json in
+        field_map json__ "LoggingConfiguration" LoggingConfiguration.of_json in
+      let executionRole = field_map json__ "ExecutionRole" Role.of_json in
       let serviceMetadata =
-        field_map json "ServiceMetadata" ServiceMetadata.of_json in
+        field_map json__ "ServiceMetadata" ServiceMetadata.of_json in
       let initialFileLocation =
-        field_map json "InitialFileLocation" FileLocation.of_json in
-      let executionId = field_map json "ExecutionId" ExecutionId.of_json in
+        field_map json__ "InitialFileLocation" FileLocation.of_json in
+      let executionId = field_map json__ "ExecutionId" ExecutionId.of_json in
       make ?results ?status ?posixProfile ?loggingConfiguration
         ?executionRole ?serviceMetadata ?initialFileLocation ?executionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details for an execution object."]
+module DescribedConnector =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "The unique Amazon Resource Name (ARN) for the connector."];
+      connectorId: ConnectorId.t option
+        [@ocaml.doc "The unique identifier for the connector."];
+      url: Url.t option
+        [@ocaml.doc
+          "The URL of the partner's AS2 or SFTP endpoint. When creating AS2 connectors or service-managed SFTP connectors (connectors without egress configuration), you must provide a URL to specify the remote server endpoint. For VPC Lattice type connectors, the URL must be null."];
+      as2Config: As2ConnectorConfig.t option
+        [@ocaml.doc
+          "A structure that contains the parameters for an AS2 connector object."];
+      accessRole: Role.t option
+        [@ocaml.doc
+          "Connectors are used to send files using either the AS2 or SFTP protocol. For the access role, provide the Amazon Resource Name (ARN) of the Identity and Access Management role to use. For AS2 connectors With AS2, you can send files by calling StartFileTransfer and specifying the file paths in the request parameter, SendFilePaths. We use the file\226\128\153s parent directory (for example, for --send-file-paths /bucket/dir/file.txt, parent directory is /bucket/dir/) to temporarily store a processed AS2 message file, store the MDN when we receive them from the partner, and write a final JSON file containing relevant metadata of the transmission. So, the AccessRole needs to provide read and write access to the parent directory of the file location used in the StartFileTransfer request. Additionally, you need to provide read and write access to the parent directory of the files that you intend to send with StartFileTransfer. If you are using Basic authentication for your AS2 connector, the access role requires the secretsmanager:GetSecretValue permission for the secret. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key in Secrets Manager, then the role also needs the kms:Decrypt permission for that key. For SFTP connectors Make sure that the access role provides read and write access to the parent directory of the file location that's used in the StartFileTransfer request. Additionally, make sure that the role provides secretsmanager:GetSecretValue permission to Secrets Manager."];
+      loggingRole: Role.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that allows a connector to turn on CloudWatch logging for Amazon S3 events. When set, you can view connector activity in your CloudWatch logs."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for connectors."];
+      sftpConfig: SftpConnectorConfig.t option
+        [@ocaml.doc
+          "A structure that contains the parameters for an SFTP connector object."];
+      serviceManagedEgressIpAddresses:
+        ServiceManagedEgressIpAddresses.t option
+        [@ocaml.doc
+          "The list of egress IP addresses of this connector. These IP addresses are assigned automatically when you create the connector."];
+      securityPolicyName: ConnectorSecurityPolicyName.t option
+        [@ocaml.doc
+          "The text name of the security policy for the specified connector."];
+      egressConfig: DescribedConnectorEgressConfig.t option
+        [@ocaml.doc
+          "Current egress configuration of the connector, showing how traffic is routed to the SFTP server. Contains VPC Lattice settings when using VPC_LATTICE egress type. When using the VPC_LATTICE egress type, Transfer Family uses a managed Service Network to simplify the resource sharing process."];
+      egressType: ConnectorEgressType.t option
+        [@ocaml.doc
+          "Type of egress configuration for the connector. SERVICE_MANAGED uses Transfer Family managed NAT gateways, while VPC_LATTICE routes traffic through customer VPCs using VPC Lattice."];
+      errorMessage: ConnectorErrorMessage.t option
+        [@ocaml.doc
+          "Error message providing details when the connector is in ERRORED status. Contains information to help troubleshoot connector creation or operation failures."];
+      status: ConnectorStatus.t option
+        [@ocaml.doc
+          "Current status of the connector. PENDING indicates creation/update in progress, ACTIVE means ready for operations, and ERRORED indicates a failure requiring attention."];
+      ipAddressType: ConnectorsIpAddressType.t option
+        [@ocaml.doc
+          "IP address type for the connector's network connections. When set to IPV4, the connector uses IPv4 addresses only. When set to DUALSTACK, the connector supports both IPv4 and IPv6 addresses, with IPv6 preferred when available."]}
+    let make ?arn =
+      fun ?connectorId ->
+        fun ?url ->
+          fun ?as2Config ->
+            fun ?accessRole ->
+              fun ?loggingRole ->
+                fun ?tags ->
+                  fun ?sftpConfig ->
+                    fun ?serviceManagedEgressIpAddresses ->
+                      fun ?securityPolicyName ->
+                        fun ?egressConfig ->
+                          fun ?egressType ->
+                            fun ?errorMessage ->
+                              fun ?status ->
+                                fun ?ipAddressType ->
+                                  fun () ->
+                                    {
+                                      arn;
+                                      connectorId;
+                                      url;
+                                      as2Config;
+                                      accessRole;
+                                      loggingRole;
+                                      tags;
+                                      sftpConfig;
+                                      serviceManagedEgressIpAddresses;
+                                      securityPolicyName;
+                                      egressConfig;
+                                      egressType;
+                                      errorMessage;
+                                      status;
+                                      ipAddressType
+                                    }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("ConnectorId", (Option.map x.connectorId ~f:ConnectorId.to_value));
+        ("Url", (Option.map x.url ~f:Url.to_value));
+        ("As2Config",
+          (Option.map x.as2Config ~f:As2ConnectorConfig.to_value));
+        ("AccessRole", (Option.map x.accessRole ~f:Role.to_value));
+        ("LoggingRole", (Option.map x.loggingRole ~f:Role.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("SftpConfig",
+          (Option.map x.sftpConfig ~f:SftpConnectorConfig.to_value));
+        ("ServiceManagedEgressIpAddresses",
+          (Option.map x.serviceManagedEgressIpAddresses
+             ~f:ServiceManagedEgressIpAddresses.to_value));
+        ("SecurityPolicyName",
+          (Option.map x.securityPolicyName
+             ~f:ConnectorSecurityPolicyName.to_value));
+        ("EgressConfig",
+          (Option.map x.egressConfig
+             ~f:DescribedConnectorEgressConfig.to_value));
+        ("EgressType",
+          (Option.map x.egressType ~f:ConnectorEgressType.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ConnectorErrorMessage.to_value));
+        ("Status", (Option.map x.status ~f:ConnectorStatus.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType ~f:ConnectorsIpAddressType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:ConnectorsIpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let status =
+        (Option.map ~f:ConnectorStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let errorMessage =
+        (Option.map ~f:ConnectorErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let egressType =
+        (Option.map ~f:ConnectorEgressType.of_xml)
+          (Xml.child xml_arg0 "EgressType") in
+      let egressConfig =
+        (Option.map ~f:DescribedConnectorEgressConfig.of_xml)
+          (Xml.child xml_arg0 "EgressConfig") in
+      let securityPolicyName =
+        (Option.map ~f:ConnectorSecurityPolicyName.of_xml)
+          (Xml.child xml_arg0 "SecurityPolicyName") in
+      let serviceManagedEgressIpAddresses =
+        (Option.map ~f:ServiceManagedEgressIpAddresses.of_xml)
+          (Xml.child xml_arg0 "ServiceManagedEgressIpAddresses") in
+      let sftpConfig =
+        (Option.map ~f:SftpConnectorConfig.of_xml)
+          (Xml.child xml_arg0 "SftpConfig") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let loggingRole =
+        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "LoggingRole") in
+      let accessRole =
+        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "AccessRole") in
+      let as2Config =
+        (Option.map ~f:As2ConnectorConfig.of_xml)
+          (Xml.child xml_arg0 "As2Config") in
+      let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "Url") in
+      let connectorId =
+        (Option.map ~f:ConnectorId.of_xml) (Xml.child xml_arg0 "ConnectorId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?ipAddressType ?status ?errorMessage ?egressType ?egressConfig
+        ?securityPolicyName ?serviceManagedEgressIpAddresses ?sftpConfig
+        ?tags ?loggingRole ?accessRole ?as2Config ?url ?connectorId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "IpAddressType" ConnectorsIpAddressType.of_json in
+      let status = field_map json__ "Status" ConnectorStatus.of_json in
+      let errorMessage =
+        field_map json__ "ErrorMessage" ConnectorErrorMessage.of_json in
+      let egressType =
+        field_map json__ "EgressType" ConnectorEgressType.of_json in
+      let egressConfig =
+        field_map json__ "EgressConfig"
+          DescribedConnectorEgressConfig.of_json in
+      let securityPolicyName =
+        field_map json__ "SecurityPolicyName"
+          ConnectorSecurityPolicyName.of_json in
+      let serviceManagedEgressIpAddresses =
+        field_map json__ "ServiceManagedEgressIpAddresses"
+          ServiceManagedEgressIpAddresses.of_json in
+      let sftpConfig =
+        field_map json__ "SftpConfig" SftpConnectorConfig.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let loggingRole = field_map json__ "LoggingRole" Role.of_json in
+      let accessRole = field_map json__ "AccessRole" Role.of_json in
+      let as2Config = field_map json__ "As2Config" As2ConnectorConfig.of_json in
+      let url = field_map json__ "Url" Url.of_json in
+      let connectorId = field_map json__ "ConnectorId" ConnectorId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?ipAddressType ?status ?errorMessage ?egressType ?egressConfig
+        ?securityPolicyName ?serviceManagedEgressIpAddresses ?sftpConfig
+        ?tags ?loggingRole ?accessRole ?as2Config ?url ?connectorId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the parameters for the connector, as identified by the ConnectorId."]
+module DescribedCertificate =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "The unique Amazon Resource Name (ARN) for the certificate."];
+      certificateId: CertificateId.t option
+        [@ocaml.doc
+          "An array of identifiers for the imported certificates. You use this identifier for working with profiles and partner profiles."];
+      usage: CertificateUsageType.t option
+        [@ocaml.doc
+          "Specifies how this certificate is used. It can be used in the following ways: SIGNING: For signing AS2 messages ENCRYPTION: For encrypting AS2 messages TLS: For securing AS2 communications sent over HTTPS"];
+      status: CertificateStatusType.t option
+        [@ocaml.doc
+          "A certificate's status can be either ACTIVE or INACTIVE. You can set ActiveDate and InactiveDate in the UpdateCertificate call. If you set values for these parameters, those values are used to determine whether the certificate has a status of ACTIVE or INACTIVE. If you don't set values for ActiveDate and InactiveDate, we use the NotBefore and NotAfter date as specified on the X509 certificate to determine when a certificate is active and when it is inactive."];
+      certificate: CertificateBodyType.t option
+        [@ocaml.doc "The file name for the certificate."];
+      certificateChain: CertificateChainType.t option
+        [@ocaml.doc
+          "The list of certificates that make up the chain for the certificate."];
+      activeDate: CertDate.t option
+        [@ocaml.doc
+          "An optional date that specifies when the certificate becomes active. If you do not specify a value, ActiveDate takes the same value as NotBeforeDate, which is specified by the CA."];
+      inactiveDate: CertDate.t option
+        [@ocaml.doc
+          "An optional date that specifies when the certificate becomes inactive. If you do not specify a value, InactiveDate takes the same value as NotAfterDate, which is specified by the CA."];
+      serial: CertSerial.t option
+        [@ocaml.doc "The serial number for the certificate."];
+      notBeforeDate: CertDate.t option
+        [@ocaml.doc "The earliest date that the certificate is valid."];
+      notAfterDate: CertDate.t option
+        [@ocaml.doc "The final date that the certificate is valid."];
+      type_: CertificateType.t option
+        [@ocaml.doc
+          "If a private key has been specified for the certificate, its type is CERTIFICATE_WITH_PRIVATE_KEY. If there is no private key, the type is CERTIFICATE."];
+      description: Description.t option
+        [@ocaml.doc
+          "The name or description that's used to identity the certificate."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for certificates."]}
+    let make ?arn =
+      fun ?certificateId ->
+        fun ?usage ->
+          fun ?status ->
+            fun ?certificate ->
+              fun ?certificateChain ->
+                fun ?activeDate ->
+                  fun ?inactiveDate ->
+                    fun ?serial ->
+                      fun ?notBeforeDate ->
+                        fun ?notAfterDate ->
+                          fun ?type_ ->
+                            fun ?description ->
+                              fun ?tags ->
+                                fun () ->
+                                  {
+                                    arn;
+                                    certificateId;
+                                    usage;
+                                    status;
+                                    certificate;
+                                    certificateChain;
+                                    activeDate;
+                                    inactiveDate;
+                                    serial;
+                                    notBeforeDate;
+                                    notAfterDate;
+                                    type_;
+                                    description;
+                                    tags
+                                  }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("CertificateId",
+          (Option.map x.certificateId ~f:CertificateId.to_value));
+        ("Usage", (Option.map x.usage ~f:CertificateUsageType.to_value));
+        ("Status", (Option.map x.status ~f:CertificateStatusType.to_value));
+        ("Certificate",
+          (Option.map x.certificate ~f:CertificateBodyType.to_value));
+        ("CertificateChain",
+          (Option.map x.certificateChain ~f:CertificateChainType.to_value));
+        ("ActiveDate", (Option.map x.activeDate ~f:CertDate.to_value));
+        ("InactiveDate", (Option.map x.inactiveDate ~f:CertDate.to_value));
+        ("Serial", (Option.map x.serial ~f:CertSerial.to_value));
+        ("NotBeforeDate", (Option.map x.notBeforeDate ~f:CertDate.to_value));
+        ("NotAfterDate", (Option.map x.notAfterDate ~f:CertDate.to_value));
+        ("Type", (Option.map x.type_ ~f:CertificateType.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let type_ =
+        (Option.map ~f:CertificateType.of_xml) (Xml.child xml_arg0 "Type") in
+      let notAfterDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "NotAfterDate") in
+      let notBeforeDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "NotBeforeDate") in
+      let serial =
+        (Option.map ~f:CertSerial.of_xml) (Xml.child xml_arg0 "Serial") in
+      let inactiveDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "InactiveDate") in
+      let activeDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "ActiveDate") in
+      let certificateChain =
+        (Option.map ~f:CertificateChainType.of_xml)
+          (Xml.child xml_arg0 "CertificateChain") in
+      let certificate =
+        (Option.map ~f:CertificateBodyType.of_xml)
+          (Xml.child xml_arg0 "Certificate") in
+      let status =
+        (Option.map ~f:CertificateStatusType.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let usage =
+        (Option.map ~f:CertificateUsageType.of_xml)
+          (Xml.child xml_arg0 "Usage") in
+      let certificateId =
+        (Option.map ~f:CertificateId.of_xml)
+          (Xml.child xml_arg0 "CertificateId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?tags ?description ?type_ ?notAfterDate ?notBeforeDate ?serial
+        ?inactiveDate ?activeDate ?certificateChain ?certificate ?status
+        ?usage ?certificateId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let type_ = field_map json__ "Type" CertificateType.of_json in
+      let notAfterDate = field_map json__ "NotAfterDate" CertDate.of_json in
+      let notBeforeDate = field_map json__ "NotBeforeDate" CertDate.of_json in
+      let serial = field_map json__ "Serial" CertSerial.of_json in
+      let inactiveDate = field_map json__ "InactiveDate" CertDate.of_json in
+      let activeDate = field_map json__ "ActiveDate" CertDate.of_json in
+      let certificateChain =
+        field_map json__ "CertificateChain" CertificateChainType.of_json in
+      let certificate =
+        field_map json__ "Certificate" CertificateBodyType.of_json in
+      let status = field_map json__ "Status" CertificateStatusType.of_json in
+      let usage = field_map json__ "Usage" CertificateUsageType.of_json in
+      let certificateId =
+        field_map json__ "CertificateId" CertificateId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?tags ?description ?type_ ?notAfterDate ?notBeforeDate ?serial
+        ?inactiveDate ?activeDate ?certificateChain ?certificate ?status
+        ?usage ?certificateId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the properties of a certificate."]
+module DescribedAgreement =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "The unique Amazon Resource Name (ARN) for the agreement."];
+      agreementId: AgreementId.t option
+        [@ocaml.doc
+          "A unique identifier for the agreement. This identifier is returned when you create an agreement."];
+      description: Description.t option
+        [@ocaml.doc
+          "The name or short description that's used to identify the agreement."];
+      status: AgreementStatusType.t option
+        [@ocaml.doc
+          "The current status of the agreement, either ACTIVE or INACTIVE."];
+      serverId: ServerId.t option
+        [@ocaml.doc
+          "A system-assigned unique identifier for a server instance. This identifier indicates the specific server that the agreement uses."];
+      localProfileId: ProfileId.t option
+        [@ocaml.doc "A unique identifier for the AS2 local profile."];
+      partnerProfileId: ProfileId.t option
+        [@ocaml.doc
+          "A unique identifier for the partner profile used in the agreement."];
+      baseDirectory: HomeDirectory.t option
+        [@ocaml.doc
+          "The landing directory (folder) for files that are transferred by using the AS2 protocol."];
+      accessRole: Role.t option
+        [@ocaml.doc
+          "Connectors are used to send files using either the AS2 or SFTP protocol. For the access role, provide the Amazon Resource Name (ARN) of the Identity and Access Management role to use. For AS2 connectors With AS2, you can send files by calling StartFileTransfer and specifying the file paths in the request parameter, SendFilePaths. We use the file\226\128\153s parent directory (for example, for --send-file-paths /bucket/dir/file.txt, parent directory is /bucket/dir/) to temporarily store a processed AS2 message file, store the MDN when we receive them from the partner, and write a final JSON file containing relevant metadata of the transmission. So, the AccessRole needs to provide read and write access to the parent directory of the file location used in the StartFileTransfer request. Additionally, you need to provide read and write access to the parent directory of the files that you intend to send with StartFileTransfer. If you are using Basic authentication for your AS2 connector, the access role requires the secretsmanager:GetSecretValue permission for the secret. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key in Secrets Manager, then the role also needs the kms:Decrypt permission for that key. For SFTP connectors Make sure that the access role provides read and write access to the parent directory of the file location that's used in the StartFileTransfer request. Additionally, make sure that the role provides secretsmanager:GetSecretValue permission to Secrets Manager."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for agreements."];
+      preserveFilename: PreserveFilenameType.t option
+        [@ocaml.doc
+          "Determines whether or not Transfer Family appends a unique string of characters to the end of the AS2 message payload filename when saving it. ENABLED: the filename provided by your trading parter is preserved when the file is saved. DISABLED (default value): when Transfer Family saves the file, the filename is adjusted, as described in File names and locations."];
+      enforceMessageSigning: EnforceMessageSigningType.t option
+        [@ocaml.doc
+          "Determines whether or not unsigned messages from your trading partners will be accepted. ENABLED: Transfer Family rejects unsigned messages from your trading partner. DISABLED (default value): Transfer Family accepts unsigned messages from your trading partner."];
+      customDirectories: CustomDirectoriesType.t option
+        [@ocaml.doc
+          "A CustomDirectoriesType structure. This structure specifies custom directories for storing various AS2 message files. You can specify directories for the following types of files. Failed files MDN files Payload files Status files Temporary files"]}
+    let make ?arn =
+      fun ?agreementId ->
+        fun ?description ->
+          fun ?status ->
+            fun ?serverId ->
+              fun ?localProfileId ->
+                fun ?partnerProfileId ->
+                  fun ?baseDirectory ->
+                    fun ?accessRole ->
+                      fun ?tags ->
+                        fun ?preserveFilename ->
+                          fun ?enforceMessageSigning ->
+                            fun ?customDirectories ->
+                              fun () ->
+                                {
+                                  arn;
+                                  agreementId;
+                                  description;
+                                  status;
+                                  serverId;
+                                  localProfileId;
+                                  partnerProfileId;
+                                  baseDirectory;
+                                  accessRole;
+                                  tags;
+                                  preserveFilename;
+                                  enforceMessageSigning;
+                                  customDirectories
+                                }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("AgreementId", (Option.map x.agreementId ~f:AgreementId.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Status", (Option.map x.status ~f:AgreementStatusType.to_value));
+        ("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("LocalProfileId",
+          (Option.map x.localProfileId ~f:ProfileId.to_value));
+        ("PartnerProfileId",
+          (Option.map x.partnerProfileId ~f:ProfileId.to_value));
+        ("BaseDirectory",
+          (Option.map x.baseDirectory ~f:HomeDirectory.to_value));
+        ("AccessRole", (Option.map x.accessRole ~f:Role.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("PreserveFilename",
+          (Option.map x.preserveFilename ~f:PreserveFilenameType.to_value));
+        ("EnforceMessageSigning",
+          (Option.map x.enforceMessageSigning
+             ~f:EnforceMessageSigningType.to_value));
+        ("CustomDirectories",
+          (Option.map x.customDirectories ~f:CustomDirectoriesType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customDirectories =
+        (Option.map ~f:CustomDirectoriesType.of_xml)
+          (Xml.child xml_arg0 "CustomDirectories") in
+      let enforceMessageSigning =
+        (Option.map ~f:EnforceMessageSigningType.of_xml)
+          (Xml.child xml_arg0 "EnforceMessageSigning") in
+      let preserveFilename =
+        (Option.map ~f:PreserveFilenameType.of_xml)
+          (Xml.child xml_arg0 "PreserveFilename") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let accessRole =
+        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "AccessRole") in
+      let baseDirectory =
+        (Option.map ~f:HomeDirectory.of_xml)
+          (Xml.child xml_arg0 "BaseDirectory") in
+      let partnerProfileId =
+        (Option.map ~f:ProfileId.of_xml)
+          (Xml.child xml_arg0 "PartnerProfileId") in
+      let localProfileId =
+        (Option.map ~f:ProfileId.of_xml)
+          (Xml.child xml_arg0 "LocalProfileId") in
+      let serverId =
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      let status =
+        (Option.map ~f:AgreementStatusType.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let agreementId =
+        (Option.map ~f:AgreementId.of_xml) (Xml.child xml_arg0 "AgreementId") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?customDirectories ?enforceMessageSigning ?preserveFilename ?tags
+        ?accessRole ?baseDirectory ?partnerProfileId ?localProfileId
+        ?serverId ?status ?description ?agreementId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customDirectories =
+        field_map json__ "CustomDirectories" CustomDirectoriesType.of_json in
+      let enforceMessageSigning =
+        field_map json__ "EnforceMessageSigning"
+          EnforceMessageSigningType.of_json in
+      let preserveFilename =
+        field_map json__ "PreserveFilename" PreserveFilenameType.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let accessRole = field_map json__ "AccessRole" Role.of_json in
+      let baseDirectory =
+        field_map json__ "BaseDirectory" HomeDirectory.of_json in
+      let partnerProfileId =
+        field_map json__ "PartnerProfileId" ProfileId.of_json in
+      let localProfileId =
+        field_map json__ "LocalProfileId" ProfileId.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      let status = field_map json__ "Status" AgreementStatusType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let agreementId = field_map json__ "AgreementId" AgreementId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?customDirectories ?enforceMessageSigning ?preserveFilename ?tags
+        ?accessRole ?baseDirectory ?partnerProfileId ?localProfileId
+        ?serverId ?status ?description ?agreementId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the properties of an agreement."]
 module DescribedAccess =
   struct
     type nonrec t =
       {
       homeDirectory: HomeDirectory.t option
         [@ocaml.doc
-          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory."];
+          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory. You can use the HomeDirectory parameter for HomeDirectoryType when it is set to either PATH or LOGICAL."];
       homeDirectoryMappings: HomeDirectoryMappings.t option
         [@ocaml.doc
-          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Amazon Web Services Identity and Access Management (IAM) role provides access to paths in Target. This value can only be set when HomeDirectoryType is set to LOGICAL. In most cases, you can use this value instead of the session policy to lock down the associated access to the designated home directory (\"chroot\"). To do this, you can set Entry to '/' and set Target to the HomeDirectory parameter value."];
+          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Identity and Access Management (IAM) role provides access to paths in Target. This value can be set only when HomeDirectoryType is set to LOGICAL. In most cases, you can use this value instead of the session policy to lock down the associated access to the designated home directory (\"chroot\"). To do this, you can set Entry to '/' and set Target to the HomeDirectory parameter value."];
       homeDirectoryType: HomeDirectoryType.t option
         [@ocaml.doc
-          "The type of landing directory (folder) you want your users' home directory to be when they log into the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If you set it LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or EFS paths visible to your users."];
+          "The type of landing directory (folder) that you want your users' home directory to be when they log in to the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or Amazon EFS path as is in their file transfer protocol clients. If you set it to LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or Amazon EFS paths visible to your users. If HomeDirectoryType is LOGICAL, you must provide mappings, using the HomeDirectoryMappings parameter. If, on the other hand, HomeDirectoryType is PATH, you provide an absolute path using the HomeDirectory parameter. You cannot have both HomeDirectory and HomeDirectoryMappings in your template."];
       policy: Policy.t option
         [@ocaml.doc
-          "A session policy for your user so that you can use the same IAM role across multiple users. This policy scopes down user access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}."];
+          "A session policy for your user so that you can use the same Identity and Access Management (IAM) role across multiple users. This policy scopes down a user's access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}."];
       posixProfile: PosixProfile.t option ;
       role: Role.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the IAM role that controls your users' access to your Amazon S3 bucket or EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that controls your users' access to your Amazon S3 bucket or Amazon EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or Amazon EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
       externalId: ExternalId.t option
         [@ocaml.doc
-          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Amazon Web Services Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regex used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
+          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regular expression used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
     let make ?homeDirectory =
       fun ?homeDirectoryMappings ->
         fun ?homeDirectoryType ->
@@ -4272,30 +8974,424 @@ module DescribedAccess =
       make ?externalId ?role ?posixProfile ?policy ?homeDirectoryType
         ?homeDirectoryMappings ?homeDirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let externalId = field_map json "ExternalId" ExternalId.of_json in
-      let role = field_map json "Role" Role.of_json in
-      let posixProfile = field_map json "PosixProfile" PosixProfile.of_json in
-      let policy = field_map json "Policy" Policy.of_json in
+    let of_json json__ =
+      let externalId = field_map json__ "ExternalId" ExternalId.of_json in
+      let role = field_map json__ "Role" Role.of_json in
+      let posixProfile = field_map json__ "PosixProfile" PosixProfile.of_json in
+      let policy = field_map json__ "Policy" Policy.of_json in
       let homeDirectoryType =
-        field_map json "HomeDirectoryType" HomeDirectoryType.of_json in
+        field_map json__ "HomeDirectoryType" HomeDirectoryType.of_json in
       let homeDirectoryMappings =
-        field_map json "HomeDirectoryMappings" HomeDirectoryMappings.of_json in
+        field_map json__ "HomeDirectoryMappings"
+          HomeDirectoryMappings.of_json in
       let homeDirectory =
-        field_map json "HomeDirectory" HomeDirectory.of_json in
+        field_map json__ "HomeDirectory" HomeDirectory.of_json in
       make ?externalId ?role ?posixProfile ?policy ?homeDirectoryType
         ?homeDirectoryMappings ?homeDirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the properties of the access that was specified."]
+module WebAppEndpointDetails =
+  struct
+    type nonrec t =
+      {
+      vpc: WebAppVpcConfig.t option
+        [@ocaml.doc
+          "The VPC configuration for hosting the web app endpoint within a VPC."]}
+    let make ?vpc = fun () -> { vpc }
+    let to_value x =
+      structure_to_value
+        [("Vpc", (Option.map x.vpc ~f:WebAppVpcConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpc =
+        (Option.map ~f:WebAppVpcConfig.of_xml) (Xml.child xml_arg0 "Vpc") in
+      make ?vpc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpc = field_map json__ "Vpc" WebAppVpcConfig.of_json in
+      make ?vpc ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the endpoint configuration for a web app, including VPC settings when the endpoint is hosted within a VPC."]
+module WebAppIdentityProviderDetails =
+  struct
+    type nonrec t =
+      {
+      identityCenterConfig: IdentityCenterConfig.t option
+        [@ocaml.doc
+          "A structure that describes the values to use for the IAM Identity Center settings when you create a web app."]}
+    let make ?identityCenterConfig = fun () -> { identityCenterConfig }
+    let to_value x =
+      structure_to_value
+        [("IdentityCenterConfig",
+           (Option.map x.identityCenterConfig
+              ~f:IdentityCenterConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityCenterConfig =
+        (Option.map ~f:IdentityCenterConfig.of_xml)
+          (Xml.child xml_arg0 "IdentityCenterConfig") in
+      make ?identityCenterConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityCenterConfig =
+        field_map json__ "IdentityCenterConfig" IdentityCenterConfig.of_json in
+      make ?identityCenterConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A union that contains the IdentityCenterConfig object."]
+module ConnectorEgressConfig =
+  struct
+    type nonrec t =
+      {
+      vpcLattice: ConnectorVpcLatticeEgressConfig.t option
+        [@ocaml.doc
+          "VPC_LATTICE configuration for routing connector traffic through customer VPCs. Enables private connectivity to SFTP servers without requiring public internet access or complex network configurations."]}
+    let make ?vpcLattice = fun () -> { vpcLattice }
+    let to_value x =
+      structure_to_value
+        [("VpcLattice",
+           (Option.map x.vpcLattice
+              ~f:ConnectorVpcLatticeEgressConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcLattice =
+        (Option.map ~f:ConnectorVpcLatticeEgressConfig.of_xml)
+          (Xml.child xml_arg0 "VpcLattice") in
+      make ?vpcLattice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcLattice =
+        field_map json__ "VpcLattice" ConnectorVpcLatticeEgressConfig.of_json in
+      make ?vpcLattice ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration structure that defines how traffic is routed from the connector to the SFTP server. Contains VPC Lattice settings when using VPC_LATTICE egress type for private connectivity through customer VPCs."]
+module UpdateWebAppResponse =
+  struct
+    type nonrec t =
+      {
+      webAppId: WebAppId.t option
+        [@ocaml.doc
+          "Returns the unique identifier for the web app being updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?webAppId = fun () -> { webAppId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WebAppId", (Option.map x.webAppId ~f:WebAppId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webAppId =
+        (Option.map ~f:WebAppId.of_xml) (Xml.child xml_arg0 "WebAppId") in
+      make ?webAppId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webAppId = field_map json__ "WebAppId" WebAppId.of_json in
+      make ?webAppId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Assigns new properties to a web app. You can modify the access point, identity provider details, endpoint configuration, and the web app units. For more information about using VPC endpoints with Transfer Family, see Create a Transfer Family web app in a VPC."]
+module UpdateWebAppRequest =
+  struct
+    type nonrec t =
+      {
+      webAppId: WebAppId.t
+        [@ocaml.doc
+          "Provide the identifier of the web app that you are updating."];
+      identityProviderDetails: UpdateWebAppIdentityProviderDetails.t option
+        [@ocaml.doc
+          "Provide updated identity provider values in a WebAppIdentityProviderDetails object."];
+      accessEndpoint: WebAppAccessEndpoint.t option
+        [@ocaml.doc
+          "The AccessEndpoint is the URL that you provide to your users for them to interact with the Transfer Family web app. You can specify a custom URL or use the default value."];
+      webAppUnits: WebAppUnits.t option
+        [@ocaml.doc
+          "A union that contains the value for number of concurrent connections or the user sessions on your web app."];
+      endpointDetails: UpdateWebAppEndpointDetails.t option
+        [@ocaml.doc
+          "The updated endpoint configuration for the web app. You can modify the endpoint type and VPC configuration settings."]}
+    let context_ = "UpdateWebAppRequest"
+    let make ?identityProviderDetails =
+      fun ?accessEndpoint ->
+        fun ?webAppUnits ->
+          fun ?endpointDetails ->
+            fun ~webAppId ->
+              fun () ->
+                {
+                  identityProviderDetails;
+                  accessEndpoint;
+                  webAppUnits;
+                  endpointDetails;
+                  webAppId
+                }
+    let to_value x =
+      structure_to_value
+        [("WebAppId", (Some (WebAppId.to_value x.webAppId)));
+        ("IdentityProviderDetails",
+          (Option.map x.identityProviderDetails
+             ~f:UpdateWebAppIdentityProviderDetails.to_value));
+        ("AccessEndpoint",
+          (Option.map x.accessEndpoint ~f:WebAppAccessEndpoint.to_value));
+        ("WebAppUnits", (Option.map x.webAppUnits ~f:WebAppUnits.to_value));
+        ("EndpointDetails",
+          (Option.map x.endpointDetails
+             ~f:UpdateWebAppEndpointDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpointDetails =
+        (Option.map ~f:UpdateWebAppEndpointDetails.of_xml)
+          (Xml.child xml_arg0 "EndpointDetails") in
+      let webAppUnits =
+        (Option.map ~f:WebAppUnits.of_xml) (Xml.child xml_arg0 "WebAppUnits") in
+      let accessEndpoint =
+        (Option.map ~f:WebAppAccessEndpoint.of_xml)
+          (Xml.child xml_arg0 "AccessEndpoint") in
+      let identityProviderDetails =
+        (Option.map ~f:UpdateWebAppIdentityProviderDetails.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderDetails") in
+      let webAppId =
+        WebAppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "WebAppId") in
+      make ?endpointDetails ?webAppUnits ?accessEndpoint
+        ?identityProviderDetails ~webAppId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpointDetails =
+        field_map json__ "EndpointDetails"
+          UpdateWebAppEndpointDetails.of_json in
+      let webAppUnits = field_map json__ "WebAppUnits" WebAppUnits.of_json in
+      let accessEndpoint =
+        field_map json__ "AccessEndpoint" WebAppAccessEndpoint.of_json in
+      let identityProviderDetails =
+        field_map json__ "IdentityProviderDetails"
+          UpdateWebAppIdentityProviderDetails.of_json in
+      let webAppId = field_map_exn json__ "WebAppId" WebAppId.of_json in
+      make ?endpointDetails ?webAppUnits ?accessEndpoint
+        ?identityProviderDetails ~webAppId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Assigns new properties to a web app. You can modify the access point, identity provider details, endpoint configuration, and the web app units. For more information about using VPC endpoints with Transfer Family, see Create a Transfer Family web app in a VPC."]
+module UpdateWebAppCustomizationResponse =
+  struct
+    type nonrec t =
+      {
+      webAppId: WebAppId.t option
+        [@ocaml.doc
+          "Returns the unique identifier for the web app being updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?webAppId = fun () -> { webAppId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WebAppId", (Option.map x.webAppId ~f:WebAppId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webAppId =
+        (Option.map ~f:WebAppId.of_xml) (Xml.child xml_arg0 "WebAppId") in
+      make ?webAppId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webAppId = field_map json__ "WebAppId" WebAppId.of_json in
+      make ?webAppId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Assigns new customization properties to a web app. You can modify the icon file, logo file, and title."]
+module UpdateWebAppCustomizationRequest =
+  struct
+    type nonrec t =
+      {
+      webAppId: WebAppId.t
+        [@ocaml.doc
+          "Provide the identifier of the web app that you are updating."];
+      title: WebAppTitle.t option [@ocaml.doc "Provide an updated title."];
+      logoFile: WebAppLogoFile.t option
+        [@ocaml.doc "Specify logo file data string (in base64 encoding)."];
+      faviconFile: WebAppFaviconFile.t option
+        [@ocaml.doc "Specify an icon file data string (in base64 encoding)."]}
+    let context_ = "UpdateWebAppCustomizationRequest"
+    let make ?title =
+      fun ?logoFile ->
+        fun ?faviconFile ->
+          fun ~webAppId ->
+            fun () -> { title; logoFile; faviconFile; webAppId }
+    let to_value x =
+      structure_to_value
+        [("WebAppId", (Some (WebAppId.to_value x.webAppId)));
+        ("Title", (Option.map x.title ~f:WebAppTitle.to_value));
+        ("LogoFile", (Option.map x.logoFile ~f:WebAppLogoFile.to_value));
+        ("FaviconFile",
+          (Option.map x.faviconFile ~f:WebAppFaviconFile.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let faviconFile =
+        (Option.map ~f:WebAppFaviconFile.of_xml)
+          (Xml.child xml_arg0 "FaviconFile") in
+      let logoFile =
+        (Option.map ~f:WebAppLogoFile.of_xml) (Xml.child xml_arg0 "LogoFile") in
+      let title =
+        (Option.map ~f:WebAppTitle.of_xml) (Xml.child xml_arg0 "Title") in
+      let webAppId =
+        WebAppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "WebAppId") in
+      make ?faviconFile ?logoFile ?title ~webAppId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let faviconFile =
+        field_map json__ "FaviconFile" WebAppFaviconFile.of_json in
+      let logoFile = field_map json__ "LogoFile" WebAppLogoFile.of_json in
+      let title = field_map json__ "Title" WebAppTitle.of_json in
+      let webAppId = field_map_exn json__ "WebAppId" WebAppId.of_json in
+      make ?faviconFile ?logoFile ?title ~webAppId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Assigns new customization properties to a web app. You can modify the icon file, logo file, and title."]
 module UpdateUserResponse =
   struct
     type nonrec t =
       {
-      serverId: ServerId.t
+      serverId: ServerId.t option
         [@ocaml.doc
-          "A system-assigned unique identifier for a server instance that the user account is assigned to."];
-      userName: UserName.t
+          "A system-assigned unique identifier for a Transfer Family server instance that the account is assigned to."];
+      userName: UserName.t option
         [@ocaml.doc
           "The unique identifier for a user that is assigned to a server instance that was specified in the request."]}
     type nonrec error =
@@ -4305,8 +9401,7 @@ module UpdateUserResponse =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateUserResponse"
-    let make ~serverId = fun ~userName -> fun () -> { serverId; userName }
+    let make ?serverId = fun ?userName -> fun () -> { serverId; userName }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -4367,20 +9462,20 @@ module UpdateUserResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ServerId", (Some (ServerId.to_value x.serverId)));
-        ("UserName", (Some (UserName.to_value x.userName)))]
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("UserName", (Option.map x.userName ~f:UserName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userName =
-        UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
+        (Option.map ~f:UserName.of_xml) (Xml.child xml_arg0 "UserName") in
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
-      make ~userName ~serverId ()
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?userName ?serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      make ~userName ~serverId ()
+    let of_json json__ =
+      let userName = field_map json__ "UserName" UserName.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?userName ?serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "UpdateUserResponse returns the user name and identifier for the request to update a user's properties."]
@@ -4390,25 +9485,25 @@ module UpdateUserRequest =
       {
       homeDirectory: HomeDirectory.t option
         [@ocaml.doc
-          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory."];
+          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory. You can use the HomeDirectory parameter for HomeDirectoryType when it is set to either PATH or LOGICAL."];
       homeDirectoryType: HomeDirectoryType.t option
         [@ocaml.doc
-          "The type of landing directory (folder) you want your users' home directory to be when they log into the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If you set it LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or EFS paths visible to your users."];
+          "The type of landing directory (folder) that you want your users' home directory to be when they log in to the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or Amazon EFS path as is in their file transfer protocol clients. If you set it to LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or Amazon EFS paths visible to your users. If HomeDirectoryType is LOGICAL, you must provide mappings, using the HomeDirectoryMappings parameter. If, on the other hand, HomeDirectoryType is PATH, you provide an absolute path using the HomeDirectory parameter. You cannot have both HomeDirectory and HomeDirectoryMappings in your template."];
       homeDirectoryMappings: HomeDirectoryMappings.t option
         [@ocaml.doc
-          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Amazon Web Services Identity and Access Management (IAM) role provides access to paths in Target. This value can only be set when HomeDirectoryType is set to LOGICAL. The following is an Entry and Target pair example. \\[ \\{ \"Entry\": \"/directory1\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\] In most cases, you can use this value instead of the session policy to lock down your user to the designated home directory (\"chroot\"). To do this, you can set Entry to '/' and set Target to the HomeDirectory parameter value. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry:\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"];
+          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Identity and Access Management (IAM) role provides access to paths in Target. This value can be set only when HomeDirectoryType is set to LOGICAL. The following is an Entry and Target pair example. \\[ \\{ \"Entry\": \"/directory1\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\] In most cases, you can use this value instead of the session policy to lock down your user to the designated home directory (\"chroot\"). To do this, you can set Entry to '/' and set Target to the HomeDirectory parameter value. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"];
       policy: Policy.t option
         [@ocaml.doc
-          "A session policy for your user so that you can use the same IAM role across multiple users. This policy scopes down user access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}. This only applies when the domain of ServerId is S3. EFS does not use session policies. For session policies, Amazon Web Services Transfer Family stores the policy as a JSON blob, instead of the Amazon Resource Name (ARN) of the policy. You save the policy as a JSON blob and pass it in the Policy argument. For an example of a session policy, see Creating a session policy. For more information, see AssumeRole in the Amazon Web Services Security Token Service API Reference."];
+          "A session policy for your user so that you can use the same Identity and Access Management (IAM) role across multiple users. This policy scopes down a user's access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}. This policy applies only when the domain of ServerId is Amazon S3. Amazon EFS does not use session policies. For session policies, Transfer Family stores the policy as a JSON blob, instead of the Amazon Resource Name (ARN) of the policy. You save the policy as a JSON blob and pass it in the Policy argument. For an example of a session policy, see Creating a session policy. For more information, see AssumeRole in the Amazon Web Services Security Token Service API Reference."];
       posixProfile: PosixProfile.t option
         [@ocaml.doc
           "Specifies the full POSIX identity, including user ID (Uid), group ID (Gid), and any secondary groups IDs (SecondaryGids), that controls your users' access to your Amazon Elastic File Systems (Amazon EFS). The POSIX permissions that are set on files and directories in your file system determines the level of access your users get when transferring files into and out of your Amazon EFS file systems."];
       role: Role.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the IAM role that controls your users' access to your Amazon S3 bucket or EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that controls your users' access to your Amazon S3 bucket or Amazon EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or Amazon EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
       serverId: ServerId.t
         [@ocaml.doc
-          "A system-assigned unique identifier for a server instance that the user account is assigned to."];
+          "A system-assigned unique identifier for a Transfer Family server instance that the user is assigned to."];
       userName: UserName.t
         [@ocaml.doc
           "A unique string that identifies a user and is associated with a server as specified by the ServerId. This user name must be a minimum of 3 and a maximum of 100 characters long. The following are valid characters: a-z, A-Z, 0-9, underscore '_', hyphen '-', period '.', and at sign '\\@'. The user name can't start with a hyphen, period, or at sign."]}
@@ -4471,30 +9566,31 @@ module UpdateUserRequest =
       make ~userName ~serverId ?role ?posixProfile ?policy
         ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      let role = field_map json "Role" Role.of_json in
-      let posixProfile = field_map json "PosixProfile" PosixProfile.of_json in
-      let policy = field_map json "Policy" Policy.of_json in
+    let of_json json__ =
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let role = field_map json__ "Role" Role.of_json in
+      let posixProfile = field_map json__ "PosixProfile" PosixProfile.of_json in
+      let policy = field_map json__ "Policy" Policy.of_json in
       let homeDirectoryMappings =
-        field_map json "HomeDirectoryMappings" HomeDirectoryMappings.of_json in
+        field_map json__ "HomeDirectoryMappings"
+          HomeDirectoryMappings.of_json in
       let homeDirectoryType =
-        field_map json "HomeDirectoryType" HomeDirectoryType.of_json in
+        field_map json__ "HomeDirectoryType" HomeDirectoryType.of_json in
       let homeDirectory =
-        field_map json "HomeDirectory" HomeDirectory.of_json in
+        field_map json__ "HomeDirectory" HomeDirectory.of_json in
       make ~userName ~serverId ?role ?posixProfile ?policy
         ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns new properties to a user. Parameters you pass modify any or all of the following: the home directory, role, and policy for the UserName and ServerId you specify. The response returns the ServerId and the UserName for the updated user."]
+       "Assigns new properties to a user. Parameters you pass modify any or all of the following: the home directory, role, and policy for the UserName and ServerId you specify. The response returns the ServerId and the UserName for the updated user. In the console, you can select Restricted when you create or update a user. This ensures that the user can't access anything outside of their home directory. The programmatic way to configure this behavior is to update the user. Set their HomeDirectoryType to LOGICAL, and specify HomeDirectoryMappings with Entry as root (/) and Target as their home directory. For example, if the user's home directory is /test/admin-user, the following command updates the user so that their configuration in the console shows the Restricted flag as selected. aws transfer update-user --server-id <server-id> --user-name admin-user --home-directory-type LOGICAL --home-directory-mappings \"\\[\\{\\\"Entry\\\":\\\"/\\\", \\\"Target\\\":\\\"/test/admin-user\\\"\\}\\]\""]
 module UpdateServerResponse =
   struct
     type nonrec t =
       {
-      serverId: ServerId.t
+      serverId: ServerId.t option
         [@ocaml.doc
-          "A system-assigned unique identifier for a server that the user account is assigned to."]}
+          "A system-assigned unique identifier for a server that the Transfer Family user is assigned to."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -4505,8 +9601,7 @@ module UpdateServerResponse =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateServerResponse"
-    let make ~serverId = fun () -> { serverId }
+    let make ?serverId = fun () -> { serverId }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4591,16 +9686,16 @@ module UpdateServerResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ServerId", (Some (ServerId.to_value x.serverId)))]
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
-      make ~serverId ()
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      make ~serverId ()
+    let of_json json__ =
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the file transfer protocol-enabled server's properties after that server has been created. The UpdateServer call returns the ServerId of the server you updated."]
@@ -4613,40 +9708,52 @@ module UpdateServerRequest =
           "The Amazon Resource Name (ARN) of the Amazon Web ServicesCertificate Manager (ACM) certificate. Required when Protocols is set to FTPS. To request a new public certificate, see Request a public certificate in the Amazon Web ServicesCertificate Manager User Guide. To import an existing certificate into ACM, see Importing certificates into ACM in the Amazon Web ServicesCertificate Manager User Guide. To request a private certificate to use FTPS through private IP addresses, see Request a private certificate in the Amazon Web ServicesCertificate Manager User Guide. Certificates with the following cryptographic algorithms and key sizes are supported: 2048-bit RSA (RSA_2048) 4096-bit RSA (RSA_4096) Elliptic Prime Curve 256 bit (EC_prime256v1) Elliptic Prime Curve 384 bit (EC_secp384r1) Elliptic Prime Curve 521 bit (EC_secp521r1) The certificate must be a valid SSL/TLS X.509 version 3 certificate with FQDN or IP address specified and information about the issuer."];
       protocolDetails: ProtocolDetails.t option
         [@ocaml.doc
-          "The protocol settings that are configured for your server. Use the PassiveIp parameter to indicate passive mode (for FTP and FTPS protocols). Enter a single dotted-quad IPv4 address, such as the external IP address of a firewall, router, or load balancer. Use the TlsSessionResumptionMode parameter to determine whether or not your Transfer server resumes recent, negotiated sessions through a unique session ID."];
+          "The protocol settings that are configured for your server. Avoid placing Network Load Balancers (NLBs) or NAT gateways in front of Transfer Family servers, as this increases costs and can cause performance issues, including reduced connection limits for FTPS. For more details, see Avoid placing NLBs and NATs in front of Transfer Family. To indicate passive mode (for FTP and FTPS protocols), use the PassiveIp parameter. Enter a single dotted-quad IPv4 address, such as the external IP address of a firewall, router, or load balancer. To ignore the error that is generated when the client attempts to use the SETSTAT command on a file that you are uploading to an Amazon S3 bucket, use the SetStatOption parameter. To have the Transfer Family server ignore the SETSTAT command and upload files without needing to make any changes to your SFTP client, set the value to ENABLE_NO_OP. If you set the SetStatOption parameter to ENABLE_NO_OP, Transfer Family generates a log entry to Amazon CloudWatch Logs, so that you can determine when the client is making a SETSTAT call. To determine whether your Transfer Family server resumes recent, negotiated sessions through a unique session ID, use the TlsSessionResumptionMode parameter. As2Transports indicates the transport method for the AS2 messages. Currently, only HTTP is supported."];
       endpointDetails: EndpointDetails.t option
         [@ocaml.doc
-          "The virtual private cloud (VPC) endpoint settings that are configured for your server. When you host your endpoint within your VPC, you can make it accessible only to resources within your VPC, or you can attach Elastic IP addresses and make it accessible to clients over the internet. Your VPC's default security groups are automatically assigned to your endpoint."];
+          "The virtual private cloud (VPC) endpoint settings that are configured for your server. When you host your endpoint within your VPC, you can make your endpoint accessible only to resources within your VPC, or you can attach Elastic IP addresses and make your endpoint accessible to clients over the internet. Your VPC's default security groups are automatically assigned to your endpoint."];
       endpointType: EndpointType.t option
         [@ocaml.doc
-          "The type of endpoint that you want your server to use. You can choose to make your server's endpoint publicly accessible (PUBLIC) or host it inside your VPC. With an endpoint that is hosted in a VPC, you can restrict access to your server and resources only within your VPC or choose to make it internet facing by attaching Elastic IP addresses directly to it. After May 19, 2021, you won't be able to create a server using EndpointType=VPC_ENDPOINT in your Amazon Web Servicesaccount if your account hasn't already done so before May 19, 2021. If you have already created servers with EndpointType=VPC_ENDPOINT in your Amazon Web Servicesaccount on or before May 19, 2021, you will not be affected. After this date, use EndpointType=VPC. For more information, see https://docs.aws.amazon.com/transfer/latest/userguide/create-server-in-vpc.html#deprecate-vpc-endpoint. It is recommended that you use VPC as the EndpointType. With this endpoint type, you have the option to directly associate up to three Elastic IPv4 addresses (BYO IP included) with your server's endpoint and use VPC security groups to restrict traffic by the client's public IP address. This is not possible with EndpointType set to VPC_ENDPOINT."];
+          "The type of endpoint that you want your server to use. You can choose to make your server's endpoint publicly accessible (PUBLIC) or host it inside your VPC. With an endpoint that is hosted in a VPC, you can restrict access to your server and resources only within your VPC or choose to make it internet facing by attaching Elastic IP addresses directly to it. After May 19, 2021, you won't be able to create a server using EndpointType=VPC_ENDPOINT in your Amazon Web Services account if your account hasn't already done so before May 19, 2021. If you have already created servers with EndpointType=VPC_ENDPOINT in your Amazon Web Services account on or before May 19, 2021, you will not be affected. After this date, use EndpointType=VPC. For more information, see https://docs.aws.amazon.com/transfer/latest/userguide/create-server-in-vpc.html#deprecate-vpc-endpoint. It is recommended that you use VPC as the EndpointType. With this endpoint type, you have the option to directly associate up to three Elastic IPv4 addresses (BYO IP included) with your server's endpoint and use VPC security groups to restrict traffic by the client's public IP address. This is not possible with EndpointType set to VPC_ENDPOINT."];
       hostKey: HostKey.t option
         [@ocaml.doc
-          "The RSA private key as generated by ssh-keygen -N \"\" -m PEM -f my-new-server-key. If you aren't planning to migrate existing users from an existing server to a new server, don't update the host key. Accidentally changing a server's host key can be disruptive. For more information, see Change the host key for your SFTP-enabled server in the Amazon Web ServicesTransfer Family User Guide."];
+          "The RSA, ECDSA, or ED25519 private key to use for your SFTP-enabled server. You can add multiple host keys, in case you want to rotate keys, or have a set of active keys that use different algorithms. Use the following command to generate an RSA 2048 bit key with no passphrase: ssh-keygen -t rsa -b 2048 -N \"\" -m PEM -f my-new-server-key. Use a minimum value of 2048 for the -b option. You can create a stronger key by using 3072 or 4096. Use the following command to generate an ECDSA 256 bit key with no passphrase: ssh-keygen -t ecdsa -b 256 -N \"\" -m PEM -f my-new-server-key. Valid values for the -b option for ECDSA are 256, 384, and 521. Use the following command to generate an ED25519 key with no passphrase: ssh-keygen -t ed25519 -N \"\" -f my-new-server-key. For all of these commands, you can replace my-new-server-key with a string of your choice. If you aren't planning to migrate existing users from an existing SFTP-enabled server to a new server, don't update the host key. Accidentally changing a server's host key can be disruptive. For more information, see Manage host keys for your SFTP-enabled server in the Transfer Family User Guide."];
       identityProviderDetails: IdentityProviderDetails.t option
         [@ocaml.doc
           "An array containing all of the information required to call a customer's authentication API method."];
       loggingRole: NullableRole.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the Amazon Web Services Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, user activity can be viewed in your CloudWatch logs."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, you can view user activity in your CloudWatch logs."];
       postAuthenticationLoginBanner: PostAuthenticationLoginBanner.t option
         [@ocaml.doc
-          "Specify a string to display when users connect to a server. This string is displayed after the user authenticates. The SFTP protocol does not support post-authentication display banners."];
+          "Specifies a string to display when users connect to a server. This string is displayed after the user authenticates. The SFTP protocol does not support post-authentication display banners."];
       preAuthenticationLoginBanner: PreAuthenticationLoginBanner.t option
         [@ocaml.doc
-          "Specify a string to display when users connect to a server. This string is displayed before the user authenticates. For example, the following banner displays details about using the system. This system is for the use of authorized users only. Individuals using this computer system without authority, or in excess of their authority, are subject to having all of their activities on this system monitored and recorded by system personnel."];
+          "Specifies a string to display when users connect to a server. This string is displayed before the user authenticates. For example, the following banner displays details about using the system: This system is for the use of authorized users only. Individuals using this computer system without authority, or in excess of their authority, are subject to having all of their activities on this system monitored and recorded by system personnel."];
       protocols: Protocols.t option
         [@ocaml.doc
-          "Specifies the file transfer protocol or protocols over which your file transfer protocol client can connect to your server's endpoint. The available protocols are: Secure Shell (SSH) File Transfer Protocol (SFTP): File transfer over SSH File Transfer Protocol Secure (FTPS): File transfer with TLS encryption File Transfer Protocol (FTP): Unencrypted file transfer If you select FTPS, you must choose a certificate stored in Amazon Web ServicesCertificate Manager (ACM) which will be used to identify your server when clients connect to it over FTPS. If Protocol includes either FTP or FTPS, then the EndpointType must be VPC and the IdentityProviderType must be AWS_DIRECTORY_SERVICE or API_GATEWAY. If Protocol includes FTP, then AddressAllocationIds cannot be associated. If Protocol is set only to SFTP, the EndpointType can be set to PUBLIC and the IdentityProviderType can be set to SERVICE_MANAGED."];
+          "Specifies the file transfer protocol or protocols over which your file transfer protocol client can connect to your server's endpoint. The available protocols are: SFTP (Secure Shell (SSH) File Transfer Protocol): File transfer over SSH FTPS (File Transfer Protocol Secure): File transfer with TLS encryption FTP (File Transfer Protocol): Unencrypted file transfer AS2 (Applicability Statement 2): used for transporting structured business-to-business data If you select FTPS, you must choose a certificate stored in Certificate Manager (ACM) which is used to identify your server when clients connect to it over FTPS. If Protocol includes either FTP or FTPS, then the EndpointType must be VPC and the IdentityProviderType must be either AWS_DIRECTORY_SERVICE, AWS_LAMBDA, or API_GATEWAY. If Protocol includes FTP, then AddressAllocationIds cannot be associated. If Protocol is set only to SFTP, the EndpointType can be set to PUBLIC and the IdentityProviderType can be set any of the supported identity types: SERVICE_MANAGED, AWS_DIRECTORY_SERVICE, AWS_LAMBDA, or API_GATEWAY. If Protocol includes AS2, then the EndpointType must be VPC, and domain must be Amazon S3."];
       securityPolicyName: SecurityPolicyName.t option
         [@ocaml.doc
-          "Specifies the name of the security policy that is attached to the server."];
+          "Specifies the name of the security policy for the server."];
       serverId: ServerId.t
         [@ocaml.doc
-          "A system-assigned unique identifier for a server instance that the user account is assigned to."];
+          "A system-assigned unique identifier for a server instance that the Transfer Family user is assigned to."];
       workflowDetails: WorkflowDetails.t option
         [@ocaml.doc
-          "Specifies the workflow ID for the workflow to assign and the execution role used for executing the workflow. To remove an associated workflow from a server, you can provide an empty OnUpload object, as in the following example. aws transfer update-server --server-id s-01234567890abcdef --workflow-details '\\{\"OnUpload\":\\[\\]\\}'"]}
+          "Specifies the workflow ID for the workflow to assign and the execution role that's used for executing the workflow. In addition to a workflow to execute when a file is uploaded completely, WorkflowDetails can also contain a workflow ID (and execution role) for a workflow to execute on partial upload. A partial upload occurs when the server session disconnects while the file is still being uploaded. To remove an associated workflow from a server, you can provide an empty OnUpload object, as in the following example. aws transfer update-server --server-id s-01234567890abcdef --workflow-details '\\{\"OnUpload\":\\[\\]\\}'"];
+      structuredLogDestinations: StructuredLogDestinations.t option
+        [@ocaml.doc
+          "Specifies the log groups to which your server logs are sent. To specify a log group, you must provide the ARN for an existing log group. In this case, the format of the log group is as follows: arn:aws:logs:region-name:amazon-account-id:log-group:log-group-name:* For example, arn:aws:logs:us-east-1:111122223333:log-group:mytestgroup:* If you have previously specified a log group for a server, you can clear it, and in effect turn off structured logging, by providing an empty value for this parameter in an update-server call. For example: update-server --server-id s-1234567890abcdef0 --structured-log-destinations"];
+      s3StorageOptions: S3StorageOptions.t option
+        [@ocaml.doc
+          "Specifies whether or not performance for your Amazon S3 directories is optimized. If using the console, this is enabled by default. If using the API or CLI, this is disabled by default. By default, home directory mappings have a TYPE of DIRECTORY. If you enable this option, you would then need to explicitly set the HomeDirectoryMapEntry Type to FILE if you want a mapping to have a file target."];
+      ipAddressType: IpAddressType.t option
+        [@ocaml.doc
+          "Specifies whether to use IPv4 only, or to use dual-stack (IPv4 and IPv6) for your Transfer Family endpoint. The default value is IPV4. The IpAddressType parameter has the following limitations: It cannot be changed while the server is online. You must stop the server before modifying this parameter. It cannot be updated to DUALSTACK if the server has AddressAllocationIds specified. When using DUALSTACK as the IpAddressType, you cannot set the AddressAllocationIds parameter for the EndpointDetails for the server."];
+      identityProviderType: IdentityProviderType.t option
+        [@ocaml.doc
+          "The mode of authentication for a server. The default value is SERVICE_MANAGED, which allows you to store and access user credentials within the Transfer Family service. Use AWS_DIRECTORY_SERVICE to provide access to Active Directory groups in Directory Service for Microsoft Active Directory or Microsoft Active Directory in your on-premises environment or in Amazon Web Services using AD Connector. This option also requires you to provide a Directory ID by using the IdentityProviderDetails parameter. Use the API_GATEWAY value to integrate with an identity provider of your choosing. The API_GATEWAY setting requires you to provide an Amazon API Gateway endpoint URL to call for authentication by using the IdentityProviderDetails parameter. Use the AWS_LAMBDA value to directly use an Lambda function as your identity provider. If you choose this value, you must specify the ARN for the Lambda function in the Function parameter for the IdentityProviderDetails data type."]}
     let context_ = "UpdateServerRequest"
     let make ?certificate =
       fun ?protocolDetails ->
@@ -4660,23 +9767,31 @@ module UpdateServerRequest =
                       fun ?protocols ->
                         fun ?securityPolicyName ->
                           fun ?workflowDetails ->
-                            fun ~serverId ->
-                              fun () ->
-                                {
-                                  certificate;
-                                  protocolDetails;
-                                  endpointDetails;
-                                  endpointType;
-                                  hostKey;
-                                  identityProviderDetails;
-                                  loggingRole;
-                                  postAuthenticationLoginBanner;
-                                  preAuthenticationLoginBanner;
-                                  protocols;
-                                  securityPolicyName;
-                                  workflowDetails;
-                                  serverId
-                                }
+                            fun ?structuredLogDestinations ->
+                              fun ?s3StorageOptions ->
+                                fun ?ipAddressType ->
+                                  fun ?identityProviderType ->
+                                    fun ~serverId ->
+                                      fun () ->
+                                        {
+                                          certificate;
+                                          protocolDetails;
+                                          endpointDetails;
+                                          endpointType;
+                                          hostKey;
+                                          identityProviderDetails;
+                                          loggingRole;
+                                          postAuthenticationLoginBanner;
+                                          preAuthenticationLoginBanner;
+                                          protocols;
+                                          securityPolicyName;
+                                          workflowDetails;
+                                          structuredLogDestinations;
+                                          s3StorageOptions;
+                                          ipAddressType;
+                                          identityProviderType;
+                                          serverId
+                                        }
     let to_value x =
       structure_to_value
         [("Certificate", (Option.map x.certificate ~f:Certificate.to_value));
@@ -4702,9 +9817,30 @@ module UpdateServerRequest =
           (Option.map x.securityPolicyName ~f:SecurityPolicyName.to_value));
         ("ServerId", (Some (ServerId.to_value x.serverId)));
         ("WorkflowDetails",
-          (Option.map x.workflowDetails ~f:WorkflowDetails.to_value))]
+          (Option.map x.workflowDetails ~f:WorkflowDetails.to_value));
+        ("StructuredLogDestinations",
+          (Option.map x.structuredLogDestinations
+             ~f:StructuredLogDestinations.to_value));
+        ("S3StorageOptions",
+          (Option.map x.s3StorageOptions ~f:S3StorageOptions.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType ~f:IpAddressType.to_value));
+        ("IdentityProviderType",
+          (Option.map x.identityProviderType ~f:IdentityProviderType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let identityProviderType =
+        (Option.map ~f:IdentityProviderType.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderType") in
+      let ipAddressType =
+        (Option.map ~f:IpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let s3StorageOptions =
+        (Option.map ~f:S3StorageOptions.of_xml)
+          (Xml.child xml_arg0 "S3StorageOptions") in
+      let structuredLogDestinations =
+        (Option.map ~f:StructuredLogDestinations.of_xml)
+          (Xml.child xml_arg0 "StructuredLogDestinations") in
       let workflowDetails =
         (Option.map ~f:WorkflowDetails.of_xml)
           (Xml.child xml_arg0 "WorkflowDetails") in
@@ -4740,61 +9876,331 @@ module UpdateServerRequest =
           (Xml.child xml_arg0 "ProtocolDetails") in
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "Certificate") in
-      make ?workflowDetails ~serverId ?securityPolicyName ?protocols
-        ?preAuthenticationLoginBanner ?postAuthenticationLoginBanner
-        ?loggingRole ?identityProviderDetails ?hostKey ?endpointType
-        ?endpointDetails ?protocolDetails ?certificate ()
+      make ?identityProviderType ?ipAddressType ?s3StorageOptions
+        ?structuredLogDestinations ?workflowDetails ~serverId
+        ?securityPolicyName ?protocols ?preAuthenticationLoginBanner
+        ?postAuthenticationLoginBanner ?loggingRole ?identityProviderDetails
+        ?hostKey ?endpointType ?endpointDetails ?protocolDetails ?certificate
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let identityProviderType =
+        field_map json__ "IdentityProviderType" IdentityProviderType.of_json in
+      let ipAddressType =
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let s3StorageOptions =
+        field_map json__ "S3StorageOptions" S3StorageOptions.of_json in
+      let structuredLogDestinations =
+        field_map json__ "StructuredLogDestinations"
+          StructuredLogDestinations.of_json in
       let workflowDetails =
-        field_map json "WorkflowDetails" WorkflowDetails.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+        field_map json__ "WorkflowDetails" WorkflowDetails.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       let securityPolicyName =
-        field_map json "SecurityPolicyName" SecurityPolicyName.of_json in
-      let protocols = field_map json "Protocols" Protocols.of_json in
+        field_map json__ "SecurityPolicyName" SecurityPolicyName.of_json in
+      let protocols = field_map json__ "Protocols" Protocols.of_json in
       let preAuthenticationLoginBanner =
-        field_map json "PreAuthenticationLoginBanner"
+        field_map json__ "PreAuthenticationLoginBanner"
           PreAuthenticationLoginBanner.of_json in
       let postAuthenticationLoginBanner =
-        field_map json "PostAuthenticationLoginBanner"
+        field_map json__ "PostAuthenticationLoginBanner"
           PostAuthenticationLoginBanner.of_json in
-      let loggingRole = field_map json "LoggingRole" NullableRole.of_json in
+      let loggingRole = field_map json__ "LoggingRole" NullableRole.of_json in
       let identityProviderDetails =
-        field_map json "IdentityProviderDetails"
+        field_map json__ "IdentityProviderDetails"
           IdentityProviderDetails.of_json in
-      let hostKey = field_map json "HostKey" HostKey.of_json in
-      let endpointType = field_map json "EndpointType" EndpointType.of_json in
+      let hostKey = field_map json__ "HostKey" HostKey.of_json in
+      let endpointType = field_map json__ "EndpointType" EndpointType.of_json in
       let endpointDetails =
-        field_map json "EndpointDetails" EndpointDetails.of_json in
+        field_map json__ "EndpointDetails" EndpointDetails.of_json in
       let protocolDetails =
-        field_map json "ProtocolDetails" ProtocolDetails.of_json in
-      let certificate = field_map json "Certificate" Certificate.of_json in
-      make ?workflowDetails ~serverId ?securityPolicyName ?protocols
-        ?preAuthenticationLoginBanner ?postAuthenticationLoginBanner
-        ?loggingRole ?identityProviderDetails ?hostKey ?endpointType
-        ?endpointDetails ?protocolDetails ?certificate ()
+        field_map json__ "ProtocolDetails" ProtocolDetails.of_json in
+      let certificate = field_map json__ "Certificate" Certificate.of_json in
+      make ?identityProviderType ?ipAddressType ?s3StorageOptions
+        ?structuredLogDestinations ?workflowDetails ~serverId
+        ?securityPolicyName ?protocols ?preAuthenticationLoginBanner
+        ?postAuthenticationLoginBanner ?loggingRole ?identityProviderDetails
+        ?hostKey ?endpointType ?endpointDetails ?protocolDetails ?certificate
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the file transfer protocol-enabled server's properties after that server has been created. The UpdateServer call returns the ServerId of the server you updated."]
-module UpdateAccessResponse =
+module UpdateProfileResponse =
+  struct
+    type nonrec t =
+      {
+      profileId: ProfileId.t option
+        [@ocaml.doc
+          "Returns the identifier for the profile that's being updated."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?profileId = fun () -> { profileId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ProfileId", (Option.map x.profileId ~f:ProfileId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileId =
+        (Option.map ~f:ProfileId.of_xml) (Xml.child xml_arg0 "ProfileId") in
+      make ?profileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileId = field_map json__ "ProfileId" ProfileId.of_json in
+      make ?profileId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates some of the parameters for an existing profile. Provide the ProfileId for the profile that you want to update, along with the new values for the parameters to update."]
+module UpdateProfileRequest =
+  struct
+    type nonrec t =
+      {
+      profileId: ProfileId.t
+        [@ocaml.doc
+          "The identifier of the profile object that you are updating."];
+      certificateIds: CertificateIds.t option
+        [@ocaml.doc
+          "An array of identifiers for the imported certificates. You use this identifier for working with profiles and partner profiles."]}
+    let context_ = "UpdateProfileRequest"
+    let make ?certificateIds =
+      fun ~profileId -> fun () -> { certificateIds; profileId }
+    let to_value x =
+      structure_to_value
+        [("ProfileId", (Some (ProfileId.to_value x.profileId)));
+        ("CertificateIds",
+          (Option.map x.certificateIds ~f:CertificateIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateIds =
+        (Option.map ~f:CertificateIds.of_xml)
+          (Xml.child xml_arg0 "CertificateIds") in
+      let profileId =
+        ProfileId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileId") in
+      make ?certificateIds ~profileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateIds =
+        field_map json__ "CertificateIds" CertificateIds.of_json in
+      let profileId = field_map_exn json__ "ProfileId" ProfileId.of_json in
+      make ?certificateIds ~profileId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates some of the parameters for an existing profile. Provide the ProfileId for the profile that you want to update, along with the new values for the parameters to update."]
+module UpdateHostKeyResponse =
+  struct
+    type nonrec t =
+      {
+      serverId: ServerId.t option
+        [@ocaml.doc
+          "Returns the server identifier for the server that contains the updated host key."];
+      hostKeyId: HostKeyId.t option
+        [@ocaml.doc
+          "Returns the host key identifier for the updated host key."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serverId = fun ?hostKeyId -> fun () -> { serverId; hostKeyId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("HostKeyId", (Option.map x.hostKeyId ~f:HostKeyId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hostKeyId =
+        (Option.map ~f:HostKeyId.of_xml) (Xml.child xml_arg0 "HostKeyId") in
+      let serverId =
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?hostKeyId ?serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hostKeyId = field_map json__ "HostKeyId" HostKeyId.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?hostKeyId ?serverId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the description for the host key that's specified by the ServerId and HostKeyId parameters."]
+module UpdateHostKeyRequest =
   struct
     type nonrec t =
       {
       serverId: ServerId.t
-        [@ocaml.doc "The ID of the server that the user is attached to."];
-      externalId: ExternalId.t
         [@ocaml.doc
-          "The external ID of the group whose users have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Amazon Web ServicesTransfer Family."]}
+          "The identifier of the server that contains the host key that you are updating."];
+      hostKeyId: HostKeyId.t
+        [@ocaml.doc "The identifier of the host key that you are updating."];
+      description: HostKeyDescription.t
+        [@ocaml.doc "An updated description for the host key."]}
+    let context_ = "UpdateHostKeyRequest"
+    let make ~serverId =
+      fun ~hostKeyId ->
+        fun ~description -> fun () -> { serverId; hostKeyId; description }
+    let to_value x =
+      structure_to_value
+        [("ServerId", (Some (ServerId.to_value x.serverId)));
+        ("HostKeyId", (Some (HostKeyId.to_value x.hostKeyId)));
+        ("Description", (Some (HostKeyDescription.to_value x.description)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        HostKeyDescription.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
+      let hostKeyId =
+        HostKeyId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HostKeyId") in
+      let serverId =
+        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+      make ~description ~hostKeyId ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map_exn json__ "Description" HostKeyDescription.of_json in
+      let hostKeyId = field_map_exn json__ "HostKeyId" HostKeyId.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      make ~description ~hostKeyId ~serverId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the description for the host key that's specified by the ServerId and HostKeyId parameters."]
+module UpdateConnectorResponse =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t option
+        [@ocaml.doc
+          "Returns the identifier of the connector object that you are updating."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceExistsException of ResourceExistsException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateAccessResponse"
-    let make ~serverId =
-      fun ~externalId -> fun () -> { serverId; externalId }
+    let make ?connectorId = fun () -> { connectorId }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -4808,6 +10214,8 @@ module UpdateAccessResponse =
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4824,6 +10232,8 @@ module UpdateAccessResponse =
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4848,6 +10258,10 @@ module UpdateAccessResponse =
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
             ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4855,21 +10269,621 @@ module UpdateAccessResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ServerId", (Some (ServerId.to_value x.serverId)));
-        ("ExternalId", (Some (ExternalId.to_value x.externalId)))]
+        [("ConnectorId", (Option.map x.connectorId ~f:ConnectorId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectorId =
+        (Option.map ~f:ConnectorId.of_xml) (Xml.child xml_arg0 "ConnectorId") in
+      make ?connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectorId = field_map json__ "ConnectorId" ConnectorId.of_json in
+      make ?connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates some of the parameters for an existing connector. Provide the ConnectorId for the connector that you want to update, along with the new values for the parameters to update."]
+module UpdateConnectorRequest =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t
+        [@ocaml.doc "The unique identifier for the connector."];
+      url: Url.t option
+        [@ocaml.doc
+          "The URL of the partner's AS2 or SFTP endpoint. When creating AS2 connectors or service-managed SFTP connectors (connectors without egress configuration), you must provide a URL to specify the remote server endpoint. For VPC Lattice type connectors, the URL must be null."];
+      as2Config: As2ConnectorConfig.t option
+        [@ocaml.doc
+          "A structure that contains the parameters for an AS2 connector object."];
+      accessRole: Role.t option
+        [@ocaml.doc
+          "Connectors are used to send files using either the AS2 or SFTP protocol. For the access role, provide the Amazon Resource Name (ARN) of the Identity and Access Management role to use. For AS2 connectors With AS2, you can send files by calling StartFileTransfer and specifying the file paths in the request parameter, SendFilePaths. We use the file\226\128\153s parent directory (for example, for --send-file-paths /bucket/dir/file.txt, parent directory is /bucket/dir/) to temporarily store a processed AS2 message file, store the MDN when we receive them from the partner, and write a final JSON file containing relevant metadata of the transmission. So, the AccessRole needs to provide read and write access to the parent directory of the file location used in the StartFileTransfer request. Additionally, you need to provide read and write access to the parent directory of the files that you intend to send with StartFileTransfer. If you are using Basic authentication for your AS2 connector, the access role requires the secretsmanager:GetSecretValue permission for the secret. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key in Secrets Manager, then the role also needs the kms:Decrypt permission for that key. For SFTP connectors Make sure that the access role provides read and write access to the parent directory of the file location that's used in the StartFileTransfer request. Additionally, make sure that the role provides secretsmanager:GetSecretValue permission to Secrets Manager."];
+      loggingRole: Role.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that allows a connector to turn on CloudWatch logging for Amazon S3 events. When set, you can view connector activity in your CloudWatch logs."];
+      sftpConfig: SftpConnectorConfig.t option
+        [@ocaml.doc
+          "A structure that contains the parameters for an SFTP connector object."];
+      securityPolicyName: ConnectorSecurityPolicyName.t option
+        [@ocaml.doc
+          "Specifies the name of the security policy for the connector."];
+      egressConfig: UpdateConnectorEgressConfig.t option
+        [@ocaml.doc
+          "Updates the egress configuration for the connector, allowing you to modify how traffic is routed from the connector to the SFTP server. Changes to VPC configuration may require connector restart."];
+      ipAddressType: ConnectorsIpAddressType.t option
+        [@ocaml.doc
+          "Specifies the IP address type for the connector's network connections. When set to IPV4, the connector uses IPv4 addresses only. When set to DUALSTACK, the connector supports both IPv4 and IPv6 addresses, with IPv6 preferred when available."]}
+    let context_ = "UpdateConnectorRequest"
+    let make ?url =
+      fun ?as2Config ->
+        fun ?accessRole ->
+          fun ?loggingRole ->
+            fun ?sftpConfig ->
+              fun ?securityPolicyName ->
+                fun ?egressConfig ->
+                  fun ?ipAddressType ->
+                    fun ~connectorId ->
+                      fun () ->
+                        {
+                          url;
+                          as2Config;
+                          accessRole;
+                          loggingRole;
+                          sftpConfig;
+                          securityPolicyName;
+                          egressConfig;
+                          ipAddressType;
+                          connectorId
+                        }
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Some (ConnectorId.to_value x.connectorId)));
+        ("Url", (Option.map x.url ~f:Url.to_value));
+        ("As2Config",
+          (Option.map x.as2Config ~f:As2ConnectorConfig.to_value));
+        ("AccessRole", (Option.map x.accessRole ~f:Role.to_value));
+        ("LoggingRole", (Option.map x.loggingRole ~f:Role.to_value));
+        ("SftpConfig",
+          (Option.map x.sftpConfig ~f:SftpConnectorConfig.to_value));
+        ("SecurityPolicyName",
+          (Option.map x.securityPolicyName
+             ~f:ConnectorSecurityPolicyName.to_value));
+        ("EgressConfig",
+          (Option.map x.egressConfig ~f:UpdateConnectorEgressConfig.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType ~f:ConnectorsIpAddressType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:ConnectorsIpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let egressConfig =
+        (Option.map ~f:UpdateConnectorEgressConfig.of_xml)
+          (Xml.child xml_arg0 "EgressConfig") in
+      let securityPolicyName =
+        (Option.map ~f:ConnectorSecurityPolicyName.of_xml)
+          (Xml.child xml_arg0 "SecurityPolicyName") in
+      let sftpConfig =
+        (Option.map ~f:SftpConnectorConfig.of_xml)
+          (Xml.child xml_arg0 "SftpConfig") in
+      let loggingRole =
+        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "LoggingRole") in
+      let accessRole =
+        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "AccessRole") in
+      let as2Config =
+        (Option.map ~f:As2ConnectorConfig.of_xml)
+          (Xml.child xml_arg0 "As2Config") in
+      let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "Url") in
+      let connectorId =
+        ConnectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectorId") in
+      make ?ipAddressType ?egressConfig ?securityPolicyName ?sftpConfig
+        ?loggingRole ?accessRole ?as2Config ?url ~connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "IpAddressType" ConnectorsIpAddressType.of_json in
+      let egressConfig =
+        field_map json__ "EgressConfig" UpdateConnectorEgressConfig.of_json in
+      let securityPolicyName =
+        field_map json__ "SecurityPolicyName"
+          ConnectorSecurityPolicyName.of_json in
+      let sftpConfig =
+        field_map json__ "SftpConfig" SftpConnectorConfig.of_json in
+      let loggingRole = field_map json__ "LoggingRole" Role.of_json in
+      let accessRole = field_map json__ "AccessRole" Role.of_json in
+      let as2Config = field_map json__ "As2Config" As2ConnectorConfig.of_json in
+      let url = field_map json__ "Url" Url.of_json in
+      let connectorId =
+        field_map_exn json__ "ConnectorId" ConnectorId.of_json in
+      make ?ipAddressType ?egressConfig ?securityPolicyName ?sftpConfig
+        ?loggingRole ?accessRole ?as2Config ?url ~connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates some of the parameters for an existing connector. Provide the ConnectorId for the connector that you want to update, along with the new values for the parameters to update."]
+module UpdateCertificateResponse =
+  struct
+    type nonrec t =
+      {
+      certificateId: CertificateId.t option
+        [@ocaml.doc
+          "Returns the identifier of the certificate object that you are updating."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?certificateId = fun () -> { certificateId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CertificateId",
+           (Option.map x.certificateId ~f:CertificateId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateId =
+        (Option.map ~f:CertificateId.of_xml)
+          (Xml.child xml_arg0 "CertificateId") in
+      make ?certificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateId =
+        field_map json__ "CertificateId" CertificateId.of_json in
+      make ?certificateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the active and inactive dates for a certificate."]
+module UpdateCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateId: CertificateId.t
+        [@ocaml.doc
+          "The identifier of the certificate object that you are updating."];
+      activeDate: CertDate.t option
+        [@ocaml.doc
+          "An optional date that specifies when the certificate becomes active. If you do not specify a value, ActiveDate takes the same value as NotBeforeDate, which is specified by the CA."];
+      inactiveDate: CertDate.t option
+        [@ocaml.doc
+          "An optional date that specifies when the certificate becomes inactive. If you do not specify a value, InactiveDate takes the same value as NotAfterDate, which is specified by the CA."];
+      description: Description.t option
+        [@ocaml.doc "A short description to help identify the certificate."]}
+    let context_ = "UpdateCertificateRequest"
+    let make ?activeDate =
+      fun ?inactiveDate ->
+        fun ?description ->
+          fun ~certificateId ->
+            fun () ->
+              { activeDate; inactiveDate; description; certificateId }
+    let to_value x =
+      structure_to_value
+        [("CertificateId", (Some (CertificateId.to_value x.certificateId)));
+        ("ActiveDate", (Option.map x.activeDate ~f:CertDate.to_value));
+        ("InactiveDate", (Option.map x.inactiveDate ~f:CertDate.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let inactiveDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "InactiveDate") in
+      let activeDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "ActiveDate") in
+      let certificateId =
+        CertificateId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateId") in
+      make ?description ?inactiveDate ?activeDate ~certificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let inactiveDate = field_map json__ "InactiveDate" CertDate.of_json in
+      let activeDate = field_map json__ "ActiveDate" CertDate.of_json in
+      let certificateId =
+        field_map_exn json__ "CertificateId" CertificateId.of_json in
+      make ?description ?inactiveDate ?activeDate ~certificateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the active and inactive dates for a certificate."]
+module UpdateAgreementResponse =
+  struct
+    type nonrec t =
+      {
+      agreementId: AgreementId.t option
+        [@ocaml.doc
+          "A unique identifier for the agreement. This identifier is returned when you create an agreement."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceExistsException of ResourceExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?agreementId = fun () -> { agreementId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceExistsException"));
+            ("details", (ResourceExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AgreementId", (Option.map x.agreementId ~f:AgreementId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let agreementId =
+        (Option.map ~f:AgreementId.of_xml) (Xml.child xml_arg0 "AgreementId") in
+      make ?agreementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agreementId = field_map json__ "AgreementId" AgreementId.of_json in
+      make ?agreementId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates some of the parameters for an existing agreement. Provide the AgreementId and the ServerId for the agreement that you want to update, along with the new values for the parameters to update. Specify either BaseDirectory or CustomDirectories, but not both. Specifying both causes the command to fail. If you update an agreement from using base directory to custom directories, the base directory is no longer used. Similarly, if you change from custom directories to a base directory, the custom directories are no longer used."]
+module UpdateAgreementRequest =
+  struct
+    type nonrec t =
+      {
+      agreementId: AgreementId.t
+        [@ocaml.doc
+          "A unique identifier for the agreement. This identifier is returned when you create an agreement."];
+      serverId: ServerId.t
+        [@ocaml.doc
+          "A system-assigned unique identifier for a server instance. This is the specific server that the agreement uses."];
+      description: Description.t option
+        [@ocaml.doc
+          "To replace the existing description, provide a short description for the agreement."];
+      status: AgreementStatusType.t option
+        [@ocaml.doc
+          "You can update the status for the agreement, either activating an inactive agreement or the reverse."];
+      localProfileId: ProfileId.t option
+        [@ocaml.doc
+          "A unique identifier for the AS2 local profile. To change the local profile identifier, provide a new value here."];
+      partnerProfileId: ProfileId.t option
+        [@ocaml.doc
+          "A unique identifier for the partner profile. To change the partner profile identifier, provide a new value here."];
+      baseDirectory: HomeDirectory.t option
+        [@ocaml.doc
+          "To change the landing directory (folder) for files that are transferred, provide the bucket folder that you want to use; for example, /amzn-s3-demo-bucket/home/mydirectory ."];
+      accessRole: Role.t option
+        [@ocaml.doc
+          "Connectors are used to send files using either the AS2 or SFTP protocol. For the access role, provide the Amazon Resource Name (ARN) of the Identity and Access Management role to use. For AS2 connectors With AS2, you can send files by calling StartFileTransfer and specifying the file paths in the request parameter, SendFilePaths. We use the file\226\128\153s parent directory (for example, for --send-file-paths /bucket/dir/file.txt, parent directory is /bucket/dir/) to temporarily store a processed AS2 message file, store the MDN when we receive them from the partner, and write a final JSON file containing relevant metadata of the transmission. So, the AccessRole needs to provide read and write access to the parent directory of the file location used in the StartFileTransfer request. Additionally, you need to provide read and write access to the parent directory of the files that you intend to send with StartFileTransfer. If you are using Basic authentication for your AS2 connector, the access role requires the secretsmanager:GetSecretValue permission for the secret. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key in Secrets Manager, then the role also needs the kms:Decrypt permission for that key. For SFTP connectors Make sure that the access role provides read and write access to the parent directory of the file location that's used in the StartFileTransfer request. Additionally, make sure that the role provides secretsmanager:GetSecretValue permission to Secrets Manager."];
+      preserveFilename: PreserveFilenameType.t option
+        [@ocaml.doc
+          "Determines whether or not Transfer Family appends a unique string of characters to the end of the AS2 message payload filename when saving it. ENABLED: the filename provided by your trading parter is preserved when the file is saved. DISABLED (default value): when Transfer Family saves the file, the filename is adjusted, as described in File names and locations."];
+      enforceMessageSigning: EnforceMessageSigningType.t option
+        [@ocaml.doc
+          "Determines whether or not unsigned messages from your trading partners will be accepted. ENABLED: Transfer Family rejects unsigned messages from your trading partner. DISABLED (default value): Transfer Family accepts unsigned messages from your trading partner."];
+      customDirectories: CustomDirectoriesType.t option
+        [@ocaml.doc
+          "A CustomDirectoriesType structure. This structure specifies custom directories for storing various AS2 message files. You can specify directories for the following types of files. Failed files MDN files Payload files Status files Temporary files"]}
+    let context_ = "UpdateAgreementRequest"
+    let make ?description =
+      fun ?status ->
+        fun ?localProfileId ->
+          fun ?partnerProfileId ->
+            fun ?baseDirectory ->
+              fun ?accessRole ->
+                fun ?preserveFilename ->
+                  fun ?enforceMessageSigning ->
+                    fun ?customDirectories ->
+                      fun ~agreementId ->
+                        fun ~serverId ->
+                          fun () ->
+                            {
+                              description;
+                              status;
+                              localProfileId;
+                              partnerProfileId;
+                              baseDirectory;
+                              accessRole;
+                              preserveFilename;
+                              enforceMessageSigning;
+                              customDirectories;
+                              agreementId;
+                              serverId
+                            }
+    let to_value x =
+      structure_to_value
+        [("AgreementId", (Some (AgreementId.to_value x.agreementId)));
+        ("ServerId", (Some (ServerId.to_value x.serverId)));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Status", (Option.map x.status ~f:AgreementStatusType.to_value));
+        ("LocalProfileId",
+          (Option.map x.localProfileId ~f:ProfileId.to_value));
+        ("PartnerProfileId",
+          (Option.map x.partnerProfileId ~f:ProfileId.to_value));
+        ("BaseDirectory",
+          (Option.map x.baseDirectory ~f:HomeDirectory.to_value));
+        ("AccessRole", (Option.map x.accessRole ~f:Role.to_value));
+        ("PreserveFilename",
+          (Option.map x.preserveFilename ~f:PreserveFilenameType.to_value));
+        ("EnforceMessageSigning",
+          (Option.map x.enforceMessageSigning
+             ~f:EnforceMessageSigningType.to_value));
+        ("CustomDirectories",
+          (Option.map x.customDirectories ~f:CustomDirectoriesType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customDirectories =
+        (Option.map ~f:CustomDirectoriesType.of_xml)
+          (Xml.child xml_arg0 "CustomDirectories") in
+      let enforceMessageSigning =
+        (Option.map ~f:EnforceMessageSigningType.of_xml)
+          (Xml.child xml_arg0 "EnforceMessageSigning") in
+      let preserveFilename =
+        (Option.map ~f:PreserveFilenameType.of_xml)
+          (Xml.child xml_arg0 "PreserveFilename") in
+      let accessRole =
+        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "AccessRole") in
+      let baseDirectory =
+        (Option.map ~f:HomeDirectory.of_xml)
+          (Xml.child xml_arg0 "BaseDirectory") in
+      let partnerProfileId =
+        (Option.map ~f:ProfileId.of_xml)
+          (Xml.child xml_arg0 "PartnerProfileId") in
+      let localProfileId =
+        (Option.map ~f:ProfileId.of_xml)
+          (Xml.child xml_arg0 "LocalProfileId") in
+      let status =
+        (Option.map ~f:AgreementStatusType.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let serverId =
+        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+      let agreementId =
+        AgreementId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AgreementId") in
+      make ?customDirectories ?enforceMessageSigning ?preserveFilename
+        ?accessRole ?baseDirectory ?partnerProfileId ?localProfileId ?status
+        ?description ~serverId ~agreementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customDirectories =
+        field_map json__ "CustomDirectories" CustomDirectoriesType.of_json in
+      let enforceMessageSigning =
+        field_map json__ "EnforceMessageSigning"
+          EnforceMessageSigningType.of_json in
+      let preserveFilename =
+        field_map json__ "PreserveFilename" PreserveFilenameType.of_json in
+      let accessRole = field_map json__ "AccessRole" Role.of_json in
+      let baseDirectory =
+        field_map json__ "BaseDirectory" HomeDirectory.of_json in
+      let partnerProfileId =
+        field_map json__ "PartnerProfileId" ProfileId.of_json in
+      let localProfileId =
+        field_map json__ "LocalProfileId" ProfileId.of_json in
+      let status = field_map json__ "Status" AgreementStatusType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let agreementId =
+        field_map_exn json__ "AgreementId" AgreementId.of_json in
+      make ?customDirectories ?enforceMessageSigning ?preserveFilename
+        ?accessRole ?baseDirectory ?partnerProfileId ?localProfileId ?status
+        ?description ~serverId ~agreementId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates some of the parameters for an existing agreement. Provide the AgreementId and the ServerId for the agreement that you want to update, along with the new values for the parameters to update. Specify either BaseDirectory or CustomDirectories, but not both. Specifying both causes the command to fail. If you update an agreement from using base directory to custom directories, the base directory is no longer used. Similarly, if you change from custom directories to a base directory, the custom directories are no longer used."]
+module UpdateAccessResponse =
+  struct
+    type nonrec t =
+      {
+      serverId: ServerId.t option
+        [@ocaml.doc
+          "The identifier of the server that the user is attached to."];
+      externalId: ExternalId.t option
+        [@ocaml.doc
+          "The external identifier of the group whose users have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Amazon Web ServicesTransfer Family."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceExistsException of ResourceExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serverId =
+      fun ?externalId -> fun () -> { serverId; externalId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceExistsException"));
+            ("details", (ResourceExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("ExternalId", (Option.map x.externalId ~f:ExternalId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let externalId =
-        ExternalId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExternalId") in
+        (Option.map ~f:ExternalId.of_xml) (Xml.child xml_arg0 "ExternalId") in
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
-      make ~externalId ~serverId ()
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?externalId ?serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      make ~externalId ~serverId ()
+    let of_json json__ =
+      let externalId = field_map json__ "ExternalId" ExternalId.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?externalId ?serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Allows you to update parameters for the access specified in the ServerID and ExternalID parameters."]
@@ -4879,26 +10893,26 @@ module UpdateAccessRequest =
       {
       homeDirectory: HomeDirectory.t option
         [@ocaml.doc
-          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory."];
+          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory. You can use the HomeDirectory parameter for HomeDirectoryType when it is set to either PATH or LOGICAL."];
       homeDirectoryType: HomeDirectoryType.t option
         [@ocaml.doc
-          "The type of landing directory (folder) you want your users' home directory to be when they log into the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If you set it LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or EFS paths visible to your users."];
+          "The type of landing directory (folder) that you want your users' home directory to be when they log in to the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or Amazon EFS path as is in their file transfer protocol clients. If you set it to LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or Amazon EFS paths visible to your users. If HomeDirectoryType is LOGICAL, you must provide mappings, using the HomeDirectoryMappings parameter. If, on the other hand, HomeDirectoryType is PATH, you provide an absolute path using the HomeDirectory parameter. You cannot have both HomeDirectory and HomeDirectoryMappings in your template."];
       homeDirectoryMappings: HomeDirectoryMappings.t option
         [@ocaml.doc
-          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Amazon Web Services Identity and Access Management (IAM) role provides access to paths in Target. This value can only be set when HomeDirectoryType is set to LOGICAL. The following is an Entry and Target pair example. \\[ \\{ \"Entry\": \"/directory1\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\] In most cases, you can use this value instead of the session policy to lock down your user to the designated home directory (\"chroot\"). To do this, you can set Entry to / and set Target to the HomeDirectory parameter value. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry:\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"];
+          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Identity and Access Management (IAM) role provides access to paths in Target. This value can be set only when HomeDirectoryType is set to LOGICAL. The following is an Entry and Target pair example. \\[ \\{ \"Entry\": \"/directory1\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\] In most cases, you can use this value instead of the session policy to lock down your user to the designated home directory (\"chroot\"). To do this, you can set Entry to / and set Target to the HomeDirectory parameter value. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"];
       policy: Policy.t option
         [@ocaml.doc
-          "A session policy for your user so that you can use the same IAM role across multiple users. This policy scopes down user access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}. This only applies when the domain of ServerId is S3. EFS does not use session policies. For session policies, Amazon Web Services Transfer Family stores the policy as a JSON blob, instead of the Amazon Resource Name (ARN) of the policy. You save the policy as a JSON blob and pass it in the Policy argument. For an example of a session policy, see Example session policy. For more information, see AssumeRole in the Amazon Web ServicesSecurity Token Service API Reference."];
+          "A session policy for your user so that you can use the same Identity and Access Management (IAM) role across multiple users. This policy scopes down a user's access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}. This policy applies only when the domain of ServerId is Amazon S3. Amazon EFS does not use session policies. For session policies, Transfer Family stores the policy as a JSON blob, instead of the Amazon Resource Name (ARN) of the policy. You save the policy as a JSON blob and pass it in the Policy argument. For an example of a session policy, see Example session policy. For more information, see AssumeRole in the Amazon Web ServicesSecurity Token Service API Reference."];
       posixProfile: PosixProfile.t option ;
       role: Role.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the IAM role that controls your users' access to your Amazon S3 bucket or EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that controls your users' access to your Amazon S3 bucket or Amazon EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or Amazon EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
       serverId: ServerId.t
         [@ocaml.doc
           "A system-assigned unique identifier for a server instance. This is the specific server that you added your user to."];
       externalId: ExternalId.t
         [@ocaml.doc
-          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Amazon Web Services Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regex used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
+          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regular expression used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
     let context_ = "UpdateAccessRequest"
     let make ?homeDirectory =
       fun ?homeDirectoryType ->
@@ -4959,18 +10973,19 @@ module UpdateAccessRequest =
       make ~externalId ~serverId ?role ?posixProfile ?policy
         ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      let role = field_map json "Role" Role.of_json in
-      let posixProfile = field_map json "PosixProfile" PosixProfile.of_json in
-      let policy = field_map json "Policy" Policy.of_json in
+    let of_json json__ =
+      let externalId = field_map_exn json__ "ExternalId" ExternalId.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let role = field_map json__ "Role" Role.of_json in
+      let posixProfile = field_map json__ "PosixProfile" PosixProfile.of_json in
+      let policy = field_map json__ "Policy" Policy.of_json in
       let homeDirectoryMappings =
-        field_map json "HomeDirectoryMappings" HomeDirectoryMappings.of_json in
+        field_map json__ "HomeDirectoryMappings"
+          HomeDirectoryMappings.of_json in
       let homeDirectoryType =
-        field_map json "HomeDirectoryType" HomeDirectoryType.of_json in
+        field_map json__ "HomeDirectoryType" HomeDirectoryType.of_json in
       let homeDirectory =
-        field_map json "HomeDirectory" HomeDirectory.of_json in
+        field_map json__ "HomeDirectory" HomeDirectory.of_json in
       make ~externalId ~serverId ?role ?posixProfile ?policy
         ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
     let to_json v = composed_to_json to_value v
@@ -4999,9 +11014,10 @@ module UntagResourceRequest =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tagKeys ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in make ~tagKeys ~arn ()
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let arn = field_map_exn json__ "Arn" Arn.of_json in
+      make ~tagKeys ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Detaches a key-value pair from a resource, as identified by its Amazon Resource Name (ARN). Resources are users, servers, roles, and other entities. No response is returned from this call."]
@@ -5010,14 +11026,15 @@ module TestIdentityProviderResponse =
     type nonrec t =
       {
       response: Response.t option
-        [@ocaml.doc "The response that is returned from your API Gateway."];
-      statusCode: StatusCode.t
         [@ocaml.doc
-          "The HTTP status code that is the response from your API Gateway."];
+          "The response that is returned from your API Gateway or your Lambda function."];
+      statusCode: StatusCode.t option
+        [@ocaml.doc
+          "The HTTP status code that is the response from your API Gateway or your Lambda function."];
       message: Message.t option
         [@ocaml.doc
           "A message that indicates whether the test was successful or not. If an empty string is returned, the most likely cause is that the authentication failed due to an incorrect username or password."];
-      url: Url.t
+      url: Url.t option
         [@ocaml.doc
           "The endpoint of the service used to authenticate a user."]}
     type nonrec error =
@@ -5026,11 +11043,10 @@ module TestIdentityProviderResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "TestIdentityProviderResponse"
     let make ?response =
-      fun ?message ->
-        fun ~statusCode ->
-          fun ~url -> fun () -> { response; message; statusCode; url }
+      fun ?statusCode ->
+        fun ?message ->
+          fun ?url -> fun () -> { response; statusCode; message; url }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -5084,30 +11100,29 @@ module TestIdentityProviderResponse =
     let to_value x =
       structure_to_value
         [("Response", (Option.map x.response ~f:Response.to_value));
-        ("StatusCode", (Some (StatusCode.to_value x.statusCode)));
+        ("StatusCode", (Option.map x.statusCode ~f:StatusCode.to_value));
         ("Message", (Option.map x.message ~f:Message.to_value));
-        ("Url", (Some (Url.to_value x.url)))]
+        ("Url", (Option.map x.url ~f:Url.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let url = Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Url") in
+      let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "Url") in
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       let statusCode =
-        StatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatusCode") in
+        (Option.map ~f:StatusCode.of_xml) (Xml.child xml_arg0 "StatusCode") in
       let response =
         (Option.map ~f:Response.of_xml) (Xml.child xml_arg0 "Response") in
-      make ~url ?message ~statusCode ?response ()
+      make ?url ?message ?statusCode ?response ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map_exn json "Url" Url.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let statusCode = field_map_exn json "StatusCode" StatusCode.of_json in
-      let response = field_map json "Response" Response.of_json in
-      make ~url ?message ~statusCode ?response ()
+    let of_json json__ =
+      let url = field_map json__ "Url" Url.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let statusCode = field_map json__ "StatusCode" StatusCode.of_json in
+      let response = field_map json__ "Response" Response.of_json in
+      make ?url ?message ?statusCode ?response ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "If the IdentityProviderType of a file transfer protocol-enabled server is AWS_DIRECTORY_SERVICE or API_Gateway, tests whether your identity provider is set up successfully. We highly recommend that you call this operation to test your authentication method as soon as you create your server. By doing so, you can troubleshoot issues with the identity provider integration to ensure that your users can successfully use the service. The ServerId and UserName parameters are required. The ServerProtocol, SourceIp, and UserPassword are all optional. You cannot use TestIdentityProvider if the IdentityProviderType of your server is SERVICE_MANAGED. If you provide any incorrect values for any parameters, the Response field is empty. If you provide a server ID for a server that uses service-managed users, you get an error: An error occurred (InvalidRequestException) when calling the TestIdentityProvider operation: s-server-ID not configured for external auth If you enter a Server ID for the --server-id parameter that does not identify an actual Transfer server, you receive the following error: An error occurred (ResourceNotFoundException) when calling the TestIdentityProvider operation: Unknown server"]
+       "If the IdentityProviderType of a file transfer protocol-enabled server is AWS_DIRECTORY_SERVICE or API_Gateway, tests whether your identity provider is set up successfully. We highly recommend that you call this operation to test your authentication method as soon as you create your server. By doing so, you can troubleshoot issues with the identity provider integration to ensure that your users can successfully use the service. The ServerId and UserName parameters are required. The ServerProtocol, SourceIp, and UserPassword are all optional. Note the following: You cannot use TestIdentityProvider if the IdentityProviderType of your server is SERVICE_MANAGED. TestIdentityProvider does not work with keys: it only accepts passwords. TestIdentityProvider can test the password operation for a custom Identity Provider that handles keys and passwords. If you provide any incorrect values for any parameters, the Response field is empty. If you provide a server ID for a server that uses service-managed users, you get an error: An error occurred (InvalidRequestException) when calling the TestIdentityProvider operation: s-server-ID not configured for external auth If you enter a Server ID for the --server-id parameter that does not identify an actual Transfer server, you receive the following error: An error occurred (ResourceNotFoundException) when calling the TestIdentityProvider operation: Unknown server. It is possible your sever is in a different region. You can specify a region by adding the following: --region region-code, such as --region us-east-2 to specify a server in US East (Ohio)."]
 module TestIdentityProviderRequest =
   struct
     type nonrec t =
@@ -5117,14 +11132,13 @@ module TestIdentityProviderRequest =
           "A system-assigned identifier for a specific server. That server's user authentication method is tested with a user name and password."];
       serverProtocol: Protocol.t option
         [@ocaml.doc
-          "The type of file transfer protocol to be tested. The available protocols are: Secure Shell (SSH) File Transfer Protocol (SFTP) File Transfer Protocol Secure (FTPS) File Transfer Protocol (FTP)"];
+          "The type of file transfer protocol to be tested. The available protocols are: Secure Shell (SSH) File Transfer Protocol (SFTP) File Transfer Protocol Secure (FTPS) File Transfer Protocol (FTP) Applicability Statement 2 (AS2)"];
       sourceIp: SourceIp.t option
-        [@ocaml.doc
-          "The source IP address of the user account to be tested."];
+        [@ocaml.doc "The source IP address of the account to be tested."];
       userName: UserName.t
-        [@ocaml.doc "The name of the user account to be tested."];
+        [@ocaml.doc "The name of the account to be tested."];
       userPassword: UserPassword.t option
-        [@ocaml.doc "The password of the user account to be tested."]}
+        [@ocaml.doc "The password of the account to be tested."]}
     let context_ = "TestIdentityProviderRequest"
     let make ?serverProtocol =
       fun ?sourceIp ->
@@ -5158,16 +11172,150 @@ module TestIdentityProviderRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ?userPassword ~userName ?sourceIp ?serverProtocol ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userPassword = field_map json "UserPassword" UserPassword.of_json in
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      let sourceIp = field_map json "SourceIp" SourceIp.of_json in
-      let serverProtocol = field_map json "ServerProtocol" Protocol.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+    let of_json json__ =
+      let userPassword = field_map json__ "UserPassword" UserPassword.of_json in
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
+      let sourceIp = field_map json__ "SourceIp" SourceIp.of_json in
+      let serverProtocol = field_map json__ "ServerProtocol" Protocol.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ?userPassword ~userName ?sourceIp ?serverProtocol ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "If the IdentityProviderType of a file transfer protocol-enabled server is AWS_DIRECTORY_SERVICE or API_Gateway, tests whether your identity provider is set up successfully. We highly recommend that you call this operation to test your authentication method as soon as you create your server. By doing so, you can troubleshoot issues with the identity provider integration to ensure that your users can successfully use the service. The ServerId and UserName parameters are required. The ServerProtocol, SourceIp, and UserPassword are all optional. You cannot use TestIdentityProvider if the IdentityProviderType of your server is SERVICE_MANAGED. If you provide any incorrect values for any parameters, the Response field is empty. If you provide a server ID for a server that uses service-managed users, you get an error: An error occurred (InvalidRequestException) when calling the TestIdentityProvider operation: s-server-ID not configured for external auth If you enter a Server ID for the --server-id parameter that does not identify an actual Transfer server, you receive the following error: An error occurred (ResourceNotFoundException) when calling the TestIdentityProvider operation: Unknown server"]
+       "If the IdentityProviderType of a file transfer protocol-enabled server is AWS_DIRECTORY_SERVICE or API_Gateway, tests whether your identity provider is set up successfully. We highly recommend that you call this operation to test your authentication method as soon as you create your server. By doing so, you can troubleshoot issues with the identity provider integration to ensure that your users can successfully use the service. The ServerId and UserName parameters are required. The ServerProtocol, SourceIp, and UserPassword are all optional. Note the following: You cannot use TestIdentityProvider if the IdentityProviderType of your server is SERVICE_MANAGED. TestIdentityProvider does not work with keys: it only accepts passwords. TestIdentityProvider can test the password operation for a custom Identity Provider that handles keys and passwords. If you provide any incorrect values for any parameters, the Response field is empty. If you provide a server ID for a server that uses service-managed users, you get an error: An error occurred (InvalidRequestException) when calling the TestIdentityProvider operation: s-server-ID not configured for external auth If you enter a Server ID for the --server-id parameter that does not identify an actual Transfer server, you receive the following error: An error occurred (ResourceNotFoundException) when calling the TestIdentityProvider operation: Unknown server. It is possible your sever is in a different region. You can specify a region by adding the following: --region region-code, such as --region us-east-2 to specify a server in US East (Ohio)."]
+module TestConnectionResponse =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t option
+        [@ocaml.doc
+          "Returns the identifier of the connector object that you are testing."];
+      status: Status.t option
+        [@ocaml.doc
+          "Returns OK for successful test, or ERROR if the test fails."];
+      statusMessage: Message.t option
+        [@ocaml.doc
+          "Returns Connection succeeded if the test is successful. Or, returns a descriptive error message if the test fails. The following list provides troubleshooting details, depending on the error message that you receive. Verify that your secret name aligns with the one in Transfer Role permissions. Verify the server URL in the connector configuration , and verify that the login credentials work successfully outside of the connector. Verify that the secret exists and is formatted correctly. Verify that the trusted host key in the connector configuration matches the ssh-keyscan output."];
+      sftpConnectionDetails: SftpConnectorConnectionDetails.t option
+        [@ocaml.doc "Structure that contains the SFTP connector host key."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?connectorId =
+      fun ?status ->
+        fun ?statusMessage ->
+          fun ?sftpConnectionDetails ->
+            fun () ->
+              { connectorId; status; statusMessage; sftpConnectionDetails }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Option.map x.connectorId ~f:ConnectorId.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("StatusMessage", (Option.map x.statusMessage ~f:Message.to_value));
+        ("SftpConnectionDetails",
+          (Option.map x.sftpConnectionDetails
+             ~f:SftpConnectorConnectionDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sftpConnectionDetails =
+        (Option.map ~f:SftpConnectorConnectionDetails.of_xml)
+          (Xml.child xml_arg0 "SftpConnectionDetails") in
+      let statusMessage =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let connectorId =
+        (Option.map ~f:ConnectorId.of_xml) (Xml.child xml_arg0 "ConnectorId") in
+      make ?sftpConnectionDetails ?statusMessage ?status ?connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sftpConnectionDetails =
+        field_map json__ "SftpConnectionDetails"
+          SftpConnectorConnectionDetails.of_json in
+      let statusMessage = field_map json__ "StatusMessage" Message.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let connectorId = field_map json__ "ConnectorId" ConnectorId.of_json in
+      make ?sftpConnectionDetails ?statusMessage ?status ?connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Tests whether your SFTP connector is set up successfully. We highly recommend that you call this operation to test your ability to transfer files between local Amazon Web Services storage and a trading partner's SFTP server."]
+module TestConnectionRequest =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t
+        [@ocaml.doc "The unique identifier for the connector."]}
+    let context_ = "TestConnectionRequest"
+    let make ~connectorId = fun () -> { connectorId }
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Some (ConnectorId.to_value x.connectorId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectorId =
+        ConnectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectorId") in
+      make ~connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectorId =
+        field_map_exn json__ "ConnectorId" ConnectorId.of_json in
+      make ~connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Tests whether your SFTP connector is set up successfully. We highly recommend that you call this operation to test your ability to transfer files between local Amazon Web Services storage and a trading partner's SFTP server."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -5177,7 +11325,7 @@ module TagResourceRequest =
           "An Amazon Resource Name (ARN) for a specific Amazon Web Services resource, such as a server, user, or role."];
       tags: Tags.t
         [@ocaml.doc
-          "Key-value pairs assigned to ARNs that you can use to group and search for resources by type. You can attach this metadata to user accounts for any purpose."]}
+          "Key-value pairs assigned to ARNs that you can use to group and search for resources by type. You can attach this metadata to resources (servers, users, workflows, and so on) for any purpose."]}
     let context_ = "TagResourceRequest"
     let make ~arn = fun ~tags -> fun () -> { arn; tags }
     let to_value x =
@@ -5191,9 +11339,9 @@ module TagResourceRequest =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tags ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in make ~tags ~arn ()
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let arn = field_map_exn json__ "Arn" Arn.of_json in make ~tags ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Attaches a key-value pair to a resource, as identified by its Amazon Resource Name (ARN). Resources are users, servers, roles, and other entities. There is no response returned from this call."]
@@ -5215,12 +11363,12 @@ module StopServerRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the state of a file transfer protocol-enabled server from ONLINE to OFFLINE. An OFFLINE server cannot accept and process file transfer jobs. Information tied to your server, such as server and user properties, are not affected by stopping your server. Stopping the server will not reduce or impact your file transfer protocol endpoint billing; you must delete the server to stop being billed. The state of STOPPING indicates that the server is in an intermediate state, either not fully able to respond, or not fully offline. The values of STOP_FAILED can indicate an error condition. No response is returned from this call."]
+       "Changes the state of a file transfer protocol-enabled server from ONLINE to OFFLINE. An OFFLINE server cannot accept and process file transfer jobs. Information tied to your server, such as server and user properties, are not affected by stopping your server. Stopping the server does not reduce or impact your file transfer protocol endpoint billing; you must delete the server to stop being billed. The state of STOPPING indicates that the server is in an intermediate state, either not fully able to respond, or not fully offline. The values of STOP_FAILED can indicate an error condition. No response is returned from this call."]
 module StartServerRequest =
   struct
     type nonrec t =
@@ -5239,12 +11387,600 @@ module StartServerRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Changes the state of a file transfer protocol-enabled server from OFFLINE to ONLINE. It has no impact on a server that is already ONLINE. An ONLINE server can accept and process file transfer jobs. The state of STARTING indicates that the server is in an intermediate state, either not fully able to respond, or not fully online. The values of START_FAILED can indicate an error condition. No response is returned from this call."]
+module StartRemoteMoveResponse =
+  struct
+    type nonrec t =
+      {
+      moveId: MoveId.t option
+        [@ocaml.doc
+          "Returns a unique identifier for the move/rename operation."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?moveId = fun () -> { moveId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MoveId", (Option.map x.moveId ~f:MoveId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let moveId =
+        (Option.map ~f:MoveId.of_xml) (Xml.child xml_arg0 "MoveId") in
+      make ?moveId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let moveId = field_map json__ "MoveId" MoveId.of_json in
+      make ?moveId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Moves or renames a file or directory on the remote SFTP server."]
+module StartRemoteMoveRequest =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t
+        [@ocaml.doc "The unique identifier for the connector."];
+      sourcePath: FilePath.t
+        [@ocaml.doc
+          "The absolute path of the file or directory to move or rename. You can only specify one path per call to this operation."];
+      targetPath: FilePath.t
+        [@ocaml.doc
+          "The absolute path for the target of the move/rename operation."]}
+    let context_ = "StartRemoteMoveRequest"
+    let make ~connectorId =
+      fun ~sourcePath ->
+        fun ~targetPath -> fun () -> { connectorId; sourcePath; targetPath }
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Some (ConnectorId.to_value x.connectorId)));
+        ("SourcePath", (Some (FilePath.to_value x.sourcePath)));
+        ("TargetPath", (Some (FilePath.to_value x.targetPath)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetPath =
+        FilePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetPath") in
+      let sourcePath =
+        FilePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourcePath") in
+      let connectorId =
+        ConnectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectorId") in
+      make ~targetPath ~sourcePath ~connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetPath = field_map_exn json__ "TargetPath" FilePath.of_json in
+      let sourcePath = field_map_exn json__ "SourcePath" FilePath.of_json in
+      let connectorId =
+        field_map_exn json__ "ConnectorId" ConnectorId.of_json in
+      make ~targetPath ~sourcePath ~connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Moves or renames a file or directory on the remote SFTP server."]
+module StartRemoteDeleteResponse =
+  struct
+    type nonrec t =
+      {
+      deleteId: DeleteId.t option
+        [@ocaml.doc "Returns a unique identifier for the delete operation."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?deleteId = fun () -> { deleteId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DeleteId", (Option.map x.deleteId ~f:DeleteId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deleteId =
+        (Option.map ~f:DeleteId.of_xml) (Xml.child xml_arg0 "DeleteId") in
+      make ?deleteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deleteId = field_map json__ "DeleteId" DeleteId.of_json in
+      make ?deleteId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a file or directory on the remote SFTP server."]
+module StartRemoteDeleteRequest =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t
+        [@ocaml.doc "The unique identifier for the connector."];
+      deletePath: FilePath.t
+        [@ocaml.doc
+          "The absolute path of the file or directory to delete. You can only specify one path per call to this operation."]}
+    let context_ = "StartRemoteDeleteRequest"
+    let make ~connectorId =
+      fun ~deletePath -> fun () -> { connectorId; deletePath }
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Some (ConnectorId.to_value x.connectorId)));
+        ("DeletePath", (Some (FilePath.to_value x.deletePath)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deletePath =
+        FilePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DeletePath") in
+      let connectorId =
+        ConnectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectorId") in
+      make ~deletePath ~connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deletePath = field_map_exn json__ "DeletePath" FilePath.of_json in
+      let connectorId =
+        field_map_exn json__ "ConnectorId" ConnectorId.of_json in
+      make ~deletePath ~connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a file or directory on the remote SFTP server."]
+module StartFileTransferResponse =
+  struct
+    type nonrec t =
+      {
+      transferId: TransferId.t option
+        [@ocaml.doc "Returns the unique identifier for the file transfer."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?transferId = fun () -> { transferId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TransferId", (Option.map x.transferId ~f:TransferId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let transferId =
+        (Option.map ~f:TransferId.of_xml) (Xml.child xml_arg0 "TransferId") in
+      make ?transferId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let transferId = field_map json__ "TransferId" TransferId.of_json in
+      make ?transferId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Begins a file transfer between local Amazon Web Services storage and a remote AS2 or SFTP server. For an AS2 connector, you specify the ConnectorId and one or more SendFilePaths to identify the files you want to transfer. For an SFTP connector, the file transfer can be either outbound or inbound. In both cases, you specify the ConnectorId. Depending on the direction of the transfer, you also specify the following items: If you are transferring file from a partner's SFTP server to Amazon Web Services storage, you specify one or more RetrieveFilePaths to identify the files you want to transfer, and a LocalDirectoryPath to specify the destination folder. If you are transferring file to a partner's SFTP server from Amazon Web Services storage, you specify one or more SendFilePaths to identify the files you want to transfer, and a RemoteDirectoryPath to specify the destination folder."]
+module StartFileTransferRequest =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t
+        [@ocaml.doc "The unique identifier for the connector."];
+      sendFilePaths: FilePaths.t option
+        [@ocaml.doc
+          "One or more source paths for the Amazon S3 storage. Each string represents a source file path for one outbound file transfer. For example, amzn-s3-demo-bucket/myfile.txt . Replace amzn-s3-demo-bucket with one of your actual buckets."];
+      retrieveFilePaths: FilePaths.t option
+        [@ocaml.doc
+          "One or more source paths for the partner's SFTP server. Each string represents a source file path for one inbound file transfer."];
+      localDirectoryPath: FilePath.t option
+        [@ocaml.doc
+          "For an inbound transfer, the LocaDirectoryPath specifies the destination for one or more files that are transferred from the partner's SFTP server."];
+      remoteDirectoryPath: FilePath.t option
+        [@ocaml.doc
+          "For an outbound transfer, the RemoteDirectoryPath specifies the destination for one or more files that are transferred to the partner's SFTP server. If you don't specify a RemoteDirectoryPath, the destination for transferred files is the SFTP user's home directory."];
+      customHttpHeaders: CustomHttpHeaders.t option
+        [@ocaml.doc
+          "An array of key-value pairs that represent custom HTTP headers to include in AS2 messages. These headers are added to the AS2 message when sending files to your trading partner."]}
+    let context_ = "StartFileTransferRequest"
+    let make ?sendFilePaths =
+      fun ?retrieveFilePaths ->
+        fun ?localDirectoryPath ->
+          fun ?remoteDirectoryPath ->
+            fun ?customHttpHeaders ->
+              fun ~connectorId ->
+                fun () ->
+                  {
+                    sendFilePaths;
+                    retrieveFilePaths;
+                    localDirectoryPath;
+                    remoteDirectoryPath;
+                    customHttpHeaders;
+                    connectorId
+                  }
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Some (ConnectorId.to_value x.connectorId)));
+        ("SendFilePaths", (Option.map x.sendFilePaths ~f:FilePaths.to_value));
+        ("RetrieveFilePaths",
+          (Option.map x.retrieveFilePaths ~f:FilePaths.to_value));
+        ("LocalDirectoryPath",
+          (Option.map x.localDirectoryPath ~f:FilePath.to_value));
+        ("RemoteDirectoryPath",
+          (Option.map x.remoteDirectoryPath ~f:FilePath.to_value));
+        ("CustomHttpHeaders",
+          (Option.map x.customHttpHeaders ~f:CustomHttpHeaders.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customHttpHeaders =
+        (Option.map ~f:CustomHttpHeaders.of_xml)
+          (Xml.child xml_arg0 "CustomHttpHeaders") in
+      let remoteDirectoryPath =
+        (Option.map ~f:FilePath.of_xml)
+          (Xml.child xml_arg0 "RemoteDirectoryPath") in
+      let localDirectoryPath =
+        (Option.map ~f:FilePath.of_xml)
+          (Xml.child xml_arg0 "LocalDirectoryPath") in
+      let retrieveFilePaths =
+        (Option.map ~f:FilePaths.of_xml)
+          (Xml.child xml_arg0 "RetrieveFilePaths") in
+      let sendFilePaths =
+        (Option.map ~f:FilePaths.of_xml) (Xml.child xml_arg0 "SendFilePaths") in
+      let connectorId =
+        ConnectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectorId") in
+      make ?customHttpHeaders ?remoteDirectoryPath ?localDirectoryPath
+        ?retrieveFilePaths ?sendFilePaths ~connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customHttpHeaders =
+        field_map json__ "CustomHttpHeaders" CustomHttpHeaders.of_json in
+      let remoteDirectoryPath =
+        field_map json__ "RemoteDirectoryPath" FilePath.of_json in
+      let localDirectoryPath =
+        field_map json__ "LocalDirectoryPath" FilePath.of_json in
+      let retrieveFilePaths =
+        field_map json__ "RetrieveFilePaths" FilePaths.of_json in
+      let sendFilePaths = field_map json__ "SendFilePaths" FilePaths.of_json in
+      let connectorId =
+        field_map_exn json__ "ConnectorId" ConnectorId.of_json in
+      make ?customHttpHeaders ?remoteDirectoryPath ?localDirectoryPath
+        ?retrieveFilePaths ?sendFilePaths ~connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Begins a file transfer between local Amazon Web Services storage and a remote AS2 or SFTP server. For an AS2 connector, you specify the ConnectorId and one or more SendFilePaths to identify the files you want to transfer. For an SFTP connector, the file transfer can be either outbound or inbound. In both cases, you specify the ConnectorId. Depending on the direction of the transfer, you also specify the following items: If you are transferring file from a partner's SFTP server to Amazon Web Services storage, you specify one or more RetrieveFilePaths to identify the files you want to transfer, and a LocalDirectoryPath to specify the destination folder. If you are transferring file to a partner's SFTP server from Amazon Web Services storage, you specify one or more SendFilePaths to identify the files you want to transfer, and a RemoteDirectoryPath to specify the destination folder."]
+module StartDirectoryListingResponse =
+  struct
+    type nonrec t =
+      {
+      listingId: ListingId.t option
+        [@ocaml.doc
+          "Returns a unique identifier for the directory listing call."];
+      outputFileName: OutputFileName.t option
+        [@ocaml.doc
+          "Returns the file name where the results are stored. This is a combination of the connector ID and the listing ID: <connector-id>-<listing-id>.json."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?listingId =
+      fun ?outputFileName -> fun () -> { listingId; outputFileName }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ListingId", (Option.map x.listingId ~f:ListingId.to_value));
+        ("OutputFileName",
+          (Option.map x.outputFileName ~f:OutputFileName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outputFileName =
+        (Option.map ~f:OutputFileName.of_xml)
+          (Xml.child xml_arg0 "OutputFileName") in
+      let listingId =
+        (Option.map ~f:ListingId.of_xml) (Xml.child xml_arg0 "ListingId") in
+      make ?outputFileName ?listingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outputFileName =
+        field_map json__ "OutputFileName" OutputFileName.of_json in
+      let listingId = field_map json__ "ListingId" ListingId.of_json in
+      make ?outputFileName ?listingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of the contents of a directory from a remote SFTP server. You specify the connector ID, the output path, and the remote directory path. You can also specify the optional MaxItems value to control the maximum number of items that are listed from the remote directory. This API returns a list of all files and directories in the remote directory (up to the maximum value), but does not return files or folders in sub-directories. That is, it only returns a list of files and directories one-level deep. After you receive the listing file, you can provide the files that you want to transfer to the RetrieveFilePaths parameter of the StartFileTransfer API call. The naming convention for the output file is connector-ID-listing-ID.json. The output file contains the following information: filePath: the complete path of a remote file, relative to the directory of the listing request for your SFTP connector on the remote server. modifiedTimestamp: the last time the file was modified, in UTC time format. This field is optional. If the remote file attributes don't contain a timestamp, it is omitted from the file listing. size: the size of the file, in bytes. This field is optional. If the remote file attributes don't contain a file size, it is omitted from the file listing. path: the complete path of a remote directory, relative to the directory of the listing request for your SFTP connector on the remote server. truncated: a flag indicating whether the list output contains all of the items contained in the remote directory or not. If your Truncated output value is true, you can increase the value provided in the optional max-items input attribute to be able to list more items (up to the maximum allowed list size of 200,000 items)."]
+module StartDirectoryListingRequest =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t
+        [@ocaml.doc "The unique identifier for the connector."];
+      remoteDirectoryPath: FilePath.t
+        [@ocaml.doc
+          "Specifies the directory on the remote SFTP server for which you want to list its contents."];
+      maxItems: MaxItems.t option
+        [@ocaml.doc
+          "An optional parameter where you can specify the maximum number of file/directory names to retrieve. The default value is 1,000."];
+      outputDirectoryPath: FilePath.t
+        [@ocaml.doc
+          "Specifies the path (bucket and prefix) in Amazon S3 storage to store the results of the directory listing."]}
+    let context_ = "StartDirectoryListingRequest"
+    let make ?maxItems =
+      fun ~connectorId ->
+        fun ~remoteDirectoryPath ->
+          fun ~outputDirectoryPath ->
+            fun () ->
+              {
+                maxItems;
+                connectorId;
+                remoteDirectoryPath;
+                outputDirectoryPath
+              }
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Some (ConnectorId.to_value x.connectorId)));
+        ("RemoteDirectoryPath",
+          (Some (FilePath.to_value x.remoteDirectoryPath)));
+        ("MaxItems", (Option.map x.maxItems ~f:MaxItems.to_value));
+        ("OutputDirectoryPath",
+          (Some (FilePath.to_value x.outputDirectoryPath)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outputDirectoryPath =
+        FilePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutputDirectoryPath") in
+      let maxItems =
+        (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
+      let remoteDirectoryPath =
+        FilePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RemoteDirectoryPath") in
+      let connectorId =
+        ConnectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectorId") in
+      make ~outputDirectoryPath ?maxItems ~remoteDirectoryPath ~connectorId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outputDirectoryPath =
+        field_map_exn json__ "OutputDirectoryPath" FilePath.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
+      let remoteDirectoryPath =
+        field_map_exn json__ "RemoteDirectoryPath" FilePath.of_json in
+      let connectorId =
+        field_map_exn json__ "ConnectorId" ConnectorId.of_json in
+      make ~outputDirectoryPath ?maxItems ~remoteDirectoryPath ~connectorId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of the contents of a directory from a remote SFTP server. You specify the connector ID, the output path, and the remote directory path. You can also specify the optional MaxItems value to control the maximum number of items that are listed from the remote directory. This API returns a list of all files and directories in the remote directory (up to the maximum value), but does not return files or folders in sub-directories. That is, it only returns a list of files and directories one-level deep. After you receive the listing file, you can provide the files that you want to transfer to the RetrieveFilePaths parameter of the StartFileTransfer API call. The naming convention for the output file is connector-ID-listing-ID.json. The output file contains the following information: filePath: the complete path of a remote file, relative to the directory of the listing request for your SFTP connector on the remote server. modifiedTimestamp: the last time the file was modified, in UTC time format. This field is optional. If the remote file attributes don't contain a timestamp, it is omitted from the file listing. size: the size of the file, in bytes. This field is optional. If the remote file attributes don't contain a file size, it is omitted from the file listing. path: the complete path of a remote directory, relative to the directory of the listing request for your SFTP connector on the remote server. truncated: a flag indicating whether the list output contains all of the items contained in the remote directory or not. If your Truncated output value is true, you can increase the value provided in the optional max-items input attribute to be able to list more items (up to the maximum allowed list size of 200,000 items)."]
 module SendWorkflowStepStateResponse =
   struct
     type nonrec t = unit
@@ -5373,11 +12109,12 @@ module SendWorkflowStepStateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~status ~token ~executionId ~workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" CustomStepStatus.of_json in
-      let token = field_map_exn json "Token" CallbackToken.of_json in
-      let executionId = field_map_exn json "ExecutionId" ExecutionId.of_json in
-      let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "Status" CustomStepStatus.of_json in
+      let token = field_map_exn json__ "Token" CallbackToken.of_json in
+      let executionId =
+        field_map_exn json__ "ExecutionId" ExecutionId.of_json in
+      let workflowId = field_map_exn json__ "WorkflowId" WorkflowId.of_json in
       make ~status ~token ~executionId ~workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5389,7 +12126,7 @@ module ListWorkflowsResponse =
       nextToken: NextToken.t option
         [@ocaml.doc
           "ListWorkflows returns the NextToken parameter in the output. You can then pass the NextToken parameter in a subsequent command to continue listing additional workflows."];
-      workflows: ListedWorkflows.t
+      workflows: ListedWorkflows.t option
         [@ocaml.doc
           "Returns the Arn, WorkflowId, and Description for each workflow."]}
     type nonrec error =
@@ -5398,9 +12135,8 @@ module ListWorkflowsResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListWorkflowsResponse"
     let make ?nextToken =
-      fun ~workflows -> fun () -> { nextToken; workflows }
+      fun ?workflows -> fun () -> { nextToken; workflows }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -5454,28 +12190,29 @@ module ListWorkflowsResponse =
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("Workflows", (Some (ListedWorkflows.to_value x.workflows)))]
+        ("Workflows", (Option.map x.workflows ~f:ListedWorkflows.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workflows =
-        ListedWorkflows.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Workflows") in
+        (Option.map ~f:ListedWorkflows.of_xml)
+          (Xml.child xml_arg0 "Workflows") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ~workflows ?nextToken ()
+      make ?workflows ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workflows = field_map_exn json "Workflows" ListedWorkflows.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ~workflows ?nextToken ()
+    let of_json json__ =
+      let workflows = field_map json__ "Workflows" ListedWorkflows.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?workflows ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all of your workflows."]
+  end[@@ocaml.doc
+       "Lists all workflows associated with your Amazon Web Services account for your current region."]
 module ListWorkflowsRequest =
   struct
     type nonrec t =
       {
       maxResults: MaxResults.t option
-        [@ocaml.doc "Specifies the maximum number of workflows to return."];
+        [@ocaml.doc "The maximum number of items to return."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "ListWorkflows returns the NextToken parameter in the output. You can then pass the NextToken parameter in a subsequent command to continue listing additional workflows."]}
@@ -5493,12 +12230,127 @@ module ListWorkflowsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all of your workflows."]
+  end[@@ocaml.doc
+       "Lists all workflows associated with your Amazon Web Services account for your current region."]
+module ListWebAppsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Provide this value for the NextToken parameter in a subsequent command to continue listing additional web apps."];
+      webApps: ListedWebApps.t option
+        [@ocaml.doc
+          "Returns, for each listed web app, a structure that contains details for the web app."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken = fun ?webApps -> fun () -> { nextToken; webApps }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("WebApps", (Option.map x.webApps ~f:ListedWebApps.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webApps =
+        (Option.map ~f:ListedWebApps.of_xml) (Xml.child xml_arg0 "WebApps") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?webApps ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webApps = field_map json__ "WebApps" ListedWebApps.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?webApps ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all web apps associated with your Amazon Web Services account for your current region. The response includes the endpoint type for each web app, showing whether it is publicly accessible or VPC hosted. For more information about using VPC endpoints with Transfer Family, see Create a Transfer Family web app in a VPC."]
+module ListWebAppsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of items to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Returns the NextToken parameter in the output. You can then pass the NextToken parameter in a subsequent command to continue listing additional web apps."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all web apps associated with your Amazon Web Services account for your current region. The response includes the endpoint type for each web app, showing whether it is publicly accessible or VPC hosted. For more information about using VPC endpoints with Transfer Family, see Create a Transfer Family web app in a VPC."]
 module ListUsersResponse =
   struct
     type nonrec t =
@@ -5506,12 +12358,12 @@ module ListUsersResponse =
       nextToken: NextToken.t option
         [@ocaml.doc
           "When you can get additional results from the ListUsers call, a NextToken parameter is returned in the output. You can then pass in a subsequent command to the NextToken parameter to continue listing additional users."];
-      serverId: ServerId.t
+      serverId: ServerId.t option
         [@ocaml.doc
           "A system-assigned unique identifier for a server that the users are assigned to."];
-      users: ListedUsers.t
+      users: ListedUsers.t option
         [@ocaml.doc
-          "Returns the user accounts and their properties for the ServerId value that you specify."]}
+          "Returns the Transfer Family users and their properties for the ServerId value that you specify."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
@@ -5519,9 +12371,8 @@ module ListUsersResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListUsersResponse"
     let make ?nextToken =
-      fun ~serverId -> fun ~users -> fun () -> { nextToken; serverId; users }
+      fun ?serverId -> fun ?users -> fun () -> { nextToken; serverId; users }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -5583,23 +12434,23 @@ module ListUsersResponse =
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("ServerId", (Some (ServerId.to_value x.serverId)));
-        ("Users", (Some (ListedUsers.to_value x.users)))]
+        ("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("Users", (Option.map x.users ~f:ListedUsers.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let users =
-        ListedUsers.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Users") in
+        (Option.map ~f:ListedUsers.of_xml) (Xml.child xml_arg0 "Users") in
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ~users ~serverId ?nextToken ()
+      make ?users ?serverId ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let users = field_map_exn json "Users" ListedUsers.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ~users ~serverId ?nextToken ()
+    let of_json json__ =
+      let users = field_map json__ "Users" ListedUsers.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?users ?serverId ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the users for a file transfer protocol-enabled server that you specify by passing the ServerId parameter."]
@@ -5612,7 +12463,7 @@ module ListUsersRequest =
           "Specifies the number of users to return as a response to the ListUsers request."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "When you can get additional results from the ListUsers call, a NextToken parameter is returned in the output. You can then pass in a subsequent command to the NextToken parameter to continue listing additional users."];
+          "If there are additional results from the ListUsers call, a NextToken parameter is returned in the output. You can then pass the NextToken to a subsequent ListUsers command, to continue listing additional users."];
       serverId: ServerId.t
         [@ocaml.doc
           "A system-assigned unique identifier for a server that has users assigned to it."]}
@@ -5635,10 +12486,10 @@ module ListUsersRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~serverId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~serverId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5726,10 +12577,10 @@ module ListTagsForResourceResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?nextToken ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
       make ?tags ?nextToken ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5764,10 +12615,10 @@ module ListTagsForResourceRequest =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?nextToken ?maxResults ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let arn = field_map_exn json__ "Arn" Arn.of_json in
       make ?nextToken ?maxResults ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5779,7 +12630,7 @@ module ListServersResponse =
       nextToken: NextToken.t option
         [@ocaml.doc
           "When you can get additional results from the ListServers operation, a NextToken parameter is returned in the output. In a following command, you can pass in the NextToken parameter to continue listing additional servers."];
-      servers: ListedServers.t
+      servers: ListedServers.t option
         [@ocaml.doc "An array of servers that were listed."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
@@ -5787,8 +12638,7 @@ module ListServersResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServersResponse"
-    let make ?nextToken = fun ~servers -> fun () -> { nextToken; servers }
+    let make ?nextToken = fun ?servers -> fun () -> { nextToken; servers }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -5842,20 +12692,19 @@ module ListServersResponse =
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("Servers", (Some (ListedServers.to_value x.servers)))]
+        ("Servers", (Option.map x.servers ~f:ListedServers.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let servers =
-        ListedServers.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Servers") in
+        (Option.map ~f:ListedServers.of_xml) (Xml.child xml_arg0 "Servers") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ~servers ?nextToken ()
+      make ?servers ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let servers = field_map_exn json "Servers" ListedServers.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ~servers ?nextToken ()
+    let of_json json__ =
+      let servers = field_map json__ "Servers" ListedServers.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?servers ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the file transfer protocol-enabled servers that are associated with your Amazon Web Services account."]
@@ -5883,9 +12732,9 @@ module ListServersRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5897,7 +12746,7 @@ module ListSecurityPoliciesResponse =
       nextToken: NextToken.t option
         [@ocaml.doc
           "When you can get additional results from the ListSecurityPolicies operation, a NextToken parameter is returned in the output. In a following command, you can pass in the NextToken parameter to continue listing security policies."];
-      securityPolicyNames: SecurityPolicyNames.t
+      securityPolicyNames: SecurityPolicyNames.t option
         [@ocaml.doc "An array of security policies that were listed."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
@@ -5905,9 +12754,8 @@ module ListSecurityPoliciesResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListSecurityPoliciesResponse"
     let make ?nextToken =
-      fun ~securityPolicyNames ->
+      fun ?securityPolicyNames ->
         fun () -> { nextToken; securityPolicyNames }
     let error_of_json name json =
       match name with
@@ -5963,24 +12811,24 @@ module ListSecurityPoliciesResponse =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("SecurityPolicyNames",
-          (Some (SecurityPolicyNames.to_value x.securityPolicyNames)))]
+          (Option.map x.securityPolicyNames ~f:SecurityPolicyNames.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let securityPolicyNames =
-        SecurityPolicyNames.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecurityPolicyNames") in
+        (Option.map ~f:SecurityPolicyNames.of_xml)
+          (Xml.child xml_arg0 "SecurityPolicyNames") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ~securityPolicyNames ?nextToken ()
+      make ?securityPolicyNames ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityPolicyNames =
-        field_map_exn json "SecurityPolicyNames" SecurityPolicyNames.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ~securityPolicyNames ?nextToken ()
+        field_map json__ "SecurityPolicyNames" SecurityPolicyNames.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?securityPolicyNames ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the security policies that are attached to your file transfer protocol-enabled servers."]
+       "Lists the security policies that are attached to your servers and SFTP connectors. For more information about security policies, see Working with security policies for servers or Working with security policies for SFTP connectors."]
 module ListSecurityPoliciesRequest =
   struct
     type nonrec t =
@@ -6005,25 +12853,23 @@ module ListSecurityPoliciesRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the security policies that are attached to your file transfer protocol-enabled servers."]
-module ListExecutionsResponse =
+       "Lists the security policies that are attached to your servers and SFTP connectors. For more information about security policies, see Working with security policies for servers or Working with security policies for SFTP connectors."]
+module ListProfilesResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "ListExecutions returns the NextToken parameter in the output. You can then pass the NextToken parameter in a subsequent command to continue listing additional executions."];
-      workflowId: WorkflowId.t
-        [@ocaml.doc "A unique identifier for the workflow."];
-      executions: ListedExecutions.t
+          "Returns a token that you can use to call ListProfiles again and receive additional results, if there are any."];
+      profiles: ListedProfiles.t option
         [@ocaml.doc
-          "Returns the details for each execution. NextToken: returned from a call to several APIs, you can use pass it to a subsequent command to continue listing additional executions. StartTime: timestamp indicating when the execution began. Executions: details of the execution, including the execution ID, initial file location, and Service metadata. Status: one of the following values: IN_PROGRESS, COMPLETED, EXCEPTION, HANDLING_EXEPTION."]}
+          "Returns an array, where each item contains the details of a profile."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
@@ -6031,10 +12877,7 @@ module ListExecutionsResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListExecutionsResponse"
-    let make ?nextToken =
-      fun ~workflowId ->
-        fun ~executions -> fun () -> { nextToken; workflowId; executions }
+    let make ?nextToken = fun ?profiles -> fun () -> { nextToken; profiles }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -6096,37 +12939,461 @@ module ListExecutionsResponse =
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("WorkflowId", (Some (WorkflowId.to_value x.workflowId)));
-        ("Executions", (Some (ListedExecutions.to_value x.executions)))]
+        ("Profiles", (Option.map x.profiles ~f:ListedProfiles.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profiles =
+        (Option.map ~f:ListedProfiles.of_xml) (Xml.child xml_arg0 "Profiles") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?profiles ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profiles = field_map json__ "Profiles" ListedProfiles.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?profiles ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the profiles for your system. If you want to limit the results to a certain number, supply a value for the MaxResults parameter. If you ran the command previously and received a value for NextToken, you can supply that value to continue listing profiles from where you left off."]
+module ListProfilesRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of items to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "When there are additional results that were not returned, a NextToken parameter is returned. You can use that value for a subsequent call to ListProfiles to continue listing results."];
+      profileType: ProfileType.t option
+        [@ocaml.doc
+          "Indicates whether to list only LOCAL type profiles or only PARTNER type profiles. If not supplied in the request, the command lists all types of profiles."]}
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?profileType -> fun () -> { maxResults; nextToken; profileType }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("ProfileType", (Option.map x.profileType ~f:ProfileType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileType =
+        (Option.map ~f:ProfileType.of_xml) (Xml.child xml_arg0 "ProfileType") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ?profileType ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileType = field_map json__ "ProfileType" ProfileType.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?profileType ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the profiles for your system. If you want to limit the results to a certain number, supply a value for the MaxResults parameter. If you ran the command previously and received a value for NextToken, you can supply that value to continue listing profiles from where you left off."]
+module ListHostKeysResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Returns a token that you can use to call ListHostKeys again and receive additional results, if there are any."];
+      serverId: ServerId.t option
+        [@ocaml.doc
+          "Returns the server identifier that contains the listed host keys."];
+      hostKeys: ListedHostKeys.t option
+        [@ocaml.doc
+          "Returns an array, where each item contains the details of a host key."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?serverId ->
+        fun ?hostKeys -> fun () -> { nextToken; serverId; hostKeys }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("HostKeys", (Option.map x.hostKeys ~f:ListedHostKeys.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hostKeys =
+        (Option.map ~f:ListedHostKeys.of_xml) (Xml.child xml_arg0 "HostKeys") in
+      let serverId =
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?hostKeys ?serverId ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hostKeys = field_map json__ "HostKeys" ListedHostKeys.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?hostKeys ?serverId ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of host keys for the server that's specified by the ServerId parameter."]
+module ListHostKeysRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of items to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "When there are additional results that were not returned, a NextToken parameter is returned. You can use that value for a subsequent call to ListHostKeys to continue listing results."];
+      serverId: ServerId.t
+        [@ocaml.doc
+          "The identifier of the server that contains the host keys that you want to view."]}
+    let context_ = "ListHostKeysRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~serverId -> fun () -> { maxResults; nextToken; serverId }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("ServerId", (Some (ServerId.to_value x.serverId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serverId =
+        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ~serverId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ~serverId ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of host keys for the server that's specified by the ServerId parameter."]
+module ListFileTransferResultsResponse =
+  struct
+    type nonrec t =
+      {
+      fileTransferResults: ConnectorFileTransferResults.t option
+        [@ocaml.doc
+          "Returns the details for the files transferred in the transfer identified by the TransferId and ConnectorId specified. FilePath: the filename and path to where the file was sent to or retrieved from. StatusCode: current status for the transfer. The status returned is one of the following values:QUEUED, IN_PROGRESS, COMPLETED, or FAILED FailureCode: for transfers that fail, this parameter contains a code indicating the reason. For example, RETRIEVE_FILE_NOT_FOUND FailureMessage: for transfers that fail, this parameter describes the reason for the failure."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Returns a token that you can use to call ListFileTransferResults again and receive additional results, if there are any (against the same TransferId."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fileTransferResults =
+      fun ?nextToken -> fun () -> { fileTransferResults; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FileTransferResults",
+           (Option.map x.fileTransferResults
+              ~f:ConnectorFileTransferResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let fileTransferResults =
+        (Option.map ~f:ConnectorFileTransferResults.of_xml)
+          (Xml.child xml_arg0 "FileTransferResults") in
+      make ?nextToken ?fileTransferResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let fileTransferResults =
+        field_map json__ "FileTransferResults"
+          ConnectorFileTransferResults.of_json in
+      make ?nextToken ?fileTransferResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns real-time updates and detailed information on the status of each individual file being transferred in a specific file transfer operation. You specify the file transfer by providing its ConnectorId and its TransferId. File transfer results are available up to 7 days after an operation has been requested."]
+module ListFileTransferResultsRequest =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t
+        [@ocaml.doc
+          "A unique identifier for a connector. This value should match the value supplied to the corresponding StartFileTransfer call."];
+      transferId: TransferId.t
+        [@ocaml.doc
+          "A unique identifier for a file transfer. This value should match the value supplied to the corresponding StartFileTransfer call."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If there are more file details than returned in this call, use this value for a subsequent call to ListFileTransferResults to retrieve them."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of files to return in a single page. Note that currently you can specify a maximum of 10 file paths in a single StartFileTransfer operation. Thus, the maximum number of file transfer results that can be returned in a single page is 10."]}
+    let context_ = "ListFileTransferResultsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~connectorId ->
+          fun ~transferId ->
+            fun () -> { nextToken; maxResults; connectorId; transferId }
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Some (ConnectorId.to_value x.connectorId)));
+        ("TransferId", (Some (TransferId.to_value x.transferId)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let transferId =
+        TransferId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TransferId") in
+      let connectorId =
+        ConnectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectorId") in
+      make ?maxResults ?nextToken ~transferId ~connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let transferId = field_map_exn json__ "TransferId" TransferId.of_json in
+      let connectorId =
+        field_map_exn json__ "ConnectorId" ConnectorId.of_json in
+      make ?maxResults ?nextToken ~transferId ~connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns real-time updates and detailed information on the status of each individual file being transferred in a specific file transfer operation. You specify the file transfer by providing its ConnectorId and its TransferId. File transfer results are available up to 7 days after an operation has been requested."]
+module ListExecutionsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "ListExecutions returns the NextToken parameter in the output. You can then pass the NextToken parameter in a subsequent command to continue listing additional executions."];
+      workflowId: WorkflowId.t option
+        [@ocaml.doc "A unique identifier for the workflow."];
+      executions: ListedExecutions.t option
+        [@ocaml.doc
+          "Returns the details for each execution, in a ListedExecution array."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?workflowId ->
+        fun ?executions -> fun () -> { nextToken; workflowId; executions }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("WorkflowId", (Option.map x.workflowId ~f:WorkflowId.to_value));
+        ("Executions",
+          (Option.map x.executions ~f:ListedExecutions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let executions =
-        ListedExecutions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Executions") in
+        (Option.map ~f:ListedExecutions.of_xml)
+          (Xml.child xml_arg0 "Executions") in
       let workflowId =
-        WorkflowId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
+        (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "WorkflowId") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ~executions ~workflowId ?nextToken ()
+      make ?executions ?workflowId ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let executions =
-        field_map_exn json "Executions" ListedExecutions.of_json in
-      let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ~executions ~workflowId ?nextToken ()
+    let of_json json__ =
+      let executions = field_map json__ "Executions" ListedExecutions.of_json in
+      let workflowId = field_map json__ "WorkflowId" WorkflowId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?executions ?workflowId ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all executions for the specified workflow."]
+  end[@@ocaml.doc
+       "Lists all in-progress executions for the specified workflow. If the specified workflow ID cannot be found, ListExecutions returns a ResourceNotFound exception."]
 module ListExecutionsRequest =
   struct
     type nonrec t =
       {
       maxResults: MaxResults.t option
-        [@ocaml.doc "Specifies the aximum number of executions to return."];
+        [@ocaml.doc "The maximum number of items to return."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "ListExecutions returns the NextToken parameter in the output. You can then pass the NextToken parameter in a subsequent command to continue listing additional executions. This is useful for pagination, for instance. If you have 100 executions for a workflow, you might only want to list first 10. If so, callthe API by specifing the max-results: aws transfer list-executions --max-results 10 This returns details for the first 10 executions, as well as the pointer (NextToken) to the eleventh execution. You can now call the API again, suppling the NextToken value you received: aws transfer list-executions --max-results 10 --next-token $somePointerReturnedFromPreviousListResult This call returns the next 10 executions, the 11th through the 20th. You can then repeat the call until the details for all 100 executions have been returned."];
+          "ListExecutions returns the NextToken parameter in the output. You can then pass the NextToken parameter in a subsequent command to continue listing additional executions. This is useful for pagination, for instance. If you have 100 executions for a workflow, you might only want to list first 10. If so, call the API by specifying the max-results: aws transfer list-executions --max-results 10 This returns details for the first 10 executions, as well as the pointer (NextToken) to the eleventh execution. You can now call the API again, supplying the NextToken value you received: aws transfer list-executions --max-results 10 --next-token $somePointerReturnedFromPreviousListResult This call returns the next 10 executions, the 11th through the 20th. You can then repeat the call until the details for all 100 executions have been returned."];
       workflowId: WorkflowId.t
         [@ocaml.doc "A unique identifier for the workflow."]}
     let context_ = "ListExecutionsRequest"
@@ -6149,26 +13416,24 @@ module ListExecutionsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~workflowId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let workflowId = field_map_exn json__ "WorkflowId" WorkflowId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~workflowId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all executions for the specified workflow."]
-module ListAccessesResponse =
+  end[@@ocaml.doc
+       "Lists all in-progress executions for the specified workflow. If the specified workflow ID cannot be found, ListExecutions returns a ResourceNotFound exception."]
+module ListConnectorsResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "When you can get additional results from the ListAccesses call, a NextToken parameter is returned in the output. You can then pass in a subsequent command to the NextToken parameter to continue listing additional accesses."];
-      serverId: ServerId.t
+          "Returns a token that you can use to call ListConnectors again and receive additional results, if there are any."];
+      connectors: ListedConnectors.t option
         [@ocaml.doc
-          "A system-assigned unique identifier for a server that has users assigned to it."];
-      accesses: ListedAccesses.t
-        [@ocaml.doc
-          "Returns the accesses and their properties for the ServerId value that you specify."]}
+          "Returns an array, where each item contains the details of a connector."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
@@ -6176,10 +13441,8 @@ module ListAccessesResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAccessesResponse"
     let make ?nextToken =
-      fun ~serverId ->
-        fun ~accesses -> fun () -> { nextToken; serverId; accesses }
+      fun ?connectors -> fun () -> { nextToken; connectors }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -6241,24 +13504,419 @@ module ListAccessesResponse =
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("ServerId", (Some (ServerId.to_value x.serverId)));
-        ("Accesses", (Some (ListedAccesses.to_value x.accesses)))]
+        ("Connectors",
+          (Option.map x.connectors ~f:ListedConnectors.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let accesses =
-        ListedAccesses.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Accesses") in
+      let connectors =
+        (Option.map ~f:ListedConnectors.of_xml)
+          (Xml.child xml_arg0 "Connectors") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?connectors ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectors = field_map json__ "Connectors" ListedConnectors.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?connectors ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the connectors for the specified Region."]
+module ListConnectorsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of items to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "When you can get additional results from the ListConnectors call, a NextToken parameter is returned in the output. You can then pass in a subsequent command to the NextToken parameter to continue listing additional connectors."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the connectors for the specified Region."]
+module ListCertificatesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Returns the next token, which you can use to list the next certificate."];
+      certificates: ListedCertificates.t option
+        [@ocaml.doc
+          "Returns an array of the certificates that are specified in the ListCertificates call."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?certificates -> fun () -> { nextToken; certificates }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("Certificates",
+          (Option.map x.certificates ~f:ListedCertificates.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificates =
+        (Option.map ~f:ListedCertificates.of_xml)
+          (Xml.child xml_arg0 "Certificates") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?certificates ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificates =
+        field_map json__ "Certificates" ListedCertificates.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?certificates ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the current certificates that have been imported into Transfer Family. If you want to limit the results to a certain number, supply a value for the MaxResults parameter. If you ran the command previously and received a value for the NextToken parameter, you can supply that value to continue listing certificates from where you left off."]
+module ListCertificatesRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of items to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "When you can get additional results from the ListCertificates call, a NextToken parameter is returned in the output. You can then pass in a subsequent command to the NextToken parameter to continue listing additional certificates."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the current certificates that have been imported into Transfer Family. If you want to limit the results to a certain number, supply a value for the MaxResults parameter. If you ran the command previously and received a value for the NextToken parameter, you can supply that value to continue listing certificates from where you left off."]
+module ListAgreementsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Returns a token that you can use to call ListAgreements again and receive additional results, if there are any."];
+      agreements: ListedAgreements.t option
+        [@ocaml.doc
+          "Returns an array, where each item contains the details of an agreement."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?agreements -> fun () -> { nextToken; agreements }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("Agreements",
+          (Option.map x.agreements ~f:ListedAgreements.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let agreements =
+        (Option.map ~f:ListedAgreements.of_xml)
+          (Xml.child xml_arg0 "Agreements") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?agreements ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agreements = field_map json__ "Agreements" ListedAgreements.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?agreements ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the agreements for the server that's identified by the ServerId that you supply. If you want to limit the results to a certain number, supply a value for the MaxResults parameter. If you ran the command previously and received a value for NextToken, you can supply that value to continue listing agreements from where you left off."]
+module ListAgreementsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of items to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "When you can get additional results from the ListAgreements call, a NextToken parameter is returned in the output. You can then pass in a subsequent command to the NextToken parameter to continue listing additional agreements."];
+      serverId: ServerId.t
+        [@ocaml.doc
+          "The identifier of the server for which you want a list of agreements."]}
+    let context_ = "ListAgreementsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~serverId -> fun () -> { maxResults; nextToken; serverId }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("ServerId", (Some (ServerId.to_value x.serverId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ~accesses ~serverId ?nextToken ()
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ~serverId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accesses = field_map_exn json "Accesses" ListedAccesses.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ~accesses ~serverId ?nextToken ()
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ~serverId ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the agreements for the server that's identified by the ServerId that you supply. If you want to limit the results to a certain number, supply a value for the MaxResults parameter. If you ran the command previously and received a value for NextToken, you can supply that value to continue listing agreements from where you left off."]
+module ListAccessesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "When you can get additional results from the ListAccesses call, a NextToken parameter is returned in the output. You can then pass in a subsequent command to the NextToken parameter to continue listing additional accesses."];
+      serverId: ServerId.t option
+        [@ocaml.doc
+          "A system-assigned unique identifier for a server that has users assigned to it."];
+      accesses: ListedAccesses.t option
+        [@ocaml.doc
+          "Returns the accesses and their properties for the ServerId value that you specify."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?serverId ->
+        fun ?accesses -> fun () -> { nextToken; serverId; accesses }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("Accesses", (Option.map x.accesses ~f:ListedAccesses.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accesses =
+        (Option.map ~f:ListedAccesses.of_xml) (Xml.child xml_arg0 "Accesses") in
+      let serverId =
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?accesses ?serverId ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accesses = field_map json__ "Accesses" ListedAccesses.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?accesses ?serverId ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the details for all the accesses you have on your server."]
@@ -6267,7 +13925,7 @@ module ListAccessesRequest =
     type nonrec t =
       {
       maxResults: MaxResults.t option
-        [@ocaml.doc "Specifies the maximum number of access SIDs to return."];
+        [@ocaml.doc "The maximum number of items to return."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "When you can get additional results from the ListAccesses call, a NextToken parameter is returned in the output. You can then pass in a subsequent command to the NextToken parameter to continue listing additional accesses."];
@@ -6293,10 +13951,10 @@ module ListAccessesRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~serverId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~serverId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6305,12 +13963,12 @@ module ImportSshPublicKeyResponse =
   struct
     type nonrec t =
       {
-      serverId: ServerId.t
+      serverId: ServerId.t option
         [@ocaml.doc "A system-assigned unique identifier for a server."];
-      sshPublicKeyId: SshPublicKeyId.t
+      sshPublicKeyId: SshPublicKeyId.t option
         [@ocaml.doc
           "The name given to a public key by the system that was imported."];
-      userName: UserName.t
+      userName: UserName.t option
         [@ocaml.doc
           "A user name assigned to the ServerID value that you specified."]}
     type nonrec error =
@@ -6321,10 +13979,9 @@ module ImportSshPublicKeyResponse =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ImportSshPublicKeyResponse"
-    let make ~serverId =
-      fun ~sshPublicKeyId ->
-        fun ~userName -> fun () -> { serverId; sshPublicKeyId; userName }
+    let make ?serverId =
+      fun ?sshPublicKeyId ->
+        fun ?userName -> fun () -> { serverId; sshPublicKeyId; userName }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -6393,26 +14050,27 @@ module ImportSshPublicKeyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ServerId", (Some (ServerId.to_value x.serverId)));
-        ("SshPublicKeyId", (Some (SshPublicKeyId.to_value x.sshPublicKeyId)));
-        ("UserName", (Some (UserName.to_value x.userName)))]
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("SshPublicKeyId",
+          (Option.map x.sshPublicKeyId ~f:SshPublicKeyId.to_value));
+        ("UserName", (Option.map x.userName ~f:UserName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userName =
-        UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
+        (Option.map ~f:UserName.of_xml) (Xml.child xml_arg0 "UserName") in
       let sshPublicKeyId =
-        SshPublicKeyId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SshPublicKeyId") in
+        (Option.map ~f:SshPublicKeyId.of_xml)
+          (Xml.child xml_arg0 "SshPublicKeyId") in
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
-      make ~userName ~sshPublicKeyId ~serverId ()
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?userName ?sshPublicKeyId ?serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
+    let of_json json__ =
+      let userName = field_map json__ "UserName" UserName.of_json in
       let sshPublicKeyId =
-        field_map_exn json "SshPublicKeyId" SshPublicKeyId.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      make ~userName ~sshPublicKeyId ~serverId ()
+        field_map json__ "SshPublicKeyId" SshPublicKeyId.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?userName ?sshPublicKeyId ?serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Identifies the user, the server they belong to, and the identifier of the SSH public key associated with that user. A user can have more than one key on each server that they are associated with."]
@@ -6423,10 +14081,11 @@ module ImportSshPublicKeyRequest =
       serverId: ServerId.t
         [@ocaml.doc "A system-assigned unique identifier for a server."];
       sshPublicKeyBody: SshPublicKeyBody.t
-        [@ocaml.doc "The public key portion of an SSH key pair."];
+        [@ocaml.doc
+          "The public key portion of an SSH key pair. Transfer Family accepts RSA, ECDSA, and ED25519 keys."];
       userName: UserName.t
         [@ocaml.doc
-          "The name of the user account that is assigned to one or more servers."]}
+          "The name of the Transfer Family user that is assigned to one or more servers."]}
     let context_ = "ImportSshPublicKeyRequest"
     let make ~serverId =
       fun ~sshPublicKeyBody ->
@@ -6448,30 +14107,183 @@ module ImportSshPublicKeyRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~sshPublicKeyBody ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
+    let of_json json__ =
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
       let sshPublicKeyBody =
-        field_map_exn json "SshPublicKeyBody" SshPublicKeyBody.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+        field_map_exn json__ "SshPublicKeyBody" SshPublicKeyBody.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~userName ~sshPublicKeyBody ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a Secure Shell (SSH) public key to a user account identified by a UserName value assigned to the specific file transfer protocol-enabled server, identified by ServerId. The response returns the UserName value, the ServerId value, and the name of the SshPublicKeyId."]
-module DescribeWorkflowResponse =
+       "Adds a Secure Shell (SSH) public key to a Transfer Family user identified by a UserName value assigned to the specific file transfer protocol-enabled server, identified by ServerId. The response returns the UserName value, the ServerId value, and the name of the SshPublicKeyId."]
+module ImportHostKeyResponse =
   struct
     type nonrec t =
       {
-      workflow: DescribedWorkflow.t
+      serverId: ServerId.t option
         [@ocaml.doc
-          "The structure that contains the details of the workflow."]}
+          "Returns the server identifier that contains the imported key."];
+      hostKeyId: HostKeyId.t option
+        [@ocaml.doc "Returns the host key identifier for the imported key."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceExistsException of ResourceExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serverId = fun ?hostKeyId -> fun () -> { serverId; hostKeyId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceExistsException"));
+            ("details", (ResourceExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("HostKeyId", (Option.map x.hostKeyId ~f:HostKeyId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hostKeyId =
+        (Option.map ~f:HostKeyId.of_xml) (Xml.child xml_arg0 "HostKeyId") in
+      let serverId =
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?hostKeyId ?serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hostKeyId = field_map json__ "HostKeyId" HostKeyId.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?hostKeyId ?serverId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a host key to the server that's specified by the ServerId parameter."]
+module ImportHostKeyRequest =
+  struct
+    type nonrec t =
+      {
+      serverId: ServerId.t
+        [@ocaml.doc
+          "The identifier of the server that contains the host key that you are importing."];
+      hostKeyBody: HostKey.t
+        [@ocaml.doc
+          "The private key portion of an SSH key pair. Transfer Family accepts RSA, ECDSA, and ED25519 keys."];
+      description: HostKeyDescription.t option
+        [@ocaml.doc "The text description that identifies this host key."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for host keys."]}
+    let context_ = "ImportHostKeyRequest"
+    let make ?description =
+      fun ?tags ->
+        fun ~serverId ->
+          fun ~hostKeyBody ->
+            fun () -> { description; tags; serverId; hostKeyBody }
+    let to_value x =
+      structure_to_value
+        [("ServerId", (Some (ServerId.to_value x.serverId)));
+        ("HostKeyBody", (Some (HostKey.to_value x.hostKeyBody)));
+        ("Description",
+          (Option.map x.description ~f:HostKeyDescription.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let description =
+        (Option.map ~f:HostKeyDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let hostKeyBody =
+        HostKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HostKeyBody") in
+      let serverId =
+        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+      make ?tags ?description ~hostKeyBody ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let description =
+        field_map json__ "Description" HostKeyDescription.of_json in
+      let hostKeyBody = field_map_exn json__ "HostKeyBody" HostKey.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      make ?tags ?description ~hostKeyBody ~serverId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a host key to the server that's specified by the ServerId parameter."]
+module ImportCertificateResponse =
+  struct
+    type nonrec t =
+      {
+      certificateId: CertificateId.t option
+        [@ocaml.doc
+          "An array of identifiers for the imported certificates. You use this identifier for working with profiles and partner profiles."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeWorkflowResponse"
-    let make ~workflow = fun () -> { workflow }
+    let make ?certificateId = fun () -> { certificateId }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -6524,17 +14336,198 @@ module DescribeWorkflowResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Workflow", (Some (DescribedWorkflow.to_value x.workflow)))]
+        [("CertificateId",
+           (Option.map x.certificateId ~f:CertificateId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateId =
+        (Option.map ~f:CertificateId.of_xml)
+          (Xml.child xml_arg0 "CertificateId") in
+      make ?certificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateId =
+        field_map json__ "CertificateId" CertificateId.of_json in
+      make ?certificateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Imports the signing and encryption certificates that you need to create local (AS2) profiles and partner profiles. You can import both the certificate and its chain in the Certificate parameter. After importing a certificate, Transfer Family automatically creates a Amazon CloudWatch metric called DaysUntilExpiry that tracks the number of days until the certificate expires. The metric is based on the InactiveDate parameter and is published daily in the AWS/Transfer namespace. It can take up to a full day after importing a certificate for Transfer Family to emit the DaysUntilExpiry metric to your account. If you use the Certificate parameter to upload both the certificate and its chain, don't use the CertificateChain parameter. CloudWatch monitoring The DaysUntilExpiry metric includes the following specifications: Units: Count (days) Dimensions: CertificateId (always present), Description (if provided during certificate import) Statistics: Minimum, Maximum, Average Frequency: Published daily"]
+module ImportCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      usage: CertificateUsageType.t
+        [@ocaml.doc
+          "Specifies how this certificate is used. It can be used in the following ways: SIGNING: For signing AS2 messages ENCRYPTION: For encrypting AS2 messages TLS: For securing AS2 communications sent over HTTPS"];
+      certificate: CertificateBodyType.t
+        [@ocaml.doc
+          "For the CLI, provide a file path for a certificate in URI format. For example, --certificate file://encryption-cert.pem. Alternatively, you can provide the raw content. For the SDK, specify the raw content of a certificate file. For example, --certificate \"`cat encryption-cert.pem`\". You can provide both the certificate and its chain in this parameter, without needing to use the CertificateChain parameter. If you use this parameter for both the certificate and its chain, do not use the CertificateChain parameter."];
+      certificateChain: CertificateChainType.t option
+        [@ocaml.doc
+          "An optional list of certificates that make up the chain for the certificate that's being imported."];
+      privateKey: PrivateKeyType.t option
+        [@ocaml.doc
+          "For the CLI, provide a file path for a private key in URI format. For example, --private-key file://encryption-key.pem. Alternatively, you can provide the raw content of the private key file. For the SDK, specify the raw content of a private key file. For example, --private-key \"`cat encryption-key.pem`\""];
+      activeDate: CertDate.t option
+        [@ocaml.doc
+          "An optional date that specifies when the certificate becomes active. If you do not specify a value, ActiveDate takes the same value as NotBeforeDate, which is specified by the CA."];
+      inactiveDate: CertDate.t option
+        [@ocaml.doc
+          "An optional date that specifies when the certificate becomes inactive. If you do not specify a value, InactiveDate takes the same value as NotAfterDate, which is specified by the CA."];
+      description: Description.t option
+        [@ocaml.doc
+          "A short description that helps identify the certificate."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for certificates."]}
+    let context_ = "ImportCertificateRequest"
+    let make ?certificateChain =
+      fun ?privateKey ->
+        fun ?activeDate ->
+          fun ?inactiveDate ->
+            fun ?description ->
+              fun ?tags ->
+                fun ~usage ->
+                  fun ~certificate ->
+                    fun () ->
+                      {
+                        certificateChain;
+                        privateKey;
+                        activeDate;
+                        inactiveDate;
+                        description;
+                        tags;
+                        usage;
+                        certificate
+                      }
+    let to_value x =
+      structure_to_value
+        [("Usage", (Some (CertificateUsageType.to_value x.usage)));
+        ("Certificate", (Some (CertificateBodyType.to_value x.certificate)));
+        ("CertificateChain",
+          (Option.map x.certificateChain ~f:CertificateChainType.to_value));
+        ("PrivateKey", (Option.map x.privateKey ~f:PrivateKeyType.to_value));
+        ("ActiveDate", (Option.map x.activeDate ~f:CertDate.to_value));
+        ("InactiveDate", (Option.map x.inactiveDate ~f:CertDate.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let inactiveDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "InactiveDate") in
+      let activeDate =
+        (Option.map ~f:CertDate.of_xml) (Xml.child xml_arg0 "ActiveDate") in
+      let privateKey =
+        (Option.map ~f:PrivateKeyType.of_xml)
+          (Xml.child xml_arg0 "PrivateKey") in
+      let certificateChain =
+        (Option.map ~f:CertificateChainType.of_xml)
+          (Xml.child xml_arg0 "CertificateChain") in
+      let certificate =
+        CertificateBodyType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Certificate") in
+      let usage =
+        CertificateUsageType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Usage") in
+      make ?tags ?description ?inactiveDate ?activeDate ?privateKey
+        ?certificateChain ~certificate ~usage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let inactiveDate = field_map json__ "InactiveDate" CertDate.of_json in
+      let activeDate = field_map json__ "ActiveDate" CertDate.of_json in
+      let privateKey = field_map json__ "PrivateKey" PrivateKeyType.of_json in
+      let certificateChain =
+        field_map json__ "CertificateChain" CertificateChainType.of_json in
+      let certificate =
+        field_map_exn json__ "Certificate" CertificateBodyType.of_json in
+      let usage = field_map_exn json__ "Usage" CertificateUsageType.of_json in
+      make ?tags ?description ?inactiveDate ?activeDate ?privateKey
+        ?certificateChain ~certificate ~usage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Imports the signing and encryption certificates that you need to create local (AS2) profiles and partner profiles. You can import both the certificate and its chain in the Certificate parameter. After importing a certificate, Transfer Family automatically creates a Amazon CloudWatch metric called DaysUntilExpiry that tracks the number of days until the certificate expires. The metric is based on the InactiveDate parameter and is published daily in the AWS/Transfer namespace. It can take up to a full day after importing a certificate for Transfer Family to emit the DaysUntilExpiry metric to your account. If you use the Certificate parameter to upload both the certificate and its chain, don't use the CertificateChain parameter. CloudWatch monitoring The DaysUntilExpiry metric includes the following specifications: Units: Count (days) Dimensions: CertificateId (always present), Description (if provided during certificate import) Statistics: Minimum, Maximum, Average Frequency: Published daily"]
+module DescribeWorkflowResponse =
+  struct
+    type nonrec t =
+      {
+      workflow: DescribedWorkflow.t option
+        [@ocaml.doc
+          "The structure that contains the details of the workflow."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workflow = fun () -> { workflow }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Workflow", (Option.map x.workflow ~f:DescribedWorkflow.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workflow =
-        DescribedWorkflow.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Workflow") in
-      make ~workflow ()
+        (Option.map ~f:DescribedWorkflow.of_xml)
+          (Xml.child xml_arg0 "Workflow") in
+      make ?workflow ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workflow = field_map_exn json "Workflow" DescribedWorkflow.of_json in
-      make ~workflow ()
+    let of_json json__ =
+      let workflow = field_map json__ "Workflow" DescribedWorkflow.of_json in
+      make ?workflow ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified workflow."]
 module DescribeWorkflowRequest =
@@ -6555,29 +14548,251 @@ module DescribeWorkflowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
+    let of_json json__ =
+      let workflowId = field_map_exn json__ "WorkflowId" WorkflowId.of_json in
       make ~workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified workflow."]
+module DescribeWebAppResponse =
+  struct
+    type nonrec t =
+      {
+      webApp: DescribedWebApp.t option
+        [@ocaml.doc
+          "Returns a structure that contains the details of the web app."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?webApp = fun () -> { webApp }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WebApp", (Option.map x.webApp ~f:DescribedWebApp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webApp =
+        (Option.map ~f:DescribedWebApp.of_xml) (Xml.child xml_arg0 "WebApp") in
+      make ?webApp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webApp = field_map json__ "WebApp" DescribedWebApp.of_json in
+      make ?webApp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the web app that's identified by WebAppId. The response includes endpoint configuration details such as whether the web app is publicly accessible or VPC hosted. For more information about using VPC endpoints with Transfer Family, see Create a Transfer Family web app in a VPC."]
+module DescribeWebAppRequest =
+  struct
+    type nonrec t =
+      {
+      webAppId: WebAppId.t
+        [@ocaml.doc "Provide the unique identifier for the web app."]}
+    let context_ = "DescribeWebAppRequest"
+    let make ~webAppId = fun () -> { webAppId }
+    let to_value x =
+      structure_to_value
+        [("WebAppId", (Some (WebAppId.to_value x.webAppId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webAppId =
+        WebAppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "WebAppId") in
+      make ~webAppId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webAppId = field_map_exn json__ "WebAppId" WebAppId.of_json in
+      make ~webAppId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the web app that's identified by WebAppId. The response includes endpoint configuration details such as whether the web app is publicly accessible or VPC hosted. For more information about using VPC endpoints with Transfer Family, see Create a Transfer Family web app in a VPC."]
+module DescribeWebAppCustomizationResponse =
+  struct
+    type nonrec t =
+      {
+      webAppCustomization: DescribedWebAppCustomization.t option
+        [@ocaml.doc
+          "Returns a structure that contains the details of the web app customizations."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?webAppCustomization = fun () -> { webAppCustomization }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WebAppCustomization",
+           (Option.map x.webAppCustomization
+              ~f:DescribedWebAppCustomization.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webAppCustomization =
+        (Option.map ~f:DescribedWebAppCustomization.of_xml)
+          (Xml.child xml_arg0 "WebAppCustomization") in
+      make ?webAppCustomization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webAppCustomization =
+        field_map json__ "WebAppCustomization"
+          DescribedWebAppCustomization.of_json in
+      make ?webAppCustomization ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the web app customization object that's identified by WebAppId."]
+module DescribeWebAppCustomizationRequest =
+  struct
+    type nonrec t =
+      {
+      webAppId: WebAppId.t
+        [@ocaml.doc "Provide the unique identifier for the web app."]}
+    let context_ = "DescribeWebAppCustomizationRequest"
+    let make ~webAppId = fun () -> { webAppId }
+    let to_value x =
+      structure_to_value
+        [("WebAppId", (Some (WebAppId.to_value x.webAppId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webAppId =
+        WebAppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "WebAppId") in
+      make ~webAppId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webAppId = field_map_exn json__ "WebAppId" WebAppId.of_json in
+      make ~webAppId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the web app customization object that's identified by WebAppId."]
 module DescribeUserResponse =
   struct
     type nonrec t =
       {
-      serverId: ServerId.t
+      serverId: ServerId.t option
         [@ocaml.doc
           "A system-assigned unique identifier for a server that has this user assigned."];
-      user: DescribedUser.t
+      user: DescribedUser.t option
         [@ocaml.doc
-          "An array containing the properties of the user account for the ServerID value that you specified."]}
+          "An array containing the properties of the Transfer Family user for the ServerID value that you specified."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeUserResponse"
-    let make ~serverId = fun ~user -> fun () -> { serverId; user }
+    let make ?serverId = fun ?user -> fun () -> { serverId; user }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -6630,21 +14845,20 @@ module DescribeUserResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ServerId", (Some (ServerId.to_value x.serverId)));
-        ("User", (Some (DescribedUser.to_value x.user)))]
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("User", (Option.map x.user ~f:DescribedUser.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let user =
-        DescribedUser.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "User") in
+        (Option.map ~f:DescribedUser.of_xml) (Xml.child xml_arg0 "User") in
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
-      make ~user ~serverId ()
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?user ?serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map_exn json "User" DescribedUser.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      make ~user ~serverId ()
+    let of_json json__ =
+      let user = field_map json__ "User" DescribedUser.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?user ?serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the user assigned to the specific file transfer protocol-enabled server, as identified by its ServerId property. The response from this call returns the properties of the user associated with the ServerId value that was specified."]
@@ -6657,7 +14871,7 @@ module DescribeUserRequest =
           "A system-assigned unique identifier for a server that has this user assigned."];
       userName: UserName.t
         [@ocaml.doc
-          "The name of the user assigned to one or more servers. User names are part of the sign-in credentials to use the Amazon Web Services Transfer Family service and perform file transfer tasks."]}
+          "The name of the user assigned to one or more servers. User names are part of the sign-in credentials to use the Transfer Family service and perform file transfer tasks."]}
     let context_ = "DescribeUserRequest"
     let make ~serverId = fun ~userName -> fun () -> { serverId; userName }
     let to_value x =
@@ -6672,9 +14886,9 @@ module DescribeUserRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+    let of_json json__ =
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~userName ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6683,7 +14897,7 @@ module DescribeServerResponse =
   struct
     type nonrec t =
       {
-      server: DescribedServer.t
+      server: DescribedServer.t option
         [@ocaml.doc
           "An array containing the properties of a server with the ServerID you specified."]}
     type nonrec error =
@@ -6692,8 +14906,7 @@ module DescribeServerResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeServerResponse"
-    let make ~server = fun () -> { server }
+    let make ?server = fun () -> { server }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -6746,17 +14959,16 @@ module DescribeServerResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Server", (Some (DescribedServer.to_value x.server)))]
+        [("Server", (Option.map x.server ~f:DescribedServer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let server =
-        DescribedServer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Server") in
-      make ~server ()
+        (Option.map ~f:DescribedServer.of_xml) (Xml.child xml_arg0 "Server") in
+      make ?server ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let server = field_map_exn json "Server" DescribedServer.of_json in
-      make ~server ()
+    let of_json json__ =
+      let server = field_map json__ "Server" DescribedServer.of_json in
+      make ?server ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a file transfer protocol-enabled server that you specify by passing the ServerId parameter. The response contains a description of a server's properties. When you set EndpointType to VPC, the response will contain the EndpointDetails."]
@@ -6777,8 +14989,8 @@ module DescribeServerRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6787,7 +14999,7 @@ module DescribeSecurityPolicyResponse =
   struct
     type nonrec t =
       {
-      securityPolicy: DescribedSecurityPolicy.t
+      securityPolicy: DescribedSecurityPolicy.t option
         [@ocaml.doc
           "An array containing the properties of the security policy."]}
     type nonrec error =
@@ -6796,8 +15008,7 @@ module DescribeSecurityPolicyResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeSecurityPolicyResponse"
-    let make ~securityPolicy = fun () -> { securityPolicy }
+    let make ?securityPolicy = fun () -> { securityPolicy }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -6851,28 +15062,28 @@ module DescribeSecurityPolicyResponse =
     let to_value x =
       structure_to_value
         [("SecurityPolicy",
-           (Some (DescribedSecurityPolicy.to_value x.securityPolicy)))]
+           (Option.map x.securityPolicy ~f:DescribedSecurityPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let securityPolicy =
-        DescribedSecurityPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecurityPolicy") in
-      make ~securityPolicy ()
+        (Option.map ~f:DescribedSecurityPolicy.of_xml)
+          (Xml.child xml_arg0 "SecurityPolicy") in
+      make ?securityPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityPolicy =
-        field_map_exn json "SecurityPolicy" DescribedSecurityPolicy.of_json in
-      make ~securityPolicy ()
+        field_map json__ "SecurityPolicy" DescribedSecurityPolicy.of_json in
+      make ?securityPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the security policy that is attached to your file transfer protocol-enabled server. The response contains a description of the security policy's properties. For more information about security policies, see Working with security policies."]
+       "Describes the security policy that is attached to your server or SFTP connector. The response contains a description of the security policy's properties. For more information about security policies, see Working with security policies for servers or Working with security policies for SFTP connectors."]
 module DescribeSecurityPolicyRequest =
   struct
     type nonrec t =
       {
       securityPolicyName: SecurityPolicyName.t
         [@ocaml.doc
-          "Specifies the name of the security policy that is attached to the server."]}
+          "Specify the text name of the security policy for which you want the details."]}
     let context_ = "DescribeSecurityPolicyRequest"
     let make ~securityPolicyName = fun () -> { securityPolicyName }
     let to_value x =
@@ -6886,31 +15097,27 @@ module DescribeSecurityPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityPolicyName") in
       make ~securityPolicyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityPolicyName =
-        field_map_exn json "SecurityPolicyName" SecurityPolicyName.of_json in
+        field_map_exn json__ "SecurityPolicyName" SecurityPolicyName.of_json in
       make ~securityPolicyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the security policy that is attached to your file transfer protocol-enabled server. The response contains a description of the security policy's properties. For more information about security policies, see Working with security policies."]
-module DescribeExecutionResponse =
+       "Describes the security policy that is attached to your server or SFTP connector. The response contains a description of the security policy's properties. For more information about security policies, see Working with security policies for servers or Working with security policies for SFTP connectors."]
+module DescribeProfileResponse =
   struct
     type nonrec t =
       {
-      workflowId: WorkflowId.t
-        [@ocaml.doc "A unique identifier for the workflow."];
-      execution: DescribedExecution.t
+      profile: DescribedProfile.t option
         [@ocaml.doc
-          "The structure that contains the details of the workflow' execution."]}
+          "The details of the specified profile, returned as an object."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeExecutionResponse"
-    let make ~workflowId =
-      fun ~execution -> fun () -> { workflowId; execution }
+    let make ?profile = fun () -> { profile }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -6963,26 +15170,243 @@ module DescribeExecutionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("WorkflowId", (Some (WorkflowId.to_value x.workflowId)));
-        ("Execution", (Some (DescribedExecution.to_value x.execution)))]
+        [("Profile", (Option.map x.profile ~f:DescribedProfile.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profile =
+        (Option.map ~f:DescribedProfile.of_xml)
+          (Xml.child xml_arg0 "Profile") in
+      make ?profile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profile = field_map json__ "Profile" DescribedProfile.of_json in
+      make ?profile ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details of the profile that's specified by the ProfileId."]
+module DescribeProfileRequest =
+  struct
+    type nonrec t =
+      {
+      profileId: ProfileId.t
+        [@ocaml.doc "The identifier of the profile that you want described."]}
+    let context_ = "DescribeProfileRequest"
+    let make ~profileId = fun () -> { profileId }
+    let to_value x =
+      structure_to_value
+        [("ProfileId", (Some (ProfileId.to_value x.profileId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileId =
+        ProfileId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileId") in
+      make ~profileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileId = field_map_exn json__ "ProfileId" ProfileId.of_json in
+      make ~profileId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details of the profile that's specified by the ProfileId."]
+module DescribeHostKeyResponse =
+  struct
+    type nonrec t =
+      {
+      hostKey: DescribedHostKey.t option
+        [@ocaml.doc "Returns the details for the specified host key."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?hostKey = fun () -> { hostKey }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("HostKey", (Option.map x.hostKey ~f:DescribedHostKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hostKey =
+        (Option.map ~f:DescribedHostKey.of_xml)
+          (Xml.child xml_arg0 "HostKey") in
+      make ?hostKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hostKey = field_map json__ "HostKey" DescribedHostKey.of_json in
+      make ?hostKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details of the host key that's specified by the HostKeyId and ServerId."]
+module DescribeHostKeyRequest =
+  struct
+    type nonrec t =
+      {
+      serverId: ServerId.t
+        [@ocaml.doc
+          "The identifier of the server that contains the host key that you want described."];
+      hostKeyId: HostKeyId.t
+        [@ocaml.doc
+          "The identifier of the host key that you want described."]}
+    let context_ = "DescribeHostKeyRequest"
+    let make ~serverId = fun ~hostKeyId -> fun () -> { serverId; hostKeyId }
+    let to_value x =
+      structure_to_value
+        [("ServerId", (Some (ServerId.to_value x.serverId)));
+        ("HostKeyId", (Some (HostKeyId.to_value x.hostKeyId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hostKeyId =
+        HostKeyId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HostKeyId") in
+      let serverId =
+        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+      make ~hostKeyId ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hostKeyId = field_map_exn json__ "HostKeyId" HostKeyId.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      make ~hostKeyId ~serverId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details of the host key that's specified by the HostKeyId and ServerId."]
+module DescribeExecutionResponse =
+  struct
+    type nonrec t =
+      {
+      workflowId: WorkflowId.t option
+        [@ocaml.doc "A unique identifier for the workflow."];
+      execution: DescribedExecution.t option
+        [@ocaml.doc
+          "The structure that contains the details of the workflow' execution."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workflowId =
+      fun ?execution -> fun () -> { workflowId; execution }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WorkflowId", (Option.map x.workflowId ~f:WorkflowId.to_value));
+        ("Execution",
+          (Option.map x.execution ~f:DescribedExecution.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let execution =
-        DescribedExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Execution") in
+        (Option.map ~f:DescribedExecution.of_xml)
+          (Xml.child xml_arg0 "Execution") in
       let workflowId =
-        WorkflowId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
-      make ~execution ~workflowId ()
+        (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "WorkflowId") in
+      make ?execution ?workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let execution =
-        field_map_exn json "Execution" DescribedExecution.of_json in
-      let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
-      make ~execution ~workflowId ()
+    let of_json json__ =
+      let execution = field_map json__ "Execution" DescribedExecution.of_json in
+      let workflowId = field_map json__ "WorkflowId" WorkflowId.of_json in
+      make ?execution ?workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You can use DescribeExecution to check the details of the execution of the specified workflow."]
+       "You can use DescribeExecution to check the details of the execution of the specified workflow. This API call only returns details for in-progress workflows. If you provide an ID for an execution that is not in progress, or if the execution doesn't match the specified workflow ID, you receive a ResourceNotFound exception."]
 module DescribeExecutionRequest =
   struct
     type nonrec t =
@@ -7008,31 +15432,28 @@ module DescribeExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ExecutionId") in
       make ~workflowId ~executionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
-      let executionId = field_map_exn json "ExecutionId" ExecutionId.of_json in
+    let of_json json__ =
+      let workflowId = field_map_exn json__ "WorkflowId" WorkflowId.of_json in
+      let executionId =
+        field_map_exn json__ "ExecutionId" ExecutionId.of_json in
       make ~workflowId ~executionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You can use DescribeExecution to check the details of the execution of the specified workflow."]
-module DescribeAccessResponse =
+       "You can use DescribeExecution to check the details of the execution of the specified workflow. This API call only returns details for in-progress workflows. If you provide an ID for an execution that is not in progress, or if the execution doesn't match the specified workflow ID, you receive a ResourceNotFound exception."]
+module DescribeConnectorResponse =
   struct
     type nonrec t =
       {
-      serverId: ServerId.t
+      connector: DescribedConnector.t option
         [@ocaml.doc
-          "A system-assigned unique identifier for a server that has this access assigned."];
-      access: DescribedAccess.t
-        [@ocaml.doc
-          "The external ID of the server that the access is attached to."]}
+          "The structure that contains the details of the connector."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAccessResponse"
-    let make ~serverId = fun ~access -> fun () -> { serverId; access }
+    let make ?connector = fun () -> { connector }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -7085,24 +15506,355 @@ module DescribeAccessResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ServerId", (Some (ServerId.to_value x.serverId)));
-        ("Access", (Some (DescribedAccess.to_value x.access)))]
+        [("Connector",
+           (Option.map x.connector ~f:DescribedConnector.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connector =
+        (Option.map ~f:DescribedConnector.of_xml)
+          (Xml.child xml_arg0 "Connector") in
+      make ?connector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connector = field_map json__ "Connector" DescribedConnector.of_json in
+      make ?connector ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the connector that's identified by the ConnectorId."]
+module DescribeConnectorRequest =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t
+        [@ocaml.doc "The unique identifier for the connector."]}
+    let context_ = "DescribeConnectorRequest"
+    let make ~connectorId = fun () -> { connectorId }
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Some (ConnectorId.to_value x.connectorId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectorId =
+        ConnectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectorId") in
+      make ~connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectorId =
+        field_map_exn json__ "ConnectorId" ConnectorId.of_json in
+      make ~connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the connector that's identified by the ConnectorId."]
+module DescribeCertificateResponse =
+  struct
+    type nonrec t =
+      {
+      certificate: DescribedCertificate.t option
+        [@ocaml.doc
+          "The details for the specified certificate, returned as an object."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?certificate = fun () -> { certificate }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Certificate",
+           (Option.map x.certificate ~f:DescribedCertificate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificate =
+        (Option.map ~f:DescribedCertificate.of_xml)
+          (Xml.child xml_arg0 "Certificate") in
+      make ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificate =
+        field_map json__ "Certificate" DescribedCertificate.of_json in
+      make ?certificate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the certificate that's identified by the CertificateId. Transfer Family automatically publishes a Amazon CloudWatch metric called DaysUntilExpiry for imported certificates. This metric tracks the number of days until the certificate expires based on the InactiveDate. The metric is available in the AWS/Transfer namespace and includes the CertificateId as a dimension."]
+module DescribeCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateId: CertificateId.t
+        [@ocaml.doc
+          "An array of identifiers for the imported certificates. You use this identifier for working with profiles and partner profiles."]}
+    let context_ = "DescribeCertificateRequest"
+    let make ~certificateId = fun () -> { certificateId }
+    let to_value x =
+      structure_to_value
+        [("CertificateId", (Some (CertificateId.to_value x.certificateId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateId =
+        CertificateId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateId") in
+      make ~certificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateId =
+        field_map_exn json__ "CertificateId" CertificateId.of_json in
+      make ~certificateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the certificate that's identified by the CertificateId. Transfer Family automatically publishes a Amazon CloudWatch metric called DaysUntilExpiry for imported certificates. This metric tracks the number of days until the certificate expires based on the InactiveDate. The metric is available in the AWS/Transfer namespace and includes the CertificateId as a dimension."]
+module DescribeAgreementResponse =
+  struct
+    type nonrec t =
+      {
+      agreement: DescribedAgreement.t option
+        [@ocaml.doc
+          "The details for the specified agreement, returned as a DescribedAgreement object."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?agreement = fun () -> { agreement }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Agreement",
+           (Option.map x.agreement ~f:DescribedAgreement.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let agreement =
+        (Option.map ~f:DescribedAgreement.of_xml)
+          (Xml.child xml_arg0 "Agreement") in
+      make ?agreement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agreement = field_map json__ "Agreement" DescribedAgreement.of_json in
+      make ?agreement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the agreement that's identified by the AgreementId."]
+module DescribeAgreementRequest =
+  struct
+    type nonrec t =
+      {
+      agreementId: AgreementId.t
+        [@ocaml.doc
+          "A unique identifier for the agreement. This identifier is returned when you create an agreement."];
+      serverId: ServerId.t
+        [@ocaml.doc
+          "The server identifier that's associated with the agreement."]}
+    let context_ = "DescribeAgreementRequest"
+    let make ~agreementId =
+      fun ~serverId -> fun () -> { agreementId; serverId }
+    let to_value x =
+      structure_to_value
+        [("AgreementId", (Some (AgreementId.to_value x.agreementId)));
+        ("ServerId", (Some (ServerId.to_value x.serverId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serverId =
+        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+      let agreementId =
+        AgreementId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AgreementId") in
+      make ~serverId ~agreementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let agreementId =
+        field_map_exn json__ "AgreementId" AgreementId.of_json in
+      make ~serverId ~agreementId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the agreement that's identified by the AgreementId."]
+module DescribeAccessResponse =
+  struct
+    type nonrec t =
+      {
+      serverId: ServerId.t option
+        [@ocaml.doc
+          "A system-assigned unique identifier for a server that has this access assigned."];
+      access: DescribedAccess.t option
+        [@ocaml.doc
+          "The external identifier of the server that the access is attached to."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serverId = fun ?access -> fun () -> { serverId; access }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("Access", (Option.map x.access ~f:DescribedAccess.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let access =
-        DescribedAccess.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Access") in
+        (Option.map ~f:DescribedAccess.of_xml) (Xml.child xml_arg0 "Access") in
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
-      make ~access ~serverId ()
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?access ?serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let access = field_map_exn json "Access" DescribedAccess.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      make ~access ~serverId ()
+    let of_json json__ =
+      let access = field_map json__ "Access" DescribedAccess.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?access ?serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the access that is assigned to the specific file transfer protocol-enabled server, as identified by its ServerId property and its ExternalID. The response from this call returns the properties of the access that is associated with the ServerId value that was specified."]
+       "Describes the access that is assigned to the specific file transfer protocol-enabled server, as identified by its ServerId property and its ExternalId. The response from this call returns the properties of the access that is associated with the ServerId value that was specified."]
 module DescribeAccessRequest =
   struct
     type nonrec t =
@@ -7112,7 +15864,7 @@ module DescribeAccessRequest =
           "A system-assigned unique identifier for a server that has this access assigned."];
       externalId: ExternalId.t
         [@ocaml.doc
-          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Amazon Web Services Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regex used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
+          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regular expression used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
     let context_ = "DescribeAccessRequest"
     let make ~serverId =
       fun ~externalId -> fun () -> { serverId; externalId }
@@ -7129,13 +15881,13 @@ module DescribeAccessRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~externalId ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+    let of_json json__ =
+      let externalId = field_map_exn json__ "ExternalId" ExternalId.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~externalId ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the access that is assigned to the specific file transfer protocol-enabled server, as identified by its ServerId property and its ExternalID. The response from this call returns the properties of the access that is associated with the ServerId value that was specified."]
+       "Describes the access that is assigned to the specific file transfer protocol-enabled server, as identified by its ServerId property and its ExternalId. The response from this call returns the properties of the access that is associated with the ServerId value that was specified."]
 module DeleteWorkflowRequest =
   struct
     type nonrec t =
@@ -7154,11 +15906,58 @@ module DeleteWorkflowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
+    let of_json json__ =
+      let workflowId = field_map_exn json__ "WorkflowId" WorkflowId.of_json in
       make ~workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified workflow."]
+module DeleteWebAppRequest =
+  struct
+    type nonrec t =
+      {
+      webAppId: WebAppId.t
+        [@ocaml.doc
+          "Provide the unique identifier for the web app that you are deleting."]}
+    let context_ = "DeleteWebAppRequest"
+    let make ~webAppId = fun () -> { webAppId }
+    let to_value x =
+      structure_to_value
+        [("WebAppId", (Some (WebAppId.to_value x.webAppId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webAppId =
+        WebAppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "WebAppId") in
+      make ~webAppId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webAppId = field_map_exn json__ "WebAppId" WebAppId.of_json in
+      make ~webAppId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified web app."]
+module DeleteWebAppCustomizationRequest =
+  struct
+    type nonrec t =
+      {
+      webAppId: WebAppId.t
+        [@ocaml.doc
+          "Provide the unique identifier for the web app that contains the customizations that you are deleting."]}
+    let context_ = "DeleteWebAppCustomizationRequest"
+    let make ~webAppId = fun () -> { webAppId }
+    let to_value x =
+      structure_to_value
+        [("WebAppId", (Some (WebAppId.to_value x.webAppId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webAppId =
+        WebAppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "WebAppId") in
+      make ~webAppId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webAppId = field_map_exn json__ "WebAppId" WebAppId.of_json in
+      make ~webAppId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the WebAppCustomization object that corresponds to the web app ID specified."]
 module DeleteUserRequest =
   struct
     type nonrec t =
@@ -7183,9 +15982,9 @@ module DeleteUserRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+    let of_json json__ =
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~userName ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7223,11 +16022,11 @@ module DeleteSshPublicKeyRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~sshPublicKeyId ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
+    let of_json json__ =
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
       let sshPublicKeyId =
-        field_map_exn json "SshPublicKeyId" SshPublicKeyId.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+        field_map_exn json__ "SshPublicKeyId" SshPublicKeyId.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~userName ~sshPublicKeyId ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a user's Secure Shell (SSH) public key."]
@@ -7249,12 +16048,152 @@ module DeleteServerRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the file transfer protocol-enabled server that you specify. No response returns from this operation."]
+module DeleteProfileRequest =
+  struct
+    type nonrec t =
+      {
+      profileId: ProfileId.t
+        [@ocaml.doc "The identifier of the profile that you are deleting."]}
+    let context_ = "DeleteProfileRequest"
+    let make ~profileId = fun () -> { profileId }
+    let to_value x =
+      structure_to_value
+        [("ProfileId", (Some (ProfileId.to_value x.profileId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileId =
+        ProfileId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileId") in
+      make ~profileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileId = field_map_exn json__ "ProfileId" ProfileId.of_json in
+      make ~profileId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the profile that's specified in the ProfileId parameter."]
+module DeleteHostKeyRequest =
+  struct
+    type nonrec t =
+      {
+      serverId: ServerId.t
+        [@ocaml.doc
+          "The identifier of the server that contains the host key that you are deleting."];
+      hostKeyId: HostKeyId.t
+        [@ocaml.doc "The identifier of the host key that you are deleting."]}
+    let context_ = "DeleteHostKeyRequest"
+    let make ~serverId = fun ~hostKeyId -> fun () -> { serverId; hostKeyId }
+    let to_value x =
+      structure_to_value
+        [("ServerId", (Some (ServerId.to_value x.serverId)));
+        ("HostKeyId", (Some (HostKeyId.to_value x.hostKeyId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hostKeyId =
+        HostKeyId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HostKeyId") in
+      let serverId =
+        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+      make ~hostKeyId ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hostKeyId = field_map_exn json__ "HostKeyId" HostKeyId.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      make ~hostKeyId ~serverId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the host key that's specified in the HostKeyId parameter."]
+module DeleteConnectorRequest =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t
+        [@ocaml.doc "The unique identifier for the connector."]}
+    let context_ = "DeleteConnectorRequest"
+    let make ~connectorId = fun () -> { connectorId }
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Some (ConnectorId.to_value x.connectorId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectorId =
+        ConnectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectorId") in
+      make ~connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectorId =
+        field_map_exn json__ "ConnectorId" ConnectorId.of_json in
+      make ~connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the connector that's specified in the provided ConnectorId."]
+module DeleteCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateId: CertificateId.t
+        [@ocaml.doc
+          "The identifier of the certificate object that you are deleting."]}
+    let context_ = "DeleteCertificateRequest"
+    let make ~certificateId = fun () -> { certificateId }
+    let to_value x =
+      structure_to_value
+        [("CertificateId", (Some (CertificateId.to_value x.certificateId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateId =
+        CertificateId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateId") in
+      make ~certificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateId =
+        field_map_exn json__ "CertificateId" CertificateId.of_json in
+      make ~certificateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the certificate that's specified in the CertificateId parameter."]
+module DeleteAgreementRequest =
+  struct
+    type nonrec t =
+      {
+      agreementId: AgreementId.t
+        [@ocaml.doc
+          "A unique identifier for the agreement. This identifier is returned when you create an agreement."];
+      serverId: ServerId.t
+        [@ocaml.doc
+          "The server identifier associated with the agreement that you are deleting."]}
+    let context_ = "DeleteAgreementRequest"
+    let make ~agreementId =
+      fun ~serverId -> fun () -> { agreementId; serverId }
+    let to_value x =
+      structure_to_value
+        [("AgreementId", (Some (AgreementId.to_value x.agreementId)));
+        ("ServerId", (Some (ServerId.to_value x.serverId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serverId =
+        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+      let agreementId =
+        AgreementId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AgreementId") in
+      make ~serverId ~agreementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let agreementId =
+        field_map_exn json__ "AgreementId" AgreementId.of_json in
+      make ~serverId ~agreementId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete the agreement that's specified in the provided AgreementId."]
 module DeleteAccessRequest =
   struct
     type nonrec t =
@@ -7264,7 +16203,7 @@ module DeleteAccessRequest =
           "A system-assigned unique identifier for a server that has this user assigned."];
       externalId: ExternalId.t
         [@ocaml.doc
-          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Amazon Web Services Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regex used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
+          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regular expression used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
     let context_ = "DeleteAccessRequest"
     let make ~serverId =
       fun ~externalId -> fun () -> { serverId; externalId }
@@ -7281,9 +16220,9 @@ module DeleteAccessRequest =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~externalId ~serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
+    let of_json json__ =
+      let externalId = field_map_exn json__ "ExternalId" ExternalId.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
       make ~externalId ~serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7292,7 +16231,7 @@ module CreateWorkflowResponse =
   struct
     type nonrec t =
       {
-      workflowId: WorkflowId.t
+      workflowId: WorkflowId.t option
         [@ocaml.doc "A unique identifier for the workflow."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -7302,8 +16241,7 @@ module CreateWorkflowResponse =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateWorkflowResponse"
-    let make ~workflowId = fun () -> { workflowId }
+    let make ?workflowId = fun () -> { workflowId }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7372,17 +16310,16 @@ module CreateWorkflowResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("WorkflowId", (Some (WorkflowId.to_value x.workflowId)))]
+        [("WorkflowId", (Option.map x.workflowId ~f:WorkflowId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workflowId =
-        WorkflowId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
-      make ~workflowId ()
+        (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "WorkflowId") in
+      make ?workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
-      make ~workflowId ()
+    let of_json json__ =
+      let workflowId = field_map json__ "WorkflowId" WorkflowId.of_json in
+      make ?workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Allows you to create a workflow with specified steps and step details the workflow invokes after file transfer completes. After creating a workflow, you can associate the workflow created with any transfer servers by specifying the workflow-details field in CreateServer and UpdateServer operations."]
@@ -7394,10 +16331,10 @@ module CreateWorkflowRequest =
         [@ocaml.doc "A textual description for the workflow."];
       steps: WorkflowSteps.t
         [@ocaml.doc
-          "Specifies the details for the steps that are in the specified workflow. The TYPE specifies which of the following actions is being taken for this step. Copy: copy the file to another location Custom: custom step with a lambda target Delete: delete the file Tag: add a tag to the file Currently, copying and tagging are supported only on S3. For file location, you specify either the S3 bucket and key, or the EFS filesystem ID and path."];
+          "Specifies the details for the steps that are in the specified workflow. The TYPE specifies which of the following actions is being taken for this step. COPY - Copy the file to another location. CUSTOM - Perform a custom step with an Lambda function target. DECRYPT - Decrypt a file that was encrypted before it was uploaded. DELETE - Delete the file. TAG - Add a tag to the file. Currently, copying and tagging are supported only on S3. For file location, you specify either the Amazon S3 bucket and key, or the Amazon EFS file system ID and path."];
       onExceptionSteps: WorkflowSteps.t option
         [@ocaml.doc
-          "Specifies the steps (actions) to take if errors are encountered during execution of the workflow. For custom steps, the lambda function needs to send FAILURE to the call back API to kick off the exception steps. Additionally, if the lambda does not send SUCCESS before it times out, the exception steps are executed."];
+          "Specifies the steps (actions) to take if errors are encountered during execution of the workflow. For custom steps, the Lambda function needs to send FAILURE to the call back API to kick off the exception steps. Additionally, if the Lambda does not send SUCCESS before it times out, the exception steps are executed."];
       tags: Tags.t option
         [@ocaml.doc
           "Key-value pairs that can be used to group and search for workflows. Tags are metadata attached to workflows for any purpose."]}
@@ -7429,26 +16366,201 @@ module CreateWorkflowRequest =
           (Xml.child xml_arg0 "Description") in
       make ?tags ?onExceptionSteps ~steps ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let onExceptionSteps =
-        field_map json "OnExceptionSteps" WorkflowSteps.of_json in
-      let steps = field_map_exn json "Steps" WorkflowSteps.of_json in
+        field_map json__ "OnExceptionSteps" WorkflowSteps.of_json in
+      let steps = field_map_exn json__ "Steps" WorkflowSteps.of_json in
       let description =
-        field_map json "Description" WorkflowDescription.of_json in
+        field_map json__ "Description" WorkflowDescription.of_json in
       make ?tags ?onExceptionSteps ~steps ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Allows you to create a workflow with specified steps and step details the workflow invokes after file transfer completes. After creating a workflow, you can associate the workflow created with any transfer servers by specifying the workflow-details field in CreateServer and UpdateServer operations."]
+module CreateWebAppResponse =
+  struct
+    type nonrec t =
+      {
+      webAppId: WebAppId.t option
+        [@ocaml.doc "Returns a unique identifier for the web app."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?webAppId = fun () -> { webAppId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WebAppId", (Option.map x.webAppId ~f:WebAppId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let webAppId =
+        (Option.map ~f:WebAppId.of_xml) (Xml.child xml_arg0 "WebAppId") in
+      make ?webAppId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webAppId = field_map json__ "WebAppId" WebAppId.of_json in
+      make ?webAppId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a web app based on specified parameters, and returns the ID for the new web app. You can configure the web app to be publicly accessible or hosted within a VPC. For more information about using VPC endpoints with Transfer Family, see Create a Transfer Family web app in a VPC."]
+module CreateWebAppRequest =
+  struct
+    type nonrec t =
+      {
+      identityProviderDetails: WebAppIdentityProviderDetails.t
+        [@ocaml.doc
+          "You can provide a structure that contains the details for the identity provider to use with your web app. For more details about this parameter, see Configure your identity provider for Transfer Family web apps."];
+      accessEndpoint: WebAppAccessEndpoint.t option
+        [@ocaml.doc
+          "The AccessEndpoint is the URL that you provide to your users for them to interact with the Transfer Family web app. You can specify a custom URL or use the default value. Before you enter a custom URL for this parameter, follow the steps described in Update your access endpoint with a custom URL."];
+      webAppUnits: WebAppUnits.t option
+        [@ocaml.doc
+          "A union that contains the value for number of concurrent connections or the user sessions on your web app."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for web apps."];
+      webAppEndpointPolicy: WebAppEndpointPolicy.t option
+        [@ocaml.doc
+          "Setting for the type of endpoint policy for the web app. The default value is STANDARD. If you are creating the web app in an Amazon Web Services GovCloud (US) Region, you can set this parameter to FIPS."];
+      endpointDetails: WebAppEndpointDetails.t option
+        [@ocaml.doc
+          "The endpoint configuration for the web app. You can specify whether the web app endpoint is publicly accessible or hosted within a VPC."]}
+    let context_ = "CreateWebAppRequest"
+    let make ?accessEndpoint =
+      fun ?webAppUnits ->
+        fun ?tags ->
+          fun ?webAppEndpointPolicy ->
+            fun ?endpointDetails ->
+              fun ~identityProviderDetails ->
+                fun () ->
+                  {
+                    accessEndpoint;
+                    webAppUnits;
+                    tags;
+                    webAppEndpointPolicy;
+                    endpointDetails;
+                    identityProviderDetails
+                  }
+    let to_value x =
+      structure_to_value
+        [("IdentityProviderDetails",
+           (Some
+              (WebAppIdentityProviderDetails.to_value
+                 x.identityProviderDetails)));
+        ("AccessEndpoint",
+          (Option.map x.accessEndpoint ~f:WebAppAccessEndpoint.to_value));
+        ("WebAppUnits", (Option.map x.webAppUnits ~f:WebAppUnits.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("WebAppEndpointPolicy",
+          (Option.map x.webAppEndpointPolicy ~f:WebAppEndpointPolicy.to_value));
+        ("EndpointDetails",
+          (Option.map x.endpointDetails ~f:WebAppEndpointDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpointDetails =
+        (Option.map ~f:WebAppEndpointDetails.of_xml)
+          (Xml.child xml_arg0 "EndpointDetails") in
+      let webAppEndpointPolicy =
+        (Option.map ~f:WebAppEndpointPolicy.of_xml)
+          (Xml.child xml_arg0 "WebAppEndpointPolicy") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let webAppUnits =
+        (Option.map ~f:WebAppUnits.of_xml) (Xml.child xml_arg0 "WebAppUnits") in
+      let accessEndpoint =
+        (Option.map ~f:WebAppAccessEndpoint.of_xml)
+          (Xml.child xml_arg0 "AccessEndpoint") in
+      let identityProviderDetails =
+        WebAppIdentityProviderDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityProviderDetails") in
+      make ?endpointDetails ?webAppEndpointPolicy ?tags ?webAppUnits
+        ?accessEndpoint ~identityProviderDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpointDetails =
+        field_map json__ "EndpointDetails" WebAppEndpointDetails.of_json in
+      let webAppEndpointPolicy =
+        field_map json__ "WebAppEndpointPolicy" WebAppEndpointPolicy.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let webAppUnits = field_map json__ "WebAppUnits" WebAppUnits.of_json in
+      let accessEndpoint =
+        field_map json__ "AccessEndpoint" WebAppAccessEndpoint.of_json in
+      let identityProviderDetails =
+        field_map_exn json__ "IdentityProviderDetails"
+          WebAppIdentityProviderDetails.of_json in
+      make ?endpointDetails ?webAppEndpointPolicy ?tags ?webAppUnits
+        ?accessEndpoint ~identityProviderDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a web app based on specified parameters, and returns the ID for the new web app. You can configure the web app to be publicly accessible or hosted within a VPC. For more information about using VPC endpoints with Transfer Family, see Create a Transfer Family web app in a VPC."]
 module CreateUserResponse =
   struct
     type nonrec t =
       {
-      serverId: ServerId.t
-        [@ocaml.doc "The ID of the server that the user is attached to."];
-      userName: UserName.t
+      serverId: ServerId.t option
         [@ocaml.doc
-          "A unique string that identifies a user account associated with a server."]}
+          "The identifier of the server that the user is attached to."];
+      userName: UserName.t option
+        [@ocaml.doc
+          "A unique string that identifies a Transfer Family user."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -7456,8 +16568,7 @@ module CreateUserResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateUserResponse"
-    let make ~serverId = fun ~userName -> fun () -> { serverId; userName }
+    let make ?serverId = fun ?userName -> fun () -> { serverId; userName }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -7518,51 +16629,51 @@ module CreateUserResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ServerId", (Some (ServerId.to_value x.serverId)));
-        ("UserName", (Some (UserName.to_value x.userName)))]
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("UserName", (Option.map x.userName ~f:UserName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userName =
-        UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
+        (Option.map ~f:UserName.of_xml) (Xml.child xml_arg0 "UserName") in
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
-      make ~userName ~serverId ()
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?userName ?serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      make ~userName ~serverId ()
+    let of_json json__ =
+      let userName = field_map json__ "UserName" UserName.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?userName ?serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a user and associates them with an existing file transfer protocol-enabled server. You can only create and associate users with servers that have the IdentityProviderType set to SERVICE_MANAGED. Using parameters for CreateUser, you can specify the user name, set the home directory, store the user's public key, and assign the user's Amazon Web Services Identity and Access Management (IAM) role. You can also optionally add a session policy, and assign metadata with tags that can be used to group and search for users."]
+       "Creates a user and associates them with an existing file transfer protocol-enabled server. You can only create and associate users with servers that have the IdentityProviderType set to SERVICE_MANAGED. Using parameters for CreateUser, you can specify the user name, set the home directory, store the user's public key, and assign the user's Identity and Access Management (IAM) role. You can also optionally add a session policy, and assign metadata with tags that can be used to group and search for users."]
 module CreateUserRequest =
   struct
     type nonrec t =
       {
       homeDirectory: HomeDirectory.t option
         [@ocaml.doc
-          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory."];
+          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory. You can use the HomeDirectory parameter for HomeDirectoryType when it is set to either PATH or LOGICAL."];
       homeDirectoryType: HomeDirectoryType.t option
         [@ocaml.doc
-          "The type of landing directory (folder) you want your users' home directory to be when they log into the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If you set it LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or EFS paths visible to your users."];
+          "The type of landing directory (folder) that you want your users' home directory to be when they log in to the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or Amazon EFS path as is in their file transfer protocol clients. If you set it to LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or Amazon EFS paths visible to your users. If HomeDirectoryType is LOGICAL, you must provide mappings, using the HomeDirectoryMappings parameter. If, on the other hand, HomeDirectoryType is PATH, you provide an absolute path using the HomeDirectory parameter. You cannot have both HomeDirectory and HomeDirectoryMappings in your template."];
       homeDirectoryMappings: HomeDirectoryMappings.t option
         [@ocaml.doc
-          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Amazon Web Services Identity and Access Management (IAM) role provides access to paths in Target. This value can only be set when HomeDirectoryType is set to LOGICAL. The following is an Entry and Target pair example. \\[ \\{ \"Entry\": \"/directory1\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\] In most cases, you can use this value instead of the session policy to lock your user down to the designated home directory (\"chroot\"). To do this, you can set Entry to / and set Target to the HomeDirectory parameter value. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry:\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"];
+          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Identity and Access Management (IAM) role provides access to paths in Target. This value can be set only when HomeDirectoryType is set to LOGICAL. The following is an Entry and Target pair example. \\[ \\{ \"Entry\": \"/directory1\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\] In most cases, you can use this value instead of the session policy to lock your user down to the designated home directory (\"chroot\"). To do this, you can set Entry to / and set Target to the value the user should see for their home directory when they log in. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"];
       policy: Policy.t option
         [@ocaml.doc
-          "A session policy for your user so that you can use the same IAM role across multiple users. This policy scopes down user access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}. This only applies when the domain of ServerId is S3. EFS does not use session policies. For session policies, Amazon Web Services Transfer Family stores the policy as a JSON blob, instead of the Amazon Resource Name (ARN) of the policy. You save the policy as a JSON blob and pass it in the Policy argument. For an example of a session policy, see Example session policy. For more information, see AssumeRole in the Amazon Web Services Security Token Service API Reference."];
+          "A session policy for your user so that you can use the same Identity and Access Management (IAM) role across multiple users. This policy scopes down a user's access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}. This policy applies only when the domain of ServerId is Amazon S3. Amazon EFS does not use session policies. For session policies, Transfer Family stores the policy as a JSON blob, instead of the Amazon Resource Name (ARN) of the policy. You save the policy as a JSON blob and pass it in the Policy argument. For an example of a session policy, see Example session policy. For more information, see AssumeRole in the Amazon Web Services Security Token Service API Reference."];
       posixProfile: PosixProfile.t option
         [@ocaml.doc
           "Specifies the full POSIX identity, including user ID (Uid), group ID (Gid), and any secondary groups IDs (SecondaryGids), that controls your users' access to your Amazon EFS file systems. The POSIX permissions that are set on files and directories in Amazon EFS determine the level of access your users get when transferring files into and out of your Amazon EFS file systems."];
       role: Role.t
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the IAM role that controls your users' access to your Amazon S3 bucket or EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that controls your users' access to your Amazon S3 bucket or Amazon EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or Amazon EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
       serverId: ServerId.t
         [@ocaml.doc
           "A system-assigned unique identifier for a server instance. This is the specific server that you added your user to."];
       sshPublicKeyBody: SshPublicKeyBody.t option
         [@ocaml.doc
-          "The public portion of the Secure Shell (SSH) key used to authenticate the user to the server. Currently, Transfer Family does not accept elliptical curve keys (keys beginning with ecdsa)."];
+          "The public portion of the Secure Shell (SSH) key used to authenticate the user to the server. The three standard SSH public key format elements are <key type>, <body base64>, and an optional <comment>, with spaces between each element. Transfer Family accepts RSA, ECDSA, and ED25519 keys. For RSA keys, the key type is ssh-rsa. For ED25519 keys, the key type is ssh-ed25519. For ECDSA keys, the key type is either ecdsa-sha2-nistp256, ecdsa-sha2-nistp384, or ecdsa-sha2-nistp521, depending on the size of the key you generated."];
       tags: Tags.t option
         [@ocaml.doc
           "Key-value pairs that can be used to group and search for users. Tags are metadata attached to users for any purpose."];
@@ -7640,32 +16751,34 @@ module CreateUserRequest =
       make ~userName ?tags ?sshPublicKeyBody ~serverId ~role ?posixProfile
         ?policy ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let sshPublicKeyBody =
-        field_map json "SshPublicKeyBody" SshPublicKeyBody.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      let role = field_map_exn json "Role" Role.of_json in
-      let posixProfile = field_map json "PosixProfile" PosixProfile.of_json in
-      let policy = field_map json "Policy" Policy.of_json in
+        field_map json__ "SshPublicKeyBody" SshPublicKeyBody.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let role = field_map_exn json__ "Role" Role.of_json in
+      let posixProfile = field_map json__ "PosixProfile" PosixProfile.of_json in
+      let policy = field_map json__ "Policy" Policy.of_json in
       let homeDirectoryMappings =
-        field_map json "HomeDirectoryMappings" HomeDirectoryMappings.of_json in
+        field_map json__ "HomeDirectoryMappings"
+          HomeDirectoryMappings.of_json in
       let homeDirectoryType =
-        field_map json "HomeDirectoryType" HomeDirectoryType.of_json in
+        field_map json__ "HomeDirectoryType" HomeDirectoryType.of_json in
       let homeDirectory =
-        field_map json "HomeDirectory" HomeDirectory.of_json in
+        field_map json__ "HomeDirectory" HomeDirectory.of_json in
       make ~userName ?tags ?sshPublicKeyBody ~serverId ~role ?posixProfile
         ?policy ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a user and associates them with an existing file transfer protocol-enabled server. You can only create and associate users with servers that have the IdentityProviderType set to SERVICE_MANAGED. Using parameters for CreateUser, you can specify the user name, set the home directory, store the user's public key, and assign the user's Amazon Web Services Identity and Access Management (IAM) role. You can also optionally add a session policy, and assign metadata with tags that can be used to group and search for users."]
+       "Creates a user and associates them with an existing file transfer protocol-enabled server. You can only create and associate users with servers that have the IdentityProviderType set to SERVICE_MANAGED. Using parameters for CreateUser, you can specify the user name, set the home directory, store the user's public key, and assign the user's Identity and Access Management (IAM) role. You can also optionally add a session policy, and assign metadata with tags that can be used to group and search for users."]
 module CreateServerResponse =
   struct
     type nonrec t =
       {
-      serverId: ServerId.t
-        [@ocaml.doc "The service-assigned ID of the server that is created."]}
+      serverId: ServerId.t option
+        [@ocaml.doc
+          "The service-assigned identifier of the server that is created."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceError of InternalServiceError.t 
@@ -7675,8 +16788,7 @@ module CreateServerResponse =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateServerResponse"
-    let make ~serverId = fun () -> { serverId }
+    let make ?serverId = fun () -> { serverId }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7753,16 +16865,16 @@ module CreateServerResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ServerId", (Some (ServerId.to_value x.serverId)))]
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
-      make ~serverId ()
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      make ~serverId ()
+    let of_json json__ =
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Instantiates an auto-scaling virtual server based on the selected file transfer protocol in Amazon Web Services. When you make updates to your file transfer protocol-enabled server or when you work with users, use the service-generated ServerId property that is assigned to the newly created server."]
@@ -7772,49 +16884,58 @@ module CreateServerRequest =
       {
       certificate: Certificate.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon Web Services Certificate Manager (ACM) certificate. Required when Protocols is set to FTPS. To request a new public certificate, see Request a public certificate in the Amazon Web Services Certificate Manager User Guide. To import an existing certificate into ACM, see Importing certificates into ACM in the Amazon Web Services Certificate Manager User Guide. To request a private certificate to use FTPS through private IP addresses, see Request a private certificate in the Amazon Web Services Certificate Manager User Guide. Certificates with the following cryptographic algorithms and key sizes are supported: 2048-bit RSA (RSA_2048) 4096-bit RSA (RSA_4096) Elliptic Prime Curve 256 bit (EC_prime256v1) Elliptic Prime Curve 384 bit (EC_secp384r1) Elliptic Prime Curve 521 bit (EC_secp521r1) The certificate must be a valid SSL/TLS X.509 version 3 certificate with FQDN or IP address specified and information about the issuer."];
+          "The Amazon Resource Name (ARN) of the Certificate Manager (ACM) certificate. Required when Protocols is set to FTPS. To request a new public certificate, see Request a public certificate in the Certificate Manager User Guide. To import an existing certificate into ACM, see Importing certificates into ACM in the Certificate Manager User Guide. To request a private certificate to use FTPS through private IP addresses, see Request a private certificate in the Certificate Manager User Guide. Certificates with the following cryptographic algorithms and key sizes are supported: 2048-bit RSA (RSA_2048) 4096-bit RSA (RSA_4096) Elliptic Prime Curve 256 bit (EC_prime256v1) Elliptic Prime Curve 384 bit (EC_secp384r1) Elliptic Prime Curve 521 bit (EC_secp521r1) The certificate must be a valid SSL/TLS X.509 version 3 certificate with FQDN or IP address specified and information about the issuer."];
       domain: Domain.t option
         [@ocaml.doc
           "The domain of the storage system that is used for file transfers. There are two domains available: Amazon Simple Storage Service (Amazon S3) and Amazon Elastic File System (Amazon EFS). The default value is S3. After the server is created, the domain cannot be changed."];
       endpointDetails: EndpointDetails.t option
         [@ocaml.doc
-          "The virtual private cloud (VPC) endpoint settings that are configured for your server. When you host your endpoint within your VPC, you can make it accessible only to resources within your VPC, or you can attach Elastic IP addresses and make it accessible to clients over the internet. Your VPC's default security groups are automatically assigned to your endpoint."];
+          "The virtual private cloud (VPC) endpoint settings that are configured for your server. When you host your endpoint within your VPC, you can make your endpoint accessible only to resources within your VPC, or you can attach Elastic IP addresses and make your endpoint accessible to clients over the internet. Your VPC's default security groups are automatically assigned to your endpoint."];
       endpointType: EndpointType.t option
         [@ocaml.doc
           "The type of endpoint that you want your server to use. You can choose to make your server's endpoint publicly accessible (PUBLIC) or host it inside your VPC. With an endpoint that is hosted in a VPC, you can restrict access to your server and resources only within your VPC or choose to make it internet facing by attaching Elastic IP addresses directly to it. After May 19, 2021, you won't be able to create a server using EndpointType=VPC_ENDPOINT in your Amazon Web Services account if your account hasn't already done so before May 19, 2021. If you have already created servers with EndpointType=VPC_ENDPOINT in your Amazon Web Services account on or before May 19, 2021, you will not be affected. After this date, use EndpointType=VPC. For more information, see https://docs.aws.amazon.com/transfer/latest/userguide/create-server-in-vpc.html#deprecate-vpc-endpoint. It is recommended that you use VPC as the EndpointType. With this endpoint type, you have the option to directly associate up to three Elastic IPv4 addresses (BYO IP included) with your server's endpoint and use VPC security groups to restrict traffic by the client's public IP address. This is not possible with EndpointType set to VPC_ENDPOINT."];
       hostKey: HostKey.t option
         [@ocaml.doc
-          "The RSA private key as generated by the ssh-keygen -N \"\" -m PEM -f my-new-server-key command. If you aren't planning to migrate existing users from an existing SFTP-enabled server to a new server, don't update the host key. Accidentally changing a server's host key can be disruptive. For more information, see Change the host key for your SFTP-enabled server in the Amazon Web Services Transfer Family User Guide."];
+          "The RSA, ECDSA, or ED25519 private key to use for your SFTP-enabled server. You can add multiple host keys, in case you want to rotate keys, or have a set of active keys that use different algorithms. Use the following command to generate an RSA 2048 bit key with no passphrase: ssh-keygen -t rsa -b 2048 -N \"\" -m PEM -f my-new-server-key. Use a minimum value of 2048 for the -b option. You can create a stronger key by using 3072 or 4096. Use the following command to generate an ECDSA 256 bit key with no passphrase: ssh-keygen -t ecdsa -b 256 -N \"\" -m PEM -f my-new-server-key. Valid values for the -b option for ECDSA are 256, 384, and 521. Use the following command to generate an ED25519 key with no passphrase: ssh-keygen -t ed25519 -N \"\" -f my-new-server-key. For all of these commands, you can replace my-new-server-key with a string of your choice. If you aren't planning to migrate existing users from an existing SFTP-enabled server to a new server, don't update the host key. Accidentally changing a server's host key can be disruptive. For more information, see Manage host keys for your SFTP-enabled server in the Transfer Family User Guide."];
       identityProviderDetails: IdentityProviderDetails.t option
         [@ocaml.doc
-          "Required when IdentityProviderType is set to AWS_DIRECTORY_SERVICE or API_GATEWAY. Accepts an array containing all of the information required to use a directory in AWS_DIRECTORY_SERVICE or invoke a customer-supplied authentication API, including the API Gateway URL. Not required when IdentityProviderType is set to SERVICE_MANAGED."];
+          "Required when IdentityProviderType is set to AWS_DIRECTORY_SERVICE, Amazon Web Services_LAMBDA or API_GATEWAY. Accepts an array containing all of the information required to use a directory in AWS_DIRECTORY_SERVICE or invoke a customer-supplied authentication API, including the API Gateway URL. Cannot be specified when IdentityProviderType is set to SERVICE_MANAGED."];
       identityProviderType: IdentityProviderType.t option
         [@ocaml.doc
-          "Specifies the mode of authentication for a server. The default value is SERVICE_MANAGED, which allows you to store and access user credentials within the Amazon Web Services Transfer Family service. Use AWS_DIRECTORY_SERVICE to provide access to Active Directory groups in Amazon Web Services Managed Active Directory or Microsoft Active Directory in your on-premises environment or in Amazon Web Services using AD Connectors. This option also requires you to provide a Directory ID using the IdentityProviderDetails parameter. Use the API_GATEWAY value to integrate with an identity provider of your choosing. The API_GATEWAY setting requires you to provide an API Gateway endpoint URL to call for authentication using the IdentityProviderDetails parameter. Use the AWS_LAMBDA value to directly use a Lambda function as your identity provider. If you choose this value, you must specify the ARN for the lambda function in the Function parameter for the IdentityProviderDetails data type."];
-      loggingRole: Role.t option
+          "The mode of authentication for a server. The default value is SERVICE_MANAGED, which allows you to store and access user credentials within the Transfer Family service. Use AWS_DIRECTORY_SERVICE to provide access to Active Directory groups in Directory Service for Microsoft Active Directory or Microsoft Active Directory in your on-premises environment or in Amazon Web Services using AD Connector. This option also requires you to provide a Directory ID by using the IdentityProviderDetails parameter. Use the API_GATEWAY value to integrate with an identity provider of your choosing. The API_GATEWAY setting requires you to provide an Amazon API Gateway endpoint URL to call for authentication by using the IdentityProviderDetails parameter. Use the AWS_LAMBDA value to directly use an Lambda function as your identity provider. If you choose this value, you must specify the ARN for the Lambda function in the Function parameter for the IdentityProviderDetails data type."];
+      loggingRole: NullableRole.t option
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the Amazon Web Services Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, user activity can be viewed in your CloudWatch logs."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch logging for Amazon S3 or Amazon EFS events. When set, you can view user activity in your CloudWatch logs."];
       postAuthenticationLoginBanner: PostAuthenticationLoginBanner.t option
         [@ocaml.doc
-          "Specify a string to display when users connect to a server. This string is displayed after the user authenticates. The SFTP protocol does not support post-authentication display banners."];
+          "Specifies a string to display when users connect to a server. This string is displayed after the user authenticates. The SFTP protocol does not support post-authentication display banners."];
       preAuthenticationLoginBanner: PreAuthenticationLoginBanner.t option
         [@ocaml.doc
-          "Specify a string to display when users connect to a server. This string is displayed before the user authenticates. For example, the following banner displays details about using the system. This system is for the use of authorized users only. Individuals using this computer system without authority, or in excess of their authority, are subject to having all of their activities on this system monitored and recorded by system personnel."];
+          "Specifies a string to display when users connect to a server. This string is displayed before the user authenticates. For example, the following banner displays details about using the system: This system is for the use of authorized users only. Individuals using this computer system without authority, or in excess of their authority, are subject to having all of their activities on this system monitored and recorded by system personnel."];
       protocols: Protocols.t option
         [@ocaml.doc
-          "Specifies the file transfer protocol or protocols over which your file transfer protocol client can connect to your server's endpoint. The available protocols are: SFTP (Secure Shell (SSH) File Transfer Protocol): File transfer over SSH FTPS (File Transfer Protocol Secure): File transfer with TLS encryption FTP (File Transfer Protocol): Unencrypted file transfer If you select FTPS, you must choose a certificate stored in Amazon Web Services Certificate Manager (ACM) which is used to identify your server when clients connect to it over FTPS. If Protocol includes either FTP or FTPS, then the EndpointType must be VPC and the IdentityProviderType must be AWS_DIRECTORY_SERVICE or API_GATEWAY. If Protocol includes FTP, then AddressAllocationIds cannot be associated. If Protocol is set only to SFTP, the EndpointType can be set to PUBLIC and the IdentityProviderType can be set to SERVICE_MANAGED."];
+          "Specifies the file transfer protocol or protocols over which your file transfer protocol client can connect to your server's endpoint. The available protocols are: SFTP (Secure Shell (SSH) File Transfer Protocol): File transfer over SSH FTPS (File Transfer Protocol Secure): File transfer with TLS encryption FTP (File Transfer Protocol): Unencrypted file transfer AS2 (Applicability Statement 2): used for transporting structured business-to-business data If you select FTPS, you must choose a certificate stored in Certificate Manager (ACM) which is used to identify your server when clients connect to it over FTPS. If Protocol includes either FTP or FTPS, then the EndpointType must be VPC and the IdentityProviderType must be either AWS_DIRECTORY_SERVICE, AWS_LAMBDA, or API_GATEWAY. If Protocol includes FTP, then AddressAllocationIds cannot be associated. If Protocol is set only to SFTP, the EndpointType can be set to PUBLIC and the IdentityProviderType can be set any of the supported identity types: SERVICE_MANAGED, AWS_DIRECTORY_SERVICE, AWS_LAMBDA, or API_GATEWAY. If Protocol includes AS2, then the EndpointType must be VPC, and domain must be Amazon S3."];
       protocolDetails: ProtocolDetails.t option
         [@ocaml.doc
-          "The protocol settings that are configured for your server. Use the PassiveIp parameter to indicate passive mode (for FTP and FTPS protocols). Enter a single dotted-quad IPv4 address, such as the external IP address of a firewall, router, or load balancer. Use the TlsSessionResumptionMode parameter to determine whether or not your Transfer server resumes recent, negotiated sessions through a unique session ID."];
+          "The protocol settings that are configured for your server. Avoid placing Network Load Balancers (NLBs) or NAT gateways in front of Transfer Family servers, as this increases costs and can cause performance issues, including reduced connection limits for FTPS. For more details, see Avoid placing NLBs and NATs in front of Transfer Family. To indicate passive mode (for FTP and FTPS protocols), use the PassiveIp parameter. Enter a single dotted-quad IPv4 address, such as the external IP address of a firewall, router, or load balancer. To ignore the error that is generated when the client attempts to use the SETSTAT command on a file that you are uploading to an Amazon S3 bucket, use the SetStatOption parameter. To have the Transfer Family server ignore the SETSTAT command and upload files without needing to make any changes to your SFTP client, set the value to ENABLE_NO_OP. If you set the SetStatOption parameter to ENABLE_NO_OP, Transfer Family generates a log entry to Amazon CloudWatch Logs, so that you can determine when the client is making a SETSTAT call. To determine whether your Transfer Family server resumes recent, negotiated sessions through a unique session ID, use the TlsSessionResumptionMode parameter. As2Transports indicates the transport method for the AS2 messages. Currently, only HTTP is supported."];
       securityPolicyName: SecurityPolicyName.t option
         [@ocaml.doc
-          "Specifies the name of the security policy that is attached to the server."];
+          "Specifies the name of the security policy for the server."];
       tags: Tags.t option
         [@ocaml.doc
           "Key-value pairs that can be used to group and search for servers."];
       workflowDetails: WorkflowDetails.t option
         [@ocaml.doc
-          "Specifies the workflow ID for the workflow to assign and the execution role used for executing the workflow."]}
+          "Specifies the workflow ID for the workflow to assign and the execution role that's used for executing the workflow. In addition to a workflow to execute when a file is uploaded completely, WorkflowDetails can also contain a workflow ID (and execution role) for a workflow to execute on partial upload. A partial upload occurs when the server session disconnects while the file is still being uploaded."];
+      structuredLogDestinations: StructuredLogDestinations.t option
+        [@ocaml.doc
+          "Specifies the log groups to which your server logs are sent. To specify a log group, you must provide the ARN for an existing log group. In this case, the format of the log group is as follows: arn:aws:logs:region-name:amazon-account-id:log-group:log-group-name:* For example, arn:aws:logs:us-east-1:111122223333:log-group:mytestgroup:* If you have previously specified a log group for a server, you can clear it, and in effect turn off structured logging, by providing an empty value for this parameter in an update-server call. For example: update-server --server-id s-1234567890abcdef0 --structured-log-destinations"];
+      s3StorageOptions: S3StorageOptions.t option
+        [@ocaml.doc
+          "Specifies whether or not performance for your Amazon S3 directories is optimized. If using the console, this is enabled by default. If using the API or CLI, this is disabled by default. By default, home directory mappings have a TYPE of DIRECTORY. If you enable this option, you would then need to explicitly set the HomeDirectoryMapEntry Type to FILE if you want a mapping to have a file target."];
+      ipAddressType: IpAddressType.t option
+        [@ocaml.doc
+          "Specifies whether to use IPv4 only, or to use dual-stack (IPv4 and IPv6) for your Transfer Family endpoint. The default value is IPV4. The IpAddressType parameter has the following limitations: It cannot be changed while the server is online. You must stop the server before modifying this parameter. It cannot be updated to DUALSTACK if the server has AddressAllocationIds specified. When using DUALSTACK as the IpAddressType, you cannot set the AddressAllocationIds parameter for the EndpointDetails for the server."]}
     let make ?certificate =
       fun ?domain ->
         fun ?endpointDetails ->
@@ -7830,24 +16951,30 @@ module CreateServerRequest =
                             fun ?securityPolicyName ->
                               fun ?tags ->
                                 fun ?workflowDetails ->
-                                  fun () ->
-                                    {
-                                      certificate;
-                                      domain;
-                                      endpointDetails;
-                                      endpointType;
-                                      hostKey;
-                                      identityProviderDetails;
-                                      identityProviderType;
-                                      loggingRole;
-                                      postAuthenticationLoginBanner;
-                                      preAuthenticationLoginBanner;
-                                      protocols;
-                                      protocolDetails;
-                                      securityPolicyName;
-                                      tags;
-                                      workflowDetails
-                                    }
+                                  fun ?structuredLogDestinations ->
+                                    fun ?s3StorageOptions ->
+                                      fun ?ipAddressType ->
+                                        fun () ->
+                                          {
+                                            certificate;
+                                            domain;
+                                            endpointDetails;
+                                            endpointType;
+                                            hostKey;
+                                            identityProviderDetails;
+                                            identityProviderType;
+                                            loggingRole;
+                                            postAuthenticationLoginBanner;
+                                            preAuthenticationLoginBanner;
+                                            protocols;
+                                            protocolDetails;
+                                            securityPolicyName;
+                                            tags;
+                                            workflowDetails;
+                                            structuredLogDestinations;
+                                            s3StorageOptions;
+                                            ipAddressType
+                                          }
     let to_value x =
       structure_to_value
         [("Certificate", (Option.map x.certificate ~f:Certificate.to_value));
@@ -7862,7 +16989,7 @@ module CreateServerRequest =
              ~f:IdentityProviderDetails.to_value));
         ("IdentityProviderType",
           (Option.map x.identityProviderType ~f:IdentityProviderType.to_value));
-        ("LoggingRole", (Option.map x.loggingRole ~f:Role.to_value));
+        ("LoggingRole", (Option.map x.loggingRole ~f:NullableRole.to_value));
         ("PostAuthenticationLoginBanner",
           (Option.map x.postAuthenticationLoginBanner
              ~f:PostAuthenticationLoginBanner.to_value));
@@ -7876,9 +17003,25 @@ module CreateServerRequest =
           (Option.map x.securityPolicyName ~f:SecurityPolicyName.to_value));
         ("Tags", (Option.map x.tags ~f:Tags.to_value));
         ("WorkflowDetails",
-          (Option.map x.workflowDetails ~f:WorkflowDetails.to_value))]
+          (Option.map x.workflowDetails ~f:WorkflowDetails.to_value));
+        ("StructuredLogDestinations",
+          (Option.map x.structuredLogDestinations
+             ~f:StructuredLogDestinations.to_value));
+        ("S3StorageOptions",
+          (Option.map x.s3StorageOptions ~f:S3StorageOptions.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType ~f:IpAddressType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:IpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let s3StorageOptions =
+        (Option.map ~f:S3StorageOptions.of_xml)
+          (Xml.child xml_arg0 "S3StorageOptions") in
+      let structuredLogDestinations =
+        (Option.map ~f:StructuredLogDestinations.of_xml)
+          (Xml.child xml_arg0 "StructuredLogDestinations") in
       let workflowDetails =
         (Option.map ~f:WorkflowDetails.of_xml)
           (Xml.child xml_arg0 "WorkflowDetails") in
@@ -7898,7 +17041,8 @@ module CreateServerRequest =
         (Option.map ~f:PostAuthenticationLoginBanner.of_xml)
           (Xml.child xml_arg0 "PostAuthenticationLoginBanner") in
       let loggingRole =
-        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "LoggingRole") in
+        (Option.map ~f:NullableRole.of_xml)
+          (Xml.child xml_arg0 "LoggingRole") in
       let identityProviderType =
         (Option.map ~f:IdentityProviderType.of_xml)
           (Xml.child xml_arg0 "IdentityProviderType") in
@@ -7917,40 +17061,49 @@ module CreateServerRequest =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "Certificate") in
-      make ?workflowDetails ?tags ?securityPolicyName ?protocolDetails
+      make ?ipAddressType ?s3StorageOptions ?structuredLogDestinations
+        ?workflowDetails ?tags ?securityPolicyName ?protocolDetails
         ?protocols ?preAuthenticationLoginBanner
         ?postAuthenticationLoginBanner ?loggingRole ?identityProviderType
         ?identityProviderDetails ?hostKey ?endpointType ?endpointDetails
         ?domain ?certificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let s3StorageOptions =
+        field_map json__ "S3StorageOptions" S3StorageOptions.of_json in
+      let structuredLogDestinations =
+        field_map json__ "StructuredLogDestinations"
+          StructuredLogDestinations.of_json in
       let workflowDetails =
-        field_map json "WorkflowDetails" WorkflowDetails.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "WorkflowDetails" WorkflowDetails.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let securityPolicyName =
-        field_map json "SecurityPolicyName" SecurityPolicyName.of_json in
+        field_map json__ "SecurityPolicyName" SecurityPolicyName.of_json in
       let protocolDetails =
-        field_map json "ProtocolDetails" ProtocolDetails.of_json in
-      let protocols = field_map json "Protocols" Protocols.of_json in
+        field_map json__ "ProtocolDetails" ProtocolDetails.of_json in
+      let protocols = field_map json__ "Protocols" Protocols.of_json in
       let preAuthenticationLoginBanner =
-        field_map json "PreAuthenticationLoginBanner"
+        field_map json__ "PreAuthenticationLoginBanner"
           PreAuthenticationLoginBanner.of_json in
       let postAuthenticationLoginBanner =
-        field_map json "PostAuthenticationLoginBanner"
+        field_map json__ "PostAuthenticationLoginBanner"
           PostAuthenticationLoginBanner.of_json in
-      let loggingRole = field_map json "LoggingRole" Role.of_json in
+      let loggingRole = field_map json__ "LoggingRole" NullableRole.of_json in
       let identityProviderType =
-        field_map json "IdentityProviderType" IdentityProviderType.of_json in
+        field_map json__ "IdentityProviderType" IdentityProviderType.of_json in
       let identityProviderDetails =
-        field_map json "IdentityProviderDetails"
+        field_map json__ "IdentityProviderDetails"
           IdentityProviderDetails.of_json in
-      let hostKey = field_map json "HostKey" HostKey.of_json in
-      let endpointType = field_map json "EndpointType" EndpointType.of_json in
+      let hostKey = field_map json__ "HostKey" HostKey.of_json in
+      let endpointType = field_map json__ "EndpointType" EndpointType.of_json in
       let endpointDetails =
-        field_map json "EndpointDetails" EndpointDetails.of_json in
-      let domain = field_map json "Domain" Domain.of_json in
-      let certificate = field_map json "Certificate" Certificate.of_json in
-      make ?workflowDetails ?tags ?securityPolicyName ?protocolDetails
+        field_map json__ "EndpointDetails" EndpointDetails.of_json in
+      let domain = field_map json__ "Domain" Domain.of_json in
+      let certificate = field_map json__ "Certificate" Certificate.of_json in
+      make ?ipAddressType ?s3StorageOptions ?structuredLogDestinations
+        ?workflowDetails ?tags ?securityPolicyName ?protocolDetails
         ?protocols ?preAuthenticationLoginBanner
         ?postAuthenticationLoginBanner ?loggingRole ?identityProviderType
         ?identityProviderDetails ?hostKey ?endpointType ?endpointDetails
@@ -7958,15 +17111,605 @@ module CreateServerRequest =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Instantiates an auto-scaling virtual server based on the selected file transfer protocol in Amazon Web Services. When you make updates to your file transfer protocol-enabled server or when you work with users, use the service-generated ServerId property that is assigned to the newly created server."]
+module CreateProfileResponse =
+  struct
+    type nonrec t =
+      {
+      profileId: ProfileId.t option
+        [@ocaml.doc
+          "The unique identifier for the AS2 profile, returned after the API call succeeds."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?profileId = fun () -> { profileId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ProfileId", (Option.map x.profileId ~f:ProfileId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileId =
+        (Option.map ~f:ProfileId.of_xml) (Xml.child xml_arg0 "ProfileId") in
+      make ?profileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileId = field_map json__ "ProfileId" ProfileId.of_json in
+      make ?profileId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates the local or partner profile to use for AS2 transfers."]
+module CreateProfileRequest =
+  struct
+    type nonrec t =
+      {
+      as2Id: As2Id.t
+        [@ocaml.doc
+          "The As2Id is the AS2-name, as defined in the RFC 4130. For inbound transfers, this is the AS2-From header for the AS2 messages sent from the partner. For outbound connectors, this is the AS2-To header for the AS2 messages sent to the partner using the StartFileTransfer API operation. This ID cannot include spaces."];
+      profileType: ProfileType.t
+        [@ocaml.doc
+          "Determines the type of profile to create: Specify LOCAL to create a local profile. A local profile represents the AS2-enabled Transfer Family server organization or party. Specify PARTNER to create a partner profile. A partner profile represents a remote organization, external to Transfer Family."];
+      certificateIds: CertificateIds.t option
+        [@ocaml.doc
+          "An array of identifiers for the imported certificates. You use this identifier for working with profiles and partner profiles."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for AS2 profiles."]}
+    let context_ = "CreateProfileRequest"
+    let make ?certificateIds =
+      fun ?tags ->
+        fun ~as2Id ->
+          fun ~profileType ->
+            fun () -> { certificateIds; tags; as2Id; profileType }
+    let to_value x =
+      structure_to_value
+        [("As2Id", (Some (As2Id.to_value x.as2Id)));
+        ("ProfileType", (Some (ProfileType.to_value x.profileType)));
+        ("CertificateIds",
+          (Option.map x.certificateIds ~f:CertificateIds.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let certificateIds =
+        (Option.map ~f:CertificateIds.of_xml)
+          (Xml.child xml_arg0 "CertificateIds") in
+      let profileType =
+        ProfileType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileType") in
+      let as2Id =
+        As2Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "As2Id") in
+      make ?tags ?certificateIds ~profileType ~as2Id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let certificateIds =
+        field_map json__ "CertificateIds" CertificateIds.of_json in
+      let profileType =
+        field_map_exn json__ "ProfileType" ProfileType.of_json in
+      let as2Id = field_map_exn json__ "As2Id" As2Id.of_json in
+      make ?tags ?certificateIds ~profileType ~as2Id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates the local or partner profile to use for AS2 transfers."]
+module CreateConnectorResponse =
+  struct
+    type nonrec t =
+      {
+      connectorId: ConnectorId.t option
+        [@ocaml.doc
+          "The unique identifier for the connector, returned after the API call succeeds."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceExistsException of ResourceExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?connectorId = fun () -> { connectorId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceExistsException"));
+            ("details", (ResourceExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ConnectorId", (Option.map x.connectorId ~f:ConnectorId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectorId =
+        (Option.map ~f:ConnectorId.of_xml) (Xml.child xml_arg0 "ConnectorId") in
+      make ?connectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectorId = field_map json__ "ConnectorId" ConnectorId.of_json in
+      make ?connectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates the connector, which captures the parameters for a connection for the AS2 or SFTP protocol. For AS2, the connector is required for sending files to an externally hosted AS2 server. For SFTP, the connector is required when sending files to an SFTP server or receiving files from an SFTP server. For more details about connectors, see Configure AS2 connectors and Create SFTP connectors. You must specify exactly one configuration object: either for AS2 (As2Config) or SFTP (SftpConfig)."]
+module CreateConnectorRequest =
+  struct
+    type nonrec t =
+      {
+      url: Url.t option
+        [@ocaml.doc
+          "The URL of the partner's AS2 or SFTP endpoint. When creating AS2 connectors or service-managed SFTP connectors (connectors without egress configuration), you must provide a URL to specify the remote server endpoint. For VPC Lattice type connectors, the URL must be null."];
+      as2Config: As2ConnectorConfig.t option
+        [@ocaml.doc
+          "A structure that contains the parameters for an AS2 connector object."];
+      accessRole: Role.t
+        [@ocaml.doc
+          "Connectors are used to send files using either the AS2 or SFTP protocol. For the access role, provide the Amazon Resource Name (ARN) of the Identity and Access Management role to use. For AS2 connectors With AS2, you can send files by calling StartFileTransfer and specifying the file paths in the request parameter, SendFilePaths. We use the file\226\128\153s parent directory (for example, for --send-file-paths /bucket/dir/file.txt, parent directory is /bucket/dir/) to temporarily store a processed AS2 message file, store the MDN when we receive them from the partner, and write a final JSON file containing relevant metadata of the transmission. So, the AccessRole needs to provide read and write access to the parent directory of the file location used in the StartFileTransfer request. Additionally, you need to provide read and write access to the parent directory of the files that you intend to send with StartFileTransfer. If you are using Basic authentication for your AS2 connector, the access role requires the secretsmanager:GetSecretValue permission for the secret. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key in Secrets Manager, then the role also needs the kms:Decrypt permission for that key. For SFTP connectors Make sure that the access role provides read and write access to the parent directory of the file location that's used in the StartFileTransfer request. Additionally, make sure that the role provides secretsmanager:GetSecretValue permission to Secrets Manager."];
+      loggingRole: Role.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that allows a connector to turn on CloudWatch logging for Amazon S3 events. When set, you can view connector activity in your CloudWatch logs."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for connectors. Tags are metadata attached to connectors for any purpose."];
+      sftpConfig: SftpConnectorConfig.t option
+        [@ocaml.doc
+          "A structure that contains the parameters for an SFTP connector object."];
+      securityPolicyName: ConnectorSecurityPolicyName.t option
+        [@ocaml.doc
+          "Specifies the name of the security policy for the connector."];
+      egressConfig: ConnectorEgressConfig.t option
+        [@ocaml.doc
+          "Specifies the egress configuration for the connector, which determines how traffic is routed from the connector to the SFTP server. When set to VPC, enables routing through customer VPCs using VPC_LATTICE for private connectivity."];
+      ipAddressType: ConnectorsIpAddressType.t option
+        [@ocaml.doc
+          "Specifies the IP address type for the connector's network connections. When set to IPV4, the connector uses IPv4 addresses only. When set to DUALSTACK, the connector supports both IPv4 and IPv6 addresses, with IPv6 preferred when available."]}
+    let context_ = "CreateConnectorRequest"
+    let make ?url =
+      fun ?as2Config ->
+        fun ?loggingRole ->
+          fun ?tags ->
+            fun ?sftpConfig ->
+              fun ?securityPolicyName ->
+                fun ?egressConfig ->
+                  fun ?ipAddressType ->
+                    fun ~accessRole ->
+                      fun () ->
+                        {
+                          url;
+                          as2Config;
+                          loggingRole;
+                          tags;
+                          sftpConfig;
+                          securityPolicyName;
+                          egressConfig;
+                          ipAddressType;
+                          accessRole
+                        }
+    let to_value x =
+      structure_to_value
+        [("Url", (Option.map x.url ~f:Url.to_value));
+        ("As2Config",
+          (Option.map x.as2Config ~f:As2ConnectorConfig.to_value));
+        ("AccessRole", (Some (Role.to_value x.accessRole)));
+        ("LoggingRole", (Option.map x.loggingRole ~f:Role.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("SftpConfig",
+          (Option.map x.sftpConfig ~f:SftpConnectorConfig.to_value));
+        ("SecurityPolicyName",
+          (Option.map x.securityPolicyName
+             ~f:ConnectorSecurityPolicyName.to_value));
+        ("EgressConfig",
+          (Option.map x.egressConfig ~f:ConnectorEgressConfig.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType ~f:ConnectorsIpAddressType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:ConnectorsIpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let egressConfig =
+        (Option.map ~f:ConnectorEgressConfig.of_xml)
+          (Xml.child xml_arg0 "EgressConfig") in
+      let securityPolicyName =
+        (Option.map ~f:ConnectorSecurityPolicyName.of_xml)
+          (Xml.child xml_arg0 "SecurityPolicyName") in
+      let sftpConfig =
+        (Option.map ~f:SftpConnectorConfig.of_xml)
+          (Xml.child xml_arg0 "SftpConfig") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let loggingRole =
+        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "LoggingRole") in
+      let accessRole =
+        Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AccessRole") in
+      let as2Config =
+        (Option.map ~f:As2ConnectorConfig.of_xml)
+          (Xml.child xml_arg0 "As2Config") in
+      let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "Url") in
+      make ?ipAddressType ?egressConfig ?securityPolicyName ?sftpConfig ?tags
+        ?loggingRole ~accessRole ?as2Config ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "IpAddressType" ConnectorsIpAddressType.of_json in
+      let egressConfig =
+        field_map json__ "EgressConfig" ConnectorEgressConfig.of_json in
+      let securityPolicyName =
+        field_map json__ "SecurityPolicyName"
+          ConnectorSecurityPolicyName.of_json in
+      let sftpConfig =
+        field_map json__ "SftpConfig" SftpConnectorConfig.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let loggingRole = field_map json__ "LoggingRole" Role.of_json in
+      let accessRole = field_map_exn json__ "AccessRole" Role.of_json in
+      let as2Config = field_map json__ "As2Config" As2ConnectorConfig.of_json in
+      let url = field_map json__ "Url" Url.of_json in
+      make ?ipAddressType ?egressConfig ?securityPolicyName ?sftpConfig ?tags
+        ?loggingRole ~accessRole ?as2Config ?url ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates the connector, which captures the parameters for a connection for the AS2 or SFTP protocol. For AS2, the connector is required for sending files to an externally hosted AS2 server. For SFTP, the connector is required when sending files to an SFTP server or receiving files from an SFTP server. For more details about connectors, see Configure AS2 connectors and Create SFTP connectors. You must specify exactly one configuration object: either for AS2 (As2Config) or SFTP (SftpConfig)."]
+module CreateAgreementResponse =
+  struct
+    type nonrec t =
+      {
+      agreementId: AgreementId.t option
+        [@ocaml.doc
+          "The unique identifier for the agreement. Use this ID for deleting, or updating an agreement, as well as in any other API calls that require that you specify the agreement ID."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceExistsException of ResourceExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?agreementId = fun () -> { agreementId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceExistsException" ->
+          `ResourceExistsException (ResourceExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceExistsException"));
+            ("details", (ResourceExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AgreementId", (Option.map x.agreementId ~f:AgreementId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let agreementId =
+        (Option.map ~f:AgreementId.of_xml) (Xml.child xml_arg0 "AgreementId") in
+      make ?agreementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agreementId = field_map json__ "AgreementId" AgreementId.of_json in
+      make ?agreementId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an agreement. An agreement is a bilateral trading partner agreement, or partnership, between an Transfer Family server and an AS2 process. The agreement defines the file and message transfer relationship between the server and the AS2 process. To define an agreement, Transfer Family combines a server, local profile, partner profile, certificate, and other attributes. The partner is identified with the PartnerProfileId, and the AS2 process is identified with the LocalProfileId. Specify either BaseDirectory or CustomDirectories, but not both. Specifying both causes the command to fail."]
+module CreateAgreementRequest =
+  struct
+    type nonrec t =
+      {
+      description: Description.t option
+        [@ocaml.doc "A name or short description to identify the agreement."];
+      serverId: ServerId.t
+        [@ocaml.doc
+          "A system-assigned unique identifier for a server instance. This is the specific server that the agreement uses."];
+      localProfileId: ProfileId.t
+        [@ocaml.doc "A unique identifier for the AS2 local profile."];
+      partnerProfileId: ProfileId.t
+        [@ocaml.doc
+          "A unique identifier for the partner profile used in the agreement."];
+      baseDirectory: HomeDirectory.t option
+        [@ocaml.doc
+          "The landing directory (folder) for files transferred by using the AS2 protocol. A BaseDirectory example is /amzn-s3-demo-bucket/home/mydirectory."];
+      accessRole: Role.t
+        [@ocaml.doc
+          "Connectors are used to send files using either the AS2 or SFTP protocol. For the access role, provide the Amazon Resource Name (ARN) of the Identity and Access Management role to use. For AS2 connectors With AS2, you can send files by calling StartFileTransfer and specifying the file paths in the request parameter, SendFilePaths. We use the file\226\128\153s parent directory (for example, for --send-file-paths /bucket/dir/file.txt, parent directory is /bucket/dir/) to temporarily store a processed AS2 message file, store the MDN when we receive them from the partner, and write a final JSON file containing relevant metadata of the transmission. So, the AccessRole needs to provide read and write access to the parent directory of the file location used in the StartFileTransfer request. Additionally, you need to provide read and write access to the parent directory of the files that you intend to send with StartFileTransfer. If you are using Basic authentication for your AS2 connector, the access role requires the secretsmanager:GetSecretValue permission for the secret. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key in Secrets Manager, then the role also needs the kms:Decrypt permission for that key. For SFTP connectors Make sure that the access role provides read and write access to the parent directory of the file location that's used in the StartFileTransfer request. Additionally, make sure that the role provides secretsmanager:GetSecretValue permission to Secrets Manager."];
+      status: AgreementStatusType.t option
+        [@ocaml.doc
+          "The status of the agreement. The agreement can be either ACTIVE or INACTIVE."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Key-value pairs that can be used to group and search for agreements."];
+      preserveFilename: PreserveFilenameType.t option
+        [@ocaml.doc
+          "Determines whether or not Transfer Family appends a unique string of characters to the end of the AS2 message payload filename when saving it. ENABLED: the filename provided by your trading parter is preserved when the file is saved. DISABLED (default value): when Transfer Family saves the file, the filename is adjusted, as described in File names and locations."];
+      enforceMessageSigning: EnforceMessageSigningType.t option
+        [@ocaml.doc
+          "Determines whether or not unsigned messages from your trading partners will be accepted. ENABLED: Transfer Family rejects unsigned messages from your trading partner. DISABLED (default value): Transfer Family accepts unsigned messages from your trading partner."];
+      customDirectories: CustomDirectoriesType.t option
+        [@ocaml.doc
+          "A CustomDirectoriesType structure. This structure specifies custom directories for storing various AS2 message files. You can specify directories for the following types of files. Failed files MDN files Payload files Status files Temporary files"]}
+    let context_ = "CreateAgreementRequest"
+    let make ?description =
+      fun ?baseDirectory ->
+        fun ?status ->
+          fun ?tags ->
+            fun ?preserveFilename ->
+              fun ?enforceMessageSigning ->
+                fun ?customDirectories ->
+                  fun ~serverId ->
+                    fun ~localProfileId ->
+                      fun ~partnerProfileId ->
+                        fun ~accessRole ->
+                          fun () ->
+                            {
+                              description;
+                              baseDirectory;
+                              status;
+                              tags;
+                              preserveFilename;
+                              enforceMessageSigning;
+                              customDirectories;
+                              serverId;
+                              localProfileId;
+                              partnerProfileId;
+                              accessRole
+                            }
+    let to_value x =
+      structure_to_value
+        [("Description", (Option.map x.description ~f:Description.to_value));
+        ("ServerId", (Some (ServerId.to_value x.serverId)));
+        ("LocalProfileId", (Some (ProfileId.to_value x.localProfileId)));
+        ("PartnerProfileId", (Some (ProfileId.to_value x.partnerProfileId)));
+        ("BaseDirectory",
+          (Option.map x.baseDirectory ~f:HomeDirectory.to_value));
+        ("AccessRole", (Some (Role.to_value x.accessRole)));
+        ("Status", (Option.map x.status ~f:AgreementStatusType.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("PreserveFilename",
+          (Option.map x.preserveFilename ~f:PreserveFilenameType.to_value));
+        ("EnforceMessageSigning",
+          (Option.map x.enforceMessageSigning
+             ~f:EnforceMessageSigningType.to_value));
+        ("CustomDirectories",
+          (Option.map x.customDirectories ~f:CustomDirectoriesType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customDirectories =
+        (Option.map ~f:CustomDirectoriesType.of_xml)
+          (Xml.child xml_arg0 "CustomDirectories") in
+      let enforceMessageSigning =
+        (Option.map ~f:EnforceMessageSigningType.of_xml)
+          (Xml.child xml_arg0 "EnforceMessageSigning") in
+      let preserveFilename =
+        (Option.map ~f:PreserveFilenameType.of_xml)
+          (Xml.child xml_arg0 "PreserveFilename") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let status =
+        (Option.map ~f:AgreementStatusType.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let accessRole =
+        Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AccessRole") in
+      let baseDirectory =
+        (Option.map ~f:HomeDirectory.of_xml)
+          (Xml.child xml_arg0 "BaseDirectory") in
+      let partnerProfileId =
+        ProfileId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PartnerProfileId") in
+      let localProfileId =
+        ProfileId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocalProfileId") in
+      let serverId =
+        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      make ?customDirectories ?enforceMessageSigning ?preserveFilename ?tags
+        ?status ~accessRole ?baseDirectory ~partnerProfileId ~localProfileId
+        ~serverId ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customDirectories =
+        field_map json__ "CustomDirectories" CustomDirectoriesType.of_json in
+      let enforceMessageSigning =
+        field_map json__ "EnforceMessageSigning"
+          EnforceMessageSigningType.of_json in
+      let preserveFilename =
+        field_map json__ "PreserveFilename" PreserveFilenameType.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let status = field_map json__ "Status" AgreementStatusType.of_json in
+      let accessRole = field_map_exn json__ "AccessRole" Role.of_json in
+      let baseDirectory =
+        field_map json__ "BaseDirectory" HomeDirectory.of_json in
+      let partnerProfileId =
+        field_map_exn json__ "PartnerProfileId" ProfileId.of_json in
+      let localProfileId =
+        field_map_exn json__ "LocalProfileId" ProfileId.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      make ?customDirectories ?enforceMessageSigning ?preserveFilename ?tags
+        ?status ~accessRole ?baseDirectory ~partnerProfileId ~localProfileId
+        ~serverId ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an agreement. An agreement is a bilateral trading partner agreement, or partnership, between an Transfer Family server and an AS2 process. The agreement defines the file and message transfer relationship between the server and the AS2 process. To define an agreement, Transfer Family combines a server, local profile, partner profile, certificate, and other attributes. The partner is identified with the PartnerProfileId, and the AS2 process is identified with the LocalProfileId. Specify either BaseDirectory or CustomDirectories, but not both. Specifying both causes the command to fail."]
 module CreateAccessResponse =
   struct
     type nonrec t =
       {
-      serverId: ServerId.t
-        [@ocaml.doc "The ID of the server that the user is attached to."];
-      externalId: ExternalId.t
+      serverId: ServerId.t option
         [@ocaml.doc
-          "The external ID of the group whose users have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Amazon Web Services Transfer Family."]}
+          "The identifier of the server that the user is attached to."];
+      externalId: ExternalId.t option
+        [@ocaml.doc
+          "The external identifier of the group whose users have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Transfer Family."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -7974,9 +17717,8 @@ module CreateAccessResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAccessResponse"
-    let make ~serverId =
-      fun ~externalId -> fun () -> { serverId; externalId }
+    let make ?serverId =
+      fun ?externalId -> fun () -> { serverId; externalId }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -8037,50 +17779,49 @@ module CreateAccessResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ServerId", (Some (ServerId.to_value x.serverId)));
-        ("ExternalId", (Some (ExternalId.to_value x.externalId)))]
+        [("ServerId", (Option.map x.serverId ~f:ServerId.to_value));
+        ("ExternalId", (Option.map x.externalId ~f:ExternalId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let externalId =
-        ExternalId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExternalId") in
+        (Option.map ~f:ExternalId.of_xml) (Xml.child xml_arg0 "ExternalId") in
       let serverId =
-        ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
-      make ~externalId ~serverId ()
+        (Option.map ~f:ServerId.of_xml) (Xml.child xml_arg0 "ServerId") in
+      make ?externalId ?serverId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      make ~externalId ~serverId ()
+    let of_json json__ =
+      let externalId = field_map json__ "ExternalId" ExternalId.of_json in
+      let serverId = field_map json__ "ServerId" ServerId.of_json in
+      make ?externalId ?serverId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by administrators to choose which groups in the directory should have access to upload and download files over the enabled protocols using Amazon Web Services Transfer Family. For example, a Microsoft Active Directory might contain 50,000 users, but only a small fraction might need the ability to transfer files to the server. An administrator can use CreateAccess to limit the access to the correct set of users who need this ability."]
+       "Used by administrators to choose which groups in the directory should have access to upload and download files over the enabled protocols using Transfer Family. For example, a Microsoft Active Directory might contain 50,000 users, but only a small fraction might need the ability to transfer files to the server. An administrator can use CreateAccess to limit the access to the correct set of users who need this ability."]
 module CreateAccessRequest =
   struct
     type nonrec t =
       {
       homeDirectory: HomeDirectory.t option
         [@ocaml.doc
-          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory."];
+          "The landing directory (folder) for a user when they log in to the server using the client. A HomeDirectory example is /bucket_name/home/mydirectory. You can use the HomeDirectory parameter for HomeDirectoryType when it is set to either PATH or LOGICAL."];
       homeDirectoryType: HomeDirectoryType.t option
         [@ocaml.doc
-          "The type of landing directory (folder) you want your users' home directory to be when they log into the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If you set it LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or EFS paths visible to your users."];
+          "The type of landing directory (folder) that you want your users' home directory to be when they log in to the server. If you set it to PATH, the user will see the absolute Amazon S3 bucket or Amazon EFS path as is in their file transfer protocol clients. If you set it to LOGICAL, you need to provide mappings in the HomeDirectoryMappings for how you want to make Amazon S3 or Amazon EFS paths visible to your users. If HomeDirectoryType is LOGICAL, you must provide mappings, using the HomeDirectoryMappings parameter. If, on the other hand, HomeDirectoryType is PATH, you provide an absolute path using the HomeDirectory parameter. You cannot have both HomeDirectory and HomeDirectoryMappings in your template."];
       homeDirectoryMappings: HomeDirectoryMappings.t option
         [@ocaml.doc
-          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Amazon Web Services Identity and Access Management (IAM) role provides access to paths in Target. This value can only be set when HomeDirectoryType is set to LOGICAL. The following is an Entry and Target pair example. \\[ \\{ \"Entry\": \"/directory1\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\] In most cases, you can use this value instead of the session policy to lock down your user to the designated home directory (\"chroot\"). To do this, you can set Entry to / and set Target to the HomeDirectory parameter value. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry:\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"];
+          "Logical directory mappings that specify what Amazon S3 or Amazon EFS paths and keys should be visible to your user and how you want to make them visible. You must specify the Entry and Target pair, where Entry shows how the path is made visible and Target is the actual Amazon S3 or Amazon EFS path. If you only specify a target, it is displayed as is. You also must ensure that your Identity and Access Management (IAM) role provides access to paths in Target. This value can be set only when HomeDirectoryType is set to LOGICAL. The following is an Entry and Target pair example. \\[ \\{ \"Entry\": \"/directory1\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\] In most cases, you can use this value instead of the session policy to lock down your user to the designated home directory (\"chroot\"). To do this, you can set Entry to / and set Target to the HomeDirectory parameter value. The following is an Entry and Target pair example for chroot. \\[ \\{ \"Entry\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" \\} \\]"];
       policy: Policy.t option
         [@ocaml.doc
-          "A session policy for your user so that you can use the same IAM role across multiple users. This policy scopes down user access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}. This only applies when the domain of ServerId is S3. EFS does not use session policies. For session policies, Amazon Web Services Transfer Family stores the policy as a JSON blob, instead of the Amazon Resource Name (ARN) of the policy. You save the policy as a JSON blob and pass it in the Policy argument. For an example of a session policy, see Example session policy. For more information, see AssumeRole in the Amazon Web Services Security Token Service API Reference."];
+          "A session policy for your user so that you can use the same Identity and Access Management (IAM) role across multiple users. This policy scopes down a user's access to portions of their Amazon S3 bucket. Variables that you can use inside this policy include $\\{Transfer:UserName\\}, $\\{Transfer:HomeDirectory\\}, and $\\{Transfer:HomeBucket\\}. This policy applies only when the domain of ServerId is Amazon S3. Amazon EFS does not use session policies. For session policies, Transfer Family stores the policy as a JSON blob, instead of the Amazon Resource Name (ARN) of the policy. You save the policy as a JSON blob and pass it in the Policy argument. For an example of a session policy, see Example session policy. For more information, see AssumeRole in the Security Token Service API Reference."];
       posixProfile: PosixProfile.t option ;
       role: Role.t
         [@ocaml.doc
-          "Specifies the Amazon Resource Name (ARN) of the IAM role that controls your users' access to your Amazon S3 bucket or EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
+          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) role that controls your users' access to your Amazon S3 bucket or Amazon EFS file system. The policies attached to this role determine the level of access that you want to provide your users when transferring files into and out of your Amazon S3 bucket or Amazon EFS file system. The IAM role should also contain a trust relationship that allows the server to access your resources when servicing your users' transfer requests."];
       serverId: ServerId.t
         [@ocaml.doc
           "A system-assigned unique identifier for a server instance. This is the specific server that you added your user to."];
       externalId: ExternalId.t
         [@ocaml.doc
-          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Amazon Web Services Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regex used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
+          "A unique identifier that is required to identify specific groups within your directory. The users of the group that you associate have access to your Amazon S3 or Amazon EFS resources over the enabled protocols using Transfer Family. If you know the group name, you can view the SID values by running the following command using Windows PowerShell. Get-ADGroup -Filter \\{samAccountName -like \"YourGroupName*\"\\} -Properties * | Select SamAccountName,ObjectSid In that command, replace YourGroupName with the name of your Active Directory group. The regular expression used to validate this parameter is a string of characters consisting of uppercase and lowercase alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"]}
     let context_ = "CreateAccessRequest"
     let make ?homeDirectory =
       fun ?homeDirectoryType ->
@@ -8142,20 +17883,21 @@ module CreateAccessRequest =
       make ~externalId ~serverId ~role ?posixProfile ?policy
         ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
-      let serverId = field_map_exn json "ServerId" ServerId.of_json in
-      let role = field_map_exn json "Role" Role.of_json in
-      let posixProfile = field_map json "PosixProfile" PosixProfile.of_json in
-      let policy = field_map json "Policy" Policy.of_json in
+    let of_json json__ =
+      let externalId = field_map_exn json__ "ExternalId" ExternalId.of_json in
+      let serverId = field_map_exn json__ "ServerId" ServerId.of_json in
+      let role = field_map_exn json__ "Role" Role.of_json in
+      let posixProfile = field_map json__ "PosixProfile" PosixProfile.of_json in
+      let policy = field_map json__ "Policy" Policy.of_json in
       let homeDirectoryMappings =
-        field_map json "HomeDirectoryMappings" HomeDirectoryMappings.of_json in
+        field_map json__ "HomeDirectoryMappings"
+          HomeDirectoryMappings.of_json in
       let homeDirectoryType =
-        field_map json "HomeDirectoryType" HomeDirectoryType.of_json in
+        field_map json__ "HomeDirectoryType" HomeDirectoryType.of_json in
       let homeDirectory =
-        field_map json "HomeDirectory" HomeDirectory.of_json in
+        field_map json__ "HomeDirectory" HomeDirectory.of_json in
       make ~externalId ~serverId ~role ?posixProfile ?policy
         ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by administrators to choose which groups in the directory should have access to upload and download files over the enabled protocols using Amazon Web Services Transfer Family. For example, a Microsoft Active Directory might contain 50,000 users, but only a small fraction might need the ability to transfer files to the server. An administrator can use CreateAccess to limit the access to the correct set of users who need this ability."]
+       "Used by administrators to choose which groups in the directory should have access to upload and download files over the enabled protocols using Transfer Family. For example, a Microsoft Active Directory might contain 50,000 users, but only a small fraction might need the ability to transfer files to the server. An administrator can use CreateAccess to limit the access to the correct set of users who need this ability."]

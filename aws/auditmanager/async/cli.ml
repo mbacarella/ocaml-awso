@@ -257,6 +257,9 @@ let create_assessment_report =
        and description =
          flag "description" (optional string)
            ~doc:"STRING AssessmentReportDescription"
+       and queryStatement =
+         flag "query-statement" (optional string)
+           ~doc:"STRING QueryStatement"
        and name =
          flag "name" (required string) ~doc:"STRING AssessmentReportName"
        and assessmentId =
@@ -264,8 +267,8 @@ let create_assessment_report =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_assessment_report
-           (Values.CreateAssessmentReportRequest.make ?description ~name
-              ~assessmentId ())
+           (Values.CreateAssessmentReportRequest.make ?description
+              ?queryStatement ~name ~assessmentId ())
            (Some Values.CreateAssessmentReportResponse.to_json)
            (Some Values.CreateAssessmentReportResponse.error_to_json)])
 let create_control =
@@ -644,6 +647,25 @@ let get_evidence_by_evidence_folder =
               ?maxResults ~assessmentId ~controlSetId ~evidenceFolderId ())
            (Some Values.GetEvidenceByEvidenceFolderResponse.to_json)
            (Some Values.GetEvidenceByEvidenceFolderResponse.error_to_json)])
+let get_evidence_file_upload_url =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fileName =
+         flag "file-name" (required string)
+           ~doc:"STRING ManualEvidenceLocalFileName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_evidence_file_upload_url
+           (Values.GetEvidenceFileUploadUrlRequest.make ~fileName ())
+           (Some Values.GetEvidenceFileUploadUrlResponse.to_json)
+           (Some Values.GetEvidenceFileUploadUrlResponse.error_to_json)])
 let get_evidence_folder =
   Command.async ~summary:""
     ([%map_open.Command
@@ -820,7 +842,8 @@ let list_assessment_control_insights_by_control_domain =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and controlDomainId =
-         flag "control-domain-id" (required string) ~doc:"STRING UUID"
+         flag "control-domain-id" (required string)
+           ~doc:"STRING ControlDomainId"
        and assessmentId =
          flag "assessment-id" (required string) ~doc:"STRING UUID" in
        fun () ->
@@ -985,7 +1008,8 @@ let list_control_insights_by_control_domain =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and controlDomainId =
-         flag "control-domain-id" (required string) ~doc:"STRING UUID" in
+         flag "control-domain-id" (required string)
+           ~doc:"STRING ControlDomainId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_control_insights_by_control_domain
@@ -1008,12 +1032,16 @@ let list_controls =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and controlCatalogId =
+         flag "control-catalog-id" (optional string)
+           ~doc:"STRING ControlCatalogId"
        and controlType =
          flag "control-type" (required json_arg) ~doc:"JSON ControlType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_controls
            (Values.ListControlsRequest.make ?nextToken ?maxResults
+              ?controlCatalogId
               ~controlType:(Values.ControlType.of_json controlType) ())
            (Some Values.ListControlsResponse.to_json)
            (Some Values.ListControlsResponse.error_to_json)])
@@ -1031,12 +1059,13 @@ let list_keywords_for_data_source =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
-       and source = flag "source" (required json_arg) ~doc:"JSON SourceType" in
+       and source =
+         flag "source" (required json_arg) ~doc:"JSON DataSourceType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_keywords_for_data_source
            (Values.ListKeywordsForDataSourceRequest.make ?nextToken
-              ?maxResults ~source:(Values.SourceType.of_json source) ())
+              ?maxResults ~source:(Values.DataSourceType.of_json source) ())
            (Some Values.ListKeywordsForDataSourceResponse.to_json)
            (Some Values.ListKeywordsForDataSourceResponse.error_to_json)])
 let list_notifications =
@@ -1401,7 +1430,15 @@ let update_settings =
            ~doc:"JSON AssessmentReportsDestination"
        and defaultProcessOwners =
          flag "default-process-owners" (optional json_arg) ~doc:"JSON Roles"
-       and kmsKey = flag "kms-key" (optional string) ~doc:"STRING KmsKey" in
+       and kmsKey = flag "kms-key" (optional string) ~doc:"STRING KmsKey"
+       and evidenceFinderEnabled =
+         flag "evidence-finder-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and deregistrationPolicy =
+         flag "deregistration-policy" (optional json_arg)
+           ~doc:"JSON DeregistrationPolicy"
+       and defaultExportDestination =
+         flag "default-export-destination" (optional json_arg)
+           ~doc:"JSON DefaultExportDestination" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_settings
@@ -1410,7 +1447,14 @@ let update_settings =
                                                       ~f:Values.AssessmentReportsDestination.of_json
                                                       defaultAssessmentReportsDestination)
               ?defaultProcessOwners:(Option.map ~f:Values.Roles.of_json
-                                       defaultProcessOwners) ?kmsKey ())
+                                       defaultProcessOwners) ?kmsKey
+              ?evidenceFinderEnabled
+              ?deregistrationPolicy:(Option.map
+                                       ~f:Values.DeregistrationPolicy.of_json
+                                       deregistrationPolicy)
+              ?defaultExportDestination:(Option.map
+                                           ~f:Values.DefaultExportDestination.of_json
+                                           defaultExportDestination) ())
            (Some Values.UpdateSettingsResponse.to_json)
            (Some Values.UpdateSettingsResponse.error_to_json)])
 let validate_assessment_report_integrity =
@@ -1471,6 +1515,7 @@ let main =
     ("get-delegations", get_delegations);
     ("get-evidence", get_evidence);
     ("get-evidence-by-evidence-folder", get_evidence_by_evidence_folder);
+    ("get-evidence-file-upload-url", get_evidence_file_upload_url);
     ("get-evidence-folder", get_evidence_folder);
     ("get-evidence-folders-by-assessment",
       get_evidence_folders_by_assessment);

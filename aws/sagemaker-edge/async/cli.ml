@@ -28,6 +28,27 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let get_deployments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deviceName =
+         flag "device-name" (required string) ~doc:"STRING DeviceName"
+       and deviceFleetName =
+         flag "device-fleet-name" (required string)
+           ~doc:"STRING DeviceFleetName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_deployments
+           (Values.GetDeploymentsRequest.make ~deviceName ~deviceFleetName ())
+           (Some Values.GetDeploymentsResult.to_json)
+           (Some Values.GetDeploymentsResult.error_to_json)])
 let get_device_registration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -63,6 +84,9 @@ let send_heartbeat =
        and agentMetrics =
          flag "agent-metrics" (optional json_arg) ~doc:"JSON EdgeMetrics"
        and models = flag "models" (optional json_arg) ~doc:"JSON Models"
+       and deploymentResult =
+         flag "deployment-result" (optional json_arg)
+           ~doc:"JSON DeploymentResult"
        and agentVersion =
          flag "agent-version" (required string) ~doc:"STRING Version"
        and deviceName =
@@ -77,9 +101,13 @@ let send_heartbeat =
               ?agentMetrics:(Option.map ~f:Values.EdgeMetrics.of_json
                                agentMetrics)
               ?models:(Option.map ~f:Values.Models.of_json models)
-              ~agentVersion ~deviceName ~deviceFleetName ()) None None])
+              ?deploymentResult:(Option.map
+                                   ~f:Values.DeploymentResult.of_json
+                                   deploymentResult) ~agentVersion
+              ~deviceName ~deviceFleetName ()) None None])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("get-device-registration", get_device_registration);
+    [("get-deployments", get_deployments);
+    ("get-device-registration", get_device_registration);
     ("send-heartbeat", send_heartbeat)]

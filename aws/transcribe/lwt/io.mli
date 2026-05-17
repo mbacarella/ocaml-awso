@@ -46,6 +46,10 @@ val delete_language_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLanguageModelRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_medical_scribe_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteMedicalScribeJobRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_medical_transcription_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -83,6 +87,12 @@ val get_call_analytics_job :
     ?cfg:Awso.Cfg.t ->
       GetCallAnalyticsJobRequest.t ->
         (GetCallAnalyticsJobResponse.t, GetCallAnalyticsJobResponse.error)
+          Result.t Lwt.t
+val get_medical_scribe_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetMedicalScribeJobRequest.t ->
+        (GetMedicalScribeJobResponse.t, GetMedicalScribeJobResponse.error)
           Result.t Lwt.t
 val get_medical_transcription_job :
   ?endpoint_url:string ->
@@ -131,6 +141,12 @@ val list_language_models :
       ListLanguageModelsRequest.t ->
         (ListLanguageModelsResponse.t, ListLanguageModelsResponse.error)
           Result.t Lwt.t
+val list_medical_scribe_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMedicalScribeJobsRequest.t ->
+        (ListMedicalScribeJobsResponse.t,
+          ListMedicalScribeJobsResponse.error) Result.t Lwt.t
 val list_medical_transcription_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -173,6 +189,12 @@ val start_call_analytics_job :
       StartCallAnalyticsJobRequest.t ->
         (StartCallAnalyticsJobResponse.t,
           StartCallAnalyticsJobResponse.error) Result.t Lwt.t
+val start_medical_scribe_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMedicalScribeJobRequest.t ->
+        (StartMedicalScribeJobResponse.t,
+          StartMedicalScribeJobResponse.error) Result.t Lwt.t
 val start_medical_transcription_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -6,6 +6,12 @@ val cancel_image_creation :
       CancelImageCreationRequest.t ->
         (CancelImageCreationResponse.t, CancelImageCreationResponse.error)
           Result.t
+val cancel_lifecycle_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelLifecycleExecutionRequest.t ->
+        (CancelLifecycleExecutionResponse.t,
+          CancelLifecycleExecutionResponse.error) Result.t
 val create_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -46,6 +52,17 @@ val create_infrastructure_configuration :
       CreateInfrastructureConfigurationRequest.t ->
         (CreateInfrastructureConfigurationResponse.t,
           CreateInfrastructureConfigurationResponse.error) Result.t
+val create_lifecycle_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLifecyclePolicyRequest.t ->
+        (CreateLifecyclePolicyResponse.t,
+          CreateLifecyclePolicyResponse.error) Result.t
+val create_workflow :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateWorkflowRequest.t ->
+        (CreateWorkflowResponse.t, CreateWorkflowResponse.error) Result.t
 val delete_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -86,6 +103,22 @@ val delete_infrastructure_configuration :
       DeleteInfrastructureConfigurationRequest.t ->
         (DeleteInfrastructureConfigurationResponse.t,
           DeleteInfrastructureConfigurationResponse.error) Result.t
+val delete_lifecycle_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLifecyclePolicyRequest.t ->
+        (DeleteLifecyclePolicyResponse.t,
+          DeleteLifecyclePolicyResponse.error) Result.t
+val delete_workflow :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWorkflowRequest.t ->
+        (DeleteWorkflowResponse.t, DeleteWorkflowResponse.error) Result.t
+val distribute_image :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DistributeImageRequest.t ->
+        (DistributeImageResponse.t, DistributeImageResponse.error) Result.t
 val get_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -147,11 +180,51 @@ val get_infrastructure_configuration :
       GetInfrastructureConfigurationRequest.t ->
         (GetInfrastructureConfigurationResponse.t,
           GetInfrastructureConfigurationResponse.error) Result.t
+val get_lifecycle_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLifecycleExecutionRequest.t ->
+        (GetLifecycleExecutionResponse.t,
+          GetLifecycleExecutionResponse.error) Result.t
+val get_lifecycle_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLifecyclePolicyRequest.t ->
+        (GetLifecyclePolicyResponse.t, GetLifecyclePolicyResponse.error)
+          Result.t
+val get_marketplace_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetMarketplaceResourceRequest.t ->
+        (GetMarketplaceResourceResponse.t,
+          GetMarketplaceResourceResponse.error) Result.t
+val get_workflow :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetWorkflowRequest.t ->
+        (GetWorkflowResponse.t, GetWorkflowResponse.error) Result.t
+val get_workflow_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetWorkflowExecutionRequest.t ->
+        (GetWorkflowExecutionResponse.t, GetWorkflowExecutionResponse.error)
+          Result.t
+val get_workflow_step_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetWorkflowStepExecutionRequest.t ->
+        (GetWorkflowStepExecutionResponse.t,
+          GetWorkflowStepExecutionResponse.error) Result.t
 val import_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportComponentRequest.t ->
         (ImportComponentResponse.t, ImportComponentResponse.error) Result.t
+val import_disk_image :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ImportDiskImageRequest.t ->
+        (ImportDiskImageResponse.t, ImportDiskImageResponse.error) Result.t
 val import_vm_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -209,6 +282,18 @@ val list_image_recipes :
     ?cfg:Awso.Cfg.t ->
       ListImageRecipesRequest.t ->
         (ListImageRecipesResponse.t, ListImageRecipesResponse.error) Result.t
+val list_image_scan_finding_aggregations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListImageScanFindingAggregationsRequest.t ->
+        (ListImageScanFindingAggregationsResponse.t,
+          ListImageScanFindingAggregationsResponse.error) Result.t
+val list_image_scan_findings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListImageScanFindingsRequest.t ->
+        (ListImageScanFindingsResponse.t,
+          ListImageScanFindingsResponse.error) Result.t
 val list_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -220,12 +305,59 @@ val list_infrastructure_configurations :
       ListInfrastructureConfigurationsRequest.t ->
         (ListInfrastructureConfigurationsResponse.t,
           ListInfrastructureConfigurationsResponse.error) Result.t
+val list_lifecycle_execution_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLifecycleExecutionResourcesRequest.t ->
+        (ListLifecycleExecutionResourcesResponse.t,
+          ListLifecycleExecutionResourcesResponse.error) Result.t
+val list_lifecycle_executions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLifecycleExecutionsRequest.t ->
+        (ListLifecycleExecutionsResponse.t,
+          ListLifecycleExecutionsResponse.error) Result.t
+val list_lifecycle_policies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLifecyclePoliciesRequest.t ->
+        (ListLifecyclePoliciesResponse.t,
+          ListLifecyclePoliciesResponse.error) Result.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t
+val list_waiting_workflow_steps :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWaitingWorkflowStepsRequest.t ->
+        (ListWaitingWorkflowStepsResponse.t,
+          ListWaitingWorkflowStepsResponse.error) Result.t
+val list_workflow_build_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWorkflowBuildVersionsRequest.t ->
+        (ListWorkflowBuildVersionsResponse.t,
+          ListWorkflowBuildVersionsResponse.error) Result.t
+val list_workflow_executions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWorkflowExecutionsRequest.t ->
+        (ListWorkflowExecutionsResponse.t,
+          ListWorkflowExecutionsResponse.error) Result.t
+val list_workflow_step_executions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWorkflowStepExecutionsRequest.t ->
+        (ListWorkflowStepExecutionsResponse.t,
+          ListWorkflowStepExecutionsResponse.error) Result.t
+val list_workflows :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWorkflowsRequest.t ->
+        (ListWorkflowsResponse.t, ListWorkflowsResponse.error) Result.t
 val put_component_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -249,12 +381,29 @@ val put_image_recipe_policy :
       PutImageRecipePolicyRequest.t ->
         (PutImageRecipePolicyResponse.t, PutImageRecipePolicyResponse.error)
           Result.t
+val retry_image :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RetryImageRequest.t ->
+        (RetryImageResponse.t, RetryImageResponse.error) Result.t
+val send_workflow_step_action :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendWorkflowStepActionRequest.t ->
+        (SendWorkflowStepActionResponse.t,
+          SendWorkflowStepActionResponse.error) Result.t
 val start_image_pipeline_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartImagePipelineExecutionRequest.t ->
         (StartImagePipelineExecutionResponse.t,
           StartImagePipelineExecutionResponse.error) Result.t
+val start_resource_state_update :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartResourceStateUpdateRequest.t ->
+        (StartResourceStateUpdateResponse.t,
+          StartResourceStateUpdateResponse.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -283,3 +432,9 @@ val update_infrastructure_configuration :
       UpdateInfrastructureConfigurationRequest.t ->
         (UpdateInfrastructureConfigurationResponse.t,
           UpdateInfrastructureConfigurationResponse.error) Result.t
+val update_lifecycle_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLifecyclePolicyRequest.t ->
+        (UpdateLifecyclePolicyResponse.t,
+          UpdateLifecyclePolicyResponse.error) Result.t

@@ -2,30 +2,140 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | CreateGroup: (CreateGroupRequest.t, CreateGroupResponse.t,
+  CreateGroupResponse.error) t 
+  | CreateGroupMembership: (CreateGroupMembershipRequest.t,
+  CreateGroupMembershipResponse.t, CreateGroupMembershipResponse.error) t 
+  | CreateUser: (CreateUserRequest.t, CreateUserResponse.t,
+  CreateUserResponse.error) t 
+  | DeleteGroup: (DeleteGroupRequest.t, DeleteGroupResponse.t,
+  DeleteGroupResponse.error) t 
+  | DeleteGroupMembership: (DeleteGroupMembershipRequest.t,
+  DeleteGroupMembershipResponse.t, DeleteGroupMembershipResponse.error) t 
+  | DeleteUser: (DeleteUserRequest.t, DeleteUserResponse.t,
+  DeleteUserResponse.error) t 
   | DescribeGroup: (DescribeGroupRequest.t, DescribeGroupResponse.t,
   DescribeGroupResponse.error) t 
+  | DescribeGroupMembership: (DescribeGroupMembershipRequest.t,
+  DescribeGroupMembershipResponse.t, DescribeGroupMembershipResponse.error) t
+  
   | DescribeUser: (DescribeUserRequest.t, DescribeUserResponse.t,
   DescribeUserResponse.error) t 
+  | GetGroupId: (GetGroupIdRequest.t, GetGroupIdResponse.t,
+  GetGroupIdResponse.error) t 
+  | GetGroupMembershipId: (GetGroupMembershipIdRequest.t,
+  GetGroupMembershipIdResponse.t, GetGroupMembershipIdResponse.error) t 
+  | GetUserId: (GetUserIdRequest.t, GetUserIdResponse.t,
+  GetUserIdResponse.error) t 
+  | IsMemberInGroups: (IsMemberInGroupsRequest.t, IsMemberInGroupsResponse.t,
+  IsMemberInGroupsResponse.error) t 
+  | ListGroupMemberships: (ListGroupMembershipsRequest.t,
+  ListGroupMembershipsResponse.t, ListGroupMembershipsResponse.error) t 
+  | ListGroupMembershipsForMember: (ListGroupMembershipsForMemberRequest.t,
+  ListGroupMembershipsForMemberResponse.t,
+  ListGroupMembershipsForMemberResponse.error) t 
   | ListGroups: (ListGroupsRequest.t, ListGroupsResponse.t,
   ListGroupsResponse.error) t 
   | ListUsers: (ListUsersRequest.t, ListUsersResponse.t,
   ListUsersResponse.error) t 
+  | UpdateGroup: (UpdateGroupRequest.t, UpdateGroupResponse.t,
+  UpdateGroupResponse.error) t 
+  | UpdateUser: (UpdateUserRequest.t, UpdateUserResponse.t,
+  UpdateUserResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | CreateGroup -> `POST
+  | CreateGroupMembership -> `POST
+  | CreateUser -> `POST
+  | DeleteGroup -> `POST
+  | DeleteGroupMembership -> `POST
+  | DeleteUser -> `POST
   | DescribeGroup -> `POST
+  | DescribeGroupMembership -> `POST
   | DescribeUser -> `POST
+  | GetGroupId -> `POST
+  | GetGroupMembershipId -> `POST
+  | GetUserId -> `POST
+  | IsMemberInGroups -> `POST
+  | ListGroupMemberships -> `POST
+  | ListGroupMembershipsForMember -> `POST
   | ListGroups -> `POST
   | ListUsers -> `POST
+  | UpdateGroup -> `POST
+  | UpdateUser -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | CreateGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateGroupMembership -> (Format.kasprintf Uri.of_string) "/"
+      | CreateUser -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteGroupMembership -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteUser -> (Format.kasprintf Uri.of_string) "/"
       | DescribeGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeGroupMembership -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUser -> (Format.kasprintf Uri.of_string) "/"
+      | GetGroupId -> (Format.kasprintf Uri.of_string) "/"
+      | GetGroupMembershipId -> (Format.kasprintf Uri.of_string) "/"
+      | GetUserId -> (Format.kasprintf Uri.of_string) "/"
+      | IsMemberInGroups -> (Format.kasprintf Uri.of_string) "/"
+      | ListGroupMemberships -> (Format.kasprintf Uri.of_string) "/"
+      | ListGroupMembershipsForMember -> (Format.kasprintf Uri.of_string) "/"
       | ListGroups -> (Format.kasprintf Uri.of_string) "/"
-      | ListUsers -> (Format.kasprintf Uri.of_string) "/")
+      | ListUsers -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateGroup -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateUser -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | CreateGroup ->
+      let json = CreateGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.CreateGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateGroupMembership ->
+      let json = CreateGroupMembershipRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.CreateGroupMembership")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateUser ->
+      let json = CreateUserRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.CreateUser")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteGroup ->
+      let json = DeleteGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.DeleteGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteGroupMembership ->
+      let json = DeleteGroupMembershipRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.DeleteGroupMembership")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteUser ->
+      let json = DeleteUserRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.DeleteUser")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeGroup ->
       let json = DescribeGroupRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -34,6 +144,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSIdentityStore.DescribeGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeGroupMembership ->
+      let json = DescribeGroupMembershipRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.DescribeGroupMembership")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeUser ->
       let json = DescribeUserRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -41,6 +159,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSIdentityStore.DescribeUser")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetGroupId ->
+      let json = GetGroupIdRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.GetGroupId")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetGroupMembershipId ->
+      let json = GetGroupMembershipIdRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.GetGroupMembershipId")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetUserId ->
+      let json = GetUserIdRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.GetUserId")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | IsMemberInGroups ->
+      let json = IsMemberInGroupsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.IsMemberInGroups")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListGroupMemberships ->
+      let json = ListGroupMembershipsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.ListGroupMemberships")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListGroupMembershipsForMember ->
+      let json = ListGroupMembershipsForMemberRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.ListGroupMembershipsForMember")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListGroups ->
       let json = ListGroupsRequest.to_json req in
@@ -57,6 +223,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSIdentityStore.ListUsers")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateGroup ->
+      let json = UpdateGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.UpdateGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateUser ->
+      let json = UpdateUserRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSIdentityStore.UpdateUser")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -81,18 +263,111 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | CreateGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateGroupResponse.of_json json)
+      else Error (parse_aws_error (Some CreateGroupResponse.error_of_json))
+  | CreateGroupMembership ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateGroupMembershipResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateGroupMembershipResponse.error_of_json))
+  | CreateUser ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateUserResponse.of_json json)
+      else Error (parse_aws_error (Some CreateUserResponse.error_of_json))
+  | DeleteGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteGroupResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteGroupResponse.error_of_json))
+  | DeleteGroupMembership ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteGroupMembershipResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteGroupMembershipResponse.error_of_json))
+  | DeleteUser ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteUserResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteUserResponse.error_of_json))
   | DescribeGroup ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeGroupResponse.of_json json)
       else Error (parse_aws_error (Some DescribeGroupResponse.error_of_json))
+  | DescribeGroupMembership ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeGroupMembershipResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeGroupMembershipResponse.error_of_json))
   | DescribeUser ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeUserResponse.of_json json)
       else Error (parse_aws_error (Some DescribeUserResponse.error_of_json))
+  | GetGroupId ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetGroupIdResponse.of_json json)
+      else Error (parse_aws_error (Some GetGroupIdResponse.error_of_json))
+  | GetGroupMembershipId ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetGroupMembershipIdResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetGroupMembershipIdResponse.error_of_json))
+  | GetUserId ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetUserIdResponse.of_json json)
+      else Error (parse_aws_error (Some GetUserIdResponse.error_of_json))
+  | IsMemberInGroups ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (IsMemberInGroupsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some IsMemberInGroupsResponse.error_of_json))
+  | ListGroupMemberships ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListGroupMembershipsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListGroupMembershipsResponse.error_of_json))
+  | ListGroupMembershipsForMember ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListGroupMembershipsForMemberResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListGroupMembershipsForMemberResponse.error_of_json))
   | ListGroups ->
       if is_success
       then
@@ -105,3 +380,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListUsersResponse.of_json json)
       else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
+  | UpdateGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateGroupResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateGroupResponse.error_of_json))
+  | UpdateUser ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateUserResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateUserResponse.error_of_json))

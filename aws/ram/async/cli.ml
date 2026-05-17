@@ -67,6 +67,9 @@ let associate_resource_share =
            ~doc:"JSON PrincipalArnOrIdList"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING String"
+       and sources =
+         flag "sources" (optional json_arg)
+           ~doc:"JSON SourceArnOrAccountList"
        and resourceShareArn =
          flag "resource-share-arn" (required string) ~doc:"STRING String" in
        fun () ->
@@ -76,7 +79,9 @@ let associate_resource_share =
               ?resourceArns:(Option.map ~f:Values.ResourceArnList.of_json
                                resourceArns)
               ?principals:(Option.map ~f:Values.PrincipalArnOrIdList.of_json
-                             principals) ?clientToken ~resourceShareArn ())
+                             principals) ?clientToken
+              ?sources:(Option.map ~f:Values.SourceArnOrAccountList.of_json
+                          sources) ~resourceShareArn ())
            (Some Values.AssociateResourceShareResponse.to_json)
            (Some Values.AssociateResourceShareResponse.error_to_json)])
 let associate_resource_share_permission =
@@ -107,6 +112,55 @@ let associate_resource_share_permission =
            (Some Values.AssociateResourceSharePermissionResponse.to_json)
            (Some
               Values.AssociateResourceSharePermissionResponse.error_to_json)])
+let create_permission =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and name = flag "name" (required string) ~doc:"STRING PermissionName"
+       and resourceType =
+         flag "resource-type" (required string) ~doc:"STRING String"
+       and policyTemplate =
+         flag "policy-template" (required string) ~doc:"STRING Policy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_permission
+           (Values.CreatePermissionRequest.make ?clientToken
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
+              ~resourceType ~policyTemplate ())
+           (Some Values.CreatePermissionResponse.to_json)
+           (Some Values.CreatePermissionResponse.error_to_json)])
+let create_permission_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and permissionArn =
+         flag "permission-arn" (required string) ~doc:"STRING String"
+       and policyTemplate =
+         flag "policy-template" (required string) ~doc:"STRING Policy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_permission_version
+           (Values.CreatePermissionVersionRequest.make ?clientToken
+              ~permissionArn ~policyTemplate ())
+           (Some Values.CreatePermissionVersionResponse.to_json)
+           (Some Values.CreatePermissionVersionResponse.error_to_json)])
 let create_resource_share =
   Command.async ~summary:""
     ([%map_open.Command
@@ -130,6 +184,12 @@ let create_resource_share =
        and permissionArns =
          flag "permission-arns" (optional json_arg)
            ~doc:"JSON PermissionArnList"
+       and sources =
+         flag "sources" (optional json_arg)
+           ~doc:"JSON SourceArnOrAccountList"
+       and resourceShareConfiguration =
+         flag "resource-share-configuration" (optional json_arg)
+           ~doc:"JSON ResourceShareConfiguration"
        and name = flag "name" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -142,9 +202,57 @@ let create_resource_share =
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?allowExternalPrincipals ?clientToken
               ?permissionArns:(Option.map ~f:Values.PermissionArnList.of_json
-                                 permissionArns) ~name ())
-           (Some Values.CreateResourceShareResponse.to_json)
+                                 permissionArns)
+              ?sources:(Option.map ~f:Values.SourceArnOrAccountList.of_json
+                          sources)
+              ?resourceShareConfiguration:(Option.map
+                                             ~f:Values.ResourceShareConfiguration.of_json
+                                             resourceShareConfiguration)
+              ~name ()) (Some Values.CreateResourceShareResponse.to_json)
            (Some Values.CreateResourceShareResponse.error_to_json)])
+let delete_permission =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and permissionArn =
+         flag "permission-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_permission
+           (Values.DeletePermissionRequest.make ?clientToken ~permissionArn
+              ()) (Some Values.DeletePermissionResponse.to_json)
+           (Some Values.DeletePermissionResponse.error_to_json)])
+let delete_permission_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and permissionArn =
+         flag "permission-arn" (required string) ~doc:"STRING String"
+       and permissionVersion =
+         flag "permission-version" (required int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_permission_version
+           (Values.DeletePermissionVersionRequest.make ?clientToken
+              ~permissionArn ~permissionVersion ())
+           (Some Values.DeletePermissionVersionResponse.to_json)
+           (Some Values.DeletePermissionVersionResponse.error_to_json)])
 let delete_resource_share =
   Command.async ~summary:""
     ([%map_open.Command
@@ -183,6 +291,9 @@ let disassociate_resource_share =
            ~doc:"JSON PrincipalArnOrIdList"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING String"
+       and sources =
+         flag "sources" (optional json_arg)
+           ~doc:"JSON SourceArnOrAccountList"
        and resourceShareArn =
          flag "resource-share-arn" (required string) ~doc:"STRING String" in
        fun () ->
@@ -192,7 +303,9 @@ let disassociate_resource_share =
               ?resourceArns:(Option.map ~f:Values.ResourceArnList.of_json
                                resourceArns)
               ?principals:(Option.map ~f:Values.PrincipalArnOrIdList.of_json
-                             principals) ?clientToken ~resourceShareArn ())
+                             principals) ?clientToken
+              ?sources:(Option.map ~f:Values.SourceArnOrAccountList.of_json
+                          sources) ~resourceShareArn ())
            (Some Values.DisassociateResourceShareResponse.to_json)
            (Some Values.DisassociateResourceShareResponse.error_to_json)])
 let disassociate_resource_share_permission =
@@ -382,6 +495,8 @@ let get_resource_shares =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and permissionArn =
          flag "permission-arn" (optional string) ~doc:"STRING String"
+       and permissionVersion =
+         flag "permission-version" (optional int) ~doc:"INT Integer"
        and resourceOwner =
          flag "resource-owner" (required json_arg) ~doc:"JSON ResourceOwner" in
        fun () ->
@@ -395,7 +510,7 @@ let get_resource_shares =
                                       ~f:Values.ResourceShareStatus.of_json
                                       resourceShareStatus) ?name
               ?tagFilters:(Option.map ~f:Values.TagFilters.of_json tagFilters)
-              ?nextToken ?maxResults ?permissionArn
+              ?nextToken ?maxResults ?permissionArn ?permissionVersion
               ~resourceOwner:(Values.ResourceOwner.of_json resourceOwner) ())
            (Some Values.GetResourceSharesResponse.to_json)
            (Some Values.GetResourceSharesResponse.error_to_json)])
@@ -430,6 +545,47 @@ let list_pending_invitation_resources =
               ~resourceShareInvitationArn ())
            (Some Values.ListPendingInvitationResourcesResponse.to_json)
            (Some Values.ListPendingInvitationResourcesResponse.error_to_json)])
+let list_permission_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and permissionArn =
+         flag "permission-arn" (optional string) ~doc:"STRING String"
+       and permissionVersion =
+         flag "permission-version" (optional int) ~doc:"INT Integer"
+       and associationStatus =
+         flag "association-status" (optional json_arg)
+           ~doc:"JSON ResourceShareAssociationStatus"
+       and resourceType =
+         flag "resource-type" (optional string) ~doc:"STRING String"
+       and featureSet =
+         flag "feature-set" (optional json_arg)
+           ~doc:"JSON PermissionFeatureSet"
+       and defaultVersion =
+         flag "default-version" (optional bool) ~doc:"BOOL Boolean"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_permission_associations
+           (Values.ListPermissionAssociationsRequest.make ?permissionArn
+              ?permissionVersion
+              ?associationStatus:(Option.map
+                                    ~f:Values.ResourceShareAssociationStatus.of_json
+                                    associationStatus) ?resourceType
+              ?featureSet:(Option.map ~f:Values.PermissionFeatureSet.of_json
+                             featureSet) ?defaultVersion ?nextToken
+              ?maxResults ())
+           (Some Values.ListPermissionAssociationsResponse.to_json)
+           (Some Values.ListPermissionAssociationsResponse.error_to_json)])
 let list_permission_versions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -468,12 +624,19 @@ let list_permissions =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and permissionType =
+         flag "permission-type" (optional json_arg)
+           ~doc:"JSON PermissionTypeFilter" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_permissions
            (Values.ListPermissionsRequest.make ?resourceType ?nextToken
-              ?maxResults ()) (Some Values.ListPermissionsResponse.to_json)
+              ?maxResults
+              ?permissionType:(Option.map
+                                 ~f:Values.PermissionTypeFilter.of_json
+                                 permissionType) ())
+           (Some Values.ListPermissionsResponse.to_json)
            (Some Values.ListPermissionsResponse.error_to_json)])
 let list_principals =
   Command.async ~summary:""
@@ -513,6 +676,39 @@ let list_principals =
               ~resourceOwner:(Values.ResourceOwner.of_json resourceOwner) ())
            (Some Values.ListPrincipalsResponse.to_json)
            (Some Values.ListPrincipalsResponse.error_to_json)])
+let list_replace_permission_associations_work =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workIds =
+         flag "work-ids" (optional json_arg)
+           ~doc:"JSON ReplacePermissionAssociationsWorkIdList"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON ReplacePermissionAssociationsWorkStatus"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_replace_permission_associations_work
+           (Values.ListReplacePermissionAssociationsWorkRequest.make
+              ?workIds:(Option.map
+                          ~f:Values.ReplacePermissionAssociationsWorkIdList.of_json
+                          workIds)
+              ?status:(Option.map
+                         ~f:Values.ReplacePermissionAssociationsWorkStatus.of_json
+                         status) ?nextToken ?maxResults ())
+           (Some Values.ListReplacePermissionAssociationsWorkResponse.to_json)
+           (Some
+              Values.ListReplacePermissionAssociationsWorkResponse.error_to_json)])
 let list_resource_share_permissions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -605,6 +801,64 @@ let list_resources =
               ~resourceOwner:(Values.ResourceOwner.of_json resourceOwner) ())
            (Some Values.ListResourcesResponse.to_json)
            (Some Values.ListResourcesResponse.error_to_json)])
+let list_source_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceShareArns =
+         flag "resource-share-arns" (optional json_arg)
+           ~doc:"JSON ResourceShareArnList"
+       and sourceId = flag "source-id" (optional string) ~doc:"STRING String"
+       and sourceType =
+         flag "source-type" (optional string) ~doc:"STRING String"
+       and associationStatus =
+         flag "association-status" (optional json_arg)
+           ~doc:"JSON ResourceShareAssociationStatus"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_source_associations
+           (Values.ListSourceAssociationsRequest.make
+              ?resourceShareArns:(Option.map
+                                    ~f:Values.ResourceShareArnList.of_json
+                                    resourceShareArns) ?sourceId ?sourceType
+              ?associationStatus:(Option.map
+                                    ~f:Values.ResourceShareAssociationStatus.of_json
+                                    associationStatus) ?nextToken ?maxResults
+              ()) (Some Values.ListSourceAssociationsResponse.to_json)
+           (Some Values.ListSourceAssociationsResponse.error_to_json)])
+let promote_permission_created_from_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and permissionArn =
+         flag "permission-arn" (required string) ~doc:"STRING String"
+       and name = flag "name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.promote_permission_created_from_policy
+           (Values.PromotePermissionCreatedFromPolicyRequest.make
+              ?clientToken ~permissionArn ~name ())
+           (Some Values.PromotePermissionCreatedFromPolicyResponse.to_json)
+           (Some
+              Values.PromotePermissionCreatedFromPolicyResponse.error_to_json)])
 let promote_resource_share_created_from_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -647,6 +901,55 @@ let reject_resource_share_invitation =
               ~resourceShareInvitationArn ())
            (Some Values.RejectResourceShareInvitationResponse.to_json)
            (Some Values.RejectResourceShareInvitationResponse.error_to_json)])
+let replace_permission_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fromPermissionVersion =
+         flag "from-permission-version" (optional int) ~doc:"INT Integer"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and fromPermissionArn =
+         flag "from-permission-arn" (required string) ~doc:"STRING String"
+       and toPermissionArn =
+         flag "to-permission-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.replace_permission_associations
+           (Values.ReplacePermissionAssociationsRequest.make
+              ?fromPermissionVersion ?clientToken ~fromPermissionArn
+              ~toPermissionArn ())
+           (Some Values.ReplacePermissionAssociationsResponse.to_json)
+           (Some Values.ReplacePermissionAssociationsResponse.error_to_json)])
+let set_default_permission_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and permissionArn =
+         flag "permission-arn" (required string) ~doc:"STRING String"
+       and permissionVersion =
+         flag "permission-version" (required int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.set_default_permission_version
+           (Values.SetDefaultPermissionVersionRequest.make ?clientToken
+              ~permissionArn ~permissionVersion ())
+           (Some Values.SetDefaultPermissionVersionResponse.to_json)
+           (Some Values.SetDefaultPermissionVersionResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -658,12 +961,14 @@ let tag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceShareArn =
-         flag "resource-share-arn" (required string) ~doc:"STRING String"
+         flag "resource-share-arn" (optional string) ~doc:"STRING String"
+       and resourceArn =
+         flag "resource-arn" (optional string) ~doc:"STRING String"
        and tags = flag "tags" (required json_arg) ~doc:"JSON TagList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.tag_resource
-           (Values.TagResourceRequest.make ~resourceShareArn
+           (Values.TagResourceRequest.make ?resourceShareArn ?resourceArn
               ~tags:(Values.TagList.of_json tags) ())
            (Some Values.TagResourceResponse.to_json)
            (Some Values.TagResourceResponse.error_to_json)])
@@ -678,13 +983,15 @@ let untag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceShareArn =
-         flag "resource-share-arn" (required string) ~doc:"STRING String"
+         flag "resource-share-arn" (optional string) ~doc:"STRING String"
+       and resourceArn =
+         flag "resource-arn" (optional string) ~doc:"STRING String"
        and tagKeys =
          flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.untag_resource
-           (Values.UntagResourceRequest.make ~resourceShareArn
+           (Values.UntagResourceRequest.make ?resourceShareArn ?resourceArn
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
@@ -719,7 +1026,11 @@ let main =
     ("associate-resource-share", associate_resource_share);
     ("associate-resource-share-permission",
       associate_resource_share_permission);
+    ("create-permission", create_permission);
+    ("create-permission-version", create_permission_version);
     ("create-resource-share", create_resource_share);
+    ("delete-permission", delete_permission);
+    ("delete-permission-version", delete_permission_version);
     ("delete-resource-share", delete_resource_share);
     ("disassociate-resource-share", disassociate_resource_share);
     ("disassociate-resource-share-permission",
@@ -732,15 +1043,23 @@ let main =
     ("get-resource-share-invitations", get_resource_share_invitations);
     ("get-resource-shares", get_resource_shares);
     ("list-pending-invitation-resources", list_pending_invitation_resources);
+    ("list-permission-associations", list_permission_associations);
     ("list-permission-versions", list_permission_versions);
     ("list-permissions", list_permissions);
     ("list-principals", list_principals);
+    ("list-replace-permission-associations-work",
+      list_replace_permission_associations_work);
     ("list-resource-share-permissions", list_resource_share_permissions);
     ("list-resource-types", list_resource_types);
     ("list-resources", list_resources);
+    ("list-source-associations", list_source_associations);
+    ("promote-permission-created-from-policy",
+      promote_permission_created_from_policy);
     ("promote-resource-share-created-from-policy",
       promote_resource_share_created_from_policy);
     ("reject-resource-share-invitation", reject_resource_share_invitation);
+    ("replace-permission-associations", replace_permission_associations);
+    ("set-default-permission-version", set_default_permission_version);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-resource-share", update_resource_share)]

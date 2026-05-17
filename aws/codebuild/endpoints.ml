@@ -8,12 +8,21 @@ type ('i, 'o, 'e) t =
   BatchGetBuildBatchesOutput.t, BatchGetBuildBatchesOutput.error) t 
   | BatchGetBuilds: (BatchGetBuildsInput.t, BatchGetBuildsOutput.t,
   BatchGetBuildsOutput.error) t 
+  | BatchGetCommandExecutions: (BatchGetCommandExecutionsInput.t,
+  BatchGetCommandExecutionsOutput.t, BatchGetCommandExecutionsOutput.error) t
+  
+  | BatchGetFleets: (BatchGetFleetsInput.t, BatchGetFleetsOutput.t,
+  BatchGetFleetsOutput.error) t 
   | BatchGetProjects: (BatchGetProjectsInput.t, BatchGetProjectsOutput.t,
   BatchGetProjectsOutput.error) t 
   | BatchGetReportGroups: (BatchGetReportGroupsInput.t,
   BatchGetReportGroupsOutput.t, BatchGetReportGroupsOutput.error) t 
   | BatchGetReports: (BatchGetReportsInput.t, BatchGetReportsOutput.t,
   BatchGetReportsOutput.error) t 
+  | BatchGetSandboxes: (BatchGetSandboxesInput.t, BatchGetSandboxesOutput.t,
+  BatchGetSandboxesOutput.error) t 
+  | CreateFleet: (CreateFleetInput.t, CreateFleetOutput.t,
+  CreateFleetOutput.error) t 
   | CreateProject: (CreateProjectInput.t, CreateProjectOutput.t,
   CreateProjectOutput.error) t 
   | CreateReportGroup: (CreateReportGroupInput.t, CreateReportGroupOutput.t,
@@ -22,6 +31,8 @@ type ('i, 'o, 'e) t =
   CreateWebhookOutput.error) t 
   | DeleteBuildBatch: (DeleteBuildBatchInput.t, DeleteBuildBatchOutput.t,
   DeleteBuildBatchOutput.error) t 
+  | DeleteFleet: (DeleteFleetInput.t, DeleteFleetOutput.t,
+  DeleteFleetOutput.error) t 
   | DeleteProject: (DeleteProjectInput.t, DeleteProjectOutput.t,
   DeleteProjectOutput.error) t 
   | DeleteReport: (DeleteReportInput.t, DeleteReportOutput.t,
@@ -55,9 +66,14 @@ type ('i, 'o, 'e) t =
   ListBuildsOutput.error) t 
   | ListBuildsForProject: (ListBuildsForProjectInput.t,
   ListBuildsForProjectOutput.t, ListBuildsForProjectOutput.error) t 
+  | ListCommandExecutionsForSandbox: (ListCommandExecutionsForSandboxInput.t,
+  ListCommandExecutionsForSandboxOutput.t,
+  ListCommandExecutionsForSandboxOutput.error) t 
   | ListCuratedEnvironmentImages: (ListCuratedEnvironmentImagesInput.t,
   ListCuratedEnvironmentImagesOutput.t,
   ListCuratedEnvironmentImagesOutput.error) t 
+  | ListFleets: (ListFleetsInput.t, ListFleetsOutput.t,
+  ListFleetsOutput.error) t 
   | ListProjects: (ListProjectsInput.t, ListProjectsOutput.t,
   ListProjectsOutput.error) t 
   | ListReportGroups: (ListReportGroupsInput.t, ListReportGroupsOutput.t,
@@ -67,6 +83,10 @@ type ('i, 'o, 'e) t =
   | ListReportsForReportGroup: (ListReportsForReportGroupInput.t,
   ListReportsForReportGroupOutput.t, ListReportsForReportGroupOutput.error) t
   
+  | ListSandboxes: (ListSandboxesInput.t, ListSandboxesOutput.t,
+  ListSandboxesOutput.error) t 
+  | ListSandboxesForProject: (ListSandboxesForProjectInput.t,
+  ListSandboxesForProjectOutput.t, ListSandboxesForProjectOutput.error) t 
   | ListSharedProjects: (ListSharedProjectsInput.t,
   ListSharedProjectsOutput.t, ListSharedProjectsOutput.error) t 
   | ListSharedReportGroups: (ListSharedReportGroupsInput.t,
@@ -83,10 +103,20 @@ type ('i, 'o, 'e) t =
   StartBuildOutput.error) t 
   | StartBuildBatch: (StartBuildBatchInput.t, StartBuildBatchOutput.t,
   StartBuildBatchOutput.error) t 
+  | StartCommandExecution: (StartCommandExecutionInput.t,
+  StartCommandExecutionOutput.t, StartCommandExecutionOutput.error) t 
+  | StartSandbox: (StartSandboxInput.t, StartSandboxOutput.t,
+  StartSandboxOutput.error) t 
+  | StartSandboxConnection: (StartSandboxConnectionInput.t,
+  StartSandboxConnectionOutput.t, StartSandboxConnectionOutput.error) t 
   | StopBuild: (StopBuildInput.t, StopBuildOutput.t, StopBuildOutput.error) t
   
   | StopBuildBatch: (StopBuildBatchInput.t, StopBuildBatchOutput.t,
   StopBuildBatchOutput.error) t 
+  | StopSandbox: (StopSandboxInput.t, StopSandboxOutput.t,
+  StopSandboxOutput.error) t 
+  | UpdateFleet: (UpdateFleetInput.t, UpdateFleetOutput.t,
+  UpdateFleetOutput.error) t 
   | UpdateProject: (UpdateProjectInput.t, UpdateProjectOutput.t,
   UpdateProjectOutput.error) t 
   | UpdateProjectVisibility: (UpdateProjectVisibilityInput.t,
@@ -100,13 +130,18 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | BatchDeleteBuilds -> `POST
   | BatchGetBuildBatches -> `POST
   | BatchGetBuilds -> `POST
+  | BatchGetCommandExecutions -> `POST
+  | BatchGetFleets -> `POST
   | BatchGetProjects -> `POST
   | BatchGetReportGroups -> `POST
   | BatchGetReports -> `POST
+  | BatchGetSandboxes -> `POST
+  | CreateFleet -> `POST
   | CreateProject -> `POST
   | CreateReportGroup -> `POST
   | CreateWebhook -> `POST
   | DeleteBuildBatch -> `POST
+  | DeleteFleet -> `POST
   | DeleteProject -> `POST
   | DeleteReport -> `POST
   | DeleteReportGroup -> `POST
@@ -123,11 +158,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListBuildBatchesForProject -> `POST
   | ListBuilds -> `POST
   | ListBuildsForProject -> `POST
+  | ListCommandExecutionsForSandbox -> `POST
   | ListCuratedEnvironmentImages -> `POST
+  | ListFleets -> `POST
   | ListProjects -> `POST
   | ListReportGroups -> `POST
   | ListReports -> `POST
   | ListReportsForReportGroup -> `POST
+  | ListSandboxes -> `POST
+  | ListSandboxesForProject -> `POST
   | ListSharedProjects -> `POST
   | ListSharedReportGroups -> `POST
   | ListSourceCredentials -> `POST
@@ -136,8 +175,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RetryBuildBatch -> `POST
   | StartBuild -> `POST
   | StartBuildBatch -> `POST
+  | StartCommandExecution -> `POST
+  | StartSandbox -> `POST
+  | StartSandboxConnection -> `POST
   | StopBuild -> `POST
   | StopBuildBatch -> `POST
+  | StopSandbox -> `POST
+  | UpdateFleet -> `POST
   | UpdateProject -> `POST
   | UpdateProjectVisibility -> `POST
   | UpdateReportGroup -> `POST
@@ -148,13 +192,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | BatchDeleteBuilds -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetBuildBatches -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetBuilds -> (Format.kasprintf Uri.of_string) "/"
+      | BatchGetCommandExecutions -> (Format.kasprintf Uri.of_string) "/"
+      | BatchGetFleets -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetProjects -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetReportGroups -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetReports -> (Format.kasprintf Uri.of_string) "/"
+      | BatchGetSandboxes -> (Format.kasprintf Uri.of_string) "/"
+      | CreateFleet -> (Format.kasprintf Uri.of_string) "/"
       | CreateProject -> (Format.kasprintf Uri.of_string) "/"
       | CreateReportGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateWebhook -> (Format.kasprintf Uri.of_string) "/"
       | DeleteBuildBatch -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteFleet -> (Format.kasprintf Uri.of_string) "/"
       | DeleteProject -> (Format.kasprintf Uri.of_string) "/"
       | DeleteReport -> (Format.kasprintf Uri.of_string) "/"
       | DeleteReportGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -171,11 +220,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListBuildBatchesForProject -> (Format.kasprintf Uri.of_string) "/"
       | ListBuilds -> (Format.kasprintf Uri.of_string) "/"
       | ListBuildsForProject -> (Format.kasprintf Uri.of_string) "/"
+      | ListCommandExecutionsForSandbox ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListCuratedEnvironmentImages -> (Format.kasprintf Uri.of_string) "/"
+      | ListFleets -> (Format.kasprintf Uri.of_string) "/"
       | ListProjects -> (Format.kasprintf Uri.of_string) "/"
       | ListReportGroups -> (Format.kasprintf Uri.of_string) "/"
       | ListReports -> (Format.kasprintf Uri.of_string) "/"
       | ListReportsForReportGroup -> (Format.kasprintf Uri.of_string) "/"
+      | ListSandboxes -> (Format.kasprintf Uri.of_string) "/"
+      | ListSandboxesForProject -> (Format.kasprintf Uri.of_string) "/"
       | ListSharedProjects -> (Format.kasprintf Uri.of_string) "/"
       | ListSharedReportGroups -> (Format.kasprintf Uri.of_string) "/"
       | ListSourceCredentials -> (Format.kasprintf Uri.of_string) "/"
@@ -184,8 +238,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RetryBuildBatch -> (Format.kasprintf Uri.of_string) "/"
       | StartBuild -> (Format.kasprintf Uri.of_string) "/"
       | StartBuildBatch -> (Format.kasprintf Uri.of_string) "/"
+      | StartCommandExecution -> (Format.kasprintf Uri.of_string) "/"
+      | StartSandbox -> (Format.kasprintf Uri.of_string) "/"
+      | StartSandboxConnection -> (Format.kasprintf Uri.of_string) "/"
       | StopBuild -> (Format.kasprintf Uri.of_string) "/"
       | StopBuildBatch -> (Format.kasprintf Uri.of_string) "/"
+      | StopSandbox -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateFleet -> (Format.kasprintf Uri.of_string) "/"
       | UpdateProject -> (Format.kasprintf Uri.of_string) "/"
       | UpdateProjectVisibility -> (Format.kasprintf Uri.of_string) "/"
       | UpdateReportGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -217,6 +276,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeBuild_20161006.BatchGetBuilds")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchGetCommandExecutions ->
+      let json = BatchGetCommandExecutionsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.BatchGetCommandExecutions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchGetFleets ->
+      let json = BatchGetFleetsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.BatchGetFleets")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchGetProjects ->
       let json = BatchGetProjectsInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -240,6 +315,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeBuild_20161006.BatchGetReports")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchGetSandboxes ->
+      let json = BatchGetSandboxesInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.BatchGetSandboxes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateFleet ->
+      let json = CreateFleetInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.CreateFleet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateProject ->
       let json = CreateProjectInput.to_json req in
@@ -272,6 +363,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeBuild_20161006.DeleteBuildBatch")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteFleet ->
+      let json = DeleteFleetInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.DeleteFleet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteProject ->
       let json = DeleteProjectInput.to_json req in
@@ -401,6 +500,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeBuild_20161006.ListBuildsForProject")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCommandExecutionsForSandbox ->
+      let json = ListCommandExecutionsForSandboxInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "CodeBuild_20161006.ListCommandExecutionsForSandbox")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListCuratedEnvironmentImages ->
       let json = ListCuratedEnvironmentImagesInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -408,6 +516,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeBuild_20161006.ListCuratedEnvironmentImages")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFleets ->
+      let json = ListFleetsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.ListFleets")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListProjects ->
       let json = ListProjectsInput.to_json req in
@@ -440,6 +556,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeBuild_20161006.ListReportsForReportGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSandboxes ->
+      let json = ListSandboxesInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.ListSandboxes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSandboxesForProject ->
+      let json = ListSandboxesForProjectInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.ListSandboxesForProject")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListSharedProjects ->
       let json = ListSharedProjectsInput.to_json req in
@@ -505,6 +637,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeBuild_20161006.StartBuildBatch")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartCommandExecution ->
+      let json = StartCommandExecutionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.StartCommandExecution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartSandbox ->
+      let json = StartSandboxInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.StartSandbox")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartSandboxConnection ->
+      let json = StartSandboxConnectionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.StartSandboxConnection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopBuild ->
       let json = StopBuildInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -520,6 +676,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeBuild_20161006.StopBuildBatch")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopSandbox ->
+      let json = StopSandboxInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.StopSandbox")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateFleet ->
+      let json = UpdateFleetInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeBuild_20161006.UpdateFleet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateProject ->
       let json = UpdateProjectInput.to_json req in
@@ -597,6 +769,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (BatchGetBuildsOutput.of_json json)
       else Error (parse_aws_error (Some BatchGetBuildsOutput.error_of_json))
+  | BatchGetCommandExecutions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetCommandExecutionsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetCommandExecutionsOutput.error_of_json))
+  | BatchGetFleets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetFleetsOutput.of_json json)
+      else Error (parse_aws_error (Some BatchGetFleetsOutput.error_of_json))
   | BatchGetProjects ->
       if is_success
       then
@@ -618,6 +805,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (BatchGetReportsOutput.of_json json)
       else Error (parse_aws_error (Some BatchGetReportsOutput.error_of_json))
+  | BatchGetSandboxes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetSandboxesOutput.of_json json)
+      else
+        Error (parse_aws_error (Some BatchGetSandboxesOutput.error_of_json))
+  | CreateFleet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateFleetOutput.of_json json)
+      else Error (parse_aws_error (Some CreateFleetOutput.error_of_json))
   | CreateProject ->
       if is_success
       then
@@ -644,6 +844,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteBuildBatchOutput.of_json json)
       else
         Error (parse_aws_error (Some DeleteBuildBatchOutput.error_of_json))
+  | DeleteFleet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteFleetOutput.of_json json)
+      else Error (parse_aws_error (Some DeleteFleetOutput.error_of_json))
   | DeleteProject ->
       if is_success
       then
@@ -761,12 +967,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListBuildsForProjectOutput.error_of_json))
+  | ListCommandExecutionsForSandbox ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCommandExecutionsForSandboxOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCommandExecutionsForSandboxOutput.error_of_json))
   | ListCuratedEnvironmentImages ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListCuratedEnvironmentImagesOutput.of_json json)
       else Error (parse_aws_error None)
+  | ListFleets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFleetsOutput.of_json json)
+      else Error (parse_aws_error (Some ListFleetsOutput.error_of_json))
   | ListProjects ->
       if is_success
       then
@@ -795,6 +1016,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListReportsForReportGroupOutput.error_of_json))
+  | ListSandboxes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSandboxesOutput.of_json json)
+      else Error (parse_aws_error (Some ListSandboxesOutput.error_of_json))
+  | ListSandboxesForProject ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSandboxesForProjectOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListSandboxesForProjectOutput.error_of_json))
   | ListSharedProjects ->
       if is_success
       then
@@ -849,6 +1084,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (StartBuildBatchOutput.of_json json)
       else Error (parse_aws_error (Some StartBuildBatchOutput.error_of_json))
+  | StartCommandExecution ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartCommandExecutionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartCommandExecutionOutput.error_of_json))
+  | StartSandbox ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartSandboxOutput.of_json json)
+      else Error (parse_aws_error (Some StartSandboxOutput.error_of_json))
+  | StartSandboxConnection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartSandboxConnectionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartSandboxConnectionOutput.error_of_json))
   | StopBuild ->
       if is_success
       then
@@ -861,6 +1118,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (StopBuildBatchOutput.of_json json)
       else Error (parse_aws_error (Some StopBuildBatchOutput.error_of_json))
+  | StopSandbox ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopSandboxOutput.of_json json)
+      else Error (parse_aws_error (Some StopSandboxOutput.error_of_json))
+  | UpdateFleet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateFleetOutput.of_json json)
+      else Error (parse_aws_error (Some UpdateFleetOutput.error_of_json))
   | UpdateProject ->
       if is_success
       then

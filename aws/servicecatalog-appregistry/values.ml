@@ -24,6 +24,51 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module AssociationOption =
+  struct
+    type nonrec t =
+      | APPLY_APPLICATION_TAG 
+      | SKIP_APPLICATION_TAG 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | APPLY_APPLICATION_TAG -> "APPLY_APPLICATION_TAG"
+      | SKIP_APPLICATION_TAG -> "SKIP_APPLICATION_TAG"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "APPLY_APPLICATION_TAG" -> APPLY_APPLICATION_TAG
+      | "SKIP_APPLICATION_TAG" -> SKIP_APPLICATION_TAG
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AssociationOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AssociationOption" j)
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i ~pattern:"[\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
 module Arn =
   struct
     type nonrec t = string
@@ -44,6 +89,53 @@ module Arn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Arn" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceItemType =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceItemType"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"AWS::[a-zA-Z0-9]+::\\w+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceItemType" j
+    let to_json = simple_to_json to_value
+  end
+module ResourcesListItemErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ResourcesListItemErrorMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourcesListItemErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
 module ResourceGroupState =
@@ -84,19 +176,6 @@ module ResourceGroupState =
     let of_json j = of_string (string_of_json ~kind:"ResourceGroupState" j)
     let to_json = simple_to_json to_value
   end
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
-  end
 module TagKey =
   struct
     type nonrec t = string
@@ -108,7 +187,8 @@ module TagKey =
              (fun () ->
                 (check_string_max i ~max:128) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"(?!aws:)[a-zA-Z+-=._:/]+")));
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:\\/=+\\-@]*)$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -118,23 +198,26 @@ module TagKey =
     let of_json j = string_of_json ~kind:"TagKey" j
     let to_json = simple_to_json to_value
   end
-module TagValue =
+module TagKeyConfig =
   struct
     type nonrec t = string
-    let context_ = "TagValue"
+    let context_ = "TagKeyConfig"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
-                check_pattern i ~pattern:"[\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*"));
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?!\\s+$)[\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
+    let of_json j = string_of_json ~kind:"TagKeyConfig" j
     let to_json = simple_to_json to_value
   end
 module AttributeGroupArn =
@@ -145,7 +228,7 @@ module AttributeGroupArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"arn:aws[-a-z]*:servicecatalog:[a-z]{2}(-gov)?-[a-z]+-\\d:\\d{12}:/attribute-groups/[a-z0-9]+");
+             ~pattern:"arn:aws[-a-z]*:servicecatalog:[a-z]{2}(-gov)?-[a-z]+-\\d:\\d{12}:/attribute-groups/[-.\\w]+");
         i
     let of_string x = x
     let to_value x = `String x
@@ -162,10 +245,10 @@ module AttributeGroupId =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:26) >>=
+          ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:26) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-z0-9]+")));
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[-.\\w]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -173,6 +256,28 @@ module AttributeGroupId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AttributeGroupId" j
+    let to_json = simple_to_json to_value
+  end
+module CreatedBy =
+  struct
+    type nonrec t = string
+    let context_ = "CreatedBy"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?!-)([a-z0-9-]+\\.)+(aws\\.internal|amazonaws\\.com(\\.cn)?)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CreatedBy" j
     let to_json = simple_to_json to_value
   end
 module Description =
@@ -221,6 +326,53 @@ module Timestamp =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module Options =
+  struct
+    type nonrec t = AssociationOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssociationOption.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssociationOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Options" ~of_json:AssociationOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceDetails =
+  struct
+    type nonrec t =
+      {
+      tagValue: TagValue.t option [@ocaml.doc "The value of the tag."]}
+    let make ?tagValue = fun () -> { tagValue }
+    let to_value x =
+      structure_to_value
+        [("tagValue", (Option.map x.tagValue ~f:TagValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagValue =
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "tagValue") in
+      make ?tagValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagValue = field_map json__ "tagValue" TagValue.of_json in
+      make ?tagValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details related to the resource."]
 module ResourceSpecifier =
   struct
     type nonrec t = string
@@ -241,22 +393,29 @@ module ResourceSpecifier =
     let of_json j = string_of_json ~kind:"ResourceSpecifier" j
     let to_json = simple_to_json to_value
   end
-module StackArn =
+module ResourceType =
   struct
-    type nonrec t = string
-    let context_ = "StackArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"arn:aws[-a-z]*:cloudformation:[a-z]{2}(-gov)?-[a-z]+-\\d:\\d{12}:stack/[a-zA-Z][-A-Za-z0-9]{0,127}/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}");
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | CFN_STACK 
+      | RESOURCE_TAG_VALUE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CFN_STACK -> "CFN_STACK"
+      | RESOURCE_TAG_VALUE -> "RESOURCE_TAG_VALUE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CFN_STACK" -> CFN_STACK
+      | "RESOURCE_TAG_VALUE" -> RESOURCE_TAG_VALUE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StackArn" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
     let to_json = simple_to_json to_value
   end
 module ApplicationArn =
@@ -297,6 +456,56 @@ module ApplicationId =
     let of_json j = string_of_json ~kind:"ApplicationId" j
     let to_json = simple_to_json to_value
   end
+module ResourcesListItem =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Arn.t option
+        [@ocaml.doc "The Amazon resource name (ARN) of the resource."];
+      errorMessage: ResourcesListItemErrorMessage.t option
+        [@ocaml.doc "The message returned if the call fails."];
+      status: String_.t option [@ocaml.doc "The status of the list item."];
+      resourceType: ResourceItemType.t option
+        [@ocaml.doc
+          "Provides information about the AppRegistry resource type."]}
+    let make ?resourceArn =
+      fun ?errorMessage ->
+        fun ?status ->
+          fun ?resourceType ->
+            fun () -> { resourceArn; errorMessage; status; resourceType }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
+        ("errorMessage",
+          (Option.map x.errorMessage
+             ~f:ResourcesListItemErrorMessage.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceItemType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:ResourceItemType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      let errorMessage =
+        (Option.map ~f:ResourcesListItemErrorMessage.of_xml)
+          (Xml.child xml_arg0 "errorMessage") in
+      let resourceArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?resourceType ?status ?errorMessage ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType =
+        field_map json__ "resourceType" ResourceItemType.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let errorMessage =
+        field_map json__ "errorMessage" ResourcesListItemErrorMessage.of_json in
+      let resourceArn = field_map json__ "resourceArn" Arn.of_json in
+      make ?resourceType ?status ?errorMessage ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource in a list of resources."]
 module ResourceGroup =
   struct
     type nonrec t =
@@ -326,10 +535,10 @@ module ResourceGroup =
           (Xml.child xml_arg0 "state") in
       make ?errorMessage ?arn ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" String_.of_json in
-      let arn = field_map json "arn" Arn.of_json in
-      let state = field_map json "state" ResourceGroupState.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" String_.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      let state = field_map json__ "state" ResourceGroupState.of_json in
       make ?errorMessage ?arn ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The information about the resource group integration."]
@@ -358,6 +567,8 @@ module Tags =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -365,6 +576,59 @@ module Tags =
         ~of_json:TagValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ApplicationTagDefinition =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagQueryConfiguration =
+  struct
+    type nonrec t =
+      {
+      tagKey: TagKeyConfig.t option
+        [@ocaml.doc
+          "Condition in the IAM policy that associates resources to an application."]}
+    let make ?tagKey = fun () -> { tagKey }
+    let to_value x =
+      structure_to_value
+        [("tagKey", (Option.map x.tagKey ~f:TagKeyConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKey =
+        (Option.map ~f:TagKeyConfig.of_xml) (Xml.child xml_arg0 "tagKey") in
+      make ?tagKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKey = field_map json__ "tagKey" TagKeyConfig.of_json in
+      make ?tagKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The definition of tagQuery. Specifies which resources are associated with an application."]
 module AttributeGroupSummary =
   struct
     type nonrec t =
@@ -384,16 +648,27 @@ module AttributeGroupSummary =
           "The ISO-8601 formatted timestamp of the moment the attribute group was created."];
       lastUpdateTime: Timestamp.t option
         [@ocaml.doc
-          "The ISO-8601 formatted timestamp of the moment the attribute group was last updated. This time is the same as the creationTime for a newly created attribute group."]}
+          "The ISO-8601 formatted timestamp of the moment the attribute group was last updated. This time is the same as the creationTime for a newly created attribute group."];
+      createdBy: CreatedBy.t option
+        [@ocaml.doc
+          "The service principal that created the attribute group."]}
     let make ?id =
       fun ?arn ->
         fun ?name ->
           fun ?description ->
             fun ?creationTime ->
               fun ?lastUpdateTime ->
-                fun () ->
-                  { id; arn; name; description; creationTime; lastUpdateTime
-                  }
+                fun ?createdBy ->
+                  fun () ->
+                    {
+                      id;
+                      arn;
+                      name;
+                      description;
+                      creationTime;
+                      lastUpdateTime;
+                      createdBy
+                    }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:AttributeGroupId.to_value));
@@ -402,9 +677,12 @@ module AttributeGroupSummary =
         ("description", (Option.map x.description ~f:Description.to_value));
         ("creationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("lastUpdateTime",
-          (Option.map x.lastUpdateTime ~f:Timestamp.to_value))]
+          (Option.map x.lastUpdateTime ~f:Timestamp.to_value));
+        ("createdBy", (Option.map x.createdBy ~f:CreatedBy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let createdBy =
+        (Option.map ~f:CreatedBy.of_xml) (Xml.child xml_arg0 "createdBy") in
       let lastUpdateTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "lastUpdateTime") in
@@ -417,44 +695,121 @@ module AttributeGroupSummary =
         (Option.map ~f:AttributeGroupArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id =
         (Option.map ~f:AttributeGroupId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
+      make ?createdBy ?lastUpdateTime ?creationTime ?description ?name ?arn
+        ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" Name.of_json in
-      let arn = field_map json "arn" AttributeGroupArn.of_json in
-      let id = field_map json "id" AttributeGroupId.of_json in
-      make ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
+    let of_json json__ =
+      let createdBy = field_map json__ "createdBy" CreatedBy.of_json in
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let arn = field_map json__ "arn" AttributeGroupArn.of_json in
+      let id = field_map json__ "id" AttributeGroupId.of_json in
+      make ?createdBy ?lastUpdateTime ?creationTime ?description ?name ?arn
+        ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Summary of a Amazon Web Services Service Catalog AppRegistry attribute group."]
+module AttributeGroupDetails =
+  struct
+    type nonrec t =
+      {
+      id: AttributeGroupId.t option
+        [@ocaml.doc "The unique identifier of the attribute group."];
+      arn: AttributeGroupArn.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) that specifies the attribute group."];
+      name: Name.t option
+        [@ocaml.doc
+          "This field is no longer supported. We recommend you don't use the field when using ListAttributeGroupsForApplication. The name of the attribute group."];
+      createdBy: CreatedBy.t option
+        [@ocaml.doc
+          "The service principal that created the attribute group."]}
+    let make ?id =
+      fun ?arn ->
+        fun ?name -> fun ?createdBy -> fun () -> { id; arn; name; createdBy }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:AttributeGroupId.to_value));
+        ("arn", (Option.map x.arn ~f:AttributeGroupArn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("createdBy", (Option.map x.createdBy ~f:CreatedBy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdBy =
+        (Option.map ~f:CreatedBy.of_xml) (Xml.child xml_arg0 "createdBy") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:AttributeGroupArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let id =
+        (Option.map ~f:AttributeGroupId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?createdBy ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdBy = field_map json__ "createdBy" CreatedBy.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let arn = field_map json__ "arn" AttributeGroupArn.of_json in
+      let id = field_map json__ "id" AttributeGroupId.of_json in
+      make ?createdBy ?name ?arn ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details related to a specific AttributeGroup."]
 module ResourceInfo =
   struct
     type nonrec t =
       {
       name: ResourceSpecifier.t option
         [@ocaml.doc "The name of the resource."];
-      arn: StackArn.t option
+      arn: Arn.t option
         [@ocaml.doc
-          "The Amazon resource name (ARN) that specifies the resource across services."]}
-    let make ?name = fun ?arn -> fun () -> { name; arn }
+          "The Amazon resource name (ARN) that specifies the resource across services."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc
+          "Provides information about the Service Catalog App Registry resource type."];
+      resourceDetails: ResourceDetails.t option
+        [@ocaml.doc "The details related to the resource."];
+      options: Options.t option
+        [@ocaml.doc
+          "Determines whether an application tag is applied or skipped."]}
+    let make ?name =
+      fun ?arn ->
+        fun ?resourceType ->
+          fun ?resourceDetails ->
+            fun ?options ->
+              fun () -> { name; arn; resourceType; resourceDetails; options }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:ResourceSpecifier.to_value));
-        ("arn", (Option.map x.arn ~f:StackArn.to_value))]
+        ("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("resourceDetails",
+          (Option.map x.resourceDetails ~f:ResourceDetails.to_value));
+        ("options", (Option.map x.options ~f:Options.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let arn = (Option.map ~f:StackArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let options =
+        (Option.map ~f:Options.of_xml) (Xml.child xml_arg0 "options") in
+      let resourceDetails =
+        (Option.map ~f:ResourceDetails.of_xml)
+          (Xml.child xml_arg0 "resourceDetails") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       let name =
         (Option.map ~f:ResourceSpecifier.of_xml) (Xml.child xml_arg0 "name") in
-      make ?arn ?name ()
+      make ?options ?resourceDetails ?resourceType ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "arn" StackArn.of_json in
-      let name = field_map json "name" ResourceSpecifier.of_json in
-      make ?arn ?name ()
+    let of_json json__ =
+      let options = field_map json__ "options" Options.of_json in
+      let resourceDetails =
+        field_map json__ "resourceDetails" ResourceDetails.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      let name = field_map json__ "name" ResourceSpecifier.of_json in
+      make ?options ?resourceDetails ?resourceType ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The information about the resource."]
 module ApplicationSummary =
@@ -510,17 +865,94 @@ module ApplicationSummary =
       let id = (Option.map ~f:ApplicationId.of_xml) (Xml.child xml_arg0 "id") in
       make ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" Name.of_json in
-      let arn = field_map json "arn" ApplicationArn.of_json in
-      let id = field_map json "id" ApplicationId.of_json in
+    let of_json json__ =
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let arn = field_map json__ "arn" ApplicationArn.of_json in
+      let id = field_map json__ "id" ApplicationId.of_json in
       make ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Summary of a Amazon Web Services Service Catalog AppRegistry application."]
+module ApplicationTagStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | SUCCESS 
+      | FAILURE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCESS -> "SUCCESS"
+      | FAILURE -> "FAILURE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCESS" -> SUCCESS
+      | "FAILURE" -> FAILURE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ApplicationTagStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ApplicationTagStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module NextToken =
+  struct
+    type nonrec t = string
+    let context_ = "NextToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2024) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9+/=]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end
+module ResourcesList =
+  struct
+    type nonrec t = ResourcesListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourcesListItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourcesListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourcesList" ~of_json:ResourcesListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResourceIntegrations =
   struct
     type nonrec t =
@@ -540,12 +972,44 @@ module ResourceIntegrations =
           (Xml.child xml_arg0 "resourceGroup") in
       make ?resourceGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceGroup =
-        field_map json "resourceGroup" ResourceGroup.of_json in
+        field_map json__ "resourceGroup" ResourceGroup.of_json in
       make ?resourceGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service integration information about the resource."]
+module ResourceItemStatus =
+  struct
+    type nonrec t =
+      | SUCCESS 
+      | FAILED 
+      | IN_PROGRESS 
+      | SKIPPED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCESS -> "SUCCESS"
+      | FAILED -> "FAILED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SKIPPED -> "SKIPPED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCESS" -> SUCCESS
+      | "FAILED" -> FAILED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SKIPPED" -> SKIPPED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceItemStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceItemStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module AttributeGroup =
   struct
     type nonrec t =
@@ -613,14 +1077,15 @@ module AttributeGroup =
         (Option.map ~f:AttributeGroupId.of_xml) (Xml.child xml_arg0 "id") in
       make ?tags ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" Name.of_json in
-      let arn = field_map json "arn" AttributeGroupArn.of_json in
-      let id = field_map json "id" AttributeGroupId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let arn = field_map json__ "arn" AttributeGroupArn.of_json in
+      let id = field_map json__ "id" AttributeGroupId.of_json in
       make ?tags ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -639,8 +1104,8 @@ module ConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -659,8 +1124,8 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is experiencing internal problems."]
@@ -678,8 +1143,8 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource does not exist."]
@@ -697,8 +1162,8 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request has invalid or missing parameters."]
@@ -711,8 +1176,10 @@ module AttributeGroupSpecifier =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"[-.\\w]+")));
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([-.\\w]+)|(arn:aws[-a-z]*:servicecatalog:[a-z]{2}(-gov)?-[a-z]+-\\d:\\d{12}:/attribute-groups/[-.\\w]+)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -766,7 +1233,10 @@ module Application =
           "The ISO-8601 formatted timestamp of the moment when the application was last updated."];
       tags: Tags.t option
         [@ocaml.doc
-          "Key-value pairs you can use to associate with the application."]}
+          "Key-value pairs you can use to associate with the application."];
+      applicationTag: ApplicationTagDefinition.t option
+        [@ocaml.doc
+          "A key-value pair that identifies an associated resource."]}
     let make ?id =
       fun ?arn ->
         fun ?name ->
@@ -774,16 +1244,18 @@ module Application =
             fun ?creationTime ->
               fun ?lastUpdateTime ->
                 fun ?tags ->
-                  fun () ->
-                    {
-                      id;
-                      arn;
-                      name;
-                      description;
-                      creationTime;
-                      lastUpdateTime;
-                      tags
-                    }
+                  fun ?applicationTag ->
+                    fun () ->
+                      {
+                        id;
+                        arn;
+                        name;
+                        description;
+                        creationTime;
+                        lastUpdateTime;
+                        tags;
+                        applicationTag
+                      }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:ApplicationId.to_value));
@@ -793,9 +1265,14 @@ module Application =
         ("creationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("lastUpdateTime",
           (Option.map x.lastUpdateTime ~f:Timestamp.to_value));
-        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("tags", (Option.map x.tags ~f:Tags.to_value));
+        ("applicationTag",
+          (Option.map x.applicationTag ~f:ApplicationTagDefinition.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationTag =
+        (Option.map ~f:ApplicationTagDefinition.of_xml)
+          (Xml.child xml_arg0 "applicationTag") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let lastUpdateTime =
         (Option.map ~f:Timestamp.of_xml)
@@ -808,20 +1285,53 @@ module Application =
       let arn =
         (Option.map ~f:ApplicationArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:ApplicationId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?tags ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
+      make ?applicationTag ?tags ?lastUpdateTime ?creationTime ?description
+        ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" Name.of_json in
-      let arn = field_map json "arn" ApplicationArn.of_json in
-      let id = field_map json "id" ApplicationId.of_json in
-      make ?tags ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
+    let of_json json__ =
+      let applicationTag =
+        field_map json__ "applicationTag" ApplicationTagDefinition.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let arn = field_map json__ "arn" ApplicationArn.of_json in
+      let id = field_map json__ "id" ApplicationId.of_json in
+      make ?applicationTag ?tags ?lastUpdateTime ?creationTime ?description
+        ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a Amazon Web Services Service Catalog AppRegistry application that is the top-level node in a hierarchy of related cloud resource abstractions."]
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc "A message associated with the Throttling exception."];
+      serviceCode: String_.t option
+        [@ocaml.doc "The originating service code."]}
+    let make ?message =
+      fun ?serviceCode -> fun () -> { message; serviceCode }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?serviceCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceCode = field_map json__ "serviceCode" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?serviceCode ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The maximum number of API requests has been exceeded."]
 module ApplicationSpecifier =
   struct
     type nonrec t = string
@@ -832,7 +1342,9 @@ module ApplicationSpecifier =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"[-.\\w]+")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([-.\\w]+)|(arn:aws[-a-z]*:servicecatalog:[a-z]{2}(-gov)?-[a-z]+-\\d:\\d{12}:/applications/[-.\\w]+)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -850,6 +1362,9 @@ module TagKeys =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -894,28 +1409,39 @@ module SyncAction =
     let of_json j = of_string (string_of_json ~kind:"SyncAction" j)
     let to_json = simple_to_json to_value
   end
-module ResourceType =
+module AppRegistryConfiguration =
   struct
     type nonrec t =
-      | CFN_STACK 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | CFN_STACK -> "CFN_STACK" | Non_static_id s -> s
-    let of_string =
-      function | "CFN_STACK" -> CFN_STACK | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      tagQueryConfiguration: TagQueryConfiguration.t option
+        [@ocaml.doc "Includes the definition of a tagQuery."]}
+    let make ?tagQueryConfiguration = fun () -> { tagQueryConfiguration }
+    let to_value x =
+      structure_to_value
+        [("tagQueryConfiguration",
+           (Option.map x.tagQueryConfiguration
+              ~f:TagQueryConfiguration.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
-    let to_json = simple_to_json to_value
-  end
+      let tagQueryConfiguration =
+        (Option.map ~f:TagQueryConfiguration.of_xml)
+          (Xml.child xml_arg0 "tagQueryConfiguration") in
+      make ?tagQueryConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagQueryConfiguration =
+        field_map json__ "tagQueryConfiguration"
+          TagQueryConfiguration.of_json in
+      make ?tagQueryConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Includes all of the AppRegistry settings."]
 module AttributeGroupSummaries =
   struct
     type nonrec t = AttributeGroupSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeGroupSummary.to_value)) |>
         (fun x -> `List x)
@@ -938,33 +1464,13 @@ module AttributeGroupSummaries =
         ~of_json:AttributeGroupSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module NextToken =
-  struct
-    type nonrec t = string
-    let context_ = "NextToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:2024) >>=
-                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9+/=]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextToken" j
-    let to_json = simple_to_json to_value
-  end
 module MaxResults =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -976,10 +1482,42 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module AttributeGroupDetailsList =
+  struct
+    type nonrec t = AttributeGroupDetails.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttributeGroupDetails.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AttributeGroupDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttributeGroupDetailsList"
+        ~of_json:AttributeGroupDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Resources =
   struct
     type nonrec t = ResourceInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1004,6 +1542,9 @@ module AttributeGroupIds =
   struct
     type nonrec t = AttributeGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1029,6 +1570,9 @@ module ApplicationSummaries =
   struct
     type nonrec t = ApplicationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1050,13 +1594,64 @@ module ApplicationSummaries =
         ~of_json:ApplicationSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ApplicationTagResult =
+  struct
+    type nonrec t =
+      {
+      applicationTagStatus: ApplicationTagStatus.t option
+        [@ocaml.doc
+          "The application tag is in the process of being applied to a resource, was successfully applied to a resource, or failed to apply to a resource."];
+      errorMessage: String_.t option
+        [@ocaml.doc "The message returned if the call fails."];
+      resources: ResourcesList.t option
+        [@ocaml.doc "The resources associated with an application"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A unique pagination token for each page of results. Make the call again with the returned token to retrieve the next page of results."]}
+    let make ?applicationTagStatus =
+      fun ?errorMessage ->
+        fun ?resources ->
+          fun ?nextToken ->
+            fun () ->
+              { applicationTagStatus; errorMessage; resources; nextToken }
+    let to_value x =
+      structure_to_value
+        [("applicationTagStatus",
+           (Option.map x.applicationTagStatus
+              ~f:ApplicationTagStatus.to_value));
+        ("errorMessage", (Option.map x.errorMessage ~f:String_.to_value));
+        ("resources", (Option.map x.resources ~f:ResourcesList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let resources =
+        (Option.map ~f:ResourcesList.of_xml) (Xml.child xml_arg0 "resources") in
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "errorMessage") in
+      let applicationTagStatus =
+        (Option.map ~f:ApplicationTagStatus.of_xml)
+          (Xml.child xml_arg0 "applicationTagStatus") in
+      make ?nextToken ?resources ?errorMessage ?applicationTagStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resources = field_map json__ "resources" ResourcesList.of_json in
+      let errorMessage = field_map json__ "errorMessage" String_.of_json in
+      let applicationTagStatus =
+        field_map json__ "applicationTagStatus" ApplicationTagStatus.of_json in
+      make ?nextToken ?resources ?errorMessage ?applicationTagStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The result of the application tag that's applied to a resource."]
 module Resource =
   struct
     type nonrec t =
       {
       name: ResourceSpecifier.t option
         [@ocaml.doc "The name of the resource."];
-      arn: StackArn.t option
+      arn: Arn.t option
         [@ocaml.doc "The Amazon resource name (ARN) of the resource."];
       associationTime: Timestamp.t option
         [@ocaml.doc
@@ -1072,7 +1667,7 @@ module Resource =
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:ResourceSpecifier.to_value));
-        ("arn", (Option.map x.arn ~f:StackArn.to_value));
+        ("arn", (Option.map x.arn ~f:Arn.to_value));
         ("associationTime",
           (Option.map x.associationTime ~f:Timestamp.to_value));
         ("integrations",
@@ -1085,21 +1680,53 @@ module Resource =
       let associationTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "associationTime") in
-      let arn = (Option.map ~f:StackArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       let name =
         (Option.map ~f:ResourceSpecifier.of_xml) (Xml.child xml_arg0 "name") in
       make ?integrations ?associationTime ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let integrations =
-        field_map json "integrations" ResourceIntegrations.of_json in
+        field_map json__ "integrations" ResourceIntegrations.of_json in
       let associationTime =
-        field_map json "associationTime" Timestamp.of_json in
-      let arn = field_map json "arn" StackArn.of_json in
-      let name = field_map json "name" ResourceSpecifier.of_json in
+        field_map json__ "associationTime" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      let name = field_map json__ "name" ResourceSpecifier.of_json in
       make ?integrations ?associationTime ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The information about the resource."]
+module GetAssociatedResourceFilter =
+  struct
+    type nonrec t = ResourceItemStatus.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceItemStatus.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceItemStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GetAssociatedResourceFilter"
+        ~of_json:ResourceItemStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AssociationCount =
   struct
     type nonrec t = int
@@ -1120,23 +1747,33 @@ module Integrations =
     type nonrec t =
       {
       resourceGroup: ResourceGroup.t option
-        [@ocaml.doc "The information about the resource group integration."]}
-    let make ?resourceGroup = fun () -> { resourceGroup }
+        [@ocaml.doc "The information about the resource group integration."];
+      applicationTagResourceGroup: ResourceGroup.t option }
+    let make ?resourceGroup =
+      fun ?applicationTagResourceGroup ->
+        fun () -> { resourceGroup; applicationTagResourceGroup }
     let to_value x =
       structure_to_value
         [("resourceGroup",
-           (Option.map x.resourceGroup ~f:ResourceGroup.to_value))]
+           (Option.map x.resourceGroup ~f:ResourceGroup.to_value));
+        ("applicationTagResourceGroup",
+          (Option.map x.applicationTagResourceGroup ~f:ResourceGroup.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationTagResourceGroup =
+        (Option.map ~f:ResourceGroup.of_xml)
+          (Xml.child xml_arg0 "applicationTagResourceGroup") in
       let resourceGroup =
         (Option.map ~f:ResourceGroup.of_xml)
           (Xml.child xml_arg0 "resourceGroup") in
-      make ?resourceGroup ()
+      make ?applicationTagResourceGroup ?resourceGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let applicationTagResourceGroup =
+        field_map json__ "applicationTagResourceGroup" ResourceGroup.of_json in
       let resourceGroup =
-        field_map json "resourceGroup" ResourceGroup.of_json in
-      make ?resourceGroup ()
+        field_map json__ "resourceGroup" ResourceGroup.of_json in
+      make ?applicationTagResourceGroup ?resourceGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The information about the service integration."]
 module ServiceQuotaExceededException =
@@ -1153,8 +1790,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1252,9 +1889,9 @@ module UpdateAttributeGroupResponse =
           (Xml.child xml_arg0 "attributeGroup") in
       make ?attributeGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeGroup =
-        field_map json "attributeGroup" AttributeGroup.of_json in
+        field_map json__ "attributeGroup" AttributeGroup.of_json in
       make ?attributeGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing attribute group with new details."]
@@ -1264,10 +1901,10 @@ module UpdateAttributeGroupRequest =
       {
       attributeGroup: AttributeGroupSpecifier.t
         [@ocaml.doc
-          "The name or ID of the attribute group that holds the attributes to describe the application."];
+          "The name, ID, or ARN of the attribute group that holds the attributes to describe the application."];
       name: Name.t option
         [@ocaml.doc
-          "The new name of the attribute group. The name must be unique in the region in which you are updating the attribute group."];
+          "Deprecated: The new name of the attribute group. The name must be unique in the region in which you are updating the attribute group. Please do not use this field as we have stopped supporting name updates."];
       description: Description.t option
         [@ocaml.doc
           "The description of the attribute group that the user provides."];
@@ -1299,12 +1936,12 @@ module UpdateAttributeGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attributeGroup") in
       make ?attributes ?description ?name ~attributeGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "attributes" Attributes.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" Name.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "attributes" Attributes.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" Name.of_json in
       let attributeGroup =
-        field_map_exn json "attributeGroup" AttributeGroupSpecifier.of_json in
+        field_map_exn json__ "attributeGroup" AttributeGroupSpecifier.of_json in
       make ?attributes ?description ?name ~attributeGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing attribute group with new details."]
@@ -1318,6 +1955,8 @@ module UpdateApplicationResponse =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?application = fun () -> { application }
     let error_of_json name json =
@@ -1328,6 +1967,10 @@ module UpdateApplicationResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -1339,6 +1982,10 @@ module UpdateApplicationResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -1355,6 +2002,14 @@ module UpdateApplicationResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -1369,8 +2024,8 @@ module UpdateApplicationResponse =
         (Option.map ~f:Application.of_xml) (Xml.child xml_arg0 "application") in
       make ?application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let application = field_map json "application" Application.of_json in
+    let of_json json__ =
+      let application = field_map json__ "application" Application.of_json in
       make ?application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing application with new attributes."]
@@ -1380,10 +2035,10 @@ module UpdateApplicationRequest =
       {
       application: ApplicationSpecifier.t
         [@ocaml.doc
-          "The name or ID of the application that will be updated."];
+          "The name, ID, or ARN of the application that will be updated."];
       name: Name.t option
         [@ocaml.doc
-          "The new name of the application. The name must be unique in the region in which you are updating the application."];
+          "Deprecated: The new name of the application. The name must be unique in the region in which you are updating the application. Please do not use this field as we have stopped supporting name updates."];
       description: Description.t option
         [@ocaml.doc "The new description of the application."]}
     let context_ = "UpdateApplicationRequest"
@@ -1406,11 +2061,11 @@ module UpdateApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?description ?name ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" Name.of_json in
+    let of_json json__ =
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" Name.of_json in
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
       make ?description ?name ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing application with new attributes."]
@@ -1497,9 +2152,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1584,9 +2239,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" Tags.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1608,6 +2263,8 @@ module SyncResourceResponse =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?applicationArn =
       fun ?resourceArn ->
@@ -1621,6 +2278,10 @@ module SyncResourceResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -1632,6 +2293,10 @@ module SyncResourceResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -1648,6 +2313,14 @@ module SyncResourceResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -1670,11 +2343,11 @@ module SyncResourceResponse =
           (Xml.child xml_arg0 "applicationArn") in
       make ?actionTaken ?resourceArn ?applicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actionTaken = field_map json "actionTaken" SyncAction.of_json in
-      let resourceArn = field_map json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let actionTaken = field_map json__ "actionTaken" SyncAction.of_json in
+      let resourceArn = field_map json__ "resourceArn" Arn.of_json in
       let applicationArn =
-        field_map json "applicationArn" ApplicationArn.of_json in
+        field_map json__ "applicationArn" ApplicationArn.of_json in
       make ?actionTaken ?resourceArn ?applicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1706,14 +2379,40 @@ module SyncResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ~resource ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resource = field_map_exn json "resource" ResourceSpecifier.of_json in
+    let of_json json__ =
+      let resource =
+        field_map_exn json__ "resource" ResourceSpecifier.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        field_map_exn json__ "resourceType" ResourceType.of_json in
       make ~resource ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Syncs the resource with current AppRegistry records. Specifically, the resource\226\128\153s AppRegistry system tags sync with its associated application. We remove the resource's AppRegistry system tags if it does not associate with the application. The caller must have permissions to read and update the resource."]
+module PutConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      configuration: AppRegistryConfiguration.t
+        [@ocaml.doc "Associates a TagKey configuration to an account."]}
+    let context_ = "PutConfigurationRequest"
+    let make ~configuration = fun () -> { configuration }
+    let to_value x =
+      structure_to_value
+        [("configuration",
+           (Some (AppRegistryConfiguration.to_value x.configuration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configuration =
+        AppRegistryConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
+      make ~configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configuration =
+        field_map_exn json__ "configuration" AppRegistryConfiguration.of_json in
+      make ~configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Associates a TagKey configuration to an account."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -1772,8 +2471,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the tags on the resource."]
 module ListTagsForResourceRequest =
@@ -1794,8 +2493,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the tags on the resource."]
@@ -1860,10 +2559,10 @@ module ListAttributeGroupsResponse =
           (Xml.child xml_arg0 "attributeGroups") in
       make ?nextToken ?attributeGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let attributeGroups =
-        field_map json "attributeGroups" AttributeGroupSummaries.of_json in
+        field_map json__ "attributeGroups" AttributeGroupSummaries.of_json in
       make ?nextToken ?attributeGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1892,13 +2591,135 @@ module ListAttributeGroupsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all attribute groups which you have access to. Results are paginated."]
+module ListAttributeGroupsForApplicationResponse =
+  struct
+    type nonrec t =
+      {
+      attributeGroupsDetails: AttributeGroupDetailsList.t option
+        [@ocaml.doc "The details related to a specific attribute group."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to get the next page of results after a previous API call."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?attributeGroupsDetails =
+      fun ?nextToken -> fun () -> { attributeGroupsDetails; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("attributeGroupsDetails",
+           (Option.map x.attributeGroupsDetails
+              ~f:AttributeGroupDetailsList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let attributeGroupsDetails =
+        (Option.map ~f:AttributeGroupDetailsList.of_xml)
+          (Xml.child xml_arg0 "attributeGroupsDetails") in
+      make ?nextToken ?attributeGroupsDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let attributeGroupsDetails =
+        field_map json__ "attributeGroupsDetails"
+          AttributeGroupDetailsList.of_json in
+      make ?nextToken ?attributeGroupsDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the details of all attribute groups associated with a specific application. The results display in pages."]
+module ListAttributeGroupsForApplicationRequest =
+  struct
+    type nonrec t =
+      {
+      application: ApplicationSpecifier.t
+        [@ocaml.doc "The name or ID of the application."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "This token retrieves the next page of results after a previous API call."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The upper bound of the number of results to return. The value cannot exceed 25. If you omit this parameter, it defaults to 25. This value is optional."]}
+    let context_ = "ListAttributeGroupsForApplicationRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~application -> fun () -> { nextToken; maxResults; application }
+    let to_value x =
+      structure_to_value
+        [("application",
+           (Some (ApplicationSpecifier.to_value x.application)));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let application =
+        ApplicationSpecifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "application") in
+      make ?maxResults ?nextToken ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let application =
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
+      make ?maxResults ?nextToken ~application ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the details of all attribute groups associated with a specific application. The results display in pages."]
 module ListAssociatedResourcesResponse =
   struct
     type nonrec t =
@@ -1967,19 +2788,19 @@ module ListAssociatedResourcesResponse =
         (Option.map ~f:Resources.of_xml) (Xml.child xml_arg0 "resources") in
       make ?nextToken ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let resources = field_map json "resources" Resources.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resources = field_map json__ "resources" Resources.of_json in
       make ?nextToken ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all resources that are associated with specified application. Results are paginated."]
+       "Lists all of the resources that are associated with the specified application. Results are paginated. If you share an application, and a consumer account associates a tag query to the application, all of the users who can access the application can also view the tag values in all accounts that are associated with it using this API."]
 module ListAssociatedResourcesRequest =
   struct
     type nonrec t =
       {
       application: ApplicationSpecifier.t
-        [@ocaml.doc "The name or ID of the application."];
+        [@ocaml.doc "The name, ID, or ARN of the application."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token to use to get the next page of results after a previous API call."];
@@ -2007,15 +2828,15 @@ module ListAssociatedResourcesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?maxResults ?nextToken ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
       make ?maxResults ?nextToken ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all resources that are associated with specified application. Results are paginated."]
+       "Lists all of the resources that are associated with the specified application. Results are paginated. If you share an application, and a consumer account associates a tag query to the application, all of the users who can access the application can also view the tag values in all accounts that are associated with it using this API."]
 module ListAssociatedAttributeGroupsResponse =
   struct
     type nonrec t =
@@ -2086,10 +2907,10 @@ module ListAssociatedAttributeGroupsResponse =
           (Xml.child xml_arg0 "attributeGroups") in
       make ?nextToken ?attributeGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let attributeGroups =
-        field_map json "attributeGroups" AttributeGroupIds.of_json in
+        field_map json__ "attributeGroups" AttributeGroupIds.of_json in
       make ?nextToken ?attributeGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2127,11 +2948,11 @@ module ListAssociatedAttributeGroupsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?maxResults ?nextToken ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
       make ?maxResults ?nextToken ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2197,10 +3018,10 @@ module ListApplicationsResponse =
           (Xml.child xml_arg0 "applications") in
       make ?nextToken ?applications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let applications =
-        field_map json "applications" ApplicationSummaries.of_json in
+        field_map json__ "applications" ApplicationSummaries.of_json in
       make ?nextToken ?applications ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2229,13 +3050,64 @@ module ListApplicationsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of all of your applications. Results are paginated."]
+module GetConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      configuration: AppRegistryConfiguration.t option
+        [@ocaml.doc "Retrieves TagKey configuration from an account."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?configuration = fun () -> { configuration }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("configuration",
+           (Option.map x.configuration ~f:AppRegistryConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configuration =
+        (Option.map ~f:AppRegistryConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      make ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configuration =
+        field_map json__ "configuration" AppRegistryConfiguration.of_json in
+      make ?configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a TagKey configuration from an account."]
 module GetAttributeGroupResponse =
   struct
     type nonrec t =
@@ -2259,9 +3131,13 @@ module GetAttributeGroupResponse =
         [@ocaml.doc
           "The ISO-8601 formatted timestamp of the moment the attribute group was last updated. This time is the same as the creationTime for a newly created attribute group."];
       tags: Tags.t option
-        [@ocaml.doc "Key-value pairs associated with the attribute group."]}
+        [@ocaml.doc "Key-value pairs associated with the attribute group."];
+      createdBy: CreatedBy.t option
+        [@ocaml.doc
+          "The service principal that created the attribute group."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -2273,19 +3149,23 @@ module GetAttributeGroupResponse =
               fun ?creationTime ->
                 fun ?lastUpdateTime ->
                   fun ?tags ->
-                    fun () ->
-                      {
-                        id;
-                        arn;
-                        name;
-                        description;
-                        attributes;
-                        creationTime;
-                        lastUpdateTime;
-                        tags
-                      }
+                    fun ?createdBy ->
+                      fun () ->
+                        {
+                          id;
+                          arn;
+                          name;
+                          description;
+                          attributes;
+                          creationTime;
+                          lastUpdateTime;
+                          tags;
+                          createdBy
+                        }
     let error_of_json name json =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -2297,6 +3177,8 @@ module GetAttributeGroupResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -2307,6 +3189,10 @@ module GetAttributeGroupResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -2334,9 +3220,12 @@ module GetAttributeGroupResponse =
         ("creationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("lastUpdateTime",
           (Option.map x.lastUpdateTime ~f:Timestamp.to_value));
-        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("tags", (Option.map x.tags ~f:Tags.to_value));
+        ("createdBy", (Option.map x.createdBy ~f:CreatedBy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let createdBy =
+        (Option.map ~f:CreatedBy.of_xml) (Xml.child xml_arg0 "createdBy") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let lastUpdateTime =
         (Option.map ~f:Timestamp.of_xml)
@@ -2352,30 +3241,32 @@ module GetAttributeGroupResponse =
         (Option.map ~f:AttributeGroupArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id =
         (Option.map ~f:AttributeGroupId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?tags ?lastUpdateTime ?creationTime ?attributes ?description ?name
-        ?arn ?id ()
+      make ?createdBy ?tags ?lastUpdateTime ?creationTime ?attributes
+        ?description ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let attributes = field_map json "attributes" Attributes.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" Name.of_json in
-      let arn = field_map json "arn" AttributeGroupArn.of_json in
-      let id = field_map json "id" AttributeGroupId.of_json in
-      make ?tags ?lastUpdateTime ?creationTime ?attributes ?description ?name
-        ?arn ?id ()
+    let of_json json__ =
+      let createdBy = field_map json__ "createdBy" CreatedBy.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let attributes = field_map json__ "attributes" Attributes.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let arn = field_map json__ "arn" AttributeGroupArn.of_json in
+      let id = field_map json__ "id" AttributeGroupId.of_json in
+      make ?createdBy ?tags ?lastUpdateTime ?creationTime ?attributes
+        ?description ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an attribute group, either by its name or its ID. The attribute group can be specified either by its unique ID or by its name."]
+       "Retrieves an attribute group by its ARN, ID, or name. The attribute group can be specified by its ARN, ID, or name."]
 module GetAttributeGroupRequest =
   struct
     type nonrec t =
       {
       attributeGroup: AttributeGroupSpecifier.t
         [@ocaml.doc
-          "The name or ID of the attribute group that holds the attributes to describe the application."]}
+          "The name, ID, or ARN of the attribute group that holds the attributes to describe the application."]}
     let context_ = "GetAttributeGroupRequest"
     let make ~attributeGroup = fun () -> { attributeGroup }
     let to_value x =
@@ -2389,25 +3280,34 @@ module GetAttributeGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attributeGroup") in
       make ~attributeGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeGroup =
-        field_map_exn json "attributeGroup" AttributeGroupSpecifier.of_json in
+        field_map_exn json__ "attributeGroup" AttributeGroupSpecifier.of_json in
       make ~attributeGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an attribute group, either by its name or its ID. The attribute group can be specified either by its unique ID or by its name."]
+       "Retrieves an attribute group by its ARN, ID, or name. The attribute group can be specified by its ARN, ID, or name."]
 module GetAssociatedResourceResponse =
   struct
     type nonrec t =
       {
       resource: Resource.t option
-        [@ocaml.doc "The resource associated with the application."]}
+        [@ocaml.doc "The resource associated with the application."];
+      options: Options.t option
+        [@ocaml.doc
+          "Determines whether an application tag is applied or skipped."];
+      applicationTagResult: ApplicationTagResult.t option
+        [@ocaml.doc
+          "The result of the application that's tag applied to a resource."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?resource = fun () -> { resource }
+    let make ?resource =
+      fun ?options ->
+        fun ?applicationTagResult ->
+          fun () -> { resource; options; applicationTagResult }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2450,16 +3350,27 @@ module GetAssociatedResourceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("resource", (Option.map x.resource ~f:Resource.to_value))]
+        [("resource", (Option.map x.resource ~f:Resource.to_value));
+        ("options", (Option.map x.options ~f:Options.to_value));
+        ("applicationTagResult",
+          (Option.map x.applicationTagResult ~f:ApplicationTagResult.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationTagResult =
+        (Option.map ~f:ApplicationTagResult.of_xml)
+          (Xml.child xml_arg0 "applicationTagResult") in
+      let options =
+        (Option.map ~f:Options.of_xml) (Xml.child xml_arg0 "options") in
       let resource =
         (Option.map ~f:Resource.of_xml) (Xml.child xml_arg0 "resource") in
-      make ?resource ()
+      make ?applicationTagResult ?options ?resource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resource = field_map json "resource" Resource.of_json in
-      make ?resource ()
+    let of_json json__ =
+      let applicationTagResult =
+        field_map json__ "applicationTagResult" ApplicationTagResult.of_json in
+      let options = field_map json__ "options" Options.of_json in
+      let resource = field_map json__ "resource" Resource.of_json in
+      make ?applicationTagResult ?options ?resource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the resource associated with the application."]
 module GetAssociatedResourceRequest =
@@ -2467,24 +3378,57 @@ module GetAssociatedResourceRequest =
     type nonrec t =
       {
       application: ApplicationSpecifier.t
-        [@ocaml.doc "The name or ID of the application."];
+        [@ocaml.doc "The name, ID, or ARN of the application."];
       resourceType: ResourceType.t
         [@ocaml.doc "The type of resource associated with the application."];
       resource: ResourceSpecifier.t
         [@ocaml.doc
-          "The name or ID of the resource associated with the application."]}
+          "The name or ID of the resource associated with the application."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A unique pagination token for each page of results. Make the call again with the returned token to retrieve the next page of results."];
+      resourceTagStatus: GetAssociatedResourceFilter.t option
+        [@ocaml.doc
+          "States whether an application tag is applied, not applied, in the process of being applied, or skipped."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return. If the parameter is omitted, it defaults to 25. The value is optional."]}
     let context_ = "GetAssociatedResourceRequest"
-    let make ~application =
-      fun ~resourceType ->
-        fun ~resource -> fun () -> { application; resourceType; resource }
+    let make ?nextToken =
+      fun ?resourceTagStatus ->
+        fun ?maxResults ->
+          fun ~application ->
+            fun ~resourceType ->
+              fun ~resource ->
+                fun () ->
+                  {
+                    nextToken;
+                    resourceTagStatus;
+                    maxResults;
+                    application;
+                    resourceType;
+                    resource
+                  }
     let to_value x =
       structure_to_value
         [("application",
            (Some (ApplicationSpecifier.to_value x.application)));
         ("resourceType", (Some (ResourceType.to_value x.resourceType)));
-        ("resource", (Some (ResourceSpecifier.to_value x.resource)))]
+        ("resource", (Some (ResourceSpecifier.to_value x.resource)));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("resourceTagStatus",
+          (Option.map x.resourceTagStatus
+             ~f:GetAssociatedResourceFilter.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let resourceTagStatus =
+        (Option.map ~f:GetAssociatedResourceFilter.of_xml)
+          (Xml.child xml_arg0 "resourceTagStatus") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let resource =
         ResourceSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resource") in
@@ -2494,15 +3438,23 @@ module GetAssociatedResourceRequest =
       let application =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
-      make ~resource ~resourceType ~application ()
+      make ?maxResults ?resourceTagStatus ?nextToken ~resource ~resourceType
+        ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resource = field_map_exn json "resource" ResourceSpecifier.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let resourceTagStatus =
+        field_map json__ "resourceTagStatus"
+          GetAssociatedResourceFilter.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resource =
+        field_map_exn json__ "resource" ResourceSpecifier.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        field_map_exn json__ "resourceType" ResourceType.of_json in
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
-      make ~resource ~resourceType ~application ()
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
+      make ?maxResults ?resourceTagStatus ?nextToken ~resource ~resourceType
+        ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the resource associated with the application."]
 module GetApplicationResponse =
@@ -2532,9 +3484,13 @@ module GetApplicationResponse =
         [@ocaml.doc "Key-value pairs associated with the application."];
       integrations: Integrations.t option
         [@ocaml.doc
-          "The information about the integration of the application with other services, such as Resource Groups."]}
+          "The information about the integration of the application with other services, such as Resource Groups."];
+      applicationTag: ApplicationTagDefinition.t option
+        [@ocaml.doc
+          "A key-value pair that identifies an associated resource."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -2547,20 +3503,24 @@ module GetApplicationResponse =
                 fun ?associatedResourceCount ->
                   fun ?tags ->
                     fun ?integrations ->
-                      fun () ->
-                        {
-                          id;
-                          arn;
-                          name;
-                          description;
-                          creationTime;
-                          lastUpdateTime;
-                          associatedResourceCount;
-                          tags;
-                          integrations
-                        }
+                      fun ?applicationTag ->
+                        fun () ->
+                          {
+                            id;
+                            arn;
+                            name;
+                            description;
+                            creationTime;
+                            lastUpdateTime;
+                            associatedResourceCount;
+                            tags;
+                            integrations;
+                            applicationTag
+                          }
     let error_of_json name json =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -2572,6 +3532,8 @@ module GetApplicationResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -2582,6 +3544,10 @@ module GetApplicationResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -2612,9 +3578,14 @@ module GetApplicationResponse =
           (Option.map x.associatedResourceCount ~f:AssociationCount.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
         ("integrations",
-          (Option.map x.integrations ~f:Integrations.to_value))]
+          (Option.map x.integrations ~f:Integrations.to_value));
+        ("applicationTag",
+          (Option.map x.applicationTag ~f:ApplicationTagDefinition.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationTag =
+        (Option.map ~f:ApplicationTagDefinition.of_xml)
+          (Xml.child xml_arg0 "applicationTag") in
       let integrations =
         (Option.map ~f:Integrations.of_xml)
           (Xml.child xml_arg0 "integrations") in
@@ -2633,31 +3604,34 @@ module GetApplicationResponse =
       let arn =
         (Option.map ~f:ApplicationArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:ApplicationId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?integrations ?tags ?associatedResourceCount ?lastUpdateTime
-        ?creationTime ?description ?name ?arn ?id ()
+      make ?applicationTag ?integrations ?tags ?associatedResourceCount
+        ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let integrations = field_map json "integrations" Integrations.of_json in
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let applicationTag =
+        field_map json__ "applicationTag" ApplicationTagDefinition.of_json in
+      let integrations = field_map json__ "integrations" Integrations.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let associatedResourceCount =
-        field_map json "associatedResourceCount" AssociationCount.of_json in
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" Name.of_json in
-      let arn = field_map json "arn" ApplicationArn.of_json in
-      let id = field_map json "id" ApplicationId.of_json in
-      make ?integrations ?tags ?associatedResourceCount ?lastUpdateTime
-        ?creationTime ?description ?name ?arn ?id ()
+        field_map json__ "associatedResourceCount" AssociationCount.of_json in
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let arn = field_map json__ "arn" ApplicationArn.of_json in
+      let id = field_map json__ "id" ApplicationId.of_json in
+      make ?applicationTag ?integrations ?tags ?associatedResourceCount
+        ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves metadata information about one of your applications. The application can be specified either by its unique ID or by its name (which is unique within one account in one region at a given point in time). Specify by ID in automated workflows if you want to make sure that the exact same application is returned or a ResourceNotFoundException is thrown, avoiding the ABA addressing problem."]
+       "Retrieves metadata information about one of your applications. The application can be specified by its ARN, ID, or name (which is unique within one account in one region at a given point in time). Specify by ARN or ID in automated workflows if you want to make sure that the exact same application is returned or a ResourceNotFoundException is thrown, avoiding the ABA addressing problem."]
 module GetApplicationRequest =
   struct
     type nonrec t =
       {
       application: ApplicationSpecifier.t
-        [@ocaml.doc "The name or ID of the application."]}
+        [@ocaml.doc "The name, ID, or ARN of the application."]}
     let context_ = "GetApplicationRequest"
     let make ~application = fun () -> { application }
     let to_value x =
@@ -2671,13 +3645,13 @@ module GetApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
       make ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves metadata information about one of your applications. The application can be specified either by its unique ID or by its name (which is unique within one account in one region at a given point in time). Specify by ID in automated workflows if you want to make sure that the exact same application is returned or a ResourceNotFoundException is thrown, avoiding the ABA addressing problem."]
+       "Retrieves metadata information about one of your applications. The application can be specified by its ARN, ID, or name (which is unique within one account in one region at a given point in time). Specify by ARN or ID in automated workflows if you want to make sure that the exact same application is returned or a ResourceNotFoundException is thrown, avoiding the ABA addressing problem."]
 module DisassociateResourceResponse =
   struct
     type nonrec t =
@@ -2691,6 +3665,8 @@ module DisassociateResourceResponse =
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?applicationArn =
       fun ?resourceArn -> fun () -> { applicationArn; resourceArn }
@@ -2700,6 +3676,10 @@ module DisassociateResourceResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2709,6 +3689,10 @@ module DisassociateResourceResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2721,6 +3705,14 @@ module DisassociateResourceResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2740,14 +3732,14 @@ module DisassociateResourceResponse =
           (Xml.child xml_arg0 "applicationArn") in
       make ?resourceArn ?applicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" Arn.of_json in
       let applicationArn =
-        field_map json "applicationArn" ApplicationArn.of_json in
+        field_map json__ "applicationArn" ApplicationArn.of_json in
       make ?resourceArn ?applicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates a resource from application. Both the resource and the application can be specified either by ID or name."]
+       "Disassociates a resource from application. Both the resource and the application can be specified either by ID or name. Minimum permissions You must have the following permissions to remove a resource that's been associated with an application using the APPLY_APPLICATION_TAG option for AssociateResource. tag:GetResources tag:UntagResources You must also have the following permissions if you don't use the AWSServiceCatalogAppRegistryFullAccess policy. For more information, see AWSServiceCatalogAppRegistryFullAccess in the AppRegistry Administrator Guide. resource-groups:DisassociateResource cloudformation:UpdateStack cloudformation:DescribeStacks In addition, you must have the tagging permission defined by the Amazon Web Services service that creates the resource. For more information, see UntagResources in the Resource Groups Tagging API Reference."]
 module DisassociateResourceRequest =
   struct
     type nonrec t =
@@ -2781,16 +3773,17 @@ module DisassociateResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~resource ~resourceType ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resource = field_map_exn json "resource" ResourceSpecifier.of_json in
+    let of_json json__ =
+      let resource =
+        field_map_exn json__ "resource" ResourceSpecifier.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        field_map_exn json__ "resourceType" ResourceType.of_json in
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
       make ~resource ~resourceType ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates a resource from application. Both the resource and the application can be specified either by ID or name."]
+       "Disassociates a resource from application. Both the resource and the application can be specified either by ID or name. Minimum permissions You must have the following permissions to remove a resource that's been associated with an application using the APPLY_APPLICATION_TAG option for AssociateResource. tag:GetResources tag:UntagResources You must also have the following permissions if you don't use the AWSServiceCatalogAppRegistryFullAccess policy. For more information, see AWSServiceCatalogAppRegistryFullAccess in the AppRegistry Administrator Guide. resource-groups:DisassociateResource cloudformation:UpdateStack cloudformation:DescribeStacks In addition, you must have the tagging permission defined by the Amazon Web Services service that creates the resource. For more information, see UntagResources in the Resource Groups Tagging API Reference."]
 module DisassociateAttributeGroupResponse =
   struct
     type nonrec t =
@@ -2865,11 +3858,11 @@ module DisassociateAttributeGroupResponse =
           (Xml.child xml_arg0 "applicationArn") in
       make ?attributeGroupArn ?applicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeGroupArn =
-        field_map json "attributeGroupArn" AttributeGroupArn.of_json in
+        field_map json__ "attributeGroupArn" AttributeGroupArn.of_json in
       let applicationArn =
-        field_map json "applicationArn" ApplicationArn.of_json in
+        field_map json__ "applicationArn" ApplicationArn.of_json in
       make ?attributeGroupArn ?applicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2879,10 +3872,10 @@ module DisassociateAttributeGroupRequest =
     type nonrec t =
       {
       application: ApplicationSpecifier.t
-        [@ocaml.doc "The name or ID of the application."];
+        [@ocaml.doc "The name, ID, or ARN of the application."];
       attributeGroup: AttributeGroupSpecifier.t
         [@ocaml.doc
-          "The name or ID of the attribute group that holds the attributes to describe the application."]}
+          "The name, ID, or ARN of the attribute group that holds the attributes to describe the application."]}
     let context_ = "DisassociateAttributeGroupRequest"
     let make ~application =
       fun ~attributeGroup -> fun () -> { application; attributeGroup }
@@ -2902,11 +3895,11 @@ module DisassociateAttributeGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~attributeGroup ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeGroup =
-        field_map_exn json "attributeGroup" AttributeGroupSpecifier.of_json in
+        field_map_exn json__ "attributeGroup" AttributeGroupSpecifier.of_json in
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
       make ~attributeGroup ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2974,20 +3967,20 @@ module DeleteAttributeGroupResponse =
           (Xml.child xml_arg0 "attributeGroup") in
       make ?attributeGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeGroup =
-        field_map json "attributeGroup" AttributeGroupSummary.of_json in
+        field_map json__ "attributeGroup" AttributeGroupSummary.of_json in
       make ?attributeGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an attribute group, specified either by its attribute group ID or name."]
+       "Deletes an attribute group, specified either by its attribute group ID, name, or ARN."]
 module DeleteAttributeGroupRequest =
   struct
     type nonrec t =
       {
       attributeGroup: AttributeGroupSpecifier.t
         [@ocaml.doc
-          "The name or ID of the attribute group that holds the attributes to describe the application."]}
+          "The name, ID, or ARN of the attribute group that holds the attributes to describe the application."]}
     let context_ = "DeleteAttributeGroupRequest"
     let make ~attributeGroup = fun () -> { attributeGroup }
     let to_value x =
@@ -3001,13 +3994,13 @@ module DeleteAttributeGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attributeGroup") in
       make ~attributeGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeGroup =
-        field_map_exn json "attributeGroup" AttributeGroupSpecifier.of_json in
+        field_map_exn json__ "attributeGroup" AttributeGroupSpecifier.of_json in
       make ~attributeGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an attribute group, specified either by its attribute group ID or name."]
+       "Deletes an attribute group, specified either by its attribute group ID, name, or ARN."]
 module DeleteApplicationResponse =
   struct
     type nonrec t =
@@ -3071,19 +4064,19 @@ module DeleteApplicationResponse =
           (Xml.child xml_arg0 "application") in
       make ?application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let application =
-        field_map json "application" ApplicationSummary.of_json in
+        field_map json__ "application" ApplicationSummary.of_json in
       make ?application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an application that is specified either by its application ID or name. All associated attribute groups and resources must be disassociated from it before deleting an application."]
+       "Deletes an application that is specified either by its application ID, name, or ARN. All associated attribute groups and resources must be disassociated from it before deleting an application."]
 module DeleteApplicationRequest =
   struct
     type nonrec t =
       {
       application: ApplicationSpecifier.t
-        [@ocaml.doc "The name or ID of the application."]}
+        [@ocaml.doc "The name, ID, or ARN of the application."]}
     let context_ = "DeleteApplicationRequest"
     let make ~application = fun () -> { application }
     let to_value x =
@@ -3097,13 +4090,13 @@ module DeleteApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
       make ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an application that is specified either by its application ID or name. All associated attribute groups and resources must be disassociated from it before deleting an application."]
+       "Deletes an application that is specified either by its application ID, name, or ARN. All associated attribute groups and resources must be disassociated from it before deleting an application."]
 module CreateAttributeGroupResponse =
   struct
     type nonrec t =
@@ -3178,9 +4171,9 @@ module CreateAttributeGroupResponse =
           (Xml.child xml_arg0 "attributeGroup") in
       make ?attributeGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeGroup =
-        field_map json "attributeGroup" AttributeGroup.of_json in
+        field_map json__ "attributeGroup" AttributeGroup.of_json in
       make ?attributeGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3231,12 +4224,13 @@ module CreateAttributeGroupRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~clientToken ?tags ~attributes ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let attributes = field_map_exn json "attributes" Attributes.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let attributes = field_map_exn json__ "attributes" Attributes.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ~clientToken ?tags ~attributes ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3251,6 +4245,8 @@ module CreateApplicationResponse =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?application = fun () -> { application }
     let error_of_json name json =
@@ -3262,6 +4258,10 @@ module CreateApplicationResponse =
       | "ServiceQuotaExceededException" ->
           `ServiceQuotaExceededException
             (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3274,6 +4274,10 @@ module CreateApplicationResponse =
       | "ServiceQuotaExceededException" ->
           `ServiceQuotaExceededException
             (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3290,6 +4294,14 @@ module CreateApplicationResponse =
           `Assoc
             [("error", (`String "ServiceQuotaExceededException"));
             ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3304,8 +4316,8 @@ module CreateApplicationResponse =
         (Option.map ~f:Application.of_xml) (Xml.child xml_arg0 "application") in
       make ?application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let application = field_map json "application" Application.of_json in
+    let of_json json__ =
+      let application = field_map json__ "application" Application.of_json in
       make ?application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3349,11 +4361,12 @@ module CreateApplicationRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~clientToken ?tags ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ~clientToken ?tags ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3367,15 +4380,21 @@ module AssociateResourceResponse =
           "The Amazon resource name (ARN) of the application that was augmented with attributes."];
       resourceArn: Arn.t option
         [@ocaml.doc
-          "The Amazon resource name (ARN) that specifies the resource."]}
+          "The Amazon resource name (ARN) that specifies the resource."];
+      options: Options.t option
+        [@ocaml.doc
+          "Determines whether an application tag is applied or skipped."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?applicationArn =
-      fun ?resourceArn -> fun () -> { applicationArn; resourceArn }
+      fun ?resourceArn ->
+        fun ?options -> fun () -> { applicationArn; resourceArn; options }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -3387,6 +4406,10 @@ module AssociateResourceResponse =
       | "ServiceQuotaExceededException" ->
           `ServiceQuotaExceededException
             (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3401,6 +4424,10 @@ module AssociateResourceResponse =
       | "ServiceQuotaExceededException" ->
           `ServiceQuotaExceededException
             (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3421,6 +4448,14 @@ module AssociateResourceResponse =
           `Assoc
             [("error", (`String "ServiceQuotaExceededException"));
             ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3430,48 +4465,60 @@ module AssociateResourceResponse =
       structure_to_value
         [("applicationArn",
            (Option.map x.applicationArn ~f:ApplicationArn.to_value));
-        ("resourceArn", (Option.map x.resourceArn ~f:Arn.to_value))]
+        ("resourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
+        ("options", (Option.map x.options ~f:Options.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let options =
+        (Option.map ~f:Options.of_xml) (Xml.child xml_arg0 "options") in
       let resourceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resourceArn") in
       let applicationArn =
         (Option.map ~f:ApplicationArn.of_xml)
           (Xml.child xml_arg0 "applicationArn") in
-      make ?resourceArn ?applicationArn ()
+      make ?options ?resourceArn ?applicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let options = field_map json__ "options" Options.of_json in
+      let resourceArn = field_map json__ "resourceArn" Arn.of_json in
       let applicationArn =
-        field_map json "applicationArn" ApplicationArn.of_json in
-      make ?resourceArn ?applicationArn ()
+        field_map json__ "applicationArn" ApplicationArn.of_json in
+      make ?options ?resourceArn ?applicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates a resource with an application. Both the resource and the application can be specified either by ID or name."]
+       "Associates a resource with an application. The resource can be specified by its ARN or name. The application can be specified by ARN, ID, or name. Minimum permissions You must have the following permissions to associate a resource using the OPTIONS parameter set to APPLY_APPLICATION_TAG. tag:GetResources tag:TagResources You must also have these additional permissions if you don't use the AWSServiceCatalogAppRegistryFullAccess policy. For more information, see AWSServiceCatalogAppRegistryFullAccess in the AppRegistry Administrator Guide. resource-groups:AssociateResource cloudformation:UpdateStack cloudformation:DescribeStacks In addition, you must have the tagging permission defined by the Amazon Web Services service that creates the resource. For more information, see TagResources in the Resource Groups Tagging API Reference."]
 module AssociateResourceRequest =
   struct
     type nonrec t =
       {
       application: ApplicationSpecifier.t
-        [@ocaml.doc "The name or ID of the application."];
+        [@ocaml.doc "The name, ID, or ARN of the application."];
       resourceType: ResourceType.t
         [@ocaml.doc
           "The type of resource of which the application will be associated."];
       resource: ResourceSpecifier.t
         [@ocaml.doc
-          "The name or ID of the resource of which the application will be associated."]}
+          "The name or ID of the resource of which the application will be associated."];
+      options: Options.t option
+        [@ocaml.doc
+          "Determines whether an application tag is applied or skipped."]}
     let context_ = "AssociateResourceRequest"
-    let make ~application =
-      fun ~resourceType ->
-        fun ~resource -> fun () -> { application; resourceType; resource }
+    let make ?options =
+      fun ~application ->
+        fun ~resourceType ->
+          fun ~resource ->
+            fun () -> { options; application; resourceType; resource }
     let to_value x =
       structure_to_value
         [("application",
            (Some (ApplicationSpecifier.to_value x.application)));
         ("resourceType", (Some (ResourceType.to_value x.resourceType)));
-        ("resource", (Some (ResourceSpecifier.to_value x.resource)))]
+        ("resource", (Some (ResourceSpecifier.to_value x.resource)));
+        ("options", (Option.map x.options ~f:Options.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let options =
+        (Option.map ~f:Options.of_xml) (Xml.child xml_arg0 "options") in
       let resource =
         ResourceSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resource") in
@@ -3481,18 +4528,20 @@ module AssociateResourceRequest =
       let application =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
-      make ~resource ~resourceType ~application ()
+      make ?options ~resource ~resourceType ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resource = field_map_exn json "resource" ResourceSpecifier.of_json in
+    let of_json json__ =
+      let options = field_map json__ "options" Options.of_json in
+      let resource =
+        field_map_exn json__ "resource" ResourceSpecifier.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        field_map_exn json__ "resourceType" ResourceType.of_json in
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
-      make ~resource ~resourceType ~application ()
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
+      make ?options ~resource ~resourceType ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates a resource with an application. Both the resource and the application can be specified either by ID or name."]
+       "Associates a resource with an application. The resource can be specified by its ARN or name. The application can be specified by ARN, ID, or name. Minimum permissions You must have the following permissions to associate a resource using the OPTIONS parameter set to APPLY_APPLICATION_TAG. tag:GetResources tag:TagResources You must also have these additional permissions if you don't use the AWSServiceCatalogAppRegistryFullAccess policy. For more information, see AWSServiceCatalogAppRegistryFullAccess in the AppRegistry Administrator Guide. resource-groups:AssociateResource cloudformation:UpdateStack cloudformation:DescribeStacks In addition, you must have the tagging permission defined by the Amazon Web Services service that creates the resource. For more information, see TagResources in the Resource Groups Tagging API Reference."]
 module AssociateAttributeGroupResponse =
   struct
     type nonrec t =
@@ -3504,7 +4553,8 @@ module AssociateAttributeGroupResponse =
         [@ocaml.doc
           "The Amazon resource name (ARN) of the attribute group that contains the application's new attributes."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
@@ -3514,6 +4564,8 @@ module AssociateAttributeGroupResponse =
         fun () -> { applicationArn; attributeGroupArn }
     let error_of_json name json =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -3528,6 +4580,8 @@ module AssociateAttributeGroupResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -3541,6 +4595,10 @@ module AssociateAttributeGroupResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -3578,11 +4636,11 @@ module AssociateAttributeGroupResponse =
           (Xml.child xml_arg0 "applicationArn") in
       make ?attributeGroupArn ?applicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeGroupArn =
-        field_map json "attributeGroupArn" AttributeGroupArn.of_json in
+        field_map json__ "attributeGroupArn" AttributeGroupArn.of_json in
       let applicationArn =
-        field_map json "applicationArn" ApplicationArn.of_json in
+        field_map json__ "applicationArn" ApplicationArn.of_json in
       make ?attributeGroupArn ?applicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3592,10 +4650,10 @@ module AssociateAttributeGroupRequest =
     type nonrec t =
       {
       application: ApplicationSpecifier.t
-        [@ocaml.doc "The name or ID of the application."];
+        [@ocaml.doc "The name, ID, or ARN of the application."];
       attributeGroup: AttributeGroupSpecifier.t
         [@ocaml.doc
-          "The name or ID of the attribute group that holds the attributes to describe the application."]}
+          "The name, ID, or ARN of the attribute group that holds the attributes to describe the application."]}
     let context_ = "AssociateAttributeGroupRequest"
     let make ~application =
       fun ~attributeGroup -> fun () -> { application; attributeGroup }
@@ -3615,11 +4673,11 @@ module AssociateAttributeGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~attributeGroup ~application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeGroup =
-        field_map_exn json "attributeGroup" AttributeGroupSpecifier.of_json in
+        field_map_exn json__ "attributeGroup" AttributeGroupSpecifier.of_json in
       let application =
-        field_map_exn json "application" ApplicationSpecifier.of_json in
+        field_map_exn json__ "application" ApplicationSpecifier.of_json in
       make ~attributeGroup ~application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

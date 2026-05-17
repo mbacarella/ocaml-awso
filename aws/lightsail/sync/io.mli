@@ -121,6 +121,12 @@ val create_domain_entry :
     ?cfg:Awso.Cfg.t ->
       CreateDomainEntryRequest.t ->
         (CreateDomainEntryResult.t, CreateDomainEntryResult.error) Result.t
+val create_g_u_i_session_access_details :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateGUISessionAccessDetailsRequest.t ->
+        (CreateGUISessionAccessDetailsResult.t,
+          CreateGUISessionAccessDetailsResult.error) Result.t
 val create_instance_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -432,6 +438,11 @@ val get_container_services :
       GetContainerServicesRequest.t ->
         (ContainerServicesListResult.t, ContainerServicesListResult.error)
           Result.t
+val get_cost_estimate :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCostEstimateRequest.t ->
+        (GetCostEstimateResult.t, GetCostEstimateResult.error) Result.t
 val get_disk :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -561,6 +572,12 @@ val get_load_balancer_tls_certificates :
       GetLoadBalancerTlsCertificatesRequest.t ->
         (GetLoadBalancerTlsCertificatesResult.t,
           GetLoadBalancerTlsCertificatesResult.error) Result.t
+val get_load_balancer_tls_policies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLoadBalancerTlsPoliciesRequest.t ->
+        (GetLoadBalancerTlsPoliciesResult.t,
+          GetLoadBalancerTlsPoliciesResult.error) Result.t
 val get_load_balancers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -659,6 +676,11 @@ val get_relational_databases :
       GetRelationalDatabasesRequest.t ->
         (GetRelationalDatabasesResult.t, GetRelationalDatabasesResult.error)
           Result.t
+val get_setup_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSetupHistoryRequest.t ->
+        (GetSetupHistoryResult.t, GetSetupHistoryResult.error) Result.t
 val get_static_ip :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -744,6 +766,16 @@ val set_resource_access_for_bucket :
       SetResourceAccessForBucketRequest.t ->
         (SetResourceAccessForBucketResult.t,
           SetResourceAccessForBucketResult.error) Result.t
+val setup_instance_https :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SetupInstanceHttpsRequest.t ->
+        (SetupInstanceHttpsResult.t, SetupInstanceHttpsResult.error) Result.t
+val start_g_u_i_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartGUISessionRequest.t ->
+        (StartGUISessionResult.t, StartGUISessionResult.error) Result.t
 val start_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -755,6 +787,11 @@ val start_relational_database :
       StartRelationalDatabaseRequest.t ->
         (StartRelationalDatabaseResult.t,
           StartRelationalDatabaseResult.error) Result.t
+val stop_g_u_i_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopGUISessionRequest.t ->
+        (StopGUISessionResult.t, StopGUISessionResult.error) Result.t
 val stop_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -818,6 +855,12 @@ val update_domain_entry :
     ?cfg:Awso.Cfg.t ->
       UpdateDomainEntryRequest.t ->
         (UpdateDomainEntryResult.t, UpdateDomainEntryResult.error) Result.t
+val update_instance_metadata_options :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateInstanceMetadataOptionsRequest.t ->
+        (UpdateInstanceMetadataOptionsResult.t,
+          UpdateInstanceMetadataOptionsResult.error) Result.t
 val update_load_balancer_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

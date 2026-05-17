@@ -53,11 +53,24 @@ val create_core_network :
       CreateCoreNetworkRequest.t ->
         (CreateCoreNetworkResponse.t, CreateCoreNetworkResponse.error)
           Result.t Lwt.t
+val create_core_network_prefix_list_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCoreNetworkPrefixListAssociationRequest.t ->
+        (CreateCoreNetworkPrefixListAssociationResponse.t,
+          CreateCoreNetworkPrefixListAssociationResponse.error) Result.t
+          Lwt.t
 val create_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeviceRequest.t ->
         (CreateDeviceResponse.t, CreateDeviceResponse.error) Result.t Lwt.t
+val create_direct_connect_gateway_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDirectConnectGatewayAttachmentRequest.t ->
+        (CreateDirectConnectGatewayAttachmentResponse.t,
+          CreateDirectConnectGatewayAttachmentResponse.error) Result.t Lwt.t
 val create_global_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -80,6 +93,19 @@ val create_site_to_site_vpn_attachment :
       CreateSiteToSiteVpnAttachmentRequest.t ->
         (CreateSiteToSiteVpnAttachmentResponse.t,
           CreateSiteToSiteVpnAttachmentResponse.error) Result.t Lwt.t
+val create_transit_gateway_peering :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTransitGatewayPeeringRequest.t ->
+        (CreateTransitGatewayPeeringResponse.t,
+          CreateTransitGatewayPeeringResponse.error) Result.t Lwt.t
+val create_transit_gateway_route_table_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTransitGatewayRouteTableAttachmentRequest.t ->
+        (CreateTransitGatewayRouteTableAttachmentResponse.t,
+          CreateTransitGatewayRouteTableAttachmentResponse.error) Result.t
+          Lwt.t
 val create_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -116,6 +142,13 @@ val delete_core_network_policy_version :
       DeleteCoreNetworkPolicyVersionRequest.t ->
         (DeleteCoreNetworkPolicyVersionResponse.t,
           DeleteCoreNetworkPolicyVersionResponse.error) Result.t Lwt.t
+val delete_core_network_prefix_list_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCoreNetworkPrefixListAssociationRequest.t ->
+        (DeleteCoreNetworkPrefixListAssociationResponse.t,
+          DeleteCoreNetworkPrefixListAssociationResponse.error) Result.t
+          Lwt.t
 val delete_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -132,6 +165,11 @@ val delete_link :
     ?cfg:Awso.Cfg.t ->
       DeleteLinkRequest.t ->
         (DeleteLinkResponse.t, DeleteLinkResponse.error) Result.t Lwt.t
+val delete_peering :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePeeringRequest.t ->
+        (DeletePeeringResponse.t, DeletePeeringResponse.error) Result.t Lwt.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -215,6 +253,12 @@ val get_core_network :
       GetCoreNetworkRequest.t ->
         (GetCoreNetworkResponse.t, GetCoreNetworkResponse.error) Result.t
           Lwt.t
+val get_core_network_change_events :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCoreNetworkChangeEventsRequest.t ->
+        (GetCoreNetworkChangeEventsResponse.t,
+          GetCoreNetworkChangeEventsResponse.error) Result.t Lwt.t
 val get_core_network_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -238,6 +282,12 @@ val get_devices :
     ?cfg:Awso.Cfg.t ->
       GetDevicesRequest.t ->
         (GetDevicesResponse.t, GetDevicesResponse.error) Result.t Lwt.t
+val get_direct_connect_gateway_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDirectConnectGatewayAttachmentRequest.t ->
+        (GetDirectConnectGatewayAttachmentResponse.t,
+          GetDirectConnectGatewayAttachmentResponse.error) Result.t Lwt.t
 val get_link_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -309,17 +359,36 @@ val get_transit_gateway_connect_peer_associations :
         (GetTransitGatewayConnectPeerAssociationsResponse.t,
           GetTransitGatewayConnectPeerAssociationsResponse.error) Result.t
           Lwt.t
+val get_transit_gateway_peering :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTransitGatewayPeeringRequest.t ->
+        (GetTransitGatewayPeeringResponse.t,
+          GetTransitGatewayPeeringResponse.error) Result.t Lwt.t
 val get_transit_gateway_registrations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTransitGatewayRegistrationsRequest.t ->
         (GetTransitGatewayRegistrationsResponse.t,
           GetTransitGatewayRegistrationsResponse.error) Result.t Lwt.t
+val get_transit_gateway_route_table_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTransitGatewayRouteTableAttachmentRequest.t ->
+        (GetTransitGatewayRouteTableAttachmentResponse.t,
+          GetTransitGatewayRouteTableAttachmentResponse.error) Result.t Lwt.t
 val get_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVpcAttachmentRequest.t ->
         (GetVpcAttachmentResponse.t, GetVpcAttachmentResponse.error) Result.t
+          Lwt.t
+val list_attachment_routing_policy_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAttachmentRoutingPolicyAssociationsRequest.t ->
+        (ListAttachmentRoutingPolicyAssociationsResponse.t,
+          ListAttachmentRoutingPolicyAssociationsResponse.error) Result.t
           Lwt.t
 val list_attachments :
   ?endpoint_url:string ->
@@ -339,18 +408,47 @@ val list_core_network_policy_versions :
       ListCoreNetworkPolicyVersionsRequest.t ->
         (ListCoreNetworkPolicyVersionsResponse.t,
           ListCoreNetworkPolicyVersionsResponse.error) Result.t Lwt.t
+val list_core_network_prefix_list_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCoreNetworkPrefixListAssociationsRequest.t ->
+        (ListCoreNetworkPrefixListAssociationsResponse.t,
+          ListCoreNetworkPrefixListAssociationsResponse.error) Result.t Lwt.t
+val list_core_network_routing_information :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCoreNetworkRoutingInformationRequest.t ->
+        (ListCoreNetworkRoutingInformationResponse.t,
+          ListCoreNetworkRoutingInformationResponse.error) Result.t Lwt.t
 val list_core_networks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCoreNetworksRequest.t ->
         (ListCoreNetworksResponse.t, ListCoreNetworksResponse.error) Result.t
           Lwt.t
+val list_organization_service_access_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListOrganizationServiceAccessStatusRequest.t ->
+        (ListOrganizationServiceAccessStatusResponse.t,
+          ListOrganizationServiceAccessStatusResponse.error) Result.t Lwt.t
+val list_peerings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPeeringsRequest.t ->
+        (ListPeeringsResponse.t, ListPeeringsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val put_attachment_routing_policy_label :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutAttachmentRoutingPolicyLabelRequest.t ->
+        (PutAttachmentRoutingPolicyLabelResponse.t,
+          PutAttachmentRoutingPolicyLabelResponse.error) Result.t Lwt.t
 val put_core_network_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -375,12 +473,24 @@ val reject_attachment :
       RejectAttachmentRequest.t ->
         (RejectAttachmentResponse.t, RejectAttachmentResponse.error) Result.t
           Lwt.t
+val remove_attachment_routing_policy_label :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RemoveAttachmentRoutingPolicyLabelRequest.t ->
+        (RemoveAttachmentRoutingPolicyLabelResponse.t,
+          RemoveAttachmentRoutingPolicyLabelResponse.error) Result.t Lwt.t
 val restore_core_network_policy_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreCoreNetworkPolicyVersionRequest.t ->
         (RestoreCoreNetworkPolicyVersionResponse.t,
           RestoreCoreNetworkPolicyVersionResponse.error) Result.t Lwt.t
+val start_organization_service_access_update :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartOrganizationServiceAccessUpdateRequest.t ->
+        (StartOrganizationServiceAccessUpdateResponse.t,
+          StartOrganizationServiceAccessUpdateResponse.error) Result.t Lwt.t
 val start_route_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -414,6 +524,12 @@ val update_device :
     ?cfg:Awso.Cfg.t ->
       UpdateDeviceRequest.t ->
         (UpdateDeviceResponse.t, UpdateDeviceResponse.error) Result.t Lwt.t
+val update_direct_connect_gateway_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDirectConnectGatewayAttachmentRequest.t ->
+        (UpdateDirectConnectGatewayAttachmentResponse.t,
+          UpdateDirectConnectGatewayAttachmentResponse.error) Result.t Lwt.t
 val update_global_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

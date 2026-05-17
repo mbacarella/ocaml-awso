@@ -113,7 +113,7 @@ let create_content =
          flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn"
        and name = flag "name" (required string) ~doc:"STRING Name"
        and uploadId =
-         flag "upload-id" (required string) ~doc:"STRING NonEmptyString" in
+         flag "upload-id" (required string) ~doc:"STRING UploadId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_content
@@ -170,6 +170,57 @@ let create_knowledge_base =
                                     knowledgeBaseType) ~name ())
            (Some Values.CreateKnowledgeBaseResponse.to_json)
            (Some Values.CreateKnowledgeBaseResponse.error_to_json)])
+let create_quick_response =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and channels =
+         flag "channels" (optional json_arg) ~doc:"JSON Channels"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING NonEmptyString"
+       and contentType =
+         flag "content-type" (optional string)
+           ~doc:"STRING QuickResponseType"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING QuickResponseDescription"
+       and groupingConfiguration =
+         flag "grouping-configuration" (optional json_arg)
+           ~doc:"JSON GroupingConfiguration"
+       and isActive = flag "is-active" (optional bool) ~doc:"BOOL Boolean"
+       and language =
+         flag "language" (optional string) ~doc:"STRING LanguageCode"
+       and shortcutKey =
+         flag "shortcut-key" (optional string) ~doc:"STRING ShortCutKey"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and content =
+         flag "content" (required json_arg)
+           ~doc:"JSON QuickResponseDataProvider"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn"
+       and name =
+         flag "name" (required string) ~doc:"STRING QuickResponseName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_quick_response
+           (Values.CreateQuickResponseRequest.make
+              ?channels:(Option.map ~f:Values.Channels.of_json channels)
+              ?clientToken ?contentType ?description
+              ?groupingConfiguration:(Option.map
+                                        ~f:Values.GroupingConfiguration.of_json
+                                        groupingConfiguration) ?isActive
+              ?language ?shortcutKey
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~content:(Values.QuickResponseDataProvider.of_json content)
+              ~knowledgeBaseId ~name ())
+           (Some Values.CreateQuickResponseResponse.to_json)
+           (Some Values.CreateQuickResponseResponse.error_to_json)])
 let create_session =
   Command.async ~summary:""
     ([%map_open.Command
@@ -255,6 +306,26 @@ let delete_content =
            (Values.DeleteContentRequest.make ~contentId ~knowledgeBaseId ())
            (Some Values.DeleteContentResponse.to_json)
            (Some Values.DeleteContentResponse.error_to_json)])
+let delete_import_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and importJobId =
+         flag "import-job-id" (required string) ~doc:"STRING Uuid"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_import_job
+           (Values.DeleteImportJobRequest.make ~importJobId ~knowledgeBaseId
+              ()) (Some Values.DeleteImportJobResponse.to_json)
+           (Some Values.DeleteImportJobResponse.error_to_json)])
 let delete_knowledge_base =
   Command.async ~summary:""
     ([%map_open.Command
@@ -273,6 +344,27 @@ let delete_knowledge_base =
            (Values.DeleteKnowledgeBaseRequest.make ~knowledgeBaseId ())
            (Some Values.DeleteKnowledgeBaseResponse.to_json)
            (Some Values.DeleteKnowledgeBaseResponse.error_to_json)])
+let delete_quick_response =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn"
+       and quickResponseId =
+         flag "quick-response-id" (required string) ~doc:"STRING UuidOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_quick_response
+           (Values.DeleteQuickResponseRequest.make ~knowledgeBaseId
+              ~quickResponseId ())
+           (Some Values.DeleteQuickResponseResponse.to_json)
+           (Some Values.DeleteQuickResponseResponse.error_to_json)])
 let get_assistant =
   Command.async ~summary:""
     ([%map_open.Command
@@ -352,6 +444,26 @@ let get_content_summary =
            (Values.GetContentSummaryRequest.make ~contentId ~knowledgeBaseId
               ()) (Some Values.GetContentSummaryResponse.to_json)
            (Some Values.GetContentSummaryResponse.error_to_json)])
+let get_import_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and importJobId =
+         flag "import-job-id" (required string) ~doc:"STRING Uuid"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_import_job
+           (Values.GetImportJobRequest.make ~importJobId ~knowledgeBaseId ())
+           (Some Values.GetImportJobResponse.to_json)
+           (Some Values.GetImportJobResponse.error_to_json)])
 let get_knowledge_base =
   Command.async ~summary:""
     ([%map_open.Command
@@ -370,6 +482,27 @@ let get_knowledge_base =
            (Values.GetKnowledgeBaseRequest.make ~knowledgeBaseId ())
            (Some Values.GetKnowledgeBaseResponse.to_json)
            (Some Values.GetKnowledgeBaseResponse.error_to_json)])
+let get_quick_response =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn"
+       and quickResponseId =
+         flag "quick-response-id" (required string) ~doc:"STRING UuidOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_quick_response
+           (Values.GetQuickResponseRequest.make ~knowledgeBaseId
+              ~quickResponseId ())
+           (Some Values.GetQuickResponseResponse.to_json)
+           (Some Values.GetQuickResponseResponse.error_to_json)])
 let get_recommendations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -480,6 +613,29 @@ let list_contents =
            (Values.ListContentsRequest.make ?maxResults ?nextToken
               ~knowledgeBaseId ()) (Some Values.ListContentsResponse.to_json)
            (Some Values.ListContentsResponse.error_to_json)])
+let list_import_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NonEmptyString"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_import_jobs
+           (Values.ListImportJobsRequest.make ?maxResults ?nextToken
+              ~knowledgeBaseId ())
+           (Some Values.ListImportJobsResponse.to_json)
+           (Some Values.ListImportJobsResponse.error_to_json)])
 let list_knowledge_bases =
   Command.async ~summary:""
     ([%map_open.Command
@@ -500,6 +656,29 @@ let list_knowledge_bases =
            (Values.ListKnowledgeBasesRequest.make ?maxResults ?nextToken ())
            (Some Values.ListKnowledgeBasesResponse.to_json)
            (Some Values.ListKnowledgeBasesResponse.error_to_json)])
+let list_quick_responses =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NonEmptyString"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_quick_responses
+           (Values.ListQuickResponsesRequest.make ?maxResults ?nextToken
+              ~knowledgeBaseId ())
+           (Some Values.ListQuickResponsesResponse.to_json)
+           (Some Values.ListQuickResponsesResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -615,6 +794,38 @@ let search_content =
                                    searchExpression) ())
            (Some Values.SearchContentResponse.to_json)
            (Some Values.SearchContentResponse.error_to_json)])
+let search_quick_responses =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and attributes =
+         flag "attributes" (optional json_arg) ~doc:"JSON ContactAttributes"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NonEmptyString"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn"
+       and searchExpression =
+         flag "search-expression" (required json_arg)
+           ~doc:"JSON QuickResponseSearchExpression" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_quick_responses
+           (Values.SearchQuickResponsesRequest.make
+              ?attributes:(Option.map ~f:Values.ContactAttributes.of_json
+                             attributes) ?maxResults ?nextToken
+              ~knowledgeBaseId
+              ~searchExpression:(Values.QuickResponseSearchExpression.of_json
+                                   searchExpression) ())
+           (Some Values.SearchQuickResponsesResponse.to_json)
+           (Some Values.SearchQuickResponsesResponse.error_to_json)])
 let search_sessions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -653,6 +864,9 @@ let start_content_upload =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and presignedUrlTimeToLive =
+         flag "presigned-url-time-to-live" (optional int)
+           ~doc:"INT TimeToLive"
        and contentType =
          flag "content-type" (required string) ~doc:"STRING ContentType"
        and knowledgeBaseId =
@@ -660,10 +874,46 @@ let start_content_upload =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_content_upload
-           (Values.StartContentUploadRequest.make ~contentType
-              ~knowledgeBaseId ())
+           (Values.StartContentUploadRequest.make ?presignedUrlTimeToLive
+              ~contentType ~knowledgeBaseId ())
            (Some Values.StartContentUploadResponse.to_json)
            (Some Values.StartContentUploadResponse.error_to_json)])
+let start_import_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING NonEmptyString"
+       and externalSourceConfiguration =
+         flag "external-source-configuration" (optional json_arg)
+           ~doc:"JSON ExternalSourceConfiguration"
+       and metadata =
+         flag "metadata" (optional json_arg) ~doc:"JSON ContentMetadata"
+       and importJobType =
+         flag "import-job-type" (required json_arg) ~doc:"JSON ImportJobType"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn"
+       and uploadId =
+         flag "upload-id" (required string) ~doc:"STRING UploadId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_import_job
+           (Values.StartImportJobRequest.make ?clientToken
+              ?externalSourceConfiguration:(Option.map
+                                              ~f:Values.ExternalSourceConfiguration.of_json
+                                              externalSourceConfiguration)
+              ?metadata:(Option.map ~f:Values.ContentMetadata.of_json
+                           metadata)
+              ~importJobType:(Values.ImportJobType.of_json importJobType)
+              ~knowledgeBaseId ~uploadId ())
+           (Some Values.StartImportJobResponse.to_json)
+           (Some Values.StartImportJobResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -726,7 +976,7 @@ let update_content =
          flag "revision-id" (optional string) ~doc:"STRING NonEmptyString"
        and title = flag "title" (optional string) ~doc:"STRING ContentTitle"
        and uploadId =
-         flag "upload-id" (optional string) ~doc:"STRING NonEmptyString"
+         flag "upload-id" (optional string) ~doc:"STRING UploadId"
        and contentId =
          flag "content-id" (required string) ~doc:"STRING UuidOrArn"
        and knowledgeBaseId =
@@ -762,6 +1012,64 @@ let update_knowledge_base_template_uri =
               ~knowledgeBaseId ~templateUri ())
            (Some Values.UpdateKnowledgeBaseTemplateUriResponse.to_json)
            (Some Values.UpdateKnowledgeBaseTemplateUriResponse.error_to_json)])
+let update_quick_response =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and channels =
+         flag "channels" (optional json_arg) ~doc:"JSON Channels"
+       and content =
+         flag "content" (optional json_arg)
+           ~doc:"JSON QuickResponseDataProvider"
+       and contentType =
+         flag "content-type" (optional string)
+           ~doc:"STRING QuickResponseType"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING QuickResponseDescription"
+       and groupingConfiguration =
+         flag "grouping-configuration" (optional json_arg)
+           ~doc:"JSON GroupingConfiguration"
+       and isActive = flag "is-active" (optional bool) ~doc:"BOOL Boolean"
+       and language =
+         flag "language" (optional string) ~doc:"STRING LanguageCode"
+       and name =
+         flag "name" (optional string) ~doc:"STRING QuickResponseName"
+       and removeDescription =
+         flag "remove-description" (optional bool) ~doc:"BOOL Boolean"
+       and removeGroupingConfiguration =
+         flag "remove-grouping-configuration" (optional bool)
+           ~doc:"BOOL Boolean"
+       and removeShortcutKey =
+         flag "remove-shortcut-key" (optional bool) ~doc:"BOOL Boolean"
+       and shortcutKey =
+         flag "shortcut-key" (optional string) ~doc:"STRING ShortCutKey"
+       and knowledgeBaseId =
+         flag "knowledge-base-id" (required string) ~doc:"STRING UuidOrArn"
+       and quickResponseId =
+         flag "quick-response-id" (required string) ~doc:"STRING UuidOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_quick_response
+           (Values.UpdateQuickResponseRequest.make
+              ?channels:(Option.map ~f:Values.Channels.of_json channels)
+              ?content:(Option.map
+                          ~f:Values.QuickResponseDataProvider.of_json content)
+              ?contentType ?description
+              ?groupingConfiguration:(Option.map
+                                        ~f:Values.GroupingConfiguration.of_json
+                                        groupingConfiguration) ?isActive
+              ?language ?name ?removeDescription ?removeGroupingConfiguration
+              ?removeShortcutKey ?shortcutKey ~knowledgeBaseId
+              ~quickResponseId ())
+           (Some Values.UpdateQuickResponseResponse.to_json)
+           (Some Values.UpdateQuickResponseResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -769,32 +1077,42 @@ let main =
     ("create-assistant-association", create_assistant_association);
     ("create-content", create_content);
     ("create-knowledge-base", create_knowledge_base);
+    ("create-quick-response", create_quick_response);
     ("create-session", create_session);
     ("delete-assistant", delete_assistant);
     ("delete-assistant-association", delete_assistant_association);
     ("delete-content", delete_content);
+    ("delete-import-job", delete_import_job);
     ("delete-knowledge-base", delete_knowledge_base);
+    ("delete-quick-response", delete_quick_response);
     ("get-assistant", get_assistant);
     ("get-assistant-association", get_assistant_association);
     ("get-content", get_content);
     ("get-content-summary", get_content_summary);
+    ("get-import-job", get_import_job);
     ("get-knowledge-base", get_knowledge_base);
+    ("get-quick-response", get_quick_response);
     ("get-recommendations", get_recommendations);
     ("get-session", get_session);
     ("list-assistant-associations", list_assistant_associations);
     ("list-assistants", list_assistants);
     ("list-contents", list_contents);
+    ("list-import-jobs", list_import_jobs);
     ("list-knowledge-bases", list_knowledge_bases);
+    ("list-quick-responses", list_quick_responses);
     ("list-tags-for-resource", list_tags_for_resource);
     ("notify-recommendations-received", notify_recommendations_received);
     ("query-assistant", query_assistant);
     ("remove-knowledge-base-template-uri",
       remove_knowledge_base_template_uri);
     ("search-content", search_content);
+    ("search-quick-responses", search_quick_responses);
     ("search-sessions", search_sessions);
     ("start-content-upload", start_content_upload);
+    ("start-import-job", start_import_job);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-content", update_content);
     ("update-knowledge-base-template-uri",
-      update_knowledge_base_template_uri)]
+      update_knowledge_base_template_uri);
+    ("update-quick-response", update_quick_response)]

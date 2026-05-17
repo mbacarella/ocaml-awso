@@ -24,6 +24,8 @@ let delete_configuration_set_event_destination ?endpoint_url ?cfg input =
 let get_configuration_set_event_destinations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetConfigurationSetEventDestinations
     input
+let list_configuration_sets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConfigurationSets input
 let send_voice_message ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendVoiceMessage input
 let update_configuration_set_event_destination ?endpoint_url ?cfg input =

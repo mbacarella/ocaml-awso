@@ -15,6 +15,12 @@ let apply_archive_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ApplyArchiveRule input
 let cancel_policy_generation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelPolicyGeneration input
+let check_access_not_granted ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CheckAccessNotGranted input
+let check_no_new_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CheckNoNewAccess input
+let check_no_public_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CheckNoPublicAccess input
 let create_access_preview ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAccessPreview input
 let create_analyzer ?endpoint_url ?cfg input =
@@ -25,6 +31,8 @@ let delete_analyzer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAnalyzer input
 let delete_archive_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteArchiveRule input
+let generate_finding_recommendation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GenerateFindingRecommendation input
 let get_access_preview ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAccessPreview input
 let get_analyzed_resource ?endpoint_url ?cfg input =
@@ -35,6 +43,12 @@ let get_archive_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetArchiveRule input
 let get_finding ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFinding input
+let get_finding_recommendation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetFindingRecommendation input
+let get_finding_v2 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetFindingV2 input
+let get_findings_statistics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetFindingsStatistics input
 let get_generated_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGeneratedPolicy input
 let list_access_preview_findings ?endpoint_url ?cfg input =
@@ -49,6 +63,8 @@ let list_archive_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListArchiveRules input
 let list_findings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFindings input
+let list_findings_v2 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFindingsV2 input
 let list_policy_generations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPolicyGenerations input
 let list_tags_for_resource ?endpoint_url ?cfg input =
@@ -61,6 +77,8 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_analyzer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAnalyzer input
 let update_archive_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateArchiveRule input
 let update_findings ?endpoint_url ?cfg input =

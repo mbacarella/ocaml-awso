@@ -140,6 +140,9 @@ let associate_service_action_with_provisioning_artifact =
        and acceptLanguage =
          flag "accept-language" (optional string)
            ~doc:"STRING AcceptLanguage"
+       and idempotencyToken =
+         flag "idempotency-token" (optional string)
+           ~doc:"STRING IdempotencyToken"
        and productId = flag "product-id" (required string) ~doc:"STRING Id"
        and provisioningArtifactId =
          flag "provisioning-artifact-id" (required string) ~doc:"STRING Id"
@@ -149,8 +152,8 @@ let associate_service_action_with_provisioning_artifact =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_service_action_with_provisioning_artifact
            (Values.AssociateServiceActionWithProvisioningArtifactInput.make
-              ?acceptLanguage ~productId ~provisioningArtifactId
-              ~serviceActionId ())
+              ?acceptLanguage ?idempotencyToken ~productId
+              ~provisioningArtifactId ~serviceActionId ())
            (Some
               Values.AssociateServiceActionWithProvisioningArtifactOutput.to_json)
            (Some
@@ -357,6 +360,8 @@ let create_portfolio_share =
            ~doc:"JSON OrganizationNode"
        and shareTagOptions =
          flag "share-tag-options" (optional bool) ~doc:"BOOL Boolean"
+       and sharePrincipals =
+         flag "share-principals" (optional bool) ~doc:"BOOL Boolean"
        and portfolioId =
          flag "portfolio-id" (required string) ~doc:"STRING Id" in
        fun () ->
@@ -366,7 +371,7 @@ let create_portfolio_share =
               ?organizationNode:(Option.map
                                    ~f:Values.OrganizationNode.of_json
                                    organizationNode) ?shareTagOptions
-              ~portfolioId ())
+              ?sharePrincipals ~portfolioId ())
            (Some Values.CreatePortfolioShareOutput.to_json)
            (Some Values.CreatePortfolioShareOutput.error_to_json)])
 let create_product =
@@ -395,14 +400,17 @@ let create_product =
        and supportUrl =
          flag "support-url" (optional string) ~doc:"STRING SupportUrl"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON AddTags"
+       and provisioningArtifactParameters =
+         flag "provisioning-artifact-parameters" (optional json_arg)
+           ~doc:"JSON ProvisioningArtifactProperties"
+       and sourceConnection =
+         flag "source-connection" (optional json_arg)
+           ~doc:"JSON SourceConnection"
        and name = flag "name" (required string) ~doc:"STRING ProductViewName"
        and owner =
          flag "owner" (required string) ~doc:"STRING ProductViewOwner"
        and productType =
          flag "product-type" (required json_arg) ~doc:"JSON ProductType"
-       and provisioningArtifactParameters =
-         flag "provisioning-artifact-parameters" (required json_arg)
-           ~doc:"JSON ProvisioningArtifactProperties"
        and idempotencyToken =
          flag "idempotency-token" (required string)
            ~doc:"STRING IdempotencyToken" in
@@ -411,10 +419,14 @@ let create_product =
            Io.create_product
            (Values.CreateProductInput.make ?acceptLanguage ?description
               ?distributor ?supportDescription ?supportEmail ?supportUrl
-              ?tags:(Option.map ~f:Values.AddTags.of_json tags) ~name ~owner
-              ~productType:(Values.ProductType.of_json productType)
-              ~provisioningArtifactParameters:(Values.ProvisioningArtifactProperties.of_json
+              ?tags:(Option.map ~f:Values.AddTags.of_json tags)
+              ?provisioningArtifactParameters:(Option.map
+                                                 ~f:Values.ProvisioningArtifactProperties.of_json
                                                  provisioningArtifactParameters)
+              ?sourceConnection:(Option.map
+                                   ~f:Values.SourceConnection.of_json
+                                   sourceConnection) ~name ~owner
+              ~productType:(Values.ProductType.of_json productType)
               ~idempotencyToken ()) (Some Values.CreateProductOutput.to_json)
            (Some Values.CreateProductOutput.error_to_json)])
 let create_provisioned_product_plan =
@@ -703,11 +715,15 @@ let delete_service_action =
        and acceptLanguage =
          flag "accept-language" (optional string)
            ~doc:"STRING AcceptLanguage"
+       and idempotencyToken =
+         flag "idempotency-token" (optional string)
+           ~doc:"STRING IdempotencyToken"
        and id = flag "id" (required string) ~doc:"STRING Id" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_service_action
-           (Values.DeleteServiceActionInput.make ?acceptLanguage ~id ())
+           (Values.DeleteServiceActionInput.make ?acceptLanguage
+              ?idempotencyToken ~id ())
            (Some Values.DeleteServiceActionOutput.to_json)
            (Some Values.DeleteServiceActionOutput.error_to_json)])
 let delete_tag_option =
@@ -967,13 +983,16 @@ let describe_provisioning_artifact =
            ~doc:"STRING ProvisioningArtifactName"
        and productName =
          flag "product-name" (optional string) ~doc:"STRING ProductViewName"
-       and verbose = flag "verbose" (optional bool) ~doc:"BOOL Verbose" in
+       and verbose = flag "verbose" (optional bool) ~doc:"BOOL Verbose"
+       and includeProvisioningArtifactParameters =
+         flag "include-provisioning-artifact-parameters" (optional bool)
+           ~doc:"BOOL Boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_provisioning_artifact
            (Values.DescribeProvisioningArtifactInput.make ?acceptLanguage
               ?provisioningArtifactId ?productId ?provisioningArtifactName
-              ?productName ?verbose ())
+              ?productName ?verbose ?includeProvisioningArtifactParameters ())
            (Some Values.DescribeProvisioningArtifactOutput.to_json)
            (Some Values.DescribeProvisioningArtifactOutput.error_to_json)])
 let describe_provisioning_parameters =
@@ -1144,6 +1163,8 @@ let disassociate_principal_from_portfolio =
        and acceptLanguage =
          flag "accept-language" (optional string)
            ~doc:"STRING AcceptLanguage"
+       and principalType =
+         flag "principal-type" (optional json_arg) ~doc:"JSON PrincipalType"
        and portfolioId =
          flag "portfolio-id" (required string) ~doc:"STRING Id"
        and principalARN =
@@ -1152,7 +1173,9 @@ let disassociate_principal_from_portfolio =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disassociate_principal_from_portfolio
            (Values.DisassociatePrincipalFromPortfolioInput.make
-              ?acceptLanguage ~portfolioId ~principalARN ())
+              ?acceptLanguage
+              ?principalType:(Option.map ~f:Values.PrincipalType.of_json
+                                principalType) ~portfolioId ~principalARN ())
            (Some Values.DisassociatePrincipalFromPortfolioOutput.to_json)
            (Some
               Values.DisassociatePrincipalFromPortfolioOutput.error_to_json)])
@@ -1192,6 +1215,9 @@ let disassociate_service_action_from_provisioning_artifact =
        and acceptLanguage =
          flag "accept-language" (optional string)
            ~doc:"STRING AcceptLanguage"
+       and idempotencyToken =
+         flag "idempotency-token" (optional string)
+           ~doc:"STRING IdempotencyToken"
        and productId = flag "product-id" (required string) ~doc:"STRING Id"
        and provisioningArtifactId =
          flag "provisioning-artifact-id" (required string) ~doc:"STRING Id"
@@ -1201,8 +1227,8 @@ let disassociate_service_action_from_provisioning_artifact =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disassociate_service_action_from_provisioning_artifact
            (Values.DisassociateServiceActionFromProvisioningArtifactInput.make
-              ?acceptLanguage ~productId ~provisioningArtifactId
-              ~serviceActionId ())
+              ?acceptLanguage ?idempotencyToken ~productId
+              ~provisioningArtifactId ~serviceActionId ())
            (Some
               Values.DisassociateServiceActionFromProvisioningArtifactOutput.to_json)
            (Some
@@ -1856,6 +1882,119 @@ let list_tag_options =
                           filters) ?pageSize ?pageToken ())
            (Some Values.ListTagOptionsOutput.to_json)
            (Some Values.ListTagOptionsOutput.error_to_json)])
+let notify_provision_product_engine_workflow_result =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and failureReason =
+         flag "failure-reason" (optional string)
+           ~doc:"STRING EngineWorkflowFailureReason"
+       and resourceIdentifier =
+         flag "resource-identifier" (optional json_arg)
+           ~doc:"JSON EngineWorkflowResourceIdentifier"
+       and outputs =
+         flag "outputs" (optional json_arg) ~doc:"JSON RecordOutputs"
+       and workflowToken =
+         flag "workflow-token" (required string)
+           ~doc:"STRING EngineWorkflowToken"
+       and recordId = flag "record-id" (required string) ~doc:"STRING Id"
+       and status =
+         flag "status" (required json_arg) ~doc:"JSON EngineWorkflowStatus"
+       and idempotencyToken =
+         flag "idempotency-token" (required string)
+           ~doc:"STRING IdempotencyToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.notify_provision_product_engine_workflow_result
+           (Values.NotifyProvisionProductEngineWorkflowResultInput.make
+              ?failureReason
+              ?resourceIdentifier:(Option.map
+                                     ~f:Values.EngineWorkflowResourceIdentifier.of_json
+                                     resourceIdentifier)
+              ?outputs:(Option.map ~f:Values.RecordOutputs.of_json outputs)
+              ~workflowToken ~recordId
+              ~status:(Values.EngineWorkflowStatus.of_json status)
+              ~idempotencyToken ())
+           (Some
+              Values.NotifyProvisionProductEngineWorkflowResultOutput.to_json)
+           (Some
+              Values.NotifyProvisionProductEngineWorkflowResultOutput.error_to_json)])
+let notify_terminate_provisioned_product_engine_workflow_result =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and failureReason =
+         flag "failure-reason" (optional string)
+           ~doc:"STRING EngineWorkflowFailureReason"
+       and workflowToken =
+         flag "workflow-token" (required string)
+           ~doc:"STRING EngineWorkflowToken"
+       and recordId = flag "record-id" (required string) ~doc:"STRING Id"
+       and status =
+         flag "status" (required json_arg) ~doc:"JSON EngineWorkflowStatus"
+       and idempotencyToken =
+         flag "idempotency-token" (required string)
+           ~doc:"STRING IdempotencyToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.notify_terminate_provisioned_product_engine_workflow_result
+           (Values.NotifyTerminateProvisionedProductEngineWorkflowResultInput.make
+              ?failureReason ~workflowToken ~recordId
+              ~status:(Values.EngineWorkflowStatus.of_json status)
+              ~idempotencyToken ())
+           (Some
+              Values.NotifyTerminateProvisionedProductEngineWorkflowResultOutput.to_json)
+           (Some
+              Values.NotifyTerminateProvisionedProductEngineWorkflowResultOutput.error_to_json)])
+let notify_update_provisioned_product_engine_workflow_result =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and failureReason =
+         flag "failure-reason" (optional string)
+           ~doc:"STRING EngineWorkflowFailureReason"
+       and outputs =
+         flag "outputs" (optional json_arg) ~doc:"JSON RecordOutputs"
+       and workflowToken =
+         flag "workflow-token" (required string)
+           ~doc:"STRING EngineWorkflowToken"
+       and recordId = flag "record-id" (required string) ~doc:"STRING Id"
+       and status =
+         flag "status" (required json_arg) ~doc:"JSON EngineWorkflowStatus"
+       and idempotencyToken =
+         flag "idempotency-token" (required string)
+           ~doc:"STRING IdempotencyToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.notify_update_provisioned_product_engine_workflow_result
+           (Values.NotifyUpdateProvisionedProductEngineWorkflowResultInput.make
+              ?failureReason
+              ?outputs:(Option.map ~f:Values.RecordOutputs.of_json outputs)
+              ~workflowToken ~recordId
+              ~status:(Values.EngineWorkflowStatus.of_json status)
+              ~idempotencyToken ())
+           (Some
+              Values.NotifyUpdateProvisionedProductEngineWorkflowResultOutput.to_json)
+           (Some
+              Values.NotifyUpdateProvisionedProductEngineWorkflowResultOutput.error_to_json)])
 let provision_product =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2200,6 +2339,8 @@ let update_portfolio_share =
            ~doc:"JSON OrganizationNode"
        and shareTagOptions =
          flag "share-tag-options" (optional bool) ~doc:"BOOL NullableBoolean"
+       and sharePrincipals =
+         flag "share-principals" (optional bool) ~doc:"BOOL NullableBoolean"
        and portfolioId =
          flag "portfolio-id" (required string) ~doc:"STRING Id" in
        fun () ->
@@ -2209,7 +2350,7 @@ let update_portfolio_share =
               ?organizationNode:(Option.map
                                    ~f:Values.OrganizationNode.of_json
                                    organizationNode) ?shareTagOptions
-              ~portfolioId ())
+              ?sharePrincipals ~portfolioId ())
            (Some Values.UpdatePortfolioShareOutput.to_json)
            (Some Values.UpdatePortfolioShareOutput.error_to_json)])
 let update_product =
@@ -2243,6 +2384,9 @@ let update_product =
        and addTags = flag "add-tags" (optional json_arg) ~doc:"JSON AddTags"
        and removeTags =
          flag "remove-tags" (optional json_arg) ~doc:"JSON TagKeys"
+       and sourceConnection =
+         flag "source-connection" (optional json_arg)
+           ~doc:"JSON SourceConnection"
        and id = flag "id" (required string) ~doc:"STRING Id" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -2252,7 +2396,10 @@ let update_product =
               ?supportUrl
               ?addTags:(Option.map ~f:Values.AddTags.of_json addTags)
               ?removeTags:(Option.map ~f:Values.TagKeys.of_json removeTags)
-              ~id ()) (Some Values.UpdateProductOutput.to_json)
+              ?sourceConnection:(Option.map
+                                   ~f:Values.SourceConnection.of_json
+                                   sourceConnection) ~id ())
+           (Some Values.UpdateProductOutput.to_json)
            (Some Values.UpdateProductOutput.error_to_json)])
 let update_provisioned_product =
   Command.async ~summary:""
@@ -2519,6 +2666,12 @@ let main =
     ("list-stack-instances-for-provisioned-product",
       list_stack_instances_for_provisioned_product);
     ("list-tag-options", list_tag_options);
+    ("notify-provision-product-engine-workflow-result",
+      notify_provision_product_engine_workflow_result);
+    ("notify-terminate-provisioned-product-engine-workflow-result",
+      notify_terminate_provisioned_product_engine_workflow_result);
+    ("notify-update-provisioned-product-engine-workflow-result",
+      notify_update_provisioned_product_engine_workflow_result);
     ("provision-product", provision_product);
     ("reject-portfolio-share", reject_portfolio_share);
     ("scan-provisioned-products", scan_provisioned_products);

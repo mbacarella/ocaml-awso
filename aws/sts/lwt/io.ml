@@ -17,13 +17,19 @@ let assume_role_with_s_a_m_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssumeRoleWithSAML input
 let assume_role_with_web_identity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssumeRoleWithWebIdentity input
+let assume_root ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssumeRoot input
 let decode_authorization_message ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DecodeAuthorizationMessage input
 let get_access_key_info ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAccessKeyInfo input
 let get_caller_identity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCallerIdentity input
+let get_delegated_access_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDelegatedAccessToken input
 let get_federation_token ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFederationToken input
 let get_session_token ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSessionToken input
+let get_web_identity_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetWebIdentityToken input

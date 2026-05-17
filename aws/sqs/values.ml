@@ -7,10 +7,10 @@ let apiVersion = "2012-11-05"
 let endpointPrefix = "sqs"
 let serviceFullName = "Amazon Simple Queue Service"
 let signatureVersion = "v4"
-let protocol = "query"
+let protocol = "json"
 let globalEndpoint = endpointPrefix ^ ".amazonaws.com"
 let serviceAbbreviation = "Amazon SQS"
-let xmlNamespace = "http://queue.amazonaws.com/doc/2012-11-05/"
+let targetPrefix = "AmazonSQS"
 let simple_to_json to_value x =
   Botodata.Json.value_to_json_scalar (to_value x)
 let composed_to_json to_value x = Botodata.Json.value_to_json (to_value x)
@@ -54,6 +54,9 @@ module BinaryList =
   struct
     type nonrec t = Binary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Binary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -77,6 +80,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -132,9 +138,9 @@ module MessageAttributeValue =
       structure_to_value
         [("StringValue", (Option.map x.stringValue ~f:String_.to_value));
         ("BinaryValue", (Option.map x.binaryValue ~f:Binary.to_value));
-        ("StringListValue",
+        ("StringListValues",
           (Option.map x.stringListValues ~f:StringList.to_value));
-        ("BinaryListValue",
+        ("BinaryListValues",
           (Option.map x.binaryListValues ~f:BinaryList.to_value));
         ("DataType", (Some (String_.to_value x.dataType)))]
     let to_query v = to_query to_value v
@@ -143,10 +149,10 @@ module MessageAttributeValue =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DataType") in
       let binaryListValues =
         (Option.map ~f:BinaryList.of_xml)
-          (Xml.child xml_arg0 "BinaryListValue") in
+          (Xml.child xml_arg0 "BinaryListValues") in
       let stringListValues =
         (Option.map ~f:StringList.of_xml)
-          (Xml.child xml_arg0 "StringListValue") in
+          (Xml.child xml_arg0 "StringListValues") in
       let binaryValue =
         (Option.map ~f:Binary.of_xml) (Xml.child xml_arg0 "BinaryValue") in
       let stringValue =
@@ -154,19 +160,19 @@ module MessageAttributeValue =
       make ~dataType ?binaryListValues ?stringListValues ?binaryValue
         ?stringValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataType = field_map_exn json "DataType" String_.of_json in
+    let of_json json__ =
+      let dataType = field_map_exn json__ "DataType" String_.of_json in
       let binaryListValues =
-        field_map json "BinaryListValues" BinaryList.of_json in
+        field_map json__ "BinaryListValues" BinaryList.of_json in
       let stringListValues =
-        field_map json "StringListValues" StringList.of_json in
-      let binaryValue = field_map json "BinaryValue" Binary.of_json in
-      let stringValue = field_map json "StringValue" String_.of_json in
+        field_map json__ "StringListValues" StringList.of_json in
+      let binaryValue = field_map json__ "BinaryValue" Binary.of_json in
+      let stringValue = field_map json__ "StringValue" String_.of_json in
       make ~dataType ?binaryListValues ?stringListValues ?binaryValue
         ?stringValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The user-specified message attribute value. For string data types, the Value attribute has the same restrictions on the content as the message body. For more information, see SendMessage. Name, type, value and the message body must not be empty or null. All parts of the message attribute, including Name, Type, and Value, are part of the message size restriction (256 KB or 262,144 bytes)."]
+       "The user-specified message attribute value. For string data types, the Value attribute has the same restrictions on the content as the message body. For more information, see SendMessage. Name, type, value and the message body must not be empty or null. All parts of the message attribute, including Name, Type, and Value, are part of the message size restriction (1 MiB or 1,048,576 bytes)."]
 module MessageSystemAttributeNameForSends =
   struct
     type nonrec t =
@@ -223,9 +229,9 @@ module MessageSystemAttributeValue =
       structure_to_value
         [("StringValue", (Option.map x.stringValue ~f:String_.to_value));
         ("BinaryValue", (Option.map x.binaryValue ~f:Binary.to_value));
-        ("StringListValue",
+        ("StringListValues",
           (Option.map x.stringListValues ~f:StringList.to_value));
-        ("BinaryListValue",
+        ("BinaryListValues",
           (Option.map x.binaryListValues ~f:BinaryList.to_value));
         ("DataType", (Some (String_.to_value x.dataType)))]
     let to_query v = to_query to_value v
@@ -234,10 +240,10 @@ module MessageSystemAttributeValue =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DataType") in
       let binaryListValues =
         (Option.map ~f:BinaryList.of_xml)
-          (Xml.child xml_arg0 "BinaryListValue") in
+          (Xml.child xml_arg0 "BinaryListValues") in
       let stringListValues =
         (Option.map ~f:StringList.of_xml)
-          (Xml.child xml_arg0 "StringListValue") in
+          (Xml.child xml_arg0 "StringListValues") in
       let binaryValue =
         (Option.map ~f:Binary.of_xml) (Xml.child xml_arg0 "BinaryValue") in
       let stringValue =
@@ -245,14 +251,14 @@ module MessageSystemAttributeValue =
       make ~dataType ?binaryListValues ?stringListValues ?binaryValue
         ?stringValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataType = field_map_exn json "DataType" String_.of_json in
+    let of_json json__ =
+      let dataType = field_map_exn json__ "DataType" String_.of_json in
       let binaryListValues =
-        field_map json "BinaryListValues" BinaryList.of_json in
+        field_map json__ "BinaryListValues" BinaryList.of_json in
       let stringListValues =
-        field_map json "StringListValues" StringList.of_json in
-      let binaryValue = field_map json "BinaryValue" Binary.of_json in
-      let stringValue = field_map json "StringValue" String_.of_json in
+        field_map json__ "StringListValues" StringList.of_json in
+      let binaryValue = field_map json__ "BinaryValue" Binary.of_json in
+      let stringValue = field_map json__ "StringValue" String_.of_json in
       make ~dataType ?binaryListValues ?stringListValues ?binaryValue
         ?stringValue ()
     let to_json v = composed_to_json to_value v
@@ -261,6 +267,7 @@ module MessageSystemAttributeValue =
 module MessageSystemAttributeName =
   struct
     type nonrec t =
+      | All 
       | SenderId 
       | SentTimestamp 
       | ApproximateReceiveCount 
@@ -269,10 +276,12 @@ module MessageSystemAttributeName =
       | MessageDeduplicationId 
       | MessageGroupId 
       | AWSTraceHeader 
+      | DeadLetterQueueSourceArn 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
+      | All -> "All"
       | SenderId -> "SenderId"
       | SentTimestamp -> "SentTimestamp"
       | ApproximateReceiveCount -> "ApproximateReceiveCount"
@@ -282,9 +291,11 @@ module MessageSystemAttributeName =
       | MessageDeduplicationId -> "MessageDeduplicationId"
       | MessageGroupId -> "MessageGroupId"
       | AWSTraceHeader -> "AWSTraceHeader"
+      | DeadLetterQueueSourceArn -> "DeadLetterQueueSourceArn"
       | Non_static_id s -> s
     let of_string =
       function
+      | "All" -> All
       | "SenderId" -> SenderId
       | "SentTimestamp" -> SentTimestamp
       | "ApproximateReceiveCount" -> ApproximateReceiveCount
@@ -294,6 +305,7 @@ module MessageSystemAttributeName =
       | "MessageDeduplicationId" -> MessageDeduplicationId
       | "MessageGroupId" -> MessageGroupId
       | "AWSTraceHeader" -> AWSTraceHeader
+      | "DeadLetterQueueSourceArn" -> DeadLetterQueueSourceArn
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -317,19 +329,6 @@ module Boolean =
     let of_xml xml_arg0 =
       Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
     let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
-module Integer =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module MessageBodyAttributeMap =
@@ -357,6 +356,8 @@ module MessageBodyAttributeMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -391,6 +392,8 @@ module MessageBodySystemAttributeMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -398,6 +401,20 @@ module MessageBodySystemAttributeMap =
         ~key_of_string:MessageSystemAttributeNameForSends.of_string
         ~of_json:MessageSystemAttributeValue.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module NullableInteger =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NullableInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
   end
 module MessageSystemAttributeMap =
   struct
@@ -407,7 +424,7 @@ module MessageSystemAttributeMap =
       make
         (List.filter_map xs
            ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"Attribute") |>
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
                    (Option.map
                       ~f:(fun chopped ->
                             ((MessageSystemAttributeName.of_string chopped),
@@ -420,12 +437,40 @@ module MessageSystemAttributeMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:MessageSystemAttributeName.of_string
         ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module NullableLong =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
   end
 module TagKey =
   struct
@@ -451,6 +496,19 @@ module TagValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module ExceptionMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ExceptionMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExceptionMessage" j
     let to_json = simple_to_json to_value
   end
 module QueueAttributeName =
@@ -547,45 +605,43 @@ module BatchResultErrorEntry =
   struct
     type nonrec t =
       {
-      id: String_.t [@ocaml.doc "The Id of an entry in a batch request."];
-      senderFault: Boolean.t
+      id: String_.t option
+        [@ocaml.doc "The Id of an entry in a batch request."];
+      senderFault: Boolean.t option
         [@ocaml.doc
           "Specifies whether the error happened due to the caller of the batch API action."];
-      code: String_.t
+      code: String_.t option
         [@ocaml.doc
           "An error code representing why the action failed on this entry."];
       message: String_.t option
         [@ocaml.doc
           "A message explaining why the action failed on this entry."]}
-    let context_ = "BatchResultErrorEntry"
-    let make ?message =
-      fun ~id ->
-        fun ~senderFault ->
-          fun ~code -> fun () -> { message; id; senderFault; code }
+    let make ?id =
+      fun ?senderFault ->
+        fun ?code ->
+          fun ?message -> fun () -> { id; senderFault; code; message }
     let to_value x =
       structure_to_value
-        [("Id", (Some (String_.to_value x.id)));
-        ("SenderFault", (Some (Boolean.to_value x.senderFault)));
-        ("Code", (Some (String_.to_value x.code)));
+        [("Id", (Option.map x.id ~f:String_.to_value));
+        ("SenderFault", (Option.map x.senderFault ~f:Boolean.to_value));
+        ("Code", (Option.map x.code ~f:String_.to_value));
         ("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      let code =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       let senderFault =
-        Boolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SenderFault") in
-      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?message ~code ~senderFault ~id ()
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "SenderFault") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?message ?code ?senderFault ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map_exn json "Code" String_.of_json in
-      let senderFault = field_map_exn json "SenderFault" Boolean.of_json in
-      let id = field_map_exn json "Id" String_.of_json in
-      make ?message ~code ~senderFault ~id ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      let senderFault = field_map json__ "SenderFault" Boolean.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      make ?message ?code ?senderFault ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gives a detailed description of the result of an action on each entry in the request."]
@@ -593,10 +649,11 @@ module SendMessageBatchResultEntry =
   struct
     type nonrec t =
       {
-      id: String_.t
+      id: String_.t option
         [@ocaml.doc "An identifier for the message in this batch."];
-      messageId: String_.t [@ocaml.doc "An identifier for the message."];
-      mD5OfMessageBody: String_.t
+      messageId: String_.t option
+        [@ocaml.doc "An identifier for the message."];
+      mD5OfMessageBody: String_.t option
         [@ocaml.doc
           "An MD5 digest of the non-URL-encoded message body string. You can use this attribute to verify that Amazon SQS received the message correctly. Amazon SQS URL-decodes the message before creating the MD5 digest. For information about MD5, see RFC1321."];
       mD5OfMessageAttributes: String_.t option
@@ -608,27 +665,27 @@ module SendMessageBatchResultEntry =
       sequenceNumber: String_.t option
         [@ocaml.doc
           "This parameter applies only to FIFO (first-in-first-out) queues. The large, non-consecutive number that Amazon SQS assigns to each message. The length of SequenceNumber is 128 bits. As SequenceNumber continues to increase for a particular MessageGroupId."]}
-    let context_ = "SendMessageBatchResultEntry"
-    let make ?mD5OfMessageAttributes =
-      fun ?mD5OfMessageSystemAttributes ->
-        fun ?sequenceNumber ->
-          fun ~id ->
-            fun ~messageId ->
-              fun ~mD5OfMessageBody ->
+    let make ?id =
+      fun ?messageId ->
+        fun ?mD5OfMessageBody ->
+          fun ?mD5OfMessageAttributes ->
+            fun ?mD5OfMessageSystemAttributes ->
+              fun ?sequenceNumber ->
                 fun () ->
                   {
-                    mD5OfMessageAttributes;
-                    mD5OfMessageSystemAttributes;
-                    sequenceNumber;
                     id;
                     messageId;
-                    mD5OfMessageBody
+                    mD5OfMessageBody;
+                    mD5OfMessageAttributes;
+                    mD5OfMessageSystemAttributes;
+                    sequenceNumber
                   }
     let to_value x =
       structure_to_value
-        [("Id", (Some (String_.to_value x.id)));
-        ("MessageId", (Some (String_.to_value x.messageId)));
-        ("MD5OfMessageBody", (Some (String_.to_value x.mD5OfMessageBody)));
+        [("Id", (Option.map x.id ~f:String_.to_value));
+        ("MessageId", (Option.map x.messageId ~f:String_.to_value));
+        ("MD5OfMessageBody",
+          (Option.map x.mD5OfMessageBody ~f:String_.to_value));
         ("MD5OfMessageAttributes",
           (Option.map x.mD5OfMessageAttributes ~f:String_.to_value));
         ("MD5OfMessageSystemAttributes",
@@ -645,26 +702,26 @@ module SendMessageBatchResultEntry =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "MD5OfMessageAttributes") in
       let mD5OfMessageBody =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MD5OfMessageBody") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MD5OfMessageBody") in
       let messageId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
-      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MessageId") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
       make ?sequenceNumber ?mD5OfMessageSystemAttributes
-        ?mD5OfMessageAttributes ~mD5OfMessageBody ~messageId ~id ()
+        ?mD5OfMessageAttributes ?mD5OfMessageBody ?messageId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sequenceNumber = field_map json "SequenceNumber" String_.of_json in
+    let of_json json__ =
+      let sequenceNumber = field_map json__ "SequenceNumber" String_.of_json in
       let mD5OfMessageSystemAttributes =
-        field_map json "MD5OfMessageSystemAttributes" String_.of_json in
+        field_map json__ "MD5OfMessageSystemAttributes" String_.of_json in
       let mD5OfMessageAttributes =
-        field_map json "MD5OfMessageAttributes" String_.of_json in
+        field_map json__ "MD5OfMessageAttributes" String_.of_json in
       let mD5OfMessageBody =
-        field_map_exn json "MD5OfMessageBody" String_.of_json in
-      let messageId = field_map_exn json "MessageId" String_.of_json in
-      let id = field_map_exn json "Id" String_.of_json in
+        field_map json__ "MD5OfMessageBody" String_.of_json in
+      let messageId = field_map json__ "MessageId" String_.of_json in
+      let id = field_map json__ "Id" String_.of_json in
       make ?sequenceNumber ?mD5OfMessageSystemAttributes
-        ?mD5OfMessageAttributes ~mD5OfMessageBody ~messageId ~id ()
+        ?mD5OfMessageAttributes ?mD5OfMessageBody ?messageId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Encloses a MessageId for a successfully-enqueued message in a SendMessageBatch."]
@@ -676,7 +733,7 @@ module SendMessageBatchRequestEntry =
         [@ocaml.doc
           "An identifier for a message in this batch used to communicate the result. The Ids of a batch request need to be unique within a request. This identifier can have up to 80 characters. The following characters are accepted: alphanumeric characters, hyphens(-), and underscores (_)."];
       messageBody: String_.t [@ocaml.doc "The body of the message."];
-      delaySeconds: Integer.t option
+      delaySeconds: NullableInteger.t option
         [@ocaml.doc
           "The length of time, in seconds, for which a specific message is delayed. Valid values: 0 to 900. Maximum: 15 minutes. Messages with a positive DelaySeconds value become available for processing after the delay period is finished. If you don't specify a value, the default value for the queue is applied. When you set FifoQueue, you can't set DelaySeconds per message. You can set this parameter only on a queue level."];
       messageAttributes: MessageBodyAttributeMap.t option
@@ -690,7 +747,7 @@ module SendMessageBatchRequestEntry =
           "This parameter applies only to FIFO (first-in-first-out) queues. The token used for deduplication of messages within a 5-minute minimum deduplication interval. If a message with a particular MessageDeduplicationId is sent successfully, subsequent messages with the same MessageDeduplicationId are accepted successfully but aren't delivered. For more information, see Exactly-once processing in the Amazon SQS Developer Guide. Every message must have a unique MessageDeduplicationId, You may provide a MessageDeduplicationId explicitly. If you aren't able to provide a MessageDeduplicationId and you enable ContentBasedDeduplication for your queue, Amazon SQS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). If you don't provide a MessageDeduplicationId and the queue doesn't have ContentBasedDeduplication set, the action fails with an error. If the queue has ContentBasedDeduplication set, your MessageDeduplicationId overrides the generated one. When ContentBasedDeduplication is in effect, messages with identical content sent within the deduplication interval are treated as duplicates and only one copy of the message is delivered. If you send one message with ContentBasedDeduplication enabled and then another message with a MessageDeduplicationId that is the same as the one generated for the first MessageDeduplicationId, the two messages are treated as duplicates and only one copy of the message is delivered. The MessageDeduplicationId is available to the consumer of the message (this can be useful for troubleshooting delivery issues). If a message is sent successfully but the acknowledgement is lost and the message is resent with the same MessageDeduplicationId after the deduplication interval, Amazon SQS can't detect duplicate messages. Amazon SQS continues to keep track of the message deduplication ID even after the message is received and deleted. The length of MessageDeduplicationId is 128 characters. MessageDeduplicationId can contain alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). For best practices of using MessageDeduplicationId, see Using the MessageDeduplicationId Property in the Amazon SQS Developer Guide."];
       messageGroupId: String_.t option
         [@ocaml.doc
-          "This parameter applies only to FIFO (first-in-first-out) queues. The tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). To interleave multiple ordered streams within a single queue, use MessageGroupId values (for example, session data for multiple users). In this scenario, multiple consumers can process the queue, but the session data of each user is processed in a FIFO fashion. You must associate a non-empty MessageGroupId with a message. If you don't provide a MessageGroupId, the action fails. ReceiveMessage might return messages with multiple MessageGroupId values. For each MessageGroupId, the messages are sorted by time sent. The caller can't specify a MessageGroupId. The length of MessageGroupId is 128 characters. Valid values: alphanumeric characters and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). For best practices of using MessageGroupId, see Using the MessageGroupId Property in the Amazon SQS Developer Guide. MessageGroupId is required for FIFO queues. You can't use it for Standard queues."]}
+          "MessageGroupId is an attribute used in Amazon SQS FIFO (First-In-First-Out) and standard queues. In FIFO queues, MessageGroupId organizes messages into distinct groups. Messages within the same message group are always processed one at a time, in strict order, ensuring that no two messages from the same group are processed simultaneously. In standard queues, using MessageGroupId enables fair queues. It is used to identify the tenant a message belongs to, helping maintain consistent message dwell time across all tenants during noisy neighbor events. Unlike FIFO queues, messages with the same MessageGroupId can be processed in parallel, maintaining the high throughput of standard queues. FIFO queues: MessageGroupId acts as the tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). To interleave multiple ordered streams within a single queue, use MessageGroupId values (for example, session data for multiple users). In this scenario, multiple consumers can process the queue, but the session data of each user is processed in a FIFO fashion. If you do not provide a MessageGroupId when sending a message to a FIFO queue, the action fails. ReceiveMessage might return messages with multiple MessageGroupId values. For each MessageGroupId, the messages are sorted by time sent. Standard queues:Use MessageGroupId in standard queues to enable fair queues. The MessageGroupId identifies the tenant a message belongs to. A tenant can be any entity that shares a queue with others, such as your customer, a client application, or a request type. When one tenant sends a disproportionately large volume of messages or has messages that require longer processing time, fair queues ensure other tenants' messages maintain low dwell time. This preserves quality of service for all tenants while maintaining the scalability and throughput of standard queues. We recommend that you include a MessageGroupId in all messages when using fair queues. The length of MessageGroupId is 128 characters. Valid values: alphanumeric characters and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). For best practices of using MessageGroupId, see Using the MessageGroupId Property in the Amazon SQS Developer Guide."]}
     let context_ = "SendMessageBatchRequestEntry"
     let make ?delaySeconds =
       fun ?messageAttributes ->
@@ -713,10 +770,11 @@ module SendMessageBatchRequestEntry =
       structure_to_value
         [("Id", (Some (String_.to_value x.id)));
         ("MessageBody", (Some (String_.to_value x.messageBody)));
-        ("DelaySeconds", (Option.map x.delaySeconds ~f:Integer.to_value));
-        ("MessageAttribute",
+        ("DelaySeconds",
+          (Option.map x.delaySeconds ~f:NullableInteger.to_value));
+        ("MessageAttributes",
           (Option.map x.messageAttributes ~f:MessageBodyAttributeMap.to_value));
-        ("MessageSystemAttribute",
+        ("MessageSystemAttributes",
           (Option.map x.messageSystemAttributes
              ~f:MessageBodySystemAttributeMap.to_value));
         ("MessageDeduplicationId",
@@ -731,12 +789,13 @@ module SendMessageBatchRequestEntry =
           (Xml.child xml_arg0 "MessageDeduplicationId") in
       let messageSystemAttributes =
         (Option.map ~f:MessageBodySystemAttributeMap.of_xml)
-          (Xml.child xml_arg0 "MessageSystemAttribute") in
+          (Xml.child xml_arg0 "MessageSystemAttributes") in
       let messageAttributes =
         (Option.map ~f:MessageBodyAttributeMap.of_xml)
-          (Xml.child xml_arg0 "MessageAttribute") in
+          (Xml.child xml_arg0 "MessageAttributes") in
       let delaySeconds =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "DelaySeconds") in
+        (Option.map ~f:NullableInteger.of_xml)
+          (Xml.child xml_arg0 "DelaySeconds") in
       let messageBody =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MessageBody") in
@@ -744,18 +803,19 @@ module SendMessageBatchRequestEntry =
       make ?messageGroupId ?messageDeduplicationId ?messageSystemAttributes
         ?messageAttributes ?delaySeconds ~messageBody ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageGroupId = field_map json "MessageGroupId" String_.of_json in
+    let of_json json__ =
+      let messageGroupId = field_map json__ "MessageGroupId" String_.of_json in
       let messageDeduplicationId =
-        field_map json "MessageDeduplicationId" String_.of_json in
+        field_map json__ "MessageDeduplicationId" String_.of_json in
       let messageSystemAttributes =
-        field_map json "MessageSystemAttributes"
+        field_map json__ "MessageSystemAttributes"
           MessageBodySystemAttributeMap.of_json in
       let messageAttributes =
-        field_map json "MessageAttributes" MessageBodyAttributeMap.of_json in
-      let delaySeconds = field_map json "DelaySeconds" Integer.of_json in
-      let messageBody = field_map_exn json "MessageBody" String_.of_json in
-      let id = field_map_exn json "Id" String_.of_json in
+        field_map json__ "MessageAttributes" MessageBodyAttributeMap.of_json in
+      let delaySeconds =
+        field_map json__ "DelaySeconds" NullableInteger.of_json in
+      let messageBody = field_map_exn json__ "MessageBody" String_.of_json in
+      let id = field_map_exn json__ "Id" String_.of_json in
       make ?messageGroupId ?messageDeduplicationId ?messageSystemAttributes
         ?messageAttributes ?delaySeconds ~messageBody ~id ()
     let to_json v = composed_to_json to_value v
@@ -808,23 +868,23 @@ module Message =
         ("ReceiptHandle", (Option.map x.receiptHandle ~f:String_.to_value));
         ("MD5OfBody", (Option.map x.mD5OfBody ~f:String_.to_value));
         ("Body", (Option.map x.body ~f:String_.to_value));
-        ("Attribute",
+        ("Attributes",
           (Option.map x.attributes ~f:MessageSystemAttributeMap.to_value));
         ("MD5OfMessageAttributes",
           (Option.map x.mD5OfMessageAttributes ~f:String_.to_value));
-        ("MessageAttribute",
+        ("MessageAttributes",
           (Option.map x.messageAttributes ~f:MessageBodyAttributeMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let messageAttributes =
         (Option.map ~f:MessageBodyAttributeMap.of_xml)
-          (Xml.child xml_arg0 "MessageAttribute") in
+          (Xml.child xml_arg0 "MessageAttributes") in
       let mD5OfMessageAttributes =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "MD5OfMessageAttributes") in
       let attributes =
         (Option.map ~f:MessageSystemAttributeMap.of_xml)
-          (Xml.child xml_arg0 "Attribute") in
+          (Xml.child xml_arg0 "Attributes") in
       let body = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Body") in
       let mD5OfBody =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MD5OfBody") in
@@ -835,17 +895,17 @@ module Message =
       make ?messageAttributes ?mD5OfMessageAttributes ?attributes ?body
         ?mD5OfBody ?receiptHandle ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let messageAttributes =
-        field_map json "MessageAttributes" MessageBodyAttributeMap.of_json in
+        field_map json__ "MessageAttributes" MessageBodyAttributeMap.of_json in
       let mD5OfMessageAttributes =
-        field_map json "MD5OfMessageAttributes" String_.of_json in
+        field_map json__ "MD5OfMessageAttributes" String_.of_json in
       let attributes =
-        field_map json "Attributes" MessageSystemAttributeMap.of_json in
-      let body = field_map json "Body" String_.of_json in
-      let mD5OfBody = field_map json "MD5OfBody" String_.of_json in
-      let receiptHandle = field_map json "ReceiptHandle" String_.of_json in
-      let messageId = field_map json "MessageId" String_.of_json in
+        field_map json__ "Attributes" MessageSystemAttributeMap.of_json in
+      let body = field_map json__ "Body" String_.of_json in
+      let mD5OfBody = field_map json__ "MD5OfBody" String_.of_json in
+      let receiptHandle = field_map json__ "ReceiptHandle" String_.of_json in
+      let messageId = field_map json__ "MessageId" String_.of_json in
       make ?messageAttributes ?mD5OfMessageAttributes ?attributes ?body
         ?mD5OfBody ?receiptHandle ?messageId ()
     let to_json v = composed_to_json to_value v
@@ -863,22 +923,139 @@ module MessageAttributeName =
     let of_json j = string_of_json ~kind:"MessageAttributeName" j
     let to_json = simple_to_json to_value
   end
+module ListMessageMoveTasksResultEntry =
+  struct
+    type nonrec t =
+      {
+      taskHandle: String_.t option
+        [@ocaml.doc
+          "An identifier associated with a message movement task. When this field is returned in the response of the ListMessageMoveTasks action, it is only populated for tasks that are in RUNNING status."];
+      status: String_.t option
+        [@ocaml.doc
+          "The status of the message movement task. Possible values are: RUNNING, COMPLETED, CANCELLING, CANCELLED, and FAILED."];
+      sourceArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the queue that contains the messages to be moved to another queue."];
+      destinationArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the destination queue if it has been specified in the StartMessageMoveTask request. If a DestinationArn has not been specified in the StartMessageMoveTask request, this field value will be NULL."];
+      maxNumberOfMessagesPerSecond: NullableInteger.t option
+        [@ocaml.doc
+          "The number of messages to be moved per second (the message movement rate), if it has been specified in the StartMessageMoveTask request. If a MaxNumberOfMessagesPerSecond has not been specified in the StartMessageMoveTask request, this field value will be NULL."];
+      approximateNumberOfMessagesMoved: Long.t option
+        [@ocaml.doc
+          "The approximate number of messages already moved to the destination queue."];
+      approximateNumberOfMessagesToMove: NullableLong.t option
+        [@ocaml.doc
+          "The number of messages to be moved from the source queue. This number is obtained at the time of starting the message movement task and is only included after the message movement task is selected to start."];
+      failureReason: String_.t option
+        [@ocaml.doc
+          "The task failure reason (only included if the task status is FAILED)."];
+      startedTimestamp: Long.t option
+        [@ocaml.doc "The timestamp of starting the message movement task."]}
+    let make ?taskHandle =
+      fun ?status ->
+        fun ?sourceArn ->
+          fun ?destinationArn ->
+            fun ?maxNumberOfMessagesPerSecond ->
+              fun ?approximateNumberOfMessagesMoved ->
+                fun ?approximateNumberOfMessagesToMove ->
+                  fun ?failureReason ->
+                    fun ?startedTimestamp ->
+                      fun () ->
+                        {
+                          taskHandle;
+                          status;
+                          sourceArn;
+                          destinationArn;
+                          maxNumberOfMessagesPerSecond;
+                          approximateNumberOfMessagesMoved;
+                          approximateNumberOfMessagesToMove;
+                          failureReason;
+                          startedTimestamp
+                        }
+    let to_value x =
+      structure_to_value
+        [("TaskHandle", (Option.map x.taskHandle ~f:String_.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value));
+        ("SourceArn", (Option.map x.sourceArn ~f:String_.to_value));
+        ("DestinationArn", (Option.map x.destinationArn ~f:String_.to_value));
+        ("MaxNumberOfMessagesPerSecond",
+          (Option.map x.maxNumberOfMessagesPerSecond
+             ~f:NullableInteger.to_value));
+        ("ApproximateNumberOfMessagesMoved",
+          (Option.map x.approximateNumberOfMessagesMoved ~f:Long.to_value));
+        ("ApproximateNumberOfMessagesToMove",
+          (Option.map x.approximateNumberOfMessagesToMove
+             ~f:NullableLong.to_value));
+        ("FailureReason", (Option.map x.failureReason ~f:String_.to_value));
+        ("StartedTimestamp",
+          (Option.map x.startedTimestamp ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let startedTimestamp =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "StartedTimestamp") in
+      let failureReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FailureReason") in
+      let approximateNumberOfMessagesToMove =
+        (Option.map ~f:NullableLong.of_xml)
+          (Xml.child xml_arg0 "ApproximateNumberOfMessagesToMove") in
+      let approximateNumberOfMessagesMoved =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "ApproximateNumberOfMessagesMoved") in
+      let maxNumberOfMessagesPerSecond =
+        (Option.map ~f:NullableInteger.of_xml)
+          (Xml.child xml_arg0 "MaxNumberOfMessagesPerSecond") in
+      let destinationArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DestinationArn") in
+      let sourceArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceArn") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let taskHandle =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TaskHandle") in
+      make ?startedTimestamp ?failureReason
+        ?approximateNumberOfMessagesToMove ?approximateNumberOfMessagesMoved
+        ?maxNumberOfMessagesPerSecond ?destinationArn ?sourceArn ?status
+        ?taskHandle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let startedTimestamp = field_map json__ "StartedTimestamp" Long.of_json in
+      let failureReason = field_map json__ "FailureReason" String_.of_json in
+      let approximateNumberOfMessagesToMove =
+        field_map json__ "ApproximateNumberOfMessagesToMove"
+          NullableLong.of_json in
+      let approximateNumberOfMessagesMoved =
+        field_map json__ "ApproximateNumberOfMessagesMoved" Long.of_json in
+      let maxNumberOfMessagesPerSecond =
+        field_map json__ "MaxNumberOfMessagesPerSecond"
+          NullableInteger.of_json in
+      let destinationArn = field_map json__ "DestinationArn" String_.of_json in
+      let sourceArn = field_map json__ "SourceArn" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let taskHandle = field_map json__ "TaskHandle" String_.of_json in
+      make ?startedTimestamp ?failureReason
+        ?approximateNumberOfMessagesToMove ?approximateNumberOfMessagesMoved
+        ?maxNumberOfMessagesPerSecond ?destinationArn ?sourceArn ?status
+        ?taskHandle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains the details of a message movement task."]
 module DeleteMessageBatchResultEntry =
   struct
     type nonrec t =
       {
-      id: String_.t [@ocaml.doc "Represents a successfully deleted message."]}
-    let context_ = "DeleteMessageBatchResultEntry"
-    let make ~id = fun () -> { id }
+      id: String_.t option
+        [@ocaml.doc "Represents a successfully deleted message."]}
+    let make ?id = fun () -> { id }
     let to_value x =
-      structure_to_value [("Id", (Some (String_.to_value x.id)))]
+      structure_to_value [("Id", (Option.map x.id ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~id ()
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" String_.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" String_.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Encloses the Id of an entry in DeleteMessageBatch."]
 module DeleteMessageBatchRequestEntry =
@@ -887,7 +1064,7 @@ module DeleteMessageBatchRequestEntry =
       {
       id: String_.t
         [@ocaml.doc
-          "An identifier for this particular receipt handle. This is used to communicate the result. The Ids of a batch request need to be unique within a request. This identifier can have up to 80 characters. The following characters are accepted: alphanumeric characters, hyphens(-), and underscores (_)."];
+          "The identifier for this particular receipt handle. This is used to communicate the result. The Ids of a batch request need to be unique within a request. This identifier can have up to 80 characters. The following characters are accepted: alphanumeric characters, hyphens(-), and underscores (_)."];
       receiptHandle: String_.t [@ocaml.doc "A receipt handle."]}
     let context_ = "DeleteMessageBatchRequestEntry"
     let make ~id = fun ~receiptHandle -> fun () -> { id; receiptHandle }
@@ -903,9 +1080,10 @@ module DeleteMessageBatchRequestEntry =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~receiptHandle ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let receiptHandle = field_map_exn json "ReceiptHandle" String_.of_json in
-      let id = field_map_exn json "Id" String_.of_json in
+    let of_json json__ =
+      let receiptHandle =
+        field_map_exn json__ "ReceiptHandle" String_.of_json in
+      let id = field_map_exn json__ "Id" String_.of_json in
       make ~receiptHandle ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Encloses a receipt handle and an identifier for it."]
@@ -913,20 +1091,19 @@ module ChangeMessageVisibilityBatchResultEntry =
   struct
     type nonrec t =
       {
-      id: String_.t
+      id: String_.t option
         [@ocaml.doc
           "Represents a message whose visibility timeout has been changed successfully."]}
-    let context_ = "ChangeMessageVisibilityBatchResultEntry"
-    let make ~id = fun () -> { id }
+    let make ?id = fun () -> { id }
     let to_value x =
-      structure_to_value [("Id", (Some (String_.to_value x.id)))]
+      structure_to_value [("Id", (Option.map x.id ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~id ()
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" String_.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" String_.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Encloses the Id of an entry in ChangeMessageVisibilityBatch."]
@@ -938,7 +1115,7 @@ module ChangeMessageVisibilityBatchRequestEntry =
         [@ocaml.doc
           "An identifier for this particular receipt handle used to communicate the result. The Ids of a batch request need to be unique within a request. This identifier can have up to 80 characters. The following characters are accepted: alphanumeric characters, hyphens(-), and underscores (_)."];
       receiptHandle: String_.t [@ocaml.doc "A receipt handle."];
-      visibilityTimeout: Integer.t option
+      visibilityTimeout: NullableInteger.t option
         [@ocaml.doc
           "The new value (in seconds) for the message's visibility timeout."]}
     let context_ = "ChangeMessageVisibilityBatchRequestEntry"
@@ -951,11 +1128,11 @@ module ChangeMessageVisibilityBatchRequestEntry =
         [("Id", (Some (String_.to_value x.id)));
         ("ReceiptHandle", (Some (String_.to_value x.receiptHandle)));
         ("VisibilityTimeout",
-          (Option.map x.visibilityTimeout ~f:Integer.to_value))]
+          (Option.map x.visibilityTimeout ~f:NullableInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let visibilityTimeout =
-        (Option.map ~f:Integer.of_xml)
+        (Option.map ~f:NullableInteger.of_xml)
           (Xml.child xml_arg0 "VisibilityTimeout") in
       let receiptHandle =
         String_.of_xml
@@ -963,19 +1140,23 @@ module ChangeMessageVisibilityBatchRequestEntry =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?visibilityTimeout ~receiptHandle ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let visibilityTimeout =
-        field_map json "VisibilityTimeout" Integer.of_json in
-      let receiptHandle = field_map_exn json "ReceiptHandle" String_.of_json in
-      let id = field_map_exn json "Id" String_.of_json in
+        field_map json__ "VisibilityTimeout" NullableInteger.of_json in
+      let receiptHandle =
+        field_map_exn json__ "ReceiptHandle" String_.of_json in
+      let id = field_map_exn json__ "Id" String_.of_json in
       make ?visibilityTimeout ~receiptHandle ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Encloses a receipt handle and an entry id for each message in ChangeMessageVisibilityBatch. All of the following list parameters must be prefixed with ChangeMessageVisibilityBatchRequestEntry.n, where n is an integer value starting with 1. For example, a parameter list for this action might look like this: &ChangeMessageVisibilityBatchRequestEntry.1.Id=change_visibility_msg_2 &ChangeMessageVisibilityBatchRequestEntry.1.ReceiptHandle=your_receipt_handle &ChangeMessageVisibilityBatchRequestEntry.1.VisibilityTimeout=45"]
+       "Encloses a receipt handle and an entry ID for each message in ChangeMessageVisibilityBatch."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -993,7 +1174,7 @@ module TagMap =
       make
         (List.filter_map xs
            ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"Tag") |>
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
                    (Option.map
                       ~f:(fun chopped ->
                             ((TagKey.of_string chopped),
@@ -1006,6 +1187,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1013,6 +1196,108 @@ module TagMap =
         ~of_json:TagValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InvalidAddress =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified ID is invalid."]
+module InvalidSecurity =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was not made over HTTPS or did not use SigV4 for signing."]
+module RequestThrottled =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was denied due to request throttling. Exceeds the permitted request rate for the queue or for the recipient of the request. Ensure that the request rate is within the Amazon SQS limits for sending messages. For more information, see Amazon SQS quotas in the Amazon SQS Developer Guide."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "One or more specified resources don't exist."]
+module UnsupportedOperation =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Error code 400. Unsupported operation."]
 module QueueAttributeMap =
   struct
     type nonrec t = (QueueAttributeName.t * String_.t) list
@@ -1021,7 +1306,7 @@ module QueueAttributeMap =
       make
         (List.filter_map xs
            ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"Attribute") |>
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
                    (Option.map
                       ~f:(fun chopped ->
                             ((QueueAttributeName.of_string chopped),
@@ -1034,6 +1319,8 @@ module QueueAttributeMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1043,51 +1330,229 @@ module QueueAttributeMap =
   end
 module InvalidMessageContents =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The message contains characters outside the allowed set."]
-module UnsupportedOperation =
+module KmsAccessDenied =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Error code 400. Unsupported operation."]
+  end[@@ocaml.doc "The caller doesn't have the required KMS access."]
+module KmsDisabled =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was denied due to request throttling."]
+module KmsInvalidKeyUsage =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected for one of the following reasons: The KeyUsage value of the KMS key is incompatible with the API operation. The encryption algorithm or signing algorithm specified for the operation is incompatible with the type of key material in the KMS key (KeySpec)."]
+module KmsInvalidState =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because the state of the specified resource is not valid for this request."]
+module KmsNotFound =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because the specified entity or resource could not be found."]
+module KmsOptInRequired =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because the specified key policy isn't syntactically or semantically correct."]
+module KmsThrottled =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon Web Services KMS throttles requests for the following conditions."]
+module QueueDoesNotExist =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Ensure that the QueueUrl is correct and that the queue has not been deleted."]
 module BatchEntryIdsNotDistinct =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Two or more batch entries in the request have the same Id."]
 module BatchRequestTooLong =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The length of all the messages put together is more than the limit."]
@@ -1095,6 +1560,9 @@ module BatchResultErrorEntryList =
   struct
     type nonrec t = BatchResultErrorEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchResultErrorEntry.to_value)) |>
         (fun x -> `List x)
@@ -1109,26 +1577,42 @@ module BatchResultErrorEntryList =
   end
 module EmptyBatchRequest =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The batch request doesn't contain any entries."]
 module InvalidBatchEntryId =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Id of a batch entry in a batch request doesn't abide by the specification."]
@@ -1136,6 +1620,9 @@ module SendMessageBatchResultEntryList =
   struct
     type nonrec t = SendMessageBatchResultEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SendMessageBatchResultEntry.to_value)) |>
         (fun x -> `List x)
@@ -1150,21 +1637,32 @@ module SendMessageBatchResultEntryList =
   end
 module TooManyEntriesInBatchRequest =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The batch request contains more entries than permissible."]
+       "The batch request contains more entries than permissible. For Amazon SQS, the maximum number of entries you can include in a single SendMessageBatch, DeleteMessageBatch, or ChangeMessageVisibilityBatch request is 10."]
 module SendMessageBatchRequestEntryList =
   struct
     type nonrec t = SendMessageBatchRequestEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SendMessageBatchRequestEntry.to_value)) |>
         (fun x -> `List x)
@@ -1181,6 +1679,9 @@ module MessageList =
   struct
     type nonrec t = Message.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Message.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1193,21 +1694,32 @@ module MessageList =
   end
 module OverLimit =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified action violates a limit. For example, ReceiveMessage returns this error if the maximum number of inflight messages is reached and AddPermission returns this error if the maximum number of permissions for the queue is reached."]
+       "The specified action violates a limit. For example, ReceiveMessage returns this error if the maximum number of in flight messages is reached and AddPermission returns this error if the maximum number of permissions for the queue is reached."]
 module AttributeNameList =
   struct
     type nonrec t = QueueAttributeName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QueueAttributeName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1223,6 +1735,9 @@ module MessageAttributeNameList =
   struct
     type nonrec t = MessageAttributeName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MessageAttributeName.to_value)) |>
         (fun x -> `List x)
@@ -1235,10 +1750,32 @@ module MessageAttributeNameList =
         ~of_json:MessageAttributeName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MessageSystemAttributeList =
+  struct
+    type nonrec t = MessageSystemAttributeName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MessageSystemAttributeName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x = make (List.map x ~f:MessageSystemAttributeName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MessageSystemAttributeList"
+        ~of_json:MessageSystemAttributeName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module QueueUrlList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1276,34 +1813,53 @@ module BoxedInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module QueueDoesNotExist =
+module ListMessageMoveTasksResultEntryList =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = ListMessageMoveTasksResultEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListMessageMoveTasksResultEntry.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make (List.map x ~f:ListMessageMoveTasksResultEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListMessageMoveTasksResultEntryList"
+        ~of_json:ListMessageMoveTasksResultEntry.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified queue doesn't exist."]
+  end
 module InvalidAttributeName =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified attribute doesn't exist."]
 module DeleteMessageBatchResultEntryList =
   struct
     type nonrec t = DeleteMessageBatchResultEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeleteMessageBatchResultEntry.to_value)) |>
         (fun x -> `List x)
@@ -1320,6 +1876,9 @@ module DeleteMessageBatchRequestEntryList =
   struct
     type nonrec t = DeleteMessageBatchRequestEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeleteMessageBatchRequestEntry.to_value)) |>
         (fun x -> `List x)
@@ -1332,29 +1891,65 @@ module DeleteMessageBatchRequestEntryList =
         ~of_json:DeleteMessageBatchRequestEntry.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InvalidAttributeValue =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A queue attribute value is invalid."]
 module QueueDeletedRecently =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You must wait 60 seconds after deleting a queue before you can create another queue with the same name."]
 module QueueNameExists =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A queue with this name already exists. Amazon SQS returns this error only if the request includes attributes whose values differ from those of the existing queue."]
@@ -1362,6 +1957,9 @@ module ChangeMessageVisibilityBatchResultEntryList =
   struct
     type nonrec t = ChangeMessageVisibilityBatchResultEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChangeMessageVisibilityBatchResultEntry.to_value))
         |> (fun x -> `List x)
@@ -1379,6 +1977,9 @@ module ChangeMessageVisibilityBatchRequestEntryList =
   struct
     type nonrec t = ChangeMessageVisibilityBatchRequestEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChangeMessageVisibilityBatchRequestEntry.to_value))
         |> (fun x -> `List x)
@@ -1396,6 +1997,9 @@ module AWSAccountIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1410,6 +2014,9 @@ module ActionNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1436,18 +2043,18 @@ module UntagQueueRequest =
         ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tagKeys = TagKeyList.of_xml (Xml.children xml_arg0 "TagKey") in
+      let tagKeys = TagKeyList.of_xml (Xml.children xml_arg0 "TagKeys") in
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~tagKeys ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~tagKeys ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Remove cost allocation tags from the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a user name in the Amazon SQS Developer Guide."]
+       "Remove cost allocation tags from the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a username in the Amazon SQS Developer Guide."]
 module TagQueueRequest =
   struct
     type nonrec t =
@@ -1469,13 +2076,141 @@ module TagQueueRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~tags ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~tags ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Add cost allocation tags to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. When you use queue tags, keep the following guidelines in mind: Adding more than 50 tags to a queue isn't recommended. Tags don't have any semantic meaning. Amazon SQS interprets tags as character strings. Tags are case-sensitive. A new tag with a key identical to that of an existing tag overwrites the existing tag. For a full list of tag restrictions, see Quotas related to queues in the Amazon SQS Developer Guide. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a user name in the Amazon SQS Developer Guide."]
+       "Add cost allocation tags to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. When you use queue tags, keep the following guidelines in mind: Adding more than 50 tags to a queue isn't recommended. Tags don't have any semantic meaning. Amazon SQS interprets tags as character strings. Tags are case-sensitive. A new tag with a key identical to that of an existing tag overwrites the existing tag. For a full list of tag restrictions, see Quotas related to queues in the Amazon SQS Developer Guide. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a username in the Amazon SQS Developer Guide."]
+module StartMessageMoveTaskResult =
+  struct
+    type nonrec t =
+      {
+      taskHandle: String_.t option
+        [@ocaml.doc
+          "An identifier associated with a message movement task. You can use this identifier to cancel a specified message movement task using the CancelMessageMoveTask action."]}
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?taskHandle = fun () -> { taskHandle }
+    let error_of_json name json =
+      match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TaskHandle", (Option.map x.taskHandle ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskHandle =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TaskHandle") in
+      make ?taskHandle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskHandle = field_map json__ "TaskHandle" String_.of_json in
+      make ?taskHandle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts an asynchronous task to move messages from a specified source queue to a specified destination queue. This action is currently limited to supporting message redrive from queues that are configured as dead-letter queues (DLQs) of other Amazon SQS queues only. Non-SQS queue sources of dead-letter queues, such as Lambda or Amazon SNS topics, are currently not supported. In dead-letter queues redrive context, the StartMessageMoveTask the source queue is the DLQ, while the destination queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue. Only one active message movement task is supported per queue at any given time."]
+module StartMessageMoveTaskRequest =
+  struct
+    type nonrec t =
+      {
+      sourceArn: String_.t
+        [@ocaml.doc
+          "The ARN of the queue that contains the messages to be moved to another queue. Currently, only ARNs of dead-letter queues (DLQs) whose sources are other Amazon SQS queues are accepted. DLQs whose sources are non-SQS queues, such as Lambda or Amazon SNS topics, are not currently supported."];
+      destinationArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the queue that receives the moved messages. You can use this field to specify the destination queue where you would like to redrive messages. If this field is left blank, the messages will be redriven back to their respective original source queues."];
+      maxNumberOfMessagesPerSecond: NullableInteger.t option
+        [@ocaml.doc
+          "The number of messages to be moved per second (the message movement rate). You can use this field to define a fixed message movement rate. The maximum value for messages per second is 500. If this field is left blank, the system will optimize the rate based on the queue message backlog size, which may vary throughout the duration of the message movement task."]}
+    let context_ = "StartMessageMoveTaskRequest"
+    let make ?destinationArn =
+      fun ?maxNumberOfMessagesPerSecond ->
+        fun ~sourceArn ->
+          fun () ->
+            { destinationArn; maxNumberOfMessagesPerSecond; sourceArn }
+    let to_value x =
+      structure_to_value
+        [("SourceArn", (Some (String_.to_value x.sourceArn)));
+        ("DestinationArn", (Option.map x.destinationArn ~f:String_.to_value));
+        ("MaxNumberOfMessagesPerSecond",
+          (Option.map x.maxNumberOfMessagesPerSecond
+             ~f:NullableInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxNumberOfMessagesPerSecond =
+        (Option.map ~f:NullableInteger.of_xml)
+          (Xml.child xml_arg0 "MaxNumberOfMessagesPerSecond") in
+      let destinationArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DestinationArn") in
+      let sourceArn =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SourceArn") in
+      make ?maxNumberOfMessagesPerSecond ?destinationArn ~sourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxNumberOfMessagesPerSecond =
+        field_map json__ "MaxNumberOfMessagesPerSecond"
+          NullableInteger.of_json in
+      let destinationArn = field_map json__ "DestinationArn" String_.of_json in
+      let sourceArn = field_map_exn json__ "SourceArn" String_.of_json in
+      make ?maxNumberOfMessagesPerSecond ?destinationArn ~sourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts an asynchronous task to move messages from a specified source queue to a specified destination queue. This action is currently limited to supporting message redrive from queues that are configured as dead-letter queues (DLQs) of other Amazon SQS queues only. Non-SQS queue sources of dead-letter queues, such as Lambda or Amazon SNS topics, are currently not supported. In dead-letter queues redrive context, the StartMessageMoveTask the source queue is the DLQ, while the destination queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue. Only one active message movement task is supported per queue at any given time."]
 module SetQueueAttributesRequest =
   struct
     type nonrec t =
@@ -1485,33 +2220,33 @@ module SetQueueAttributesRequest =
           "The URL of the Amazon SQS queue whose attributes are set. Queue URLs and names are case-sensitive."];
       attributes: QueueAttributeMap.t
         [@ocaml.doc
-          "A map of attributes to set. The following lists the names, descriptions, and values of the special request parameters that the SetQueueAttributes action uses: DelaySeconds \226\128\147 The length of time, in seconds, for which the delivery of all messages in the queue is delayed. Valid values: An integer from 0 to 900 (15 minutes). Default: 0. MaximumMessageSize \226\128\147 The limit of how many bytes a message can contain before Amazon SQS rejects it. Valid values: An integer from 1,024 bytes (1 KiB) up to 262,144 bytes (256 KiB). Default: 262,144 (256 KiB). MessageRetentionPeriod \226\128\147 The length of time, in seconds, for which Amazon SQS retains a message. Valid values: An integer representing seconds, from 60 (1 minute) to 1,209,600 (14 days). Default: 345,600 (4 days). Policy \226\128\147 The queue's policy. A valid Amazon Web Services policy. For more information about policy structure, see Overview of Amazon Web Services IAM Policies in the Identity and Access Management User Guide. ReceiveMessageWaitTimeSeconds \226\128\147 The length of time, in seconds, for which a ReceiveMessage action waits for a message to arrive. Valid values: An integer from 0 to 20 (seconds). Default: 0. RedrivePolicy \226\128\147 The string that includes the parameters for the dead-letter queue functionality of the source queue as a JSON object. For more information about the redrive policy and dead-letter queues, see Using Amazon SQS Dead-Letter Queues in the Amazon SQS Developer Guide. deadLetterTargetArn \226\128\147 The Amazon Resource Name (ARN) of the dead-letter queue to which Amazon SQS moves messages after the value of maxReceiveCount is exceeded. maxReceiveCount \226\128\147 The number of times a message is delivered to the source queue before being moved to the dead-letter queue. When the ReceiveCount for a message exceeds the maxReceiveCount for a queue, Amazon SQS moves the message to the dead-letter-queue. The dead-letter queue of a FIFO queue must also be a FIFO queue. Similarly, the dead-letter queue of a standard queue must also be a standard queue. VisibilityTimeout \226\128\147 The visibility timeout for the queue, in seconds. Valid values: An integer from 0 to 43,200 (12 hours). Default: 30. For more information about the visibility timeout, see Visibility Timeout in the Amazon SQS Developer Guide. The following attributes apply only to server-side-encryption: KmsMasterKeyId \226\128\147 The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SQS or a custom CMK. For more information, see Key Terms. While the alias of the AWS-managed CMK for Amazon SQS is always alias/aws/sqs, the alias of a custom CMK can, for example, be alias/MyAlias . For more examples, see KeyId in the Key Management Service API Reference. KmsDataKeyReusePeriodSeconds \226\128\147 The length of time, in seconds, for which Amazon SQS can reuse a data key to encrypt or decrypt messages before calling KMS again. An integer representing seconds, between 60 seconds (1 minute) and 86,400 seconds (24 hours). Default: 300 (5 minutes). A shorter time period provides better security but results in more calls to KMS which might incur charges after Free Tier. For more information, see How Does the Data Key Reuse Period Work?. SqsManagedSseEnabled \226\128\147 Enables server-side queue encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue (e.g. SSE-KMS or SSE-SQS). The following attribute applies only to FIFO (first-in-first-out) queues: ContentBasedDeduplication \226\128\147 Enables content-based deduplication. For more information, see Exactly-once processing in the Amazon SQS Developer Guide. Note the following: Every message must have a unique MessageDeduplicationId. You may provide a MessageDeduplicationId explicitly. If you aren't able to provide a MessageDeduplicationId and you enable ContentBasedDeduplication for your queue, Amazon SQS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). If you don't provide a MessageDeduplicationId and the queue doesn't have ContentBasedDeduplication set, the action fails with an error. If the queue has ContentBasedDeduplication set, your MessageDeduplicationId overrides the generated one. When ContentBasedDeduplication is in effect, messages with identical content sent within the deduplication interval are treated as duplicates and only one copy of the message is delivered. If you send one message with ContentBasedDeduplication enabled and then another message with a MessageDeduplicationId that is the same as the one generated for the first MessageDeduplicationId, the two messages are treated as duplicates and only one copy of the message is delivered. The following attributes apply only to high throughput for FIFO queues: DeduplicationScope \226\128\147 Specifies whether message deduplication occurs at the message group or queue level. Valid values are messageGroup and queue. FifoThroughputLimit \226\128\147 Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group. Valid values are perQueue and perMessageGroupId. The perMessageGroupId value is allowed only when the value for DeduplicationScope is messageGroup. To enable high throughput for FIFO queues, do the following: Set DeduplicationScope to messageGroup. Set FifoThroughputLimit to perMessageGroupId. If you set these attributes to anything other than the values shown for enabling high throughput, normal throughput is in effect and deduplication occurs as specified. For information on throughput quotas, see Quotas related to messages in the Amazon SQS Developer Guide."]}
+          "A map of attributes to set. The following lists the names, descriptions, and values of the special request parameters that the SetQueueAttributes action uses: DelaySeconds \226\128\147 The length of time, in seconds, for which the delivery of all messages in the queue is delayed. Valid values: An integer from 0 to 900 (15 minutes). Default: 0. MaximumMessageSize \226\128\147 The limit of how many bytes a message can contain before Amazon SQS rejects it. Valid values: An integer from 1,024 bytes (1 KiB) up to 1,048,576 bytes (1 MiB). Default: 1,048,576 bytes (1 MiB). MessageRetentionPeriod \226\128\147 The length of time, in seconds, for which Amazon SQS retains a message. Valid values: An integer representing seconds, from 60 (1 minute) to 1,209,600 (14 days). Default: 345,600 (4 days). When you change a queue's attributes, the change can take up to 60 seconds for most of the attributes to propagate throughout the Amazon SQS system. Changes made to the MessageRetentionPeriod attribute can take up to 15 minutes and will impact existing messages in the queue potentially causing them to be expired and deleted if the MessageRetentionPeriod is reduced below the age of existing messages. Policy \226\128\147 The queue's policy. A valid Amazon Web Services policy. For more information about policy structure, see Overview of Amazon Web Services IAM Policies in the Identity and Access Management User Guide. ReceiveMessageWaitTimeSeconds \226\128\147 The length of time, in seconds, for which a ReceiveMessage action waits for a message to arrive. Valid values: An integer from 0 to 20 (seconds). Default: 0. VisibilityTimeout \226\128\147 The visibility timeout for the queue, in seconds. Valid values: An integer from 0 to 43,200 (12 hours). Default: 30. For more information about the visibility timeout, see Visibility Timeout in the Amazon SQS Developer Guide. The following attributes apply only to dead-letter queues: RedrivePolicy \226\128\147 The string that includes the parameters for the dead-letter queue functionality of the source queue as a JSON object. The parameters are as follows: deadLetterTargetArn \226\128\147 The Amazon Resource Name (ARN) of the dead-letter queue to which Amazon SQS moves messages after the value of maxReceiveCount is exceeded. maxReceiveCount \226\128\147 The number of times a message is delivered to the source queue before being moved to the dead-letter queue. Default: 10. When the ReceiveCount for a message exceeds the maxReceiveCount for a queue, Amazon SQS moves the message to the dead-letter-queue. RedriveAllowPolicy \226\128\147 The string that includes the parameters for the permissions for the dead-letter queue redrive permission and which source queues can specify dead-letter queues as a JSON object. The parameters are as follows: redrivePermission \226\128\147 The permission type that defines which source queues can specify the current queue as the dead-letter queue. Valid values are: allowAll \226\128\147 (Default) Any source queues in this Amazon Web Services account in the same Region can specify this queue as the dead-letter queue. denyAll \226\128\147 No source queues can specify this queue as the dead-letter queue. byQueue \226\128\147 Only queues specified by the sourceQueueArns parameter can specify this queue as the dead-letter queue. sourceQueueArns \226\128\147 The Amazon Resource Names (ARN)s of the source queues that can specify this queue as the dead-letter queue and redrive messages. You can specify this parameter only when the redrivePermission parameter is set to byQueue. You can specify up to 10 source queue ARNs. To allow more than 10 source queues to specify dead-letter queues, set the redrivePermission parameter to allowAll. The dead-letter queue of a FIFO queue must also be a FIFO queue. Similarly, the dead-letter queue of a standard queue must also be a standard queue. The following attributes apply only to server-side-encryption: KmsMasterKeyId \226\128\147 The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SQS or a custom CMK. For more information, see Key Terms. While the alias of the AWS-managed CMK for Amazon SQS is always alias/aws/sqs, the alias of a custom CMK can, for example, be alias/MyAlias . For more examples, see KeyId in the Key Management Service API Reference. KmsDataKeyReusePeriodSeconds \226\128\147 The length of time, in seconds, for which Amazon SQS can reuse a data key to encrypt or decrypt messages before calling KMS again. An integer representing seconds, between 60 seconds (1 minute) and 86,400 seconds (24 hours). Default: 300 (5 minutes). A shorter time period provides better security but results in more calls to KMS which might incur charges after Free Tier. For more information, see How Does the Data Key Reuse Period Work?. SqsManagedSseEnabled \226\128\147 Enables server-side queue encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue (for example, SSE-KMS or SSE-SQS). The following attribute applies only to FIFO (first-in-first-out) queues: ContentBasedDeduplication \226\128\147 Enables content-based deduplication. For more information, see Exactly-once processing in the Amazon SQS Developer Guide. Note the following: Every message must have a unique MessageDeduplicationId. You may provide a MessageDeduplicationId explicitly. If you aren't able to provide a MessageDeduplicationId and you enable ContentBasedDeduplication for your queue, Amazon SQS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). If you don't provide a MessageDeduplicationId and the queue doesn't have ContentBasedDeduplication set, the action fails with an error. If the queue has ContentBasedDeduplication set, your MessageDeduplicationId overrides the generated one. When ContentBasedDeduplication is in effect, messages with identical content sent within the deduplication interval are treated as duplicates and only one copy of the message is delivered. If you send one message with ContentBasedDeduplication enabled and then another message with a MessageDeduplicationId that is the same as the one generated for the first MessageDeduplicationId, the two messages are treated as duplicates and only one copy of the message is delivered. The following attributes apply only to high throughput for FIFO queues: DeduplicationScope \226\128\147 Specifies whether message deduplication occurs at the message group or queue level. Valid values are messageGroup and queue. FifoThroughputLimit \226\128\147 Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group. Valid values are perQueue and perMessageGroupId. The perMessageGroupId value is allowed only when the value for DeduplicationScope is messageGroup. To enable high throughput for FIFO queues, do the following: Set DeduplicationScope to messageGroup. Set FifoThroughputLimit to perMessageGroupId. If you set these attributes to anything other than the values shown for enabling high throughput, normal throughput is in effect and deduplication occurs as specified. For information on throughput quotas, see Quotas related to messages in the Amazon SQS Developer Guide."]}
     let context_ = "SetQueueAttributesRequest"
     let make ~queueUrl =
       fun ~attributes -> fun () -> { queueUrl; attributes }
     let to_value x =
       structure_to_value
         [("QueueUrl", (Some (String_.to_value x.queueUrl)));
-        ("Attribute", (Some (QueueAttributeMap.to_value x.attributes)))]
+        ("Attributes", (Some (QueueAttributeMap.to_value x.attributes)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let attributes =
         QueueAttributeMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Attribute") in
+          (Xml.child_exn ~context:context_ xml_arg0 "Attributes") in
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~attributes ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "Attributes" QueueAttributeMap.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+        field_map_exn json__ "Attributes" QueueAttributeMap.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~attributes ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
 module SendMessageResult =
   struct
-    type sendMessageResult =
+    type nonrec t =
       {
       mD5OfMessageBody: String_.t option
         [@ocaml.doc
@@ -1528,16 +2263,21 @@ module SendMessageResult =
       sequenceNumber: String_.t option
         [@ocaml.doc
           "This parameter applies only to FIFO (first-in-first-out) queues. The large, non-consecutive number that Amazon SQS assigns to each message. The length of SequenceNumber is 128 bits. SequenceNumber continues to increase for a particular MessageGroupId."]}
-    and responseMetaData = unit
-    and t =
-      {
-      sendMessageResult: sendMessageResult ;
-      responseMetaData: responseMetaData }
-    type error =
-      [ `InvalidMessageContents of InvalidMessageContents.t 
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidMessageContents of InvalidMessageContents.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `KmsAccessDenied of KmsAccessDenied.t 
+      | `KmsDisabled of KmsDisabled.t 
+      | `KmsInvalidKeyUsage of KmsInvalidKeyUsage.t 
+      | `KmsInvalidState of KmsInvalidState.t 
+      | `KmsNotFound of KmsNotFound.t 
+      | `KmsOptInRequired of KmsOptInRequired.t 
+      | `KmsThrottled of KmsThrottled.t 
+      | `QueueDoesNotExist of QueueDoesNotExist.t 
+      | `RequestThrottled of RequestThrottled.t 
       | `UnsupportedOperation of UnsupportedOperation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SendMessageResult"
     let make ?mD5OfMessageBody =
       fun ?mD5OfMessageAttributes ->
         fun ?mD5OfMessageSystemAttributes ->
@@ -1545,20 +2285,31 @@ module SendMessageResult =
             fun ?sequenceNumber ->
               fun () ->
                 {
-                  sendMessageResult =
-                    {
-                      mD5OfMessageBody;
-                      mD5OfMessageAttributes;
-                      mD5OfMessageSystemAttributes;
-                      messageId;
-                      sequenceNumber
-                    };
-                  responseMetaData = ()
+                  mD5OfMessageBody;
+                  mD5OfMessageAttributes;
+                  mD5OfMessageSystemAttributes;
+                  messageId;
+                  sequenceNumber
                 }
     let error_of_json name json =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
       | "InvalidMessageContents" ->
           `InvalidMessageContents (InvalidMessageContents.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "KmsAccessDenied" -> `KmsAccessDenied (KmsAccessDenied.of_json json)
+      | "KmsDisabled" -> `KmsDisabled (KmsDisabled.of_json json)
+      | "KmsInvalidKeyUsage" ->
+          `KmsInvalidKeyUsage (KmsInvalidKeyUsage.of_json json)
+      | "KmsInvalidState" -> `KmsInvalidState (KmsInvalidState.of_json json)
+      | "KmsNotFound" -> `KmsNotFound (KmsNotFound.of_json json)
+      | "KmsOptInRequired" ->
+          `KmsOptInRequired (KmsOptInRequired.of_json json)
+      | "KmsThrottled" -> `KmsThrottled (KmsThrottled.of_json json)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
       | "UnsupportedOperation" ->
           `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
@@ -1566,18 +2317,75 @@ module SendMessageResult =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
       | "InvalidMessageContents" ->
           `InvalidMessageContents (InvalidMessageContents.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "KmsAccessDenied" -> `KmsAccessDenied (KmsAccessDenied.of_xml xml)
+      | "KmsDisabled" -> `KmsDisabled (KmsDisabled.of_xml xml)
+      | "KmsInvalidKeyUsage" ->
+          `KmsInvalidKeyUsage (KmsInvalidKeyUsage.of_xml xml)
+      | "KmsInvalidState" -> `KmsInvalidState (KmsInvalidState.of_xml xml)
+      | "KmsNotFound" -> `KmsNotFound (KmsNotFound.of_xml xml)
+      | "KmsOptInRequired" -> `KmsOptInRequired (KmsOptInRequired.of_xml xml)
+      | "KmsThrottled" -> `KmsThrottled (KmsThrottled.of_xml xml)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
       | "UnsupportedOperation" ->
           `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
       | `InvalidMessageContents e ->
           `Assoc
             [("error", (`String "InvalidMessageContents"));
             ("details", (InvalidMessageContents.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `KmsAccessDenied e ->
+          `Assoc
+            [("error", (`String "KmsAccessDenied"));
+            ("details", (KmsAccessDenied.to_json e))]
+      | `KmsDisabled e ->
+          `Assoc
+            [("error", (`String "KmsDisabled"));
+            ("details", (KmsDisabled.to_json e))]
+      | `KmsInvalidKeyUsage e ->
+          `Assoc
+            [("error", (`String "KmsInvalidKeyUsage"));
+            ("details", (KmsInvalidKeyUsage.to_json e))]
+      | `KmsInvalidState e ->
+          `Assoc
+            [("error", (`String "KmsInvalidState"));
+            ("details", (KmsInvalidState.to_json e))]
+      | `KmsNotFound e ->
+          `Assoc
+            [("error", (`String "KmsNotFound"));
+            ("details", (KmsNotFound.to_json e))]
+      | `KmsOptInRequired e ->
+          `Assoc
+            [("error", (`String "KmsOptInRequired"));
+            ("details", (KmsOptInRequired.to_json e))]
+      | `KmsThrottled e ->
+          `Assoc
+            [("error", (`String "KmsThrottled"));
+            ("details", (KmsThrottled.to_json e))]
+      | `QueueDoesNotExist e ->
+          `Assoc
+            [("error", (`String "QueueDoesNotExist"));
+            ("details", (QueueDoesNotExist.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
       | `UnsupportedOperation e ->
           `Assoc
             [("error", (`String "UnsupportedOperation"));
@@ -1587,9 +2395,8 @@ module SendMessageResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.sendMessageResult in
-      structure_to_wrapped_value
+    let to_value x =
+      structure_to_value
         [("MD5OfMessageBody",
            (Option.map x.mD5OfMessageBody ~f:String_.to_value));
         ("MD5OfMessageAttributes",
@@ -1598,10 +2405,8 @@ module SendMessageResult =
           (Option.map x.mD5OfMessageSystemAttributes ~f:String_.to_value));
         ("MessageId", (Option.map x.messageId ~f:String_.to_value));
         ("SequenceNumber", (Option.map x.sequenceNumber ~f:String_.to_value))]
-        ~wrapper:"SendMessageResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 = Xml.child_exn ~context:context_ t "SendMessageResult" in
+    let of_xml xml_arg0 =
       let sequenceNumber =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SequenceNumber") in
       let messageId =
@@ -1618,15 +2423,15 @@ module SendMessageResult =
       make ?sequenceNumber ?messageId ?mD5OfMessageSystemAttributes
         ?mD5OfMessageAttributes ?mD5OfMessageBody ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sequenceNumber = field_map json "SequenceNumber" String_.of_json in
-      let messageId = field_map json "MessageId" String_.of_json in
+    let of_json json__ =
+      let sequenceNumber = field_map json__ "SequenceNumber" String_.of_json in
+      let messageId = field_map json__ "MessageId" String_.of_json in
       let mD5OfMessageSystemAttributes =
-        field_map json "MD5OfMessageSystemAttributes" String_.of_json in
+        field_map json__ "MD5OfMessageSystemAttributes" String_.of_json in
       let mD5OfMessageAttributes =
-        field_map json "MD5OfMessageAttributes" String_.of_json in
+        field_map json__ "MD5OfMessageAttributes" String_.of_json in
       let mD5OfMessageBody =
-        field_map json "MD5OfMessageBody" String_.of_json in
+        field_map json__ "MD5OfMessageBody" String_.of_json in
       make ?sequenceNumber ?messageId ?mD5OfMessageSystemAttributes
         ?mD5OfMessageAttributes ?mD5OfMessageBody ()
     let to_json v = composed_to_json to_value v
@@ -1640,8 +2445,8 @@ module SendMessageRequest =
           "The URL of the Amazon SQS queue to which a message is sent. Queue URLs and names are case-sensitive."];
       messageBody: String_.t
         [@ocaml.doc
-          "The message to send. The minimum size is one character. The maximum size is 256 KB. A message can include only XML, JSON, and unformatted text. The following Unicode characters are allowed: #x9 | #xA | #xD | #x20 to #xD7FF | #xE000 to #xFFFD | #x10000 to #x10FFFF Any characters not included in this list will be rejected. For more information, see the W3C specification for characters."];
-      delaySeconds: Integer.t option
+          "The message to send. The minimum size is one character. The maximum size is 1 MiB or 1,048,576 bytes A message can include only XML, JSON, and unformatted text. The following Unicode characters are allowed. For more information, see the W3C specification for characters. #x9 | #xA | #xD | #x20 to #xD7FF | #xE000 to #xFFFD | #x10000 to #x10FFFF If a message contains characters outside the allowed set, Amazon SQS rejects the message and returns an InvalidMessageContents error. Ensure that your message body includes only valid characters to avoid this exception."];
+      delaySeconds: NullableInteger.t option
         [@ocaml.doc
           "The length of time, in seconds, for which to delay a specific message. Valid values: 0 to 900. Maximum: 15 minutes. Messages with a positive DelaySeconds value become available for processing after the delay period is finished. If you don't specify a value, the default value for the queue applies. When you set FifoQueue, you can't set DelaySeconds per message. You can set this parameter only on a queue level."];
       messageAttributes: MessageBodyAttributeMap.t option
@@ -1655,7 +2460,7 @@ module SendMessageRequest =
           "This parameter applies only to FIFO (first-in-first-out) queues. The token used for deduplication of sent messages. If a message with a particular MessageDeduplicationId is sent successfully, any messages sent with the same MessageDeduplicationId are accepted successfully but aren't delivered during the 5-minute deduplication interval. For more information, see Exactly-once processing in the Amazon SQS Developer Guide. Every message must have a unique MessageDeduplicationId, You may provide a MessageDeduplicationId explicitly. If you aren't able to provide a MessageDeduplicationId and you enable ContentBasedDeduplication for your queue, Amazon SQS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). If you don't provide a MessageDeduplicationId and the queue doesn't have ContentBasedDeduplication set, the action fails with an error. If the queue has ContentBasedDeduplication set, your MessageDeduplicationId overrides the generated one. When ContentBasedDeduplication is in effect, messages with identical content sent within the deduplication interval are treated as duplicates and only one copy of the message is delivered. If you send one message with ContentBasedDeduplication enabled and then another message with a MessageDeduplicationId that is the same as the one generated for the first MessageDeduplicationId, the two messages are treated as duplicates and only one copy of the message is delivered. The MessageDeduplicationId is available to the consumer of the message (this can be useful for troubleshooting delivery issues). If a message is sent successfully but the acknowledgement is lost and the message is resent with the same MessageDeduplicationId after the deduplication interval, Amazon SQS can't detect duplicate messages. Amazon SQS continues to keep track of the message deduplication ID even after the message is received and deleted. The maximum length of MessageDeduplicationId is 128 characters. MessageDeduplicationId can contain alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). For best practices of using MessageDeduplicationId, see Using the MessageDeduplicationId Property in the Amazon SQS Developer Guide."];
       messageGroupId: String_.t option
         [@ocaml.doc
-          "This parameter applies only to FIFO (first-in-first-out) queues. The tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). To interleave multiple ordered streams within a single queue, use MessageGroupId values (for example, session data for multiple users). In this scenario, multiple consumers can process the queue, but the session data of each user is processed in a FIFO fashion. You must associate a non-empty MessageGroupId with a message. If you don't provide a MessageGroupId, the action fails. ReceiveMessage might return messages with multiple MessageGroupId values. For each MessageGroupId, the messages are sorted by time sent. The caller can't specify a MessageGroupId. The length of MessageGroupId is 128 characters. Valid values: alphanumeric characters and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). For best practices of using MessageGroupId, see Using the MessageGroupId Property in the Amazon SQS Developer Guide. MessageGroupId is required for FIFO queues. You can't use it for Standard queues."]}
+          "MessageGroupId is an attribute used in Amazon SQS FIFO (First-In-First-Out) and standard queues. In FIFO queues, MessageGroupId organizes messages into distinct groups. Messages within the same message group are always processed one at a time, in strict order, ensuring that no two messages from the same group are processed simultaneously. In standard queues, using MessageGroupId enables fair queues. It is used to identify the tenant a message belongs to, helping maintain consistent message dwell time across all tenants during noisy neighbor events. Unlike FIFO queues, messages with the same MessageGroupId can be processed in parallel, maintaining the high throughput of standard queues. FIFO queues: MessageGroupId acts as the tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). To interleave multiple ordered streams within a single queue, use MessageGroupId values (for example, session data for multiple users). In this scenario, multiple consumers can process the queue, but the session data of each user is processed in a FIFO fashion. If you do not provide a MessageGroupId when sending a message to a FIFO queue, the action fails. ReceiveMessage might return messages with multiple MessageGroupId values. For each MessageGroupId, the messages are sorted by time sent. Standard queues:Use MessageGroupId in standard queues to enable fair queues. The MessageGroupId identifies the tenant a message belongs to. A tenant can be any entity that shares a queue with others, such as your customer, a client application, or a request type. When one tenant sends a disproportionately large volume of messages or has messages that require longer processing time, fair queues ensure other tenants' messages maintain low dwell time. This preserves quality of service for all tenants while maintaining the scalability and throughput of standard queues. We recommend that you include a MessageGroupId in all messages when using fair queues. The length of MessageGroupId is 128 characters. Valid values: alphanumeric characters and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). For best practices of using MessageGroupId, see Using the MessageGroupId Property in the Amazon SQS Developer Guide."]}
     let context_ = "SendMessageRequest"
     let make ?delaySeconds =
       fun ?messageAttributes ->
@@ -1678,10 +2483,11 @@ module SendMessageRequest =
       structure_to_value
         [("QueueUrl", (Some (String_.to_value x.queueUrl)));
         ("MessageBody", (Some (String_.to_value x.messageBody)));
-        ("DelaySeconds", (Option.map x.delaySeconds ~f:Integer.to_value));
-        ("MessageAttribute",
+        ("DelaySeconds",
+          (Option.map x.delaySeconds ~f:NullableInteger.to_value));
+        ("MessageAttributes",
           (Option.map x.messageAttributes ~f:MessageBodyAttributeMap.to_value));
-        ("MessageSystemAttribute",
+        ("MessageSystemAttributes",
           (Option.map x.messageSystemAttributes
              ~f:MessageBodySystemAttributeMap.to_value));
         ("MessageDeduplicationId",
@@ -1696,12 +2502,13 @@ module SendMessageRequest =
           (Xml.child xml_arg0 "MessageDeduplicationId") in
       let messageSystemAttributes =
         (Option.map ~f:MessageBodySystemAttributeMap.of_xml)
-          (Xml.child xml_arg0 "MessageSystemAttribute") in
+          (Xml.child xml_arg0 "MessageSystemAttributes") in
       let messageAttributes =
         (Option.map ~f:MessageBodyAttributeMap.of_xml)
-          (Xml.child xml_arg0 "MessageAttribute") in
+          (Xml.child xml_arg0 "MessageAttributes") in
       let delaySeconds =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "DelaySeconds") in
+        (Option.map ~f:NullableInteger.of_xml)
+          (Xml.child xml_arg0 "DelaySeconds") in
       let messageBody =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MessageBody") in
@@ -1710,52 +2517,52 @@ module SendMessageRequest =
       make ?messageGroupId ?messageDeduplicationId ?messageSystemAttributes
         ?messageAttributes ?delaySeconds ~messageBody ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageGroupId = field_map json "MessageGroupId" String_.of_json in
+    let of_json json__ =
+      let messageGroupId = field_map json__ "MessageGroupId" String_.of_json in
       let messageDeduplicationId =
-        field_map json "MessageDeduplicationId" String_.of_json in
+        field_map json__ "MessageDeduplicationId" String_.of_json in
       let messageSystemAttributes =
-        field_map json "MessageSystemAttributes"
+        field_map json__ "MessageSystemAttributes"
           MessageBodySystemAttributeMap.of_json in
       let messageAttributes =
-        field_map json "MessageAttributes" MessageBodyAttributeMap.of_json in
-      let delaySeconds = field_map json "DelaySeconds" Integer.of_json in
-      let messageBody = field_map_exn json "MessageBody" String_.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+        field_map json__ "MessageAttributes" MessageBodyAttributeMap.of_json in
+      let delaySeconds =
+        field_map json__ "DelaySeconds" NullableInteger.of_json in
+      let messageBody = field_map_exn json__ "MessageBody" String_.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ?messageGroupId ?messageDeduplicationId ?messageSystemAttributes
         ?messageAttributes ?delaySeconds ~messageBody ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
 module SendMessageBatchResult =
   struct
-    type sendMessageBatchResult =
+    type nonrec t =
       {
-      successful: SendMessageBatchResultEntryList.t
+      successful: SendMessageBatchResultEntryList.t option
         [@ocaml.doc "A list of SendMessageBatchResultEntry items."];
-      failed: BatchResultErrorEntryList.t
+      failed: BatchResultErrorEntryList.t option
         [@ocaml.doc
           "A list of BatchResultErrorEntry items with error details about each message that can't be enqueued."]}
-    and responseMetaData = unit
-    and t =
-      {
-      sendMessageBatchResult: sendMessageBatchResult ;
-      responseMetaData: responseMetaData }
-    type error =
+    type nonrec error =
       [ `BatchEntryIdsNotDistinct of BatchEntryIdsNotDistinct.t 
       | `BatchRequestTooLong of BatchRequestTooLong.t 
       | `EmptyBatchRequest of EmptyBatchRequest.t 
+      | `InvalidAddress of InvalidAddress.t 
       | `InvalidBatchEntryId of InvalidBatchEntryId.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `KmsAccessDenied of KmsAccessDenied.t 
+      | `KmsDisabled of KmsDisabled.t 
+      | `KmsInvalidKeyUsage of KmsInvalidKeyUsage.t 
+      | `KmsInvalidState of KmsInvalidState.t 
+      | `KmsNotFound of KmsNotFound.t 
+      | `KmsOptInRequired of KmsOptInRequired.t 
+      | `KmsThrottled of KmsThrottled.t 
+      | `QueueDoesNotExist of QueueDoesNotExist.t 
+      | `RequestThrottled of RequestThrottled.t 
       | `TooManyEntriesInBatchRequest of TooManyEntriesInBatchRequest.t 
       | `UnsupportedOperation of UnsupportedOperation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SendMessageBatchResult"
-    let make ~successful =
-      fun ~failed ->
-        fun () ->
-          {
-            sendMessageBatchResult = { successful; failed };
-            responseMetaData = ()
-          }
+    let make ?successful = fun ?failed -> fun () -> { successful; failed }
     let error_of_json name json =
       match name with
       | "BatchEntryIdsNotDistinct" ->
@@ -1764,8 +2571,23 @@ module SendMessageBatchResult =
           `BatchRequestTooLong (BatchRequestTooLong.of_json json)
       | "EmptyBatchRequest" ->
           `EmptyBatchRequest (EmptyBatchRequest.of_json json)
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
       | "InvalidBatchEntryId" ->
           `InvalidBatchEntryId (InvalidBatchEntryId.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "KmsAccessDenied" -> `KmsAccessDenied (KmsAccessDenied.of_json json)
+      | "KmsDisabled" -> `KmsDisabled (KmsDisabled.of_json json)
+      | "KmsInvalidKeyUsage" ->
+          `KmsInvalidKeyUsage (KmsInvalidKeyUsage.of_json json)
+      | "KmsInvalidState" -> `KmsInvalidState (KmsInvalidState.of_json json)
+      | "KmsNotFound" -> `KmsNotFound (KmsNotFound.of_json json)
+      | "KmsOptInRequired" ->
+          `KmsOptInRequired (KmsOptInRequired.of_json json)
+      | "KmsThrottled" -> `KmsThrottled (KmsThrottled.of_json json)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
       | "TooManyEntriesInBatchRequest" ->
           `TooManyEntriesInBatchRequest
             (TooManyEntriesInBatchRequest.of_json json)
@@ -1782,8 +2604,21 @@ module SendMessageBatchResult =
           `BatchRequestTooLong (BatchRequestTooLong.of_xml xml)
       | "EmptyBatchRequest" ->
           `EmptyBatchRequest (EmptyBatchRequest.of_xml xml)
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
       | "InvalidBatchEntryId" ->
           `InvalidBatchEntryId (InvalidBatchEntryId.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "KmsAccessDenied" -> `KmsAccessDenied (KmsAccessDenied.of_xml xml)
+      | "KmsDisabled" -> `KmsDisabled (KmsDisabled.of_xml xml)
+      | "KmsInvalidKeyUsage" ->
+          `KmsInvalidKeyUsage (KmsInvalidKeyUsage.of_xml xml)
+      | "KmsInvalidState" -> `KmsInvalidState (KmsInvalidState.of_xml xml)
+      | "KmsNotFound" -> `KmsNotFound (KmsNotFound.of_xml xml)
+      | "KmsOptInRequired" -> `KmsOptInRequired (KmsOptInRequired.of_xml xml)
+      | "KmsThrottled" -> `KmsThrottled (KmsThrottled.of_xml xml)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
       | "TooManyEntriesInBatchRequest" ->
           `TooManyEntriesInBatchRequest
             (TooManyEntriesInBatchRequest.of_xml xml)
@@ -1805,10 +2640,54 @@ module SendMessageBatchResult =
           `Assoc
             [("error", (`String "EmptyBatchRequest"));
             ("details", (EmptyBatchRequest.to_json e))]
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
       | `InvalidBatchEntryId e ->
           `Assoc
             [("error", (`String "InvalidBatchEntryId"));
             ("details", (InvalidBatchEntryId.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `KmsAccessDenied e ->
+          `Assoc
+            [("error", (`String "KmsAccessDenied"));
+            ("details", (KmsAccessDenied.to_json e))]
+      | `KmsDisabled e ->
+          `Assoc
+            [("error", (`String "KmsDisabled"));
+            ("details", (KmsDisabled.to_json e))]
+      | `KmsInvalidKeyUsage e ->
+          `Assoc
+            [("error", (`String "KmsInvalidKeyUsage"));
+            ("details", (KmsInvalidKeyUsage.to_json e))]
+      | `KmsInvalidState e ->
+          `Assoc
+            [("error", (`String "KmsInvalidState"));
+            ("details", (KmsInvalidState.to_json e))]
+      | `KmsNotFound e ->
+          `Assoc
+            [("error", (`String "KmsNotFound"));
+            ("details", (KmsNotFound.to_json e))]
+      | `KmsOptInRequired e ->
+          `Assoc
+            [("error", (`String "KmsOptInRequired"));
+            ("details", (KmsOptInRequired.to_json e))]
+      | `KmsThrottled e ->
+          `Assoc
+            [("error", (`String "KmsThrottled"));
+            ("details", (KmsThrottled.to_json e))]
+      | `QueueDoesNotExist e ->
+          `Assoc
+            [("error", (`String "QueueDoesNotExist"));
+            ("details", (QueueDoesNotExist.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
       | `TooManyEntriesInBatchRequest e ->
           `Assoc
             [("error", (`String "TooManyEntriesInBatchRequest"));
@@ -1822,32 +2701,29 @@ module SendMessageBatchResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.sendMessageBatchResult in
-      structure_to_wrapped_value
+    let to_value x =
+      structure_to_value
         [("Successful",
-           (Some (SendMessageBatchResultEntryList.to_value x.successful)));
-        ("Failed", (Some (BatchResultErrorEntryList.to_value x.failed)))]
-        ~wrapper:"SendMessageBatchResult" ~response:"ResponseMetaData"
+           (Option.map x.successful
+              ~f:SendMessageBatchResultEntryList.to_value));
+        ("Failed",
+          (Option.map x.failed ~f:BatchResultErrorEntryList.to_value))]
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 =
-        Xml.child_exn ~context:context_ t "SendMessageBatchResult" in
+    let of_xml xml_arg0 =
       let failed =
-        BatchResultErrorEntryList.of_xml
-          (Xml.children xml_arg0 "BatchResultErrorEntry") in
+        (Option.map ~f:BatchResultErrorEntryList.of_xml)
+          (Some (Xml.children xml_arg0 "Failed")) in
       let successful =
-        SendMessageBatchResultEntryList.of_xml
-          (Xml.children xml_arg0 "SendMessageBatchResultEntry") in
-      make ~failed ~successful ()
+        (Option.map ~f:SendMessageBatchResultEntryList.of_xml)
+          (Some (Xml.children xml_arg0 "Successful")) in
+      make ?failed ?successful ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failed =
-        field_map_exn json "Failed" BatchResultErrorEntryList.of_json in
+        field_map json__ "Failed" BatchResultErrorEntryList.of_json in
       let successful =
-        field_map_exn json "Successful"
-          SendMessageBatchResultEntryList.of_json in
-      make ~failed ~successful ()
+        field_map json__ "Successful" SendMessageBatchResultEntryList.of_json in
+      make ?failed ?successful ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For each message in the batch, the response contains a SendMessageBatchResultEntry tag if the message succeeds or a BatchResultErrorEntry tag if the message fails."]
@@ -1871,15 +2747,16 @@ module SendMessageBatchRequest =
     let of_xml xml_arg0 =
       let entries =
         SendMessageBatchRequestEntryList.of_xml
-          (Xml.children xml_arg0 "SendMessageBatchRequestEntry") in
+          (Xml.children xml_arg0 "Entries") in
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~entries ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entries =
-        field_map_exn json "Entries" SendMessageBatchRequestEntryList.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+        field_map_exn json__ "Entries"
+          SendMessageBatchRequestEntryList.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~entries ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
@@ -1907,66 +2784,146 @@ module RemovePermissionRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~label ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let label = field_map_exn json "Label" String_.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let label = field_map_exn json__ "Label" String_.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~label ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
 module ReceiveMessageResult =
   struct
-    type receiveMessageResult =
+    type nonrec t =
       {
       messages: MessageList.t option [@ocaml.doc "A list of messages."]}
-    and responseMetaData = unit
-    and t =
-      {
-      receiveMessageResult: receiveMessageResult ;
-      responseMetaData: responseMetaData }
-    type error =
-      [ `OverLimit of OverLimit.t 
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `KmsAccessDenied of KmsAccessDenied.t 
+      | `KmsDisabled of KmsDisabled.t 
+      | `KmsInvalidKeyUsage of KmsInvalidKeyUsage.t 
+      | `KmsInvalidState of KmsInvalidState.t 
+      | `KmsNotFound of KmsNotFound.t 
+      | `KmsOptInRequired of KmsOptInRequired.t 
+      | `KmsThrottled of KmsThrottled.t  | `OverLimit of OverLimit.t 
+      | `QueueDoesNotExist of QueueDoesNotExist.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ReceiveMessageResult"
-    let make ?messages =
-      fun () ->
-        { receiveMessageResult = { messages }; responseMetaData = () }
+    let make ?messages = fun () -> { messages }
     let error_of_json name json =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "KmsAccessDenied" -> `KmsAccessDenied (KmsAccessDenied.of_json json)
+      | "KmsDisabled" -> `KmsDisabled (KmsDisabled.of_json json)
+      | "KmsInvalidKeyUsage" ->
+          `KmsInvalidKeyUsage (KmsInvalidKeyUsage.of_json json)
+      | "KmsInvalidState" -> `KmsInvalidState (KmsInvalidState.of_json json)
+      | "KmsNotFound" -> `KmsNotFound (KmsNotFound.of_json json)
+      | "KmsOptInRequired" ->
+          `KmsOptInRequired (KmsOptInRequired.of_json json)
+      | "KmsThrottled" -> `KmsThrottled (KmsThrottled.of_json json)
       | "OverLimit" -> `OverLimit (OverLimit.of_json json)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "KmsAccessDenied" -> `KmsAccessDenied (KmsAccessDenied.of_xml xml)
+      | "KmsDisabled" -> `KmsDisabled (KmsDisabled.of_xml xml)
+      | "KmsInvalidKeyUsage" ->
+          `KmsInvalidKeyUsage (KmsInvalidKeyUsage.of_xml xml)
+      | "KmsInvalidState" -> `KmsInvalidState (KmsInvalidState.of_xml xml)
+      | "KmsNotFound" -> `KmsNotFound (KmsNotFound.of_xml xml)
+      | "KmsOptInRequired" -> `KmsOptInRequired (KmsOptInRequired.of_xml xml)
+      | "KmsThrottled" -> `KmsThrottled (KmsThrottled.of_xml xml)
       | "OverLimit" -> `OverLimit (OverLimit.of_xml xml)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `KmsAccessDenied e ->
+          `Assoc
+            [("error", (`String "KmsAccessDenied"));
+            ("details", (KmsAccessDenied.to_json e))]
+      | `KmsDisabled e ->
+          `Assoc
+            [("error", (`String "KmsDisabled"));
+            ("details", (KmsDisabled.to_json e))]
+      | `KmsInvalidKeyUsage e ->
+          `Assoc
+            [("error", (`String "KmsInvalidKeyUsage"));
+            ("details", (KmsInvalidKeyUsage.to_json e))]
+      | `KmsInvalidState e ->
+          `Assoc
+            [("error", (`String "KmsInvalidState"));
+            ("details", (KmsInvalidState.to_json e))]
+      | `KmsNotFound e ->
+          `Assoc
+            [("error", (`String "KmsNotFound"));
+            ("details", (KmsNotFound.to_json e))]
+      | `KmsOptInRequired e ->
+          `Assoc
+            [("error", (`String "KmsOptInRequired"));
+            ("details", (KmsOptInRequired.to_json e))]
+      | `KmsThrottled e ->
+          `Assoc
+            [("error", (`String "KmsThrottled"));
+            ("details", (KmsThrottled.to_json e))]
       | `OverLimit e ->
           `Assoc
             [("error", (`String "OverLimit"));
             ("details", (OverLimit.to_json e))]
+      | `QueueDoesNotExist e ->
+          `Assoc
+            [("error", (`String "QueueDoesNotExist"));
+            ("details", (QueueDoesNotExist.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.receiveMessageResult in
-      structure_to_wrapped_value
+    let to_value x =
+      structure_to_value
         [("Messages", (Option.map x.messages ~f:MessageList.to_value))]
-        ~wrapper:"ReceiveMessageResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 = Xml.child_exn ~context:context_ t "ReceiveMessageResult" in
+    let of_xml xml_arg0 =
       let messages =
         (Option.map ~f:MessageList.of_xml)
-          (Some (Xml.children xml_arg0 "Message")) in
+          (Some (Xml.children xml_arg0 "Messages")) in
       make ?messages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messages = field_map json "Messages" MessageList.of_json in
+    let of_json json__ =
+      let messages = field_map json__ "Messages" MessageList.of_json in
       make ?messages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of received messages."]
@@ -1979,54 +2936,62 @@ module ReceiveMessageRequest =
           "The URL of the Amazon SQS queue from which messages are received. Queue URLs and names are case-sensitive."];
       attributeNames: AttributeNameList.t option
         [@ocaml.doc
-          "A list of attributes that need to be returned along with each message. These attributes include: All \226\128\147 Returns all values. ApproximateFirstReceiveTimestamp \226\128\147 Returns the time the message was first received from the queue (epoch time in milliseconds). ApproximateReceiveCount \226\128\147 Returns the number of times a message has been received across all queues but not deleted. AWSTraceHeader \226\128\147 Returns the X-Ray trace header string. SenderId For an IAM user, returns the IAM user ID, for example ABCDEFGHI1JKLMNOPQ23R. For an IAM role, returns the IAM role ID, for example ABCDE1F2GH3I4JK5LMNOP:i-a123b456. SentTimestamp \226\128\147 Returns the time the message was sent to the queue (epoch time in milliseconds). SqsManagedSseEnabled \226\128\147 Enables server-side queue encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue (e.g. SSE-KMS or SSE-SQS). MessageDeduplicationId \226\128\147 Returns the value provided by the producer that calls the SendMessage action. MessageGroupId \226\128\147 Returns the value provided by the producer that calls the SendMessage action. Messages with the same MessageGroupId are returned in sequence. SequenceNumber \226\128\147 Returns the value provided by Amazon SQS."];
+          "This parameter has been discontinued but will be supported for backward compatibility. To provide attribute names, you are encouraged to use MessageSystemAttributeNames. A list of attributes that need to be returned along with each message. These attributes include: All \226\128\147 Returns all values. ApproximateFirstReceiveTimestamp \226\128\147 Returns the time the message was first received from the queue (epoch time in milliseconds). ApproximateReceiveCount \226\128\147 Returns the number of times a message has been received across all queues but not deleted. AWSTraceHeader \226\128\147 Returns the X-Ray trace header string. SenderId For a user, returns the user ID, for example ABCDEFGHI1JKLMNOPQ23R. For an IAM role, returns the IAM role ID, for example ABCDE1F2GH3I4JK5LMNOP:i-a123b456. SentTimestamp \226\128\147 Returns the time the message was sent to the queue (epoch time in milliseconds). SqsManagedSseEnabled \226\128\147 Enables server-side queue encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue (for example, SSE-KMS or SSE-SQS). MessageDeduplicationId \226\128\147 Returns the value provided by the producer that calls the SendMessage action. MessageGroupId \226\128\147 Returns the value provided by the producer that calls the SendMessage action. SequenceNumber \226\128\147 Returns the value provided by Amazon SQS."];
+      messageSystemAttributeNames: MessageSystemAttributeList.t option
+        [@ocaml.doc
+          "A list of attributes that need to be returned along with each message. These attributes include: All \226\128\147 Returns all values. ApproximateFirstReceiveTimestamp \226\128\147 Returns the time the message was first received from the queue (epoch time in milliseconds). ApproximateReceiveCount \226\128\147 Returns the number of times a message has been received across all queues but not deleted. AWSTraceHeader \226\128\147 Returns the X-Ray trace header string. SenderId For a user, returns the user ID, for example ABCDEFGHI1JKLMNOPQ23R. For an IAM role, returns the IAM role ID, for example ABCDE1F2GH3I4JK5LMNOP:i-a123b456. SentTimestamp \226\128\147 Returns the time the message was sent to the queue (epoch time in milliseconds). SqsManagedSseEnabled \226\128\147 Enables server-side queue encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue (for example, SSE-KMS or SSE-SQS). MessageDeduplicationId \226\128\147 Returns the value provided by the producer that calls the SendMessage action. MessageGroupId \226\128\147 Returns the value provided by the producer that calls the SendMessage action. SequenceNumber \226\128\147 Returns the value provided by Amazon SQS."];
       messageAttributeNames: MessageAttributeNameList.t option
         [@ocaml.doc
           "The name of the message attribute, where N is the index. The name can contain alphanumeric characters and the underscore (_), hyphen (-), and period (.). The name is case-sensitive and must be unique among all attribute names for the message. The name must not start with AWS-reserved prefixes such as AWS. or Amazon. (or any casing variants). The name must not start or end with a period (.), and it should not have periods in succession (..). The name can be up to 256 characters long. When using ReceiveMessage, you can send a list of attribute names to receive, or you can return all of the attributes by specifying All or .* in your request. You can also use all message attributes starting with a prefix, for example bar.*."];
-      maxNumberOfMessages: Integer.t option
+      maxNumberOfMessages: NullableInteger.t option
         [@ocaml.doc
           "The maximum number of messages to return. Amazon SQS never returns more messages than this value (however, fewer messages might be returned). Valid values: 1 to 10. Default: 1."];
-      visibilityTimeout: Integer.t option
+      visibilityTimeout: NullableInteger.t option
         [@ocaml.doc
-          "The duration (in seconds) that the received messages are hidden from subsequent retrieve requests after being retrieved by a ReceiveMessage request."];
-      waitTimeSeconds: Integer.t option
+          "The duration (in seconds) that the received messages are hidden from subsequent retrieve requests after being retrieved by a ReceiveMessage request. If not specified, the default visibility timeout for the queue is used, which is 30 seconds. Understanding VisibilityTimeout: When a message is received from a queue, it becomes temporarily invisible to other consumers for the duration of the visibility timeout. This prevents multiple consumers from processing the same message simultaneously. If the message is not deleted or its visibility timeout is not extended before the timeout expires, it becomes visible again and can be retrieved by other consumers. Setting an appropriate visibility timeout is crucial. If it's too short, the message might become visible again before processing is complete, leading to duplicate processing. If it's too long, it delays the reprocessing of messages if the initial processing fails. You can adjust the visibility timeout using the --visibility-timeout parameter in the receive-message command to match the processing time required by your application. A message that isn't deleted or a message whose visibility isn't extended before the visibility timeout expires counts as a failed receive. Depending on the configuration of the queue, the message might be sent to the dead-letter queue. For more information, see Visibility Timeout in the Amazon SQS Developer Guide."];
+      waitTimeSeconds: NullableInteger.t option
         [@ocaml.doc
-          "The duration (in seconds) for which the call waits for a message to arrive in the queue before returning. If a message is available, the call returns sooner than WaitTimeSeconds. If no messages are available and the wait time expires, the call returns successfully with an empty list of messages. To avoid HTTP errors, ensure that the HTTP response timeout for ReceiveMessage requests is longer than the WaitTimeSeconds parameter. For example, with the Java SDK, you can set HTTP transport settings using the NettyNioAsyncHttpClient for asynchronous clients, or the ApacheHttpClient for synchronous clients."];
+          "The duration (in seconds) for which the call waits for a message to arrive in the queue before returning. If a message is available, the call returns sooner than WaitTimeSeconds. If no messages are available and the wait time expires, the call does not return a message list. If you are using the Java SDK, it returns a ReceiveMessageResponse object, which has a empty list instead of a Null object. To avoid HTTP errors, ensure that the HTTP response timeout for ReceiveMessage requests is longer than the WaitTimeSeconds parameter. For example, with the Java SDK, you can set HTTP transport settings using the NettyNioAsyncHttpClient for asynchronous clients, or the ApacheHttpClient for synchronous clients."];
       receiveRequestAttemptId: String_.t option
         [@ocaml.doc
-          "This parameter applies only to FIFO (first-in-first-out) queues. The token used for deduplication of ReceiveMessage calls. If a networking issue occurs after a ReceiveMessage action, and instead of a response you receive a generic error, it is possible to retry the same action with an identical ReceiveRequestAttemptId to retrieve the same set of messages, even if their visibility timeout has not yet expired. You can use ReceiveRequestAttemptId only for 5 minutes after a ReceiveMessage action. When you set FifoQueue, a caller of the ReceiveMessage action can provide a ReceiveRequestAttemptId explicitly. If a caller of the ReceiveMessage action doesn't provide a ReceiveRequestAttemptId, Amazon SQS generates a ReceiveRequestAttemptId. It is possible to retry the ReceiveMessage action with the same ReceiveRequestAttemptId if none of the messages have been modified (deleted or had their visibility changes). During a visibility timeout, subsequent calls with the same ReceiveRequestAttemptId return the same messages and receipt handles. If a retry occurs within the deduplication interval, it resets the visibility timeout. For more information, see Visibility Timeout in the Amazon SQS Developer Guide. If a caller of the ReceiveMessage action still processes messages when the visibility timeout expires and messages become visible, another worker consuming from the same queue can receive the same messages and therefore process duplicates. Also, if a consumer whose message processing time is longer than the visibility timeout tries to delete the processed messages, the action fails with an error. To mitigate this effect, ensure that your application observes a safe threshold before the visibility timeout expires and extend the visibility timeout as necessary. While messages with a particular MessageGroupId are invisible, no more messages belonging to the same MessageGroupId are returned until the visibility timeout expires. You can still receive messages with another MessageGroupId as long as it is also visible. If a caller of ReceiveMessage can't track the ReceiveRequestAttemptId, no retries work until the original visibility timeout expires. As a result, delays might occur but the messages in the queue remain in a strict order. The maximum length of ReceiveRequestAttemptId is 128 characters. ReceiveRequestAttemptId can contain alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). For best practices of using ReceiveRequestAttemptId, see Using the ReceiveRequestAttemptId Request Parameter in the Amazon SQS Developer Guide."]}
+          "This parameter applies only to FIFO (first-in-first-out) queues. The token used for deduplication of ReceiveMessage calls. If a networking issue occurs after a ReceiveMessage action, and instead of a response you receive a generic error, it is possible to retry the same action with an identical ReceiveRequestAttemptId to retrieve the same set of messages, even if their visibility timeout has not yet expired. You can use ReceiveRequestAttemptId only for 5 minutes after a ReceiveMessage action. When you set FifoQueue, a caller of the ReceiveMessage action can provide a ReceiveRequestAttemptId explicitly. It is possible to retry the ReceiveMessage action with the same ReceiveRequestAttemptId if none of the messages have been modified (deleted or had their visibility changes). During a visibility timeout, subsequent calls with the same ReceiveRequestAttemptId return the same messages and receipt handles. If a retry occurs within the deduplication interval, it resets the visibility timeout. For more information, see Visibility Timeout in the Amazon SQS Developer Guide. If a caller of the ReceiveMessage action still processes messages when the visibility timeout expires and messages become visible, another worker consuming from the same queue can receive the same messages and therefore process duplicates. Also, if a consumer whose message processing time is longer than the visibility timeout tries to delete the processed messages, the action fails with an error. To mitigate this effect, ensure that your application observes a safe threshold before the visibility timeout expires and extend the visibility timeout as necessary. While messages with a particular MessageGroupId are invisible, no more messages belonging to the same MessageGroupId are returned until the visibility timeout expires. You can still receive messages with another MessageGroupId from your FIFO queue as long as they are visible. If a caller of ReceiveMessage can't track the ReceiveRequestAttemptId, no retries work until the original visibility timeout expires. As a result, delays might occur but the messages in the queue remain in a strict order. The maximum length of ReceiveRequestAttemptId is 128 characters. ReceiveRequestAttemptId can contain alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). For best practices of using ReceiveRequestAttemptId, see Using the ReceiveRequestAttemptId Request Parameter in the Amazon SQS Developer Guide."]}
     let context_ = "ReceiveMessageRequest"
     let make ?attributeNames =
-      fun ?messageAttributeNames ->
-        fun ?maxNumberOfMessages ->
-          fun ?visibilityTimeout ->
-            fun ?waitTimeSeconds ->
-              fun ?receiveRequestAttemptId ->
-                fun ~queueUrl ->
-                  fun () ->
-                    {
-                      attributeNames;
-                      messageAttributeNames;
-                      maxNumberOfMessages;
-                      visibilityTimeout;
-                      waitTimeSeconds;
-                      receiveRequestAttemptId;
-                      queueUrl
-                    }
+      fun ?messageSystemAttributeNames ->
+        fun ?messageAttributeNames ->
+          fun ?maxNumberOfMessages ->
+            fun ?visibilityTimeout ->
+              fun ?waitTimeSeconds ->
+                fun ?receiveRequestAttemptId ->
+                  fun ~queueUrl ->
+                    fun () ->
+                      {
+                        attributeNames;
+                        messageSystemAttributeNames;
+                        messageAttributeNames;
+                        maxNumberOfMessages;
+                        visibilityTimeout;
+                        waitTimeSeconds;
+                        receiveRequestAttemptId;
+                        queueUrl
+                      }
     let to_value x =
       structure_to_value
         [("QueueUrl", (Some (String_.to_value x.queueUrl)));
         ("AttributeNames",
           (Option.map x.attributeNames ~f:AttributeNameList.to_value));
+        ("MessageSystemAttributeNames",
+          (Option.map x.messageSystemAttributeNames
+             ~f:MessageSystemAttributeList.to_value));
         ("MessageAttributeNames",
           (Option.map x.messageAttributeNames
              ~f:MessageAttributeNameList.to_value));
         ("MaxNumberOfMessages",
-          (Option.map x.maxNumberOfMessages ~f:Integer.to_value));
+          (Option.map x.maxNumberOfMessages ~f:NullableInteger.to_value));
         ("VisibilityTimeout",
-          (Option.map x.visibilityTimeout ~f:Integer.to_value));
+          (Option.map x.visibilityTimeout ~f:NullableInteger.to_value));
         ("WaitTimeSeconds",
-          (Option.map x.waitTimeSeconds ~f:Integer.to_value));
+          (Option.map x.waitTimeSeconds ~f:NullableInteger.to_value));
         ("ReceiveRequestAttemptId",
           (Option.map x.receiveRequestAttemptId ~f:String_.to_value))]
     let to_query v = to_query to_value v
@@ -2035,54 +3000,70 @@ module ReceiveMessageRequest =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ReceiveRequestAttemptId") in
       let waitTimeSeconds =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "WaitTimeSeconds") in
+        (Option.map ~f:NullableInteger.of_xml)
+          (Xml.child xml_arg0 "WaitTimeSeconds") in
       let visibilityTimeout =
-        (Option.map ~f:Integer.of_xml)
+        (Option.map ~f:NullableInteger.of_xml)
           (Xml.child xml_arg0 "VisibilityTimeout") in
       let maxNumberOfMessages =
-        (Option.map ~f:Integer.of_xml)
+        (Option.map ~f:NullableInteger.of_xml)
           (Xml.child xml_arg0 "MaxNumberOfMessages") in
       let messageAttributeNames =
         (Option.map ~f:MessageAttributeNameList.of_xml)
-          (Some (Xml.children xml_arg0 "MessageAttributeName")) in
+          (Some (Xml.children xml_arg0 "MessageAttributeNames")) in
+      let messageSystemAttributeNames =
+        (Option.map ~f:MessageSystemAttributeList.of_xml)
+          (Some (Xml.children xml_arg0 "MessageSystemAttributeNames")) in
       let attributeNames =
         (Option.map ~f:AttributeNameList.of_xml)
-          (Some (Xml.children xml_arg0 "AttributeName")) in
+          (Some (Xml.children xml_arg0 "AttributeNames")) in
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ?receiveRequestAttemptId ?waitTimeSeconds ?visibilityTimeout
-        ?maxNumberOfMessages ?messageAttributeNames ?attributeNames ~queueUrl
-        ()
+        ?maxNumberOfMessages ?messageAttributeNames
+        ?messageSystemAttributeNames ?attributeNames ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let receiveRequestAttemptId =
-        field_map json "ReceiveRequestAttemptId" String_.of_json in
-      let waitTimeSeconds = field_map json "WaitTimeSeconds" Integer.of_json in
+        field_map json__ "ReceiveRequestAttemptId" String_.of_json in
+      let waitTimeSeconds =
+        field_map json__ "WaitTimeSeconds" NullableInteger.of_json in
       let visibilityTimeout =
-        field_map json "VisibilityTimeout" Integer.of_json in
+        field_map json__ "VisibilityTimeout" NullableInteger.of_json in
       let maxNumberOfMessages =
-        field_map json "MaxNumberOfMessages" Integer.of_json in
+        field_map json__ "MaxNumberOfMessages" NullableInteger.of_json in
       let messageAttributeNames =
-        field_map json "MessageAttributeNames"
+        field_map json__ "MessageAttributeNames"
           MessageAttributeNameList.of_json in
+      let messageSystemAttributeNames =
+        field_map json__ "MessageSystemAttributeNames"
+          MessageSystemAttributeList.of_json in
       let attributeNames =
-        field_map json "AttributeNames" AttributeNameList.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+        field_map json__ "AttributeNames" AttributeNameList.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ?receiveRequestAttemptId ?waitTimeSeconds ?visibilityTimeout
-        ?maxNumberOfMessages ?messageAttributeNames ?attributeNames ~queueUrl
-        ()
+        ?maxNumberOfMessages ?messageAttributeNames
+        ?messageSystemAttributeNames ?attributeNames ~queueUrl ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Retrieves one or more messages from a specified queue."]
 module ReceiptHandleIsInvalid =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified receipt handle isn't valid."]
 module PurgeQueueRequest =
@@ -2102,21 +3083,29 @@ module PurgeQueueRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
 module PurgeQueueInProgress =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates that the specified queue previously received a PurgeQueue request within the last 60 seconds (the time it can take to delete the messages in the queue)."]
@@ -2134,7 +3123,7 @@ module MessageNotInflight =
   end[@@ocaml.doc "The specified message isn't in flight."]
 module ListQueuesResult =
   struct
-    type listQueuesResult =
+    type nonrec t =
       {
       queueUrls: QueueUrlList.t option
         [@ocaml.doc
@@ -2142,55 +3131,73 @@ module ListQueuesResult =
       nextToken: Token.t option
         [@ocaml.doc
           "Pagination token to include in the next request. Token value is null if there are no additional results to request, or if you did not set MaxResults in the request."]}
-    and responseMetaData = unit
-    and t =
-      {
-      listQueuesResult: listQueuesResult ;
-      responseMetaData: responseMetaData }
-    type error = [ `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListQueuesResult"
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
     let make ?queueUrls =
-      fun ?nextToken ->
-        fun () ->
-          {
-            listQueuesResult = { queueUrls; nextToken };
-            responseMetaData = ()
-          }
+      fun ?nextToken -> fun () -> { queueUrls; nextToken }
     let error_of_json name json =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.listQueuesResult in
-      structure_to_wrapped_value
+    let to_value x =
+      structure_to_value
         [("QueueUrls", (Option.map x.queueUrls ~f:QueueUrlList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
-        ~wrapper:"ListQueuesResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 = Xml.child_exn ~context:context_ t "ListQueuesResult" in
+    let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let queueUrls =
         (Option.map ~f:QueueUrlList.of_xml)
-          (Some (Xml.children xml_arg0 "QueueUrl")) in
+          (Some (Xml.children xml_arg0 "QueueUrls")) in
       make ?nextToken ?queueUrls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let queueUrls = field_map json "QueueUrls" QueueUrlList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let queueUrls = field_map json__ "QueueUrls" QueueUrlList.of_json in
       make ?nextToken ?queueUrls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of your queues."]
@@ -2226,60 +3233,91 @@ module ListQueuesRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QueueNamePrefix") in
       make ?maxResults ?nextToken ?queueNamePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let queueNamePrefix = field_map json "QueueNamePrefix" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" BoxedInteger.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let queueNamePrefix =
+        field_map json__ "QueueNamePrefix" String_.of_json in
       make ?maxResults ?nextToken ?queueNamePrefix ()
     let to_json v = composed_to_json to_value v
   end
 module ListQueueTagsResult =
   struct
-    type listQueueTagsResult =
+    type nonrec t =
       {
       tags: TagMap.t option
         [@ocaml.doc "The list of all tags added to the specified queue."]}
-    and responseMetaData = unit
-    and t =
-      {
-      listQueueTagsResult: listQueueTagsResult ;
-      responseMetaData: responseMetaData }
-    type error = [ `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListQueueTagsResult"
-    let make ?tags =
-      fun () -> { listQueueTagsResult = { tags }; responseMetaData = () }
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `QueueDoesNotExist of QueueDoesNotExist.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
     let error_of_json name json =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `QueueDoesNotExist e ->
+          `Assoc
+            [("error", (`String "QueueDoesNotExist"));
+            ("details", (QueueDoesNotExist.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.listQueueTagsResult in
-      structure_to_wrapped_value
-        [("Tag", (Option.map x.tags ~f:TagMap.to_value))]
-        ~wrapper:"ListQueueTagsResult" ~response:"ResponseMetaData"
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 = Xml.child_exn ~context:context_ t "ListQueueTagsResult" in
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tag") in
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all cost allocation tags added to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a user name in the Amazon SQS Developer Guide."]
+       "List all cost allocation tags added to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a username in the Amazon SQS Developer Guide."]
 module ListQueueTagsRequest =
   struct
     type nonrec t =
@@ -2295,82 +3333,217 @@ module ListQueueTagsRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all cost allocation tags added to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a user name in the Amazon SQS Developer Guide."]
-module ListDeadLetterSourceQueuesResult =
+       "List all cost allocation tags added to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a username in the Amazon SQS Developer Guide."]
+module ListMessageMoveTasksResult =
   struct
-    type listDeadLetterSourceQueuesResult =
+    type nonrec t =
       {
-      queueUrls: QueueUrlList.t
-        [@ocaml.doc
-          "A list of source queue URLs that have the RedrivePolicy queue attribute configured with a dead-letter queue."];
-      nextToken: Token.t option
-        [@ocaml.doc
-          "Pagination token to include in the next request. Token value is null if there are no additional results to request, or if you did not set MaxResults in the request."]}
-    and responseMetaData = unit
-    and t =
-      {
-      listDeadLetterSourceQueuesResult: listDeadLetterSourceQueuesResult ;
-      responseMetaData: responseMetaData }
-    type error =
-      [ `QueueDoesNotExist of QueueDoesNotExist.t 
+      results: ListMessageMoveTasksResultEntryList.t option
+        [@ocaml.doc "A list of message movement tasks and their attributes."]}
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDeadLetterSourceQueuesResult"
-    let make ?nextToken =
-      fun ~queueUrls ->
-        fun () ->
-          {
-            listDeadLetterSourceQueuesResult = { nextToken; queueUrls };
-            responseMetaData = ()
-          }
+    let make ?results = fun () -> { results }
     let error_of_json name json =
       match name with
-      | "QueueDoesNotExist" ->
-          `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
-      | "QueueDoesNotExist" ->
-          `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
-      | `QueueDoesNotExist e ->
+      | `InvalidAddress e ->
           `Assoc
-            [("error", (`String "QueueDoesNotExist"));
-            ("details", (QueueDoesNotExist.to_json e))]
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.listDeadLetterSourceQueuesResult in
-      structure_to_wrapped_value
-        [("queueUrls", (Some (QueueUrlList.to_value x.queueUrls)));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
-        ~wrapper:"ListDeadLetterSourceQueuesResult"
-        ~response:"ResponseMetaData"
+    let to_value x =
+      structure_to_value
+        [("Results",
+           (Option.map x.results
+              ~f:ListMessageMoveTasksResultEntryList.to_value))]
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 =
-        Xml.child_exn ~context:context_ t "ListDeadLetterSourceQueuesResult" in
+    let of_xml xml_arg0 =
+      let results =
+        (Option.map ~f:ListMessageMoveTasksResultEntryList.of_xml)
+          (Some (Xml.children xml_arg0 "Results")) in
+      make ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let results =
+        field_map json__ "Results"
+          ListMessageMoveTasksResultEntryList.of_json in
+      make ?results ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the most recent message movement tasks (up to 10) under a specific source queue. This action is currently limited to supporting message redrive from dead-letter queues (DLQs) only. In this context, the source queue is the dead-letter queue (DLQ), while the destination queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue. Only one active message movement task is supported per queue at any given time."]
+module ListMessageMoveTasksRequest =
+  struct
+    type nonrec t =
+      {
+      sourceArn: String_.t
+        [@ocaml.doc
+          "The ARN of the queue whose message movement tasks are to be listed."];
+      maxResults: NullableInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to include in the response. The default is 1, which provides the most recent message movement task. The upper limit is 10."]}
+    let context_ = "ListMessageMoveTasksRequest"
+    let make ?maxResults =
+      fun ~sourceArn -> fun () -> { maxResults; sourceArn }
+    let to_value x =
+      structure_to_value
+        [("SourceArn", (Some (String_.to_value x.sourceArn)));
+        ("MaxResults", (Option.map x.maxResults ~f:NullableInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:NullableInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let sourceArn =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SourceArn") in
+      make ?maxResults ~sourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NullableInteger.of_json in
+      let sourceArn = field_map_exn json__ "SourceArn" String_.of_json in
+      make ?maxResults ~sourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the most recent message movement tasks (up to 10) under a specific source queue. This action is currently limited to supporting message redrive from dead-letter queues (DLQs) only. In this context, the source queue is the dead-letter queue (DLQ), while the destination queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue. Only one active message movement task is supported per queue at any given time."]
+module ListDeadLetterSourceQueuesResult =
+  struct
+    type nonrec t =
+      {
+      queueUrls: QueueUrlList.t option
+        [@ocaml.doc
+          "A list of source queue URLs that have the RedrivePolicy queue attribute configured with a dead-letter queue."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "Pagination token to include in the next request. Token value is null if there are no additional results to request, or if you did not set MaxResults in the request."]}
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `QueueDoesNotExist of QueueDoesNotExist.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?queueUrls =
+      fun ?nextToken -> fun () -> { queueUrls; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `QueueDoesNotExist e ->
+          `Assoc
+            [("error", (`String "QueueDoesNotExist"));
+            ("details", (QueueDoesNotExist.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("queueUrls", (Option.map x.queueUrls ~f:QueueUrlList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let queueUrls = QueueUrlList.of_xml (Xml.children xml_arg0 "QueueUrl") in
-      make ?nextToken ~queueUrls ()
+      let queueUrls =
+        (Option.map ~f:QueueUrlList.of_xml)
+          (Some (Xml.children xml_arg0 "queueUrls")) in
+      make ?nextToken ?queueUrls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let queueUrls = field_map_exn json "queueUrls" QueueUrlList.of_json in
-      make ?nextToken ~queueUrls ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let queueUrls = field_map json__ "queueUrls" QueueUrlList.of_json in
+      make ?nextToken ?queueUrls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of your dead letter source queues."]
 module ListDeadLetterSourceQueuesRequest =
@@ -2404,10 +3577,10 @@ module ListDeadLetterSourceQueuesRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ?maxResults ?nextToken ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" BoxedInteger.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ?maxResults ?nextToken ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
@@ -2426,58 +3599,79 @@ module InvalidIdFormat =
        "The specified receipt handle isn't valid for the current version."]
 module GetQueueUrlResult =
   struct
-    type getQueueUrlResult =
+    type nonrec t =
       {
       queueUrl: String_.t option [@ocaml.doc "The URL of the queue."]}
-    and responseMetaData = unit
-    and t =
-      {
-      getQueueUrlResult: getQueueUrlResult ;
-      responseMetaData: responseMetaData }
-    type error =
-      [ `QueueDoesNotExist of QueueDoesNotExist.t 
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `QueueDoesNotExist of QueueDoesNotExist.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetQueueUrlResult"
-    let make ?queueUrl =
-      fun () -> { getQueueUrlResult = { queueUrl }; responseMetaData = () }
+    let make ?queueUrl = fun () -> { queueUrl }
     let error_of_json name json =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
       | "QueueDoesNotExist" ->
           `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
       | "QueueDoesNotExist" ->
           `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
       | `QueueDoesNotExist e ->
           `Assoc
             [("error", (`String "QueueDoesNotExist"));
             ("details", (QueueDoesNotExist.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.getQueueUrlResult in
-      structure_to_wrapped_value
+    let to_value x =
+      structure_to_value
         [("QueueUrl", (Option.map x.queueUrl ~f:String_.to_value))]
-        ~wrapper:"GetQueueUrlResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 = Xml.child_exn ~context:context_ t "GetQueueUrlResult" in
+    let of_xml xml_arg0 =
       let queueUrl =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QueueUrl") in
       make ?queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queueUrl = field_map json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let queueUrl = field_map json__ "QueueUrl" String_.of_json in
       make ?queueUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2488,10 +3682,10 @@ module GetQueueUrlRequest =
       {
       queueName: String_.t
         [@ocaml.doc
-          "The name of the queue whose URL must be fetched. Maximum 80 characters. Valid values: alphanumeric characters, hyphens (-), and underscores (_). Queue URLs and names are case-sensitive."];
+          "(Required) The name of the queue for which you want to fetch the URL. The name can be up to 80 characters long and can include alphanumeric characters, hyphens (-), and underscores (_). Queue URLs and names are case-sensitive."];
       queueOwnerAWSAccountId: String_.t option
         [@ocaml.doc
-          "The Amazon Web Services account ID of the account that created the queue."]}
+          "(Optional) The Amazon Web Services account ID of the account that created the queue. This is only required when you are attempting to access a queue owned by another Amazon Web Services account."]}
     let context_ = "GetQueueUrlRequest"
     let make ?queueOwnerAWSAccountId =
       fun ~queueName -> fun () -> { queueOwnerAWSAccountId; queueName }
@@ -2509,72 +3703,102 @@ module GetQueueUrlRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueName") in
       make ?queueOwnerAWSAccountId ~queueName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queueOwnerAWSAccountId =
-        field_map json "QueueOwnerAWSAccountId" String_.of_json in
-      let queueName = field_map_exn json "QueueName" String_.of_json in
+        field_map json__ "QueueOwnerAWSAccountId" String_.of_json in
+      let queueName = field_map_exn json__ "QueueName" String_.of_json in
       make ?queueOwnerAWSAccountId ~queueName ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Retrieves the URL of an existing queue based on its name and, optionally, the Amazon Web Services account ID."]
 module GetQueueAttributesResult =
   struct
-    type getQueueAttributesResult =
+    type nonrec t =
       {
       attributes: QueueAttributeMap.t option
         [@ocaml.doc "A map of attributes to their respective values."]}
-    and responseMetaData = unit
-    and t =
-      {
-      getQueueAttributesResult: getQueueAttributesResult ;
-      responseMetaData: responseMetaData }
-    type error =
-      [ `InvalidAttributeName of InvalidAttributeName.t 
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidAttributeName of InvalidAttributeName.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `QueueDoesNotExist of QueueDoesNotExist.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetQueueAttributesResult"
-    let make ?attributes =
-      fun () ->
-        { getQueueAttributesResult = { attributes }; responseMetaData = () }
+    let make ?attributes = fun () -> { attributes }
     let error_of_json name json =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
       | "InvalidAttributeName" ->
           `InvalidAttributeName (InvalidAttributeName.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
       | "InvalidAttributeName" ->
           `InvalidAttributeName (InvalidAttributeName.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
       | `InvalidAttributeName e ->
           `Assoc
             [("error", (`String "InvalidAttributeName"));
             ("details", (InvalidAttributeName.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `QueueDoesNotExist e ->
+          `Assoc
+            [("error", (`String "QueueDoesNotExist"));
+            ("details", (QueueDoesNotExist.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.getQueueAttributesResult in
-      structure_to_wrapped_value
-        [("Attribute",
+    let to_value x =
+      structure_to_value
+        [("Attributes",
            (Option.map x.attributes ~f:QueueAttributeMap.to_value))]
-        ~wrapper:"GetQueueAttributesResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 =
-        Xml.child_exn ~context:context_ t "GetQueueAttributesResult" in
+    let of_xml xml_arg0 =
       let attributes =
         (Option.map ~f:QueueAttributeMap.of_xml)
-          (Xml.child xml_arg0 "Attribute") in
+          (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" QueueAttributeMap.of_json in
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" QueueAttributeMap.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of returned queue attributes."]
@@ -2587,7 +3811,7 @@ module GetQueueAttributesRequest =
           "The URL of the Amazon SQS queue whose attribute information is retrieved. Queue URLs and names are case-sensitive."];
       attributeNames: AttributeNameList.t option
         [@ocaml.doc
-          "A list of attributes for which to retrieve information. The AttributeName.N parameter is optional, but if you don't specify values for this parameter, the request returns empty results. In the future, new attributes might be added. If you write code that calls this action, we recommend that you structure your code so that it can handle new attributes gracefully. The following attributes are supported: The ApproximateNumberOfMessagesDelayed, ApproximateNumberOfMessagesNotVisible, and ApproximateNumberOfMessagesVisible metrics may not achieve consistency until at least 1 minute after the producers stop sending messages. This period is required for the queue metadata to reach eventual consistency. All \226\128\147 Returns all values. ApproximateNumberOfMessages \226\128\147 Returns the approximate number of messages available for retrieval from the queue. ApproximateNumberOfMessagesDelayed \226\128\147 Returns the approximate number of messages in the queue that are delayed and not available for reading immediately. This can happen when the queue is configured as a delay queue or when a message has been sent with a delay parameter. ApproximateNumberOfMessagesNotVisible \226\128\147 Returns the approximate number of messages that are in flight. Messages are considered to be in flight if they have been sent to a client but have not yet been deleted or have not yet reached the end of their visibility window. CreatedTimestamp \226\128\147 Returns the time when the queue was created in seconds (epoch time). DelaySeconds \226\128\147 Returns the default delay on the queue in seconds. LastModifiedTimestamp \226\128\147 Returns the time when the queue was last changed in seconds (epoch time). MaximumMessageSize \226\128\147 Returns the limit of how many bytes a message can contain before Amazon SQS rejects it. MessageRetentionPeriod \226\128\147 Returns the length of time, in seconds, for which Amazon SQS retains a message. Policy \226\128\147 Returns the policy of the queue. QueueArn \226\128\147 Returns the Amazon resource name (ARN) of the queue. ReceiveMessageWaitTimeSeconds \226\128\147 Returns the length of time, in seconds, for which the ReceiveMessage action waits for a message to arrive. RedrivePolicy \226\128\147 The string that includes the parameters for the dead-letter queue functionality of the source queue as a JSON object. For more information about the redrive policy and dead-letter queues, see Using Amazon SQS Dead-Letter Queues in the Amazon SQS Developer Guide. deadLetterTargetArn \226\128\147 The Amazon Resource Name (ARN) of the dead-letter queue to which Amazon SQS moves messages after the value of maxReceiveCount is exceeded. maxReceiveCount \226\128\147 The number of times a message is delivered to the source queue before being moved to the dead-letter queue. When the ReceiveCount for a message exceeds the maxReceiveCount for a queue, Amazon SQS moves the message to the dead-letter-queue. VisibilityTimeout \226\128\147 Returns the visibility timeout for the queue. For more information about the visibility timeout, see Visibility Timeout in the Amazon SQS Developer Guide. The following attributes apply only to server-side-encryption: KmsMasterKeyId \226\128\147 Returns the ID of an Amazon Web Services managed customer master key (CMK) for Amazon SQS or a custom CMK. For more information, see Key Terms. KmsDataKeyReusePeriodSeconds \226\128\147 Returns the length of time, in seconds, for which Amazon SQS can reuse a data key to encrypt or decrypt messages before calling KMS again. For more information, see How Does the Data Key Reuse Period Work?. SqsManagedSseEnabled \226\128\147 Returns information about whether the queue is using SSE-SQS encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue (e.g. SSE-KMS or SSE-SQS). The following attributes apply only to FIFO (first-in-first-out) queues: FifoQueue \226\128\147 Returns information about whether the queue is FIFO. For more information, see FIFO queue logic in the Amazon SQS Developer Guide. To determine whether a queue is FIFO, you can check whether QueueName ends with the .fifo suffix. ContentBasedDeduplication \226\128\147 Returns whether content-based deduplication is enabled for the queue. For more information, see Exactly-once processing in the Amazon SQS Developer Guide. The following attributes apply only to high throughput for FIFO queues: DeduplicationScope \226\128\147 Specifies whether message deduplication occurs at the message group or queue level. Valid values are messageGroup and queue. FifoThroughputLimit \226\128\147 Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group. Valid values are perQueue and perMessageGroupId. The perMessageGroupId value is allowed only when the value for DeduplicationScope is messageGroup. To enable high throughput for FIFO queues, do the following: Set DeduplicationScope to messageGroup. Set FifoThroughputLimit to perMessageGroupId. If you set these attributes to anything other than the values shown for enabling high throughput, normal throughput is in effect and deduplication occurs as specified. For information on throughput quotas, see Quotas related to messages in the Amazon SQS Developer Guide."]}
+          "A list of attributes for which to retrieve information. The AttributeNames parameter is optional, but if you don't specify values for this parameter, the request returns empty results. In the future, new attributes might be added. If you write code that calls this action, we recommend that you structure your code so that it can handle new attributes gracefully. The following attributes are supported: The ApproximateNumberOfMessagesDelayed, ApproximateNumberOfMessagesNotVisible, and ApproximateNumberOfMessages metrics may not achieve consistency until at least 1 minute after the producers stop sending messages. This period is required for the queue metadata to reach eventual consistency. All \226\128\147 Returns all values. ApproximateNumberOfMessages \226\128\147 Returns the approximate number of messages available for retrieval from the queue. ApproximateNumberOfMessagesDelayed \226\128\147 Returns the approximate number of messages in the queue that are delayed and not available for reading immediately. This can happen when the queue is configured as a delay queue or when a message has been sent with a delay parameter. ApproximateNumberOfMessagesNotVisible \226\128\147 Returns the approximate number of messages that are in flight. Messages are considered to be in flight if they have been sent to a client but have not yet been deleted or have not yet reached the end of their visibility window. CreatedTimestamp \226\128\147 Returns the time when the queue was created in seconds (epoch time). DelaySeconds \226\128\147 Returns the default delay on the queue in seconds. LastModifiedTimestamp \226\128\147 Returns the time when the queue was last changed in seconds (epoch time). MaximumMessageSize \226\128\147 Returns the limit of how many bytes a message can contain before Amazon SQS rejects it. MessageRetentionPeriod \226\128\147 Returns the length of time, in seconds, for which Amazon SQS retains a message. When you change a queue's attributes, the change can take up to 60 seconds for most of the attributes to propagate throughout the Amazon SQS system. Changes made to the MessageRetentionPeriod attribute can take up to 15 minutes and will impact existing messages in the queue potentially causing them to be expired and deleted if the MessageRetentionPeriod is reduced below the age of existing messages. Policy \226\128\147 Returns the policy of the queue. QueueArn \226\128\147 Returns the Amazon resource name (ARN) of the queue. ReceiveMessageWaitTimeSeconds \226\128\147 Returns the length of time, in seconds, for which the ReceiveMessage action waits for a message to arrive. VisibilityTimeout \226\128\147 Returns the visibility timeout for the queue. For more information about the visibility timeout, see Visibility Timeout in the Amazon SQS Developer Guide. The following attributes apply only to dead-letter queues: RedrivePolicy \226\128\147 The string that includes the parameters for the dead-letter queue functionality of the source queue as a JSON object. The parameters are as follows: deadLetterTargetArn \226\128\147 The Amazon Resource Name (ARN) of the dead-letter queue to which Amazon SQS moves messages after the value of maxReceiveCount is exceeded. maxReceiveCount \226\128\147 The number of times a message is delivered to the source queue before being moved to the dead-letter queue. Default: 10. When the ReceiveCount for a message exceeds the maxReceiveCount for a queue, Amazon SQS moves the message to the dead-letter-queue. RedriveAllowPolicy \226\128\147 The string that includes the parameters for the permissions for the dead-letter queue redrive permission and which source queues can specify dead-letter queues as a JSON object. The parameters are as follows: redrivePermission \226\128\147 The permission type that defines which source queues can specify the current queue as the dead-letter queue. Valid values are: allowAll \226\128\147 (Default) Any source queues in this Amazon Web Services account in the same Region can specify this queue as the dead-letter queue. denyAll \226\128\147 No source queues can specify this queue as the dead-letter queue. byQueue \226\128\147 Only queues specified by the sourceQueueArns parameter can specify this queue as the dead-letter queue. sourceQueueArns \226\128\147 The Amazon Resource Names (ARN)s of the source queues that can specify this queue as the dead-letter queue and redrive messages. You can specify this parameter only when the redrivePermission parameter is set to byQueue. You can specify up to 10 source queue ARNs. To allow more than 10 source queues to specify dead-letter queues, set the redrivePermission parameter to allowAll. The dead-letter queue of a FIFO queue must also be a FIFO queue. Similarly, the dead-letter queue of a standard queue must also be a standard queue. The following attributes apply only to server-side-encryption: KmsMasterKeyId \226\128\147 Returns the ID of an Amazon Web Services managed customer master key (CMK) for Amazon SQS or a custom CMK. For more information, see Key Terms. KmsDataKeyReusePeriodSeconds \226\128\147 Returns the length of time, in seconds, for which Amazon SQS can reuse a data key to encrypt or decrypt messages before calling KMS again. For more information, see How Does the Data Key Reuse Period Work?. SqsManagedSseEnabled \226\128\147 Returns information about whether the queue is using SSE-SQS encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue (for example, SSE-KMS or SSE-SQS). The following attributes apply only to FIFO (first-in-first-out) queues: FifoQueue \226\128\147 Returns information about whether the queue is FIFO. For more information, see FIFO queue logic in the Amazon SQS Developer Guide. To determine whether a queue is FIFO, you can check whether QueueName ends with the .fifo suffix. ContentBasedDeduplication \226\128\147 Returns whether content-based deduplication is enabled for the queue. For more information, see Exactly-once processing in the Amazon SQS Developer Guide. The following attributes apply only to high throughput for FIFO queues: DeduplicationScope \226\128\147 Specifies whether message deduplication occurs at the message group or queue level. Valid values are messageGroup and queue. FifoThroughputLimit \226\128\147 Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group. Valid values are perQueue and perMessageGroupId. The perMessageGroupId value is allowed only when the value for DeduplicationScope is messageGroup. To enable high throughput for FIFO queues, do the following: Set DeduplicationScope to messageGroup. Set FifoThroughputLimit to perMessageGroupId. If you set these attributes to anything other than the values shown for enabling high throughput, normal throughput is in effect and deduplication occurs as specified. For information on throughput quotas, see Quotas related to messages in the Amazon SQS Developer Guide."]}
     let context_ = "GetQueueAttributesRequest"
     let make ?attributeNames =
       fun ~queueUrl -> fun () -> { attributeNames; queueUrl }
@@ -2600,15 +3824,15 @@ module GetQueueAttributesRequest =
     let of_xml xml_arg0 =
       let attributeNames =
         (Option.map ~f:AttributeNameList.of_xml)
-          (Some (Xml.children xml_arg0 "AttributeName")) in
+          (Some (Xml.children xml_arg0 "AttributeNames")) in
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ?attributeNames ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeNames =
-        field_map json "AttributeNames" AttributeNameList.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+        field_map json__ "AttributeNames" AttributeNameList.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ?attributeNames ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
@@ -2629,8 +3853,8 @@ module DeleteQueueRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
@@ -2660,50 +3884,52 @@ module DeleteMessageRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~receiptHandle ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let receiptHandle = field_map_exn json "ReceiptHandle" String_.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let receiptHandle =
+        field_map_exn json__ "ReceiptHandle" String_.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~receiptHandle ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
 module DeleteMessageBatchResult =
   struct
-    type deleteMessageBatchResult =
+    type nonrec t =
       {
-      successful: DeleteMessageBatchResultEntryList.t
+      successful: DeleteMessageBatchResultEntryList.t option
         [@ocaml.doc "A list of DeleteMessageBatchResultEntry items."];
-      failed: BatchResultErrorEntryList.t
+      failed: BatchResultErrorEntryList.t option
         [@ocaml.doc "A list of BatchResultErrorEntry items."]}
-    and responseMetaData = unit
-    and t =
-      {
-      deleteMessageBatchResult: deleteMessageBatchResult ;
-      responseMetaData: responseMetaData }
-    type error =
+    type nonrec error =
       [ `BatchEntryIdsNotDistinct of BatchEntryIdsNotDistinct.t 
       | `EmptyBatchRequest of EmptyBatchRequest.t 
+      | `InvalidAddress of InvalidAddress.t 
       | `InvalidBatchEntryId of InvalidBatchEntryId.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `QueueDoesNotExist of QueueDoesNotExist.t 
+      | `RequestThrottled of RequestThrottled.t 
       | `TooManyEntriesInBatchRequest of TooManyEntriesInBatchRequest.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteMessageBatchResult"
-    let make ~successful =
-      fun ~failed ->
-        fun () ->
-          {
-            deleteMessageBatchResult = { successful; failed };
-            responseMetaData = ()
-          }
+    let make ?successful = fun ?failed -> fun () -> { successful; failed }
     let error_of_json name json =
       match name with
       | "BatchEntryIdsNotDistinct" ->
           `BatchEntryIdsNotDistinct (BatchEntryIdsNotDistinct.of_json json)
       | "EmptyBatchRequest" ->
           `EmptyBatchRequest (EmptyBatchRequest.of_json json)
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
       | "InvalidBatchEntryId" ->
           `InvalidBatchEntryId (InvalidBatchEntryId.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
       | "TooManyEntriesInBatchRequest" ->
           `TooManyEntriesInBatchRequest
             (TooManyEntriesInBatchRequest.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2713,11 +3939,18 @@ module DeleteMessageBatchResult =
           `BatchEntryIdsNotDistinct (BatchEntryIdsNotDistinct.of_xml xml)
       | "EmptyBatchRequest" ->
           `EmptyBatchRequest (EmptyBatchRequest.of_xml xml)
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
       | "InvalidBatchEntryId" ->
           `InvalidBatchEntryId (InvalidBatchEntryId.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
       | "TooManyEntriesInBatchRequest" ->
           `TooManyEntriesInBatchRequest
             (TooManyEntriesInBatchRequest.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2730,45 +3963,63 @@ module DeleteMessageBatchResult =
           `Assoc
             [("error", (`String "EmptyBatchRequest"));
             ("details", (EmptyBatchRequest.to_json e))]
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
       | `InvalidBatchEntryId e ->
           `Assoc
             [("error", (`String "InvalidBatchEntryId"));
             ("details", (InvalidBatchEntryId.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `QueueDoesNotExist e ->
+          `Assoc
+            [("error", (`String "QueueDoesNotExist"));
+            ("details", (QueueDoesNotExist.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
       | `TooManyEntriesInBatchRequest e ->
           `Assoc
             [("error", (`String "TooManyEntriesInBatchRequest"));
             ("details", (TooManyEntriesInBatchRequest.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.deleteMessageBatchResult in
-      structure_to_wrapped_value
+    let to_value x =
+      structure_to_value
         [("Successful",
-           (Some (DeleteMessageBatchResultEntryList.to_value x.successful)));
-        ("Failed", (Some (BatchResultErrorEntryList.to_value x.failed)))]
-        ~wrapper:"DeleteMessageBatchResult" ~response:"ResponseMetaData"
+           (Option.map x.successful
+              ~f:DeleteMessageBatchResultEntryList.to_value));
+        ("Failed",
+          (Option.map x.failed ~f:BatchResultErrorEntryList.to_value))]
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 =
-        Xml.child_exn ~context:context_ t "DeleteMessageBatchResult" in
+    let of_xml xml_arg0 =
       let failed =
-        BatchResultErrorEntryList.of_xml
-          (Xml.children xml_arg0 "BatchResultErrorEntry") in
+        (Option.map ~f:BatchResultErrorEntryList.of_xml)
+          (Some (Xml.children xml_arg0 "Failed")) in
       let successful =
-        DeleteMessageBatchResultEntryList.of_xml
-          (Xml.children xml_arg0 "DeleteMessageBatchResultEntry") in
-      make ~failed ~successful ()
+        (Option.map ~f:DeleteMessageBatchResultEntryList.of_xml)
+          (Some (Xml.children xml_arg0 "Successful")) in
+      make ?failed ?successful ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failed =
-        field_map_exn json "Failed" BatchResultErrorEntryList.of_json in
+        field_map json__ "Failed" BatchResultErrorEntryList.of_json in
       let successful =
-        field_map_exn json "Successful"
+        field_map json__ "Successful"
           DeleteMessageBatchResultEntryList.of_json in
-      make ~failed ~successful ()
+      make ?failed ?successful ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For each message in the batch, the response contains a DeleteMessageBatchResultEntry tag if the message is deleted or a BatchResultErrorEntry tag if the message can't be deleted."]
@@ -2781,7 +4032,7 @@ module DeleteMessageBatchRequest =
           "The URL of the Amazon SQS queue from which messages are deleted. Queue URLs and names are case-sensitive."];
       entries: DeleteMessageBatchRequestEntryList.t
         [@ocaml.doc
-          "A list of receipt handles for the messages to be deleted."]}
+          "Lists the receipt handles for the messages to be deleted."]}
     let context_ = "DeleteMessageBatchRequest"
     let make ~queueUrl = fun ~entries -> fun () -> { queueUrl; entries }
     let to_value x =
@@ -2793,54 +4044,88 @@ module DeleteMessageBatchRequest =
     let of_xml xml_arg0 =
       let entries =
         DeleteMessageBatchRequestEntryList.of_xml
-          (Xml.children xml_arg0 "DeleteMessageBatchRequestEntry") in
+          (Xml.children xml_arg0 "Entries") in
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~entries ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entries =
-        field_map_exn json "Entries"
+        field_map_exn json__ "Entries"
           DeleteMessageBatchRequestEntryList.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~entries ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
 module CreateQueueResult =
   struct
-    type createQueueResult =
+    type nonrec t =
       {
       queueUrl: String_.t option
         [@ocaml.doc "The URL of the created Amazon SQS queue."]}
-    and responseMetaData = unit
-    and t =
-      {
-      createQueueResult: createQueueResult ;
-      responseMetaData: responseMetaData }
-    type error =
-      [ `QueueDeletedRecently of QueueDeletedRecently.t 
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidAttributeName of InvalidAttributeName.t 
+      | `InvalidAttributeValue of InvalidAttributeValue.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `QueueDeletedRecently of QueueDeletedRecently.t 
       | `QueueNameExists of QueueNameExists.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateQueueResult"
-    let make ?queueUrl =
-      fun () -> { createQueueResult = { queueUrl }; responseMetaData = () }
+    let make ?queueUrl = fun () -> { queueUrl }
     let error_of_json name json =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
+      | "InvalidAttributeName" ->
+          `InvalidAttributeName (InvalidAttributeName.of_json json)
+      | "InvalidAttributeValue" ->
+          `InvalidAttributeValue (InvalidAttributeValue.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
       | "QueueDeletedRecently" ->
           `QueueDeletedRecently (QueueDeletedRecently.of_json json)
       | "QueueNameExists" -> `QueueNameExists (QueueNameExists.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
+      | "InvalidAttributeName" ->
+          `InvalidAttributeName (InvalidAttributeName.of_xml xml)
+      | "InvalidAttributeValue" ->
+          `InvalidAttributeValue (InvalidAttributeValue.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
       | "QueueDeletedRecently" ->
           `QueueDeletedRecently (QueueDeletedRecently.of_xml xml)
       | "QueueNameExists" -> `QueueNameExists (QueueNameExists.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
+      | `InvalidAttributeName e ->
+          `Assoc
+            [("error", (`String "InvalidAttributeName"));
+            ("details", (InvalidAttributeName.to_json e))]
+      | `InvalidAttributeValue e ->
+          `Assoc
+            [("error", (`String "InvalidAttributeValue"));
+            ("details", (InvalidAttributeValue.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
       | `QueueDeletedRecently e ->
           `Assoc
             [("error", (`String "QueueDeletedRecently"));
@@ -2849,25 +4134,30 @@ module CreateQueueResult =
           `Assoc
             [("error", (`String "QueueNameExists"));
             ("details", (QueueNameExists.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.createQueueResult in
-      structure_to_wrapped_value
+    let to_value x =
+      structure_to_value
         [("QueueUrl", (Option.map x.queueUrl ~f:String_.to_value))]
-        ~wrapper:"CreateQueueResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 = Xml.child_exn ~context:context_ t "CreateQueueResult" in
+    let of_xml xml_arg0 =
       let queueUrl =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QueueUrl") in
       make ?queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queueUrl = field_map json "QueueUrl" String_.of_json in
+    let of_json json__ =
+      let queueUrl = field_map json__ "QueueUrl" String_.of_json in
       make ?queueUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the QueueUrl attribute of the created queue."]
@@ -2880,10 +4170,10 @@ module CreateQueueRequest =
           "The name of the new queue. The following limits apply to this name: A queue name can have up to 80 characters. Valid values: alphanumeric characters, hyphens (-), and underscores (_). A FIFO queue name must end with the .fifo suffix. Queue URLs and names are case-sensitive."];
       attributes: QueueAttributeMap.t option
         [@ocaml.doc
-          "A map of attributes with their corresponding values. The following lists the names, descriptions, and values of the special request parameters that the CreateQueue action uses: DelaySeconds \226\128\147 The length of time, in seconds, for which the delivery of all messages in the queue is delayed. Valid values: An integer from 0 to 900 seconds (15 minutes). Default: 0. MaximumMessageSize \226\128\147 The limit of how many bytes a message can contain before Amazon SQS rejects it. Valid values: An integer from 1,024 bytes (1 KiB) to 262,144 bytes (256 KiB). Default: 262,144 (256 KiB). MessageRetentionPeriod \226\128\147 The length of time, in seconds, for which Amazon SQS retains a message. Valid values: An integer from 60 seconds (1 minute) to 1,209,600 seconds (14 days). Default: 345,600 (4 days). Policy \226\128\147 The queue's policy. A valid Amazon Web Services policy. For more information about policy structure, see Overview of Amazon Web Services IAM Policies in the Amazon IAM User Guide. ReceiveMessageWaitTimeSeconds \226\128\147 The length of time, in seconds, for which a ReceiveMessage action waits for a message to arrive. Valid values: An integer from 0 to 20 (seconds). Default: 0. RedrivePolicy \226\128\147 The string that includes the parameters for the dead-letter queue functionality of the source queue as a JSON object. For more information about the redrive policy and dead-letter queues, see Using Amazon SQS Dead-Letter Queues in the Amazon SQS Developer Guide. deadLetterTargetArn \226\128\147 The Amazon Resource Name (ARN) of the dead-letter queue to which Amazon SQS moves messages after the value of maxReceiveCount is exceeded. maxReceiveCount \226\128\147 The number of times a message is delivered to the source queue before being moved to the dead-letter queue. When the ReceiveCount for a message exceeds the maxReceiveCount for a queue, Amazon SQS moves the message to the dead-letter-queue. The dead-letter queue of a FIFO queue must also be a FIFO queue. Similarly, the dead-letter queue of a standard queue must also be a standard queue. VisibilityTimeout \226\128\147 The visibility timeout for the queue, in seconds. Valid values: An integer from 0 to 43,200 (12 hours). Default: 30. For more information about the visibility timeout, see Visibility Timeout in the Amazon SQS Developer Guide. The following attributes apply only to server-side-encryption: KmsMasterKeyId \226\128\147 The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SQS or a custom CMK. For more information, see Key Terms. While the alias of the Amazon Web Services managed CMK for Amazon SQS is always alias/aws/sqs, the alias of a custom CMK can, for example, be alias/MyAlias . For more examples, see KeyId in the Key Management Service API Reference. KmsDataKeyReusePeriodSeconds \226\128\147 The length of time, in seconds, for which Amazon SQS can reuse a data key to encrypt or decrypt messages before calling KMS again. An integer representing seconds, between 60 seconds (1 minute) and 86,400 seconds (24 hours). Default: 300 (5 minutes). A shorter time period provides better security but results in more calls to KMS which might incur charges after Free Tier. For more information, see How Does the Data Key Reuse Period Work?. SqsManagedSseEnabled \226\128\147 Enables server-side queue encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue (e.g. SSE-KMS or SSE-SQS). The following attributes apply only to FIFO (first-in-first-out) queues: FifoQueue \226\128\147 Designates a queue as FIFO. Valid values are true and false. If you don't specify the FifoQueue attribute, Amazon SQS creates a standard queue. You can provide this attribute only during queue creation. You can't change it for an existing queue. When you set this attribute, you must also provide the MessageGroupId for your messages explicitly. For more information, see FIFO queue logic in the Amazon SQS Developer Guide. ContentBasedDeduplication \226\128\147 Enables content-based deduplication. Valid values are true and false. For more information, see Exactly-once processing in the Amazon SQS Developer Guide. Note the following: Every message must have a unique MessageDeduplicationId. You may provide a MessageDeduplicationId explicitly. If you aren't able to provide a MessageDeduplicationId and you enable ContentBasedDeduplication for your queue, Amazon SQS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). If you don't provide a MessageDeduplicationId and the queue doesn't have ContentBasedDeduplication set, the action fails with an error. If the queue has ContentBasedDeduplication set, your MessageDeduplicationId overrides the generated one. When ContentBasedDeduplication is in effect, messages with identical content sent within the deduplication interval are treated as duplicates and only one copy of the message is delivered. If you send one message with ContentBasedDeduplication enabled and then another message with a MessageDeduplicationId that is the same as the one generated for the first MessageDeduplicationId, the two messages are treated as duplicates and only one copy of the message is delivered. The following attributes apply only to high throughput for FIFO queues: DeduplicationScope \226\128\147 Specifies whether message deduplication occurs at the message group or queue level. Valid values are messageGroup and queue. FifoThroughputLimit \226\128\147 Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group. Valid values are perQueue and perMessageGroupId. The perMessageGroupId value is allowed only when the value for DeduplicationScope is messageGroup. To enable high throughput for FIFO queues, do the following: Set DeduplicationScope to messageGroup. Set FifoThroughputLimit to perMessageGroupId. If you set these attributes to anything other than the values shown for enabling high throughput, normal throughput is in effect and deduplication occurs as specified. For information on throughput quotas, see Quotas related to messages in the Amazon SQS Developer Guide."];
+          "A map of attributes with their corresponding values. The following lists the names, descriptions, and values of the special request parameters that the CreateQueue action uses: DelaySeconds \226\128\147 The length of time, in seconds, for which the delivery of all messages in the queue is delayed. Valid values: An integer from 0 to 900 seconds (15 minutes). Default: 0. MaximumMessageSize \226\128\147 The limit of how many bytes a message can contain before Amazon SQS rejects it. Valid values: An integer from 1,024 bytes (1 KiB) to 1,048,576 bytes (1 MiB). Default: 1,048,576 bytes (1 MiB). MessageRetentionPeriod \226\128\147 The length of time, in seconds, for which Amazon SQS retains a message. Valid values: An integer from 60 seconds (1 minute) to 1,209,600 seconds (14 days). Default: 345,600 (4 days). When you change a queue's attributes, the change can take up to 60 seconds for most of the attributes to propagate throughout the Amazon SQS system. Changes made to the MessageRetentionPeriod attribute can take up to 15 minutes and will impact existing messages in the queue potentially causing them to be expired and deleted if the MessageRetentionPeriod is reduced below the age of existing messages. Policy \226\128\147 The queue's policy. A valid Amazon Web Services policy. For more information about policy structure, see Overview of Amazon Web Services IAM Policies in the IAM User Guide. ReceiveMessageWaitTimeSeconds \226\128\147 The length of time, in seconds, for which a ReceiveMessage action waits for a message to arrive. Valid values: An integer from 0 to 20 (seconds). Default: 0. VisibilityTimeout \226\128\147 The visibility timeout for the queue, in seconds. Valid values: An integer from 0 to 43,200 (12 hours). Default: 30. For more information about the visibility timeout, see Visibility Timeout in the Amazon SQS Developer Guide. The following attributes apply only to dead-letter queues: RedrivePolicy \226\128\147 The string that includes the parameters for the dead-letter queue functionality of the source queue as a JSON object. The parameters are as follows: deadLetterTargetArn \226\128\147 The Amazon Resource Name (ARN) of the dead-letter queue to which Amazon SQS moves messages after the value of maxReceiveCount is exceeded. maxReceiveCount \226\128\147 The number of times a message is delivered to the source queue before being moved to the dead-letter queue. Default: 10. When the ReceiveCount for a message exceeds the maxReceiveCount for a queue, Amazon SQS moves the message to the dead-letter-queue. RedriveAllowPolicy \226\128\147 The string that includes the parameters for the permissions for the dead-letter queue redrive permission and which source queues can specify dead-letter queues as a JSON object. The parameters are as follows: redrivePermission \226\128\147 The permission type that defines which source queues can specify the current queue as the dead-letter queue. Valid values are: allowAll \226\128\147 (Default) Any source queues in this Amazon Web Services account in the same Region can specify this queue as the dead-letter queue. denyAll \226\128\147 No source queues can specify this queue as the dead-letter queue. byQueue \226\128\147 Only queues specified by the sourceQueueArns parameter can specify this queue as the dead-letter queue. sourceQueueArns \226\128\147 The Amazon Resource Names (ARN)s of the source queues that can specify this queue as the dead-letter queue and redrive messages. You can specify this parameter only when the redrivePermission parameter is set to byQueue. You can specify up to 10 source queue ARNs. To allow more than 10 source queues to specify dead-letter queues, set the redrivePermission parameter to allowAll. The dead-letter queue of a FIFO queue must also be a FIFO queue. Similarly, the dead-letter queue of a standard queue must also be a standard queue. The following attributes apply only to server-side-encryption: KmsMasterKeyId \226\128\147 The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SQS or a custom CMK. For more information, see Key Terms. While the alias of the Amazon Web Services managed CMK for Amazon SQS is always alias/aws/sqs, the alias of a custom CMK can, for example, be alias/MyAlias . For more examples, see KeyId in the Key Management Service API Reference. KmsDataKeyReusePeriodSeconds \226\128\147 The length of time, in seconds, for which Amazon SQS can reuse a data key to encrypt or decrypt messages before calling KMS again. An integer representing seconds, between 60 seconds (1 minute) and 86,400 seconds (24 hours). Default: 300 (5 minutes). A shorter time period provides better security but results in more calls to KMS which might incur charges after Free Tier. For more information, see How Does the Data Key Reuse Period Work? SqsManagedSseEnabled \226\128\147 Enables server-side queue encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue (for example, SSE-KMS or SSE-SQS). The following attributes apply only to FIFO (first-in-first-out) queues: FifoQueue \226\128\147 Designates a queue as FIFO. Valid values are true and false. If you don't specify the FifoQueue attribute, Amazon SQS creates a standard queue. You can provide this attribute only during queue creation. You can't change it for an existing queue. When you set this attribute, you must also provide the MessageGroupId for your messages explicitly. For more information, see FIFO queue logic in the Amazon SQS Developer Guide. ContentBasedDeduplication \226\128\147 Enables content-based deduplication. Valid values are true and false. For more information, see Exactly-once processing in the Amazon SQS Developer Guide. Note the following: Every message must have a unique MessageDeduplicationId. You may provide a MessageDeduplicationId explicitly. If you aren't able to provide a MessageDeduplicationId and you enable ContentBasedDeduplication for your queue, Amazon SQS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). If you don't provide a MessageDeduplicationId and the queue doesn't have ContentBasedDeduplication set, the action fails with an error. If the queue has ContentBasedDeduplication set, your MessageDeduplicationId overrides the generated one. When ContentBasedDeduplication is in effect, messages with identical content sent within the deduplication interval are treated as duplicates and only one copy of the message is delivered. If you send one message with ContentBasedDeduplication enabled and then another message with a MessageDeduplicationId that is the same as the one generated for the first MessageDeduplicationId, the two messages are treated as duplicates and only one copy of the message is delivered. The following attributes apply only to high throughput for FIFO queues: DeduplicationScope \226\128\147 Specifies whether message deduplication occurs at the message group or queue level. Valid values are messageGroup and queue. FifoThroughputLimit \226\128\147 Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group. Valid values are perQueue and perMessageGroupId. The perMessageGroupId value is allowed only when the value for DeduplicationScope is messageGroup. To enable high throughput for FIFO queues, do the following: Set DeduplicationScope to messageGroup. Set FifoThroughputLimit to perMessageGroupId. If you set these attributes to anything other than the values shown for enabling high throughput, normal throughput is in effect and deduplication occurs as specified. For information on throughput quotas, see Quotas related to messages in the Amazon SQS Developer Guide."];
       tags: TagMap.t option
         [@ocaml.doc
-          "Add cost allocation tags to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. When you use queue tags, keep the following guidelines in mind: Adding more than 50 tags to a queue isn't recommended. Tags don't have any semantic meaning. Amazon SQS interprets tags as character strings. Tags are case-sensitive. A new tag with a key identical to that of an existing tag overwrites the existing tag. For a full list of tag restrictions, see Quotas related to queues in the Amazon SQS Developer Guide. To be able to tag a queue on creation, you must have the sqs:CreateQueue and sqs:TagQueue permissions. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a user name in the Amazon SQS Developer Guide."]}
+          "Add cost allocation tags to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. When you use queue tags, keep the following guidelines in mind: Adding more than 50 tags to a queue isn't recommended. Tags don't have any semantic meaning. Amazon SQS interprets tags as character strings. Tags are case-sensitive. A new tag with a key identical to that of an existing tag overwrites the existing tag. For a full list of tag restrictions, see Quotas related to queues in the Amazon SQS Developer Guide. To be able to tag a queue on creation, you must have the sqs:CreateQueue and sqs:TagQueue permissions. Cross-account permissions don't apply to this action. For more information, see Grant cross-account permissions to a role and a username in the Amazon SQS Developer Guide."]}
     let context_ = "CreateQueueRequest"
     let make ?attributes =
       fun ?tags ->
@@ -2891,23 +4181,24 @@ module CreateQueueRequest =
     let to_value x =
       structure_to_value
         [("QueueName", (Some (String_.to_value x.queueName)));
-        ("Attribute",
+        ("Attributes",
           (Option.map x.attributes ~f:QueueAttributeMap.to_value));
-        ("Tag", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tag") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let attributes =
         (Option.map ~f:QueueAttributeMap.of_xml)
-          (Xml.child xml_arg0 "Attribute") in
+          (Xml.child xml_arg0 "Attributes") in
       let queueName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueName") in
       make ?tags ?attributes ~queueName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let attributes = field_map json "Attributes" QueueAttributeMap.of_json in
-      let queueName = field_map_exn json "QueueName" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let attributes =
+        field_map json__ "Attributes" QueueAttributeMap.of_json in
+      let queueName = field_map_exn json__ "QueueName" String_.of_json in
       make ?tags ?attributes ~queueName ()
     let to_json v = composed_to_json to_value v
   end
@@ -2920,8 +4211,8 @@ module ChangeMessageVisibilityRequest =
           "The URL of the Amazon SQS queue whose message's visibility is changed. Queue URLs and names are case-sensitive."];
       receiptHandle: String_.t
         [@ocaml.doc
-          "The receipt handle associated with the message whose visibility timeout is changed. This parameter is returned by the ReceiveMessage action."];
-      visibilityTimeout: Integer.t
+          "The receipt handle associated with the message, whose visibility timeout is changed. This parameter is returned by the ReceiveMessage action."];
+      visibilityTimeout: NullableInteger.t
         [@ocaml.doc
           "The new value for the message's visibility timeout (in seconds). Values range: 0 to 43200. Maximum: 12 hours."]}
     let context_ = "ChangeMessageVisibilityRequest"
@@ -2933,11 +4224,12 @@ module ChangeMessageVisibilityRequest =
       structure_to_value
         [("QueueUrl", (Some (String_.to_value x.queueUrl)));
         ("ReceiptHandle", (Some (String_.to_value x.receiptHandle)));
-        ("VisibilityTimeout", (Some (Integer.to_value x.visibilityTimeout)))]
+        ("VisibilityTimeout",
+          (Some (NullableInteger.to_value x.visibilityTimeout)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let visibilityTimeout =
-        Integer.of_xml
+        NullableInteger.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VisibilityTimeout") in
       let receiptHandle =
         String_.of_xml
@@ -2946,54 +4238,56 @@ module ChangeMessageVisibilityRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~visibilityTimeout ~receiptHandle ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let visibilityTimeout =
-        field_map_exn json "VisibilityTimeout" Integer.of_json in
-      let receiptHandle = field_map_exn json "ReceiptHandle" String_.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+        field_map_exn json__ "VisibilityTimeout" NullableInteger.of_json in
+      let receiptHandle =
+        field_map_exn json__ "ReceiptHandle" String_.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~visibilityTimeout ~receiptHandle ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the visibility timeout of a specified message in a queue to a new value. The default visibility timeout for a message is 30 seconds. The minimum is 0 seconds. The maximum is 12 hours. For more information, see Visibility Timeout in the Amazon SQS Developer Guide. For example, you have a message with a visibility timeout of 5 minutes. After 3 minutes, you call ChangeMessageVisibility with a timeout of 10 minutes. You can continue to call ChangeMessageVisibility to extend the visibility timeout to the maximum allowed time. If you try to extend the visibility timeout beyond the maximum, your request is rejected. An Amazon SQS message has three basic states: Sent to a queue by a producer. Received from the queue by a consumer. Deleted from the queue. A message is considered to be stored after it is sent to a queue by a producer, but not yet received from the queue by a consumer (that is, between states 1 and 2). There is no limit to the number of stored messages. A message is considered to be in flight after it is received from a queue by a consumer, but not yet deleted from the queue (that is, between states 2 and 3). There is a limit to the number of inflight messages. Limits that apply to inflight messages are unrelated to the unlimited number of stored messages. For most standard queues (depending on queue traffic and message backlog), there can be a maximum of approximately 120,000 inflight messages (received from a queue by a consumer, but not yet deleted from the queue). If you reach this limit, Amazon SQS returns the OverLimit error message. To avoid reaching the limit, you should delete messages from the queue after they're processed. You can also increase the number of queues you use to process your messages. To request a limit increase, file a support request. For FIFO queues, there can be a maximum of 20,000 inflight messages (received from a queue by a consumer, but not yet deleted from the queue). If you reach this limit, Amazon SQS returns no error messages. If you attempt to set the VisibilityTimeout to a value greater than the maximum time left, Amazon SQS returns an error. Amazon SQS doesn't automatically recalculate and increase the timeout to the maximum remaining time. Unlike with a queue, when you change the visibility timeout for a specific message the timeout value is applied immediately but isn't saved in memory for that message. If you don't delete a message after it is received, the visibility timeout for the message reverts to the original timeout value (not to the value you set using the ChangeMessageVisibility action) the next time the message is received."]
+       "Changes the visibility timeout of a specified message in a queue to a new value. The default visibility timeout for a message is 30 seconds. The minimum is 0 seconds. The maximum is 12 hours. For more information, see Visibility Timeout in the Amazon SQS Developer Guide. For example, if the default timeout for a queue is 60 seconds, 15 seconds have elapsed since you received the message, and you send a ChangeMessageVisibility call with VisibilityTimeout set to 10 seconds, the 10 seconds begin to count from the time that you make the ChangeMessageVisibility call. Thus, any attempt to change the visibility timeout or to delete that message 10 seconds after you initially change the visibility timeout (a total of 25 seconds) might result in an error. An Amazon SQS message has three basic states: Sent to a queue by a producer. Received from the queue by a consumer. Deleted from the queue. A message is considered to be stored after it is sent to a queue by a producer, but not yet received from the queue by a consumer (that is, between states 1 and 2). There is no limit to the number of stored messages. A message is considered to be in flight after it is received from a queue by a consumer, but not yet deleted from the queue (that is, between states 2 and 3). There is a limit to the number of in flight messages. Limits that apply to in flight messages are unrelated to the unlimited number of stored messages. For most standard queues (depending on queue traffic and message backlog), there can be a maximum of approximately 120,000 in flight messages (received from a queue by a consumer, but not yet deleted from the queue). If you reach this limit, Amazon SQS returns the OverLimit error message. To avoid reaching the limit, you should delete messages from the queue after they're processed. You can also increase the number of queues you use to process your messages. To request a limit increase, file a support request. For FIFO queues, there can be a maximum of 120,000 in flight messages (received from a queue by a consumer, but not yet deleted from the queue). If you reach this limit, Amazon SQS returns no error messages. If you attempt to set the VisibilityTimeout to a value greater than the maximum time left, Amazon SQS returns an error. Amazon SQS doesn't automatically recalculate and increase the timeout to the maximum remaining time. Unlike with a queue, when you change the visibility timeout for a specific message the timeout value is applied immediately but isn't saved in memory for that message. If you don't delete a message after it is received, the visibility timeout for the message reverts to the original timeout value (not to the value you set using the ChangeMessageVisibility action) the next time the message is received."]
 module ChangeMessageVisibilityBatchResult =
   struct
-    type changeMessageVisibilityBatchResult =
+    type nonrec t =
       {
-      successful: ChangeMessageVisibilityBatchResultEntryList.t
+      successful: ChangeMessageVisibilityBatchResultEntryList.t option
         [@ocaml.doc
           "A list of ChangeMessageVisibilityBatchResultEntry items."];
-      failed: BatchResultErrorEntryList.t
+      failed: BatchResultErrorEntryList.t option
         [@ocaml.doc "A list of BatchResultErrorEntry items."]}
-    and responseMetaData = unit
-    and t =
-      {
-      changeMessageVisibilityBatchResult: changeMessageVisibilityBatchResult ;
-      responseMetaData: responseMetaData }
-    type error =
+    type nonrec error =
       [ `BatchEntryIdsNotDistinct of BatchEntryIdsNotDistinct.t 
       | `EmptyBatchRequest of EmptyBatchRequest.t 
+      | `InvalidAddress of InvalidAddress.t 
       | `InvalidBatchEntryId of InvalidBatchEntryId.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `QueueDoesNotExist of QueueDoesNotExist.t 
+      | `RequestThrottled of RequestThrottled.t 
       | `TooManyEntriesInBatchRequest of TooManyEntriesInBatchRequest.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ChangeMessageVisibilityBatchResult"
-    let make ~successful =
-      fun ~failed ->
-        fun () ->
-          {
-            changeMessageVisibilityBatchResult = { successful; failed };
-            responseMetaData = ()
-          }
+    let make ?successful = fun ?failed -> fun () -> { successful; failed }
     let error_of_json name json =
       match name with
       | "BatchEntryIdsNotDistinct" ->
           `BatchEntryIdsNotDistinct (BatchEntryIdsNotDistinct.of_json json)
       | "EmptyBatchRequest" ->
           `EmptyBatchRequest (EmptyBatchRequest.of_json json)
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
       | "InvalidBatchEntryId" ->
           `InvalidBatchEntryId (InvalidBatchEntryId.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
       | "TooManyEntriesInBatchRequest" ->
           `TooManyEntriesInBatchRequest
             (TooManyEntriesInBatchRequest.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3003,11 +4297,18 @@ module ChangeMessageVisibilityBatchResult =
           `BatchEntryIdsNotDistinct (BatchEntryIdsNotDistinct.of_xml xml)
       | "EmptyBatchRequest" ->
           `EmptyBatchRequest (EmptyBatchRequest.of_xml xml)
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
       | "InvalidBatchEntryId" ->
           `InvalidBatchEntryId (InvalidBatchEntryId.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "QueueDoesNotExist" ->
+          `QueueDoesNotExist (QueueDoesNotExist.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
       | "TooManyEntriesInBatchRequest" ->
           `TooManyEntriesInBatchRequest
             (TooManyEntriesInBatchRequest.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3020,49 +4321,63 @@ module ChangeMessageVisibilityBatchResult =
           `Assoc
             [("error", (`String "EmptyBatchRequest"));
             ("details", (EmptyBatchRequest.to_json e))]
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
       | `InvalidBatchEntryId e ->
           `Assoc
             [("error", (`String "InvalidBatchEntryId"));
             ("details", (InvalidBatchEntryId.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `QueueDoesNotExist e ->
+          `Assoc
+            [("error", (`String "QueueDoesNotExist"));
+            ("details", (QueueDoesNotExist.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
       | `TooManyEntriesInBatchRequest e ->
           `Assoc
             [("error", (`String "TooManyEntriesInBatchRequest"));
             ("details", (TooManyEntriesInBatchRequest.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value t =
-      let x = t.changeMessageVisibilityBatchResult in
-      structure_to_wrapped_value
+    let to_value x =
+      structure_to_value
         [("Successful",
-           (Some
-              (ChangeMessageVisibilityBatchResultEntryList.to_value
-                 x.successful)));
-        ("Failed", (Some (BatchResultErrorEntryList.to_value x.failed)))]
-        ~wrapper:"ChangeMessageVisibilityBatchResult"
-        ~response:"ResponseMetaData"
+           (Option.map x.successful
+              ~f:ChangeMessageVisibilityBatchResultEntryList.to_value));
+        ("Failed",
+          (Option.map x.failed ~f:BatchResultErrorEntryList.to_value))]
     let to_query v = to_query to_value v
-    let of_xml t =
-      let xml_arg0 =
-        Xml.child_exn ~context:context_ t
-          "ChangeMessageVisibilityBatchResult" in
+    let of_xml xml_arg0 =
       let failed =
-        BatchResultErrorEntryList.of_xml
-          (Xml.children xml_arg0 "BatchResultErrorEntry") in
+        (Option.map ~f:BatchResultErrorEntryList.of_xml)
+          (Some (Xml.children xml_arg0 "Failed")) in
       let successful =
-        ChangeMessageVisibilityBatchResultEntryList.of_xml
-          (Xml.children xml_arg0 "ChangeMessageVisibilityBatchResultEntry") in
-      make ~failed ~successful ()
+        (Option.map ~f:ChangeMessageVisibilityBatchResultEntryList.of_xml)
+          (Some (Xml.children xml_arg0 "Successful")) in
+      make ?failed ?successful ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failed =
-        field_map_exn json "Failed" BatchResultErrorEntryList.of_json in
+        field_map json__ "Failed" BatchResultErrorEntryList.of_json in
       let successful =
-        field_map_exn json "Successful"
+        field_map json__ "Successful"
           ChangeMessageVisibilityBatchResultEntryList.of_json in
-      make ~failed ~successful ()
+      make ?failed ?successful ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For each message in the batch, the response contains a ChangeMessageVisibilityBatchResultEntry tag if the message succeeds or a BatchResultErrorEntry tag if the message fails."]
@@ -3075,7 +4390,7 @@ module ChangeMessageVisibilityBatchRequest =
           "The URL of the Amazon SQS queue whose messages' visibility is changed. Queue URLs and names are case-sensitive."];
       entries: ChangeMessageVisibilityBatchRequestEntryList.t
         [@ocaml.doc
-          "A list of receipt handles of the messages for which the visibility timeout must be changed."]}
+          "Lists the receipt handles of the messages for which the visibility timeout must be changed."]}
     let context_ = "ChangeMessageVisibilityBatchRequest"
     let make ~queueUrl = fun ~entries -> fun () -> { queueUrl; entries }
     let to_value x =
@@ -3088,19 +4403,128 @@ module ChangeMessageVisibilityBatchRequest =
     let of_xml xml_arg0 =
       let entries =
         ChangeMessageVisibilityBatchRequestEntryList.of_xml
-          (Xml.children xml_arg0 "ChangeMessageVisibilityBatchRequestEntry") in
+          (Xml.children xml_arg0 "Entries") in
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~entries ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entries =
-        field_map_exn json "Entries"
+        field_map_exn json__ "Entries"
           ChangeMessageVisibilityBatchRequestEntryList.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~entries ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end
+module CancelMessageMoveTaskResult =
+  struct
+    type nonrec t =
+      {
+      approximateNumberOfMessagesMoved: Long.t option
+        [@ocaml.doc
+          "The approximate number of messages already moved to the destination queue."]}
+    type nonrec error =
+      [ `InvalidAddress of InvalidAddress.t 
+      | `InvalidSecurity of InvalidSecurity.t 
+      | `RequestThrottled of RequestThrottled.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `UnsupportedOperation of UnsupportedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?approximateNumberOfMessagesMoved =
+      fun () -> { approximateNumberOfMessagesMoved }
+    let error_of_json name json =
+      match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_json json)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_json json)
+      | "RequestThrottled" ->
+          `RequestThrottled (RequestThrottled.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidAddress" -> `InvalidAddress (InvalidAddress.of_xml xml)
+      | "InvalidSecurity" -> `InvalidSecurity (InvalidSecurity.of_xml xml)
+      | "RequestThrottled" -> `RequestThrottled (RequestThrottled.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "UnsupportedOperation" ->
+          `UnsupportedOperation (UnsupportedOperation.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidAddress e ->
+          `Assoc
+            [("error", (`String "InvalidAddress"));
+            ("details", (InvalidAddress.to_json e))]
+      | `InvalidSecurity e ->
+          `Assoc
+            [("error", (`String "InvalidSecurity"));
+            ("details", (InvalidSecurity.to_json e))]
+      | `RequestThrottled e ->
+          `Assoc
+            [("error", (`String "RequestThrottled"));
+            ("details", (RequestThrottled.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `UnsupportedOperation e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperation"));
+            ("details", (UnsupportedOperation.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ApproximateNumberOfMessagesMoved",
+           (Option.map x.approximateNumberOfMessagesMoved ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let approximateNumberOfMessagesMoved =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "ApproximateNumberOfMessagesMoved") in
+      make ?approximateNumberOfMessagesMoved ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let approximateNumberOfMessagesMoved =
+        field_map json__ "ApproximateNumberOfMessagesMoved" Long.of_json in
+      make ?approximateNumberOfMessagesMoved ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels a specified message movement task. A message movement can only be cancelled when the current status is RUNNING. Cancelling a message movement task does not revert the messages that have already been moved. It can only stop the messages that have not been moved yet. This action is currently limited to supporting message redrive from dead-letter queues (DLQs) only. In this context, the source queue is the dead-letter queue (DLQ), while the destination queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue. Only one active message movement task is supported per queue at any given time."]
+module CancelMessageMoveTaskRequest =
+  struct
+    type nonrec t =
+      {
+      taskHandle: String_.t
+        [@ocaml.doc "An identifier associated with a message movement task."]}
+    let context_ = "CancelMessageMoveTaskRequest"
+    let make ~taskHandle = fun () -> { taskHandle }
+    let to_value x =
+      structure_to_value
+        [("TaskHandle", (Some (String_.to_value x.taskHandle)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskHandle =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TaskHandle") in
+      make ~taskHandle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskHandle = field_map_exn json__ "TaskHandle" String_.of_json in
+      make ~taskHandle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels a specified message movement task. A message movement can only be cancelled when the current status is RUNNING. Cancelling a message movement task does not revert the messages that have already been moved. It can only stop the messages that have not been moved yet. This action is currently limited to supporting message redrive from dead-letter queues (DLQs) only. In this context, the source queue is the dead-letter queue (DLQ), while the destination queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue. Only one active message movement task is supported per queue at any given time."]
 module AddPermissionRequest =
   struct
     type nonrec t =
@@ -3131,22 +4555,21 @@ module AddPermissionRequest =
         ("Actions", (Some (ActionNameList.to_value x.actions)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let actions =
-        ActionNameList.of_xml (Xml.children xml_arg0 "ActionName") in
+      let actions = ActionNameList.of_xml (Xml.children xml_arg0 "Actions") in
       let aWSAccountIds =
-        AWSAccountIdList.of_xml (Xml.children xml_arg0 "AWSAccountId") in
+        AWSAccountIdList.of_xml (Xml.children xml_arg0 "AWSAccountIds") in
       let label =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Label") in
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~actions ~aWSAccountIds ~label ~queueUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actions = field_map_exn json "Actions" ActionNameList.of_json in
+    let of_json json__ =
+      let actions = field_map_exn json__ "Actions" ActionNameList.of_json in
       let aWSAccountIds =
-        field_map_exn json "AWSAccountIds" AWSAccountIdList.of_json in
-      let label = field_map_exn json "Label" String_.of_json in
-      let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
+        field_map_exn json__ "AWSAccountIds" AWSAccountIdList.of_json in
+      let label = field_map_exn json__ "Label" String_.of_json in
+      let queueUrl = field_map_exn json__ "QueueUrl" String_.of_json in
       make ~actions ~aWSAccountIds ~label ~queueUrl ()
     let to_json v = composed_to_json to_value v
   end

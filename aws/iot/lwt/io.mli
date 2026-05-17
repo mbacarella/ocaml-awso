@@ -16,6 +16,12 @@ val add_thing_to_thing_group :
       AddThingToThingGroupRequest.t ->
         (AddThingToThingGroupResponse.t, AddThingToThingGroupResponse.error)
           Result.t Lwt.t
+val associate_sbom_with_package_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateSbomWithPackageVersionRequest.t ->
+        (AssociateSbomWithPackageVersionResponse.t,
+          AssociateSbomWithPackageVersionResponse.error) Result.t Lwt.t
 val associate_targets_with_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -108,6 +114,17 @@ val create_certificate_from_csr :
       CreateCertificateFromCsrRequest.t ->
         (CreateCertificateFromCsrResponse.t,
           CreateCertificateFromCsrResponse.error) Result.t Lwt.t
+val create_certificate_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCertificateProviderRequest.t ->
+        (CreateCertificateProviderResponse.t,
+          CreateCertificateProviderResponse.error) Result.t Lwt.t
+val create_command :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCommandRequest.t ->
+        (CreateCommandResponse.t, CreateCommandResponse.error) Result.t Lwt.t
 val create_custom_metric :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -167,6 +184,17 @@ val create_o_t_a_update :
       CreateOTAUpdateRequest.t ->
         (CreateOTAUpdateResponse.t, CreateOTAUpdateResponse.error) Result.t
           Lwt.t
+val create_package :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePackageRequest.t ->
+        (CreatePackageResponse.t, CreatePackageResponse.error) Result.t Lwt.t
+val create_package_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePackageVersionRequest.t ->
+        (CreatePackageVersionResponse.t, CreatePackageVersionResponse.error)
+          Result.t Lwt.t
 val create_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -280,6 +308,23 @@ val delete_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCertificateRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_certificate_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCertificateProviderRequest.t ->
+        (DeleteCertificateProviderResponse.t,
+          DeleteCertificateProviderResponse.error) Result.t Lwt.t
+val delete_command :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCommandRequest.t ->
+        (DeleteCommandResponse.t, DeleteCommandResponse.error) Result.t Lwt.t
+val delete_command_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCommandExecutionRequest.t ->
+        (DeleteCommandExecutionResponse.t,
+          DeleteCommandExecutionResponse.error) Result.t Lwt.t
 val delete_custom_metric :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -331,6 +376,17 @@ val delete_o_t_a_update :
       DeleteOTAUpdateRequest.t ->
         (DeleteOTAUpdateResponse.t, DeleteOTAUpdateResponse.error) Result.t
           Lwt.t
+val delete_package :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePackageRequest.t ->
+        (DeletePackageResponse.t, DeletePackageResponse.error) Result.t Lwt.t
+val delete_package_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePackageVersionRequest.t ->
+        (DeletePackageVersionResponse.t, DeletePackageVersionResponse.error)
+          Result.t Lwt.t
 val delete_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeletePolicyRequest.t -> (unit, unit) Result.t Lwt.t
@@ -470,6 +526,12 @@ val describe_certificate :
       DescribeCertificateRequest.t ->
         (DescribeCertificateResponse.t, DescribeCertificateResponse.error)
           Result.t Lwt.t
+val describe_certificate_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeCertificateProviderRequest.t ->
+        (DescribeCertificateProviderResponse.t,
+          DescribeCertificateProviderResponse.error) Result.t Lwt.t
 val describe_custom_metric :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -500,6 +562,12 @@ val describe_domain_configuration :
       DescribeDomainConfigurationRequest.t ->
         (DescribeDomainConfigurationResponse.t,
           DescribeDomainConfigurationResponse.error) Result.t Lwt.t
+val describe_encryption_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeEncryptionConfigurationRequest.t ->
+        (DescribeEncryptionConfigurationResponse.t,
+          DescribeEncryptionConfigurationResponse.error) Result.t Lwt.t
 val describe_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -634,6 +702,12 @@ val disable_topic_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableTopicRuleRequest.t -> (unit, unit) Result.t Lwt.t
+val disassociate_sbom_from_package_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateSbomFromPackageVersionRequest.t ->
+        (DisassociateSbomFromPackageVersionResponse.t,
+          DisassociateSbomFromPackageVersionResponse.error) Result.t Lwt.t
 val enable_topic_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -656,6 +730,17 @@ val get_cardinality :
       GetCardinalityRequest.t ->
         (GetCardinalityResponse.t, GetCardinalityResponse.error) Result.t
           Lwt.t
+val get_command :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCommandRequest.t ->
+        (GetCommandResponse.t, GetCommandResponse.error) Result.t Lwt.t
+val get_command_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCommandExecutionRequest.t ->
+        (GetCommandExecutionResponse.t, GetCommandExecutionResponse.error)
+          Result.t Lwt.t
 val get_effective_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -685,6 +770,23 @@ val get_o_t_a_update :
     ?cfg:Awso.Cfg.t ->
       GetOTAUpdateRequest.t ->
         (GetOTAUpdateResponse.t, GetOTAUpdateResponse.error) Result.t Lwt.t
+val get_package :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPackageRequest.t ->
+        (GetPackageResponse.t, GetPackageResponse.error) Result.t Lwt.t
+val get_package_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPackageConfigurationRequest.t ->
+        (GetPackageConfigurationResponse.t,
+          GetPackageConfigurationResponse.error) Result.t Lwt.t
+val get_package_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPackageVersionRequest.t ->
+        (GetPackageVersionResponse.t, GetPackageVersionResponse.error)
+          Result.t Lwt.t
 val get_percentiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -713,6 +815,12 @@ val get_statistics :
     ?cfg:Awso.Cfg.t ->
       GetStatisticsRequest.t ->
         (GetStatisticsResponse.t, GetStatisticsResponse.error) Result.t Lwt.t
+val get_thing_connectivity_data :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetThingConnectivityDataRequest.t ->
+        (GetThingConnectivityDataResponse.t,
+          GetThingConnectivityDataResponse.error) Result.t Lwt.t
 val get_topic_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -790,6 +898,12 @@ val list_c_a_certificates :
       ListCACertificatesRequest.t ->
         (ListCACertificatesResponse.t, ListCACertificatesResponse.error)
           Result.t Lwt.t
+val list_certificate_providers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCertificateProvidersRequest.t ->
+        (ListCertificateProvidersResponse.t,
+          ListCertificateProvidersResponse.error) Result.t Lwt.t
 val list_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -802,6 +916,17 @@ val list_certificates_by_c_a :
       ListCertificatesByCARequest.t ->
         (ListCertificatesByCAResponse.t, ListCertificatesByCAResponse.error)
           Result.t Lwt.t
+val list_command_executions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCommandExecutionsRequest.t ->
+        (ListCommandExecutionsResponse.t,
+          ListCommandExecutionsResponse.error) Result.t Lwt.t
+val list_commands :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCommandsRequest.t ->
+        (ListCommandsResponse.t, ListCommandsResponse.error) Result.t Lwt.t
 val list_custom_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -896,6 +1021,17 @@ val list_outgoing_certificates :
       ListOutgoingCertificatesRequest.t ->
         (ListOutgoingCertificatesResponse.t,
           ListOutgoingCertificatesResponse.error) Result.t Lwt.t
+val list_package_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPackageVersionsRequest.t ->
+        (ListPackageVersionsResponse.t, ListPackageVersionsResponse.error)
+          Result.t Lwt.t
+val list_packages :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPackagesRequest.t ->
+        (ListPackagesResponse.t, ListPackagesResponse.error) Result.t Lwt.t
 val list_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -925,6 +1061,12 @@ val list_principal_things :
       ListPrincipalThingsRequest.t ->
         (ListPrincipalThingsResponse.t, ListPrincipalThingsResponse.error)
           Result.t Lwt.t
+val list_principal_things_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPrincipalThingsV2Request.t ->
+        (ListPrincipalThingsV2Response.t,
+          ListPrincipalThingsV2Response.error) Result.t Lwt.t
 val list_provisioning_template_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -937,12 +1079,24 @@ val list_provisioning_templates :
       ListProvisioningTemplatesRequest.t ->
         (ListProvisioningTemplatesResponse.t,
           ListProvisioningTemplatesResponse.error) Result.t Lwt.t
+val list_related_resources_for_audit_finding :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRelatedResourcesForAuditFindingRequest.t ->
+        (ListRelatedResourcesForAuditFindingResponse.t,
+          ListRelatedResourcesForAuditFindingResponse.error) Result.t Lwt.t
 val list_role_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRoleAliasesRequest.t ->
         (ListRoleAliasesResponse.t, ListRoleAliasesResponse.error) Result.t
           Lwt.t
+val list_sbom_validation_results :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSbomValidationResultsRequest.t ->
+        (ListSbomValidationResultsResponse.t,
+          ListSbomValidationResultsResponse.error) Result.t Lwt.t
 val list_scheduled_audits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1002,6 +1156,12 @@ val list_thing_principals :
       ListThingPrincipalsRequest.t ->
         (ListThingPrincipalsResponse.t, ListThingPrincipalsResponse.error)
           Result.t Lwt.t
+val list_thing_principals_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListThingPrincipalsV2Request.t ->
+        (ListThingPrincipalsV2Response.t,
+          ListThingPrincipalsV2Response.error) Result.t Lwt.t
 val list_thing_registration_task_reports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1227,6 +1387,17 @@ val update_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCertificateRequest.t -> (unit, unit) Result.t Lwt.t
+val update_certificate_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCertificateProviderRequest.t ->
+        (UpdateCertificateProviderResponse.t,
+          UpdateCertificateProviderResponse.error) Result.t Lwt.t
+val update_command :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCommandRequest.t ->
+        (UpdateCommandResponse.t, UpdateCommandResponse.error) Result.t Lwt.t
 val update_custom_metric :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1251,6 +1422,12 @@ val update_dynamic_thing_group :
       UpdateDynamicThingGroupRequest.t ->
         (UpdateDynamicThingGroupResponse.t,
           UpdateDynamicThingGroupResponse.error) Result.t Lwt.t
+val update_encryption_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateEncryptionConfigurationRequest.t ->
+        (UpdateEncryptionConfigurationResponse.t,
+          UpdateEncryptionConfigurationResponse.error) Result.t Lwt.t
 val update_event_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1276,6 +1453,23 @@ val update_mitigation_action :
       UpdateMitigationActionRequest.t ->
         (UpdateMitigationActionResponse.t,
           UpdateMitigationActionResponse.error) Result.t Lwt.t
+val update_package :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePackageRequest.t ->
+        (UpdatePackageResponse.t, UpdatePackageResponse.error) Result.t Lwt.t
+val update_package_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePackageConfigurationRequest.t ->
+        (UpdatePackageConfigurationResponse.t,
+          UpdatePackageConfigurationResponse.error) Result.t Lwt.t
+val update_package_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePackageVersionRequest.t ->
+        (UpdatePackageVersionResponse.t, UpdatePackageVersionResponse.error)
+          Result.t Lwt.t
 val update_provisioning_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1322,6 +1516,12 @@ val update_thing_groups_for_thing :
       UpdateThingGroupsForThingRequest.t ->
         (UpdateThingGroupsForThingResponse.t,
           UpdateThingGroupsForThingResponse.error) Result.t Lwt.t
+val update_thing_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateThingTypeRequest.t ->
+        (UpdateThingTypeResponse.t, UpdateThingTypeResponse.error) Result.t
+          Lwt.t
 val update_topic_rule_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

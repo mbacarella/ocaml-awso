@@ -24,6 +24,42 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module Instant =
+  struct
+    type nonrec t = string
+    let context_ = "Instant"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Instant" j
+    let to_json = simple_to_json to_value
+  end
+module ParticipantId =
+  struct
+    type nonrec t = string
+    let context_ = "ParticipantId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ParticipantId" j
+    let to_json = simple_to_json to_value
+  end
 module ArtifactId =
   struct
     type nonrec t = string
@@ -106,6 +142,76 @@ module ContentType =
     let of_json j = string_of_json ~kind:"ContentType" j
     let to_json = simple_to_json to_value
   end
+module Receipt =
+  struct
+    type nonrec t =
+      {
+      deliveredTimestamp: Instant.t option
+        [@ocaml.doc
+          "The time when the message was delivered to the recipient."];
+      readTimestamp: Instant.t option
+        [@ocaml.doc "The time when the message was read by the recipient."];
+      recipientParticipantId: ParticipantId.t option
+        [@ocaml.doc "The identifier of the recipient of the message."]}
+    let make ?deliveredTimestamp =
+      fun ?readTimestamp ->
+        fun ?recipientParticipantId ->
+          fun () ->
+            { deliveredTimestamp; readTimestamp; recipientParticipantId }
+    let to_value x =
+      structure_to_value
+        [("DeliveredTimestamp",
+           (Option.map x.deliveredTimestamp ~f:Instant.to_value));
+        ("ReadTimestamp", (Option.map x.readTimestamp ~f:Instant.to_value));
+        ("RecipientParticipantId",
+          (Option.map x.recipientParticipantId ~f:ParticipantId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recipientParticipantId =
+        (Option.map ~f:ParticipantId.of_xml)
+          (Xml.child xml_arg0 "RecipientParticipantId") in
+      let readTimestamp =
+        (Option.map ~f:Instant.of_xml) (Xml.child xml_arg0 "ReadTimestamp") in
+      let deliveredTimestamp =
+        (Option.map ~f:Instant.of_xml)
+          (Xml.child xml_arg0 "DeliveredTimestamp") in
+      make ?recipientParticipantId ?readTimestamp ?deliveredTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recipientParticipantId =
+        field_map json__ "RecipientParticipantId" ParticipantId.of_json in
+      let readTimestamp = field_map json__ "ReadTimestamp" Instant.of_json in
+      let deliveredTimestamp =
+        field_map json__ "DeliveredTimestamp" Instant.of_json in
+      make ?recipientParticipantId ?readTimestamp ?deliveredTimestamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The receipt for the message delivered to the recipient."]
+module MeetingFeatureStatus =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | UNAVAILABLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | UNAVAILABLE -> "UNAVAILABLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "UNAVAILABLE" -> UNAVAILABLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MeetingFeatureStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MeetingFeatureStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module AttachmentItem =
   struct
     type nonrec t =
@@ -145,16 +251,156 @@ module AttachmentItem =
         (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "ContentType") in
       make ?status ?attachmentName ?attachmentId ?contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ArtifactStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ArtifactStatus.of_json in
       let attachmentName =
-        field_map json "AttachmentName" AttachmentName.of_json in
-      let attachmentId = field_map json "AttachmentId" ArtifactId.of_json in
-      let contentType = field_map json "ContentType" ContentType.of_json in
+        field_map json__ "AttachmentName" AttachmentName.of_json in
+      let attachmentId = field_map json__ "AttachmentId" ArtifactId.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
       make ?status ?attachmentName ?attachmentId ?contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The case-insensitive input to indicate standard MIME type that describes the format of the file that will be uploaded."]
+module ChatItemId =
+  struct
+    type nonrec t = string
+    let context_ = "ChatItemId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChatItemId" j
+    let to_json = simple_to_json to_value
+  end
+module MessageProcessingStatus =
+  struct
+    type nonrec t =
+      | PROCESSING 
+      | FAILED 
+      | REJECTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PROCESSING -> "PROCESSING"
+      | FAILED -> "FAILED"
+      | REJECTED -> "REJECTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PROCESSING" -> PROCESSING
+      | "FAILED" -> FAILED
+      | "REJECTED" -> REJECTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MessageProcessingStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MessageProcessingStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Receipts =
+  struct
+    type nonrec t = Receipt.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Receipt.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Receipt.of_xml)
+    let of_json j = list_of_json ~kind:"Receipts" ~of_json:Receipt.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ViewAction =
+  struct
+    type nonrec t = string
+    let context_ = "ViewAction"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{N}_.:\\/=+\\-@()']+[\\p{L}\\p{Z}\\p{N}_.:\\/=+\\-@()']*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ViewAction" j
+    let to_json = simple_to_json to_value
+  end
+module AudioFeatures =
+  struct
+    type nonrec t =
+      {
+      echoReduction: MeetingFeatureStatus.t option
+        [@ocaml.doc
+          "Makes echo reduction available to clients who connect to the meeting."]}
+    let make ?echoReduction = fun () -> { echoReduction }
+    let to_value x =
+      structure_to_value
+        [("EchoReduction",
+           (Option.map x.echoReduction ~f:MeetingFeatureStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let echoReduction =
+        (Option.map ~f:MeetingFeatureStatus.of_xml)
+          (Xml.child xml_arg0 "EchoReduction") in
+      make ?echoReduction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let echoReduction =
+        field_map json__ "EchoReduction" MeetingFeatureStatus.of_json in
+      make ?echoReduction ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Has audio-specific configurations as the operating parameter for Echo Reduction."]
+module URI =
+  struct
+    type nonrec t = string
+    let context_ = "URI"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"URI" j
+    let to_json = simple_to_json to_value
+  end
 module UploadMetadataSignedHeadersKey =
   struct
     type nonrec t = string
@@ -195,6 +441,9 @@ module Attachments =
   struct
     type nonrec t = AttachmentItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttachmentItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -222,7 +471,7 @@ module ChatContent =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
+          ((check_string_max i ~max:16384) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -251,24 +500,6 @@ module ChatContentType =
     let of_json j = string_of_json ~kind:"ChatContentType" j
     let to_json = simple_to_json to_value
   end
-module ChatItemId =
-  struct
-    type nonrec t = string
-    let context_ = "ChatItemId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ChatItemId" j
-    let to_json = simple_to_json to_value
-  end
 module ChatItemType =
   struct
     type nonrec t =
@@ -282,6 +513,8 @@ module ChatItemType =
       | EVENT 
       | ATTACHMENT 
       | CONNECTION_ACK 
+      | MESSAGE_DELIVERED 
+      | MESSAGE_READ 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -296,6 +529,8 @@ module ChatItemType =
       | EVENT -> "EVENT"
       | ATTACHMENT -> "ATTACHMENT"
       | CONNECTION_ACK -> "CONNECTION_ACK"
+      | MESSAGE_DELIVERED -> "MESSAGE_DELIVERED"
+      | MESSAGE_READ -> "MESSAGE_READ"
       | Non_static_id s -> s
     let of_string =
       function
@@ -309,6 +544,8 @@ module ChatItemType =
       | "EVENT" -> EVENT
       | "ATTACHMENT" -> ATTACHMENT
       | "CONNECTION_ACK" -> CONNECTION_ACK
+      | "MESSAGE_DELIVERED" -> MESSAGE_DELIVERED
+      | "MESSAGE_READ" -> MESSAGE_READ
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -316,6 +553,24 @@ module ChatItemType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration ChatItemType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ChatItemType" j)
+    let to_json = simple_to_json to_value
+  end
+module ContactId =
+  struct
+    type nonrec t = string
+    let context_ = "ContactId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContactId" j
     let to_json = simple_to_json to_value
   end
 module DisplayName =
@@ -336,48 +591,57 @@ module DisplayName =
     let of_json j = string_of_json ~kind:"DisplayName" j
     let to_json = simple_to_json to_value
   end
-module Instant =
+module MessageMetadata =
   struct
-    type nonrec t = string
-    let context_ = "Instant"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:100) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      messageId: ChatItemId.t option
+        [@ocaml.doc
+          "The identifier of the message that contains the metadata information."];
+      receipts: Receipts.t option
+        [@ocaml.doc
+          "The list of receipt information for a message for different recipients."];
+      messageProcessingStatus: MessageProcessingStatus.t option
+        [@ocaml.doc "The status of Message Processing for the message."]}
+    let make ?messageId =
+      fun ?receipts ->
+        fun ?messageProcessingStatus ->
+          fun () -> { messageId; receipts; messageProcessingStatus }
+    let to_value x =
+      structure_to_value
+        [("MessageId", (Option.map x.messageId ~f:ChatItemId.to_value));
+        ("Receipts", (Option.map x.receipts ~f:Receipts.to_value));
+        ("MessageProcessingStatus",
+          (Option.map x.messageProcessingStatus
+             ~f:MessageProcessingStatus.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Instant" j
-    let to_json = simple_to_json to_value
-  end
-module ParticipantId =
-  struct
-    type nonrec t = string
-    let context_ = "ParticipantId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ParticipantId" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let messageProcessingStatus =
+        (Option.map ~f:MessageProcessingStatus.of_xml)
+          (Xml.child xml_arg0 "MessageProcessingStatus") in
+      let receipts =
+        (Option.map ~f:Receipts.of_xml) (Xml.child xml_arg0 "Receipts") in
+      let messageId =
+        (Option.map ~f:ChatItemId.of_xml) (Xml.child xml_arg0 "MessageId") in
+      make ?messageProcessingStatus ?receipts ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let messageProcessingStatus =
+        field_map json__ "MessageProcessingStatus"
+          MessageProcessingStatus.of_json in
+      let receipts = field_map json__ "Receipts" Receipts.of_json in
+      let messageId = field_map json__ "MessageId" ChatItemId.of_json in
+      make ?messageProcessingStatus ?receipts ?messageId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains metadata related to a message."]
 module ParticipantRole =
   struct
     type nonrec t =
       | AGENT 
       | CUSTOMER 
       | SYSTEM 
+      | CUSTOM_BOT 
+      | SUPERVISOR 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -385,12 +649,16 @@ module ParticipantRole =
       | AGENT -> "AGENT"
       | CUSTOMER -> "CUSTOMER"
       | SYSTEM -> "SYSTEM"
+      | CUSTOM_BOT -> "CUSTOM_BOT"
+      | SUPERVISOR -> "SUPERVISOR"
       | Non_static_id s -> s
     let of_string =
       function
       | "AGENT" -> AGENT
       | "CUSTOMER" -> CUSTOMER
       | "SYSTEM" -> SYSTEM
+      | "CUSTOM_BOT" -> CUSTOM_BOT
+      | "SUPERVISOR" -> SUPERVISOR
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -400,6 +668,178 @@ module ParticipantRole =
     let of_json j = of_string (string_of_json ~kind:"ParticipantRole" j)
     let to_json = simple_to_json to_value
   end
+module ViewActions =
+  struct
+    type nonrec t = ViewAction.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ViewAction.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ViewAction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ViewActions" ~of_json:ViewAction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ViewInputSchema =
+  struct
+    type nonrec t = string
+    let context_ = "ViewInputSchema"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ViewInputSchema" j
+    let to_json = simple_to_json to_value
+  end
+module ViewTemplate =
+  struct
+    type nonrec t = string
+    let context_ = "ViewTemplate"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ViewTemplate" j
+    let to_json = simple_to_json to_value
+  end
+module AttendeeId =
+  struct
+    type nonrec t = string
+    let context_ = "AttendeeId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttendeeId" j
+    let to_json = simple_to_json to_value
+  end
+module JoinToken =
+  struct
+    type nonrec t = string
+    let context_ = "JoinToken"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JoinToken" j
+    let to_json = simple_to_json to_value
+  end
+module GuidString =
+  struct
+    type nonrec t = string
+    let context_ = "GuidString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"[a-fA-F0-9]{8}(?:-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GuidString" j
+    let to_json = simple_to_json to_value
+  end
+module MeetingFeaturesConfiguration =
+  struct
+    type nonrec t =
+      {
+      audio: AudioFeatures.t option
+        [@ocaml.doc
+          "The configuration settings for the audio features available to a meeting."]}
+    let make ?audio = fun () -> { audio }
+    let to_value x =
+      structure_to_value
+        [("Audio", (Option.map x.audio ~f:AudioFeatures.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let audio =
+        (Option.map ~f:AudioFeatures.of_xml) (Xml.child xml_arg0 "Audio") in
+      make ?audio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let audio = field_map json__ "Audio" AudioFeatures.of_json in
+      make ?audio ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration settings of the features available to a meeting."]
+module WebRTCMediaPlacement =
+  struct
+    type nonrec t =
+      {
+      audioHostUrl: URI.t option [@ocaml.doc "The audio host URL."];
+      audioFallbackUrl: URI.t option [@ocaml.doc "The audio fallback URL."];
+      signalingUrl: URI.t option [@ocaml.doc "The signaling URL."];
+      eventIngestionUrl: URI.t option
+        [@ocaml.doc
+          "The event ingestion URL to which you send client meeting events."]}
+    let make ?audioHostUrl =
+      fun ?audioFallbackUrl ->
+        fun ?signalingUrl ->
+          fun ?eventIngestionUrl ->
+            fun () ->
+              {
+                audioHostUrl;
+                audioFallbackUrl;
+                signalingUrl;
+                eventIngestionUrl
+              }
+    let to_value x =
+      structure_to_value
+        [("AudioHostUrl", (Option.map x.audioHostUrl ~f:URI.to_value));
+        ("AudioFallbackUrl", (Option.map x.audioFallbackUrl ~f:URI.to_value));
+        ("SignalingUrl", (Option.map x.signalingUrl ~f:URI.to_value));
+        ("EventIngestionUrl",
+          (Option.map x.eventIngestionUrl ~f:URI.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventIngestionUrl =
+        (Option.map ~f:URI.of_xml) (Xml.child xml_arg0 "EventIngestionUrl") in
+      let signalingUrl =
+        (Option.map ~f:URI.of_xml) (Xml.child xml_arg0 "SignalingUrl") in
+      let audioFallbackUrl =
+        (Option.map ~f:URI.of_xml) (Xml.child xml_arg0 "AudioFallbackUrl") in
+      let audioHostUrl =
+        (Option.map ~f:URI.of_xml) (Xml.child xml_arg0 "AudioHostUrl") in
+      make ?eventIngestionUrl ?signalingUrl ?audioFallbackUrl ?audioHostUrl
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventIngestionUrl =
+        field_map json__ "EventIngestionUrl" URI.of_json in
+      let signalingUrl = field_map json__ "SignalingUrl" URI.of_json in
+      let audioFallbackUrl = field_map json__ "AudioFallbackUrl" URI.of_json in
+      let audioHostUrl = field_map json__ "AudioHostUrl" URI.of_json in
+      make ?eventIngestionUrl ?signalingUrl ?audioFallbackUrl ?audioHostUrl
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A set of endpoints used by clients to connect to the media service group for an Amazon Chime SDK meeting."]
 module Message =
   struct
     type nonrec t = string
@@ -452,6 +892,8 @@ module UploadMetadataSignedHeaders =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -517,7 +959,16 @@ module Item =
         [@ocaml.doc
           "The role of the sender. For example, is it a customer, agent, or system."];
       attachments: Attachments.t option
-        [@ocaml.doc "Provides information about the attachments."]}
+        [@ocaml.doc "Provides information about the attachments."];
+      messageMetadata: MessageMetadata.t option
+        [@ocaml.doc
+          "The metadata related to the message. Currently this supports only information related to message receipts."];
+      relatedContactId: ContactId.t option
+        [@ocaml.doc
+          "The contactId on which the transcript item was originally sent. This field is only populated for persistent chats when the transcript item is from the past chat session. For more information, see Enable persistent chat."];
+      contactId: ContactId.t option
+        [@ocaml.doc
+          "The contactId on which the transcript item was originally sent. This field is populated only when the transcript item is from the current chat session."]}
     let make ?absoluteTime =
       fun ?content ->
         fun ?contentType ->
@@ -527,18 +978,24 @@ module Item =
                 fun ?displayName ->
                   fun ?participantRole ->
                     fun ?attachments ->
-                      fun () ->
-                        {
-                          absoluteTime;
-                          content;
-                          contentType;
-                          id;
-                          type_;
-                          participantId;
-                          displayName;
-                          participantRole;
-                          attachments
-                        }
+                      fun ?messageMetadata ->
+                        fun ?relatedContactId ->
+                          fun ?contactId ->
+                            fun () ->
+                              {
+                                absoluteTime;
+                                content;
+                                contentType;
+                                id;
+                                type_;
+                                participantId;
+                                displayName;
+                                participantRole;
+                                attachments;
+                                messageMetadata;
+                                relatedContactId;
+                                contactId
+                              }
     let to_value x =
       structure_to_value
         [("AbsoluteTime", (Option.map x.absoluteTime ~f:Instant.to_value));
@@ -552,9 +1009,22 @@ module Item =
         ("DisplayName", (Option.map x.displayName ~f:DisplayName.to_value));
         ("ParticipantRole",
           (Option.map x.participantRole ~f:ParticipantRole.to_value));
-        ("Attachments", (Option.map x.attachments ~f:Attachments.to_value))]
+        ("Attachments", (Option.map x.attachments ~f:Attachments.to_value));
+        ("MessageMetadata",
+          (Option.map x.messageMetadata ~f:MessageMetadata.to_value));
+        ("RelatedContactId",
+          (Option.map x.relatedContactId ~f:ContactId.to_value));
+        ("ContactId", (Option.map x.contactId ~f:ContactId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contactId =
+        (Option.map ~f:ContactId.of_xml) (Xml.child xml_arg0 "ContactId") in
+      let relatedContactId =
+        (Option.map ~f:ContactId.of_xml)
+          (Xml.child xml_arg0 "RelatedContactId") in
+      let messageMetadata =
+        (Option.map ~f:MessageMetadata.of_xml)
+          (Xml.child xml_arg0 "MessageMetadata") in
       let attachments =
         (Option.map ~f:Attachments.of_xml) (Xml.child xml_arg0 "Attachments") in
       let participantRole =
@@ -575,23 +1045,31 @@ module Item =
         (Option.map ~f:ChatContent.of_xml) (Xml.child xml_arg0 "Content") in
       let absoluteTime =
         (Option.map ~f:Instant.of_xml) (Xml.child xml_arg0 "AbsoluteTime") in
-      make ?attachments ?participantRole ?displayName ?participantId ?type_
-        ?id ?contentType ?content ?absoluteTime ()
+      make ?contactId ?relatedContactId ?messageMetadata ?attachments
+        ?participantRole ?displayName ?participantId ?type_ ?id ?contentType
+        ?content ?absoluteTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attachments = field_map json "Attachments" Attachments.of_json in
+    let of_json json__ =
+      let contactId = field_map json__ "ContactId" ContactId.of_json in
+      let relatedContactId =
+        field_map json__ "RelatedContactId" ContactId.of_json in
+      let messageMetadata =
+        field_map json__ "MessageMetadata" MessageMetadata.of_json in
+      let attachments = field_map json__ "Attachments" Attachments.of_json in
       let participantRole =
-        field_map json "ParticipantRole" ParticipantRole.of_json in
-      let displayName = field_map json "DisplayName" DisplayName.of_json in
+        field_map json__ "ParticipantRole" ParticipantRole.of_json in
+      let displayName = field_map json__ "DisplayName" DisplayName.of_json in
       let participantId =
-        field_map json "ParticipantId" ParticipantId.of_json in
-      let type_ = field_map json "Type" ChatItemType.of_json in
-      let id = field_map json "Id" ChatItemId.of_json in
-      let contentType = field_map json "ContentType" ChatContentType.of_json in
-      let content = field_map json "Content" ChatContent.of_json in
-      let absoluteTime = field_map json "AbsoluteTime" Instant.of_json in
-      make ?attachments ?participantRole ?displayName ?participantId ?type_
-        ?id ?contentType ?content ?absoluteTime ()
+        field_map json__ "ParticipantId" ParticipantId.of_json in
+      let type_ = field_map json__ "Type" ChatItemType.of_json in
+      let id = field_map json__ "Id" ChatItemId.of_json in
+      let contentType =
+        field_map json__ "ContentType" ChatContentType.of_json in
+      let content = field_map json__ "Content" ChatContent.of_json in
+      let absoluteTime = field_map json__ "AbsoluteTime" Instant.of_json in
+      make ?contactId ?relatedContactId ?messageMetadata ?attachments
+        ?participantRole ?displayName ?participantId ?type_ ?id ?contentType
+        ?content ?absoluteTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An item - message or event - that has been sent."]
 module MostRecent =
@@ -609,6 +1087,173 @@ module MostRecent =
     let of_xml xml_arg0 =
       Int.of_string
         (string_of_xml ~kind:"an integer for MostRecent" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceId =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceId" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceType =
+  struct
+    type nonrec t =
+      | CONTACT 
+      | CONTACT_FLOW 
+      | INSTANCE 
+      | PARTICIPANT 
+      | HIERARCHY_LEVEL 
+      | HIERARCHY_GROUP 
+      | USER 
+      | PHONE_NUMBER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONTACT -> "CONTACT"
+      | CONTACT_FLOW -> "CONTACT_FLOW"
+      | INSTANCE -> "INSTANCE"
+      | PARTICIPANT -> "PARTICIPANT"
+      | HIERARCHY_LEVEL -> "HIERARCHY_LEVEL"
+      | HIERARCHY_GROUP -> "HIERARCHY_GROUP"
+      | USER -> "USER"
+      | PHONE_NUMBER -> "PHONE_NUMBER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONTACT" -> CONTACT
+      | "CONTACT_FLOW" -> CONTACT_FLOW
+      | "INSTANCE" -> INSTANCE
+      | "PARTICIPANT" -> PARTICIPANT
+      | "HIERARCHY_LEVEL" -> HIERARCHY_LEVEL
+      | "HIERARCHY_GROUP" -> HIERARCHY_GROUP
+      | "USER" -> USER
+      | "PHONE_NUMBER" -> PHONE_NUMBER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module ARN =
+  struct
+    type nonrec t = string
+    let context_ = "ARN"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ARN" j
+    let to_json = simple_to_json to_value
+  end
+module ViewContent =
+  struct
+    type nonrec t =
+      {
+      inputSchema: ViewInputSchema.t option
+        [@ocaml.doc
+          "The schema representing the input data that the view template must be supplied to render."];
+      template: ViewTemplate.t option
+        [@ocaml.doc
+          "The view template representing the structure of the view."];
+      actions: ViewActions.t option
+        [@ocaml.doc "A list of actions possible from the view"]}
+    let make ?inputSchema =
+      fun ?template ->
+        fun ?actions -> fun () -> { inputSchema; template; actions }
+    let to_value x =
+      structure_to_value
+        [("InputSchema",
+           (Option.map x.inputSchema ~f:ViewInputSchema.to_value));
+        ("Template", (Option.map x.template ~f:ViewTemplate.to_value));
+        ("Actions", (Option.map x.actions ~f:ViewActions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actions =
+        (Option.map ~f:ViewActions.of_xml) (Xml.child xml_arg0 "Actions") in
+      let template =
+        (Option.map ~f:ViewTemplate.of_xml) (Xml.child xml_arg0 "Template") in
+      let inputSchema =
+        (Option.map ~f:ViewInputSchema.of_xml)
+          (Xml.child xml_arg0 "InputSchema") in
+      make ?actions ?template ?inputSchema ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actions = field_map json__ "Actions" ViewActions.of_json in
+      let template = field_map json__ "Template" ViewTemplate.of_json in
+      let inputSchema =
+        field_map json__ "InputSchema" ViewInputSchema.of_json in
+      make ?actions ?template ?inputSchema ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "View content containing all content necessary to render a view except for runtime input data."]
+module ViewId =
+  struct
+    type nonrec t = string
+    let context_ = "ViewId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\_\\-:\\/$]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ViewId" j
+    let to_json = simple_to_json to_value
+  end
+module ViewName =
+  struct
+    type nonrec t = string
+    let context_ = "ViewName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{N}_.:\\/=+\\-@()']+[\\p{L}\\p{Z}\\p{N}_.:\\/=+\\-@()']*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ViewName" j
+    let to_json = simple_to_json to_value
+  end
+module ViewVersion =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ViewVersion" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
@@ -630,6 +1275,78 @@ module ParticipantToken =
     let of_json j = string_of_json ~kind:"ParticipantToken" j
     let to_json = simple_to_json to_value
   end
+module Attendee =
+  struct
+    type nonrec t =
+      {
+      attendeeId: AttendeeId.t option
+        [@ocaml.doc "The Amazon Chime SDK attendee ID."];
+      joinToken: JoinToken.t option
+        [@ocaml.doc "The join token used by the Amazon Chime SDK attendee."]}
+    let make ?attendeeId =
+      fun ?joinToken -> fun () -> { attendeeId; joinToken }
+    let to_value x =
+      structure_to_value
+        [("AttendeeId", (Option.map x.attendeeId ~f:AttendeeId.to_value));
+        ("JoinToken", (Option.map x.joinToken ~f:JoinToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let joinToken =
+        (Option.map ~f:JoinToken.of_xml) (Xml.child xml_arg0 "JoinToken") in
+      let attendeeId =
+        (Option.map ~f:AttendeeId.of_xml) (Xml.child xml_arg0 "AttendeeId") in
+      make ?joinToken ?attendeeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let joinToken = field_map json__ "JoinToken" JoinToken.of_json in
+      let attendeeId = field_map json__ "AttendeeId" AttendeeId.of_json in
+      make ?joinToken ?attendeeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The attendee information, including attendee ID and join token."]
+module WebRTCMeeting =
+  struct
+    type nonrec t =
+      {
+      mediaPlacement: WebRTCMediaPlacement.t option
+        [@ocaml.doc "The media placement for the meeting."];
+      meetingFeatures: MeetingFeaturesConfiguration.t option ;
+      meetingId: GuidString.t option
+        [@ocaml.doc "The Amazon Chime SDK meeting ID."]}
+    let make ?mediaPlacement =
+      fun ?meetingFeatures ->
+        fun ?meetingId ->
+          fun () -> { mediaPlacement; meetingFeatures; meetingId }
+    let to_value x =
+      structure_to_value
+        [("MediaPlacement",
+           (Option.map x.mediaPlacement ~f:WebRTCMediaPlacement.to_value));
+        ("MeetingFeatures",
+          (Option.map x.meetingFeatures
+             ~f:MeetingFeaturesConfiguration.to_value));
+        ("MeetingId", (Option.map x.meetingId ~f:GuidString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let meetingId =
+        (Option.map ~f:GuidString.of_xml) (Xml.child xml_arg0 "MeetingId") in
+      let meetingFeatures =
+        (Option.map ~f:MeetingFeaturesConfiguration.of_xml)
+          (Xml.child xml_arg0 "MeetingFeatures") in
+      let mediaPlacement =
+        (Option.map ~f:WebRTCMediaPlacement.of_xml)
+          (Xml.child xml_arg0 "MediaPlacement") in
+      make ?meetingId ?meetingFeatures ?mediaPlacement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let meetingId = field_map json__ "MeetingId" GuidString.of_json in
+      let meetingFeatures =
+        field_map json__ "MeetingFeatures"
+          MeetingFeaturesConfiguration.of_json in
+      let mediaPlacement =
+        field_map json__ "MediaPlacement" WebRTCMediaPlacement.of_json in
+      make ?meetingId ?meetingFeatures ?mediaPlacement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A meeting created using the Amazon Chime SDK."]
 module PreSignedConnectionUrl =
   struct
     type nonrec t = string
@@ -653,17 +1370,20 @@ module ConnectionType =
     type nonrec t =
       | WEBSOCKET 
       | CONNECTION_CREDENTIALS 
+      | WEBRTC_CONNECTION 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | WEBSOCKET -> "WEBSOCKET"
       | CONNECTION_CREDENTIALS -> "CONNECTION_CREDENTIALS"
+      | WEBRTC_CONNECTION -> "WEBRTC_CONNECTION"
       | Non_static_id s -> s
     let of_string =
       function
       | "WEBSOCKET" -> WEBSOCKET
       | "CONNECTION_CREDENTIALS" -> CONNECTION_CREDENTIALS
+      | "WEBRTC_CONNECTION" -> WEBRTC_CONNECTION
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -676,79 +1396,79 @@ module ConnectionType =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: Message.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: Message.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient access to perform this action."]
 module InternalServerException =
   struct
     type nonrec t = {
-      message: Message.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: Message.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception occurs when there is an internal failure in the Amazon Connect service."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
-      message: Message.t }
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message = fun () -> { message }
+      message: Message.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The number of attachments per contact exceeds the quota."]
 module ThrottlingException =
   struct
     type nonrec t = {
-      message: Message.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: Message.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module UploadMetadata =
@@ -787,31 +1507,32 @@ module UploadMetadata =
         (Option.map ~f:UploadMetadataUrl.of_xml) (Xml.child xml_arg0 "Url") in
       make ?headersToInclude ?urlExpiry ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let headersToInclude =
-        field_map json "HeadersToInclude" UploadMetadataSignedHeaders.of_json in
-      let urlExpiry = field_map json "UrlExpiry" ISO8601Datetime.of_json in
-      let url = field_map json "Url" UploadMetadataUrl.of_json in
+        field_map json__ "HeadersToInclude"
+          UploadMetadataSignedHeaders.of_json in
+      let urlExpiry = field_map json__ "UrlExpiry" ISO8601Datetime.of_json in
+      let url = field_map json__ "Url" UploadMetadataUrl.of_json in
       make ?headersToInclude ?urlExpiry ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Fields to be used while uploading the attachment."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: Reason.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
+      message: Reason.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (Reason.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Reason.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Reason.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:Reason.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Reason.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Reason.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input fails to satisfy the constraints specified by Amazon Connect."]
@@ -847,6 +1568,32 @@ module NonEmptyClientToken =
     let of_json j = string_of_json ~kind:"NonEmptyClientToken" j
     let to_json = simple_to_json to_value
   end
+module MessageProcessingMetadata =
+  struct
+    type nonrec t =
+      {
+      messageProcessingStatus: MessageProcessingStatus.t option
+        [@ocaml.doc "The status of Message Processing for the message."]}
+    let make ?messageProcessingStatus = fun () -> { messageProcessingStatus }
+    let to_value x =
+      structure_to_value
+        [("MessageProcessingStatus",
+           (Option.map x.messageProcessingStatus
+              ~f:MessageProcessingStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let messageProcessingStatus =
+        (Option.map ~f:MessageProcessingStatus.of_xml)
+          (Xml.child xml_arg0 "MessageProcessingStatus") in
+      make ?messageProcessingStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let messageProcessingStatus =
+        field_map json__ "MessageProcessingStatus"
+          MessageProcessingStatus.of_json in
+      make ?messageProcessingStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains metadata for chat messages."]
 module ClientToken =
   struct
     type nonrec t = string
@@ -861,24 +1608,26 @@ module ClientToken =
     let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
-module ContactId =
+module ConflictException =
   struct
-    type nonrec t = string
-    let context_ = "ContactId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = {
+      message: Reason.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Reason.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ContactId" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Reason.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Reason.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested operation conflicts with the current state of a service resource associated with the request."]
 module NextToken =
   struct
     type nonrec t = string
@@ -901,6 +1650,9 @@ module Transcript =
   struct
     type nonrec t = Item.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Item.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1017,14 +1769,68 @@ module StartPosition =
       let id = (Option.map ~f:ChatItemId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?mostRecent ?absoluteTime ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mostRecent = field_map json "MostRecent" MostRecent.of_json in
-      let absoluteTime = field_map json "AbsoluteTime" Instant.of_json in
-      let id = field_map json "Id" ChatItemId.of_json in
+    let of_json json__ =
+      let mostRecent = field_map json__ "MostRecent" MostRecent.of_json in
+      let absoluteTime = field_map json__ "AbsoluteTime" Instant.of_json in
+      let id = field_map json__ "Id" ChatItemId.of_json in
       make ?mostRecent ?absoluteTime ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A filtering option for where to start. For example, if you sent 100 messages, start with message 50."]
+module AuthenticationUrl =
+  struct
+    type nonrec t = string
+    let context_ = "AuthenticationUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2083) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AuthenticationUrl" j
+    let to_json = simple_to_json to_value
+  end
+module RedirectURI =
+  struct
+    type nonrec t = string
+    let context_ = "RedirectURI"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RedirectURI" j
+    let to_json = simple_to_json to_value
+  end
+module SessionId =
+  struct
+    type nonrec t = string
+    let context_ = "SessionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:36) >>=
+             (fun () -> check_string_min i ~min:36));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SessionId" j
+    let to_json = simple_to_json to_value
+  end
 module PreSignedAttachmentUrl =
   struct
     type nonrec t = string
@@ -1041,6 +1847,124 @@ module PreSignedAttachmentUrl =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"PreSignedAttachmentUrl" j
+    let to_json = simple_to_json to_value
+  end
+module URLExpiryInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:300) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for URLExpiryInSeconds" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceNotFoundException =
+  struct
+    type nonrec t =
+      {
+      message: Message.t option ;
+      resourceId: ResourceId.t option
+        [@ocaml.doc "The identifier of the resource."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc "The type of Amazon Connect resource."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:ResourceId.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let resourceId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      make ?resourceType ?resourceId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource was not found."]
+module View =
+  struct
+    type nonrec t =
+      {
+      id: ViewId.t option [@ocaml.doc "The identifier of the view."];
+      arn: ARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the view."];
+      name: ViewName.t option [@ocaml.doc "The name of the view."];
+      version: ViewVersion.t option
+        [@ocaml.doc "The current version of the view."];
+      content: ViewContent.t option
+        [@ocaml.doc
+          "View content containing all content necessary to render a view except for runtime input data."]}
+    let make ?id =
+      fun ?arn ->
+        fun ?name ->
+          fun ?version ->
+            fun ?content -> fun () -> { id; arn; name; version; content }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ViewId.to_value));
+        ("Arn", (Option.map x.arn ~f:ARN.to_value));
+        ("Name", (Option.map x.name ~f:ViewName.to_value));
+        ("Version", (Option.map x.version ~f:ViewVersion.to_value));
+        ("Content", (Option.map x.content ~f:ViewContent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let content =
+        (Option.map ~f:ViewContent.of_xml) (Xml.child xml_arg0 "Content") in
+      let version =
+        (Option.map ~f:ViewVersion.of_xml) (Xml.child xml_arg0 "Version") in
+      let name = (Option.map ~f:ViewName.of_xml) (Xml.child xml_arg0 "Name") in
+      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
+      let id = (Option.map ~f:ViewId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?content ?version ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let content = field_map json__ "Content" ViewContent.of_json in
+      let version = field_map json__ "Version" ViewVersion.of_json in
+      let name = field_map json__ "Name" ViewName.of_json in
+      let arn = field_map json__ "Arn" ARN.of_json in
+      let id = field_map json__ "Id" ViewId.of_json in
+      make ?content ?version ?name ?arn ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A view resource object. Contains metadata and content necessary to render the view."]
+module ViewToken =
+  struct
+    type nonrec t = string
+    let context_ = "ViewToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ViewToken" j
     let to_json = simple_to_json to_value
   end
 module ConnectionCredentials =
@@ -1068,13 +1992,40 @@ module ConnectionCredentials =
           (Xml.child xml_arg0 "ConnectionToken") in
       make ?expiry ?connectionToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiry = field_map json "Expiry" ISO8601Datetime.of_json in
+    let of_json json__ =
+      let expiry = field_map json__ "Expiry" ISO8601Datetime.of_json in
       let connectionToken =
-        field_map json "ConnectionToken" ParticipantToken.of_json in
+        field_map json__ "ConnectionToken" ParticipantToken.of_json in
       make ?expiry ?connectionToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Connection credentials."]
+module WebRTCConnection =
+  struct
+    type nonrec t =
+      {
+      attendee: Attendee.t option ;
+      meeting: WebRTCMeeting.t option
+        [@ocaml.doc "A meeting created using the Amazon Chime SDK."]}
+    let make ?attendee = fun ?meeting -> fun () -> { attendee; meeting }
+    let to_value x =
+      structure_to_value
+        [("Attendee", (Option.map x.attendee ~f:Attendee.to_value));
+        ("Meeting", (Option.map x.meeting ~f:WebRTCMeeting.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let meeting =
+        (Option.map ~f:WebRTCMeeting.of_xml) (Xml.child xml_arg0 "Meeting") in
+      let attendee =
+        (Option.map ~f:Attendee.of_xml) (Xml.child xml_arg0 "Attendee") in
+      make ?meeting ?attendee ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let meeting = field_map json__ "Meeting" WebRTCMeeting.of_json in
+      let attendee = field_map json__ "Attendee" Attendee.of_json in
+      make ?meeting ?attendee ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates the participant\226\128\153s WebRTC connection data required for the client application (mobile or web) to connect to the call."]
 module Websocket =
   struct
     type nonrec t =
@@ -1101,14 +2052,14 @@ module Websocket =
           (Xml.child xml_arg0 "Url") in
       make ?connectionExpiry ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionExpiry =
-        field_map json "ConnectionExpiry" ISO8601Datetime.of_json in
-      let url = field_map json "Url" PreSignedConnectionUrl.of_json in
+        field_map json__ "ConnectionExpiry" ISO8601Datetime.of_json in
+      let url = field_map json__ "Url" PreSignedConnectionUrl.of_json in
       make ?connectionExpiry ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The websocket for the participant's connection."]
-module Bool =
+module Bool_ =
   struct
     type nonrec t = bool
     let make i = i
@@ -1126,6 +2077,9 @@ module ConnectionTypeList =
     type nonrec t = ConnectionType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectionType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1147,26 +2101,6 @@ module ConnectionTypeList =
         j
     let to_json v = composed_to_json to_value v
   end
-module ConflictException =
-  struct
-    type nonrec t = {
-      message: Reason.t }
-    let context_ = "ConflictException"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value [("Message", (Some (Reason.to_value x.message)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        Reason.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Reason.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An attachment with that identifier is already being uploaded."]
 module AttachmentIdList =
   struct
     type nonrec t = ArtifactId.t list
@@ -1175,6 +2109,9 @@ module AttachmentIdList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ArtifactId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1202,7 +2139,8 @@ module StartAttachmentUploadResponse =
       attachmentId: ArtifactId.t option
         [@ocaml.doc "A unique identifier for the attachment."];
       uploadMetadata: UploadMetadata.t option
-        [@ocaml.doc "Fields to be used while uploading the attachment."]}
+        [@ocaml.doc
+          "The headers to be provided while uploading the file to the URL."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -1284,14 +2222,14 @@ module StartAttachmentUploadResponse =
         (Option.map ~f:ArtifactId.of_xml) (Xml.child xml_arg0 "AttachmentId") in
       make ?uploadMetadata ?attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uploadMetadata =
-        field_map json "UploadMetadata" UploadMetadata.of_json in
-      let attachmentId = field_map json "AttachmentId" ArtifactId.of_json in
+        field_map json__ "UploadMetadata" UploadMetadata.of_json in
+      let attachmentId = field_map json__ "AttachmentId" ArtifactId.of_json in
       make ?uploadMetadata ?attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a pre-signed Amazon S3 URL in response for uploading the file directly to S3. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Provides a pre-signed Amazon S3 URL in response for uploading the file directly to S3. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module StartAttachmentUploadRequest =
   struct
     type nonrec t =
@@ -1306,7 +2244,7 @@ module StartAttachmentUploadRequest =
           "A case-sensitive name of the attachment being uploaded."];
       clientToken: NonEmptyClientToken.t
         [@ocaml.doc
-          "A unique case sensitive identifier to support idempotency of request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       connectionToken: ParticipantToken.t
         [@ocaml.doc
           "The authentication token associated with the participant's connection."]}
@@ -1353,22 +2291,23 @@ module StartAttachmentUploadRequest =
       make ~connectionToken ~clientToken ~attachmentName
         ~attachmentSizeInBytes ~contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionToken =
-        field_map_exn json "ConnectionToken" ParticipantToken.of_json in
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" NonEmptyClientToken.of_json in
+        field_map_exn json__ "ClientToken" NonEmptyClientToken.of_json in
       let attachmentName =
-        field_map_exn json "AttachmentName" AttachmentName.of_json in
+        field_map_exn json__ "AttachmentName" AttachmentName.of_json in
       let attachmentSizeInBytes =
-        field_map_exn json "AttachmentSizeInBytes"
+        field_map_exn json__ "AttachmentSizeInBytes"
           AttachmentSizeInBytes.of_json in
-      let contentType = field_map_exn json "ContentType" ContentType.of_json in
+      let contentType =
+        field_map_exn json__ "ContentType" ContentType.of_json in
       make ~connectionToken ~clientToken ~attachmentName
         ~attachmentSizeInBytes ~contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a pre-signed Amazon S3 URL in response for uploading the file directly to S3. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Provides a pre-signed Amazon S3 URL in response for uploading the file directly to S3. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module SendMessageResponse =
   struct
     type nonrec t =
@@ -1376,14 +2315,19 @@ module SendMessageResponse =
       id: ChatItemId.t option [@ocaml.doc "The ID of the message."];
       absoluteTime: Instant.t option
         [@ocaml.doc
-          "The time when the message was sent. It's specified in ISO 8601 format: yyyy-MM-ddThh:mm:ss.SSSZ. For example, 2019-11-08T02:41:28.172Z."]}
+          "The time when the message was sent. It's specified in ISO 8601 format: yyyy-MM-ddThh:mm:ss.SSSZ. For example, 2019-11-08T02:41:28.172Z."];
+      messageMetadata: MessageProcessingMetadata.t option
+        [@ocaml.doc "Contains metadata for the message."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?id = fun ?absoluteTime -> fun () -> { id; absoluteTime }
+    let make ?id =
+      fun ?absoluteTime ->
+        fun ?messageMetadata ->
+          fun () -> { id; absoluteTime; messageMetadata }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1435,32 +2379,41 @@ module SendMessageResponse =
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ChatItemId.to_value));
-        ("AbsoluteTime", (Option.map x.absoluteTime ~f:Instant.to_value))]
+        ("AbsoluteTime", (Option.map x.absoluteTime ~f:Instant.to_value));
+        ("MessageMetadata",
+          (Option.map x.messageMetadata ~f:MessageProcessingMetadata.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let messageMetadata =
+        (Option.map ~f:MessageProcessingMetadata.of_xml)
+          (Xml.child xml_arg0 "MessageMetadata") in
       let absoluteTime =
         (Option.map ~f:Instant.of_xml) (Xml.child xml_arg0 "AbsoluteTime") in
       let id = (Option.map ~f:ChatItemId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?absoluteTime ?id ()
+      make ?messageMetadata ?absoluteTime ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let absoluteTime = field_map json "AbsoluteTime" Instant.of_json in
-      let id = field_map json "Id" ChatItemId.of_json in
-      make ?absoluteTime ?id ()
+    let of_json json__ =
+      let messageMetadata =
+        field_map json__ "MessageMetadata" MessageProcessingMetadata.of_json in
+      let absoluteTime = field_map json__ "AbsoluteTime" Instant.of_json in
+      let id = field_map json__ "Id" ChatItemId.of_json in
+      make ?messageMetadata ?absoluteTime ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends a message. Note that ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Sends a message. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module SendMessageRequest =
   struct
     type nonrec t =
       {
       contentType: ChatContentType.t
         [@ocaml.doc
-          "The type of the content. Supported types are text/plain."];
-      content: ChatContent.t [@ocaml.doc "The content of the message."];
+          "The type of the content. Possible types are text/plain, text/markdown, application/json, and application/vnd.amazonaws.connect.message.interactive.response. Supported types on the contact are configured through SupportedMessagingContentTypes on StartChatContact and StartOutboundChatContact. For Apple Messages for Business, SMS, and WhatsApp Business Messaging contacts, only text/plain is supported."];
+      content: ChatContent.t
+        [@ocaml.doc
+          "The content of the message. For text/plain and text/markdown, the Length Constraints are Minimum of 1, Maximum of 1024. For application/json, the Length Constraints are Minimum of 1, Maximum of 12000. For application/vnd.amazonaws.connect.message.interactive.response, the Length Constraints are Minimum of 1, Maximum of 12288."];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       connectionToken: ParticipantToken.t
         [@ocaml.doc
           "The authentication token associated with the connection."]}
@@ -1492,17 +2445,17 @@ module SendMessageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContentType") in
       make ~connectionToken ?clientToken ~content ~contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionToken =
-        field_map_exn json "ConnectionToken" ParticipantToken.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let content = field_map_exn json "Content" ChatContent.of_json in
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let content = field_map_exn json__ "Content" ChatContent.of_json in
       let contentType =
-        field_map_exn json "ContentType" ChatContentType.of_json in
+        field_map_exn json__ "ContentType" ChatContentType.of_json in
       make ~connectionToken ?clientToken ~content ~contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends a message. Note that ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Sends a message. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module SendEventResponse =
   struct
     type nonrec t =
@@ -1513,6 +2466,7 @@ module SendEventResponse =
           "The time when the event was sent. It's specified in ISO 8601 format: yyyy-MM-ddThh:mm:ss.SSSZ. For example, 2019-11-08T02:41:28.172Z."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
@@ -1522,6 +2476,8 @@ module SendEventResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ThrottlingException" ->
@@ -1535,6 +2491,8 @@ module SendEventResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ThrottlingException" ->
@@ -1549,6 +2507,10 @@ module SendEventResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1577,26 +2539,26 @@ module SendEventResponse =
       let id = (Option.map ~f:ChatItemId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?absoluteTime ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let absoluteTime = field_map json "AbsoluteTime" Instant.of_json in
-      let id = field_map json "Id" ChatItemId.of_json in
+    let of_json json__ =
+      let absoluteTime = field_map json__ "AbsoluteTime" Instant.of_json in
+      let id = field_map json__ "Id" ChatItemId.of_json in
       make ?absoluteTime ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends an event. Note that ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "The application/vnd.amazonaws.connect.event.connection.acknowledged ContentType is no longer maintained since December 31, 2024. This event has been migrated to the CreateParticipantConnection API using the ConnectParticipant field. Sends an event. Message receipts are not supported when there are more than two active participants in the chat. Using the SendEvent API for message receipts when a supervisor is barged-in will result in a conflict exception. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module SendEventRequest =
   struct
     type nonrec t =
       {
       contentType: ChatContentType.t
         [@ocaml.doc
-          "The content type of the request. Supported types are: application/vnd.amazonaws.connect.event.typing application/vnd.amazonaws.connect.event.connection.acknowledged"];
+          "The content type of the request. Supported types are: application/vnd.amazonaws.connect.event.typing application/vnd.amazonaws.connect.event.connection.acknowledged (is no longer maintained since December 31, 2024) application/vnd.amazonaws.connect.event.message.delivered application/vnd.amazonaws.connect.event.message.read"];
       content: ChatContent.t option
         [@ocaml.doc
-          "The content of the event to be sent (for example, message text). This is not yet supported."];
+          "The content of the event to be sent (for example, message text). For content related to message receipts, this is supported in the form of a JSON string. Sample Content: \"\\{\\\"messageId\\\":\\\"11111111-aaaa-bbbb-cccc-EXAMPLE01234\\\"\\}\""];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       connectionToken: ParticipantToken.t
         [@ocaml.doc
           "The authentication token associated with the participant's connection."]}
@@ -1627,17 +2589,17 @@ module SendEventRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContentType") in
       make ~connectionToken ?clientToken ?content ~contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionToken =
-        field_map_exn json "ConnectionToken" ParticipantToken.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let content = field_map json "Content" ChatContent.of_json in
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let content = field_map json__ "Content" ChatContent.of_json in
       let contentType =
-        field_map_exn json "ContentType" ChatContentType.of_json in
+        field_map_exn json__ "ContentType" ChatContentType.of_json in
       make ~connectionToken ?clientToken ?content ~contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends an event. Note that ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "The application/vnd.amazonaws.connect.event.connection.acknowledged ContentType is no longer maintained since December 31, 2024. This event has been migrated to the CreateParticipantConnection API using the ConnectParticipant field. Sends an event. Message receipts are not supported when there are more than two active participants in the chat. Using the SendEvent API for message receipts when a supervisor is barged-in will result in a conflict exception. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module GetTranscriptResponse =
   struct
     type nonrec t =
@@ -1724,15 +2686,15 @@ module GetTranscriptResponse =
           (Xml.child xml_arg0 "InitialContactId") in
       make ?nextToken ?transcript ?initialContactId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let transcript = field_map json "Transcript" Transcript.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let transcript = field_map json__ "Transcript" Transcript.of_json in
       let initialContactId =
-        field_map json "InitialContactId" ContactId.of_json in
+        field_map json__ "InitialContactId" ContactId.of_json in
       make ?nextToken ?transcript ?initialContactId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a transcript of the session, including details about any attachments. Note that ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Retrieves a transcript of the session, including details about any attachments. For information about accessing past chat contact transcripts for a persistent chat, see Enable persistent chat. For security recommendations, see Amazon Connect Chat security best practices. If you have a process that consumes events in the transcript of an chat that has ended, note that chat transcripts contain the following event content types if the event has occurred during the chat session: application/vnd.amazonaws.connect.event.participant.invited application/vnd.amazonaws.connect.event.participant.joined application/vnd.amazonaws.connect.event.participant.left application/vnd.amazonaws.connect.event.chat.ended application/vnd.amazonaws.connect.event.transfer.succeeded application/vnd.amazonaws.connect.event.transfer.failed ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module GetTranscriptRequest =
   struct
     type nonrec t =
@@ -1808,22 +2770,149 @@ module GetTranscriptRequest =
       make ~connectionToken ?startPosition ?sortOrder ?scanDirection
         ?nextToken ?maxResults ?contactId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionToken =
-        field_map_exn json "ConnectionToken" ParticipantToken.of_json in
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
       let startPosition =
-        field_map json "StartPosition" StartPosition.of_json in
-      let sortOrder = field_map json "SortOrder" SortKey.of_json in
+        field_map json__ "StartPosition" StartPosition.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortKey.of_json in
       let scanDirection =
-        field_map json "ScanDirection" ScanDirection.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let contactId = field_map json "ContactId" ContactId.of_json in
+        field_map json__ "ScanDirection" ScanDirection.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let contactId = field_map json__ "ContactId" ContactId.of_json in
       make ~connectionToken ?startPosition ?sortOrder ?scanDirection
         ?nextToken ?maxResults ?contactId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a transcript of the session, including details about any attachments. Note that ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Retrieves a transcript of the session, including details about any attachments. For information about accessing past chat contact transcripts for a persistent chat, see Enable persistent chat. For security recommendations, see Amazon Connect Chat security best practices. If you have a process that consumes events in the transcript of an chat that has ended, note that chat transcripts contain the following event content types if the event has occurred during the chat session: application/vnd.amazonaws.connect.event.participant.invited application/vnd.amazonaws.connect.event.participant.joined application/vnd.amazonaws.connect.event.participant.left application/vnd.amazonaws.connect.event.chat.ended application/vnd.amazonaws.connect.event.transfer.succeeded application/vnd.amazonaws.connect.event.transfer.failed ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+module GetAuthenticationUrlResponse =
+  struct
+    type nonrec t =
+      {
+      authenticationUrl: AuthenticationUrl.t option
+        [@ocaml.doc
+          "The URL where the customer will sign in to the identity provider. This URL contains the authorize endpoint for the Cognito UserPool used in the authentication."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?authenticationUrl = fun () -> { authenticationUrl }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AuthenticationUrl",
+           (Option.map x.authenticationUrl ~f:AuthenticationUrl.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authenticationUrl =
+        (Option.map ~f:AuthenticationUrl.of_xml)
+          (Xml.child xml_arg0 "AuthenticationUrl") in
+      make ?authenticationUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authenticationUrl =
+        field_map json__ "AuthenticationUrl" AuthenticationUrl.of_json in
+      make ?authenticationUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the AuthenticationUrl for the current authentication session for the AuthenticateCustomer flow block. For security recommendations, see Amazon Connect Chat security best practices. This API can only be called within one minute of receiving the authenticationInitiated event. The current supported channel is chat. This API is not supported for Apple Messages for Business, WhatsApp, or SMS chats. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+module GetAuthenticationUrlRequest =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t
+        [@ocaml.doc
+          "The sessionId provided in the authenticationInitiated event."];
+      redirectUri: RedirectURI.t
+        [@ocaml.doc
+          "The URL where the customer will be redirected after Amazon Cognito authorizes the user."];
+      connectionToken: ParticipantToken.t
+        [@ocaml.doc
+          "The authentication token associated with the participant's connection."]}
+    let context_ = "GetAuthenticationUrlRequest"
+    let make ~sessionId =
+      fun ~redirectUri ->
+        fun ~connectionToken ->
+          fun () -> { sessionId; redirectUri; connectionToken }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (SessionId.to_value x.sessionId)));
+        ("RedirectUri", (Some (RedirectURI.to_value x.redirectUri)));
+        ("X-Amz-Bearer",
+          (Some (ParticipantToken.to_value x.connectionToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectionToken =
+        ParticipantToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "X-Amz-Bearer") in
+      let redirectUri =
+        RedirectURI.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RedirectUri") in
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ~connectionToken ~redirectUri ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectionToken =
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
+      let redirectUri =
+        field_map_exn json__ "RedirectUri" RedirectURI.of_json in
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ~connectionToken ~redirectUri ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the AuthenticationUrl for the current authentication session for the AuthenticateCustomer flow block. For security recommendations, see Amazon Connect Chat security best practices. This API can only be called within one minute of receiving the authenticationInitiated event. The current supported channel is chat. This API is not supported for Apple Messages for Business, WhatsApp, or SMS chats. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module GetAttachmentResponse =
   struct
     type nonrec t =
@@ -1833,14 +2922,19 @@ module GetAttachmentResponse =
           "This is the pre-signed URL that can be used for uploading the file to Amazon S3 when used in response to StartAttachmentUpload."];
       urlExpiry: ISO8601Datetime.t option
         [@ocaml.doc
-          "The expiration time of the URL in ISO timestamp. It's specified in ISO 8601 format: yyyy-MM-ddThh:mm:ss.SSSZ. For example, 2019-11-08T02:41:28.172Z."]}
+          "The expiration time of the URL in ISO timestamp. It's specified in ISO 8601 format: yyyy-MM-ddThh:mm:ss.SSSZ. For example, 2019-11-08T02:41:28.172Z."];
+      attachmentSizeInBytes: AttachmentSizeInBytes.t option
+        [@ocaml.doc "The size of the attachment in bytes."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?url = fun ?urlExpiry -> fun () -> { url; urlExpiry }
+    let make ?url =
+      fun ?urlExpiry ->
+        fun ?attachmentSizeInBytes ->
+          fun () -> { url; urlExpiry; attachmentSizeInBytes }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1892,24 +2986,33 @@ module GetAttachmentResponse =
     let to_value x =
       structure_to_value
         [("Url", (Option.map x.url ~f:PreSignedAttachmentUrl.to_value));
-        ("UrlExpiry", (Option.map x.urlExpiry ~f:ISO8601Datetime.to_value))]
+        ("UrlExpiry", (Option.map x.urlExpiry ~f:ISO8601Datetime.to_value));
+        ("AttachmentSizeInBytes",
+          (Option.map x.attachmentSizeInBytes
+             ~f:AttachmentSizeInBytes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attachmentSizeInBytes =
+        (Option.map ~f:AttachmentSizeInBytes.of_xml)
+          (Xml.child xml_arg0 "AttachmentSizeInBytes") in
       let urlExpiry =
         (Option.map ~f:ISO8601Datetime.of_xml)
           (Xml.child xml_arg0 "UrlExpiry") in
       let url =
         (Option.map ~f:PreSignedAttachmentUrl.of_xml)
           (Xml.child xml_arg0 "Url") in
-      make ?urlExpiry ?url ()
+      make ?attachmentSizeInBytes ?urlExpiry ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let urlExpiry = field_map json "UrlExpiry" ISO8601Datetime.of_json in
-      let url = field_map json "Url" PreSignedAttachmentUrl.of_json in
-      make ?urlExpiry ?url ()
+    let of_json json__ =
+      let attachmentSizeInBytes =
+        field_map json__ "AttachmentSizeInBytes"
+          AttachmentSizeInBytes.of_json in
+      let urlExpiry = field_map json__ "UrlExpiry" ISO8601Datetime.of_json in
+      let url = field_map json__ "Url" PreSignedAttachmentUrl.of_json in
+      make ?attachmentSizeInBytes ?urlExpiry ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a pre-signed URL for download of a completed attachment. This is an asynchronous API for use with active contacts. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Provides a pre-signed URL for download of a completed attachment. This is an asynchronous API for use with active contacts. For security recommendations, see Amazon Connect Chat security best practices. The participant role CUSTOM_BOT is not permitted to access attachments customers may upload. An AccessDeniedException can indicate that the participant may be a CUSTOM_BOT, and it doesn't have access to attachments. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module GetAttachmentRequest =
   struct
     type nonrec t =
@@ -1918,33 +3021,46 @@ module GetAttachmentRequest =
         [@ocaml.doc "A unique identifier for the attachment."];
       connectionToken: ParticipantToken.t
         [@ocaml.doc
-          "The authentication token associated with the participant's connection."]}
+          "The authentication token associated with the participant's connection."];
+      urlExpiryInSeconds: URLExpiryInSeconds.t option
+        [@ocaml.doc
+          "The expiration time of the URL in ISO timestamp. It's specified in ISO 8601 format: yyyy-MM-ddThh:mm:ss.SSSZ. For example, 2019-11-08T02:41:28.172Z."]}
     let context_ = "GetAttachmentRequest"
-    let make ~attachmentId =
-      fun ~connectionToken -> fun () -> { attachmentId; connectionToken }
+    let make ?urlExpiryInSeconds =
+      fun ~attachmentId ->
+        fun ~connectionToken ->
+          fun () -> { urlExpiryInSeconds; attachmentId; connectionToken }
     let to_value x =
       structure_to_value
         [("AttachmentId", (Some (ArtifactId.to_value x.attachmentId)));
         ("X-Amz-Bearer",
-          (Some (ParticipantToken.to_value x.connectionToken)))]
+          (Some (ParticipantToken.to_value x.connectionToken)));
+        ("UrlExpiryInSeconds",
+          (Option.map x.urlExpiryInSeconds ~f:URLExpiryInSeconds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let urlExpiryInSeconds =
+        (Option.map ~f:URLExpiryInSeconds.of_xml)
+          (Xml.child xml_arg0 "UrlExpiryInSeconds") in
       let connectionToken =
         ParticipantToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "X-Amz-Bearer") in
       let attachmentId =
         ArtifactId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttachmentId") in
-      make ~connectionToken ~attachmentId ()
+      make ?urlExpiryInSeconds ~connectionToken ~attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let urlExpiryInSeconds =
+        field_map json__ "UrlExpiryInSeconds" URLExpiryInSeconds.of_json in
       let connectionToken =
-        field_map_exn json "ConnectionToken" ParticipantToken.of_json in
-      let attachmentId = field_map_exn json "AttachmentId" ArtifactId.of_json in
-      make ~connectionToken ~attachmentId ()
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
+      let attachmentId =
+        field_map_exn json__ "AttachmentId" ArtifactId.of_json in
+      make ?urlExpiryInSeconds ~connectionToken ~attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a pre-signed URL for download of a completed attachment. This is an asynchronous API for use with active contacts. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Provides a pre-signed URL for download of a completed attachment. This is an asynchronous API for use with active contacts. For security recommendations, see Amazon Connect Chat security best practices. The participant role CUSTOM_BOT is not permitted to access attachments customers may upload. An AccessDeniedException can indicate that the participant may be a CUSTOM_BOT, and it doesn't have access to attachments. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module DisconnectParticipantResponse =
   struct
     type nonrec t = unit
@@ -2011,14 +3127,14 @@ module DisconnectParticipantResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disconnects a participant. Note that ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Disconnects a participant. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module DisconnectParticipantRequest =
   struct
     type nonrec t =
       {
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       connectionToken: ParticipantToken.t
         [@ocaml.doc
           "The authentication token associated with the participant's connection."]}
@@ -2039,14 +3155,132 @@ module DisconnectParticipantRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ~connectionToken ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionToken =
-        field_map_exn json "ConnectionToken" ParticipantToken.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       make ~connectionToken ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disconnects a participant. Note that ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Disconnects a participant. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+module DescribeViewResponse =
+  struct
+    type nonrec t =
+      {
+      view: View.t option
+        [@ocaml.doc
+          "A view resource object. Contains metadata and content necessary to render the view."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?view = fun () -> { view }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("View", (Option.map x.view ~f:View.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let view = (Option.map ~f:View.of_xml) (Xml.child xml_arg0 "View") in
+      make ?view ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let view = field_map json__ "View" View.of_json in make ?view ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the view for the specified view token. For security recommendations, see Amazon Connect Chat security best practices."]
+module DescribeViewRequest =
+  struct
+    type nonrec t =
+      {
+      viewToken: ViewToken.t
+        [@ocaml.doc
+          "An encrypted token originating from the interactive message of a ShowView block operation. Represents the desired view."];
+      connectionToken: ParticipantToken.t
+        [@ocaml.doc "The connection token."]}
+    let context_ = "DescribeViewRequest"
+    let make ~viewToken =
+      fun ~connectionToken -> fun () -> { viewToken; connectionToken }
+    let to_value x =
+      structure_to_value
+        [("ViewToken", (Some (ViewToken.to_value x.viewToken)));
+        ("X-Amz-Bearer",
+          (Some (ParticipantToken.to_value x.connectionToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectionToken =
+        ParticipantToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "X-Amz-Bearer") in
+      let viewToken =
+        ViewToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ViewToken") in
+      make ~connectionToken ~viewToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectionToken =
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
+      let viewToken = field_map_exn json__ "ViewToken" ViewToken.of_json in
+      make ~connectionToken ~viewToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the view for the specified view token. For security recommendations, see Amazon Connect Chat security best practices."]
 module CreateParticipantConnectionResponse =
   struct
     type nonrec t =
@@ -2055,7 +3289,10 @@ module CreateParticipantConnectionResponse =
         [@ocaml.doc "Creates the participant's websocket connection."];
       connectionCredentials: ConnectionCredentials.t option
         [@ocaml.doc
-          "Creates the participant's connection credentials. The authentication token associated with the participant's connection."]}
+          "Creates the participant's connection credentials. The authentication token associated with the participant's connection."];
+      webRTCConnection: WebRTCConnection.t option
+        [@ocaml.doc
+          "Creates the participant's WebRTC connection data required for the client application (mobile application or website) to connect to the call."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2064,7 +3301,8 @@ module CreateParticipantConnectionResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?websocket =
       fun ?connectionCredentials ->
-        fun () -> { websocket; connectionCredentials }
+        fun ?webRTCConnection ->
+          fun () -> { websocket; connectionCredentials; webRTCConnection }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2118,70 +3356,79 @@ module CreateParticipantConnectionResponse =
         [("Websocket", (Option.map x.websocket ~f:Websocket.to_value));
         ("ConnectionCredentials",
           (Option.map x.connectionCredentials
-             ~f:ConnectionCredentials.to_value))]
+             ~f:ConnectionCredentials.to_value));
+        ("WebRTCConnection",
+          (Option.map x.webRTCConnection ~f:WebRTCConnection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let webRTCConnection =
+        (Option.map ~f:WebRTCConnection.of_xml)
+          (Xml.child xml_arg0 "WebRTCConnection") in
       let connectionCredentials =
         (Option.map ~f:ConnectionCredentials.of_xml)
           (Xml.child xml_arg0 "ConnectionCredentials") in
       let websocket =
         (Option.map ~f:Websocket.of_xml) (Xml.child xml_arg0 "Websocket") in
-      make ?connectionCredentials ?websocket ()
+      make ?webRTCConnection ?connectionCredentials ?websocket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let webRTCConnection =
+        field_map json__ "WebRTCConnection" WebRTCConnection.of_json in
       let connectionCredentials =
-        field_map json "ConnectionCredentials" ConnectionCredentials.of_json in
-      let websocket = field_map json "Websocket" Websocket.of_json in
-      make ?connectionCredentials ?websocket ()
+        field_map json__ "ConnectionCredentials"
+          ConnectionCredentials.of_json in
+      let websocket = field_map json__ "Websocket" Websocket.of_json in
+      make ?webRTCConnection ?connectionCredentials ?websocket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates the participant's connection. Note that ParticipantToken is used for invoking this API instead of ConnectionToken. The participant token is valid for the lifetime of the participant \226\128\147 until they are part of a contact. The response URL for WEBSOCKET Type has a connect expiry timeout of 100s. Clients must manually connect to the returned websocket URL and subscribe to the desired topic. For chat, you need to publish the following on the established websocket connection: \\{\"topic\":\"aws/subscribe\",\"content\":\\{\"topics\":\\[\"aws/chat\"\\]\\}\\} Upon websocket URL expiry, as specified in the response ConnectionExpiry parameter, clients need to call this API again to obtain a new websocket URL and perform the same steps as before. Message streaming support: This API can also be used together with the StartContactStreaming API to create a participant connection for chat contacts that are not using a websocket. For more information about message streaming, Enable real-time chat message streaming in the Amazon Connect Administrator Guide. Feature specifications: For information about feature specifications, such as the allowed number of open websocket connections per participant, see Feature specifications in the Amazon Connect Administrator Guide. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Creates the participant's connection. For security recommendations, see Amazon Connect Chat security best practices. For WebRTC security recommendations, see Amazon Connect WebRTC security best practices. ParticipantToken is used for invoking this API instead of ConnectionToken. The participant token is valid for the lifetime of the participant \226\128\147 until they are part of a contact. For WebRTC participants, if they leave or are disconnected for 60 seconds, a new participant needs to be created using the CreateParticipant API. For WEBSOCKET Type: The response URL for has a connect expiry timeout of 100s. Clients must manually connect to the returned websocket URL and subscribe to the desired topic. For chat, you need to publish the following on the established websocket connection: \\{\"topic\":\"aws/subscribe\",\"content\":\\{\"topics\":\\[\"aws/chat\"\\]\\}\\} Upon websocket URL expiry, as specified in the response ConnectionExpiry parameter, clients need to call this API again to obtain a new websocket URL and perform the same steps as before. The expiry time for the connection token is different than the ChatDurationInMinutes. Expiry time for the connection token is 1 day. For WEBRTC_CONNECTION Type: The response includes connection data required for the client application to join the call using the Amazon Chime SDK client libraries. The WebRTCConnection response contains Meeting and Attendee information needed to establish the media connection. The attendee join token in WebRTCConnection response is valid for the lifetime of the participant in the call. If a participant leaves or is disconnected for 60 seconds, their participant credentials will no longer be valid, and a new participant will need to be created to rejoin the call. Message streaming support: This API can also be used together with the StartContactStreaming API to create a participant connection for chat contacts that are not using a websocket. For more information about message streaming, Enable real-time chat message streaming in the Amazon Connect Administrator Guide. Multi-user web, in-app, video calling support: For WebRTC calls, this API is used in conjunction with the CreateParticipant API to enable multi-party calling. The StartWebRTCContact API creates the initial contact and routes it to an agent, while CreateParticipant adds additional participants to the ongoing call. For more information about multi-party WebRTC calls, see Enable multi-user web, in-app, and video calling in the Amazon Connect Administrator Guide. Feature specifications: For information about feature specifications, such as the allowed number of open websocket connections per participant or maximum number of WebRTC participants, see Feature specifications in the Amazon Connect Administrator Guide. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module CreateParticipantConnectionRequest =
   struct
     type nonrec t =
       {
-      type_: ConnectionTypeList.t
-        [@ocaml.doc "Type of connection information required."];
+      type_: ConnectionTypeList.t option
+        [@ocaml.doc
+          "Type of connection information required. If you need CONNECTION_CREDENTIALS along with marking participant as connected, pass CONNECTION_CREDENTIALS in Type."];
       participantToken: ParticipantToken.t
         [@ocaml.doc
           "This is a header parameter. The ParticipantToken as obtained from StartChatContact API response."];
-      connectParticipant: Bool.t option
+      connectParticipant: Bool_.t option
         [@ocaml.doc
-          "Amazon Connect Participant is used to mark the participant as connected for message streaming."]}
+          "Amazon Connect Participant is used to mark the participant as connected for customer participant in message streaming, as well as for agent or manager participant in non-streaming chats."]}
     let context_ = "CreateParticipantConnectionRequest"
-    let make ?connectParticipant =
-      fun ~type_ ->
+    let make ?type_ =
+      fun ?connectParticipant ->
         fun ~participantToken ->
-          fun () -> { connectParticipant; type_; participantToken }
+          fun () -> { type_; connectParticipant; participantToken }
     let to_value x =
       structure_to_value
-        [("Type", (Some (ConnectionTypeList.to_value x.type_)));
+        [("Type", (Option.map x.type_ ~f:ConnectionTypeList.to_value));
         ("X-Amz-Bearer",
           (Some (ParticipantToken.to_value x.participantToken)));
         ("ConnectParticipant",
-          (Option.map x.connectParticipant ~f:Bool.to_value))]
+          (Option.map x.connectParticipant ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let connectParticipant =
-        (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "ConnectParticipant") in
+        (Option.map ~f:Bool_.of_xml)
+          (Xml.child xml_arg0 "ConnectParticipant") in
       let participantToken =
         ParticipantToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "X-Amz-Bearer") in
       let type_ =
-        ConnectionTypeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ?connectParticipant ~participantToken ~type_ ()
+        (Option.map ~f:ConnectionTypeList.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?connectParticipant ~participantToken ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectParticipant =
-        field_map json "ConnectParticipant" Bool.of_json in
+        field_map json__ "ConnectParticipant" Bool_.of_json in
       let participantToken =
-        field_map_exn json "ParticipantToken" ParticipantToken.of_json in
-      let type_ = field_map_exn json "Type" ConnectionTypeList.of_json in
-      make ?connectParticipant ~participantToken ~type_ ()
+        field_map_exn json__ "ParticipantToken" ParticipantToken.of_json in
+      let type_ = field_map json__ "Type" ConnectionTypeList.of_json in
+      make ?connectParticipant ~participantToken ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates the participant's connection. Note that ParticipantToken is used for invoking this API instead of ConnectionToken. The participant token is valid for the lifetime of the participant \226\128\147 until they are part of a contact. The response URL for WEBSOCKET Type has a connect expiry timeout of 100s. Clients must manually connect to the returned websocket URL and subscribe to the desired topic. For chat, you need to publish the following on the established websocket connection: \\{\"topic\":\"aws/subscribe\",\"content\":\\{\"topics\":\\[\"aws/chat\"\\]\\}\\} Upon websocket URL expiry, as specified in the response ConnectionExpiry parameter, clients need to call this API again to obtain a new websocket URL and perform the same steps as before. Message streaming support: This API can also be used together with the StartContactStreaming API to create a participant connection for chat contacts that are not using a websocket. For more information about message streaming, Enable real-time chat message streaming in the Amazon Connect Administrator Guide. Feature specifications: For information about feature specifications, such as the allowed number of open websocket connections per participant, see Feature specifications in the Amazon Connect Administrator Guide. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Creates the participant's connection. For security recommendations, see Amazon Connect Chat security best practices. For WebRTC security recommendations, see Amazon Connect WebRTC security best practices. ParticipantToken is used for invoking this API instead of ConnectionToken. The participant token is valid for the lifetime of the participant \226\128\147 until they are part of a contact. For WebRTC participants, if they leave or are disconnected for 60 seconds, a new participant needs to be created using the CreateParticipant API. For WEBSOCKET Type: The response URL for has a connect expiry timeout of 100s. Clients must manually connect to the returned websocket URL and subscribe to the desired topic. For chat, you need to publish the following on the established websocket connection: \\{\"topic\":\"aws/subscribe\",\"content\":\\{\"topics\":\\[\"aws/chat\"\\]\\}\\} Upon websocket URL expiry, as specified in the response ConnectionExpiry parameter, clients need to call this API again to obtain a new websocket URL and perform the same steps as before. The expiry time for the connection token is different than the ChatDurationInMinutes. Expiry time for the connection token is 1 day. For WEBRTC_CONNECTION Type: The response includes connection data required for the client application to join the call using the Amazon Chime SDK client libraries. The WebRTCConnection response contains Meeting and Attendee information needed to establish the media connection. The attendee join token in WebRTCConnection response is valid for the lifetime of the participant in the call. If a participant leaves or is disconnected for 60 seconds, their participant credentials will no longer be valid, and a new participant will need to be created to rejoin the call. Message streaming support: This API can also be used together with the StartContactStreaming API to create a participant connection for chat contacts that are not using a websocket. For more information about message streaming, Enable real-time chat message streaming in the Amazon Connect Administrator Guide. Multi-user web, in-app, video calling support: For WebRTC calls, this API is used in conjunction with the CreateParticipant API to enable multi-party calling. The StartWebRTCContact API creates the initial contact and routes it to an agent, while CreateParticipant adds additional participants to the ongoing call. For more information about multi-party WebRTC calls, see Enable multi-user web, in-app, and video calling in the Amazon Connect Administrator Guide. Feature specifications: For information about feature specifications, such as the allowed number of open websocket connections per participant or maximum number of WebRTC participants, see Feature specifications in the Amazon Connect Administrator Guide. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module CompleteAttachmentUploadResponse =
   struct
     type nonrec t = unit
@@ -2268,7 +3515,7 @@ module CompleteAttachmentUploadResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Allows you to confirm that the attachment has been uploaded using the pre-signed URL provided in StartAttachmentUpload API. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Allows you to confirm that the attachment has been uploaded using the pre-signed URL provided in StartAttachmentUpload API. A conflict exception is thrown when an attachment with that identifier is already being uploaded. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
 module CompleteAttachmentUploadRequest =
   struct
     type nonrec t =
@@ -2277,7 +3524,7 @@ module CompleteAttachmentUploadRequest =
         [@ocaml.doc "A list of unique identifiers for the attachments."];
       clientToken: NonEmptyClientToken.t
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       connectionToken: ParticipantToken.t
         [@ocaml.doc
           "The authentication token associated with the participant's connection."]}
@@ -2306,14 +3553,117 @@ module CompleteAttachmentUploadRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AttachmentIds") in
       make ~connectionToken ~clientToken ~attachmentIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionToken =
-        field_map_exn json "ConnectionToken" ParticipantToken.of_json in
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" NonEmptyClientToken.of_json in
+        field_map_exn json__ "ClientToken" NonEmptyClientToken.of_json in
       let attachmentIds =
-        field_map_exn json "AttachmentIds" AttachmentIdList.of_json in
+        field_map_exn json__ "AttachmentIds" AttachmentIdList.of_json in
       make ~connectionToken ~clientToken ~attachmentIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Allows you to confirm that the attachment has been uploaded using the pre-signed URL provided in StartAttachmentUpload API. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+       "Allows you to confirm that the attachment has been uploaded using the pre-signed URL provided in StartAttachmentUpload API. A conflict exception is thrown when an attachment with that identifier is already being uploaded. For security recommendations, see Amazon Connect Chat security best practices. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+module CancelParticipantAuthenticationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels the authentication session. The opted out branch of the Authenticate Customer flow block will be taken. The current supported channel is chat. This API is not supported for Apple Messages for Business, WhatsApp, or SMS chats. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]
+module CancelParticipantAuthenticationRequest =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t
+        [@ocaml.doc
+          "The sessionId provided in the authenticationInitiated event."];
+      connectionToken: ParticipantToken.t
+        [@ocaml.doc
+          "The authentication token associated with the participant's connection."]}
+    let context_ = "CancelParticipantAuthenticationRequest"
+    let make ~sessionId =
+      fun ~connectionToken -> fun () -> { sessionId; connectionToken }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (SessionId.to_value x.sessionId)));
+        ("X-Amz-Bearer",
+          (Some (ParticipantToken.to_value x.connectionToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectionToken =
+        ParticipantToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "X-Amz-Bearer") in
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ~connectionToken ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectionToken =
+        field_map_exn json__ "ConnectionToken" ParticipantToken.of_json in
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ~connectionToken ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels the authentication session. The opted out branch of the Authenticate Customer flow block will be taken. The current supported channel is chat. This API is not supported for Apple Messages for Business, WhatsApp, or SMS chats. ConnectionToken is used for invoking this API instead of ParticipantToken. The Amazon Connect Participant Service APIs do not use Signature Version 4 authentication."]

@@ -24,11 +24,228 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ConstrainedString =
+  struct
+    type nonrec t = string
+    let context_ = "ConstrainedString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConstrainedString" j
+    let to_json = simple_to_json to_value
+  end
+module EdgeSet =
+  struct
+    type nonrec t = ConstrainedString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConstrainedString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConstrainedString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EdgeSet" ~of_json:ConstrainedString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EdgeSetList =
+  struct
+    type nonrec t = EdgeSet.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EdgeSet.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EdgeSet.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EdgeSetList" ~of_json:EdgeSet.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NetworkFunctionGroup =
+  struct
+    type nonrec t =
+      {
+      name: ConstrainedString.t option
+        [@ocaml.doc "The name of the network function group."]}
+    let make ?name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:ConstrainedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" ConstrainedString.of_json in
+      make ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a network function group for service insertion."]
+module EdgeOverride =
+  struct
+    type nonrec t =
+      {
+      edgeSets: EdgeSetList.t option
+        [@ocaml.doc "The list of edge locations."];
+      useEdge: ConstrainedString.t option
+        [@ocaml.doc
+          "The edge that should be used when overriding the current edge order."]}
+    let make ?edgeSets = fun ?useEdge -> fun () -> { edgeSets; useEdge }
+    let to_value x =
+      structure_to_value
+        [("EdgeSets", (Option.map x.edgeSets ~f:EdgeSetList.to_value));
+        ("UseEdge", (Option.map x.useEdge ~f:ConstrainedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let useEdge =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "UseEdge") in
+      let edgeSets =
+        (Option.map ~f:EdgeSetList.of_xml) (Xml.child xml_arg0 "EdgeSets") in
+      make ?useEdge ?edgeSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let useEdge = field_map json__ "UseEdge" ConstrainedString.of_json in
+      let edgeSets = field_map json__ "EdgeSets" EdgeSetList.of_json in
+      make ?useEdge ?edgeSets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the edge that's used for the override."]
+module NetworkFunctionGroupList =
+  struct
+    type nonrec t = NetworkFunctionGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NetworkFunctionGroup.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NetworkFunctionGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkFunctionGroupList"
+        ~of_json:NetworkFunctionGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WithEdgeOverridesList =
+  struct
+    type nonrec t = EdgeOverride.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EdgeOverride.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EdgeOverride.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WithEdgeOverridesList"
+        ~of_json:EdgeOverride.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WhenSentToSegmentsList =
+  struct
+    type nonrec t = ConstrainedString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConstrainedString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConstrainedString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WhenSentToSegmentsList"
+        ~of_json:ConstrainedString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TagKey =
   struct
     type nonrec t = string
     let context_ = "TagKey"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:10000000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -41,7 +258,14 @@ module TagValue =
   struct
     type nonrec t = string
     let context_ = "TagValue"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:10000000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -63,24 +287,6 @@ module Boolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module ConstrainedString =
-  struct
-    type nonrec t = string
-    let context_ = "ConstrainedString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ConstrainedString" j
-    let to_json = simple_to_json to_value
-  end
 module ResourceArn =
   struct
     type nonrec t = string
@@ -88,8 +294,10 @@ module ResourceArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -97,6 +305,244 @@ module ResourceArn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_json = simple_to_json to_value
+  end
+module ServerSideString =
+  struct
+    type nonrec t = string
+    let context_ = "ServerSideString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:10000000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServerSideString" j
+    let to_json = simple_to_json to_value
+  end
+module ConstrainedStringList =
+  struct
+    type nonrec t = ConstrainedString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConstrainedString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConstrainedString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConstrainedStringList"
+        ~of_json:ConstrainedString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SegmentActionServiceInsertion =
+  struct
+    type nonrec t =
+      | Send_via 
+      | Send_to 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Send_via -> "send-via"
+      | Send_to -> "send-to"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "send-via" -> Send_via
+      | "send-to" -> Send_to
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SegmentActionServiceInsertion"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SegmentActionServiceInsertion" j)
+    let to_json = simple_to_json to_value
+  end
+module SendViaMode =
+  struct
+    type nonrec t =
+      | Dual_hop 
+      | Single_hop 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Dual_hop -> "dual-hop"
+      | Single_hop -> "single-hop"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "dual-hop" -> Dual_hop
+      | "single-hop" -> Single_hop
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SendViaMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SendViaMode" j)
+    let to_json = simple_to_json to_value
+  end
+module Via =
+  struct
+    type nonrec t =
+      {
+      networkFunctionGroups: NetworkFunctionGroupList.t option
+        [@ocaml.doc
+          "The list of network function groups associated with the service insertion action."];
+      withEdgeOverrides: WithEdgeOverridesList.t option
+        [@ocaml.doc
+          "Describes any edge overrides. An edge override is a specific edge to be used for traffic."]}
+    let make ?networkFunctionGroups =
+      fun ?withEdgeOverrides ->
+        fun () -> { networkFunctionGroups; withEdgeOverrides }
+    let to_value x =
+      structure_to_value
+        [("NetworkFunctionGroups",
+           (Option.map x.networkFunctionGroups
+              ~f:NetworkFunctionGroupList.to_value));
+        ("WithEdgeOverrides",
+          (Option.map x.withEdgeOverrides ~f:WithEdgeOverridesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let withEdgeOverrides =
+        (Option.map ~f:WithEdgeOverridesList.of_xml)
+          (Xml.child xml_arg0 "WithEdgeOverrides") in
+      let networkFunctionGroups =
+        (Option.map ~f:NetworkFunctionGroupList.of_xml)
+          (Xml.child xml_arg0 "NetworkFunctionGroups") in
+      make ?withEdgeOverrides ?networkFunctionGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let withEdgeOverrides =
+        field_map json__ "WithEdgeOverrides" WithEdgeOverridesList.of_json in
+      let networkFunctionGroups =
+        field_map json__ "NetworkFunctionGroups"
+          NetworkFunctionGroupList.of_json in
+      make ?withEdgeOverrides ?networkFunctionGroups ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The list of network function groups and edge overrides for the service insertion action. Used for both the send-to and send-via actions."]
+module WhenSentTo =
+  struct
+    type nonrec t =
+      {
+      whenSentToSegmentsList: WhenSentToSegmentsList.t option
+        [@ocaml.doc
+          "The list of destination segments when the service insertion action is send-to."]}
+    let make ?whenSentToSegmentsList = fun () -> { whenSentToSegmentsList }
+    let to_value x =
+      structure_to_value
+        [("WhenSentToSegmentsList",
+           (Option.map x.whenSentToSegmentsList
+              ~f:WhenSentToSegmentsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whenSentToSegmentsList =
+        (Option.map ~f:WhenSentToSegmentsList.of_xml)
+          (Xml.child xml_arg0 "WhenSentToSegmentsList") in
+      make ?whenSentToSegmentsList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whenSentToSegmentsList =
+        field_map json__ "WhenSentToSegmentsList"
+          WhenSentToSegmentsList.of_json in
+      make ?whenSentToSegmentsList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Displays a list of the destination segments. Used only when the service insertion action is send-to."]
+module AttachmentErrorCode =
+  struct
+    type nonrec t =
+      | VPC_NOT_FOUND 
+      | SUBNET_NOT_FOUND 
+      | SUBNET_DUPLICATED_IN_AVAILABILITY_ZONE 
+      | SUBNET_NO_FREE_ADDRESSES 
+      | SUBNET_UNSUPPORTED_AVAILABILITY_ZONE 
+      | SUBNET_NO_IPV6_CIDRS 
+      | VPN_CONNECTION_NOT_FOUND 
+      | MAXIMUM_NO_ENCAP_LIMIT_EXCEEDED 
+      | DIRECT_CONNECT_GATEWAY_NOT_FOUND 
+      | DIRECT_CONNECT_GATEWAY_EXISTING_ATTACHMENTS 
+      | DIRECT_CONNECT_GATEWAY_NO_PRIVATE_VIF 
+      | VPN_EXISTING_ASSOCIATIONS 
+      | VPC_UNSUPPORTED_FEATURES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VPC_NOT_FOUND -> "VPC_NOT_FOUND"
+      | SUBNET_NOT_FOUND -> "SUBNET_NOT_FOUND"
+      | SUBNET_DUPLICATED_IN_AVAILABILITY_ZONE ->
+          "SUBNET_DUPLICATED_IN_AVAILABILITY_ZONE"
+      | SUBNET_NO_FREE_ADDRESSES -> "SUBNET_NO_FREE_ADDRESSES"
+      | SUBNET_UNSUPPORTED_AVAILABILITY_ZONE ->
+          "SUBNET_UNSUPPORTED_AVAILABILITY_ZONE"
+      | SUBNET_NO_IPV6_CIDRS -> "SUBNET_NO_IPV6_CIDRS"
+      | VPN_CONNECTION_NOT_FOUND -> "VPN_CONNECTION_NOT_FOUND"
+      | MAXIMUM_NO_ENCAP_LIMIT_EXCEEDED -> "MAXIMUM_NO_ENCAP_LIMIT_EXCEEDED"
+      | DIRECT_CONNECT_GATEWAY_NOT_FOUND ->
+          "DIRECT_CONNECT_GATEWAY_NOT_FOUND"
+      | DIRECT_CONNECT_GATEWAY_EXISTING_ATTACHMENTS ->
+          "DIRECT_CONNECT_GATEWAY_EXISTING_ATTACHMENTS"
+      | DIRECT_CONNECT_GATEWAY_NO_PRIVATE_VIF ->
+          "DIRECT_CONNECT_GATEWAY_NO_PRIVATE_VIF"
+      | VPN_EXISTING_ASSOCIATIONS -> "VPN_EXISTING_ASSOCIATIONS"
+      | VPC_UNSUPPORTED_FEATURES -> "VPC_UNSUPPORTED_FEATURES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VPC_NOT_FOUND" -> VPC_NOT_FOUND
+      | "SUBNET_NOT_FOUND" -> SUBNET_NOT_FOUND
+      | "SUBNET_DUPLICATED_IN_AVAILABILITY_ZONE" ->
+          SUBNET_DUPLICATED_IN_AVAILABILITY_ZONE
+      | "SUBNET_NO_FREE_ADDRESSES" -> SUBNET_NO_FREE_ADDRESSES
+      | "SUBNET_UNSUPPORTED_AVAILABILITY_ZONE" ->
+          SUBNET_UNSUPPORTED_AVAILABILITY_ZONE
+      | "SUBNET_NO_IPV6_CIDRS" -> SUBNET_NO_IPV6_CIDRS
+      | "VPN_CONNECTION_NOT_FOUND" -> VPN_CONNECTION_NOT_FOUND
+      | "MAXIMUM_NO_ENCAP_LIMIT_EXCEEDED" -> MAXIMUM_NO_ENCAP_LIMIT_EXCEEDED
+      | "DIRECT_CONNECT_GATEWAY_NOT_FOUND" ->
+          DIRECT_CONNECT_GATEWAY_NOT_FOUND
+      | "DIRECT_CONNECT_GATEWAY_EXISTING_ATTACHMENTS" ->
+          DIRECT_CONNECT_GATEWAY_EXISTING_ATTACHMENTS
+      | "DIRECT_CONNECT_GATEWAY_NO_PRIVATE_VIF" ->
+          DIRECT_CONNECT_GATEWAY_NO_PRIVATE_VIF
+      | "VPN_EXISTING_ASSOCIATIONS" -> VPN_EXISTING_ASSOCIATIONS
+      | "VPC_UNSUPPORTED_FEATURES" -> VPC_UNSUPPORTED_FEATURES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AttachmentErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AttachmentErrorCode" j)
     let to_json = simple_to_json to_value
   end
 module Tag =
@@ -121,9 +567,9 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a tag."]
 module ExternalRegionCode =
@@ -133,8 +579,10 @@ module ExternalRegionCode =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:63) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -221,15 +669,16 @@ module NetworkResourceSummary =
       make ?isMiddlebox ?nameTag ?definition ?resourceType ?resourceArn
         ?registeredGatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isMiddlebox = field_map json "IsMiddlebox" Boolean.of_json in
-      let nameTag = field_map json "NameTag" ConstrainedString.of_json in
-      let definition = field_map json "Definition" ConstrainedString.of_json in
+    let of_json json__ =
+      let isMiddlebox = field_map json__ "IsMiddlebox" Boolean.of_json in
+      let nameTag = field_map json__ "NameTag" ConstrainedString.of_json in
+      let definition =
+        field_map json__ "Definition" ConstrainedString.of_json in
       let resourceType =
-        field_map json "ResourceType" ConstrainedString.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+        field_map json__ "ResourceType" ConstrainedString.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       let registeredGatewayArn =
-        field_map json "RegisteredGatewayArn" ResourceArn.of_json in
+        field_map json__ "RegisteredGatewayArn" ResourceArn.of_json in
       make ?isMiddlebox ?nameTag ?definition ?resourceType ?resourceArn
         ?registeredGatewayArn ()
     let to_json v = composed_to_json to_value v
@@ -238,7 +687,14 @@ module ReasonContextKey =
   struct
     type nonrec t = string
     let context_ = "ReasonContextKey"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:10000000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -251,7 +707,14 @@ module ReasonContextValue =
   struct
     type nonrec t = string
     let context_ = "ReasonContextValue"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:10000000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -260,6 +723,70 @@ module ReasonContextValue =
     let of_json j = string_of_json ~kind:"ReasonContextValue" j
     let to_json = simple_to_json to_value
   end
+module PeeringErrorCode =
+  struct
+    type nonrec t =
+      | TRANSIT_GATEWAY_NOT_FOUND 
+      | TRANSIT_GATEWAY_PEERS_LIMIT_EXCEEDED 
+      | MISSING_PERMISSIONS 
+      | INTERNAL_ERROR 
+      | EDGE_LOCATION_PEER_DUPLICATE 
+      | INVALID_TRANSIT_GATEWAY_STATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TRANSIT_GATEWAY_NOT_FOUND -> "TRANSIT_GATEWAY_NOT_FOUND"
+      | TRANSIT_GATEWAY_PEERS_LIMIT_EXCEEDED ->
+          "TRANSIT_GATEWAY_PEERS_LIMIT_EXCEEDED"
+      | MISSING_PERMISSIONS -> "MISSING_PERMISSIONS"
+      | INTERNAL_ERROR -> "INTERNAL_ERROR"
+      | EDGE_LOCATION_PEER_DUPLICATE -> "EDGE_LOCATION_PEER_DUPLICATE"
+      | INVALID_TRANSIT_GATEWAY_STATE -> "INVALID_TRANSIT_GATEWAY_STATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TRANSIT_GATEWAY_NOT_FOUND" -> TRANSIT_GATEWAY_NOT_FOUND
+      | "TRANSIT_GATEWAY_PEERS_LIMIT_EXCEEDED" ->
+          TRANSIT_GATEWAY_PEERS_LIMIT_EXCEEDED
+      | "MISSING_PERMISSIONS" -> MISSING_PERMISSIONS
+      | "INTERNAL_ERROR" -> INTERNAL_ERROR
+      | "EDGE_LOCATION_PEER_DUPLICATE" -> EDGE_LOCATION_PEER_DUPLICATE
+      | "INVALID_TRANSIT_GATEWAY_STATE" -> INVALID_TRANSIT_GATEWAY_STATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PeeringErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PeeringErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
+module PermissionsErrorContext =
+  struct
+    type nonrec t =
+      {
+      missingPermission: ServerSideString.t option
+        [@ocaml.doc "The missing permissions."]}
+    let make ?missingPermission = fun () -> { missingPermission }
+    let to_value x =
+      structure_to_value
+        [("MissingPermission",
+           (Option.map x.missingPermission ~f:ServerSideString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let missingPermission =
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "MissingPermission") in
+      make ?missingPermission ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let missingPermission =
+        field_map json__ "MissingPermission" ServerSideString.of_json in
+      make ?missingPermission ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes additional information about missing permissions."]
 module AttachmentId =
   struct
     type nonrec t = string
@@ -288,8 +815,10 @@ module TransitGatewayAttachmentId =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:50) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -299,6 +828,90 @@ module TransitGatewayAttachmentId =
     let of_json j = string_of_json ~kind:"TransitGatewayAttachmentId" j
     let to_json = simple_to_json to_value
   end
+module RoutingPolicyAssociationDetail =
+  struct
+    type nonrec t =
+      {
+      routingPolicyNames: ConstrainedStringList.t option
+        [@ocaml.doc "The names of the routing policies in the association."];
+      sharedSegments: ConstrainedStringList.t option
+        [@ocaml.doc
+          "The names of the segments that are shared with each other in the association."]}
+    let make ?routingPolicyNames =
+      fun ?sharedSegments -> fun () -> { routingPolicyNames; sharedSegments }
+    let to_value x =
+      structure_to_value
+        [("RoutingPolicyNames",
+           (Option.map x.routingPolicyNames ~f:ConstrainedStringList.to_value));
+        ("SharedSegments",
+          (Option.map x.sharedSegments ~f:ConstrainedStringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sharedSegments =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "SharedSegments") in
+      let routingPolicyNames =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyNames") in
+      make ?sharedSegments ?routingPolicyNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sharedSegments =
+        field_map json__ "SharedSegments" ConstrainedStringList.of_json in
+      let routingPolicyNames =
+        field_map json__ "RoutingPolicyNames" ConstrainedStringList.of_json in
+      make ?sharedSegments ?routingPolicyNames ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a routing policy association."]
+module ServiceInsertionAction =
+  struct
+    type nonrec t =
+      {
+      action: SegmentActionServiceInsertion.t option
+        [@ocaml.doc
+          "The action the service insertion takes for traffic. send-via sends east-west traffic between attachments. send-to sends north-south traffic to the security appliance, and then from that to either the Internet or to an on-premesis location."];
+      mode: SendViaMode.t option
+        [@ocaml.doc
+          "Describes the mode packets take for the send-via action. This is not used when the action is send-to. dual-hop packets traverse attachments in both the source to the destination core network edges. This mode requires that an inspection attachment must be present in all Regions of the service insertion-enabled segments. For single-hop, packets traverse a single intermediate inserted attachment. You can use EdgeOverride to specify a specific edge to use."];
+      whenSentTo: WhenSentTo.t option
+        [@ocaml.doc
+          "The list of destination segments if the service insertion action is send-via."];
+      via: Via.t option
+        [@ocaml.doc
+          "The list of network function groups and any edge overrides for the chosen service insertion action. Used for both send-to or send-via."]}
+    let make ?action =
+      fun ?mode ->
+        fun ?whenSentTo ->
+          fun ?via -> fun () -> { action; mode; whenSentTo; via }
+    let to_value x =
+      structure_to_value
+        [("Action",
+           (Option.map x.action ~f:SegmentActionServiceInsertion.to_value));
+        ("Mode", (Option.map x.mode ~f:SendViaMode.to_value));
+        ("WhenSentTo", (Option.map x.whenSentTo ~f:WhenSentTo.to_value));
+        ("Via", (Option.map x.via ~f:Via.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let via = (Option.map ~f:Via.of_xml) (Xml.child xml_arg0 "Via") in
+      let whenSentTo =
+        (Option.map ~f:WhenSentTo.of_xml) (Xml.child xml_arg0 "WhenSentTo") in
+      let mode =
+        (Option.map ~f:SendViaMode.of_xml) (Xml.child xml_arg0 "Mode") in
+      let action =
+        (Option.map ~f:SegmentActionServiceInsertion.of_xml)
+          (Xml.child xml_arg0 "Action") in
+      make ?via ?whenSentTo ?mode ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let via = field_map json__ "Via" Via.of_json in
+      let whenSentTo = field_map json__ "WhenSentTo" WhenSentTo.of_json in
+      let mode = field_map json__ "Mode" SendViaMode.of_json in
+      let action =
+        field_map json__ "Action" SegmentActionServiceInsertion.of_json in
+      make ?via ?whenSentTo ?mode ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the action that the service insertion will take for any segments associated with it."]
 module IPAddress =
   struct
     type nonrec t = string
@@ -306,8 +919,10 @@ module IPAddress =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:50) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -330,23 +945,60 @@ module Long =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
-module ServerSideString =
+module AttachmentError =
   struct
-    type nonrec t = string
-    let context_ = "ServerSideString"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      code: AttachmentErrorCode.t option
+        [@ocaml.doc "The error code for the attachment request."];
+      message: ServerSideString.t option
+        [@ocaml.doc "The message associated with the error code."];
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The ARN of the requested attachment resource."];
+      requestId: ServerSideString.t option
+        [@ocaml.doc "The ID of the attachment request."]}
+    let make ?code =
+      fun ?message ->
+        fun ?resourceArn ->
+          fun ?requestId ->
+            fun () -> { code; message; resourceArn; requestId }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:AttachmentErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ServerSideString.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("RequestId", (Option.map x.requestId ~f:ServerSideString.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ServerSideString" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "RequestId") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      let message =
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      let code =
+        (Option.map ~f:AttachmentErrorCode.of_xml)
+          (Xml.child xml_arg0 "Code") in
+      make ?requestId ?resourceArn ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" ServerSideString.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      let code = field_map json__ "Code" AttachmentErrorCode.of_json in
+      make ?requestId ?resourceArn ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the error associated with an attachment request."]
 module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -366,35 +1018,13 @@ module TagList =
     let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ConstrainedStringList =
-  struct
-    type nonrec t = ConstrainedString.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ConstrainedString.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ConstrainedString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ConstrainedStringList"
-        ~of_json:ConstrainedString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module ExternalRegionCodeList =
   struct
     type nonrec t = ExternalRegionCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExternalRegionCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -416,6 +1046,39 @@ module ExternalRegionCodeList =
         ~of_json:ExternalRegionCode.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ServiceInsertionSegments =
+  struct
+    type nonrec t =
+      {
+      sendVia: ConstrainedStringList.t option
+        [@ocaml.doc
+          "The list of segments associated with the send-via action."];
+      sendTo: ConstrainedStringList.t option
+        [@ocaml.doc
+          "The list of segments associated with the send-to action."]}
+    let make ?sendVia = fun ?sendTo -> fun () -> { sendVia; sendTo }
+    let to_value x =
+      structure_to_value
+        [("SendVia",
+           (Option.map x.sendVia ~f:ConstrainedStringList.to_value));
+        ("SendTo", (Option.map x.sendTo ~f:ConstrainedStringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sendTo =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "SendTo") in
+      let sendVia =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "SendVia") in
+      make ?sendTo ?sendVia ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sendTo = field_map json__ "SendTo" ConstrainedStringList.of_json in
+      let sendVia = field_map json__ "SendVia" ConstrainedStringList.of_json in
+      make ?sendTo ?sendVia ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the segments associated with the service insertion action."]
 module PathComponent =
   struct
     type nonrec t =
@@ -448,11 +1111,12 @@ module PathComponent =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Sequence") in
       make ?destinationCidrBlock ?resource ?sequence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationCidrBlock =
-        field_map json "DestinationCidrBlock" ConstrainedString.of_json in
-      let resource = field_map json "Resource" NetworkResourceSummary.of_json in
-      let sequence = field_map json "Sequence" Integer.of_json in
+        field_map json__ "DestinationCidrBlock" ConstrainedString.of_json in
+      let resource =
+        field_map json__ "Resource" NetworkResourceSummary.of_json in
+      let sequence = field_map json__ "Sequence" Integer.of_json in
       make ?destinationCidrBlock ?resource ?sequence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a path component."]
@@ -478,6 +1142,8 @@ module ReasonContextMap =
                        (ReasonContextValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -580,6 +1246,109 @@ module RouteAnalysisCompletionResultCode =
       of_string (string_of_json ~kind:"RouteAnalysisCompletionResultCode" j)
     let to_json = simple_to_json to_value
   end
+module AccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountId" j
+    let to_json = simple_to_json to_value
+  end
+module SLRDeploymentStatus =
+  struct
+    type nonrec t = string
+    let context_ = "SLRDeploymentStatus"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SLRDeploymentStatus" j
+    let to_json = simple_to_json to_value
+  end
+module PeeringError =
+  struct
+    type nonrec t =
+      {
+      code: PeeringErrorCode.t option
+        [@ocaml.doc "The error code for the peering request."];
+      message: ServerSideString.t option
+        [@ocaml.doc "The message associated with the error code."];
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The ARN of the requested peering resource."];
+      requestId: ServerSideString.t option
+        [@ocaml.doc "The ID of the Peering request."];
+      missingPermissionsContext: PermissionsErrorContext.t option
+        [@ocaml.doc
+          "Provides additional information about missing permissions for the peering error."]}
+    let make ?code =
+      fun ?message ->
+        fun ?resourceArn ->
+          fun ?requestId ->
+            fun ?missingPermissionsContext ->
+              fun () ->
+                {
+                  code;
+                  message;
+                  resourceArn;
+                  requestId;
+                  missingPermissionsContext
+                }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:PeeringErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ServerSideString.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("RequestId", (Option.map x.requestId ~f:ServerSideString.to_value));
+        ("MissingPermissionsContext",
+          (Option.map x.missingPermissionsContext
+             ~f:PermissionsErrorContext.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let missingPermissionsContext =
+        (Option.map ~f:PermissionsErrorContext.of_xml)
+          (Xml.child xml_arg0 "MissingPermissionsContext") in
+      let requestId =
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "RequestId") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      let message =
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      let code =
+        (Option.map ~f:PeeringErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?missingPermissionsContext ?requestId ?resourceArn ?message ?code
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let missingPermissionsContext =
+        field_map json__ "MissingPermissionsContext"
+          PermissionsErrorContext.of_json in
+      let requestId = field_map json__ "RequestId" ServerSideString.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      let code = field_map json__ "Code" PeeringErrorCode.of_json in
+      make ?missingPermissionsContext ?requestId ?resourceArn ?message ?code
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an error associated with a peering request."]
 module TransitGatewayRegistrationState =
   struct
     type nonrec t =
@@ -677,6 +1446,9 @@ module NetworkRouteDestination =
         [@ocaml.doc "The ID of the transit gateway attachment."];
       segmentName: ConstrainedString.t option
         [@ocaml.doc "The name of the segment."];
+      networkFunctionGroupName: ConstrainedString.t option
+        [@ocaml.doc
+          "The network function group name associated with the destination."];
       edgeLocation: ExternalRegionCode.t option
         [@ocaml.doc "The edge location for the network destination."];
       resourceType: ConstrainedString.t option
@@ -686,18 +1458,20 @@ module NetworkRouteDestination =
     let make ?coreNetworkAttachmentId =
       fun ?transitGatewayAttachmentId ->
         fun ?segmentName ->
-          fun ?edgeLocation ->
-            fun ?resourceType ->
-              fun ?resourceId ->
-                fun () ->
-                  {
-                    coreNetworkAttachmentId;
-                    transitGatewayAttachmentId;
-                    segmentName;
-                    edgeLocation;
-                    resourceType;
-                    resourceId
-                  }
+          fun ?networkFunctionGroupName ->
+            fun ?edgeLocation ->
+              fun ?resourceType ->
+                fun ?resourceId ->
+                  fun () ->
+                    {
+                      coreNetworkAttachmentId;
+                      transitGatewayAttachmentId;
+                      segmentName;
+                      networkFunctionGroupName;
+                      edgeLocation;
+                      resourceType;
+                      resourceId
+                    }
     let to_value x =
       structure_to_value
         [("CoreNetworkAttachmentId",
@@ -707,6 +1481,9 @@ module NetworkRouteDestination =
              ~f:TransitGatewayAttachmentId.to_value));
         ("SegmentName",
           (Option.map x.segmentName ~f:ConstrainedString.to_value));
+        ("NetworkFunctionGroupName",
+          (Option.map x.networkFunctionGroupName
+             ~f:ConstrainedString.to_value));
         ("EdgeLocation",
           (Option.map x.edgeLocation ~f:ExternalRegionCode.to_value));
         ("ResourceType",
@@ -724,6 +1501,9 @@ module NetworkRouteDestination =
       let edgeLocation =
         (Option.map ~f:ExternalRegionCode.of_xml)
           (Xml.child xml_arg0 "EdgeLocation") in
+      let networkFunctionGroupName =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "NetworkFunctionGroupName") in
       let segmentName =
         (Option.map ~f:ConstrainedString.of_xml)
           (Xml.child xml_arg0 "SegmentName") in
@@ -733,24 +1513,27 @@ module NetworkRouteDestination =
       let coreNetworkAttachmentId =
         (Option.map ~f:AttachmentId.of_xml)
           (Xml.child xml_arg0 "CoreNetworkAttachmentId") in
-      make ?resourceId ?resourceType ?edgeLocation ?segmentName
-        ?transitGatewayAttachmentId ?coreNetworkAttachmentId ()
+      make ?resourceId ?resourceType ?edgeLocation ?networkFunctionGroupName
+        ?segmentName ?transitGatewayAttachmentId ?coreNetworkAttachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map json "ResourceId" ConstrainedString.of_json in
+    let of_json json__ =
+      let resourceId =
+        field_map json__ "ResourceId" ConstrainedString.of_json in
       let resourceType =
-        field_map json "ResourceType" ConstrainedString.of_json in
+        field_map json__ "ResourceType" ConstrainedString.of_json in
       let edgeLocation =
-        field_map json "EdgeLocation" ExternalRegionCode.of_json in
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
+      let networkFunctionGroupName =
+        field_map json__ "NetworkFunctionGroupName" ConstrainedString.of_json in
       let segmentName =
-        field_map json "SegmentName" ConstrainedString.of_json in
+        field_map json__ "SegmentName" ConstrainedString.of_json in
       let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId"
+        field_map json__ "TransitGatewayAttachmentId"
           TransitGatewayAttachmentId.of_json in
       let coreNetworkAttachmentId =
-        field_map json "CoreNetworkAttachmentId" AttachmentId.of_json in
-      make ?resourceId ?resourceType ?edgeLocation ?segmentName
-        ?transitGatewayAttachmentId ?coreNetworkAttachmentId ()
+        field_map json__ "CoreNetworkAttachmentId" AttachmentId.of_json in
+      make ?resourceId ?resourceType ?edgeLocation ?networkFunctionGroupName
+        ?segmentName ?transitGatewayAttachmentId ?coreNetworkAttachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the destination of a network route."]
 module SubnetArn =
@@ -765,7 +1548,7 @@ module SubnetArn =
                 (check_string_max i ~max:500) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:[^:]{1,63}:ec2:[^:]{0,63}:[^:]{0,63}:subnet\\/subnet-[0-9a-f]{8,17}$")));
+                       ~pattern:"^arn:[^:]{1,63}:ec2:[^:]{0,63}:[^:]{0,63}:subnet\\/subnet-[0-9a-f]{8,17}$|^$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -774,6 +1557,111 @@ module SubnetArn =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"SubnetArn" j
     let to_json = simple_to_json to_value
+  end
+module CoreNetworkPolicyDocument =
+  struct
+    type nonrec t = string
+    let context_ = "CoreNetworkPolicyDocument"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:10000000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CoreNetworkPolicyDocument" j
+    let to_json = simple_to_json to_value
+  end
+module RoutingPolicyAssociationDetailsList =
+  struct
+    type nonrec t = RoutingPolicyAssociationDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RoutingPolicyAssociationDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RoutingPolicyAssociationDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RoutingPolicyAssociationDetailsList"
+        ~of_json:RoutingPolicyAssociationDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RoutingPolicyDirection =
+  struct
+    type nonrec t =
+      | Inbound 
+      | Outbound 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Inbound -> "inbound"
+      | Outbound -> "outbound"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "inbound" -> Inbound
+      | "outbound" -> Outbound
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RoutingPolicyDirection" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RoutingPolicyDirection" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceInsertionActionList =
+  struct
+    type nonrec t = ServiceInsertionAction.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceInsertionAction.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceInsertionAction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceInsertionActionList"
+        ~of_json:ServiceInsertionAction.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module ConnectPeerBgpConfiguration =
   struct
@@ -812,15 +1700,53 @@ module ConnectPeerBgpConfiguration =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "CoreNetworkAsn") in
       make ?peerAddress ?coreNetworkAddress ?peerAsn ?coreNetworkAsn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let peerAddress = field_map json "PeerAddress" IPAddress.of_json in
+    let of_json json__ =
+      let peerAddress = field_map json__ "PeerAddress" IPAddress.of_json in
       let coreNetworkAddress =
-        field_map json "CoreNetworkAddress" IPAddress.of_json in
-      let peerAsn = field_map json "PeerAsn" Long.of_json in
-      let coreNetworkAsn = field_map json "CoreNetworkAsn" Long.of_json in
+        field_map json__ "CoreNetworkAddress" IPAddress.of_json in
+      let peerAsn = field_map json__ "PeerAsn" Long.of_json in
+      let coreNetworkAsn = field_map json__ "CoreNetworkAsn" Long.of_json in
       make ?peerAddress ?coreNetworkAddress ?peerAsn ?coreNetworkAsn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network BGP configuration."]
+module ConnectPeerErrorCode =
+  struct
+    type nonrec t =
+      | EDGE_LOCATION_NO_FREE_IPS 
+      | EDGE_LOCATION_PEER_DUPLICATE 
+      | SUBNET_NOT_FOUND 
+      | IP_OUTSIDE_SUBNET_CIDR_RANGE 
+      | INVALID_INSIDE_CIDR_BLOCK 
+      | NO_ASSOCIATED_CIDR_BLOCK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EDGE_LOCATION_NO_FREE_IPS -> "EDGE_LOCATION_NO_FREE_IPS"
+      | EDGE_LOCATION_PEER_DUPLICATE -> "EDGE_LOCATION_PEER_DUPLICATE"
+      | SUBNET_NOT_FOUND -> "SUBNET_NOT_FOUND"
+      | IP_OUTSIDE_SUBNET_CIDR_RANGE -> "IP_OUTSIDE_SUBNET_CIDR_RANGE"
+      | INVALID_INSIDE_CIDR_BLOCK -> "INVALID_INSIDE_CIDR_BLOCK"
+      | NO_ASSOCIATED_CIDR_BLOCK -> "NO_ASSOCIATED_CIDR_BLOCK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EDGE_LOCATION_NO_FREE_IPS" -> EDGE_LOCATION_NO_FREE_IPS
+      | "EDGE_LOCATION_PEER_DUPLICATE" -> EDGE_LOCATION_PEER_DUPLICATE
+      | "SUBNET_NOT_FOUND" -> SUBNET_NOT_FOUND
+      | "IP_OUTSIDE_SUBNET_CIDR_RANGE" -> IP_OUTSIDE_SUBNET_CIDR_RANGE
+      | "INVALID_INSIDE_CIDR_BLOCK" -> INVALID_INSIDE_CIDR_BLOCK
+      | "NO_ASSOCIATED_CIDR_BLOCK" -> NO_ASSOCIATED_CIDR_BLOCK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConnectPeerErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ConnectPeerErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
 module ExceptionContextKey =
   struct
     type nonrec t = string
@@ -851,28 +1777,27 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      name: ServerSideString.t [@ocaml.doc "The name of the field."];
-      message: ServerSideString.t [@ocaml.doc "The message for the field."]}
-    let context_ = "ValidationExceptionField"
-    let make ~name = fun ~message -> fun () -> { name; message }
+      name: ServerSideString.t option [@ocaml.doc "The name of the field."];
+      message: ServerSideString.t option
+        [@ocaml.doc "The message for the field."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("Name", (Some (ServerSideString.to_value x.name)));
-        ("Message", (Some (ServerSideString.to_value x.message)))]
+        [("Name", (Option.map x.name ~f:ServerSideString.to_value));
+        ("Message", (Option.map x.message ~f:ServerSideString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
       let name =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~message ~name ()
+        (Option.map ~f:ServerSideString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      let name = field_map_exn json "Name" ServerSideString.of_json in
-      make ~message ~name ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      let name = field_map json__ "Name" ServerSideString.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a validation exception for a field."]
 module AWSAccountId =
@@ -882,8 +1807,10 @@ module AWSAccountId =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:12) >>=
-             (fun () -> check_string_min i ~min:12));
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -892,6 +1819,38 @@ module AWSAccountId =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AWSAccountId" j
     let to_json = simple_to_json to_value
+  end
+module AttachmentErrorList =
+  struct
+    type nonrec t = AttachmentError.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttachmentError.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AttachmentError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttachmentErrorList"
+        ~of_json:AttachmentError.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module AttachmentState =
   struct
@@ -945,6 +1904,8 @@ module AttachmentType =
       | CONNECT 
       | SITE_TO_SITE_VPN 
       | VPC 
+      | DIRECT_CONNECT_GATEWAY 
+      | TRANSIT_GATEWAY_ROUTE_TABLE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -952,12 +1913,16 @@ module AttachmentType =
       | CONNECT -> "CONNECT"
       | SITE_TO_SITE_VPN -> "SITE_TO_SITE_VPN"
       | VPC -> "VPC"
+      | DIRECT_CONNECT_GATEWAY -> "DIRECT_CONNECT_GATEWAY"
+      | TRANSIT_GATEWAY_ROUTE_TABLE -> "TRANSIT_GATEWAY_ROUTE_TABLE"
       | Non_static_id s -> s
     let of_string =
       function
       | "CONNECT" -> CONNECT
       | "SITE_TO_SITE_VPN" -> SITE_TO_SITE_VPN
       | "VPC" -> VPC
+      | "DIRECT_CONNECT_GATEWAY" -> DIRECT_CONNECT_GATEWAY
+      | "TRANSIT_GATEWAY_ROUTE_TABLE" -> TRANSIT_GATEWAY_ROUTE_TABLE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -974,8 +1939,10 @@ module CoreNetworkArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1007,12 +1974,74 @@ module CoreNetworkId =
     let of_json j = string_of_json ~kind:"CoreNetworkId" j
     let to_json = simple_to_json to_value
   end
+module NetworkFunctionGroupName =
+  struct
+    type nonrec t = string
+    let context_ = "NetworkFunctionGroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[\\s\\S]*"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NetworkFunctionGroupName" j
+    let to_json = simple_to_json to_value
+  end
+module ProposedNetworkFunctionGroupChange =
+  struct
+    type nonrec t =
+      {
+      tags: TagList.t option
+        [@ocaml.doc
+          "The list of proposed changes to the key-value tags associated with the network function group."];
+      attachmentPolicyRuleNumber: Integer.t option
+        [@ocaml.doc
+          "The proposed new attachment policy rule number for the network function group."];
+      networkFunctionGroupName: ConstrainedString.t option
+        [@ocaml.doc
+          "The proposed name change for the network function group name."]}
+    let make ?tags =
+      fun ?attachmentPolicyRuleNumber ->
+        fun ?networkFunctionGroupName ->
+          fun () ->
+            { tags; attachmentPolicyRuleNumber; networkFunctionGroupName }
+    let to_value x =
+      structure_to_value
+        [("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("AttachmentPolicyRuleNumber",
+          (Option.map x.attachmentPolicyRuleNumber ~f:Integer.to_value));
+        ("NetworkFunctionGroupName",
+          (Option.map x.networkFunctionGroupName
+             ~f:ConstrainedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkFunctionGroupName =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "NetworkFunctionGroupName") in
+      let attachmentPolicyRuleNumber =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "AttachmentPolicyRuleNumber") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?networkFunctionGroupName ?attachmentPolicyRuleNumber ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkFunctionGroupName =
+        field_map json__ "NetworkFunctionGroupName" ConstrainedString.of_json in
+      let attachmentPolicyRuleNumber =
+        field_map json__ "AttachmentPolicyRuleNumber" Integer.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      make ?networkFunctionGroupName ?attachmentPolicyRuleNumber ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes proposed changes to a network function group."]
 module ProposedSegmentChange =
   struct
     type nonrec t =
       {
       tags: TagList.t option
-        [@ocaml.doc "The key-value tags that changed for the segment."];
+        [@ocaml.doc
+          "The list of key-value tags that changed for the segment."];
       attachmentPolicyRuleNumber: Integer.t option
         [@ocaml.doc
           "The rule number in the policy document that applies to this change."];
@@ -1040,12 +2069,12 @@ module ProposedSegmentChange =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?segmentName ?attachmentPolicyRuleNumber ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let segmentName =
-        field_map json "SegmentName" ConstrainedString.of_json in
+        field_map json__ "SegmentName" ConstrainedString.of_json in
       let attachmentPolicyRuleNumber =
-        field_map json "AttachmentPolicyRuleNumber" Integer.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "AttachmentPolicyRuleNumber" Integer.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       make ?segmentName ?attachmentPolicyRuleNumber ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1081,15 +2110,57 @@ module CoreNetworkEdge =
           (Xml.child xml_arg0 "EdgeLocation") in
       make ?insideCidrBlocks ?asn ?edgeLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let insideCidrBlocks =
-        field_map json "InsideCidrBlocks" ConstrainedStringList.of_json in
-      let asn = field_map json "Asn" Long.of_json in
+        field_map json__ "InsideCidrBlocks" ConstrainedStringList.of_json in
+      let asn = field_map json__ "Asn" Long.of_json in
       let edgeLocation =
-        field_map json "EdgeLocation" ExternalRegionCode.of_json in
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
       make ?insideCidrBlocks ?asn ?edgeLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network edge."]
+module CoreNetworkNetworkFunctionGroup =
+  struct
+    type nonrec t =
+      {
+      name: ConstrainedString.t option
+        [@ocaml.doc "The name of the network function group."];
+      edgeLocations: ExternalRegionCodeList.t option
+        [@ocaml.doc "The core network edge locations."];
+      segments: ServiceInsertionSegments.t option
+        [@ocaml.doc
+          "The segments associated with the network function group."]}
+    let make ?name =
+      fun ?edgeLocations ->
+        fun ?segments -> fun () -> { name; edgeLocations; segments }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:ConstrainedString.to_value));
+        ("EdgeLocations",
+          (Option.map x.edgeLocations ~f:ExternalRegionCodeList.to_value));
+        ("Segments",
+          (Option.map x.segments ~f:ServiceInsertionSegments.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let segments =
+        (Option.map ~f:ServiceInsertionSegments.of_xml)
+          (Xml.child xml_arg0 "Segments") in
+      let edgeLocations =
+        (Option.map ~f:ExternalRegionCodeList.of_xml)
+          (Xml.child xml_arg0 "EdgeLocations") in
+      let name =
+        (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?segments ?edgeLocations ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let segments =
+        field_map json__ "Segments" ServiceInsertionSegments.of_json in
+      let edgeLocations =
+        field_map json__ "EdgeLocations" ExternalRegionCodeList.of_json in
+      let name = field_map json__ "Name" ConstrainedString.of_json in
+      make ?segments ?edgeLocations ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a network function group."]
 module CoreNetworkSegment =
   struct
     type nonrec t =
@@ -1123,12 +2194,12 @@ module CoreNetworkSegment =
         (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?sharedSegments ?edgeLocations ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sharedSegments =
-        field_map json "SharedSegments" ConstrainedStringList.of_json in
+        field_map json__ "SharedSegments" ConstrainedStringList.of_json in
       let edgeLocations =
-        field_map json "EdgeLocations" ExternalRegionCodeList.of_json in
-      let name = field_map json "Name" ConstrainedString.of_json in
+        field_map json__ "EdgeLocations" ExternalRegionCodeList.of_json in
+      let name = field_map json__ "Name" ConstrainedString.of_json in
       make ?sharedSegments ?edgeLocations ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1140,8 +2211,10 @@ module TransitGatewayArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1158,8 +2231,10 @@ module TransitGatewayAttachmentArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1173,6 +2248,9 @@ module PathComponentList =
   struct
     type nonrec t = PathComponent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PathComponent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1233,58 +2311,193 @@ module RouteAnalysisCompletion =
           (Xml.child xml_arg0 "ResultCode") in
       make ?reasonContext ?reasonCode ?resultCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reasonContext =
-        field_map json "ReasonContext" ReasonContextMap.of_json in
+        field_map json__ "ReasonContext" ReasonContextMap.of_json in
       let reasonCode =
-        field_map json "ReasonCode" RouteAnalysisCompletionReasonCode.of_json in
+        field_map json__ "ReasonCode"
+          RouteAnalysisCompletionReasonCode.of_json in
       let resultCode =
-        field_map json "ResultCode" RouteAnalysisCompletionResultCode.of_json in
+        field_map json__ "ResultCode"
+          RouteAnalysisCompletionResultCode.of_json in
       make ?reasonContext ?reasonCode ?resultCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the status of an analysis at completion."]
+module AccountStatus =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The ID of an account within the Amazon Web Services Organization."];
+      sLRDeploymentStatus: SLRDeploymentStatus.t option
+        [@ocaml.doc "The status of SLR deployment for the account."]}
+    let make ?accountId =
+      fun ?sLRDeploymentStatus ->
+        fun () -> { accountId; sLRDeploymentStatus }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("SLRDeploymentStatus",
+          (Option.map x.sLRDeploymentStatus ~f:SLRDeploymentStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sLRDeploymentStatus =
+        (Option.map ~f:SLRDeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "SLRDeploymentStatus") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?sLRDeploymentStatus ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sLRDeploymentStatus =
+        field_map json__ "SLRDeploymentStatus" SLRDeploymentStatus.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?sLRDeploymentStatus ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the current status of an account within an Amazon Web Services Organization, including service-linked roles (SLRs)."]
 module CoreNetworkPolicyError =
   struct
     type nonrec t =
       {
-      errorCode: ServerSideString.t
+      errorCode: ServerSideString.t option
         [@ocaml.doc
           "The error code associated with a core network policy error."];
-      message: ServerSideString.t
+      message: ServerSideString.t option
         [@ocaml.doc
           "The message associated with a core network policy error code."];
       path: ServerSideString.t option
         [@ocaml.doc
           "The JSON path where the error was discovered in the policy document."]}
-    let context_ = "CoreNetworkPolicyError"
-    let make ?path =
-      fun ~errorCode ->
-        fun ~message -> fun () -> { path; errorCode; message }
+    let make ?errorCode =
+      fun ?message -> fun ?path -> fun () -> { errorCode; message; path }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ServerSideString.to_value x.errorCode)));
-        ("Message", (Some (ServerSideString.to_value x.message)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ServerSideString.to_value));
+        ("Message", (Option.map x.message ~f:ServerSideString.to_value));
         ("Path", (Option.map x.path ~f:ServerSideString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let path =
         (Option.map ~f:ServerSideString.of_xml) (Xml.child xml_arg0 "Path") in
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?path ~message ~errorCode ()
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "ErrorCode") in
+      make ?path ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map json "Path" ServerSideString.of_json in
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ServerSideString.of_json in
-      make ?path ~message ~errorCode ()
+    let of_json json__ =
+      let path = field_map json__ "Path" ServerSideString.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      let errorCode = field_map json__ "ErrorCode" ServerSideString.of_json in
+      make ?path ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides details about an error in a core network policy."]
+module PeeringErrorList =
+  struct
+    type nonrec t = PeeringError.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PeeringError.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PeeringError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PeeringErrorList" ~of_json:PeeringError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PeeringId =
+  struct
+    type nonrec t = string
+    let context_ = "PeeringId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^peering-([0-9a-f]{8,17})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PeeringId" j
+    let to_json = simple_to_json to_value
+  end
+module PeeringState =
+  struct
+    type nonrec t =
+      | CREATING 
+      | FAILED 
+      | AVAILABLE 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | FAILED -> "FAILED"
+      | AVAILABLE -> "AVAILABLE"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "FAILED" -> FAILED
+      | "AVAILABLE" -> AVAILABLE
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PeeringState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PeeringState" j)
+    let to_json = simple_to_json to_value
+  end
+module PeeringType =
+  struct
+    type nonrec t =
+      | TRANSIT_GATEWAY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | TRANSIT_GATEWAY -> "TRANSIT_GATEWAY" | Non_static_id s -> s
+    let of_string =
+      function | "TRANSIT_GATEWAY" -> TRANSIT_GATEWAY | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PeeringType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PeeringType" j)
+    let to_json = simple_to_json to_value
+  end
 module CoreNetworkState =
   struct
     type nonrec t =
@@ -1323,8 +2536,10 @@ module GlobalNetworkId =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:50) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1332,6 +2547,129 @@ module GlobalNetworkId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"GlobalNetworkId" j
+    let to_json = simple_to_json to_value
+  end
+module RoutingInformationNextHop =
+  struct
+    type nonrec t =
+      {
+      ipAddress: IPAddress.t option
+        [@ocaml.doc "The IP address of the next hop."];
+      coreNetworkAttachmentId: ConstrainedString.t option
+        [@ocaml.doc
+          "The ID of the core network attachment for the next hop."];
+      resourceId: ConstrainedString.t option
+        [@ocaml.doc "The ID of the resource for the next hop."];
+      resourceType: ConstrainedString.t option
+        [@ocaml.doc "The type of resource for the next hop."];
+      segmentName: ConstrainedString.t option
+        [@ocaml.doc "The name of the segment for the next hop."];
+      edgeLocation: ExternalRegionCode.t option
+        [@ocaml.doc "The edge location for the next hop."]}
+    let make ?ipAddress =
+      fun ?coreNetworkAttachmentId ->
+        fun ?resourceId ->
+          fun ?resourceType ->
+            fun ?segmentName ->
+              fun ?edgeLocation ->
+                fun () ->
+                  {
+                    ipAddress;
+                    coreNetworkAttachmentId;
+                    resourceId;
+                    resourceType;
+                    segmentName;
+                    edgeLocation
+                  }
+    let to_value x =
+      structure_to_value
+        [("IpAddress", (Option.map x.ipAddress ~f:IPAddress.to_value));
+        ("CoreNetworkAttachmentId",
+          (Option.map x.coreNetworkAttachmentId ~f:ConstrainedString.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ConstrainedString.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ConstrainedString.to_value));
+        ("SegmentName",
+          (Option.map x.segmentName ~f:ConstrainedString.to_value));
+        ("EdgeLocation",
+          (Option.map x.edgeLocation ~f:ExternalRegionCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let edgeLocation =
+        (Option.map ~f:ExternalRegionCode.of_xml)
+          (Xml.child xml_arg0 "EdgeLocation") in
+      let segmentName =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "SegmentName") in
+      let resourceType =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let resourceId =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
+      let coreNetworkAttachmentId =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkAttachmentId") in
+      let ipAddress =
+        (Option.map ~f:IPAddress.of_xml) (Xml.child xml_arg0 "IpAddress") in
+      make ?edgeLocation ?segmentName ?resourceType ?resourceId
+        ?coreNetworkAttachmentId ?ipAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let edgeLocation =
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
+      let segmentName =
+        field_map json__ "SegmentName" ConstrainedString.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" ConstrainedString.of_json in
+      let resourceId =
+        field_map json__ "ResourceId" ConstrainedString.of_json in
+      let coreNetworkAttachmentId =
+        field_map json__ "CoreNetworkAttachmentId" ConstrainedString.of_json in
+      let ipAddress = field_map json__ "IpAddress" IPAddress.of_json in
+      make ?edgeLocation ?segmentName ?resourceType ?resourceId
+        ?coreNetworkAttachmentId ?ipAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the next hop for a route in the core network."]
+module FilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "FilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () ->
+                check_pattern i ~pattern:"^[0-9a-zA-Z\\*\\.\\\\/\\?-]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module PrefixListArn =
+  struct
+    type nonrec t = string
+    let context_ = "PrefixListArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrefixListArn" j
     let to_json = simple_to_json to_value
   end
 module ChangeSetState =
@@ -1469,10 +2807,10 @@ module TransitGatewayRegistrationStateReason =
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ConstrainedString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ConstrainedString.of_json in
       let code =
-        field_map json "Code" TransitGatewayRegistrationState.of_json in
+        field_map json__ "Code" TransitGatewayRegistrationState.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the status of a transit gateway registration."]
@@ -1483,8 +2821,10 @@ module DeviceId =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:50) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1501,8 +2841,10 @@ module LinkId =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:50) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1519,8 +2861,10 @@ module TransitGatewayConnectPeerArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1595,10 +2939,10 @@ module Location =
           (Xml.child xml_arg0 "Address") in
       make ?longitude ?latitude ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let longitude = field_map json "Longitude" ConstrainedString.of_json in
-      let latitude = field_map json "Latitude" ConstrainedString.of_json in
-      let address = field_map json "Address" ConstrainedString.of_json in
+    let of_json json__ =
+      let longitude = field_map json__ "Longitude" ConstrainedString.of_json in
+      let latitude = field_map json__ "Latitude" ConstrainedString.of_json in
+      let address = field_map json__ "Address" ConstrainedString.of_json in
       make ?longitude ?latitude ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a location."]
@@ -1609,8 +2953,10 @@ module SiteArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1627,8 +2973,10 @@ module SiteId =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:50) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1694,10 +3042,10 @@ module ConnectionHealth =
         (Option.map ~f:ConnectionType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?timestamp ?status ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "Timestamp" DateTime.of_json in
-      let status = field_map json "Status" ConnectionStatus.of_json in
-      let type_ = field_map json "Type" ConnectionType.of_json in
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" DateTime.of_json in
+      let status = field_map json__ "Status" ConnectionStatus.of_json in
+      let type_ = field_map json__ "Type" ConnectionType.of_json in
       make ?timestamp ?status ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes connection health."]
@@ -1705,6 +3053,9 @@ module NetworkRouteDestinationList =
   struct
     type nonrec t = NetworkRouteDestination.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkRouteDestination.to_value)) |>
         (fun x -> `List x)
@@ -1777,25 +3128,6 @@ module RouteType =
     let of_json j = of_string (string_of_json ~kind:"RouteType" j)
     let to_json = simple_to_json to_value
   end
-module FilterValue =
-  struct
-    type nonrec t = string
-    let context_ = "FilterValue"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () ->
-                check_pattern i ~pattern:"^[0-9a-zA-Z\\*\\.\\\\/\\?-]*$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FilterValue" j
-    let to_json = simple_to_json to_value
-  end
 module NetworkResourceMetadataMap =
   struct
     type nonrec t = (ConstrainedString.t * ConstrainedString.t) list
@@ -1818,6 +3150,8 @@ module NetworkResourceMetadataMap =
                        (ConstrainedString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1845,9 +3179,9 @@ module Bandwidth =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "UploadSpeed") in
       make ?downloadSpeed ?uploadSpeed ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let downloadSpeed = field_map json "DownloadSpeed" Integer.of_json in
-      let uploadSpeed = field_map json "UploadSpeed" Integer.of_json in
+    let of_json json__ =
+      let downloadSpeed = field_map json__ "DownloadSpeed" Integer.of_json in
+      let uploadSpeed = field_map json__ "UploadSpeed" Integer.of_json in
       make ?downloadSpeed ?uploadSpeed ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes bandwidth information."]
@@ -1858,8 +3192,10 @@ module LinkArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1955,9 +3291,9 @@ module AWSLocation =
         (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "Zone") in
       make ?subnetArn ?zone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetArn = field_map json "SubnetArn" SubnetArn.of_json in
-      let zone = field_map json "Zone" ConstrainedString.of_json in
+    let of_json json__ =
+      let subnetArn = field_map json__ "SubnetArn" SubnetArn.of_json in
+      let zone = field_map json__ "Zone" ConstrainedString.of_json in
       make ?subnetArn ?zone ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies a location in Amazon Web Services."]
@@ -1968,8 +3304,10 @@ module DeviceArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2017,8 +3355,10 @@ module CustomerGatewayArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2094,27 +3434,60 @@ module ChangeType =
   struct
     type nonrec t =
       | CORE_NETWORK_SEGMENT 
+      | NETWORK_FUNCTION_GROUP 
       | CORE_NETWORK_EDGE 
       | ATTACHMENT_MAPPING 
       | ATTACHMENT_ROUTE_PROPAGATION 
       | ATTACHMENT_ROUTE_STATIC 
+      | ROUTING_POLICY 
+      | ROUTING_POLICY_SEGMENT_ASSOCIATION 
+      | ROUTING_POLICY_EDGE_ASSOCIATION 
+      | ROUTING_POLICY_ATTACHMENT_ASSOCIATION 
+      | CORE_NETWORK_CONFIGURATION 
+      | SEGMENTS_CONFIGURATION 
+      | SEGMENT_ACTIONS_CONFIGURATION 
+      | ATTACHMENT_POLICIES_CONFIGURATION 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | CORE_NETWORK_SEGMENT -> "CORE_NETWORK_SEGMENT"
+      | NETWORK_FUNCTION_GROUP -> "NETWORK_FUNCTION_GROUP"
       | CORE_NETWORK_EDGE -> "CORE_NETWORK_EDGE"
       | ATTACHMENT_MAPPING -> "ATTACHMENT_MAPPING"
       | ATTACHMENT_ROUTE_PROPAGATION -> "ATTACHMENT_ROUTE_PROPAGATION"
       | ATTACHMENT_ROUTE_STATIC -> "ATTACHMENT_ROUTE_STATIC"
+      | ROUTING_POLICY -> "ROUTING_POLICY"
+      | ROUTING_POLICY_SEGMENT_ASSOCIATION ->
+          "ROUTING_POLICY_SEGMENT_ASSOCIATION"
+      | ROUTING_POLICY_EDGE_ASSOCIATION -> "ROUTING_POLICY_EDGE_ASSOCIATION"
+      | ROUTING_POLICY_ATTACHMENT_ASSOCIATION ->
+          "ROUTING_POLICY_ATTACHMENT_ASSOCIATION"
+      | CORE_NETWORK_CONFIGURATION -> "CORE_NETWORK_CONFIGURATION"
+      | SEGMENTS_CONFIGURATION -> "SEGMENTS_CONFIGURATION"
+      | SEGMENT_ACTIONS_CONFIGURATION -> "SEGMENT_ACTIONS_CONFIGURATION"
+      | ATTACHMENT_POLICIES_CONFIGURATION ->
+          "ATTACHMENT_POLICIES_CONFIGURATION"
       | Non_static_id s -> s
     let of_string =
       function
       | "CORE_NETWORK_SEGMENT" -> CORE_NETWORK_SEGMENT
+      | "NETWORK_FUNCTION_GROUP" -> NETWORK_FUNCTION_GROUP
       | "CORE_NETWORK_EDGE" -> CORE_NETWORK_EDGE
       | "ATTACHMENT_MAPPING" -> ATTACHMENT_MAPPING
       | "ATTACHMENT_ROUTE_PROPAGATION" -> ATTACHMENT_ROUTE_PROPAGATION
       | "ATTACHMENT_ROUTE_STATIC" -> ATTACHMENT_ROUTE_STATIC
+      | "ROUTING_POLICY" -> ROUTING_POLICY
+      | "ROUTING_POLICY_SEGMENT_ASSOCIATION" ->
+          ROUTING_POLICY_SEGMENT_ASSOCIATION
+      | "ROUTING_POLICY_EDGE_ASSOCIATION" -> ROUTING_POLICY_EDGE_ASSOCIATION
+      | "ROUTING_POLICY_ATTACHMENT_ASSOCIATION" ->
+          ROUTING_POLICY_ATTACHMENT_ASSOCIATION
+      | "CORE_NETWORK_CONFIGURATION" -> CORE_NETWORK_CONFIGURATION
+      | "SEGMENTS_CONFIGURATION" -> SEGMENTS_CONFIGURATION
+      | "SEGMENT_ACTIONS_CONFIGURATION" -> SEGMENT_ACTIONS_CONFIGURATION
+      | "ATTACHMENT_POLICIES_CONFIGURATION" ->
+          ATTACHMENT_POLICIES_CONFIGURATION
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2130,6 +3503,9 @@ module CoreNetworkChangeValues =
       {
       segmentName: ConstrainedString.t option
         [@ocaml.doc "The names of the segments in a core network."];
+      networkFunctionGroupName: ConstrainedString.t option
+        [@ocaml.doc
+          "The network function group name if the change event is associated with a network function group."];
       edgeLocations: ExternalRegionCodeList.t option
         [@ocaml.doc "The Regions where edges are located in a core network."];
       asn: Long.t option [@ocaml.doc "The ASN of a core network."];
@@ -2141,28 +3517,78 @@ module CoreNetworkChangeValues =
         [@ocaml.doc
           "The inside IP addresses used for core network change values."];
       sharedSegments: ConstrainedStringList.t option
-        [@ocaml.doc "The shared segments for a core network change value."]}
+        [@ocaml.doc "The shared segments for a core network change value."];
+      serviceInsertionActions: ServiceInsertionActionList.t option
+        [@ocaml.doc "Describes the service insertion action."];
+      vpnEcmpSupport: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether Equal Cost Multipath (ECMP) is enabled for the core network."];
+      dnsSupport: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether public DNS support is supported. The default is true."];
+      securityGroupReferencingSupport: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether security group referencing is enabled for the core network."];
+      routingPolicyDirection: RoutingPolicyDirection.t option
+        [@ocaml.doc
+          "The routing policy direction (inbound/outbound) in a core network change event."];
+      routingPolicy: CoreNetworkPolicyDocument.t option
+        [@ocaml.doc
+          "The routing policy configuration in the core network change values."];
+      peerEdgeLocations: ExternalRegionCodeList.t option
+        [@ocaml.doc
+          "The edge locations of peers in the core network change values."];
+      attachmentId: ConstrainedString.t option
+        [@ocaml.doc
+          "The attachment identifier in the core network change values."];
+      routingPolicyAssociationDetails:
+        RoutingPolicyAssociationDetailsList.t option
+        [@ocaml.doc
+          "The names of the routing policies and other association details in the core network change values."]}
     let make ?segmentName =
-      fun ?edgeLocations ->
-        fun ?asn ->
-          fun ?cidr ->
-            fun ?destinationIdentifier ->
-              fun ?insideCidrBlocks ->
-                fun ?sharedSegments ->
-                  fun () ->
-                    {
-                      segmentName;
-                      edgeLocations;
-                      asn;
-                      cidr;
-                      destinationIdentifier;
-                      insideCidrBlocks;
-                      sharedSegments
-                    }
+      fun ?networkFunctionGroupName ->
+        fun ?edgeLocations ->
+          fun ?asn ->
+            fun ?cidr ->
+              fun ?destinationIdentifier ->
+                fun ?insideCidrBlocks ->
+                  fun ?sharedSegments ->
+                    fun ?serviceInsertionActions ->
+                      fun ?vpnEcmpSupport ->
+                        fun ?dnsSupport ->
+                          fun ?securityGroupReferencingSupport ->
+                            fun ?routingPolicyDirection ->
+                              fun ?routingPolicy ->
+                                fun ?peerEdgeLocations ->
+                                  fun ?attachmentId ->
+                                    fun ?routingPolicyAssociationDetails ->
+                                      fun () ->
+                                        {
+                                          segmentName;
+                                          networkFunctionGroupName;
+                                          edgeLocations;
+                                          asn;
+                                          cidr;
+                                          destinationIdentifier;
+                                          insideCidrBlocks;
+                                          sharedSegments;
+                                          serviceInsertionActions;
+                                          vpnEcmpSupport;
+                                          dnsSupport;
+                                          securityGroupReferencingSupport;
+                                          routingPolicyDirection;
+                                          routingPolicy;
+                                          peerEdgeLocations;
+                                          attachmentId;
+                                          routingPolicyAssociationDetails
+                                        }
     let to_value x =
       structure_to_value
         [("SegmentName",
            (Option.map x.segmentName ~f:ConstrainedString.to_value));
+        ("NetworkFunctionGroupName",
+          (Option.map x.networkFunctionGroupName
+             ~f:ConstrainedString.to_value));
         ("EdgeLocations",
           (Option.map x.edgeLocations ~f:ExternalRegionCodeList.to_value));
         ("Asn", (Option.map x.asn ~f:Long.to_value));
@@ -2172,9 +3598,53 @@ module CoreNetworkChangeValues =
         ("InsideCidrBlocks",
           (Option.map x.insideCidrBlocks ~f:ConstrainedStringList.to_value));
         ("SharedSegments",
-          (Option.map x.sharedSegments ~f:ConstrainedStringList.to_value))]
+          (Option.map x.sharedSegments ~f:ConstrainedStringList.to_value));
+        ("ServiceInsertionActions",
+          (Option.map x.serviceInsertionActions
+             ~f:ServiceInsertionActionList.to_value));
+        ("VpnEcmpSupport", (Option.map x.vpnEcmpSupport ~f:Boolean.to_value));
+        ("DnsSupport", (Option.map x.dnsSupport ~f:Boolean.to_value));
+        ("SecurityGroupReferencingSupport",
+          (Option.map x.securityGroupReferencingSupport ~f:Boolean.to_value));
+        ("RoutingPolicyDirection",
+          (Option.map x.routingPolicyDirection
+             ~f:RoutingPolicyDirection.to_value));
+        ("RoutingPolicy",
+          (Option.map x.routingPolicy ~f:CoreNetworkPolicyDocument.to_value));
+        ("PeerEdgeLocations",
+          (Option.map x.peerEdgeLocations ~f:ExternalRegionCodeList.to_value));
+        ("AttachmentId",
+          (Option.map x.attachmentId ~f:ConstrainedString.to_value));
+        ("RoutingPolicyAssociationDetails",
+          (Option.map x.routingPolicyAssociationDetails
+             ~f:RoutingPolicyAssociationDetailsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let routingPolicyAssociationDetails =
+        (Option.map ~f:RoutingPolicyAssociationDetailsList.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyAssociationDetails") in
+      let attachmentId =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "AttachmentId") in
+      let peerEdgeLocations =
+        (Option.map ~f:ExternalRegionCodeList.of_xml)
+          (Xml.child xml_arg0 "PeerEdgeLocations") in
+      let routingPolicy =
+        (Option.map ~f:CoreNetworkPolicyDocument.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicy") in
+      let routingPolicyDirection =
+        (Option.map ~f:RoutingPolicyDirection.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyDirection") in
+      let securityGroupReferencingSupport =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupReferencingSupport") in
+      let dnsSupport =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DnsSupport") in
+      let vpnEcmpSupport =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "VpnEcmpSupport") in
+      let serviceInsertionActions =
+        (Option.map ~f:ServiceInsertionActionList.of_xml)
+          (Xml.child xml_arg0 "ServiceInsertionActions") in
       let sharedSegments =
         (Option.map ~f:ConstrainedStringList.of_xml)
           (Xml.child xml_arg0 "SharedSegments") in
@@ -2190,29 +3660,208 @@ module CoreNetworkChangeValues =
       let edgeLocations =
         (Option.map ~f:ExternalRegionCodeList.of_xml)
           (Xml.child xml_arg0 "EdgeLocations") in
+      let networkFunctionGroupName =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "NetworkFunctionGroupName") in
       let segmentName =
         (Option.map ~f:ConstrainedString.of_xml)
           (Xml.child xml_arg0 "SegmentName") in
-      make ?sharedSegments ?insideCidrBlocks ?destinationIdentifier ?cidr
-        ?asn ?edgeLocations ?segmentName ()
+      make ?routingPolicyAssociationDetails ?attachmentId ?peerEdgeLocations
+        ?routingPolicy ?routingPolicyDirection
+        ?securityGroupReferencingSupport ?dnsSupport ?vpnEcmpSupport
+        ?serviceInsertionActions ?sharedSegments ?insideCidrBlocks
+        ?destinationIdentifier ?cidr ?asn ?edgeLocations
+        ?networkFunctionGroupName ?segmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let routingPolicyAssociationDetails =
+        field_map json__ "RoutingPolicyAssociationDetails"
+          RoutingPolicyAssociationDetailsList.of_json in
+      let attachmentId =
+        field_map json__ "AttachmentId" ConstrainedString.of_json in
+      let peerEdgeLocations =
+        field_map json__ "PeerEdgeLocations" ExternalRegionCodeList.of_json in
+      let routingPolicy =
+        field_map json__ "RoutingPolicy" CoreNetworkPolicyDocument.of_json in
+      let routingPolicyDirection =
+        field_map json__ "RoutingPolicyDirection"
+          RoutingPolicyDirection.of_json in
+      let securityGroupReferencingSupport =
+        field_map json__ "SecurityGroupReferencingSupport" Boolean.of_json in
+      let dnsSupport = field_map json__ "DnsSupport" Boolean.of_json in
+      let vpnEcmpSupport = field_map json__ "VpnEcmpSupport" Boolean.of_json in
+      let serviceInsertionActions =
+        field_map json__ "ServiceInsertionActions"
+          ServiceInsertionActionList.of_json in
       let sharedSegments =
-        field_map json "SharedSegments" ConstrainedStringList.of_json in
+        field_map json__ "SharedSegments" ConstrainedStringList.of_json in
       let insideCidrBlocks =
-        field_map json "InsideCidrBlocks" ConstrainedStringList.of_json in
+        field_map json__ "InsideCidrBlocks" ConstrainedStringList.of_json in
       let destinationIdentifier =
-        field_map json "DestinationIdentifier" ConstrainedString.of_json in
-      let cidr = field_map json "Cidr" ConstrainedString.of_json in
-      let asn = field_map json "Asn" Long.of_json in
+        field_map json__ "DestinationIdentifier" ConstrainedString.of_json in
+      let cidr = field_map json__ "Cidr" ConstrainedString.of_json in
+      let asn = field_map json__ "Asn" Long.of_json in
       let edgeLocations =
-        field_map json "EdgeLocations" ExternalRegionCodeList.of_json in
+        field_map json__ "EdgeLocations" ExternalRegionCodeList.of_json in
+      let networkFunctionGroupName =
+        field_map json__ "NetworkFunctionGroupName" ConstrainedString.of_json in
       let segmentName =
-        field_map json "SegmentName" ConstrainedString.of_json in
-      make ?sharedSegments ?insideCidrBlocks ?destinationIdentifier ?cidr
-        ?asn ?edgeLocations ?segmentName ()
+        field_map json__ "SegmentName" ConstrainedString.of_json in
+      make ?routingPolicyAssociationDetails ?attachmentId ?peerEdgeLocations
+        ?routingPolicy ?routingPolicyDirection
+        ?securityGroupReferencingSupport ?dnsSupport ?vpnEcmpSupport
+        ?serviceInsertionActions ?sharedSegments ?insideCidrBlocks
+        ?destinationIdentifier ?cidr ?asn ?edgeLocations
+        ?networkFunctionGroupName ?segmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network change."]
+module ChangeStatus =
+  struct
+    type nonrec t =
+      | NOT_STARTED 
+      | IN_PROGRESS 
+      | COMPLETE 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NOT_STARTED -> "NOT_STARTED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETE -> "COMPLETE"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NOT_STARTED" -> NOT_STARTED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETE" -> COMPLETE
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ChangeStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ChangeStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CoreNetworkChangeEventValues =
+  struct
+    type nonrec t =
+      {
+      edgeLocation: ExternalRegionCode.t option
+        [@ocaml.doc "The edge location for the core network change event."];
+      peerEdgeLocation: ExternalRegionCode.t option
+        [@ocaml.doc
+          "The edge location of the peer in a core network change event."];
+      routingPolicyDirection: RoutingPolicyDirection.t option
+        [@ocaml.doc
+          "The routing policy direction (inbound/outbound) in a core network change event."];
+      segmentName: ConstrainedString.t option
+        [@ocaml.doc
+          "The segment name if the change event is associated with a segment."];
+      networkFunctionGroupName: ConstrainedString.t option
+        [@ocaml.doc "The changed network function group name."];
+      attachmentId: AttachmentId.t option
+        [@ocaml.doc
+          "The ID of the attachment if the change event is associated with an attachment."];
+      cidr: ConstrainedString.t option
+        [@ocaml.doc "For a STATIC_ROUTE event, this is the IP address."];
+      routingPolicyAssociationDetails:
+        RoutingPolicyAssociationDetailsList.t option
+        [@ocaml.doc
+          "The names of the routing policies and other association details in the core network change values."]}
+    let make ?edgeLocation =
+      fun ?peerEdgeLocation ->
+        fun ?routingPolicyDirection ->
+          fun ?segmentName ->
+            fun ?networkFunctionGroupName ->
+              fun ?attachmentId ->
+                fun ?cidr ->
+                  fun ?routingPolicyAssociationDetails ->
+                    fun () ->
+                      {
+                        edgeLocation;
+                        peerEdgeLocation;
+                        routingPolicyDirection;
+                        segmentName;
+                        networkFunctionGroupName;
+                        attachmentId;
+                        cidr;
+                        routingPolicyAssociationDetails
+                      }
+    let to_value x =
+      structure_to_value
+        [("EdgeLocation",
+           (Option.map x.edgeLocation ~f:ExternalRegionCode.to_value));
+        ("PeerEdgeLocation",
+          (Option.map x.peerEdgeLocation ~f:ExternalRegionCode.to_value));
+        ("RoutingPolicyDirection",
+          (Option.map x.routingPolicyDirection
+             ~f:RoutingPolicyDirection.to_value));
+        ("SegmentName",
+          (Option.map x.segmentName ~f:ConstrainedString.to_value));
+        ("NetworkFunctionGroupName",
+          (Option.map x.networkFunctionGroupName
+             ~f:ConstrainedString.to_value));
+        ("AttachmentId",
+          (Option.map x.attachmentId ~f:AttachmentId.to_value));
+        ("Cidr", (Option.map x.cidr ~f:ConstrainedString.to_value));
+        ("RoutingPolicyAssociationDetails",
+          (Option.map x.routingPolicyAssociationDetails
+             ~f:RoutingPolicyAssociationDetailsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let routingPolicyAssociationDetails =
+        (Option.map ~f:RoutingPolicyAssociationDetailsList.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyAssociationDetails") in
+      let cidr =
+        (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "Cidr") in
+      let attachmentId =
+        (Option.map ~f:AttachmentId.of_xml)
+          (Xml.child xml_arg0 "AttachmentId") in
+      let networkFunctionGroupName =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "NetworkFunctionGroupName") in
+      let segmentName =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "SegmentName") in
+      let routingPolicyDirection =
+        (Option.map ~f:RoutingPolicyDirection.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyDirection") in
+      let peerEdgeLocation =
+        (Option.map ~f:ExternalRegionCode.of_xml)
+          (Xml.child xml_arg0 "PeerEdgeLocation") in
+      let edgeLocation =
+        (Option.map ~f:ExternalRegionCode.of_xml)
+          (Xml.child xml_arg0 "EdgeLocation") in
+      make ?routingPolicyAssociationDetails ?cidr ?attachmentId
+        ?networkFunctionGroupName ?segmentName ?routingPolicyDirection
+        ?peerEdgeLocation ?edgeLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let routingPolicyAssociationDetails =
+        field_map json__ "RoutingPolicyAssociationDetails"
+          RoutingPolicyAssociationDetailsList.of_json in
+      let cidr = field_map json__ "Cidr" ConstrainedString.of_json in
+      let attachmentId = field_map json__ "AttachmentId" AttachmentId.of_json in
+      let networkFunctionGroupName =
+        field_map json__ "NetworkFunctionGroupName" ConstrainedString.of_json in
+      let segmentName =
+        field_map json__ "SegmentName" ConstrainedString.of_json in
+      let routingPolicyDirection =
+        field_map json__ "RoutingPolicyDirection"
+          RoutingPolicyDirection.of_json in
+      let peerEdgeLocation =
+        field_map json__ "PeerEdgeLocation" ExternalRegionCode.of_json in
+      let edgeLocation =
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
+      make ?routingPolicyAssociationDetails ?cidr ?attachmentId
+        ?networkFunctionGroupName ?segmentName ?routingPolicyDirection
+        ?peerEdgeLocation ?edgeLocation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a core network change event."]
 module ConnectionArn =
   struct
     type nonrec t = string
@@ -2220,8 +3869,10 @@ module ConnectionArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2238,8 +3889,10 @@ module ConnectionId =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:50) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2284,6 +3937,9 @@ module ConnectPeerBgpConfigurationList =
   struct
     type nonrec t = ConnectPeerBgpConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectPeerBgpConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2310,10 +3966,13 @@ module TunnelProtocol =
   struct
     type nonrec t =
       | GRE 
+      | NO_ENCAP 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | GRE -> "GRE" | Non_static_id s -> s
-    let of_string = function | "GRE" -> GRE | x -> Non_static_id x
+    let to_string =
+      function | GRE -> "GRE" | NO_ENCAP -> "NO_ENCAP" | Non_static_id s -> s
+    let of_string =
+      function | "GRE" -> GRE | "NO_ENCAP" -> NO_ENCAP | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -2322,6 +3981,53 @@ module TunnelProtocol =
     let of_json j = of_string (string_of_json ~kind:"TunnelProtocol" j)
     let to_json = simple_to_json to_value
   end
+module ConnectPeerError =
+  struct
+    type nonrec t =
+      {
+      code: ConnectPeerErrorCode.t option
+        [@ocaml.doc "The error code for the Connect peer request."];
+      message: ServerSideString.t option
+        [@ocaml.doc "The message associated with the error code."];
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The ARN of the requested Connect peer resource."];
+      requestId: ServerSideString.t option
+        [@ocaml.doc "The ID of the Connect peer request."]}
+    let make ?code =
+      fun ?message ->
+        fun ?resourceArn ->
+          fun ?requestId ->
+            fun () -> { code; message; resourceArn; requestId }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:ConnectPeerErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ServerSideString.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("RequestId", (Option.map x.requestId ~f:ServerSideString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "RequestId") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      let message =
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      let code =
+        (Option.map ~f:ConnectPeerErrorCode.of_xml)
+          (Xml.child xml_arg0 "Code") in
+      make ?requestId ?resourceArn ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" ServerSideString.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      let code = field_map json__ "Code" ConnectPeerErrorCode.of_json in
+      make ?requestId ?resourceArn ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an error associated with a Connect peer request"]
 module ConnectPeerAssociationState =
   struct
     type nonrec t =
@@ -2363,8 +4069,10 @@ module GlobalNetworkArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2443,6 +4151,8 @@ module ExceptionContextMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2454,6 +4164,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -2513,7 +4226,8 @@ module Attachment =
   struct
     type nonrec t =
       {
-      coreNetworkId: CoreNetworkId.t option [@ocaml.doc "A core network ID."];
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc "The ID of a core network."];
       coreNetworkArn: CoreNetworkArn.t option
         [@ocaml.doc "The ARN of a core network."];
       attachmentId: AttachmentId.t option
@@ -2525,21 +4239,34 @@ module Attachment =
       state: AttachmentState.t option
         [@ocaml.doc "The state of the attachment."];
       edgeLocation: ExternalRegionCode.t option
-        [@ocaml.doc "The Region where the edge is located."];
+        [@ocaml.doc
+          "The Region where the edge is located. This is returned for all attachment types except a Direct Connect gateway attachment, which instead returns EdgeLocations."];
+      edgeLocations: ExternalRegionCodeList.t option
+        [@ocaml.doc
+          "The edge locations that the Direct Connect gateway is associated with. This is returned only for Direct Connect gateway attachments. All other attachment types retrun EdgeLocation."];
       resourceArn: ResourceArn.t option
         [@ocaml.doc "The attachment resource ARN."];
       attachmentPolicyRuleNumber: Integer.t option
         [@ocaml.doc "The policy rule number associated with the attachment."];
       segmentName: ConstrainedString.t option
         [@ocaml.doc "The name of the segment attachment."];
+      networkFunctionGroupName: NetworkFunctionGroupName.t option
+        [@ocaml.doc "The name of the network function group."];
       tags: TagList.t option
         [@ocaml.doc "The tags associated with the attachment."];
       proposedSegmentChange: ProposedSegmentChange.t option
         [@ocaml.doc "The attachment to move from one segment to another."];
+      proposedNetworkFunctionGroupChange:
+        ProposedNetworkFunctionGroupChange.t option
+        [@ocaml.doc
+          "Describes a proposed change to a network function group associated with the attachment."];
       createdAt: DateTime.t option
         [@ocaml.doc "The timestamp when the attachment was created."];
       updatedAt: DateTime.t option
-        [@ocaml.doc "The timestamp when the attachment was last updated."]}
+        [@ocaml.doc "The timestamp when the attachment was last updated."];
+      lastModificationErrors: AttachmentErrorList.t option
+        [@ocaml.doc
+          "Describes the error associated with the attachment request."]}
     let make ?coreNetworkId =
       fun ?coreNetworkArn ->
         fun ?attachmentId ->
@@ -2547,30 +4274,38 @@ module Attachment =
             fun ?attachmentType ->
               fun ?state ->
                 fun ?edgeLocation ->
-                  fun ?resourceArn ->
-                    fun ?attachmentPolicyRuleNumber ->
-                      fun ?segmentName ->
-                        fun ?tags ->
-                          fun ?proposedSegmentChange ->
-                            fun ?createdAt ->
-                              fun ?updatedAt ->
-                                fun () ->
-                                  {
-                                    coreNetworkId;
-                                    coreNetworkArn;
-                                    attachmentId;
-                                    ownerAccountId;
-                                    attachmentType;
-                                    state;
-                                    edgeLocation;
-                                    resourceArn;
-                                    attachmentPolicyRuleNumber;
-                                    segmentName;
-                                    tags;
-                                    proposedSegmentChange;
-                                    createdAt;
-                                    updatedAt
-                                  }
+                  fun ?edgeLocations ->
+                    fun ?resourceArn ->
+                      fun ?attachmentPolicyRuleNumber ->
+                        fun ?segmentName ->
+                          fun ?networkFunctionGroupName ->
+                            fun ?tags ->
+                              fun ?proposedSegmentChange ->
+                                fun ?proposedNetworkFunctionGroupChange ->
+                                  fun ?createdAt ->
+                                    fun ?updatedAt ->
+                                      fun ?lastModificationErrors ->
+                                        fun () ->
+                                          {
+                                            coreNetworkId;
+                                            coreNetworkArn;
+                                            attachmentId;
+                                            ownerAccountId;
+                                            attachmentType;
+                                            state;
+                                            edgeLocation;
+                                            edgeLocations;
+                                            resourceArn;
+                                            attachmentPolicyRuleNumber;
+                                            segmentName;
+                                            networkFunctionGroupName;
+                                            tags;
+                                            proposedSegmentChange;
+                                            proposedNetworkFunctionGroupChange;
+                                            createdAt;
+                                            updatedAt;
+                                            lastModificationErrors
+                                          }
     let to_value x =
       structure_to_value
         [("CoreNetworkId",
@@ -2586,27 +4321,47 @@ module Attachment =
         ("State", (Option.map x.state ~f:AttachmentState.to_value));
         ("EdgeLocation",
           (Option.map x.edgeLocation ~f:ExternalRegionCode.to_value));
+        ("EdgeLocations",
+          (Option.map x.edgeLocations ~f:ExternalRegionCodeList.to_value));
         ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
         ("AttachmentPolicyRuleNumber",
           (Option.map x.attachmentPolicyRuleNumber ~f:Integer.to_value));
         ("SegmentName",
           (Option.map x.segmentName ~f:ConstrainedString.to_value));
+        ("NetworkFunctionGroupName",
+          (Option.map x.networkFunctionGroupName
+             ~f:NetworkFunctionGroupName.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("ProposedSegmentChange",
           (Option.map x.proposedSegmentChange
              ~f:ProposedSegmentChange.to_value));
+        ("ProposedNetworkFunctionGroupChange",
+          (Option.map x.proposedNetworkFunctionGroupChange
+             ~f:ProposedNetworkFunctionGroupChange.to_value));
         ("CreatedAt", (Option.map x.createdAt ~f:DateTime.to_value));
-        ("UpdatedAt", (Option.map x.updatedAt ~f:DateTime.to_value))]
+        ("UpdatedAt", (Option.map x.updatedAt ~f:DateTime.to_value));
+        ("LastModificationErrors",
+          (Option.map x.lastModificationErrors
+             ~f:AttachmentErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lastModificationErrors =
+        (Option.map ~f:AttachmentErrorList.of_xml)
+          (Xml.child xml_arg0 "LastModificationErrors") in
       let updatedAt =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
       let createdAt =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let proposedNetworkFunctionGroupChange =
+        (Option.map ~f:ProposedNetworkFunctionGroupChange.of_xml)
+          (Xml.child xml_arg0 "ProposedNetworkFunctionGroupChange") in
       let proposedSegmentChange =
         (Option.map ~f:ProposedSegmentChange.of_xml)
           (Xml.child xml_arg0 "ProposedSegmentChange") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let networkFunctionGroupName =
+        (Option.map ~f:NetworkFunctionGroupName.of_xml)
+          (Xml.child xml_arg0 "NetworkFunctionGroupName") in
       let segmentName =
         (Option.map ~f:ConstrainedString.of_xml)
           (Xml.child xml_arg0 "SegmentName") in
@@ -2615,6 +4370,9 @@ module Attachment =
           (Xml.child xml_arg0 "AttachmentPolicyRuleNumber") in
       let resourceArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      let edgeLocations =
+        (Option.map ~f:ExternalRegionCodeList.of_xml)
+          (Xml.child xml_arg0 "EdgeLocations") in
       let edgeLocation =
         (Option.map ~f:ExternalRegionCode.of_xml)
           (Xml.child xml_arg0 "EdgeLocation") in
@@ -2635,44 +4393,60 @@ module Attachment =
       let coreNetworkId =
         (Option.map ~f:CoreNetworkId.of_xml)
           (Xml.child xml_arg0 "CoreNetworkId") in
-      make ?updatedAt ?createdAt ?proposedSegmentChange ?tags ?segmentName
-        ?attachmentPolicyRuleNumber ?resourceArn ?edgeLocation ?state
-        ?attachmentType ?ownerAccountId ?attachmentId ?coreNetworkArn
-        ?coreNetworkId ()
+      make ?lastModificationErrors ?updatedAt ?createdAt
+        ?proposedNetworkFunctionGroupChange ?proposedSegmentChange ?tags
+        ?networkFunctionGroupName ?segmentName ?attachmentPolicyRuleNumber
+        ?resourceArn ?edgeLocations ?edgeLocation ?state ?attachmentType
+        ?ownerAccountId ?attachmentId ?coreNetworkArn ?coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" DateTime.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
+    let of_json json__ =
+      let lastModificationErrors =
+        field_map json__ "LastModificationErrors" AttachmentErrorList.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" DateTime.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
+      let proposedNetworkFunctionGroupChange =
+        field_map json__ "ProposedNetworkFunctionGroupChange"
+          ProposedNetworkFunctionGroupChange.of_json in
       let proposedSegmentChange =
-        field_map json "ProposedSegmentChange" ProposedSegmentChange.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "ProposedSegmentChange"
+          ProposedSegmentChange.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let networkFunctionGroupName =
+        field_map json__ "NetworkFunctionGroupName"
+          NetworkFunctionGroupName.of_json in
       let segmentName =
-        field_map json "SegmentName" ConstrainedString.of_json in
+        field_map json__ "SegmentName" ConstrainedString.of_json in
       let attachmentPolicyRuleNumber =
-        field_map json "AttachmentPolicyRuleNumber" Integer.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+        field_map json__ "AttachmentPolicyRuleNumber" Integer.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let edgeLocations =
+        field_map json__ "EdgeLocations" ExternalRegionCodeList.of_json in
       let edgeLocation =
-        field_map json "EdgeLocation" ExternalRegionCode.of_json in
-      let state = field_map json "State" AttachmentState.of_json in
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
+      let state = field_map json__ "State" AttachmentState.of_json in
       let attachmentType =
-        field_map json "AttachmentType" AttachmentType.of_json in
+        field_map json__ "AttachmentType" AttachmentType.of_json in
       let ownerAccountId =
-        field_map json "OwnerAccountId" AWSAccountId.of_json in
-      let attachmentId = field_map json "AttachmentId" AttachmentId.of_json in
+        field_map json__ "OwnerAccountId" AWSAccountId.of_json in
+      let attachmentId = field_map json__ "AttachmentId" AttachmentId.of_json in
       let coreNetworkArn =
-        field_map json "CoreNetworkArn" CoreNetworkArn.of_json in
+        field_map json__ "CoreNetworkArn" CoreNetworkArn.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
-      make ?updatedAt ?createdAt ?proposedSegmentChange ?tags ?segmentName
-        ?attachmentPolicyRuleNumber ?resourceArn ?edgeLocation ?state
-        ?attachmentType ?ownerAccountId ?attachmentId ?coreNetworkArn
-        ?coreNetworkId ()
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?lastModificationErrors ?updatedAt ?createdAt
+        ?proposedNetworkFunctionGroupChange ?proposedSegmentChange ?tags
+        ?networkFunctionGroupName ?segmentName ?attachmentPolicyRuleNumber
+        ?resourceArn ?edgeLocations ?edgeLocation ?state ?attachmentType
+        ?ownerAccountId ?attachmentId ?coreNetworkArn ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network attachment."]
 module SubnetArnList =
   struct
     type nonrec t = SubnetArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2698,26 +4472,89 @@ module VpcOptions =
     type nonrec t =
       {
       ipv6Support: Boolean.t option
-        [@ocaml.doc "Indicates whether IPv6 is supported."]}
-    let make ?ipv6Support = fun () -> { ipv6Support }
+        [@ocaml.doc "Indicates whether IPv6 is supported."];
+      applianceModeSupport: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether appliance mode is supported. If enabled, traffic flow between a source and destination use the same Availability Zone for the VPC attachment for the lifetime of that flow. The default value is false."];
+      dnsSupport: Boolean.t option
+        [@ocaml.doc "Indicates whether DNS is supported."];
+      securityGroupReferencingSupport: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether security group referencing is enabled for this VPC attachment. The default is true. However, at the core network policy-level the default is set to false."]}
+    let make ?ipv6Support =
+      fun ?applianceModeSupport ->
+        fun ?dnsSupport ->
+          fun ?securityGroupReferencingSupport ->
+            fun () ->
+              {
+                ipv6Support;
+                applianceModeSupport;
+                dnsSupport;
+                securityGroupReferencingSupport
+              }
     let to_value x =
       structure_to_value
-        [("Ipv6Support", (Option.map x.ipv6Support ~f:Boolean.to_value))]
+        [("Ipv6Support", (Option.map x.ipv6Support ~f:Boolean.to_value));
+        ("ApplianceModeSupport",
+          (Option.map x.applianceModeSupport ~f:Boolean.to_value));
+        ("DnsSupport", (Option.map x.dnsSupport ~f:Boolean.to_value));
+        ("SecurityGroupReferencingSupport",
+          (Option.map x.securityGroupReferencingSupport ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let securityGroupReferencingSupport =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupReferencingSupport") in
+      let dnsSupport =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DnsSupport") in
+      let applianceModeSupport =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ApplianceModeSupport") in
       let ipv6Support =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Ipv6Support") in
-      make ?ipv6Support ()
+      make ?securityGroupReferencingSupport ?dnsSupport ?applianceModeSupport
+        ?ipv6Support ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipv6Support = field_map json "Ipv6Support" Boolean.of_json in
-      make ?ipv6Support ()
+    let of_json json__ =
+      let securityGroupReferencingSupport =
+        field_map json__ "SecurityGroupReferencingSupport" Boolean.of_json in
+      let dnsSupport = field_map json__ "DnsSupport" Boolean.of_json in
+      let applianceModeSupport =
+        field_map json__ "ApplianceModeSupport" Boolean.of_json in
+      let ipv6Support = field_map json__ "Ipv6Support" Boolean.of_json in
+      make ?securityGroupReferencingSupport ?dnsSupport ?applianceModeSupport
+        ?ipv6Support ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the VPC options."]
+module DirectConnectGatewayArn =
+  struct
+    type nonrec t = string
+    let context_ = "DirectConnectGatewayArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:[^:]{1,63}:directconnect::[^:]{0,63}:dx-gateway\\/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DirectConnectGatewayArn" j
+    let to_json = simple_to_json to_value
+  end
 module CoreNetworkEdgeList =
   struct
     type nonrec t = CoreNetworkEdge.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoreNetworkEdge.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2739,10 +4576,42 @@ module CoreNetworkEdgeList =
         ~of_json:CoreNetworkEdge.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CoreNetworkNetworkFunctionGroupList =
+  struct
+    type nonrec t = CoreNetworkNetworkFunctionGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CoreNetworkNetworkFunctionGroup.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CoreNetworkNetworkFunctionGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CoreNetworkNetworkFunctionGroupList"
+        ~of_json:CoreNetworkNetworkFunctionGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CoreNetworkSegmentList =
   struct
     type nonrec t = CoreNetworkSegment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoreNetworkSegment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2798,12 +4667,12 @@ module RouteAnalysisEndpointOptions =
           (Xml.child xml_arg0 "TransitGatewayAttachmentArn") in
       make ?ipAddress ?transitGatewayArn ?transitGatewayAttachmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipAddress = field_map json "IpAddress" IPAddress.of_json in
+    let of_json json__ =
+      let ipAddress = field_map json__ "IpAddress" IPAddress.of_json in
       let transitGatewayArn =
-        field_map json "TransitGatewayArn" TransitGatewayArn.of_json in
+        field_map json__ "TransitGatewayArn" TransitGatewayArn.of_json in
       let transitGatewayAttachmentArn =
-        field_map json "TransitGatewayAttachmentArn"
+        field_map json__ "TransitGatewayAttachmentArn"
           TransitGatewayAttachmentArn.of_json in
       make ?ipAddress ?transitGatewayArn ?transitGatewayAttachmentArn ()
     let to_json v = composed_to_json to_value v
@@ -2832,10 +4701,10 @@ module RouteAnalysisPath =
           (Xml.child xml_arg0 "CompletionStatus") in
       make ?path ?completionStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map json "Path" PathComponentList.of_json in
+    let of_json json__ =
+      let path = field_map json__ "Path" PathComponentList.of_json in
       let completionStatus =
-        field_map json "CompletionStatus" RouteAnalysisCompletion.of_json in
+        field_map json__ "CompletionStatus" RouteAnalysisCompletion.of_json in
       make ?path ?completionStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a route analysis path."]
@@ -2868,23 +4737,79 @@ module RouteAnalysisStatus =
     let of_json j = of_string (string_of_json ~kind:"RouteAnalysisStatus" j)
     let to_json = simple_to_json to_value
   end
-module CoreNetworkPolicyDocument =
+module AccountStatusList =
+  struct
+    type nonrec t = AccountStatus.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccountStatus.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccountStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccountStatusList" ~of_json:AccountStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OrganizationAwsServiceAccessStatus =
   struct
     type nonrec t = string
-    let context_ = "CoreNetworkPolicyDocument"
-    let make i = i
+    let context_ = "OrganizationAwsServiceAccessStatus"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CoreNetworkPolicyDocument" j
+    let of_json j =
+      string_of_json ~kind:"OrganizationAwsServiceAccessStatus" j
+    let to_json = simple_to_json to_value
+  end
+module OrganizationId =
+  struct
+    type nonrec t = string
+    let context_ = "OrganizationId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"^o-([0-9a-f]{8,17})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OrganizationId" j
     let to_json = simple_to_json to_value
   end
 module CoreNetworkPolicyErrorList =
   struct
     type nonrec t = CoreNetworkPolicyError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoreNetworkPolicyError.to_value)) |>
         (fun x -> `List x)
@@ -2907,6 +4832,131 @@ module CoreNetworkPolicyErrorList =
         ~of_json:CoreNetworkPolicyError.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Peering =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc "The ID of the core network for the peering request."];
+      coreNetworkArn: CoreNetworkArn.t option
+        [@ocaml.doc "The ARN of a core network."];
+      peeringId: PeeringId.t option
+        [@ocaml.doc "The ID of the peering attachment."];
+      ownerAccountId: AWSAccountId.t option
+        [@ocaml.doc "The ID of the account owner."];
+      peeringType: PeeringType.t option
+        [@ocaml.doc "The type of peering. This will be TRANSIT_GATEWAY."];
+      state: PeeringState.t option
+        [@ocaml.doc "The current state of the peering connection."];
+      edgeLocation: ExternalRegionCode.t option
+        [@ocaml.doc "The edge location for the peer."];
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The resource ARN of the peer."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The list of key-value tags associated with the peering."];
+      createdAt: DateTime.t option
+        [@ocaml.doc "The timestamp when the attachment peer was created."];
+      lastModificationErrors: PeeringErrorList.t option
+        [@ocaml.doc
+          "Describes the error associated with the Connect peer request."]}
+    let make ?coreNetworkId =
+      fun ?coreNetworkArn ->
+        fun ?peeringId ->
+          fun ?ownerAccountId ->
+            fun ?peeringType ->
+              fun ?state ->
+                fun ?edgeLocation ->
+                  fun ?resourceArn ->
+                    fun ?tags ->
+                      fun ?createdAt ->
+                        fun ?lastModificationErrors ->
+                          fun () ->
+                            {
+                              coreNetworkId;
+                              coreNetworkArn;
+                              peeringId;
+                              ownerAccountId;
+                              peeringType;
+                              state;
+                              edgeLocation;
+                              resourceArn;
+                              tags;
+                              createdAt;
+                              lastModificationErrors
+                            }
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId",
+           (Option.map x.coreNetworkId ~f:CoreNetworkId.to_value));
+        ("CoreNetworkArn",
+          (Option.map x.coreNetworkArn ~f:CoreNetworkArn.to_value));
+        ("PeeringId", (Option.map x.peeringId ~f:PeeringId.to_value));
+        ("OwnerAccountId",
+          (Option.map x.ownerAccountId ~f:AWSAccountId.to_value));
+        ("PeeringType", (Option.map x.peeringType ~f:PeeringType.to_value));
+        ("State", (Option.map x.state ~f:PeeringState.to_value));
+        ("EdgeLocation",
+          (Option.map x.edgeLocation ~f:ExternalRegionCode.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:DateTime.to_value));
+        ("LastModificationErrors",
+          (Option.map x.lastModificationErrors ~f:PeeringErrorList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModificationErrors =
+        (Option.map ~f:PeeringErrorList.of_xml)
+          (Xml.child xml_arg0 "LastModificationErrors") in
+      let createdAt =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      let edgeLocation =
+        (Option.map ~f:ExternalRegionCode.of_xml)
+          (Xml.child xml_arg0 "EdgeLocation") in
+      let state =
+        (Option.map ~f:PeeringState.of_xml) (Xml.child xml_arg0 "State") in
+      let peeringType =
+        (Option.map ~f:PeeringType.of_xml) (Xml.child xml_arg0 "PeeringType") in
+      let ownerAccountId =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "OwnerAccountId") in
+      let peeringId =
+        (Option.map ~f:PeeringId.of_xml) (Xml.child xml_arg0 "PeeringId") in
+      let coreNetworkArn =
+        (Option.map ~f:CoreNetworkArn.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkArn") in
+      let coreNetworkId =
+        (Option.map ~f:CoreNetworkId.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkId") in
+      make ?lastModificationErrors ?createdAt ?tags ?resourceArn
+        ?edgeLocation ?state ?peeringType ?ownerAccountId ?peeringId
+        ?coreNetworkArn ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModificationErrors =
+        field_map json__ "LastModificationErrors" PeeringErrorList.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let edgeLocation =
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
+      let state = field_map json__ "State" PeeringState.of_json in
+      let peeringType = field_map json__ "PeeringType" PeeringType.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AWSAccountId.of_json in
+      let peeringId = field_map json__ "PeeringId" PeeringId.of_json in
+      let coreNetworkArn =
+        field_map json__ "CoreNetworkArn" CoreNetworkArn.of_json in
+      let coreNetworkId =
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?lastModificationErrors ?createdAt ?tags ?resourceArn
+        ?edgeLocation ?state ?peeringType ?ownerAccountId ?peeringId
+        ?coreNetworkArn ?coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a peering connection."]
 module CoreNetworkSummary =
   struct
     type nonrec t =
@@ -2980,23 +5030,192 @@ module CoreNetworkSummary =
       make ?tags ?description ?state ?ownerAccountId ?globalNetworkId
         ?coreNetworkArn ?coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let state = field_map json "State" CoreNetworkState.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let state = field_map json__ "State" CoreNetworkState.of_json in
       let ownerAccountId =
-        field_map json "OwnerAccountId" AWSAccountId.of_json in
+        field_map json__ "OwnerAccountId" AWSAccountId.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       let coreNetworkArn =
-        field_map json "CoreNetworkArn" CoreNetworkArn.of_json in
+        field_map json__ "CoreNetworkArn" CoreNetworkArn.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?tags ?description ?state ?ownerAccountId ?globalNetworkId
         ?coreNetworkArn ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns summary information about a core network."]
+module CoreNetworkRoutingInformation =
+  struct
+    type nonrec t =
+      {
+      prefix: ConstrainedString.t option
+        [@ocaml.doc "The IP prefix for the route."];
+      nextHop: RoutingInformationNextHop.t option
+        [@ocaml.doc "The next hop information for the route."];
+      localPreference: ConstrainedString.t option
+        [@ocaml.doc "The BGP local preference value for the route."];
+      med: ConstrainedString.t option
+        [@ocaml.doc
+          "The BGP Multi-Exit Discriminator (MED) value for the route."];
+      asPath: ConstrainedStringList.t option
+        [@ocaml.doc "The BGP AS path for the route."];
+      communities: ConstrainedStringList.t option
+        [@ocaml.doc "The BGP community values for the route."]}
+    let make ?prefix =
+      fun ?nextHop ->
+        fun ?localPreference ->
+          fun ?med ->
+            fun ?asPath ->
+              fun ?communities ->
+                fun () ->
+                  {
+                    prefix;
+                    nextHop;
+                    localPreference;
+                    med;
+                    asPath;
+                    communities
+                  }
+    let to_value x =
+      structure_to_value
+        [("Prefix", (Option.map x.prefix ~f:ConstrainedString.to_value));
+        ("NextHop",
+          (Option.map x.nextHop ~f:RoutingInformationNextHop.to_value));
+        ("LocalPreference",
+          (Option.map x.localPreference ~f:ConstrainedString.to_value));
+        ("Med", (Option.map x.med ~f:ConstrainedString.to_value));
+        ("AsPath", (Option.map x.asPath ~f:ConstrainedStringList.to_value));
+        ("Communities",
+          (Option.map x.communities ~f:ConstrainedStringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let communities =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "Communities") in
+      let asPath =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "AsPath") in
+      let med =
+        (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "Med") in
+      let localPreference =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "LocalPreference") in
+      let nextHop =
+        (Option.map ~f:RoutingInformationNextHop.of_xml)
+          (Xml.child xml_arg0 "NextHop") in
+      let prefix =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "Prefix") in
+      make ?communities ?asPath ?med ?localPreference ?nextHop ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let communities =
+        field_map json__ "Communities" ConstrainedStringList.of_json in
+      let asPath = field_map json__ "AsPath" ConstrainedStringList.of_json in
+      let med = field_map json__ "Med" ConstrainedString.of_json in
+      let localPreference =
+        field_map json__ "LocalPreference" ConstrainedString.of_json in
+      let nextHop =
+        field_map json__ "NextHop" RoutingInformationNextHop.of_json in
+      let prefix = field_map json__ "Prefix" ConstrainedString.of_json in
+      make ?communities ?asPath ?med ?localPreference ?nextHop ?prefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Routing information for a core network, including route details and BGP attributes."]
+module FilterName =
+  struct
+    type nonrec t = string
+    let context_ = "FilterName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_pattern i ~pattern:"^[0-9a-zA-Z\\.-]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterName" j
+    let to_json = simple_to_json to_value
+  end
+module FilterValues =
+  struct
+    type nonrec t = FilterValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FilterValues" ~of_json:FilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PrefixListAssociation =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc "The core network id in the association."];
+      prefixListArn: PrefixListArn.t option
+        [@ocaml.doc "The ARN of the prefix list in the association."];
+      prefixListAlias: ConstrainedString.t option
+        [@ocaml.doc "The alias of the prefix list in the association."]}
+    let make ?coreNetworkId =
+      fun ?prefixListArn ->
+        fun ?prefixListAlias ->
+          fun () -> { coreNetworkId; prefixListArn; prefixListAlias }
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId",
+           (Option.map x.coreNetworkId ~f:CoreNetworkId.to_value));
+        ("PrefixListArn",
+          (Option.map x.prefixListArn ~f:PrefixListArn.to_value));
+        ("PrefixListAlias",
+          (Option.map x.prefixListAlias ~f:ConstrainedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefixListAlias =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "PrefixListAlias") in
+      let prefixListArn =
+        (Option.map ~f:PrefixListArn.of_xml)
+          (Xml.child xml_arg0 "PrefixListArn") in
+      let coreNetworkId =
+        (Option.map ~f:CoreNetworkId.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkId") in
+      make ?prefixListAlias ?prefixListArn ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefixListAlias =
+        field_map json__ "PrefixListAlias" ConstrainedString.of_json in
+      let prefixListArn =
+        field_map json__ "PrefixListArn" PrefixListArn.of_json in
+      let coreNetworkId =
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?prefixListAlias ?prefixListArn ?coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a prefix list association with a core network."]
 module CoreNetworkPolicyVersion =
   struct
     type nonrec t =
@@ -3063,16 +5282,17 @@ module CoreNetworkPolicyVersion =
       make ?changeSetState ?createdAt ?description ?alias ?policyVersionId
         ?coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let changeSetState =
-        field_map json "ChangeSetState" ChangeSetState.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
+        field_map json__ "ChangeSetState" ChangeSetState.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let alias = field_map json "Alias" CoreNetworkPolicyAlias.of_json in
-      let policyVersionId = field_map json "PolicyVersionId" Integer.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let alias = field_map json__ "Alias" CoreNetworkPolicyAlias.of_json in
+      let policyVersionId =
+        field_map json__ "PolicyVersionId" Integer.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?changeSetState ?createdAt ?description ?alias ?policyVersionId
         ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -3094,7 +5314,10 @@ module ConnectPeerSummary =
       createdAt: DateTime.t option
         [@ocaml.doc "The timestamp when a Connect peer was created."];
       tags: TagList.t option
-        [@ocaml.doc "The tags associated with a Connect peer summary."]}
+        [@ocaml.doc
+          "The list of key-value tags associated with the Connect peer summary."];
+      subnetArn: SubnetArn.t option
+        [@ocaml.doc "The subnet ARN for the Connect peer summary."]}
     let make ?coreNetworkId =
       fun ?connectAttachmentId ->
         fun ?connectPeerId ->
@@ -3102,16 +5325,18 @@ module ConnectPeerSummary =
             fun ?connectPeerState ->
               fun ?createdAt ->
                 fun ?tags ->
-                  fun () ->
-                    {
-                      coreNetworkId;
-                      connectAttachmentId;
-                      connectPeerId;
-                      edgeLocation;
-                      connectPeerState;
-                      createdAt;
-                      tags
-                    }
+                  fun ?subnetArn ->
+                    fun () ->
+                      {
+                        coreNetworkId;
+                        connectAttachmentId;
+                        connectPeerId;
+                        edgeLocation;
+                        connectPeerState;
+                        createdAt;
+                        tags;
+                        subnetArn
+                      }
     let to_value x =
       structure_to_value
         [("CoreNetworkId",
@@ -3125,9 +5350,12 @@ module ConnectPeerSummary =
         ("ConnectPeerState",
           (Option.map x.connectPeerState ~f:ConnectPeerState.to_value));
         ("CreatedAt", (Option.map x.createdAt ~f:DateTime.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("SubnetArn", (Option.map x.subnetArn ~f:SubnetArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subnetArn =
+        (Option.map ~f:SubnetArn.of_xml) (Xml.child xml_arg0 "SubnetArn") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let createdAt =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreatedAt") in
@@ -3146,26 +5374,118 @@ module ConnectPeerSummary =
       let coreNetworkId =
         (Option.map ~f:CoreNetworkId.of_xml)
           (Xml.child xml_arg0 "CoreNetworkId") in
-      make ?tags ?createdAt ?connectPeerState ?edgeLocation ?connectPeerId
-        ?connectAttachmentId ?coreNetworkId ()
+      make ?subnetArn ?tags ?createdAt ?connectPeerState ?edgeLocation
+        ?connectPeerId ?connectAttachmentId ?coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
+    let of_json json__ =
+      let subnetArn = field_map json__ "SubnetArn" SubnetArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
       let connectPeerState =
-        field_map json "ConnectPeerState" ConnectPeerState.of_json in
+        field_map json__ "ConnectPeerState" ConnectPeerState.of_json in
       let edgeLocation =
-        field_map json "EdgeLocation" ExternalRegionCode.of_json in
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
       let connectPeerId =
-        field_map json "ConnectPeerId" ConnectPeerId.of_json in
+        field_map json__ "ConnectPeerId" ConnectPeerId.of_json in
       let connectAttachmentId =
-        field_map json "ConnectAttachmentId" AttachmentId.of_json in
+        field_map json__ "ConnectAttachmentId" AttachmentId.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
-      make ?tags ?createdAt ?connectPeerState ?edgeLocation ?connectPeerId
-        ?connectAttachmentId ?coreNetworkId ()
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?subnetArn ?tags ?createdAt ?connectPeerState ?edgeLocation
+        ?connectPeerId ?connectAttachmentId ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary description of a Connect peer."]
+module AttachmentRoutingPolicyAssociationSummary =
+  struct
+    type nonrec t =
+      {
+      attachmentId: AttachmentId.t option
+        [@ocaml.doc
+          "The ID of the attachment associated with the routing policy."];
+      pendingRoutingPolicies: ConstrainedStringList.t option
+        [@ocaml.doc
+          "The list of routing policies that are pending association with the attachment."];
+      associatedRoutingPolicies: ConstrainedStringList.t option
+        [@ocaml.doc
+          "The list of routing policies currently associated with the attachment."];
+      routingPolicyLabel: ConstrainedString.t option
+        [@ocaml.doc
+          "The routing policy label associated with the attachment."]}
+    let make ?attachmentId =
+      fun ?pendingRoutingPolicies ->
+        fun ?associatedRoutingPolicies ->
+          fun ?routingPolicyLabel ->
+            fun () ->
+              {
+                attachmentId;
+                pendingRoutingPolicies;
+                associatedRoutingPolicies;
+                routingPolicyLabel
+              }
+    let to_value x =
+      structure_to_value
+        [("AttachmentId",
+           (Option.map x.attachmentId ~f:AttachmentId.to_value));
+        ("PendingRoutingPolicies",
+          (Option.map x.pendingRoutingPolicies
+             ~f:ConstrainedStringList.to_value));
+        ("AssociatedRoutingPolicies",
+          (Option.map x.associatedRoutingPolicies
+             ~f:ConstrainedStringList.to_value));
+        ("RoutingPolicyLabel",
+          (Option.map x.routingPolicyLabel ~f:ConstrainedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let routingPolicyLabel =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyLabel") in
+      let associatedRoutingPolicies =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "AssociatedRoutingPolicies") in
+      let pendingRoutingPolicies =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "PendingRoutingPolicies") in
+      let attachmentId =
+        (Option.map ~f:AttachmentId.of_xml)
+          (Xml.child xml_arg0 "AttachmentId") in
+      make ?routingPolicyLabel ?associatedRoutingPolicies
+        ?pendingRoutingPolicies ?attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let routingPolicyLabel =
+        field_map json__ "RoutingPolicyLabel" ConstrainedString.of_json in
+      let associatedRoutingPolicies =
+        field_map json__ "AssociatedRoutingPolicies"
+          ConstrainedStringList.of_json in
+      let pendingRoutingPolicies =
+        field_map json__ "PendingRoutingPolicies"
+          ConstrainedStringList.of_json in
+      let attachmentId = field_map json__ "AttachmentId" AttachmentId.of_json in
+      make ?routingPolicyLabel ?associatedRoutingPolicies
+        ?pendingRoutingPolicies ?attachmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary information about routing policy associations for an attachment."]
+module TransitGatewayRouteTableArn =
+  struct
+    type nonrec t = string
+    let context_ = "TransitGatewayRouteTableArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TransitGatewayRouteTableArn" j
+    let to_json = simple_to_json to_value
+  end
 module TransitGatewayRegistration =
   struct
     type nonrec t =
@@ -3201,17 +5521,40 @@ module TransitGatewayRegistration =
           (Xml.child xml_arg0 "GlobalNetworkId") in
       make ?state ?transitGatewayArn ?globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let state =
-        field_map json "State" TransitGatewayRegistrationStateReason.of_json in
+        field_map json__ "State"
+          TransitGatewayRegistrationStateReason.of_json in
       let transitGatewayArn =
-        field_map json "TransitGatewayArn" TransitGatewayArn.of_json in
+        field_map json__ "TransitGatewayArn" TransitGatewayArn.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?state ?transitGatewayArn ?globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the registration of a transit gateway to a global network."]
+module TransitGatewayPeeringAttachmentId =
+  struct
+    type nonrec t = string
+    let context_ = "TransitGatewayPeeringAttachmentId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^tgw-attach-([0-9a-f]{8,17})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"TransitGatewayPeeringAttachmentId" j
+    let to_json = simple_to_json to_value
+  end
 module TransitGatewayConnectPeerAssociation =
   struct
     type nonrec t =
@@ -3268,16 +5611,16 @@ module TransitGatewayConnectPeerAssociation =
       make ?state ?linkId ?deviceId ?globalNetworkId
         ?transitGatewayConnectPeerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let state =
-        field_map json "State"
+        field_map json__ "State"
           TransitGatewayConnectPeerAssociationState.of_json in
-      let linkId = field_map json "LinkId" LinkId.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       let transitGatewayConnectPeerArn =
-        field_map json "TransitGatewayConnectPeerArn"
+        field_map json__ "TransitGatewayConnectPeerArn"
           TransitGatewayConnectPeerArn.of_json in
       make ?state ?linkId ?deviceId ?globalNetworkId
         ?transitGatewayConnectPeerArn ()
@@ -3352,17 +5695,17 @@ module Site =
       make ?tags ?state ?createdAt ?location ?description ?globalNetworkId
         ?siteArn ?siteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let state = field_map json "State" SiteState.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
-      let location = field_map json "Location" Location.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let state = field_map json__ "State" SiteState.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
+      let location = field_map json__ "Location" Location.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
-      let siteArn = field_map json "SiteArn" SiteArn.of_json in
-      let siteId = field_map json "SiteId" SiteId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
+      let siteArn = field_map json__ "SiteArn" SiteArn.of_json in
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
       make ?tags ?state ?createdAt ?location ?description ?globalNetworkId
         ?siteArn ?siteId ()
     let to_json v = composed_to_json to_value v
@@ -3475,19 +5818,20 @@ module NetworkTelemetry =
       make ?health ?address ?resourceArn ?resourceId ?resourceType ?accountId
         ?awsRegion ?coreNetworkId ?registeredGatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let health = field_map json "Health" ConnectionHealth.of_json in
-      let address = field_map json "Address" ConstrainedString.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
-      let resourceId = field_map json "ResourceId" ConstrainedString.of_json in
+    let of_json json__ =
+      let health = field_map json__ "Health" ConnectionHealth.of_json in
+      let address = field_map json__ "Address" ConstrainedString.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let resourceId =
+        field_map json__ "ResourceId" ConstrainedString.of_json in
       let resourceType =
-        field_map json "ResourceType" ConstrainedString.of_json in
-      let accountId = field_map json "AccountId" AWSAccountId.of_json in
-      let awsRegion = field_map json "AwsRegion" ExternalRegionCode.of_json in
+        field_map json__ "ResourceType" ConstrainedString.of_json in
+      let accountId = field_map json__ "AccountId" AWSAccountId.of_json in
+      let awsRegion = field_map json__ "AwsRegion" ExternalRegionCode.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       let registeredGatewayArn =
-        field_map json "RegisteredGatewayArn" ResourceArn.of_json in
+        field_map json__ "RegisteredGatewayArn" ResourceArn.of_json in
       make ?health ?address ?resourceArn ?resourceId ?resourceType ?accountId
         ?awsRegion ?coreNetworkId ?registeredGatewayArn ()
     let to_json v = composed_to_json to_value v
@@ -3549,60 +5893,64 @@ module NetworkRoute =
           (Xml.child xml_arg0 "DestinationCidrBlock") in
       make ?type_ ?state ?prefixListId ?destinations ?destinationCidrBlock ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" RouteType.of_json in
-      let state = field_map json "State" RouteState.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" RouteType.of_json in
+      let state = field_map json__ "State" RouteState.of_json in
       let prefixListId =
-        field_map json "PrefixListId" ConstrainedString.of_json in
+        field_map json__ "PrefixListId" ConstrainedString.of_json in
       let destinations =
-        field_map json "Destinations" NetworkRouteDestinationList.of_json in
+        field_map json__ "Destinations" NetworkRouteDestinationList.of_json in
       let destinationCidrBlock =
-        field_map json "DestinationCidrBlock" ConstrainedString.of_json in
+        field_map json__ "DestinationCidrBlock" ConstrainedString.of_json in
       make ?type_ ?state ?prefixListId ?destinations ?destinationCidrBlock ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a network route."]
-module FilterName =
+module CoreNetworkNetworkFunctionGroupIdentifier =
   struct
-    type nonrec t = string
-    let context_ = "FilterName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_pattern i ~pattern:"^[0-9a-zA-Z\\.-]*$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc "The ID of the core network."];
+      networkFunctionGroupName: ConstrainedString.t option
+        [@ocaml.doc "The network function group name."];
+      edgeLocation: ExternalRegionCode.t option
+        [@ocaml.doc "The location for the core network edge."]}
+    let make ?coreNetworkId =
+      fun ?networkFunctionGroupName ->
+        fun ?edgeLocation ->
+          fun () -> { coreNetworkId; networkFunctionGroupName; edgeLocation }
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId",
+           (Option.map x.coreNetworkId ~f:CoreNetworkId.to_value));
+        ("NetworkFunctionGroupName",
+          (Option.map x.networkFunctionGroupName
+             ~f:ConstrainedString.to_value));
+        ("EdgeLocation",
+          (Option.map x.edgeLocation ~f:ExternalRegionCode.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FilterName" j
-    let to_json = simple_to_json to_value
-  end
-module FilterValues =
-  struct
-    type nonrec t = FilterValue.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:FilterValue.of_xml)
-    let of_json j =
-      list_of_json ~kind:"FilterValues" ~of_json:FilterValue.of_json j
+    let of_xml xml_arg0 =
+      let edgeLocation =
+        (Option.map ~f:ExternalRegionCode.of_xml)
+          (Xml.child xml_arg0 "EdgeLocation") in
+      let networkFunctionGroupName =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "NetworkFunctionGroupName") in
+      let coreNetworkId =
+        (Option.map ~f:CoreNetworkId.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkId") in
+      make ?edgeLocation ?networkFunctionGroupName ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let edgeLocation =
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
+      let networkFunctionGroupName =
+        field_map json__ "NetworkFunctionGroupName" ConstrainedString.of_json in
+      let coreNetworkId =
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?edgeLocation ?networkFunctionGroupName ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Describes a core network"]
 module CoreNetworkSegmentEdgeIdentifier =
   struct
     type nonrec t =
@@ -3638,48 +5986,31 @@ module CoreNetworkSegmentEdgeIdentifier =
           (Xml.child xml_arg0 "CoreNetworkId") in
       make ?edgeLocation ?segmentName ?coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let edgeLocation =
-        field_map json "EdgeLocation" ExternalRegionCode.of_json in
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
       let segmentName =
-        field_map json "SegmentName" ConstrainedString.of_json in
+        field_map json__ "SegmentName" ConstrainedString.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?edgeLocation ?segmentName ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns details about a core network edge."]
-module TransitGatewayRouteTableArn =
-  struct
-    type nonrec t = string
-    let context_ = "TransitGatewayRouteTableArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TransitGatewayRouteTableArn" j
-    let to_json = simple_to_json to_value
-  end
 module NetworkResource =
   struct
     type nonrec t =
       {
       registeredGatewayArn: ResourceArn.t option
         [@ocaml.doc "The ARN of the gateway."];
-      coreNetworkId: CoreNetworkId.t option [@ocaml.doc "a core network ID."];
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc "The ID of a core network."];
       awsRegion: ExternalRegionCode.t option
         [@ocaml.doc "The Amazon Web Services Region."];
       accountId: AWSAccountId.t option
         [@ocaml.doc "The Amazon Web Services account ID."];
       resourceType: ConstrainedString.t option
         [@ocaml.doc
-          "The resource type. The following are the supported resource types for Direct Connect: dxcon dx-gateway dx-vif The following are the supported resource types for Network Manager: connection device link site The following are the supported resource types for Amazon VPC: customer-gateway transit-gateway transit-gateway-attachment transit-gateway-connect-peer transit-gateway-route-table vpn-connection"];
+          "The resource type. The following are the supported resource types for Direct Connect: dxcon dx-gateway dx-vif The following are the supported resource types for Network Manager: attachment connect-peer connection core-network device link peering site The following are the supported resource types for Amazon VPC: customer-gateway transit-gateway transit-gateway-attachment transit-gateway-connect-peer transit-gateway-route-table vpn-connection"];
       resourceId: ConstrainedString.t option
         [@ocaml.doc "The ID of the resource."];
       resourceArn: ResourceArn.t option
@@ -3773,23 +6104,25 @@ module NetworkResource =
         ?resourceId ?resourceType ?accountId ?awsRegion ?coreNetworkId
         ?registeredGatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metadata =
-        field_map json "Metadata" NetworkResourceMetadataMap.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "Metadata" NetworkResourceMetadataMap.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let definitionTimestamp =
-        field_map json "DefinitionTimestamp" DateTime.of_json in
-      let definition = field_map json "Definition" ConstrainedString.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
-      let resourceId = field_map json "ResourceId" ConstrainedString.of_json in
+        field_map json__ "DefinitionTimestamp" DateTime.of_json in
+      let definition =
+        field_map json__ "Definition" ConstrainedString.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let resourceId =
+        field_map json__ "ResourceId" ConstrainedString.of_json in
       let resourceType =
-        field_map json "ResourceType" ConstrainedString.of_json in
-      let accountId = field_map json "AccountId" AWSAccountId.of_json in
-      let awsRegion = field_map json "AwsRegion" ExternalRegionCode.of_json in
+        field_map json__ "ResourceType" ConstrainedString.of_json in
+      let accountId = field_map json__ "AccountId" AWSAccountId.of_json in
+      let awsRegion = field_map json__ "AwsRegion" ExternalRegionCode.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       let registeredGatewayArn =
-        field_map json "RegisteredGatewayArn" ResourceArn.of_json in
+        field_map json__ "RegisteredGatewayArn" ResourceArn.of_json in
       make ?metadata ?tags ?definitionTimestamp ?definition ?resourceArn
         ?resourceId ?resourceType ?accountId ?awsRegion ?coreNetworkId
         ?registeredGatewayArn ()
@@ -3815,9 +6148,9 @@ module Relationship =
         (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "From") in
       make ?to_ ?from ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let to_ = field_map json "To" ConstrainedString.of_json in
-      let from = field_map json "From" ConstrainedString.of_json in
+    let of_json json__ =
+      let to_ = field_map json__ "To" ConstrainedString.of_json in
+      let from = field_map json__ "From" ConstrainedString.of_json in
       make ?to_ ?from ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a resource relationship."]
@@ -3842,10 +6175,10 @@ module NetworkResourceCount =
           (Xml.child xml_arg0 "ResourceType") in
       make ?count ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map json "Count" Integer.of_json in
+    let of_json json__ =
+      let count = field_map json__ "Count" Integer.of_json in
       let resourceType =
-        field_map json "ResourceType" ConstrainedString.of_json in
+        field_map json__ "ResourceType" ConstrainedString.of_json in
       make ?count ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a resource count."]
@@ -3939,20 +6272,20 @@ module Link =
       make ?tags ?state ?createdAt ?provider ?bandwidth ?type_ ?description
         ?siteId ?globalNetworkId ?linkArn ?linkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let state = field_map json "State" LinkState.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
-      let provider = field_map json "Provider" ConstrainedString.of_json in
-      let bandwidth = field_map json "Bandwidth" Bandwidth.of_json in
-      let type_ = field_map json "Type" ConstrainedString.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let state = field_map json__ "State" LinkState.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
+      let provider = field_map json__ "Provider" ConstrainedString.of_json in
+      let bandwidth = field_map json__ "Bandwidth" Bandwidth.of_json in
+      let type_ = field_map json__ "Type" ConstrainedString.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let siteId = field_map json "SiteId" SiteId.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
-      let linkArn = field_map json "LinkArn" LinkArn.of_json in
-      let linkId = field_map json "LinkId" LinkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
+      let linkArn = field_map json__ "LinkArn" LinkArn.of_json in
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
       make ?tags ?state ?createdAt ?provider ?bandwidth ?type_ ?description
         ?siteId ?globalNetworkId ?linkArn ?linkId ()
     let to_json v = composed_to_json to_value v
@@ -3996,13 +6329,13 @@ module LinkAssociation =
           (Xml.child xml_arg0 "GlobalNetworkId") in
       make ?linkAssociationState ?linkId ?deviceId ?globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let linkAssociationState =
-        field_map json "LinkAssociationState" LinkAssociationState.of_json in
-      let linkId = field_map json "LinkId" LinkId.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
+        field_map json__ "LinkAssociationState" LinkAssociationState.of_json in
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?linkAssociationState ?linkId ?deviceId ?globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the association between a device and a link."]
@@ -4117,24 +6450,24 @@ module Device =
         ?vendor ?type_ ?description ?aWSLocation ?globalNetworkId ?deviceArn
         ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let state = field_map json "State" DeviceState.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
-      let siteId = field_map json "SiteId" SiteId.of_json in
-      let location = field_map json "Location" Location.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let state = field_map json__ "State" DeviceState.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
+      let location = field_map json__ "Location" Location.of_json in
       let serialNumber =
-        field_map json "SerialNumber" ConstrainedString.of_json in
-      let model = field_map json "Model" ConstrainedString.of_json in
-      let vendor = field_map json "Vendor" ConstrainedString.of_json in
-      let type_ = field_map json "Type" ConstrainedString.of_json in
+        field_map json__ "SerialNumber" ConstrainedString.of_json in
+      let model = field_map json__ "Model" ConstrainedString.of_json in
+      let vendor = field_map json__ "Vendor" ConstrainedString.of_json in
+      let type_ = field_map json__ "Type" ConstrainedString.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let aWSLocation = field_map json "AWSLocation" AWSLocation.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let aWSLocation = field_map json__ "AWSLocation" AWSLocation.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
-      let deviceArn = field_map json "DeviceArn" DeviceArn.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
+      let deviceArn = field_map json__ "DeviceArn" DeviceArn.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
       make ?tags ?state ?createdAt ?siteId ?location ?serialNumber ?model
         ?vendor ?type_ ?description ?aWSLocation ?globalNetworkId ?deviceArn
         ?deviceId ()
@@ -4193,15 +6526,15 @@ module CustomerGatewayAssociation =
           (Xml.child xml_arg0 "CustomerGatewayArn") in
       make ?state ?linkId ?deviceId ?globalNetworkId ?customerGatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let state =
-        field_map json "State" CustomerGatewayAssociationState.of_json in
-      let linkId = field_map json "LinkId" LinkId.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
+        field_map json__ "State" CustomerGatewayAssociationState.of_json in
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       let customerGatewayArn =
-        field_map json "CustomerGatewayArn" CustomerGatewayArn.of_json in
+        field_map json__ "CustomerGatewayArn" CustomerGatewayArn.of_json in
       make ?state ?linkId ?deviceId ?globalNetworkId ?customerGatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4218,14 +6551,25 @@ module CoreNetworkChange =
       previousValues: CoreNetworkChangeValues.t option
         [@ocaml.doc "The previous values for a core network."];
       newValues: CoreNetworkChangeValues.t option
-        [@ocaml.doc "The new value for a core network"]}
+        [@ocaml.doc "The new value for a core network"];
+      identifierPath: ConstrainedString.t option
+        [@ocaml.doc
+          "Uniquely identifies the path for a change within the changeset. For example, the IdentifierPath for a core network segment change might be \"CORE_NETWORK_SEGMENT/us-east-1/devsegment\"."]}
     let make ?type_ =
       fun ?action ->
         fun ?identifier ->
           fun ?previousValues ->
             fun ?newValues ->
-              fun () ->
-                { type_; action; identifier; previousValues; newValues }
+              fun ?identifierPath ->
+                fun () ->
+                  {
+                    type_;
+                    action;
+                    identifier;
+                    previousValues;
+                    newValues;
+                    identifierPath
+                  }
     let to_value x =
       structure_to_value
         [("Type", (Option.map x.type_ ~f:ChangeType.to_value));
@@ -4235,9 +6579,14 @@ module CoreNetworkChange =
         ("PreviousValues",
           (Option.map x.previousValues ~f:CoreNetworkChangeValues.to_value));
         ("NewValues",
-          (Option.map x.newValues ~f:CoreNetworkChangeValues.to_value))]
+          (Option.map x.newValues ~f:CoreNetworkChangeValues.to_value));
+        ("IdentifierPath",
+          (Option.map x.identifierPath ~f:ConstrainedString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let identifierPath =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "IdentifierPath") in
       let newValues =
         (Option.map ~f:CoreNetworkChangeValues.of_xml)
           (Xml.child xml_arg0 "NewValues") in
@@ -4251,19 +6600,91 @@ module CoreNetworkChange =
         (Option.map ~f:ChangeAction.of_xml) (Xml.child xml_arg0 "Action") in
       let type_ =
         (Option.map ~f:ChangeType.of_xml) (Xml.child xml_arg0 "Type") in
-      make ?newValues ?previousValues ?identifier ?action ?type_ ()
+      make ?identifierPath ?newValues ?previousValues ?identifier ?action
+        ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let identifierPath =
+        field_map json__ "IdentifierPath" ConstrainedString.of_json in
       let newValues =
-        field_map json "NewValues" CoreNetworkChangeValues.of_json in
+        field_map json__ "NewValues" CoreNetworkChangeValues.of_json in
       let previousValues =
-        field_map json "PreviousValues" CoreNetworkChangeValues.of_json in
-      let identifier = field_map json "Identifier" ConstrainedString.of_json in
-      let action = field_map json "Action" ChangeAction.of_json in
-      let type_ = field_map json "Type" ChangeType.of_json in
-      make ?newValues ?previousValues ?identifier ?action ?type_ ()
+        field_map json__ "PreviousValues" CoreNetworkChangeValues.of_json in
+      let identifier =
+        field_map json__ "Identifier" ConstrainedString.of_json in
+      let action = field_map json__ "Action" ChangeAction.of_json in
+      let type_ = field_map json__ "Type" ChangeType.of_json in
+      make ?identifierPath ?newValues ?previousValues ?identifier ?action
+        ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details describing a core network change."]
+module CoreNetworkChangeEvent =
+  struct
+    type nonrec t =
+      {
+      type_: ChangeType.t option
+        [@ocaml.doc "Describes the type of change event."];
+      action: ChangeAction.t option
+        [@ocaml.doc "The action taken for the change event."];
+      identifierPath: ConstrainedString.t option
+        [@ocaml.doc
+          "Uniquely identifies the path for a change within the changeset. For example, the IdentifierPath for a core network segment change might be \"CORE_NETWORK_SEGMENT/us-east-1/devsegment\"."];
+      eventTime: DateTime.t option
+        [@ocaml.doc "The timestamp for an event change in status."];
+      status: ChangeStatus.t option
+        [@ocaml.doc "The status of the core network change event."];
+      values: CoreNetworkChangeEventValues.t option
+        [@ocaml.doc "Details of the change event."]}
+    let make ?type_ =
+      fun ?action ->
+        fun ?identifierPath ->
+          fun ?eventTime ->
+            fun ?status ->
+              fun ?values ->
+                fun () ->
+                  { type_; action; identifierPath; eventTime; status; values
+                  }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:ChangeType.to_value));
+        ("Action", (Option.map x.action ~f:ChangeAction.to_value));
+        ("IdentifierPath",
+          (Option.map x.identifierPath ~f:ConstrainedString.to_value));
+        ("EventTime", (Option.map x.eventTime ~f:DateTime.to_value));
+        ("Status", (Option.map x.status ~f:ChangeStatus.to_value));
+        ("Values",
+          (Option.map x.values ~f:CoreNetworkChangeEventValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:CoreNetworkChangeEventValues.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      let status =
+        (Option.map ~f:ChangeStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let eventTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "EventTime") in
+      let identifierPath =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "IdentifierPath") in
+      let action =
+        (Option.map ~f:ChangeAction.of_xml) (Xml.child xml_arg0 "Action") in
+      let type_ =
+        (Option.map ~f:ChangeType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?values ?status ?eventTime ?identifierPath ?action ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map json__ "Values" CoreNetworkChangeEventValues.of_json in
+      let status = field_map json__ "Status" ChangeStatus.of_json in
+      let eventTime = field_map json__ "EventTime" DateTime.of_json in
+      let identifierPath =
+        field_map json__ "IdentifierPath" ConstrainedString.of_json in
+      let action = field_map json__ "Action" ChangeAction.of_json in
+      let type_ = field_map json__ "Type" ChangeType.of_json in
+      make ?values ?status ?eventTime ?identifierPath ?action ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a core network change event. This can be a change to a segment, attachment, route, etc."]
 module Connection =
   struct
     type nonrec t =
@@ -4367,22 +6788,22 @@ module Connection =
         ?connectedDeviceId ?deviceId ?globalNetworkId ?connectionArn
         ?connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let state = field_map json "State" ConnectionState.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let state = field_map json__ "State" ConnectionState.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let connectedLinkId = field_map json "ConnectedLinkId" LinkId.of_json in
-      let linkId = field_map json "LinkId" LinkId.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let connectedLinkId = field_map json__ "ConnectedLinkId" LinkId.of_json in
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
       let connectedDeviceId =
-        field_map json "ConnectedDeviceId" DeviceId.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
+        field_map json__ "ConnectedDeviceId" DeviceId.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
-      let connectionId = field_map json "ConnectionId" ConnectionId.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
+      let connectionId = field_map json__ "ConnectionId" ConnectionId.of_json in
       make ?tags ?state ?createdAt ?description ?connectedLinkId ?linkId
         ?connectedDeviceId ?deviceId ?globalNetworkId ?connectionArn
         ?connectionId ()
@@ -4445,20 +6866,52 @@ module ConnectPeerConfiguration =
       make ?bgpConfigurations ?protocol ?insideCidrBlocks ?peerAddress
         ?coreNetworkAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bgpConfigurations =
-        field_map json "BgpConfigurations"
+        field_map json__ "BgpConfigurations"
           ConnectPeerBgpConfigurationList.of_json in
-      let protocol = field_map json "Protocol" TunnelProtocol.of_json in
+      let protocol = field_map json__ "Protocol" TunnelProtocol.of_json in
       let insideCidrBlocks =
-        field_map json "InsideCidrBlocks" ConstrainedStringList.of_json in
-      let peerAddress = field_map json "PeerAddress" IPAddress.of_json in
+        field_map json__ "InsideCidrBlocks" ConstrainedStringList.of_json in
+      let peerAddress = field_map json__ "PeerAddress" IPAddress.of_json in
       let coreNetworkAddress =
-        field_map json "CoreNetworkAddress" IPAddress.of_json in
+        field_map json__ "CoreNetworkAddress" IPAddress.of_json in
       make ?bgpConfigurations ?protocol ?insideCidrBlocks ?peerAddress
         ?coreNetworkAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network Connect peer configuration."]
+module ConnectPeerErrorList =
+  struct
+    type nonrec t = ConnectPeerError.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConnectPeerError.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConnectPeerError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConnectPeerErrorList"
+        ~of_json:ConnectPeerError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ConnectPeerAssociation =
   struct
     type nonrec t =
@@ -4506,14 +6959,15 @@ module ConnectPeerAssociation =
           (Xml.child xml_arg0 "ConnectPeerId") in
       make ?state ?linkId ?deviceId ?globalNetworkId ?connectPeerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" ConnectPeerAssociationState.of_json in
-      let linkId = field_map json "LinkId" LinkId.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let state =
+        field_map json__ "State" ConnectPeerAssociationState.of_json in
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       let connectPeerId =
-        field_map json "ConnectPeerId" ConnectPeerId.of_json in
+        field_map json__ "ConnectPeerId" ConnectPeerId.of_json in
       make ?state ?linkId ?deviceId ?globalNetworkId ?connectPeerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network Connect peer association."]
@@ -4533,8 +6987,8 @@ module ConnectAttachmentOptions =
         (Option.map ~f:TunnelProtocol.of_xml) (Xml.child xml_arg0 "Protocol") in
       make ?protocol ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let protocol = field_map json "Protocol" TunnelProtocol.of_json in
+    let of_json json__ =
+      let protocol = field_map json__ "Protocol" TunnelProtocol.of_json in
       make ?protocol ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network Connect attachment options."]
@@ -4599,40 +7053,39 @@ module GlobalNetwork =
       make ?tags ?state ?createdAt ?description ?globalNetworkArn
         ?globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let state = field_map json "State" GlobalNetworkState.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let state = field_map json__ "State" GlobalNetworkState.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       let globalNetworkArn =
-        field_map json "GlobalNetworkArn" GlobalNetworkArn.of_json in
+        field_map json__ "GlobalNetworkArn" GlobalNetworkArn.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?tags ?state ?createdAt ?description ?globalNetworkArn
         ?globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a global network. This is a single private network acting as a high-level container for your network objects, including an Amazon Web Services-manged Core Network."]
+       "Describes a global network. This is a single private network acting as a high-level container for your network objects, including an Amazon Web Services-managed Core Network."]
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: ServerSideString.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: ServerSideString.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ServerSideString.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:ServerSideString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient access to perform this action."]
@@ -4640,38 +7093,40 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      message: ServerSideString.t ;
-      resourceId: ServerSideString.t [@ocaml.doc "The ID of the resource."];
-      resourceType: ServerSideString.t [@ocaml.doc "The resource type."]}
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      message: ServerSideString.t option ;
+      resourceId: ServerSideString.t option
+        [@ocaml.doc "The ID of the resource."];
+      resourceType: ServerSideString.t option
+        [@ocaml.doc "The resource type."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ServerSideString.to_value x.message)));
-        ("ResourceId", (Some (ServerSideString.to_value x.resourceId)));
-        ("ResourceType", (Some (ServerSideString.to_value x.resourceType)))]
+        [("Message", (Option.map x.message ~f:ServerSideString.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ServerSideString.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ServerSideString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" ServerSideString.of_json in
-      let resourceId =
-        field_map_exn json "ResourceId" ServerSideString.of_json in
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      make ~resourceType ~resourceId ~message ()
+        field_map json__ "ResourceType" ServerSideString.of_json in
+      let resourceId = field_map json__ "ResourceId" ServerSideString.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "There was a conflict processing the request. Updating or deleting the resource can cause an inconsistent state."]
@@ -4679,15 +7134,14 @@ module InternalServerException =
   struct
     type nonrec t =
       {
-      message: ServerSideString.t ;
+      message: ServerSideString.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc "Indicates when to retry the request."]}
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ServerSideString.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ServerSideString.to_value));
         ("Retry-After",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -4696,37 +7150,40 @@ module InternalServerException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request has failed due to an internal error."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: ServerSideString.t ;
-      resourceId: ServerSideString.t [@ocaml.doc "The ID of the resource."];
-      resourceType: ServerSideString.t [@ocaml.doc "The resource type."];
+      message: ServerSideString.t option ;
+      resourceId: ServerSideString.t option
+        [@ocaml.doc "The ID of the resource."];
+      resourceType: ServerSideString.t option
+        [@ocaml.doc "The resource type."];
       context: ExceptionContextMap.t option
         [@ocaml.doc "The specified resource could not be found."]}
-    let context_ = "ResourceNotFoundException"
-    let make ?context =
-      fun ~message ->
-        fun ~resourceId ->
-          fun ~resourceType ->
-            fun () -> { context; message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?context ->
+            fun () -> { message; resourceId; resourceType; context }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ServerSideString.to_value x.message)));
-        ("ResourceId", (Some (ServerSideString.to_value x.resourceId)));
-        ("ResourceType", (Some (ServerSideString.to_value x.resourceType)));
+        [("Message", (Option.map x.message ~f:ServerSideString.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ServerSideString.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ServerSideString.to_value));
         ("Context", (Option.map x.context ~f:ExceptionContextMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -4734,39 +7191,37 @@ module ResourceNotFoundException =
         (Option.map ~f:ExceptionContextMap.of_xml)
           (Xml.child xml_arg0 "Context") in
       let resourceType =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?context ~resourceType ~resourceId ~message ()
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?context ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let context = field_map json "Context" ExceptionContextMap.of_json in
+    let of_json json__ =
+      let context = field_map json__ "Context" ExceptionContextMap.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ServerSideString.of_json in
-      let resourceId =
-        field_map_exn json "ResourceId" ServerSideString.of_json in
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      make ?context ~resourceType ~resourceId ~message ()
+        field_map json__ "ResourceType" ServerSideString.of_json in
+      let resourceId = field_map json__ "ResourceId" ServerSideString.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      make ?context ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource could not be found."]
 module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: ServerSideString.t ;
+      message: ServerSideString.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc "Indicates when to retry the request."]}
-    let context_ = "ThrottlingException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ServerSideString.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ServerSideString.to_value));
         ("Retry-After",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -4775,32 +7230,31 @@ module ThrottlingException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module ValidationException =
   struct
     type nonrec t =
       {
-      message: ServerSideString.t ;
+      message: ServerSideString.t option ;
       reason: ValidationExceptionReason.t option
         [@ocaml.doc "The reason for the error."];
       fields: ValidationExceptionFieldList.t option
         [@ocaml.doc "The fields that caused the error, if applicable."]}
-    let context_ = "ValidationException"
-    let make ?reason =
-      fun ?fields -> fun ~message -> fun () -> { reason; fields; message }
+    let make ?message =
+      fun ?reason -> fun ?fields -> fun () -> { message; reason; fields }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ServerSideString.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ServerSideString.to_value));
         ("Reason",
           (Option.map x.reason ~f:ValidationExceptionReason.to_value));
         ("Fields",
@@ -4814,16 +7268,17 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionReason.of_xml)
           (Xml.child xml_arg0 "Reason") in
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?fields ?reason ~message ()
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?fields ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fields =
-        field_map json "Fields" ValidationExceptionFieldList.of_json in
-      let reason = field_map json "Reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      make ?fields ?reason ~message ()
+        field_map json__ "Fields" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "Reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      make ?fields ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input fails to satisfy the constraints."]
 module VpcAttachment =
@@ -4854,10 +7309,10 @@ module VpcAttachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?options ?subnetArns ?attachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let options = field_map json "Options" VpcOptions.of_json in
-      let subnetArns = field_map json "SubnetArns" SubnetArnList.of_json in
-      let attachment = field_map json "Attachment" Attachment.of_json in
+    let of_json json__ =
+      let options = field_map json__ "Options" VpcOptions.of_json in
+      let subnetArns = field_map json__ "SubnetArns" SubnetArnList.of_json in
+      let attachment = field_map json__ "Attachment" Attachment.of_json in
       make ?options ?subnetArns ?attachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a VPC attachment."]
@@ -4865,38 +7320,38 @@ module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
-      message: ServerSideString.t [@ocaml.doc "The error message."];
+      message: ServerSideString.t option [@ocaml.doc "The error message."];
       resourceId: ServerSideString.t option
         [@ocaml.doc "The ID of the resource."];
       resourceType: ServerSideString.t option
         [@ocaml.doc "The resource type."];
-      limitCode: ServerSideString.t [@ocaml.doc "The limit code."];
-      serviceCode: ServerSideString.t [@ocaml.doc "The service code."]}
-    let context_ = "ServiceQuotaExceededException"
-    let make ?resourceId =
-      fun ?resourceType ->
-        fun ~message ->
-          fun ~limitCode ->
-            fun ~serviceCode ->
+      limitCode: ServerSideString.t option [@ocaml.doc "The limit code."];
+      serviceCode: ServerSideString.t option [@ocaml.doc "The service code."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?limitCode ->
+            fun ?serviceCode ->
               fun () ->
-                { resourceId; resourceType; message; limitCode; serviceCode }
+                { message; resourceId; resourceType; limitCode; serviceCode }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ServerSideString.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ServerSideString.to_value));
         ("ResourceId",
           (Option.map x.resourceId ~f:ServerSideString.to_value));
         ("ResourceType",
           (Option.map x.resourceType ~f:ServerSideString.to_value));
-        ("LimitCode", (Some (ServerSideString.to_value x.limitCode)));
-        ("ServiceCode", (Some (ServerSideString.to_value x.serviceCode)))]
+        ("LimitCode", (Option.map x.limitCode ~f:ServerSideString.to_value));
+        ("ServiceCode",
+          (Option.map x.serviceCode ~f:ServerSideString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceCode =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "ServiceCode") in
       let limitCode =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LimitCode") in
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "LimitCode") in
       let resourceType =
         (Option.map ~f:ServerSideString.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
@@ -4904,21 +7359,54 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ServerSideString.of_xml)
           (Xml.child xml_arg0 "ResourceId") in
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~serviceCode ~limitCode ?resourceType ?resourceId ~message ()
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?serviceCode ?limitCode ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceCode =
-        field_map_exn json "ServiceCode" ServerSideString.of_json in
-      let limitCode = field_map_exn json "LimitCode" ServerSideString.of_json in
+        field_map json__ "ServiceCode" ServerSideString.of_json in
+      let limitCode = field_map json__ "LimitCode" ServerSideString.of_json in
       let resourceType =
-        field_map json "ResourceType" ServerSideString.of_json in
-      let resourceId = field_map json "ResourceId" ServerSideString.of_json in
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      make ~serviceCode ~limitCode ?resourceType ?resourceId ~message ()
+        field_map json__ "ResourceType" ServerSideString.of_json in
+      let resourceId = field_map json__ "ResourceId" ServerSideString.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      make ?serviceCode ?limitCode ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A service limit was exceeded."]
+module DirectConnectGatewayAttachment =
+  struct
+    type nonrec t =
+      {
+      attachment: Attachment.t option ;
+      directConnectGatewayArn: DirectConnectGatewayArn.t option
+        [@ocaml.doc "The Direct Connect gateway attachment ARN."]}
+    let make ?attachment =
+      fun ?directConnectGatewayArn ->
+        fun () -> { attachment; directConnectGatewayArn }
+    let to_value x =
+      structure_to_value
+        [("Attachment", (Option.map x.attachment ~f:Attachment.to_value));
+        ("DirectConnectGatewayArn",
+          (Option.map x.directConnectGatewayArn
+             ~f:DirectConnectGatewayArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directConnectGatewayArn =
+        (Option.map ~f:DirectConnectGatewayArn.of_xml)
+          (Xml.child xml_arg0 "DirectConnectGatewayArn") in
+      let attachment =
+        (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
+      make ?directConnectGatewayArn ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directConnectGatewayArn =
+        field_map json__ "DirectConnectGatewayArn"
+          DirectConnectGatewayArn.of_json in
+      let attachment = field_map json__ "Attachment" Attachment.of_json in
+      make ?directConnectGatewayArn ?attachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a Direct Connect gateway attachment."]
 module CoreNetwork =
   struct
     type nonrec t =
@@ -4938,10 +7426,14 @@ module CoreNetwork =
         [@ocaml.doc "The current state of a core network."];
       segments: CoreNetworkSegmentList.t option
         [@ocaml.doc "The segments within a core network."];
+      networkFunctionGroups: CoreNetworkNetworkFunctionGroupList.t option
+        [@ocaml.doc
+          "The network function groups associated with a core network."];
       edges: CoreNetworkEdgeList.t option
         [@ocaml.doc "The edges within a core network."];
       tags: TagList.t option
-        [@ocaml.doc "The tags associated with a core network."]}
+        [@ocaml.doc
+          "The list of key-value tags associated with a core network."]}
     let make ?globalNetworkId =
       fun ?coreNetworkId ->
         fun ?coreNetworkArn ->
@@ -4949,20 +7441,22 @@ module CoreNetwork =
             fun ?createdAt ->
               fun ?state ->
                 fun ?segments ->
-                  fun ?edges ->
-                    fun ?tags ->
-                      fun () ->
-                        {
-                          globalNetworkId;
-                          coreNetworkId;
-                          coreNetworkArn;
-                          description;
-                          createdAt;
-                          state;
-                          segments;
-                          edges;
-                          tags
-                        }
+                  fun ?networkFunctionGroups ->
+                    fun ?edges ->
+                      fun ?tags ->
+                        fun () ->
+                          {
+                            globalNetworkId;
+                            coreNetworkId;
+                            coreNetworkArn;
+                            description;
+                            createdAt;
+                            state;
+                            segments;
+                            networkFunctionGroups;
+                            edges;
+                            tags
+                          }
     let to_value x =
       structure_to_value
         [("GlobalNetworkId",
@@ -4977,6 +7471,9 @@ module CoreNetwork =
         ("State", (Option.map x.state ~f:CoreNetworkState.to_value));
         ("Segments",
           (Option.map x.segments ~f:CoreNetworkSegmentList.to_value));
+        ("NetworkFunctionGroups",
+          (Option.map x.networkFunctionGroups
+             ~f:CoreNetworkNetworkFunctionGroupList.to_value));
         ("Edges", (Option.map x.edges ~f:CoreNetworkEdgeList.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
@@ -4985,6 +7482,9 @@ module CoreNetwork =
       let edges =
         (Option.map ~f:CoreNetworkEdgeList.of_xml)
           (Xml.child xml_arg0 "Edges") in
+      let networkFunctionGroups =
+        (Option.map ~f:CoreNetworkNetworkFunctionGroupList.of_xml)
+          (Xml.child xml_arg0 "NetworkFunctionGroups") in
       let segments =
         (Option.map ~f:CoreNetworkSegmentList.of_xml)
           (Xml.child xml_arg0 "Segments") in
@@ -5004,31 +7504,38 @@ module CoreNetwork =
       let globalNetworkId =
         (Option.map ~f:GlobalNetworkId.of_xml)
           (Xml.child xml_arg0 "GlobalNetworkId") in
-      make ?tags ?edges ?segments ?state ?createdAt ?description
-        ?coreNetworkArn ?coreNetworkId ?globalNetworkId ()
+      make ?tags ?edges ?networkFunctionGroups ?segments ?state ?createdAt
+        ?description ?coreNetworkArn ?coreNetworkId ?globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let edges = field_map json "Edges" CoreNetworkEdgeList.of_json in
-      let segments = field_map json "Segments" CoreNetworkSegmentList.of_json in
-      let state = field_map json "State" CoreNetworkState.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let edges = field_map json__ "Edges" CoreNetworkEdgeList.of_json in
+      let networkFunctionGroups =
+        field_map json__ "NetworkFunctionGroups"
+          CoreNetworkNetworkFunctionGroupList.of_json in
+      let segments =
+        field_map json__ "Segments" CoreNetworkSegmentList.of_json in
+      let state = field_map json__ "State" CoreNetworkState.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       let coreNetworkArn =
-        field_map json "CoreNetworkArn" CoreNetworkArn.of_json in
+        field_map json__ "CoreNetworkArn" CoreNetworkArn.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
-      make ?tags ?edges ?segments ?state ?createdAt ?description
-        ?coreNetworkArn ?coreNetworkId ?globalNetworkId ()
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
+      make ?tags ?edges ?networkFunctionGroups ?segments ?state ?createdAt
+        ?description ?coreNetworkArn ?coreNetworkId ?globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5160,25 +7667,26 @@ module RouteAnalysis =
         ?destination ?source ?status ?startTimestamp ?routeAnalysisId
         ?ownerAccountId ?globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let returnPath = field_map json "ReturnPath" RouteAnalysisPath.of_json in
+    let of_json json__ =
+      let returnPath =
+        field_map json__ "ReturnPath" RouteAnalysisPath.of_json in
       let forwardPath =
-        field_map json "ForwardPath" RouteAnalysisPath.of_json in
-      let useMiddleboxes = field_map json "UseMiddleboxes" Boolean.of_json in
+        field_map json__ "ForwardPath" RouteAnalysisPath.of_json in
+      let useMiddleboxes = field_map json__ "UseMiddleboxes" Boolean.of_json in
       let includeReturnPath =
-        field_map json "IncludeReturnPath" Boolean.of_json in
+        field_map json__ "IncludeReturnPath" Boolean.of_json in
       let destination =
-        field_map json "Destination" RouteAnalysisEndpointOptions.of_json in
+        field_map json__ "Destination" RouteAnalysisEndpointOptions.of_json in
       let source =
-        field_map json "Source" RouteAnalysisEndpointOptions.of_json in
-      let status = field_map json "Status" RouteAnalysisStatus.of_json in
-      let startTimestamp = field_map json "StartTimestamp" DateTime.of_json in
+        field_map json__ "Source" RouteAnalysisEndpointOptions.of_json in
+      let status = field_map json__ "Status" RouteAnalysisStatus.of_json in
+      let startTimestamp = field_map json__ "StartTimestamp" DateTime.of_json in
       let routeAnalysisId =
-        field_map json "RouteAnalysisId" ConstrainedString.of_json in
+        field_map json__ "RouteAnalysisId" ConstrainedString.of_json in
       let ownerAccountId =
-        field_map json "OwnerAccountId" AWSAccountId.of_json in
+        field_map json__ "OwnerAccountId" AWSAccountId.of_json in
       let globalNetworkId =
-        field_map json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?returnPath ?forwardPath ?useMiddleboxes ?includeReturnPath
         ?destination ?source ?status ?startTimestamp ?routeAnalysisId
         ?ownerAccountId ?globalNetworkId ()
@@ -5208,14 +7716,102 @@ module RouteAnalysisEndpointOptionsSpecification =
           (Xml.child xml_arg0 "TransitGatewayAttachmentArn") in
       make ?ipAddress ?transitGatewayAttachmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipAddress = field_map json "IpAddress" IPAddress.of_json in
+    let of_json json__ =
+      let ipAddress = field_map json__ "IpAddress" IPAddress.of_json in
       let transitGatewayAttachmentArn =
-        field_map json "TransitGatewayAttachmentArn"
+        field_map json__ "TransitGatewayAttachmentArn"
           TransitGatewayAttachmentArn.of_json in
       make ?ipAddress ?transitGatewayAttachmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a source or a destination."]
+module OrganizationStatus =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t option
+        [@ocaml.doc "The ID of an Amazon Web Services Organization."];
+      organizationAwsServiceAccessStatus:
+        OrganizationAwsServiceAccessStatus.t option
+        [@ocaml.doc
+          "The status of the organization's AWS service access. This will be ENABLED or DISABLED."];
+      sLRDeploymentStatus: SLRDeploymentStatus.t option
+        [@ocaml.doc
+          "The status of the SLR deployment for the account. This will be either SUCCEEDED or IN_PROGRESS."];
+      accountStatusList: AccountStatusList.t option
+        [@ocaml.doc
+          "The current service-linked role (SLR) deployment status for an Amazon Web Services Organization's accounts. This will be either SUCCEEDED or IN_PROGRESS."]}
+    let make ?organizationId =
+      fun ?organizationAwsServiceAccessStatus ->
+        fun ?sLRDeploymentStatus ->
+          fun ?accountStatusList ->
+            fun () ->
+              {
+                organizationId;
+                organizationAwsServiceAccessStatus;
+                sLRDeploymentStatus;
+                accountStatusList
+              }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Option.map x.organizationId ~f:OrganizationId.to_value));
+        ("OrganizationAwsServiceAccessStatus",
+          (Option.map x.organizationAwsServiceAccessStatus
+             ~f:OrganizationAwsServiceAccessStatus.to_value));
+        ("SLRDeploymentStatus",
+          (Option.map x.sLRDeploymentStatus ~f:SLRDeploymentStatus.to_value));
+        ("AccountStatusList",
+          (Option.map x.accountStatusList ~f:AccountStatusList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountStatusList =
+        (Option.map ~f:AccountStatusList.of_xml)
+          (Xml.child xml_arg0 "AccountStatusList") in
+      let sLRDeploymentStatus =
+        (Option.map ~f:SLRDeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "SLRDeploymentStatus") in
+      let organizationAwsServiceAccessStatus =
+        (Option.map ~f:OrganizationAwsServiceAccessStatus.of_xml)
+          (Xml.child xml_arg0 "OrganizationAwsServiceAccessStatus") in
+      let organizationId =
+        (Option.map ~f:OrganizationId.of_xml)
+          (Xml.child xml_arg0 "OrganizationId") in
+      make ?accountStatusList ?sLRDeploymentStatus
+        ?organizationAwsServiceAccessStatus ?organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountStatusList =
+        field_map json__ "AccountStatusList" AccountStatusList.of_json in
+      let sLRDeploymentStatus =
+        field_map json__ "SLRDeploymentStatus" SLRDeploymentStatus.of_json in
+      let organizationAwsServiceAccessStatus =
+        field_map json__ "OrganizationAwsServiceAccessStatus"
+          OrganizationAwsServiceAccessStatus.of_json in
+      let organizationId =
+        field_map json__ "OrganizationId" OrganizationId.of_json in
+      make ?accountStatusList ?sLRDeploymentStatus
+        ?organizationAwsServiceAccessStatus ?organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The status of an Amazon Web Services Organization and the accounts within that organization."]
+module Action =
+  struct
+    type nonrec t = string
+    let context_ = "Action"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Action" j
+    let to_json = simple_to_json to_value
+  end
 module CoreNetworkPolicy =
   struct
     type nonrec t =
@@ -5299,20 +7895,21 @@ module CoreNetworkPolicy =
       make ?policyDocument ?policyErrors ?changeSetState ?createdAt
         ?description ?alias ?policyVersionId ?coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map json "PolicyDocument" CoreNetworkPolicyDocument.of_json in
+        field_map json__ "PolicyDocument" CoreNetworkPolicyDocument.of_json in
       let policyErrors =
-        field_map json "PolicyErrors" CoreNetworkPolicyErrorList.of_json in
+        field_map json__ "PolicyErrors" CoreNetworkPolicyErrorList.of_json in
       let changeSetState =
-        field_map json "ChangeSetState" ChangeSetState.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
+        field_map json__ "ChangeSetState" ChangeSetState.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let alias = field_map json "Alias" CoreNetworkPolicyAlias.of_json in
-      let policyVersionId = field_map json "PolicyVersionId" Integer.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let alias = field_map json__ "Alias" CoreNetworkPolicyAlias.of_json in
+      let policyVersionId =
+        field_map json__ "PolicyVersionId" Integer.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?policyDocument ?policyErrors ?changeSetState ?createdAt
         ?description ?alias ?policyVersionId ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -5322,7 +7919,14 @@ module ResourcePolicyDocument =
   struct
     type nonrec t = string
     let context_ = "ResourcePolicyDocument"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:10000000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -5335,14 +7939,13 @@ module CoreNetworkPolicyException =
   struct
     type nonrec t =
       {
-      message: ServerSideString.t ;
+      message: ServerSideString.t option ;
       errors: CoreNetworkPolicyErrorList.t option
         [@ocaml.doc "Describes a core network policy exception."]}
-    let context_ = "CoreNetworkPolicyException"
-    let make ?errors = fun ~message -> fun () -> { errors; message }
+    let make ?message = fun ?errors -> fun () -> { message; errors }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ServerSideString.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ServerSideString.to_value));
         ("Errors",
           (Option.map x.errors ~f:CoreNetworkPolicyErrorList.to_value))]
     let to_query v = to_query to_value v
@@ -5351,14 +7954,15 @@ module CoreNetworkPolicyException =
         (Option.map ~f:CoreNetworkPolicyErrorList.of_xml)
           (Xml.child xml_arg0 "Errors") in
       let message =
-        ServerSideString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?errors ~message ()
+        (Option.map ~f:ServerSideString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?errors ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "Errors" CoreNetworkPolicyErrorList.of_json in
-      let message = field_map_exn json "Message" ServerSideString.of_json in
-      make ?errors ~message ()
+    let of_json json__ =
+      let errors =
+        field_map json__ "Errors" CoreNetworkPolicyErrorList.of_json in
+      let message = field_map json__ "Message" ServerSideString.of_json in
+      make ?errors ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network policy exception."]
 module ClientToken =
@@ -5368,8 +7972,10 @@ module ClientToken =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -5379,10 +7985,78 @@ module ClientToken =
     let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
+module NextToken =
+  struct
+    type nonrec t = string
+    let context_ = "NextToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end
+module PeeringList =
+  struct
+    type nonrec t = Peering.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Peering.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Peering.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PeeringList" ~of_json:Peering.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module CoreNetworkSummaryList =
   struct
     type nonrec t = CoreNetworkSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoreNetworkSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5404,46 +8078,103 @@ module CoreNetworkSummaryList =
         ~of_json:CoreNetworkSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module NextToken =
+module CoreNetworkRoutingInformationList =
   struct
-    type nonrec t = string
-    let context_ = "NextToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = CoreNetworkRoutingInformation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CoreNetworkRoutingInformation.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextToken" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CoreNetworkRoutingInformation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CoreNetworkRoutingInformationList"
+        ~of_json:CoreNetworkRoutingInformation.of_json j
+    let to_json v = composed_to_json to_value v
   end
-module MaxResults =
+module FilterMap =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t = (FilterName.t * FilterValues.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types FilterName FilterValues"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (FilterName.to_value x) |>
+                    (fun x -> (FilterValues.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:FilterName.of_string
+        ~of_json:FilterValues.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PrefixListAssociationList =
+  struct
+    type nonrec t = PrefixListAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PrefixListAssociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PrefixListAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PrefixListAssociationList"
+        ~of_json:PrefixListAssociation.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module CoreNetworkPolicyVersionList =
   struct
     type nonrec t = CoreNetworkPolicyVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoreNetworkPolicyVersion.to_value)) |>
         (fun x -> `List x)
@@ -5470,6 +8201,9 @@ module ConnectPeerSummaryList =
   struct
     type nonrec t = ConnectPeerSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectPeerSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5495,6 +8229,9 @@ module AttachmentList =
   struct
     type nonrec t = Attachment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Attachment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5515,10 +8252,84 @@ module AttachmentList =
       list_of_json ~kind:"AttachmentList" ~of_json:Attachment.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AttachmentRoutingPolicyAssociationsList =
+  struct
+    type nonrec t = AttachmentRoutingPolicyAssociationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttachmentRoutingPolicyAssociationSummary.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:AttachmentRoutingPolicyAssociationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttachmentRoutingPolicyAssociationsList"
+        ~of_json:AttachmentRoutingPolicyAssociationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TransitGatewayRouteTableAttachment =
+  struct
+    type nonrec t =
+      {
+      attachment: Attachment.t option ;
+      peeringId: PeeringId.t option
+        [@ocaml.doc "The ID of the peering attachment."];
+      transitGatewayRouteTableArn: TransitGatewayRouteTableArn.t option
+        [@ocaml.doc
+          "The ARN of the transit gateway attachment route table. For example, \"TransitGatewayRouteTableArn\": \"arn:aws:ec2:us-west-2:123456789012:transit-gateway-route-table/tgw-rtb-9876543210123456\"."]}
+    let make ?attachment =
+      fun ?peeringId ->
+        fun ?transitGatewayRouteTableArn ->
+          fun () -> { attachment; peeringId; transitGatewayRouteTableArn }
+    let to_value x =
+      structure_to_value
+        [("Attachment", (Option.map x.attachment ~f:Attachment.to_value));
+        ("PeeringId", (Option.map x.peeringId ~f:PeeringId.to_value));
+        ("TransitGatewayRouteTableArn",
+          (Option.map x.transitGatewayRouteTableArn
+             ~f:TransitGatewayRouteTableArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let transitGatewayRouteTableArn =
+        (Option.map ~f:TransitGatewayRouteTableArn.of_xml)
+          (Xml.child xml_arg0 "TransitGatewayRouteTableArn") in
+      let peeringId =
+        (Option.map ~f:PeeringId.of_xml) (Xml.child xml_arg0 "PeeringId") in
+      let attachment =
+        (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
+      make ?transitGatewayRouteTableArn ?peeringId ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let transitGatewayRouteTableArn =
+        field_map json__ "TransitGatewayRouteTableArn"
+          TransitGatewayRouteTableArn.of_json in
+      let peeringId = field_map json__ "PeeringId" PeeringId.of_json in
+      let attachment = field_map json__ "Attachment" Attachment.of_json in
+      make ?transitGatewayRouteTableArn ?peeringId ?attachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a transit gateway route table attachment."]
 module TransitGatewayRegistrationList =
   struct
     type nonrec t = TransitGatewayRegistration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayRegistration.to_value)) |>
         (fun x -> `List x)
@@ -5545,6 +8356,9 @@ module TransitGatewayArnList =
   struct
     type nonrec t = TransitGatewayArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5566,10 +8380,59 @@ module TransitGatewayArnList =
         ~of_json:TransitGatewayArn.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TransitGatewayPeering =
+  struct
+    type nonrec t =
+      {
+      peering: Peering.t option
+        [@ocaml.doc "Describes a transit gateway peer connection."];
+      transitGatewayArn: TransitGatewayArn.t option
+        [@ocaml.doc "The ARN of the transit gateway."];
+      transitGatewayPeeringAttachmentId:
+        TransitGatewayPeeringAttachmentId.t option
+        [@ocaml.doc "The ID of the transit gateway peering attachment."]}
+    let make ?peering =
+      fun ?transitGatewayArn ->
+        fun ?transitGatewayPeeringAttachmentId ->
+          fun () ->
+            { peering; transitGatewayArn; transitGatewayPeeringAttachmentId }
+    let to_value x =
+      structure_to_value
+        [("Peering", (Option.map x.peering ~f:Peering.to_value));
+        ("TransitGatewayArn",
+          (Option.map x.transitGatewayArn ~f:TransitGatewayArn.to_value));
+        ("TransitGatewayPeeringAttachmentId",
+          (Option.map x.transitGatewayPeeringAttachmentId
+             ~f:TransitGatewayPeeringAttachmentId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let transitGatewayPeeringAttachmentId =
+        (Option.map ~f:TransitGatewayPeeringAttachmentId.of_xml)
+          (Xml.child xml_arg0 "TransitGatewayPeeringAttachmentId") in
+      let transitGatewayArn =
+        (Option.map ~f:TransitGatewayArn.of_xml)
+          (Xml.child xml_arg0 "TransitGatewayArn") in
+      let peering =
+        (Option.map ~f:Peering.of_xml) (Xml.child xml_arg0 "Peering") in
+      make ?transitGatewayPeeringAttachmentId ?transitGatewayArn ?peering ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let transitGatewayPeeringAttachmentId =
+        field_map json__ "TransitGatewayPeeringAttachmentId"
+          TransitGatewayPeeringAttachmentId.of_json in
+      let transitGatewayArn =
+        field_map json__ "TransitGatewayArn" TransitGatewayArn.of_json in
+      let peering = field_map json__ "Peering" Peering.of_json in
+      make ?transitGatewayPeeringAttachmentId ?transitGatewayArn ?peering ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a transit gateway peering attachment."]
 module TransitGatewayConnectPeerAssociationList =
   struct
     type nonrec t = TransitGatewayConnectPeerAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayConnectPeerAssociation.to_value)) |>
         (fun x -> `List x)
@@ -5597,6 +8460,9 @@ module TransitGatewayConnectPeerArnList =
   struct
     type nonrec t = TransitGatewayConnectPeerArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayConnectPeerArn.to_value)) |>
         (fun x -> `List x)
@@ -5623,6 +8489,9 @@ module SiteList =
   struct
     type nonrec t = Site.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Site.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5646,6 +8515,9 @@ module SiteIdList =
   struct
     type nonrec t = SiteId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SiteId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5689,10 +8561,10 @@ module SiteToSiteVpnAttachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?vpnConnectionArn ?attachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpnConnectionArn =
-        field_map json "VpnConnectionArn" VpnConnectionArn.of_json in
-      let attachment = field_map json "Attachment" Attachment.of_json in
+        field_map json__ "VpnConnectionArn" VpnConnectionArn.of_json in
+      let attachment = field_map json__ "Attachment" Attachment.of_json in
       make ?vpnConnectionArn ?attachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a site-to-site VPN attachment."]
@@ -5700,6 +8572,9 @@ module NetworkTelemetryList =
   struct
     type nonrec t = NetworkTelemetry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkTelemetry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5725,6 +8600,9 @@ module NetworkRouteList =
   struct
     type nonrec t = NetworkRoute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkRoute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5750,17 +8628,20 @@ module RouteTableType =
     type nonrec t =
       | TRANSIT_GATEWAY_ROUTE_TABLE 
       | CORE_NETWORK_SEGMENT 
+      | NETWORK_FUNCTION_GROUP 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | TRANSIT_GATEWAY_ROUTE_TABLE -> "TRANSIT_GATEWAY_ROUTE_TABLE"
       | CORE_NETWORK_SEGMENT -> "CORE_NETWORK_SEGMENT"
+      | NETWORK_FUNCTION_GROUP -> "NETWORK_FUNCTION_GROUP"
       | Non_static_id s -> s
     let of_string =
       function
       | "TRANSIT_GATEWAY_ROUTE_TABLE" -> TRANSIT_GATEWAY_ROUTE_TABLE
       | "CORE_NETWORK_SEGMENT" -> CORE_NETWORK_SEGMENT
+      | "NETWORK_FUNCTION_GROUP" -> NETWORK_FUNCTION_GROUP
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5770,40 +8651,13 @@ module RouteTableType =
     let of_json j = of_string (string_of_json ~kind:"RouteTableType" j)
     let to_json = simple_to_json to_value
   end
-module FilterMap =
-  struct
-    type nonrec t = (FilterName.t * FilterValues.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            let (_ : string) = v in
-                            let (_ : string) = chopped in
-                            failwith
-                              "no of_header for complex types FilterName FilterValues"))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (FilterName.to_value x) |>
-                    (fun x -> (FilterValues.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:FilterName.of_string
-        ~of_json:FilterValues.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module RouteStateList =
   struct
     type nonrec t = RouteState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5829,12 +8683,23 @@ module RouteTableIdentifier =
     type nonrec t =
       {
       transitGatewayRouteTableArn: TransitGatewayRouteTableArn.t option
-        [@ocaml.doc "The ARN of the transit gateway route table."];
+        [@ocaml.doc
+          "The ARN of the transit gateway route table for the attachment request. For example, \"TransitGatewayRouteTableArn\": \"arn:aws:ec2:us-west-2:123456789012:transit-gateway-route-table/tgw-rtb-9876543210123456\"."];
       coreNetworkSegmentEdge: CoreNetworkSegmentEdgeIdentifier.t option
-        [@ocaml.doc "The segment edge in a core network."]}
+        [@ocaml.doc "The segment edge in a core network."];
+      coreNetworkNetworkFunctionGroup:
+        CoreNetworkNetworkFunctionGroupIdentifier.t option
+        [@ocaml.doc
+          "The route table identifier associated with the network function group."]}
     let make ?transitGatewayRouteTableArn =
       fun ?coreNetworkSegmentEdge ->
-        fun () -> { transitGatewayRouteTableArn; coreNetworkSegmentEdge }
+        fun ?coreNetworkNetworkFunctionGroup ->
+          fun () ->
+            {
+              transitGatewayRouteTableArn;
+              coreNetworkSegmentEdge;
+              coreNetworkNetworkFunctionGroup
+            }
     let to_value x =
       structure_to_value
         [("TransitGatewayRouteTableArn",
@@ -5842,31 +8707,45 @@ module RouteTableIdentifier =
               ~f:TransitGatewayRouteTableArn.to_value));
         ("CoreNetworkSegmentEdge",
           (Option.map x.coreNetworkSegmentEdge
-             ~f:CoreNetworkSegmentEdgeIdentifier.to_value))]
+             ~f:CoreNetworkSegmentEdgeIdentifier.to_value));
+        ("CoreNetworkNetworkFunctionGroup",
+          (Option.map x.coreNetworkNetworkFunctionGroup
+             ~f:CoreNetworkNetworkFunctionGroupIdentifier.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let coreNetworkNetworkFunctionGroup =
+        (Option.map ~f:CoreNetworkNetworkFunctionGroupIdentifier.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkNetworkFunctionGroup") in
       let coreNetworkSegmentEdge =
         (Option.map ~f:CoreNetworkSegmentEdgeIdentifier.of_xml)
           (Xml.child xml_arg0 "CoreNetworkSegmentEdge") in
       let transitGatewayRouteTableArn =
         (Option.map ~f:TransitGatewayRouteTableArn.of_xml)
           (Xml.child xml_arg0 "TransitGatewayRouteTableArn") in
-      make ?coreNetworkSegmentEdge ?transitGatewayRouteTableArn ()
+      make ?coreNetworkNetworkFunctionGroup ?coreNetworkSegmentEdge
+        ?transitGatewayRouteTableArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let coreNetworkNetworkFunctionGroup =
+        field_map json__ "CoreNetworkNetworkFunctionGroup"
+          CoreNetworkNetworkFunctionGroupIdentifier.of_json in
       let coreNetworkSegmentEdge =
-        field_map json "CoreNetworkSegmentEdge"
+        field_map json__ "CoreNetworkSegmentEdge"
           CoreNetworkSegmentEdgeIdentifier.of_json in
       let transitGatewayRouteTableArn =
-        field_map json "TransitGatewayRouteTableArn"
+        field_map json__ "TransitGatewayRouteTableArn"
           TransitGatewayRouteTableArn.of_json in
-      make ?coreNetworkSegmentEdge ?transitGatewayRouteTableArn ()
+      make ?coreNetworkNetworkFunctionGroup ?coreNetworkSegmentEdge
+        ?transitGatewayRouteTableArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a route table."]
 module RouteTypeList =
   struct
     type nonrec t = RouteType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5891,6 +8770,9 @@ module NetworkResourceList =
   struct
     type nonrec t = NetworkResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5916,6 +8798,9 @@ module RelationshipList =
   struct
     type nonrec t = Relationship.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Relationship.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5940,6 +8825,9 @@ module NetworkResourceCountList =
   struct
     type nonrec t = NetworkResourceCount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkResourceCount.to_value)) |>
         (fun x -> `List x)
@@ -5966,6 +8854,9 @@ module LinkList =
   struct
     type nonrec t = Link.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Link.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5989,6 +8880,9 @@ module LinkIdList =
   struct
     type nonrec t = LinkId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LinkId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6012,6 +8906,9 @@ module LinkAssociationList =
   struct
     type nonrec t = LinkAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LinkAssociation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6037,6 +8934,9 @@ module DeviceList =
   struct
     type nonrec t = Device.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Device.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6060,6 +8960,9 @@ module DeviceIdList =
   struct
     type nonrec t = DeviceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6084,6 +8987,9 @@ module CustomerGatewayAssociationList =
   struct
     type nonrec t = CustomerGatewayAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomerGatewayAssociation.to_value)) |>
         (fun x -> `List x)
@@ -6110,6 +9016,9 @@ module CustomerGatewayArnList =
   struct
     type nonrec t = CustomerGatewayArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomerGatewayArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6135,6 +9044,9 @@ module CoreNetworkChangeList =
   struct
     type nonrec t = CoreNetworkChange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoreNetworkChange.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6156,10 +9068,42 @@ module CoreNetworkChangeList =
         ~of_json:CoreNetworkChange.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CoreNetworkChangeEventList =
+  struct
+    type nonrec t = CoreNetworkChangeEvent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CoreNetworkChangeEvent.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CoreNetworkChangeEvent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CoreNetworkChangeEventList"
+        ~of_json:CoreNetworkChangeEvent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ConnectionList =
   struct
     type nonrec t = Connection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Connection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6184,6 +9128,9 @@ module ConnectionIdList =
   struct
     type nonrec t = ConnectionId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectionId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6223,7 +9170,14 @@ module ConnectPeer =
       configuration: ConnectPeerConfiguration.t option
         [@ocaml.doc "The configuration of the Connect peer."];
       tags: TagList.t option
-        [@ocaml.doc "The tags associated with the Connect peer."]}
+        [@ocaml.doc
+          "The list of key-value tags associated with the Connect peer."];
+      subnetArn: SubnetArn.t option
+        [@ocaml.doc
+          "The subnet ARN for the Connect peer. This only applies only when the protocol is NO_ENCAP."];
+      lastModificationErrors: ConnectPeerErrorList.t option
+        [@ocaml.doc
+          "Describes the error associated with the attachment request."]}
     let make ?coreNetworkId =
       fun ?connectAttachmentId ->
         fun ?connectPeerId ->
@@ -6232,17 +9186,21 @@ module ConnectPeer =
               fun ?createdAt ->
                 fun ?configuration ->
                   fun ?tags ->
-                    fun () ->
-                      {
-                        coreNetworkId;
-                        connectAttachmentId;
-                        connectPeerId;
-                        edgeLocation;
-                        state;
-                        createdAt;
-                        configuration;
-                        tags
-                      }
+                    fun ?subnetArn ->
+                      fun ?lastModificationErrors ->
+                        fun () ->
+                          {
+                            coreNetworkId;
+                            connectAttachmentId;
+                            connectPeerId;
+                            edgeLocation;
+                            state;
+                            createdAt;
+                            configuration;
+                            tags;
+                            subnetArn;
+                            lastModificationErrors
+                          }
     let to_value x =
       structure_to_value
         [("CoreNetworkId",
@@ -6257,9 +9215,18 @@ module ConnectPeer =
         ("CreatedAt", (Option.map x.createdAt ~f:DateTime.to_value));
         ("Configuration",
           (Option.map x.configuration ~f:ConnectPeerConfiguration.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("SubnetArn", (Option.map x.subnetArn ~f:SubnetArn.to_value));
+        ("LastModificationErrors",
+          (Option.map x.lastModificationErrors
+             ~f:ConnectPeerErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lastModificationErrors =
+        (Option.map ~f:ConnectPeerErrorList.of_xml)
+          (Xml.child xml_arg0 "LastModificationErrors") in
+      let subnetArn =
+        (Option.map ~f:SubnetArn.of_xml) (Xml.child xml_arg0 "SubnetArn") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let configuration =
         (Option.map ~f:ConnectPeerConfiguration.of_xml)
@@ -6280,31 +9247,40 @@ module ConnectPeer =
       let coreNetworkId =
         (Option.map ~f:CoreNetworkId.of_xml)
           (Xml.child xml_arg0 "CoreNetworkId") in
-      make ?tags ?configuration ?createdAt ?state ?edgeLocation
-        ?connectPeerId ?connectAttachmentId ?coreNetworkId ()
+      make ?lastModificationErrors ?subnetArn ?tags ?configuration ?createdAt
+        ?state ?edgeLocation ?connectPeerId ?connectAttachmentId
+        ?coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let lastModificationErrors =
+        field_map json__ "LastModificationErrors"
+          ConnectPeerErrorList.of_json in
+      let subnetArn = field_map json__ "SubnetArn" SubnetArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let configuration =
-        field_map json "Configuration" ConnectPeerConfiguration.of_json in
-      let createdAt = field_map json "CreatedAt" DateTime.of_json in
-      let state = field_map json "State" ConnectPeerState.of_json in
+        field_map json__ "Configuration" ConnectPeerConfiguration.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateTime.of_json in
+      let state = field_map json__ "State" ConnectPeerState.of_json in
       let edgeLocation =
-        field_map json "EdgeLocation" ExternalRegionCode.of_json in
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
       let connectPeerId =
-        field_map json "ConnectPeerId" ConnectPeerId.of_json in
+        field_map json__ "ConnectPeerId" ConnectPeerId.of_json in
       let connectAttachmentId =
-        field_map json "ConnectAttachmentId" AttachmentId.of_json in
+        field_map json__ "ConnectAttachmentId" AttachmentId.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
-      make ?tags ?configuration ?createdAt ?state ?edgeLocation
-        ?connectPeerId ?connectAttachmentId ?coreNetworkId ()
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?lastModificationErrors ?subnetArn ?tags ?configuration ?createdAt
+        ?state ?edgeLocation ?connectPeerId ?connectAttachmentId
+        ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network Connect peer."]
 module ConnectPeerAssociationList =
   struct
     type nonrec t = ConnectPeerAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectPeerAssociation.to_value)) |>
         (fun x -> `List x)
@@ -6331,6 +9307,9 @@ module ConnectPeerIdList =
   struct
     type nonrec t = ConnectPeerId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectPeerId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6383,11 +9362,12 @@ module ConnectAttachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?options ?transportAttachmentId ?attachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let options = field_map json "Options" ConnectAttachmentOptions.of_json in
+    let of_json json__ =
+      let options =
+        field_map json__ "Options" ConnectAttachmentOptions.of_json in
       let transportAttachmentId =
-        field_map json "TransportAttachmentId" AttachmentId.of_json in
-      let attachment = field_map json "Attachment" Attachment.of_json in
+        field_map json__ "TransportAttachmentId" AttachmentId.of_json in
+      let attachment = field_map json__ "Attachment" Attachment.of_json in
       make ?options ?transportAttachmentId ?attachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a core network Connect attachment."]
@@ -6395,6 +9375,9 @@ module GlobalNetworkList =
   struct
     type nonrec t = GlobalNetwork.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalNetwork.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6419,6 +9402,9 @@ module GlobalNetworkIdList =
   struct
     type nonrec t = GlobalNetworkId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalNetworkId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6477,8 +9463,9 @@ module BgpOptions =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "PeerAsn") in
       make ?peerAsn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let peerAsn = field_map json "PeerAsn" Long.of_json in make ?peerAsn ()
+    let of_json json__ =
+      let peerAsn = field_map json__ "PeerAsn" Long.of_json in
+      make ?peerAsn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the BGP options."]
 module UpdateVpcAttachmentResponse =
@@ -6571,9 +9558,9 @@ module UpdateVpcAttachmentResponse =
           (Xml.child xml_arg0 "VpcAttachment") in
       make ?vpcAttachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcAttachment =
-        field_map json "VpcAttachment" VpcAttachment.of_json in
+        field_map json__ "VpcAttachment" VpcAttachment.of_json in
       make ?vpcAttachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a VPC attachment."]
@@ -6618,14 +9605,14 @@ module UpdateVpcAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ?options ?removeSubnetArns ?addSubnetArns ~attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let options = field_map json "Options" VpcOptions.of_json in
+    let of_json json__ =
+      let options = field_map json__ "Options" VpcOptions.of_json in
       let removeSubnetArns =
-        field_map json "RemoveSubnetArns" SubnetArnList.of_json in
+        field_map json__ "RemoveSubnetArns" SubnetArnList.of_json in
       let addSubnetArns =
-        field_map json "AddSubnetArns" SubnetArnList.of_json in
+        field_map json__ "AddSubnetArns" SubnetArnList.of_json in
       let attachmentId =
-        field_map_exn json "AttachmentId" AttachmentId.of_json in
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
       make ?options ?removeSubnetArns ?addSubnetArns ~attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a VPC attachment."]
@@ -6714,8 +9701,8 @@ module UpdateSiteResponse =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let site = field_map json "Site" Site.of_json in make ?site ()
+    let of_json json__ =
+      let site = field_map json__ "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the information for an existing site. To remove information for any of the parameters, specify an empty string."]
@@ -6760,13 +9747,13 @@ module UpdateSiteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?location ?description ~siteId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map json "Location" Location.of_json in
+    let of_json json__ =
+      let location = field_map json__ "Location" Location.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?location ?description ~siteId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6867,10 +9854,10 @@ module UpdateNetworkResourceMetadataResponse =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?metadata ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metadata =
-        field_map json "Metadata" NetworkResourceMetadataMap.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+        field_map json__ "Metadata" NetworkResourceMetadataMap.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       make ?metadata ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6907,12 +9894,13 @@ module UpdateNetworkResourceMetadataRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~metadata ~resourceArn ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metadata =
-        field_map_exn json "Metadata" NetworkResourceMetadataMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+        field_map_exn json__ "Metadata" NetworkResourceMetadataMap.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~metadata ~resourceArn ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7013,8 +10001,8 @@ module UpdateLinkResponse =
       let link = (Option.map ~f:Link.of_xml) (Xml.child xml_arg0 "Link") in
       make ?link ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let link = field_map json "Link" Link.of_json in make ?link ()
+    let of_json json__ =
+      let link = field_map json__ "Link" Link.of_json in make ?link ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the details for an existing link. To remove information for any of the parameters, specify an empty string."]
@@ -7082,15 +10070,15 @@ module UpdateLinkRequest =
       make ?provider ?bandwidth ?type_ ?description ~linkId ~globalNetworkId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let provider = field_map json "Provider" ConstrainedString.of_json in
-      let bandwidth = field_map json "Bandwidth" Bandwidth.of_json in
-      let type_ = field_map json "Type" ConstrainedString.of_json in
+    let of_json json__ =
+      let provider = field_map json__ "Provider" ConstrainedString.of_json in
+      let bandwidth = field_map json__ "Bandwidth" Bandwidth.of_json in
+      let type_ = field_map json__ "Type" ConstrainedString.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let linkId = field_map_exn json "LinkId" LinkId.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let linkId = field_map_exn json__ "LinkId" LinkId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?provider ?bandwidth ?type_ ?description ~linkId ~globalNetworkId
         ()
     let to_json v = composed_to_json to_value v
@@ -7186,9 +10174,9 @@ module UpdateGlobalNetworkResponse =
           (Xml.child xml_arg0 "GlobalNetwork") in
       make ?globalNetwork ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalNetwork =
-        field_map json "GlobalNetwork" GlobalNetwork.of_json in
+        field_map json__ "GlobalNetwork" GlobalNetwork.of_json in
       make ?globalNetwork ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7221,15 +10209,153 @@ module UpdateGlobalNetworkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?description ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?description ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates an existing global network. To remove information for any of the parameters, specify an empty string."]
+module UpdateDirectConnectGatewayAttachmentResponse =
+  struct
+    type nonrec t =
+      {
+      directConnectGatewayAttachment: DirectConnectGatewayAttachment.t option
+        [@ocaml.doc
+          "Returns details of the Direct Connect gateway attachment with the updated edge locations."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?directConnectGatewayAttachment =
+      fun () -> { directConnectGatewayAttachment }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DirectConnectGatewayAttachment",
+           (Option.map x.directConnectGatewayAttachment
+              ~f:DirectConnectGatewayAttachment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directConnectGatewayAttachment =
+        (Option.map ~f:DirectConnectGatewayAttachment.of_xml)
+          (Xml.child xml_arg0 "DirectConnectGatewayAttachment") in
+      make ?directConnectGatewayAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directConnectGatewayAttachment =
+        field_map json__ "DirectConnectGatewayAttachment"
+          DirectConnectGatewayAttachment.of_json in
+      make ?directConnectGatewayAttachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the edge locations associated with an Amazon Web Services Direct Connect gateway attachment."]
+module UpdateDirectConnectGatewayAttachmentRequest =
+  struct
+    type nonrec t =
+      {
+      attachmentId: AttachmentId.t
+        [@ocaml.doc
+          "The ID of the Direct Connect gateway attachment for the updated edge locations."];
+      edgeLocations: ExternalRegionCodeList.t option
+        [@ocaml.doc
+          "One or more edge locations to update for the Direct Connect gateway attachment. The updated array of edge locations overwrites the previous array of locations. EdgeLocations is only used for Direct Connect gateway attachments."]}
+    let context_ = "UpdateDirectConnectGatewayAttachmentRequest"
+    let make ?edgeLocations =
+      fun ~attachmentId -> fun () -> { edgeLocations; attachmentId }
+    let to_value x =
+      structure_to_value
+        [("attachmentId", (Some (AttachmentId.to_value x.attachmentId)));
+        ("EdgeLocations",
+          (Option.map x.edgeLocations ~f:ExternalRegionCodeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let edgeLocations =
+        (Option.map ~f:ExternalRegionCodeList.of_xml)
+          (Xml.child xml_arg0 "EdgeLocations") in
+      let attachmentId =
+        AttachmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
+      make ?edgeLocations ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let edgeLocations =
+        field_map json__ "EdgeLocations" ExternalRegionCodeList.of_json in
+      let attachmentId =
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
+      make ?edgeLocations ~attachmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the edge locations associated with an Amazon Web Services Direct Connect gateway attachment."]
 module UpdateDeviceResponse =
   struct
     type nonrec t =
@@ -7317,8 +10443,9 @@ module UpdateDeviceResponse =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "Device") in
       make ?device ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let device = field_map json "Device" Device.of_json in make ?device ()
+    let of_json json__ =
+      let device = field_map json__ "Device" Device.of_json in
+      make ?device ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the details for an existing device. To remove information for any of the parameters, specify an empty string."]
@@ -7416,20 +10543,20 @@ module UpdateDeviceRequest =
       make ?siteId ?location ?serialNumber ?model ?vendor ?type_ ?description
         ?aWSLocation ~deviceId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let siteId = field_map json "SiteId" SiteId.of_json in
-      let location = field_map json "Location" Location.of_json in
+    let of_json json__ =
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
+      let location = field_map json__ "Location" Location.of_json in
       let serialNumber =
-        field_map json "SerialNumber" ConstrainedString.of_json in
-      let model = field_map json "Model" ConstrainedString.of_json in
-      let vendor = field_map json "Vendor" ConstrainedString.of_json in
-      let type_ = field_map json "Type" ConstrainedString.of_json in
+        field_map json__ "SerialNumber" ConstrainedString.of_json in
+      let model = field_map json__ "Model" ConstrainedString.of_json in
+      let vendor = field_map json__ "Vendor" ConstrainedString.of_json in
+      let type_ = field_map json__ "Type" ConstrainedString.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let aWSLocation = field_map json "AWSLocation" AWSLocation.of_json in
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let aWSLocation = field_map json__ "AWSLocation" AWSLocation.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?siteId ?location ?serialNumber ?model ?vendor ?type_ ?description
         ?aWSLocation ~deviceId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -7523,8 +10650,8 @@ module UpdateCoreNetworkResponse =
         (Option.map ~f:CoreNetwork.of_xml) (Xml.child xml_arg0 "CoreNetwork") in
       make ?coreNetwork ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let coreNetwork = field_map json "CoreNetwork" CoreNetwork.of_json in
+    let of_json json__ =
+      let coreNetwork = field_map json__ "CoreNetwork" CoreNetwork.of_json in
       make ?coreNetwork ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the description of a core network."]
@@ -7553,11 +10680,11 @@ module UpdateCoreNetworkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ?description ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?description ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the description of a core network."]
@@ -7649,8 +10776,8 @@ module UpdateConnectionResponse =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connection = field_map json "Connection" Connection.of_json in
+    let of_json json__ =
+      let connection = field_map json__ "Connection" Connection.of_json in
       make ?connection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7713,15 +10840,15 @@ module UpdateConnectionRequest =
       make ?description ?connectedLinkId ?linkId ~connectionId
         ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let connectedLinkId = field_map json "ConnectedLinkId" LinkId.of_json in
-      let linkId = field_map json "LinkId" LinkId.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let connectedLinkId = field_map json__ "ConnectedLinkId" LinkId.of_json in
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
       let connectionId =
-        field_map_exn json "ConnectionId" ConnectionId.of_json in
+        field_map_exn json__ "ConnectionId" ConnectionId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?description ?connectedLinkId ?linkId ~connectionId
         ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -7836,9 +10963,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a specified resource."]
@@ -7960,9 +11088,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Tags a specified resource."]
@@ -8056,9 +11185,9 @@ module StartRouteAnalysisResponse =
           (Xml.child xml_arg0 "RouteAnalysis") in
       make ?routeAnalysis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routeAnalysis =
-        field_map json "RouteAnalysis" RouteAnalysis.of_json in
+        field_map json__ "RouteAnalysis" RouteAnalysis.of_json in
       make ?routeAnalysis ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8125,23 +11254,146 @@ module StartRouteAnalysisRequest =
       make ?useMiddleboxes ?includeReturnPath ~destination ~source
         ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let useMiddleboxes = field_map json "UseMiddleboxes" Boolean.of_json in
+    let of_json json__ =
+      let useMiddleboxes = field_map json__ "UseMiddleboxes" Boolean.of_json in
       let includeReturnPath =
-        field_map json "IncludeReturnPath" Boolean.of_json in
+        field_map json__ "IncludeReturnPath" Boolean.of_json in
       let destination =
-        field_map_exn json "Destination"
+        field_map_exn json__ "Destination"
           RouteAnalysisEndpointOptionsSpecification.of_json in
       let source =
-        field_map_exn json "Source"
+        field_map_exn json__ "Source"
           RouteAnalysisEndpointOptionsSpecification.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?useMiddleboxes ?includeReturnPath ~destination ~source
         ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts analyzing the routing path between the specified source and destination. For more information, see Route Analyzer."]
+module StartOrganizationServiceAccessUpdateResponse =
+  struct
+    type nonrec t =
+      {
+      organizationStatus: OrganizationStatus.t option
+        [@ocaml.doc
+          "The status of the service access update request for an Amazon Web Services Organization."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?organizationStatus = fun () -> { organizationStatus }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OrganizationStatus",
+           (Option.map x.organizationStatus ~f:OrganizationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let organizationStatus =
+        (Option.map ~f:OrganizationStatus.of_xml)
+          (Xml.child xml_arg0 "OrganizationStatus") in
+      make ?organizationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let organizationStatus =
+        field_map json__ "OrganizationStatus" OrganizationStatus.of_json in
+      make ?organizationStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables the Network Manager service for an Amazon Web Services Organization. This can only be called by a management account within the organization."]
+module StartOrganizationServiceAccessUpdateRequest =
+  struct
+    type nonrec t =
+      {
+      action: Action.t
+        [@ocaml.doc
+          "The action to take for the update request. This can be either ENABLE or DISABLE."]}
+    let context_ = "StartOrganizationServiceAccessUpdateRequest"
+    let make ~action = fun () -> { action }
+    let to_value x =
+      structure_to_value [("Action", (Some (Action.to_value x.action)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let action =
+        Action.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Action") in
+      make ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let action = field_map_exn json__ "Action" Action.of_json in
+      make ~action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables the Network Manager service for an Amazon Web Services Organization. This can only be called by a management account within the organization."]
 module RestoreCoreNetworkPolicyVersionResponse =
   struct
     type nonrec t =
@@ -8232,9 +11484,9 @@ module RestoreCoreNetworkPolicyVersionResponse =
           (Xml.child xml_arg0 "CoreNetworkPolicy") in
       make ?coreNetworkPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreNetworkPolicy =
-        field_map json "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
+        field_map json__ "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
       make ?coreNetworkPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8263,15 +11515,178 @@ module RestoreCoreNetworkPolicyVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~policyVersionId ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyVersionId =
-        field_map_exn json "PolicyVersionId" Integer.of_json in
+        field_map_exn json__ "PolicyVersionId" Integer.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ~policyVersionId ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Restores a previous policy version as a new, immutable version of a core network policy. A subsequent change set is created showing the differences between the LIVE policy and restored policy."]
+module RemoveAttachmentRoutingPolicyLabelResponse =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc "The ID of the core network containing the attachment."];
+      attachmentId: AttachmentId.t option
+        [@ocaml.doc
+          "The ID of the attachment from which the routing policy label was removed."];
+      routingPolicyLabel: ConstrainedString.t option
+        [@ocaml.doc
+          "The routing policy label that was removed from the attachment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?coreNetworkId =
+      fun ?attachmentId ->
+        fun ?routingPolicyLabel ->
+          fun () -> { coreNetworkId; attachmentId; routingPolicyLabel }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId",
+           (Option.map x.coreNetworkId ~f:CoreNetworkId.to_value));
+        ("AttachmentId",
+          (Option.map x.attachmentId ~f:AttachmentId.to_value));
+        ("RoutingPolicyLabel",
+          (Option.map x.routingPolicyLabel ~f:ConstrainedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let routingPolicyLabel =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyLabel") in
+      let attachmentId =
+        (Option.map ~f:AttachmentId.of_xml)
+          (Xml.child xml_arg0 "AttachmentId") in
+      let coreNetworkId =
+        (Option.map ~f:CoreNetworkId.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkId") in
+      make ?routingPolicyLabel ?attachmentId ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let routingPolicyLabel =
+        field_map json__ "RoutingPolicyLabel" ConstrainedString.of_json in
+      let attachmentId = field_map json__ "AttachmentId" AttachmentId.of_json in
+      let coreNetworkId =
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?routingPolicyLabel ?attachmentId ?coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Removes a routing policy label from an attachment."]
+module RemoveAttachmentRoutingPolicyLabelRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t
+        [@ocaml.doc "The ID of the core network containing the attachment."];
+      attachmentId: AttachmentId.t
+        [@ocaml.doc
+          "The ID of the attachment to remove the routing policy label from."]}
+    let context_ = "RemoveAttachmentRoutingPolicyLabelRequest"
+    let make ~coreNetworkId =
+      fun ~attachmentId -> fun () -> { coreNetworkId; attachmentId }
+    let to_value x =
+      structure_to_value
+        [("coreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("attachmentId", (Some (AttachmentId.to_value x.attachmentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachmentId =
+        AttachmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
+      make ~attachmentId ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachmentId =
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ~attachmentId ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Removes a routing policy label from an attachment."]
 module RejectAttachmentResponse =
   struct
     type nonrec t =
@@ -8360,8 +11775,8 @@ module RejectAttachmentResponse =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?attachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attachment = field_map json "Attachment" Attachment.of_json in
+    let of_json json__ =
+      let attachment = field_map json__ "Attachment" Attachment.of_json in
       make ?attachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Rejects a core network attachment request."]
@@ -8382,9 +11797,9 @@ module RejectAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentId =
-        field_map_exn json "AttachmentId" AttachmentId.of_json in
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
       make ~attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Rejects a core network attachment request."]
@@ -8480,14 +11895,14 @@ module RegisterTransitGatewayResponse =
           (Xml.child xml_arg0 "TransitGatewayRegistration") in
       make ?transitGatewayRegistration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayRegistration =
-        field_map json "TransitGatewayRegistration"
+        field_map json__ "TransitGatewayRegistration"
           TransitGatewayRegistration.of_json in
       make ?transitGatewayRegistration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a transit gateway in your global network. The transit gateway can be in any Amazon Web Services Region, but it must be owned by the same Amazon Web Services account that owns the global network. You cannot register a transit gateway in more than one global network."]
+       "Registers a transit gateway in your global network. Not all Regions support transit gateways for global networks. For a list of the supported Regions, see Region Availability in the Amazon Web Services Transit Gateways for Global Networks User Guide. The transit gateway can be in any of the supported Amazon Web Services Regions, but it must be owned by the same Amazon Web Services account that owns the global network. You cannot register a transit gateway in more than one global network."]
 module RegisterTransitGatewayRequest =
   struct
     type nonrec t =
@@ -8516,15 +11931,15 @@ module RegisterTransitGatewayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~transitGatewayArn ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayArn =
-        field_map_exn json "TransitGatewayArn" TransitGatewayArn.of_json in
+        field_map_exn json__ "TransitGatewayArn" TransitGatewayArn.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~transitGatewayArn ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a transit gateway in your global network. The transit gateway can be in any Amazon Web Services Region, but it must be owned by the same Amazon Web Services account that owns the global network. You cannot register a transit gateway in more than one global network."]
+       "Registers a transit gateway in your global network. Not all Regions support transit gateways for global networks. For a list of the supported Regions, see Region Availability in the Amazon Web Services Transit Gateways for Global Networks User Guide. The transit gateway can be in any of the supported Amazon Web Services Regions, but it must be owned by the same Amazon Web Services account that owns the global network. You cannot register a transit gateway in more than one global network."]
 module PutResourcePolicyResponse =
   struct
     type nonrec t = unit
@@ -8637,10 +12052,11 @@ module PutResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyDocument") in
       make ~resourceArn ~policyDocument ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       let policyDocument =
-        field_map_exn json "PolicyDocument" ResourcePolicyDocument.of_json in
+        field_map_exn json__ "PolicyDocument" ResourcePolicyDocument.of_json in
       make ~resourceArn ~policyDocument ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates or updates a resource policy."]
@@ -8744,9 +12160,9 @@ module PutCoreNetworkPolicyResponse =
           (Xml.child xml_arg0 "CoreNetworkPolicy") in
       make ?coreNetworkPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreNetworkPolicy =
-        field_map json "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
+        field_map json__ "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
       make ?coreNetworkPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8806,20 +12222,208 @@ module PutCoreNetworkPolicyRequest =
       make ?clientToken ?latestVersionId ?description ~policyDocument
         ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let latestVersionId = field_map json "LatestVersionId" Integer.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let latestVersionId =
+        field_map json__ "LatestVersionId" Integer.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       let policyDocument =
-        field_map_exn json "PolicyDocument" CoreNetworkPolicyDocument.of_json in
+        field_map_exn json__ "PolicyDocument"
+          CoreNetworkPolicyDocument.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?clientToken ?latestVersionId ?description ~policyDocument
         ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new, immutable version of a core network policy. A subsequent change set is created showing the differences between the LIVE policy and the submitted policy."]
+module PutAttachmentRoutingPolicyLabelResponse =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc "The ID of the core network containing the attachment."];
+      attachmentId: AttachmentId.t option
+        [@ocaml.doc
+          "The ID of the attachment that received the routing policy label."];
+      routingPolicyLabel: ConstrainedString.t option
+        [@ocaml.doc
+          "The routing policy label that was applied to the attachment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?coreNetworkId =
+      fun ?attachmentId ->
+        fun ?routingPolicyLabel ->
+          fun () -> { coreNetworkId; attachmentId; routingPolicyLabel }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId",
+           (Option.map x.coreNetworkId ~f:CoreNetworkId.to_value));
+        ("AttachmentId",
+          (Option.map x.attachmentId ~f:AttachmentId.to_value));
+        ("RoutingPolicyLabel",
+          (Option.map x.routingPolicyLabel ~f:ConstrainedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let routingPolicyLabel =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyLabel") in
+      let attachmentId =
+        (Option.map ~f:AttachmentId.of_xml)
+          (Xml.child xml_arg0 "AttachmentId") in
+      let coreNetworkId =
+        (Option.map ~f:CoreNetworkId.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkId") in
+      make ?routingPolicyLabel ?attachmentId ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let routingPolicyLabel =
+        field_map json__ "RoutingPolicyLabel" ConstrainedString.of_json in
+      let attachmentId = field_map json__ "AttachmentId" AttachmentId.of_json in
+      let coreNetworkId =
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?routingPolicyLabel ?attachmentId ?coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Applies a routing policy label to an attachment for traffic routing decisions."]
+module PutAttachmentRoutingPolicyLabelRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t
+        [@ocaml.doc "The ID of the core network containing the attachment."];
+      attachmentId: AttachmentId.t
+        [@ocaml.doc
+          "The ID of the attachment to apply the routing policy label to."];
+      routingPolicyLabel: ConstrainedString.t
+        [@ocaml.doc "The routing policy label to apply to the attachment."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "PutAttachmentRoutingPolicyLabelRequest"
+    let make ?clientToken =
+      fun ~coreNetworkId ->
+        fun ~attachmentId ->
+          fun ~routingPolicyLabel ->
+            fun () ->
+              { clientToken; coreNetworkId; attachmentId; routingPolicyLabel
+              }
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("AttachmentId", (Some (AttachmentId.to_value x.attachmentId)));
+        ("RoutingPolicyLabel",
+          (Some (ConstrainedString.to_value x.routingPolicyLabel)));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let routingPolicyLabel =
+        ConstrainedString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RoutingPolicyLabel") in
+      let attachmentId =
+        AttachmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttachmentId") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
+      make ?clientToken ~routingPolicyLabel ~attachmentId ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let routingPolicyLabel =
+        field_map_exn json__ "RoutingPolicyLabel" ConstrainedString.of_json in
+      let attachmentId =
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?clientToken ~routingPolicyLabel ~attachmentId ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Applies a routing policy label to an attachment for traffic routing decisions."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -8898,8 +12502,8 @@ module ListTagsForResourceResponse =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       make ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for a specified resource."]
@@ -8921,11 +12525,247 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for a specified resource."]
+module ListPeeringsResponse =
+  struct
+    type nonrec t =
+      {
+      peerings: PeeringList.t option
+        [@ocaml.doc
+          "Lists the transit gateway peerings for the ListPeerings request."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?peerings = fun ?nextToken -> fun () -> { peerings; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Peerings", (Option.map x.peerings ~f:PeeringList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let peerings =
+        (Option.map ~f:PeeringList.of_xml) (Xml.child xml_arg0 "Peerings") in
+      make ?nextToken ?peerings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let peerings = field_map json__ "Peerings" PeeringList.of_json in
+      make ?nextToken ?peerings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the peerings for a core network."]
+module ListPeeringsRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc "The ID of a core network."];
+      peeringType: PeeringType.t option
+        [@ocaml.doc "Returns a list of a peering requests."];
+      edgeLocation: ExternalRegionCode.t option
+        [@ocaml.doc "Returns a list edge locations for the"];
+      state: PeeringState.t option
+        [@ocaml.doc "Returns a list of the peering request states."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of results to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let make ?coreNetworkId =
+      fun ?peeringType ->
+        fun ?edgeLocation ->
+          fun ?state ->
+            fun ?maxResults ->
+              fun ?nextToken ->
+                fun () ->
+                  {
+                    coreNetworkId;
+                    peeringType;
+                    edgeLocation;
+                    state;
+                    maxResults;
+                    nextToken
+                  }
+    let to_value x =
+      structure_to_value
+        [("coreNetworkId",
+           (Option.map x.coreNetworkId ~f:CoreNetworkId.to_value));
+        ("peeringType", (Option.map x.peeringType ~f:PeeringType.to_value));
+        ("edgeLocation",
+          (Option.map x.edgeLocation ~f:ExternalRegionCode.to_value));
+        ("state", (Option.map x.state ~f:PeeringState.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let state =
+        (Option.map ~f:PeeringState.of_xml) (Xml.child xml_arg0 "state") in
+      let edgeLocation =
+        (Option.map ~f:ExternalRegionCode.of_xml)
+          (Xml.child xml_arg0 "edgeLocation") in
+      let peeringType =
+        (Option.map ~f:PeeringType.of_xml) (Xml.child xml_arg0 "peeringType") in
+      let coreNetworkId =
+        (Option.map ~f:CoreNetworkId.of_xml)
+          (Xml.child xml_arg0 "coreNetworkId") in
+      make ?nextToken ?maxResults ?state ?edgeLocation ?peeringType
+        ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let state = field_map json__ "State" PeeringState.of_json in
+      let edgeLocation =
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
+      let peeringType = field_map json__ "PeeringType" PeeringType.of_json in
+      let coreNetworkId =
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?nextToken ?maxResults ?state ?edgeLocation ?peeringType
+        ?coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the peerings for a core network."]
+module ListOrganizationServiceAccessStatusResponse =
+  struct
+    type nonrec t =
+      {
+      organizationStatus: OrganizationStatus.t option
+        [@ocaml.doc
+          "Displays the status of an Amazon Web Services Organization."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?organizationStatus =
+      fun ?nextToken -> fun () -> { organizationStatus; nextToken }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OrganizationStatus",
+           (Option.map x.organizationStatus ~f:OrganizationStatus.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let organizationStatus =
+        (Option.map ~f:OrganizationStatus.of_xml)
+          (Xml.child xml_arg0 "OrganizationStatus") in
+      make ?nextToken ?organizationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let organizationStatus =
+        field_map json__ "OrganizationStatus" OrganizationStatus.of_json in
+      make ?nextToken ?organizationStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the status of the Service Linked Role (SLR) deployment for the accounts in a given Amazon Web Services Organization."]
+module ListOrganizationServiceAccessStatusRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of results to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the status of the Service Linked Role (SLR) deployment for the accounts in a given Amazon Web Services Organization."]
 module ListCoreNetworksResponse =
   struct
     type nonrec t =
@@ -9004,10 +12844,10 @@ module ListCoreNetworksResponse =
           (Xml.child xml_arg0 "CoreNetworks") in
       make ?nextToken ?coreNetworks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let coreNetworks =
-        field_map json "CoreNetworks" CoreNetworkSummaryList.of_json in
+        field_map json__ "CoreNetworks" CoreNetworkSummaryList.of_json in
       make ?nextToken ?coreNetworks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of owned and shared core networks."]
@@ -9033,12 +12873,393 @@ module ListCoreNetworksRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of owned and shared core networks."]
+module ListCoreNetworkRoutingInformationResponse =
+  struct
+    type nonrec t =
+      {
+      coreNetworkRoutingInformation:
+        CoreNetworkRoutingInformationList.t option
+        [@ocaml.doc "The list of routing information for the core network."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?coreNetworkRoutingInformation =
+      fun ?nextToken ->
+        fun () -> { coreNetworkRoutingInformation; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkRoutingInformation",
+           (Option.map x.coreNetworkRoutingInformation
+              ~f:CoreNetworkRoutingInformationList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let coreNetworkRoutingInformation =
+        (Option.map ~f:CoreNetworkRoutingInformationList.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkRoutingInformation") in
+      make ?nextToken ?coreNetworkRoutingInformation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let coreNetworkRoutingInformation =
+        field_map json__ "CoreNetworkRoutingInformation"
+          CoreNetworkRoutingInformationList.of_json in
+      make ?nextToken ?coreNetworkRoutingInformation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists routing information for a core network, including routes and their attributes."]
+module ListCoreNetworkRoutingInformationRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t
+        [@ocaml.doc
+          "The ID of the core network to retrieve routing information for."];
+      segmentName: ConstrainedString.t
+        [@ocaml.doc
+          "The name of the segment to filter routing information by."];
+      edgeLocation: ExternalRegionCode.t
+        [@ocaml.doc "The edge location to filter routing information by."];
+      nextHopFilters: FilterMap.t option
+        [@ocaml.doc "Filters to apply based on next hop information."];
+      localPreferenceMatches: ConstrainedStringList.t option
+        [@ocaml.doc
+          "Local preference values to match when filtering routing information."];
+      exactAsPathMatches: ConstrainedStringList.t option
+        [@ocaml.doc
+          "Exact AS path values to match when filtering routing information."];
+      medMatches: ConstrainedStringList.t option
+        [@ocaml.doc
+          "Multi-Exit Discriminator (MED) values to match when filtering routing information."];
+      communityMatches: ConstrainedStringList.t option
+        [@ocaml.doc
+          "BGP community values to match when filtering routing information."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of routing information entries to return in a single page."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let context_ = "ListCoreNetworkRoutingInformationRequest"
+    let make ?nextHopFilters =
+      fun ?localPreferenceMatches ->
+        fun ?exactAsPathMatches ->
+          fun ?medMatches ->
+            fun ?communityMatches ->
+              fun ?maxResults ->
+                fun ?nextToken ->
+                  fun ~coreNetworkId ->
+                    fun ~segmentName ->
+                      fun ~edgeLocation ->
+                        fun () ->
+                          {
+                            nextHopFilters;
+                            localPreferenceMatches;
+                            exactAsPathMatches;
+                            medMatches;
+                            communityMatches;
+                            maxResults;
+                            nextToken;
+                            coreNetworkId;
+                            segmentName;
+                            edgeLocation
+                          }
+    let to_value x =
+      structure_to_value
+        [("coreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("SegmentName", (Some (ConstrainedString.to_value x.segmentName)));
+        ("EdgeLocation", (Some (ExternalRegionCode.to_value x.edgeLocation)));
+        ("NextHopFilters",
+          (Option.map x.nextHopFilters ~f:FilterMap.to_value));
+        ("LocalPreferenceMatches",
+          (Option.map x.localPreferenceMatches
+             ~f:ConstrainedStringList.to_value));
+        ("ExactAsPathMatches",
+          (Option.map x.exactAsPathMatches ~f:ConstrainedStringList.to_value));
+        ("MedMatches",
+          (Option.map x.medMatches ~f:ConstrainedStringList.to_value));
+        ("CommunityMatches",
+          (Option.map x.communityMatches ~f:ConstrainedStringList.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let communityMatches =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "CommunityMatches") in
+      let medMatches =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "MedMatches") in
+      let exactAsPathMatches =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "ExactAsPathMatches") in
+      let localPreferenceMatches =
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "LocalPreferenceMatches") in
+      let nextHopFilters =
+        (Option.map ~f:FilterMap.of_xml)
+          (Xml.child xml_arg0 "NextHopFilters") in
+      let edgeLocation =
+        ExternalRegionCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EdgeLocation") in
+      let segmentName =
+        ConstrainedString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SegmentName") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
+      make ?nextToken ?maxResults ?communityMatches ?medMatches
+        ?exactAsPathMatches ?localPreferenceMatches ?nextHopFilters
+        ~edgeLocation ~segmentName ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let communityMatches =
+        field_map json__ "CommunityMatches" ConstrainedStringList.of_json in
+      let medMatches =
+        field_map json__ "MedMatches" ConstrainedStringList.of_json in
+      let exactAsPathMatches =
+        field_map json__ "ExactAsPathMatches" ConstrainedStringList.of_json in
+      let localPreferenceMatches =
+        field_map json__ "LocalPreferenceMatches"
+          ConstrainedStringList.of_json in
+      let nextHopFilters =
+        field_map json__ "NextHopFilters" FilterMap.of_json in
+      let edgeLocation =
+        field_map_exn json__ "EdgeLocation" ExternalRegionCode.of_json in
+      let segmentName =
+        field_map_exn json__ "SegmentName" ConstrainedString.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?nextToken ?maxResults ?communityMatches ?medMatches
+        ?exactAsPathMatches ?localPreferenceMatches ?nextHopFilters
+        ~edgeLocation ~segmentName ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists routing information for a core network, including routes and their attributes."]
+module ListCoreNetworkPrefixListAssociationsResponse =
+  struct
+    type nonrec t =
+      {
+      prefixListAssociations: PrefixListAssociationList.t option
+        [@ocaml.doc
+          "The list of prefix list associations for the core network."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?prefixListAssociations =
+      fun ?nextToken -> fun () -> { prefixListAssociations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PrefixListAssociations",
+           (Option.map x.prefixListAssociations
+              ~f:PrefixListAssociationList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let prefixListAssociations =
+        (Option.map ~f:PrefixListAssociationList.of_xml)
+          (Xml.child xml_arg0 "PrefixListAssociations") in
+      make ?nextToken ?prefixListAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let prefixListAssociations =
+        field_map json__ "PrefixListAssociations"
+          PrefixListAssociationList.of_json in
+      make ?nextToken ?prefixListAssociations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the prefix list associations for a core network."]
+module ListCoreNetworkPrefixListAssociationsRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t
+        [@ocaml.doc
+          "The ID of the core network to list prefix list associations for."];
+      prefixListArn: PrefixListArn.t option
+        [@ocaml.doc
+          "The ARN of a specific prefix list to filter the associations."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single page."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let context_ = "ListCoreNetworkPrefixListAssociationsRequest"
+    let make ?prefixListArn =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~coreNetworkId ->
+            fun () -> { prefixListArn; maxResults; nextToken; coreNetworkId }
+    let to_value x =
+      structure_to_value
+        [("coreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("prefixListArn",
+          (Option.map x.prefixListArn ~f:PrefixListArn.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let prefixListArn =
+        (Option.map ~f:PrefixListArn.of_xml)
+          (Xml.child xml_arg0 "prefixListArn") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
+      make ?nextToken ?maxResults ?prefixListArn ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let prefixListArn =
+        field_map json__ "PrefixListArn" PrefixListArn.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?nextToken ?maxResults ?prefixListArn ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the prefix list associations for a core network."]
 module ListCoreNetworkPolicyVersionsResponse =
   struct
     type nonrec t =
@@ -9127,10 +13348,10 @@ module ListCoreNetworkPolicyVersionsResponse =
           (Xml.child xml_arg0 "CoreNetworkPolicyVersions") in
       make ?nextToken ?coreNetworkPolicyVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let coreNetworkPolicyVersions =
-        field_map json "CoreNetworkPolicyVersions"
+        field_map json__ "CoreNetworkPolicyVersions"
           CoreNetworkPolicyVersionList.of_json in
       make ?nextToken ?coreNetworkPolicyVersions ()
     let to_json v = composed_to_json to_value v
@@ -9165,11 +13386,11 @@ module ListCoreNetworkPolicyVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ?nextToken ?maxResults ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?nextToken ?maxResults ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of core network policy versions."]
@@ -9251,10 +13472,10 @@ module ListConnectPeersResponse =
           (Xml.child xml_arg0 "ConnectPeers") in
       make ?nextToken ?connectPeers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let connectPeers =
-        field_map json "ConnectPeers" ConnectPeerSummaryList.of_json in
+        field_map json__ "ConnectPeers" ConnectPeerSummaryList.of_json in
       make ?nextToken ?connectPeers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of core network Connect peers."]
@@ -9298,13 +13519,13 @@ module ListConnectPeersRequest =
           (Xml.child xml_arg0 "coreNetworkId") in
       make ?nextToken ?maxResults ?connectAttachmentId ?coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let connectAttachmentId =
-        field_map json "ConnectAttachmentId" AttachmentId.of_json in
+        field_map json__ "ConnectAttachmentId" AttachmentId.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?nextToken ?maxResults ?connectAttachmentId ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of core network Connect peers."]
@@ -9386,9 +13607,9 @@ module ListAttachmentsResponse =
           (Xml.child xml_arg0 "Attachments") in
       make ?nextToken ?attachments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let attachments = field_map json "Attachments" AttachmentList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let attachments = field_map json__ "Attachments" AttachmentList.of_json in
       make ?nextToken ?attachments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of core network attachments."]
@@ -9454,20 +13675,171 @@ module ListAttachmentsRequest =
       make ?nextToken ?maxResults ?state ?edgeLocation ?attachmentType
         ?coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let state = field_map json "State" AttachmentState.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let state = field_map json__ "State" AttachmentState.of_json in
       let edgeLocation =
-        field_map json "EdgeLocation" ExternalRegionCode.of_json in
+        field_map json__ "EdgeLocation" ExternalRegionCode.of_json in
       let attachmentType =
-        field_map json "AttachmentType" AttachmentType.of_json in
+        field_map json__ "AttachmentType" AttachmentType.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?nextToken ?maxResults ?state ?edgeLocation ?attachmentType
         ?coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of core network attachments."]
+module ListAttachmentRoutingPolicyAssociationsResponse =
+  struct
+    type nonrec t =
+      {
+      attachmentRoutingPolicyAssociations:
+        AttachmentRoutingPolicyAssociationsList.t option
+        [@ocaml.doc "The list of attachment routing policy associations."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?attachmentRoutingPolicyAssociations =
+      fun ?nextToken ->
+        fun () -> { attachmentRoutingPolicyAssociations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AttachmentRoutingPolicyAssociations",
+           (Option.map x.attachmentRoutingPolicyAssociations
+              ~f:AttachmentRoutingPolicyAssociationsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let attachmentRoutingPolicyAssociations =
+        (Option.map ~f:AttachmentRoutingPolicyAssociationsList.of_xml)
+          (Xml.child xml_arg0 "AttachmentRoutingPolicyAssociations") in
+      make ?nextToken ?attachmentRoutingPolicyAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let attachmentRoutingPolicyAssociations =
+        field_map json__ "AttachmentRoutingPolicyAssociations"
+          AttachmentRoutingPolicyAssociationsList.of_json in
+      make ?nextToken ?attachmentRoutingPolicyAssociations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the routing policy associations for attachments in a core network."]
+module ListAttachmentRoutingPolicyAssociationsRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t
+        [@ocaml.doc
+          "The ID of the core network to list attachment routing policy associations for."];
+      attachmentId: AttachmentId.t option
+        [@ocaml.doc
+          "The ID of a specific attachment to filter the routing policy associations."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single page."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let context_ = "ListAttachmentRoutingPolicyAssociationsRequest"
+    let make ?attachmentId =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~coreNetworkId ->
+            fun () -> { attachmentId; maxResults; nextToken; coreNetworkId }
+    let to_value x =
+      structure_to_value
+        [("coreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("attachmentId",
+          (Option.map x.attachmentId ~f:AttachmentId.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let attachmentId =
+        (Option.map ~f:AttachmentId.of_xml)
+          (Xml.child xml_arg0 "attachmentId") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
+      make ?nextToken ?maxResults ?attachmentId ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let attachmentId = field_map json__ "AttachmentId" AttachmentId.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?nextToken ?maxResults ?attachmentId ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the routing policy associations for attachments in a core network."]
 module GetVpcAttachmentResponse =
   struct
     type nonrec t =
@@ -9549,9 +13921,9 @@ module GetVpcAttachmentResponse =
           (Xml.child xml_arg0 "VpcAttachment") in
       make ?vpcAttachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcAttachment =
-        field_map json "VpcAttachment" VpcAttachment.of_json in
+        field_map json__ "VpcAttachment" VpcAttachment.of_json in
       make ?vpcAttachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a VPC attachment."]
@@ -9572,12 +13944,130 @@ module GetVpcAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentId =
-        field_map_exn json "AttachmentId" AttachmentId.of_json in
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
       make ~attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a VPC attachment."]
+module GetTransitGatewayRouteTableAttachmentResponse =
+  struct
+    type nonrec t =
+      {
+      transitGatewayRouteTableAttachment:
+        TransitGatewayRouteTableAttachment.t option
+        [@ocaml.doc
+          "Returns information about the transit gateway route table attachment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?transitGatewayRouteTableAttachment =
+      fun () -> { transitGatewayRouteTableAttachment }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TransitGatewayRouteTableAttachment",
+           (Option.map x.transitGatewayRouteTableAttachment
+              ~f:TransitGatewayRouteTableAttachment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let transitGatewayRouteTableAttachment =
+        (Option.map ~f:TransitGatewayRouteTableAttachment.of_xml)
+          (Xml.child xml_arg0 "TransitGatewayRouteTableAttachment") in
+      make ?transitGatewayRouteTableAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let transitGatewayRouteTableAttachment =
+        field_map json__ "TransitGatewayRouteTableAttachment"
+          TransitGatewayRouteTableAttachment.of_json in
+      make ?transitGatewayRouteTableAttachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a transit gateway route table attachment."]
+module GetTransitGatewayRouteTableAttachmentRequest =
+  struct
+    type nonrec t =
+      {
+      attachmentId: AttachmentId.t
+        [@ocaml.doc "The ID of the transit gateway route table attachment."]}
+    let context_ = "GetTransitGatewayRouteTableAttachmentRequest"
+    let make ~attachmentId = fun () -> { attachmentId }
+    let to_value x =
+      structure_to_value
+        [("attachmentId", (Some (AttachmentId.to_value x.attachmentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachmentId =
+        AttachmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
+      make ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachmentId =
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
+      make ~attachmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a transit gateway route table attachment."]
 module GetTransitGatewayRegistrationsResponse =
   struct
     type nonrec t =
@@ -9666,10 +14156,10 @@ module GetTransitGatewayRegistrationsResponse =
           (Xml.child xml_arg0 "TransitGatewayRegistrations") in
       make ?nextToken ?transitGatewayRegistrations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let transitGatewayRegistrations =
-        field_map json "TransitGatewayRegistrations"
+        field_map json__ "TransitGatewayRegistrations"
           TransitGatewayRegistrationList.of_json in
       make ?nextToken ?transitGatewayRegistrations ()
     let to_json v = composed_to_json to_value v
@@ -9717,17 +14207,128 @@ module GetTransitGatewayRegistrationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?transitGatewayArns ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let transitGatewayArns =
-        field_map json "TransitGatewayArns" TransitGatewayArnList.of_json in
+        field_map json__ "TransitGatewayArns" TransitGatewayArnList.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?transitGatewayArns ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the transit gateway registrations in a specified global network."]
+module GetTransitGatewayPeeringResponse =
+  struct
+    type nonrec t =
+      {
+      transitGatewayPeering: TransitGatewayPeering.t option
+        [@ocaml.doc "Returns information about a transit gateway peering."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?transitGatewayPeering = fun () -> { transitGatewayPeering }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TransitGatewayPeering",
+           (Option.map x.transitGatewayPeering
+              ~f:TransitGatewayPeering.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let transitGatewayPeering =
+        (Option.map ~f:TransitGatewayPeering.of_xml)
+          (Xml.child xml_arg0 "TransitGatewayPeering") in
+      make ?transitGatewayPeering ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let transitGatewayPeering =
+        field_map json__ "TransitGatewayPeering"
+          TransitGatewayPeering.of_json in
+      make ?transitGatewayPeering ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a transit gateway peer."]
+module GetTransitGatewayPeeringRequest =
+  struct
+    type nonrec t =
+      {
+      peeringId: PeeringId.t [@ocaml.doc "The ID of the peering request."]}
+    let context_ = "GetTransitGatewayPeeringRequest"
+    let make ~peeringId = fun () -> { peeringId }
+    let to_value x =
+      structure_to_value
+        [("peeringId", (Some (PeeringId.to_value x.peeringId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let peeringId =
+        PeeringId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "peeringId") in
+      make ~peeringId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let peeringId = field_map_exn json__ "PeeringId" PeeringId.of_json in
+      make ~peeringId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a transit gateway peer."]
 module GetTransitGatewayConnectPeerAssociationsResponse =
   struct
     type nonrec t =
@@ -9828,10 +14429,10 @@ module GetTransitGatewayConnectPeerAssociationsResponse =
           (Xml.child xml_arg0 "TransitGatewayConnectPeerAssociations") in
       make ?nextToken ?transitGatewayConnectPeerAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let transitGatewayConnectPeerAssociations =
-        field_map json "TransitGatewayConnectPeerAssociations"
+        field_map json__ "TransitGatewayConnectPeerAssociations"
           TransitGatewayConnectPeerAssociationList.of_json in
       make ?nextToken ?transitGatewayConnectPeerAssociations ()
     let to_json v = composed_to_json to_value v
@@ -9887,14 +14488,14 @@ module GetTransitGatewayConnectPeerAssociationsRequest =
       make ?nextToken ?maxResults ?transitGatewayConnectPeerArns
         ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let transitGatewayConnectPeerArns =
-        field_map json "TransitGatewayConnectPeerArns"
+        field_map json__ "TransitGatewayConnectPeerArns"
           TransitGatewayConnectPeerArnList.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?transitGatewayConnectPeerArns
         ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -9983,9 +14584,9 @@ module GetSitesResponse =
         (Option.map ~f:SiteList.of_xml) (Xml.child xml_arg0 "Sites") in
       make ?nextToken ?sites ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let sites = field_map json "Sites" SiteList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let sites = field_map json__ "Sites" SiteList.of_json in
       make ?nextToken ?sites ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10028,12 +14629,12 @@ module GetSitesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?siteIds ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let siteIds = field_map json "SiteIds" SiteIdList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let siteIds = field_map json__ "SiteIds" SiteIdList.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?siteIds ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10120,9 +14721,9 @@ module GetSiteToSiteVpnAttachmentResponse =
           (Xml.child xml_arg0 "SiteToSiteVpnAttachment") in
       make ?siteToSiteVpnAttachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let siteToSiteVpnAttachment =
-        field_map json "SiteToSiteVpnAttachment"
+        field_map json__ "SiteToSiteVpnAttachment"
           SiteToSiteVpnAttachment.of_json in
       make ?siteToSiteVpnAttachment ()
     let to_json v = composed_to_json to_value v
@@ -10144,9 +14745,9 @@ module GetSiteToSiteVpnAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentId =
-        field_map_exn json "AttachmentId" AttachmentId.of_json in
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
       make ~attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a site-to-site VPN attachment."]
@@ -10231,9 +14832,9 @@ module GetRouteAnalysisResponse =
           (Xml.child xml_arg0 "RouteAnalysis") in
       make ?routeAnalysis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routeAnalysis =
-        field_map json "RouteAnalysis" RouteAnalysis.of_json in
+        field_map json__ "RouteAnalysis" RouteAnalysis.of_json in
       make ?routeAnalysis ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified route analysis."]
@@ -10264,11 +14865,11 @@ module GetRouteAnalysisRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~routeAnalysisId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routeAnalysisId =
-        field_map_exn json "RouteAnalysisId" ConstrainedString.of_json in
+        field_map_exn json__ "RouteAnalysisId" ConstrainedString.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~routeAnalysisId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified route analysis."]
@@ -10344,9 +14945,9 @@ module GetResourcePolicyResponse =
           (Xml.child xml_arg0 "PolicyDocument") in
       make ?policyDocument ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map json "PolicyDocument" ResourcePolicyDocument.of_json in
+        field_map json__ "PolicyDocument" ResourcePolicyDocument.of_json in
       make ?policyDocument ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a resource policy."]
@@ -10367,8 +14968,9 @@ module GetResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a resource policy."]
@@ -10459,10 +15061,10 @@ module GetNetworkTelemetryResponse =
           (Xml.child xml_arg0 "NetworkTelemetry") in
       make ?nextToken ?networkTelemetry ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let networkTelemetry =
-        field_map json "NetworkTelemetry" NetworkTelemetryList.of_json in
+        field_map json__ "NetworkTelemetry" NetworkTelemetryList.of_json in
       make ?nextToken ?networkTelemetry ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10483,7 +15085,7 @@ module GetNetworkTelemetryRequest =
         [@ocaml.doc "The Amazon Web Services account ID."];
       resourceType: ConstrainedString.t option
         [@ocaml.doc
-          "The resource type. The following are the supported resource types for Direct Connect: dxcon dx-gateway dx-vif The following are the supported resource types for Network Manager: connection device link site The following are the supported resource types for Amazon VPC: customer-gateway transit-gateway transit-gateway-attachment transit-gateway-connect-peer transit-gateway-route-table vpn-connection"];
+          "The resource type. The following are the supported resource types: connect-peer transit-gateway-connect-peer vpn-connection"];
       resourceArn: ResourceArn.t option
         [@ocaml.doc "The ARN of the resource."];
       maxResults: MaxResults.t option
@@ -10556,20 +15158,20 @@ module GetNetworkTelemetryRequest =
       make ?nextToken ?maxResults ?resourceArn ?resourceType ?accountId
         ?awsRegion ?registeredGatewayArn ?coreNetworkId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       let resourceType =
-        field_map json "ResourceType" ConstrainedString.of_json in
-      let accountId = field_map json "AccountId" AWSAccountId.of_json in
-      let awsRegion = field_map json "AwsRegion" ExternalRegionCode.of_json in
+        field_map json__ "ResourceType" ConstrainedString.of_json in
+      let accountId = field_map json__ "AccountId" AWSAccountId.of_json in
+      let awsRegion = field_map json__ "AwsRegion" ExternalRegionCode.of_json in
       let registeredGatewayArn =
-        field_map json "RegisteredGatewayArn" ResourceArn.of_json in
+        field_map json__ "RegisteredGatewayArn" ResourceArn.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?resourceArn ?resourceType ?accountId
         ?awsRegion ?registeredGatewayArn ?coreNetworkId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -10698,17 +15300,18 @@ module GetNetworkRoutesResponse =
       make ?networkRoutes ?routeTableTimestamp ?routeTableType
         ?coreNetworkSegmentEdge ?routeTableArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkRoutes =
-        field_map json "NetworkRoutes" NetworkRouteList.of_json in
+        field_map json__ "NetworkRoutes" NetworkRouteList.of_json in
       let routeTableTimestamp =
-        field_map json "RouteTableTimestamp" DateTime.of_json in
+        field_map json__ "RouteTableTimestamp" DateTime.of_json in
       let routeTableType =
-        field_map json "RouteTableType" RouteTableType.of_json in
+        field_map json__ "RouteTableType" RouteTableType.of_json in
       let coreNetworkSegmentEdge =
-        field_map json "CoreNetworkSegmentEdge"
+        field_map json__ "CoreNetworkSegmentEdge"
           CoreNetworkSegmentEdgeIdentifier.of_json in
-      let routeTableArn = field_map json "RouteTableArn" ResourceArn.of_json in
+      let routeTableArn =
+        field_map json__ "RouteTableArn" ResourceArn.of_json in
       make ?networkRoutes ?routeTableTimestamp ?routeTableType
         ?coreNetworkSegmentEdge ?routeTableArn ()
     let to_json v = composed_to_json to_value v
@@ -10818,26 +15421,26 @@ module GetNetworkRoutesRequest =
         ?supernetOfMatches ?subnetOfMatches ?longestPrefixMatches
         ?exactCidrMatches ~routeTableIdentifier ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationFilters =
-        field_map json "DestinationFilters" FilterMap.of_json in
-      let types = field_map json "Types" RouteTypeList.of_json in
-      let states = field_map json "States" RouteStateList.of_json in
+        field_map json__ "DestinationFilters" FilterMap.of_json in
+      let types = field_map json__ "Types" RouteTypeList.of_json in
+      let states = field_map json__ "States" RouteStateList.of_json in
       let prefixListIds =
-        field_map json "PrefixListIds" ConstrainedStringList.of_json in
+        field_map json__ "PrefixListIds" ConstrainedStringList.of_json in
       let supernetOfMatches =
-        field_map json "SupernetOfMatches" ConstrainedStringList.of_json in
+        field_map json__ "SupernetOfMatches" ConstrainedStringList.of_json in
       let subnetOfMatches =
-        field_map json "SubnetOfMatches" ConstrainedStringList.of_json in
+        field_map json__ "SubnetOfMatches" ConstrainedStringList.of_json in
       let longestPrefixMatches =
-        field_map json "LongestPrefixMatches" ConstrainedStringList.of_json in
+        field_map json__ "LongestPrefixMatches" ConstrainedStringList.of_json in
       let exactCidrMatches =
-        field_map json "ExactCidrMatches" ConstrainedStringList.of_json in
+        field_map json__ "ExactCidrMatches" ConstrainedStringList.of_json in
       let routeTableIdentifier =
-        field_map_exn json "RouteTableIdentifier"
+        field_map_exn json__ "RouteTableIdentifier"
           RouteTableIdentifier.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?destinationFilters ?types ?states ?prefixListIds
         ?supernetOfMatches ?subnetOfMatches ?longestPrefixMatches
         ?exactCidrMatches ~routeTableIdentifier ~globalNetworkId ()
@@ -10930,10 +15533,10 @@ module GetNetworkResourcesResponse =
           (Xml.child xml_arg0 "NetworkResources") in
       make ?nextToken ?networkResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let networkResources =
-        field_map json "NetworkResources" NetworkResourceList.of_json in
+        field_map json__ "NetworkResources" NetworkResourceList.of_json in
       make ?nextToken ?networkResources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10954,7 +15557,7 @@ module GetNetworkResourcesRequest =
         [@ocaml.doc "The Amazon Web Services account ID."];
       resourceType: ConstrainedString.t option
         [@ocaml.doc
-          "The resource type. The following are the supported resource types for Direct Connect: dxcon - The definition model is Connection. dx-gateway - The definition model is DirectConnectGateway. dx-vif - The definition model is VirtualInterface. The following are the supported resource types for Network Manager: connection - The definition model is Connection. device - The definition model is Device. link - The definition model is Link. site - The definition model is Site. The following are the supported resource types for Amazon VPC: customer-gateway - The definition model is CustomerGateway. transit-gateway - The definition model is TransitGateway. transit-gateway-attachment - The definition model is TransitGatewayAttachment. transit-gateway-connect-peer - The definition model is TransitGatewayConnectPeer. transit-gateway-route-table - The definition model is TransitGatewayRouteTable. vpn-connection - The definition model is VpnConnection."];
+          "The resource type. The following are the supported resource types for Direct Connect: dxcon dx-gateway dx-vif The following are the supported resource types for Network Manager: attachment connect-peer connection core-network device link peering site The following are the supported resource types for Amazon VPC: customer-gateway transit-gateway transit-gateway-attachment transit-gateway-connect-peer transit-gateway-route-table vpn-connection"];
       resourceArn: ResourceArn.t option
         [@ocaml.doc "The ARN of the resource."];
       maxResults: MaxResults.t option
@@ -11027,20 +15630,20 @@ module GetNetworkResourcesRequest =
       make ?nextToken ?maxResults ?resourceArn ?resourceType ?accountId
         ?awsRegion ?registeredGatewayArn ?coreNetworkId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       let resourceType =
-        field_map json "ResourceType" ConstrainedString.of_json in
-      let accountId = field_map json "AccountId" AWSAccountId.of_json in
-      let awsRegion = field_map json "AwsRegion" ExternalRegionCode.of_json in
+        field_map json__ "ResourceType" ConstrainedString.of_json in
+      let accountId = field_map json__ "AccountId" AWSAccountId.of_json in
+      let awsRegion = field_map json__ "AwsRegion" ExternalRegionCode.of_json in
       let registeredGatewayArn =
-        field_map json "RegisteredGatewayArn" ResourceArn.of_json in
+        field_map json__ "RegisteredGatewayArn" ResourceArn.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?resourceArn ?resourceType ?accountId
         ?awsRegion ?registeredGatewayArn ?coreNetworkId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -11133,10 +15736,10 @@ module GetNetworkResourceRelationshipsResponse =
           (Xml.child xml_arg0 "Relationships") in
       make ?nextToken ?relationships ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let relationships =
-        field_map json "Relationships" RelationshipList.of_json in
+        field_map json__ "Relationships" RelationshipList.of_json in
       make ?nextToken ?relationships ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11157,7 +15760,7 @@ module GetNetworkResourceRelationshipsRequest =
         [@ocaml.doc "The Amazon Web Services account ID."];
       resourceType: ConstrainedString.t option
         [@ocaml.doc
-          "The resource type. The following are the supported resource types for Direct Connect: dxcon dx-gateway dx-vif The following are the supported resource types for Network Manager: connection device link site The following are the supported resource types for Amazon VPC: customer-gateway transit-gateway transit-gateway-attachment transit-gateway-connect-peer transit-gateway-route-table vpn-connection"];
+          "The resource type. The following are the supported resource types for Direct Connect: dxcon dx-gateway dx-vif The following are the supported resource types for Network Manager: attachment connect-peer connection core-network device link peering site The following are the supported resource types for Amazon VPC: customer-gateway transit-gateway transit-gateway-attachment transit-gateway-connect-peer transit-gateway-route-table vpn-connection"];
       resourceArn: ResourceArn.t option
         [@ocaml.doc "The ARN of the gateway."];
       maxResults: MaxResults.t option
@@ -11230,20 +15833,20 @@ module GetNetworkResourceRelationshipsRequest =
       make ?nextToken ?maxResults ?resourceArn ?resourceType ?accountId
         ?awsRegion ?registeredGatewayArn ?coreNetworkId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       let resourceType =
-        field_map json "ResourceType" ConstrainedString.of_json in
-      let accountId = field_map json "AccountId" AWSAccountId.of_json in
-      let awsRegion = field_map json "AwsRegion" ExternalRegionCode.of_json in
+        field_map json__ "ResourceType" ConstrainedString.of_json in
+      let accountId = field_map json__ "AccountId" AWSAccountId.of_json in
+      let awsRegion = field_map json__ "AwsRegion" ExternalRegionCode.of_json in
       let registeredGatewayArn =
-        field_map json "RegisteredGatewayArn" ResourceArn.of_json in
+        field_map json__ "RegisteredGatewayArn" ResourceArn.of_json in
       let coreNetworkId =
-        field_map json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?resourceArn ?resourceType ?accountId
         ?awsRegion ?registeredGatewayArn ?coreNetworkId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -11328,10 +15931,10 @@ module GetNetworkResourceCountsResponse =
           (Xml.child xml_arg0 "NetworkResourceCounts") in
       make ?nextToken ?networkResourceCounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let networkResourceCounts =
-        field_map json "NetworkResourceCounts"
+        field_map json__ "NetworkResourceCounts"
           NetworkResourceCountList.of_json in
       make ?nextToken ?networkResourceCounts ()
     let to_json v = composed_to_json to_value v
@@ -11345,7 +15948,7 @@ module GetNetworkResourceCountsRequest =
         [@ocaml.doc "The ID of the global network."];
       resourceType: ConstrainedString.t option
         [@ocaml.doc
-          "The resource type. The following are the supported resource types for Direct Connect: dxcon dx-gateway dx-vif The following are the supported resource types for Network Manager: connection device link site The following are the supported resource types for Amazon VPC: customer-gateway transit-gateway transit-gateway-attachment transit-gateway-connect-peer transit-gateway-route-table vpn-connection"];
+          "The resource type. The following are the supported resource types for Direct Connect: dxcon dx-gateway dx-vif The following are the supported resource types for Network Manager: attachment connect-peer connection core-network device link peering site The following are the supported resource types for Amazon VPC: customer-gateway transit-gateway transit-gateway-attachment transit-gateway-connect-peer transit-gateway-route-table vpn-connection"];
       maxResults: MaxResults.t option
         [@ocaml.doc "The maximum number of results to return."];
       nextToken: NextToken.t option
@@ -11379,13 +15982,13 @@ module GetNetworkResourceCountsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?resourceType ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let resourceType =
-        field_map json "ResourceType" ConstrainedString.of_json in
+        field_map json__ "ResourceType" ConstrainedString.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?resourceType ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11473,9 +16076,9 @@ module GetLinksResponse =
         (Option.map ~f:LinkList.of_xml) (Xml.child xml_arg0 "Links") in
       make ?nextToken ?links ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let links = field_map json "Links" LinkList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let links = field_map json__ "Links" LinkList.of_json in
       make ?nextToken ?links ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11544,15 +16147,15 @@ module GetLinksRequest =
       make ?nextToken ?maxResults ?provider ?type_ ?siteId ?linkIds
         ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let provider = field_map json "Provider" ConstrainedString.of_json in
-      let type_ = field_map json "Type" ConstrainedString.of_json in
-      let siteId = field_map json "SiteId" SiteId.of_json in
-      let linkIds = field_map json "LinkIds" LinkIdList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let provider = field_map json__ "Provider" ConstrainedString.of_json in
+      let type_ = field_map json__ "Type" ConstrainedString.of_json in
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
+      let linkIds = field_map json__ "LinkIds" LinkIdList.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?provider ?type_ ?siteId ?linkIds
         ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -11645,10 +16248,10 @@ module GetLinkAssociationsResponse =
           (Xml.child xml_arg0 "LinkAssociations") in
       make ?nextToken ?linkAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let linkAssociations =
-        field_map json "LinkAssociations" LinkAssociationList.of_json in
+        field_map json__ "LinkAssociations" LinkAssociationList.of_json in
       make ?nextToken ?linkAssociations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11696,17 +16299,135 @@ module GetLinkAssociationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?linkId ?deviceId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let linkId = field_map json "LinkId" LinkId.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?linkId ?deviceId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the link associations for a device or a link. Either the device ID or the link ID must be specified."]
+module GetDirectConnectGatewayAttachmentResponse =
+  struct
+    type nonrec t =
+      {
+      directConnectGatewayAttachment: DirectConnectGatewayAttachment.t option
+        [@ocaml.doc
+          "Shows details about the Direct Connect gateway attachment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?directConnectGatewayAttachment =
+      fun () -> { directConnectGatewayAttachment }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DirectConnectGatewayAttachment",
+           (Option.map x.directConnectGatewayAttachment
+              ~f:DirectConnectGatewayAttachment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directConnectGatewayAttachment =
+        (Option.map ~f:DirectConnectGatewayAttachment.of_xml)
+          (Xml.child xml_arg0 "DirectConnectGatewayAttachment") in
+      make ?directConnectGatewayAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directConnectGatewayAttachment =
+        field_map json__ "DirectConnectGatewayAttachment"
+          DirectConnectGatewayAttachment.of_json in
+      make ?directConnectGatewayAttachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a specific Amazon Web Services Direct Connect gateway attachment."]
+module GetDirectConnectGatewayAttachmentRequest =
+  struct
+    type nonrec t =
+      {
+      attachmentId: AttachmentId.t
+        [@ocaml.doc
+          "The ID of the Direct Connect gateway attachment that you want to see details about."]}
+    let context_ = "GetDirectConnectGatewayAttachmentRequest"
+    let make ~attachmentId = fun () -> { attachmentId }
+    let to_value x =
+      structure_to_value
+        [("attachmentId", (Some (AttachmentId.to_value x.attachmentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachmentId =
+        AttachmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
+      make ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachmentId =
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
+      make ~attachmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a specific Amazon Web Services Direct Connect gateway attachment."]
 module GetDevicesResponse =
   struct
     type nonrec t =
@@ -11790,9 +16511,9 @@ module GetDevicesResponse =
         (Option.map ~f:DeviceList.of_xml) (Xml.child xml_arg0 "Devices") in
       make ?nextToken ?devices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let devices = field_map json "Devices" DeviceList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let devices = field_map json__ "Devices" DeviceList.of_json in
       make ?nextToken ?devices ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11841,13 +16562,13 @@ module GetDevicesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?siteId ?deviceIds ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let siteId = field_map json "SiteId" SiteId.of_json in
-      let deviceIds = field_map json "DeviceIds" DeviceIdList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
+      let deviceIds = field_map json__ "DeviceIds" DeviceIdList.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?siteId ?deviceIds ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11949,10 +16670,10 @@ module GetCustomerGatewayAssociationsResponse =
           (Xml.child xml_arg0 "CustomerGatewayAssociations") in
       make ?nextToken ?customerGatewayAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let customerGatewayAssociations =
-        field_map json "CustomerGatewayAssociations"
+        field_map json__ "CustomerGatewayAssociations"
           CustomerGatewayAssociationList.of_json in
       make ?nextToken ?customerGatewayAssociations ()
     let to_json v = composed_to_json to_value v
@@ -12001,13 +16722,13 @@ module GetCustomerGatewayAssociationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?customerGatewayArns ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let customerGatewayArns =
-        field_map json "CustomerGatewayArns" CustomerGatewayArnList.of_json in
+        field_map json__ "CustomerGatewayArns" CustomerGatewayArnList.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?customerGatewayArns ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12091,12 +16812,12 @@ module GetCoreNetworkResponse =
         (Option.map ~f:CoreNetwork.of_xml) (Xml.child xml_arg0 "CoreNetwork") in
       make ?coreNetwork ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let coreNetwork = field_map json "CoreNetwork" CoreNetwork.of_json in
+    let of_json json__ =
+      let coreNetwork = field_map json__ "CoreNetwork" CoreNetwork.of_json in
       make ?coreNetwork ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about a core network. By default it returns the LIVE policy."]
+       "Returns information about the LIVE policy for a core network."]
 module GetCoreNetworkRequest =
   struct
     type nonrec t =
@@ -12114,13 +16835,13 @@ module GetCoreNetworkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about a core network. By default it returns the LIVE policy."]
+       "Returns information about the LIVE policy for a core network."]
 module GetCoreNetworkPolicyResponse =
   struct
     type nonrec t =
@@ -12202,13 +16923,13 @@ module GetCoreNetworkPolicyResponse =
           (Xml.child xml_arg0 "CoreNetworkPolicy") in
       make ?coreNetworkPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreNetworkPolicy =
-        field_map json "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
+        field_map json__ "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
       make ?coreNetworkPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets details about a core network policy. You can get details about your current live policy or any previous policy version."]
+       "Returns details about a core network policy. You can get details about your current live policy or any previous policy version."]
 module GetCoreNetworkPolicyRequest =
   struct
     type nonrec t =
@@ -12241,15 +16962,16 @@ module GetCoreNetworkPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ?alias ?policyVersionId ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alias = field_map json "Alias" CoreNetworkPolicyAlias.of_json in
-      let policyVersionId = field_map json "PolicyVersionId" Integer.of_json in
+    let of_json json__ =
+      let alias = field_map json__ "Alias" CoreNetworkPolicyAlias.of_json in
+      let policyVersionId =
+        field_map json__ "PolicyVersionId" Integer.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?alias ?policyVersionId ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets details about a core network policy. You can get details about your current live policy or any previous policy version."]
+       "Returns details about a core network policy. You can get details about your current live policy or any previous policy version."]
 module GetCoreNetworkChangeSetResponse =
   struct
     type nonrec t =
@@ -12337,10 +17059,10 @@ module GetCoreNetworkChangeSetResponse =
           (Xml.child xml_arg0 "CoreNetworkChanges") in
       make ?nextToken ?coreNetworkChanges ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let coreNetworkChanges =
-        field_map json "CoreNetworkChanges" CoreNetworkChangeList.of_json in
+        field_map json__ "CoreNetworkChanges" CoreNetworkChangeList.of_json in
       make ?nextToken ?coreNetworkChanges ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12382,17 +17104,160 @@ module GetCoreNetworkChangeSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ?nextToken ?maxResults ~policyVersionId ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let policyVersionId =
-        field_map_exn json "PolicyVersionId" Integer.of_json in
+        field_map_exn json__ "PolicyVersionId" Integer.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ?nextToken ?maxResults ~policyVersionId ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a change set between the LIVE core network policy and a submitted policy."]
+module GetCoreNetworkChangeEventsResponse =
+  struct
+    type nonrec t =
+      {
+      coreNetworkChangeEvents: CoreNetworkChangeEventList.t option
+        [@ocaml.doc "The response to GetCoreNetworkChangeEventsRequest."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?coreNetworkChangeEvents =
+      fun ?nextToken -> fun () -> { coreNetworkChangeEvents; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkChangeEvents",
+           (Option.map x.coreNetworkChangeEvents
+              ~f:CoreNetworkChangeEventList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let coreNetworkChangeEvents =
+        (Option.map ~f:CoreNetworkChangeEventList.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkChangeEvents") in
+      make ?nextToken ?coreNetworkChangeEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let coreNetworkChangeEvents =
+        field_map json__ "CoreNetworkChangeEvents"
+          CoreNetworkChangeEventList.of_json in
+      make ?nextToken ?coreNetworkChangeEvents ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a core network change event."]
+module GetCoreNetworkChangeEventsRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t [@ocaml.doc "The ID of a core network."];
+      policyVersionId: Integer.t [@ocaml.doc "The ID of the policy version."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of results to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let context_ = "GetCoreNetworkChangeEventsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~coreNetworkId ->
+          fun ~policyVersionId ->
+            fun () ->
+              { maxResults; nextToken; coreNetworkId; policyVersionId }
+    let to_value x =
+      structure_to_value
+        [("coreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("policyVersionId", (Some (Integer.to_value x.policyVersionId)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let policyVersionId =
+        Integer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyVersionId") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
+      make ?nextToken ?maxResults ~policyVersionId ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let policyVersionId =
+        field_map_exn json__ "PolicyVersionId" Integer.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?nextToken ?maxResults ~policyVersionId ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a core network change event."]
 module GetConnectionsResponse =
   struct
     type nonrec t =
@@ -12480,9 +17345,9 @@ module GetConnectionsResponse =
           (Xml.child xml_arg0 "Connections") in
       make ?nextToken ?connections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let connections = field_map json "Connections" ConnectionList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let connections = field_map json__ "Connections" ConnectionList.of_json in
       make ?nextToken ?connections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12540,14 +17405,14 @@ module GetConnectionsRequest =
       make ?nextToken ?maxResults ?deviceId ?connectionIds ~globalNetworkId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
       let connectionIds =
-        field_map json "ConnectionIds" ConnectionIdList.of_json in
+        field_map json__ "ConnectionIds" ConnectionIdList.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?deviceId ?connectionIds ~globalNetworkId
         ()
     let to_json v = composed_to_json to_value v
@@ -12632,8 +17497,8 @@ module GetConnectPeerResponse =
         (Option.map ~f:ConnectPeer.of_xml) (Xml.child xml_arg0 "ConnectPeer") in
       make ?connectPeer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectPeer = field_map json "ConnectPeer" ConnectPeer.of_json in
+    let of_json json__ =
+      let connectPeer = field_map json__ "ConnectPeer" ConnectPeer.of_json in
       make ?connectPeer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a core network Connect peer."]
@@ -12655,9 +17520,9 @@ module GetConnectPeerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectPeerId") in
       make ~connectPeerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectPeerId =
-        field_map_exn json "ConnectPeerId" ConnectPeerId.of_json in
+        field_map_exn json__ "ConnectPeerId" ConnectPeerId.of_json in
       make ~connectPeerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a core network Connect peer."]
@@ -12758,10 +17623,10 @@ module GetConnectPeerAssociationsResponse =
           (Xml.child xml_arg0 "ConnectPeerAssociations") in
       make ?nextToken ?connectPeerAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let connectPeerAssociations =
-        field_map json "ConnectPeerAssociations"
+        field_map json__ "ConnectPeerAssociations"
           ConnectPeerAssociationList.of_json in
       make ?nextToken ?connectPeerAssociations ()
     let to_json v = composed_to_json to_value v
@@ -12808,13 +17673,13 @@ module GetConnectPeerAssociationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?connectPeerIds ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let connectPeerIds =
-        field_map json "ConnectPeerIds" ConnectPeerIdList.of_json in
+        field_map json__ "ConnectPeerIds" ConnectPeerIdList.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?nextToken ?maxResults ?connectPeerIds ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12900,9 +17765,9 @@ module GetConnectAttachmentResponse =
           (Xml.child xml_arg0 "ConnectAttachment") in
       make ?connectAttachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectAttachment =
-        field_map json "ConnectAttachment" ConnectAttachment.of_json in
+        field_map json__ "ConnectAttachment" ConnectAttachment.of_json in
       make ?connectAttachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12924,9 +17789,9 @@ module GetConnectAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentId =
-        field_map_exn json "AttachmentId" AttachmentId.of_json in
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
       make ~attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13039,11 +17904,11 @@ module ExecuteCoreNetworkChangeSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~policyVersionId ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyVersionId =
-        field_map_exn json "PolicyVersionId" Integer.of_json in
+        field_map_exn json__ "PolicyVersionId" Integer.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ~policyVersionId ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13141,9 +18006,9 @@ module DisassociateTransitGatewayConnectPeerResponse =
           (Xml.child xml_arg0 "TransitGatewayConnectPeerAssociation") in
       make ?transitGatewayConnectPeerAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayConnectPeerAssociation =
-        field_map json "TransitGatewayConnectPeerAssociation"
+        field_map json__ "TransitGatewayConnectPeerAssociation"
           TransitGatewayConnectPeerAssociation.of_json in
       make ?transitGatewayConnectPeerAssociation ()
     let to_json v = composed_to_json to_value v
@@ -13181,12 +18046,12 @@ module DisassociateTransitGatewayConnectPeerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~transitGatewayConnectPeerArn ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayConnectPeerArn =
-        field_map_exn json "TransitGatewayConnectPeerArn"
+        field_map_exn json__ "TransitGatewayConnectPeerArn"
           TransitGatewayConnectPeerArn.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~transitGatewayConnectPeerArn ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13281,9 +18146,9 @@ module DisassociateLinkResponse =
           (Xml.child xml_arg0 "LinkAssociation") in
       make ?linkAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let linkAssociation =
-        field_map json "LinkAssociation" LinkAssociation.of_json in
+        field_map json__ "LinkAssociation" LinkAssociation.of_json in
       make ?linkAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13317,11 +18182,11 @@ module DisassociateLinkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~linkId ~deviceId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkId = field_map_exn json "LinkId" LinkId.of_json in
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let linkId = field_map_exn json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~linkId ~deviceId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13418,9 +18283,9 @@ module DisassociateCustomerGatewayResponse =
           (Xml.child xml_arg0 "CustomerGatewayAssociation") in
       make ?customerGatewayAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerGatewayAssociation =
-        field_map json "CustomerGatewayAssociation"
+        field_map json__ "CustomerGatewayAssociation"
           CustomerGatewayAssociation.of_json in
       make ?customerGatewayAssociation ()
     let to_json v = composed_to_json to_value v
@@ -13455,11 +18320,11 @@ module DisassociateCustomerGatewayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~customerGatewayArn ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerGatewayArn =
-        field_map_exn json "CustomerGatewayArn" CustomerGatewayArn.of_json in
+        field_map_exn json__ "CustomerGatewayArn" CustomerGatewayArn.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~customerGatewayArn ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13555,9 +18420,9 @@ module DisassociateConnectPeerResponse =
           (Xml.child xml_arg0 "ConnectPeerAssociation") in
       make ?connectPeerAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectPeerAssociation =
-        field_map json "ConnectPeerAssociation"
+        field_map json__ "ConnectPeerAssociation"
           ConnectPeerAssociation.of_json in
       make ?connectPeerAssociation ()
     let to_json v = composed_to_json to_value v
@@ -13590,11 +18455,11 @@ module DisassociateConnectPeerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~connectPeerId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectPeerId =
-        field_map_exn json "ConnectPeerId" ConnectPeerId.of_json in
+        field_map_exn json__ "ConnectPeerId" ConnectPeerId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~connectPeerId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13686,10 +18551,10 @@ module DescribeGlobalNetworksResponse =
           (Xml.child xml_arg0 "GlobalNetworks") in
       make ?nextToken ?globalNetworks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let globalNetworks =
-        field_map json "GlobalNetworks" GlobalNetworkList.of_json in
+        field_map json__ "GlobalNetworks" GlobalNetworkList.of_json in
       make ?nextToken ?globalNetworks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13726,11 +18591,11 @@ module DescribeGlobalNetworksRequest =
           (Xml.child xml_arg0 "globalNetworkIds") in
       make ?nextToken ?maxResults ?globalNetworkIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let globalNetworkIds =
-        field_map json "GlobalNetworkIds" GlobalNetworkIdList.of_json in
+        field_map json__ "GlobalNetworkIds" GlobalNetworkIdList.of_json in
       make ?nextToken ?maxResults ?globalNetworkIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13827,9 +18692,9 @@ module DeregisterTransitGatewayResponse =
           (Xml.child xml_arg0 "TransitGatewayRegistration") in
       make ?transitGatewayRegistration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayRegistration =
-        field_map json "TransitGatewayRegistration"
+        field_map json__ "TransitGatewayRegistration"
           TransitGatewayRegistration.of_json in
       make ?transitGatewayRegistration ()
     let to_json v = composed_to_json to_value v
@@ -13863,11 +18728,11 @@ module DeregisterTransitGatewayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~transitGatewayArn ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayArn =
-        field_map_exn json "TransitGatewayArn" TransitGatewayArn.of_json in
+        field_map_exn json__ "TransitGatewayArn" TransitGatewayArn.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~transitGatewayArn ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13957,8 +18822,8 @@ module DeleteSiteResponse =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let site = field_map json "Site" Site.of_json in make ?site ()
+    let of_json json__ =
+      let site = field_map json__ "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes an existing site. The site cannot be associated with any device or link."]
@@ -13986,10 +18851,10 @@ module DeleteSiteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~siteId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
+    let of_json json__ =
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~siteId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14088,12 +18953,129 @@ module DeleteResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a resource policy for the specified resource. This revokes the access of the principals specified in the resource policy."]
+module DeletePeeringResponse =
+  struct
+    type nonrec t =
+      {
+      peering: Peering.t option
+        [@ocaml.doc "Information about a deleted peering connection."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?peering = fun () -> { peering }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Peering", (Option.map x.peering ~f:Peering.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let peering =
+        (Option.map ~f:Peering.of_xml) (Xml.child xml_arg0 "Peering") in
+      make ?peering ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let peering = field_map json__ "Peering" Peering.of_json in
+      make ?peering ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes an existing peering connection."]
+module DeletePeeringRequest =
+  struct
+    type nonrec t =
+      {
+      peeringId: PeeringId.t
+        [@ocaml.doc "The ID of the peering connection to delete."]}
+    let context_ = "DeletePeeringRequest"
+    let make ~peeringId = fun () -> { peeringId }
+    let to_value x =
+      structure_to_value
+        [("peeringId", (Some (PeeringId.to_value x.peeringId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let peeringId =
+        PeeringId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "peeringId") in
+      make ~peeringId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let peeringId = field_map_exn json__ "PeeringId" PeeringId.of_json in
+      make ~peeringId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes an existing peering connection."]
 module DeleteLinkResponse =
   struct
     type nonrec t =
@@ -14179,8 +19161,8 @@ module DeleteLinkResponse =
       let link = (Option.map ~f:Link.of_xml) (Xml.child xml_arg0 "Link") in
       make ?link ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let link = field_map json "Link" Link.of_json in make ?link ()
+    let of_json json__ =
+      let link = field_map json__ "Link" Link.of_json in make ?link ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes an existing link. You must first disassociate the link from any devices and customer gateways."]
@@ -14208,10 +19190,10 @@ module DeleteLinkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~linkId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkId = field_map_exn json "LinkId" LinkId.of_json in
+    let of_json json__ =
+      let linkId = field_map_exn json__ "LinkId" LinkId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~linkId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14306,13 +19288,13 @@ module DeleteGlobalNetworkResponse =
           (Xml.child xml_arg0 "GlobalNetwork") in
       make ?globalNetwork ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalNetwork =
-        field_map json "GlobalNetwork" GlobalNetwork.of_json in
+        field_map json__ "GlobalNetwork" GlobalNetwork.of_json in
       make ?globalNetwork ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an existing global network. You must first delete all global network objects (devices, links, and sites) and deregister all transit gateways."]
+       "Deletes an existing global network. You must first delete all global network objects (devices, links, and sites), deregister all transit gateways, and delete any core networks."]
 module DeleteGlobalNetworkRequest =
   struct
     type nonrec t =
@@ -14332,13 +19314,13 @@ module DeleteGlobalNetworkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an existing global network. You must first delete all global network objects (devices, links, and sites) and deregister all transit gateways."]
+       "Deletes an existing global network. You must first delete all global network objects (devices, links, and sites), deregister all transit gateways, and delete any core networks."]
 module DeleteDeviceResponse =
   struct
     type nonrec t =
@@ -14426,8 +19408,9 @@ module DeleteDeviceResponse =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "Device") in
       make ?device ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let device = field_map json "Device" Device.of_json in make ?device ()
+    let of_json json__ =
+      let device = field_map json__ "Device" Device.of_json in
+      make ?device ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes an existing device. You must first disassociate the device from any links and customer gateways."]
@@ -14455,10 +19438,10 @@ module DeleteDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~deviceId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~deviceId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14551,8 +19534,8 @@ module DeleteCoreNetworkResponse =
         (Option.map ~f:CoreNetwork.of_xml) (Xml.child xml_arg0 "CoreNetwork") in
       make ?coreNetwork ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let coreNetwork = field_map json "CoreNetwork" CoreNetwork.of_json in
+    let of_json json__ =
+      let coreNetwork = field_map json__ "CoreNetwork" CoreNetwork.of_json in
       make ?coreNetwork ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14575,13 +19558,169 @@ module DeleteCoreNetworkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a core network along with all core network policies. This can only be done if there are no attachments on a core network."]
+module DeleteCoreNetworkPrefixListAssociationResponse =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc
+          "The ID of the core network from which the prefix list association was deleted."];
+      prefixListArn: PrefixListArn.t option
+        [@ocaml.doc
+          "The ARN of the prefix list that was disassociated from the core network."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?coreNetworkId =
+      fun ?prefixListArn -> fun () -> { coreNetworkId; prefixListArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId",
+           (Option.map x.coreNetworkId ~f:CoreNetworkId.to_value));
+        ("PrefixListArn",
+          (Option.map x.prefixListArn ~f:PrefixListArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefixListArn =
+        (Option.map ~f:PrefixListArn.of_xml)
+          (Xml.child xml_arg0 "PrefixListArn") in
+      let coreNetworkId =
+        (Option.map ~f:CoreNetworkId.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkId") in
+      make ?prefixListArn ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefixListArn =
+        field_map json__ "PrefixListArn" PrefixListArn.of_json in
+      let coreNetworkId =
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?prefixListArn ?coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an association between a core network and a prefix list."]
+module DeleteCoreNetworkPrefixListAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t
+        [@ocaml.doc
+          "The ID of the core network from which to delete the prefix list association."];
+      prefixListArn: PrefixListArn.t
+        [@ocaml.doc
+          "The ARN of the prefix list to disassociate from the core network."]}
+    let context_ = "DeleteCoreNetworkPrefixListAssociationRequest"
+    let make ~coreNetworkId =
+      fun ~prefixListArn -> fun () -> { coreNetworkId; prefixListArn }
+    let to_value x =
+      structure_to_value
+        [("coreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("prefixListArn", (Some (PrefixListArn.to_value x.prefixListArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefixListArn =
+        PrefixListArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "prefixListArn") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
+      make ~prefixListArn ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefixListArn =
+        field_map_exn json__ "PrefixListArn" PrefixListArn.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ~prefixListArn ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an association between a core network and a prefix list."]
 module DeleteCoreNetworkPolicyVersionResponse =
   struct
     type nonrec t =
@@ -14672,9 +19811,9 @@ module DeleteCoreNetworkPolicyVersionResponse =
           (Xml.child xml_arg0 "CoreNetworkPolicy") in
       make ?coreNetworkPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreNetworkPolicy =
-        field_map json "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
+        field_map json__ "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
       make ?coreNetworkPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14704,11 +19843,11 @@ module DeleteCoreNetworkPolicyVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~policyVersionId ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyVersionId =
-        field_map_exn json "PolicyVersionId" Integer.of_json in
+        field_map_exn json__ "PolicyVersionId" Integer.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
       make ~policyVersionId ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14801,8 +19940,8 @@ module DeleteConnectionResponse =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connection = field_map json "Connection" Connection.of_json in
+    let of_json json__ =
+      let connection = field_map json__ "Connection" Connection.of_json in
       make ?connection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified connection in your global network."]
@@ -14831,11 +19970,11 @@ module DeleteConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~connectionId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionId =
-        field_map_exn json "ConnectionId" ConnectionId.of_json in
+        field_map_exn json__ "ConnectionId" ConnectionId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~connectionId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified connection in your global network."]
@@ -14927,8 +20066,8 @@ module DeleteConnectPeerResponse =
         (Option.map ~f:ConnectPeer.of_xml) (Xml.child xml_arg0 "ConnectPeer") in
       make ?connectPeer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectPeer = field_map json "ConnectPeer" ConnectPeer.of_json in
+    let of_json json__ =
+      let connectPeer = field_map json__ "ConnectPeer" ConnectPeer.of_json in
       make ?connectPeer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a Connect peer."]
@@ -14950,9 +20089,9 @@ module DeleteConnectPeerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectPeerId") in
       make ~connectPeerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectPeerId =
-        field_map_exn json "ConnectPeerId" ConnectPeerId.of_json in
+        field_map_exn json__ "ConnectPeerId" ConnectPeerId.of_json in
       make ~connectPeerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a Connect peer."]
@@ -15044,8 +20183,8 @@ module DeleteAttachmentResponse =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?attachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attachment = field_map json "Attachment" Attachment.of_json in
+    let of_json json__ =
+      let attachment = field_map json__ "Attachment" Attachment.of_json in
       make ?attachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an attachment. Supports all attachment types."]
@@ -15067,9 +20206,9 @@ module DeleteAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentId =
-        field_map_exn json "AttachmentId" AttachmentId.of_json in
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
       make ~attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an attachment. Supports all attachment types."]
@@ -15163,9 +20302,9 @@ module CreateVpcAttachmentResponse =
           (Xml.child xml_arg0 "VpcAttachment") in
       make ?vpcAttachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcAttachment =
-        field_map json "VpcAttachment" VpcAttachment.of_json in
+        field_map json__ "VpcAttachment" VpcAttachment.of_json in
       make ?vpcAttachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15181,32 +20320,39 @@ module CreateVpcAttachmentRequest =
         [@ocaml.doc "The subnet ARN of the VPC attachment."];
       options: VpcOptions.t option
         [@ocaml.doc "Options for the VPC attachment."];
+      routingPolicyLabel: ConstrainedString.t option
+        [@ocaml.doc
+          "The routing policy label to apply to the VPC attachment for traffic routing decisions."];
       tags: TagList.t option
         [@ocaml.doc "The key-value tags associated with the request."];
       clientToken: ClientToken.t option
         [@ocaml.doc "The client token associated with the request."]}
     let context_ = "CreateVpcAttachmentRequest"
     let make ?options =
-      fun ?tags ->
-        fun ?clientToken ->
-          fun ~coreNetworkId ->
-            fun ~vpcArn ->
-              fun ~subnetArns ->
-                fun () ->
-                  {
-                    options;
-                    tags;
-                    clientToken;
-                    coreNetworkId;
-                    vpcArn;
-                    subnetArns
-                  }
+      fun ?routingPolicyLabel ->
+        fun ?tags ->
+          fun ?clientToken ->
+            fun ~coreNetworkId ->
+              fun ~vpcArn ->
+                fun ~subnetArns ->
+                  fun () ->
+                    {
+                      options;
+                      routingPolicyLabel;
+                      tags;
+                      clientToken;
+                      coreNetworkId;
+                      vpcArn;
+                      subnetArns
+                    }
     let to_value x =
       structure_to_value
         [("CoreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
         ("VpcArn", (Some (VpcArn.to_value x.vpcArn)));
         ("SubnetArns", (Some (SubnetArnList.to_value x.subnetArns)));
         ("Options", (Option.map x.options ~f:VpcOptions.to_value));
+        ("RoutingPolicyLabel",
+          (Option.map x.routingPolicyLabel ~f:ConstrainedString.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
@@ -15214,6 +20360,9 @@ module CreateVpcAttachmentRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let routingPolicyLabel =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyLabel") in
       let options =
         (Option.map ~f:VpcOptions.of_xml) (Xml.child xml_arg0 "Options") in
       let subnetArns =
@@ -15224,20 +20373,346 @@ module CreateVpcAttachmentRequest =
       let coreNetworkId =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
-      make ?clientToken ?tags ?options ~subnetArns ~vpcArn ~coreNetworkId ()
+      make ?clientToken ?tags ?routingPolicyLabel ?options ~subnetArns
+        ~vpcArn ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let options = field_map json "Options" VpcOptions.of_json in
-      let subnetArns = field_map_exn json "SubnetArns" SubnetArnList.of_json in
-      let vpcArn = field_map_exn json "VpcArn" VpcArn.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let routingPolicyLabel =
+        field_map json__ "RoutingPolicyLabel" ConstrainedString.of_json in
+      let options = field_map json__ "Options" VpcOptions.of_json in
+      let subnetArns =
+        field_map_exn json__ "SubnetArns" SubnetArnList.of_json in
+      let vpcArn = field_map_exn json__ "VpcArn" VpcArn.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
-      make ?clientToken ?tags ?options ~subnetArns ~vpcArn ~coreNetworkId ()
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?clientToken ?tags ?routingPolicyLabel ?options ~subnetArns
+        ~vpcArn ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a VPC attachment on an edge location of a core network."]
+module CreateTransitGatewayRouteTableAttachmentResponse =
+  struct
+    type nonrec t =
+      {
+      transitGatewayRouteTableAttachment:
+        TransitGatewayRouteTableAttachment.t option
+        [@ocaml.doc
+          "The route table associated with the create transit gateway route table attachment request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?transitGatewayRouteTableAttachment =
+      fun () -> { transitGatewayRouteTableAttachment }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TransitGatewayRouteTableAttachment",
+           (Option.map x.transitGatewayRouteTableAttachment
+              ~f:TransitGatewayRouteTableAttachment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let transitGatewayRouteTableAttachment =
+        (Option.map ~f:TransitGatewayRouteTableAttachment.of_xml)
+          (Xml.child xml_arg0 "TransitGatewayRouteTableAttachment") in
+      make ?transitGatewayRouteTableAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let transitGatewayRouteTableAttachment =
+        field_map json__ "TransitGatewayRouteTableAttachment"
+          TransitGatewayRouteTableAttachment.of_json in
+      make ?transitGatewayRouteTableAttachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a transit gateway route table attachment."]
+module CreateTransitGatewayRouteTableAttachmentRequest =
+  struct
+    type nonrec t =
+      {
+      peeringId: PeeringId.t [@ocaml.doc "The ID of the peer for the"];
+      transitGatewayRouteTableArn: TransitGatewayRouteTableArn.t
+        [@ocaml.doc
+          "The ARN of the transit gateway route table for the attachment request. For example, \"TransitGatewayRouteTableArn\": \"arn:aws:ec2:us-west-2:123456789012:transit-gateway-route-table/tgw-rtb-9876543210123456\"."];
+      routingPolicyLabel: ConstrainedString.t option
+        [@ocaml.doc
+          "The routing policy label to apply to the Transit Gateway route table attachment for traffic routing decisions."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The list of key-value tags associated with the request."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token associated with the request."]}
+    let context_ = "CreateTransitGatewayRouteTableAttachmentRequest"
+    let make ?routingPolicyLabel =
+      fun ?tags ->
+        fun ?clientToken ->
+          fun ~peeringId ->
+            fun ~transitGatewayRouteTableArn ->
+              fun () ->
+                {
+                  routingPolicyLabel;
+                  tags;
+                  clientToken;
+                  peeringId;
+                  transitGatewayRouteTableArn
+                }
+    let to_value x =
+      structure_to_value
+        [("PeeringId", (Some (PeeringId.to_value x.peeringId)));
+        ("TransitGatewayRouteTableArn",
+          (Some
+             (TransitGatewayRouteTableArn.to_value
+                x.transitGatewayRouteTableArn)));
+        ("RoutingPolicyLabel",
+          (Option.map x.routingPolicyLabel ~f:ConstrainedString.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let routingPolicyLabel =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyLabel") in
+      let transitGatewayRouteTableArn =
+        TransitGatewayRouteTableArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "TransitGatewayRouteTableArn") in
+      let peeringId =
+        PeeringId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PeeringId") in
+      make ?clientToken ?tags ?routingPolicyLabel
+        ~transitGatewayRouteTableArn ~peeringId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let routingPolicyLabel =
+        field_map json__ "RoutingPolicyLabel" ConstrainedString.of_json in
+      let transitGatewayRouteTableArn =
+        field_map_exn json__ "TransitGatewayRouteTableArn"
+          TransitGatewayRouteTableArn.of_json in
+      let peeringId = field_map_exn json__ "PeeringId" PeeringId.of_json in
+      make ?clientToken ?tags ?routingPolicyLabel
+        ~transitGatewayRouteTableArn ~peeringId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a transit gateway route table attachment."]
+module CreateTransitGatewayPeeringResponse =
+  struct
+    type nonrec t =
+      {
+      transitGatewayPeering: TransitGatewayPeering.t option
+        [@ocaml.doc
+          "Returns information about the transit gateway peering connection request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?transitGatewayPeering = fun () -> { transitGatewayPeering }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TransitGatewayPeering",
+           (Option.map x.transitGatewayPeering
+              ~f:TransitGatewayPeering.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let transitGatewayPeering =
+        (Option.map ~f:TransitGatewayPeering.of_xml)
+          (Xml.child xml_arg0 "TransitGatewayPeering") in
+      make ?transitGatewayPeering ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let transitGatewayPeering =
+        field_map json__ "TransitGatewayPeering"
+          TransitGatewayPeering.of_json in
+      make ?transitGatewayPeering ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a transit gateway peering connection."]
+module CreateTransitGatewayPeeringRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t [@ocaml.doc "The ID of a core network."];
+      transitGatewayArn: TransitGatewayArn.t
+        [@ocaml.doc
+          "The ARN of the transit gateway for the peering request."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The list of key-value tags associated with the request."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client token associated with the request."]}
+    let context_ = "CreateTransitGatewayPeeringRequest"
+    let make ?tags =
+      fun ?clientToken ->
+        fun ~coreNetworkId ->
+          fun ~transitGatewayArn ->
+            fun () -> { tags; clientToken; coreNetworkId; transitGatewayArn }
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("TransitGatewayArn",
+          (Some (TransitGatewayArn.to_value x.transitGatewayArn)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let transitGatewayArn =
+        TransitGatewayArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TransitGatewayArn") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
+      make ?clientToken ?tags ~transitGatewayArn ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let transitGatewayArn =
+        field_map_exn json__ "TransitGatewayArn" TransitGatewayArn.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?clientToken ?tags ~transitGatewayArn ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a transit gateway peering connection."]
 module CreateSiteToSiteVpnAttachmentResponse =
   struct
     type nonrec t =
@@ -15329,14 +20804,14 @@ module CreateSiteToSiteVpnAttachmentResponse =
           (Xml.child xml_arg0 "SiteToSiteVpnAttachment") in
       make ?siteToSiteVpnAttachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let siteToSiteVpnAttachment =
-        field_map json "SiteToSiteVpnAttachment"
+        field_map json__ "SiteToSiteVpnAttachment"
           SiteToSiteVpnAttachment.of_json in
       make ?siteToSiteVpnAttachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a site-to-site VPN attachment on an edge location of a core network."]
+       "Creates an Amazon Web Services site-to-site VPN attachment on an edge location of a core network."]
 module CreateSiteToSiteVpnAttachmentRequest =
   struct
     type nonrec t =
@@ -15346,21 +20821,34 @@ module CreateSiteToSiteVpnAttachmentRequest =
           "The ID of a core network where you're creating a site-to-site VPN attachment."];
       vpnConnectionArn: VpnConnectionArn.t
         [@ocaml.doc "The ARN identifying the VPN attachment."];
+      routingPolicyLabel: ConstrainedString.t option
+        [@ocaml.doc
+          "The routing policy label to apply to the Site-to-Site VPN attachment for traffic routing decisions."];
       tags: TagList.t option
         [@ocaml.doc "The tags associated with the request."];
       clientToken: ClientToken.t option
         [@ocaml.doc "The client token associated with the request."]}
     let context_ = "CreateSiteToSiteVpnAttachmentRequest"
-    let make ?tags =
-      fun ?clientToken ->
-        fun ~coreNetworkId ->
-          fun ~vpnConnectionArn ->
-            fun () -> { tags; clientToken; coreNetworkId; vpnConnectionArn }
+    let make ?routingPolicyLabel =
+      fun ?tags ->
+        fun ?clientToken ->
+          fun ~coreNetworkId ->
+            fun ~vpnConnectionArn ->
+              fun () ->
+                {
+                  routingPolicyLabel;
+                  tags;
+                  clientToken;
+                  coreNetworkId;
+                  vpnConnectionArn
+                }
     let to_value x =
       structure_to_value
         [("CoreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
         ("VpnConnectionArn",
           (Some (VpnConnectionArn.to_value x.vpnConnectionArn)));
+        ("RoutingPolicyLabel",
+          (Option.map x.routingPolicyLabel ~f:ConstrainedString.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
@@ -15368,25 +20856,32 @@ module CreateSiteToSiteVpnAttachmentRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let routingPolicyLabel =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyLabel") in
       let vpnConnectionArn =
         VpnConnectionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpnConnectionArn") in
       let coreNetworkId =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
-      make ?clientToken ?tags ~vpnConnectionArn ~coreNetworkId ()
+      make ?clientToken ?tags ?routingPolicyLabel ~vpnConnectionArn
+        ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let routingPolicyLabel =
+        field_map json__ "RoutingPolicyLabel" ConstrainedString.of_json in
       let vpnConnectionArn =
-        field_map_exn json "VpnConnectionArn" VpnConnectionArn.of_json in
+        field_map_exn json__ "VpnConnectionArn" VpnConnectionArn.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
-      make ?clientToken ?tags ~vpnConnectionArn ~coreNetworkId ()
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?clientToken ?tags ?routingPolicyLabel ~vpnConnectionArn
+        ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a site-to-site VPN attachment on an edge location of a core network."]
+       "Creates an Amazon Web Services site-to-site VPN attachment on an edge location of a core network."]
 module CreateSiteResponse =
   struct
     type nonrec t =
@@ -15483,8 +20978,8 @@ module CreateSiteResponse =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let site = field_map json "Site" Site.of_json in make ?site ()
+    let of_json json__ =
+      let site = field_map json__ "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new site in a global network."]
 module CreateSiteRequest =
@@ -15528,13 +21023,13 @@ module CreateSiteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?tags ?location ?description ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let location = field_map json "Location" Location.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let location = field_map json__ "Location" Location.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?tags ?location ?description ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new site in a global network."]
@@ -15634,8 +21129,8 @@ module CreateLinkResponse =
       let link = (Option.map ~f:Link.of_xml) (Xml.child xml_arg0 "Link") in
       make ?link ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let link = field_map json "Link" Link.of_json in make ?link ()
+    let of_json json__ =
+      let link = field_map json__ "Link" Link.of_json in make ?link ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new link for a specified site."]
 module CreateLinkRequest =
@@ -15709,16 +21204,16 @@ module CreateLinkRequest =
       make ?tags ~siteId ?provider ~bandwidth ?type_ ?description
         ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
-      let provider = field_map json "Provider" ConstrainedString.of_json in
-      let bandwidth = field_map_exn json "Bandwidth" Bandwidth.of_json in
-      let type_ = field_map json "Type" ConstrainedString.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
+      let provider = field_map json__ "Provider" ConstrainedString.of_json in
+      let bandwidth = field_map_exn json__ "Bandwidth" Bandwidth.of_json in
+      let type_ = field_map json__ "Type" ConstrainedString.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?tags ~siteId ?provider ~bandwidth ?type_ ?description
         ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -15815,9 +21310,9 @@ module CreateGlobalNetworkResponse =
           (Xml.child xml_arg0 "GlobalNetwork") in
       make ?globalNetwork ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalNetwork =
-        field_map json "GlobalNetwork" GlobalNetwork.of_json in
+        field_map json__ "GlobalNetwork" GlobalNetwork.of_json in
       make ?globalNetwork ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new, empty global network."]
@@ -15844,13 +21339,197 @@ module CreateGlobalNetworkRequest =
           (Xml.child xml_arg0 "Description") in
       make ?tags ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       make ?tags ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new, empty global network."]
+module CreateDirectConnectGatewayAttachmentResponse =
+  struct
+    type nonrec t =
+      {
+      directConnectGatewayAttachment: DirectConnectGatewayAttachment.t option
+        [@ocaml.doc
+          "Describes the details of a CreateDirectConnectGatewayAttachment request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?directConnectGatewayAttachment =
+      fun () -> { directConnectGatewayAttachment }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DirectConnectGatewayAttachment",
+           (Option.map x.directConnectGatewayAttachment
+              ~f:DirectConnectGatewayAttachment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directConnectGatewayAttachment =
+        (Option.map ~f:DirectConnectGatewayAttachment.of_xml)
+          (Xml.child xml_arg0 "DirectConnectGatewayAttachment") in
+      make ?directConnectGatewayAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directConnectGatewayAttachment =
+        field_map json__ "DirectConnectGatewayAttachment"
+          DirectConnectGatewayAttachment.of_json in
+      make ?directConnectGatewayAttachment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an Amazon Web Services Direct Connect gateway attachment"]
+module CreateDirectConnectGatewayAttachmentRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t
+        [@ocaml.doc
+          "The ID of the Cloud WAN core network that the Direct Connect gateway attachment should be attached to."];
+      directConnectGatewayArn: DirectConnectGatewayArn.t
+        [@ocaml.doc "The ARN of the Direct Connect gateway attachment."];
+      routingPolicyLabel: ConstrainedString.t option
+        [@ocaml.doc
+          "The routing policy label to apply to the Direct Connect Gateway attachment for traffic routing decisions."];
+      edgeLocations: ExternalRegionCodeList.t
+        [@ocaml.doc
+          "One or more core network edge locations that the Direct Connect gateway attachment is associated with."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The key value tags to apply to the Direct Connect gateway attachment during creation."];
+      clientToken: ClientToken.t option [@ocaml.doc "client token"]}
+    let context_ = "CreateDirectConnectGatewayAttachmentRequest"
+    let make ?routingPolicyLabel =
+      fun ?tags ->
+        fun ?clientToken ->
+          fun ~coreNetworkId ->
+            fun ~directConnectGatewayArn ->
+              fun ~edgeLocations ->
+                fun () ->
+                  {
+                    routingPolicyLabel;
+                    tags;
+                    clientToken;
+                    coreNetworkId;
+                    directConnectGatewayArn;
+                    edgeLocations
+                  }
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("DirectConnectGatewayArn",
+          (Some (DirectConnectGatewayArn.to_value x.directConnectGatewayArn)));
+        ("RoutingPolicyLabel",
+          (Option.map x.routingPolicyLabel ~f:ConstrainedString.to_value));
+        ("EdgeLocations",
+          (Some (ExternalRegionCodeList.to_value x.edgeLocations)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let edgeLocations =
+        ExternalRegionCodeList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EdgeLocations") in
+      let routingPolicyLabel =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyLabel") in
+      let directConnectGatewayArn =
+        DirectConnectGatewayArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectConnectGatewayArn") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
+      make ?clientToken ?tags ~edgeLocations ?routingPolicyLabel
+        ~directConnectGatewayArn ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let edgeLocations =
+        field_map_exn json__ "EdgeLocations" ExternalRegionCodeList.of_json in
+      let routingPolicyLabel =
+        field_map json__ "RoutingPolicyLabel" ConstrainedString.of_json in
+      let directConnectGatewayArn =
+        field_map_exn json__ "DirectConnectGatewayArn"
+          DirectConnectGatewayArn.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?clientToken ?tags ~edgeLocations ?routingPolicyLabel
+        ~directConnectGatewayArn ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an Amazon Web Services Direct Connect gateway attachment"]
 module CreateDeviceResponse =
   struct
     type nonrec t =
@@ -15949,8 +21628,9 @@ module CreateDeviceResponse =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "Device") in
       make ?device ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let device = field_map json "Device" Device.of_json in make ?device ()
+    let of_json json__ =
+      let device = field_map json__ "Device" Device.of_json in
+      make ?device ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new device in a global network. If you specify both a site ID and a location, the location of the site is used for visualization in the Network Manager console."]
@@ -16048,20 +21728,20 @@ module CreateDeviceRequest =
       make ?tags ?siteId ?location ?serialNumber ?model ?vendor ?type_
         ?description ?aWSLocation ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let siteId = field_map json "SiteId" SiteId.of_json in
-      let location = field_map json "Location" Location.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
+      let location = field_map json__ "Location" Location.of_json in
       let serialNumber =
-        field_map json "SerialNumber" ConstrainedString.of_json in
-      let model = field_map json "Model" ConstrainedString.of_json in
-      let vendor = field_map json "Vendor" ConstrainedString.of_json in
-      let type_ = field_map json "Type" ConstrainedString.of_json in
+        field_map json__ "SerialNumber" ConstrainedString.of_json in
+      let model = field_map json__ "Model" ConstrainedString.of_json in
+      let vendor = field_map json__ "Vendor" ConstrainedString.of_json in
+      let type_ = field_map json__ "Type" ConstrainedString.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let aWSLocation = field_map json "AWSLocation" AWSLocation.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let aWSLocation = field_map json__ "AWSLocation" AWSLocation.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?tags ?siteId ?location ?serialNumber ?model ?vendor ?type_
         ?description ?aWSLocation ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -16167,8 +21847,8 @@ module CreateCoreNetworkResponse =
         (Option.map ~f:CoreNetwork.of_xml) (Xml.child xml_arg0 "CoreNetwork") in
       make ?coreNetwork ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let coreNetwork = field_map json "CoreNetwork" CoreNetwork.of_json in
+    let of_json json__ =
+      let coreNetwork = field_map json__ "CoreNetwork" CoreNetwork.of_json in
       make ?coreNetwork ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16230,20 +21910,207 @@ module CreateCoreNetworkRequest =
       make ?clientToken ?policyDocument ?tags ?description ~globalNetworkId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       let policyDocument =
-        field_map json "PolicyDocument" CoreNetworkPolicyDocument.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "PolicyDocument" CoreNetworkPolicyDocument.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?clientToken ?policyDocument ?tags ?description ~globalNetworkId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a core network as part of your global network, and optionally, with a core network policy."]
+module CreateCoreNetworkPrefixListAssociationResponse =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t option
+        [@ocaml.doc
+          "The ID of the core network associated with the prefix list."];
+      prefixListArn: PrefixListArn.t option
+        [@ocaml.doc
+          "The ARN of the prefix list that was associated with the core network."];
+      prefixListAlias: ConstrainedString.t option
+        [@ocaml.doc "The alias of the prefix list association, if provided."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?coreNetworkId =
+      fun ?prefixListArn ->
+        fun ?prefixListAlias ->
+          fun () -> { coreNetworkId; prefixListArn; prefixListAlias }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId",
+           (Option.map x.coreNetworkId ~f:CoreNetworkId.to_value));
+        ("PrefixListArn",
+          (Option.map x.prefixListArn ~f:PrefixListArn.to_value));
+        ("PrefixListAlias",
+          (Option.map x.prefixListAlias ~f:ConstrainedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefixListAlias =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "PrefixListAlias") in
+      let prefixListArn =
+        (Option.map ~f:PrefixListArn.of_xml)
+          (Xml.child xml_arg0 "PrefixListArn") in
+      let coreNetworkId =
+        (Option.map ~f:CoreNetworkId.of_xml)
+          (Xml.child xml_arg0 "CoreNetworkId") in
+      make ?prefixListAlias ?prefixListArn ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefixListAlias =
+        field_map json__ "PrefixListAlias" ConstrainedString.of_json in
+      let prefixListArn =
+        field_map json__ "PrefixListArn" PrefixListArn.of_json in
+      let coreNetworkId =
+        field_map json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?prefixListAlias ?prefixListArn ?coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an association between a core network and a prefix list for routing control."]
+module CreateCoreNetworkPrefixListAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      coreNetworkId: CoreNetworkId.t
+        [@ocaml.doc
+          "The ID of the core network to associate with the prefix list."];
+      prefixListArn: PrefixListArn.t
+        [@ocaml.doc
+          "The ARN of the prefix list to associate with the core network."];
+      prefixListAlias: ConstrainedString.t
+        [@ocaml.doc "An optional alias for the prefix list association."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "CreateCoreNetworkPrefixListAssociationRequest"
+    let make ?clientToken =
+      fun ~coreNetworkId ->
+        fun ~prefixListArn ->
+          fun ~prefixListAlias ->
+            fun () ->
+              { clientToken; coreNetworkId; prefixListArn; prefixListAlias }
+    let to_value x =
+      structure_to_value
+        [("CoreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
+        ("PrefixListArn", (Some (PrefixListArn.to_value x.prefixListArn)));
+        ("PrefixListAlias",
+          (Some (ConstrainedString.to_value x.prefixListAlias)));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let prefixListAlias =
+        ConstrainedString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PrefixListAlias") in
+      let prefixListArn =
+        PrefixListArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PrefixListArn") in
+      let coreNetworkId =
+        CoreNetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
+      make ?clientToken ~prefixListAlias ~prefixListArn ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let prefixListAlias =
+        field_map_exn json__ "PrefixListAlias" ConstrainedString.of_json in
+      let prefixListArn =
+        field_map_exn json__ "PrefixListArn" PrefixListArn.of_json in
+      let coreNetworkId =
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?clientToken ~prefixListAlias ~prefixListArn ~coreNetworkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an association between a core network and a prefix list for routing control."]
 module CreateConnectionResponse =
   struct
     type nonrec t =
@@ -16334,8 +22201,8 @@ module CreateConnectionResponse =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connection = field_map json "Connection" Connection.of_json in
+    let of_json json__ =
+      let connection = field_map json__ "Connection" Connection.of_json in
       make ?connection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16410,17 +22277,17 @@ module CreateConnectionRequest =
       make ?tags ?description ?connectedLinkId ?linkId ~connectedDeviceId
         ~deviceId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let description =
-        field_map json "Description" ConstrainedString.of_json in
-      let connectedLinkId = field_map json "ConnectedLinkId" LinkId.of_json in
-      let linkId = field_map json "LinkId" LinkId.of_json in
+        field_map json__ "Description" ConstrainedString.of_json in
+      let connectedLinkId = field_map json__ "ConnectedLinkId" LinkId.of_json in
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
       let connectedDeviceId =
-        field_map_exn json "ConnectedDeviceId" DeviceId.of_json in
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
+        field_map_exn json__ "ConnectedDeviceId" DeviceId.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?tags ?description ?connectedLinkId ?linkId ~connectedDeviceId
         ~deviceId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
@@ -16514,12 +22381,12 @@ module CreateConnectPeerResponse =
         (Option.map ~f:ConnectPeer.of_xml) (Xml.child xml_arg0 "ConnectPeer") in
       make ?connectPeer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectPeer = field_map json "ConnectPeer" ConnectPeer.of_json in
+    let of_json json__ =
+      let connectPeer = field_map json__ "ConnectPeer" ConnectPeer.of_json in
       make ?connectPeer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a core network connect peer for a specified core network connect attachment between a core network and an appliance. The peer address and transit gateway address must be the same IP address family (IPv4 or IPv6)."]
+       "Creates a core network Connect peer for a specified core network connect attachment between a core network and an appliance. The peer address and transit gateway address must be the same IP address family (IPv4 or IPv6)."]
 module CreateConnectPeerRequest =
   struct
     type nonrec t =
@@ -16527,34 +22394,41 @@ module CreateConnectPeerRequest =
       connectAttachmentId: AttachmentId.t
         [@ocaml.doc "The ID of the connection attachment."];
       coreNetworkAddress: IPAddress.t option
-        [@ocaml.doc "A Connect peer core network address."];
+        [@ocaml.doc
+          "A Connect peer core network address. This only applies only when the protocol is GRE."];
       peerAddress: IPAddress.t [@ocaml.doc "The Connect peer address."];
       bgpOptions: BgpOptions.t option
-        [@ocaml.doc "The Connect peer BGP options."];
-      insideCidrBlocks: ConstrainedStringList.t
+        [@ocaml.doc
+          "The Connect peer BGP options. This only applies only when the protocol is GRE."];
+      insideCidrBlocks: ConstrainedStringList.t option
         [@ocaml.doc "The inside IP addresses used for BGP peering."];
       tags: TagList.t option
         [@ocaml.doc "The tags associated with the peer request."];
       clientToken: ClientToken.t option
-        [@ocaml.doc "The client token associated with the request."]}
+        [@ocaml.doc "The client token associated with the request."];
+      subnetArn: SubnetArn.t option
+        [@ocaml.doc
+          "The subnet ARN for the Connect peer. This only applies only when the protocol is NO_ENCAP."]}
     let context_ = "CreateConnectPeerRequest"
     let make ?coreNetworkAddress =
       fun ?bgpOptions ->
-        fun ?tags ->
-          fun ?clientToken ->
-            fun ~connectAttachmentId ->
-              fun ~peerAddress ->
-                fun ~insideCidrBlocks ->
-                  fun () ->
-                    {
-                      coreNetworkAddress;
-                      bgpOptions;
-                      tags;
-                      clientToken;
-                      connectAttachmentId;
-                      peerAddress;
-                      insideCidrBlocks
-                    }
+        fun ?insideCidrBlocks ->
+          fun ?tags ->
+            fun ?clientToken ->
+              fun ?subnetArn ->
+                fun ~connectAttachmentId ->
+                  fun ~peerAddress ->
+                    fun () ->
+                      {
+                        coreNetworkAddress;
+                        bgpOptions;
+                        insideCidrBlocks;
+                        tags;
+                        clientToken;
+                        subnetArn;
+                        connectAttachmentId;
+                        peerAddress
+                      }
     let to_value x =
       structure_to_value
         [("ConnectAttachmentId",
@@ -16564,17 +22438,20 @@ module CreateConnectPeerRequest =
         ("PeerAddress", (Some (IPAddress.to_value x.peerAddress)));
         ("BgpOptions", (Option.map x.bgpOptions ~f:BgpOptions.to_value));
         ("InsideCidrBlocks",
-          (Some (ConstrainedStringList.to_value x.insideCidrBlocks)));
+          (Option.map x.insideCidrBlocks ~f:ConstrainedStringList.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
-        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("SubnetArn", (Option.map x.subnetArn ~f:SubnetArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subnetArn =
+        (Option.map ~f:SubnetArn.of_xml) (Xml.child xml_arg0 "SubnetArn") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let insideCidrBlocks =
-        ConstrainedStringList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InsideCidrBlocks") in
+        (Option.map ~f:ConstrainedStringList.of_xml)
+          (Xml.child xml_arg0 "InsideCidrBlocks") in
       let bgpOptions =
         (Option.map ~f:BgpOptions.of_xml) (Xml.child xml_arg0 "BgpOptions") in
       let peerAddress =
@@ -16586,25 +22463,26 @@ module CreateConnectPeerRequest =
       let connectAttachmentId =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectAttachmentId") in
-      make ?clientToken ?tags ~insideCidrBlocks ?bgpOptions ~peerAddress
-        ?coreNetworkAddress ~connectAttachmentId ()
+      make ?subnetArn ?clientToken ?tags ?insideCidrBlocks ?bgpOptions
+        ~peerAddress ?coreNetworkAddress ~connectAttachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let subnetArn = field_map json__ "SubnetArn" SubnetArn.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let insideCidrBlocks =
-        field_map_exn json "InsideCidrBlocks" ConstrainedStringList.of_json in
-      let bgpOptions = field_map json "BgpOptions" BgpOptions.of_json in
-      let peerAddress = field_map_exn json "PeerAddress" IPAddress.of_json in
+        field_map json__ "InsideCidrBlocks" ConstrainedStringList.of_json in
+      let bgpOptions = field_map json__ "BgpOptions" BgpOptions.of_json in
+      let peerAddress = field_map_exn json__ "PeerAddress" IPAddress.of_json in
       let coreNetworkAddress =
-        field_map json "CoreNetworkAddress" IPAddress.of_json in
+        field_map json__ "CoreNetworkAddress" IPAddress.of_json in
       let connectAttachmentId =
-        field_map_exn json "ConnectAttachmentId" AttachmentId.of_json in
-      make ?clientToken ?tags ~insideCidrBlocks ?bgpOptions ~peerAddress
-        ?coreNetworkAddress ~connectAttachmentId ()
+        field_map_exn json__ "ConnectAttachmentId" AttachmentId.of_json in
+      make ?subnetArn ?clientToken ?tags ?insideCidrBlocks ?bgpOptions
+        ~peerAddress ?coreNetworkAddress ~connectAttachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a core network connect peer for a specified core network connect attachment between a core network and an appliance. The peer address and transit gateway address must be the same IP address family (IPv4 or IPv6)."]
+       "Creates a core network Connect peer for a specified core network connect attachment between a core network and an appliance. The peer address and transit gateway address must be the same IP address family (IPv4 or IPv6)."]
 module CreateConnectAttachmentResponse =
   struct
     type nonrec t =
@@ -16695,9 +22573,9 @@ module CreateConnectAttachmentResponse =
           (Xml.child xml_arg0 "ConnectAttachment") in
       make ?connectAttachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectAttachment =
-        field_map json "ConnectAttachment" ConnectAttachment.of_json in
+        field_map json__ "ConnectAttachment" ConnectAttachment.of_json in
       make ?connectAttachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16713,6 +22591,9 @@ module CreateConnectAttachmentRequest =
         [@ocaml.doc "The Region where the edge is located."];
       transportAttachmentId: AttachmentId.t
         [@ocaml.doc "The ID of the attachment between the two connections."];
+      routingPolicyLabel: ConstrainedString.t option
+        [@ocaml.doc
+          "The routing policy label to apply to the Connect attachment for traffic routing decisions."];
       options: ConnectAttachmentOptions.t
         [@ocaml.doc "Options for creating an attachment."];
       tags: TagList.t option
@@ -16721,27 +22602,31 @@ module CreateConnectAttachmentRequest =
       clientToken: ClientToken.t option
         [@ocaml.doc "The client token associated with the request."]}
     let context_ = "CreateConnectAttachmentRequest"
-    let make ?tags =
-      fun ?clientToken ->
-        fun ~coreNetworkId ->
-          fun ~edgeLocation ->
-            fun ~transportAttachmentId ->
-              fun ~options ->
-                fun () ->
-                  {
-                    tags;
-                    clientToken;
-                    coreNetworkId;
-                    edgeLocation;
-                    transportAttachmentId;
-                    options
-                  }
+    let make ?routingPolicyLabel =
+      fun ?tags ->
+        fun ?clientToken ->
+          fun ~coreNetworkId ->
+            fun ~edgeLocation ->
+              fun ~transportAttachmentId ->
+                fun ~options ->
+                  fun () ->
+                    {
+                      routingPolicyLabel;
+                      tags;
+                      clientToken;
+                      coreNetworkId;
+                      edgeLocation;
+                      transportAttachmentId;
+                      options
+                    }
     let to_value x =
       structure_to_value
         [("CoreNetworkId", (Some (CoreNetworkId.to_value x.coreNetworkId)));
         ("EdgeLocation", (Some (ExternalRegionCode.to_value x.edgeLocation)));
         ("TransportAttachmentId",
           (Some (AttachmentId.to_value x.transportAttachmentId)));
+        ("RoutingPolicyLabel",
+          (Option.map x.routingPolicyLabel ~f:ConstrainedString.to_value));
         ("Options", (Some (ConnectAttachmentOptions.to_value x.options)));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
@@ -16753,6 +22638,9 @@ module CreateConnectAttachmentRequest =
       let options =
         ConnectAttachmentOptions.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Options") in
+      let routingPolicyLabel =
+        (Option.map ~f:ConstrainedString.of_xml)
+          (Xml.child xml_arg0 "RoutingPolicyLabel") in
       let transportAttachmentId =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TransportAttachmentId") in
@@ -16762,22 +22650,24 @@ module CreateConnectAttachmentRequest =
       let coreNetworkId =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
-      make ?clientToken ?tags ~options ~transportAttachmentId ~edgeLocation
-        ~coreNetworkId ()
+      make ?clientToken ?tags ~options ?routingPolicyLabel
+        ~transportAttachmentId ~edgeLocation ~coreNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let options =
-        field_map_exn json "Options" ConnectAttachmentOptions.of_json in
+        field_map_exn json__ "Options" ConnectAttachmentOptions.of_json in
+      let routingPolicyLabel =
+        field_map json__ "RoutingPolicyLabel" ConstrainedString.of_json in
       let transportAttachmentId =
-        field_map_exn json "TransportAttachmentId" AttachmentId.of_json in
+        field_map_exn json__ "TransportAttachmentId" AttachmentId.of_json in
       let edgeLocation =
-        field_map_exn json "EdgeLocation" ExternalRegionCode.of_json in
+        field_map_exn json__ "EdgeLocation" ExternalRegionCode.of_json in
       let coreNetworkId =
-        field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
-      make ?clientToken ?tags ~options ~transportAttachmentId ~edgeLocation
-        ~coreNetworkId ()
+        field_map_exn json__ "CoreNetworkId" CoreNetworkId.of_json in
+      make ?clientToken ?tags ~options ?routingPolicyLabel
+        ~transportAttachmentId ~edgeLocation ~coreNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a core network Connect attachment from a specified core network attachment. A core network Connect attachment is a GRE-based tunnel attachment that you can use to establish a connection between a core network and an appliance. A core network Connect attachment uses an existing VPC attachment as the underlying transport mechanism."]
@@ -16885,9 +22775,9 @@ module AssociateTransitGatewayConnectPeerResponse =
           (Xml.child xml_arg0 "TransitGatewayConnectPeerAssociation") in
       make ?transitGatewayConnectPeerAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayConnectPeerAssociation =
-        field_map json "TransitGatewayConnectPeerAssociation"
+        field_map json__ "TransitGatewayConnectPeerAssociation"
           TransitGatewayConnectPeerAssociation.of_json in
       make ?transitGatewayConnectPeerAssociation ()
     let to_json v = composed_to_json to_value v
@@ -16941,14 +22831,14 @@ module AssociateTransitGatewayConnectPeerRequest =
       make ?linkId ~deviceId ~transitGatewayConnectPeerArn ~globalNetworkId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkId = field_map json "LinkId" LinkId.of_json in
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
       let transitGatewayConnectPeerArn =
-        field_map_exn json "TransitGatewayConnectPeerArn"
+        field_map_exn json__ "TransitGatewayConnectPeerArn"
           TransitGatewayConnectPeerArn.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?linkId ~deviceId ~transitGatewayConnectPeerArn ~globalNetworkId
         ()
     let to_json v = composed_to_json to_value v
@@ -17055,9 +22945,9 @@ module AssociateLinkResponse =
           (Xml.child xml_arg0 "LinkAssociation") in
       make ?linkAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let linkAssociation =
-        field_map json "LinkAssociation" LinkAssociation.of_json in
+        field_map json__ "LinkAssociation" LinkAssociation.of_json in
       make ?linkAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17091,11 +22981,11 @@ module AssociateLinkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~linkId ~deviceId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkId = field_map_exn json "LinkId" LinkId.of_json in
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let linkId = field_map_exn json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ~linkId ~deviceId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17203,14 +23093,14 @@ module AssociateCustomerGatewayResponse =
           (Xml.child xml_arg0 "CustomerGatewayAssociation") in
       make ?customerGatewayAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerGatewayAssociation =
-        field_map json "CustomerGatewayAssociation"
+        field_map json__ "CustomerGatewayAssociation"
           CustomerGatewayAssociation.of_json in
       make ?customerGatewayAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates a customer gateway with a device and optionally, with a link. If you specify a link, it must be associated with the specified device. You can only associate customer gateways that are connected to a VPN attachment on a transit gateway. The transit gateway must be registered in your global network. When you register a transit gateway, customer gateways that are connected to the transit gateway are automatically included in the global network. To list customer gateways that are connected to a transit gateway, use the DescribeVpnConnections EC2 API and filter by transit-gateway-id. You cannot associate a customer gateway with more than one device and link."]
+       "Associates a customer gateway with a device and optionally, with a link. If you specify a link, it must be associated with the specified device. You can only associate customer gateways that are connected to a VPN attachment on a transit gateway or core network registered in your global network. When you register a transit gateway or core network, customer gateways that are connected to the transit gateway are automatically included in the global network. To list customer gateways that are connected to a transit gateway, use the DescribeVpnConnections EC2 API and filter by transit-gateway-id. You cannot associate a customer gateway with more than one device and link."]
 module AssociateCustomerGatewayRequest =
   struct
     type nonrec t =
@@ -17251,17 +23141,17 @@ module AssociateCustomerGatewayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CustomerGatewayArn") in
       make ?linkId ~deviceId ~globalNetworkId ~customerGatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkId = field_map json "LinkId" LinkId.of_json in
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       let customerGatewayArn =
-        field_map_exn json "CustomerGatewayArn" CustomerGatewayArn.of_json in
+        field_map_exn json__ "CustomerGatewayArn" CustomerGatewayArn.of_json in
       make ?linkId ~deviceId ~globalNetworkId ~customerGatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates a customer gateway with a device and optionally, with a link. If you specify a link, it must be associated with the specified device. You can only associate customer gateways that are connected to a VPN attachment on a transit gateway. The transit gateway must be registered in your global network. When you register a transit gateway, customer gateways that are connected to the transit gateway are automatically included in the global network. To list customer gateways that are connected to a transit gateway, use the DescribeVpnConnections EC2 API and filter by transit-gateway-id. You cannot associate a customer gateway with more than one device and link."]
+       "Associates a customer gateway with a device and optionally, with a link. If you specify a link, it must be associated with the specified device. You can only associate customer gateways that are connected to a VPN attachment on a transit gateway or core network registered in your global network. When you register a transit gateway or core network, customer gateways that are connected to the transit gateway are automatically included in the global network. To list customer gateways that are connected to a transit gateway, use the DescribeVpnConnections EC2 API and filter by transit-gateway-id. You cannot associate a customer gateway with more than one device and link."]
 module AssociateConnectPeerResponse =
   struct
     type nonrec t =
@@ -17364,9 +23254,9 @@ module AssociateConnectPeerResponse =
           (Xml.child xml_arg0 "ConnectPeerAssociation") in
       make ?connectPeerAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectPeerAssociation =
-        field_map json "ConnectPeerAssociation"
+        field_map json__ "ConnectPeerAssociation"
           ConnectPeerAssociation.of_json in
       make ?connectPeerAssociation ()
     let to_json v = composed_to_json to_value v
@@ -17409,13 +23299,13 @@ module AssociateConnectPeerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?linkId ~deviceId ~connectPeerId ~globalNetworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkId = field_map json "LinkId" LinkId.of_json in
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let linkId = field_map json__ "LinkId" LinkId.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
       let connectPeerId =
-        field_map_exn json "ConnectPeerId" ConnectPeerId.of_json in
+        field_map_exn json__ "ConnectPeerId" ConnectPeerId.of_json in
       let globalNetworkId =
-        field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
+        field_map_exn json__ "GlobalNetworkId" GlobalNetworkId.of_json in
       make ?linkId ~deviceId ~connectPeerId ~globalNetworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17508,8 +23398,8 @@ module AcceptAttachmentResponse =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?attachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attachment = field_map json "Attachment" Attachment.of_json in
+    let of_json json__ =
+      let attachment = field_map json__ "Attachment" Attachment.of_json in
       make ?attachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17531,9 +23421,9 @@ module AcceptAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentId =
-        field_map_exn json "AttachmentId" AttachmentId.of_json in
+        field_map_exn json__ "AttachmentId" AttachmentId.of_json in
       make ~attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

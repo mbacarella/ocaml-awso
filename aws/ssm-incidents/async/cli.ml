@@ -28,6 +28,28 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let batch_get_incident_findings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and findingIds =
+         flag "finding-ids" (required json_arg) ~doc:"JSON FindingIdList"
+       and incidentRecordArn =
+         flag "incident-record-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_incident_findings
+           (Values.BatchGetIncidentFindingsInput.make
+              ~findingIds:(Values.FindingIdList.of_json findingIds)
+              ~incidentRecordArn ())
+           (Some Values.BatchGetIncidentFindingsOutput.to_json)
+           (Some Values.BatchGetIncidentFindingsOutput.error_to_json)])
 let create_replication_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -40,12 +62,14 @@ let create_replication_set =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and regions =
          flag "regions" (required json_arg) ~doc:"JSON RegionMapInput" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_replication_set
            (Values.CreateReplicationSetInput.make ?clientToken
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ~regions:(Values.RegionMapInput.of_json regions) ())
            (Some Values.CreateReplicationSetOutput.to_json)
            (Some Values.CreateReplicationSetOutput.error_to_json)])
@@ -70,6 +94,8 @@ let create_response_plan =
            ~doc:"STRING ResponsePlanDisplayName"
        and engagements =
          flag "engagements" (optional json_arg) ~doc:"JSON EngagementSet"
+       and integrations =
+         flag "integrations" (optional json_arg) ~doc:"JSON Integrations"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and incidentTemplate =
          flag "incident-template" (required json_arg)
@@ -85,6 +111,8 @@ let create_response_plan =
                               chatChannel) ?clientToken ?displayName
               ?engagements:(Option.map ~f:Values.EngagementSet.of_json
                               engagements)
+              ?integrations:(Option.map ~f:Values.Integrations.of_json
+                               integrations)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ~incidentTemplate:(Values.IncidentTemplate.of_json
                                    incidentTemplate) ~name ())
@@ -102,6 +130,9 @@ let create_timeline_event =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and eventReferences =
+         flag "event-references" (optional json_arg)
+           ~doc:"JSON EventReferenceList"
        and eventData =
          flag "event-data" (required string) ~doc:"STRING EventData"
        and eventTime =
@@ -113,7 +144,10 @@ let create_timeline_event =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_timeline_event
-           (Values.CreateTimelineEventInput.make ?clientToken ~eventData
+           (Values.CreateTimelineEventInput.make ?clientToken
+              ?eventReferences:(Option.map
+                                  ~f:Values.EventReferenceList.of_json
+                                  eventReferences) ~eventData
               ~eventTime:(Values.Timestamp.of_json eventTime) ~eventType
               ~incidentRecordArn ())
            (Some Values.CreateTimelineEventOutput.to_json)
@@ -300,6 +334,30 @@ let get_timeline_event =
            (Values.GetTimelineEventInput.make ~eventId ~incidentRecordArn ())
            (Some Values.GetTimelineEventOutput.to_json)
            (Some Values.GetTimelineEventOutput.error_to_json)])
+let list_incident_findings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListIncidentFindingsInputMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and incidentRecordArn =
+         flag "incident-record-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_incident_findings
+           (Values.ListIncidentFindingsInput.make ?maxResults ?nextToken
+              ~incidentRecordArn ())
+           (Some Values.ListIncidentFindingsOutput.to_json)
+           (Some Values.ListIncidentFindingsOutput.error_to_json)])
 let list_incident_records =
   Command.async ~summary:""
     ([%map_open.Command
@@ -670,9 +728,14 @@ let update_response_plan =
        and incidentTemplateSummary =
          flag "incident-template-summary" (optional string)
            ~doc:"STRING IncidentSummary"
+       and incidentTemplateTags =
+         flag "incident-template-tags" (optional json_arg)
+           ~doc:"JSON TagMapUpdate"
        and incidentTemplateTitle =
          flag "incident-template-title" (optional string)
            ~doc:"STRING IncidentTitle"
+       and integrations =
+         flag "integrations" (optional json_arg) ~doc:"JSON Integrations"
        and arn = flag "arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -687,7 +750,13 @@ let update_response_plan =
               ?incidentTemplateNotificationTargets:(Option.map
                                                       ~f:Values.NotificationTargetSet.of_json
                                                       incidentTemplateNotificationTargets)
-              ?incidentTemplateSummary ?incidentTemplateTitle ~arn ())
+              ?incidentTemplateSummary
+              ?incidentTemplateTags:(Option.map
+                                       ~f:Values.TagMapUpdate.of_json
+                                       incidentTemplateTags)
+              ?incidentTemplateTitle
+              ?integrations:(Option.map ~f:Values.Integrations.of_json
+                               integrations) ~arn ())
            (Some Values.UpdateResponsePlanOutput.to_json)
            (Some Values.UpdateResponsePlanOutput.error_to_json)])
 let update_timeline_event =
@@ -704,6 +773,9 @@ let update_timeline_event =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and eventData =
          flag "event-data" (optional string) ~doc:"STRING EventData"
+       and eventReferences =
+         flag "event-references" (optional json_arg)
+           ~doc:"JSON EventReferenceList"
        and eventTime =
          flag "event-time" (optional json_arg) ~doc:"JSON Timestamp"
        and eventType =
@@ -715,6 +787,9 @@ let update_timeline_event =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_timeline_event
            (Values.UpdateTimelineEventInput.make ?clientToken ?eventData
+              ?eventReferences:(Option.map
+                                  ~f:Values.EventReferenceList.of_json
+                                  eventReferences)
               ?eventTime:(Option.map ~f:Values.Timestamp.of_json eventTime)
               ?eventType ~eventId ~incidentRecordArn ())
            (Some Values.UpdateTimelineEventOutput.to_json)
@@ -722,7 +797,8 @@ let update_timeline_event =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-replication-set", create_replication_set);
+    [("batch-get-incident-findings", batch_get_incident_findings);
+    ("create-replication-set", create_replication_set);
     ("create-response-plan", create_response_plan);
     ("create-timeline-event", create_timeline_event);
     ("delete-incident-record", delete_incident_record);
@@ -735,6 +811,7 @@ let main =
     ("get-resource-policies", get_resource_policies);
     ("get-response-plan", get_response_plan);
     ("get-timeline-event", get_timeline_event);
+    ("list-incident-findings", list_incident_findings);
     ("list-incident-records", list_incident_records);
     ("list-related-items", list_related_items);
     ("list-replication-sets", list_replication_sets);

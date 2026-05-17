@@ -12,6 +12,12 @@ val create_table :
       CreateTableRequest.t ->
         (CreateTableResponse.t, CreateTableResponse.error) Result.t
           Async.Deferred.t
+val create_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTypeRequest.t ->
+        (CreateTypeResponse.t, CreateTypeResponse.error) Result.t
+          Async.Deferred.t
 val delete_keyspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -23,6 +29,12 @@ val delete_table :
     ?cfg:Awso.Cfg.t ->
       DeleteTableRequest.t ->
         (DeleteTableResponse.t, DeleteTableResponse.error) Result.t
+          Async.Deferred.t
+val delete_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteTypeRequest.t ->
+        (DeleteTypeResponse.t, DeleteTypeResponse.error) Result.t
           Async.Deferred.t
 val get_keyspace :
   ?endpoint_url:string ->
@@ -36,6 +48,18 @@ val get_table :
       GetTableRequest.t ->
         (GetTableResponse.t, GetTableResponse.error) Result.t
           Async.Deferred.t
+val get_table_auto_scaling_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTableAutoScalingSettingsRequest.t ->
+        (GetTableAutoScalingSettingsResponse.t,
+          GetTableAutoScalingSettingsResponse.error) Result.t
+          Async.Deferred.t
+val get_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTypeRequest.t ->
+        (GetTypeResponse.t, GetTypeResponse.error) Result.t Async.Deferred.t
 val list_keyspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -54,6 +78,12 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Async.Deferred.t
+val list_types :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTypesRequest.t ->
+        (ListTypesResponse.t, ListTypesResponse.error) Result.t
+          Async.Deferred.t
 val restore_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -71,6 +101,12 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+          Async.Deferred.t
+val update_keyspace :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKeyspaceRequest.t ->
+        (UpdateKeyspaceResponse.t, UpdateKeyspaceResponse.error) Result.t
           Async.Deferred.t
 val update_table :
   ?endpoint_url:string ->

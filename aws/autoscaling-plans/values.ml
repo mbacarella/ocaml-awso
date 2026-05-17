@@ -73,9 +73,9 @@ module MetricDimension =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" MetricDimensionValue.of_json in
-      let name = field_map_exn json "Name" MetricDimensionName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" MetricDimensionValue.of_json in
+      let name = field_map_exn json__ "Name" MetricDimensionName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a dimension for a customized metric."]
@@ -83,6 +83,9 @@ module MetricDimensions =
   struct
     type nonrec t = MetricDimension.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricDimension.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -348,12 +351,14 @@ module CustomizedScalingMetricSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
       make ?unit ~statistic ?dimensions ~namespace ~metricName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" MetricUnit.of_json in
-      let statistic = field_map_exn json "Statistic" MetricStatistic.of_json in
-      let dimensions = field_map json "Dimensions" MetricDimensions.of_json in
-      let namespace = field_map_exn json "Namespace" MetricNamespace.of_json in
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" MetricUnit.of_json in
+      let statistic =
+        field_map_exn json__ "Statistic" MetricStatistic.of_json in
+      let dimensions = field_map json__ "Dimensions" MetricDimensions.of_json in
+      let namespace =
+        field_map_exn json__ "Namespace" MetricNamespace.of_json in
+      let metricName = field_map_exn json__ "MetricName" MetricName.of_json in
       make ?unit ~statistic ?dimensions ~namespace ~metricName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -415,11 +420,11 @@ module PredefinedScalingMetricSpecification =
              "PredefinedScalingMetricType") in
       make ?resourceLabel ~predefinedScalingMetricType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceLabel =
-        field_map json "ResourceLabel" ResourceLabel.of_json in
+        field_map json__ "ResourceLabel" ResourceLabel.of_json in
       let predefinedScalingMetricType =
-        field_map_exn json "PredefinedScalingMetricType"
+        field_map_exn json__ "PredefinedScalingMetricType"
           ScalingMetricType.of_json in
       make ?resourceLabel ~predefinedScalingMetricType ()
     let to_json v = composed_to_json to_value v
@@ -429,6 +434,9 @@ module TagValues =
   struct
     type nonrec t = XmlStringMaxLen256.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -591,20 +599,22 @@ module TargetTrackingConfiguration =
         ?disableScaleIn ~targetValue ?customizedScalingMetricSpecification
         ?predefinedScalingMetricSpecification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let estimatedInstanceWarmup =
-        field_map json "EstimatedInstanceWarmup" Cooldown.of_json in
-      let scaleInCooldown = field_map json "ScaleInCooldown" Cooldown.of_json in
+        field_map json__ "EstimatedInstanceWarmup" Cooldown.of_json in
+      let scaleInCooldown =
+        field_map json__ "ScaleInCooldown" Cooldown.of_json in
       let scaleOutCooldown =
-        field_map json "ScaleOutCooldown" Cooldown.of_json in
+        field_map json__ "ScaleOutCooldown" Cooldown.of_json in
       let disableScaleIn =
-        field_map json "DisableScaleIn" DisableScaleIn.of_json in
-      let targetValue = field_map_exn json "TargetValue" MetricScale.of_json in
+        field_map json__ "DisableScaleIn" DisableScaleIn.of_json in
+      let targetValue =
+        field_map_exn json__ "TargetValue" MetricScale.of_json in
       let customizedScalingMetricSpecification =
-        field_map json "CustomizedScalingMetricSpecification"
+        field_map json__ "CustomizedScalingMetricSpecification"
           CustomizedScalingMetricSpecification.of_json in
       let predefinedScalingMetricSpecification =
-        field_map json "PredefinedScalingMetricSpecification"
+        field_map json__ "PredefinedScalingMetricSpecification"
           PredefinedScalingMetricSpecification.of_json in
       make ?estimatedInstanceWarmup ?scaleInCooldown ?scaleOutCooldown
         ?disableScaleIn ~targetValue ?customizedScalingMetricSpecification
@@ -631,9 +641,9 @@ module TagFilter =
         (Option.map ~f:XmlStringMaxLen128.of_xml) (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" TagValues.of_json in
-      let key = field_map json "Key" XmlStringMaxLen128.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" TagValues.of_json in
+      let key = field_map json__ "Key" XmlStringMaxLen128.of_json in
       make ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a tag."]
@@ -685,12 +695,14 @@ module CustomizedLoadMetricSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
       make ?unit ~statistic ?dimensions ~namespace ~metricName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" MetricUnit.of_json in
-      let statistic = field_map_exn json "Statistic" MetricStatistic.of_json in
-      let dimensions = field_map json "Dimensions" MetricDimensions.of_json in
-      let namespace = field_map_exn json "Namespace" MetricNamespace.of_json in
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" MetricUnit.of_json in
+      let statistic =
+        field_map_exn json__ "Statistic" MetricStatistic.of_json in
+      let dimensions = field_map json__ "Dimensions" MetricDimensions.of_json in
+      let namespace =
+        field_map_exn json__ "Namespace" MetricNamespace.of_json in
+      let metricName = field_map_exn json__ "MetricName" MetricName.of_json in
       make ?unit ~statistic ?dimensions ~namespace ~metricName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -738,11 +750,12 @@ module PredefinedLoadMetricSpecification =
              "PredefinedLoadMetricType") in
       make ?resourceLabel ~predefinedLoadMetricType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceLabel =
-        field_map json "ResourceLabel" ResourceLabel.of_json in
+        field_map json__ "ResourceLabel" ResourceLabel.of_json in
       let predefinedLoadMetricType =
-        field_map_exn json "PredefinedLoadMetricType" LoadMetricType.of_json in
+        field_map_exn json__ "PredefinedLoadMetricType"
+          LoadMetricType.of_json in
       make ?resourceLabel ~predefinedLoadMetricType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -986,6 +999,9 @@ module TargetTrackingConfigurations =
   struct
     type nonrec t = TargetTrackingConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetTrackingConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1054,6 +1070,9 @@ module TagFilters =
   struct
     type nonrec t = TagFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1260,42 +1279,44 @@ module ScalingInstruction =
         ~targetTrackingConfigurations ~maxCapacity ~minCapacity
         ~scalableDimension ~resourceId ~serviceNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disableDynamicScaling =
-        field_map json "DisableDynamicScaling" DisableDynamicScaling.of_json in
+        field_map json__ "DisableDynamicScaling"
+          DisableDynamicScaling.of_json in
       let scalingPolicyUpdateBehavior =
-        field_map json "ScalingPolicyUpdateBehavior"
+        field_map json__ "ScalingPolicyUpdateBehavior"
           ScalingPolicyUpdateBehavior.of_json in
       let predictiveScalingMode =
-        field_map json "PredictiveScalingMode" PredictiveScalingMode.of_json in
+        field_map json__ "PredictiveScalingMode"
+          PredictiveScalingMode.of_json in
       let predictiveScalingMaxCapacityBuffer =
-        field_map json "PredictiveScalingMaxCapacityBuffer"
+        field_map json__ "PredictiveScalingMaxCapacityBuffer"
           ResourceCapacity.of_json in
       let predictiveScalingMaxCapacityBehavior =
-        field_map json "PredictiveScalingMaxCapacityBehavior"
+        field_map json__ "PredictiveScalingMaxCapacityBehavior"
           PredictiveScalingMaxCapacityBehavior.of_json in
       let scheduledActionBufferTime =
-        field_map json "ScheduledActionBufferTime"
+        field_map json__ "ScheduledActionBufferTime"
           ScheduledActionBufferTime.of_json in
       let customizedLoadMetricSpecification =
-        field_map json "CustomizedLoadMetricSpecification"
+        field_map json__ "CustomizedLoadMetricSpecification"
           CustomizedLoadMetricSpecification.of_json in
       let predefinedLoadMetricSpecification =
-        field_map json "PredefinedLoadMetricSpecification"
+        field_map json__ "PredefinedLoadMetricSpecification"
           PredefinedLoadMetricSpecification.of_json in
       let targetTrackingConfigurations =
-        field_map_exn json "TargetTrackingConfigurations"
+        field_map_exn json__ "TargetTrackingConfigurations"
           TargetTrackingConfigurations.of_json in
       let maxCapacity =
-        field_map_exn json "MaxCapacity" ResourceCapacity.of_json in
+        field_map_exn json__ "MaxCapacity" ResourceCapacity.of_json in
       let minCapacity =
-        field_map_exn json "MinCapacity" ResourceCapacity.of_json in
+        field_map_exn json__ "MinCapacity" ResourceCapacity.of_json in
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map_exn json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
       make ?disableDynamicScaling ?scalingPolicyUpdateBehavior
         ?predictiveScalingMode ?predictiveScalingMaxCapacityBuffer
         ?predictiveScalingMaxCapacityBehavior ?scheduledActionBufferTime
@@ -1309,20 +1330,21 @@ module ScalingPolicy =
   struct
     type nonrec t =
       {
-      policyName: PolicyName.t [@ocaml.doc "The name of the scaling policy."];
-      policyType: PolicyType.t [@ocaml.doc "The type of scaling policy."];
+      policyName: PolicyName.t option
+        [@ocaml.doc "The name of the scaling policy."];
+      policyType: PolicyType.t option
+        [@ocaml.doc "The type of scaling policy."];
       targetTrackingConfiguration: TargetTrackingConfiguration.t option
         [@ocaml.doc
           "The target tracking scaling policy. Includes support for predefined or customized metrics."]}
-    let context_ = "ScalingPolicy"
-    let make ?targetTrackingConfiguration =
-      fun ~policyName ->
-        fun ~policyType ->
-          fun () -> { targetTrackingConfiguration; policyName; policyType }
+    let make ?policyName =
+      fun ?policyType ->
+        fun ?targetTrackingConfiguration ->
+          fun () -> { policyName; policyType; targetTrackingConfiguration }
     let to_value x =
       structure_to_value
-        [("PolicyName", (Some (PolicyName.to_value x.policyName)));
-        ("PolicyType", (Some (PolicyType.to_value x.policyType)));
+        [("PolicyName", (Option.map x.policyName ~f:PolicyName.to_value));
+        ("PolicyType", (Option.map x.policyType ~f:PolicyType.to_value));
         ("TargetTrackingConfiguration",
           (Option.map x.targetTrackingConfiguration
              ~f:TargetTrackingConfiguration.to_value))]
@@ -1332,20 +1354,18 @@ module ScalingPolicy =
         (Option.map ~f:TargetTrackingConfiguration.of_xml)
           (Xml.child xml_arg0 "TargetTrackingConfiguration") in
       let policyType =
-        PolicyType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyType") in
+        (Option.map ~f:PolicyType.of_xml) (Xml.child xml_arg0 "PolicyType") in
       let policyName =
-        PolicyName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
-      make ?targetTrackingConfiguration ~policyType ~policyName ()
+        (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "PolicyName") in
+      make ?targetTrackingConfiguration ?policyType ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetTrackingConfiguration =
-        field_map json "TargetTrackingConfiguration"
+        field_map json__ "TargetTrackingConfiguration"
           TargetTrackingConfiguration.of_json in
-      let policyType = field_map_exn json "PolicyType" PolicyType.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
-      make ?targetTrackingConfiguration ~policyType ~policyName ()
+      let policyType = field_map json__ "PolicyType" PolicyType.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyName.of_json in
+      make ?targetTrackingConfiguration ?policyType ?policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a scaling policy."]
 module TimestampType =
@@ -1385,10 +1405,10 @@ module ApplicationSource =
           (Xml.child xml_arg0 "CloudFormationStackARN") in
       make ?tagFilters ?cloudFormationStackARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagFilters = field_map json "TagFilters" TagFilters.of_json in
+    let of_json json__ =
+      let tagFilters = field_map json__ "TagFilters" TagFilters.of_json in
       let cloudFormationStackARN =
-        field_map json "CloudFormationStackARN" XmlString.of_json in
+        field_map json__ "CloudFormationStackARN" XmlString.of_json in
       make ?tagFilters ?cloudFormationStackARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents an application source."]
@@ -1396,6 +1416,9 @@ module ScalingInstructions =
   struct
     type nonrec t = ScalingInstruction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalingInstruction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1499,6 +1522,9 @@ module ScalingPolicies =
   struct
     type nonrec t = ScalingPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalingPolicy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1581,9 +1607,9 @@ module Datapoint =
         (Option.map ~f:TimestampType.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?value ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" MetricScale.of_json in
-      let timestamp = field_map json "Timestamp" TimestampType.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" MetricScale.of_json in
+      let timestamp = field_map json__ "Timestamp" TimestampType.of_json in
       make ?value ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1592,16 +1618,16 @@ module ScalingPlan =
   struct
     type nonrec t =
       {
-      scalingPlanName: ScalingPlanName.t
+      scalingPlanName: ScalingPlanName.t option
         [@ocaml.doc "The name of the scaling plan."];
-      scalingPlanVersion: ScalingPlanVersion.t
+      scalingPlanVersion: ScalingPlanVersion.t option
         [@ocaml.doc "The version number of the scaling plan."];
-      applicationSource: ApplicationSource.t
+      applicationSource: ApplicationSource.t option
         [@ocaml.doc
           "A CloudFormation stack or a set of tags. You can create one scaling plan per application source."];
-      scalingInstructions: ScalingInstructions.t
+      scalingInstructions: ScalingInstructions.t option
         [@ocaml.doc "The scaling instructions."];
-      statusCode: ScalingPlanStatusCode.t
+      statusCode: ScalingPlanStatusCode.t option
         [@ocaml.doc
           "The status of the scaling plan. Active - The scaling plan is active. ActiveWithProblems - The scaling plan is active, but the scaling configuration for one or more resources could not be applied. CreationInProgress - The scaling plan is being created. CreationFailed - The scaling plan could not be created. DeletionInProgress - The scaling plan is being deleted. DeletionFailed - The scaling plan could not be deleted. UpdateInProgress - The scaling plan is being updated. UpdateFailed - The scaling plan could not be updated."];
       statusMessage: XmlString.t option
@@ -1612,37 +1638,37 @@ module ScalingPlan =
           "The Unix time stamp when the scaling plan entered the current status."];
       creationTime: TimestampType.t option
         [@ocaml.doc "The Unix time stamp when the scaling plan was created."]}
-    let context_ = "ScalingPlan"
-    let make ?statusMessage =
-      fun ?statusStartTime ->
-        fun ?creationTime ->
-          fun ~scalingPlanName ->
-            fun ~scalingPlanVersion ->
-              fun ~applicationSource ->
-                fun ~scalingInstructions ->
-                  fun ~statusCode ->
+    let make ?scalingPlanName =
+      fun ?scalingPlanVersion ->
+        fun ?applicationSource ->
+          fun ?scalingInstructions ->
+            fun ?statusCode ->
+              fun ?statusMessage ->
+                fun ?statusStartTime ->
+                  fun ?creationTime ->
                     fun () ->
                       {
-                        statusMessage;
-                        statusStartTime;
-                        creationTime;
                         scalingPlanName;
                         scalingPlanVersion;
                         applicationSource;
                         scalingInstructions;
-                        statusCode
+                        statusCode;
+                        statusMessage;
+                        statusStartTime;
+                        creationTime
                       }
     let to_value x =
       structure_to_value
         [("ScalingPlanName",
-           (Some (ScalingPlanName.to_value x.scalingPlanName)));
+           (Option.map x.scalingPlanName ~f:ScalingPlanName.to_value));
         ("ScalingPlanVersion",
-          (Some (ScalingPlanVersion.to_value x.scalingPlanVersion)));
+          (Option.map x.scalingPlanVersion ~f:ScalingPlanVersion.to_value));
         ("ApplicationSource",
-          (Some (ApplicationSource.to_value x.applicationSource)));
+          (Option.map x.applicationSource ~f:ApplicationSource.to_value));
         ("ScalingInstructions",
-          (Some (ScalingInstructions.to_value x.scalingInstructions)));
-        ("StatusCode", (Some (ScalingPlanStatusCode.to_value x.statusCode)));
+          (Option.map x.scalingInstructions ~f:ScalingInstructions.to_value));
+        ("StatusCode",
+          (Option.map x.statusCode ~f:ScalingPlanStatusCode.to_value));
         ("StatusMessage", (Option.map x.statusMessage ~f:XmlString.to_value));
         ("StatusStartTime",
           (Option.map x.statusStartTime ~f:TimestampType.to_value));
@@ -1659,103 +1685,104 @@ module ScalingPlan =
       let statusMessage =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "StatusMessage") in
       let statusCode =
-        ScalingPlanStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatusCode") in
+        (Option.map ~f:ScalingPlanStatusCode.of_xml)
+          (Xml.child xml_arg0 "StatusCode") in
       let scalingInstructions =
-        ScalingInstructions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalingInstructions") in
+        (Option.map ~f:ScalingInstructions.of_xml)
+          (Xml.child xml_arg0 "ScalingInstructions") in
       let applicationSource =
-        ApplicationSource.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationSource") in
+        (Option.map ~f:ApplicationSource.of_xml)
+          (Xml.child xml_arg0 "ApplicationSource") in
       let scalingPlanVersion =
-        ScalingPlanVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalingPlanVersion") in
+        (Option.map ~f:ScalingPlanVersion.of_xml)
+          (Xml.child xml_arg0 "ScalingPlanVersion") in
       let scalingPlanName =
-        ScalingPlanName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalingPlanName") in
-      make ?creationTime ?statusStartTime ?statusMessage ~statusCode
-        ~scalingInstructions ~applicationSource ~scalingPlanVersion
-        ~scalingPlanName ()
+        (Option.map ~f:ScalingPlanName.of_xml)
+          (Xml.child xml_arg0 "ScalingPlanName") in
+      make ?creationTime ?statusStartTime ?statusMessage ?statusCode
+        ?scalingInstructions ?applicationSource ?scalingPlanVersion
+        ?scalingPlanName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" TimestampType.of_json in
+    let of_json json__ =
+      let creationTime =
+        field_map json__ "CreationTime" TimestampType.of_json in
       let statusStartTime =
-        field_map json "StatusStartTime" TimestampType.of_json in
-      let statusMessage = field_map json "StatusMessage" XmlString.of_json in
+        field_map json__ "StatusStartTime" TimestampType.of_json in
+      let statusMessage = field_map json__ "StatusMessage" XmlString.of_json in
       let statusCode =
-        field_map_exn json "StatusCode" ScalingPlanStatusCode.of_json in
+        field_map json__ "StatusCode" ScalingPlanStatusCode.of_json in
       let scalingInstructions =
-        field_map_exn json "ScalingInstructions" ScalingInstructions.of_json in
+        field_map json__ "ScalingInstructions" ScalingInstructions.of_json in
       let applicationSource =
-        field_map_exn json "ApplicationSource" ApplicationSource.of_json in
+        field_map json__ "ApplicationSource" ApplicationSource.of_json in
       let scalingPlanVersion =
-        field_map_exn json "ScalingPlanVersion" ScalingPlanVersion.of_json in
+        field_map json__ "ScalingPlanVersion" ScalingPlanVersion.of_json in
       let scalingPlanName =
-        field_map_exn json "ScalingPlanName" ScalingPlanName.of_json in
-      make ?creationTime ?statusStartTime ?statusMessage ~statusCode
-        ~scalingInstructions ~applicationSource ~scalingPlanVersion
-        ~scalingPlanName ()
+        field_map json__ "ScalingPlanName" ScalingPlanName.of_json in
+      make ?creationTime ?statusStartTime ?statusMessage ?statusCode
+        ?scalingInstructions ?applicationSource ?scalingPlanVersion
+        ?scalingPlanName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a scaling plan."]
 module ScalingPlanResource =
   struct
     type nonrec t =
       {
-      scalingPlanName: ScalingPlanName.t
+      scalingPlanName: ScalingPlanName.t option
         [@ocaml.doc "The name of the scaling plan."];
-      scalingPlanVersion: ScalingPlanVersion.t
+      scalingPlanVersion: ScalingPlanVersion.t option
         [@ocaml.doc "The version number of the scaling plan."];
-      serviceNamespace: ServiceNamespace.t
+      serviceNamespace: ServiceNamespace.t option
         [@ocaml.doc "The namespace of the AWS service."];
-      resourceId: ResourceIdMaxLen1600.t
+      resourceId: ResourceIdMaxLen1600.t option
         [@ocaml.doc
           "The ID of the resource. This string consists of the resource type and unique identifier. Auto Scaling group - The resource type is autoScalingGroup and the unique identifier is the name of the Auto Scaling group. Example: autoScalingGroup/my-asg. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet request - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. DynamoDB table - The resource type is table and the unique identifier is the resource ID. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the resource ID. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster."];
-      scalableDimension: ScalableDimension.t
+      scalableDimension: ScalableDimension.t option
         [@ocaml.doc
           "The scalable dimension for the resource. autoscaling:autoScalingGroup:DesiredCapacity - The desired capacity of an Auto Scaling group. ecs:service:DesiredCount - The desired task count of an ECS service. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet request. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition."];
       scalingPolicies: ScalingPolicies.t option
         [@ocaml.doc "The scaling policies."];
-      scalingStatusCode: ScalingStatusCode.t
+      scalingStatusCode: ScalingStatusCode.t option
         [@ocaml.doc
           "The scaling status of the resource. Active - The scaling configuration is active. Inactive - The scaling configuration is not active because the scaling plan is being created or the scaling configuration could not be applied. Check the status message for more information. PartiallyActive - The scaling configuration is partially active because the scaling plan is being created or deleted or the scaling configuration could not be fully applied. Check the status message for more information."];
       scalingStatusMessage: XmlString.t option
         [@ocaml.doc
           "A simple message about the current scaling status of the resource."]}
-    let context_ = "ScalingPlanResource"
-    let make ?scalingPolicies =
-      fun ?scalingStatusMessage ->
-        fun ~scalingPlanName ->
-          fun ~scalingPlanVersion ->
-            fun ~serviceNamespace ->
-              fun ~resourceId ->
-                fun ~scalableDimension ->
-                  fun ~scalingStatusCode ->
+    let make ?scalingPlanName =
+      fun ?scalingPlanVersion ->
+        fun ?serviceNamespace ->
+          fun ?resourceId ->
+            fun ?scalableDimension ->
+              fun ?scalingPolicies ->
+                fun ?scalingStatusCode ->
+                  fun ?scalingStatusMessage ->
                     fun () ->
                       {
-                        scalingPolicies;
-                        scalingStatusMessage;
                         scalingPlanName;
                         scalingPlanVersion;
                         serviceNamespace;
                         resourceId;
                         scalableDimension;
-                        scalingStatusCode
+                        scalingPolicies;
+                        scalingStatusCode;
+                        scalingStatusMessage
                       }
     let to_value x =
       structure_to_value
         [("ScalingPlanName",
-           (Some (ScalingPlanName.to_value x.scalingPlanName)));
+           (Option.map x.scalingPlanName ~f:ScalingPlanName.to_value));
         ("ScalingPlanVersion",
-          (Some (ScalingPlanVersion.to_value x.scalingPlanVersion)));
+          (Option.map x.scalingPlanVersion ~f:ScalingPlanVersion.to_value));
         ("ServiceNamespace",
-          (Some (ServiceNamespace.to_value x.serviceNamespace)));
-        ("ResourceId", (Some (ResourceIdMaxLen1600.to_value x.resourceId)));
+          (Option.map x.serviceNamespace ~f:ServiceNamespace.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ResourceIdMaxLen1600.to_value));
         ("ScalableDimension",
-          (Some (ScalableDimension.to_value x.scalableDimension)));
+          (Option.map x.scalableDimension ~f:ScalableDimension.to_value));
         ("ScalingPolicies",
           (Option.map x.scalingPolicies ~f:ScalingPolicies.to_value));
         ("ScalingStatusCode",
-          (Some (ScalingStatusCode.to_value x.scalingStatusCode)));
+          (Option.map x.scalingStatusCode ~f:ScalingStatusCode.to_value));
         ("ScalingStatusMessage",
           (Option.map x.scalingStatusMessage ~f:XmlString.to_value))]
     let to_query v = to_query to_value v
@@ -1764,50 +1791,50 @@ module ScalingPlanResource =
         (Option.map ~f:XmlString.of_xml)
           (Xml.child xml_arg0 "ScalingStatusMessage") in
       let scalingStatusCode =
-        ScalingStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalingStatusCode") in
+        (Option.map ~f:ScalingStatusCode.of_xml)
+          (Xml.child xml_arg0 "ScalingStatusCode") in
       let scalingPolicies =
         (Option.map ~f:ScalingPolicies.of_xml)
           (Xml.child xml_arg0 "ScalingPolicies") in
       let scalableDimension =
-        ScalableDimension.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalableDimension") in
+        (Option.map ~f:ScalableDimension.of_xml)
+          (Xml.child xml_arg0 "ScalableDimension") in
       let resourceId =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let serviceNamespace =
-        ServiceNamespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
+        (Option.map ~f:ServiceNamespace.of_xml)
+          (Xml.child xml_arg0 "ServiceNamespace") in
       let scalingPlanVersion =
-        ScalingPlanVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalingPlanVersion") in
+        (Option.map ~f:ScalingPlanVersion.of_xml)
+          (Xml.child xml_arg0 "ScalingPlanVersion") in
       let scalingPlanName =
-        ScalingPlanName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalingPlanName") in
-      make ?scalingStatusMessage ~scalingStatusCode ?scalingPolicies
-        ~scalableDimension ~resourceId ~serviceNamespace ~scalingPlanVersion
-        ~scalingPlanName ()
+        (Option.map ~f:ScalingPlanName.of_xml)
+          (Xml.child xml_arg0 "ScalingPlanName") in
+      make ?scalingStatusMessage ?scalingStatusCode ?scalingPolicies
+        ?scalableDimension ?resourceId ?serviceNamespace ?scalingPlanVersion
+        ?scalingPlanName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingStatusMessage =
-        field_map json "ScalingStatusMessage" XmlString.of_json in
+        field_map json__ "ScalingStatusMessage" XmlString.of_json in
       let scalingStatusCode =
-        field_map_exn json "ScalingStatusCode" ScalingStatusCode.of_json in
+        field_map json__ "ScalingStatusCode" ScalingStatusCode.of_json in
       let scalingPolicies =
-        field_map json "ScalingPolicies" ScalingPolicies.of_json in
+        field_map json__ "ScalingPolicies" ScalingPolicies.of_json in
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map json__ "ServiceNamespace" ServiceNamespace.of_json in
       let scalingPlanVersion =
-        field_map_exn json "ScalingPlanVersion" ScalingPlanVersion.of_json in
+        field_map json__ "ScalingPlanVersion" ScalingPlanVersion.of_json in
       let scalingPlanName =
-        field_map_exn json "ScalingPlanName" ScalingPlanName.of_json in
-      make ?scalingStatusMessage ~scalingStatusCode ?scalingPolicies
-        ~scalableDimension ~resourceId ~serviceNamespace ~scalingPlanVersion
-        ~scalingPlanName ()
+        field_map json__ "ScalingPlanName" ScalingPlanName.of_json in
+      make ?scalingStatusMessage ?scalingStatusCode ?scalingPolicies
+        ?scalableDimension ?resourceId ?serviceNamespace ?scalingPlanVersion
+        ?scalingPlanName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a scalable resource."]
 module ConcurrentUpdateException =
@@ -1824,8 +1851,8 @@ module ConcurrentUpdateException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1844,8 +1871,8 @@ module InternalServiceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service encountered an internal error."]
@@ -1863,8 +1890,8 @@ module ObjectNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified object could not be found."]
@@ -1882,8 +1909,8 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1892,6 +1919,9 @@ module Datapoints =
   struct
     type nonrec t = Datapoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Datapoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1957,8 +1987,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The token provided is not valid."]
@@ -1979,6 +2009,9 @@ module ScalingPlans =
   struct
     type nonrec t = ScalingPlan.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalingPlan.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2003,6 +2036,9 @@ module ApplicationSources =
   struct
     type nonrec t = ApplicationSource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationSource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2042,6 +2078,9 @@ module ScalingPlanNames =
   struct
     type nonrec t = ScalingPlanName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalingPlanName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2067,6 +2106,9 @@ module ScalingPlanResources =
   struct
     type nonrec t = ScalingPlanResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalingPlanResource.to_value)) |>
         (fun x -> `List x)
@@ -2103,8 +2145,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2230,15 +2272,15 @@ module UpdateScalingPlanRequest =
       make ?scalingInstructions ?applicationSource ~scalingPlanVersion
         ~scalingPlanName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingInstructions =
-        field_map json "ScalingInstructions" ScalingInstructions.of_json in
+        field_map json__ "ScalingInstructions" ScalingInstructions.of_json in
       let applicationSource =
-        field_map json "ApplicationSource" ApplicationSource.of_json in
+        field_map json__ "ApplicationSource" ApplicationSource.of_json in
       let scalingPlanVersion =
-        field_map_exn json "ScalingPlanVersion" ScalingPlanVersion.of_json in
+        field_map_exn json__ "ScalingPlanVersion" ScalingPlanVersion.of_json in
       let scalingPlanName =
-        field_map_exn json "ScalingPlanName" ScalingPlanName.of_json in
+        field_map_exn json__ "ScalingPlanName" ScalingPlanName.of_json in
       make ?scalingInstructions ?applicationSource ~scalingPlanVersion
         ~scalingPlanName ()
     let to_json v = composed_to_json to_value v
@@ -2248,13 +2290,13 @@ module GetScalingPlanResourceForecastDataResponse =
   struct
     type nonrec t =
       {
-      datapoints: Datapoints.t [@ocaml.doc "The data points to return."]}
+      datapoints: Datapoints.t option
+        [@ocaml.doc "The data points to return."]}
     type nonrec error =
       [ `InternalServiceException of InternalServiceException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetScalingPlanResourceForecastDataResponse"
-    let make ~datapoints = fun () -> { datapoints }
+    let make ?datapoints = fun () -> { datapoints }
     let error_of_json name json =
       match name with
       | "InternalServiceException" ->
@@ -2289,17 +2331,16 @@ module GetScalingPlanResourceForecastDataResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Datapoints", (Some (Datapoints.to_value x.datapoints)))]
+        [("Datapoints", (Option.map x.datapoints ~f:Datapoints.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let datapoints =
-        Datapoints.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Datapoints") in
-      make ~datapoints ()
+        (Option.map ~f:Datapoints.of_xml) (Xml.child xml_arg0 "Datapoints") in
+      make ?datapoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datapoints = field_map_exn json "Datapoints" Datapoints.of_json in
-      make ~datapoints ()
+    let of_json json__ =
+      let datapoints = field_map json__ "Datapoints" Datapoints.of_json in
+      make ?datapoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the forecast data for a scalable resource. Capacity forecasts are represented as predicted values, or data points, that are calculated using historical data points from a specified CloudWatch load metric. Data points are available for up to 56 days."]
@@ -2394,20 +2435,20 @@ module GetScalingPlanResourceForecastDataRequest =
       make ~endTime ~startTime ~forecastDataType ~scalableDimension
         ~resourceId ~serviceNamespace ~scalingPlanVersion ~scalingPlanName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map_exn json "EndTime" TimestampType.of_json in
-      let startTime = field_map_exn json "StartTime" TimestampType.of_json in
+    let of_json json__ =
+      let endTime = field_map_exn json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map_exn json__ "StartTime" TimestampType.of_json in
       let forecastDataType =
-        field_map_exn json "ForecastDataType" ForecastDataType.of_json in
+        field_map_exn json__ "ForecastDataType" ForecastDataType.of_json in
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
-      let resourceId = field_map_exn json "ResourceId" XmlString.of_json in
+        field_map_exn json__ "ScalableDimension" ScalableDimension.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" XmlString.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
       let scalingPlanVersion =
-        field_map_exn json "ScalingPlanVersion" ScalingPlanVersion.of_json in
+        field_map_exn json__ "ScalingPlanVersion" ScalingPlanVersion.of_json in
       let scalingPlanName =
-        field_map_exn json "ScalingPlanName" ScalingPlanName.of_json in
+        field_map_exn json__ "ScalingPlanName" ScalingPlanName.of_json in
       make ~endTime ~startTime ~forecastDataType ~scalableDimension
         ~resourceId ~serviceNamespace ~scalingPlanVersion ~scalingPlanName ()
     let to_json v = composed_to_json to_value v
@@ -2492,9 +2533,9 @@ module DescribeScalingPlansResponse =
           (Xml.child xml_arg0 "ScalingPlans") in
       make ?nextToken ?scalingPlans ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let scalingPlans = field_map json "ScalingPlans" ScalingPlans.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let scalingPlans = field_map json__ "ScalingPlans" ScalingPlans.of_json in
       make ?nextToken ?scalingPlans ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes one or more of your scaling plans."]
@@ -2557,15 +2598,15 @@ module DescribeScalingPlansRequest =
       make ?nextToken ?maxResults ?applicationSources ?scalingPlanVersion
         ?scalingPlanNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let applicationSources =
-        field_map json "ApplicationSources" ApplicationSources.of_json in
+        field_map json__ "ApplicationSources" ApplicationSources.of_json in
       let scalingPlanVersion =
-        field_map json "ScalingPlanVersion" ScalingPlanVersion.of_json in
+        field_map json__ "ScalingPlanVersion" ScalingPlanVersion.of_json in
       let scalingPlanNames =
-        field_map json "ScalingPlanNames" ScalingPlanNames.of_json in
+        field_map json__ "ScalingPlanNames" ScalingPlanNames.of_json in
       make ?nextToken ?maxResults ?applicationSources ?scalingPlanVersion
         ?scalingPlanNames ()
     let to_json v = composed_to_json to_value v
@@ -2650,10 +2691,10 @@ module DescribeScalingPlanResourcesResponse =
           (Xml.child xml_arg0 "ScalingPlanResources") in
       make ?nextToken ?scalingPlanResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let scalingPlanResources =
-        field_map json "ScalingPlanResources" ScalingPlanResources.of_json in
+        field_map json__ "ScalingPlanResources" ScalingPlanResources.of_json in
       make ?nextToken ?scalingPlanResources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2701,13 +2742,13 @@ module DescribeScalingPlanResourcesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ScalingPlanName") in
       make ?nextToken ?maxResults ~scalingPlanVersion ~scalingPlanName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let scalingPlanVersion =
-        field_map_exn json "ScalingPlanVersion" ScalingPlanVersion.of_json in
+        field_map_exn json__ "ScalingPlanVersion" ScalingPlanVersion.of_json in
       let scalingPlanName =
-        field_map_exn json "ScalingPlanName" ScalingPlanName.of_json in
+        field_map_exn json__ "ScalingPlanName" ScalingPlanName.of_json in
       make ?nextToken ?maxResults ~scalingPlanVersion ~scalingPlanName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2808,11 +2849,11 @@ module DeleteScalingPlanRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ScalingPlanName") in
       make ~scalingPlanVersion ~scalingPlanName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingPlanVersion =
-        field_map_exn json "ScalingPlanVersion" ScalingPlanVersion.of_json in
+        field_map_exn json__ "ScalingPlanVersion" ScalingPlanVersion.of_json in
       let scalingPlanName =
-        field_map_exn json "ScalingPlanName" ScalingPlanName.of_json in
+        field_map_exn json__ "ScalingPlanName" ScalingPlanName.of_json in
       make ~scalingPlanVersion ~scalingPlanName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2821,7 +2862,7 @@ module CreateScalingPlanResponse =
   struct
     type nonrec t =
       {
-      scalingPlanVersion: ScalingPlanVersion.t
+      scalingPlanVersion: ScalingPlanVersion.t option
         [@ocaml.doc
           "The version number of the scaling plan. This value is always 1. Currently, you cannot have multiple scaling plan versions."]}
     type nonrec error =
@@ -2830,8 +2871,7 @@ module CreateScalingPlanResponse =
       | `LimitExceededException of LimitExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateScalingPlanResponse"
-    let make ~scalingPlanVersion = fun () -> { scalingPlanVersion }
+    let make ?scalingPlanVersion = fun () -> { scalingPlanVersion }
     let error_of_json name json =
       match name with
       | "ConcurrentUpdateException" ->
@@ -2883,18 +2923,18 @@ module CreateScalingPlanResponse =
     let to_value x =
       structure_to_value
         [("ScalingPlanVersion",
-           (Some (ScalingPlanVersion.to_value x.scalingPlanVersion)))]
+           (Option.map x.scalingPlanVersion ~f:ScalingPlanVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let scalingPlanVersion =
-        ScalingPlanVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalingPlanVersion") in
-      make ~scalingPlanVersion ()
+        (Option.map ~f:ScalingPlanVersion.of_xml)
+          (Xml.child xml_arg0 "ScalingPlanVersion") in
+      make ?scalingPlanVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingPlanVersion =
-        field_map_exn json "ScalingPlanVersion" ScalingPlanVersion.of_json in
-      make ~scalingPlanVersion ()
+        field_map json__ "ScalingPlanVersion" ScalingPlanVersion.of_json in
+      make ?scalingPlanVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a scaling plan."]
 module CreateScalingPlanRequest =
@@ -2937,13 +2977,14 @@ module CreateScalingPlanRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ScalingPlanName") in
       make ~scalingInstructions ~applicationSource ~scalingPlanName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingInstructions =
-        field_map_exn json "ScalingInstructions" ScalingInstructions.of_json in
+        field_map_exn json__ "ScalingInstructions"
+          ScalingInstructions.of_json in
       let applicationSource =
-        field_map_exn json "ApplicationSource" ApplicationSource.of_json in
+        field_map_exn json__ "ApplicationSource" ApplicationSource.of_json in
       let scalingPlanName =
-        field_map_exn json "ScalingPlanName" ScalingPlanName.of_json in
+        field_map_exn json__ "ScalingPlanName" ScalingPlanName.of_json in
       make ~scalingInstructions ~applicationSource ~scalingPlanName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a scaling plan."]

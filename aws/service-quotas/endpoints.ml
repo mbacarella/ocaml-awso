@@ -5,6 +5,8 @@ type ('i, 'o, 'e) t =
   | AssociateServiceQuotaTemplate: (AssociateServiceQuotaTemplateRequest.t,
   AssociateServiceQuotaTemplateResponse.t,
   AssociateServiceQuotaTemplateResponse.error) t 
+  | CreateSupportCase: (CreateSupportCaseRequest.t,
+  CreateSupportCaseResponse.t, CreateSupportCaseResponse.error) t 
   | DeleteServiceQuotaIncreaseRequestFromTemplate:
   (DeleteServiceQuotaIncreaseRequestFromTemplateRequest.t,
   DeleteServiceQuotaIncreaseRequestFromTemplateResponse.t,
@@ -20,6 +22,12 @@ type ('i, 'o, 'e) t =
   (GetAssociationForServiceQuotaTemplateRequest.t,
   GetAssociationForServiceQuotaTemplateResponse.t,
   GetAssociationForServiceQuotaTemplateResponse.error) t 
+  | GetAutoManagementConfiguration: (GetAutoManagementConfigurationRequest.t,
+  GetAutoManagementConfigurationResponse.t,
+  GetAutoManagementConfigurationResponse.error) t 
+  | GetQuotaUtilizationReport: (GetQuotaUtilizationReportRequest.t,
+  GetQuotaUtilizationReportResponse.t,
+  GetQuotaUtilizationReportResponse.error) t 
   | GetRequestedServiceQuotaChange: (GetRequestedServiceQuotaChangeRequest.t,
   GetRequestedServiceQuotaChangeResponse.t,
   GetRequestedServiceQuotaChangeResponse.error) t 
@@ -57,17 +65,29 @@ type ('i, 'o, 'e) t =
   | RequestServiceQuotaIncrease: (RequestServiceQuotaIncreaseRequest.t,
   RequestServiceQuotaIncreaseResponse.t,
   RequestServiceQuotaIncreaseResponse.error) t 
+  | StartAutoManagement: (StartAutoManagementRequest.t,
+  StartAutoManagementResponse.t, StartAutoManagementResponse.error) t 
+  | StartQuotaUtilizationReport: (StartQuotaUtilizationReportRequest.t,
+  StartQuotaUtilizationReportResponse.t,
+  StartQuotaUtilizationReportResponse.error) t 
+  | StopAutoManagement: (StopAutoManagementRequest.t,
+  StopAutoManagementResponse.t, StopAutoManagementResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAutoManagement: (UpdateAutoManagementRequest.t,
+  UpdateAutoManagementResponse.t, UpdateAutoManagementResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateServiceQuotaTemplate -> `POST
+  | CreateSupportCase -> `POST
   | DeleteServiceQuotaIncreaseRequestFromTemplate -> `POST
   | DisassociateServiceQuotaTemplate -> `POST
   | GetAWSDefaultServiceQuota -> `POST
   | GetAssociationForServiceQuotaTemplate -> `POST
+  | GetAutoManagementConfiguration -> `POST
+  | GetQuotaUtilizationReport -> `POST
   | GetRequestedServiceQuotaChange -> `POST
   | GetServiceQuota -> `POST
   | GetServiceQuotaIncreaseRequestFromTemplate -> `POST
@@ -80,12 +100,17 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListTagsForResource -> `POST
   | PutServiceQuotaIncreaseRequestIntoTemplate -> `POST
   | RequestServiceQuotaIncrease -> `POST
+  | StartAutoManagement -> `POST
+  | StartQuotaUtilizationReport -> `POST
+  | StopAutoManagement -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateAutoManagement -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AssociateServiceQuotaTemplate -> (Format.kasprintf Uri.of_string) "/"
+      | CreateSupportCase -> (Format.kasprintf Uri.of_string) "/"
       | DeleteServiceQuotaIncreaseRequestFromTemplate ->
           (Format.kasprintf Uri.of_string) "/"
       | DisassociateServiceQuotaTemplate ->
@@ -93,6 +118,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetAWSDefaultServiceQuota -> (Format.kasprintf Uri.of_string) "/"
       | GetAssociationForServiceQuotaTemplate ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetAutoManagementConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetQuotaUtilizationReport -> (Format.kasprintf Uri.of_string) "/"
       | GetRequestedServiceQuotaChange ->
           (Format.kasprintf Uri.of_string) "/"
       | GetServiceQuota -> (Format.kasprintf Uri.of_string) "/"
@@ -111,8 +139,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutServiceQuotaIncreaseRequestIntoTemplate ->
           (Format.kasprintf Uri.of_string) "/"
       | RequestServiceQuotaIncrease -> (Format.kasprintf Uri.of_string) "/"
+      | StartAutoManagement -> (Format.kasprintf Uri.of_string) "/"
+      | StartQuotaUtilizationReport -> (Format.kasprintf Uri.of_string) "/"
+      | StopAutoManagement -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
-      | UntagResource -> (Format.kasprintf Uri.of_string) "/")
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAutoManagement -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -124,6 +156,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "ServiceQuotasV20190624.AssociateServiceQuotaTemplate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateSupportCase ->
+      let json = CreateSupportCaseRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ServiceQuotasV20190624.CreateSupportCase")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteServiceQuotaIncreaseRequestFromTemplate ->
       let json =
@@ -161,6 +201,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "ServiceQuotasV20190624.GetAssociationForServiceQuotaTemplate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetAutoManagementConfiguration ->
+      let json = GetAutoManagementConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "ServiceQuotasV20190624.GetAutoManagementConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetQuotaUtilizationReport ->
+      let json = GetQuotaUtilizationReportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "ServiceQuotasV20190624.GetQuotaUtilizationReport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetRequestedServiceQuotaChange ->
       let json = GetRequestedServiceQuotaChangeRequest.to_json req in
@@ -270,6 +328,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "ServiceQuotasV20190624.RequestServiceQuotaIncrease")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartAutoManagement ->
+      let json = StartAutoManagementRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ServiceQuotasV20190624.StartAutoManagement")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartQuotaUtilizationReport ->
+      let json = StartQuotaUtilizationReportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "ServiceQuotasV20190624.StartQuotaUtilizationReport")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopAutoManagement ->
+      let json = StopAutoManagementRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ServiceQuotasV20190624.StopAutoManagement")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -285,6 +368,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "ServiceQuotasV20190624.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAutoManagement ->
+      let json = UpdateAutoManagementRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ServiceQuotasV20190624.UpdateAutoManagement")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -318,6 +409,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateServiceQuotaTemplateResponse.error_of_json))
+  | CreateSupportCase ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateSupportCaseResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateSupportCaseResponse.error_of_json))
   | DeleteServiceQuotaIncreaseRequestFromTemplate ->
       if is_success
       then
@@ -357,6 +456,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 GetAssociationForServiceQuotaTemplateResponse.error_of_json))
+  | GetAutoManagementConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAutoManagementConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetAutoManagementConfigurationResponse.error_of_json))
+  | GetQuotaUtilizationReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetQuotaUtilizationReportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetQuotaUtilizationReportResponse.error_of_json))
   | GetRequestedServiceQuotaChange ->
       if is_success
       then
@@ -464,6 +581,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some RequestServiceQuotaIncreaseResponse.error_of_json))
+  | StartAutoManagement ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartAutoManagementResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartAutoManagementResponse.error_of_json))
+  | StartQuotaUtilizationReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartQuotaUtilizationReportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartQuotaUtilizationReportResponse.error_of_json))
+  | StopAutoManagement ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopAutoManagementResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StopAutoManagementResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -476,3 +618,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAutoManagement ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAutoManagementResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateAutoManagementResponse.error_of_json))

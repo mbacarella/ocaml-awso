@@ -42,7 +42,8 @@ let get_entitlements =
          flag "filter" (optional json_arg) ~doc:"JSON GetEntitlementFilters"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NonEmptyString"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PageSizeInteger"
        and productCode =
          flag "product-code" (required string) ~doc:"STRING ProductCode" in
        fun () ->

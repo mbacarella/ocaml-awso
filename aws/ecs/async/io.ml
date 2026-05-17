@@ -15,6 +15,10 @@ let create_capacity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCapacityProvider input
 let create_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCluster input
+let create_daemon ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDaemon input
+let create_express_gateway_service ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateExpressGatewayService input
 let create_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateService input
 let create_task_set ?endpoint_url ?cfg input =
@@ -27,8 +31,16 @@ let delete_capacity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCapacityProvider input
 let delete_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCluster input
+let delete_daemon ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDaemon input
+let delete_daemon_task_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDaemonTaskDefinition input
+let delete_express_gateway_service ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteExpressGatewayService input
 let delete_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteService input
+let delete_task_definitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTaskDefinitions input
 let delete_task_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTaskSet input
 let deregister_container_instance ?endpoint_url ?cfg input =
@@ -41,6 +53,20 @@ let describe_clusters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeClusters input
 let describe_container_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeContainerInstances input
+let describe_daemon ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDaemon input
+let describe_daemon_deployments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDaemonDeployments input
+let describe_daemon_revisions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDaemonRevisions input
+let describe_daemon_task_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDaemonTaskDefinition input
+let describe_express_gateway_service ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeExpressGatewayService input
+let describe_service_deployments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeServiceDeployments input
+let describe_service_revisions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeServiceRevisions input
 let describe_services ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeServices input
 let describe_task_definition ?endpoint_url ?cfg input =
@@ -53,6 +79,8 @@ let discover_poll_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DiscoverPollEndpoint input
 let execute_command ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExecuteCommand input
+let get_task_protection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTaskProtection input
 let list_account_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccountSettings input
 let list_attributes ?endpoint_url ?cfg input =
@@ -61,8 +89,18 @@ let list_clusters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListClusters input
 let list_container_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListContainerInstances input
+let list_daemon_deployments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDaemonDeployments input
+let list_daemon_task_definitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDaemonTaskDefinitions input
+let list_daemons ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDaemons input
+let list_service_deployments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListServiceDeployments input
 let list_services ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListServices input
+let list_services_by_namespace ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListServicesByNamespace input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_task_definition_families ?endpoint_url ?cfg input =
@@ -81,12 +119,16 @@ let put_cluster_capacity_providers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutClusterCapacityProviders input
 let register_container_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterContainerInstance input
+let register_daemon_task_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RegisterDaemonTaskDefinition input
 let register_task_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterTaskDefinition input
 let run_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RunTask input
 let start_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartTask input
+let stop_service_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopServiceDeployment input
 let stop_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopTask input
 let submit_attachment_state_changes ?endpoint_url ?cfg input =
@@ -109,9 +151,15 @@ let update_container_agent ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateContainerAgent input
 let update_container_instances_state ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateContainerInstancesState input
+let update_daemon ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDaemon input
+let update_express_gateway_service ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateExpressGatewayService input
 let update_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateService input
 let update_service_primary_task_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateServicePrimaryTaskSet input
+let update_task_protection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTaskProtection input
 let update_task_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTaskSet input

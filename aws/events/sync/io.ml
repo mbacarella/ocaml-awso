@@ -123,3 +123,5 @@ let update_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateConnection input
 let update_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateEndpoint input
+let update_event_bus ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateEventBus input

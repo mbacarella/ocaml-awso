@@ -2,6 +2,53 @@
 open Core
 open Async
 open Cli_0[@@warning "-33"]
+let describe_pipeline =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pipelineVersionId =
+         flag "pipeline-version-id" (optional json_arg)
+           ~doc:"JSON PipelineVersionId"
+       and pipelineName =
+         flag "pipeline-name" (required string)
+           ~doc:"STRING PipelineNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_pipeline
+           (Values.DescribePipelineRequest.make
+              ?pipelineVersionId:(Option.map
+                                    ~f:Values.PipelineVersionId.of_json
+                                    pipelineVersionId) ~pipelineName ())
+           (Some Values.DescribePipelineResponse.to_json)
+           (Some Values.DescribePipelineResponse.error_to_json)])
+let describe_pipeline_definition_for_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pipelineExecutionArn =
+         flag "pipeline-execution-arn" (required string)
+           ~doc:"STRING PipelineExecutionArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_pipeline_definition_for_execution
+           (Values.DescribePipelineDefinitionForExecutionRequest.make
+              ~pipelineExecutionArn ())
+           (Some
+              Values.DescribePipelineDefinitionForExecutionResponse.to_json)
+           (Some
+              Values.DescribePipelineDefinitionForExecutionResponse.error_to_json)])
 let describe_pipeline_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -60,6 +107,45 @@ let describe_project =
            (Values.DescribeProjectInput.make ~projectName ())
            (Some Values.DescribeProjectOutput.to_json)
            (Some Values.DescribeProjectOutput.error_to_json)])
+let describe_reserved_capacity =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reservedCapacityArn =
+         flag "reserved-capacity-arn" (required string)
+           ~doc:"STRING ReservedCapacityArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_reserved_capacity
+           (Values.DescribeReservedCapacityRequest.make ~reservedCapacityArn
+              ()) (Some Values.DescribeReservedCapacityResponse.to_json)
+           (Some Values.DescribeReservedCapacityResponse.error_to_json)])
+let describe_space =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId"
+       and spaceName =
+         flag "space-name" (required string) ~doc:"STRING SpaceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_space
+           (Values.DescribeSpaceRequest.make ~domainId ~spaceName ())
+           (Some Values.DescribeSpaceResponse.to_json)
+           (Some Values.DescribeSpaceResponse.error_to_json)])
 let describe_studio_lifecycle_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -117,6 +203,50 @@ let describe_training_job =
            (Values.DescribeTrainingJobRequest.make ~trainingJobName ())
            (Some Values.DescribeTrainingJobResponse.to_json)
            (Some Values.DescribeTrainingJobResponse.error_to_json)])
+let describe_training_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trainingPlanName =
+         flag "training-plan-name" (required string)
+           ~doc:"STRING TrainingPlanName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_training_plan
+           (Values.DescribeTrainingPlanRequest.make ~trainingPlanName ())
+           (Some Values.DescribeTrainingPlanResponse.to_json)
+           (Some Values.DescribeTrainingPlanResponse.error_to_json)])
+let describe_training_plan_extension_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and trainingPlanArn =
+         flag "training-plan-arn" (required string)
+           ~doc:"STRING TrainingPlanArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_training_plan_extension_history
+           (Values.DescribeTrainingPlanExtensionHistoryRequest.make
+              ?nextToken ?maxResults ~trainingPlanArn ())
+           (Some Values.DescribeTrainingPlanExtensionHistoryResponse.to_json)
+           (Some
+              Values.DescribeTrainingPlanExtensionHistoryResponse.error_to_json)])
 let describe_transform_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -230,6 +360,29 @@ let describe_workteam =
            (Values.DescribeWorkteamRequest.make ~workteamName ())
            (Some Values.DescribeWorkteamResponse.to_json)
            (Some Values.DescribeWorkteamResponse.error_to_json)])
+let detach_cluster_node_volume =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING ClusterArn"
+       and nodeId =
+         flag "node-id" (required string) ~doc:"STRING ClusterNodeId"
+       and volumeId =
+         flag "volume-id" (required string) ~doc:"STRING VolumeId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.detach_cluster_node_volume
+           (Values.DetachClusterNodeVolumeRequest.make ~clusterArn ~nodeId
+              ~volumeId ())
+           (Some Values.DetachClusterNodeVolumeResponse.to_json)
+           (Some Values.DetachClusterNodeVolumeResponse.error_to_json)])
 let disable_sagemaker_servicecatalog_portfolio =
   Command.async ~summary:""
     ([%map_open.Command
@@ -289,6 +442,26 @@ let enable_sagemaker_servicecatalog_portfolio =
            (Some Values.EnableSagemakerServicecatalogPortfolioOutput.to_json)
            (Some
               Values.EnableSagemakerServicecatalogPortfolioOutput.error_to_json)])
+let extend_training_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trainingPlanExtensionOfferingId =
+         flag "training-plan-extension-offering-id" (required string)
+           ~doc:"STRING TrainingPlanExtensionOfferingId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.extend_training_plan
+           (Values.ExtendTrainingPlanRequest.make
+              ~trainingPlanExtensionOfferingId ())
+           (Some Values.ExtendTrainingPlanResponse.to_json)
+           (Some Values.ExtendTrainingPlanResponse.error_to_json)])
 let get_device_fleet_report =
   Command.async ~summary:""
     ([%map_open.Command
@@ -365,6 +538,41 @@ let get_sagemaker_servicecatalog_portfolio_status =
               Values.GetSagemakerServicecatalogPortfolioStatusOutput.to_json)
            (Some
               Values.GetSagemakerServicecatalogPortfolioStatusOutput.error_to_json)])
+let get_scaling_configuration_recommendation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recommendationId =
+         flag "recommendation-id" (optional string) ~doc:"STRING String"
+       and endpointName =
+         flag "endpoint-name" (optional string) ~doc:"STRING EndpointName"
+       and targetCpuUtilizationPerCore =
+         flag "target-cpu-utilization-per-core" (optional int)
+           ~doc:"INT UtilizationPercentagePerCore"
+       and scalingPolicyObjective =
+         flag "scaling-policy-objective" (optional json_arg)
+           ~doc:"JSON ScalingPolicyObjective"
+       and inferenceRecommendationsJobName =
+         flag "inference-recommendations-job-name" (required string)
+           ~doc:"STRING RecommendationJobName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_scaling_configuration_recommendation
+           (Values.GetScalingConfigurationRecommendationRequest.make
+              ?recommendationId ?endpointName ?targetCpuUtilizationPerCore
+              ?scalingPolicyObjective:(Option.map
+                                         ~f:Values.ScalingPolicyObjective.of_json
+                                         scalingPolicyObjective)
+              ~inferenceRecommendationsJobName ())
+           (Some Values.GetScalingConfigurationRecommendationResponse.to_json)
+           (Some
+              Values.GetScalingConfigurationRecommendationResponse.error_to_json)])
 let get_search_suggestions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -389,6 +597,200 @@ let get_search_suggestions =
               ~resource:(Values.ResourceType.of_json resource) ())
            (Some Values.GetSearchSuggestionsResponse.to_json)
            (Some Values.GetSearchSuggestionsResponse.error_to_json)])
+let import_hub_content =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hubContentVersion =
+         flag "hub-content-version" (optional string)
+           ~doc:"STRING HubContentVersion"
+       and hubContentDisplayName =
+         flag "hub-content-display-name" (optional string)
+           ~doc:"STRING HubContentDisplayName"
+       and hubContentDescription =
+         flag "hub-content-description" (optional string)
+           ~doc:"STRING HubContentDescription"
+       and hubContentMarkdown =
+         flag "hub-content-markdown" (optional string)
+           ~doc:"STRING HubContentMarkdown"
+       and supportStatus =
+         flag "support-status" (optional json_arg)
+           ~doc:"JSON HubContentSupportStatus"
+       and hubContentSearchKeywords =
+         flag "hub-content-search-keywords" (optional json_arg)
+           ~doc:"JSON HubContentSearchKeywordList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and hubContentName =
+         flag "hub-content-name" (required string)
+           ~doc:"STRING HubContentName"
+       and hubContentType =
+         flag "hub-content-type" (required json_arg)
+           ~doc:"JSON HubContentType"
+       and documentSchemaVersion =
+         flag "document-schema-version" (required string)
+           ~doc:"STRING DocumentSchemaVersion"
+       and hubName =
+         flag "hub-name" (required string) ~doc:"STRING HubNameOrArn"
+       and hubContentDocument =
+         flag "hub-content-document" (required string)
+           ~doc:"STRING HubContentDocument" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.import_hub_content
+           (Values.ImportHubContentRequest.make ?hubContentVersion
+              ?hubContentDisplayName ?hubContentDescription
+              ?hubContentMarkdown
+              ?supportStatus:(Option.map
+                                ~f:Values.HubContentSupportStatus.of_json
+                                supportStatus)
+              ?hubContentSearchKeywords:(Option.map
+                                           ~f:Values.HubContentSearchKeywordList.of_json
+                                           hubContentSearchKeywords)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~hubContentName
+              ~hubContentType:(Values.HubContentType.of_json hubContentType)
+              ~documentSchemaVersion ~hubName ~hubContentDocument ())
+           (Some Values.ImportHubContentResponse.to_json)
+           (Some Values.ImportHubContentResponse.error_to_json)])
+let list_a_i_benchmark_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING NameContains"
+       and statusEquals =
+         flag "status-equals" (optional json_arg)
+           ~doc:"JSON AIBenchmarkJobStatus"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON ListAIBenchmarkJobsSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_a_i_benchmark_jobs
+           (Values.ListAIBenchmarkJobsRequest.make ?maxResults ?nextToken
+              ?nameContains
+              ?statusEquals:(Option.map
+                               ~f:Values.AIBenchmarkJobStatus.of_json
+                               statusEquals)
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?sortBy:(Option.map ~f:Values.ListAIBenchmarkJobsSortBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ()) (Some Values.ListAIBenchmarkJobsResponse.to_json)
+           (Some Values.ListAIBenchmarkJobsResponse.error_to_json)])
+let list_a_i_recommendation_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING NameContains"
+       and statusEquals =
+         flag "status-equals" (optional json_arg)
+           ~doc:"JSON AIRecommendationJobStatus"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON ListAIRecommendationJobsSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_a_i_recommendation_jobs
+           (Values.ListAIRecommendationJobsRequest.make ?maxResults
+              ?nextToken ?nameContains
+              ?statusEquals:(Option.map
+                               ~f:Values.AIRecommendationJobStatus.of_json
+                               statusEquals)
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?sortBy:(Option.map
+                         ~f:Values.ListAIRecommendationJobsSortBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ()) (Some Values.ListAIRecommendationJobsResponse.to_json)
+           (Some Values.ListAIRecommendationJobsResponse.error_to_json)])
+let list_a_i_workload_configs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING NameContains"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON ListAIWorkloadConfigsSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_a_i_workload_configs
+           (Values.ListAIWorkloadConfigsRequest.make ?maxResults ?nextToken
+              ?nameContains
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?sortBy:(Option.map
+                         ~f:Values.ListAIWorkloadConfigsSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ()) (Some Values.ListAIWorkloadConfigsResponse.to_json)
+           (Some Values.ListAIWorkloadConfigsResponse.error_to_json)])
 let list_actions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -467,6 +869,34 @@ let list_algorithms =
               ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
               ()) (Some Values.ListAlgorithmsOutput.to_json)
            (Some Values.ListAlgorithmsOutput.error_to_json)])
+let list_aliases =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and alias =
+         flag "alias" (optional string)
+           ~doc:"STRING SageMakerImageVersionAlias"
+       and version =
+         flag "version" (optional int) ~doc:"INT ImageVersionNumber"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and imageName =
+         flag "image-name" (required string) ~doc:"STRING ImageName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_aliases
+           (Values.ListAliasesRequest.make ?alias ?version ?maxResults
+              ?nextToken ~imageName ())
+           (Some Values.ListAliasesResponse.to_json)
+           (Some Values.ListAliasesResponse.error_to_json)])
 let list_app_image_configs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -537,14 +967,16 @@ let list_apps =
          flag "domain-id-equals" (optional string) ~doc:"STRING DomainId"
        and userProfileNameEquals =
          flag "user-profile-name-equals" (optional string)
-           ~doc:"STRING UserProfileName" in
+           ~doc:"STRING UserProfileName"
+       and spaceNameEquals =
+         flag "space-name-equals" (optional string) ~doc:"STRING SpaceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_apps
            (Values.ListAppsRequest.make ?nextToken ?maxResults
               ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
               ?sortBy:(Option.map ~f:Values.AppSortKey.of_json sortBy)
-              ?domainIdEquals ?userProfileNameEquals ())
+              ?domainIdEquals ?userProfileNameEquals ?spaceNameEquals ())
            (Some Values.ListAppsResponse.to_json)
            (Some Values.ListAppsResponse.error_to_json)])
 let list_artifacts =
@@ -713,7 +1145,8 @@ let list_candidates_for_auto_m_l_job =
        and sortBy =
          flag "sort-by" (optional json_arg) ~doc:"JSON CandidateSortBy"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT AutoMLMaxResults"
+         flag "max-results" (optional int)
+           ~doc:"INT AutoMLMaxResultsForTrials"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and autoMLJobName =
@@ -731,6 +1164,187 @@ let list_candidates_for_auto_m_l_job =
               ?maxResults ?nextToken ~autoMLJobName ())
            (Some Values.ListCandidatesForAutoMLJobResponse.to_json)
            (Some Values.ListCandidatesForAutoMLJobResponse.error_to_json)])
+let list_cluster_events =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceGroupName =
+         flag "instance-group-name" (optional string)
+           ~doc:"STRING ClusterInstanceGroupName"
+       and nodeId =
+         flag "node-id" (optional string) ~doc:"STRING ClusterNodeId"
+       and eventTimeAfter =
+         flag "event-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and eventTimeBefore =
+         flag "event-time-before" (optional json_arg) ~doc:"JSON Timestamp"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON EventSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and resourceType =
+         flag "resource-type" (optional json_arg)
+           ~doc:"JSON ClusterEventResourceType"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ClusterEventMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING ClusterNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cluster_events
+           (Values.ListClusterEventsRequest.make ?instanceGroupName ?nodeId
+              ?eventTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                 eventTimeAfter)
+              ?eventTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                  eventTimeBefore)
+              ?sortBy:(Option.map ~f:Values.EventSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?resourceType:(Option.map
+                               ~f:Values.ClusterEventResourceType.of_json
+                               resourceType) ?maxResults ?nextToken
+              ~clusterName ())
+           (Some Values.ListClusterEventsResponse.to_json)
+           (Some Values.ListClusterEventsResponse.error_to_json)])
+let list_cluster_nodes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and instanceGroupNameContains =
+         flag "instance-group-name-contains" (optional string)
+           ~doc:"STRING ClusterInstanceGroupName"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON ClusterSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and includeNodeLogicalIds =
+         flag "include-node-logical-ids" (optional bool)
+           ~doc:"BOOL IncludeNodeLogicalIdsBoolean"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING ClusterNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cluster_nodes
+           (Values.ListClusterNodesRequest.make
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?instanceGroupNameContains ?maxResults ?nextToken
+              ?sortBy:(Option.map ~f:Values.ClusterSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?includeNodeLogicalIds ~clusterName ())
+           (Some Values.ListClusterNodesResponse.to_json)
+           (Some Values.ListClusterNodesResponse.error_to_json)])
+let list_cluster_scheduler_configs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and createdAfter =
+         flag "created-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and createdBefore =
+         flag "created-before" (optional json_arg) ~doc:"JSON Timestamp"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING EntityName"
+       and clusterArn =
+         flag "cluster-arn" (optional string) ~doc:"STRING ClusterArn"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON SchedulerResourceStatus"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON SortClusterSchedulerConfigBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cluster_scheduler_configs
+           (Values.ListClusterSchedulerConfigsRequest.make
+              ?createdAfter:(Option.map ~f:Values.Timestamp.of_json
+                               createdAfter)
+              ?createdBefore:(Option.map ~f:Values.Timestamp.of_json
+                                createdBefore) ?nameContains ?clusterArn
+              ?status:(Option.map ~f:Values.SchedulerResourceStatus.of_json
+                         status)
+              ?sortBy:(Option.map
+                         ~f:Values.SortClusterSchedulerConfigBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ())
+           (Some Values.ListClusterSchedulerConfigsResponse.to_json)
+           (Some Values.ListClusterSchedulerConfigsResponse.error_to_json)])
+let list_clusters =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING NameContains"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON ClusterSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and trainingPlanArn =
+         flag "training-plan-arn" (optional string)
+           ~doc:"STRING TrainingPlanArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_clusters
+           (Values.ListClustersRequest.make
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore) ?maxResults
+              ?nameContains ?nextToken
+              ?sortBy:(Option.map ~f:Values.ClusterSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?trainingPlanArn ()) (Some Values.ListClustersResponse.to_json)
+           (Some Values.ListClustersResponse.error_to_json)])
 let list_code_repositories =
   Command.async ~summary:""
     ([%map_open.Command
@@ -844,6 +1458,50 @@ let list_compilation_jobs =
               ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
               ()) (Some Values.ListCompilationJobsResponse.to_json)
            (Some Values.ListCompilationJobsResponse.error_to_json)])
+let list_compute_quotas =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and createdAfter =
+         flag "created-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and createdBefore =
+         flag "created-before" (optional json_arg) ~doc:"JSON Timestamp"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING EntityName"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON SchedulerResourceStatus"
+       and clusterArn =
+         flag "cluster-arn" (optional string) ~doc:"STRING ClusterArn"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON SortQuotaBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_compute_quotas
+           (Values.ListComputeQuotasRequest.make
+              ?createdAfter:(Option.map ~f:Values.Timestamp.of_json
+                               createdAfter)
+              ?createdBefore:(Option.map ~f:Values.Timestamp.of_json
+                                createdBefore) ?nameContains
+              ?status:(Option.map ~f:Values.SchedulerResourceStatus.of_json
+                         status) ?clusterArn
+              ?sortBy:(Option.map ~f:Values.SortQuotaBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ())
+           (Some Values.ListComputeQuotasResponse.to_json)
+           (Some Values.ListComputeQuotasResponse.error_to_json)])
 let list_contexts =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1025,6 +1683,60 @@ let list_domains =
            (Values.ListDomainsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListDomainsResponse.to_json)
            (Some Values.ListDomainsResponse.error_to_json)])
+let list_edge_deployment_plans =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListMaxResults"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and lastModifiedTimeAfter =
+         flag "last-modified-time-after" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and lastModifiedTimeBefore =
+         flag "last-modified-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING NameContains"
+       and deviceFleetNameContains =
+         flag "device-fleet-name-contains" (optional string)
+           ~doc:"STRING NameContains"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON ListEdgeDeploymentPlansSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_edge_deployment_plans
+           (Values.ListEdgeDeploymentPlansRequest.make ?nextToken ?maxResults
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?lastModifiedTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                        lastModifiedTimeAfter)
+              ?lastModifiedTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                         lastModifiedTimeBefore)
+              ?nameContains ?deviceFleetNameContains
+              ?sortBy:(Option.map
+                         ~f:Values.ListEdgeDeploymentPlansSortBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ()) (Some Values.ListEdgeDeploymentPlansResponse.to_json)
+           (Some Values.ListEdgeDeploymentPlansResponse.error_to_json)])
 let list_edge_packaging_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1299,6 +2011,153 @@ let list_flow_definitions =
               ?nextToken ?maxResults ())
            (Some Values.ListFlowDefinitionsResponse.to_json)
            (Some Values.ListFlowDefinitionsResponse.error_to_json)])
+let list_hub_content_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and minVersion =
+         flag "min-version" (optional string) ~doc:"STRING HubContentVersion"
+       and maxSchemaVersion =
+         flag "max-schema-version" (optional string)
+           ~doc:"STRING DocumentSchemaVersion"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON HubContentSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and hubName =
+         flag "hub-name" (required string) ~doc:"STRING HubNameOrArn"
+       and hubContentType =
+         flag "hub-content-type" (required json_arg)
+           ~doc:"JSON HubContentType"
+       and hubContentName =
+         flag "hub-content-name" (required string)
+           ~doc:"STRING HubContentName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_hub_content_versions
+           (Values.ListHubContentVersionsRequest.make ?minVersion
+              ?maxSchemaVersion
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?sortBy:(Option.map ~f:Values.HubContentSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?maxResults ?nextToken ~hubName
+              ~hubContentType:(Values.HubContentType.of_json hubContentType)
+              ~hubContentName ())
+           (Some Values.ListHubContentVersionsResponse.to_json)
+           (Some Values.ListHubContentVersionsResponse.error_to_json)])
+let list_hub_contents =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING NameContains"
+       and maxSchemaVersion =
+         flag "max-schema-version" (optional string)
+           ~doc:"STRING DocumentSchemaVersion"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON HubContentSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and hubName =
+         flag "hub-name" (required string) ~doc:"STRING HubNameOrArn"
+       and hubContentType =
+         flag "hub-content-type" (required json_arg)
+           ~doc:"JSON HubContentType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_hub_contents
+           (Values.ListHubContentsRequest.make ?nameContains
+              ?maxSchemaVersion
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?sortBy:(Option.map ~f:Values.HubContentSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?maxResults ?nextToken ~hubName
+              ~hubContentType:(Values.HubContentType.of_json hubContentType)
+              ()) (Some Values.ListHubContentsResponse.to_json)
+           (Some Values.ListHubContentsResponse.error_to_json)])
+let list_hubs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING NameContains"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and lastModifiedTimeBefore =
+         flag "last-modified-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and lastModifiedTimeAfter =
+         flag "last-modified-time-after" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and sortBy = flag "sort-by" (optional json_arg) ~doc:"JSON HubSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_hubs
+           (Values.ListHubsRequest.make ?nameContains
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?lastModifiedTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                         lastModifiedTimeBefore)
+              ?lastModifiedTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                        lastModifiedTimeAfter)
+              ?sortBy:(Option.map ~f:Values.HubSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?maxResults ?nextToken ())
+           (Some Values.ListHubsResponse.to_json)
+           (Some Values.ListHubsResponse.error_to_json)])
 let list_human_task_uis =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1490,6 +2349,164 @@ let list_images =
                             sortOrder) ())
            (Some Values.ListImagesResponse.to_json)
            (Some Values.ListImagesResponse.error_to_json)])
+let list_inference_components =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON InferenceComponentSortKey"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON OrderKey"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nameContains =
+         flag "name-contains" (optional string)
+           ~doc:"STRING InferenceComponentNameContains"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and lastModifiedTimeBefore =
+         flag "last-modified-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and lastModifiedTimeAfter =
+         flag "last-modified-time-after" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and statusEquals =
+         flag "status-equals" (optional json_arg)
+           ~doc:"JSON InferenceComponentStatus"
+       and endpointNameEquals =
+         flag "endpoint-name-equals" (optional string)
+           ~doc:"STRING EndpointName"
+       and variantNameEquals =
+         flag "variant-name-equals" (optional string)
+           ~doc:"STRING VariantName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_inference_components
+           (Values.ListInferenceComponentsInput.make
+              ?sortBy:(Option.map ~f:Values.InferenceComponentSortKey.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.OrderKey.of_json sortOrder)
+              ?nextToken ?maxResults ?nameContains
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?lastModifiedTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                         lastModifiedTimeBefore)
+              ?lastModifiedTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                        lastModifiedTimeAfter)
+              ?statusEquals:(Option.map
+                               ~f:Values.InferenceComponentStatus.of_json
+                               statusEquals) ?endpointNameEquals
+              ?variantNameEquals ())
+           (Some Values.ListInferenceComponentsOutput.to_json)
+           (Some Values.ListInferenceComponentsOutput.error_to_json)])
+let list_inference_experiments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING NameContains"
+       and type_ =
+         flag "type-" (optional json_arg) ~doc:"JSON InferenceExperimentType"
+       and statusEquals =
+         flag "status-equals" (optional json_arg)
+           ~doc:"JSON InferenceExperimentStatus"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and lastModifiedTimeAfter =
+         flag "last-modified-time-after" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and lastModifiedTimeBefore =
+         flag "last-modified-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON SortInferenceExperimentsBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_inference_experiments
+           (Values.ListInferenceExperimentsRequest.make ?nameContains
+              ?type_:(Option.map ~f:Values.InferenceExperimentType.of_json
+                        type_)
+              ?statusEquals:(Option.map
+                               ~f:Values.InferenceExperimentStatus.of_json
+                               statusEquals)
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?lastModifiedTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                        lastModifiedTimeAfter)
+              ?lastModifiedTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                         lastModifiedTimeBefore)
+              ?sortBy:(Option.map
+                         ~f:Values.SortInferenceExperimentsBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ())
+           (Some Values.ListInferenceExperimentsResponse.to_json)
+           (Some Values.ListInferenceExperimentsResponse.error_to_json)])
+let list_inference_recommendations_job_steps =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON RecommendationJobStatus"
+       and stepType =
+         flag "step-type" (optional json_arg)
+           ~doc:"JSON RecommendationStepType"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and jobName =
+         flag "job-name" (required string)
+           ~doc:"STRING RecommendationJobName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_inference_recommendations_job_steps
+           (Values.ListInferenceRecommendationsJobStepsRequest.make
+              ?status:(Option.map ~f:Values.RecommendationJobStatus.of_json
+                         status)
+              ?stepType:(Option.map ~f:Values.RecommendationStepType.of_json
+                           stepType) ?maxResults ?nextToken ~jobName ())
+           (Some Values.ListInferenceRecommendationsJobStepsResponse.to_json)
+           (Some
+              Values.ListInferenceRecommendationsJobStepsResponse.error_to_json)])
 let list_inference_recommendations_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1525,7 +2542,12 @@ let list_inference_recommendations_jobs =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and modelNameEquals =
+         flag "model-name-equals" (optional string) ~doc:"STRING ModelName"
+       and modelPackageVersionArnEquals =
+         flag "model-package-version-arn-equals" (optional string)
+           ~doc:"STRING ModelPackageArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_inference_recommendations_jobs
@@ -1548,7 +2570,8 @@ let list_inference_recommendations_jobs =
                          ~f:Values.ListInferenceRecommendationsJobsSortBy.of_json
                          sortBy)
               ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
-              ?nextToken ?maxResults ())
+              ?nextToken ?maxResults ?modelNameEquals
+              ?modelPackageVersionArnEquals ())
            (Some Values.ListInferenceRecommendationsJobsResponse.to_json)
            (Some
               Values.ListInferenceRecommendationsJobsResponse.error_to_json)])
@@ -1686,6 +2709,99 @@ let list_lineage_groups =
               ?nextToken ?maxResults ())
            (Some Values.ListLineageGroupsResponse.to_json)
            (Some Values.ListLineageGroupsResponse.error_to_json)])
+let list_mlflow_apps =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and createdAfter =
+         flag "created-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and createdBefore =
+         flag "created-before" (optional json_arg) ~doc:"JSON Timestamp"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON MlflowAppStatus"
+       and mlflowVersion =
+         flag "mlflow-version" (optional string) ~doc:"STRING MlflowVersion"
+       and defaultForDomainId =
+         flag "default-for-domain-id" (optional string) ~doc:"STRING String"
+       and accountDefaultStatus =
+         flag "account-default-status" (optional json_arg)
+           ~doc:"JSON AccountDefaultStatus"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON SortMlflowAppBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_mlflow_apps
+           (Values.ListMlflowAppsRequest.make
+              ?createdAfter:(Option.map ~f:Values.Timestamp.of_json
+                               createdAfter)
+              ?createdBefore:(Option.map ~f:Values.Timestamp.of_json
+                                createdBefore)
+              ?status:(Option.map ~f:Values.MlflowAppStatus.of_json status)
+              ?mlflowVersion ?defaultForDomainId
+              ?accountDefaultStatus:(Option.map
+                                       ~f:Values.AccountDefaultStatus.of_json
+                                       accountDefaultStatus)
+              ?sortBy:(Option.map ~f:Values.SortMlflowAppBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ())
+           (Some Values.ListMlflowAppsResponse.to_json)
+           (Some Values.ListMlflowAppsResponse.error_to_json)])
+let list_mlflow_tracking_servers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and createdAfter =
+         flag "created-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and createdBefore =
+         flag "created-before" (optional json_arg) ~doc:"JSON Timestamp"
+       and trackingServerStatus =
+         flag "tracking-server-status" (optional json_arg)
+           ~doc:"JSON TrackingServerStatus"
+       and mlflowVersion =
+         flag "mlflow-version" (optional string) ~doc:"STRING MlflowVersion"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON SortTrackingServerBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_mlflow_tracking_servers
+           (Values.ListMlflowTrackingServersRequest.make
+              ?createdAfter:(Option.map ~f:Values.Timestamp.of_json
+                               createdAfter)
+              ?createdBefore:(Option.map ~f:Values.Timestamp.of_json
+                                createdBefore)
+              ?trackingServerStatus:(Option.map
+                                       ~f:Values.TrackingServerStatus.of_json
+                                       trackingServerStatus) ?mlflowVersion
+              ?sortBy:(Option.map ~f:Values.SortTrackingServerBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ())
+           (Some Values.ListMlflowTrackingServersResponse.to_json)
+           (Some Values.ListMlflowTrackingServersResponse.error_to_json)])
 let list_model_bias_job_definitions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1729,6 +2845,150 @@ let list_model_bias_job_definitions =
                                     creationTimeAfter) ())
            (Some Values.ListModelBiasJobDefinitionsResponse.to_json)
            (Some Values.ListModelBiasJobDefinitionsResponse.error_to_json)])
+let list_model_card_export_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and modelCardVersion =
+         flag "model-card-version" (optional int) ~doc:"INT Integer"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and modelCardExportJobNameContains =
+         flag "model-card-export-job-name-contains" (optional string)
+           ~doc:"STRING EntityName"
+       and statusEquals =
+         flag "status-equals" (optional json_arg)
+           ~doc:"JSON ModelCardExportJobStatus"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON ModelCardExportJobSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg)
+           ~doc:"JSON ModelCardExportJobSortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and modelCardName =
+         flag "model-card-name" (required string) ~doc:"STRING EntityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_model_card_export_jobs
+           (Values.ListModelCardExportJobsRequest.make ?modelCardVersion
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?modelCardExportJobNameContains
+              ?statusEquals:(Option.map
+                               ~f:Values.ModelCardExportJobStatus.of_json
+                               statusEquals)
+              ?sortBy:(Option.map ~f:Values.ModelCardExportJobSortBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map
+                            ~f:Values.ModelCardExportJobSortOrder.of_json
+                            sortOrder) ?nextToken ?maxResults ~modelCardName
+              ()) (Some Values.ListModelCardExportJobsResponse.to_json)
+           (Some Values.ListModelCardExportJobsResponse.error_to_json)])
+let list_model_card_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and modelCardStatus =
+         flag "model-card-status" (optional json_arg)
+           ~doc:"JSON ModelCardStatus"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON ModelCardVersionSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON ModelCardSortOrder"
+       and modelCardName =
+         flag "model-card-name" (required string)
+           ~doc:"STRING ModelCardNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_model_card_versions
+           (Values.ListModelCardVersionsRequest.make
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore) ?maxResults
+              ?modelCardStatus:(Option.map ~f:Values.ModelCardStatus.of_json
+                                  modelCardStatus) ?nextToken
+              ?sortBy:(Option.map ~f:Values.ModelCardVersionSortBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.ModelCardSortOrder.of_json
+                            sortOrder) ~modelCardName ())
+           (Some Values.ListModelCardVersionsResponse.to_json)
+           (Some Values.ListModelCardVersionsResponse.error_to_json)])
+let list_model_cards =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING EntityName"
+       and modelCardStatus =
+         flag "model-card-status" (optional json_arg)
+           ~doc:"JSON ModelCardStatus"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON ModelCardSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON ModelCardSortOrder" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_model_cards
+           (Values.ListModelCardsRequest.make
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore) ?maxResults
+              ?nameContains
+              ?modelCardStatus:(Option.map ~f:Values.ModelCardStatus.of_json
+                                  modelCardStatus) ?nextToken
+              ?sortBy:(Option.map ~f:Values.ModelCardSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.ModelCardSortOrder.of_json
+                            sortOrder) ())
+           (Some Values.ListModelCardsResponse.to_json)
+           (Some Values.ListModelCardsResponse.error_to_json)])
 let list_model_explainability_job_definitions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1826,7 +3086,10 @@ let list_model_package_groups =
          flag "sort-by" (optional json_arg)
            ~doc:"JSON ModelPackageGroupSortBy"
        and sortOrder =
-         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and crossAccountFilterOption =
+         flag "cross-account-filter-option" (optional json_arg)
+           ~doc:"JSON CrossAccountFilterOption" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_model_package_groups
@@ -1839,7 +3102,10 @@ let list_model_package_groups =
               ?sortBy:(Option.map ~f:Values.ModelPackageGroupSortBy.of_json
                          sortBy)
               ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
-              ()) (Some Values.ListModelPackageGroupsOutput.to_json)
+              ?crossAccountFilterOption:(Option.map
+                                           ~f:Values.CrossAccountFilterOption.of_json
+                                           crossAccountFilterOption) ())
+           (Some Values.ListModelPackageGroupsOutput.to_json)
            (Some Values.ListModelPackageGroupsOutput.error_to_json)])
 let list_model_packages =
   Command.async ~summary:""
@@ -1978,6 +3244,82 @@ let list_models =
                                     creationTimeAfter) ())
            (Some Values.ListModelsOutput.to_json)
            (Some Values.ListModelsOutput.error_to_json)])
+let list_monitoring_alert_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and monitoringScheduleName =
+         flag "monitoring-schedule-name" (optional string)
+           ~doc:"STRING MonitoringScheduleName"
+       and monitoringAlertName =
+         flag "monitoring-alert-name" (optional string)
+           ~doc:"STRING MonitoringAlertName"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON MonitoringAlertHistorySortKey"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and statusEquals =
+         flag "status-equals" (optional json_arg)
+           ~doc:"JSON MonitoringAlertStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_monitoring_alert_history
+           (Values.ListMonitoringAlertHistoryRequest.make
+              ?monitoringScheduleName ?monitoringAlertName
+              ?sortBy:(Option.map
+                         ~f:Values.MonitoringAlertHistorySortKey.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?nextToken ?maxResults
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?statusEquals:(Option.map
+                               ~f:Values.MonitoringAlertStatus.of_json
+                               statusEquals) ())
+           (Some Values.ListMonitoringAlertHistoryResponse.to_json)
+           (Some Values.ListMonitoringAlertHistoryResponse.error_to_json)])
+let list_monitoring_alerts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and monitoringScheduleName =
+         flag "monitoring-schedule-name" (required string)
+           ~doc:"STRING MonitoringScheduleName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_monitoring_alerts
+           (Values.ListMonitoringAlertsRequest.make ?nextToken ?maxResults
+              ~monitoringScheduleName ())
+           (Some Values.ListMonitoringAlertsResponse.to_json)
+           (Some Values.ListMonitoringAlertsResponse.error_to_json)])
 let list_monitoring_executions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2253,6 +3595,88 @@ let list_notebook_instances =
               ?defaultCodeRepositoryContains ?additionalCodeRepositoryEquals
               ()) (Some Values.ListNotebookInstancesOutput.to_json)
            (Some Values.ListNotebookInstancesOutput.error_to_json)])
+let list_optimization_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg)
+           ~doc:"JSON CreationTime"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON CreationTime"
+       and lastModifiedTimeAfter =
+         flag "last-modified-time-after" (optional json_arg)
+           ~doc:"JSON LastModifiedTime"
+       and lastModifiedTimeBefore =
+         flag "last-modified-time-before" (optional json_arg)
+           ~doc:"JSON LastModifiedTime"
+       and optimizationContains =
+         flag "optimization-contains" (optional string)
+           ~doc:"STRING NameContains"
+       and nameContains =
+         flag "name-contains" (optional string) ~doc:"STRING NameContains"
+       and statusEquals =
+         flag "status-equals" (optional json_arg)
+           ~doc:"JSON OptimizationJobStatus"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON ListOptimizationJobsSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_optimization_jobs
+           (Values.ListOptimizationJobsRequest.make ?nextToken ?maxResults
+              ?creationTimeAfter:(Option.map ~f:Values.CreationTime.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.CreationTime.of_json
+                                     creationTimeBefore)
+              ?lastModifiedTimeAfter:(Option.map
+                                        ~f:Values.LastModifiedTime.of_json
+                                        lastModifiedTimeAfter)
+              ?lastModifiedTimeBefore:(Option.map
+                                         ~f:Values.LastModifiedTime.of_json
+                                         lastModifiedTimeBefore)
+              ?optimizationContains ?nameContains
+              ?statusEquals:(Option.map
+                               ~f:Values.OptimizationJobStatus.of_json
+                               statusEquals)
+              ?sortBy:(Option.map
+                         ~f:Values.ListOptimizationJobsSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ()) (Some Values.ListOptimizationJobsResponse.to_json)
+           (Some Values.ListOptimizationJobsResponse.error_to_json)])
+let list_partner_apps =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_partner_apps
+           (Values.ListPartnerAppsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListPartnerAppsResponse.to_json)
+           (Some Values.ListPartnerAppsResponse.error_to_json)])
 let list_pipeline_execution_steps =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2304,7 +3728,8 @@ let list_pipeline_executions =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and pipelineName =
-         flag "pipeline-name" (required string) ~doc:"STRING PipelineName" in
+         flag "pipeline-name" (required string)
+           ~doc:"STRING PipelineNameOrArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_pipeline_executions
@@ -2344,6 +3769,41 @@ let list_pipeline_parameters_for_execution =
            (Some Values.ListPipelineParametersForExecutionResponse.to_json)
            (Some
               Values.ListPipelineParametersForExecutionResponse.error_to_json)])
+let list_pipeline_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and createdAfter =
+         flag "created-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and createdBefore =
+         flag "created-before" (optional json_arg) ~doc:"JSON Timestamp"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and pipelineName =
+         flag "pipeline-name" (required string)
+           ~doc:"STRING PipelineNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_pipeline_versions
+           (Values.ListPipelineVersionsRequest.make
+              ?createdAfter:(Option.map ~f:Values.Timestamp.of_json
+                               createdAfter)
+              ?createdBefore:(Option.map ~f:Values.Timestamp.of_json
+                                createdBefore)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?nextToken ?maxResults ~pipelineName ())
+           (Some Values.ListPipelineVersionsResponse.to_json)
+           (Some Values.ListPipelineVersionsResponse.error_to_json)])
 let list_pipelines =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2475,6 +3935,108 @@ let list_projects =
                             sortOrder) ())
            (Some Values.ListProjectsOutput.to_json)
            (Some Values.ListProjectsOutput.error_to_json)])
+let list_resource_catalogs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nameContains =
+         flag "name-contains" (optional string)
+           ~doc:"STRING ResourceCatalogName"
+       and creationTimeAfter =
+         flag "creation-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and creationTimeBefore =
+         flag "creation-time-before" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and sortOrder =
+         flag "sort-order" (optional json_arg)
+           ~doc:"JSON ResourceCatalogSortOrder"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON ResourceCatalogSortBy"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_catalogs
+           (Values.ListResourceCatalogsRequest.make ?nameContains
+              ?creationTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                    creationTimeAfter)
+              ?creationTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                     creationTimeBefore)
+              ?sortOrder:(Option.map
+                            ~f:Values.ResourceCatalogSortOrder.of_json
+                            sortOrder)
+              ?sortBy:(Option.map ~f:Values.ResourceCatalogSortBy.of_json
+                         sortBy) ?maxResults ?nextToken ())
+           (Some Values.ListResourceCatalogsResponse.to_json)
+           (Some Values.ListResourceCatalogsResponse.error_to_json)])
+let list_spaces =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON SpaceSortKey"
+       and domainIdEquals =
+         flag "domain-id-equals" (optional string) ~doc:"STRING DomainId"
+       and spaceNameContains =
+         flag "space-name-contains" (optional string) ~doc:"STRING SpaceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_spaces
+           (Values.ListSpacesRequest.make ?nextToken ?maxResults
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?sortBy:(Option.map ~f:Values.SpaceSortKey.of_json sortBy)
+              ?domainIdEquals ?spaceNameContains ())
+           (Some Values.ListSpacesResponse.to_json)
+           (Some Values.ListSpacesResponse.error_to_json)])
+let list_stage_devices =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListMaxResults"
+       and excludeDevicesDeployedInOtherStage =
+         flag "exclude-devices-deployed-in-other-stage" (optional bool)
+           ~doc:"BOOL Boolean"
+       and edgeDeploymentPlanName =
+         flag "edge-deployment-plan-name" (required string)
+           ~doc:"STRING EntityName"
+       and stageName =
+         flag "stage-name" (required string) ~doc:"STRING EntityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_stage_devices
+           (Values.ListStageDevicesRequest.make ?nextToken ?maxResults
+              ?excludeDevicesDeployedInOtherStage ~edgeDeploymentPlanName
+              ~stageName ()) (Some Values.ListStageDevicesResponse.to_json)
+           (Some Values.ListStageDevicesResponse.error_to_json)])
 let list_studio_lifecycle_configs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2609,7 +4171,13 @@ let list_training_jobs =
            ~doc:"JSON TrainingJobStatus"
        and sortBy = flag "sort-by" (optional json_arg) ~doc:"JSON SortBy"
        and sortOrder =
-         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and warmPoolStatusEquals =
+         flag "warm-pool-status-equals" (optional json_arg)
+           ~doc:"JSON WarmPoolResourceStatus"
+       and trainingPlanArnEquals =
+         flag "training-plan-arn-equals" (optional string)
+           ~doc:"STRING TrainingPlanArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_training_jobs
@@ -2627,7 +4195,11 @@ let list_training_jobs =
                                statusEquals)
               ?sortBy:(Option.map ~f:Values.SortBy.of_json sortBy)
               ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
-              ()) (Some Values.ListTrainingJobsResponse.to_json)
+              ?warmPoolStatusEquals:(Option.map
+                                       ~f:Values.WarmPoolResourceStatus.of_json
+                                       warmPoolStatusEquals)
+              ?trainingPlanArnEquals ())
+           (Some Values.ListTrainingJobsResponse.to_json)
            (Some Values.ListTrainingJobsResponse.error_to_json)])
 let list_training_jobs_for_hyper_parameter_tuning_job =
   Command.async ~summary:""
@@ -2669,6 +4241,46 @@ let list_training_jobs_for_hyper_parameter_tuning_job =
               Values.ListTrainingJobsForHyperParameterTuningJobResponse.to_json)
            (Some
               Values.ListTrainingJobsForHyperParameterTuningJobResponse.error_to_json)])
+let list_training_plans =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and startTimeAfter =
+         flag "start-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and startTimeBefore =
+         flag "start-time-before" (optional json_arg) ~doc:"JSON Timestamp"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON TrainingPlanSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg)
+           ~doc:"JSON TrainingPlanSortOrder"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON TrainingPlanFilters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_training_plans
+           (Values.ListTrainingPlansRequest.make ?nextToken ?maxResults
+              ?startTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                 startTimeAfter)
+              ?startTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                  startTimeBefore)
+              ?sortBy:(Option.map ~f:Values.TrainingPlanSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.TrainingPlanSortOrder.of_json
+                            sortOrder)
+              ?filters:(Option.map ~f:Values.TrainingPlanFilters.of_json
+                          filters) ())
+           (Some Values.ListTrainingPlansResponse.to_json)
+           (Some Values.ListTrainingPlansResponse.error_to_json)])
 let list_transform_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2808,6 +4420,31 @@ let list_trials =
               ?maxResults ?nextToken ())
            (Some Values.ListTrialsResponse.to_json)
            (Some Values.ListTrialsResponse.error_to_json)])
+let list_ultra_servers_by_reserved_capacity =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and reservedCapacityArn =
+         flag "reserved-capacity-arn" (required string)
+           ~doc:"STRING ReservedCapacityArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_ultra_servers_by_reserved_capacity
+           (Values.ListUltraServersByReservedCapacityRequest.make ?maxResults
+              ?nextToken ~reservedCapacityArn ())
+           (Some Values.ListUltraServersByReservedCapacityResponse.to_json)
+           (Some
+              Values.ListUltraServersByReservedCapacityResponse.error_to_json)])
 let list_user_profiles =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2934,6 +4571,9 @@ let query_lineage =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and startArns =
+         flag "start-arns" (optional json_arg)
+           ~doc:"JSON QueryLineageStartArns"
        and direction =
          flag "direction" (optional json_arg) ~doc:"JSON Direction"
        and includeEdges =
@@ -2945,19 +4585,17 @@ let query_lineage =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT QueryLineageMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String8192"
-       and startArns =
-         flag "start-arns" (required json_arg)
-           ~doc:"JSON QueryLineageStartArns" in
+         flag "next-token" (optional string) ~doc:"STRING String8192" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.query_lineage
            (Values.QueryLineageRequest.make
+              ?startArns:(Option.map ~f:Values.QueryLineageStartArns.of_json
+                            startArns)
               ?direction:(Option.map ~f:Values.Direction.of_json direction)
               ?includeEdges
               ?filters:(Option.map ~f:Values.QueryFilters.of_json filters)
-              ?maxDepth ?maxResults ?nextToken
-              ~startArns:(Values.QueryLineageStartArns.of_json startArns) ())
+              ?maxDepth ?maxResults ?nextToken ())
            (Some Values.QueryLineageResponse.to_json)
            (Some Values.QueryLineageResponse.error_to_json)])
 let register_devices =
@@ -3056,6 +4694,12 @@ let search =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and crossAccountFilterOption =
+         flag "cross-account-filter-option" (optional json_arg)
+           ~doc:"JSON CrossAccountFilterOption"
+       and visibilityConditions =
+         flag "visibility-conditions" (optional json_arg)
+           ~doc:"JSON VisibilityConditionsList"
        and resource =
          flag "resource" (required json_arg) ~doc:"JSON ResourceType" in
        fun () ->
@@ -3066,9 +4710,68 @@ let search =
                                    searchExpression) ?sortBy
               ?sortOrder:(Option.map ~f:Values.SearchSortOrder.of_json
                             sortOrder) ?nextToken ?maxResults
+              ?crossAccountFilterOption:(Option.map
+                                           ~f:Values.CrossAccountFilterOption.of_json
+                                           crossAccountFilterOption)
+              ?visibilityConditions:(Option.map
+                                       ~f:Values.VisibilityConditionsList.of_json
+                                       visibilityConditions)
               ~resource:(Values.ResourceType.of_json resource) ())
            (Some Values.SearchResponse.to_json)
            (Some Values.SearchResponse.error_to_json)])
+let search_training_plan_offerings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceType =
+         flag "instance-type" (optional json_arg)
+           ~doc:"JSON ReservedCapacityInstanceType"
+       and instanceCount =
+         flag "instance-count" (optional int)
+           ~doc:"INT ReservedCapacityInstanceCount"
+       and ultraServerType =
+         flag "ultra-server-type" (optional string)
+           ~doc:"STRING UltraServerType"
+       and ultraServerCount =
+         flag "ultra-server-count" (optional int) ~doc:"INT UltraServerCount"
+       and startTimeAfter =
+         flag "start-time-after" (optional json_arg) ~doc:"JSON Timestamp"
+       and endTimeBefore =
+         flag "end-time-before" (optional json_arg) ~doc:"JSON Timestamp"
+       and durationHours =
+         flag "duration-hours" (optional json_arg)
+           ~doc:"JSON TrainingPlanDurationHoursInput"
+       and targetResources =
+         flag "target-resources" (optional json_arg)
+           ~doc:"JSON SageMakerResourceNames"
+       and trainingPlanArn =
+         flag "training-plan-arn" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_training_plan_offerings
+           (Values.SearchTrainingPlanOfferingsRequest.make
+              ?instanceType:(Option.map
+                               ~f:Values.ReservedCapacityInstanceType.of_json
+                               instanceType) ?instanceCount ?ultraServerType
+              ?ultraServerCount
+              ?startTimeAfter:(Option.map ~f:Values.Timestamp.of_json
+                                 startTimeAfter)
+              ?endTimeBefore:(Option.map ~f:Values.Timestamp.of_json
+                                endTimeBefore)
+              ?durationHours:(Option.map
+                                ~f:Values.TrainingPlanDurationHoursInput.of_json
+                                durationHours)
+              ?targetResources:(Option.map
+                                  ~f:Values.SageMakerResourceNames.of_json
+                                  targetResources) ?trainingPlanArn ())
+           (Some Values.SearchTrainingPlanOfferingsResponse.to_json)
+           (Some Values.SearchTrainingPlanOfferingsResponse.error_to_json)])
 let send_pipeline_execution_step_failure =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3123,6 +4826,86 @@ let send_pipeline_execution_step_success =
            (Some Values.SendPipelineExecutionStepSuccessResponse.to_json)
            (Some
               Values.SendPipelineExecutionStepSuccessResponse.error_to_json)])
+let start_cluster_health_check =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING ClusterNameOrArn"
+       and deepHealthCheckConfigurations =
+         flag "deep-health-check-configurations" (required json_arg)
+           ~doc:"JSON DeepHealthCheckConfigurations" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_cluster_health_check
+           (Values.StartClusterHealthCheckRequest.make ~clusterName
+              ~deepHealthCheckConfigurations:(Values.DeepHealthCheckConfigurations.of_json
+                                                deepHealthCheckConfigurations)
+              ()) (Some Values.StartClusterHealthCheckResponse.to_json)
+           (Some Values.StartClusterHealthCheckResponse.error_to_json)])
+let start_edge_deployment_stage =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and edgeDeploymentPlanName =
+         flag "edge-deployment-plan-name" (required string)
+           ~doc:"STRING EntityName"
+       and stageName =
+         flag "stage-name" (required string) ~doc:"STRING EntityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_edge_deployment_stage
+           (Values.StartEdgeDeploymentStageRequest.make
+              ~edgeDeploymentPlanName ~stageName ()) None None])
+let start_inference_experiment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING InferenceExperimentName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_inference_experiment
+           (Values.StartInferenceExperimentRequest.make ~name ())
+           (Some Values.StartInferenceExperimentResponse.to_json)
+           (Some Values.StartInferenceExperimentResponse.error_to_json)])
+let start_mlflow_tracking_server =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trackingServerName =
+         flag "tracking-server-name" (required string)
+           ~doc:"STRING TrackingServerName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_mlflow_tracking_server
+           (Values.StartMlflowTrackingServerRequest.make ~trackingServerName
+              ()) (Some Values.StartMlflowTrackingServerResponse.to_json)
+           (Some Values.StartMlflowTrackingServerResponse.error_to_json)])
 let start_monitoring_schedule =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3181,8 +4964,18 @@ let start_pipeline_execution =
        and parallelismConfiguration =
          flag "parallelism-configuration" (optional json_arg)
            ~doc:"JSON ParallelismConfiguration"
+       and selectiveExecutionConfig =
+         flag "selective-execution-config" (optional json_arg)
+           ~doc:"JSON SelectiveExecutionConfig"
+       and pipelineVersionId =
+         flag "pipeline-version-id" (optional json_arg)
+           ~doc:"JSON PipelineVersionId"
+       and mlflowExperimentName =
+         flag "mlflow-experiment-name" (optional string)
+           ~doc:"STRING MlflowExperimentEntityName"
        and pipelineName =
-         flag "pipeline-name" (required string) ~doc:"STRING PipelineName"
+         flag "pipeline-name" (required string)
+           ~doc:"STRING PipelineNameOrArn"
        and clientRequestToken =
          flag "client-request-token" (required string)
            ~doc:"STRING IdempotencyToken" in
@@ -3197,9 +4990,73 @@ let start_pipeline_execution =
               ?parallelismConfiguration:(Option.map
                                            ~f:Values.ParallelismConfiguration.of_json
                                            parallelismConfiguration)
+              ?selectiveExecutionConfig:(Option.map
+                                           ~f:Values.SelectiveExecutionConfig.of_json
+                                           selectiveExecutionConfig)
+              ?pipelineVersionId:(Option.map
+                                    ~f:Values.PipelineVersionId.of_json
+                                    pipelineVersionId) ?mlflowExperimentName
               ~pipelineName ~clientRequestToken ())
            (Some Values.StartPipelineExecutionResponse.to_json)
            (Some Values.StartPipelineExecutionResponse.error_to_json)])
+let start_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceIdentifier =
+         flag "resource-identifier" (required string)
+           ~doc:"STRING ResourceIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_session
+           (Values.StartSessionRequest.make ~resourceIdentifier ())
+           (Some Values.StartSessionResponse.to_json)
+           (Some Values.StartSessionResponse.error_to_json)])
+let stop_a_i_benchmark_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and aIBenchmarkJobName =
+         flag "a-i-benchmark-job-name" (required string)
+           ~doc:"STRING AIEntityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_a_i_benchmark_job
+           (Values.StopAIBenchmarkJobRequest.make ~aIBenchmarkJobName ())
+           (Some Values.StopAIBenchmarkJobResponse.to_json)
+           (Some Values.StopAIBenchmarkJobResponse.error_to_json)])
+let stop_a_i_recommendation_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and aIRecommendationJobName =
+         flag "a-i-recommendation-job-name" (required string)
+           ~doc:"STRING AIEntityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_a_i_recommendation_job
+           (Values.StopAIRecommendationJobRequest.make
+              ~aIRecommendationJobName ())
+           (Some Values.StopAIRecommendationJobResponse.to_json)
+           (Some Values.StopAIRecommendationJobResponse.error_to_json)])
 let stop_auto_m_l_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3235,6 +5092,26 @@ let stop_compilation_job =
            Io.stop_compilation_job
            (Values.StopCompilationJobRequest.make ~compilationJobName ())
            None None])
+let stop_edge_deployment_stage =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and edgeDeploymentPlanName =
+         flag "edge-deployment-plan-name" (required string)
+           ~doc:"STRING EntityName"
+       and stageName =
+         flag "stage-name" (required string) ~doc:"STRING EntityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_edge_deployment_stage
+           (Values.StopEdgeDeploymentStageRequest.make
+              ~edgeDeploymentPlanName ~stageName ()) None None])
 let stop_edge_packaging_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3271,6 +5148,44 @@ let stop_hyper_parameter_tuning_job =
            Io.stop_hyper_parameter_tuning_job
            (Values.StopHyperParameterTuningJobRequest.make
               ~hyperParameterTuningJobName ()) None None])
+let stop_inference_experiment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and desiredModelVariants =
+         flag "desired-model-variants" (optional json_arg)
+           ~doc:"JSON ModelVariantConfigList"
+       and desiredState =
+         flag "desired-state" (optional json_arg)
+           ~doc:"JSON InferenceExperimentStopDesiredState"
+       and reason =
+         flag "reason" (optional string)
+           ~doc:"STRING InferenceExperimentStatusReason"
+       and name =
+         flag "name" (required string) ~doc:"STRING InferenceExperimentName"
+       and modelVariantActions =
+         flag "model-variant-actions" (required json_arg)
+           ~doc:"JSON ModelVariantActionMap" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_inference_experiment
+           (Values.StopInferenceExperimentRequest.make
+              ?desiredModelVariants:(Option.map
+                                       ~f:Values.ModelVariantConfigList.of_json
+                                       desiredModelVariants)
+              ?desiredState:(Option.map
+                               ~f:Values.InferenceExperimentStopDesiredState.of_json
+                               desiredState) ?reason ~name
+              ~modelVariantActions:(Values.ModelVariantActionMap.of_json
+                                      modelVariantActions) ())
+           (Some Values.StopInferenceExperimentResponse.to_json)
+           (Some Values.StopInferenceExperimentResponse.error_to_json)])
 let stop_inference_recommendations_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3306,6 +5221,25 @@ let stop_labeling_job =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.stop_labeling_job
            (Values.StopLabelingJobRequest.make ~labelingJobName ()) None None])
+let stop_mlflow_tracking_server =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trackingServerName =
+         flag "tracking-server-name" (required string)
+           ~doc:"STRING TrackingServerName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_mlflow_tracking_server
+           (Values.StopMlflowTrackingServerRequest.make ~trackingServerName
+              ()) (Some Values.StopMlflowTrackingServerResponse.to_json)
+           (Some Values.StopMlflowTrackingServerResponse.error_to_json)])
 let stop_monitoring_schedule =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3341,6 +5275,24 @@ let stop_notebook_instance =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.stop_notebook_instance
            (Values.StopNotebookInstanceInput.make ~notebookInstanceName ())
+           None None])
+let stop_optimization_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and optimizationJobName =
+         flag "optimization-job-name" (required string)
+           ~doc:"STRING EntityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_optimization_job
+           (Values.StopOptimizationJobRequest.make ~optimizationJobName ())
            None None])
 let stop_pipeline_execution =
   Command.async ~summary:""
@@ -3468,6 +5420,12 @@ let update_app_image_config =
        and kernelGatewayImageConfig =
          flag "kernel-gateway-image-config" (optional json_arg)
            ~doc:"JSON KernelGatewayImageConfig"
+       and jupyterLabAppImageConfig =
+         flag "jupyter-lab-app-image-config" (optional json_arg)
+           ~doc:"JSON JupyterLabAppImageConfig"
+       and codeEditorAppImageConfig =
+         flag "code-editor-app-image-config" (optional json_arg)
+           ~doc:"JSON CodeEditorAppImageConfig"
        and appImageConfigName =
          flag "app-image-config-name" (required string)
            ~doc:"STRING AppImageConfigName" in
@@ -3478,6 +5436,12 @@ let update_app_image_config =
               ?kernelGatewayImageConfig:(Option.map
                                            ~f:Values.KernelGatewayImageConfig.of_json
                                            kernelGatewayImageConfig)
+              ?jupyterLabAppImageConfig:(Option.map
+                                           ~f:Values.JupyterLabAppImageConfig.of_json
+                                           jupyterLabAppImageConfig)
+              ?codeEditorAppImageConfig:(Option.map
+                                           ~f:Values.CodeEditorAppImageConfig.of_json
+                                           codeEditorAppImageConfig)
               ~appImageConfigName ())
            (Some Values.UpdateAppImageConfigResponse.to_json)
            (Some Values.UpdateAppImageConfigResponse.error_to_json)])
@@ -3495,8 +5459,7 @@ let update_artifact =
          flag "artifact-name" (optional string)
            ~doc:"STRING ExperimentEntityName"
        and properties =
-         flag "properties" (optional json_arg)
-           ~doc:"JSON LineageEntityParameters"
+         flag "properties" (optional json_arg) ~doc:"JSON ArtifactProperties"
        and propertiesToRemove =
          flag "properties-to-remove" (optional json_arg)
            ~doc:"JSON ListLineageEntityParameterKey"
@@ -3506,14 +5469,139 @@ let update_artifact =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_artifact
            (Values.UpdateArtifactRequest.make ?artifactName
-              ?properties:(Option.map
-                             ~f:Values.LineageEntityParameters.of_json
+              ?properties:(Option.map ~f:Values.ArtifactProperties.of_json
                              properties)
               ?propertiesToRemove:(Option.map
                                      ~f:Values.ListLineageEntityParameterKey.of_json
                                      propertiesToRemove) ~artifactArn ())
            (Some Values.UpdateArtifactResponse.to_json)
            (Some Values.UpdateArtifactResponse.error_to_json)])
+let update_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceGroups =
+         flag "instance-groups" (optional json_arg)
+           ~doc:"JSON ClusterInstanceGroupSpecifications"
+       and restrictedInstanceGroups =
+         flag "restricted-instance-groups" (optional json_arg)
+           ~doc:"JSON ClusterRestrictedInstanceGroupSpecifications"
+       and tieredStorageConfig =
+         flag "tiered-storage-config" (optional json_arg)
+           ~doc:"JSON ClusterTieredStorageConfig"
+       and nodeRecovery =
+         flag "node-recovery" (optional json_arg)
+           ~doc:"JSON ClusterNodeRecovery"
+       and instanceGroupsToDelete =
+         flag "instance-groups-to-delete" (optional json_arg)
+           ~doc:"JSON ClusterInstanceGroupsToDelete"
+       and nodeProvisioningMode =
+         flag "node-provisioning-mode" (optional json_arg)
+           ~doc:"JSON ClusterNodeProvisioningMode"
+       and clusterRole =
+         flag "cluster-role" (optional string) ~doc:"STRING RoleArn"
+       and autoScaling =
+         flag "auto-scaling" (optional json_arg)
+           ~doc:"JSON ClusterAutoScalingConfig"
+       and orchestrator =
+         flag "orchestrator" (optional json_arg)
+           ~doc:"JSON ClusterOrchestrator"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING ClusterNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_cluster
+           (Values.UpdateClusterRequest.make
+              ?instanceGroups:(Option.map
+                                 ~f:Values.ClusterInstanceGroupSpecifications.of_json
+                                 instanceGroups)
+              ?restrictedInstanceGroups:(Option.map
+                                           ~f:Values.ClusterRestrictedInstanceGroupSpecifications.of_json
+                                           restrictedInstanceGroups)
+              ?tieredStorageConfig:(Option.map
+                                      ~f:Values.ClusterTieredStorageConfig.of_json
+                                      tieredStorageConfig)
+              ?nodeRecovery:(Option.map ~f:Values.ClusterNodeRecovery.of_json
+                               nodeRecovery)
+              ?instanceGroupsToDelete:(Option.map
+                                         ~f:Values.ClusterInstanceGroupsToDelete.of_json
+                                         instanceGroupsToDelete)
+              ?nodeProvisioningMode:(Option.map
+                                       ~f:Values.ClusterNodeProvisioningMode.of_json
+                                       nodeProvisioningMode) ?clusterRole
+              ?autoScaling:(Option.map
+                              ~f:Values.ClusterAutoScalingConfig.of_json
+                              autoScaling)
+              ?orchestrator:(Option.map ~f:Values.ClusterOrchestrator.of_json
+                               orchestrator) ~clusterName ())
+           (Some Values.UpdateClusterResponse.to_json)
+           (Some Values.UpdateClusterResponse.error_to_json)])
+let update_cluster_scheduler_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and schedulerConfig =
+         flag "scheduler-config" (optional json_arg)
+           ~doc:"JSON SchedulerConfig"
+       and description =
+         flag "description" (optional string) ~doc:"STRING EntityDescription"
+       and clusterSchedulerConfigId =
+         flag "cluster-scheduler-config-id" (required string)
+           ~doc:"STRING ClusterSchedulerConfigId"
+       and targetVersion =
+         flag "target-version" (required int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_cluster_scheduler_config
+           (Values.UpdateClusterSchedulerConfigRequest.make
+              ?schedulerConfig:(Option.map ~f:Values.SchedulerConfig.of_json
+                                  schedulerConfig) ?description
+              ~clusterSchedulerConfigId ~targetVersion ())
+           (Some Values.UpdateClusterSchedulerConfigResponse.to_json)
+           (Some Values.UpdateClusterSchedulerConfigResponse.error_to_json)])
+let update_cluster_software =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceGroups =
+         flag "instance-groups" (optional json_arg)
+           ~doc:"JSON UpdateClusterSoftwareInstanceGroups"
+       and deploymentConfig =
+         flag "deployment-config" (optional json_arg)
+           ~doc:"JSON DeploymentConfiguration"
+       and imageId = flag "image-id" (optional string) ~doc:"STRING ImageId"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING ClusterNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_cluster_software
+           (Values.UpdateClusterSoftwareRequest.make
+              ?instanceGroups:(Option.map
+                                 ~f:Values.UpdateClusterSoftwareInstanceGroups.of_json
+                                 instanceGroups)
+              ?deploymentConfig:(Option.map
+                                   ~f:Values.DeploymentConfiguration.of_json
+                                   deploymentConfig) ?imageId ~clusterName ())
+           (Some Values.UpdateClusterSoftwareResponse.to_json)
+           (Some Values.UpdateClusterSoftwareResponse.error_to_json)])
 let update_code_repository =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3537,6 +5625,47 @@ let update_code_repository =
                             gitConfig) ~codeRepositoryName ())
            (Some Values.UpdateCodeRepositoryOutput.to_json)
            (Some Values.UpdateCodeRepositoryOutput.error_to_json)])
+let update_compute_quota =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and computeQuotaConfig =
+         flag "compute-quota-config" (optional json_arg)
+           ~doc:"JSON ComputeQuotaConfig"
+       and computeQuotaTarget =
+         flag "compute-quota-target" (optional json_arg)
+           ~doc:"JSON ComputeQuotaTarget"
+       and activationState =
+         flag "activation-state" (optional json_arg)
+           ~doc:"JSON ActivationState"
+       and description =
+         flag "description" (optional string) ~doc:"STRING EntityDescription"
+       and computeQuotaId =
+         flag "compute-quota-id" (required string)
+           ~doc:"STRING ComputeQuotaId"
+       and targetVersion =
+         flag "target-version" (required int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_compute_quota
+           (Values.UpdateComputeQuotaRequest.make
+              ?computeQuotaConfig:(Option.map
+                                     ~f:Values.ComputeQuotaConfig.of_json
+                                     computeQuotaConfig)
+              ?computeQuotaTarget:(Option.map
+                                     ~f:Values.ComputeQuotaTarget.of_json
+                                     computeQuotaTarget)
+              ?activationState:(Option.map ~f:Values.ActivationState.of_json
+                                  activationState) ?description
+              ~computeQuotaId ~targetVersion ())
+           (Some Values.UpdateComputeQuotaResponse.to_json)
+           (Some Values.UpdateComputeQuotaResponse.error_to_json)])
 let update_context =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3557,8 +5686,7 @@ let update_context =
          flag "properties-to-remove" (optional json_arg)
            ~doc:"JSON ListLineageEntityParameterKey"
        and contextName =
-         flag "context-name" (required string)
-           ~doc:"STRING ExperimentEntityName" in
+         flag "context-name" (required string) ~doc:"STRING ContextName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_context
@@ -3634,6 +5762,21 @@ let update_domain =
        and domainSettingsForUpdate =
          flag "domain-settings-for-update" (optional json_arg)
            ~doc:"JSON DomainSettingsForUpdate"
+       and appSecurityGroupManagement =
+         flag "app-security-group-management" (optional json_arg)
+           ~doc:"JSON AppSecurityGroupManagement"
+       and defaultSpaceSettings =
+         flag "default-space-settings" (optional json_arg)
+           ~doc:"JSON DefaultSpaceSettings"
+       and subnetIds =
+         flag "subnet-ids" (optional json_arg) ~doc:"JSON Subnets"
+       and appNetworkAccessType =
+         flag "app-network-access-type" (optional json_arg)
+           ~doc:"JSON AppNetworkAccessType"
+       and tagPropagation =
+         flag "tag-propagation" (optional json_arg)
+           ~doc:"JSON TagPropagation"
+       and vpcId = flag "vpc-id" (optional string) ~doc:"STRING VpcId"
        and domainId =
          flag "domain-id" (required string) ~doc:"STRING DomainId" in
        fun () ->
@@ -3644,8 +5787,20 @@ let update_domain =
                                       defaultUserSettings)
               ?domainSettingsForUpdate:(Option.map
                                           ~f:Values.DomainSettingsForUpdate.of_json
-                                          domainSettingsForUpdate) ~domainId
-              ()) (Some Values.UpdateDomainResponse.to_json)
+                                          domainSettingsForUpdate)
+              ?appSecurityGroupManagement:(Option.map
+                                             ~f:Values.AppSecurityGroupManagement.of_json
+                                             appSecurityGroupManagement)
+              ?defaultSpaceSettings:(Option.map
+                                       ~f:Values.DefaultSpaceSettings.of_json
+                                       defaultSpaceSettings)
+              ?subnetIds:(Option.map ~f:Values.Subnets.of_json subnetIds)
+              ?appNetworkAccessType:(Option.map
+                                       ~f:Values.AppNetworkAccessType.of_json
+                                       appNetworkAccessType)
+              ?tagPropagation:(Option.map ~f:Values.TagPropagation.of_json
+                                 tagPropagation) ?vpcId ~domainId ())
+           (Some Values.UpdateDomainResponse.to_json)
            (Some Values.UpdateDomainResponse.error_to_json)])
 let update_endpoint =
   Command.async ~summary:""
@@ -3736,6 +5891,187 @@ let update_experiment =
               ~experimentName ())
            (Some Values.UpdateExperimentResponse.to_json)
            (Some Values.UpdateExperimentResponse.error_to_json)])
+let update_feature_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and featureAdditions =
+         flag "feature-additions" (optional json_arg)
+           ~doc:"JSON FeatureAdditions"
+       and onlineStoreConfig =
+         flag "online-store-config" (optional json_arg)
+           ~doc:"JSON OnlineStoreConfigUpdate"
+       and throughputConfig =
+         flag "throughput-config" (optional json_arg)
+           ~doc:"JSON ThroughputConfigUpdate"
+       and featureGroupName =
+         flag "feature-group-name" (required string)
+           ~doc:"STRING FeatureGroupNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_feature_group
+           (Values.UpdateFeatureGroupRequest.make
+              ?featureAdditions:(Option.map
+                                   ~f:Values.FeatureAdditions.of_json
+                                   featureAdditions)
+              ?onlineStoreConfig:(Option.map
+                                    ~f:Values.OnlineStoreConfigUpdate.of_json
+                                    onlineStoreConfig)
+              ?throughputConfig:(Option.map
+                                   ~f:Values.ThroughputConfigUpdate.of_json
+                                   throughputConfig) ~featureGroupName ())
+           (Some Values.UpdateFeatureGroupResponse.to_json)
+           (Some Values.UpdateFeatureGroupResponse.error_to_json)])
+let update_feature_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING FeatureDescription"
+       and parameterAdditions =
+         flag "parameter-additions" (optional json_arg)
+           ~doc:"JSON FeatureParameterAdditions"
+       and parameterRemovals =
+         flag "parameter-removals" (optional json_arg)
+           ~doc:"JSON FeatureParameterRemovals"
+       and featureGroupName =
+         flag "feature-group-name" (required string)
+           ~doc:"STRING FeatureGroupNameOrArn"
+       and featureName =
+         flag "feature-name" (required string) ~doc:"STRING FeatureName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_feature_metadata
+           (Values.UpdateFeatureMetadataRequest.make ?description
+              ?parameterAdditions:(Option.map
+                                     ~f:Values.FeatureParameterAdditions.of_json
+                                     parameterAdditions)
+              ?parameterRemovals:(Option.map
+                                    ~f:Values.FeatureParameterRemovals.of_json
+                                    parameterRemovals) ~featureGroupName
+              ~featureName ()) None None])
+let update_hub =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hubDescription =
+         flag "hub-description" (optional string)
+           ~doc:"STRING HubDescription"
+       and hubDisplayName =
+         flag "hub-display-name" (optional string)
+           ~doc:"STRING HubDisplayName"
+       and hubSearchKeywords =
+         flag "hub-search-keywords" (optional json_arg)
+           ~doc:"JSON HubSearchKeywordList"
+       and hubName =
+         flag "hub-name" (required string) ~doc:"STRING HubNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_hub
+           (Values.UpdateHubRequest.make ?hubDescription ?hubDisplayName
+              ?hubSearchKeywords:(Option.map
+                                    ~f:Values.HubSearchKeywordList.of_json
+                                    hubSearchKeywords) ~hubName ())
+           (Some Values.UpdateHubResponse.to_json)
+           (Some Values.UpdateHubResponse.error_to_json)])
+let update_hub_content =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hubContentDisplayName =
+         flag "hub-content-display-name" (optional string)
+           ~doc:"STRING HubContentDisplayName"
+       and hubContentDescription =
+         flag "hub-content-description" (optional string)
+           ~doc:"STRING HubContentDescription"
+       and hubContentMarkdown =
+         flag "hub-content-markdown" (optional string)
+           ~doc:"STRING HubContentMarkdown"
+       and hubContentSearchKeywords =
+         flag "hub-content-search-keywords" (optional json_arg)
+           ~doc:"JSON HubContentSearchKeywordList"
+       and supportStatus =
+         flag "support-status" (optional json_arg)
+           ~doc:"JSON HubContentSupportStatus"
+       and hubName =
+         flag "hub-name" (required string) ~doc:"STRING HubNameOrArn"
+       and hubContentName =
+         flag "hub-content-name" (required string)
+           ~doc:"STRING HubContentName"
+       and hubContentType =
+         flag "hub-content-type" (required json_arg)
+           ~doc:"JSON HubContentType"
+       and hubContentVersion =
+         flag "hub-content-version" (required string)
+           ~doc:"STRING HubContentVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_hub_content
+           (Values.UpdateHubContentRequest.make ?hubContentDisplayName
+              ?hubContentDescription ?hubContentMarkdown
+              ?hubContentSearchKeywords:(Option.map
+                                           ~f:Values.HubContentSearchKeywordList.of_json
+                                           hubContentSearchKeywords)
+              ?supportStatus:(Option.map
+                                ~f:Values.HubContentSupportStatus.of_json
+                                supportStatus) ~hubName ~hubContentName
+              ~hubContentType:(Values.HubContentType.of_json hubContentType)
+              ~hubContentVersion ())
+           (Some Values.UpdateHubContentResponse.to_json)
+           (Some Values.UpdateHubContentResponse.error_to_json)])
+let update_hub_content_reference =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and minVersion =
+         flag "min-version" (optional string) ~doc:"STRING HubContentVersion"
+       and hubName =
+         flag "hub-name" (required string) ~doc:"STRING HubNameOrArn"
+       and hubContentName =
+         flag "hub-content-name" (required string)
+           ~doc:"STRING HubContentName"
+       and hubContentType =
+         flag "hub-content-type" (required json_arg)
+           ~doc:"JSON HubContentType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_hub_content_reference
+           (Values.UpdateHubContentReferenceRequest.make ?minVersion ~hubName
+              ~hubContentName
+              ~hubContentType:(Values.HubContentType.of_json hubContentType)
+              ()) (Some Values.UpdateHubContentReferenceResponse.to_json)
+           (Some Values.UpdateHubContentReferenceResponse.error_to_json)])
 let update_image =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3766,6 +6102,285 @@ let update_image =
               ?displayName ?roleArn ~imageName ())
            (Some Values.UpdateImageResponse.to_json)
            (Some Values.UpdateImageResponse.error_to_json)])
+let update_image_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and alias =
+         flag "alias" (optional string)
+           ~doc:"STRING SageMakerImageVersionAlias"
+       and version =
+         flag "version" (optional int) ~doc:"INT ImageVersionNumber"
+       and aliasesToAdd =
+         flag "aliases-to-add" (optional json_arg)
+           ~doc:"JSON SageMakerImageVersionAliases"
+       and aliasesToDelete =
+         flag "aliases-to-delete" (optional json_arg)
+           ~doc:"JSON SageMakerImageVersionAliases"
+       and vendorGuidance =
+         flag "vendor-guidance" (optional json_arg)
+           ~doc:"JSON VendorGuidance"
+       and jobType = flag "job-type" (optional json_arg) ~doc:"JSON JobType"
+       and mLFramework =
+         flag "m-l-framework" (optional string) ~doc:"STRING MLFramework"
+       and programmingLang =
+         flag "programming-lang" (optional string)
+           ~doc:"STRING ProgrammingLang"
+       and processor =
+         flag "processor" (optional json_arg) ~doc:"JSON Processor"
+       and horovod = flag "horovod" (optional bool) ~doc:"BOOL Horovod"
+       and releaseNotes =
+         flag "release-notes" (optional string) ~doc:"STRING ReleaseNotes"
+       and imageName =
+         flag "image-name" (required string) ~doc:"STRING ImageName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_image_version
+           (Values.UpdateImageVersionRequest.make ?alias ?version
+              ?aliasesToAdd:(Option.map
+                               ~f:Values.SageMakerImageVersionAliases.of_json
+                               aliasesToAdd)
+              ?aliasesToDelete:(Option.map
+                                  ~f:Values.SageMakerImageVersionAliases.of_json
+                                  aliasesToDelete)
+              ?vendorGuidance:(Option.map ~f:Values.VendorGuidance.of_json
+                                 vendorGuidance)
+              ?jobType:(Option.map ~f:Values.JobType.of_json jobType)
+              ?mLFramework ?programmingLang
+              ?processor:(Option.map ~f:Values.Processor.of_json processor)
+              ?horovod ?releaseNotes ~imageName ())
+           (Some Values.UpdateImageVersionResponse.to_json)
+           (Some Values.UpdateImageVersionResponse.error_to_json)])
+let update_inference_component =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and specification =
+         flag "specification" (optional json_arg)
+           ~doc:"JSON InferenceComponentSpecification"
+       and specifications =
+         flag "specifications" (optional json_arg)
+           ~doc:"JSON InferenceComponentSpecificationList"
+       and runtimeConfig =
+         flag "runtime-config" (optional json_arg)
+           ~doc:"JSON InferenceComponentRuntimeConfig"
+       and deploymentConfig =
+         flag "deployment-config" (optional json_arg)
+           ~doc:"JSON InferenceComponentDeploymentConfig"
+       and inferenceComponentName =
+         flag "inference-component-name" (required string)
+           ~doc:"STRING InferenceComponentName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_inference_component
+           (Values.UpdateInferenceComponentInput.make
+              ?specification:(Option.map
+                                ~f:Values.InferenceComponentSpecification.of_json
+                                specification)
+              ?specifications:(Option.map
+                                 ~f:Values.InferenceComponentSpecificationList.of_json
+                                 specifications)
+              ?runtimeConfig:(Option.map
+                                ~f:Values.InferenceComponentRuntimeConfig.of_json
+                                runtimeConfig)
+              ?deploymentConfig:(Option.map
+                                   ~f:Values.InferenceComponentDeploymentConfig.of_json
+                                   deploymentConfig) ~inferenceComponentName
+              ()) (Some Values.UpdateInferenceComponentOutput.to_json)
+           (Some Values.UpdateInferenceComponentOutput.error_to_json)])
+let update_inference_component_runtime_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and inferenceComponentName =
+         flag "inference-component-name" (required string)
+           ~doc:"STRING InferenceComponentName"
+       and desiredRuntimeConfig =
+         flag "desired-runtime-config" (required json_arg)
+           ~doc:"JSON InferenceComponentRuntimeConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_inference_component_runtime_config
+           (Values.UpdateInferenceComponentRuntimeConfigInput.make
+              ~inferenceComponentName
+              ~desiredRuntimeConfig:(Values.InferenceComponentRuntimeConfig.of_json
+                                       desiredRuntimeConfig) ())
+           (Some Values.UpdateInferenceComponentRuntimeConfigOutput.to_json)
+           (Some
+              Values.UpdateInferenceComponentRuntimeConfigOutput.error_to_json)])
+let update_inference_experiment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and schedule =
+         flag "schedule" (optional json_arg)
+           ~doc:"JSON InferenceExperimentSchedule"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING InferenceExperimentDescription"
+       and modelVariants =
+         flag "model-variants" (optional json_arg)
+           ~doc:"JSON ModelVariantConfigList"
+       and dataStorageConfig =
+         flag "data-storage-config" (optional json_arg)
+           ~doc:"JSON InferenceExperimentDataStorageConfig"
+       and shadowModeConfig =
+         flag "shadow-mode-config" (optional json_arg)
+           ~doc:"JSON ShadowModeConfig"
+       and name =
+         flag "name" (required string) ~doc:"STRING InferenceExperimentName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_inference_experiment
+           (Values.UpdateInferenceExperimentRequest.make
+              ?schedule:(Option.map
+                           ~f:Values.InferenceExperimentSchedule.of_json
+                           schedule) ?description
+              ?modelVariants:(Option.map
+                                ~f:Values.ModelVariantConfigList.of_json
+                                modelVariants)
+              ?dataStorageConfig:(Option.map
+                                    ~f:Values.InferenceExperimentDataStorageConfig.of_json
+                                    dataStorageConfig)
+              ?shadowModeConfig:(Option.map
+                                   ~f:Values.ShadowModeConfig.of_json
+                                   shadowModeConfig) ~name ())
+           (Some Values.UpdateInferenceExperimentResponse.to_json)
+           (Some Values.UpdateInferenceExperimentResponse.error_to_json)])
+let update_mlflow_app =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING MlflowAppName"
+       and artifactStoreUri =
+         flag "artifact-store-uri" (optional string) ~doc:"STRING S3Uri"
+       and modelRegistrationMode =
+         flag "model-registration-mode" (optional json_arg)
+           ~doc:"JSON ModelRegistrationMode"
+       and weeklyMaintenanceWindowStart =
+         flag "weekly-maintenance-window-start" (optional string)
+           ~doc:"STRING WeeklyMaintenanceWindowStart"
+       and defaultDomainIdList =
+         flag "default-domain-id-list" (optional json_arg)
+           ~doc:"JSON DefaultDomainIdList"
+       and accountDefaultStatus =
+         flag "account-default-status" (optional json_arg)
+           ~doc:"JSON AccountDefaultStatus"
+       and arn = flag "arn" (required string) ~doc:"STRING MlflowAppArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_mlflow_app
+           (Values.UpdateMlflowAppRequest.make ?name ?artifactStoreUri
+              ?modelRegistrationMode:(Option.map
+                                        ~f:Values.ModelRegistrationMode.of_json
+                                        modelRegistrationMode)
+              ?weeklyMaintenanceWindowStart
+              ?defaultDomainIdList:(Option.map
+                                      ~f:Values.DefaultDomainIdList.of_json
+                                      defaultDomainIdList)
+              ?accountDefaultStatus:(Option.map
+                                       ~f:Values.AccountDefaultStatus.of_json
+                                       accountDefaultStatus) ~arn ())
+           (Some Values.UpdateMlflowAppResponse.to_json)
+           (Some Values.UpdateMlflowAppResponse.error_to_json)])
+let update_mlflow_tracking_server =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and artifactStoreUri =
+         flag "artifact-store-uri" (optional string) ~doc:"STRING S3Uri"
+       and trackingServerSize =
+         flag "tracking-server-size" (optional json_arg)
+           ~doc:"JSON TrackingServerSize"
+       and automaticModelRegistration =
+         flag "automatic-model-registration" (optional bool)
+           ~doc:"BOOL Boolean"
+       and weeklyMaintenanceWindowStart =
+         flag "weekly-maintenance-window-start" (optional string)
+           ~doc:"STRING WeeklyMaintenanceWindowStart"
+       and s3BucketOwnerAccountId =
+         flag "s3-bucket-owner-account-id" (optional string)
+           ~doc:"STRING AccountId"
+       and s3BucketOwnerVerification =
+         flag "s3-bucket-owner-verification" (optional bool)
+           ~doc:"BOOL Boolean"
+       and trackingServerName =
+         flag "tracking-server-name" (required string)
+           ~doc:"STRING TrackingServerName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_mlflow_tracking_server
+           (Values.UpdateMlflowTrackingServerRequest.make ?artifactStoreUri
+              ?trackingServerSize:(Option.map
+                                     ~f:Values.TrackingServerSize.of_json
+                                     trackingServerSize)
+              ?automaticModelRegistration ?weeklyMaintenanceWindowStart
+              ?s3BucketOwnerAccountId ?s3BucketOwnerVerification
+              ~trackingServerName ())
+           (Some Values.UpdateMlflowTrackingServerResponse.to_json)
+           (Some Values.UpdateMlflowTrackingServerResponse.error_to_json)])
+let update_model_card =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and content =
+         flag "content" (optional string) ~doc:"STRING ModelCardContent"
+       and modelCardStatus =
+         flag "model-card-status" (optional json_arg)
+           ~doc:"JSON ModelCardStatus"
+       and modelCardName =
+         flag "model-card-name" (required string)
+           ~doc:"STRING ModelCardNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_model_card
+           (Values.UpdateModelCardRequest.make ?content
+              ?modelCardStatus:(Option.map ~f:Values.ModelCardStatus.of_json
+                                  modelCardStatus) ~modelCardName ())
+           (Some Values.UpdateModelCardResponse.to_json)
+           (Some Values.UpdateModelCardResponse.error_to_json)])
 let update_model_package =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3779,6 +6394,9 @@ let update_model_package =
        and modelApprovalStatus =
          flag "model-approval-status" (optional json_arg)
            ~doc:"JSON ModelApprovalStatus"
+       and modelPackageRegistrationType =
+         flag "model-package-registration-type" (optional json_arg)
+           ~doc:"JSON ModelPackageRegistrationType"
        and approvalDescription =
          flag "approval-description" (optional string)
            ~doc:"STRING ApprovalDescription"
@@ -3791,6 +6409,20 @@ let update_model_package =
        and additionalInferenceSpecificationsToAdd =
          flag "additional-inference-specifications-to-add"
            (optional json_arg) ~doc:"JSON AdditionalInferenceSpecifications"
+       and inferenceSpecification =
+         flag "inference-specification" (optional json_arg)
+           ~doc:"JSON InferenceSpecification"
+       and sourceUri =
+         flag "source-uri" (optional string)
+           ~doc:"STRING ModelPackageSourceUri"
+       and modelCard =
+         flag "model-card" (optional json_arg)
+           ~doc:"JSON ModelPackageModelCard"
+       and modelLifeCycle =
+         flag "model-life-cycle" (optional json_arg)
+           ~doc:"JSON ModelLifeCycle"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and modelPackageArn =
          flag "model-package-arn" (required string)
            ~doc:"STRING ModelPackageArn" in
@@ -3801,6 +6433,9 @@ let update_model_package =
               ?modelApprovalStatus:(Option.map
                                       ~f:Values.ModelApprovalStatus.of_json
                                       modelApprovalStatus)
+              ?modelPackageRegistrationType:(Option.map
+                                               ~f:Values.ModelPackageRegistrationType.of_json
+                                               modelPackageRegistrationType)
               ?approvalDescription
               ?customerMetadataProperties:(Option.map
                                              ~f:Values.CustomerMetadataMap.of_json
@@ -3811,9 +6446,45 @@ let update_model_package =
               ?additionalInferenceSpecificationsToAdd:(Option.map
                                                          ~f:Values.AdditionalInferenceSpecifications.of_json
                                                          additionalInferenceSpecificationsToAdd)
+              ?inferenceSpecification:(Option.map
+                                         ~f:Values.InferenceSpecification.of_json
+                                         inferenceSpecification) ?sourceUri
+              ?modelCard:(Option.map ~f:Values.ModelPackageModelCard.of_json
+                            modelCard)
+              ?modelLifeCycle:(Option.map ~f:Values.ModelLifeCycle.of_json
+                                 modelLifeCycle) ?clientToken
               ~modelPackageArn ())
            (Some Values.UpdateModelPackageOutput.to_json)
            (Some Values.UpdateModelPackageOutput.error_to_json)])
+let update_monitoring_alert =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and monitoringScheduleName =
+         flag "monitoring-schedule-name" (required string)
+           ~doc:"STRING MonitoringScheduleName"
+       and monitoringAlertName =
+         flag "monitoring-alert-name" (required string)
+           ~doc:"STRING MonitoringAlertName"
+       and datapointsToAlert =
+         flag "datapoints-to-alert" (required int)
+           ~doc:"INT MonitoringDatapointsToAlert"
+       and evaluationPeriod =
+         flag "evaluation-period" (required int)
+           ~doc:"INT MonitoringEvaluationPeriod" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_monitoring_alert
+           (Values.UpdateMonitoringAlertRequest.make ~monitoringScheduleName
+              ~monitoringAlertName ~datapointsToAlert ~evaluationPeriod ())
+           (Some Values.UpdateMonitoringAlertResponse.to_json)
+           (Some Values.UpdateMonitoringAlertResponse.error_to_json)])
 let update_monitoring_schedule =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3851,6 +6522,11 @@ let update_notebook_instance =
            ~doc:"URL override endpoint url"
        and instanceType =
          flag "instance-type" (optional json_arg) ~doc:"JSON InstanceType"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IPAddressType"
+       and platformIdentifier =
+         flag "platform-identifier" (optional string)
+           ~doc:"STRING PlatformIdentifier"
        and roleArn = flag "role-arn" (optional string) ~doc:"STRING RoleArn"
        and lifecycleConfigName =
          flag "lifecycle-config-name" (optional string)
@@ -3881,6 +6557,9 @@ let update_notebook_instance =
            ~doc:"BOOL DisassociateAdditionalCodeRepositories"
        and rootAccess =
          flag "root-access" (optional json_arg) ~doc:"JSON RootAccess"
+       and instanceMetadataServiceConfiguration =
+         flag "instance-metadata-service-configuration" (optional json_arg)
+           ~doc:"JSON InstanceMetadataServiceConfiguration"
        and notebookInstanceName =
          flag "notebook-instance-name" (required string)
            ~doc:"STRING NotebookInstanceName" in
@@ -3889,9 +6568,11 @@ let update_notebook_instance =
            Io.update_notebook_instance
            (Values.UpdateNotebookInstanceInput.make
               ?instanceType:(Option.map ~f:Values.InstanceType.of_json
-                               instanceType) ?roleArn ?lifecycleConfigName
-              ?disassociateLifecycleConfig ?volumeSizeInGB
-              ?defaultCodeRepository
+                               instanceType)
+              ?ipAddressType:(Option.map ~f:Values.IPAddressType.of_json
+                                ipAddressType) ?platformIdentifier ?roleArn
+              ?lifecycleConfigName ?disassociateLifecycleConfig
+              ?volumeSizeInGB ?defaultCodeRepository
               ?additionalCodeRepositories:(Option.map
                                              ~f:Values.AdditionalCodeRepositoryNamesOrUrls.of_json
                                              additionalCodeRepositories)
@@ -3902,6 +6583,9 @@ let update_notebook_instance =
               ?disassociateDefaultCodeRepository
               ?disassociateAdditionalCodeRepositories
               ?rootAccess:(Option.map ~f:Values.RootAccess.of_json rootAccess)
+              ?instanceMetadataServiceConfiguration:(Option.map
+                                                       ~f:Values.InstanceMetadataServiceConfiguration.of_json
+                                                       instanceMetadataServiceConfiguration)
               ~notebookInstanceName ())
            (Some Values.UpdateNotebookInstanceOutput.to_json)
            (Some Values.UpdateNotebookInstanceOutput.error_to_json)])
@@ -3937,6 +6621,51 @@ let update_notebook_instance_lifecycle_config =
            (Some Values.UpdateNotebookInstanceLifecycleConfigOutput.to_json)
            (Some
               Values.UpdateNotebookInstanceLifecycleConfigOutput.error_to_json)])
+let update_partner_app =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maintenanceConfig =
+         flag "maintenance-config" (optional json_arg)
+           ~doc:"JSON PartnerAppMaintenanceConfig"
+       and tier =
+         flag "tier" (optional string) ~doc:"STRING NonEmptyString64"
+       and applicationConfig =
+         flag "application-config" (optional json_arg)
+           ~doc:"JSON PartnerAppConfig"
+       and enableIamSessionBasedIdentity =
+         flag "enable-iam-session-based-identity" (optional bool)
+           ~doc:"BOOL Boolean"
+       and enableAutoMinorVersionUpgrade =
+         flag "enable-auto-minor-version-upgrade" (optional bool)
+           ~doc:"BOOL Boolean"
+       and appVersion =
+         flag "app-version" (optional string) ~doc:"STRING MajorMinorVersion"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and arn = flag "arn" (required string) ~doc:"STRING PartnerAppArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_partner_app
+           (Values.UpdatePartnerAppRequest.make
+              ?maintenanceConfig:(Option.map
+                                    ~f:Values.PartnerAppMaintenanceConfig.of_json
+                                    maintenanceConfig) ?tier
+              ?applicationConfig:(Option.map
+                                    ~f:Values.PartnerAppConfig.of_json
+                                    applicationConfig)
+              ?enableIamSessionBasedIdentity ?enableAutoMinorVersionUpgrade
+              ?appVersion ?clientToken
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~arn ())
+           (Some Values.UpdatePartnerAppResponse.to_json)
+           (Some Values.UpdatePartnerAppResponse.error_to_json)])
 let update_pipeline =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4012,6 +6741,37 @@ let update_pipeline_execution =
               ~pipelineExecutionArn ())
            (Some Values.UpdatePipelineExecutionResponse.to_json)
            (Some Values.UpdatePipelineExecutionResponse.error_to_json)])
+let update_pipeline_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pipelineVersionDisplayName =
+         flag "pipeline-version-display-name" (optional string)
+           ~doc:"STRING PipelineVersionName"
+       and pipelineVersionDescription =
+         flag "pipeline-version-description" (optional string)
+           ~doc:"STRING PipelineVersionDescription"
+       and pipelineArn =
+         flag "pipeline-arn" (required string) ~doc:"STRING PipelineArn"
+       and pipelineVersionId =
+         flag "pipeline-version-id" (required json_arg)
+           ~doc:"JSON PipelineVersionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_pipeline_version
+           (Values.UpdatePipelineVersionRequest.make
+              ?pipelineVersionDisplayName ?pipelineVersionDescription
+              ~pipelineArn
+              ~pipelineVersionId:(Values.PipelineVersionId.of_json
+                                    pipelineVersionId) ())
+           (Some Values.UpdatePipelineVersionResponse.to_json)
+           (Some Values.UpdatePipelineVersionResponse.error_to_json)])
 let update_project =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4030,6 +6790,9 @@ let update_project =
            (optional json_arg)
            ~doc:"JSON ServiceCatalogProvisioningUpdateDetails"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and templateProvidersToUpdate =
+         flag "template-providers-to-update" (optional json_arg)
+           ~doc:"JSON UpdateTemplateProviderList"
        and projectName =
          flag "project-name" (required string)
            ~doc:"STRING ProjectEntityName" in
@@ -4040,9 +6803,39 @@ let update_project =
               ?serviceCatalogProvisioningUpdateDetails:(Option.map
                                                           ~f:Values.ServiceCatalogProvisioningUpdateDetails.of_json
                                                           serviceCatalogProvisioningUpdateDetails)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~projectName
-              ()) (Some Values.UpdateProjectOutput.to_json)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?templateProvidersToUpdate:(Option.map
+                                            ~f:Values.UpdateTemplateProviderList.of_json
+                                            templateProvidersToUpdate)
+              ~projectName ()) (Some Values.UpdateProjectOutput.to_json)
            (Some Values.UpdateProjectOutput.error_to_json)])
+let update_space =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and spaceSettings =
+         flag "space-settings" (optional json_arg) ~doc:"JSON SpaceSettings"
+       and spaceDisplayName =
+         flag "space-display-name" (optional string)
+           ~doc:"STRING NonEmptyString64"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId"
+       and spaceName =
+         flag "space-name" (required string) ~doc:"STRING SpaceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_space
+           (Values.UpdateSpaceRequest.make
+              ?spaceSettings:(Option.map ~f:Values.SpaceSettings.of_json
+                                spaceSettings) ?spaceDisplayName ~domainId
+              ~spaceName ()) (Some Values.UpdateSpaceResponse.to_json)
+           (Some Values.UpdateSpaceResponse.error_to_json)])
 let update_training_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4059,6 +6852,12 @@ let update_training_job =
        and profilerRuleConfigurations =
          flag "profiler-rule-configurations" (optional json_arg)
            ~doc:"JSON ProfilerRuleConfigurations"
+       and resourceConfig =
+         flag "resource-config" (optional json_arg)
+           ~doc:"JSON ResourceConfigForUpdate"
+       and remoteDebugConfig =
+         flag "remote-debug-config" (optional json_arg)
+           ~doc:"JSON RemoteDebugConfigForUpdate"
        and trainingJobName =
          flag "training-job-name" (required string)
            ~doc:"STRING TrainingJobName" in
@@ -4072,7 +6871,12 @@ let update_training_job =
               ?profilerRuleConfigurations:(Option.map
                                              ~f:Values.ProfilerRuleConfigurations.of_json
                                              profilerRuleConfigurations)
-              ~trainingJobName ())
+              ?resourceConfig:(Option.map
+                                 ~f:Values.ResourceConfigForUpdate.of_json
+                                 resourceConfig)
+              ?remoteDebugConfig:(Option.map
+                                    ~f:Values.RemoteDebugConfigForUpdate.of_json
+                                    remoteDebugConfig) ~trainingJobName ())
            (Some Values.UpdateTrainingJobResponse.to_json)
            (Some Values.UpdateTrainingJobResponse.error_to_json)])
 let update_trial =
@@ -4206,6 +7010,12 @@ let update_workforce =
            ~doc:"JSON SourceIpConfig"
        and oidcConfig =
          flag "oidc-config" (optional json_arg) ~doc:"JSON OidcConfig"
+       and workforceVpcConfig =
+         flag "workforce-vpc-config" (optional json_arg)
+           ~doc:"JSON WorkforceVpcConfigRequest"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg)
+           ~doc:"JSON WorkforceIpAddressType"
        and workforceName =
          flag "workforce-name" (required string) ~doc:"STRING WorkforceName" in
        fun () ->
@@ -4215,7 +7025,12 @@ let update_workforce =
               ?sourceIpConfig:(Option.map ~f:Values.SourceIpConfig.of_json
                                  sourceIpConfig)
               ?oidcConfig:(Option.map ~f:Values.OidcConfig.of_json oidcConfig)
-              ~workforceName ())
+              ?workforceVpcConfig:(Option.map
+                                     ~f:Values.WorkforceVpcConfigRequest.of_json
+                                     workforceVpcConfig)
+              ?ipAddressType:(Option.map
+                                ~f:Values.WorkforceIpAddressType.of_json
+                                ipAddressType) ~workforceName ())
            (Some Values.UpdateWorkforceResponse.to_json)
            (Some Values.UpdateWorkforceResponse.error_to_json)])
 let update_workteam =
@@ -4236,6 +7051,9 @@ let update_workteam =
        and notificationConfiguration =
          flag "notification-configuration" (optional json_arg)
            ~doc:"JSON NotificationConfiguration"
+       and workerAccessConfiguration =
+         flag "worker-access-configuration" (optional json_arg)
+           ~doc:"JSON WorkerAccessConfiguration"
        and workteamName =
          flag "workteam-name" (required string) ~doc:"STRING WorkteamName" in
        fun () ->
@@ -4248,5 +7066,8 @@ let update_workteam =
               ?notificationConfiguration:(Option.map
                                             ~f:Values.NotificationConfiguration.of_json
                                             notificationConfiguration)
+              ?workerAccessConfiguration:(Option.map
+                                            ~f:Values.WorkerAccessConfiguration.of_json
+                                            workerAccessConfiguration)
               ~workteamName ()) (Some Values.UpdateWorkteamResponse.to_json)
            (Some Values.UpdateWorkteamResponse.error_to_json)])

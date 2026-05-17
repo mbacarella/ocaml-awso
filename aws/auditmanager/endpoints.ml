@@ -76,6 +76,9 @@ type ('i, 'o, 'e) t =
   | GetEvidenceByEvidenceFolder: (GetEvidenceByEvidenceFolderRequest.t,
   GetEvidenceByEvidenceFolderResponse.t,
   GetEvidenceByEvidenceFolderResponse.error) t 
+  | GetEvidenceFileUploadUrl: (GetEvidenceFileUploadUrlRequest.t,
+  GetEvidenceFileUploadUrlResponse.t, GetEvidenceFileUploadUrlResponse.error)
+  t 
   | GetEvidenceFolder: (GetEvidenceFolderRequest.t,
   GetEvidenceFolderResponse.t, GetEvidenceFolderResponse.error) t 
   | GetEvidenceFoldersByAssessment: (GetEvidenceFoldersByAssessmentRequest.t,
@@ -199,6 +202,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetDelegations -> `GET
   | GetEvidence -> `GET
   | GetEvidenceByEvidenceFolder -> `GET
+  | GetEvidenceFileUploadUrl -> `GET
   | GetEvidenceFolder -> `GET
   | GetEvidenceFoldersByAssessment -> `GET
   | GetEvidenceFoldersByAssessmentControl -> `GET
@@ -371,6 +375,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
+      | GetEvidenceFileUploadUrl ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/evidenceFileUploadUrl")
+            (List.filter_opt
+               [Some
+                  ("fileName",
+                    (ManualEvidenceLocalFileName.to_header x.fileName))])
       | GetEvidenceFolder ->
           (Format.kasprintf Uri.of_string)
             "/assessments/%s/controlSets/%s/evidenceFolders/%s"
@@ -421,7 +432,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string)
                "/insights/controls-by-assessment")
             (List.filter_opt
-               [Some ("controlDomainId", (UUID.to_header x.controlDomainId));
+               [Some
+                  ("controlDomainId",
+                    (ControlDomainId.to_header x.controlDomainId));
                Some ("assessmentId", (UUID.to_header x.assessmentId));
                Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
                  x.nextToken;
@@ -497,7 +510,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/insights/controls")
             (List.filter_opt
-               [Some ("controlDomainId", (UUID.to_header x.controlDomainId));
+               [Some
+                  ("controlDomainId",
+                    (ControlDomainId.to_header x.controlDomainId));
                Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
                  x.nextToken;
                Option.map
@@ -512,12 +527,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("controlCatalogId", (ControlCatalogId.to_header v)))
+                 x.controlCatalogId])
       | ListKeywordsForDataSource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/dataSourceKeywords")
             (List.filter_opt
-               [Some ("source", (SourceType.to_header x.source));
+               [Some ("source", (DataSourceType.to_header x.source));
                Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
                  x.nextToken;
                Option.map
@@ -732,7 +751,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateAssessmentReportRequest.description
                         ~f:(fun x ->
                               ("description",
-                                (AssessmentReportDescription.to_value x)))])
+                                (AssessmentReportDescription.to_value x)));
+                      Option.map
+                        req.CreateAssessmentReportRequest.queryStatement
+                        ~f:(fun x ->
+                              ("queryStatement", (QueryStatement.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -841,6 +864,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetEvidenceByEvidenceFolder ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetEvidenceFileUploadUrl ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetEvidenceFolder ->
@@ -1298,6 +1324,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetEvidenceByEvidenceFolderResponse.error_of_json))
+  | GetEvidenceFileUploadUrl ->
+      if is_success
+      then
+        Ok (GetEvidenceFileUploadUrlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetEvidenceFileUploadUrlResponse.error_of_json))
   | GetEvidenceFolder ->
       if is_success
       then Ok (GetEvidenceFolderResponse.of_json (response_to_json resp))

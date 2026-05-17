@@ -21,17 +21,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteRecord ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/FeatureGroup/%s"
-               (FeatureGroupName.to_header
+               (FeatureGroupNameOrArn.to_header
                   x.DeleteRecordRequest.featureGroupName))
             (List.filter_opt
                [Some
                   ("RecordIdentifierValueAsString",
                     (ValueAsString.to_header x.recordIdentifierValueAsString));
-               Some ("EventTime", (ValueAsString.to_header x.eventTime))])
+               Some ("EventTime", (ValueAsString.to_header x.eventTime));
+               Option.map
+                 ~f:(fun v -> ("TargetStores", (TargetStores.to_header v)))
+                 x.targetStores;
+               Option.map
+                 ~f:(fun v -> ("DeletionMode", (DeletionMode.to_header v)))
+                 x.deletionMode])
       | GetRecord ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/FeatureGroup/%s"
-               (FeatureGroupName.to_header
+               (FeatureGroupNameOrArn.to_header
                   x.GetRecordRequest.featureGroupName))
             (List.filter_opt
                [Some
@@ -39,10 +45,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                     (ValueAsString.to_header x.recordIdentifierValueAsString));
                Option.map
                  ~f:(fun v -> ("FeatureName", (FeatureNames.to_header v)))
-                 x.featureNames])
+                 x.featureNames;
+               Option.map
+                 ~f:(fun v ->
+                       ("ExpirationTimeResponse",
+                         (ExpirationTimeResponse.to_header v)))
+                 x.expirationTimeResponse])
       | PutRecord ->
           (Format.kasprintf Uri.of_string) "/FeatureGroup/%s"
-            (FeatureGroupName.to_header x.PutRecordRequest.featureGroupName))
+            (FeatureGroupNameOrArn.to_header
+               x.PutRecordRequest.featureGroupName))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -59,7 +71,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("Identifiers",
                            (BatchGetRecordIdentifiers.to_value
-                              req.BatchGetRecordRequest.identifiers))])
+                              req.BatchGetRecordRequest.identifiers));
+                      Option.map
+                        req.BatchGetRecordRequest.expirationTimeResponse
+                        ~f:(fun x ->
+                              ("ExpirationTimeResponse",
+                                (ExpirationTimeResponse.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in

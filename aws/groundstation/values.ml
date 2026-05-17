@@ -49,6 +49,445 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module IntegerRange =
+  struct
+    type nonrec t =
+      {
+      minimum: Integer.t [@ocaml.doc "A minimum value."];
+      maximum: Integer.t [@ocaml.doc "A maximum value."]}
+    let context_ = "IntegerRange"
+    let make ~minimum = fun ~maximum -> fun () -> { minimum; maximum }
+    let to_value x =
+      structure_to_value
+        [("minimum", (Some (Integer.to_value x.minimum)));
+        ("maximum", (Some (Integer.to_value x.maximum)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maximum =
+        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "maximum") in
+      let minimum =
+        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "minimum") in
+      make ~maximum ~minimum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maximum = field_map_exn json__ "maximum" Integer.of_json in
+      let minimum = field_map_exn json__ "minimum" Integer.of_json in
+      make ~maximum ~minimum ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An integer range that has a minimum and maximum value."]
+module IpV4Address =
+  struct
+    type nonrec t = string
+    let context_ = "IpV4Address"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:7) >>=
+             (fun () ->
+                (check_string_max i ~max:16) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpV4Address" j
+    let to_json = simple_to_json to_value
+  end
+module SocketAddress =
+  struct
+    type nonrec t =
+      {
+      name: String_.t [@ocaml.doc "Name of a socket address."];
+      port: Integer.t [@ocaml.doc "Port of a socket address."]}
+    let context_ = "SocketAddress"
+    let make ~name = fun ~port -> fun () -> { name; port }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.name)));
+        ("port", (Some (Integer.to_value x.port)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let port =
+        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "port") in
+      let name =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~port ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let port = field_map_exn json__ "port" Integer.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ~port ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the socket address."]
+module RangedConnectionDetailsMtuInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1500) >>=
+             (fun () -> check_int_min i ~min:1400));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for RangedConnectionDetailsMtuInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RangedSocketAddress =
+  struct
+    type nonrec t =
+      {
+      name: IpV4Address.t [@ocaml.doc "IPv4 socket address."];
+      portRange: IntegerRange.t
+        [@ocaml.doc "Port range of a socket address."]}
+    let context_ = "RangedSocketAddress"
+    let make ~name = fun ~portRange -> fun () -> { name; portRange }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (IpV4Address.to_value x.name)));
+        ("portRange", (Some (IntegerRange.to_value x.portRange)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portRange =
+        IntegerRange.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "portRange") in
+      let name =
+        IpV4Address.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~portRange ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portRange = field_map_exn json__ "portRange" IntegerRange.of_json in
+      let name = field_map_exn json__ "name" IpV4Address.of_json in
+      make ~portRange ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A socket address with a port range."]
+module ConnectionDetails =
+  struct
+    type nonrec t =
+      {
+      socketAddress: SocketAddress.t [@ocaml.doc "A socket address."];
+      mtu: Integer.t option
+        [@ocaml.doc
+          "Maximum transmission unit (MTU) size in bytes of a dataflow endpoint."]}
+    let context_ = "ConnectionDetails"
+    let make ?mtu = fun ~socketAddress -> fun () -> { mtu; socketAddress }
+    let to_value x =
+      structure_to_value
+        [("socketAddress", (Some (SocketAddress.to_value x.socketAddress)));
+        ("mtu", (Option.map x.mtu ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mtu = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "mtu") in
+      let socketAddress =
+        SocketAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "socketAddress") in
+      make ?mtu ~socketAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mtu = field_map json__ "mtu" Integer.of_json in
+      let socketAddress =
+        field_map_exn json__ "socketAddress" SocketAddress.of_json in
+      make ?mtu ~socketAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Egress address of AgentEndpoint with an optional mtu."]
+module RangedConnectionDetails =
+  struct
+    type nonrec t =
+      {
+      socketAddress: RangedSocketAddress.t
+        [@ocaml.doc "A ranged socket address."];
+      mtu: RangedConnectionDetailsMtuInteger.t option
+        [@ocaml.doc
+          "Maximum transmission unit (MTU) size in bytes of a dataflow endpoint."]}
+    let context_ = "RangedConnectionDetails"
+    let make ?mtu = fun ~socketAddress -> fun () -> { mtu; socketAddress }
+    let to_value x =
+      structure_to_value
+        [("socketAddress",
+           (Some (RangedSocketAddress.to_value x.socketAddress)));
+        ("mtu",
+          (Option.map x.mtu ~f:RangedConnectionDetailsMtuInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mtu =
+        (Option.map ~f:RangedConnectionDetailsMtuInteger.of_xml)
+          (Xml.child xml_arg0 "mtu") in
+      let socketAddress =
+        RangedSocketAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "socketAddress") in
+      make ?mtu ~socketAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mtu =
+        field_map json__ "mtu" RangedConnectionDetailsMtuInteger.of_json in
+      let socketAddress =
+        field_map_exn json__ "socketAddress" RangedSocketAddress.of_json in
+      make ?mtu ~socketAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Ingress address of AgentEndpoint with a port range and an optional mtu."]
+module Double =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module DownlinkConnectionDetails =
+  struct
+    type nonrec t =
+      {
+      agentIpAndPortAddress: RangedConnectionDetails.t ;
+      egressAddressAndPort: ConnectionDetails.t }
+    let context_ = "DownlinkConnectionDetails"
+    let make ~agentIpAndPortAddress =
+      fun ~egressAddressAndPort ->
+        fun () -> { agentIpAndPortAddress; egressAddressAndPort }
+    let to_value x =
+      structure_to_value
+        [("agentIpAndPortAddress",
+           (Some (RangedConnectionDetails.to_value x.agentIpAndPortAddress)));
+        ("egressAddressAndPort",
+          (Some (ConnectionDetails.to_value x.egressAddressAndPort)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let egressAddressAndPort =
+        ConnectionDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "egressAddressAndPort") in
+      let agentIpAndPortAddress =
+        RangedConnectionDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "agentIpAndPortAddress") in
+      make ~egressAddressAndPort ~agentIpAndPortAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let egressAddressAndPort =
+        field_map_exn json__ "egressAddressAndPort" ConnectionDetails.of_json in
+      let agentIpAndPortAddress =
+        field_map_exn json__ "agentIpAndPortAddress"
+          RangedConnectionDetails.of_json in
+      make ~egressAddressAndPort ~agentIpAndPortAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Connection details for Ground Station to Agent and Agent to customer"]
+module UplinkConnectionDetails =
+  struct
+    type nonrec t =
+      {
+      ingressAddressAndPort: ConnectionDetails.t ;
+      agentIpAndPortAddress: RangedConnectionDetails.t }
+    let context_ = "UplinkConnectionDetails"
+    let make ~ingressAddressAndPort =
+      fun ~agentIpAndPortAddress ->
+        fun () -> { ingressAddressAndPort; agentIpAndPortAddress }
+    let to_value x =
+      structure_to_value
+        [("ingressAddressAndPort",
+           (Some (ConnectionDetails.to_value x.ingressAddressAndPort)));
+        ("agentIpAndPortAddress",
+          (Some (RangedConnectionDetails.to_value x.agentIpAndPortAddress)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let agentIpAndPortAddress =
+        RangedConnectionDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "agentIpAndPortAddress") in
+      let ingressAddressAndPort =
+        ConnectionDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ingressAddressAndPort") in
+      make ~agentIpAndPortAddress ~ingressAddressAndPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agentIpAndPortAddress =
+        field_map_exn json__ "agentIpAndPortAddress"
+          RangedConnectionDetails.of_json in
+      let ingressAddressAndPort =
+        field_map_exn json__ "ingressAddressAndPort"
+          ConnectionDetails.of_json in
+      make ~agentIpAndPortAddress ~ingressAddressAndPort ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Connection details for customer to Agent and Agent to Ground Station"]
+module SyntheticTimestamp_date_time =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module TimeAzEl =
+  struct
+    type nonrec t =
+      {
+      dt: Double.t
+        [@ocaml.doc
+          "Time offset in atomic seconds from the segment's reference epoch. All dt values within a segment must be in ascending order with no duplicates. dt values may be: negative expressed as fractions of a second expressed in scientific notation"];
+      az: Double.t
+        [@ocaml.doc
+          "Azimuth angle at the specified time. Valid ranges by unit: DEGREE_ANGLE: -180 to 360 degrees, measured clockwise from true north RADIAN: -\207\128 to 2\207\128 radians, measured clockwise from true north"];
+      el: Double.t
+        [@ocaml.doc
+          "Elevation angle at the specified time. Valid ranges by unit: DEGREE_ANGLE: -90 to 90 degrees, where 0 is the horizon, 90 is zenith, and negative values are below the horizon RADIAN: -\207\128/2 to \207\128/2 radians, where 0 is the horizon, \207\128/2 is zenith, and negative values are below the horizon"]}
+    let context_ = "TimeAzEl"
+    let make ~dt = fun ~az -> fun ~el -> fun () -> { dt; az; el }
+    let to_value x =
+      structure_to_value
+        [("dt", (Some (Double.to_value x.dt)));
+        ("az", (Some (Double.to_value x.az)));
+        ("el", (Some (Double.to_value x.el)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let el = Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "el") in
+      let az = Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "az") in
+      let dt = Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "dt") in
+      make ~el ~az ~dt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let el = field_map_exn json__ "el" Double.of_json in
+      let az = field_map_exn json__ "az" Double.of_json in
+      let dt = field_map_exn json__ "dt" Double.of_json in
+      make ~el ~az ~dt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Time-tagged azimuth elevation pointing data. Specifies the antenna pointing direction at a specific time offset from the segment's reference epoch."]
+module AgentStatus =
+  struct
+    type nonrec t =
+      | SUCCESS 
+      | FAILED 
+      | ACTIVE 
+      | INACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCESS -> "SUCCESS"
+      | FAILED -> "FAILED"
+      | ACTIVE -> "ACTIVE"
+      | INACTIVE -> "INACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCESS" -> SUCCESS
+      | "FAILED" -> FAILED
+      | "ACTIVE" -> ACTIVE
+      | "INACTIVE" -> INACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AgentStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AgentStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AuditResults =
+  struct
+    type nonrec t =
+      | HEALTHY 
+      | UNHEALTHY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HEALTHY -> "HEALTHY"
+      | UNHEALTHY -> "UNHEALTHY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HEALTHY" -> HEALTHY
+      | "UNHEALTHY" -> UNHEALTHY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AuditResults" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AuditResults" j)
+    let to_json = simple_to_json to_value
+  end
+module SafeName =
+  struct
+    type nonrec t = string
+    let context_ = "SafeName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[ a-zA-Z0-9_:-]{1,256}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SafeName" j
+    let to_json = simple_to_json to_value
+  end
+module CapabilityHealthReason =
+  struct
+    type nonrec t =
+      | NO_REGISTERED_AGENT 
+      | INVALID_IP_OWNERSHIP 
+      | NOT_AUTHORIZED_TO_CREATE_SLR 
+      | UNVERIFIED_IP_OWNERSHIP 
+      | INITIALIZING_DATAPLANE 
+      | DATAPLANE_FAILURE 
+      | HEALTHY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NO_REGISTERED_AGENT -> "NO_REGISTERED_AGENT"
+      | INVALID_IP_OWNERSHIP -> "INVALID_IP_OWNERSHIP"
+      | NOT_AUTHORIZED_TO_CREATE_SLR -> "NOT_AUTHORIZED_TO_CREATE_SLR"
+      | UNVERIFIED_IP_OWNERSHIP -> "UNVERIFIED_IP_OWNERSHIP"
+      | INITIALIZING_DATAPLANE -> "INITIALIZING_DATAPLANE"
+      | DATAPLANE_FAILURE -> "DATAPLANE_FAILURE"
+      | HEALTHY -> "HEALTHY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NO_REGISTERED_AGENT" -> NO_REGISTERED_AGENT
+      | "INVALID_IP_OWNERSHIP" -> INVALID_IP_OWNERSHIP
+      | "NOT_AUTHORIZED_TO_CREATE_SLR" -> NOT_AUTHORIZED_TO_CREATE_SLR
+      | "UNVERIFIED_IP_OWNERSHIP" -> UNVERIFIED_IP_OWNERSHIP
+      | "INITIALIZING_DATAPLANE" -> INITIALIZING_DATAPLANE
+      | "DATAPLANE_FAILURE" -> DATAPLANE_FAILURE
+      | "HEALTHY" -> HEALTHY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapabilityHealthReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapabilityHealthReason" j)
+    let to_json = simple_to_json to_value
+  end
 module DataflowEndpointMtuInteger =
   struct
     type nonrec t = int
@@ -103,58 +542,47 @@ module EndpointStatus =
     let of_json j = of_string (string_of_json ~kind:"EndpointStatus" j)
     let to_json = simple_to_json to_value
   end
-module SafeName =
-  struct
-    type nonrec t = string
-    let context_ = "SafeName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^[ a-zA-Z0-9_:-]{1,256}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SafeName" j
-    let to_json = simple_to_json to_value
-  end
-module SocketAddress =
+module DownlinkDataflowDetails =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "Name of a socket address."];
-      port: Integer.t [@ocaml.doc "Port of a socket address."]}
-    let context_ = "SocketAddress"
-    let make ~name = fun ~port -> fun () -> { name; port }
+      agentConnectionDetails: DownlinkConnectionDetails.t option
+        [@ocaml.doc
+          "Downlink connection details for customer to Agent and Agent to Ground Station"]}
+    let make ?agentConnectionDetails = fun () -> { agentConnectionDetails }
     let to_value x =
       structure_to_value
-        [("name", (Some (String_.to_value x.name)));
-        ("port", (Some (Integer.to_value x.port)))]
+        [("agentConnectionDetails",
+           (Option.map x.agentConnectionDetails
+              ~f:DownlinkConnectionDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let port =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "port") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~port ~name ()
+      let agentConnectionDetails =
+        (Option.map ~f:DownlinkConnectionDetails.of_xml)
+          (Xml.child xml_arg0 "agentConnectionDetails") in
+      make ?agentConnectionDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map_exn json "port" Integer.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ~port ~name ()
+    let of_json json__ =
+      let agentConnectionDetails =
+        field_map json__ "agentConnectionDetails"
+          DownlinkConnectionDetails.of_json in
+      make ?agentConnectionDetails ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about the socket address."]
+  end[@@ocaml.doc "Dataflow details for a downlink endpoint"]
 module RoleArn =
   struct
     type nonrec t = string
     let context_ = "RoleArn"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:30) >>=
+             (fun () ->
+                (check_string_max i ~max:165) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[a-z0-9-.]{1,63}:iam::[0-9]{12}:role/[\\w+=,.@-]{1,64}")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -167,6 +595,9 @@ module SecurityGroupIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -191,6 +622,9 @@ module SubnetList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -211,90 +645,406 @@ module SubnetList =
       list_of_json ~kind:"SubnetList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UplinkDataflowDetails =
+  struct
+    type nonrec t =
+      {
+      agentConnectionDetails: UplinkConnectionDetails.t option
+        [@ocaml.doc
+          "Uplink connection details for customer to Agent and Agent to Ground Station"]}
+    let make ?agentConnectionDetails = fun () -> { agentConnectionDetails }
+    let to_value x =
+      structure_to_value
+        [("agentConnectionDetails",
+           (Option.map x.agentConnectionDetails
+              ~f:UplinkConnectionDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let agentConnectionDetails =
+        (Option.map ~f:UplinkConnectionDetails.of_xml)
+          (Xml.child xml_arg0 "agentConnectionDetails") in
+      make ?agentConnectionDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agentConnectionDetails =
+        field_map json__ "agentConnectionDetails"
+          UplinkConnectionDetails.of_json in
+      make ?agentConnectionDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Dataflow details for an uplink endpoint"]
+module ISO8601TimeRange =
+  struct
+    type nonrec t =
+      {
+      startTime: SyntheticTimestamp_date_time.t
+        [@ocaml.doc
+          "Start time in ISO 8601 format in Coordinated Universal Time (UTC). Example: 2026-11-15T10:28:48.000Z"];
+      endTime: SyntheticTimestamp_date_time.t
+        [@ocaml.doc
+          "End time in ISO 8601 format in Coordinated Universal Time (UTC). Example: 2024-01-15T12:00:00.000Z"]}
+    let context_ = "ISO8601TimeRange"
+    let make ~startTime = fun ~endTime -> fun () -> { startTime; endTime }
+    let to_value x =
+      structure_to_value
+        [("startTime",
+           (Some (SyntheticTimestamp_date_time.to_value x.startTime)));
+        ("endTime", (Some (SyntheticTimestamp_date_time.to_value x.endTime)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        SyntheticTimestamp_date_time.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
+      let startTime =
+        SyntheticTimestamp_date_time.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
+      make ~endTime ~startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime =
+        field_map_exn json__ "endTime" SyntheticTimestamp_date_time.of_json in
+      let startTime =
+        field_map_exn json__ "startTime" SyntheticTimestamp_date_time.of_json in
+      make ~endTime ~startTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Time range specified using ISO 8601 format timestamps."]
+module TimeAzElList =
+  struct
+    type nonrec t = TimeAzEl.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TimeAzEl.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TimeAzEl.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TimeAzElList" ~of_json:TimeAzEl.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AwsGroundStationAgentEndpoint =
+  struct
+    type nonrec t =
+      {
+      name: SafeName.t
+        [@ocaml.doc
+          "Name string associated with AgentEndpoint. Used as a human-readable identifier for AgentEndpoint."];
+      egressAddress: ConnectionDetails.t
+        [@ocaml.doc "The egress address of AgentEndpoint."];
+      ingressAddress: RangedConnectionDetails.t
+        [@ocaml.doc "The ingress address of AgentEndpoint."];
+      agentStatus: AgentStatus.t option
+        [@ocaml.doc "The status of AgentEndpoint."];
+      auditResults: AuditResults.t option
+        [@ocaml.doc "The results of the audit."]}
+    let context_ = "AwsGroundStationAgentEndpoint"
+    let make ?agentStatus =
+      fun ?auditResults ->
+        fun ~name ->
+          fun ~egressAddress ->
+            fun ~ingressAddress ->
+              fun () ->
+                {
+                  agentStatus;
+                  auditResults;
+                  name;
+                  egressAddress;
+                  ingressAddress
+                }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (SafeName.to_value x.name)));
+        ("egressAddress",
+          (Some (ConnectionDetails.to_value x.egressAddress)));
+        ("ingressAddress",
+          (Some (RangedConnectionDetails.to_value x.ingressAddress)));
+        ("agentStatus", (Option.map x.agentStatus ~f:AgentStatus.to_value));
+        ("auditResults",
+          (Option.map x.auditResults ~f:AuditResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let auditResults =
+        (Option.map ~f:AuditResults.of_xml)
+          (Xml.child xml_arg0 "auditResults") in
+      let agentStatus =
+        (Option.map ~f:AgentStatus.of_xml) (Xml.child xml_arg0 "agentStatus") in
+      let ingressAddress =
+        RangedConnectionDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ingressAddress") in
+      let egressAddress =
+        ConnectionDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "egressAddress") in
+      let name =
+        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?auditResults ?agentStatus ~ingressAddress ~egressAddress ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let auditResults = field_map json__ "auditResults" AuditResults.of_json in
+      let agentStatus = field_map json__ "agentStatus" AgentStatus.of_json in
+      let ingressAddress =
+        field_map_exn json__ "ingressAddress" RangedConnectionDetails.of_json in
+      let egressAddress =
+        field_map_exn json__ "egressAddress" ConnectionDetails.of_json in
+      let name = field_map_exn json__ "name" SafeName.of_json in
+      make ?auditResults ?agentStatus ~ingressAddress ~egressAddress ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about AwsGroundStationAgentEndpoint."]
+module CapabilityHealth =
+  struct
+    type nonrec t =
+      | HEALTHY 
+      | UNHEALTHY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HEALTHY -> "HEALTHY"
+      | UNHEALTHY -> "UNHEALTHY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HEALTHY" -> HEALTHY
+      | "UNHEALTHY" -> UNHEALTHY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CapabilityHealth" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CapabilityHealth" j)
+    let to_json = simple_to_json to_value
+  end
+module CapabilityHealthReasonList =
+  struct
+    type nonrec t = CapabilityHealthReason.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapabilityHealthReason.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapabilityHealthReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapabilityHealthReasonList"
+        ~of_json:CapabilityHealthReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DataflowEndpoint =
   struct
     type nonrec t =
       {
+      name: SafeName.t option [@ocaml.doc "Name of a dataflow endpoint."];
       address: SocketAddress.t option
         [@ocaml.doc "Socket address of a dataflow endpoint."];
+      status: EndpointStatus.t option
+        [@ocaml.doc "Status of a dataflow endpoint."];
       mtu: DataflowEndpointMtuInteger.t option
         [@ocaml.doc
-          "Maximum transmission unit (MTU) size in bytes of a dataflow endpoint."];
-      name: SafeName.t option [@ocaml.doc "Name of a dataflow endpoint."];
-      status: EndpointStatus.t option
-        [@ocaml.doc "Status of a dataflow endpoint."]}
-    let make ?address =
-      fun ?mtu ->
-        fun ?name -> fun ?status -> fun () -> { address; mtu; name; status }
+          "Maximum transmission unit (MTU) size in bytes of a dataflow endpoint."]}
+    let make ?name =
+      fun ?address ->
+        fun ?status -> fun ?mtu -> fun () -> { name; address; status; mtu }
     let to_value x =
       structure_to_value
-        [("address", (Option.map x.address ~f:SocketAddress.to_value));
-        ("mtu", (Option.map x.mtu ~f:DataflowEndpointMtuInteger.to_value));
-        ("name", (Option.map x.name ~f:SafeName.to_value));
-        ("status", (Option.map x.status ~f:EndpointStatus.to_value))]
+        [("name", (Option.map x.name ~f:SafeName.to_value));
+        ("address", (Option.map x.address ~f:SocketAddress.to_value));
+        ("status", (Option.map x.status ~f:EndpointStatus.to_value));
+        ("mtu", (Option.map x.mtu ~f:DataflowEndpointMtuInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let status =
-        (Option.map ~f:EndpointStatus.of_xml) (Xml.child xml_arg0 "status") in
-      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
       let mtu =
         (Option.map ~f:DataflowEndpointMtuInteger.of_xml)
           (Xml.child xml_arg0 "mtu") in
+      let status =
+        (Option.map ~f:EndpointStatus.of_xml) (Xml.child xml_arg0 "status") in
       let address =
         (Option.map ~f:SocketAddress.of_xml) (Xml.child xml_arg0 "address") in
-      make ?status ?name ?mtu ?address ()
+      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?mtu ?status ?address ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" EndpointStatus.of_json in
-      let name = field_map json "name" SafeName.of_json in
-      let mtu = field_map json "mtu" DataflowEndpointMtuInteger.of_json in
-      let address = field_map json "address" SocketAddress.of_json in
-      make ?status ?name ?mtu ?address ()
+    let of_json json__ =
+      let mtu = field_map json__ "mtu" DataflowEndpointMtuInteger.of_json in
+      let status = field_map json__ "status" EndpointStatus.of_json in
+      let address = field_map json__ "address" SocketAddress.of_json in
+      let name = field_map json__ "name" SafeName.of_json in
+      make ?mtu ?status ?address ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a dataflow endpoint."]
+module DownlinkAwsGroundStationAgentEndpointDetails =
+  struct
+    type nonrec t =
+      {
+      name: SafeName.t [@ocaml.doc "Downlink dataflow endpoint name"];
+      dataflowDetails: DownlinkDataflowDetails.t
+        [@ocaml.doc "Dataflow details for the downlink endpoint"];
+      agentStatus: AgentStatus.t option
+        [@ocaml.doc
+          "Status of the agent associated with the downlink dataflow endpoint"];
+      auditResults: AuditResults.t option
+        [@ocaml.doc
+          "Health audit results for the downlink dataflow endpoint"]}
+    let context_ = "DownlinkAwsGroundStationAgentEndpointDetails"
+    let make ?agentStatus =
+      fun ?auditResults ->
+        fun ~name ->
+          fun ~dataflowDetails ->
+            fun () -> { agentStatus; auditResults; name; dataflowDetails }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (SafeName.to_value x.name)));
+        ("dataflowDetails",
+          (Some (DownlinkDataflowDetails.to_value x.dataflowDetails)));
+        ("agentStatus", (Option.map x.agentStatus ~f:AgentStatus.to_value));
+        ("auditResults",
+          (Option.map x.auditResults ~f:AuditResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let auditResults =
+        (Option.map ~f:AuditResults.of_xml)
+          (Xml.child xml_arg0 "auditResults") in
+      let agentStatus =
+        (Option.map ~f:AgentStatus.of_xml) (Xml.child xml_arg0 "agentStatus") in
+      let dataflowDetails =
+        DownlinkDataflowDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataflowDetails") in
+      let name =
+        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?auditResults ?agentStatus ~dataflowDetails ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let auditResults = field_map json__ "auditResults" AuditResults.of_json in
+      let agentStatus = field_map json__ "agentStatus" AgentStatus.of_json in
+      let dataflowDetails =
+        field_map_exn json__ "dataflowDetails"
+          DownlinkDataflowDetails.of_json in
+      let name = field_map_exn json__ "name" SafeName.of_json in
+      make ?auditResults ?agentStatus ~dataflowDetails ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details for a downlink agent endpoint"]
 module SecurityDetails =
   struct
     type nonrec t =
       {
-      roleArn: RoleArn.t
+      subnetIds: SubnetList.t
         [@ocaml.doc
-          "ARN to a role needed for connecting streams to your instances."];
+          "A list of subnets where AWS Ground Station places elastic network interfaces to send streams to your instances."];
       securityGroupIds: SecurityGroupIdList.t
         [@ocaml.doc
           "The security groups to attach to the elastic network interfaces."];
-      subnetIds: SubnetList.t
+      roleArn: RoleArn.t
         [@ocaml.doc
-          "A list of subnets where AWS Ground Station places elastic network interfaces to send streams to your instances."]}
+          "ARN to a role needed for connecting streams to your instances."]}
     let context_ = "SecurityDetails"
-    let make ~roleArn =
+    let make ~subnetIds =
       fun ~securityGroupIds ->
-        fun ~subnetIds -> fun () -> { roleArn; securityGroupIds; subnetIds }
+        fun ~roleArn -> fun () -> { subnetIds; securityGroupIds; roleArn }
     let to_value x =
       structure_to_value
-        [("roleArn", (Some (RoleArn.to_value x.roleArn)));
+        [("subnetIds", (Some (SubnetList.to_value x.subnetIds)));
         ("securityGroupIds",
           (Some (SecurityGroupIdList.to_value x.securityGroupIds)));
-        ("subnetIds", (Some (SubnetList.to_value x.subnetIds)))]
+        ("roleArn", (Some (RoleArn.to_value x.roleArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let subnetIds =
-        SubnetList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "subnetIds") in
+      let roleArn =
+        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       let securityGroupIds =
         SecurityGroupIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "securityGroupIds") in
-      let roleArn =
-        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
-      make ~subnetIds ~securityGroupIds ~roleArn ()
+      let subnetIds =
+        SubnetList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "subnetIds") in
+      make ~roleArn ~securityGroupIds ~subnetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetIds = field_map_exn json "subnetIds" SubnetList.of_json in
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
       let securityGroupIds =
-        field_map_exn json "securityGroupIds" SecurityGroupIdList.of_json in
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
-      make ~subnetIds ~securityGroupIds ~roleArn ()
+        field_map_exn json__ "securityGroupIds" SecurityGroupIdList.of_json in
+      let subnetIds = field_map_exn json__ "subnetIds" SubnetList.of_json in
+      make ~roleArn ~securityGroupIds ~subnetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about endpoints."]
+module UplinkAwsGroundStationAgentEndpointDetails =
+  struct
+    type nonrec t =
+      {
+      name: SafeName.t [@ocaml.doc "Uplink dataflow endpoint name"];
+      dataflowDetails: UplinkDataflowDetails.t
+        [@ocaml.doc "Dataflow details for the uplink endpoint"];
+      agentStatus: AgentStatus.t option
+        [@ocaml.doc
+          "Status of the agent associated with the uplink dataflow endpoint"];
+      auditResults: AuditResults.t option
+        [@ocaml.doc "Health audit results for the uplink dataflow endpoint"]}
+    let context_ = "UplinkAwsGroundStationAgentEndpointDetails"
+    let make ?agentStatus =
+      fun ?auditResults ->
+        fun ~name ->
+          fun ~dataflowDetails ->
+            fun () -> { agentStatus; auditResults; name; dataflowDetails }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (SafeName.to_value x.name)));
+        ("dataflowDetails",
+          (Some (UplinkDataflowDetails.to_value x.dataflowDetails)));
+        ("agentStatus", (Option.map x.agentStatus ~f:AgentStatus.to_value));
+        ("auditResults",
+          (Option.map x.auditResults ~f:AuditResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let auditResults =
+        (Option.map ~f:AuditResults.of_xml)
+          (Xml.child xml_arg0 "auditResults") in
+      let agentStatus =
+        (Option.map ~f:AgentStatus.of_xml) (Xml.child xml_arg0 "agentStatus") in
+      let dataflowDetails =
+        UplinkDataflowDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataflowDetails") in
+      let name =
+        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?auditResults ?agentStatus ~dataflowDetails ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let auditResults = field_map json__ "auditResults" AuditResults.of_json in
+      let agentStatus = field_map json__ "agentStatus" AgentStatus.of_json in
+      let dataflowDetails =
+        field_map_exn json__ "dataflowDetails" UplinkDataflowDetails.of_json in
+      let name = field_map_exn json__ "name" SafeName.of_json in
+      make ?auditResults ?agentStatus ~dataflowDetails ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details for an uplink agent endpoint"]
 module BucketArn =
   struct
     type nonrec t = string
@@ -308,17 +1058,65 @@ module BucketArn =
     let of_json j = string_of_json ~kind:"BucketArn" j
     let to_json = simple_to_json to_value
   end
-module Double =
+module AzElSegment =
   struct
-    type nonrec t = float
-    let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Double x
+    type nonrec t =
+      {
+      referenceEpoch: SyntheticTimestamp_date_time.t
+        [@ocaml.doc
+          "The reference time for this segment in ISO 8601 format in Coordinated Universal Time (UTC). All time values within the segment's AzElSegment$azElList are specified as offsets in atomic seconds from this reference epoch. Example: 2024-01-15T12:00:00.000Z"];
+      validTimeRange: ISO8601TimeRange.t
+        [@ocaml.doc
+          "The valid time range for this segment. Specifies the start and end timestamps in ISO 8601 format in Coordinated Universal Time (UTC). The segment's pointing data must cover this entire time range."];
+      azElList: TimeAzElList.t
+        [@ocaml.doc
+          "List of time-tagged azimuth elevation data points. Must contain at least five points to support 4th order Lagrange interpolation. Points must be in chronological order with no duplicates."]}
+    let context_ = "AzElSegment"
+    let make ~referenceEpoch =
+      fun ~validTimeRange ->
+        fun ~azElList ->
+          fun () -> { referenceEpoch; validTimeRange; azElList }
+    let to_value x =
+      structure_to_value
+        [("referenceEpoch",
+           (Some (SyntheticTimestamp_date_time.to_value x.referenceEpoch)));
+        ("validTimeRange",
+          (Some (ISO8601TimeRange.to_value x.validTimeRange)));
+        ("azElList", (Some (TimeAzElList.to_value x.azElList)))]
     let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
     let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
+      let azElList =
+        TimeAzElList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "azElList") in
+      let validTimeRange =
+        ISO8601TimeRange.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "validTimeRange") in
+      let referenceEpoch =
+        SyntheticTimestamp_date_time.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "referenceEpoch") in
+      make ~azElList ~validTimeRange ~referenceEpoch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let azElList = field_map_exn json__ "azElList" TimeAzElList.of_json in
+      let validTimeRange =
+        field_map_exn json__ "validTimeRange" ISO8601TimeRange.of_json in
+      let referenceEpoch =
+        field_map_exn json__ "referenceEpoch"
+          SyntheticTimestamp_date_time.of_json in
+      make ~azElList ~validTimeRange ~referenceEpoch ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A time segment containing azimuth elevation pointing data. Each segment defines a continuous time period with pointing angle data points. AWS Ground Station uses 4th order Lagrange interpolation between the provided points, so each segment must contain at least five data points."]
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
 module FrequencyUnits =
@@ -377,6 +1175,160 @@ module BandwidthUnits =
     let of_json j = of_string (string_of_json ~kind:"BandwidthUnits" j)
     let to_json = simple_to_json to_value
   end
+module KinesisDataStreamArn =
+  struct
+    type nonrec t = string
+    let context_ = "KinesisDataStreamArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:37) >>=
+             (fun () ->
+                (check_string_max i ~max:275) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[a-z0-9-.]{1,63}:kinesis:[-a-z0-9]{1,50}:[0-9]{12}:stream/[a-zA-Z0-9_.-]{1,128}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KinesisDataStreamArn" j
+    let to_json = simple_to_json to_value
+  end
+module VersionString =
+  struct
+    type nonrec t = string
+    let context_ = "VersionString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(0|[1-9]\\d*)(\\.(0|[1-9]\\d*))*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VersionString" j
+    let to_json = simple_to_json to_value
+  end
+module Uuid =
+  struct
+    type nonrec t = string
+    let context_ = "Uuid"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Uuid" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceType =
+  struct
+    type nonrec t =
+      | PLANNED 
+      | UNPLANNED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PLANNED -> "PLANNED"
+      | UNPLANNED -> "UNPLANNED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PLANNED" -> PLANNED
+      | "UNPLANNED" -> UNPLANNED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MaintenanceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MaintenanceType" j)
+    let to_json = simple_to_json to_value
+  end
+module VersionFailureReasonCode =
+  struct
+    type nonrec t =
+      | INTERNAL_ERROR 
+      | INVALID_SATELLITE_ARN 
+      | INVALID_UPDATE_CONTACT_REQUEST 
+      | EPHEMERIS_NOT_FOUND 
+      | EPHEMERIS_TIME_RANGE_INVALID 
+      | EPHEMERIS_NOT_ENABLED 
+      | SATELLITE_DOES_NOT_MATCH_EPHEMERIS 
+      | NOT_ONBOARDED_TO_AZEL_EPHEMERIS 
+      | AZEL_EPHEMERIS_NOT_FOUND 
+      | AZEL_EPHEMERIS_WRONG_GROUND_STATION 
+      | AZEL_EPHEMERIS_INVALID_STATUS 
+      | AZEL_EPHEMERIS_TIME_RANGE_INVALID 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INTERNAL_ERROR -> "INTERNAL_ERROR"
+      | INVALID_SATELLITE_ARN -> "INVALID_SATELLITE_ARN"
+      | INVALID_UPDATE_CONTACT_REQUEST -> "INVALID_UPDATE_CONTACT_REQUEST"
+      | EPHEMERIS_NOT_FOUND -> "EPHEMERIS_NOT_FOUND"
+      | EPHEMERIS_TIME_RANGE_INVALID -> "EPHEMERIS_TIME_RANGE_INVALID"
+      | EPHEMERIS_NOT_ENABLED -> "EPHEMERIS_NOT_ENABLED"
+      | SATELLITE_DOES_NOT_MATCH_EPHEMERIS ->
+          "SATELLITE_DOES_NOT_MATCH_EPHEMERIS"
+      | NOT_ONBOARDED_TO_AZEL_EPHEMERIS -> "NOT_ONBOARDED_TO_AZEL_EPHEMERIS"
+      | AZEL_EPHEMERIS_NOT_FOUND -> "AZEL_EPHEMERIS_NOT_FOUND"
+      | AZEL_EPHEMERIS_WRONG_GROUND_STATION ->
+          "AZEL_EPHEMERIS_WRONG_GROUND_STATION"
+      | AZEL_EPHEMERIS_INVALID_STATUS -> "AZEL_EPHEMERIS_INVALID_STATUS"
+      | AZEL_EPHEMERIS_TIME_RANGE_INVALID ->
+          "AZEL_EPHEMERIS_TIME_RANGE_INVALID"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INTERNAL_ERROR" -> INTERNAL_ERROR
+      | "INVALID_SATELLITE_ARN" -> INVALID_SATELLITE_ARN
+      | "INVALID_UPDATE_CONTACT_REQUEST" -> INVALID_UPDATE_CONTACT_REQUEST
+      | "EPHEMERIS_NOT_FOUND" -> EPHEMERIS_NOT_FOUND
+      | "EPHEMERIS_TIME_RANGE_INVALID" -> EPHEMERIS_TIME_RANGE_INVALID
+      | "EPHEMERIS_NOT_ENABLED" -> EPHEMERIS_NOT_ENABLED
+      | "SATELLITE_DOES_NOT_MATCH_EPHEMERIS" ->
+          SATELLITE_DOES_NOT_MATCH_EPHEMERIS
+      | "NOT_ONBOARDED_TO_AZEL_EPHEMERIS" -> NOT_ONBOARDED_TO_AZEL_EPHEMERIS
+      | "AZEL_EPHEMERIS_NOT_FOUND" -> AZEL_EPHEMERIS_NOT_FOUND
+      | "AZEL_EPHEMERIS_WRONG_GROUND_STATION" ->
+          AZEL_EPHEMERIS_WRONG_GROUND_STATION
+      | "AZEL_EPHEMERIS_INVALID_STATUS" -> AZEL_EPHEMERIS_INVALID_STATUS
+      | "AZEL_EPHEMERIS_TIME_RANGE_INVALID" ->
+          AZEL_EPHEMERIS_TIME_RANGE_INVALID
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VersionFailureReasonCode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"VersionFailureReasonCode" j)
+    let to_json = simple_to_json to_value
+  end
 module AntennaDemodDecodeDetails =
   struct
     type nonrec t =
@@ -394,8 +1346,8 @@ module AntennaDemodDecodeDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "outputNode") in
       make ?outputNode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputNode = field_map json "outputNode" String_.of_json in
+    let of_json json__ =
+      let outputNode = field_map json__ "outputNode" String_.of_json in
       make ?outputNode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -404,31 +1356,108 @@ module EndpointDetails =
   struct
     type nonrec t =
       {
-      endpoint: DataflowEndpoint.t option [@ocaml.doc "A dataflow endpoint."];
       securityDetails: SecurityDetails.t option
-        [@ocaml.doc "Endpoint security details."]}
-    let make ?endpoint =
-      fun ?securityDetails -> fun () -> { endpoint; securityDetails }
+        [@ocaml.doc
+          "Endpoint security details including a list of subnets, a list of security groups and a role to connect streams to instances."];
+      endpoint: DataflowEndpoint.t option [@ocaml.doc "A dataflow endpoint."];
+      awsGroundStationAgentEndpoint: AwsGroundStationAgentEndpoint.t option
+        [@ocaml.doc "An agent endpoint."];
+      uplinkAwsGroundStationAgentEndpoint:
+        UplinkAwsGroundStationAgentEndpointDetails.t option
+        [@ocaml.doc "Definition for an uplink agent endpoint"];
+      downlinkAwsGroundStationAgentEndpoint:
+        DownlinkAwsGroundStationAgentEndpointDetails.t option
+        [@ocaml.doc "Definition for a downlink agent endpoint"];
+      healthStatus: CapabilityHealth.t option
+        [@ocaml.doc
+          "A dataflow endpoint health status. This field is ignored when calling CreateDataflowEndpointGroup."];
+      healthReasons: CapabilityHealthReasonList.t option
+        [@ocaml.doc
+          "Health reasons for a dataflow endpoint. This field is ignored when calling CreateDataflowEndpointGroup."]}
+    let make ?securityDetails =
+      fun ?endpoint ->
+        fun ?awsGroundStationAgentEndpoint ->
+          fun ?uplinkAwsGroundStationAgentEndpoint ->
+            fun ?downlinkAwsGroundStationAgentEndpoint ->
+              fun ?healthStatus ->
+                fun ?healthReasons ->
+                  fun () ->
+                    {
+                      securityDetails;
+                      endpoint;
+                      awsGroundStationAgentEndpoint;
+                      uplinkAwsGroundStationAgentEndpoint;
+                      downlinkAwsGroundStationAgentEndpoint;
+                      healthStatus;
+                      healthReasons
+                    }
     let to_value x =
       structure_to_value
-        [("endpoint", (Option.map x.endpoint ~f:DataflowEndpoint.to_value));
-        ("securityDetails",
-          (Option.map x.securityDetails ~f:SecurityDetails.to_value))]
+        [("securityDetails",
+           (Option.map x.securityDetails ~f:SecurityDetails.to_value));
+        ("endpoint", (Option.map x.endpoint ~f:DataflowEndpoint.to_value));
+        ("awsGroundStationAgentEndpoint",
+          (Option.map x.awsGroundStationAgentEndpoint
+             ~f:AwsGroundStationAgentEndpoint.to_value));
+        ("uplinkAwsGroundStationAgentEndpoint",
+          (Option.map x.uplinkAwsGroundStationAgentEndpoint
+             ~f:UplinkAwsGroundStationAgentEndpointDetails.to_value));
+        ("downlinkAwsGroundStationAgentEndpoint",
+          (Option.map x.downlinkAwsGroundStationAgentEndpoint
+             ~f:DownlinkAwsGroundStationAgentEndpointDetails.to_value));
+        ("healthStatus",
+          (Option.map x.healthStatus ~f:CapabilityHealth.to_value));
+        ("healthReasons",
+          (Option.map x.healthReasons ~f:CapabilityHealthReasonList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let securityDetails =
-        (Option.map ~f:SecurityDetails.of_xml)
-          (Xml.child xml_arg0 "securityDetails") in
+      let healthReasons =
+        (Option.map ~f:CapabilityHealthReasonList.of_xml)
+          (Xml.child xml_arg0 "healthReasons") in
+      let healthStatus =
+        (Option.map ~f:CapabilityHealth.of_xml)
+          (Xml.child xml_arg0 "healthStatus") in
+      let downlinkAwsGroundStationAgentEndpoint =
+        (Option.map ~f:DownlinkAwsGroundStationAgentEndpointDetails.of_xml)
+          (Xml.child xml_arg0 "downlinkAwsGroundStationAgentEndpoint") in
+      let uplinkAwsGroundStationAgentEndpoint =
+        (Option.map ~f:UplinkAwsGroundStationAgentEndpointDetails.of_xml)
+          (Xml.child xml_arg0 "uplinkAwsGroundStationAgentEndpoint") in
+      let awsGroundStationAgentEndpoint =
+        (Option.map ~f:AwsGroundStationAgentEndpoint.of_xml)
+          (Xml.child xml_arg0 "awsGroundStationAgentEndpoint") in
       let endpoint =
         (Option.map ~f:DataflowEndpoint.of_xml)
           (Xml.child xml_arg0 "endpoint") in
-      make ?securityDetails ?endpoint ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let securityDetails =
-        field_map json "securityDetails" SecurityDetails.of_json in
-      let endpoint = field_map json "endpoint" DataflowEndpoint.of_json in
-      make ?securityDetails ?endpoint ()
+        (Option.map ~f:SecurityDetails.of_xml)
+          (Xml.child xml_arg0 "securityDetails") in
+      make ?healthReasons ?healthStatus
+        ?downlinkAwsGroundStationAgentEndpoint
+        ?uplinkAwsGroundStationAgentEndpoint ?awsGroundStationAgentEndpoint
+        ?endpoint ?securityDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let healthReasons =
+        field_map json__ "healthReasons" CapabilityHealthReasonList.of_json in
+      let healthStatus =
+        field_map json__ "healthStatus" CapabilityHealth.of_json in
+      let downlinkAwsGroundStationAgentEndpoint =
+        field_map json__ "downlinkAwsGroundStationAgentEndpoint"
+          DownlinkAwsGroundStationAgentEndpointDetails.of_json in
+      let uplinkAwsGroundStationAgentEndpoint =
+        field_map json__ "uplinkAwsGroundStationAgentEndpoint"
+          UplinkAwsGroundStationAgentEndpointDetails.of_json in
+      let awsGroundStationAgentEndpoint =
+        field_map json__ "awsGroundStationAgentEndpoint"
+          AwsGroundStationAgentEndpoint.of_json in
+      let endpoint = field_map json__ "endpoint" DataflowEndpoint.of_json in
+      let securityDetails =
+        field_map json__ "securityDetails" SecurityDetails.of_json in
+      make ?healthReasons ?healthStatus
+        ?downlinkAwsGroundStationAgentEndpoint
+        ?uplinkAwsGroundStationAgentEndpoint ?awsGroundStationAgentEndpoint
+        ?endpoint ?securityDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the endpoint details."]
 module S3RecordingDetails =
@@ -437,7 +1466,7 @@ module S3RecordingDetails =
       {
       bucketArn: BucketArn.t option [@ocaml.doc "ARN of the bucket used."];
       keyTemplate: String_.t option
-        [@ocaml.doc "Template of the S3 key used."]}
+        [@ocaml.doc "Key template used for the S3 Recording Configuration"]}
     let make ?bucketArn =
       fun ?keyTemplate -> fun () -> { bucketArn; keyTemplate }
     let to_value x =
@@ -452,136 +1481,12 @@ module S3RecordingDetails =
         (Option.map ~f:BucketArn.of_xml) (Xml.child xml_arg0 "bucketArn") in
       make ?keyTemplate ?bucketArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyTemplate = field_map json "keyTemplate" String_.of_json in
-      let bucketArn = field_map json "bucketArn" BucketArn.of_json in
+    let of_json json__ =
+      let keyTemplate = field_map json__ "keyTemplate" String_.of_json in
+      let bucketArn = field_map json__ "bucketArn" BucketArn.of_json in
       make ?keyTemplate ?bucketArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about an S3 recording Config used in a contact."]
-module Frequency =
-  struct
-    type nonrec t =
-      {
-      units: FrequencyUnits.t [@ocaml.doc "Frequency units."];
-      value: Double.t
-        [@ocaml.doc
-          "Frequency value. Valid values are between 2200 to 2300 MHz and 7750 to 8400 MHz for downlink and 2025 to 2120 MHz for uplink."]}
-    let context_ = "Frequency"
-    let make ~units = fun ~value -> fun () -> { units; value }
-    let to_value x =
-      structure_to_value
-        [("units", (Some (FrequencyUnits.to_value x.units)));
-        ("value", (Some (Double.to_value x.value)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
-      let units =
-        FrequencyUnits.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "units") in
-      make ~value ~units ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" Double.of_json in
-      let units = field_map_exn json "units" FrequencyUnits.of_json in
-      make ~value ~units ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Object that describes the frequency."]
-module FrequencyBandwidth =
-  struct
-    type nonrec t =
-      {
-      units: BandwidthUnits.t [@ocaml.doc "Frequency bandwidth units."];
-      value: Double.t
-        [@ocaml.doc
-          "Frequency bandwidth value. AWS Ground Station currently has the following bandwidth limitations: For AntennaDownlinkDemodDecodeconfig, valid values are between 125 kHz to 650 MHz. For AntennaDownlinkconfig, valid values are between 10 kHz to 54 MHz. For AntennaUplinkConfig, valid values are between 10 kHz to 54 MHz."]}
-    let context_ = "FrequencyBandwidth"
-    let make ~units = fun ~value -> fun () -> { units; value }
-    let to_value x =
-      structure_to_value
-        [("units", (Some (BandwidthUnits.to_value x.units)));
-        ("value", (Some (Double.to_value x.value)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
-      let units =
-        BandwidthUnits.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "units") in
-      make ~value ~units ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" Double.of_json in
-      let units = field_map_exn json "units" BandwidthUnits.of_json in
-      make ~value ~units ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Object that describes the frequency bandwidth."]
-module Polarization =
-  struct
-    type nonrec t =
-      | LEFT_HAND 
-      | NONE 
-      | RIGHT_HAND 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | LEFT_HAND -> "LEFT_HAND"
-      | NONE -> "NONE"
-      | RIGHT_HAND -> "RIGHT_HAND"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "LEFT_HAND" -> LEFT_HAND
-      | "NONE" -> NONE
-      | "RIGHT_HAND" -> RIGHT_HAND
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration Polarization" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"Polarization" j)
-    let to_json = simple_to_json to_value
-  end
-module JsonString =
-  struct
-    type nonrec t = string
-    let context_ = "JsonString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:2) >>=
-             (fun () ->
-                (check_string_max i ~max:8192) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^[{}\\[\\]:.,\"0-9A-z\\-_\\s]{2,8192}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"JsonString" j
-    let to_json = simple_to_json to_value
-  end
-module EirpUnits =
-  struct
-    type nonrec t =
-      | DBW 
-      | Non_static_id of string 
-    let make i = i
-    let to_string = function | DBW -> "dBW" | Non_static_id s -> s
-    let of_string = function | "dBW" -> DBW | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration EirpUnits" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"EirpUnits" j)
-    let to_json = simple_to_json to_value
-  end
 module AngleUnits =
   struct
     type nonrec t =
@@ -607,37 +1512,616 @@ module AngleUnits =
     let of_json j = of_string (string_of_json ~kind:"AngleUnits" j)
     let to_json = simple_to_json to_value
   end
+module AzElSegmentList =
+  struct
+    type nonrec t = AzElSegment.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AzElSegment.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AzElSegment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AzElSegmentList" ~of_json:AzElSegment.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module S3BucketName =
+  struct
+    type nonrec t = string
+    let context_ = "S3BucketName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-z0-9.-]{3,63}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3BucketName" j
+    let to_json = simple_to_json to_value
+  end
+module S3ObjectKey =
+  struct
+    type nonrec t = string
+    let context_ = "S3ObjectKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-zA-Z0-9!*'\\)\\(./_-]{1,1024}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3ObjectKey" j
+    let to_json = simple_to_json to_value
+  end
+module S3VersionId =
+  struct
+    type nonrec t = string
+    let context_ = "S3VersionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]{1,1024}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3VersionId" j
+    let to_json = simple_to_json to_value
+  end
+module TimeRange =
+  struct
+    type nonrec t =
+      {
+      startTime: Timestamp.t
+        [@ocaml.doc
+          "Unix epoch timestamp in UTC at which the time range starts."];
+      endTime: Timestamp.t
+        [@ocaml.doc
+          "Unix epoch timestamp in UTC at which the time range ends."]}
+    let context_ = "TimeRange"
+    let make ~startTime = fun ~endTime -> fun () -> { startTime; endTime }
+    let to_value x =
+      structure_to_value
+        [("startTime", (Some (Timestamp.to_value x.startTime)));
+        ("endTime", (Some (Timestamp.to_value x.endTime)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
+      let startTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
+      make ~endTime ~startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map_exn json__ "endTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "startTime" Timestamp.of_json in
+      make ~endTime ~startTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A time range with a start and end time."]
+module TleLineOne =
+  struct
+    type nonrec t = string
+    let context_ = "TleLineOne"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:69) >>=
+             (fun () ->
+                (check_string_max i ~max:69) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"1 [ 0-9]{5}[A-Z] [ 0-9]{5}[ A-Z]{3} [ 0-9]{5}[.][ 0-9]{8} (?:(?:[ 0+-][.][ 0-9]{8})|(?: [ +-][.][ 0-9]{7})) [ +-][ 0-9]{5}[+-][ 0-9] [ +-][ 0-9]{5}[+-][ 0-9] [ 0-9] [ 0-9]{4}[ 0-9]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TleLineOne" j
+    let to_json = simple_to_json to_value
+  end
+module TleLineTwo =
+  struct
+    type nonrec t = string
+    let context_ = "TleLineTwo"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:69) >>=
+             (fun () ->
+                (check_string_max i ~max:69) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"2 [ 0-9]{5} [ 0-9]{3}[.][ 0-9]{4} [ 0-9]{3}[.][ 0-9]{4} [ 0-9]{7} [ 0-9]{3}[.][ 0-9]{4} [ 0-9]{3}[.][ 0-9]{4} [ 0-9]{2}[.][ 0-9]{13}[ 0-9]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TleLineTwo" j
+    let to_json = simple_to_json to_value
+  end
+module Frequency =
+  struct
+    type nonrec t =
+      {
+      value: Double.t
+        [@ocaml.doc
+          "Frequency value. Valid values are between 2200 to 2300 MHz and 7750 to 8400 MHz for downlink and 2025 to 2120 MHz for uplink."];
+      units: FrequencyUnits.t [@ocaml.doc "Frequency units."]}
+    let context_ = "Frequency"
+    let make ~value = fun ~units -> fun () -> { value; units }
+    let to_value x =
+      structure_to_value
+        [("value", (Some (Double.to_value x.value)));
+        ("units", (Some (FrequencyUnits.to_value x.units)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let units =
+        FrequencyUnits.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "units") in
+      let value =
+        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      make ~units ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let units = field_map_exn json__ "units" FrequencyUnits.of_json in
+      let value = field_map_exn json__ "value" Double.of_json in
+      make ~units ~value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object that describes the frequency."]
+module FrequencyBandwidth =
+  struct
+    type nonrec t =
+      {
+      value: Double.t
+        [@ocaml.doc
+          "Frequency bandwidth value. AWS Ground Station currently has the following bandwidth limitations: For AntennaDownlinkDemodDecodeconfig, valid values are between 125 kHz to 650 MHz. For AntennaDownlinkconfig, valid values are between 10 kHz to 54 MHz. For AntennaUplinkConfig, valid values are between 10 kHz to 54 MHz."];
+      units: BandwidthUnits.t [@ocaml.doc "Frequency bandwidth units."]}
+    let context_ = "FrequencyBandwidth"
+    let make ~value = fun ~units -> fun () -> { value; units }
+    let to_value x =
+      structure_to_value
+        [("value", (Some (Double.to_value x.value)));
+        ("units", (Some (BandwidthUnits.to_value x.units)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let units =
+        BandwidthUnits.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "units") in
+      let value =
+        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      make ~units ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let units = field_map_exn json__ "units" BandwidthUnits.of_json in
+      let value = field_map_exn json__ "value" Double.of_json in
+      make ~units ~value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object that describes the frequency bandwidth."]
+module Polarization =
+  struct
+    type nonrec t =
+      | RIGHT_HAND 
+      | LEFT_HAND 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RIGHT_HAND -> "RIGHT_HAND"
+      | LEFT_HAND -> "LEFT_HAND"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RIGHT_HAND" -> RIGHT_HAND
+      | "LEFT_HAND" -> LEFT_HAND
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Polarization" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Polarization" j)
+    let to_json = simple_to_json to_value
+  end
+module JsonString =
+  struct
+    type nonrec t = string
+    let context_ = "JsonString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:8192) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[{}\\[\\]:.,\"0-9A-Za-z\\-_\\s]{2,8192}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JsonString" j
+    let to_json = simple_to_json to_value
+  end
+module EirpUnits =
+  struct
+    type nonrec t =
+      | DBW 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | DBW -> "dBW" | Non_static_id s -> s
+    let of_string = function | "dBW" -> DBW | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EirpUnits" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EirpUnits" j)
+    let to_json = simple_to_json to_value
+  end
+module KinesisDataStreamData =
+  struct
+    type nonrec t =
+      {
+      kinesisRoleArn: RoleArn.t
+        [@ocaml.doc
+          "ARN of the IAM Role used by AWS Ground Station to deliver telemetry."];
+      kinesisDataStreamArn: KinesisDataStreamArn.t
+        [@ocaml.doc
+          "ARN of the Kinesis Data Stream to deliver telemetry to."]}
+    let context_ = "KinesisDataStreamData"
+    let make ~kinesisRoleArn =
+      fun ~kinesisDataStreamArn ->
+        fun () -> { kinesisRoleArn; kinesisDataStreamArn }
+    let to_value x =
+      structure_to_value
+        [("kinesisRoleArn", (Some (RoleArn.to_value x.kinesisRoleArn)));
+        ("kinesisDataStreamArn",
+          (Some (KinesisDataStreamArn.to_value x.kinesisDataStreamArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kinesisDataStreamArn =
+        KinesisDataStreamArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "kinesisDataStreamArn") in
+      let kinesisRoleArn =
+        RoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "kinesisRoleArn") in
+      make ~kinesisDataStreamArn ~kinesisRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kinesisDataStreamArn =
+        field_map_exn json__ "kinesisDataStreamArn"
+          KinesisDataStreamArn.of_json in
+      let kinesisRoleArn =
+        field_map_exn json__ "kinesisRoleArn" RoleArn.of_json in
+      make ~kinesisDataStreamArn ~kinesisRoleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information for telemetry delivery to Kinesis Data Streams."]
+module ComponentTypeString =
+  struct
+    type nonrec t = string
+    let context_ = "ComponentTypeString"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[a-zA-Z0-9_]{1,64}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComponentTypeString" j
+    let to_json = simple_to_json to_value
+  end
+module VersionStringList =
+  struct
+    type nonrec t = VersionString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VersionString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VersionString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VersionStringList" ~of_json:VersionString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EphemerisSource =
+  struct
+    type nonrec t =
+      | CUSTOMER_PROVIDED 
+      | SPACE_TRACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CUSTOMER_PROVIDED -> "CUSTOMER_PROVIDED"
+      | SPACE_TRACK -> "SPACE_TRACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CUSTOMER_PROVIDED" -> CUSTOMER_PROVIDED
+      | "SPACE_TRACK" -> SPACE_TRACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EphemerisSource" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EphemerisSource" j)
+    let to_json = simple_to_json to_value
+  end
+module GroundStationName =
+  struct
+    type nonrec t = string
+    let context_ = "GroundStationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:97) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[ a-zA-Z0-9-._:=]{4,97}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GroundStationName" j
+    let to_json = simple_to_json to_value
+  end
+module ContactReservationDetails =
+  struct
+    type nonrec t =
+      {
+      contactId: Uuid.t option [@ocaml.doc "UUID of a contact."]}
+    let make ?contactId = fun () -> { contactId }
+    let to_value x =
+      structure_to_value
+        [("contactId", (Option.map x.contactId ~f:Uuid.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contactId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "contactId") in
+      make ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contactId = field_map json__ "contactId" Uuid.of_json in
+      make ?contactId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details of a contact reservation."]
+module MaintenanceReservationDetails =
+  struct
+    type nonrec t =
+      {
+      maintenanceType: MaintenanceType.t option
+        [@ocaml.doc "Type of maintenance."]}
+    let make ?maintenanceType = fun () -> { maintenanceType }
+    let to_value x =
+      structure_to_value
+        [("maintenanceType",
+           (Option.map x.maintenanceType ~f:MaintenanceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maintenanceType =
+        (Option.map ~f:MaintenanceType.of_xml)
+          (Xml.child xml_arg0 "maintenanceType") in
+      make ?maintenanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maintenanceType =
+        field_map json__ "maintenanceType" MaintenanceType.of_json in
+      make ?maintenanceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details of a maintenance reservation."]
+module VersionFailureReasonCodes =
+  struct
+    type nonrec t = VersionFailureReasonCode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VersionFailureReasonCode.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VersionFailureReasonCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VersionFailureReasonCodes"
+        ~of_json:VersionFailureReasonCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VersionId =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:128) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for VersionId" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VersionStatus =
+  struct
+    type nonrec t =
+      | UPDATING 
+      | ACTIVE 
+      | SUPERSEDED 
+      | FAILED_TO_UPDATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UPDATING -> "UPDATING"
+      | ACTIVE -> "ACTIVE"
+      | SUPERSEDED -> "SUPERSEDED"
+      | FAILED_TO_UPDATE -> "FAILED_TO_UPDATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UPDATING" -> UPDATING
+      | "ACTIVE" -> ACTIVE
+      | "SUPERSEDED" -> SUPERSEDED
+      | "FAILED_TO_UPDATE" -> FAILED_TO_UPDATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration VersionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VersionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module EphemerisType =
+  struct
+    type nonrec t =
+      | TLE 
+      | OEM 
+      | AZ_EL 
+      | SERVICE_MANAGED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TLE -> "TLE"
+      | OEM -> "OEM"
+      | AZ_EL -> "AZ_EL"
+      | SERVICE_MANAGED -> "SERVICE_MANAGED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TLE" -> TLE
+      | "OEM" -> OEM
+      | "AZ_EL" -> AZ_EL
+      | "SERVICE_MANAGED" -> SERVICE_MANAGED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EphemerisType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EphemerisType" j)
+    let to_json = simple_to_json to_value
+  end
 module ConfigCapabilityType =
   struct
     type nonrec t =
       | Antenna_downlink 
       | Antenna_downlink_demod_decode 
-      | Antenna_uplink 
-      | Dataflow_endpoint 
       | Tracking 
+      | Dataflow_endpoint 
+      | Antenna_uplink 
       | Uplink_echo 
       | S3_recording 
+      | Telemetry_sink 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Antenna_downlink -> "antenna-downlink"
       | Antenna_downlink_demod_decode -> "antenna-downlink-demod-decode"
-      | Antenna_uplink -> "antenna-uplink"
-      | Dataflow_endpoint -> "dataflow-endpoint"
       | Tracking -> "tracking"
+      | Dataflow_endpoint -> "dataflow-endpoint"
+      | Antenna_uplink -> "antenna-uplink"
       | Uplink_echo -> "uplink-echo"
       | S3_recording -> "s3-recording"
+      | Telemetry_sink -> "telemetry-sink"
       | Non_static_id s -> s
     let of_string =
       function
       | "antenna-downlink" -> Antenna_downlink
       | "antenna-downlink-demod-decode" -> Antenna_downlink_demod_decode
-      | "antenna-uplink" -> Antenna_uplink
-      | "dataflow-endpoint" -> Dataflow_endpoint
       | "tracking" -> Tracking
+      | "dataflow-endpoint" -> Dataflow_endpoint
+      | "antenna-uplink" -> Antenna_uplink
       | "uplink-echo" -> Uplink_echo
       | "s3-recording" -> S3_recording
+      | "telemetry-sink" -> Telemetry_sink
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -652,24 +2136,24 @@ module ConfigDetails =
   struct
     type nonrec t =
       {
+      endpointDetails: EndpointDetails.t option ;
       antennaDemodDecodeDetails: AntennaDemodDecodeDetails.t option
         [@ocaml.doc "Details for antenna demod decode Config in a contact."];
-      endpointDetails: EndpointDetails.t option ;
       s3RecordingDetails: S3RecordingDetails.t option
         [@ocaml.doc "Details for an S3 recording Config in a contact."]}
-    let make ?antennaDemodDecodeDetails =
-      fun ?endpointDetails ->
+    let make ?endpointDetails =
+      fun ?antennaDemodDecodeDetails ->
         fun ?s3RecordingDetails ->
           fun () ->
-            { antennaDemodDecodeDetails; endpointDetails; s3RecordingDetails
+            { endpointDetails; antennaDemodDecodeDetails; s3RecordingDetails
             }
     let to_value x =
       structure_to_value
-        [("antennaDemodDecodeDetails",
-           (Option.map x.antennaDemodDecodeDetails
-              ~f:AntennaDemodDecodeDetails.to_value));
-        ("endpointDetails",
-          (Option.map x.endpointDetails ~f:EndpointDetails.to_value));
+        [("endpointDetails",
+           (Option.map x.endpointDetails ~f:EndpointDetails.to_value));
+        ("antennaDemodDecodeDetails",
+          (Option.map x.antennaDemodDecodeDetails
+             ~f:AntennaDemodDecodeDetails.to_value));
         ("s3RecordingDetails",
           (Option.map x.s3RecordingDetails ~f:S3RecordingDetails.to_value))]
     let to_query v = to_query to_value v
@@ -677,30 +2161,150 @@ module ConfigDetails =
       let s3RecordingDetails =
         (Option.map ~f:S3RecordingDetails.of_xml)
           (Xml.child xml_arg0 "s3RecordingDetails") in
-      let endpointDetails =
-        (Option.map ~f:EndpointDetails.of_xml)
-          (Xml.child xml_arg0 "endpointDetails") in
       let antennaDemodDecodeDetails =
         (Option.map ~f:AntennaDemodDecodeDetails.of_xml)
           (Xml.child xml_arg0 "antennaDemodDecodeDetails") in
-      make ?s3RecordingDetails ?endpointDetails ?antennaDemodDecodeDetails ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3RecordingDetails =
-        field_map json "s3RecordingDetails" S3RecordingDetails.of_json in
       let endpointDetails =
-        field_map json "endpointDetails" EndpointDetails.of_json in
+        (Option.map ~f:EndpointDetails.of_xml)
+          (Xml.child xml_arg0 "endpointDetails") in
+      make ?s3RecordingDetails ?antennaDemodDecodeDetails ?endpointDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3RecordingDetails =
+        field_map json__ "s3RecordingDetails" S3RecordingDetails.of_json in
       let antennaDemodDecodeDetails =
-        field_map json "antennaDemodDecodeDetails"
+        field_map json__ "antennaDemodDecodeDetails"
           AntennaDemodDecodeDetails.of_json in
-      make ?s3RecordingDetails ?endpointDetails ?antennaDemodDecodeDetails ()
+      let endpointDetails =
+        field_map json__ "endpointDetails" EndpointDetails.of_json in
+      make ?s3RecordingDetails ?antennaDemodDecodeDetails ?endpointDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details for certain Config object types in a contact."]
+module AzElSegments =
+  struct
+    type nonrec t =
+      {
+      angleUnit: AngleUnits.t
+        [@ocaml.doc
+          "The unit of measure for azimuth and elevation angles. All angles in all segments must use the same unit."];
+      azElSegmentList: AzElSegmentList.t
+        [@ocaml.doc
+          "List of azimuth elevation segments. Must contain between 1 and 100 segments. Segments must be in chronological order with no overlaps."]}
+    let context_ = "AzElSegments"
+    let make ~angleUnit =
+      fun ~azElSegmentList -> fun () -> { angleUnit; azElSegmentList }
+    let to_value x =
+      structure_to_value
+        [("angleUnit", (Some (AngleUnits.to_value x.angleUnit)));
+        ("azElSegmentList",
+          (Some (AzElSegmentList.to_value x.azElSegmentList)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let azElSegmentList =
+        AzElSegmentList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "azElSegmentList") in
+      let angleUnit =
+        AngleUnits.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "angleUnit") in
+      make ~azElSegmentList ~angleUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let azElSegmentList =
+        field_map_exn json__ "azElSegmentList" AzElSegmentList.of_json in
+      let angleUnit = field_map_exn json__ "angleUnit" AngleUnits.of_json in
+      make ~azElSegmentList ~angleUnit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Azimuth elevation segment collection. Contains five or more time-ordered segments that define antenna pointing angles over the ephemeris validity period."]
+module S3Object =
+  struct
+    type nonrec t =
+      {
+      bucket: S3BucketName.t option [@ocaml.doc "An Amazon S3 Bucket name."];
+      key: S3ObjectKey.t option
+        [@ocaml.doc "An Amazon S3 key for the ephemeris."];
+      version: S3VersionId.t option
+        [@ocaml.doc
+          "For versioned Amazon S3 objects, the version to use for the ephemeris."]}
+    let make ?bucket =
+      fun ?key -> fun ?version -> fun () -> { bucket; key; version }
+    let to_value x =
+      structure_to_value
+        [("bucket", (Option.map x.bucket ~f:S3BucketName.to_value));
+        ("key", (Option.map x.key ~f:S3ObjectKey.to_value));
+        ("version", (Option.map x.version ~f:S3VersionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:S3VersionId.of_xml) (Xml.child xml_arg0 "version") in
+      let key = (Option.map ~f:S3ObjectKey.of_xml) (Xml.child xml_arg0 "key") in
+      let bucket =
+        (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucket") in
+      make ?version ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "version" S3VersionId.of_json in
+      let key = field_map json__ "key" S3ObjectKey.of_json in
+      let bucket = field_map json__ "bucket" S3BucketName.of_json in
+      make ?version ?key ?bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object stored in Amazon S3 containing ephemeris data."]
+module TLEData =
+  struct
+    type nonrec t =
+      {
+      tleLine1: TleLineOne.t
+        [@ocaml.doc "First line of two-line element set (TLE) data."];
+      tleLine2: TleLineTwo.t
+        [@ocaml.doc "Second line of two-line element set (TLE) data."];
+      validTimeRange: TimeRange.t
+        [@ocaml.doc
+          "The valid time range for the TLE. Time ranges must be continuous without gaps or overlaps."]}
+    let context_ = "TLEData"
+    let make ~tleLine1 =
+      fun ~tleLine2 ->
+        fun ~validTimeRange ->
+          fun () -> { tleLine1; tleLine2; validTimeRange }
+    let to_value x =
+      structure_to_value
+        [("tleLine1", (Some (TleLineOne.to_value x.tleLine1)));
+        ("tleLine2", (Some (TleLineTwo.to_value x.tleLine2)));
+        ("validTimeRange", (Some (TimeRange.to_value x.validTimeRange)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let validTimeRange =
+        TimeRange.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "validTimeRange") in
+      let tleLine2 =
+        TleLineTwo.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "tleLine2") in
+      let tleLine1 =
+        TleLineOne.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "tleLine1") in
+      make ~validTimeRange ~tleLine2 ~tleLine1 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let validTimeRange =
+        field_map_exn json__ "validTimeRange" TimeRange.of_json in
+      let tleLine2 = field_map_exn json__ "tleLine2" TleLineTwo.of_json in
+      let tleLine1 = field_map_exn json__ "tleLine1" TleLineOne.of_json in
+      make ~validTimeRange ~tleLine2 ~tleLine1 ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Two-line element set (TLE) data."]
 module ConfigArn =
   struct
     type nonrec t = string
     let context_ = "ConfigArn"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:82) >>=
+             (fun () ->
+                (check_string_max i ~max:424) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:groundstation:[-a-z0-9]{1,50}:[0-9]{12}:config/[a-z0-9]+(-[a-z0-9]+){0,4}/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}(/.{1,256})?")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -709,28 +2313,94 @@ module ConfigArn =
     let of_json j = string_of_json ~kind:"ConfigArn" j
     let to_json = simple_to_json to_value
   end
+module AzElProgramTrackSettings =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t
+        [@ocaml.doc "Unique identifier of the azimuth elevation ephemeris."]}
+    let context_ = "AzElProgramTrackSettings"
+    let make ~ephemerisId = fun () -> { ephemerisId }
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Some (Uuid.to_value x.ephemerisId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ephemerisId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ephemerisId") in
+      make ~ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ephemerisId = field_map_exn json__ "ephemerisId" Uuid.of_json in
+      make ~ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Program track settings for AzElEphemeris."]
+module OemProgramTrackSettings =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t
+        [@ocaml.doc "Unique identifier of the OEM ephemeris."]}
+    let context_ = "OemProgramTrackSettings"
+    let make ~ephemerisId = fun () -> { ephemerisId }
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Some (Uuid.to_value x.ephemerisId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ephemerisId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ephemerisId") in
+      make ~ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ephemerisId = field_map_exn json__ "ephemerisId" Uuid.of_json in
+      make ~ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Program track settings for OEMEphemeris."]
+module TleProgramTrackSettings =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t
+        [@ocaml.doc "Unique identifier of the TLE ephemeris."]}
+    let context_ = "TleProgramTrackSettings"
+    let make ~ephemerisId = fun () -> { ephemerisId }
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Some (Uuid.to_value x.ephemerisId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ephemerisId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ephemerisId") in
+      make ~ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ephemerisId = field_map_exn json__ "ephemerisId" Uuid.of_json in
+      make ~ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Program track settings for TLEEphemeris."]
 module SpectrumConfig =
   struct
     type nonrec t =
       {
-      bandwidth: FrequencyBandwidth.t
-        [@ocaml.doc
-          "Bandwidth of a spectral Config. AWS Ground Station currently has the following bandwidth limitations: For AntennaDownlinkDemodDecodeconfig, valid values are between 125 kHz to 650 MHz. For AntennaDownlinkconfig valid values are between 10 kHz to 54 MHz. For AntennaUplinkConfig, valid values are between 10 kHz to 54 MHz."];
       centerFrequency: Frequency.t
         [@ocaml.doc
           "Center frequency of a spectral Config. Valid values are between 2200 to 2300 MHz and 7750 to 8400 MHz for downlink and 2025 to 2120 MHz for uplink."];
+      bandwidth: FrequencyBandwidth.t
+        [@ocaml.doc
+          "Bandwidth of a spectral Config. AWS Ground Station currently has the following bandwidth limitations: For AntennaDownlinkDemodDecodeconfig, valid values are between 125 kHz to 650 MHz. For AntennaDownlinkconfig valid values are between 10 kHz to 54 MHz. For AntennaUplinkConfig, valid values are between 10 kHz to 54 MHz."];
       polarization: Polarization.t option
         [@ocaml.doc
           "Polarization of a spectral Config. Capturing both \"RIGHT_HAND\" and \"LEFT_HAND\" polarization requires two separate configs."]}
     let context_ = "SpectrumConfig"
     let make ?polarization =
-      fun ~bandwidth ->
-        fun ~centerFrequency ->
-          fun () -> { polarization; bandwidth; centerFrequency }
+      fun ~centerFrequency ->
+        fun ~bandwidth ->
+          fun () -> { polarization; centerFrequency; bandwidth }
     let to_value x =
       structure_to_value
-        [("bandwidth", (Some (FrequencyBandwidth.to_value x.bandwidth)));
-        ("centerFrequency", (Some (Frequency.to_value x.centerFrequency)));
+        [("centerFrequency", (Some (Frequency.to_value x.centerFrequency)));
+        ("bandwidth", (Some (FrequencyBandwidth.to_value x.bandwidth)));
         ("polarization",
           (Option.map x.polarization ~f:Polarization.to_value))]
     let to_query v = to_query to_value v
@@ -738,21 +2408,21 @@ module SpectrumConfig =
       let polarization =
         (Option.map ~f:Polarization.of_xml)
           (Xml.child xml_arg0 "polarization") in
-      let centerFrequency =
-        Frequency.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "centerFrequency") in
       let bandwidth =
         FrequencyBandwidth.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bandwidth") in
-      make ?polarization ~centerFrequency ~bandwidth ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let polarization = field_map json "polarization" Polarization.of_json in
       let centerFrequency =
-        field_map_exn json "centerFrequency" Frequency.of_json in
+        Frequency.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "centerFrequency") in
+      make ?polarization ~bandwidth ~centerFrequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let polarization = field_map json__ "polarization" Polarization.of_json in
       let bandwidth =
-        field_map_exn json "bandwidth" FrequencyBandwidth.of_json in
-      make ?polarization ~centerFrequency ~bandwidth ()
+        field_map_exn json__ "bandwidth" FrequencyBandwidth.of_json in
+      let centerFrequency =
+        field_map_exn json__ "centerFrequency" Frequency.of_json in
+      make ?polarization ~bandwidth ~centerFrequency ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Object that describes a spectral Config."]
 module DecodeConfig =
@@ -773,9 +2443,9 @@ module DecodeConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "unvalidatedJSON") in
       make ~unvalidatedJSON ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unvalidatedJSON =
-        field_map_exn json "unvalidatedJSON" JsonString.of_json in
+        field_map_exn json__ "unvalidatedJSON" JsonString.of_json in
       make ~unvalidatedJSON ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the decode Config."]
@@ -797,9 +2467,9 @@ module DemodulationConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "unvalidatedJSON") in
       make ~unvalidatedJSON ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unvalidatedJSON =
-        field_map_exn json "unvalidatedJSON" JsonString.of_json in
+        field_map_exn json__ "unvalidatedJSON" JsonString.of_json in
       make ~unvalidatedJSON ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the demodulation Config."]
@@ -820,28 +2490,28 @@ module Eirp =
   struct
     type nonrec t =
       {
-      units: EirpUnits.t [@ocaml.doc "Units of an EIRP."];
       value: Double.t
         [@ocaml.doc
-          "Value of an EIRP. Valid values are between 20.0 to 50.0 dBW."]}
+          "Value of an EIRP. Valid values are between 20.0 to 50.0 dBW."];
+      units: EirpUnits.t [@ocaml.doc "Units of an EIRP."]}
     let context_ = "Eirp"
-    let make ~units = fun ~value -> fun () -> { units; value }
+    let make ~value = fun ~units -> fun () -> { value; units }
     let to_value x =
       structure_to_value
-        [("units", (Some (EirpUnits.to_value x.units)));
-        ("value", (Some (Double.to_value x.value)))]
+        [("value", (Some (Double.to_value x.value)));
+        ("units", (Some (EirpUnits.to_value x.units)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value =
-        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
       let units =
         EirpUnits.of_xml (Xml.child_exn ~context:context_ xml_arg0 "units") in
-      make ~value ~units ()
+      let value =
+        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      make ~units ~value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" Double.of_json in
-      let units = field_map_exn json "units" EirpUnits.of_json in
-      make ~value ~units ()
+    let of_json json__ =
+      let units = field_map_exn json__ "units" EirpUnits.of_json in
+      let value = field_map_exn json__ "value" Double.of_json in
+      make ~units ~value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Object that represents EIRP."]
 module UplinkSpectrumConfig =
@@ -872,10 +2542,10 @@ module UplinkSpectrumConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "centerFrequency") in
       make ?polarization ~centerFrequency ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let polarization = field_map json "polarization" Polarization.of_json in
+    let of_json json__ =
+      let polarization = field_map json__ "polarization" Polarization.of_json in
       let centerFrequency =
-        field_map_exn json "centerFrequency" Frequency.of_json in
+        field_map_exn json__ "centerFrequency" Frequency.of_json in
       make ?polarization ~centerFrequency ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the uplink spectral Config."]
@@ -891,7 +2561,7 @@ module S3KeyPrefix =
                 (check_string_max i ~max:900) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([a-zA-Z0-9_\\-=/]|\\{satellite_id\\}|\\{config\\-name}|\\{s3\\-config-id}|\\{year\\}|\\{month\\}|\\{day\\}){1,900}$")));
+                       ~pattern:"([a-zA-Z0-9_\\-=/]|\\{satellite_id\\}|\\{config\\-name}|\\{s3\\-config-id}|\\{year\\}|\\{month\\}|\\{day\\}){1,900}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -901,25 +2571,75 @@ module S3KeyPrefix =
     let of_json j = string_of_json ~kind:"S3KeyPrefix" j
     let to_json = simple_to_json to_value
   end
-module Criticality =
+module TelemetrySinkData =
   struct
     type nonrec t =
-      | PREFERRED 
-      | REMOVED 
-      | REQUIRED 
+      {
+      kinesisDataStreamData: KinesisDataStreamData.t option
+        [@ocaml.doc
+          "Information about a telemetry sink of type KINESIS_DATA_STREAM."]}
+    let make ?kinesisDataStreamData = fun () -> { kinesisDataStreamData }
+    let to_value x =
+      structure_to_value
+        [("kinesisDataStreamData",
+           (Option.map x.kinesisDataStreamData
+              ~f:KinesisDataStreamData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kinesisDataStreamData =
+        (Option.map ~f:KinesisDataStreamData.of_xml)
+          (Xml.child xml_arg0 "kinesisDataStreamData") in
+      make ?kinesisDataStreamData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kinesisDataStreamData =
+        field_map json__ "kinesisDataStreamData"
+          KinesisDataStreamData.of_json in
+      make ?kinesisDataStreamData ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a telemetry sink."]
+module TelemetrySinkType =
+  struct
+    type nonrec t =
+      | KINESIS_DATA_STREAM 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | PREFERRED -> "PREFERRED"
-      | REMOVED -> "REMOVED"
-      | REQUIRED -> "REQUIRED"
+      | KINESIS_DATA_STREAM -> "KINESIS_DATA_STREAM"
       | Non_static_id s -> s
     let of_string =
       function
+      | "KINESIS_DATA_STREAM" -> KINESIS_DATA_STREAM
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TelemetrySinkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TelemetrySinkType" j)
+    let to_json = simple_to_json to_value
+  end
+module Criticality =
+  struct
+    type nonrec t =
+      | REQUIRED 
+      | PREFERRED 
+      | REMOVED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REQUIRED -> "REQUIRED"
+      | PREFERRED -> "PREFERRED"
+      | REMOVED -> "REMOVED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REQUIRED" -> REQUIRED
       | "PREFERRED" -> PREFERRED
       | "REMOVED" -> REMOVED
-      | "REQUIRED" -> REQUIRED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -929,12 +2649,122 @@ module Criticality =
     let of_json j = of_string (string_of_json ~kind:"Criticality" j)
     let to_json = simple_to_json to_value
   end
+module CapabilityArn =
+  struct
+    type nonrec t = string
+    let context_ = "CapabilityArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CapabilityArn" j
+    let to_json = simple_to_json to_value
+  end
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ComponentVersion =
+  struct
+    type nonrec t =
+      {
+      componentType: ComponentTypeString.t [@ocaml.doc "Component type."];
+      versions: VersionStringList.t [@ocaml.doc "List of versions."]}
+    let context_ = "ComponentVersion"
+    let make ~componentType =
+      fun ~versions -> fun () -> { componentType; versions }
+    let to_value x =
+      structure_to_value
+        [("componentType",
+           (Some (ComponentTypeString.to_value x.componentType)));
+        ("versions", (Some (VersionStringList.to_value x.versions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let versions =
+        VersionStringList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "versions") in
+      let componentType =
+        ComponentTypeString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "componentType") in
+      make ~versions ~componentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let versions =
+        field_map_exn json__ "versions" VersionStringList.of_json in
+      let componentType =
+        field_map_exn json__ "componentType" ComponentTypeString.of_json in
+      make ~versions ~componentType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Version information for agent components."]
+module EphemerisMetaData =
+  struct
+    type nonrec t =
+      {
+      source: EphemerisSource.t option
+        [@ocaml.doc "The EphemerisSource that generated a given ephemeris."];
+      ephemerisId: Uuid.t option
+        [@ocaml.doc
+          "UUID of a customer-provided ephemeris. This field is not populated for default ephemerides from Space Track."];
+      epoch: Timestamp.t option
+        [@ocaml.doc
+          "The epoch of a default, ephemeris from Space Track in UTC. This field is not populated for customer-provided ephemerides."];
+      name: SafeName.t option
+        [@ocaml.doc
+          "A name string associated with the ephemeris. Used as a human-readable identifier for the ephemeris. A name is only returned for customer-provider ephemerides that have a name associated."]}
+    let make ?source =
+      fun ?ephemerisId ->
+        fun ?epoch ->
+          fun ?name -> fun () -> { source; ephemerisId; epoch; name }
+    let to_value x =
+      structure_to_value
+        [("source", (Option.map x.source ~f:EphemerisSource.to_value));
+        ("ephemerisId", (Option.map x.ephemerisId ~f:Uuid.to_value));
+        ("epoch", (Option.map x.epoch ~f:Timestamp.to_value));
+        ("name", (Option.map x.name ~f:SafeName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
+      let epoch =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "epoch") in
+      let ephemerisId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "ephemerisId") in
+      let source =
+        (Option.map ~f:EphemerisSource.of_xml) (Xml.child xml_arg0 "source") in
+      make ?name ?epoch ?ephemerisId ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "name" SafeName.of_json in
+      let epoch = field_map json__ "epoch" Timestamp.of_json in
+      let ephemerisId = field_map json__ "ephemerisId" Uuid.of_json in
+      let source = field_map json__ "source" EphemerisSource.of_json in
+      make ?name ?epoch ?ephemerisId ?source ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Metadata describing a particular ephemeris."]
 module GroundStationIdList =
   struct
-    type nonrec t = String_.t list
-    let make i = i
+    type nonrec t = GroundStationName.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:GroundStationName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -948,32 +2778,11 @@ module GroundStationIdList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
+                     | _ -> true))) ~f:GroundStationName.of_xml)
     let of_json j =
-      list_of_json ~kind:"GroundStationIdList" ~of_json:String_.of_json j
+      list_of_json ~kind:"GroundStationIdList"
+        ~of_json:GroundStationName.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module Uuid =
-  struct
-    type nonrec t = string
-    let context_ = "Uuid"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Uuid" j
-    let to_json = simple_to_json to_value
   end
 module NoradSatelliteID =
   struct
@@ -982,7 +2791,7 @@ module NoradSatelliteID =
       let open Result in
         ok_or_failwith
           ((check_int_max i ~max:99999) >>=
-             (fun () -> check_int_min i ~min:1));
+             (fun () -> check_int_min i ~min:0));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -998,7 +2807,16 @@ module SatelliteArn =
   struct
     type nonrec t = string
     let context_ = "satelliteArn"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:82) >>=
+             (fun () ->
+                (check_string_max i ~max:132) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:groundstation:([-a-z0-9]{1,50})?:[0-9]{12}:satellite/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -1007,11 +2825,40 @@ module SatelliteArn =
     let of_json j = string_of_json ~kind:"satelliteArn" j
     let to_json = simple_to_json to_value
   end
+module AWSRegion =
+  struct
+    type nonrec t = string
+    let context_ = "AWSRegion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AWSRegion" j
+    let to_json = simple_to_json to_value
+  end
 module MissionProfileArn =
   struct
     type nonrec t = string
     let context_ = "MissionProfileArn"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:89) >>=
+             (fun () ->
+                (check_string_max i ~max:138) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:groundstation:[-a-z0-9]{1,50}:[0-9]{12}:mission-profile/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -1020,11 +2867,157 @@ module MissionProfileArn =
     let of_json j = string_of_json ~kind:"MissionProfileArn" j
     let to_json = simple_to_json to_value
   end
+module AntennaName =
+  struct
+    type nonrec t = string
+    let context_ = "AntennaName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[ a-zA-Z0-9-._:=]{4,256}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AntennaName" j
+    let to_json = simple_to_json to_value
+  end
+module ReservationDetails =
+  struct
+    type nonrec t =
+      {
+      maintenance: MaintenanceReservationDetails.t option
+        [@ocaml.doc "Details of a maintenance reservation."];
+      contact: ContactReservationDetails.t option
+        [@ocaml.doc "Details of a contact reservation."]}
+    let make ?maintenance =
+      fun ?contact -> fun () -> { maintenance; contact }
+    let to_value x =
+      structure_to_value
+        [("maintenance",
+           (Option.map x.maintenance
+              ~f:MaintenanceReservationDetails.to_value));
+        ("contact",
+          (Option.map x.contact ~f:ContactReservationDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contact =
+        (Option.map ~f:ContactReservationDetails.of_xml)
+          (Xml.child xml_arg0 "contact") in
+      let maintenance =
+        (Option.map ~f:MaintenanceReservationDetails.of_xml)
+          (Xml.child xml_arg0 "maintenance") in
+      make ?contact ?maintenance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contact =
+        field_map json__ "contact" ContactReservationDetails.of_json in
+      let maintenance =
+        field_map json__ "maintenance" MaintenanceReservationDetails.of_json in
+      make ?contact ?maintenance ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details of a ground station reservation."]
+module ReservationType =
+  struct
+    type nonrec t =
+      | MAINTENANCE 
+      | CONTACT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MAINTENANCE -> "MAINTENANCE"
+      | CONTACT -> "CONTACT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MAINTENANCE" -> MAINTENANCE
+      | "CONTACT" -> CONTACT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ReservationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReservationType" j)
+    let to_json = simple_to_json to_value
+  end
+module EphemerisPriority =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:99999) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for EphemerisPriority" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module EphemerisStatus =
+  struct
+    type nonrec t =
+      | VALIDATING 
+      | INVALID 
+      | ERROR 
+      | ENABLED 
+      | DISABLED 
+      | EXPIRED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VALIDATING -> "VALIDATING"
+      | INVALID -> "INVALID"
+      | ERROR -> "ERROR"
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | EXPIRED -> "EXPIRED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VALIDATING" -> VALIDATING
+      | "INVALID" -> INVALID
+      | "ERROR" -> ERROR
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | "EXPIRED" -> EXPIRED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EphemerisStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EphemerisStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module DataflowEndpointGroupArn =
   struct
     type nonrec t = string
     let context_ = "DataflowEndpointGroupArn"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:97) >>=
+             (fun () ->
+                (check_string_max i ~max:146) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:groundstation:[-a-z0-9]{1,50}:[0-9]{12}:dataflow-endpoint-group/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -1036,52 +3029,52 @@ module DataflowEndpointGroupArn =
 module ContactStatus =
   struct
     type nonrec t =
-      | AVAILABLE 
-      | AWS_CANCELLED 
-      | AWS_FAILED 
-      | CANCELLED 
-      | CANCELLING 
-      | COMPLETED 
-      | FAILED 
+      | SCHEDULING 
       | FAILED_TO_SCHEDULE 
+      | SCHEDULED 
+      | CANCELLED 
+      | AWS_CANCELLED 
+      | PREPASS 
       | PASS 
       | POSTPASS 
-      | PREPASS 
-      | SCHEDULED 
-      | SCHEDULING 
+      | COMPLETED 
+      | FAILED 
+      | AVAILABLE 
+      | CANCELLING 
+      | AWS_FAILED 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | AVAILABLE -> "AVAILABLE"
-      | AWS_CANCELLED -> "AWS_CANCELLED"
-      | AWS_FAILED -> "AWS_FAILED"
-      | CANCELLED -> "CANCELLED"
-      | CANCELLING -> "CANCELLING"
-      | COMPLETED -> "COMPLETED"
-      | FAILED -> "FAILED"
+      | SCHEDULING -> "SCHEDULING"
       | FAILED_TO_SCHEDULE -> "FAILED_TO_SCHEDULE"
+      | SCHEDULED -> "SCHEDULED"
+      | CANCELLED -> "CANCELLED"
+      | AWS_CANCELLED -> "AWS_CANCELLED"
+      | PREPASS -> "PREPASS"
       | PASS -> "PASS"
       | POSTPASS -> "POSTPASS"
-      | PREPASS -> "PREPASS"
-      | SCHEDULED -> "SCHEDULED"
-      | SCHEDULING -> "SCHEDULING"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | AVAILABLE -> "AVAILABLE"
+      | CANCELLING -> "CANCELLING"
+      | AWS_FAILED -> "AWS_FAILED"
       | Non_static_id s -> s
     let of_string =
       function
-      | "AVAILABLE" -> AVAILABLE
-      | "AWS_CANCELLED" -> AWS_CANCELLED
-      | "AWS_FAILED" -> AWS_FAILED
-      | "CANCELLED" -> CANCELLED
-      | "CANCELLING" -> CANCELLING
-      | "COMPLETED" -> COMPLETED
-      | "FAILED" -> FAILED
+      | "SCHEDULING" -> SCHEDULING
       | "FAILED_TO_SCHEDULE" -> FAILED_TO_SCHEDULE
+      | "SCHEDULED" -> SCHEDULED
+      | "CANCELLED" -> CANCELLED
+      | "AWS_CANCELLED" -> AWS_CANCELLED
+      | "PREPASS" -> PREPASS
       | "PASS" -> PASS
       | "POSTPASS" -> POSTPASS
-      | "PREPASS" -> PREPASS
-      | "SCHEDULED" -> SCHEDULED
-      | "SCHEDULING" -> SCHEDULING
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | "AVAILABLE" -> AVAILABLE
+      | "CANCELLING" -> CANCELLING
+      | "AWS_FAILED" -> AWS_FAILED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1091,33 +3084,149 @@ module ContactStatus =
     let of_json j = of_string (string_of_json ~kind:"ContactStatus" j)
     let to_json = simple_to_json to_value
   end
+module ContactVersion =
+  struct
+    type nonrec t =
+      {
+      versionId: VersionId.t option [@ocaml.doc "Version ID of a contact."];
+      created: Timestamp.t option
+        [@ocaml.doc "Time the contact version was created in UTC."];
+      activated: Timestamp.t option
+        [@ocaml.doc
+          "Time the contact version was activated in UTC. A version is activated when it becomes the current active version of the contact."];
+      superseded: Timestamp.t option
+        [@ocaml.doc
+          "Time the contact version was superseded in UTC. A version is superseded when a newer version becomes active."];
+      lastUpdated: Timestamp.t option
+        [@ocaml.doc "Time the contact version was last updated in UTC."];
+      status: VersionStatus.t option
+        [@ocaml.doc "Status of the contact version."];
+      failureCodes: VersionFailureReasonCodes.t option
+        [@ocaml.doc "List of failure codes for the contact version."];
+      failureMessage: String_.t option
+        [@ocaml.doc "Failure message for the contact version."]}
+    let make ?versionId =
+      fun ?created ->
+        fun ?activated ->
+          fun ?superseded ->
+            fun ?lastUpdated ->
+              fun ?status ->
+                fun ?failureCodes ->
+                  fun ?failureMessage ->
+                    fun () ->
+                      {
+                        versionId;
+                        created;
+                        activated;
+                        superseded;
+                        lastUpdated;
+                        status;
+                        failureCodes;
+                        failureMessage
+                      }
+    let to_value x =
+      structure_to_value
+        [("versionId", (Option.map x.versionId ~f:VersionId.to_value));
+        ("created", (Option.map x.created ~f:Timestamp.to_value));
+        ("activated", (Option.map x.activated ~f:Timestamp.to_value));
+        ("superseded", (Option.map x.superseded ~f:Timestamp.to_value));
+        ("lastUpdated", (Option.map x.lastUpdated ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:VersionStatus.to_value));
+        ("failureCodes",
+          (Option.map x.failureCodes ~f:VersionFailureReasonCodes.to_value));
+        ("failureMessage", (Option.map x.failureMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "failureMessage") in
+      let failureCodes =
+        (Option.map ~f:VersionFailureReasonCodes.of_xml)
+          (Xml.child xml_arg0 "failureCodes") in
+      let status =
+        (Option.map ~f:VersionStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let lastUpdated =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdated") in
+      let superseded =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "superseded") in
+      let activated =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "activated") in
+      let created =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "created") in
+      let versionId =
+        (Option.map ~f:VersionId.of_xml) (Xml.child xml_arg0 "versionId") in
+      make ?failureMessage ?failureCodes ?status ?lastUpdated ?superseded
+        ?activated ?created ?versionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureMessage = field_map json__ "failureMessage" String_.of_json in
+      let failureCodes =
+        field_map json__ "failureCodes" VersionFailureReasonCodes.of_json in
+      let status = field_map json__ "status" VersionStatus.of_json in
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
+      let superseded = field_map json__ "superseded" Timestamp.of_json in
+      let activated = field_map json__ "activated" Timestamp.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
+      let versionId = field_map json__ "versionId" VersionId.of_json in
+      make ?failureMessage ?failureCodes ?status ?lastUpdated ?superseded
+        ?activated ?created ?versionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Version information for a contact."]
 module Elevation =
   struct
     type nonrec t =
       {
-      unit: AngleUnits.t [@ocaml.doc "Elevation angle units."];
-      value: Double.t [@ocaml.doc "Elevation angle value."]}
-    let context_ = "Elevation"
-    let make ~unit = fun ~value -> fun () -> { unit; value }
+      value: Double.t option [@ocaml.doc "Elevation angle value."];
+      unit: AngleUnits.t option [@ocaml.doc "Elevation angle units."]}
+    let make ?value = fun ?unit -> fun () -> { value; unit }
     let to_value x =
       structure_to_value
-        [("unit", (Some (AngleUnits.to_value x.unit)));
-        ("value", (Some (Double.to_value x.value)))]
+        [("value", (Option.map x.value ~f:Double.to_value));
+        ("unit", (Option.map x.unit ~f:AngleUnits.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value =
-        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
       let unit =
-        AngleUnits.of_xml (Xml.child_exn ~context:context_ xml_arg0 "unit") in
-      make ~value ~unit ()
+        (Option.map ~f:AngleUnits.of_xml) (Xml.child xml_arg0 "unit") in
+      let value = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "value") in
+      make ?unit ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" Double.of_json in
-      let unit = field_map_exn json "unit" AngleUnits.of_json in
-      make ~value ~unit ()
+    let of_json json__ =
+      let unit = field_map json__ "unit" AngleUnits.of_json in
+      let value = field_map json__ "value" Double.of_json in
+      make ?unit ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Elevation angle of the satellite in the sky during a contact."]
+module EphemerisResponseData =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t option
+        [@ocaml.doc
+          "Unique identifier of the ephemeris. Appears only for custom ephemerides."];
+      ephemerisType: EphemerisType.t option [@ocaml.doc "Type of ephemeris."]}
+    let make ?ephemerisId =
+      fun ?ephemerisType -> fun () -> { ephemerisId; ephemerisType }
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Option.map x.ephemerisId ~f:Uuid.to_value));
+        ("ephemerisType",
+          (Option.map x.ephemerisType ~f:EphemerisType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ephemerisType =
+        (Option.map ~f:EphemerisType.of_xml)
+          (Xml.child xml_arg0 "ephemerisType") in
+      let ephemerisId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "ephemerisId") in
+      make ?ephemerisType ?ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ephemerisType =
+        field_map json__ "ephemerisType" EphemerisType.of_json in
+      let ephemerisId = field_map json__ "ephemerisId" Uuid.of_json in
+      make ?ephemerisType ?ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Ephemeris data for a contact."]
 module TagsMap =
   struct
     type nonrec t = (String_.t * String_.t) list
@@ -1139,6 +3248,8 @@ module TagsMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1146,48 +3257,222 @@ module TagsMap =
         ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Timestamp =
+module EphemerisErrorCode =
+  struct
+    type nonrec t =
+      | INTERNAL_ERROR 
+      | MISMATCHED_SATCAT_ID 
+      | OEM_VERSION_UNSUPPORTED 
+      | ORIGINATOR_MISSING 
+      | CREATION_DATE_MISSING 
+      | OBJECT_NAME_MISSING 
+      | OBJECT_ID_MISSING 
+      | REF_FRAME_UNSUPPORTED 
+      | REF_FRAME_EPOCH_UNSUPPORTED 
+      | TIME_SYSTEM_UNSUPPORTED 
+      | CENTER_BODY_UNSUPPORTED 
+      | INTERPOLATION_MISSING 
+      | INTERPOLATION_DEGREE_INVALID 
+      | AZ_EL_SEGMENT_LIST_MISSING 
+      | INSUFFICIENT_TIME_AZ_EL 
+      | START_TIME_IN_FUTURE 
+      | END_TIME_IN_PAST 
+      | EXPIRATION_TIME_TOO_EARLY 
+      | START_TIME_METADATA_TOO_EARLY 
+      | STOP_TIME_METADATA_TOO_LATE 
+      | AZ_EL_SEGMENT_END_TIME_BEFORE_START_TIME 
+      | AZ_EL_SEGMENT_TIMES_OVERLAP 
+      | AZ_EL_SEGMENTS_OUT_OF_ORDER 
+      | TIME_AZ_EL_ITEMS_OUT_OF_ORDER 
+      | MEAN_MOTION_INVALID 
+      | TIME_AZ_EL_AZ_RADIAN_RANGE_INVALID 
+      | TIME_AZ_EL_EL_RADIAN_RANGE_INVALID 
+      | TIME_AZ_EL_AZ_DEGREE_RANGE_INVALID 
+      | TIME_AZ_EL_EL_DEGREE_RANGE_INVALID 
+      | TIME_AZ_EL_ANGLE_UNITS_INVALID 
+      | INSUFFICIENT_KMS_PERMISSIONS 
+      | FILE_FORMAT_INVALID 
+      | AZ_EL_SEGMENT_REFERENCE_EPOCH_INVALID 
+      | AZ_EL_SEGMENT_START_TIME_INVALID 
+      | AZ_EL_SEGMENT_END_TIME_INVALID 
+      | AZ_EL_SEGMENT_VALID_TIME_RANGE_INVALID 
+      | AZ_EL_SEGMENT_END_TIME_TOO_LATE 
+      | AZ_EL_TOTAL_DURATION_EXCEEDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INTERNAL_ERROR -> "INTERNAL_ERROR"
+      | MISMATCHED_SATCAT_ID -> "MISMATCHED_SATCAT_ID"
+      | OEM_VERSION_UNSUPPORTED -> "OEM_VERSION_UNSUPPORTED"
+      | ORIGINATOR_MISSING -> "ORIGINATOR_MISSING"
+      | CREATION_DATE_MISSING -> "CREATION_DATE_MISSING"
+      | OBJECT_NAME_MISSING -> "OBJECT_NAME_MISSING"
+      | OBJECT_ID_MISSING -> "OBJECT_ID_MISSING"
+      | REF_FRAME_UNSUPPORTED -> "REF_FRAME_UNSUPPORTED"
+      | REF_FRAME_EPOCH_UNSUPPORTED -> "REF_FRAME_EPOCH_UNSUPPORTED"
+      | TIME_SYSTEM_UNSUPPORTED -> "TIME_SYSTEM_UNSUPPORTED"
+      | CENTER_BODY_UNSUPPORTED -> "CENTER_BODY_UNSUPPORTED"
+      | INTERPOLATION_MISSING -> "INTERPOLATION_MISSING"
+      | INTERPOLATION_DEGREE_INVALID -> "INTERPOLATION_DEGREE_INVALID"
+      | AZ_EL_SEGMENT_LIST_MISSING -> "AZ_EL_SEGMENT_LIST_MISSING"
+      | INSUFFICIENT_TIME_AZ_EL -> "INSUFFICIENT_TIME_AZ_EL"
+      | START_TIME_IN_FUTURE -> "START_TIME_IN_FUTURE"
+      | END_TIME_IN_PAST -> "END_TIME_IN_PAST"
+      | EXPIRATION_TIME_TOO_EARLY -> "EXPIRATION_TIME_TOO_EARLY"
+      | START_TIME_METADATA_TOO_EARLY -> "START_TIME_METADATA_TOO_EARLY"
+      | STOP_TIME_METADATA_TOO_LATE -> "STOP_TIME_METADATA_TOO_LATE"
+      | AZ_EL_SEGMENT_END_TIME_BEFORE_START_TIME ->
+          "AZ_EL_SEGMENT_END_TIME_BEFORE_START_TIME"
+      | AZ_EL_SEGMENT_TIMES_OVERLAP -> "AZ_EL_SEGMENT_TIMES_OVERLAP"
+      | AZ_EL_SEGMENTS_OUT_OF_ORDER -> "AZ_EL_SEGMENTS_OUT_OF_ORDER"
+      | TIME_AZ_EL_ITEMS_OUT_OF_ORDER -> "TIME_AZ_EL_ITEMS_OUT_OF_ORDER"
+      | MEAN_MOTION_INVALID -> "MEAN_MOTION_INVALID"
+      | TIME_AZ_EL_AZ_RADIAN_RANGE_INVALID ->
+          "TIME_AZ_EL_AZ_RADIAN_RANGE_INVALID"
+      | TIME_AZ_EL_EL_RADIAN_RANGE_INVALID ->
+          "TIME_AZ_EL_EL_RADIAN_RANGE_INVALID"
+      | TIME_AZ_EL_AZ_DEGREE_RANGE_INVALID ->
+          "TIME_AZ_EL_AZ_DEGREE_RANGE_INVALID"
+      | TIME_AZ_EL_EL_DEGREE_RANGE_INVALID ->
+          "TIME_AZ_EL_EL_DEGREE_RANGE_INVALID"
+      | TIME_AZ_EL_ANGLE_UNITS_INVALID -> "TIME_AZ_EL_ANGLE_UNITS_INVALID"
+      | INSUFFICIENT_KMS_PERMISSIONS -> "INSUFFICIENT_KMS_PERMISSIONS"
+      | FILE_FORMAT_INVALID -> "FILE_FORMAT_INVALID"
+      | AZ_EL_SEGMENT_REFERENCE_EPOCH_INVALID ->
+          "AZ_EL_SEGMENT_REFERENCE_EPOCH_INVALID"
+      | AZ_EL_SEGMENT_START_TIME_INVALID ->
+          "AZ_EL_SEGMENT_START_TIME_INVALID"
+      | AZ_EL_SEGMENT_END_TIME_INVALID -> "AZ_EL_SEGMENT_END_TIME_INVALID"
+      | AZ_EL_SEGMENT_VALID_TIME_RANGE_INVALID ->
+          "AZ_EL_SEGMENT_VALID_TIME_RANGE_INVALID"
+      | AZ_EL_SEGMENT_END_TIME_TOO_LATE -> "AZ_EL_SEGMENT_END_TIME_TOO_LATE"
+      | AZ_EL_TOTAL_DURATION_EXCEEDED -> "AZ_EL_TOTAL_DURATION_EXCEEDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INTERNAL_ERROR" -> INTERNAL_ERROR
+      | "MISMATCHED_SATCAT_ID" -> MISMATCHED_SATCAT_ID
+      | "OEM_VERSION_UNSUPPORTED" -> OEM_VERSION_UNSUPPORTED
+      | "ORIGINATOR_MISSING" -> ORIGINATOR_MISSING
+      | "CREATION_DATE_MISSING" -> CREATION_DATE_MISSING
+      | "OBJECT_NAME_MISSING" -> OBJECT_NAME_MISSING
+      | "OBJECT_ID_MISSING" -> OBJECT_ID_MISSING
+      | "REF_FRAME_UNSUPPORTED" -> REF_FRAME_UNSUPPORTED
+      | "REF_FRAME_EPOCH_UNSUPPORTED" -> REF_FRAME_EPOCH_UNSUPPORTED
+      | "TIME_SYSTEM_UNSUPPORTED" -> TIME_SYSTEM_UNSUPPORTED
+      | "CENTER_BODY_UNSUPPORTED" -> CENTER_BODY_UNSUPPORTED
+      | "INTERPOLATION_MISSING" -> INTERPOLATION_MISSING
+      | "INTERPOLATION_DEGREE_INVALID" -> INTERPOLATION_DEGREE_INVALID
+      | "AZ_EL_SEGMENT_LIST_MISSING" -> AZ_EL_SEGMENT_LIST_MISSING
+      | "INSUFFICIENT_TIME_AZ_EL" -> INSUFFICIENT_TIME_AZ_EL
+      | "START_TIME_IN_FUTURE" -> START_TIME_IN_FUTURE
+      | "END_TIME_IN_PAST" -> END_TIME_IN_PAST
+      | "EXPIRATION_TIME_TOO_EARLY" -> EXPIRATION_TIME_TOO_EARLY
+      | "START_TIME_METADATA_TOO_EARLY" -> START_TIME_METADATA_TOO_EARLY
+      | "STOP_TIME_METADATA_TOO_LATE" -> STOP_TIME_METADATA_TOO_LATE
+      | "AZ_EL_SEGMENT_END_TIME_BEFORE_START_TIME" ->
+          AZ_EL_SEGMENT_END_TIME_BEFORE_START_TIME
+      | "AZ_EL_SEGMENT_TIMES_OVERLAP" -> AZ_EL_SEGMENT_TIMES_OVERLAP
+      | "AZ_EL_SEGMENTS_OUT_OF_ORDER" -> AZ_EL_SEGMENTS_OUT_OF_ORDER
+      | "TIME_AZ_EL_ITEMS_OUT_OF_ORDER" -> TIME_AZ_EL_ITEMS_OUT_OF_ORDER
+      | "MEAN_MOTION_INVALID" -> MEAN_MOTION_INVALID
+      | "TIME_AZ_EL_AZ_RADIAN_RANGE_INVALID" ->
+          TIME_AZ_EL_AZ_RADIAN_RANGE_INVALID
+      | "TIME_AZ_EL_EL_RADIAN_RANGE_INVALID" ->
+          TIME_AZ_EL_EL_RADIAN_RANGE_INVALID
+      | "TIME_AZ_EL_AZ_DEGREE_RANGE_INVALID" ->
+          TIME_AZ_EL_AZ_DEGREE_RANGE_INVALID
+      | "TIME_AZ_EL_EL_DEGREE_RANGE_INVALID" ->
+          TIME_AZ_EL_EL_DEGREE_RANGE_INVALID
+      | "TIME_AZ_EL_ANGLE_UNITS_INVALID" -> TIME_AZ_EL_ANGLE_UNITS_INVALID
+      | "INSUFFICIENT_KMS_PERMISSIONS" -> INSUFFICIENT_KMS_PERMISSIONS
+      | "FILE_FORMAT_INVALID" -> FILE_FORMAT_INVALID
+      | "AZ_EL_SEGMENT_REFERENCE_EPOCH_INVALID" ->
+          AZ_EL_SEGMENT_REFERENCE_EPOCH_INVALID
+      | "AZ_EL_SEGMENT_START_TIME_INVALID" ->
+          AZ_EL_SEGMENT_START_TIME_INVALID
+      | "AZ_EL_SEGMENT_END_TIME_INVALID" -> AZ_EL_SEGMENT_END_TIME_INVALID
+      | "AZ_EL_SEGMENT_VALID_TIME_RANGE_INVALID" ->
+          AZ_EL_SEGMENT_VALID_TIME_RANGE_INVALID
+      | "AZ_EL_SEGMENT_END_TIME_TOO_LATE" -> AZ_EL_SEGMENT_END_TIME_TOO_LATE
+      | "AZ_EL_TOTAL_DURATION_EXCEEDED" -> AZ_EL_TOTAL_DURATION_EXCEEDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EphemerisErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EphemerisErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
+module ErrorString =
   struct
     type nonrec t = string
-    let make i = i
+    let context_ = "ErrorString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
-    let to_value x = `Timestamp x
+    let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorString" j
+    let to_json = simple_to_json to_value
+  end
+module UnboundedString =
+  struct
+    type nonrec t = string
+    let context_ = "UnboundedString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UnboundedString" j
     let to_json = simple_to_json to_value
   end
 module Destination =
   struct
     type nonrec t =
       {
+      configType: ConfigCapabilityType.t option
+        [@ocaml.doc "Type of a Config."];
+      configId: Uuid.t option [@ocaml.doc "UUID of a Config."];
       configDetails: ConfigDetails.t option
         [@ocaml.doc
           "Additional details for a Config, if type is dataflow endpoint or antenna demod decode."];
-      configId: String_.t option [@ocaml.doc "UUID of a Config."];
-      configType: ConfigCapabilityType.t option
-        [@ocaml.doc "Type of a Config."];
       dataflowDestinationRegion: String_.t option
         [@ocaml.doc "Region of a dataflow destination."]}
-    let make ?configDetails =
+    let make ?configType =
       fun ?configId ->
-        fun ?configType ->
+        fun ?configDetails ->
           fun ?dataflowDestinationRegion ->
             fun () ->
               {
-                configDetails;
-                configId;
                 configType;
+                configId;
+                configDetails;
                 dataflowDestinationRegion
               }
     let to_value x =
       structure_to_value
-        [("configDetails",
-           (Option.map x.configDetails ~f:ConfigDetails.to_value));
-        ("configId", (Option.map x.configId ~f:String_.to_value));
-        ("configType",
-          (Option.map x.configType ~f:ConfigCapabilityType.to_value));
+        [("configType",
+           (Option.map x.configType ~f:ConfigCapabilityType.to_value));
+        ("configId", (Option.map x.configId ~f:Uuid.to_value));
+        ("configDetails",
+          (Option.map x.configDetails ~f:ConfigDetails.to_value));
         ("dataflowDestinationRegion",
           (Option.map x.dataflowDestinationRegion ~f:String_.to_value))]
     let to_query v = to_query to_value v
@@ -1195,52 +3480,52 @@ module Destination =
       let dataflowDestinationRegion =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "dataflowDestinationRegion") in
-      let configType =
-        (Option.map ~f:ConfigCapabilityType.of_xml)
-          (Xml.child xml_arg0 "configType") in
-      let configId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "configId") in
       let configDetails =
         (Option.map ~f:ConfigDetails.of_xml)
           (Xml.child xml_arg0 "configDetails") in
-      make ?dataflowDestinationRegion ?configType ?configId ?configDetails ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataflowDestinationRegion =
-        field_map json "dataflowDestinationRegion" String_.of_json in
+      let configId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "configId") in
       let configType =
-        field_map json "configType" ConfigCapabilityType.of_json in
-      let configId = field_map json "configId" String_.of_json in
+        (Option.map ~f:ConfigCapabilityType.of_xml)
+          (Xml.child xml_arg0 "configType") in
+      make ?dataflowDestinationRegion ?configDetails ?configId ?configType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataflowDestinationRegion =
+        field_map json__ "dataflowDestinationRegion" String_.of_json in
       let configDetails =
-        field_map json "configDetails" ConfigDetails.of_json in
-      make ?dataflowDestinationRegion ?configType ?configId ?configDetails ()
+        field_map json__ "configDetails" ConfigDetails.of_json in
+      let configId = field_map json__ "configId" Uuid.of_json in
+      let configType =
+        field_map json__ "configType" ConfigCapabilityType.of_json in
+      make ?dataflowDestinationRegion ?configDetails ?configId ?configType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Dataflow details for the destination side."]
 module Source =
   struct
     type nonrec t =
       {
-      configDetails: ConfigDetails.t option
-        [@ocaml.doc
-          "Additional details for a Config, if type is dataflow endpoint or antenna demod decode."];
-      configId: String_.t option [@ocaml.doc "UUID of a Config."];
       configType: ConfigCapabilityType.t option
         [@ocaml.doc "Type of a Config."];
+      configId: String_.t option [@ocaml.doc "UUID of a Config."];
+      configDetails: ConfigDetails.t option
+        [@ocaml.doc
+          "Additional details for a Config, if type is dataflow-endpoint or antenna-downlink-demod-decode"];
       dataflowSourceRegion: String_.t option
         [@ocaml.doc "Region of a dataflow source."]}
-    let make ?configDetails =
+    let make ?configType =
       fun ?configId ->
-        fun ?configType ->
+        fun ?configDetails ->
           fun ?dataflowSourceRegion ->
             fun () ->
-              { configDetails; configId; configType; dataflowSourceRegion }
+              { configType; configId; configDetails; dataflowSourceRegion }
     let to_value x =
       structure_to_value
-        [("configDetails",
-           (Option.map x.configDetails ~f:ConfigDetails.to_value));
+        [("configType",
+           (Option.map x.configType ~f:ConfigCapabilityType.to_value));
         ("configId", (Option.map x.configId ~f:String_.to_value));
-        ("configType",
-          (Option.map x.configType ~f:ConfigCapabilityType.to_value));
+        ("configDetails",
+          (Option.map x.configDetails ~f:ConfigDetails.to_value));
         ("dataflowSourceRegion",
           (Option.map x.dataflowSourceRegion ~f:String_.to_value))]
     let to_query v = to_query to_value v
@@ -1248,27 +3533,152 @@ module Source =
       let dataflowSourceRegion =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "dataflowSourceRegion") in
-      let configType =
-        (Option.map ~f:ConfigCapabilityType.of_xml)
-          (Xml.child xml_arg0 "configType") in
-      let configId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "configId") in
       let configDetails =
         (Option.map ~f:ConfigDetails.of_xml)
           (Xml.child xml_arg0 "configDetails") in
-      make ?dataflowSourceRegion ?configType ?configId ?configDetails ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataflowSourceRegion =
-        field_map json "dataflowSourceRegion" String_.of_json in
+      let configId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "configId") in
       let configType =
-        field_map json "configType" ConfigCapabilityType.of_json in
-      let configId = field_map json "configId" String_.of_json in
+        (Option.map ~f:ConfigCapabilityType.of_xml)
+          (Xml.child xml_arg0 "configType") in
+      make ?dataflowSourceRegion ?configDetails ?configId ?configType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataflowSourceRegion =
+        field_map json__ "dataflowSourceRegion" String_.of_json in
       let configDetails =
-        field_map json "configDetails" ConfigDetails.of_json in
-      make ?dataflowSourceRegion ?configType ?configId ?configDetails ()
+        field_map json__ "configDetails" ConfigDetails.of_json in
+      let configId = field_map json__ "configId" String_.of_json in
+      let configType =
+        field_map json__ "configType" ConfigCapabilityType.of_json in
+      make ?dataflowSourceRegion ?configDetails ?configId ?configType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Dataflow details for the source side."]
+module AzElSegmentsData =
+  struct
+    type nonrec t =
+      {
+      s3Object: S3Object.t option
+        [@ocaml.doc
+          "The Amazon S3 object containing azimuth elevation segment data. The Amazon S3 object must contain JSON-formatted azimuth elevation data matching the AzElSegments structure."];
+      azElData: AzElSegments.t option
+        [@ocaml.doc
+          "Azimuth elevation segment data provided directly in the request. Use this option for smaller datasets or when Amazon S3 access is not available."]}
+    let make ?s3Object = fun ?azElData -> fun () -> { s3Object; azElData }
+    let to_value x =
+      structure_to_value
+        [("s3Object", (Option.map x.s3Object ~f:S3Object.to_value));
+        ("azElData", (Option.map x.azElData ~f:AzElSegments.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let azElData =
+        (Option.map ~f:AzElSegments.of_xml) (Xml.child xml_arg0 "azElData") in
+      let s3Object =
+        (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "s3Object") in
+      make ?azElData ?s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let azElData = field_map json__ "azElData" AzElSegments.of_json in
+      let s3Object = field_map json__ "s3Object" S3Object.of_json in
+      make ?azElData ?s3Object ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for azimuth elevation segment data. Specify either AzElSegmentsData$s3Object to reference data in Amazon S3, or AzElSegmentsData$azElData to provide data inline."]
+module TLEDataList =
+  struct
+    type nonrec t = TLEData.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TLEData.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TLEData.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TLEDataList" ~of_json:TLEData.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DownlinkAwsGroundStationAgentEndpoint =
+  struct
+    type nonrec t =
+      {
+      name: SafeName.t [@ocaml.doc "Downlink dataflow endpoint name"];
+      dataflowDetails: DownlinkDataflowDetails.t
+        [@ocaml.doc "Dataflow details for the downlink endpoint"]}
+    let context_ = "DownlinkAwsGroundStationAgentEndpoint"
+    let make ~name =
+      fun ~dataflowDetails -> fun () -> { name; dataflowDetails }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (SafeName.to_value x.name)));
+        ("dataflowDetails",
+          (Some (DownlinkDataflowDetails.to_value x.dataflowDetails)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataflowDetails =
+        DownlinkDataflowDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataflowDetails") in
+      let name =
+        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~dataflowDetails ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataflowDetails =
+        field_map_exn json__ "dataflowDetails"
+          DownlinkDataflowDetails.of_json in
+      let name = field_map_exn json__ "name" SafeName.of_json in
+      make ~dataflowDetails ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Definition for a downlink agent endpoint"]
+module UplinkAwsGroundStationAgentEndpoint =
+  struct
+    type nonrec t =
+      {
+      name: SafeName.t [@ocaml.doc "Uplink dataflow endpoint name"];
+      dataflowDetails: UplinkDataflowDetails.t
+        [@ocaml.doc "Dataflow details for the uplink endpoint"]}
+    let context_ = "UplinkAwsGroundStationAgentEndpoint"
+    let make ~name =
+      fun ~dataflowDetails -> fun () -> { name; dataflowDetails }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (SafeName.to_value x.name)));
+        ("dataflowDetails",
+          (Some (UplinkDataflowDetails.to_value x.dataflowDetails)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataflowDetails =
+        UplinkDataflowDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataflowDetails") in
+      let name =
+        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~dataflowDetails ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataflowDetails =
+        field_map_exn json__ "dataflowDetails" UplinkDataflowDetails.of_json in
+      let name = field_map_exn json__ "name" SafeName.of_json in
+      make ~dataflowDetails ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Definition for an uplink agent endpoint"]
 module DataflowEdge =
   struct
     type nonrec t = ConfigArn.t list
@@ -1277,6 +3687,9 @@ module DataflowEdge =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1297,6 +3710,98 @@ module DataflowEdge =
       list_of_json ~kind:"DataflowEdge" ~of_json:ConfigArn.of_json j
     let to_json v = composed_to_json to_value v
   end
+module KeyAliasArn =
+  struct
+    type nonrec t = string
+    let context_ = "KeyAliasArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws[a-zA-Z-]{0,16}:kms:[-a-z0-9]{1,50}:[0-9]{12}:((alias/[a-zA-Z0-9:/_-]{1,256}))")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KeyAliasArn" j
+    let to_json = simple_to_json to_value
+  end
+module KeyAliasName =
+  struct
+    type nonrec t = string
+    let context_ = "KeyAliasName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"alias/[a-zA-Z0-9:/_-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KeyAliasName" j
+    let to_json = simple_to_json to_value
+  end
+module KeyArn =
+  struct
+    type nonrec t = string
+    let context_ = "KeyArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KeyArn" j
+    let to_json = simple_to_json to_value
+  end
+module ProgramTrackSettings =
+  struct
+    type nonrec t =
+      {
+      azEl: AzElProgramTrackSettings.t option
+        [@ocaml.doc "Program track settings for AzElEphemeris."];
+      oem: OemProgramTrackSettings.t option
+        [@ocaml.doc "Program track settings for OEMEphemeris."];
+      tle: TleProgramTrackSettings.t option
+        [@ocaml.doc "Program track settings for TLEEphemeris."]}
+    let make ?azEl = fun ?oem -> fun ?tle -> fun () -> { azEl; oem; tle }
+    let to_value x =
+      structure_to_value
+        [("azEl", (Option.map x.azEl ~f:AzElProgramTrackSettings.to_value));
+        ("oem", (Option.map x.oem ~f:OemProgramTrackSettings.to_value));
+        ("tle", (Option.map x.tle ~f:TleProgramTrackSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tle =
+        (Option.map ~f:TleProgramTrackSettings.of_xml)
+          (Xml.child xml_arg0 "tle") in
+      let oem =
+        (Option.map ~f:OemProgramTrackSettings.of_xml)
+          (Xml.child xml_arg0 "oem") in
+      let azEl =
+        (Option.map ~f:AzElProgramTrackSettings.of_xml)
+          (Xml.child xml_arg0 "azEl") in
+      make ?tle ?oem ?azEl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tle = field_map json__ "tle" TleProgramTrackSettings.of_json in
+      let oem = field_map json__ "oem" OemProgramTrackSettings.of_json in
+      let azEl = field_map json__ "azEl" AzElProgramTrackSettings.of_json in
+      make ?tle ?oem ?azEl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Program track settings for an antenna during a contact."]
 module AntennaDownlinkConfig =
   struct
     type nonrec t =
@@ -1316,9 +3821,9 @@ module AntennaDownlinkConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "spectrumConfig") in
       make ~spectrumConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spectrumConfig =
-        field_map_exn json "spectrumConfig" SpectrumConfig.of_json in
+        field_map_exn json__ "spectrumConfig" SpectrumConfig.of_json in
       make ~spectrumConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1327,44 +3832,45 @@ module AntennaDownlinkDemodDecodeConfig =
   struct
     type nonrec t =
       {
-      decodeConfig: DecodeConfig.t
-        [@ocaml.doc "Information about the decode Config."];
+      spectrumConfig: SpectrumConfig.t
+        [@ocaml.doc "Information about the spectral Config."];
       demodulationConfig: DemodulationConfig.t
         [@ocaml.doc "Information about the demodulation Config."];
-      spectrumConfig: SpectrumConfig.t
-        [@ocaml.doc "Information about the spectral Config."]}
+      decodeConfig: DecodeConfig.t
+        [@ocaml.doc "Information about the decode Config."]}
     let context_ = "AntennaDownlinkDemodDecodeConfig"
-    let make ~decodeConfig =
+    let make ~spectrumConfig =
       fun ~demodulationConfig ->
-        fun ~spectrumConfig ->
-          fun () -> { decodeConfig; demodulationConfig; spectrumConfig }
+        fun ~decodeConfig ->
+          fun () -> { spectrumConfig; demodulationConfig; decodeConfig }
     let to_value x =
       structure_to_value
-        [("decodeConfig", (Some (DecodeConfig.to_value x.decodeConfig)));
+        [("spectrumConfig",
+           (Some (SpectrumConfig.to_value x.spectrumConfig)));
         ("demodulationConfig",
           (Some (DemodulationConfig.to_value x.demodulationConfig)));
-        ("spectrumConfig", (Some (SpectrumConfig.to_value x.spectrumConfig)))]
+        ("decodeConfig", (Some (DecodeConfig.to_value x.decodeConfig)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let spectrumConfig =
-        SpectrumConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spectrumConfig") in
-      let demodulationConfig =
-        DemodulationConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "demodulationConfig") in
       let decodeConfig =
         DecodeConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "decodeConfig") in
-      make ~spectrumConfig ~demodulationConfig ~decodeConfig ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let spectrumConfig =
-        field_map_exn json "spectrumConfig" SpectrumConfig.of_json in
       let demodulationConfig =
-        field_map_exn json "demodulationConfig" DemodulationConfig.of_json in
+        DemodulationConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "demodulationConfig") in
+      let spectrumConfig =
+        SpectrumConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "spectrumConfig") in
+      make ~decodeConfig ~demodulationConfig ~spectrumConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let decodeConfig =
-        field_map_exn json "decodeConfig" DecodeConfig.of_json in
-      make ~spectrumConfig ~demodulationConfig ~decodeConfig ()
+        field_map_exn json__ "decodeConfig" DecodeConfig.of_json in
+      let demodulationConfig =
+        field_map_exn json__ "demodulationConfig" DemodulationConfig.of_json in
+      let spectrumConfig =
+        field_map_exn json__ "spectrumConfig" SpectrumConfig.of_json in
+      make ~decodeConfig ~demodulationConfig ~spectrumConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about how AWS Ground Station should con\239\172\129gure an antenna for downlink demod decode during a contact."]
@@ -1372,11 +3878,11 @@ module AntennaUplinkConfig =
   struct
     type nonrec t =
       {
+      transmitDisabled: Boolean.t option
+        [@ocaml.doc "Whether or not uplink transmit is disabled."];
       spectrumConfig: UplinkSpectrumConfig.t
         [@ocaml.doc "Information about the uplink spectral Config."];
-      targetEirp: Eirp.t [@ocaml.doc "EIRP of the target."];
-      transmitDisabled: Boolean.t option
-        [@ocaml.doc "Whether or not uplink transmit is disabled."]}
+      targetEirp: Eirp.t [@ocaml.doc "EIRP of the target."]}
     let context_ = "AntennaUplinkConfig"
     let make ?transmitDisabled =
       fun ~spectrumConfig ->
@@ -1384,30 +3890,30 @@ module AntennaUplinkConfig =
           fun () -> { transmitDisabled; spectrumConfig; targetEirp }
     let to_value x =
       structure_to_value
-        [("spectrumConfig",
-           (Some (UplinkSpectrumConfig.to_value x.spectrumConfig)));
-        ("targetEirp", (Some (Eirp.to_value x.targetEirp)));
-        ("transmitDisabled",
-          (Option.map x.transmitDisabled ~f:Boolean.to_value))]
+        [("transmitDisabled",
+           (Option.map x.transmitDisabled ~f:Boolean.to_value));
+        ("spectrumConfig",
+          (Some (UplinkSpectrumConfig.to_value x.spectrumConfig)));
+        ("targetEirp", (Some (Eirp.to_value x.targetEirp)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let transmitDisabled =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "transmitDisabled") in
       let targetEirp =
         Eirp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "targetEirp") in
       let spectrumConfig =
         UplinkSpectrumConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "spectrumConfig") in
-      make ?transmitDisabled ~targetEirp ~spectrumConfig ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let transmitDisabled =
-        field_map json "transmitDisabled" Boolean.of_json in
-      let targetEirp = field_map_exn json "targetEirp" Eirp.of_json in
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "transmitDisabled") in
+      make ~targetEirp ~spectrumConfig ?transmitDisabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetEirp = field_map_exn json__ "targetEirp" Eirp.of_json in
       let spectrumConfig =
-        field_map_exn json "spectrumConfig" UplinkSpectrumConfig.of_json in
-      make ?transmitDisabled ~targetEirp ~spectrumConfig ()
+        field_map_exn json__ "spectrumConfig" UplinkSpectrumConfig.of_json in
+      let transmitDisabled =
+        field_map json__ "transmitDisabled" Boolean.of_json in
+      make ~targetEirp ~spectrumConfig ?transmitDisabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the uplink Config of an antenna."]
 module DataflowEndpointConfig =
@@ -1438,11 +3944,11 @@ module DataflowEndpointConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "dataflowEndpointName") in
       make ?dataflowEndpointRegion ~dataflowEndpointName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataflowEndpointRegion =
-        field_map json "dataflowEndpointRegion" String_.of_json in
+        field_map json__ "dataflowEndpointRegion" String_.of_json in
       let dataflowEndpointName =
-        field_map_exn json "dataflowEndpointName" String_.of_json in
+        field_map_exn json__ "dataflowEndpointName" String_.of_json in
       make ?dataflowEndpointRegion ~dataflowEndpointName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the dataflow endpoint Config."]
@@ -1451,11 +3957,11 @@ module S3RecordingConfig =
     type nonrec t =
       {
       bucketArn: BucketArn.t [@ocaml.doc "ARN of the bucket to record to."];
-      prefix: S3KeyPrefix.t option
-        [@ocaml.doc "S3 Key prefix to prefice data files."];
       roleArn: RoleArn.t
         [@ocaml.doc
-          "ARN of the role Ground Station assumes to write data to the bucket."]}
+          "ARN of the role Ground Station assumes to write data to the bucket."];
+      prefix: S3KeyPrefix.t option
+        [@ocaml.doc "S3 Key prefix to prefice data files."]}
     let context_ = "S3RecordingConfig"
     let make ?prefix =
       fun ~bucketArn ->
@@ -1463,26 +3969,63 @@ module S3RecordingConfig =
     let to_value x =
       structure_to_value
         [("bucketArn", (Some (BucketArn.to_value x.bucketArn)));
-        ("prefix", (Option.map x.prefix ~f:S3KeyPrefix.to_value));
-        ("roleArn", (Some (RoleArn.to_value x.roleArn)))]
+        ("roleArn", (Some (RoleArn.to_value x.roleArn)));
+        ("prefix", (Option.map x.prefix ~f:S3KeyPrefix.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let roleArn =
-        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       let prefix =
         (Option.map ~f:S3KeyPrefix.of_xml) (Xml.child xml_arg0 "prefix") in
+      let roleArn =
+        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       let bucketArn =
         BucketArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketArn") in
-      make ~roleArn ?prefix ~bucketArn ()
+      make ?prefix ~roleArn ~bucketArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
-      let prefix = field_map json "prefix" S3KeyPrefix.of_json in
-      let bucketArn = field_map_exn json "bucketArn" BucketArn.of_json in
-      make ~roleArn ?prefix ~bucketArn ()
+    let of_json json__ =
+      let prefix = field_map json__ "prefix" S3KeyPrefix.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
+      let bucketArn = field_map_exn json__ "bucketArn" BucketArn.of_json in
+      make ?prefix ~roleArn ~bucketArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an S3 recording Config."]
+module TelemetrySinkConfig =
+  struct
+    type nonrec t =
+      {
+      telemetrySinkType: TelemetrySinkType.t
+        [@ocaml.doc "The type of telemetry sink."];
+      telemetrySinkData: TelemetrySinkData.t
+        [@ocaml.doc
+          "Information about the telemetry sink specified by the telemetrySinkType."]}
+    let context_ = "TelemetrySinkConfig"
+    let make ~telemetrySinkType =
+      fun ~telemetrySinkData ->
+        fun () -> { telemetrySinkType; telemetrySinkData }
+    let to_value x =
+      structure_to_value
+        [("telemetrySinkType",
+           (Some (TelemetrySinkType.to_value x.telemetrySinkType)));
+        ("telemetrySinkData",
+          (Some (TelemetrySinkData.to_value x.telemetrySinkData)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let telemetrySinkData =
+        TelemetrySinkData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "telemetrySinkData") in
+      let telemetrySinkType =
+        TelemetrySinkType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "telemetrySinkType") in
+      make ~telemetrySinkData ~telemetrySinkType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let telemetrySinkData =
+        field_map_exn json__ "telemetrySinkData" TelemetrySinkData.of_json in
+      let telemetrySinkType =
+        field_map_exn json__ "telemetrySinkType" TelemetrySinkType.of_json in
+      make ~telemetrySinkData ~telemetrySinkType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a telemetry sink Config."]
 module TrackingConfig =
   struct
     type nonrec t =
@@ -1500,8 +4043,8 @@ module TrackingConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "autotrack") in
       make ~autotrack ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let autotrack = field_map_exn json "autotrack" Criticality.of_json in
+    let of_json json__ =
+      let autotrack = field_map_exn json__ "autotrack" Criticality.of_json in
       make ~autotrack ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1510,141 +4053,434 @@ module UplinkEchoConfig =
   struct
     type nonrec t =
       {
-      antennaUplinkConfigArn: ConfigArn.t
-        [@ocaml.doc "ARN of an uplink Config."];
       enabled: Boolean.t
-        [@ocaml.doc "Whether or not an uplink Config is enabled."]}
+        [@ocaml.doc "Whether or not an uplink Config is enabled."];
+      antennaUplinkConfigArn: ConfigArn.t
+        [@ocaml.doc "ARN of an uplink Config."]}
     let context_ = "UplinkEchoConfig"
-    let make ~antennaUplinkConfigArn =
-      fun ~enabled -> fun () -> { antennaUplinkConfigArn; enabled }
+    let make ~enabled =
+      fun ~antennaUplinkConfigArn ->
+        fun () -> { enabled; antennaUplinkConfigArn }
     let to_value x =
       structure_to_value
-        [("antennaUplinkConfigArn",
-           (Some (ConfigArn.to_value x.antennaUplinkConfigArn)));
-        ("enabled", (Some (Boolean.to_value x.enabled)))]
+        [("enabled", (Some (Boolean.to_value x.enabled)));
+        ("antennaUplinkConfigArn",
+          (Some (ConfigArn.to_value x.antennaUplinkConfigArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let enabled =
-        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "enabled") in
       let antennaUplinkConfigArn =
         ConfigArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "antennaUplinkConfigArn") in
-      make ~enabled ~antennaUplinkConfigArn ()
+      let enabled =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "enabled") in
+      make ~antennaUplinkConfigArn ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map_exn json "enabled" Boolean.of_json in
+    let of_json json__ =
       let antennaUplinkConfigArn =
-        field_map_exn json "antennaUplinkConfigArn" ConfigArn.of_json in
-      make ~enabled ~antennaUplinkConfigArn ()
+        field_map_exn json__ "antennaUplinkConfigArn" ConfigArn.of_json in
+      let enabled = field_map_exn json__ "enabled" Boolean.of_json in
+      make ~antennaUplinkConfigArn ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an uplink echo Config. Parameters from the AntennaUplinkConfig, corresponding to the specified AntennaUplinkConfigArn, are used when this UplinkEchoConfig is used in a contact."]
+module SignatureMap =
+  struct
+    type nonrec t = (String_.t * Boolean.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (Boolean.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (Boolean.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:Boolean.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ComponentStatusData =
+  struct
+    type nonrec t =
+      {
+      componentType: ComponentTypeString.t [@ocaml.doc "The Component type."];
+      capabilityArn: CapabilityArn.t
+        [@ocaml.doc "Capability ARN of the component."];
+      status: AgentStatus.t [@ocaml.doc "Component status."];
+      bytesSent: Long.t option [@ocaml.doc "Bytes sent by the component."];
+      bytesReceived: Long.t option
+        [@ocaml.doc "Bytes received by the component."];
+      packetsDropped: Long.t option
+        [@ocaml.doc "Packets dropped by component."];
+      dataflowId: Uuid.t
+        [@ocaml.doc "Dataflow UUID associated with the component."]}
+    let context_ = "ComponentStatusData"
+    let make ?bytesSent =
+      fun ?bytesReceived ->
+        fun ?packetsDropped ->
+          fun ~componentType ->
+            fun ~capabilityArn ->
+              fun ~status ->
+                fun ~dataflowId ->
+                  fun () ->
+                    {
+                      bytesSent;
+                      bytesReceived;
+                      packetsDropped;
+                      componentType;
+                      capabilityArn;
+                      status;
+                      dataflowId
+                    }
+    let to_value x =
+      structure_to_value
+        [("componentType",
+           (Some (ComponentTypeString.to_value x.componentType)));
+        ("capabilityArn", (Some (CapabilityArn.to_value x.capabilityArn)));
+        ("status", (Some (AgentStatus.to_value x.status)));
+        ("bytesSent", (Option.map x.bytesSent ~f:Long.to_value));
+        ("bytesReceived", (Option.map x.bytesReceived ~f:Long.to_value));
+        ("packetsDropped", (Option.map x.packetsDropped ~f:Long.to_value));
+        ("dataflowId", (Some (Uuid.to_value x.dataflowId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataflowId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "dataflowId") in
+      let packetsDropped =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "packetsDropped") in
+      let bytesReceived =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "bytesReceived") in
+      let bytesSent =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "bytesSent") in
+      let status =
+        AgentStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      let capabilityArn =
+        CapabilityArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "capabilityArn") in
+      let componentType =
+        ComponentTypeString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "componentType") in
+      make ~dataflowId ?packetsDropped ?bytesReceived ?bytesSent ~status
+        ~capabilityArn ~componentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataflowId = field_map_exn json__ "dataflowId" Uuid.of_json in
+      let packetsDropped = field_map json__ "packetsDropped" Long.of_json in
+      let bytesReceived = field_map json__ "bytesReceived" Long.of_json in
+      let bytesSent = field_map json__ "bytesSent" Long.of_json in
+      let status = field_map_exn json__ "status" AgentStatus.of_json in
+      let capabilityArn =
+        field_map_exn json__ "capabilityArn" CapabilityArn.of_json in
+      let componentType =
+        field_map_exn json__ "componentType" ComponentTypeString.of_json in
+      make ~dataflowId ?packetsDropped ?bytesReceived ?bytesSent ~status
+        ~capabilityArn ~componentType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Data on the status of agent components."]
+module AgentCpuCoresList =
+  struct
+    type nonrec t = Integer.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:256) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Integer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Integer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AgentCpuCoresList" ~of_json:Integer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ComponentVersionList =
+  struct
+    type nonrec t = ComponentVersion.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ComponentVersion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ComponentVersion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ComponentVersionList"
+        ~of_json:ComponentVersion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstanceId =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:10) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-z0-9-]{10,64}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceId" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-z0-9.-]{1,64}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceType" j
+    let to_json = simple_to_json to_value
+  end
+module CapabilityArnList =
+  struct
+    type nonrec t = CapabilityArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapabilityArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapabilityArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapabilityArnList" ~of_json:CapabilityArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpAddressList =
+  struct
+    type nonrec t = IpV4Address.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpV4Address.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpV4Address.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpAddressList" ~of_json:IpV4Address.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SatelliteListItem =
   struct
     type nonrec t =
       {
+      satelliteId: Uuid.t option [@ocaml.doc "UUID of a satellite."];
+      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
+      noradSatelliteID: NoradSatelliteID.t option
+        [@ocaml.doc "NORAD satellite ID number."];
       groundStations: GroundStationIdList.t option
         [@ocaml.doc
           "A list of ground stations to which the satellite is on-boarded."];
-      noradSatelliteID: NoradSatelliteID.t option
-        [@ocaml.doc "NORAD satellite ID number."];
-      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
-      satelliteId: Uuid.t option [@ocaml.doc "UUID of a satellite."]}
-    let make ?groundStations =
-      fun ?noradSatelliteID ->
-        fun ?satelliteArn ->
-          fun ?satelliteId ->
-            fun () ->
-              { groundStations; noradSatelliteID; satelliteArn; satelliteId }
+      currentEphemeris: EphemerisMetaData.t option
+        [@ocaml.doc
+          "The current ephemeris being used to compute the trajectory of the satellite."]}
+    let make ?satelliteId =
+      fun ?satelliteArn ->
+        fun ?noradSatelliteID ->
+          fun ?groundStations ->
+            fun ?currentEphemeris ->
+              fun () ->
+                {
+                  satelliteId;
+                  satelliteArn;
+                  noradSatelliteID;
+                  groundStations;
+                  currentEphemeris
+                }
     let to_value x =
       structure_to_value
-        [("groundStations",
-           (Option.map x.groundStations ~f:GroundStationIdList.to_value));
-        ("noradSatelliteID",
-          (Option.map x.noradSatelliteID ~f:NoradSatelliteID.to_value));
+        [("satelliteId", (Option.map x.satelliteId ~f:Uuid.to_value));
         ("satelliteArn",
           (Option.map x.satelliteArn ~f:SatelliteArn.to_value));
-        ("satelliteId", (Option.map x.satelliteId ~f:Uuid.to_value))]
+        ("noradSatelliteID",
+          (Option.map x.noradSatelliteID ~f:NoradSatelliteID.to_value));
+        ("groundStations",
+          (Option.map x.groundStations ~f:GroundStationIdList.to_value));
+        ("currentEphemeris",
+          (Option.map x.currentEphemeris ~f:EphemerisMetaData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let satelliteId =
-        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "satelliteId") in
-      let satelliteArn =
-        (Option.map ~f:SatelliteArn.of_xml)
-          (Xml.child xml_arg0 "satelliteArn") in
-      let noradSatelliteID =
-        (Option.map ~f:NoradSatelliteID.of_xml)
-          (Xml.child xml_arg0 "noradSatelliteID") in
+      let currentEphemeris =
+        (Option.map ~f:EphemerisMetaData.of_xml)
+          (Xml.child xml_arg0 "currentEphemeris") in
       let groundStations =
         (Option.map ~f:GroundStationIdList.of_xml)
           (Xml.child xml_arg0 "groundStations") in
-      make ?satelliteId ?satelliteArn ?noradSatelliteID ?groundStations ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let satelliteId = field_map json "satelliteId" Uuid.of_json in
-      let satelliteArn = field_map json "satelliteArn" SatelliteArn.of_json in
       let noradSatelliteID =
-        field_map json "noradSatelliteID" NoradSatelliteID.of_json in
+        (Option.map ~f:NoradSatelliteID.of_xml)
+          (Xml.child xml_arg0 "noradSatelliteID") in
+      let satelliteArn =
+        (Option.map ~f:SatelliteArn.of_xml)
+          (Xml.child xml_arg0 "satelliteArn") in
+      let satelliteId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "satelliteId") in
+      make ?currentEphemeris ?groundStations ?noradSatelliteID ?satelliteArn
+        ?satelliteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let currentEphemeris =
+        field_map json__ "currentEphemeris" EphemerisMetaData.of_json in
       let groundStations =
-        field_map json "groundStations" GroundStationIdList.of_json in
-      make ?satelliteId ?satelliteArn ?noradSatelliteID ?groundStations ()
+        field_map json__ "groundStations" GroundStationIdList.of_json in
+      let noradSatelliteID =
+        field_map json__ "noradSatelliteID" NoradSatelliteID.of_json in
+      let satelliteArn = field_map json__ "satelliteArn" SatelliteArn.of_json in
+      let satelliteId = field_map json__ "satelliteId" Uuid.of_json in
+      make ?currentEphemeris ?groundStations ?noradSatelliteID ?satelliteArn
+        ?satelliteId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Item in a list of satellites."]
 module MissionProfileListItem =
   struct
     type nonrec t =
       {
+      missionProfileId: Uuid.t option
+        [@ocaml.doc "UUID of a mission profile."];
       missionProfileArn: MissionProfileArn.t option
         [@ocaml.doc "ARN of a mission profile."];
-      missionProfileId: String_.t option
-        [@ocaml.doc "UUID of a mission profile."];
-      name: String_.t option [@ocaml.doc "Name of a mission profile."];
-      region: String_.t option [@ocaml.doc "Region of a mission profile."]}
-    let make ?missionProfileArn =
-      fun ?missionProfileId ->
-        fun ?name ->
-          fun ?region ->
-            fun () -> { missionProfileArn; missionProfileId; name; region }
+      region: AWSRegion.t option [@ocaml.doc "Region of a mission profile."];
+      name: SafeName.t option [@ocaml.doc "Name of a mission profile."]}
+    let make ?missionProfileId =
+      fun ?missionProfileArn ->
+        fun ?region ->
+          fun ?name ->
+            fun () -> { missionProfileId; missionProfileArn; region; name }
     let to_value x =
       structure_to_value
-        [("missionProfileArn",
-           (Option.map x.missionProfileArn ~f:MissionProfileArn.to_value));
-        ("missionProfileId",
-          (Option.map x.missionProfileId ~f:String_.to_value));
-        ("name", (Option.map x.name ~f:String_.to_value));
-        ("region", (Option.map x.region ~f:String_.to_value))]
+        [("missionProfileId",
+           (Option.map x.missionProfileId ~f:Uuid.to_value));
+        ("missionProfileArn",
+          (Option.map x.missionProfileArn ~f:MissionProfileArn.to_value));
+        ("region", (Option.map x.region ~f:AWSRegion.to_value));
+        ("name", (Option.map x.name ~f:SafeName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
       let region =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
-      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
-      let missionProfileId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "missionProfileId") in
+        (Option.map ~f:AWSRegion.of_xml) (Xml.child xml_arg0 "region") in
       let missionProfileArn =
         (Option.map ~f:MissionProfileArn.of_xml)
           (Xml.child xml_arg0 "missionProfileArn") in
-      make ?region ?name ?missionProfileId ?missionProfileArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map json "region" String_.of_json in
-      let name = field_map json "name" String_.of_json in
       let missionProfileId =
-        field_map json "missionProfileId" String_.of_json in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "missionProfileId") in
+      make ?name ?region ?missionProfileArn ?missionProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "name" SafeName.of_json in
+      let region = field_map json__ "region" AWSRegion.of_json in
       let missionProfileArn =
-        field_map json "missionProfileArn" MissionProfileArn.of_json in
-      make ?region ?name ?missionProfileId ?missionProfileArn ()
+        field_map json__ "missionProfileArn" MissionProfileArn.of_json in
+      let missionProfileId = field_map json__ "missionProfileId" Uuid.of_json in
+      make ?name ?region ?missionProfileArn ?missionProfileId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Item in a list of mission profiles."]
 module GroundStationData =
   struct
     type nonrec t =
       {
-      groundStationId: String_.t option
-        [@ocaml.doc "UUID of a ground station."];
-      groundStationName: String_.t option
+      groundStationId: GroundStationName.t option
+        [@ocaml.doc "ID of a ground station."];
+      groundStationName: GroundStationName.t option
         [@ocaml.doc "Name of a ground station."];
-      region: String_.t option [@ocaml.doc "Ground station Region."]}
+      region: AWSRegion.t option [@ocaml.doc "Ground station Region."]}
     let make ?groundStationId =
       fun ?groundStationName ->
         fun ?region ->
@@ -1652,281 +4488,765 @@ module GroundStationData =
     let to_value x =
       structure_to_value
         [("groundStationId",
-           (Option.map x.groundStationId ~f:String_.to_value));
+           (Option.map x.groundStationId ~f:GroundStationName.to_value));
         ("groundStationName",
-          (Option.map x.groundStationName ~f:String_.to_value));
-        ("region", (Option.map x.region ~f:String_.to_value))]
+          (Option.map x.groundStationName ~f:GroundStationName.to_value));
+        ("region", (Option.map x.region ~f:AWSRegion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let region =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
+        (Option.map ~f:AWSRegion.of_xml) (Xml.child xml_arg0 "region") in
       let groundStationName =
-        (Option.map ~f:String_.of_xml)
+        (Option.map ~f:GroundStationName.of_xml)
           (Xml.child xml_arg0 "groundStationName") in
       let groundStationId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groundStationId") in
+        (Option.map ~f:GroundStationName.of_xml)
+          (Xml.child xml_arg0 "groundStationId") in
       make ?region ?groundStationName ?groundStationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map json "region" String_.of_json in
+    let of_json json__ =
+      let region = field_map json__ "region" AWSRegion.of_json in
       let groundStationName =
-        field_map json "groundStationName" String_.of_json in
-      let groundStationId = field_map json "groundStationId" String_.of_json in
+        field_map json__ "groundStationName" GroundStationName.of_json in
+      let groundStationId =
+        field_map json__ "groundStationId" GroundStationName.of_json in
       make ?region ?groundStationName ?groundStationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the ground station data."]
+module GroundStationReservationListItem =
+  struct
+    type nonrec t =
+      {
+      reservationType: ReservationType.t option
+        [@ocaml.doc "Type of a ground station reservation."];
+      groundStationId: GroundStationName.t option
+        [@ocaml.doc "ID of a ground station."];
+      antennaName: AntennaName.t option [@ocaml.doc "Name of an antenna."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "Start time of a ground station reservation in UTC."];
+      endTime: Timestamp.t option
+        [@ocaml.doc "End time of a ground station reservation in UTC."];
+      reservationDetails: ReservationDetails.t option
+        [@ocaml.doc "Details of a ground station reservation."]}
+    let make ?reservationType =
+      fun ?groundStationId ->
+        fun ?antennaName ->
+          fun ?startTime ->
+            fun ?endTime ->
+              fun ?reservationDetails ->
+                fun () ->
+                  {
+                    reservationType;
+                    groundStationId;
+                    antennaName;
+                    startTime;
+                    endTime;
+                    reservationDetails
+                  }
+    let to_value x =
+      structure_to_value
+        [("reservationType",
+           (Option.map x.reservationType ~f:ReservationType.to_value));
+        ("groundStationId",
+          (Option.map x.groundStationId ~f:GroundStationName.to_value));
+        ("antennaName", (Option.map x.antennaName ~f:AntennaName.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("reservationDetails",
+          (Option.map x.reservationDetails ~f:ReservationDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reservationDetails =
+        (Option.map ~f:ReservationDetails.of_xml)
+          (Xml.child xml_arg0 "reservationDetails") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let antennaName =
+        (Option.map ~f:AntennaName.of_xml) (Xml.child xml_arg0 "antennaName") in
+      let groundStationId =
+        (Option.map ~f:GroundStationName.of_xml)
+          (Xml.child xml_arg0 "groundStationId") in
+      let reservationType =
+        (Option.map ~f:ReservationType.of_xml)
+          (Xml.child xml_arg0 "reservationType") in
+      make ?reservationDetails ?endTime ?startTime ?antennaName
+        ?groundStationId ?reservationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reservationDetails =
+        field_map json__ "reservationDetails" ReservationDetails.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let antennaName = field_map json__ "antennaName" AntennaName.of_json in
+      let groundStationId =
+        field_map json__ "groundStationId" GroundStationName.of_json in
+      let reservationType =
+        field_map json__ "reservationType" ReservationType.of_json in
+      make ?reservationDetails ?endTime ?startTime ?antennaName
+        ?groundStationId ?reservationType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Item in a list of ground station reservations."]
+module EphemerisItem =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t option
+        [@ocaml.doc "The AWS Ground Station ephemeris ID."];
+      ephemerisType: EphemerisType.t option
+        [@ocaml.doc "The type of ephemeris."];
+      status: EphemerisStatus.t option
+        [@ocaml.doc "The status of the ephemeris."];
+      priority: EphemerisPriority.t option
+        [@ocaml.doc
+          "A priority score that determines which ephemeris to use when multiple ephemerides overlap. Higher numbers take precedence. The default is 1. Must be 1 or greater."];
+      enabled: Boolean.t option
+        [@ocaml.doc "Whether or not the ephemeris is enabled."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "The time the ephemeris was uploaded in UTC."];
+      name: SafeName.t option
+        [@ocaml.doc "A name that you can use to identify the ephemeris."];
+      sourceS3Object: S3Object.t option
+        [@ocaml.doc "Source Amazon S3 object used for the ephemeris."]}
+    let make ?ephemerisId =
+      fun ?ephemerisType ->
+        fun ?status ->
+          fun ?priority ->
+            fun ?enabled ->
+              fun ?creationTime ->
+                fun ?name ->
+                  fun ?sourceS3Object ->
+                    fun () ->
+                      {
+                        ephemerisId;
+                        ephemerisType;
+                        status;
+                        priority;
+                        enabled;
+                        creationTime;
+                        name;
+                        sourceS3Object
+                      }
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Option.map x.ephemerisId ~f:Uuid.to_value));
+        ("ephemerisType",
+          (Option.map x.ephemerisType ~f:EphemerisType.to_value));
+        ("status", (Option.map x.status ~f:EphemerisStatus.to_value));
+        ("priority", (Option.map x.priority ~f:EphemerisPriority.to_value));
+        ("enabled", (Option.map x.enabled ~f:Boolean.to_value));
+        ("creationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("name", (Option.map x.name ~f:SafeName.to_value));
+        ("sourceS3Object",
+          (Option.map x.sourceS3Object ~f:S3Object.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceS3Object =
+        (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "sourceS3Object") in
+      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationTime") in
+      let enabled =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      let priority =
+        (Option.map ~f:EphemerisPriority.of_xml)
+          (Xml.child xml_arg0 "priority") in
+      let status =
+        (Option.map ~f:EphemerisStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let ephemerisType =
+        (Option.map ~f:EphemerisType.of_xml)
+          (Xml.child xml_arg0 "ephemerisType") in
+      let ephemerisId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "ephemerisId") in
+      make ?sourceS3Object ?name ?creationTime ?enabled ?priority ?status
+        ?ephemerisType ?ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceS3Object = field_map json__ "sourceS3Object" S3Object.of_json in
+      let name = field_map json__ "name" SafeName.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let enabled = field_map json__ "enabled" Boolean.of_json in
+      let priority = field_map json__ "priority" EphemerisPriority.of_json in
+      let status = field_map json__ "status" EphemerisStatus.of_json in
+      let ephemerisType =
+        field_map json__ "ephemerisType" EphemerisType.of_json in
+      let ephemerisId = field_map json__ "ephemerisId" Uuid.of_json in
+      make ?sourceS3Object ?name ?creationTime ?enabled ?priority ?status
+        ?ephemerisType ?ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Ephemeris item."]
 module DataflowEndpointListItem =
   struct
     type nonrec t =
       {
+      dataflowEndpointGroupId: Uuid.t option
+        [@ocaml.doc "UUID of a dataflow endpoint group."];
       dataflowEndpointGroupArn: DataflowEndpointGroupArn.t option
-        [@ocaml.doc "ARN of a dataflow endpoint group."];
-      dataflowEndpointGroupId: String_.t option
-        [@ocaml.doc "UUID of a dataflow endpoint group."]}
-    let make ?dataflowEndpointGroupArn =
-      fun ?dataflowEndpointGroupId ->
-        fun () -> { dataflowEndpointGroupArn; dataflowEndpointGroupId }
+        [@ocaml.doc "ARN of a dataflow endpoint group."]}
+    let make ?dataflowEndpointGroupId =
+      fun ?dataflowEndpointGroupArn ->
+        fun () -> { dataflowEndpointGroupId; dataflowEndpointGroupArn }
     let to_value x =
       structure_to_value
-        [("dataflowEndpointGroupArn",
-           (Option.map x.dataflowEndpointGroupArn
-              ~f:DataflowEndpointGroupArn.to_value));
-        ("dataflowEndpointGroupId",
-          (Option.map x.dataflowEndpointGroupId ~f:String_.to_value))]
+        [("dataflowEndpointGroupId",
+           (Option.map x.dataflowEndpointGroupId ~f:Uuid.to_value));
+        ("dataflowEndpointGroupArn",
+          (Option.map x.dataflowEndpointGroupArn
+             ~f:DataflowEndpointGroupArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let dataflowEndpointGroupId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "dataflowEndpointGroupId") in
       let dataflowEndpointGroupArn =
         (Option.map ~f:DataflowEndpointGroupArn.of_xml)
           (Xml.child xml_arg0 "dataflowEndpointGroupArn") in
-      make ?dataflowEndpointGroupId ?dataflowEndpointGroupArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let dataflowEndpointGroupId =
-        field_map json "dataflowEndpointGroupId" String_.of_json in
+        (Option.map ~f:Uuid.of_xml)
+          (Xml.child xml_arg0 "dataflowEndpointGroupId") in
+      make ?dataflowEndpointGroupArn ?dataflowEndpointGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let dataflowEndpointGroupArn =
-        field_map json "dataflowEndpointGroupArn"
+        field_map json__ "dataflowEndpointGroupArn"
           DataflowEndpointGroupArn.of_json in
-      make ?dataflowEndpointGroupId ?dataflowEndpointGroupArn ()
+      let dataflowEndpointGroupId =
+        field_map json__ "dataflowEndpointGroupId" Uuid.of_json in
+      make ?dataflowEndpointGroupArn ?dataflowEndpointGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Item in a list of DataflowEndpoint groups."]
 module ContactData =
   struct
     type nonrec t =
       {
-      contactId: String_.t option [@ocaml.doc "UUID of a contact."];
-      contactStatus: ContactStatus.t option
-        [@ocaml.doc "Status of a contact."];
-      endTime: Timestamp.t option [@ocaml.doc "End time of a contact."];
-      errorMessage: String_.t option
-        [@ocaml.doc "Error message of a contact."];
-      groundStation: String_.t option
-        [@ocaml.doc "Name of a ground station."];
-      maximumElevation: Elevation.t option
-        [@ocaml.doc "Maximum elevation angle of a contact."];
+      contactId: Uuid.t option [@ocaml.doc "UUID of a contact."];
       missionProfileArn: MissionProfileArn.t option
         [@ocaml.doc "ARN of a mission profile."];
-      postPassEndTime: Timestamp.t option
-        [@ocaml.doc
-          "Amount of time after a contact ends that you\226\128\153d like to receive a CloudWatch event indicating the pass has finished."];
+      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "Start time of a contact in UTC."];
+      endTime: Timestamp.t option
+        [@ocaml.doc "End time of a contact in UTC."];
       prePassStartTime: Timestamp.t option
         [@ocaml.doc
-          "Amount of time prior to contact start you\226\128\153d like to receive a CloudWatch event indicating an upcoming pass."];
+          "Start time in UTC of the pre-pass period, at which you receive a CloudWatch event indicating an upcoming pass."];
+      postPassEndTime: Timestamp.t option
+        [@ocaml.doc
+          "End time in UTC of the post-pass period, at which you receive a CloudWatch event indicating the pass has finished."];
+      groundStation: String_.t option
+        [@ocaml.doc "Name of a ground station."];
+      contactStatus: ContactStatus.t option
+        [@ocaml.doc "Status of a contact."];
+      errorMessage: String_.t option
+        [@ocaml.doc "Error message of a contact."];
+      maximumElevation: Elevation.t option
+        [@ocaml.doc "Maximum elevation angle of a contact."];
       region: String_.t option [@ocaml.doc "Region of a contact."];
-      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
-      startTime: Timestamp.t option [@ocaml.doc "Start time of a contact."];
-      tags: TagsMap.t option [@ocaml.doc "Tags assigned to a contact."]}
+      tags: TagsMap.t option [@ocaml.doc "Tags assigned to a contact."];
+      visibilityStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Projected time in UTC your satellite will rise above the receive mask. This time is based on the satellite's current active ephemeris for future contacts and the ephemeris that was active during contact execution for completed contacts. This field is not present for contacts with a SCHEDULING or SCHEDULED status."];
+      visibilityEndTime: Timestamp.t option
+        [@ocaml.doc
+          "Projected time in UTC your satellite will set below the receive mask. This time is based on the satellite's current active ephemeris for future contacts and the ephemeris that was active during contact execution for completed contacts. This field is not present for contacts with a SCHEDULING or SCHEDULED status."];
+      ephemeris: EphemerisResponseData.t option
+        [@ocaml.doc
+          "The ephemeris that determines antenna pointing for the contact."];
+      version: ContactVersion.t option
+        [@ocaml.doc "Version information for a contact."]}
     let make ?contactId =
-      fun ?contactStatus ->
-        fun ?endTime ->
-          fun ?errorMessage ->
-            fun ?groundStation ->
-              fun ?maximumElevation ->
-                fun ?missionProfileArn ->
-                  fun ?postPassEndTime ->
-                    fun ?prePassStartTime ->
-                      fun ?region ->
-                        fun ?satelliteArn ->
-                          fun ?startTime ->
+      fun ?missionProfileArn ->
+        fun ?satelliteArn ->
+          fun ?startTime ->
+            fun ?endTime ->
+              fun ?prePassStartTime ->
+                fun ?postPassEndTime ->
+                  fun ?groundStation ->
+                    fun ?contactStatus ->
+                      fun ?errorMessage ->
+                        fun ?maximumElevation ->
+                          fun ?region ->
                             fun ?tags ->
-                              fun () ->
-                                {
-                                  contactId;
-                                  contactStatus;
-                                  endTime;
-                                  errorMessage;
-                                  groundStation;
-                                  maximumElevation;
-                                  missionProfileArn;
-                                  postPassEndTime;
-                                  prePassStartTime;
-                                  region;
-                                  satelliteArn;
-                                  startTime;
-                                  tags
-                                }
+                              fun ?visibilityStartTime ->
+                                fun ?visibilityEndTime ->
+                                  fun ?ephemeris ->
+                                    fun ?version ->
+                                      fun () ->
+                                        {
+                                          contactId;
+                                          missionProfileArn;
+                                          satelliteArn;
+                                          startTime;
+                                          endTime;
+                                          prePassStartTime;
+                                          postPassEndTime;
+                                          groundStation;
+                                          contactStatus;
+                                          errorMessage;
+                                          maximumElevation;
+                                          region;
+                                          tags;
+                                          visibilityStartTime;
+                                          visibilityEndTime;
+                                          ephemeris;
+                                          version
+                                        }
     let to_value x =
       structure_to_value
-        [("contactId", (Option.map x.contactId ~f:String_.to_value));
-        ("contactStatus",
-          (Option.map x.contactStatus ~f:ContactStatus.to_value));
-        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
-        ("errorMessage", (Option.map x.errorMessage ~f:String_.to_value));
-        ("groundStation", (Option.map x.groundStation ~f:String_.to_value));
-        ("maximumElevation",
-          (Option.map x.maximumElevation ~f:Elevation.to_value));
+        [("contactId", (Option.map x.contactId ~f:Uuid.to_value));
         ("missionProfileArn",
           (Option.map x.missionProfileArn ~f:MissionProfileArn.to_value));
-        ("postPassEndTime",
-          (Option.map x.postPassEndTime ~f:Timestamp.to_value));
-        ("prePassStartTime",
-          (Option.map x.prePassStartTime ~f:Timestamp.to_value));
-        ("region", (Option.map x.region ~f:String_.to_value));
         ("satelliteArn",
           (Option.map x.satelliteArn ~f:SatelliteArn.to_value));
         ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("prePassStartTime",
+          (Option.map x.prePassStartTime ~f:Timestamp.to_value));
+        ("postPassEndTime",
+          (Option.map x.postPassEndTime ~f:Timestamp.to_value));
+        ("groundStation", (Option.map x.groundStation ~f:String_.to_value));
+        ("contactStatus",
+          (Option.map x.contactStatus ~f:ContactStatus.to_value));
+        ("errorMessage", (Option.map x.errorMessage ~f:String_.to_value));
+        ("maximumElevation",
+          (Option.map x.maximumElevation ~f:Elevation.to_value));
+        ("region", (Option.map x.region ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("visibilityStartTime",
+          (Option.map x.visibilityStartTime ~f:Timestamp.to_value));
+        ("visibilityEndTime",
+          (Option.map x.visibilityEndTime ~f:Timestamp.to_value));
+        ("ephemeris",
+          (Option.map x.ephemeris ~f:EphemerisResponseData.to_value));
+        ("version", (Option.map x.version ~f:ContactVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:ContactVersion.of_xml) (Xml.child xml_arg0 "version") in
+      let ephemeris =
+        (Option.map ~f:EphemerisResponseData.of_xml)
+          (Xml.child xml_arg0 "ephemeris") in
+      let visibilityEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "visibilityEndTime") in
+      let visibilityStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "visibilityStartTime") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let region =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
+      let maximumElevation =
+        (Option.map ~f:Elevation.of_xml)
+          (Xml.child xml_arg0 "maximumElevation") in
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "errorMessage") in
+      let contactStatus =
+        (Option.map ~f:ContactStatus.of_xml)
+          (Xml.child xml_arg0 "contactStatus") in
+      let groundStation =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groundStation") in
+      let postPassEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "postPassEndTime") in
+      let prePassStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "prePassStartTime") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
       let startTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
       let satelliteArn =
         (Option.map ~f:SatelliteArn.of_xml)
           (Xml.child xml_arg0 "satelliteArn") in
-      let region =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
-      let prePassStartTime =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "prePassStartTime") in
-      let postPassEndTime =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "postPassEndTime") in
       let missionProfileArn =
         (Option.map ~f:MissionProfileArn.of_xml)
           (Xml.child xml_arg0 "missionProfileArn") in
-      let maximumElevation =
-        (Option.map ~f:Elevation.of_xml)
-          (Xml.child xml_arg0 "maximumElevation") in
-      let groundStation =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groundStation") in
-      let errorMessage =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "errorMessage") in
-      let endTime =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
-      let contactStatus =
-        (Option.map ~f:ContactStatus.of_xml)
-          (Xml.child xml_arg0 "contactStatus") in
       let contactId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "contactId") in
-      make ?tags ?startTime ?satelliteArn ?region ?prePassStartTime
-        ?postPassEndTime ?missionProfileArn ?maximumElevation ?groundStation
-        ?errorMessage ?endTime ?contactStatus ?contactId ()
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "contactId") in
+      make ?version ?ephemeris ?visibilityEndTime ?visibilityStartTime ?tags
+        ?region ?maximumElevation ?errorMessage ?contactStatus ?groundStation
+        ?postPassEndTime ?prePassStartTime ?endTime ?startTime ?satelliteArn
+        ?missionProfileArn ?contactId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let satelliteArn = field_map json "satelliteArn" SatelliteArn.of_json in
-      let region = field_map json "region" String_.of_json in
-      let prePassStartTime =
-        field_map json "prePassStartTime" Timestamp.of_json in
-      let postPassEndTime =
-        field_map json "postPassEndTime" Timestamp.of_json in
-      let missionProfileArn =
-        field_map json "missionProfileArn" MissionProfileArn.of_json in
+    let of_json json__ =
+      let version = field_map json__ "version" ContactVersion.of_json in
+      let ephemeris =
+        field_map json__ "ephemeris" EphemerisResponseData.of_json in
+      let visibilityEndTime =
+        field_map json__ "visibilityEndTime" Timestamp.of_json in
+      let visibilityStartTime =
+        field_map json__ "visibilityStartTime" Timestamp.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let region = field_map json__ "region" String_.of_json in
       let maximumElevation =
-        field_map json "maximumElevation" Elevation.of_json in
-      let groundStation = field_map json "groundStation" String_.of_json in
-      let errorMessage = field_map json "errorMessage" String_.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
+        field_map json__ "maximumElevation" Elevation.of_json in
+      let errorMessage = field_map json__ "errorMessage" String_.of_json in
       let contactStatus =
-        field_map json "contactStatus" ContactStatus.of_json in
-      let contactId = field_map json "contactId" String_.of_json in
-      make ?tags ?startTime ?satelliteArn ?region ?prePassStartTime
-        ?postPassEndTime ?missionProfileArn ?maximumElevation ?groundStation
-        ?errorMessage ?endTime ?contactStatus ?contactId ()
+        field_map json__ "contactStatus" ContactStatus.of_json in
+      let groundStation = field_map json__ "groundStation" String_.of_json in
+      let postPassEndTime =
+        field_map json__ "postPassEndTime" Timestamp.of_json in
+      let prePassStartTime =
+        field_map json__ "prePassStartTime" Timestamp.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let satelliteArn = field_map json__ "satelliteArn" SatelliteArn.of_json in
+      let missionProfileArn =
+        field_map json__ "missionProfileArn" MissionProfileArn.of_json in
+      let contactId = field_map json__ "contactId" Uuid.of_json in
+      make ?version ?ephemeris ?visibilityEndTime ?visibilityStartTime ?tags
+        ?region ?maximumElevation ?errorMessage ?contactStatus ?groundStation
+        ?postPassEndTime ?prePassStartTime ?endTime ?startTime ?satelliteArn
+        ?missionProfileArn ?contactId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Data describing a contact."]
+module AzElEphemerisFilter =
+  struct
+    type nonrec t =
+      {
+      id: Uuid.t
+        [@ocaml.doc "Unique identifier of the azimuth elevation ephemeris."]}
+    let context_ = "AzElEphemerisFilter"
+    let make ~id = fun () -> { id }
+    let to_value x = structure_to_value [("id", (Some (Uuid.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Uuid.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filter for selecting contacts that use a specific AzElEphemeris."]
 module ConfigListItem =
   struct
     type nonrec t =
       {
-      configArn: ConfigArn.t option [@ocaml.doc "ARN of a Config."];
       configId: String_.t option [@ocaml.doc "UUID of a Config."];
       configType: ConfigCapabilityType.t option
         [@ocaml.doc "Type of a Config."];
+      configArn: ConfigArn.t option [@ocaml.doc "ARN of a Config."];
       name: String_.t option [@ocaml.doc "Name of a Config."]}
-    let make ?configArn =
-      fun ?configId ->
-        fun ?configType ->
-          fun ?name -> fun () -> { configArn; configId; configType; name }
+    let make ?configId =
+      fun ?configType ->
+        fun ?configArn ->
+          fun ?name -> fun () -> { configId; configType; configArn; name }
     let to_value x =
       structure_to_value
-        [("configArn", (Option.map x.configArn ~f:ConfigArn.to_value));
-        ("configId", (Option.map x.configId ~f:String_.to_value));
+        [("configId", (Option.map x.configId ~f:String_.to_value));
         ("configType",
           (Option.map x.configType ~f:ConfigCapabilityType.to_value));
+        ("configArn", (Option.map x.configArn ~f:ConfigArn.to_value));
         ("name", (Option.map x.name ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let configArn =
+        (Option.map ~f:ConfigArn.of_xml) (Xml.child xml_arg0 "configArn") in
       let configType =
         (Option.map ~f:ConfigCapabilityType.of_xml)
           (Xml.child xml_arg0 "configType") in
       let configId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "configId") in
-      let configArn =
-        (Option.map ~f:ConfigArn.of_xml) (Xml.child xml_arg0 "configArn") in
-      make ?name ?configType ?configId ?configArn ()
+      make ?name ?configArn ?configType ?configId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" String_.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" String_.of_json in
+      let configArn = field_map json__ "configArn" ConfigArn.of_json in
       let configType =
-        field_map json "configType" ConfigCapabilityType.of_json in
-      let configId = field_map json "configId" String_.of_json in
-      let configArn = field_map json "configArn" ConfigArn.of_json in
-      make ?name ?configType ?configId ?configArn ()
+        field_map json__ "configType" ConfigCapabilityType.of_json in
+      let configId = field_map json__ "configId" String_.of_json in
+      make ?name ?configArn ?configType ?configId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An item in a list of Config objects."]
+module AntennaListItem =
+  struct
+    type nonrec t =
+      {
+      groundStationName: GroundStationName.t option
+        [@ocaml.doc
+          "Name of the ground station the antenna is associated with."];
+      antennaName: AntennaName.t option [@ocaml.doc "Name of the antenna."];
+      region: AWSRegion.t option [@ocaml.doc "Region of the antenna."]}
+    let make ?groundStationName =
+      fun ?antennaName ->
+        fun ?region -> fun () -> { groundStationName; antennaName; region }
+    let to_value x =
+      structure_to_value
+        [("groundStationName",
+           (Option.map x.groundStationName ~f:GroundStationName.to_value));
+        ("antennaName", (Option.map x.antennaName ~f:AntennaName.to_value));
+        ("region", (Option.map x.region ~f:AWSRegion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let region =
+        (Option.map ~f:AWSRegion.of_xml) (Xml.child xml_arg0 "region") in
+      let antennaName =
+        (Option.map ~f:AntennaName.of_xml) (Xml.child xml_arg0 "antennaName") in
+      let groundStationName =
+        (Option.map ~f:GroundStationName.of_xml)
+          (Xml.child xml_arg0 "groundStationName") in
+      make ?region ?antennaName ?groundStationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let region = field_map json__ "region" AWSRegion.of_json in
+      let antennaName = field_map json__ "antennaName" AntennaName.of_json in
+      let groundStationName =
+        field_map json__ "groundStationName" GroundStationName.of_json in
+      make ?region ?antennaName ?groundStationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An antenna at a ground station."]
+module EphemerisErrorReason =
+  struct
+    type nonrec t =
+      {
+      errorCode: EphemerisErrorCode.t option
+        [@ocaml.doc
+          "The error code identifying the type of validation failure. See the Troubleshooting Invalid Ephemerides guide for error code details."];
+      errorMessage: ErrorString.t option
+        [@ocaml.doc
+          "A human-readable message describing the validation failure. Provides specific details about what failed and may include suggestions for remediation."]}
+    let make ?errorCode =
+      fun ?errorMessage -> fun () -> { errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("errorCode",
+           (Option.map x.errorCode ~f:EphemerisErrorCode.to_value));
+        ("errorMessage", (Option.map x.errorMessage ~f:ErrorString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ErrorString.of_xml)
+          (Xml.child xml_arg0 "errorMessage") in
+      let errorCode =
+        (Option.map ~f:EphemerisErrorCode.of_xml)
+          (Xml.child xml_arg0 "errorCode") in
+      make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorString.of_json in
+      let errorCode = field_map json__ "errorCode" EphemerisErrorCode.of_json in
+      make ?errorMessage ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detailed error information for ephemeris validation failures. Provides an error code and descriptive message to help diagnose and resolve validation issues."]
+module EphemerisDescription =
+  struct
+    type nonrec t =
+      {
+      sourceS3Object: S3Object.t option
+        [@ocaml.doc "Source Amazon S3 object used for the ephemeris."];
+      ephemerisData: UnboundedString.t option
+        [@ocaml.doc "Supplied ephemeris data."]}
+    let make ?sourceS3Object =
+      fun ?ephemerisData -> fun () -> { sourceS3Object; ephemerisData }
+    let to_value x =
+      structure_to_value
+        [("sourceS3Object",
+           (Option.map x.sourceS3Object ~f:S3Object.to_value));
+        ("ephemerisData",
+          (Option.map x.ephemerisData ~f:UnboundedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ephemerisData =
+        (Option.map ~f:UnboundedString.of_xml)
+          (Xml.child xml_arg0 "ephemerisData") in
+      let sourceS3Object =
+        (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "sourceS3Object") in
+      make ?ephemerisData ?sourceS3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ephemerisData =
+        field_map json__ "ephemerisData" UnboundedString.of_json in
+      let sourceS3Object = field_map json__ "sourceS3Object" S3Object.of_json in
+      make ?ephemerisData ?sourceS3Object ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Description of ephemeris."]
 module DataflowDetail =
   struct
     type nonrec t =
       {
+      source: Source.t option ;
       destination: Destination.t option ;
       errorMessage: String_.t option
-        [@ocaml.doc "Error message for a dataflow."];
-      source: Source.t option }
-    let make ?destination =
-      fun ?errorMessage ->
-        fun ?source -> fun () -> { destination; errorMessage; source }
+        [@ocaml.doc "Error message for a dataflow."]}
+    let make ?source =
+      fun ?destination ->
+        fun ?errorMessage -> fun () -> { source; destination; errorMessage }
     let to_value x =
       structure_to_value
-        [("destination", (Option.map x.destination ~f:Destination.to_value));
-        ("errorMessage", (Option.map x.errorMessage ~f:String_.to_value));
-        ("source", (Option.map x.source ~f:Source.to_value))]
+        [("source", (Option.map x.source ~f:Source.to_value));
+        ("destination", (Option.map x.destination ~f:Destination.to_value));
+        ("errorMessage", (Option.map x.errorMessage ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let source =
-        (Option.map ~f:Source.of_xml) (Xml.child xml_arg0 "source") in
       let errorMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "errorMessage") in
       let destination =
         (Option.map ~f:Destination.of_xml) (Xml.child xml_arg0 "destination") in
-      make ?source ?errorMessage ?destination ()
+      let source =
+        (Option.map ~f:Source.of_xml) (Xml.child xml_arg0 "source") in
+      make ?errorMessage ?destination ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let source = field_map json "source" Source.of_json in
-      let errorMessage = field_map json "errorMessage" String_.of_json in
-      let destination = field_map json "destination" Destination.of_json in
-      make ?source ?errorMessage ?destination ()
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" String_.of_json in
+      let destination = field_map json__ "destination" Destination.of_json in
+      let source = field_map json__ "source" Source.of_json in
+      make ?errorMessage ?destination ?source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a dataflow edge used in a contact."]
+module AzElEphemeris =
+  struct
+    type nonrec t =
+      {
+      groundStation: GroundStationName.t
+        [@ocaml.doc
+          "The ground station name for which you're providing azimuth elevation data. This ephemeris is specific to this ground station and can't be used at other locations."];
+      data: AzElSegmentsData.t
+        [@ocaml.doc
+          "Azimuth elevation segment data. You can provide data inline in the request or through an Amazon S3 object reference."]}
+    let context_ = "AzElEphemeris"
+    let make ~groundStation = fun ~data -> fun () -> { groundStation; data }
+    let to_value x =
+      structure_to_value
+        [("groundStation",
+           (Some (GroundStationName.to_value x.groundStation)));
+        ("data", (Some (AzElSegmentsData.to_value x.data)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let data =
+        AzElSegmentsData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "data") in
+      let groundStation =
+        GroundStationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "groundStation") in
+      make ~data ~groundStation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let data = field_map_exn json__ "data" AzElSegmentsData.of_json in
+      let groundStation =
+        field_map_exn json__ "groundStation" GroundStationName.of_json in
+      make ~data ~groundStation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Azimuth elevation ephemeris data. Use this ephemeris type to provide pointing angles directly, rather than satellite orbital elements. Use this when you need precise antenna pointing but have imprecise or unknown satellite trajectory information. The azimuth elevation data specifies the antenna pointing direction at specific times relative to a ground station location. AWS Ground Station uses 4th order Lagrange interpolation to compute pointing angles between the provided data points. AWS Ground Station automatically filters interpolated pointing angles, including only those that are above the site mask elevation of the specified ground station. For more detail about providing azimuth elevation ephemerides to AWS Ground Station, see the azimuth elevation ephemeris section of the AWS Ground Station User Guide."]
+module OEMEphemeris =
+  struct
+    type nonrec t =
+      {
+      s3Object: S3Object.t option
+        [@ocaml.doc "The Amazon S3 object that contains the ephemeris data."];
+      oemData: UnboundedString.t option
+        [@ocaml.doc
+          "OEM data that you provide directly instead of using an Amazon S3 object."]}
+    let make ?s3Object = fun ?oemData -> fun () -> { s3Object; oemData }
+    let to_value x =
+      structure_to_value
+        [("s3Object", (Option.map x.s3Object ~f:S3Object.to_value));
+        ("oemData", (Option.map x.oemData ~f:UnboundedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let oemData =
+        (Option.map ~f:UnboundedString.of_xml) (Xml.child xml_arg0 "oemData") in
+      let s3Object =
+        (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "s3Object") in
+      make ?oemData ?s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let oemData = field_map json__ "oemData" UnboundedString.of_json in
+      let s3Object = field_map json__ "s3Object" S3Object.of_json in
+      make ?oemData ?s3Object ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Ephemeris data in Orbit Ephemeris Message (OEM) format. AWS Ground Station processes OEM ephemerides according to the CCSDS standard with some extra restrictions. OEM files should be in KVN format. For more detail about the OEM format that AWS Ground Station supports, see OEM ephemeris format in the AWS Ground Station user guide."]
+module TLEEphemeris =
+  struct
+    type nonrec t =
+      {
+      s3Object: S3Object.t option
+        [@ocaml.doc "The Amazon S3 object that contains the ephemeris data."];
+      tleData: TLEDataList.t option
+        [@ocaml.doc
+          "TLE data that you provide directly instead of using an Amazon S3 object."]}
+    let make ?s3Object = fun ?tleData -> fun () -> { s3Object; tleData }
+    let to_value x =
+      structure_to_value
+        [("s3Object", (Option.map x.s3Object ~f:S3Object.to_value));
+        ("tleData", (Option.map x.tleData ~f:TLEDataList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tleData =
+        (Option.map ~f:TLEDataList.of_xml) (Xml.child xml_arg0 "tleData") in
+      let s3Object =
+        (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "s3Object") in
+      make ?tleData ?s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tleData = field_map json__ "tleData" TLEDataList.of_json in
+      let s3Object = field_map json__ "s3Object" S3Object.of_json in
+      make ?tleData ?s3Object ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Two-line element set (TLE) ephemeris. For more detail about providing Two-line element sets to AWS Ground Station, see the TLE section of the AWS Ground Station user guide."]
+module CreateEndpointDetails =
+  struct
+    type nonrec t =
+      {
+      uplinkAwsGroundStationAgentEndpoint:
+        UplinkAwsGroundStationAgentEndpoint.t option
+        [@ocaml.doc "Definition for an uplink agent endpoint"];
+      downlinkAwsGroundStationAgentEndpoint:
+        DownlinkAwsGroundStationAgentEndpoint.t option
+        [@ocaml.doc "Definition for a downlink agent endpoint"]}
+    let make ?uplinkAwsGroundStationAgentEndpoint =
+      fun ?downlinkAwsGroundStationAgentEndpoint ->
+        fun () ->
+          {
+            uplinkAwsGroundStationAgentEndpoint;
+            downlinkAwsGroundStationAgentEndpoint
+          }
+    let to_value x =
+      structure_to_value
+        [("uplinkAwsGroundStationAgentEndpoint",
+           (Option.map x.uplinkAwsGroundStationAgentEndpoint
+              ~f:UplinkAwsGroundStationAgentEndpoint.to_value));
+        ("downlinkAwsGroundStationAgentEndpoint",
+          (Option.map x.downlinkAwsGroundStationAgentEndpoint
+             ~f:DownlinkAwsGroundStationAgentEndpoint.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let downlinkAwsGroundStationAgentEndpoint =
+        (Option.map ~f:DownlinkAwsGroundStationAgentEndpoint.of_xml)
+          (Xml.child xml_arg0 "downlinkAwsGroundStationAgentEndpoint") in
+      let uplinkAwsGroundStationAgentEndpoint =
+        (Option.map ~f:UplinkAwsGroundStationAgentEndpoint.of_xml)
+          (Xml.child xml_arg0 "uplinkAwsGroundStationAgentEndpoint") in
+      make ?downlinkAwsGroundStationAgentEndpoint
+        ?uplinkAwsGroundStationAgentEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let downlinkAwsGroundStationAgentEndpoint =
+        field_map json__ "downlinkAwsGroundStationAgentEndpoint"
+          DownlinkAwsGroundStationAgentEndpoint.of_json in
+      let uplinkAwsGroundStationAgentEndpoint =
+        field_map json__ "uplinkAwsGroundStationAgentEndpoint"
+          UplinkAwsGroundStationAgentEndpoint.of_json in
+      make ?downlinkAwsGroundStationAgentEndpoint
+        ?uplinkAwsGroundStationAgentEndpoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Endpoint definition used for creating a dataflow endpoint"]
 module DataflowEdgeList =
   struct
     type nonrec t = DataflowEdge.t list
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataflowEdge.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1954,7 +5274,7 @@ module DurationInSeconds =
       let open Result in
         ok_or_failwith
           ((check_int_max i ~max:21600) >>=
-             (fun () -> check_int_min i ~min:1));
+             (fun () -> check_int_min i ~min:0));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -1966,122 +5286,68 @@ module DurationInSeconds =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module ConfigTypeData =
+module KmsKey =
   struct
     type nonrec t =
       {
-      antennaDownlinkConfig: AntennaDownlinkConfig.t option
-        [@ocaml.doc
-          "Information about how AWS Ground Station should configure an antenna for downlink during a contact."];
-      antennaDownlinkDemodDecodeConfig:
-        AntennaDownlinkDemodDecodeConfig.t option
-        [@ocaml.doc
-          "Information about how AWS Ground Station should con\239\172\129gure an antenna for downlink demod decode during a contact."];
-      antennaUplinkConfig: AntennaUplinkConfig.t option
-        [@ocaml.doc
-          "Information about how AWS Ground Station should con\239\172\129gure an antenna for uplink during a contact."];
-      dataflowEndpointConfig: DataflowEndpointConfig.t option
-        [@ocaml.doc "Information about the dataflow endpoint Config."];
-      s3RecordingConfig: S3RecordingConfig.t option
-        [@ocaml.doc "Information about an S3 recording Config."];
-      trackingConfig: TrackingConfig.t option
-        [@ocaml.doc
-          "Object that determines whether tracking should be used during a contact executed with this Config in the mission profile."];
-      uplinkEchoConfig: UplinkEchoConfig.t option
-        [@ocaml.doc
-          "Information about an uplink echo Config. Parameters from the AntennaUplinkConfig, corresponding to the specified AntennaUplinkConfigArn, are used when this UplinkEchoConfig is used in a contact."]}
-    let make ?antennaDownlinkConfig =
-      fun ?antennaDownlinkDemodDecodeConfig ->
-        fun ?antennaUplinkConfig ->
-          fun ?dataflowEndpointConfig ->
-            fun ?s3RecordingConfig ->
-              fun ?trackingConfig ->
-                fun ?uplinkEchoConfig ->
-                  fun () ->
-                    {
-                      antennaDownlinkConfig;
-                      antennaDownlinkDemodDecodeConfig;
-                      antennaUplinkConfig;
-                      dataflowEndpointConfig;
-                      s3RecordingConfig;
-                      trackingConfig;
-                      uplinkEchoConfig
-                    }
+      kmsKeyArn: KeyArn.t option [@ocaml.doc "KMS Key Arn."];
+      kmsAliasArn: KeyAliasArn.t option [@ocaml.doc "KMS Alias Arn."];
+      kmsAliasName: KeyAliasName.t option [@ocaml.doc "KMS Alias Name."]}
+    let make ?kmsKeyArn =
+      fun ?kmsAliasArn ->
+        fun ?kmsAliasName ->
+          fun () -> { kmsKeyArn; kmsAliasArn; kmsAliasName }
     let to_value x =
       structure_to_value
-        [("antennaDownlinkConfig",
-           (Option.map x.antennaDownlinkConfig
-              ~f:AntennaDownlinkConfig.to_value));
-        ("antennaDownlinkDemodDecodeConfig",
-          (Option.map x.antennaDownlinkDemodDecodeConfig
-             ~f:AntennaDownlinkDemodDecodeConfig.to_value));
-        ("antennaUplinkConfig",
-          (Option.map x.antennaUplinkConfig ~f:AntennaUplinkConfig.to_value));
-        ("dataflowEndpointConfig",
-          (Option.map x.dataflowEndpointConfig
-             ~f:DataflowEndpointConfig.to_value));
-        ("s3RecordingConfig",
-          (Option.map x.s3RecordingConfig ~f:S3RecordingConfig.to_value));
-        ("trackingConfig",
-          (Option.map x.trackingConfig ~f:TrackingConfig.to_value));
-        ("uplinkEchoConfig",
-          (Option.map x.uplinkEchoConfig ~f:UplinkEchoConfig.to_value))]
+        [("kmsKeyArn", (Option.map x.kmsKeyArn ~f:KeyArn.to_value));
+        ("kmsAliasArn", (Option.map x.kmsAliasArn ~f:KeyAliasArn.to_value));
+        ("kmsAliasName",
+          (Option.map x.kmsAliasName ~f:KeyAliasName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let uplinkEchoConfig =
-        (Option.map ~f:UplinkEchoConfig.of_xml)
-          (Xml.child xml_arg0 "uplinkEchoConfig") in
-      let trackingConfig =
-        (Option.map ~f:TrackingConfig.of_xml)
-          (Xml.child xml_arg0 "trackingConfig") in
-      let s3RecordingConfig =
-        (Option.map ~f:S3RecordingConfig.of_xml)
-          (Xml.child xml_arg0 "s3RecordingConfig") in
-      let dataflowEndpointConfig =
-        (Option.map ~f:DataflowEndpointConfig.of_xml)
-          (Xml.child xml_arg0 "dataflowEndpointConfig") in
-      let antennaUplinkConfig =
-        (Option.map ~f:AntennaUplinkConfig.of_xml)
-          (Xml.child xml_arg0 "antennaUplinkConfig") in
-      let antennaDownlinkDemodDecodeConfig =
-        (Option.map ~f:AntennaDownlinkDemodDecodeConfig.of_xml)
-          (Xml.child xml_arg0 "antennaDownlinkDemodDecodeConfig") in
-      let antennaDownlinkConfig =
-        (Option.map ~f:AntennaDownlinkConfig.of_xml)
-          (Xml.child xml_arg0 "antennaDownlinkConfig") in
-      make ?uplinkEchoConfig ?trackingConfig ?s3RecordingConfig
-        ?dataflowEndpointConfig ?antennaUplinkConfig
-        ?antennaDownlinkDemodDecodeConfig ?antennaDownlinkConfig ()
+      let kmsAliasName =
+        (Option.map ~f:KeyAliasName.of_xml)
+          (Xml.child xml_arg0 "kmsAliasName") in
+      let kmsAliasArn =
+        (Option.map ~f:KeyAliasArn.of_xml) (Xml.child xml_arg0 "kmsAliasArn") in
+      let kmsKeyArn =
+        (Option.map ~f:KeyArn.of_xml) (Xml.child xml_arg0 "kmsKeyArn") in
+      make ?kmsAliasName ?kmsAliasArn ?kmsKeyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uplinkEchoConfig =
-        field_map json "uplinkEchoConfig" UplinkEchoConfig.of_json in
-      let trackingConfig =
-        field_map json "trackingConfig" TrackingConfig.of_json in
-      let s3RecordingConfig =
-        field_map json "s3RecordingConfig" S3RecordingConfig.of_json in
-      let dataflowEndpointConfig =
-        field_map json "dataflowEndpointConfig"
-          DataflowEndpointConfig.of_json in
-      let antennaUplinkConfig =
-        field_map json "antennaUplinkConfig" AntennaUplinkConfig.of_json in
-      let antennaDownlinkDemodDecodeConfig =
-        field_map json "antennaDownlinkDemodDecodeConfig"
-          AntennaDownlinkDemodDecodeConfig.of_json in
-      let antennaDownlinkConfig =
-        field_map json "antennaDownlinkConfig" AntennaDownlinkConfig.of_json in
-      make ?uplinkEchoConfig ?trackingConfig ?s3RecordingConfig
-        ?dataflowEndpointConfig ?antennaUplinkConfig
-        ?antennaDownlinkDemodDecodeConfig ?antennaDownlinkConfig ()
+    let of_json json__ =
+      let kmsAliasName = field_map json__ "kmsAliasName" KeyAliasName.of_json in
+      let kmsAliasArn = field_map json__ "kmsAliasArn" KeyAliasArn.of_json in
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KeyArn.of_json in
+      make ?kmsAliasName ?kmsAliasArn ?kmsKeyArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Object containing the parameters of a Config. See the subtype definitions for what each type of Config contains."]
+  end[@@ocaml.doc "KMS key info."]
+module PositiveDurationInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:21600) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PositiveDurationInSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module DependencyException =
   struct
     type nonrec t =
       {
       message: String_.t option ;
-      parameterName: String_.t option }
+      parameterName: String_.t option
+        [@ocaml.doc "Name of the parameter that caused the exception."]}
     let make ?message =
       fun ?parameterName -> fun () -> { message; parameterName }
     let to_value x =
@@ -2096,9 +5362,9 @@ module DependencyException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?parameterName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameterName = field_map json "parameterName" String_.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let parameterName = field_map json__ "parameterName" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?parameterName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Dependency encountered an error."]
@@ -2107,7 +5373,8 @@ module InvalidParameterException =
     type nonrec t =
       {
       message: String_.t option ;
-      parameterName: String_.t option }
+      parameterName: String_.t option
+        [@ocaml.doc "Name of the invalid parameter."]}
     let make ?message =
       fun ?parameterName -> fun () -> { message; parameterName }
     let to_value x =
@@ -2122,12 +5389,40 @@ module InvalidParameterException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?parameterName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameterName = field_map json "parameterName" String_.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let parameterName = field_map json__ "parameterName" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?parameterName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more parameters are not valid."]
+module ResourceLimitExceededException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      parameterName: String_.t option
+        [@ocaml.doc
+          "Name of the parameter that exceeded the resource limit."]}
+    let make ?message =
+      fun ?parameterName -> fun () -> { message; parameterName }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("parameterName", (Option.map x.parameterName ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let parameterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "parameterName") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?parameterName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let parameterName = field_map json__ "parameterName" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?parameterName ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Account limits for this resource have been exceeded."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -2142,17 +5437,227 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resource was not found."]
-module TagKeys =
+module ClientToken =
   struct
-    type nonrec t = String_.t list
-    let make i = i
+    type nonrec t = string[@@ocaml.doc
+                            "A client token is a unique, case-sensitive string of up to 64 ASCII characters. It is generated by the client to ensure idempotent operations, allowing safe retries without unintended side effects."]
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[!-~]{1,64}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "A client token is a unique, case-sensitive string of up to 64 ASCII characters. It is generated by the client to ensure idempotent operations, allowing safe retries without unintended side effects."]
+module TrackingOverrides =
+  struct
+    type nonrec t =
+      {
+      programTrackSettings: ProgramTrackSettings.t option
+        [@ocaml.doc
+          "Program track settings to override for antenna tracking during the contact."]}
+    let make ?programTrackSettings = fun () -> { programTrackSettings }
+    let to_value x =
+      structure_to_value
+        [("programTrackSettings",
+           (Option.map x.programTrackSettings
+              ~f:ProgramTrackSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let programTrackSettings =
+        (Option.map ~f:ProgramTrackSettings.of_xml)
+          (Xml.child xml_arg0 "programTrackSettings") in
+      make ?programTrackSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let programTrackSettings =
+        field_map json__ "programTrackSettings" ProgramTrackSettings.of_json in
+      make ?programTrackSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Overrides the default tracking configuration on an antenna during a contact."]
+module ConfigTypeData =
+  struct
+    type nonrec t =
+      {
+      antennaDownlinkConfig: AntennaDownlinkConfig.t option
+        [@ocaml.doc
+          "Information about how AWS Ground Station should configure an antenna for downlink during a contact."];
+      trackingConfig: TrackingConfig.t option
+        [@ocaml.doc
+          "Object that determines whether tracking should be used during a contact executed with this Config in the mission profile."];
+      dataflowEndpointConfig: DataflowEndpointConfig.t option
+        [@ocaml.doc "Information about the dataflow endpoint Config."];
+      antennaDownlinkDemodDecodeConfig:
+        AntennaDownlinkDemodDecodeConfig.t option
+        [@ocaml.doc
+          "Information about how AWS Ground Station should con\239\172\129gure an antenna for downlink demod decode during a contact."];
+      antennaUplinkConfig: AntennaUplinkConfig.t option
+        [@ocaml.doc
+          "Information about how AWS Ground Station should con\239\172\129gure an antenna for uplink during a contact."];
+      uplinkEchoConfig: UplinkEchoConfig.t option
+        [@ocaml.doc
+          "Information about an uplink echo Config. Parameters from the AntennaUplinkConfig, corresponding to the specified AntennaUplinkConfigArn, are used when this UplinkEchoConfig is used in a contact."];
+      s3RecordingConfig: S3RecordingConfig.t option
+        [@ocaml.doc "Information about an S3 recording Config."];
+      telemetrySinkConfig: TelemetrySinkConfig.t option
+        [@ocaml.doc "Information about a telemetry sink Config."]}
+    let make ?antennaDownlinkConfig =
+      fun ?trackingConfig ->
+        fun ?dataflowEndpointConfig ->
+          fun ?antennaDownlinkDemodDecodeConfig ->
+            fun ?antennaUplinkConfig ->
+              fun ?uplinkEchoConfig ->
+                fun ?s3RecordingConfig ->
+                  fun ?telemetrySinkConfig ->
+                    fun () ->
+                      {
+                        antennaDownlinkConfig;
+                        trackingConfig;
+                        dataflowEndpointConfig;
+                        antennaDownlinkDemodDecodeConfig;
+                        antennaUplinkConfig;
+                        uplinkEchoConfig;
+                        s3RecordingConfig;
+                        telemetrySinkConfig
+                      }
+    let to_value x =
+      structure_to_value
+        [("antennaDownlinkConfig",
+           (Option.map x.antennaDownlinkConfig
+              ~f:AntennaDownlinkConfig.to_value));
+        ("trackingConfig",
+          (Option.map x.trackingConfig ~f:TrackingConfig.to_value));
+        ("dataflowEndpointConfig",
+          (Option.map x.dataflowEndpointConfig
+             ~f:DataflowEndpointConfig.to_value));
+        ("antennaDownlinkDemodDecodeConfig",
+          (Option.map x.antennaDownlinkDemodDecodeConfig
+             ~f:AntennaDownlinkDemodDecodeConfig.to_value));
+        ("antennaUplinkConfig",
+          (Option.map x.antennaUplinkConfig ~f:AntennaUplinkConfig.to_value));
+        ("uplinkEchoConfig",
+          (Option.map x.uplinkEchoConfig ~f:UplinkEchoConfig.to_value));
+        ("s3RecordingConfig",
+          (Option.map x.s3RecordingConfig ~f:S3RecordingConfig.to_value));
+        ("telemetrySinkConfig",
+          (Option.map x.telemetrySinkConfig ~f:TelemetrySinkConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let telemetrySinkConfig =
+        (Option.map ~f:TelemetrySinkConfig.of_xml)
+          (Xml.child xml_arg0 "telemetrySinkConfig") in
+      let s3RecordingConfig =
+        (Option.map ~f:S3RecordingConfig.of_xml)
+          (Xml.child xml_arg0 "s3RecordingConfig") in
+      let uplinkEchoConfig =
+        (Option.map ~f:UplinkEchoConfig.of_xml)
+          (Xml.child xml_arg0 "uplinkEchoConfig") in
+      let antennaUplinkConfig =
+        (Option.map ~f:AntennaUplinkConfig.of_xml)
+          (Xml.child xml_arg0 "antennaUplinkConfig") in
+      let antennaDownlinkDemodDecodeConfig =
+        (Option.map ~f:AntennaDownlinkDemodDecodeConfig.of_xml)
+          (Xml.child xml_arg0 "antennaDownlinkDemodDecodeConfig") in
+      let dataflowEndpointConfig =
+        (Option.map ~f:DataflowEndpointConfig.of_xml)
+          (Xml.child xml_arg0 "dataflowEndpointConfig") in
+      let trackingConfig =
+        (Option.map ~f:TrackingConfig.of_xml)
+          (Xml.child xml_arg0 "trackingConfig") in
+      let antennaDownlinkConfig =
+        (Option.map ~f:AntennaDownlinkConfig.of_xml)
+          (Xml.child xml_arg0 "antennaDownlinkConfig") in
+      make ?telemetrySinkConfig ?s3RecordingConfig ?uplinkEchoConfig
+        ?antennaUplinkConfig ?antennaDownlinkDemodDecodeConfig
+        ?dataflowEndpointConfig ?trackingConfig ?antennaDownlinkConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let telemetrySinkConfig =
+        field_map json__ "telemetrySinkConfig" TelemetrySinkConfig.of_json in
+      let s3RecordingConfig =
+        field_map json__ "s3RecordingConfig" S3RecordingConfig.of_json in
+      let uplinkEchoConfig =
+        field_map json__ "uplinkEchoConfig" UplinkEchoConfig.of_json in
+      let antennaUplinkConfig =
+        field_map json__ "antennaUplinkConfig" AntennaUplinkConfig.of_json in
+      let antennaDownlinkDemodDecodeConfig =
+        field_map json__ "antennaDownlinkDemodDecodeConfig"
+          AntennaDownlinkDemodDecodeConfig.of_json in
+      let dataflowEndpointConfig =
+        field_map json__ "dataflowEndpointConfig"
+          DataflowEndpointConfig.of_json in
+      let trackingConfig =
+        field_map json__ "trackingConfig" TrackingConfig.of_json in
+      let antennaDownlinkConfig =
+        field_map json__ "antennaDownlinkConfig"
+          AntennaDownlinkConfig.of_json in
+      make ?telemetrySinkConfig ?s3RecordingConfig ?uplinkEchoConfig
+        ?antennaUplinkConfig ?antennaDownlinkDemodDecodeConfig
+        ?dataflowEndpointConfig ?trackingConfig ?antennaDownlinkConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing the parameters of a Config. See the subtype definitions for what each type of Config contains."]
+module AggregateStatus =
+  struct
+    type nonrec t =
+      {
+      status: AgentStatus.t [@ocaml.doc "Aggregate status."];
+      signatureMap: SignatureMap.t option
+        [@ocaml.doc "Sparse map of failure signatures."]}
+    let context_ = "AggregateStatus"
+    let make ?signatureMap =
+      fun ~status -> fun () -> { signatureMap; status }
+    let to_value x =
+      structure_to_value
+        [("status", (Some (AgentStatus.to_value x.status)));
+        ("signatureMap",
+          (Option.map x.signatureMap ~f:SignatureMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signatureMap =
+        (Option.map ~f:SignatureMap.of_xml)
+          (Xml.child xml_arg0 "signatureMap") in
+      let status =
+        AgentStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      make ?signatureMap ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signatureMap = field_map json__ "signatureMap" SignatureMap.of_json in
+      let status = field_map_exn json__ "status" AgentStatus.of_json in
+      make ?signatureMap ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Aggregate status of Agent components."]
+module ComponentStatusList =
+  struct
+    type nonrec t = ComponentStatusData.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:ComponentStatusData.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2166,14 +5671,220 @@ module TagKeys =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
-    let of_json j = list_of_json ~kind:"TagKeys" ~of_json:String_.of_json j
+                     | _ -> true))) ~f:ComponentStatusData.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ComponentStatusList"
+        ~of_json:ComponentStatusData.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module AnyArn =
+  struct
+    type nonrec t = string
+    let context_ = "AnyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"(arn:aws:)[\\s\\S]{0,1024}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AnyArn" j
+    let to_json = simple_to_json to_value
+  end
+module TagKeys =
+  struct
+    type nonrec t = UnboundedString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnboundedString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnboundedString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TagKeys" ~of_json:UnboundedString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AgentDetails =
+  struct
+    type nonrec t =
+      {
+      agentVersion: VersionString.t [@ocaml.doc "Current agent version."];
+      instanceId: InstanceId.t
+        [@ocaml.doc "ID of EC2 instance agent is running on."];
+      instanceType: InstanceType.t
+        [@ocaml.doc "Type of EC2 instance agent is running on."];
+      reservedCpuCores: AgentCpuCoresList.t option
+        [@ocaml.doc
+          "This field should not be used. Use agentCpuCores instead. List of CPU cores reserved for processes other than the agent running on the EC2 instance."];
+      agentCpuCores: AgentCpuCoresList.t option
+        [@ocaml.doc "List of CPU cores reserved for the agent."];
+      componentVersions: ComponentVersionList.t
+        [@ocaml.doc "List of versions being used by agent components."]}
+    let context_ = "AgentDetails"
+    let make ?reservedCpuCores =
+      fun ?agentCpuCores ->
+        fun ~agentVersion ->
+          fun ~instanceId ->
+            fun ~instanceType ->
+              fun ~componentVersions ->
+                fun () ->
+                  {
+                    reservedCpuCores;
+                    agentCpuCores;
+                    agentVersion;
+                    instanceId;
+                    instanceType;
+                    componentVersions
+                  }
+    let to_value x =
+      structure_to_value
+        [("agentVersion", (Some (VersionString.to_value x.agentVersion)));
+        ("instanceId", (Some (InstanceId.to_value x.instanceId)));
+        ("instanceType", (Some (InstanceType.to_value x.instanceType)));
+        ("reservedCpuCores",
+          (Option.map x.reservedCpuCores ~f:AgentCpuCoresList.to_value));
+        ("agentCpuCores",
+          (Option.map x.agentCpuCores ~f:AgentCpuCoresList.to_value));
+        ("componentVersions",
+          (Some (ComponentVersionList.to_value x.componentVersions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let componentVersions =
+        ComponentVersionList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "componentVersions") in
+      let agentCpuCores =
+        (Option.map ~f:AgentCpuCoresList.of_xml)
+          (Xml.child xml_arg0 "agentCpuCores") in
+      let reservedCpuCores =
+        (Option.map ~f:AgentCpuCoresList.of_xml)
+          (Xml.child xml_arg0 "reservedCpuCores") in
+      let instanceType =
+        InstanceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "instanceType") in
+      let instanceId =
+        InstanceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "instanceId") in
+      let agentVersion =
+        VersionString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "agentVersion") in
+      make ~componentVersions ?agentCpuCores ?reservedCpuCores ~instanceType
+        ~instanceId ~agentVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let componentVersions =
+        field_map_exn json__ "componentVersions" ComponentVersionList.of_json in
+      let agentCpuCores =
+        field_map json__ "agentCpuCores" AgentCpuCoresList.of_json in
+      let reservedCpuCores =
+        field_map json__ "reservedCpuCores" AgentCpuCoresList.of_json in
+      let instanceType =
+        field_map_exn json__ "instanceType" InstanceType.of_json in
+      let instanceId = field_map_exn json__ "instanceId" InstanceId.of_json in
+      let agentVersion =
+        field_map_exn json__ "agentVersion" VersionString.of_json in
+      make ~componentVersions ?agentCpuCores ?reservedCpuCores ~instanceType
+        ~instanceId ~agentVersion ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Detailed information about the agent."]
+module DiscoveryData =
+  struct
+    type nonrec t =
+      {
+      publicIpAddresses: IpAddressList.t
+        [@ocaml.doc "List of public IP addresses to associate with agent."];
+      privateIpAddresses: IpAddressList.t
+        [@ocaml.doc "List of private IP addresses to associate with agent."];
+      capabilityArns: CapabilityArnList.t
+        [@ocaml.doc "List of capabilities to associate with agent."]}
+    let context_ = "DiscoveryData"
+    let make ~publicIpAddresses =
+      fun ~privateIpAddresses ->
+        fun ~capabilityArns ->
+          fun () -> { publicIpAddresses; privateIpAddresses; capabilityArns }
+    let to_value x =
+      structure_to_value
+        [("publicIpAddresses",
+           (Some (IpAddressList.to_value x.publicIpAddresses)));
+        ("privateIpAddresses",
+          (Some (IpAddressList.to_value x.privateIpAddresses)));
+        ("capabilityArns",
+          (Some (CapabilityArnList.to_value x.capabilityArns)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capabilityArns =
+        CapabilityArnList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "capabilityArns") in
+      let privateIpAddresses =
+        IpAddressList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "privateIpAddresses") in
+      let publicIpAddresses =
+        IpAddressList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "publicIpAddresses") in
+      make ~capabilityArns ~privateIpAddresses ~publicIpAddresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capabilityArns =
+        field_map_exn json__ "capabilityArns" CapabilityArnList.of_json in
+      let privateIpAddresses =
+        field_map_exn json__ "privateIpAddresses" IpAddressList.of_json in
+      let publicIpAddresses =
+        field_map_exn json__ "publicIpAddresses" IpAddressList.of_json in
+      make ~capabilityArns ~privateIpAddresses ~publicIpAddresses ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Data for agent discovery."]
+module PaginationToken =
+  struct
+    type nonrec t = string
+    let context_ = "PaginationToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9-/+_.=]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PaginationToken" j
+    let to_json = simple_to_json to_value
   end
 module SatelliteList =
   struct
     type nonrec t = SatelliteListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SatelliteListItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2194,10 +5905,31 @@ module SatelliteList =
       list_of_json ~kind:"SatelliteList" ~of_json:SatelliteListItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PaginationMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PaginationMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module MissionProfileList =
   struct
     type nonrec t = MissionProfileListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MissionProfileListItem.to_value)) |>
         (fun x -> `List x)
@@ -2224,6 +5956,9 @@ module GroundStationList =
   struct
     type nonrec t = GroundStationData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroundStationData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2245,10 +5980,153 @@ module GroundStationList =
         ~of_json:GroundStationData.of_json j
     let to_json v = composed_to_json to_value v
   end
+module GroundStationReservationList =
+  struct
+    type nonrec t = GroundStationReservationListItem.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroundStationReservationListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:GroundStationReservationListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroundStationReservationList"
+        ~of_json:GroundStationReservationListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReservationTypeFilterList =
+  struct
+    type nonrec t = ReservationType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReservationType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReservationType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReservationTypeFilterList"
+        ~of_json:ReservationType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SyntheticTimestamp_epoch_seconds =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module EphemeridesList =
+  struct
+    type nonrec t = EphemerisItem.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EphemerisItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EphemerisItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EphemeridesList" ~of_json:EphemerisItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EphemerisStatusList =
+  struct
+    type nonrec t = EphemerisStatus.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EphemerisStatus.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EphemerisStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EphemerisStatusList"
+        ~of_json:EphemerisStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DataflowEndpointGroupList =
   struct
     type nonrec t = DataflowEndpointListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataflowEndpointListItem.to_value)) |>
         (fun x -> `List x)
@@ -2275,6 +6153,9 @@ module ContactList =
   struct
     type nonrec t = ContactData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContactData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2295,10 +6176,41 @@ module ContactList =
       list_of_json ~kind:"ContactList" ~of_json:ContactData.of_json j
     let to_json v = composed_to_json to_value v
   end
+module EphemerisFilter =
+  struct
+    type nonrec t =
+      {
+      azEl: AzElEphemerisFilter.t option
+        [@ocaml.doc "Filter for AzElEphemeris."]}
+    let make ?azEl = fun () -> { azEl }
+    let to_value x =
+      structure_to_value
+        [("azEl", (Option.map x.azEl ~f:AzElEphemerisFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let azEl =
+        (Option.map ~f:AzElEphemerisFilter.of_xml)
+          (Xml.child xml_arg0 "azEl") in
+      make ?azEl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let azEl = field_map json__ "azEl" AzElEphemerisFilter.of_json in
+      make ?azEl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filter for selecting contacts that use a specific ephemeris\"."]
 module StatusList =
   struct
     type nonrec t = ContactStatus.t list
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContactStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2319,10 +6231,41 @@ module StatusList =
       list_of_json ~kind:"StatusList" ~of_json:ContactStatus.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ContactVersionsList =
+  struct
+    type nonrec t = ContactVersion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContactVersion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ContactVersion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ContactVersionsList"
+        ~of_json:ContactVersion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ConfigList =
   struct
     type nonrec t = ConfigListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigListItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2343,10 +6286,105 @@ module ConfigList =
       list_of_json ~kind:"ConfigList" ~of_json:ConfigListItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AntennaList =
+  struct
+    type nonrec t = AntennaListItem.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AntennaListItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AntennaListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AntennaList" ~of_json:AntennaListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Month =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:12) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Month" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Year =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3000) >>=
+             (fun () -> check_int_min i ~min:2018));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Year" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DataflowEndpointGroupDurationInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:480) >>= (fun () -> check_int_min i ~min:30));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DataflowEndpointGroupDurationInSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module EndpointDetailsList =
   struct
     type nonrec t = EndpointDetails.t list
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointDetails.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2368,10 +6406,135 @@ module EndpointDetailsList =
         ~of_json:EndpointDetails.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ResourceInUseException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified resource is in use by non-terminal state contacts and cannot be modified or deleted."]
+module EphemerisErrorReasonList =
+  struct
+    type nonrec t = EphemerisErrorReason.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EphemerisErrorReason.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EphemerisErrorReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EphemerisErrorReasonList"
+        ~of_json:EphemerisErrorReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EphemerisInvalidReason =
+  struct
+    type nonrec t =
+      | METADATA_INVALID 
+      | TIME_RANGE_INVALID 
+      | TRAJECTORY_INVALID 
+      | KMS_KEY_INVALID 
+      | VALIDATION_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | METADATA_INVALID -> "METADATA_INVALID"
+      | TIME_RANGE_INVALID -> "TIME_RANGE_INVALID"
+      | TRAJECTORY_INVALID -> "TRAJECTORY_INVALID"
+      | KMS_KEY_INVALID -> "KMS_KEY_INVALID"
+      | VALIDATION_ERROR -> "VALIDATION_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "METADATA_INVALID" -> METADATA_INVALID
+      | "TIME_RANGE_INVALID" -> TIME_RANGE_INVALID
+      | "TRAJECTORY_INVALID" -> TRAJECTORY_INVALID
+      | "KMS_KEY_INVALID" -> KMS_KEY_INVALID
+      | "VALIDATION_ERROR" -> VALIDATION_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EphemerisInvalidReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EphemerisInvalidReason" j)
+    let to_json = simple_to_json to_value
+  end
+module EphemerisTypeDescription =
+  struct
+    type nonrec t =
+      {
+      tle: EphemerisDescription.t option ;
+      oem: EphemerisDescription.t option ;
+      azEl: EphemerisDescription.t option }
+    let make ?tle = fun ?oem -> fun ?azEl -> fun () -> { tle; oem; azEl }
+    let to_value x =
+      structure_to_value
+        [("tle", (Option.map x.tle ~f:EphemerisDescription.to_value));
+        ("oem", (Option.map x.oem ~f:EphemerisDescription.to_value));
+        ("azEl", (Option.map x.azEl ~f:EphemerisDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let azEl =
+        (Option.map ~f:EphemerisDescription.of_xml)
+          (Xml.child xml_arg0 "azEl") in
+      let oem =
+        (Option.map ~f:EphemerisDescription.of_xml)
+          (Xml.child xml_arg0 "oem") in
+      let tle =
+        (Option.map ~f:EphemerisDescription.of_xml)
+          (Xml.child xml_arg0 "tle") in
+      make ?azEl ?oem ?tle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let azEl = field_map json__ "azEl" EphemerisDescription.of_json in
+      let oem = field_map json__ "oem" EphemerisDescription.of_json in
+      let tle = field_map json__ "tle" EphemerisDescription.of_json in
+      make ?azEl ?oem ?tle ()
+    let to_json v = composed_to_json to_value v
+  end
 module DataflowList =
   struct
     type nonrec t = DataflowDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataflowDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2392,12 +6555,63 @@ module DataflowList =
       list_of_json ~kind:"DataflowList" ~of_json:DataflowDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ResourceLimitExceededException =
+module CustomerEphemerisPriority =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:99999) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CustomerEphemerisPriority"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module EphemerisData =
+  struct
+    type nonrec t =
+      {
+      tle: TLEEphemeris.t option ;
+      oem: OEMEphemeris.t option ;
+      azEl: AzElEphemeris.t option }
+    let make ?tle = fun ?oem -> fun ?azEl -> fun () -> { tle; oem; azEl }
+    let to_value x =
+      structure_to_value
+        [("tle", (Option.map x.tle ~f:TLEEphemeris.to_value));
+        ("oem", (Option.map x.oem ~f:OEMEphemeris.to_value));
+        ("azEl", (Option.map x.azEl ~f:AzElEphemeris.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let azEl =
+        (Option.map ~f:AzElEphemeris.of_xml) (Xml.child xml_arg0 "azEl") in
+      let oem =
+        (Option.map ~f:OEMEphemeris.of_xml) (Xml.child xml_arg0 "oem") in
+      let tle =
+        (Option.map ~f:TLEEphemeris.of_xml) (Xml.child xml_arg0 "tle") in
+      make ?azEl ?oem ?tle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let azEl = field_map json__ "azEl" AzElEphemeris.of_json in
+      let oem = field_map json__ "oem" OEMEphemeris.of_json in
+      let tle = field_map json__ "tle" TLEEphemeris.of_json in
+      make ?azEl ?oem ?tle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Ephemeris data."]
+module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
       message: String_.t option ;
-      parameterName: String_.t option }
+      parameterName: String_.t option
+        [@ocaml.doc "Parameter name that caused the exception"]}
     let make ?message =
       fun ?parameterName -> fun () -> { message; parameterName }
     let to_value x =
@@ -2412,156 +6626,509 @@ module ResourceLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?parameterName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameterName = field_map json "parameterName" String_.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let parameterName = field_map json__ "parameterName" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?parameterName ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Account limits for this resource have been exceeded."]
+  end[@@ocaml.doc "Request would cause a service quota to be exceeded."]
+module CreateEndpointDetailsList =
+  struct
+    type nonrec t = CreateEndpointDetails.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:12) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CreateEndpointDetails.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CreateEndpointDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CreateEndpointDetailsList"
+        ~of_json:CreateEndpointDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module UpdateMissionProfileRequest =
   struct
     type nonrec t =
       {
-      contactPostPassDurationSeconds: DurationInSeconds.t option
-        [@ocaml.doc
-          "Amount of time after a contact ends that you\226\128\153d like to receive a CloudWatch event indicating the pass has finished."];
+      missionProfileId: Uuid.t [@ocaml.doc "UUID of a mission profile."];
+      name: SafeName.t option [@ocaml.doc "Name of a mission profile."];
       contactPrePassDurationSeconds: DurationInSeconds.t option
         [@ocaml.doc
-          "Amount of time after a contact ends that you\226\128\153d like to receive a CloudWatch event indicating the pass has finished."];
+          "Amount of time after a contact ends that you'd like to receive a Ground Station Contact State Change event indicating the pass has finished."];
+      contactPostPassDurationSeconds: DurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time after a contact ends that you'd like to receive a Ground Station Contact State Change event indicating the pass has finished."];
+      minimumViableContactDurationSeconds: PositiveDurationInSeconds.t option
+        [@ocaml.doc
+          "Smallest amount of time in seconds that you'd like to see for an available contact. AWS Ground Station will not present you with contacts shorter than this duration."];
       dataflowEdges: DataflowEdgeList.t option
         [@ocaml.doc
           "A list of lists of ARNs. Each list of ARNs is an edge, with a from Config and a to Config."];
-      minimumViableContactDurationSeconds: DurationInSeconds.t option
-        [@ocaml.doc
-          "Smallest amount of time in seconds that you\226\128\153d like to see for an available contact. AWS Ground Station will not present you with contacts shorter than this duration."];
-      missionProfileId: String_.t [@ocaml.doc "UUID of a mission profile."];
-      name: SafeName.t option [@ocaml.doc "Name of a mission profile."];
       trackingConfigArn: ConfigArn.t option
-        [@ocaml.doc "ARN of a tracking Config."]}
+        [@ocaml.doc "ARN of a tracking Config."];
+      telemetrySinkConfigArn: ConfigArn.t option
+        [@ocaml.doc "ARN of a telemetry sink Config."];
+      streamsKmsKey: KmsKey.t option
+        [@ocaml.doc "KMS key to use for encrypting streams."];
+      streamsKmsRole: RoleArn.t option
+        [@ocaml.doc "Role to use for encrypting streams with KMS key."]}
     let context_ = "UpdateMissionProfileRequest"
-    let make ?contactPostPassDurationSeconds =
+    let make ?name =
       fun ?contactPrePassDurationSeconds ->
-        fun ?dataflowEdges ->
+        fun ?contactPostPassDurationSeconds ->
           fun ?minimumViableContactDurationSeconds ->
-            fun ?name ->
+            fun ?dataflowEdges ->
               fun ?trackingConfigArn ->
-                fun ~missionProfileId ->
-                  fun () ->
-                    {
-                      contactPostPassDurationSeconds;
-                      contactPrePassDurationSeconds;
-                      dataflowEdges;
-                      minimumViableContactDurationSeconds;
-                      name;
-                      trackingConfigArn;
-                      missionProfileId
-                    }
+                fun ?telemetrySinkConfigArn ->
+                  fun ?streamsKmsKey ->
+                    fun ?streamsKmsRole ->
+                      fun ~missionProfileId ->
+                        fun () ->
+                          {
+                            name;
+                            contactPrePassDurationSeconds;
+                            contactPostPassDurationSeconds;
+                            minimumViableContactDurationSeconds;
+                            dataflowEdges;
+                            trackingConfigArn;
+                            telemetrySinkConfigArn;
+                            streamsKmsKey;
+                            streamsKmsRole;
+                            missionProfileId
+                          }
     let to_value x =
       structure_to_value
-        [("contactPostPassDurationSeconds",
-           (Option.map x.contactPostPassDurationSeconds
-              ~f:DurationInSeconds.to_value));
+        [("missionProfileId", (Some (Uuid.to_value x.missionProfileId)));
+        ("name", (Option.map x.name ~f:SafeName.to_value));
         ("contactPrePassDurationSeconds",
           (Option.map x.contactPrePassDurationSeconds
              ~f:DurationInSeconds.to_value));
-        ("dataflowEdges",
-          (Option.map x.dataflowEdges ~f:DataflowEdgeList.to_value));
+        ("contactPostPassDurationSeconds",
+          (Option.map x.contactPostPassDurationSeconds
+             ~f:DurationInSeconds.to_value));
         ("minimumViableContactDurationSeconds",
           (Option.map x.minimumViableContactDurationSeconds
-             ~f:DurationInSeconds.to_value));
-        ("missionProfileId", (Some (String_.to_value x.missionProfileId)));
-        ("name", (Option.map x.name ~f:SafeName.to_value));
+             ~f:PositiveDurationInSeconds.to_value));
+        ("dataflowEdges",
+          (Option.map x.dataflowEdges ~f:DataflowEdgeList.to_value));
         ("trackingConfigArn",
-          (Option.map x.trackingConfigArn ~f:ConfigArn.to_value))]
+          (Option.map x.trackingConfigArn ~f:ConfigArn.to_value));
+        ("telemetrySinkConfigArn",
+          (Option.map x.telemetrySinkConfigArn ~f:ConfigArn.to_value));
+        ("streamsKmsKey", (Option.map x.streamsKmsKey ~f:KmsKey.to_value));
+        ("streamsKmsRole", (Option.map x.streamsKmsRole ~f:RoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamsKmsRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "streamsKmsRole") in
+      let streamsKmsKey =
+        (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "streamsKmsKey") in
+      let telemetrySinkConfigArn =
+        (Option.map ~f:ConfigArn.of_xml)
+          (Xml.child xml_arg0 "telemetrySinkConfigArn") in
       let trackingConfigArn =
         (Option.map ~f:ConfigArn.of_xml)
           (Xml.child xml_arg0 "trackingConfigArn") in
-      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
-      let missionProfileId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "missionProfileId") in
-      let minimumViableContactDurationSeconds =
-        (Option.map ~f:DurationInSeconds.of_xml)
-          (Xml.child xml_arg0 "minimumViableContactDurationSeconds") in
       let dataflowEdges =
         (Option.map ~f:DataflowEdgeList.of_xml)
           (Xml.child xml_arg0 "dataflowEdges") in
-      let contactPrePassDurationSeconds =
-        (Option.map ~f:DurationInSeconds.of_xml)
-          (Xml.child xml_arg0 "contactPrePassDurationSeconds") in
+      let minimumViableContactDurationSeconds =
+        (Option.map ~f:PositiveDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "minimumViableContactDurationSeconds") in
       let contactPostPassDurationSeconds =
         (Option.map ~f:DurationInSeconds.of_xml)
           (Xml.child xml_arg0 "contactPostPassDurationSeconds") in
-      make ?trackingConfigArn ?name ~missionProfileId
-        ?minimumViableContactDurationSeconds ?dataflowEdges
-        ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackingConfigArn =
-        field_map json "trackingConfigArn" ConfigArn.of_json in
-      let name = field_map json "name" SafeName.of_json in
-      let missionProfileId =
-        field_map_exn json "missionProfileId" String_.of_json in
-      let minimumViableContactDurationSeconds =
-        field_map json "minimumViableContactDurationSeconds"
-          DurationInSeconds.of_json in
-      let dataflowEdges =
-        field_map json "dataflowEdges" DataflowEdgeList.of_json in
       let contactPrePassDurationSeconds =
-        field_map json "contactPrePassDurationSeconds"
-          DurationInSeconds.of_json in
+        (Option.map ~f:DurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPrePassDurationSeconds") in
+      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
+      let missionProfileId =
+        Uuid.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "missionProfileId") in
+      make ?streamsKmsRole ?streamsKmsKey ?telemetrySinkConfigArn
+        ?trackingConfigArn ?dataflowEdges
+        ?minimumViableContactDurationSeconds ?contactPostPassDurationSeconds
+        ?contactPrePassDurationSeconds ?name ~missionProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamsKmsRole = field_map json__ "streamsKmsRole" RoleArn.of_json in
+      let streamsKmsKey = field_map json__ "streamsKmsKey" KmsKey.of_json in
+      let telemetrySinkConfigArn =
+        field_map json__ "telemetrySinkConfigArn" ConfigArn.of_json in
+      let trackingConfigArn =
+        field_map json__ "trackingConfigArn" ConfigArn.of_json in
+      let dataflowEdges =
+        field_map json__ "dataflowEdges" DataflowEdgeList.of_json in
+      let minimumViableContactDurationSeconds =
+        field_map json__ "minimumViableContactDurationSeconds"
+          PositiveDurationInSeconds.of_json in
       let contactPostPassDurationSeconds =
-        field_map json "contactPostPassDurationSeconds"
+        field_map json__ "contactPostPassDurationSeconds"
           DurationInSeconds.of_json in
-      make ?trackingConfigArn ?name ~missionProfileId
-        ?minimumViableContactDurationSeconds ?dataflowEdges
-        ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds ()
+      let contactPrePassDurationSeconds =
+        field_map json__ "contactPrePassDurationSeconds"
+          DurationInSeconds.of_json in
+      let name = field_map json__ "name" SafeName.of_json in
+      let missionProfileId =
+        field_map_exn json__ "missionProfileId" Uuid.of_json in
+      make ?streamsKmsRole ?streamsKmsKey ?telemetrySinkConfigArn
+        ?trackingConfigArn ?dataflowEdges
+        ?minimumViableContactDurationSeconds ?contactPostPassDurationSeconds
+        ?contactPrePassDurationSeconds ?name ~missionProfileId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the UpdateMissionProfile operation."]
+module UpdateEphemerisRequest =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t [@ocaml.doc "The AWS Ground Station ephemeris ID."];
+      enabled: Boolean.t
+        [@ocaml.doc
+          "Enable or disable the ephemeris. Changing this value doesn't require re-validation."];
+      name: SafeName.t option
+        [@ocaml.doc "A name that you can use to identify the ephemeris."];
+      priority: EphemerisPriority.t option
+        [@ocaml.doc
+          "A priority score that determines which ephemeris to use when multiple ephemerides overlap. Higher numbers take precedence. The default is 1. Must be 1 or greater."]}
+    let context_ = "UpdateEphemerisRequest"
+    let make ?name =
+      fun ?priority ->
+        fun ~ephemerisId ->
+          fun ~enabled -> fun () -> { name; priority; ephemerisId; enabled }
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Some (Uuid.to_value x.ephemerisId)));
+        ("enabled", (Some (Boolean.to_value x.enabled)));
+        ("name", (Option.map x.name ~f:SafeName.to_value));
+        ("priority", (Option.map x.priority ~f:EphemerisPriority.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let priority =
+        (Option.map ~f:EphemerisPriority.of_xml)
+          (Xml.child xml_arg0 "priority") in
+      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
+      let enabled =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "enabled") in
+      let ephemerisId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ephemerisId") in
+      make ?priority ?name ~enabled ~ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let priority = field_map json__ "priority" EphemerisPriority.of_json in
+      let name = field_map json__ "name" SafeName.of_json in
+      let enabled = field_map_exn json__ "enabled" Boolean.of_json in
+      let ephemerisId = field_map_exn json__ "ephemerisId" Uuid.of_json in
+      make ?priority ?name ~enabled ~ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update an existing ephemeris."]
+module UpdateContactResponse =
+  struct
+    type nonrec t =
+      {
+      contactId: Uuid.t option [@ocaml.doc "UUID of a contact."];
+      versionId: VersionId.t option [@ocaml.doc "Version ID of a contact."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?contactId =
+      fun ?versionId -> fun () -> { contactId; versionId }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("contactId", (Option.map x.contactId ~f:Uuid.to_value));
+        ("versionId", (Option.map x.versionId ~f:VersionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let versionId =
+        (Option.map ~f:VersionId.of_xml) (Xml.child xml_arg0 "versionId") in
+      let contactId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "contactId") in
+      make ?versionId ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let versionId = field_map json__ "versionId" VersionId.of_json in
+      let contactId = field_map json__ "contactId" Uuid.of_json in
+      make ?versionId ?contactId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a specific contact."]
+module UpdateContactRequest =
+  struct
+    type nonrec t =
+      {
+      contactId: Uuid.t [@ocaml.doc "UUID of a contact."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A client token is a unique, case-sensitive string of up to 64 ASCII characters. It is generated by the client to ensure idempotent operations, allowing safe retries without unintended side effects."];
+      trackingOverrides: TrackingOverrides.t option ;
+      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."]}
+    let context_ = "UpdateContactRequest"
+    let make ?clientToken =
+      fun ?trackingOverrides ->
+        fun ?satelliteArn ->
+          fun ~contactId ->
+            fun () ->
+              { clientToken; trackingOverrides; satelliteArn; contactId }
+    let to_value x =
+      structure_to_value
+        [("contactId", (Some (Uuid.to_value x.contactId)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("trackingOverrides",
+          (Option.map x.trackingOverrides ~f:TrackingOverrides.to_value));
+        ("satelliteArn",
+          (Option.map x.satelliteArn ~f:SatelliteArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let satelliteArn =
+        (Option.map ~f:SatelliteArn.of_xml)
+          (Xml.child xml_arg0 "satelliteArn") in
+      let trackingOverrides =
+        (Option.map ~f:TrackingOverrides.of_xml)
+          (Xml.child xml_arg0 "trackingOverrides") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let contactId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contactId") in
+      make ?satelliteArn ?trackingOverrides ?clientToken ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let satelliteArn = field_map json__ "satelliteArn" SatelliteArn.of_json in
+      let trackingOverrides =
+        field_map json__ "trackingOverrides" TrackingOverrides.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let contactId = field_map_exn json__ "contactId" Uuid.of_json in
+      make ?satelliteArn ?trackingOverrides ?clientToken ~contactId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a specific contact."]
 module UpdateConfigRequest =
   struct
     type nonrec t =
       {
-      configData: ConfigTypeData.t [@ocaml.doc "Parameters of a Config."];
-      configId: String_.t [@ocaml.doc "UUID of a Config."];
+      configId: Uuid.t [@ocaml.doc "UUID of a Config."];
+      name: SafeName.t [@ocaml.doc "Name of a Config."];
       configType: ConfigCapabilityType.t [@ocaml.doc "Type of a Config."];
-      name: SafeName.t [@ocaml.doc "Name of a Config."]}
+      configData: ConfigTypeData.t [@ocaml.doc "Parameters of a Config."]}
     let context_ = "UpdateConfigRequest"
-    let make ~configData =
-      fun ~configId ->
+    let make ~configId =
+      fun ~name ->
         fun ~configType ->
-          fun ~name -> fun () -> { configData; configId; configType; name }
+          fun ~configData ->
+            fun () -> { configId; name; configType; configData }
     let to_value x =
       structure_to_value
-        [("configData", (Some (ConfigTypeData.to_value x.configData)));
-        ("configId", (Some (String_.to_value x.configId)));
+        [("configId", (Some (Uuid.to_value x.configId)));
+        ("name", (Some (SafeName.to_value x.name)));
         ("configType", (Some (ConfigCapabilityType.to_value x.configType)));
-        ("name", (Some (SafeName.to_value x.name)))]
+        ("configData", (Some (ConfigTypeData.to_value x.configData)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let configType =
-        ConfigCapabilityType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "configType") in
-      let configId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "configId") in
       let configData =
         ConfigTypeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configData") in
-      make ~name ~configType ~configId ~configData ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" SafeName.of_json in
       let configType =
-        field_map_exn json "configType" ConfigCapabilityType.of_json in
-      let configId = field_map_exn json "configId" String_.of_json in
-      let configData = field_map_exn json "configData" ConfigTypeData.of_json in
-      make ~name ~configType ~configId ~configData ()
+        ConfigCapabilityType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "configType") in
+      let name =
+        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let configId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "configId") in
+      make ~configData ~configType ~name ~configId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configData =
+        field_map_exn json__ "configData" ConfigTypeData.of_json in
+      let configType =
+        field_map_exn json__ "configType" ConfigCapabilityType.of_json in
+      let name = field_map_exn json__ "name" SafeName.of_json in
+      let configId = field_map_exn json__ "configId" Uuid.of_json in
+      make ~configData ~configType ~name ~configId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the UpdateConfig operation."]
+module UpdateAgentStatusResponse =
+  struct
+    type nonrec t =
+      {
+      agentId: Uuid.t option [@ocaml.doc "UUID of updated agent."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?agentId = fun () -> { agentId }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("agentId", (Option.map x.agentId ~f:Uuid.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let agentId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "agentId") in
+      make ?agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agentId = field_map json__ "agentId" Uuid.of_json in
+      make ?agentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For use by AWS Ground Station Agent and shouldn't be called directly. Update the status of the agent."]
+module UpdateAgentStatusRequest =
+  struct
+    type nonrec t =
+      {
+      agentId: Uuid.t [@ocaml.doc "UUID of agent to update."];
+      taskId: Uuid.t [@ocaml.doc "GUID of agent task."];
+      aggregateStatus: AggregateStatus.t
+        [@ocaml.doc "Aggregate status for agent."];
+      componentStatuses: ComponentStatusList.t
+        [@ocaml.doc "List of component statuses for agent."]}
+    let context_ = "UpdateAgentStatusRequest"
+    let make ~agentId =
+      fun ~taskId ->
+        fun ~aggregateStatus ->
+          fun ~componentStatuses ->
+            fun () -> { agentId; taskId; aggregateStatus; componentStatuses }
+    let to_value x =
+      structure_to_value
+        [("agentId", (Some (Uuid.to_value x.agentId)));
+        ("taskId", (Some (Uuid.to_value x.taskId)));
+        ("aggregateStatus",
+          (Some (AggregateStatus.to_value x.aggregateStatus)));
+        ("componentStatuses",
+          (Some (ComponentStatusList.to_value x.componentStatuses)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let componentStatuses =
+        ComponentStatusList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "componentStatuses") in
+      let aggregateStatus =
+        AggregateStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "aggregateStatus") in
+      let taskId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskId") in
+      let agentId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentId") in
+      make ~componentStatuses ~aggregateStatus ~taskId ~agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let componentStatuses =
+        field_map_exn json__ "componentStatuses" ComponentStatusList.of_json in
+      let aggregateStatus =
+        field_map_exn json__ "aggregateStatus" AggregateStatus.of_json in
+      let taskId = field_map_exn json__ "taskId" Uuid.of_json in
+      let agentId = field_map_exn json__ "agentId" Uuid.of_json in
+      make ~componentStatuses ~aggregateStatus ~taskId ~agentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For use by AWS Ground Station Agent and shouldn't be called directly. Update the status of the agent."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -2618,35 +7185,35 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the UntagResource operation."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: String_.t [@ocaml.doc "ARN of a resource."];
+      resourceArn: AnyArn.t [@ocaml.doc "ARN of a resource."];
       tagKeys: TagKeys.t [@ocaml.doc "Keys of a resource tag."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (String_.to_value x.resourceArn)));
+        [("resourceArn", (Some (AnyArn.to_value x.resourceArn)));
         ("tagKeys", (Some (TagKeys.to_value x.tagKeys)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tagKeys =
         TagKeys.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tagKeys") in
       let resourceArn =
-        String_.of_xml
+        AnyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" AnyArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the UntagResource operation."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -2703,108 +7270,228 @@ module TagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the TagResource operation."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: String_.t [@ocaml.doc "ARN of a resource tag."];
+      resourceArn: AnyArn.t [@ocaml.doc "ARN of a resource tag."];
       tags: TagsMap.t [@ocaml.doc "Tags assigned to a resource."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (String_.to_value x.resourceArn)));
+        [("resourceArn", (Some (AnyArn.to_value x.resourceArn)));
         ("tags", (Some (TagsMap.to_value x.tags)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags =
         TagsMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       let resourceArn =
-        String_.of_xml
+        AnyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagsMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagsMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" AnyArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the TagResource operation."]
 module ReserveContactRequest =
   struct
     type nonrec t =
       {
-      endTime: Timestamp.t [@ocaml.doc "End time of a contact."];
-      groundStation: String_.t [@ocaml.doc "Name of a ground station."];
       missionProfileArn: MissionProfileArn.t
         [@ocaml.doc "ARN of a mission profile."];
-      satelliteArn: SatelliteArn.t [@ocaml.doc "ARN of a satellite"];
-      startTime: Timestamp.t [@ocaml.doc "Start time of a contact."];
-      tags: TagsMap.t option [@ocaml.doc "Tags assigned to a contact."]}
+      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite"];
+      startTime: Timestamp.t [@ocaml.doc "Start time of a contact in UTC."];
+      endTime: Timestamp.t [@ocaml.doc "End time of a contact in UTC."];
+      groundStation: GroundStationName.t
+        [@ocaml.doc "Name of a ground station."];
+      tags: TagsMap.t option [@ocaml.doc "Tags assigned to a contact."];
+      trackingOverrides: TrackingOverrides.t option
+        [@ocaml.doc "Tracking configuration overrides for the contact."]}
     let context_ = "ReserveContactRequest"
-    let make ?tags =
-      fun ~endTime ->
-        fun ~groundStation ->
+    let make ?satelliteArn =
+      fun ?tags ->
+        fun ?trackingOverrides ->
           fun ~missionProfileArn ->
-            fun ~satelliteArn ->
-              fun ~startTime ->
-                fun () ->
-                  {
-                    tags;
-                    endTime;
-                    groundStation;
-                    missionProfileArn;
-                    satelliteArn;
-                    startTime
-                  }
+            fun ~startTime ->
+              fun ~endTime ->
+                fun ~groundStation ->
+                  fun () ->
+                    {
+                      satelliteArn;
+                      tags;
+                      trackingOverrides;
+                      missionProfileArn;
+                      startTime;
+                      endTime;
+                      groundStation
+                    }
     let to_value x =
       structure_to_value
-        [("endTime", (Some (Timestamp.to_value x.endTime)));
-        ("groundStation", (Some (String_.to_value x.groundStation)));
-        ("missionProfileArn",
-          (Some (MissionProfileArn.to_value x.missionProfileArn)));
-        ("satelliteArn", (Some (SatelliteArn.to_value x.satelliteArn)));
+        [("missionProfileArn",
+           (Some (MissionProfileArn.to_value x.missionProfileArn)));
+        ("satelliteArn",
+          (Option.map x.satelliteArn ~f:SatelliteArn.to_value));
         ("startTime", (Some (Timestamp.to_value x.startTime)));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("endTime", (Some (Timestamp.to_value x.endTime)));
+        ("groundStation",
+          (Some (GroundStationName.to_value x.groundStation)));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("trackingOverrides",
+          (Option.map x.trackingOverrides ~f:TrackingOverrides.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let trackingOverrides =
+        (Option.map ~f:TrackingOverrides.of_xml)
+          (Xml.child xml_arg0 "trackingOverrides") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let groundStation =
+        GroundStationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "groundStation") in
+      let endTime =
+        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
       let startTime =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
       let satelliteArn =
-        SatelliteArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "satelliteArn") in
+        (Option.map ~f:SatelliteArn.of_xml)
+          (Xml.child xml_arg0 "satelliteArn") in
       let missionProfileArn =
         MissionProfileArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "missionProfileArn") in
-      let groundStation =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "groundStation") in
-      let endTime =
-        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
-      make ?tags ~startTime ~satelliteArn ~missionProfileArn ~groundStation
-        ~endTime ()
+      make ?trackingOverrides ?tags ~groundStation ~endTime ~startTime
+        ?satelliteArn ~missionProfileArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let startTime = field_map_exn json "startTime" Timestamp.of_json in
-      let satelliteArn =
-        field_map_exn json "satelliteArn" SatelliteArn.of_json in
+    let of_json json__ =
+      let trackingOverrides =
+        field_map json__ "trackingOverrides" TrackingOverrides.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let groundStation =
+        field_map_exn json__ "groundStation" GroundStationName.of_json in
+      let endTime = field_map_exn json__ "endTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "startTime" Timestamp.of_json in
+      let satelliteArn = field_map json__ "satelliteArn" SatelliteArn.of_json in
       let missionProfileArn =
-        field_map_exn json "missionProfileArn" MissionProfileArn.of_json in
-      let groundStation = field_map_exn json "groundStation" String_.of_json in
-      let endTime = field_map_exn json "endTime" Timestamp.of_json in
-      make ?tags ~startTime ~satelliteArn ~missionProfileArn ~groundStation
-        ~endTime ()
+        field_map_exn json__ "missionProfileArn" MissionProfileArn.of_json in
+      make ?trackingOverrides ?tags ~groundStation ~endTime ~startTime
+        ?satelliteArn ~missionProfileArn ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the ReserveContact operation."]
+module RegisterAgentResponse =
+  struct
+    type nonrec t =
+      {
+      agentId: Uuid.t option [@ocaml.doc "UUID of registered agent."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?agentId = fun () -> { agentId }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("agentId", (Option.map x.agentId ~f:Uuid.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let agentId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "agentId") in
+      make ?agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agentId = field_map json__ "agentId" Uuid.of_json in
+      make ?agentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For use by AWS Ground Station Agent and shouldn't be called directly. Registers a new agent with AWS Ground Station."]
+module RegisterAgentRequest =
+  struct
+    type nonrec t =
+      {
+      discoveryData: DiscoveryData.t
+        [@ocaml.doc
+          "Data for associating an agent with the capabilities it is managing."];
+      agentDetails: AgentDetails.t
+        [@ocaml.doc "Detailed information about the agent being registered."];
+      tags: TagsMap.t option [@ocaml.doc "Tags assigned to an Agent."]}
+    let context_ = "RegisterAgentRequest"
+    let make ?tags =
+      fun ~discoveryData ->
+        fun ~agentDetails -> fun () -> { tags; discoveryData; agentDetails }
+    let to_value x =
+      structure_to_value
+        [("discoveryData", (Some (DiscoveryData.to_value x.discoveryData)));
+        ("agentDetails", (Some (AgentDetails.to_value x.agentDetails)));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let agentDetails =
+        AgentDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "agentDetails") in
+      let discoveryData =
+        DiscoveryData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "discoveryData") in
+      make ?tags ~agentDetails ~discoveryData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let agentDetails =
+        field_map_exn json__ "agentDetails" AgentDetails.of_json in
+      let discoveryData =
+        field_map_exn json__ "discoveryData" DiscoveryData.of_json in
+      make ?tags ~agentDetails ~discoveryData ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For use by AWS Ground Station Agent and shouldn't be called directly. Registers a new agent with AWS Ground Station."]
 module MissionProfileIdResponse =
   struct
     type nonrec t =
       {
-      missionProfileId: String_.t option
+      missionProfileId: Uuid.t option
         [@ocaml.doc "UUID of a mission profile."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
@@ -2855,20 +7542,18 @@ module MissionProfileIdResponse =
     let to_value x =
       structure_to_value
         [("missionProfileId",
-           (Option.map x.missionProfileId ~f:String_.to_value))]
+           (Option.map x.missionProfileId ~f:Uuid.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let missionProfileId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "missionProfileId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "missionProfileId") in
       make ?missionProfileId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let missionProfileId =
-        field_map json "missionProfileId" String_.of_json in
+    let of_json json__ =
+      let missionProfileId = field_map json__ "missionProfileId" Uuid.of_json in
       make ?missionProfileId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Response containing the ID of a mission profile."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -2927,37 +7612,36 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the ListTagsForResource operation."]
 module ListTagsForResourceRequest =
   struct
-    type nonrec t =
-      {
-      resourceArn: String_.t [@ocaml.doc "ARN of a resource."]}
+    type nonrec t = {
+      resourceArn: AnyArn.t [@ocaml.doc "ARN of a resource."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (String_.to_value x.resourceArn)))]
+        [("resourceArn", (Some (AnyArn.to_value x.resourceArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceArn =
-        String_.of_xml
+        AnyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" AnyArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the ListTagsForResource operation."]
 module ListSatellitesResponse =
   struct
     type nonrec t =
       {
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
           "Next token that can be supplied in the next call to get the next page of satellites."];
       satellites: SatelliteList.t option [@ocaml.doc "List of satellites."]}
@@ -3010,7 +7694,7 @@ module ListSatellitesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("satellites", (Option.map x.satellites ~f:SatelliteList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -3018,60 +7702,65 @@ module ListSatellitesResponse =
         (Option.map ~f:SatelliteList.of_xml)
           (Xml.child xml_arg0 "satellites") in
       let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       make ?satellites ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let satellites = field_map json "satellites" SatelliteList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let satellites = field_map json__ "satellites" SatelliteList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       make ?satellites ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the ListSatellites operation."]
 module ListSatellitesRequest =
   struct
     type nonrec t =
       {
-      maxResults: Integer.t option
+      maxResults: PaginationMaxResults.t option
         [@ocaml.doc "Maximum number of satellites returned."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
           "Next token that can be supplied in the next call to get the next page of satellites."]}
     let make ?maxResults =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("maxResults",
+           (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the ListSatellites operation."]
 module ListMissionProfilesResponse =
   struct
     type nonrec t =
       {
-      missionProfileList: MissionProfileList.t option
-        [@ocaml.doc "List of mission profiles."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
-          "Next token returned in the response of a previous ListMissionProfiles call. Used to get the next page of results."]}
+          "Next token returned in the response of a previous ListMissionProfiles call. Used to get the next page of results."];
+      missionProfileList: MissionProfileList.t option
+        [@ocaml.doc "List of mission profiles."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?missionProfileList =
-      fun ?nextToken -> fun () -> { missionProfileList; nextToken }
+    let make ?nextToken =
+      fun ?missionProfileList -> fun () -> { nextToken; missionProfileList }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -3114,70 +7803,75 @@ module ListMissionProfilesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("missionProfileList",
-           (Option.map x.missionProfileList ~f:MissionProfileList.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("missionProfileList",
+          (Option.map x.missionProfileList ~f:MissionProfileList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let missionProfileList =
         (Option.map ~f:MissionProfileList.of_xml)
           (Xml.child xml_arg0 "missionProfileList") in
-      make ?nextToken ?missionProfileList ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?missionProfileList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
       let missionProfileList =
-        field_map json "missionProfileList" MissionProfileList.of_json in
-      make ?nextToken ?missionProfileList ()
+        field_map json__ "missionProfileList" MissionProfileList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?missionProfileList ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the ListMissionProfiles operation."]
 module ListMissionProfilesRequest =
   struct
     type nonrec t =
       {
-      maxResults: Integer.t option
+      maxResults: PaginationMaxResults.t option
         [@ocaml.doc "Maximum number of mission profiles returned."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
           "Next token returned in the request of a previous ListMissionProfiles call. Used to get the next page of results."]}
     let make ?maxResults =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("maxResults",
+           (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the ListMissionProfiles operation."]
 module ListGroundStationsResponse =
   struct
     type nonrec t =
       {
-      groundStationList: GroundStationList.t option
-        [@ocaml.doc "List of ground stations."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
-          "Next token that can be supplied in the next call to get the next page of ground stations."]}
+          "Next token that can be supplied in the next call to get the next page of ground stations."];
+      groundStationList: GroundStationList.t option
+        [@ocaml.doc "List of ground stations."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?groundStationList =
-      fun ?nextToken -> fun () -> { groundStationList; nextToken }
+    let make ?nextToken =
+      fun ?groundStationList -> fun () -> { nextToken; groundStationList }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -3220,77 +7914,242 @@ module ListGroundStationsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("groundStationList",
-           (Option.map x.groundStationList ~f:GroundStationList.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("groundStationList",
+          (Option.map x.groundStationList ~f:GroundStationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let groundStationList =
         (Option.map ~f:GroundStationList.of_xml)
           (Xml.child xml_arg0 "groundStationList") in
-      make ?nextToken ?groundStationList ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?groundStationList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
       let groundStationList =
-        field_map json "groundStationList" GroundStationList.of_json in
-      make ?nextToken ?groundStationList ()
+        field_map json__ "groundStationList" GroundStationList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?groundStationList ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the ListGroundStations operation."]
 module ListGroundStationsRequest =
   struct
     type nonrec t =
       {
-      maxResults: Integer.t option
+      satelliteId: Uuid.t option
+        [@ocaml.doc "Satellite ID to retrieve on-boarded ground stations."];
+      maxResults: PaginationMaxResults.t option
         [@ocaml.doc "Maximum number of ground stations returned."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
-          "Next token that can be supplied in the next call to get the next page of ground stations."];
-      satelliteId: String_.t option
-        [@ocaml.doc "Satellite ID to retrieve on-boarded ground stations."]}
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ?satelliteId -> fun () -> { maxResults; nextToken; satelliteId }
+          "Next token that can be supplied in the next call to get the next page of ground stations."]}
+    let make ?satelliteId =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { satelliteId; maxResults; nextToken }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("satelliteId", (Option.map x.satelliteId ~f:String_.to_value))]
+        [("satelliteId", (Option.map x.satelliteId ~f:Uuid.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let satelliteId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "satelliteId") in
       let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?satelliteId ?nextToken ?maxResults ()
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let satelliteId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "satelliteId") in
+      make ?nextToken ?maxResults ?satelliteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let satelliteId = field_map json "satelliteId" String_.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      make ?satelliteId ?nextToken ?maxResults ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
+      let satelliteId = field_map json__ "satelliteId" Uuid.of_json in
+      make ?nextToken ?maxResults ?satelliteId ()
     let to_json v = composed_to_json to_value v
-  end
-module ListDataflowEndpointGroupsResponse =
+  end[@@ocaml.doc "Input for the ListGroundStations operation."]
+module ListGroundStationReservationsResponse =
   struct
     type nonrec t =
       {
-      dataflowEndpointGroupList: DataflowEndpointGroupList.t option
-        [@ocaml.doc "A list of dataflow endpoint groups."];
-      nextToken: String_.t option
+      reservationList: GroundStationReservationList.t option
+        [@ocaml.doc "List of ground station reservations."];
+      nextToken: PaginationToken.t option
         [@ocaml.doc
-          "Next token returned in the response of a previous ListDataflowEndpointGroups call. Used to get the next page of results."]}
+          "Next token to be used in a subsequent ListGroundStationReservations call to retrieve the next page of results."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reservationList =
+      fun ?nextToken -> fun () -> { reservationList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("reservationList",
+           (Option.map x.reservationList
+              ~f:GroundStationReservationList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let reservationList =
+        (Option.map ~f:GroundStationReservationList.of_xml)
+          (Xml.child xml_arg0 "reservationList") in
+      make ?nextToken ?reservationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let reservationList =
+        field_map json__ "reservationList"
+          GroundStationReservationList.of_json in
+      make ?nextToken ?reservationList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of reservations for a specified ground station."]
+module ListGroundStationReservationsRequest =
+  struct
+    type nonrec t =
+      {
+      groundStationId: GroundStationName.t
+        [@ocaml.doc "ID of a ground station."];
+      startTime: SyntheticTimestamp_epoch_seconds.t
+        [@ocaml.doc "Start time of the reservation window in UTC."];
+      endTime: SyntheticTimestamp_epoch_seconds.t
+        [@ocaml.doc "End time of the reservation window in UTC."];
+      reservationTypes: ReservationTypeFilterList.t option
+        [@ocaml.doc "Types of reservations to filter by."];
+      maxResults: PaginationMaxResults.t option
+        [@ocaml.doc
+          "Maximum number of ground station reservations returned."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Next token returned in the request of a previous ListGroundStationReservations call. Used to get the next page of results."]}
+    let context_ = "ListGroundStationReservationsRequest"
+    let make ?reservationTypes =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~groundStationId ->
+            fun ~startTime ->
+              fun ~endTime ->
+                fun () ->
+                  {
+                    reservationTypes;
+                    maxResults;
+                    nextToken;
+                    groundStationId;
+                    startTime;
+                    endTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("groundStationId",
+           (Some (GroundStationName.to_value x.groundStationId)));
+        ("startTime",
+          (Some (SyntheticTimestamp_epoch_seconds.to_value x.startTime)));
+        ("endTime",
+          (Some (SyntheticTimestamp_epoch_seconds.to_value x.endTime)));
+        ("reservationTypes",
+          (Option.map x.reservationTypes
+             ~f:ReservationTypeFilterList.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let reservationTypes =
+        (Option.map ~f:ReservationTypeFilterList.of_xml)
+          (Xml.child xml_arg0 "reservationTypes") in
+      let endTime =
+        SyntheticTimestamp_epoch_seconds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
+      let startTime =
+        SyntheticTimestamp_epoch_seconds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
+      let groundStationId =
+        GroundStationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "groundStationId") in
+      make ?nextToken ?maxResults ?reservationTypes ~endTime ~startTime
+        ~groundStationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
+      let reservationTypes =
+        field_map json__ "reservationTypes" ReservationTypeFilterList.of_json in
+      let endTime =
+        field_map_exn json__ "endTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let startTime =
+        field_map_exn json__ "startTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let groundStationId =
+        field_map_exn json__ "groundStationId" GroundStationName.of_json in
+      make ?nextToken ?maxResults ?reservationTypes ~endTime ~startTime
+        ~groundStationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of reservations for a specified ground station."]
+module ListEphemeridesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option [@ocaml.doc "Pagination token."];
+      ephemerides: EphemeridesList.t option
+        [@ocaml.doc "List of ephemerides."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?dataflowEndpointGroupList =
-      fun ?nextToken -> fun () -> { dataflowEndpointGroupList; nextToken }
+    let make ?nextToken =
+      fun ?ephemerides -> fun () -> { nextToken; ephemerides }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -3333,71 +8192,245 @@ module ListDataflowEndpointGroupsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("dataflowEndpointGroupList",
-           (Option.map x.dataflowEndpointGroupList
-              ~f:DataflowEndpointGroupList.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("ephemerides",
+          (Option.map x.ephemerides ~f:EphemeridesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ephemerides =
+        (Option.map ~f:EphemeridesList.of_xml)
+          (Xml.child xml_arg0 "ephemerides") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?ephemerides ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ephemerides =
+        field_map json__ "ephemerides" EphemeridesList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?ephemerides ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List your existing ephemerides."]
+module ListEphemeridesRequest =
+  struct
+    type nonrec t =
+      {
+      satelliteId: Uuid.t option
+        [@ocaml.doc
+          "The AWS Ground Station satellite ID to list ephemeris for."];
+      ephemerisType: EphemerisType.t option
+        [@ocaml.doc
+          "Filter ephemerides by type. If not specified, all ephemeris types will be returned."];
+      startTime: Timestamp.t
+        [@ocaml.doc
+          "The start time for the list operation in UTC. Returns ephemerides with expiration times within your specified time range."];
+      endTime: Timestamp.t
+        [@ocaml.doc
+          "The end time for the list operation in UTC. Returns ephemerides with expiration times within your specified time range."];
+      statusList: EphemerisStatusList.t option
+        [@ocaml.doc "The list of ephemeris status to return."];
+      maxResults: PaginationMaxResults.t option
+        [@ocaml.doc "Maximum number of ephemerides to return."];
+      nextToken: PaginationToken.t option [@ocaml.doc "Pagination token."]}
+    let context_ = "ListEphemeridesRequest"
+    let make ?satelliteId =
+      fun ?ephemerisType ->
+        fun ?statusList ->
+          fun ?maxResults ->
+            fun ?nextToken ->
+              fun ~startTime ->
+                fun ~endTime ->
+                  fun () ->
+                    {
+                      satelliteId;
+                      ephemerisType;
+                      statusList;
+                      maxResults;
+                      nextToken;
+                      startTime;
+                      endTime
+                    }
+    let to_value x =
+      structure_to_value
+        [("satelliteId", (Option.map x.satelliteId ~f:Uuid.to_value));
+        ("ephemerisType",
+          (Option.map x.ephemerisType ~f:EphemerisType.to_value));
+        ("startTime", (Some (Timestamp.to_value x.startTime)));
+        ("endTime", (Some (Timestamp.to_value x.endTime)));
+        ("statusList",
+          (Option.map x.statusList ~f:EphemerisStatusList.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let statusList =
+        (Option.map ~f:EphemerisStatusList.of_xml)
+          (Xml.child xml_arg0 "statusList") in
+      let endTime =
+        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
+      let startTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
+      let ephemerisType =
+        (Option.map ~f:EphemerisType.of_xml)
+          (Xml.child xml_arg0 "ephemerisType") in
+      let satelliteId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "satelliteId") in
+      make ?nextToken ?maxResults ?statusList ~endTime ~startTime
+        ?ephemerisType ?satelliteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
+      let statusList =
+        field_map json__ "statusList" EphemerisStatusList.of_json in
+      let endTime = field_map_exn json__ "endTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "startTime" Timestamp.of_json in
+      let ephemerisType =
+        field_map json__ "ephemerisType" EphemerisType.of_json in
+      let satelliteId = field_map json__ "satelliteId" Uuid.of_json in
+      make ?nextToken ?maxResults ?statusList ~endTime ~startTime
+        ?ephemerisType ?satelliteId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List your existing ephemerides."]
+module ListDataflowEndpointGroupsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Next token returned in the response of a previous ListDataflowEndpointGroups call. Used to get the next page of results."];
+      dataflowEndpointGroupList: DataflowEndpointGroupList.t option
+        [@ocaml.doc "A list of dataflow endpoint groups."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?dataflowEndpointGroupList ->
+        fun () -> { nextToken; dataflowEndpointGroupList }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("dataflowEndpointGroupList",
+          (Option.map x.dataflowEndpointGroupList
+             ~f:DataflowEndpointGroupList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let dataflowEndpointGroupList =
         (Option.map ~f:DataflowEndpointGroupList.of_xml)
           (Xml.child xml_arg0 "dataflowEndpointGroupList") in
-      make ?nextToken ?dataflowEndpointGroupList ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?dataflowEndpointGroupList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
       let dataflowEndpointGroupList =
-        field_map json "dataflowEndpointGroupList"
+        field_map json__ "dataflowEndpointGroupList"
           DataflowEndpointGroupList.of_json in
-      make ?nextToken ?dataflowEndpointGroupList ()
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?dataflowEndpointGroupList ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the ListDataflowEndpointGroups operation."]
 module ListDataflowEndpointGroupsRequest =
   struct
     type nonrec t =
       {
-      maxResults: Integer.t option
+      maxResults: PaginationMaxResults.t option
         [@ocaml.doc "Maximum number of dataflow endpoint groups returned."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
           "Next token returned in the request of a previous ListDataflowEndpointGroups call. Used to get the next page of results."]}
     let make ?maxResults =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("maxResults",
+           (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the ListDataflowEndpointGroups operation."]
 module ListContactsResponse =
   struct
     type nonrec t =
       {
-      contactList: ContactList.t option [@ocaml.doc "List of contacts."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
-          "Next token returned in the response of a previous ListContacts call. Used to get the next page of results."]}
+          "Next token returned in the response of a previous ListContacts call. Used to get the next page of results."];
+      contactList: ContactList.t option [@ocaml.doc "List of contacts."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?contactList =
-      fun ?nextToken -> fun () -> { contactList; nextToken }
+    let make ?nextToken =
+      fun ?contactList -> fun () -> { nextToken; contactList }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -3440,126 +8473,146 @@ module ListContactsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("contactList", (Option.map x.contactList ~f:ContactList.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("contactList", (Option.map x.contactList ~f:ContactList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let contactList =
         (Option.map ~f:ContactList.of_xml) (Xml.child xml_arg0 "contactList") in
-      make ?nextToken ?contactList ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?contactList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let contactList = field_map json "contactList" ContactList.of_json in
-      make ?nextToken ?contactList ()
+    let of_json json__ =
+      let contactList = field_map json__ "contactList" ContactList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?contactList ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the ListContacts operation."]
 module ListContactsRequest =
   struct
     type nonrec t =
       {
-      endTime: Timestamp.t [@ocaml.doc "End time of a contact."];
-      groundStation: String_.t option
-        [@ocaml.doc "Name of a ground station."];
-      maxResults: Integer.t option
+      maxResults: PaginationMaxResults.t option
         [@ocaml.doc "Maximum number of contacts returned."];
-      missionProfileArn: MissionProfileArn.t option
-        [@ocaml.doc "ARN of a mission profile."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
           "Next token returned in the request of a previous ListContacts call. Used to get the next page of results."];
-      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
-      startTime: Timestamp.t [@ocaml.doc "Start time of a contact."];
       statusList: StatusList.t
-        [@ocaml.doc "Status of a contact reservation."]}
+        [@ocaml.doc "Status of a contact reservation."];
+      startTime: Timestamp.t [@ocaml.doc "Start time of a contact in UTC."];
+      endTime: Timestamp.t [@ocaml.doc "End time of a contact in UTC."];
+      groundStation: GroundStationName.t option
+        [@ocaml.doc "Name of a ground station."];
+      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
+      missionProfileArn: MissionProfileArn.t option
+        [@ocaml.doc "ARN of a mission profile."];
+      ephemeris: EphemerisFilter.t option
+        [@ocaml.doc
+          "Filter for selecting contacts that use a specific ephemeris\"."]}
     let context_ = "ListContactsRequest"
-    let make ?groundStation =
-      fun ?maxResults ->
-        fun ?missionProfileArn ->
-          fun ?nextToken ->
-            fun ?satelliteArn ->
-              fun ~endTime ->
-                fun ~startTime ->
-                  fun ~statusList ->
-                    fun () ->
-                      {
-                        groundStation;
-                        maxResults;
-                        missionProfileArn;
-                        nextToken;
-                        satelliteArn;
-                        endTime;
-                        startTime;
-                        statusList
-                      }
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?groundStation ->
+          fun ?satelliteArn ->
+            fun ?missionProfileArn ->
+              fun ?ephemeris ->
+                fun ~statusList ->
+                  fun ~startTime ->
+                    fun ~endTime ->
+                      fun () ->
+                        {
+                          maxResults;
+                          nextToken;
+                          groundStation;
+                          satelliteArn;
+                          missionProfileArn;
+                          ephemeris;
+                          statusList;
+                          startTime;
+                          endTime
+                        }
     let to_value x =
       structure_to_value
-        [("endTime", (Some (Timestamp.to_value x.endTime)));
-        ("groundStation", (Option.map x.groundStation ~f:String_.to_value));
-        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("missionProfileArn",
-          (Option.map x.missionProfileArn ~f:MissionProfileArn.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        [("maxResults",
+           (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("statusList", (Some (StatusList.to_value x.statusList)));
+        ("startTime", (Some (Timestamp.to_value x.startTime)));
+        ("endTime", (Some (Timestamp.to_value x.endTime)));
+        ("groundStation",
+          (Option.map x.groundStation ~f:GroundStationName.to_value));
         ("satelliteArn",
           (Option.map x.satelliteArn ~f:SatelliteArn.to_value));
-        ("startTime", (Some (Timestamp.to_value x.startTime)));
-        ("statusList", (Some (StatusList.to_value x.statusList)))]
+        ("missionProfileArn",
+          (Option.map x.missionProfileArn ~f:MissionProfileArn.to_value));
+        ("ephemeris", (Option.map x.ephemeris ~f:EphemerisFilter.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let statusList =
-        StatusList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "statusList") in
-      let startTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
-      let satelliteArn =
-        (Option.map ~f:SatelliteArn.of_xml)
-          (Xml.child xml_arg0 "satelliteArn") in
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let ephemeris =
+        (Option.map ~f:EphemerisFilter.of_xml)
+          (Xml.child xml_arg0 "ephemeris") in
       let missionProfileArn =
         (Option.map ~f:MissionProfileArn.of_xml)
           (Xml.child xml_arg0 "missionProfileArn") in
-      let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let satelliteArn =
+        (Option.map ~f:SatelliteArn.of_xml)
+          (Xml.child xml_arg0 "satelliteArn") in
       let groundStation =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groundStation") in
+        (Option.map ~f:GroundStationName.of_xml)
+          (Xml.child xml_arg0 "groundStation") in
       let endTime =
         Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
-      make ~statusList ~startTime ?satelliteArn ?nextToken ?missionProfileArn
-        ?maxResults ?groundStation ~endTime ()
+      let startTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
+      let statusList =
+        StatusList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "statusList") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ?ephemeris ?missionProfileArn ?satelliteArn ?groundStation
+        ~endTime ~startTime ~statusList ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusList = field_map_exn json "statusList" StatusList.of_json in
-      let startTime = field_map_exn json "startTime" Timestamp.of_json in
-      let satelliteArn = field_map json "satelliteArn" SatelliteArn.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let ephemeris = field_map json__ "ephemeris" EphemerisFilter.of_json in
       let missionProfileArn =
-        field_map json "missionProfileArn" MissionProfileArn.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let groundStation = field_map json "groundStation" String_.of_json in
-      let endTime = field_map_exn json "endTime" Timestamp.of_json in
-      make ~statusList ~startTime ?satelliteArn ?nextToken ?missionProfileArn
-        ?maxResults ?groundStation ~endTime ()
+        field_map json__ "missionProfileArn" MissionProfileArn.of_json in
+      let satelliteArn = field_map json__ "satelliteArn" SatelliteArn.of_json in
+      let groundStation =
+        field_map json__ "groundStation" GroundStationName.of_json in
+      let endTime = field_map_exn json__ "endTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "startTime" Timestamp.of_json in
+      let statusList = field_map_exn json__ "statusList" StatusList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
+      make ?ephemeris ?missionProfileArn ?satelliteArn ?groundStation
+        ~endTime ~startTime ~statusList ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end
-module ListConfigsResponse =
+  end[@@ocaml.doc "Input for the ListContacts operation."]
+module ListContactVersionsResponse =
   struct
     type nonrec t =
       {
-      configList: ConfigList.t option [@ocaml.doc "List of Config items."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
-          "Next token returned in the response of a previous ListConfigs call. Used to get the next page of results."]}
+          "Next token to be used in a subsequent ListContactVersions call to retrieve the next page of results."];
+      contactVersionsList: ContactVersionsList.t option
+        [@ocaml.doc "List of contact versions."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?configList =
-      fun ?nextToken -> fun () -> { configList; nextToken }
+    let make ?nextToken =
+      fun ?contactVersionsList ->
+        fun () -> { nextToken; contactVersionsList }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -3602,403 +8655,316 @@ module ListConfigsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("configList", (Option.map x.configList ~f:ConfigList.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("contactVersionsList",
+          (Option.map x.contactVersionsList ~f:ContactVersionsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contactVersionsList =
+        (Option.map ~f:ContactVersionsList.of_xml)
+          (Xml.child xml_arg0 "contactVersionsList") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?contactVersionsList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contactVersionsList =
+        field_map json__ "contactVersionsList" ContactVersionsList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?contactVersionsList ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of versions for a specified contact."]
+module ListContactVersionsRequest =
+  struct
+    type nonrec t =
+      {
+      contactId: Uuid.t [@ocaml.doc "UUID of a contact."];
+      maxResults: PaginationMaxResults.t option
+        [@ocaml.doc "Maximum number of contact versions returned."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Next token returned in the request of a previous ListContactVersions call. Used to get the next page of results."]}
+    let context_ = "ListContactVersionsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~contactId -> fun () -> { maxResults; nextToken; contactId }
+    let to_value x =
+      structure_to_value
+        [("contactId", (Some (Uuid.to_value x.contactId)));
+        ("maxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let contactId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contactId") in
+      make ?nextToken ?maxResults ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
+      let contactId = field_map_exn json__ "contactId" Uuid.of_json in
+      make ?nextToken ?maxResults ~contactId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of versions for a specified contact."]
+module ListConfigsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Next token returned in the response of a previous ListConfigs call. Used to get the next page of results."];
+      configList: ConfigList.t option [@ocaml.doc "List of Config items."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?configList -> fun () -> { nextToken; configList }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("configList", (Option.map x.configList ~f:ConfigList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let configList =
         (Option.map ~f:ConfigList.of_xml) (Xml.child xml_arg0 "configList") in
-      make ?nextToken ?configList ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?configList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let configList = field_map json "configList" ConfigList.of_json in
-      make ?nextToken ?configList ()
+    let of_json json__ =
+      let configList = field_map json__ "configList" ConfigList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?configList ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the ListConfigs operation."]
 module ListConfigsRequest =
   struct
     type nonrec t =
       {
-      maxResults: Integer.t option
+      maxResults: PaginationMaxResults.t option
         [@ocaml.doc "Maximum number of Configs returned."];
-      nextToken: String_.t option
+      nextToken: PaginationToken.t option
         [@ocaml.doc
           "Next token returned in the request of a previous ListConfigs call. Used to get the next page of results."]}
     let make ?maxResults =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("maxResults",
+           (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the ListConfigs operation."]
+module ListAntennasResponse =
+  struct
+    type nonrec t =
+      {
+      antennaList: AntennaList.t option [@ocaml.doc "List of antennas."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Next token to be used in a subsequent ListAntennas call to retrieve the next page of results."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?antennaList =
+      fun ?nextToken -> fun () -> { antennaList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("antennaList", (Option.map x.antennaList ~f:AntennaList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let antennaList =
+        (Option.map ~f:AntennaList.of_xml) (Xml.child xml_arg0 "antennaList") in
+      make ?nextToken ?antennaList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let antennaList = field_map json__ "antennaList" AntennaList.of_json in
+      make ?nextToken ?antennaList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of antennas at a specified ground station."]
+module ListAntennasRequest =
+  struct
+    type nonrec t =
+      {
+      groundStationId: GroundStationName.t
+        [@ocaml.doc "ID of a ground station."];
+      maxResults: PaginationMaxResults.t option
+        [@ocaml.doc "Maximum number of antennas returned."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Next token returned in the request of a previous ListAntennas call. Used to get the next page of results."]}
+    let context_ = "ListAntennasRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~groundStationId ->
+          fun () -> { maxResults; nextToken; groundStationId }
+    let to_value x =
+      structure_to_value
+        [("groundStationId",
+           (Some (GroundStationName.to_value x.groundStationId)));
+        ("maxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let groundStationId =
+        GroundStationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "groundStationId") in
+      make ?nextToken ?maxResults ~groundStationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" PaginationMaxResults.of_json in
+      let groundStationId =
+        field_map_exn json__ "groundStationId" GroundStationName.of_json in
+      make ?nextToken ?maxResults ~groundStationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of antennas at a specified ground station."]
 module GetSatelliteResponse =
   struct
     type nonrec t =
       {
+      satelliteId: Uuid.t option [@ocaml.doc "UUID of a satellite."];
+      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
+      noradSatelliteID: NoradSatelliteID.t option
+        [@ocaml.doc "NORAD satellite ID number."];
       groundStations: GroundStationIdList.t option
         [@ocaml.doc
           "A list of ground stations to which the satellite is on-boarded."];
-      noradSatelliteID: NoradSatelliteID.t option
-        [@ocaml.doc "NORAD satellite ID number."];
-      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
-      satelliteId: Uuid.t option [@ocaml.doc "UUID of a satellite."]}
+      currentEphemeris: EphemerisMetaData.t option
+        [@ocaml.doc
+          "The current ephemeris being used to compute the trajectory of the satellite."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?groundStations =
-      fun ?noradSatelliteID ->
-        fun ?satelliteArn ->
-          fun ?satelliteId ->
-            fun () ->
-              { groundStations; noradSatelliteID; satelliteArn; satelliteId }
-    let error_of_json name json =
-      match name with
-      | "DependencyException" ->
-          `DependencyException (DependencyException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "DependencyException" ->
-          `DependencyException (DependencyException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `DependencyException e ->
-          `Assoc
-            [("error", (`String "DependencyException"));
-            ("details", (DependencyException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("groundStations",
-           (Option.map x.groundStations ~f:GroundStationIdList.to_value));
-        ("noradSatelliteID",
-          (Option.map x.noradSatelliteID ~f:NoradSatelliteID.to_value));
-        ("satelliteArn",
-          (Option.map x.satelliteArn ~f:SatelliteArn.to_value));
-        ("satelliteId", (Option.map x.satelliteId ~f:Uuid.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let satelliteId =
-        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "satelliteId") in
-      let satelliteArn =
-        (Option.map ~f:SatelliteArn.of_xml)
-          (Xml.child xml_arg0 "satelliteArn") in
-      let noradSatelliteID =
-        (Option.map ~f:NoradSatelliteID.of_xml)
-          (Xml.child xml_arg0 "noradSatelliteID") in
-      let groundStations =
-        (Option.map ~f:GroundStationIdList.of_xml)
-          (Xml.child xml_arg0 "groundStations") in
-      make ?satelliteId ?satelliteArn ?noradSatelliteID ?groundStations ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let satelliteId = field_map json "satelliteId" Uuid.of_json in
-      let satelliteArn = field_map json "satelliteArn" SatelliteArn.of_json in
-      let noradSatelliteID =
-        field_map json "noradSatelliteID" NoradSatelliteID.of_json in
-      let groundStations =
-        field_map json "groundStations" GroundStationIdList.of_json in
-      make ?satelliteId ?satelliteArn ?noradSatelliteID ?groundStations ()
-    let to_json v = composed_to_json to_value v
-  end
-module GetSatelliteRequest =
-  struct
-    type nonrec t =
-      {
-      satelliteId: String_.t [@ocaml.doc "UUID of a satellite."]}
-    let context_ = "GetSatelliteRequest"
-    let make ~satelliteId = fun () -> { satelliteId }
-    let to_value x =
-      structure_to_value
-        [("satelliteId", (Some (String_.to_value x.satelliteId)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let satelliteId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "satelliteId") in
-      make ~satelliteId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let satelliteId = field_map_exn json "satelliteId" String_.of_json in
-      make ~satelliteId ()
-    let to_json v = composed_to_json to_value v
-  end
-module GetMissionProfileResponse =
-  struct
-    type nonrec t =
-      {
-      contactPostPassDurationSeconds: DurationInSeconds.t option
-        [@ocaml.doc
-          "Amount of time after a contact ends that you\226\128\153d like to receive a CloudWatch event indicating the pass has finished."];
-      contactPrePassDurationSeconds: DurationInSeconds.t option
-        [@ocaml.doc
-          "Amount of time prior to contact start you\226\128\153d like to receive a CloudWatch event indicating an upcoming pass."];
-      dataflowEdges: DataflowEdgeList.t option
-        [@ocaml.doc
-          "A list of lists of ARNs. Each list of ARNs is an edge, with a from Config and a to Config."];
-      minimumViableContactDurationSeconds: DurationInSeconds.t option
-        [@ocaml.doc
-          "Smallest amount of time in seconds that you\226\128\153d like to see for an available contact. AWS Ground Station will not present you with contacts shorter than this duration."];
-      missionProfileArn: MissionProfileArn.t option
-        [@ocaml.doc "ARN of a mission profile."];
-      missionProfileId: String_.t option
-        [@ocaml.doc "UUID of a mission profile."];
-      name: String_.t option [@ocaml.doc "Name of a mission profile."];
-      region: String_.t option [@ocaml.doc "Region of a mission profile."];
-      tags: TagsMap.t option
-        [@ocaml.doc "Tags assigned to a mission profile."];
-      trackingConfigArn: ConfigArn.t option
-        [@ocaml.doc "ARN of a tracking Config."]}
-    type nonrec error =
-      [ `DependencyException of DependencyException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?contactPostPassDurationSeconds =
-      fun ?contactPrePassDurationSeconds ->
-        fun ?dataflowEdges ->
-          fun ?minimumViableContactDurationSeconds ->
-            fun ?missionProfileArn ->
-              fun ?missionProfileId ->
-                fun ?name ->
-                  fun ?region ->
-                    fun ?tags ->
-                      fun ?trackingConfigArn ->
-                        fun () ->
-                          {
-                            contactPostPassDurationSeconds;
-                            contactPrePassDurationSeconds;
-                            dataflowEdges;
-                            minimumViableContactDurationSeconds;
-                            missionProfileArn;
-                            missionProfileId;
-                            name;
-                            region;
-                            tags;
-                            trackingConfigArn
-                          }
-    let error_of_json name json =
-      match name with
-      | "DependencyException" ->
-          `DependencyException (DependencyException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "DependencyException" ->
-          `DependencyException (DependencyException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `DependencyException e ->
-          `Assoc
-            [("error", (`String "DependencyException"));
-            ("details", (DependencyException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("contactPostPassDurationSeconds",
-           (Option.map x.contactPostPassDurationSeconds
-              ~f:DurationInSeconds.to_value));
-        ("contactPrePassDurationSeconds",
-          (Option.map x.contactPrePassDurationSeconds
-             ~f:DurationInSeconds.to_value));
-        ("dataflowEdges",
-          (Option.map x.dataflowEdges ~f:DataflowEdgeList.to_value));
-        ("minimumViableContactDurationSeconds",
-          (Option.map x.minimumViableContactDurationSeconds
-             ~f:DurationInSeconds.to_value));
-        ("missionProfileArn",
-          (Option.map x.missionProfileArn ~f:MissionProfileArn.to_value));
-        ("missionProfileId",
-          (Option.map x.missionProfileId ~f:String_.to_value));
-        ("name", (Option.map x.name ~f:String_.to_value));
-        ("region", (Option.map x.region ~f:String_.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
-        ("trackingConfigArn",
-          (Option.map x.trackingConfigArn ~f:ConfigArn.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let trackingConfigArn =
-        (Option.map ~f:ConfigArn.of_xml)
-          (Xml.child xml_arg0 "trackingConfigArn") in
-      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let region =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
-      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
-      let missionProfileId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "missionProfileId") in
-      let missionProfileArn =
-        (Option.map ~f:MissionProfileArn.of_xml)
-          (Xml.child xml_arg0 "missionProfileArn") in
-      let minimumViableContactDurationSeconds =
-        (Option.map ~f:DurationInSeconds.of_xml)
-          (Xml.child xml_arg0 "minimumViableContactDurationSeconds") in
-      let dataflowEdges =
-        (Option.map ~f:DataflowEdgeList.of_xml)
-          (Xml.child xml_arg0 "dataflowEdges") in
-      let contactPrePassDurationSeconds =
-        (Option.map ~f:DurationInSeconds.of_xml)
-          (Xml.child xml_arg0 "contactPrePassDurationSeconds") in
-      let contactPostPassDurationSeconds =
-        (Option.map ~f:DurationInSeconds.of_xml)
-          (Xml.child xml_arg0 "contactPostPassDurationSeconds") in
-      make ?trackingConfigArn ?tags ?region ?name ?missionProfileId
-        ?missionProfileArn ?minimumViableContactDurationSeconds
-        ?dataflowEdges ?contactPrePassDurationSeconds
-        ?contactPostPassDurationSeconds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackingConfigArn =
-        field_map json "trackingConfigArn" ConfigArn.of_json in
-      let tags = field_map json "tags" TagsMap.of_json in
-      let region = field_map json "region" String_.of_json in
-      let name = field_map json "name" String_.of_json in
-      let missionProfileId =
-        field_map json "missionProfileId" String_.of_json in
-      let missionProfileArn =
-        field_map json "missionProfileArn" MissionProfileArn.of_json in
-      let minimumViableContactDurationSeconds =
-        field_map json "minimumViableContactDurationSeconds"
-          DurationInSeconds.of_json in
-      let dataflowEdges =
-        field_map json "dataflowEdges" DataflowEdgeList.of_json in
-      let contactPrePassDurationSeconds =
-        field_map json "contactPrePassDurationSeconds"
-          DurationInSeconds.of_json in
-      let contactPostPassDurationSeconds =
-        field_map json "contactPostPassDurationSeconds"
-          DurationInSeconds.of_json in
-      make ?trackingConfigArn ?tags ?region ?name ?missionProfileId
-        ?missionProfileArn ?minimumViableContactDurationSeconds
-        ?dataflowEdges ?contactPrePassDurationSeconds
-        ?contactPostPassDurationSeconds ()
-    let to_json v = composed_to_json to_value v
-  end
-module GetMissionProfileRequest =
-  struct
-    type nonrec t =
-      {
-      missionProfileId: String_.t [@ocaml.doc "UUID of a mission profile."]}
-    let context_ = "GetMissionProfileRequest"
-    let make ~missionProfileId = fun () -> { missionProfileId }
-    let to_value x =
-      structure_to_value
-        [("missionProfileId", (Some (String_.to_value x.missionProfileId)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let missionProfileId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "missionProfileId") in
-      make ~missionProfileId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let missionProfileId =
-        field_map_exn json "missionProfileId" String_.of_json in
-      make ~missionProfileId ()
-    let to_json v = composed_to_json to_value v
-  end
-module GetMinuteUsageResponse =
-  struct
-    type nonrec t =
-      {
-      estimatedMinutesRemaining: Integer.t option
-        [@ocaml.doc
-          "Estimated number of minutes remaining for an account, specific to the month being requested."];
-      isReservedMinutesCustomer: Boolean.t option
-        [@ocaml.doc
-          "Returns whether or not an account has signed up for the reserved minutes pricing plan, specific to the month being requested."];
-      totalReservedMinuteAllocation: Integer.t option
-        [@ocaml.doc
-          "Total number of reserved minutes allocated, specific to the month being requested."];
-      totalScheduledMinutes: Integer.t option
-        [@ocaml.doc
-          "Total scheduled minutes for an account, specific to the month being requested."];
-      upcomingMinutesScheduled: Integer.t option
-        [@ocaml.doc
-          "Upcoming minutes scheduled for an account, specific to the month being requested."]}
-    type nonrec error =
-      [ `DependencyException of DependencyException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?estimatedMinutesRemaining =
-      fun ?isReservedMinutesCustomer ->
-        fun ?totalReservedMinuteAllocation ->
-          fun ?totalScheduledMinutes ->
-            fun ?upcomingMinutesScheduled ->
+    let make ?satelliteId =
+      fun ?satelliteArn ->
+        fun ?noradSatelliteID ->
+          fun ?groundStations ->
+            fun ?currentEphemeris ->
               fun () ->
                 {
-                  estimatedMinutesRemaining;
-                  isReservedMinutesCustomer;
-                  totalReservedMinuteAllocation;
-                  totalScheduledMinutes;
-                  upcomingMinutesScheduled
+                  satelliteId;
+                  satelliteArn;
+                  noradSatelliteID;
+                  groundStations;
+                  currentEphemeris
                 }
     let error_of_json name json =
       match name with
@@ -4042,109 +9008,486 @@ module GetMinuteUsageResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("estimatedMinutesRemaining",
-           (Option.map x.estimatedMinutesRemaining ~f:Integer.to_value));
-        ("isReservedMinutesCustomer",
-          (Option.map x.isReservedMinutesCustomer ~f:Boolean.to_value));
-        ("totalReservedMinuteAllocation",
-          (Option.map x.totalReservedMinuteAllocation ~f:Integer.to_value));
-        ("totalScheduledMinutes",
-          (Option.map x.totalScheduledMinutes ~f:Integer.to_value));
-        ("upcomingMinutesScheduled",
-          (Option.map x.upcomingMinutesScheduled ~f:Integer.to_value))]
+        [("satelliteId", (Option.map x.satelliteId ~f:Uuid.to_value));
+        ("satelliteArn",
+          (Option.map x.satelliteArn ~f:SatelliteArn.to_value));
+        ("noradSatelliteID",
+          (Option.map x.noradSatelliteID ~f:NoradSatelliteID.to_value));
+        ("groundStations",
+          (Option.map x.groundStations ~f:GroundStationIdList.to_value));
+        ("currentEphemeris",
+          (Option.map x.currentEphemeris ~f:EphemerisMetaData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let upcomingMinutesScheduled =
+      let currentEphemeris =
+        (Option.map ~f:EphemerisMetaData.of_xml)
+          (Xml.child xml_arg0 "currentEphemeris") in
+      let groundStations =
+        (Option.map ~f:GroundStationIdList.of_xml)
+          (Xml.child xml_arg0 "groundStations") in
+      let noradSatelliteID =
+        (Option.map ~f:NoradSatelliteID.of_xml)
+          (Xml.child xml_arg0 "noradSatelliteID") in
+      let satelliteArn =
+        (Option.map ~f:SatelliteArn.of_xml)
+          (Xml.child xml_arg0 "satelliteArn") in
+      let satelliteId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "satelliteId") in
+      make ?currentEphemeris ?groundStations ?noradSatelliteID ?satelliteArn
+        ?satelliteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let currentEphemeris =
+        field_map json__ "currentEphemeris" EphemerisMetaData.of_json in
+      let groundStations =
+        field_map json__ "groundStations" GroundStationIdList.of_json in
+      let noradSatelliteID =
+        field_map json__ "noradSatelliteID" NoradSatelliteID.of_json in
+      let satelliteArn = field_map json__ "satelliteArn" SatelliteArn.of_json in
+      let satelliteId = field_map json__ "satelliteId" Uuid.of_json in
+      make ?currentEphemeris ?groundStations ?noradSatelliteID ?satelliteArn
+        ?satelliteId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Output for the GetSatellite operation."]
+module GetSatelliteRequest =
+  struct
+    type nonrec t = {
+      satelliteId: Uuid.t [@ocaml.doc "UUID of a satellite."]}
+    let context_ = "GetSatelliteRequest"
+    let make ~satelliteId = fun () -> { satelliteId }
+    let to_value x =
+      structure_to_value
+        [("satelliteId", (Some (Uuid.to_value x.satelliteId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let satelliteId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "satelliteId") in
+      make ~satelliteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let satelliteId = field_map_exn json__ "satelliteId" Uuid.of_json in
+      make ~satelliteId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Input for the GetSatellite operation."]
+module GetMissionProfileResponse =
+  struct
+    type nonrec t =
+      {
+      missionProfileId: Uuid.t option
+        [@ocaml.doc "UUID of a mission profile."];
+      missionProfileArn: MissionProfileArn.t option
+        [@ocaml.doc "ARN of a mission profile."];
+      name: SafeName.t option [@ocaml.doc "Name of a mission profile."];
+      region: AWSRegion.t option [@ocaml.doc "Region of a mission profile."];
+      contactPrePassDurationSeconds: DurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time prior to contact start you'd like to receive a CloudWatch event indicating an upcoming pass."];
+      contactPostPassDurationSeconds: DurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time after a contact ends that you'd like to receive a CloudWatch event indicating the pass has finished."];
+      minimumViableContactDurationSeconds: PositiveDurationInSeconds.t option
+        [@ocaml.doc
+          "Smallest amount of time in seconds that you'd like to see for an available contact. AWS Ground Station will not present you with contacts shorter than this duration."];
+      dataflowEdges: DataflowEdgeList.t option
+        [@ocaml.doc
+          "A list of lists of ARNs. Each list of ARNs is an edge, with a from Config and a to Config."];
+      trackingConfigArn: ConfigArn.t option
+        [@ocaml.doc "ARN of a tracking Config."];
+      telemetrySinkConfigArn: ConfigArn.t option
+        [@ocaml.doc "ARN of a telemetry sink Config."];
+      tags: TagsMap.t option
+        [@ocaml.doc "Tags assigned to a mission profile."];
+      streamsKmsKey: KmsKey.t option
+        [@ocaml.doc "KMS key to use for encrypting streams."];
+      streamsKmsRole: RoleArn.t option
+        [@ocaml.doc "Role to use for encrypting streams with KMS key."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?missionProfileId =
+      fun ?missionProfileArn ->
+        fun ?name ->
+          fun ?region ->
+            fun ?contactPrePassDurationSeconds ->
+              fun ?contactPostPassDurationSeconds ->
+                fun ?minimumViableContactDurationSeconds ->
+                  fun ?dataflowEdges ->
+                    fun ?trackingConfigArn ->
+                      fun ?telemetrySinkConfigArn ->
+                        fun ?tags ->
+                          fun ?streamsKmsKey ->
+                            fun ?streamsKmsRole ->
+                              fun () ->
+                                {
+                                  missionProfileId;
+                                  missionProfileArn;
+                                  name;
+                                  region;
+                                  contactPrePassDurationSeconds;
+                                  contactPostPassDurationSeconds;
+                                  minimumViableContactDurationSeconds;
+                                  dataflowEdges;
+                                  trackingConfigArn;
+                                  telemetrySinkConfigArn;
+                                  tags;
+                                  streamsKmsKey;
+                                  streamsKmsRole
+                                }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("missionProfileId",
+           (Option.map x.missionProfileId ~f:Uuid.to_value));
+        ("missionProfileArn",
+          (Option.map x.missionProfileArn ~f:MissionProfileArn.to_value));
+        ("name", (Option.map x.name ~f:SafeName.to_value));
+        ("region", (Option.map x.region ~f:AWSRegion.to_value));
+        ("contactPrePassDurationSeconds",
+          (Option.map x.contactPrePassDurationSeconds
+             ~f:DurationInSeconds.to_value));
+        ("contactPostPassDurationSeconds",
+          (Option.map x.contactPostPassDurationSeconds
+             ~f:DurationInSeconds.to_value));
+        ("minimumViableContactDurationSeconds",
+          (Option.map x.minimumViableContactDurationSeconds
+             ~f:PositiveDurationInSeconds.to_value));
+        ("dataflowEdges",
+          (Option.map x.dataflowEdges ~f:DataflowEdgeList.to_value));
+        ("trackingConfigArn",
+          (Option.map x.trackingConfigArn ~f:ConfigArn.to_value));
+        ("telemetrySinkConfigArn",
+          (Option.map x.telemetrySinkConfigArn ~f:ConfigArn.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("streamsKmsKey", (Option.map x.streamsKmsKey ~f:KmsKey.to_value));
+        ("streamsKmsRole", (Option.map x.streamsKmsRole ~f:RoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamsKmsRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "streamsKmsRole") in
+      let streamsKmsKey =
+        (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "streamsKmsKey") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let telemetrySinkConfigArn =
+        (Option.map ~f:ConfigArn.of_xml)
+          (Xml.child xml_arg0 "telemetrySinkConfigArn") in
+      let trackingConfigArn =
+        (Option.map ~f:ConfigArn.of_xml)
+          (Xml.child xml_arg0 "trackingConfigArn") in
+      let dataflowEdges =
+        (Option.map ~f:DataflowEdgeList.of_xml)
+          (Xml.child xml_arg0 "dataflowEdges") in
+      let minimumViableContactDurationSeconds =
+        (Option.map ~f:PositiveDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "minimumViableContactDurationSeconds") in
+      let contactPostPassDurationSeconds =
+        (Option.map ~f:DurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPostPassDurationSeconds") in
+      let contactPrePassDurationSeconds =
+        (Option.map ~f:DurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPrePassDurationSeconds") in
+      let region =
+        (Option.map ~f:AWSRegion.of_xml) (Xml.child xml_arg0 "region") in
+      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
+      let missionProfileArn =
+        (Option.map ~f:MissionProfileArn.of_xml)
+          (Xml.child xml_arg0 "missionProfileArn") in
+      let missionProfileId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "missionProfileId") in
+      make ?streamsKmsRole ?streamsKmsKey ?tags ?telemetrySinkConfigArn
+        ?trackingConfigArn ?dataflowEdges
+        ?minimumViableContactDurationSeconds ?contactPostPassDurationSeconds
+        ?contactPrePassDurationSeconds ?region ?name ?missionProfileArn
+        ?missionProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamsKmsRole = field_map json__ "streamsKmsRole" RoleArn.of_json in
+      let streamsKmsKey = field_map json__ "streamsKmsKey" KmsKey.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let telemetrySinkConfigArn =
+        field_map json__ "telemetrySinkConfigArn" ConfigArn.of_json in
+      let trackingConfigArn =
+        field_map json__ "trackingConfigArn" ConfigArn.of_json in
+      let dataflowEdges =
+        field_map json__ "dataflowEdges" DataflowEdgeList.of_json in
+      let minimumViableContactDurationSeconds =
+        field_map json__ "minimumViableContactDurationSeconds"
+          PositiveDurationInSeconds.of_json in
+      let contactPostPassDurationSeconds =
+        field_map json__ "contactPostPassDurationSeconds"
+          DurationInSeconds.of_json in
+      let contactPrePassDurationSeconds =
+        field_map json__ "contactPrePassDurationSeconds"
+          DurationInSeconds.of_json in
+      let region = field_map json__ "region" AWSRegion.of_json in
+      let name = field_map json__ "name" SafeName.of_json in
+      let missionProfileArn =
+        field_map json__ "missionProfileArn" MissionProfileArn.of_json in
+      let missionProfileId = field_map json__ "missionProfileId" Uuid.of_json in
+      make ?streamsKmsRole ?streamsKmsKey ?tags ?telemetrySinkConfigArn
+        ?trackingConfigArn ?dataflowEdges
+        ?minimumViableContactDurationSeconds ?contactPostPassDurationSeconds
+        ?contactPrePassDurationSeconds ?region ?name ?missionProfileArn
+        ?missionProfileId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Output for the GetMissionProfile operation."]
+module GetMissionProfileRequest =
+  struct
+    type nonrec t =
+      {
+      missionProfileId: Uuid.t [@ocaml.doc "UUID of a mission profile."]}
+    let context_ = "GetMissionProfileRequest"
+    let make ~missionProfileId = fun () -> { missionProfileId }
+    let to_value x =
+      structure_to_value
+        [("missionProfileId", (Some (Uuid.to_value x.missionProfileId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let missionProfileId =
+        Uuid.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "missionProfileId") in
+      make ~missionProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let missionProfileId =
+        field_map_exn json__ "missionProfileId" Uuid.of_json in
+      make ~missionProfileId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Input for the GetMissionProfile operation."]
+module GetMinuteUsageResponse =
+  struct
+    type nonrec t =
+      {
+      isReservedMinutesCustomer: Boolean.t option
+        [@ocaml.doc
+          "Returns whether or not an account has signed up for the reserved minutes pricing plan, specific to the month being requested."];
+      totalReservedMinuteAllocation: Integer.t option
+        [@ocaml.doc
+          "Total number of reserved minutes allocated, specific to the month being requested."];
+      upcomingMinutesScheduled: Integer.t option
+        [@ocaml.doc
+          "Upcoming minutes scheduled for an account, specific to the month being requested."];
+      totalScheduledMinutes: Integer.t option
+        [@ocaml.doc
+          "Total scheduled minutes for an account, specific to the month being requested."];
+      estimatedMinutesRemaining: Integer.t option
+        [@ocaml.doc
+          "Estimated number of minutes remaining for an account, specific to the month being requested."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?isReservedMinutesCustomer =
+      fun ?totalReservedMinuteAllocation ->
+        fun ?upcomingMinutesScheduled ->
+          fun ?totalScheduledMinutes ->
+            fun ?estimatedMinutesRemaining ->
+              fun () ->
+                {
+                  isReservedMinutesCustomer;
+                  totalReservedMinuteAllocation;
+                  upcomingMinutesScheduled;
+                  totalScheduledMinutes;
+                  estimatedMinutesRemaining
+                }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("isReservedMinutesCustomer",
+           (Option.map x.isReservedMinutesCustomer ~f:Boolean.to_value));
+        ("totalReservedMinuteAllocation",
+          (Option.map x.totalReservedMinuteAllocation ~f:Integer.to_value));
+        ("upcomingMinutesScheduled",
+          (Option.map x.upcomingMinutesScheduled ~f:Integer.to_value));
+        ("totalScheduledMinutes",
+          (Option.map x.totalScheduledMinutes ~f:Integer.to_value));
+        ("estimatedMinutesRemaining",
+          (Option.map x.estimatedMinutesRemaining ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMinutesRemaining =
         (Option.map ~f:Integer.of_xml)
-          (Xml.child xml_arg0 "upcomingMinutesScheduled") in
+          (Xml.child xml_arg0 "estimatedMinutesRemaining") in
       let totalScheduledMinutes =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "totalScheduledMinutes") in
+      let upcomingMinutesScheduled =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "upcomingMinutesScheduled") in
       let totalReservedMinuteAllocation =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "totalReservedMinuteAllocation") in
       let isReservedMinutesCustomer =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "isReservedMinutesCustomer") in
-      let estimatedMinutesRemaining =
-        (Option.map ~f:Integer.of_xml)
-          (Xml.child xml_arg0 "estimatedMinutesRemaining") in
-      make ?upcomingMinutesScheduled ?totalScheduledMinutes
-        ?totalReservedMinuteAllocation ?isReservedMinutesCustomer
-        ?estimatedMinutesRemaining ()
+      make ?estimatedMinutesRemaining ?totalScheduledMinutes
+        ?upcomingMinutesScheduled ?totalReservedMinuteAllocation
+        ?isReservedMinutesCustomer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let upcomingMinutesScheduled =
-        field_map json "upcomingMinutesScheduled" Integer.of_json in
-      let totalScheduledMinutes =
-        field_map json "totalScheduledMinutes" Integer.of_json in
-      let totalReservedMinuteAllocation =
-        field_map json "totalReservedMinuteAllocation" Integer.of_json in
-      let isReservedMinutesCustomer =
-        field_map json "isReservedMinutesCustomer" Boolean.of_json in
+    let of_json json__ =
       let estimatedMinutesRemaining =
-        field_map json "estimatedMinutesRemaining" Integer.of_json in
-      make ?upcomingMinutesScheduled ?totalScheduledMinutes
-        ?totalReservedMinuteAllocation ?isReservedMinutesCustomer
-        ?estimatedMinutesRemaining ()
+        field_map json__ "estimatedMinutesRemaining" Integer.of_json in
+      let totalScheduledMinutes =
+        field_map json__ "totalScheduledMinutes" Integer.of_json in
+      let upcomingMinutesScheduled =
+        field_map json__ "upcomingMinutesScheduled" Integer.of_json in
+      let totalReservedMinuteAllocation =
+        field_map json__ "totalReservedMinuteAllocation" Integer.of_json in
+      let isReservedMinutesCustomer =
+        field_map json__ "isReservedMinutesCustomer" Boolean.of_json in
+      make ?estimatedMinutesRemaining ?totalScheduledMinutes
+        ?upcomingMinutesScheduled ?totalReservedMinuteAllocation
+        ?isReservedMinutesCustomer ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the GetMinuteUsage operation."]
 module GetMinuteUsageRequest =
   struct
     type nonrec t =
       {
-      month: Integer.t
+      month: Month.t
         [@ocaml.doc "The month being requested, with a value of 1-12."];
-      year: Integer.t
+      year: Year.t
         [@ocaml.doc "The year being requested, in the format of YYYY."]}
     let context_ = "GetMinuteUsageRequest"
     let make ~month = fun ~year -> fun () -> { month; year }
     let to_value x =
       structure_to_value
-        [("month", (Some (Integer.to_value x.month)));
-        ("year", (Some (Integer.to_value x.year)))]
+        [("month", (Some (Month.to_value x.month)));
+        ("year", (Some (Year.to_value x.year)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let year =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "year") in
+        Year.of_xml (Xml.child_exn ~context:context_ xml_arg0 "year") in
       let month =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "month") in
+        Month.of_xml (Xml.child_exn ~context:context_ xml_arg0 "month") in
       make ~year ~month ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let year = field_map_exn json "year" Integer.of_json in
-      let month = field_map_exn json "month" Integer.of_json in
+    let of_json json__ =
+      let year = field_map_exn json__ "year" Year.of_json in
+      let month = field_map_exn json__ "month" Month.of_json in
       make ~year ~month ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the GetMinuteUsage operation."]
 module GetDataflowEndpointGroupResponse =
   struct
     type nonrec t =
       {
+      dataflowEndpointGroupId: Uuid.t option
+        [@ocaml.doc "UUID of a dataflow endpoint group."];
       dataflowEndpointGroupArn: DataflowEndpointGroupArn.t option
         [@ocaml.doc "ARN of a dataflow endpoint group."];
-      dataflowEndpointGroupId: String_.t option
-        [@ocaml.doc "UUID of a dataflow endpoint group."];
       endpointsDetails: EndpointDetailsList.t option
         [@ocaml.doc "Details of a dataflow endpoint."];
       tags: TagsMap.t option
-        [@ocaml.doc "Tags assigned to a dataflow endpoint group."]}
+        [@ocaml.doc "Tags assigned to a dataflow endpoint group."];
+      contactPrePassDurationSeconds:
+        DataflowEndpointGroupDurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time, in seconds, before a contact starts that the Ground Station Dataflow Endpoint Group will be in a PREPASS state. A Ground Station Dataflow Endpoint Group State Change event will be emitted when the Dataflow Endpoint Group enters and exits the PREPASS state."];
+      contactPostPassDurationSeconds:
+        DataflowEndpointGroupDurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time, in seconds, after a contact ends that the Ground Station Dataflow Endpoint Group will be in a POSTPASS state. A Ground Station Dataflow Endpoint Group State Change event will be emitted when the Dataflow Endpoint Group enters and exits the POSTPASS state."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?dataflowEndpointGroupArn =
-      fun ?dataflowEndpointGroupId ->
+    let make ?dataflowEndpointGroupId =
+      fun ?dataflowEndpointGroupArn ->
         fun ?endpointsDetails ->
           fun ?tags ->
-            fun () ->
-              {
-                dataflowEndpointGroupArn;
-                dataflowEndpointGroupId;
-                endpointsDetails;
-                tags
-              }
+            fun ?contactPrePassDurationSeconds ->
+              fun ?contactPostPassDurationSeconds ->
+                fun () ->
+                  {
+                    dataflowEndpointGroupId;
+                    dataflowEndpointGroupArn;
+                    endpointsDetails;
+                    tags;
+                    contactPrePassDurationSeconds;
+                    contactPostPassDurationSeconds
+                  }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -4187,92 +9530,112 @@ module GetDataflowEndpointGroupResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("dataflowEndpointGroupArn",
-           (Option.map x.dataflowEndpointGroupArn
-              ~f:DataflowEndpointGroupArn.to_value));
-        ("dataflowEndpointGroupId",
-          (Option.map x.dataflowEndpointGroupId ~f:String_.to_value));
+        [("dataflowEndpointGroupId",
+           (Option.map x.dataflowEndpointGroupId ~f:Uuid.to_value));
+        ("dataflowEndpointGroupArn",
+          (Option.map x.dataflowEndpointGroupArn
+             ~f:DataflowEndpointGroupArn.to_value));
         ("endpointsDetails",
           (Option.map x.endpointsDetails ~f:EndpointDetailsList.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("contactPrePassDurationSeconds",
+          (Option.map x.contactPrePassDurationSeconds
+             ~f:DataflowEndpointGroupDurationInSeconds.to_value));
+        ("contactPostPassDurationSeconds",
+          (Option.map x.contactPostPassDurationSeconds
+             ~f:DataflowEndpointGroupDurationInSeconds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contactPostPassDurationSeconds =
+        (Option.map ~f:DataflowEndpointGroupDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPostPassDurationSeconds") in
+      let contactPrePassDurationSeconds =
+        (Option.map ~f:DataflowEndpointGroupDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPrePassDurationSeconds") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let endpointsDetails =
         (Option.map ~f:EndpointDetailsList.of_xml)
           (Xml.child xml_arg0 "endpointsDetails") in
-      let dataflowEndpointGroupId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "dataflowEndpointGroupId") in
       let dataflowEndpointGroupArn =
         (Option.map ~f:DataflowEndpointGroupArn.of_xml)
           (Xml.child xml_arg0 "dataflowEndpointGroupArn") in
-      make ?tags ?endpointsDetails ?dataflowEndpointGroupId
-        ?dataflowEndpointGroupArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let endpointsDetails =
-        field_map json "endpointsDetails" EndpointDetailsList.of_json in
       let dataflowEndpointGroupId =
-        field_map json "dataflowEndpointGroupId" String_.of_json in
+        (Option.map ~f:Uuid.of_xml)
+          (Xml.child xml_arg0 "dataflowEndpointGroupId") in
+      make ?contactPostPassDurationSeconds ?contactPrePassDurationSeconds
+        ?tags ?endpointsDetails ?dataflowEndpointGroupArn
+        ?dataflowEndpointGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contactPostPassDurationSeconds =
+        field_map json__ "contactPostPassDurationSeconds"
+          DataflowEndpointGroupDurationInSeconds.of_json in
+      let contactPrePassDurationSeconds =
+        field_map json__ "contactPrePassDurationSeconds"
+          DataflowEndpointGroupDurationInSeconds.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let endpointsDetails =
+        field_map json__ "endpointsDetails" EndpointDetailsList.of_json in
       let dataflowEndpointGroupArn =
-        field_map json "dataflowEndpointGroupArn"
+        field_map json__ "dataflowEndpointGroupArn"
           DataflowEndpointGroupArn.of_json in
-      make ?tags ?endpointsDetails ?dataflowEndpointGroupId
-        ?dataflowEndpointGroupArn ()
+      let dataflowEndpointGroupId =
+        field_map json__ "dataflowEndpointGroupId" Uuid.of_json in
+      make ?contactPostPassDurationSeconds ?contactPrePassDurationSeconds
+        ?tags ?endpointsDetails ?dataflowEndpointGroupArn
+        ?dataflowEndpointGroupId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the GetDataflowEndpointGroup operation."]
 module GetDataflowEndpointGroupRequest =
   struct
     type nonrec t =
       {
-      dataflowEndpointGroupId: String_.t
+      dataflowEndpointGroupId: Uuid.t
         [@ocaml.doc "UUID of a dataflow endpoint group."]}
     let context_ = "GetDataflowEndpointGroupRequest"
     let make ~dataflowEndpointGroupId = fun () -> { dataflowEndpointGroupId }
     let to_value x =
       structure_to_value
         [("dataflowEndpointGroupId",
-           (Some (String_.to_value x.dataflowEndpointGroupId)))]
+           (Some (Uuid.to_value x.dataflowEndpointGroupId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dataflowEndpointGroupId =
-        String_.of_xml
+        Uuid.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataflowEndpointGroupId") in
       make ~dataflowEndpointGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataflowEndpointGroupId =
-        field_map_exn json "dataflowEndpointGroupId" String_.of_json in
+        field_map_exn json__ "dataflowEndpointGroupId" Uuid.of_json in
       make ~dataflowEndpointGroupId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the GetDataflowEndpointGroup operation."]
 module GetConfigResponse =
   struct
     type nonrec t =
       {
-      configArn: ConfigArn.t [@ocaml.doc "ARN of a Config"];
-      configData: ConfigTypeData.t [@ocaml.doc "Data elements in a Config."];
-      configId: String_.t [@ocaml.doc "UUID of a Config."];
+      configId: String_.t option [@ocaml.doc "UUID of a Config."];
+      configArn: ConfigArn.t option [@ocaml.doc "ARN of a Config"];
+      name: String_.t option [@ocaml.doc "Name of a Config."];
       configType: ConfigCapabilityType.t option
         [@ocaml.doc "Type of a Config."];
-      name: String_.t [@ocaml.doc "Name of a Config."];
+      configData: ConfigTypeData.t option
+        [@ocaml.doc "Data elements in a Config."];
       tags: TagsMap.t option [@ocaml.doc "Tags assigned to a Config."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetConfigResponse"
-    let make ?configType =
-      fun ?tags ->
-        fun ~configArn ->
-          fun ~configData ->
-            fun ~configId ->
-              fun ~name ->
+    let make ?configId =
+      fun ?configArn ->
+        fun ?name ->
+          fun ?configType ->
+            fun ?configData ->
+              fun ?tags ->
                 fun () ->
-                  { configType; tags; configArn; configData; configId; name }
+                  { configId; configArn; name; configType; configData; tags }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -4315,54 +9678,52 @@ module GetConfigResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("configArn", (Some (ConfigArn.to_value x.configArn)));
-        ("configData", (Some (ConfigTypeData.to_value x.configData)));
-        ("configId", (Some (String_.to_value x.configId)));
+        [("configId", (Option.map x.configId ~f:String_.to_value));
+        ("configArn", (Option.map x.configArn ~f:ConfigArn.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
         ("configType",
           (Option.map x.configType ~f:ConfigCapabilityType.to_value));
-        ("name", (Some (String_.to_value x.name)));
+        ("configData", (Option.map x.configData ~f:ConfigTypeData.to_value));
         ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let configData =
+        (Option.map ~f:ConfigTypeData.of_xml)
+          (Xml.child xml_arg0 "configData") in
       let configType =
         (Option.map ~f:ConfigCapabilityType.of_xml)
           (Xml.child xml_arg0 "configType") in
-      let configId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "configId") in
-      let configData =
-        ConfigTypeData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "configData") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       let configArn =
-        ConfigArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "configArn") in
-      make ?tags ~name ?configType ~configId ~configData ~configArn ()
+        (Option.map ~f:ConfigArn.of_xml) (Xml.child xml_arg0 "configArn") in
+      let configId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "configId") in
+      make ?tags ?configData ?configType ?name ?configArn ?configId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let name = field_map_exn json "name" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let configData = field_map json__ "configData" ConfigTypeData.of_json in
       let configType =
-        field_map json "configType" ConfigCapabilityType.of_json in
-      let configId = field_map_exn json "configId" String_.of_json in
-      let configData = field_map_exn json "configData" ConfigTypeData.of_json in
-      let configArn = field_map_exn json "configArn" ConfigArn.of_json in
-      make ?tags ~name ?configType ~configId ~configData ~configArn ()
+        field_map json__ "configType" ConfigCapabilityType.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let configArn = field_map json__ "configArn" ConfigArn.of_json in
+      let configId = field_map json__ "configId" String_.of_json in
+      make ?tags ?configData ?configType ?name ?configArn ?configId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the GetConfig operation."]
 module GetConfigRequest =
   struct
     type nonrec t =
       {
-      configId: String_.t [@ocaml.doc "UUID of a Config."];
+      configId: Uuid.t [@ocaml.doc "UUID of a Config."];
       configType: ConfigCapabilityType.t [@ocaml.doc "Type of a Config."]}
     let context_ = "GetConfigRequest"
     let make ~configId =
       fun ~configType -> fun () -> { configId; configType }
     let to_value x =
       structure_to_value
-        [("configId", (Some (String_.to_value x.configId)));
+        [("configId", (Some (Uuid.to_value x.configId)));
         ("configType", (Some (ConfigCapabilityType.to_value x.configType)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -4370,81 +9731,33 @@ module GetConfigRequest =
         ConfigCapabilityType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configType") in
       let configId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "configId") in
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "configId") in
       make ~configType ~configId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configType =
-        field_map_exn json "configType" ConfigCapabilityType.of_json in
-      let configId = field_map_exn json "configId" String_.of_json in
+        field_map_exn json__ "configType" ConfigCapabilityType.of_json in
+      let configId = field_map_exn json__ "configId" Uuid.of_json in
       make ~configType ~configId ()
     let to_json v = composed_to_json to_value v
-  end
-module DescribeContactResponse =
+  end[@@ocaml.doc "Input for the GetConfig operation."]
+module GetAgentTaskResponseUrlResponse =
   struct
     type nonrec t =
       {
-      contactId: String_.t option [@ocaml.doc "UUID of a contact."];
-      contactStatus: ContactStatus.t option
-        [@ocaml.doc "Status of a contact."];
-      dataflowList: DataflowList.t option
-        [@ocaml.doc
-          "List describing source and destination details for each dataflow edge."];
-      endTime: Timestamp.t option [@ocaml.doc "End time of a contact."];
-      errorMessage: String_.t option
-        [@ocaml.doc "Error message for a contact."];
-      groundStation: String_.t option
-        [@ocaml.doc "Ground station for a contact."];
-      maximumElevation: Elevation.t option
-        [@ocaml.doc "Maximum elevation angle of a contact."];
-      missionProfileArn: MissionProfileArn.t option
-        [@ocaml.doc "ARN of a mission profile."];
-      postPassEndTime: Timestamp.t option
-        [@ocaml.doc
-          "Amount of time after a contact ends that you\226\128\153d like to receive a CloudWatch event indicating the pass has finished."];
-      prePassStartTime: Timestamp.t option
-        [@ocaml.doc
-          "Amount of time prior to contact start you\226\128\153d like to receive a CloudWatch event indicating an upcoming pass."];
-      region: String_.t option [@ocaml.doc "Region of a contact."];
-      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
-      startTime: Timestamp.t option [@ocaml.doc "Start time of a contact."];
-      tags: TagsMap.t option [@ocaml.doc "Tags assigned to a contact."]}
+      agentId: Uuid.t option [@ocaml.doc "UUID of the agent."];
+      taskId: Uuid.t option [@ocaml.doc "GUID of the agent task."];
+      presignedLogUrl: String_.t option
+        [@ocaml.doc "Presigned URL for uploading agent task response logs."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?contactId =
-      fun ?contactStatus ->
-        fun ?dataflowList ->
-          fun ?endTime ->
-            fun ?errorMessage ->
-              fun ?groundStation ->
-                fun ?maximumElevation ->
-                  fun ?missionProfileArn ->
-                    fun ?postPassEndTime ->
-                      fun ?prePassStartTime ->
-                        fun ?region ->
-                          fun ?satelliteArn ->
-                            fun ?startTime ->
-                              fun ?tags ->
-                                fun () ->
-                                  {
-                                    contactId;
-                                    contactStatus;
-                                    dataflowList;
-                                    endTime;
-                                    errorMessage;
-                                    groundStation;
-                                    maximumElevation;
-                                    missionProfileArn;
-                                    postPassEndTime;
-                                    prePassStartTime;
-                                    region;
-                                    satelliteArn;
-                                    startTime;
-                                    tags
-                                  }
+    let make ?agentId =
+      fun ?taskId ->
+        fun ?presignedLogUrl ->
+          fun () -> { agentId; taskId; presignedLogUrl }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -4487,172 +9800,1047 @@ module DescribeContactResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("contactId", (Option.map x.contactId ~f:String_.to_value));
-        ("contactStatus",
-          (Option.map x.contactStatus ~f:ContactStatus.to_value));
-        ("dataflowList",
-          (Option.map x.dataflowList ~f:DataflowList.to_value));
-        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
-        ("errorMessage", (Option.map x.errorMessage ~f:String_.to_value));
-        ("groundStation", (Option.map x.groundStation ~f:String_.to_value));
-        ("maximumElevation",
-          (Option.map x.maximumElevation ~f:Elevation.to_value));
+        [("agentId", (Option.map x.agentId ~f:Uuid.to_value));
+        ("taskId", (Option.map x.taskId ~f:Uuid.to_value));
+        ("presignedLogUrl",
+          (Option.map x.presignedLogUrl ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let presignedLogUrl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "presignedLogUrl") in
+      let taskId = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "taskId") in
+      let agentId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "agentId") in
+      make ?presignedLogUrl ?taskId ?agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let presignedLogUrl =
+        field_map json__ "presignedLogUrl" String_.of_json in
+      let taskId = field_map json__ "taskId" Uuid.of_json in
+      let agentId = field_map json__ "agentId" Uuid.of_json in
+      make ?presignedLogUrl ?taskId ?agentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For use by AWS Ground Station Agent and shouldn't be called directly. Gets a presigned URL for uploading agent task response logs."]
+module GetAgentTaskResponseUrlRequest =
+  struct
+    type nonrec t =
+      {
+      agentId: Uuid.t
+        [@ocaml.doc "UUID of agent requesting the response URL."];
+      taskId: Uuid.t
+        [@ocaml.doc
+          "GUID of the agent task for which the response URL is being requested."]}
+    let context_ = "GetAgentTaskResponseUrlRequest"
+    let make ~agentId = fun ~taskId -> fun () -> { agentId; taskId }
+    let to_value x =
+      structure_to_value
+        [("agentId", (Some (Uuid.to_value x.agentId)));
+        ("taskId", (Some (Uuid.to_value x.taskId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskId") in
+      let agentId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentId") in
+      make ~taskId ~agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskId = field_map_exn json__ "taskId" Uuid.of_json in
+      let agentId = field_map_exn json__ "agentId" Uuid.of_json in
+      make ~taskId ~agentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For use by AWS Ground Station Agent and shouldn't be called directly. Gets a presigned URL for uploading agent task response logs."]
+module GetAgentConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      agentId: Uuid.t option [@ocaml.doc "UUID of agent."];
+      taskingDocument: String_.t option
+        [@ocaml.doc "Tasking document for agent."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?agentId =
+      fun ?taskingDocument -> fun () -> { agentId; taskingDocument }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("agentId", (Option.map x.agentId ~f:Uuid.to_value));
+        ("taskingDocument",
+          (Option.map x.taskingDocument ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskingDocument =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "taskingDocument") in
+      let agentId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "agentId") in
+      make ?taskingDocument ?agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskingDocument =
+        field_map json__ "taskingDocument" String_.of_json in
+      let agentId = field_map json__ "agentId" Uuid.of_json in
+      make ?taskingDocument ?agentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For use by AWS Ground Station Agent and shouldn't be called directly. Gets the latest configuration information for a registered agent."]
+module GetAgentConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      agentId: Uuid.t
+        [@ocaml.doc "UUID of agent to get configuration information for."]}
+    let context_ = "GetAgentConfigurationRequest"
+    let make ~agentId = fun () -> { agentId }
+    let to_value x =
+      structure_to_value [("agentId", (Some (Uuid.to_value x.agentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let agentId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentId") in
+      make ~agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agentId = field_map_exn json__ "agentId" Uuid.of_json in
+      make ~agentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For use by AWS Ground Station Agent and shouldn't be called directly. Gets the latest configuration information for a registered agent."]
+module EphemerisIdResponse =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t option
+        [@ocaml.doc "The AWS Ground Station ephemeris ID."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ephemerisId = fun () -> { ephemerisId }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Option.map x.ephemerisId ~f:Uuid.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ephemerisId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "ephemerisId") in
+      make ?ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ephemerisId = field_map json__ "ephemerisId" Uuid.of_json in
+      make ?ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create an ephemeris with your specified EphemerisData."]
+module DescribeEphemerisResponse =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t option
+        [@ocaml.doc "The AWS Ground Station ephemeris ID."];
+      satelliteId: Uuid.t option
+        [@ocaml.doc
+          "The AWS Ground Station satellite ID associated with ephemeris."];
+      status: EphemerisStatus.t option
+        [@ocaml.doc "The status of the ephemeris."];
+      priority: EphemerisPriority.t option
+        [@ocaml.doc
+          "A priority score that determines which ephemeris to use when multiple ephemerides overlap. Higher numbers take precedence. The default is 1. Must be 1 or greater."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "The time the ephemeris was uploaded in UTC."];
+      enabled: Boolean.t option
+        [@ocaml.doc "Whether or not the ephemeris is enabled."];
+      name: SafeName.t option
+        [@ocaml.doc "A name that you can use to identify the ephemeris."];
+      tags: TagsMap.t option [@ocaml.doc "Tags assigned to an ephemeris."];
+      suppliedData: EphemerisTypeDescription.t option
+        [@ocaml.doc "Supplied ephemeris data."];
+      invalidReason: EphemerisInvalidReason.t option
+        [@ocaml.doc
+          "Reason that an ephemeris failed validation. Appears only when the status is INVALID."];
+      errorReasons: EphemerisErrorReasonList.t option
+        [@ocaml.doc
+          "Detailed error information for ephemerides with INVALID status. Provides specific error codes and messages to help diagnose validation failures."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ephemerisId =
+      fun ?satelliteId ->
+        fun ?status ->
+          fun ?priority ->
+            fun ?creationTime ->
+              fun ?enabled ->
+                fun ?name ->
+                  fun ?tags ->
+                    fun ?suppliedData ->
+                      fun ?invalidReason ->
+                        fun ?errorReasons ->
+                          fun () ->
+                            {
+                              ephemerisId;
+                              satelliteId;
+                              status;
+                              priority;
+                              creationTime;
+                              enabled;
+                              name;
+                              tags;
+                              suppliedData;
+                              invalidReason;
+                              errorReasons
+                            }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Option.map x.ephemerisId ~f:Uuid.to_value));
+        ("satelliteId", (Option.map x.satelliteId ~f:Uuid.to_value));
+        ("status", (Option.map x.status ~f:EphemerisStatus.to_value));
+        ("priority", (Option.map x.priority ~f:EphemerisPriority.to_value));
+        ("creationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("enabled", (Option.map x.enabled ~f:Boolean.to_value));
+        ("name", (Option.map x.name ~f:SafeName.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("suppliedData",
+          (Option.map x.suppliedData ~f:EphemerisTypeDescription.to_value));
+        ("invalidReason",
+          (Option.map x.invalidReason ~f:EphemerisInvalidReason.to_value));
+        ("errorReasons",
+          (Option.map x.errorReasons ~f:EphemerisErrorReasonList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorReasons =
+        (Option.map ~f:EphemerisErrorReasonList.of_xml)
+          (Xml.child xml_arg0 "errorReasons") in
+      let invalidReason =
+        (Option.map ~f:EphemerisInvalidReason.of_xml)
+          (Xml.child xml_arg0 "invalidReason") in
+      let suppliedData =
+        (Option.map ~f:EphemerisTypeDescription.of_xml)
+          (Xml.child xml_arg0 "suppliedData") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let name = (Option.map ~f:SafeName.of_xml) (Xml.child xml_arg0 "name") in
+      let enabled =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationTime") in
+      let priority =
+        (Option.map ~f:EphemerisPriority.of_xml)
+          (Xml.child xml_arg0 "priority") in
+      let status =
+        (Option.map ~f:EphemerisStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let satelliteId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "satelliteId") in
+      let ephemerisId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "ephemerisId") in
+      make ?errorReasons ?invalidReason ?suppliedData ?tags ?name ?enabled
+        ?creationTime ?priority ?status ?satelliteId ?ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorReasons =
+        field_map json__ "errorReasons" EphemerisErrorReasonList.of_json in
+      let invalidReason =
+        field_map json__ "invalidReason" EphemerisInvalidReason.of_json in
+      let suppliedData =
+        field_map json__ "suppliedData" EphemerisTypeDescription.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let name = field_map json__ "name" SafeName.of_json in
+      let enabled = field_map json__ "enabled" Boolean.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let priority = field_map json__ "priority" EphemerisPriority.of_json in
+      let status = field_map json__ "status" EphemerisStatus.of_json in
+      let satelliteId = field_map json__ "satelliteId" Uuid.of_json in
+      let ephemerisId = field_map json__ "ephemerisId" Uuid.of_json in
+      make ?errorReasons ?invalidReason ?suppliedData ?tags ?name ?enabled
+        ?creationTime ?priority ?status ?satelliteId ?ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieve information about an existing ephemeris."]
+module DescribeEphemerisRequest =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t [@ocaml.doc "The AWS Ground Station ephemeris ID."]}
+    let context_ = "DescribeEphemerisRequest"
+    let make ~ephemerisId = fun () -> { ephemerisId }
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Some (Uuid.to_value x.ephemerisId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ephemerisId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ephemerisId") in
+      make ~ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ephemerisId = field_map_exn json__ "ephemerisId" Uuid.of_json in
+      make ~ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieve information about an existing ephemeris."]
+module DescribeContactVersionResponse =
+  struct
+    type nonrec t =
+      {
+      contactId: Uuid.t option [@ocaml.doc "UUID of a contact."];
+      missionProfileArn: MissionProfileArn.t option
+        [@ocaml.doc "ARN of the contact's mission profile."];
+      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "Start time of a contact in UTC."];
+      endTime: Timestamp.t option
+        [@ocaml.doc "End time of a contact in UTC."];
+      prePassStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Start time in UTC of the pre-pass period, at which you receive a CloudWatch event indicating an upcoming pass."];
+      postPassEndTime: Timestamp.t option
+        [@ocaml.doc
+          "End time in UTC of the post-pass period, at which you receive a CloudWatch event indicating the pass has finished."];
+      groundStation: String_.t option
+        [@ocaml.doc "Ground station for a contact."];
+      contactStatus: ContactStatus.t option
+        [@ocaml.doc "Status of a contact."];
+      errorMessage: String_.t option
+        [@ocaml.doc "Error message for a contact."];
+      maximumElevation: Elevation.t option
+        [@ocaml.doc "Maximum elevation angle of a contact."];
+      tags: TagsMap.t option [@ocaml.doc "Tags assigned to a contact."];
+      region: String_.t option
+        [@ocaml.doc
+          "Region where the ReserveContact API was called to schedule this contact."];
+      dataflowList: DataflowList.t option
+        [@ocaml.doc
+          "List describing source and destination details for each dataflow edge."];
+      visibilityStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Projected time in UTC your satellite will rise above the receive mask. This time is based on the satellite's current active ephemeris for future contacts and the ephemeris that was active during contact execution for completed contacts."];
+      visibilityEndTime: Timestamp.t option
+        [@ocaml.doc
+          "Projected time in UTC your satellite will set below the receive mask. This time is based on the satellite's current active ephemeris for future contacts and the ephemeris that was active during contact execution for completed contacts."];
+      trackingOverrides: TrackingOverrides.t option
+        [@ocaml.doc
+          "Tracking configuration overrides applied to this contact version. For the initial version, these are the overrides specified when the contact was reserved. For subsequent versions, these are the overrides associated with that specific version update."];
+      ephemeris: EphemerisResponseData.t option
+        [@ocaml.doc
+          "The ephemeris that determines antenna pointing directions for the contact."];
+      version: ContactVersion.t option
+        [@ocaml.doc "Version information for a contact."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?contactId =
+      fun ?missionProfileArn ->
+        fun ?satelliteArn ->
+          fun ?startTime ->
+            fun ?endTime ->
+              fun ?prePassStartTime ->
+                fun ?postPassEndTime ->
+                  fun ?groundStation ->
+                    fun ?contactStatus ->
+                      fun ?errorMessage ->
+                        fun ?maximumElevation ->
+                          fun ?tags ->
+                            fun ?region ->
+                              fun ?dataflowList ->
+                                fun ?visibilityStartTime ->
+                                  fun ?visibilityEndTime ->
+                                    fun ?trackingOverrides ->
+                                      fun ?ephemeris ->
+                                        fun ?version ->
+                                          fun () ->
+                                            {
+                                              contactId;
+                                              missionProfileArn;
+                                              satelliteArn;
+                                              startTime;
+                                              endTime;
+                                              prePassStartTime;
+                                              postPassEndTime;
+                                              groundStation;
+                                              contactStatus;
+                                              errorMessage;
+                                              maximumElevation;
+                                              tags;
+                                              region;
+                                              dataflowList;
+                                              visibilityStartTime;
+                                              visibilityEndTime;
+                                              trackingOverrides;
+                                              ephemeris;
+                                              version
+                                            }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("contactId", (Option.map x.contactId ~f:Uuid.to_value));
         ("missionProfileArn",
           (Option.map x.missionProfileArn ~f:MissionProfileArn.to_value));
-        ("postPassEndTime",
-          (Option.map x.postPassEndTime ~f:Timestamp.to_value));
-        ("prePassStartTime",
-          (Option.map x.prePassStartTime ~f:Timestamp.to_value));
-        ("region", (Option.map x.region ~f:String_.to_value));
         ("satelliteArn",
           (Option.map x.satelliteArn ~f:SatelliteArn.to_value));
         ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("prePassStartTime",
+          (Option.map x.prePassStartTime ~f:Timestamp.to_value));
+        ("postPassEndTime",
+          (Option.map x.postPassEndTime ~f:Timestamp.to_value));
+        ("groundStation", (Option.map x.groundStation ~f:String_.to_value));
+        ("contactStatus",
+          (Option.map x.contactStatus ~f:ContactStatus.to_value));
+        ("errorMessage", (Option.map x.errorMessage ~f:String_.to_value));
+        ("maximumElevation",
+          (Option.map x.maximumElevation ~f:Elevation.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("region", (Option.map x.region ~f:String_.to_value));
+        ("dataflowList",
+          (Option.map x.dataflowList ~f:DataflowList.to_value));
+        ("visibilityStartTime",
+          (Option.map x.visibilityStartTime ~f:Timestamp.to_value));
+        ("visibilityEndTime",
+          (Option.map x.visibilityEndTime ~f:Timestamp.to_value));
+        ("trackingOverrides",
+          (Option.map x.trackingOverrides ~f:TrackingOverrides.to_value));
+        ("ephemeris",
+          (Option.map x.ephemeris ~f:EphemerisResponseData.to_value));
+        ("version", (Option.map x.version ~f:ContactVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:ContactVersion.of_xml) (Xml.child xml_arg0 "version") in
+      let ephemeris =
+        (Option.map ~f:EphemerisResponseData.of_xml)
+          (Xml.child xml_arg0 "ephemeris") in
+      let trackingOverrides =
+        (Option.map ~f:TrackingOverrides.of_xml)
+          (Xml.child xml_arg0 "trackingOverrides") in
+      let visibilityEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "visibilityEndTime") in
+      let visibilityStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "visibilityStartTime") in
+      let dataflowList =
+        (Option.map ~f:DataflowList.of_xml)
+          (Xml.child xml_arg0 "dataflowList") in
+      let region =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let maximumElevation =
+        (Option.map ~f:Elevation.of_xml)
+          (Xml.child xml_arg0 "maximumElevation") in
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "errorMessage") in
+      let contactStatus =
+        (Option.map ~f:ContactStatus.of_xml)
+          (Xml.child xml_arg0 "contactStatus") in
+      let groundStation =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groundStation") in
+      let postPassEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "postPassEndTime") in
+      let prePassStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "prePassStartTime") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
       let startTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
       let satelliteArn =
         (Option.map ~f:SatelliteArn.of_xml)
           (Xml.child xml_arg0 "satelliteArn") in
-      let region =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
-      let prePassStartTime =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "prePassStartTime") in
-      let postPassEndTime =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "postPassEndTime") in
       let missionProfileArn =
         (Option.map ~f:MissionProfileArn.of_xml)
           (Xml.child xml_arg0 "missionProfileArn") in
+      let contactId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "contactId") in
+      make ?version ?ephemeris ?trackingOverrides ?visibilityEndTime
+        ?visibilityStartTime ?dataflowList ?region ?tags ?maximumElevation
+        ?errorMessage ?contactStatus ?groundStation ?postPassEndTime
+        ?prePassStartTime ?endTime ?startTime ?satelliteArn
+        ?missionProfileArn ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "version" ContactVersion.of_json in
+      let ephemeris =
+        field_map json__ "ephemeris" EphemerisResponseData.of_json in
+      let trackingOverrides =
+        field_map json__ "trackingOverrides" TrackingOverrides.of_json in
+      let visibilityEndTime =
+        field_map json__ "visibilityEndTime" Timestamp.of_json in
+      let visibilityStartTime =
+        field_map json__ "visibilityStartTime" Timestamp.of_json in
+      let dataflowList = field_map json__ "dataflowList" DataflowList.of_json in
+      let region = field_map json__ "region" String_.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let maximumElevation =
-        (Option.map ~f:Elevation.of_xml)
-          (Xml.child xml_arg0 "maximumElevation") in
-      let groundStation =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groundStation") in
-      let errorMessage =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "errorMessage") in
-      let endTime =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+        field_map json__ "maximumElevation" Elevation.of_json in
+      let errorMessage = field_map json__ "errorMessage" String_.of_json in
+      let contactStatus =
+        field_map json__ "contactStatus" ContactStatus.of_json in
+      let groundStation = field_map json__ "groundStation" String_.of_json in
+      let postPassEndTime =
+        field_map json__ "postPassEndTime" Timestamp.of_json in
+      let prePassStartTime =
+        field_map json__ "prePassStartTime" Timestamp.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let satelliteArn = field_map json__ "satelliteArn" SatelliteArn.of_json in
+      let missionProfileArn =
+        field_map json__ "missionProfileArn" MissionProfileArn.of_json in
+      let contactId = field_map json__ "contactId" Uuid.of_json in
+      make ?version ?ephemeris ?trackingOverrides ?visibilityEndTime
+        ?visibilityStartTime ?dataflowList ?region ?tags ?maximumElevation
+        ?errorMessage ?contactStatus ?groundStation ?postPassEndTime
+        ?prePassStartTime ?endTime ?startTime ?satelliteArn
+        ?missionProfileArn ?contactId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a specific version of a contact."]
+module DescribeContactVersionRequest =
+  struct
+    type nonrec t =
+      {
+      contactId: Uuid.t [@ocaml.doc "UUID of a contact."];
+      versionId: VersionId.t [@ocaml.doc "Version ID of a contact."]}
+    let context_ = "DescribeContactVersionRequest"
+    let make ~contactId =
+      fun ~versionId -> fun () -> { contactId; versionId }
+    let to_value x =
+      structure_to_value
+        [("contactId", (Some (Uuid.to_value x.contactId)));
+        ("versionId", (Some (VersionId.to_value x.versionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let versionId =
+        VersionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "versionId") in
+      let contactId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contactId") in
+      make ~versionId ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let versionId = field_map_exn json__ "versionId" VersionId.of_json in
+      let contactId = field_map_exn json__ "contactId" Uuid.of_json in
+      make ~versionId ~contactId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a specific version of a contact."]
+module DescribeContactResponse =
+  struct
+    type nonrec t =
+      {
+      contactId: Uuid.t option [@ocaml.doc "UUID of a contact."];
+      missionProfileArn: MissionProfileArn.t option
+        [@ocaml.doc "ARN of a mission profile."];
+      satelliteArn: SatelliteArn.t option [@ocaml.doc "ARN of a satellite."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "Start time of a contact in UTC."];
+      endTime: Timestamp.t option
+        [@ocaml.doc "End time of a contact in UTC."];
+      prePassStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Start time in UTC of the pre-pass period, at which you receive a CloudWatch event indicating an upcoming pass."];
+      postPassEndTime: Timestamp.t option
+        [@ocaml.doc
+          "End time in UTC of the post-pass period, at which you receive a CloudWatch event indicating the pass has finished."];
+      groundStation: String_.t option
+        [@ocaml.doc "Ground station for a contact."];
+      contactStatus: ContactStatus.t option
+        [@ocaml.doc "Status of a contact."];
+      errorMessage: String_.t option
+        [@ocaml.doc "Error message for a contact."];
+      maximumElevation: Elevation.t option
+        [@ocaml.doc "Maximum elevation angle of a contact."];
+      tags: TagsMap.t option [@ocaml.doc "Tags assigned to a contact."];
+      region: String_.t option
+        [@ocaml.doc
+          "Region where the ReserveContact API was called to schedule this contact."];
+      dataflowList: DataflowList.t option
+        [@ocaml.doc
+          "List describing source and destination details for each dataflow edge."];
+      visibilityStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Projected time in UTC your satellite will rise above the receive mask. This time is based on the satellite's current active ephemeris for future contacts and the ephemeris that was active during contact execution for completed contacts."];
+      visibilityEndTime: Timestamp.t option
+        [@ocaml.doc
+          "Projected time in UTC your satellite will set below the receive mask. This time is based on the satellite's current active ephemeris for future contacts and the ephemeris that was active during contact execution for completed contacts."];
+      trackingOverrides: TrackingOverrides.t option
+        [@ocaml.doc
+          "Tracking configuration overrides specified when the contact was reserved."];
+      ephemeris: EphemerisResponseData.t option
+        [@ocaml.doc
+          "The ephemeris that determines antenna pointing directions for the contact."];
+      version: ContactVersion.t option
+        [@ocaml.doc "Version information for a contact."]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?contactId =
+      fun ?missionProfileArn ->
+        fun ?satelliteArn ->
+          fun ?startTime ->
+            fun ?endTime ->
+              fun ?prePassStartTime ->
+                fun ?postPassEndTime ->
+                  fun ?groundStation ->
+                    fun ?contactStatus ->
+                      fun ?errorMessage ->
+                        fun ?maximumElevation ->
+                          fun ?tags ->
+                            fun ?region ->
+                              fun ?dataflowList ->
+                                fun ?visibilityStartTime ->
+                                  fun ?visibilityEndTime ->
+                                    fun ?trackingOverrides ->
+                                      fun ?ephemeris ->
+                                        fun ?version ->
+                                          fun () ->
+                                            {
+                                              contactId;
+                                              missionProfileArn;
+                                              satelliteArn;
+                                              startTime;
+                                              endTime;
+                                              prePassStartTime;
+                                              postPassEndTime;
+                                              groundStation;
+                                              contactStatus;
+                                              errorMessage;
+                                              maximumElevation;
+                                              tags;
+                                              region;
+                                              dataflowList;
+                                              visibilityStartTime;
+                                              visibilityEndTime;
+                                              trackingOverrides;
+                                              ephemeris;
+                                              version
+                                            }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("contactId", (Option.map x.contactId ~f:Uuid.to_value));
+        ("missionProfileArn",
+          (Option.map x.missionProfileArn ~f:MissionProfileArn.to_value));
+        ("satelliteArn",
+          (Option.map x.satelliteArn ~f:SatelliteArn.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("prePassStartTime",
+          (Option.map x.prePassStartTime ~f:Timestamp.to_value));
+        ("postPassEndTime",
+          (Option.map x.postPassEndTime ~f:Timestamp.to_value));
+        ("groundStation", (Option.map x.groundStation ~f:String_.to_value));
+        ("contactStatus",
+          (Option.map x.contactStatus ~f:ContactStatus.to_value));
+        ("errorMessage", (Option.map x.errorMessage ~f:String_.to_value));
+        ("maximumElevation",
+          (Option.map x.maximumElevation ~f:Elevation.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("region", (Option.map x.region ~f:String_.to_value));
+        ("dataflowList",
+          (Option.map x.dataflowList ~f:DataflowList.to_value));
+        ("visibilityStartTime",
+          (Option.map x.visibilityStartTime ~f:Timestamp.to_value));
+        ("visibilityEndTime",
+          (Option.map x.visibilityEndTime ~f:Timestamp.to_value));
+        ("trackingOverrides",
+          (Option.map x.trackingOverrides ~f:TrackingOverrides.to_value));
+        ("ephemeris",
+          (Option.map x.ephemeris ~f:EphemerisResponseData.to_value));
+        ("version", (Option.map x.version ~f:ContactVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:ContactVersion.of_xml) (Xml.child xml_arg0 "version") in
+      let ephemeris =
+        (Option.map ~f:EphemerisResponseData.of_xml)
+          (Xml.child xml_arg0 "ephemeris") in
+      let trackingOverrides =
+        (Option.map ~f:TrackingOverrides.of_xml)
+          (Xml.child xml_arg0 "trackingOverrides") in
+      let visibilityEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "visibilityEndTime") in
+      let visibilityStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "visibilityStartTime") in
       let dataflowList =
         (Option.map ~f:DataflowList.of_xml)
           (Xml.child xml_arg0 "dataflowList") in
+      let region =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let maximumElevation =
+        (Option.map ~f:Elevation.of_xml)
+          (Xml.child xml_arg0 "maximumElevation") in
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "errorMessage") in
       let contactStatus =
         (Option.map ~f:ContactStatus.of_xml)
           (Xml.child xml_arg0 "contactStatus") in
-      let contactId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "contactId") in
-      make ?tags ?startTime ?satelliteArn ?region ?prePassStartTime
-        ?postPassEndTime ?missionProfileArn ?maximumElevation ?groundStation
-        ?errorMessage ?endTime ?dataflowList ?contactStatus ?contactId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let satelliteArn = field_map json "satelliteArn" SatelliteArn.of_json in
-      let region = field_map json "region" String_.of_json in
-      let prePassStartTime =
-        field_map json "prePassStartTime" Timestamp.of_json in
+      let groundStation =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groundStation") in
       let postPassEndTime =
-        field_map json "postPassEndTime" Timestamp.of_json in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "postPassEndTime") in
+      let prePassStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "prePassStartTime") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let satelliteArn =
+        (Option.map ~f:SatelliteArn.of_xml)
+          (Xml.child xml_arg0 "satelliteArn") in
       let missionProfileArn =
-        field_map json "missionProfileArn" MissionProfileArn.of_json in
+        (Option.map ~f:MissionProfileArn.of_xml)
+          (Xml.child xml_arg0 "missionProfileArn") in
+      let contactId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "contactId") in
+      make ?version ?ephemeris ?trackingOverrides ?visibilityEndTime
+        ?visibilityStartTime ?dataflowList ?region ?tags ?maximumElevation
+        ?errorMessage ?contactStatus ?groundStation ?postPassEndTime
+        ?prePassStartTime ?endTime ?startTime ?satelliteArn
+        ?missionProfileArn ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "version" ContactVersion.of_json in
+      let ephemeris =
+        field_map json__ "ephemeris" EphemerisResponseData.of_json in
+      let trackingOverrides =
+        field_map json__ "trackingOverrides" TrackingOverrides.of_json in
+      let visibilityEndTime =
+        field_map json__ "visibilityEndTime" Timestamp.of_json in
+      let visibilityStartTime =
+        field_map json__ "visibilityStartTime" Timestamp.of_json in
+      let dataflowList = field_map json__ "dataflowList" DataflowList.of_json in
+      let region = field_map json__ "region" String_.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let maximumElevation =
-        field_map json "maximumElevation" Elevation.of_json in
-      let groundStation = field_map json "groundStation" String_.of_json in
-      let errorMessage = field_map json "errorMessage" String_.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let dataflowList = field_map json "dataflowList" DataflowList.of_json in
+        field_map json__ "maximumElevation" Elevation.of_json in
+      let errorMessage = field_map json__ "errorMessage" String_.of_json in
       let contactStatus =
-        field_map json "contactStatus" ContactStatus.of_json in
-      let contactId = field_map json "contactId" String_.of_json in
-      make ?tags ?startTime ?satelliteArn ?region ?prePassStartTime
-        ?postPassEndTime ?missionProfileArn ?maximumElevation ?groundStation
-        ?errorMessage ?endTime ?dataflowList ?contactStatus ?contactId ()
+        field_map json__ "contactStatus" ContactStatus.of_json in
+      let groundStation = field_map json__ "groundStation" String_.of_json in
+      let postPassEndTime =
+        field_map json__ "postPassEndTime" Timestamp.of_json in
+      let prePassStartTime =
+        field_map json__ "prePassStartTime" Timestamp.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let satelliteArn = field_map json__ "satelliteArn" SatelliteArn.of_json in
+      let missionProfileArn =
+        field_map json__ "missionProfileArn" MissionProfileArn.of_json in
+      let contactId = field_map json__ "contactId" Uuid.of_json in
+      make ?version ?ephemeris ?trackingOverrides ?visibilityEndTime
+        ?visibilityStartTime ?dataflowList ?region ?tags ?maximumElevation
+        ?errorMessage ?contactStatus ?groundStation ?postPassEndTime
+        ?prePassStartTime ?endTime ?startTime ?satelliteArn
+        ?missionProfileArn ?contactId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Output for the DescribeContact operation."]
 module DescribeContactRequest =
   struct
     type nonrec t = {
-      contactId: String_.t [@ocaml.doc "UUID of a contact."]}
+      contactId: Uuid.t [@ocaml.doc "UUID of a contact."]}
     let context_ = "DescribeContactRequest"
     let make ~contactId = fun () -> { contactId }
     let to_value x =
-      structure_to_value
-        [("contactId", (Some (String_.to_value x.contactId)))]
+      structure_to_value [("contactId", (Some (Uuid.to_value x.contactId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let contactId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contactId") in
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contactId") in
       make ~contactId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contactId = field_map_exn json "contactId" String_.of_json in
+    let of_json json__ =
+      let contactId = field_map_exn json__ "contactId" Uuid.of_json in
       make ~contactId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the DescribeContact operation."]
 module DeleteMissionProfileRequest =
   struct
     type nonrec t =
       {
-      missionProfileId: String_.t [@ocaml.doc "UUID of a mission profile."]}
+      missionProfileId: Uuid.t [@ocaml.doc "UUID of a mission profile."]}
     let context_ = "DeleteMissionProfileRequest"
     let make ~missionProfileId = fun () -> { missionProfileId }
     let to_value x =
       structure_to_value
-        [("missionProfileId", (Some (String_.to_value x.missionProfileId)))]
+        [("missionProfileId", (Some (Uuid.to_value x.missionProfileId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let missionProfileId =
-        String_.of_xml
+        Uuid.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "missionProfileId") in
       make ~missionProfileId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let missionProfileId =
-        field_map_exn json "missionProfileId" String_.of_json in
+        field_map_exn json__ "missionProfileId" Uuid.of_json in
       make ~missionProfileId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the DeleteMissionProfile operation."]
+module DeleteEphemerisRequest =
+  struct
+    type nonrec t =
+      {
+      ephemerisId: Uuid.t [@ocaml.doc "The AWS Ground Station ephemeris ID."]}
+    let context_ = "DeleteEphemerisRequest"
+    let make ~ephemerisId = fun () -> { ephemerisId }
+    let to_value x =
+      structure_to_value
+        [("ephemerisId", (Some (Uuid.to_value x.ephemerisId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ephemerisId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ephemerisId") in
+      make ~ephemerisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ephemerisId = field_map_exn json__ "ephemerisId" Uuid.of_json in
+      make ~ephemerisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete an ephemeris."]
 module DeleteDataflowEndpointGroupRequest =
   struct
     type nonrec t =
       {
-      dataflowEndpointGroupId: String_.t
+      dataflowEndpointGroupId: Uuid.t
         [@ocaml.doc "UUID of a dataflow endpoint group."]}
     let context_ = "DeleteDataflowEndpointGroupRequest"
     let make ~dataflowEndpointGroupId = fun () -> { dataflowEndpointGroupId }
     let to_value x =
       structure_to_value
         [("dataflowEndpointGroupId",
-           (Some (String_.to_value x.dataflowEndpointGroupId)))]
+           (Some (Uuid.to_value x.dataflowEndpointGroupId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dataflowEndpointGroupId =
-        String_.of_xml
+        Uuid.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataflowEndpointGroupId") in
       make ~dataflowEndpointGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataflowEndpointGroupId =
-        field_map_exn json "dataflowEndpointGroupId" String_.of_json in
+        field_map_exn json__ "dataflowEndpointGroupId" Uuid.of_json in
       make ~dataflowEndpointGroupId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the DeleteDataflowEndpointGroup operation."]
 module DeleteConfigRequest =
   struct
     type nonrec t =
       {
-      configId: String_.t [@ocaml.doc "UUID of a Config."];
+      configId: Uuid.t [@ocaml.doc "UUID of a Config."];
       configType: ConfigCapabilityType.t [@ocaml.doc "Type of a Config."]}
     let context_ = "DeleteConfigRequest"
     let make ~configId =
       fun ~configType -> fun () -> { configId; configType }
     let to_value x =
       structure_to_value
-        [("configId", (Some (String_.to_value x.configId)));
+        [("configId", (Some (Uuid.to_value x.configId)));
         ("configType", (Some (ConfigCapabilityType.to_value x.configType)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -4660,21 +10848,21 @@ module DeleteConfigRequest =
         ConfigCapabilityType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configType") in
       let configId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "configId") in
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "configId") in
       make ~configType ~configId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configType =
-        field_map_exn json "configType" ConfigCapabilityType.of_json in
-      let configId = field_map_exn json "configId" String_.of_json in
+        field_map_exn json__ "configType" ConfigCapabilityType.of_json in
+      let configId = field_map_exn json__ "configId" Uuid.of_json in
       make ~configType ~configId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the DeleteConfig operation."]
 module DataflowEndpointGroupIdResponse =
   struct
     type nonrec t =
       {
-      dataflowEndpointGroupId: String_.t option
+      dataflowEndpointGroupId: Uuid.t option
         [@ocaml.doc "UUID of a dataflow endpoint group."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
@@ -4725,196 +10913,507 @@ module DataflowEndpointGroupIdResponse =
     let to_value x =
       structure_to_value
         [("dataflowEndpointGroupId",
-           (Option.map x.dataflowEndpointGroupId ~f:String_.to_value))]
+           (Option.map x.dataflowEndpointGroupId ~f:Uuid.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dataflowEndpointGroupId =
-        (Option.map ~f:String_.of_xml)
+        (Option.map ~f:Uuid.of_xml)
           (Xml.child xml_arg0 "dataflowEndpointGroupId") in
       make ?dataflowEndpointGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataflowEndpointGroupId =
-        field_map json "dataflowEndpointGroupId" String_.of_json in
+        field_map json__ "dataflowEndpointGroupId" Uuid.of_json in
       make ?dataflowEndpointGroupId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Response containing the ID of a dataflow endpoint group."]
 module CreateMissionProfileRequest =
   struct
     type nonrec t =
       {
-      contactPostPassDurationSeconds: DurationInSeconds.t option
-        [@ocaml.doc
-          "Amount of time after a contact ends that you\226\128\153d like to receive a CloudWatch event indicating the pass has finished."];
+      name: SafeName.t [@ocaml.doc "Name of a mission profile."];
       contactPrePassDurationSeconds: DurationInSeconds.t option
         [@ocaml.doc
-          "Amount of time prior to contact start you\226\128\153d like to receive a CloudWatch event indicating an upcoming pass."];
+          "Amount of time prior to contact start you'd like to receive a Ground Station Contact State Change event indicating an upcoming pass."];
+      contactPostPassDurationSeconds: DurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time after a contact ends that you'd like to receive a Ground Station Contact State Change event indicating the pass has finished."];
+      minimumViableContactDurationSeconds: PositiveDurationInSeconds.t
+        [@ocaml.doc
+          "Smallest amount of time in seconds that you'd like to see for an available contact. AWS Ground Station will not present you with contacts shorter than this duration."];
       dataflowEdges: DataflowEdgeList.t
         [@ocaml.doc
           "A list of lists of ARNs. Each list of ARNs is an edge, with a from Config and a to Config."];
-      minimumViableContactDurationSeconds: DurationInSeconds.t
-        [@ocaml.doc
-          "Smallest amount of time in seconds that you\226\128\153d like to see for an available contact. AWS Ground Station will not present you with contacts shorter than this duration."];
-      name: SafeName.t [@ocaml.doc "Name of a mission profile."];
+      trackingConfigArn: ConfigArn.t [@ocaml.doc "ARN of a tracking Config."];
+      telemetrySinkConfigArn: ConfigArn.t option
+        [@ocaml.doc "ARN of a telemetry sink Config."];
       tags: TagsMap.t option
         [@ocaml.doc "Tags assigned to a mission profile."];
-      trackingConfigArn: ConfigArn.t [@ocaml.doc "ARN of a tracking Config."]}
+      streamsKmsKey: KmsKey.t option
+        [@ocaml.doc "KMS key to use for encrypting streams."];
+      streamsKmsRole: RoleArn.t option
+        [@ocaml.doc "Role to use for encrypting streams with KMS key."]}
     let context_ = "CreateMissionProfileRequest"
-    let make ?contactPostPassDurationSeconds =
-      fun ?contactPrePassDurationSeconds ->
-        fun ?tags ->
-          fun ~dataflowEdges ->
-            fun ~minimumViableContactDurationSeconds ->
-              fun ~name ->
-                fun ~trackingConfigArn ->
-                  fun () ->
-                    {
-                      contactPostPassDurationSeconds;
-                      contactPrePassDurationSeconds;
-                      tags;
-                      dataflowEdges;
-                      minimumViableContactDurationSeconds;
-                      name;
-                      trackingConfigArn
-                    }
+    let make ?contactPrePassDurationSeconds =
+      fun ?contactPostPassDurationSeconds ->
+        fun ?telemetrySinkConfigArn ->
+          fun ?tags ->
+            fun ?streamsKmsKey ->
+              fun ?streamsKmsRole ->
+                fun ~name ->
+                  fun ~minimumViableContactDurationSeconds ->
+                    fun ~dataflowEdges ->
+                      fun ~trackingConfigArn ->
+                        fun () ->
+                          {
+                            contactPrePassDurationSeconds;
+                            contactPostPassDurationSeconds;
+                            telemetrySinkConfigArn;
+                            tags;
+                            streamsKmsKey;
+                            streamsKmsRole;
+                            name;
+                            minimumViableContactDurationSeconds;
+                            dataflowEdges;
+                            trackingConfigArn
+                          }
     let to_value x =
       structure_to_value
-        [("contactPostPassDurationSeconds",
-           (Option.map x.contactPostPassDurationSeconds
-              ~f:DurationInSeconds.to_value));
+        [("name", (Some (SafeName.to_value x.name)));
         ("contactPrePassDurationSeconds",
           (Option.map x.contactPrePassDurationSeconds
              ~f:DurationInSeconds.to_value));
-        ("dataflowEdges", (Some (DataflowEdgeList.to_value x.dataflowEdges)));
+        ("contactPostPassDurationSeconds",
+          (Option.map x.contactPostPassDurationSeconds
+             ~f:DurationInSeconds.to_value));
         ("minimumViableContactDurationSeconds",
           (Some
-             (DurationInSeconds.to_value
+             (PositiveDurationInSeconds.to_value
                 x.minimumViableContactDurationSeconds)));
-        ("name", (Some (SafeName.to_value x.name)));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("dataflowEdges", (Some (DataflowEdgeList.to_value x.dataflowEdges)));
         ("trackingConfigArn",
-          (Some (ConfigArn.to_value x.trackingConfigArn)))]
+          (Some (ConfigArn.to_value x.trackingConfigArn)));
+        ("telemetrySinkConfigArn",
+          (Option.map x.telemetrySinkConfigArn ~f:ConfigArn.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("streamsKmsKey", (Option.map x.streamsKmsKey ~f:KmsKey.to_value));
+        ("streamsKmsRole", (Option.map x.streamsKmsRole ~f:RoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamsKmsRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "streamsKmsRole") in
+      let streamsKmsKey =
+        (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "streamsKmsKey") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let telemetrySinkConfigArn =
+        (Option.map ~f:ConfigArn.of_xml)
+          (Xml.child xml_arg0 "telemetrySinkConfigArn") in
       let trackingConfigArn =
         ConfigArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "trackingConfigArn") in
-      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let name =
-        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let minimumViableContactDurationSeconds =
-        DurationInSeconds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "minimumViableContactDurationSeconds") in
       let dataflowEdges =
         DataflowEdgeList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataflowEdges") in
-      let contactPrePassDurationSeconds =
-        (Option.map ~f:DurationInSeconds.of_xml)
-          (Xml.child xml_arg0 "contactPrePassDurationSeconds") in
+      let minimumViableContactDurationSeconds =
+        PositiveDurationInSeconds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "minimumViableContactDurationSeconds") in
       let contactPostPassDurationSeconds =
         (Option.map ~f:DurationInSeconds.of_xml)
           (Xml.child xml_arg0 "contactPostPassDurationSeconds") in
-      make ~trackingConfigArn ?tags ~name
-        ~minimumViableContactDurationSeconds ~dataflowEdges
-        ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackingConfigArn =
-        field_map_exn json "trackingConfigArn" ConfigArn.of_json in
-      let tags = field_map json "tags" TagsMap.of_json in
-      let name = field_map_exn json "name" SafeName.of_json in
-      let minimumViableContactDurationSeconds =
-        field_map_exn json "minimumViableContactDurationSeconds"
-          DurationInSeconds.of_json in
-      let dataflowEdges =
-        field_map_exn json "dataflowEdges" DataflowEdgeList.of_json in
       let contactPrePassDurationSeconds =
-        field_map json "contactPrePassDurationSeconds"
-          DurationInSeconds.of_json in
+        (Option.map ~f:DurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPrePassDurationSeconds") in
+      let name =
+        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?streamsKmsRole ?streamsKmsKey ?tags ?telemetrySinkConfigArn
+        ~trackingConfigArn ~dataflowEdges
+        ~minimumViableContactDurationSeconds ?contactPostPassDurationSeconds
+        ?contactPrePassDurationSeconds ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamsKmsRole = field_map json__ "streamsKmsRole" RoleArn.of_json in
+      let streamsKmsKey = field_map json__ "streamsKmsKey" KmsKey.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let telemetrySinkConfigArn =
+        field_map json__ "telemetrySinkConfigArn" ConfigArn.of_json in
+      let trackingConfigArn =
+        field_map_exn json__ "trackingConfigArn" ConfigArn.of_json in
+      let dataflowEdges =
+        field_map_exn json__ "dataflowEdges" DataflowEdgeList.of_json in
+      let minimumViableContactDurationSeconds =
+        field_map_exn json__ "minimumViableContactDurationSeconds"
+          PositiveDurationInSeconds.of_json in
       let contactPostPassDurationSeconds =
-        field_map json "contactPostPassDurationSeconds"
+        field_map json__ "contactPostPassDurationSeconds"
           DurationInSeconds.of_json in
-      make ~trackingConfigArn ?tags ~name
-        ~minimumViableContactDurationSeconds ~dataflowEdges
-        ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds ()
+      let contactPrePassDurationSeconds =
+        field_map json__ "contactPrePassDurationSeconds"
+          DurationInSeconds.of_json in
+      let name = field_map_exn json__ "name" SafeName.of_json in
+      make ?streamsKmsRole ?streamsKmsKey ?tags ?telemetrySinkConfigArn
+        ~trackingConfigArn ~dataflowEdges
+        ~minimumViableContactDurationSeconds ?contactPostPassDurationSeconds
+        ?contactPrePassDurationSeconds ~name ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the CreateMissionProfile operation."]
+module CreateEphemerisRequest =
+  struct
+    type nonrec t =
+      {
+      satelliteId: Uuid.t option
+        [@ocaml.doc
+          "The satellite ID that associates this ephemeris with a satellite in AWS Ground Station."];
+      enabled: Boolean.t option
+        [@ocaml.doc
+          "Set to true to enable the ephemeris after validation. Set to false to keep it disabled."];
+      priority: CustomerEphemerisPriority.t option
+        [@ocaml.doc
+          "A priority score that determines which ephemeris to use when multiple ephemerides overlap. Higher numbers take precedence. The default is 1. Must be 1 or greater."];
+      expirationTime: Timestamp.t option
+        [@ocaml.doc
+          "An overall expiration time for the ephemeris in UTC, after which it will become EXPIRED."];
+      name: SafeName.t
+        [@ocaml.doc "A name that you can use to identify the ephemeris."];
+      kmsKeyArn: KeyArn.t option
+        [@ocaml.doc
+          "The ARN of the KMS key to use for encrypting the ephemeris."];
+      ephemeris: EphemerisData.t option [@ocaml.doc "Ephemeris data."];
+      tags: TagsMap.t option [@ocaml.doc "Tags assigned to an ephemeris."]}
+    let context_ = "CreateEphemerisRequest"
+    let make ?satelliteId =
+      fun ?enabled ->
+        fun ?priority ->
+          fun ?expirationTime ->
+            fun ?kmsKeyArn ->
+              fun ?ephemeris ->
+                fun ?tags ->
+                  fun ~name ->
+                    fun () ->
+                      {
+                        satelliteId;
+                        enabled;
+                        priority;
+                        expirationTime;
+                        kmsKeyArn;
+                        ephemeris;
+                        tags;
+                        name
+                      }
+    let to_value x =
+      structure_to_value
+        [("satelliteId", (Option.map x.satelliteId ~f:Uuid.to_value));
+        ("enabled", (Option.map x.enabled ~f:Boolean.to_value));
+        ("priority",
+          (Option.map x.priority ~f:CustomerEphemerisPriority.to_value));
+        ("expirationTime",
+          (Option.map x.expirationTime ~f:Timestamp.to_value));
+        ("name", (Some (SafeName.to_value x.name)));
+        ("kmsKeyArn", (Option.map x.kmsKeyArn ~f:KeyArn.to_value));
+        ("ephemeris", (Option.map x.ephemeris ~f:EphemerisData.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let ephemeris =
+        (Option.map ~f:EphemerisData.of_xml) (Xml.child xml_arg0 "ephemeris") in
+      let kmsKeyArn =
+        (Option.map ~f:KeyArn.of_xml) (Xml.child xml_arg0 "kmsKeyArn") in
+      let name =
+        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let expirationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "expirationTime") in
+      let priority =
+        (Option.map ~f:CustomerEphemerisPriority.of_xml)
+          (Xml.child xml_arg0 "priority") in
+      let enabled =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      let satelliteId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "satelliteId") in
+      make ?tags ?ephemeris ?kmsKeyArn ~name ?expirationTime ?priority
+        ?enabled ?satelliteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let ephemeris = field_map json__ "ephemeris" EphemerisData.of_json in
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KeyArn.of_json in
+      let name = field_map_exn json__ "name" SafeName.of_json in
+      let expirationTime =
+        field_map json__ "expirationTime" Timestamp.of_json in
+      let priority =
+        field_map json__ "priority" CustomerEphemerisPriority.of_json in
+      let enabled = field_map json__ "enabled" Boolean.of_json in
+      let satelliteId = field_map json__ "satelliteId" Uuid.of_json in
+      make ?tags ?ephemeris ?kmsKeyArn ~name ?expirationTime ?priority
+        ?enabled ?satelliteId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create an ephemeris with your specified EphemerisData."]
+module CreateDataflowEndpointGroupV2Response =
+  struct
+    type nonrec t =
+      {
+      dataflowEndpointGroupId: Uuid.t option
+        [@ocaml.doc "Dataflow endpoint group ID"]}
+    type nonrec error =
+      [ `DependencyException of DependencyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataflowEndpointGroupId = fun () -> { dataflowEndpointGroupId }
+    let error_of_json name json =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependencyException" ->
+          `DependencyException (DependencyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependencyException e ->
+          `Assoc
+            [("error", (`String "DependencyException"));
+            ("details", (DependencyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("dataflowEndpointGroupId",
+           (Option.map x.dataflowEndpointGroupId ~f:Uuid.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataflowEndpointGroupId =
+        (Option.map ~f:Uuid.of_xml)
+          (Xml.child xml_arg0 "dataflowEndpointGroupId") in
+      make ?dataflowEndpointGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataflowEndpointGroupId =
+        field_map json__ "dataflowEndpointGroupId" Uuid.of_json in
+      make ?dataflowEndpointGroupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a DataflowEndpoint group containing the specified list of Ground Station Agent based endpoints. The name field in each endpoint is used in your mission profile DataflowEndpointConfig to specify which endpoints to use during a contact. When a contact uses multiple DataflowEndpointConfig objects, each Config must match a DataflowEndpoint in the same group."]
+module CreateDataflowEndpointGroupV2Request =
+  struct
+    type nonrec t =
+      {
+      endpoints: CreateEndpointDetailsList.t
+        [@ocaml.doc "Dataflow endpoint group's endpoint definitions"];
+      contactPrePassDurationSeconds:
+        DataflowEndpointGroupDurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time, in seconds, before a contact starts that the Ground Station Dataflow Endpoint Group will be in a PREPASS state. A Ground Station Dataflow Endpoint Group State Change event will be emitted when the Dataflow Endpoint Group enters and exits the PREPASS state."];
+      contactPostPassDurationSeconds:
+        DataflowEndpointGroupDurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time, in seconds, after a contact ends that the Ground Station Dataflow Endpoint Group will be in a POSTPASS state. A Ground Station Dataflow Endpoint Group State Change event will be emitted when the Dataflow Endpoint Group enters and exits the POSTPASS state."];
+      tags: TagsMap.t option
+        [@ocaml.doc "Tags of a V2 dataflow endpoint group."]}
+    let context_ = "CreateDataflowEndpointGroupV2Request"
+    let make ?contactPrePassDurationSeconds =
+      fun ?contactPostPassDurationSeconds ->
+        fun ?tags ->
+          fun ~endpoints ->
+            fun () ->
+              {
+                contactPrePassDurationSeconds;
+                contactPostPassDurationSeconds;
+                tags;
+                endpoints
+              }
+    let to_value x =
+      structure_to_value
+        [("endpoints",
+           (Some (CreateEndpointDetailsList.to_value x.endpoints)));
+        ("contactPrePassDurationSeconds",
+          (Option.map x.contactPrePassDurationSeconds
+             ~f:DataflowEndpointGroupDurationInSeconds.to_value));
+        ("contactPostPassDurationSeconds",
+          (Option.map x.contactPostPassDurationSeconds
+             ~f:DataflowEndpointGroupDurationInSeconds.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let contactPostPassDurationSeconds =
+        (Option.map ~f:DataflowEndpointGroupDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPostPassDurationSeconds") in
+      let contactPrePassDurationSeconds =
+        (Option.map ~f:DataflowEndpointGroupDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPrePassDurationSeconds") in
+      let endpoints =
+        CreateEndpointDetailsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "endpoints") in
+      make ?tags ?contactPostPassDurationSeconds
+        ?contactPrePassDurationSeconds ~endpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let contactPostPassDurationSeconds =
+        field_map json__ "contactPostPassDurationSeconds"
+          DataflowEndpointGroupDurationInSeconds.of_json in
+      let contactPrePassDurationSeconds =
+        field_map json__ "contactPrePassDurationSeconds"
+          DataflowEndpointGroupDurationInSeconds.of_json in
+      let endpoints =
+        field_map_exn json__ "endpoints" CreateEndpointDetailsList.of_json in
+      make ?tags ?contactPostPassDurationSeconds
+        ?contactPrePassDurationSeconds ~endpoints ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a DataflowEndpoint group containing the specified list of Ground Station Agent based endpoints. The name field in each endpoint is used in your mission profile DataflowEndpointConfig to specify which endpoints to use during a contact. When a contact uses multiple DataflowEndpointConfig objects, each Config must match a DataflowEndpoint in the same group."]
 module CreateDataflowEndpointGroupRequest =
   struct
     type nonrec t =
       {
       endpointDetails: EndpointDetailsList.t
         [@ocaml.doc
-          "Endpoint details of each endpoint in the dataflow endpoint group."];
+          "Endpoint details of each endpoint in the dataflow endpoint group. All dataflow endpoints within a single dataflow endpoint group must be of the same type. You cannot mix AWS Ground Station Agent endpoints with Dataflow endpoints in the same group. If your use case requires both types of endpoints, you must create separate dataflow endpoint groups for each type."];
       tags: TagsMap.t option
-        [@ocaml.doc "Tags of a dataflow endpoint group."]}
+        [@ocaml.doc "Tags of a dataflow endpoint group."];
+      contactPrePassDurationSeconds:
+        DataflowEndpointGroupDurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time, in seconds, before a contact starts that the Ground Station Dataflow Endpoint Group will be in a PREPASS state. A Ground Station Dataflow Endpoint Group State Change event will be emitted when the Dataflow Endpoint Group enters and exits the PREPASS state."];
+      contactPostPassDurationSeconds:
+        DataflowEndpointGroupDurationInSeconds.t option
+        [@ocaml.doc
+          "Amount of time, in seconds, after a contact ends that the Ground Station Dataflow Endpoint Group will be in a POSTPASS state. A Ground Station Dataflow Endpoint Group State Change event will be emitted when the Dataflow Endpoint Group enters and exits the POSTPASS state."]}
     let context_ = "CreateDataflowEndpointGroupRequest"
     let make ?tags =
-      fun ~endpointDetails -> fun () -> { tags; endpointDetails }
+      fun ?contactPrePassDurationSeconds ->
+        fun ?contactPostPassDurationSeconds ->
+          fun ~endpointDetails ->
+            fun () ->
+              {
+                tags;
+                contactPrePassDurationSeconds;
+                contactPostPassDurationSeconds;
+                endpointDetails
+              }
     let to_value x =
       structure_to_value
         [("endpointDetails",
            (Some (EndpointDetailsList.to_value x.endpointDetails)));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("contactPrePassDurationSeconds",
+          (Option.map x.contactPrePassDurationSeconds
+             ~f:DataflowEndpointGroupDurationInSeconds.to_value));
+        ("contactPostPassDurationSeconds",
+          (Option.map x.contactPostPassDurationSeconds
+             ~f:DataflowEndpointGroupDurationInSeconds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contactPostPassDurationSeconds =
+        (Option.map ~f:DataflowEndpointGroupDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPostPassDurationSeconds") in
+      let contactPrePassDurationSeconds =
+        (Option.map ~f:DataflowEndpointGroupDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "contactPrePassDurationSeconds") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let endpointDetails =
         EndpointDetailsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "endpointDetails") in
-      make ?tags ~endpointDetails ()
+      make ?contactPostPassDurationSeconds ?contactPrePassDurationSeconds
+        ?tags ~endpointDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
+    let of_json json__ =
+      let contactPostPassDurationSeconds =
+        field_map json__ "contactPostPassDurationSeconds"
+          DataflowEndpointGroupDurationInSeconds.of_json in
+      let contactPrePassDurationSeconds =
+        field_map json__ "contactPrePassDurationSeconds"
+          DataflowEndpointGroupDurationInSeconds.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let endpointDetails =
-        field_map_exn json "endpointDetails" EndpointDetailsList.of_json in
-      make ?tags ~endpointDetails ()
+        field_map_exn json__ "endpointDetails" EndpointDetailsList.of_json in
+      make ?contactPostPassDurationSeconds ?contactPrePassDurationSeconds
+        ?tags ~endpointDetails ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the CreateDataflowEndpointGroup operation."]
 module CreateConfigRequest =
   struct
     type nonrec t =
       {
-      configData: ConfigTypeData.t [@ocaml.doc "Parameters of a Config."];
       name: SafeName.t [@ocaml.doc "Name of a Config."];
+      configData: ConfigTypeData.t [@ocaml.doc "Parameters of a Config."];
       tags: TagsMap.t option [@ocaml.doc "Tags assigned to a Config."]}
     let context_ = "CreateConfigRequest"
     let make ?tags =
-      fun ~configData -> fun ~name -> fun () -> { tags; configData; name }
+      fun ~name -> fun ~configData -> fun () -> { tags; name; configData }
     let to_value x =
       structure_to_value
-        [("configData", (Some (ConfigTypeData.to_value x.configData)));
-        ("name", (Some (SafeName.to_value x.name)));
+        [("name", (Some (SafeName.to_value x.name)));
+        ("configData", (Some (ConfigTypeData.to_value x.configData)));
         ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let name =
-        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let configData =
         ConfigTypeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configData") in
-      make ?tags ~name ~configData ()
+      let name =
+        SafeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?tags ~configData ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let name = field_map_exn json "name" SafeName.of_json in
-      let configData = field_map_exn json "configData" ConfigTypeData.of_json in
-      make ?tags ~name ~configData ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let configData =
+        field_map_exn json__ "configData" ConfigTypeData.of_json in
+      let name = field_map_exn json__ "name" SafeName.of_json in
+      make ?tags ~configData ~name ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the CreateConfig operation."]
 module ContactIdResponse =
   struct
     type nonrec t =
       {
-      contactId: String_.t option [@ocaml.doc "UUID of a contact."]}
+      contactId: Uuid.t option [@ocaml.doc "UUID of a contact."];
+      versionId: VersionId.t option [@ocaml.doc "Version ID of a contact."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?contactId = fun () -> { contactId }
+    let make ?contactId =
+      fun ?versionId -> fun () -> { contactId; versionId }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -4957,35 +11456,39 @@ module ContactIdResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("contactId", (Option.map x.contactId ~f:String_.to_value))]
+        [("contactId", (Option.map x.contactId ~f:Uuid.to_value));
+        ("versionId", (Option.map x.versionId ~f:VersionId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let versionId =
+        (Option.map ~f:VersionId.of_xml) (Xml.child xml_arg0 "versionId") in
       let contactId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "contactId") in
-      make ?contactId ()
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "contactId") in
+      make ?versionId ?contactId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contactId = field_map json "contactId" String_.of_json in
-      make ?contactId ()
+    let of_json json__ =
+      let versionId = field_map json__ "versionId" VersionId.of_json in
+      let contactId = field_map json__ "contactId" Uuid.of_json in
+      make ?versionId ?contactId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Response containing the ID of a contact."]
 module ConfigIdResponse =
   struct
     type nonrec t =
       {
-      configArn: ConfigArn.t option [@ocaml.doc "ARN of a Config."];
       configId: String_.t option [@ocaml.doc "UUID of a Config."];
       configType: ConfigCapabilityType.t option
-        [@ocaml.doc "Type of a Config."]}
+        [@ocaml.doc "Type of a Config."];
+      configArn: ConfigArn.t option [@ocaml.doc "ARN of a Config."]}
     type nonrec error =
       [ `DependencyException of DependencyException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceLimitExceededException of ResourceLimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?configArn =
-      fun ?configId ->
-        fun ?configType -> fun () -> { configArn; configId; configType }
+    let make ?configId =
+      fun ?configType ->
+        fun ?configArn -> fun () -> { configId; configType; configArn }
     let error_of_json name json =
       match name with
       | "DependencyException" ->
@@ -5038,46 +11541,45 @@ module ConfigIdResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("configArn", (Option.map x.configArn ~f:ConfigArn.to_value));
-        ("configId", (Option.map x.configId ~f:String_.to_value));
+        [("configId", (Option.map x.configId ~f:String_.to_value));
         ("configType",
-          (Option.map x.configType ~f:ConfigCapabilityType.to_value))]
+          (Option.map x.configType ~f:ConfigCapabilityType.to_value));
+        ("configArn", (Option.map x.configArn ~f:ConfigArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let configArn =
+        (Option.map ~f:ConfigArn.of_xml) (Xml.child xml_arg0 "configArn") in
       let configType =
         (Option.map ~f:ConfigCapabilityType.of_xml)
           (Xml.child xml_arg0 "configType") in
       let configId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "configId") in
-      let configArn =
-        (Option.map ~f:ConfigArn.of_xml) (Xml.child xml_arg0 "configArn") in
-      make ?configType ?configId ?configArn ()
+      make ?configArn ?configType ?configId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let configArn = field_map json__ "configArn" ConfigArn.of_json in
       let configType =
-        field_map json "configType" ConfigCapabilityType.of_json in
-      let configId = field_map json "configId" String_.of_json in
-      let configArn = field_map json "configArn" ConfigArn.of_json in
-      make ?configType ?configId ?configArn ()
+        field_map json__ "configType" ConfigCapabilityType.of_json in
+      let configId = field_map json__ "configId" String_.of_json in
+      make ?configArn ?configType ?configId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Response containing the ARN, ID, and type of a Config."]
 module CancelContactRequest =
   struct
     type nonrec t = {
-      contactId: String_.t [@ocaml.doc "UUID of a contact."]}
+      contactId: Uuid.t [@ocaml.doc "UUID of a contact."]}
     let context_ = "CancelContactRequest"
     let make ~contactId = fun () -> { contactId }
     let to_value x =
-      structure_to_value
-        [("contactId", (Some (String_.to_value x.contactId)))]
+      structure_to_value [("contactId", (Some (Uuid.to_value x.contactId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let contactId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contactId") in
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contactId") in
       make ~contactId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contactId = field_map_exn json "contactId" String_.of_json in
+    let of_json json__ =
+      let contactId = field_map_exn json__ "contactId" Uuid.of_json in
       make ~contactId ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Input for the CancelContact operation."]

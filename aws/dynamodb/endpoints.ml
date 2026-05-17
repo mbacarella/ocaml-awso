@@ -18,6 +18,8 @@ type ('i, 'o, 'e) t =
   DeleteBackupOutput.error) t 
   | DeleteItem: (DeleteItemInput.t, DeleteItemOutput.t,
   DeleteItemOutput.error) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyInput.t,
+  DeleteResourcePolicyOutput.t, DeleteResourcePolicyOutput.error) t 
   | DeleteTable: (DeleteTableInput.t, DeleteTableOutput.t,
   DeleteTableOutput.error) t 
   | DescribeBackup: (DescribeBackupInput.t, DescribeBackupOutput.t,
@@ -37,6 +39,8 @@ type ('i, 'o, 'e) t =
   | DescribeGlobalTableSettings: (DescribeGlobalTableSettingsInput.t,
   DescribeGlobalTableSettingsOutput.t,
   DescribeGlobalTableSettingsOutput.error) t 
+  | DescribeImport: (DescribeImportInput.t, DescribeImportOutput.t,
+  DescribeImportOutput.error) t 
   | DescribeKinesisStreamingDestination:
   (DescribeKinesisStreamingDestinationInput.t,
   DescribeKinesisStreamingDestinationOutput.t,
@@ -63,6 +67,10 @@ type ('i, 'o, 'e) t =
   | ExportTableToPointInTime: (ExportTableToPointInTimeInput.t,
   ExportTableToPointInTimeOutput.t, ExportTableToPointInTimeOutput.error) t 
   | GetItem: (GetItemInput.t, GetItemOutput.t, GetItemOutput.error) t 
+  | GetResourcePolicy: (GetResourcePolicyInput.t, GetResourcePolicyOutput.t,
+  GetResourcePolicyOutput.error) t 
+  | ImportTable: (ImportTableInput.t, ImportTableOutput.t,
+  ImportTableOutput.error) t 
   | ListBackups: (ListBackupsInput.t, ListBackupsOutput.t,
   ListBackupsOutput.error) t 
   | ListContributorInsights: (ListContributorInsightsInput.t,
@@ -71,11 +79,15 @@ type ('i, 'o, 'e) t =
   ListExportsOutput.error) t 
   | ListGlobalTables: (ListGlobalTablesInput.t, ListGlobalTablesOutput.t,
   ListGlobalTablesOutput.error) t 
+  | ListImports: (ListImportsInput.t, ListImportsOutput.t,
+  ListImportsOutput.error) t 
   | ListTables: (ListTablesInput.t, ListTablesOutput.t,
   ListTablesOutput.error) t 
   | ListTagsOfResource: (ListTagsOfResourceInput.t,
   ListTagsOfResourceOutput.t, ListTagsOfResourceOutput.error) t 
   | PutItem: (PutItemInput.t, PutItemOutput.t, PutItemOutput.error) t 
+  | PutResourcePolicy: (PutResourcePolicyInput.t, PutResourcePolicyOutput.t,
+  PutResourcePolicyOutput.error) t 
   | Query: (QueryInput.t, QueryOutput.t, QueryOutput.error) t 
   | RestoreTableFromBackup: (RestoreTableFromBackupInput.t,
   RestoreTableFromBackupOutput.t, RestoreTableFromBackupOutput.error) t 
@@ -101,6 +113,10 @@ type ('i, 'o, 'e) t =
   
   | UpdateItem: (UpdateItemInput.t, UpdateItemOutput.t,
   UpdateItemOutput.error) t 
+  | UpdateKinesisStreamingDestination:
+  (UpdateKinesisStreamingDestinationInput.t,
+  UpdateKinesisStreamingDestinationOutput.t,
+  UpdateKinesisStreamingDestinationOutput.error) t 
   | UpdateTable: (UpdateTableInput.t, UpdateTableOutput.t,
   UpdateTableOutput.error) t 
   | UpdateTableReplicaAutoScaling: (UpdateTableReplicaAutoScalingInput.t,
@@ -118,6 +134,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateTable -> `POST
   | DeleteBackup -> `POST
   | DeleteItem -> `POST
+  | DeleteResourcePolicy -> `POST
   | DeleteTable -> `POST
   | DescribeBackup -> `POST
   | DescribeContinuousBackups -> `POST
@@ -126,6 +143,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeExport -> `POST
   | DescribeGlobalTable -> `POST
   | DescribeGlobalTableSettings -> `POST
+  | DescribeImport -> `POST
   | DescribeKinesisStreamingDestination -> `POST
   | DescribeLimits -> `POST
   | DescribeTable -> `POST
@@ -137,13 +155,17 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ExecuteTransaction -> `POST
   | ExportTableToPointInTime -> `POST
   | GetItem -> `POST
+  | GetResourcePolicy -> `POST
+  | ImportTable -> `POST
   | ListBackups -> `POST
   | ListContributorInsights -> `POST
   | ListExports -> `POST
   | ListGlobalTables -> `POST
+  | ListImports -> `POST
   | ListTables -> `POST
   | ListTagsOfResource -> `POST
   | PutItem -> `POST
+  | PutResourcePolicy -> `POST
   | Query -> `POST
   | RestoreTableFromBackup -> `POST
   | RestoreTableToPointInTime -> `POST
@@ -157,6 +179,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateGlobalTable -> `POST
   | UpdateGlobalTableSettings -> `POST
   | UpdateItem -> `POST
+  | UpdateKinesisStreamingDestination -> `POST
   | UpdateTable -> `POST
   | UpdateTableReplicaAutoScaling -> `POST
   | UpdateTimeToLive -> `POST
@@ -171,6 +194,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateTable -> (Format.kasprintf Uri.of_string) "/"
       | DeleteBackup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteItem -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTable -> (Format.kasprintf Uri.of_string) "/"
       | DescribeBackup -> (Format.kasprintf Uri.of_string) "/"
       | DescribeContinuousBackups -> (Format.kasprintf Uri.of_string) "/"
@@ -179,6 +203,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeExport -> (Format.kasprintf Uri.of_string) "/"
       | DescribeGlobalTable -> (Format.kasprintf Uri.of_string) "/"
       | DescribeGlobalTableSettings -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeImport -> (Format.kasprintf Uri.of_string) "/"
       | DescribeKinesisStreamingDestination ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeLimits -> (Format.kasprintf Uri.of_string) "/"
@@ -194,13 +219,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ExecuteTransaction -> (Format.kasprintf Uri.of_string) "/"
       | ExportTableToPointInTime -> (Format.kasprintf Uri.of_string) "/"
       | GetItem -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | ImportTable -> (Format.kasprintf Uri.of_string) "/"
       | ListBackups -> (Format.kasprintf Uri.of_string) "/"
       | ListContributorInsights -> (Format.kasprintf Uri.of_string) "/"
       | ListExports -> (Format.kasprintf Uri.of_string) "/"
       | ListGlobalTables -> (Format.kasprintf Uri.of_string) "/"
+      | ListImports -> (Format.kasprintf Uri.of_string) "/"
       | ListTables -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsOfResource -> (Format.kasprintf Uri.of_string) "/"
       | PutItem -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | Query -> (Format.kasprintf Uri.of_string) "/"
       | RestoreTableFromBackup -> (Format.kasprintf Uri.of_string) "/"
       | RestoreTableToPointInTime -> (Format.kasprintf Uri.of_string) "/"
@@ -214,6 +243,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateGlobalTable -> (Format.kasprintf Uri.of_string) "/"
       | UpdateGlobalTableSettings -> (Format.kasprintf Uri.of_string) "/"
       | UpdateItem -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateKinesisStreamingDestination ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateTable -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTableReplicaAutoScaling -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTimeToLive -> (Format.kasprintf Uri.of_string) "/")
@@ -284,6 +315,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "DynamoDB_20120810.DeleteItem")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let json = DeleteResourcePolicyInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "DynamoDB_20120810.DeleteResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteTable ->
       let json = DeleteTableInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -347,6 +386,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "DynamoDB_20120810.DescribeGlobalTableSettings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeImport ->
+      let json = DescribeImportInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "DynamoDB_20120810.DescribeImport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeKinesisStreamingDestination ->
       let json = DescribeKinesisStreamingDestinationInput.to_json req in
@@ -440,6 +487,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "DynamoDB_20120810.GetItem")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourcePolicy ->
+      let json = GetResourcePolicyInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "DynamoDB_20120810.GetResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ImportTable ->
+      let json = ImportTableInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "DynamoDB_20120810.ImportTable")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListBackups ->
       let json = ListBackupsInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -472,6 +535,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "DynamoDB_20120810.ListGlobalTables")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListImports ->
+      let json = ListImportsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "DynamoDB_20120810.ListImports")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTables ->
       let json = ListTablesInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -495,6 +566,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "DynamoDB_20120810.PutItem")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let json = PutResourcePolicyInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "DynamoDB_20120810.PutResourcePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | Query ->
       let json = QueryInput.to_json req in
@@ -600,6 +679,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "DynamoDB_20120810.UpdateItem")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateKinesisStreamingDestination ->
+      let json = UpdateKinesisStreamingDestinationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "DynamoDB_20120810.UpdateKinesisStreamingDestination")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateTable ->
       let json = UpdateTableInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -698,6 +786,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteItemOutput.of_json json)
       else Error (parse_aws_error (Some DeleteItemOutput.error_of_json))
+  | DeleteResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteResourcePolicyOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyOutput.error_of_json))
   | DeleteTable ->
       if is_success
       then
@@ -757,6 +853,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeGlobalTableSettingsOutput.error_of_json))
+  | DescribeImport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeImportOutput.of_json json)
+      else Error (parse_aws_error (Some DescribeImportOutput.error_of_json))
   | DescribeKinesisStreamingDestination ->
       if is_success
       then
@@ -841,6 +943,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetItemOutput.of_json json)
       else Error (parse_aws_error (Some GetItemOutput.error_of_json))
+  | GetResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourcePolicyOutput.of_json json)
+      else
+        Error (parse_aws_error (Some GetResourcePolicyOutput.error_of_json))
+  | ImportTable ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportTableOutput.of_json json)
+      else Error (parse_aws_error (Some ImportTableOutput.error_of_json))
   | ListBackups ->
       if is_success
       then
@@ -868,6 +983,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListGlobalTablesOutput.of_json json)
       else
         Error (parse_aws_error (Some ListGlobalTablesOutput.error_of_json))
+  | ListImports ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListImportsOutput.of_json json)
+      else Error (parse_aws_error (Some ListImportsOutput.error_of_json))
   | ListTables ->
       if is_success
       then
@@ -887,6 +1008,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (PutItemOutput.of_json json)
       else Error (parse_aws_error (Some PutItemOutput.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutResourcePolicyOutput.of_json json)
+      else
+        Error (parse_aws_error (Some PutResourcePolicyOutput.error_of_json))
   | Query ->
       if is_success
       then
@@ -972,6 +1100,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateItemOutput.of_json json)
       else Error (parse_aws_error (Some UpdateItemOutput.error_of_json))
+  | UpdateKinesisStreamingDestination ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateKinesisStreamingDestinationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateKinesisStreamingDestinationOutput.error_of_json))
   | UpdateTable ->
       if is_success
       then

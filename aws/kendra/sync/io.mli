@@ -18,6 +18,12 @@ val batch_delete_document :
       BatchDeleteDocumentRequest.t ->
         (BatchDeleteDocumentResponse.t, BatchDeleteDocumentResponse.error)
           Result.t
+val batch_delete_featured_results_set :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchDeleteFeaturedResultsSetRequest.t ->
+        (BatchDeleteFeaturedResultsSetResponse.t,
+          BatchDeleteFeaturedResultsSetResponse.error) Result.t
 val batch_get_document_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -33,6 +39,12 @@ val clear_query_suggestions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ClearQuerySuggestionsRequest.t -> (unit, unit) Result.t
+val create_access_control_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAccessControlConfigurationRequest.t ->
+        (CreateAccessControlConfigurationResponse.t,
+          CreateAccessControlConfigurationResponse.error) Result.t
 val create_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -48,6 +60,12 @@ val create_faq :
     ?cfg:Awso.Cfg.t ->
       CreateFaqRequest.t ->
         (CreateFaqResponse.t, CreateFaqResponse.error) Result.t
+val create_featured_results_set :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateFeaturedResultsSetRequest.t ->
+        (CreateFeaturedResultsSetResponse.t,
+          CreateFeaturedResultsSetResponse.error) Result.t
 val create_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -64,6 +82,12 @@ val create_thesaurus :
     ?cfg:Awso.Cfg.t ->
       CreateThesaurusRequest.t ->
         (CreateThesaurusResponse.t, CreateThesaurusResponse.error) Result.t
+val delete_access_control_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAccessControlConfigurationRequest.t ->
+        (DeleteAccessControlConfigurationResponse.t,
+          DeleteAccessControlConfigurationResponse.error) Result.t
 val delete_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteDataSourceRequest.t -> (unit, unit) Result.t
@@ -89,6 +113,12 @@ val delete_query_suggestions_block_list :
 val delete_thesaurus :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteThesaurusRequest.t -> (unit, unit) Result.t
+val describe_access_control_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAccessControlConfigurationRequest.t ->
+        (DescribeAccessControlConfigurationResponse.t,
+          DescribeAccessControlConfigurationResponse.error) Result.t
 val describe_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -106,6 +136,12 @@ val describe_faq :
     ?cfg:Awso.Cfg.t ->
       DescribeFaqRequest.t ->
         (DescribeFaqResponse.t, DescribeFaqResponse.error) Result.t
+val describe_featured_results_set :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFeaturedResultsSetRequest.t ->
+        (DescribeFeaturedResultsSetResponse.t,
+          DescribeFeaturedResultsSetResponse.error) Result.t
 val describe_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -158,6 +194,12 @@ val get_snapshots :
     ?cfg:Awso.Cfg.t ->
       GetSnapshotsRequest.t ->
         (GetSnapshotsResponse.t, GetSnapshotsResponse.error) Result.t
+val list_access_control_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAccessControlConfigurationsRequest.t ->
+        (ListAccessControlConfigurationsResponse.t,
+          ListAccessControlConfigurationsResponse.error) Result.t
 val list_data_source_sync_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -191,6 +233,12 @@ val list_faqs :
     ?cfg:Awso.Cfg.t ->
       ListFaqsRequest.t ->
         (ListFaqsResponse.t, ListFaqsResponse.error) Result.t
+val list_featured_results_sets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFeaturedResultsSetsRequest.t ->
+        (ListFeaturedResultsSetsResponse.t,
+          ListFeaturedResultsSetsResponse.error) Result.t
 val list_groups_older_than_ordering_id :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -226,6 +274,10 @@ val query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       QueryRequest.t -> (QueryResult.t, QueryResult.error) Result.t
+val retrieve :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RetrieveRequest.t -> (RetrieveResult.t, RetrieveResult.error) Result.t
 val start_data_source_sync_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -249,12 +301,24 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+val update_access_control_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAccessControlConfigurationRequest.t ->
+        (UpdateAccessControlConfigurationResponse.t,
+          UpdateAccessControlConfigurationResponse.error) Result.t
 val update_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UpdateDataSourceRequest.t -> (unit, unit) Result.t
 val update_experience :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UpdateExperienceRequest.t -> (unit, unit) Result.t
+val update_featured_results_set :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateFeaturedResultsSetRequest.t ->
+        (UpdateFeaturedResultsSetResponse.t,
+          UpdateFeaturedResultsSetResponse.error) Result.t
 val update_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UpdateIndexRequest.t -> (unit, unit) Result.t

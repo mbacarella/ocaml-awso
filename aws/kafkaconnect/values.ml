@@ -54,6 +54,9 @@ module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -130,10 +133,10 @@ module S3LocationDescription =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucketArn") in
       make ?objectVersion ?fileKey ?bucketArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let objectVersion = field_map json "objectVersion" Zz__string.of_json in
-      let fileKey = field_map json "fileKey" Zz__string.of_json in
-      let bucketArn = field_map json "bucketArn" Zz__string.of_json in
+    let of_json json__ =
+      let objectVersion = field_map json__ "objectVersion" Zz__string.of_json in
+      let fileKey = field_map json__ "fileKey" Zz__string.of_json in
+      let bucketArn = field_map json__ "bucketArn" Zz__string.of_json in
       make ?objectVersion ?fileKey ?bucketArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -158,9 +161,9 @@ module ScaleInPolicyDescription =
           (Xml.child xml_arg0 "cpuUtilizationPercentage") in
       make ?cpuUtilizationPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cpuUtilizationPercentage =
-        field_map json "cpuUtilizationPercentage" Zz__integer.of_json in
+        field_map json__ "cpuUtilizationPercentage" Zz__integer.of_json in
       make ?cpuUtilizationPercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -185,9 +188,9 @@ module ScaleOutPolicyDescription =
           (Xml.child xml_arg0 "cpuUtilizationPercentage") in
       make ?cpuUtilizationPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cpuUtilizationPercentage =
-        field_map json "cpuUtilizationPercentage" Zz__integer.of_json in
+        field_map json__ "cpuUtilizationPercentage" Zz__integer.of_json in
       make ?cpuUtilizationPercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -217,10 +220,10 @@ module VpcDescription =
           (Xml.child xml_arg0 "securityGroups") in
       make ?subnets ?securityGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnets = field_map json "subnets" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let subnets = field_map json__ "subnets" Zz__listOf__string.of_json in
       let securityGroups =
-        field_map json "securityGroups" Zz__listOf__string.of_json in
+        field_map json__ "securityGroups" Zz__listOf__string.of_json in
       make ?subnets ?securityGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -248,9 +251,9 @@ module CloudWatchLogsLogDeliveryDescription =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?logGroup ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroup = field_map json "logGroup" Zz__string.of_json in
-      let enabled = field_map json "enabled" Zz__boolean.of_json in
+    let of_json json__ =
+      let logGroup = field_map json__ "logGroup" Zz__string.of_json in
+      let enabled = field_map json__ "enabled" Zz__boolean.of_json in
       make ?logGroup ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A description of the log delivery settings."]
@@ -280,9 +283,10 @@ module FirehoseLogDeliveryDescription =
           (Xml.child xml_arg0 "deliveryStream") in
       make ?enabled ?deliveryStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "enabled" Zz__boolean.of_json in
-      let deliveryStream = field_map json "deliveryStream" Zz__string.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "enabled" Zz__boolean.of_json in
+      let deliveryStream =
+        field_map json__ "deliveryStream" Zz__string.of_json in
       make ?enabled ?deliveryStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -317,10 +321,10 @@ module S3LogDeliveryDescription =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?prefix ?enabled ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "prefix" Zz__string.of_json in
-      let enabled = field_map json "enabled" Zz__boolean.of_json in
-      let bucket = field_map json "bucket" Zz__string.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "prefix" Zz__string.of_json in
+      let enabled = field_map json__ "enabled" Zz__boolean.of_json in
+      let bucket = field_map json__ "bucket" Zz__string.of_json in
       make ?prefix ?enabled ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -349,10 +353,10 @@ module CustomPluginDescription =
           (Xml.child xml_arg0 "customPluginArn") in
       make ?revision ?customPluginArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revision = field_map json "revision" Zz__long.of_json in
+    let of_json json__ =
+      let revision = field_map json__ "revision" Zz__long.of_json in
       let customPluginArn =
-        field_map json "customPluginArn" Zz__string.of_json in
+        field_map json__ "customPluginArn" Zz__string.of_json in
       make ?revision ?customPluginArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a custom plugin."]
@@ -430,9 +434,9 @@ module CustomPluginFileDescription =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "fileMd5") in
       make ?fileSize ?fileMd5 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileSize = field_map json "fileSize" Zz__long.of_json in
-      let fileMd5 = field_map json "fileMd5" Zz__string.of_json in
+    let of_json json__ =
+      let fileSize = field_map json__ "fileSize" Zz__long.of_json in
+      let fileMd5 = field_map json__ "fileMd5" Zz__string.of_json in
       make ?fileSize ?fileMd5 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a custom plugin file."]
@@ -455,9 +459,9 @@ module CustomPluginLocationDescription =
           (Xml.child xml_arg0 "s3Location") in
       make ?s3Location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Location =
-        field_map json "s3Location" S3LocationDescription.of_json in
+        field_map json__ "s3Location" S3LocationDescription.of_json in
       make ?s3Location ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the location of a custom plugin."]
@@ -475,22 +479,27 @@ module AutoScalingDescription =
         [@ocaml.doc
           "The minimum number of workers allocated to the connector."];
       scaleInPolicy: ScaleInPolicyDescription.t option
-        [@ocaml.doc "The sacle-in policy for the connector."];
+        [@ocaml.doc "The scale-in policy for the connector."];
       scaleOutPolicy: ScaleOutPolicyDescription.t option
-        [@ocaml.doc "The sacle-out policy for the connector.>"]}
+        [@ocaml.doc "The scale-out policy for the connector."];
+      maxAutoscalingTaskCount: Zz__integer.t option
+        [@ocaml.doc
+          "The maximum number of tasks allocated to the connector during autoscaling operations. Must be at least equal to maxWorkerCount."]}
     let make ?maxWorkerCount =
       fun ?mcuCount ->
         fun ?minWorkerCount ->
           fun ?scaleInPolicy ->
             fun ?scaleOutPolicy ->
-              fun () ->
-                {
-                  maxWorkerCount;
-                  mcuCount;
-                  minWorkerCount;
-                  scaleInPolicy;
-                  scaleOutPolicy
-                }
+              fun ?maxAutoscalingTaskCount ->
+                fun () ->
+                  {
+                    maxWorkerCount;
+                    mcuCount;
+                    minWorkerCount;
+                    scaleInPolicy;
+                    scaleOutPolicy;
+                    maxAutoscalingTaskCount
+                  }
     let to_value x =
       structure_to_value
         [("maxWorkerCount",
@@ -501,9 +510,14 @@ module AutoScalingDescription =
         ("scaleInPolicy",
           (Option.map x.scaleInPolicy ~f:ScaleInPolicyDescription.to_value));
         ("scaleOutPolicy",
-          (Option.map x.scaleOutPolicy ~f:ScaleOutPolicyDescription.to_value))]
+          (Option.map x.scaleOutPolicy ~f:ScaleOutPolicyDescription.to_value));
+        ("maxAutoscalingTaskCount",
+          (Option.map x.maxAutoscalingTaskCount ~f:Zz__integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxAutoscalingTaskCount =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "maxAutoscalingTaskCount") in
       let scaleOutPolicy =
         (Option.map ~f:ScaleOutPolicyDescription.of_xml)
           (Xml.child xml_arg0 "scaleOutPolicy") in
@@ -518,21 +532,23 @@ module AutoScalingDescription =
       let maxWorkerCount =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "maxWorkerCount") in
-      make ?scaleOutPolicy ?scaleInPolicy ?minWorkerCount ?mcuCount
-        ?maxWorkerCount ()
+      make ?maxAutoscalingTaskCount ?scaleOutPolicy ?scaleInPolicy
+        ?minWorkerCount ?mcuCount ?maxWorkerCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let maxAutoscalingTaskCount =
+        field_map json__ "maxAutoscalingTaskCount" Zz__integer.of_json in
       let scaleOutPolicy =
-        field_map json "scaleOutPolicy" ScaleOutPolicyDescription.of_json in
+        field_map json__ "scaleOutPolicy" ScaleOutPolicyDescription.of_json in
       let scaleInPolicy =
-        field_map json "scaleInPolicy" ScaleInPolicyDescription.of_json in
+        field_map json__ "scaleInPolicy" ScaleInPolicyDescription.of_json in
       let minWorkerCount =
-        field_map json "minWorkerCount" Zz__integer.of_json in
-      let mcuCount = field_map json "mcuCount" Zz__integer.of_json in
+        field_map json__ "minWorkerCount" Zz__integer.of_json in
+      let mcuCount = field_map json__ "mcuCount" Zz__integer.of_json in
       let maxWorkerCount =
-        field_map json "maxWorkerCount" Zz__integer.of_json in
-      make ?scaleOutPolicy ?scaleInPolicy ?minWorkerCount ?mcuCount
-        ?maxWorkerCount ()
+        field_map json__ "maxWorkerCount" Zz__integer.of_json in
+      make ?maxAutoscalingTaskCount ?scaleOutPolicy ?scaleInPolicy
+        ?minWorkerCount ?mcuCount ?maxWorkerCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the auto scaling parameters for the connector."]
@@ -560,9 +576,9 @@ module ProvisionedCapacityDescription =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "mcuCount") in
       make ?workerCount ?mcuCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workerCount = field_map json "workerCount" Zz__integer.of_json in
-      let mcuCount = field_map json "mcuCount" Zz__integer.of_json in
+    let of_json json__ =
+      let workerCount = field_map json__ "workerCount" Zz__integer.of_json in
+      let mcuCount = field_map json__ "mcuCount" Zz__integer.of_json in
       make ?workerCount ?mcuCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The description of a connector's provisioned capacity."]
@@ -614,10 +630,10 @@ module ApacheKafkaClusterDescription =
           (Xml.child xml_arg0 "bootstrapServers") in
       make ?vpc ?bootstrapServers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpc = field_map json "vpc" VpcDescription.of_json in
+    let of_json json__ =
+      let vpc = field_map json__ "vpc" VpcDescription.of_json in
       let bootstrapServers =
-        field_map json "bootstrapServers" Zz__string.of_json in
+        field_map json__ "bootstrapServers" Zz__string.of_json in
       make ?vpc ?bootstrapServers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -686,12 +702,12 @@ module WorkerLogDeliveryDescription =
           (Xml.child xml_arg0 "cloudWatchLogs") in
       make ?s3 ?firehose ?cloudWatchLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "s3" S3LogDeliveryDescription.of_json in
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3LogDeliveryDescription.of_json in
       let firehose =
-        field_map json "firehose" FirehoseLogDeliveryDescription.of_json in
+        field_map json__ "firehose" FirehoseLogDeliveryDescription.of_json in
       let cloudWatchLogs =
-        field_map json "cloudWatchLogs"
+        field_map json__ "cloudWatchLogs"
           CloudWatchLogsLogDeliveryDescription.of_json in
       make ?s3 ?firehose ?cloudWatchLogs ()
     let to_json v = composed_to_json to_value v
@@ -715,9 +731,9 @@ module PluginDescription =
           (Xml.child xml_arg0 "customPlugin") in
       make ?customPlugin ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customPlugin =
-        field_map json "customPlugin" CustomPluginDescription.of_json in
+        field_map json__ "customPlugin" CustomPluginDescription.of_json in
       make ?customPlugin ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The description of the plugin."]
@@ -761,9 +777,9 @@ module ScaleInPolicyUpdate =
              "cpuUtilizationPercentage") in
       make ~cpuUtilizationPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cpuUtilizationPercentage =
-        field_map_exn json "cpuUtilizationPercentage"
+        field_map_exn json__ "cpuUtilizationPercentage"
           Zz__integerMin1Max100.of_json in
       make ~cpuUtilizationPercentage ()
     let to_json v = composed_to_json to_value v
@@ -790,31 +806,13 @@ module ScaleOutPolicyUpdate =
              "cpuUtilizationPercentage") in
       make ~cpuUtilizationPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cpuUtilizationPercentage =
-        field_map_exn json "cpuUtilizationPercentage"
+        field_map_exn json__ "cpuUtilizationPercentage"
           Zz__integerMin1Max100.of_json in
       make ~cpuUtilizationPercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An update to the connector's scale-out policy."]
-module Zz__integerMin1Max10 =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for __integerMin1Max10" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module Zz__integerMin1Max8 =
   struct
     type nonrec t = int
@@ -864,14 +862,41 @@ module WorkerConfigurationRevisionSummary =
           (Xml.child xml_arg0 "creationTime") in
       make ?revision ?description ?creationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revision = field_map json "revision" Zz__long.of_json in
-      let description = field_map json "description" Zz__string.of_json in
+    let of_json json__ =
+      let revision = field_map json__ "revision" Zz__long.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
       make ?revision ?description ?creationTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of a worker configuration revision."]
+module WorkerConfigurationState =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WorkerConfigurationState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WorkerConfigurationState" j)
+    let to_json = simple_to_json to_value
+  end
 module CustomPluginRevisionSummary =
   struct
     type nonrec t =
@@ -937,17 +962,18 @@ module CustomPluginRevisionSummary =
       make ?revision ?location ?fileDescription ?description ?creationTime
         ?contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revision = field_map json "revision" Zz__long.of_json in
+    let of_json json__ =
+      let revision = field_map json__ "revision" Zz__long.of_json in
       let location =
-        field_map json "location" CustomPluginLocationDescription.of_json in
+        field_map json__ "location" CustomPluginLocationDescription.of_json in
       let fileDescription =
-        field_map json "fileDescription" CustomPluginFileDescription.of_json in
-      let description = field_map json "description" Zz__string.of_json in
+        field_map json__ "fileDescription"
+          CustomPluginFileDescription.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
       let contentType =
-        field_map json "contentType" CustomPluginContentType.of_json in
+        field_map json__ "contentType" CustomPluginContentType.of_json in
       make ?revision ?location ?fileDescription ?description ?creationTime
         ?contentType ()
     let to_json v = composed_to_json to_value v
@@ -1018,12 +1044,12 @@ module CapacityDescription =
           (Xml.child xml_arg0 "autoScaling") in
       make ?provisionedCapacity ?autoScaling ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedCapacity =
-        field_map json "provisionedCapacity"
+        field_map json__ "provisionedCapacity"
           ProvisionedCapacityDescription.of_json in
       let autoScaling =
-        field_map json "autoScaling" AutoScalingDescription.of_json in
+        field_map json__ "autoScaling" AutoScalingDescription.of_json in
       make ?provisionedCapacity ?autoScaling ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A description of the connector's capacity."]
@@ -1081,9 +1107,9 @@ module KafkaClusterClientAuthenticationDescription =
           (Xml.child xml_arg0 "authenticationType") in
       make ?authenticationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationType =
-        field_map json "authenticationType"
+        field_map json__ "authenticationType"
           KafkaClusterClientAuthenticationType.of_json in
       make ?authenticationType ()
     let to_json v = composed_to_json to_value v
@@ -1109,9 +1135,9 @@ module KafkaClusterDescription =
           (Xml.child xml_arg0 "apacheKafkaCluster") in
       make ?apacheKafkaCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let apacheKafkaCluster =
-        field_map json "apacheKafkaCluster"
+        field_map json__ "apacheKafkaCluster"
           ApacheKafkaClusterDescription.of_json in
       make ?apacheKafkaCluster ()
     let to_json v = composed_to_json to_value v
@@ -1136,9 +1162,9 @@ module KafkaClusterEncryptionInTransitDescription =
           (Xml.child xml_arg0 "encryptionType") in
       make ?encryptionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionType =
-        field_map json "encryptionType"
+        field_map json__ "encryptionType"
           KafkaClusterEncryptionInTransitType.of_json in
       make ?encryptionType ()
     let to_json v = composed_to_json to_value v
@@ -1164,13 +1190,32 @@ module LogDeliveryDescription =
           (Xml.child xml_arg0 "workerLogDelivery") in
       make ?workerLogDelivery ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerLogDelivery =
-        field_map json "workerLogDelivery"
+        field_map json__ "workerLogDelivery"
           WorkerLogDeliveryDescription.of_json in
       make ?workerLogDelivery ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The description of the log delivery settings."]
+module NetworkType =
+  struct
+    type nonrec t =
+      | IPV4 
+      | DUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | IPV4 -> "IPV4" | DUAL -> "DUAL" | Non_static_id s -> s
+    let of_string =
+      function | "IPV4" -> IPV4 | "DUAL" -> DUAL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkType" j)
+    let to_json = simple_to_json to_value
+  end
 module WorkerConfigurationDescription =
   struct
     type nonrec t =
@@ -1197,10 +1242,10 @@ module WorkerConfigurationDescription =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "revision") in
       make ?workerConfigurationArn ?revision ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerConfigurationArn =
-        field_map json "workerConfigurationArn" Zz__string.of_json in
-      let revision = field_map json "revision" Zz__long.of_json in
+        field_map json__ "workerConfigurationArn" Zz__string.of_json in
+      let revision = field_map json__ "revision" Zz__long.of_json in
       make ?workerConfigurationArn ?revision ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The description of the worker configuration."]
@@ -1208,6 +1253,9 @@ module Zz__listOfPluginDescription =
   struct
     type nonrec t = PluginDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PluginDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1228,6 +1276,155 @@ module Zz__listOfPluginDescription =
       list_of_json ~kind:"__listOfPluginDescription"
         ~of_json:PluginDescription.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ConnectorOperationState =
+  struct
+    type nonrec t =
+      | PENDING 
+      | UPDATE_IN_PROGRESS 
+      | UPDATE_COMPLETE 
+      | UPDATE_FAILED 
+      | ROLLBACK_IN_PROGRESS 
+      | ROLLBACK_FAILED 
+      | ROLLBACK_COMPLETE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | UPDATE_IN_PROGRESS -> "UPDATE_IN_PROGRESS"
+      | UPDATE_COMPLETE -> "UPDATE_COMPLETE"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | ROLLBACK_IN_PROGRESS -> "ROLLBACK_IN_PROGRESS"
+      | ROLLBACK_FAILED -> "ROLLBACK_FAILED"
+      | ROLLBACK_COMPLETE -> "ROLLBACK_COMPLETE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "UPDATE_IN_PROGRESS" -> UPDATE_IN_PROGRESS
+      | "UPDATE_COMPLETE" -> UPDATE_COMPLETE
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | "ROLLBACK_IN_PROGRESS" -> ROLLBACK_IN_PROGRESS
+      | "ROLLBACK_FAILED" -> ROLLBACK_FAILED
+      | "ROLLBACK_COMPLETE" -> ROLLBACK_COMPLETE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConnectorOperationState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConnectorOperationState" j)
+    let to_json = simple_to_json to_value
+  end
+module ConnectorOperationType =
+  struct
+    type nonrec t =
+      | UPDATE_WORKER_SETTING 
+      | UPDATE_CONNECTOR_CONFIGURATION 
+      | ISOLATE_CONNECTOR 
+      | RESTORE_CONNECTOR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UPDATE_WORKER_SETTING -> "UPDATE_WORKER_SETTING"
+      | UPDATE_CONNECTOR_CONFIGURATION -> "UPDATE_CONNECTOR_CONFIGURATION"
+      | ISOLATE_CONNECTOR -> "ISOLATE_CONNECTOR"
+      | RESTORE_CONNECTOR -> "RESTORE_CONNECTOR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UPDATE_WORKER_SETTING" -> UPDATE_WORKER_SETTING
+      | "UPDATE_CONNECTOR_CONFIGURATION" -> UPDATE_CONNECTOR_CONFIGURATION
+      | "ISOLATE_CONNECTOR" -> ISOLATE_CONNECTOR
+      | "RESTORE_CONNECTOR" -> RESTORE_CONNECTOR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConnectorOperationType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConnectorOperationType" j)
+    let to_json = simple_to_json to_value
+  end
+module ConnectorOperationStepState =
+  struct
+    type nonrec t =
+      | PENDING 
+      | IN_PROGRESS 
+      | COMPLETED 
+      | FAILED 
+      | CANCELLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | CANCELLED -> "CANCELLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | "CANCELLED" -> CANCELLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConnectorOperationStepState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConnectorOperationStepState" j)
+    let to_json = simple_to_json to_value
+  end
+module ConnectorOperationStepType =
+  struct
+    type nonrec t =
+      | INITIALIZE_UPDATE 
+      | FINALIZE_UPDATE 
+      | UPDATE_WORKER_SETTING 
+      | UPDATE_CONNECTOR_CONFIGURATION 
+      | VALIDATE_UPDATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INITIALIZE_UPDATE -> "INITIALIZE_UPDATE"
+      | FINALIZE_UPDATE -> "FINALIZE_UPDATE"
+      | UPDATE_WORKER_SETTING -> "UPDATE_WORKER_SETTING"
+      | UPDATE_CONNECTOR_CONFIGURATION -> "UPDATE_CONNECTOR_CONFIGURATION"
+      | VALIDATE_UPDATE -> "VALIDATE_UPDATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INITIALIZE_UPDATE" -> INITIALIZE_UPDATE
+      | "FINALIZE_UPDATE" -> FINALIZE_UPDATE
+      | "UPDATE_WORKER_SETTING" -> UPDATE_WORKER_SETTING
+      | "UPDATE_CONNECTOR_CONFIGURATION" -> UPDATE_CONNECTOR_CONFIGURATION
+      | "VALIDATE_UPDATE" -> VALIDATE_UPDATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConnectorOperationStepType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConnectorOperationStepType" j)
+    let to_json = simple_to_json to_value
   end
 module ScaleInPolicy =
   struct
@@ -1251,9 +1448,9 @@ module ScaleInPolicy =
              "cpuUtilizationPercentage") in
       make ~cpuUtilizationPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cpuUtilizationPercentage =
-        field_map_exn json "cpuUtilizationPercentage"
+        field_map_exn json__ "cpuUtilizationPercentage"
           Zz__integerMin1Max100.of_json in
       make ~cpuUtilizationPercentage ()
     let to_json v = composed_to_json to_value v
@@ -1280,9 +1477,9 @@ module ScaleOutPolicy =
              "cpuUtilizationPercentage") in
       make ~cpuUtilizationPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cpuUtilizationPercentage =
-        field_map_exn json "cpuUtilizationPercentage"
+        field_map_exn json__ "cpuUtilizationPercentage"
           Zz__integerMin1Max100.of_json in
       make ~cpuUtilizationPercentage ()
     let to_json v = composed_to_json to_value v
@@ -1313,10 +1510,10 @@ module Vpc =
           (Xml.child xml_arg0 "securityGroups") in
       make ~subnets ?securityGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnets = field_map_exn json "subnets" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let subnets = field_map_exn json__ "subnets" Zz__listOf__string.of_json in
       let securityGroups =
-        field_map json "securityGroups" Zz__listOf__string.of_json in
+        field_map json__ "securityGroups" Zz__listOf__string.of_json in
       make ~subnets ?securityGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1346,9 +1543,9 @@ module CloudWatchLogsLogDelivery =
           (Xml.child_exn ~context:context_ xml_arg0 "enabled") in
       make ?logGroup ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroup = field_map json "logGroup" Zz__string.of_json in
-      let enabled = field_map_exn json "enabled" Zz__boolean.of_json in
+    let of_json json__ =
+      let logGroup = field_map json__ "logGroup" Zz__string.of_json in
+      let enabled = field_map_exn json__ "enabled" Zz__boolean.of_json in
       make ?logGroup ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1381,9 +1578,10 @@ module FirehoseLogDelivery =
           (Xml.child xml_arg0 "deliveryStream") in
       make ~enabled ?deliveryStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map_exn json "enabled" Zz__boolean.of_json in
-      let deliveryStream = field_map json "deliveryStream" Zz__string.of_json in
+    let of_json json__ =
+      let enabled = field_map_exn json__ "enabled" Zz__boolean.of_json in
+      let deliveryStream =
+        field_map json__ "deliveryStream" Zz__string.of_json in
       make ~enabled ?deliveryStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1420,10 +1618,10 @@ module S3LogDelivery =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?prefix ~enabled ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "prefix" Zz__string.of_json in
-      let enabled = field_map_exn json "enabled" Zz__boolean.of_json in
-      let bucket = field_map json "bucket" Zz__string.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "prefix" Zz__string.of_json in
+      let enabled = field_map_exn json__ "enabled" Zz__boolean.of_json in
+      let bucket = field_map json__ "bucket" Zz__string.of_json in
       make ?prefix ~enabled ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about delivering logs to Amazon S3."]
@@ -1452,58 +1650,66 @@ module CustomPlugin =
           (Xml.child_exn ~context:context_ xml_arg0 "customPluginArn") in
       make ~revision ~customPluginArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revision = field_map_exn json "revision" Zz__longMin1.of_json in
+    let of_json json__ =
+      let revision = field_map_exn json__ "revision" Zz__longMin1.of_json in
       let customPluginArn =
-        field_map_exn json "customPluginArn" Zz__string.of_json in
+        field_map_exn json__ "customPluginArn" Zz__string.of_json in
       make ~revision ~customPluginArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A plugin is an AWS resource that contains the code that defines a connector's logic."]
+       "A plugin is an Amazon Web Services resource that contains the code that defines a connector's logic."]
 module AutoScalingUpdate =
   struct
     type nonrec t =
       {
-      maxWorkerCount: Zz__integerMin1Max10.t
+      maxWorkerCount: Zz__integer.t
         [@ocaml.doc
           "The target maximum number of workers allocated to the connector."];
       mcuCount: Zz__integerMin1Max8.t
         [@ocaml.doc
           "The target number of microcontroller units (MCUs) allocated to each connector worker. The valid values are 1,2,4,8."];
-      minWorkerCount: Zz__integerMin1Max10.t
+      minWorkerCount: Zz__integer.t
         [@ocaml.doc
           "The target minimum number of workers allocated to the connector."];
       scaleInPolicy: ScaleInPolicyUpdate.t
-        [@ocaml.doc "The target sacle-in policy for the connector."];
+        [@ocaml.doc "The target scale-in policy for the connector."];
       scaleOutPolicy: ScaleOutPolicyUpdate.t
-        [@ocaml.doc "The target sacle-out policy for the connector."]}
+        [@ocaml.doc "The target scale-out policy for the connector."];
+      maxAutoscalingTaskCount: Zz__integer.t option
+        [@ocaml.doc
+          "The maximum number of tasks allocated to the connector during autoscaling operations. Must be at least equal to maxWorkerCount."]}
     let context_ = "AutoScalingUpdate"
-    let make ~maxWorkerCount =
-      fun ~mcuCount ->
-        fun ~minWorkerCount ->
-          fun ~scaleInPolicy ->
-            fun ~scaleOutPolicy ->
-              fun () ->
-                {
-                  maxWorkerCount;
-                  mcuCount;
-                  minWorkerCount;
-                  scaleInPolicy;
-                  scaleOutPolicy
-                }
+    let make ?maxAutoscalingTaskCount =
+      fun ~maxWorkerCount ->
+        fun ~mcuCount ->
+          fun ~minWorkerCount ->
+            fun ~scaleInPolicy ->
+              fun ~scaleOutPolicy ->
+                fun () ->
+                  {
+                    maxAutoscalingTaskCount;
+                    maxWorkerCount;
+                    mcuCount;
+                    minWorkerCount;
+                    scaleInPolicy;
+                    scaleOutPolicy
+                  }
     let to_value x =
       structure_to_value
-        [("maxWorkerCount",
-           (Some (Zz__integerMin1Max10.to_value x.maxWorkerCount)));
+        [("maxWorkerCount", (Some (Zz__integer.to_value x.maxWorkerCount)));
         ("mcuCount", (Some (Zz__integerMin1Max8.to_value x.mcuCount)));
-        ("minWorkerCount",
-          (Some (Zz__integerMin1Max10.to_value x.minWorkerCount)));
+        ("minWorkerCount", (Some (Zz__integer.to_value x.minWorkerCount)));
         ("scaleInPolicy",
           (Some (ScaleInPolicyUpdate.to_value x.scaleInPolicy)));
         ("scaleOutPolicy",
-          (Some (ScaleOutPolicyUpdate.to_value x.scaleOutPolicy)))]
+          (Some (ScaleOutPolicyUpdate.to_value x.scaleOutPolicy)));
+        ("maxAutoscalingTaskCount",
+          (Option.map x.maxAutoscalingTaskCount ~f:Zz__integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxAutoscalingTaskCount =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "maxAutoscalingTaskCount") in
       let scaleOutPolicy =
         ScaleOutPolicyUpdate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "scaleOutPolicy") in
@@ -1511,30 +1717,32 @@ module AutoScalingUpdate =
         ScaleInPolicyUpdate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "scaleInPolicy") in
       let minWorkerCount =
-        Zz__integerMin1Max10.of_xml
+        Zz__integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "minWorkerCount") in
       let mcuCount =
         Zz__integerMin1Max8.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "mcuCount") in
       let maxWorkerCount =
-        Zz__integerMin1Max10.of_xml
+        Zz__integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "maxWorkerCount") in
-      make ~scaleOutPolicy ~scaleInPolicy ~minWorkerCount ~mcuCount
-        ~maxWorkerCount ()
+      make ?maxAutoscalingTaskCount ~scaleOutPolicy ~scaleInPolicy
+        ~minWorkerCount ~mcuCount ~maxWorkerCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let maxAutoscalingTaskCount =
+        field_map json__ "maxAutoscalingTaskCount" Zz__integer.of_json in
       let scaleOutPolicy =
-        field_map_exn json "scaleOutPolicy" ScaleOutPolicyUpdate.of_json in
+        field_map_exn json__ "scaleOutPolicy" ScaleOutPolicyUpdate.of_json in
       let scaleInPolicy =
-        field_map_exn json "scaleInPolicy" ScaleInPolicyUpdate.of_json in
+        field_map_exn json__ "scaleInPolicy" ScaleInPolicyUpdate.of_json in
       let minWorkerCount =
-        field_map_exn json "minWorkerCount" Zz__integerMin1Max10.of_json in
+        field_map_exn json__ "minWorkerCount" Zz__integer.of_json in
       let mcuCount =
-        field_map_exn json "mcuCount" Zz__integerMin1Max8.of_json in
+        field_map_exn json__ "mcuCount" Zz__integerMin1Max8.of_json in
       let maxWorkerCount =
-        field_map_exn json "maxWorkerCount" Zz__integerMin1Max10.of_json in
-      make ~scaleOutPolicy ~scaleInPolicy ~minWorkerCount ~mcuCount
-        ~maxWorkerCount ()
+        field_map_exn json__ "maxWorkerCount" Zz__integer.of_json in
+      make ?maxAutoscalingTaskCount ~scaleOutPolicy ~scaleInPolicy
+        ~minWorkerCount ~mcuCount ~maxWorkerCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The updates to the auto scaling parameters for the connector."]
@@ -1545,7 +1753,7 @@ module ProvisionedCapacityUpdate =
       mcuCount: Zz__integerMin1Max8.t
         [@ocaml.doc
           "The number of microcontroller units (MCUs) allocated to each connector worker. The valid values are 1,2,4,8."];
-      workerCount: Zz__integerMin1Max10.t
+      workerCount: Zz__integer.t
         [@ocaml.doc
           "The number of workers that are allocated to the connector."]}
     let context_ = "ProvisionedCapacityUpdate"
@@ -1554,25 +1762,61 @@ module ProvisionedCapacityUpdate =
     let to_value x =
       structure_to_value
         [("mcuCount", (Some (Zz__integerMin1Max8.to_value x.mcuCount)));
-        ("workerCount", (Some (Zz__integerMin1Max10.to_value x.workerCount)))]
+        ("workerCount", (Some (Zz__integer.to_value x.workerCount)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workerCount =
-        Zz__integerMin1Max10.of_xml
+        Zz__integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workerCount") in
       let mcuCount =
         Zz__integerMin1Max8.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "mcuCount") in
       make ~workerCount ~mcuCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerCount =
-        field_map_exn json "workerCount" Zz__integerMin1Max10.of_json in
+        field_map_exn json__ "workerCount" Zz__integer.of_json in
       let mcuCount =
-        field_map_exn json "mcuCount" Zz__integerMin1Max8.of_json in
+        field_map_exn json__ "mcuCount" Zz__integerMin1Max8.of_json in
       make ~workerCount ~mcuCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An update to a connector's fixed capacity."]
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
 module WorkerConfigurationSummary =
   struct
     type nonrec t =
@@ -1587,20 +1831,24 @@ module WorkerConfigurationSummary =
         [@ocaml.doc "The name of the worker configuration."];
       workerConfigurationArn: Zz__string.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the worker configuration."]}
+          "The Amazon Resource Name (ARN) of the worker configuration."];
+      workerConfigurationState: WorkerConfigurationState.t option
+        [@ocaml.doc "The state of the worker configuration."]}
     let make ?creationTime =
       fun ?description ->
         fun ?latestRevision ->
           fun ?name ->
             fun ?workerConfigurationArn ->
-              fun () ->
-                {
-                  creationTime;
-                  description;
-                  latestRevision;
-                  name;
-                  workerConfigurationArn
-                }
+              fun ?workerConfigurationState ->
+                fun () ->
+                  {
+                    creationTime;
+                    description;
+                    latestRevision;
+                    name;
+                    workerConfigurationArn;
+                    workerConfigurationState
+                  }
     let to_value x =
       structure_to_value
         [("creationTime",
@@ -1611,9 +1859,15 @@ module WorkerConfigurationSummary =
              ~f:WorkerConfigurationRevisionSummary.to_value));
         ("name", (Option.map x.name ~f:Zz__string.to_value));
         ("workerConfigurationArn",
-          (Option.map x.workerConfigurationArn ~f:Zz__string.to_value))]
+          (Option.map x.workerConfigurationArn ~f:Zz__string.to_value));
+        ("workerConfigurationState",
+          (Option.map x.workerConfigurationState
+             ~f:WorkerConfigurationState.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let workerConfigurationState =
+        (Option.map ~f:WorkerConfigurationState.of_xml)
+          (Xml.child xml_arg0 "workerConfigurationState") in
       let workerConfigurationArn =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "workerConfigurationArn") in
@@ -1627,21 +1881,24 @@ module WorkerConfigurationSummary =
       let creationTime =
         (Option.map ~f:Zz__timestampIso8601.of_xml)
           (Xml.child xml_arg0 "creationTime") in
-      make ?workerConfigurationArn ?name ?latestRevision ?description
-        ?creationTime ()
+      make ?workerConfigurationState ?workerConfigurationArn ?name
+        ?latestRevision ?description ?creationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let workerConfigurationState =
+        field_map json__ "workerConfigurationState"
+          WorkerConfigurationState.of_json in
       let workerConfigurationArn =
-        field_map json "workerConfigurationArn" Zz__string.of_json in
-      let name = field_map json "name" Zz__string.of_json in
+        field_map json__ "workerConfigurationArn" Zz__string.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
       let latestRevision =
-        field_map json "latestRevision"
+        field_map json__ "latestRevision"
           WorkerConfigurationRevisionSummary.of_json in
-      let description = field_map json "description" Zz__string.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
-      make ?workerConfigurationArn ?name ?latestRevision ?description
-        ?creationTime ()
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
+      make ?workerConfigurationState ?workerConfigurationArn ?name
+        ?latestRevision ?description ?creationTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of a worker configuration."]
 module CustomPluginSummary =
@@ -1708,17 +1965,17 @@ module CustomPluginSummary =
       make ?name ?latestRevision ?description ?customPluginState
         ?customPluginArn ?creationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" Zz__string.of_json in
       let latestRevision =
-        field_map json "latestRevision" CustomPluginRevisionSummary.of_json in
-      let description = field_map json "description" Zz__string.of_json in
+        field_map json__ "latestRevision" CustomPluginRevisionSummary.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
       let customPluginState =
-        field_map json "customPluginState" CustomPluginState.of_json in
+        field_map json__ "customPluginState" CustomPluginState.of_json in
       let customPluginArn =
-        field_map json "customPluginArn" Zz__string.of_json in
+        field_map json__ "customPluginArn" Zz__string.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
       make ?name ?latestRevision ?description ?customPluginState
         ?customPluginArn ?creationTime ()
     let to_json v = composed_to_json to_value v
@@ -1758,6 +2015,9 @@ module ConnectorSummary =
       logDelivery: LogDeliveryDescription.t option
         [@ocaml.doc
           "The settings for delivering connector logs to Amazon CloudWatch Logs."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The network type of the connector. It gives connectors connectivity to either IPv4 (IPV4) or IPv4 and IPv6 (DUAL) destinations. Defaults to IPV4."];
       plugins: Zz__listOfPluginDescription.t option
         [@ocaml.doc "Specifies which plugins were used for this connector."];
       serviceExecutionRoleArn: Zz__string.t option
@@ -1778,27 +2038,29 @@ module ConnectorSummary =
                       fun ?kafkaClusterEncryptionInTransit ->
                         fun ?kafkaConnectVersion ->
                           fun ?logDelivery ->
-                            fun ?plugins ->
-                              fun ?serviceExecutionRoleArn ->
-                                fun ?workerConfiguration ->
-                                  fun () ->
-                                    {
-                                      capacity;
-                                      connectorArn;
-                                      connectorDescription;
-                                      connectorName;
-                                      connectorState;
-                                      creationTime;
-                                      currentVersion;
-                                      kafkaCluster;
-                                      kafkaClusterClientAuthentication;
-                                      kafkaClusterEncryptionInTransit;
-                                      kafkaConnectVersion;
-                                      logDelivery;
-                                      plugins;
-                                      serviceExecutionRoleArn;
-                                      workerConfiguration
-                                    }
+                            fun ?networkType ->
+                              fun ?plugins ->
+                                fun ?serviceExecutionRoleArn ->
+                                  fun ?workerConfiguration ->
+                                    fun () ->
+                                      {
+                                        capacity;
+                                        connectorArn;
+                                        connectorDescription;
+                                        connectorName;
+                                        connectorState;
+                                        creationTime;
+                                        currentVersion;
+                                        kafkaCluster;
+                                        kafkaClusterClientAuthentication;
+                                        kafkaClusterEncryptionInTransit;
+                                        kafkaConnectVersion;
+                                        logDelivery;
+                                        networkType;
+                                        plugins;
+                                        serviceExecutionRoleArn;
+                                        workerConfiguration
+                                      }
     let to_value x =
       structure_to_value
         [("capacity",
@@ -1826,6 +2088,7 @@ module ConnectorSummary =
           (Option.map x.kafkaConnectVersion ~f:Zz__string.to_value));
         ("logDelivery",
           (Option.map x.logDelivery ~f:LogDeliveryDescription.to_value));
+        ("networkType", (Option.map x.networkType ~f:NetworkType.to_value));
         ("plugins",
           (Option.map x.plugins ~f:Zz__listOfPluginDescription.to_value));
         ("serviceExecutionRoleArn",
@@ -1844,6 +2107,8 @@ module ConnectorSummary =
       let plugins =
         (Option.map ~f:Zz__listOfPluginDescription.of_xml)
           (Xml.child xml_arg0 "plugins") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "networkType") in
       let logDelivery =
         (Option.map ~f:LogDeliveryDescription.of_xml)
           (Xml.child xml_arg0 "logDelivery") in
@@ -1880,63 +2145,174 @@ module ConnectorSummary =
         (Option.map ~f:CapacityDescription.of_xml)
           (Xml.child xml_arg0 "capacity") in
       make ?workerConfiguration ?serviceExecutionRoleArn ?plugins
-        ?logDelivery ?kafkaConnectVersion ?kafkaClusterEncryptionInTransit
-        ?kafkaClusterClientAuthentication ?kafkaCluster ?currentVersion
-        ?creationTime ?connectorState ?connectorName ?connectorDescription
-        ?connectorArn ?capacity ()
+        ?networkType ?logDelivery ?kafkaConnectVersion
+        ?kafkaClusterEncryptionInTransit ?kafkaClusterClientAuthentication
+        ?kafkaCluster ?currentVersion ?creationTime ?connectorState
+        ?connectorName ?connectorDescription ?connectorArn ?capacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerConfiguration =
-        field_map json "workerConfiguration"
+        field_map json__ "workerConfiguration"
           WorkerConfigurationDescription.of_json in
       let serviceExecutionRoleArn =
-        field_map json "serviceExecutionRoleArn" Zz__string.of_json in
+        field_map json__ "serviceExecutionRoleArn" Zz__string.of_json in
       let plugins =
-        field_map json "plugins" Zz__listOfPluginDescription.of_json in
+        field_map json__ "plugins" Zz__listOfPluginDescription.of_json in
+      let networkType = field_map json__ "networkType" NetworkType.of_json in
       let logDelivery =
-        field_map json "logDelivery" LogDeliveryDescription.of_json in
+        field_map json__ "logDelivery" LogDeliveryDescription.of_json in
       let kafkaConnectVersion =
-        field_map json "kafkaConnectVersion" Zz__string.of_json in
+        field_map json__ "kafkaConnectVersion" Zz__string.of_json in
       let kafkaClusterEncryptionInTransit =
-        field_map json "kafkaClusterEncryptionInTransit"
+        field_map json__ "kafkaClusterEncryptionInTransit"
           KafkaClusterEncryptionInTransitDescription.of_json in
       let kafkaClusterClientAuthentication =
-        field_map json "kafkaClusterClientAuthentication"
+        field_map json__ "kafkaClusterClientAuthentication"
           KafkaClusterClientAuthenticationDescription.of_json in
       let kafkaCluster =
-        field_map json "kafkaCluster" KafkaClusterDescription.of_json in
-      let currentVersion = field_map json "currentVersion" Zz__string.of_json in
+        field_map json__ "kafkaCluster" KafkaClusterDescription.of_json in
+      let currentVersion =
+        field_map json__ "currentVersion" Zz__string.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
       let connectorState =
-        field_map json "connectorState" ConnectorState.of_json in
-      let connectorName = field_map json "connectorName" Zz__string.of_json in
+        field_map json__ "connectorState" ConnectorState.of_json in
+      let connectorName = field_map json__ "connectorName" Zz__string.of_json in
       let connectorDescription =
-        field_map json "connectorDescription" Zz__string.of_json in
-      let connectorArn = field_map json "connectorArn" Zz__string.of_json in
-      let capacity = field_map json "capacity" CapacityDescription.of_json in
+        field_map json__ "connectorDescription" Zz__string.of_json in
+      let connectorArn = field_map json__ "connectorArn" Zz__string.of_json in
+      let capacity = field_map json__ "capacity" CapacityDescription.of_json in
       make ?workerConfiguration ?serviceExecutionRoleArn ?plugins
-        ?logDelivery ?kafkaConnectVersion ?kafkaClusterEncryptionInTransit
-        ?kafkaClusterClientAuthentication ?kafkaCluster ?currentVersion
-        ?creationTime ?connectorState ?connectorName ?connectorDescription
-        ?connectorArn ?capacity ()
+        ?networkType ?logDelivery ?kafkaConnectVersion
+        ?kafkaClusterEncryptionInTransit ?kafkaClusterClientAuthentication
+        ?kafkaCluster ?currentVersion ?creationTime ?connectorState
+        ?connectorName ?connectorDescription ?connectorArn ?capacity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of a connector."]
-module SyntheticWorkerConfigurationRevisionDescription__string =
+module ConnectorOperationSummary =
+  struct
+    type nonrec t =
+      {
+      connectorOperationArn: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the connector operation."];
+      connectorOperationType: ConnectorOperationType.t option
+        [@ocaml.doc "The type of connector operation performed."];
+      connectorOperationState: ConnectorOperationState.t option
+        [@ocaml.doc "The state of the connector operation."];
+      creationTime: Zz__timestampIso8601.t option
+        [@ocaml.doc "The time when operation was created."];
+      endTime: Zz__timestampIso8601.t option
+        [@ocaml.doc "The time when operation ended."]}
+    let make ?connectorOperationArn =
+      fun ?connectorOperationType ->
+        fun ?connectorOperationState ->
+          fun ?creationTime ->
+            fun ?endTime ->
+              fun () ->
+                {
+                  connectorOperationArn;
+                  connectorOperationType;
+                  connectorOperationState;
+                  creationTime;
+                  endTime
+                }
+    let to_value x =
+      structure_to_value
+        [("connectorOperationArn",
+           (Option.map x.connectorOperationArn ~f:Zz__string.to_value));
+        ("connectorOperationType",
+          (Option.map x.connectorOperationType
+             ~f:ConnectorOperationType.to_value));
+        ("connectorOperationState",
+          (Option.map x.connectorOperationState
+             ~f:ConnectorOperationState.to_value));
+        ("creationTime",
+          (Option.map x.creationTime ~f:Zz__timestampIso8601.to_value));
+        ("endTime", (Option.map x.endTime ~f:Zz__timestampIso8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "endTime") in
+      let creationTime =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "creationTime") in
+      let connectorOperationState =
+        (Option.map ~f:ConnectorOperationState.of_xml)
+          (Xml.child xml_arg0 "connectorOperationState") in
+      let connectorOperationType =
+        (Option.map ~f:ConnectorOperationType.of_xml)
+          (Xml.child xml_arg0 "connectorOperationType") in
+      let connectorOperationArn =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "connectorOperationArn") in
+      make ?endTime ?creationTime ?connectorOperationState
+        ?connectorOperationType ?connectorOperationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" Zz__timestampIso8601.of_json in
+      let creationTime =
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
+      let connectorOperationState =
+        field_map json__ "connectorOperationState"
+          ConnectorOperationState.of_json in
+      let connectorOperationType =
+        field_map json__ "connectorOperationType"
+          ConnectorOperationType.of_json in
+      let connectorOperationArn =
+        field_map json__ "connectorOperationArn" Zz__string.of_json in
+      make ?endTime ?creationTime ?connectorOperationState
+        ?connectorOperationType ?connectorOperationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary of a connector operation."]
+module Zz__sensitiveString =
   struct
     type nonrec t = string
-    let context_ = "SyntheticWorkerConfigurationRevisionDescription__string"
+    let context_ = "__sensitiveString"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json
-        ~kind:"SyntheticWorkerConfigurationRevisionDescription__string" j
+    let of_json j = string_of_json ~kind:"__sensitiveString" j
     let to_json = simple_to_json to_value
   end
+module ConnectorOperationStep =
+  struct
+    type nonrec t =
+      {
+      stepType: ConnectorOperationStepType.t option
+        [@ocaml.doc "The step type of the operation."];
+      stepState: ConnectorOperationStepState.t option
+        [@ocaml.doc "The step state of the operation."]}
+    let make ?stepType = fun ?stepState -> fun () -> { stepType; stepState }
+    let to_value x =
+      structure_to_value
+        [("stepType",
+           (Option.map x.stepType ~f:ConnectorOperationStepType.to_value));
+        ("stepState",
+          (Option.map x.stepState ~f:ConnectorOperationStepState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stepState =
+        (Option.map ~f:ConnectorOperationStepState.of_xml)
+          (Xml.child xml_arg0 "stepState") in
+      let stepType =
+        (Option.map ~f:ConnectorOperationStepType.of_xml)
+          (Xml.child xml_arg0 "stepType") in
+      make ?stepState ?stepType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stepState =
+        field_map json__ "stepState" ConnectorOperationStepState.of_json in
+      let stepType =
+        field_map json__ "stepType" ConnectorOperationStepType.of_json in
+      make ?stepState ?stepType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details of a step that is involved in a connector's operation."]
 module S3Location =
   struct
     type nonrec t =
@@ -1970,10 +2346,10 @@ module S3Location =
           (Xml.child_exn ~context:context_ xml_arg0 "bucketArn") in
       make ?objectVersion ~fileKey ~bucketArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let objectVersion = field_map json "objectVersion" Zz__string.of_json in
-      let fileKey = field_map_exn json "fileKey" Zz__string.of_json in
-      let bucketArn = field_map_exn json "bucketArn" Zz__string.of_json in
+    let of_json json__ =
+      let objectVersion = field_map json__ "objectVersion" Zz__string.of_json in
+      let fileKey = field_map_exn json__ "fileKey" Zz__string.of_json in
+      let bucketArn = field_map_exn json__ "bucketArn" Zz__string.of_json in
       make ?objectVersion ~fileKey ~bucketArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The location of an object in Amazon S3."]
@@ -1981,46 +2357,54 @@ module AutoScaling =
   struct
     type nonrec t =
       {
-      maxWorkerCount: Zz__integerMin1Max10.t
+      maxWorkerCount: Zz__integer.t
         [@ocaml.doc
           "The maximum number of workers allocated to the connector."];
       mcuCount: Zz__integerMin1Max8.t
         [@ocaml.doc
           "The number of microcontroller units (MCUs) allocated to each connector worker. The valid values are 1,2,4,8."];
-      minWorkerCount: Zz__integerMin1Max10.t
+      minWorkerCount: Zz__integer.t
         [@ocaml.doc
           "The minimum number of workers allocated to the connector."];
       scaleInPolicy: ScaleInPolicy.t option
-        [@ocaml.doc "The sacle-in policy for the connector."];
+        [@ocaml.doc "The scale-in policy for the connector."];
       scaleOutPolicy: ScaleOutPolicy.t option
-        [@ocaml.doc "The sacle-out policy for the connector."]}
+        [@ocaml.doc "The scale-out policy for the connector."];
+      maxAutoscalingTaskCount: Zz__integer.t option
+        [@ocaml.doc
+          "The maximum number of tasks allocated to the connector during autoscaling operations. Must be at least equal to maxWorkerCount."]}
     let context_ = "AutoScaling"
     let make ?scaleInPolicy =
       fun ?scaleOutPolicy ->
-        fun ~maxWorkerCount ->
-          fun ~mcuCount ->
-            fun ~minWorkerCount ->
-              fun () ->
-                {
-                  scaleInPolicy;
-                  scaleOutPolicy;
-                  maxWorkerCount;
-                  mcuCount;
-                  minWorkerCount
-                }
+        fun ?maxAutoscalingTaskCount ->
+          fun ~maxWorkerCount ->
+            fun ~mcuCount ->
+              fun ~minWorkerCount ->
+                fun () ->
+                  {
+                    scaleInPolicy;
+                    scaleOutPolicy;
+                    maxAutoscalingTaskCount;
+                    maxWorkerCount;
+                    mcuCount;
+                    minWorkerCount
+                  }
     let to_value x =
       structure_to_value
-        [("maxWorkerCount",
-           (Some (Zz__integerMin1Max10.to_value x.maxWorkerCount)));
+        [("maxWorkerCount", (Some (Zz__integer.to_value x.maxWorkerCount)));
         ("mcuCount", (Some (Zz__integerMin1Max8.to_value x.mcuCount)));
-        ("minWorkerCount",
-          (Some (Zz__integerMin1Max10.to_value x.minWorkerCount)));
+        ("minWorkerCount", (Some (Zz__integer.to_value x.minWorkerCount)));
         ("scaleInPolicy",
           (Option.map x.scaleInPolicy ~f:ScaleInPolicy.to_value));
         ("scaleOutPolicy",
-          (Option.map x.scaleOutPolicy ~f:ScaleOutPolicy.to_value))]
+          (Option.map x.scaleOutPolicy ~f:ScaleOutPolicy.to_value));
+        ("maxAutoscalingTaskCount",
+          (Option.map x.maxAutoscalingTaskCount ~f:Zz__integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxAutoscalingTaskCount =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "maxAutoscalingTaskCount") in
       let scaleOutPolicy =
         (Option.map ~f:ScaleOutPolicy.of_xml)
           (Xml.child xml_arg0 "scaleOutPolicy") in
@@ -2028,30 +2412,32 @@ module AutoScaling =
         (Option.map ~f:ScaleInPolicy.of_xml)
           (Xml.child xml_arg0 "scaleInPolicy") in
       let minWorkerCount =
-        Zz__integerMin1Max10.of_xml
+        Zz__integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "minWorkerCount") in
       let mcuCount =
         Zz__integerMin1Max8.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "mcuCount") in
       let maxWorkerCount =
-        Zz__integerMin1Max10.of_xml
+        Zz__integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "maxWorkerCount") in
-      make ?scaleOutPolicy ?scaleInPolicy ~minWorkerCount ~mcuCount
-        ~maxWorkerCount ()
+      make ?maxAutoscalingTaskCount ?scaleOutPolicy ?scaleInPolicy
+        ~minWorkerCount ~mcuCount ~maxWorkerCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let maxAutoscalingTaskCount =
+        field_map json__ "maxAutoscalingTaskCount" Zz__integer.of_json in
       let scaleOutPolicy =
-        field_map json "scaleOutPolicy" ScaleOutPolicy.of_json in
+        field_map json__ "scaleOutPolicy" ScaleOutPolicy.of_json in
       let scaleInPolicy =
-        field_map json "scaleInPolicy" ScaleInPolicy.of_json in
+        field_map json__ "scaleInPolicy" ScaleInPolicy.of_json in
       let minWorkerCount =
-        field_map_exn json "minWorkerCount" Zz__integerMin1Max10.of_json in
+        field_map_exn json__ "minWorkerCount" Zz__integer.of_json in
       let mcuCount =
-        field_map_exn json "mcuCount" Zz__integerMin1Max8.of_json in
+        field_map_exn json__ "mcuCount" Zz__integerMin1Max8.of_json in
       let maxWorkerCount =
-        field_map_exn json "maxWorkerCount" Zz__integerMin1Max10.of_json in
-      make ?scaleOutPolicy ?scaleInPolicy ~minWorkerCount ~mcuCount
-        ~maxWorkerCount ()
+        field_map_exn json__ "maxWorkerCount" Zz__integer.of_json in
+      make ?maxAutoscalingTaskCount ?scaleOutPolicy ?scaleInPolicy
+        ~minWorkerCount ~mcuCount ~maxWorkerCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies how the connector scales."]
 module ProvisionedCapacity =
@@ -2061,7 +2447,7 @@ module ProvisionedCapacity =
       mcuCount: Zz__integerMin1Max8.t
         [@ocaml.doc
           "The number of microcontroller units (MCUs) allocated to each connector worker. The valid values are 1,2,4,8."];
-      workerCount: Zz__integerMin1Max10.t
+      workerCount: Zz__integer.t
         [@ocaml.doc
           "The number of workers that are allocated to the connector."]}
     let context_ = "ProvisionedCapacity"
@@ -2070,22 +2456,22 @@ module ProvisionedCapacity =
     let to_value x =
       structure_to_value
         [("mcuCount", (Some (Zz__integerMin1Max8.to_value x.mcuCount)));
-        ("workerCount", (Some (Zz__integerMin1Max10.to_value x.workerCount)))]
+        ("workerCount", (Some (Zz__integer.to_value x.workerCount)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workerCount =
-        Zz__integerMin1Max10.of_xml
+        Zz__integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workerCount") in
       let mcuCount =
         Zz__integerMin1Max8.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "mcuCount") in
       make ~workerCount ~mcuCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerCount =
-        field_map_exn json "workerCount" Zz__integerMin1Max10.of_json in
+        field_map_exn json__ "workerCount" Zz__integer.of_json in
       let mcuCount =
-        field_map_exn json "mcuCount" Zz__integerMin1Max8.of_json in
+        field_map_exn json__ "mcuCount" Zz__integerMin1Max8.of_json in
       make ~workerCount ~mcuCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a connector's provisioned capacity."]
@@ -2114,10 +2500,10 @@ module ApacheKafkaCluster =
           (Xml.child_exn ~context:context_ xml_arg0 "bootstrapServers") in
       make ~vpc ~bootstrapServers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpc = field_map_exn json "vpc" Vpc.of_json in
+    let of_json json__ =
+      let vpc = field_map_exn json__ "vpc" Vpc.of_json in
       let bootstrapServers =
-        field_map_exn json "bootstrapServers" Zz__string.of_json in
+        field_map_exn json__ "bootstrapServers" Zz__string.of_json in
       make ~vpc ~bootstrapServers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2153,11 +2539,11 @@ module WorkerLogDelivery =
           (Xml.child xml_arg0 "cloudWatchLogs") in
       make ?s3 ?firehose ?cloudWatchLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "s3" S3LogDelivery.of_json in
-      let firehose = field_map json "firehose" FirehoseLogDelivery.of_json in
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3LogDelivery.of_json in
+      let firehose = field_map json__ "firehose" FirehoseLogDelivery.of_json in
       let cloudWatchLogs =
-        field_map json "cloudWatchLogs" CloudWatchLogsLogDelivery.of_json in
+        field_map json__ "cloudWatchLogs" CloudWatchLogsLogDelivery.of_json in
       make ?s3 ?firehose ?cloudWatchLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2180,13 +2566,13 @@ module Plugin =
           (Xml.child_exn ~context:context_ xml_arg0 "customPlugin") in
       make ~customPlugin ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customPlugin =
-        field_map_exn json "customPlugin" CustomPlugin.of_json in
+        field_map_exn json__ "customPlugin" CustomPlugin.of_json in
       make ~customPlugin ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A plugin is an AWS resource that contains the code that defines your connector logic."]
+       "A plugin is an Amazon Web Services resource that contains the code that defines your connector logic."]
 module BadRequestException =
   struct
     type nonrec t = {
@@ -2201,8 +2587,8 @@ module BadRequestException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2221,8 +2607,8 @@ module ForbiddenException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2241,8 +2627,8 @@ module InternalServerErrorException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2261,8 +2647,8 @@ module NotFoundException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2281,8 +2667,8 @@ module ServiceUnavailableException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2301,8 +2687,8 @@ module TooManyRequestsException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2321,8 +2707,8 @@ module UnauthorizedException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2355,20 +2741,139 @@ module CapacityUpdate =
           (Xml.child xml_arg0 "autoScaling") in
       make ?provisionedCapacity ?autoScaling ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedCapacity =
-        field_map json "provisionedCapacity"
+        field_map json__ "provisionedCapacity"
           ProvisionedCapacityUpdate.of_json in
       let autoScaling =
-        field_map json "autoScaling" AutoScalingUpdate.of_json in
+        field_map json__ "autoScaling" AutoScalingUpdate.of_json in
       make ?provisionedCapacity ?autoScaling ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The target capacity for the connector. The capacity can be auto scaled or provisioned."]
+module ConnectorConfigurationUpdate =
+  struct
+    type nonrec t = (Zz__string.t * Zz__string.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((Zz__string.of_string chopped),
+                              (Zz__string.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (Zz__string.to_value x) |>
+                    (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:Zz__string.of_string
+        ~of_json:Zz__string.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: Zz__string.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "HTTP Status Code 409: Conflict. A resource with this name already exists. Retry your request with another name."]
+module Tags =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Zz__listOfWorkerConfigurationSummary =
   struct
     type nonrec t = WorkerConfigurationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkerConfigurationSummary.to_value)) |>
         (fun x -> `List x)
@@ -2413,6 +2918,9 @@ module Zz__listOfCustomPluginSummary =
   struct
     type nonrec t = CustomPluginSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomPluginSummary.to_value)) |>
         (fun x -> `List x)
@@ -2439,6 +2947,9 @@ module Zz__listOfConnectorSummary =
   struct
     type nonrec t = ConnectorSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2460,6 +2971,35 @@ module Zz__listOfConnectorSummary =
         ~of_json:ConnectorSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Zz__listOfConnectorOperationSummary =
+  struct
+    type nonrec t = ConnectorOperationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConnectorOperationSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConnectorOperationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfConnectorOperationSummary"
+        ~of_json:ConnectorOperationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module WorkerConfigurationRevisionDescription =
   struct
     type nonrec t =
@@ -2468,8 +3008,7 @@ module WorkerConfigurationRevisionDescription =
         [@ocaml.doc "The time that the worker configuration was created."];
       description: Zz__string.t option
         [@ocaml.doc "The description of the worker configuration revision."];
-      propertiesFileContent:
-        SyntheticWorkerConfigurationRevisionDescription__string.t option
+      propertiesFileContent: Zz__sensitiveString.t option
         [@ocaml.doc
           "Base64 encoded contents of the connect-distributed.properties file."];
       revision: Zz__long.t option
@@ -2487,16 +3026,14 @@ module WorkerConfigurationRevisionDescription =
            (Option.map x.creationTime ~f:Zz__timestampIso8601.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("propertiesFileContent",
-          (Option.map x.propertiesFileContent
-             ~f:SyntheticWorkerConfigurationRevisionDescription__string.to_value));
+          (Option.map x.propertiesFileContent ~f:Zz__sensitiveString.to_value));
         ("revision", (Option.map x.revision ~f:Zz__long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let revision =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "revision") in
       let propertiesFileContent =
-        (Option.map
-           ~f:SyntheticWorkerConfigurationRevisionDescription__string.of_xml)
+        (Option.map ~f:Zz__sensitiveString.of_xml)
           (Xml.child xml_arg0 "propertiesFileContent") in
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
@@ -2505,14 +3042,13 @@ module WorkerConfigurationRevisionDescription =
           (Xml.child xml_arg0 "creationTime") in
       make ?revision ?propertiesFileContent ?description ?creationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revision = field_map json "revision" Zz__long.of_json in
+    let of_json json__ =
+      let revision = field_map json__ "revision" Zz__long.of_json in
       let propertiesFileContent =
-        field_map json "propertiesFileContent"
-          SyntheticWorkerConfigurationRevisionDescription__string.of_json in
-      let description = field_map json "description" Zz__string.of_json in
+        field_map json__ "propertiesFileContent" Zz__sensitiveString.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
       make ?revision ?propertiesFileContent ?description ?creationTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The description of the worker configuration revision."]
@@ -2537,13 +3073,13 @@ module StateDescription =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
-      let code = field_map json "code" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
+      let code = field_map json__ "code" Zz__string.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about the state of a resource."]
-module SyntheticDescribeConnectorResponse__mapOf__string =
+module ConnectorConfiguration =
   struct
     type nonrec t = (Zz__string.t * Zz__string.t) list
     let make i = i
@@ -2564,6 +3100,8 @@ module SyntheticDescribeConnectorResponse__mapOf__string =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2571,40 +3109,55 @@ module SyntheticDescribeConnectorResponse__mapOf__string =
         ~of_json:Zz__string.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ConflictException =
+module WorkerSetting =
   struct
     type nonrec t = {
-      message: Zz__string.t option }
-    let make ?message = fun () -> { message }
+      capacity: CapacityDescription.t option }
+    let make ?capacity = fun () -> { capacity }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:Zz__string.to_value))]
+        [("capacity",
+           (Option.map x.capacity ~f:CapacityDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
+      let capacity =
+        (Option.map ~f:CapacityDescription.of_xml)
+          (Xml.child xml_arg0 "capacity") in
+      make ?capacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
-      make ?message ()
+    let of_json json__ =
+      let capacity = field_map json__ "capacity" CapacityDescription.of_json in
+      make ?capacity ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "HTTP Status Code 409: Conflict. A resource with this name already exists. Retry your request with another name."]
-module SyntheticCreateWorkerConfigurationRequest__string =
+  end[@@ocaml.doc "Details about worker setting of a connector"]
+module Zz__listOfConnectorOperationStep =
   struct
-    type nonrec t = string
-    let context_ = "SyntheticCreateWorkerConfigurationRequest__string"
+    type nonrec t = ConnectorOperationStep.t list
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConnectorOperationStep.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConnectorOperationStep.of_xml)
     let of_json j =
-      string_of_json
-        ~kind:"SyntheticCreateWorkerConfigurationRequest__string" j
-    let to_json = simple_to_json to_value
+      list_of_json ~kind:"__listOfConnectorOperationStep"
+        ~of_json:ConnectorOperationStep.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module Zz__stringMax1024 =
   struct
@@ -2661,8 +3214,8 @@ module CustomPluginLocation =
           (Xml.child_exn ~context:context_ xml_arg0 "s3Location") in
       make ~s3Location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Location = field_map_exn json "s3Location" S3Location.of_json in
+    let of_json json__ =
+      let s3Location = field_map_exn json__ "s3Location" S3Location.of_json in
       make ~s3Location ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the location of a custom plugin."]
@@ -2693,10 +3246,10 @@ module Capacity =
         (Option.map ~f:AutoScaling.of_xml) (Xml.child xml_arg0 "autoScaling") in
       make ?provisionedCapacity ?autoScaling ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedCapacity =
-        field_map json "provisionedCapacity" ProvisionedCapacity.of_json in
-      let autoScaling = field_map json "autoScaling" AutoScaling.of_json in
+        field_map json__ "provisionedCapacity" ProvisionedCapacity.of_json in
+      let autoScaling = field_map json__ "autoScaling" AutoScaling.of_json in
       make ?provisionedCapacity ?autoScaling ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2721,9 +3274,9 @@ module KafkaCluster =
           (Xml.child_exn ~context:context_ xml_arg0 "apacheKafkaCluster") in
       make ~apacheKafkaCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let apacheKafkaCluster =
-        field_map_exn json "apacheKafkaCluster" ApacheKafkaCluster.of_json in
+        field_map_exn json__ "apacheKafkaCluster" ApacheKafkaCluster.of_json in
       make ~apacheKafkaCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2750,9 +3303,9 @@ module KafkaClusterClientAuthentication =
           (Xml.child_exn ~context:context_ xml_arg0 "authenticationType") in
       make ~authenticationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationType =
-        field_map_exn json "authenticationType"
+        field_map_exn json__ "authenticationType"
           KafkaClusterClientAuthenticationType.of_json in
       make ~authenticationType ()
     let to_json v = composed_to_json to_value v
@@ -2779,9 +3332,9 @@ module KafkaClusterEncryptionInTransit =
           (Xml.child_exn ~context:context_ xml_arg0 "encryptionType") in
       make ~encryptionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionType =
-        field_map_exn json "encryptionType"
+        field_map_exn json__ "encryptionType"
           KafkaClusterEncryptionInTransitType.of_json in
       make ~encryptionType ()
     let to_json v = composed_to_json to_value v
@@ -2807,40 +3360,12 @@ module LogDelivery =
           (Xml.child_exn ~context:context_ xml_arg0 "workerLogDelivery") in
       make ~workerLogDelivery ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerLogDelivery =
-        field_map_exn json "workerLogDelivery" WorkerLogDelivery.of_json in
+        field_map_exn json__ "workerLogDelivery" WorkerLogDelivery.of_json in
       make ~workerLogDelivery ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about log delivery."]
-module SyntheticCreateConnectorRequest__mapOf__string =
-  struct
-    type nonrec t = (Zz__string.t * Zz__string.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((Zz__string.of_string chopped),
-                              (Zz__string.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (Zz__string.to_value x) |>
-                    (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:Zz__string.of_string
-        ~of_json:Zz__string.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module WorkerConfiguration =
   struct
     type nonrec t =
@@ -2869,10 +3394,10 @@ module WorkerConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "revision") in
       make ~workerConfigurationArn ~revision ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerConfigurationArn =
-        field_map_exn json "workerConfigurationArn" Zz__string.of_json in
-      let revision = field_map_exn json "revision" Zz__longMin1.of_json in
+        field_map_exn json__ "workerConfigurationArn" Zz__string.of_json in
+      let revision = field_map_exn json__ "revision" Zz__longMin1.of_json in
       make ~workerConfigurationArn ~revision ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2881,6 +3406,9 @@ module Zz__listOfPlugin =
   struct
     type nonrec t = Plugin.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Plugin.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2908,7 +3436,10 @@ module UpdateConnectorResponse =
       connectorArn: Zz__string.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the connector."];
       connectorState: ConnectorState.t option
-        [@ocaml.doc "The state of the connector."]}
+        [@ocaml.doc "The state of the connector."];
+      connectorOperationArn: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the connector operation."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -2919,7 +3450,9 @@ module UpdateConnectorResponse =
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?connectorArn =
-      fun ?connectorState -> fun () -> { connectorArn; connectorState }
+      fun ?connectorState ->
+        fun ?connectorOperationArn ->
+          fun () -> { connectorArn; connectorState; connectorOperationArn }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -3000,28 +3533,39 @@ module UpdateConnectorResponse =
       structure_to_value
         [("connectorArn", (Option.map x.connectorArn ~f:Zz__string.to_value));
         ("connectorState",
-          (Option.map x.connectorState ~f:ConnectorState.to_value))]
+          (Option.map x.connectorState ~f:ConnectorState.to_value));
+        ("connectorOperationArn",
+          (Option.map x.connectorOperationArn ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let connectorOperationArn =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "connectorOperationArn") in
       let connectorState =
         (Option.map ~f:ConnectorState.of_xml)
           (Xml.child xml_arg0 "connectorState") in
       let connectorArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "connectorArn") in
-      make ?connectorState ?connectorArn ()
+      make ?connectorOperationArn ?connectorState ?connectorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let connectorOperationArn =
+        field_map json__ "connectorOperationArn" Zz__string.of_json in
       let connectorState =
-        field_map json "connectorState" ConnectorState.of_json in
-      let connectorArn = field_map json "connectorArn" Zz__string.of_json in
-      make ?connectorState ?connectorArn ()
+        field_map json__ "connectorState" ConnectorState.of_json in
+      let connectorArn = field_map json__ "connectorArn" Zz__string.of_json in
+      make ?connectorOperationArn ?connectorState ?connectorArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the specified connector."]
+  end[@@ocaml.doc
+       "Updates the specified connector. For request body, specify only one parameter: either capacity or connectorConfiguration."]
 module UpdateConnectorRequest =
   struct
     type nonrec t =
       {
-      capacity: CapacityUpdate.t [@ocaml.doc "The target capacity."];
+      capacity: CapacityUpdate.t option [@ocaml.doc "The target capacity."];
+      connectorConfiguration: ConnectorConfigurationUpdate.t option
+        [@ocaml.doc
+          "A map of keys to values that represent the configuration for the connector."];
       connectorArn: Zz__string.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the connector that you want to update."];
@@ -3029,13 +3573,23 @@ module UpdateConnectorRequest =
         [@ocaml.doc
           "The current version of the connector that you want to update."]}
     let context_ = "UpdateConnectorRequest"
-    let make ~capacity =
-      fun ~connectorArn ->
-        fun ~currentVersion ->
-          fun () -> { capacity; connectorArn; currentVersion }
+    let make ?capacity =
+      fun ?connectorConfiguration ->
+        fun ~connectorArn ->
+          fun ~currentVersion ->
+            fun () ->
+              {
+                capacity;
+                connectorConfiguration;
+                connectorArn;
+                currentVersion
+              }
     let to_value x =
       structure_to_value
-        [("capacity", (Some (CapacityUpdate.to_value x.capacity)));
+        [("capacity", (Option.map x.capacity ~f:CapacityUpdate.to_value));
+        ("connectorConfiguration",
+          (Option.map x.connectorConfiguration
+             ~f:ConnectorConfigurationUpdate.to_value));
         ("connectorArn", (Some (Zz__string.to_value x.connectorArn)));
         ("currentVersion", (Some (Zz__string.to_value x.currentVersion)))]
     let to_query v = to_query to_value v
@@ -3046,19 +3600,292 @@ module UpdateConnectorRequest =
       let connectorArn =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorArn") in
+      let connectorConfiguration =
+        (Option.map ~f:ConnectorConfigurationUpdate.of_xml)
+          (Xml.child xml_arg0 "connectorConfiguration") in
       let capacity =
-        CapacityUpdate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "capacity") in
-      make ~currentVersion ~connectorArn ~capacity ()
+        (Option.map ~f:CapacityUpdate.of_xml) (Xml.child xml_arg0 "capacity") in
+      make ~currentVersion ~connectorArn ?connectorConfiguration ?capacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let currentVersion =
-        field_map_exn json "currentVersion" Zz__string.of_json in
-      let connectorArn = field_map_exn json "connectorArn" Zz__string.of_json in
-      let capacity = field_map_exn json "capacity" CapacityUpdate.of_json in
-      make ~currentVersion ~connectorArn ~capacity ()
+        field_map_exn json__ "currentVersion" Zz__string.of_json in
+      let connectorArn =
+        field_map_exn json__ "connectorArn" Zz__string.of_json in
+      let connectorConfiguration =
+        field_map json__ "connectorConfiguration"
+          ConnectorConfigurationUpdate.of_json in
+      let capacity = field_map json__ "capacity" CapacityUpdate.of_json in
+      make ~currentVersion ~connectorArn ?connectorConfiguration ?capacity ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the specified connector."]
+  end[@@ocaml.doc
+       "Updates the specified connector. For request body, specify only one parameter: either capacity or connectorConfiguration."]
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Removes tags from the specified resource."]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource from which you want to remove tags."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "The keys of the tags that you want to remove from the resource."]}
+    let context_ = "UntagResourceRequest"
+    let make ~resourceArn =
+      fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (Zz__string.to_value x.resourceArn)));
+        ("tagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "tagKeys") in
+      let resourceArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
+      make ~tagKeys ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Removes tags from the specified resource."]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Attaches tags to the specified resource."]
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource to which you want to attach tags."];
+      tags: Tags.t
+        [@ocaml.doc "The tags that you want to attach to the resource."]}
+    let context_ = "TagResourceRequest"
+    let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (Zz__string.to_value x.resourceArn)));
+        ("tags", (Some (Tags.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
+      let resourceArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
+      make ~tags ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Attaches tags to the specified resource."]
 module ListWorkerConfigurationsResponse =
   struct
     type nonrec t =
@@ -3171,11 +3998,11 @@ module ListWorkerConfigurationsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?workerConfigurations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerConfigurations =
-        field_map json "workerConfigurations"
+        field_map json__ "workerConfigurations"
           Zz__listOfWorkerConfigurationSummary.of_json in
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       make ?workerConfigurations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3189,28 +4016,164 @@ module ListWorkerConfigurationsRequest =
           "The maximum number of worker configurations to list in one response."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "If the response of a ListWorkerConfigurations operation is truncated, it will include a NextToken. Send this NextToken in a subsequent request to continue listing from where the previous operation left off."]}
+          "If the response of a ListWorkerConfigurations operation is truncated, it will include a NextToken. Send this NextToken in a subsequent request to continue listing from where the previous operation left off."];
+      namePrefix: Zz__string.t option
+        [@ocaml.doc
+          "Lists worker configuration names that start with the specified text string."]}
     let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+      fun ?nextToken ->
+        fun ?namePrefix -> fun () -> { maxResults; nextToken; namePrefix }
     let to_value x =
       structure_to_value
         [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value));
+        ("namePrefix", (Option.map x.namePrefix ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let namePrefix =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "namePrefix") in
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      make ?namePrefix ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let namePrefix = field_map json__ "namePrefix" Zz__string.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      make ?namePrefix ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of all of the worker configurations in this account and Region."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      tags: Tags.t option
+        [@ocaml.doc
+          "Lists the tags attached to the specified resource in the corresponding request."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all the tags attached to the specified resource."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource for which you want to list all attached tags."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (Zz__string.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all the tags attached to the specified resource."]
 module ListCustomPluginsResponse =
   struct
     type nonrec t =
@@ -3322,10 +4285,11 @@ module ListCustomPluginsResponse =
           (Xml.child xml_arg0 "customPlugins") in
       make ?nextToken ?customPlugins ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       let customPlugins =
-        field_map json "customPlugins" Zz__listOfCustomPluginSummary.of_json in
+        field_map json__ "customPlugins"
+          Zz__listOfCustomPluginSummary.of_json in
       make ?nextToken ?customPlugins ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3339,25 +4303,33 @@ module ListCustomPluginsRequest =
           "The maximum number of custom plugins to list in one response."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "If the response of a ListCustomPlugins operation is truncated, it will include a NextToken. Send this NextToken in a subsequent request to continue listing from where the previous operation left off."]}
+          "If the response of a ListCustomPlugins operation is truncated, it will include a NextToken. Send this NextToken in a subsequent request to continue listing from where the previous operation left off."];
+      namePrefix: Zz__string.t option
+        [@ocaml.doc
+          "Lists custom plugin names that start with the specified text string."]}
     let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+      fun ?nextToken ->
+        fun ?namePrefix -> fun () -> { maxResults; nextToken; namePrefix }
     let to_value x =
       structure_to_value
         [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value));
+        ("namePrefix", (Option.map x.namePrefix ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let namePrefix =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "namePrefix") in
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      make ?namePrefix ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let namePrefix = field_map json__ "namePrefix" Zz__string.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      make ?namePrefix ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of all of the custom plugins in this account and Region."]
@@ -3471,10 +4443,10 @@ module ListConnectorsResponse =
           (Xml.child xml_arg0 "connectors") in
       make ?nextToken ?connectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       let connectors =
-        field_map json "connectors" Zz__listOfConnectorSummary.of_json in
+        field_map json__ "connectors" Zz__listOfConnectorSummary.of_json in
       make ?nextToken ?connectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3513,15 +4485,176 @@ module ListConnectorsRequest =
           (Xml.child xml_arg0 "connectorNamePrefix") in
       make ?nextToken ?maxResults ?connectorNamePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let connectorNamePrefix =
-        field_map json "connectorNamePrefix" Zz__string.of_json in
+        field_map json__ "connectorNamePrefix" Zz__string.of_json in
       make ?nextToken ?maxResults ?connectorNamePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of all the connectors in this account and Region. The list is limited to connectors whose name starts with the specified prefix. The response also includes a description of each of the listed connectors."]
+module ListConnectorOperationsResponse =
+  struct
+    type nonrec t =
+      {
+      connectorOperations: Zz__listOfConnectorOperationSummary.t option
+        [@ocaml.doc "An array of connector operation descriptions."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "If the response is truncated, it includes a NextToken. Send this NextToken in a subsequent request to continue listing from where it left off."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?connectorOperations =
+      fun ?nextToken -> fun () -> { connectorOperations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("connectorOperations",
+           (Option.map x.connectorOperations
+              ~f:Zz__listOfConnectorOperationSummary.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let connectorOperations =
+        (Option.map ~f:Zz__listOfConnectorOperationSummary.of_xml)
+          (Xml.child xml_arg0 "connectorOperations") in
+      make ?nextToken ?connectorOperations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let connectorOperations =
+        field_map json__ "connectorOperations"
+          Zz__listOfConnectorOperationSummary.of_json in
+      make ?nextToken ?connectorOperations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists information about a connector's operation(s)."]
+module ListConnectorOperationsRequest =
+  struct
+    type nonrec t =
+      {
+      connectorArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the connector for which to list operations."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Maximum number of connector operations to fetch in one get request."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "If the response is truncated, it includes a NextToken. Send this NextToken in a subsequent request to continue listing from where it left off."]}
+    let context_ = "ListConnectorOperationsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~connectorArn ->
+          fun () -> { maxResults; nextToken; connectorArn }
+    let to_value x =
+      structure_to_value
+        [("connectorArn", (Some (Zz__string.to_value x.connectorArn)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let connectorArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "connectorArn") in
+      make ?nextToken ?maxResults ~connectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let connectorArn =
+        field_map_exn json__ "connectorArn" Zz__string.of_json in
+      make ?nextToken ?maxResults ~connectorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists information about a connector's operation(s)."]
 module DescribeWorkerConfigurationResponse =
   struct
     type nonrec t =
@@ -3536,7 +4669,9 @@ module DescribeWorkerConfigurationResponse =
         [@ocaml.doc "The name of the worker configuration."];
       workerConfigurationArn: Zz__string.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the custom configuration."]}
+          "The Amazon Resource Name (ARN) of the custom configuration."];
+      workerConfigurationState: WorkerConfigurationState.t option
+        [@ocaml.doc "The state of the worker configuration."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -3551,14 +4686,16 @@ module DescribeWorkerConfigurationResponse =
         fun ?latestRevision ->
           fun ?name ->
             fun ?workerConfigurationArn ->
-              fun () ->
-                {
-                  creationTime;
-                  description;
-                  latestRevision;
-                  name;
-                  workerConfigurationArn
-                }
+              fun ?workerConfigurationState ->
+                fun () ->
+                  {
+                    creationTime;
+                    description;
+                    latestRevision;
+                    name;
+                    workerConfigurationArn;
+                    workerConfigurationState
+                  }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -3645,9 +4782,15 @@ module DescribeWorkerConfigurationResponse =
              ~f:WorkerConfigurationRevisionDescription.to_value));
         ("name", (Option.map x.name ~f:Zz__string.to_value));
         ("workerConfigurationArn",
-          (Option.map x.workerConfigurationArn ~f:Zz__string.to_value))]
+          (Option.map x.workerConfigurationArn ~f:Zz__string.to_value));
+        ("workerConfigurationState",
+          (Option.map x.workerConfigurationState
+             ~f:WorkerConfigurationState.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let workerConfigurationState =
+        (Option.map ~f:WorkerConfigurationState.of_xml)
+          (Xml.child xml_arg0 "workerConfigurationState") in
       let workerConfigurationArn =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "workerConfigurationArn") in
@@ -3661,21 +4804,24 @@ module DescribeWorkerConfigurationResponse =
       let creationTime =
         (Option.map ~f:Zz__timestampIso8601.of_xml)
           (Xml.child xml_arg0 "creationTime") in
-      make ?workerConfigurationArn ?name ?latestRevision ?description
-        ?creationTime ()
+      make ?workerConfigurationState ?workerConfigurationArn ?name
+        ?latestRevision ?description ?creationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let workerConfigurationState =
+        field_map json__ "workerConfigurationState"
+          WorkerConfigurationState.of_json in
       let workerConfigurationArn =
-        field_map json "workerConfigurationArn" Zz__string.of_json in
-      let name = field_map json "name" Zz__string.of_json in
+        field_map json__ "workerConfigurationArn" Zz__string.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
       let latestRevision =
-        field_map json "latestRevision"
+        field_map json__ "latestRevision"
           WorkerConfigurationRevisionDescription.of_json in
-      let description = field_map json "description" Zz__string.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
-      make ?workerConfigurationArn ?name ?latestRevision ?description
-        ?creationTime ()
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
+      make ?workerConfigurationState ?workerConfigurationArn ?name
+        ?latestRevision ?description ?creationTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a worker configuration."]
 module DescribeWorkerConfigurationRequest =
@@ -3698,9 +4844,9 @@ module DescribeWorkerConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "workerConfigurationArn") in
       make ~workerConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerConfigurationArn =
-        field_map_exn json "workerConfigurationArn" Zz__string.of_json in
+        field_map_exn json__ "workerConfigurationArn" Zz__string.of_json in
       make ~workerConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a worker configuration."]
@@ -3863,19 +5009,19 @@ module DescribeCustomPluginResponse =
       make ?stateDescription ?name ?latestRevision ?description
         ?customPluginState ?customPluginArn ?creationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stateDescription =
-        field_map json "stateDescription" StateDescription.of_json in
-      let name = field_map json "name" Zz__string.of_json in
+        field_map json__ "stateDescription" StateDescription.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
       let latestRevision =
-        field_map json "latestRevision" CustomPluginRevisionSummary.of_json in
-      let description = field_map json "description" Zz__string.of_json in
+        field_map json__ "latestRevision" CustomPluginRevisionSummary.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
       let customPluginState =
-        field_map json "customPluginState" CustomPluginState.of_json in
+        field_map json__ "customPluginState" CustomPluginState.of_json in
       let customPluginArn =
-        field_map json "customPluginArn" Zz__string.of_json in
+        field_map json__ "customPluginArn" Zz__string.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
       make ?stateDescription ?name ?latestRevision ?description
         ?customPluginState ?customPluginArn ?creationTime ()
     let to_json v = composed_to_json to_value v
@@ -3898,9 +5044,9 @@ module DescribeCustomPluginRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "customPluginArn") in
       make ~customPluginArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customPluginArn =
-        field_map_exn json "customPluginArn" Zz__string.of_json in
+        field_map_exn json__ "customPluginArn" Zz__string.of_json in
       make ~customPluginArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary description of the custom plugin."]
@@ -3913,8 +5059,7 @@ module DescribeConnectorResponse =
           "Information about the capacity of the connector, whether it is auto scaled or provisioned."];
       connectorArn: Zz__string.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the connector."];
-      connectorConfiguration:
-        SyntheticDescribeConnectorResponse__mapOf__string.t option
+      connectorConfiguration: ConnectorConfiguration.t option
         [@ocaml.doc
           "A map of keys to values that represent the configuration for the connector."];
       connectorDescription: Zz__string.t option
@@ -3944,16 +5089,19 @@ module DescribeConnectorResponse =
       logDelivery: LogDeliveryDescription.t option
         [@ocaml.doc
           "Details about delivering logs to Amazon CloudWatch Logs."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The network type of the connector. It gives connectors connectivity to either IPv4 (IPV4) or IPv4 and IPv6 (DUAL) destinations. Defaults to IPV4."];
       plugins: Zz__listOfPluginDescription.t option
         [@ocaml.doc "Specifies which plugins were used for this connector."];
       serviceExecutionRoleArn: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM role used by the connector to access Amazon Web Services resources."];
-      stateDescription: StateDescription.t option
-        [@ocaml.doc "Details about the state of a connector."];
       workerConfiguration: WorkerConfigurationDescription.t option
         [@ocaml.doc
-          "Specifies which worker configuration was used for the connector."]}
+          "Specifies which worker configuration was used for the connector."];
+      stateDescription: StateDescription.t option
+        [@ocaml.doc "Details about the state of a connector."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -3976,30 +5124,32 @@ module DescribeConnectorResponse =
                         fun ?kafkaClusterEncryptionInTransit ->
                           fun ?kafkaConnectVersion ->
                             fun ?logDelivery ->
-                              fun ?plugins ->
-                                fun ?serviceExecutionRoleArn ->
-                                  fun ?stateDescription ->
+                              fun ?networkType ->
+                                fun ?plugins ->
+                                  fun ?serviceExecutionRoleArn ->
                                     fun ?workerConfiguration ->
-                                      fun () ->
-                                        {
-                                          capacity;
-                                          connectorArn;
-                                          connectorConfiguration;
-                                          connectorDescription;
-                                          connectorName;
-                                          connectorState;
-                                          creationTime;
-                                          currentVersion;
-                                          kafkaCluster;
-                                          kafkaClusterClientAuthentication;
-                                          kafkaClusterEncryptionInTransit;
-                                          kafkaConnectVersion;
-                                          logDelivery;
-                                          plugins;
-                                          serviceExecutionRoleArn;
-                                          stateDescription;
-                                          workerConfiguration
-                                        }
+                                      fun ?stateDescription ->
+                                        fun () ->
+                                          {
+                                            capacity;
+                                            connectorArn;
+                                            connectorConfiguration;
+                                            connectorDescription;
+                                            connectorName;
+                                            connectorState;
+                                            creationTime;
+                                            currentVersion;
+                                            kafkaCluster;
+                                            kafkaClusterClientAuthentication;
+                                            kafkaClusterEncryptionInTransit;
+                                            kafkaConnectVersion;
+                                            logDelivery;
+                                            networkType;
+                                            plugins;
+                                            serviceExecutionRoleArn;
+                                            workerConfiguration;
+                                            stateDescription
+                                          }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -4083,7 +5233,7 @@ module DescribeConnectorResponse =
         ("connectorArn", (Option.map x.connectorArn ~f:Zz__string.to_value));
         ("connectorConfiguration",
           (Option.map x.connectorConfiguration
-             ~f:SyntheticDescribeConnectorResponse__mapOf__string.to_value));
+             ~f:ConnectorConfiguration.to_value));
         ("connectorDescription",
           (Option.map x.connectorDescription ~f:Zz__string.to_value));
         ("connectorName",
@@ -4106,29 +5256,32 @@ module DescribeConnectorResponse =
           (Option.map x.kafkaConnectVersion ~f:Zz__string.to_value));
         ("logDelivery",
           (Option.map x.logDelivery ~f:LogDeliveryDescription.to_value));
+        ("networkType", (Option.map x.networkType ~f:NetworkType.to_value));
         ("plugins",
           (Option.map x.plugins ~f:Zz__listOfPluginDescription.to_value));
         ("serviceExecutionRoleArn",
           (Option.map x.serviceExecutionRoleArn ~f:Zz__string.to_value));
-        ("stateDescription",
-          (Option.map x.stateDescription ~f:StateDescription.to_value));
         ("workerConfiguration",
           (Option.map x.workerConfiguration
-             ~f:WorkerConfigurationDescription.to_value))]
+             ~f:WorkerConfigurationDescription.to_value));
+        ("stateDescription",
+          (Option.map x.stateDescription ~f:StateDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workerConfiguration =
-        (Option.map ~f:WorkerConfigurationDescription.of_xml)
-          (Xml.child xml_arg0 "workerConfiguration") in
       let stateDescription =
         (Option.map ~f:StateDescription.of_xml)
           (Xml.child xml_arg0 "stateDescription") in
+      let workerConfiguration =
+        (Option.map ~f:WorkerConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "workerConfiguration") in
       let serviceExecutionRoleArn =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "serviceExecutionRoleArn") in
       let plugins =
         (Option.map ~f:Zz__listOfPluginDescription.of_xml)
           (Xml.child xml_arg0 "plugins") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "networkType") in
       let logDelivery =
         (Option.map ~f:LogDeliveryDescription.of_xml)
           (Xml.child xml_arg0 "logDelivery") in
@@ -4160,58 +5313,59 @@ module DescribeConnectorResponse =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "connectorDescription") in
       let connectorConfiguration =
-        (Option.map
-           ~f:SyntheticDescribeConnectorResponse__mapOf__string.of_xml)
+        (Option.map ~f:ConnectorConfiguration.of_xml)
           (Xml.child xml_arg0 "connectorConfiguration") in
       let connectorArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "connectorArn") in
       let capacity =
         (Option.map ~f:CapacityDescription.of_xml)
           (Xml.child xml_arg0 "capacity") in
-      make ?workerConfiguration ?stateDescription ?serviceExecutionRoleArn
-        ?plugins ?logDelivery ?kafkaConnectVersion
+      make ?stateDescription ?workerConfiguration ?serviceExecutionRoleArn
+        ?plugins ?networkType ?logDelivery ?kafkaConnectVersion
         ?kafkaClusterEncryptionInTransit ?kafkaClusterClientAuthentication
         ?kafkaCluster ?currentVersion ?creationTime ?connectorState
         ?connectorName ?connectorDescription ?connectorConfiguration
         ?connectorArn ?capacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workerConfiguration =
-        field_map json "workerConfiguration"
-          WorkerConfigurationDescription.of_json in
+    let of_json json__ =
       let stateDescription =
-        field_map json "stateDescription" StateDescription.of_json in
+        field_map json__ "stateDescription" StateDescription.of_json in
+      let workerConfiguration =
+        field_map json__ "workerConfiguration"
+          WorkerConfigurationDescription.of_json in
       let serviceExecutionRoleArn =
-        field_map json "serviceExecutionRoleArn" Zz__string.of_json in
+        field_map json__ "serviceExecutionRoleArn" Zz__string.of_json in
       let plugins =
-        field_map json "plugins" Zz__listOfPluginDescription.of_json in
+        field_map json__ "plugins" Zz__listOfPluginDescription.of_json in
+      let networkType = field_map json__ "networkType" NetworkType.of_json in
       let logDelivery =
-        field_map json "logDelivery" LogDeliveryDescription.of_json in
+        field_map json__ "logDelivery" LogDeliveryDescription.of_json in
       let kafkaConnectVersion =
-        field_map json "kafkaConnectVersion" Zz__string.of_json in
+        field_map json__ "kafkaConnectVersion" Zz__string.of_json in
       let kafkaClusterEncryptionInTransit =
-        field_map json "kafkaClusterEncryptionInTransit"
+        field_map json__ "kafkaClusterEncryptionInTransit"
           KafkaClusterEncryptionInTransitDescription.of_json in
       let kafkaClusterClientAuthentication =
-        field_map json "kafkaClusterClientAuthentication"
+        field_map json__ "kafkaClusterClientAuthentication"
           KafkaClusterClientAuthenticationDescription.of_json in
       let kafkaCluster =
-        field_map json "kafkaCluster" KafkaClusterDescription.of_json in
-      let currentVersion = field_map json "currentVersion" Zz__string.of_json in
+        field_map json__ "kafkaCluster" KafkaClusterDescription.of_json in
+      let currentVersion =
+        field_map json__ "currentVersion" Zz__string.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
       let connectorState =
-        field_map json "connectorState" ConnectorState.of_json in
-      let connectorName = field_map json "connectorName" Zz__string.of_json in
+        field_map json__ "connectorState" ConnectorState.of_json in
+      let connectorName = field_map json__ "connectorName" Zz__string.of_json in
       let connectorDescription =
-        field_map json "connectorDescription" Zz__string.of_json in
+        field_map json__ "connectorDescription" Zz__string.of_json in
       let connectorConfiguration =
-        field_map json "connectorConfiguration"
-          SyntheticDescribeConnectorResponse__mapOf__string.of_json in
-      let connectorArn = field_map json "connectorArn" Zz__string.of_json in
-      let capacity = field_map json "capacity" CapacityDescription.of_json in
-      make ?workerConfiguration ?stateDescription ?serviceExecutionRoleArn
-        ?plugins ?logDelivery ?kafkaConnectVersion
+        field_map json__ "connectorConfiguration"
+          ConnectorConfiguration.of_json in
+      let connectorArn = field_map json__ "connectorArn" Zz__string.of_json in
+      let capacity = field_map json__ "capacity" CapacityDescription.of_json in
+      make ?stateDescription ?workerConfiguration ?serviceExecutionRoleArn
+        ?plugins ?networkType ?logDelivery ?kafkaConnectVersion
         ?kafkaClusterEncryptionInTransit ?kafkaClusterClientAuthentication
         ?kafkaCluster ?currentVersion ?creationTime ?connectorState
         ?connectorName ?connectorDescription ?connectorConfiguration
@@ -4237,11 +5391,431 @@ module DescribeConnectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectorArn") in
       make ~connectorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectorArn = field_map_exn json "connectorArn" Zz__string.of_json in
+    let of_json json__ =
+      let connectorArn =
+        field_map_exn json__ "connectorArn" Zz__string.of_json in
       make ~connectorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns summary information about the connector."]
+module DescribeConnectorOperationResponse =
+  struct
+    type nonrec t =
+      {
+      connectorArn: Zz__string.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the connector."];
+      connectorOperationArn: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the connector operation."];
+      connectorOperationState: ConnectorOperationState.t option
+        [@ocaml.doc "The state of the connector operation."];
+      connectorOperationType: ConnectorOperationType.t option
+        [@ocaml.doc "The type of connector operation performed."];
+      operationSteps: Zz__listOfConnectorOperationStep.t option
+        [@ocaml.doc "The array of operation steps taken."];
+      originWorkerSetting: WorkerSetting.t option
+        [@ocaml.doc "The origin worker setting."];
+      originConnectorConfiguration: ConnectorConfiguration.t option
+        [@ocaml.doc "The origin connector configuration."];
+      targetWorkerSetting: WorkerSetting.t option
+        [@ocaml.doc "The target worker setting."];
+      targetConnectorConfiguration: ConnectorConfiguration.t option
+        [@ocaml.doc "The target connector configuration."];
+      errorInfo: StateDescription.t option ;
+      creationTime: Zz__timestampIso8601.t option
+        [@ocaml.doc "The time when the operation was created."];
+      endTime: Zz__timestampIso8601.t option
+        [@ocaml.doc "The time when the operation ended."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?connectorArn =
+      fun ?connectorOperationArn ->
+        fun ?connectorOperationState ->
+          fun ?connectorOperationType ->
+            fun ?operationSteps ->
+              fun ?originWorkerSetting ->
+                fun ?originConnectorConfiguration ->
+                  fun ?targetWorkerSetting ->
+                    fun ?targetConnectorConfiguration ->
+                      fun ?errorInfo ->
+                        fun ?creationTime ->
+                          fun ?endTime ->
+                            fun () ->
+                              {
+                                connectorArn;
+                                connectorOperationArn;
+                                connectorOperationState;
+                                connectorOperationType;
+                                operationSteps;
+                                originWorkerSetting;
+                                originConnectorConfiguration;
+                                targetWorkerSetting;
+                                targetConnectorConfiguration;
+                                errorInfo;
+                                creationTime;
+                                endTime
+                              }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("connectorArn", (Option.map x.connectorArn ~f:Zz__string.to_value));
+        ("connectorOperationArn",
+          (Option.map x.connectorOperationArn ~f:Zz__string.to_value));
+        ("connectorOperationState",
+          (Option.map x.connectorOperationState
+             ~f:ConnectorOperationState.to_value));
+        ("connectorOperationType",
+          (Option.map x.connectorOperationType
+             ~f:ConnectorOperationType.to_value));
+        ("operationSteps",
+          (Option.map x.operationSteps
+             ~f:Zz__listOfConnectorOperationStep.to_value));
+        ("originWorkerSetting",
+          (Option.map x.originWorkerSetting ~f:WorkerSetting.to_value));
+        ("originConnectorConfiguration",
+          (Option.map x.originConnectorConfiguration
+             ~f:ConnectorConfiguration.to_value));
+        ("targetWorkerSetting",
+          (Option.map x.targetWorkerSetting ~f:WorkerSetting.to_value));
+        ("targetConnectorConfiguration",
+          (Option.map x.targetConnectorConfiguration
+             ~f:ConnectorConfiguration.to_value));
+        ("errorInfo", (Option.map x.errorInfo ~f:StateDescription.to_value));
+        ("creationTime",
+          (Option.map x.creationTime ~f:Zz__timestampIso8601.to_value));
+        ("endTime", (Option.map x.endTime ~f:Zz__timestampIso8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "endTime") in
+      let creationTime =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "creationTime") in
+      let errorInfo =
+        (Option.map ~f:StateDescription.of_xml)
+          (Xml.child xml_arg0 "errorInfo") in
+      let targetConnectorConfiguration =
+        (Option.map ~f:ConnectorConfiguration.of_xml)
+          (Xml.child xml_arg0 "targetConnectorConfiguration") in
+      let targetWorkerSetting =
+        (Option.map ~f:WorkerSetting.of_xml)
+          (Xml.child xml_arg0 "targetWorkerSetting") in
+      let originConnectorConfiguration =
+        (Option.map ~f:ConnectorConfiguration.of_xml)
+          (Xml.child xml_arg0 "originConnectorConfiguration") in
+      let originWorkerSetting =
+        (Option.map ~f:WorkerSetting.of_xml)
+          (Xml.child xml_arg0 "originWorkerSetting") in
+      let operationSteps =
+        (Option.map ~f:Zz__listOfConnectorOperationStep.of_xml)
+          (Xml.child xml_arg0 "operationSteps") in
+      let connectorOperationType =
+        (Option.map ~f:ConnectorOperationType.of_xml)
+          (Xml.child xml_arg0 "connectorOperationType") in
+      let connectorOperationState =
+        (Option.map ~f:ConnectorOperationState.of_xml)
+          (Xml.child xml_arg0 "connectorOperationState") in
+      let connectorOperationArn =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "connectorOperationArn") in
+      let connectorArn =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "connectorArn") in
+      make ?endTime ?creationTime ?errorInfo ?targetConnectorConfiguration
+        ?targetWorkerSetting ?originConnectorConfiguration
+        ?originWorkerSetting ?operationSteps ?connectorOperationType
+        ?connectorOperationState ?connectorOperationArn ?connectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" Zz__timestampIso8601.of_json in
+      let creationTime =
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
+      let errorInfo = field_map json__ "errorInfo" StateDescription.of_json in
+      let targetConnectorConfiguration =
+        field_map json__ "targetConnectorConfiguration"
+          ConnectorConfiguration.of_json in
+      let targetWorkerSetting =
+        field_map json__ "targetWorkerSetting" WorkerSetting.of_json in
+      let originConnectorConfiguration =
+        field_map json__ "originConnectorConfiguration"
+          ConnectorConfiguration.of_json in
+      let originWorkerSetting =
+        field_map json__ "originWorkerSetting" WorkerSetting.of_json in
+      let operationSteps =
+        field_map json__ "operationSteps"
+          Zz__listOfConnectorOperationStep.of_json in
+      let connectorOperationType =
+        field_map json__ "connectorOperationType"
+          ConnectorOperationType.of_json in
+      let connectorOperationState =
+        field_map json__ "connectorOperationState"
+          ConnectorOperationState.of_json in
+      let connectorOperationArn =
+        field_map json__ "connectorOperationArn" Zz__string.of_json in
+      let connectorArn = field_map json__ "connectorArn" Zz__string.of_json in
+      make ?endTime ?creationTime ?errorInfo ?targetConnectorConfiguration
+        ?targetWorkerSetting ?originConnectorConfiguration
+        ?originWorkerSetting ?operationSteps ?connectorOperationType
+        ?connectorOperationState ?connectorOperationArn ?connectorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the specified connector's operations."]
+module DescribeConnectorOperationRequest =
+  struct
+    type nonrec t =
+      {
+      connectorOperationArn: Zz__string.t
+        [@ocaml.doc "ARN of the connector operation to be described."]}
+    let context_ = "DescribeConnectorOperationRequest"
+    let make ~connectorOperationArn = fun () -> { connectorOperationArn }
+    let to_value x =
+      structure_to_value
+        [("connectorOperationArn",
+           (Some (Zz__string.to_value x.connectorOperationArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectorOperationArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "connectorOperationArn") in
+      make ~connectorOperationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectorOperationArn =
+        field_map_exn json__ "connectorOperationArn" Zz__string.of_json in
+      make ~connectorOperationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the specified connector's operations."]
+module DeleteWorkerConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      workerConfigurationArn: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the worker configuration that you requested to delete."];
+      workerConfigurationState: WorkerConfigurationState.t option
+        [@ocaml.doc "The state of the worker configuration."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workerConfigurationArn =
+      fun ?workerConfigurationState ->
+        fun () -> { workerConfigurationArn; workerConfigurationState }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("workerConfigurationArn",
+           (Option.map x.workerConfigurationArn ~f:Zz__string.to_value));
+        ("workerConfigurationState",
+          (Option.map x.workerConfigurationState
+             ~f:WorkerConfigurationState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workerConfigurationState =
+        (Option.map ~f:WorkerConfigurationState.of_xml)
+          (Xml.child xml_arg0 "workerConfigurationState") in
+      let workerConfigurationArn =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "workerConfigurationArn") in
+      make ?workerConfigurationState ?workerConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workerConfigurationState =
+        field_map json__ "workerConfigurationState"
+          WorkerConfigurationState.of_json in
+      let workerConfigurationArn =
+        field_map json__ "workerConfigurationArn" Zz__string.of_json in
+      make ?workerConfigurationState ?workerConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified worker configuration."]
+module DeleteWorkerConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workerConfigurationArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the worker configuration that you want to delete."]}
+    let context_ = "DeleteWorkerConfigurationRequest"
+    let make ~workerConfigurationArn = fun () -> { workerConfigurationArn }
+    let to_value x =
+      structure_to_value
+        [("workerConfigurationArn",
+           (Some (Zz__string.to_value x.workerConfigurationArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workerConfigurationArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workerConfigurationArn") in
+      make ~workerConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workerConfigurationArn =
+        field_map_exn json__ "workerConfigurationArn" Zz__string.of_json in
+      make ~workerConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified worker configuration."]
 module DeleteCustomPluginResponse =
   struct
     type nonrec t =
@@ -4355,11 +5929,11 @@ module DeleteCustomPluginResponse =
           (Xml.child xml_arg0 "customPluginArn") in
       make ?customPluginState ?customPluginArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customPluginState =
-        field_map json "customPluginState" CustomPluginState.of_json in
+        field_map json__ "customPluginState" CustomPluginState.of_json in
       let customPluginArn =
-        field_map json "customPluginArn" Zz__string.of_json in
+        field_map json__ "customPluginArn" Zz__string.of_json in
       make ?customPluginState ?customPluginArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a custom plugin."]
@@ -4382,9 +5956,9 @@ module DeleteCustomPluginRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "customPluginArn") in
       make ~customPluginArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customPluginArn =
-        field_map_exn json "customPluginArn" Zz__string.of_json in
+        field_map_exn json__ "customPluginArn" Zz__string.of_json in
       make ~customPluginArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a custom plugin."]
@@ -4499,10 +6073,10 @@ module DeleteConnectorResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "connectorArn") in
       make ?connectorState ?connectorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorState =
-        field_map json "connectorState" ConnectorState.of_json in
-      let connectorArn = field_map json "connectorArn" Zz__string.of_json in
+        field_map json__ "connectorState" ConnectorState.of_json in
+      let connectorArn = field_map json__ "connectorArn" Zz__string.of_json in
       make ?connectorState ?connectorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified connector."]
@@ -4534,9 +6108,11 @@ module DeleteConnectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectorArn") in
       make ?currentVersion ~connectorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let currentVersion = field_map json "currentVersion" Zz__string.of_json in
-      let connectorArn = field_map_exn json "connectorArn" Zz__string.of_json in
+    let of_json json__ =
+      let currentVersion =
+        field_map json__ "currentVersion" Zz__string.of_json in
+      let connectorArn =
+        field_map_exn json__ "connectorArn" Zz__string.of_json in
       make ?currentVersion ~connectorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified connector."]
@@ -4552,7 +6128,9 @@ module CreateWorkerConfigurationResponse =
         [@ocaml.doc "The name of the worker configuration."];
       workerConfigurationArn: Zz__string.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that Amazon assigned to the worker configuration."]}
+          "The Amazon Resource Name (ARN) that Amazon assigned to the worker configuration."];
+      workerConfigurationState: WorkerConfigurationState.t option
+        [@ocaml.doc "The state of the worker configuration."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -4567,8 +6145,15 @@ module CreateWorkerConfigurationResponse =
       fun ?latestRevision ->
         fun ?name ->
           fun ?workerConfigurationArn ->
-            fun () ->
-              { creationTime; latestRevision; name; workerConfigurationArn }
+            fun ?workerConfigurationState ->
+              fun () ->
+                {
+                  creationTime;
+                  latestRevision;
+                  name;
+                  workerConfigurationArn;
+                  workerConfigurationState
+                }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -4662,9 +6247,15 @@ module CreateWorkerConfigurationResponse =
              ~f:WorkerConfigurationRevisionSummary.to_value));
         ("name", (Option.map x.name ~f:Zz__string.to_value));
         ("workerConfigurationArn",
-          (Option.map x.workerConfigurationArn ~f:Zz__string.to_value))]
+          (Option.map x.workerConfigurationArn ~f:Zz__string.to_value));
+        ("workerConfigurationState",
+          (Option.map x.workerConfigurationState
+             ~f:WorkerConfigurationState.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let workerConfigurationState =
+        (Option.map ~f:WorkerConfigurationState.of_xml)
+          (Xml.child xml_arg0 "workerConfigurationState") in
       let workerConfigurationArn =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "workerConfigurationArn") in
@@ -4676,18 +6267,23 @@ module CreateWorkerConfigurationResponse =
       let creationTime =
         (Option.map ~f:Zz__timestampIso8601.of_xml)
           (Xml.child xml_arg0 "creationTime") in
-      make ?workerConfigurationArn ?name ?latestRevision ?creationTime ()
+      make ?workerConfigurationState ?workerConfigurationArn ?name
+        ?latestRevision ?creationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let workerConfigurationState =
+        field_map json__ "workerConfigurationState"
+          WorkerConfigurationState.of_json in
       let workerConfigurationArn =
-        field_map json "workerConfigurationArn" Zz__string.of_json in
-      let name = field_map json "name" Zz__string.of_json in
+        field_map json__ "workerConfigurationArn" Zz__string.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
       let latestRevision =
-        field_map json "latestRevision"
+        field_map json__ "latestRevision"
           WorkerConfigurationRevisionSummary.of_json in
       let creationTime =
-        field_map json "creationTime" Zz__timestampIso8601.of_json in
-      make ?workerConfigurationArn ?name ?latestRevision ?creationTime ()
+        field_map json__ "creationTime" Zz__timestampIso8601.of_json in
+      make ?workerConfigurationState ?workerConfigurationArn ?name
+        ?latestRevision ?creationTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a worker configuration using the specified properties."]
@@ -4699,28 +6295,31 @@ module CreateWorkerConfigurationRequest =
         [@ocaml.doc "A summary description of the worker configuration."];
       name: Zz__stringMin1Max128.t
         [@ocaml.doc "The name of the worker configuration."];
-      propertiesFileContent:
-        SyntheticCreateWorkerConfigurationRequest__string.t
+      propertiesFileContent: Zz__sensitiveString.t
         [@ocaml.doc
-          "Base64 encoded contents of connect-distributed.properties file."]}
+          "Base64 encoded contents of connect-distributed.properties file."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "The tags you want to attach to the worker configuration."]}
     let context_ = "CreateWorkerConfigurationRequest"
     let make ?description =
-      fun ~name ->
-        fun ~propertiesFileContent ->
-          fun () -> { description; name; propertiesFileContent }
+      fun ?tags ->
+        fun ~name ->
+          fun ~propertiesFileContent ->
+            fun () -> { description; tags; name; propertiesFileContent }
     let to_value x =
       structure_to_value
         [("description",
            (Option.map x.description ~f:Zz__stringMax1024.to_value));
         ("name", (Some (Zz__stringMin1Max128.to_value x.name)));
         ("propertiesFileContent",
-          (Some
-             (SyntheticCreateWorkerConfigurationRequest__string.to_value
-                x.propertiesFileContent)))]
+          (Some (Zz__sensitiveString.to_value x.propertiesFileContent)));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let propertiesFileContent =
-        SyntheticCreateWorkerConfigurationRequest__string.of_xml
+        Zz__sensitiveString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "propertiesFileContent") in
       let name =
         Zz__stringMin1Max128.of_xml
@@ -4728,16 +6327,17 @@ module CreateWorkerConfigurationRequest =
       let description =
         (Option.map ~f:Zz__stringMax1024.of_xml)
           (Xml.child xml_arg0 "description") in
-      make ~propertiesFileContent ~name ?description ()
+      make ?tags ~propertiesFileContent ~name ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let propertiesFileContent =
-        field_map_exn json "propertiesFileContent"
-          SyntheticCreateWorkerConfigurationRequest__string.of_json in
-      let name = field_map_exn json "name" Zz__stringMin1Max128.of_json in
+        field_map_exn json__ "propertiesFileContent"
+          Zz__sensitiveString.of_json in
+      let name = field_map_exn json__ "name" Zz__stringMin1Max128.of_json in
       let description =
-        field_map json "description" Zz__stringMax1024.of_json in
-      make ~propertiesFileContent ~name ?description ()
+        field_map json__ "description" Zz__stringMax1024.of_json in
+      make ?tags ~propertiesFileContent ~name ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a worker configuration using the specified properties."]
@@ -4874,13 +6474,13 @@ module CreateCustomPluginResponse =
           (Xml.child xml_arg0 "customPluginArn") in
       make ?revision ?name ?customPluginState ?customPluginArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revision = field_map json "revision" Zz__long.of_json in
-      let name = field_map json "name" Zz__string.of_json in
+    let of_json json__ =
+      let revision = field_map json__ "revision" Zz__long.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
       let customPluginState =
-        field_map json "customPluginState" CustomPluginState.of_json in
+        field_map json__ "customPluginState" CustomPluginState.of_json in
       let customPluginArn =
-        field_map json "customPluginArn" Zz__string.of_json in
+        field_map json__ "customPluginArn" Zz__string.of_json in
       make ?revision ?name ?customPluginState ?customPluginArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a custom plugin using the specified properties."]
@@ -4895,12 +6495,16 @@ module CreateCustomPluginRequest =
       location: CustomPluginLocation.t
         [@ocaml.doc "Information about the location of a custom plugin."];
       name: Zz__stringMin1Max128.t
-        [@ocaml.doc "The name of the custom plugin."]}
+        [@ocaml.doc "The name of the custom plugin."];
+      tags: Tags.t option
+        [@ocaml.doc "The tags you want to attach to the custom plugin."]}
     let context_ = "CreateCustomPluginRequest"
     let make ?description =
-      fun ~contentType ->
-        fun ~location ->
-          fun ~name -> fun () -> { description; contentType; location; name }
+      fun ?tags ->
+        fun ~contentType ->
+          fun ~location ->
+            fun ~name ->
+              fun () -> { description; tags; contentType; location; name }
     let to_value x =
       structure_to_value
         [("contentType",
@@ -4908,9 +6512,11 @@ module CreateCustomPluginRequest =
         ("description",
           (Option.map x.description ~f:Zz__stringMax1024.to_value));
         ("location", (Some (CustomPluginLocation.to_value x.location)));
-        ("name", (Some (Zz__stringMin1Max128.to_value x.name)))]
+        ("name", (Some (Zz__stringMin1Max128.to_value x.name)));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let name =
         Zz__stringMin1Max128.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
@@ -4923,17 +6529,18 @@ module CreateCustomPluginRequest =
       let contentType =
         CustomPluginContentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentType") in
-      make ~name ~location ?description ~contentType ()
+      make ?tags ~name ~location ?description ~contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" Zz__stringMin1Max128.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map_exn json__ "name" Zz__stringMin1Max128.of_json in
       let location =
-        field_map_exn json "location" CustomPluginLocation.of_json in
+        field_map_exn json__ "location" CustomPluginLocation.of_json in
       let description =
-        field_map json "description" Zz__stringMax1024.of_json in
+        field_map json__ "description" Zz__stringMax1024.of_json in
       let contentType =
-        field_map_exn json "contentType" CustomPluginContentType.of_json in
-      make ~name ~location ?description ~contentType ()
+        field_map_exn json__ "contentType" CustomPluginContentType.of_json in
+      make ?tags ~name ~location ?description ~contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a custom plugin using the specified properties."]
 module CreateConnectorResponse =
@@ -5064,11 +6671,11 @@ module CreateConnectorResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "connectorArn") in
       make ?connectorState ?connectorName ?connectorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorState =
-        field_map json "connectorState" ConnectorState.of_json in
-      let connectorName = field_map json "connectorName" Zz__string.of_json in
-      let connectorArn = field_map json "connectorArn" Zz__string.of_json in
+        field_map json__ "connectorState" ConnectorState.of_json in
+      let connectorName = field_map json__ "connectorName" Zz__string.of_json in
+      let connectorArn = field_map json__ "connectorArn" Zz__string.of_json in
       make ?connectorState ?connectorName ?connectorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a connector using the specified properties."]
@@ -5079,8 +6686,7 @@ module CreateConnectorRequest =
       capacity: Capacity.t
         [@ocaml.doc
           "Information about the capacity allocated to the connector. Exactly one of the two properties must be specified."];
-      connectorConfiguration:
-        SyntheticCreateConnectorRequest__mapOf__string.t
+      connectorConfiguration: ConnectorConfiguration.t
         [@ocaml.doc
           "A map of keys to values that represent the configuration for the connector."];
       connectorDescription: Zz__stringMax1024.t option
@@ -5100,49 +6706,57 @@ module CreateConnectorRequest =
           "The version of Kafka Connect. It has to be compatible with both the Apache Kafka cluster's version and the plugins."];
       logDelivery: LogDelivery.t option
         [@ocaml.doc "Details about log delivery."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The network type of the connector. It gives connectors connectivity to either IPv4 (IPV4) or IPv4 and IPv6 (DUAL) destinations. Defaults to IPV4."];
       plugins: Zz__listOfPlugin.t
-        [@ocaml.doc "Specifies which plugins to use for the connector."];
+        [@ocaml.doc
+          "Amazon MSK Connect does not currently support specifying multiple plugins as a list. To use more than one plugin for your connector, you can create a single custom plugin using a ZIP file that bundles multiple plugins together. Specifies which plugin to use for the connector. You must specify a single-element list containing one customPlugin object."];
       serviceExecutionRoleArn: Zz__string.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM role used by the connector to access the Amazon Web Services resources that it needs. The types of resources depends on the logic of the connector. For example, a connector that has Amazon S3 as a destination must have permissions that allow it to write to the S3 destination bucket."];
       workerConfiguration: WorkerConfiguration.t option
         [@ocaml.doc
-          "Specifies which worker configuration to use with the connector."]}
+          "Specifies which worker configuration to use with the connector."];
+      tags: Tags.t option
+        [@ocaml.doc "The tags you want to attach to the connector."]}
     let context_ = "CreateConnectorRequest"
     let make ?connectorDescription =
       fun ?logDelivery ->
-        fun ?workerConfiguration ->
-          fun ~capacity ->
-            fun ~connectorConfiguration ->
-              fun ~connectorName ->
-                fun ~kafkaCluster ->
-                  fun ~kafkaClusterClientAuthentication ->
-                    fun ~kafkaClusterEncryptionInTransit ->
-                      fun ~kafkaConnectVersion ->
-                        fun ~plugins ->
-                          fun ~serviceExecutionRoleArn ->
-                            fun () ->
-                              {
-                                connectorDescription;
-                                logDelivery;
-                                workerConfiguration;
-                                capacity;
-                                connectorConfiguration;
-                                connectorName;
-                                kafkaCluster;
-                                kafkaClusterClientAuthentication;
-                                kafkaClusterEncryptionInTransit;
-                                kafkaConnectVersion;
-                                plugins;
-                                serviceExecutionRoleArn
-                              }
+        fun ?networkType ->
+          fun ?workerConfiguration ->
+            fun ?tags ->
+              fun ~capacity ->
+                fun ~connectorConfiguration ->
+                  fun ~connectorName ->
+                    fun ~kafkaCluster ->
+                      fun ~kafkaClusterClientAuthentication ->
+                        fun ~kafkaClusterEncryptionInTransit ->
+                          fun ~kafkaConnectVersion ->
+                            fun ~plugins ->
+                              fun ~serviceExecutionRoleArn ->
+                                fun () ->
+                                  {
+                                    connectorDescription;
+                                    logDelivery;
+                                    networkType;
+                                    workerConfiguration;
+                                    tags;
+                                    capacity;
+                                    connectorConfiguration;
+                                    connectorName;
+                                    kafkaCluster;
+                                    kafkaClusterClientAuthentication;
+                                    kafkaClusterEncryptionInTransit;
+                                    kafkaConnectVersion;
+                                    plugins;
+                                    serviceExecutionRoleArn
+                                  }
     let to_value x =
       structure_to_value
         [("capacity", (Some (Capacity.to_value x.capacity)));
         ("connectorConfiguration",
-          (Some
-             (SyntheticCreateConnectorRequest__mapOf__string.to_value
-                x.connectorConfiguration)));
+          (Some (ConnectorConfiguration.to_value x.connectorConfiguration)));
         ("connectorDescription",
           (Option.map x.connectorDescription ~f:Zz__stringMax1024.to_value));
         ("connectorName",
@@ -5159,13 +6773,16 @@ module CreateConnectorRequest =
         ("kafkaConnectVersion",
           (Some (Zz__string.to_value x.kafkaConnectVersion)));
         ("logDelivery", (Option.map x.logDelivery ~f:LogDelivery.to_value));
+        ("networkType", (Option.map x.networkType ~f:NetworkType.to_value));
         ("plugins", (Some (Zz__listOfPlugin.to_value x.plugins)));
         ("serviceExecutionRoleArn",
           (Some (Zz__string.to_value x.serviceExecutionRoleArn)));
         ("workerConfiguration",
-          (Option.map x.workerConfiguration ~f:WorkerConfiguration.to_value))]
+          (Option.map x.workerConfiguration ~f:WorkerConfiguration.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let workerConfiguration =
         (Option.map ~f:WorkerConfiguration.of_xml)
           (Xml.child xml_arg0 "workerConfiguration") in
@@ -5175,6 +6792,8 @@ module CreateConnectorRequest =
       let plugins =
         Zz__listOfPlugin.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "plugins") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "networkType") in
       let logDelivery =
         (Option.map ~f:LogDelivery.of_xml) (Xml.child xml_arg0 "logDelivery") in
       let kafkaConnectVersion =
@@ -5198,43 +6817,47 @@ module CreateConnectorRequest =
         (Option.map ~f:Zz__stringMax1024.of_xml)
           (Xml.child xml_arg0 "connectorDescription") in
       let connectorConfiguration =
-        SyntheticCreateConnectorRequest__mapOf__string.of_xml
+        ConnectorConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorConfiguration") in
       let capacity =
         Capacity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "capacity") in
-      make ?workerConfiguration ~serviceExecutionRoleArn ~plugins
-        ?logDelivery ~kafkaConnectVersion ~kafkaClusterEncryptionInTransit
-        ~kafkaClusterClientAuthentication ~kafkaCluster ~connectorName
-        ?connectorDescription ~connectorConfiguration ~capacity ()
+      make ?tags ?workerConfiguration ~serviceExecutionRoleArn ~plugins
+        ?networkType ?logDelivery ~kafkaConnectVersion
+        ~kafkaClusterEncryptionInTransit ~kafkaClusterClientAuthentication
+        ~kafkaCluster ~connectorName ?connectorDescription
+        ~connectorConfiguration ~capacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let workerConfiguration =
-        field_map json "workerConfiguration" WorkerConfiguration.of_json in
+        field_map json__ "workerConfiguration" WorkerConfiguration.of_json in
       let serviceExecutionRoleArn =
-        field_map_exn json "serviceExecutionRoleArn" Zz__string.of_json in
-      let plugins = field_map_exn json "plugins" Zz__listOfPlugin.of_json in
-      let logDelivery = field_map json "logDelivery" LogDelivery.of_json in
+        field_map_exn json__ "serviceExecutionRoleArn" Zz__string.of_json in
+      let plugins = field_map_exn json__ "plugins" Zz__listOfPlugin.of_json in
+      let networkType = field_map json__ "networkType" NetworkType.of_json in
+      let logDelivery = field_map json__ "logDelivery" LogDelivery.of_json in
       let kafkaConnectVersion =
-        field_map_exn json "kafkaConnectVersion" Zz__string.of_json in
+        field_map_exn json__ "kafkaConnectVersion" Zz__string.of_json in
       let kafkaClusterEncryptionInTransit =
-        field_map_exn json "kafkaClusterEncryptionInTransit"
+        field_map_exn json__ "kafkaClusterEncryptionInTransit"
           KafkaClusterEncryptionInTransit.of_json in
       let kafkaClusterClientAuthentication =
-        field_map_exn json "kafkaClusterClientAuthentication"
+        field_map_exn json__ "kafkaClusterClientAuthentication"
           KafkaClusterClientAuthentication.of_json in
       let kafkaCluster =
-        field_map_exn json "kafkaCluster" KafkaCluster.of_json in
+        field_map_exn json__ "kafkaCluster" KafkaCluster.of_json in
       let connectorName =
-        field_map_exn json "connectorName" Zz__stringMin1Max128.of_json in
+        field_map_exn json__ "connectorName" Zz__stringMin1Max128.of_json in
       let connectorDescription =
-        field_map json "connectorDescription" Zz__stringMax1024.of_json in
+        field_map json__ "connectorDescription" Zz__stringMax1024.of_json in
       let connectorConfiguration =
-        field_map_exn json "connectorConfiguration"
-          SyntheticCreateConnectorRequest__mapOf__string.of_json in
-      let capacity = field_map_exn json "capacity" Capacity.of_json in
-      make ?workerConfiguration ~serviceExecutionRoleArn ~plugins
-        ?logDelivery ~kafkaConnectVersion ~kafkaClusterEncryptionInTransit
-        ~kafkaClusterClientAuthentication ~kafkaCluster ~connectorName
-        ?connectorDescription ~connectorConfiguration ~capacity ()
+        field_map_exn json__ "connectorConfiguration"
+          ConnectorConfiguration.of_json in
+      let capacity = field_map_exn json__ "capacity" Capacity.of_json in
+      make ?tags ?workerConfiguration ~serviceExecutionRoleArn ~plugins
+        ?networkType ?logDelivery ~kafkaConnectVersion
+        ~kafkaClusterEncryptionInTransit ~kafkaClusterClientAuthentication
+        ~kafkaCluster ~connectorName ?connectorDescription
+        ~connectorConfiguration ~capacity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a connector using the specified properties."]

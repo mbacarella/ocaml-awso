@@ -44,6 +44,8 @@ let create_cluster =
        and tags =
          flag "tags" (optional json_arg)
            ~doc:"JSON __mapOf__stringMin0Max256PatternS"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and clusterName =
          flag "cluster-name" (required string)
            ~doc:"STRING __stringMin1Max64PatternS" in
@@ -53,7 +55,9 @@ let create_cluster =
            (Values.CreateClusterRequest.make ?clientToken
               ?tags:(Option.map
                        ~f:Values.Zz__mapOf__stringMin0Max256PatternS.of_json
-                       tags) ~clusterName ())
+                       tags)
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType) ~clusterName ())
            (Some Values.CreateClusterResponse.to_json)
            (Some Values.CreateClusterResponse.error_to_json)])
 let create_control_panel =
@@ -294,6 +298,24 @@ let describe_safety_rule =
            (Values.DescribeSafetyRuleRequest.make ~safetyRuleArn ())
            (Some Values.DescribeSafetyRuleResponse.to_json)
            (Some Values.DescribeSafetyRuleResponse.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyRequest.make ~resourceArn ())
+           (Some Values.GetResourcePolicyResponse.to_json)
+           (Some Values.GetResourcePolicyResponse.error_to_json)])
 let list_associated_route53_health_checks =
   Command.async ~summary:""
     ([%map_open.Command
@@ -467,6 +489,28 @@ let untag_resource =
               ~tagKeys:(Values.Zz__listOf__string.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (required string)
+           ~doc:"STRING __stringMin1Max256PatternAZaZ09"
+       and networkType =
+         flag "network-type" (required json_arg) ~doc:"JSON NetworkType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_cluster
+           (Values.UpdateClusterRequest.make ~clusterArn
+              ~networkType:(Values.NetworkType.of_json networkType) ())
+           (Some Values.UpdateClusterResponse.to_json)
+           (Some Values.UpdateClusterResponse.error_to_json)])
 let update_control_panel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -556,6 +600,7 @@ let main =
     ("describe-control-panel", describe_control_panel);
     ("describe-routing-control", describe_routing_control);
     ("describe-safety-rule", describe_safety_rule);
+    ("get-resource-policy", get_resource_policy);
     ("list-associated-route53-health-checks",
       list_associated_route53_health_checks);
     ("list-clusters", list_clusters);
@@ -565,6 +610,7 @@ let main =
     ("list-tags-for-resource", list_tags_for_resource);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-cluster", update_cluster);
     ("update-control-panel", update_control_panel);
     ("update-routing-control", update_routing_control);
     ("update-safety-rule", update_safety_rule)]

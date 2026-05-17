@@ -62,6 +62,8 @@ let create_cluster =
        and clusterEndpointEncryptionType =
          flag "cluster-endpoint-encryption-type" (optional json_arg)
            ~doc:"JSON ClusterEndpointEncryptionType"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and clusterName =
          flag "cluster-name" (required string) ~doc:"STRING String"
        and nodeType = flag "node-type" (required string) ~doc:"STRING String"
@@ -88,7 +90,9 @@ let create_cluster =
               ?clusterEndpointEncryptionType:(Option.map
                                                 ~f:Values.ClusterEndpointEncryptionType.of_json
                                                 clusterEndpointEncryptionType)
-              ~clusterName ~nodeType ~replicationFactor ~iamRoleArn ())
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType) ~clusterName ~nodeType
+              ~replicationFactor ~iamRoleArn ())
            (Some Values.CreateClusterResponse.to_json)
            (Some Values.CreateClusterResponse.error_to_json)])
 let create_parameter_group =

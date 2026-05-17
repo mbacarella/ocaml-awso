@@ -248,7 +248,8 @@ let copy_d_b_cluster_snapshot =
        and kmsKeyId =
          flag "kms-key-id" (optional string) ~doc:"STRING String"
        and preSignedUrl =
-         flag "pre-signed-url" (optional string) ~doc:"STRING String"
+         flag "pre-signed-url" (optional string)
+           ~doc:"STRING SensitiveString"
        and copyTags =
          flag "copy-tags" (optional bool) ~doc:"BOOL BooleanOptional"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
@@ -313,11 +314,19 @@ let copy_d_b_snapshot =
        and copyTags =
          flag "copy-tags" (optional bool) ~doc:"BOOL BooleanOptional"
        and preSignedUrl =
-         flag "pre-signed-url" (optional string) ~doc:"STRING String"
+         flag "pre-signed-url" (optional string)
+           ~doc:"STRING SensitiveString"
        and optionGroupName =
          flag "option-group-name" (optional string) ~doc:"STRING String"
        and targetCustomAvailabilityZone =
          flag "target-custom-availability-zone" (optional string)
+           ~doc:"STRING String"
+       and snapshotTarget =
+         flag "snapshot-target" (optional string) ~doc:"STRING String"
+       and copyOptionGroup =
+         flag "copy-option-group" (optional bool) ~doc:"BOOL BooleanOptional"
+       and snapshotAvailabilityZone =
+         flag "snapshot-availability-zone" (optional string)
            ~doc:"STRING String"
        and sourceDBSnapshotIdentifier =
          flag "source-d-b-snapshot-identifier" (required string)
@@ -331,6 +340,7 @@ let copy_d_b_snapshot =
            (Values.CopyDBSnapshotMessage.make ?kmsKeyId
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?copyTags
               ?preSignedUrl ?optionGroupName ?targetCustomAvailabilityZone
+              ?snapshotTarget ?copyOptionGroup ?snapshotAvailabilityZone
               ~sourceDBSnapshotIdentifier ~targetDBSnapshotIdentifier ())
            (Some Values.CopyDBSnapshotResult.to_json)
            (Some Values.CopyDBSnapshotResult.error_to_json)])
@@ -363,7 +373,7 @@ let copy_option_group =
               ~targetOptionGroupDescription ())
            (Some Values.CopyOptionGroupResult.to_json)
            (Some Values.CopyOptionGroupResult.error_to_json)])
-let create_custom_availability_zone =
+let create_blue_green_deployment =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -373,24 +383,48 @@ let create_custom_availability_zone =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and existingVpnId =
-         flag "existing-vpn-id" (optional string) ~doc:"STRING String"
-       and newVpnTunnelName =
-         flag "new-vpn-tunnel-name" (optional string) ~doc:"STRING String"
-       and vpnTunnelOriginatorIP =
-         flag "vpn-tunnel-originator-i-p" (optional string)
-           ~doc:"STRING String"
-       and customAvailabilityZoneName =
-         flag "custom-availability-zone-name" (required string)
-           ~doc:"STRING String" in
+       and targetEngineVersion =
+         flag "target-engine-version" (optional string)
+           ~doc:"STRING TargetEngineVersion"
+       and targetDBParameterGroupName =
+         flag "target-d-b-parameter-group-name" (optional string)
+           ~doc:"STRING TargetDBParameterGroupName"
+       and targetDBClusterParameterGroupName =
+         flag "target-d-b-cluster-parameter-group-name" (optional string)
+           ~doc:"STRING TargetDBClusterParameterGroupName"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and targetDBInstanceClass =
+         flag "target-d-b-instance-class" (optional string)
+           ~doc:"STRING TargetDBInstanceClass"
+       and upgradeTargetStorageConfig =
+         flag "upgrade-target-storage-config" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and targetIops =
+         flag "target-iops" (optional int) ~doc:"INT IntegerOptional"
+       and targetStorageType =
+         flag "target-storage-type" (optional string)
+           ~doc:"STRING TargetStorageType"
+       and targetAllocatedStorage =
+         flag "target-allocated-storage" (optional int)
+           ~doc:"INT IntegerOptional"
+       and targetStorageThroughput =
+         flag "target-storage-throughput" (optional int)
+           ~doc:"INT IntegerOptional"
+       and blueGreenDeploymentName =
+         flag "blue-green-deployment-name" (required string)
+           ~doc:"STRING BlueGreenDeploymentName"
+       and source = flag "source" (required string) ~doc:"STRING DatabaseArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_custom_availability_zone
-           (Values.CreateCustomAvailabilityZoneMessage.make ?existingVpnId
-              ?newVpnTunnelName ?vpnTunnelOriginatorIP
-              ~customAvailabilityZoneName ())
-           (Some Values.CreateCustomAvailabilityZoneResult.to_json)
-           (Some Values.CreateCustomAvailabilityZoneResult.error_to_json)])
+           Io.create_blue_green_deployment
+           (Values.CreateBlueGreenDeploymentRequest.make ?targetEngineVersion
+              ?targetDBParameterGroupName ?targetDBClusterParameterGroupName
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?targetDBInstanceClass ?upgradeTargetStorageConfig ?targetIops
+              ?targetStorageType ?targetAllocatedStorage
+              ?targetStorageThroughput ~blueGreenDeploymentName ~source ())
+           (Some Values.CreateBlueGreenDeploymentResponse.to_json)
+           (Some Values.CreateBlueGreenDeploymentResponse.error_to_json)])
 let create_custom_d_b_engine_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -401,33 +435,49 @@ let create_custom_d_b_engine_version =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and databaseInstallationFilesS3BucketName =
+         flag "database-installation-files-s3-bucket-name" (optional string)
+           ~doc:"STRING BucketName"
        and databaseInstallationFilesS3Prefix =
          flag "database-installation-files-s3-prefix" (optional string)
            ~doc:"STRING String255"
+       and databaseInstallationFiles =
+         flag "database-installation-files" (optional json_arg)
+           ~doc:"JSON StringList"
+       and imageId =
+         flag "image-id" (optional string) ~doc:"STRING String255"
+       and kMSKeyId =
+         flag "k-m-s-key-id" (optional string) ~doc:"STRING KmsKeyIdOrArn"
+       and sourceCustomDbEngineVersionIdentifier =
+         flag "source-custom-db-engine-version-identifier" (optional string)
+           ~doc:"STRING String255"
+       and useAwsProvidedLatestImage =
+         flag "use-aws-provided-latest-image" (optional bool)
+           ~doc:"BOOL BooleanOptional"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
+       and manifest =
+         flag "manifest" (optional string)
+           ~doc:"STRING CustomDBEngineVersionManifest"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and engine =
          flag "engine" (required string) ~doc:"STRING CustomEngineName"
        and engineVersion =
          flag "engine-version" (required string)
-           ~doc:"STRING CustomEngineVersion"
-       and databaseInstallationFilesS3BucketName =
-         flag "database-installation-files-s3-bucket-name" (required string)
-           ~doc:"STRING BucketName"
-       and kMSKeyId =
-         flag "k-m-s-key-id" (required string) ~doc:"STRING KmsKeyIdOrArn"
-       and manifest =
-         flag "manifest" (required string)
-           ~doc:"STRING CustomDBEngineVersionManifest" in
+           ~doc:"STRING CustomEngineVersion" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_custom_d_b_engine_version
            (Values.CreateCustomDBEngineVersionMessage.make
-              ?databaseInstallationFilesS3Prefix ?description
+              ?databaseInstallationFilesS3BucketName
+              ?databaseInstallationFilesS3Prefix
+              ?databaseInstallationFiles:(Option.map
+                                            ~f:Values.StringList.of_json
+                                            databaseInstallationFiles)
+              ?imageId ?kMSKeyId ?sourceCustomDbEngineVersionIdentifier
+              ?useAwsProvidedLatestImage ?description ?manifest
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ~engine
-              ~engineVersion ~databaseInstallationFilesS3BucketName ~kMSKeyId
-              ~manifest ()) (Some Values.DBEngineVersion.to_json)
+              ~engineVersion ()) (Some Values.DBEngineVersion.to_json)
            (Some Values.DBEngineVersion.error_to_json)])
 let create_d_b_cluster =
   Command.async ~summary:""
@@ -463,7 +513,8 @@ let create_d_b_cluster =
        and masterUsername =
          flag "master-username" (optional string) ~doc:"STRING String"
        and masterUserPassword =
-         flag "master-user-password" (optional string) ~doc:"STRING String"
+         flag "master-user-password" (optional string)
+           ~doc:"STRING SensitiveString"
        and optionGroupName =
          flag "option-group-name" (optional string) ~doc:"STRING String"
        and preferredBackupWindow =
@@ -481,7 +532,8 @@ let create_d_b_cluster =
        and kmsKeyId =
          flag "kms-key-id" (optional string) ~doc:"STRING String"
        and preSignedUrl =
-         flag "pre-signed-url" (optional string) ~doc:"STRING String"
+         flag "pre-signed-url" (optional string)
+           ~doc:"STRING SensitiveString"
        and enableIAMDatabaseAuthentication =
          flag "enable-i-a-m-database-authentication" (optional bool)
            ~doc:"BOOL BooleanOptional"
@@ -495,24 +547,9 @@ let create_d_b_cluster =
        and scalingConfiguration =
          flag "scaling-configuration" (optional json_arg)
            ~doc:"JSON ScalingConfiguration"
-       and deletionProtection =
-         flag "deletion-protection" (optional bool)
-           ~doc:"BOOL BooleanOptional"
-       and globalClusterIdentifier =
-         flag "global-cluster-identifier" (optional string)
-           ~doc:"STRING String"
-       and enableHttpEndpoint =
-         flag "enable-http-endpoint" (optional bool)
-           ~doc:"BOOL BooleanOptional"
-       and copyTagsToSnapshot =
-         flag "copy-tags-to-snapshot" (optional bool)
-           ~doc:"BOOL BooleanOptional"
-       and domain = flag "domain" (optional string) ~doc:"STRING String"
-       and domainIAMRoleName =
-         flag "domain-i-a-m-role-name" (optional string) ~doc:"STRING String"
-       and enableGlobalWriteForwarding =
-         flag "enable-global-write-forwarding" (optional bool)
-           ~doc:"BOOL BooleanOptional"
+       and rdsCustomClusterConfiguration =
+         flag "rds-custom-cluster-configuration" (optional json_arg)
+           ~doc:"JSON RdsCustomClusterConfiguration"
        and dBClusterInstanceClass =
          flag "d-b-cluster-instance-class" (optional string)
            ~doc:"STRING String"
@@ -527,10 +564,36 @@ let create_d_b_cluster =
        and autoMinorVersionUpgrade =
          flag "auto-minor-version-upgrade" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and deletionProtection =
+         flag "deletion-protection" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and globalClusterIdentifier =
+         flag "global-cluster-identifier" (optional string)
+           ~doc:"STRING GlobalClusterIdentifier"
+       and enableHttpEndpoint =
+         flag "enable-http-endpoint" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and copyTagsToSnapshot =
+         flag "copy-tags-to-snapshot" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and domain = flag "domain" (optional string) ~doc:"STRING String"
+       and domainIAMRoleName =
+         flag "domain-i-a-m-role-name" (optional string) ~doc:"STRING String"
+       and enableGlobalWriteForwarding =
+         flag "enable-global-write-forwarding" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
+       and serverlessV2ScalingConfiguration =
+         flag "serverless-v2-scaling-configuration" (optional json_arg)
+           ~doc:"JSON ServerlessV2ScalingConfiguration"
        and monitoringInterval =
          flag "monitoring-interval" (optional int) ~doc:"INT IntegerOptional"
        and monitoringRoleArn =
          flag "monitoring-role-arn" (optional string) ~doc:"STRING String"
+       and databaseInsightsMode =
+         flag "database-insights-mode" (optional json_arg)
+           ~doc:"JSON DatabaseInsightsMode"
        and enablePerformanceInsights =
          flag "enable-performance-insights" (optional bool)
            ~doc:"BOOL BooleanOptional"
@@ -540,6 +603,38 @@ let create_d_b_cluster =
        and performanceInsightsRetentionPeriod =
          flag "performance-insights-retention-period" (optional int)
            ~doc:"INT IntegerOptional"
+       and enableLimitlessDatabase =
+         flag "enable-limitless-database" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and clusterScalabilityType =
+         flag "cluster-scalability-type" (optional json_arg)
+           ~doc:"JSON ClusterScalabilityType"
+       and dBSystemId =
+         flag "d-b-system-id" (optional string) ~doc:"STRING String"
+       and manageMasterUserPassword =
+         flag "manage-master-user-password" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and enableLocalWriteForwarding =
+         flag "enable-local-write-forwarding" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and masterUserSecretKmsKeyId =
+         flag "master-user-secret-kms-key-id" (optional string)
+           ~doc:"STRING String"
+       and cACertificateIdentifier =
+         flag "c-a-certificate-identifier" (optional string)
+           ~doc:"STRING String"
+       and engineLifecycleSupport =
+         flag "engine-lifecycle-support" (optional string)
+           ~doc:"STRING String"
+       and tagSpecifications =
+         flag "tag-specifications" (optional json_arg)
+           ~doc:"JSON TagSpecificationList"
+       and masterUserAuthenticationType =
+         flag "master-user-authentication-type" (optional json_arg)
+           ~doc:"JSON MasterUserAuthenticationType"
+       and withExpressConfiguration =
+         flag "with-express-configuration" (optional bool)
+           ~doc:"BOOL BooleanOptional"
        and dBClusterIdentifier =
          flag "d-b-cluster-identifier" (required string) ~doc:"STRING String"
        and engine = flag "engine" (required string) ~doc:"STRING String" in
@@ -569,15 +664,37 @@ let create_d_b_cluster =
               ?scalingConfiguration:(Option.map
                                        ~f:Values.ScalingConfiguration.of_json
                                        scalingConfiguration)
-              ?deletionProtection ?globalClusterIdentifier
-              ?enableHttpEndpoint ?copyTagsToSnapshot ?domain
-              ?domainIAMRoleName ?enableGlobalWriteForwarding
+              ?rdsCustomClusterConfiguration:(Option.map
+                                                ~f:Values.RdsCustomClusterConfiguration.of_json
+                                                rdsCustomClusterConfiguration)
               ?dBClusterInstanceClass ?allocatedStorage ?storageType ?iops
               ?publiclyAccessible ?autoMinorVersionUpgrade
+              ?deletionProtection ?globalClusterIdentifier
+              ?enableHttpEndpoint ?copyTagsToSnapshot ?domain
+              ?domainIAMRoleName ?enableGlobalWriteForwarding ?networkType
+              ?serverlessV2ScalingConfiguration:(Option.map
+                                                   ~f:Values.ServerlessV2ScalingConfiguration.of_json
+                                                   serverlessV2ScalingConfiguration)
               ?monitoringInterval ?monitoringRoleArn
+              ?databaseInsightsMode:(Option.map
+                                       ~f:Values.DatabaseInsightsMode.of_json
+                                       databaseInsightsMode)
               ?enablePerformanceInsights ?performanceInsightsKMSKeyId
-              ?performanceInsightsRetentionPeriod ~dBClusterIdentifier
-              ~engine ()) (Some Values.CreateDBClusterResult.to_json)
+              ?performanceInsightsRetentionPeriod ?enableLimitlessDatabase
+              ?clusterScalabilityType:(Option.map
+                                         ~f:Values.ClusterScalabilityType.of_json
+                                         clusterScalabilityType) ?dBSystemId
+              ?manageMasterUserPassword ?enableLocalWriteForwarding
+              ?masterUserSecretKmsKeyId ?cACertificateIdentifier
+              ?engineLifecycleSupport
+              ?tagSpecifications:(Option.map
+                                    ~f:Values.TagSpecificationList.of_json
+                                    tagSpecifications)
+              ?masterUserAuthenticationType:(Option.map
+                                               ~f:Values.MasterUserAuthenticationType.of_json
+                                               masterUserAuthenticationType)
+              ?withExpressConfiguration ~dBClusterIdentifier ~engine ())
+           (Some Values.CreateDBClusterResult.to_json)
            (Some Values.CreateDBClusterResult.error_to_json)])
 let create_d_b_cluster_endpoint =
   Command.async ~summary:""
@@ -681,7 +798,8 @@ let create_d_b_instance =
        and masterUsername =
          flag "master-username" (optional string) ~doc:"STRING String"
        and masterUserPassword =
-         flag "master-user-password" (optional string) ~doc:"STRING String"
+         flag "master-user-password" (optional string)
+           ~doc:"STRING SensitiveString"
        and dBSecurityGroups =
          flag "d-b-security-groups" (optional json_arg)
            ~doc:"JSON DBSecurityGroupNameList"
@@ -715,6 +833,8 @@ let create_d_b_instance =
        and licenseModel =
          flag "license-model" (optional string) ~doc:"STRING String"
        and iops = flag "iops" (optional int) ~doc:"INT IntegerOptional"
+       and storageThroughput =
+         flag "storage-throughput" (optional int) ~doc:"INT IntegerOptional"
        and optionGroupName =
          flag "option-group-name" (optional string) ~doc:"STRING String"
        and characterSetName =
@@ -734,12 +854,19 @@ let create_d_b_instance =
          flag "tde-credential-arn" (optional string) ~doc:"STRING String"
        and tdeCredentialPassword =
          flag "tde-credential-password" (optional string)
-           ~doc:"STRING String"
+           ~doc:"STRING SensitiveString"
        and storageEncrypted =
          flag "storage-encrypted" (optional bool) ~doc:"BOOL BooleanOptional"
        and kmsKeyId =
          flag "kms-key-id" (optional string) ~doc:"STRING String"
        and domain = flag "domain" (optional string) ~doc:"STRING String"
+       and domainFqdn =
+         flag "domain-fqdn" (optional string) ~doc:"STRING String"
+       and domainOu = flag "domain-ou" (optional string) ~doc:"STRING String"
+       and domainAuthSecretArn =
+         flag "domain-auth-secret-arn" (optional string) ~doc:"STRING String"
+       and domainDnsIps =
+         flag "domain-dns-ips" (optional json_arg) ~doc:"JSON StringList"
        and copyTagsToSnapshot =
          flag "copy-tags-to-snapshot" (optional bool)
            ~doc:"BOOL BooleanOptional"
@@ -755,6 +882,9 @@ let create_d_b_instance =
        and enableIAMDatabaseAuthentication =
          flag "enable-i-a-m-database-authentication" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and databaseInsightsMode =
+         flag "database-insights-mode" (optional json_arg)
+           ~doc:"JSON DatabaseInsightsMode"
        and enablePerformanceInsights =
          flag "enable-performance-insights" (optional bool)
            ~doc:"BOOL BooleanOptional"
@@ -779,11 +909,41 @@ let create_d_b_instance =
        and enableCustomerOwnedIp =
          flag "enable-customer-owned-ip" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
+       and backupTarget =
+         flag "backup-target" (optional string) ~doc:"STRING String"
        and customIamInstanceProfile =
          flag "custom-iam-instance-profile" (optional string)
            ~doc:"STRING String"
-       and backupTarget =
-         flag "backup-target" (optional string) ~doc:"STRING String"
+       and dBSystemId =
+         flag "d-b-system-id" (optional string) ~doc:"STRING String"
+       and cACertificateIdentifier =
+         flag "c-a-certificate-identifier" (optional string)
+           ~doc:"STRING String"
+       and manageMasterUserPassword =
+         flag "manage-master-user-password" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and masterUserSecretKmsKeyId =
+         flag "master-user-secret-kms-key-id" (optional string)
+           ~doc:"STRING String"
+       and multiTenant =
+         flag "multi-tenant" (optional bool) ~doc:"BOOL BooleanOptional"
+       and dedicatedLogVolume =
+         flag "dedicated-log-volume" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and engineLifecycleSupport =
+         flag "engine-lifecycle-support" (optional string)
+           ~doc:"STRING String"
+       and additionalStorageVolumes =
+         flag "additional-storage-volumes" (optional json_arg)
+           ~doc:"JSON AdditionalStorageVolumesList"
+       and tagSpecifications =
+         flag "tag-specifications" (optional json_arg)
+           ~doc:"JSON TagSpecificationList"
+       and masterUserAuthenticationType =
+         flag "master-user-authentication-type" (optional json_arg)
+           ~doc:"JSON MasterUserAuthenticationType"
        and dBInstanceIdentifier =
          flag "d-b-instance-identifier" (required string)
            ~doc:"STRING String"
@@ -804,15 +964,21 @@ let create_d_b_instance =
               ?dBSubnetGroupName ?preferredMaintenanceWindow
               ?dBParameterGroupName ?backupRetentionPeriod
               ?preferredBackupWindow ?port ?multiAZ ?engineVersion
-              ?autoMinorVersionUpgrade ?licenseModel ?iops ?optionGroupName
-              ?characterSetName ?ncharCharacterSetName ?publiclyAccessible
+              ?autoMinorVersionUpgrade ?licenseModel ?iops ?storageThroughput
+              ?optionGroupName ?characterSetName ?ncharCharacterSetName
+              ?publiclyAccessible
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?dBClusterIdentifier ?storageType ?tdeCredentialArn
               ?tdeCredentialPassword ?storageEncrypted ?kmsKeyId ?domain
-              ?copyTagsToSnapshot ?monitoringInterval ?monitoringRoleArn
-              ?domainIAMRoleName ?promotionTier ?timezone
-              ?enableIAMDatabaseAuthentication ?enablePerformanceInsights
-              ?performanceInsightsKMSKeyId
+              ?domainFqdn ?domainOu ?domainAuthSecretArn
+              ?domainDnsIps:(Option.map ~f:Values.StringList.of_json
+                               domainDnsIps) ?copyTagsToSnapshot
+              ?monitoringInterval ?monitoringRoleArn ?domainIAMRoleName
+              ?promotionTier ?timezone ?enableIAMDatabaseAuthentication
+              ?databaseInsightsMode:(Option.map
+                                       ~f:Values.DatabaseInsightsMode.of_json
+                                       databaseInsightsMode)
+              ?enablePerformanceInsights ?performanceInsightsKMSKeyId
               ?performanceInsightsRetentionPeriod
               ?enableCloudwatchLogsExports:(Option.map
                                               ~f:Values.LogTypeList.of_json
@@ -820,9 +986,21 @@ let create_d_b_instance =
               ?processorFeatures:(Option.map
                                     ~f:Values.ProcessorFeatureList.of_json
                                     processorFeatures) ?deletionProtection
-              ?maxAllocatedStorage ?enableCustomerOwnedIp
-              ?customIamInstanceProfile ?backupTarget ~dBInstanceIdentifier
-              ~dBInstanceClass ~engine ())
+              ?maxAllocatedStorage ?enableCustomerOwnedIp ?networkType
+              ?backupTarget ?customIamInstanceProfile ?dBSystemId
+              ?cACertificateIdentifier ?manageMasterUserPassword
+              ?masterUserSecretKmsKeyId ?multiTenant ?dedicatedLogVolume
+              ?engineLifecycleSupport
+              ?additionalStorageVolumes:(Option.map
+                                           ~f:Values.AdditionalStorageVolumesList.of_json
+                                           additionalStorageVolumes)
+              ?tagSpecifications:(Option.map
+                                    ~f:Values.TagSpecificationList.of_json
+                                    tagSpecifications)
+              ?masterUserAuthenticationType:(Option.map
+                                               ~f:Values.MasterUserAuthenticationType.of_json
+                                               masterUserAuthenticationType)
+              ~dBInstanceIdentifier ~dBInstanceClass ~engine ())
            (Some Values.CreateDBInstanceResult.to_json)
            (Some Values.CreateDBInstanceResult.error_to_json)])
 let create_d_b_instance_read_replica =
@@ -835,6 +1013,9 @@ let create_d_b_instance_read_replica =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and sourceDBInstanceIdentifier =
+         flag "source-d-b-instance-identifier" (optional string)
+           ~doc:"STRING String"
        and dBInstanceClass =
          flag "d-b-instance-class" (optional string) ~doc:"STRING String"
        and availabilityZone =
@@ -846,6 +1027,8 @@ let create_d_b_instance_read_replica =
          flag "auto-minor-version-upgrade" (optional bool)
            ~doc:"BOOL BooleanOptional"
        and iops = flag "iops" (optional int) ~doc:"INT IntegerOptional"
+       and storageThroughput =
+         flag "storage-throughput" (optional int) ~doc:"INT IntegerOptional"
        and optionGroupName =
          flag "option-group-name" (optional string) ~doc:"STRING String"
        and dBParameterGroupName =
@@ -872,10 +1055,14 @@ let create_d_b_instance_read_replica =
        and kmsKeyId =
          flag "kms-key-id" (optional string) ~doc:"STRING String"
        and preSignedUrl =
-         flag "pre-signed-url" (optional string) ~doc:"STRING String"
+         flag "pre-signed-url" (optional string)
+           ~doc:"STRING SensitiveString"
        and enableIAMDatabaseAuthentication =
          flag "enable-i-a-m-database-authentication" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and databaseInsightsMode =
+         flag "database-insights-mode" (optional json_arg)
+           ~doc:"JSON DatabaseInsightsMode"
        and enablePerformanceInsights =
          flag "enable-performance-insights" (optional bool)
            ~doc:"BOOL BooleanOptional"
@@ -900,26 +1087,59 @@ let create_d_b_instance_read_replica =
        and domain = flag "domain" (optional string) ~doc:"STRING String"
        and domainIAMRoleName =
          flag "domain-i-a-m-role-name" (optional string) ~doc:"STRING String"
+       and domainFqdn =
+         flag "domain-fqdn" (optional string) ~doc:"STRING String"
+       and domainOu = flag "domain-ou" (optional string) ~doc:"STRING String"
+       and domainAuthSecretArn =
+         flag "domain-auth-secret-arn" (optional string) ~doc:"STRING String"
+       and domainDnsIps =
+         flag "domain-dns-ips" (optional json_arg) ~doc:"JSON StringList"
        and replicaMode =
          flag "replica-mode" (optional json_arg) ~doc:"JSON ReplicaMode"
+       and enableCustomerOwnedIp =
+         flag "enable-customer-owned-ip" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
        and maxAllocatedStorage =
          flag "max-allocated-storage" (optional int)
            ~doc:"INT IntegerOptional"
+       and backupTarget =
+         flag "backup-target" (optional string) ~doc:"STRING String"
        and customIamInstanceProfile =
          flag "custom-iam-instance-profile" (optional string)
            ~doc:"STRING String"
+       and allocatedStorage =
+         flag "allocated-storage" (optional int) ~doc:"INT IntegerOptional"
+       and sourceDBClusterIdentifier =
+         flag "source-d-b-cluster-identifier" (optional string)
+           ~doc:"STRING String"
+       and dedicatedLogVolume =
+         flag "dedicated-log-volume" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and upgradeStorageConfig =
+         flag "upgrade-storage-config" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and cACertificateIdentifier =
+         flag "c-a-certificate-identifier" (optional string)
+           ~doc:"STRING String"
+       and additionalStorageVolumes =
+         flag "additional-storage-volumes" (optional json_arg)
+           ~doc:"JSON AdditionalStorageVolumesList"
+       and tagSpecifications =
+         flag "tag-specifications" (optional json_arg)
+           ~doc:"JSON TagSpecificationList"
        and dBInstanceIdentifier =
          flag "d-b-instance-identifier" (required string)
-           ~doc:"STRING String"
-       and sourceDBInstanceIdentifier =
-         flag "source-d-b-instance-identifier" (required string)
            ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_d_b_instance_read_replica
-           (Values.CreateDBInstanceReadReplicaMessage.make ?dBInstanceClass
-              ?availabilityZone ?port ?multiAZ ?autoMinorVersionUpgrade ?iops
-              ?optionGroupName ?dBParameterGroupName ?publiclyAccessible
+           (Values.CreateDBInstanceReadReplicaMessage.make
+              ?sourceDBInstanceIdentifier ?dBInstanceClass ?availabilityZone
+              ?port ?multiAZ ?autoMinorVersionUpgrade ?iops
+              ?storageThroughput ?optionGroupName ?dBParameterGroupName
+              ?publiclyAccessible
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?dBSubnetGroupName
               ?vpcSecurityGroupIds:(Option.map
@@ -927,6 +1147,9 @@ let create_d_b_instance_read_replica =
                                       vpcSecurityGroupIds) ?storageType
               ?copyTagsToSnapshot ?monitoringInterval ?monitoringRoleArn
               ?kmsKeyId ?preSignedUrl ?enableIAMDatabaseAuthentication
+              ?databaseInsightsMode:(Option.map
+                                       ~f:Values.DatabaseInsightsMode.of_json
+                                       databaseInsightsMode)
               ?enablePerformanceInsights ?performanceInsightsKMSKeyId
               ?performanceInsightsRetentionPeriod
               ?enableCloudwatchLogsExports:(Option.map
@@ -936,12 +1159,22 @@ let create_d_b_instance_read_replica =
                                     ~f:Values.ProcessorFeatureList.of_json
                                     processorFeatures)
               ?useDefaultProcessorFeatures ?deletionProtection ?domain
-              ?domainIAMRoleName
+              ?domainIAMRoleName ?domainFqdn ?domainOu ?domainAuthSecretArn
+              ?domainDnsIps:(Option.map ~f:Values.StringList.of_json
+                               domainDnsIps)
               ?replicaMode:(Option.map ~f:Values.ReplicaMode.of_json
-                              replicaMode) ?maxAllocatedStorage
-              ?customIamInstanceProfile ~dBInstanceIdentifier
-              ~sourceDBInstanceIdentifier ())
-           (Some Values.CreateDBInstanceReadReplicaResult.to_json)
+                              replicaMode) ?enableCustomerOwnedIp
+              ?networkType ?maxAllocatedStorage ?backupTarget
+              ?customIamInstanceProfile ?allocatedStorage
+              ?sourceDBClusterIdentifier ?dedicatedLogVolume
+              ?upgradeStorageConfig ?cACertificateIdentifier
+              ?additionalStorageVolumes:(Option.map
+                                           ~f:Values.AdditionalStorageVolumesList.of_json
+                                           additionalStorageVolumes)
+              ?tagSpecifications:(Option.map
+                                    ~f:Values.TagSpecificationList.of_json
+                                    tagSpecifications) ~dBInstanceIdentifier
+              ()) (Some Values.CreateDBInstanceReadReplicaResult.to_json)
            (Some Values.CreateDBInstanceReadReplicaResult.error_to_json)])
 let create_d_b_parameter_group =
   Command.async ~summary:""
@@ -980,6 +1213,11 @@ let create_d_b_proxy =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and defaultAuthScheme =
+         flag "default-auth-scheme" (optional json_arg)
+           ~doc:"JSON DefaultAuthScheme"
+       and auth =
+         flag "auth" (optional json_arg) ~doc:"JSON UserAuthConfigList"
        and vpcSecurityGroupIds =
          flag "vpc-security-group-ids" (optional json_arg)
            ~doc:"JSON StringList"
@@ -990,27 +1228,41 @@ let create_d_b_proxy =
        and debugLogging =
          flag "debug-logging" (optional bool) ~doc:"BOOL Boolean"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and endpointNetworkType =
+         flag "endpoint-network-type" (optional json_arg)
+           ~doc:"JSON EndpointNetworkType"
+       and targetConnectionNetworkType =
+         flag "target-connection-network-type" (optional json_arg)
+           ~doc:"JSON TargetConnectionNetworkType"
        and dBProxyName =
-         flag "d-b-proxy-name" (required string) ~doc:"STRING String"
+         flag "d-b-proxy-name" (required string) ~doc:"STRING DBProxyName"
        and engineFamily =
          flag "engine-family" (required json_arg) ~doc:"JSON EngineFamily"
-       and auth =
-         flag "auth" (required json_arg) ~doc:"JSON UserAuthConfigList"
-       and roleArn = flag "role-arn" (required string) ~doc:"STRING String"
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING Arn"
        and vpcSubnetIds =
          flag "vpc-subnet-ids" (required json_arg) ~doc:"JSON StringList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_d_b_proxy
            (Values.CreateDBProxyRequest.make
+              ?defaultAuthScheme:(Option.map
+                                    ~f:Values.DefaultAuthScheme.of_json
+                                    defaultAuthScheme)
+              ?auth:(Option.map ~f:Values.UserAuthConfigList.of_json auth)
               ?vpcSecurityGroupIds:(Option.map ~f:Values.StringList.of_json
                                       vpcSecurityGroupIds) ?requireTLS
               ?idleClientTimeout ?debugLogging
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~dBProxyName
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?endpointNetworkType:(Option.map
+                                      ~f:Values.EndpointNetworkType.of_json
+                                      endpointNetworkType)
+              ?targetConnectionNetworkType:(Option.map
+                                              ~f:Values.TargetConnectionNetworkType.of_json
+                                              targetConnectionNetworkType)
+              ~dBProxyName
               ~engineFamily:(Values.EngineFamily.of_json engineFamily)
-              ~auth:(Values.UserAuthConfigList.of_json auth) ~roleArn
-              ~vpcSubnetIds:(Values.StringList.of_json vpcSubnetIds) ())
-           (Some Values.CreateDBProxyResponse.to_json)
+              ~roleArn ~vpcSubnetIds:(Values.StringList.of_json vpcSubnetIds)
+              ()) (Some Values.CreateDBProxyResponse.to_json)
            (Some Values.CreateDBProxyResponse.error_to_json)])
 let create_d_b_proxy_endpoint =
   Command.async ~summary:""
@@ -1029,6 +1281,9 @@ let create_d_b_proxy_endpoint =
          flag "target-role" (optional json_arg)
            ~doc:"JSON DBProxyEndpointTargetRole"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and endpointNetworkType =
+         flag "endpoint-network-type" (optional json_arg)
+           ~doc:"JSON EndpointNetworkType"
        and dBProxyName =
          flag "d-b-proxy-name" (required string) ~doc:"STRING DBProxyName"
        and dBProxyEndpointName =
@@ -1045,7 +1300,10 @@ let create_d_b_proxy_endpoint =
               ?targetRole:(Option.map
                              ~f:Values.DBProxyEndpointTargetRole.of_json
                              targetRole)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~dBProxyName
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?endpointNetworkType:(Option.map
+                                      ~f:Values.EndpointNetworkType.of_json
+                                      endpointNetworkType) ~dBProxyName
               ~dBProxyEndpointName
               ~vpcSubnetIds:(Values.StringList.of_json vpcSubnetIds) ())
            (Some Values.CreateDBProxyEndpointResponse.to_json)
@@ -1075,6 +1333,40 @@ let create_d_b_security_group =
               ~dBSecurityGroupName ~dBSecurityGroupDescription ())
            (Some Values.CreateDBSecurityGroupResult.to_json)
            (Some Values.CreateDBSecurityGroupResult.error_to_json)])
+let create_d_b_shard_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and computeRedundancy =
+         flag "compute-redundancy" (optional int) ~doc:"INT IntegerOptional"
+       and minACU =
+         flag "min-a-c-u" (optional float) ~doc:"FLOAT DoubleOptional"
+       and publiclyAccessible =
+         flag "publicly-accessible" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and dBShardGroupIdentifier =
+         flag "d-b-shard-group-identifier" (required string)
+           ~doc:"STRING String"
+       and dBClusterIdentifier =
+         flag "d-b-cluster-identifier" (required string) ~doc:"STRING String"
+       and maxACU =
+         flag "max-a-c-u" (required float) ~doc:"FLOAT DoubleOptional" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_d_b_shard_group
+           (Values.CreateDBShardGroupMessage.make ?computeRedundancy ?minACU
+              ?publiclyAccessible
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~dBShardGroupIdentifier ~dBClusterIdentifier ~maxACU ())
+           (Some Values.DBShardGroup.to_json)
+           (Some Values.DBShardGroup.error_to_json)])
 let create_d_b_snapshot =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1175,30 +1467,74 @@ let create_global_cluster =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and globalClusterIdentifier =
-         flag "global-cluster-identifier" (optional string)
-           ~doc:"STRING String"
        and sourceDBClusterIdentifier =
          flag "source-d-b-cluster-identifier" (optional string)
            ~doc:"STRING String"
        and engine = flag "engine" (optional string) ~doc:"STRING String"
        and engineVersion =
          flag "engine-version" (optional string) ~doc:"STRING String"
+       and engineLifecycleSupport =
+         flag "engine-lifecycle-support" (optional string)
+           ~doc:"STRING String"
        and deletionProtection =
          flag "deletion-protection" (optional bool)
            ~doc:"BOOL BooleanOptional"
        and databaseName =
          flag "database-name" (optional string) ~doc:"STRING String"
        and storageEncrypted =
-         flag "storage-encrypted" (optional bool) ~doc:"BOOL BooleanOptional" in
+         flag "storage-encrypted" (optional bool) ~doc:"BOOL BooleanOptional"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and globalClusterIdentifier =
+         flag "global-cluster-identifier" (required string)
+           ~doc:"STRING GlobalClusterIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_global_cluster
-           (Values.CreateGlobalClusterMessage.make ?globalClusterIdentifier
-              ?sourceDBClusterIdentifier ?engine ?engineVersion
-              ?deletionProtection ?databaseName ?storageEncrypted ())
+           (Values.CreateGlobalClusterMessage.make ?sourceDBClusterIdentifier
+              ?engine ?engineVersion ?engineLifecycleSupport
+              ?deletionProtection ?databaseName ?storageEncrypted
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~globalClusterIdentifier ())
            (Some Values.CreateGlobalClusterResult.to_json)
            (Some Values.CreateGlobalClusterResult.error_to_json)])
+let create_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and kMSKeyId =
+         flag "k-m-s-key-id" (optional string) ~doc:"STRING String"
+       and additionalEncryptionContext =
+         flag "additional-encryption-context" (optional json_arg)
+           ~doc:"JSON EncryptionContextMap"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and dataFilter =
+         flag "data-filter" (optional string) ~doc:"STRING DataFilter"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING IntegrationDescription"
+       and sourceArn =
+         flag "source-arn" (required string) ~doc:"STRING SourceArn"
+       and targetArn = flag "target-arn" (required string) ~doc:"STRING Arn"
+       and integrationName =
+         flag "integration-name" (required string)
+           ~doc:"STRING IntegrationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_integration
+           (Values.CreateIntegrationMessage.make ?kMSKeyId
+              ?additionalEncryptionContext:(Option.map
+                                              ~f:Values.EncryptionContextMap.of_json
+                                              additionalEncryptionContext)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?dataFilter
+              ?description ~sourceArn ~targetArn ~integrationName ())
+           (Some Values.Integration.to_json)
+           (Some Values.Integration.error_to_json)])
 let create_option_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1228,7 +1564,7 @@ let create_option_group =
               ~optionGroupDescription ())
            (Some Values.CreateOptionGroupResult.to_json)
            (Some Values.CreateOptionGroupResult.error_to_json)])
-let delete_custom_availability_zone =
+let create_tenant_database =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1238,16 +1574,60 @@ let delete_custom_availability_zone =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and customAvailabilityZoneId =
-         flag "custom-availability-zone-id" (required string)
-           ~doc:"STRING String" in
+       and masterUserPassword =
+         flag "master-user-password" (optional string)
+           ~doc:"STRING SensitiveString"
+       and characterSetName =
+         flag "character-set-name" (optional string) ~doc:"STRING String"
+       and ncharCharacterSetName =
+         flag "nchar-character-set-name" (optional string)
+           ~doc:"STRING String"
+       and manageMasterUserPassword =
+         flag "manage-master-user-password" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and masterUserSecretKmsKeyId =
+         flag "master-user-secret-kms-key-id" (optional string)
+           ~doc:"STRING String"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and dBInstanceIdentifier =
+         flag "d-b-instance-identifier" (required string)
+           ~doc:"STRING String"
+       and tenantDBName =
+         flag "tenant-d-b-name" (required string) ~doc:"STRING String"
+       and masterUsername =
+         flag "master-username" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_custom_availability_zone
-           (Values.DeleteCustomAvailabilityZoneMessage.make
-              ~customAvailabilityZoneId ())
-           (Some Values.DeleteCustomAvailabilityZoneResult.to_json)
-           (Some Values.DeleteCustomAvailabilityZoneResult.error_to_json)])
+           Io.create_tenant_database
+           (Values.CreateTenantDatabaseMessage.make ?masterUserPassword
+              ?characterSetName ?ncharCharacterSetName
+              ?manageMasterUserPassword ?masterUserSecretKmsKeyId
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~dBInstanceIdentifier ~tenantDBName ~masterUsername ())
+           (Some Values.CreateTenantDatabaseResult.to_json)
+           (Some Values.CreateTenantDatabaseResult.error_to_json)])
+let delete_blue_green_deployment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deleteTarget =
+         flag "delete-target" (optional bool) ~doc:"BOOL BooleanOptional"
+       and blueGreenDeploymentIdentifier =
+         flag "blue-green-deployment-identifier" (required string)
+           ~doc:"STRING BlueGreenDeploymentIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_blue_green_deployment
+           (Values.DeleteBlueGreenDeploymentRequest.make ?deleteTarget
+              ~blueGreenDeploymentIdentifier ())
+           (Some Values.DeleteBlueGreenDeploymentResponse.to_json)
+           (Some Values.DeleteBlueGreenDeploymentResponse.error_to_json)])
 let delete_custom_d_b_engine_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1284,15 +1664,38 @@ let delete_d_b_cluster =
        and finalDBSnapshotIdentifier =
          flag "final-d-b-snapshot-identifier" (optional string)
            ~doc:"STRING String"
+       and deleteAutomatedBackups =
+         flag "delete-automated-backups" (optional bool)
+           ~doc:"BOOL BooleanOptional"
        and dBClusterIdentifier =
          flag "d-b-cluster-identifier" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_d_b_cluster
            (Values.DeleteDBClusterMessage.make ?skipFinalSnapshot
-              ?finalDBSnapshotIdentifier ~dBClusterIdentifier ())
+              ?finalDBSnapshotIdentifier ?deleteAutomatedBackups
+              ~dBClusterIdentifier ())
            (Some Values.DeleteDBClusterResult.to_json)
            (Some Values.DeleteDBClusterResult.error_to_json)])
+let delete_d_b_cluster_automated_backup =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dbClusterResourceId =
+         flag "db-cluster-resource-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_d_b_cluster_automated_backup
+           (Values.DeleteDBClusterAutomatedBackupMessage.make
+              ~dbClusterResourceId ())
+           (Some Values.DeleteDBClusterAutomatedBackupResult.to_json)
+           (Some Values.DeleteDBClusterAutomatedBackupResult.error_to_json)])
 let delete_d_b_cluster_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1431,7 +1834,7 @@ let delete_d_b_proxy =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dBProxyName =
-         flag "d-b-proxy-name" (required string) ~doc:"STRING String" in
+         flag "d-b-proxy-name" (required string) ~doc:"STRING DBProxyName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_d_b_proxy
@@ -1475,6 +1878,25 @@ let delete_d_b_security_group =
            Io.delete_d_b_security_group
            (Values.DeleteDBSecurityGroupMessage.make ~dBSecurityGroupName ())
            None None])
+let delete_d_b_shard_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dBShardGroupIdentifier =
+         flag "d-b-shard-group-identifier" (required string)
+           ~doc:"STRING DBShardGroupIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_d_b_shard_group
+           (Values.DeleteDBShardGroupMessage.make ~dBShardGroupIdentifier ())
+           (Some Values.DBShardGroup.to_json)
+           (Some Values.DBShardGroup.error_to_json)])
 let delete_d_b_snapshot =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1541,14 +1963,14 @@ let delete_global_cluster =
            ~doc:"URL override endpoint url"
        and globalClusterIdentifier =
          flag "global-cluster-identifier" (required string)
-           ~doc:"STRING String" in
+           ~doc:"STRING GlobalClusterIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_global_cluster
            (Values.DeleteGlobalClusterMessage.make ~globalClusterIdentifier
               ()) (Some Values.DeleteGlobalClusterResult.to_json)
            (Some Values.DeleteGlobalClusterResult.error_to_json)])
-let delete_installation_media =
+let delete_integration =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1558,14 +1980,15 @@ let delete_installation_media =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and installationMediaId =
-         flag "installation-media-id" (required string) ~doc:"STRING String" in
+       and integrationIdentifier =
+         flag "integration-identifier" (required string)
+           ~doc:"STRING IntegrationIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_installation_media
-           (Values.DeleteInstallationMediaMessage.make ~installationMediaId
-              ()) (Some Values.InstallationMedia.to_json)
-           (Some Values.InstallationMedia.error_to_json)])
+           Io.delete_integration
+           (Values.DeleteIntegrationMessage.make ~integrationIdentifier ())
+           (Some Values.Integration.to_json)
+           (Some Values.Integration.error_to_json)])
 let delete_option_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1583,6 +2006,33 @@ let delete_option_group =
            Io.delete_option_group
            (Values.DeleteOptionGroupMessage.make ~optionGroupName ()) None
            None])
+let delete_tenant_database =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and skipFinalSnapshot =
+         flag "skip-final-snapshot" (optional bool) ~doc:"BOOL Boolean"
+       and finalDBSnapshotIdentifier =
+         flag "final-d-b-snapshot-identifier" (optional string)
+           ~doc:"STRING String"
+       and dBInstanceIdentifier =
+         flag "d-b-instance-identifier" (required string)
+           ~doc:"STRING String"
+       and tenantDBName =
+         flag "tenant-d-b-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_tenant_database
+           (Values.DeleteTenantDatabaseMessage.make ?skipFinalSnapshot
+              ?finalDBSnapshotIdentifier ~dBInstanceIdentifier ~tenantDBName
+              ()) (Some Values.DeleteTenantDatabaseResult.to_json)
+           (Some Values.DeleteTenantDatabaseResult.error_to_json)])
 let deregister_d_b_proxy_targets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1594,7 +2044,8 @@ let deregister_d_b_proxy_targets =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and targetGroupName =
-         flag "target-group-name" (optional string) ~doc:"STRING String"
+         flag "target-group-name" (optional string)
+           ~doc:"STRING DBProxyTargetGroupName"
        and dBInstanceIdentifiers =
          flag "d-b-instance-identifiers" (optional json_arg)
            ~doc:"JSON StringList"
@@ -1602,7 +2053,7 @@ let deregister_d_b_proxy_targets =
          flag "d-b-cluster-identifiers" (optional json_arg)
            ~doc:"JSON StringList"
        and dBProxyName =
-         flag "d-b-proxy-name" (required string) ~doc:"STRING String" in
+         flag "d-b-proxy-name" (required string) ~doc:"STRING DBProxyName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.deregister_d_b_proxy_targets
@@ -1630,6 +2081,33 @@ let describe_account_attributes =
            (Values.DescribeAccountAttributesMessage.make ())
            (Some Values.AccountAttributesMessage.to_json)
            (Some Values.AccountAttributesMessage.error_to_json)])
+let describe_blue_green_deployments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and blueGreenDeploymentIdentifier =
+         flag "blue-green-deployment-identifier" (optional string)
+           ~doc:"STRING BlueGreenDeploymentIdentifier"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT MaxRecords" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_blue_green_deployments
+           (Values.DescribeBlueGreenDeploymentsRequest.make
+              ?blueGreenDeploymentIdentifier
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?marker ?maxRecords ())
+           (Some Values.DescribeBlueGreenDeploymentsResponse.to_json)
+           (Some Values.DescribeBlueGreenDeploymentsResponse.error_to_json)])
 let describe_certificates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1655,7 +2133,7 @@ let describe_certificates =
               ?maxRecords ?marker ())
            (Some Values.CertificateMessage.to_json)
            (Some Values.CertificateMessage.error_to_json)])
-let describe_custom_availability_zones =
+let describe_d_b_cluster_automated_backups =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1665,9 +2143,10 @@ let describe_custom_availability_zones =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and customAvailabilityZoneId =
-         flag "custom-availability-zone-id" (optional string)
-           ~doc:"STRING String"
+       and dbClusterResourceId =
+         flag "db-cluster-resource-id" (optional string) ~doc:"STRING String"
+       and dBClusterIdentifier =
+         flag "d-b-cluster-identifier" (optional string) ~doc:"STRING String"
        and filters =
          flag "filters" (optional json_arg) ~doc:"JSON FilterList"
        and maxRecords =
@@ -1675,13 +2154,13 @@ let describe_custom_availability_zones =
        and marker = flag "marker" (optional string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_custom_availability_zones
-           (Values.DescribeCustomAvailabilityZonesMessage.make
-              ?customAvailabilityZoneId
+           Io.describe_d_b_cluster_automated_backups
+           (Values.DescribeDBClusterAutomatedBackupsMessage.make
+              ?dbClusterResourceId ?dBClusterIdentifier
               ?filters:(Option.map ~f:Values.FilterList.of_json filters)
               ?maxRecords ?marker ())
-           (Some Values.CustomAvailabilityZoneMessage.to_json)
-           (Some Values.CustomAvailabilityZoneMessage.error_to_json)])
+           (Some Values.DBClusterAutomatedBackupMessage.to_json)
+           (Some Values.DBClusterAutomatedBackupMessage.error_to_json)])
 let describe_d_b_cluster_backtracks =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1839,14 +2318,17 @@ let describe_d_b_cluster_snapshots =
        and includeShared =
          flag "include-shared" (optional bool) ~doc:"BOOL Boolean"
        and includePublic =
-         flag "include-public" (optional bool) ~doc:"BOOL Boolean" in
+         flag "include-public" (optional bool) ~doc:"BOOL Boolean"
+       and dbClusterResourceId =
+         flag "db-cluster-resource-id" (optional string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_d_b_cluster_snapshots
            (Values.DescribeDBClusterSnapshotsMessage.make
               ?dBClusterIdentifier ?dBClusterSnapshotIdentifier ?snapshotType
               ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxRecords ?marker ?includeShared ?includePublic ())
+              ?maxRecords ?marker ?includeShared ?includePublic
+              ?dbClusterResourceId ())
            (Some Values.DBClusterSnapshotMessage.to_json)
            (Some Values.DBClusterSnapshotMessage.error_to_json)])
 let describe_d_b_clusters =
@@ -2008,6 +2490,30 @@ let describe_d_b_log_files =
               ?maxRecords ?marker ~dBInstanceIdentifier ())
            (Some Values.DescribeDBLogFilesResponse.to_json)
            (Some Values.DescribeDBLogFilesResponse.error_to_json)])
+let describe_d_b_major_engine_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and engine = flag "engine" (optional string) ~doc:"STRING Engine"
+       and majorEngineVersion =
+         flag "major-engine-version" (optional string)
+           ~doc:"STRING MajorEngineVersion"
+       and marker = flag "marker" (optional string) ~doc:"STRING Marker"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT MaxRecords" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_d_b_major_engine_versions
+           (Values.DescribeDBMajorEngineVersionsRequest.make ?engine
+              ?majorEngineVersion ?marker ?maxRecords ())
+           (Some Values.DescribeDBMajorEngineVersionsResponse.to_json)
+           (Some Values.DescribeDBMajorEngineVersionsResponse.error_to_json)])
 let describe_d_b_parameter_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2073,7 +2579,7 @@ let describe_d_b_proxies =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dBProxyName =
-         flag "d-b-proxy-name" (optional string) ~doc:"STRING String"
+         flag "d-b-proxy-name" (optional string) ~doc:"STRING DBProxyName"
        and filters =
          flag "filters" (optional json_arg) ~doc:"JSON FilterList"
        and marker = flag "marker" (optional string) ~doc:"STRING String"
@@ -2127,14 +2633,15 @@ let describe_d_b_proxy_target_groups =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and targetGroupName =
-         flag "target-group-name" (optional string) ~doc:"STRING String"
+         flag "target-group-name" (optional string)
+           ~doc:"STRING DBProxyTargetGroupName"
        and filters =
          flag "filters" (optional json_arg) ~doc:"JSON FilterList"
        and marker = flag "marker" (optional string) ~doc:"STRING String"
        and maxRecords =
          flag "max-records" (optional int) ~doc:"INT MaxRecords"
        and dBProxyName =
-         flag "d-b-proxy-name" (required string) ~doc:"STRING String" in
+         flag "d-b-proxy-name" (required string) ~doc:"STRING DBProxyName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_d_b_proxy_target_groups
@@ -2154,14 +2661,15 @@ let describe_d_b_proxy_targets =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and targetGroupName =
-         flag "target-group-name" (optional string) ~doc:"STRING String"
+         flag "target-group-name" (optional string)
+           ~doc:"STRING DBProxyTargetGroupName"
        and filters =
          flag "filters" (optional json_arg) ~doc:"JSON FilterList"
        and marker = flag "marker" (optional string) ~doc:"STRING String"
        and maxRecords =
          flag "max-records" (optional int) ~doc:"INT MaxRecords"
        and dBProxyName =
-         flag "d-b-proxy-name" (required string) ~doc:"STRING String" in
+         flag "d-b-proxy-name" (required string) ~doc:"STRING DBProxyName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_d_b_proxy_targets
@@ -2170,6 +2678,38 @@ let describe_d_b_proxy_targets =
               ?marker ?maxRecords ~dBProxyName ())
            (Some Values.DescribeDBProxyTargetsResponse.to_json)
            (Some Values.DescribeDBProxyTargetsResponse.error_to_json)])
+let describe_d_b_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lastUpdatedAfter =
+         flag "last-updated-after" (optional json_arg) ~doc:"JSON TStamp"
+       and lastUpdatedBefore =
+         flag "last-updated-before" (optional json_arg) ~doc:"JSON TStamp"
+       and locale = flag "locale" (optional string) ~doc:"STRING String"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_d_b_recommendations
+           (Values.DescribeDBRecommendationsMessage.make
+              ?lastUpdatedAfter:(Option.map ~f:Values.TStamp.of_json
+                                   lastUpdatedAfter)
+              ?lastUpdatedBefore:(Option.map ~f:Values.TStamp.of_json
+                                    lastUpdatedBefore) ?locale
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?marker ())
+           (Some Values.DBRecommendationsMessage.to_json)
+           (Some Values.DBRecommendationsMessage.error_to_json)])
 let describe_d_b_security_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2196,6 +2736,32 @@ let describe_d_b_security_groups =
               ?maxRecords ?marker ())
            (Some Values.DBSecurityGroupMessage.to_json)
            (Some Values.DBSecurityGroupMessage.error_to_json)])
+let describe_d_b_shard_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dBShardGroupIdentifier =
+         flag "d-b-shard-group-identifier" (optional string)
+           ~doc:"STRING DBShardGroupIdentifier"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT MaxRecords" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_d_b_shard_groups
+           (Values.DescribeDBShardGroupsMessage.make ?dBShardGroupIdentifier
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?marker ?maxRecords ())
+           (Some Values.DescribeDBShardGroupsResponse.to_json)
+           (Some Values.DescribeDBShardGroupsResponse.error_to_json)])
 let describe_d_b_snapshot_attributes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2216,3 +2782,37 @@ let describe_d_b_snapshot_attributes =
               ~dBSnapshotIdentifier ())
            (Some Values.DescribeDBSnapshotAttributesResult.to_json)
            (Some Values.DescribeDBSnapshotAttributesResult.error_to_json)])
+let describe_d_b_snapshot_tenant_databases =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dBInstanceIdentifier =
+         flag "d-b-instance-identifier" (optional string)
+           ~doc:"STRING String"
+       and dBSnapshotIdentifier =
+         flag "d-b-snapshot-identifier" (optional string)
+           ~doc:"STRING String"
+       and snapshotType =
+         flag "snapshot-type" (optional string) ~doc:"STRING String"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and dbiResourceId =
+         flag "dbi-resource-id" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_d_b_snapshot_tenant_databases
+           (Values.DescribeDBSnapshotTenantDatabasesMessage.make
+              ?dBInstanceIdentifier ?dBSnapshotIdentifier ?snapshotType
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?marker ?dbiResourceId ())
+           (Some Values.DBSnapshotTenantDatabasesMessage.to_json)
+           (Some Values.DBSnapshotTenantDatabasesMessage.error_to_json)])

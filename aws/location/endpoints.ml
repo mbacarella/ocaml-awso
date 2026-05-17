@@ -24,9 +24,13 @@ type ('i, 'o, 'e) t =
   CalculateRouteResponse.error) t 
   | CalculateRouteMatrix: (CalculateRouteMatrixRequest.t,
   CalculateRouteMatrixResponse.t, CalculateRouteMatrixResponse.error) t 
+  | CancelJob: (CancelJobRequest.t, CancelJobResponse.t,
+  CancelJobResponse.error) t 
   | CreateGeofenceCollection: (CreateGeofenceCollectionRequest.t,
   CreateGeofenceCollectionResponse.t, CreateGeofenceCollectionResponse.error)
   t 
+  | CreateKey: (CreateKeyRequest.t, CreateKeyResponse.t,
+  CreateKeyResponse.error) t 
   | CreateMap: (CreateMapRequest.t, CreateMapResponse.t,
   CreateMapResponse.error) t 
   | CreatePlaceIndex: (CreatePlaceIndexRequest.t, CreatePlaceIndexResponse.t,
@@ -38,6 +42,8 @@ type ('i, 'o, 'e) t =
   | DeleteGeofenceCollection: (DeleteGeofenceCollectionRequest.t,
   DeleteGeofenceCollectionResponse.t, DeleteGeofenceCollectionResponse.error)
   t 
+  | DeleteKey: (DeleteKeyRequest.t, DeleteKeyResponse.t,
+  DeleteKeyResponse.error) t 
   | DeleteMap: (DeleteMapRequest.t, DeleteMapResponse.t,
   DeleteMapResponse.error) t 
   | DeletePlaceIndex: (DeletePlaceIndexRequest.t, DeletePlaceIndexResponse.t,
@@ -49,6 +55,8 @@ type ('i, 'o, 'e) t =
   | DescribeGeofenceCollection: (DescribeGeofenceCollectionRequest.t,
   DescribeGeofenceCollectionResponse.t,
   DescribeGeofenceCollectionResponse.error) t 
+  | DescribeKey: (DescribeKeyRequest.t, DescribeKeyResponse.t,
+  DescribeKeyResponse.error) t 
   | DescribeMap: (DescribeMapRequest.t, DescribeMapResponse.t,
   DescribeMapResponse.error) t 
   | DescribePlaceIndex: (DescribePlaceIndexRequest.t,
@@ -61,6 +69,8 @@ type ('i, 'o, 'e) t =
   | DisassociateTrackerConsumer: (DisassociateTrackerConsumerRequest.t,
   DisassociateTrackerConsumerResponse.t,
   DisassociateTrackerConsumerResponse.error) t 
+  | ForecastGeofenceEvents: (ForecastGeofenceEventsRequest.t,
+  ForecastGeofenceEventsResponse.t, ForecastGeofenceEventsResponse.error) t 
   | GetDevicePosition: (GetDevicePositionRequest.t,
   GetDevicePositionResponse.t, GetDevicePositionResponse.error) t 
   | GetDevicePositionHistory: (GetDevicePositionHistoryRequest.t,
@@ -68,6 +78,7 @@ type ('i, 'o, 'e) t =
   t 
   | GetGeofence: (GetGeofenceRequest.t, GetGeofenceResponse.t,
   GetGeofenceResponse.error) t 
+  | GetJob: (GetJobRequest.t, GetJobResponse.t, GetJobResponse.error) t 
   | GetMapGlyphs: (GetMapGlyphsRequest.t, GetMapGlyphsResponse.t,
   GetMapGlyphsResponse.error) t 
   | GetMapSprites: (GetMapSpritesRequest.t, GetMapSpritesResponse.t,
@@ -76,6 +87,8 @@ type ('i, 'o, 'e) t =
   GetMapStyleDescriptorResponse.t, GetMapStyleDescriptorResponse.error) t 
   | GetMapTile: (GetMapTileRequest.t, GetMapTileResponse.t,
   GetMapTileResponse.error) t 
+  | GetPlace: (GetPlaceRequest.t, GetPlaceResponse.t, GetPlaceResponse.error)
+  t 
   | ListDevicePositions: (ListDevicePositionsRequest.t,
   ListDevicePositionsResponse.t, ListDevicePositionsResponse.error) t 
   | ListGeofenceCollections: (ListGeofenceCollectionsRequest.t,
@@ -83,6 +96,10 @@ type ('i, 'o, 'e) t =
   
   | ListGeofences: (ListGeofencesRequest.t, ListGeofencesResponse.t,
   ListGeofencesResponse.error) t 
+  | ListJobs: (ListJobsRequest.t, ListJobsResponse.t, ListJobsResponse.error)
+  t 
+  | ListKeys: (ListKeysRequest.t, ListKeysResponse.t, ListKeysResponse.error)
+  t 
   | ListMaps: (ListMapsRequest.t, ListMapsResponse.t, ListMapsResponse.error)
   t 
   | ListPlaceIndexes: (ListPlaceIndexesRequest.t, ListPlaceIndexesResponse.t,
@@ -106,6 +123,8 @@ type ('i, 'o, 'e) t =
   | SearchPlaceIndexForText: (SearchPlaceIndexForTextRequest.t,
   SearchPlaceIndexForTextResponse.t, SearchPlaceIndexForTextResponse.error) t
   
+  | StartJob: (StartJobRequest.t, StartJobResponse.t, StartJobResponse.error)
+  t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -113,6 +132,8 @@ type ('i, 'o, 'e) t =
   | UpdateGeofenceCollection: (UpdateGeofenceCollectionRequest.t,
   UpdateGeofenceCollectionResponse.t, UpdateGeofenceCollectionResponse.error)
   t 
+  | UpdateKey: (UpdateKeyRequest.t, UpdateKeyResponse.t,
+  UpdateKeyResponse.error) t 
   | UpdateMap: (UpdateMapRequest.t, UpdateMapResponse.t,
   UpdateMapResponse.error) t 
   | UpdatePlaceIndex: (UpdatePlaceIndexRequest.t, UpdatePlaceIndexResponse.t,
@@ -121,6 +142,8 @@ type ('i, 'o, 'e) t =
   UpdateRouteCalculatorResponse.t, UpdateRouteCalculatorResponse.error) t 
   | UpdateTracker: (UpdateTrackerRequest.t, UpdateTrackerResponse.t,
   UpdateTrackerResponse.error) t 
+  | VerifyDevicePosition: (VerifyDevicePositionRequest.t,
+  VerifyDevicePositionResponse.t, VerifyDevicePositionResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateTrackerConsumer -> `POST
@@ -132,32 +155,41 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | BatchUpdateDevicePosition -> `POST
   | CalculateRoute -> `POST
   | CalculateRouteMatrix -> `POST
+  | CancelJob -> `POST
   | CreateGeofenceCollection -> `POST
+  | CreateKey -> `POST
   | CreateMap -> `POST
   | CreatePlaceIndex -> `POST
   | CreateRouteCalculator -> `POST
   | CreateTracker -> `POST
   | DeleteGeofenceCollection -> `DELETE
+  | DeleteKey -> `DELETE
   | DeleteMap -> `DELETE
   | DeletePlaceIndex -> `DELETE
   | DeleteRouteCalculator -> `DELETE
   | DeleteTracker -> `DELETE
   | DescribeGeofenceCollection -> `GET
+  | DescribeKey -> `GET
   | DescribeMap -> `GET
   | DescribePlaceIndex -> `GET
   | DescribeRouteCalculator -> `GET
   | DescribeTracker -> `GET
   | DisassociateTrackerConsumer -> `DELETE
+  | ForecastGeofenceEvents -> `POST
   | GetDevicePosition -> `GET
   | GetDevicePositionHistory -> `POST
   | GetGeofence -> `GET
+  | GetJob -> `GET
   | GetMapGlyphs -> `GET
   | GetMapSprites -> `GET
   | GetMapStyleDescriptor -> `GET
   | GetMapTile -> `GET
+  | GetPlace -> `GET
   | ListDevicePositions -> `POST
   | ListGeofenceCollections -> `POST
   | ListGeofences -> `POST
+  | ListJobs -> `POST
+  | ListKeys -> `POST
   | ListMaps -> `POST
   | ListPlaceIndexes -> `POST
   | ListRouteCalculators -> `POST
@@ -168,13 +200,16 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | SearchPlaceIndexForPosition -> `POST
   | SearchPlaceIndexForSuggestions -> `POST
   | SearchPlaceIndexForText -> `POST
+  | StartJob -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateGeofenceCollection -> `PATCH
+  | UpdateKey -> `PATCH
   | UpdateMap -> `PATCH
   | UpdatePlaceIndex -> `PATCH
   | UpdateRouteCalculator -> `PATCH
   | UpdateTracker -> `PATCH
+  | VerifyDevicePosition -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -213,16 +248,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ResourceName.to_header
                x.BatchUpdateDevicePositionRequest.trackerName)
       | CalculateRoute ->
-          (Format.kasprintf Uri.of_string)
-            "/routes/v0/calculators/%s/calculate/route"
-            (ResourceName.to_header x.CalculateRouteRequest.calculatorName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/routes/v0/calculators/%s/calculate/route"
+               (ResourceName.to_header x.CalculateRouteRequest.calculatorName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
       | CalculateRouteMatrix ->
-          (Format.kasprintf Uri.of_string)
-            "/routes/v0/calculators/%s/calculate/route-matrix"
-            (ResourceName.to_header
-               x.CalculateRouteMatrixRequest.calculatorName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/routes/v0/calculators/%s/calculate/route-matrix"
+               (ResourceName.to_header
+                  x.CalculateRouteMatrixRequest.calculatorName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
+      | CancelJob ->
+          (Format.kasprintf Uri.of_string) "/metadata/v0/jobs/cancel-job"
       | CreateGeofenceCollection ->
           (Format.kasprintf Uri.of_string) "/geofencing/v0/collections"
+      | CreateKey -> (Format.kasprintf Uri.of_string) "/metadata/v0/keys"
       | CreateMap -> (Format.kasprintf Uri.of_string) "/maps/v0/maps"
       | CreatePlaceIndex ->
           (Format.kasprintf Uri.of_string) "/places/v0/indexes"
@@ -234,6 +278,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/geofencing/v0/collections/%s"
             (ResourceName.to_header
                x.DeleteGeofenceCollectionRequest.collectionName)
+      | DeleteKey ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/metadata/v0/keys/%s"
+               (ResourceName.to_header x.DeleteKeyRequest.keyName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("forceDelete", (Boolean.to_header v)))
+                  x.forceDelete])
       | DeleteMap ->
           (Format.kasprintf Uri.of_string) "/maps/v0/maps/%s"
             (ResourceName.to_header x.DeleteMapRequest.mapName)
@@ -251,6 +303,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/geofencing/v0/collections/%s"
             (ResourceName.to_header
                x.DescribeGeofenceCollectionRequest.collectionName)
+      | DescribeKey ->
+          (Format.kasprintf Uri.of_string) "/metadata/v0/keys/%s"
+            (ResourceName.to_header x.DescribeKeyRequest.keyName)
       | DescribeMap ->
           (Format.kasprintf Uri.of_string) "/maps/v0/maps/%s"
             (ResourceName.to_header x.DescribeMapRequest.mapName)
@@ -270,6 +325,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ResourceName.to_header
                x.DisassociateTrackerConsumerRequest.trackerName)
             (Arn.to_header x.DisassociateTrackerConsumerRequest.consumerArn)
+      | ForecastGeofenceEvents ->
+          (Format.kasprintf Uri.of_string)
+            "/geofencing/v0/collections/%s/forecast-geofence-events"
+            (ResourceName.to_header
+               x.ForecastGeofenceEventsRequest.collectionName)
       | GetDevicePosition ->
           (Format.kasprintf Uri.of_string)
             "/tracking/v0/trackers/%s/devices/%s/positions/latest"
@@ -286,27 +346,54 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/geofencing/v0/collections/%s/geofences/%s"
             (ResourceName.to_header x.GetGeofenceRequest.collectionName)
             (Id.to_header x.GetGeofenceRequest.geofenceId)
+      | GetJob ->
+          (Format.kasprintf Uri.of_string) "/metadata/v0/jobs/%s"
+            (JobId.to_header x.GetJobRequest.jobId)
       | GetMapGlyphs ->
-          (Format.kasprintf Uri.of_string) "/maps/v0/maps/%s/glyphs/%s/%s"
-            (ResourceName.to_header x.GetMapGlyphsRequest.mapName)
-            (String_.to_header x.GetMapGlyphsRequest.fontStack)
-            (GetMapGlyphsRequestFontUnicodeRangeString.to_header
-               x.GetMapGlyphsRequest.fontUnicodeRange)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/maps/v0/maps/%s/glyphs/%s/%s"
+               (ResourceName.to_header x.GetMapGlyphsRequest.mapName)
+               (String_.to_header x.GetMapGlyphsRequest.fontStack)
+               (GetMapGlyphsRequestFontUnicodeRangeString.to_header
+                  x.GetMapGlyphsRequest.fontUnicodeRange))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
       | GetMapSprites ->
-          (Format.kasprintf Uri.of_string) "/maps/v0/maps/%s/sprites/%s"
-            (ResourceName.to_header x.GetMapSpritesRequest.mapName)
-            (GetMapSpritesRequestFileNameString.to_header
-               x.GetMapSpritesRequest.fileName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/maps/v0/maps/%s/sprites/%s"
+               (ResourceName.to_header x.GetMapSpritesRequest.mapName)
+               (GetMapSpritesRequestFileNameString.to_header
+                  x.GetMapSpritesRequest.fileName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
       | GetMapStyleDescriptor ->
-          (Format.kasprintf Uri.of_string)
-            "/maps/v0/maps/%s/style-descriptor"
-            (ResourceName.to_header x.GetMapStyleDescriptorRequest.mapName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/maps/v0/maps/%s/style-descriptor"
+               (ResourceName.to_header x.GetMapStyleDescriptorRequest.mapName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
       | GetMapTile ->
-          (Format.kasprintf Uri.of_string) "/maps/v0/maps/%s/tiles/%s/%s/%s"
-            (ResourceName.to_header x.GetMapTileRequest.mapName)
-            (GetMapTileRequestZString.to_header x.GetMapTileRequest.z)
-            (GetMapTileRequestXString.to_header x.GetMapTileRequest.x)
-            (GetMapTileRequestYString.to_header x.GetMapTileRequest.y)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/maps/v0/maps/%s/tiles/%s/%s/%s"
+               (ResourceName.to_header x.GetMapTileRequest.mapName)
+               (GetMapTileRequestZString.to_header x.GetMapTileRequest.z)
+               (GetMapTileRequestXString.to_header x.GetMapTileRequest.x)
+               (GetMapTileRequestYString.to_header x.GetMapTileRequest.y))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
+      | GetPlace ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/places/v0/indexes/%s/places/%s"
+               (ResourceName.to_header x.GetPlaceRequest.indexName)
+               (PlaceId.to_header x.GetPlaceRequest.placeId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("language", (LanguageTag.to_header v)))
+                  x.language;
+               Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
       | ListDevicePositions ->
           (Format.kasprintf Uri.of_string)
             "/tracking/v0/trackers/%s/list-positions"
@@ -317,6 +404,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/geofencing/v0/collections/%s/list-geofences"
             (ResourceName.to_header x.ListGeofencesRequest.collectionName)
+      | ListJobs ->
+          (Format.kasprintf Uri.of_string) "/metadata/v0/jobs/list-jobs"
+      | ListKeys -> (Format.kasprintf Uri.of_string) "/metadata/v0/list-keys"
       | ListMaps -> (Format.kasprintf Uri.of_string) "/maps/v0/list-maps"
       | ListPlaceIndexes ->
           (Format.kasprintf Uri.of_string) "/places/v0/list-indexes"
@@ -337,20 +427,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ResourceName.to_header x.PutGeofenceRequest.collectionName)
             (Id.to_header x.PutGeofenceRequest.geofenceId)
       | SearchPlaceIndexForPosition ->
-          (Format.kasprintf Uri.of_string)
-            "/places/v0/indexes/%s/search/position"
-            (ResourceName.to_header
-               x.SearchPlaceIndexForPositionRequest.indexName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/places/v0/indexes/%s/search/position"
+               (ResourceName.to_header
+                  x.SearchPlaceIndexForPositionRequest.indexName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
       | SearchPlaceIndexForSuggestions ->
-          (Format.kasprintf Uri.of_string)
-            "/places/v0/indexes/%s/search/suggestions"
-            (ResourceName.to_header
-               x.SearchPlaceIndexForSuggestionsRequest.indexName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/places/v0/indexes/%s/search/suggestions"
+               (ResourceName.to_header
+                  x.SearchPlaceIndexForSuggestionsRequest.indexName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
       | SearchPlaceIndexForText ->
-          (Format.kasprintf Uri.of_string)
-            "/places/v0/indexes/%s/search/text"
-            (ResourceName.to_header
-               x.SearchPlaceIndexForTextRequest.indexName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/places/v0/indexes/%s/search/text"
+               (ResourceName.to_header
+                  x.SearchPlaceIndexForTextRequest.indexName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("key", (ApiKey.to_header v))) x.key])
+      | StartJob -> (Format.kasprintf Uri.of_string) "/metadata/v0/jobs"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.TagResourceRequest.resourceArn)
@@ -364,6 +464,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/geofencing/v0/collections/%s"
             (ResourceName.to_header
                x.UpdateGeofenceCollectionRequest.collectionName)
+      | UpdateKey ->
+          (Format.kasprintf Uri.of_string) "/metadata/v0/keys/%s"
+            (ResourceName.to_header x.UpdateKeyRequest.keyName)
       | UpdateMap ->
           (Format.kasprintf Uri.of_string) "/maps/v0/maps/%s"
             (ResourceName.to_header x.UpdateMapRequest.mapName)
@@ -376,7 +479,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.UpdateRouteCalculatorRequest.calculatorName)
       | UpdateTracker ->
           (Format.kasprintf Uri.of_string) "/tracking/v0/trackers/%s"
-            (ResourceName.to_header x.UpdateTrackerRequest.trackerName))
+            (ResourceName.to_header x.UpdateTrackerRequest.trackerName)
+      | VerifyDevicePosition ->
+          (Format.kasprintf Uri.of_string)
+            "/tracking/v0/trackers/%s/positions/verify"
+            (ResourceName.to_header x.VerifyDevicePositionRequest.trackerName))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -530,40 +637,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.CalculateRouteRequest.carModeOptions
-                         ~f:(fun x ->
-                               ("CarModeOptions",
-                                 (CalculateRouteCarModeOptions.to_value x)));
-                      Option.map req.CalculateRouteRequest.departNow
-                        ~f:(fun x -> ("DepartNow", (Boolean.to_value x)));
-                      Some
-                        ("DeparturePosition",
-                          (Position.to_value
-                             req.CalculateRouteRequest.departurePosition));
-                      Option.map req.CalculateRouteRequest.departureTime
-                        ~f:(fun x ->
-                              ("DepartureTime", (Timestamp.to_value x)));
+                      [Some
+                         ("DeparturePosition",
+                           (Position.to_value
+                              req.CalculateRouteRequest.departurePosition));
                       Some
                         ("DestinationPosition",
                           (Position.to_value
                              req.CalculateRouteRequest.destinationPosition));
+                      Option.map req.CalculateRouteRequest.waypointPositions
+                        ~f:(fun x ->
+                              ("WaypointPositions",
+                                (CalculateRouteRequestWaypointPositionsList.to_value
+                                   x)));
+                      Option.map req.CalculateRouteRequest.travelMode
+                        ~f:(fun x -> ("TravelMode", (TravelMode.to_value x)));
+                      Option.map req.CalculateRouteRequest.departureTime
+                        ~f:(fun x ->
+                              ("DepartureTime", (Timestamp.to_value x)));
+                      Option.map req.CalculateRouteRequest.departNow
+                        ~f:(fun x ->
+                              ("DepartNow", (SensitiveBoolean.to_value x)));
                       Option.map req.CalculateRouteRequest.distanceUnit
                         ~f:(fun x ->
                               ("DistanceUnit", (DistanceUnit.to_value x)));
                       Option.map req.CalculateRouteRequest.includeLegGeometry
                         ~f:(fun x ->
-                              ("IncludeLegGeometry", (Boolean.to_value x)));
-                      Option.map req.CalculateRouteRequest.travelMode
-                        ~f:(fun x -> ("TravelMode", (TravelMode.to_value x)));
+                              ("IncludeLegGeometry",
+                                (SensitiveBoolean.to_value x)));
+                      Option.map req.CalculateRouteRequest.carModeOptions
+                        ~f:(fun x ->
+                              ("CarModeOptions",
+                                (CalculateRouteCarModeOptions.to_value x)));
                       Option.map req.CalculateRouteRequest.truckModeOptions
                         ~f:(fun x ->
                               ("TruckModeOptions",
                                 (CalculateRouteTruckModeOptions.to_value x)));
-                      Option.map req.CalculateRouteRequest.waypointPositions
+                      Option.map req.CalculateRouteRequest.arrivalTime
+                        ~f:(fun x -> ("ArrivalTime", (Timestamp.to_value x)));
+                      Option.map req.CalculateRouteRequest.optimizeFor
                         ~f:(fun x ->
-                              ("WaypointPositions",
-                                (CalculateRouteRequestWaypointPositionsList.to_value
-                                   x)))])
+                              ("OptimizeFor", (OptimizationMode.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -580,35 +694,55 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CalculateRouteMatrixRequest.carModeOptions
-                         ~f:(fun x ->
-                               ("CarModeOptions",
-                                 (CalculateRouteCarModeOptions.to_value x)));
-                      Option.map req.CalculateRouteMatrixRequest.departNow
-                        ~f:(fun x -> ("DepartNow", (Boolean.to_value x)));
-                      Some
-                        ("DeparturePositions",
-                          (CalculateRouteMatrixRequestDeparturePositionsList.to_value
-                             req.CalculateRouteMatrixRequest.departurePositions));
-                      Option.map
-                        req.CalculateRouteMatrixRequest.departureTime
-                        ~f:(fun x ->
-                              ("DepartureTime", (Timestamp.to_value x)));
+                      [Some
+                         ("DeparturePositions",
+                           (CalculateRouteMatrixRequestDeparturePositionsList.to_value
+                              req.CalculateRouteMatrixRequest.departurePositions));
                       Some
                         ("DestinationPositions",
                           (CalculateRouteMatrixRequestDestinationPositionsList.to_value
                              req.CalculateRouteMatrixRequest.destinationPositions));
+                      Option.map req.CalculateRouteMatrixRequest.travelMode
+                        ~f:(fun x -> ("TravelMode", (TravelMode.to_value x)));
+                      Option.map
+                        req.CalculateRouteMatrixRequest.departureTime
+                        ~f:(fun x ->
+                              ("DepartureTime", (Timestamp.to_value x)));
+                      Option.map req.CalculateRouteMatrixRequest.departNow
+                        ~f:(fun x ->
+                              ("DepartNow", (SensitiveBoolean.to_value x)));
                       Option.map req.CalculateRouteMatrixRequest.distanceUnit
                         ~f:(fun x ->
                               ("DistanceUnit", (DistanceUnit.to_value x)));
-                      Option.map req.CalculateRouteMatrixRequest.travelMode
-                        ~f:(fun x -> ("TravelMode", (TravelMode.to_value x)));
+                      Option.map
+                        req.CalculateRouteMatrixRequest.carModeOptions
+                        ~f:(fun x ->
+                              ("CarModeOptions",
+                                (CalculateRouteCarModeOptions.to_value x)));
                       Option.map
                         req.CalculateRouteMatrixRequest.truckModeOptions
                         ~f:(fun x ->
                               ("TruckModeOptions",
                                 (CalculateRouteTruckModeOptions.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CancelJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("JobId",
+                           (JobId.to_value req.CancelJobRequest.jobId))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -630,13 +764,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (ResourceName.to_value
                               req.CreateGeofenceCollectionRequest.collectionName));
                       Option.map
-                        req.CreateGeofenceCollectionRequest.description
-                        ~f:(fun x ->
-                              ("Description",
-                                (ResourceDescription.to_value x)));
-                      Option.map req.CreateGeofenceCollectionRequest.kmsKeyId
-                        ~f:(fun x -> ("KmsKeyId", (KmsKeyId.to_value x)));
-                      Option.map
                         req.CreateGeofenceCollectionRequest.pricingPlan
                         ~f:(fun x ->
                               ("PricingPlan", (PricingPlan.to_value x)));
@@ -644,7 +771,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateGeofenceCollectionRequest.pricingPlanDataSource
                         ~f:(fun x ->
                               ("PricingPlanDataSource", (String_.to_value x)));
+                      Option.map
+                        req.CreateGeofenceCollectionRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (ResourceDescription.to_value x)));
                       Option.map req.CreateGeofenceCollectionRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map req.CreateGeofenceCollectionRequest.kmsKeyId
+                        ~f:(fun x -> ("KmsKeyId", (KmsKeyId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateKey ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("KeyName",
+                           (ResourceName.to_value
+                              req.CreateKeyRequest.keyName));
+                      Some
+                        ("Restrictions",
+                          (ApiKeyRestrictions.to_value
+                             req.CreateKeyRequest.restrictions));
+                      Option.map req.CreateKeyRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (ResourceDescription.to_value x)));
+                      Option.map req.CreateKeyRequest.expireTime
+                        ~f:(fun x -> ("ExpireTime", (Timestamp.to_value x)));
+                      Option.map req.CreateKeyRequest.noExpiry
+                        ~f:(fun x -> ("NoExpiry", (Boolean.to_value x)));
+                      Option.map req.CreateKeyRequest.tags
                         ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -663,19 +831,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("Configuration",
-                           (MapConfiguration.to_value
-                              req.CreateMapRequest.configuration));
+                         ("MapName",
+                           (ResourceName.to_value
+                              req.CreateMapRequest.mapName));
+                      Some
+                        ("Configuration",
+                          (MapConfiguration.to_value
+                             req.CreateMapRequest.configuration));
+                      Option.map req.CreateMapRequest.pricingPlan
+                        ~f:(fun x ->
+                              ("PricingPlan", (PricingPlan.to_value x)));
                       Option.map req.CreateMapRequest.description
                         ~f:(fun x ->
                               ("Description",
                                 (ResourceDescription.to_value x)));
-                      Some
-                        ("MapName",
-                          (ResourceName.to_value req.CreateMapRequest.mapName));
-                      Option.map req.CreateMapRequest.pricingPlan
-                        ~f:(fun x ->
-                              ("PricingPlan", (PricingPlan.to_value x)));
                       Option.map req.CreateMapRequest.tags
                         ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -695,25 +864,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("DataSource",
-                           (String_.to_value
-                              req.CreatePlaceIndexRequest.dataSource));
+                         ("IndexName",
+                           (ResourceName.to_value
+                              req.CreatePlaceIndexRequest.indexName));
+                      Some
+                        ("DataSource",
+                          (String_.to_value
+                             req.CreatePlaceIndexRequest.dataSource));
+                      Option.map req.CreatePlaceIndexRequest.pricingPlan
+                        ~f:(fun x ->
+                              ("PricingPlan", (PricingPlan.to_value x)));
+                      Option.map req.CreatePlaceIndexRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (ResourceDescription.to_value x)));
                       Option.map
                         req.CreatePlaceIndexRequest.dataSourceConfiguration
                         ~f:(fun x ->
                               ("DataSourceConfiguration",
                                 (DataSourceConfiguration.to_value x)));
-                      Option.map req.CreatePlaceIndexRequest.description
-                        ~f:(fun x ->
-                              ("Description",
-                                (ResourceDescription.to_value x)));
-                      Some
-                        ("IndexName",
-                          (ResourceName.to_value
-                             req.CreatePlaceIndexRequest.indexName));
-                      Option.map req.CreatePlaceIndexRequest.pricingPlan
-                        ~f:(fun x ->
-                              ("PricingPlan", (PricingPlan.to_value x)));
                       Option.map req.CreatePlaceIndexRequest.tags
                         ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -740,13 +909,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("DataSource",
                           (String_.to_value
                              req.CreateRouteCalculatorRequest.dataSource));
+                      Option.map req.CreateRouteCalculatorRequest.pricingPlan
+                        ~f:(fun x ->
+                              ("PricingPlan", (PricingPlan.to_value x)));
                       Option.map req.CreateRouteCalculatorRequest.description
                         ~f:(fun x ->
                               ("Description",
                                 (ResourceDescription.to_value x)));
-                      Option.map req.CreateRouteCalculatorRequest.pricingPlan
-                        ~f:(fun x ->
-                              ("PricingPlan", (PricingPlan.to_value x)));
                       Option.map req.CreateRouteCalculatorRequest.tags
                         ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -765,29 +934,37 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.CreateTrackerRequest.description
-                         ~f:(fun x ->
-                               ("Description",
-                                 (ResourceDescription.to_value x)));
-                      Option.map req.CreateTrackerRequest.kmsKeyId
-                        ~f:(fun x -> ("KmsKeyId", (KmsKeyId.to_value x)));
-                      Option.map req.CreateTrackerRequest.positionFiltering
-                        ~f:(fun x ->
-                              ("PositionFiltering",
-                                (PositionFiltering.to_value x)));
+                      [Some
+                         ("TrackerName",
+                           (ResourceName.to_value
+                              req.CreateTrackerRequest.trackerName));
                       Option.map req.CreateTrackerRequest.pricingPlan
                         ~f:(fun x ->
                               ("PricingPlan", (PricingPlan.to_value x)));
+                      Option.map req.CreateTrackerRequest.kmsKeyId
+                        ~f:(fun x -> ("KmsKeyId", (KmsKeyId.to_value x)));
                       Option.map
                         req.CreateTrackerRequest.pricingPlanDataSource
                         ~f:(fun x ->
                               ("PricingPlanDataSource", (String_.to_value x)));
+                      Option.map req.CreateTrackerRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (ResourceDescription.to_value x)));
                       Option.map req.CreateTrackerRequest.tags
                         ~f:(fun x -> ("Tags", (TagMap.to_value x)));
-                      Some
-                        ("TrackerName",
-                          (ResourceName.to_value
-                             req.CreateTrackerRequest.trackerName))])
+                      Option.map req.CreateTrackerRequest.positionFiltering
+                        ~f:(fun x ->
+                              ("PositionFiltering",
+                                (PositionFiltering.to_value x)));
+                      Option.map req.CreateTrackerRequest.eventBridgeEnabled
+                        ~f:(fun x ->
+                              ("EventBridgeEnabled", (Boolean.to_value x)));
+                      Option.map
+                        req.CreateTrackerRequest.kmsKeyEnableGeospatialQueries
+                        ~f:(fun x ->
+                              ("KmsKeyEnableGeospatialQueries",
+                                (Boolean.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -797,11 +974,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteGeofenceCollection ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKey -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteMap -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePlaceIndex -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteRouteCalculator -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteTracker -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeGeofenceCollection ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeKey ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeMap ->
@@ -818,6 +999,45 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociateTrackerConsumer ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | ForecastGeofenceEvents ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DeviceState",
+                           (ForecastGeofenceEventsDeviceState.to_value
+                              req.ForecastGeofenceEventsRequest.deviceState));
+                      Option.map
+                        req.ForecastGeofenceEventsRequest.timeHorizonMinutes
+                        ~f:(fun x ->
+                              ("TimeHorizonMinutes",
+                                (ForecastGeofenceEventsRequestTimeHorizonMinutesDouble.to_value
+                                   x)));
+                      Option.map
+                        req.ForecastGeofenceEventsRequest.distanceUnit
+                        ~f:(fun x ->
+                              ("DistanceUnit", (DistanceUnit.to_value x)));
+                      Option.map req.ForecastGeofenceEventsRequest.speedUnit
+                        ~f:(fun x -> ("SpeedUnit", (SpeedUnit.to_value x)));
+                      Option.map req.ForecastGeofenceEventsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (LargeToken.to_value x)));
+                      Option.map req.ForecastGeofenceEventsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (ForecastGeofenceEventsRequestMaxResultsInteger.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetDevicePosition ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -831,22 +1051,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Option.map
-                         req.GetDevicePositionHistoryRequest.endTimeExclusive
-                         ~f:(fun x ->
-                               ("EndTimeExclusive", (Timestamp.to_value x)));
+                         req.GetDevicePositionHistoryRequest.nextToken
+                         ~f:(fun x -> ("NextToken", (Token.to_value x)));
+                      Option.map
+                        req.GetDevicePositionHistoryRequest.startTimeInclusive
+                        ~f:(fun x ->
+                              ("StartTimeInclusive", (Timestamp.to_value x)));
+                      Option.map
+                        req.GetDevicePositionHistoryRequest.endTimeExclusive
+                        ~f:(fun x ->
+                              ("EndTimeExclusive", (Timestamp.to_value x)));
                       Option.map
                         req.GetDevicePositionHistoryRequest.maxResults
                         ~f:(fun x ->
                               ("MaxResults",
                                 (GetDevicePositionHistoryRequestMaxResultsInteger.to_value
-                                   x)));
-                      Option.map
-                        req.GetDevicePositionHistoryRequest.nextToken
-                        ~f:(fun x -> ("NextToken", (Token.to_value x)));
-                      Option.map
-                        req.GetDevicePositionHistoryRequest.startTimeInclusive
-                        ~f:(fun x ->
-                              ("StartTimeInclusive", (Timestamp.to_value x)))])
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -855,6 +1075,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetGeofence ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetJob ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetMapGlyphs ->
@@ -867,6 +1090,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetMapTile ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPlace ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDevicePositions ->
@@ -884,7 +1110,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                  (ListDevicePositionsRequestMaxResultsInteger.to_value
                                     x)));
                       Option.map req.ListDevicePositionsRequest.nextToken
-                        ~f:(fun x -> ("NextToken", (Token.to_value x)))])
+                        ~f:(fun x -> ("NextToken", (Token.to_value x)));
+                      Option.map
+                        req.ListDevicePositionsRequest.filterGeometry
+                        ~f:(fun x ->
+                              ("FilterGeometry",
+                                (TrackingFilterGeometry.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -926,7 +1157,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Option.map req.ListGeofencesRequest.nextToken
-                         ~f:(fun x -> ("NextToken", (Token.to_value x)))])
+                         ~f:(fun x -> ("NextToken", (LargeToken.to_value x)));
+                      Option.map req.ListGeofencesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (ListGeofencesRequestMaxResultsInteger.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListJobs ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListJobsRequest.filter
+                         ~f:(fun x -> ("Filter", (JobsFilter.to_value x)));
+                      Option.map req.ListJobsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (ListJobsRequestMaxResultsInteger.to_value x)));
+                      Option.map req.ListJobsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (LargeToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKeys ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListKeysRequest.maxResults
+                         ~f:(fun x ->
+                               ("MaxResults",
+                                 (ListKeysRequestMaxResultsInteger.to_value x)));
+                      Option.map req.ListKeysRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (Token.to_value x)));
+                      Option.map req.ListKeysRequest.filter
+                        ~f:(fun x -> ("Filter", (ApiKeyFilter.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1061,18 +1345,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.SearchPlaceIndexForPositionRequest.language
-                         ~f:(fun x -> ("Language", (LanguageTag.to_value x)));
+                      [Some
+                         ("Position",
+                           (Position.to_value
+                              req.SearchPlaceIndexForPositionRequest.position));
                       Option.map
                         req.SearchPlaceIndexForPositionRequest.maxResults
                         ~f:(fun x ->
                               ("MaxResults",
                                 (PlaceIndexSearchResultLimit.to_value x)));
-                      Some
-                        ("Position",
-                          (Position.to_value
-                             req.SearchPlaceIndexForPositionRequest.position))])
+                      Option.map
+                        req.SearchPlaceIndexForPositionRequest.language
+                        ~f:(fun x -> ("Language", (LanguageTag.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1089,9 +1373,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.SearchPlaceIndexForSuggestionsRequest.biasPosition
-                         ~f:(fun x -> ("BiasPosition", (Position.to_value x)));
+                      [Some
+                         ("Text",
+                           (SearchPlaceIndexForSuggestionsRequestTextString.to_value
+                              req.SearchPlaceIndexForSuggestionsRequest.text));
+                      Option.map
+                        req.SearchPlaceIndexForSuggestionsRequest.biasPosition
+                        ~f:(fun x -> ("BiasPosition", (Position.to_value x)));
                       Option.map
                         req.SearchPlaceIndexForSuggestionsRequest.filterBBox
                         ~f:(fun x -> ("FilterBBox", (BoundingBox.to_value x)));
@@ -1101,18 +1389,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("FilterCountries",
                                 (CountryCodeList.to_value x)));
                       Option.map
-                        req.SearchPlaceIndexForSuggestionsRequest.language
-                        ~f:(fun x -> ("Language", (LanguageTag.to_value x)));
-                      Option.map
                         req.SearchPlaceIndexForSuggestionsRequest.maxResults
                         ~f:(fun x ->
                               ("MaxResults",
                                 (SearchPlaceIndexForSuggestionsRequestMaxResultsInteger.to_value
                                    x)));
-                      Some
-                        ("Text",
-                          (SyntheticSearchPlaceIndexForSuggestionsRequestString.to_value
-                             req.SearchPlaceIndexForSuggestionsRequest.text))])
+                      Option.map
+                        req.SearchPlaceIndexForSuggestionsRequest.language
+                        ~f:(fun x -> ("Language", (LanguageTag.to_value x)));
+                      Option.map
+                        req.SearchPlaceIndexForSuggestionsRequest.filterCategories
+                        ~f:(fun x ->
+                              ("FilterCategories",
+                                (FilterPlaceCategoryList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1129,9 +1418,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.SearchPlaceIndexForTextRequest.biasPosition
-                         ~f:(fun x -> ("BiasPosition", (Position.to_value x)));
+                      [Some
+                         ("Text",
+                           (SearchPlaceIndexForTextRequestTextString.to_value
+                              req.SearchPlaceIndexForTextRequest.text));
+                      Option.map
+                        req.SearchPlaceIndexForTextRequest.biasPosition
+                        ~f:(fun x -> ("BiasPosition", (Position.to_value x)));
                       Option.map
                         req.SearchPlaceIndexForTextRequest.filterBBox
                         ~f:(fun x -> ("FilterBBox", (BoundingBox.to_value x)));
@@ -1140,17 +1433,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("FilterCountries",
                                 (CountryCodeList.to_value x)));
-                      Option.map req.SearchPlaceIndexForTextRequest.language
-                        ~f:(fun x -> ("Language", (LanguageTag.to_value x)));
                       Option.map
                         req.SearchPlaceIndexForTextRequest.maxResults
                         ~f:(fun x ->
                               ("MaxResults",
                                 (PlaceIndexSearchResultLimit.to_value x)));
+                      Option.map req.SearchPlaceIndexForTextRequest.language
+                        ~f:(fun x -> ("Language", (LanguageTag.to_value x)));
+                      Option.map
+                        req.SearchPlaceIndexForTextRequest.filterCategories
+                        ~f:(fun x ->
+                              ("FilterCategories",
+                                (FilterPlaceCategoryList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.StartJobRequest.clientToken
+                         ~f:(fun x ->
+                               ("ClientToken", (ClientToken.to_value x)));
                       Some
-                        ("Text",
-                          (SyntheticSearchPlaceIndexForTextRequestString.to_value
-                             req.SearchPlaceIndexForTextRequest.text))])
+                        ("Action",
+                          (JobAction.to_value req.StartJobRequest.action));
+                      Option.map req.StartJobRequest.actionOptions
+                        ~f:(fun x ->
+                              ("ActionOptions",
+                                (JobActionOptions.to_value x)));
+                      Some
+                        ("ExecutionRoleArn",
+                          (IamRoleArn.to_value
+                             req.StartJobRequest.executionRoleArn));
+                      Some
+                        ("InputOptions",
+                          (JobInputOptions.to_value
+                             req.StartJobRequest.inputOptions));
+                      Option.map req.StartJobRequest.name
+                        ~f:(fun x -> ("Name", (ResourceName.to_value x)));
+                      Some
+                        ("OutputOptions",
+                          (JobOutputOptions.to_value
+                             req.StartJobRequest.outputOptions));
+                      Option.map req.StartJobRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1180,10 +1516,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateGeofenceCollection ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKey -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateMap -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdatePlaceIndex -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateRouteCalculator -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateTracker -> Awso.Http.Request.make (method_of_endpoint endp)
+  | VerifyDevicePosition ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DeviceState",
+                           (DeviceState.to_value
+                              req.VerifyDevicePositionRequest.deviceState));
+                      Option.map req.VerifyDevicePositionRequest.distanceUnit
+                        ~f:(fun x ->
+                              ("DistanceUnit", (DistanceUnit.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -1300,6 +1660,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CalculateRouteMatrixResponse.error_of_json))
+  | CancelJob ->
+      if is_success
+      then Ok (CancelJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CancelJobResponse.error_of_json))
   | CreateGeofenceCollection ->
       if is_success
       then
@@ -1308,6 +1672,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateGeofenceCollectionResponse.error_of_json))
+  | CreateKey ->
+      if is_success
+      then Ok (CreateKeyResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateKeyResponse.error_of_json))
   | CreateMap ->
       if is_success
       then Ok (CreateMapResponse.of_json (response_to_json resp))
@@ -1338,6 +1706,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteGeofenceCollectionResponse.error_of_json))
+  | DeleteKey ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKeyResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteKeyResponse.error_of_json))
   | DeleteMap ->
       if is_success
       then
@@ -1378,6 +1753,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeGeofenceCollectionResponse.error_of_json))
+  | DescribeKey ->
+      if is_success
+      then Ok (DescribeKeyResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeKeyResponse.error_of_json))
   | DescribeMap ->
       if is_success
       then Ok (DescribeMapResponse.of_json (response_to_json resp))
@@ -1413,6 +1792,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateTrackerConsumerResponse.error_of_json))
+  | ForecastGeofenceEvents ->
+      if is_success
+      then
+        Ok (ForecastGeofenceEventsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ForecastGeofenceEventsResponse.error_of_json))
   | GetDevicePosition ->
       if is_success
       then Ok (GetDevicePositionResponse.of_json (response_to_json resp))
@@ -1431,6 +1818,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetGeofenceResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetGeofenceResponse.error_of_json))
+  | GetJob ->
+      if is_success
+      then Ok (GetJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetJobResponse.error_of_json))
   | GetMapGlyphs ->
       if is_success
       then
@@ -1465,6 +1856,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (GetMapTileResponse.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetMapTileResponse.error_of_json))
+  | GetPlace ->
+      if is_success
+      then Ok (GetPlaceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetPlaceResponse.error_of_json))
   | ListDevicePositions ->
       if is_success
       then Ok (ListDevicePositionsResponse.of_json (response_to_json resp))
@@ -1483,6 +1878,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListGeofencesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListGeofencesResponse.error_of_json))
+  | ListJobs ->
+      if is_success
+      then Ok (ListJobsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListJobsResponse.error_of_json))
+  | ListKeys ->
+      if is_success
+      then Ok (ListKeysResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListKeysResponse.error_of_json))
   | ListMaps ->
       if is_success
       then Ok (ListMapsResponse.of_json (response_to_json resp))
@@ -1546,6 +1949,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some SearchPlaceIndexForTextResponse.error_of_json))
+  | StartJob ->
+      if is_success
+      then Ok (StartJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartJobResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -1568,6 +1975,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateGeofenceCollectionResponse.error_of_json))
+  | UpdateKey ->
+      if is_success
+      then Ok (UpdateKeyResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateKeyResponse.error_of_json))
   | UpdateMap ->
       if is_success
       then Ok (UpdateMapResponse.of_json (response_to_json resp))
@@ -1587,3 +1998,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UpdateTrackerResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateTrackerResponse.error_of_json))
+  | VerifyDevicePosition ->
+      if is_success
+      then Ok (VerifyDevicePositionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some VerifyDevicePositionResponse.error_of_json))

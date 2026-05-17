@@ -11,34 +11,48 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let cancel_tag_sync_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelTagSyncTask input
 let create_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGroup input
 let delete_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGroup input
+let get_account_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAccountSettings input
 let get_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGroup input
 let get_group_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGroupConfiguration input
 let get_group_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGroupQuery input
+let get_tag_sync_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTagSyncTask input
 let get_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTags input
 let group_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GroupResources input
 let list_group_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGroupResources input
+let list_grouping_statuses ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListGroupingStatuses input
 let list_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGroups input
+let list_tag_sync_tasks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagSyncTasks input
 let put_group_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutGroupConfiguration input
 let search_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchResources input
+let start_tag_sync_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartTagSyncTask input
 let tag ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.Tag input
 let ungroup_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UngroupResources input
 let untag ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.Untag input
+let update_account_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAccountSettings input
 let update_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGroup input
 let update_group_query ?endpoint_url ?cfg input =

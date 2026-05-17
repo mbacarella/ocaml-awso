@@ -45,6 +45,11 @@ val cancel_archival :
     ?cfg:Awso.Cfg.t ->
       CancelArchivalInput.t ->
         (CancelArchivalOutput.t, CancelArchivalOutput.error) Result.t
+val cancel_cache_report :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelCacheReportInput.t ->
+        (CancelCacheReportOutput.t, CancelCacheReportOutput.error) Result.t
 val cancel_retrieval :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -111,6 +116,11 @@ val delete_bandwidth_rate_limit :
       DeleteBandwidthRateLimitInput.t ->
         (DeleteBandwidthRateLimitOutput.t,
           DeleteBandwidthRateLimitOutput.error) Result.t
+val delete_cache_report :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCacheReportInput.t ->
+        (DeleteCacheReportOutput.t, DeleteCacheReportOutput.error) Result.t
 val delete_chap_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -176,6 +186,12 @@ val describe_cache :
     ?cfg:Awso.Cfg.t ->
       DescribeCacheInput.t ->
         (DescribeCacheOutput.t, DescribeCacheOutput.error) Result.t
+val describe_cache_report :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeCacheReportInput.t ->
+        (DescribeCacheReportOutput.t, DescribeCacheReportOutput.error)
+          Result.t
 val describe_cachedi_s_c_s_i_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -286,6 +302,12 @@ val disassociate_file_system :
       DisassociateFileSystemInput.t ->
         (DisassociateFileSystemOutput.t, DisassociateFileSystemOutput.error)
           Result.t
+val evict_files_failing_upload :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      EvictFilesFailingUploadInput.t ->
+        (EvictFilesFailingUploadOutput.t,
+          EvictFilesFailingUploadOutput.error) Result.t
 val join_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -297,6 +319,11 @@ val list_automatic_tape_creation_policies :
       ListAutomaticTapeCreationPoliciesInput.t ->
         (ListAutomaticTapeCreationPoliciesOutput.t,
           ListAutomaticTapeCreationPoliciesOutput.error) Result.t
+val list_cache_reports :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCacheReportsInput.t ->
+        (ListCacheReportsOutput.t, ListCacheReportsOutput.error) Result.t
 val list_file_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -406,6 +433,11 @@ val start_availability_monitor_test :
       StartAvailabilityMonitorTestInput.t ->
         (StartAvailabilityMonitorTestOutput.t,
           StartAvailabilityMonitorTestOutput.error) Result.t
+val start_cache_report :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartCacheReportInput.t ->
+        (StartCacheReportOutput.t, StartCacheReportOutput.error) Result.t
 val start_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

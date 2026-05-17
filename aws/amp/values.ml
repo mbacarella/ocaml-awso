@@ -23,6 +23,46 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module SecurityGroupId =
+  struct
+    type nonrec t = string[@@ocaml.doc "ID of a VPC security group."]
+    let context_ = "SecurityGroupId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"sg-[0-9a-z]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecurityGroupId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "ID of a VPC security group."]
+module SubnetId =
+  struct
+    type nonrec t = string[@@ocaml.doc "ID of a VPC subnet."]
+    let context_ = "SubnetId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"subnet-[0-9a-z]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubnetId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "ID of a VPC subnet."]
 module String_ =
   struct
     type nonrec t = string
@@ -36,6 +76,241 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module WorkspaceArn =
+  struct
+    type nonrec t = string[@@ocaml.doc "An ARN identifying a Workspace."]
+    let context_ = "WorkspaceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:aws[-a-z]*:aps:[-a-z0-9]+:[0-9]{12}:workspace/.+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkspaceArn" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "An ARN identifying a Workspace."]
+module ClusterArn =
+  struct
+    type nonrec t = string[@@ocaml.doc "The ARN of an EKS cluster."]
+    let context_ = "ClusterArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:aws[-a-z]*:eks:[-a-z0-9]+:[0-9]{12}:cluster/.+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClusterArn" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The ARN of an EKS cluster."]
+module SecurityGroupIds =
+  struct
+    type nonrec t = SecurityGroupId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecurityGroupId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityGroupIds" ~of_json:SecurityGroupId.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module SubnetIds =
+  struct
+    type nonrec t = SubnetId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SubnetId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubnetIds" ~of_json:SubnetId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LabelName =
+  struct
+    type nonrec t = string
+    let context_ = "LabelName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () -> check_pattern i ~pattern:"[a-zA-Z_][a-zA-Z0-9_]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LabelName" j
+    let to_json = simple_to_json to_value
+  end
+module LabelValue =
+  struct
+    type nonrec t = string
+    let context_ = "LabelValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LabelValue" j
+    let to_json = simple_to_json to_value
+  end
+module LimitsPerLabelSetEntryMaxSeriesLong =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module LogGroupArn =
+  struct
+    type nonrec t = string
+    let context_ = "LogGroupArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:aws[a-z0-9-]*:logs:[a-z0-9-]+:[0-9]{12}:log-group:[A-Za-z0-9\\.\\-\\_\\#/]{1,512}\\:\\*");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogGroupArn" j
+    let to_json = simple_to_json to_value
+  end
+module LoggingFilterQspThresholdLong =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module IgnoreNearExpectedAmountDouble =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module IgnoreNearExpectedRatioDouble =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module StringMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -48,7 +323,7 @@ module TagKey =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -70,7 +345,7 @@ module TagValue =
                 (check_string_max i ~max:256) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -115,6 +390,171 @@ module WorkspaceStatusCode =
     let of_json j = of_string (string_of_json ~kind:"WorkspaceStatusCode" j)
     let to_json = simple_to_json to_value
   end
+module AmpConfiguration =
+  struct
+    type nonrec t =
+      {
+      workspaceArn: WorkspaceArn.t
+        [@ocaml.doc
+          "ARN of the Amazon Managed Service for Prometheus workspace."]}
+    let context_ = "AmpConfiguration"
+    let make ~workspaceArn = fun () -> { workspaceArn }
+    let to_value x =
+      structure_to_value
+        [("workspaceArn", (Some (WorkspaceArn.to_value x.workspaceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceArn =
+        WorkspaceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceArn") in
+      make ~workspaceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceArn =
+        field_map_exn json__ "workspaceArn" WorkspaceArn.of_json in
+      make ~workspaceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The AmpConfiguration structure defines the Amazon Managed Service for Prometheus instance a scraper should send metrics to."]
+module IamRoleArn =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "An ARN identifying an IAM role used by the scraper."]
+    let context_ = "IamRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"arn:aws[-a-z]*:iam::[0-9]{12}:role/.+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IamRoleArn" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "An ARN identifying an IAM role used by the scraper."]
+module ScraperStatusCode =
+  struct
+    type nonrec t =
+      | CREATING 
+      | UPDATING 
+      | ACTIVE 
+      | DELETING 
+      | CREATION_FAILED 
+      | UPDATE_FAILED 
+      | DELETION_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | UPDATING -> "UPDATING"
+      | ACTIVE -> "ACTIVE"
+      | DELETING -> "DELETING"
+      | CREATION_FAILED -> "CREATION_FAILED"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | DELETION_FAILED -> "DELETION_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "UPDATING" -> UPDATING
+      | "ACTIVE" -> ACTIVE
+      | "DELETING" -> DELETING
+      | "CREATION_FAILED" -> CREATION_FAILED
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | "DELETION_FAILED" -> DELETION_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ScraperStatusCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ScraperStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
+module EksConfiguration =
+  struct
+    type nonrec t =
+      {
+      clusterArn: ClusterArn.t [@ocaml.doc "ARN of the Amazon EKS cluster."];
+      securityGroupIds: SecurityGroupIds.t option
+        [@ocaml.doc
+          "A list of the security group IDs for the Amazon EKS cluster VPC configuration."];
+      subnetIds: SubnetIds.t
+        [@ocaml.doc
+          "A list of subnet IDs for the Amazon EKS cluster VPC configuration."]}
+    let context_ = "EksConfiguration"
+    let make ?securityGroupIds =
+      fun ~clusterArn ->
+        fun ~subnetIds ->
+          fun () -> { securityGroupIds; clusterArn; subnetIds }
+    let to_value x =
+      structure_to_value
+        [("clusterArn", (Some (ClusterArn.to_value x.clusterArn)));
+        ("securityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value));
+        ("subnetIds", (Some (SubnetIds.to_value x.subnetIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subnetIds =
+        SubnetIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "subnetIds") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIds.of_xml)
+          (Xml.child xml_arg0 "securityGroupIds") in
+      let clusterArn =
+        ClusterArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
+      make ~subnetIds ?securityGroupIds ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subnetIds = field_map_exn json__ "subnetIds" SubnetIds.of_json in
+      let securityGroupIds =
+        field_map json__ "securityGroupIds" SecurityGroupIds.of_json in
+      let clusterArn = field_map_exn json__ "clusterArn" ClusterArn.of_json in
+      make ~subnetIds ?securityGroupIds ~clusterArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The EksConfiguration structure describes the connection to the Amazon EKS cluster from which a scraper collects metrics."]
+module VpcConfiguration =
+  struct
+    type nonrec t =
+      {
+      securityGroupIds: SecurityGroupIds.t
+        [@ocaml.doc
+          "The security group IDs that control network access for the Prometheus collector. These security groups must allow the collector to communicate with your Amazon MSK cluster on the required ports."];
+      subnetIds: SubnetIds.t
+        [@ocaml.doc
+          "The subnet IDs where the Prometheus collector will be deployed. The subnets must be in the same Amazon VPC as your Amazon MSK cluster and have network connectivity to the cluster."]}
+    let context_ = "VpcConfiguration"
+    let make ~securityGroupIds =
+      fun ~subnetIds -> fun () -> { securityGroupIds; subnetIds }
+    let to_value x =
+      structure_to_value
+        [("securityGroupIds",
+           (Some (SecurityGroupIds.to_value x.securityGroupIds)));
+        ("subnetIds", (Some (SubnetIds.to_value x.subnetIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subnetIds =
+        SubnetIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "subnetIds") in
+      let securityGroupIds =
+        SecurityGroupIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "securityGroupIds") in
+      make ~subnetIds ~securityGroupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subnetIds = field_map_exn json__ "subnetIds" SubnetIds.of_json in
+      let securityGroupIds =
+        field_map_exn json__ "securityGroupIds" SecurityGroupIds.of_json in
+      make ~subnetIds ~securityGroupIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon VPC configuration that specifies the network settings for a Prometheus collector to securely connect to Amazon MSK clusters. This configuration includes the security groups and subnets that control network access and placement for the collector."]
 module RuleGroupsNamespaceStatusCode =
   struct
     type nonrec t =
@@ -155,34 +595,354 @@ module RuleGroupsNamespaceStatusCode =
       of_string (string_of_json ~kind:"RuleGroupsNamespaceStatusCode" j)
     let to_json = simple_to_json to_value
   end
+module AnomalyDetectorStatusCode =
+  struct
+    type nonrec t =
+      | CREATING 
+      | ACTIVE 
+      | UPDATING 
+      | DELETING 
+      | CREATION_FAILED 
+      | UPDATE_FAILED 
+      | DELETION_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | CREATION_FAILED -> "CREATION_FAILED"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | DELETION_FAILED -> "DELETION_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "CREATION_FAILED" -> CREATION_FAILED
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | "DELETION_FAILED" -> DELETION_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AnomalyDetectorStatusCode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AnomalyDetectorStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
+module LabelSet =
+  struct
+    type nonrec t = (LabelName.t * LabelValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((LabelName.of_string chopped),
+                              (LabelValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (LabelName.to_value x) |>
+                    (fun x -> (LabelValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:LabelName.of_string
+        ~of_json:LabelValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LimitsPerLabelSetEntry =
+  struct
+    type nonrec t =
+      {
+      maxSeries: LimitsPerLabelSetEntryMaxSeriesLong.t option
+        [@ocaml.doc
+          "The maximum number of active series that can be ingested that match this label set. Setting this to 0 causes no label set limit to be enforced, but it does cause Amazon Managed Service for Prometheus to vend label set metrics to CloudWatch"]}
+    let make ?maxSeries = fun () -> { maxSeries }
+    let to_value x =
+      structure_to_value
+        [("maxSeries",
+           (Option.map x.maxSeries
+              ~f:LimitsPerLabelSetEntryMaxSeriesLong.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxSeries =
+        (Option.map ~f:LimitsPerLabelSetEntryMaxSeriesLong.of_xml)
+          (Xml.child xml_arg0 "maxSeries") in
+      make ?maxSeries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxSeries =
+        field_map json__ "maxSeries"
+          LimitsPerLabelSetEntryMaxSeriesLong.of_json in
+      make ?maxSeries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure contains the information about the limits that apply to time series that match one label set."]
+module CloudWatchLogDestination =
+  struct
+    type nonrec t =
+      {
+      logGroupArn: LogGroupArn.t
+        [@ocaml.doc
+          "The ARN of the CloudWatch log group to which the vended log data will be published. This log group must exist prior to calling this operation."]}
+    let context_ = "CloudWatchLogDestination"
+    let make ~logGroupArn = fun () -> { logGroupArn }
+    let to_value x =
+      structure_to_value
+        [("logGroupArn", (Some (LogGroupArn.to_value x.logGroupArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logGroupArn =
+        LogGroupArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "logGroupArn") in
+      make ~logGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logGroupArn =
+        field_map_exn json__ "logGroupArn" LogGroupArn.of_json in
+      make ~logGroupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration details for logging to CloudWatch Logs."]
+module LoggingFilter =
+  struct
+    type nonrec t =
+      {
+      qspThreshold: LoggingFilterQspThresholdLong.t
+        [@ocaml.doc
+          "The Query Samples Processed (QSP) threshold above which queries will be logged. Queries processing more samples than this threshold will be captured in logs."]}
+    let context_ = "LoggingFilter"
+    let make ~qspThreshold = fun () -> { qspThreshold }
+    let to_value x =
+      structure_to_value
+        [("qspThreshold",
+           (Some (LoggingFilterQspThresholdLong.to_value x.qspThreshold)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let qspThreshold =
+        LoggingFilterQspThresholdLong.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "qspThreshold") in
+      make ~qspThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let qspThreshold =
+        field_map_exn json__ "qspThreshold"
+          LoggingFilterQspThresholdLong.of_json in
+      make ~qspThreshold ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filtering criteria that determine which queries are logged."]
+module IgnoreNearExpected =
+  struct
+    type nonrec t =
+      {
+      amount: IgnoreNearExpectedAmountDouble.t option
+        [@ocaml.doc
+          "The absolute amount by which values can differ from expected values before being considered anomalous."];
+      ratio: IgnoreNearExpectedRatioDouble.t option
+        [@ocaml.doc
+          "The ratio by which values can differ from expected values before being considered anomalous."]}
+    let make ?amount = fun ?ratio -> fun () -> { amount; ratio }
+    let to_value x =
+      structure_to_value
+        [("amount",
+           (Option.map x.amount ~f:IgnoreNearExpectedAmountDouble.to_value));
+        ("ratio",
+          (Option.map x.ratio ~f:IgnoreNearExpectedRatioDouble.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ratio =
+        (Option.map ~f:IgnoreNearExpectedRatioDouble.of_xml)
+          (Xml.child xml_arg0 "ratio") in
+      let amount =
+        (Option.map ~f:IgnoreNearExpectedAmountDouble.of_xml)
+          (Xml.child xml_arg0 "amount") in
+      make ?ratio ?amount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ratio =
+        field_map json__ "ratio" IgnoreNearExpectedRatioDouble.of_json in
+      let amount =
+        field_map json__ "amount" IgnoreNearExpectedAmountDouble.of_json in
+      make ?ratio ?amount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for threshold settings that determine when values near expected values should be ignored during anomaly detection."]
+module RandomCutForestConfigurationSampleSizeInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1024) >>=
+             (fun () -> check_int_min i ~min:256));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for RandomCutForestConfigurationSampleSizeInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RandomCutForestConfigurationShingleSizeInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1024) >>= (fun () -> check_int_min i ~min:2));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for RandomCutForestConfigurationShingleSizeInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RandomCutForestQuery =
+  struct
+    type nonrec t = string
+    let context_ = "RandomCutForestQuery"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:8192) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RandomCutForestQuery" j
+    let to_json = simple_to_json to_value
+  end
 module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      message: String_.t
-        [@ocaml.doc "Message describing why the field failed validation."];
-      name: String_.t [@ocaml.doc "The field name."]}
-    let context_ = "ValidationExceptionField"
-    let make ~message = fun ~name -> fun () -> { message; name }
+      name: String_.t option
+        [@ocaml.doc "The name of the field that caused an exception."];
+      message: String_.t option
+        [@ocaml.doc
+          "A message describing why the field caused an exception."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("name", (Some (String_.to_value x.name)))]
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~name ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~name ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stores information about a field passed inside a request that resulted in an exception."]
+       "Information about a field passed into a request that resulted in an exception."]
+module ComponentConfig =
+  struct
+    type nonrec t =
+      {
+      options: StringMap.t option
+        [@ocaml.doc "Configuration options for the scraper component."]}
+    let make ?options = fun () -> { options }
+    let to_value x =
+      structure_to_value
+        [("options", (Option.map x.options ~f:StringMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let options =
+        (Option.map ~f:StringMap.of_xml) (Xml.child xml_arg0 "options") in
+      make ?options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let options = field_map json__ "options" StringMap.of_json in
+      make ?options ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration settings for a scraper component."]
+module ScraperComponentType =
+  struct
+    type nonrec t =
+      | SERVICE_DISCOVERY 
+      | COLLECTOR 
+      | EXPORTER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SERVICE_DISCOVERY -> "SERVICE_DISCOVERY"
+      | COLLECTOR -> "COLLECTOR"
+      | EXPORTER -> "EXPORTER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SERVICE_DISCOVERY" -> SERVICE_DISCOVERY
+      | "COLLECTOR" -> COLLECTOR
+      | "EXPORTER" -> EXPORTER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ScraperComponentType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ScraperComponentType" j)
+    let to_json = simple_to_json to_value
+  end
+module KmsKeyArn =
+  struct
+    type nonrec t = string[@@ocaml.doc "A KMS Key ARN."]
+    let context_ = "KmsKeyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws[-a-z]*:kms:[-a-z0-9]+:[0-9]{12}:key/[-a-f0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyArn" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "A KMS Key ARN."]
 module TagMap =
   struct
     type nonrec t = (TagKey.t * TagValue.t) list
@@ -208,6 +968,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -245,23 +1007,152 @@ module WorkspaceAlias =
     let of_json j = string_of_json ~kind:"WorkspaceAlias" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "A user-assigned workspace alias."]
-module WorkspaceArn =
+module WorkspaceId =
   struct
-    type nonrec t = string[@@ocaml.doc "An ARN identifying a Workspace."]
-    let context_ = "WorkspaceArn"
+    type nonrec t = string[@@ocaml.doc "A workspace ID."]
+    let context_ = "WorkspaceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:".*[0-9A-Za-z][-.0-9A-Z_a-z]*.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkspaceId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "A workspace ID."]
+module WorkspaceStatus =
+  struct
+    type nonrec t =
+      {
+      statusCode: WorkspaceStatusCode.t option
+        [@ocaml.doc "The current status of the workspace."]}
+    let make ?statusCode = fun () -> { statusCode }
+    let to_value x =
+      structure_to_value
+        [("statusCode",
+           (Option.map x.statusCode ~f:WorkspaceStatusCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusCode =
+        (Option.map ~f:WorkspaceStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusCode =
+        field_map json__ "statusCode" WorkspaceStatusCode.of_json in
+      make ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status of the workspace."]
+module Destination =
+  struct
+    type nonrec t =
+      {
+      ampConfiguration: AmpConfiguration.t option
+        [@ocaml.doc
+          "The Amazon Managed Service for Prometheus workspace to send metrics to."]}
+    let make ?ampConfiguration = fun () -> { ampConfiguration }
+    let to_value x =
+      structure_to_value
+        [("ampConfiguration",
+           (Option.map x.ampConfiguration ~f:AmpConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ampConfiguration =
+        (Option.map ~f:AmpConfiguration.of_xml)
+          (Xml.child xml_arg0 "ampConfiguration") in
+      make ?ampConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ampConfiguration =
+        field_map json__ "ampConfiguration" AmpConfiguration.of_json in
+      make ?ampConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Where to send the metrics from a scraper."]
+module RoleConfiguration =
+  struct
+    type nonrec t =
+      {
+      sourceRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the role used in the source account to enable cross-account scraping. For information about the contents of this policy, see Cross-account setup."];
+      targetRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the role used in the target account to enable cross-account scraping. For information about the contents of this policy, see Cross-account setup."]}
+    let make ?sourceRoleArn =
+      fun ?targetRoleArn -> fun () -> { sourceRoleArn; targetRoleArn }
+    let to_value x =
+      structure_to_value
+        [("sourceRoleArn",
+           (Option.map x.sourceRoleArn ~f:IamRoleArn.to_value));
+        ("targetRoleArn",
+          (Option.map x.targetRoleArn ~f:IamRoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "targetRoleArn") in
+      let sourceRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "sourceRoleArn") in
+      make ?targetRoleArn ?sourceRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetRoleArn = field_map json__ "targetRoleArn" IamRoleArn.of_json in
+      let sourceRoleArn = field_map json__ "sourceRoleArn" IamRoleArn.of_json in
+      make ?targetRoleArn ?sourceRoleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this structure to enable cross-account access, so that you can use a target account to access Prometheus metrics from source accounts."]
+module ScraperAlias =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "An optional user-assigned scraper alias."]
+    let context_ = "ScraperAlias"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[0-9A-Za-z][-.0-9A-Z_a-z]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ScraperAlias" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "An optional user-assigned scraper alias."]
+module ScraperArn =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "An ARN identifying a scrape configuration."]
+    let context_ = "ScraperArn"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"WorkspaceArn" j
+    let of_json j = string_of_json ~kind:"ScraperArn" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "An ARN identifying a Workspace."]
-module WorkspaceId =
+  end[@@ocaml.doc "An ARN identifying a scrape configuration."]
+module ScraperId =
   struct
-    type nonrec t = string[@@ocaml.doc "A workspace ID."]
-    let context_ = "WorkspaceId"
+    type nonrec t = string[@@ocaml.doc "A scraper ID."]
+    let context_ = "ScraperId"
     let make i =
       let open Result in
         ok_or_failwith
@@ -276,33 +1167,108 @@ module WorkspaceId =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"WorkspaceId" j
+    let of_json j = string_of_json ~kind:"ScraperId" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "A workspace ID."]
-module WorkspaceStatus =
+  end[@@ocaml.doc "A scraper ID."]
+module ScraperStatus =
   struct
     type nonrec t =
       {
-      statusCode: WorkspaceStatusCode.t
-        [@ocaml.doc "Status code of this workspace."]}
-    let context_ = "WorkspaceStatus"
-    let make ~statusCode = fun () -> { statusCode }
+      statusCode: ScraperStatusCode.t option
+        [@ocaml.doc "The current status of the scraper."]}
+    let make ?statusCode = fun () -> { statusCode }
     let to_value x =
       structure_to_value
-        [("statusCode", (Some (WorkspaceStatusCode.to_value x.statusCode)))]
+        [("statusCode",
+           (Option.map x.statusCode ~f:ScraperStatusCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let statusCode =
-        WorkspaceStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "statusCode") in
-      make ~statusCode ()
+        (Option.map ~f:ScraperStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusCode =
-        field_map_exn json "statusCode" WorkspaceStatusCode.of_json in
-      make ~statusCode ()
+        field_map json__ "statusCode" ScraperStatusCode.of_json in
+      make ?statusCode ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents the status of a workspace."]
+  end[@@ocaml.doc
+       "The ScraperStatus structure contains status information about the scraper."]
+module Source =
+  struct
+    type nonrec t =
+      {
+      eksConfiguration: EksConfiguration.t option
+        [@ocaml.doc
+          "The Amazon EKS cluster from which a scraper collects metrics."];
+      vpcConfiguration: VpcConfiguration.t option
+        [@ocaml.doc
+          "The Amazon VPC configuration for the Prometheus collector when connecting to Amazon MSK clusters. This configuration enables secure, private network connectivity between the collector and your Amazon MSK cluster within your Amazon VPC."]}
+    let make ?eksConfiguration =
+      fun ?vpcConfiguration ->
+        fun () -> { eksConfiguration; vpcConfiguration }
+    let to_value x =
+      structure_to_value
+        [("eksConfiguration",
+           (Option.map x.eksConfiguration ~f:EksConfiguration.to_value));
+        ("vpcConfiguration",
+          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConfiguration =
+        (Option.map ~f:VpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "vpcConfiguration") in
+      let eksConfiguration =
+        (Option.map ~f:EksConfiguration.of_xml)
+          (Xml.child xml_arg0 "eksConfiguration") in
+      make ?vpcConfiguration ?eksConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConfiguration =
+        field_map json__ "vpcConfiguration" VpcConfiguration.of_json in
+      let eksConfiguration =
+        field_map json__ "eksConfiguration" EksConfiguration.of_json in
+      make ?vpcConfiguration ?eksConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The source of collected metrics for a scraper."]
+module StatusReason =
+  struct
+    type nonrec t = string[@@ocaml.doc "The reason for the failure, if any."]
+    let context_ = "StatusReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StatusReason" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The reason for the failure, if any."]
+module FilterValue =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The value for a given key by which to filter."]
+    let context_ = "FilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterValue" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The value for a given key by which to filter."]
 module RuleGroupsNamespaceArn =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -320,8 +1286,61 @@ module RuleGroupsNamespaceArn =
 module RuleGroupsNamespaceName =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The namespace name that the rule group belong to."]
+                            "The name of the namespace that the rule group belong to."]
     let context_ = "RuleGroupsNamespaceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:".*[0-9A-Za-z][-.0-9A-Z_a-z]*.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuleGroupsNamespaceName" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The name of the namespace that the rule group belong to."]
+module RuleGroupsNamespaceStatus =
+  struct
+    type nonrec t =
+      {
+      statusCode: RuleGroupsNamespaceStatusCode.t option
+        [@ocaml.doc "The current status of the namespace."];
+      statusReason: String_.t option
+        [@ocaml.doc "The reason for the failure, if any."]}
+    let make ?statusCode =
+      fun ?statusReason -> fun () -> { statusCode; statusReason }
+    let to_value x =
+      structure_to_value
+        [("statusCode",
+           (Option.map x.statusCode ~f:RuleGroupsNamespaceStatusCode.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let statusCode =
+        (Option.map ~f:RuleGroupsNamespaceStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusReason ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let statusCode =
+        field_map json__ "statusCode" RuleGroupsNamespaceStatusCode.of_json in
+      make ?statusReason ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status information about a rule groups namespace."]
+module AnomalyDetectorAlias =
+  struct
+    type nonrec t = string
+    let context_ = "AnomalyDetectorAlias"
     let make i =
       let open Result in
         ok_or_failwith
@@ -336,41 +1355,412 @@ module RuleGroupsNamespaceName =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RuleGroupsNamespaceName" j
+    let of_json j = string_of_json ~kind:"AnomalyDetectorAlias" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The namespace name that the rule group belong to."]
-module RuleGroupsNamespaceStatus =
+  end
+module AnomalyDetectorArn =
+  struct
+    type nonrec t = string
+    let context_ = "AnomalyDetectorArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:aws[-a-z]*:aps:[-a-z0-9]+:[0-9]{12}:anomalydetector/ws-.+/ad-.+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AnomalyDetectorArn" j
+    let to_json = simple_to_json to_value
+  end
+module AnomalyDetectorId =
+  struct
+    type nonrec t = string
+    let context_ = "AnomalyDetectorId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"ad-[0-9A-Za-z][-.0-9A-Z_a-z]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AnomalyDetectorId" j
+    let to_json = simple_to_json to_value
+  end
+module AnomalyDetectorStatus =
   struct
     type nonrec t =
       {
-      statusCode: RuleGroupsNamespaceStatusCode.t
-        [@ocaml.doc "Status code of this namespace."];
+      statusCode: AnomalyDetectorStatusCode.t option
+        [@ocaml.doc "The status code of the anomaly detector."];
       statusReason: String_.t option
-        [@ocaml.doc "The reason for failure if any."]}
-    let context_ = "RuleGroupsNamespaceStatus"
-    let make ?statusReason =
-      fun ~statusCode -> fun () -> { statusReason; statusCode }
+        [@ocaml.doc
+          "A description of the current status of the anomaly detector."]}
+    let make ?statusCode =
+      fun ?statusReason -> fun () -> { statusCode; statusReason }
     let to_value x =
       structure_to_value
         [("statusCode",
-           (Some (RuleGroupsNamespaceStatusCode.to_value x.statusCode)));
+           (Option.map x.statusCode ~f:AnomalyDetectorStatusCode.to_value));
         ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let statusReason =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
       let statusCode =
-        RuleGroupsNamespaceStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "statusCode") in
-      make ?statusReason ~statusCode ()
+        (Option.map ~f:AnomalyDetectorStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusReason ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusReason = field_map json "statusReason" String_.of_json in
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
       let statusCode =
-        field_map_exn json "statusCode" RuleGroupsNamespaceStatusCode.of_json in
-      make ?statusReason ~statusCode ()
+        field_map json__ "statusCode" AnomalyDetectorStatusCode.of_json in
+      make ?statusReason ?statusCode ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents the status of a namespace."]
+  end[@@ocaml.doc "The status information of an anomaly detector."]
+module LimitsPerLabelSet =
+  struct
+    type nonrec t =
+      {
+      limits: LimitsPerLabelSetEntry.t
+        [@ocaml.doc
+          "This structure contains the information about the limits that apply to time series that match this label set."];
+      labelSet: LabelSet.t
+        [@ocaml.doc
+          "This defines one label set that will have an enforced active time series limit. Label values accept ASCII characters and must contain at least one character that isn't whitespace. ASCII control characters are not accepted. If the label name is metric name label __name__, then the metric part of the name must conform to the following pattern: \\[a-zA-Z_:\\]\\[a-zA-Z0-9_:\\]*"]}
+    let context_ = "LimitsPerLabelSet"
+    let make ~limits = fun ~labelSet -> fun () -> { limits; labelSet }
+    let to_value x =
+      structure_to_value
+        [("limits", (Some (LimitsPerLabelSetEntry.to_value x.limits)));
+        ("labelSet", (Some (LabelSet.to_value x.labelSet)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelSet =
+        LabelSet.of_xml (Xml.child_exn ~context:context_ xml_arg0 "labelSet") in
+      let limits =
+        LimitsPerLabelSetEntry.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "limits") in
+      make ~labelSet ~limits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelSet = field_map_exn json__ "labelSet" LabelSet.of_json in
+      let limits =
+        field_map_exn json__ "limits" LimitsPerLabelSetEntry.of_json in
+      make ~labelSet ~limits ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure defines one label set used to enforce active time series limits for the workspace, and defines the limit for that label set. A label set is a unique combination of label-value pairs. Use them to control time series limits and to monitor usage by specific label groups. Example label sets might be team:finance or env:prod"]
+module WorkspaceConfigurationStatusCode =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | UPDATING 
+      | UPDATE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WorkspaceConfigurationStatusCode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WorkspaceConfigurationStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
+module Blob =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module LoggingDestination =
+  struct
+    type nonrec t =
+      {
+      cloudWatchLogs: CloudWatchLogDestination.t
+        [@ocaml.doc "Configuration details for logging to CloudWatch Logs."];
+      filters: LoggingFilter.t
+        [@ocaml.doc
+          "Filtering criteria that determine which queries are logged."]}
+    let context_ = "LoggingDestination"
+    let make ~cloudWatchLogs =
+      fun ~filters -> fun () -> { cloudWatchLogs; filters }
+    let to_value x =
+      structure_to_value
+        [("cloudWatchLogs",
+           (Some (CloudWatchLogDestination.to_value x.cloudWatchLogs)));
+        ("filters", (Some (LoggingFilter.to_value x.filters)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        LoggingFilter.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "filters") in
+      let cloudWatchLogs =
+        CloudWatchLogDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "cloudWatchLogs") in
+      make ~filters ~cloudWatchLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters = field_map_exn json__ "filters" LoggingFilter.of_json in
+      let cloudWatchLogs =
+        field_map_exn json__ "cloudWatchLogs"
+          CloudWatchLogDestination.of_json in
+      make ~filters ~cloudWatchLogs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines a destination and its associated filtering criteria for query logging."]
+module QueryLoggingConfigurationStatusCode =
+  struct
+    type nonrec t =
+      | CREATING 
+      | ACTIVE 
+      | UPDATING 
+      | DELETING 
+      | CREATION_FAILED 
+      | UPDATE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | CREATION_FAILED -> "CREATION_FAILED"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "CREATION_FAILED" -> CREATION_FAILED
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration QueryLoggingConfigurationStatusCode" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"QueryLoggingConfigurationStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
+module LoggingConfigurationStatusCode =
+  struct
+    type nonrec t =
+      | CREATING 
+      | ACTIVE 
+      | UPDATING 
+      | DELETING 
+      | CREATION_FAILED 
+      | UPDATE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | CREATION_FAILED -> "CREATION_FAILED"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "CREATION_FAILED" -> CREATION_FAILED
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LoggingConfigurationStatusCode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LoggingConfigurationStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
+module RandomCutForestConfiguration =
+  struct
+    type nonrec t =
+      {
+      query: RandomCutForestQuery.t
+        [@ocaml.doc
+          "The Prometheus query used to retrieve the time-series data for anomaly detection. Random Cut Forest queries must be wrapped by a supported PromQL aggregation operator. For more information, see Aggregation operators on the Prometheus docs website. Supported PromQL aggregation operators: avg, count, group, max, min, quantile, stddev, stdvar, and sum."];
+      shingleSize: RandomCutForestConfigurationShingleSizeInteger.t option
+        [@ocaml.doc
+          "The number of consecutive data points used to create a shingle for the Random Cut Forest algorithm. The default number is 8 consecutive data points."];
+      sampleSize: RandomCutForestConfigurationSampleSizeInteger.t option
+        [@ocaml.doc
+          "The number of data points sampled from the input stream for the Random Cut Forest algorithm. The default number is 256 consecutive data points."];
+      ignoreNearExpectedFromAbove: IgnoreNearExpected.t option
+        [@ocaml.doc
+          "Configuration for ignoring values that are near expected values from above during anomaly detection."];
+      ignoreNearExpectedFromBelow: IgnoreNearExpected.t option
+        [@ocaml.doc
+          "Configuration for ignoring values that are near expected values from below during anomaly detection."]}
+    let context_ = "RandomCutForestConfiguration"
+    let make ?shingleSize =
+      fun ?sampleSize ->
+        fun ?ignoreNearExpectedFromAbove ->
+          fun ?ignoreNearExpectedFromBelow ->
+            fun ~query ->
+              fun () ->
+                {
+                  shingleSize;
+                  sampleSize;
+                  ignoreNearExpectedFromAbove;
+                  ignoreNearExpectedFromBelow;
+                  query
+                }
+    let to_value x =
+      structure_to_value
+        [("query", (Some (RandomCutForestQuery.to_value x.query)));
+        ("shingleSize",
+          (Option.map x.shingleSize
+             ~f:RandomCutForestConfigurationShingleSizeInteger.to_value));
+        ("sampleSize",
+          (Option.map x.sampleSize
+             ~f:RandomCutForestConfigurationSampleSizeInteger.to_value));
+        ("ignoreNearExpectedFromAbove",
+          (Option.map x.ignoreNearExpectedFromAbove
+             ~f:IgnoreNearExpected.to_value));
+        ("ignoreNearExpectedFromBelow",
+          (Option.map x.ignoreNearExpectedFromBelow
+             ~f:IgnoreNearExpected.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ignoreNearExpectedFromBelow =
+        (Option.map ~f:IgnoreNearExpected.of_xml)
+          (Xml.child xml_arg0 "ignoreNearExpectedFromBelow") in
+      let ignoreNearExpectedFromAbove =
+        (Option.map ~f:IgnoreNearExpected.of_xml)
+          (Xml.child xml_arg0 "ignoreNearExpectedFromAbove") in
+      let sampleSize =
+        (Option.map ~f:RandomCutForestConfigurationSampleSizeInteger.of_xml)
+          (Xml.child xml_arg0 "sampleSize") in
+      let shingleSize =
+        (Option.map ~f:RandomCutForestConfigurationShingleSizeInteger.of_xml)
+          (Xml.child xml_arg0 "shingleSize") in
+      let query =
+        RandomCutForestQuery.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "query") in
+      make ?ignoreNearExpectedFromBelow ?ignoreNearExpectedFromAbove
+        ?sampleSize ?shingleSize ~query ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ignoreNearExpectedFromBelow =
+        field_map json__ "ignoreNearExpectedFromBelow"
+          IgnoreNearExpected.of_json in
+      let ignoreNearExpectedFromAbove =
+        field_map json__ "ignoreNearExpectedFromAbove"
+          IgnoreNearExpected.of_json in
+      let sampleSize =
+        field_map json__ "sampleSize"
+          RandomCutForestConfigurationSampleSizeInteger.of_json in
+      let shingleSize =
+        field_map json__ "shingleSize"
+          RandomCutForestConfigurationShingleSizeInteger.of_json in
+      let query = field_map_exn json__ "query" RandomCutForestQuery.of_json in
+      make ?ignoreNearExpectedFromBelow ?ignoreNearExpectedFromAbove
+        ?sampleSize ?shingleSize ~query ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for the Random Cut Forest algorithm used for anomaly detection in time-series data."]
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module PrometheusMetricLabelKey =
+  struct
+    type nonrec t = string
+    let context_ = "PrometheusMetricLabelKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:7168) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"(?!__)[a-zA-Z_][a-zA-Z0-9_]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrometheusMetricLabelKey" j
+    let to_json = simple_to_json to_value
+  end
+module PrometheusMetricLabelValue =
+  struct
+    type nonrec t = string
+    let context_ = "PrometheusMetricLabelValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:7168) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrometheusMetricLabelValue" j
+    let to_json = simple_to_json to_value
+  end
 module AlertManagerDefinitionStatusCode =
   struct
     type nonrec t =
@@ -428,6 +1818,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -483,128 +1876,477 @@ module ValidationExceptionReason =
       of_string (string_of_json ~kind:"ValidationExceptionReason" j)
     let to_json = simple_to_json to_value
   end
+module ScraperLoggingConfigurationStatusCode =
+  struct
+    type nonrec t =
+      | CREATING 
+      | ACTIVE 
+      | UPDATING 
+      | DELETING 
+      | CREATION_FAILED 
+      | UPDATE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | CREATION_FAILED -> "CREATION_FAILED"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "CREATION_FAILED" -> CREATION_FAILED
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ScraperLoggingConfigurationStatusCode" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ScraperLoggingConfigurationStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
+module ScraperComponent =
+  struct
+    type nonrec t =
+      {
+      type_: ScraperComponentType.t
+        [@ocaml.doc "The type of the scraper component."];
+      config: ComponentConfig.t option
+        [@ocaml.doc "The configuration settings for the scraper component."]}
+    let context_ = "ScraperComponent"
+    let make ?config = fun ~type_ -> fun () -> { config; type_ }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (ScraperComponentType.to_value x.type_)));
+        ("config", (Option.map x.config ~f:ComponentConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let config =
+        (Option.map ~f:ComponentConfig.of_xml) (Xml.child xml_arg0 "config") in
+      let type_ =
+        ScraperComponentType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?config ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let config = field_map json__ "config" ComponentConfig.of_json in
+      let type_ = field_map_exn json__ "type" ScraperComponentType.of_json in
+      make ?config ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A component of a Amazon Managed Service for Prometheus scraper that can be configured for logging."]
 module WorkspaceSummary =
   struct
     type nonrec t =
       {
-      alias: WorkspaceAlias.t option [@ocaml.doc "Alias of this workspace."];
-      arn: WorkspaceArn.t
-        [@ocaml.doc "The AmazonResourceName of this workspace."];
-      createdAt: Timestamp.t
-        [@ocaml.doc "The time when the workspace was created."];
-      status: WorkspaceStatus.t [@ocaml.doc "The status of this workspace."];
-      tags: TagMap.t option [@ocaml.doc "The tags of this workspace."];
-      workspaceId: WorkspaceId.t
-        [@ocaml.doc "Unique string identifying this workspace."]}
-    let context_ = "WorkspaceSummary"
-    let make ?alias =
-      fun ?tags ->
-        fun ~arn ->
-          fun ~createdAt ->
-            fun ~status ->
-              fun ~workspaceId ->
-                fun () ->
-                  { alias; tags; arn; createdAt; status; workspaceId }
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc "The unique ID for the workspace."];
+      alias: WorkspaceAlias.t option
+        [@ocaml.doc
+          "The alias that is assigned to this workspace to help identify it. It does not need to be unique."];
+      arn: WorkspaceArn.t option [@ocaml.doc "The ARN of the workspace."];
+      status: WorkspaceStatus.t option
+        [@ocaml.doc "The current status of the workspace."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time that the workspace was created."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The list of tag keys and values that are associated with the workspace."];
+      kmsKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "(optional) If the workspace was created with a customer managed KMS key, the ARN for the key used."]}
+    let make ?workspaceId =
+      fun ?alias ->
+        fun ?arn ->
+          fun ?status ->
+            fun ?createdAt ->
+              fun ?tags ->
+                fun ?kmsKeyArn ->
+                  fun () ->
+                    {
+                      workspaceId;
+                      alias;
+                      arn;
+                      status;
+                      createdAt;
+                      tags;
+                      kmsKeyArn
+                    }
     let to_value x =
       structure_to_value
-        [("alias", (Option.map x.alias ~f:WorkspaceAlias.to_value));
-        ("arn", (Some (WorkspaceArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("status", (Some (WorkspaceStatus.to_value x.status)));
+        [("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value));
+        ("alias", (Option.map x.alias ~f:WorkspaceAlias.to_value));
+        ("arn", (Option.map x.arn ~f:WorkspaceArn.to_value));
+        ("status", (Option.map x.status ~f:WorkspaceStatus.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        ("kmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let kmsKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "kmsKeyArn") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let status =
-        WorkspaceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let status =
+        (Option.map ~f:WorkspaceStatus.of_xml) (Xml.child xml_arg0 "status") in
       let arn =
-        WorkspaceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+        (Option.map ~f:WorkspaceArn.of_xml) (Xml.child xml_arg0 "arn") in
       let alias =
         (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
-      make ~workspaceId ?tags ~status ~createdAt ~arn ?alias ()
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      make ?kmsKeyArn ?tags ?createdAt ?status ?arn ?alias ?workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let status = field_map_exn json "status" WorkspaceStatus.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" WorkspaceArn.of_json in
-      let alias = field_map json "alias" WorkspaceAlias.of_json in
-      make ~workspaceId ?tags ~status ~createdAt ~arn ?alias ()
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KmsKeyArn.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let status = field_map json__ "status" WorkspaceStatus.of_json in
+      let arn = field_map json__ "arn" WorkspaceArn.of_json in
+      let alias = field_map json__ "alias" WorkspaceAlias.of_json in
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      make ?kmsKeyArn ?tags ?createdAt ?status ?arn ?alias ?workspaceId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents a summary of the properties of a workspace."]
+  end[@@ocaml.doc
+       "The information about one Amazon Managed Service for Prometheus workspace in your account."]
+module ScraperSummary =
+  struct
+    type nonrec t =
+      {
+      alias: ScraperAlias.t option
+        [@ocaml.doc "(Optional) A name associated with the scraper."];
+      scraperId: ScraperId.t option [@ocaml.doc "The ID of the scraper."];
+      arn: ScraperArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the scraper."];
+      roleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that provides permissions for the scraper to discover and collect metrics on your behalf."];
+      status: ScraperStatus.t option
+        [@ocaml.doc
+          "A structure that contains the current status of the scraper."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time that the scraper was created."];
+      lastModifiedAt: Timestamp.t option
+        [@ocaml.doc "The date and time that the scraper was last modified."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "(Optional) The list of tag keys and values associated with the scraper."];
+      statusReason: StatusReason.t option
+        [@ocaml.doc "If there is a failure, the reason for the failure."];
+      source: Source.t option
+        [@ocaml.doc
+          "The Amazon EKS cluster from which the scraper collects metrics."];
+      destination: Destination.t option
+        [@ocaml.doc
+          "The Amazon Managed Service for Prometheus workspace the scraper sends metrics to."];
+      roleConfiguration: RoleConfiguration.t option
+        [@ocaml.doc
+          "This structure displays information about the IAM roles used for cross-account scraping configuration."]}
+    let make ?alias =
+      fun ?scraperId ->
+        fun ?arn ->
+          fun ?roleArn ->
+            fun ?status ->
+              fun ?createdAt ->
+                fun ?lastModifiedAt ->
+                  fun ?tags ->
+                    fun ?statusReason ->
+                      fun ?source ->
+                        fun ?destination ->
+                          fun ?roleConfiguration ->
+                            fun () ->
+                              {
+                                alias;
+                                scraperId;
+                                arn;
+                                roleArn;
+                                status;
+                                createdAt;
+                                lastModifiedAt;
+                                tags;
+                                statusReason;
+                                source;
+                                destination;
+                                roleConfiguration
+                              }
+    let to_value x =
+      structure_to_value
+        [("alias", (Option.map x.alias ~f:ScraperAlias.to_value));
+        ("scraperId", (Option.map x.scraperId ~f:ScraperId.to_value));
+        ("arn", (Option.map x.arn ~f:ScraperArn.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:IamRoleArn.to_value));
+        ("status", (Option.map x.status ~f:ScraperStatus.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:StatusReason.to_value));
+        ("source", (Option.map x.source ~f:Source.to_value));
+        ("destination", (Option.map x.destination ~f:Destination.to_value));
+        ("roleConfiguration",
+          (Option.map x.roleConfiguration ~f:RoleConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleConfiguration =
+        (Option.map ~f:RoleConfiguration.of_xml)
+          (Xml.child xml_arg0 "roleConfiguration") in
+      let destination =
+        (Option.map ~f:Destination.of_xml) (Xml.child xml_arg0 "destination") in
+      let source =
+        (Option.map ~f:Source.of_xml) (Xml.child xml_arg0 "source") in
+      let statusReason =
+        (Option.map ~f:StatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let lastModifiedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let status =
+        (Option.map ~f:ScraperStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let roleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let arn = (Option.map ~f:ScraperArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let scraperId =
+        (Option.map ~f:ScraperId.of_xml) (Xml.child xml_arg0 "scraperId") in
+      let alias =
+        (Option.map ~f:ScraperAlias.of_xml) (Xml.child xml_arg0 "alias") in
+      make ?roleConfiguration ?destination ?source ?statusReason ?tags
+        ?lastModifiedAt ?createdAt ?status ?roleArn ?arn ?scraperId ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleConfiguration =
+        field_map json__ "roleConfiguration" RoleConfiguration.of_json in
+      let destination = field_map json__ "destination" Destination.of_json in
+      let source = field_map json__ "source" Source.of_json in
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let lastModifiedAt =
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let status = field_map json__ "status" ScraperStatus.of_json in
+      let roleArn = field_map json__ "roleArn" IamRoleArn.of_json in
+      let arn = field_map json__ "arn" ScraperArn.of_json in
+      let scraperId = field_map json__ "scraperId" ScraperId.of_json in
+      let alias = field_map json__ "alias" ScraperAlias.of_json in
+      make ?roleConfiguration ?destination ?source ?statusReason ?tags
+        ?lastModifiedAt ?createdAt ?status ?roleArn ?arn ?scraperId ?alias ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The ScraperSummary structure contains a summary of the details about one scraper in your account."]
+module FilterKey =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The name of the key by which to filter."]
+    let context_ = "FilterKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterKey" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The name of the key by which to filter."]
+module FilterValues =
+  struct
+    type nonrec t = FilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FilterValues" ~of_json:FilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RuleGroupsNamespaceSummary =
   struct
     type nonrec t =
       {
-      arn: RuleGroupsNamespaceArn.t
+      arn: RuleGroupsNamespaceArn.t option
+        [@ocaml.doc "The ARN of the rule groups namespace."];
+      name: RuleGroupsNamespaceName.t option
+        [@ocaml.doc "The name of the rule groups namespace."];
+      status: RuleGroupsNamespaceStatus.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of this rule groups namespace."];
-      createdAt: Timestamp.t
-        [@ocaml.doc "The time when the rule groups namespace was created."];
-      modifiedAt: Timestamp.t
-        [@ocaml.doc "The time when the rule groups namespace was modified."];
-      name: RuleGroupsNamespaceName.t
-        [@ocaml.doc "The rule groups namespace name."];
-      status: RuleGroupsNamespaceStatus.t
-        [@ocaml.doc "The status of rule groups namespace."];
+          "A structure that displays the current status of the rule groups namespace."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the rule groups namespace was created."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the rule groups namespace was most recently changed."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags of this rule groups namespace."]}
-    let context_ = "RuleGroupsNamespaceSummary"
-    let make ?tags =
-      fun ~arn ->
-        fun ~createdAt ->
-          fun ~modifiedAt ->
-            fun ~name ->
-              fun ~status ->
-                fun () -> { tags; arn; createdAt; modifiedAt; name; status }
+        [@ocaml.doc
+          "The list of tag keys and values that are associated with the rule groups namespace."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?status ->
+          fun ?createdAt ->
+            fun ?modifiedAt ->
+              fun ?tags ->
+                fun () -> { arn; name; status; createdAt; modifiedAt; tags }
     let to_value x =
       structure_to_value
-        [("arn", (Some (RuleGroupsNamespaceArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("modifiedAt", (Some (Timestamp.to_value x.modifiedAt)));
-        ("name", (Some (RuleGroupsNamespaceName.to_value x.name)));
-        ("status", (Some (RuleGroupsNamespaceStatus.to_value x.status)));
+        [("arn", (Option.map x.arn ~f:RuleGroupsNamespaceArn.to_value));
+        ("name", (Option.map x.name ~f:RuleGroupsNamespaceName.to_value));
+        ("status",
+          (Option.map x.status ~f:RuleGroupsNamespaceStatus.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let status =
-        RuleGroupsNamespaceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let name =
-        RuleGroupsNamespaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let modifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "modifiedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn =
-        RuleGroupsNamespaceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?tags ~status ~name ~modifiedAt ~createdAt ~arn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let status =
-        field_map_exn json "status" RuleGroupsNamespaceStatus.of_json in
-      let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
-      let modifiedAt = field_map_exn json "modifiedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" RuleGroupsNamespaceArn.of_json in
-      make ?tags ~status ~name ~modifiedAt ~createdAt ~arn ()
+        (Option.map ~f:RuleGroupsNamespaceStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let name =
+        (Option.map ~f:RuleGroupsNamespaceName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:RuleGroupsNamespaceArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?tags ?modifiedAt ?createdAt ?status ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let status =
+        field_map json__ "status" RuleGroupsNamespaceStatus.of_json in
+      let name = field_map json__ "name" RuleGroupsNamespaceName.of_json in
+      let arn = field_map json__ "arn" RuleGroupsNamespaceArn.of_json in
+      make ?tags ?modifiedAt ?createdAt ?status ?name ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents a summary of the rule groups namespace."]
+  end[@@ocaml.doc
+       "The high-level information about a rule groups namespace. To retrieve more information, use DescribeRuleGroupsNamespace."]
+module AnomalyDetectorSummary =
+  struct
+    type nonrec t =
+      {
+      arn: AnomalyDetectorArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the anomaly detector."];
+      anomalyDetectorId: AnomalyDetectorId.t option
+        [@ocaml.doc "The unique identifier of the anomaly detector."];
+      alias: AnomalyDetectorAlias.t option
+        [@ocaml.doc "The user-friendly name of the anomaly detector."];
+      status: AnomalyDetectorStatus.t option
+        [@ocaml.doc "The current status of the anomaly detector."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The timestamp when the anomaly detector was created."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the anomaly detector was last modified."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags applied to the anomaly detector."]}
+    let make ?arn =
+      fun ?anomalyDetectorId ->
+        fun ?alias ->
+          fun ?status ->
+            fun ?createdAt ->
+              fun ?modifiedAt ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      arn;
+                      anomalyDetectorId;
+                      alias;
+                      status;
+                      createdAt;
+                      modifiedAt;
+                      tags
+                    }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:AnomalyDetectorArn.to_value));
+        ("anomalyDetectorId",
+          (Option.map x.anomalyDetectorId ~f:AnomalyDetectorId.to_value));
+        ("alias", (Option.map x.alias ~f:AnomalyDetectorAlias.to_value));
+        ("status", (Option.map x.status ~f:AnomalyDetectorStatus.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let status =
+        (Option.map ~f:AnomalyDetectorStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let alias =
+        (Option.map ~f:AnomalyDetectorAlias.of_xml)
+          (Xml.child xml_arg0 "alias") in
+      let anomalyDetectorId =
+        (Option.map ~f:AnomalyDetectorId.of_xml)
+          (Xml.child xml_arg0 "anomalyDetectorId") in
+      let arn =
+        (Option.map ~f:AnomalyDetectorArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?tags ?modifiedAt ?createdAt ?status ?alias ?anomalyDetectorId
+        ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let status = field_map json__ "status" AnomalyDetectorStatus.of_json in
+      let alias = field_map json__ "alias" AnomalyDetectorAlias.of_json in
+      let anomalyDetectorId =
+        field_map json__ "anomalyDetectorId" AnomalyDetectorId.of_json in
+      let arn = field_map json__ "arn" AnomalyDetectorArn.of_json in
+      make ?tags ?modifiedAt ?createdAt ?status ?alias ?anomalyDetectorId
+        ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary information about an anomaly detector for list operations."]
 module Uri_ =
   struct
     type nonrec t = string
@@ -623,6 +2365,113 @@ module Uri_ =
     let of_json j = string_of_json ~kind:"Uri" j
     let to_json = simple_to_json to_value
   end
+module LimitsPerLabelSetList =
+  struct
+    type nonrec t = LimitsPerLabelSet.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LimitsPerLabelSet.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LimitsPerLabelSet.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LimitsPerLabelSetList"
+        ~of_json:LimitsPerLabelSet.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkspaceConfigurationDescriptionRetentionPeriodInDaysInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for WorkspaceConfigurationDescriptionRetentionPeriodInDaysInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module WorkspaceConfigurationStatus =
+  struct
+    type nonrec t =
+      {
+      statusCode: WorkspaceConfigurationStatusCode.t option
+        [@ocaml.doc "The current status of the workspace configuration."];
+      statusReason: String_.t option
+        [@ocaml.doc
+          "The reason for the current status, if a reason is available."]}
+    let make ?statusCode =
+      fun ?statusReason -> fun () -> { statusCode; statusReason }
+    let to_value x =
+      structure_to_value
+        [("statusCode",
+           (Option.map x.statusCode
+              ~f:WorkspaceConfigurationStatusCode.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let statusCode =
+        (Option.map ~f:WorkspaceConfigurationStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusReason ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let statusCode =
+        field_map json__ "statusCode"
+          WorkspaceConfigurationStatusCode.of_json in
+      make ?statusReason ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure displays the current status of the workspace configuration, and might also contain a reason for that status."]
+module ScrapeConfiguration =
+  struct
+    type nonrec t =
+      {
+      configurationBlob: Blob.t option
+        [@ocaml.doc "The base 64 encoded scrape configuration file."]}
+    let make ?configurationBlob = fun () -> { configurationBlob }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?configurationBlob:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("configurationBlob",
+           (Option.map x.configurationBlob ~f:Blob.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configurationBlob =
+        (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "configurationBlob") in
+      make ?configurationBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configurationBlob =
+        field_map json__ "configurationBlob" Blob.of_json in
+      make ?configurationBlob ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A scrape configuration for a scraper, base 64 encoded. For more information, see Scraper configuration in the Amazon Managed Service for Prometheus User Guide."]
 module RuleGroupsNamespaceData =
   struct
     type nonrec t = string[@@ocaml.doc "The rule groups namespace data."]
@@ -635,9 +2484,216 @@ module RuleGroupsNamespaceData =
     let of_json j = string_of_json ~kind:"a blob" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The rule groups namespace data."]
+module LoggingDestinations =
+  struct
+    type nonrec t = LoggingDestination.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LoggingDestination.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LoggingDestination.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LoggingDestinations"
+        ~of_json:LoggingDestination.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QueryLoggingConfigurationStatus =
+  struct
+    type nonrec t =
+      {
+      statusCode: QueryLoggingConfigurationStatusCode.t option
+        [@ocaml.doc "The current status of the query logging configuration."];
+      statusReason: String_.t option
+        [@ocaml.doc "If there is a failure, the reason for the failure."]}
+    let make ?statusCode =
+      fun ?statusReason -> fun () -> { statusCode; statusReason }
+    let to_value x =
+      structure_to_value
+        [("statusCode",
+           (Option.map x.statusCode
+              ~f:QueryLoggingConfigurationStatusCode.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let statusCode =
+        (Option.map ~f:QueryLoggingConfigurationStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusReason ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let statusCode =
+        field_map json__ "statusCode"
+          QueryLoggingConfigurationStatusCode.of_json in
+      make ?statusReason ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The status information for a query logging configuration."]
+module LoggingConfigurationStatus =
+  struct
+    type nonrec t =
+      {
+      statusCode: LoggingConfigurationStatusCode.t option
+        [@ocaml.doc
+          "The current status of the current rules and alerting logging configuration. These logging configurations are only for rules and alerting logs."];
+      statusReason: String_.t option
+        [@ocaml.doc "If failed, the reason for the failure."]}
+    let make ?statusCode =
+      fun ?statusReason -> fun () -> { statusCode; statusReason }
+    let to_value x =
+      structure_to_value
+        [("statusCode",
+           (Option.map x.statusCode
+              ~f:LoggingConfigurationStatusCode.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let statusCode =
+        (Option.map ~f:LoggingConfigurationStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusReason ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let statusCode =
+        field_map json__ "statusCode" LoggingConfigurationStatusCode.of_json in
+      make ?statusReason ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status of the logging configuration."]
+module AnomalyDetectorConfiguration =
+  struct
+    type nonrec t =
+      {
+      randomCutForest: RandomCutForestConfiguration.t option
+        [@ocaml.doc
+          "The Random Cut Forest algorithm configuration for anomaly detection."]}
+    let make ?randomCutForest = fun () -> { randomCutForest }
+    let to_value x =
+      structure_to_value
+        [("randomCutForest",
+           (Option.map x.randomCutForest
+              ~f:RandomCutForestConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let randomCutForest =
+        (Option.map ~f:RandomCutForestConfiguration.of_xml)
+          (Xml.child xml_arg0 "randomCutForest") in
+      make ?randomCutForest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let randomCutForest =
+        field_map json__ "randomCutForest"
+          RandomCutForestConfiguration.of_json in
+      make ?randomCutForest ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration for the anomaly detection algorithm."]
+module AnomalyDetectorEvaluationInterval =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:86400) >>=
+             (fun () -> check_int_min i ~min:30));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for AnomalyDetectorEvaluationInterval" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AnomalyDetectorMissingDataAction =
+  struct
+    type nonrec t =
+      {
+      markAsAnomaly: Boolean.t option
+        [@ocaml.doc "Marks missing data points as anomalies."];
+      skip: Boolean.t option
+        [@ocaml.doc "Skips evaluation when data is missing."]}
+    let make ?markAsAnomaly = fun ?skip -> fun () -> { markAsAnomaly; skip }
+    let to_value x =
+      structure_to_value
+        [("markAsAnomaly", (Option.map x.markAsAnomaly ~f:Boolean.to_value));
+        ("skip", (Option.map x.skip ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let skip = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "skip") in
+      let markAsAnomaly =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "markAsAnomaly") in
+      make ?skip ?markAsAnomaly ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let skip = field_map json__ "skip" Boolean.of_json in
+      let markAsAnomaly = field_map json__ "markAsAnomaly" Boolean.of_json in
+      make ?skip ?markAsAnomaly ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the action to take when data is missing during anomaly detection evaluation."]
+module PrometheusMetricLabelMap =
+  struct
+    type nonrec t =
+      (PrometheusMetricLabelKey.t * PrometheusMetricLabelValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((PrometheusMetricLabelKey.of_string chopped),
+                              (PrometheusMetricLabelValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (PrometheusMetricLabelKey.to_value x) |>
+                    (fun x ->
+                       (PrometheusMetricLabelValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:PrometheusMetricLabelKey.of_string
+        ~of_json:PrometheusMetricLabelValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AlertManagerDefinitionData =
   struct
-    type nonrec t = string[@@ocaml.doc "The alert manager definition data."]
+    type nonrec t = string[@@ocaml.doc
+                            "The base-64 encoded blob that is alert manager definition. For details about the alert manager definition, see AlertManagedDefinitionData."]
     let make i = i
     let of_string x = x
     let to_value x = `Blob x
@@ -646,40 +2702,296 @@ module AlertManagerDefinitionData =
     let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
     let of_json j = string_of_json ~kind:"a blob" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The alert manager definition data."]
+  end[@@ocaml.doc
+       "The base-64 encoded blob that is alert manager definition. For details about the alert manager definition, see AlertManagedDefinitionData."]
 module AlertManagerDefinitionStatus =
   struct
     type nonrec t =
       {
-      statusCode: AlertManagerDefinitionStatusCode.t
-        [@ocaml.doc "Status code of this definition."];
+      statusCode: AlertManagerDefinitionStatusCode.t option
+        [@ocaml.doc "The current status of the alert manager."];
       statusReason: String_.t option
-        [@ocaml.doc "The reason for failure if any."]}
-    let context_ = "AlertManagerDefinitionStatus"
-    let make ?statusReason =
-      fun ~statusCode -> fun () -> { statusReason; statusCode }
+        [@ocaml.doc "If there is a failure, the reason for the failure."]}
+    let make ?statusCode =
+      fun ?statusReason -> fun () -> { statusCode; statusReason }
     let to_value x =
       structure_to_value
         [("statusCode",
-           (Some (AlertManagerDefinitionStatusCode.to_value x.statusCode)));
+           (Option.map x.statusCode
+              ~f:AlertManagerDefinitionStatusCode.to_value));
         ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let statusReason =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
       let statusCode =
-        AlertManagerDefinitionStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "statusCode") in
-      make ?statusReason ~statusCode ()
+        (Option.map ~f:AlertManagerDefinitionStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusReason ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusReason = field_map json "statusReason" String_.of_json in
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
       let statusCode =
-        field_map_exn json "statusCode"
+        field_map json__ "statusCode"
           AlertManagerDefinitionStatusCode.of_json in
-      make ?statusReason ~statusCode ()
+      make ?statusReason ?statusCode ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents the status of a definition."]
+  end[@@ocaml.doc "The status of the alert manager."]
+module AccessDeniedException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option [@ocaml.doc "Description of the error."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You do not have sufficient access to perform this action."]
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option [@ocaml.doc "Description of the error."];
+      resourceId: String_.t option
+        [@ocaml.doc "Identifier of the resource affected."];
+      resourceType: String_.t option
+        [@ocaml.doc "Type of the resource affected."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request would cause an inconsistent state."]
+module InternalServerException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option [@ocaml.doc "Description of the error."];
+      retryAfterSeconds: Integer.t option
+        [@ocaml.doc
+          "Advice to clients on when the call can be safely retried."]}
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retryAfterSeconds =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retryAfterSeconds =
+        field_map json__ "retryAfterSeconds" Integer.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An unexpected error occurred during the processing of the request."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option [@ocaml.doc "Description of the error."];
+      resourceId: String_.t option
+        [@ocaml.doc "Identifier of the resource affected."];
+      resourceType: String_.t option
+        [@ocaml.doc "Type of the resource affected."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request references a resources that doesn't exist."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option [@ocaml.doc "Description of the error."];
+      resourceId: String_.t option
+        [@ocaml.doc "Identifier of the resource affected."];
+      resourceType: String_.t option
+        [@ocaml.doc "Type of the resource affected."];
+      serviceCode: String_.t option
+        [@ocaml.doc "Service quotas code for the originating service."];
+      quotaCode: String_.t option
+        [@ocaml.doc "Service quotas code of the originating quota."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?serviceCode ->
+            fun ?quotaCode ->
+              fun () ->
+                { message; resourceId; resourceType; serviceCode; quotaCode }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value));
+        ("quotaCode", (Option.map x.quotaCode ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quotaCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaCode") in
+      let serviceCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?quotaCode ?serviceCode ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quotaCode = field_map json__ "quotaCode" String_.of_json in
+      let serviceCode = field_map json__ "serviceCode" String_.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?quotaCode ?serviceCode ?resourceType ?resourceId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Completing the request would cause a service quota to be exceeded."]
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option [@ocaml.doc "Description of the error."];
+      serviceCode: String_.t option
+        [@ocaml.doc "Service quotas code for the originating service."];
+      quotaCode: String_.t option
+        [@ocaml.doc "Service quotas code for the originating quota."];
+      retryAfterSeconds: Integer.t option
+        [@ocaml.doc
+          "Advice to clients on when the call can be safely retried."]}
+    let make ?message =
+      fun ?serviceCode ->
+        fun ?quotaCode ->
+          fun ?retryAfterSeconds ->
+            fun () -> { message; serviceCode; quotaCode; retryAfterSeconds }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value));
+        ("quotaCode", (Option.map x.quotaCode ~f:String_.to_value));
+        ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retryAfterSeconds =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
+      let quotaCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaCode") in
+      let serviceCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retryAfterSeconds =
+        field_map json__ "retryAfterSeconds" Integer.of_json in
+      let quotaCode = field_map json__ "quotaCode" String_.of_json in
+      let serviceCode = field_map json__ "serviceCode" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was denied due to request throttling."]
+module ValidationException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option [@ocaml.doc "Description of the error."];
+      reason: ValidationExceptionReason.t option
+        [@ocaml.doc "Reason the request failed validation."];
+      fieldList: ValidationExceptionFieldList.t option
+        [@ocaml.doc "The field that caused the error, if applicable."]}
+    let make ?message =
+      fun ?reason ->
+        fun ?fieldList -> fun () -> { message; reason; fieldList }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value));
+        ("fieldList",
+          (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fieldList =
+        (Option.map ~f:ValidationExceptionFieldList.of_xml)
+          (Xml.child xml_arg0 "fieldList") in
+      let reason =
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?fieldList ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fieldList =
+        field_map json__ "fieldList" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?fieldList ?reason ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The input fails to satisfy the constraints specified by an Amazon Web Services service."]
 module IdempotencyToken =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -702,185 +3014,118 @@ module IdempotencyToken =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "An identifier used to ensure the idempotency of a write request."]
-module AccessDeniedException =
+module UpdateWorkspaceConfigurationRequestRetentionPeriodInDaysInteger =
   struct
-    type nonrec t =
-      {
-      message: String_.t [@ocaml.doc "Description of the error."]}
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "User does not have sufficient access to perform this action."]
-module InternalServerException =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for UpdateWorkspaceConfigurationRequestRetentionPeriodInDaysInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ScraperLoggingConfigurationStatus =
   struct
     type nonrec t =
       {
-      message: String_.t [@ocaml.doc "Description of the error."];
-      retryAfterSeconds: Integer.t option
+      statusCode: ScraperLoggingConfigurationStatusCode.t option
+        [@ocaml.doc "The status code of the scraper logging configuration."];
+      statusReason: String_.t option
         [@ocaml.doc
-          "Advice to clients on when the call can be safely retried."]}
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+          "The reason for the current status of the scraper logging configuration."]}
+    let make ?statusCode =
+      fun ?statusReason -> fun () -> { statusCode; statusReason }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value))]
+        [("statusCode",
+           (Option.map x.statusCode
+              ~f:ScraperLoggingConfigurationStatusCode.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let retryAfterSeconds =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let statusCode =
+        (Option.map ~f:ScraperLoggingConfigurationStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusReason ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let retryAfterSeconds =
-        field_map json "retryAfterSeconds" Integer.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let statusCode =
+        field_map json__ "statusCode"
+          ScraperLoggingConfigurationStatusCode.of_json in
+      make ?statusReason ?statusCode ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Unexpected error during processing of request."]
-module ResourceNotFoundException =
+  end[@@ocaml.doc "The status of a scraper logging configuration."]
+module ScraperComponents =
+  struct
+    type nonrec t = ScraperComponent.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ScraperComponent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ScraperComponent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ScraperComponents"
+        ~of_json:ScraperComponent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ScraperLoggingDestination =
   struct
     type nonrec t =
       {
-      message: String_.t [@ocaml.doc "Description of the error."];
-      resourceId: String_.t
-        [@ocaml.doc "Identifier of the resource affected."];
-      resourceType: String_.t [@ocaml.doc "Type of the resource affected."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      cloudWatchLogs: CloudWatchLogDestination.t option
+        [@ocaml.doc
+          "The CloudWatch Logs configuration for the scraper logging destination."]}
+    let make ?cloudWatchLogs = fun () -> { cloudWatchLogs }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("cloudWatchLogs",
+           (Option.map x.cloudWatchLogs ~f:CloudWatchLogDestination.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+      let cloudWatchLogs =
+        (Option.map ~f:CloudWatchLogDestination.of_xml)
+          (Xml.child xml_arg0 "cloudWatchLogs") in
+      make ?cloudWatchLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let cloudWatchLogs =
+        field_map json__ "cloudWatchLogs" CloudWatchLogDestination.of_json in
+      make ?cloudWatchLogs ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request references a resource which does not exist."]
-module ThrottlingException =
-  struct
-    type nonrec t =
-      {
-      message: String_.t [@ocaml.doc "Description of the error."];
-      quotaCode: String_.t option
-        [@ocaml.doc
-          "Service Quotas requirement to identify originating quota."];
-      retryAfterSeconds: Integer.t option
-        [@ocaml.doc
-          "Advice to clients on when the call can be safely retried."];
-      serviceCode: String_.t option
-        [@ocaml.doc
-          "Service Quotas requirement to identify originating service."]}
-    let context_ = "ThrottlingException"
-    let make ?quotaCode =
-      fun ?retryAfterSeconds ->
-        fun ?serviceCode ->
-          fun ~message ->
-            fun () -> { quotaCode; retryAfterSeconds; serviceCode; message }
-    let to_value x =
-      structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("quotaCode", (Option.map x.quotaCode ~f:String_.to_value));
-        ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value));
-        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let serviceCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
-      let retryAfterSeconds =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
-      let quotaCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaCode") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map json "serviceCode" String_.of_json in
-      let retryAfterSeconds =
-        field_map json "retryAfterSeconds" Integer.of_json in
-      let quotaCode = field_map json "quotaCode" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request was denied due to request throttling."]
-module ValidationException =
-  struct
-    type nonrec t =
-      {
-      fieldList: ValidationExceptionFieldList.t option
-        [@ocaml.doc
-          "The field that caused the error, if applicable. If more than one field caused the error, pick one and elaborate in the message."];
-      message: String_.t [@ocaml.doc "Description of the error."];
-      reason: ValidationExceptionReason.t
-        [@ocaml.doc "Reason the request failed validation."]}
-    let context_ = "ValidationException"
-    let make ?fieldList =
-      fun ~message -> fun ~reason -> fun () -> { fieldList; message; reason }
-    let to_value x =
-      structure_to_value
-        [("fieldList",
-           (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value));
-        ("message", (Some (String_.to_value x.message)));
-        ("reason", (Some (ValidationExceptionReason.to_value x.reason)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let reason =
-        ValidationExceptionReason.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "reason") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      let fieldList =
-        (Option.map ~f:ValidationExceptionFieldList.of_xml)
-          (Xml.child xml_arg0 "fieldList") in
-      make ~reason ~message ?fieldList ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason =
-        field_map_exn json "reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      let fieldList =
-        field_map json "fieldList" ValidationExceptionFieldList.of_json in
-      make ~reason ~message ?fieldList ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The input fails to satisfy the constraints specified by an AWS service."]
+  end[@@ocaml.doc "The destination where scraper logs are sent."]
 module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -900,104 +3145,50 @@ module TagKeys =
     let of_json j = list_of_json ~kind:"TagKeys" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ConflictException =
+module WorkspacePolicyStatusCode =
   struct
     type nonrec t =
-      {
-      message: String_.t [@ocaml.doc "Description of the error."];
-      resourceId: String_.t
-        [@ocaml.doc "Identifier of the resource affected."];
-      resourceType: String_.t [@ocaml.doc "Type of the resource affected."]}
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
-    let to_value x =
-      structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+      | CREATING 
+      | ACTIVE 
+      | UPDATING 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updating or deleting a resource can cause an inconsistent state."]
-module ServiceQuotaExceededException =
-  struct
-    type nonrec t =
-      {
-      message: String_.t [@ocaml.doc "Description of the error."];
-      quotaCode: String_.t
-        [@ocaml.doc
-          "Service Quotas requirement to identify originating quota."];
-      resourceId: String_.t
-        [@ocaml.doc "Identifier of the resource affected."];
-      resourceType: String_.t [@ocaml.doc "Type of the resource affected."];
-      serviceCode: String_.t
-        [@ocaml.doc
-          "Service Quotas requirement to identify originating service."]}
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message =
-      fun ~quotaCode ->
-        fun ~resourceId ->
-          fun ~resourceType ->
-            fun ~serviceCode ->
-              fun () ->
-                { message; quotaCode; resourceId; resourceType; serviceCode }
-    let to_value x =
-      structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("quotaCode", (Some (String_.to_value x.quotaCode)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)));
-        ("serviceCode", (Some (String_.to_value x.serviceCode)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let serviceCode =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceCode") in
-      let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
-      let quotaCode =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "quotaCode") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~serviceCode ~resourceType ~resourceId ~quotaCode ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map_exn json "serviceCode" String_.of_json in
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let quotaCode = field_map_exn json "quotaCode" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~serviceCode ~resourceType ~resourceId ~quotaCode ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request would cause a service quota to be exceeded."]
+      of_string
+        (string_of_xml ~kind:"enumeration WorkspacePolicyStatusCode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WorkspacePolicyStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
 module PaginationToken =
   struct
     type nonrec t = string[@@ocaml.doc
                             "A token used to access the next page in a paginated result set."]
     let context_ = "PaginationToken"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -1011,6 +3202,9 @@ module WorkspaceSummaryList =
   struct
     type nonrec t = WorkspaceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkspaceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1052,10 +3246,97 @@ module ListWorkspacesRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ScraperSummaryList =
+  struct
+    type nonrec t = ScraperSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ScraperSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ScraperSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ScraperSummaryList" ~of_json:ScraperSummary.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ListScrapersRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListScrapersRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ScraperFilters =
+  struct
+    type nonrec t = (FilterKey.t * FilterValues.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types FilterKey FilterValues"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (FilterKey.to_value x) |>
+                    (fun x -> (FilterValues.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:FilterKey.of_string
+        ~of_json:FilterValues.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RuleGroupsNamespaceSummaryList =
   struct
     type nonrec t = RuleGroupsNamespaceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleGroupsNamespaceSummary.to_value)) |>
         (fun x -> `List x)
@@ -1098,248 +3379,1606 @@ module ListRuleGroupsNamespacesRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module AnomalyDetectorSummaryList =
+  struct
+    type nonrec t = AnomalyDetectorSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AnomalyDetectorSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AnomalyDetectorSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AnomalyDetectorSummaryList"
+        ~of_json:AnomalyDetectorSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListAnomalyDetectorsRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListAnomalyDetectorsRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module WorkspaceDescription =
   struct
     type nonrec t =
       {
-      alias: WorkspaceAlias.t option [@ocaml.doc "Alias of this workspace."];
-      arn: WorkspaceArn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of this workspace."];
-      createdAt: Timestamp.t
-        [@ocaml.doc "The time when the workspace was created."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc
+          "The unique ID for the workspace. For example, ws-example1-1234-abcd-5678-ef90abcd1234."];
+      alias: WorkspaceAlias.t option
+        [@ocaml.doc
+          "The alias that is assigned to this workspace to help identify it. It does not need to be unique."];
+      arn: WorkspaceArn.t option
+        [@ocaml.doc
+          "The ARN of the workspace. For example, arn:aws:aps:<region>:123456789012:workspace/ws-example1-1234-abcd-5678-ef90abcd1234."];
+      status: WorkspaceStatus.t option
+        [@ocaml.doc "The current status of the workspace."];
       prometheusEndpoint: Uri_.t option
-        [@ocaml.doc "Prometheus endpoint URI."];
-      status: WorkspaceStatus.t [@ocaml.doc "The status of this workspace."];
-      tags: TagMap.t option [@ocaml.doc "The tags of this workspace."];
-      workspaceId: WorkspaceId.t
-        [@ocaml.doc "Unique string identifying this workspace."]}
-    let context_ = "WorkspaceDescription"
-    let make ?alias =
-      fun ?prometheusEndpoint ->
-        fun ?tags ->
-          fun ~arn ->
-            fun ~createdAt ->
-              fun ~status ->
-                fun ~workspaceId ->
-                  fun () ->
-                    {
-                      alias;
-                      prometheusEndpoint;
-                      tags;
-                      arn;
-                      createdAt;
-                      status;
-                      workspaceId
-                    }
+        [@ocaml.doc
+          "The Prometheus endpoint available for this workspace. For example, https://aps-workspaces.<region>.amazonaws.com/workspaces/ws-example1-1234-abcd-5678-ef90abcd1234/api/v1/."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time that the workspace was created."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The list of tag keys and values that are associated with the workspace."];
+      kmsKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "(optional) If the workspace was created with a customer managed KMS key, the ARN for the key used."]}
+    let make ?workspaceId =
+      fun ?alias ->
+        fun ?arn ->
+          fun ?status ->
+            fun ?prometheusEndpoint ->
+              fun ?createdAt ->
+                fun ?tags ->
+                  fun ?kmsKeyArn ->
+                    fun () ->
+                      {
+                        workspaceId;
+                        alias;
+                        arn;
+                        status;
+                        prometheusEndpoint;
+                        createdAt;
+                        tags;
+                        kmsKeyArn
+                      }
     let to_value x =
       structure_to_value
-        [("alias", (Option.map x.alias ~f:WorkspaceAlias.to_value));
-        ("arn", (Some (WorkspaceArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value));
+        ("alias", (Option.map x.alias ~f:WorkspaceAlias.to_value));
+        ("arn", (Option.map x.arn ~f:WorkspaceArn.to_value));
+        ("status", (Option.map x.status ~f:WorkspaceStatus.to_value));
         ("prometheusEndpoint",
           (Option.map x.prometheusEndpoint ~f:Uri_.to_value));
-        ("status", (Some (WorkspaceStatus.to_value x.status)));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        ("kmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let kmsKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "kmsKeyArn") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let status =
-        WorkspaceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let prometheusEndpoint =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "prometheusEndpoint") in
-      let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+      let status =
+        (Option.map ~f:WorkspaceStatus.of_xml) (Xml.child xml_arg0 "status") in
       let arn =
-        WorkspaceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+        (Option.map ~f:WorkspaceArn.of_xml) (Xml.child xml_arg0 "arn") in
       let alias =
         (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
-      make ~workspaceId ?tags ~status ?prometheusEndpoint ~createdAt ~arn
-        ?alias ()
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      make ?kmsKeyArn ?tags ?createdAt ?prometheusEndpoint ?status ?arn
+        ?alias ?workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let status = field_map_exn json "status" WorkspaceStatus.of_json in
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KmsKeyArn.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let prometheusEndpoint =
-        field_map json "prometheusEndpoint" Uri_.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" WorkspaceArn.of_json in
-      let alias = field_map json "alias" WorkspaceAlias.of_json in
-      make ~workspaceId ?tags ~status ?prometheusEndpoint ~createdAt ~arn
-        ?alias ()
+        field_map json__ "prometheusEndpoint" Uri_.of_json in
+      let status = field_map json__ "status" WorkspaceStatus.of_json in
+      let arn = field_map json__ "arn" WorkspaceArn.of_json in
+      let alias = field_map json__ "alias" WorkspaceAlias.of_json in
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      make ?kmsKeyArn ?tags ?createdAt ?prometheusEndpoint ?status ?arn
+        ?alias ?workspaceId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents the properties of a workspace."]
+  end[@@ocaml.doc
+       "The full details about one Amazon Managed Service for Prometheus workspace in your account."]
+module WorkspaceConfigurationDescription =
+  struct
+    type nonrec t =
+      {
+      status: WorkspaceConfigurationStatus.t option
+        [@ocaml.doc
+          "This structure displays the current status of the workspace configuration, and might also contain a reason for that status."];
+      limitsPerLabelSet: LimitsPerLabelSetList.t option
+        [@ocaml.doc
+          "This is an array of structures, where each structure displays one label sets for the workspace and the limits for that label set."];
+      retentionPeriodInDays:
+        WorkspaceConfigurationDescriptionRetentionPeriodInDaysInteger.t
+          option
+        [@ocaml.doc
+          "This field displays how many days that metrics are retained in the workspace."]}
+    let make ?status =
+      fun ?limitsPerLabelSet ->
+        fun ?retentionPeriodInDays ->
+          fun () -> { status; limitsPerLabelSet; retentionPeriodInDays }
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:WorkspaceConfigurationStatus.to_value));
+        ("limitsPerLabelSet",
+          (Option.map x.limitsPerLabelSet ~f:LimitsPerLabelSetList.to_value));
+        ("retentionPeriodInDays",
+          (Option.map x.retentionPeriodInDays
+             ~f:WorkspaceConfigurationDescriptionRetentionPeriodInDaysInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retentionPeriodInDays =
+        (Option.map
+           ~f:WorkspaceConfigurationDescriptionRetentionPeriodInDaysInteger.of_xml)
+          (Xml.child xml_arg0 "retentionPeriodInDays") in
+      let limitsPerLabelSet =
+        (Option.map ~f:LimitsPerLabelSetList.of_xml)
+          (Xml.child xml_arg0 "limitsPerLabelSet") in
+      let status =
+        (Option.map ~f:WorkspaceConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?retentionPeriodInDays ?limitsPerLabelSet ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retentionPeriodInDays =
+        field_map json__ "retentionPeriodInDays"
+          WorkspaceConfigurationDescriptionRetentionPeriodInDaysInteger.of_json in
+      let limitsPerLabelSet =
+        field_map json__ "limitsPerLabelSet" LimitsPerLabelSetList.of_json in
+      let status =
+        field_map json__ "status" WorkspaceConfigurationStatus.of_json in
+      make ?retentionPeriodInDays ?limitsPerLabelSet ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure contains the description of the workspace configuration."]
+module ScraperDescription =
+  struct
+    type nonrec t =
+      {
+      alias: ScraperAlias.t option
+        [@ocaml.doc "(Optional) A name associated with the scraper."];
+      scraperId: ScraperId.t option
+        [@ocaml.doc
+          "The ID of the scraper. For example, s-example1-1234-abcd-5678-ef9012abcd34."];
+      arn: ScraperArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the scraper. For example, arn:aws:aps:<region>:123456798012:scraper/s-example1-1234-abcd-5678-ef9012abcd34."];
+      roleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that provides permissions for the scraper to discover and collect metrics on your behalf. For example, arn:aws:iam::123456789012:role/service-role/AmazonGrafanaServiceRole-12example."];
+      status: ScraperStatus.t option
+        [@ocaml.doc
+          "A structure that contains the current status of the scraper."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time that the scraper was created."];
+      lastModifiedAt: Timestamp.t option
+        [@ocaml.doc "The date and time that the scraper was last modified."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "(Optional) The list of tag keys and values associated with the scraper."];
+      statusReason: StatusReason.t option
+        [@ocaml.doc "If there is a failure, the reason for the failure."];
+      scrapeConfiguration: ScrapeConfiguration.t option
+        [@ocaml.doc "The configuration in use by the scraper."];
+      source: Source.t option
+        [@ocaml.doc
+          "The Amazon EKS cluster from which the scraper collects metrics."];
+      destination: Destination.t option
+        [@ocaml.doc
+          "The Amazon Managed Service for Prometheus workspace the scraper sends metrics to."];
+      roleConfiguration: RoleConfiguration.t option
+        [@ocaml.doc
+          "This structure displays information about the IAM roles used for cross-account scraping configuration."]}
+    let make ?alias =
+      fun ?scraperId ->
+        fun ?arn ->
+          fun ?roleArn ->
+            fun ?status ->
+              fun ?createdAt ->
+                fun ?lastModifiedAt ->
+                  fun ?tags ->
+                    fun ?statusReason ->
+                      fun ?scrapeConfiguration ->
+                        fun ?source ->
+                          fun ?destination ->
+                            fun ?roleConfiguration ->
+                              fun () ->
+                                {
+                                  alias;
+                                  scraperId;
+                                  arn;
+                                  roleArn;
+                                  status;
+                                  createdAt;
+                                  lastModifiedAt;
+                                  tags;
+                                  statusReason;
+                                  scrapeConfiguration;
+                                  source;
+                                  destination;
+                                  roleConfiguration
+                                }
+    let to_value x =
+      structure_to_value
+        [("alias", (Option.map x.alias ~f:ScraperAlias.to_value));
+        ("scraperId", (Option.map x.scraperId ~f:ScraperId.to_value));
+        ("arn", (Option.map x.arn ~f:ScraperArn.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:IamRoleArn.to_value));
+        ("status", (Option.map x.status ~f:ScraperStatus.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastModifiedAt",
+          (Option.map x.lastModifiedAt ~f:Timestamp.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:StatusReason.to_value));
+        ("scrapeConfiguration",
+          (Option.map x.scrapeConfiguration ~f:ScrapeConfiguration.to_value));
+        ("source", (Option.map x.source ~f:Source.to_value));
+        ("destination", (Option.map x.destination ~f:Destination.to_value));
+        ("roleConfiguration",
+          (Option.map x.roleConfiguration ~f:RoleConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleConfiguration =
+        (Option.map ~f:RoleConfiguration.of_xml)
+          (Xml.child xml_arg0 "roleConfiguration") in
+      let destination =
+        (Option.map ~f:Destination.of_xml) (Xml.child xml_arg0 "destination") in
+      let source =
+        (Option.map ~f:Source.of_xml) (Xml.child xml_arg0 "source") in
+      let scrapeConfiguration =
+        (Option.map ~f:ScrapeConfiguration.of_xml)
+          (Xml.child xml_arg0 "scrapeConfiguration") in
+      let statusReason =
+        (Option.map ~f:StatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let lastModifiedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let status =
+        (Option.map ~f:ScraperStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let roleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let arn = (Option.map ~f:ScraperArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let scraperId =
+        (Option.map ~f:ScraperId.of_xml) (Xml.child xml_arg0 "scraperId") in
+      let alias =
+        (Option.map ~f:ScraperAlias.of_xml) (Xml.child xml_arg0 "alias") in
+      make ?roleConfiguration ?destination ?source ?scrapeConfiguration
+        ?statusReason ?tags ?lastModifiedAt ?createdAt ?status ?roleArn ?arn
+        ?scraperId ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleConfiguration =
+        field_map json__ "roleConfiguration" RoleConfiguration.of_json in
+      let destination = field_map json__ "destination" Destination.of_json in
+      let source = field_map json__ "source" Source.of_json in
+      let scrapeConfiguration =
+        field_map json__ "scrapeConfiguration" ScrapeConfiguration.of_json in
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let lastModifiedAt =
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let status = field_map json__ "status" ScraperStatus.of_json in
+      let roleArn = field_map json__ "roleArn" IamRoleArn.of_json in
+      let arn = field_map json__ "arn" ScraperArn.of_json in
+      let scraperId = field_map json__ "scraperId" ScraperId.of_json in
+      let alias = field_map json__ "alias" ScraperAlias.of_json in
+      make ?roleConfiguration ?destination ?source ?scrapeConfiguration
+        ?statusReason ?tags ?lastModifiedAt ?createdAt ?status ?roleArn ?arn
+        ?scraperId ?alias ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The ScraperDescription structure contains the full details about one scraper in your account."]
 module RuleGroupsNamespaceDescription =
   struct
     type nonrec t =
       {
-      arn: RuleGroupsNamespaceArn.t
+      arn: RuleGroupsNamespaceArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of this rule groups namespace."];
-      createdAt: Timestamp.t
-        [@ocaml.doc "The time when the rule groups namespace was created."];
-      data: RuleGroupsNamespaceData.t
-        [@ocaml.doc "The rule groups namespace data."];
-      modifiedAt: Timestamp.t
-        [@ocaml.doc "The time when the rule groups namespace was modified."];
-      name: RuleGroupsNamespaceName.t
-        [@ocaml.doc "The rule groups namespace name."];
-      status: RuleGroupsNamespaceStatus.t
-        [@ocaml.doc "The status of rule groups namespace."];
+          "The ARN of the rule groups namespace. For example, arn:aws:aps:<region>:123456789012:rulegroupsnamespace/ws-example1-1234-abcd-5678-ef90abcd1234/rulesfile1."];
+      name: RuleGroupsNamespaceName.t option
+        [@ocaml.doc "The name of the rule groups namespace."];
+      status: RuleGroupsNamespaceStatus.t option
+        [@ocaml.doc "The current status of the rule groups namespace."];
+      data: RuleGroupsNamespaceData.t option
+        [@ocaml.doc
+          "The rule groups file used in the namespace. For details about the rule groups namespace structure, see RuleGroupsNamespaceData."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the rule groups namespace was created."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the rule groups namespace was most recently changed."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags of this rule groups namespace."]}
-    let context_ = "RuleGroupsNamespaceDescription"
-    let make ?tags =
-      fun ~arn ->
-        fun ~createdAt ->
-          fun ~data ->
-            fun ~modifiedAt ->
-              fun ~name ->
-                fun ~status ->
+        [@ocaml.doc
+          "The list of tag keys and values that are associated with the rule groups namespace."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?status ->
+          fun ?data ->
+            fun ?createdAt ->
+              fun ?modifiedAt ->
+                fun ?tags ->
                   fun () ->
-                    { tags; arn; createdAt; data; modifiedAt; name; status }
+                    { arn; name; status; data; createdAt; modifiedAt; tags }
     let to_value x =
       structure_to_value
-        [("arn", (Some (RuleGroupsNamespaceArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("data", (Some (RuleGroupsNamespaceData.to_value x.data)));
-        ("modifiedAt", (Some (Timestamp.to_value x.modifiedAt)));
-        ("name", (Some (RuleGroupsNamespaceName.to_value x.name)));
-        ("status", (Some (RuleGroupsNamespaceStatus.to_value x.status)));
+        [("arn", (Option.map x.arn ~f:RuleGroupsNamespaceArn.to_value));
+        ("name", (Option.map x.name ~f:RuleGroupsNamespaceName.to_value));
+        ("status",
+          (Option.map x.status ~f:RuleGroupsNamespaceStatus.to_value));
+        ("data", (Option.map x.data ~f:RuleGroupsNamespaceData.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let status =
-        RuleGroupsNamespaceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let name =
-        RuleGroupsNamespaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let modifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "modifiedAt") in
-      let data =
-        RuleGroupsNamespaceData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "data") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn =
-        RuleGroupsNamespaceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?tags ~status ~name ~modifiedAt ~data ~createdAt ~arn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let data =
+        (Option.map ~f:RuleGroupsNamespaceData.of_xml)
+          (Xml.child xml_arg0 "data") in
       let status =
-        field_map_exn json "status" RuleGroupsNamespaceStatus.of_json in
-      let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
-      let modifiedAt = field_map_exn json "modifiedAt" Timestamp.of_json in
-      let data = field_map_exn json "data" RuleGroupsNamespaceData.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" RuleGroupsNamespaceArn.of_json in
-      make ?tags ~status ~name ~modifiedAt ~data ~createdAt ~arn ()
+        (Option.map ~f:RuleGroupsNamespaceStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let name =
+        (Option.map ~f:RuleGroupsNamespaceName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:RuleGroupsNamespaceArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?tags ?modifiedAt ?createdAt ?data ?status ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let data = field_map json__ "data" RuleGroupsNamespaceData.of_json in
+      let status =
+        field_map json__ "status" RuleGroupsNamespaceStatus.of_json in
+      let name = field_map json__ "name" RuleGroupsNamespaceName.of_json in
+      let arn = field_map json__ "arn" RuleGroupsNamespaceArn.of_json in
+      make ?tags ?modifiedAt ?createdAt ?data ?status ?name ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents a description of the rule groups namespace."]
+  end[@@ocaml.doc "The details about one rule groups namespace."]
+module QueryLoggingConfigurationMetadata =
+  struct
+    type nonrec t =
+      {
+      status: QueryLoggingConfigurationStatus.t option
+        [@ocaml.doc "The current status of the query logging configuration."];
+      workspace: WorkspaceId.t option
+        [@ocaml.doc
+          "The ID of the workspace associated with this query logging configuration."];
+      destinations: LoggingDestinations.t option
+        [@ocaml.doc
+          "The configured destinations for the query logging configuration."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the query logging configuration was created."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the query logging configuration was last modified."]}
+    let make ?status =
+      fun ?workspace ->
+        fun ?destinations ->
+          fun ?createdAt ->
+            fun ?modifiedAt ->
+              fun () ->
+                { status; workspace; destinations; createdAt; modifiedAt }
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:QueryLoggingConfigurationStatus.to_value));
+        ("workspace", (Option.map x.workspace ~f:WorkspaceId.to_value));
+        ("destinations",
+          (Option.map x.destinations ~f:LoggingDestinations.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let destinations =
+        (Option.map ~f:LoggingDestinations.of_xml)
+          (Xml.child xml_arg0 "destinations") in
+      let workspace =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspace") in
+      let status =
+        (Option.map ~f:QueryLoggingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?modifiedAt ?createdAt ?destinations ?workspace ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let destinations =
+        field_map json__ "destinations" LoggingDestinations.of_json in
+      let workspace = field_map json__ "workspace" WorkspaceId.of_json in
+      let status =
+        field_map json__ "status" QueryLoggingConfigurationStatus.of_json in
+      make ?modifiedAt ?createdAt ?destinations ?workspace ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The metadata for a query logging configuration."]
+module LoggingConfigurationMetadata =
+  struct
+    type nonrec t =
+      {
+      status: LoggingConfigurationStatus.t option
+        [@ocaml.doc "The current status of the logging configuration."];
+      workspace: WorkspaceId.t option
+        [@ocaml.doc
+          "The ID of the workspace the logging configuration is for."];
+      logGroupArn: LogGroupArn.t option
+        [@ocaml.doc
+          "The ARN of the CloudWatch log group to which the vended log data will be published."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the logging configuration was created."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the logging configuration was most recently changed."]}
+    let make ?status =
+      fun ?workspace ->
+        fun ?logGroupArn ->
+          fun ?createdAt ->
+            fun ?modifiedAt ->
+              fun () ->
+                { status; workspace; logGroupArn; createdAt; modifiedAt }
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:LoggingConfigurationStatus.to_value));
+        ("workspace", (Option.map x.workspace ~f:WorkspaceId.to_value));
+        ("logGroupArn", (Option.map x.logGroupArn ~f:LogGroupArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let logGroupArn =
+        (Option.map ~f:LogGroupArn.of_xml) (Xml.child xml_arg0 "logGroupArn") in
+      let workspace =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspace") in
+      let status =
+        (Option.map ~f:LoggingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?modifiedAt ?createdAt ?logGroupArn ?workspace ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let logGroupArn = field_map json__ "logGroupArn" LogGroupArn.of_json in
+      let workspace = field_map json__ "workspace" WorkspaceId.of_json in
+      let status =
+        field_map json__ "status" LoggingConfigurationStatus.of_json in
+      make ?modifiedAt ?createdAt ?logGroupArn ?workspace ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the current rules and alerting logging configuration for the workspace. These logging configurations are only for rules and alerting logs."]
+module AnomalyDetectorDescription =
+  struct
+    type nonrec t =
+      {
+      arn: AnomalyDetectorArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the anomaly detector."];
+      anomalyDetectorId: AnomalyDetectorId.t option
+        [@ocaml.doc "The unique identifier of the anomaly detector."];
+      alias: AnomalyDetectorAlias.t option
+        [@ocaml.doc "The user-friendly name of the anomaly detector."];
+      evaluationIntervalInSeconds: AnomalyDetectorEvaluationInterval.t option
+        [@ocaml.doc
+          "The frequency, in seconds, at which the anomaly detector evaluates metrics."];
+      missingDataAction: AnomalyDetectorMissingDataAction.t option
+        [@ocaml.doc
+          "The action taken when data is missing during evaluation."];
+      configuration: AnomalyDetectorConfiguration.t option
+        [@ocaml.doc "The algorithm configuration of the anomaly detector."];
+      labels: PrometheusMetricLabelMap.t option
+        [@ocaml.doc
+          "The Amazon Managed Service for Prometheus metric labels associated with the anomaly detector."];
+      status: AnomalyDetectorStatus.t option
+        [@ocaml.doc "The current status of the anomaly detector."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The timestamp when the anomaly detector was created."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the anomaly detector was last modified."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags applied to the anomaly detector."]}
+    let make ?arn =
+      fun ?anomalyDetectorId ->
+        fun ?alias ->
+          fun ?evaluationIntervalInSeconds ->
+            fun ?missingDataAction ->
+              fun ?configuration ->
+                fun ?labels ->
+                  fun ?status ->
+                    fun ?createdAt ->
+                      fun ?modifiedAt ->
+                        fun ?tags ->
+                          fun () ->
+                            {
+                              arn;
+                              anomalyDetectorId;
+                              alias;
+                              evaluationIntervalInSeconds;
+                              missingDataAction;
+                              configuration;
+                              labels;
+                              status;
+                              createdAt;
+                              modifiedAt;
+                              tags
+                            }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:AnomalyDetectorArn.to_value));
+        ("anomalyDetectorId",
+          (Option.map x.anomalyDetectorId ~f:AnomalyDetectorId.to_value));
+        ("alias", (Option.map x.alias ~f:AnomalyDetectorAlias.to_value));
+        ("evaluationIntervalInSeconds",
+          (Option.map x.evaluationIntervalInSeconds
+             ~f:AnomalyDetectorEvaluationInterval.to_value));
+        ("missingDataAction",
+          (Option.map x.missingDataAction
+             ~f:AnomalyDetectorMissingDataAction.to_value));
+        ("configuration",
+          (Option.map x.configuration
+             ~f:AnomalyDetectorConfiguration.to_value));
+        ("labels",
+          (Option.map x.labels ~f:PrometheusMetricLabelMap.to_value));
+        ("status", (Option.map x.status ~f:AnomalyDetectorStatus.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let status =
+        (Option.map ~f:AnomalyDetectorStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let labels =
+        (Option.map ~f:PrometheusMetricLabelMap.of_xml)
+          (Xml.child xml_arg0 "labels") in
+      let configuration =
+        (Option.map ~f:AnomalyDetectorConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      let missingDataAction =
+        (Option.map ~f:AnomalyDetectorMissingDataAction.of_xml)
+          (Xml.child xml_arg0 "missingDataAction") in
+      let evaluationIntervalInSeconds =
+        (Option.map ~f:AnomalyDetectorEvaluationInterval.of_xml)
+          (Xml.child xml_arg0 "evaluationIntervalInSeconds") in
+      let alias =
+        (Option.map ~f:AnomalyDetectorAlias.of_xml)
+          (Xml.child xml_arg0 "alias") in
+      let anomalyDetectorId =
+        (Option.map ~f:AnomalyDetectorId.of_xml)
+          (Xml.child xml_arg0 "anomalyDetectorId") in
+      let arn =
+        (Option.map ~f:AnomalyDetectorArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?tags ?modifiedAt ?createdAt ?status ?labels ?configuration
+        ?missingDataAction ?evaluationIntervalInSeconds ?alias
+        ?anomalyDetectorId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let status = field_map json__ "status" AnomalyDetectorStatus.of_json in
+      let labels = field_map json__ "labels" PrometheusMetricLabelMap.of_json in
+      let configuration =
+        field_map json__ "configuration" AnomalyDetectorConfiguration.of_json in
+      let missingDataAction =
+        field_map json__ "missingDataAction"
+          AnomalyDetectorMissingDataAction.of_json in
+      let evaluationIntervalInSeconds =
+        field_map json__ "evaluationIntervalInSeconds"
+          AnomalyDetectorEvaluationInterval.of_json in
+      let alias = field_map json__ "alias" AnomalyDetectorAlias.of_json in
+      let anomalyDetectorId =
+        field_map json__ "anomalyDetectorId" AnomalyDetectorId.of_json in
+      let arn = field_map json__ "arn" AnomalyDetectorArn.of_json in
+      make ?tags ?modifiedAt ?createdAt ?status ?labels ?configuration
+        ?missingDataAction ?evaluationIntervalInSeconds ?alias
+        ?anomalyDetectorId ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Detailed information about an anomaly detector."]
 module AlertManagerDefinitionDescription =
   struct
     type nonrec t =
       {
-      createdAt: Timestamp.t
+      status: AlertManagerDefinitionStatus.t option
         [@ocaml.doc
-          "The time when the alert manager definition was created."];
-      data: AlertManagerDefinitionData.t
-        [@ocaml.doc "The alert manager definition."];
-      modifiedAt: Timestamp.t
+          "A structure that displays the current status of the alert manager definition.."];
+      data: AlertManagerDefinitionData.t option
         [@ocaml.doc
-          "The time when the alert manager definition was modified."];
-      status: AlertManagerDefinitionStatus.t
-        [@ocaml.doc "The status of alert manager definition."]}
-    let context_ = "AlertManagerDefinitionDescription"
-    let make ~createdAt =
-      fun ~data ->
-        fun ~modifiedAt ->
-          fun ~status -> fun () -> { createdAt; data; modifiedAt; status }
+          "The actual alert manager definition. For details about the alert manager definition, see AlertManagedDefinitionData."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the alert manager definition was created."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the alert manager definition was most recently changed."]}
+    let make ?status =
+      fun ?data ->
+        fun ?createdAt ->
+          fun ?modifiedAt ->
+            fun () -> { status; data; createdAt; modifiedAt }
     let to_value x =
       structure_to_value
-        [("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("data", (Some (AlertManagerDefinitionData.to_value x.data)));
-        ("modifiedAt", (Some (Timestamp.to_value x.modifiedAt)));
-        ("status", (Some (AlertManagerDefinitionStatus.to_value x.status)))]
+        [("status",
+           (Option.map x.status ~f:AlertManagerDefinitionStatus.to_value));
+        ("data", (Option.map x.data ~f:AlertManagerDefinitionData.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let data =
+        (Option.map ~f:AlertManagerDefinitionData.of_xml)
+          (Xml.child xml_arg0 "data") in
+      let status =
+        (Option.map ~f:AlertManagerDefinitionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?modifiedAt ?createdAt ?data ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let data = field_map json__ "data" AlertManagerDefinitionData.of_json in
+      let status =
+        field_map json__ "status" AlertManagerDefinitionStatus.of_json in
+      make ?modifiedAt ?createdAt ?data ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The details of an alert manager definition. It is the configuration for the alert manager, including information about receivers for routing alerts."]
+module CreateAnomalyDetectorRequestLabelsMap =
+  struct
+    type nonrec t =
+      (PrometheusMetricLabelKey.t * PrometheusMetricLabelValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:140) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((PrometheusMetricLabelKey.of_string chopped),
+                              (PrometheusMetricLabelValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (PrometheusMetricLabelKey.to_value x) |>
+                    (fun x ->
+                       (PrometheusMetricLabelValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:PrometheusMetricLabelKey.of_string
+        ~of_json:PrometheusMetricLabelValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateWorkspaceConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      status: WorkspaceConfigurationStatus.t option
+        [@ocaml.doc "The status of the workspace configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:WorkspaceConfigurationStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        AlertManagerDefinitionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let modifiedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "modifiedAt") in
-      let data =
-        AlertManagerDefinitionData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "data") in
-      let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      make ~status ~modifiedAt ~data ~createdAt ()
+        (Option.map ~f:WorkspaceConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status" AlertManagerDefinitionStatus.of_json in
-      let modifiedAt = field_map_exn json "modifiedAt" Timestamp.of_json in
-      let data = field_map_exn json "data" AlertManagerDefinitionData.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      make ~status ~modifiedAt ~data ~createdAt ()
+        field_map json__ "status" WorkspaceConfigurationStatus.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents the properties of an alert manager definition."]
+       "Use this operation to create or update the label sets, label set limits, and retention period of a workspace. You must specify at least one of limitsPerLabelSet or retentionPeriodInDays for the request to be valid."]
+module UpdateWorkspaceConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace that you want to update. To find the IDs of your workspaces, use the ListWorkspaces operation."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "You can include a token in your operation to make it an idempotent opeartion."];
+      limitsPerLabelSet: LimitsPerLabelSetList.t option
+        [@ocaml.doc
+          "This is an array of structures, where each structure defines a label set for the workspace, and defines the active time series limit for each of those label sets. Each label name in a label set must be unique."];
+      retentionPeriodInDays:
+        UpdateWorkspaceConfigurationRequestRetentionPeriodInDaysInteger.t
+          option
+        [@ocaml.doc
+          "Specifies how many days that metrics will be retained in the workspace."]}
+    let context_ = "UpdateWorkspaceConfigurationRequest"
+    let make ?clientToken =
+      fun ?limitsPerLabelSet ->
+        fun ?retentionPeriodInDays ->
+          fun ~workspaceId ->
+            fun () ->
+              {
+                clientToken;
+                limitsPerLabelSet;
+                retentionPeriodInDays;
+                workspaceId
+              }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("limitsPerLabelSet",
+          (Option.map x.limitsPerLabelSet ~f:LimitsPerLabelSetList.to_value));
+        ("retentionPeriodInDays",
+          (Option.map x.retentionPeriodInDays
+             ~f:UpdateWorkspaceConfigurationRequestRetentionPeriodInDaysInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retentionPeriodInDays =
+        (Option.map
+           ~f:UpdateWorkspaceConfigurationRequestRetentionPeriodInDaysInteger.of_xml)
+          (Xml.child xml_arg0 "retentionPeriodInDays") in
+      let limitsPerLabelSet =
+        (Option.map ~f:LimitsPerLabelSetList.of_xml)
+          (Xml.child xml_arg0 "limitsPerLabelSet") in
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?retentionPeriodInDays ?limitsPerLabelSet ?clientToken
+        ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retentionPeriodInDays =
+        field_map json__ "retentionPeriodInDays"
+          UpdateWorkspaceConfigurationRequestRetentionPeriodInDaysInteger.of_json in
+      let limitsPerLabelSet =
+        field_map json__ "limitsPerLabelSet" LimitsPerLabelSetList.of_json in
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?retentionPeriodInDays ?limitsPerLabelSet ?clientToken
+        ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this operation to create or update the label sets, label set limits, and retention period of a workspace. You must specify at least one of limitsPerLabelSet or retentionPeriodInDays for the request to be valid."]
 module UpdateWorkspaceAliasRequest =
   struct
     type nonrec t =
       {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc "The ID of the workspace to update."];
       alias: WorkspaceAlias.t option
-        [@ocaml.doc "The new alias of the workspace."];
+        [@ocaml.doc
+          "The new alias for the workspace. It does not need to be unique. Amazon Managed Service for Prometheus will automatically strip any blank spaces from the beginning and end of the alias that you specify."];
       clientToken: IdempotencyToken.t option
         [@ocaml.doc
-          "Optional, unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
-      workspaceId: WorkspaceId.t
-        [@ocaml.doc "The ID of the workspace being updated."]}
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
     let context_ = "UpdateWorkspaceAliasRequest"
     let make ?alias =
       fun ?clientToken ->
         fun ~workspaceId -> fun () -> { alias; clientToken; workspaceId }
     let to_value x =
       structure_to_value
-        [("alias", (Option.map x.alias ~f:WorkspaceAlias.to_value));
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("alias", (Option.map x.alias ~f:WorkspaceAlias.to_value));
         ("clientToken",
-          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
       let alias =
         (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
-      make ~workspaceId ?clientToken ?alias ()
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ?alias ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
-      let alias = field_map json "alias" WorkspaceAlias.of_json in
-      make ~workspaceId ?clientToken ?alias ()
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let alias = field_map json__ "alias" WorkspaceAlias.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ?alias ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of an UpdateWorkspaceAlias operation."]
+module UpdateScraperResponse =
+  struct
+    type nonrec t =
+      {
+      scraperId: ScraperId.t option
+        [@ocaml.doc "The ID of the updated scraper."];
+      arn: ScraperArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the updated scraper."];
+      status: ScraperStatus.t option
+        [@ocaml.doc
+          "A structure that displays the current status of the scraper."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The list of tag keys and values that are associated with the scraper."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?scraperId =
+      fun ?arn ->
+        fun ?status ->
+          fun ?tags -> fun () -> { scraperId; arn; status; tags }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("scraperId", (Option.map x.scraperId ~f:ScraperId.to_value));
+        ("arn", (Option.map x.arn ~f:ScraperArn.to_value));
+        ("status", (Option.map x.status ~f:ScraperStatus.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:ScraperStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let arn = (Option.map ~f:ScraperArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let scraperId =
+        (Option.map ~f:ScraperId.of_xml) (Xml.child xml_arg0 "scraperId") in
+      make ?tags ?status ?arn ?scraperId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" ScraperStatus.of_json in
+      let arn = field_map json__ "arn" ScraperArn.of_json in
+      let scraperId = field_map json__ "scraperId" ScraperId.of_json in
+      make ?tags ?status ?arn ?scraperId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing scraper. You can't use this function to update the source from which the scraper is collecting metrics. To change the source, delete the scraper and create a new one."]
+module UpdateScraperRequest =
+  struct
+    type nonrec t =
+      {
+      scraperId: ScraperId.t [@ocaml.doc "The ID of the scraper to update."];
+      alias: ScraperAlias.t option
+        [@ocaml.doc "The new alias of the scraper."];
+      scrapeConfiguration: ScrapeConfiguration.t option
+        [@ocaml.doc
+          "Contains the base-64 encoded YAML configuration for the scraper. For more information about configuring a scraper, see Using an Amazon Web Services managed collector in the Amazon Managed Service for Prometheus User Guide."];
+      destination: Destination.t option
+        [@ocaml.doc
+          "The new Amazon Managed Service for Prometheus workspace to send metrics to."];
+      roleConfiguration: RoleConfiguration.t option
+        [@ocaml.doc
+          "Use this structure to enable cross-account access, so that you can use a target account to access Prometheus metrics from source accounts."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
+    let context_ = "UpdateScraperRequest"
+    let make ?alias =
+      fun ?scrapeConfiguration ->
+        fun ?destination ->
+          fun ?roleConfiguration ->
+            fun ?clientToken ->
+              fun ~scraperId ->
+                fun () ->
+                  {
+                    alias;
+                    scrapeConfiguration;
+                    destination;
+                    roleConfiguration;
+                    clientToken;
+                    scraperId
+                  }
+    let to_value x =
+      structure_to_value
+        [("scraperId", (Some (ScraperId.to_value x.scraperId)));
+        ("alias", (Option.map x.alias ~f:ScraperAlias.to_value));
+        ("scrapeConfiguration",
+          (Option.map x.scrapeConfiguration ~f:ScrapeConfiguration.to_value));
+        ("destination", (Option.map x.destination ~f:Destination.to_value));
+        ("roleConfiguration",
+          (Option.map x.roleConfiguration ~f:RoleConfiguration.to_value));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let roleConfiguration =
+        (Option.map ~f:RoleConfiguration.of_xml)
+          (Xml.child xml_arg0 "roleConfiguration") in
+      let destination =
+        (Option.map ~f:Destination.of_xml) (Xml.child xml_arg0 "destination") in
+      let scrapeConfiguration =
+        (Option.map ~f:ScrapeConfiguration.of_xml)
+          (Xml.child xml_arg0 "scrapeConfiguration") in
+      let alias =
+        (Option.map ~f:ScraperAlias.of_xml) (Xml.child xml_arg0 "alias") in
+      let scraperId =
+        ScraperId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scraperId") in
+      make ?clientToken ?roleConfiguration ?destination ?scrapeConfiguration
+        ?alias ~scraperId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let roleConfiguration =
+        field_map json__ "roleConfiguration" RoleConfiguration.of_json in
+      let destination = field_map json__ "destination" Destination.of_json in
+      let scrapeConfiguration =
+        field_map json__ "scrapeConfiguration" ScrapeConfiguration.of_json in
+      let alias = field_map json__ "alias" ScraperAlias.of_json in
+      let scraperId = field_map_exn json__ "scraperId" ScraperId.of_json in
+      make ?clientToken ?roleConfiguration ?destination ?scrapeConfiguration
+        ?alias ~scraperId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing scraper. You can't use this function to update the source from which the scraper is collecting metrics. To change the source, delete the scraper and create a new one."]
+module UpdateScraperLoggingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      status: ScraperLoggingConfigurationStatus.t option
+        [@ocaml.doc
+          "The status of the updated scraper logging configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:ScraperLoggingConfigurationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ScraperLoggingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" ScraperLoggingConfigurationStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the logging configuration for a Amazon Managed Service for Prometheus scraper."]
+module UpdateScraperLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      scraperId: ScraperId.t
+        [@ocaml.doc
+          "The ID of the scraper whose logging configuration will be updated."];
+      loggingDestination: ScraperLoggingDestination.t
+        [@ocaml.doc "The destination where scraper logs will be sent."];
+      scraperComponents: ScraperComponents.t option
+        [@ocaml.doc
+          "The list of scraper components to configure for logging."]}
+    let context_ = "UpdateScraperLoggingConfigurationRequest"
+    let make ?scraperComponents =
+      fun ~scraperId ->
+        fun ~loggingDestination ->
+          fun () -> { scraperComponents; scraperId; loggingDestination }
+    let to_value x =
+      structure_to_value
+        [("scraperId", (Some (ScraperId.to_value x.scraperId)));
+        ("loggingDestination",
+          (Some (ScraperLoggingDestination.to_value x.loggingDestination)));
+        ("scraperComponents",
+          (Option.map x.scraperComponents ~f:ScraperComponents.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scraperComponents =
+        (Option.map ~f:ScraperComponents.of_xml)
+          (Xml.child xml_arg0 "scraperComponents") in
+      let loggingDestination =
+        ScraperLoggingDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "loggingDestination") in
+      let scraperId =
+        ScraperId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scraperId") in
+      make ?scraperComponents ~loggingDestination ~scraperId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scraperComponents =
+        field_map json__ "scraperComponents" ScraperComponents.of_json in
+      let loggingDestination =
+        field_map_exn json__ "loggingDestination"
+          ScraperLoggingDestination.of_json in
+      let scraperId = field_map_exn json__ "scraperId" ScraperId.of_json in
+      make ?scraperComponents ~loggingDestination ~scraperId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the logging configuration for a Amazon Managed Service for Prometheus scraper."]
+module UpdateQueryLoggingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      status: QueryLoggingConfigurationStatus.t option
+        [@ocaml.doc "The current status of the query logging configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:QueryLoggingConfigurationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:QueryLoggingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" QueryLoggingConfigurationStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the query logging configuration for the specified workspace."]
+module UpdateQueryLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace for which to update the query logging configuration."];
+      destinations: LoggingDestinations.t
+        [@ocaml.doc
+          "The destinations where query logs will be sent. Only CloudWatch Logs destination is supported. The list must contain exactly one element."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "(Optional) A unique, case-sensitive identifier that you can provide to ensure the idempotency of the request."]}
+    let context_ = "UpdateQueryLoggingConfigurationRequest"
+    let make ?clientToken =
+      fun ~workspaceId ->
+        fun ~destinations ->
+          fun () -> { clientToken; workspaceId; destinations }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("destinations",
+          (Some (LoggingDestinations.to_value x.destinations)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let destinations =
+        LoggingDestinations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "destinations") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~destinations ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let destinations =
+        field_map_exn json__ "destinations" LoggingDestinations.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~destinations ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the query logging configuration for the specified workspace."]
+module UpdateLoggingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      status: LoggingConfigurationStatus.t option
+        [@ocaml.doc
+          "A structure that contains the current status of the logging configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:LoggingConfigurationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:LoggingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" LoggingConfigurationStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the output of an UpdateLoggingConfiguration operation."]
+module UpdateLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace to update the logging configuration for."];
+      logGroupArn: LogGroupArn.t
+        [@ocaml.doc
+          "The ARN of the CloudWatch log group to which the vended log data will be published."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
+    let context_ = "UpdateLoggingConfigurationRequest"
+    let make ?clientToken =
+      fun ~workspaceId ->
+        fun ~logGroupArn ->
+          fun () -> { clientToken; workspaceId; logGroupArn }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("logGroupArn", (Some (LogGroupArn.to_value x.logGroupArn)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let logGroupArn =
+        LogGroupArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "logGroupArn") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~logGroupArn ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let logGroupArn =
+        field_map_exn json__ "logGroupArn" LogGroupArn.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~logGroupArn ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the input of an UpdateLoggingConfiguration operation."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -1414,13 +5053,15 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes tags from the specified resource."]
+  end[@@ocaml.doc
+       "Removes the specified tags from an Amazon Managed Service for Prometheus resource. The only resources that can be tagged are rule groups namespaces, scrapers, and workspaces."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: String_.t [@ocaml.doc "The ARN of the resource."];
-      tagKeys: TagKeys.t [@ocaml.doc "One or more tag keys"]}
+      resourceArn: String_.t
+        [@ocaml.doc "The ARN of the resource from which to remove a tag."];
+      tagKeys: TagKeys.t [@ocaml.doc "The keys of the tags to remove."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -1437,12 +5078,13 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes tags from the specified resource."]
+  end[@@ocaml.doc
+       "Removes the specified tags from an Amazon Managed Service for Prometheus resource. The only resources that can be tagged are rule groups namespaces, scrapers, and workspaces."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -1517,13 +5159,17 @@ module TagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates tags for the specified resource."]
+  end[@@ocaml.doc
+       "The TagResource operation associates tags with an Amazon Managed Service for Prometheus resource. The only resources that can be tagged are rule groups namespaces, scrapers, and workspaces. If you specify a new tag key for the resource, this tag is appended to the list of tags associated with the resource. If you specify a tag key that is already associated with the resource, the new tag value that you specify replaces the previous value for that tag. To remove a tag, use UntagResource."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: String_.t [@ocaml.doc "The ARN of the resource."];
-      tags: TagMap.t }
+      resourceArn: String_.t
+        [@ocaml.doc "The ARN of the resource to apply tags to."];
+      tags: TagMap.t
+        [@ocaml.doc
+          "The list of tag keys and values to associate with the resource. Keys must not begin with aws:."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -1539,25 +5185,28 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates tags for the specified resource."]
+  end[@@ocaml.doc
+       "The TagResource operation associates tags with an Amazon Managed Service for Prometheus resource. The only resources that can be tagged are rule groups namespaces, scrapers, and workspaces. If you specify a new tag key for the resource, this tag is appended to the list of tags associated with the resource. If you specify a tag key that is already associated with the resource, the new tag value that you specify replaces the previous value for that tag. To remove a tag, use UntagResource."]
 module PutRuleGroupsNamespaceResponse =
   struct
     type nonrec t =
       {
-      arn: RuleGroupsNamespaceArn.t
+      name: RuleGroupsNamespaceName.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of this rule groups namespace."];
-      name: RuleGroupsNamespaceName.t
-        [@ocaml.doc "The rule groups namespace name."];
-      status: RuleGroupsNamespaceStatus.t
-        [@ocaml.doc "The status of rule groups namespace."];
+          "The name of the rule groups namespace that was updated."];
+      arn: RuleGroupsNamespaceArn.t option
+        [@ocaml.doc "The ARN of the rule groups namespace."];
+      status: RuleGroupsNamespaceStatus.t option
+        [@ocaml.doc
+          "A structure that includes the current status of the rule groups namespace."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags of this rule groups namespace."]}
+        [@ocaml.doc
+          "The list of tag keys and values that are associated with the namespace."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -1567,10 +5216,9 @@ module PutRuleGroupsNamespaceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutRuleGroupsNamespaceResponse"
-    let make ?tags =
-      fun ~arn ->
-        fun ~name -> fun ~status -> fun () -> { tags; arn; name; status }
+    let make ?name =
+      fun ?arn ->
+        fun ?status -> fun ?tags -> fun () -> { name; arn; status; tags }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1647,31 +5295,32 @@ module PutRuleGroupsNamespaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("arn", (Some (RuleGroupsNamespaceArn.to_value x.arn)));
-        ("name", (Some (RuleGroupsNamespaceName.to_value x.name)));
-        ("status", (Some (RuleGroupsNamespaceStatus.to_value x.status)));
+        [("name", (Option.map x.name ~f:RuleGroupsNamespaceName.to_value));
+        ("arn", (Option.map x.arn ~f:RuleGroupsNamespaceArn.to_value));
+        ("status",
+          (Option.map x.status ~f:RuleGroupsNamespaceStatus.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        RuleGroupsNamespaceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let name =
-        RuleGroupsNamespaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:RuleGroupsNamespaceStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let arn =
-        RuleGroupsNamespaceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?tags ~status ~name ~arn ()
+        (Option.map ~f:RuleGroupsNamespaceArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      let name =
+        (Option.map ~f:RuleGroupsNamespaceName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?tags ?status ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let status =
-        field_map_exn json "status" RuleGroupsNamespaceStatus.of_json in
-      let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
-      let arn = field_map_exn json "arn" RuleGroupsNamespaceArn.of_json in
-      make ?tags ~status ~name ~arn ()
+        field_map json__ "status" RuleGroupsNamespaceStatus.of_json in
+      let arn = field_map json__ "arn" RuleGroupsNamespaceArn.of_json in
+      let name = field_map json__ "name" RuleGroupsNamespaceName.of_json in
+      make ?tags ?status ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a PutRuleGroupsNamespace operation."]
@@ -1679,60 +5328,454 @@ module PutRuleGroupsNamespaceRequest =
   struct
     type nonrec t =
       {
-      clientToken: IdempotencyToken.t option
-        [@ocaml.doc
-          "Optional, unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
-      data: RuleGroupsNamespaceData.t
-        [@ocaml.doc "The namespace data that define the rule groups."];
-      name: RuleGroupsNamespaceName.t
-        [@ocaml.doc "The rule groups namespace name."];
       workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "The ID of the workspace in which to update the rule group namespace."]}
+          "The ID of the workspace where you are updating the rule groups namespace."];
+      name: RuleGroupsNamespaceName.t
+        [@ocaml.doc
+          "The name of the rule groups namespace that you are updating."];
+      data: RuleGroupsNamespaceData.t
+        [@ocaml.doc
+          "The new rules file to use in the namespace. A base64-encoded version of the YAML rule groups file. For details about the rule groups namespace structure, see RuleGroupsNamespaceData."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
     let context_ = "PutRuleGroupsNamespaceRequest"
     let make ?clientToken =
-      fun ~data ->
+      fun ~workspaceId ->
         fun ~name ->
-          fun ~workspaceId ->
-            fun () -> { clientToken; data; name; workspaceId }
+          fun ~data -> fun () -> { clientToken; workspaceId; name; data }
     let to_value x =
       structure_to_value
-        [("clientToken",
-           (Option.map x.clientToken ~f:IdempotencyToken.to_value));
-        ("data", (Some (RuleGroupsNamespaceData.to_value x.data)));
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
         ("name", (Some (RuleGroupsNamespaceName.to_value x.name)));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        ("data", (Some (RuleGroupsNamespaceData.to_value x.data)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
-      let name =
-        RuleGroupsNamespaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let data =
-        RuleGroupsNamespaceData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "data") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
-      make ~workspaceId ~name ~data ?clientToken ()
+      let data =
+        RuleGroupsNamespaceData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "data") in
+      let name =
+        RuleGroupsNamespaceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~data ~name ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
-      let data = field_map_exn json "data" RuleGroupsNamespaceData.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
-      make ~workspaceId ~name ~data ?clientToken ()
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let data = field_map_exn json__ "data" RuleGroupsNamespaceData.of_json in
+      let name = field_map_exn json__ "name" RuleGroupsNamespaceName.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~data ~name ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a PutRuleGroupsNamespace operation."]
+module PutResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policyStatus: WorkspacePolicyStatusCode.t option
+        [@ocaml.doc "The current status of the resource-based policy."];
+      revisionId: String_.t option
+        [@ocaml.doc
+          "The revision ID of the newly created or updated resource-based policy."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policyStatus =
+      fun ?revisionId -> fun () -> { policyStatus; revisionId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("policyStatus",
+           (Option.map x.policyStatus ~f:WorkspacePolicyStatusCode.to_value));
+        ("revisionId", (Option.map x.revisionId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
+      let policyStatus =
+        (Option.map ~f:WorkspacePolicyStatusCode.of_xml)
+          (Xml.child xml_arg0 "policyStatus") in
+      make ?revisionId ?policyStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionId = field_map json__ "revisionId" String_.of_json in
+      let policyStatus =
+        field_map json__ "policyStatus" WorkspacePolicyStatusCode.of_json in
+      make ?revisionId ?policyStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates a resource-based policy for an Amazon Managed Service for Prometheus workspace. Use resource-based policies to grant permissions to other AWS accounts or services to access your workspace. Only Prometheus-compatible APIs can be used for workspace sharing. You can add non-Prometheus-compatible APIs to the policy, but they will be ignored. For more information, see Prometheus-compatible APIs in the Amazon Managed Service for Prometheus User Guide. If your workspace uses customer-managed KMS keys for encryption, you must grant the principals in your resource-based policy access to those KMS keys. You can do this by creating KMS grants. For more information, see CreateGrant in the AWS Key Management Service API Reference and Encryption at rest in the Amazon Managed Service for Prometheus User Guide. For more information about working with IAM, see Using Amazon Managed Service for Prometheus with IAM in the Amazon Managed Service for Prometheus User Guide."]
+module PutResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace to attach the resource-based policy to."];
+      policyDocument: String_.t
+        [@ocaml.doc
+          "The JSON policy document to use as the resource-based policy. This policy defines the permissions that other AWS accounts or services have to access your workspace."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the request is safe to retry (idempotent)."];
+      revisionId: String_.t option
+        [@ocaml.doc
+          "The revision ID of the policy to update. Use this parameter to ensure that you are updating the correct version of the policy. If you don't specify a revision ID, the policy is updated regardless of its current revision. For the first PUT request on a workspace that doesn't have an existing resource policy, you can specify NO_POLICY as the revision ID."]}
+    let context_ = "PutResourcePolicyRequest"
+    let make ?clientToken =
+      fun ?revisionId ->
+        fun ~workspaceId ->
+          fun ~policyDocument ->
+            fun () ->
+              { clientToken; revisionId; workspaceId; policyDocument }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("policyDocument", (Some (String_.to_value x.policyDocument)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("revisionId", (Option.map x.revisionId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let policyDocument =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyDocument") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?revisionId ?clientToken ~policyDocument ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionId = field_map json__ "revisionId" String_.of_json in
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let policyDocument =
+        field_map_exn json__ "policyDocument" String_.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?revisionId ?clientToken ~policyDocument ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates a resource-based policy for an Amazon Managed Service for Prometheus workspace. Use resource-based policies to grant permissions to other AWS accounts or services to access your workspace. Only Prometheus-compatible APIs can be used for workspace sharing. You can add non-Prometheus-compatible APIs to the policy, but they will be ignored. For more information, see Prometheus-compatible APIs in the Amazon Managed Service for Prometheus User Guide. If your workspace uses customer-managed KMS keys for encryption, you must grant the principals in your resource-based policy access to those KMS keys. You can do this by creating KMS grants. For more information, see CreateGrant in the AWS Key Management Service API Reference and Encryption at rest in the Amazon Managed Service for Prometheus User Guide. For more information about working with IAM, see Using Amazon Managed Service for Prometheus with IAM in the Amazon Managed Service for Prometheus User Guide."]
+module PutAnomalyDetectorResponse =
+  struct
+    type nonrec t =
+      {
+      anomalyDetectorId: AnomalyDetectorId.t option
+        [@ocaml.doc "The unique identifier of the updated anomaly detector."];
+      arn: AnomalyDetectorArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the updated anomaly detector."];
+      status: AnomalyDetectorStatus.t option
+        [@ocaml.doc
+          "The status information of the updated anomaly detector."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags applied to the updated anomaly detector."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?anomalyDetectorId =
+      fun ?arn ->
+        fun ?status ->
+          fun ?tags -> fun () -> { anomalyDetectorId; arn; status; tags }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("anomalyDetectorId",
+           (Option.map x.anomalyDetectorId ~f:AnomalyDetectorId.to_value));
+        ("arn", (Option.map x.arn ~f:AnomalyDetectorArn.to_value));
+        ("status", (Option.map x.status ~f:AnomalyDetectorStatus.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:AnomalyDetectorStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let arn =
+        (Option.map ~f:AnomalyDetectorArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let anomalyDetectorId =
+        (Option.map ~f:AnomalyDetectorId.of_xml)
+          (Xml.child xml_arg0 "anomalyDetectorId") in
+      make ?tags ?status ?arn ?anomalyDetectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" AnomalyDetectorStatus.of_json in
+      let arn = field_map json__ "arn" AnomalyDetectorArn.of_json in
+      let anomalyDetectorId =
+        field_map json__ "anomalyDetectorId" AnomalyDetectorId.of_json in
+      make ?tags ?status ?arn ?anomalyDetectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "When you call PutAnomalyDetector, the operation creates a new anomaly detector if one doesn't exist, or updates an existing one. Each call to this operation triggers a complete retraining of the detector, which includes querying the minimum required samples and backfilling the detector with historical data. This process occurs regardless of whether you're making a minor change like updating the evaluation interval or making more substantial modifications. The operation serves as the single method for creating, updating, and retraining anomaly detectors."]
+module PutAnomalyDetectorRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The identifier of the workspace containing the anomaly detector to update."];
+      anomalyDetectorId: AnomalyDetectorId.t
+        [@ocaml.doc "The identifier of the anomaly detector to update."];
+      evaluationIntervalInSeconds: AnomalyDetectorEvaluationInterval.t option
+        [@ocaml.doc
+          "The frequency, in seconds, at which the anomaly detector evaluates metrics."];
+      missingDataAction: AnomalyDetectorMissingDataAction.t option
+        [@ocaml.doc
+          "Specifies the action to take when data is missing during evaluation."];
+      configuration: AnomalyDetectorConfiguration.t
+        [@ocaml.doc "The algorithm configuration for the anomaly detector."];
+      labels: PrometheusMetricLabelMap.t option
+        [@ocaml.doc
+          "The Amazon Managed Service for Prometheus metric labels to associate with the anomaly detector."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "PutAnomalyDetectorRequest"
+    let make ?evaluationIntervalInSeconds =
+      fun ?missingDataAction ->
+        fun ?labels ->
+          fun ?clientToken ->
+            fun ~workspaceId ->
+              fun ~anomalyDetectorId ->
+                fun ~configuration ->
+                  fun () ->
+                    {
+                      evaluationIntervalInSeconds;
+                      missingDataAction;
+                      labels;
+                      clientToken;
+                      workspaceId;
+                      anomalyDetectorId;
+                      configuration
+                    }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("anomalyDetectorId",
+          (Some (AnomalyDetectorId.to_value x.anomalyDetectorId)));
+        ("evaluationIntervalInSeconds",
+          (Option.map x.evaluationIntervalInSeconds
+             ~f:AnomalyDetectorEvaluationInterval.to_value));
+        ("missingDataAction",
+          (Option.map x.missingDataAction
+             ~f:AnomalyDetectorMissingDataAction.to_value));
+        ("configuration",
+          (Some (AnomalyDetectorConfiguration.to_value x.configuration)));
+        ("labels",
+          (Option.map x.labels ~f:PrometheusMetricLabelMap.to_value));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let labels =
+        (Option.map ~f:PrometheusMetricLabelMap.of_xml)
+          (Xml.child xml_arg0 "labels") in
+      let configuration =
+        AnomalyDetectorConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
+      let missingDataAction =
+        (Option.map ~f:AnomalyDetectorMissingDataAction.of_xml)
+          (Xml.child xml_arg0 "missingDataAction") in
+      let evaluationIntervalInSeconds =
+        (Option.map ~f:AnomalyDetectorEvaluationInterval.of_xml)
+          (Xml.child xml_arg0 "evaluationIntervalInSeconds") in
+      let anomalyDetectorId =
+        AnomalyDetectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "anomalyDetectorId") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ?labels ~configuration ?missingDataAction
+        ?evaluationIntervalInSeconds ~anomalyDetectorId ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let labels = field_map json__ "labels" PrometheusMetricLabelMap.of_json in
+      let configuration =
+        field_map_exn json__ "configuration"
+          AnomalyDetectorConfiguration.of_json in
+      let missingDataAction =
+        field_map json__ "missingDataAction"
+          AnomalyDetectorMissingDataAction.of_json in
+      let evaluationIntervalInSeconds =
+        field_map json__ "evaluationIntervalInSeconds"
+          AnomalyDetectorEvaluationInterval.of_json in
+      let anomalyDetectorId =
+        field_map_exn json__ "anomalyDetectorId" AnomalyDetectorId.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ?labels ~configuration ?missingDataAction
+        ?evaluationIntervalInSeconds ~anomalyDetectorId ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "When you call PutAnomalyDetector, the operation creates a new anomaly detector if one doesn't exist, or updates an existing one. Each call to this operation triggers a complete retraining of the detector, which includes querying the minimum required samples and backfilling the detector with historical data. This process occurs regardless of whether you're making a minor change like updating the evaluation interval or making more substantial modifications. The operation serves as the single method for creating, updating, and retraining anomaly detectors."]
 module PutAlertManagerDefinitionResponse =
   struct
     type nonrec t =
       {
-      status: AlertManagerDefinitionStatus.t
-        [@ocaml.doc "The status of alert manager definition."]}
+      status: AlertManagerDefinitionStatus.t option
+        [@ocaml.doc
+          "A structure that returns the current status of the alert manager definition."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -1742,8 +5785,7 @@ module PutAlertManagerDefinitionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutAlertManagerDefinitionResponse"
-    let make ~status = fun () -> { status }
+    let make ?status = fun () -> { status }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1820,18 +5862,19 @@ module PutAlertManagerDefinitionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("status", (Some (AlertManagerDefinitionStatus.to_value x.status)))]
+        [("status",
+           (Option.map x.status ~f:AlertManagerDefinitionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        AlertManagerDefinitionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~status ()
+        (Option.map ~f:AlertManagerDefinitionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status" AlertManagerDefinitionStatus.of_json in
-      make ~status ()
+        field_map json__ "status" AlertManagerDefinitionStatus.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a PutAlertManagerDefinition operation."]
@@ -1839,42 +5882,46 @@ module PutAlertManagerDefinitionRequest =
   struct
     type nonrec t =
       {
-      clientToken: IdempotencyToken.t option
-        [@ocaml.doc
-          "Optional, unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
-      data: AlertManagerDefinitionData.t
-        [@ocaml.doc "The alert manager definition data."];
       workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "The ID of the workspace in which to update the alert manager definition."]}
+          "The ID of the workspace to update the alert manager definition in."];
+      data: AlertManagerDefinitionData.t
+        [@ocaml.doc
+          "The alert manager definition to use. A base64-encoded version of the YAML alert manager definition file. For details about the alert manager definition, see AlertManagedDefinitionData."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
     let context_ = "PutAlertManagerDefinitionRequest"
     let make ?clientToken =
-      fun ~data ->
-        fun ~workspaceId -> fun () -> { clientToken; data; workspaceId }
+      fun ~workspaceId ->
+        fun ~data -> fun () -> { clientToken; workspaceId; data }
     let to_value x =
       structure_to_value
-        [("clientToken",
-           (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
         ("data", (Some (AlertManagerDefinitionData.to_value x.data)));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
-      let data =
-        AlertManagerDefinitionData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "data") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
-      make ~workspaceId ~data ?clientToken ()
+      let data =
+        AlertManagerDefinitionData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "data") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~data ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let data = field_map_exn json "data" AlertManagerDefinitionData.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
-      make ~workspaceId ~data ?clientToken ()
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let data =
+        field_map_exn json__ "data" AlertManagerDefinitionData.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~data ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a PutAlertManagerDefinition operation."]
@@ -1882,21 +5929,20 @@ module ListWorkspacesResponse =
   struct
     type nonrec t =
       {
+      workspaces: WorkspaceSummaryList.t option
+        [@ocaml.doc
+          "An array of WorkspaceSummary structures containing information about the workspaces requested."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "Pagination token to use when requesting the next page in this list."];
-      workspaces: WorkspaceSummaryList.t
-        [@ocaml.doc
-          "The list of existing workspaces, including those undergoing creation or deletion."]}
+          "A token indicating that there are more results to retrieve. You can use this token as part of your next ListWorkspaces request to retrieve those results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListWorkspacesResponse"
-    let make ?nextToken =
-      fun ~workspaces -> fun () -> { nextToken; workspaces }
+    let make ?workspaces =
+      fun ?nextToken -> fun () -> { workspaces; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1947,73 +5993,77 @@ module ListWorkspacesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("workspaces", (Some (WorkspaceSummaryList.to_value x.workspaces)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let workspaces =
-        WorkspaceSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaces") in
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
-      make ~workspaces ?nextToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaces =
-        field_map_exn json "workspaces" WorkspaceSummaryList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ~workspaces ?nextToken ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents the output of a ListWorkspaces operation."]
-module ListWorkspacesRequest =
-  struct
-    type nonrec t =
-      {
-      alias: WorkspaceAlias.t option
-        [@ocaml.doc
-          "Optional filter for workspace alias. Only the workspaces with aliases that begin with this value will be returned."];
-      maxResults: ListWorkspacesRequestMaxResultsInteger.t option
-        [@ocaml.doc
-          "Maximum results to return in response (default=100, maximum=1000)."];
-      nextToken: PaginationToken.t option
-        [@ocaml.doc
-          "Pagination token to request the next page in a paginated list. This token is obtained from the output of the previous ListWorkspaces request."]}
-    let make ?alias =
-      fun ?maxResults ->
-        fun ?nextToken -> fun () -> { alias; maxResults; nextToken }
-    let to_value x =
-      structure_to_value
-        [("alias", (Option.map x.alias ~f:WorkspaceAlias.to_value));
-        ("maxResults",
-          (Option.map x.maxResults
-             ~f:ListWorkspacesRequestMaxResultsInteger.to_value));
+        [("workspaces",
+           (Option.map x.workspaces ~f:WorkspaceSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
+      let workspaces =
+        (Option.map ~f:WorkspaceSummaryList.of_xml)
+          (Xml.child xml_arg0 "workspaces") in
+      make ?nextToken ?workspaces ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let workspaces =
+        field_map json__ "workspaces" WorkspaceSummaryList.of_json in
+      make ?nextToken ?workspaces ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the output of a ListWorkspaces operation."]
+module ListWorkspacesRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. You receive this token from a previous call, and use it to get the next page of results. The other parameters must be the same as the initial call. For example, if your initial request has maxResults of 10, and there are 12 workspaces to return, then your initial request will return 10 and a nextToken. Using the next token in a subsequent call will return the remaining 2 workspaces."];
+      alias: WorkspaceAlias.t option
+        [@ocaml.doc
+          "If this is included, it filters the results to only the workspaces with names that start with the value that you specify here. Amazon Managed Service for Prometheus will automatically strip any blank spaces from the beginning and end of the alias that you specify."];
+      maxResults: ListWorkspacesRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of workspaces to return per request. The default is 100."]}
+    let make ?nextToken =
+      fun ?alias ->
+        fun ?maxResults -> fun () -> { nextToken; alias; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("alias", (Option.map x.alias ~f:WorkspaceAlias.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListWorkspacesRequestMaxResultsInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let maxResults =
         (Option.map ~f:ListWorkspacesRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       let alias =
         (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
-      make ?nextToken ?maxResults ?alias ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?alias ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           ListWorkspacesRequestMaxResultsInteger.of_json in
-      let alias = field_map json "alias" WorkspaceAlias.of_json in
-      make ?nextToken ?maxResults ?alias ()
+      let alias = field_map json__ "alias" WorkspaceAlias.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?alias ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a ListWorkspaces operation."]
 module ListTagsForResourceResponse =
   struct
-    type nonrec t = {
-      tags: TagMap.t option }
+    type nonrec t =
+      {
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The list of tag keys and values associated with the resource."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2085,15 +6135,18 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the tags you have assigned to the resource."]
+  end[@@ocaml.doc
+       "The ListTagsForResource operation returns the tags that are associated with an Amazon Managed Service for Prometheus resource. Currently, the only resources that can be tagged are scrapers, workspaces, and rule groups namespaces."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: String_.t [@ocaml.doc "The ARN of the resource."]}
+      resourceArn: String_.t
+        [@ocaml.doc
+          "The ARN of the resource to list tages for. Must be a workspace, scraper, or rule groups namespace resource."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -2106,20 +6159,150 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the tags you have assigned to the resource."]
+  end[@@ocaml.doc
+       "The ListTagsForResource operation returns the tags that are associated with an Amazon Managed Service for Prometheus resource. Currently, the only resources that can be tagged are scrapers, workspaces, and rule groups namespaces."]
+module ListScrapersResponse =
+  struct
+    type nonrec t =
+      {
+      scrapers: ScraperSummaryList.t option
+        [@ocaml.doc
+          "A list of ScraperSummary structures giving information about scrapers in the account that match the filters provided."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token indicating that there are more results to retrieve. You can use this token as part of your next ListScrapers operation to retrieve those results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?scrapers = fun ?nextToken -> fun () -> { scrapers; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("scrapers", (Option.map x.scrapers ~f:ScraperSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let scrapers =
+        (Option.map ~f:ScraperSummaryList.of_xml)
+          (Xml.child xml_arg0 "scrapers") in
+      make ?nextToken ?scrapers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let scrapers = field_map json__ "scrapers" ScraperSummaryList.of_json in
+      make ?nextToken ?scrapers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the output of a ListScrapers operation."]
+module ListScrapersRequest =
+  struct
+    type nonrec t =
+      {
+      filters: ScraperFilters.t option
+        [@ocaml.doc
+          "(Optional) A list of key-value pairs to filter the list of scrapers returned. Keys include status, sourceArn, destinationArn, and alias. Filters on the same key are OR'd together, and filters on different keys are AND'd together. For example, status=ACTIVE&status=CREATING&alias=Test, will return all scrapers that have the alias Test, and are either in status ACTIVE or CREATING. To find all active scrapers that are sending metrics to a specific Amazon Managed Service for Prometheus workspace, you would use the ARN of the workspace in a query: status=ACTIVE&destinationArn=arn:aws:aps:us-east-1:123456789012:workspace/ws-example1-1234-abcd-56ef-123456789012 If this is included, it filters the results to only the scrapers that match the filter."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "(Optional) The token for the next set of items to return. (You received this token from a previous call.)"];
+      maxResults: ListScrapersRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "Optional) The maximum number of scrapers to return in one ListScrapers operation. The range is 1-1000. If you omit this parameter, the default of 100 is used."]}
+    let make ?filters =
+      fun ?nextToken ->
+        fun ?maxResults -> fun () -> { filters; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("filters", (Option.map x.filters ~f:ScraperFilters.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListScrapersRequestMaxResultsInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListScrapersRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let filters =
+        (Option.map ~f:ScraperFilters.of_xml) (Xml.child xml_arg0 "filters") in
+      make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "maxResults"
+          ListScrapersRequestMaxResultsInteger.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let filters = field_map json__ "filters" ScraperFilters.of_json in
+      make ?maxResults ?nextToken ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the input of a ListScrapers operation."]
 module ListRuleGroupsNamespacesResponse =
   struct
     type nonrec t =
       {
+      ruleGroupsNamespaces: RuleGroupsNamespaceSummaryList.t option
+        [@ocaml.doc "The returned list of rule groups namespaces."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "Pagination token to use when requesting the next page in this list."];
-      ruleGroupsNamespaces: RuleGroupsNamespaceSummaryList.t
-        [@ocaml.doc "The list of the selected rule groups namespaces."]}
+          "A token indicating that there are more results to retrieve. You can use this token as part of your next ListRuleGroupsNamespaces request to retrieve those results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2127,10 +6310,8 @@ module ListRuleGroupsNamespacesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRuleGroupsNamespacesResponse"
-    let make ?nextToken =
-      fun ~ruleGroupsNamespaces ->
-        fun () -> { nextToken; ruleGroupsNamespaces }
+    let make ?ruleGroupsNamespaces =
+      fun ?nextToken -> fun () -> { ruleGroupsNamespaces; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2189,26 +6370,26 @@ module ListRuleGroupsNamespacesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("ruleGroupsNamespaces",
-          (Some
-             (RuleGroupsNamespaceSummaryList.to_value x.ruleGroupsNamespaces)))]
+        [("ruleGroupsNamespaces",
+           (Option.map x.ruleGroupsNamespaces
+              ~f:RuleGroupsNamespaceSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let ruleGroupsNamespaces =
-        RuleGroupsNamespaceSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ruleGroupsNamespaces") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~ruleGroupsNamespaces ?nextToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let ruleGroupsNamespaces =
-        field_map_exn json "ruleGroupsNamespaces"
+        (Option.map ~f:RuleGroupsNamespaceSummaryList.of_xml)
+          (Xml.child xml_arg0 "ruleGroupsNamespaces") in
+      make ?nextToken ?ruleGroupsNamespaces ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let ruleGroupsNamespaces =
+        field_map json__ "ruleGroupsNamespaces"
           RuleGroupsNamespaceSummaryList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ~ruleGroupsNamespaces ?nextToken ()
+      make ?nextToken ?ruleGroupsNamespaces ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a ListRuleGroupsNamespaces operation."]
@@ -2216,64 +6397,70 @@ module ListRuleGroupsNamespacesRequest =
   struct
     type nonrec t =
       {
-      maxResults: ListRuleGroupsNamespacesRequestMaxResultsInteger.t option
+      workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "Maximum results to return in response (default=100, maximum=1000)."];
+          "The ID of the workspace containing the rule groups namespaces."];
       name: RuleGroupsNamespaceName.t option
         [@ocaml.doc
-          "Optional filter for rule groups namespace name. Only the rule groups namespace that begin with this value will be returned."];
+          "Use this parameter to filter the rule groups namespaces that are returned. Only the namespaces with names that begin with the value that you specify are returned."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "Pagination token to request the next page in a paginated list. This token is obtained from the output of the previous ListRuleGroupsNamespaces request."];
-      workspaceId: WorkspaceId.t [@ocaml.doc "The ID of the workspace."]}
+          "The token for the next set of items to return. You receive this token from a previous call, and use it to get the next page of results. The other parameters must be the same as the initial call. For example, if your initial request has maxResults of 10, and there are 12 rule groups namespaces to return, then your initial request will return 10 and a nextToken. Using the next token in a subsequent call will return the remaining 2 namespaces."];
+      maxResults: ListRuleGroupsNamespacesRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to return. The default is 100."]}
     let context_ = "ListRuleGroupsNamespacesRequest"
-    let make ?maxResults =
-      fun ?name ->
-        fun ?nextToken ->
+    let make ?name =
+      fun ?nextToken ->
+        fun ?maxResults ->
           fun ~workspaceId ->
-            fun () -> { maxResults; name; nextToken; workspaceId }
+            fun () -> { name; nextToken; maxResults; workspaceId }
     let to_value x =
       structure_to_value
-        [("maxResults",
-           (Option.map x.maxResults
-              ~f:ListRuleGroupsNamespacesRequestMaxResultsInteger.to_value));
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
         ("name", (Option.map x.name ~f:RuleGroupsNamespaceName.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListRuleGroupsNamespacesRequestMaxResultsInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let maxResults =
+        (Option.map
+           ~f:ListRuleGroupsNamespacesRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let name =
         (Option.map ~f:RuleGroupsNamespaceName.of_xml)
           (Xml.child xml_arg0 "name") in
-      let maxResults =
-        (Option.map
-           ~f:ListRuleGroupsNamespacesRequestMaxResultsInteger.of_xml)
-          (Xml.child xml_arg0 "maxResults") in
-      make ~workspaceId ?nextToken ?name ?maxResults ()
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?maxResults ?nextToken ?name ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let name = field_map json "name" RuleGroupsNamespaceName.of_json in
+    let of_json json__ =
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           ListRuleGroupsNamespacesRequestMaxResultsInteger.of_json in
-      make ~workspaceId ?nextToken ?name ?maxResults ()
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let name = field_map json__ "name" RuleGroupsNamespaceName.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?maxResults ?nextToken ?name ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a ListRuleGroupsNamespaces operation."]
-module DescribeWorkspaceResponse =
+module ListAnomalyDetectorsResponse =
   struct
     type nonrec t =
       {
-      workspace: WorkspaceDescription.t
-        [@ocaml.doc "The properties of the selected workspace."]}
+      anomalyDetectors: AnomalyDetectorSummaryList.t option
+        [@ocaml.doc "The list of anomaly detectors in the workspace."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token to retrieve the next set of results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2281,8 +6468,8 @@ module DescribeWorkspaceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeWorkspaceResponse"
-    let make ~workspace = fun () -> { workspace }
+    let make ?anomalyDetectors =
+      fun ?nextToken -> fun () -> { anomalyDetectors; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2341,18 +6528,255 @@ module DescribeWorkspaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("workspace", (Some (WorkspaceDescription.to_value x.workspace)))]
+        [("anomalyDetectors",
+           (Option.map x.anomalyDetectors
+              ~f:AnomalyDetectorSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let anomalyDetectors =
+        (Option.map ~f:AnomalyDetectorSummaryList.of_xml)
+          (Xml.child xml_arg0 "anomalyDetectors") in
+      make ?nextToken ?anomalyDetectors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let anomalyDetectors =
+        field_map json__ "anomalyDetectors"
+          AnomalyDetectorSummaryList.of_json in
+      make ?nextToken ?anomalyDetectors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of anomaly detectors for a workspace with optional filtering by alias."]
+module ListAnomalyDetectorsRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The identifier of the workspace containing the anomaly detectors to list."];
+      alias: AnomalyDetectorAlias.t option
+        [@ocaml.doc
+          "Filters the results to anomaly detectors with the specified alias."];
+      maxResults: ListAnomalyDetectorsRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single call. Valid range is 1 to 1000."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The pagination token to continue retrieving results."]}
+    let context_ = "ListAnomalyDetectorsRequest"
+    let make ?alias =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~workspaceId ->
+            fun () -> { alias; maxResults; nextToken; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("alias", (Option.map x.alias ~f:AnomalyDetectorAlias.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListAnomalyDetectorsRequestMaxResultsInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListAnomalyDetectorsRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let alias =
+        (Option.map ~f:AnomalyDetectorAlias.of_xml)
+          (Xml.child xml_arg0 "alias") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?nextToken ?maxResults ?alias ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListAnomalyDetectorsRequestMaxResultsInteger.of_json in
+      let alias = field_map json__ "alias" AnomalyDetectorAlias.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?nextToken ?maxResults ?alias ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of anomaly detectors for a workspace with optional filtering by alias."]
+module GetDefaultScraperConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      configuration: Blob.t option
+        [@ocaml.doc
+          "The configuration file. Base 64 encoded. For more information, see Scraper configurationin the Amazon Managed Service for Prometheus User Guide."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?configuration = fun () -> { configuration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?configuration:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("configuration", (Option.map x.configuration ~f:Blob.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configuration =
+        (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "configuration") in
+      make ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configuration = field_map json__ "configuration" Blob.of_json in
+      make ?configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the output of a GetDefaultScraperConfiguration operation."]
+module GetDefaultScraperConfigurationRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the input of a GetDefaultScraperConfiguration operation."]
+module DescribeWorkspaceResponse =
+  struct
+    type nonrec t =
+      {
+      workspace: WorkspaceDescription.t option
+        [@ocaml.doc "A structure that contains details about the workspace."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workspace = fun () -> { workspace }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("workspace",
+           (Option.map x.workspace ~f:WorkspaceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workspace =
-        WorkspaceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
-      make ~workspace ()
+        (Option.map ~f:WorkspaceDescription.of_xml)
+          (Xml.child xml_arg0 "workspace") in
+      make ?workspace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workspace =
-        field_map_exn json "workspace" WorkspaceDescription.of_json in
-      make ~workspace ()
+        field_map json__ "workspace" WorkspaceDescription.of_json in
+      make ?workspace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DescribeWorkspace operation."]
 module DescribeWorkspaceRequest =
@@ -2373,17 +6797,19 @@ module DescribeWorkspaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DescribeWorkspace operation."]
-module DescribeRuleGroupsNamespaceResponse =
+module DescribeWorkspaceConfigurationResponse =
   struct
     type nonrec t =
       {
-      ruleGroupsNamespace: RuleGroupsNamespaceDescription.t
-        [@ocaml.doc "The selected rule groups namespace."]}
+      workspaceConfiguration: WorkspaceConfigurationDescription.t option
+        [@ocaml.doc
+          "This structure contains the information about the workspace configuration."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2391,8 +6817,381 @@ module DescribeRuleGroupsNamespaceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeRuleGroupsNamespaceResponse"
-    let make ~ruleGroupsNamespace = fun () -> { ruleGroupsNamespace }
+    let make ?workspaceConfiguration = fun () -> { workspaceConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("workspaceConfiguration",
+           (Option.map x.workspaceConfiguration
+              ~f:WorkspaceConfigurationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceConfiguration =
+        (Option.map ~f:WorkspaceConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "workspaceConfiguration") in
+      make ?workspaceConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceConfiguration =
+        field_map json__ "workspaceConfiguration"
+          WorkspaceConfigurationDescription.of_json in
+      make ?workspaceConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this operation to return information about the configuration of a workspace. The configuration details returned include workspace configuration status, label set limits, and retention period."]
+module DescribeWorkspaceConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace that you want to retrieve information for. To find the IDs of your workspaces, use the ListWorkspaces operation."]}
+    let context_ = "DescribeWorkspaceConfigurationRequest"
+    let make ~workspaceId = fun () -> { workspaceId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this operation to return information about the configuration of a workspace. The configuration details returned include workspace configuration status, label set limits, and retention period."]
+module DescribeScraperResponse =
+  struct
+    type nonrec t =
+      {
+      scraper: ScraperDescription.t option
+        [@ocaml.doc "Contains details about the scraper."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?scraper = fun () -> { scraper }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("scraper", (Option.map x.scraper ~f:ScraperDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scraper =
+        (Option.map ~f:ScraperDescription.of_xml)
+          (Xml.child xml_arg0 "scraper") in
+      make ?scraper ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scraper = field_map json__ "scraper" ScraperDescription.of_json in
+      make ?scraper ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the output of a DescribeScraper operation."]
+module DescribeScraperRequest =
+  struct
+    type nonrec t =
+      {
+      scraperId: ScraperId.t
+        [@ocaml.doc "The ID of the scraper to describe."]}
+    let context_ = "DescribeScraperRequest"
+    let make ~scraperId = fun () -> { scraperId }
+    let to_value x =
+      structure_to_value
+        [("scraperId", (Some (ScraperId.to_value x.scraperId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scraperId =
+        ScraperId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scraperId") in
+      make ~scraperId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scraperId = field_map_exn json__ "scraperId" ScraperId.of_json in
+      make ~scraperId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the input of a DescribeScraper operation."]
+module DescribeScraperLoggingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      status: ScraperLoggingConfigurationStatus.t option
+        [@ocaml.doc "The status of the scraper logging configuration."];
+      scraperId: ScraperId.t option [@ocaml.doc "The ID of the scraper."];
+      loggingDestination: ScraperLoggingDestination.t option
+        [@ocaml.doc "The destination where scraper logs are sent."];
+      scraperComponents: ScraperComponents.t option
+        [@ocaml.doc "The list of scraper components configured for logging."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the logging configuration was last modified."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status =
+      fun ?scraperId ->
+        fun ?loggingDestination ->
+          fun ?scraperComponents ->
+            fun ?modifiedAt ->
+              fun () ->
+                {
+                  status;
+                  scraperId;
+                  loggingDestination;
+                  scraperComponents;
+                  modifiedAt
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:ScraperLoggingConfigurationStatus.to_value));
+        ("scraperId", (Option.map x.scraperId ~f:ScraperId.to_value));
+        ("loggingDestination",
+          (Option.map x.loggingDestination
+             ~f:ScraperLoggingDestination.to_value));
+        ("scraperComponents",
+          (Option.map x.scraperComponents ~f:ScraperComponents.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let scraperComponents =
+        (Option.map ~f:ScraperComponents.of_xml)
+          (Xml.child xml_arg0 "scraperComponents") in
+      let loggingDestination =
+        (Option.map ~f:ScraperLoggingDestination.of_xml)
+          (Xml.child xml_arg0 "loggingDestination") in
+      let scraperId =
+        (Option.map ~f:ScraperId.of_xml) (Xml.child xml_arg0 "scraperId") in
+      let status =
+        (Option.map ~f:ScraperLoggingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?modifiedAt ?scraperComponents ?loggingDestination ?scraperId
+        ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let scraperComponents =
+        field_map json__ "scraperComponents" ScraperComponents.of_json in
+      let loggingDestination =
+        field_map json__ "loggingDestination"
+          ScraperLoggingDestination.of_json in
+      let scraperId = field_map json__ "scraperId" ScraperId.of_json in
+      let status =
+        field_map json__ "status" ScraperLoggingConfigurationStatus.of_json in
+      make ?modifiedAt ?scraperComponents ?loggingDestination ?scraperId
+        ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the logging configuration for a Amazon Managed Service for Prometheus scraper."]
+module DescribeScraperLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      scraperId: ScraperId.t
+        [@ocaml.doc
+          "The ID of the scraper whose logging configuration will be described."]}
+    let context_ = "DescribeScraperLoggingConfigurationRequest"
+    let make ~scraperId = fun () -> { scraperId }
+    let to_value x =
+      structure_to_value
+        [("scraperId", (Some (ScraperId.to_value x.scraperId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scraperId =
+        ScraperId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scraperId") in
+      make ~scraperId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scraperId = field_map_exn json__ "scraperId" ScraperId.of_json in
+      make ~scraperId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the logging configuration for a Amazon Managed Service for Prometheus scraper."]
+module DescribeRuleGroupsNamespaceResponse =
+  struct
+    type nonrec t =
+      {
+      ruleGroupsNamespace: RuleGroupsNamespaceDescription.t option
+        [@ocaml.doc "The information about the rule groups namespace."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ruleGroupsNamespace = fun () -> { ruleGroupsNamespace }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2452,20 +7251,20 @@ module DescribeRuleGroupsNamespaceResponse =
     let to_value x =
       structure_to_value
         [("ruleGroupsNamespace",
-           (Some
-              (RuleGroupsNamespaceDescription.to_value x.ruleGroupsNamespace)))]
+           (Option.map x.ruleGroupsNamespace
+              ~f:RuleGroupsNamespaceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let ruleGroupsNamespace =
-        RuleGroupsNamespaceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ruleGroupsNamespace") in
-      make ~ruleGroupsNamespace ()
+        (Option.map ~f:RuleGroupsNamespaceDescription.of_xml)
+          (Xml.child xml_arg0 "ruleGroupsNamespace") in
+      make ?ruleGroupsNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ruleGroupsNamespace =
-        field_map_exn json "ruleGroupsNamespace"
+        field_map json__ "ruleGroupsNamespace"
           RuleGroupsNamespaceDescription.of_json in
-      make ~ruleGroupsNamespace ()
+      make ?ruleGroupsNamespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a DescribeRuleGroupsNamespace operation."]
@@ -2473,40 +7272,47 @@ module DescribeRuleGroupsNamespaceRequest =
   struct
     type nonrec t =
       {
-      name: RuleGroupsNamespaceName.t
-        [@ocaml.doc "The rule groups namespace."];
       workspaceId: WorkspaceId.t
-        [@ocaml.doc "The ID of the workspace to describe."]}
+        [@ocaml.doc
+          "The ID of the workspace containing the rule groups namespace."];
+      name: RuleGroupsNamespaceName.t
+        [@ocaml.doc
+          "The name of the rule groups namespace that you want information for."]}
     let context_ = "DescribeRuleGroupsNamespaceRequest"
-    let make ~name = fun ~workspaceId -> fun () -> { name; workspaceId }
+    let make ~workspaceId = fun ~name -> fun () -> { workspaceId; name }
     let to_value x =
       structure_to_value
-        [("name", (Some (RuleGroupsNamespaceName.to_value x.name)));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("name", (Some (RuleGroupsNamespaceName.to_value x.name)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       let name =
         RuleGroupsNamespaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~workspaceId ~name ()
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ~name ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
-      make ~workspaceId ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "name" RuleGroupsNamespaceName.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ~name ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a DescribeRuleGroupsNamespace operation."]
-module DescribeAlertManagerDefinitionResponse =
+module DescribeResourcePolicyResponse =
   struct
     type nonrec t =
       {
-      alertManagerDefinition: AlertManagerDefinitionDescription.t
+      policyDocument: String_.t option
         [@ocaml.doc
-          "The properties of the selected workspace's alert manager definition."]}
+          "The JSON policy document for the resource-based policy attached to the workspace."];
+      policyStatus: WorkspacePolicyStatusCode.t option
+        [@ocaml.doc "The current status of the resource-based policy."];
+      revisionId: String_.t option
+        [@ocaml.doc "The revision ID of the current resource-based policy."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2514,8 +7320,475 @@ module DescribeAlertManagerDefinitionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAlertManagerDefinitionResponse"
-    let make ~alertManagerDefinition = fun () -> { alertManagerDefinition }
+    let make ?policyDocument =
+      fun ?policyStatus ->
+        fun ?revisionId ->
+          fun () -> { policyDocument; policyStatus; revisionId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("policyDocument",
+           (Option.map x.policyDocument ~f:String_.to_value));
+        ("policyStatus",
+          (Option.map x.policyStatus ~f:WorkspacePolicyStatusCode.to_value));
+        ("revisionId", (Option.map x.revisionId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
+      let policyStatus =
+        (Option.map ~f:WorkspacePolicyStatusCode.of_xml)
+          (Xml.child xml_arg0 "policyStatus") in
+      let policyDocument =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "policyDocument") in
+      make ?revisionId ?policyStatus ?policyDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionId = field_map json__ "revisionId" String_.of_json in
+      let policyStatus =
+        field_map json__ "policyStatus" WorkspacePolicyStatusCode.of_json in
+      let policyDocument = field_map json__ "policyDocument" String_.of_json in
+      make ?revisionId ?policyStatus ?policyDocument ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the resource-based policy attached to an Amazon Managed Service for Prometheus workspace."]
+module DescribeResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace to describe the resource-based policy for."]}
+    let context_ = "DescribeResourcePolicyRequest"
+    let make ~workspaceId = fun () -> { workspaceId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the resource-based policy attached to an Amazon Managed Service for Prometheus workspace."]
+module DescribeQueryLoggingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      queryLoggingConfiguration: QueryLoggingConfigurationMetadata.t option
+        [@ocaml.doc
+          "The detailed information about the query logging configuration for the specified workspace."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?queryLoggingConfiguration =
+      fun () -> { queryLoggingConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("queryLoggingConfiguration",
+           (Option.map x.queryLoggingConfiguration
+              ~f:QueryLoggingConfigurationMetadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryLoggingConfiguration =
+        (Option.map ~f:QueryLoggingConfigurationMetadata.of_xml)
+          (Xml.child xml_arg0 "queryLoggingConfiguration") in
+      make ?queryLoggingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryLoggingConfiguration =
+        field_map json__ "queryLoggingConfiguration"
+          QueryLoggingConfigurationMetadata.of_json in
+      make ?queryLoggingConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the details of the query logging configuration for the specified workspace."]
+module DescribeQueryLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace for which to retrieve the query logging configuration."]}
+    let context_ = "DescribeQueryLoggingConfigurationRequest"
+    let make ~workspaceId = fun () -> { workspaceId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the details of the query logging configuration for the specified workspace."]
+module DescribeLoggingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      loggingConfiguration: LoggingConfigurationMetadata.t option
+        [@ocaml.doc
+          "A structure that displays the information about the logging configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?loggingConfiguration = fun () -> { loggingConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("loggingConfiguration",
+           (Option.map x.loggingConfiguration
+              ~f:LoggingConfigurationMetadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let loggingConfiguration =
+        (Option.map ~f:LoggingConfigurationMetadata.of_xml)
+          (Xml.child xml_arg0 "loggingConfiguration") in
+      make ?loggingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let loggingConfiguration =
+        field_map json__ "loggingConfiguration"
+          LoggingConfigurationMetadata.of_json in
+      make ?loggingConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the output of a DescribeLoggingConfiguration operation."]
+module DescribeLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace to describe the logging configuration for."]}
+    let context_ = "DescribeLoggingConfigurationRequest"
+    let make ~workspaceId = fun () -> { workspaceId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the input of a DescribeLoggingConfiguration operation."]
+module DescribeAnomalyDetectorResponse =
+  struct
+    type nonrec t =
+      {
+      anomalyDetector: AnomalyDetectorDescription.t option
+        [@ocaml.doc "The detailed information about the anomaly detector."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?anomalyDetector = fun () -> { anomalyDetector }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("anomalyDetector",
+           (Option.map x.anomalyDetector
+              ~f:AnomalyDetectorDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let anomalyDetector =
+        (Option.map ~f:AnomalyDetectorDescription.of_xml)
+          (Xml.child xml_arg0 "anomalyDetector") in
+      make ?anomalyDetector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let anomalyDetector =
+        field_map json__ "anomalyDetector" AnomalyDetectorDescription.of_json in
+      make ?anomalyDetector ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves detailed information about a specific anomaly detector, including its status and configuration."]
+module DescribeAnomalyDetectorRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The identifier of the workspace containing the anomaly detector."];
+      anomalyDetectorId: AnomalyDetectorId.t
+        [@ocaml.doc "The identifier of the anomaly detector to describe."]}
+    let context_ = "DescribeAnomalyDetectorRequest"
+    let make ~workspaceId =
+      fun ~anomalyDetectorId -> fun () -> { workspaceId; anomalyDetectorId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("anomalyDetectorId",
+          (Some (AnomalyDetectorId.to_value x.anomalyDetectorId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let anomalyDetectorId =
+        AnomalyDetectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "anomalyDetectorId") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ~anomalyDetectorId ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let anomalyDetectorId =
+        field_map_exn json__ "anomalyDetectorId" AnomalyDetectorId.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ~anomalyDetectorId ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves detailed information about a specific anomaly detector, including its status and configuration."]
+module DescribeAlertManagerDefinitionResponse =
+  struct
+    type nonrec t =
+      {
+      alertManagerDefinition: AlertManagerDefinitionDescription.t option
+        [@ocaml.doc "The alert manager definition."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?alertManagerDefinition = fun () -> { alertManagerDefinition }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2575,21 +7848,20 @@ module DescribeAlertManagerDefinitionResponse =
     let to_value x =
       structure_to_value
         [("alertManagerDefinition",
-           (Some
-              (AlertManagerDefinitionDescription.to_value
-                 x.alertManagerDefinition)))]
+           (Option.map x.alertManagerDefinition
+              ~f:AlertManagerDefinitionDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let alertManagerDefinition =
-        AlertManagerDefinitionDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "alertManagerDefinition") in
-      make ~alertManagerDefinition ()
+        (Option.map ~f:AlertManagerDefinitionDescription.of_xml)
+          (Xml.child xml_arg0 "alertManagerDefinition") in
+      make ?alertManagerDefinition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let alertManagerDefinition =
-        field_map_exn json "alertManagerDefinition"
+        field_map json__ "alertManagerDefinition"
           AlertManagerDefinitionDescription.of_json in
-      make ~alertManagerDefinition ()
+      make ?alertManagerDefinition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a DescribeAlertManagerDefinition operation."]
@@ -2598,7 +7870,8 @@ module DescribeAlertManagerDefinitionRequest =
     type nonrec t =
       {
       workspaceId: WorkspaceId.t
-        [@ocaml.doc "The ID of the workspace to describe."]}
+        [@ocaml.doc
+          "The ID of the workspace to retrieve the alert manager definition from."]}
     let context_ = "DescribeAlertManagerDefinitionRequest"
     let make ~workspaceId = fun () -> { workspaceId }
     let to_value x =
@@ -2611,8 +7884,9 @@ module DescribeAlertManagerDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2621,110 +7895,452 @@ module DeleteWorkspaceRequest =
   struct
     type nonrec t =
       {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc "The ID of the workspace to delete."];
       clientToken: IdempotencyToken.t option
         [@ocaml.doc
-          "Optional, unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
-      workspaceId: WorkspaceId.t
-        [@ocaml.doc "The ID of the workspace to delete."]}
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
     let context_ = "DeleteWorkspaceRequest"
     let make ?clientToken =
       fun ~workspaceId -> fun () -> { clientToken; workspaceId }
     let to_value x =
       structure_to_value
-        [("clientToken",
-           (Option.map x.clientToken ~f:IdempotencyToken.to_value));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
-      make ~workspaceId ?clientToken ()
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
-      make ~workspaceId ?clientToken ()
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DeleteWorkspace operation."]
+module DeleteScraperResponse =
+  struct
+    type nonrec t =
+      {
+      scraperId: ScraperId.t option
+        [@ocaml.doc "The ID of the scraper to delete."];
+      status: ScraperStatus.t option
+        [@ocaml.doc "The current status of the scraper."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?scraperId = fun ?status -> fun () -> { scraperId; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("scraperId", (Option.map x.scraperId ~f:ScraperId.to_value));
+        ("status", (Option.map x.status ~f:ScraperStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ScraperStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let scraperId =
+        (Option.map ~f:ScraperId.of_xml) (Xml.child xml_arg0 "scraperId") in
+      make ?status ?scraperId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" ScraperStatus.of_json in
+      let scraperId = field_map json__ "scraperId" ScraperId.of_json in
+      make ?status ?scraperId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the output of a DeleteScraper operation."]
+module DeleteScraperRequest =
+  struct
+    type nonrec t =
+      {
+      scraperId: ScraperId.t [@ocaml.doc "The ID of the scraper to delete."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "(Optional) A unique, case-sensitive identifier that you can provide to ensure the idempotency of the request."]}
+    let context_ = "DeleteScraperRequest"
+    let make ?clientToken =
+      fun ~scraperId -> fun () -> { clientToken; scraperId }
+    let to_value x =
+      structure_to_value
+        [("scraperId", (Some (ScraperId.to_value x.scraperId)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let scraperId =
+        ScraperId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scraperId") in
+      make ?clientToken ~scraperId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let scraperId = field_map_exn json__ "scraperId" ScraperId.of_json in
+      make ?clientToken ~scraperId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the input of a DeleteScraper operation."]
+module DeleteScraperLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      scraperId: ScraperId.t
+        [@ocaml.doc
+          "The ID of the scraper whose logging configuration will be deleted."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the request is processed exactly once."]}
+    let context_ = "DeleteScraperLoggingConfigurationRequest"
+    let make ?clientToken =
+      fun ~scraperId -> fun () -> { clientToken; scraperId }
+    let to_value x =
+      structure_to_value
+        [("scraperId", (Some (ScraperId.to_value x.scraperId)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let scraperId =
+        ScraperId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scraperId") in
+      make ?clientToken ~scraperId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let scraperId = field_map_exn json__ "scraperId" ScraperId.of_json in
+      make ?clientToken ~scraperId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the logging configuration for a Amazon Managed Service for Prometheus scraper."]
 module DeleteRuleGroupsNamespaceRequest =
   struct
     type nonrec t =
       {
-      clientToken: IdempotencyToken.t option
-        [@ocaml.doc
-          "Optional, unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
-      name: RuleGroupsNamespaceName.t
-        [@ocaml.doc "The rule groups namespace name."];
       workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "The ID of the workspace to delete rule group definition."]}
+          "The ID of the workspace containing the rule groups namespace and definition to delete."];
+      name: RuleGroupsNamespaceName.t
+        [@ocaml.doc "The name of the rule groups namespace to delete."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
     let context_ = "DeleteRuleGroupsNamespaceRequest"
     let make ?clientToken =
-      fun ~name ->
-        fun ~workspaceId -> fun () -> { clientToken; name; workspaceId }
+      fun ~workspaceId ->
+        fun ~name -> fun () -> { clientToken; workspaceId; name }
     let to_value x =
       structure_to_value
-        [("clientToken",
-           (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
         ("name", (Some (RuleGroupsNamespaceName.to_value x.name)));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
-      let name =
-        RuleGroupsNamespaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
-      make ~workspaceId ~name ?clientToken ()
+      let name =
+        RuleGroupsNamespaceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~name ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
-      make ~workspaceId ~name ?clientToken ()
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let name = field_map_exn json__ "name" RuleGroupsNamespaceName.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~name ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a DeleteRuleGroupsNamespace operation."]
+module DeleteResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace from which to delete the resource-based policy."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the request is safe to retry (idempotent)."];
+      revisionId: String_.t option
+        [@ocaml.doc
+          "The revision ID of the policy to delete. Use this parameter to ensure that you are deleting the correct version of the policy."]}
+    let context_ = "DeleteResourcePolicyRequest"
+    let make ?clientToken =
+      fun ?revisionId ->
+        fun ~workspaceId ->
+          fun () -> { clientToken; revisionId; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("revisionId", (Option.map x.revisionId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?revisionId ?clientToken ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionId = field_map json__ "revisionId" String_.of_json in
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?revisionId ?clientToken ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the resource-based policy attached to an Amazon Managed Service for Prometheus workspace."]
+module DeleteQueryLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace from which to delete the query logging configuration."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "(Optional) A unique, case-sensitive identifier that you can provide to ensure the idempotency of the request."]}
+    let context_ = "DeleteQueryLoggingConfigurationRequest"
+    let make ?clientToken =
+      fun ~workspaceId -> fun () -> { clientToken; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the query logging configuration for the specified workspace."]
+module DeleteLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace containing the logging configuration to delete."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
+    let context_ = "DeleteLoggingConfigurationRequest"
+    let make ?clientToken =
+      fun ~workspaceId -> fun () -> { clientToken; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the input of a DeleteLoggingConfiguration operation."]
+module DeleteAnomalyDetectorRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The identifier of the workspace containing the anomaly detector to delete."];
+      anomalyDetectorId: AnomalyDetectorId.t
+        [@ocaml.doc "The identifier of the anomaly detector to delete."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "DeleteAnomalyDetectorRequest"
+    let make ?clientToken =
+      fun ~workspaceId ->
+        fun ~anomalyDetectorId ->
+          fun () -> { clientToken; workspaceId; anomalyDetectorId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("anomalyDetectorId",
+          (Some (AnomalyDetectorId.to_value x.anomalyDetectorId)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let anomalyDetectorId =
+        AnomalyDetectorId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "anomalyDetectorId") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~anomalyDetectorId ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let anomalyDetectorId =
+        field_map_exn json__ "anomalyDetectorId" AnomalyDetectorId.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~anomalyDetectorId ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes an anomaly detector from a workspace. This operation is idempotent."]
 module DeleteAlertManagerDefinitionRequest =
   struct
     type nonrec t =
       {
-      clientToken: IdempotencyToken.t option
-        [@ocaml.doc
-          "Optional, unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
       workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "The ID of the workspace in which to delete the alert manager definition."]}
+          "The ID of the workspace to delete the alert manager definition from."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
     let context_ = "DeleteAlertManagerDefinitionRequest"
     let make ?clientToken =
       fun ~workspaceId -> fun () -> { clientToken; workspaceId }
     let to_value x =
       structure_to_value
-        [("clientToken",
-           (Option.map x.clientToken ~f:IdempotencyToken.to_value));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
-      make ~workspaceId ?clientToken ()
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
-      make ~workspaceId ?clientToken ()
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a DeleteAlertManagerDefinition operation."]
@@ -2732,15 +8348,19 @@ module CreateWorkspaceResponse =
   struct
     type nonrec t =
       {
-      arn: WorkspaceArn.t
-        [@ocaml.doc "The ARN of the workspace that was just created."];
-      status: WorkspaceStatus.t
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc "The unique ID for the new workspace."];
+      arn: WorkspaceArn.t option
+        [@ocaml.doc "The ARN for the new workspace."];
+      status: WorkspaceStatus.t option
         [@ocaml.doc
-          "The status of the workspace that was just created (usually CREATING)."];
-      tags: TagMap.t option [@ocaml.doc "The tags of this workspace."];
-      workspaceId: WorkspaceId.t
+          "The current status of the new workspace. Immediately after you create the workspace, the status is usually CREATING."];
+      tags: TagMap.t option
         [@ocaml.doc
-          "The generated ID of the workspace that was just created."]}
+          "The list of tag keys and values that are associated with the workspace."];
+      kmsKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "(optional) If the workspace was created with a customer managed KMS key, the ARN for the key used."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -2749,11 +8369,12 @@ module CreateWorkspaceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateWorkspaceResponse"
-    let make ?tags =
-      fun ~arn ->
-        fun ~status ->
-          fun ~workspaceId -> fun () -> { tags; arn; status; workspaceId }
+    let make ?workspaceId =
+      fun ?arn ->
+        fun ?status ->
+          fun ?tags ->
+            fun ?kmsKeyArn ->
+              fun () -> { workspaceId; arn; status; tags; kmsKeyArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2822,29 +8443,31 @@ module CreateWorkspaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("arn", (Some (WorkspaceArn.to_value x.arn)));
-        ("status", (Some (WorkspaceStatus.to_value x.status)));
+        [("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value));
+        ("arn", (Option.map x.arn ~f:WorkspaceArn.to_value));
+        ("status", (Option.map x.status ~f:WorkspaceStatus.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        ("kmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let kmsKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "kmsKeyArn") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        WorkspaceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:WorkspaceStatus.of_xml) (Xml.child xml_arg0 "status") in
       let arn =
-        WorkspaceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~workspaceId ?tags ~status ~arn ()
+        (Option.map ~f:WorkspaceArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      make ?kmsKeyArn ?tags ?status ?arn ?workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let status = field_map_exn json "status" WorkspaceStatus.of_json in
-      let arn = field_map_exn json "arn" WorkspaceArn.of_json in
-      make ~workspaceId ?tags ~status ~arn ()
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KmsKeyArn.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" WorkspaceStatus.of_json in
+      let arn = field_map json__ "arn" WorkspaceArn.of_json in
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      make ?kmsKeyArn ?tags ?status ?arn ?workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a CreateWorkspace operation."]
 module CreateWorkspaceRequest =
@@ -2853,17 +8476,224 @@ module CreateWorkspaceRequest =
       {
       alias: WorkspaceAlias.t option
         [@ocaml.doc
-          "An optional user-assigned alias for this workspace. This alias is for user reference and does not need to be unique."];
+          "An alias that you assign to this workspace to help you identify it. It does not need to be unique. Blank spaces at the beginning or end of the alias that you specify will be trimmed from the value used."];
       clientToken: IdempotencyToken.t option
         [@ocaml.doc
-          "Optional, unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."];
       tags: TagMap.t option
-        [@ocaml.doc "Optional, user-provided tags for this workspace."]}
+        [@ocaml.doc
+          "The list of tag keys and values to associate with the workspace."];
+      kmsKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "(optional) The ARN for a customer managed KMS key to use for encrypting data within your workspace. For more information about using your own key in your workspace, see Encryption at rest in the Amazon Managed Service for Prometheus User Guide."]}
     let make ?alias =
-      fun ?clientToken -> fun ?tags -> fun () -> { alias; clientToken; tags }
+      fun ?clientToken ->
+        fun ?tags ->
+          fun ?kmsKeyArn -> fun () -> { alias; clientToken; tags; kmsKeyArn }
     let to_value x =
       structure_to_value
         [("alias", (Option.map x.alias ~f:WorkspaceAlias.to_value));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("kmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "kmsKeyArn") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let alias =
+        (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
+      make ?kmsKeyArn ?tags ?clientToken ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KmsKeyArn.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let alias = field_map json__ "alias" WorkspaceAlias.of_json in
+      make ?kmsKeyArn ?tags ?clientToken ?alias ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the input of a CreateWorkspace operation."]
+module CreateScraperResponse =
+  struct
+    type nonrec t =
+      {
+      scraperId: ScraperId.t option [@ocaml.doc "The ID of the new scraper."];
+      arn: ScraperArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the new scraper."];
+      status: ScraperStatus.t option
+        [@ocaml.doc
+          "A structure that displays the current status of the scraper."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The list of tag keys and values that are associated with the scraper."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?scraperId =
+      fun ?arn ->
+        fun ?status ->
+          fun ?tags -> fun () -> { scraperId; arn; status; tags }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("scraperId", (Option.map x.scraperId ~f:ScraperId.to_value));
+        ("arn", (Option.map x.arn ~f:ScraperArn.to_value));
+        ("status", (Option.map x.status ~f:ScraperStatus.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:ScraperStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let arn = (Option.map ~f:ScraperArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let scraperId =
+        (Option.map ~f:ScraperId.of_xml) (Xml.child xml_arg0 "scraperId") in
+      make ?tags ?status ?arn ?scraperId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" ScraperStatus.of_json in
+      let arn = field_map json__ "arn" ScraperArn.of_json in
+      let scraperId = field_map json__ "scraperId" ScraperId.of_json in
+      make ?tags ?status ?arn ?scraperId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the output of a CreateScraper operation."]
+module CreateScraperRequest =
+  struct
+    type nonrec t =
+      {
+      alias: ScraperAlias.t option
+        [@ocaml.doc
+          "(optional) An alias to associate with the scraper. This is for your use, and does not need to be unique."];
+      scrapeConfiguration: ScrapeConfiguration.t
+        [@ocaml.doc
+          "The configuration file to use in the new scraper. For more information, see Scraper configuration in the Amazon Managed Service for Prometheus User Guide."];
+      source: Source.t
+        [@ocaml.doc
+          "The Amazon EKS or Amazon Web Services cluster from which the scraper will collect metrics."];
+      destination: Destination.t
+        [@ocaml.doc
+          "The Amazon Managed Service for Prometheus workspace to send metrics to."];
+      roleConfiguration: RoleConfiguration.t option
+        [@ocaml.doc
+          "Use this structure to enable cross-account access, so that you can use a target account to access Prometheus metrics from source accounts."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "(Optional) A unique, case-sensitive identifier that you can provide to ensure the idempotency of the request."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "(Optional) The list of tag keys and values to associate with the scraper."]}
+    let context_ = "CreateScraperRequest"
+    let make ?alias =
+      fun ?roleConfiguration ->
+        fun ?clientToken ->
+          fun ?tags ->
+            fun ~scrapeConfiguration ->
+              fun ~source ->
+                fun ~destination ->
+                  fun () ->
+                    {
+                      alias;
+                      roleConfiguration;
+                      clientToken;
+                      tags;
+                      scrapeConfiguration;
+                      source;
+                      destination
+                    }
+    let to_value x =
+      structure_to_value
+        [("alias", (Option.map x.alias ~f:ScraperAlias.to_value));
+        ("scrapeConfiguration",
+          (Some (ScrapeConfiguration.to_value x.scrapeConfiguration)));
+        ("source", (Some (Source.to_value x.source)));
+        ("destination", (Some (Destination.to_value x.destination)));
+        ("roleConfiguration",
+          (Option.map x.roleConfiguration ~f:RoleConfiguration.to_value));
         ("clientToken",
           (Option.map x.clientToken ~f:IdempotencyToken.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
@@ -2873,30 +8703,54 @@ module CreateWorkspaceRequest =
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
+      let roleConfiguration =
+        (Option.map ~f:RoleConfiguration.of_xml)
+          (Xml.child xml_arg0 "roleConfiguration") in
+      let destination =
+        Destination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "destination") in
+      let source =
+        Source.of_xml (Xml.child_exn ~context:context_ xml_arg0 "source") in
+      let scrapeConfiguration =
+        ScrapeConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scrapeConfiguration") in
       let alias =
-        (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
-      make ?tags ?clientToken ?alias ()
+        (Option.map ~f:ScraperAlias.of_xml) (Xml.child xml_arg0 "alias") in
+      make ?tags ?clientToken ?roleConfiguration ~destination ~source
+        ~scrapeConfiguration ?alias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
-      let alias = field_map json "alias" WorkspaceAlias.of_json in
-      make ?tags ?clientToken ?alias ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let roleConfiguration =
+        field_map json__ "roleConfiguration" RoleConfiguration.of_json in
+      let destination =
+        field_map_exn json__ "destination" Destination.of_json in
+      let source = field_map_exn json__ "source" Source.of_json in
+      let scrapeConfiguration =
+        field_map_exn json__ "scrapeConfiguration"
+          ScrapeConfiguration.of_json in
+      let alias = field_map json__ "alias" ScraperAlias.of_json in
+      make ?tags ?clientToken ?roleConfiguration ~destination ~source
+        ~scrapeConfiguration ?alias ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents the input of a CreateWorkspace operation."]
+  end[@@ocaml.doc "Represents the input of a CreateScraper operation."]
 module CreateRuleGroupsNamespaceResponse =
   struct
     type nonrec t =
       {
-      arn: RuleGroupsNamespaceArn.t
+      name: RuleGroupsNamespaceName.t option
+        [@ocaml.doc "The name of the new rule groups namespace."];
+      arn: RuleGroupsNamespaceArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of this rule groups namespace."];
-      name: RuleGroupsNamespaceName.t
-        [@ocaml.doc "The rule groups namespace name."];
-      status: RuleGroupsNamespaceStatus.t
-        [@ocaml.doc "The status of rule groups namespace."];
+          "The Amazon Resource Name (ARN) of the new rule groups namespace."];
+      status: RuleGroupsNamespaceStatus.t option
+        [@ocaml.doc
+          "A structure that returns the current status of the rule groups namespace."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags of this rule groups namespace."]}
+        [@ocaml.doc
+          "The list of tag keys and values that are associated with the namespace."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -2906,10 +8760,9 @@ module CreateRuleGroupsNamespaceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateRuleGroupsNamespaceResponse"
-    let make ?tags =
-      fun ~arn ->
-        fun ~name -> fun ~status -> fun () -> { tags; arn; name; status }
+    let make ?name =
+      fun ?arn ->
+        fun ?status -> fun ?tags -> fun () -> { name; arn; status; tags }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2986,31 +8839,32 @@ module CreateRuleGroupsNamespaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("arn", (Some (RuleGroupsNamespaceArn.to_value x.arn)));
-        ("name", (Some (RuleGroupsNamespaceName.to_value x.name)));
-        ("status", (Some (RuleGroupsNamespaceStatus.to_value x.status)));
+        [("name", (Option.map x.name ~f:RuleGroupsNamespaceName.to_value));
+        ("arn", (Option.map x.arn ~f:RuleGroupsNamespaceArn.to_value));
+        ("status",
+          (Option.map x.status ~f:RuleGroupsNamespaceStatus.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        RuleGroupsNamespaceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let name =
-        RuleGroupsNamespaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:RuleGroupsNamespaceStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let arn =
-        RuleGroupsNamespaceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?tags ~status ~name ~arn ()
+        (Option.map ~f:RuleGroupsNamespaceArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      let name =
+        (Option.map ~f:RuleGroupsNamespaceName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?tags ?status ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let status =
-        field_map_exn json "status" RuleGroupsNamespaceStatus.of_json in
-      let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
-      let arn = field_map_exn json "arn" RuleGroupsNamespaceArn.of_json in
-      make ?tags ~status ~name ~arn ()
+        field_map json__ "status" RuleGroupsNamespaceStatus.of_json in
+      let arn = field_map json__ "arn" RuleGroupsNamespaceArn.of_json in
+      let name = field_map json__ "name" RuleGroupsNamespaceName.of_json in
+      make ?tags ?status ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a CreateRuleGroupsNamespace operation."]
@@ -3018,67 +8872,564 @@ module CreateRuleGroupsNamespaceRequest =
   struct
     type nonrec t =
       {
-      clientToken: IdempotencyToken.t option
-        [@ocaml.doc
-          "Optional, unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
-      data: RuleGroupsNamespaceData.t
-        [@ocaml.doc "The namespace data that define the rule groups."];
-      name: RuleGroupsNamespaceName.t
-        [@ocaml.doc "The rule groups namespace name."];
-      tags: TagMap.t option
-        [@ocaml.doc
-          "Optional, user-provided tags for this rule groups namespace."];
       workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "The ID of the workspace in which to create the rule group namespace."]}
+          "The ID of the workspace to add the rule groups namespace."];
+      name: RuleGroupsNamespaceName.t
+        [@ocaml.doc "The name for the new rule groups namespace."];
+      data: RuleGroupsNamespaceData.t
+        [@ocaml.doc
+          "The rules file to use in the new namespace. Contains the base64-encoded version of the YAML rules file. For details about the rule groups namespace structure, see RuleGroupsNamespaceData."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The list of tag keys and values to associate with the rule groups namespace."]}
     let context_ = "CreateRuleGroupsNamespaceRequest"
     let make ?clientToken =
       fun ?tags ->
-        fun ~data ->
+        fun ~workspaceId ->
           fun ~name ->
-            fun ~workspaceId ->
-              fun () -> { clientToken; tags; data; name; workspaceId }
+            fun ~data ->
+              fun () -> { clientToken; tags; workspaceId; name; data }
     let to_value x =
       structure_to_value
-        [("clientToken",
-           (Option.map x.clientToken ~f:IdempotencyToken.to_value));
-        ("data", (Some (RuleGroupsNamespaceData.to_value x.data)));
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
         ("name", (Some (RuleGroupsNamespaceName.to_value x.name)));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        ("data", (Some (RuleGroupsNamespaceData.to_value x.data)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let name =
-        RuleGroupsNamespaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let data =
-        RuleGroupsNamespaceData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "data") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
-      make ~workspaceId ?tags ~name ~data ?clientToken ()
+      let data =
+        RuleGroupsNamespaceData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "data") in
+      let name =
+        RuleGroupsNamespaceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?tags ?clientToken ~data ~name ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
-      let data = field_map_exn json "data" RuleGroupsNamespaceData.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
-      make ~workspaceId ?tags ~name ~data ?clientToken ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let data = field_map_exn json__ "data" RuleGroupsNamespaceData.of_json in
+      let name = field_map_exn json__ "name" RuleGroupsNamespaceName.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?tags ?clientToken ~data ~name ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a CreateRuleGroupsNamespace operation."]
+module CreateQueryLoggingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      status: QueryLoggingConfigurationStatus.t option
+        [@ocaml.doc "The current status of the query logging configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:QueryLoggingConfigurationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:QueryLoggingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" QueryLoggingConfigurationStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a query logging configuration for the specified workspace. This operation enables logging of queries that exceed the specified QSP threshold."]
+module CreateQueryLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace for which to create the query logging configuration."];
+      destinations: LoggingDestinations.t
+        [@ocaml.doc
+          "The destinations where query logs will be sent. Only CloudWatch Logs destination is supported. The list must contain exactly one element."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "(Optional) A unique, case-sensitive identifier that you can provide to ensure the idempotency of the request."]}
+    let context_ = "CreateQueryLoggingConfigurationRequest"
+    let make ?clientToken =
+      fun ~workspaceId ->
+        fun ~destinations ->
+          fun () -> { clientToken; workspaceId; destinations }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("destinations",
+          (Some (LoggingDestinations.to_value x.destinations)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let destinations =
+        LoggingDestinations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "destinations") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~destinations ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let destinations =
+        field_map_exn json__ "destinations" LoggingDestinations.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~destinations ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a query logging configuration for the specified workspace. This operation enables logging of queries that exceed the specified QSP threshold."]
+module CreateLoggingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      status: LoggingConfigurationStatus.t option
+        [@ocaml.doc
+          "A structure that displays the current status of the logging configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:LoggingConfigurationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:LoggingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" LoggingConfigurationStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the output of a CreateLoggingConfiguration operation."]
+module CreateLoggingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace to create the logging configuration for."];
+      logGroupArn: LogGroupArn.t
+        [@ocaml.doc
+          "The ARN of the CloudWatch log group to which the vended log data will be published. This log group must exist prior to calling this operation."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
+    let context_ = "CreateLoggingConfigurationRequest"
+    let make ?clientToken =
+      fun ~workspaceId ->
+        fun ~logGroupArn ->
+          fun () -> { clientToken; workspaceId; logGroupArn }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("logGroupArn", (Some (LogGroupArn.to_value x.logGroupArn)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let logGroupArn =
+        LogGroupArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "logGroupArn") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~logGroupArn ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let logGroupArn =
+        field_map_exn json__ "logGroupArn" LogGroupArn.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~logGroupArn ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the input of a CreateLoggingConfiguration operation."]
+module CreateAnomalyDetectorResponse =
+  struct
+    type nonrec t =
+      {
+      anomalyDetectorId: AnomalyDetectorId.t option
+        [@ocaml.doc "The unique identifier of the created anomaly detector."];
+      arn: AnomalyDetectorArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the created anomaly detector."];
+      status: AnomalyDetectorStatus.t option
+        [@ocaml.doc
+          "The status information of the created anomaly detector."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags applied to the created anomaly detector."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?anomalyDetectorId =
+      fun ?arn ->
+        fun ?status ->
+          fun ?tags -> fun () -> { anomalyDetectorId; arn; status; tags }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("anomalyDetectorId",
+           (Option.map x.anomalyDetectorId ~f:AnomalyDetectorId.to_value));
+        ("arn", (Option.map x.arn ~f:AnomalyDetectorArn.to_value));
+        ("status", (Option.map x.status ~f:AnomalyDetectorStatus.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:AnomalyDetectorStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let arn =
+        (Option.map ~f:AnomalyDetectorArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let anomalyDetectorId =
+        (Option.map ~f:AnomalyDetectorId.of_xml)
+          (Xml.child xml_arg0 "anomalyDetectorId") in
+      make ?tags ?status ?arn ?anomalyDetectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" AnomalyDetectorStatus.of_json in
+      let arn = field_map json__ "arn" AnomalyDetectorArn.of_json in
+      let anomalyDetectorId =
+        field_map json__ "anomalyDetectorId" AnomalyDetectorId.of_json in
+      make ?tags ?status ?arn ?anomalyDetectorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an anomaly detector within a workspace using the Random Cut Forest algorithm for time-series analysis. The anomaly detector analyzes Amazon Managed Service for Prometheus metrics to identify unusual patterns and behaviors."]
+module CreateAnomalyDetectorRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The identifier of the workspace where the anomaly detector will be created."];
+      alias: AnomalyDetectorAlias.t
+        [@ocaml.doc "A user-friendly name for the anomaly detector."];
+      evaluationIntervalInSeconds: AnomalyDetectorEvaluationInterval.t option
+        [@ocaml.doc
+          "The frequency, in seconds, at which the anomaly detector evaluates metrics. The default value is 60 seconds."];
+      missingDataAction: AnomalyDetectorMissingDataAction.t option
+        [@ocaml.doc
+          "Specifies the action to take when data is missing during evaluation."];
+      configuration: AnomalyDetectorConfiguration.t
+        [@ocaml.doc "The algorithm configuration for the anomaly detector."];
+      labels: CreateAnomalyDetectorRequestLabelsMap.t option
+        [@ocaml.doc
+          "The Amazon Managed Service for Prometheus metric labels to associate with the anomaly detector."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The metadata to apply to the anomaly detector to assist with categorization and organization."]}
+    let context_ = "CreateAnomalyDetectorRequest"
+    let make ?evaluationIntervalInSeconds =
+      fun ?missingDataAction ->
+        fun ?labels ->
+          fun ?clientToken ->
+            fun ?tags ->
+              fun ~workspaceId ->
+                fun ~alias ->
+                  fun ~configuration ->
+                    fun () ->
+                      {
+                        evaluationIntervalInSeconds;
+                        missingDataAction;
+                        labels;
+                        clientToken;
+                        tags;
+                        workspaceId;
+                        alias;
+                        configuration
+                      }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("alias", (Some (AnomalyDetectorAlias.to_value x.alias)));
+        ("evaluationIntervalInSeconds",
+          (Option.map x.evaluationIntervalInSeconds
+             ~f:AnomalyDetectorEvaluationInterval.to_value));
+        ("missingDataAction",
+          (Option.map x.missingDataAction
+             ~f:AnomalyDetectorMissingDataAction.to_value));
+        ("configuration",
+          (Some (AnomalyDetectorConfiguration.to_value x.configuration)));
+        ("labels",
+          (Option.map x.labels
+             ~f:CreateAnomalyDetectorRequestLabelsMap.to_value));
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let labels =
+        (Option.map ~f:CreateAnomalyDetectorRequestLabelsMap.of_xml)
+          (Xml.child xml_arg0 "labels") in
+      let configuration =
+        AnomalyDetectorConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
+      let missingDataAction =
+        (Option.map ~f:AnomalyDetectorMissingDataAction.of_xml)
+          (Xml.child xml_arg0 "missingDataAction") in
+      let evaluationIntervalInSeconds =
+        (Option.map ~f:AnomalyDetectorEvaluationInterval.of_xml)
+          (Xml.child xml_arg0 "evaluationIntervalInSeconds") in
+      let alias =
+        AnomalyDetectorAlias.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "alias") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?tags ?clientToken ?labels ~configuration ?missingDataAction
+        ?evaluationIntervalInSeconds ~alias ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let labels =
+        field_map json__ "labels"
+          CreateAnomalyDetectorRequestLabelsMap.of_json in
+      let configuration =
+        field_map_exn json__ "configuration"
+          AnomalyDetectorConfiguration.of_json in
+      let missingDataAction =
+        field_map json__ "missingDataAction"
+          AnomalyDetectorMissingDataAction.of_json in
+      let evaluationIntervalInSeconds =
+        field_map json__ "evaluationIntervalInSeconds"
+          AnomalyDetectorEvaluationInterval.of_json in
+      let alias = field_map_exn json__ "alias" AnomalyDetectorAlias.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?tags ?clientToken ?labels ~configuration ?missingDataAction
+        ?evaluationIntervalInSeconds ~alias ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an anomaly detector within a workspace using the Random Cut Forest algorithm for time-series analysis. The anomaly detector analyzes Amazon Managed Service for Prometheus metrics to identify unusual patterns and behaviors."]
 module CreateAlertManagerDefinitionResponse =
   struct
     type nonrec t =
       {
-      status: AlertManagerDefinitionStatus.t
-        [@ocaml.doc "The status of alert manager definition."]}
+      status: AlertManagerDefinitionStatus.t option
+        [@ocaml.doc
+          "A structure that displays the current status of the alert manager definition."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -3088,8 +9439,7 @@ module CreateAlertManagerDefinitionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAlertManagerDefinitionResponse"
-    let make ~status = fun () -> { status }
+    let make ?status = fun () -> { status }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3166,18 +9516,19 @@ module CreateAlertManagerDefinitionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("status", (Some (AlertManagerDefinitionStatus.to_value x.status)))]
+        [("status",
+           (Option.map x.status ~f:AlertManagerDefinitionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        AlertManagerDefinitionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~status ()
+        (Option.map ~f:AlertManagerDefinitionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status" AlertManagerDefinitionStatus.of_json in
-      make ~status ()
+        field_map json__ "status" AlertManagerDefinitionStatus.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a CreateAlertManagerDefinition operation."]
@@ -3185,42 +9536,46 @@ module CreateAlertManagerDefinitionRequest =
   struct
     type nonrec t =
       {
-      clientToken: IdempotencyToken.t option
-        [@ocaml.doc
-          "Optional, unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
-      data: AlertManagerDefinitionData.t
-        [@ocaml.doc "The alert manager definition data."];
       workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "The ID of the workspace in which to create the alert manager definition."]}
+          "The ID of the workspace to add the alert manager definition to."];
+      data: AlertManagerDefinitionData.t
+        [@ocaml.doc
+          "The alert manager definition to add. A base64-encoded version of the YAML alert manager definition file. For details about the alert manager definition, see AlertManagedDefinitionData."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique identifier that you can provide to ensure the idempotency of the request. Case-sensitive."]}
     let context_ = "CreateAlertManagerDefinitionRequest"
     let make ?clientToken =
-      fun ~data ->
-        fun ~workspaceId -> fun () -> { clientToken; data; workspaceId }
+      fun ~workspaceId ->
+        fun ~data -> fun () -> { clientToken; workspaceId; data }
     let to_value x =
       structure_to_value
-        [("clientToken",
-           (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
         ("data", (Some (AlertManagerDefinitionData.to_value x.data)));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        ("clientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
-      let data =
-        AlertManagerDefinitionData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "data") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
-      make ~workspaceId ~data ?clientToken ()
+      let data =
+        AlertManagerDefinitionData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "data") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?clientToken ~data ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let data = field_map_exn json "data" AlertManagerDefinitionData.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
-      make ~workspaceId ~data ?clientToken ()
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
+      let data =
+        field_map_exn json__ "data" AlertManagerDefinitionData.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?clientToken ~data ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a CreateAlertManagerDefinition operation."]

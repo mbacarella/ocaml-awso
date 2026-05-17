@@ -562,11 +562,17 @@ let list_protection_groups =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and inclusionFilters =
+         flag "inclusion-filters" (optional json_arg)
+           ~doc:"JSON InclusionProtectionGroupFilters" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_protection_groups
-           (Values.ListProtectionGroupsRequest.make ?nextToken ?maxResults ())
+           (Values.ListProtectionGroupsRequest.make ?nextToken ?maxResults
+              ?inclusionFilters:(Option.map
+                                   ~f:Values.InclusionProtectionGroupFilters.of_json
+                                   inclusionFilters) ())
            (Some Values.ListProtectionGroupsResponse.to_json)
            (Some Values.ListProtectionGroupsResponse.error_to_json)])
 let list_protections =
@@ -582,11 +588,17 @@ let list_protections =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and inclusionFilters =
+         flag "inclusion-filters" (optional json_arg)
+           ~doc:"JSON InclusionProtectionFilters" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_protections
-           (Values.ListProtectionsRequest.make ?nextToken ?maxResults ())
+           (Values.ListProtectionsRequest.make ?nextToken ?maxResults
+              ?inclusionFilters:(Option.map
+                                   ~f:Values.InclusionProtectionFilters.of_json
+                                   inclusionFilters) ())
            (Some Values.ListProtectionsResponse.to_json)
            (Some Values.ListProtectionsResponse.error_to_json)])
 let list_resources_in_protection_group =

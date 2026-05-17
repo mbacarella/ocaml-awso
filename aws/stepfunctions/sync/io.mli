@@ -10,6 +10,12 @@ val create_state_machine :
     ?cfg:Awso.Cfg.t ->
       CreateStateMachineInput.t ->
         (CreateStateMachineOutput.t, CreateStateMachineOutput.error) Result.t
+val create_state_machine_alias :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateStateMachineAliasInput.t ->
+        (CreateStateMachineAliasOutput.t,
+          CreateStateMachineAliasOutput.error) Result.t
 val delete_activity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -20,6 +26,18 @@ val delete_state_machine :
     ?cfg:Awso.Cfg.t ->
       DeleteStateMachineInput.t ->
         (DeleteStateMachineOutput.t, DeleteStateMachineOutput.error) Result.t
+val delete_state_machine_alias :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteStateMachineAliasInput.t ->
+        (DeleteStateMachineAliasOutput.t,
+          DeleteStateMachineAliasOutput.error) Result.t
+val delete_state_machine_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteStateMachineVersionInput.t ->
+        (DeleteStateMachineVersionOutput.t,
+          DeleteStateMachineVersionOutput.error) Result.t
 val describe_activity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -30,12 +48,23 @@ val describe_execution :
     ?cfg:Awso.Cfg.t ->
       DescribeExecutionInput.t ->
         (DescribeExecutionOutput.t, DescribeExecutionOutput.error) Result.t
+val describe_map_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMapRunInput.t ->
+        (DescribeMapRunOutput.t, DescribeMapRunOutput.error) Result.t
 val describe_state_machine :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStateMachineInput.t ->
         (DescribeStateMachineOutput.t, DescribeStateMachineOutput.error)
           Result.t
+val describe_state_machine_alias :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeStateMachineAliasInput.t ->
+        (DescribeStateMachineAliasOutput.t,
+          DescribeStateMachineAliasOutput.error) Result.t
 val describe_state_machine_for_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -63,6 +92,23 @@ val list_executions :
     ?cfg:Awso.Cfg.t ->
       ListExecutionsInput.t ->
         (ListExecutionsOutput.t, ListExecutionsOutput.error) Result.t
+val list_map_runs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMapRunsInput.t ->
+        (ListMapRunsOutput.t, ListMapRunsOutput.error) Result.t
+val list_state_machine_aliases :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListStateMachineAliasesInput.t ->
+        (ListStateMachineAliasesOutput.t,
+          ListStateMachineAliasesOutput.error) Result.t
+val list_state_machine_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListStateMachineVersionsInput.t ->
+        (ListStateMachineVersionsOutput.t,
+          ListStateMachineVersionsOutput.error) Result.t
 val list_state_machines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -74,6 +120,17 @@ val list_tags_for_resource :
       ListTagsForResourceInput.t ->
         (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
           Result.t
+val publish_state_machine_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PublishStateMachineVersionInput.t ->
+        (PublishStateMachineVersionOutput.t,
+          PublishStateMachineVersionOutput.error) Result.t
+val redrive_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RedriveExecutionInput.t ->
+        (RedriveExecutionOutput.t, RedriveExecutionOutput.error) Result.t
 val send_task_failure :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -109,13 +166,34 @@ val tag_resource :
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
         (TagResourceOutput.t, TagResourceOutput.error) Result.t
+val test_state :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TestStateInput.t -> (TestStateOutput.t, TestStateOutput.error) Result.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
         (UntagResourceOutput.t, UntagResourceOutput.error) Result.t
+val update_map_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateMapRunInput.t ->
+        (UpdateMapRunOutput.t, UpdateMapRunOutput.error) Result.t
 val update_state_machine :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStateMachineInput.t ->
         (UpdateStateMachineOutput.t, UpdateStateMachineOutput.error) Result.t
+val update_state_machine_alias :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateStateMachineAliasInput.t ->
+        (UpdateStateMachineAliasOutput.t,
+          UpdateStateMachineAliasOutput.error) Result.t
+val validate_state_machine_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ValidateStateMachineDefinitionInput.t ->
+        (ValidateStateMachineDefinitionOutput.t,
+          ValidateStateMachineDefinitionOutput.error) Result.t

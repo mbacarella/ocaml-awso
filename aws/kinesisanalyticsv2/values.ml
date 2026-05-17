@@ -168,12 +168,12 @@ module CSVMappingParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordRowDelimiter") in
       make ~recordColumnDelimiter ~recordRowDelimiter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordColumnDelimiter =
-        field_map_exn json "RecordColumnDelimiter"
+        field_map_exn json__ "RecordColumnDelimiter"
           RecordColumnDelimiter.of_json in
       let recordRowDelimiter =
-        field_map_exn json "RecordRowDelimiter" RecordRowDelimiter.of_json in
+        field_map_exn json__ "RecordRowDelimiter" RecordRowDelimiter.of_json in
       make ~recordColumnDelimiter ~recordRowDelimiter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -197,9 +197,9 @@ module JSONMappingParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordRowPath") in
       make ~recordRowPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordRowPath =
-        field_map_exn json "RecordRowPath" RecordRowPath.of_json in
+        field_map_exn json__ "RecordRowPath" RecordRowPath.of_json in
       make ~recordRowPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -278,10 +278,11 @@ module RecordColumn =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~sqlType ?mapping ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sqlType = field_map_exn json "SqlType" RecordColumnSqlType.of_json in
-      let mapping = field_map json "Mapping" RecordColumnMapping.of_json in
-      let name = field_map_exn json "Name" RecordColumnName.of_json in
+    let of_json json__ =
+      let sqlType =
+        field_map_exn json__ "SqlType" RecordColumnSqlType.of_json in
+      let mapping = field_map json__ "Mapping" RecordColumnMapping.of_json in
+      let name = field_map_exn json__ "Name" RecordColumnName.of_json in
       make ~sqlType ?mapping ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -316,11 +317,12 @@ module MappingParameters =
           (Xml.child xml_arg0 "JSONMappingParameters") in
       make ?cSVMappingParameters ?jSONMappingParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cSVMappingParameters =
-        field_map json "CSVMappingParameters" CSVMappingParameters.of_json in
+        field_map json__ "CSVMappingParameters" CSVMappingParameters.of_json in
       let jSONMappingParameters =
-        field_map json "JSONMappingParameters" JSONMappingParameters.of_json in
+        field_map json__ "JSONMappingParameters"
+          JSONMappingParameters.of_json in
       make ?cSVMappingParameters ?jSONMappingParameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -422,32 +424,30 @@ module InputLambdaProcessorDescription =
   struct
     type nonrec t =
       {
-      resourceARN: ResourceARN.t
+      resourceARN: ResourceARN.t option
         [@ocaml.doc
           "The ARN of the Amazon Lambda function that is used to preprocess the records in the stream. To specify an earlier version of the Lambda function than the latest, include the Lambda function version in the Lambda function ARN. For more information about Lambda ARNs, see Example ARNs: Amazon Lambda"];
       roleARN: RoleARN.t option
         [@ocaml.doc
           "The ARN of the IAM role that is used to access the Amazon Lambda function. Provided for backward compatibility. Applications that are created with the current API version have an application-level service execution role rather than a resource-level role."]}
-    let context_ = "InputLambdaProcessorDescription"
-    let make ?roleARN =
-      fun ~resourceARN -> fun () -> { roleARN; resourceARN }
+    let make ?resourceARN =
+      fun ?roleARN -> fun () -> { resourceARN; roleARN }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        [("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let resourceARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?roleARN ~resourceARN ()
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      make ?roleARN ~resourceARN ()
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For a SQL-based Kinesis Data Analytics application, an object that contains the Amazon Resource Name (ARN) of the Amazon Lambda function that is used to preprocess records in the stream."]
@@ -490,6 +490,9 @@ module RecordColumns =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecordColumn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -559,11 +562,11 @@ module RecordFormat =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordFormatType") in
       make ?mappingParameters ~recordFormatType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mappingParameters =
-        field_map json "MappingParameters" MappingParameters.of_json in
+        field_map json__ "MappingParameters" MappingParameters.of_json in
       let recordFormatType =
-        field_map_exn json "RecordFormatType" RecordFormatType.of_json in
+        field_map_exn json__ "RecordFormatType" RecordFormatType.of_json in
       make ?mappingParameters ~recordFormatType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -729,6 +732,8 @@ module PropertyMap =
                     (fun x -> (PropertyValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -740,6 +745,9 @@ module InAppStreamNames =
   struct
     type nonrec t = InAppStreamName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InAppStreamName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -778,8 +786,8 @@ module InputParallelism =
           (Xml.child xml_arg0 "Count") in
       make ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map json "Count" InputParallelismCount.of_json in
+    let of_json json__ =
+      let count = field_map json__ "Count" InputParallelismCount.of_json in
       make ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -806,9 +814,9 @@ module InputProcessingConfigurationDescription =
           (Xml.child xml_arg0 "InputLambdaProcessorDescription") in
       make ?inputLambdaProcessorDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputLambdaProcessorDescription =
-        field_map json "InputLambdaProcessorDescription"
+        field_map json__ "InputLambdaProcessorDescription"
           InputLambdaProcessorDescription.of_json in
       make ?inputLambdaProcessorDescription ()
     let to_json v = composed_to_json to_value v
@@ -834,9 +842,10 @@ module InputStartingPositionConfiguration =
           (Xml.child xml_arg0 "InputStartingPosition") in
       make ?inputStartingPosition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputStartingPosition =
-        field_map json "InputStartingPosition" InputStartingPosition.of_json in
+        field_map json__ "InputStartingPosition"
+          InputStartingPosition.of_json in
       make ?inputStartingPosition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -845,31 +854,29 @@ module KinesisFirehoseInputDescription =
   struct
     type nonrec t =
       {
-      resourceARN: ResourceARN.t
+      resourceARN: ResourceARN.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the delivery stream."];
       roleARN: RoleARN.t option
         [@ocaml.doc
           "The ARN of the IAM role that Kinesis Data Analytics assumes to access the stream. Provided for backward compatibility. Applications that are created with the current API version have an application-level service execution role rather than a resource-level role."]}
-    let context_ = "KinesisFirehoseInputDescription"
-    let make ?roleARN =
-      fun ~resourceARN -> fun () -> { roleARN; resourceARN }
+    let make ?resourceARN =
+      fun ?roleARN -> fun () -> { resourceARN; roleARN }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        [("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let resourceARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?roleARN ~resourceARN ()
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      make ?roleARN ~resourceARN ()
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the Amazon Kinesis Data Firehose delivery stream that is configured as the streaming source in the application input configuration."]
@@ -877,32 +884,30 @@ module KinesisStreamsInputDescription =
   struct
     type nonrec t =
       {
-      resourceARN: ResourceARN.t
+      resourceARN: ResourceARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Kinesis data stream."];
       roleARN: RoleARN.t option
         [@ocaml.doc
           "The ARN of the IAM role that Kinesis Data Analytics can assume to access the stream. Provided for backward compatibility. Applications that are created with the current API version have an application-level service execution role rather than a resource-level role."]}
-    let context_ = "KinesisStreamsInputDescription"
-    let make ?roleARN =
-      fun ~resourceARN -> fun () -> { roleARN; resourceARN }
+    let make ?resourceARN =
+      fun ?roleARN -> fun () -> { resourceARN; roleARN }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        [("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let resourceARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?roleARN ~resourceARN ()
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      make ?roleARN ~resourceARN ()
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For a SQL-based Kinesis Data Analytics application, describes the Kinesis data stream that is configured as the streaming source in the application input configuration."]
@@ -942,13 +947,13 @@ module SourceSchema =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordFormat") in
       make ~recordColumns ?recordEncoding ~recordFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordColumns =
-        field_map_exn json "RecordColumns" RecordColumns.of_json in
+        field_map_exn json__ "RecordColumns" RecordColumns.of_json in
       let recordEncoding =
-        field_map json "RecordEncoding" RecordEncoding.of_json in
+        field_map json__ "RecordEncoding" RecordEncoding.of_json in
       let recordFormat =
-        field_map_exn json "RecordFormat" RecordFormat.of_json in
+        field_map_exn json__ "RecordFormat" RecordFormat.of_json in
       make ~recordColumns ?recordEncoding ~recordFormat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -973,9 +978,9 @@ module DestinationSchema =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordFormatType") in
       make ~recordFormatType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordFormatType =
-        field_map_exn json "RecordFormatType" RecordFormatType.of_json in
+        field_map_exn json__ "RecordFormatType" RecordFormatType.of_json in
       make ~recordFormatType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -984,31 +989,29 @@ module KinesisFirehoseOutputDescription =
   struct
     type nonrec t =
       {
-      resourceARN: ResourceARN.t
+      resourceARN: ResourceARN.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the delivery stream."];
       roleARN: RoleARN.t option
         [@ocaml.doc
           "The ARN of the IAM role that Kinesis Data Analytics can assume to access the stream. Provided for backward compatibility. Applications that are created with the current API version have an application-level service execution role rather than a resource-level role."]}
-    let context_ = "KinesisFirehoseOutputDescription"
-    let make ?roleARN =
-      fun ~resourceARN -> fun () -> { roleARN; resourceARN }
+    let make ?resourceARN =
+      fun ?roleARN -> fun () -> { resourceARN; roleARN }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        [("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let resourceARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?roleARN ~resourceARN ()
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      make ?roleARN ~resourceARN ()
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For a SQL-based Kinesis Data Analytics application's output, describes the Kinesis Data Firehose delivery stream that is configured as its destination."]
@@ -1016,32 +1019,30 @@ module KinesisStreamsOutputDescription =
   struct
     type nonrec t =
       {
-      resourceARN: ResourceARN.t
+      resourceARN: ResourceARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Kinesis data stream."];
       roleARN: RoleARN.t option
         [@ocaml.doc
           "The ARN of the IAM role that Kinesis Data Analytics can assume to access the stream. Provided for backward compatibility. Applications that are created with the current API version have an application-level service execution role rather than a resource-level role."]}
-    let context_ = "KinesisStreamsOutputDescription"
-    let make ?roleARN =
-      fun ~resourceARN -> fun () -> { roleARN; resourceARN }
+    let make ?resourceARN =
+      fun ?roleARN -> fun () -> { resourceARN; roleARN }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        [("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let resourceARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?roleARN ~resourceARN ()
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      make ?roleARN ~resourceARN ()
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For an SQL-based Kinesis Data Analytics application's output, describes the Kinesis data stream that is configured as its destination."]
@@ -1049,32 +1050,30 @@ module LambdaOutputDescription =
   struct
     type nonrec t =
       {
-      resourceARN: ResourceARN.t
+      resourceARN: ResourceARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the destination Lambda function."];
       roleARN: RoleARN.t option
         [@ocaml.doc
           "The ARN of the IAM role that Kinesis Data Analytics can assume to write to the destination function. Provided for backward compatibility. Applications that are created with the current API version have an application-level service execution role rather than a resource-level role."]}
-    let context_ = "LambdaOutputDescription"
-    let make ?roleARN =
-      fun ~resourceARN -> fun () -> { roleARN; resourceARN }
+    let make ?resourceARN =
+      fun ?roleARN -> fun () -> { resourceARN; roleARN }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        [("ResourceARN", (Option.map x.resourceARN ~f:ResourceARN.to_value));
         ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let resourceARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?roleARN ~resourceARN ()
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
+      make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      make ?roleARN ~resourceARN ()
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
+      make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For a SQL-based Kinesis Data Analytics application's output, describes the Amazon Lambda function that is configured as its destination."]
@@ -1100,20 +1099,20 @@ module S3ReferenceDataSourceDescription =
   struct
     type nonrec t =
       {
-      bucketARN: BucketARN.t
+      bucketARN: BucketARN.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the S3 bucket."];
-      fileKey: FileKey.t [@ocaml.doc "Amazon S3 object key name."];
+      fileKey: FileKey.t option [@ocaml.doc "Amazon S3 object key name."];
       referenceRoleARN: RoleARN.t option
         [@ocaml.doc
           "The ARN of the IAM role that Kinesis Data Analytics can assume to read the Amazon S3 object on your behalf to populate the in-application reference table. Provided for backward compatibility. Applications that are created with the current API version have an application-level service execution role rather than a resource-level role."]}
-    let context_ = "S3ReferenceDataSourceDescription"
-    let make ?referenceRoleARN =
-      fun ~bucketARN ->
-        fun ~fileKey -> fun () -> { referenceRoleARN; bucketARN; fileKey }
+    let make ?bucketARN =
+      fun ?fileKey ->
+        fun ?referenceRoleARN ->
+          fun () -> { bucketARN; fileKey; referenceRoleARN }
     let to_value x =
       structure_to_value
-        [("BucketARN", (Some (BucketARN.to_value x.bucketARN)));
-        ("FileKey", (Some (FileKey.to_value x.fileKey)));
+        [("BucketARN", (Option.map x.bucketARN ~f:BucketARN.to_value));
+        ("FileKey", (Option.map x.fileKey ~f:FileKey.to_value));
         ("ReferenceRoleARN",
           (Option.map x.referenceRoleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
@@ -1122,18 +1121,17 @@ module S3ReferenceDataSourceDescription =
         (Option.map ~f:RoleARN.of_xml)
           (Xml.child xml_arg0 "ReferenceRoleARN") in
       let fileKey =
-        FileKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FileKey") in
+        (Option.map ~f:FileKey.of_xml) (Xml.child xml_arg0 "FileKey") in
       let bucketARN =
-        BucketARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
-      make ?referenceRoleARN ~fileKey ~bucketARN ()
+        (Option.map ~f:BucketARN.of_xml) (Xml.child xml_arg0 "BucketARN") in
+      make ?referenceRoleARN ?fileKey ?bucketARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceRoleARN =
-        field_map json "ReferenceRoleARN" RoleARN.of_json in
-      let fileKey = field_map_exn json "FileKey" FileKey.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
-      make ?referenceRoleARN ~fileKey ~bucketARN ()
+        field_map json__ "ReferenceRoleARN" RoleARN.of_json in
+      let fileKey = field_map json__ "FileKey" FileKey.of_json in
+      let bucketARN = field_map json__ "BucketARN" BucketARN.of_json in
+      make ?referenceRoleARN ?fileKey ?bucketARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For a SQL-based Kinesis Data Analytics application, provides the bucket name and object key name that stores the reference data."]
@@ -1240,11 +1238,11 @@ module MavenReference =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~version ~artifactId ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "Version" MavenVersion.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "Version" MavenVersion.of_json in
       let artifactId =
-        field_map_exn json "ArtifactId" MavenArtifactId.of_json in
-      let groupId = field_map_exn json "GroupId" MavenGroupId.of_json in
+        field_map_exn json__ "ArtifactId" MavenArtifactId.of_json in
+      let groupId = field_map_exn json__ "GroupId" MavenGroupId.of_json in
       make ~version ~artifactId ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1284,15 +1282,15 @@ module S3ContentLocation =
           (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
       make ?objectVersion ~fileKey ~bucketARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectVersion =
-        field_map json "ObjectVersion" ObjectVersion.of_json in
-      let fileKey = field_map_exn json "FileKey" FileKey.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
+        field_map json__ "ObjectVersion" ObjectVersion.of_json in
+      let fileKey = field_map_exn json__ "FileKey" FileKey.of_json in
+      let bucketARN = field_map_exn json__ "BucketARN" BucketARN.of_json in
       make ?objectVersion ~fileKey ~bucketARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For a Kinesis Data Analytics application provides a description of an Amazon S3 object, including the Amazon Resource Name (ARN) of the S3 bucket, the name of the Amazon S3 object that contains the data, and the version number of the Amazon S3 object that contains the data."]
+       "For a Managed Service for Apache Flink application provides a description of an Amazon S3 object, including the Amazon Resource Name (ARN) of the S3 bucket, the name of the Amazon S3 object that contains the data, and the version number of the Amazon S3 object that contains the data."]
 module BasePath =
   struct
     type nonrec t = string
@@ -1333,9 +1331,9 @@ module InputLambdaProcessorUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNUpdate") in
       make ~resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARNUpdate =
-        field_map_exn json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map_exn json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ~resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1359,8 +1357,9 @@ module InputLambdaProcessor =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1405,23 +1404,22 @@ module S3ApplicationCodeLocationDescription =
   struct
     type nonrec t =
       {
-      bucketARN: BucketARN.t
+      bucketARN: BucketARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the S3 bucket containing the application code."];
-      fileKey: FileKey.t
+      fileKey: FileKey.t option
         [@ocaml.doc
           "The file key for the object containing the application code."];
       objectVersion: ObjectVersion.t option
         [@ocaml.doc
           "The version of the object containing the application code."]}
-    let context_ = "S3ApplicationCodeLocationDescription"
-    let make ?objectVersion =
-      fun ~bucketARN ->
-        fun ~fileKey -> fun () -> { objectVersion; bucketARN; fileKey }
+    let make ?bucketARN =
+      fun ?fileKey ->
+        fun ?objectVersion -> fun () -> { bucketARN; fileKey; objectVersion }
     let to_value x =
       structure_to_value
-        [("BucketARN", (Some (BucketARN.to_value x.bucketARN)));
-        ("FileKey", (Some (FileKey.to_value x.fileKey)));
+        [("BucketARN", (Option.map x.bucketARN ~f:BucketARN.to_value));
+        ("FileKey", (Option.map x.fileKey ~f:FileKey.to_value));
         ("ObjectVersion",
           (Option.map x.objectVersion ~f:ObjectVersion.to_value))]
     let to_query v = to_query to_value v
@@ -1430,18 +1428,17 @@ module S3ApplicationCodeLocationDescription =
         (Option.map ~f:ObjectVersion.of_xml)
           (Xml.child xml_arg0 "ObjectVersion") in
       let fileKey =
-        FileKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FileKey") in
+        (Option.map ~f:FileKey.of_xml) (Xml.child xml_arg0 "FileKey") in
       let bucketARN =
-        BucketARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
-      make ?objectVersion ~fileKey ~bucketARN ()
+        (Option.map ~f:BucketARN.of_xml) (Xml.child xml_arg0 "BucketARN") in
+      make ?objectVersion ?fileKey ?bucketARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectVersion =
-        field_map json "ObjectVersion" ObjectVersion.of_json in
-      let fileKey = field_map_exn json "FileKey" FileKey.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
-      make ?objectVersion ~fileKey ~bucketARN ()
+        field_map json__ "ObjectVersion" ObjectVersion.of_json in
+      let fileKey = field_map json__ "FileKey" FileKey.of_json in
+      let bucketARN = field_map json__ "BucketARN" BucketARN.of_json in
+      make ?objectVersion ?fileKey ?bucketARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the location of an application's code stored in an S3 bucket."]
@@ -1490,9 +1487,10 @@ module PropertyGroup =
           (Xml.child_exn ~context:context_ xml_arg0 "PropertyGroupId") in
       make ~propertyMap ~propertyGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let propertyMap = field_map_exn json "PropertyMap" PropertyMap.of_json in
-      let propertyGroupId = field_map_exn json "PropertyGroupId" Id.of_json in
+    let of_json json__ =
+      let propertyMap =
+        field_map_exn json__ "PropertyMap" PropertyMap.of_json in
+      let propertyGroupId = field_map_exn json__ "PropertyGroupId" Id.of_json in
       make ~propertyMap ~propertyGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Property key-value pairs passed into an application."]
@@ -1812,26 +1810,26 @@ module InputDescription =
         ?inputProcessingConfigurationDescription ?inAppStreamNames
         ?namePrefix ?inputId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputStartingPositionConfiguration =
-        field_map json "InputStartingPositionConfiguration"
+        field_map json__ "InputStartingPositionConfiguration"
           InputStartingPositionConfiguration.of_json in
       let inputParallelism =
-        field_map json "InputParallelism" InputParallelism.of_json in
-      let inputSchema = field_map json "InputSchema" SourceSchema.of_json in
+        field_map json__ "InputParallelism" InputParallelism.of_json in
+      let inputSchema = field_map json__ "InputSchema" SourceSchema.of_json in
       let kinesisFirehoseInputDescription =
-        field_map json "KinesisFirehoseInputDescription"
+        field_map json__ "KinesisFirehoseInputDescription"
           KinesisFirehoseInputDescription.of_json in
       let kinesisStreamsInputDescription =
-        field_map json "KinesisStreamsInputDescription"
+        field_map json__ "KinesisStreamsInputDescription"
           KinesisStreamsInputDescription.of_json in
       let inputProcessingConfigurationDescription =
-        field_map json "InputProcessingConfigurationDescription"
+        field_map json__ "InputProcessingConfigurationDescription"
           InputProcessingConfigurationDescription.of_json in
       let inAppStreamNames =
-        field_map json "InAppStreamNames" InAppStreamNames.of_json in
-      let namePrefix = field_map json "NamePrefix" InAppStreamName.of_json in
-      let inputId = field_map json "InputId" Id.of_json in
+        field_map json__ "InAppStreamNames" InAppStreamNames.of_json in
+      let namePrefix = field_map json__ "NamePrefix" InAppStreamName.of_json in
+      let inputId = field_map json__ "InputId" Id.of_json in
       make ?inputStartingPositionConfiguration ?inputParallelism ?inputSchema
         ?kinesisFirehoseInputDescription ?kinesisStreamsInputDescription
         ?inputProcessingConfigurationDescription ?inAppStreamNames
@@ -1914,20 +1912,20 @@ module OutputDescription =
         ?kinesisFirehoseOutputDescription ?kinesisStreamsOutputDescription
         ?name ?outputId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationSchema =
-        field_map json "DestinationSchema" DestinationSchema.of_json in
+        field_map json__ "DestinationSchema" DestinationSchema.of_json in
       let lambdaOutputDescription =
-        field_map json "LambdaOutputDescription"
+        field_map json__ "LambdaOutputDescription"
           LambdaOutputDescription.of_json in
       let kinesisFirehoseOutputDescription =
-        field_map json "KinesisFirehoseOutputDescription"
+        field_map json__ "KinesisFirehoseOutputDescription"
           KinesisFirehoseOutputDescription.of_json in
       let kinesisStreamsOutputDescription =
-        field_map json "KinesisStreamsOutputDescription"
+        field_map json__ "KinesisStreamsOutputDescription"
           KinesisStreamsOutputDescription.of_json in
-      let name = field_map json "Name" InAppStreamName.of_json in
-      let outputId = field_map json "OutputId" Id.of_json in
+      let name = field_map json__ "Name" InAppStreamName.of_json in
+      let outputId = field_map json__ "OutputId" Id.of_json in
       make ?destinationSchema ?lambdaOutputDescription
         ?kinesisFirehoseOutputDescription ?kinesisStreamsOutputDescription
         ?name ?outputId ()
@@ -1938,38 +1936,37 @@ module ReferenceDataSourceDescription =
   struct
     type nonrec t =
       {
-      referenceId: Id.t
+      referenceId: Id.t option
         [@ocaml.doc
           "The ID of the reference data source. This is the ID that Kinesis Data Analytics assigns when you add the reference data source to your application using the CreateApplication or UpdateApplication operation."];
-      tableName: InAppTableName.t
+      tableName: InAppTableName.t option
         [@ocaml.doc
           "The in-application table name created by the specific reference data source configuration."];
-      s3ReferenceDataSourceDescription: S3ReferenceDataSourceDescription.t
+      s3ReferenceDataSourceDescription:
+        S3ReferenceDataSourceDescription.t option
         [@ocaml.doc
           "Provides the Amazon S3 bucket name, the object key name that contains the reference data."];
       referenceSchema: SourceSchema.t option
         [@ocaml.doc
           "Describes the format of the data in the streaming source, and how each data element maps to corresponding columns created in the in-application stream."]}
-    let context_ = "ReferenceDataSourceDescription"
-    let make ?referenceSchema =
-      fun ~referenceId ->
-        fun ~tableName ->
-          fun ~s3ReferenceDataSourceDescription ->
+    let make ?referenceId =
+      fun ?tableName ->
+        fun ?s3ReferenceDataSourceDescription ->
+          fun ?referenceSchema ->
             fun () ->
               {
-                referenceSchema;
                 referenceId;
                 tableName;
-                s3ReferenceDataSourceDescription
+                s3ReferenceDataSourceDescription;
+                referenceSchema
               }
     let to_value x =
       structure_to_value
-        [("ReferenceId", (Some (Id.to_value x.referenceId)));
-        ("TableName", (Some (InAppTableName.to_value x.tableName)));
+        [("ReferenceId", (Option.map x.referenceId ~f:Id.to_value));
+        ("TableName", (Option.map x.tableName ~f:InAppTableName.to_value));
         ("S3ReferenceDataSourceDescription",
-          (Some
-             (S3ReferenceDataSourceDescription.to_value
-                x.s3ReferenceDataSourceDescription)));
+          (Option.map x.s3ReferenceDataSourceDescription
+             ~f:S3ReferenceDataSourceDescription.to_value));
         ("ReferenceSchema",
           (Option.map x.referenceSchema ~f:SourceSchema.to_value))]
     let to_query v = to_query to_value v
@@ -1978,27 +1975,26 @@ module ReferenceDataSourceDescription =
         (Option.map ~f:SourceSchema.of_xml)
           (Xml.child xml_arg0 "ReferenceSchema") in
       let s3ReferenceDataSourceDescription =
-        S3ReferenceDataSourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "S3ReferenceDataSourceDescription") in
+        (Option.map ~f:S3ReferenceDataSourceDescription.of_xml)
+          (Xml.child xml_arg0 "S3ReferenceDataSourceDescription") in
       let tableName =
-        InAppTableName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
+        (Option.map ~f:InAppTableName.of_xml)
+          (Xml.child xml_arg0 "TableName") in
       let referenceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ReferenceId") in
-      make ?referenceSchema ~s3ReferenceDataSourceDescription ~tableName
-        ~referenceId ()
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "ReferenceId") in
+      make ?referenceSchema ?s3ReferenceDataSourceDescription ?tableName
+        ?referenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceSchema =
-        field_map json "ReferenceSchema" SourceSchema.of_json in
+        field_map json__ "ReferenceSchema" SourceSchema.of_json in
       let s3ReferenceDataSourceDescription =
-        field_map_exn json "S3ReferenceDataSourceDescription"
+        field_map json__ "S3ReferenceDataSourceDescription"
           S3ReferenceDataSourceDescription.of_json in
-      let tableName = field_map_exn json "TableName" InAppTableName.of_json in
-      let referenceId = field_map_exn json "ReferenceId" Id.of_json in
-      make ?referenceSchema ~s3ReferenceDataSourceDescription ~tableName
-        ~referenceId ()
+      let tableName = field_map json__ "TableName" InAppTableName.of_json in
+      let referenceId = field_map json__ "ReferenceId" Id.of_json in
+      make ?referenceSchema ?s3ReferenceDataSourceDescription ?tableName
+        ?referenceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For a SQL-based Kinesis Data Analytics application, describes the reference data source configured for an application."]
@@ -2010,6 +2006,9 @@ module SecurityGroupIds =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2039,6 +2038,9 @@ module SubnetIds =
         ok_or_failwith
           ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2076,23 +2078,21 @@ module GlueDataCatalogConfigurationDescription =
   struct
     type nonrec t =
       {
-      databaseARN: DatabaseARN.t
+      databaseARN: DatabaseARN.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the database."]}
-    let context_ = "GlueDataCatalogConfigurationDescription"
-    let make ~databaseARN = fun () -> { databaseARN }
+    let make ?databaseARN = fun () -> { databaseARN }
     let to_value x =
       structure_to_value
-        [("DatabaseARN", (Some (DatabaseARN.to_value x.databaseARN)))]
+        [("DatabaseARN", (Option.map x.databaseARN ~f:DatabaseARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let databaseARN =
-        DatabaseARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatabaseARN") in
-      make ~databaseARN ()
+        (Option.map ~f:DatabaseARN.of_xml) (Xml.child xml_arg0 "DatabaseARN") in
+      make ?databaseARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let databaseARN = field_map_exn json "DatabaseARN" DatabaseARN.of_json in
-      make ~databaseARN ()
+    let of_json json__ =
+      let databaseARN = field_map json__ "DatabaseARN" DatabaseARN.of_json in
+      make ?databaseARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration of the Glue Data Catalog that you use for Apache Flink SQL queries and table API transforms that you write in an application."]
@@ -2139,13 +2139,13 @@ module CustomArtifactConfigurationDescription =
       make ?mavenReferenceDescription ?s3ContentLocationDescription
         ?artifactType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mavenReferenceDescription =
-        field_map json "MavenReferenceDescription" MavenReference.of_json in
+        field_map json__ "MavenReferenceDescription" MavenReference.of_json in
       let s3ContentLocationDescription =
-        field_map json "S3ContentLocationDescription"
+        field_map json__ "S3ContentLocationDescription"
           S3ContentLocation.of_json in
-      let artifactType = field_map json "ArtifactType" ArtifactType.of_json in
+      let artifactType = field_map json__ "ArtifactType" ArtifactType.of_json in
       make ?mavenReferenceDescription ?s3ContentLocationDescription
         ?artifactType ()
     let to_json v = composed_to_json to_value v
@@ -2155,29 +2155,27 @@ module S3ContentBaseLocationDescription =
   struct
     type nonrec t =
       {
-      bucketARN: BucketARN.t
+      bucketARN: BucketARN.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the S3 bucket."];
       basePath: BasePath.t option
         [@ocaml.doc "The base path for the S3 bucket."]}
-    let context_ = "S3ContentBaseLocationDescription"
-    let make ?basePath = fun ~bucketARN -> fun () -> { basePath; bucketARN }
+    let make ?bucketARN = fun ?basePath -> fun () -> { bucketARN; basePath }
     let to_value x =
       structure_to_value
-        [("BucketARN", (Some (BucketARN.to_value x.bucketARN)));
+        [("BucketARN", (Option.map x.bucketARN ~f:BucketARN.to_value));
         ("BasePath", (Option.map x.basePath ~f:BasePath.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let basePath =
         (Option.map ~f:BasePath.of_xml) (Xml.child xml_arg0 "BasePath") in
       let bucketARN =
-        BucketARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
-      make ?basePath ~bucketARN ()
+        (Option.map ~f:BucketARN.of_xml) (Xml.child xml_arg0 "BucketARN") in
+      make ?basePath ?bucketARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let basePath = field_map json "BasePath" BasePath.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
-      make ?basePath ~bucketARN ()
+    let of_json json__ =
+      let basePath = field_map json__ "BasePath" BasePath.of_json in
+      let bucketARN = field_map json__ "BucketARN" BucketARN.of_json in
+      make ?basePath ?bucketARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The description of the S3 base location that holds the application."]
@@ -2201,9 +2199,9 @@ module InputParallelismUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "CountUpdate") in
       make ~countUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let countUpdate =
-        field_map_exn json "CountUpdate" InputParallelismCount.of_json in
+        field_map_exn json__ "CountUpdate" InputParallelismCount.of_json in
       make ~countUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2232,9 +2230,9 @@ module InputProcessingConfigurationUpdate =
              "InputLambdaProcessorUpdate") in
       make ~inputLambdaProcessorUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputLambdaProcessorUpdate =
-        field_map_exn json "InputLambdaProcessorUpdate"
+        field_map_exn json__ "InputLambdaProcessorUpdate"
           InputLambdaProcessorUpdate.of_json in
       make ~inputLambdaProcessorUpdate ()
     let to_json v = composed_to_json to_value v
@@ -2279,13 +2277,13 @@ module InputSchemaUpdate =
           (Xml.child xml_arg0 "RecordFormatUpdate") in
       make ?recordColumnUpdates ?recordEncodingUpdate ?recordFormatUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordColumnUpdates =
-        field_map json "RecordColumnUpdates" RecordColumns.of_json in
+        field_map json__ "RecordColumnUpdates" RecordColumns.of_json in
       let recordEncodingUpdate =
-        field_map json "RecordEncodingUpdate" RecordEncoding.of_json in
+        field_map json__ "RecordEncodingUpdate" RecordEncoding.of_json in
       let recordFormatUpdate =
-        field_map json "RecordFormatUpdate" RecordFormat.of_json in
+        field_map json__ "RecordFormatUpdate" RecordFormat.of_json in
       make ?recordColumnUpdates ?recordEncodingUpdate ?recordFormatUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2310,9 +2308,9 @@ module KinesisFirehoseInputUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNUpdate") in
       make ~resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARNUpdate =
-        field_map_exn json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map_exn json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ~resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2337,9 +2335,9 @@ module KinesisStreamsInputUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNUpdate") in
       make ~resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARNUpdate =
-        field_map_exn json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map_exn json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ~resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2364,9 +2362,9 @@ module KinesisFirehoseOutputUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNUpdate") in
       make ~resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARNUpdate =
-        field_map_exn json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map_exn json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ~resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2391,9 +2389,9 @@ module KinesisStreamsOutputUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNUpdate") in
       make ~resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARNUpdate =
-        field_map_exn json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map_exn json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ~resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2418,9 +2416,9 @@ module LambdaOutputUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNUpdate") in
       make ~resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARNUpdate =
-        field_map_exn json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map_exn json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ~resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2448,10 +2446,10 @@ module S3ReferenceDataSourceUpdate =
           (Xml.child xml_arg0 "BucketARNUpdate") in
       make ?fileKeyUpdate ?bucketARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileKeyUpdate = field_map json "FileKeyUpdate" FileKey.of_json in
+    let of_json json__ =
+      let fileKeyUpdate = field_map json__ "FileKeyUpdate" FileKey.of_json in
       let bucketARNUpdate =
-        field_map json "BucketARNUpdate" BucketARN.of_json in
+        field_map json__ "BucketARNUpdate" BucketARN.of_json in
       make ?fileKeyUpdate ?bucketARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2476,9 +2474,9 @@ module InputProcessingConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "InputLambdaProcessor") in
       make ~inputLambdaProcessor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputLambdaProcessor =
-        field_map_exn json "InputLambdaProcessor"
+        field_map_exn json__ "InputLambdaProcessor"
           InputLambdaProcessor.of_json in
       make ~inputLambdaProcessor ()
     let to_json v = composed_to_json to_value v
@@ -2502,8 +2500,9 @@ module KinesisFirehoseInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2526,8 +2525,9 @@ module KinesisStreamsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2551,8 +2551,9 @@ module KinesisFirehoseOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2576,8 +2577,9 @@ module KinesisStreamsOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2601,8 +2603,9 @@ module LambdaOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2628,13 +2631,13 @@ module S3ReferenceDataSource =
         (Option.map ~f:BucketARN.of_xml) (Xml.child xml_arg0 "BucketARN") in
       make ?fileKey ?bucketARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileKey = field_map json "FileKey" FileKey.of_json in
-      let bucketARN = field_map json "BucketARN" BucketARN.of_json in
+    let of_json json__ =
+      let fileKey = field_map json__ "FileKey" FileKey.of_json in
+      let bucketARN = field_map json__ "BucketARN" BucketARN.of_json in
       make ?fileKey ?bucketARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For a SQL-based Kinesis Data Analytics application, identifies the Amazon S3 bucket and object that contains the reference data. A Kinesis Data Analytics application loads reference data only once. If the data changes, you call the UpdateApplication operation to trigger reloading of data into your application."]
+       "For a SQL-based Kinesis Data Analytics application, identifies the Amazon S3 bucket and object that contains the reference data. A SQL-based Kinesis Data Analytics application loads reference data only once. If the data changes, you call the UpdateApplication operation to trigger reloading of data into your application."]
 module CodeContentDescription =
   struct
     type nonrec t =
@@ -2683,18 +2686,18 @@ module CodeContentDescription =
       make ?s3ApplicationCodeLocationDescription ?codeSize ?codeMD5
         ?textContent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3ApplicationCodeLocationDescription =
-        field_map json "S3ApplicationCodeLocationDescription"
+        field_map json__ "S3ApplicationCodeLocationDescription"
           S3ApplicationCodeLocationDescription.of_json in
-      let codeSize = field_map json "CodeSize" CodeSize.of_json in
-      let codeMD5 = field_map json "CodeMD5" CodeMD5.of_json in
-      let textContent = field_map json "TextContent" TextContent.of_json in
+      let codeSize = field_map json__ "CodeSize" CodeSize.of_json in
+      let codeMD5 = field_map json__ "CodeMD5" CodeMD5.of_json in
+      let textContent = field_map json__ "TextContent" TextContent.of_json in
       make ?s3ApplicationCodeLocationDescription ?codeSize ?codeMD5
         ?textContent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes details about the code of a Kinesis Data Analytics application."]
+       "Describes details about the code of a Managed Service for Apache Flink application."]
 module CodeContentType =
   struct
     type nonrec t =
@@ -2720,11 +2723,57 @@ module CodeContentType =
     let of_json j = of_string (string_of_json ~kind:"CodeContentType" j)
     let to_json = simple_to_json to_value
   end
+module KeyId =
+  struct
+    type nonrec t = string
+    let context_ = "KeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KeyId" j
+    let to_json = simple_to_json to_value
+  end
+module KeyType =
+  struct
+    type nonrec t =
+      | AWS_OWNED_KEY 
+      | CUSTOMER_MANAGED_KEY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS_OWNED_KEY -> "AWS_OWNED_KEY"
+      | CUSTOMER_MANAGED_KEY -> "CUSTOMER_MANAGED_KEY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS_OWNED_KEY" -> AWS_OWNED_KEY
+      | "CUSTOMER_MANAGED_KEY" -> CUSTOMER_MANAGED_KEY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KeyType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KeyType" j)
+    let to_json = simple_to_json to_value
+  end
 module PropertyGroups =
   struct
     type nonrec t = PropertyGroup.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PropertyGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2751,10 +2800,10 @@ module CheckpointConfigurationDescription =
       {
       configurationType: ConfigurationType.t option
         [@ocaml.doc
-          "Describes whether the application uses the default checkpointing behavior in Kinesis Data Analytics. If this value is set to DEFAULT, the application will use the following values, even if they are set to other values using APIs or application code: CheckpointingEnabled: true CheckpointInterval: 60000 MinPauseBetweenCheckpoints: 5000"];
+          "Describes whether the application uses the default checkpointing behavior in Managed Service for Apache Flink. If this value is set to DEFAULT, the application will use the following values, even if they are set to other values using APIs or application code: CheckpointingEnabled: true CheckpointInterval: 60000 MinPauseBetweenCheckpoints: 5000"];
       checkpointingEnabled: BooleanObject.t option
         [@ocaml.doc
-          "Describes whether checkpointing is enabled for a Flink-based Kinesis Data Analytics application. If CheckpointConfiguration.ConfigurationType is DEFAULT, the application will use a CheckpointingEnabled value of true, even if this value is set to another value using this API or in application code."];
+          "Describes whether checkpointing is enabled for a Managed Service for Apache Flink application. If CheckpointConfiguration.ConfigurationType is DEFAULT, the application will use a CheckpointingEnabled value of true, even if this value is set to another value using this API or in application code."];
       checkpointInterval: CheckpointInterval.t option
         [@ocaml.doc
           "Describes the interval in milliseconds between checkpoint operations. If CheckpointConfiguration.ConfigurationType is DEFAULT, the application will use a CheckpointInterval value of 60000, even if this value is set to another value using this API or in application code."];
@@ -2800,21 +2849,21 @@ module CheckpointConfigurationDescription =
       make ?minPauseBetweenCheckpoints ?checkpointInterval
         ?checkpointingEnabled ?configurationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minPauseBetweenCheckpoints =
-        field_map json "MinPauseBetweenCheckpoints"
+        field_map json__ "MinPauseBetweenCheckpoints"
           MinPauseBetweenCheckpoints.of_json in
       let checkpointInterval =
-        field_map json "CheckpointInterval" CheckpointInterval.of_json in
+        field_map json__ "CheckpointInterval" CheckpointInterval.of_json in
       let checkpointingEnabled =
-        field_map json "CheckpointingEnabled" BooleanObject.of_json in
+        field_map json__ "CheckpointingEnabled" BooleanObject.of_json in
       let configurationType =
-        field_map json "ConfigurationType" ConfigurationType.of_json in
+        field_map json__ "ConfigurationType" ConfigurationType.of_json in
       make ?minPauseBetweenCheckpoints ?checkpointInterval
         ?checkpointingEnabled ?configurationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes checkpointing parameters for a Flink-based Kinesis Data Analytics application."]
+       "Describes checkpointing parameters for a Managed Service for Apache Flink application."]
 module JobPlanDescription =
   struct
     type nonrec t = string
@@ -2864,11 +2913,11 @@ module MonitoringConfigurationDescription =
           (Xml.child xml_arg0 "ConfigurationType") in
       make ?logLevel ?metricsLevel ?configurationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map json "LogLevel" LogLevel.of_json in
-      let metricsLevel = field_map json "MetricsLevel" MetricsLevel.of_json in
+    let of_json json__ =
+      let logLevel = field_map json__ "LogLevel" LogLevel.of_json in
+      let metricsLevel = field_map json__ "MetricsLevel" MetricsLevel.of_json in
       let configurationType =
-        field_map json "ConfigurationType" ConfigurationType.of_json in
+        field_map json__ "ConfigurationType" ConfigurationType.of_json in
       make ?logLevel ?metricsLevel ?configurationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2879,19 +2928,19 @@ module ParallelismConfigurationDescription =
       {
       configurationType: ConfigurationType.t option
         [@ocaml.doc
-          "Describes whether the application uses the default parallelism for the Kinesis Data Analytics service."];
+          "Describes whether the application uses the default parallelism for the Managed Service for Apache Flink service."];
       parallelism: Parallelism.t option
         [@ocaml.doc
-          "Describes the initial number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform. If AutoScalingEnabled is set to True, then Kinesis Data Analytics can increase the CurrentParallelism value in response to application load. The service can increase CurrentParallelism up to the maximum parallelism, which is ParalellismPerKPU times the maximum KPUs for the application. The maximum KPUs for an application is 32 by default, and can be increased by requesting a limit increase. If application load is reduced, the service can reduce the CurrentParallelism value down to the Parallelism setting."];
+          "Describes the initial number of parallel tasks that a Managed Service for Apache Flink application can perform. If AutoScalingEnabled is set to True, then Managed Service for Apache Flink can increase the CurrentParallelism value in response to application load. The service can increase CurrentParallelism up to the maximum parallelism, which is ParalellismPerKPU times the maximum KPUs for the application. The maximum KPUs for an application is 64 by default, and can be increased by requesting a limit increase. If application load is reduced, the service can reduce the CurrentParallelism value down to the Parallelism setting."];
       parallelismPerKPU: ParallelismPerKPU.t option
         [@ocaml.doc
-          "Describes the number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform per Kinesis Processing Unit (KPU) used by the application."];
+          "Describes the number of parallel tasks that a Managed Service for Apache Flink application can perform per Kinesis Processing Unit (KPU) used by the application."];
       currentParallelism: Parallelism.t option
         [@ocaml.doc
-          "Describes the current number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform. If AutoScalingEnabled is set to True, Kinesis Data Analytics can increase this value in response to application load. The service can increase this value up to the maximum parallelism, which is ParalellismPerKPU times the maximum KPUs for the application. The maximum KPUs for an application is 32 by default, and can be increased by requesting a limit increase. If application load is reduced, the service can reduce the CurrentParallelism value down to the Parallelism setting."];
+          "Describes the current number of parallel tasks that a Managed Service for Apache Flink application can perform. If AutoScalingEnabled is set to True, Managed Service for Apache Flink can increase this value in response to application load. The service can increase this value up to the maximum parallelism, which is ParalellismPerKPU times the maximum KPUs for the application. The maximum KPUs for an application is 32 by default, and can be increased by requesting a limit increase. If application load is reduced, the service can reduce the CurrentParallelism value down to the Parallelism setting."];
       autoScalingEnabled: BooleanObject.t option
         [@ocaml.doc
-          "Describes whether the Kinesis Data Analytics service can increase the parallelism of the application in response to increased throughput."]}
+          "Describes whether the Managed Service for Apache Flink service can increase the parallelism of the application in response to increased throughput."]}
     let make ?configurationType =
       fun ?parallelism ->
         fun ?parallelismPerKPU ->
@@ -2935,21 +2984,21 @@ module ParallelismConfigurationDescription =
       make ?autoScalingEnabled ?currentParallelism ?parallelismPerKPU
         ?parallelism ?configurationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingEnabled =
-        field_map json "AutoScalingEnabled" BooleanObject.of_json in
+        field_map json__ "AutoScalingEnabled" BooleanObject.of_json in
       let currentParallelism =
-        field_map json "CurrentParallelism" Parallelism.of_json in
+        field_map json__ "CurrentParallelism" Parallelism.of_json in
       let parallelismPerKPU =
-        field_map json "ParallelismPerKPU" ParallelismPerKPU.of_json in
-      let parallelism = field_map json "Parallelism" Parallelism.of_json in
+        field_map json__ "ParallelismPerKPU" ParallelismPerKPU.of_json in
+      let parallelism = field_map json__ "Parallelism" Parallelism.of_json in
       let configurationType =
-        field_map json "ConfigurationType" ConfigurationType.of_json in
+        field_map json__ "ConfigurationType" ConfigurationType.of_json in
       make ?autoScalingEnabled ?currentParallelism ?parallelismPerKPU
         ?parallelism ?configurationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes parameters for how a Flink-based Kinesis Data Analytics application executes multiple tasks simultaneously."]
+       "Describes parameters for how a Managed Service for Apache Flink application executes multiple tasks simultaneously."]
 module ApplicationRestoreConfiguration =
   struct
     type nonrec t =
@@ -2979,10 +3028,10 @@ module ApplicationRestoreConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationRestoreType") in
       make ?snapshotName ~applicationRestoreType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotName = field_map json "SnapshotName" SnapshotName.of_json in
+    let of_json json__ =
+      let snapshotName = field_map json__ "SnapshotName" SnapshotName.of_json in
       let applicationRestoreType =
-        field_map_exn json "ApplicationRestoreType"
+        field_map_exn json__ "ApplicationRestoreType"
           ApplicationRestoreType.of_json in
       make ?snapshotName ~applicationRestoreType ()
     let to_json v = composed_to_json to_value v
@@ -3007,17 +3056,20 @@ module FlinkRunConfiguration =
           (Xml.child xml_arg0 "AllowNonRestoredState") in
       make ?allowNonRestoredState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowNonRestoredState =
-        field_map json "AllowNonRestoredState" BooleanObject.of_json in
+        field_map json__ "AllowNonRestoredState" BooleanObject.of_json in
       make ?allowNonRestoredState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the starting parameters for a Flink-based Kinesis Data Analytics application."]
+       "Describes the starting parameters for a Managed Service for Apache Flink application."]
 module InputDescriptions =
   struct
     type nonrec t = InputDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InputDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3043,6 +3095,9 @@ module OutputDescriptions =
   struct
     type nonrec t = OutputDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OutputDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3068,6 +3123,9 @@ module ReferenceDataSourceDescriptions =
   struct
     type nonrec t = ReferenceDataSourceDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReferenceDataSourceDescription.to_value)) |>
         (fun x -> `List x)
@@ -3094,51 +3152,48 @@ module VpcConfigurationDescription =
   struct
     type nonrec t =
       {
-      vpcConfigurationId: Id.t
+      vpcConfigurationId: Id.t option
         [@ocaml.doc "The ID of the VPC configuration."];
-      vpcId: VpcId.t [@ocaml.doc "The ID of the associated VPC."];
-      subnetIds: SubnetIds.t
+      vpcId: VpcId.t option [@ocaml.doc "The ID of the associated VPC."];
+      subnetIds: SubnetIds.t option
         [@ocaml.doc "The array of Subnet IDs used by the VPC configuration."];
-      securityGroupIds: SecurityGroupIds.t
+      securityGroupIds: SecurityGroupIds.t option
         [@ocaml.doc
           "The array of SecurityGroup IDs used by the VPC configuration."]}
-    let context_ = "VpcConfigurationDescription"
-    let make ~vpcConfigurationId =
-      fun ~vpcId ->
-        fun ~subnetIds ->
-          fun ~securityGroupIds ->
+    let make ?vpcConfigurationId =
+      fun ?vpcId ->
+        fun ?subnetIds ->
+          fun ?securityGroupIds ->
             fun () ->
               { vpcConfigurationId; vpcId; subnetIds; securityGroupIds }
     let to_value x =
       structure_to_value
-        [("VpcConfigurationId", (Some (Id.to_value x.vpcConfigurationId)));
-        ("VpcId", (Some (VpcId.to_value x.vpcId)));
-        ("SubnetIds", (Some (SubnetIds.to_value x.subnetIds)));
+        [("VpcConfigurationId",
+           (Option.map x.vpcConfigurationId ~f:Id.to_value));
+        ("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
+        ("SubnetIds", (Option.map x.subnetIds ~f:SubnetIds.to_value));
         ("SecurityGroupIds",
-          (Some (SecurityGroupIds.to_value x.securityGroupIds)))]
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let securityGroupIds =
-        SecurityGroupIds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupIds") in
+        (Option.map ~f:SecurityGroupIds.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
       let subnetIds =
-        SubnetIds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
-      let vpcId =
-        VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
+        (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
       let vpcConfigurationId =
-        Id.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VpcConfigurationId") in
-      make ~securityGroupIds ~subnetIds ~vpcId ~vpcConfigurationId ()
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "VpcConfigurationId") in
+      make ?securityGroupIds ?subnetIds ?vpcId ?vpcConfigurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
-      let vpcId = field_map_exn json "VpcId" VpcId.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
       let vpcConfigurationId =
-        field_map_exn json "VpcConfigurationId" Id.of_json in
-      make ~securityGroupIds ~subnetIds ~vpcId ~vpcConfigurationId ()
+        field_map json__ "VpcConfigurationId" Id.of_json in
+      make ?securityGroupIds ?subnetIds ?vpcId ?vpcConfigurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the parameters of a VPC used by the application."]
@@ -3147,39 +3202,39 @@ module CatalogConfigurationDescription =
     type nonrec t =
       {
       glueDataCatalogConfigurationDescription:
-        GlueDataCatalogConfigurationDescription.t
+        GlueDataCatalogConfigurationDescription.t option
         [@ocaml.doc
-          "The configuration parameters for the default Amazon Glue database. You use this database for SQL queries that you write in a Kinesis Data Analytics Studio notebook."]}
-    let context_ = "CatalogConfigurationDescription"
-    let make ~glueDataCatalogConfigurationDescription =
+          "The configuration parameters for the default Amazon Glue database. You use this database for SQL queries that you write in a Managed Service for Apache Flink Studio notebook."]}
+    let make ?glueDataCatalogConfigurationDescription =
       fun () -> { glueDataCatalogConfigurationDescription }
     let to_value x =
       structure_to_value
         [("GlueDataCatalogConfigurationDescription",
-           (Some
-              (GlueDataCatalogConfigurationDescription.to_value
-                 x.glueDataCatalogConfigurationDescription)))]
+           (Option.map x.glueDataCatalogConfigurationDescription
+              ~f:GlueDataCatalogConfigurationDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let glueDataCatalogConfigurationDescription =
-        GlueDataCatalogConfigurationDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "GlueDataCatalogConfigurationDescription") in
-      make ~glueDataCatalogConfigurationDescription ()
+        (Option.map ~f:GlueDataCatalogConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "GlueDataCatalogConfigurationDescription") in
+      make ?glueDataCatalogConfigurationDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let glueDataCatalogConfigurationDescription =
-        field_map_exn json "GlueDataCatalogConfigurationDescription"
+        field_map json__ "GlueDataCatalogConfigurationDescription"
           GlueDataCatalogConfigurationDescription.of_json in
-      make ~glueDataCatalogConfigurationDescription ()
+      make ?glueDataCatalogConfigurationDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration parameters for the default Amazon Glue database. You use this database for Apache Flink SQL queries and table API transforms that you write in a Kinesis Data Analytics Studio notebook."]
+       "The configuration parameters for the default Amazon Glue database. You use this database for Apache Flink SQL queries and table API transforms that you write in a Managed Service for Apache Flink Studio notebook."]
 module CustomArtifactsConfigurationDescriptionList =
   struct
     type nonrec t = CustomArtifactConfigurationDescription.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomArtifactConfigurationDescription.to_value))
         |> (fun x -> `List x)
@@ -3207,31 +3262,28 @@ module DeployAsApplicationConfigurationDescription =
   struct
     type nonrec t =
       {
-      s3ContentLocationDescription: S3ContentBaseLocationDescription.t
+      s3ContentLocationDescription: S3ContentBaseLocationDescription.t option
         [@ocaml.doc
           "The location that holds the data required to specify an Amazon Data Analytics application."]}
-    let context_ = "DeployAsApplicationConfigurationDescription"
-    let make ~s3ContentLocationDescription =
+    let make ?s3ContentLocationDescription =
       fun () -> { s3ContentLocationDescription }
     let to_value x =
       structure_to_value
         [("S3ContentLocationDescription",
-           (Some
-              (S3ContentBaseLocationDescription.to_value
-                 x.s3ContentLocationDescription)))]
+           (Option.map x.s3ContentLocationDescription
+              ~f:S3ContentBaseLocationDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let s3ContentLocationDescription =
-        S3ContentBaseLocationDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "S3ContentLocationDescription") in
-      make ~s3ContentLocationDescription ()
+        (Option.map ~f:S3ContentBaseLocationDescription.of_xml)
+          (Xml.child xml_arg0 "S3ContentLocationDescription") in
+      make ?s3ContentLocationDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3ContentLocationDescription =
-        field_map_exn json "S3ContentLocationDescription"
+        field_map json__ "S3ContentLocationDescription"
           S3ContentBaseLocationDescription.of_json in
-      make ~s3ContentLocationDescription ()
+      make ?s3ContentLocationDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration information required to deploy an Amazon Data Analytics Studio notebook as an application with durable state."]
@@ -3252,12 +3304,12 @@ module ZeppelinMonitoringConfigurationDescription =
         (Option.map ~f:LogLevel.of_xml) (Xml.child xml_arg0 "LogLevel") in
       make ?logLevel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map json "LogLevel" LogLevel.of_json in
+    let of_json json__ =
+      let logLevel = field_map json__ "LogLevel" LogLevel.of_json in
       make ?logLevel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The monitoring configuration for Apache Zeppelin within a Kinesis Data Analytics Studio notebook."]
+       "The monitoring configuration for Apache Zeppelin within a Managed Service for Apache Flink Studio notebook."]
 module LogStreamARN =
   struct
     type nonrec t = string
@@ -3314,12 +3366,12 @@ module S3ContentLocationUpdate =
           (Xml.child xml_arg0 "BucketARNUpdate") in
       make ?objectVersionUpdate ?fileKeyUpdate ?bucketARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectVersionUpdate =
-        field_map json "ObjectVersionUpdate" ObjectVersion.of_json in
-      let fileKeyUpdate = field_map json "FileKeyUpdate" FileKey.of_json in
+        field_map json__ "ObjectVersionUpdate" ObjectVersion.of_json in
+      let fileKeyUpdate = field_map json__ "FileKeyUpdate" FileKey.of_json in
       let bucketARNUpdate =
-        field_map json "BucketARNUpdate" BucketARN.of_json in
+        field_map json__ "BucketARNUpdate" BucketARN.of_json in
       make ?objectVersionUpdate ?fileKeyUpdate ?bucketARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3423,24 +3475,24 @@ module InputUpdate =
         ?kinesisFirehoseInputUpdate ?kinesisStreamsInputUpdate
         ?inputProcessingConfigurationUpdate ?namePrefixUpdate ~inputId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputParallelismUpdate =
-        field_map json "InputParallelismUpdate"
+        field_map json__ "InputParallelismUpdate"
           InputParallelismUpdate.of_json in
       let inputSchemaUpdate =
-        field_map json "InputSchemaUpdate" InputSchemaUpdate.of_json in
+        field_map json__ "InputSchemaUpdate" InputSchemaUpdate.of_json in
       let kinesisFirehoseInputUpdate =
-        field_map json "KinesisFirehoseInputUpdate"
+        field_map json__ "KinesisFirehoseInputUpdate"
           KinesisFirehoseInputUpdate.of_json in
       let kinesisStreamsInputUpdate =
-        field_map json "KinesisStreamsInputUpdate"
+        field_map json__ "KinesisStreamsInputUpdate"
           KinesisStreamsInputUpdate.of_json in
       let inputProcessingConfigurationUpdate =
-        field_map json "InputProcessingConfigurationUpdate"
+        field_map json__ "InputProcessingConfigurationUpdate"
           InputProcessingConfigurationUpdate.of_json in
       let namePrefixUpdate =
-        field_map json "NamePrefixUpdate" InAppStreamName.of_json in
-      let inputId = field_map_exn json "InputId" Id.of_json in
+        field_map json__ "NamePrefixUpdate" InAppStreamName.of_json in
+      let inputId = field_map_exn json__ "InputId" Id.of_json in
       make ?inputParallelismUpdate ?inputSchemaUpdate
         ?kinesisFirehoseInputUpdate ?kinesisStreamsInputUpdate
         ?inputProcessingConfigurationUpdate ?namePrefixUpdate ~inputId ()
@@ -3522,19 +3574,19 @@ module OutputUpdate =
         ?kinesisFirehoseOutputUpdate ?kinesisStreamsOutputUpdate ?nameUpdate
         ~outputId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationSchemaUpdate =
-        field_map json "DestinationSchemaUpdate" DestinationSchema.of_json in
+        field_map json__ "DestinationSchemaUpdate" DestinationSchema.of_json in
       let lambdaOutputUpdate =
-        field_map json "LambdaOutputUpdate" LambdaOutputUpdate.of_json in
+        field_map json__ "LambdaOutputUpdate" LambdaOutputUpdate.of_json in
       let kinesisFirehoseOutputUpdate =
-        field_map json "KinesisFirehoseOutputUpdate"
+        field_map json__ "KinesisFirehoseOutputUpdate"
           KinesisFirehoseOutputUpdate.of_json in
       let kinesisStreamsOutputUpdate =
-        field_map json "KinesisStreamsOutputUpdate"
+        field_map json__ "KinesisStreamsOutputUpdate"
           KinesisStreamsOutputUpdate.of_json in
-      let nameUpdate = field_map json "NameUpdate" InAppStreamName.of_json in
-      let outputId = field_map_exn json "OutputId" Id.of_json in
+      let nameUpdate = field_map json__ "NameUpdate" InAppStreamName.of_json in
+      let outputId = field_map_exn json__ "OutputId" Id.of_json in
       make ?destinationSchemaUpdate ?lambdaOutputUpdate
         ?kinesisFirehoseOutputUpdate ?kinesisStreamsOutputUpdate ?nameUpdate
         ~outputId ()
@@ -3595,15 +3647,15 @@ module ReferenceDataSourceUpdate =
       make ?referenceSchemaUpdate ?s3ReferenceDataSourceUpdate
         ?tableNameUpdate ~referenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceSchemaUpdate =
-        field_map json "ReferenceSchemaUpdate" SourceSchema.of_json in
+        field_map json__ "ReferenceSchemaUpdate" SourceSchema.of_json in
       let s3ReferenceDataSourceUpdate =
-        field_map json "S3ReferenceDataSourceUpdate"
+        field_map json__ "S3ReferenceDataSourceUpdate"
           S3ReferenceDataSourceUpdate.of_json in
       let tableNameUpdate =
-        field_map json "TableNameUpdate" InAppTableName.of_json in
-      let referenceId = field_map_exn json "ReferenceId" Id.of_json in
+        field_map json__ "TableNameUpdate" InAppTableName.of_json in
+      let referenceId = field_map_exn json__ "ReferenceId" Id.of_json in
       make ?referenceSchemaUpdate ?s3ReferenceDataSourceUpdate
         ?tableNameUpdate ~referenceId ()
     let to_json v = composed_to_json to_value v
@@ -3629,13 +3681,13 @@ module GlueDataCatalogConfigurationUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseARNUpdate") in
       make ~databaseARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let databaseARNUpdate =
-        field_map_exn json "DatabaseARNUpdate" DatabaseARN.of_json in
+        field_map_exn json__ "DatabaseARNUpdate" DatabaseARN.of_json in
       make ~databaseARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates to the configuration of the Glue Data Catalog that you use for SQL queries that you write in a Kinesis Data Analytics Studio notebook."]
+       "Updates to the configuration of the Glue Data Catalog that you use for SQL queries that you write in a Managed Service for Apache Flink Studio notebook."]
 module CustomArtifactConfiguration =
   struct
     type nonrec t =
@@ -3672,13 +3724,13 @@ module CustomArtifactConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "ArtifactType") in
       make ?mavenReference ?s3ContentLocation ~artifactType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mavenReference =
-        field_map json "MavenReference" MavenReference.of_json in
+        field_map json__ "MavenReference" MavenReference.of_json in
       let s3ContentLocation =
-        field_map json "S3ContentLocation" S3ContentLocation.of_json in
+        field_map json__ "S3ContentLocation" S3ContentLocation.of_json in
       let artifactType =
-        field_map_exn json "ArtifactType" ArtifactType.of_json in
+        field_map_exn json__ "ArtifactType" ArtifactType.of_json in
       make ?mavenReference ?s3ContentLocation ~artifactType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3709,14 +3761,34 @@ module S3ContentBaseLocationUpdate =
           (Xml.child xml_arg0 "BucketARNUpdate") in
       make ?basePathUpdate ?bucketARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let basePathUpdate = field_map json "BasePathUpdate" BasePath.of_json in
+    let of_json json__ =
+      let basePathUpdate = field_map json__ "BasePathUpdate" BasePath.of_json in
       let bucketARNUpdate =
-        field_map json "BucketARNUpdate" BucketARN.of_json in
+        field_map json__ "BucketARNUpdate" BucketARN.of_json in
       make ?basePathUpdate ?bucketARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The information required to update the S3 base location that holds the application."]
+module ErrorString =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "An error message that is returned when an operation fails."]
+    let context_ = "ErrorString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorString" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "An error message that is returned when an operation fails."]
 module Input =
   struct
     type nonrec t =
@@ -3791,19 +3863,20 @@ module Input =
       make ~inputSchema ?inputParallelism ?kinesisFirehoseInput
         ?kinesisStreamsInput ?inputProcessingConfiguration ~namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let inputSchema = field_map_exn json "InputSchema" SourceSchema.of_json in
+    let of_json json__ =
+      let inputSchema =
+        field_map_exn json__ "InputSchema" SourceSchema.of_json in
       let inputParallelism =
-        field_map json "InputParallelism" InputParallelism.of_json in
+        field_map json__ "InputParallelism" InputParallelism.of_json in
       let kinesisFirehoseInput =
-        field_map json "KinesisFirehoseInput" KinesisFirehoseInput.of_json in
+        field_map json__ "KinesisFirehoseInput" KinesisFirehoseInput.of_json in
       let kinesisStreamsInput =
-        field_map json "KinesisStreamsInput" KinesisStreamsInput.of_json in
+        field_map json__ "KinesisStreamsInput" KinesisStreamsInput.of_json in
       let inputProcessingConfiguration =
-        field_map json "InputProcessingConfiguration"
+        field_map json__ "InputProcessingConfiguration"
           InputProcessingConfiguration.of_json in
       let namePrefix =
-        field_map_exn json "NamePrefix" InAppStreamName.of_json in
+        field_map_exn json__ "NamePrefix" InAppStreamName.of_json in
       make ~inputSchema ?inputParallelism ?kinesisFirehoseInput
         ?kinesisStreamsInput ?inputProcessingConfiguration ~namePrefix ()
     let to_json v = composed_to_json to_value v
@@ -3872,15 +3945,16 @@ module Output =
       make ~destinationSchema ?lambdaOutput ?kinesisFirehoseOutput
         ?kinesisStreamsOutput ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationSchema =
-        field_map_exn json "DestinationSchema" DestinationSchema.of_json in
-      let lambdaOutput = field_map json "LambdaOutput" LambdaOutput.of_json in
+        field_map_exn json__ "DestinationSchema" DestinationSchema.of_json in
+      let lambdaOutput = field_map json__ "LambdaOutput" LambdaOutput.of_json in
       let kinesisFirehoseOutput =
-        field_map json "KinesisFirehoseOutput" KinesisFirehoseOutput.of_json in
+        field_map json__ "KinesisFirehoseOutput"
+          KinesisFirehoseOutput.of_json in
       let kinesisStreamsOutput =
-        field_map json "KinesisStreamsOutput" KinesisStreamsOutput.of_json in
-      let name = field_map_exn json "Name" InAppStreamName.of_json in
+        field_map json__ "KinesisStreamsOutput" KinesisStreamsOutput.of_json in
+      let name = field_map_exn json__ "Name" InAppStreamName.of_json in
       make ~destinationSchema ?lambdaOutput ?kinesisFirehoseOutput
         ?kinesisStreamsOutput ~name ()
     let to_json v = composed_to_json to_value v
@@ -3894,7 +3968,7 @@ module ReferenceDataSource =
         [@ocaml.doc "The name of the in-application table to create."];
       s3ReferenceDataSource: S3ReferenceDataSource.t option
         [@ocaml.doc
-          "Identifies the S3 bucket and object that contains the reference data. A Kinesis Data Analytics application loads reference data only once. If the data changes, you call the UpdateApplication operation to trigger reloading of data into your application."];
+          "Identifies the S3 bucket and object that contains the reference data. A SQL-based Kinesis Data Analytics application loads reference data only once. If the data changes, you call the UpdateApplication operation to trigger reloading of data into your application."];
       referenceSchema: SourceSchema.t
         [@ocaml.doc
           "Describes the format of the data in the streaming source, and how each data element maps to corresponding columns created in the in-application stream."]}
@@ -3923,12 +3997,13 @@ module ReferenceDataSource =
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~referenceSchema ?s3ReferenceDataSource ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceSchema =
-        field_map_exn json "ReferenceSchema" SourceSchema.of_json in
+        field_map_exn json__ "ReferenceSchema" SourceSchema.of_json in
       let s3ReferenceDataSource =
-        field_map json "S3ReferenceDataSource" S3ReferenceDataSource.of_json in
-      let tableName = field_map_exn json "TableName" InAppTableName.of_json in
+        field_map json__ "S3ReferenceDataSource"
+          S3ReferenceDataSource.of_json in
+      let tableName = field_map_exn json__ "TableName" InAppTableName.of_json in
       make ~referenceSchema ?s3ReferenceDataSource ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3951,8 +4026,9 @@ module GlueDataCatalogConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseARN") in
       make ~databaseARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let databaseARN = field_map_exn json "DatabaseARN" DatabaseARN.of_json in
+    let of_json json__ =
+      let databaseARN =
+        field_map_exn json__ "DatabaseARN" DatabaseARN.of_json in
       make ~databaseARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3980,9 +4056,9 @@ module S3ContentBaseLocation =
           (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
       make ?basePath ~bucketARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let basePath = field_map json "BasePath" BasePath.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
+    let of_json json__ =
+      let basePath = field_map json__ "BasePath" BasePath.of_json in
+      let bucketARN = field_map_exn json__ "BucketARN" BucketARN.of_json in
       make ?basePath ~bucketARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The S3 bucket that holds the application information."]
@@ -3990,20 +4066,19 @@ module ApplicationCodeConfigurationDescription =
   struct
     type nonrec t =
       {
-      codeContentType: CodeContentType.t
+      codeContentType: CodeContentType.t option
         [@ocaml.doc
           "Specifies whether the code content is in text or zip format."];
       codeContentDescription: CodeContentDescription.t option
         [@ocaml.doc
           "Describes details about the location and format of the application code."]}
-    let context_ = "ApplicationCodeConfigurationDescription"
-    let make ?codeContentDescription =
-      fun ~codeContentType ->
-        fun () -> { codeContentDescription; codeContentType }
+    let make ?codeContentType =
+      fun ?codeContentDescription ->
+        fun () -> { codeContentType; codeContentDescription }
     let to_value x =
       structure_to_value
         [("CodeContentType",
-           (Some (CodeContentType.to_value x.codeContentType)));
+           (Option.map x.codeContentType ~f:CodeContentType.to_value));
         ("CodeContentDescription",
           (Option.map x.codeContentDescription
              ~f:CodeContentDescription.to_value))]
@@ -4013,46 +4088,98 @@ module ApplicationCodeConfigurationDescription =
         (Option.map ~f:CodeContentDescription.of_xml)
           (Xml.child xml_arg0 "CodeContentDescription") in
       let codeContentType =
-        CodeContentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CodeContentType") in
-      make ?codeContentDescription ~codeContentType ()
+        (Option.map ~f:CodeContentType.of_xml)
+          (Xml.child xml_arg0 "CodeContentType") in
+      make ?codeContentDescription ?codeContentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let codeContentDescription =
-        field_map json "CodeContentDescription"
+        field_map json__ "CodeContentDescription"
           CodeContentDescription.of_json in
       let codeContentType =
-        field_map_exn json "CodeContentType" CodeContentType.of_json in
-      make ?codeContentDescription ~codeContentType ()
+        field_map json__ "CodeContentType" CodeContentType.of_json in
+      make ?codeContentDescription ?codeContentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes code configuration for an application."]
+module ApplicationEncryptionConfigurationDescription =
+  struct
+    type nonrec t =
+      {
+      keyId: KeyId.t option
+        [@ocaml.doc
+          "The key ARN, key ID, alias ARN, or alias name of the KMS key used for encryption at rest."];
+      keyType: KeyType.t option
+        [@ocaml.doc "Specifies the type of key used for encryption at rest."]}
+    let make ?keyId = fun ?keyType -> fun () -> { keyId; keyType }
+    let to_value x =
+      structure_to_value
+        [("KeyId", (Option.map x.keyId ~f:KeyId.to_value));
+        ("KeyType", (Option.map x.keyType ~f:KeyType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keyType =
+        (Option.map ~f:KeyType.of_xml) (Xml.child xml_arg0 "KeyType") in
+      let keyId = (Option.map ~f:KeyId.of_xml) (Xml.child xml_arg0 "KeyId") in
+      make ?keyType ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keyType = field_map json__ "KeyType" KeyType.of_json in
+      let keyId = field_map json__ "KeyId" KeyId.of_json in
+      make ?keyType ?keyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the encryption at rest configuration."]
 module ApplicationSnapshotConfigurationDescription =
   struct
     type nonrec t =
       {
-      snapshotsEnabled: BooleanObject.t
+      snapshotsEnabled: BooleanObject.t option
         [@ocaml.doc
-          "Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application."]}
-    let context_ = "ApplicationSnapshotConfigurationDescription"
-    let make ~snapshotsEnabled = fun () -> { snapshotsEnabled }
+          "Describes whether snapshots are enabled for a Managed Service for Apache Flink application."]}
+    let make ?snapshotsEnabled = fun () -> { snapshotsEnabled }
     let to_value x =
       structure_to_value
         [("SnapshotsEnabled",
-           (Some (BooleanObject.to_value x.snapshotsEnabled)))]
+           (Option.map x.snapshotsEnabled ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let snapshotsEnabled =
-        BooleanObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SnapshotsEnabled") in
-      make ~snapshotsEnabled ()
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "SnapshotsEnabled") in
+      make ?snapshotsEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotsEnabled =
-        field_map_exn json "SnapshotsEnabled" BooleanObject.of_json in
-      make ~snapshotsEnabled ()
+        field_map json__ "SnapshotsEnabled" BooleanObject.of_json in
+      make ?snapshotsEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application."]
+       "Describes whether snapshots are enabled for a Managed Service for Apache Flink application."]
+module ApplicationSystemRollbackConfigurationDescription =
+  struct
+    type nonrec t =
+      {
+      rollbackEnabled: BooleanObject.t option
+        [@ocaml.doc
+          "Describes whether system rollbacks are enabled for a Managed Service for Apache Flink application."]}
+    let make ?rollbackEnabled = fun () -> { rollbackEnabled }
+    let to_value x =
+      structure_to_value
+        [("RollbackEnabled",
+           (Option.map x.rollbackEnabled ~f:BooleanObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rollbackEnabled =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "RollbackEnabled") in
+      make ?rollbackEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rollbackEnabled =
+        field_map json__ "RollbackEnabled" BooleanObject.of_json in
+      make ?rollbackEnabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the system rollback configuration for a Managed Service for Apache Flink application."]
 module EnvironmentPropertyDescriptions =
   struct
     type nonrec t =
@@ -4072,9 +4199,9 @@ module EnvironmentPropertyDescriptions =
           (Xml.child xml_arg0 "PropertyGroupDescriptions") in
       make ?propertyGroupDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let propertyGroupDescriptions =
-        field_map json "PropertyGroupDescriptions" PropertyGroups.of_json in
+        field_map json__ "PropertyGroupDescriptions" PropertyGroups.of_json in
       make ?propertyGroupDescriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4140,24 +4267,24 @@ module FlinkApplicationConfigurationDescription =
         ?monitoringConfigurationDescription
         ?checkpointConfigurationDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobPlanDescription =
-        field_map json "JobPlanDescription" JobPlanDescription.of_json in
+        field_map json__ "JobPlanDescription" JobPlanDescription.of_json in
       let parallelismConfigurationDescription =
-        field_map json "ParallelismConfigurationDescription"
+        field_map json__ "ParallelismConfigurationDescription"
           ParallelismConfigurationDescription.of_json in
       let monitoringConfigurationDescription =
-        field_map json "MonitoringConfigurationDescription"
+        field_map json__ "MonitoringConfigurationDescription"
           MonitoringConfigurationDescription.of_json in
       let checkpointConfigurationDescription =
-        field_map json "CheckpointConfigurationDescription"
+        field_map json__ "CheckpointConfigurationDescription"
           CheckpointConfigurationDescription.of_json in
       make ?jobPlanDescription ?parallelismConfigurationDescription
         ?monitoringConfigurationDescription
         ?checkpointConfigurationDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes configuration parameters for a Flink-based Kinesis Data Analytics application."]
+       "Describes configuration parameters for a Managed Service for Apache Flink application."]
 module RunConfigurationDescription =
   struct
     type nonrec t =
@@ -4193,18 +4320,18 @@ module RunConfigurationDescription =
       make ?flinkRunConfigurationDescription
         ?applicationRestoreConfigurationDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let flinkRunConfigurationDescription =
-        field_map json "FlinkRunConfigurationDescription"
+        field_map json__ "FlinkRunConfigurationDescription"
           FlinkRunConfiguration.of_json in
       let applicationRestoreConfigurationDescription =
-        field_map json "ApplicationRestoreConfigurationDescription"
+        field_map json__ "ApplicationRestoreConfigurationDescription"
           ApplicationRestoreConfiguration.of_json in
       make ?flinkRunConfigurationDescription
         ?applicationRestoreConfigurationDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the starting properties for a Kinesis Data Analytics application."]
+       "Describes the starting properties for a Managed Service for Apache Flink application."]
 module SqlApplicationConfigurationDescription =
   struct
     type nonrec t =
@@ -4251,14 +4378,14 @@ module SqlApplicationConfigurationDescription =
       make ?referenceDataSourceDescriptions ?outputDescriptions
         ?inputDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceDataSourceDescriptions =
-        field_map json "ReferenceDataSourceDescriptions"
+        field_map json__ "ReferenceDataSourceDescriptions"
           ReferenceDataSourceDescriptions.of_json in
       let outputDescriptions =
-        field_map json "OutputDescriptions" OutputDescriptions.of_json in
+        field_map json__ "OutputDescriptions" OutputDescriptions.of_json in
       let inputDescriptions =
-        field_map json "InputDescriptions" InputDescriptions.of_json in
+        field_map json__ "InputDescriptions" InputDescriptions.of_json in
       make ?referenceDataSourceDescriptions ?outputDescriptions
         ?inputDescriptions ()
     let to_json v = composed_to_json to_value v
@@ -4268,6 +4395,9 @@ module VpcConfigurationDescriptions =
   struct
     type nonrec t = VpcConfigurationDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcConfigurationDescription.to_value)) |>
         (fun x -> `List x)
@@ -4295,39 +4425,37 @@ module ZeppelinApplicationConfigurationDescription =
     type nonrec t =
       {
       monitoringConfigurationDescription:
-        ZeppelinMonitoringConfigurationDescription.t
+        ZeppelinMonitoringConfigurationDescription.t option
         [@ocaml.doc
-          "The monitoring configuration of a Kinesis Data Analytics Studio notebook."];
+          "The monitoring configuration of a Managed Service for Apache Flink Studio notebook."];
       catalogConfigurationDescription:
         CatalogConfigurationDescription.t option
         [@ocaml.doc
-          "The Amazon Glue Data Catalog that is associated with the Kinesis Data Analytics Studio notebook."];
+          "The Amazon Glue Data Catalog that is associated with the Managed Service for Apache Flink Studio notebook."];
       deployAsApplicationConfigurationDescription:
         DeployAsApplicationConfigurationDescription.t option
         [@ocaml.doc
-          "The parameters required to deploy a Kinesis Data Analytics Studio notebook as an application with durable state."];
+          "The parameters required to deploy a Managed Service for Apache Flink Studio notebook as an application with durable state."];
       customArtifactsConfigurationDescription:
         CustomArtifactsConfigurationDescriptionList.t option
         [@ocaml.doc
           "Custom artifacts are dependency JARs and user-defined functions (UDF)."]}
-    let context_ = "ZeppelinApplicationConfigurationDescription"
-    let make ?catalogConfigurationDescription =
-      fun ?deployAsApplicationConfigurationDescription ->
-        fun ?customArtifactsConfigurationDescription ->
-          fun ~monitoringConfigurationDescription ->
+    let make ?monitoringConfigurationDescription =
+      fun ?catalogConfigurationDescription ->
+        fun ?deployAsApplicationConfigurationDescription ->
+          fun ?customArtifactsConfigurationDescription ->
             fun () ->
               {
+                monitoringConfigurationDescription;
                 catalogConfigurationDescription;
                 deployAsApplicationConfigurationDescription;
-                customArtifactsConfigurationDescription;
-                monitoringConfigurationDescription
+                customArtifactsConfigurationDescription
               }
     let to_value x =
       structure_to_value
         [("MonitoringConfigurationDescription",
-           (Some
-              (ZeppelinMonitoringConfigurationDescription.to_value
-                 x.monitoringConfigurationDescription)));
+           (Option.map x.monitoringConfigurationDescription
+              ~f:ZeppelinMonitoringConfigurationDescription.to_value));
         ("CatalogConfigurationDescription",
           (Option.map x.catalogConfigurationDescription
              ~f:CatalogConfigurationDescription.to_value));
@@ -4349,34 +4477,33 @@ module ZeppelinApplicationConfigurationDescription =
         (Option.map ~f:CatalogConfigurationDescription.of_xml)
           (Xml.child xml_arg0 "CatalogConfigurationDescription") in
       let monitoringConfigurationDescription =
-        ZeppelinMonitoringConfigurationDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "MonitoringConfigurationDescription") in
+        (Option.map ~f:ZeppelinMonitoringConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "MonitoringConfigurationDescription") in
       make ?customArtifactsConfigurationDescription
         ?deployAsApplicationConfigurationDescription
-        ?catalogConfigurationDescription ~monitoringConfigurationDescription
+        ?catalogConfigurationDescription ?monitoringConfigurationDescription
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customArtifactsConfigurationDescription =
-        field_map json "CustomArtifactsConfigurationDescription"
+        field_map json__ "CustomArtifactsConfigurationDescription"
           CustomArtifactsConfigurationDescriptionList.of_json in
       let deployAsApplicationConfigurationDescription =
-        field_map json "DeployAsApplicationConfigurationDescription"
+        field_map json__ "DeployAsApplicationConfigurationDescription"
           DeployAsApplicationConfigurationDescription.of_json in
       let catalogConfigurationDescription =
-        field_map json "CatalogConfigurationDescription"
+        field_map json__ "CatalogConfigurationDescription"
           CatalogConfigurationDescription.of_json in
       let monitoringConfigurationDescription =
-        field_map_exn json "MonitoringConfigurationDescription"
+        field_map json__ "MonitoringConfigurationDescription"
           ZeppelinMonitoringConfigurationDescription.of_json in
       make ?customArtifactsConfigurationDescription
         ?deployAsApplicationConfigurationDescription
-        ?catalogConfigurationDescription ~monitoringConfigurationDescription
+        ?catalogConfigurationDescription ?monitoringConfigurationDescription
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration of a Kinesis Data Analytics Studio notebook."]
+       "The configuration of a Managed Service for Apache Flink Studio notebook."]
 module ApplicationMaintenanceWindowEndTime =
   struct
     type nonrec t = string
@@ -4427,42 +4554,41 @@ module CloudWatchLoggingOptionDescription =
       {
       cloudWatchLoggingOptionId: Id.t option
         [@ocaml.doc "The ID of the CloudWatch logging option description."];
-      logStreamARN: LogStreamARN.t
+      logStreamARN: LogStreamARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the CloudWatch log to receive application messages."];
       roleARN: RoleARN.t option
         [@ocaml.doc
           "The IAM ARN of the role to use to send application messages. Provided for backward compatibility. Applications created with the current API version have an application-level service execution role rather than a resource-level role."]}
-    let context_ = "CloudWatchLoggingOptionDescription"
     let make ?cloudWatchLoggingOptionId =
-      fun ?roleARN ->
-        fun ~logStreamARN ->
-          fun () -> { cloudWatchLoggingOptionId; roleARN; logStreamARN }
+      fun ?logStreamARN ->
+        fun ?roleARN ->
+          fun () -> { cloudWatchLoggingOptionId; logStreamARN; roleARN }
     let to_value x =
       structure_to_value
         [("CloudWatchLoggingOptionId",
            (Option.map x.cloudWatchLoggingOptionId ~f:Id.to_value));
-        ("LogStreamARN", (Some (LogStreamARN.to_value x.logStreamARN)));
+        ("LogStreamARN",
+          (Option.map x.logStreamARN ~f:LogStreamARN.to_value));
         ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleARN =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let logStreamARN =
-        LogStreamARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LogStreamARN") in
+        (Option.map ~f:LogStreamARN.of_xml)
+          (Xml.child xml_arg0 "LogStreamARN") in
       let cloudWatchLoggingOptionId =
         (Option.map ~f:Id.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptionId") in
-      make ?roleARN ~logStreamARN ?cloudWatchLoggingOptionId ()
+      make ?roleARN ?logStreamARN ?cloudWatchLoggingOptionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let logStreamARN =
-        field_map_exn json "LogStreamARN" LogStreamARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let logStreamARN = field_map json__ "LogStreamARN" LogStreamARN.of_json in
       let cloudWatchLoggingOptionId =
-        field_map json "CloudWatchLoggingOptionId" Id.of_json in
-      make ?roleARN ~logStreamARN ?cloudWatchLoggingOptionId ()
+        field_map json__ "CloudWatchLoggingOptionId" Id.of_json in
+      make ?roleARN ?logStreamARN ?cloudWatchLoggingOptionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the Amazon CloudWatch logging option."]
 module CodeContentUpdate =
@@ -4510,14 +4636,14 @@ module CodeContentUpdate =
       make ?s3ContentLocationUpdate ?zipFileContentUpdate ?textContentUpdate
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3ContentLocationUpdate =
-        field_map json "S3ContentLocationUpdate"
+        field_map json__ "S3ContentLocationUpdate"
           S3ContentLocationUpdate.of_json in
       let zipFileContentUpdate =
-        field_map json "ZipFileContentUpdate" ZipFileContent.of_json in
+        field_map json__ "ZipFileContentUpdate" ZipFileContent.of_json in
       let textContentUpdate =
-        field_map json "TextContentUpdate" TextContent.of_json in
+        field_map json__ "TextContentUpdate" TextContent.of_json in
       make ?s3ContentLocationUpdate ?zipFileContentUpdate ?textContentUpdate
         ()
     let to_json v = composed_to_json to_value v
@@ -4529,7 +4655,7 @@ module CheckpointConfigurationUpdate =
       {
       configurationTypeUpdate: ConfigurationType.t option
         [@ocaml.doc
-          "Describes updates to whether the application uses the default checkpointing behavior of Kinesis Data Analytics. You must set this property to CUSTOM in order to set the CheckpointingEnabled, CheckpointInterval, or MinPauseBetweenCheckpoints parameters. If this value is set to DEFAULT, the application will use the following values, even if they are set to other values using APIs or application code: CheckpointingEnabled: true CheckpointInterval: 60000 MinPauseBetweenCheckpoints: 5000"];
+          "Describes updates to whether the application uses the default checkpointing behavior of Managed Service for Apache Flink. You must set this property to CUSTOM in order to set the CheckpointingEnabled, CheckpointInterval, or MinPauseBetweenCheckpoints parameters. If this value is set to DEFAULT, the application will use the following values, even if they are set to other values using APIs or application code: CheckpointingEnabled: true CheckpointInterval: 60000 MinPauseBetweenCheckpoints: 5000"];
       checkpointingEnabledUpdate: BooleanObject.t option
         [@ocaml.doc
           "Describes updates to whether checkpointing is enabled for an application. If CheckpointConfiguration.ConfigurationType is DEFAULT, the application will use a CheckpointingEnabled value of true, even if this value is set to another value using this API or in application code."];
@@ -4580,21 +4706,22 @@ module CheckpointConfigurationUpdate =
       make ?minPauseBetweenCheckpointsUpdate ?checkpointIntervalUpdate
         ?checkpointingEnabledUpdate ?configurationTypeUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minPauseBetweenCheckpointsUpdate =
-        field_map json "MinPauseBetweenCheckpointsUpdate"
+        field_map json__ "MinPauseBetweenCheckpointsUpdate"
           MinPauseBetweenCheckpoints.of_json in
       let checkpointIntervalUpdate =
-        field_map json "CheckpointIntervalUpdate" CheckpointInterval.of_json in
+        field_map json__ "CheckpointIntervalUpdate"
+          CheckpointInterval.of_json in
       let checkpointingEnabledUpdate =
-        field_map json "CheckpointingEnabledUpdate" BooleanObject.of_json in
+        field_map json__ "CheckpointingEnabledUpdate" BooleanObject.of_json in
       let configurationTypeUpdate =
-        field_map json "ConfigurationTypeUpdate" ConfigurationType.of_json in
+        field_map json__ "ConfigurationTypeUpdate" ConfigurationType.of_json in
       make ?minPauseBetweenCheckpointsUpdate ?checkpointIntervalUpdate
         ?checkpointingEnabledUpdate ?configurationTypeUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes updates to the checkpointing parameters for a Flink-based Kinesis Data Analytics application."]
+       "Describes updates to the checkpointing parameters for a Managed Service for Apache Flink application."]
 module MonitoringConfigurationUpdate =
   struct
     type nonrec t =
@@ -4634,12 +4761,12 @@ module MonitoringConfigurationUpdate =
           (Xml.child xml_arg0 "ConfigurationTypeUpdate") in
       make ?logLevelUpdate ?metricsLevelUpdate ?configurationTypeUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevelUpdate = field_map json "LogLevelUpdate" LogLevel.of_json in
+    let of_json json__ =
+      let logLevelUpdate = field_map json__ "LogLevelUpdate" LogLevel.of_json in
       let metricsLevelUpdate =
-        field_map json "MetricsLevelUpdate" MetricsLevel.of_json in
+        field_map json__ "MetricsLevelUpdate" MetricsLevel.of_json in
       let configurationTypeUpdate =
-        field_map json "ConfigurationTypeUpdate" ConfigurationType.of_json in
+        field_map json__ "ConfigurationTypeUpdate" ConfigurationType.of_json in
       make ?logLevelUpdate ?metricsLevelUpdate ?configurationTypeUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4650,16 +4777,16 @@ module ParallelismConfigurationUpdate =
       {
       configurationTypeUpdate: ConfigurationType.t option
         [@ocaml.doc
-          "Describes updates to whether the application uses the default parallelism for the Kinesis Data Analytics service, or if a custom parallelism is used. You must set this property to CUSTOM in order to change your application's AutoScalingEnabled, Parallelism, or ParallelismPerKPU properties."];
+          "Describes updates to whether the application uses the default parallelism for the Managed Service for Apache Flink service, or if a custom parallelism is used. You must set this property to CUSTOM in order to change your application's AutoScalingEnabled, Parallelism, or ParallelismPerKPU properties."];
       parallelismUpdate: Parallelism.t option
         [@ocaml.doc
-          "Describes updates to the initial number of parallel tasks an application can perform. If AutoScalingEnabled is set to True, then Kinesis Data Analytics can increase the CurrentParallelism value in response to application load. The service can increase CurrentParallelism up to the maximum parallelism, which is ParalellismPerKPU times the maximum KPUs for the application. The maximum KPUs for an application is 32 by default, and can be increased by requesting a limit increase. If application load is reduced, the service will reduce CurrentParallelism down to the Parallelism setting."];
+          "Describes updates to the initial number of parallel tasks an application can perform. If AutoScalingEnabled is set to True, then Managed Service for Apache Flink can increase the CurrentParallelism value in response to application load. The service can increase CurrentParallelism up to the maximum parallelism, which is ParalellismPerKPU times the maximum KPUs for the application. The maximum KPUs for an application is 32 by default, and can be increased by requesting a limit increase. If application load is reduced, the service will reduce CurrentParallelism down to the Parallelism setting."];
       parallelismPerKPUUpdate: ParallelismPerKPU.t option
         [@ocaml.doc
           "Describes updates to the number of parallel tasks an application can perform per Kinesis Processing Unit (KPU) used by the application."];
       autoScalingEnabledUpdate: BooleanObject.t option
         [@ocaml.doc
-          "Describes updates to whether the Kinesis Data Analytics service can increase the parallelism of a Flink-based Kinesis Data Analytics application in response to increased throughput."]}
+          "Describes updates to whether the Managed Service for Apache Flink service can increase the parallelism of a Managed Service for Apache Flink application in response to increased throughput."]}
     let make ?configurationTypeUpdate =
       fun ?parallelismUpdate ->
         fun ?parallelismPerKPUUpdate ->
@@ -4699,15 +4826,15 @@ module ParallelismConfigurationUpdate =
       make ?autoScalingEnabledUpdate ?parallelismPerKPUUpdate
         ?parallelismUpdate ?configurationTypeUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingEnabledUpdate =
-        field_map json "AutoScalingEnabledUpdate" BooleanObject.of_json in
+        field_map json__ "AutoScalingEnabledUpdate" BooleanObject.of_json in
       let parallelismPerKPUUpdate =
-        field_map json "ParallelismPerKPUUpdate" ParallelismPerKPU.of_json in
+        field_map json__ "ParallelismPerKPUUpdate" ParallelismPerKPU.of_json in
       let parallelismUpdate =
-        field_map json "ParallelismUpdate" Parallelism.of_json in
+        field_map json__ "ParallelismUpdate" Parallelism.of_json in
       let configurationTypeUpdate =
-        field_map json "ConfigurationTypeUpdate" ConfigurationType.of_json in
+        field_map json__ "ConfigurationTypeUpdate" ConfigurationType.of_json in
       make ?autoScalingEnabledUpdate ?parallelismPerKPUUpdate
         ?parallelismUpdate ?configurationTypeUpdate ()
     let to_json v = composed_to_json to_value v
@@ -4717,6 +4844,9 @@ module InputUpdates =
   struct
     type nonrec t = InputUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InputUpdate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4741,6 +4871,9 @@ module OutputUpdates =
   struct
     type nonrec t = OutputUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OutputUpdate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4765,6 +4898,9 @@ module ReferenceDataSourceUpdates =
   struct
     type nonrec t = ReferenceDataSourceUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReferenceDataSourceUpdate.to_value)) |>
         (fun x -> `List x)
@@ -4826,13 +4962,13 @@ module VpcConfigurationUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConfigurationId") in
       make ?securityGroupIdUpdates ?subnetIdUpdates ~vpcConfigurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupIdUpdates =
-        field_map json "SecurityGroupIdUpdates" SecurityGroupIds.of_json in
+        field_map json__ "SecurityGroupIdUpdates" SecurityGroupIds.of_json in
       let subnetIdUpdates =
-        field_map json "SubnetIdUpdates" SubnetIds.of_json in
+        field_map json__ "SubnetIdUpdates" SubnetIds.of_json in
       let vpcConfigurationId =
-        field_map_exn json "VpcConfigurationId" Id.of_json in
+        field_map_exn json__ "VpcConfigurationId" Id.of_json in
       make ?securityGroupIdUpdates ?subnetIdUpdates ~vpcConfigurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4844,7 +4980,7 @@ module CatalogConfigurationUpdate =
       glueDataCatalogConfigurationUpdate:
         GlueDataCatalogConfigurationUpdate.t
         [@ocaml.doc
-          "Updates to the configuration parameters for the default Amazon Glue database. You use this database for SQL queries that you write in a Kinesis Data Analytics Studio notebook."]}
+          "Updates to the configuration parameters for the default Amazon Glue database. You use this database for SQL queries that you write in a Managed Service for Apache Flink Studio notebook."]}
     let context_ = "CatalogConfigurationUpdate"
     let make ~glueDataCatalogConfigurationUpdate =
       fun () -> { glueDataCatalogConfigurationUpdate }
@@ -4862,19 +4998,22 @@ module CatalogConfigurationUpdate =
              "GlueDataCatalogConfigurationUpdate") in
       make ~glueDataCatalogConfigurationUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let glueDataCatalogConfigurationUpdate =
-        field_map_exn json "GlueDataCatalogConfigurationUpdate"
+        field_map_exn json__ "GlueDataCatalogConfigurationUpdate"
           GlueDataCatalogConfigurationUpdate.of_json in
       make ~glueDataCatalogConfigurationUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates to the configuration parameters for the default Amazon Glue database. You use this database for SQL queries that you write in a Kinesis Data Analytics Studio notebook."]
+       "Updates to the configuration parameters for the default Amazon Glue database. You use this database for SQL queries that you write in a Managed Service for Apache Flink Studio notebook."]
 module CustomArtifactsConfigurationList =
   struct
     type nonrec t = CustomArtifactConfiguration.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomArtifactConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -4917,9 +5056,9 @@ module DeployAsApplicationConfigurationUpdate =
           (Xml.child xml_arg0 "S3ContentLocationUpdate") in
       make ?s3ContentLocationUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3ContentLocationUpdate =
-        field_map json "S3ContentLocationUpdate"
+        field_map json__ "S3ContentLocationUpdate"
           S3ContentBaseLocationUpdate.of_json in
       make ?s3ContentLocationUpdate ()
     let to_json v = composed_to_json to_value v
@@ -4931,7 +5070,7 @@ module ZeppelinMonitoringConfigurationUpdate =
       {
       logLevelUpdate: LogLevel.t
         [@ocaml.doc
-          "Updates to the logging level for Apache Zeppelin within a Kinesis Data Analytics Studio notebook."]}
+          "Updates to the logging level for Apache Zeppelin within a Managed Service for Apache Flink Studio notebook."]}
     let context_ = "ZeppelinMonitoringConfigurationUpdate"
     let make ~logLevelUpdate = fun () -> { logLevelUpdate }
     let to_value x =
@@ -4944,13 +5083,13 @@ module ZeppelinMonitoringConfigurationUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "LogLevelUpdate") in
       make ~logLevelUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logLevelUpdate =
-        field_map_exn json "LogLevelUpdate" LogLevel.of_json in
+        field_map_exn json__ "LogLevelUpdate" LogLevel.of_json in
       make ~logLevelUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates to the monitoring configuration for Apache Zeppelin within a Kinesis Data Analytics Studio notebook."]
+       "Updates to the monitoring configuration for Apache Zeppelin within a Managed Service for Apache Flink Studio notebook."]
 module TagKey =
   struct
     type nonrec t = string
@@ -5019,11 +5158,11 @@ module SqlRunConfiguration =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "InputId") in
       make ~inputStartingPositionConfiguration ~inputId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputStartingPositionConfiguration =
-        field_map_exn json "InputStartingPositionConfiguration"
+        field_map_exn json__ "InputStartingPositionConfiguration"
           InputStartingPositionConfiguration.of_json in
-      let inputId = field_map_exn json "InputId" Id.of_json in
+      let inputId = field_map_exn json__ "InputId" Id.of_json in
       make ~inputStartingPositionConfiguration ~inputId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5055,7 +5194,7 @@ module ApplicationMode =
   end
 module ApplicationName =
   struct
-    type nonrec t = string
+    type nonrec t = string[@@ocaml.doc "The name of the application."]
     let context_ = "ApplicationName"
     let make i =
       let open Result in
@@ -5072,7 +5211,7 @@ module ApplicationName =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ApplicationName" j
     let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "The name of the application."]
 module ApplicationStatus =
   struct
     type nonrec t =
@@ -5154,6 +5293,12 @@ module RuntimeEnvironment =
       | FLINK_1_11 
       | FLINK_1_13 
       | ZEPPELIN_FLINK_2_0 
+      | FLINK_1_15 
+      | ZEPPELIN_FLINK_3_0 
+      | FLINK_1_18 
+      | FLINK_1_19 
+      | FLINK_1_20 
+      | FLINK_2_2 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5165,6 +5310,12 @@ module RuntimeEnvironment =
       | FLINK_1_11 -> "FLINK-1_11"
       | FLINK_1_13 -> "FLINK-1_13"
       | ZEPPELIN_FLINK_2_0 -> "ZEPPELIN-FLINK-2_0"
+      | FLINK_1_15 -> "FLINK-1_15"
+      | ZEPPELIN_FLINK_3_0 -> "ZEPPELIN-FLINK-3_0"
+      | FLINK_1_18 -> "FLINK-1_18"
+      | FLINK_1_19 -> "FLINK-1_19"
+      | FLINK_1_20 -> "FLINK-1_20"
+      | FLINK_2_2 -> "FLINK-2_2"
       | Non_static_id s -> s
     let of_string =
       function
@@ -5175,6 +5326,12 @@ module RuntimeEnvironment =
       | "FLINK-1_11" -> FLINK_1_11
       | "FLINK-1_13" -> FLINK_1_13
       | "ZEPPELIN-FLINK-2_0" -> ZEPPELIN_FLINK_2_0
+      | "FLINK-1_15" -> FLINK_1_15
+      | "ZEPPELIN-FLINK-3_0" -> ZEPPELIN_FLINK_3_0
+      | "FLINK-1_18" -> FLINK_1_18
+      | "FLINK-1_19" -> FLINK_1_19
+      | "FLINK-1_20" -> FLINK_1_20
+      | "FLINK-2_2" -> FLINK_2_2
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5228,6 +5385,75 @@ module Timestamp =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module Operation =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The type of operation that is performed on an application."]
+    let context_ = "Operation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Operation" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The type of operation that is performed on an application."]
+module OperationId =
+  struct
+    type nonrec t = string[@@ocaml.doc "The operation ID of the request."]
+    let context_ = "OperationId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OperationId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The operation ID of the request."]
+module OperationStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | CANCELLED 
+      | SUCCESSFUL 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | CANCELLED -> "CANCELLED"
+      | SUCCESSFUL -> "SUCCESSFUL"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "CANCELLED" -> CANCELLED
+      | "SUCCESSFUL" -> SUCCESSFUL
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OperationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OperationStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ParsedInputRecordField =
   struct
     type nonrec t = string
@@ -5267,16 +5493,36 @@ module RawInputRecord =
     let of_json j = string_of_json ~kind:"RawInputRecord" j
     let to_json = simple_to_json to_value
   end
+module ErrorInfo =
+  struct
+    type nonrec t = {
+      errorString: ErrorString.t option }
+    let make ?errorString = fun () -> { errorString }
+    let to_value x =
+      structure_to_value
+        [("ErrorString", (Option.map x.errorString ~f:ErrorString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorString =
+        (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "ErrorString") in
+      make ?errorString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorString = field_map json__ "ErrorString" ErrorString.of_json in
+      make ?errorString ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A description of the error that caused an operation to fail."]
 module CodeContent =
   struct
     type nonrec t =
       {
       textContent: TextContent.t option
         [@ocaml.doc
-          "The text-format code for a Flink-based Kinesis Data Analytics application."];
+          "The text-format code for a Managed Service for Apache Flink application."];
       zipFileContent: ZipFileContent.t option
         [@ocaml.doc
-          "The zip-format code for a Flink-based Kinesis Data Analytics application."];
+          "The zip-format code for a Managed Service for Apache Flink application."];
       s3ContentLocation: S3ContentLocation.t option
         [@ocaml.doc
           "Information about the Amazon S3 bucket that contains the application code."]}
@@ -5303,26 +5549,26 @@ module CodeContent =
         (Option.map ~f:TextContent.of_xml) (Xml.child xml_arg0 "TextContent") in
       make ?s3ContentLocation ?zipFileContent ?textContent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3ContentLocation =
-        field_map json "S3ContentLocation" S3ContentLocation.of_json in
+        field_map json__ "S3ContentLocation" S3ContentLocation.of_json in
       let zipFileContent =
-        field_map json "ZipFileContent" ZipFileContent.of_json in
-      let textContent = field_map json "TextContent" TextContent.of_json in
+        field_map json__ "ZipFileContent" ZipFileContent.of_json in
+      let textContent = field_map json__ "TextContent" TextContent.of_json in
       make ?s3ContentLocation ?zipFileContent ?textContent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies either the application code, or the location of the application code, for a Flink-based Kinesis Data Analytics application."]
+       "Specifies either the application code, or the location of the application code, for a Managed Service for Apache Flink application."]
 module CheckpointConfiguration =
   struct
     type nonrec t =
       {
       configurationType: ConfigurationType.t
         [@ocaml.doc
-          "Describes whether the application uses Kinesis Data Analytics' default checkpointing behavior. You must set this property to CUSTOM in order to set the CheckpointingEnabled, CheckpointInterval, or MinPauseBetweenCheckpoints parameters. If this value is set to DEFAULT, the application will use the following values, even if they are set to other values using APIs or application code: CheckpointingEnabled: true CheckpointInterval: 60000 MinPauseBetweenCheckpoints: 5000"];
+          "Describes whether the application uses Managed Service for Apache Flink' default checkpointing behavior. You must set this property to CUSTOM in order to set the CheckpointingEnabled, CheckpointInterval, or MinPauseBetweenCheckpoints parameters. If this value is set to DEFAULT, the application will use the following values, even if they are set to other values using APIs or application code: CheckpointingEnabled: true CheckpointInterval: 60000 MinPauseBetweenCheckpoints: 5000"];
       checkpointingEnabled: BooleanObject.t option
         [@ocaml.doc
-          "Describes whether checkpointing is enabled for a Flink-based Kinesis Data Analytics application. If CheckpointConfiguration.ConfigurationType is DEFAULT, the application will use a CheckpointingEnabled value of true, even if this value is set to another value using this API or in application code."];
+          "Describes whether checkpointing is enabled for a Managed Service for Apache Flink application. If CheckpointConfiguration.ConfigurationType is DEFAULT, the application will use a CheckpointingEnabled value of true, even if this value is set to another value using this API or in application code."];
       checkpointInterval: CheckpointInterval.t option
         [@ocaml.doc
           "Describes the interval in milliseconds between checkpoint operations. If CheckpointConfiguration.ConfigurationType is DEFAULT, the application will use a CheckpointInterval value of 60000, even if this value is set to another value using this API or in application code."];
@@ -5369,16 +5615,16 @@ module CheckpointConfiguration =
       make ?minPauseBetweenCheckpoints ?checkpointInterval
         ?checkpointingEnabled ~configurationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minPauseBetweenCheckpoints =
-        field_map json "MinPauseBetweenCheckpoints"
+        field_map json__ "MinPauseBetweenCheckpoints"
           MinPauseBetweenCheckpoints.of_json in
       let checkpointInterval =
-        field_map json "CheckpointInterval" CheckpointInterval.of_json in
+        field_map json__ "CheckpointInterval" CheckpointInterval.of_json in
       let checkpointingEnabled =
-        field_map json "CheckpointingEnabled" BooleanObject.of_json in
+        field_map json__ "CheckpointingEnabled" BooleanObject.of_json in
       let configurationType =
-        field_map_exn json "ConfigurationType" ConfigurationType.of_json in
+        field_map_exn json__ "ConfigurationType" ConfigurationType.of_json in
       make ?minPauseBetweenCheckpoints ?checkpointInterval
         ?checkpointingEnabled ~configurationType ()
     let to_json v = composed_to_json to_value v
@@ -5421,11 +5667,11 @@ module MonitoringConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationType") in
       make ?logLevel ?metricsLevel ~configurationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map json "LogLevel" LogLevel.of_json in
-      let metricsLevel = field_map json "MetricsLevel" MetricsLevel.of_json in
+    let of_json json__ =
+      let logLevel = field_map json__ "LogLevel" LogLevel.of_json in
+      let metricsLevel = field_map json__ "MetricsLevel" MetricsLevel.of_json in
       let configurationType =
-        field_map_exn json "ConfigurationType" ConfigurationType.of_json in
+        field_map_exn json__ "ConfigurationType" ConfigurationType.of_json in
       make ?logLevel ?metricsLevel ~configurationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5436,16 +5682,16 @@ module ParallelismConfiguration =
       {
       configurationType: ConfigurationType.t
         [@ocaml.doc
-          "Describes whether the application uses the default parallelism for the Kinesis Data Analytics service. You must set this property to CUSTOM in order to change your application's AutoScalingEnabled, Parallelism, or ParallelismPerKPU properties."];
+          "Describes whether the application uses the default parallelism for the Managed Service for Apache Flink service. You must set this property to CUSTOM in order to change your application's AutoScalingEnabled, Parallelism, or ParallelismPerKPU properties."];
       parallelism: Parallelism.t option
         [@ocaml.doc
-          "Describes the initial number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform. If AutoScalingEnabled is set to True, Kinesis Data Analytics increases the CurrentParallelism value in response to application load. The service can increase the CurrentParallelism value up to the maximum parallelism, which is ParalellismPerKPU times the maximum KPUs for the application. The maximum KPUs for an application is 32 by default, and can be increased by requesting a limit increase. If application load is reduced, the service can reduce the CurrentParallelism value down to the Parallelism setting."];
+          "Describes the initial number of parallel tasks that a Managed Service for Apache Flink application can perform. If AutoScalingEnabled is set to True, Managed Service for Apache Flink increases the CurrentParallelism value in response to application load. The service can increase the CurrentParallelism value up to the maximum parallelism, which is ParalellismPerKPU times the maximum KPUs for the application. The maximum KPUs for an application is 64 by default, and can be increased by requesting a limit increase. If application load is reduced, the service can reduce the CurrentParallelism value down to the Parallelism setting."];
       parallelismPerKPU: ParallelismPerKPU.t option
         [@ocaml.doc
-          "Describes the number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform per Kinesis Processing Unit (KPU) used by the application. For more information about KPUs, see Amazon Kinesis Data Analytics Pricing."];
+          "Describes the number of parallel tasks that a Managed Service for Apache Flink application can perform per Kinesis Processing Unit (KPU) used by the application. For more information about KPUs, see Amazon Managed Service for Apache Flink Pricing."];
       autoScalingEnabled: BooleanObject.t option
         [@ocaml.doc
-          "Describes whether the Kinesis Data Analytics service can increase the parallelism of the application in response to increased throughput."]}
+          "Describes whether the Managed Service for Apache Flink service can increase the parallelism of the application in response to increased throughput."]}
     let context_ = "ParallelismConfiguration"
     let make ?parallelism =
       fun ?parallelismPerKPU ->
@@ -5483,23 +5729,26 @@ module ParallelismConfiguration =
       make ?autoScalingEnabled ?parallelismPerKPU ?parallelism
         ~configurationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingEnabled =
-        field_map json "AutoScalingEnabled" BooleanObject.of_json in
+        field_map json__ "AutoScalingEnabled" BooleanObject.of_json in
       let parallelismPerKPU =
-        field_map json "ParallelismPerKPU" ParallelismPerKPU.of_json in
-      let parallelism = field_map json "Parallelism" Parallelism.of_json in
+        field_map json__ "ParallelismPerKPU" ParallelismPerKPU.of_json in
+      let parallelism = field_map json__ "Parallelism" Parallelism.of_json in
       let configurationType =
-        field_map_exn json "ConfigurationType" ConfigurationType.of_json in
+        field_map_exn json__ "ConfigurationType" ConfigurationType.of_json in
       make ?autoScalingEnabled ?parallelismPerKPU ?parallelism
         ~configurationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes parameters for how a Flink-based Kinesis Data Analytics application executes multiple tasks simultaneously. For more information about parallelism, see Parallel Execution in the Apache Flink Documentation."]
+       "Describes parameters for how a Managed Service for Apache Flink application executes multiple tasks simultaneously. For more information about parallelism, see Parallel Execution in the Apache Flink Documentation."]
 module Inputs =
   struct
     type nonrec t = Input.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Input.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5523,6 +5772,9 @@ module Outputs =
   struct
     type nonrec t = Output.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Output.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5546,6 +5798,9 @@ module ReferenceDataSources =
   struct
     type nonrec t = ReferenceDataSource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReferenceDataSource.to_value)) |>
         (fun x -> `List x)
@@ -5595,10 +5850,10 @@ module VpcConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
       make ~securityGroupIds ~subnetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
+        field_map_exn json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIds.of_json in
       make ~securityGroupIds ~subnetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5609,7 +5864,7 @@ module CatalogConfiguration =
       {
       glueDataCatalogConfiguration: GlueDataCatalogConfiguration.t
         [@ocaml.doc
-          "The configuration parameters for the default Amazon Glue database. You use this database for Apache Flink SQL queries and table API transforms that you write in a Kinesis Data Analytics Studio notebook."]}
+          "The configuration parameters for the default Amazon Glue database. You use this database for Apache Flink SQL queries and table API transforms that you write in a Managed Service for Apache Flink Studio notebook."]}
     let context_ = "CatalogConfiguration"
     let make ~glueDataCatalogConfiguration =
       fun () -> { glueDataCatalogConfiguration }
@@ -5627,14 +5882,14 @@ module CatalogConfiguration =
              "GlueDataCatalogConfiguration") in
       make ~glueDataCatalogConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let glueDataCatalogConfiguration =
-        field_map_exn json "GlueDataCatalogConfiguration"
+        field_map_exn json__ "GlueDataCatalogConfiguration"
           GlueDataCatalogConfiguration.of_json in
       make ~glueDataCatalogConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration parameters for the default Amazon Glue database. You use this database for SQL queries that you write in a Kinesis Data Analytics Studio notebook."]
+       "The configuration parameters for the default Amazon Glue database. You use this database for SQL queries that you write in a Managed Service for Apache Flink Studio notebook."]
 module DeployAsApplicationConfiguration =
   struct
     type nonrec t =
@@ -5655,13 +5910,14 @@ module DeployAsApplicationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "S3ContentLocation") in
       make ~s3ContentLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3ContentLocation =
-        field_map_exn json "S3ContentLocation" S3ContentBaseLocation.of_json in
+        field_map_exn json__ "S3ContentLocation"
+          S3ContentBaseLocation.of_json in
       make ~s3ContentLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The information required to deploy a Kinesis Data Analytics Studio notebook as an application with durable state."]
+       "The information required to deploy a Managed Service for Apache Flink Studio notebook as an application with durable state."]
 module ZeppelinMonitoringConfiguration =
   struct
     type nonrec t =
@@ -5680,12 +5936,12 @@ module ZeppelinMonitoringConfiguration =
         LogLevel.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LogLevel") in
       make ~logLevel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map_exn json "LogLevel" LogLevel.of_json in
+    let of_json json__ =
+      let logLevel = field_map_exn json__ "LogLevel" LogLevel.of_json in
       make ~logLevel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes configuration parameters for Amazon CloudWatch logging for a Kinesis Data Analytics Studio notebook. For more information about CloudWatch logging, see Monitoring."]
+       "Describes configuration parameters for Amazon CloudWatch logging for a Managed Service for Apache Flink Studio notebook. For more information about CloudWatch logging, see Monitoring."]
 module ApplicationConfigurationDescription =
   struct
     type nonrec t =
@@ -5697,48 +5953,59 @@ module ApplicationConfigurationDescription =
       applicationCodeConfigurationDescription:
         ApplicationCodeConfigurationDescription.t option
         [@ocaml.doc
-          "The details about the application code for a Flink-based Kinesis Data Analytics application."];
+          "The details about the application code for a Managed Service for Apache Flink application."];
       runConfigurationDescription: RunConfigurationDescription.t option
         [@ocaml.doc
-          "The details about the starting properties for a Kinesis Data Analytics application."];
+          "The details about the starting properties for a Managed Service for Apache Flink application."];
       flinkApplicationConfigurationDescription:
         FlinkApplicationConfigurationDescription.t option
         [@ocaml.doc
-          "The details about a Flink-based Kinesis Data Analytics application."];
+          "The details about a Managed Service for Apache Flink application."];
       environmentPropertyDescriptions:
         EnvironmentPropertyDescriptions.t option
         [@ocaml.doc
-          "Describes execution properties for a Flink-based Kinesis Data Analytics application."];
+          "Describes execution properties for a Managed Service for Apache Flink application."];
       applicationSnapshotConfigurationDescription:
         ApplicationSnapshotConfigurationDescription.t option
         [@ocaml.doc
-          "Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application."];
+          "Describes whether snapshots are enabled for a Managed Service for Apache Flink application."];
+      applicationSystemRollbackConfigurationDescription:
+        ApplicationSystemRollbackConfigurationDescription.t option
+        [@ocaml.doc
+          "Describes whether system rollbacks are enabled for a Managed Service for Apache Flink application."];
       vpcConfigurationDescriptions: VpcConfigurationDescriptions.t option
         [@ocaml.doc
           "The array of descriptions of VPC configurations available to the application."];
       zeppelinApplicationConfigurationDescription:
         ZeppelinApplicationConfigurationDescription.t option
         [@ocaml.doc
-          "The configuration parameters for a Kinesis Data Analytics Studio notebook."]}
+          "The configuration parameters for a Managed Service for Apache Flink Studio notebook."];
+      applicationEncryptionConfigurationDescription:
+        ApplicationEncryptionConfigurationDescription.t option
+        [@ocaml.doc "Describes the encryption at rest configuration."]}
     let make ?sqlApplicationConfigurationDescription =
       fun ?applicationCodeConfigurationDescription ->
         fun ?runConfigurationDescription ->
           fun ?flinkApplicationConfigurationDescription ->
             fun ?environmentPropertyDescriptions ->
               fun ?applicationSnapshotConfigurationDescription ->
-                fun ?vpcConfigurationDescriptions ->
-                  fun ?zeppelinApplicationConfigurationDescription ->
-                    fun () ->
-                      {
-                        sqlApplicationConfigurationDescription;
-                        applicationCodeConfigurationDescription;
-                        runConfigurationDescription;
-                        flinkApplicationConfigurationDescription;
-                        environmentPropertyDescriptions;
-                        applicationSnapshotConfigurationDescription;
-                        vpcConfigurationDescriptions;
-                        zeppelinApplicationConfigurationDescription
-                      }
+                fun ?applicationSystemRollbackConfigurationDescription ->
+                  fun ?vpcConfigurationDescriptions ->
+                    fun ?zeppelinApplicationConfigurationDescription ->
+                      fun ?applicationEncryptionConfigurationDescription ->
+                        fun () ->
+                          {
+                            sqlApplicationConfigurationDescription;
+                            applicationCodeConfigurationDescription;
+                            runConfigurationDescription;
+                            flinkApplicationConfigurationDescription;
+                            environmentPropertyDescriptions;
+                            applicationSnapshotConfigurationDescription;
+                            applicationSystemRollbackConfigurationDescription;
+                            vpcConfigurationDescriptions;
+                            zeppelinApplicationConfigurationDescription;
+                            applicationEncryptionConfigurationDescription
+                          }
     let to_value x =
       structure_to_value
         [("SqlApplicationConfigurationDescription",
@@ -5759,20 +6026,34 @@ module ApplicationConfigurationDescription =
         ("ApplicationSnapshotConfigurationDescription",
           (Option.map x.applicationSnapshotConfigurationDescription
              ~f:ApplicationSnapshotConfigurationDescription.to_value));
+        ("ApplicationSystemRollbackConfigurationDescription",
+          (Option.map x.applicationSystemRollbackConfigurationDescription
+             ~f:ApplicationSystemRollbackConfigurationDescription.to_value));
         ("VpcConfigurationDescriptions",
           (Option.map x.vpcConfigurationDescriptions
              ~f:VpcConfigurationDescriptions.to_value));
         ("ZeppelinApplicationConfigurationDescription",
           (Option.map x.zeppelinApplicationConfigurationDescription
-             ~f:ZeppelinApplicationConfigurationDescription.to_value))]
+             ~f:ZeppelinApplicationConfigurationDescription.to_value));
+        ("ApplicationEncryptionConfigurationDescription",
+          (Option.map x.applicationEncryptionConfigurationDescription
+             ~f:ApplicationEncryptionConfigurationDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationEncryptionConfigurationDescription =
+        (Option.map ~f:ApplicationEncryptionConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "ApplicationEncryptionConfigurationDescription") in
       let zeppelinApplicationConfigurationDescription =
         (Option.map ~f:ZeppelinApplicationConfigurationDescription.of_xml)
           (Xml.child xml_arg0 "ZeppelinApplicationConfigurationDescription") in
       let vpcConfigurationDescriptions =
         (Option.map ~f:VpcConfigurationDescriptions.of_xml)
           (Xml.child xml_arg0 "VpcConfigurationDescriptions") in
+      let applicationSystemRollbackConfigurationDescription =
+        (Option.map
+           ~f:ApplicationSystemRollbackConfigurationDescription.of_xml)
+          (Xml.child xml_arg0
+             "ApplicationSystemRollbackConfigurationDescription") in
       let applicationSnapshotConfigurationDescription =
         (Option.map ~f:ApplicationSnapshotConfigurationDescription.of_xml)
           (Xml.child xml_arg0 "ApplicationSnapshotConfigurationDescription") in
@@ -5791,41 +6072,51 @@ module ApplicationConfigurationDescription =
       let sqlApplicationConfigurationDescription =
         (Option.map ~f:SqlApplicationConfigurationDescription.of_xml)
           (Xml.child xml_arg0 "SqlApplicationConfigurationDescription") in
-      make ?zeppelinApplicationConfigurationDescription
+      make ?applicationEncryptionConfigurationDescription
+        ?zeppelinApplicationConfigurationDescription
         ?vpcConfigurationDescriptions
+        ?applicationSystemRollbackConfigurationDescription
         ?applicationSnapshotConfigurationDescription
         ?environmentPropertyDescriptions
         ?flinkApplicationConfigurationDescription
         ?runConfigurationDescription ?applicationCodeConfigurationDescription
         ?sqlApplicationConfigurationDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let applicationEncryptionConfigurationDescription =
+        field_map json__ "ApplicationEncryptionConfigurationDescription"
+          ApplicationEncryptionConfigurationDescription.of_json in
       let zeppelinApplicationConfigurationDescription =
-        field_map json "ZeppelinApplicationConfigurationDescription"
+        field_map json__ "ZeppelinApplicationConfigurationDescription"
           ZeppelinApplicationConfigurationDescription.of_json in
       let vpcConfigurationDescriptions =
-        field_map json "VpcConfigurationDescriptions"
+        field_map json__ "VpcConfigurationDescriptions"
           VpcConfigurationDescriptions.of_json in
+      let applicationSystemRollbackConfigurationDescription =
+        field_map json__ "ApplicationSystemRollbackConfigurationDescription"
+          ApplicationSystemRollbackConfigurationDescription.of_json in
       let applicationSnapshotConfigurationDescription =
-        field_map json "ApplicationSnapshotConfigurationDescription"
+        field_map json__ "ApplicationSnapshotConfigurationDescription"
           ApplicationSnapshotConfigurationDescription.of_json in
       let environmentPropertyDescriptions =
-        field_map json "EnvironmentPropertyDescriptions"
+        field_map json__ "EnvironmentPropertyDescriptions"
           EnvironmentPropertyDescriptions.of_json in
       let flinkApplicationConfigurationDescription =
-        field_map json "FlinkApplicationConfigurationDescription"
+        field_map json__ "FlinkApplicationConfigurationDescription"
           FlinkApplicationConfigurationDescription.of_json in
       let runConfigurationDescription =
-        field_map json "RunConfigurationDescription"
+        field_map json__ "RunConfigurationDescription"
           RunConfigurationDescription.of_json in
       let applicationCodeConfigurationDescription =
-        field_map json "ApplicationCodeConfigurationDescription"
+        field_map json__ "ApplicationCodeConfigurationDescription"
           ApplicationCodeConfigurationDescription.of_json in
       let sqlApplicationConfigurationDescription =
-        field_map json "SqlApplicationConfigurationDescription"
+        field_map json__ "SqlApplicationConfigurationDescription"
           SqlApplicationConfigurationDescription.of_json in
-      make ?zeppelinApplicationConfigurationDescription
+      make ?applicationEncryptionConfigurationDescription
+        ?zeppelinApplicationConfigurationDescription
         ?vpcConfigurationDescriptions
+        ?applicationSystemRollbackConfigurationDescription
         ?applicationSnapshotConfigurationDescription
         ?environmentPropertyDescriptions
         ?flinkApplicationConfigurationDescription
@@ -5833,7 +6124,7 @@ module ApplicationConfigurationDescription =
         ?sqlApplicationConfigurationDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes details about the application code and starting parameters for a Kinesis Data Analytics application."]
+       "Describes details about the application code and starting parameters for a Managed Service for Apache Flink application."]
 module ApplicationDescription =
   struct
     type nonrec t = string
@@ -5857,14 +6148,13 @@ module ApplicationMaintenanceConfigurationDescription =
     type nonrec t =
       {
       applicationMaintenanceWindowStartTime:
-        ApplicationMaintenanceWindowStartTime.t
+        ApplicationMaintenanceWindowStartTime.t option
         [@ocaml.doc "The start time for the maintenance window."];
       applicationMaintenanceWindowEndTime:
-        ApplicationMaintenanceWindowEndTime.t
+        ApplicationMaintenanceWindowEndTime.t option
         [@ocaml.doc "The end time for the maintenance window."]}
-    let context_ = "ApplicationMaintenanceConfigurationDescription"
-    let make ~applicationMaintenanceWindowStartTime =
-      fun ~applicationMaintenanceWindowEndTime ->
+    let make ?applicationMaintenanceWindowStartTime =
+      fun ?applicationMaintenanceWindowEndTime ->
         fun () ->
           {
             applicationMaintenanceWindowStartTime;
@@ -5873,35 +6163,31 @@ module ApplicationMaintenanceConfigurationDescription =
     let to_value x =
       structure_to_value
         [("ApplicationMaintenanceWindowStartTime",
-           (Some
-              (ApplicationMaintenanceWindowStartTime.to_value
-                 x.applicationMaintenanceWindowStartTime)));
+           (Option.map x.applicationMaintenanceWindowStartTime
+              ~f:ApplicationMaintenanceWindowStartTime.to_value));
         ("ApplicationMaintenanceWindowEndTime",
-          (Some
-             (ApplicationMaintenanceWindowEndTime.to_value
-                x.applicationMaintenanceWindowEndTime)))]
+          (Option.map x.applicationMaintenanceWindowEndTime
+             ~f:ApplicationMaintenanceWindowEndTime.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let applicationMaintenanceWindowEndTime =
-        ApplicationMaintenanceWindowEndTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ApplicationMaintenanceWindowEndTime") in
+        (Option.map ~f:ApplicationMaintenanceWindowEndTime.of_xml)
+          (Xml.child xml_arg0 "ApplicationMaintenanceWindowEndTime") in
       let applicationMaintenanceWindowStartTime =
-        ApplicationMaintenanceWindowStartTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ApplicationMaintenanceWindowStartTime") in
-      make ~applicationMaintenanceWindowEndTime
-        ~applicationMaintenanceWindowStartTime ()
+        (Option.map ~f:ApplicationMaintenanceWindowStartTime.of_xml)
+          (Xml.child xml_arg0 "ApplicationMaintenanceWindowStartTime") in
+      make ?applicationMaintenanceWindowEndTime
+        ?applicationMaintenanceWindowStartTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationMaintenanceWindowEndTime =
-        field_map_exn json "ApplicationMaintenanceWindowEndTime"
+        field_map json__ "ApplicationMaintenanceWindowEndTime"
           ApplicationMaintenanceWindowEndTime.of_json in
       let applicationMaintenanceWindowStartTime =
-        field_map_exn json "ApplicationMaintenanceWindowStartTime"
+        field_map json__ "ApplicationMaintenanceWindowStartTime"
           ApplicationMaintenanceWindowStartTime.of_json in
-      make ~applicationMaintenanceWindowEndTime
-        ~applicationMaintenanceWindowStartTime ()
+      make ?applicationMaintenanceWindowEndTime
+        ?applicationMaintenanceWindowStartTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The details of the maintenance configuration for the application."]
@@ -5909,6 +6195,9 @@ module CloudWatchLoggingOptionDescriptions =
   struct
     type nonrec t = CloudWatchLoggingOptionDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchLoggingOptionDescription.to_value)) |>
         (fun x -> `List x)
@@ -5993,15 +6282,48 @@ module ApplicationCodeConfigurationUpdate =
           (Xml.child xml_arg0 "CodeContentTypeUpdate") in
       make ?codeContentUpdate ?codeContentTypeUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let codeContentUpdate =
-        field_map json "CodeContentUpdate" CodeContentUpdate.of_json in
+        field_map json__ "CodeContentUpdate" CodeContentUpdate.of_json in
       let codeContentTypeUpdate =
-        field_map json "CodeContentTypeUpdate" CodeContentType.of_json in
+        field_map json__ "CodeContentTypeUpdate" CodeContentType.of_json in
       make ?codeContentUpdate ?codeContentTypeUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes code configuration updates for an application. This is supported for a Flink-based Kinesis Data Analytics application or a SQL-based Kinesis Data Analytics application."]
+       "Describes code configuration updates for an application. This is supported for a Managed Service for Apache Flink application or a SQL-based Kinesis Data Analytics application."]
+module ApplicationEncryptionConfigurationUpdate =
+  struct
+    type nonrec t =
+      {
+      keyIdUpdate: KeyId.t option
+        [@ocaml.doc
+          "The key ARN, key ID, alias ARN, or alias name of the KMS key to be used for encryption at rest."];
+      keyTypeUpdate: KeyType.t
+        [@ocaml.doc
+          "Specifies the type of key to be used for encryption at rest."]}
+    let context_ = "ApplicationEncryptionConfigurationUpdate"
+    let make ?keyIdUpdate =
+      fun ~keyTypeUpdate -> fun () -> { keyIdUpdate; keyTypeUpdate }
+    let to_value x =
+      structure_to_value
+        [("KeyIdUpdate", (Option.map x.keyIdUpdate ~f:KeyId.to_value));
+        ("KeyTypeUpdate", (Some (KeyType.to_value x.keyTypeUpdate)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keyTypeUpdate =
+        KeyType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "KeyTypeUpdate") in
+      let keyIdUpdate =
+        (Option.map ~f:KeyId.of_xml) (Xml.child xml_arg0 "KeyIdUpdate") in
+      make ~keyTypeUpdate ?keyIdUpdate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keyTypeUpdate =
+        field_map_exn json__ "KeyTypeUpdate" KeyType.of_json in
+      let keyIdUpdate = field_map json__ "KeyIdUpdate" KeyId.of_json in
+      make ~keyTypeUpdate ?keyIdUpdate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes configuration updates to encryption at rest."]
 module ApplicationSnapshotConfigurationUpdate =
   struct
     type nonrec t =
@@ -6022,13 +6344,40 @@ module ApplicationSnapshotConfigurationUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotsEnabledUpdate") in
       make ~snapshotsEnabledUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotsEnabledUpdate =
-        field_map_exn json "SnapshotsEnabledUpdate" BooleanObject.of_json in
+        field_map_exn json__ "SnapshotsEnabledUpdate" BooleanObject.of_json in
       make ~snapshotsEnabledUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes updates to whether snapshots are enabled for a Flink-based Kinesis Data Analytics application."]
+       "Describes updates to whether snapshots are enabled for a Managed Service for Apache Flink application."]
+module ApplicationSystemRollbackConfigurationUpdate =
+  struct
+    type nonrec t =
+      {
+      rollbackEnabledUpdate: BooleanObject.t
+        [@ocaml.doc
+          "Describes whether system rollbacks are enabled for a Managed Service for Apache Flink application."]}
+    let context_ = "ApplicationSystemRollbackConfigurationUpdate"
+    let make ~rollbackEnabledUpdate = fun () -> { rollbackEnabledUpdate }
+    let to_value x =
+      structure_to_value
+        [("RollbackEnabledUpdate",
+           (Some (BooleanObject.to_value x.rollbackEnabledUpdate)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rollbackEnabledUpdate =
+        BooleanObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RollbackEnabledUpdate") in
+      make ~rollbackEnabledUpdate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rollbackEnabledUpdate =
+        field_map_exn json__ "RollbackEnabledUpdate" BooleanObject.of_json in
+      make ~rollbackEnabledUpdate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the system rollback configuration for a Managed Service for Apache Flink application."]
 module EnvironmentPropertyUpdates =
   struct
     type nonrec t =
@@ -6048,13 +6397,13 @@ module EnvironmentPropertyUpdates =
           (Xml.child_exn ~context:context_ xml_arg0 "PropertyGroups") in
       make ~propertyGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let propertyGroups =
-        field_map_exn json "PropertyGroups" PropertyGroups.of_json in
+        field_map_exn json__ "PropertyGroups" PropertyGroups.of_json in
       make ~propertyGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes updates to the execution property groups for a Flink-based Kinesis Data Analytics application or a Studio notebook."]
+       "Describes updates to the execution property groups for a Managed Service for Apache Flink application or a Studio notebook."]
 module FlinkApplicationConfigurationUpdate =
   struct
     type nonrec t =
@@ -6102,21 +6451,21 @@ module FlinkApplicationConfigurationUpdate =
       make ?parallelismConfigurationUpdate ?monitoringConfigurationUpdate
         ?checkpointConfigurationUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parallelismConfigurationUpdate =
-        field_map json "ParallelismConfigurationUpdate"
+        field_map json__ "ParallelismConfigurationUpdate"
           ParallelismConfigurationUpdate.of_json in
       let monitoringConfigurationUpdate =
-        field_map json "MonitoringConfigurationUpdate"
+        field_map json__ "MonitoringConfigurationUpdate"
           MonitoringConfigurationUpdate.of_json in
       let checkpointConfigurationUpdate =
-        field_map json "CheckpointConfigurationUpdate"
+        field_map json__ "CheckpointConfigurationUpdate"
           CheckpointConfigurationUpdate.of_json in
       make ?parallelismConfigurationUpdate ?monitoringConfigurationUpdate
         ?checkpointConfigurationUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes updates to the configuration parameters for a Flink-based Kinesis Data Analytics application."]
+       "Describes updates to the configuration parameters for a Managed Service for Apache Flink application."]
 module SqlApplicationConfigurationUpdate =
   struct
     type nonrec t =
@@ -6157,13 +6506,13 @@ module SqlApplicationConfigurationUpdate =
           (Xml.child xml_arg0 "InputUpdates") in
       make ?referenceDataSourceUpdates ?outputUpdates ?inputUpdates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceDataSourceUpdates =
-        field_map json "ReferenceDataSourceUpdates"
+        field_map json__ "ReferenceDataSourceUpdates"
           ReferenceDataSourceUpdates.of_json in
       let outputUpdates =
-        field_map json "OutputUpdates" OutputUpdates.of_json in
-      let inputUpdates = field_map json "InputUpdates" InputUpdates.of_json in
+        field_map json__ "OutputUpdates" OutputUpdates.of_json in
+      let inputUpdates = field_map json__ "InputUpdates" InputUpdates.of_json in
       make ?referenceDataSourceUpdates ?outputUpdates ?inputUpdates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6172,6 +6521,9 @@ module VpcConfigurationUpdates =
   struct
     type nonrec t = VpcConfigurationUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcConfigurationUpdate.to_value)) |>
         (fun x -> `List x)
@@ -6201,10 +6553,10 @@ module ZeppelinApplicationConfigurationUpdate =
       monitoringConfigurationUpdate:
         ZeppelinMonitoringConfigurationUpdate.t option
         [@ocaml.doc
-          "Updates to the monitoring configuration of a Kinesis Data Analytics Studio notebook."];
+          "Updates to the monitoring configuration of a Managed Service for Apache Flink Studio notebook."];
       catalogConfigurationUpdate: CatalogConfigurationUpdate.t option
         [@ocaml.doc
-          "Updates to the configuration of the Amazon Glue Data Catalog that is associated with the Kinesis Data Analytics Studio notebook."];
+          "Updates to the configuration of the Amazon Glue Data Catalog that is associated with the Managed Service for Apache Flink Studio notebook."];
       deployAsApplicationConfigurationUpdate:
         DeployAsApplicationConfigurationUpdate.t option ;
       customArtifactsConfigurationUpdate:
@@ -6254,25 +6606,25 @@ module ZeppelinApplicationConfigurationUpdate =
         ?deployAsApplicationConfigurationUpdate ?catalogConfigurationUpdate
         ?monitoringConfigurationUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customArtifactsConfigurationUpdate =
-        field_map json "CustomArtifactsConfigurationUpdate"
+        field_map json__ "CustomArtifactsConfigurationUpdate"
           CustomArtifactsConfigurationList.of_json in
       let deployAsApplicationConfigurationUpdate =
-        field_map json "DeployAsApplicationConfigurationUpdate"
+        field_map json__ "DeployAsApplicationConfigurationUpdate"
           DeployAsApplicationConfigurationUpdate.of_json in
       let catalogConfigurationUpdate =
-        field_map json "CatalogConfigurationUpdate"
+        field_map json__ "CatalogConfigurationUpdate"
           CatalogConfigurationUpdate.of_json in
       let monitoringConfigurationUpdate =
-        field_map json "MonitoringConfigurationUpdate"
+        field_map json__ "MonitoringConfigurationUpdate"
           ZeppelinMonitoringConfigurationUpdate.of_json in
       make ?customArtifactsConfigurationUpdate
         ?deployAsApplicationConfigurationUpdate ?catalogConfigurationUpdate
         ?monitoringConfigurationUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates to the configuration of Kinesis Data Analytics Studio notebook."]
+       "Updates to the configuration of Managed Service for Apache Flink Studio notebook."]
 module CloudWatchLoggingOptionUpdate =
   struct
     type nonrec t =
@@ -6303,11 +6655,11 @@ module CloudWatchLoggingOptionUpdate =
              "CloudWatchLoggingOptionId") in
       make ?logStreamARNUpdate ~cloudWatchLoggingOptionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logStreamARNUpdate =
-        field_map json "LogStreamARNUpdate" LogStreamARN.of_json in
+        field_map json__ "LogStreamARNUpdate" LogStreamARN.of_json in
       let cloudWatchLoggingOptionId =
-        field_map_exn json "CloudWatchLoggingOptionId" Id.of_json in
+        field_map_exn json__ "CloudWatchLoggingOptionId" Id.of_json in
       make ?logStreamARNUpdate ~cloudWatchLoggingOptionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the Amazon CloudWatch logging option updates."]
@@ -6332,9 +6684,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6343,6 +6695,9 @@ module SqlRunConfigurations =
   struct
     type nonrec t = SqlRunConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SqlRunConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -6369,46 +6724,46 @@ module ApplicationSummary =
   struct
     type nonrec t =
       {
-      applicationName: ApplicationName.t
+      applicationName: ApplicationName.t option
         [@ocaml.doc "The name of the application."];
-      applicationARN: ResourceARN.t
+      applicationARN: ResourceARN.t option
         [@ocaml.doc "The ARN of the application."];
-      applicationStatus: ApplicationStatus.t
+      applicationStatus: ApplicationStatus.t option
         [@ocaml.doc "The status of the application."];
-      applicationVersionId: ApplicationVersionId.t
+      applicationVersionId: ApplicationVersionId.t option
         [@ocaml.doc "Provides the current application version."];
-      runtimeEnvironment: RuntimeEnvironment.t
+      runtimeEnvironment: RuntimeEnvironment.t option
         [@ocaml.doc "The runtime environment for the application."];
       applicationMode: ApplicationMode.t option
         [@ocaml.doc
-          "For a Kinesis Data Analytics for Apache Flink application, the mode is STREAMING. For a Kinesis Data Analytics Studio notebook, it is INTERACTIVE."]}
-    let context_ = "ApplicationSummary"
-    let make ?applicationMode =
-      fun ~applicationName ->
-        fun ~applicationARN ->
-          fun ~applicationStatus ->
-            fun ~applicationVersionId ->
-              fun ~runtimeEnvironment ->
+          "For a Managed Service for Apache Flink application, the mode is STREAMING. For a Managed Service for Apache Flink Studio notebook, it is INTERACTIVE."]}
+    let make ?applicationName =
+      fun ?applicationARN ->
+        fun ?applicationStatus ->
+          fun ?applicationVersionId ->
+            fun ?runtimeEnvironment ->
+              fun ?applicationMode ->
                 fun () ->
                   {
-                    applicationMode;
                     applicationName;
                     applicationARN;
                     applicationStatus;
                     applicationVersionId;
-                    runtimeEnvironment
+                    runtimeEnvironment;
+                    applicationMode
                   }
     let to_value x =
       structure_to_value
         [("ApplicationName",
-           (Some (ApplicationName.to_value x.applicationName)));
-        ("ApplicationARN", (Some (ResourceARN.to_value x.applicationARN)));
+           (Option.map x.applicationName ~f:ApplicationName.to_value));
+        ("ApplicationARN",
+          (Option.map x.applicationARN ~f:ResourceARN.to_value));
         ("ApplicationStatus",
-          (Some (ApplicationStatus.to_value x.applicationStatus)));
+          (Option.map x.applicationStatus ~f:ApplicationStatus.to_value));
         ("ApplicationVersionId",
-          (Some (ApplicationVersionId.to_value x.applicationVersionId)));
+          (Option.map x.applicationVersionId ~f:ApplicationVersionId.to_value));
         ("RuntimeEnvironment",
-          (Some (RuntimeEnvironment.to_value x.runtimeEnvironment)));
+          (Option.map x.runtimeEnvironment ~f:RuntimeEnvironment.to_value));
         ("ApplicationMode",
           (Option.map x.applicationMode ~f:ApplicationMode.to_value))]
     let to_query v = to_query to_value v
@@ -6417,39 +6772,38 @@ module ApplicationSummary =
         (Option.map ~f:ApplicationMode.of_xml)
           (Xml.child xml_arg0 "ApplicationMode") in
       let runtimeEnvironment =
-        RuntimeEnvironment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RuntimeEnvironment") in
+        (Option.map ~f:RuntimeEnvironment.of_xml)
+          (Xml.child xml_arg0 "RuntimeEnvironment") in
       let applicationVersionId =
-        ApplicationVersionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationVersionId") in
+        (Option.map ~f:ApplicationVersionId.of_xml)
+          (Xml.child xml_arg0 "ApplicationVersionId") in
       let applicationStatus =
-        ApplicationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationStatus") in
+        (Option.map ~f:ApplicationStatus.of_xml)
+          (Xml.child xml_arg0 "ApplicationStatus") in
       let applicationARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationARN") in
+        (Option.map ~f:ResourceARN.of_xml)
+          (Xml.child xml_arg0 "ApplicationARN") in
       let applicationName =
-        ApplicationName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
-      make ?applicationMode ~runtimeEnvironment ~applicationVersionId
-        ~applicationStatus ~applicationARN ~applicationName ()
+        (Option.map ~f:ApplicationName.of_xml)
+          (Xml.child xml_arg0 "ApplicationName") in
+      make ?applicationMode ?runtimeEnvironment ?applicationVersionId
+        ?applicationStatus ?applicationARN ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationMode =
-        field_map json "ApplicationMode" ApplicationMode.of_json in
+        field_map json__ "ApplicationMode" ApplicationMode.of_json in
       let runtimeEnvironment =
-        field_map_exn json "RuntimeEnvironment" RuntimeEnvironment.of_json in
+        field_map json__ "RuntimeEnvironment" RuntimeEnvironment.of_json in
       let applicationVersionId =
-        field_map_exn json "ApplicationVersionId"
-          ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationStatus =
-        field_map_exn json "ApplicationStatus" ApplicationStatus.of_json in
+        field_map json__ "ApplicationStatus" ApplicationStatus.of_json in
       let applicationARN =
-        field_map_exn json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
-      make ?applicationMode ~runtimeEnvironment ~applicationVersionId
-        ~applicationStatus ~applicationARN ~applicationName ()
+        field_map json__ "ApplicationName" ApplicationName.of_json in
+      make ?applicationMode ?runtimeEnvironment ?applicationVersionId
+        ?applicationStatus ?applicationARN ?applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides application summary information, including the application Amazon Resource Name (ARN), name, and status."]
@@ -6457,108 +6811,192 @@ module ApplicationVersionSummary =
   struct
     type nonrec t =
       {
-      applicationVersionId: ApplicationVersionId.t
+      applicationVersionId: ApplicationVersionId.t option
         [@ocaml.doc
-          "The ID of the application version. Kinesis Data Analytics updates the ApplicationVersionId each time you update the application."];
-      applicationStatus: ApplicationStatus.t
+          "The ID of the application version. Managed Service for Apache Flink updates the ApplicationVersionId each time you update the application."];
+      applicationStatus: ApplicationStatus.t option
         [@ocaml.doc "The status of the application."]}
-    let context_ = "ApplicationVersionSummary"
-    let make ~applicationVersionId =
-      fun ~applicationStatus ->
+    let make ?applicationVersionId =
+      fun ?applicationStatus ->
         fun () -> { applicationVersionId; applicationStatus }
     let to_value x =
       structure_to_value
         [("ApplicationVersionId",
-           (Some (ApplicationVersionId.to_value x.applicationVersionId)));
+           (Option.map x.applicationVersionId
+              ~f:ApplicationVersionId.to_value));
         ("ApplicationStatus",
-          (Some (ApplicationStatus.to_value x.applicationStatus)))]
+          (Option.map x.applicationStatus ~f:ApplicationStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let applicationStatus =
-        ApplicationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationStatus") in
+        (Option.map ~f:ApplicationStatus.of_xml)
+          (Xml.child xml_arg0 "ApplicationStatus") in
       let applicationVersionId =
-        ApplicationVersionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationVersionId") in
-      make ~applicationStatus ~applicationVersionId ()
+        (Option.map ~f:ApplicationVersionId.of_xml)
+          (Xml.child xml_arg0 "ApplicationVersionId") in
+      make ?applicationStatus ?applicationVersionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationStatus =
-        field_map_exn json "ApplicationStatus" ApplicationStatus.of_json in
+        field_map json__ "ApplicationStatus" ApplicationStatus.of_json in
       let applicationVersionId =
-        field_map_exn json "ApplicationVersionId"
-          ApplicationVersionId.of_json in
-      make ~applicationStatus ~applicationVersionId ()
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
+      make ?applicationStatus ?applicationVersionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of the application version."]
 module SnapshotDetails =
   struct
     type nonrec t =
       {
-      snapshotName: SnapshotName.t
+      snapshotName: SnapshotName.t option
         [@ocaml.doc "The identifier for the application snapshot."];
-      snapshotStatus: SnapshotStatus.t
+      snapshotStatus: SnapshotStatus.t option
         [@ocaml.doc "The status of the application snapshot."];
-      applicationVersionId: ApplicationVersionId.t
+      applicationVersionId: ApplicationVersionId.t option
         [@ocaml.doc
           "The current application version ID when the snapshot was created."];
       snapshotCreationTimestamp: Timestamp.t option
-        [@ocaml.doc "The timestamp of the application snapshot."]}
-    let context_ = "SnapshotDetails"
-    let make ?snapshotCreationTimestamp =
-      fun ~snapshotName ->
-        fun ~snapshotStatus ->
-          fun ~applicationVersionId ->
-            fun () ->
-              {
-                snapshotCreationTimestamp;
-                snapshotName;
-                snapshotStatus;
-                applicationVersionId
-              }
+        [@ocaml.doc "The timestamp of the application snapshot."];
+      runtimeEnvironment: RuntimeEnvironment.t option
+        [@ocaml.doc "The Flink Runtime for the application snapshot."];
+      applicationEncryptionConfigurationDescription:
+        ApplicationEncryptionConfigurationDescription.t option
+        [@ocaml.doc
+          "Specifies the encryption settings of data at rest for the application snapshot."]}
+    let make ?snapshotName =
+      fun ?snapshotStatus ->
+        fun ?applicationVersionId ->
+          fun ?snapshotCreationTimestamp ->
+            fun ?runtimeEnvironment ->
+              fun ?applicationEncryptionConfigurationDescription ->
+                fun () ->
+                  {
+                    snapshotName;
+                    snapshotStatus;
+                    applicationVersionId;
+                    snapshotCreationTimestamp;
+                    runtimeEnvironment;
+                    applicationEncryptionConfigurationDescription
+                  }
     let to_value x =
       structure_to_value
-        [("SnapshotName", (Some (SnapshotName.to_value x.snapshotName)));
-        ("SnapshotStatus", (Some (SnapshotStatus.to_value x.snapshotStatus)));
+        [("SnapshotName",
+           (Option.map x.snapshotName ~f:SnapshotName.to_value));
+        ("SnapshotStatus",
+          (Option.map x.snapshotStatus ~f:SnapshotStatus.to_value));
         ("ApplicationVersionId",
-          (Some (ApplicationVersionId.to_value x.applicationVersionId)));
+          (Option.map x.applicationVersionId ~f:ApplicationVersionId.to_value));
         ("SnapshotCreationTimestamp",
-          (Option.map x.snapshotCreationTimestamp ~f:Timestamp.to_value))]
+          (Option.map x.snapshotCreationTimestamp ~f:Timestamp.to_value));
+        ("RuntimeEnvironment",
+          (Option.map x.runtimeEnvironment ~f:RuntimeEnvironment.to_value));
+        ("ApplicationEncryptionConfigurationDescription",
+          (Option.map x.applicationEncryptionConfigurationDescription
+             ~f:ApplicationEncryptionConfigurationDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationEncryptionConfigurationDescription =
+        (Option.map ~f:ApplicationEncryptionConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "ApplicationEncryptionConfigurationDescription") in
+      let runtimeEnvironment =
+        (Option.map ~f:RuntimeEnvironment.of_xml)
+          (Xml.child xml_arg0 "RuntimeEnvironment") in
       let snapshotCreationTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "SnapshotCreationTimestamp") in
       let applicationVersionId =
-        ApplicationVersionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationVersionId") in
+        (Option.map ~f:ApplicationVersionId.of_xml)
+          (Xml.child xml_arg0 "ApplicationVersionId") in
       let snapshotStatus =
-        SnapshotStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SnapshotStatus") in
+        (Option.map ~f:SnapshotStatus.of_xml)
+          (Xml.child xml_arg0 "SnapshotStatus") in
       let snapshotName =
-        SnapshotName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SnapshotName") in
-      make ?snapshotCreationTimestamp ~applicationVersionId ~snapshotStatus
-        ~snapshotName ()
+        (Option.map ~f:SnapshotName.of_xml)
+          (Xml.child xml_arg0 "SnapshotName") in
+      make ?applicationEncryptionConfigurationDescription ?runtimeEnvironment
+        ?snapshotCreationTimestamp ?applicationVersionId ?snapshotStatus
+        ?snapshotName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let applicationEncryptionConfigurationDescription =
+        field_map json__ "ApplicationEncryptionConfigurationDescription"
+          ApplicationEncryptionConfigurationDescription.of_json in
+      let runtimeEnvironment =
+        field_map json__ "RuntimeEnvironment" RuntimeEnvironment.of_json in
       let snapshotCreationTimestamp =
-        field_map json "SnapshotCreationTimestamp" Timestamp.of_json in
+        field_map json__ "SnapshotCreationTimestamp" Timestamp.of_json in
       let applicationVersionId =
-        field_map_exn json "ApplicationVersionId"
-          ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let snapshotStatus =
-        field_map_exn json "SnapshotStatus" SnapshotStatus.of_json in
-      let snapshotName =
-        field_map_exn json "SnapshotName" SnapshotName.of_json in
-      make ?snapshotCreationTimestamp ~applicationVersionId ~snapshotStatus
-        ~snapshotName ()
+        field_map json__ "SnapshotStatus" SnapshotStatus.of_json in
+      let snapshotName = field_map json__ "SnapshotName" SnapshotName.of_json in
+      make ?applicationEncryptionConfigurationDescription ?runtimeEnvironment
+        ?snapshotCreationTimestamp ?applicationVersionId ?snapshotStatus
+        ?snapshotName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides details about a snapshot of application state."]
+module ApplicationOperationInfo =
+  struct
+    type nonrec t =
+      {
+      operation: Operation.t option ;
+      operationId: OperationId.t option ;
+      startTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the operation was created."];
+      endTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the operation finished."];
+      operationStatus: OperationStatus.t option }
+    let make ?operation =
+      fun ?operationId ->
+        fun ?startTime ->
+          fun ?endTime ->
+            fun ?operationStatus ->
+              fun () ->
+                { operation; operationId; startTime; endTime; operationStatus
+                }
+    let to_value x =
+      structure_to_value
+        [("Operation", (Option.map x.operation ~f:Operation.to_value));
+        ("OperationId", (Option.map x.operationId ~f:OperationId.to_value));
+        ("StartTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("OperationStatus",
+          (Option.map x.operationStatus ~f:OperationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operationStatus =
+        (Option.map ~f:OperationStatus.of_xml)
+          (Xml.child xml_arg0 "OperationStatus") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      let operation =
+        (Option.map ~f:Operation.of_xml) (Xml.child xml_arg0 "Operation") in
+      make ?operationStatus ?endTime ?startTime ?operationId ?operation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operationStatus =
+        field_map json__ "OperationStatus" OperationStatus.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      let operation = field_map json__ "Operation" Operation.of_json in
+      make ?operationStatus ?endTime ?startTime ?operationId ?operation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A description of the aplication operation that provides information about the updates that were made to the application."]
 module ParsedInputRecord =
   struct
     type nonrec t = ParsedInputRecordField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParsedInputRecordField.to_value)) |>
         (fun x -> `List x)
@@ -6585,6 +7023,9 @@ module ProcessedInputRecords =
   struct
     type nonrec t = ProcessedInputRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProcessedInputRecord.to_value)) |>
         (fun x -> `List x)
@@ -6611,6 +7052,9 @@ module RawInputRecords =
   struct
     type nonrec t = RawInputRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RawInputRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6631,6 +7075,79 @@ module RawInputRecords =
       list_of_json ~kind:"RawInputRecords" ~of_json:RawInputRecord.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ApplicationVersionChangeDetails =
+  struct
+    type nonrec t =
+      {
+      applicationVersionUpdatedFrom: ApplicationVersionId.t option
+        [@ocaml.doc "The new version that the application was updated to."];
+      applicationVersionUpdatedTo: ApplicationVersionId.t option
+        [@ocaml.doc
+          "The version that the operation execution applied to the applicartion."]}
+    let make ?applicationVersionUpdatedFrom =
+      fun ?applicationVersionUpdatedTo ->
+        fun () ->
+          { applicationVersionUpdatedFrom; applicationVersionUpdatedTo }
+    let to_value x =
+      structure_to_value
+        [("ApplicationVersionUpdatedFrom",
+           (Option.map x.applicationVersionUpdatedFrom
+              ~f:ApplicationVersionId.to_value));
+        ("ApplicationVersionUpdatedTo",
+          (Option.map x.applicationVersionUpdatedTo
+             ~f:ApplicationVersionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationVersionUpdatedTo =
+        (Option.map ~f:ApplicationVersionId.of_xml)
+          (Xml.child xml_arg0 "ApplicationVersionUpdatedTo") in
+      let applicationVersionUpdatedFrom =
+        (Option.map ~f:ApplicationVersionId.of_xml)
+          (Xml.child xml_arg0 "ApplicationVersionUpdatedFrom") in
+      make ?applicationVersionUpdatedTo ?applicationVersionUpdatedFrom ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationVersionUpdatedTo =
+        field_map json__ "ApplicationVersionUpdatedTo"
+          ApplicationVersionId.of_json in
+      let applicationVersionUpdatedFrom =
+        field_map json__ "ApplicationVersionUpdatedFrom"
+          ApplicationVersionId.of_json in
+      make ?applicationVersionUpdatedTo ?applicationVersionUpdatedFrom ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the version changes that the operation applied to the application."]
+module OperationFailureDetails =
+  struct
+    type nonrec t =
+      {
+      rollbackOperationId: OperationId.t option
+        [@ocaml.doc
+          "The rollback operation ID of the system-rollback operation that executed due to failure in the current operation."];
+      errorInfo: ErrorInfo.t option }
+    let make ?rollbackOperationId =
+      fun ?errorInfo -> fun () -> { rollbackOperationId; errorInfo }
+    let to_value x =
+      structure_to_value
+        [("RollbackOperationId",
+           (Option.map x.rollbackOperationId ~f:OperationId.to_value));
+        ("ErrorInfo", (Option.map x.errorInfo ~f:ErrorInfo.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorInfo =
+        (Option.map ~f:ErrorInfo.of_xml) (Xml.child xml_arg0 "ErrorInfo") in
+      let rollbackOperationId =
+        (Option.map ~f:OperationId.of_xml)
+          (Xml.child xml_arg0 "RollbackOperationId") in
+      make ?errorInfo ?rollbackOperationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorInfo = field_map json__ "ErrorInfo" ErrorInfo.of_json in
+      let rollbackOperationId =
+        field_map json__ "RollbackOperationId" OperationId.of_json in
+      make ?errorInfo ?rollbackOperationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides a description of the operation failure."]
 module ApplicationCodeConfiguration =
   struct
     type nonrec t =
@@ -6657,20 +7174,49 @@ module ApplicationCodeConfiguration =
         (Option.map ~f:CodeContent.of_xml) (Xml.child xml_arg0 "CodeContent") in
       make ~codeContentType ?codeContent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let codeContentType =
-        field_map_exn json "CodeContentType" CodeContentType.of_json in
-      let codeContent = field_map json "CodeContent" CodeContent.of_json in
+        field_map_exn json__ "CodeContentType" CodeContentType.of_json in
+      let codeContent = field_map json__ "CodeContent" CodeContent.of_json in
       make ~codeContentType ?codeContent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes code configuration for an application."]
+module ApplicationEncryptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      keyId: KeyId.t option
+        [@ocaml.doc
+          "The key ARN, key ID, alias ARN, or alias name of the KMS key used for encryption at rest."];
+      keyType: KeyType.t
+        [@ocaml.doc "Specifies the type of key used for encryption at rest."]}
+    let context_ = "ApplicationEncryptionConfiguration"
+    let make ?keyId = fun ~keyType -> fun () -> { keyId; keyType }
+    let to_value x =
+      structure_to_value
+        [("KeyId", (Option.map x.keyId ~f:KeyId.to_value));
+        ("KeyType", (Some (KeyType.to_value x.keyType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keyType =
+        KeyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyType") in
+      let keyId = (Option.map ~f:KeyId.of_xml) (Xml.child xml_arg0 "KeyId") in
+      make ~keyType ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keyType = field_map_exn json__ "KeyType" KeyType.of_json in
+      let keyId = field_map json__ "KeyId" KeyId.of_json in
+      make ~keyType ?keyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the configuration to manage encryption at rest."]
 module ApplicationSnapshotConfiguration =
   struct
     type nonrec t =
       {
       snapshotsEnabled: BooleanObject.t
         [@ocaml.doc
-          "Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application."]}
+          "Describes whether snapshots are enabled for a Managed Service for Apache Flink application."]}
     let context_ = "ApplicationSnapshotConfiguration"
     let make ~snapshotsEnabled = fun () -> { snapshotsEnabled }
     let to_value x =
@@ -6684,13 +7230,40 @@ module ApplicationSnapshotConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotsEnabled") in
       make ~snapshotsEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotsEnabled =
-        field_map_exn json "SnapshotsEnabled" BooleanObject.of_json in
+        field_map_exn json__ "SnapshotsEnabled" BooleanObject.of_json in
       make ~snapshotsEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application."]
+       "Describes whether snapshots are enabled for a Managed Service for Apache Flink application."]
+module ApplicationSystemRollbackConfiguration =
+  struct
+    type nonrec t =
+      {
+      rollbackEnabled: BooleanObject.t
+        [@ocaml.doc
+          "Describes whether system rollbacks are enabled for a Managed Service for Apache Flink application."]}
+    let context_ = "ApplicationSystemRollbackConfiguration"
+    let make ~rollbackEnabled = fun () -> { rollbackEnabled }
+    let to_value x =
+      structure_to_value
+        [("RollbackEnabled",
+           (Some (BooleanObject.to_value x.rollbackEnabled)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rollbackEnabled =
+        BooleanObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RollbackEnabled") in
+      make ~rollbackEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rollbackEnabled =
+        field_map_exn json__ "RollbackEnabled" BooleanObject.of_json in
+      make ~rollbackEnabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the system rollback configuration for a Managed Service for Apache Flink application."]
 module EnvironmentProperties =
   struct
     type nonrec t =
@@ -6710,13 +7283,13 @@ module EnvironmentProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "PropertyGroups") in
       make ~propertyGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let propertyGroups =
-        field_map_exn json "PropertyGroups" PropertyGroups.of_json in
+        field_map_exn json__ "PropertyGroups" PropertyGroups.of_json in
       make ~propertyGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes execution properties for a Flink-based Kinesis Data Analytics application."]
+       "Describes execution properties for a Managed Service for Apache Flink application."]
 module FlinkApplicationConfiguration =
   struct
     type nonrec t =
@@ -6764,21 +7337,21 @@ module FlinkApplicationConfiguration =
       make ?parallelismConfiguration ?monitoringConfiguration
         ?checkpointConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parallelismConfiguration =
-        field_map json "ParallelismConfiguration"
+        field_map json__ "ParallelismConfiguration"
           ParallelismConfiguration.of_json in
       let monitoringConfiguration =
-        field_map json "MonitoringConfiguration"
+        field_map json__ "MonitoringConfiguration"
           MonitoringConfiguration.of_json in
       let checkpointConfiguration =
-        field_map json "CheckpointConfiguration"
+        field_map json__ "CheckpointConfiguration"
           CheckpointConfiguration.of_json in
       make ?parallelismConfiguration ?monitoringConfiguration
         ?checkpointConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes configuration parameters for a Flink-based Kinesis Data Analytics application or a Studio notebook."]
+       "Describes configuration parameters for a Managed Service for Apache Flink application or a Studio notebook."]
 module SqlApplicationConfiguration =
   struct
     type nonrec t =
@@ -6813,11 +7386,11 @@ module SqlApplicationConfiguration =
         (Option.map ~f:Inputs.of_xml) (Xml.child xml_arg0 "Inputs") in
       make ?referenceDataSources ?outputs ?inputs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceDataSources =
-        field_map json "ReferenceDataSources" ReferenceDataSources.of_json in
-      let outputs = field_map json "Outputs" Outputs.of_json in
-      let inputs = field_map json "Inputs" Inputs.of_json in
+        field_map json__ "ReferenceDataSources" ReferenceDataSources.of_json in
+      let outputs = field_map json__ "Outputs" Outputs.of_json in
+      let inputs = field_map json__ "Inputs" Inputs.of_json in
       make ?referenceDataSources ?outputs ?inputs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6826,6 +7399,9 @@ module VpcConfigurations =
   struct
     type nonrec t = VpcConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcConfiguration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6853,14 +7429,14 @@ module ZeppelinApplicationConfiguration =
       {
       monitoringConfiguration: ZeppelinMonitoringConfiguration.t option
         [@ocaml.doc
-          "The monitoring configuration of a Kinesis Data Analytics Studio notebook."];
+          "The monitoring configuration of a Managed Service for Apache Flink Studio notebook."];
       catalogConfiguration: CatalogConfiguration.t option
         [@ocaml.doc
-          "The Amazon Glue Data Catalog that you use in queries in a Kinesis Data Analytics Studio notebook."];
+          "The Amazon Glue Data Catalog that you use in queries in a Managed Service for Apache Flink Studio notebook."];
       deployAsApplicationConfiguration:
         DeployAsApplicationConfiguration.t option
         [@ocaml.doc
-          "The information required to deploy a Kinesis Data Analytics Studio notebook as an application with durable state."];
+          "The information required to deploy a Managed Service for Apache Flink Studio notebook as an application with durable state."];
       customArtifactsConfiguration: CustomArtifactsConfigurationList.t option
         [@ocaml.doc
           "Custom artifacts are dependency JARs and user-defined functions (UDF)."]}
@@ -6905,23 +7481,23 @@ module ZeppelinApplicationConfiguration =
       make ?customArtifactsConfiguration ?deployAsApplicationConfiguration
         ?catalogConfiguration ?monitoringConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customArtifactsConfiguration =
-        field_map json "CustomArtifactsConfiguration"
+        field_map json__ "CustomArtifactsConfiguration"
           CustomArtifactsConfigurationList.of_json in
       let deployAsApplicationConfiguration =
-        field_map json "DeployAsApplicationConfiguration"
+        field_map json__ "DeployAsApplicationConfiguration"
           DeployAsApplicationConfiguration.of_json in
       let catalogConfiguration =
-        field_map json "CatalogConfiguration" CatalogConfiguration.of_json in
+        field_map json__ "CatalogConfiguration" CatalogConfiguration.of_json in
       let monitoringConfiguration =
-        field_map json "MonitoringConfiguration"
+        field_map json__ "MonitoringConfiguration"
           ZeppelinMonitoringConfiguration.of_json in
       make ?customArtifactsConfiguration ?deployAsApplicationConfiguration
         ?catalogConfiguration ?monitoringConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration of a Kinesis Data Analytics Studio notebook."]
+       "The configuration of a Managed Service for Apache Flink Studio notebook."]
 module CloudWatchLoggingOption =
   struct
     type nonrec t =
@@ -6941,9 +7517,9 @@ module CloudWatchLoggingOption =
           (Xml.child_exn ~context:context_ xml_arg0 "LogStreamARN") in
       make ~logStreamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logStreamARN =
-        field_map_exn json "LogStreamARN" LogStreamARN.of_json in
+        field_map_exn json__ "LogStreamARN" LogStreamARN.of_json in
       make ~logStreamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6952,23 +7528,22 @@ module ApplicationDetail =
   struct
     type nonrec t =
       {
-      applicationARN: ResourceARN.t
+      applicationARN: ResourceARN.t option
         [@ocaml.doc "The ARN of the application."];
       applicationDescription: ApplicationDescription.t option
         [@ocaml.doc "The description of the application."];
-      applicationName: ApplicationName.t
+      applicationName: ApplicationName.t option
         [@ocaml.doc "The name of the application."];
-      runtimeEnvironment: RuntimeEnvironment.t
-        [@ocaml.doc
-          "The runtime environment for the application (SQL-1_0, FLINK-1_6, FLINK-1_8, or FLINK-1_11)."];
+      runtimeEnvironment: RuntimeEnvironment.t option
+        [@ocaml.doc "The runtime environment for the application."];
       serviceExecutionRole: RoleARN.t option
         [@ocaml.doc
           "Specifies the IAM role that the application uses to access external resources."];
-      applicationStatus: ApplicationStatus.t
+      applicationStatus: ApplicationStatus.t option
         [@ocaml.doc "The status of the application."];
-      applicationVersionId: ApplicationVersionId.t
+      applicationVersionId: ApplicationVersionId.t option
         [@ocaml.doc
-          "Provides the current application version. Kinesis Data Analytics updates the ApplicationVersionId each time you update the application."];
+          "Provides the current application version. Managed Service for Apache Flink updates the ApplicationVersionId each time you update the application."];
       createTimestamp: Timestamp.t option
         [@ocaml.doc
           "The current timestamp when the application was created."];
@@ -6978,7 +7553,7 @@ module ApplicationDetail =
       applicationConfigurationDescription:
         ApplicationConfigurationDescription.t option
         [@ocaml.doc
-          "Describes details about the application code and starting parameters for a Kinesis Data Analytics application."];
+          "Describes details about the application code and starting parameters for a Managed Service for Apache Flink application."];
       cloudWatchLoggingOptionDescriptions:
         CloudWatchLoggingOptionDescriptions.t option
         [@ocaml.doc
@@ -6993,6 +7568,9 @@ module ApplicationDetail =
       applicationVersionRolledBackFrom: ApplicationVersionId.t option
         [@ocaml.doc
           "If you reverted the application using RollbackApplication, the application version when RollbackApplication was called."];
+      applicationVersionCreateTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the application version was created."];
       conditionalToken: ConditionalToken.t option
         [@ocaml.doc
           "A value you use to implement strong concurrency for application updates."];
@@ -7001,61 +7579,64 @@ module ApplicationDetail =
           "The version to which you want to roll back the application."];
       applicationMode: ApplicationMode.t option
         [@ocaml.doc
-          "To create a Kinesis Data Analytics Studio notebook, you must set the mode to INTERACTIVE. However, for a Kinesis Data Analytics for Apache Flink application, the mode is optional."]}
-    let context_ = "ApplicationDetail"
-    let make ?applicationDescription =
-      fun ?serviceExecutionRole ->
-        fun ?createTimestamp ->
-          fun ?lastUpdateTimestamp ->
-            fun ?applicationConfigurationDescription ->
-              fun ?cloudWatchLoggingOptionDescriptions ->
-                fun ?applicationMaintenanceConfigurationDescription ->
-                  fun ?applicationVersionUpdatedFrom ->
-                    fun ?applicationVersionRolledBackFrom ->
-                      fun ?conditionalToken ->
-                        fun ?applicationVersionRolledBackTo ->
-                          fun ?applicationMode ->
-                            fun ~applicationARN ->
-                              fun ~applicationName ->
-                                fun ~runtimeEnvironment ->
-                                  fun ~applicationStatus ->
-                                    fun ~applicationVersionId ->
-                                      fun () ->
-                                        {
-                                          applicationDescription;
-                                          serviceExecutionRole;
-                                          createTimestamp;
-                                          lastUpdateTimestamp;
-                                          applicationConfigurationDescription;
-                                          cloudWatchLoggingOptionDescriptions;
-                                          applicationMaintenanceConfigurationDescription;
-                                          applicationVersionUpdatedFrom;
-                                          applicationVersionRolledBackFrom;
-                                          conditionalToken;
-                                          applicationVersionRolledBackTo;
-                                          applicationMode;
-                                          applicationARN;
-                                          applicationName;
-                                          runtimeEnvironment;
-                                          applicationStatus;
-                                          applicationVersionId
-                                        }
+          "To create a Managed Service for Apache Flink Studio notebook, you must set the mode to INTERACTIVE. However, for a Managed Service for Apache Flink application, the mode is optional."]}
+    let make ?applicationARN =
+      fun ?applicationDescription ->
+        fun ?applicationName ->
+          fun ?runtimeEnvironment ->
+            fun ?serviceExecutionRole ->
+              fun ?applicationStatus ->
+                fun ?applicationVersionId ->
+                  fun ?createTimestamp ->
+                    fun ?lastUpdateTimestamp ->
+                      fun ?applicationConfigurationDescription ->
+                        fun ?cloudWatchLoggingOptionDescriptions ->
+                          fun ?applicationMaintenanceConfigurationDescription
+                            ->
+                            fun ?applicationVersionUpdatedFrom ->
+                              fun ?applicationVersionRolledBackFrom ->
+                                fun ?applicationVersionCreateTimestamp ->
+                                  fun ?conditionalToken ->
+                                    fun ?applicationVersionRolledBackTo ->
+                                      fun ?applicationMode ->
+                                        fun () ->
+                                          {
+                                            applicationARN;
+                                            applicationDescription;
+                                            applicationName;
+                                            runtimeEnvironment;
+                                            serviceExecutionRole;
+                                            applicationStatus;
+                                            applicationVersionId;
+                                            createTimestamp;
+                                            lastUpdateTimestamp;
+                                            applicationConfigurationDescription;
+                                            cloudWatchLoggingOptionDescriptions;
+                                            applicationMaintenanceConfigurationDescription;
+                                            applicationVersionUpdatedFrom;
+                                            applicationVersionRolledBackFrom;
+                                            applicationVersionCreateTimestamp;
+                                            conditionalToken;
+                                            applicationVersionRolledBackTo;
+                                            applicationMode
+                                          }
     let to_value x =
       structure_to_value
-        [("ApplicationARN", (Some (ResourceARN.to_value x.applicationARN)));
+        [("ApplicationARN",
+           (Option.map x.applicationARN ~f:ResourceARN.to_value));
         ("ApplicationDescription",
           (Option.map x.applicationDescription
              ~f:ApplicationDescription.to_value));
         ("ApplicationName",
-          (Some (ApplicationName.to_value x.applicationName)));
+          (Option.map x.applicationName ~f:ApplicationName.to_value));
         ("RuntimeEnvironment",
-          (Some (RuntimeEnvironment.to_value x.runtimeEnvironment)));
+          (Option.map x.runtimeEnvironment ~f:RuntimeEnvironment.to_value));
         ("ServiceExecutionRole",
           (Option.map x.serviceExecutionRole ~f:RoleARN.to_value));
         ("ApplicationStatus",
-          (Some (ApplicationStatus.to_value x.applicationStatus)));
+          (Option.map x.applicationStatus ~f:ApplicationStatus.to_value));
         ("ApplicationVersionId",
-          (Some (ApplicationVersionId.to_value x.applicationVersionId)));
+          (Option.map x.applicationVersionId ~f:ApplicationVersionId.to_value));
         ("CreateTimestamp",
           (Option.map x.createTimestamp ~f:Timestamp.to_value));
         ("LastUpdateTimestamp",
@@ -7075,6 +7656,9 @@ module ApplicationDetail =
         ("ApplicationVersionRolledBackFrom",
           (Option.map x.applicationVersionRolledBackFrom
              ~f:ApplicationVersionId.to_value));
+        ("ApplicationVersionCreateTimestamp",
+          (Option.map x.applicationVersionCreateTimestamp
+             ~f:Timestamp.to_value));
         ("ConditionalToken",
           (Option.map x.conditionalToken ~f:ConditionalToken.to_value));
         ("ApplicationVersionRolledBackTo",
@@ -7093,6 +7677,9 @@ module ApplicationDetail =
       let conditionalToken =
         (Option.map ~f:ConditionalToken.of_xml)
           (Xml.child xml_arg0 "ConditionalToken") in
+      let applicationVersionCreateTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ApplicationVersionCreateTimestamp") in
       let applicationVersionRolledBackFrom =
         (Option.map ~f:ApplicationVersionId.of_xml)
           (Xml.child xml_arg0 "ApplicationVersionRolledBackFrom") in
@@ -7116,86 +7703,90 @@ module ApplicationDetail =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "CreateTimestamp") in
       let applicationVersionId =
-        ApplicationVersionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationVersionId") in
+        (Option.map ~f:ApplicationVersionId.of_xml)
+          (Xml.child xml_arg0 "ApplicationVersionId") in
       let applicationStatus =
-        ApplicationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationStatus") in
+        (Option.map ~f:ApplicationStatus.of_xml)
+          (Xml.child xml_arg0 "ApplicationStatus") in
       let serviceExecutionRole =
         (Option.map ~f:RoleARN.of_xml)
           (Xml.child xml_arg0 "ServiceExecutionRole") in
       let runtimeEnvironment =
-        RuntimeEnvironment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RuntimeEnvironment") in
+        (Option.map ~f:RuntimeEnvironment.of_xml)
+          (Xml.child xml_arg0 "RuntimeEnvironment") in
       let applicationName =
-        ApplicationName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
+        (Option.map ~f:ApplicationName.of_xml)
+          (Xml.child xml_arg0 "ApplicationName") in
       let applicationDescription =
         (Option.map ~f:ApplicationDescription.of_xml)
           (Xml.child xml_arg0 "ApplicationDescription") in
       let applicationARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationARN") in
+        (Option.map ~f:ResourceARN.of_xml)
+          (Xml.child xml_arg0 "ApplicationARN") in
       make ?applicationMode ?applicationVersionRolledBackTo ?conditionalToken
-        ?applicationVersionRolledBackFrom ?applicationVersionUpdatedFrom
+        ?applicationVersionCreateTimestamp ?applicationVersionRolledBackFrom
+        ?applicationVersionUpdatedFrom
         ?applicationMaintenanceConfigurationDescription
         ?cloudWatchLoggingOptionDescriptions
         ?applicationConfigurationDescription ?lastUpdateTimestamp
-        ?createTimestamp ~applicationVersionId ~applicationStatus
-        ?serviceExecutionRole ~runtimeEnvironment ~applicationName
-        ?applicationDescription ~applicationARN ()
+        ?createTimestamp ?applicationVersionId ?applicationStatus
+        ?serviceExecutionRole ?runtimeEnvironment ?applicationName
+        ?applicationDescription ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationMode =
-        field_map json "ApplicationMode" ApplicationMode.of_json in
+        field_map json__ "ApplicationMode" ApplicationMode.of_json in
       let applicationVersionRolledBackTo =
-        field_map json "ApplicationVersionRolledBackTo"
+        field_map json__ "ApplicationVersionRolledBackTo"
           ApplicationVersionId.of_json in
       let conditionalToken =
-        field_map json "ConditionalToken" ConditionalToken.of_json in
+        field_map json__ "ConditionalToken" ConditionalToken.of_json in
+      let applicationVersionCreateTimestamp =
+        field_map json__ "ApplicationVersionCreateTimestamp"
+          Timestamp.of_json in
       let applicationVersionRolledBackFrom =
-        field_map json "ApplicationVersionRolledBackFrom"
+        field_map json__ "ApplicationVersionRolledBackFrom"
           ApplicationVersionId.of_json in
       let applicationVersionUpdatedFrom =
-        field_map json "ApplicationVersionUpdatedFrom"
+        field_map json__ "ApplicationVersionUpdatedFrom"
           ApplicationVersionId.of_json in
       let applicationMaintenanceConfigurationDescription =
-        field_map json "ApplicationMaintenanceConfigurationDescription"
+        field_map json__ "ApplicationMaintenanceConfigurationDescription"
           ApplicationMaintenanceConfigurationDescription.of_json in
       let cloudWatchLoggingOptionDescriptions =
-        field_map json "CloudWatchLoggingOptionDescriptions"
+        field_map json__ "CloudWatchLoggingOptionDescriptions"
           CloudWatchLoggingOptionDescriptions.of_json in
       let applicationConfigurationDescription =
-        field_map json "ApplicationConfigurationDescription"
+        field_map json__ "ApplicationConfigurationDescription"
           ApplicationConfigurationDescription.of_json in
       let lastUpdateTimestamp =
-        field_map json "LastUpdateTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdateTimestamp" Timestamp.of_json in
       let createTimestamp =
-        field_map json "CreateTimestamp" Timestamp.of_json in
+        field_map json__ "CreateTimestamp" Timestamp.of_json in
       let applicationVersionId =
-        field_map_exn json "ApplicationVersionId"
-          ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationStatus =
-        field_map_exn json "ApplicationStatus" ApplicationStatus.of_json in
+        field_map json__ "ApplicationStatus" ApplicationStatus.of_json in
       let serviceExecutionRole =
-        field_map json "ServiceExecutionRole" RoleARN.of_json in
+        field_map json__ "ServiceExecutionRole" RoleARN.of_json in
       let runtimeEnvironment =
-        field_map_exn json "RuntimeEnvironment" RuntimeEnvironment.of_json in
+        field_map json__ "RuntimeEnvironment" RuntimeEnvironment.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map json__ "ApplicationName" ApplicationName.of_json in
       let applicationDescription =
-        field_map json "ApplicationDescription"
+        field_map json__ "ApplicationDescription"
           ApplicationDescription.of_json in
       let applicationARN =
-        field_map_exn json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       make ?applicationMode ?applicationVersionRolledBackTo ?conditionalToken
-        ?applicationVersionRolledBackFrom ?applicationVersionUpdatedFrom
+        ?applicationVersionCreateTimestamp ?applicationVersionRolledBackFrom
+        ?applicationVersionUpdatedFrom
         ?applicationMaintenanceConfigurationDescription
         ?cloudWatchLoggingOptionDescriptions
         ?applicationConfigurationDescription ?lastUpdateTimestamp
-        ?createTimestamp ~applicationVersionId ~applicationStatus
-        ?serviceExecutionRole ~runtimeEnvironment ~applicationName
-        ?applicationDescription ~applicationARN ()
+        ?createTimestamp ?applicationVersionId ?applicationStatus
+        ?serviceExecutionRole ?runtimeEnvironment ?applicationName
+        ?applicationDescription ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the application, including the application Amazon Resource Name (ARN), status, latest version, and input and output configurations."]
@@ -7213,8 +7804,8 @@ module CodeValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7233,8 +7824,8 @@ module ConcurrentModificationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7253,8 +7844,8 @@ module InvalidApplicationConfigurationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7273,8 +7864,8 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified input parameter value is not valid."]
@@ -7292,8 +7883,8 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request JSON is not valid for the operation."]
@@ -7311,8 +7902,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The number of allowed resources has been exceeded."]
@@ -7330,8 +7921,8 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The application is not available for this operation."]
@@ -7349,8 +7940,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specified application can't be found."]
@@ -7369,38 +7960,50 @@ module ApplicationConfigurationUpdate =
       flinkApplicationConfigurationUpdate:
         FlinkApplicationConfigurationUpdate.t option
         [@ocaml.doc
-          "Describes updates to a Flink-based Kinesis Data Analytics application's configuration."];
+          "Describes updates to a Managed Service for Apache Flink application's configuration."];
       environmentPropertyUpdates: EnvironmentPropertyUpdates.t option
         [@ocaml.doc
-          "Describes updates to the environment properties for a Flink-based Kinesis Data Analytics application."];
+          "Describes updates to the environment properties for a Managed Service for Apache Flink application."];
       applicationSnapshotConfigurationUpdate:
         ApplicationSnapshotConfigurationUpdate.t option
         [@ocaml.doc
-          "Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application."];
+          "Describes whether snapshots are enabled for a Managed Service for Apache Flink application."];
+      applicationSystemRollbackConfigurationUpdate:
+        ApplicationSystemRollbackConfigurationUpdate.t option
+        [@ocaml.doc
+          "Describes whether system rollbacks are enabled for a Managed Service for Apache Flink application."];
       vpcConfigurationUpdates: VpcConfigurationUpdates.t option
         [@ocaml.doc
           "Updates to the array of descriptions of VPC configurations available to the application."];
       zeppelinApplicationConfigurationUpdate:
         ZeppelinApplicationConfigurationUpdate.t option
         [@ocaml.doc
-          "Updates to the configuration of a Kinesis Data Analytics Studio notebook."]}
+          "Updates to the configuration of a Managed Service for Apache Flink Studio notebook."];
+      applicationEncryptionConfigurationUpdate:
+        ApplicationEncryptionConfigurationUpdate.t option
+        [@ocaml.doc
+          "Represents an update for encryption at rest configuration."]}
     let make ?sqlApplicationConfigurationUpdate =
       fun ?applicationCodeConfigurationUpdate ->
         fun ?flinkApplicationConfigurationUpdate ->
           fun ?environmentPropertyUpdates ->
             fun ?applicationSnapshotConfigurationUpdate ->
-              fun ?vpcConfigurationUpdates ->
-                fun ?zeppelinApplicationConfigurationUpdate ->
-                  fun () ->
-                    {
-                      sqlApplicationConfigurationUpdate;
-                      applicationCodeConfigurationUpdate;
-                      flinkApplicationConfigurationUpdate;
-                      environmentPropertyUpdates;
-                      applicationSnapshotConfigurationUpdate;
-                      vpcConfigurationUpdates;
-                      zeppelinApplicationConfigurationUpdate
-                    }
+              fun ?applicationSystemRollbackConfigurationUpdate ->
+                fun ?vpcConfigurationUpdates ->
+                  fun ?zeppelinApplicationConfigurationUpdate ->
+                    fun ?applicationEncryptionConfigurationUpdate ->
+                      fun () ->
+                        {
+                          sqlApplicationConfigurationUpdate;
+                          applicationCodeConfigurationUpdate;
+                          flinkApplicationConfigurationUpdate;
+                          environmentPropertyUpdates;
+                          applicationSnapshotConfigurationUpdate;
+                          applicationSystemRollbackConfigurationUpdate;
+                          vpcConfigurationUpdates;
+                          zeppelinApplicationConfigurationUpdate;
+                          applicationEncryptionConfigurationUpdate
+                        }
     let to_value x =
       structure_to_value
         [("SqlApplicationConfigurationUpdate",
@@ -7418,20 +8021,32 @@ module ApplicationConfigurationUpdate =
         ("ApplicationSnapshotConfigurationUpdate",
           (Option.map x.applicationSnapshotConfigurationUpdate
              ~f:ApplicationSnapshotConfigurationUpdate.to_value));
+        ("ApplicationSystemRollbackConfigurationUpdate",
+          (Option.map x.applicationSystemRollbackConfigurationUpdate
+             ~f:ApplicationSystemRollbackConfigurationUpdate.to_value));
         ("VpcConfigurationUpdates",
           (Option.map x.vpcConfigurationUpdates
              ~f:VpcConfigurationUpdates.to_value));
         ("ZeppelinApplicationConfigurationUpdate",
           (Option.map x.zeppelinApplicationConfigurationUpdate
-             ~f:ZeppelinApplicationConfigurationUpdate.to_value))]
+             ~f:ZeppelinApplicationConfigurationUpdate.to_value));
+        ("ApplicationEncryptionConfigurationUpdate",
+          (Option.map x.applicationEncryptionConfigurationUpdate
+             ~f:ApplicationEncryptionConfigurationUpdate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationEncryptionConfigurationUpdate =
+        (Option.map ~f:ApplicationEncryptionConfigurationUpdate.of_xml)
+          (Xml.child xml_arg0 "ApplicationEncryptionConfigurationUpdate") in
       let zeppelinApplicationConfigurationUpdate =
         (Option.map ~f:ZeppelinApplicationConfigurationUpdate.of_xml)
           (Xml.child xml_arg0 "ZeppelinApplicationConfigurationUpdate") in
       let vpcConfigurationUpdates =
         (Option.map ~f:VpcConfigurationUpdates.of_xml)
           (Xml.child xml_arg0 "VpcConfigurationUpdates") in
+      let applicationSystemRollbackConfigurationUpdate =
+        (Option.map ~f:ApplicationSystemRollbackConfigurationUpdate.of_xml)
+          (Xml.child xml_arg0 "ApplicationSystemRollbackConfigurationUpdate") in
       let applicationSnapshotConfigurationUpdate =
         (Option.map ~f:ApplicationSnapshotConfigurationUpdate.of_xml)
           (Xml.child xml_arg0 "ApplicationSnapshotConfigurationUpdate") in
@@ -7447,35 +8062,45 @@ module ApplicationConfigurationUpdate =
       let sqlApplicationConfigurationUpdate =
         (Option.map ~f:SqlApplicationConfigurationUpdate.of_xml)
           (Xml.child xml_arg0 "SqlApplicationConfigurationUpdate") in
-      make ?zeppelinApplicationConfigurationUpdate ?vpcConfigurationUpdates
+      make ?applicationEncryptionConfigurationUpdate
+        ?zeppelinApplicationConfigurationUpdate ?vpcConfigurationUpdates
+        ?applicationSystemRollbackConfigurationUpdate
         ?applicationSnapshotConfigurationUpdate ?environmentPropertyUpdates
         ?flinkApplicationConfigurationUpdate
         ?applicationCodeConfigurationUpdate
         ?sqlApplicationConfigurationUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let applicationEncryptionConfigurationUpdate =
+        field_map json__ "ApplicationEncryptionConfigurationUpdate"
+          ApplicationEncryptionConfigurationUpdate.of_json in
       let zeppelinApplicationConfigurationUpdate =
-        field_map json "ZeppelinApplicationConfigurationUpdate"
+        field_map json__ "ZeppelinApplicationConfigurationUpdate"
           ZeppelinApplicationConfigurationUpdate.of_json in
       let vpcConfigurationUpdates =
-        field_map json "VpcConfigurationUpdates"
+        field_map json__ "VpcConfigurationUpdates"
           VpcConfigurationUpdates.of_json in
+      let applicationSystemRollbackConfigurationUpdate =
+        field_map json__ "ApplicationSystemRollbackConfigurationUpdate"
+          ApplicationSystemRollbackConfigurationUpdate.of_json in
       let applicationSnapshotConfigurationUpdate =
-        field_map json "ApplicationSnapshotConfigurationUpdate"
+        field_map json__ "ApplicationSnapshotConfigurationUpdate"
           ApplicationSnapshotConfigurationUpdate.of_json in
       let environmentPropertyUpdates =
-        field_map json "EnvironmentPropertyUpdates"
+        field_map json__ "EnvironmentPropertyUpdates"
           EnvironmentPropertyUpdates.of_json in
       let flinkApplicationConfigurationUpdate =
-        field_map json "FlinkApplicationConfigurationUpdate"
+        field_map json__ "FlinkApplicationConfigurationUpdate"
           FlinkApplicationConfigurationUpdate.of_json in
       let applicationCodeConfigurationUpdate =
-        field_map json "ApplicationCodeConfigurationUpdate"
+        field_map json__ "ApplicationCodeConfigurationUpdate"
           ApplicationCodeConfigurationUpdate.of_json in
       let sqlApplicationConfigurationUpdate =
-        field_map json "SqlApplicationConfigurationUpdate"
+        field_map json__ "SqlApplicationConfigurationUpdate"
           SqlApplicationConfigurationUpdate.of_json in
-      make ?zeppelinApplicationConfigurationUpdate ?vpcConfigurationUpdates
+      make ?applicationEncryptionConfigurationUpdate
+        ?zeppelinApplicationConfigurationUpdate ?vpcConfigurationUpdates
+        ?applicationSystemRollbackConfigurationUpdate
         ?applicationSnapshotConfigurationUpdate ?environmentPropertyUpdates
         ?flinkApplicationConfigurationUpdate
         ?applicationCodeConfigurationUpdate
@@ -7486,6 +8111,9 @@ module CloudWatchLoggingOptionUpdates =
   struct
     type nonrec t = CloudWatchLoggingOptionUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchLoggingOptionUpdate.to_value)) |>
         (fun x -> `List x)
@@ -7514,7 +8142,7 @@ module RunConfigurationUpdate =
       {
       flinkRunConfiguration: FlinkRunConfiguration.t option
         [@ocaml.doc
-          "Describes the starting parameters for a Flink-based Kinesis Data Analytics application."];
+          "Describes the starting parameters for a Managed Service for Apache Flink application."];
       applicationRestoreConfiguration:
         ApplicationRestoreConfiguration.t option
         [@ocaml.doc
@@ -7540,16 +8168,17 @@ module RunConfigurationUpdate =
           (Xml.child xml_arg0 "FlinkRunConfiguration") in
       make ?applicationRestoreConfiguration ?flinkRunConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationRestoreConfiguration =
-        field_map json "ApplicationRestoreConfiguration"
+        field_map json__ "ApplicationRestoreConfiguration"
           ApplicationRestoreConfiguration.of_json in
       let flinkRunConfiguration =
-        field_map json "FlinkRunConfiguration" FlinkRunConfiguration.of_json in
+        field_map json__ "FlinkRunConfiguration"
+          FlinkRunConfiguration.of_json in
       make ?applicationRestoreConfiguration ?flinkRunConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the updates to the starting parameters for a Kinesis Data Analytics application."]
+       "Describes the updates to the starting parameters for a Managed Service for Apache Flink application."]
 module UnsupportedOperationException =
   struct
     type nonrec t = {
@@ -7564,8 +8193,8 @@ module UnsupportedOperationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7594,9 +8223,9 @@ module ApplicationMaintenanceConfigurationUpdate =
              "ApplicationMaintenanceWindowStartTimeUpdate") in
       make ~applicationMaintenanceWindowStartTimeUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationMaintenanceWindowStartTimeUpdate =
-        field_map_exn json "ApplicationMaintenanceWindowStartTimeUpdate"
+        field_map_exn json__ "ApplicationMaintenanceWindowStartTimeUpdate"
           ApplicationMaintenanceWindowStartTime.of_json in
       make ~applicationMaintenanceWindowStartTimeUpdate ()
     let to_json v = composed_to_json to_value v
@@ -7616,8 +8245,8 @@ module TooManyTagsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7651,6 +8280,9 @@ module TagKeys =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7679,6 +8311,9 @@ module Tags =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7704,7 +8339,7 @@ module RunConfiguration =
       {
       flinkRunConfiguration: FlinkRunConfiguration.t option
         [@ocaml.doc
-          "Describes the starting parameters for a Flink-based Kinesis Data Analytics application."];
+          "Describes the starting parameters for a Managed Service for Apache Flink application."];
       sqlRunConfigurations: SqlRunConfigurations.t option
         [@ocaml.doc
           "Describes the starting parameters for a SQL-based Kinesis Data Analytics application application."];
@@ -7745,23 +8380,27 @@ module RunConfiguration =
       make ?applicationRestoreConfiguration ?sqlRunConfigurations
         ?flinkRunConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationRestoreConfiguration =
-        field_map json "ApplicationRestoreConfiguration"
+        field_map json__ "ApplicationRestoreConfiguration"
           ApplicationRestoreConfiguration.of_json in
       let sqlRunConfigurations =
-        field_map json "SqlRunConfigurations" SqlRunConfigurations.of_json in
+        field_map json__ "SqlRunConfigurations" SqlRunConfigurations.of_json in
       let flinkRunConfiguration =
-        field_map json "FlinkRunConfiguration" FlinkRunConfiguration.of_json in
+        field_map json__ "FlinkRunConfiguration"
+          FlinkRunConfiguration.of_json in
       make ?applicationRestoreConfiguration ?sqlRunConfigurations
         ?flinkRunConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the starting parameters for an Kinesis Data Analytics application."]
+       "Describes the starting parameters for an Managed Service for Apache Flink application."]
 module ApplicationSummaries =
   struct
     type nonrec t = ApplicationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7806,6 +8445,9 @@ module ApplicationVersionSummaries =
   struct
     type nonrec t = ApplicationVersionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationVersionSummary.to_value)) |>
         (fun x -> `List x)
@@ -7830,7 +8472,8 @@ module ApplicationVersionSummaries =
   end
 module NextToken =
   struct
-    type nonrec t = string
+    type nonrec t = string[@@ocaml.doc
+                            "A pagination token that can be used in a subsequent request."]
     let context_ = "NextToken"
     let make i =
       let open Result in
@@ -7845,7 +8488,8 @@ module NextToken =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc
+       "A pagination token that can be used in a subsequent request."]
 module ListApplicationVersionsInputLimit =
   struct
     type nonrec t = int
@@ -7869,6 +8513,9 @@ module SnapshotSummaries =
   struct
     type nonrec t = SnapshotDetails.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotDetails.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7909,10 +8556,64 @@ module ListSnapshotsInputLimit =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ApplicationOperationInfoList =
+  struct
+    type nonrec t = ApplicationOperationInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApplicationOperationInfo.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ApplicationOperationInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApplicationOperationInfoList"
+        ~of_json:ApplicationOperationInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListApplicationOperationsInputLimit =
+  struct
+    type nonrec t = int[@@ocaml.doc
+                         "The limit on the number of records to be returned in the response."]
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListApplicationOperationsInputLimit"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The limit on the number of records to be returned in the response."]
 module ParsedInputRecords =
   struct
     type nonrec t = ParsedInputRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParsedInputRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7948,8 +8649,8 @@ module ResourceProvisionedThroughputExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7968,8 +8669,8 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service cannot complete the request."]
@@ -8007,12 +8708,13 @@ module UnableToDetectSchemaException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?processedInputRecords ?rawInputRecords ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let processedInputRecords =
-        field_map json "ProcessedInputRecords" ProcessedInputRecords.of_json in
+        field_map json__ "ProcessedInputRecords"
+          ProcessedInputRecords.of_json in
       let rawInputRecords =
-        field_map json "RawInputRecords" RawInputRecords.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "RawInputRecords" RawInputRecords.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?processedInputRecords ?rawInputRecords ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8040,13 +8742,93 @@ module S3Configuration =
           (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
       make ~fileKey ~bucketARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileKey = field_map_exn json "FileKey" FileKey.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
+    let of_json json__ =
+      let fileKey = field_map_exn json__ "FileKey" FileKey.of_json in
+      let bucketARN = field_map_exn json__ "BucketARN" BucketARN.of_json in
       make ~fileKey ~bucketARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For a SQL-based Kinesis Data Analytics application, provides a description of an Amazon S3 data source, including the Amazon Resource Name (ARN) of the S3 bucket and the name of the Amazon S3 object that contains the data."]
+module ApplicationOperationInfoDetails =
+  struct
+    type nonrec t =
+      {
+      operation: Operation.t option ;
+      startTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the operation was created."];
+      endTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the operation finished."];
+      operationStatus: OperationStatus.t option ;
+      applicationVersionChangeDetails:
+        ApplicationVersionChangeDetails.t option ;
+      operationFailureDetails: OperationFailureDetails.t option }
+    let make ?operation =
+      fun ?startTime ->
+        fun ?endTime ->
+          fun ?operationStatus ->
+            fun ?applicationVersionChangeDetails ->
+              fun ?operationFailureDetails ->
+                fun () ->
+                  {
+                    operation;
+                    startTime;
+                    endTime;
+                    operationStatus;
+                    applicationVersionChangeDetails;
+                    operationFailureDetails
+                  }
+    let to_value x =
+      structure_to_value
+        [("Operation", (Option.map x.operation ~f:Operation.to_value));
+        ("StartTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("OperationStatus",
+          (Option.map x.operationStatus ~f:OperationStatus.to_value));
+        ("ApplicationVersionChangeDetails",
+          (Option.map x.applicationVersionChangeDetails
+             ~f:ApplicationVersionChangeDetails.to_value));
+        ("OperationFailureDetails",
+          (Option.map x.operationFailureDetails
+             ~f:OperationFailureDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operationFailureDetails =
+        (Option.map ~f:OperationFailureDetails.of_xml)
+          (Xml.child xml_arg0 "OperationFailureDetails") in
+      let applicationVersionChangeDetails =
+        (Option.map ~f:ApplicationVersionChangeDetails.of_xml)
+          (Xml.child xml_arg0 "ApplicationVersionChangeDetails") in
+      let operationStatus =
+        (Option.map ~f:OperationStatus.of_xml)
+          (Xml.child xml_arg0 "OperationStatus") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let operation =
+        (Option.map ~f:Operation.of_xml) (Xml.child xml_arg0 "Operation") in
+      make ?operationFailureDetails ?applicationVersionChangeDetails
+        ?operationStatus ?endTime ?startTime ?operation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operationFailureDetails =
+        field_map json__ "OperationFailureDetails"
+          OperationFailureDetails.of_json in
+      let applicationVersionChangeDetails =
+        field_map json__ "ApplicationVersionChangeDetails"
+          ApplicationVersionChangeDetails.of_json in
+      let operationStatus =
+        field_map json__ "OperationStatus" OperationStatus.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      let operation = field_map json__ "Operation" Operation.of_json in
+      make ?operationFailureDetails ?applicationVersionChangeDetails
+        ?operationStatus ?endTime ?startTime ?operation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A description of the application operation that provides information about the updates that were made to the application."]
 module ApplicationConfiguration =
   struct
     type nonrec t =
@@ -8056,41 +8838,52 @@ module ApplicationConfiguration =
           "The creation and update parameters for a SQL-based Kinesis Data Analytics application."];
       flinkApplicationConfiguration: FlinkApplicationConfiguration.t option
         [@ocaml.doc
-          "The creation and update parameters for a Flink-based Kinesis Data Analytics application."];
+          "The creation and update parameters for a Managed Service for Apache Flink application."];
       environmentProperties: EnvironmentProperties.t option
         [@ocaml.doc
-          "Describes execution properties for a Flink-based Kinesis Data Analytics application."];
+          "Describes execution properties for a Managed Service for Apache Flink application."];
       applicationCodeConfiguration: ApplicationCodeConfiguration.t option
         [@ocaml.doc
-          "The code location and type parameters for a Flink-based Kinesis Data Analytics application."];
+          "The code location and type parameters for a Managed Service for Apache Flink application."];
       applicationSnapshotConfiguration:
         ApplicationSnapshotConfiguration.t option
         [@ocaml.doc
-          "Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application."];
+          "Describes whether snapshots are enabled for a Managed Service for Apache Flink application."];
+      applicationSystemRollbackConfiguration:
+        ApplicationSystemRollbackConfiguration.t option
+        [@ocaml.doc
+          "Describes whether system rollbacks are enabled for a Managed Service for Apache Flink application."];
       vpcConfigurations: VpcConfigurations.t option
         [@ocaml.doc
           "The array of descriptions of VPC configurations available to the application."];
       zeppelinApplicationConfiguration:
         ZeppelinApplicationConfiguration.t option
         [@ocaml.doc
-          "The configuration parameters for a Kinesis Data Analytics Studio notebook."]}
+          "The configuration parameters for a Managed Service for Apache Flink Studio notebook."];
+      applicationEncryptionConfiguration:
+        ApplicationEncryptionConfiguration.t option
+        [@ocaml.doc "The configuration to manage encryption at rest."]}
     let make ?sqlApplicationConfiguration =
       fun ?flinkApplicationConfiguration ->
         fun ?environmentProperties ->
           fun ?applicationCodeConfiguration ->
             fun ?applicationSnapshotConfiguration ->
-              fun ?vpcConfigurations ->
-                fun ?zeppelinApplicationConfiguration ->
-                  fun () ->
-                    {
-                      sqlApplicationConfiguration;
-                      flinkApplicationConfiguration;
-                      environmentProperties;
-                      applicationCodeConfiguration;
-                      applicationSnapshotConfiguration;
-                      vpcConfigurations;
-                      zeppelinApplicationConfiguration
-                    }
+              fun ?applicationSystemRollbackConfiguration ->
+                fun ?vpcConfigurations ->
+                  fun ?zeppelinApplicationConfiguration ->
+                    fun ?applicationEncryptionConfiguration ->
+                      fun () ->
+                        {
+                          sqlApplicationConfiguration;
+                          flinkApplicationConfiguration;
+                          environmentProperties;
+                          applicationCodeConfiguration;
+                          applicationSnapshotConfiguration;
+                          applicationSystemRollbackConfiguration;
+                          vpcConfigurations;
+                          zeppelinApplicationConfiguration;
+                          applicationEncryptionConfiguration
+                        }
     let to_value x =
       structure_to_value
         [("SqlApplicationConfiguration",
@@ -8108,19 +8901,31 @@ module ApplicationConfiguration =
         ("ApplicationSnapshotConfiguration",
           (Option.map x.applicationSnapshotConfiguration
              ~f:ApplicationSnapshotConfiguration.to_value));
+        ("ApplicationSystemRollbackConfiguration",
+          (Option.map x.applicationSystemRollbackConfiguration
+             ~f:ApplicationSystemRollbackConfiguration.to_value));
         ("VpcConfigurations",
           (Option.map x.vpcConfigurations ~f:VpcConfigurations.to_value));
         ("ZeppelinApplicationConfiguration",
           (Option.map x.zeppelinApplicationConfiguration
-             ~f:ZeppelinApplicationConfiguration.to_value))]
+             ~f:ZeppelinApplicationConfiguration.to_value));
+        ("ApplicationEncryptionConfiguration",
+          (Option.map x.applicationEncryptionConfiguration
+             ~f:ApplicationEncryptionConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationEncryptionConfiguration =
+        (Option.map ~f:ApplicationEncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "ApplicationEncryptionConfiguration") in
       let zeppelinApplicationConfiguration =
         (Option.map ~f:ZeppelinApplicationConfiguration.of_xml)
           (Xml.child xml_arg0 "ZeppelinApplicationConfiguration") in
       let vpcConfigurations =
         (Option.map ~f:VpcConfigurations.of_xml)
           (Xml.child xml_arg0 "VpcConfigurations") in
+      let applicationSystemRollbackConfiguration =
+        (Option.map ~f:ApplicationSystemRollbackConfiguration.of_xml)
+          (Xml.child xml_arg0 "ApplicationSystemRollbackConfiguration") in
       let applicationSnapshotConfiguration =
         (Option.map ~f:ApplicationSnapshotConfiguration.of_xml)
           (Xml.child xml_arg0 "ApplicationSnapshotConfiguration") in
@@ -8136,42 +8941,56 @@ module ApplicationConfiguration =
       let sqlApplicationConfiguration =
         (Option.map ~f:SqlApplicationConfiguration.of_xml)
           (Xml.child xml_arg0 "SqlApplicationConfiguration") in
-      make ?zeppelinApplicationConfiguration ?vpcConfigurations
+      make ?applicationEncryptionConfiguration
+        ?zeppelinApplicationConfiguration ?vpcConfigurations
+        ?applicationSystemRollbackConfiguration
         ?applicationSnapshotConfiguration ?applicationCodeConfiguration
         ?environmentProperties ?flinkApplicationConfiguration
         ?sqlApplicationConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let applicationEncryptionConfiguration =
+        field_map json__ "ApplicationEncryptionConfiguration"
+          ApplicationEncryptionConfiguration.of_json in
       let zeppelinApplicationConfiguration =
-        field_map json "ZeppelinApplicationConfiguration"
+        field_map json__ "ZeppelinApplicationConfiguration"
           ZeppelinApplicationConfiguration.of_json in
       let vpcConfigurations =
-        field_map json "VpcConfigurations" VpcConfigurations.of_json in
+        field_map json__ "VpcConfigurations" VpcConfigurations.of_json in
+      let applicationSystemRollbackConfiguration =
+        field_map json__ "ApplicationSystemRollbackConfiguration"
+          ApplicationSystemRollbackConfiguration.of_json in
       let applicationSnapshotConfiguration =
-        field_map json "ApplicationSnapshotConfiguration"
+        field_map json__ "ApplicationSnapshotConfiguration"
           ApplicationSnapshotConfiguration.of_json in
       let applicationCodeConfiguration =
-        field_map json "ApplicationCodeConfiguration"
+        field_map json__ "ApplicationCodeConfiguration"
           ApplicationCodeConfiguration.of_json in
       let environmentProperties =
-        field_map json "EnvironmentProperties" EnvironmentProperties.of_json in
+        field_map json__ "EnvironmentProperties"
+          EnvironmentProperties.of_json in
       let flinkApplicationConfiguration =
-        field_map json "FlinkApplicationConfiguration"
+        field_map json__ "FlinkApplicationConfiguration"
           FlinkApplicationConfiguration.of_json in
       let sqlApplicationConfiguration =
-        field_map json "SqlApplicationConfiguration"
+        field_map json__ "SqlApplicationConfiguration"
           SqlApplicationConfiguration.of_json in
-      make ?zeppelinApplicationConfiguration ?vpcConfigurations
+      make ?applicationEncryptionConfiguration
+        ?zeppelinApplicationConfiguration ?vpcConfigurations
+        ?applicationSystemRollbackConfiguration
         ?applicationSnapshotConfiguration ?applicationCodeConfiguration
         ?environmentProperties ?flinkApplicationConfiguration
         ?sqlApplicationConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the creation parameters for a Kinesis Data Analytics application."]
+       "Specifies the creation parameters for a Managed Service for Apache Flink application."]
 module CloudWatchLoggingOptions =
   struct
     type nonrec t = CloudWatchLoggingOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchLoggingOption.to_value)) |>
         (fun x -> `List x)
@@ -8259,8 +9078,11 @@ module UpdateApplicationResponse =
   struct
     type nonrec t =
       {
-      applicationDetail: ApplicationDetail.t
-        [@ocaml.doc "Describes application updates."]}
+      applicationDetail: ApplicationDetail.t option
+        [@ocaml.doc "Describes application updates."];
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "The operation ID that can be used to track the request."]}
     type nonrec error =
       [ `CodeValidationException of CodeValidationException.t 
       | `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -8272,8 +9094,8 @@ module UpdateApplicationResponse =
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateApplicationResponse"
-    let make ~applicationDetail = fun () -> { applicationDetail }
+    let make ?applicationDetail =
+      fun ?operationId -> fun () -> { applicationDetail; operationId }
     let error_of_json name json =
       match name with
       | "CodeValidationException" ->
@@ -8361,21 +9183,25 @@ module UpdateApplicationResponse =
     let to_value x =
       structure_to_value
         [("ApplicationDetail",
-           (Some (ApplicationDetail.to_value x.applicationDetail)))]
+           (Option.map x.applicationDetail ~f:ApplicationDetail.to_value));
+        ("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       let applicationDetail =
-        ApplicationDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationDetail") in
-      make ~applicationDetail ()
+        (Option.map ~f:ApplicationDetail.of_xml)
+          (Xml.child xml_arg0 "ApplicationDetail") in
+      make ?operationId ?applicationDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       let applicationDetail =
-        field_map_exn json "ApplicationDetail" ApplicationDetail.of_json in
-      make ~applicationDetail ()
+        field_map json__ "ApplicationDetail" ApplicationDetail.of_json in
+      make ?operationId ?applicationDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing Kinesis Data Analytics application. Using this operation, you can update application code, input configuration, and output configuration. Kinesis Data Analytics updates the ApplicationVersionId each time you update your application. You cannot update the RuntimeEnvironment of an existing application. If you need to update an application's RuntimeEnvironment, you must delete the application and create it again."]
+       "Updates an existing Managed Service for Apache Flink application. Using this operation, you can update application code, input configuration, and output configuration. Managed Service for Apache Flink updates the ApplicationVersionId each time you update your application."]
 module UpdateApplicationRequest =
   struct
     type nonrec t =
@@ -8397,7 +9223,10 @@ module UpdateApplicationRequest =
           "Describes application Amazon CloudWatch logging option updates. You can only update existing CloudWatch logging options with this action. To add a new CloudWatch logging option, use AddApplicationCloudWatchLoggingOption."];
       conditionalToken: ConditionalToken.t option
         [@ocaml.doc
-          "A value you use to implement strong concurrency for application updates. You must provide the CurrentApplicationVersionId or the ConditionalToken. You get the application's current ConditionalToken using DescribeApplication. For better concurrency support, use the ConditionalToken parameter instead of CurrentApplicationVersionId."]}
+          "A value you use to implement strong concurrency for application updates. You must provide the CurrentApplicationVersionId or the ConditionalToken. You get the application's current ConditionalToken using DescribeApplication. For better concurrency support, use the ConditionalToken parameter instead of CurrentApplicationVersionId."];
+      runtimeEnvironmentUpdate: RuntimeEnvironment.t option
+        [@ocaml.doc
+          "Updates the Managed Service for Apache Flink runtime environment used to run your code. To avoid issues you must: Ensure your new jar and dependencies are compatible with the new runtime selected. Ensure your new code's state is compatible with the snapshot from which your application will start"]}
     let context_ = "UpdateApplicationRequest"
     let make ?currentApplicationVersionId =
       fun ?applicationConfigurationUpdate ->
@@ -8405,17 +9234,19 @@ module UpdateApplicationRequest =
           fun ?runConfigurationUpdate ->
             fun ?cloudWatchLoggingOptionUpdates ->
               fun ?conditionalToken ->
-                fun ~applicationName ->
-                  fun () ->
-                    {
-                      currentApplicationVersionId;
-                      applicationConfigurationUpdate;
-                      serviceExecutionRoleUpdate;
-                      runConfigurationUpdate;
-                      cloudWatchLoggingOptionUpdates;
-                      conditionalToken;
-                      applicationName
-                    }
+                fun ?runtimeEnvironmentUpdate ->
+                  fun ~applicationName ->
+                    fun () ->
+                      {
+                        currentApplicationVersionId;
+                        applicationConfigurationUpdate;
+                        serviceExecutionRoleUpdate;
+                        runConfigurationUpdate;
+                        cloudWatchLoggingOptionUpdates;
+                        conditionalToken;
+                        runtimeEnvironmentUpdate;
+                        applicationName
+                      }
     let to_value x =
       structure_to_value
         [("ApplicationName",
@@ -8435,9 +9266,15 @@ module UpdateApplicationRequest =
           (Option.map x.cloudWatchLoggingOptionUpdates
              ~f:CloudWatchLoggingOptionUpdates.to_value));
         ("ConditionalToken",
-          (Option.map x.conditionalToken ~f:ConditionalToken.to_value))]
+          (Option.map x.conditionalToken ~f:ConditionalToken.to_value));
+        ("RuntimeEnvironmentUpdate",
+          (Option.map x.runtimeEnvironmentUpdate
+             ~f:RuntimeEnvironment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let runtimeEnvironmentUpdate =
+        (Option.map ~f:RuntimeEnvironment.of_xml)
+          (Xml.child xml_arg0 "RuntimeEnvironmentUpdate") in
       let conditionalToken =
         (Option.map ~f:ConditionalToken.of_xml)
           (Xml.child xml_arg0 "ConditionalToken") in
@@ -8459,37 +9296,40 @@ module UpdateApplicationRequest =
       let applicationName =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
-      make ?conditionalToken ?cloudWatchLoggingOptionUpdates
-        ?runConfigurationUpdate ?serviceExecutionRoleUpdate
-        ?applicationConfigurationUpdate ?currentApplicationVersionId
-        ~applicationName ()
+      make ?runtimeEnvironmentUpdate ?conditionalToken
+        ?cloudWatchLoggingOptionUpdates ?runConfigurationUpdate
+        ?serviceExecutionRoleUpdate ?applicationConfigurationUpdate
+        ?currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let runtimeEnvironmentUpdate =
+        field_map json__ "RuntimeEnvironmentUpdate"
+          RuntimeEnvironment.of_json in
       let conditionalToken =
-        field_map json "ConditionalToken" ConditionalToken.of_json in
+        field_map json__ "ConditionalToken" ConditionalToken.of_json in
       let cloudWatchLoggingOptionUpdates =
-        field_map json "CloudWatchLoggingOptionUpdates"
+        field_map json__ "CloudWatchLoggingOptionUpdates"
           CloudWatchLoggingOptionUpdates.of_json in
       let runConfigurationUpdate =
-        field_map json "RunConfigurationUpdate"
+        field_map json__ "RunConfigurationUpdate"
           RunConfigurationUpdate.of_json in
       let serviceExecutionRoleUpdate =
-        field_map json "ServiceExecutionRoleUpdate" RoleARN.of_json in
+        field_map json__ "ServiceExecutionRoleUpdate" RoleARN.of_json in
       let applicationConfigurationUpdate =
-        field_map json "ApplicationConfigurationUpdate"
+        field_map json__ "ApplicationConfigurationUpdate"
           ApplicationConfigurationUpdate.of_json in
       let currentApplicationVersionId =
-        field_map json "CurrentApplicationVersionId"
+        field_map json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
-      make ?conditionalToken ?cloudWatchLoggingOptionUpdates
-        ?runConfigurationUpdate ?serviceExecutionRoleUpdate
-        ?applicationConfigurationUpdate ?currentApplicationVersionId
-        ~applicationName ()
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
+      make ?runtimeEnvironmentUpdate ?conditionalToken
+        ?cloudWatchLoggingOptionUpdates ?runConfigurationUpdate
+        ?serviceExecutionRoleUpdate ?applicationConfigurationUpdate
+        ?currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing Kinesis Data Analytics application. Using this operation, you can update application code, input configuration, and output configuration. Kinesis Data Analytics updates the ApplicationVersionId each time you update your application. You cannot update the RuntimeEnvironment of an existing application. If you need to update an application's RuntimeEnvironment, you must delete the application and create it again."]
+       "Updates an existing Managed Service for Apache Flink application. Using this operation, you can update application code, input configuration, and output configuration. Managed Service for Apache Flink updates the ApplicationVersionId each time you update your application."]
 module UpdateApplicationMaintenanceConfigurationResponse =
   struct
     type nonrec t =
@@ -8590,16 +9430,16 @@ module UpdateApplicationMaintenanceConfigurationResponse =
           (Xml.child xml_arg0 "ApplicationARN") in
       make ?applicationMaintenanceConfigurationDescription ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationMaintenanceConfigurationDescription =
-        field_map json "ApplicationMaintenanceConfigurationDescription"
+        field_map json__ "ApplicationMaintenanceConfigurationDescription"
           ApplicationMaintenanceConfigurationDescription.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       make ?applicationMaintenanceConfigurationDescription ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the maintenance configuration of the Kinesis Data Analytics application. You can invoke this operation on an application that is in one of the two following states: READY or RUNNING. If you invoke it when the application is in a state other than these two states, it throws a ResourceInUseException. The service makes use of the updated configuration the next time it schedules maintenance for the application. If you invoke this operation after the service schedules maintenance, the service will apply the configuration update the next time it schedules maintenance for the application. This means that you might not see the maintenance configuration update applied to the maintenance process that follows a successful invocation of this operation, but to the following maintenance process instead. To see the current maintenance configuration of your application, invoke the DescribeApplication operation. For information about application maintenance, see Kinesis Data Analytics for Apache Flink Maintenance. This operation is supported only for Amazon Kinesis Data Analytics for Apache Flink."]
+       "Updates the maintenance configuration of the Managed Service for Apache Flink application. You can invoke this operation on an application that is in one of the two following states: READY or RUNNING. If you invoke it when the application is in a state other than these two states, it throws a ResourceInUseException. The service makes use of the updated configuration the next time it schedules maintenance for the application. If you invoke this operation after the service schedules maintenance, the service will apply the configuration update the next time it schedules maintenance for the application. This means that you might not see the maintenance configuration update applied to the maintenance process that follows a successful invocation of this operation, but to the following maintenance process instead. To see the current maintenance configuration of your application, invoke the DescribeApplication operation. For information about application maintenance, see Managed Service for Apache Flink for Apache Flink Maintenance. This operation is supported only for Managed Service for Apache Flink."]
 module UpdateApplicationMaintenanceConfigurationRequest =
   struct
     type nonrec t =
@@ -8635,16 +9475,16 @@ module UpdateApplicationMaintenanceConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~applicationMaintenanceConfigurationUpdate ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationMaintenanceConfigurationUpdate =
-        field_map_exn json "ApplicationMaintenanceConfigurationUpdate"
+        field_map_exn json__ "ApplicationMaintenanceConfigurationUpdate"
           ApplicationMaintenanceConfigurationUpdate.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~applicationMaintenanceConfigurationUpdate ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the maintenance configuration of the Kinesis Data Analytics application. You can invoke this operation on an application that is in one of the two following states: READY or RUNNING. If you invoke it when the application is in a state other than these two states, it throws a ResourceInUseException. The service makes use of the updated configuration the next time it schedules maintenance for the application. If you invoke this operation after the service schedules maintenance, the service will apply the configuration update the next time it schedules maintenance for the application. This means that you might not see the maintenance configuration update applied to the maintenance process that follows a successful invocation of this operation, but to the following maintenance process instead. To see the current maintenance configuration of your application, invoke the DescribeApplication operation. For information about application maintenance, see Kinesis Data Analytics for Apache Flink Maintenance. This operation is supported only for Amazon Kinesis Data Analytics for Apache Flink."]
+       "Updates the maintenance configuration of the Managed Service for Apache Flink application. You can invoke this operation on an application that is in one of the two following states: READY or RUNNING. If you invoke it when the application is in a state other than these two states, it throws a ResourceInUseException. The service makes use of the updated configuration the next time it schedules maintenance for the application. If you invoke this operation after the service schedules maintenance, the service will apply the configuration update the next time it schedules maintenance for the application. This means that you might not see the maintenance configuration update applied to the maintenance process that follows a successful invocation of this operation, but to the following maintenance process instead. To see the current maintenance configuration of your application, invoke the DescribeApplication operation. For information about application maintenance, see Managed Service for Apache Flink for Apache Flink Maintenance. This operation is supported only for Managed Service for Apache Flink."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -8723,14 +9563,14 @@ module UntagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags from a Kinesis Data Analytics application. For more information, see Using Tagging."]
+       "Removes one or more tags from a Managed Service for Apache Flink application. For more information, see Using Tagging."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceARN: KinesisAnalyticsARN.t
         [@ocaml.doc
-          "The ARN of the Kinesis Data Analytics application from which to remove the tags."];
+          "The ARN of the Managed Service for Apache Flink application from which to remove the tags."];
       tagKeys: TagKeys.t
         [@ocaml.doc
           "A list of keys of tags to remove from the specified application."]}
@@ -8750,14 +9590,14 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" KinesisAnalyticsARN.of_json in
+        field_map_exn json__ "ResourceARN" KinesisAnalyticsARN.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags from a Kinesis Data Analytics application. For more information, see Using Tagging."]
+       "Removes one or more tags from a Managed Service for Apache Flink application. For more information, see Using Tagging."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -8836,7 +9676,7 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more key-value tags to a Kinesis Data Analytics application. Note that the maximum number of application tags includes system tags. The maximum number of user-defined application tags is 50. For more information, see Using Tagging."]
+       "Adds one or more key-value tags to a Managed Service for Apache Flink application. Note that the maximum number of application tags includes system tags. The maximum number of user-defined application tags is 50. For more information, see Using Tagging."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -8860,17 +9700,21 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" KinesisAnalyticsARN.of_json in
+        field_map_exn json__ "ResourceARN" KinesisAnalyticsARN.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more key-value tags to a Kinesis Data Analytics application. Note that the maximum number of application tags includes system tags. The maximum number of user-defined application tags is 50. For more information, see Using Tagging."]
+       "Adds one or more key-value tags to a Managed Service for Apache Flink application. Note that the maximum number of application tags includes system tags. The maximum number of user-defined application tags is 50. For more information, see Using Tagging."]
 module StopApplicationResponse =
   struct
-    type nonrec t = unit
+    type nonrec t =
+      {
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "The operation ID that can be used to track the request."]}
     type nonrec error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -8881,7 +9725,7 @@ module StopApplicationResponse =
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "ConcurrentModificationException" ->
@@ -8950,15 +9794,21 @@ module StopApplicationResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    let to_value x =
+      structure_to_value
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops the application from processing data. You can stop an application only if it is in the running status, unless you set the Force parameter to true. You can use the DescribeApplication operation to find the application status. Kinesis Data Analytics takes a snapshot when the application is stopped, unless Force is set to true."]
+       "Stops the application from processing data. You can stop an application only if it is in the running status, unless you set the Force parameter to true. You can use the DescribeApplication operation to find the application status. Managed Service for Apache Flink takes a snapshot when the application is stopped, unless Force is set to true."]
 module StopApplicationRequest =
   struct
     type nonrec t =
@@ -8967,7 +9817,7 @@ module StopApplicationRequest =
         [@ocaml.doc "The name of the running application to stop."];
       force: BooleanObject.t option
         [@ocaml.doc
-          "Set to true to force the application to stop. If you set Force to true, Kinesis Data Analytics stops the application without taking a snapshot. Force-stopping your application may lead to data loss or duplication. To prevent data loss or duplicate processing of data during application restarts, we recommend you to take frequent snapshots of your application. You can only force stop a Flink-based Kinesis Data Analytics application. You can't force stop a SQL-based Kinesis Data Analytics application. The application must be in the STARTING, UPDATING, STOPPING, AUTOSCALING, or RUNNING status."]}
+          "Set to true to force the application to stop. If you set Force to true, Managed Service for Apache Flink stops the application without taking a snapshot. Force-stopping your application may lead to data loss or duplication. To prevent data loss or duplicate processing of data during application restarts, we recommend you to take frequent snapshots of your application. You can only force stop a Managed Service for Apache Flink application. You can't force stop a SQL-based Kinesis Data Analytics application. The application must be in the STARTING, UPDATING, STOPPING, AUTOSCALING, or RUNNING status."]}
     let context_ = "StopApplicationRequest"
     let make ?force =
       fun ~applicationName -> fun () -> { force; applicationName }
@@ -8985,17 +9835,21 @@ module StopApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ?force ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "Force" BooleanObject.of_json in
+    let of_json json__ =
+      let force = field_map json__ "Force" BooleanObject.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?force ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops the application from processing data. You can stop an application only if it is in the running status, unless you set the Force parameter to true. You can use the DescribeApplication operation to find the application status. Kinesis Data Analytics takes a snapshot when the application is stopped, unless Force is set to true."]
+       "Stops the application from processing data. You can stop an application only if it is in the running status, unless you set the Force parameter to true. You can use the DescribeApplication operation to find the application status. Managed Service for Apache Flink takes a snapshot when the application is stopped, unless Force is set to true."]
 module StartApplicationResponse =
   struct
-    type nonrec t = unit
+    type nonrec t =
+      {
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "The operation ID that can be used to track the request."]}
     type nonrec error =
       [
         `InvalidApplicationConfigurationException of
@@ -9005,7 +9859,7 @@ module StartApplicationResponse =
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "InvalidApplicationConfigurationException" ->
@@ -9064,15 +9918,21 @@ module StartApplicationResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    let to_value x =
+      structure_to_value
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the specified Kinesis Data Analytics application. After creating an application, you must exclusively call this operation to start your application."]
+       "Starts the specified Managed Service for Apache Flink application. After creating an application, you must exclusively call this operation to start your application."]
 module StartApplicationRequest =
   struct
     type nonrec t =
@@ -9081,7 +9941,7 @@ module StartApplicationRequest =
         [@ocaml.doc "The name of the application."];
       runConfiguration: RunConfiguration.t option
         [@ocaml.doc
-          "Identifies the run configuration (start parameters) of a Kinesis Data Analytics application."]}
+          "Identifies the run configuration (start parameters) of a Managed Service for Apache Flink application."]}
     let context_ = "StartApplicationRequest"
     let make ?runConfiguration =
       fun ~applicationName -> fun () -> { runConfiguration; applicationName }
@@ -9101,19 +9961,23 @@ module StartApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ?runConfiguration ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let runConfiguration =
-        field_map json "RunConfiguration" RunConfiguration.of_json in
+        field_map json__ "RunConfiguration" RunConfiguration.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?runConfiguration ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the specified Kinesis Data Analytics application. After creating an application, you must exclusively call this operation to start your application."]
+       "Starts the specified Managed Service for Apache Flink application. After creating an application, you must exclusively call this operation to start your application."]
 module RollbackApplicationResponse =
   struct
-    type nonrec t = {
-      applicationDetail: ApplicationDetail.t }
+    type nonrec t =
+      {
+      applicationDetail: ApplicationDetail.t option ;
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "The operation ID that can be used to track the request."]}
     type nonrec error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -9123,8 +9987,8 @@ module RollbackApplicationResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RollbackApplicationResponse"
-    let make ~applicationDetail = fun () -> { applicationDetail }
+    let make ?applicationDetail =
+      fun ?operationId -> fun () -> { applicationDetail; operationId }
     let error_of_json name json =
       match name with
       | "ConcurrentModificationException" ->
@@ -9196,21 +10060,25 @@ module RollbackApplicationResponse =
     let to_value x =
       structure_to_value
         [("ApplicationDetail",
-           (Some (ApplicationDetail.to_value x.applicationDetail)))]
+           (Option.map x.applicationDetail ~f:ApplicationDetail.to_value));
+        ("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       let applicationDetail =
-        ApplicationDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationDetail") in
-      make ~applicationDetail ()
+        (Option.map ~f:ApplicationDetail.of_xml)
+          (Xml.child xml_arg0 "ApplicationDetail") in
+      make ?operationId ?applicationDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       let applicationDetail =
-        field_map_exn json "ApplicationDetail" ApplicationDetail.of_json in
-      make ~applicationDetail ()
+        field_map json__ "ApplicationDetail" ApplicationDetail.of_json in
+      make ?operationId ?applicationDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Reverts the application to the previous running version. You can roll back an application if you suspect it is stuck in a transient status. You can roll back an application only if it is in the UPDATING or AUTOSCALING status. When you rollback an application, it loads state data from the last successful snapshot. If the application has no snapshots, Kinesis Data Analytics rejects the rollback request. This action is not supported for Kinesis Data Analytics for SQL applications."]
+       "Reverts the application to the previous running version. You can roll back an application if you suspect it is stuck in a transient status or in the running status. You can roll back an application only if it is in the UPDATING, AUTOSCALING, or RUNNING statuses. When you rollback an application, it loads state data from the last successful snapshot. If the application has no snapshots, Managed Service for Apache Flink rejects the rollback request."]
 module RollbackApplicationRequest =
   struct
     type nonrec t =
@@ -9241,16 +10109,16 @@ module RollbackApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Reverts the application to the previous running version. You can roll back an application if you suspect it is stuck in a transient status. You can roll back an application only if it is in the UPDATING or AUTOSCALING status. When you rollback an application, it loads state data from the last successful snapshot. If the application has no snapshots, Kinesis Data Analytics rejects the rollback request. This action is not supported for Kinesis Data Analytics for SQL applications."]
+       "Reverts the application to the previous running version. You can roll back an application if you suspect it is stuck in a transient status or in the running status. You can roll back an application only if it is in the UPDATING, AUTOSCALING, or RUNNING statuses. When you rollback an application, it loads state data from the last successful snapshot. If the application has no snapshots, Managed Service for Apache Flink rejects the rollback request."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -9313,8 +10181,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the list of key-value tags assigned to the application. For more information, see Using Tagging."]
@@ -9336,9 +10204,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" KinesisAnalyticsARN.of_json in
+        field_map_exn json__ "ResourceARN" KinesisAnalyticsARN.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9347,7 +10215,7 @@ module ListApplicationsResponse =
   struct
     type nonrec t =
       {
-      applicationSummaries: ApplicationSummaries.t
+      applicationSummaries: ApplicationSummaries.t option
         [@ocaml.doc "A list of ApplicationSummary objects."];
       nextToken: ApplicationName.t option
         [@ocaml.doc
@@ -9355,10 +10223,8 @@ module ListApplicationsResponse =
     type nonrec error =
       [ `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListApplicationsResponse"
-    let make ?nextToken =
-      fun ~applicationSummaries ->
-        fun () -> { nextToken; applicationSummaries }
+    let make ?applicationSummaries =
+      fun ?nextToken -> fun () -> { applicationSummaries; nextToken }
     let error_of_json name json =
       match name with
       | "InvalidRequestException" ->
@@ -9386,7 +10252,8 @@ module ListApplicationsResponse =
     let to_value x =
       structure_to_value
         [("ApplicationSummaries",
-           (Some (ApplicationSummaries.to_value x.applicationSummaries)));
+           (Option.map x.applicationSummaries
+              ~f:ApplicationSummaries.to_value));
         ("NextToken", (Option.map x.nextToken ~f:ApplicationName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -9394,19 +10261,18 @@ module ListApplicationsResponse =
         (Option.map ~f:ApplicationName.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       let applicationSummaries =
-        ApplicationSummaries.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationSummaries") in
-      make ?nextToken ~applicationSummaries ()
+        (Option.map ~f:ApplicationSummaries.of_xml)
+          (Xml.child xml_arg0 "ApplicationSummaries") in
+      make ?nextToken ?applicationSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" ApplicationName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" ApplicationName.of_json in
       let applicationSummaries =
-        field_map_exn json "ApplicationSummaries"
-          ApplicationSummaries.of_json in
-      make ?nextToken ~applicationSummaries ()
+        field_map json__ "ApplicationSummaries" ApplicationSummaries.of_json in
+      make ?nextToken ?applicationSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of Kinesis Data Analytics applications in your account. For each application, the response includes the application name, Amazon Resource Name (ARN), and status. If you want detailed information about a specific application, use DescribeApplication."]
+       "Returns a list of Managed Service for Apache Flink applications in your account. For each application, the response includes the application name, Amazon Resource Name (ARN), and status. If you want detailed information about a specific application, use DescribeApplication."]
 module ListApplicationsRequest =
   struct
     type nonrec t =
@@ -9432,13 +10298,13 @@ module ListApplicationsRequest =
           (Xml.child xml_arg0 "Limit") in
       make ?nextToken ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" ApplicationName.of_json in
-      let limit = field_map json "Limit" ListApplicationsInputLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" ApplicationName.of_json in
+      let limit = field_map json__ "Limit" ListApplicationsInputLimit.of_json in
       make ?nextToken ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of Kinesis Data Analytics applications in your account. For each application, the response includes the application name, Amazon Resource Name (ARN), and status. If you want detailed information about a specific application, use DescribeApplication."]
+       "Returns a list of Managed Service for Apache Flink applications in your account. For each application, the response includes the application name, Amazon Resource Name (ARN), and status. If you want detailed information about a specific application, use DescribeApplication."]
 module ListApplicationVersionsResponse =
   struct
     type nonrec t =
@@ -9513,15 +10379,15 @@ module ListApplicationVersionsResponse =
           (Xml.child xml_arg0 "ApplicationVersionSummaries") in
       make ?nextToken ?applicationVersionSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let applicationVersionSummaries =
-        field_map json "ApplicationVersionSummaries"
+        field_map json__ "ApplicationVersionSummaries"
           ApplicationVersionSummaries.of_json in
       make ?nextToken ?applicationVersionSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the versions for the specified application, including versions that were rolled back. The response also includes a summary of the configuration associated with each version. To get the complete description of a specific application version, invoke the DescribeApplicationVersion operation. This operation is supported only for Amazon Kinesis Data Analytics for Apache Flink."]
+       "Lists all the versions for the specified application, including versions that were rolled back. The response also includes a summary of the configuration associated with each version. To get the complete description of a specific application version, invoke the DescribeApplicationVersion operation. This operation is supported only for Managed Service for Apache Flink."]
 module ListApplicationVersionsRequest =
   struct
     type nonrec t =
@@ -9559,16 +10425,16 @@ module ListApplicationVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ?nextToken ?limit ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let limit =
-        field_map json "Limit" ListApplicationVersionsInputLimit.of_json in
+        field_map json__ "Limit" ListApplicationVersionsInputLimit.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?nextToken ?limit ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the versions for the specified application, including versions that were rolled back. The response also includes a summary of the configuration associated with each version. To get the complete description of a specific application version, invoke the DescribeApplicationVersion operation. This operation is supported only for Amazon Kinesis Data Analytics for Apache Flink."]
+       "Lists all the versions for the specified application, including versions that were rolled back. The response also includes a summary of the configuration associated with each version. To get the complete description of a specific application version, invoke the DescribeApplicationVersion operation. This operation is supported only for Managed Service for Apache Flink."]
 module ListApplicationSnapshotsResponse =
   struct
     type nonrec t =
@@ -9633,10 +10499,10 @@ module ListApplicationSnapshotsResponse =
           (Xml.child xml_arg0 "SnapshotSummaries") in
       make ?nextToken ?snapshotSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let snapshotSummaries =
-        field_map json "SnapshotSummaries" SnapshotSummaries.of_json in
+        field_map json__ "SnapshotSummaries" SnapshotSummaries.of_json in
       make ?nextToken ?snapshotSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9675,15 +10541,157 @@ module ListApplicationSnapshotsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ?nextToken ?limit ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" ListSnapshotsInputLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" ListSnapshotsInputLimit.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?nextToken ?limit ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists information about the current application snapshots."]
+module ListApplicationOperationsResponse =
+  struct
+    type nonrec t =
+      {
+      applicationOperationInfoList: ApplicationOperationInfoList.t option ;
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?applicationOperationInfoList =
+      fun ?nextToken -> fun () -> { applicationOperationInfoList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ApplicationOperationInfoList",
+           (Option.map x.applicationOperationInfoList
+              ~f:ApplicationOperationInfoList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let applicationOperationInfoList =
+        (Option.map ~f:ApplicationOperationInfoList.of_xml)
+          (Xml.child xml_arg0 "ApplicationOperationInfoList") in
+      make ?nextToken ?applicationOperationInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let applicationOperationInfoList =
+        field_map json__ "ApplicationOperationInfoList"
+          ApplicationOperationInfoList.of_json in
+      make ?nextToken ?applicationOperationInfoList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A response that returns a list of operations for an application."]
+module ListApplicationOperationsRequest =
+  struct
+    type nonrec t =
+      {
+      applicationName: ApplicationName.t ;
+      limit: ListApplicationOperationsInputLimit.t option ;
+      nextToken: NextToken.t option ;
+      operation: Operation.t option ;
+      operationStatus: OperationStatus.t option }
+    let context_ = "ListApplicationOperationsRequest"
+    let make ?limit =
+      fun ?nextToken ->
+        fun ?operation ->
+          fun ?operationStatus ->
+            fun ~applicationName ->
+              fun () ->
+                {
+                  limit;
+                  nextToken;
+                  operation;
+                  operationStatus;
+                  applicationName
+                }
+    let to_value x =
+      structure_to_value
+        [("ApplicationName",
+           (Some (ApplicationName.to_value x.applicationName)));
+        ("Limit",
+          (Option.map x.limit ~f:ListApplicationOperationsInputLimit.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("Operation", (Option.map x.operation ~f:Operation.to_value));
+        ("OperationStatus",
+          (Option.map x.operationStatus ~f:OperationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operationStatus =
+        (Option.map ~f:OperationStatus.of_xml)
+          (Xml.child xml_arg0 "OperationStatus") in
+      let operation =
+        (Option.map ~f:Operation.of_xml) (Xml.child xml_arg0 "Operation") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let limit =
+        (Option.map ~f:ListApplicationOperationsInputLimit.of_xml)
+          (Xml.child xml_arg0 "Limit") in
+      let applicationName =
+        ApplicationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
+      make ?operationStatus ?operation ?nextToken ?limit ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operationStatus =
+        field_map json__ "OperationStatus" OperationStatus.of_json in
+      let operation = field_map json__ "Operation" Operation.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit =
+        field_map json__ "Limit" ListApplicationOperationsInputLimit.of_json in
+      let applicationName =
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
+      make ?operationStatus ?operation ?nextToken ?limit ~applicationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request for a list of operations performed on an application."]
 module DiscoverInputSchemaResponse =
   struct
     type nonrec t =
@@ -9821,14 +10829,15 @@ module DiscoverInputSchemaResponse =
       make ?rawInputRecords ?processedInputRecords ?parsedInputRecords
         ?inputSchema ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rawInputRecords =
-        field_map json "RawInputRecords" RawInputRecords.of_json in
+        field_map json__ "RawInputRecords" RawInputRecords.of_json in
       let processedInputRecords =
-        field_map json "ProcessedInputRecords" ProcessedInputRecords.of_json in
+        field_map json__ "ProcessedInputRecords"
+          ProcessedInputRecords.of_json in
       let parsedInputRecords =
-        field_map json "ParsedInputRecords" ParsedInputRecords.of_json in
-      let inputSchema = field_map json "InputSchema" SourceSchema.of_json in
+        field_map json__ "ParsedInputRecords" ParsedInputRecords.of_json in
+      let inputSchema = field_map json__ "InputSchema" SourceSchema.of_json in
       make ?rawInputRecords ?processedInputRecords ?parsedInputRecords
         ?inputSchema ()
     let to_json v = composed_to_json to_value v
@@ -9847,7 +10856,7 @@ module DiscoverInputSchemaRequest =
       inputStartingPositionConfiguration:
         InputStartingPositionConfiguration.t option
         [@ocaml.doc
-          "The point at which you want Kinesis Data Analytics to start reading records from the specified streaming source discovery purposes."];
+          "The point at which you want Kinesis Data Analytics to start reading records from the specified streaming source for discovery purposes."];
       s3Configuration: S3Configuration.t option
         [@ocaml.doc
           "Specify this parameter to discover a schema from data in an Amazon S3 object."];
@@ -9901,18 +10910,18 @@ module DiscoverInputSchemaRequest =
         ?inputStartingPositionConfiguration ~serviceExecutionRole
         ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputProcessingConfiguration =
-        field_map json "InputProcessingConfiguration"
+        field_map json__ "InputProcessingConfiguration"
           InputProcessingConfiguration.of_json in
       let s3Configuration =
-        field_map json "S3Configuration" S3Configuration.of_json in
+        field_map json__ "S3Configuration" S3Configuration.of_json in
       let inputStartingPositionConfiguration =
-        field_map json "InputStartingPositionConfiguration"
+        field_map json__ "InputStartingPositionConfiguration"
           InputStartingPositionConfiguration.of_json in
       let serviceExecutionRole =
-        field_map_exn json "ServiceExecutionRole" RoleARN.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+        field_map_exn json__ "ServiceExecutionRole" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?inputProcessingConfiguration ?s3Configuration
         ?inputStartingPositionConfiguration ~serviceExecutionRole
         ?resourceARN ()
@@ -9984,13 +10993,13 @@ module DescribeApplicationVersionResponse =
           (Xml.child xml_arg0 "ApplicationVersionDetail") in
       make ?applicationVersionDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationVersionDetail =
-        field_map json "ApplicationVersionDetail" ApplicationDetail.of_json in
+        field_map json__ "ApplicationVersionDetail" ApplicationDetail.of_json in
       make ?applicationVersionDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a detailed description of a specified version of the application. To see a list of all the versions of an application, invoke the ListApplicationVersions operation. This operation is supported only for Amazon Kinesis Data Analytics for Apache Flink."]
+       "Provides a detailed description of a specified version of the application. To see a list of all the versions of an application, invoke the ListApplicationVersions operation. This operation is supported only for Managed Service for Apache Flink."]
 module DescribeApplicationVersionRequest =
   struct
     type nonrec t =
@@ -10021,21 +11030,21 @@ module DescribeApplicationVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~applicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationVersionId =
-        field_map_exn json "ApplicationVersionId"
+        field_map_exn json__ "ApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~applicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a detailed description of a specified version of the application. To see a list of all the versions of an application, invoke the ListApplicationVersions operation. This operation is supported only for Amazon Kinesis Data Analytics for Apache Flink."]
+       "Provides a detailed description of a specified version of the application. To see a list of all the versions of an application, invoke the ListApplicationVersions operation. This operation is supported only for Managed Service for Apache Flink."]
 module DescribeApplicationSnapshotResponse =
   struct
     type nonrec t =
       {
-      snapshotDetails: SnapshotDetails.t
+      snapshotDetails: SnapshotDetails.t option
         [@ocaml.doc
           "An object containing information about the application snapshot."]}
     type nonrec error =
@@ -10043,8 +11052,7 @@ module DescribeApplicationSnapshotResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeApplicationSnapshotResponse"
-    let make ~snapshotDetails = fun () -> { snapshotDetails }
+    let make ?snapshotDetails = fun () -> { snapshotDetails }
     let error_of_json name json =
       match name with
       | "InvalidArgumentException" ->
@@ -10090,18 +11098,18 @@ module DescribeApplicationSnapshotResponse =
     let to_value x =
       structure_to_value
         [("SnapshotDetails",
-           (Some (SnapshotDetails.to_value x.snapshotDetails)))]
+           (Option.map x.snapshotDetails ~f:SnapshotDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let snapshotDetails =
-        SnapshotDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SnapshotDetails") in
-      make ~snapshotDetails ()
+        (Option.map ~f:SnapshotDetails.of_xml)
+          (Xml.child xml_arg0 "SnapshotDetails") in
+      make ?snapshotDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotDetails =
-        field_map_exn json "SnapshotDetails" SnapshotDetails.of_json in
-      make ~snapshotDetails ()
+        field_map json__ "SnapshotDetails" SnapshotDetails.of_json in
+      make ?snapshotDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about a snapshot of application state data."]
@@ -10132,11 +11140,11 @@ module DescribeApplicationSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~snapshotName ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotName =
-        field_map_exn json "SnapshotName" SnapshotName.of_json in
+        field_map_exn json__ "SnapshotName" SnapshotName.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~snapshotName ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10145,7 +11153,7 @@ module DescribeApplicationResponse =
   struct
     type nonrec t =
       {
-      applicationDetail: ApplicationDetail.t
+      applicationDetail: ApplicationDetail.t option
         [@ocaml.doc
           "Provides a description of the application, such as the application's Amazon Resource Name (ARN), status, and latest version."]}
     type nonrec error =
@@ -10153,8 +11161,7 @@ module DescribeApplicationResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeApplicationResponse"
-    let make ~applicationDetail = fun () -> { applicationDetail }
+    let make ?applicationDetail = fun () -> { applicationDetail }
     let error_of_json name json =
       match name with
       | "InvalidArgumentException" ->
@@ -10198,21 +11205,21 @@ module DescribeApplicationResponse =
     let to_value x =
       structure_to_value
         [("ApplicationDetail",
-           (Some (ApplicationDetail.to_value x.applicationDetail)))]
+           (Option.map x.applicationDetail ~f:ApplicationDetail.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let applicationDetail =
-        ApplicationDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationDetail") in
-      make ~applicationDetail ()
+        (Option.map ~f:ApplicationDetail.of_xml)
+          (Xml.child xml_arg0 "ApplicationDetail") in
+      make ?applicationDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationDetail =
-        field_map_exn json "ApplicationDetail" ApplicationDetail.of_json in
-      make ~applicationDetail ()
+        field_map json__ "ApplicationDetail" ApplicationDetail.of_json in
+      make ?applicationDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about a specific Kinesis Data Analytics application. If you want to retrieve a list of all applications in your account, use the ListApplications operation."]
+       "Returns information about a specific Managed Service for Apache Flink application. If you want to retrieve a list of all applications in your account, use the ListApplications operation."]
 module DescribeApplicationRequest =
   struct
     type nonrec t =
@@ -10221,7 +11228,7 @@ module DescribeApplicationRequest =
         [@ocaml.doc "The name of the application."];
       includeAdditionalDetails: BooleanObject.t option
         [@ocaml.doc
-          "Displays verbose information about a Kinesis Data Analytics application, including the application's job plan."]}
+          "Displays verbose information about a Managed Service for Apache Flink application, including the application's job plan."]}
     let context_ = "DescribeApplicationRequest"
     let make ?includeAdditionalDetails =
       fun ~applicationName ->
@@ -10242,23 +11249,135 @@ module DescribeApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ?includeAdditionalDetails ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeAdditionalDetails =
-        field_map json "IncludeAdditionalDetails" BooleanObject.of_json in
+        field_map json__ "IncludeAdditionalDetails" BooleanObject.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?includeAdditionalDetails ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about a specific Kinesis Data Analytics application. If you want to retrieve a list of all applications in your account, use the ListApplications operation."]
+       "Returns information about a specific Managed Service for Apache Flink application. If you want to retrieve a list of all applications in your account, use the ListApplications operation."]
+module DescribeApplicationOperationResponse =
+  struct
+    type nonrec t =
+      {
+      applicationOperationInfoDetails:
+        ApplicationOperationInfoDetails.t option }
+    type nonrec error =
+      [ `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?applicationOperationInfoDetails =
+      fun () -> { applicationOperationInfoDetails }
+    let error_of_json name json =
+      match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ApplicationOperationInfoDetails",
+           (Option.map x.applicationOperationInfoDetails
+              ~f:ApplicationOperationInfoDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationOperationInfoDetails =
+        (Option.map ~f:ApplicationOperationInfoDetails.of_xml)
+          (Xml.child xml_arg0 "ApplicationOperationInfoDetails") in
+      make ?applicationOperationInfoDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationOperationInfoDetails =
+        field_map json__ "ApplicationOperationInfoDetails"
+          ApplicationOperationInfoDetails.of_json in
+      make ?applicationOperationInfoDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details of the operation that corresponds to the operation ID on a Managed Service for Apache Flink application."]
+module DescribeApplicationOperationRequest =
+  struct
+    type nonrec t =
+      {
+      applicationName: ApplicationName.t ;
+      operationId: OperationId.t }
+    let context_ = "DescribeApplicationOperationRequest"
+    let make ~applicationName =
+      fun ~operationId -> fun () -> { applicationName; operationId }
+    let to_value x =
+      structure_to_value
+        [("ApplicationName",
+           (Some (ApplicationName.to_value x.applicationName)));
+        ("OperationId", (Some (OperationId.to_value x.operationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operationId =
+        OperationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
+      let applicationName =
+        ApplicationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
+      make ~operationId ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operationId =
+        field_map_exn json__ "OperationId" OperationId.of_json in
+      let applicationName =
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
+      make ~operationId ~applicationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request for information about a specific operation that was performed on a Managed Service for Apache Flink application."]
 module DeleteApplicationVpcConfigurationResponse =
   struct
     type nonrec t =
       {
       applicationARN: ResourceARN.t option
-        [@ocaml.doc "The ARN of the Kinesis Data Analytics application."];
+        [@ocaml.doc
+          "The ARN of the Managed Service for Apache Flink application."];
       applicationVersionId: ApplicationVersionId.t option
-        [@ocaml.doc "The updated version ID of the application."]}
+        [@ocaml.doc "The updated version ID of the application."];
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "The operation ID that can be used to track the request."]}
     type nonrec error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -10270,7 +11389,8 @@ module DeleteApplicationVpcConfigurationResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?applicationARN =
       fun ?applicationVersionId ->
-        fun () -> { applicationARN; applicationVersionId }
+        fun ?operationId ->
+          fun () -> { applicationARN; applicationVersionId; operationId }
     let error_of_json name json =
       match name with
       | "ConcurrentModificationException" ->
@@ -10336,26 +11456,30 @@ module DeleteApplicationVpcConfigurationResponse =
         [("ApplicationARN",
            (Option.map x.applicationARN ~f:ResourceARN.to_value));
         ("ApplicationVersionId",
-          (Option.map x.applicationVersionId ~f:ApplicationVersionId.to_value))]
+          (Option.map x.applicationVersionId ~f:ApplicationVersionId.to_value));
+        ("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       let applicationVersionId =
         (Option.map ~f:ApplicationVersionId.of_xml)
           (Xml.child xml_arg0 "ApplicationVersionId") in
       let applicationARN =
         (Option.map ~f:ResourceARN.of_xml)
           (Xml.child xml_arg0 "ApplicationARN") in
-      make ?applicationVersionId ?applicationARN ()
+      make ?operationId ?applicationVersionId ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
-      make ?applicationVersionId ?applicationARN ()
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
+      make ?operationId ?applicationVersionId ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes a VPC configuration from a Kinesis Data Analytics application."]
+       "Removes a VPC configuration from a Managed Service for Apache Flink application."]
 module DeleteApplicationVpcConfigurationRequest =
   struct
     type nonrec t =
@@ -10409,26 +11533,28 @@ module DeleteApplicationVpcConfigurationRequest =
       make ?conditionalToken ~vpcConfigurationId ?currentApplicationVersionId
         ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conditionalToken =
-        field_map json "ConditionalToken" ConditionalToken.of_json in
+        field_map json__ "ConditionalToken" ConditionalToken.of_json in
       let vpcConfigurationId =
-        field_map_exn json "VpcConfigurationId" Id.of_json in
+        field_map_exn json__ "VpcConfigurationId" Id.of_json in
       let currentApplicationVersionId =
-        field_map json "CurrentApplicationVersionId"
+        field_map json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?conditionalToken ~vpcConfigurationId ?currentApplicationVersionId
         ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes a VPC configuration from a Kinesis Data Analytics application."]
+       "Removes a VPC configuration from a Managed Service for Apache Flink application."]
 module DeleteApplicationSnapshotResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `InvalidArgumentException of InvalidArgumentException.t 
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -10437,6 +11563,9 @@ module DeleteApplicationSnapshotResponse =
     let make () = ()
     let error_of_json name json =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "InvalidRequestException" ->
@@ -10453,6 +11582,9 @@ module DeleteApplicationSnapshotResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "InvalidRequestException" ->
@@ -10468,6 +11600,10 @@ module DeleteApplicationSnapshotResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
       | `InvalidArgumentException e ->
           `Assoc
             [("error", (`String "InvalidArgumentException"));
@@ -10539,13 +11675,13 @@ module DeleteApplicationSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~snapshotCreationTimestamp ~snapshotName ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotCreationTimestamp =
-        field_map_exn json "SnapshotCreationTimestamp" Timestamp.of_json in
+        field_map_exn json__ "SnapshotCreationTimestamp" Timestamp.of_json in
       let snapshotName =
-        field_map_exn json "SnapshotName" SnapshotName.of_json in
+        field_map_exn json__ "SnapshotName" SnapshotName.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~snapshotCreationTimestamp ~snapshotName ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a snapshot of application state."]
@@ -10639,7 +11775,7 @@ module DeleteApplicationResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified application. Kinesis Data Analytics halts application execution and deletes the application."]
+       "Deletes the specified application. Managed Service for Apache Flink halts application execution and deletes the application."]
 module DeleteApplicationRequest =
   struct
     type nonrec t =
@@ -10667,15 +11803,15 @@ module DeleteApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~createTimestamp ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createTimestamp =
-        field_map_exn json "CreateTimestamp" Timestamp.of_json in
+        field_map_exn json__ "CreateTimestamp" Timestamp.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~createTimestamp ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified application. Kinesis Data Analytics halts application execution and deletes the application."]
+       "Deletes the specified application. Managed Service for Apache Flink halts application execution and deletes the application."]
 module DeleteApplicationReferenceDataSourceResponse =
   struct
     type nonrec t =
@@ -10769,11 +11905,11 @@ module DeleteApplicationReferenceDataSourceResponse =
           (Xml.child xml_arg0 "ApplicationARN") in
       make ?applicationVersionId ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       make ?applicationVersionId ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10816,13 +11952,13 @@ module DeleteApplicationReferenceDataSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~referenceId ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let referenceId = field_map_exn json "ReferenceId" Id.of_json in
+    let of_json json__ =
+      let referenceId = field_map_exn json__ "ReferenceId" Id.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~referenceId ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10920,11 +12056,11 @@ module DeleteApplicationOutputResponse =
           (Xml.child xml_arg0 "ApplicationARN") in
       make ?applicationVersionId ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       make ?applicationVersionId ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10966,13 +12102,13 @@ module DeleteApplicationOutputRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~outputId ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputId = field_map_exn json "OutputId" Id.of_json in
+    let of_json json__ =
+      let outputId = field_map_exn json__ "OutputId" Id.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~outputId ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11070,11 +12206,11 @@ module DeleteApplicationInputProcessingConfigurationResponse =
           (Xml.child xml_arg0 "ApplicationARN") in
       make ?applicationVersionId ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       make ?applicationVersionId ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an InputProcessingConfiguration from an input."]
@@ -11115,13 +12251,13 @@ module DeleteApplicationInputProcessingConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~inputId ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let inputId = field_map_exn json "InputId" Id.of_json in
+    let of_json json__ =
+      let inputId = field_map_exn json__ "InputId" Id.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~inputId ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an InputProcessingConfiguration from an input."]
@@ -11137,7 +12273,10 @@ module DeleteApplicationCloudWatchLoggingOptionResponse =
       cloudWatchLoggingOptionDescriptions:
         CloudWatchLoggingOptionDescriptions.t option
         [@ocaml.doc
-          "The descriptions of the remaining CloudWatch logging options for the application."]}
+          "The descriptions of the remaining CloudWatch logging options for the application."];
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "The operation ID that can be used to track the request."]}
     type nonrec error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -11151,12 +12290,14 @@ module DeleteApplicationCloudWatchLoggingOptionResponse =
     let make ?applicationARN =
       fun ?applicationVersionId ->
         fun ?cloudWatchLoggingOptionDescriptions ->
-          fun () ->
-            {
-              applicationARN;
-              applicationVersionId;
-              cloudWatchLoggingOptionDescriptions
-            }
+          fun ?operationId ->
+            fun () ->
+              {
+                applicationARN;
+                applicationVersionId;
+                cloudWatchLoggingOptionDescriptions;
+                operationId
+              }
     let error_of_json name json =
       match name with
       | "ConcurrentModificationException" ->
@@ -11233,9 +12374,12 @@ module DeleteApplicationCloudWatchLoggingOptionResponse =
           (Option.map x.applicationVersionId ~f:ApplicationVersionId.to_value));
         ("CloudWatchLoggingOptionDescriptions",
           (Option.map x.cloudWatchLoggingOptionDescriptions
-             ~f:CloudWatchLoggingOptionDescriptions.to_value))]
+             ~f:CloudWatchLoggingOptionDescriptions.to_value));
+        ("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       let cloudWatchLoggingOptionDescriptions =
         (Option.map ~f:CloudWatchLoggingOptionDescriptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptionDescriptions") in
@@ -11245,22 +12389,23 @@ module DeleteApplicationCloudWatchLoggingOptionResponse =
       let applicationARN =
         (Option.map ~f:ResourceARN.of_xml)
           (Xml.child xml_arg0 "ApplicationARN") in
-      make ?cloudWatchLoggingOptionDescriptions ?applicationVersionId
-        ?applicationARN ()
+      make ?operationId ?cloudWatchLoggingOptionDescriptions
+        ?applicationVersionId ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       let cloudWatchLoggingOptionDescriptions =
-        field_map json "CloudWatchLoggingOptionDescriptions"
+        field_map json__ "CloudWatchLoggingOptionDescriptions"
           CloudWatchLoggingOptionDescriptions.of_json in
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
-      make ?cloudWatchLoggingOptionDescriptions ?applicationVersionId
-        ?applicationARN ()
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
+      make ?operationId ?cloudWatchLoggingOptionDescriptions
+        ?applicationVersionId ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon CloudWatch log stream from an Kinesis Data Analytics application."]
+       "Deletes an Amazon CloudWatch log stream from an SQL-based Kinesis Data Analytics application."]
 module DeleteApplicationCloudWatchLoggingOptionRequest =
   struct
     type nonrec t =
@@ -11316,21 +12461,21 @@ module DeleteApplicationCloudWatchLoggingOptionRequest =
       make ?conditionalToken ~cloudWatchLoggingOptionId
         ?currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conditionalToken =
-        field_map json "ConditionalToken" ConditionalToken.of_json in
+        field_map json__ "ConditionalToken" ConditionalToken.of_json in
       let cloudWatchLoggingOptionId =
-        field_map_exn json "CloudWatchLoggingOptionId" Id.of_json in
+        field_map_exn json__ "CloudWatchLoggingOptionId" Id.of_json in
       let currentApplicationVersionId =
-        field_map json "CurrentApplicationVersionId"
+        field_map json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?conditionalToken ~cloudWatchLoggingOptionId
         ?currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon CloudWatch log stream from an Kinesis Data Analytics application."]
+       "Deletes an Amazon CloudWatch log stream from an SQL-based Kinesis Data Analytics application."]
 module CreateApplicationSnapshotResponse =
   struct
     type nonrec t = unit
@@ -11456,11 +12601,11 @@ module CreateApplicationSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~snapshotName ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotName =
-        field_map_exn json "SnapshotName" SnapshotName.of_json in
+        field_map_exn json__ "SnapshotName" SnapshotName.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~snapshotName ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a snapshot of the application's state data."]
@@ -11468,9 +12613,9 @@ module CreateApplicationResponse =
   struct
     type nonrec t =
       {
-      applicationDetail: ApplicationDetail.t
+      applicationDetail: ApplicationDetail.t option
         [@ocaml.doc
-          "In response to your CreateApplication request, Kinesis Data Analytics returns a response with details of the application it created."]}
+          "In response to your CreateApplication request, Managed Service for Apache Flink returns a response with details of the application it created."]}
     type nonrec error =
       [ `CodeValidationException of CodeValidationException.t 
       | `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -11481,8 +12626,7 @@ module CreateApplicationResponse =
       | `TooManyTagsException of TooManyTagsException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateApplicationResponse"
-    let make ~applicationDetail = fun () -> { applicationDetail }
+    let make ?applicationDetail = fun () -> { applicationDetail }
     let error_of_json name json =
       match name with
       | "CodeValidationException" ->
@@ -11570,21 +12714,21 @@ module CreateApplicationResponse =
     let to_value x =
       structure_to_value
         [("ApplicationDetail",
-           (Some (ApplicationDetail.to_value x.applicationDetail)))]
+           (Option.map x.applicationDetail ~f:ApplicationDetail.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let applicationDetail =
-        ApplicationDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationDetail") in
-      make ~applicationDetail ()
+        (Option.map ~f:ApplicationDetail.of_xml)
+          (Xml.child xml_arg0 "ApplicationDetail") in
+      make ?applicationDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationDetail =
-        field_map_exn json "ApplicationDetail" ApplicationDetail.of_json in
-      make ~applicationDetail ()
+        field_map json__ "ApplicationDetail" ApplicationDetail.of_json in
+      make ?applicationDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a Kinesis Data Analytics application. For information about creating a Kinesis Data Analytics application, see Creating an Application."]
+       "Creates a Managed Service for Apache Flink application. For information about creating a Managed Service for Apache Flink application, see Creating an Application."]
 module CreateApplicationRequest =
   struct
     type nonrec t =
@@ -11595,8 +12739,7 @@ module CreateApplicationRequest =
       applicationDescription: ApplicationDescription.t option
         [@ocaml.doc "A summary description of the application."];
       runtimeEnvironment: RuntimeEnvironment.t
-        [@ocaml.doc
-          "The runtime environment for the application (SQL-1_0, FLINK-1_6, FLINK-1_8, or FLINK-1_11)."];
+        [@ocaml.doc "The runtime environment for the application."];
       serviceExecutionRole: RoleARN.t
         [@ocaml.doc
           "The IAM role used by the application to access Kinesis data streams, Kinesis Data Firehose delivery streams, Amazon S3 objects, and other external resources."];
@@ -11610,7 +12753,7 @@ module CreateApplicationRequest =
           "A list of one or more tags to assign to the application. A tag is a key-value pair that identifies an application. Note that the maximum number of application tags includes system tags. The maximum number of user-defined application tags is 50. For more information, see Using Tagging."];
       applicationMode: ApplicationMode.t option
         [@ocaml.doc
-          "Use the STREAMING mode to create a Kinesis Data Analytics Studio notebook. To create a Kinesis Data Analytics Studio notebook, use the INTERACTIVE mode."]}
+          "Use the STREAMING mode to create a Managed Service for Apache Flink application. To create a Managed Service for Apache Flink Studio notebook, use the INTERACTIVE mode."]}
     let context_ = "CreateApplicationRequest"
     let make ?applicationDescription =
       fun ?applicationConfiguration ->
@@ -11679,31 +12822,31 @@ module CreateApplicationRequest =
         ?applicationConfiguration ~serviceExecutionRole ~runtimeEnvironment
         ?applicationDescription ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationMode =
-        field_map json "ApplicationMode" ApplicationMode.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "ApplicationMode" ApplicationMode.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
       let applicationConfiguration =
-        field_map json "ApplicationConfiguration"
+        field_map json__ "ApplicationConfiguration"
           ApplicationConfiguration.of_json in
       let serviceExecutionRole =
-        field_map_exn json "ServiceExecutionRole" RoleARN.of_json in
+        field_map_exn json__ "ServiceExecutionRole" RoleARN.of_json in
       let runtimeEnvironment =
-        field_map_exn json "RuntimeEnvironment" RuntimeEnvironment.of_json in
+        field_map_exn json__ "RuntimeEnvironment" RuntimeEnvironment.of_json in
       let applicationDescription =
-        field_map json "ApplicationDescription"
+        field_map json__ "ApplicationDescription"
           ApplicationDescription.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?applicationMode ?tags ?cloudWatchLoggingOptions
         ?applicationConfiguration ~serviceExecutionRole ~runtimeEnvironment
         ?applicationDescription ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a Kinesis Data Analytics application. For information about creating a Kinesis Data Analytics application, see Creating an Application."]
+       "Creates a Managed Service for Apache Flink application. For information about creating a Managed Service for Apache Flink application, see Creating an Application."]
 module CreateApplicationPresignedUrlResponse =
   struct
     type nonrec t =
@@ -11767,13 +12910,13 @@ module CreateApplicationPresignedUrlResponse =
           (Xml.child xml_arg0 "AuthorizedUrl") in
       make ?authorizedUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authorizedUrl =
-        field_map json "AuthorizedUrl" AuthorizedUrl.of_json in
+        field_map json__ "AuthorizedUrl" AuthorizedUrl.of_json in
       make ?authorizedUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates and returns a URL that you can use to connect to an application's extension. Currently, the only available extension is the Apache Flink dashboard. The IAM role or user used to call this API defines the permissions to access the extension. After the presigned URL is created, no additional permission is required to access this URL. IAM authorization policies for this API are also enforced for every HTTP request that attempts to connect to the extension. You control the amount of time that the URL will be valid using the SessionExpirationDurationInSeconds parameter. If you do not provide this parameter, the returned URL is valid for twelve hours. The URL that you get from a call to CreateApplicationPresignedUrl must be used within 3 minutes to be valid. If you first try to use the URL after the 3-minute limit expires, the service returns an HTTP 403 Forbidden error."]
+       "Creates and returns a URL that you can use to connect to an application's extension. The IAM role or user used to call this API defines the permissions to access the extension. After the presigned URL is created, no additional permission is required to access this URL. IAM authorization policies for this API are also enforced for every HTTP request that attempts to connect to the extension. You control the amount of time that the URL will be valid using the SessionExpirationDurationInSeconds parameter. If you do not provide this parameter, the returned URL is valid for twelve hours. The URL that you get from a call to CreateApplicationPresignedUrl must be used within 3 minutes to be valid. If you first try to use the URL after the 3-minute limit expires, the service returns an HTTP 403 Forbidden error."]
 module CreateApplicationPresignedUrlRequest =
   struct
     type nonrec t =
@@ -11813,17 +12956,17 @@ module CreateApplicationPresignedUrlRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ?sessionExpirationDurationInSeconds ~urlType ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionExpirationDurationInSeconds =
-        field_map json "SessionExpirationDurationInSeconds"
+        field_map json__ "SessionExpirationDurationInSeconds"
           SessionExpirationDurationInSeconds.of_json in
-      let urlType = field_map_exn json "UrlType" UrlType.of_json in
+      let urlType = field_map_exn json__ "UrlType" UrlType.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?sessionExpirationDurationInSeconds ~urlType ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates and returns a URL that you can use to connect to an application's extension. Currently, the only available extension is the Apache Flink dashboard. The IAM role or user used to call this API defines the permissions to access the extension. After the presigned URL is created, no additional permission is required to access this URL. IAM authorization policies for this API are also enforced for every HTTP request that attempts to connect to the extension. You control the amount of time that the URL will be valid using the SessionExpirationDurationInSeconds parameter. If you do not provide this parameter, the returned URL is valid for twelve hours. The URL that you get from a call to CreateApplicationPresignedUrl must be used within 3 minutes to be valid. If you first try to use the URL after the 3-minute limit expires, the service returns an HTTP 403 Forbidden error."]
+       "Creates and returns a URL that you can use to connect to an application's extension. The IAM role or user used to call this API defines the permissions to access the extension. After the presigned URL is created, no additional permission is required to access this URL. IAM authorization policies for this API are also enforced for every HTTP request that attempts to connect to the extension. You control the amount of time that the URL will be valid using the SessionExpirationDurationInSeconds parameter. If you do not provide this parameter, the returned URL is valid for twelve hours. The URL that you get from a call to CreateApplicationPresignedUrl must be used within 3 minutes to be valid. If you first try to use the URL after the 3-minute limit expires, the service returns an HTTP 403 Forbidden error."]
 module AddApplicationVpcConfigurationResponse =
   struct
     type nonrec t =
@@ -11832,9 +12975,12 @@ module AddApplicationVpcConfigurationResponse =
         [@ocaml.doc "The ARN of the application."];
       applicationVersionId: ApplicationVersionId.t option
         [@ocaml.doc
-          "Provides the current application version. Kinesis Data Analytics updates the ApplicationVersionId each time you update the application."];
+          "Provides the current application version. Managed Service for Apache Flink updates the ApplicationVersionId each time you update the application."];
       vpcConfigurationDescription: VpcConfigurationDescription.t option
-        [@ocaml.doc "The parameters of the new VPC configuration."]}
+        [@ocaml.doc "The parameters of the new VPC configuration."];
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "The operation ID that can be used to track the request."]}
     type nonrec error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -11847,12 +12993,14 @@ module AddApplicationVpcConfigurationResponse =
     let make ?applicationARN =
       fun ?applicationVersionId ->
         fun ?vpcConfigurationDescription ->
-          fun () ->
-            {
-              applicationARN;
-              applicationVersionId;
-              vpcConfigurationDescription
-            }
+          fun ?operationId ->
+            fun () ->
+              {
+                applicationARN;
+                applicationVersionId;
+                vpcConfigurationDescription;
+                operationId
+              }
     let error_of_json name json =
       match name with
       | "ConcurrentModificationException" ->
@@ -11921,9 +13069,12 @@ module AddApplicationVpcConfigurationResponse =
           (Option.map x.applicationVersionId ~f:ApplicationVersionId.to_value));
         ("VpcConfigurationDescription",
           (Option.map x.vpcConfigurationDescription
-             ~f:VpcConfigurationDescription.to_value))]
+             ~f:VpcConfigurationDescription.to_value));
+        ("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       let vpcConfigurationDescription =
         (Option.map ~f:VpcConfigurationDescription.of_xml)
           (Xml.child xml_arg0 "VpcConfigurationDescription") in
@@ -11933,22 +13084,23 @@ module AddApplicationVpcConfigurationResponse =
       let applicationARN =
         (Option.map ~f:ResourceARN.of_xml)
           (Xml.child xml_arg0 "ApplicationARN") in
-      make ?vpcConfigurationDescription ?applicationVersionId ?applicationARN
-        ()
+      make ?operationId ?vpcConfigurationDescription ?applicationVersionId
+        ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       let vpcConfigurationDescription =
-        field_map json "VpcConfigurationDescription"
+        field_map json__ "VpcConfigurationDescription"
           VpcConfigurationDescription.of_json in
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
-      make ?vpcConfigurationDescription ?applicationVersionId ?applicationARN
-        ()
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
+      make ?operationId ?vpcConfigurationDescription ?applicationVersionId
+        ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a Virtual Private Cloud (VPC) configuration to the application. Applications can use VPCs to store and access resources securely. Note the following about VPC configurations for Kinesis Data Analytics applications: VPC configurations are not supported for SQL applications. When a VPC is added to a Kinesis Data Analytics application, the application can no longer be accessed from the Internet directly. To enable Internet access to the application, add an Internet gateway to your VPC."]
+       "Adds a Virtual Private Cloud (VPC) configuration to the application. Applications can use VPCs to store and access resources securely. Note the following about VPC configurations for Managed Service for Apache Flink applications: VPC configurations are not supported for SQL applications. When a VPC is added to a Managed Service for Apache Flink application, the application can no longer be accessed from the Internet directly. To enable Internet access to the application, add an Internet gateway to your VPC."]
 module AddApplicationVpcConfigurationRequest =
   struct
     type nonrec t =
@@ -12003,21 +13155,21 @@ module AddApplicationVpcConfigurationRequest =
       make ?conditionalToken ~vpcConfiguration ?currentApplicationVersionId
         ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conditionalToken =
-        field_map json "ConditionalToken" ConditionalToken.of_json in
+        field_map json__ "ConditionalToken" ConditionalToken.of_json in
       let vpcConfiguration =
-        field_map_exn json "VpcConfiguration" VpcConfiguration.of_json in
+        field_map_exn json__ "VpcConfiguration" VpcConfiguration.of_json in
       let currentApplicationVersionId =
-        field_map json "CurrentApplicationVersionId"
+        field_map json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?conditionalToken ~vpcConfiguration ?currentApplicationVersionId
         ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a Virtual Private Cloud (VPC) configuration to the application. Applications can use VPCs to store and access resources securely. Note the following about VPC configurations for Kinesis Data Analytics applications: VPC configurations are not supported for SQL applications. When a VPC is added to a Kinesis Data Analytics application, the application can no longer be accessed from the Internet directly. To enable Internet access to the application, add an Internet gateway to your VPC."]
+       "Adds a Virtual Private Cloud (VPC) configuration to the application. Applications can use VPCs to store and access resources securely. Note the following about VPC configurations for Managed Service for Apache Flink applications: VPC configurations are not supported for SQL applications. When a VPC is added to a Managed Service for Apache Flink application, the application can no longer be accessed from the Internet directly. To enable Internet access to the application, add an Internet gateway to your VPC."]
 module AddApplicationReferenceDataSourceResponse =
   struct
     type nonrec t =
@@ -12129,14 +13281,14 @@ module AddApplicationReferenceDataSourceResponse =
       make ?referenceDataSourceDescriptions ?applicationVersionId
         ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceDataSourceDescriptions =
-        field_map json "ReferenceDataSourceDescriptions"
+        field_map json__ "ReferenceDataSourceDescriptions"
           ReferenceDataSourceDescriptions.of_json in
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       make ?referenceDataSourceDescriptions ?applicationVersionId
         ?applicationARN ()
     let to_json v = composed_to_json to_value v
@@ -12187,14 +13339,15 @@ module AddApplicationReferenceDataSourceRequest =
       make ~referenceDataSource ~currentApplicationVersionId ~applicationName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceDataSource =
-        field_map_exn json "ReferenceDataSource" ReferenceDataSource.of_json in
+        field_map_exn json__ "ReferenceDataSource"
+          ReferenceDataSource.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~referenceDataSource ~currentApplicationVersionId ~applicationName
         ()
     let to_json v = composed_to_json to_value v
@@ -12304,13 +13457,13 @@ module AddApplicationOutputResponse =
           (Xml.child xml_arg0 "ApplicationARN") in
       make ?outputDescriptions ?applicationVersionId ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputDescriptions =
-        field_map json "OutputDescriptions" OutputDescriptions.of_json in
+        field_map json__ "OutputDescriptions" OutputDescriptions.of_json in
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       make ?outputDescriptions ?applicationVersionId ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12353,13 +13506,13 @@ module AddApplicationOutputRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~output ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let output = field_map_exn json "Output" Output.of_json in
+    let of_json json__ =
+      let output = field_map_exn json__ "Output" Output.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~output ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12474,13 +13627,13 @@ module AddApplicationInputResponse =
           (Xml.child xml_arg0 "ApplicationARN") in
       make ?inputDescriptions ?applicationVersionId ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputDescriptions =
-        field_map json "InputDescriptions" InputDescriptions.of_json in
+        field_map json__ "InputDescriptions" InputDescriptions.of_json in
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       make ?inputDescriptions ?applicationVersionId ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12521,13 +13674,13 @@ module AddApplicationInputRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~input ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let input = field_map_exn json "Input" Input.of_json in
+    let of_json json__ =
+      let input = field_map_exn json__ "Input" Input.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~input ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12649,15 +13802,15 @@ module AddApplicationInputProcessingConfigurationResponse =
       make ?inputProcessingConfigurationDescription ?inputId
         ?applicationVersionId ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputProcessingConfigurationDescription =
-        field_map json "InputProcessingConfigurationDescription"
+        field_map json__ "InputProcessingConfigurationDescription"
           InputProcessingConfigurationDescription.of_json in
-      let inputId = field_map json "InputId" Id.of_json in
+      let inputId = field_map json__ "InputId" Id.of_json in
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       make ?inputProcessingConfigurationDescription ?inputId
         ?applicationVersionId ?applicationARN ()
     let to_json v = composed_to_json to_value v
@@ -12720,16 +13873,16 @@ module AddApplicationInputProcessingConfigurationRequest =
       make ~inputProcessingConfiguration ~inputId
         ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputProcessingConfiguration =
-        field_map_exn json "InputProcessingConfiguration"
+        field_map_exn json__ "InputProcessingConfiguration"
           InputProcessingConfiguration.of_json in
-      let inputId = field_map_exn json "InputId" Id.of_json in
+      let inputId = field_map_exn json__ "InputId" Id.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~inputProcessingConfiguration ~inputId
         ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
@@ -12743,11 +13896,14 @@ module AddApplicationCloudWatchLoggingOptionResponse =
         [@ocaml.doc "The application's ARN."];
       applicationVersionId: ApplicationVersionId.t option
         [@ocaml.doc
-          "The new version ID of the Kinesis Data Analytics application. Kinesis Data Analytics updates the ApplicationVersionId each time you change the CloudWatch logging options."];
+          "The new version ID of the SQL-based Kinesis Data Analytics application. Kinesis Data Analytics updates the ApplicationVersionId each time you change the CloudWatch logging options."];
       cloudWatchLoggingOptionDescriptions:
         CloudWatchLoggingOptionDescriptions.t option
         [@ocaml.doc
-          "The descriptions of the current CloudWatch logging options for the Kinesis Data Analytics application."]}
+          "The descriptions of the current CloudWatch logging options for the SQL-based Kinesis Data Analytics application."];
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "The operation ID that can be used to track the request."]}
     type nonrec error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -12761,12 +13917,14 @@ module AddApplicationCloudWatchLoggingOptionResponse =
     let make ?applicationARN =
       fun ?applicationVersionId ->
         fun ?cloudWatchLoggingOptionDescriptions ->
-          fun () ->
-            {
-              applicationARN;
-              applicationVersionId;
-              cloudWatchLoggingOptionDescriptions
-            }
+          fun ?operationId ->
+            fun () ->
+              {
+                applicationARN;
+                applicationVersionId;
+                cloudWatchLoggingOptionDescriptions;
+                operationId
+              }
     let error_of_json name json =
       match name with
       | "ConcurrentModificationException" ->
@@ -12843,9 +14001,12 @@ module AddApplicationCloudWatchLoggingOptionResponse =
           (Option.map x.applicationVersionId ~f:ApplicationVersionId.to_value));
         ("CloudWatchLoggingOptionDescriptions",
           (Option.map x.cloudWatchLoggingOptionDescriptions
-             ~f:CloudWatchLoggingOptionDescriptions.to_value))]
+             ~f:CloudWatchLoggingOptionDescriptions.to_value));
+        ("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       let cloudWatchLoggingOptionDescriptions =
         (Option.map ~f:CloudWatchLoggingOptionDescriptions.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptionDescriptions") in
@@ -12855,19 +14016,20 @@ module AddApplicationCloudWatchLoggingOptionResponse =
       let applicationARN =
         (Option.map ~f:ResourceARN.of_xml)
           (Xml.child xml_arg0 "ApplicationARN") in
-      make ?cloudWatchLoggingOptionDescriptions ?applicationVersionId
-        ?applicationARN ()
+      make ?operationId ?cloudWatchLoggingOptionDescriptions
+        ?applicationVersionId ?applicationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       let cloudWatchLoggingOptionDescriptions =
-        field_map json "CloudWatchLoggingOptionDescriptions"
+        field_map json__ "CloudWatchLoggingOptionDescriptions"
           CloudWatchLoggingOptionDescriptions.of_json in
       let applicationVersionId =
-        field_map json "ApplicationVersionId" ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationARN =
-        field_map json "ApplicationARN" ResourceARN.of_json in
-      make ?cloudWatchLoggingOptionDescriptions ?applicationVersionId
-        ?applicationARN ()
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
+      make ?operationId ?cloudWatchLoggingOptionDescriptions
+        ?applicationVersionId ?applicationARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Adds an Amazon CloudWatch log stream to monitor application configuration errors."]
@@ -12879,7 +14041,7 @@ module AddApplicationCloudWatchLoggingOptionRequest =
         [@ocaml.doc "The Kinesis Data Analytics application name."];
       currentApplicationVersionId: ApplicationVersionId.t option
         [@ocaml.doc
-          "The version ID of the Kinesis Data Analytics application. You must provide the CurrentApplicationVersionId or the ConditionalToken.You can retrieve the application version ID using DescribeApplication. For better concurrency support, use the ConditionalToken parameter instead of CurrentApplicationVersionId."];
+          "The version ID of the SQL-based Kinesis Data Analytics application. You must provide the CurrentApplicationVersionId or the ConditionalToken.You can retrieve the application version ID using DescribeApplication. For better concurrency support, use the ConditionalToken parameter instead of CurrentApplicationVersionId."];
       cloudWatchLoggingOption: CloudWatchLoggingOption.t
         [@ocaml.doc
           "Provides the Amazon CloudWatch log stream Amazon Resource Name (ARN)."];
@@ -12926,17 +14088,17 @@ module AddApplicationCloudWatchLoggingOptionRequest =
       make ?conditionalToken ~cloudWatchLoggingOption
         ?currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conditionalToken =
-        field_map json "ConditionalToken" ConditionalToken.of_json in
+        field_map json__ "ConditionalToken" ConditionalToken.of_json in
       let cloudWatchLoggingOption =
-        field_map_exn json "CloudWatchLoggingOption"
+        field_map_exn json__ "CloudWatchLoggingOption"
           CloudWatchLoggingOption.of_json in
       let currentApplicationVersionId =
-        field_map json "CurrentApplicationVersionId"
+        field_map json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?conditionalToken ~cloudWatchLoggingOption
         ?currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v

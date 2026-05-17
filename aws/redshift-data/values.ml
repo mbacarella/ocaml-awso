@@ -30,7 +30,7 @@ module ParameterName =
     let context_ = "ParameterName"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^[0-9a-zA-Z_]+$"); i
+        ok_or_failwith (check_pattern i ~pattern:"[0-9a-zA-Z_]+"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -60,7 +60,7 @@ module SqlParameter =
       name: ParameterName.t [@ocaml.doc "The name of the parameter."];
       value: ParameterValue.t
         [@ocaml.doc
-          "The value of the parameter. Amazon Redshift implicitly converts to the proper data type. For more inforation, see Data types in the Amazon Redshift Database Developer Guide."]}
+          "The value of the parameter. Amazon Redshift implicitly converts to the proper data type. For more information, see Data types in the Amazon Redshift Database Developer Guide."]}
     let context_ = "SqlParameter"
     let make ~name = fun ~value -> fun () -> { name; value }
     let to_value x =
@@ -77,9 +77,9 @@ module SqlParameter =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" ParameterValue.of_json in
-      let name = field_map_exn json "name" ParameterName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" ParameterValue.of_json in
+      let name = field_map_exn json__ "name" ParameterName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A parameter used in a SQL statement."]
@@ -173,6 +173,26 @@ module Boolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module ResultFormatString =
+  struct
+    type nonrec t =
+      | JSON 
+      | CSV 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | JSON -> "JSON" | CSV -> "CSV" | Non_static_id s -> s
+    let of_string =
+      function | "JSON" -> JSON | "CSV" -> CSV | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResultFormatString" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResultFormatString" j)
+    let to_json = simple_to_json to_value
+  end
 module SecretArn =
   struct
     type nonrec t = string
@@ -191,6 +211,9 @@ module SqlParametersList =
     type nonrec t = SqlParameter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SqlParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -211,24 +234,6 @@ module SqlParametersList =
       list_of_json ~kind:"SqlParametersList" ~of_json:SqlParameter.of_json j
     let to_json v = composed_to_json to_value v
   end
-module StatementId =
-  struct
-    type nonrec t = string
-    let context_ = "StatementId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"^[a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12}(:\\d+)?$");
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StatementId" j
-    let to_json = simple_to_json to_value
-  end
 module StatementNameString =
   struct
     type nonrec t = string
@@ -236,7 +241,7 @@ module StatementNameString =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
+          ((check_string_max i ~max:2048) >>=
              (fun () -> check_string_min i ~min:0));
         i
     let of_string x = x
@@ -251,6 +256,9 @@ module StatementStringList =
   struct
     type nonrec t = StatementString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StatementString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -324,6 +332,24 @@ module Timestamp =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module UUID =
+  struct
+    type nonrec t = string
+    let context_ = "UUID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"[a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12}(:\\d{0,2})?");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UUID" j
+    let to_json = simple_to_json to_value
+  end
 module Integer =
   struct
     type nonrec t = int
@@ -337,7 +363,7 @@ module Integer =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Bool =
+module Bool_ =
   struct
     type nonrec t = bool
     let make i = i
@@ -354,68 +380,68 @@ module Field =
   struct
     type nonrec t =
       {
-      blobValue: Blob.t option [@ocaml.doc "A value of the BLOB data type."];
-      booleanValue: BoxedBoolean.t option
-        [@ocaml.doc "A value of the Boolean data type."];
-      doubleValue: BoxedDouble.t option
-        [@ocaml.doc "A value of the double data type."];
       isNull: BoxedBoolean.t option
         [@ocaml.doc "A value that indicates whether the data is NULL."];
+      booleanValue: BoxedBoolean.t option
+        [@ocaml.doc "A value of the Boolean data type."];
       longValue: BoxedLong.t option
         [@ocaml.doc "A value of the long data type."];
+      doubleValue: BoxedDouble.t option
+        [@ocaml.doc "A value of the double data type."];
       stringValue: String_.t option
-        [@ocaml.doc "A value of the string data type."]}
-    let make ?blobValue =
+        [@ocaml.doc "A value of the string data type."];
+      blobValue: Blob.t option [@ocaml.doc "A value of the BLOB data type."]}
+    let make ?isNull =
       fun ?booleanValue ->
-        fun ?doubleValue ->
-          fun ?isNull ->
-            fun ?longValue ->
-              fun ?stringValue ->
+        fun ?longValue ->
+          fun ?doubleValue ->
+            fun ?stringValue ->
+              fun ?blobValue ->
                 fun () ->
                   {
-                    blobValue;
-                    booleanValue;
-                    doubleValue;
                     isNull;
+                    booleanValue;
                     longValue;
-                    stringValue
+                    doubleValue;
+                    stringValue;
+                    blobValue
                   }
     let to_value x =
       structure_to_value
-        [("blobValue", (Option.map x.blobValue ~f:Blob.to_value));
+        [("isNull", (Option.map x.isNull ~f:BoxedBoolean.to_value));
         ("booleanValue",
           (Option.map x.booleanValue ~f:BoxedBoolean.to_value));
-        ("doubleValue", (Option.map x.doubleValue ~f:BoxedDouble.to_value));
-        ("isNull", (Option.map x.isNull ~f:BoxedBoolean.to_value));
         ("longValue", (Option.map x.longValue ~f:BoxedLong.to_value));
-        ("stringValue", (Option.map x.stringValue ~f:String_.to_value))]
+        ("doubleValue", (Option.map x.doubleValue ~f:BoxedDouble.to_value));
+        ("stringValue", (Option.map x.stringValue ~f:String_.to_value));
+        ("blobValue", (Option.map x.blobValue ~f:Blob.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let blobValue =
+        (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "blobValue") in
       let stringValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "stringValue") in
-      let longValue =
-        (Option.map ~f:BoxedLong.of_xml) (Xml.child xml_arg0 "longValue") in
-      let isNull =
-        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "isNull") in
       let doubleValue =
         (Option.map ~f:BoxedDouble.of_xml) (Xml.child xml_arg0 "doubleValue") in
+      let longValue =
+        (Option.map ~f:BoxedLong.of_xml) (Xml.child xml_arg0 "longValue") in
       let booleanValue =
         (Option.map ~f:BoxedBoolean.of_xml)
           (Xml.child xml_arg0 "booleanValue") in
-      let blobValue =
-        (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "blobValue") in
-      make ?stringValue ?longValue ?isNull ?doubleValue ?booleanValue
-        ?blobValue ()
+      let isNull =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "isNull") in
+      make ?blobValue ?stringValue ?doubleValue ?longValue ?booleanValue
+        ?isNull ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stringValue = field_map json "stringValue" String_.of_json in
-      let longValue = field_map json "longValue" BoxedLong.of_json in
-      let isNull = field_map json "isNull" BoxedBoolean.of_json in
-      let doubleValue = field_map json "doubleValue" BoxedDouble.of_json in
-      let booleanValue = field_map json "booleanValue" BoxedBoolean.of_json in
-      let blobValue = field_map json "blobValue" Blob.of_json in
-      make ?stringValue ?longValue ?isNull ?doubleValue ?booleanValue
-        ?blobValue ()
+    let of_json json__ =
+      let blobValue = field_map json__ "blobValue" Blob.of_json in
+      let stringValue = field_map json__ "stringValue" String_.of_json in
+      let doubleValue = field_map json__ "doubleValue" BoxedDouble.of_json in
+      let longValue = field_map json__ "longValue" BoxedLong.of_json in
+      let booleanValue = field_map json__ "booleanValue" BoxedBoolean.of_json in
+      let isNull = field_map json__ "isNull" BoxedBoolean.of_json in
+      make ?blobValue ?stringValue ?doubleValue ?longValue ?booleanValue
+        ?isNull ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A data value in a column."]
 module Long =
@@ -475,47 +501,40 @@ module TableMember =
     type nonrec t =
       {
       name: String_.t option [@ocaml.doc "The name of the table."];
-      schema: String_.t option
-        [@ocaml.doc "The schema containing the table."];
       type_: String_.t option
         [@ocaml.doc
-          "The type of the table. Possible values include TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, LOCAL TEMPORARY, ALIAS, and SYNONYM."]}
+          "The type of the table. Possible values include TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, LOCAL TEMPORARY, ALIAS, and SYNONYM."];
+      schema: String_.t option
+        [@ocaml.doc "The schema containing the table."]}
     let make ?name =
-      fun ?schema -> fun ?type_ -> fun () -> { name; schema; type_ }
+      fun ?type_ -> fun ?schema -> fun () -> { name; type_; schema }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:String_.to_value));
-        ("schema", (Option.map x.schema ~f:String_.to_value));
-        ("type", (Option.map x.type_ ~f:String_.to_value))]
+        ("type", (Option.map x.type_ ~f:String_.to_value));
+        ("schema", (Option.map x.schema ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       let schema =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "schema") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
-      make ?type_ ?schema ?name ()
+      make ?schema ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" String_.of_json in
-      let schema = field_map json "schema" String_.of_json in
-      let name = field_map json "name" String_.of_json in
-      make ?type_ ?schema ?name ()
+    let of_json json__ =
+      let schema = field_map json__ "schema" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?schema ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The properties of a table."]
 module StatementData =
   struct
     type nonrec t =
       {
-      createdAt: Timestamp.t option
-        [@ocaml.doc "The date and time (UTC) the statement was created."];
-      id: StatementId.t
+      id: UUID.t option
         [@ocaml.doc
           "The SQL statement identifier. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API."];
-      isBatchStatement: Boolean.t option
-        [@ocaml.doc
-          "A value that indicates whether the statement is a batch query request."];
-      queryParameters: SqlParametersList.t option
-        [@ocaml.doc "The parameters used in a SQL statement."];
       queryString: StatementString.t option [@ocaml.doc "The SQL statement."];
       queryStrings: StatementStringList.t option
         [@ocaml.doc
@@ -523,64 +542,94 @@ module StatementData =
       secretArn: SecretArn.t option
         [@ocaml.doc
           "The name or Amazon Resource Name (ARN) of the secret that enables access to the database."];
-      statementName: StatementNameString.t option
-        [@ocaml.doc "The name of the SQL statement."];
       status: StatusString.t option
         [@ocaml.doc
           "The status of the SQL statement. An example is the that the SQL statement finished."];
+      statementName: StatementNameString.t option
+        [@ocaml.doc "The name of the SQL statement."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time (UTC) the statement was created."];
       updatedAt: Timestamp.t option
         [@ocaml.doc
-          "The date and time (UTC) that the statement metadata was last updated."]}
-    let context_ = "StatementData"
-    let make ?createdAt =
-      fun ?isBatchStatement ->
-        fun ?queryParameters ->
-          fun ?queryString ->
-            fun ?queryStrings ->
-              fun ?secretArn ->
-                fun ?statementName ->
-                  fun ?status ->
-                    fun ?updatedAt ->
-                      fun ~id ->
-                        fun () ->
-                          {
-                            createdAt;
-                            isBatchStatement;
-                            queryParameters;
-                            queryString;
-                            queryStrings;
-                            secretArn;
-                            statementName;
-                            status;
-                            updatedAt;
-                            id
-                          }
+          "The date and time (UTC) that the statement metadata was last updated."];
+      queryParameters: SqlParametersList.t option
+        [@ocaml.doc "The parameters used in a SQL statement."];
+      isBatchStatement: Boolean.t option
+        [@ocaml.doc
+          "A value that indicates whether the statement is a batch query request."];
+      resultFormat: ResultFormatString.t option
+        [@ocaml.doc "The data format of the result of the SQL statement."];
+      sessionId: UUID.t option
+        [@ocaml.doc "The session identifier of the query."]}
+    let make ?id =
+      fun ?queryString ->
+        fun ?queryStrings ->
+          fun ?secretArn ->
+            fun ?status ->
+              fun ?statementName ->
+                fun ?createdAt ->
+                  fun ?updatedAt ->
+                    fun ?queryParameters ->
+                      fun ?isBatchStatement ->
+                        fun ?resultFormat ->
+                          fun ?sessionId ->
+                            fun () ->
+                              {
+                                id;
+                                queryString;
+                                queryStrings;
+                                secretArn;
+                                status;
+                                statementName;
+                                createdAt;
+                                updatedAt;
+                                queryParameters;
+                                isBatchStatement;
+                                resultFormat;
+                                sessionId
+                              }
     let to_value x =
       structure_to_value
-        [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
-        ("Id", (Some (StatementId.to_value x.id)));
-        ("IsBatchStatement",
-          (Option.map x.isBatchStatement ~f:Boolean.to_value));
-        ("QueryParameters",
-          (Option.map x.queryParameters ~f:SqlParametersList.to_value));
+        [("Id", (Option.map x.id ~f:UUID.to_value));
         ("QueryString",
           (Option.map x.queryString ~f:StatementString.to_value));
         ("QueryStrings",
           (Option.map x.queryStrings ~f:StatementStringList.to_value));
         ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
+        ("Status", (Option.map x.status ~f:StatusString.to_value));
         ("StatementName",
           (Option.map x.statementName ~f:StatementNameString.to_value));
-        ("Status", (Option.map x.status ~f:StatusString.to_value));
-        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("QueryParameters",
+          (Option.map x.queryParameters ~f:SqlParametersList.to_value));
+        ("IsBatchStatement",
+          (Option.map x.isBatchStatement ~f:Boolean.to_value));
+        ("ResultFormat",
+          (Option.map x.resultFormat ~f:ResultFormatString.to_value));
+        ("SessionId", (Option.map x.sessionId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sessionId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "SessionId") in
+      let resultFormat =
+        (Option.map ~f:ResultFormatString.of_xml)
+          (Xml.child xml_arg0 "ResultFormat") in
+      let isBatchStatement =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IsBatchStatement") in
+      let queryParameters =
+        (Option.map ~f:SqlParametersList.of_xml)
+          (Xml.child xml_arg0 "QueryParameters") in
       let updatedAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
-      let status =
-        (Option.map ~f:StatusString.of_xml) (Xml.child xml_arg0 "Status") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       let statementName =
         (Option.map ~f:StatementNameString.of_xml)
           (Xml.child xml_arg0 "StatementName") in
+      let status =
+        (Option.map ~f:StatusString.of_xml) (Xml.child xml_arg0 "Status") in
       let secretArn =
         (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
       let queryStrings =
@@ -589,60 +638,55 @@ module StatementData =
       let queryString =
         (Option.map ~f:StatementString.of_xml)
           (Xml.child xml_arg0 "QueryString") in
-      let queryParameters =
-        (Option.map ~f:SqlParametersList.of_xml)
-          (Xml.child xml_arg0 "QueryParameters") in
-      let isBatchStatement =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "IsBatchStatement") in
-      let id =
-        StatementId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      let createdAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      make ?updatedAt ?status ?statementName ?secretArn ?queryStrings
-        ?queryString ?queryParameters ?isBatchStatement ~id ?createdAt ()
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?sessionId ?resultFormat ?isBatchStatement ?queryParameters
+        ?updatedAt ?createdAt ?statementName ?status ?secretArn ?queryStrings
+        ?queryString ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let status = field_map json "Status" StatusString.of_json in
-      let statementName =
-        field_map json "StatementName" StatementNameString.of_json in
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let queryStrings =
-        field_map json "QueryStrings" StatementStringList.of_json in
-      let queryString = field_map json "QueryString" StatementString.of_json in
-      let queryParameters =
-        field_map json "QueryParameters" SqlParametersList.of_json in
+    let of_json json__ =
+      let sessionId = field_map json__ "SessionId" UUID.of_json in
+      let resultFormat =
+        field_map json__ "ResultFormat" ResultFormatString.of_json in
       let isBatchStatement =
-        field_map json "IsBatchStatement" Boolean.of_json in
-      let id = field_map_exn json "Id" StatementId.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      make ?updatedAt ?status ?statementName ?secretArn ?queryStrings
-        ?queryString ?queryParameters ?isBatchStatement ~id ?createdAt ()
+        field_map json__ "IsBatchStatement" Boolean.of_json in
+      let queryParameters =
+        field_map json__ "QueryParameters" SqlParametersList.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let statementName =
+        field_map json__ "StatementName" StatementNameString.of_json in
+      let status = field_map json__ "Status" StatusString.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
+      let queryStrings =
+        field_map json__ "QueryStrings" StatementStringList.of_json in
+      let queryString =
+        field_map json__ "QueryString" StatementString.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      make ?sessionId ?resultFormat ?isBatchStatement ?queryParameters
+        ?updatedAt ?createdAt ?statementName ?status ?secretArn ?queryStrings
+        ?queryString ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The SQL statement to run."]
 module ColumnMetadata =
   struct
     type nonrec t =
       {
-      columnDefault: String_.t option
-        [@ocaml.doc "The default value of the column."];
-      isCaseSensitive: Bool.t option
+      isCaseSensitive: Bool_.t option
         [@ocaml.doc
           "A value that indicates whether the column is case-sensitive."];
-      isCurrency: Bool.t option
+      isCurrency: Bool_.t option
         [@ocaml.doc
           "A value that indicates whether the column contains currency values."];
-      isSigned: Bool.t option
+      isSigned: Bool_.t option
         [@ocaml.doc
           "A value that indicates whether an integer column is signed."];
       label: String_.t option [@ocaml.doc "The label for the column."];
-      length: Integer.t option [@ocaml.doc "The length of the column."];
       name: String_.t option [@ocaml.doc "The name of the column."];
       nullable: Integer.t option
         [@ocaml.doc "A value that indicates whether the column is nullable."];
       precision: Integer.t option
-        [@ocaml.doc "The precision value of a decimal number column."];
+        [@ocaml.doc
+          "The precision value of a decimal number column, or the column length for a non-numeric column."];
       scale: Integer.t option
         [@ocaml.doc "The scale value of a decimal number column."];
       schemaName: String_.t option
@@ -651,53 +695,61 @@ module ColumnMetadata =
       tableName: String_.t option
         [@ocaml.doc "The name of the table that includes the column."];
       typeName: String_.t option
-        [@ocaml.doc "The database-specific data type of the column."]}
-    let make ?columnDefault =
-      fun ?isCaseSensitive ->
-        fun ?isCurrency ->
-          fun ?isSigned ->
-            fun ?label ->
-              fun ?length ->
-                fun ?name ->
-                  fun ?nullable ->
-                    fun ?precision ->
-                      fun ?scale ->
-                        fun ?schemaName ->
-                          fun ?tableName ->
-                            fun ?typeName ->
+        [@ocaml.doc "The database-specific data type of the column."];
+      length: Integer.t option [@ocaml.doc "The length of the column."];
+      columnDefault: String_.t option
+        [@ocaml.doc "The default value of the column."]}
+    let make ?isCaseSensitive =
+      fun ?isCurrency ->
+        fun ?isSigned ->
+          fun ?label ->
+            fun ?name ->
+              fun ?nullable ->
+                fun ?precision ->
+                  fun ?scale ->
+                    fun ?schemaName ->
+                      fun ?tableName ->
+                        fun ?typeName ->
+                          fun ?length ->
+                            fun ?columnDefault ->
                               fun () ->
                                 {
-                                  columnDefault;
                                   isCaseSensitive;
                                   isCurrency;
                                   isSigned;
                                   label;
-                                  length;
                                   name;
                                   nullable;
                                   precision;
                                   scale;
                                   schemaName;
                                   tableName;
-                                  typeName
+                                  typeName;
+                                  length;
+                                  columnDefault
                                 }
     let to_value x =
       structure_to_value
-        [("columnDefault", (Option.map x.columnDefault ~f:String_.to_value));
-        ("isCaseSensitive", (Option.map x.isCaseSensitive ~f:Bool.to_value));
-        ("isCurrency", (Option.map x.isCurrency ~f:Bool.to_value));
-        ("isSigned", (Option.map x.isSigned ~f:Bool.to_value));
+        [("isCaseSensitive",
+           (Option.map x.isCaseSensitive ~f:Bool_.to_value));
+        ("isCurrency", (Option.map x.isCurrency ~f:Bool_.to_value));
+        ("isSigned", (Option.map x.isSigned ~f:Bool_.to_value));
         ("label", (Option.map x.label ~f:String_.to_value));
-        ("length", (Option.map x.length ~f:Integer.to_value));
         ("name", (Option.map x.name ~f:String_.to_value));
         ("nullable", (Option.map x.nullable ~f:Integer.to_value));
         ("precision", (Option.map x.precision ~f:Integer.to_value));
         ("scale", (Option.map x.scale ~f:Integer.to_value));
         ("schemaName", (Option.map x.schemaName ~f:String_.to_value));
         ("tableName", (Option.map x.tableName ~f:String_.to_value));
-        ("typeName", (Option.map x.typeName ~f:String_.to_value))]
+        ("typeName", (Option.map x.typeName ~f:String_.to_value));
+        ("length", (Option.map x.length ~f:Integer.to_value));
+        ("columnDefault", (Option.map x.columnDefault ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let columnDefault =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "columnDefault") in
+      let length =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "length") in
       let typeName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "typeName") in
       let tableName =
@@ -710,44 +762,64 @@ module ColumnMetadata =
       let nullable =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "nullable") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
-      let length =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "length") in
       let label = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "label") in
       let isSigned =
-        (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "isSigned") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "isSigned") in
       let isCurrency =
-        (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "isCurrency") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "isCurrency") in
       let isCaseSensitive =
-        (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "isCaseSensitive") in
-      let columnDefault =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "columnDefault") in
-      make ?typeName ?tableName ?schemaName ?scale ?precision ?nullable ?name
-        ?length ?label ?isSigned ?isCurrency ?isCaseSensitive ?columnDefault
-        ()
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "isCaseSensitive") in
+      make ?columnDefault ?length ?typeName ?tableName ?schemaName ?scale
+        ?precision ?nullable ?name ?label ?isSigned ?isCurrency
+        ?isCaseSensitive ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let typeName = field_map json "typeName" String_.of_json in
-      let tableName = field_map json "tableName" String_.of_json in
-      let schemaName = field_map json "schemaName" String_.of_json in
-      let scale = field_map json "scale" Integer.of_json in
-      let precision = field_map json "precision" Integer.of_json in
-      let nullable = field_map json "nullable" Integer.of_json in
-      let name = field_map json "name" String_.of_json in
-      let length = field_map json "length" Integer.of_json in
-      let label = field_map json "label" String_.of_json in
-      let isSigned = field_map json "isSigned" Bool.of_json in
-      let isCurrency = field_map json "isCurrency" Bool.of_json in
-      let isCaseSensitive = field_map json "isCaseSensitive" Bool.of_json in
-      let columnDefault = field_map json "columnDefault" String_.of_json in
-      make ?typeName ?tableName ?schemaName ?scale ?precision ?nullable ?name
-        ?length ?label ?isSigned ?isCurrency ?isCaseSensitive ?columnDefault
-        ()
+    let of_json json__ =
+      let columnDefault = field_map json__ "columnDefault" String_.of_json in
+      let length = field_map json__ "length" Integer.of_json in
+      let typeName = field_map json__ "typeName" String_.of_json in
+      let tableName = field_map json__ "tableName" String_.of_json in
+      let schemaName = field_map json__ "schemaName" String_.of_json in
+      let scale = field_map json__ "scale" Integer.of_json in
+      let precision = field_map json__ "precision" Integer.of_json in
+      let nullable = field_map json__ "nullable" Integer.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let label = field_map json__ "label" String_.of_json in
+      let isSigned = field_map json__ "isSigned" Bool_.of_json in
+      let isCurrency = field_map json__ "isCurrency" Bool_.of_json in
+      let isCaseSensitive = field_map json__ "isCaseSensitive" Bool_.of_json in
+      make ?columnDefault ?length ?typeName ?tableName ?schemaName ?scale
+        ?precision ?nullable ?name ?label ?isSigned ?isCurrency
+        ?isCaseSensitive ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The properties (metadata) of a column."]
+module QueryRecords =
+  struct
+    type nonrec t =
+      {
+      cSVRecords: String_.t option
+        [@ocaml.doc "The results of the SQL statement in CSV format."]}
+    let make ?cSVRecords = fun () -> { cSVRecords }
+    let to_value x =
+      structure_to_value
+        [("CSVRecords", (Option.map x.cSVRecords ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cSVRecords =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CSVRecords") in
+      make ?cSVRecords ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cSVRecords = field_map json__ "CSVRecords" String_.of_json in
+      make ?cSVRecords ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The results of the SQL statement."]
 module FieldList =
   struct
     type nonrec t = Field.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Field.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -771,165 +843,214 @@ module SubStatementData =
   struct
     type nonrec t =
       {
-      createdAt: Timestamp.t option
-        [@ocaml.doc "The date and time (UTC) the statement was created."];
+      id: UUID.t option
+        [@ocaml.doc
+          "The identifier of the SQL statement. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API. A suffix indicates the number of the SQL statement. For example, d9b6c0c9-0747-4bf4-b142-e8883122f766:2 has a suffix of :2 that indicates the second SQL statement of a batch query."];
       duration: Long.t option
         [@ocaml.doc
           "The amount of time in nanoseconds that the statement ran."];
       error: String_.t option
         [@ocaml.doc
           "The error message from the cluster if the SQL statement encountered an error while running."];
-      hasResultSet: Boolean.t option
+      status: StatementStatusString.t option
         [@ocaml.doc
-          "A value that indicates whether the statement has a result set. The result set can be empty. The value is true for an empty result set."];
-      id: StatementId.t
+          "The status of the SQL statement. An example is the that the SQL statement finished."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time (UTC) the statement was created."];
+      updatedAt: Timestamp.t option
         [@ocaml.doc
-          "The identifier of the SQL statement. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API. A suffix indicates the number of the SQL statement. For example, d9b6c0c9-0747-4bf4-b142-e8883122f766:2 has a suffix of :2 that indicates the second SQL statement of a batch query."];
+          "The date and time (UTC) that the statement metadata was last updated."];
       queryString: StatementString.t option
         [@ocaml.doc "The SQL statement text."];
-      redshiftQueryId: Long.t option
-        [@ocaml.doc
-          "The SQL statement identifier. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API."];
       resultRows: Long.t option
         [@ocaml.doc
           "Either the number of rows returned from the SQL statement or the number of rows affected. If result size is greater than zero, the result rows can be the number of rows affected by SQL statements such as INSERT, UPDATE, DELETE, COPY, and others. A -1 indicates the value is null."];
       resultSize: Long.t option
         [@ocaml.doc
           "The size in bytes of the returned results. A -1 indicates the value is null."];
-      status: StatementStatusString.t option
+      redshiftQueryId: Long.t option
         [@ocaml.doc
-          "The status of the SQL statement. An example is the that the SQL statement finished."];
-      updatedAt: Timestamp.t option
+          "The SQL statement identifier. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API."];
+      hasResultSet: Boolean.t option
         [@ocaml.doc
-          "The date and time (UTC) that the statement metadata was last updated."]}
-    let context_ = "SubStatementData"
-    let make ?createdAt =
+          "A value that indicates whether the statement has a result set. The result set can be empty. The value is true for an empty result set."]}
+    let make ?id =
       fun ?duration ->
         fun ?error ->
-          fun ?hasResultSet ->
-            fun ?queryString ->
-              fun ?redshiftQueryId ->
-                fun ?resultRows ->
-                  fun ?resultSize ->
-                    fun ?status ->
-                      fun ?updatedAt ->
-                        fun ~id ->
+          fun ?status ->
+            fun ?createdAt ->
+              fun ?updatedAt ->
+                fun ?queryString ->
+                  fun ?resultRows ->
+                    fun ?resultSize ->
+                      fun ?redshiftQueryId ->
+                        fun ?hasResultSet ->
                           fun () ->
                             {
-                              createdAt;
+                              id;
                               duration;
                               error;
-                              hasResultSet;
+                              status;
+                              createdAt;
+                              updatedAt;
                               queryString;
-                              redshiftQueryId;
                               resultRows;
                               resultSize;
-                              status;
-                              updatedAt;
-                              id
+                              redshiftQueryId;
+                              hasResultSet
                             }
     let to_value x =
       structure_to_value
-        [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        [("Id", (Option.map x.id ~f:UUID.to_value));
         ("Duration", (Option.map x.duration ~f:Long.to_value));
         ("Error", (Option.map x.error ~f:String_.to_value));
-        ("HasResultSet", (Option.map x.hasResultSet ~f:Boolean.to_value));
-        ("Id", (Some (StatementId.to_value x.id)));
+        ("Status", (Option.map x.status ~f:StatementStatusString.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
         ("QueryString",
           (Option.map x.queryString ~f:StatementString.to_value));
-        ("RedshiftQueryId", (Option.map x.redshiftQueryId ~f:Long.to_value));
         ("ResultRows", (Option.map x.resultRows ~f:Long.to_value));
         ("ResultSize", (Option.map x.resultSize ~f:Long.to_value));
-        ("Status", (Option.map x.status ~f:StatementStatusString.to_value));
-        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+        ("RedshiftQueryId", (Option.map x.redshiftQueryId ~f:Long.to_value));
+        ("HasResultSet", (Option.map x.hasResultSet ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let updatedAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
-      let status =
-        (Option.map ~f:StatementStatusString.of_xml)
-          (Xml.child xml_arg0 "Status") in
+      let hasResultSet =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "HasResultSet") in
+      let redshiftQueryId =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "RedshiftQueryId") in
       let resultSize =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ResultSize") in
       let resultRows =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ResultRows") in
-      let redshiftQueryId =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "RedshiftQueryId") in
       let queryString =
         (Option.map ~f:StatementString.of_xml)
           (Xml.child xml_arg0 "QueryString") in
-      let id =
-        StatementId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      let hasResultSet =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "HasResultSet") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let status =
+        (Option.map ~f:StatementStatusString.of_xml)
+          (Xml.child xml_arg0 "Status") in
       let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Error") in
       let duration =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Duration") in
-      let createdAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      make ?updatedAt ?status ?resultSize ?resultRows ?redshiftQueryId
-        ?queryString ~id ?hasResultSet ?error ?duration ?createdAt ()
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?hasResultSet ?redshiftQueryId ?resultSize ?resultRows
+        ?queryString ?updatedAt ?createdAt ?status ?error ?duration ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let status = field_map json "Status" StatementStatusString.of_json in
-      let resultSize = field_map json "ResultSize" Long.of_json in
-      let resultRows = field_map json "ResultRows" Long.of_json in
-      let redshiftQueryId = field_map json "RedshiftQueryId" Long.of_json in
-      let queryString = field_map json "QueryString" StatementString.of_json in
-      let id = field_map_exn json "Id" StatementId.of_json in
-      let hasResultSet = field_map json "HasResultSet" Boolean.of_json in
-      let error = field_map json "Error" String_.of_json in
-      let duration = field_map json "Duration" Long.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      make ?updatedAt ?status ?resultSize ?resultRows ?redshiftQueryId
-        ?queryString ~id ?hasResultSet ?error ?duration ?createdAt ()
+    let of_json json__ =
+      let hasResultSet = field_map json__ "HasResultSet" Boolean.of_json in
+      let redshiftQueryId = field_map json__ "RedshiftQueryId" Long.of_json in
+      let resultSize = field_map json__ "ResultSize" Long.of_json in
+      let resultRows = field_map json__ "ResultRows" Long.of_json in
+      let queryString =
+        field_map json__ "QueryString" StatementString.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" StatementStatusString.of_json in
+      let error = field_map json__ "Error" String_.of_json in
+      let duration = field_map json__ "Duration" Long.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      make ?hasResultSet ?redshiftQueryId ?resultSize ?resultRows
+        ?queryString ?updatedAt ?createdAt ?status ?error ?duration ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an SQL statement."]
 module DatabaseConnectionException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "DatabaseConnectionException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Connection to a database failed."]
 module InternalServerException =
   struct
     type nonrec t =
       {
-      message: String_.t [@ocaml.doc "The exception message."]}
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: String_.t option [@ocaml.doc "The exception message."]}
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon Redshift Data API operation failed due to invalid input."]
+module QueryTimeoutException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Redshift Data API operation failed due to timeout."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option [@ocaml.doc "The exception message."];
+      resourceId: String_.t option
+        [@ocaml.doc "Resource identifier associated with the exception."]}
+    let make ?message = fun ?resourceId -> fun () -> { message; resourceId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?resourceId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Redshift Data API operation failed due to a missing resource."]
 module TableList =
   struct
     type nonrec t = TableMember.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TableMember.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -965,23 +1086,31 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon Redshift Data API operation failed due to invalid input."]
-module Location =
+module ClusterIdentifierString =
   struct
     type nonrec t = string
-    let context_ = "Location"
-    let make i = i
+    let context_ = "ClusterIdentifierString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-z][a-z0-9]*(-[a-z0-9]+)*")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Location" j
+    let of_json j = string_of_json ~kind:"ClusterIdentifierString" j
     let to_json = simple_to_json to_value
   end
 module PageSize =
@@ -1001,10 +1130,35 @@ module PageSize =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module WorkgroupNameString =
+  struct
+    type nonrec t = string
+    let context_ = "WorkgroupNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:".*((^[a-z0-9-]{3,63}$)|^(arn:(aws(-[a-z]+)*):redshift-serverless:[a-z]{2}(-gov|(-iso[a-z]?))?-[a-z]+-\\d{1}:\\d{12}:workgroup/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}))")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkgroupNameString" j
+    let to_json = simple_to_json to_value
+  end
 module StatementList =
   struct
     type nonrec t = StatementData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StatementData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1047,6 +1201,9 @@ module SchemaList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1071,6 +1228,9 @@ module DatabaseList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1095,6 +1255,9 @@ module ColumnMetadataList =
   struct
     type nonrec t = ColumnMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1116,39 +1279,41 @@ module ColumnMetadataList =
         j
     let to_json v = composed_to_json to_value v
   end
-module ResourceNotFoundException =
+module FormattedSqlRecords =
   struct
-    type nonrec t =
-      {
-      message: String_.t [@ocaml.doc "The exception message."];
-      resourceId: String_.t
-        [@ocaml.doc "Resource identifier associated with the exception."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message = fun ~resourceId -> fun () -> { message; resourceId }
-    let to_value x =
-      structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
-        ("ResourceId", (Some (String_.to_value x.resourceId)))]
+    type nonrec t = QueryRecords.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QueryRecords.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceId ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~resourceId ~message ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QueryRecords.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FormattedSqlRecords" ~of_json:QueryRecords.of_json
+        j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The Amazon Redshift Data API operation failed due to a missing resource."]
+  end
 module SqlRecords =
   struct
     type nonrec t = FieldList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FieldList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1169,6 +1334,26 @@ module SqlRecords =
       list_of_json ~kind:"SqlRecords" ~of_json:FieldList.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ActiveSessionsExceededException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Redshift Data API operation failed because the maximum number of active sessions exceeded."]
 module ActiveStatementsExceededException =
   struct
     type nonrec t = {
@@ -1183,45 +1368,110 @@ module ActiveStatementsExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The number of active statements exceeds the limit."]
+module DbGroupList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DbGroupList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ExecuteStatementException =
   struct
     type nonrec t =
       {
-      message: String_.t [@ocaml.doc "The exception message."];
-      statementId: String_.t
+      message: String_.t option [@ocaml.doc "The exception message."];
+      statementId: String_.t option
         [@ocaml.doc "Statement identifier of the exception."]}
-    let context_ = "ExecuteStatementException"
-    let make ~message =
-      fun ~statementId -> fun () -> { message; statementId }
+    let make ?message =
+      fun ?statementId -> fun () -> { message; statementId }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
-        ("StatementId", (Some (String_.to_value x.statementId)))]
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("StatementId", (Option.map x.statementId ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let statementId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatementId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StatementId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~statementId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?statementId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statementId = field_map_exn json "StatementId" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~statementId ~message ()
+    let of_json json__ =
+      let statementId = field_map json__ "StatementId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?statementId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The SQL statement encountered an environmental error while running."]
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
+module SessionAliveSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:86400) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SessionAliveSeconds" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ColumnList =
   struct
     type nonrec t = ColumnMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1246,6 +1496,9 @@ module SubStatementList =
   struct
     type nonrec t = SubStatementData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubStatementData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1271,29 +1524,27 @@ module BatchExecuteStatementException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      statementId: String_.t
+      message: String_.t option ;
+      statementId: String_.t option
         [@ocaml.doc "Statement identifier of the exception."]}
-    let context_ = "BatchExecuteStatementException"
-    let make ~message =
-      fun ~statementId -> fun () -> { message; statementId }
+    let make ?message =
+      fun ?statementId -> fun () -> { message; statementId }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
-        ("StatementId", (Some (String_.to_value x.statementId)))]
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("StatementId", (Option.map x.statementId ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let statementId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatementId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StatementId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~statementId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?statementId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statementId = field_map_exn json "StatementId" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~statementId ~message ()
+    let of_json json__ =
+      let statementId = field_map json__ "StatementId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?statementId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An SQL statement encountered an environmental error while running."]
@@ -1305,6 +1556,9 @@ module SqlList =
         ok_or_failwith
           ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StatementString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1329,17 +1583,19 @@ module ListTablesResponse =
   struct
     type nonrec t =
       {
+      tables: TableList.t option
+        [@ocaml.doc "The tables that match the request pattern."];
       nextToken: String_.t option
         [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
-      tables: TableList.t option
-        [@ocaml.doc "The tables that match the request pattern."]}
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."]}
     type nonrec error =
       [ `DatabaseConnectionException of DatabaseConnectionException.t 
       | `InternalServerException of InternalServerException.t 
+      | `QueryTimeoutException of QueryTimeoutException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?nextToken = fun ?tables -> fun () -> { nextToken; tables }
+    let make ?tables = fun ?nextToken -> fun () -> { tables; nextToken }
     let error_of_json name json =
       match name with
       | "DatabaseConnectionException" ->
@@ -1347,6 +1603,10 @@ module ListTablesResponse =
             (DatabaseConnectionException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1359,6 +1619,10 @@ module ListTablesResponse =
             (DatabaseConnectionException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1373,6 +1637,14 @@ module ListTablesResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `QueryTimeoutException e ->
+          `Assoc
+            [("error", (`String "QueryTimeoutException"));
+            ("details", (QueryTimeoutException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1384,150 +1656,165 @@ module ListTablesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("Tables", (Option.map x.tables ~f:TableList.to_value))]
+        [("Tables", (Option.map x.tables ~f:TableList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tables =
-        (Option.map ~f:TableList.of_xml) (Xml.child xml_arg0 "Tables") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?tables ?nextToken ()
+      let tables =
+        (Option.map ~f:TableList.of_xml) (Xml.child xml_arg0 "Tables") in
+      make ?nextToken ?tables ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tables = field_map json "Tables" TableList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      make ?tables ?nextToken ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let tables = field_map json__ "Tables" TableList.of_json in
+      make ?nextToken ?tables ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the tables in a database. If neither SchemaPattern nor TablePattern are specified, then all tables in the database are returned. A token is returned to page through the table list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "List the tables in a database. If neither SchemaPattern nor TablePattern are specified, then all tables in the database are returned. A token is returned to page through the table list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module ListTablesRequest =
   struct
     type nonrec t =
       {
-      clusterIdentifier: Location.t option
+      clusterIdentifier: ClusterIdentifierString.t option
         [@ocaml.doc
           "The cluster identifier. This parameter is required when connecting to a cluster and authenticating using either Secrets Manager or temporary credentials."];
-      connectedDatabase: String_.t option
-        [@ocaml.doc
-          "A database name. The connected database is specified when you connect with your authentication credentials."];
-      database: String_.t
-        [@ocaml.doc
-          "The name of the database that contains the tables to list. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials."];
-      dbUser: String_.t option
-        [@ocaml.doc
-          "The database user name. This parameter is required when connecting to a cluster and authenticating using temporary credentials."];
-      maxResults: PageSize.t option
-        [@ocaml.doc
-          "The maximum number of tables to return in the response. If more tables exist than fit in one response, then NextToken is returned to page through the results."];
-      nextToken: String_.t option
-        [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
-      schemaPattern: String_.t option
-        [@ocaml.doc
-          "A pattern to filter results by schema name. Within a schema pattern, \"%\" means match any substring of 0 or more characters and \"_\" means match any one character. Only schema name entries matching the search pattern are returned. If SchemaPattern is not specified, then all tables that match TablePattern are returned. If neither SchemaPattern or TablePattern are specified, then all tables are returned."];
       secretArn: SecretArn.t option
         [@ocaml.doc
           "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager."];
+      dbUser: String_.t option
+        [@ocaml.doc
+          "The database user name. This parameter is required when connecting to a cluster as a database user and authenticating using temporary credentials."];
+      database: String_.t
+        [@ocaml.doc
+          "The name of the database that contains the tables to list. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials."];
+      connectedDatabase: String_.t option
+        [@ocaml.doc
+          "A database name. The connected database is specified when you connect with your authentication credentials."];
+      schemaPattern: String_.t option
+        [@ocaml.doc
+          "A pattern to filter results by schema name. Within a schema pattern, \"%\" means match any substring of 0 or more characters and \"_\" means match any one character. Only schema name entries matching the search pattern are returned. If SchemaPattern is not specified, then all tables that match TablePattern are returned. If neither SchemaPattern or TablePattern are specified, then all tables are returned."];
       tablePattern: String_.t option
         [@ocaml.doc
-          "A pattern to filter results by table name. Within a table pattern, \"%\" means match any substring of 0 or more characters and \"_\" means match any one character. Only table name entries matching the search pattern are returned. If TablePattern is not specified, then all tables that match SchemaPatternare returned. If neither SchemaPattern or TablePattern are specified, then all tables are returned."]}
+          "A pattern to filter results by table name. Within a table pattern, \"%\" means match any substring of 0 or more characters and \"_\" means match any one character. Only table name entries matching the search pattern are returned. If TablePattern is not specified, then all tables that match SchemaPatternare returned. If neither SchemaPattern or TablePattern are specified, then all tables are returned."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
+      maxResults: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of tables to return in the response. If more tables exist than fit in one response, then NextToken is returned to page through the results."];
+      workgroupName: WorkgroupNameString.t option
+        [@ocaml.doc
+          "The serverless workgroup name or Amazon Resource Name (ARN). This parameter is required when connecting to a serverless workgroup and authenticating using either Secrets Manager or temporary credentials."]}
     let context_ = "ListTablesRequest"
     let make ?clusterIdentifier =
-      fun ?connectedDatabase ->
+      fun ?secretArn ->
         fun ?dbUser ->
-          fun ?maxResults ->
-            fun ?nextToken ->
-              fun ?schemaPattern ->
-                fun ?secretArn ->
-                  fun ?tablePattern ->
-                    fun ~database ->
-                      fun () ->
-                        {
-                          clusterIdentifier;
-                          connectedDatabase;
-                          dbUser;
-                          maxResults;
-                          nextToken;
-                          schemaPattern;
-                          secretArn;
-                          tablePattern;
-                          database
-                        }
+          fun ?connectedDatabase ->
+            fun ?schemaPattern ->
+              fun ?tablePattern ->
+                fun ?nextToken ->
+                  fun ?maxResults ->
+                    fun ?workgroupName ->
+                      fun ~database ->
+                        fun () ->
+                          {
+                            clusterIdentifier;
+                            secretArn;
+                            dbUser;
+                            connectedDatabase;
+                            schemaPattern;
+                            tablePattern;
+                            nextToken;
+                            maxResults;
+                            workgroupName;
+                            database
+                          }
     let to_value x =
       structure_to_value
         [("ClusterIdentifier",
-           (Option.map x.clusterIdentifier ~f:Location.to_value));
+           (Option.map x.clusterIdentifier
+              ~f:ClusterIdentifierString.to_value));
+        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
+        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
+        ("Database", (Some (String_.to_value x.database)));
         ("ConnectedDatabase",
           (Option.map x.connectedDatabase ~f:String_.to_value));
-        ("Database", (Some (String_.to_value x.database)));
-        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("SchemaPattern", (Option.map x.schemaPattern ~f:String_.to_value));
-        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
-        ("TablePattern", (Option.map x.tablePattern ~f:String_.to_value))]
+        ("TablePattern", (Option.map x.tablePattern ~f:String_.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tablePattern =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TablePattern") in
-      let secretArn =
-        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
-      let schemaPattern =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SchemaPattern") in
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
       let maxResults =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let dbUser =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
-      let database =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let tablePattern =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TablePattern") in
+      let schemaPattern =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SchemaPattern") in
       let connectedDatabase =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ConnectedDatabase") in
+      let database =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let dbUser =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
       let clusterIdentifier =
-        (Option.map ~f:Location.of_xml)
+        (Option.map ~f:ClusterIdentifierString.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?tablePattern ?secretArn ?schemaPattern ?nextToken ?maxResults
-        ?dbUser ~database ?connectedDatabase ?clusterIdentifier ()
+      make ?workgroupName ?maxResults ?nextToken ?tablePattern ?schemaPattern
+        ?connectedDatabase ~database ?dbUser ?secretArn ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tablePattern = field_map json "TablePattern" String_.of_json in
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let schemaPattern = field_map json "SchemaPattern" String_.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
-      let database = field_map_exn json "Database" String_.of_json in
+    let of_json json__ =
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let tablePattern = field_map json__ "TablePattern" String_.of_json in
+      let schemaPattern = field_map json__ "SchemaPattern" String_.of_json in
       let connectedDatabase =
-        field_map json "ConnectedDatabase" String_.of_json in
+        field_map json__ "ConnectedDatabase" String_.of_json in
+      let database = field_map_exn json__ "Database" String_.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" Location.of_json in
-      make ?tablePattern ?secretArn ?schemaPattern ?nextToken ?maxResults
-        ?dbUser ~database ?connectedDatabase ?clusterIdentifier ()
+        field_map json__ "ClusterIdentifier" ClusterIdentifierString.of_json in
+      make ?workgroupName ?maxResults ?nextToken ?tablePattern ?schemaPattern
+        ?connectedDatabase ~database ?dbUser ?secretArn ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the tables in a database. If neither SchemaPattern nor TablePattern are specified, then all tables in the database are returned. A token is returned to page through the table list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "List the tables in a database. If neither SchemaPattern nor TablePattern are specified, then all tables in the database are returned. A token is returned to page through the table list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module ListStatementsResponse =
   struct
     type nonrec t =
       {
+      statements: StatementList.t option [@ocaml.doc "The SQL statements."];
       nextToken: String_.t option
         [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
-      statements: StatementList.t [@ocaml.doc "The SQL statements."]}
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListStatementsResponse"
-    let make ?nextToken =
-      fun ~statements -> fun () -> { nextToken; statements }
+    let make ?statements =
+      fun ?nextToken -> fun () -> { statements; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1537,6 +1824,8 @@ module ListStatementsResponse =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1547,6 +1836,10 @@ module ListStatementsResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1558,102 +1851,145 @@ module ListStatementsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("Statements", (Some (StatementList.to_value x.statements)))]
+        [("Statements", (Option.map x.statements ~f:StatementList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let statements =
-        StatementList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Statements") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ~statements ?nextToken ()
+      let statements =
+        (Option.map ~f:StatementList.of_xml)
+          (Xml.child xml_arg0 "Statements") in
+      make ?nextToken ?statements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statements = field_map_exn json "Statements" StatementList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      make ~statements ?nextToken ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let statements = field_map json__ "Statements" StatementList.of_json in
+      make ?nextToken ?statements ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List of SQL statements. By default, only finished statements are shown. A token is returned to page through the statement list."]
+       "List of SQL statements. By default, only finished statements are shown. A token is returned to page through the statement list. When you use identity-enhanced role sessions to list statements, you must provide either the cluster-identifier or workgroup-name parameter. This ensures that the IdC user can only access the Amazon Redshift IdC applications they are assigned. For more information, see Trusted identity propagation overview. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module ListStatementsRequest =
   struct
     type nonrec t =
       {
-      maxResults: ListStatementsLimit.t option
-        [@ocaml.doc
-          "The maximum number of SQL statements to return in the response. If more SQL statements exist than fit in one response, then NextToken is returned to page through the results."];
       nextToken: String_.t option
         [@ocaml.doc
           "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
-      roleLevel: Boolean.t option
+      maxResults: ListStatementsLimit.t option
         [@ocaml.doc
-          "A value that filters which statements to return in the response. If true, all statements run by the caller's IAM role are returned. If false, only statements run by the caller's IAM role in the current IAM session are returned. The default is true."];
+          "The maximum number of SQL statements to return in the response. If more SQL statements exist than fit in one response, then NextToken is returned to page through the results."];
       statementName: StatementNameString.t option
         [@ocaml.doc
           "The name of the SQL statement specified as input to BatchExecuteStatement or ExecuteStatement to identify the query. You can list multiple statements by providing a prefix that matches the beginning of the statement name. For example, to list myStatement1, myStatement2, myStatement3, and so on, then provide the a value of myStatement. Data API does a case-sensitive match of SQL statement names to the prefix value you provide."];
       status: StatusString.t option
         [@ocaml.doc
-          "The status of the SQL statement to list. Status values are defined as follows: ABORTED - The query run was stopped by the user. ALL - A status value that includes all query statuses. This value can be used to filter results. FAILED - The query run failed. FINISHED - The query has finished running. PICKED - The query has been chosen to be run. STARTED - The query run has started. SUBMITTED - The query was submitted, but not yet processed."]}
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ?roleLevel ->
-          fun ?statementName ->
-            fun ?status ->
-              fun () ->
-                { maxResults; nextToken; roleLevel; statementName; status }
+          "The status of the SQL statement to list. Status values are defined as follows: ABORTED - The query run was stopped by the user. ALL - A status value that includes all query statuses. This value can be used to filter results. FAILED - The query run failed. FINISHED - The query has finished running. PICKED - The query has been chosen to be run. STARTED - The query run has started. SUBMITTED - The query was submitted, but not yet processed."];
+      roleLevel: Boolean.t option
+        [@ocaml.doc
+          "A value that filters which statements to return in the response. If true, all statements run by the caller's IAM role are returned. If false, only statements run by the caller's IAM role in the current IAM session are returned. The default is true."];
+      database: String_.t option
+        [@ocaml.doc
+          "The name of the database when listing statements run against a ClusterIdentifier or WorkgroupName."];
+      clusterIdentifier: ClusterIdentifierString.t option
+        [@ocaml.doc
+          "The cluster identifier. Only statements that ran on this cluster are returned. When providing ClusterIdentifier, then WorkgroupName can't be specified."];
+      workgroupName: WorkgroupNameString.t option
+        [@ocaml.doc
+          "The serverless workgroup name or Amazon Resource Name (ARN). Only statements that ran on this workgroup are returned. When providing WorkgroupName, then ClusterIdentifier can't be specified."]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?statementName ->
+          fun ?status ->
+            fun ?roleLevel ->
+              fun ?database ->
+                fun ?clusterIdentifier ->
+                  fun ?workgroupName ->
+                    fun () ->
+                      {
+                        nextToken;
+                        maxResults;
+                        statementName;
+                        status;
+                        roleLevel;
+                        database;
+                        clusterIdentifier;
+                        workgroupName
+                      }
     let to_value x =
       structure_to_value
-        [("MaxResults",
-           (Option.map x.maxResults ~f:ListStatementsLimit.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("RoleLevel", (Option.map x.roleLevel ~f:Boolean.to_value));
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:ListStatementsLimit.to_value));
         ("StatementName",
           (Option.map x.statementName ~f:StatementNameString.to_value));
-        ("Status", (Option.map x.status ~f:StatusString.to_value))]
+        ("Status", (Option.map x.status ~f:StatusString.to_value));
+        ("RoleLevel", (Option.map x.roleLevel ~f:Boolean.to_value));
+        ("Database", (Option.map x.database ~f:String_.to_value));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:ClusterIdentifierString.to_value));
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
+      let clusterIdentifier =
+        (Option.map ~f:ClusterIdentifierString.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
+      let database =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Database") in
+      let roleLevel =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "RoleLevel") in
       let status =
         (Option.map ~f:StatusString.of_xml) (Xml.child xml_arg0 "Status") in
       let statementName =
         (Option.map ~f:StatementNameString.of_xml)
           (Xml.child xml_arg0 "StatementName") in
-      let roleLevel =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "RoleLevel") in
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
         (Option.map ~f:ListStatementsLimit.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      make ?status ?statementName ?roleLevel ?nextToken ?maxResults ()
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?workgroupName ?clusterIdentifier ?database ?roleLevel ?status
+        ?statementName ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" StatusString.of_json in
+    let of_json json__ =
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
+      let clusterIdentifier =
+        field_map json__ "ClusterIdentifier" ClusterIdentifierString.of_json in
+      let database = field_map json__ "Database" String_.of_json in
+      let roleLevel = field_map json__ "RoleLevel" Boolean.of_json in
+      let status = field_map json__ "Status" StatusString.of_json in
       let statementName =
-        field_map json "StatementName" StatementNameString.of_json in
-      let roleLevel = field_map json "RoleLevel" Boolean.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "StatementName" StatementNameString.of_json in
       let maxResults =
-        field_map json "MaxResults" ListStatementsLimit.of_json in
-      make ?status ?statementName ?roleLevel ?nextToken ?maxResults ()
+        field_map json__ "MaxResults" ListStatementsLimit.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?workgroupName ?clusterIdentifier ?database ?roleLevel ?status
+        ?statementName ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List of SQL statements. By default, only finished statements are shown. A token is returned to page through the statement list."]
+       "List of SQL statements. By default, only finished statements are shown. A token is returned to page through the statement list. When you use identity-enhanced role sessions to list statements, you must provide either the cluster-identifier or workgroup-name parameter. This ensures that the IdC user can only access the Amazon Redshift IdC applications they are assigned. For more information, see Trusted identity propagation overview. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module ListSchemasResponse =
   struct
     type nonrec t =
       {
+      schemas: SchemaList.t option
+        [@ocaml.doc "The schemas that match the request pattern."];
       nextToken: String_.t option
         [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
-      schemas: SchemaList.t option
-        [@ocaml.doc "The schemas that match the request pattern."]}
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."]}
     type nonrec error =
       [ `DatabaseConnectionException of DatabaseConnectionException.t 
       | `InternalServerException of InternalServerException.t 
+      | `QueryTimeoutException of QueryTimeoutException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?nextToken = fun ?schemas -> fun () -> { nextToken; schemas }
+    let make ?schemas = fun ?nextToken -> fun () -> { schemas; nextToken }
     let error_of_json name json =
       match name with
       | "DatabaseConnectionException" ->
@@ -1661,6 +1997,10 @@ module ListSchemasResponse =
             (DatabaseConnectionException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1673,6 +2013,10 @@ module ListSchemasResponse =
             (DatabaseConnectionException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1687,6 +2031,14 @@ module ListSchemasResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `QueryTimeoutException e ->
+          `Assoc
+            [("error", (`String "QueryTimeoutException"));
+            ("details", (QueryTimeoutException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1698,122 +2050,135 @@ module ListSchemasResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("Schemas", (Option.map x.schemas ~f:SchemaList.to_value))]
+        [("Schemas", (Option.map x.schemas ~f:SchemaList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let schemas =
-        (Option.map ~f:SchemaList.of_xml) (Xml.child xml_arg0 "Schemas") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?schemas ?nextToken ()
+      let schemas =
+        (Option.map ~f:SchemaList.of_xml) (Xml.child xml_arg0 "Schemas") in
+      make ?nextToken ?schemas ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemas = field_map json "Schemas" SchemaList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      make ?schemas ?nextToken ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let schemas = field_map json__ "Schemas" SchemaList.of_json in
+      make ?nextToken ?schemas ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the schemas in a database. A token is returned to page through the schema list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "Lists the schemas in a database. A token is returned to page through the schema list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module ListSchemasRequest =
   struct
     type nonrec t =
       {
-      clusterIdentifier: Location.t option
+      clusterIdentifier: ClusterIdentifierString.t option
         [@ocaml.doc
           "The cluster identifier. This parameter is required when connecting to a cluster and authenticating using either Secrets Manager or temporary credentials."];
-      connectedDatabase: String_.t option
+      secretArn: SecretArn.t option
         [@ocaml.doc
-          "A database name. The connected database is specified when you connect with your authentication credentials."];
+          "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager."];
+      dbUser: String_.t option
+        [@ocaml.doc
+          "The database user name. This parameter is required when connecting to a cluster as a database user and authenticating using temporary credentials."];
       database: String_.t
         [@ocaml.doc
           "The name of the database that contains the schemas to list. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials."];
-      dbUser: String_.t option
+      connectedDatabase: String_.t option
         [@ocaml.doc
-          "The database user name. This parameter is required when connecting to a cluster and authenticating using temporary credentials."];
-      maxResults: PageSize.t option
-        [@ocaml.doc
-          "The maximum number of schemas to return in the response. If more schemas exist than fit in one response, then NextToken is returned to page through the results."];
-      nextToken: String_.t option
-        [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
+          "A database name. The connected database is specified when you connect with your authentication credentials."];
       schemaPattern: String_.t option
         [@ocaml.doc
           "A pattern to filter results by schema name. Within a schema pattern, \"%\" means match any substring of 0 or more characters and \"_\" means match any one character. Only schema name entries matching the search pattern are returned."];
-      secretArn: SecretArn.t option
+      nextToken: String_.t option
         [@ocaml.doc
-          "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager."]}
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
+      maxResults: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of schemas to return in the response. If more schemas exist than fit in one response, then NextToken is returned to page through the results."];
+      workgroupName: WorkgroupNameString.t option
+        [@ocaml.doc
+          "The serverless workgroup name or Amazon Resource Name (ARN). This parameter is required when connecting to a serverless workgroup and authenticating using either Secrets Manager or temporary credentials."]}
     let context_ = "ListSchemasRequest"
     let make ?clusterIdentifier =
-      fun ?connectedDatabase ->
+      fun ?secretArn ->
         fun ?dbUser ->
-          fun ?maxResults ->
-            fun ?nextToken ->
-              fun ?schemaPattern ->
-                fun ?secretArn ->
-                  fun ~database ->
-                    fun () ->
-                      {
-                        clusterIdentifier;
-                        connectedDatabase;
-                        dbUser;
-                        maxResults;
-                        nextToken;
-                        schemaPattern;
-                        secretArn;
-                        database
-                      }
+          fun ?connectedDatabase ->
+            fun ?schemaPattern ->
+              fun ?nextToken ->
+                fun ?maxResults ->
+                  fun ?workgroupName ->
+                    fun ~database ->
+                      fun () ->
+                        {
+                          clusterIdentifier;
+                          secretArn;
+                          dbUser;
+                          connectedDatabase;
+                          schemaPattern;
+                          nextToken;
+                          maxResults;
+                          workgroupName;
+                          database
+                        }
     let to_value x =
       structure_to_value
         [("ClusterIdentifier",
-           (Option.map x.clusterIdentifier ~f:Location.to_value));
+           (Option.map x.clusterIdentifier
+              ~f:ClusterIdentifierString.to_value));
+        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
+        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
+        ("Database", (Some (String_.to_value x.database)));
         ("ConnectedDatabase",
           (Option.map x.connectedDatabase ~f:String_.to_value));
-        ("Database", (Some (String_.to_value x.database)));
-        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("SchemaPattern", (Option.map x.schemaPattern ~f:String_.to_value));
-        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let secretArn =
-        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
-      let schemaPattern =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SchemaPattern") in
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
       let maxResults =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let dbUser =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
-      let database =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let schemaPattern =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SchemaPattern") in
       let connectedDatabase =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ConnectedDatabase") in
+      let database =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let dbUser =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
       let clusterIdentifier =
-        (Option.map ~f:Location.of_xml)
+        (Option.map ~f:ClusterIdentifierString.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?secretArn ?schemaPattern ?nextToken ?maxResults ?dbUser ~database
-        ?connectedDatabase ?clusterIdentifier ()
+      make ?workgroupName ?maxResults ?nextToken ?schemaPattern
+        ?connectedDatabase ~database ?dbUser ?secretArn ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let schemaPattern = field_map json "SchemaPattern" String_.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
-      let database = field_map_exn json "Database" String_.of_json in
+    let of_json json__ =
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let schemaPattern = field_map json__ "SchemaPattern" String_.of_json in
       let connectedDatabase =
-        field_map json "ConnectedDatabase" String_.of_json in
+        field_map json__ "ConnectedDatabase" String_.of_json in
+      let database = field_map_exn json__ "Database" String_.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" Location.of_json in
-      make ?secretArn ?schemaPattern ?nextToken ?maxResults ?dbUser ~database
-        ?connectedDatabase ?clusterIdentifier ()
+        field_map json__ "ClusterIdentifier" ClusterIdentifierString.of_json in
+      make ?workgroupName ?maxResults ?nextToken ?schemaPattern
+        ?connectedDatabase ~database ?dbUser ?secretArn ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the schemas in a database. A token is returned to page through the schema list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "Lists the schemas in a database. A token is returned to page through the schema list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module ListDatabasesResponse =
   struct
     type nonrec t =
@@ -1825,6 +2190,8 @@ module ListDatabasesResponse =
     type nonrec error =
       [ `DatabaseConnectionException of DatabaseConnectionException.t 
       | `InternalServerException of InternalServerException.t 
+      | `QueryTimeoutException of QueryTimeoutException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?databases =
@@ -1836,6 +2203,10 @@ module ListDatabasesResponse =
             (DatabaseConnectionException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1848,6 +2219,10 @@ module ListDatabasesResponse =
             (DatabaseConnectionException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1862,6 +2237,14 @@ module ListDatabasesResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `QueryTimeoutException e ->
+          `Assoc
+            [("error", (`String "QueryTimeoutException"));
+            ("details", (QueryTimeoutException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1883,115 +2266,138 @@ module ListDatabasesResponse =
         (Option.map ~f:DatabaseList.of_xml) (Xml.child xml_arg0 "Databases") in
       make ?nextToken ?databases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let databases = field_map json "Databases" DatabaseList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let databases = field_map json__ "Databases" DatabaseList.of_json in
       make ?nextToken ?databases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the databases in a cluster. A token is returned to page through the database list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "List the databases in a cluster. A token is returned to page through the database list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module ListDatabasesRequest =
   struct
     type nonrec t =
       {
-      clusterIdentifier: Location.t option
+      clusterIdentifier: ClusterIdentifierString.t option
         [@ocaml.doc
           "The cluster identifier. This parameter is required when connecting to a cluster and authenticating using either Secrets Manager or temporary credentials."];
       database: String_.t
         [@ocaml.doc
           "The name of the database. This parameter is required when authenticating using either Secrets Manager or temporary credentials."];
+      secretArn: SecretArn.t option
+        [@ocaml.doc
+          "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager."];
       dbUser: String_.t option
         [@ocaml.doc
-          "The database user name. This parameter is required when connecting to a cluster and authenticating using temporary credentials."];
+          "The database user name. This parameter is required when connecting to a cluster as a database user and authenticating using temporary credentials."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
       maxResults: PageSize.t option
         [@ocaml.doc
           "The maximum number of databases to return in the response. If more databases exist than fit in one response, then NextToken is returned to page through the results."];
-      nextToken: String_.t option
+      workgroupName: WorkgroupNameString.t option
         [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
-      secretArn: SecretArn.t option
-        [@ocaml.doc
-          "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager."]}
+          "The serverless workgroup name or Amazon Resource Name (ARN). This parameter is required when connecting to a serverless workgroup and authenticating using either Secrets Manager or temporary credentials."]}
     let context_ = "ListDatabasesRequest"
     let make ?clusterIdentifier =
-      fun ?dbUser ->
-        fun ?maxResults ->
+      fun ?secretArn ->
+        fun ?dbUser ->
           fun ?nextToken ->
-            fun ?secretArn ->
-              fun ~database ->
-                fun () ->
-                  {
-                    clusterIdentifier;
-                    dbUser;
-                    maxResults;
-                    nextToken;
-                    secretArn;
-                    database
-                  }
+            fun ?maxResults ->
+              fun ?workgroupName ->
+                fun ~database ->
+                  fun () ->
+                    {
+                      clusterIdentifier;
+                      secretArn;
+                      dbUser;
+                      nextToken;
+                      maxResults;
+                      workgroupName;
+                      database
+                    }
     let to_value x =
       structure_to_value
         [("ClusterIdentifier",
-           (Option.map x.clusterIdentifier ~f:Location.to_value));
+           (Option.map x.clusterIdentifier
+              ~f:ClusterIdentifierString.to_value));
         ("Database", (Some (String_.to_value x.database)));
+        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
         ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
         ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let secretArn =
-        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
       let maxResults =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let dbUser =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
       let database =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Database") in
       let clusterIdentifier =
-        (Option.map ~f:Location.of_xml)
+        (Option.map ~f:ClusterIdentifierString.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?secretArn ?nextToken ?maxResults ?dbUser ~database
+      make ?workgroupName ?maxResults ?nextToken ?dbUser ?secretArn ~database
         ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
-      let database = field_map_exn json "Database" String_.of_json in
+    let of_json json__ =
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
+      let database = field_map_exn json__ "Database" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" Location.of_json in
-      make ?secretArn ?nextToken ?maxResults ?dbUser ~database
+        field_map json__ "ClusterIdentifier" ClusterIdentifierString.of_json in
+      make ?workgroupName ?maxResults ?nextToken ?dbUser ?secretArn ~database
         ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the databases in a cluster. A token is returned to page through the database list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
-module GetStatementResultResponse =
+       "List the databases in a cluster. A token is returned to page through the database list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
+module GetStatementResultV2Response =
   struct
     type nonrec t =
       {
+      records: FormattedSqlRecords.t option
+        [@ocaml.doc "The results of the SQL statement in CSV format."];
       columnMetadata: ColumnMetadataList.t option
         [@ocaml.doc "The properties (metadata) of a column."];
-      nextToken: String_.t option
-        [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
-      records: SqlRecords.t [@ocaml.doc "The results of the SQL statement."];
       totalNumRows: Long.t option
         [@ocaml.doc
-          "The total number of rows in the result set returned from a query. You can use this number to estimate the number of calls to the GetStatementResult operation needed to page through the results."]}
+          "The total number of rows in the result set returned from a query. You can use this number to estimate the number of calls to the GetStatementResultV2 operation needed to page through the results."];
+      resultFormat: ResultFormatString.t option
+        [@ocaml.doc "The data format of the result of the SQL statement."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetStatementResultResponse"
-    let make ?columnMetadata =
-      fun ?nextToken ->
+    let make ?records =
+      fun ?columnMetadata ->
         fun ?totalNumRows ->
-          fun ~records ->
-            fun () -> { columnMetadata; nextToken; totalNumRows; records }
+          fun ?resultFormat ->
+            fun ?nextToken ->
+              fun () ->
+                {
+                  records;
+                  columnMetadata;
+                  totalNumRows;
+                  resultFormat;
+                  nextToken
+                }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2034,112 +2440,102 @@ module GetStatementResultResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ColumnMetadata",
-           (Option.map x.columnMetadata ~f:ColumnMetadataList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("Records", (Some (SqlRecords.to_value x.records)));
-        ("TotalNumRows", (Option.map x.totalNumRows ~f:Long.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let totalNumRows =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "TotalNumRows") in
-      let records =
-        SqlRecords.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Records") in
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let columnMetadata =
-        (Option.map ~f:ColumnMetadataList.of_xml)
-          (Xml.child xml_arg0 "ColumnMetadata") in
-      make ?totalNumRows ~records ?nextToken ?columnMetadata ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalNumRows = field_map json "TotalNumRows" Long.of_json in
-      let records = field_map_exn json "Records" SqlRecords.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let columnMetadata =
-        field_map json "ColumnMetadata" ColumnMetadataList.of_json in
-      make ?totalNumRows ~records ?nextToken ?columnMetadata ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Fetches the temporarily cached result of an SQL statement. A token is returned to page through the statement results."]
-module GetStatementResultRequest =
-  struct
-    type nonrec t =
-      {
-      id: StatementId.t
-        [@ocaml.doc
-          "The identifier of the SQL statement whose results are to be fetched. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API. A suffix indicates then number of the SQL statement. For example, d9b6c0c9-0747-4bf4-b142-e8883122f766:2 has a suffix of :2 that indicates the second SQL statement of a batch query. This identifier is returned by BatchExecuteStatment, ExecuteStatment, and ListStatements."];
-      nextToken: String_.t option
-        [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."]}
-    let context_ = "GetStatementResultRequest"
-    let make ?nextToken = fun ~id -> fun () -> { nextToken; id }
-    let to_value x =
-      structure_to_value
-        [("Id", (Some (StatementId.to_value x.id)));
+        [("Records", (Option.map x.records ~f:FormattedSqlRecords.to_value));
+        ("ColumnMetadata",
+          (Option.map x.columnMetadata ~f:ColumnMetadataList.to_value));
+        ("TotalNumRows", (Option.map x.totalNumRows ~f:Long.to_value));
+        ("ResultFormat",
+          (Option.map x.resultFormat ~f:ResultFormatString.to_value));
         ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let id =
-        StatementId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?nextToken ~id ()
+      let resultFormat =
+        (Option.map ~f:ResultFormatString.of_xml)
+          (Xml.child xml_arg0 "ResultFormat") in
+      let totalNumRows =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "TotalNumRows") in
+      let columnMetadata =
+        (Option.map ~f:ColumnMetadataList.of_xml)
+          (Xml.child xml_arg0 "ColumnMetadata") in
+      let records =
+        (Option.map ~f:FormattedSqlRecords.of_xml)
+          (Xml.child xml_arg0 "Records") in
+      make ?nextToken ?resultFormat ?totalNumRows ?columnMetadata ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let id = field_map_exn json "Id" StatementId.of_json in
-      make ?nextToken ~id ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let resultFormat =
+        field_map json__ "ResultFormat" ResultFormatString.of_json in
+      let totalNumRows = field_map json__ "TotalNumRows" Long.of_json in
+      let columnMetadata =
+        field_map json__ "ColumnMetadata" ColumnMetadataList.of_json in
+      let records = field_map json__ "Records" FormattedSqlRecords.of_json in
+      make ?nextToken ?resultFormat ?totalNumRows ?columnMetadata ?records ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Fetches the temporarily cached result of an SQL statement. A token is returned to page through the statement results."]
-module ExecuteStatementOutput =
+       "Fetches the temporarily cached result of an SQL statement in CSV format. The ExecuteStatement or BatchExecuteStatement operation that ran the SQL statement must have specified ResultFormat as CSV. A token is returned to page through the statement results. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
+module GetStatementResultV2Request =
   struct
     type nonrec t =
       {
-      clusterIdentifier: Location.t option
+      id: UUID.t
         [@ocaml.doc
-          "The cluster identifier. This parameter is not returned when connecting to a serverless endpoint."];
-      createdAt: Timestamp.t option
-        [@ocaml.doc "The date and time (UTC) the statement was created."];
-      database: String_.t option [@ocaml.doc "The name of the database."];
-      dbUser: String_.t option [@ocaml.doc "The database user name."];
-      id: StatementId.t option
+          "The identifier of the SQL statement whose results are to be fetched. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API. A suffix indicates then number of the SQL statement. For example, d9b6c0c9-0747-4bf4-b142-e8883122f766:2 has a suffix of :2 that indicates the second SQL statement of a batch query. This identifier is returned by BatchExecuteStatment, ExecuteStatment, and ListStatements."];
+      nextToken: String_.t option
         [@ocaml.doc
-          "The identifier of the SQL statement whose results are to be fetched. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API."];
-      secretArn: SecretArn.t option
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."]}
+    let context_ = "GetStatementResultV2Request"
+    let make ?nextToken = fun ~id -> fun () -> { nextToken; id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (UUID.to_value x.id)));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let id = UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ?nextToken ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let id = field_map_exn json__ "Id" UUID.of_json in
+      make ?nextToken ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Fetches the temporarily cached result of an SQL statement in CSV format. The ExecuteStatement or BatchExecuteStatement operation that ran the SQL statement must have specified ResultFormat as CSV. A token is returned to page through the statement results. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
+module GetStatementResultResponse =
+  struct
+    type nonrec t =
+      {
+      records: SqlRecords.t option
+        [@ocaml.doc "The results of the SQL statement in JSON format."];
+      columnMetadata: ColumnMetadataList.t option
+        [@ocaml.doc "The properties (metadata) of a column."];
+      totalNumRows: Long.t option
         [@ocaml.doc
-          "The name or ARN of the secret that enables access to the database."]}
+          "The total number of rows in the result set returned from a query. You can use this number to estimate the number of calls to the GetStatementResult operation needed to page through the results."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."]}
     type nonrec error =
-      [
-        `ActiveStatementsExceededException of
-          ActiveStatementsExceededException.t 
-      | `ExecuteStatementException of ExecuteStatementException.t 
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?clusterIdentifier =
-      fun ?createdAt ->
-        fun ?database ->
-          fun ?dbUser ->
-            fun ?id ->
-              fun ?secretArn ->
-                fun () ->
-                  {
-                    clusterIdentifier;
-                    createdAt;
-                    database;
-                    dbUser;
-                    id;
-                    secretArn
-                  }
+    let make ?records =
+      fun ?columnMetadata ->
+        fun ?totalNumRows ->
+          fun ?nextToken ->
+            fun () -> { records; columnMetadata; totalNumRows; nextToken }
     let error_of_json name json =
       match name with
-      | "ActiveStatementsExceededException" ->
-          `ActiveStatementsExceededException
-            (ActiveStatementsExceededException.of_json json)
-      | "ExecuteStatementException" ->
-          `ExecuteStatementException (ExecuteStatementException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2147,25 +2543,24 @@ module ExecuteStatementOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
-      | "ActiveStatementsExceededException" ->
-          `ActiveStatementsExceededException
-            (ActiveStatementsExceededException.of_xml xml)
-      | "ExecuteStatementException" ->
-          `ExecuteStatementException (ExecuteStatementException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
-      | `ActiveStatementsExceededException e ->
+      | `InternalServerException e ->
           `Assoc
-            [("error", (`String "ActiveStatementsExceededException"));
-            ("details", (ActiveStatementsExceededException.to_json e))]
-      | `ExecuteStatementException e ->
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
           `Assoc
-            [("error", (`String "ExecuteStatementException"));
-            ("details", (ExecuteStatementException.to_json e))]
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2177,158 +2572,419 @@ module ExecuteStatementOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ClusterIdentifier",
-           (Option.map x.clusterIdentifier ~f:Location.to_value));
-        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
-        ("Database", (Option.map x.database ~f:String_.to_value));
-        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
-        ("Id", (Option.map x.id ~f:StatementId.to_value));
-        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value))]
+        [("Records", (Option.map x.records ~f:SqlRecords.to_value));
+        ("ColumnMetadata",
+          (Option.map x.columnMetadata ~f:ColumnMetadataList.to_value));
+        ("TotalNumRows", (Option.map x.totalNumRows ~f:Long.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let secretArn =
-        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
-      let id = (Option.map ~f:StatementId.of_xml) (Xml.child xml_arg0 "Id") in
-      let dbUser =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
-      let database =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Database") in
-      let createdAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      let clusterIdentifier =
-        (Option.map ~f:Location.of_xml)
-          (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?secretArn ?id ?dbUser ?database ?createdAt ?clusterIdentifier ()
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let totalNumRows =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "TotalNumRows") in
+      let columnMetadata =
+        (Option.map ~f:ColumnMetadataList.of_xml)
+          (Xml.child xml_arg0 "ColumnMetadata") in
+      let records =
+        (Option.map ~f:SqlRecords.of_xml) (Xml.child xml_arg0 "Records") in
+      make ?nextToken ?totalNumRows ?columnMetadata ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let id = field_map json "Id" StatementId.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
-      let database = field_map json "Database" String_.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let clusterIdentifier =
-        field_map json "ClusterIdentifier" Location.of_json in
-      make ?secretArn ?id ?dbUser ?database ?createdAt ?clusterIdentifier ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let totalNumRows = field_map json__ "TotalNumRows" Long.of_json in
+      let columnMetadata =
+        field_map json__ "ColumnMetadata" ColumnMetadataList.of_json in
+      let records = field_map json__ "Records" SqlRecords.of_json in
+      make ?nextToken ?totalNumRows ?columnMetadata ?records ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Runs an SQL statement, which can be data manipulation language (DML) or data definition language (DDL). This statement must be a single SQL statement. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "Fetches the temporarily cached result of an SQL statement in JSON format. The ExecuteStatement or BatchExecuteStatement operation that ran the SQL statement must have specified ResultFormat as JSON , or let the format default to JSON. A token is returned to page through the statement results. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
+module GetStatementResultRequest =
+  struct
+    type nonrec t =
+      {
+      id: UUID.t
+        [@ocaml.doc
+          "The identifier of the SQL statement whose results are to be fetched. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API. A suffix indicates then number of the SQL statement. For example, d9b6c0c9-0747-4bf4-b142-e8883122f766:2 has a suffix of :2 that indicates the second SQL statement of a batch query. This identifier is returned by BatchExecuteStatment, ExecuteStatment, and ListStatements."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."]}
+    let context_ = "GetStatementResultRequest"
+    let make ?nextToken = fun ~id -> fun () -> { nextToken; id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (UUID.to_value x.id)));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let id = UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ?nextToken ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let id = field_map_exn json__ "Id" UUID.of_json in
+      make ?nextToken ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Fetches the temporarily cached result of an SQL statement in JSON format. The ExecuteStatement or BatchExecuteStatement operation that ran the SQL statement must have specified ResultFormat as JSON , or let the format default to JSON. A token is returned to page through the statement results. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
+module ExecuteStatementOutput =
+  struct
+    type nonrec t =
+      {
+      id: UUID.t option
+        [@ocaml.doc
+          "The identifier of the SQL statement whose results are to be fetched. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time (UTC) the statement was created."];
+      clusterIdentifier: ClusterIdentifierString.t option
+        [@ocaml.doc
+          "The cluster identifier. This element is not returned when connecting to a serverless workgroup."];
+      dbUser: String_.t option [@ocaml.doc "The database user name."];
+      dbGroups: DbGroupList.t option
+        [@ocaml.doc
+          "A list of colon (:) separated names of database groups."];
+      database: String_.t option [@ocaml.doc "The name of the database."];
+      secretArn: SecretArn.t option
+        [@ocaml.doc
+          "The name or ARN of the secret that enables access to the database."];
+      workgroupName: WorkgroupNameString.t option
+        [@ocaml.doc
+          "The serverless workgroup name or Amazon Resource Name (ARN). This element is not returned when connecting to a provisioned cluster."];
+      sessionId: UUID.t option
+        [@ocaml.doc "The session identifier of the query."]}
+    type nonrec error =
+      [
+        `ActiveSessionsExceededException of ActiveSessionsExceededException.t 
+      | `ActiveStatementsExceededException of
+          ActiveStatementsExceededException.t 
+      | `ExecuteStatementException of ExecuteStatementException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id =
+      fun ?createdAt ->
+        fun ?clusterIdentifier ->
+          fun ?dbUser ->
+            fun ?dbGroups ->
+              fun ?database ->
+                fun ?secretArn ->
+                  fun ?workgroupName ->
+                    fun ?sessionId ->
+                      fun () ->
+                        {
+                          id;
+                          createdAt;
+                          clusterIdentifier;
+                          dbUser;
+                          dbGroups;
+                          database;
+                          secretArn;
+                          workgroupName;
+                          sessionId
+                        }
+    let error_of_json name json =
+      match name with
+      | "ActiveSessionsExceededException" ->
+          `ActiveSessionsExceededException
+            (ActiveSessionsExceededException.of_json json)
+      | "ActiveStatementsExceededException" ->
+          `ActiveStatementsExceededException
+            (ActiveStatementsExceededException.of_json json)
+      | "ExecuteStatementException" ->
+          `ExecuteStatementException (ExecuteStatementException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ActiveSessionsExceededException" ->
+          `ActiveSessionsExceededException
+            (ActiveSessionsExceededException.of_xml xml)
+      | "ActiveStatementsExceededException" ->
+          `ActiveStatementsExceededException
+            (ActiveStatementsExceededException.of_xml xml)
+      | "ExecuteStatementException" ->
+          `ExecuteStatementException (ExecuteStatementException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ActiveSessionsExceededException e ->
+          `Assoc
+            [("error", (`String "ActiveSessionsExceededException"));
+            ("details", (ActiveSessionsExceededException.to_json e))]
+      | `ActiveStatementsExceededException e ->
+          `Assoc
+            [("error", (`String "ActiveStatementsExceededException"));
+            ("details", (ActiveStatementsExceededException.to_json e))]
+      | `ExecuteStatementException e ->
+          `Assoc
+            [("error", (`String "ExecuteStatementException"));
+            ("details", (ExecuteStatementException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:UUID.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:ClusterIdentifierString.to_value));
+        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
+        ("DbGroups", (Option.map x.dbGroups ~f:DbGroupList.to_value));
+        ("Database", (Option.map x.database ~f:String_.to_value));
+        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value));
+        ("SessionId", (Option.map x.sessionId ~f:UUID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "SessionId") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
+      let database =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Database") in
+      let dbGroups =
+        (Option.map ~f:DbGroupList.of_xml) (Xml.child xml_arg0 "DbGroups") in
+      let dbUser =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
+      let clusterIdentifier =
+        (Option.map ~f:ClusterIdentifierString.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?sessionId ?workgroupName ?secretArn ?database ?dbGroups ?dbUser
+        ?clusterIdentifier ?createdAt ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionId = field_map json__ "SessionId" UUID.of_json in
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
+      let database = field_map json__ "Database" String_.of_json in
+      let dbGroups = field_map json__ "DbGroups" DbGroupList.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
+      let clusterIdentifier =
+        field_map json__ "ClusterIdentifier" ClusterIdentifierString.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      make ?sessionId ?workgroupName ?secretArn ?database ?dbGroups ?dbUser
+        ?clusterIdentifier ?createdAt ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Runs an SQL statement, which can be data manipulation language (DML) or data definition language (DDL). This statement must be a single SQL statement. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module ExecuteStatementInput =
   struct
     type nonrec t =
       {
-      clusterIdentifier: Location.t option
+      sql: StatementString.t [@ocaml.doc "The SQL statement text to run."];
+      clusterIdentifier: ClusterIdentifierString.t option
         [@ocaml.doc
           "The cluster identifier. This parameter is required when connecting to a cluster and authenticating using either Secrets Manager or temporary credentials."];
-      database: String_.t
-        [@ocaml.doc
-          "The name of the database. This parameter is required when authenticating using either Secrets Manager or temporary credentials."];
-      dbUser: String_.t option
-        [@ocaml.doc
-          "The database user name. This parameter is required when connecting to a cluster and authenticating using temporary credentials."];
-      parameters: SqlParametersList.t option
-        [@ocaml.doc "The parameters for the SQL statement."];
       secretArn: SecretArn.t option
         [@ocaml.doc
           "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager."];
-      sql: StatementString.t [@ocaml.doc "The SQL statement text to run."];
+      dbUser: String_.t option
+        [@ocaml.doc
+          "The database user name. This parameter is required when connecting to a cluster as a database user and authenticating using temporary credentials."];
+      database: String_.t option
+        [@ocaml.doc
+          "The name of the database. This parameter is required when authenticating using either Secrets Manager or temporary credentials."];
+      withEvent: Boolean.t option
+        [@ocaml.doc
+          "A value that indicates whether to send an event to the Amazon EventBridge event bus after the SQL statement runs."];
       statementName: StatementNameString.t option
         [@ocaml.doc
           "The name of the SQL statement. You can name the SQL statement when you create it to identify the query."];
-      withEvent: Boolean.t option
+      parameters: SqlParametersList.t option
+        [@ocaml.doc "The parameters for the SQL statement."];
+      workgroupName: WorkgroupNameString.t option
         [@ocaml.doc
-          "A value that indicates whether to send an event to the Amazon EventBridge event bus after the SQL statement runs."]}
+          "The serverless workgroup name or Amazon Resource Name (ARN). This parameter is required when connecting to a serverless workgroup and authenticating using either Secrets Manager or temporary credentials."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      resultFormat: ResultFormatString.t option
+        [@ocaml.doc
+          "The data format of the result of the SQL statement. If no format is specified, the default is JSON."];
+      sessionKeepAliveSeconds: SessionAliveSeconds.t option
+        [@ocaml.doc
+          "The number of seconds to keep the session alive after the query finishes. The maximum time a session can keep alive is 24 hours. After 24 hours, the session is forced closed and the query is terminated."];
+      sessionId: UUID.t option
+        [@ocaml.doc "The session identifier of the query."]}
     let context_ = "ExecuteStatementInput"
     let make ?clusterIdentifier =
-      fun ?dbUser ->
-        fun ?parameters ->
-          fun ?secretArn ->
-            fun ?statementName ->
-              fun ?withEvent ->
-                fun ~database ->
-                  fun ~sql ->
-                    fun () ->
-                      {
-                        clusterIdentifier;
-                        dbUser;
-                        parameters;
-                        secretArn;
-                        statementName;
-                        withEvent;
-                        database;
-                        sql
-                      }
+      fun ?secretArn ->
+        fun ?dbUser ->
+          fun ?database ->
+            fun ?withEvent ->
+              fun ?statementName ->
+                fun ?parameters ->
+                  fun ?workgroupName ->
+                    fun ?clientToken ->
+                      fun ?resultFormat ->
+                        fun ?sessionKeepAliveSeconds ->
+                          fun ?sessionId ->
+                            fun ~sql ->
+                              fun () ->
+                                {
+                                  clusterIdentifier;
+                                  secretArn;
+                                  dbUser;
+                                  database;
+                                  withEvent;
+                                  statementName;
+                                  parameters;
+                                  workgroupName;
+                                  clientToken;
+                                  resultFormat;
+                                  sessionKeepAliveSeconds;
+                                  sessionId;
+                                  sql
+                                }
     let to_value x =
       structure_to_value
-        [("ClusterIdentifier",
-           (Option.map x.clusterIdentifier ~f:Location.to_value));
-        ("Database", (Some (String_.to_value x.database)));
-        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
-        ("Parameters",
-          (Option.map x.parameters ~f:SqlParametersList.to_value));
+        [("Sql", (Some (StatementString.to_value x.sql)));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:ClusterIdentifierString.to_value));
         ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
-        ("Sql", (Some (StatementString.to_value x.sql)));
+        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
+        ("Database", (Option.map x.database ~f:String_.to_value));
+        ("WithEvent", (Option.map x.withEvent ~f:Boolean.to_value));
         ("StatementName",
           (Option.map x.statementName ~f:StatementNameString.to_value));
-        ("WithEvent", (Option.map x.withEvent ~f:Boolean.to_value))]
+        ("Parameters",
+          (Option.map x.parameters ~f:SqlParametersList.to_value));
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("ResultFormat",
+          (Option.map x.resultFormat ~f:ResultFormatString.to_value));
+        ("SessionKeepAliveSeconds",
+          (Option.map x.sessionKeepAliveSeconds
+             ~f:SessionAliveSeconds.to_value));
+        ("SessionId", (Option.map x.sessionId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let withEvent =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "WithEvent") in
-      let statementName =
-        (Option.map ~f:StatementNameString.of_xml)
-          (Xml.child xml_arg0 "StatementName") in
-      let sql =
-        StatementString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Sql") in
-      let secretArn =
-        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
+      let sessionId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "SessionId") in
+      let sessionKeepAliveSeconds =
+        (Option.map ~f:SessionAliveSeconds.of_xml)
+          (Xml.child xml_arg0 "SessionKeepAliveSeconds") in
+      let resultFormat =
+        (Option.map ~f:ResultFormatString.of_xml)
+          (Xml.child xml_arg0 "ResultFormat") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
       let parameters =
         (Option.map ~f:SqlParametersList.of_xml)
           (Xml.child xml_arg0 "Parameters") in
+      let statementName =
+        (Option.map ~f:StatementNameString.of_xml)
+          (Xml.child xml_arg0 "StatementName") in
+      let withEvent =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "WithEvent") in
+      let database =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Database") in
       let dbUser =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
-      let database =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
       let clusterIdentifier =
-        (Option.map ~f:Location.of_xml)
+        (Option.map ~f:ClusterIdentifierString.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?withEvent ?statementName ~sql ?secretArn ?parameters ?dbUser
-        ~database ?clusterIdentifier ()
+      let sql =
+        StatementString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Sql") in
+      make ?sessionId ?sessionKeepAliveSeconds ?resultFormat ?clientToken
+        ?workgroupName ?parameters ?statementName ?withEvent ?database
+        ?dbUser ?secretArn ?clusterIdentifier ~sql ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let withEvent = field_map json "WithEvent" Boolean.of_json in
+    let of_json json__ =
+      let sessionId = field_map json__ "SessionId" UUID.of_json in
+      let sessionKeepAliveSeconds =
+        field_map json__ "SessionKeepAliveSeconds"
+          SessionAliveSeconds.of_json in
+      let resultFormat =
+        field_map json__ "ResultFormat" ResultFormatString.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
+      let parameters =
+        field_map json__ "Parameters" SqlParametersList.of_json in
       let statementName =
-        field_map json "StatementName" StatementNameString.of_json in
-      let sql = field_map_exn json "Sql" StatementString.of_json in
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let parameters = field_map json "Parameters" SqlParametersList.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
-      let database = field_map_exn json "Database" String_.of_json in
+        field_map json__ "StatementName" StatementNameString.of_json in
+      let withEvent = field_map json__ "WithEvent" Boolean.of_json in
+      let database = field_map json__ "Database" String_.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" Location.of_json in
-      make ?withEvent ?statementName ~sql ?secretArn ?parameters ?dbUser
-        ~database ?clusterIdentifier ()
+        field_map json__ "ClusterIdentifier" ClusterIdentifierString.of_json in
+      let sql = field_map_exn json__ "Sql" StatementString.of_json in
+      make ?sessionId ?sessionKeepAliveSeconds ?resultFormat ?clientToken
+        ?workgroupName ?parameters ?statementName ?withEvent ?database
+        ?dbUser ?secretArn ?clusterIdentifier ~sql ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Runs an SQL statement, which can be data manipulation language (DML) or data definition language (DDL). This statement must be a single SQL statement. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "Runs an SQL statement, which can be data manipulation language (DML) or data definition language (DDL). This statement must be a single SQL statement. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module DescribeTableResponse =
   struct
     type nonrec t =
       {
+      tableName: String_.t option [@ocaml.doc "The table name."];
       columnList: ColumnList.t option
         [@ocaml.doc "A list of columns in the table."];
       nextToken: String_.t option
         [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
-      tableName: String_.t option [@ocaml.doc "The table name."]}
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."]}
     type nonrec error =
       [ `DatabaseConnectionException of DatabaseConnectionException.t 
       | `InternalServerException of InternalServerException.t 
+      | `QueryTimeoutException of QueryTimeoutException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?columnList =
-      fun ?nextToken ->
-        fun ?tableName -> fun () -> { columnList; nextToken; tableName }
+    let make ?tableName =
+      fun ?columnList ->
+        fun ?nextToken -> fun () -> { tableName; columnList; nextToken }
     let error_of_json name json =
       match name with
       | "DatabaseConnectionException" ->
@@ -2336,6 +2992,10 @@ module DescribeTableResponse =
             (DatabaseConnectionException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2348,6 +3008,10 @@ module DescribeTableResponse =
             (DatabaseConnectionException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -2362,6 +3026,14 @@ module DescribeTableResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `QueryTimeoutException e ->
+          `Assoc
+            [("error", (`String "QueryTimeoutException"));
+            ("details", (QueryTimeoutException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2373,228 +3045,253 @@ module DescribeTableResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ColumnList", (Option.map x.columnList ~f:ColumnList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("TableName", (Option.map x.tableName ~f:String_.to_value))]
+        [("TableName", (Option.map x.tableName ~f:String_.to_value));
+        ("ColumnList", (Option.map x.columnList ~f:ColumnList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tableName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TableName") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let columnList =
         (Option.map ~f:ColumnList.of_xml) (Xml.child xml_arg0 "ColumnList") in
-      make ?tableName ?nextToken ?columnList ()
+      let tableName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TableName") in
+      make ?nextToken ?columnList ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map json "TableName" String_.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let columnList = field_map json "ColumnList" ColumnList.of_json in
-      make ?tableName ?nextToken ?columnList ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let columnList = field_map json__ "ColumnList" ColumnList.of_json in
+      let tableName = field_map json__ "TableName" String_.of_json in
+      make ?nextToken ?columnList ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the detailed information about a table from metadata in the cluster. The information includes its columns. A token is returned to page through the column list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "Describes the detailed information about a table from metadata in the cluster. The information includes its columns. A token is returned to page through the column list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module DescribeTableRequest =
   struct
     type nonrec t =
       {
-      clusterIdentifier: Location.t option
+      clusterIdentifier: ClusterIdentifierString.t option
         [@ocaml.doc
           "The cluster identifier. This parameter is required when connecting to a cluster and authenticating using either Secrets Manager or temporary credentials."];
-      connectedDatabase: String_.t option
-        [@ocaml.doc
-          "A database name. The connected database is specified when you connect with your authentication credentials."];
-      database: String_.t
-        [@ocaml.doc
-          "The name of the database that contains the tables to be described. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials."];
-      dbUser: String_.t option
-        [@ocaml.doc
-          "The database user name. This parameter is required when connecting to a cluster and authenticating using temporary credentials."];
-      maxResults: PageSize.t option
-        [@ocaml.doc
-          "The maximum number of tables to return in the response. If more tables exist than fit in one response, then NextToken is returned to page through the results."];
-      nextToken: String_.t option
-        [@ocaml.doc
-          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
-      schema: String_.t option
-        [@ocaml.doc
-          "The schema that contains the table. If no schema is specified, then matching tables for all schemas are returned."];
       secretArn: SecretArn.t option
         [@ocaml.doc
           "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager."];
+      dbUser: String_.t option
+        [@ocaml.doc
+          "The database user name. This parameter is required when connecting to a cluster as a database user and authenticating using temporary credentials."];
+      database: String_.t
+        [@ocaml.doc
+          "The name of the database that contains the tables to be described. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials."];
+      connectedDatabase: String_.t option
+        [@ocaml.doc
+          "A database name. The connected database is specified when you connect with your authentication credentials."];
+      schema: String_.t option
+        [@ocaml.doc
+          "The schema that contains the table. If no schema is specified, then matching tables for all schemas are returned."];
       table: String_.t option
         [@ocaml.doc
-          "The table name. If no table is specified, then all tables for all matching schemas are returned. If no table and no schema is specified, then all tables for all schemas in the database are returned"]}
+          "The table name. If no table is specified, then all tables for all matching schemas are returned. If no table and no schema is specified, then all tables for all schemas in the database are returned"];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request."];
+      maxResults: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of tables to return in the response. If more tables exist than fit in one response, then NextToken is returned to page through the results."];
+      workgroupName: WorkgroupNameString.t option
+        [@ocaml.doc
+          "The serverless workgroup name or Amazon Resource Name (ARN). This parameter is required when connecting to a serverless workgroup and authenticating using either Secrets Manager or temporary credentials."]}
     let context_ = "DescribeTableRequest"
     let make ?clusterIdentifier =
-      fun ?connectedDatabase ->
+      fun ?secretArn ->
         fun ?dbUser ->
-          fun ?maxResults ->
-            fun ?nextToken ->
-              fun ?schema ->
-                fun ?secretArn ->
-                  fun ?table ->
-                    fun ~database ->
-                      fun () ->
-                        {
-                          clusterIdentifier;
-                          connectedDatabase;
-                          dbUser;
-                          maxResults;
-                          nextToken;
-                          schema;
-                          secretArn;
-                          table;
-                          database
-                        }
+          fun ?connectedDatabase ->
+            fun ?schema ->
+              fun ?table ->
+                fun ?nextToken ->
+                  fun ?maxResults ->
+                    fun ?workgroupName ->
+                      fun ~database ->
+                        fun () ->
+                          {
+                            clusterIdentifier;
+                            secretArn;
+                            dbUser;
+                            connectedDatabase;
+                            schema;
+                            table;
+                            nextToken;
+                            maxResults;
+                            workgroupName;
+                            database
+                          }
     let to_value x =
       structure_to_value
         [("ClusterIdentifier",
-           (Option.map x.clusterIdentifier ~f:Location.to_value));
+           (Option.map x.clusterIdentifier
+              ~f:ClusterIdentifierString.to_value));
+        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
+        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
+        ("Database", (Some (String_.to_value x.database)));
         ("ConnectedDatabase",
           (Option.map x.connectedDatabase ~f:String_.to_value));
-        ("Database", (Some (String_.to_value x.database)));
-        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("Schema", (Option.map x.schema ~f:String_.to_value));
-        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
-        ("Table", (Option.map x.table ~f:String_.to_value))]
+        ("Table", (Option.map x.table ~f:String_.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let table = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Table") in
-      let secretArn =
-        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
-      let schema =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Schema") in
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
       let maxResults =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let dbUser =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
-      let database =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let table = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Table") in
+      let schema =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Schema") in
       let connectedDatabase =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ConnectedDatabase") in
+      let database =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let dbUser =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
       let clusterIdentifier =
-        (Option.map ~f:Location.of_xml)
+        (Option.map ~f:ClusterIdentifierString.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?table ?secretArn ?schema ?nextToken ?maxResults ?dbUser ~database
-        ?connectedDatabase ?clusterIdentifier ()
+      make ?workgroupName ?maxResults ?nextToken ?table ?schema
+        ?connectedDatabase ~database ?dbUser ?secretArn ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let table = field_map json "Table" String_.of_json in
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let schema = field_map json "Schema" String_.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
-      let database = field_map_exn json "Database" String_.of_json in
+    let of_json json__ =
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let table = field_map json__ "Table" String_.of_json in
+      let schema = field_map json__ "Schema" String_.of_json in
       let connectedDatabase =
-        field_map json "ConnectedDatabase" String_.of_json in
+        field_map json__ "ConnectedDatabase" String_.of_json in
+      let database = field_map_exn json__ "Database" String_.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" Location.of_json in
-      make ?table ?secretArn ?schema ?nextToken ?maxResults ?dbUser ~database
-        ?connectedDatabase ?clusterIdentifier ()
+        field_map json__ "ClusterIdentifier" ClusterIdentifierString.of_json in
+      make ?workgroupName ?maxResults ?nextToken ?table ?schema
+        ?connectedDatabase ~database ?dbUser ?secretArn ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the detailed information about a table from metadata in the cluster. The information includes its columns. A token is returned to page through the column list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "Describes the detailed information about a table from metadata in the cluster. The information includes its columns. A token is returned to page through the column list. Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module DescribeStatementResponse =
   struct
     type nonrec t =
       {
+      id: UUID.t option
+        [@ocaml.doc
+          "The identifier of the SQL statement described. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API."];
+      secretArn: SecretArn.t option
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) of the secret that enables access to the database."];
+      dbUser: String_.t option [@ocaml.doc "The database user name."];
+      database: String_.t option [@ocaml.doc "The name of the database."];
       clusterIdentifier: String_.t option
         [@ocaml.doc "The cluster identifier."];
-      createdAt: Timestamp.t option
-        [@ocaml.doc
-          "The date and time (UTC) when the SQL statement was submitted to run."];
-      database: String_.t option [@ocaml.doc "The name of the database."];
-      dbUser: String_.t option [@ocaml.doc "The database user name."];
       duration: Long.t option
         [@ocaml.doc
           "The amount of time in nanoseconds that the statement ran."];
       error: String_.t option
         [@ocaml.doc
           "The error message from the cluster if the SQL statement encountered an error while running."];
+      status: StatusString.t option
+        [@ocaml.doc
+          "The status of the SQL statement being described. Status values are defined as follows: ABORTED - The query run was stopped by the user. ALL - A status value that includes all query statuses. This value can be used to filter results. FAILED - The query run failed. FINISHED - The query has finished running. PICKED - The query has been chosen to be run. STARTED - The query run has started. SUBMITTED - The query was submitted, but not yet processed."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time (UTC) when the SQL statement was submitted to run."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time (UTC) that the metadata for the SQL statement was last updated. An example is the time the status last changed."];
+      redshiftPid: Long.t option
+        [@ocaml.doc "The process identifier from Amazon Redshift."];
       hasResultSet: Boolean.t option
         [@ocaml.doc
           "A value that indicates whether the statement has a result set. The result set can be empty. The value is true for an empty result set. The value is true if any substatement returns a result set."];
-      id: StatementId.t
-        [@ocaml.doc
-          "The identifier of the SQL statement described. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API."];
-      queryParameters: SqlParametersList.t option
-        [@ocaml.doc "The parameters for the SQL statement."];
       queryString: StatementString.t option
         [@ocaml.doc "The SQL statement text."];
-      redshiftPid: Long.t option
-        [@ocaml.doc "The process identifier from Amazon Redshift."];
-      redshiftQueryId: Long.t option
-        [@ocaml.doc
-          "The identifier of the query generated by Amazon Redshift. These identifiers are also available in the query column of the STL_QUERY system view."];
       resultRows: Long.t option
         [@ocaml.doc
           "Either the number of rows returned from the SQL statement or the number of rows affected. If result size is greater than zero, the result rows can be the number of rows affected by SQL statements such as INSERT, UPDATE, DELETE, COPY, and others. A -1 indicates the value is null."];
       resultSize: Long.t option
         [@ocaml.doc
           "The size in bytes of the returned results. A -1 indicates the value is null."];
-      secretArn: SecretArn.t option
+      redshiftQueryId: Long.t option
         [@ocaml.doc
-          "The name or Amazon Resource Name (ARN) of the secret that enables access to the database."];
-      status: StatusString.t option
-        [@ocaml.doc
-          "The status of the SQL statement being described. Status values are defined as follows: ABORTED - The query run was stopped by the user. ALL - A status value that includes all query statuses. This value can be used to filter results. FAILED - The query run failed. FINISHED - The query has finished running. PICKED - The query has been chosen to be run. STARTED - The query run has started. SUBMITTED - The query was submitted, but not yet processed."];
+          "The identifier of the query generated by Amazon Redshift. These identifiers are also available in the query column of the STL_QUERY system view."];
+      queryParameters: SqlParametersList.t option
+        [@ocaml.doc "The parameters for the SQL statement."];
       subStatements: SubStatementList.t option
         [@ocaml.doc "The SQL statements from a multiple statement run."];
-      updatedAt: Timestamp.t option
+      workgroupName: WorkgroupNameString.t option
         [@ocaml.doc
-          "The date and time (UTC) that the metadata for the SQL statement was last updated. An example is the time the status last changed."]}
+          "The serverless workgroup name or Amazon Resource Name (ARN)."];
+      resultFormat: ResultFormatString.t option
+        [@ocaml.doc "The data format of the result of the SQL statement."];
+      sessionId: String_.t option
+        [@ocaml.doc "The session identifier of the query."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeStatementResponse"
-    let make ?clusterIdentifier =
-      fun ?createdAt ->
-        fun ?database ->
-          fun ?dbUser ->
-            fun ?duration ->
-              fun ?error ->
-                fun ?hasResultSet ->
-                  fun ?queryParameters ->
-                    fun ?queryString ->
-                      fun ?redshiftPid ->
-                        fun ?redshiftQueryId ->
-                          fun ?resultRows ->
-                            fun ?resultSize ->
-                              fun ?secretArn ->
-                                fun ?status ->
-                                  fun ?subStatements ->
-                                    fun ?updatedAt ->
-                                      fun ~id ->
-                                        fun () ->
-                                          {
-                                            clusterIdentifier;
-                                            createdAt;
-                                            database;
-                                            dbUser;
-                                            duration;
-                                            error;
-                                            hasResultSet;
-                                            queryParameters;
-                                            queryString;
-                                            redshiftPid;
-                                            redshiftQueryId;
-                                            resultRows;
-                                            resultSize;
-                                            secretArn;
-                                            status;
-                                            subStatements;
-                                            updatedAt;
-                                            id
-                                          }
+    let make ?id =
+      fun ?secretArn ->
+        fun ?dbUser ->
+          fun ?database ->
+            fun ?clusterIdentifier ->
+              fun ?duration ->
+                fun ?error ->
+                  fun ?status ->
+                    fun ?createdAt ->
+                      fun ?updatedAt ->
+                        fun ?redshiftPid ->
+                          fun ?hasResultSet ->
+                            fun ?queryString ->
+                              fun ?resultRows ->
+                                fun ?resultSize ->
+                                  fun ?redshiftQueryId ->
+                                    fun ?queryParameters ->
+                                      fun ?subStatements ->
+                                        fun ?workgroupName ->
+                                          fun ?resultFormat ->
+                                            fun ?sessionId ->
+                                              fun () ->
+                                                {
+                                                  id;
+                                                  secretArn;
+                                                  dbUser;
+                                                  database;
+                                                  clusterIdentifier;
+                                                  duration;
+                                                  error;
+                                                  status;
+                                                  createdAt;
+                                                  updatedAt;
+                                                  redshiftPid;
+                                                  hasResultSet;
+                                                  queryString;
+                                                  resultRows;
+                                                  resultSize;
+                                                  redshiftQueryId;
+                                                  queryParameters;
+                                                  subStatements;
+                                                  workgroupName;
+                                                  resultFormat;
+                                                  sessionId
+                                                }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2637,125 +3334,143 @@ module DescribeStatementResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ClusterIdentifier",
-           (Option.map x.clusterIdentifier ~f:String_.to_value));
-        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
-        ("Database", (Option.map x.database ~f:String_.to_value));
+        [("Id", (Option.map x.id ~f:UUID.to_value));
+        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
         ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
+        ("Database", (Option.map x.database ~f:String_.to_value));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:String_.to_value));
         ("Duration", (Option.map x.duration ~f:Long.to_value));
         ("Error", (Option.map x.error ~f:String_.to_value));
+        ("Status", (Option.map x.status ~f:StatusString.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("RedshiftPid", (Option.map x.redshiftPid ~f:Long.to_value));
         ("HasResultSet", (Option.map x.hasResultSet ~f:Boolean.to_value));
-        ("Id", (Some (StatementId.to_value x.id)));
-        ("QueryParameters",
-          (Option.map x.queryParameters ~f:SqlParametersList.to_value));
         ("QueryString",
           (Option.map x.queryString ~f:StatementString.to_value));
-        ("RedshiftPid", (Option.map x.redshiftPid ~f:Long.to_value));
-        ("RedshiftQueryId", (Option.map x.redshiftQueryId ~f:Long.to_value));
         ("ResultRows", (Option.map x.resultRows ~f:Long.to_value));
         ("ResultSize", (Option.map x.resultSize ~f:Long.to_value));
-        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
-        ("Status", (Option.map x.status ~f:StatusString.to_value));
+        ("RedshiftQueryId", (Option.map x.redshiftQueryId ~f:Long.to_value));
+        ("QueryParameters",
+          (Option.map x.queryParameters ~f:SqlParametersList.to_value));
         ("SubStatements",
           (Option.map x.subStatements ~f:SubStatementList.to_value));
-        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value));
+        ("ResultFormat",
+          (Option.map x.resultFormat ~f:ResultFormatString.to_value));
+        ("SessionId", (Option.map x.sessionId ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let updatedAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let sessionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SessionId") in
+      let resultFormat =
+        (Option.map ~f:ResultFormatString.of_xml)
+          (Xml.child xml_arg0 "ResultFormat") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
       let subStatements =
         (Option.map ~f:SubStatementList.of_xml)
           (Xml.child xml_arg0 "SubStatements") in
-      let status =
-        (Option.map ~f:StatusString.of_xml) (Xml.child xml_arg0 "Status") in
-      let secretArn =
-        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
+      let queryParameters =
+        (Option.map ~f:SqlParametersList.of_xml)
+          (Xml.child xml_arg0 "QueryParameters") in
+      let redshiftQueryId =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "RedshiftQueryId") in
       let resultSize =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ResultSize") in
       let resultRows =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ResultRows") in
-      let redshiftQueryId =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "RedshiftQueryId") in
-      let redshiftPid =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "RedshiftPid") in
       let queryString =
         (Option.map ~f:StatementString.of_xml)
           (Xml.child xml_arg0 "QueryString") in
-      let queryParameters =
-        (Option.map ~f:SqlParametersList.of_xml)
-          (Xml.child xml_arg0 "QueryParameters") in
-      let id =
-        StatementId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       let hasResultSet =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "HasResultSet") in
+      let redshiftPid =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "RedshiftPid") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let status =
+        (Option.map ~f:StatusString.of_xml) (Xml.child xml_arg0 "Status") in
       let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Error") in
       let duration =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Duration") in
-      let dbUser =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
-      let database =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Database") in
-      let createdAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       let clusterIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?updatedAt ?subStatements ?status ?secretArn ?resultSize
-        ?resultRows ?redshiftQueryId ?redshiftPid ?queryString
-        ?queryParameters ~id ?hasResultSet ?error ?duration ?dbUser ?database
-        ?createdAt ?clusterIdentifier ()
+      let database =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Database") in
+      let dbUser =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?sessionId ?resultFormat ?workgroupName ?subStatements
+        ?queryParameters ?redshiftQueryId ?resultSize ?resultRows
+        ?queryString ?hasResultSet ?redshiftPid ?updatedAt ?createdAt ?status
+        ?error ?duration ?clusterIdentifier ?database ?dbUser ?secretArn ?id
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
+    let of_json json__ =
+      let sessionId = field_map json__ "SessionId" String_.of_json in
+      let resultFormat =
+        field_map json__ "ResultFormat" ResultFormatString.of_json in
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
       let subStatements =
-        field_map json "SubStatements" SubStatementList.of_json in
-      let status = field_map json "Status" StatusString.of_json in
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let resultSize = field_map json "ResultSize" Long.of_json in
-      let resultRows = field_map json "ResultRows" Long.of_json in
-      let redshiftQueryId = field_map json "RedshiftQueryId" Long.of_json in
-      let redshiftPid = field_map json "RedshiftPid" Long.of_json in
-      let queryString = field_map json "QueryString" StatementString.of_json in
+        field_map json__ "SubStatements" SubStatementList.of_json in
       let queryParameters =
-        field_map json "QueryParameters" SqlParametersList.of_json in
-      let id = field_map_exn json "Id" StatementId.of_json in
-      let hasResultSet = field_map json "HasResultSet" Boolean.of_json in
-      let error = field_map json "Error" String_.of_json in
-      let duration = field_map json "Duration" Long.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
-      let database = field_map json "Database" String_.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+        field_map json__ "QueryParameters" SqlParametersList.of_json in
+      let redshiftQueryId = field_map json__ "RedshiftQueryId" Long.of_json in
+      let resultSize = field_map json__ "ResultSize" Long.of_json in
+      let resultRows = field_map json__ "ResultRows" Long.of_json in
+      let queryString =
+        field_map json__ "QueryString" StatementString.of_json in
+      let hasResultSet = field_map json__ "HasResultSet" Boolean.of_json in
+      let redshiftPid = field_map json__ "RedshiftPid" Long.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" StatusString.of_json in
+      let error = field_map json__ "Error" String_.of_json in
+      let duration = field_map json__ "Duration" Long.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
-      make ?updatedAt ?subStatements ?status ?secretArn ?resultSize
-        ?resultRows ?redshiftQueryId ?redshiftPid ?queryString
-        ?queryParameters ~id ?hasResultSet ?error ?duration ?dbUser ?database
-        ?createdAt ?clusterIdentifier ()
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let database = field_map json__ "Database" String_.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      make ?sessionId ?resultFormat ?workgroupName ?subStatements
+        ?queryParameters ?redshiftQueryId ?resultSize ?resultRows
+        ?queryString ?hasResultSet ?redshiftPid ?updatedAt ?createdAt ?status
+        ?error ?duration ?clusterIdentifier ?database ?dbUser ?secretArn ?id
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the details about a specific instance when a query was run by the Amazon Redshift Data API. The information includes when the query started, when it finished, the query status, the number of rows returned, and the SQL statement."]
+       "Describes the details about a specific instance when a query was run by the Amazon Redshift Data API. The information includes when the query started, when it finished, the query status, the number of rows returned, and the SQL statement. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module DescribeStatementRequest =
   struct
     type nonrec t =
       {
-      id: StatementId.t
+      id: UUID.t
         [@ocaml.doc
           "The identifier of the SQL statement to describe. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API. A suffix indicates the number of the SQL statement. For example, d9b6c0c9-0747-4bf4-b142-e8883122f766:2 has a suffix of :2 that indicates the second SQL statement of a batch query. This identifier is returned by BatchExecuteStatment, ExecuteStatement, and ListStatements."]}
     let context_ = "DescribeStatementRequest"
     let make ~id = fun () -> { id }
-    let to_value x =
-      structure_to_value [("Id", (Some (StatementId.to_value x.id)))]
+    let to_value x = structure_to_value [("Id", (Some (UUID.to_value x.id)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id =
-        StatementId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" StatementId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" UUID.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the details about a specific instance when a query was run by the Amazon Redshift Data API. The information includes when the query started, when it finished, the query status, the number of rows returned, and the SQL statement."]
+       "Describes the details about a specific instance when a query was run by the Amazon Redshift Data API. The information includes when the query started, when it finished, the query status, the number of rows returned, and the SQL statement. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module CancelStatementResponse =
   struct
     type nonrec t =
@@ -2766,6 +3481,7 @@ module CancelStatementResponse =
     type nonrec error =
       [ `DatabaseConnectionException of DatabaseConnectionException.t 
       | `InternalServerException of InternalServerException.t 
+      | `QueryTimeoutException of QueryTimeoutException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -2777,6 +3493,8 @@ module CancelStatementResponse =
             (DatabaseConnectionException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
@@ -2791,6 +3509,8 @@ module CancelStatementResponse =
             (DatabaseConnectionException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "QueryTimeoutException" ->
+          `QueryTimeoutException (QueryTimeoutException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
@@ -2807,6 +3527,10 @@ module CancelStatementResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `QueryTimeoutException e ->
+          `Assoc
+            [("error", (`String "QueryTimeoutException"));
+            ("details", (QueryTimeoutException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -2829,80 +3553,103 @@ module CancelStatementResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Boolean.of_json in make ?status ()
+    let of_json json__ =
+      let status = field_map json__ "Status" Boolean.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels a running query. To be canceled, a query must be running."]
+       "Cancels a running query. To be canceled, a query must be running. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module CancelStatementRequest =
   struct
     type nonrec t =
       {
-      id: StatementId.t
+      id: UUID.t
         [@ocaml.doc
           "The identifier of the SQL statement to cancel. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API. This identifier is returned by BatchExecuteStatment, ExecuteStatment, and ListStatements."]}
     let context_ = "CancelStatementRequest"
     let make ~id = fun () -> { id }
-    let to_value x =
-      structure_to_value [("Id", (Some (StatementId.to_value x.id)))]
+    let to_value x = structure_to_value [("Id", (Some (UUID.to_value x.id)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id =
-        StatementId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" StatementId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" UUID.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels a running query. To be canceled, a query must be running."]
+       "Cancels a running query. To be canceled, a query must be running. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module BatchExecuteStatementOutput =
   struct
     type nonrec t =
       {
-      clusterIdentifier: Location.t option
-        [@ocaml.doc
-          "The cluster identifier. This parameter is not returned when connecting to a serverless endpoint."];
-      createdAt: Timestamp.t option
-        [@ocaml.doc "The date and time (UTC) the statement was created."];
-      database: String_.t option [@ocaml.doc "The name of the database."];
-      dbUser: String_.t option [@ocaml.doc "The database user name."];
-      id: StatementId.t option
+      id: UUID.t option
         [@ocaml.doc
           "The identifier of the SQL statement whose results are to be fetched. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API. This identifier is returned by BatchExecuteStatment."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The date and time (UTC) the statement was created."];
+      clusterIdentifier: ClusterIdentifierString.t option
+        [@ocaml.doc
+          "The cluster identifier. This element is not returned when connecting to a serverless workgroup."];
+      dbUser: String_.t option [@ocaml.doc "The database user name."];
+      dbGroups: DbGroupList.t option
+        [@ocaml.doc
+          "A list of colon (:) separated names of database groups."];
+      database: String_.t option [@ocaml.doc "The name of the database."];
       secretArn: SecretArn.t option
         [@ocaml.doc
-          "The name or ARN of the secret that enables access to the database."]}
+          "The name or ARN of the secret that enables access to the database."];
+      workgroupName: WorkgroupNameString.t option
+        [@ocaml.doc
+          "The serverless workgroup name or Amazon Resource Name (ARN). This element is not returned when connecting to a provisioned cluster."];
+      sessionId: UUID.t option
+        [@ocaml.doc "The session identifier of the query."]}
     type nonrec error =
       [
-        `ActiveStatementsExceededException of
+        `ActiveSessionsExceededException of ActiveSessionsExceededException.t 
+      | `ActiveStatementsExceededException of
           ActiveStatementsExceededException.t 
       | `BatchExecuteStatementException of BatchExecuteStatementException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?clusterIdentifier =
+    let make ?id =
       fun ?createdAt ->
-        fun ?database ->
+        fun ?clusterIdentifier ->
           fun ?dbUser ->
-            fun ?id ->
-              fun ?secretArn ->
-                fun () ->
-                  {
-                    clusterIdentifier;
-                    createdAt;
-                    database;
-                    dbUser;
-                    id;
-                    secretArn
-                  }
+            fun ?dbGroups ->
+              fun ?database ->
+                fun ?secretArn ->
+                  fun ?workgroupName ->
+                    fun ?sessionId ->
+                      fun () ->
+                        {
+                          id;
+                          createdAt;
+                          clusterIdentifier;
+                          dbUser;
+                          dbGroups;
+                          database;
+                          secretArn;
+                          workgroupName;
+                          sessionId
+                        }
     let error_of_json name json =
       match name with
+      | "ActiveSessionsExceededException" ->
+          `ActiveSessionsExceededException
+            (ActiveSessionsExceededException.of_json json)
       | "ActiveStatementsExceededException" ->
           `ActiveStatementsExceededException
             (ActiveStatementsExceededException.of_json json)
       | "BatchExecuteStatementException" ->
           `BatchExecuteStatementException
             (BatchExecuteStatementException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2910,18 +3657,29 @@ module BatchExecuteStatementOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ActiveSessionsExceededException" ->
+          `ActiveSessionsExceededException
+            (ActiveSessionsExceededException.of_xml xml)
       | "ActiveStatementsExceededException" ->
           `ActiveStatementsExceededException
             (ActiveStatementsExceededException.of_xml xml)
       | "BatchExecuteStatementException" ->
           `BatchExecuteStatementException
             (BatchExecuteStatementException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ActiveSessionsExceededException e ->
+          `Assoc
+            [("error", (`String "ActiveSessionsExceededException"));
+            ("details", (ActiveSessionsExceededException.to_json e))]
       | `ActiveStatementsExceededException e ->
           `Assoc
             [("error", (`String "ActiveStatementsExceededException"));
@@ -2930,6 +3688,14 @@ module BatchExecuteStatementOutput =
           `Assoc
             [("error", (`String "BatchExecuteStatementException"));
             ("details", (BatchExecuteStatementException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2941,126 +3707,214 @@ module BatchExecuteStatementOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ClusterIdentifier",
-           (Option.map x.clusterIdentifier ~f:Location.to_value));
+        [("Id", (Option.map x.id ~f:UUID.to_value));
         ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
-        ("Database", (Option.map x.database ~f:String_.to_value));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:ClusterIdentifierString.to_value));
         ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
-        ("Id", (Option.map x.id ~f:StatementId.to_value));
-        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value))]
+        ("DbGroups", (Option.map x.dbGroups ~f:DbGroupList.to_value));
+        ("Database", (Option.map x.database ~f:String_.to_value));
+        ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value));
+        ("SessionId", (Option.map x.sessionId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sessionId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "SessionId") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
       let secretArn =
         (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
-      let id = (Option.map ~f:StatementId.of_xml) (Xml.child xml_arg0 "Id") in
-      let dbUser =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
       let database =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Database") in
+      let dbGroups =
+        (Option.map ~f:DbGroupList.of_xml) (Xml.child xml_arg0 "DbGroups") in
+      let dbUser =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
+      let clusterIdentifier =
+        (Option.map ~f:ClusterIdentifierString.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      let clusterIdentifier =
-        (Option.map ~f:Location.of_xml)
-          (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?secretArn ?id ?dbUser ?database ?createdAt ?clusterIdentifier ()
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?sessionId ?workgroupName ?secretArn ?database ?dbGroups ?dbUser
+        ?clusterIdentifier ?createdAt ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let id = field_map json "Id" StatementId.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
-      let database = field_map json "Database" String_.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+    let of_json json__ =
+      let sessionId = field_map json__ "SessionId" UUID.of_json in
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
+      let database = field_map json__ "Database" String_.of_json in
+      let dbGroups = field_map json__ "DbGroups" DbGroupList.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" Location.of_json in
-      make ?secretArn ?id ?dbUser ?database ?createdAt ?clusterIdentifier ()
+        field_map json__ "ClusterIdentifier" ClusterIdentifierString.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      make ?sessionId ?workgroupName ?secretArn ?database ?dbGroups ?dbUser
+        ?clusterIdentifier ?createdAt ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Runs one or more SQL statements, which can be data manipulation language (DML) or data definition language (DDL). Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "Runs one or more SQL statements, which can be data manipulation language (DML) or data definition language (DDL). Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]
 module BatchExecuteStatementInput =
   struct
     type nonrec t =
       {
-      clusterIdentifier: Location.t option
+      sqls: SqlList.t
+        [@ocaml.doc
+          "One or more SQL statements to run. The SQL statements are run as a single transaction. They run serially in the order of the array. Subsequent SQL statements don't start until the previous statement in the array completes. If any SQL statement fails, then because they are run as one transaction, all work is rolled back."];
+      clusterIdentifier: ClusterIdentifierString.t option
         [@ocaml.doc
           "The cluster identifier. This parameter is required when connecting to a cluster and authenticating using either Secrets Manager or temporary credentials."];
-      database: String_.t
-        [@ocaml.doc
-          "The name of the database. This parameter is required when authenticating using either Secrets Manager or temporary credentials."];
-      dbUser: String_.t option
-        [@ocaml.doc
-          "The database user name. This parameter is required when connecting to a cluster and authenticating using temporary credentials."];
       secretArn: SecretArn.t option
         [@ocaml.doc
           "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager."];
-      sqls: SqlList.t [@ocaml.doc "One or more SQL statements to run."];
+      dbUser: String_.t option
+        [@ocaml.doc
+          "The database user name. This parameter is required when connecting to a cluster as a database user and authenticating using temporary credentials."];
+      database: String_.t option
+        [@ocaml.doc
+          "The name of the database. This parameter is required when authenticating using either Secrets Manager or temporary credentials."];
+      withEvent: Boolean.t option
+        [@ocaml.doc
+          "A value that indicates whether to send an event to the Amazon EventBridge event bus after the SQL statements run."];
       statementName: StatementNameString.t option
         [@ocaml.doc
           "The name of the SQL statements. You can name the SQL statements when you create them to identify the query."];
-      withEvent: Boolean.t option
+      parameters: SqlParametersList.t option
         [@ocaml.doc
-          "A value that indicates whether to send an event to the Amazon EventBridge event bus after the SQL statements run."]}
+          "The parameters for the SQL statements. The parameters are shared across all SQL statements in the batch."];
+      workgroupName: WorkgroupNameString.t option
+        [@ocaml.doc
+          "The serverless workgroup name or Amazon Resource Name (ARN). This parameter is required when connecting to a serverless workgroup and authenticating using either Secrets Manager or temporary credentials."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      resultFormat: ResultFormatString.t option
+        [@ocaml.doc
+          "The data format of the result of the SQL statement. If no format is specified, the default is JSON."];
+      sessionKeepAliveSeconds: SessionAliveSeconds.t option
+        [@ocaml.doc
+          "The number of seconds to keep the session alive after the query finishes. The maximum time a session can keep alive is 24 hours. After 24 hours, the session is forced closed and the query is terminated."];
+      sessionId: UUID.t option
+        [@ocaml.doc "The session identifier of the query."]}
     let context_ = "BatchExecuteStatementInput"
     let make ?clusterIdentifier =
-      fun ?dbUser ->
-        fun ?secretArn ->
-          fun ?statementName ->
+      fun ?secretArn ->
+        fun ?dbUser ->
+          fun ?database ->
             fun ?withEvent ->
-              fun ~database ->
-                fun ~sqls ->
-                  fun () ->
-                    {
-                      clusterIdentifier;
-                      dbUser;
-                      secretArn;
-                      statementName;
-                      withEvent;
-                      database;
-                      sqls
-                    }
+              fun ?statementName ->
+                fun ?parameters ->
+                  fun ?workgroupName ->
+                    fun ?clientToken ->
+                      fun ?resultFormat ->
+                        fun ?sessionKeepAliveSeconds ->
+                          fun ?sessionId ->
+                            fun ~sqls ->
+                              fun () ->
+                                {
+                                  clusterIdentifier;
+                                  secretArn;
+                                  dbUser;
+                                  database;
+                                  withEvent;
+                                  statementName;
+                                  parameters;
+                                  workgroupName;
+                                  clientToken;
+                                  resultFormat;
+                                  sessionKeepAliveSeconds;
+                                  sessionId;
+                                  sqls
+                                }
     let to_value x =
       structure_to_value
-        [("ClusterIdentifier",
-           (Option.map x.clusterIdentifier ~f:Location.to_value));
-        ("Database", (Some (String_.to_value x.database)));
-        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
+        [("Sqls", (Some (SqlList.to_value x.sqls)));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:ClusterIdentifierString.to_value));
         ("SecretArn", (Option.map x.secretArn ~f:SecretArn.to_value));
-        ("Sqls", (Some (SqlList.to_value x.sqls)));
+        ("DbUser", (Option.map x.dbUser ~f:String_.to_value));
+        ("Database", (Option.map x.database ~f:String_.to_value));
+        ("WithEvent", (Option.map x.withEvent ~f:Boolean.to_value));
         ("StatementName",
           (Option.map x.statementName ~f:StatementNameString.to_value));
-        ("WithEvent", (Option.map x.withEvent ~f:Boolean.to_value))]
+        ("Parameters",
+          (Option.map x.parameters ~f:SqlParametersList.to_value));
+        ("WorkgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupNameString.to_value));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("ResultFormat",
+          (Option.map x.resultFormat ~f:ResultFormatString.to_value));
+        ("SessionKeepAliveSeconds",
+          (Option.map x.sessionKeepAliveSeconds
+             ~f:SessionAliveSeconds.to_value));
+        ("SessionId", (Option.map x.sessionId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let withEvent =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "WithEvent") in
+      let sessionId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "SessionId") in
+      let sessionKeepAliveSeconds =
+        (Option.map ~f:SessionAliveSeconds.of_xml)
+          (Xml.child xml_arg0 "SessionKeepAliveSeconds") in
+      let resultFormat =
+        (Option.map ~f:ResultFormatString.of_xml)
+          (Xml.child xml_arg0 "ResultFormat") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupNameString.of_xml)
+          (Xml.child xml_arg0 "WorkgroupName") in
+      let parameters =
+        (Option.map ~f:SqlParametersList.of_xml)
+          (Xml.child xml_arg0 "Parameters") in
       let statementName =
         (Option.map ~f:StatementNameString.of_xml)
           (Xml.child xml_arg0 "StatementName") in
-      let sqls =
-        SqlList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Sqls") in
-      let secretArn =
-        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
+      let withEvent =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "WithEvent") in
+      let database =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Database") in
       let dbUser =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
-      let database =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let secretArn =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "SecretArn") in
       let clusterIdentifier =
-        (Option.map ~f:Location.of_xml)
+        (Option.map ~f:ClusterIdentifierString.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?withEvent ?statementName ~sqls ?secretArn ?dbUser ~database
-        ?clusterIdentifier ()
+      let sqls =
+        SqlList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Sqls") in
+      make ?sessionId ?sessionKeepAliveSeconds ?resultFormat ?clientToken
+        ?workgroupName ?parameters ?statementName ?withEvent ?database
+        ?dbUser ?secretArn ?clusterIdentifier ~sqls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let withEvent = field_map json "WithEvent" Boolean.of_json in
+    let of_json json__ =
+      let sessionId = field_map json__ "SessionId" UUID.of_json in
+      let sessionKeepAliveSeconds =
+        field_map json__ "SessionKeepAliveSeconds"
+          SessionAliveSeconds.of_json in
+      let resultFormat =
+        field_map json__ "ResultFormat" ResultFormatString.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let workgroupName =
+        field_map json__ "WorkgroupName" WorkgroupNameString.of_json in
+      let parameters =
+        field_map json__ "Parameters" SqlParametersList.of_json in
       let statementName =
-        field_map json "StatementName" StatementNameString.of_json in
-      let sqls = field_map_exn json "Sqls" SqlList.of_json in
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
-      let database = field_map_exn json "Database" String_.of_json in
+        field_map json__ "StatementName" StatementNameString.of_json in
+      let withEvent = field_map json__ "WithEvent" Boolean.of_json in
+      let database = field_map json__ "Database" String_.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" Location.of_json in
-      make ?withEvent ?statementName ~sqls ?secretArn ?dbUser ~database
-        ?clusterIdentifier ()
+        field_map json__ "ClusterIdentifier" ClusterIdentifierString.of_json in
+      let sqls = field_map_exn json__ "Sqls" SqlList.of_json in
+      make ?sessionId ?sessionKeepAliveSeconds ?resultFormat ?clientToken
+        ?workgroupName ?parameters ?statementName ?withEvent ?database
+        ?dbUser ?secretArn ?clusterIdentifier ~sqls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Runs one or more SQL statements, which can be data manipulation language (DML) or data definition language (DDL). Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, specify the Amazon Resource Name (ARN) of the secret, the database name, and the cluster identifier that matches the cluster in the secret. When connecting to a serverless endpoint, specify the Amazon Resource Name (ARN) of the secret and the database name. Temporary credentials - when connecting to a cluster, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. When connecting to a serverless endpoint, specify the database name."]
+       "Runs one or more SQL statements, which can be data manipulation language (DML) or data definition language (DDL). Depending on the authorization method, use one of the following combinations of request parameters: Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name. Temporary credentials - when connecting to your data warehouse, choose one of the following options: When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required. When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required. When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide."]

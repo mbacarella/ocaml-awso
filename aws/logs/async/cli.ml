@@ -39,14 +39,40 @@ let associate_kms_key =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and logGroupName =
-         flag "log-group-name" (required string) ~doc:"STRING LogGroupName"
+         flag "log-group-name" (optional string) ~doc:"STRING LogGroupName"
+       and resourceIdentifier =
+         flag "resource-identifier" (optional string)
+           ~doc:"STRING ResourceIdentifier"
        and kmsKeyId =
          flag "kms-key-id" (required string) ~doc:"STRING KmsKeyId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_kms_key
-           (Values.AssociateKmsKeyRequest.make ~logGroupName ~kmsKeyId ())
-           None None])
+           (Values.AssociateKmsKeyRequest.make ?logGroupName
+              ?resourceIdentifier ~kmsKeyId ()) None None])
+let associate_source_to_s3_table_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationArn =
+         flag "integration-arn" (required string) ~doc:"STRING Arn"
+       and dataSource =
+         flag "data-source" (required json_arg) ~doc:"JSON DataSource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_source_to_s3_table_integration
+           (Values.AssociateSourceToS3TableIntegrationRequest.make
+              ~integrationArn
+              ~dataSource:(Values.DataSource.of_json dataSource) ())
+           (Some Values.AssociateSourceToS3TableIntegrationResponse.to_json)
+           (Some
+              Values.AssociateSourceToS3TableIntegrationResponse.error_to_json)])
 let cancel_export_task =
   Command.async ~summary:""
     ([%map_open.Command
@@ -63,6 +89,61 @@ let cancel_export_task =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.cancel_export_task
            (Values.CancelExportTaskRequest.make ~taskId ()) None None])
+let cancel_import_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and importId =
+         flag "import-id" (required string) ~doc:"STRING ImportId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_import_task
+           (Values.CancelImportTaskRequest.make ~importId ())
+           (Some Values.CancelImportTaskResponse.to_json)
+           (Some Values.CancelImportTaskResponse.error_to_json)])
+let create_delivery =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recordFields =
+         flag "record-fields" (optional json_arg) ~doc:"JSON RecordFields"
+       and fieldDelimiter =
+         flag "field-delimiter" (optional string)
+           ~doc:"STRING FieldDelimiter"
+       and s3DeliveryConfiguration =
+         flag "s3-delivery-configuration" (optional json_arg)
+           ~doc:"JSON S3DeliveryConfiguration"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and deliverySourceName =
+         flag "delivery-source-name" (required string)
+           ~doc:"STRING DeliverySourceName"
+       and deliveryDestinationArn =
+         flag "delivery-destination-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_delivery
+           (Values.CreateDeliveryRequest.make
+              ?recordFields:(Option.map ~f:Values.RecordFields.of_json
+                               recordFields) ?fieldDelimiter
+              ?s3DeliveryConfiguration:(Option.map
+                                          ~f:Values.S3DeliveryConfiguration.of_json
+                                          s3DeliveryConfiguration)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~deliverySourceName ~deliveryDestinationArn ())
+           (Some Values.CreateDeliveryResponse.to_json)
+           (Some Values.CreateDeliveryResponse.error_to_json)])
 let create_export_task =
   Command.async ~summary:""
     ([%map_open.Command
@@ -97,6 +178,72 @@ let create_export_task =
               ~to_:(Values.Timestamp.of_json to_) ~destination ())
            (Some Values.CreateExportTaskResponse.to_json)
            (Some Values.CreateExportTaskResponse.error_to_json)])
+let create_import_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and importFilter =
+         flag "import-filter" (optional json_arg) ~doc:"JSON ImportFilter"
+       and importSourceArn =
+         flag "import-source-arn" (required string) ~doc:"STRING Arn"
+       and importRoleArn =
+         flag "import-role-arn" (required string) ~doc:"STRING RoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_import_task
+           (Values.CreateImportTaskRequest.make
+              ?importFilter:(Option.map ~f:Values.ImportFilter.of_json
+                               importFilter) ~importSourceArn ~importRoleArn
+              ()) (Some Values.CreateImportTaskResponse.to_json)
+           (Some Values.CreateImportTaskResponse.error_to_json)])
+let create_log_anomaly_detector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectorName =
+         flag "detector-name" (optional string) ~doc:"STRING DetectorName"
+       and evaluationFrequency =
+         flag "evaluation-frequency" (optional json_arg)
+           ~doc:"JSON EvaluationFrequency"
+       and filterPattern =
+         flag "filter-pattern" (optional string) ~doc:"STRING FilterPattern"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING DetectorKmsKeyArn"
+       and anomalyVisibilityTime =
+         flag "anomaly-visibility-time" (optional json_arg)
+           ~doc:"JSON AnomalyVisibilityTime"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and logGroupArnList =
+         flag "log-group-arn-list" (required json_arg)
+           ~doc:"JSON LogGroupArnList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_log_anomaly_detector
+           (Values.CreateLogAnomalyDetectorRequest.make ?detectorName
+              ?evaluationFrequency:(Option.map
+                                      ~f:Values.EvaluationFrequency.of_json
+                                      evaluationFrequency) ?filterPattern
+              ?kmsKeyId
+              ?anomalyVisibilityTime:(Option.map
+                                        ~f:Values.AnomalyVisibilityTime.of_json
+                                        anomalyVisibilityTime)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~logGroupArnList:(Values.LogGroupArnList.of_json
+                                  logGroupArnList) ())
+           (Some Values.CreateLogAnomalyDetectorResponse.to_json)
+           (Some Values.CreateLogAnomalyDetectorResponse.error_to_json)])
 let create_log_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -110,14 +257,21 @@ let create_log_group =
        and kmsKeyId =
          flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and logGroupClass =
+         flag "log-group-class" (optional json_arg) ~doc:"JSON LogGroupClass"
+       and deletionProtectionEnabled =
+         flag "deletion-protection-enabled" (optional bool)
+           ~doc:"BOOL DeletionProtectionEnabled"
        and logGroupName =
          flag "log-group-name" (required string) ~doc:"STRING LogGroupName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_log_group
            (Values.CreateLogGroupRequest.make ?kmsKeyId
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~logGroupName ())
-           None None])
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?logGroupClass:(Option.map ~f:Values.LogGroupClass.of_json
+                                logGroupClass) ?deletionProtectionEnabled
+              ~logGroupName ()) None None])
 let create_log_stream =
   Command.async ~summary:""
     ([%map_open.Command
@@ -137,6 +291,201 @@ let create_log_stream =
            Io.create_log_stream
            (Values.CreateLogStreamRequest.make ~logGroupName ~logStreamName
               ()) None None])
+let create_lookup_table =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING LookupTableDescription"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and lookupTableName =
+         flag "lookup-table-name" (required string)
+           ~doc:"STRING LookupTableName"
+       and tableBody =
+         flag "table-body" (required string) ~doc:"STRING TableBody" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_lookup_table
+           (Values.CreateLookupTableRequest.make ?description ?kmsKeyId
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~lookupTableName
+              ~tableBody ()) (Some Values.CreateLookupTableResponse.to_json)
+           (Some Values.CreateLookupTableResponse.error_to_json)])
+let create_scheduled_query =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ScheduledQueryDescription"
+       and logGroupIdentifiers =
+         flag "log-group-identifiers" (optional json_arg)
+           ~doc:"JSON ScheduledQueryLogGroupIdentifiers"
+       and timezone =
+         flag "timezone" (optional string) ~doc:"STRING ScheduleTimezone"
+       and startTimeOffset =
+         flag "start-time-offset" (optional json_arg)
+           ~doc:"JSON StartTimeOffset"
+       and destinationConfiguration =
+         flag "destination-configuration" (optional json_arg)
+           ~doc:"JSON DestinationConfiguration"
+       and scheduleStartTime =
+         flag "schedule-start-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and scheduleEndTime =
+         flag "schedule-end-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON ScheduledQueryState"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and name =
+         flag "name" (required string) ~doc:"STRING ScheduledQueryName"
+       and queryLanguage =
+         flag "query-language" (required json_arg) ~doc:"JSON QueryLanguage"
+       and queryString =
+         flag "query-string" (required string) ~doc:"STRING QueryString"
+       and scheduleExpression =
+         flag "schedule-expression" (required string)
+           ~doc:"STRING ScheduleExpression"
+       and executionRoleArn =
+         flag "execution-role-arn" (required string) ~doc:"STRING RoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_scheduled_query
+           (Values.CreateScheduledQueryRequest.make ?description
+              ?logGroupIdentifiers:(Option.map
+                                      ~f:Values.ScheduledQueryLogGroupIdentifiers.of_json
+                                      logGroupIdentifiers) ?timezone
+              ?startTimeOffset:(Option.map ~f:Values.StartTimeOffset.of_json
+                                  startTimeOffset)
+              ?destinationConfiguration:(Option.map
+                                           ~f:Values.DestinationConfiguration.of_json
+                                           destinationConfiguration)
+              ?scheduleStartTime:(Option.map ~f:Values.Timestamp.of_json
+                                    scheduleStartTime)
+              ?scheduleEndTime:(Option.map ~f:Values.Timestamp.of_json
+                                  scheduleEndTime)
+              ?state:(Option.map ~f:Values.ScheduledQueryState.of_json state)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name
+              ~queryLanguage:(Values.QueryLanguage.of_json queryLanguage)
+              ~queryString ~scheduleExpression ~executionRoleArn ())
+           (Some Values.CreateScheduledQueryResponse.to_json)
+           (Some Values.CreateScheduledQueryResponse.error_to_json)])
+let delete_account_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyName =
+         flag "policy-name" (required string) ~doc:"STRING PolicyName"
+       and policyType =
+         flag "policy-type" (required json_arg) ~doc:"JSON PolicyType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_account_policy
+           (Values.DeleteAccountPolicyRequest.make ~policyName
+              ~policyType:(Values.PolicyType.of_json policyType) ()) None
+           None])
+let delete_data_protection_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_data_protection_policy
+           (Values.DeleteDataProtectionPolicyRequest.make ~logGroupIdentifier
+              ()) None None])
+let delete_delivery =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING DeliveryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_delivery (Values.DeleteDeliveryRequest.make ~id ()) None
+           None])
+let delete_delivery_destination =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING DeliveryDestinationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_delivery_destination
+           (Values.DeleteDeliveryDestinationRequest.make ~name ()) None None])
+let delete_delivery_destination_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deliveryDestinationName =
+         flag "delivery-destination-name" (required string)
+           ~doc:"STRING DeliveryDestinationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_delivery_destination_policy
+           (Values.DeleteDeliveryDestinationPolicyRequest.make
+              ~deliveryDestinationName ()) None None])
+let delete_delivery_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING DeliverySourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_delivery_source
+           (Values.DeleteDeliverySourceRequest.make ~name ()) None None])
 let delete_destination =
   Command.async ~summary:""
     ([%map_open.Command
@@ -155,6 +504,63 @@ let delete_destination =
            Io.delete_destination
            (Values.DeleteDestinationRequest.make ~destinationName ()) None
            None])
+let delete_index_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_index_policy
+           (Values.DeleteIndexPolicyRequest.make ~logGroupIdentifier ())
+           (Some Values.DeleteIndexPolicyResponse.to_json)
+           (Some Values.DeleteIndexPolicyResponse.error_to_json)])
+let delete_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and force = flag "force" (optional bool) ~doc:"BOOL Force"
+       and integrationName =
+         flag "integration-name" (required string)
+           ~doc:"STRING IntegrationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_integration
+           (Values.DeleteIntegrationRequest.make ?force ~integrationName ())
+           (Some Values.DeleteIntegrationResponse.to_json)
+           (Some Values.DeleteIntegrationResponse.error_to_json)])
+let delete_log_anomaly_detector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and anomalyDetectorArn =
+         flag "anomaly-detector-arn" (required string)
+           ~doc:"STRING AnomalyDetectorArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_log_anomaly_detector
+           (Values.DeleteLogAnomalyDetectorRequest.make ~anomalyDetectorArn
+              ()) None None])
 let delete_log_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -190,6 +596,23 @@ let delete_log_stream =
            Io.delete_log_stream
            (Values.DeleteLogStreamRequest.make ~logGroupName ~logStreamName
               ()) None None])
+let delete_lookup_table =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lookupTableArn =
+         flag "lookup-table-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_lookup_table
+           (Values.DeleteLookupTableRequest.make ~lookupTableArn ()) None
+           None])
 let delete_metric_filter =
   Command.async ~summary:""
     ([%map_open.Command
@@ -238,11 +661,17 @@ let delete_resource_policy =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and policyName =
-         flag "policy-name" (optional string) ~doc:"STRING PolicyName" in
+         flag "policy-name" (optional string) ~doc:"STRING PolicyName"
+       and resourceArn =
+         flag "resource-arn" (optional string) ~doc:"STRING Arn"
+       and expectedRevisionId =
+         flag "expected-revision-id" (optional string)
+           ~doc:"STRING ExpectedRevisionId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_resource_policy
-           (Values.DeleteResourcePolicyRequest.make ?policyName ()) None None])
+           (Values.DeleteResourcePolicyRequest.make ?policyName ?resourceArn
+              ?expectedRevisionId ()) None None])
 let delete_retention_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -260,6 +689,25 @@ let delete_retention_policy =
            Io.delete_retention_policy
            (Values.DeleteRetentionPolicyRequest.make ~logGroupName ()) None
            None])
+let delete_scheduled_query =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string)
+           ~doc:"STRING ScheduledQueryIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_scheduled_query
+           (Values.DeleteScheduledQueryRequest.make ~identifier ())
+           (Some Values.DeleteScheduledQueryResponse.to_json)
+           (Some Values.DeleteScheduledQueryResponse.error_to_json)])
 let delete_subscription_filter =
   Command.async ~summary:""
     ([%map_open.Command
@@ -279,6 +727,143 @@ let delete_subscription_filter =
            Io.delete_subscription_filter
            (Values.DeleteSubscriptionFilterRequest.make ~logGroupName
               ~filterName ()) None None])
+let delete_transformer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transformer
+           (Values.DeleteTransformerRequest.make ~logGroupIdentifier ()) None
+           None])
+let describe_account_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyName =
+         flag "policy-name" (optional string) ~doc:"STRING PolicyName"
+       and accountIdentifiers =
+         flag "account-identifiers" (optional json_arg)
+           ~doc:"JSON AccountIds"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and policyType =
+         flag "policy-type" (required json_arg) ~doc:"JSON PolicyType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_account_policies
+           (Values.DescribeAccountPoliciesRequest.make ?policyName
+              ?accountIdentifiers:(Option.map ~f:Values.AccountIds.of_json
+                                     accountIdentifiers) ?nextToken
+              ~policyType:(Values.PolicyType.of_json policyType) ())
+           (Some Values.DescribeAccountPoliciesResponse.to_json)
+           (Some Values.DescribeAccountPoliciesResponse.error_to_json)])
+let describe_configuration_templates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and service = flag "service" (optional string) ~doc:"STRING Service"
+       and logTypes =
+         flag "log-types" (optional json_arg) ~doc:"JSON LogTypes"
+       and resourceTypes =
+         flag "resource-types" (optional json_arg) ~doc:"JSON ResourceTypes"
+       and deliveryDestinationTypes =
+         flag "delivery-destination-types" (optional json_arg)
+           ~doc:"JSON DeliveryDestinationTypes"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_configuration_templates
+           (Values.DescribeConfigurationTemplatesRequest.make ?service
+              ?logTypes:(Option.map ~f:Values.LogTypes.of_json logTypes)
+              ?resourceTypes:(Option.map ~f:Values.ResourceTypes.of_json
+                                resourceTypes)
+              ?deliveryDestinationTypes:(Option.map
+                                           ~f:Values.DeliveryDestinationTypes.of_json
+                                           deliveryDestinationTypes)
+              ?nextToken ?limit ())
+           (Some Values.DescribeConfigurationTemplatesResponse.to_json)
+           (Some Values.DescribeConfigurationTemplatesResponse.error_to_json)])
+let describe_deliveries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_deliveries
+           (Values.DescribeDeliveriesRequest.make ?nextToken ?limit ())
+           (Some Values.DescribeDeliveriesResponse.to_json)
+           (Some Values.DescribeDeliveriesResponse.error_to_json)])
+let describe_delivery_destinations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_delivery_destinations
+           (Values.DescribeDeliveryDestinationsRequest.make ?nextToken ?limit
+              ()) (Some Values.DescribeDeliveryDestinationsResponse.to_json)
+           (Some Values.DescribeDeliveryDestinationsResponse.error_to_json)])
+let describe_delivery_sources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_delivery_sources
+           (Values.DescribeDeliverySourcesRequest.make ?nextToken ?limit ())
+           (Some Values.DescribeDeliverySourcesResponse.to_json)
+           (Some Values.DescribeDeliverySourcesResponse.error_to_json)])
 let describe_destinations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -328,6 +913,108 @@ let describe_export_tasks =
                              statusCode) ?nextToken ?limit ())
            (Some Values.DescribeExportTasksResponse.to_json)
            (Some Values.DescribeExportTasksResponse.error_to_json)])
+let describe_field_indexes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and logGroupIdentifiers =
+         flag "log-group-identifiers" (required json_arg)
+           ~doc:"JSON DescribeFieldIndexesLogGroupIdentifiers" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_field_indexes
+           (Values.DescribeFieldIndexesRequest.make ?nextToken
+              ~logGroupIdentifiers:(Values.DescribeFieldIndexesLogGroupIdentifiers.of_json
+                                      logGroupIdentifiers) ())
+           (Some Values.DescribeFieldIndexesResponse.to_json)
+           (Some Values.DescribeFieldIndexesResponse.error_to_json)])
+let describe_import_task_batches =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and batchImportStatus =
+         flag "batch-import-status" (optional json_arg)
+           ~doc:"JSON ImportStatusList"
+       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and importId =
+         flag "import-id" (required string) ~doc:"STRING ImportId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_import_task_batches
+           (Values.DescribeImportTaskBatchesRequest.make
+              ?batchImportStatus:(Option.map
+                                    ~f:Values.ImportStatusList.of_json
+                                    batchImportStatus) ?limit ?nextToken
+              ~importId ())
+           (Some Values.DescribeImportTaskBatchesResponse.to_json)
+           (Some Values.DescribeImportTaskBatchesResponse.error_to_json)])
+let describe_import_tasks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and importId =
+         flag "import-id" (optional string) ~doc:"STRING ImportId"
+       and importStatus =
+         flag "import-status" (optional json_arg) ~doc:"JSON ImportStatus"
+       and importSourceArn =
+         flag "import-source-arn" (optional string) ~doc:"STRING Arn"
+       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_import_tasks
+           (Values.DescribeImportTasksRequest.make ?importId
+              ?importStatus:(Option.map ~f:Values.ImportStatus.of_json
+                               importStatus) ?importSourceArn ?limit
+              ?nextToken ())
+           (Some Values.DescribeImportTasksResponse.to_json)
+           (Some Values.DescribeImportTasksResponse.error_to_json)])
+let describe_index_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and logGroupIdentifiers =
+         flag "log-group-identifiers" (required json_arg)
+           ~doc:"JSON DescribeIndexPoliciesLogGroupIdentifiers" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_index_policies
+           (Values.DescribeIndexPoliciesRequest.make ?nextToken
+              ~logGroupIdentifiers:(Values.DescribeIndexPoliciesLogGroupIdentifiers.of_json
+                                      logGroupIdentifiers) ())
+           (Some Values.DescribeIndexPoliciesResponse.to_json)
+           (Some Values.DescribeIndexPoliciesResponse.error_to_json)])
 let describe_log_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -338,17 +1025,38 @@ let describe_log_groups =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountIdentifiers =
+         flag "account-identifiers" (optional json_arg)
+           ~doc:"JSON AccountIds"
        and logGroupNamePrefix =
          flag "log-group-name-prefix" (optional string)
            ~doc:"STRING LogGroupName"
+       and logGroupNamePattern =
+         flag "log-group-name-pattern" (optional string)
+           ~doc:"STRING LogGroupNamePattern"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit" in
+       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit"
+       and includeLinkedAccounts =
+         flag "include-linked-accounts" (optional bool)
+           ~doc:"BOOL IncludeLinkedAccounts"
+       and logGroupClass =
+         flag "log-group-class" (optional json_arg) ~doc:"JSON LogGroupClass"
+       and logGroupIdentifiers =
+         flag "log-group-identifiers" (optional json_arg)
+           ~doc:"JSON DescribeLogGroupsLogGroupIdentifiers" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_log_groups
-           (Values.DescribeLogGroupsRequest.make ?logGroupNamePrefix
-              ?nextToken ?limit ())
+           (Values.DescribeLogGroupsRequest.make
+              ?accountIdentifiers:(Option.map ~f:Values.AccountIds.of_json
+                                     accountIdentifiers) ?logGroupNamePrefix
+              ?logGroupNamePattern ?nextToken ?limit ?includeLinkedAccounts
+              ?logGroupClass:(Option.map ~f:Values.LogGroupClass.of_json
+                                logGroupClass)
+              ?logGroupIdentifiers:(Option.map
+                                      ~f:Values.DescribeLogGroupsLogGroupIdentifiers.of_json
+                                      logGroupIdentifiers) ())
            (Some Values.DescribeLogGroupsResponse.to_json)
            (Some Values.DescribeLogGroupsResponse.error_to_json)])
 let describe_log_streams =
@@ -361,6 +1069,11 @@ let describe_log_streams =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and logGroupName =
+         flag "log-group-name" (optional string) ~doc:"STRING LogGroupName"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (optional string)
+           ~doc:"STRING LogGroupIdentifier"
        and logStreamNamePrefix =
          flag "log-stream-name-prefix" (optional string)
            ~doc:"STRING LogStreamName"
@@ -369,17 +1082,41 @@ let describe_log_streams =
          flag "descending" (optional bool) ~doc:"BOOL Descending"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit"
-       and logGroupName =
-         flag "log-group-name" (required string) ~doc:"STRING LogGroupName" in
+       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_log_streams
-           (Values.DescribeLogStreamsRequest.make ?logStreamNamePrefix
+           (Values.DescribeLogStreamsRequest.make ?logGroupName
+              ?logGroupIdentifier ?logStreamNamePrefix
               ?orderBy:(Option.map ~f:Values.OrderBy.of_json orderBy)
-              ?descending ?nextToken ?limit ~logGroupName ())
+              ?descending ?nextToken ?limit ())
            (Some Values.DescribeLogStreamsResponse.to_json)
            (Some Values.DescribeLogStreamsResponse.error_to_json)])
+let describe_lookup_tables =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lookupTableNamePrefix =
+         flag "lookup-table-name-prefix" (optional string)
+           ~doc:"STRING LookupTableName"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT DescribeLookupTablesMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_lookup_tables
+           (Values.DescribeLookupTablesRequest.make ?lookupTableNamePrefix
+              ?maxResults ?nextToken ())
+           (Some Values.DescribeLookupTablesResponse.to_json)
+           (Some Values.DescribeLookupTablesResponse.error_to_json)])
 let describe_metric_filters =
   Command.async ~summary:""
     ([%map_open.Command
@@ -427,13 +1164,17 @@ let describe_queries =
          flag "max-results" (optional int)
            ~doc:"INT DescribeQueriesMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and queryLanguage =
+         flag "query-language" (optional json_arg) ~doc:"JSON QueryLanguage" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_queries
            (Values.DescribeQueriesRequest.make ?logGroupName
               ?status:(Option.map ~f:Values.QueryStatus.of_json status)
-              ?maxResults ?nextToken ())
+              ?maxResults ?nextToken
+              ?queryLanguage:(Option.map ~f:Values.QueryLanguage.of_json
+                                queryLanguage) ())
            (Some Values.DescribeQueriesResponse.to_json)
            (Some Values.DescribeQueriesResponse.error_to_json)])
 let describe_query_definitions =
@@ -446,6 +1187,8 @@ let describe_query_definitions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and queryLanguage =
+         flag "query-language" (optional json_arg) ~doc:"JSON QueryLanguage"
        and queryDefinitionNamePrefix =
          flag "query-definition-name-prefix" (optional string)
            ~doc:"STRING QueryDefinitionName"
@@ -457,7 +1200,9 @@ let describe_query_definitions =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_query_definitions
            (Values.DescribeQueryDefinitionsRequest.make
-              ?queryDefinitionNamePrefix ?maxResults ?nextToken ())
+              ?queryLanguage:(Option.map ~f:Values.QueryLanguage.of_json
+                                queryLanguage) ?queryDefinitionNamePrefix
+              ?maxResults ?nextToken ())
            (Some Values.DescribeQueryDefinitionsResponse.to_json)
            (Some Values.DescribeQueryDefinitionsResponse.error_to_json)])
 let describe_resource_policies =
@@ -472,11 +1217,18 @@ let describe_resource_policies =
            ~doc:"URL override endpoint url"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit" in
+       and limit = flag "limit" (optional int) ~doc:"INT DescribeLimit"
+       and resourceArn =
+         flag "resource-arn" (optional string) ~doc:"STRING Arn"
+       and policyScope =
+         flag "policy-scope" (optional json_arg) ~doc:"JSON PolicyScope" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_resource_policies
-           (Values.DescribeResourcePoliciesRequest.make ?nextToken ?limit ())
+           (Values.DescribeResourcePoliciesRequest.make ?nextToken ?limit
+              ?resourceArn
+              ?policyScope:(Option.map ~f:Values.PolicyScope.of_json
+                              policyScope) ())
            (Some Values.DescribeResourcePoliciesResponse.to_json)
            (Some Values.DescribeResourcePoliciesResponse.error_to_json)])
 let describe_subscription_filters =
@@ -514,11 +1266,37 @@ let disassociate_kms_key =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and logGroupName =
-         flag "log-group-name" (required string) ~doc:"STRING LogGroupName" in
+         flag "log-group-name" (optional string) ~doc:"STRING LogGroupName"
+       and resourceIdentifier =
+         flag "resource-identifier" (optional string)
+           ~doc:"STRING ResourceIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disassociate_kms_key
-           (Values.DisassociateKmsKeyRequest.make ~logGroupName ()) None None])
+           (Values.DisassociateKmsKeyRequest.make ?logGroupName
+              ?resourceIdentifier ()) None None])
+let disassociate_source_from_s3_table_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string)
+           ~doc:"STRING S3TableIntegrationSourceIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_source_from_s3_table_integration
+           (Values.DisassociateSourceFromS3TableIntegrationRequest.make
+              ~identifier ())
+           (Some
+              Values.DisassociateSourceFromS3TableIntegrationResponse.to_json)
+           (Some
+              Values.DisassociateSourceFromS3TableIntegrationResponse.error_to_json)])
 let filter_log_events =
   Command.async ~summary:""
     ([%map_open.Command
@@ -529,6 +1307,11 @@ let filter_log_events =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and logGroupName =
+         flag "log-group-name" (optional string) ~doc:"STRING LogGroupName"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (optional string)
+           ~doc:"STRING LogGroupIdentifier"
        and logStreamNames =
          flag "log-stream-names" (optional json_arg)
            ~doc:"JSON InputLogStreamNames"
@@ -546,20 +1329,149 @@ let filter_log_events =
        and limit = flag "limit" (optional int) ~doc:"INT EventsLimit"
        and interleaved =
          flag "interleaved" (optional bool) ~doc:"BOOL Interleaved"
-       and logGroupName =
-         flag "log-group-name" (required string) ~doc:"STRING LogGroupName" in
+       and unmask = flag "unmask" (optional bool) ~doc:"BOOL Unmask" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.filter_log_events
-           (Values.FilterLogEventsRequest.make
+           (Values.FilterLogEventsRequest.make ?logGroupName
+              ?logGroupIdentifier
               ?logStreamNames:(Option.map
                                  ~f:Values.InputLogStreamNames.of_json
                                  logStreamNames) ?logStreamNamePrefix
               ?startTime:(Option.map ~f:Values.Timestamp.of_json startTime)
               ?endTime:(Option.map ~f:Values.Timestamp.of_json endTime)
-              ?filterPattern ?nextToken ?limit ?interleaved ~logGroupName ())
+              ?filterPattern ?nextToken ?limit ?interleaved ?unmask ())
            (Some Values.FilterLogEventsResponse.to_json)
            (Some Values.FilterLogEventsResponse.error_to_json)])
+let get_data_protection_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_protection_policy
+           (Values.GetDataProtectionPolicyRequest.make ~logGroupIdentifier ())
+           (Some Values.GetDataProtectionPolicyResponse.to_json)
+           (Some Values.GetDataProtectionPolicyResponse.error_to_json)])
+let get_delivery =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING DeliveryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_delivery (Values.GetDeliveryRequest.make ~id ())
+           (Some Values.GetDeliveryResponse.to_json)
+           (Some Values.GetDeliveryResponse.error_to_json)])
+let get_delivery_destination =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING DeliveryDestinationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_delivery_destination
+           (Values.GetDeliveryDestinationRequest.make ~name ())
+           (Some Values.GetDeliveryDestinationResponse.to_json)
+           (Some Values.GetDeliveryDestinationResponse.error_to_json)])
+let get_delivery_destination_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deliveryDestinationName =
+         flag "delivery-destination-name" (required string)
+           ~doc:"STRING DeliveryDestinationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_delivery_destination_policy
+           (Values.GetDeliveryDestinationPolicyRequest.make
+              ~deliveryDestinationName ())
+           (Some Values.GetDeliveryDestinationPolicyResponse.to_json)
+           (Some Values.GetDeliveryDestinationPolicyResponse.error_to_json)])
+let get_delivery_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING DeliverySourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_delivery_source
+           (Values.GetDeliverySourceRequest.make ~name ())
+           (Some Values.GetDeliverySourceResponse.to_json)
+           (Some Values.GetDeliverySourceResponse.error_to_json)])
+let get_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationName =
+         flag "integration-name" (required string)
+           ~doc:"STRING IntegrationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_integration
+           (Values.GetIntegrationRequest.make ~integrationName ())
+           (Some Values.GetIntegrationResponse.to_json)
+           (Some Values.GetIntegrationResponse.error_to_json)])
+let get_log_anomaly_detector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and anomalyDetectorArn =
+         flag "anomaly-detector-arn" (required string)
+           ~doc:"STRING AnomalyDetectorArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_log_anomaly_detector
+           (Values.GetLogAnomalyDetectorRequest.make ~anomalyDetectorArn ())
+           (Some Values.GetLogAnomalyDetectorResponse.to_json)
+           (Some Values.GetLogAnomalyDetectorResponse.error_to_json)])
 let get_log_events =
   Command.async ~summary:""
     ([%map_open.Command
@@ -570,6 +1482,11 @@ let get_log_events =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and logGroupName =
+         flag "log-group-name" (optional string) ~doc:"STRING LogGroupName"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (optional string)
+           ~doc:"STRING LogGroupIdentifier"
        and startTime =
          flag "start-time" (optional json_arg) ~doc:"JSON Timestamp"
        and endTime =
@@ -579,19 +1496,40 @@ let get_log_events =
        and limit = flag "limit" (optional int) ~doc:"INT EventsLimit"
        and startFromHead =
          flag "start-from-head" (optional bool) ~doc:"BOOL StartFromHead"
-       and logGroupName =
-         flag "log-group-name" (required string) ~doc:"STRING LogGroupName"
+       and unmask = flag "unmask" (optional bool) ~doc:"BOOL Unmask"
        and logStreamName =
          flag "log-stream-name" (required string) ~doc:"STRING LogStreamName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_log_events
-           (Values.GetLogEventsRequest.make
+           (Values.GetLogEventsRequest.make ?logGroupName ?logGroupIdentifier
               ?startTime:(Option.map ~f:Values.Timestamp.of_json startTime)
               ?endTime:(Option.map ~f:Values.Timestamp.of_json endTime)
-              ?nextToken ?limit ?startFromHead ~logGroupName ~logStreamName
-              ()) (Some Values.GetLogEventsResponse.to_json)
+              ?nextToken ?limit ?startFromHead ?unmask ~logStreamName ())
+           (Some Values.GetLogEventsResponse.to_json)
            (Some Values.GetLogEventsResponse.error_to_json)])
+let get_log_fields =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataSourceName =
+         flag "data-source-name" (required string)
+           ~doc:"STRING DataSourceName"
+       and dataSourceType =
+         flag "data-source-type" (required string)
+           ~doc:"STRING DataSourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_log_fields
+           (Values.GetLogFieldsRequest.make ~dataSourceName ~dataSourceType
+              ()) (Some Values.GetLogFieldsResponse.to_json)
+           (Some Values.GetLogFieldsResponse.error_to_json)])
 let get_log_group_fields =
   Command.async ~summary:""
     ([%map_open.Command
@@ -602,17 +1540,40 @@ let get_log_group_fields =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and time = flag "time" (optional json_arg) ~doc:"JSON Timestamp"
        and logGroupName =
-         flag "log-group-name" (required string) ~doc:"STRING LogGroupName" in
+         flag "log-group-name" (optional string) ~doc:"STRING LogGroupName"
+       and time = flag "time" (optional json_arg) ~doc:"JSON Timestamp"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (optional string)
+           ~doc:"STRING LogGroupIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_log_group_fields
-           (Values.GetLogGroupFieldsRequest.make
+           (Values.GetLogGroupFieldsRequest.make ?logGroupName
               ?time:(Option.map ~f:Values.Timestamp.of_json time)
-              ~logGroupName ())
+              ?logGroupIdentifier ())
            (Some Values.GetLogGroupFieldsResponse.to_json)
            (Some Values.GetLogGroupFieldsResponse.error_to_json)])
+let get_log_object =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and unmask = flag "unmask" (optional bool) ~doc:"BOOL Unmask"
+       and logObjectPointer =
+         flag "log-object-pointer" (required string)
+           ~doc:"STRING LogObjectPointer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_log_object
+           (Values.GetLogObjectRequest.make ?unmask ~logObjectPointer ())
+           (Some Values.GetLogObjectResponse.to_json)
+           (Some Values.GetLogObjectResponse.error_to_json)])
 let get_log_record =
   Command.async ~summary:""
     ([%map_open.Command
@@ -623,15 +1584,34 @@ let get_log_record =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and unmask = flag "unmask" (optional bool) ~doc:"BOOL Unmask"
        and logRecordPointer =
          flag "log-record-pointer" (required string)
            ~doc:"STRING LogRecordPointer" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_log_record
-           (Values.GetLogRecordRequest.make ~logRecordPointer ())
+           (Values.GetLogRecordRequest.make ?unmask ~logRecordPointer ())
            (Some Values.GetLogRecordResponse.to_json)
            (Some Values.GetLogRecordResponse.error_to_json)])
+let get_lookup_table =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lookupTableArn =
+         flag "lookup-table-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_lookup_table
+           (Values.GetLookupTableRequest.make ~lookupTableArn ())
+           (Some Values.GetLookupTableResponse.to_json)
+           (Some Values.GetLookupTableResponse.error_to_json)])
 let get_query_results =
   Command.async ~summary:""
     ([%map_open.Command
@@ -642,13 +1622,359 @@ let get_query_results =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING GetQueryResultsNextToken"
+       and maxItems =
+         flag "max-items" (optional int) ~doc:"INT GetQueryResultsMaxItems"
        and queryId = flag "query-id" (required string) ~doc:"STRING QueryId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_query_results
-           (Values.GetQueryResultsRequest.make ~queryId ())
-           (Some Values.GetQueryResultsResponse.to_json)
+           (Values.GetQueryResultsRequest.make ?nextToken ?maxItems ~queryId
+              ()) (Some Values.GetQueryResultsResponse.to_json)
            (Some Values.GetQueryResultsResponse.error_to_json)])
+let get_scheduled_query =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string)
+           ~doc:"STRING ScheduledQueryIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_scheduled_query
+           (Values.GetScheduledQueryRequest.make ~identifier ())
+           (Some Values.GetScheduledQueryResponse.to_json)
+           (Some Values.GetScheduledQueryResponse.error_to_json)])
+let get_scheduled_query_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and executionStatuses =
+         flag "execution-statuses" (optional json_arg)
+           ~doc:"JSON ExecutionStatusList"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetScheduledQueryHistoryMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and identifier =
+         flag "identifier" (required string)
+           ~doc:"STRING ScheduledQueryIdentifier"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON Timestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_scheduled_query_history
+           (Values.GetScheduledQueryHistoryRequest.make
+              ?executionStatuses:(Option.map
+                                    ~f:Values.ExecutionStatusList.of_json
+                                    executionStatuses) ?maxResults ?nextToken
+              ~identifier ~startTime:(Values.Timestamp.of_json startTime)
+              ~endTime:(Values.Timestamp.of_json endTime) ())
+           (Some Values.GetScheduledQueryHistoryResponse.to_json)
+           (Some Values.GetScheduledQueryHistoryResponse.error_to_json)])
+let get_transformer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_transformer
+           (Values.GetTransformerRequest.make ~logGroupIdentifier ())
+           (Some Values.GetTransformerResponse.to_json)
+           (Some Values.GetTransformerResponse.error_to_json)])
+let list_aggregate_log_group_summaries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountIdentifiers =
+         flag "account-identifiers" (optional json_arg)
+           ~doc:"JSON AccountIds"
+       and includeLinkedAccounts =
+         flag "include-linked-accounts" (optional bool)
+           ~doc:"BOOL IncludeLinkedAccounts"
+       and logGroupClass =
+         flag "log-group-class" (optional json_arg) ~doc:"JSON LogGroupClass"
+       and logGroupNamePattern =
+         flag "log-group-name-pattern" (optional string)
+           ~doc:"STRING LogGroupNameRegexPattern"
+       and dataSources =
+         flag "data-sources" (optional json_arg)
+           ~doc:"JSON DataSourceFilters"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and limit =
+         flag "limit" (optional int) ~doc:"INT ListLogGroupsRequestLimit"
+       and groupBy =
+         flag "group-by" (required json_arg)
+           ~doc:"JSON ListAggregateLogGroupSummariesGroupBy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_aggregate_log_group_summaries
+           (Values.ListAggregateLogGroupSummariesRequest.make
+              ?accountIdentifiers:(Option.map ~f:Values.AccountIds.of_json
+                                     accountIdentifiers)
+              ?includeLinkedAccounts
+              ?logGroupClass:(Option.map ~f:Values.LogGroupClass.of_json
+                                logGroupClass) ?logGroupNamePattern
+              ?dataSources:(Option.map ~f:Values.DataSourceFilters.of_json
+                              dataSources) ?nextToken ?limit
+              ~groupBy:(Values.ListAggregateLogGroupSummariesGroupBy.of_json
+                          groupBy) ())
+           (Some Values.ListAggregateLogGroupSummariesResponse.to_json)
+           (Some Values.ListAggregateLogGroupSummariesResponse.error_to_json)])
+let list_anomalies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and anomalyDetectorArn =
+         flag "anomaly-detector-arn" (optional string)
+           ~doc:"STRING AnomalyDetectorArn"
+       and suppressionState =
+         flag "suppression-state" (optional json_arg)
+           ~doc:"JSON SuppressionState"
+       and limit = flag "limit" (optional int) ~doc:"INT ListAnomaliesLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_anomalies
+           (Values.ListAnomaliesRequest.make ?anomalyDetectorArn
+              ?suppressionState:(Option.map
+                                   ~f:Values.SuppressionState.of_json
+                                   suppressionState) ?limit ?nextToken ())
+           (Some Values.ListAnomaliesResponse.to_json)
+           (Some Values.ListAnomaliesResponse.error_to_json)])
+let list_integrations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationNamePrefix =
+         flag "integration-name-prefix" (optional string)
+           ~doc:"STRING IntegrationNamePrefix"
+       and integrationType =
+         flag "integration-type" (optional json_arg)
+           ~doc:"JSON IntegrationType"
+       and integrationStatus =
+         flag "integration-status" (optional json_arg)
+           ~doc:"JSON IntegrationStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_integrations
+           (Values.ListIntegrationsRequest.make ?integrationNamePrefix
+              ?integrationType:(Option.map ~f:Values.IntegrationType.of_json
+                                  integrationType)
+              ?integrationStatus:(Option.map
+                                    ~f:Values.IntegrationStatus.of_json
+                                    integrationStatus) ())
+           (Some Values.ListIntegrationsResponse.to_json)
+           (Some Values.ListIntegrationsResponse.error_to_json)])
+let list_log_anomaly_detectors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filterLogGroupArn =
+         flag "filter-log-group-arn" (optional string)
+           ~doc:"STRING LogGroupArn"
+       and limit =
+         flag "limit" (optional int) ~doc:"INT ListLogAnomalyDetectorsLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_log_anomaly_detectors
+           (Values.ListLogAnomalyDetectorsRequest.make ?filterLogGroupArn
+              ?limit ?nextToken ())
+           (Some Values.ListLogAnomalyDetectorsResponse.to_json)
+           (Some Values.ListLogAnomalyDetectorsResponse.error_to_json)])
+let list_log_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupNamePattern =
+         flag "log-group-name-pattern" (optional string)
+           ~doc:"STRING LogGroupNameRegexPattern"
+       and logGroupClass =
+         flag "log-group-class" (optional json_arg) ~doc:"JSON LogGroupClass"
+       and includeLinkedAccounts =
+         flag "include-linked-accounts" (optional bool)
+           ~doc:"BOOL IncludeLinkedAccounts"
+       and accountIdentifiers =
+         flag "account-identifiers" (optional json_arg)
+           ~doc:"JSON AccountIds"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and limit = flag "limit" (optional int) ~doc:"INT ListLimit"
+       and dataSources =
+         flag "data-sources" (optional json_arg)
+           ~doc:"JSON DataSourceFilters"
+       and fieldIndexNames =
+         flag "field-index-names" (optional json_arg)
+           ~doc:"JSON FieldIndexNames"
+       and logGroupTags =
+         flag "log-group-tags" (optional json_arg) ~doc:"JSON TagFilters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_log_groups
+           (Values.ListLogGroupsRequest.make ?logGroupNamePattern
+              ?logGroupClass:(Option.map ~f:Values.LogGroupClass.of_json
+                                logGroupClass) ?includeLinkedAccounts
+              ?accountIdentifiers:(Option.map ~f:Values.AccountIds.of_json
+                                     accountIdentifiers) ?nextToken ?limit
+              ?dataSources:(Option.map ~f:Values.DataSourceFilters.of_json
+                              dataSources)
+              ?fieldIndexNames:(Option.map ~f:Values.FieldIndexNames.of_json
+                                  fieldIndexNames)
+              ?logGroupTags:(Option.map ~f:Values.TagFilters.of_json
+                               logGroupTags) ())
+           (Some Values.ListLogGroupsResponse.to_json)
+           (Some Values.ListLogGroupsResponse.error_to_json)])
+let list_log_groups_for_query =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListLogGroupsForQueryMaxResults"
+       and queryId = flag "query-id" (required string) ~doc:"STRING QueryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_log_groups_for_query
+           (Values.ListLogGroupsForQueryRequest.make ?nextToken ?maxResults
+              ~queryId ())
+           (Some Values.ListLogGroupsForQueryResponse.to_json)
+           (Some Values.ListLogGroupsForQueryResponse.error_to_json)])
+let list_scheduled_queries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListScheduledQueriesMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON ScheduledQueryState" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_scheduled_queries
+           (Values.ListScheduledQueriesRequest.make ?maxResults ?nextToken
+              ?state:(Option.map ~f:Values.ScheduledQueryState.of_json state)
+              ()) (Some Values.ListScheduledQueriesResponse.to_json)
+           (Some Values.ListScheduledQueriesResponse.error_to_json)])
+let list_sources_for_s3_table_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListSourcesForS3TableIntegrationMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and integrationArn =
+         flag "integration-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sources_for_s3_table_integration
+           (Values.ListSourcesForS3TableIntegrationRequest.make ?maxResults
+              ?nextToken ~integrationArn ())
+           (Some Values.ListSourcesForS3TableIntegrationResponse.to_json)
+           (Some
+              Values.ListSourcesForS3TableIntegrationResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make ~resourceArn ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
 let list_tags_log_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -667,6 +1993,170 @@ let list_tags_log_group =
            (Values.ListTagsLogGroupRequest.make ~logGroupName ())
            (Some Values.ListTagsLogGroupResponse.to_json)
            (Some Values.ListTagsLogGroupResponse.error_to_json)])
+let put_account_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scope = flag "scope" (optional json_arg) ~doc:"JSON Scope"
+       and selectionCriteria =
+         flag "selection-criteria" (optional string)
+           ~doc:"STRING SelectionCriteria"
+       and policyName =
+         flag "policy-name" (required string) ~doc:"STRING PolicyName"
+       and policyDocument =
+         flag "policy-document" (required string)
+           ~doc:"STRING AccountPolicyDocument"
+       and policyType =
+         flag "policy-type" (required json_arg) ~doc:"JSON PolicyType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_account_policy
+           (Values.PutAccountPolicyRequest.make
+              ?scope:(Option.map ~f:Values.Scope.of_json scope)
+              ?selectionCriteria ~policyName ~policyDocument
+              ~policyType:(Values.PolicyType.of_json policyType) ())
+           (Some Values.PutAccountPolicyResponse.to_json)
+           (Some Values.PutAccountPolicyResponse.error_to_json)])
+let put_bearer_token_authentication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier"
+       and bearerTokenAuthenticationEnabled =
+         flag "bearer-token-authentication-enabled" (required bool)
+           ~doc:"BOOL BearerTokenAuthenticationEnabled" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_bearer_token_authentication
+           (Values.PutBearerTokenAuthenticationRequest.make
+              ~logGroupIdentifier ~bearerTokenAuthenticationEnabled ()) None
+           None])
+let put_data_protection_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier"
+       and policyDocument =
+         flag "policy-document" (required string)
+           ~doc:"STRING DataProtectionPolicyDocument" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_data_protection_policy
+           (Values.PutDataProtectionPolicyRequest.make ~logGroupIdentifier
+              ~policyDocument ())
+           (Some Values.PutDataProtectionPolicyResponse.to_json)
+           (Some Values.PutDataProtectionPolicyResponse.error_to_json)])
+let put_delivery_destination =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and outputFormat =
+         flag "output-format" (optional json_arg) ~doc:"JSON OutputFormat"
+       and deliveryDestinationConfiguration =
+         flag "delivery-destination-configuration" (optional json_arg)
+           ~doc:"JSON DeliveryDestinationConfiguration"
+       and deliveryDestinationType =
+         flag "delivery-destination-type" (optional json_arg)
+           ~doc:"JSON DeliveryDestinationType"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and name =
+         flag "name" (required string) ~doc:"STRING DeliveryDestinationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_delivery_destination
+           (Values.PutDeliveryDestinationRequest.make
+              ?outputFormat:(Option.map ~f:Values.OutputFormat.of_json
+                               outputFormat)
+              ?deliveryDestinationConfiguration:(Option.map
+                                                   ~f:Values.DeliveryDestinationConfiguration.of_json
+                                                   deliveryDestinationConfiguration)
+              ?deliveryDestinationType:(Option.map
+                                          ~f:Values.DeliveryDestinationType.of_json
+                                          deliveryDestinationType)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name ())
+           (Some Values.PutDeliveryDestinationResponse.to_json)
+           (Some Values.PutDeliveryDestinationResponse.error_to_json)])
+let put_delivery_destination_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deliveryDestinationName =
+         flag "delivery-destination-name" (required string)
+           ~doc:"STRING DeliveryDestinationName"
+       and deliveryDestinationPolicy =
+         flag "delivery-destination-policy" (required string)
+           ~doc:"STRING DeliveryDestinationPolicy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_delivery_destination_policy
+           (Values.PutDeliveryDestinationPolicyRequest.make
+              ~deliveryDestinationName ~deliveryDestinationPolicy ())
+           (Some Values.PutDeliveryDestinationPolicyResponse.to_json)
+           (Some Values.PutDeliveryDestinationPolicyResponse.error_to_json)])
+let put_delivery_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and deliverySourceConfiguration =
+         flag "delivery-source-configuration" (optional json_arg)
+           ~doc:"JSON DeliverySourceConfiguration"
+       and name =
+         flag "name" (required string) ~doc:"STRING DeliverySourceName"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING Arn"
+       and logType = flag "log-type" (required string) ~doc:"STRING LogType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_delivery_source
+           (Values.PutDeliverySourceRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?deliverySourceConfiguration:(Option.map
+                                              ~f:Values.DeliverySourceConfiguration.of_json
+                                              deliverySourceConfiguration)
+              ~name ~resourceArn ~logType ())
+           (Some Values.PutDeliverySourceResponse.to_json)
+           (Some Values.PutDeliverySourceResponse.error_to_json)])
 let put_destination =
   Command.async ~summary:""
     ([%map_open.Command
@@ -677,6 +2167,7 @@ let put_destination =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and destinationName =
          flag "destination-name" (required string)
            ~doc:"STRING DestinationName"
@@ -686,8 +2177,10 @@ let put_destination =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_destination
-           (Values.PutDestinationRequest.make ~destinationName ~targetArn
-              ~roleArn ()) (Some Values.PutDestinationResponse.to_json)
+           (Values.PutDestinationRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~destinationName
+              ~targetArn ~roleArn ())
+           (Some Values.PutDestinationResponse.to_json)
            (Some Values.PutDestinationResponse.error_to_json)])
 let put_destination_policy =
   Command.async ~summary:""
@@ -711,6 +2204,57 @@ let put_destination_policy =
            Io.put_destination_policy
            (Values.PutDestinationPolicyRequest.make ?forceUpdate
               ~destinationName ~accessPolicy ()) None None])
+let put_index_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier"
+       and policyDocument =
+         flag "policy-document" (required string)
+           ~doc:"STRING PolicyDocument" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_index_policy
+           (Values.PutIndexPolicyRequest.make ~logGroupIdentifier
+              ~policyDocument ())
+           (Some Values.PutIndexPolicyResponse.to_json)
+           (Some Values.PutIndexPolicyResponse.error_to_json)])
+let put_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationName =
+         flag "integration-name" (required string)
+           ~doc:"STRING IntegrationName"
+       and resourceConfig =
+         flag "resource-config" (required json_arg)
+           ~doc:"JSON ResourceConfig"
+       and integrationType =
+         flag "integration-type" (required json_arg)
+           ~doc:"JSON IntegrationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_integration
+           (Values.PutIntegrationRequest.make ~integrationName
+              ~resourceConfig:(Values.ResourceConfig.of_json resourceConfig)
+              ~integrationType:(Values.IntegrationType.of_json
+                                  integrationType) ())
+           (Some Values.PutIntegrationResponse.to_json)
+           (Some Values.PutIntegrationResponse.error_to_json)])
 let put_log_events =
   Command.async ~summary:""
     ([%map_open.Command
@@ -723,6 +2267,7 @@ let put_log_events =
            ~doc:"URL override endpoint url"
        and sequenceToken =
          flag "sequence-token" (optional string) ~doc:"STRING SequenceToken"
+       and entity = flag "entity" (optional json_arg) ~doc:"JSON Entity"
        and logGroupName =
          flag "log-group-name" (required string) ~doc:"STRING LogGroupName"
        and logStreamName =
@@ -732,11 +2277,33 @@ let put_log_events =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_log_events
-           (Values.PutLogEventsRequest.make ?sequenceToken ~logGroupName
-              ~logStreamName
+           (Values.PutLogEventsRequest.make ?sequenceToken
+              ?entity:(Option.map ~f:Values.Entity.of_json entity)
+              ~logGroupName ~logStreamName
               ~logEvents:(Values.InputLogEvents.of_json logEvents) ())
            (Some Values.PutLogEventsResponse.to_json)
            (Some Values.PutLogEventsResponse.error_to_json)])
+let put_log_group_deletion_protection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier"
+       and deletionProtectionEnabled =
+         flag "deletion-protection-enabled" (required bool)
+           ~doc:"BOOL DeletionProtectionEnabled" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_log_group_deletion_protection
+           (Values.PutLogGroupDeletionProtectionRequest.make
+              ~logGroupIdentifier ~deletionProtectionEnabled ()) None None])
 let put_metric_filter =
   Command.async ~summary:""
     ([%map_open.Command
@@ -747,6 +2314,15 @@ let put_metric_filter =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and applyOnTransformedLogs =
+         flag "apply-on-transformed-logs" (optional bool)
+           ~doc:"BOOL ApplyOnTransformedLogs"
+       and fieldSelectionCriteria =
+         flag "field-selection-criteria" (optional string)
+           ~doc:"STRING FieldSelectionCriteria"
+       and emitSystemFieldDimensions =
+         flag "emit-system-field-dimensions" (optional json_arg)
+           ~doc:"JSON EmitSystemFields"
        and logGroupName =
          flag "log-group-name" (required string) ~doc:"STRING LogGroupName"
        and filterName =
@@ -759,8 +2335,12 @@ let put_metric_filter =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_metric_filter
-           (Values.PutMetricFilterRequest.make ~logGroupName ~filterName
-              ~filterPattern
+           (Values.PutMetricFilterRequest.make ?applyOnTransformedLogs
+              ?fieldSelectionCriteria
+              ?emitSystemFieldDimensions:(Option.map
+                                            ~f:Values.EmitSystemFields.of_json
+                                            emitSystemFieldDimensions)
+              ~logGroupName ~filterName ~filterPattern
               ~metricTransformations:(Values.MetricTransformations.of_json
                                         metricTransformations) ()) None None])
 let put_query_definition =
@@ -773,10 +2353,16 @@ let put_query_definition =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and queryLanguage =
+         flag "query-language" (optional json_arg) ~doc:"JSON QueryLanguage"
        and queryDefinitionId =
          flag "query-definition-id" (optional string) ~doc:"STRING QueryId"
        and logGroupNames =
          flag "log-group-names" (optional json_arg) ~doc:"JSON LogGroupNames"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and parameters =
+         flag "parameters" (optional json_arg) ~doc:"JSON QueryParameterList"
        and name =
          flag "name" (required string) ~doc:"STRING QueryDefinitionName"
        and queryString =
@@ -785,9 +2371,13 @@ let put_query_definition =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_query_definition
-           (Values.PutQueryDefinitionRequest.make ?queryDefinitionId
+           (Values.PutQueryDefinitionRequest.make
+              ?queryLanguage:(Option.map ~f:Values.QueryLanguage.of_json
+                                queryLanguage) ?queryDefinitionId
               ?logGroupNames:(Option.map ~f:Values.LogGroupNames.of_json
-                                logGroupNames) ~name ~queryString ())
+                                logGroupNames) ?clientToken
+              ?parameters:(Option.map ~f:Values.QueryParameterList.of_json
+                             parameters) ~name ~queryString ())
            (Some Values.PutQueryDefinitionResponse.to_json)
            (Some Values.PutQueryDefinitionResponse.error_to_json)])
 let put_resource_policy =
@@ -804,12 +2394,18 @@ let put_resource_policy =
          flag "policy-name" (optional string) ~doc:"STRING PolicyName"
        and policyDocument =
          flag "policy-document" (optional string)
-           ~doc:"STRING PolicyDocument" in
+           ~doc:"STRING PolicyDocument"
+       and resourceArn =
+         flag "resource-arn" (optional string) ~doc:"STRING Arn"
+       and expectedRevisionId =
+         flag "expected-revision-id" (optional string)
+           ~doc:"STRING ExpectedRevisionId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_resource_policy
            (Values.PutResourcePolicyRequest.make ?policyName ?policyDocument
-              ()) (Some Values.PutResourcePolicyResponse.to_json)
+              ?resourceArn ?expectedRevisionId ())
+           (Some Values.PutResourcePolicyResponse.to_json)
            (Some Values.PutResourcePolicyResponse.error_to_json)])
 let put_retention_policy =
   Command.async ~summary:""
@@ -843,6 +2439,15 @@ let put_subscription_filter =
        and roleArn = flag "role-arn" (optional string) ~doc:"STRING RoleArn"
        and distribution =
          flag "distribution" (optional json_arg) ~doc:"JSON Distribution"
+       and applyOnTransformedLogs =
+         flag "apply-on-transformed-logs" (optional bool)
+           ~doc:"BOOL ApplyOnTransformedLogs"
+       and fieldSelectionCriteria =
+         flag "field-selection-criteria" (optional string)
+           ~doc:"STRING FieldSelectionCriteria"
+       and emitSystemFields =
+         flag "emit-system-fields" (optional json_arg)
+           ~doc:"JSON EmitSystemFields"
        and logGroupName =
          flag "log-group-name" (required string) ~doc:"STRING LogGroupName"
        and filterName =
@@ -857,8 +2462,70 @@ let put_subscription_filter =
            Io.put_subscription_filter
            (Values.PutSubscriptionFilterRequest.make ?roleArn
               ?distribution:(Option.map ~f:Values.Distribution.of_json
-                               distribution) ~logGroupName ~filterName
-              ~filterPattern ~destinationArn ()) None None])
+                               distribution) ?applyOnTransformedLogs
+              ?fieldSelectionCriteria
+              ?emitSystemFields:(Option.map
+                                   ~f:Values.EmitSystemFields.of_json
+                                   emitSystemFields) ~logGroupName
+              ~filterName ~filterPattern ~destinationArn ()) None None])
+let put_transformer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logGroupIdentifier =
+         flag "log-group-identifier" (required string)
+           ~doc:"STRING LogGroupIdentifier"
+       and transformerConfig =
+         flag "transformer-config" (required json_arg) ~doc:"JSON Processors" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_transformer
+           (Values.PutTransformerRequest.make ~logGroupIdentifier
+              ~transformerConfig:(Values.Processors.of_json transformerConfig)
+              ()) None None])
+let start_live_tail =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and logStreamNames =
+         flag "log-stream-names" (optional json_arg)
+           ~doc:"JSON InputLogStreamNames"
+       and logStreamNamePrefixes =
+         flag "log-stream-name-prefixes" (optional json_arg)
+           ~doc:"JSON InputLogStreamNames"
+       and logEventFilterPattern =
+         flag "log-event-filter-pattern" (optional string)
+           ~doc:"STRING FilterPattern"
+       and logGroupIdentifiers =
+         flag "log-group-identifiers" (required json_arg)
+           ~doc:"JSON StartLiveTailLogGroupIdentifiers" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_live_tail
+           (Values.StartLiveTailRequest.make
+              ?logStreamNames:(Option.map
+                                 ~f:Values.InputLogStreamNames.of_json
+                                 logStreamNames)
+              ?logStreamNamePrefixes:(Option.map
+                                        ~f:Values.InputLogStreamNames.of_json
+                                        logStreamNamePrefixes)
+              ?logEventFilterPattern
+              ~logGroupIdentifiers:(Values.StartLiveTailLogGroupIdentifiers.of_json
+                                      logGroupIdentifiers) ())
+           (Some Values.StartLiveTailResponse.to_json)
+           (Some Values.StartLiveTailResponse.error_to_json)])
 let start_query =
   Command.async ~summary:""
     ([%map_open.Command
@@ -869,11 +2536,17 @@ let start_query =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and queryLanguage =
+         flag "query-language" (optional json_arg) ~doc:"JSON QueryLanguage"
        and logGroupName =
          flag "log-group-name" (optional string) ~doc:"STRING LogGroupName"
        and logGroupNames =
          flag "log-group-names" (optional json_arg) ~doc:"JSON LogGroupNames"
-       and limit = flag "limit" (optional int) ~doc:"INT EventsLimit"
+       and logGroupIdentifiers =
+         flag "log-group-identifiers" (optional json_arg)
+           ~doc:"JSON LogGroupIdentifiers"
+       and limit =
+         flag "limit" (optional int) ~doc:"INT EventsLimitStartQuery"
        and startTime =
          flag "start-time" (required json_arg) ~doc:"JSON Timestamp"
        and endTime =
@@ -883,9 +2556,14 @@ let start_query =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_query
-           (Values.StartQueryRequest.make ?logGroupName
+           (Values.StartQueryRequest.make
+              ?queryLanguage:(Option.map ~f:Values.QueryLanguage.of_json
+                                queryLanguage) ?logGroupName
               ?logGroupNames:(Option.map ~f:Values.LogGroupNames.of_json
-                                logGroupNames) ?limit
+                                logGroupNames)
+              ?logGroupIdentifiers:(Option.map
+                                      ~f:Values.LogGroupIdentifiers.of_json
+                                      logGroupIdentifiers) ?limit
               ~startTime:(Values.Timestamp.of_json startTime)
               ~endTime:(Values.Timestamp.of_json endTime) ~queryString ())
            (Some Values.StartQueryResponse.to_json)
@@ -924,6 +2602,25 @@ let tag_log_group =
            Io.tag_log_group
            (Values.TagLogGroupRequest.make ~logGroupName
               ~tags:(Values.Tags.of_json tags) ()) None None])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON Tags" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make ~resourceArn
+              ~tags:(Values.Tags.of_json tags) ()) None None])
 let test_metric_filter =
   Command.async ~summary:""
     ([%map_open.Command
@@ -947,6 +2644,30 @@ let test_metric_filter =
                                    logEventMessages) ())
            (Some Values.TestMetricFilterResponse.to_json)
            (Some Values.TestMetricFilterResponse.error_to_json)])
+let test_transformer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and transformerConfig =
+         flag "transformer-config" (required json_arg) ~doc:"JSON Processors"
+       and logEventMessages =
+         flag "log-event-messages" (required json_arg)
+           ~doc:"JSON TestEventMessages" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.test_transformer
+           (Values.TestTransformerRequest.make
+              ~transformerConfig:(Values.Processors.of_json transformerConfig)
+              ~logEventMessages:(Values.TestEventMessages.of_json
+                                   logEventMessages) ())
+           (Some Values.TestTransformerResponse.to_json)
+           (Some Values.TestTransformerResponse.error_to_json)])
 let untag_log_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -965,48 +2686,331 @@ let untag_log_group =
            Io.untag_log_group
            (Values.UntagLogGroupRequest.make ~logGroupName
               ~tags:(Values.TagList.of_json tags) ()) None None])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make ~resourceArn
+              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ()) None None])
+let update_anomaly =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and anomalyId =
+         flag "anomaly-id" (optional string) ~doc:"STRING AnomalyId"
+       and patternId =
+         flag "pattern-id" (optional string) ~doc:"STRING PatternId"
+       and suppressionType =
+         flag "suppression-type" (optional json_arg)
+           ~doc:"JSON SuppressionType"
+       and suppressionPeriod =
+         flag "suppression-period" (optional json_arg)
+           ~doc:"JSON SuppressionPeriod"
+       and baseline = flag "baseline" (optional bool) ~doc:"BOOL Baseline"
+       and anomalyDetectorArn =
+         flag "anomaly-detector-arn" (required string)
+           ~doc:"STRING AnomalyDetectorArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_anomaly
+           (Values.UpdateAnomalyRequest.make ?anomalyId ?patternId
+              ?suppressionType:(Option.map ~f:Values.SuppressionType.of_json
+                                  suppressionType)
+              ?suppressionPeriod:(Option.map
+                                    ~f:Values.SuppressionPeriod.of_json
+                                    suppressionPeriod) ?baseline
+              ~anomalyDetectorArn ()) None None])
+let update_delivery_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recordFields =
+         flag "record-fields" (optional json_arg) ~doc:"JSON RecordFields"
+       and fieldDelimiter =
+         flag "field-delimiter" (optional string)
+           ~doc:"STRING FieldDelimiter"
+       and s3DeliveryConfiguration =
+         flag "s3-delivery-configuration" (optional json_arg)
+           ~doc:"JSON S3DeliveryConfiguration"
+       and id = flag "id" (required string) ~doc:"STRING DeliveryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_delivery_configuration
+           (Values.UpdateDeliveryConfigurationRequest.make
+              ?recordFields:(Option.map ~f:Values.RecordFields.of_json
+                               recordFields) ?fieldDelimiter
+              ?s3DeliveryConfiguration:(Option.map
+                                          ~f:Values.S3DeliveryConfiguration.of_json
+                                          s3DeliveryConfiguration) ~id ())
+           (Some Values.UpdateDeliveryConfigurationResponse.to_json)
+           (Some Values.UpdateDeliveryConfigurationResponse.error_to_json)])
+let update_log_anomaly_detector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and evaluationFrequency =
+         flag "evaluation-frequency" (optional json_arg)
+           ~doc:"JSON EvaluationFrequency"
+       and filterPattern =
+         flag "filter-pattern" (optional string) ~doc:"STRING FilterPattern"
+       and anomalyVisibilityTime =
+         flag "anomaly-visibility-time" (optional json_arg)
+           ~doc:"JSON AnomalyVisibilityTime"
+       and anomalyDetectorArn =
+         flag "anomaly-detector-arn" (required string)
+           ~doc:"STRING AnomalyDetectorArn"
+       and enabled = flag "enabled" (required bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_log_anomaly_detector
+           (Values.UpdateLogAnomalyDetectorRequest.make
+              ?evaluationFrequency:(Option.map
+                                      ~f:Values.EvaluationFrequency.of_json
+                                      evaluationFrequency) ?filterPattern
+              ?anomalyVisibilityTime:(Option.map
+                                        ~f:Values.AnomalyVisibilityTime.of_json
+                                        anomalyVisibilityTime)
+              ~anomalyDetectorArn ~enabled ()) None None])
+let update_lookup_table =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING LookupTableDescription"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
+       and lookupTableArn =
+         flag "lookup-table-arn" (required string) ~doc:"STRING Arn"
+       and tableBody =
+         flag "table-body" (required string) ~doc:"STRING TableBody" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_lookup_table
+           (Values.UpdateLookupTableRequest.make ?description ?kmsKeyId
+              ~lookupTableArn ~tableBody ())
+           (Some Values.UpdateLookupTableResponse.to_json)
+           (Some Values.UpdateLookupTableResponse.error_to_json)])
+let update_scheduled_query =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ScheduledQueryDescription"
+       and logGroupIdentifiers =
+         flag "log-group-identifiers" (optional json_arg)
+           ~doc:"JSON ScheduledQueryLogGroupIdentifiers"
+       and timezone =
+         flag "timezone" (optional string) ~doc:"STRING ScheduleTimezone"
+       and startTimeOffset =
+         flag "start-time-offset" (optional json_arg)
+           ~doc:"JSON StartTimeOffset"
+       and destinationConfiguration =
+         flag "destination-configuration" (optional json_arg)
+           ~doc:"JSON DestinationConfiguration"
+       and scheduleStartTime =
+         flag "schedule-start-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and scheduleEndTime =
+         flag "schedule-end-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON ScheduledQueryState"
+       and identifier =
+         flag "identifier" (required string)
+           ~doc:"STRING ScheduledQueryIdentifier"
+       and queryLanguage =
+         flag "query-language" (required json_arg) ~doc:"JSON QueryLanguage"
+       and queryString =
+         flag "query-string" (required string) ~doc:"STRING QueryString"
+       and scheduleExpression =
+         flag "schedule-expression" (required string)
+           ~doc:"STRING ScheduleExpression"
+       and executionRoleArn =
+         flag "execution-role-arn" (required string) ~doc:"STRING RoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_scheduled_query
+           (Values.UpdateScheduledQueryRequest.make ?description
+              ?logGroupIdentifiers:(Option.map
+                                      ~f:Values.ScheduledQueryLogGroupIdentifiers.of_json
+                                      logGroupIdentifiers) ?timezone
+              ?startTimeOffset:(Option.map ~f:Values.StartTimeOffset.of_json
+                                  startTimeOffset)
+              ?destinationConfiguration:(Option.map
+                                           ~f:Values.DestinationConfiguration.of_json
+                                           destinationConfiguration)
+              ?scheduleStartTime:(Option.map ~f:Values.Timestamp.of_json
+                                    scheduleStartTime)
+              ?scheduleEndTime:(Option.map ~f:Values.Timestamp.of_json
+                                  scheduleEndTime)
+              ?state:(Option.map ~f:Values.ScheduledQueryState.of_json state)
+              ~identifier
+              ~queryLanguage:(Values.QueryLanguage.of_json queryLanguage)
+              ~queryString ~scheduleExpression ~executionRoleArn ())
+           (Some Values.UpdateScheduledQueryResponse.to_json)
+           (Some Values.UpdateScheduledQueryResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-kms-key", associate_kms_key);
+    ("associate-source-to-s3-table-integration",
+      associate_source_to_s3_table_integration);
     ("cancel-export-task", cancel_export_task);
+    ("cancel-import-task", cancel_import_task);
+    ("create-delivery", create_delivery);
     ("create-export-task", create_export_task);
+    ("create-import-task", create_import_task);
+    ("create-log-anomaly-detector", create_log_anomaly_detector);
     ("create-log-group", create_log_group);
     ("create-log-stream", create_log_stream);
+    ("create-lookup-table", create_lookup_table);
+    ("create-scheduled-query", create_scheduled_query);
+    ("delete-account-policy", delete_account_policy);
+    ("delete-data-protection-policy", delete_data_protection_policy);
+    ("delete-delivery", delete_delivery);
+    ("delete-delivery-destination", delete_delivery_destination);
+    ("delete-delivery-destination-policy",
+      delete_delivery_destination_policy);
+    ("delete-delivery-source", delete_delivery_source);
     ("delete-destination", delete_destination);
+    ("delete-index-policy", delete_index_policy);
+    ("delete-integration", delete_integration);
+    ("delete-log-anomaly-detector", delete_log_anomaly_detector);
     ("delete-log-group", delete_log_group);
     ("delete-log-stream", delete_log_stream);
+    ("delete-lookup-table", delete_lookup_table);
     ("delete-metric-filter", delete_metric_filter);
     ("delete-query-definition", delete_query_definition);
     ("delete-resource-policy", delete_resource_policy);
     ("delete-retention-policy", delete_retention_policy);
+    ("delete-scheduled-query", delete_scheduled_query);
     ("delete-subscription-filter", delete_subscription_filter);
+    ("delete-transformer", delete_transformer);
+    ("describe-account-policies", describe_account_policies);
+    ("describe-configuration-templates", describe_configuration_templates);
+    ("describe-deliveries", describe_deliveries);
+    ("describe-delivery-destinations", describe_delivery_destinations);
+    ("describe-delivery-sources", describe_delivery_sources);
     ("describe-destinations", describe_destinations);
     ("describe-export-tasks", describe_export_tasks);
+    ("describe-field-indexes", describe_field_indexes);
+    ("describe-import-task-batches", describe_import_task_batches);
+    ("describe-import-tasks", describe_import_tasks);
+    ("describe-index-policies", describe_index_policies);
     ("describe-log-groups", describe_log_groups);
     ("describe-log-streams", describe_log_streams);
+    ("describe-lookup-tables", describe_lookup_tables);
     ("describe-metric-filters", describe_metric_filters);
     ("describe-queries", describe_queries);
     ("describe-query-definitions", describe_query_definitions);
     ("describe-resource-policies", describe_resource_policies);
     ("describe-subscription-filters", describe_subscription_filters);
     ("disassociate-kms-key", disassociate_kms_key);
+    ("disassociate-source-from-s3-table-integration",
+      disassociate_source_from_s3_table_integration);
     ("filter-log-events", filter_log_events);
+    ("get-data-protection-policy", get_data_protection_policy);
+    ("get-delivery", get_delivery);
+    ("get-delivery-destination", get_delivery_destination);
+    ("get-delivery-destination-policy", get_delivery_destination_policy);
+    ("get-delivery-source", get_delivery_source);
+    ("get-integration", get_integration);
+    ("get-log-anomaly-detector", get_log_anomaly_detector);
     ("get-log-events", get_log_events);
+    ("get-log-fields", get_log_fields);
     ("get-log-group-fields", get_log_group_fields);
+    ("get-log-object", get_log_object);
     ("get-log-record", get_log_record);
+    ("get-lookup-table", get_lookup_table);
     ("get-query-results", get_query_results);
+    ("get-scheduled-query", get_scheduled_query);
+    ("get-scheduled-query-history", get_scheduled_query_history);
+    ("get-transformer", get_transformer);
+    ("list-aggregate-log-group-summaries",
+      list_aggregate_log_group_summaries);
+    ("list-anomalies", list_anomalies);
+    ("list-integrations", list_integrations);
+    ("list-log-anomaly-detectors", list_log_anomaly_detectors);
+    ("list-log-groups", list_log_groups);
+    ("list-log-groups-for-query", list_log_groups_for_query);
+    ("list-scheduled-queries", list_scheduled_queries);
+    ("list-sources-for-s3-table-integration",
+      list_sources_for_s3_table_integration);
+    ("list-tags-for-resource", list_tags_for_resource);
     ("list-tags-log-group", list_tags_log_group);
+    ("put-account-policy", put_account_policy);
+    ("put-bearer-token-authentication", put_bearer_token_authentication);
+    ("put-data-protection-policy", put_data_protection_policy);
+    ("put-delivery-destination", put_delivery_destination);
+    ("put-delivery-destination-policy", put_delivery_destination_policy);
+    ("put-delivery-source", put_delivery_source);
     ("put-destination", put_destination);
     ("put-destination-policy", put_destination_policy);
+    ("put-index-policy", put_index_policy);
+    ("put-integration", put_integration);
     ("put-log-events", put_log_events);
+    ("put-log-group-deletion-protection", put_log_group_deletion_protection);
     ("put-metric-filter", put_metric_filter);
     ("put-query-definition", put_query_definition);
     ("put-resource-policy", put_resource_policy);
     ("put-retention-policy", put_retention_policy);
     ("put-subscription-filter", put_subscription_filter);
+    ("put-transformer", put_transformer);
+    ("start-live-tail", start_live_tail);
     ("start-query", start_query);
     ("stop-query", stop_query);
     ("tag-log-group", tag_log_group);
+    ("tag-resource", tag_resource);
     ("test-metric-filter", test_metric_filter);
-    ("untag-log-group", untag_log_group)]
+    ("test-transformer", test_transformer);
+    ("untag-log-group", untag_log_group);
+    ("untag-resource", untag_resource);
+    ("update-anomaly", update_anomaly);
+    ("update-delivery-configuration", update_delivery_configuration);
+    ("update-log-anomaly-detector", update_log_anomaly_detector);
+    ("update-lookup-table", update_lookup_table);
+    ("update-scheduled-query", update_scheduled_query)]

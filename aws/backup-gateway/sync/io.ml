@@ -21,6 +21,16 @@ let delete_hypervisor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteHypervisor input
 let disassociate_gateway_from_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateGatewayFromServer input
+let get_bandwidth_rate_limit_schedule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetBandwidthRateLimitSchedule input
+let get_gateway ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetGateway input
+let get_hypervisor ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetHypervisor input
+let get_hypervisor_property_mappings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetHypervisorPropertyMappings input
+let get_virtual_machine ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetVirtualMachine input
 let import_hypervisor_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportHypervisorConfiguration input
 let list_gateways ?endpoint_url ?cfg input =
@@ -31,8 +41,14 @@ let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_virtual_machines ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListVirtualMachines input
+let put_bandwidth_rate_limit_schedule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutBandwidthRateLimitSchedule input
+let put_hypervisor_property_mappings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutHypervisorPropertyMappings input
 let put_maintenance_start_time ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutMaintenanceStartTime input
+let start_virtual_machines_metadata_sync ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartVirtualMachinesMetadataSync input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let test_hypervisor_configuration ?endpoint_url ?cfg input =
@@ -41,5 +57,7 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_gateway_information ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGatewayInformation input
+let update_gateway_software_now ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateGatewaySoftwareNow input
 let update_hypervisor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateHypervisor input

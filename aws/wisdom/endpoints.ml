@@ -11,6 +11,8 @@ type ('i, 'o, 'e) t =
   CreateContentResponse.error) t 
   | CreateKnowledgeBase: (CreateKnowledgeBaseRequest.t,
   CreateKnowledgeBaseResponse.t, CreateKnowledgeBaseResponse.error) t 
+  | CreateQuickResponse: (CreateQuickResponseRequest.t,
+  CreateQuickResponseResponse.t, CreateQuickResponseResponse.error) t 
   | CreateSession: (CreateSessionRequest.t, CreateSessionResponse.t,
   CreateSessionResponse.error) t 
   | DeleteAssistant: (DeleteAssistantRequest.t, DeleteAssistantResponse.t,
@@ -20,8 +22,12 @@ type ('i, 'o, 'e) t =
   DeleteAssistantAssociationResponse.error) t 
   | DeleteContent: (DeleteContentRequest.t, DeleteContentResponse.t,
   DeleteContentResponse.error) t 
+  | DeleteImportJob: (DeleteImportJobRequest.t, DeleteImportJobResponse.t,
+  DeleteImportJobResponse.error) t 
   | DeleteKnowledgeBase: (DeleteKnowledgeBaseRequest.t,
   DeleteKnowledgeBaseResponse.t, DeleteKnowledgeBaseResponse.error) t 
+  | DeleteQuickResponse: (DeleteQuickResponseRequest.t,
+  DeleteQuickResponseResponse.t, DeleteQuickResponseResponse.error) t 
   | GetAssistant: (GetAssistantRequest.t, GetAssistantResponse.t,
   GetAssistantResponse.error) t 
   | GetAssistantAssociation: (GetAssistantAssociationRequest.t,
@@ -31,8 +37,12 @@ type ('i, 'o, 'e) t =
   GetContentResponse.error) t 
   | GetContentSummary: (GetContentSummaryRequest.t,
   GetContentSummaryResponse.t, GetContentSummaryResponse.error) t 
+  | GetImportJob: (GetImportJobRequest.t, GetImportJobResponse.t,
+  GetImportJobResponse.error) t 
   | GetKnowledgeBase: (GetKnowledgeBaseRequest.t, GetKnowledgeBaseResponse.t,
   GetKnowledgeBaseResponse.error) t 
+  | GetQuickResponse: (GetQuickResponseRequest.t, GetQuickResponseResponse.t,
+  GetQuickResponseResponse.error) t 
   | GetRecommendations: (GetRecommendationsRequest.t,
   GetRecommendationsResponse.t, GetRecommendationsResponse.error) t 
   | GetSession: (GetSessionRequest.t, GetSessionResponse.t,
@@ -44,8 +54,12 @@ type ('i, 'o, 'e) t =
   ListAssistantsResponse.error) t 
   | ListContents: (ListContentsRequest.t, ListContentsResponse.t,
   ListContentsResponse.error) t 
+  | ListImportJobs: (ListImportJobsRequest.t, ListImportJobsResponse.t,
+  ListImportJobsResponse.error) t 
   | ListKnowledgeBases: (ListKnowledgeBasesRequest.t,
   ListKnowledgeBasesResponse.t, ListKnowledgeBasesResponse.error) t 
+  | ListQuickResponses: (ListQuickResponsesRequest.t,
+  ListQuickResponsesResponse.t, ListQuickResponsesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | NotifyRecommendationsReceived: (NotifyRecommendationsReceivedRequest.t,
@@ -58,10 +72,14 @@ type ('i, 'o, 'e) t =
   RemoveKnowledgeBaseTemplateUriResponse.error) t 
   | SearchContent: (SearchContentRequest.t, SearchContentResponse.t,
   SearchContentResponse.error) t 
+  | SearchQuickResponses: (SearchQuickResponsesRequest.t,
+  SearchQuickResponsesResponse.t, SearchQuickResponsesResponse.error) t 
   | SearchSessions: (SearchSessionsRequest.t, SearchSessionsResponse.t,
   SearchSessionsResponse.error) t 
   | StartContentUpload: (StartContentUploadRequest.t,
   StartContentUploadResponse.t, StartContentUploadResponse.error) t 
+  | StartImportJob: (StartImportJobRequest.t, StartImportJobResponse.t,
+  StartImportJobResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -71,39 +89,51 @@ type ('i, 'o, 'e) t =
   | UpdateKnowledgeBaseTemplateUri: (UpdateKnowledgeBaseTemplateUriRequest.t,
   UpdateKnowledgeBaseTemplateUriResponse.t,
   UpdateKnowledgeBaseTemplateUriResponse.error) t 
+  | UpdateQuickResponse: (UpdateQuickResponseRequest.t,
+  UpdateQuickResponseResponse.t, UpdateQuickResponseResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateAssistant -> `POST
   | CreateAssistantAssociation -> `POST
   | CreateContent -> `POST
   | CreateKnowledgeBase -> `POST
+  | CreateQuickResponse -> `POST
   | CreateSession -> `POST
   | DeleteAssistant -> `DELETE
   | DeleteAssistantAssociation -> `DELETE
   | DeleteContent -> `DELETE
+  | DeleteImportJob -> `DELETE
   | DeleteKnowledgeBase -> `DELETE
+  | DeleteQuickResponse -> `DELETE
   | GetAssistant -> `GET
   | GetAssistantAssociation -> `GET
   | GetContent -> `GET
   | GetContentSummary -> `GET
+  | GetImportJob -> `GET
   | GetKnowledgeBase -> `GET
+  | GetQuickResponse -> `GET
   | GetRecommendations -> `GET
   | GetSession -> `GET
   | ListAssistantAssociations -> `GET
   | ListAssistants -> `GET
   | ListContents -> `GET
+  | ListImportJobs -> `GET
   | ListKnowledgeBases -> `GET
+  | ListQuickResponses -> `GET
   | ListTagsForResource -> `GET
   | NotifyRecommendationsReceived -> `POST
   | QueryAssistant -> `POST
   | RemoveKnowledgeBaseTemplateUri -> `DELETE
   | SearchContent -> `POST
+  | SearchQuickResponses -> `POST
   | SearchSessions -> `POST
   | StartContentUpload -> `POST
+  | StartImportJob -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateContent -> `POST
   | UpdateKnowledgeBaseTemplateUri -> `POST
+  | UpdateQuickResponse -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -117,6 +147,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (UuidOrArn.to_header x.CreateContentRequest.knowledgeBaseId)
       | CreateKnowledgeBase ->
           (Format.kasprintf Uri.of_string) "/knowledgeBases"
+      | CreateQuickResponse ->
+          (Format.kasprintf Uri.of_string)
+            "/knowledgeBases/%s/quickResponses"
+            (UuidOrArn.to_header x.CreateQuickResponseRequest.knowledgeBaseId)
       | CreateSession ->
           (Format.kasprintf Uri.of_string) "/assistants/%s/sessions"
             (UuidOrArn.to_header x.CreateSessionRequest.assistantId)
@@ -133,9 +167,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/knowledgeBases/%s/contents/%s"
             (UuidOrArn.to_header x.DeleteContentRequest.knowledgeBaseId)
             (UuidOrArn.to_header x.DeleteContentRequest.contentId)
+      | DeleteImportJob ->
+          (Format.kasprintf Uri.of_string) "/knowledgeBases/%s/importJobs/%s"
+            (UuidOrArn.to_header x.DeleteImportJobRequest.knowledgeBaseId)
+            (Uuid.to_header x.DeleteImportJobRequest.importJobId)
       | DeleteKnowledgeBase ->
           (Format.kasprintf Uri.of_string) "/knowledgeBases/%s"
             (UuidOrArn.to_header x.DeleteKnowledgeBaseRequest.knowledgeBaseId)
+      | DeleteQuickResponse ->
+          (Format.kasprintf Uri.of_string)
+            "/knowledgeBases/%s/quickResponses/%s"
+            (UuidOrArn.to_header x.DeleteQuickResponseRequest.knowledgeBaseId)
+            (UuidOrArn.to_header x.DeleteQuickResponseRequest.quickResponseId)
       | GetAssistant ->
           (Format.kasprintf Uri.of_string) "/assistants/%s"
             (UuidOrArn.to_header x.GetAssistantRequest.assistantId)
@@ -153,9 +196,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/knowledgeBases/%s/contents/%s/summary"
             (UuidOrArn.to_header x.GetContentSummaryRequest.knowledgeBaseId)
             (UuidOrArn.to_header x.GetContentSummaryRequest.contentId)
+      | GetImportJob ->
+          (Format.kasprintf Uri.of_string) "/knowledgeBases/%s/importJobs/%s"
+            (UuidOrArn.to_header x.GetImportJobRequest.knowledgeBaseId)
+            (Uuid.to_header x.GetImportJobRequest.importJobId)
       | GetKnowledgeBase ->
           (Format.kasprintf Uri.of_string) "/knowledgeBases/%s"
             (UuidOrArn.to_header x.GetKnowledgeBaseRequest.knowledgeBaseId)
+      | GetQuickResponse ->
+          (Format.kasprintf Uri.of_string)
+            "/knowledgeBases/%s/quickResponses/%s"
+            (UuidOrArn.to_header x.GetQuickResponseRequest.knowledgeBaseId)
+            (UuidOrArn.to_header x.GetQuickResponseRequest.quickResponseId)
       | GetRecommendations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -207,9 +259,33 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListImportJobs ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/knowledgeBases/%s/importJobs"
+               (UuidOrArn.to_header x.ListImportJobsRequest.knowledgeBaseId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NonEmptyString.to_header v)))
+                 x.nextToken])
       | ListKnowledgeBases ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/knowledgeBases")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NonEmptyString.to_header v)))
+                 x.nextToken])
+      | ListQuickResponses ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/knowledgeBases/%s/quickResponses"
+               (UuidOrArn.to_header
+                  x.ListQuickResponsesRequest.knowledgeBaseId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -245,6 +321,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | SearchQuickResponses ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/knowledgeBases/%s/search/quickResponses"
+               (UuidOrArn.to_header
+                  x.SearchQuickResponsesRequest.knowledgeBaseId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NonEmptyString.to_header v)))
+                 x.nextToken])
       | SearchSessions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/assistants/%s/searchSessions"
@@ -259,6 +348,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | StartContentUpload ->
           (Format.kasprintf Uri.of_string) "/knowledgeBases/%s/upload"
             (UuidOrArn.to_header x.StartContentUploadRequest.knowledgeBaseId)
+      | StartImportJob ->
+          (Format.kasprintf Uri.of_string) "/knowledgeBases/%s/importJobs"
+            (UuidOrArn.to_header x.StartImportJobRequest.knowledgeBaseId)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.TagResourceRequest.resourceArn)
@@ -275,7 +367,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateKnowledgeBaseTemplateUri ->
           (Format.kasprintf Uri.of_string) "/knowledgeBases/%s/templateUri"
             (UuidOrArn.to_header
-               x.UpdateKnowledgeBaseTemplateUriRequest.knowledgeBaseId))
+               x.UpdateKnowledgeBaseTemplateUriRequest.knowledgeBaseId)
+      | UpdateQuickResponse ->
+          (Format.kasprintf Uri.of_string)
+            "/knowledgeBases/%s/quickResponses/%s"
+            (UuidOrArn.to_header x.UpdateQuickResponseRequest.knowledgeBaseId)
+            (UuidOrArn.to_header x.UpdateQuickResponseRequest.quickResponseId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -373,7 +470,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("title", (ContentTitle.to_value x)));
                       Some
                         ("uploadId",
-                          (NonEmptyString.to_value
+                          (UploadId.to_value
                              req.CreateContentRequest.uploadId))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -428,6 +525,56 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateQuickResponse ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateQuickResponseRequest.channels
+                         ~f:(fun x -> ("channels", (Channels.to_value x)));
+                      Option.map req.CreateQuickResponseRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (NonEmptyString.to_value x)));
+                      Some
+                        ("content",
+                          (QuickResponseDataProvider.to_value
+                             req.CreateQuickResponseRequest.content));
+                      Option.map req.CreateQuickResponseRequest.contentType
+                        ~f:(fun x ->
+                              ("contentType", (QuickResponseType.to_value x)));
+                      Option.map req.CreateQuickResponseRequest.description
+                        ~f:(fun x ->
+                              ("description",
+                                (QuickResponseDescription.to_value x)));
+                      Option.map
+                        req.CreateQuickResponseRequest.groupingConfiguration
+                        ~f:(fun x ->
+                              ("groupingConfiguration",
+                                (GroupingConfiguration.to_value x)));
+                      Option.map req.CreateQuickResponseRequest.isActive
+                        ~f:(fun x -> ("isActive", (Boolean.to_value x)));
+                      Option.map req.CreateQuickResponseRequest.language
+                        ~f:(fun x -> ("language", (LanguageCode.to_value x)));
+                      Some
+                        ("name",
+                          (QuickResponseName.to_value
+                             req.CreateQuickResponseRequest.name));
+                      Option.map req.CreateQuickResponseRequest.shortcutKey
+                        ~f:(fun x ->
+                              ("shortcutKey", (ShortCutKey.to_value x)));
+                      Option.map req.CreateQuickResponseRequest.tags
+                        ~f:(fun x -> ("tags", (Tags.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateSession ->
       let (headers, body) =
         let headers =
@@ -459,7 +606,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteAssistantAssociation ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteContent -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteImportJob -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteKnowledgeBase -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteQuickResponse -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetAssistant ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -472,7 +621,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetContentSummary ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetImportJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetKnowledgeBase ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetQuickResponse ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetRecommendations ->
@@ -490,7 +645,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListContents ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListImportJobs ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListKnowledgeBases ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListQuickResponses ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
@@ -562,6 +723,29 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchQuickResponses ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.SearchQuickResponsesRequest.attributes
+                         ~f:(fun x ->
+                               ("attributes", (ContactAttributes.to_value x)));
+                      Some
+                        ("searchExpression",
+                          (QuickResponseSearchExpression.to_value
+                             req.SearchQuickResponsesRequest.searchExpression))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | SearchSessions ->
       let (headers, body) =
         let headers =
@@ -594,7 +778,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("contentType",
                            (ContentType.to_value
-                              req.StartContentUploadRequest.contentType))])
+                              req.StartContentUploadRequest.contentType));
+                      Option.map
+                        req.StartContentUploadRequest.presignedUrlTimeToLive
+                        ~f:(fun x ->
+                              ("presignedUrlTimeToLive",
+                                (TimeToLive.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartImportJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.StartImportJobRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken", (NonEmptyString.to_value x)));
+                      Option.map
+                        req.StartImportJobRequest.externalSourceConfiguration
+                        ~f:(fun x ->
+                              ("externalSourceConfiguration",
+                                (ExternalSourceConfiguration.to_value x)));
+                      Some
+                        ("importJobType",
+                          (ImportJobType.to_value
+                             req.StartImportJobRequest.importJobType));
+                      Option.map req.StartImportJobRequest.metadata
+                        ~f:(fun x ->
+                              ("metadata", (ContentMetadata.to_value x)));
+                      Some
+                        ("uploadId",
+                          (UploadId.to_value
+                             req.StartImportJobRequest.uploadId))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -648,8 +872,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdateContentRequest.title
                         ~f:(fun x -> ("title", (ContentTitle.to_value x)));
                       Option.map req.UpdateContentRequest.uploadId
-                        ~f:(fun x ->
-                              ("uploadId", (NonEmptyString.to_value x)))])
+                        ~f:(fun x -> ("uploadId", (UploadId.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -670,6 +893,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("templateUri",
                            (Uri_.to_value
                               req.UpdateKnowledgeBaseTemplateUriRequest.templateUri))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateQuickResponse ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateQuickResponseRequest.channels
+                         ~f:(fun x -> ("channels", (Channels.to_value x)));
+                      Option.map req.UpdateQuickResponseRequest.content
+                        ~f:(fun x ->
+                              ("content",
+                                (QuickResponseDataProvider.to_value x)));
+                      Option.map req.UpdateQuickResponseRequest.contentType
+                        ~f:(fun x ->
+                              ("contentType", (QuickResponseType.to_value x)));
+                      Option.map req.UpdateQuickResponseRequest.description
+                        ~f:(fun x ->
+                              ("description",
+                                (QuickResponseDescription.to_value x)));
+                      Option.map
+                        req.UpdateQuickResponseRequest.groupingConfiguration
+                        ~f:(fun x ->
+                              ("groupingConfiguration",
+                                (GroupingConfiguration.to_value x)));
+                      Option.map req.UpdateQuickResponseRequest.isActive
+                        ~f:(fun x -> ("isActive", (Boolean.to_value x)));
+                      Option.map req.UpdateQuickResponseRequest.language
+                        ~f:(fun x -> ("language", (LanguageCode.to_value x)));
+                      Option.map req.UpdateQuickResponseRequest.name
+                        ~f:(fun x -> ("name", (QuickResponseName.to_value x)));
+                      Option.map
+                        req.UpdateQuickResponseRequest.removeDescription
+                        ~f:(fun x ->
+                              ("removeDescription", (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateQuickResponseRequest.removeGroupingConfiguration
+                        ~f:(fun x ->
+                              ("removeGroupingConfiguration",
+                                (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateQuickResponseRequest.removeShortcutKey
+                        ~f:(fun x ->
+                              ("removeShortcutKey", (Boolean.to_value x)));
+                      Option.map req.UpdateQuickResponseRequest.shortcutKey
+                        ~f:(fun x ->
+                              ("shortcutKey", (ShortCutKey.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -749,6 +1028,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateKnowledgeBaseResponse.error_of_json))
+  | CreateQuickResponse ->
+      if is_success
+      then Ok (CreateQuickResponseResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateQuickResponseResponse.error_of_json))
   | CreateSession ->
       if is_success
       then Ok (CreateSessionResponse.of_json (response_to_json resp))
@@ -780,6 +1065,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteContentResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeleteContentResponse.error_of_json))
+  | DeleteImportJob ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteImportJobResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteImportJobResponse.error_of_json))
   | DeleteKnowledgeBase ->
       if is_success
       then
@@ -789,6 +1082,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteKnowledgeBaseResponse.error_of_json))
+  | DeleteQuickResponse ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteQuickResponseResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteQuickResponseResponse.error_of_json))
   | GetAssistant ->
       if is_success
       then Ok (GetAssistantResponse.of_json (response_to_json resp))
@@ -811,11 +1113,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetContentSummaryResponse.error_of_json))
+  | GetImportJob ->
+      if is_success
+      then Ok (GetImportJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetImportJobResponse.error_of_json))
   | GetKnowledgeBase ->
       if is_success
       then Ok (GetKnowledgeBaseResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetKnowledgeBaseResponse.error_of_json))
+  | GetQuickResponse ->
+      if is_success
+      then Ok (GetQuickResponseResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetQuickResponseResponse.error_of_json))
   | GetRecommendations ->
       if is_success
       then Ok (GetRecommendationsResponse.of_json (response_to_json resp))
@@ -844,12 +1155,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListContentsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListContentsResponse.error_of_json))
+  | ListImportJobs ->
+      if is_success
+      then Ok (ListImportJobsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListImportJobsResponse.error_of_json))
   | ListKnowledgeBases ->
       if is_success
       then Ok (ListKnowledgeBasesResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListKnowledgeBasesResponse.error_of_json))
+  | ListQuickResponses ->
+      if is_success
+      then Ok (ListQuickResponsesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListQuickResponsesResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -887,6 +1209,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (SearchContentResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some SearchContentResponse.error_of_json))
+  | SearchQuickResponses ->
+      if is_success
+      then Ok (SearchQuickResponsesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchQuickResponsesResponse.error_of_json))
   | SearchSessions ->
       if is_success
       then Ok (SearchSessionsResponse.of_json (response_to_json resp))
@@ -898,6 +1226,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartContentUploadResponse.error_of_json))
+  | StartImportJob ->
+      if is_success
+      then Ok (StartImportJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartImportJobResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -926,3 +1259,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateKnowledgeBaseTemplateUriResponse.error_of_json))
+  | UpdateQuickResponse ->
+      if is_success
+      then Ok (UpdateQuickResponseResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateQuickResponseResponse.error_of_json))

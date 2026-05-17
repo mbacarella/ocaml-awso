@@ -2,66 +2,191 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | BatchCreateRumMetricDefinitions:
+  (BatchCreateRumMetricDefinitionsRequest.t,
+  BatchCreateRumMetricDefinitionsResponse.t,
+  BatchCreateRumMetricDefinitionsResponse.error) t 
+  | BatchDeleteRumMetricDefinitions:
+  (BatchDeleteRumMetricDefinitionsRequest.t,
+  BatchDeleteRumMetricDefinitionsResponse.t,
+  BatchDeleteRumMetricDefinitionsResponse.error) t 
+  | BatchGetRumMetricDefinitions: (BatchGetRumMetricDefinitionsRequest.t,
+  BatchGetRumMetricDefinitionsResponse.t,
+  BatchGetRumMetricDefinitionsResponse.error) t 
   | CreateAppMonitor: (CreateAppMonitorRequest.t, CreateAppMonitorResponse.t,
   CreateAppMonitorResponse.error) t 
   | DeleteAppMonitor: (DeleteAppMonitorRequest.t, DeleteAppMonitorResponse.t,
   DeleteAppMonitorResponse.error) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
+  DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error) t 
+  | DeleteRumMetricsDestination: (DeleteRumMetricsDestinationRequest.t,
+  DeleteRumMetricsDestinationResponse.t,
+  DeleteRumMetricsDestinationResponse.error) t 
   | GetAppMonitor: (GetAppMonitorRequest.t, GetAppMonitorResponse.t,
   GetAppMonitorResponse.error) t 
   | GetAppMonitorData: (GetAppMonitorDataRequest.t,
   GetAppMonitorDataResponse.t, GetAppMonitorDataResponse.error) t 
+  | GetResourcePolicy: (GetResourcePolicyRequest.t,
+  GetResourcePolicyResponse.t, GetResourcePolicyResponse.error) t 
   | ListAppMonitors: (ListAppMonitorsRequest.t, ListAppMonitorsResponse.t,
   ListAppMonitorsResponse.error) t 
+  | ListRumMetricsDestinations: (ListRumMetricsDestinationsRequest.t,
+  ListRumMetricsDestinationsResponse.t,
+  ListRumMetricsDestinationsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
   | PutRumEvents: (PutRumEventsRequest.t, PutRumEventsResponse.t,
   PutRumEventsResponse.error) t 
+  | PutRumMetricsDestination: (PutRumMetricsDestinationRequest.t,
+  PutRumMetricsDestinationResponse.t, PutRumMetricsDestinationResponse.error)
+  t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
   | UpdateAppMonitor: (UpdateAppMonitorRequest.t, UpdateAppMonitorResponse.t,
   UpdateAppMonitorResponse.error) t 
+  | UpdateRumMetricDefinition: (UpdateRumMetricDefinitionRequest.t,
+  UpdateRumMetricDefinitionResponse.t,
+  UpdateRumMetricDefinitionResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | BatchCreateRumMetricDefinitions -> `POST
+  | BatchDeleteRumMetricDefinitions -> `DELETE
+  | BatchGetRumMetricDefinitions -> `GET
   | CreateAppMonitor -> `POST
   | DeleteAppMonitor -> `DELETE
+  | DeleteResourcePolicy -> `DELETE
+  | DeleteRumMetricsDestination -> `DELETE
   | GetAppMonitor -> `GET
   | GetAppMonitorData -> `POST
+  | GetResourcePolicy -> `GET
   | ListAppMonitors -> `POST
+  | ListRumMetricsDestinations -> `GET
   | ListTagsForResource -> `GET
+  | PutResourcePolicy -> `PUT
   | PutRumEvents -> `POST
+  | PutRumMetricsDestination -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateAppMonitor -> `PATCH
+  | UpdateRumMetricDefinition -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | BatchCreateRumMetricDefinitions ->
+          (Format.kasprintf Uri.of_string) "/rummetrics/%s/metrics"
+            (AppMonitorName.to_header
+               x.BatchCreateRumMetricDefinitionsRequest.appMonitorName)
+      | BatchDeleteRumMetricDefinitions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/rummetrics/%s/metrics"
+               (AppMonitorName.to_header
+                  x.BatchDeleteRumMetricDefinitionsRequest.appMonitorName))
+            (List.filter_opt
+               [Some
+                  ("destination",
+                    (MetricDestination.to_header x.destination));
+               Option.map
+                 ~f:(fun v ->
+                       ("destinationArn", (DestinationArn.to_header v)))
+                 x.destinationArn;
+               Some
+                 ("metricDefinitionIds",
+                   (MetricDefinitionIds.to_header x.metricDefinitionIds))])
+      | BatchGetRumMetricDefinitions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/rummetrics/%s/metrics"
+               (AppMonitorName.to_header
+                  x.BatchGetRumMetricDefinitionsRequest.appMonitorName))
+            (List.filter_opt
+               [Some
+                  ("destination",
+                    (MetricDestination.to_header x.destination));
+               Option.map
+                 ~f:(fun v ->
+                       ("destinationArn", (DestinationArn.to_header v)))
+                 x.destinationArn;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResultsInteger.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
       | CreateAppMonitor -> (Format.kasprintf Uri.of_string) "/appmonitor"
       | DeleteAppMonitor ->
           (Format.kasprintf Uri.of_string) "/appmonitor/%s"
             (AppMonitorName.to_header x.DeleteAppMonitorRequest.name)
+      | DeleteResourcePolicy ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/appmonitor/%s/policy"
+               (AppMonitorName.to_header x.DeleteResourcePolicyRequest.name))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("policyRevisionId", (PolicyRevisionId.to_header v)))
+                  x.policyRevisionId])
+      | DeleteRumMetricsDestination ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/rummetrics/%s/metricsdestination"
+               (AppMonitorName.to_header
+                  x.DeleteRumMetricsDestinationRequest.appMonitorName))
+            (List.filter_opt
+               [Some
+                  ("destination",
+                    (MetricDestination.to_header x.destination));
+               Option.map
+                 ~f:(fun v ->
+                       ("destinationArn", (DestinationArn.to_header v)))
+                 x.destinationArn])
       | GetAppMonitor ->
           (Format.kasprintf Uri.of_string) "/appmonitor/%s"
             (AppMonitorName.to_header x.GetAppMonitorRequest.name)
       | GetAppMonitorData ->
           (Format.kasprintf Uri.of_string) "/appmonitor/%s/data"
             (AppMonitorName.to_header x.GetAppMonitorDataRequest.name)
+      | GetResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/appmonitor/%s/policy"
+            (AppMonitorName.to_header x.GetResourcePolicyRequest.name)
       | ListAppMonitors ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/appmonitors")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (Integer.to_header v)))
+                  ~f:(fun v ->
+                        ("maxResults", (MaxResultsInteger.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
+      | ListRumMetricsDestinations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/rummetrics/%s/metricsdestination"
+               (AppMonitorName.to_header
+                  x.ListRumMetricsDestinationsRequest.appMonitorName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults", (MaxResultsInteger.to_header v)))
                   x.maxResults;
                Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
                  x.nextToken])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | PutResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/appmonitor/%s/policy"
+            (AppMonitorName.to_header x.PutResourcePolicyRequest.name)
       | PutRumEvents ->
           (Format.kasprintf Uri.of_string) "/appmonitors/%s/"
-            (AppMonitorId.to_header x.PutRumEventsRequest.id)
+            (PutRumEventsRequestIdString.to_header x.PutRumEventsRequest.id)
+      | PutRumMetricsDestination ->
+          (Format.kasprintf Uri.of_string)
+            "/rummetrics/%s/metricsdestination"
+            (AppMonitorName.to_header
+               x.PutRumMetricsDestinationRequest.appMonitorName)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.TagResourceRequest.resourceArn)
@@ -73,11 +198,48 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
       | UpdateAppMonitor ->
           (Format.kasprintf Uri.of_string) "/appmonitor/%s"
-            (AppMonitorName.to_header x.UpdateAppMonitorRequest.name))
+            (AppMonitorName.to_header x.UpdateAppMonitorRequest.name)
+      | UpdateRumMetricDefinition ->
+          (Format.kasprintf Uri.of_string) "/rummetrics/%s/metrics"
+            (AppMonitorName.to_header
+               x.UpdateRumMetricDefinitionRequest.appMonitorName))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | BatchCreateRumMetricDefinitions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Destination",
+                           (MetricDestination.to_value
+                              req.BatchCreateRumMetricDefinitionsRequest.destination));
+                      Option.map
+                        req.BatchCreateRumMetricDefinitionsRequest.destinationArn
+                        ~f:(fun x ->
+                              ("DestinationArn", (DestinationArn.to_value x)));
+                      Some
+                        ("MetricDefinitions",
+                          (MetricDefinitionsRequest.to_value
+                             req.BatchCreateRumMetricDefinitionsRequest.metricDefinitions))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchDeleteRumMetricDefinitions ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | BatchGetRumMetricDefinitions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateAppMonitor ->
       let (headers, body) =
         let headers =
@@ -87,23 +249,37 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CreateAppMonitorRequest.appMonitorConfiguration
-                         ~f:(fun x ->
-                               ("AppMonitorConfiguration",
-                                 (AppMonitorConfiguration.to_value x)));
+                      [Some
+                         ("Name",
+                           (AppMonitorName.to_value
+                              req.CreateAppMonitorRequest.name));
+                      Option.map req.CreateAppMonitorRequest.domain
+                        ~f:(fun x ->
+                              ("Domain", (AppMonitorDomain.to_value x)));
+                      Option.map req.CreateAppMonitorRequest.domainList
+                        ~f:(fun x ->
+                              ("DomainList",
+                                (AppMonitorDomainList.to_value x)));
+                      Option.map req.CreateAppMonitorRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map
+                        req.CreateAppMonitorRequest.appMonitorConfiguration
+                        ~f:(fun x ->
+                              ("AppMonitorConfiguration",
+                                (AppMonitorConfiguration.to_value x)));
                       Option.map req.CreateAppMonitorRequest.cwLogEnabled
                         ~f:(fun x -> ("CwLogEnabled", (Boolean.to_value x)));
-                      Some
-                        ("Domain",
-                          (AppMonitorDomain.to_value
-                             req.CreateAppMonitorRequest.domain));
-                      Some
-                        ("Name",
-                          (AppMonitorName.to_value
-                             req.CreateAppMonitorRequest.name));
-                      Option.map req.CreateAppMonitorRequest.tags
-                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                      Option.map req.CreateAppMonitorRequest.customEvents
+                        ~f:(fun x ->
+                              ("CustomEvents", (CustomEvents.to_value x)));
+                      Option.map
+                        req.CreateAppMonitorRequest.deobfuscationConfiguration
+                        ~f:(fun x ->
+                              ("DeobfuscationConfiguration",
+                                (DeobfuscationConfiguration.to_value x)));
+                      Option.map req.CreateAppMonitorRequest.platform
+                        ~f:(fun x ->
+                              ("Platform", (AppMonitorPlatform.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -112,6 +288,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteAppMonitor -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRumMetricsDestination ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | GetAppMonitor ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -124,17 +303,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.GetAppMonitorDataRequest.filters
-                         ~f:(fun x -> ("Filters", (QueryFilters.to_value x)));
+                      [Some
+                         ("TimeRange",
+                           (TimeRange.to_value
+                              req.GetAppMonitorDataRequest.timeRange));
+                      Option.map req.GetAppMonitorDataRequest.filters
+                        ~f:(fun x -> ("Filters", (QueryFilters.to_value x)));
                       Option.map req.GetAppMonitorDataRequest.maxResults
                         ~f:(fun x ->
                               ("MaxResults", (MaxQueryResults.to_value x)));
                       Option.map req.GetAppMonitorDataRequest.nextToken
-                        ~f:(fun x -> ("NextToken", (Token.to_value x)));
-                      Some
-                        ("TimeRange",
-                          (TimeRange.to_value
-                             req.GetAppMonitorDataRequest.timeRange))])
+                        ~f:(fun x -> ("NextToken", (Token.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -142,12 +321,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetResourcePolicy ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAppMonitors ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRumMetricsDestinations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | PutRumEvents ->
       let (headers, body) =
         let headers =
@@ -158,20 +344,50 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("AppMonitorDetails",
-                           (AppMonitorDetails.to_value
-                              req.PutRumEventsRequest.appMonitorDetails));
+                         ("BatchId",
+                           (PutRumEventsRequestBatchIdString.to_value
+                              req.PutRumEventsRequest.batchId));
                       Some
-                        ("BatchId",
-                          (String_.to_value req.PutRumEventsRequest.batchId));
+                        ("AppMonitorDetails",
+                          (AppMonitorDetails.to_value
+                             req.PutRumEventsRequest.appMonitorDetails));
+                      Some
+                        ("UserDetails",
+                          (UserDetails.to_value
+                             req.PutRumEventsRequest.userDetails));
                       Some
                         ("RumEvents",
                           (RumEventList.to_value
                              req.PutRumEventsRequest.rumEvents));
-                      Some
-                        ("UserDetails",
-                          (UserDetails.to_value
-                             req.PutRumEventsRequest.userDetails))])
+                      Option.map req.PutRumEventsRequest.alias
+                        ~f:(fun x -> ("Alias", (Alias.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutRumMetricsDestination ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Destination",
+                           (MetricDestination.to_value
+                              req.PutRumMetricsDestinationRequest.destination));
+                      Option.map
+                        req.PutRumMetricsDestinationRequest.destinationArn
+                        ~f:(fun x ->
+                              ("DestinationArn", (DestinationArn.to_value x)));
+                      Option.map
+                        req.PutRumMetricsDestinationRequest.iamRoleArn
+                        ~f:(fun x -> ("IamRoleArn", (IamRoleArn.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -200,6 +416,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAppMonitor -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRumMetricDefinition ->
+      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -248,6 +466,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | BatchCreateRumMetricDefinitions ->
+      if is_success
+      then
+        Ok
+          (BatchCreateRumMetricDefinitionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchCreateRumMetricDefinitionsResponse.error_of_json))
+  | BatchDeleteRumMetricDefinitions ->
+      if is_success
+      then
+        Ok
+          (BatchDeleteRumMetricDefinitionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteRumMetricDefinitionsResponse.error_of_json))
+  | BatchGetRumMetricDefinitions ->
+      if is_success
+      then
+        Ok
+          (BatchGetRumMetricDefinitionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetRumMetricDefinitionsResponse.error_of_json))
   | CreateAppMonitor ->
       if is_success
       then Ok (CreateAppMonitorResponse.of_json (response_to_json resp))
@@ -261,6 +509,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteAppMonitorResponse.of_header_and_body (headers, ()))
       else
         Error (parse_aws_error (Some DeleteAppMonitorResponse.error_of_json))
+  | DeleteResourcePolicy ->
+      if is_success
+      then Ok (DeleteResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResponse.error_of_json))
+  | DeleteRumMetricsDestination ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteRumMetricsDestinationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRumMetricsDestinationResponse.error_of_json))
   | GetAppMonitor ->
       if is_success
       then Ok (GetAppMonitorResponse.of_json (response_to_json resp))
@@ -271,17 +537,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetAppMonitorDataResponse.error_of_json))
+  | GetResourcePolicy ->
+      if is_success
+      then Ok (GetResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourcePolicyResponse.error_of_json))
   | ListAppMonitors ->
       if is_success
       then Ok (ListAppMonitorsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListAppMonitorsResponse.error_of_json))
+  | ListRumMetricsDestinations ->
+      if is_success
+      then
+        Ok
+          (ListRumMetricsDestinationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRumMetricsDestinationsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then Ok (PutResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | PutRumEvents ->
       if is_success
       then
@@ -289,6 +576,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (PutRumEventsResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some PutRumEventsResponse.error_of_json))
+  | PutRumMetricsDestination ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (PutRumMetricsDestinationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some PutRumMetricsDestinationResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -311,3 +609,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateAppMonitorResponse.of_header_and_body (headers, ()))
       else
         Error (parse_aws_error (Some UpdateAppMonitorResponse.error_of_json))
+  | UpdateRumMetricDefinition ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateRumMetricDefinitionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRumMetricDefinitionResponse.error_of_json))

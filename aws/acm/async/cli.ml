@@ -185,7 +185,10 @@ let list_certificates =
        and includes = flag "includes" (optional json_arg) ~doc:"JSON Filters"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and maxItems = flag "max-items" (optional int) ~doc:"INT MaxItems" in
+       and maxItems = flag "max-items" (optional int) ~doc:"INT MaxItems"
+       and sortBy = flag "sort-by" (optional json_arg) ~doc:"JSON SortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_certificates
@@ -194,8 +197,10 @@ let list_certificates =
                                       ~f:Values.CertificateStatuses.of_json
                                       certificateStatuses)
               ?includes:(Option.map ~f:Values.Filters.of_json includes)
-              ?nextToken ?maxItems ())
-           (Some Values.ListCertificatesResponse.to_json)
+              ?nextToken ?maxItems
+              ?sortBy:(Option.map ~f:Values.SortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ()) (Some Values.ListCertificatesResponse.to_json)
            (Some Values.ListCertificatesResponse.error_to_json)])
 let list_tags_for_certificate =
   Command.async ~summary:""
@@ -297,8 +302,14 @@ let request_certificate =
        and options =
          flag "options" (optional json_arg) ~doc:"JSON CertificateOptions"
        and certificateAuthorityArn =
-         flag "certificate-authority-arn" (optional string) ~doc:"STRING Arn"
+         flag "certificate-authority-arn" (optional string)
+           ~doc:"STRING PcaArn"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and keyAlgorithm =
+         flag "key-algorithm" (optional json_arg) ~doc:"JSON KeyAlgorithm"
+       and managedBy =
+         flag "managed-by" (optional json_arg)
+           ~doc:"JSON CertificateManagedBy"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainNameString" in
        fun () ->
@@ -317,8 +328,12 @@ let request_certificate =
                                           domainValidationOptions)
               ?options:(Option.map ~f:Values.CertificateOptions.of_json
                           options) ?certificateAuthorityArn
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~domainName
-              ()) (Some Values.RequestCertificateResponse.to_json)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?keyAlgorithm:(Option.map ~f:Values.KeyAlgorithm.of_json
+                               keyAlgorithm)
+              ?managedBy:(Option.map ~f:Values.CertificateManagedBy.of_json
+                            managedBy) ~domainName ())
+           (Some Values.RequestCertificateResponse.to_json)
            (Some Values.RequestCertificateResponse.error_to_json)])
 let resend_validation_email =
   Command.async ~summary:""
@@ -342,6 +357,66 @@ let resend_validation_email =
            Io.resend_validation_email
            (Values.ResendValidationEmailRequest.make ~certificateArn ~domain
               ~validationDomain ()) None None])
+let revoke_certificate =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and certificateArn =
+         flag "certificate-arn" (required string) ~doc:"STRING Arn"
+       and revocationReason =
+         flag "revocation-reason" (required json_arg)
+           ~doc:"JSON RevocationReason" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.revoke_certificate
+           (Values.RevokeCertificateRequest.make ~certificateArn
+              ~revocationReason:(Values.RevocationReason.of_json
+                                   revocationReason) ())
+           (Some Values.RevokeCertificateResponse.to_json)
+           (Some Values.RevokeCertificateResponse.error_to_json)])
+let search_certificates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filterStatement =
+         flag "filter-statement" (optional json_arg)
+           ~doc:"JSON CertificateFilterStatement"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT SearchMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON SearchCertificatesSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg)
+           ~doc:"JSON SearchCertificatesSortOrder" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_certificates
+           (Values.SearchCertificatesRequest.make
+              ?filterStatement:(Option.map
+                                  ~f:Values.CertificateFilterStatement.of_json
+                                  filterStatement) ?maxResults ?nextToken
+              ?sortBy:(Option.map ~f:Values.SearchCertificatesSortBy.of_json
+                         sortBy)
+              ?sortOrder:(Option.map
+                            ~f:Values.SearchCertificatesSortOrder.of_json
+                            sortOrder) ())
+           (Some Values.SearchCertificatesResponse.to_json)
+           (Some Values.SearchCertificatesResponse.error_to_json)])
 let update_certificate_options =
   Command.async ~summary:""
     ([%map_open.Command
@@ -379,4 +454,6 @@ let main =
     ("renew-certificate", renew_certificate);
     ("request-certificate", request_certificate);
     ("resend-validation-email", resend_validation_email);
+    ("revoke-certificate", revoke_certificate);
+    ("search-certificates", search_certificates);
     ("update-certificate-options", update_certificate_options)]

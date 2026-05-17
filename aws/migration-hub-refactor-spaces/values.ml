@@ -102,6 +102,8 @@ module AdditionalDetails =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -301,7 +303,7 @@ module LambdaArn =
                 (check_string_max i ~max:2048) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:(aws[a-zA-Z-]*)?:lambda:[a-z]{2}((-gov)|(-iso(b?)))?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_]+(: (\\$LATEST|[a-zA-Z0-9-_]+))?$")));
+                       ~pattern:"^arn:(aws[a-zA-Z-]*)?:lambda:[a-z]{2}((-gov)|(-iso(b?)))?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_]+(:(\\$LATEST|[a-zA-Z0-9-_]+))?$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -717,16 +719,16 @@ module ErrorResponse =
       make ?resourceType ?resourceIdentifier ?message ?code
         ?additionalDetails ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map json "ResourceType" ErrorResourceType.of_json in
+        field_map json__ "ResourceType" ErrorResourceType.of_json in
       let resourceIdentifier =
-        field_map json "ResourceIdentifier" ResourceIdentifier.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+        field_map json__ "ResourceIdentifier" ResourceIdentifier.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       let additionalDetails =
-        field_map json "AdditionalDetails" AdditionalDetails.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+        field_map json__ "AdditionalDetails" AdditionalDetails.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?resourceType ?resourceIdentifier ?message ?code
         ?additionalDetails ?accountId ()
     let to_json v = composed_to_json to_value v
@@ -746,8 +748,8 @@ module LambdaEndpointSummary =
       let arn = (Option.map ~f:LambdaArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" LambdaArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" LambdaArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary for the Lambda endpoint type."]
 module ResourceArn =
@@ -891,6 +893,8 @@ module TagMap =
                        (TagMapValueString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -932,9 +936,9 @@ module UrlEndpointSummary =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "HealthUrl") in
       make ?url ?healthUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "Url" Uri_.of_json in
-      let healthUrl = field_map json "HealthUrl" Uri_.of_json in
+    let of_json json__ =
+      let url = field_map json__ "Url" Uri_.of_json in
+      let healthUrl = field_map json__ "HealthUrl" Uri_.of_json in
       make ?url ?healthUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -978,6 +982,9 @@ module HttpMethods =
   struct
     type nonrec t = HttpMethod.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HttpMethod.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1021,6 +1028,8 @@ module PathResourceToId =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1120,7 +1129,9 @@ module UriPath =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:2048) >>=
-                  (fun () -> check_pattern i ~pattern:"^(/[a-zA-Z0-9._-]+)+$")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(/([a-zA-Z0-9._:-]+|\\{[a-zA-Z0-9._:-]+\\}))+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1187,12 +1198,19 @@ module NetworkFabricType =
   struct
     type nonrec t =
       | TRANSIT_GATEWAY 
+      | NONE 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | TRANSIT_GATEWAY -> "TRANSIT_GATEWAY" | Non_static_id s -> s
+      function
+      | TRANSIT_GATEWAY -> "TRANSIT_GATEWAY"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
     let of_string =
-      function | "TRANSIT_GATEWAY" -> TRANSIT_GATEWAY | x -> Non_static_id x
+      function
+      | "TRANSIT_GATEWAY" -> TRANSIT_GATEWAY
+      | "NONE" -> NONE
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -1227,6 +1245,9 @@ module CidrBlocks =
     type nonrec t = CidrBlock.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CidrBlock.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1337,15 +1358,15 @@ module ApiGatewayProxySummary =
       make ?vpcLinkId ?stageName ?proxyUrl ?nlbName ?nlbArn ?endpointType
         ?apiGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcLinkId = field_map json "VpcLinkId" VpcLinkId.of_json in
-      let stageName = field_map json "StageName" StageName.of_json in
-      let proxyUrl = field_map json "ProxyUrl" Uri_.of_json in
-      let nlbName = field_map json "NlbName" NlbName.of_json in
-      let nlbArn = field_map json "NlbArn" NlbArn.of_json in
+    let of_json json__ =
+      let vpcLinkId = field_map json__ "VpcLinkId" VpcLinkId.of_json in
+      let stageName = field_map json__ "StageName" StageName.of_json in
+      let proxyUrl = field_map json__ "ProxyUrl" Uri_.of_json in
+      let nlbName = field_map json__ "NlbName" NlbName.of_json in
+      let nlbArn = field_map json__ "NlbArn" NlbArn.of_json in
       let endpointType =
-        field_map json "EndpointType" ApiGatewayEndpointType.of_json in
-      let apiGatewayId = field_map json "ApiGatewayId" ApiGatewayId.of_json in
+        field_map json__ "EndpointType" ApiGatewayEndpointType.of_json in
+      let apiGatewayId = field_map json__ "ApiGatewayId" ApiGatewayId.of_json in
       make ?vpcLinkId ?stageName ?proxyUrl ?nlbName ?nlbArn ?endpointType
         ?apiGatewayId ()
     let to_json v = composed_to_json to_value v
@@ -1603,31 +1624,32 @@ module ServiceSummary =
         ?lastUpdatedTime ?lambdaEndpoint ?error ?environmentId ?endpointType
         ?description ?createdTime ?createdByAccountId ?arn ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" VpcId.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
       let urlEndpoint =
-        field_map json "UrlEndpoint" UrlEndpointSummary.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" ServiceState.of_json in
-      let serviceId = field_map json "ServiceId" ServiceId.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
-      let name = field_map json "Name" ServiceName.of_json in
+        field_map json__ "UrlEndpoint" UrlEndpointSummary.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" ServiceState.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
+      let name = field_map json__ "Name" ServiceName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let lambdaEndpoint =
-        field_map json "LambdaEndpoint" LambdaEndpointSummary.of_json in
-      let error = field_map json "Error" ErrorResponse.of_json in
+        field_map json__ "LambdaEndpoint" LambdaEndpointSummary.of_json in
+      let error = field_map json__ "Error" ErrorResponse.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
       let endpointType =
-        field_map json "EndpointType" ServiceEndpointType.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "EndpointType" ServiceEndpointType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let createdByAccountId =
-        field_map json "CreatedByAccountId" AccountId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "CreatedByAccountId" AccountId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       make ?vpcId ?urlEndpoint ?tags ?state ?serviceId ?ownerAccountId ?name
         ?lastUpdatedTime ?lambdaEndpoint ?error ?environmentId ?endpointType
         ?description ?createdTime ?createdByAccountId ?arn ?applicationId ()
@@ -1637,6 +1659,9 @@ module RouteSummary =
   struct
     type nonrec t =
       {
+      appendSourcePath: Boolean.t option
+        [@ocaml.doc
+          "If set to true, this option appends the source path to the service URL endpoint."];
       applicationId: ApplicationId.t option
         [@ocaml.doc "The unique identifier of the application."];
       arn: ResourceArn.t option
@@ -1672,51 +1697,55 @@ module RouteSummary =
         [@ocaml.doc "The unique identifier of the service."];
       sourcePath: UriPath.t option
         [@ocaml.doc
-          "The path to use to match traffic. Paths must start with / and are relative to the base of the application."];
+          "This is the path that Refactor Spaces uses to match traffic. Paths must start with / and are relative to the base of the application. To use path parameters in the source path, add a variable in curly braces. For example, the resource path \\{user\\} represents a path parameter called 'user'."];
       state: RouteState.t option
         [@ocaml.doc "The current state of the route."];
       tags: TagMap.t option [@ocaml.doc "The tags assigned to the route."]}
-    let make ?applicationId =
-      fun ?arn ->
-        fun ?createdByAccountId ->
-          fun ?createdTime ->
-            fun ?environmentId ->
-              fun ?error ->
-                fun ?includeChildPaths ->
-                  fun ?lastUpdatedTime ->
-                    fun ?methods ->
-                      fun ?ownerAccountId ->
-                        fun ?pathResourceToId ->
-                          fun ?routeId ->
-                            fun ?routeType ->
-                              fun ?serviceId ->
-                                fun ?sourcePath ->
-                                  fun ?state ->
-                                    fun ?tags ->
-                                      fun () ->
-                                        {
-                                          applicationId;
-                                          arn;
-                                          createdByAccountId;
-                                          createdTime;
-                                          environmentId;
-                                          error;
-                                          includeChildPaths;
-                                          lastUpdatedTime;
-                                          methods;
-                                          ownerAccountId;
-                                          pathResourceToId;
-                                          routeId;
-                                          routeType;
-                                          serviceId;
-                                          sourcePath;
-                                          state;
-                                          tags
-                                        }
+    let make ?appendSourcePath =
+      fun ?applicationId ->
+        fun ?arn ->
+          fun ?createdByAccountId ->
+            fun ?createdTime ->
+              fun ?environmentId ->
+                fun ?error ->
+                  fun ?includeChildPaths ->
+                    fun ?lastUpdatedTime ->
+                      fun ?methods ->
+                        fun ?ownerAccountId ->
+                          fun ?pathResourceToId ->
+                            fun ?routeId ->
+                              fun ?routeType ->
+                                fun ?serviceId ->
+                                  fun ?sourcePath ->
+                                    fun ?state ->
+                                      fun ?tags ->
+                                        fun () ->
+                                          {
+                                            appendSourcePath;
+                                            applicationId;
+                                            arn;
+                                            createdByAccountId;
+                                            createdTime;
+                                            environmentId;
+                                            error;
+                                            includeChildPaths;
+                                            lastUpdatedTime;
+                                            methods;
+                                            ownerAccountId;
+                                            pathResourceToId;
+                                            routeId;
+                                            routeType;
+                                            serviceId;
+                                            sourcePath;
+                                            state;
+                                            tags
+                                          }
     let to_value x =
       structure_to_value
-        [("ApplicationId",
-           (Option.map x.applicationId ~f:ApplicationId.to_value));
+        [("AppendSourcePath",
+           (Option.map x.appendSourcePath ~f:Boolean.to_value));
+        ("ApplicationId",
+          (Option.map x.applicationId ~f:ApplicationId.to_value));
         ("Arn", (Option.map x.arn ~f:ResourceArn.to_value));
         ("CreatedByAccountId",
           (Option.map x.createdByAccountId ~f:AccountId.to_value));
@@ -1780,39 +1809,45 @@ module RouteSummary =
       let applicationId =
         (Option.map ~f:ApplicationId.of_xml)
           (Xml.child xml_arg0 "ApplicationId") in
+      let appendSourcePath =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "AppendSourcePath") in
       make ?tags ?state ?sourcePath ?serviceId ?routeType ?routeId
         ?pathResourceToId ?ownerAccountId ?methods ?lastUpdatedTime
         ?includeChildPaths ?error ?environmentId ?createdTime
-        ?createdByAccountId ?arn ?applicationId ()
+        ?createdByAccountId ?arn ?applicationId ?appendSourcePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" RouteState.of_json in
-      let sourcePath = field_map json "SourcePath" UriPath.of_json in
-      let serviceId = field_map json "ServiceId" ServiceId.of_json in
-      let routeType = field_map json "RouteType" RouteType.of_json in
-      let routeId = field_map json "RouteId" RouteId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" RouteState.of_json in
+      let sourcePath = field_map json__ "SourcePath" UriPath.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let routeType = field_map json__ "RouteType" RouteType.of_json in
+      let routeId = field_map json__ "RouteId" RouteId.of_json in
       let pathResourceToId =
-        field_map json "PathResourceToId" PathResourceToId.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
-      let methods = field_map json "Methods" HttpMethods.of_json in
+        field_map json__ "PathResourceToId" PathResourceToId.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
+      let methods = field_map json__ "Methods" HttpMethods.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let includeChildPaths =
-        field_map json "IncludeChildPaths" Boolean.of_json in
-      let error = field_map json "Error" ErrorResponse.of_json in
+        field_map json__ "IncludeChildPaths" Boolean.of_json in
+      let error = field_map json__ "Error" ErrorResponse.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let createdByAccountId =
-        field_map json "CreatedByAccountId" AccountId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "CreatedByAccountId" AccountId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
+      let appendSourcePath =
+        field_map json__ "AppendSourcePath" Boolean.of_json in
       make ?tags ?state ?sourcePath ?serviceId ?routeType ?routeId
         ?pathResourceToId ?ownerAccountId ?methods ?lastUpdatedTime
         ?includeChildPaths ?error ?environmentId ?createdTime
-        ?createdByAccountId ?arn ?applicationId ()
+        ?createdByAccountId ?arn ?applicationId ?appendSourcePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The summary information for the routes as a response to ListRoutes."]
@@ -1847,7 +1882,7 @@ module EnvironmentSummary =
         [@ocaml.doc "The tags assigned to the environment."];
       transitGatewayId: TransitGatewayId.t option
         [@ocaml.doc
-          "The ID of the transit gateway set up by the environment."]}
+          "The ID of the Transit Gateway set up by the environment."]}
     let make ?arn =
       fun ?createdTime ->
         fun ?description ->
@@ -1927,23 +1962,24 @@ module EnvironmentSummary =
         ?name ?lastUpdatedTime ?error ?environmentId ?description
         ?createdTime ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayId =
-        field_map json "TransitGatewayId" TransitGatewayId.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" EnvironmentState.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
+        field_map json__ "TransitGatewayId" TransitGatewayId.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" EnvironmentState.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
       let networkFabricType =
-        field_map json "NetworkFabricType" NetworkFabricType.of_json in
-      let name = field_map json "Name" EnvironmentName.of_json in
+        field_map json__ "NetworkFabricType" NetworkFabricType.of_json in
+      let name = field_map json__ "Name" EnvironmentName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
-      let error = field_map json "Error" ErrorResponse.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let error = field_map json__ "Error" ErrorResponse.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       make ?transitGatewayId ?tags ?state ?ownerAccountId ?networkFabricType
         ?name ?lastUpdatedTime ?error ?environmentId ?description
         ?createdTime ?arn ()
@@ -2020,16 +2056,16 @@ module EnvironmentVpc =
       make ?vpcName ?vpcId ?lastUpdatedTime ?environmentId ?createdTime
         ?cidrBlocks ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcName = field_map json "VpcName" Ec2TagValue.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
+    let of_json json__ =
+      let vpcName = field_map json__ "VpcName" Ec2TagValue.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
-      let cidrBlocks = field_map json "CidrBlocks" CidrBlocks.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let cidrBlocks = field_map json__ "CidrBlocks" CidrBlocks.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?vpcName ?vpcId ?lastUpdatedTime ?environmentId ?createdTime
         ?cidrBlocks ?accountId ()
     let to_json v = composed_to_json to_value v
@@ -2162,26 +2198,27 @@ module ApplicationSummary =
         ?lastUpdatedTime ?error ?environmentId ?createdTime
         ?createdByAccountId ?arn ?applicationId ?apiGatewayProxy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" ApplicationState.of_json in
-      let proxyType = field_map json "ProxyType" ProxyType.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
-      let name = field_map json "Name" ApplicationName.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" ApplicationState.of_json in
+      let proxyType = field_map json__ "ProxyType" ProxyType.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
+      let name = field_map json__ "Name" ApplicationName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
-      let error = field_map json "Error" ErrorResponse.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let error = field_map json__ "Error" ErrorResponse.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let createdByAccountId =
-        field_map json "CreatedByAccountId" AccountId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "CreatedByAccountId" AccountId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       let apiGatewayProxy =
-        field_map json "ApiGatewayProxy" ApiGatewayProxySummary.of_json in
+        field_map json__ "ApiGatewayProxy" ApiGatewayProxySummary.of_json in
       make ?vpcId ?tags ?state ?proxyType ?ownerAccountId ?name
         ?lastUpdatedTime ?error ?environmentId ?createdTime
         ?createdByAccountId ?arn ?applicationId ?apiGatewayProxy ()
@@ -2191,10 +2228,19 @@ module RouteActivationState =
   struct
     type nonrec t =
       | ACTIVE 
+      | INACTIVE 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | ACTIVE -> "ACTIVE" | Non_static_id s -> s
-    let of_string = function | "ACTIVE" -> ACTIVE | x -> Non_static_id x
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | INACTIVE -> "INACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "INACTIVE" -> INACTIVE
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -2204,23 +2250,43 @@ module RouteActivationState =
     let of_json j = of_string (string_of_json ~kind:"RouteActivationState" j)
     let to_json = simple_to_json to_value
   end
-module InternalServerException =
+module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The user does not have sufficient access to perform this action."]
+module InternalServerException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An unexpected error occurred while processing the request."]
@@ -2228,54 +2294,98 @@ module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t [@ocaml.doc "The ID of the resource."];
-      resourceType: String_.t [@ocaml.doc "The type of resource."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      message: String_.t option ;
+      resourceId: String_.t option [@ocaml.doc "The ID of the resource."];
+      resourceType: String_.t option [@ocaml.doc "The type of resource."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
-        ("ResourceId", (Some (String_.to_value x.resourceId)));
-        ("ResourceType", (Some (String_.to_value x.resourceType)))]
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("ResourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "ResourceType" String_.of_json in
-      let resourceId = field_map_exn json "ResourceId" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request references a resource that does not exist."]
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      quotaCode: String_.t option
+        [@ocaml.doc
+          "Service quota requirement to identify originating quota. Reached throttling quota exception."];
+      retryAfterSeconds: RetryAfterSeconds.t option
+        [@ocaml.doc "The number of seconds to wait before retrying."];
+      serviceCode: String_.t option
+        [@ocaml.doc
+          "Service quota requirement to identify originating service. Reached throttling quota exception service code."]}
+    let make ?message =
+      fun ?quotaCode ->
+        fun ?retryAfterSeconds ->
+          fun ?serviceCode ->
+            fun () -> { message; quotaCode; retryAfterSeconds; serviceCode }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("QuotaCode", (Option.map x.quotaCode ~f:String_.to_value));
+        ("Retry-After",
+          (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value));
+        ("ServiceCode", (Option.map x.serviceCode ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
+      let retryAfterSeconds =
+        (Option.map ~f:RetryAfterSeconds.of_xml)
+          (Xml.child xml_arg0 "Retry-After") in
+      let quotaCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QuotaCode") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?serviceCode ?retryAfterSeconds ?quotaCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceCode = field_map json__ "ServiceCode" String_.of_json in
+      let retryAfterSeconds =
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let quotaCode = field_map json__ "QuotaCode" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?serviceCode ?retryAfterSeconds ?quotaCode ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request was denied because the request was throttled."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input does not satisfy the constraints specified by an Amazon Web Service."]
@@ -2283,6 +2393,9 @@ module TagKeys =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2302,93 +2415,25 @@ module TagKeys =
     let of_json j = list_of_json ~kind:"TagKeys" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
-module AccessDeniedException =
-  struct
-    type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value [("Message", (Some (String_.to_value x.message)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The user does not have sufficient access to perform this action."]
 module InvalidResourcePolicyException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InvalidResourcePolicyException"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value [("Message", (Some (String_.to_value x.message)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The resource policy is not valid."]
-module ThrottlingException =
-  struct
-    type nonrec t =
-      {
-      message: String_.t ;
-      quotaCode: String_.t option
-        [@ocaml.doc
-          "Service quota requirement to identify originating quota. Reached throttling quota exception."];
-      retryAfterSeconds: RetryAfterSeconds.t option
-        [@ocaml.doc "The number of seconds to wait before retrying."];
-      serviceCode: String_.t option
-        [@ocaml.doc
-          "Service quota requirement to identify originating service. Reached throttling quota exception service code."]}
-    let context_ = "ThrottlingException"
-    let make ?quotaCode =
-      fun ?retryAfterSeconds ->
-        fun ?serviceCode ->
-          fun ~message ->
-            fun () -> { quotaCode; retryAfterSeconds; serviceCode; message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
-        ("QuotaCode", (Option.map x.quotaCode ~f:String_.to_value));
-        ("Retry-After",
-          (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value));
-        ("ServiceCode", (Option.map x.serviceCode ~f:String_.to_value))]
+        [("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let serviceCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
-      let retryAfterSeconds =
-        (Option.map ~f:RetryAfterSeconds.of_xml)
-          (Xml.child xml_arg0 "Retry-After") in
-      let quotaCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QuotaCode") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map json "ServiceCode" String_.of_json in
-      let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
-      let quotaCode = field_map json "QuotaCode" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request was denied because the request was throttled."]
+  end[@@ocaml.doc "The resource policy is not valid."]
 module PolicyString =
   struct
     type nonrec t = string
@@ -2413,35 +2458,32 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t [@ocaml.doc "The ID of the resource."];
-      resourceType: String_.t [@ocaml.doc "The type of resource."]}
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      message: String_.t option ;
+      resourceId: String_.t option [@ocaml.doc "The ID of the resource."];
+      resourceType: String_.t option [@ocaml.doc "The type of resource."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
-        ("ResourceId", (Some (String_.to_value x.resourceId)));
-        ("ResourceType", (Some (String_.to_value x.resourceType)))]
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("ResourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "ResourceType" String_.of_json in
-      let resourceId = field_map_exn json "ResourceId" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updating or deleting a resource can cause an inconsistent state."]
@@ -2470,60 +2512,59 @@ module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       quotaCode: String_.t option
         [@ocaml.doc
           "Service quota requirement to identify originating quota. Reached throttling quota exception."];
-      resourceId: String_.t [@ocaml.doc "The ID of the resource."];
-      resourceType: String_.t [@ocaml.doc "The type of resource."];
-      serviceCode: String_.t
+      resourceId: String_.t option [@ocaml.doc "The ID of the resource."];
+      resourceType: String_.t option [@ocaml.doc "The type of resource."];
+      serviceCode: String_.t option
         [@ocaml.doc
           "Service quota requirement to identify originating service. Reached throttling quota exception service code."]}
-    let context_ = "ServiceQuotaExceededException"
-    let make ?quotaCode =
-      fun ~message ->
-        fun ~resourceId ->
-          fun ~resourceType ->
-            fun ~serviceCode ->
+    let make ?message =
+      fun ?quotaCode ->
+        fun ?resourceId ->
+          fun ?resourceType ->
+            fun ?serviceCode ->
               fun () ->
-                { quotaCode; message; resourceId; resourceType; serviceCode }
+                { message; quotaCode; resourceId; resourceType; serviceCode }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
+        [("Message", (Option.map x.message ~f:String_.to_value));
         ("QuotaCode", (Option.map x.quotaCode ~f:String_.to_value));
-        ("ResourceId", (Some (String_.to_value x.resourceId)));
-        ("ResourceType", (Some (String_.to_value x.resourceType)));
-        ("ServiceCode", (Some (String_.to_value x.serviceCode)))]
+        ("ResourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("ResourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("ServiceCode", (Option.map x.serviceCode ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceCode =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let quotaCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QuotaCode") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~serviceCode ~resourceType ~resourceId ?quotaCode ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?serviceCode ?resourceType ?resourceId ?quotaCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map_exn json "ServiceCode" String_.of_json in
-      let resourceType = field_map_exn json "ResourceType" String_.of_json in
-      let resourceId = field_map_exn json "ResourceId" String_.of_json in
-      let quotaCode = field_map json "QuotaCode" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~serviceCode ~resourceType ~resourceId ?quotaCode ~message ()
+    let of_json json__ =
+      let serviceCode = field_map json__ "ServiceCode" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let quotaCode = field_map json__ "QuotaCode" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?serviceCode ?resourceType ?resourceId ?quotaCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request would cause a service quota to be exceeded."]
 module ServiceSummaries =
   struct
     type nonrec t = ServiceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2566,6 +2607,9 @@ module RouteSummaries =
   struct
     type nonrec t = RouteSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2590,6 +2634,9 @@ module EnvironmentSummaries =
   struct
     type nonrec t = EnvironmentSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2615,6 +2662,9 @@ module EnvironmentVpcs =
   struct
     type nonrec t = EnvironmentVpc.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentVpc.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2639,6 +2689,9 @@ module ApplicationSummaries =
   struct
     type nonrec t = ApplicationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2674,8 +2727,8 @@ module LambdaEndpointConfig =
       let arn = (Option.map ~f:LambdaArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" LambdaArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" LambdaArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration for the Lambda endpoint type."]
 module UrlEndpointConfig =
@@ -2697,9 +2750,9 @@ module UrlEndpointConfig =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "HealthUrl") in
       make ?url ?healthUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "Url" Uri_.of_json in
-      let healthUrl = field_map json "HealthUrl" Uri_.of_json in
+    let of_json json__ =
+      let url = field_map json__ "Url" Uri_.of_json in
+      let healthUrl = field_map json__ "HealthUrl" Uri_.of_json in
       make ?url ?healthUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration for the URL endpoint type."]
@@ -2795,15 +2848,15 @@ module ApiGatewayProxyConfig =
       make ?vpcLinkId ?stageName ?proxyUrl ?nlbName ?nlbArn ?endpointType
         ?apiGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcLinkId = field_map json "VpcLinkId" VpcLinkId.of_json in
-      let stageName = field_map json "StageName" StageName.of_json in
-      let proxyUrl = field_map json "ProxyUrl" Uri_.of_json in
-      let nlbName = field_map json "NlbName" NlbName.of_json in
-      let nlbArn = field_map json "NlbArn" NlbArn.of_json in
+    let of_json json__ =
+      let vpcLinkId = field_map json__ "VpcLinkId" VpcLinkId.of_json in
+      let stageName = field_map json__ "StageName" StageName.of_json in
+      let proxyUrl = field_map json__ "ProxyUrl" Uri_.of_json in
+      let nlbName = field_map json__ "NlbName" NlbName.of_json in
+      let nlbArn = field_map json__ "NlbArn" NlbArn.of_json in
       let endpointType =
-        field_map json "EndpointType" ApiGatewayEndpointType.of_json in
-      let apiGatewayId = field_map json "ApiGatewayId" ApiGatewayId.of_json in
+        field_map json__ "EndpointType" ApiGatewayEndpointType.of_json in
+      let apiGatewayId = field_map json__ "ApiGatewayId" ApiGatewayId.of_json in
       make ?vpcLinkId ?stageName ?proxyUrl ?nlbName ?nlbArn ?endpointType
         ?apiGatewayId ()
     let to_json v = composed_to_json to_value v
@@ -2814,7 +2867,8 @@ module LambdaEndpointInput =
     type nonrec t =
       {
       arn: LambdaArn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the Lambda endpoint."]}
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Lambda function or alias."]}
     let context_ = "LambdaEndpointInput"
     let make ~arn = fun () -> { arn }
     let to_value x =
@@ -2825,8 +2879,8 @@ module LambdaEndpointInput =
         LambdaArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" LambdaArn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" LambdaArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the Lambda endpoint type."]
 module UrlEndpointInput =
@@ -2852,9 +2906,9 @@ module UrlEndpointInput =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "HealthUrl") in
       make ~url ?healthUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map_exn json "Url" Uri_.of_json in
-      let healthUrl = field_map json "HealthUrl" Uri_.of_json in
+    let of_json json__ =
+      let url = field_map_exn json__ "Url" Uri_.of_json in
+      let healthUrl = field_map json__ "HealthUrl" Uri_.of_json in
       make ~url ?healthUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration for the URL endpoint type."]
@@ -2884,7 +2938,10 @@ module UriPathRouteInput =
       {
       activationState: RouteActivationState.t
         [@ocaml.doc
-          "Indicates whether traffic is forwarded to this route\226\128\153s service after the route is created."];
+          "If set to ACTIVE, traffic is forwarded to this route\226\128\153s service after the route is created."];
+      appendSourcePath: Boolean.t option
+        [@ocaml.doc
+          "If set to true, this option appends the source path to the service URL endpoint."];
       includeChildPaths: Boolean.t option
         [@ocaml.doc
           "Indicates whether to match all subpaths of the given source path. If this value is false, requests must match the source path exactly before they are forwarded to this route's service."];
@@ -2893,18 +2950,27 @@ module UriPathRouteInput =
           "A list of HTTP methods to match. An empty list matches all values. If a method is present, only HTTP requests using that method are forwarded to this route\226\128\153s service."];
       sourcePath: UriPath.t
         [@ocaml.doc
-          "The path to use to match traffic. Paths must start with / and are relative to the base of the application."]}
+          "This is the path that Refactor Spaces uses to match traffic. Paths must start with / and are relative to the base of the application. To use path parameters in the source path, add a variable in curly braces. For example, the resource path \\{user\\} represents a path parameter called 'user'."]}
     let context_ = "UriPathRouteInput"
-    let make ?includeChildPaths =
-      fun ?methods ->
-        fun ~activationState ->
-          fun ~sourcePath ->
-            fun () ->
-              { includeChildPaths; methods; activationState; sourcePath }
+    let make ?appendSourcePath =
+      fun ?includeChildPaths ->
+        fun ?methods ->
+          fun ~activationState ->
+            fun ~sourcePath ->
+              fun () ->
+                {
+                  appendSourcePath;
+                  includeChildPaths;
+                  methods;
+                  activationState;
+                  sourcePath
+                }
     let to_value x =
       structure_to_value
         [("ActivationState",
            (Some (RouteActivationState.to_value x.activationState)));
+        ("AppendSourcePath",
+          (Option.map x.appendSourcePath ~f:Boolean.to_value));
         ("IncludeChildPaths",
           (Option.map x.includeChildPaths ~f:Boolean.to_value));
         ("Methods", (Option.map x.methods ~f:HttpMethods.to_value));
@@ -2919,28 +2985,60 @@ module UriPathRouteInput =
       let includeChildPaths =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "IncludeChildPaths") in
+      let appendSourcePath =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "AppendSourcePath") in
       let activationState =
         RouteActivationState.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ActivationState") in
-      make ~sourcePath ?methods ?includeChildPaths ~activationState ()
+      make ~sourcePath ?methods ?includeChildPaths ?appendSourcePath
+        ~activationState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourcePath = field_map_exn json "SourcePath" UriPath.of_json in
-      let methods = field_map json "Methods" HttpMethods.of_json in
+    let of_json json__ =
+      let sourcePath = field_map_exn json__ "SourcePath" UriPath.of_json in
+      let methods = field_map json__ "Methods" HttpMethods.of_json in
       let includeChildPaths =
-        field_map json "IncludeChildPaths" Boolean.of_json in
+        field_map json__ "IncludeChildPaths" Boolean.of_json in
+      let appendSourcePath =
+        field_map json__ "AppendSourcePath" Boolean.of_json in
       let activationState =
-        field_map_exn json "ActivationState" RouteActivationState.of_json in
-      make ~sourcePath ?methods ?includeChildPaths ~activationState ()
+        field_map_exn json__ "ActivationState" RouteActivationState.of_json in
+      make ~sourcePath ?methods ?includeChildPaths ?appendSourcePath
+        ~activationState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration for the URI path route type."]
+module DefaultRouteInput =
+  struct
+    type nonrec t =
+      {
+      activationState: RouteActivationState.t option
+        [@ocaml.doc
+          "If set to ACTIVE, traffic is forwarded to this route\226\128\153s service after the route is created."]}
+    let make ?activationState = fun () -> { activationState }
+    let to_value x =
+      structure_to_value
+        [("ActivationState",
+           (Option.map x.activationState ~f:RouteActivationState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let activationState =
+        (Option.map ~f:RouteActivationState.of_xml)
+          (Xml.child xml_arg0 "ActivationState") in
+      make ?activationState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let activationState =
+        field_map json__ "ActivationState" RouteActivationState.of_json in
+      make ?activationState ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration for the default route type."]
 module ApiGatewayProxyInput =
   struct
     type nonrec t =
       {
       endpointType: ApiGatewayEndpointType.t option
         [@ocaml.doc
-          "The type of endpoint to use for the API Gateway proxy. If no value is specified in the request, the value is set to REGIONAL by default. If the value is set to PRIVATE in the request, this creates a private API endpoint that is isolated from the public internet. The private endpoint can only be accessed by using Amazon Virtual Private Cloud (Amazon VPC) endpoints for Amazon API Gateway that have been granted access."];
+          "The type of endpoint to use for the API Gateway proxy. If no value is specified in the request, the value is set to REGIONAL by default. If the value is set to PRIVATE in the request, this creates a private API endpoint that is isolated from the public internet. The private endpoint can only be accessed by using Amazon Virtual Private Cloud (Amazon VPC) interface endpoints for the Amazon API Gateway that has been granted access. For more information about creating a private connection with Refactor Spaces and interface endpoint (Amazon Web Services PrivateLink) availability, see Access Refactor Spaces using an interface endpoint (Amazon Web Services PrivateLink)."];
       stageName: StageName.t option
         [@ocaml.doc
           "The name of the API Gateway stage. The name defaults to prod."]}
@@ -2960,14 +3058,219 @@ module ApiGatewayProxyInput =
           (Xml.child xml_arg0 "EndpointType") in
       make ?stageName ?endpointType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stageName = field_map json "StageName" StageName.of_json in
+    let of_json json__ =
+      let stageName = field_map json__ "StageName" StageName.of_json in
       let endpointType =
-        field_map json "EndpointType" ApiGatewayEndpointType.of_json in
+        field_map json__ "EndpointType" ApiGatewayEndpointType.of_json in
       make ?stageName ?endpointType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A wrapper object holding the Amazon API Gateway endpoint input."]
+module UpdateRouteResponse =
+  struct
+    type nonrec t =
+      {
+      applicationId: ApplicationId.t option
+        [@ocaml.doc
+          "The ID of the application in which the route is being updated."];
+      arn: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the route. The format for this ARN is arn:aws:refactor-spaces:region:account-id:resource-type/resource-id . For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
+      lastUpdatedTime: Timestamp.t option
+        [@ocaml.doc
+          "A timestamp that indicates when the route was last updated."];
+      routeId: RouteId.t option
+        [@ocaml.doc "The unique identifier of the route."];
+      serviceId: ServiceId.t option
+        [@ocaml.doc
+          "The ID of service in which the route was created. Traffic that matches this route is forwarded to this service."];
+      state: RouteState.t option
+        [@ocaml.doc "The current state of the route."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?applicationId =
+      fun ?arn ->
+        fun ?lastUpdatedTime ->
+          fun ?routeId ->
+            fun ?serviceId ->
+              fun ?state ->
+                fun () ->
+                  {
+                    applicationId;
+                    arn;
+                    lastUpdatedTime;
+                    routeId;
+                    serviceId;
+                    state
+                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ApplicationId",
+           (Option.map x.applicationId ~f:ApplicationId.to_value));
+        ("Arn", (Option.map x.arn ~f:ResourceArn.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:Timestamp.to_value));
+        ("RouteId", (Option.map x.routeId ~f:RouteId.to_value));
+        ("ServiceId", (Option.map x.serviceId ~f:ServiceId.to_value));
+        ("State", (Option.map x.state ~f:RouteState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:RouteState.of_xml) (Xml.child xml_arg0 "State") in
+      let serviceId =
+        (Option.map ~f:ServiceId.of_xml) (Xml.child xml_arg0 "ServiceId") in
+      let routeId =
+        (Option.map ~f:RouteId.of_xml) (Xml.child xml_arg0 "RouteId") in
+      let lastUpdatedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let applicationId =
+        (Option.map ~f:ApplicationId.of_xml)
+          (Xml.child xml_arg0 "ApplicationId") in
+      make ?state ?serviceId ?routeId ?lastUpdatedTime ?arn ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" RouteState.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let routeId = field_map json__ "RouteId" RouteId.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
+      let applicationId =
+        field_map json__ "ApplicationId" ApplicationId.of_json in
+      make ?state ?serviceId ?routeId ?lastUpdatedTime ?arn ?applicationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an Amazon Web Services Migration Hub Refactor Spaces route."]
+module UpdateRouteRequest =
+  struct
+    type nonrec t =
+      {
+      activationState: RouteActivationState.t
+        [@ocaml.doc
+          "If set to ACTIVE, traffic is forwarded to this route\226\128\153s service after the route is updated."];
+      applicationIdentifier: ApplicationId.t
+        [@ocaml.doc
+          "The ID of the application within which the route is being updated."];
+      environmentIdentifier: EnvironmentId.t
+        [@ocaml.doc
+          "The ID of the environment in which the route is being updated."];
+      routeIdentifier: RouteId.t
+        [@ocaml.doc "The unique identifier of the route to update."]}
+    let context_ = "UpdateRouteRequest"
+    let make ~activationState =
+      fun ~applicationIdentifier ->
+        fun ~environmentIdentifier ->
+          fun ~routeIdentifier ->
+            fun () ->
+              {
+                activationState;
+                applicationIdentifier;
+                environmentIdentifier;
+                routeIdentifier
+              }
+    let to_value x =
+      structure_to_value
+        [("ActivationState",
+           (Some (RouteActivationState.to_value x.activationState)));
+        ("ApplicationIdentifier",
+          (Some (ApplicationId.to_value x.applicationIdentifier)));
+        ("EnvironmentIdentifier",
+          (Some (EnvironmentId.to_value x.environmentIdentifier)));
+        ("RouteIdentifier", (Some (RouteId.to_value x.routeIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let routeIdentifier =
+        RouteId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RouteIdentifier") in
+      let environmentIdentifier =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
+      let applicationIdentifier =
+        ApplicationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
+      let activationState =
+        RouteActivationState.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ActivationState") in
+      make ~routeIdentifier ~environmentIdentifier ~applicationIdentifier
+        ~activationState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let routeIdentifier =
+        field_map_exn json__ "RouteIdentifier" RouteId.of_json in
+      let environmentIdentifier =
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
+      let applicationIdentifier =
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
+      let activationState =
+        field_map_exn json__ "ActivationState" RouteActivationState.of_json in
+      make ~routeIdentifier ~environmentIdentifier ~applicationIdentifier
+        ~activationState ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an Amazon Web Services Migration Hub Refactor Spaces route."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -3051,9 +3354,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3121,7 +3424,7 @@ module TagResourceRequest =
     type nonrec t =
       {
       resourceArn: String_.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource"];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
       tags: TagMap.t
         [@ocaml.doc "The new or modified tags for the resource."]}
     let context_ = "TagResourceRequest"
@@ -3139,9 +3442,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3259,9 +3562,10 @@ module PutResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
       make ~resourceArn ~policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
-      let policy = field_map_exn json "Policy" PolicyString.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      let policy = field_map_exn json__ "Policy" PolicyString.of_json in
       make ~resourceArn ~policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3325,8 +3629,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags of a resource. The caller account must be the same as the resource\226\128\153s OwnerAccountId. Listing tags in other accounts is not supported."]
@@ -3348,8 +3652,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3461,10 +3765,10 @@ module ListServicesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?serviceSummaryList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceSummaryList =
-        field_map json "ServiceSummaryList" ServiceSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ServiceSummaryList" ServiceSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?serviceSummaryList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3517,13 +3821,13 @@ module ListServicesRequest =
       make ?nextToken ?maxResults ~environmentIdentifier
         ~applicationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ?nextToken ?maxResults ~environmentIdentifier
         ~applicationIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -3636,10 +3940,10 @@ module ListRoutesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?routeSummaryList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routeSummaryList =
-        field_map json "RouteSummaryList" RouteSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "RouteSummaryList" RouteSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?routeSummaryList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3692,13 +3996,13 @@ module ListRoutesRequest =
       make ?nextToken ?maxResults ~environmentIdentifier
         ~applicationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ?nextToken ?maxResults ~environmentIdentifier
         ~applicationIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -3792,10 +4096,11 @@ module ListEnvironmentsResponse =
           (Xml.child xml_arg0 "EnvironmentSummaryList") in
       make ?nextToken ?environmentSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let environmentSummaryList =
-        field_map json "EnvironmentSummaryList" EnvironmentSummaries.of_json in
+        field_map json__ "EnvironmentSummaryList"
+          EnvironmentSummaries.of_json in
       make ?nextToken ?environmentSummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3823,9 +4128,9 @@ module ListEnvironmentsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3917,10 +4222,10 @@ module ListEnvironmentVpcsResponse =
           (Xml.child xml_arg0 "EnvironmentVpcList") in
       make ?nextToken ?environmentVpcList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let environmentVpcList =
-        field_map json "EnvironmentVpcList" EnvironmentVpcs.of_json in
+        field_map json__ "EnvironmentVpcList" EnvironmentVpcs.of_json in
       make ?nextToken ?environmentVpcList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3958,11 +4263,11 @@ module ListEnvironmentVpcsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
       make ?nextToken ?maxResults ~environmentIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       make ?nextToken ?maxResults ~environmentIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4075,10 +4380,11 @@ module ListApplicationsResponse =
           (Xml.child xml_arg0 "ApplicationSummaryList") in
       make ?nextToken ?applicationSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let applicationSummaryList =
-        field_map json "ApplicationSummaryList" ApplicationSummaries.of_json in
+        field_map json__ "ApplicationSummaryList"
+          ApplicationSummaries.of_json in
       make ?nextToken ?applicationSummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4116,11 +4422,11 @@ module ListApplicationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
       make ?nextToken ?maxResults ~environmentIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       make ?nextToken ?maxResults ~environmentIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4340,31 +4646,32 @@ module GetServiceResponse =
         ?lastUpdatedTime ?lambdaEndpoint ?error ?environmentId ?endpointType
         ?description ?createdTime ?createdByAccountId ?arn ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" VpcId.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
       let urlEndpoint =
-        field_map json "UrlEndpoint" UrlEndpointConfig.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" ServiceState.of_json in
-      let serviceId = field_map json "ServiceId" ServiceId.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
-      let name = field_map json "Name" ServiceName.of_json in
+        field_map json__ "UrlEndpoint" UrlEndpointConfig.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" ServiceState.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
+      let name = field_map json__ "Name" ServiceName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let lambdaEndpoint =
-        field_map json "LambdaEndpoint" LambdaEndpointConfig.of_json in
-      let error = field_map json "Error" ErrorResponse.of_json in
+        field_map json__ "LambdaEndpoint" LambdaEndpointConfig.of_json in
+      let error = field_map json__ "Error" ErrorResponse.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
       let endpointType =
-        field_map json "EndpointType" ServiceEndpointType.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "EndpointType" ServiceEndpointType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let createdByAccountId =
-        field_map json "CreatedByAccountId" AccountId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "CreatedByAccountId" AccountId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       make ?vpcId ?urlEndpoint ?tags ?state ?serviceId ?ownerAccountId ?name
         ?lastUpdatedTime ?lambdaEndpoint ?error ?environmentId ?endpointType
         ?description ?createdTime ?createdByAccountId ?arn ?applicationId ()
@@ -4409,13 +4716,13 @@ module GetServiceRequest =
       make ~serviceIdentifier ~environmentIdentifier ~applicationIdentifier
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceIdentifier =
-        field_map_exn json "ServiceIdentifier" ServiceId.of_json in
+        field_map_exn json__ "ServiceIdentifier" ServiceId.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ~serviceIdentifier ~environmentIdentifier ~applicationIdentifier
         ()
     let to_json v = composed_to_json to_value v
@@ -4425,6 +4732,9 @@ module GetRouteResponse =
   struct
     type nonrec t =
       {
+      appendSourcePath: Boolean.t option
+        [@ocaml.doc
+          "If set to true, this option appends the source path to the service URL endpoint."];
       applicationId: ApplicationId.t option
         [@ocaml.doc "The ID of the application that the route belongs to."];
       arn: ResourceArn.t option
@@ -4460,7 +4770,7 @@ module GetRouteResponse =
         [@ocaml.doc "The unique identifier of the service."];
       sourcePath: UriPath.t option
         [@ocaml.doc
-          "The path to use to match traffic. Paths must start with / and are relative to the base of the application."];
+          "This is the path that Refactor Spaces uses to match traffic. Paths must start with / and are relative to the base of the application. To use path parameters in the source path, add a variable in curly braces. For example, the resource path \\{user\\} represents a path parameter called 'user'."];
       state: RouteState.t option
         [@ocaml.doc "The current state of the route."];
       tags: TagMap.t option
@@ -4473,43 +4783,45 @@ module GetRouteResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?applicationId =
-      fun ?arn ->
-        fun ?createdByAccountId ->
-          fun ?createdTime ->
-            fun ?environmentId ->
-              fun ?error ->
-                fun ?includeChildPaths ->
-                  fun ?lastUpdatedTime ->
-                    fun ?methods ->
-                      fun ?ownerAccountId ->
-                        fun ?pathResourceToId ->
-                          fun ?routeId ->
-                            fun ?routeType ->
-                              fun ?serviceId ->
-                                fun ?sourcePath ->
-                                  fun ?state ->
-                                    fun ?tags ->
-                                      fun () ->
-                                        {
-                                          applicationId;
-                                          arn;
-                                          createdByAccountId;
-                                          createdTime;
-                                          environmentId;
-                                          error;
-                                          includeChildPaths;
-                                          lastUpdatedTime;
-                                          methods;
-                                          ownerAccountId;
-                                          pathResourceToId;
-                                          routeId;
-                                          routeType;
-                                          serviceId;
-                                          sourcePath;
-                                          state;
-                                          tags
-                                        }
+    let make ?appendSourcePath =
+      fun ?applicationId ->
+        fun ?arn ->
+          fun ?createdByAccountId ->
+            fun ?createdTime ->
+              fun ?environmentId ->
+                fun ?error ->
+                  fun ?includeChildPaths ->
+                    fun ?lastUpdatedTime ->
+                      fun ?methods ->
+                        fun ?ownerAccountId ->
+                          fun ?pathResourceToId ->
+                            fun ?routeId ->
+                              fun ?routeType ->
+                                fun ?serviceId ->
+                                  fun ?sourcePath ->
+                                    fun ?state ->
+                                      fun ?tags ->
+                                        fun () ->
+                                          {
+                                            appendSourcePath;
+                                            applicationId;
+                                            arn;
+                                            createdByAccountId;
+                                            createdTime;
+                                            environmentId;
+                                            error;
+                                            includeChildPaths;
+                                            lastUpdatedTime;
+                                            methods;
+                                            ownerAccountId;
+                                            pathResourceToId;
+                                            routeId;
+                                            routeType;
+                                            serviceId;
+                                            sourcePath;
+                                            state;
+                                            tags
+                                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4568,8 +4880,10 @@ module GetRouteResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ApplicationId",
-           (Option.map x.applicationId ~f:ApplicationId.to_value));
+        [("AppendSourcePath",
+           (Option.map x.appendSourcePath ~f:Boolean.to_value));
+        ("ApplicationId",
+          (Option.map x.applicationId ~f:ApplicationId.to_value));
         ("Arn", (Option.map x.arn ~f:ResourceArn.to_value));
         ("CreatedByAccountId",
           (Option.map x.createdByAccountId ~f:AccountId.to_value));
@@ -4633,39 +4947,45 @@ module GetRouteResponse =
       let applicationId =
         (Option.map ~f:ApplicationId.of_xml)
           (Xml.child xml_arg0 "ApplicationId") in
+      let appendSourcePath =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "AppendSourcePath") in
       make ?tags ?state ?sourcePath ?serviceId ?routeType ?routeId
         ?pathResourceToId ?ownerAccountId ?methods ?lastUpdatedTime
         ?includeChildPaths ?error ?environmentId ?createdTime
-        ?createdByAccountId ?arn ?applicationId ()
+        ?createdByAccountId ?arn ?applicationId ?appendSourcePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" RouteState.of_json in
-      let sourcePath = field_map json "SourcePath" UriPath.of_json in
-      let serviceId = field_map json "ServiceId" ServiceId.of_json in
-      let routeType = field_map json "RouteType" RouteType.of_json in
-      let routeId = field_map json "RouteId" RouteId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" RouteState.of_json in
+      let sourcePath = field_map json__ "SourcePath" UriPath.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let routeType = field_map json__ "RouteType" RouteType.of_json in
+      let routeId = field_map json__ "RouteId" RouteId.of_json in
       let pathResourceToId =
-        field_map json "PathResourceToId" PathResourceToId.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
-      let methods = field_map json "Methods" HttpMethods.of_json in
+        field_map json__ "PathResourceToId" PathResourceToId.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
+      let methods = field_map json__ "Methods" HttpMethods.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let includeChildPaths =
-        field_map json "IncludeChildPaths" Boolean.of_json in
-      let error = field_map json "Error" ErrorResponse.of_json in
+        field_map json__ "IncludeChildPaths" Boolean.of_json in
+      let error = field_map json__ "Error" ErrorResponse.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let createdByAccountId =
-        field_map json "CreatedByAccountId" AccountId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "CreatedByAccountId" AccountId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
+      let appendSourcePath =
+        field_map json__ "AppendSourcePath" Boolean.of_json in
       make ?tags ?state ?sourcePath ?serviceId ?routeType ?routeId
         ?pathResourceToId ?ownerAccountId ?methods ?lastUpdatedTime
         ?includeChildPaths ?error ?environmentId ?createdTime
-        ?createdByAccountId ?arn ?applicationId ()
+        ?createdByAccountId ?arn ?applicationId ?appendSourcePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets an Amazon Web Services Migration Hub Refactor Spaces route."]
@@ -4704,13 +5024,13 @@ module GetRouteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~routeIdentifier ~environmentIdentifier ~applicationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routeIdentifier =
-        field_map_exn json "RouteIdentifier" RouteId.of_json in
+        field_map_exn json__ "RouteIdentifier" RouteId.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ~routeIdentifier ~environmentIdentifier ~applicationIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4795,8 +5115,8 @@ module GetResourcePolicyResponse =
         (Option.map ~f:PolicyString.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" PolicyString.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" PolicyString.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4821,9 +5141,9 @@ module GetResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identifier =
-        field_map_exn json "Identifier" ResourcePolicyIdentifier.of_json in
+        field_map_exn json__ "Identifier" ResourcePolicyIdentifier.of_json in
       make ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4860,7 +5180,7 @@ module GetEnvironmentResponse =
           "The tags to assign to the environment. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key-value pair."];
       transitGatewayId: TransitGatewayId.t option
         [@ocaml.doc
-          "The ID of the transit gateway set up by the environment."]}
+          "The ID of the Transit Gateway set up by the environment, if applicable."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -5003,23 +5323,24 @@ module GetEnvironmentResponse =
         ?name ?lastUpdatedTime ?error ?environmentId ?description
         ?createdTime ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayId =
-        field_map json "TransitGatewayId" TransitGatewayId.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" EnvironmentState.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
+        field_map json__ "TransitGatewayId" TransitGatewayId.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" EnvironmentState.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
       let networkFabricType =
-        field_map json "NetworkFabricType" NetworkFabricType.of_json in
-      let name = field_map json "Name" EnvironmentName.of_json in
+        field_map json__ "NetworkFabricType" NetworkFabricType.of_json in
+      let name = field_map json__ "Name" EnvironmentName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
-      let error = field_map json "Error" ErrorResponse.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let error = field_map json__ "Error" ErrorResponse.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       make ?transitGatewayId ?tags ?state ?ownerAccountId ?networkFabricType
         ?name ?lastUpdatedTime ?error ?environmentId ?description
         ?createdTime ?arn ()
@@ -5045,9 +5366,9 @@ module GetEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
       make ~environmentIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       make ~environmentIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5243,26 +5564,27 @@ module GetApplicationResponse =
         ?lastUpdatedTime ?error ?environmentId ?createdTime
         ?createdByAccountId ?arn ?applicationId ?apiGatewayProxy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" ApplicationState.of_json in
-      let proxyType = field_map json "ProxyType" ProxyType.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
-      let name = field_map json "Name" ApplicationName.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" ApplicationState.of_json in
+      let proxyType = field_map json__ "ProxyType" ProxyType.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
+      let name = field_map json__ "Name" ApplicationName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
-      let error = field_map json "Error" ErrorResponse.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let error = field_map json__ "Error" ErrorResponse.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let createdByAccountId =
-        field_map json "CreatedByAccountId" AccountId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "CreatedByAccountId" AccountId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       let apiGatewayProxy =
-        field_map json "ApiGatewayProxy" ApiGatewayProxyConfig.of_json in
+        field_map json__ "ApiGatewayProxy" ApiGatewayProxyConfig.of_json in
       make ?vpcId ?tags ?state ?proxyType ?ownerAccountId ?name
         ?lastUpdatedTime ?error ?environmentId ?createdTime
         ?createdByAccountId ?arn ?applicationId ?apiGatewayProxy ()
@@ -5297,11 +5619,11 @@ module GetApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~environmentIdentifier ~applicationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ~environmentIdentifier ~applicationIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5446,17 +5768,17 @@ module DeleteServiceResponse =
       make ?state ?serviceId ?name ?lastUpdatedTime ?environmentId ?arn
         ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" ServiceState.of_json in
-      let serviceId = field_map json "ServiceId" ServiceId.of_json in
-      let name = field_map json "Name" ServiceName.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" ServiceState.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let name = field_map json__ "Name" ServiceName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       make ?state ?serviceId ?name ?lastUpdatedTime ?environmentId ?arn
         ?applicationId ()
     let to_json v = composed_to_json to_value v
@@ -5502,13 +5824,13 @@ module DeleteServiceRequest =
       make ~serviceIdentifier ~environmentIdentifier ~applicationIdentifier
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceIdentifier =
-        field_map_exn json "ServiceIdentifier" ServiceId.of_json in
+        field_map_exn json__ "ServiceIdentifier" ServiceId.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ~serviceIdentifier ~environmentIdentifier ~applicationIdentifier
         ()
     let to_json v = composed_to_json to_value v
@@ -5644,15 +5966,15 @@ module DeleteRouteResponse =
           (Xml.child xml_arg0 "ApplicationId") in
       make ?state ?serviceId ?routeId ?lastUpdatedTime ?arn ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" RouteState.of_json in
-      let serviceId = field_map json "ServiceId" ServiceId.of_json in
-      let routeId = field_map json "RouteId" RouteId.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" RouteState.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let routeId = field_map json__ "RouteId" RouteId.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       make ?state ?serviceId ?routeId ?lastUpdatedTime ?arn ?applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5693,13 +6015,13 @@ module DeleteRouteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~routeIdentifier ~environmentIdentifier ~applicationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routeIdentifier =
-        field_map_exn json "RouteIdentifier" RouteId.of_json in
+        field_map_exn json__ "RouteIdentifier" RouteId.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ~routeIdentifier ~environmentIdentifier ~applicationIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5799,9 +6121,9 @@ module DeleteResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identifier =
-        field_map_exn json "Identifier" ResourcePolicyIdentifier.of_json in
+        field_map_exn json__ "Identifier" ResourcePolicyIdentifier.of_json in
       make ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the resource policy set for the environment."]
@@ -5922,14 +6244,14 @@ module DeleteEnvironmentResponse =
       let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?state ?name ?lastUpdatedTime ?environmentId ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" EnvironmentState.of_json in
-      let name = field_map json "Name" EnvironmentName.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" EnvironmentState.of_json in
+      let name = field_map json__ "Name" EnvironmentName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       make ?state ?name ?lastUpdatedTime ?environmentId ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5953,9 +6275,9 @@ module DeleteEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
       make ~environmentIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       make ~environmentIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6095,16 +6417,16 @@ module DeleteApplicationResponse =
       make ?state ?name ?lastUpdatedTime ?environmentId ?arn ?applicationId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" ApplicationState.of_json in
-      let name = field_map json "Name" ApplicationName.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" ApplicationState.of_json in
+      let name = field_map json__ "Name" ApplicationName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       make ?state ?name ?lastUpdatedTime ?environmentId ?arn ?applicationId
         ()
     let to_json v = composed_to_json to_value v
@@ -6138,11 +6460,11 @@ module DeleteApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~environmentIdentifier ~applicationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ~environmentIdentifier ~applicationIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6374,29 +6696,31 @@ module CreateServiceResponse =
         ?lastUpdatedTime ?lambdaEndpoint ?environmentId ?endpointType
         ?description ?createdTime ?createdByAccountId ?arn ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      let urlEndpoint = field_map json "UrlEndpoint" UrlEndpointInput.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" ServiceState.of_json in
-      let serviceId = field_map json "ServiceId" ServiceId.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
-      let name = field_map json "Name" ServiceName.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let urlEndpoint =
+        field_map json__ "UrlEndpoint" UrlEndpointInput.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" ServiceState.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
+      let name = field_map json__ "Name" ServiceName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let lambdaEndpoint =
-        field_map json "LambdaEndpoint" LambdaEndpointInput.of_json in
+        field_map json__ "LambdaEndpoint" LambdaEndpointInput.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
       let endpointType =
-        field_map json "EndpointType" ServiceEndpointType.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "EndpointType" ServiceEndpointType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let createdByAccountId =
-        field_map json "CreatedByAccountId" AccountId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "CreatedByAccountId" AccountId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       make ?vpcId ?urlEndpoint ?tags ?state ?serviceId ?ownerAccountId ?name
         ?lastUpdatedTime ?lambdaEndpoint ?environmentId ?endpointType
         ?description ?createdTime ?createdByAccountId ?arn ?applicationId ()
@@ -6428,7 +6752,8 @@ module CreateServiceRequest =
         [@ocaml.doc
           "The tags to assign to the service. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key-value pair.."];
       urlEndpoint: UrlEndpointInput.t option
-        [@ocaml.doc "The configuration for the URL endpoint type."];
+        [@ocaml.doc
+          "The configuration for the URL endpoint type. When creating a route to a service, Refactor Spaces automatically resolves the address in the UrlEndpointInput object URL when the Domain Name System (DNS) time-to-live (TTL) expires, or every 60 seconds for TTLs less than 60 seconds."];
       vpcId: VpcId.t option [@ocaml.doc "The ID of the VPC."]}
     let context_ = "CreateServiceRequest"
     let make ?clientToken =
@@ -6500,21 +6825,22 @@ module CreateServiceRequest =
         ~environmentIdentifier ~endpointType ?description ?clientToken
         ~applicationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      let urlEndpoint = field_map json "UrlEndpoint" UrlEndpointInput.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let name = field_map_exn json "Name" ServiceName.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let urlEndpoint =
+        field_map json__ "UrlEndpoint" UrlEndpointInput.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let name = field_map_exn json__ "Name" ServiceName.of_json in
       let lambdaEndpoint =
-        field_map json "LambdaEndpoint" LambdaEndpointInput.of_json in
+        field_map json__ "LambdaEndpoint" LambdaEndpointInput.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
       let endpointType =
-        field_map_exn json "EndpointType" ServiceEndpointType.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+        field_map_exn json__ "EndpointType" ServiceEndpointType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ?vpcId ?urlEndpoint ?tags ~name ?lambdaEndpoint
         ~environmentIdentifier ~endpointType ?description ?clientToken
         ~applicationIdentifier ()
@@ -6549,12 +6875,13 @@ module CreateRouteResponse =
         [@ocaml.doc
           "The ID of service in which the route is created. Traffic that matches this route is forwarded to this service."];
       state: RouteState.t option
-        [@ocaml.doc "The current state of the route."];
+        [@ocaml.doc
+          "The current state of the route. Activation state only allows ACTIVE or INACTIVE as user inputs. FAILED is a route state that is system generated."];
       tags: TagMap.t option
         [@ocaml.doc
           "The tags assigned to the created route. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key-value pair."];
       uriPathRoute: UriPathRouteInput.t option
-        [@ocaml.doc "onfiguration for the URI path route type."]}
+        [@ocaml.doc "Configuration for the URI path route type."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -6717,29 +7044,30 @@ module CreateRouteResponse =
         ?ownerAccountId ?lastUpdatedTime ?createdTime ?createdByAccountId
         ?arn ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uriPathRoute =
-        field_map json "UriPathRoute" UriPathRouteInput.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" RouteState.of_json in
-      let serviceId = field_map json "ServiceId" ServiceId.of_json in
-      let routeType = field_map json "RouteType" RouteType.of_json in
-      let routeId = field_map json "RouteId" RouteId.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
+        field_map json__ "UriPathRoute" UriPathRouteInput.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" RouteState.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let routeType = field_map json__ "RouteType" RouteType.of_json in
+      let routeId = field_map json__ "RouteId" RouteId.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let createdByAccountId =
-        field_map json "CreatedByAccountId" AccountId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "CreatedByAccountId" AccountId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       make ?uriPathRoute ?tags ?state ?serviceId ?routeType ?routeId
         ?ownerAccountId ?lastUpdatedTime ?createdTime ?createdByAccountId
         ?arn ?applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services Migration Hub Refactor Spaces route. The account owner of the service resource is always the environment owner, regardless of which account creates the route. Routes target a service in the application. If an application does not have any routes, then the first route must be created as a DEFAULT RouteType. When you create a route, Refactor Spaces configures the Amazon API Gateway to send traffic to the target service as follows: If the service has a URL endpoint, and the endpoint resolves to a private IP address, Refactor Spaces routes traffic using the API Gateway VPC link. If the service has a URL endpoint, and the endpoint resolves to a public IP address, Refactor Spaces routes traffic over the public internet. If the service has an Lambda function endpoint, then Refactor Spaces configures the Lambda function's resource policy to allow the application's API Gateway to invoke the function. A one-time health check is performed on the service when the route is created. If the health check fails, the route transitions to FAILED, and no traffic is sent to the service. For Lambda functions, the Lambda function state is checked. If the function is not active, the function configuration is updated so that Lambda resources are provisioned. If the Lambda state is Failed, then the route creation fails. For more information, see the GetFunctionConfiguration's State response parameter in the Lambda Developer Guide. For public URLs, a connection is opened to the public endpoint. If the URL is not reachable, the health check fails. For private URLs, a target group is created and the target group health check is run. The HealthCheckProtocol, HealthCheckPort, and HealthCheckPath are the same protocol, port, and path specified in the URL or health URL, if used. All other settings use the default values, as described in Health checks for your target groups. The health check is considered successful if at least one target within the target group transitions to a healthy state. Services can have HTTP or HTTPS URL endpoints. For HTTPS URLs, publicly-signed certificates are supported. Private Certificate Authorities (CAs) are permitted only if the CA's domain is publicly resolvable."]
+       "Creates an Amazon Web Services Migration Hub Refactor Spaces route. The account owner of the service resource is always the environment owner, regardless of which account creates the route. Routes target a service in the application. If an application does not have any routes, then the first route must be created as a DEFAULT RouteType. When created, the default route defaults to an active state so state is not a required input. However, like all other state values the state of the default route can be updated after creation, but only when all other routes are also inactive. Conversely, no route can be active without the default route also being active. When you create a route, Refactor Spaces configures the Amazon API Gateway to send traffic to the target service as follows: URL Endpoints If the service has a URL endpoint, and the endpoint resolves to a private IP address, Refactor Spaces routes traffic using the API Gateway VPC link. If a service endpoint resolves to a public IP address, Refactor Spaces routes traffic over the public internet. Services can have HTTP or HTTPS URL endpoints. For HTTPS URLs, publicly-signed certificates are supported. Private Certificate Authorities (CAs) are permitted only if the CA's domain is also publicly resolvable. Refactor Spaces automatically resolves the public Domain Name System (DNS) names that are set in CreateService:UrlEndpoint when you create a service. The DNS names resolve when the DNS time-to-live (TTL) expires, or every 60 seconds for TTLs less than 60 seconds. This periodic DNS resolution ensures that the route configuration remains up-to-date. One-time health check A one-time health check is performed on the service when either the route is updated from inactive to active, or when it is created with an active state. If the health check fails, the route transitions the route state to FAILED, an error code of SERVICE_ENDPOINT_HEALTH_CHECK_FAILURE is provided, and no traffic is sent to the service. For private URLs, a target group is created on the Network Load Balancer and the load balancer target group runs default target health checks. By default, the health check is run against the service endpoint URL. Optionally, the health check can be performed against a different protocol, port, and/or path using the CreateService:UrlEndpoint parameter. All other health check settings for the load balancer use the default values described in the Health checks for your target groups in the Elastic Load Balancing guide. The health check is considered successful if at least one target within the target group transitions to a healthy state. Lambda function endpoints If the service has an Lambda function endpoint, then Refactor Spaces configures the Lambda function's resource policy to allow the application's API Gateway to invoke the function. The Lambda function state is checked. If the function is not active, the function configuration is updated so that Lambda resources are provisioned. If the Lambda state is Failed, then the route creation fails. For more information, see the GetFunctionConfiguration's State response parameter in the Lambda Developer Guide. A check is performed to determine that a Lambda function with the specified ARN exists. If it does not exist, the health check fails. For public URLs, a connection is opened to the public endpoint. If the URL is not reachable, the health check fails. Environments without a network bridge When you create environments without a network bridge (CreateEnvironment:NetworkFabricType is NONE) and you use your own networking infrastructure, you need to configure VPC to VPC connectivity between your network and the application proxy VPC. Route creation from the application proxy to service endpoints will fail if your network is not configured to connect to the application proxy VPC. For more information, see Create a route in the Refactor Spaces User Guide."]
 module CreateRouteRequest =
   struct
     type nonrec t =
@@ -6750,6 +7078,8 @@ module CreateRouteRequest =
       clientToken: ClientToken.t option
         [@ocaml.doc
           "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      defaultRoute: DefaultRouteInput.t option
+        [@ocaml.doc "Configuration for the default route type."];
       environmentIdentifier: EnvironmentId.t
         [@ocaml.doc
           "The ID of the environment in which the route is created."];
@@ -6766,27 +7096,31 @@ module CreateRouteRequest =
         [@ocaml.doc "The configuration for the URI path route type."]}
     let context_ = "CreateRouteRequest"
     let make ?clientToken =
-      fun ?tags ->
-        fun ?uriPathRoute ->
-          fun ~applicationIdentifier ->
-            fun ~environmentIdentifier ->
-              fun ~routeType ->
-                fun ~serviceIdentifier ->
-                  fun () ->
-                    {
-                      clientToken;
-                      tags;
-                      uriPathRoute;
-                      applicationIdentifier;
-                      environmentIdentifier;
-                      routeType;
-                      serviceIdentifier
-                    }
+      fun ?defaultRoute ->
+        fun ?tags ->
+          fun ?uriPathRoute ->
+            fun ~applicationIdentifier ->
+              fun ~environmentIdentifier ->
+                fun ~routeType ->
+                  fun ~serviceIdentifier ->
+                    fun () ->
+                      {
+                        clientToken;
+                        defaultRoute;
+                        tags;
+                        uriPathRoute;
+                        applicationIdentifier;
+                        environmentIdentifier;
+                        routeType;
+                        serviceIdentifier
+                      }
     let to_value x =
       structure_to_value
         [("ApplicationIdentifier",
            (Some (ApplicationId.to_value x.applicationIdentifier)));
         ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("DefaultRoute",
+          (Option.map x.defaultRoute ~f:DefaultRouteInput.to_value));
         ("EnvironmentIdentifier",
           (Some (EnvironmentId.to_value x.environmentIdentifier)));
         ("RouteType", (Some (RouteType.to_value x.routeType)));
@@ -6810,31 +7144,38 @@ module CreateRouteRequest =
       let environmentIdentifier =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
+      let defaultRoute =
+        (Option.map ~f:DefaultRouteInput.of_xml)
+          (Xml.child xml_arg0 "DefaultRoute") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       let applicationIdentifier =
         ApplicationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ?uriPathRoute ?tags ~serviceIdentifier ~routeType
-        ~environmentIdentifier ?clientToken ~applicationIdentifier ()
+        ~environmentIdentifier ?defaultRoute ?clientToken
+        ~applicationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uriPathRoute =
-        field_map json "UriPathRoute" UriPathRouteInput.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+        field_map json__ "UriPathRoute" UriPathRouteInput.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let serviceIdentifier =
-        field_map_exn json "ServiceIdentifier" ServiceId.of_json in
-      let routeType = field_map_exn json "RouteType" RouteType.of_json in
+        field_map_exn json__ "ServiceIdentifier" ServiceId.of_json in
+      let routeType = field_map_exn json__ "RouteType" RouteType.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
+      let defaultRoute =
+        field_map json__ "DefaultRoute" DefaultRouteInput.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       let applicationIdentifier =
-        field_map_exn json "ApplicationIdentifier" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationIdentifier" ApplicationId.of_json in
       make ?uriPathRoute ?tags ~serviceIdentifier ~routeType
-        ~environmentIdentifier ?clientToken ~applicationIdentifier ()
+        ~environmentIdentifier ?defaultRoute ?clientToken
+        ~applicationIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services Migration Hub Refactor Spaces route. The account owner of the service resource is always the environment owner, regardless of which account creates the route. Routes target a service in the application. If an application does not have any routes, then the first route must be created as a DEFAULT RouteType. When you create a route, Refactor Spaces configures the Amazon API Gateway to send traffic to the target service as follows: If the service has a URL endpoint, and the endpoint resolves to a private IP address, Refactor Spaces routes traffic using the API Gateway VPC link. If the service has a URL endpoint, and the endpoint resolves to a public IP address, Refactor Spaces routes traffic over the public internet. If the service has an Lambda function endpoint, then Refactor Spaces configures the Lambda function's resource policy to allow the application's API Gateway to invoke the function. A one-time health check is performed on the service when the route is created. If the health check fails, the route transitions to FAILED, and no traffic is sent to the service. For Lambda functions, the Lambda function state is checked. If the function is not active, the function configuration is updated so that Lambda resources are provisioned. If the Lambda state is Failed, then the route creation fails. For more information, see the GetFunctionConfiguration's State response parameter in the Lambda Developer Guide. For public URLs, a connection is opened to the public endpoint. If the URL is not reachable, the health check fails. For private URLs, a target group is created and the target group health check is run. The HealthCheckProtocol, HealthCheckPort, and HealthCheckPath are the same protocol, port, and path specified in the URL or health URL, if used. All other settings use the default values, as described in Health checks for your target groups. The health check is considered successful if at least one target within the target group transitions to a healthy state. Services can have HTTP or HTTPS URL endpoints. For HTTPS URLs, publicly-signed certificates are supported. Private Certificate Authorities (CAs) are permitted only if the CA's domain is publicly resolvable."]
+       "Creates an Amazon Web Services Migration Hub Refactor Spaces route. The account owner of the service resource is always the environment owner, regardless of which account creates the route. Routes target a service in the application. If an application does not have any routes, then the first route must be created as a DEFAULT RouteType. When created, the default route defaults to an active state so state is not a required input. However, like all other state values the state of the default route can be updated after creation, but only when all other routes are also inactive. Conversely, no route can be active without the default route also being active. When you create a route, Refactor Spaces configures the Amazon API Gateway to send traffic to the target service as follows: URL Endpoints If the service has a URL endpoint, and the endpoint resolves to a private IP address, Refactor Spaces routes traffic using the API Gateway VPC link. If a service endpoint resolves to a public IP address, Refactor Spaces routes traffic over the public internet. Services can have HTTP or HTTPS URL endpoints. For HTTPS URLs, publicly-signed certificates are supported. Private Certificate Authorities (CAs) are permitted only if the CA's domain is also publicly resolvable. Refactor Spaces automatically resolves the public Domain Name System (DNS) names that are set in CreateService:UrlEndpoint when you create a service. The DNS names resolve when the DNS time-to-live (TTL) expires, or every 60 seconds for TTLs less than 60 seconds. This periodic DNS resolution ensures that the route configuration remains up-to-date. One-time health check A one-time health check is performed on the service when either the route is updated from inactive to active, or when it is created with an active state. If the health check fails, the route transitions the route state to FAILED, an error code of SERVICE_ENDPOINT_HEALTH_CHECK_FAILURE is provided, and no traffic is sent to the service. For private URLs, a target group is created on the Network Load Balancer and the load balancer target group runs default target health checks. By default, the health check is run against the service endpoint URL. Optionally, the health check can be performed against a different protocol, port, and/or path using the CreateService:UrlEndpoint parameter. All other health check settings for the load balancer use the default values described in the Health checks for your target groups in the Elastic Load Balancing guide. The health check is considered successful if at least one target within the target group transitions to a healthy state. Lambda function endpoints If the service has an Lambda function endpoint, then Refactor Spaces configures the Lambda function's resource policy to allow the application's API Gateway to invoke the function. The Lambda function state is checked. If the function is not active, the function configuration is updated so that Lambda resources are provisioned. If the Lambda state is Failed, then the route creation fails. For more information, see the GetFunctionConfiguration's State response parameter in the Lambda Developer Guide. A check is performed to determine that a Lambda function with the specified ARN exists. If it does not exist, the health check fails. For public URLs, a connection is opened to the public endpoint. If the URL is not reachable, the health check fails. Environments without a network bridge When you create environments without a network bridge (CreateEnvironment:NetworkFabricType is NONE) and you use your own networking infrastructure, you need to configure VPC to VPC connectivity between your network and the application proxy VPC. Route creation from the application proxy to service endpoints will fail if your network is not configured to connect to the application proxy VPC. For more information, see Create a route in the Refactor Spaces User Guide."]
 module CreateEnvironmentResponse =
   struct
     type nonrec t =
@@ -7012,25 +7353,26 @@ module CreateEnvironmentResponse =
       make ?tags ?state ?ownerAccountId ?networkFabricType ?name
         ?lastUpdatedTime ?environmentId ?description ?createdTime ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" EnvironmentState.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" EnvironmentState.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
       let networkFabricType =
-        field_map json "NetworkFabricType" NetworkFabricType.of_json in
-      let name = field_map json "Name" EnvironmentName.of_json in
+        field_map json__ "NetworkFabricType" NetworkFabricType.of_json in
+      let name = field_map json__ "Name" EnvironmentName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       make ?tags ?state ?ownerAccountId ?networkFabricType ?name
         ?lastUpdatedTime ?environmentId ?description ?createdTime ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services Migration Hub Refactor Spaces environment. The caller owns the environment resource, and all Refactor Spaces applications, services, and routes created within the environment. They are referred to as the environment owner. The environment owner has cross-account visibility and control of Refactor Spaces resources that are added to the environment by other accounts that the environment is shared with. When creating an environment, Refactor Spaces provisions a transit gateway in your account."]
+       "Creates an Amazon Web Services Migration Hub Refactor Spaces environment. The caller owns the environment resource, and all Refactor Spaces applications, services, and routes created within the environment. They are referred to as the environment owner. The environment owner has cross-account visibility and control of Refactor Spaces resources that are added to the environment by other accounts that the environment is shared with. When creating an environment with a CreateEnvironment:NetworkFabricType of TRANSIT_GATEWAY, Refactor Spaces provisions a transit gateway to enable services in VPCs to communicate directly across accounts. If CreateEnvironment:NetworkFabricType is NONE, Refactor Spaces does not create a transit gateway and you must use your network infrastructure to route traffic to services with private URL endpoints."]
 module CreateEnvironmentRequest =
   struct
     type nonrec t =
@@ -7077,17 +7419,17 @@ module CreateEnvironmentRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ?tags ~networkFabricType ~name ?description ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let networkFabricType =
-        field_map_exn json "NetworkFabricType" NetworkFabricType.of_json in
-      let name = field_map_exn json "Name" EnvironmentName.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+        field_map_exn json__ "NetworkFabricType" NetworkFabricType.of_json in
+      let name = field_map_exn json__ "Name" EnvironmentName.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       make ?tags ~networkFabricType ~name ?description ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services Migration Hub Refactor Spaces environment. The caller owns the environment resource, and all Refactor Spaces applications, services, and routes created within the environment. They are referred to as the environment owner. The environment owner has cross-account visibility and control of Refactor Spaces resources that are added to the environment by other accounts that the environment is shared with. When creating an environment, Refactor Spaces provisions a transit gateway in your account."]
+       "Creates an Amazon Web Services Migration Hub Refactor Spaces environment. The caller owns the environment resource, and all Refactor Spaces applications, services, and routes created within the environment. They are referred to as the environment owner. The environment owner has cross-account visibility and control of Refactor Spaces resources that are added to the environment by other accounts that the environment is shared with. When creating an environment with a CreateEnvironment:NetworkFabricType of TRANSIT_GATEWAY, Refactor Spaces provisions a transit gateway to enable services in VPCs to communicate directly across accounts. If CreateEnvironment:NetworkFabricType is NONE, Refactor Spaces does not create a transit gateway and you must use your network infrastructure to route traffic to services with private URL endpoints."]
 module CreateApplicationResponse =
   struct
     type nonrec t =
@@ -7294,31 +7636,32 @@ module CreateApplicationResponse =
         ?lastUpdatedTime ?environmentId ?createdTime ?createdByAccountId ?arn
         ?applicationId ?apiGatewayProxy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" ApplicationState.of_json in
-      let proxyType = field_map json "ProxyType" ProxyType.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
-      let name = field_map json "Name" ApplicationName.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" ApplicationState.of_json in
+      let proxyType = field_map json__ "ProxyType" ProxyType.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
+      let name = field_map json__ "Name" ApplicationName.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
       let environmentId =
-        field_map json "EnvironmentId" EnvironmentId.of_json in
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
+        field_map json__ "EnvironmentId" EnvironmentId.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
       let createdByAccountId =
-        field_map json "CreatedByAccountId" AccountId.of_json in
-      let arn = field_map json "Arn" ResourceArn.of_json in
+        field_map json__ "CreatedByAccountId" AccountId.of_json in
+      let arn = field_map json__ "Arn" ResourceArn.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       let apiGatewayProxy =
-        field_map json "ApiGatewayProxy" ApiGatewayProxyInput.of_json in
+        field_map json__ "ApiGatewayProxy" ApiGatewayProxyInput.of_json in
       make ?vpcId ?tags ?state ?proxyType ?ownerAccountId ?name
         ?lastUpdatedTime ?environmentId ?createdTime ?createdByAccountId ?arn
         ?applicationId ?apiGatewayProxy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services Migration Hub Refactor Spaces application. The account that owns the environment also owns the applications created inside the environment, regardless of the account that creates the application. Refactor Spaces provisions an Amazon API Gateway, API Gateway VPC link, and Network Load Balancer for the application proxy inside your account."]
+       "Creates an Amazon Web Services Migration Hub Refactor Spaces application. The account that owns the environment also owns the applications created inside the environment, regardless of the account that creates the application. Refactor Spaces provisions an Amazon API Gateway, API Gateway VPC link, and Network Load Balancer for the application proxy inside your account. In environments created with a CreateEnvironment:NetworkFabricType of NONE you need to configure VPC to VPC connectivity between your service VPC and the application proxy VPC to route traffic through the application proxy to a service with a private URL endpoint. For more information, see Create an application in the Refactor Spaces User Guide."]
 module CreateApplicationRequest =
   struct
     type nonrec t =
@@ -7392,18 +7735,18 @@ module CreateApplicationRequest =
       make ~vpcId ?tags ~proxyType ~name ~environmentIdentifier ?clientToken
         ?apiGatewayProxy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map_exn json "VpcId" VpcId.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let proxyType = field_map_exn json "ProxyType" ProxyType.of_json in
-      let name = field_map_exn json "Name" ApplicationName.of_json in
+    let of_json json__ =
+      let vpcId = field_map_exn json__ "VpcId" VpcId.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let proxyType = field_map_exn json__ "ProxyType" ProxyType.of_json in
+      let name = field_map_exn json__ "Name" ApplicationName.of_json in
       let environmentIdentifier =
-        field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+        field_map_exn json__ "EnvironmentIdentifier" EnvironmentId.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       let apiGatewayProxy =
-        field_map json "ApiGatewayProxy" ApiGatewayProxyInput.of_json in
+        field_map json__ "ApiGatewayProxy" ApiGatewayProxyInput.of_json in
       make ~vpcId ?tags ~proxyType ~name ~environmentIdentifier ?clientToken
         ?apiGatewayProxy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services Migration Hub Refactor Spaces application. The account that owns the environment also owns the applications created inside the environment, regardless of the account that creates the application. Refactor Spaces provisions an Amazon API Gateway, API Gateway VPC link, and Network Load Balancer for the application proxy inside your account."]
+       "Creates an Amazon Web Services Migration Hub Refactor Spaces application. The account that owns the environment also owns the applications created inside the environment, regardless of the account that creates the application. Refactor Spaces provisions an Amazon API Gateway, API Gateway VPC link, and Network Load Balancer for the application proxy inside your account. In environments created with a CreateEnvironment:NetworkFabricType of NONE you need to configure VPC to VPC connectivity between your service VPC and the application proxy VPC to route traffic through the application proxy to a service with a private URL endpoint. For more information, see Create an application in the Refactor Spaces User Guide."]

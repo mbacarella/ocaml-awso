@@ -154,6 +154,8 @@ let connect_directory =
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and name = flag "name" (required string) ~doc:"STRING DirectoryName"
        and password =
          flag "password" (required string) ~doc:"STRING ConnectPassword"
@@ -165,7 +167,9 @@ let connect_directory =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.connect_directory
            (Values.ConnectDirectoryRequest.make ?shortName ?description
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name ~password
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType) ~name ~password
               ~size:(Values.DirectorySize.of_json size)
               ~connectSettings:(Values.DirectoryConnectSettings.of_json
                                   connectSettings) ())
@@ -232,20 +236,23 @@ let create_conditional_forwarder =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and dnsIpAddrs =
+         flag "dns-ip-addrs" (optional json_arg) ~doc:"JSON DnsIpAddrs"
+       and dnsIpv6Addrs =
+         flag "dns-ipv6-addrs" (optional json_arg) ~doc:"JSON DnsIpv6Addrs"
        and directoryId =
          flag "directory-id" (required string) ~doc:"STRING DirectoryId"
        and remoteDomainName =
          flag "remote-domain-name" (required string)
-           ~doc:"STRING RemoteDomainName"
-       and dnsIpAddrs =
-         flag "dns-ip-addrs" (required json_arg) ~doc:"JSON DnsIpAddrs" in
+           ~doc:"STRING RemoteDomainName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_conditional_forwarder
-           (Values.CreateConditionalForwarderRequest.make ~directoryId
-              ~remoteDomainName
-              ~dnsIpAddrs:(Values.DnsIpAddrs.of_json dnsIpAddrs) ())
-           (Some Values.CreateConditionalForwarderResult.to_json)
+           (Values.CreateConditionalForwarderRequest.make
+              ?dnsIpAddrs:(Option.map ~f:Values.DnsIpAddrs.of_json dnsIpAddrs)
+              ?dnsIpv6Addrs:(Option.map ~f:Values.DnsIpv6Addrs.of_json
+                               dnsIpv6Addrs) ~directoryId ~remoteDomainName
+              ()) (Some Values.CreateConditionalForwarderResult.to_json)
            (Some Values.CreateConditionalForwarderResult.error_to_json)])
 let create_directory =
   Command.async ~summary:""
@@ -265,6 +272,8 @@ let create_directory =
          flag "vpc-settings" (optional json_arg)
            ~doc:"JSON DirectoryVpcSettings"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and name = flag "name" (required string) ~doc:"STRING DirectoryName"
        and password =
          flag "password" (required string) ~doc:"STRING Password"
@@ -275,10 +284,34 @@ let create_directory =
            (Values.CreateDirectoryRequest.make ?shortName ?description
               ?vpcSettings:(Option.map ~f:Values.DirectoryVpcSettings.of_json
                               vpcSettings)
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name ~password
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType) ~name ~password
               ~size:(Values.DirectorySize.of_json size) ())
            (Some Values.CreateDirectoryResult.to_json)
            (Some Values.CreateDirectoryResult.error_to_json)])
+let create_hybrid_a_d =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and secretArn =
+         flag "secret-arn" (required string) ~doc:"STRING SecretArn"
+       and assessmentId =
+         flag "assessment-id" (required string) ~doc:"STRING AssessmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_hybrid_a_d
+           (Values.CreateHybridADRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~secretArn
+              ~assessmentId ()) (Some Values.CreateHybridADResult.to_json)
+           (Some Values.CreateHybridADResult.error_to_json)])
 let create_log_subscription =
   Command.async ~summary:""
     ([%map_open.Command
@@ -317,6 +350,8 @@ let create_microsoft_a_d =
        and edition =
          flag "edition" (optional json_arg) ~doc:"JSON DirectoryEdition"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and name = flag "name" (required string) ~doc:"STRING DirectoryName"
        and password =
          flag "password" (required string) ~doc:"STRING Password"
@@ -328,7 +363,9 @@ let create_microsoft_a_d =
            Io.create_microsoft_a_d
            (Values.CreateMicrosoftADRequest.make ?shortName ?description
               ?edition:(Option.map ~f:Values.DirectoryEdition.of_json edition)
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name ~password
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType) ~name ~password
               ~vpcSettings:(Values.DirectoryVpcSettings.of_json vpcSettings)
               ()) (Some Values.CreateMicrosoftADResult.to_json)
            (Some Values.CreateMicrosoftADResult.error_to_json)])
@@ -366,6 +403,9 @@ let create_trust =
        and conditionalForwarderIpAddrs =
          flag "conditional-forwarder-ip-addrs" (optional json_arg)
            ~doc:"JSON DnsIpAddrs"
+       and conditionalForwarderIpv6Addrs =
+         flag "conditional-forwarder-ipv6-addrs" (optional json_arg)
+           ~doc:"JSON DnsIpv6Addrs"
        and selectiveAuth =
          flag "selective-auth" (optional json_arg) ~doc:"JSON SelectiveAuth"
        and directoryId =
@@ -386,12 +426,33 @@ let create_trust =
               ?conditionalForwarderIpAddrs:(Option.map
                                               ~f:Values.DnsIpAddrs.of_json
                                               conditionalForwarderIpAddrs)
+              ?conditionalForwarderIpv6Addrs:(Option.map
+                                                ~f:Values.DnsIpv6Addrs.of_json
+                                                conditionalForwarderIpv6Addrs)
               ?selectiveAuth:(Option.map ~f:Values.SelectiveAuth.of_json
                                 selectiveAuth) ~directoryId ~remoteDomainName
               ~trustPassword
               ~trustDirection:(Values.TrustDirection.of_json trustDirection)
               ()) (Some Values.CreateTrustResult.to_json)
            (Some Values.CreateTrustResult.error_to_json)])
+let delete_a_d_assessment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assessmentId =
+         flag "assessment-id" (required string) ~doc:"STRING AssessmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_a_d_assessment
+           (Values.DeleteADAssessmentRequest.make ~assessmentId ())
+           (Some Values.DeleteADAssessmentResult.to_json)
+           (Some Values.DeleteADAssessmentResult.error_to_json)])
 let delete_conditional_forwarder =
   Command.async ~summary:""
     ([%map_open.Command
@@ -530,6 +591,42 @@ let deregister_event_topic =
            (Values.DeregisterEventTopicRequest.make ~directoryId ~topicName
               ()) (Some Values.DeregisterEventTopicResult.to_json)
            (Some Values.DeregisterEventTopicResult.error_to_json)])
+let describe_a_d_assessment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assessmentId =
+         flag "assessment-id" (required string) ~doc:"STRING AssessmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_a_d_assessment
+           (Values.DescribeADAssessmentRequest.make ~assessmentId ())
+           (Some Values.DescribeADAssessmentResult.to_json)
+           (Some Values.DescribeADAssessmentResult.error_to_json)])
+let describe_c_a_enrollment_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_c_a_enrollment_policy
+           (Values.DescribeCAEnrollmentPolicyRequest.make ~directoryId ())
+           (Some Values.DescribeCAEnrollmentPolicyResult.to_json)
+           (Some Values.DescribeCAEnrollmentPolicyResult.error_to_json)])
 let describe_certificate =
   Command.async ~summary:""
     ([%map_open.Command
@@ -625,6 +722,24 @@ let describe_directories =
                                directoryIds) ?nextToken ?limit ())
            (Some Values.DescribeDirectoriesResult.to_json)
            (Some Values.DescribeDirectoriesResult.error_to_json)])
+let describe_directory_data_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_directory_data_access
+           (Values.DescribeDirectoryDataAccessRequest.make ~directoryId ())
+           (Some Values.DescribeDirectoryDataAccessResult.to_json)
+           (Some Values.DescribeDirectoryDataAccessResult.error_to_json)])
 let describe_domain_controllers =
   Command.async ~summary:""
     ([%map_open.Command
@@ -674,6 +789,30 @@ let describe_event_topics =
               ?topicNames:(Option.map ~f:Values.TopicNames.of_json topicNames)
               ()) (Some Values.DescribeEventTopicsResult.to_json)
            (Some Values.DescribeEventTopicsResult.error_to_json)])
+let describe_hybrid_a_d_update =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and updateType =
+         flag "update-type" (optional json_arg) ~doc:"JSON HybridUpdateType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_hybrid_a_d_update
+           (Values.DescribeHybridADUpdateRequest.make
+              ?updateType:(Option.map ~f:Values.HybridUpdateType.of_json
+                             updateType) ?nextToken ~directoryId ())
+           (Some Values.DescribeHybridADUpdateResult.to_json)
+           (Some Values.DescribeHybridADUpdateResult.error_to_json)])
 let describe_l_d_a_p_s_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -720,6 +859,32 @@ let describe_regions =
            (Values.DescribeRegionsRequest.make ?regionName ?nextToken
               ~directoryId ()) (Some Values.DescribeRegionsResult.to_json)
            (Some Values.DescribeRegionsResult.error_to_json)])
+let describe_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON DirectoryConfigurationStatus"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_settings
+           (Values.DescribeSettingsRequest.make
+              ?status:(Option.map
+                         ~f:Values.DirectoryConfigurationStatus.of_json
+                         status) ?nextToken ~directoryId ())
+           (Some Values.DescribeSettingsResult.to_json)
+           (Some Values.DescribeSettingsResult.error_to_json)])
 let describe_shared_directories =
   Command.async ~summary:""
     ([%map_open.Command
@@ -798,6 +963,49 @@ let describe_trusts =
               ?nextToken ?limit ())
            (Some Values.DescribeTrustsResult.to_json)
            (Some Values.DescribeTrustsResult.error_to_json)])
+let describe_update_directory =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and regionName =
+         flag "region-name" (optional string) ~doc:"STRING RegionName"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId"
+       and updateType =
+         flag "update-type" (required json_arg) ~doc:"JSON UpdateType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_update_directory
+           (Values.DescribeUpdateDirectoryRequest.make ?regionName ?nextToken
+              ~directoryId ~updateType:(Values.UpdateType.of_json updateType)
+              ()) (Some Values.DescribeUpdateDirectoryResult.to_json)
+           (Some Values.DescribeUpdateDirectoryResult.error_to_json)])
+let disable_c_a_enrollment_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disable_c_a_enrollment_policy
+           (Values.DisableCAEnrollmentPolicyRequest.make ~directoryId ())
+           (Some Values.DisableCAEnrollmentPolicyResult.to_json)
+           (Some Values.DisableCAEnrollmentPolicyResult.error_to_json)])
 let disable_client_authentication =
   Command.async ~summary:""
     ([%map_open.Command
@@ -820,6 +1028,24 @@ let disable_client_authentication =
               ~type_:(Values.ClientAuthenticationType.of_json type_) ())
            (Some Values.DisableClientAuthenticationResult.to_json)
            (Some Values.DisableClientAuthenticationResult.error_to_json)])
+let disable_directory_data_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disable_directory_data_access
+           (Values.DisableDirectoryDataAccessRequest.make ~directoryId ())
+           (Some Values.DisableDirectoryDataAccessResult.to_json)
+           (Some Values.DisableDirectoryDataAccessResult.error_to_json)])
 let disable_l_d_a_p_s =
   Command.async ~summary:""
     ([%map_open.Command
@@ -880,6 +1106,28 @@ let disable_sso =
            (Values.DisableSsoRequest.make ?userName ?password ~directoryId ())
            (Some Values.DisableSsoResult.to_json)
            (Some Values.DisableSsoResult.error_to_json)])
+let enable_c_a_enrollment_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId"
+       and pcaConnectorArn =
+         flag "pca-connector-arn" (required string)
+           ~doc:"STRING PcaConnectorArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.enable_c_a_enrollment_policy
+           (Values.EnableCAEnrollmentPolicyRequest.make ~directoryId
+              ~pcaConnectorArn ())
+           (Some Values.EnableCAEnrollmentPolicyResult.to_json)
+           (Some Values.EnableCAEnrollmentPolicyResult.error_to_json)])
 let enable_client_authentication =
   Command.async ~summary:""
     ([%map_open.Command
@@ -902,6 +1150,24 @@ let enable_client_authentication =
               ~type_:(Values.ClientAuthenticationType.of_json type_) ())
            (Some Values.EnableClientAuthenticationResult.to_json)
            (Some Values.EnableClientAuthenticationResult.error_to_json)])
+let enable_directory_data_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.enable_directory_data_access
+           (Values.EnableDirectoryDataAccessRequest.make ~directoryId ())
+           (Some Values.EnableDirectoryDataAccessResult.to_json)
+           (Some Values.EnableDirectoryDataAccessResult.error_to_json)])
 let enable_l_d_a_p_s =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1000,6 +1266,27 @@ let get_snapshot_limits =
            (Values.GetSnapshotLimitsRequest.make ~directoryId ())
            (Some Values.GetSnapshotLimitsResult.to_json)
            (Some Values.GetSnapshotLimitsResult.error_to_json)])
+let list_a_d_assessments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (optional string) ~doc:"STRING DirectoryId"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and limit = flag "limit" (optional int) ~doc:"INT AssessmentLimit" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_a_d_assessments
+           (Values.ListADAssessmentsRequest.make ?directoryId ?nextToken
+              ?limit ()) (Some Values.ListADAssessmentsResult.to_json)
+           (Some Values.ListADAssessmentsResult.error_to_json)])
 let list_certificates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1186,15 +1473,18 @@ let remove_ip_routes =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and cidrIps = flag "cidr-ips" (optional json_arg) ~doc:"JSON CidrIps"
+       and cidrIpv6s =
+         flag "cidr-ipv6s" (optional json_arg) ~doc:"JSON CidrIpv6s"
        and directoryId =
-         flag "directory-id" (required string) ~doc:"STRING DirectoryId"
-       and cidrIps = flag "cidr-ips" (required json_arg) ~doc:"JSON CidrIps" in
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.remove_ip_routes
-           (Values.RemoveIpRoutesRequest.make ~directoryId
-              ~cidrIps:(Values.CidrIps.of_json cidrIps) ())
-           (Some Values.RemoveIpRoutesResult.to_json)
+           (Values.RemoveIpRoutesRequest.make
+              ?cidrIps:(Option.map ~f:Values.CidrIps.of_json cidrIps)
+              ?cidrIpv6s:(Option.map ~f:Values.CidrIpv6s.of_json cidrIpv6s)
+              ~directoryId ()) (Some Values.RemoveIpRoutesResult.to_json)
            (Some Values.RemoveIpRoutesResult.error_to_json)])
 let remove_region =
   Command.async ~summary:""
@@ -1299,6 +1589,30 @@ let share_directory =
               ~shareMethod:(Values.ShareMethod.of_json shareMethod) ())
            (Some Values.ShareDirectoryResult.to_json)
            (Some Values.ShareDirectoryResult.error_to_json)])
+let start_a_d_assessment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assessmentConfiguration =
+         flag "assessment-configuration" (optional json_arg)
+           ~doc:"JSON AssessmentConfiguration"
+       and directoryId =
+         flag "directory-id" (optional string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_a_d_assessment
+           (Values.StartADAssessmentRequest.make
+              ?assessmentConfiguration:(Option.map
+                                          ~f:Values.AssessmentConfiguration.of_json
+                                          assessmentConfiguration)
+              ?directoryId ()) (Some Values.StartADAssessmentResult.to_json)
+           (Some Values.StartADAssessmentResult.error_to_json)])
 let start_schema_extension =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1356,21 +1670,97 @@ let update_conditional_forwarder =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and dnsIpAddrs =
+         flag "dns-ip-addrs" (optional json_arg) ~doc:"JSON DnsIpAddrs"
+       and dnsIpv6Addrs =
+         flag "dns-ipv6-addrs" (optional json_arg) ~doc:"JSON DnsIpv6Addrs"
        and directoryId =
          flag "directory-id" (required string) ~doc:"STRING DirectoryId"
        and remoteDomainName =
          flag "remote-domain-name" (required string)
-           ~doc:"STRING RemoteDomainName"
-       and dnsIpAddrs =
-         flag "dns-ip-addrs" (required json_arg) ~doc:"JSON DnsIpAddrs" in
+           ~doc:"STRING RemoteDomainName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_conditional_forwarder
-           (Values.UpdateConditionalForwarderRequest.make ~directoryId
-              ~remoteDomainName
-              ~dnsIpAddrs:(Values.DnsIpAddrs.of_json dnsIpAddrs) ())
-           (Some Values.UpdateConditionalForwarderResult.to_json)
+           (Values.UpdateConditionalForwarderRequest.make
+              ?dnsIpAddrs:(Option.map ~f:Values.DnsIpAddrs.of_json dnsIpAddrs)
+              ?dnsIpv6Addrs:(Option.map ~f:Values.DnsIpv6Addrs.of_json
+                               dnsIpv6Addrs) ~directoryId ~remoteDomainName
+              ()) (Some Values.UpdateConditionalForwarderResult.to_json)
            (Some Values.UpdateConditionalForwarderResult.error_to_json)])
+let update_directory_setup =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and oSUpdateSettings =
+         flag "o-s-update-settings" (optional json_arg)
+           ~doc:"JSON OSUpdateSettings"
+       and directorySizeUpdateSettings =
+         flag "directory-size-update-settings" (optional json_arg)
+           ~doc:"JSON DirectorySizeUpdateSettings"
+       and networkUpdateSettings =
+         flag "network-update-settings" (optional json_arg)
+           ~doc:"JSON NetworkUpdateSettings"
+       and createSnapshotBeforeUpdate =
+         flag "create-snapshot-before-update" (optional bool)
+           ~doc:"BOOL CreateSnapshotBeforeUpdate"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId"
+       and updateType =
+         flag "update-type" (required json_arg) ~doc:"JSON UpdateType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_directory_setup
+           (Values.UpdateDirectorySetupRequest.make
+              ?oSUpdateSettings:(Option.map
+                                   ~f:Values.OSUpdateSettings.of_json
+                                   oSUpdateSettings)
+              ?directorySizeUpdateSettings:(Option.map
+                                              ~f:Values.DirectorySizeUpdateSettings.of_json
+                                              directorySizeUpdateSettings)
+              ?networkUpdateSettings:(Option.map
+                                        ~f:Values.NetworkUpdateSettings.of_json
+                                        networkUpdateSettings)
+              ?createSnapshotBeforeUpdate ~directoryId
+              ~updateType:(Values.UpdateType.of_json updateType) ())
+           (Some Values.UpdateDirectorySetupResult.to_json)
+           (Some Values.UpdateDirectorySetupResult.error_to_json)])
+let update_hybrid_a_d =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hybridAdministratorAccountUpdate =
+         flag "hybrid-administrator-account-update" (optional json_arg)
+           ~doc:"JSON HybridAdministratorAccountUpdate"
+       and selfManagedInstancesSettings =
+         flag "self-managed-instances-settings" (optional json_arg)
+           ~doc:"JSON HybridCustomerInstancesSettings"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_hybrid_a_d
+           (Values.UpdateHybridADRequest.make
+              ?hybridAdministratorAccountUpdate:(Option.map
+                                                   ~f:Values.HybridAdministratorAccountUpdate.of_json
+                                                   hybridAdministratorAccountUpdate)
+              ?selfManagedInstancesSettings:(Option.map
+                                               ~f:Values.HybridCustomerInstancesSettings.of_json
+                                               selfManagedInstancesSettings)
+              ~directoryId ()) (Some Values.UpdateHybridADResult.to_json)
+           (Some Values.UpdateHybridADResult.error_to_json)])
 let update_number_of_domain_controllers =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1415,6 +1805,27 @@ let update_radius =
               ~radiusSettings:(Values.RadiusSettings.of_json radiusSettings)
               ()) (Some Values.UpdateRadiusResult.to_json)
            (Some Values.UpdateRadiusResult.error_to_json)])
+let update_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId"
+       and settings =
+         flag "settings" (required json_arg) ~doc:"JSON Settings" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_settings
+           (Values.UpdateSettingsRequest.make ~directoryId
+              ~settings:(Values.Settings.of_json settings) ())
+           (Some Values.UpdateSettingsResult.to_json)
+           (Some Values.UpdateSettingsResult.error_to_json)])
 let update_trust =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1465,10 +1876,12 @@ let main =
     ("create-computer", create_computer);
     ("create-conditional-forwarder", create_conditional_forwarder);
     ("create-directory", create_directory);
+    ("create-hybrid-a-d", create_hybrid_a_d);
     ("create-log-subscription", create_log_subscription);
     ("create-microsoft-a-d", create_microsoft_a_d);
     ("create-snapshot", create_snapshot);
     ("create-trust", create_trust);
+    ("delete-a-d-assessment", delete_a_d_assessment);
     ("delete-conditional-forwarder", delete_conditional_forwarder);
     ("delete-directory", delete_directory);
     ("delete-log-subscription", delete_log_subscription);
@@ -1476,28 +1889,39 @@ let main =
     ("delete-trust", delete_trust);
     ("deregister-certificate", deregister_certificate);
     ("deregister-event-topic", deregister_event_topic);
+    ("describe-a-d-assessment", describe_a_d_assessment);
+    ("describe-c-a-enrollment-policy", describe_c_a_enrollment_policy);
     ("describe-certificate", describe_certificate);
     ("describe-client-authentication-settings",
       describe_client_authentication_settings);
     ("describe-conditional-forwarders", describe_conditional_forwarders);
     ("describe-directories", describe_directories);
+    ("describe-directory-data-access", describe_directory_data_access);
     ("describe-domain-controllers", describe_domain_controllers);
     ("describe-event-topics", describe_event_topics);
+    ("describe-hybrid-a-d-update", describe_hybrid_a_d_update);
     ("describe-l-d-a-p-s-settings", describe_l_d_a_p_s_settings);
     ("describe-regions", describe_regions);
+    ("describe-settings", describe_settings);
     ("describe-shared-directories", describe_shared_directories);
     ("describe-snapshots", describe_snapshots);
     ("describe-trusts", describe_trusts);
+    ("describe-update-directory", describe_update_directory);
+    ("disable-c-a-enrollment-policy", disable_c_a_enrollment_policy);
     ("disable-client-authentication", disable_client_authentication);
+    ("disable-directory-data-access", disable_directory_data_access);
     ("disable-l-d-a-p-s", disable_l_d_a_p_s);
     ("disable-radius", disable_radius);
     ("disable-sso", disable_sso);
+    ("enable-c-a-enrollment-policy", enable_c_a_enrollment_policy);
     ("enable-client-authentication", enable_client_authentication);
+    ("enable-directory-data-access", enable_directory_data_access);
     ("enable-l-d-a-p-s", enable_l_d_a_p_s);
     ("enable-radius", enable_radius);
     ("enable-sso", enable_sso);
     ("get-directory-limits", get_directory_limits);
     ("get-snapshot-limits", get_snapshot_limits);
+    ("list-a-d-assessments", list_a_d_assessments);
     ("list-certificates", list_certificates);
     ("list-ip-routes", list_ip_routes);
     ("list-log-subscriptions", list_log_subscriptions);
@@ -1512,11 +1936,15 @@ let main =
     ("reset-user-password", reset_user_password);
     ("restore-from-snapshot", restore_from_snapshot);
     ("share-directory", share_directory);
+    ("start-a-d-assessment", start_a_d_assessment);
     ("start-schema-extension", start_schema_extension);
     ("unshare-directory", unshare_directory);
     ("update-conditional-forwarder", update_conditional_forwarder);
+    ("update-directory-setup", update_directory_setup);
+    ("update-hybrid-a-d", update_hybrid_a_d);
     ("update-number-of-domain-controllers",
       update_number_of_domain_controllers);
     ("update-radius", update_radius);
+    ("update-settings", update_settings);
     ("update-trust", update_trust);
     ("verify-trust", verify_trust)]

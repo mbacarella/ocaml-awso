@@ -72,6 +72,12 @@ val describe_safety_rule :
       DescribeSafetyRuleRequest.t ->
         (DescribeSafetyRuleResponse.t, DescribeSafetyRuleResponse.error)
           Result.t Async.Deferred.t
+val get_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePolicyRequest.t ->
+        (GetResourcePolicyResponse.t, GetResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val list_associated_route53_health_checks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -120,6 +126,12 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+          Async.Deferred.t
+val update_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateClusterRequest.t ->
+        (UpdateClusterResponse.t, UpdateClusterResponse.error) Result.t
           Async.Deferred.t
 val update_control_panel :
   ?endpoint_url:string ->

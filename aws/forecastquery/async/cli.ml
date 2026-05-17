@@ -53,7 +53,34 @@ let query_forecast =
               ~forecastArn ~filters:(Values.Filters.of_json filters) ())
            (Some Values.QueryForecastResponse.to_json)
            (Some Values.QueryForecastResponse.error_to_json)])
+let query_what_if_forecast =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and startDate =
+         flag "start-date" (optional string) ~doc:"STRING DateTime"
+       and endDate = flag "end-date" (optional string) ~doc:"STRING DateTime"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and whatIfForecastArn =
+         flag "what-if-forecast-arn" (required string) ~doc:"STRING LongArn"
+       and filters = flag "filters" (required json_arg) ~doc:"JSON Filters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.query_what_if_forecast
+           (Values.QueryWhatIfForecastRequest.make ?startDate ?endDate
+              ?nextToken ~whatIfForecastArn
+              ~filters:(Values.Filters.of_json filters) ())
+           (Some Values.QueryWhatIfForecastResponse.to_json)
+           (Some Values.QueryWhatIfForecastResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("query-forecast", query_forecast)]
+    [("query-forecast", query_forecast);
+    ("query-what-if-forecast", query_what_if_forecast)]

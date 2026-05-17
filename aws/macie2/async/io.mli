@@ -13,6 +13,19 @@ val batch_get_custom_data_identifiers :
         (BatchGetCustomDataIdentifiersResponse.t,
           BatchGetCustomDataIdentifiersResponse.error) Result.t
           Async.Deferred.t
+val batch_update_automated_discovery_accounts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchUpdateAutomatedDiscoveryAccountsRequest.t ->
+        (BatchUpdateAutomatedDiscoveryAccountsResponse.t,
+          BatchUpdateAutomatedDiscoveryAccountsResponse.error) Result.t
+          Async.Deferred.t
+val create_allow_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAllowListRequest.t ->
+        (CreateAllowListResponse.t, CreateAllowListResponse.error) Result.t
+          Async.Deferred.t
 val create_classification_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -55,6 +68,12 @@ val decline_invitations :
       DeclineInvitationsRequest.t ->
         (DeclineInvitationsResponse.t, DeclineInvitationsResponse.error)
           Result.t Async.Deferred.t
+val delete_allow_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAllowListRequest.t ->
+        (DeleteAllowListResponse.t, DeleteAllowListResponse.error) Result.t
+          Async.Deferred.t
 val delete_custom_data_identifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -150,6 +169,19 @@ val get_administrator_account :
       GetAdministratorAccountRequest.t ->
         (GetAdministratorAccountResponse.t,
           GetAdministratorAccountResponse.error) Result.t Async.Deferred.t
+val get_allow_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAllowListRequest.t ->
+        (GetAllowListResponse.t, GetAllowListResponse.error) Result.t
+          Async.Deferred.t
+val get_automated_discovery_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAutomatedDiscoveryConfigurationRequest.t ->
+        (GetAutomatedDiscoveryConfigurationResponse.t,
+          GetAutomatedDiscoveryConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val get_bucket_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -163,6 +195,12 @@ val get_classification_export_configuration :
         (GetClassificationExportConfigurationResponse.t,
           GetClassificationExportConfigurationResponse.error) Result.t
           Async.Deferred.t
+val get_classification_scope :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetClassificationScopeRequest.t ->
+        (GetClassificationScopeResponse.t,
+          GetClassificationScopeResponse.error) Result.t Async.Deferred.t
 val get_custom_data_identifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -218,6 +256,39 @@ val get_member :
       GetMemberRequest.t ->
         (GetMemberResponse.t, GetMemberResponse.error) Result.t
           Async.Deferred.t
+val get_resource_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourceProfileRequest.t ->
+        (GetResourceProfileResponse.t, GetResourceProfileResponse.error)
+          Result.t Async.Deferred.t
+val get_reveal_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRevealConfigurationRequest.t ->
+        (GetRevealConfigurationResponse.t,
+          GetRevealConfigurationResponse.error) Result.t Async.Deferred.t
+val get_sensitive_data_occurrences :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSensitiveDataOccurrencesRequest.t ->
+        (GetSensitiveDataOccurrencesResponse.t,
+          GetSensitiveDataOccurrencesResponse.error) Result.t
+          Async.Deferred.t
+val get_sensitive_data_occurrences_availability :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSensitiveDataOccurrencesAvailabilityRequest.t ->
+        (GetSensitiveDataOccurrencesAvailabilityResponse.t,
+          GetSensitiveDataOccurrencesAvailabilityResponse.error) Result.t
+          Async.Deferred.t
+val get_sensitivity_inspection_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSensitivityInspectionTemplateRequest.t ->
+        (GetSensitivityInspectionTemplateResponse.t,
+          GetSensitivityInspectionTemplateResponse.error) Result.t
+          Async.Deferred.t
 val get_usage_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -230,12 +301,31 @@ val get_usage_totals :
       GetUsageTotalsRequest.t ->
         (GetUsageTotalsResponse.t, GetUsageTotalsResponse.error) Result.t
           Async.Deferred.t
+val list_allow_lists :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAllowListsRequest.t ->
+        (ListAllowListsResponse.t, ListAllowListsResponse.error) Result.t
+          Async.Deferred.t
+val list_automated_discovery_accounts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAutomatedDiscoveryAccountsRequest.t ->
+        (ListAutomatedDiscoveryAccountsResponse.t,
+          ListAutomatedDiscoveryAccountsResponse.error) Result.t
+          Async.Deferred.t
 val list_classification_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClassificationJobsRequest.t ->
         (ListClassificationJobsResponse.t,
           ListClassificationJobsResponse.error) Result.t Async.Deferred.t
+val list_classification_scopes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListClassificationScopesRequest.t ->
+        (ListClassificationScopesResponse.t,
+          ListClassificationScopesResponse.error) Result.t Async.Deferred.t
 val list_custom_data_identifiers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -278,6 +368,27 @@ val list_organization_admin_accounts :
       ListOrganizationAdminAccountsRequest.t ->
         (ListOrganizationAdminAccountsResponse.t,
           ListOrganizationAdminAccountsResponse.error) Result.t
+          Async.Deferred.t
+val list_resource_profile_artifacts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListResourceProfileArtifactsRequest.t ->
+        (ListResourceProfileArtifactsResponse.t,
+          ListResourceProfileArtifactsResponse.error) Result.t
+          Async.Deferred.t
+val list_resource_profile_detections :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListResourceProfileDetectionsRequest.t ->
+        (ListResourceProfileDetectionsResponse.t,
+          ListResourceProfileDetectionsResponse.error) Result.t
+          Async.Deferred.t
+val list_sensitivity_inspection_templates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSensitivityInspectionTemplatesRequest.t ->
+        (ListSensitivityInspectionTemplatesResponse.t,
+          ListSensitivityInspectionTemplatesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
@@ -323,12 +434,31 @@ val untag_resource :
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
+val update_allow_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAllowListRequest.t ->
+        (UpdateAllowListResponse.t, UpdateAllowListResponse.error) Result.t
+          Async.Deferred.t
+val update_automated_discovery_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAutomatedDiscoveryConfigurationRequest.t ->
+        (UpdateAutomatedDiscoveryConfigurationResponse.t,
+          UpdateAutomatedDiscoveryConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val update_classification_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateClassificationJobRequest.t ->
         (UpdateClassificationJobResponse.t,
           UpdateClassificationJobResponse.error) Result.t Async.Deferred.t
+val update_classification_scope :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateClassificationScopeRequest.t ->
+        (UpdateClassificationScopeResponse.t,
+          UpdateClassificationScopeResponse.error) Result.t Async.Deferred.t
 val update_findings_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -353,4 +483,30 @@ val update_organization_configuration :
       UpdateOrganizationConfigurationRequest.t ->
         (UpdateOrganizationConfigurationResponse.t,
           UpdateOrganizationConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val update_resource_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateResourceProfileRequest.t ->
+        (UpdateResourceProfileResponse.t,
+          UpdateResourceProfileResponse.error) Result.t Async.Deferred.t
+val update_resource_profile_detections :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateResourceProfileDetectionsRequest.t ->
+        (UpdateResourceProfileDetectionsResponse.t,
+          UpdateResourceProfileDetectionsResponse.error) Result.t
+          Async.Deferred.t
+val update_reveal_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRevealConfigurationRequest.t ->
+        (UpdateRevealConfigurationResponse.t,
+          UpdateRevealConfigurationResponse.error) Result.t Async.Deferred.t
+val update_sensitivity_inspection_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSensitivityInspectionTemplateRequest.t ->
+        (UpdateSensitivityInspectionTemplateResponse.t,
+          UpdateSensitivityInspectionTemplateResponse.error) Result.t
           Async.Deferred.t

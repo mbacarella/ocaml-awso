@@ -52,8 +52,8 @@ module AuthException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -72,8 +72,8 @@ module EC2InstanceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified instance was not found."]
@@ -91,8 +91,8 @@ module EC2InstanceStateInvalidException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -111,12 +111,32 @@ module EC2InstanceTypeInvalidException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The instance type is not supported for connecting via the serial console. Only Nitro instance types are currently supported."]
+module EC2InstanceUnavailableException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The instance is currently unavailable. Wait a few minutes and try again."]
 module InvalidArgsException =
   struct
     type nonrec t = {
@@ -131,8 +151,8 @@ module InvalidArgsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One of the parameters is not valid."]
@@ -163,8 +183,8 @@ module SerialConsoleAccessDisabledException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -183,8 +203,8 @@ module SerialConsoleSessionLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -203,12 +223,32 @@ module SerialConsoleSessionUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Unable to start a serial console session. Please try again."]
+module SerialConsoleSessionUnsupportedException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Your instance's BIOS version is unsupported for serial console connection. Reboot your instance to update its BIOS, and then try again to connect."]
 module ServiceException =
   struct
     type nonrec t = {
@@ -223,8 +263,8 @@ module ServiceException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -256,8 +296,8 @@ module ThrottlingException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -351,7 +391,7 @@ module InstanceOSUser =
                 (check_string_max i ~max:32) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[A-Za-z_][A-Za-z0-9\\@\\._-]{0,30}[A-Za-z0-9\\$_-]?$")));
+                       ~pattern:"(^[A-Za-z_][A-Za-z0-9\\@\\._-]{0,30}[A-Za-z0-9\\$_-]?$)|(^(?=.{2,32}$)[0-9]{1,32}[A-Za-z\\@\\._-][A-Za-z0-9\\@\\._-]*[A-Za-z0-9\\$_-]?$)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -377,6 +417,7 @@ module SendSerialConsoleSSHPublicKeyResponse =
       | `EC2InstanceStateInvalidException of
           EC2InstanceStateInvalidException.t 
       | `EC2InstanceTypeInvalidException of EC2InstanceTypeInvalidException.t 
+      | `EC2InstanceUnavailableException of EC2InstanceUnavailableException.t 
       | `InvalidArgsException of InvalidArgsException.t 
       | `SerialConsoleAccessDisabledException of
           SerialConsoleAccessDisabledException.t 
@@ -384,6 +425,8 @@ module SendSerialConsoleSSHPublicKeyResponse =
           SerialConsoleSessionLimitExceededException.t 
       | `SerialConsoleSessionUnavailableException of
           SerialConsoleSessionUnavailableException.t 
+      | `SerialConsoleSessionUnsupportedException of
+          SerialConsoleSessionUnsupportedException.t 
       | `ServiceException of ServiceException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -400,6 +443,9 @@ module SendSerialConsoleSSHPublicKeyResponse =
       | "EC2InstanceTypeInvalidException" ->
           `EC2InstanceTypeInvalidException
             (EC2InstanceTypeInvalidException.of_json json)
+      | "EC2InstanceUnavailableException" ->
+          `EC2InstanceUnavailableException
+            (EC2InstanceUnavailableException.of_json json)
       | "InvalidArgsException" ->
           `InvalidArgsException (InvalidArgsException.of_json json)
       | "SerialConsoleAccessDisabledException" ->
@@ -411,6 +457,9 @@ module SendSerialConsoleSSHPublicKeyResponse =
       | "SerialConsoleSessionUnavailableException" ->
           `SerialConsoleSessionUnavailableException
             (SerialConsoleSessionUnavailableException.of_json json)
+      | "SerialConsoleSessionUnsupportedException" ->
+          `SerialConsoleSessionUnsupportedException
+            (SerialConsoleSessionUnsupportedException.of_json json)
       | "ServiceException" ->
           `ServiceException (ServiceException.of_json json)
       | "ThrottlingException" ->
@@ -430,6 +479,9 @@ module SendSerialConsoleSSHPublicKeyResponse =
       | "EC2InstanceTypeInvalidException" ->
           `EC2InstanceTypeInvalidException
             (EC2InstanceTypeInvalidException.of_xml xml)
+      | "EC2InstanceUnavailableException" ->
+          `EC2InstanceUnavailableException
+            (EC2InstanceUnavailableException.of_xml xml)
       | "InvalidArgsException" ->
           `InvalidArgsException (InvalidArgsException.of_xml xml)
       | "SerialConsoleAccessDisabledException" ->
@@ -441,6 +493,9 @@ module SendSerialConsoleSSHPublicKeyResponse =
       | "SerialConsoleSessionUnavailableException" ->
           `SerialConsoleSessionUnavailableException
             (SerialConsoleSessionUnavailableException.of_xml xml)
+      | "SerialConsoleSessionUnsupportedException" ->
+          `SerialConsoleSessionUnsupportedException
+            (SerialConsoleSessionUnsupportedException.of_xml xml)
       | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
@@ -464,6 +519,10 @@ module SendSerialConsoleSSHPublicKeyResponse =
           `Assoc
             [("error", (`String "EC2InstanceTypeInvalidException"));
             ("details", (EC2InstanceTypeInvalidException.to_json e))]
+      | `EC2InstanceUnavailableException e ->
+          `Assoc
+            [("error", (`String "EC2InstanceUnavailableException"));
+            ("details", (EC2InstanceUnavailableException.to_json e))]
       | `InvalidArgsException e ->
           `Assoc
             [("error", (`String "InvalidArgsException"));
@@ -482,6 +541,10 @@ module SendSerialConsoleSSHPublicKeyResponse =
           `Assoc
             [("error", (`String "SerialConsoleSessionUnavailableException"));
             ("details", (SerialConsoleSessionUnavailableException.to_json e))]
+      | `SerialConsoleSessionUnsupportedException e ->
+          `Assoc
+            [("error", (`String "SerialConsoleSessionUnsupportedException"));
+            ("details", (SerialConsoleSessionUnsupportedException.to_json e))]
       | `ServiceException e ->
           `Assoc
             [("error", (`String "ServiceException"));
@@ -507,9 +570,9 @@ module SendSerialConsoleSSHPublicKeyResponse =
         (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
       make ?success ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let success = field_map json "Success" Success.of_json in
-      let requestId = field_map json "RequestId" RequestId.of_json in
+    let of_json json__ =
+      let success = field_map json__ "Success" Success.of_json in
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
       make ?success ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -547,11 +610,11 @@ module SendSerialConsoleSSHPublicKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~sSHPublicKey ?serialPort ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sSHPublicKey =
-        field_map_exn json "SSHPublicKey" SSHPublicKey.of_json in
-      let serialPort = field_map json "SerialPort" SerialPort.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
+        field_map_exn json__ "SSHPublicKey" SSHPublicKey.of_json in
+      let serialPort = field_map json__ "SerialPort" SerialPort.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
       make ~sSHPublicKey ?serialPort ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -571,6 +634,7 @@ module SendSSHPublicKeyResponse =
       | `EC2InstanceNotFoundException of EC2InstanceNotFoundException.t 
       | `EC2InstanceStateInvalidException of
           EC2InstanceStateInvalidException.t 
+      | `EC2InstanceUnavailableException of EC2InstanceUnavailableException.t 
       | `InvalidArgsException of InvalidArgsException.t 
       | `ServiceException of ServiceException.t 
       | `ThrottlingException of ThrottlingException.t 
@@ -585,6 +649,9 @@ module SendSSHPublicKeyResponse =
       | "EC2InstanceStateInvalidException" ->
           `EC2InstanceStateInvalidException
             (EC2InstanceStateInvalidException.of_json json)
+      | "EC2InstanceUnavailableException" ->
+          `EC2InstanceUnavailableException
+            (EC2InstanceUnavailableException.of_json json)
       | "InvalidArgsException" ->
           `InvalidArgsException (InvalidArgsException.of_json json)
       | "ServiceException" ->
@@ -603,6 +670,9 @@ module SendSSHPublicKeyResponse =
       | "EC2InstanceStateInvalidException" ->
           `EC2InstanceStateInvalidException
             (EC2InstanceStateInvalidException.of_xml xml)
+      | "EC2InstanceUnavailableException" ->
+          `EC2InstanceUnavailableException
+            (EC2InstanceUnavailableException.of_xml xml)
       | "InvalidArgsException" ->
           `InvalidArgsException (InvalidArgsException.of_xml xml)
       | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
@@ -624,6 +694,10 @@ module SendSSHPublicKeyResponse =
           `Assoc
             [("error", (`String "EC2InstanceStateInvalidException"));
             ("details", (EC2InstanceStateInvalidException.to_json e))]
+      | `EC2InstanceUnavailableException e ->
+          `Assoc
+            [("error", (`String "EC2InstanceUnavailableException"));
+            ("details", (EC2InstanceUnavailableException.to_json e))]
       | `InvalidArgsException e ->
           `Assoc
             [("error", (`String "InvalidArgsException"));
@@ -653,9 +727,9 @@ module SendSSHPublicKeyResponse =
         (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
       make ?success ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let success = field_map json "Success" Success.of_json in
-      let requestId = field_map json "RequestId" RequestId.of_json in
+    let of_json json__ =
+      let success = field_map json__ "Success" Success.of_json in
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
       make ?success ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -704,14 +778,14 @@ module SendSSHPublicKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?availabilityZone ~sSHPublicKey ~instanceOSUser ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZone =
-        field_map json "AvailabilityZone" AvailabilityZone.of_json in
+        field_map json__ "AvailabilityZone" AvailabilityZone.of_json in
       let sSHPublicKey =
-        field_map_exn json "SSHPublicKey" SSHPublicKey.of_json in
+        field_map_exn json__ "SSHPublicKey" SSHPublicKey.of_json in
       let instanceOSUser =
-        field_map_exn json "InstanceOSUser" InstanceOSUser.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
+        field_map_exn json__ "InstanceOSUser" InstanceOSUser.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
       make ?availabilityZone ~sSHPublicKey ~instanceOSUser ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

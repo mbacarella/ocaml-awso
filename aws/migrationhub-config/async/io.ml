@@ -13,6 +13,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let create_home_region_control ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateHomeRegionControl input
+let delete_home_region_control ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteHomeRegionControl input
 let describe_home_region_controls ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeHomeRegionControls input
 let get_home_region ?endpoint_url ?cfg input =

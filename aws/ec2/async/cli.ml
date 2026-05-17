@@ -5,8 +5,13 @@ include Cli_2
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("accept-reserved-instances-exchange-quote",
-       accept_reserved_instances_exchange_quote);
+    [("accept-address-transfer", accept_address_transfer);
+    ("accept-capacity-reservation-billing-ownership",
+      accept_capacity_reservation_billing_ownership);
+    ("accept-reserved-instances-exchange-quote",
+      accept_reserved_instances_exchange_quote);
+    ("accept-transit-gateway-client-vpn-attachment",
+      accept_transit_gateway_client_vpn_attachment);
     ("accept-transit-gateway-multicast-domain-associations",
       accept_transit_gateway_multicast_domain_associations);
     ("accept-transit-gateway-peering-attachment",
@@ -23,7 +28,11 @@ let main =
       apply_security_groups_to_client_vpn_target_network);
     ("assign-ipv6-addresses", assign_ipv6_addresses);
     ("assign-private-ip-addresses", assign_private_ip_addresses);
+    ("assign-private-nat-gateway-address",
+      assign_private_nat_gateway_address);
     ("associate-address", associate_address);
+    ("associate-capacity-reservation-billing-owner",
+      associate_capacity_reservation_billing_owner);
     ("associate-client-vpn-target-network",
       associate_client_vpn_target_network);
     ("associate-dhcp-options", associate_dhcp_options);
@@ -31,10 +40,17 @@ let main =
       associate_enclave_certificate_iam_role);
     ("associate-iam-instance-profile", associate_iam_instance_profile);
     ("associate-instance-event-window", associate_instance_event_window);
+    ("associate-ipam-byoasn", associate_ipam_byoasn);
+    ("associate-ipam-resource-discovery", associate_ipam_resource_discovery);
+    ("associate-nat-gateway-address", associate_nat_gateway_address);
+    ("associate-route-server", associate_route_server);
     ("associate-route-table", associate_route_table);
+    ("associate-security-group-vpc", associate_security_group_vpc);
     ("associate-subnet-cidr-block", associate_subnet_cidr_block);
     ("associate-transit-gateway-multicast-domain",
       associate_transit_gateway_multicast_domain);
+    ("associate-transit-gateway-policy-table",
+      associate_transit_gateway_policy_table);
     ("associate-transit-gateway-route-table",
       associate_transit_gateway_route_table);
     ("associate-trunk-interface", associate_trunk_interface);
@@ -42,6 +58,8 @@ let main =
     ("attach-classic-link-vpc", attach_classic_link_vpc);
     ("attach-internet-gateway", attach_internet_gateway);
     ("attach-network-interface", attach_network_interface);
+    ("attach-verified-access-trust-provider",
+      attach_verified_access_trust_provider);
     ("attach-volume", attach_volume);
     ("attach-vpn-gateway", attach_vpn_gateway);
     ("authorize-client-vpn-ingress", authorize_client_vpn_ingress);
@@ -53,7 +71,10 @@ let main =
     ("cancel-capacity-reservation-fleets",
       cancel_capacity_reservation_fleets);
     ("cancel-conversion-task", cancel_conversion_task);
+    ("cancel-declarative-policies-report",
+      cancel_declarative_policies_report);
     ("cancel-export-task", cancel_export_task);
+    ("cancel-image-launch-permission", cancel_image_launch_permission);
     ("cancel-import-task", cancel_import_task);
     ("cancel-reserved-instances-listing", cancel_reserved_instances_listing);
     ("cancel-spot-fleet-requests", cancel_spot_fleet_requests);
@@ -62,14 +83,23 @@ let main =
     ("copy-fpga-image", copy_fpga_image);
     ("copy-image", copy_image);
     ("copy-snapshot", copy_snapshot);
+    ("copy-volumes", copy_volumes);
+    ("create-capacity-manager-data-export",
+      create_capacity_manager_data_export);
     ("create-capacity-reservation", create_capacity_reservation);
+    ("create-capacity-reservation-by-splitting",
+      create_capacity_reservation_by_splitting);
     ("create-capacity-reservation-fleet", create_capacity_reservation_fleet);
     ("create-carrier-gateway", create_carrier_gateway);
     ("create-client-vpn-endpoint", create_client_vpn_endpoint);
     ("create-client-vpn-route", create_client_vpn_route);
+    ("create-coip-cidr", create_coip_cidr);
+    ("create-coip-pool", create_coip_pool);
     ("create-customer-gateway", create_customer_gateway);
     ("create-default-subnet", create_default_subnet);
     ("create-default-vpc", create_default_vpc);
+    ("create-delegate-mac-volume-ownership-task",
+      create_delegate_mac_volume_ownership_task);
     ("create-dhcp-options", create_dhcp_options);
     ("create-egress-only-internet-gateway",
       create_egress_only_internet_gateway);
@@ -77,18 +107,38 @@ let main =
     ("create-flow-logs", create_flow_logs);
     ("create-fpga-image", create_fpga_image);
     ("create-image", create_image);
+    ("create-image-usage-report", create_image_usage_report);
+    ("create-instance-connect-endpoint", create_instance_connect_endpoint);
     ("create-instance-event-window", create_instance_event_window);
     ("create-instance-export-task", create_instance_export_task);
     ("create-internet-gateway", create_internet_gateway);
+    ("create-interruptible-capacity-reservation-allocation",
+      create_interruptible_capacity_reservation_allocation);
     ("create-ipam", create_ipam);
+    ("create-ipam-external-resource-verification-token",
+      create_ipam_external_resource_verification_token);
+    ("create-ipam-policy", create_ipam_policy);
     ("create-ipam-pool", create_ipam_pool);
+    ("create-ipam-prefix-list-resolver", create_ipam_prefix_list_resolver);
+    ("create-ipam-prefix-list-resolver-target",
+      create_ipam_prefix_list_resolver_target);
+    ("create-ipam-resource-discovery", create_ipam_resource_discovery);
     ("create-ipam-scope", create_ipam_scope);
     ("create-key-pair", create_key_pair);
     ("create-launch-template", create_launch_template);
     ("create-launch-template-version", create_launch_template_version);
     ("create-local-gateway-route", create_local_gateway_route);
+    ("create-local-gateway-route-table", create_local_gateway_route_table);
+    ("create-local-gateway-route-table-virtual-interface-group-association",
+      create_local_gateway_route_table_virtual_interface_group_association);
     ("create-local-gateway-route-table-vpc-association",
       create_local_gateway_route_table_vpc_association);
+    ("create-local-gateway-virtual-interface",
+      create_local_gateway_virtual_interface);
+    ("create-local-gateway-virtual-interface-group",
+      create_local_gateway_virtual_interface_group);
+    ("create-mac-system-integrity-protection-modification-task",
+      create_mac_system_integrity_protection_modification_task);
     ("create-managed-prefix-list", create_managed_prefix_list);
     ("create-nat-gateway", create_nat_gateway);
     ("create-network-acl", create_network_acl);
@@ -105,7 +155,12 @@ let main =
     ("create-reserved-instances-listing", create_reserved_instances_listing);
     ("create-restore-image-task", create_restore_image_task);
     ("create-route", create_route);
+    ("create-route-server", create_route_server);
+    ("create-route-server-endpoint", create_route_server_endpoint);
+    ("create-route-server-peer", create_route_server_peer);
     ("create-route-table", create_route_table);
+    ("create-secondary-network", create_secondary_network);
+    ("create-secondary-subnet", create_secondary_subnet);
     ("create-security-group", create_security_group);
     ("create-snapshot", create_snapshot);
     ("create-snapshots", create_snapshots);
@@ -122,31 +177,52 @@ let main =
     ("create-transit-gateway-connect", create_transit_gateway_connect);
     ("create-transit-gateway-connect-peer",
       create_transit_gateway_connect_peer);
+    ("create-transit-gateway-metering-policy",
+      create_transit_gateway_metering_policy);
+    ("create-transit-gateway-metering-policy-entry",
+      create_transit_gateway_metering_policy_entry);
     ("create-transit-gateway-multicast-domain",
       create_transit_gateway_multicast_domain);
     ("create-transit-gateway-peering-attachment",
       create_transit_gateway_peering_attachment);
+    ("create-transit-gateway-policy-table",
+      create_transit_gateway_policy_table);
     ("create-transit-gateway-prefix-list-reference",
       create_transit_gateway_prefix_list_reference);
     ("create-transit-gateway-route", create_transit_gateway_route);
     ("create-transit-gateway-route-table",
       create_transit_gateway_route_table);
+    ("create-transit-gateway-route-table-announcement",
+      create_transit_gateway_route_table_announcement);
     ("create-transit-gateway-vpc-attachment",
       create_transit_gateway_vpc_attachment);
+    ("create-verified-access-endpoint", create_verified_access_endpoint);
+    ("create-verified-access-group", create_verified_access_group);
+    ("create-verified-access-instance", create_verified_access_instance);
+    ("create-verified-access-trust-provider",
+      create_verified_access_trust_provider);
     ("create-volume", create_volume);
     ("create-vpc", create_vpc);
+    ("create-vpc-block-public-access-exclusion",
+      create_vpc_block_public_access_exclusion);
+    ("create-vpc-encryption-control", create_vpc_encryption_control);
     ("create-vpc-endpoint", create_vpc_endpoint);
     ("create-vpc-endpoint-connection-notification",
       create_vpc_endpoint_connection_notification);
     ("create-vpc-endpoint-service-configuration",
       create_vpc_endpoint_service_configuration);
     ("create-vpc-peering-connection", create_vpc_peering_connection);
+    ("create-vpn-concentrator", create_vpn_concentrator);
     ("create-vpn-connection", create_vpn_connection);
     ("create-vpn-connection-route", create_vpn_connection_route);
     ("create-vpn-gateway", create_vpn_gateway);
+    ("delete-capacity-manager-data-export",
+      delete_capacity_manager_data_export);
     ("delete-carrier-gateway", delete_carrier_gateway);
     ("delete-client-vpn-endpoint", delete_client_vpn_endpoint);
     ("delete-client-vpn-route", delete_client_vpn_route);
+    ("delete-coip-cidr", delete_coip_cidr);
+    ("delete-coip-pool", delete_coip_pool);
     ("delete-customer-gateway", delete_customer_gateway);
     ("delete-dhcp-options", delete_dhcp_options);
     ("delete-egress-only-internet-gateway",
@@ -154,17 +230,33 @@ let main =
     ("delete-fleets", delete_fleets);
     ("delete-flow-logs", delete_flow_logs);
     ("delete-fpga-image", delete_fpga_image);
+    ("delete-image-usage-report", delete_image_usage_report);
+    ("delete-instance-connect-endpoint", delete_instance_connect_endpoint);
     ("delete-instance-event-window", delete_instance_event_window);
     ("delete-internet-gateway", delete_internet_gateway);
     ("delete-ipam", delete_ipam);
+    ("delete-ipam-external-resource-verification-token",
+      delete_ipam_external_resource_verification_token);
+    ("delete-ipam-policy", delete_ipam_policy);
     ("delete-ipam-pool", delete_ipam_pool);
+    ("delete-ipam-prefix-list-resolver", delete_ipam_prefix_list_resolver);
+    ("delete-ipam-prefix-list-resolver-target",
+      delete_ipam_prefix_list_resolver_target);
+    ("delete-ipam-resource-discovery", delete_ipam_resource_discovery);
     ("delete-ipam-scope", delete_ipam_scope);
     ("delete-key-pair", delete_key_pair);
     ("delete-launch-template", delete_launch_template);
     ("delete-launch-template-versions", delete_launch_template_versions);
     ("delete-local-gateway-route", delete_local_gateway_route);
+    ("delete-local-gateway-route-table", delete_local_gateway_route_table);
+    ("delete-local-gateway-route-table-virtual-interface-group-association",
+      delete_local_gateway_route_table_virtual_interface_group_association);
     ("delete-local-gateway-route-table-vpc-association",
       delete_local_gateway_route_table_vpc_association);
+    ("delete-local-gateway-virtual-interface",
+      delete_local_gateway_virtual_interface);
+    ("delete-local-gateway-virtual-interface-group",
+      delete_local_gateway_virtual_interface_group);
     ("delete-managed-prefix-list", delete_managed_prefix_list);
     ("delete-nat-gateway", delete_nat_gateway);
     ("delete-network-acl", delete_network_acl);
@@ -182,7 +274,12 @@ let main =
     ("delete-public-ipv4-pool", delete_public_ipv4_pool);
     ("delete-queued-reserved-instances", delete_queued_reserved_instances);
     ("delete-route", delete_route);
+    ("delete-route-server", delete_route_server);
+    ("delete-route-server-endpoint", delete_route_server_endpoint);
+    ("delete-route-server-peer", delete_route_server_peer);
     ("delete-route-table", delete_route_table);
+    ("delete-secondary-network", delete_secondary_network);
+    ("delete-secondary-subnet", delete_secondary_subnet);
     ("delete-security-group", delete_security_group);
     ("delete-snapshot", delete_snapshot);
     ("delete-spot-datafeed-subscription", delete_spot_datafeed_subscription);
@@ -194,32 +291,52 @@ let main =
     ("delete-traffic-mirror-session", delete_traffic_mirror_session);
     ("delete-traffic-mirror-target", delete_traffic_mirror_target);
     ("delete-transit-gateway", delete_transit_gateway);
+    ("delete-transit-gateway-client-vpn-attachment",
+      delete_transit_gateway_client_vpn_attachment);
     ("delete-transit-gateway-connect", delete_transit_gateway_connect);
     ("delete-transit-gateway-connect-peer",
       delete_transit_gateway_connect_peer);
+    ("delete-transit-gateway-metering-policy",
+      delete_transit_gateway_metering_policy);
+    ("delete-transit-gateway-metering-policy-entry",
+      delete_transit_gateway_metering_policy_entry);
     ("delete-transit-gateway-multicast-domain",
       delete_transit_gateway_multicast_domain);
     ("delete-transit-gateway-peering-attachment",
       delete_transit_gateway_peering_attachment);
+    ("delete-transit-gateway-policy-table",
+      delete_transit_gateway_policy_table);
     ("delete-transit-gateway-prefix-list-reference",
       delete_transit_gateway_prefix_list_reference);
     ("delete-transit-gateway-route", delete_transit_gateway_route);
     ("delete-transit-gateway-route-table",
       delete_transit_gateway_route_table);
+    ("delete-transit-gateway-route-table-announcement",
+      delete_transit_gateway_route_table_announcement);
     ("delete-transit-gateway-vpc-attachment",
       delete_transit_gateway_vpc_attachment);
+    ("delete-verified-access-endpoint", delete_verified_access_endpoint);
+    ("delete-verified-access-group", delete_verified_access_group);
+    ("delete-verified-access-instance", delete_verified_access_instance);
+    ("delete-verified-access-trust-provider",
+      delete_verified_access_trust_provider);
     ("delete-volume", delete_volume);
     ("delete-vpc", delete_vpc);
+    ("delete-vpc-block-public-access-exclusion",
+      delete_vpc_block_public_access_exclusion);
+    ("delete-vpc-encryption-control", delete_vpc_encryption_control);
     ("delete-vpc-endpoint-connection-notifications",
       delete_vpc_endpoint_connection_notifications);
     ("delete-vpc-endpoint-service-configurations",
       delete_vpc_endpoint_service_configurations);
     ("delete-vpc-endpoints", delete_vpc_endpoints);
     ("delete-vpc-peering-connection", delete_vpc_peering_connection);
+    ("delete-vpn-concentrator", delete_vpn_concentrator);
     ("delete-vpn-connection", delete_vpn_connection);
     ("delete-vpn-connection-route", delete_vpn_connection_route);
     ("delete-vpn-gateway", delete_vpn_gateway);
     ("deprovision-byoip-cidr", deprovision_byoip_cidr);
+    ("deprovision-ipam-byoasn", deprovision_ipam_byoasn);
     ("deprovision-ipam-pool-cidr", deprovision_ipam_pool_cidr);
     ("deprovision-public-ipv4-pool-cidr", deprovision_public_ipv4_pool_cidr);
     ("deregister-image", deregister_image);
@@ -230,14 +347,30 @@ let main =
     ("deregister-transit-gateway-multicast-group-sources",
       deregister_transit_gateway_multicast_group_sources);
     ("describe-account-attributes", describe_account_attributes);
+    ("describe-address-transfers", describe_address_transfers);
     ("describe-addresses", describe_addresses);
     ("describe-addresses-attribute", describe_addresses_attribute);
     ("describe-aggregate-id-format", describe_aggregate_id_format);
     ("describe-availability-zones", describe_availability_zones);
+    ("describe-aws-network-performance-metric-subscriptions",
+      describe_aws_network_performance_metric_subscriptions);
     ("describe-bundle-tasks", describe_bundle_tasks);
     ("describe-byoip-cidrs", describe_byoip_cidrs);
+    ("describe-capacity-block-extension-history",
+      describe_capacity_block_extension_history);
+    ("describe-capacity-block-extension-offerings",
+      describe_capacity_block_extension_offerings);
+    ("describe-capacity-block-offerings", describe_capacity_block_offerings);
+    ("describe-capacity-block-status", describe_capacity_block_status);
+    ("describe-capacity-blocks", describe_capacity_blocks);
+    ("describe-capacity-manager-data-exports",
+      describe_capacity_manager_data_exports);
+    ("describe-capacity-reservation-billing-requests",
+      describe_capacity_reservation_billing_requests);
     ("describe-capacity-reservation-fleets",
       describe_capacity_reservation_fleets);
+    ("describe-capacity-reservation-topology",
+      describe_capacity_reservation_topology);
     ("describe-capacity-reservations", describe_capacity_reservations);
     ("describe-carrier-gateways", describe_carrier_gateways);
     ("describe-classic-link-instances", describe_classic_link_instances);
@@ -251,6 +384,8 @@ let main =
     ("describe-coip-pools", describe_coip_pools);
     ("describe-conversion-tasks", describe_conversion_tasks);
     ("describe-customer-gateways", describe_customer_gateways);
+    ("describe-declarative-policies-reports",
+      describe_declarative_policies_reports);
     ("describe-dhcp-options", describe_dhcp_options);
     ("describe-egress-only-internet-gateways",
       describe_egress_only_internet_gateways);
@@ -274,21 +409,44 @@ let main =
     ("describe-id-format", describe_id_format);
     ("describe-identity-id-format", describe_identity_id_format);
     ("describe-image-attribute", describe_image_attribute);
+    ("describe-image-references", describe_image_references);
+    ("describe-image-usage-report-entries",
+      describe_image_usage_report_entries);
+    ("describe-image-usage-reports", describe_image_usage_reports);
     ("describe-images", describe_images);
     ("describe-import-image-tasks", describe_import_image_tasks);
     ("describe-import-snapshot-tasks", describe_import_snapshot_tasks);
     ("describe-instance-attribute", describe_instance_attribute);
+    ("describe-instance-connect-endpoints",
+      describe_instance_connect_endpoints);
     ("describe-instance-credit-specifications",
       describe_instance_credit_specifications);
     ("describe-instance-event-notification-attributes",
       describe_instance_event_notification_attributes);
     ("describe-instance-event-windows", describe_instance_event_windows);
+    ("describe-instance-image-metadata", describe_instance_image_metadata);
+    ("describe-instance-sql-ha-history-states",
+      describe_instance_sql_ha_history_states);
+    ("describe-instance-sql-ha-states", describe_instance_sql_ha_states);
     ("describe-instance-status", describe_instance_status);
+    ("describe-instance-topology", describe_instance_topology);
     ("describe-instance-type-offerings", describe_instance_type_offerings);
     ("describe-instance-types", describe_instance_types);
     ("describe-instances", describe_instances);
     ("describe-internet-gateways", describe_internet_gateways);
+    ("describe-ipam-byoasn", describe_ipam_byoasn);
+    ("describe-ipam-external-resource-verification-tokens",
+      describe_ipam_external_resource_verification_tokens);
+    ("describe-ipam-policies", describe_ipam_policies);
     ("describe-ipam-pools", describe_ipam_pools);
+    ("describe-ipam-prefix-list-resolver-targets",
+      describe_ipam_prefix_list_resolver_targets);
+    ("describe-ipam-prefix-list-resolvers",
+      describe_ipam_prefix_list_resolvers);
+    ("describe-ipam-resource-discoveries",
+      describe_ipam_resource_discoveries);
+    ("describe-ipam-resource-discovery-associations",
+      describe_ipam_resource_discovery_associations);
     ("describe-ipam-scopes", describe_ipam_scopes);
     ("describe-ipams", describe_ipams);
     ("describe-ipv6-pools", describe_ipv6_pools);
@@ -306,6 +464,9 @@ let main =
     ("describe-local-gateway-virtual-interfaces",
       describe_local_gateway_virtual_interfaces);
     ("describe-local-gateways", describe_local_gateways);
+    ("describe-locked-snapshots", describe_locked_snapshots);
+    ("describe-mac-hosts", describe_mac_hosts);
+    ("describe-mac-modification-tasks", describe_mac_modification_tasks);
     ("describe-managed-prefix-lists", describe_managed_prefix_lists);
     ("describe-moving-addresses", describe_moving_addresses);
     ("describe-nat-gateways", describe_nat_gateways);
@@ -322,6 +483,7 @@ let main =
     ("describe-network-interface-permissions",
       describe_network_interface_permissions);
     ("describe-network-interfaces", describe_network_interfaces);
+    ("describe-outpost-lags", describe_outpost_lags);
     ("describe-placement-groups", describe_placement_groups);
     ("describe-prefix-lists", describe_prefix_lists);
     ("describe-principal-id-format", describe_principal_id_format);
@@ -336,14 +498,24 @@ let main =
       describe_reserved_instances_modifications);
     ("describe-reserved-instances-offerings",
       describe_reserved_instances_offerings);
+    ("describe-route-server-endpoints", describe_route_server_endpoints);
+    ("describe-route-server-peers", describe_route_server_peers);
+    ("describe-route-servers", describe_route_servers);
     ("describe-route-tables", describe_route_tables);
     ("describe-scheduled-instance-availability",
       describe_scheduled_instance_availability);
     ("describe-scheduled-instances", describe_scheduled_instances);
+    ("describe-secondary-interfaces", describe_secondary_interfaces);
+    ("describe-secondary-networks", describe_secondary_networks);
+    ("describe-secondary-subnets", describe_secondary_subnets);
     ("describe-security-group-references",
       describe_security_group_references);
     ("describe-security-group-rules", describe_security_group_rules);
+    ("describe-security-group-vpc-associations",
+      describe_security_group_vpc_associations);
     ("describe-security-groups", describe_security_groups);
+    ("describe-service-link-virtual-interfaces",
+      describe_service_link_virtual_interfaces);
     ("describe-snapshot-attribute", describe_snapshot_attribute);
     ("describe-snapshot-tier-status", describe_snapshot_tier_status);
     ("describe-snapshots", describe_snapshots);
@@ -359,6 +531,8 @@ let main =
     ("describe-store-image-tasks", describe_store_image_tasks);
     ("describe-subnets", describe_subnets);
     ("describe-tags", describe_tags);
+    ("describe-traffic-mirror-filter-rules",
+      describe_traffic_mirror_filter_rules);
     ("describe-traffic-mirror-filters", describe_traffic_mirror_filters);
     ("describe-traffic-mirror-sessions", describe_traffic_mirror_sessions);
     ("describe-traffic-mirror-targets", describe_traffic_mirror_targets);
@@ -367,10 +541,16 @@ let main =
     ("describe-transit-gateway-connect-peers",
       describe_transit_gateway_connect_peers);
     ("describe-transit-gateway-connects", describe_transit_gateway_connects);
+    ("describe-transit-gateway-metering-policies",
+      describe_transit_gateway_metering_policies);
     ("describe-transit-gateway-multicast-domains",
       describe_transit_gateway_multicast_domains);
     ("describe-transit-gateway-peering-attachments",
       describe_transit_gateway_peering_attachments);
+    ("describe-transit-gateway-policy-tables",
+      describe_transit_gateway_policy_tables);
+    ("describe-transit-gateway-route-table-announcements",
+      describe_transit_gateway_route_table_announcements);
     ("describe-transit-gateway-route-tables",
       describe_transit_gateway_route_tables);
     ("describe-transit-gateway-vpc-attachments",
@@ -378,14 +558,30 @@ let main =
     ("describe-transit-gateways", describe_transit_gateways);
     ("describe-trunk-interface-associations",
       describe_trunk_interface_associations);
+    ("describe-verified-access-endpoints",
+      describe_verified_access_endpoints);
+    ("describe-verified-access-groups", describe_verified_access_groups);
+    ("describe-verified-access-instance-logging-configurations",
+      describe_verified_access_instance_logging_configurations);
+    ("describe-verified-access-instances",
+      describe_verified_access_instances);
+    ("describe-verified-access-trust-providers",
+      describe_verified_access_trust_providers);
     ("describe-volume-attribute", describe_volume_attribute);
     ("describe-volume-status", describe_volume_status);
     ("describe-volumes", describe_volumes);
     ("describe-volumes-modifications", describe_volumes_modifications);
     ("describe-vpc-attribute", describe_vpc_attribute);
+    ("describe-vpc-block-public-access-exclusions",
+      describe_vpc_block_public_access_exclusions);
+    ("describe-vpc-block-public-access-options",
+      describe_vpc_block_public_access_options);
     ("describe-vpc-classic-link", describe_vpc_classic_link);
     ("describe-vpc-classic-link-dns-support",
       describe_vpc_classic_link_dns_support);
+    ("describe-vpc-encryption-controls", describe_vpc_encryption_controls);
+    ("describe-vpc-endpoint-associations",
+      describe_vpc_endpoint_associations);
     ("describe-vpc-endpoint-connection-notifications",
       describe_vpc_endpoint_connection_notifications);
     ("describe-vpc-endpoint-connections", describe_vpc_endpoint_connections);
@@ -397,20 +593,38 @@ let main =
     ("describe-vpc-endpoints", describe_vpc_endpoints);
     ("describe-vpc-peering-connections", describe_vpc_peering_connections);
     ("describe-vpcs", describe_vpcs);
+    ("describe-vpn-concentrators", describe_vpn_concentrators);
     ("describe-vpn-connections", describe_vpn_connections);
     ("describe-vpn-gateways", describe_vpn_gateways);
     ("detach-classic-link-vpc", detach_classic_link_vpc);
     ("detach-internet-gateway", detach_internet_gateway);
     ("detach-network-interface", detach_network_interface);
+    ("detach-verified-access-trust-provider",
+      detach_verified_access_trust_provider);
     ("detach-volume", detach_volume);
     ("detach-vpn-gateway", detach_vpn_gateway);
+    ("disable-address-transfer", disable_address_transfer);
+    ("disable-allowed-images-settings", disable_allowed_images_settings);
+    ("disable-aws-network-performance-metric-subscription",
+      disable_aws_network_performance_metric_subscription);
+    ("disable-capacity-manager", disable_capacity_manager);
     ("disable-ebs-encryption-by-default", disable_ebs_encryption_by_default);
     ("disable-fast-launch", disable_fast_launch);
     ("disable-fast-snapshot-restores", disable_fast_snapshot_restores);
+    ("disable-image", disable_image);
+    ("disable-image-block-public-access", disable_image_block_public_access);
     ("disable-image-deprecation", disable_image_deprecation);
+    ("disable-image-deregistration-protection",
+      disable_image_deregistration_protection);
+    ("disable-instance-sql-ha-standby-detections",
+      disable_instance_sql_ha_standby_detections);
     ("disable-ipam-organization-admin-account",
       disable_ipam_organization_admin_account);
+    ("disable-ipam-policy", disable_ipam_policy);
+    ("disable-route-server-propagation", disable_route_server_propagation);
     ("disable-serial-console-access", disable_serial_console_access);
+    ("disable-snapshot-block-public-access",
+      disable_snapshot_block_public_access);
     ("disable-transit-gateway-route-table-propagation",
       disable_transit_gateway_route_table_propagation);
     ("disable-vgw-route-propagation", disable_vgw_route_propagation);
@@ -418,6 +632,8 @@ let main =
     ("disable-vpc-classic-link-dns-support",
       disable_vpc_classic_link_dns_support);
     ("disassociate-address", disassociate_address);
+    ("disassociate-capacity-reservation-billing-owner",
+      disassociate_capacity_reservation_billing_owner);
     ("disassociate-client-vpn-target-network",
       disassociate_client_vpn_target_network);
     ("disassociate-enclave-certificate-iam-role",
@@ -425,21 +641,46 @@ let main =
     ("disassociate-iam-instance-profile", disassociate_iam_instance_profile);
     ("disassociate-instance-event-window",
       disassociate_instance_event_window);
+    ("disassociate-ipam-byoasn", disassociate_ipam_byoasn);
+    ("disassociate-ipam-resource-discovery",
+      disassociate_ipam_resource_discovery);
+    ("disassociate-nat-gateway-address", disassociate_nat_gateway_address);
+    ("disassociate-route-server", disassociate_route_server);
     ("disassociate-route-table", disassociate_route_table);
+    ("disassociate-security-group-vpc", disassociate_security_group_vpc);
     ("disassociate-subnet-cidr-block", disassociate_subnet_cidr_block);
     ("disassociate-transit-gateway-multicast-domain",
       disassociate_transit_gateway_multicast_domain);
+    ("disassociate-transit-gateway-policy-table",
+      disassociate_transit_gateway_policy_table);
     ("disassociate-transit-gateway-route-table",
       disassociate_transit_gateway_route_table);
     ("disassociate-trunk-interface", disassociate_trunk_interface);
     ("disassociate-vpc-cidr-block", disassociate_vpc_cidr_block);
+    ("enable-address-transfer", enable_address_transfer);
+    ("enable-allowed-images-settings", enable_allowed_images_settings);
+    ("enable-aws-network-performance-metric-subscription",
+      enable_aws_network_performance_metric_subscription);
+    ("enable-capacity-manager", enable_capacity_manager);
     ("enable-ebs-encryption-by-default", enable_ebs_encryption_by_default);
     ("enable-fast-launch", enable_fast_launch);
     ("enable-fast-snapshot-restores", enable_fast_snapshot_restores);
+    ("enable-image", enable_image);
+    ("enable-image-block-public-access", enable_image_block_public_access);
     ("enable-image-deprecation", enable_image_deprecation);
+    ("enable-image-deregistration-protection",
+      enable_image_deregistration_protection);
+    ("enable-instance-sql-ha-standby-detections",
+      enable_instance_sql_ha_standby_detections);
     ("enable-ipam-organization-admin-account",
       enable_ipam_organization_admin_account);
+    ("enable-ipam-policy", enable_ipam_policy);
+    ("enable-reachability-analyzer-organization-sharing",
+      enable_reachability_analyzer_organization_sharing);
+    ("enable-route-server-propagation", enable_route_server_propagation);
     ("enable-serial-console-access", enable_serial_console_access);
+    ("enable-snapshot-block-public-access",
+      enable_snapshot_block_public_access);
     ("enable-transit-gateway-route-table-propagation",
       enable_transit_gateway_route_table_propagation);
     ("enable-vgw-route-propagation", enable_vgw_route_propagation);
@@ -453,32 +694,67 @@ let main =
       export_client_vpn_client_configuration);
     ("export-image", export_image);
     ("export-transit-gateway-routes", export_transit_gateway_routes);
+    ("export-verified-access-instance-client-configuration",
+      export_verified_access_instance_client_configuration);
+    ("get-active-vpn-tunnel-status", get_active_vpn_tunnel_status);
+    ("get-allowed-images-settings", get_allowed_images_settings);
     ("get-associated-enclave-certificate-iam-roles",
       get_associated_enclave_certificate_iam_roles);
     ("get-associated-ipv6-pool-cidrs", get_associated_ipv6_pool_cidrs);
+    ("get-aws-network-performance-data", get_aws_network_performance_data);
+    ("get-capacity-manager-attributes", get_capacity_manager_attributes);
+    ("get-capacity-manager-metric-data", get_capacity_manager_metric_data);
+    ("get-capacity-manager-metric-dimensions",
+      get_capacity_manager_metric_dimensions);
+    ("get-capacity-manager-monitored-tag-keys",
+      get_capacity_manager_monitored_tag_keys);
     ("get-capacity-reservation-usage", get_capacity_reservation_usage);
     ("get-coip-pool-usage", get_coip_pool_usage);
     ("get-console-output", get_console_output);
     ("get-console-screenshot", get_console_screenshot);
+    ("get-declarative-policies-report-summary",
+      get_declarative_policies_report_summary);
     ("get-default-credit-specification", get_default_credit_specification);
     ("get-ebs-default-kms-key-id", get_ebs_default_kms_key_id);
     ("get-ebs-encryption-by-default", get_ebs_encryption_by_default);
+    ("get-enabled-ipam-policy", get_enabled_ipam_policy);
     ("get-flow-logs-integration-template",
       get_flow_logs_integration_template);
     ("get-groups-for-capacity-reservation",
       get_groups_for_capacity_reservation);
     ("get-host-reservation-purchase-preview",
       get_host_reservation_purchase_preview);
+    ("get-image-ancestry", get_image_ancestry);
+    ("get-image-block-public-access-state",
+      get_image_block_public_access_state);
+    ("get-instance-metadata-defaults", get_instance_metadata_defaults);
+    ("get-instance-tpm-ek-pub", get_instance_tpm_ek_pub);
     ("get-instance-types-from-instance-requirements",
       get_instance_types_from_instance_requirements);
+    ("get-instance-uefi-data", get_instance_uefi_data);
     ("get-ipam-address-history", get_ipam_address_history);
+    ("get-ipam-discovered-accounts", get_ipam_discovered_accounts);
+    ("get-ipam-discovered-public-addresses",
+      get_ipam_discovered_public_addresses);
+    ("get-ipam-discovered-resource-cidrs",
+      get_ipam_discovered_resource_cidrs);
+    ("get-ipam-policy-allocation-rules", get_ipam_policy_allocation_rules);
+    ("get-ipam-policy-organization-targets",
+      get_ipam_policy_organization_targets);
     ("get-ipam-pool-allocations", get_ipam_pool_allocations);
     ("get-ipam-pool-cidrs", get_ipam_pool_cidrs);
+    ("get-ipam-prefix-list-resolver-rules",
+      get_ipam_prefix_list_resolver_rules);
+    ("get-ipam-prefix-list-resolver-version-entries",
+      get_ipam_prefix_list_resolver_version_entries);
+    ("get-ipam-prefix-list-resolver-versions",
+      get_ipam_prefix_list_resolver_versions);
     ("get-ipam-resource-cidrs", get_ipam_resource_cidrs);
     ("get-launch-template-data", get_launch_template_data);
     ("get-managed-prefix-list-associations",
       get_managed_prefix_list_associations);
     ("get-managed-prefix-list-entries", get_managed_prefix_list_entries);
+    ("get-managed-resource-visibility", get_managed_resource_visibility);
     ("get-network-insights-access-scope-analysis-findings",
       get_network_insights_access_scope_analysis_findings);
     ("get-network-insights-access-scope-content",
@@ -486,22 +762,42 @@ let main =
     ("get-password-data", get_password_data);
     ("get-reserved-instances-exchange-quote",
       get_reserved_instances_exchange_quote);
+    ("get-route-server-associations", get_route_server_associations);
+    ("get-route-server-propagations", get_route_server_propagations);
+    ("get-route-server-routing-database", get_route_server_routing_database);
+    ("get-security-groups-for-vpc", get_security_groups_for_vpc);
     ("get-serial-console-access-status", get_serial_console_access_status);
+    ("get-snapshot-block-public-access-state",
+      get_snapshot_block_public_access_state);
     ("get-spot-placement-scores", get_spot_placement_scores);
     ("get-subnet-cidr-reservations", get_subnet_cidr_reservations);
     ("get-transit-gateway-attachment-propagations",
       get_transit_gateway_attachment_propagations);
+    ("get-transit-gateway-metering-policy-entries",
+      get_transit_gateway_metering_policy_entries);
     ("get-transit-gateway-multicast-domain-associations",
       get_transit_gateway_multicast_domain_associations);
+    ("get-transit-gateway-policy-table-associations",
+      get_transit_gateway_policy_table_associations);
+    ("get-transit-gateway-policy-table-entries",
+      get_transit_gateway_policy_table_entries);
     ("get-transit-gateway-prefix-list-references",
       get_transit_gateway_prefix_list_references);
     ("get-transit-gateway-route-table-associations",
       get_transit_gateway_route_table_associations);
     ("get-transit-gateway-route-table-propagations",
       get_transit_gateway_route_table_propagations);
+    ("get-verified-access-endpoint-policy",
+      get_verified_access_endpoint_policy);
+    ("get-verified-access-endpoint-targets",
+      get_verified_access_endpoint_targets);
+    ("get-verified-access-group-policy", get_verified_access_group_policy);
+    ("get-vpc-resources-blocking-encryption-enforcement",
+      get_vpc_resources_blocking_encryption_enforcement);
     ("get-vpn-connection-device-sample-configuration",
       get_vpn_connection_device_sample_configuration);
     ("get-vpn-connection-device-types", get_vpn_connection_device_types);
+    ("get-vpn-tunnel-replacement-status", get_vpn_tunnel_replacement_status);
     ("import-client-vpn-client-certificate-revocation-list",
       import_client_vpn_client_certificate_revocation_list);
     ("import-image", import_image);
@@ -511,6 +807,8 @@ let main =
     ("import-volume", import_volume);
     ("list-images-in-recycle-bin", list_images_in_recycle_bin);
     ("list-snapshots-in-recycle-bin", list_snapshots_in_recycle_bin);
+    ("list-volumes-in-recycle-bin", list_volumes_in_recycle_bin);
+    ("lock-snapshot", lock_snapshot);
     ("modify-address-attribute", modify_address_attribute);
     ("modify-availability-zone-group", modify_availability_zone_group);
     ("modify-capacity-reservation", modify_capacity_reservation);
@@ -528,24 +826,40 @@ let main =
     ("modify-instance-attribute", modify_instance_attribute);
     ("modify-instance-capacity-reservation-attributes",
       modify_instance_capacity_reservation_attributes);
+    ("modify-instance-connect-endpoint", modify_instance_connect_endpoint);
+    ("modify-instance-cpu-options", modify_instance_cpu_options);
     ("modify-instance-credit-specification",
       modify_instance_credit_specification);
     ("modify-instance-event-start-time", modify_instance_event_start_time);
     ("modify-instance-event-window", modify_instance_event_window);
     ("modify-instance-maintenance-options",
       modify_instance_maintenance_options);
+    ("modify-instance-metadata-defaults", modify_instance_metadata_defaults);
     ("modify-instance-metadata-options", modify_instance_metadata_options);
+    ("modify-instance-network-performance-options",
+      modify_instance_network_performance_options);
     ("modify-instance-placement", modify_instance_placement);
     ("modify-ipam", modify_ipam);
+    ("modify-ipam-policy-allocation-rules",
+      modify_ipam_policy_allocation_rules);
     ("modify-ipam-pool", modify_ipam_pool);
+    ("modify-ipam-prefix-list-resolver", modify_ipam_prefix_list_resolver);
+    ("modify-ipam-prefix-list-resolver-target",
+      modify_ipam_prefix_list_resolver_target);
     ("modify-ipam-resource-cidr", modify_ipam_resource_cidr);
+    ("modify-ipam-resource-discovery", modify_ipam_resource_discovery);
     ("modify-ipam-scope", modify_ipam_scope);
     ("modify-launch-template", modify_launch_template);
+    ("modify-local-gateway-route", modify_local_gateway_route);
     ("modify-managed-prefix-list", modify_managed_prefix_list);
+    ("modify-managed-resource-visibility",
+      modify_managed_resource_visibility);
     ("modify-network-interface-attribute",
       modify_network_interface_attribute);
     ("modify-private-dns-name-options", modify_private_dns_name_options);
+    ("modify-public-ip-dns-name-options", modify_public_ip_dns_name_options);
     ("modify-reserved-instances", modify_reserved_instances);
+    ("modify-route-server", modify_route_server);
     ("modify-security-group-rules", modify_security_group_rules);
     ("modify-snapshot-attribute", modify_snapshot_attribute);
     ("modify-snapshot-tier", modify_snapshot_tier);
@@ -556,13 +870,31 @@ let main =
     ("modify-traffic-mirror-filter-rule", modify_traffic_mirror_filter_rule);
     ("modify-traffic-mirror-session", modify_traffic_mirror_session);
     ("modify-transit-gateway", modify_transit_gateway);
+    ("modify-transit-gateway-metering-policy",
+      modify_transit_gateway_metering_policy);
     ("modify-transit-gateway-prefix-list-reference",
       modify_transit_gateway_prefix_list_reference);
     ("modify-transit-gateway-vpc-attachment",
       modify_transit_gateway_vpc_attachment);
+    ("modify-verified-access-endpoint", modify_verified_access_endpoint);
+    ("modify-verified-access-endpoint-policy",
+      modify_verified_access_endpoint_policy);
+    ("modify-verified-access-group", modify_verified_access_group);
+    ("modify-verified-access-group-policy",
+      modify_verified_access_group_policy);
+    ("modify-verified-access-instance", modify_verified_access_instance);
+    ("modify-verified-access-instance-logging-configuration",
+      modify_verified_access_instance_logging_configuration);
+    ("modify-verified-access-trust-provider",
+      modify_verified_access_trust_provider);
     ("modify-volume", modify_volume);
     ("modify-volume-attribute", modify_volume_attribute);
     ("modify-vpc-attribute", modify_vpc_attribute);
+    ("modify-vpc-block-public-access-exclusion",
+      modify_vpc_block_public_access_exclusion);
+    ("modify-vpc-block-public-access-options",
+      modify_vpc_block_public_access_options);
+    ("modify-vpc-encryption-control", modify_vpc_encryption_control);
     ("modify-vpc-endpoint", modify_vpc_endpoint);
     ("modify-vpc-endpoint-connection-notification",
       modify_vpc_endpoint_connection_notification);
@@ -582,9 +914,14 @@ let main =
     ("monitor-instances", monitor_instances);
     ("move-address-to-vpc", move_address_to_vpc);
     ("move-byoip-cidr-to-ipam", move_byoip_cidr_to_ipam);
+    ("move-capacity-reservation-instances",
+      move_capacity_reservation_instances);
     ("provision-byoip-cidr", provision_byoip_cidr);
+    ("provision-ipam-byoasn", provision_ipam_byoasn);
     ("provision-ipam-pool-cidr", provision_ipam_pool_cidr);
     ("provision-public-ipv4-pool-cidr", provision_public_ipv4_pool_cidr);
+    ("purchase-capacity-block", purchase_capacity_block);
+    ("purchase-capacity-block-extension", purchase_capacity_block_extension);
     ("purchase-host-reservation", purchase_host_reservation);
     ("purchase-reserved-instances-offering",
       purchase_reserved_instances_offering);
@@ -597,6 +934,10 @@ let main =
       register_transit_gateway_multicast_group_members);
     ("register-transit-gateway-multicast-group-sources",
       register_transit_gateway_multicast_group_sources);
+    ("reject-capacity-reservation-billing-ownership",
+      reject_capacity_reservation_billing_ownership);
+    ("reject-transit-gateway-client-vpn-attachment",
+      reject_transit_gateway_client_vpn_attachment);
     ("reject-transit-gateway-multicast-domain-associations",
       reject_transit_gateway_multicast_domain_associations);
     ("reject-transit-gateway-peering-attachment",
@@ -610,11 +951,14 @@ let main =
     ("release-ipam-pool-allocation", release_ipam_pool_allocation);
     ("replace-iam-instance-profile-association",
       replace_iam_instance_profile_association);
+    ("replace-image-criteria-in-allowed-images-settings",
+      replace_image_criteria_in_allowed_images_settings);
     ("replace-network-acl-association", replace_network_acl_association);
     ("replace-network-acl-entry", replace_network_acl_entry);
     ("replace-route", replace_route);
     ("replace-route-table-association", replace_route_table_association);
     ("replace-transit-gateway-route", replace_transit_gateway_route);
+    ("replace-vpn-tunnel", replace_vpn_tunnel);
     ("report-instance-status", report_instance_status);
     ("request-spot-fleet", request_spot_fleet);
     ("request-spot-instances", request_spot_instances);
@@ -631,6 +975,7 @@ let main =
       restore_managed_prefix_list_version);
     ("restore-snapshot-from-recycle-bin", restore_snapshot_from_recycle_bin);
     ("restore-snapshot-tier", restore_snapshot_tier);
+    ("restore-volume-from-recycle-bin", restore_volume_from_recycle_bin);
     ("revoke-client-vpn-ingress", revoke_client_vpn_ingress);
     ("revoke-security-group-egress", revoke_security_group_egress);
     ("revoke-security-group-ingress", revoke_security_group_ingress);
@@ -641,6 +986,7 @@ let main =
       search_transit_gateway_multicast_groups);
     ("search-transit-gateway-routes", search_transit_gateway_routes);
     ("send-diagnostic-interrupt", send_diagnostic_interrupt);
+    ("start-declarative-policies-report", start_declarative_policies_report);
     ("start-instances", start_instances);
     ("start-network-insights-access-scope-analysis",
       start_network_insights_access_scope_analysis);
@@ -652,7 +998,16 @@ let main =
     ("terminate-instances", terminate_instances);
     ("unassign-ipv6-addresses", unassign_ipv6_addresses);
     ("unassign-private-ip-addresses", unassign_private_ip_addresses);
+    ("unassign-private-nat-gateway-address",
+      unassign_private_nat_gateway_address);
+    ("unlock-snapshot", unlock_snapshot);
     ("unmonitor-instances", unmonitor_instances);
+    ("update-capacity-manager-monitored-tag-keys",
+      update_capacity_manager_monitored_tag_keys);
+    ("update-capacity-manager-organizations-access",
+      update_capacity_manager_organizations_access);
+    ("update-interruptible-capacity-reservation-allocation",
+      update_interruptible_capacity_reservation_allocation);
     ("update-security-group-rule-descriptions-egress",
       update_security_group_rule_descriptions_egress);
     ("update-security-group-rule-descriptions-ingress",

@@ -11,6 +11,18 @@ val create_host :
     ?cfg:Awso.Cfg.t ->
       CreateHostInput.t ->
         (CreateHostOutput.t, CreateHostOutput.error) Result.t Lwt.t
+val create_repository_link :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRepositoryLinkInput.t ->
+        (CreateRepositoryLinkOutput.t, CreateRepositoryLinkOutput.error)
+          Result.t Lwt.t
+val create_sync_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSyncConfigurationInput.t ->
+        (CreateSyncConfigurationOutput.t,
+          CreateSyncConfigurationOutput.error) Result.t Lwt.t
 val delete_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -22,6 +34,18 @@ val delete_host :
     ?cfg:Awso.Cfg.t ->
       DeleteHostInput.t ->
         (DeleteHostOutput.t, DeleteHostOutput.error) Result.t Lwt.t
+val delete_repository_link :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRepositoryLinkInput.t ->
+        (DeleteRepositoryLinkOutput.t, DeleteRepositoryLinkOutput.error)
+          Result.t Lwt.t
+val delete_sync_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteSyncConfigurationInput.t ->
+        (DeleteSyncConfigurationOutput.t,
+          DeleteSyncConfigurationOutput.error) Result.t Lwt.t
 val get_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -31,6 +55,36 @@ val get_host :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetHostInput.t -> (GetHostOutput.t, GetHostOutput.error) Result.t Lwt.t
+val get_repository_link :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRepositoryLinkInput.t ->
+        (GetRepositoryLinkOutput.t, GetRepositoryLinkOutput.error) Result.t
+          Lwt.t
+val get_repository_sync_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRepositorySyncStatusInput.t ->
+        (GetRepositorySyncStatusOutput.t,
+          GetRepositorySyncStatusOutput.error) Result.t Lwt.t
+val get_resource_sync_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourceSyncStatusInput.t ->
+        (GetResourceSyncStatusOutput.t, GetResourceSyncStatusOutput.error)
+          Result.t Lwt.t
+val get_sync_blocker_summary :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSyncBlockerSummaryInput.t ->
+        (GetSyncBlockerSummaryOutput.t, GetSyncBlockerSummaryOutput.error)
+          Result.t Lwt.t
+val get_sync_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSyncConfigurationInput.t ->
+        (GetSyncConfigurationOutput.t, GetSyncConfigurationOutput.error)
+          Result.t Lwt.t
 val list_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -41,6 +95,24 @@ val list_hosts :
     ?cfg:Awso.Cfg.t ->
       ListHostsInput.t ->
         (ListHostsOutput.t, ListHostsOutput.error) Result.t Lwt.t
+val list_repository_links :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRepositoryLinksInput.t ->
+        (ListRepositoryLinksOutput.t, ListRepositoryLinksOutput.error)
+          Result.t Lwt.t
+val list_repository_sync_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRepositorySyncDefinitionsInput.t ->
+        (ListRepositorySyncDefinitionsOutput.t,
+          ListRepositorySyncDefinitionsOutput.error) Result.t Lwt.t
+val list_sync_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSyncConfigurationsInput.t ->
+        (ListSyncConfigurationsOutput.t, ListSyncConfigurationsOutput.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -62,3 +134,21 @@ val update_host :
     ?cfg:Awso.Cfg.t ->
       UpdateHostInput.t ->
         (UpdateHostOutput.t, UpdateHostOutput.error) Result.t Lwt.t
+val update_repository_link :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRepositoryLinkInput.t ->
+        (UpdateRepositoryLinkOutput.t, UpdateRepositoryLinkOutput.error)
+          Result.t Lwt.t
+val update_sync_blocker :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSyncBlockerInput.t ->
+        (UpdateSyncBlockerOutput.t, UpdateSyncBlockerOutput.error) Result.t
+          Lwt.t
+val update_sync_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSyncConfigurationInput.t ->
+        (UpdateSyncConfigurationOutput.t,
+          UpdateSyncConfigurationOutput.error) Result.t Lwt.t

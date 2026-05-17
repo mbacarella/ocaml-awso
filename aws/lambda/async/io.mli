@@ -12,12 +12,24 @@ val add_permission :
       AddPermissionRequest.t ->
         (AddPermissionResponse.t, AddPermissionResponse.error) Result.t
           Async.Deferred.t
+val checkpoint_durable_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CheckpointDurableExecutionRequest.t ->
+        (CheckpointDurableExecutionResponse.t,
+          CheckpointDurableExecutionResponse.error) Result.t Async.Deferred.t
 val create_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAliasRequest.t ->
         (AliasConfiguration.t, AliasConfiguration.error) Result.t
           Async.Deferred.t
+val create_capacity_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCapacityProviderRequest.t ->
+        (CreateCapacityProviderResponse.t,
+          CreateCapacityProviderResponse.error) Result.t Async.Deferred.t
 val create_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -46,6 +58,12 @@ val delete_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAliasRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_capacity_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCapacityProviderRequest.t ->
+        (DeleteCapacityProviderResponse.t,
+          DeleteCapacityProviderResponse.error) Result.t Async.Deferred.t
 val delete_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -61,7 +79,9 @@ val delete_event_source_mapping :
 val delete_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFunctionRequest.t -> (unit, unit) Result.t Async.Deferred.t
+      DeleteFunctionRequest.t ->
+        (DeleteFunctionResponse.t, DeleteFunctionResponse.error) Result.t
+          Async.Deferred.t
 val delete_function_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -103,12 +123,36 @@ val get_alias :
       GetAliasRequest.t ->
         (AliasConfiguration.t, AliasConfiguration.error) Result.t
           Async.Deferred.t
+val get_capacity_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCapacityProviderRequest.t ->
+        (GetCapacityProviderResponse.t, GetCapacityProviderResponse.error)
+          Result.t Async.Deferred.t
 val get_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCodeSigningConfigRequest.t ->
         (GetCodeSigningConfigResponse.t, GetCodeSigningConfigResponse.error)
           Result.t Async.Deferred.t
+val get_durable_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDurableExecutionRequest.t ->
+        (GetDurableExecutionResponse.t, GetDurableExecutionResponse.error)
+          Result.t Async.Deferred.t
+val get_durable_execution_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDurableExecutionHistoryRequest.t ->
+        (GetDurableExecutionHistoryResponse.t,
+          GetDurableExecutionHistoryResponse.error) Result.t Async.Deferred.t
+val get_durable_execution_state :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDurableExecutionStateRequest.t ->
+        (GetDurableExecutionStateResponse.t,
+          GetDurableExecutionStateResponse.error) Result.t Async.Deferred.t
 val get_event_source_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -146,6 +190,18 @@ val get_function_event_invoke_config :
       GetFunctionEventInvokeConfigRequest.t ->
         (FunctionEventInvokeConfig.t, FunctionEventInvokeConfig.error)
           Result.t Async.Deferred.t
+val get_function_recursion_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFunctionRecursionConfigRequest.t ->
+        (GetFunctionRecursionConfigResponse.t,
+          GetFunctionRecursionConfigResponse.error) Result.t Async.Deferred.t
+val get_function_scaling_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFunctionScalingConfigRequest.t ->
+        (GetFunctionScalingConfigResponse.t,
+          GetFunctionScalingConfigResponse.error) Result.t Async.Deferred.t
 val get_function_url_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -183,6 +239,12 @@ val get_provisioned_concurrency_config :
         (GetProvisionedConcurrencyConfigResponse.t,
           GetProvisionedConcurrencyConfigResponse.error) Result.t
           Async.Deferred.t
+val get_runtime_management_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRuntimeManagementConfigRequest.t ->
+        (GetRuntimeManagementConfigResponse.t,
+          GetRuntimeManagementConfigResponse.error) Result.t Async.Deferred.t
 val invoke :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -195,18 +257,37 @@ val invoke_async :
       InvokeAsyncRequest.t ->
         (InvokeAsyncResponse.t, InvokeAsyncResponse.error) Result.t
           Async.Deferred.t
+val invoke_with_response_stream :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      InvokeWithResponseStreamRequest.t ->
+        (InvokeWithResponseStreamResponse.t,
+          InvokeWithResponseStreamResponse.error) Result.t Async.Deferred.t
 val list_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAliasesRequest.t ->
         (ListAliasesResponse.t, ListAliasesResponse.error) Result.t
           Async.Deferred.t
+val list_capacity_providers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCapacityProvidersRequest.t ->
+        (ListCapacityProvidersResponse.t,
+          ListCapacityProvidersResponse.error) Result.t Async.Deferred.t
 val list_code_signing_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCodeSigningConfigsRequest.t ->
         (ListCodeSigningConfigsResponse.t,
           ListCodeSigningConfigsResponse.error) Result.t Async.Deferred.t
+val list_durable_executions_by_function :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDurableExecutionsByFunctionRequest.t ->
+        (ListDurableExecutionsByFunctionResponse.t,
+          ListDurableExecutionsByFunctionResponse.error) Result.t
+          Async.Deferred.t
 val list_event_source_mappings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -226,6 +307,13 @@ val list_function_url_configs :
       ListFunctionUrlConfigsRequest.t ->
         (ListFunctionUrlConfigsResponse.t,
           ListFunctionUrlConfigsResponse.error) Result.t Async.Deferred.t
+val list_function_versions_by_capacity_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFunctionVersionsByCapacityProviderRequest.t ->
+        (ListFunctionVersionsByCapacityProviderResponse.t,
+          ListFunctionVersionsByCapacityProviderResponse.error) Result.t
+          Async.Deferred.t
 val list_functions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -300,6 +388,18 @@ val put_function_event_invoke_config :
       PutFunctionEventInvokeConfigRequest.t ->
         (FunctionEventInvokeConfig.t, FunctionEventInvokeConfig.error)
           Result.t Async.Deferred.t
+val put_function_recursion_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutFunctionRecursionConfigRequest.t ->
+        (PutFunctionRecursionConfigResponse.t,
+          PutFunctionRecursionConfigResponse.error) Result.t Async.Deferred.t
+val put_function_scaling_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutFunctionScalingConfigRequest.t ->
+        (PutFunctionScalingConfigResponse.t,
+          PutFunctionScalingConfigResponse.error) Result.t Async.Deferred.t
 val put_provisioned_concurrency_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -307,6 +407,12 @@ val put_provisioned_concurrency_config :
         (PutProvisionedConcurrencyConfigResponse.t,
           PutProvisionedConcurrencyConfigResponse.error) Result.t
           Async.Deferred.t
+val put_runtime_management_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutRuntimeManagementConfigRequest.t ->
+        (PutRuntimeManagementConfigResponse.t,
+          PutRuntimeManagementConfigResponse.error) Result.t Async.Deferred.t
 val remove_layer_version_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -316,6 +422,33 @@ val remove_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemovePermissionRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val send_durable_execution_callback_failure :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendDurableExecutionCallbackFailureRequest.t ->
+        (SendDurableExecutionCallbackFailureResponse.t,
+          SendDurableExecutionCallbackFailureResponse.error) Result.t
+          Async.Deferred.t
+val send_durable_execution_callback_heartbeat :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendDurableExecutionCallbackHeartbeatRequest.t ->
+        (SendDurableExecutionCallbackHeartbeatResponse.t,
+          SendDurableExecutionCallbackHeartbeatResponse.error) Result.t
+          Async.Deferred.t
+val send_durable_execution_callback_success :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendDurableExecutionCallbackSuccessRequest.t ->
+        (SendDurableExecutionCallbackSuccessResponse.t,
+          SendDurableExecutionCallbackSuccessResponse.error) Result.t
+          Async.Deferred.t
+val stop_durable_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopDurableExecutionRequest.t ->
+        (StopDurableExecutionResponse.t, StopDurableExecutionResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -330,6 +463,12 @@ val update_alias :
       UpdateAliasRequest.t ->
         (AliasConfiguration.t, AliasConfiguration.error) Result.t
           Async.Deferred.t
+val update_capacity_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCapacityProviderRequest.t ->
+        (UpdateCapacityProviderResponse.t,
+          UpdateCapacityProviderResponse.error) Result.t Async.Deferred.t
 val update_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

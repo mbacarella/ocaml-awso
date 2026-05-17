@@ -249,6 +249,9 @@ module PolicyNames =
   struct
     type nonrec t = PolicyName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -343,16 +346,16 @@ module Listener =
       make ?sSLCertificateId ~instancePort ?instanceProtocol
         ~loadBalancerPort ~protocol ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sSLCertificateId =
-        field_map json "SSLCertificateId" SSLCertificateId.of_json in
+        field_map json__ "SSLCertificateId" SSLCertificateId.of_json in
       let instancePort =
-        field_map_exn json "InstancePort" InstancePort.of_json in
+        field_map_exn json__ "InstancePort" InstancePort.of_json in
       let instanceProtocol =
-        field_map json "InstanceProtocol" Protocol.of_json in
+        field_map json__ "InstanceProtocol" Protocol.of_json in
       let loadBalancerPort =
-        field_map_exn json "LoadBalancerPort" AccessPointPort.of_json in
-      let protocol = field_map_exn json "Protocol" Protocol.of_json in
+        field_map_exn json__ "LoadBalancerPort" AccessPointPort.of_json in
+      let protocol = field_map_exn json__ "Protocol" Protocol.of_json in
       make ?sSLCertificateId ~instancePort ?instanceProtocol
         ~loadBalancerPort ~protocol ()
     let to_json v = composed_to_json to_value v
@@ -382,9 +385,9 @@ module AppCookieStickinessPolicy =
         (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "PolicyName") in
       make ?cookieName ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cookieName = field_map json "CookieName" CookieName.of_json in
-      let policyName = field_map json "PolicyName" PolicyName.of_json in
+    let of_json json__ =
+      let cookieName = field_map json__ "CookieName" CookieName.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyName.of_json in
       make ?cookieName ?policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -417,11 +420,11 @@ module LBCookieStickinessPolicy =
         (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "PolicyName") in
       make ?cookieExpirationPeriod ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cookieExpirationPeriod =
-        field_map json "CookieExpirationPeriod"
+        field_map json__ "CookieExpirationPeriod"
           CookieExpirationPeriod.of_json in
-      let policyName = field_map json "PolicyName" PolicyName.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyName.of_json in
       make ?cookieExpirationPeriod ?policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -482,9 +485,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a tag."]
@@ -545,14 +548,14 @@ module PolicyAttributeTypeDescription =
       make ?cardinality ?defaultValue ?description ?attributeType
         ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cardinality = field_map json "Cardinality" Cardinality.of_json in
-      let defaultValue = field_map json "DefaultValue" DefaultValue.of_json in
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let cardinality = field_map json__ "Cardinality" Cardinality.of_json in
+      let defaultValue = field_map json__ "DefaultValue" DefaultValue.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let attributeType =
-        field_map json "AttributeType" AttributeType.of_json in
+        field_map json__ "AttributeType" AttributeType.of_json in
       let attributeName =
-        field_map json "AttributeName" AttributeName.of_json in
+        field_map json__ "AttributeName" AttributeName.of_json in
       make ?cardinality ?defaultValue ?description ?attributeType
         ?attributeName ()
     let to_json v = composed_to_json to_value v
@@ -583,11 +586,11 @@ module PolicyAttributeDescription =
           (Xml.child xml_arg0 "AttributeName") in
       make ?attributeValue ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValue =
-        field_map json "AttributeValue" AttributeValue.of_json in
+        field_map json__ "AttributeValue" AttributeValue.of_json in
       let attributeName =
-        field_map json "AttributeName" AttributeName.of_json in
+        field_map json__ "AttributeName" AttributeName.of_json in
       make ?attributeValue ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a policy attribute."]
@@ -629,9 +632,9 @@ module BackendServerDescription =
           (Xml.child xml_arg0 "InstancePort") in
       make ?policyNames ?instancePort ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyNames = field_map json "PolicyNames" PolicyNames.of_json in
-      let instancePort = field_map json "InstancePort" InstancePort.of_json in
+    let of_json json__ =
+      let policyNames = field_map json__ "PolicyNames" PolicyNames.of_json in
+      let instancePort = field_map json__ "InstancePort" InstancePort.of_json in
       make ?policyNames ?instancePort ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the configuration of an EC2 instance."]
@@ -735,8 +738,8 @@ module Instance =
         (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
       make ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
+    let of_json json__ =
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
       make ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The ID of an EC2 instance."]
@@ -762,9 +765,9 @@ module ListenerDescription =
         (Option.map ~f:Listener.of_xml) (Xml.child xml_arg0 "Listener") in
       make ?policyNames ?listener ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyNames = field_map json "PolicyNames" PolicyNames.of_json in
-      let listener = field_map json "Listener" Listener.of_json in
+    let of_json json__ =
+      let policyNames = field_map json__ "PolicyNames" PolicyNames.of_json in
+      let listener = field_map json__ "Listener" Listener.of_json in
       make ?policyNames ?listener ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The policies enabled for a listener."]
@@ -772,6 +775,9 @@ module AppCookieStickinessPolicies =
   struct
     type nonrec t = AppCookieStickinessPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppCookieStickinessPolicy.to_value)) |>
         (fun x -> `List x)
@@ -798,6 +804,9 @@ module LBCookieStickinessPolicies =
   struct
     type nonrec t = LBCookieStickinessPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LBCookieStickinessPolicy.to_value)) |>
         (fun x -> `List x)
@@ -949,9 +958,9 @@ module AdditionalAttribute =
           (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" AdditionalAttributeValue.of_json in
-      let key = field_map json "Key" AdditionalAttributeKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" AdditionalAttributeValue.of_json in
+      let key = field_map json__ "Key" AdditionalAttributeKey.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about additional load balancer attributes."]
@@ -1032,6 +1041,9 @@ module TagList =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1055,6 +1067,9 @@ module PolicyAttributeTypeDescriptions =
   struct
     type nonrec t = PolicyAttributeTypeDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyAttributeTypeDescription.to_value)) |>
         (fun x -> `List x)
@@ -1094,6 +1109,9 @@ module PolicyAttributeDescriptions =
   struct
     type nonrec t = PolicyAttributeDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyAttributeDescription.to_value)) |>
         (fun x -> `List x)
@@ -1172,6 +1190,9 @@ module AvailabilityZones =
   struct
     type nonrec t = AvailabilityZone.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZone.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1197,6 +1218,9 @@ module BackendServerDescriptions =
   struct
     type nonrec t = BackendServerDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BackendServerDescription.to_value)) |>
         (fun x -> `List x)
@@ -1306,15 +1330,15 @@ module HealthCheck =
       make ~healthyThreshold ~unhealthyThreshold ~timeout ~interval ~target
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthyThreshold =
-        field_map_exn json "HealthyThreshold" HealthyThreshold.of_json in
+        field_map_exn json__ "HealthyThreshold" HealthyThreshold.of_json in
       let unhealthyThreshold =
-        field_map_exn json "UnhealthyThreshold" UnhealthyThreshold.of_json in
-      let timeout = field_map_exn json "Timeout" HealthCheckTimeout.of_json in
+        field_map_exn json__ "UnhealthyThreshold" UnhealthyThreshold.of_json in
+      let timeout = field_map_exn json__ "Timeout" HealthCheckTimeout.of_json in
       let interval =
-        field_map_exn json "Interval" HealthCheckInterval.of_json in
-      let target = field_map_exn json "Target" HealthCheckTarget.of_json in
+        field_map_exn json__ "Interval" HealthCheckInterval.of_json in
+      let target = field_map_exn json__ "Target" HealthCheckTarget.of_json in
       make ~healthyThreshold ~unhealthyThreshold ~timeout ~interval ~target
         ()
     let to_json v = composed_to_json to_value v
@@ -1323,6 +1347,9 @@ module Instances =
   struct
     type nonrec t = Instance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Instance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1347,6 +1374,9 @@ module ListenerDescriptions =
   struct
     type nonrec t = ListenerDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListenerDescription.to_value)) |>
         (fun x -> `List x)
@@ -1427,13 +1457,14 @@ module Policies =
       make ?otherPolicies ?lBCookieStickinessPolicies
         ?appCookieStickinessPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let otherPolicies = field_map json "OtherPolicies" PolicyNames.of_json in
+    let of_json json__ =
+      let otherPolicies =
+        field_map json__ "OtherPolicies" PolicyNames.of_json in
       let lBCookieStickinessPolicies =
-        field_map json "LBCookieStickinessPolicies"
+        field_map json__ "LBCookieStickinessPolicies"
           LBCookieStickinessPolicies.of_json in
       let appCookieStickinessPolicies =
-        field_map json "AppCookieStickinessPolicies"
+        field_map json__ "AppCookieStickinessPolicies"
           AppCookieStickinessPolicies.of_json in
       make ?otherPolicies ?lBCookieStickinessPolicies
         ?appCookieStickinessPolicies ()
@@ -1443,6 +1474,9 @@ module SecurityGroups =
   struct
     type nonrec t = SecurityGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1488,10 +1522,10 @@ module SourceSecurityGroup =
           (Xml.child xml_arg0 "OwnerAlias") in
       make ?groupName ?ownerAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupName = field_map json "GroupName" SecurityGroupName.of_json in
+    let of_json json__ =
+      let groupName = field_map json__ "GroupName" SecurityGroupName.of_json in
       let ownerAlias =
-        field_map json "OwnerAlias" SecurityGroupOwnerAlias.of_json in
+        field_map json__ "OwnerAlias" SecurityGroupOwnerAlias.of_json in
       make ?groupName ?ownerAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a source security group."]
@@ -1499,6 +1533,9 @@ module Subnets =
   struct
     type nonrec t = SubnetId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1544,8 +1581,8 @@ module TagKeyOnly =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map json "Key" TagKey.of_json in make ?key ()
+    let of_json json__ =
+      let key = field_map json__ "Key" TagKey.of_json in make ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The key of a tag."]
 module AccessLog =
@@ -1595,13 +1632,13 @@ module AccessLog =
           (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?s3BucketPrefix ?emitInterval ?s3BucketName ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3BucketPrefix =
-        field_map json "S3BucketPrefix" AccessLogPrefix.of_json in
+        field_map json__ "S3BucketPrefix" AccessLogPrefix.of_json in
       let emitInterval =
-        field_map json "EmitInterval" AccessLogInterval.of_json in
-      let s3BucketName = field_map json "S3BucketName" S3BucketName.of_json in
-      let enabled = field_map_exn json "Enabled" AccessLogEnabled.of_json in
+        field_map json__ "EmitInterval" AccessLogInterval.of_json in
+      let s3BucketName = field_map json__ "S3BucketName" S3BucketName.of_json in
+      let enabled = field_map_exn json__ "Enabled" AccessLogEnabled.of_json in
       make ?s3BucketPrefix ?emitInterval ?s3BucketName ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the AccessLog attribute."]
@@ -1610,6 +1647,9 @@ module AdditionalAttributes =
     type nonrec t = AdditionalAttribute.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdditionalAttribute.to_value)) |>
         (fun x -> `List x)
@@ -1659,11 +1699,11 @@ module ConnectionDraining =
           (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?timeout ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeout =
-        field_map json "Timeout" ConnectionDrainingTimeout.of_json in
+        field_map json__ "Timeout" ConnectionDrainingTimeout.of_json in
       let enabled =
-        field_map_exn json "Enabled" ConnectionDrainingEnabled.of_json in
+        field_map_exn json__ "Enabled" ConnectionDrainingEnabled.of_json in
       make ?timeout ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the ConnectionDraining attribute."]
@@ -1686,8 +1726,9 @@ module ConnectionSettings =
           (Xml.child_exn ~context:context_ xml_arg0 "IdleTimeout") in
       make ~idleTimeout ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let idleTimeout = field_map_exn json "IdleTimeout" IdleTimeout.of_json in
+    let of_json json__ =
+      let idleTimeout =
+        field_map_exn json__ "IdleTimeout" IdleTimeout.of_json in
       make ~idleTimeout ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the ConnectionSettings attribute."]
@@ -1711,9 +1752,9 @@ module CrossZoneLoadBalancing =
           (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enabled =
-        field_map_exn json "Enabled" CrossZoneLoadBalancingEnabled.of_json in
+        field_map_exn json__ "Enabled" CrossZoneLoadBalancingEnabled.of_json in
       make ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the CrossZoneLoadBalancing attribute."]
@@ -1739,10 +1780,10 @@ module TagDescription =
           (Xml.child xml_arg0 "LoadBalancerName") in
       make ?tags ?loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let loadBalancerName =
-        field_map json "LoadBalancerName" AccessPointName.of_json in
+        field_map json__ "LoadBalancerName" AccessPointName.of_json in
       make ?tags ?loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tags associated with a load balancer."]
@@ -1783,13 +1824,13 @@ module PolicyTypeDescription =
           (Xml.child xml_arg0 "PolicyTypeName") in
       make ?policyAttributeTypeDescriptions ?description ?policyTypeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyAttributeTypeDescriptions =
-        field_map json "PolicyAttributeTypeDescriptions"
+        field_map json__ "PolicyAttributeTypeDescriptions"
           PolicyAttributeTypeDescriptions.of_json in
-      let description = field_map json "Description" Description.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let policyTypeName =
-        field_map json "PolicyTypeName" PolicyTypeName.of_json in
+        field_map json__ "PolicyTypeName" PolicyTypeName.of_json in
       make ?policyAttributeTypeDescriptions ?description ?policyTypeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a policy type."]
@@ -1827,13 +1868,13 @@ module PolicyDescription =
         (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "PolicyName") in
       make ?policyAttributeDescriptions ?policyTypeName ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyAttributeDescriptions =
-        field_map json "PolicyAttributeDescriptions"
+        field_map json__ "PolicyAttributeDescriptions"
           PolicyAttributeDescriptions.of_json in
       let policyTypeName =
-        field_map json "PolicyTypeName" PolicyTypeName.of_json in
-      let policyName = field_map json "PolicyName" PolicyName.of_json in
+        field_map json__ "PolicyTypeName" PolicyTypeName.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyName.of_json in
       make ?policyAttributeDescriptions ?policyTypeName ?policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a policy."]
@@ -1873,11 +1914,11 @@ module InstanceState =
         (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
       make ?description ?reasonCode ?state ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
-      let reasonCode = field_map json "ReasonCode" ReasonCode.of_json in
-      let state = field_map json "State" State.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let reasonCode = field_map json__ "ReasonCode" ReasonCode.of_json in
+      let state = field_map json__ "State" State.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
       make ?description ?reasonCode ?state ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the state of an EC2 instance."]
@@ -1900,9 +1941,9 @@ module Limit =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       make ?max ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" Max.of_json in
-      let name = field_map json "Name" Name.of_json in make ?max ?name ()
+    let of_json json__ =
+      let max = field_map json__ "Max" Max.of_json in
+      let name = field_map json__ "Name" Name.of_json in make ?max ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an Elastic Load Balancing resource limit for your AWS account."]
@@ -2058,32 +2099,32 @@ module LoadBalancerDescription =
         ?canonicalHostedZoneNameID ?canonicalHostedZoneName ?dNSName
         ?loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scheme = field_map json "Scheme" LoadBalancerScheme.of_json in
-      let createdTime = field_map json "CreatedTime" CreatedTime.of_json in
+    let of_json json__ =
+      let scheme = field_map json__ "Scheme" LoadBalancerScheme.of_json in
+      let createdTime = field_map json__ "CreatedTime" CreatedTime.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroups.of_json in
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
       let sourceSecurityGroup =
-        field_map json "SourceSecurityGroup" SourceSecurityGroup.of_json in
-      let healthCheck = field_map json "HealthCheck" HealthCheck.of_json in
-      let instances = field_map json "Instances" Instances.of_json in
-      let vPCId = field_map json "VPCId" VPCId.of_json in
-      let subnets = field_map json "Subnets" Subnets.of_json in
+        field_map json__ "SourceSecurityGroup" SourceSecurityGroup.of_json in
+      let healthCheck = field_map json__ "HealthCheck" HealthCheck.of_json in
+      let instances = field_map json__ "Instances" Instances.of_json in
+      let vPCId = field_map json__ "VPCId" VPCId.of_json in
+      let subnets = field_map json__ "Subnets" Subnets.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
       let backendServerDescriptions =
-        field_map json "BackendServerDescriptions"
+        field_map json__ "BackendServerDescriptions"
           BackendServerDescriptions.of_json in
-      let policies = field_map json "Policies" Policies.of_json in
+      let policies = field_map json__ "Policies" Policies.of_json in
       let listenerDescriptions =
-        field_map json "ListenerDescriptions" ListenerDescriptions.of_json in
+        field_map json__ "ListenerDescriptions" ListenerDescriptions.of_json in
       let canonicalHostedZoneNameID =
-        field_map json "CanonicalHostedZoneNameID" DNSName.of_json in
+        field_map json__ "CanonicalHostedZoneNameID" DNSName.of_json in
       let canonicalHostedZoneName =
-        field_map json "CanonicalHostedZoneName" DNSName.of_json in
-      let dNSName = field_map json "DNSName" DNSName.of_json in
+        field_map json__ "CanonicalHostedZoneName" DNSName.of_json in
+      let dNSName = field_map json__ "DNSName" DNSName.of_json in
       let loadBalancerName =
-        field_map json "LoadBalancerName" AccessPointName.of_json in
+        field_map json__ "LoadBalancerName" AccessPointName.of_json in
       make ?scheme ?createdTime ?securityGroups ?sourceSecurityGroup
         ?healthCheck ?instances ?vPCId ?subnets ?availabilityZones
         ?backendServerDescriptions ?policies ?listenerDescriptions
@@ -2117,11 +2158,11 @@ module PolicyAttribute =
           (Xml.child xml_arg0 "AttributeName") in
       make ?attributeValue ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValue =
-        field_map json "AttributeValue" AttributeValue.of_json in
+        field_map json__ "AttributeValue" AttributeValue.of_json in
       let attributeName =
-        field_map json "AttributeName" AttributeName.of_json in
+        field_map json__ "AttributeName" AttributeName.of_json in
       make ?attributeValue ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a policy attribute."]
@@ -2218,6 +2259,9 @@ module LoadBalancerNames =
   struct
     type nonrec t = AccessPointName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessPointName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2244,6 +2288,9 @@ module TagKeyList =
     type nonrec t = TagKeyOnly.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKeyOnly.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2350,16 +2397,16 @@ module LoadBalancerAttributes =
       make ?additionalAttributes ?connectionSettings ?connectionDraining
         ?accessLog ?crossZoneLoadBalancing ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalAttributes =
-        field_map json "AdditionalAttributes" AdditionalAttributes.of_json in
+        field_map json__ "AdditionalAttributes" AdditionalAttributes.of_json in
       let connectionSettings =
-        field_map json "ConnectionSettings" ConnectionSettings.of_json in
+        field_map json__ "ConnectionSettings" ConnectionSettings.of_json in
       let connectionDraining =
-        field_map json "ConnectionDraining" ConnectionDraining.of_json in
-      let accessLog = field_map json "AccessLog" AccessLog.of_json in
+        field_map json__ "ConnectionDraining" ConnectionDraining.of_json in
+      let accessLog = field_map json__ "AccessLog" AccessLog.of_json in
       let crossZoneLoadBalancing =
-        field_map json "CrossZoneLoadBalancing"
+        field_map json__ "CrossZoneLoadBalancing"
           CrossZoneLoadBalancing.of_json in
       make ?additionalAttributes ?connectionSettings ?connectionDraining
         ?accessLog ?crossZoneLoadBalancing ()
@@ -2369,6 +2416,9 @@ module TagDescriptions =
   struct
     type nonrec t = TagDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2397,6 +2447,9 @@ module LoadBalancerNamesMax20 =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessPointName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2422,6 +2475,9 @@ module PolicyTypeDescriptions =
   struct
     type nonrec t = PolicyTypeDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyTypeDescription.to_value)) |>
         (fun x -> `List x)
@@ -2460,6 +2516,9 @@ module PolicyTypeNames =
   struct
     type nonrec t = PolicyTypeName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyTypeName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2484,6 +2543,9 @@ module PolicyDescriptions =
   struct
     type nonrec t = PolicyDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2509,6 +2571,9 @@ module InstanceStates =
   struct
     type nonrec t = InstanceState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2533,6 +2598,9 @@ module Limits =
   struct
     type nonrec t = Limit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Limit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2599,6 +2667,9 @@ module LoadBalancerDescriptions =
   struct
     type nonrec t = LoadBalancerDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadBalancerDescription.to_value)) |>
         (fun x -> `List x)
@@ -2625,6 +2696,9 @@ module Ports =
   struct
     type nonrec t = AccessPointPort.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessPointPort.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2675,6 +2749,9 @@ module PolicyAttributes =
   struct
     type nonrec t = PolicyAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2713,6 +2790,9 @@ module Listeners =
   struct
     type nonrec t = Listener.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Listener.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2960,12 +3040,13 @@ module SetLoadBalancerPoliciesOfListenerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~policyNames ~loadBalancerPort ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyNames = field_map_exn json "PolicyNames" PolicyNames.of_json in
+    let of_json json__ =
+      let policyNames =
+        field_map_exn json__ "PolicyNames" PolicyNames.of_json in
       let loadBalancerPort =
-        field_map_exn json "LoadBalancerPort" AccessPointPort.of_json in
+        field_map_exn json__ "LoadBalancerPort" AccessPointPort.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~policyNames ~loadBalancerPort ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3078,12 +3159,13 @@ module SetLoadBalancerPoliciesForBackendServerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~policyNames ~instancePort ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyNames = field_map_exn json "PolicyNames" PolicyNames.of_json in
+    let of_json json__ =
+      let policyNames =
+        field_map_exn json__ "PolicyNames" PolicyNames.of_json in
       let instancePort =
-        field_map_exn json "InstancePort" EndPointPort.of_json in
+        field_map_exn json__ "InstancePort" EndPointPort.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~policyNames ~instancePort ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3219,13 +3301,13 @@ module SetLoadBalancerListenerSSLCertificateInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~sSLCertificateId ~loadBalancerPort ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sSLCertificateId =
-        field_map_exn json "SSLCertificateId" SSLCertificateId.of_json in
+        field_map_exn json__ "SSLCertificateId" SSLCertificateId.of_json in
       let loadBalancerPort =
-        field_map_exn json "LoadBalancerPort" AccessPointPort.of_json in
+        field_map_exn json__ "LoadBalancerPort" AccessPointPort.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~sSLCertificateId ~loadBalancerPort ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3301,10 +3383,10 @@ module RemoveTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerNames") in
       make ~tags ~loadBalancerNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagKeyList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagKeyList.of_json in
       let loadBalancerNames =
-        field_map_exn json "LoadBalancerNames" LoadBalancerNames.of_json in
+        field_map_exn json__ "LoadBalancerNames" LoadBalancerNames.of_json in
       make ~tags ~loadBalancerNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for RemoveTags."]
@@ -3387,9 +3469,9 @@ module RemoveAvailabilityZonesOutput =
           (Xml.child xml_arg0 "AvailabilityZones") in
       make ?availabilityZones ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
       make ?availabilityZones ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3422,11 +3504,11 @@ module RemoveAvailabilityZonesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~availabilityZones ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZones =
-        field_map_exn json "AvailabilityZones" AvailabilityZones.of_json in
+        field_map_exn json__ "AvailabilityZones" AvailabilityZones.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~availabilityZones ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3503,8 +3585,8 @@ module RegisterEndPointsOutput =
         (Option.map ~f:Instances.of_xml) (Xml.child xml_arg0 "Instances") in
       make ?instances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instances = field_map json "Instances" Instances.of_json in
+    let of_json json__ =
+      let instances = field_map json__ "Instances" Instances.of_json in
       make ?instances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3534,10 +3616,10 @@ module RegisterEndPointsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~instances ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instances = field_map_exn json "Instances" Instances.of_json in
+    let of_json json__ =
+      let instances = field_map_exn json__ "Instances" Instances.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~instances ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3640,12 +3722,12 @@ module ModifyLoadBalancerAttributesOutput =
           (Xml.child xml_arg0 "LoadBalancerName") in
       make ?loadBalancerAttributes ?loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerAttributes =
-        field_map json "LoadBalancerAttributes"
+        field_map json__ "LoadBalancerAttributes"
           LoadBalancerAttributes.of_json in
       let loadBalancerName =
-        field_map json "LoadBalancerName" AccessPointName.of_json in
+        field_map json__ "LoadBalancerName" AccessPointName.of_json in
       make ?loadBalancerAttributes ?loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of ModifyLoadBalancerAttributes."]
@@ -3677,12 +3759,12 @@ module ModifyLoadBalancerAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~loadBalancerAttributes ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerAttributes =
-        field_map_exn json "LoadBalancerAttributes"
+        field_map_exn json__ "LoadBalancerAttributes"
           LoadBalancerAttributes.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~loadBalancerAttributes ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3763,8 +3845,8 @@ module DetachLoadBalancerFromSubnetsOutput =
         (Option.map ~f:Subnets.of_xml) (Xml.child xml_arg0 "Subnets") in
       make ?subnets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnets = field_map json "Subnets" Subnets.of_json in
+    let of_json json__ =
+      let subnets = field_map json__ "Subnets" Subnets.of_json in
       make ?subnets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of DetachLoadBalancerFromSubnets."]
@@ -3792,10 +3874,10 @@ module DetachLoadBalancerFromSubnetsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~subnets ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnets = field_map_exn json "Subnets" Subnets.of_json in
+    let of_json json__ =
+      let subnets = field_map_exn json__ "Subnets" Subnets.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~subnets ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3858,9 +3940,9 @@ module DescribeTagsOutput =
           (Xml.child xml_arg0 "TagDescriptions") in
       make ?tagDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagDescriptions =
-        field_map json "TagDescriptions" TagDescriptions.of_json in
+        field_map json__ "TagDescriptions" TagDescriptions.of_json in
       make ?tagDescriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output for DescribeTags."]
@@ -3883,9 +3965,10 @@ module DescribeTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerNames") in
       make ~loadBalancerNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerNames =
-        field_map_exn json "LoadBalancerNames" LoadBalancerNamesMax20.of_json in
+        field_map_exn json__ "LoadBalancerNames"
+          LoadBalancerNamesMax20.of_json in
       make ~loadBalancerNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DescribeTags."]
@@ -3955,9 +4038,9 @@ module DescribeLoadBalancerPolicyTypesOutput =
           (Xml.child xml_arg0 "PolicyTypeDescriptions") in
       make ?policyTypeDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyTypeDescriptions =
-        field_map json "PolicyTypeDescriptions"
+        field_map json__ "PolicyTypeDescriptions"
           PolicyTypeDescriptions.of_json in
       make ?policyTypeDescriptions ()
     let to_json v = composed_to_json to_value v
@@ -3981,9 +4064,9 @@ module DescribeLoadBalancerPolicyTypesInput =
           (Xml.child xml_arg0 "PolicyTypeNames") in
       make ?policyTypeNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyTypeNames =
-        field_map json "PolicyTypeNames" PolicyTypeNames.of_json in
+        field_map json__ "PolicyTypeNames" PolicyTypeNames.of_json in
       make ?policyTypeNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4061,9 +4144,9 @@ module DescribeLoadBalancerPoliciesOutput =
           (Xml.child xml_arg0 "PolicyDescriptions") in
       make ?policyDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDescriptions =
-        field_map json "PolicyDescriptions" PolicyDescriptions.of_json in
+        field_map json__ "PolicyDescriptions" PolicyDescriptions.of_json in
       make ?policyDescriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of DescribeLoadBalancerPolicies."]
@@ -4091,10 +4174,10 @@ module DescribeLoadBalancerPoliciesInput =
           (Xml.child xml_arg0 "LoadBalancerName") in
       make ?policyNames ?loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyNames = field_map json "PolicyNames" PolicyNames.of_json in
+    let of_json json__ =
+      let policyNames = field_map json__ "PolicyNames" PolicyNames.of_json in
       let loadBalancerName =
-        field_map json "LoadBalancerName" AccessPointName.of_json in
+        field_map json__ "LoadBalancerName" AccessPointName.of_json in
       make ?policyNames ?loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4177,9 +4260,9 @@ module DescribeLoadBalancerAttributesOutput =
           (Xml.child xml_arg0 "LoadBalancerAttributes") in
       make ?loadBalancerAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerAttributes =
-        field_map json "LoadBalancerAttributes"
+        field_map json__ "LoadBalancerAttributes"
           LoadBalancerAttributes.of_json in
       make ?loadBalancerAttributes ()
     let to_json v = composed_to_json to_value v
@@ -4203,9 +4286,9 @@ module DescribeLoadBalancerAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4281,9 +4364,9 @@ module DescribeEndPointStateOutput =
           (Xml.child xml_arg0 "InstanceStates") in
       make ?instanceStates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceStates =
-        field_map json "InstanceStates" InstanceStates.of_json in
+        field_map json__ "InstanceStates" InstanceStates.of_json in
       make ?instanceStates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output for DescribeInstanceHealth."]
@@ -4311,10 +4394,10 @@ module DescribeEndPointStateInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ?instances ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instances = field_map json "Instances" Instances.of_json in
+    let of_json json__ =
+      let instances = field_map json__ "Instances" Instances.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ?instances ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DescribeInstanceHealth."]
@@ -4372,9 +4455,9 @@ module DescribeAccountLimitsOutput =
         (Option.map ~f:Limits.of_xml) (Xml.child xml_arg0 "Limits") in
       make ?nextMarker ?limits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
-      let limits = field_map json "Limits" Limits.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let limits = field_map json__ "Limits" Limits.of_json in
       make ?nextMarker ?limits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4402,9 +4485,9 @@ module DescribeAccountLimitsInput =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?pageSize ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
       make ?pageSize ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4491,10 +4574,10 @@ module DescribeAccessPointsOutput =
           (Xml.child xml_arg0 "LoadBalancerDescriptions") in
       make ?nextMarker ?loadBalancerDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
       let loadBalancerDescriptions =
-        field_map json "LoadBalancerDescriptions"
+        field_map json__ "LoadBalancerDescriptions"
           LoadBalancerDescriptions.of_json in
       make ?nextMarker ?loadBalancerDescriptions ()
     let to_json v = composed_to_json to_value v
@@ -4531,11 +4614,11 @@ module DescribeAccessPointsInput =
           (Xml.child xml_arg0 "LoadBalancerNames") in
       make ?pageSize ?marker ?loadBalancerNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
       let loadBalancerNames =
-        field_map json "LoadBalancerNames" LoadBalancerNames.of_json in
+        field_map json__ "LoadBalancerNames" LoadBalancerNames.of_json in
       make ?pageSize ?marker ?loadBalancerNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DescribeLoadBalancers."]
@@ -4612,8 +4695,8 @@ module DeregisterEndPointsOutput =
         (Option.map ~f:Instances.of_xml) (Xml.child xml_arg0 "Instances") in
       make ?instances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instances = field_map json "Instances" Instances.of_json in
+    let of_json json__ =
+      let instances = field_map json__ "Instances" Instances.of_json in
       make ?instances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4643,10 +4726,10 @@ module DeregisterEndPointsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~instances ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instances = field_map_exn json "Instances" Instances.of_json in
+    let of_json json__ =
+      let instances = field_map_exn json__ "Instances" Instances.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~instances ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4735,10 +4818,10 @@ module DeleteLoadBalancerPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~policyName ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
+    let of_json json__ =
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~policyName ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DeleteLoadBalancerPolicy."]
@@ -4816,11 +4899,11 @@ module DeleteLoadBalancerListenerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~loadBalancerPorts ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerPorts =
-        field_map_exn json "LoadBalancerPorts" Ports.of_json in
+        field_map_exn json__ "LoadBalancerPorts" Ports.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~loadBalancerPorts ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DeleteLoadBalancerListeners."]
@@ -4877,9 +4960,9 @@ module DeleteAccessPointInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DeleteLoadBalancer."]
@@ -5023,14 +5106,14 @@ module CreateLoadBalancerPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ?policyAttributes ~policyTypeName ~policyName ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyAttributes =
-        field_map json "PolicyAttributes" PolicyAttributes.of_json in
+        field_map json__ "PolicyAttributes" PolicyAttributes.of_json in
       let policyTypeName =
-        field_map_exn json "PolicyTypeName" PolicyTypeName.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
+        field_map_exn json__ "PolicyTypeName" PolicyTypeName.of_json in
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ?policyAttributes ~policyTypeName ~policyName ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for CreateLoadBalancerPolicy."]
@@ -5150,10 +5233,10 @@ module CreateLoadBalancerListenerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~listeners ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listeners = field_map_exn json "Listeners" Listeners.of_json in
+    let of_json json__ =
+      let listeners = field_map_exn json__ "Listeners" Listeners.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~listeners ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for CreateLoadBalancerListeners."]
@@ -5275,13 +5358,13 @@ module CreateLBCookieStickinessPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ?cookieExpirationPeriod ~policyName ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cookieExpirationPeriod =
-        field_map json "CookieExpirationPeriod"
+        field_map json__ "CookieExpirationPeriod"
           CookieExpirationPeriod.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ?cookieExpirationPeriod ~policyName ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5402,11 +5485,11 @@ module CreateAppCookieStickinessPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~cookieName ~policyName ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cookieName = field_map_exn json "CookieName" CookieName.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
+    let of_json json__ =
+      let cookieName = field_map_exn json__ "CookieName" CookieName.of_json in
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~cookieName ~policyName ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5581,8 +5664,8 @@ module CreateAccessPointOutput =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "DNSName") in
       make ?dNSName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dNSName = field_map json "DNSName" DNSName.of_json in
+    let of_json json__ =
+      let dNSName = field_map json__ "DNSName" DNSName.of_json in
       make ?dNSName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output for CreateLoadBalancer."]
@@ -5664,17 +5747,17 @@ module CreateAccessPointInput =
       make ?tags ?scheme ?securityGroups ?subnets ?availabilityZones
         ~listeners ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let scheme = field_map json "Scheme" LoadBalancerScheme.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let scheme = field_map json__ "Scheme" LoadBalancerScheme.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroups.of_json in
-      let subnets = field_map json "Subnets" Subnets.of_json in
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
+      let subnets = field_map json__ "Subnets" Subnets.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
-      let listeners = field_map_exn json "Listeners" Listeners.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
+      let listeners = field_map_exn json__ "Listeners" Listeners.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ?tags ?scheme ?securityGroups ?subnets ?availabilityZones
         ~listeners ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
@@ -5737,8 +5820,8 @@ module ConfigureHealthCheckOutput =
         (Option.map ~f:HealthCheck.of_xml) (Xml.child xml_arg0 "HealthCheck") in
       make ?healthCheck ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let healthCheck = field_map json "HealthCheck" HealthCheck.of_json in
+    let of_json json__ =
+      let healthCheck = field_map json__ "HealthCheck" HealthCheck.of_json in
       make ?healthCheck ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of ConfigureHealthCheck."]
@@ -5768,10 +5851,11 @@ module ConfigureHealthCheckInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~healthCheck ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let healthCheck = field_map_exn json "HealthCheck" HealthCheck.of_json in
+    let of_json json__ =
+      let healthCheck =
+        field_map_exn json__ "HealthCheck" HealthCheck.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~healthCheck ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for ConfigureHealthCheck."]
@@ -5866,8 +5950,8 @@ module AttachLoadBalancerToSubnetsOutput =
         (Option.map ~f:Subnets.of_xml) (Xml.child xml_arg0 "Subnets") in
       make ?subnets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnets = field_map json "Subnets" Subnets.of_json in
+    let of_json json__ =
+      let subnets = field_map json__ "Subnets" Subnets.of_json in
       make ?subnets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of AttachLoadBalancerToSubnets."]
@@ -5897,10 +5981,10 @@ module AttachLoadBalancerToSubnetsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~subnets ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnets = field_map_exn json "Subnets" Subnets.of_json in
+    let of_json json__ =
+      let subnets = field_map_exn json__ "Subnets" Subnets.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~subnets ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for AttachLoaBalancerToSubnets."]
@@ -5993,9 +6077,9 @@ module ApplySecurityGroupsToLoadBalancerOutput =
           (Xml.child xml_arg0 "SecurityGroups") in
       make ?securityGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroups.of_json in
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
       make ?securityGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6027,11 +6111,11 @@ module ApplySecurityGroupsToLoadBalancerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~securityGroups ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroups =
-        field_map_exn json "SecurityGroups" SecurityGroups.of_json in
+        field_map_exn json__ "SecurityGroups" SecurityGroups.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~securityGroups ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6125,10 +6209,10 @@ module AddTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerNames") in
       make ~tags ~loadBalancerNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let loadBalancerNames =
-        field_map_exn json "LoadBalancerNames" LoadBalancerNames.of_json in
+        field_map_exn json__ "LoadBalancerNames" LoadBalancerNames.of_json in
       make ~tags ~loadBalancerNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for AddTags."]
@@ -6199,9 +6283,9 @@ module AddAvailabilityZonesOutput =
           (Xml.child xml_arg0 "AvailabilityZones") in
       make ?availabilityZones ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
       make ?availabilityZones ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6235,11 +6319,11 @@ module AddAvailabilityZonesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerName") in
       make ~availabilityZones ~loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZones =
-        field_map_exn json "AvailabilityZones" AvailabilityZones.of_json in
+        field_map_exn json__ "AvailabilityZones" AvailabilityZones.of_json in
       let loadBalancerName =
-        field_map_exn json "LoadBalancerName" AccessPointName.of_json in
+        field_map_exn json__ "LoadBalancerName" AccessPointName.of_json in
       make ~availabilityZones ~loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

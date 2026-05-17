@@ -26,6 +26,8 @@ type ('i, 'o, 'e) t =
   GetAssociatedResourceResponse.t, GetAssociatedResourceResponse.error) t 
   | GetAttributeGroup: (GetAttributeGroupRequest.t,
   GetAttributeGroupResponse.t, GetAttributeGroupResponse.error) t 
+  | GetConfiguration: (unit, GetConfigurationResponse.t,
+  GetConfigurationResponse.error) t 
   | ListApplications: (ListApplicationsRequest.t, ListApplicationsResponse.t,
   ListApplicationsResponse.error) t 
   | ListAssociatedAttributeGroups: (ListAssociatedAttributeGroupsRequest.t,
@@ -36,8 +38,13 @@ type ('i, 'o, 'e) t =
   
   | ListAttributeGroups: (ListAttributeGroupsRequest.t,
   ListAttributeGroupsResponse.t, ListAttributeGroupsResponse.error) t 
+  | ListAttributeGroupsForApplication:
+  (ListAttributeGroupsForApplicationRequest.t,
+  ListAttributeGroupsForApplicationResponse.t,
+  ListAttributeGroupsForApplicationResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | PutConfiguration: (PutConfigurationRequest.t, unit, unit) t 
   | SyncResource: (SyncResourceRequest.t, SyncResourceResponse.t,
   SyncResourceResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -61,11 +68,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetApplication -> `GET
   | GetAssociatedResource -> `GET
   | GetAttributeGroup -> `GET
+  | GetConfiguration -> `GET
   | ListApplications -> `GET
   | ListAssociatedAttributeGroups -> `GET
   | ListAssociatedResources -> `GET
   | ListAttributeGroups -> `GET
+  | ListAttributeGroupsForApplication -> `GET
   | ListTagsForResource -> `GET
+  | PutConfiguration -> `PUT
   | SyncResource -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
@@ -118,17 +128,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ApplicationSpecifier.to_header
                x.GetApplicationRequest.application)
       | GetAssociatedResource ->
-          (Format.kasprintf Uri.of_string) "/applications/%s/resources/%s/%s"
-            (ApplicationSpecifier.to_header
-               x.GetAssociatedResourceRequest.application)
-            (ResourceType.to_header
-               x.GetAssociatedResourceRequest.resourceType)
-            (ResourceSpecifier.to_header
-               x.GetAssociatedResourceRequest.resource)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/applications/%s/resources/%s/%s"
+               (ApplicationSpecifier.to_header
+                  x.GetAssociatedResourceRequest.application)
+               (ResourceType.to_header
+                  x.GetAssociatedResourceRequest.resourceType)
+               (ResourceSpecifier.to_header
+                  x.GetAssociatedResourceRequest.resource))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("resourceTagStatus",
+                         (GetAssociatedResourceFilter.to_header v)))
+                 x.resourceTagStatus;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | GetAttributeGroup ->
           (Format.kasprintf Uri.of_string) "/attribute-groups/%s"
             (AttributeGroupSpecifier.to_header
                x.GetAttributeGroupRequest.attributeGroup)
+      | GetConfiguration -> (Format.kasprintf Uri.of_string) "/configuration"
       | ListApplications ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/applications")
@@ -174,9 +199,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListAttributeGroupsForApplication ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/applications/%s/attribute-group-details"
+               (ApplicationSpecifier.to_header
+                  x.ListAttributeGroupsForApplicationRequest.application))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | PutConfiguration -> (Format.kasprintf Uri.of_string) "/configuration"
       | SyncResource ->
           (Format.kasprintf Uri.of_string) "/sync/%s/%s"
             (ResourceType.to_header x.SyncResourceRequest.resourceType)
@@ -280,6 +319,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetAttributeGroup ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListApplications ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -292,9 +334,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListAttributeGroups ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAttributeGroupsForApplication ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutConfiguration -> Awso.Http.Request.make (method_of_endpoint endp)
   | SyncResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -438,6 +484,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetAttributeGroupResponse.error_of_json))
+  | GetConfiguration ->
+      if is_success
+      then Ok (GetConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetConfigurationResponse.error_of_json))
   | ListApplications ->
       if is_success
       then Ok (ListApplicationsResponse.of_json (response_to_json resp))
@@ -467,12 +518,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListAttributeGroupsResponse.error_of_json))
+  | ListAttributeGroupsForApplication ->
+      if is_success
+      then
+        Ok
+          (ListAttributeGroupsForApplicationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAttributeGroupsForApplicationResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | PutConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | SyncResource ->
       if is_success
       then Ok (SyncResourceResponse.of_json (response_to_json resp))

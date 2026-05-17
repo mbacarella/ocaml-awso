@@ -24,6 +24,160 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module Float_ =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module Integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module SentimentScore =
+  struct
+    type nonrec t =
+      {
+      positive: Float_.t option
+        [@ocaml.doc
+          "The level of confidence that Amazon Comprehend has in the accuracy of its detection of the POSITIVE sentiment."];
+      negative: Float_.t option
+        [@ocaml.doc
+          "The level of confidence that Amazon Comprehend has in the accuracy of its detection of the NEGATIVE sentiment."];
+      neutral: Float_.t option
+        [@ocaml.doc
+          "The level of confidence that Amazon Comprehend has in the accuracy of its detection of the NEUTRAL sentiment."];
+      mixed: Float_.t option
+        [@ocaml.doc
+          "The level of confidence that Amazon Comprehend has in the accuracy of its detection of the MIXED sentiment."]}
+    let make ?positive =
+      fun ?negative ->
+        fun ?neutral ->
+          fun ?mixed -> fun () -> { positive; negative; neutral; mixed }
+    let to_value x =
+      structure_to_value
+        [("Positive", (Option.map x.positive ~f:Float_.to_value));
+        ("Negative", (Option.map x.negative ~f:Float_.to_value));
+        ("Neutral", (Option.map x.neutral ~f:Float_.to_value));
+        ("Mixed", (Option.map x.mixed ~f:Float_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mixed = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Mixed") in
+      let neutral =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Neutral") in
+      let negative =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Negative") in
+      let positive =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Positive") in
+      make ?mixed ?neutral ?negative ?positive ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mixed = field_map json__ "Mixed" Float_.of_json in
+      let neutral = field_map json__ "Neutral" Float_.of_json in
+      let negative = field_map json__ "Negative" Float_.of_json in
+      let positive = field_map json__ "Positive" Float_.of_json in
+      make ?mixed ?neutral ?negative ?positive ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the level of confidence that Amazon Comprehend has in the accuracy of its detection of sentiments."]
+module SentimentType =
+  struct
+    type nonrec t =
+      | POSITIVE 
+      | NEGATIVE 
+      | NEUTRAL 
+      | MIXED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | POSITIVE -> "POSITIVE"
+      | NEGATIVE -> "NEGATIVE"
+      | NEUTRAL -> "NEUTRAL"
+      | MIXED -> "MIXED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "POSITIVE" -> POSITIVE
+      | "NEGATIVE" -> NEGATIVE
+      | "NEUTRAL" -> NEUTRAL
+      | "MIXED" -> MIXED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SentimentType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SentimentType" j)
+    let to_json = simple_to_json to_value
+  end
+module ChildBlock =
+  struct
+    type nonrec t =
+      {
+      childBlockId: String_.t option
+        [@ocaml.doc "Unique identifier for the child block."];
+      beginOffset: Integer.t option
+        [@ocaml.doc
+          "Offset of the start of the child block within its parent block."];
+      endOffset: Integer.t option
+        [@ocaml.doc
+          "Offset of the end of the child block within its parent block."]}
+    let make ?childBlockId =
+      fun ?beginOffset ->
+        fun ?endOffset -> fun () -> { childBlockId; beginOffset; endOffset }
+    let to_value x =
+      structure_to_value
+        [("ChildBlockId", (Option.map x.childBlockId ~f:String_.to_value));
+        ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
+        ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endOffset =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EndOffset") in
+      let beginOffset =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
+      let childBlockId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ChildBlockId") in
+      make ?endOffset ?beginOffset ?childBlockId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let childBlockId = field_map json__ "ChildBlockId" String_.of_json in
+      make ?endOffset ?beginOffset ?childBlockId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Nested block contained within a block."]
 module AttributeNamesListItem =
   struct
     type nonrec t = string
@@ -58,6 +212,157 @@ module Double =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
+module MentionSentiment =
+  struct
+    type nonrec t =
+      {
+      sentiment: SentimentType.t option
+        [@ocaml.doc "The sentiment of the mention."];
+      sentimentScore: SentimentScore.t option }
+    let make ?sentiment =
+      fun ?sentimentScore -> fun () -> { sentiment; sentimentScore }
+    let to_value x =
+      structure_to_value
+        [("Sentiment", (Option.map x.sentiment ~f:SentimentType.to_value));
+        ("SentimentScore",
+          (Option.map x.sentimentScore ~f:SentimentScore.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sentimentScore =
+        (Option.map ~f:SentimentScore.of_xml)
+          (Xml.child xml_arg0 "SentimentScore") in
+      let sentiment =
+        (Option.map ~f:SentimentType.of_xml) (Xml.child xml_arg0 "Sentiment") in
+      make ?sentimentScore ?sentiment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sentimentScore =
+        field_map json__ "SentimentScore" SentimentScore.of_json in
+      let sentiment = field_map json__ "Sentiment" SentimentType.of_json in
+      make ?sentimentScore ?sentiment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the sentiment and sentiment score for one mention of an entity. For more information about targeted sentiment, see Targeted sentiment in the Amazon Comprehend Developer Guide."]
+module TargetedSentimentEntityType =
+  struct
+    type nonrec t =
+      | PERSON 
+      | LOCATION 
+      | ORGANIZATION 
+      | FACILITY 
+      | BRAND 
+      | COMMERCIAL_ITEM 
+      | MOVIE 
+      | MUSIC 
+      | BOOK 
+      | SOFTWARE 
+      | GAME 
+      | PERSONAL_TITLE 
+      | EVENT 
+      | DATE 
+      | QUANTITY 
+      | ATTRIBUTE 
+      | OTHER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PERSON -> "PERSON"
+      | LOCATION -> "LOCATION"
+      | ORGANIZATION -> "ORGANIZATION"
+      | FACILITY -> "FACILITY"
+      | BRAND -> "BRAND"
+      | COMMERCIAL_ITEM -> "COMMERCIAL_ITEM"
+      | MOVIE -> "MOVIE"
+      | MUSIC -> "MUSIC"
+      | BOOK -> "BOOK"
+      | SOFTWARE -> "SOFTWARE"
+      | GAME -> "GAME"
+      | PERSONAL_TITLE -> "PERSONAL_TITLE"
+      | EVENT -> "EVENT"
+      | DATE -> "DATE"
+      | QUANTITY -> "QUANTITY"
+      | ATTRIBUTE -> "ATTRIBUTE"
+      | OTHER -> "OTHER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PERSON" -> PERSON
+      | "LOCATION" -> LOCATION
+      | "ORGANIZATION" -> ORGANIZATION
+      | "FACILITY" -> FACILITY
+      | "BRAND" -> BRAND
+      | "COMMERCIAL_ITEM" -> COMMERCIAL_ITEM
+      | "MOVIE" -> MOVIE
+      | "MUSIC" -> MUSIC
+      | "BOOK" -> BOOK
+      | "SOFTWARE" -> SOFTWARE
+      | "GAME" -> GAME
+      | "PERSONAL_TITLE" -> PERSONAL_TITLE
+      | "EVENT" -> EVENT
+      | "DATE" -> DATE
+      | "QUANTITY" -> QUANTITY
+      | "ATTRIBUTE" -> ATTRIBUTE
+      | "OTHER" -> OTHER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TargetedSentimentEntityType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TargetedSentimentEntityType" j)
+    let to_json = simple_to_json to_value
+  end
+module ListOfChildBlocks =
+  struct
+    type nonrec t = ChildBlock.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChildBlock.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChildBlock.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfChildBlocks" ~of_json:ChildBlock.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EntityTypeName =
+  struct
+    type nonrec t = string
+    let context_ = "EntityTypeName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^(?![^\\n\\r\\t,]*\\\\n|\\\\r|\\\\t)[^\\n\\r\\t,]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntityTypeName" j
+    let to_json = simple_to_json to_value
+  end
 module DocumentReadFeatureTypes =
   struct
     type nonrec t =
@@ -83,6 +388,9 @@ module AttributeNamesList =
   struct
     type nonrec t = AttributeNamesListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeNamesListItem.to_value)) |>
         (fun x -> `List x)
@@ -173,26 +481,6 @@ module Split =
     let of_json j = of_string (string_of_json ~kind:"Split" j)
     let to_json = simple_to_json to_value
   end
-module EntityTypeName =
-  struct
-    type nonrec t = string
-    let context_ = "EntityTypeName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:64) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"^(?![^\\n\\r\\t,]*\\\\n|\\\\r|\\\\t)[^\\n\\r\\t,]+$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EntityTypeName" j
-    let to_json = simple_to_json to_value
-  end
 module AnyLengthString =
   struct
     type nonrec t = string
@@ -236,40 +524,99 @@ module EntityTypesEvaluationMetrics =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Precision") in
       make ?f1Score ?recall ?precision ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let f1Score = field_map json "F1Score" Double.of_json in
-      let recall = field_map json "Recall" Double.of_json in
-      let precision = field_map json "Precision" Double.of_json in
+    let of_json json__ =
+      let f1Score = field_map json__ "F1Score" Double.of_json in
+      let recall = field_map json__ "Recall" Double.of_json in
+      let precision = field_map json__ "Precision" Double.of_json in
       make ?f1Score ?recall ?precision ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Detailed information about the accuracy of an entity recognizer for a specific entity type."]
-module Integer =
+module TargetedSentimentMention =
   struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t =
+      {
+      score: Float_.t option
+        [@ocaml.doc
+          "Model confidence that the entity is relevant. Value range is zero to one, where one is highest confidence."];
+      groupScore: Float_.t option
+        [@ocaml.doc
+          "The confidence that all the entities mentioned in the group relate to the same entity."];
+      text: String_.t option
+        [@ocaml.doc "The text in the document that identifies the entity."];
+      type_: TargetedSentimentEntityType.t option
+        [@ocaml.doc
+          "The type of the entity. Amazon Comprehend supports a variety of entity types."];
+      mentionSentiment: MentionSentiment.t option
+        [@ocaml.doc
+          "Contains the sentiment and sentiment score for the mention."];
+      beginOffset: Integer.t option
+        [@ocaml.doc
+          "The offset into the document text where the mention begins."];
+      endOffset: Integer.t option
+        [@ocaml.doc
+          "The offset into the document text where the mention ends."]}
+    let make ?score =
+      fun ?groupScore ->
+        fun ?text ->
+          fun ?type_ ->
+            fun ?mentionSentiment ->
+              fun ?beginOffset ->
+                fun ?endOffset ->
+                  fun () ->
+                    {
+                      score;
+                      groupScore;
+                      text;
+                      type_;
+                      mentionSentiment;
+                      beginOffset;
+                      endOffset
+                    }
+    let to_value x =
+      structure_to_value
+        [("Score", (Option.map x.score ~f:Float_.to_value));
+        ("GroupScore", (Option.map x.groupScore ~f:Float_.to_value));
+        ("Text", (Option.map x.text ~f:String_.to_value));
+        ("Type",
+          (Option.map x.type_ ~f:TargetedSentimentEntityType.to_value));
+        ("MentionSentiment",
+          (Option.map x.mentionSentiment ~f:MentionSentiment.to_value));
+        ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
+        ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module Float =
-  struct
-    type nonrec t = float
-    let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Float x
-    let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
-    let of_json j = float_of_json ~kind:"a float" j
-    let to_json = simple_to_json to_value
-  end
+      let endOffset =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EndOffset") in
+      let beginOffset =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
+      let mentionSentiment =
+        (Option.map ~f:MentionSentiment.of_xml)
+          (Xml.child xml_arg0 "MentionSentiment") in
+      let type_ =
+        (Option.map ~f:TargetedSentimentEntityType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
+      let groupScore =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "GroupScore") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
+      make ?endOffset ?beginOffset ?mentionSentiment ?type_ ?text ?groupScore
+        ?score ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let mentionSentiment =
+        field_map json__ "MentionSentiment" MentionSentiment.of_json in
+      let type_ = field_map json__ "Type" TargetedSentimentEntityType.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let groupScore = field_map json__ "GroupScore" Float_.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      make ?endOffset ?beginOffset ?mentionSentiment ?type_ ?text ?groupScore
+        ?score ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about one mention of an entity. The mention information includes the location of the mention in the text and the sentiment of the mention. For more information about targeted sentiment, see Targeted sentiment in the Amazon Comprehend Developer Guide."]
 module PartOfSpeechTagType =
   struct
     type nonrec t =
@@ -344,6 +691,136 @@ module PartOfSpeechTagType =
     let of_json j = of_string (string_of_json ~kind:"PartOfSpeechTagType" j)
     let to_json = simple_to_json to_value
   end
+module BlockReference =
+  struct
+    type nonrec t =
+      {
+      blockId: String_.t option
+        [@ocaml.doc "Unique identifier for the block."];
+      beginOffset: Integer.t option
+        [@ocaml.doc
+          "Offset of the start of the block within its parent block."];
+      endOffset: Integer.t option
+        [@ocaml.doc
+          "Offset of the end of the block within its parent block."];
+      childBlocks: ListOfChildBlocks.t option
+        [@ocaml.doc "List of child blocks within this block."]}
+    let make ?blockId =
+      fun ?beginOffset ->
+        fun ?endOffset ->
+          fun ?childBlocks ->
+            fun () -> { blockId; beginOffset; endOffset; childBlocks }
+    let to_value x =
+      structure_to_value
+        [("BlockId", (Option.map x.blockId ~f:String_.to_value));
+        ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
+        ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value));
+        ("ChildBlocks",
+          (Option.map x.childBlocks ~f:ListOfChildBlocks.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let childBlocks =
+        (Option.map ~f:ListOfChildBlocks.of_xml)
+          (Xml.child xml_arg0 "ChildBlocks") in
+      let endOffset =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EndOffset") in
+      let beginOffset =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
+      let blockId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BlockId") in
+      make ?childBlocks ?endOffset ?beginOffset ?blockId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let childBlocks =
+        field_map json__ "ChildBlocks" ListOfChildBlocks.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let blockId = field_map json__ "BlockId" String_.of_json in
+      make ?childBlocks ?endOffset ?beginOffset ?blockId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A reference to a block."]
+module SecurityGroupId =
+  struct
+    type nonrec t = string
+    let context_ = "SecurityGroupId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"[-0-9a-zA-Z]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecurityGroupId" j
+    let to_json = simple_to_json to_value
+  end
+module SubnetId =
+  struct
+    type nonrec t = string
+    let context_ = "SubnetId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"[-0-9a-zA-Z]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubnetId" j
+    let to_json = simple_to_json to_value
+  end
+module LabelListItem =
+  struct
+    type nonrec t = string
+    let context_ = "LabelListItem"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:5000) >>=
+             (fun () -> check_pattern i ~pattern:"^\\P{C}*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LabelListItem" j
+    let to_json = simple_to_json to_value
+  end
+module EntityTypesListItem =
+  struct
+    type nonrec t =
+      {
+      type_: EntityTypeName.t
+        [@ocaml.doc
+          "An entity type within a labeled training dataset that Amazon Comprehend uses to train a custom entity recognizer. Entity types must not contain the following invalid characters: \\n (line break), \\\\n (escaped line break, \\r (carriage return), \\\\r (escaped carriage return), \\t (tab), \\\\t (escaped tab), and , (comma)."]}
+    let context_ = "EntityTypesListItem"
+    let make ~type_ = fun () -> { type_ }
+    let to_value x =
+      structure_to_value [("Type", (Some (EntityTypeName.to_value x.type_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        EntityTypeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" EntityTypeName.of_json in
+      make ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An entity type within a labeled training dataset that Amazon Comprehend uses to train a custom entity recognizer."]
 module DocumentReadAction =
   struct
     type nonrec t =
@@ -403,6 +880,9 @@ module ListOfDocumentReadFeatureTypes =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentReadFeatureTypes.to_value)) |>
         (fun x -> `List x)
@@ -424,46 +904,6 @@ module ListOfDocumentReadFeatureTypes =
       list_of_json ~kind:"ListOfDocumentReadFeatureTypes"
         ~of_json:DocumentReadFeatureTypes.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module SecurityGroupId =
-  struct
-    type nonrec t = string
-    let context_ = "SecurityGroupId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:32) >>=
-                  (fun () -> check_pattern i ~pattern:"[-0-9a-zA-Z]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SecurityGroupId" j
-    let to_json = simple_to_json to_value
-  end
-module SubnetId =
-  struct
-    type nonrec t = string
-    let context_ = "SubnetId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:32) >>=
-                  (fun () -> check_pattern i ~pattern:"[-0-9a-zA-Z]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SubnetId" j
-    let to_json = simple_to_json to_value
   end
 module PiiEntityType =
   struct
@@ -491,6 +931,20 @@ module PiiEntityType =
       | IP_ADDRESS 
       | MAC_ADDRESS 
       | ALL 
+      | LICENSE_PLATE 
+      | VEHICLE_IDENTIFICATION_NUMBER 
+      | UK_NATIONAL_INSURANCE_NUMBER 
+      | CA_SOCIAL_INSURANCE_NUMBER 
+      | US_INDIVIDUAL_TAX_IDENTIFICATION_NUMBER 
+      | UK_UNIQUE_TAXPAYER_REFERENCE_NUMBER 
+      | IN_PERMANENT_ACCOUNT_NUMBER 
+      | IN_NREGA 
+      | INTERNATIONAL_BANK_ACCOUNT_NUMBER 
+      | SWIFT_CODE 
+      | UK_NATIONAL_HEALTH_SERVICE_NUMBER 
+      | CA_HEALTH_NUMBER 
+      | IN_AADHAAR 
+      | IN_VOTER_NUMBER 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -518,6 +972,24 @@ module PiiEntityType =
       | IP_ADDRESS -> "IP_ADDRESS"
       | MAC_ADDRESS -> "MAC_ADDRESS"
       | ALL -> "ALL"
+      | LICENSE_PLATE -> "LICENSE_PLATE"
+      | VEHICLE_IDENTIFICATION_NUMBER -> "VEHICLE_IDENTIFICATION_NUMBER"
+      | UK_NATIONAL_INSURANCE_NUMBER -> "UK_NATIONAL_INSURANCE_NUMBER"
+      | CA_SOCIAL_INSURANCE_NUMBER -> "CA_SOCIAL_INSURANCE_NUMBER"
+      | US_INDIVIDUAL_TAX_IDENTIFICATION_NUMBER ->
+          "US_INDIVIDUAL_TAX_IDENTIFICATION_NUMBER"
+      | UK_UNIQUE_TAXPAYER_REFERENCE_NUMBER ->
+          "UK_UNIQUE_TAXPAYER_REFERENCE_NUMBER"
+      | IN_PERMANENT_ACCOUNT_NUMBER -> "IN_PERMANENT_ACCOUNT_NUMBER"
+      | IN_NREGA -> "IN_NREGA"
+      | INTERNATIONAL_BANK_ACCOUNT_NUMBER ->
+          "INTERNATIONAL_BANK_ACCOUNT_NUMBER"
+      | SWIFT_CODE -> "SWIFT_CODE"
+      | UK_NATIONAL_HEALTH_SERVICE_NUMBER ->
+          "UK_NATIONAL_HEALTH_SERVICE_NUMBER"
+      | CA_HEALTH_NUMBER -> "CA_HEALTH_NUMBER"
+      | IN_AADHAAR -> "IN_AADHAAR"
+      | IN_VOTER_NUMBER -> "IN_VOTER_NUMBER"
       | Non_static_id s -> s
     let of_string =
       function
@@ -544,6 +1016,24 @@ module PiiEntityType =
       | "IP_ADDRESS" -> IP_ADDRESS
       | "MAC_ADDRESS" -> MAC_ADDRESS
       | "ALL" -> ALL
+      | "LICENSE_PLATE" -> LICENSE_PLATE
+      | "VEHICLE_IDENTIFICATION_NUMBER" -> VEHICLE_IDENTIFICATION_NUMBER
+      | "UK_NATIONAL_INSURANCE_NUMBER" -> UK_NATIONAL_INSURANCE_NUMBER
+      | "CA_SOCIAL_INSURANCE_NUMBER" -> CA_SOCIAL_INSURANCE_NUMBER
+      | "US_INDIVIDUAL_TAX_IDENTIFICATION_NUMBER" ->
+          US_INDIVIDUAL_TAX_IDENTIFICATION_NUMBER
+      | "UK_UNIQUE_TAXPAYER_REFERENCE_NUMBER" ->
+          UK_UNIQUE_TAXPAYER_REFERENCE_NUMBER
+      | "IN_PERMANENT_ACCOUNT_NUMBER" -> IN_PERMANENT_ACCOUNT_NUMBER
+      | "IN_NREGA" -> IN_NREGA
+      | "INTERNATIONAL_BANK_ACCOUNT_NUMBER" ->
+          INTERNATIONAL_BANK_ACCOUNT_NUMBER
+      | "SWIFT_CODE" -> SWIFT_CODE
+      | "UK_NATIONAL_HEALTH_SERVICE_NUMBER" ->
+          UK_NATIONAL_HEALTH_SERVICE_NUMBER
+      | "CA_HEALTH_NUMBER" -> CA_HEALTH_NUMBER
+      | "IN_AADHAAR" -> IN_AADHAAR
+      | "IN_VOTER_NUMBER" -> IN_VOTER_NUMBER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -623,18 +1113,18 @@ module AugmentedManifestsListItem =
       make ?documentType ?sourceDocumentsS3Uri ?annotationDataS3Uri
         ~attributeNames ?split ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentType =
-        field_map json "DocumentType"
+        field_map json__ "DocumentType"
           AugmentedManifestsDocumentTypeFormat.of_json in
       let sourceDocumentsS3Uri =
-        field_map json "SourceDocumentsS3Uri" S3Uri.of_json in
+        field_map json__ "SourceDocumentsS3Uri" S3Uri.of_json in
       let annotationDataS3Uri =
-        field_map json "AnnotationDataS3Uri" S3Uri.of_json in
+        field_map json__ "AnnotationDataS3Uri" S3Uri.of_json in
       let attributeNames =
-        field_map_exn json "AttributeNames" AttributeNamesList.of_json in
-      let split = field_map json "Split" Split.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
+        field_map_exn json__ "AttributeNames" AttributeNamesList.of_json in
+      let split = field_map json__ "Split" Split.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
       make ?documentType ?sourceDocumentsS3Uri ?annotationDataS3Uri
         ~attributeNames ?split ~s3Uri ()
     let to_json v = composed_to_json to_value v
@@ -665,30 +1155,6 @@ module InputFormat =
     let of_json j = of_string (string_of_json ~kind:"InputFormat" j)
     let to_json = simple_to_json to_value
   end
-module EntityTypesListItem =
-  struct
-    type nonrec t =
-      {
-      type_: EntityTypeName.t
-        [@ocaml.doc
-          "An entity type within a labeled training dataset that Amazon Comprehend uses to train a custom entity recognizer. Entity types must not contain the following invalid characters: \\n (line break), \\\\n (escaped line break, \\r (carriage return), \\\\r (escaped carriage return), \\t (tab), \\\\t (escaped tab), space, and , (comma)."]}
-    let context_ = "EntityTypesListItem"
-    let make ~type_ = fun () -> { type_ }
-    let to_value x =
-      structure_to_value [("Type", (Some (EntityTypeName.to_value x.type_)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let type_ =
-        EntityTypeName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ~type_ ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" EntityTypeName.of_json in
-      make ~type_ ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An entity type within a labeled training dataset that Amazon Comprehend uses to train a custom entity recognizer."]
 module EntityRecognizerMetadataEntityTypesListItem =
   struct
     type nonrec t =
@@ -726,17 +1192,182 @@ module EntityRecognizerMetadataEntityTypesListItem =
         (Option.map ~f:AnyLengthString.of_xml) (Xml.child xml_arg0 "Type") in
       make ?numberOfTrainMentions ?evaluationMetrics ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let numberOfTrainMentions =
-        field_map json "NumberOfTrainMentions" Integer.of_json in
+        field_map json__ "NumberOfTrainMentions" Integer.of_json in
       let evaluationMetrics =
-        field_map json "EvaluationMetrics"
+        field_map json__ "EvaluationMetrics"
           EntityTypesEvaluationMetrics.of_json in
-      let type_ = field_map json "Type" AnyLengthString.of_json in
+      let type_ = field_map json__ "Type" AnyLengthString.of_json in
       make ?numberOfTrainMentions ?evaluationMetrics ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Individual item from the list of entity types in the metadata of an entity recognizer."]
+module ToxicContentType =
+  struct
+    type nonrec t =
+      | GRAPHIC 
+      | HARASSMENT_OR_ABUSE 
+      | HATE_SPEECH 
+      | INSULT 
+      | PROFANITY 
+      | SEXUAL 
+      | VIOLENCE_OR_THREAT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GRAPHIC -> "GRAPHIC"
+      | HARASSMENT_OR_ABUSE -> "HARASSMENT_OR_ABUSE"
+      | HATE_SPEECH -> "HATE_SPEECH"
+      | INSULT -> "INSULT"
+      | PROFANITY -> "PROFANITY"
+      | SEXUAL -> "SEXUAL"
+      | VIOLENCE_OR_THREAT -> "VIOLENCE_OR_THREAT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GRAPHIC" -> GRAPHIC
+      | "HARASSMENT_OR_ABUSE" -> HARASSMENT_OR_ABUSE
+      | "HATE_SPEECH" -> HATE_SPEECH
+      | "INSULT" -> INSULT
+      | "PROFANITY" -> PROFANITY
+      | "SEXUAL" -> SEXUAL
+      | "VIOLENCE_OR_THREAT" -> VIOLENCE_OR_THREAT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ToxicContentType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ToxicContentType" j)
+    let to_json = simple_to_json to_value
+  end
+module Point =
+  struct
+    type nonrec t =
+      {
+      x: Float_.t option
+        [@ocaml.doc "The value of the X coordinate for a point on a polygon"];
+      y: Float_.t option
+        [@ocaml.doc "The value of the Y coordinate for a point on a polygon"]}
+    let make ?x = fun ?y -> fun () -> { x; y }
+    let to_value x =
+      structure_to_value
+        [("X", (Option.map x.x ~f:Float_.to_value));
+        ("Y", (Option.map x.y ~f:Float_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let y = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Y") in
+      let x = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "X") in
+      make ?y ?x ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let y = field_map json__ "Y" Float_.of_json in
+      let x = field_map json__ "X" Float_.of_json in make ?y ?x ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The X and Y coordinates of a point on a document page. For additional information, see Point in the Amazon Textract API reference."]
+module RelationshipType =
+  struct
+    type nonrec t =
+      | CHILD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | CHILD -> "CHILD" | Non_static_id s -> s
+    let of_string = function | "CHILD" -> CHILD | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RelationshipType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RelationshipType" j)
+    let to_json = simple_to_json to_value
+  end
+module StringList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StringList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListOfDescriptiveMentionIndices =
+  struct
+    type nonrec t = Integer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Integer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Integer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfDescriptiveMentionIndices"
+        ~of_json:Integer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListOfMentions =
+  struct
+    type nonrec t = TargetedSentimentMention.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetedSentimentMention.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TargetedSentimentMention.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfMentions"
+        ~of_json:TargetedSentimentMention.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PartOfSpeechTag =
   struct
     type nonrec t =
@@ -744,42 +1375,28 @@ module PartOfSpeechTag =
       tag: PartOfSpeechTagType.t option
         [@ocaml.doc
           "Identifies the part of speech that the token represents."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The confidence that Amazon Comprehend has that the part of speech was correctly identified."]}
     let make ?tag = fun ?score -> fun () -> { tag; score }
     let to_value x =
       structure_to_value
         [("Tag", (Option.map x.tag ~f:PartOfSpeechTagType.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let tag =
         (Option.map ~f:PartOfSpeechTagType.of_xml) (Xml.child xml_arg0 "Tag") in
       make ?score ?tag ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let tag = field_map json "Tag" PartOfSpeechTagType.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let tag = field_map json__ "Tag" PartOfSpeechTagType.of_json in
       make ?score ?tag ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Identifies the part of speech represented by the token and gives the confidence that Amazon Comprehend has that the part of speech was correctly identified. For more information about the parts of speech that Amazon Comprehend can identify, see how-syntax."]
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
-  end
+       "Identifies the part of speech represented by the token and gives the confidence that Amazon Comprehend has that the part of speech was correctly identified. For more information about the parts of speech that Amazon Comprehend can identify, see Syntax in the Comprehend Developer Guide."]
 module EntityType =
   struct
     type nonrec t =
@@ -826,73 +1443,33 @@ module EntityType =
     let of_json j = of_string (string_of_json ~kind:"EntityType" j)
     let to_json = simple_to_json to_value
   end
-module DocumentReaderConfig =
+module ListOfBlockReferences =
   struct
-    type nonrec t =
-      {
-      documentReadAction: DocumentReadAction.t
-        [@ocaml.doc
-          "This enum field will start with two values which will apply to PDFs: TEXTRACT_DETECT_DOCUMENT_TEXT - The service calls DetectDocumentText for PDF documents per page. TEXTRACT_ANALYZE_DOCUMENT - The service calls AnalyzeDocument for PDF documents per page."];
-      documentReadMode: DocumentReadMode.t option
-        [@ocaml.doc
-          "This enum field provides two values: SERVICE_DEFAULT - use service defaults for Document reading. For Digital PDF it would mean using an internal parser instead of Textract APIs FORCE_DOCUMENT_READ_ACTION - Always use specified action for DocumentReadAction, including Digital PDF."];
-      featureTypes: ListOfDocumentReadFeatureTypes.t option
-        [@ocaml.doc
-          "Specifies how the text in an input file should be processed:"]}
-    let context_ = "DocumentReaderConfig"
-    let make ?documentReadMode =
-      fun ?featureTypes ->
-        fun ~documentReadAction ->
-          fun () -> { documentReadMode; featureTypes; documentReadAction }
-    let to_value x =
-      structure_to_value
-        [("DocumentReadAction",
-           (Some (DocumentReadAction.to_value x.documentReadAction)));
-        ("DocumentReadMode",
-          (Option.map x.documentReadMode ~f:DocumentReadMode.to_value));
-        ("FeatureTypes",
-          (Option.map x.featureTypes
-             ~f:ListOfDocumentReadFeatureTypes.to_value))]
+    type nonrec t = BlockReference.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BlockReference.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let featureTypes =
-        (Option.map ~f:ListOfDocumentReadFeatureTypes.of_xml)
-          (Xml.child xml_arg0 "FeatureTypes") in
-      let documentReadMode =
-        (Option.map ~f:DocumentReadMode.of_xml)
-          (Xml.child xml_arg0 "DocumentReadMode") in
-      let documentReadAction =
-        DocumentReadAction.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DocumentReadAction") in
-      make ?featureTypes ?documentReadMode ~documentReadAction ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let featureTypes =
-        field_map json "FeatureTypes" ListOfDocumentReadFeatureTypes.of_json in
-      let documentReadMode =
-        field_map json "DocumentReadMode" DocumentReadMode.of_json in
-      let documentReadAction =
-        field_map_exn json "DocumentReadAction" DocumentReadAction.of_json in
-      make ?featureTypes ?documentReadMode ~documentReadAction ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BlockReference.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfBlockReferences"
+        ~of_json:BlockReference.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The input properties for a topic detection job."]
-module KmsKeyId =
-  struct
-    type nonrec t = string
-    let context_ = "KmsKeyId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_pattern i ~pattern:"^\\p{ASCII}+$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"KmsKeyId" j
-    let to_json = simple_to_json to_value
   end
 module SecurityGroupIds =
   struct
@@ -902,6 +1479,9 @@ module SecurityGroupIds =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -931,6 +1511,9 @@ module Subnets =
         ok_or_failwith
           ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -950,10 +1533,167 @@ module Subnets =
     let of_json j = list_of_json ~kind:"Subnets" ~of_json:SubnetId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DocumentClassifierMode =
+  struct
+    type nonrec t =
+      | MULTI_CLASS 
+      | MULTI_LABEL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MULTI_CLASS -> "MULTI_CLASS"
+      | MULTI_LABEL -> "MULTI_LABEL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MULTI_CLASS" -> MULTI_CLASS
+      | "MULTI_LABEL" -> MULTI_LABEL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DocumentClassifierMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DocumentClassifierMode" j)
+    let to_json = simple_to_json to_value
+  end
+module LabelsList =
+  struct
+    type nonrec t = LabelListItem.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1000); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LabelListItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LabelListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LabelsList" ~of_json:LabelListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EntityTypesList =
+  struct
+    type nonrec t = EntityTypesListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EntityTypesListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EntityTypesListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EntityTypesList"
+        ~of_json:EntityTypesListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DocumentReaderConfig =
+  struct
+    type nonrec t =
+      {
+      documentReadAction: DocumentReadAction.t
+        [@ocaml.doc
+          "This field defines the Amazon Textract API operation that Amazon Comprehend uses to extract text from PDF files and image files. Enter one of the following values: TEXTRACT_DETECT_DOCUMENT_TEXT - The Amazon Comprehend service uses the DetectDocumentText API operation. TEXTRACT_ANALYZE_DOCUMENT - The Amazon Comprehend service uses the AnalyzeDocument API operation."];
+      documentReadMode: DocumentReadMode.t option
+        [@ocaml.doc
+          "Determines the text extraction actions for PDF files. Enter one of the following values: SERVICE_DEFAULT - use the Amazon Comprehend service defaults for PDF files. FORCE_DOCUMENT_READ_ACTION - Amazon Comprehend uses the Textract API specified by DocumentReadAction for all PDF files, including digital PDF files."];
+      featureTypes: ListOfDocumentReadFeatureTypes.t option
+        [@ocaml.doc
+          "Specifies the type of Amazon Textract features to apply. If you chose TEXTRACT_ANALYZE_DOCUMENT as the read action, you must specify one or both of the following values: TABLES - Returns additional information about any tables that are detected in the input document. FORMS - Returns additional information about any forms that are detected in the input document."]}
+    let context_ = "DocumentReaderConfig"
+    let make ?documentReadMode =
+      fun ?featureTypes ->
+        fun ~documentReadAction ->
+          fun () -> { documentReadMode; featureTypes; documentReadAction }
+    let to_value x =
+      structure_to_value
+        [("DocumentReadAction",
+           (Some (DocumentReadAction.to_value x.documentReadAction)));
+        ("DocumentReadMode",
+          (Option.map x.documentReadMode ~f:DocumentReadMode.to_value));
+        ("FeatureTypes",
+          (Option.map x.featureTypes
+             ~f:ListOfDocumentReadFeatureTypes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let featureTypes =
+        (Option.map ~f:ListOfDocumentReadFeatureTypes.of_xml)
+          (Xml.child xml_arg0 "FeatureTypes") in
+      let documentReadMode =
+        (Option.map ~f:DocumentReadMode.of_xml)
+          (Xml.child xml_arg0 "DocumentReadMode") in
+      let documentReadAction =
+        DocumentReadAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DocumentReadAction") in
+      make ?featureTypes ?documentReadMode ~documentReadAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let featureTypes =
+        field_map json__ "FeatureTypes"
+          ListOfDocumentReadFeatureTypes.of_json in
+      let documentReadMode =
+        field_map json__ "DocumentReadMode" DocumentReadMode.of_json in
+      let documentReadAction =
+        field_map_exn json__ "DocumentReadAction" DocumentReadAction.of_json in
+      make ?featureTypes ?documentReadMode ~documentReadAction ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides configuration parameters to override the default actions for extracting text from PDF documents and image files. By default, Amazon Comprehend performs the following actions to extract text from files, based on the input file type: Word files - Amazon Comprehend parser extracts the text. Digital PDF files - Amazon Comprehend parser extracts the text. Image files and scanned PDF files - Amazon Comprehend uses the Amazon Textract DetectDocumentText API to extract the text. DocumentReaderConfig does not apply to plain text files or Word files. For image files and PDF documents, you can override these default actions using the fields listed below. For more information, see Setting text extraction options in the Comprehend Developer Guide."]
+module KmsKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_pattern i ~pattern:"^\\p{ASCII}+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyId" j
+    let to_json = simple_to_json to_value
+  end
 module ListOfPiiEntityTypes =
   struct
     type nonrec t = PiiEntityType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PiiEntityType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1049,10 +1789,10 @@ module EntityRecognizerAnnotations =
       {
       s3Uri: S3Uri.t
         [@ocaml.doc
-          "Specifies the Amazon S3 location where the annotations for an entity recognizer are located. The URI must be in the same region as the API endpoint that you are calling."];
+          "Specifies the Amazon S3 location where the annotations for an entity recognizer are located. The URI must be in the same Region as the API endpoint that you are calling."];
       testS3Uri: S3Uri.t option
         [@ocaml.doc
-          "This specifies the Amazon S3 location where the test annotations for an entity recognizer are located. The URI must be in the same AWS Region as the API endpoint that you are calling."]}
+          "Specifies the Amazon S3 location where the test annotations for an entity recognizer are located. The URI must be in the same Region as the API endpoint that you are calling."]}
     let context_ = "EntityRecognizerAnnotations"
     let make ?testS3Uri = fun ~s3Uri -> fun () -> { testS3Uri; s3Uri }
     let to_value x =
@@ -1067,9 +1807,9 @@ module EntityRecognizerAnnotations =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ?testS3Uri ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let testS3Uri = field_map json "TestS3Uri" S3Uri.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
+    let of_json json__ =
+      let testS3Uri = field_map json__ "TestS3Uri" S3Uri.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
       make ?testS3Uri ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1078,6 +1818,9 @@ module EntityRecognizerAugmentedManifestsList =
   struct
     type nonrec t = AugmentedManifestsListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AugmentedManifestsListItem.to_value)) |>
         (fun x -> `List x)
@@ -1134,10 +1877,10 @@ module EntityRecognizerDocuments =
       {
       s3Uri: S3Uri.t
         [@ocaml.doc
-          "Specifies the Amazon S3 location where the training documents for an entity recognizer are located. The URI must be in the same region as the API endpoint that you are calling."];
+          "Specifies the Amazon S3 location where the training documents for an entity recognizer are located. The URI must be in the same Region as the API endpoint that you are calling."];
       testS3Uri: S3Uri.t option
         [@ocaml.doc
-          "Specifies the Amazon S3 location where the test documents for an entity recognizer are located. The URI must be in the same AWS Region as the API endpoint that you are calling."];
+          "Specifies the Amazon S3 location where the test documents for an entity recognizer are located. The URI must be in the same Amazon Web Services Region as the API endpoint that you are calling."];
       inputFormat: InputFormat.t option
         [@ocaml.doc
           "Specifies how the text in an input file should be processed. This is optional, and the default is ONE_DOC_PER_LINE. ONE_DOC_PER_FILE - Each file is considered a separate document. Use this option when you are processing large documents, such as newspaper articles or scientific papers. ONE_DOC_PER_LINE - Each line in a file is considered a separate document. Use this option when you are processing many short documents, such as text messages."]}
@@ -1160,10 +1903,10 @@ module EntityRecognizerDocuments =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ?inputFormat ?testS3Uri ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let inputFormat = field_map json "InputFormat" InputFormat.of_json in
-      let testS3Uri = field_map json "TestS3Uri" S3Uri.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
+    let of_json json__ =
+      let inputFormat = field_map json__ "InputFormat" InputFormat.of_json in
+      let testS3Uri = field_map json__ "TestS3Uri" S3Uri.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
       make ?inputFormat ?testS3Uri ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1174,7 +1917,7 @@ module EntityRecognizerEntityList =
       {
       s3Uri: S3Uri.t
         [@ocaml.doc
-          "Specifies the Amazon S3 location where the entity list is located. The URI must be in the same region as the API endpoint that you are calling."]}
+          "Specifies the Amazon S3 location where the entity list is located. The URI must be in the same Region as the API endpoint that you are calling."]}
     let context_ = "EntityRecognizerEntityList"
     let make ~s3Uri = fun () -> { s3Uri }
     let to_value x =
@@ -1185,37 +1928,12 @@ module EntityRecognizerEntityList =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in make ~s3Uri ()
+    let of_json json__ =
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
+      make ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the entity recognizer submitted with an entity recognizer."]
-module EntityTypesList =
-  struct
-    type nonrec t = EntityTypesListItem.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:EntityTypesListItem.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:EntityTypesListItem.of_xml)
-    let of_json j =
-      list_of_json ~kind:"EntityTypesList"
-        ~of_json:EntityTypesListItem.of_json j
-    let to_json v = composed_to_json to_value v
-  end
+       "Describes the entity list submitted with an entity recognizer."]
 module EntityRecognizerEvaluationMetrics =
   struct
     type nonrec t =
@@ -1246,10 +1964,10 @@ module EntityRecognizerEvaluationMetrics =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Precision") in
       make ?f1Score ?recall ?precision ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let f1Score = field_map json "F1Score" Double.of_json in
-      let recall = field_map json "Recall" Double.of_json in
-      let precision = field_map json "Precision" Double.of_json in
+    let of_json json__ =
+      let f1Score = field_map json__ "F1Score" Double.of_json in
+      let recall = field_map json__ "Recall" Double.of_json in
+      let precision = field_map json__ "Precision" Double.of_json in
       make ?f1Score ?recall ?precision ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1258,6 +1976,9 @@ module EntityRecognizerMetadataEntityTypesList =
   struct
     type nonrec t = EntityRecognizerMetadataEntityTypesListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:EntityRecognizerMetadataEntityTypesListItem.to_value))
@@ -1360,15 +2081,15 @@ module ClassifierEvaluationMetrics =
       make ?hammingLoss ?microF1Score ?microRecall ?microPrecision ?f1Score
         ?recall ?precision ?accuracy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hammingLoss = field_map json "HammingLoss" Double.of_json in
-      let microF1Score = field_map json "MicroF1Score" Double.of_json in
-      let microRecall = field_map json "MicroRecall" Double.of_json in
-      let microPrecision = field_map json "MicroPrecision" Double.of_json in
-      let f1Score = field_map json "F1Score" Double.of_json in
-      let recall = field_map json "Recall" Double.of_json in
-      let precision = field_map json "Precision" Double.of_json in
-      let accuracy = field_map json "Accuracy" Double.of_json in
+    let of_json json__ =
+      let hammingLoss = field_map json__ "HammingLoss" Double.of_json in
+      let microF1Score = field_map json__ "MicroF1Score" Double.of_json in
+      let microRecall = field_map json__ "MicroRecall" Double.of_json in
+      let microPrecision = field_map json__ "MicroPrecision" Double.of_json in
+      let f1Score = field_map json__ "F1Score" Double.of_json in
+      let recall = field_map json__ "Recall" Double.of_json in
+      let precision = field_map json__ "Precision" Double.of_json in
+      let accuracy = field_map json__ "Accuracy" Double.of_json in
       make ?hammingLoss ?microF1Score ?microRecall ?microPrecision ?f1Score
         ?recall ?precision ?accuracy ()
     let to_json v = composed_to_json to_value v
@@ -1378,6 +2099,9 @@ module DocumentClassifierAugmentedManifestsList =
   struct
     type nonrec t = AugmentedManifestsListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AugmentedManifestsListItem.to_value)) |>
         (fun x -> `List x)
@@ -1428,6 +2152,66 @@ module DocumentClassifierDataFormat =
       of_string (string_of_json ~kind:"DocumentClassifierDataFormat" j)
     let to_json = simple_to_json to_value
   end
+module DocumentClassifierDocumentTypeFormat =
+  struct
+    type nonrec t =
+      | PLAIN_TEXT_DOCUMENT 
+      | SEMI_STRUCTURED_DOCUMENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PLAIN_TEXT_DOCUMENT -> "PLAIN_TEXT_DOCUMENT"
+      | SEMI_STRUCTURED_DOCUMENT -> "SEMI_STRUCTURED_DOCUMENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PLAIN_TEXT_DOCUMENT" -> PLAIN_TEXT_DOCUMENT
+      | "SEMI_STRUCTURED_DOCUMENT" -> SEMI_STRUCTURED_DOCUMENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration DocumentClassifierDocumentTypeFormat" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"DocumentClassifierDocumentTypeFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module DocumentClassifierDocuments =
+  struct
+    type nonrec t =
+      {
+      s3Uri: S3Uri.t
+        [@ocaml.doc
+          "The S3 URI location of the training documents specified in the S3Uri CSV file."];
+      testS3Uri: S3Uri.t option
+        [@ocaml.doc
+          "The S3 URI location of the test documents included in the TestS3Uri CSV file. This field is not required if you do not specify a test CSV file."]}
+    let context_ = "DocumentClassifierDocuments"
+    let make ?testS3Uri = fun ~s3Uri -> fun () -> { testS3Uri; s3Uri }
+    let to_value x =
+      structure_to_value
+        [("S3Uri", (Some (S3Uri.to_value x.s3Uri)));
+        ("TestS3Uri", (Option.map x.testS3Uri ~f:S3Uri.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let testS3Uri =
+        (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "TestS3Uri") in
+      let s3Uri =
+        S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
+      make ?testS3Uri ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let testS3Uri = field_map json__ "TestS3Uri" S3Uri.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
+      make ?testS3Uri ~s3Uri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The location of the training documents. This parameter is required in a request to create a semi-structured document classification model."]
 module LabelDelimiter =
   struct
     type nonrec t = string
@@ -1450,6 +2234,164 @@ module LabelDelimiter =
     let of_json j = string_of_json ~kind:"LabelDelimiter" j
     let to_json = simple_to_json to_value
   end
+module ToxicContent =
+  struct
+    type nonrec t =
+      {
+      name: ToxicContentType.t option
+        [@ocaml.doc "The name of the toxic content type."];
+      score: Float_.t option
+        [@ocaml.doc
+          "Model confidence in the detected content type. Value range is zero to one, where one is highest confidence."]}
+    let make ?name = fun ?score -> fun () -> { name; score }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:ToxicContentType.to_value));
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
+      let name =
+        (Option.map ~f:ToxicContentType.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?score ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let name = field_map json__ "Name" ToxicContentType.of_json in
+      make ?score ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Toxic content analysis result for one string. For more information about toxicity detection, see Toxicity detection in the Amazon Comprehend Developer Guide"]
+module BoundingBox =
+  struct
+    type nonrec t =
+      {
+      height: Float_.t option
+        [@ocaml.doc
+          "The height of the bounding box as a ratio of the overall document page height."];
+      left: Float_.t option
+        [@ocaml.doc
+          "The left coordinate of the bounding box as a ratio of overall document page width."];
+      top: Float_.t option
+        [@ocaml.doc
+          "The top coordinate of the bounding box as a ratio of overall document page height."];
+      width: Float_.t option
+        [@ocaml.doc
+          "The width of the bounding box as a ratio of the overall document page width."]}
+    let make ?height =
+      fun ?left ->
+        fun ?top -> fun ?width -> fun () -> { height; left; top; width }
+    let to_value x =
+      structure_to_value
+        [("Height", (Option.map x.height ~f:Float_.to_value));
+        ("Left", (Option.map x.left ~f:Float_.to_value));
+        ("Top", (Option.map x.top ~f:Float_.to_value));
+        ("Width", (Option.map x.width ~f:Float_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let width = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Width") in
+      let top = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Top") in
+      let left = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Left") in
+      let height =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Height") in
+      make ?width ?top ?left ?height ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let width = field_map json__ "Width" Float_.of_json in
+      let top = field_map json__ "Top" Float_.of_json in
+      let left = field_map json__ "Left" Float_.of_json in
+      let height = field_map json__ "Height" Float_.of_json in
+      make ?width ?top ?left ?height ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The bounding box around the detected page or around an element on a document page. The left (x-coordinate) and top (y-coordinate) are coordinates that represent the top and left sides of the bounding box. Note that the upper-left corner of the image is the origin (0,0). For additional information, see BoundingBox in the Amazon Textract API reference."]
+module Polygon =
+  struct
+    type nonrec t = Point.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Point.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Point.of_xml)
+    let of_json j = list_of_json ~kind:"Polygon" ~of_json:Point.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RelationshipsListItem =
+  struct
+    type nonrec t =
+      {
+      ids: StringList.t option [@ocaml.doc "Identifers of the child blocks."];
+      type_: RelationshipType.t option
+        [@ocaml.doc "Only supported relationship is a child relationship."]}
+    let make ?ids = fun ?type_ -> fun () -> { ids; type_ }
+    let to_value x =
+      structure_to_value
+        [("Ids", (Option.map x.ids ~f:StringList.to_value));
+        ("Type", (Option.map x.type_ ~f:RelationshipType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:RelationshipType.of_xml) (Xml.child xml_arg0 "Type") in
+      let ids = (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Ids") in
+      make ?type_ ?ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" RelationshipType.of_json in
+      let ids = field_map json__ "Ids" StringList.of_json in
+      make ?type_ ?ids ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List of child blocks for the current block."]
+module TargetedSentimentEntity =
+  struct
+    type nonrec t =
+      {
+      descriptiveMentionIndex: ListOfDescriptiveMentionIndices.t option
+        [@ocaml.doc
+          "One or more index into the Mentions array that provides the best name for the entity group."];
+      mentions: ListOfMentions.t option
+        [@ocaml.doc
+          "An array of mentions of the entity in the document. The array represents a co-reference group. See Co-reference group for an example."]}
+    let make ?descriptiveMentionIndex =
+      fun ?mentions -> fun () -> { descriptiveMentionIndex; mentions }
+    let to_value x =
+      structure_to_value
+        [("DescriptiveMentionIndex",
+           (Option.map x.descriptiveMentionIndex
+              ~f:ListOfDescriptiveMentionIndices.to_value));
+        ("Mentions", (Option.map x.mentions ~f:ListOfMentions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mentions =
+        (Option.map ~f:ListOfMentions.of_xml) (Xml.child xml_arg0 "Mentions") in
+      let descriptiveMentionIndex =
+        (Option.map ~f:ListOfDescriptiveMentionIndices.of_xml)
+          (Xml.child xml_arg0 "DescriptiveMentionIndex") in
+      make ?mentions ?descriptiveMentionIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mentions = field_map json__ "Mentions" ListOfMentions.of_json in
+      let descriptiveMentionIndex =
+        field_map json__ "DescriptiveMentionIndex"
+          ListOfDescriptiveMentionIndices.of_json in
+      make ?mentions ?descriptiveMentionIndex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about one of the entities found by targeted sentiment analysis. For more information about targeted sentiment, see Targeted sentiment in the Amazon Comprehend Developer Guide."]
 module SyntaxToken =
   struct
     type nonrec t =
@@ -1466,7 +2408,7 @@ module SyntaxToken =
           "The zero-based offset from the beginning of the source text to the last character in the word."];
       partOfSpeech: PartOfSpeechTag.t option
         [@ocaml.doc
-          "Provides the part of speech label and the confidence level that Amazon Comprehend has that the part of speech was correctly identified. For more information, see how-syntax."]}
+          "Provides the part of speech label and the confidence level that Amazon Comprehend has that the part of speech was correctly identified. For more information, see Syntax in the Comprehend Developer Guide."]}
     let make ?tokenId =
       fun ?text ->
         fun ?beginOffset ->
@@ -1496,13 +2438,13 @@ module SyntaxToken =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "TokenId") in
       make ?partOfSpeech ?endOffset ?beginOffset ?text ?tokenId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partOfSpeech =
-        field_map json "PartOfSpeech" PartOfSpeechTag.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let text = field_map json "Text" String_.of_json in
-      let tokenId = field_map json "TokenId" Integer.of_json in
+        field_map json__ "PartOfSpeech" PartOfSpeechTag.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let tokenId = field_map json__ "TokenId" Integer.of_json in
       make ?partOfSpeech ?endOffset ?beginOffset ?text ?tokenId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1511,23 +2453,23 @@ module KeyPhrase =
   struct
     type nonrec t =
       {
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend has in the accuracy of the detection."];
       text: String_.t option [@ocaml.doc "The text of a key noun phrase."];
       beginOffset: Integer.t option
         [@ocaml.doc
-          "A character offset in the input text that shows where the key phrase begins (the first character is at position 0). The offset returns the position of each UTF-8 code point in the string. A code point is the abstract character from a particular graphical representation. For example, a multi-byte UTF-8 character maps to a single code point."];
+          "The zero-based offset from the beginning of the source text to the first character in the key phrase."];
       endOffset: Integer.t option
         [@ocaml.doc
-          "A character offset in the input text where the key phrase ends. The offset returns the position of each UTF-8 code point in the string. A code point is the abstract character from a particular graphical representation. For example, a multi-byte UTF-8 character maps to a single code point."]}
+          "The zero-based offset from the beginning of the source text to the last character in the key phrase."]}
     let make ?score =
       fun ?text ->
         fun ?beginOffset ->
           fun ?endOffset -> fun () -> { score; text; beginOffset; endOffset }
     let to_value x =
       structure_to_value
-        [("Score", (Option.map x.score ~f:Float.to_value));
+        [("Score", (Option.map x.score ~f:Float_.to_value));
         ("Text", (Option.map x.text ~f:String_.to_value));
         ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
         ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value))]
@@ -1538,14 +2480,14 @@ module KeyPhrase =
       let beginOffset =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
       let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       make ?endOffset ?beginOffset ?text ?score ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let text = field_map json "Text" String_.of_json in
-      let score = field_map json "Score" Float.of_json in
+    let of_json json__ =
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
       make ?endOffset ?beginOffset ?text ?score ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a key noun phrase."]
@@ -1553,32 +2495,51 @@ module Entity =
   struct
     type nonrec t =
       {
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend has in the accuracy of the detection."];
-      type_: EntityType.t option [@ocaml.doc "The entity's type."];
+      type_: EntityType.t option
+        [@ocaml.doc
+          "The entity type. For entity detection using the built-in model, this field contains one of the standard entity types listed below. For custom entity detection, this field contains one of the entity types that you specified when you trained your custom model."];
       text: String_.t option [@ocaml.doc "The text of the entity."];
       beginOffset: Integer.t option
         [@ocaml.doc
-          "A character offset in the input text that shows where the entity begins (the first character is at position 0). The offset returns the position of each UTF-8 code point in the string. A code point is the abstract character from a particular graphical representation. For example, a multi-byte UTF-8 character maps to a single code point."];
+          "The zero-based offset from the beginning of the source text to the first character in the entity. This field is empty for non-text input."];
       endOffset: Integer.t option
         [@ocaml.doc
-          "A character offset in the input text that shows where the entity ends. The offset returns the position of each UTF-8 code point in the string. A code point is the abstract character from a particular graphical representation. For example, a multi-byte UTF-8 character maps to a single code point."]}
+          "The zero-based offset from the beginning of the source text to the last character in the entity. This field is empty for non-text input."];
+      blockReferences: ListOfBlockReferences.t option
+        [@ocaml.doc
+          "A reference to each block for this entity. This field is empty for plain-text input."]}
     let make ?score =
       fun ?type_ ->
         fun ?text ->
           fun ?beginOffset ->
             fun ?endOffset ->
-              fun () -> { score; type_; text; beginOffset; endOffset }
+              fun ?blockReferences ->
+                fun () ->
+                  {
+                    score;
+                    type_;
+                    text;
+                    beginOffset;
+                    endOffset;
+                    blockReferences
+                  }
     let to_value x =
       structure_to_value
-        [("Score", (Option.map x.score ~f:Float.to_value));
+        [("Score", (Option.map x.score ~f:Float_.to_value));
         ("Type", (Option.map x.type_ ~f:EntityType.to_value));
         ("Text", (Option.map x.text ~f:String_.to_value));
         ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
-        ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value))]
+        ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value));
+        ("BlockReferences",
+          (Option.map x.blockReferences ~f:ListOfBlockReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let blockReferences =
+        (Option.map ~f:ListOfBlockReferences.of_xml)
+          (Xml.child xml_arg0 "BlockReferences") in
       let endOffset =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EndOffset") in
       let beginOffset =
@@ -1586,16 +2547,18 @@ module Entity =
       let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
       let type_ =
         (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "Type") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
-      make ?endOffset ?beginOffset ?text ?type_ ?score ()
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
+      make ?blockReferences ?endOffset ?beginOffset ?text ?type_ ?score ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let text = field_map json "Text" String_.of_json in
-      let type_ = field_map json "Type" EntityType.of_json in
-      let score = field_map json "Score" Float.of_json in
-      make ?endOffset ?beginOffset ?text ?type_ ?score ()
+    let of_json json__ =
+      let blockReferences =
+        field_map json__ "BlockReferences" ListOfBlockReferences.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let type_ = field_map json__ "Type" EntityType.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      make ?blockReferences ?endOffset ?beginOffset ?text ?type_ ?score ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about an entity."]
 module DominantLanguage =
@@ -1605,28 +2568,209 @@ module DominantLanguage =
       languageCode: String_.t option
         [@ocaml.doc
           "The RFC 5646 language code for the dominant language. For more information about RFC 5646, see Tags for Identifying Languages on the IETF Tools web site."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend has in the accuracy of the detection."]}
     let make ?languageCode = fun ?score -> fun () -> { languageCode; score }
     let to_value x =
       structure_to_value
         [("LanguageCode", (Option.map x.languageCode ~f:String_.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let languageCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LanguageCode") in
       make ?score ?languageCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let languageCode = field_map json "LanguageCode" String_.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let languageCode = field_map json__ "LanguageCode" String_.of_json in
       make ?score ?languageCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the code for the dominant language in the input text and the level of confidence that Amazon Comprehend has in the accuracy of the detection."]
+module VpcConfig =
+  struct
+    type nonrec t =
+      {
+      securityGroupIds: SecurityGroupIds.t
+        [@ocaml.doc
+          "The ID number for a security group on an instance of your private VPC. Security groups on your VPC function serve as a virtual firewall to control inbound and outbound traffic and provides security for the resources that you\226\128\153ll be accessing on the VPC. This ID number is preceded by \"sg-\", for instance: \"sg-03b388029b0a285ea\". For more information, see Security Groups for your VPC."];
+      subnets: Subnets.t
+        [@ocaml.doc
+          "The ID for each subnet being used in your private VPC. This subnet is a subset of the a range of IPv4 addresses used by the VPC and is specific to a given availability zone in the VPC\226\128\153s Region. This ID number is preceded by \"subnet-\", for instance: \"subnet-04ccf456919e69055\". For more information, see VPCs and Subnets."]}
+    let context_ = "VpcConfig"
+    let make ~securityGroupIds =
+      fun ~subnets -> fun () -> { securityGroupIds; subnets }
+    let to_value x =
+      structure_to_value
+        [("SecurityGroupIds",
+           (Some (SecurityGroupIds.to_value x.securityGroupIds)));
+        ("Subnets", (Some (Subnets.to_value x.subnets)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subnets =
+        Subnets.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Subnets") in
+      let securityGroupIds =
+        SecurityGroupIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupIds") in
+      make ~subnets ~securityGroupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subnets = field_map_exn json__ "Subnets" Subnets.of_json in
+      let securityGroupIds =
+        field_map_exn json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      make ~subnets ~securityGroupIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for the job. For more information, see Amazon VPC."]
+module DocumentClassificationConfig =
+  struct
+    type nonrec t =
+      {
+      mode: DocumentClassifierMode.t
+        [@ocaml.doc
+          "Classification mode indicates whether the documents are MULTI_CLASS or MULTI_LABEL."];
+      labels: LabelsList.t option
+        [@ocaml.doc
+          "One or more labels to associate with the custom classifier."]}
+    let context_ = "DocumentClassificationConfig"
+    let make ?labels = fun ~mode -> fun () -> { labels; mode }
+    let to_value x =
+      structure_to_value
+        [("Mode", (Some (DocumentClassifierMode.to_value x.mode)));
+        ("Labels", (Option.map x.labels ~f:LabelsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labels =
+        (Option.map ~f:LabelsList.of_xml) (Xml.child xml_arg0 "Labels") in
+      let mode =
+        DocumentClassifierMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Mode") in
+      make ?labels ~mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labels = field_map json__ "Labels" LabelsList.of_json in
+      let mode = field_map_exn json__ "Mode" DocumentClassifierMode.of_json in
+      make ?labels ~mode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration required for a document classification model."]
+module EntityRecognitionConfig =
+  struct
+    type nonrec t =
+      {
+      entityTypes: EntityTypesList.t
+        [@ocaml.doc
+          "Up to 25 entity types that the model is trained to recognize."]}
+    let context_ = "EntityRecognitionConfig"
+    let make ~entityTypes = fun () -> { entityTypes }
+    let to_value x =
+      structure_to_value
+        [("EntityTypes", (Some (EntityTypesList.to_value x.entityTypes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entityTypes =
+        EntityTypesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EntityTypes") in
+      make ~entityTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entityTypes =
+        field_map_exn json__ "EntityTypes" EntityTypesList.of_json in
+      make ~entityTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration required for an entity recognition model."]
+module LanguageCode =
+  struct
+    type nonrec t =
+      | En 
+      | Es 
+      | Fr 
+      | De 
+      | It 
+      | Pt 
+      | Ar 
+      | Hi 
+      | Ja 
+      | Ko 
+      | Zh 
+      | Zh_TW 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | En -> "en"
+      | Es -> "es"
+      | Fr -> "fr"
+      | De -> "de"
+      | It -> "it"
+      | Pt -> "pt"
+      | Ar -> "ar"
+      | Hi -> "hi"
+      | Ja -> "ja"
+      | Ko -> "ko"
+      | Zh -> "zh"
+      | Zh_TW -> "zh-TW"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "en" -> En
+      | "es" -> Es
+      | "fr" -> Fr
+      | "de" -> De
+      | "it" -> It
+      | "pt" -> Pt
+      | "ar" -> Ar
+      | "hi" -> Hi
+      | "ja" -> Ja
+      | "ko" -> Ko
+      | "zh" -> Zh
+      | "zh-TW" -> Zh_TW
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LanguageCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LanguageCode" j)
+    let to_json = simple_to_json to_value
+  end
+module InvalidRequestDetailReason =
+  struct
+    type nonrec t =
+      | DOCUMENT_SIZE_EXCEEDED 
+      | UNSUPPORTED_DOC_TYPE 
+      | PAGE_LIMIT_EXCEEDED 
+      | TEXTRACT_ACCESS_DENIED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DOCUMENT_SIZE_EXCEEDED -> "DOCUMENT_SIZE_EXCEEDED"
+      | UNSUPPORTED_DOC_TYPE -> "UNSUPPORTED_DOC_TYPE"
+      | PAGE_LIMIT_EXCEEDED -> "PAGE_LIMIT_EXCEEDED"
+      | TEXTRACT_ACCESS_DENIED -> "TEXTRACT_ACCESS_DENIED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DOCUMENT_SIZE_EXCEEDED" -> DOCUMENT_SIZE_EXCEEDED
+      | "UNSUPPORTED_DOC_TYPE" -> UNSUPPORTED_DOC_TYPE
+      | "PAGE_LIMIT_EXCEEDED" -> PAGE_LIMIT_EXCEEDED
+      | "TEXTRACT_ACCESS_DENIED" -> TEXTRACT_ACCESS_DENIED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InvalidRequestDetailReason"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InvalidRequestDetailReason" j)
+    let to_json = simple_to_json to_value
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -1673,7 +2817,7 @@ module ComprehendArn =
           ((check_string_max i ~max:256) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"arn:aws(-[^:]+)?:comprehend:[a-zA-Z0-9-]*:[0-9]{12}:[a-zA-Z0-9-]{1,64}/[a-zA-Z0-9](-*[a-zA-Z0-9])*(/version/[a-zA-Z0-9](-*[a-zA-Z0-9])*)?"));
+                  ~pattern:"arn:aws(-[^:]+)?:comprehend:[a-zA-Z0-9-]*:[0-9]{12}:[a-zA-Z0-9-]{1,64}/[a-zA-Z0-9](-*[a-zA-Z0-9])*((/dataset/[a-zA-Z0-9](-*[a-zA-Z0-9])*)|(/version/[a-zA-Z0-9](-*[a-zA-Z0-9])*))?"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1711,13 +2855,13 @@ module InputDataConfig =
       {
       s3Uri: S3Uri.t
         [@ocaml.doc
-          "The Amazon S3 URI for the input data. The URI must be in same region as the API endpoint that you are calling. The URI can point to a single input file or it can provide the prefix for a collection of data files. For example, if you use the URI S3://bucketName/prefix, if the prefix is a single file, Amazon Comprehend uses that file as input. If more than one file begins with the prefix, Amazon Comprehend uses all of them as input."];
+          "The Amazon S3 URI for the input data. The URI must be in same Region as the API endpoint that you are calling. The URI can point to a single input file or it can provide the prefix for a collection of data files. For example, if you use the URI S3://bucketName/prefix, if the prefix is a single file, Amazon Comprehend uses that file as input. If more than one file begins with the prefix, Amazon Comprehend uses all of them as input."];
       inputFormat: InputFormat.t option
         [@ocaml.doc
           "Specifies how the text in an input file should be processed: ONE_DOC_PER_FILE - Each file is considered a separate document. Use this option when you are processing large documents, such as newspaper articles or scientific papers. ONE_DOC_PER_LINE - Each line in a file is considered a separate document. Use this option when you are processing many short documents, such as text messages."];
       documentReaderConfig: DocumentReaderConfig.t option
         [@ocaml.doc
-          "The document reader config field applies only for InputDataConfig of StartEntitiesDetectionJob. Use DocumentReaderConfig to provide specifications about how you want your inference documents read. Currently it applies for PDF documents in StartEntitiesDetectionJob custom inference."]}
+          "Provides configuration parameters to override the default actions for extracting text from PDF documents and image files."]}
     let context_ = "InputDataConfig"
     let make ?inputFormat =
       fun ?documentReaderConfig ->
@@ -1739,14 +2883,15 @@ module InputDataConfig =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ?documentReaderConfig ?inputFormat ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentReaderConfig =
-        field_map json "DocumentReaderConfig" DocumentReaderConfig.of_json in
-      let inputFormat = field_map json "InputFormat" InputFormat.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
+        field_map json__ "DocumentReaderConfig" DocumentReaderConfig.of_json in
+      let inputFormat = field_map json__ "InputFormat" InputFormat.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
       make ?documentReaderConfig ?inputFormat ~s3Uri ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The input properties for an inference job."]
+  end[@@ocaml.doc
+       "The input properties for an inference job. The document reader config field applies only to non-text inputs for custom analysis."]
 module JobId =
   struct
     type nonrec t = string
@@ -1834,10 +2979,10 @@ module OutputDataConfig =
       {
       s3Uri: S3Uri.t
         [@ocaml.doc
-          "When you use the OutputDataConfig object with asynchronous operations, you specify the Amazon S3 location where you want to write the output data. The URI must be in the same region as the API endpoint that you are calling. The location is used as the prefix for the actual location of the output file. When the topic detection job is finished, the service creates an output file in a directory specific to the job. The S3Uri field contains the location of the output file, called output.tar.gz. It is a compressed archive that contains the ouput of the operation. For a PII entity detection job, the output file is plain text, not a compressed archive. The output file name is the same as the input file, with .out appended at the end."];
+          "When you use the OutputDataConfig object with asynchronous operations, you specify the Amazon S3 location where you want to write the output data. The URI must be in the same Region as the API endpoint that you are calling. The location is used as the prefix for the actual location of the output file. When the topic detection job is finished, the service creates an output file in a directory specific to the job. The S3Uri field contains the location of the output file, called output.tar.gz. It is a compressed archive that contains the ouput of the operation. For a PII entity detection job, the output file is plain text, not a compressed archive. The output file name is the same as the input file, with .out appended at the end."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt the output results from an analysis job. The KmsKeyId can be one of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\" KMS Key Alias: \"alias/ExampleAlias\" ARN of a KMS Key Alias: \"arn:aws:kms:us-west-2:111122223333:alias/ExampleAlias\""]}
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt the output results from an analysis job. Specify the Key Id of a symmetric key, because you cannot use an asymmetric key for uploading data to S3. The KmsKeyId can be one of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\" KMS Key Alias: \"alias/ExampleAlias\" ARN of a KMS Key Alias: \"arn:aws:kms:us-west-2:111122223333:alias/ExampleAlias\""]}
     let context_ = "OutputDataConfig"
     let make ?kmsKeyId = fun ~s3Uri -> fun () -> { kmsKeyId; s3Uri }
     let to_value x =
@@ -1852,9 +2997,9 @@ module OutputDataConfig =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ?kmsKeyId ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
       make ?kmsKeyId ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1869,96 +3014,6 @@ module Timestamp =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
-module VpcConfig =
-  struct
-    type nonrec t =
-      {
-      securityGroupIds: SecurityGroupIds.t
-        [@ocaml.doc
-          "The ID number for a security group on an instance of your private VPC. Security groups on your VPC function serve as a virtual firewall to control inbound and outbound traffic and provides security for the resources that you\226\128\153ll be accessing on the VPC. This ID number is preceded by \"sg-\", for instance: \"sg-03b388029b0a285ea\". For more information, see Security Groups for your VPC."];
-      subnets: Subnets.t
-        [@ocaml.doc
-          "The ID for each subnet being used in your private VPC. This subnet is a subset of the a range of IPv4 addresses used by the VPC and is specific to a given availability zone in the VPC\226\128\153s region. This ID number is preceded by \"subnet-\", for instance: \"subnet-04ccf456919e69055\". For more information, see VPCs and Subnets."]}
-    let context_ = "VpcConfig"
-    let make ~securityGroupIds =
-      fun ~subnets -> fun () -> { securityGroupIds; subnets }
-    let to_value x =
-      structure_to_value
-        [("SecurityGroupIds",
-           (Some (SecurityGroupIds.to_value x.securityGroupIds)));
-        ("Subnets", (Some (Subnets.to_value x.subnets)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let subnets =
-        Subnets.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Subnets") in
-      let securityGroupIds =
-        SecurityGroupIds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupIds") in
-      make ~subnets ~securityGroupIds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnets = field_map_exn json "Subnets" Subnets.of_json in
-      let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" SecurityGroupIds.of_json in
-      make ~subnets ~securityGroupIds ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for the job. For more information, see Amazon VPC."]
-module LanguageCode =
-  struct
-    type nonrec t =
-      | En 
-      | Es 
-      | Fr 
-      | De 
-      | It 
-      | Pt 
-      | Ar 
-      | Hi 
-      | Ja 
-      | Ko 
-      | Zh 
-      | Zh_TW 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | En -> "en"
-      | Es -> "es"
-      | Fr -> "fr"
-      | De -> "de"
-      | It -> "it"
-      | Pt -> "pt"
-      | Ar -> "ar"
-      | Hi -> "hi"
-      | Ja -> "ja"
-      | Ko -> "ko"
-      | Zh -> "zh"
-      | Zh_TW -> "zh-TW"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "en" -> En
-      | "es" -> Es
-      | "fr" -> Fr
-      | "de" -> De
-      | "it" -> It
-      | "pt" -> Pt
-      | "ar" -> Ar
-      | "hi" -> Hi
-      | "ja" -> Ja
-      | "ko" -> Ko
-      | "zh" -> Zh
-      | "zh-TW" -> Zh_TW
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration LanguageCode" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"LanguageCode" j)
     let to_json = simple_to_json to_value
   end
 module PiiEntitiesDetectionMode =
@@ -1992,30 +3047,28 @@ module PiiOutputDataConfig =
   struct
     type nonrec t =
       {
-      s3Uri: S3Uri.t
+      s3Uri: S3Uri.t option
         [@ocaml.doc
           "When you use the PiiOutputDataConfig object with asynchronous operations, you specify the Amazon S3 location where you want to write the output data. For a PII entity detection job, the output file is plain text, not a compressed archive. The output file name is the same as the input file, with .out appended at the end."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt the output results from an analysis job."]}
-    let context_ = "PiiOutputDataConfig"
-    let make ?kmsKeyId = fun ~s3Uri -> fun () -> { kmsKeyId; s3Uri }
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt the output results from an analysis job."]}
+    let make ?s3Uri = fun ?kmsKeyId -> fun () -> { s3Uri; kmsKeyId }
     let to_value x =
       structure_to_value
-        [("S3Uri", (Some (S3Uri.to_value x.s3Uri)));
+        [("S3Uri", (Option.map x.s3Uri ~f:S3Uri.to_value));
         ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let kmsKeyId =
         (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
-      let s3Uri =
-        S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
-      make ?kmsKeyId ~s3Uri ()
+      let s3Uri = (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "S3Uri") in
+      make ?kmsKeyId ?s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
-      make ?kmsKeyId ~s3Uri ()
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let s3Uri = field_map json__ "S3Uri" S3Uri.of_json in
+      make ?kmsKeyId ?s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides configuration parameters for the output of PII entity detection jobs."]
@@ -2057,22 +3110,236 @@ module RedactionConfig =
           (Xml.child xml_arg0 "PiiEntityTypes") in
       make ?maskCharacter ?maskMode ?piiEntityTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maskCharacter =
-        field_map json "MaskCharacter" MaskCharacter.of_json in
+        field_map json__ "MaskCharacter" MaskCharacter.of_json in
       let maskMode =
-        field_map json "MaskMode" PiiEntitiesDetectionMaskMode.of_json in
+        field_map json__ "MaskMode" PiiEntitiesDetectionMaskMode.of_json in
       let piiEntityTypes =
-        field_map json "PiiEntityTypes" ListOfPiiEntityTypes.of_json in
+        field_map json__ "PiiEntityTypes" ListOfPiiEntityTypes.of_json in
       make ?maskCharacter ?maskMode ?piiEntityTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides configuration parameters for PII entity redaction."]
+module ComprehendFlywheelArn =
+  struct
+    type nonrec t = string
+    let context_ = "ComprehendFlywheelArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"arn:aws(-[^:]+)?:comprehend:[a-zA-Z0-9-]*:[0-9]{12}:flywheel/[a-zA-Z0-9](-*[a-zA-Z0-9])*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComprehendFlywheelArn" j
+    let to_json = simple_to_json to_value
+  end
+module ComprehendModelArn =
+  struct
+    type nonrec t = string
+    let context_ = "ComprehendModelArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"arn:aws(-[^:]+)?:comprehend:[a-zA-Z0-9-]*:[0-9]{12}:(document-classifier|entity-recognizer)/[a-zA-Z0-9](-*[a-zA-Z0-9])*(/version/[a-zA-Z0-9](-*[a-zA-Z0-9])*)?"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComprehendModelArn" j
+    let to_json = simple_to_json to_value
+  end
+module FlywheelIterationId =
+  struct
+    type nonrec t = string
+    let context_ = "FlywheelIterationId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:63) >>=
+             (fun () -> check_pattern i ~pattern:"[0-9]{8}T[0-9]{6}Z"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FlywheelIterationId" j
+    let to_json = simple_to_json to_value
+  end
+module FlywheelStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | ACTIVE 
+      | UPDATING 
+      | DELETING 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FlywheelStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FlywheelStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ModelType =
+  struct
+    type nonrec t =
+      | DOCUMENT_CLASSIFIER 
+      | ENTITY_RECOGNIZER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DOCUMENT_CLASSIFIER -> "DOCUMENT_CLASSIFIER"
+      | ENTITY_RECOGNIZER -> "ENTITY_RECOGNIZER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DOCUMENT_CLASSIFIER" -> DOCUMENT_CLASSIFIER
+      | "ENTITY_RECOGNIZER" -> ENTITY_RECOGNIZER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ModelType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ModelType" j)
+    let to_json = simple_to_json to_value
+  end
+module FlywheelIterationStatus =
+  struct
+    type nonrec t =
+      | TRAINING 
+      | EVALUATING 
+      | COMPLETED 
+      | FAILED 
+      | STOP_REQUESTED 
+      | STOPPED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TRAINING -> "TRAINING"
+      | EVALUATING -> "EVALUATING"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | STOP_REQUESTED -> "STOP_REQUESTED"
+      | STOPPED -> "STOPPED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TRAINING" -> TRAINING
+      | "EVALUATING" -> EVALUATING
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | "STOP_REQUESTED" -> STOP_REQUESTED
+      | "STOPPED" -> STOPPED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FlywheelIterationStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FlywheelIterationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module FlywheelModelEvaluationMetrics =
+  struct
+    type nonrec t =
+      {
+      averageF1Score: Double.t option
+        [@ocaml.doc "The average F1 score from the evaluation metrics."];
+      averagePrecision: Double.t option
+        [@ocaml.doc "Average precision metric for the model."];
+      averageRecall: Double.t option
+        [@ocaml.doc "Average recall metric for the model."];
+      averageAccuracy: Double.t option
+        [@ocaml.doc "Average accuracy metric for the model."]}
+    let make ?averageF1Score =
+      fun ?averagePrecision ->
+        fun ?averageRecall ->
+          fun ?averageAccuracy ->
+            fun () ->
+              {
+                averageF1Score;
+                averagePrecision;
+                averageRecall;
+                averageAccuracy
+              }
+    let to_value x =
+      structure_to_value
+        [("AverageF1Score", (Option.map x.averageF1Score ~f:Double.to_value));
+        ("AveragePrecision",
+          (Option.map x.averagePrecision ~f:Double.to_value));
+        ("AverageRecall", (Option.map x.averageRecall ~f:Double.to_value));
+        ("AverageAccuracy",
+          (Option.map x.averageAccuracy ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let averageAccuracy =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "AverageAccuracy") in
+      let averageRecall =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "AverageRecall") in
+      let averagePrecision =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "AveragePrecision") in
+      let averageF1Score =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "AverageF1Score") in
+      make ?averageAccuracy ?averageRecall ?averagePrecision ?averageF1Score
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let averageAccuracy = field_map json__ "AverageAccuracy" Double.of_json in
+      let averageRecall = field_map json__ "AverageRecall" Double.of_json in
+      let averagePrecision =
+        field_map json__ "AveragePrecision" Double.of_json in
+      let averageF1Score = field_map json__ "AverageF1Score" Double.of_json in
+      make ?averageAccuracy ?averageRecall ?averagePrecision ?averageF1Score
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The evaluation metrics associated with the evaluated model."]
 module TargetEventTypes =
   struct
     type nonrec t = EventTypeString.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventTypeString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2189,20 +3456,20 @@ module EntityRecognizerInputDataConfig =
       make ?augmentedManifests ?entityList ?annotations ?documents
         ~entityTypes ?dataFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let augmentedManifests =
-        field_map json "AugmentedManifests"
+        field_map json__ "AugmentedManifests"
           EntityRecognizerAugmentedManifestsList.of_json in
       let entityList =
-        field_map json "EntityList" EntityRecognizerEntityList.of_json in
+        field_map json__ "EntityList" EntityRecognizerEntityList.of_json in
       let annotations =
-        field_map json "Annotations" EntityRecognizerAnnotations.of_json in
+        field_map json__ "Annotations" EntityRecognizerAnnotations.of_json in
       let documents =
-        field_map json "Documents" EntityRecognizerDocuments.of_json in
+        field_map json__ "Documents" EntityRecognizerDocuments.of_json in
       let entityTypes =
-        field_map_exn json "EntityTypes" EntityTypesList.of_json in
+        field_map_exn json__ "EntityTypes" EntityTypesList.of_json in
       let dataFormat =
-        field_map json "DataFormat" EntityRecognizerDataFormat.of_json in
+        field_map json__ "DataFormat" EntityRecognizerDataFormat.of_json in
       make ?augmentedManifests ?entityList ?annotations ?documents
         ~entityTypes ?dataFormat ()
     let to_json v = composed_to_json to_value v
@@ -2263,21 +3530,46 @@ module EntityRecognizerMetadata =
       make ?entityTypes ?evaluationMetrics ?numberOfTestDocuments
         ?numberOfTrainedDocuments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entityTypes =
-        field_map json "EntityTypes"
+        field_map json__ "EntityTypes"
           EntityRecognizerMetadataEntityTypesList.of_json in
       let evaluationMetrics =
-        field_map json "EvaluationMetrics"
+        field_map json__ "EvaluationMetrics"
           EntityRecognizerEvaluationMetrics.of_json in
       let numberOfTestDocuments =
-        field_map json "NumberOfTestDocuments" Integer.of_json in
+        field_map json__ "NumberOfTestDocuments" Integer.of_json in
       let numberOfTrainedDocuments =
-        field_map json "NumberOfTrainedDocuments" Integer.of_json in
+        field_map json__ "NumberOfTrainedDocuments" Integer.of_json in
       make ?entityTypes ?evaluationMetrics ?numberOfTestDocuments
         ?numberOfTrainedDocuments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about an entity recognizer."]
+module EntityRecognizerOutputDataConfig =
+  struct
+    type nonrec t =
+      {
+      flywheelStatsS3Prefix: S3Uri.t option
+        [@ocaml.doc
+          "The Amazon S3 prefix for the data lake location of the flywheel statistics."]}
+    let make ?flywheelStatsS3Prefix = fun () -> { flywheelStatsS3Prefix }
+    let to_value x =
+      structure_to_value
+        [("FlywheelStatsS3Prefix",
+           (Option.map x.flywheelStatsS3Prefix ~f:S3Uri.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let flywheelStatsS3Prefix =
+        (Option.map ~f:S3Uri.of_xml)
+          (Xml.child xml_arg0 "FlywheelStatsS3Prefix") in
+      make ?flywheelStatsS3Prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let flywheelStatsS3Prefix =
+        field_map json__ "FlywheelStatsS3Prefix" S3Uri.of_json in
+      make ?flywheelStatsS3Prefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Output data configuration."]
 module ModelStatus =
   struct
     type nonrec t =
@@ -2288,6 +3580,7 @@ module ModelStatus =
       | STOPPED 
       | IN_ERROR 
       | TRAINED 
+      | TRAINED_WITH_WARNING 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2299,6 +3592,7 @@ module ModelStatus =
       | STOPPED -> "STOPPED"
       | IN_ERROR -> "IN_ERROR"
       | TRAINED -> "TRAINED"
+      | TRAINED_WITH_WARNING -> "TRAINED_WITH_WARNING"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2309,6 +3603,7 @@ module ModelStatus =
       | "STOPPED" -> STOPPED
       | "IN_ERROR" -> IN_ERROR
       | "TRAINED" -> TRAINED
+      | "TRAINED_WITH_WARNING" -> TRAINED_WITH_WARNING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2374,26 +3669,6 @@ module ComprehendEndpointArn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ComprehendEndpointArn" j
-    let to_json = simple_to_json to_value
-  end
-module ComprehendModelArn =
-  struct
-    type nonrec t = string
-    let context_ = "ComprehendModelArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"arn:aws(-[^:]+)?:comprehend:[a-zA-Z0-9-]*:[0-9]{12}:(document-classifier|entity-recognizer)/[a-zA-Z0-9](-*[a-zA-Z0-9])*(/version/[a-zA-Z0-9](-*[a-zA-Z0-9])*)?"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ComprehendModelArn" j
     let to_json = simple_to_json to_value
   end
 module EndpointStatus =
@@ -2498,15 +3773,15 @@ module ClassifierMetadata =
       make ?evaluationMetrics ?numberOfTestDocuments
         ?numberOfTrainedDocuments ?numberOfLabels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evaluationMetrics =
-        field_map json "EvaluationMetrics"
+        field_map json__ "EvaluationMetrics"
           ClassifierEvaluationMetrics.of_json in
       let numberOfTestDocuments =
-        field_map json "NumberOfTestDocuments" Integer.of_json in
+        field_map json__ "NumberOfTestDocuments" Integer.of_json in
       let numberOfTrainedDocuments =
-        field_map json "NumberOfTrainedDocuments" Integer.of_json in
-      let numberOfLabels = field_map json "NumberOfLabels" Integer.of_json in
+        field_map json__ "NumberOfTrainedDocuments" Integer.of_json in
+      let numberOfLabels = field_map json__ "NumberOfLabels" Integer.of_json in
       make ?evaluationMetrics ?numberOfTestDocuments
         ?numberOfTrainedDocuments ?numberOfLabels ()
     let to_json v = composed_to_json to_value v
@@ -2540,29 +3815,42 @@ module DocumentClassifierInputDataConfig =
           "The format of your training data: COMPREHEND_CSV: A two-column CSV file, where labels are provided in the first column, and documents are provided in the second. If you use this value, you must provide the S3Uri parameter in your request. AUGMENTED_MANIFEST: A labeled dataset that is produced by Amazon SageMaker Ground Truth. This file is in JSON lines format. Each line is a complete JSON object that contains a training document and its associated labels. If you use this value, you must provide the AugmentedManifests parameter in your request. If you don't specify a value, Amazon Comprehend uses COMPREHEND_CSV as the default."];
       s3Uri: S3Uri.t option
         [@ocaml.doc
-          "The Amazon S3 URI for the input data. The S3 bucket must be in the same region as the API endpoint that you are calling. The URI can point to a single input file or it can provide the prefix for a collection of input files. For example, if you use the URI S3://bucketName/prefix, if the prefix is a single file, Amazon Comprehend uses that file as input. If more than one file begins with the prefix, Amazon Comprehend uses all of them as input. This parameter is required if you set DataFormat to COMPREHEND_CSV."];
+          "The Amazon S3 URI for the input data. The S3 bucket must be in the same Region as the API endpoint that you are calling. The URI can point to a single input file or it can provide the prefix for a collection of input files. For example, if you use the URI S3://bucketName/prefix, if the prefix is a single file, Amazon Comprehend uses that file as input. If more than one file begins with the prefix, Amazon Comprehend uses all of them as input. This parameter is required if you set DataFormat to COMPREHEND_CSV."];
       testS3Uri: S3Uri.t option
         [@ocaml.doc
-          "The Amazon S3 URI for the input data. The Amazon S3 bucket must be in the same AWS Region as the API endpoint that you are calling. The URI can point to a single input file or it can provide the prefix for a collection of input files."];
+          "This specifies the Amazon S3 location that contains the test annotations for the document classifier. The URI must be in the same Amazon Web Services Region as the API endpoint that you are calling."];
       labelDelimiter: LabelDelimiter.t option
         [@ocaml.doc
           "Indicates the delimiter used to separate each label for training a multi-label classifier. The default delimiter between labels is a pipe (|). You can use a different character as a delimiter (if it's an allowed character) by specifying it under Delimiter for labels. If the training documents use a delimiter other than the default or the delimiter you specify, the labels on that line will be combined to make a single unique label, such as LABELLABELLABEL."];
       augmentedManifests: DocumentClassifierAugmentedManifestsList.t option
         [@ocaml.doc
-          "A list of augmented manifest files that provide training data for your custom model. An augmented manifest file is a labeled dataset that is produced by Amazon SageMaker Ground Truth. This parameter is required if you set DataFormat to AUGMENTED_MANIFEST."]}
+          "A list of augmented manifest files that provide training data for your custom model. An augmented manifest file is a labeled dataset that is produced by Amazon SageMaker Ground Truth. This parameter is required if you set DataFormat to AUGMENTED_MANIFEST."];
+      documentType: DocumentClassifierDocumentTypeFormat.t option
+        [@ocaml.doc
+          "The type of input documents for training the model. Provide plain-text documents to create a plain-text model, and provide semi-structured documents to create a native document model."];
+      documents: DocumentClassifierDocuments.t option
+        [@ocaml.doc
+          "The S3 location of the training documents. This parameter is required in a request to create a native document model."];
+      documentReaderConfig: DocumentReaderConfig.t option }
     let make ?dataFormat =
       fun ?s3Uri ->
         fun ?testS3Uri ->
           fun ?labelDelimiter ->
             fun ?augmentedManifests ->
-              fun () ->
-                {
-                  dataFormat;
-                  s3Uri;
-                  testS3Uri;
-                  labelDelimiter;
-                  augmentedManifests
-                }
+              fun ?documentType ->
+                fun ?documents ->
+                  fun ?documentReaderConfig ->
+                    fun () ->
+                      {
+                        dataFormat;
+                        s3Uri;
+                        testS3Uri;
+                        labelDelimiter;
+                        augmentedManifests;
+                        documentType;
+                        documents;
+                        documentReaderConfig
+                      }
     let to_value x =
       structure_to_value
         [("DataFormat",
@@ -2573,9 +3861,25 @@ module DocumentClassifierInputDataConfig =
           (Option.map x.labelDelimiter ~f:LabelDelimiter.to_value));
         ("AugmentedManifests",
           (Option.map x.augmentedManifests
-             ~f:DocumentClassifierAugmentedManifestsList.to_value))]
+             ~f:DocumentClassifierAugmentedManifestsList.to_value));
+        ("DocumentType",
+          (Option.map x.documentType
+             ~f:DocumentClassifierDocumentTypeFormat.to_value));
+        ("Documents",
+          (Option.map x.documents ~f:DocumentClassifierDocuments.to_value));
+        ("DocumentReaderConfig",
+          (Option.map x.documentReaderConfig ~f:DocumentReaderConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentReaderConfig =
+        (Option.map ~f:DocumentReaderConfig.of_xml)
+          (Xml.child xml_arg0 "DocumentReaderConfig") in
+      let documents =
+        (Option.map ~f:DocumentClassifierDocuments.of_xml)
+          (Xml.child xml_arg0 "Documents") in
+      let documentType =
+        (Option.map ~f:DocumentClassifierDocumentTypeFormat.of_xml)
+          (Xml.child xml_arg0 "DocumentType") in
       let augmentedManifests =
         (Option.map ~f:DocumentClassifierAugmentedManifestsList.of_xml)
           (Xml.child xml_arg0 "AugmentedManifests") in
@@ -2588,84 +3892,619 @@ module DocumentClassifierInputDataConfig =
       let dataFormat =
         (Option.map ~f:DocumentClassifierDataFormat.of_xml)
           (Xml.child xml_arg0 "DataFormat") in
-      make ?augmentedManifests ?labelDelimiter ?testS3Uri ?s3Uri ?dataFormat
-        ()
+      make ?documentReaderConfig ?documents ?documentType ?augmentedManifests
+        ?labelDelimiter ?testS3Uri ?s3Uri ?dataFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let documentReaderConfig =
+        field_map json__ "DocumentReaderConfig" DocumentReaderConfig.of_json in
+      let documents =
+        field_map json__ "Documents" DocumentClassifierDocuments.of_json in
+      let documentType =
+        field_map json__ "DocumentType"
+          DocumentClassifierDocumentTypeFormat.of_json in
       let augmentedManifests =
-        field_map json "AugmentedManifests"
+        field_map json__ "AugmentedManifests"
           DocumentClassifierAugmentedManifestsList.of_json in
       let labelDelimiter =
-        field_map json "LabelDelimiter" LabelDelimiter.of_json in
-      let testS3Uri = field_map json "TestS3Uri" S3Uri.of_json in
-      let s3Uri = field_map json "S3Uri" S3Uri.of_json in
+        field_map json__ "LabelDelimiter" LabelDelimiter.of_json in
+      let testS3Uri = field_map json__ "TestS3Uri" S3Uri.of_json in
+      let s3Uri = field_map json__ "S3Uri" S3Uri.of_json in
       let dataFormat =
-        field_map json "DataFormat" DocumentClassifierDataFormat.of_json in
-      make ?augmentedManifests ?labelDelimiter ?testS3Uri ?s3Uri ?dataFormat
-        ()
+        field_map json__ "DataFormat" DocumentClassifierDataFormat.of_json in
+      make ?documentReaderConfig ?documents ?documentType ?augmentedManifests
+        ?labelDelimiter ?testS3Uri ?s3Uri ?dataFormat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The input properties for training a document classifier. For more information on how the input file is formatted, see how-document-classification-training-data."]
-module DocumentClassifierMode =
-  struct
-    type nonrec t =
-      | MULTI_CLASS 
-      | MULTI_LABEL 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | MULTI_CLASS -> "MULTI_CLASS"
-      | MULTI_LABEL -> "MULTI_LABEL"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "MULTI_CLASS" -> MULTI_CLASS
-      | "MULTI_LABEL" -> MULTI_LABEL
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration DocumentClassifierMode" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"DocumentClassifierMode" j)
-    let to_json = simple_to_json to_value
-  end
+       "The input properties for training a document classifier. For more information on how the input file is formatted, see Preparing training data in the Comprehend Developer Guide."]
 module DocumentClassifierOutputDataConfig =
   struct
     type nonrec t =
       {
       s3Uri: S3Uri.t option
         [@ocaml.doc
-          "When you use the OutputDataConfig object while creating a custom classifier, you specify the Amazon S3 location where you want to write the confusion matrix. The URI must be in the same region as the API endpoint that you are calling. The location is used as the prefix for the actual location of this output file. When the custom classifier job is finished, the service creates the output file in a directory specific to the job. The S3Uri field contains the location of the output file, called output.tar.gz. It is a compressed archive that contains the confusion matrix."];
+          "When you use the OutputDataConfig object while creating a custom classifier, you specify the Amazon S3 location where you want to write the confusion matrix and other output files. The URI must be in the same Region as the API endpoint that you are calling. The location is used as the prefix for the actual location of this output file. When the custom classifier job is finished, the service creates the output file in a directory specific to the job. The S3Uri field contains the location of the output file, called output.tar.gz. It is a compressed archive that contains the confusion matrix."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt the output results from an analysis job. The KmsKeyId can be one of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\" KMS Key Alias: \"alias/ExampleAlias\" ARN of a KMS Key Alias: \"arn:aws:kms:us-west-2:111122223333:alias/ExampleAlias\""]}
-    let make ?s3Uri = fun ?kmsKeyId -> fun () -> { s3Uri; kmsKeyId }
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt the output results from an analysis job. The KmsKeyId can be one of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\" KMS Key Alias: \"alias/ExampleAlias\" ARN of a KMS Key Alias: \"arn:aws:kms:us-west-2:111122223333:alias/ExampleAlias\""];
+      flywheelStatsS3Prefix: S3Uri.t option
+        [@ocaml.doc
+          "The Amazon S3 prefix for the data lake location of the flywheel statistics."]}
+    let make ?s3Uri =
+      fun ?kmsKeyId ->
+        fun ?flywheelStatsS3Prefix ->
+          fun () -> { s3Uri; kmsKeyId; flywheelStatsS3Prefix }
     let to_value x =
       structure_to_value
         [("S3Uri", (Option.map x.s3Uri ~f:S3Uri.to_value));
-        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("FlywheelStatsS3Prefix",
+          (Option.map x.flywheelStatsS3Prefix ~f:S3Uri.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flywheelStatsS3Prefix =
+        (Option.map ~f:S3Uri.of_xml)
+          (Xml.child xml_arg0 "FlywheelStatsS3Prefix") in
       let kmsKeyId =
         (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let s3Uri = (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "S3Uri") in
-      make ?kmsKeyId ?s3Uri ()
+      make ?flywheelStatsS3Prefix ?kmsKeyId ?s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let s3Uri = field_map json "S3Uri" S3Uri.of_json in
-      make ?kmsKeyId ?s3Uri ()
+    let of_json json__ =
+      let flywheelStatsS3Prefix =
+        field_map json__ "FlywheelStatsS3Prefix" S3Uri.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let s3Uri = field_map json__ "S3Uri" S3Uri.of_json in
+      make ?flywheelStatsS3Prefix ?kmsKeyId ?s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides output results configuration parameters for custom classifier jobs."]
+       "Provide the location for output data from a custom classifier job. This field is mandatory if you are training a native document model."]
+module ComprehendDatasetArn =
+  struct
+    type nonrec t = string
+    let context_ = "ComprehendDatasetArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"arn:aws(-[^:]+)?:comprehend:[a-zA-Z0-9-]*:[0-9]{12}:flywheel/[a-zA-Z0-9](-*[a-zA-Z0-9])*/dataset/[a-zA-Z0-9](-*[a-zA-Z0-9])*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComprehendDatasetArn" j
+    let to_json = simple_to_json to_value
+  end
+module DatasetStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | COMPLETED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DatasetStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DatasetStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module DatasetType =
+  struct
+    type nonrec t =
+      | TRAIN 
+      | TEST 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | TRAIN -> "TRAIN" | TEST -> "TEST" | Non_static_id s -> s
+    let of_string =
+      function | "TRAIN" -> TRAIN | "TEST" -> TEST | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DatasetType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DatasetType" j)
+    let to_json = simple_to_json to_value
+  end
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^([a-zA-Z0-9_])[\\\\a-zA-Z0-9_@#%*+=:?./!\\s-]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module NumberOfDocuments =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ListOfToxicContent =
+  struct
+    type nonrec t = ToxicContent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ToxicContent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ToxicContent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfToxicContent" ~of_json:ToxicContent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CustomerInputString =
+  struct
+    type nonrec t = string
+    let context_ = "CustomerInputString"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomerInputString" j
+    let to_json = simple_to_json to_value
+  end
+module ExtractedCharactersListItem =
+  struct
+    type nonrec t =
+      {
+      page: Integer.t option [@ocaml.doc "Page number."];
+      count: Integer.t option
+        [@ocaml.doc "Number of characters extracted from each page."]}
+    let make ?page = fun ?count -> fun () -> { page; count }
+    let to_value x =
+      structure_to_value
+        [("Page", (Option.map x.page ~f:Integer.to_value));
+        ("Count", (Option.map x.count ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Count") in
+      let page = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Page") in
+      make ?count ?page ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let count = field_map json__ "Count" Integer.of_json in
+      let page = field_map json__ "Page" Integer.of_json in
+      make ?count ?page ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Array of the number of characters extracted from each page."]
+module BlockType =
+  struct
+    type nonrec t =
+      | LINE 
+      | WORD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | LINE -> "LINE" | WORD -> "WORD" | Non_static_id s -> s
+    let of_string =
+      function | "LINE" -> LINE | "WORD" -> WORD | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BlockType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BlockType" j)
+    let to_json = simple_to_json to_value
+  end
+module Geometry =
+  struct
+    type nonrec t =
+      {
+      boundingBox: BoundingBox.t option
+        [@ocaml.doc
+          "An axis-aligned coarse representation of the location of the recognized item on the document page."];
+      polygon: Polygon.t option
+        [@ocaml.doc
+          "Within the bounding box, a fine-grained polygon around the recognized item."]}
+    let make ?boundingBox =
+      fun ?polygon -> fun () -> { boundingBox; polygon }
+    let to_value x =
+      structure_to_value
+        [("BoundingBox", (Option.map x.boundingBox ~f:BoundingBox.to_value));
+        ("Polygon", (Option.map x.polygon ~f:Polygon.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let polygon =
+        (Option.map ~f:Polygon.of_xml) (Xml.child xml_arg0 "Polygon") in
+      let boundingBox =
+        (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
+      make ?polygon ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let polygon = field_map json__ "Polygon" Polygon.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      make ?polygon ?boundingBox ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the location of items on a document page. For additional information, see Geometry in the Amazon Textract API reference."]
+module ListOfRelationships =
+  struct
+    type nonrec t = RelationshipsListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RelationshipsListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RelationshipsListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfRelationships"
+        ~of_json:RelationshipsListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DocumentType =
+  struct
+    type nonrec t =
+      | NATIVE_PDF 
+      | SCANNED_PDF 
+      | MS_WORD 
+      | IMAGE 
+      | PLAIN_TEXT 
+      | TEXTRACT_DETECT_DOCUMENT_TEXT_JSON 
+      | TEXTRACT_ANALYZE_DOCUMENT_JSON 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NATIVE_PDF -> "NATIVE_PDF"
+      | SCANNED_PDF -> "SCANNED_PDF"
+      | MS_WORD -> "MS_WORD"
+      | IMAGE -> "IMAGE"
+      | PLAIN_TEXT -> "PLAIN_TEXT"
+      | TEXTRACT_DETECT_DOCUMENT_TEXT_JSON ->
+          "TEXTRACT_DETECT_DOCUMENT_TEXT_JSON"
+      | TEXTRACT_ANALYZE_DOCUMENT_JSON -> "TEXTRACT_ANALYZE_DOCUMENT_JSON"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NATIVE_PDF" -> NATIVE_PDF
+      | "SCANNED_PDF" -> SCANNED_PDF
+      | "MS_WORD" -> MS_WORD
+      | "IMAGE" -> IMAGE
+      | "PLAIN_TEXT" -> PLAIN_TEXT
+      | "TEXTRACT_DETECT_DOCUMENT_TEXT_JSON" ->
+          TEXTRACT_DETECT_DOCUMENT_TEXT_JSON
+      | "TEXTRACT_ANALYZE_DOCUMENT_JSON" -> TEXTRACT_ANALYZE_DOCUMENT_JSON
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DocumentType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DocumentType" j)
+    let to_json = simple_to_json to_value
+  end
+module PageBasedErrorCode =
+  struct
+    type nonrec t =
+      | TEXTRACT_BAD_PAGE 
+      | TEXTRACT_PROVISIONED_THROUGHPUT_EXCEEDED 
+      | PAGE_CHARACTERS_EXCEEDED 
+      | PAGE_SIZE_EXCEEDED 
+      | INTERNAL_SERVER_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TEXTRACT_BAD_PAGE -> "TEXTRACT_BAD_PAGE"
+      | TEXTRACT_PROVISIONED_THROUGHPUT_EXCEEDED ->
+          "TEXTRACT_PROVISIONED_THROUGHPUT_EXCEEDED"
+      | PAGE_CHARACTERS_EXCEEDED -> "PAGE_CHARACTERS_EXCEEDED"
+      | PAGE_SIZE_EXCEEDED -> "PAGE_SIZE_EXCEEDED"
+      | INTERNAL_SERVER_ERROR -> "INTERNAL_SERVER_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TEXTRACT_BAD_PAGE" -> TEXTRACT_BAD_PAGE
+      | "TEXTRACT_PROVISIONED_THROUGHPUT_EXCEEDED" ->
+          TEXTRACT_PROVISIONED_THROUGHPUT_EXCEEDED
+      | "PAGE_CHARACTERS_EXCEEDED" -> PAGE_CHARACTERS_EXCEEDED
+      | "PAGE_SIZE_EXCEEDED" -> PAGE_SIZE_EXCEEDED
+      | "INTERNAL_SERVER_ERROR" -> INTERNAL_SERVER_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PageBasedErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PageBasedErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
+module DatasetAugmentedManifestsListItem =
+  struct
+    type nonrec t =
+      {
+      attributeNames: AttributeNamesList.t
+        [@ocaml.doc
+          "The JSON attribute that contains the annotations for your training documents. The number of attribute names that you specify depends on whether your augmented manifest file is the output of a single labeling job or a chained labeling job. If your file is the output of a single labeling job, specify the LabelAttributeName key that was used when the job was created in Ground Truth. If your file is the output of a chained labeling job, specify the LabelAttributeName key for one or more jobs in the chain. Each LabelAttributeName key provides the annotations from an individual job."];
+      s3Uri: S3Uri.t
+        [@ocaml.doc "The Amazon S3 location of the augmented manifest file."];
+      annotationDataS3Uri: S3Uri.t option
+        [@ocaml.doc
+          "The S3 prefix to the annotation files that are referred in the augmented manifest file."];
+      sourceDocumentsS3Uri: S3Uri.t option
+        [@ocaml.doc
+          "The S3 prefix to the source files (PDFs) that are referred to in the augmented manifest file."];
+      documentType: AugmentedManifestsDocumentTypeFormat.t option
+        [@ocaml.doc
+          "The type of augmented manifest. If you don't specify, the default is PlainTextDocument. PLAIN_TEXT_DOCUMENT A document type that represents any unicode text that is encoded in UTF-8."]}
+    let context_ = "DatasetAugmentedManifestsListItem"
+    let make ?annotationDataS3Uri =
+      fun ?sourceDocumentsS3Uri ->
+        fun ?documentType ->
+          fun ~attributeNames ->
+            fun ~s3Uri ->
+              fun () ->
+                {
+                  annotationDataS3Uri;
+                  sourceDocumentsS3Uri;
+                  documentType;
+                  attributeNames;
+                  s3Uri
+                }
+    let to_value x =
+      structure_to_value
+        [("AttributeNames",
+           (Some (AttributeNamesList.to_value x.attributeNames)));
+        ("S3Uri", (Some (S3Uri.to_value x.s3Uri)));
+        ("AnnotationDataS3Uri",
+          (Option.map x.annotationDataS3Uri ~f:S3Uri.to_value));
+        ("SourceDocumentsS3Uri",
+          (Option.map x.sourceDocumentsS3Uri ~f:S3Uri.to_value));
+        ("DocumentType",
+          (Option.map x.documentType
+             ~f:AugmentedManifestsDocumentTypeFormat.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let documentType =
+        (Option.map ~f:AugmentedManifestsDocumentTypeFormat.of_xml)
+          (Xml.child xml_arg0 "DocumentType") in
+      let sourceDocumentsS3Uri =
+        (Option.map ~f:S3Uri.of_xml)
+          (Xml.child xml_arg0 "SourceDocumentsS3Uri") in
+      let annotationDataS3Uri =
+        (Option.map ~f:S3Uri.of_xml)
+          (Xml.child xml_arg0 "AnnotationDataS3Uri") in
+      let s3Uri =
+        S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
+      let attributeNames =
+        AttributeNamesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttributeNames") in
+      make ?documentType ?sourceDocumentsS3Uri ?annotationDataS3Uri ~s3Uri
+        ~attributeNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let documentType =
+        field_map json__ "DocumentType"
+          AugmentedManifestsDocumentTypeFormat.of_json in
+      let sourceDocumentsS3Uri =
+        field_map json__ "SourceDocumentsS3Uri" S3Uri.of_json in
+      let annotationDataS3Uri =
+        field_map json__ "AnnotationDataS3Uri" S3Uri.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
+      let attributeNames =
+        field_map_exn json__ "AttributeNames" AttributeNamesList.of_json in
+      make ?documentType ?sourceDocumentsS3Uri ?annotationDataS3Uri ~s3Uri
+        ~attributeNames ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An augmented manifest file that provides training data for your custom model. An augmented manifest file is a labeled dataset that is produced by Amazon SageMaker Ground Truth."]
+module DatasetEntityRecognizerAnnotations =
+  struct
+    type nonrec t =
+      {
+      s3Uri: S3Uri.t
+        [@ocaml.doc
+          "Specifies the Amazon S3 location where the training documents for an entity recognizer are located. The URI must be in the same Region as the API endpoint that you are calling."]}
+    let context_ = "DatasetEntityRecognizerAnnotations"
+    let make ~s3Uri = fun () -> { s3Uri }
+    let to_value x =
+      structure_to_value [("S3Uri", (Some (S3Uri.to_value x.s3Uri)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Uri =
+        S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
+      make ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
+      make ~s3Uri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the annotations associated with a entity recognizer."]
+module DatasetEntityRecognizerDocuments =
+  struct
+    type nonrec t =
+      {
+      s3Uri: S3Uri.t
+        [@ocaml.doc
+          "Specifies the Amazon S3 location where the documents for the dataset are located."];
+      inputFormat: InputFormat.t option
+        [@ocaml.doc
+          "Specifies how the text in an input file should be processed. This is optional, and the default is ONE_DOC_PER_LINE. ONE_DOC_PER_FILE - Each file is considered a separate document. Use this option when you are processing large documents, such as newspaper articles or scientific papers. ONE_DOC_PER_LINE - Each line in a file is considered a separate document. Use this option when you are processing many short documents, such as text messages."]}
+    let context_ = "DatasetEntityRecognizerDocuments"
+    let make ?inputFormat = fun ~s3Uri -> fun () -> { inputFormat; s3Uri }
+    let to_value x =
+      structure_to_value
+        [("S3Uri", (Some (S3Uri.to_value x.s3Uri)));
+        ("InputFormat", (Option.map x.inputFormat ~f:InputFormat.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let inputFormat =
+        (Option.map ~f:InputFormat.of_xml) (Xml.child xml_arg0 "InputFormat") in
+      let s3Uri =
+        S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
+      make ?inputFormat ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inputFormat = field_map json__ "InputFormat" InputFormat.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
+      make ?inputFormat ~s3Uri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the documents submitted with a dataset for an entity recognizer model."]
+module DatasetEntityRecognizerEntityList =
+  struct
+    type nonrec t =
+      {
+      s3Uri: S3Uri.t
+        [@ocaml.doc
+          "Specifies the Amazon S3 location where the entity list is located."]}
+    let context_ = "DatasetEntityRecognizerEntityList"
+    let make ~s3Uri = fun () -> { s3Uri }
+    let to_value x =
+      structure_to_value [("S3Uri", (Some (S3Uri.to_value x.s3Uri)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Uri =
+        S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
+      make ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
+      make ~s3Uri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the dataset entity list for an entity recognizer model. For more information on how the input file is formatted, see Preparing training data in the Comprehend Developer Guide."]
+module PageBasedWarningCode =
+  struct
+    type nonrec t =
+      | INFERENCING_PLAINTEXT_WITH_NATIVE_TRAINED_MODEL 
+      | INFERENCING_NATIVE_DOCUMENT_WITH_PLAINTEXT_TRAINED_MODEL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INFERENCING_PLAINTEXT_WITH_NATIVE_TRAINED_MODEL ->
+          "INFERENCING_PLAINTEXT_WITH_NATIVE_TRAINED_MODEL"
+      | INFERENCING_NATIVE_DOCUMENT_WITH_PLAINTEXT_TRAINED_MODEL ->
+          "INFERENCING_NATIVE_DOCUMENT_WITH_PLAINTEXT_TRAINED_MODEL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INFERENCING_PLAINTEXT_WITH_NATIVE_TRAINED_MODEL" ->
+          INFERENCING_PLAINTEXT_WITH_NATIVE_TRAINED_MODEL
+      | "INFERENCING_NATIVE_DOCUMENT_WITH_PLAINTEXT_TRAINED_MODEL" ->
+          INFERENCING_NATIVE_DOCUMENT_WITH_PLAINTEXT_TRAINED_MODEL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PageBasedWarningCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PageBasedWarningCode" j)
+    let to_json = simple_to_json to_value
+  end
+module ListOfTargetedSentimentEntities =
+  struct
+    type nonrec t = TargetedSentimentEntity.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetedSentimentEntity.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TargetedSentimentEntity.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfTargetedSentimentEntities"
+        ~of_json:TargetedSentimentEntity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ListOfSyntaxTokens =
   struct
     type nonrec t = SyntaxToken.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SyntaxToken.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2686,87 +4525,13 @@ module ListOfSyntaxTokens =
       list_of_json ~kind:"ListOfSyntaxTokens" ~of_json:SyntaxToken.of_json j
     let to_json v = composed_to_json to_value v
   end
-module SentimentScore =
-  struct
-    type nonrec t =
-      {
-      positive: Float.t option
-        [@ocaml.doc
-          "The level of confidence that Amazon Comprehend has in the accuracy of its detection of the POSITIVE sentiment."];
-      negative: Float.t option
-        [@ocaml.doc
-          "The level of confidence that Amazon Comprehend has in the accuracy of its detection of the NEGATIVE sentiment."];
-      neutral: Float.t option
-        [@ocaml.doc
-          "The level of confidence that Amazon Comprehend has in the accuracy of its detection of the NEUTRAL sentiment."];
-      mixed: Float.t option
-        [@ocaml.doc
-          "The level of confidence that Amazon Comprehend has in the accuracy of its detection of the MIXED sentiment."]}
-    let make ?positive =
-      fun ?negative ->
-        fun ?neutral ->
-          fun ?mixed -> fun () -> { positive; negative; neutral; mixed }
-    let to_value x =
-      structure_to_value
-        [("Positive", (Option.map x.positive ~f:Float.to_value));
-        ("Negative", (Option.map x.negative ~f:Float.to_value));
-        ("Neutral", (Option.map x.neutral ~f:Float.to_value));
-        ("Mixed", (Option.map x.mixed ~f:Float.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let mixed = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Mixed") in
-      let neutral =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Neutral") in
-      let negative =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Negative") in
-      let positive =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Positive") in
-      make ?mixed ?neutral ?negative ?positive ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mixed = field_map json "Mixed" Float.of_json in
-      let neutral = field_map json "Neutral" Float.of_json in
-      let negative = field_map json "Negative" Float.of_json in
-      let positive = field_map json "Positive" Float.of_json in
-      make ?mixed ?neutral ?negative ?positive ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes the level of confidence that Amazon Comprehend has in the accuracy of its detection of sentiments."]
-module SentimentType =
-  struct
-    type nonrec t =
-      | POSITIVE 
-      | NEGATIVE 
-      | NEUTRAL 
-      | MIXED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | POSITIVE -> "POSITIVE"
-      | NEGATIVE -> "NEGATIVE"
-      | NEUTRAL -> "NEUTRAL"
-      | MIXED -> "MIXED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "POSITIVE" -> POSITIVE
-      | "NEGATIVE" -> NEGATIVE
-      | "NEUTRAL" -> NEUTRAL
-      | "MIXED" -> MIXED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration SentimentType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"SentimentType" j)
-    let to_json = simple_to_json to_value
-  end
 module ListOfKeyPhrases =
   struct
     type nonrec t = KeyPhrase.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyPhrase.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2791,6 +4556,9 @@ module ListOfEntities =
   struct
     type nonrec t = Entity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Entity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2815,6 +4583,9 @@ module ListOfDominantLanguages =
   struct
     type nonrec t = DominantLanguage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DominantLanguage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2835,6 +4606,164 @@ module ListOfDominantLanguages =
       list_of_json ~kind:"ListOfDominantLanguages"
         ~of_json:DominantLanguage.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module DataSecurityConfig =
+  struct
+    type nonrec t =
+      {
+      modelKmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "ID for the KMS key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+      volumeKmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "ID for the KMS key that Amazon Comprehend uses to encrypt the volume."];
+      dataLakeKmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "ID for the KMS key that Amazon Comprehend uses to encrypt the data in the data lake."];
+      vpcConfig: VpcConfig.t option }
+    let make ?modelKmsKeyId =
+      fun ?volumeKmsKeyId ->
+        fun ?dataLakeKmsKeyId ->
+          fun ?vpcConfig ->
+            fun () ->
+              { modelKmsKeyId; volumeKmsKeyId; dataLakeKmsKeyId; vpcConfig }
+    let to_value x =
+      structure_to_value
+        [("ModelKmsKeyId", (Option.map x.modelKmsKeyId ~f:KmsKeyId.to_value));
+        ("VolumeKmsKeyId",
+          (Option.map x.volumeKmsKeyId ~f:KmsKeyId.to_value));
+        ("DataLakeKmsKeyId",
+          (Option.map x.dataLakeKmsKeyId ~f:KmsKeyId.to_value));
+        ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConfig =
+        (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "VpcConfig") in
+      let dataLakeKmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml)
+          (Xml.child xml_arg0 "DataLakeKmsKeyId") in
+      let volumeKmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "VolumeKmsKeyId") in
+      let modelKmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "ModelKmsKeyId") in
+      make ?vpcConfig ?dataLakeKmsKeyId ?volumeKmsKeyId ?modelKmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let dataLakeKmsKeyId =
+        field_map json__ "DataLakeKmsKeyId" KmsKeyId.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
+      let modelKmsKeyId = field_map json__ "ModelKmsKeyId" KmsKeyId.of_json in
+      make ?vpcConfig ?dataLakeKmsKeyId ?volumeKmsKeyId ?modelKmsKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Data security configuration."]
+module TaskConfig =
+  struct
+    type nonrec t =
+      {
+      languageCode: LanguageCode.t
+        [@ocaml.doc
+          "Language code for the language that the model supports."];
+      documentClassificationConfig: DocumentClassificationConfig.t option
+        [@ocaml.doc
+          "Configuration required for a document classification model."];
+      entityRecognitionConfig: EntityRecognitionConfig.t option
+        [@ocaml.doc
+          "Configuration required for an entity recognition model."]}
+    let context_ = "TaskConfig"
+    let make ?documentClassificationConfig =
+      fun ?entityRecognitionConfig ->
+        fun ~languageCode ->
+          fun () ->
+            {
+              documentClassificationConfig;
+              entityRecognitionConfig;
+              languageCode
+            }
+    let to_value x =
+      structure_to_value
+        [("LanguageCode", (Some (LanguageCode.to_value x.languageCode)));
+        ("DocumentClassificationConfig",
+          (Option.map x.documentClassificationConfig
+             ~f:DocumentClassificationConfig.to_value));
+        ("EntityRecognitionConfig",
+          (Option.map x.entityRecognitionConfig
+             ~f:EntityRecognitionConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entityRecognitionConfig =
+        (Option.map ~f:EntityRecognitionConfig.of_xml)
+          (Xml.child xml_arg0 "EntityRecognitionConfig") in
+      let documentClassificationConfig =
+        (Option.map ~f:DocumentClassificationConfig.of_xml)
+          (Xml.child xml_arg0 "DocumentClassificationConfig") in
+      let languageCode =
+        LanguageCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LanguageCode") in
+      make ?entityRecognitionConfig ?documentClassificationConfig
+        ~languageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entityRecognitionConfig =
+        field_map json__ "EntityRecognitionConfig"
+          EntityRecognitionConfig.of_json in
+      let documentClassificationConfig =
+        field_map json__ "DocumentClassificationConfig"
+          DocumentClassificationConfig.of_json in
+      let languageCode =
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      make ?entityRecognitionConfig ?documentClassificationConfig
+        ~languageCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration about the model associated with a flywheel."]
+module InvalidRequestDetail =
+  struct
+    type nonrec t =
+      {
+      reason: InvalidRequestDetailReason.t option
+        [@ocaml.doc
+          "Reason codes include the following values: DOCUMENT_SIZE_EXCEEDED - Document size is too large. Check the size of your file and resubmit the request. UNSUPPORTED_DOC_TYPE - Document type is not supported. Check the file type and resubmit the request. PAGE_LIMIT_EXCEEDED - Too many pages in the document. Check the number of pages in your file and resubmit the request. TEXTRACT_ACCESS_DENIED - Access denied to Amazon Textract. Verify that your account has permission to use Amazon Textract API operations and resubmit the request. NOT_TEXTRACT_JSON - Document is not Amazon Textract JSON format. Verify the format and resubmit the request. MISMATCHED_TOTAL_PAGE_COUNT - Check the number of pages in your file and resubmit the request. INVALID_DOCUMENT - Invalid document. Check the file and resubmit the request."]}
+    let make ?reason = fun () -> { reason }
+    let to_value x =
+      structure_to_value
+        [("Reason",
+           (Option.map x.reason ~f:InvalidRequestDetailReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:InvalidRequestDetailReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      make ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason =
+        field_map json__ "Reason" InvalidRequestDetailReason.of_json in
+      make ?reason ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides additional detail about why the request failed."]
+module InvalidRequestReason =
+  struct
+    type nonrec t =
+      | INVALID_DOCUMENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INVALID_DOCUMENT -> "INVALID_DOCUMENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INVALID_DOCUMENT" -> INVALID_DOCUMENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InvalidRequestReason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InvalidRequestReason" j)
+    let to_json = simple_to_json to_value
   end
 module Tag =
   struct
@@ -2860,9 +4789,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2875,7 +4804,7 @@ module TopicsDetectionJobProperties =
         [@ocaml.doc "The identifier assigned to the topic detection job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the topics detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:topics-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:topics-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the topics detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:topics-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:topics-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobName: JobName.t option
         [@ocaml.doc "The name of the topic detection job."];
       jobStatus: JobStatus.t option
@@ -2899,10 +4828,10 @@ module TopicsDetectionJobProperties =
           "The number of topics to detect supplied when you created the topic detection job. The default is 10."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Management (IAM) role that grants Amazon Comprehend read access to your job data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your job data."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your topic detection job. For more information, see Amazon VPC."]}
@@ -2988,23 +4917,23 @@ module TopicsDetectionJobProperties =
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let numberOfTopics = field_map json "NumberOfTopics" Integer.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let numberOfTopics = field_map json__ "NumberOfTopics" Integer.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?numberOfTopics
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
@@ -3019,7 +4948,7 @@ module TargetedSentimentDetectionJobProperties =
           "The identifier assigned to the targeted sentiment detection job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the targeted sentiment detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:targeted-sentiment-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:targeted-sentiment-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the targeted sentiment detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:targeted-sentiment-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:targeted-sentiment-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobName: JobName.t option
         [@ocaml.doc
           "The name that you assigned to the targeted sentiment detection job."];
@@ -3040,10 +4969,10 @@ module TargetedSentimentDetectionJobProperties =
         [@ocaml.doc "The language code of the input documents."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the targeted sentiment detection job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the KMS key that Amazon Comprehend uses to encrypt the data on the storage volume attached to the ML compute instance(s) that process the targeted sentiment detection job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option }
     let make ?jobId =
       fun ?jobArn ->
@@ -3129,23 +5058,23 @@ module TargetedSentimentDetectionJobProperties =
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?languageCode
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
@@ -3161,7 +5090,7 @@ module SentimentDetectionJobProperties =
           "The identifier assigned to the sentiment detection job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the sentiment detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:sentiment-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:sentiment-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the sentiment detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:sentiment-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:sentiment-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobName: JobName.t option
         [@ocaml.doc
           "The name that you assigned to the sentiment detection job"];
@@ -3185,10 +5114,10 @@ module SentimentDetectionJobProperties =
         [@ocaml.doc "The language code of the input documents."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your sentiment detection job. For more information, see Amazon VPC."]}
@@ -3276,23 +5205,23 @@ module SentimentDetectionJobProperties =
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?languageCode
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
@@ -3307,7 +5236,7 @@ module PiiEntitiesDetectionJobProperties =
           "The identifier assigned to the PII entities detection job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the PII entities detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:pii-entities-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:pii-entities-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the PII entities detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:pii-entities-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:pii-entities-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobName: JobName.t option
         [@ocaml.doc
           "The name that you assigned the PII entities detection job."];
@@ -3331,10 +5260,10 @@ module PiiEntitiesDetectionJobProperties =
         [@ocaml.doc
           "Provides configuration parameters for PII entity redaction. This parameter is required if you set the Mode parameter to ONLY_REDACTION. In that case, you must provide a RedactionConfig definition that includes the PiiEntityTypes parameter."];
       languageCode: LanguageCode.t option
-        [@ocaml.doc "The language code of the input documents"];
+        [@ocaml.doc "The language code of the input documents."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       mode: PiiEntitiesDetectionMode.t option
         [@ocaml.doc
           "Specifies whether the output provides the locations (offsets) of PII entities or a file in which PII entities are redacted."]}
@@ -3424,24 +5353,24 @@ module PiiEntitiesDetectionJobProperties =
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mode = field_map json "Mode" PiiEntitiesDetectionMode.of_json in
+    let of_json json__ =
+      let mode = field_map json__ "Mode" PiiEntitiesDetectionMode.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let redactionConfig =
-        field_map json "RedactionConfig" RedactionConfig.of_json in
+        field_map json__ "RedactionConfig" RedactionConfig.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" PiiOutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" PiiOutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?mode ?dataAccessRoleArn ?languageCode ?redactionConfig
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
@@ -3456,7 +5385,7 @@ module KeyPhrasesDetectionJobProperties =
           "The identifier assigned to the key phrases detection job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the key phrases detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:key-phrases-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:key-phrases-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the key phrases detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:key-phrases-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:key-phrases-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobName: JobName.t option
         [@ocaml.doc
           "The name that you assigned the key phrases detection job."];
@@ -3480,10 +5409,10 @@ module KeyPhrasesDetectionJobProperties =
         [@ocaml.doc "The language code of the input documents."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the KMS key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your key phrases detection job. For more information, see Amazon VPC."]}
@@ -3571,28 +5500,266 @@ module KeyPhrasesDetectionJobProperties =
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?languageCode
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about a key phrases detection job."]
+module FlywheelSummary =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel"];
+      activeModelArn: ComprehendModelArn.t option
+        [@ocaml.doc "ARN of the active model version for the flywheel."];
+      dataLakeS3Uri: S3Uri.t option
+        [@ocaml.doc "Amazon S3 URI of the data lake location."];
+      status: FlywheelStatus.t option
+        [@ocaml.doc "The status of the flywheel."];
+      modelType: ModelType.t option
+        [@ocaml.doc "Model type of the flywheel's model."];
+      message: AnyLengthString.t option
+        [@ocaml.doc "A description of the status of the flywheel."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "Creation time of the flywheel."];
+      lastModifiedTime: Timestamp.t option
+        [@ocaml.doc "Last modified time for the flywheel."];
+      latestFlywheelIteration: FlywheelIterationId.t option
+        [@ocaml.doc "The most recent flywheel iteration."]}
+    let make ?flywheelArn =
+      fun ?activeModelArn ->
+        fun ?dataLakeS3Uri ->
+          fun ?status ->
+            fun ?modelType ->
+              fun ?message ->
+                fun ?creationTime ->
+                  fun ?lastModifiedTime ->
+                    fun ?latestFlywheelIteration ->
+                      fun () ->
+                        {
+                          flywheelArn;
+                          activeModelArn;
+                          dataLakeS3Uri;
+                          status;
+                          modelType;
+                          message;
+                          creationTime;
+                          lastModifiedTime;
+                          latestFlywheelIteration
+                        }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value));
+        ("ActiveModelArn",
+          (Option.map x.activeModelArn ~f:ComprehendModelArn.to_value));
+        ("DataLakeS3Uri", (Option.map x.dataLakeS3Uri ~f:S3Uri.to_value));
+        ("Status", (Option.map x.status ~f:FlywheelStatus.to_value));
+        ("ModelType", (Option.map x.modelType ~f:ModelType.to_value));
+        ("Message", (Option.map x.message ~f:AnyLengthString.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value));
+        ("LatestFlywheelIteration",
+          (Option.map x.latestFlywheelIteration
+             ~f:FlywheelIterationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestFlywheelIteration =
+        (Option.map ~f:FlywheelIterationId.of_xml)
+          (Xml.child xml_arg0 "LatestFlywheelIteration") in
+      let lastModifiedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let message =
+        (Option.map ~f:AnyLengthString.of_xml) (Xml.child xml_arg0 "Message") in
+      let modelType =
+        (Option.map ~f:ModelType.of_xml) (Xml.child xml_arg0 "ModelType") in
+      let status =
+        (Option.map ~f:FlywheelStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let dataLakeS3Uri =
+        (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "DataLakeS3Uri") in
+      let activeModelArn =
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "ActiveModelArn") in
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
+      make ?latestFlywheelIteration ?lastModifiedTime ?creationTime ?message
+        ?modelType ?status ?dataLakeS3Uri ?activeModelArn ?flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestFlywheelIteration =
+        field_map json__ "LatestFlywheelIteration"
+          FlywheelIterationId.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let modelType = field_map json__ "ModelType" ModelType.of_json in
+      let status = field_map json__ "Status" FlywheelStatus.of_json in
+      let dataLakeS3Uri = field_map json__ "DataLakeS3Uri" S3Uri.of_json in
+      let activeModelArn =
+        field_map json__ "ActiveModelArn" ComprehendModelArn.of_json in
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?latestFlywheelIteration ?lastModifiedTime ?creationTime ?message
+        ?modelType ?status ?dataLakeS3Uri ?activeModelArn ?flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Flywheel summary information."]
+module FlywheelIterationProperties =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t option ;
+      flywheelIterationId: FlywheelIterationId.t option ;
+      creationTime: Timestamp.t option
+        [@ocaml.doc "The creation start time of the flywheel iteration."];
+      endTime: Timestamp.t option
+        [@ocaml.doc "The completion time of this flywheel iteration."];
+      status: FlywheelIterationStatus.t option
+        [@ocaml.doc "The status of the flywheel iteration."];
+      message: AnyLengthString.t option
+        [@ocaml.doc "A description of the status of the flywheel iteration."];
+      evaluatedModelArn: ComprehendModelArn.t option
+        [@ocaml.doc
+          "The ARN of the evaluated model associated with this flywheel iteration."];
+      evaluatedModelMetrics: FlywheelModelEvaluationMetrics.t option ;
+      trainedModelArn: ComprehendModelArn.t option
+        [@ocaml.doc
+          "The ARN of the trained model associated with this flywheel iteration."];
+      trainedModelMetrics: FlywheelModelEvaluationMetrics.t option
+        [@ocaml.doc "The metrics associated with the trained model."];
+      evaluationManifestS3Prefix: S3Uri.t option }
+    let make ?flywheelArn =
+      fun ?flywheelIterationId ->
+        fun ?creationTime ->
+          fun ?endTime ->
+            fun ?status ->
+              fun ?message ->
+                fun ?evaluatedModelArn ->
+                  fun ?evaluatedModelMetrics ->
+                    fun ?trainedModelArn ->
+                      fun ?trainedModelMetrics ->
+                        fun ?evaluationManifestS3Prefix ->
+                          fun () ->
+                            {
+                              flywheelArn;
+                              flywheelIterationId;
+                              creationTime;
+                              endTime;
+                              status;
+                              message;
+                              evaluatedModelArn;
+                              evaluatedModelMetrics;
+                              trainedModelArn;
+                              trainedModelMetrics;
+                              evaluationManifestS3Prefix
+                            }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value));
+        ("FlywheelIterationId",
+          (Option.map x.flywheelIterationId ~f:FlywheelIterationId.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("Status", (Option.map x.status ~f:FlywheelIterationStatus.to_value));
+        ("Message", (Option.map x.message ~f:AnyLengthString.to_value));
+        ("EvaluatedModelArn",
+          (Option.map x.evaluatedModelArn ~f:ComprehendModelArn.to_value));
+        ("EvaluatedModelMetrics",
+          (Option.map x.evaluatedModelMetrics
+             ~f:FlywheelModelEvaluationMetrics.to_value));
+        ("TrainedModelArn",
+          (Option.map x.trainedModelArn ~f:ComprehendModelArn.to_value));
+        ("TrainedModelMetrics",
+          (Option.map x.trainedModelMetrics
+             ~f:FlywheelModelEvaluationMetrics.to_value));
+        ("EvaluationManifestS3Prefix",
+          (Option.map x.evaluationManifestS3Prefix ~f:S3Uri.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let evaluationManifestS3Prefix =
+        (Option.map ~f:S3Uri.of_xml)
+          (Xml.child xml_arg0 "EvaluationManifestS3Prefix") in
+      let trainedModelMetrics =
+        (Option.map ~f:FlywheelModelEvaluationMetrics.of_xml)
+          (Xml.child xml_arg0 "TrainedModelMetrics") in
+      let trainedModelArn =
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "TrainedModelArn") in
+      let evaluatedModelMetrics =
+        (Option.map ~f:FlywheelModelEvaluationMetrics.of_xml)
+          (Xml.child xml_arg0 "EvaluatedModelMetrics") in
+      let evaluatedModelArn =
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "EvaluatedModelArn") in
+      let message =
+        (Option.map ~f:AnyLengthString.of_xml) (Xml.child xml_arg0 "Message") in
+      let status =
+        (Option.map ~f:FlywheelIterationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let flywheelIterationId =
+        (Option.map ~f:FlywheelIterationId.of_xml)
+          (Xml.child xml_arg0 "FlywheelIterationId") in
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
+      make ?evaluationManifestS3Prefix ?trainedModelMetrics ?trainedModelArn
+        ?evaluatedModelMetrics ?evaluatedModelArn ?message ?status ?endTime
+        ?creationTime ?flywheelIterationId ?flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let evaluationManifestS3Prefix =
+        field_map json__ "EvaluationManifestS3Prefix" S3Uri.of_json in
+      let trainedModelMetrics =
+        field_map json__ "TrainedModelMetrics"
+          FlywheelModelEvaluationMetrics.of_json in
+      let trainedModelArn =
+        field_map json__ "TrainedModelArn" ComprehendModelArn.of_json in
+      let evaluatedModelMetrics =
+        field_map json__ "EvaluatedModelMetrics"
+          FlywheelModelEvaluationMetrics.of_json in
+      let evaluatedModelArn =
+        field_map json__ "EvaluatedModelArn" ComprehendModelArn.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let status = field_map json__ "Status" FlywheelIterationStatus.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let flywheelIterationId =
+        field_map json__ "FlywheelIterationId" FlywheelIterationId.of_json in
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?evaluationManifestS3Prefix ?trainedModelMetrics ?trainedModelArn
+        ?evaluatedModelMetrics ?evaluatedModelArn ?message ?status ?endTime
+        ?creationTime ?flywheelIterationId ?flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration properties of a flywheel iteration."]
 module EventsDetectionJobProperties =
   struct
     type nonrec t =
@@ -3601,7 +5768,7 @@ module EventsDetectionJobProperties =
         [@ocaml.doc "The identifier assigned to the events detection job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the events detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:events-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:events-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the events detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:events-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:events-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobName: JobName.t option
         [@ocaml.doc "The name you assigned the events detection job."];
       jobStatus: JobStatus.t option
@@ -3624,7 +5791,7 @@ module EventsDetectionJobProperties =
         [@ocaml.doc "The language code of the input documents."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identify and Access Management (IAM) role that grants Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       targetEventTypes: TargetEventTypes.t option
         [@ocaml.doc "The types of events that are detected by the job."]}
     let make ?jobId =
@@ -3707,23 +5874,23 @@ module EventsDetectionJobProperties =
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetEventTypes =
-        field_map json "TargetEventTypes" TargetEventTypes.of_json in
+        field_map json__ "TargetEventTypes" TargetEventTypes.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?targetEventTypes ?dataAccessRoleArn ?languageCode
         ?outputDataConfig ?inputDataConfig ?endTime ?submitTime ?message
         ?jobStatus ?jobName ?jobArn ?jobId ()
@@ -3760,22 +5927,26 @@ module EntityRecognizerProperties =
         [@ocaml.doc "Provides information about an entity recognizer."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Management (IAM) role that grants Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your custom entity recognizer. For more information, see Amazon VPC."];
       modelKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the KMS key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       versionName: VersionName.t option
         [@ocaml.doc
           "The version name you assigned to the entity recognizer."];
       sourceModelArn: EntityRecognizerArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the source model. This model was imported from a different AWS account to create the entity recognizer model in your AWS account."]}
+          "The Amazon Resource Name (ARN) of the source model. This model was imported from a different Amazon Web Services account to create the entity recognizer model in your Amazon Web Services account."];
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel"];
+      outputDataConfig: EntityRecognizerOutputDataConfig.t option
+        [@ocaml.doc "Output data configuration."]}
     let make ?entityRecognizerArn =
       fun ?languageCode ->
         fun ?status ->
@@ -3792,25 +5963,29 @@ module EntityRecognizerProperties =
                               fun ?modelKmsKeyId ->
                                 fun ?versionName ->
                                   fun ?sourceModelArn ->
-                                    fun () ->
-                                      {
-                                        entityRecognizerArn;
-                                        languageCode;
-                                        status;
-                                        message;
-                                        submitTime;
-                                        endTime;
-                                        trainingStartTime;
-                                        trainingEndTime;
-                                        inputDataConfig;
-                                        recognizerMetadata;
-                                        dataAccessRoleArn;
-                                        volumeKmsKeyId;
-                                        vpcConfig;
-                                        modelKmsKeyId;
-                                        versionName;
-                                        sourceModelArn
-                                      }
+                                    fun ?flywheelArn ->
+                                      fun ?outputDataConfig ->
+                                        fun () ->
+                                          {
+                                            entityRecognizerArn;
+                                            languageCode;
+                                            status;
+                                            message;
+                                            submitTime;
+                                            endTime;
+                                            trainingStartTime;
+                                            trainingEndTime;
+                                            inputDataConfig;
+                                            recognizerMetadata;
+                                            dataAccessRoleArn;
+                                            volumeKmsKeyId;
+                                            vpcConfig;
+                                            modelKmsKeyId;
+                                            versionName;
+                                            sourceModelArn;
+                                            flywheelArn;
+                                            outputDataConfig
+                                          }
     let to_value x =
       structure_to_value
         [("EntityRecognizerArn",
@@ -3839,9 +6014,20 @@ module EntityRecognizerProperties =
         ("ModelKmsKeyId", (Option.map x.modelKmsKeyId ~f:KmsKeyId.to_value));
         ("VersionName", (Option.map x.versionName ~f:VersionName.to_value));
         ("SourceModelArn",
-          (Option.map x.sourceModelArn ~f:EntityRecognizerArn.to_value))]
+          (Option.map x.sourceModelArn ~f:EntityRecognizerArn.to_value));
+        ("FlywheelArn",
+          (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value));
+        ("OutputDataConfig",
+          (Option.map x.outputDataConfig
+             ~f:EntityRecognizerOutputDataConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let outputDataConfig =
+        (Option.map ~f:EntityRecognizerOutputDataConfig.of_xml)
+          (Xml.child xml_arg0 "OutputDataConfig") in
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
       let sourceModelArn =
         (Option.map ~f:EntityRecognizerArn.of_xml)
           (Xml.child xml_arg0 "SourceModelArn") in
@@ -3882,40 +6068,48 @@ module EntityRecognizerProperties =
       let entityRecognizerArn =
         (Option.map ~f:EntityRecognizerArn.of_xml)
           (Xml.child xml_arg0 "EntityRecognizerArn") in
-      make ?sourceModelArn ?versionName ?modelKmsKeyId ?vpcConfig
-        ?volumeKmsKeyId ?dataAccessRoleArn ?recognizerMetadata
-        ?inputDataConfig ?trainingEndTime ?trainingStartTime ?endTime
-        ?submitTime ?message ?status ?languageCode ?entityRecognizerArn ()
+      make ?outputDataConfig ?flywheelArn ?sourceModelArn ?versionName
+        ?modelKmsKeyId ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn
+        ?recognizerMetadata ?inputDataConfig ?trainingEndTime
+        ?trainingStartTime ?endTime ?submitTime ?message ?status
+        ?languageCode ?entityRecognizerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let outputDataConfig =
+        field_map json__ "OutputDataConfig"
+          EntityRecognizerOutputDataConfig.of_json in
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
       let sourceModelArn =
-        field_map json "SourceModelArn" EntityRecognizerArn.of_json in
-      let versionName = field_map json "VersionName" VersionName.of_json in
-      let modelKmsKeyId = field_map json "ModelKmsKeyId" KmsKeyId.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+        field_map json__ "SourceModelArn" EntityRecognizerArn.of_json in
+      let versionName = field_map json__ "VersionName" VersionName.of_json in
+      let modelKmsKeyId = field_map json__ "ModelKmsKeyId" KmsKeyId.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let recognizerMetadata =
-        field_map json "RecognizerMetadata" EntityRecognizerMetadata.of_json in
+        field_map json__ "RecognizerMetadata"
+          EntityRecognizerMetadata.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig"
+        field_map json__ "InputDataConfig"
           EntityRecognizerInputDataConfig.of_json in
       let trainingEndTime =
-        field_map json "TrainingEndTime" Timestamp.of_json in
+        field_map json__ "TrainingEndTime" Timestamp.of_json in
       let trainingStartTime =
-        field_map json "TrainingStartTime" Timestamp.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let status = field_map json "Status" ModelStatus.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "TrainingStartTime" Timestamp.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let status = field_map json__ "Status" ModelStatus.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let entityRecognizerArn =
-        field_map json "EntityRecognizerArn" EntityRecognizerArn.of_json in
-      make ?sourceModelArn ?versionName ?modelKmsKeyId ?vpcConfig
-        ?volumeKmsKeyId ?dataAccessRoleArn ?recognizerMetadata
-        ?inputDataConfig ?trainingEndTime ?trainingStartTime ?endTime
-        ?submitTime ?message ?status ?languageCode ?entityRecognizerArn ()
+        field_map json__ "EntityRecognizerArn" EntityRecognizerArn.of_json in
+      make ?outputDataConfig ?flywheelArn ?sourceModelArn ?versionName
+        ?modelKmsKeyId ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn
+        ?recognizerMetadata ?inputDataConfig ?trainingEndTime
+        ?trainingStartTime ?endTime ?submitTime ?message ?status
+        ?languageCode ?entityRecognizerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes information about an entity recognizer."]
 module EntityRecognizerSummary =
@@ -3980,17 +6174,17 @@ module EntityRecognizerSummary =
       make ?latestVersionStatus ?latestVersionName ?latestVersionCreatedAt
         ?numberOfVersions ?recognizerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestVersionStatus =
-        field_map json "LatestVersionStatus" ModelStatus.of_json in
+        field_map json__ "LatestVersionStatus" ModelStatus.of_json in
       let latestVersionName =
-        field_map json "LatestVersionName" VersionName.of_json in
+        field_map json__ "LatestVersionName" VersionName.of_json in
       let latestVersionCreatedAt =
-        field_map json "LatestVersionCreatedAt" Timestamp.of_json in
+        field_map json__ "LatestVersionCreatedAt" Timestamp.of_json in
       let numberOfVersions =
-        field_map json "NumberOfVersions" Integer.of_json in
+        field_map json__ "NumberOfVersions" Integer.of_json in
       let recognizerName =
-        field_map json "RecognizerName" ComprehendArnName.of_json in
+        field_map json__ "RecognizerName" ComprehendArnName.of_json in
       make ?latestVersionStatus ?latestVersionName ?latestVersionCreatedAt
         ?numberOfVersions ?recognizerName ()
     let to_json v = composed_to_json to_value v
@@ -4004,7 +6198,7 @@ module EntitiesDetectionJobProperties =
         [@ocaml.doc "The identifier assigned to the entities detection job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the entities detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:entities-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:entities-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the entities detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:entities-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:entities-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobName: JobName.t option
         [@ocaml.doc "The name that you assigned the entities detection job."];
       jobStatus: JobStatus.t option
@@ -4030,13 +6224,16 @@ module EntitiesDetectionJobProperties =
         [@ocaml.doc "The language code of the input documents."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
-          "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your entity detection job. For more information, see Amazon VPC."]}
+          "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your entity detection job. For more information, see Amazon VPC."];
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the flywheel associated with this job."]}
     let make ?jobId =
       fun ?jobArn ->
         fun ?jobName ->
@@ -4051,23 +6248,25 @@ module EntitiesDetectionJobProperties =
                           fun ?dataAccessRoleArn ->
                             fun ?volumeKmsKeyId ->
                               fun ?vpcConfig ->
-                                fun () ->
-                                  {
-                                    jobId;
-                                    jobArn;
-                                    jobName;
-                                    jobStatus;
-                                    message;
-                                    submitTime;
-                                    endTime;
-                                    entityRecognizerArn;
-                                    inputDataConfig;
-                                    outputDataConfig;
-                                    languageCode;
-                                    dataAccessRoleArn;
-                                    volumeKmsKeyId;
-                                    vpcConfig
-                                  }
+                                fun ?flywheelArn ->
+                                  fun () ->
+                                    {
+                                      jobId;
+                                      jobArn;
+                                      jobName;
+                                      jobStatus;
+                                      message;
+                                      submitTime;
+                                      endTime;
+                                      entityRecognizerArn;
+                                      inputDataConfig;
+                                      outputDataConfig;
+                                      languageCode;
+                                      dataAccessRoleArn;
+                                      volumeKmsKeyId;
+                                      vpcConfig;
+                                      flywheelArn
+                                    }
     let to_value x =
       structure_to_value
         [("JobId", (Option.map x.jobId ~f:JobId.to_value));
@@ -4089,9 +6288,14 @@ module EntitiesDetectionJobProperties =
           (Option.map x.dataAccessRoleArn ~f:IamRoleArn.to_value));
         ("VolumeKmsKeyId",
           (Option.map x.volumeKmsKeyId ~f:KmsKeyId.to_value));
-        ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value))]
+        ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value));
+        ("FlywheelArn",
+          (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
       let vpcConfig =
         (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "VpcConfig") in
       let volumeKmsKeyId =
@@ -4124,32 +6328,34 @@ module EntitiesDetectionJobProperties =
       let jobArn =
         (Option.map ~f:ComprehendArn.of_xml) (Xml.child xml_arg0 "JobArn") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
-      make ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?languageCode
-        ?outputDataConfig ?inputDataConfig ?entityRecognizerArn ?endTime
-        ?submitTime ?message ?jobStatus ?jobName ?jobArn ?jobId ()
+      make ?flywheelArn ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn
+        ?languageCode ?outputDataConfig ?inputDataConfig ?entityRecognizerArn
+        ?endTime ?submitTime ?message ?jobStatus ?jobName ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
       let entityRecognizerArn =
-        field_map json "EntityRecognizerArn" EntityRecognizerArn.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
-      make ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?languageCode
-        ?outputDataConfig ?inputDataConfig ?entityRecognizerArn ?endTime
-        ?submitTime ?message ?jobStatus ?jobName ?jobArn ?jobId ()
+        field_map json__ "EntityRecognizerArn" EntityRecognizerArn.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?flywheelArn ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn
+        ?languageCode ?outputDataConfig ?inputDataConfig ?entityRecognizerArn
+        ?endTime ?submitTime ?message ?jobStatus ?jobName ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about an entities detection job."]
 module EndpointProperties =
@@ -4182,10 +6388,12 @@ module EndpointProperties =
         [@ocaml.doc "The date and time that the endpoint was last modified."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS identity and Access Management (IAM) role that grants Amazon Comprehend read access to trained custom models encrypted with a customer managed key (ModelKmsKeyId)."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to trained custom models encrypted with a customer managed key (ModelKmsKeyId)."];
       desiredDataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "Data access role ARN to use in case the new model is encrypted with a customer KMS key."]}
+          "Data access role ARN to use in case the new model is encrypted with a customer KMS key."];
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel"]}
     let make ?endpointArn =
       fun ?status ->
         fun ?message ->
@@ -4197,20 +6405,22 @@ module EndpointProperties =
                     fun ?lastModifiedTime ->
                       fun ?dataAccessRoleArn ->
                         fun ?desiredDataAccessRoleArn ->
-                          fun () ->
-                            {
-                              endpointArn;
-                              status;
-                              message;
-                              modelArn;
-                              desiredModelArn;
-                              desiredInferenceUnits;
-                              currentInferenceUnits;
-                              creationTime;
-                              lastModifiedTime;
-                              dataAccessRoleArn;
-                              desiredDataAccessRoleArn
-                            }
+                          fun ?flywheelArn ->
+                            fun () ->
+                              {
+                                endpointArn;
+                                status;
+                                message;
+                                modelArn;
+                                desiredModelArn;
+                                desiredInferenceUnits;
+                                currentInferenceUnits;
+                                creationTime;
+                                lastModifiedTime;
+                                dataAccessRoleArn;
+                                desiredDataAccessRoleArn;
+                                flywheelArn
+                              }
     let to_value x =
       structure_to_value
         [("EndpointArn",
@@ -4232,9 +6442,14 @@ module EndpointProperties =
         ("DataAccessRoleArn",
           (Option.map x.dataAccessRoleArn ~f:IamRoleArn.to_value));
         ("DesiredDataAccessRoleArn",
-          (Option.map x.desiredDataAccessRoleArn ~f:IamRoleArn.to_value))]
+          (Option.map x.desiredDataAccessRoleArn ~f:IamRoleArn.to_value));
+        ("FlywheelArn",
+          (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
       let desiredDataAccessRoleArn =
         (Option.map ~f:IamRoleArn.of_xml)
           (Xml.child xml_arg0 "DesiredDataAccessRoleArn") in
@@ -4265,34 +6480,41 @@ module EndpointProperties =
       let endpointArn =
         (Option.map ~f:ComprehendEndpointArn.of_xml)
           (Xml.child xml_arg0 "EndpointArn") in
-      make ?desiredDataAccessRoleArn ?dataAccessRoleArn ?lastModifiedTime
-        ?creationTime ?currentInferenceUnits ?desiredInferenceUnits
-        ?desiredModelArn ?modelArn ?message ?status ?endpointArn ()
+      make ?flywheelArn ?desiredDataAccessRoleArn ?dataAccessRoleArn
+        ?lastModifiedTime ?creationTime ?currentInferenceUnits
+        ?desiredInferenceUnits ?desiredModelArn ?modelArn ?message ?status
+        ?endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
       let desiredDataAccessRoleArn =
-        field_map json "DesiredDataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DesiredDataAccessRoleArn" IamRoleArn.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let currentInferenceUnits =
-        field_map json "CurrentInferenceUnits" InferenceUnitsInteger.of_json in
+        field_map json__ "CurrentInferenceUnits"
+          InferenceUnitsInteger.of_json in
       let desiredInferenceUnits =
-        field_map json "DesiredInferenceUnits" InferenceUnitsInteger.of_json in
+        field_map json__ "DesiredInferenceUnits"
+          InferenceUnitsInteger.of_json in
       let desiredModelArn =
-        field_map json "DesiredModelArn" ComprehendModelArn.of_json in
-      let modelArn = field_map json "ModelArn" ComprehendModelArn.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let status = field_map json "Status" EndpointStatus.of_json in
+        field_map json__ "DesiredModelArn" ComprehendModelArn.of_json in
+      let modelArn = field_map json__ "ModelArn" ComprehendModelArn.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let status = field_map json__ "Status" EndpointStatus.of_json in
       let endpointArn =
-        field_map json "EndpointArn" ComprehendEndpointArn.of_json in
-      make ?desiredDataAccessRoleArn ?dataAccessRoleArn ?lastModifiedTime
-        ?creationTime ?currentInferenceUnits ?desiredInferenceUnits
-        ?desiredModelArn ?modelArn ?message ?status ?endpointArn ()
+        field_map json__ "EndpointArn" ComprehendEndpointArn.of_json in
+      make ?flywheelArn ?desiredDataAccessRoleArn ?dataAccessRoleArn
+        ?lastModifiedTime ?creationTime ?currentInferenceUnits
+        ?desiredInferenceUnits ?desiredModelArn ?modelArn ?message ?status
+        ?endpointArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies information about the specified endpoint."]
+  end[@@ocaml.doc
+       "Specifies information about the specified endpoint. For information about endpoints, see Managing endpoints."]
 module DominantLanguageDetectionJobProperties =
   struct
     type nonrec t =
@@ -4302,7 +6524,7 @@ module DominantLanguageDetectionJobProperties =
           "The identifier assigned to the dominant language detection job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the dominant language detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:dominant-language-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:dominant-language-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the dominant language detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:dominant-language-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:dominant-language-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobName: JobName.t option
         [@ocaml.doc
           "The name that you assigned to the dominant language detection job."];
@@ -4325,10 +6547,10 @@ module DominantLanguageDetectionJobProperties =
           "The output data configuration that you supplied when you created the dominant language detection job."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your dominant language detection job. For more information, see Amazon VPC."]}
@@ -4409,22 +6631,22 @@ module DominantLanguageDetectionJobProperties =
         ?inputDataConfig ?endTime ?submitTime ?message ?jobStatus ?jobName
         ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?outputDataConfig
         ?inputDataConfig ?endTime ?submitTime ?message ?jobStatus ?jobName
         ?jobArn ?jobId ()
@@ -4443,7 +6665,7 @@ module DocumentClassifierProperties =
           "The language code for the language of the documents that the classifier was trained on."];
       status: ModelStatus.t option
         [@ocaml.doc
-          "The status of the document classifier. If the status is TRAINED the classifier is ready to use. If the status is FAILED you can see additional information about why the classifier wasn't trained in the Message field."];
+          "The status of the document classifier. If the status is TRAINED the classifier is ready to use. If the status is TRAINED_WITH_WARNINGS the classifier training succeeded, but you should review the warnings returned in the CreateDocumentClassifier response. If the status is FAILED you can see additional information about why the classifier wasn't trained in the Message field."];
       message: AnyLengthString.t option
         [@ocaml.doc
           "Additional information about the status of the classifier."];
@@ -4470,10 +6692,10 @@ module DocumentClassifierProperties =
           "Information about the document classifier, including the number of documents used for training the classifier, the number of documents used for test the classifier, and an accuracy rating."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Management (IAM) role that grants Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your custom classifier. For more information, see Amazon VPC."];
@@ -4482,13 +6704,15 @@ module DocumentClassifierProperties =
           "Indicates the mode in which the specific classifier was trained. This also indicates the format of input documents and the format of the confusion matrix. Each classifier can only be trained in one mode and this cannot be changed once the classifier is trained."];
       modelKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the KMS key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       versionName: VersionName.t option
         [@ocaml.doc
           "The version name that you assigned to the document classifier."];
       sourceModelArn: DocumentClassifierArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the source model. This model was imported from a different AWS account to create the document classifier model in your AWS account."]}
+          "The Amazon Resource Name (ARN) of the source model. This model was imported from a different Amazon Web Services account to create the document classifier model in your Amazon Web Services account."];
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel"]}
     let make ?documentClassifierArn =
       fun ?languageCode ->
         fun ?status ->
@@ -4507,27 +6731,29 @@ module DocumentClassifierProperties =
                                   fun ?modelKmsKeyId ->
                                     fun ?versionName ->
                                       fun ?sourceModelArn ->
-                                        fun () ->
-                                          {
-                                            documentClassifierArn;
-                                            languageCode;
-                                            status;
-                                            message;
-                                            submitTime;
-                                            endTime;
-                                            trainingStartTime;
-                                            trainingEndTime;
-                                            inputDataConfig;
-                                            outputDataConfig;
-                                            classifierMetadata;
-                                            dataAccessRoleArn;
-                                            volumeKmsKeyId;
-                                            vpcConfig;
-                                            mode;
-                                            modelKmsKeyId;
-                                            versionName;
-                                            sourceModelArn
-                                          }
+                                        fun ?flywheelArn ->
+                                          fun () ->
+                                            {
+                                              documentClassifierArn;
+                                              languageCode;
+                                              status;
+                                              message;
+                                              submitTime;
+                                              endTime;
+                                              trainingStartTime;
+                                              trainingEndTime;
+                                              inputDataConfig;
+                                              outputDataConfig;
+                                              classifierMetadata;
+                                              dataAccessRoleArn;
+                                              volumeKmsKeyId;
+                                              vpcConfig;
+                                              mode;
+                                              modelKmsKeyId;
+                                              versionName;
+                                              sourceModelArn;
+                                              flywheelArn
+                                            }
     let to_value x =
       structure_to_value
         [("DocumentClassifierArn",
@@ -4560,9 +6786,14 @@ module DocumentClassifierProperties =
         ("ModelKmsKeyId", (Option.map x.modelKmsKeyId ~f:KmsKeyId.to_value));
         ("VersionName", (Option.map x.versionName ~f:VersionName.to_value));
         ("SourceModelArn",
-          (Option.map x.sourceModelArn ~f:DocumentClassifierArn.to_value))]
+          (Option.map x.sourceModelArn ~f:DocumentClassifierArn.to_value));
+        ("FlywheelArn",
+          (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
       let sourceModelArn =
         (Option.map ~f:DocumentClassifierArn.of_xml)
           (Xml.child xml_arg0 "SourceModelArn") in
@@ -4609,43 +6840,46 @@ module DocumentClassifierProperties =
       let documentClassifierArn =
         (Option.map ~f:DocumentClassifierArn.of_xml)
           (Xml.child xml_arg0 "DocumentClassifierArn") in
-      make ?sourceModelArn ?versionName ?modelKmsKeyId ?mode ?vpcConfig
-        ?volumeKmsKeyId ?dataAccessRoleArn ?classifierMetadata
+      make ?flywheelArn ?sourceModelArn ?versionName ?modelKmsKeyId ?mode
+        ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?classifierMetadata
         ?outputDataConfig ?inputDataConfig ?trainingEndTime
         ?trainingStartTime ?endTime ?submitTime ?message ?status
         ?languageCode ?documentClassifierArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
       let sourceModelArn =
-        field_map json "SourceModelArn" DocumentClassifierArn.of_json in
-      let versionName = field_map json "VersionName" VersionName.of_json in
-      let modelKmsKeyId = field_map json "ModelKmsKeyId" KmsKeyId.of_json in
-      let mode = field_map json "Mode" DocumentClassifierMode.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+        field_map json__ "SourceModelArn" DocumentClassifierArn.of_json in
+      let versionName = field_map json__ "VersionName" VersionName.of_json in
+      let modelKmsKeyId = field_map json__ "ModelKmsKeyId" KmsKeyId.of_json in
+      let mode = field_map json__ "Mode" DocumentClassifierMode.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let classifierMetadata =
-        field_map json "ClassifierMetadata" ClassifierMetadata.of_json in
+        field_map json__ "ClassifierMetadata" ClassifierMetadata.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig"
+        field_map json__ "OutputDataConfig"
           DocumentClassifierOutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig"
+        field_map json__ "InputDataConfig"
           DocumentClassifierInputDataConfig.of_json in
       let trainingEndTime =
-        field_map json "TrainingEndTime" Timestamp.of_json in
+        field_map json__ "TrainingEndTime" Timestamp.of_json in
       let trainingStartTime =
-        field_map json "TrainingStartTime" Timestamp.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let status = field_map json "Status" ModelStatus.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "TrainingStartTime" Timestamp.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let status = field_map json__ "Status" ModelStatus.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let documentClassifierArn =
-        field_map json "DocumentClassifierArn" DocumentClassifierArn.of_json in
-      make ?sourceModelArn ?versionName ?modelKmsKeyId ?mode ?vpcConfig
-        ?volumeKmsKeyId ?dataAccessRoleArn ?classifierMetadata
+        field_map json__ "DocumentClassifierArn"
+          DocumentClassifierArn.of_json in
+      make ?flywheelArn ?sourceModelArn ?versionName ?modelKmsKeyId ?mode
+        ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?classifierMetadata
         ?outputDataConfig ?inputDataConfig ?trainingEndTime
         ?trainingStartTime ?endTime ?submitTime ?message ?status
         ?languageCode ?documentClassifierArn ()
@@ -4713,17 +6947,17 @@ module DocumentClassifierSummary =
       make ?latestVersionStatus ?latestVersionName ?latestVersionCreatedAt
         ?numberOfVersions ?documentClassifierName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestVersionStatus =
-        field_map json "LatestVersionStatus" ModelStatus.of_json in
+        field_map json__ "LatestVersionStatus" ModelStatus.of_json in
       let latestVersionName =
-        field_map json "LatestVersionName" VersionName.of_json in
+        field_map json__ "LatestVersionName" VersionName.of_json in
       let latestVersionCreatedAt =
-        field_map json "LatestVersionCreatedAt" Timestamp.of_json in
+        field_map json__ "LatestVersionCreatedAt" Timestamp.of_json in
       let numberOfVersions =
-        field_map json "NumberOfVersions" Integer.of_json in
+        field_map json__ "NumberOfVersions" Integer.of_json in
       let documentClassifierName =
-        field_map json "DocumentClassifierName" ComprehendArnName.of_json in
+        field_map json__ "DocumentClassifierName" ComprehendArnName.of_json in
       make ?latestVersionStatus ?latestVersionName ?latestVersionCreatedAt
         ?numberOfVersions ?documentClassifierName ()
     let to_json v = composed_to_json to_value v
@@ -4738,7 +6972,7 @@ module DocumentClassificationJobProperties =
           "The identifier assigned to the document classification job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the document classification job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:document-classification-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:document-classification-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the document classification job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:document-classification-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:document-classification-job/1234abcd12ab34cd56ef1234567890ab"];
       jobName: JobName.t option
         [@ocaml.doc
           "The name that you assigned to the document classification job."];
@@ -4764,13 +6998,15 @@ module DocumentClassificationJobProperties =
           "The output data configuration that you supplied when you created the document classification job."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
-          "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your document classification job. For more information, see Amazon VPC."]}
+          "Configuration parameters for a private Virtual Private Cloud (VPC) containing the resources you are using for your document classification job. For more information, see Amazon VPC."];
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel"]}
     let make ?jobId =
       fun ?jobArn ->
         fun ?jobName ->
@@ -4784,22 +7020,24 @@ module DocumentClassificationJobProperties =
                         fun ?dataAccessRoleArn ->
                           fun ?volumeKmsKeyId ->
                             fun ?vpcConfig ->
-                              fun () ->
-                                {
-                                  jobId;
-                                  jobArn;
-                                  jobName;
-                                  jobStatus;
-                                  message;
-                                  submitTime;
-                                  endTime;
-                                  documentClassifierArn;
-                                  inputDataConfig;
-                                  outputDataConfig;
-                                  dataAccessRoleArn;
-                                  volumeKmsKeyId;
-                                  vpcConfig
-                                }
+                              fun ?flywheelArn ->
+                                fun () ->
+                                  {
+                                    jobId;
+                                    jobArn;
+                                    jobName;
+                                    jobStatus;
+                                    message;
+                                    submitTime;
+                                    endTime;
+                                    documentClassifierArn;
+                                    inputDataConfig;
+                                    outputDataConfig;
+                                    dataAccessRoleArn;
+                                    volumeKmsKeyId;
+                                    vpcConfig;
+                                    flywheelArn
+                                  }
     let to_value x =
       structure_to_value
         [("JobId", (Option.map x.jobId ~f:JobId.to_value));
@@ -4820,9 +7058,14 @@ module DocumentClassificationJobProperties =
           (Option.map x.dataAccessRoleArn ~f:IamRoleArn.to_value));
         ("VolumeKmsKeyId",
           (Option.map x.volumeKmsKeyId ~f:KmsKeyId.to_value));
-        ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value))]
+        ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value));
+        ("FlywheelArn",
+          (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
       let vpcConfig =
         (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "VpcConfig") in
       let volumeKmsKeyId =
@@ -4852,48 +7095,214 @@ module DocumentClassificationJobProperties =
       let jobArn =
         (Option.map ~f:ComprehendArn.of_xml) (Xml.child xml_arg0 "JobArn") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
-      make ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?outputDataConfig
-        ?inputDataConfig ?documentClassifierArn ?endTime ?submitTime ?message
-        ?jobStatus ?jobName ?jobArn ?jobId ()
+      make ?flywheelArn ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn
+        ?outputDataConfig ?inputDataConfig ?documentClassifierArn ?endTime
+        ?submitTime ?message ?jobStatus ?jobName ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
       let documentClassifierArn =
-        field_map json "DocumentClassifierArn" DocumentClassifierArn.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
-      make ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn ?outputDataConfig
-        ?inputDataConfig ?documentClassifierArn ?endTime ?submitTime ?message
-        ?jobStatus ?jobName ?jobArn ?jobId ()
+        field_map json__ "DocumentClassifierArn"
+          DocumentClassifierArn.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?flywheelArn ?vpcConfig ?volumeKmsKeyId ?dataAccessRoleArn
+        ?outputDataConfig ?inputDataConfig ?documentClassifierArn ?endTime
+        ?submitTime ?message ?jobStatus ?jobName ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about a document classification job."]
+module DatasetProperties =
+  struct
+    type nonrec t =
+      {
+      datasetArn: ComprehendDatasetArn.t option
+        [@ocaml.doc "The ARN of the dataset."];
+      datasetName: ComprehendArnName.t option
+        [@ocaml.doc "The name of the dataset."];
+      datasetType: DatasetType.t option
+        [@ocaml.doc "The dataset type (training data or test data)."];
+      datasetS3Uri: S3Uri.t option
+        [@ocaml.doc "The S3 URI where the dataset is stored."];
+      description: Description.t option
+        [@ocaml.doc "Description of the dataset."];
+      status: DatasetStatus.t option
+        [@ocaml.doc
+          "The dataset status. While the system creates the dataset, the status is CREATING. When the dataset is ready to use, the status changes to COMPLETED."];
+      message: AnyLengthString.t option
+        [@ocaml.doc "A description of the status of the dataset."];
+      numberOfDocuments: NumberOfDocuments.t option
+        [@ocaml.doc "The number of documents in the dataset."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "Creation time of the dataset."];
+      endTime: Timestamp.t option
+        [@ocaml.doc
+          "Time when the data from the dataset becomes available in the data lake."]}
+    let make ?datasetArn =
+      fun ?datasetName ->
+        fun ?datasetType ->
+          fun ?datasetS3Uri ->
+            fun ?description ->
+              fun ?status ->
+                fun ?message ->
+                  fun ?numberOfDocuments ->
+                    fun ?creationTime ->
+                      fun ?endTime ->
+                        fun () ->
+                          {
+                            datasetArn;
+                            datasetName;
+                            datasetType;
+                            datasetS3Uri;
+                            description;
+                            status;
+                            message;
+                            numberOfDocuments;
+                            creationTime;
+                            endTime
+                          }
+    let to_value x =
+      structure_to_value
+        [("DatasetArn",
+           (Option.map x.datasetArn ~f:ComprehendDatasetArn.to_value));
+        ("DatasetName",
+          (Option.map x.datasetName ~f:ComprehendArnName.to_value));
+        ("DatasetType", (Option.map x.datasetType ~f:DatasetType.to_value));
+        ("DatasetS3Uri", (Option.map x.datasetS3Uri ~f:S3Uri.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Status", (Option.map x.status ~f:DatasetStatus.to_value));
+        ("Message", (Option.map x.message ~f:AnyLengthString.to_value));
+        ("NumberOfDocuments",
+          (Option.map x.numberOfDocuments ~f:NumberOfDocuments.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let numberOfDocuments =
+        (Option.map ~f:NumberOfDocuments.of_xml)
+          (Xml.child xml_arg0 "NumberOfDocuments") in
+      let message =
+        (Option.map ~f:AnyLengthString.of_xml) (Xml.child xml_arg0 "Message") in
+      let status =
+        (Option.map ~f:DatasetStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let datasetS3Uri =
+        (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "DatasetS3Uri") in
+      let datasetType =
+        (Option.map ~f:DatasetType.of_xml) (Xml.child xml_arg0 "DatasetType") in
+      let datasetName =
+        (Option.map ~f:ComprehendArnName.of_xml)
+          (Xml.child xml_arg0 "DatasetName") in
+      let datasetArn =
+        (Option.map ~f:ComprehendDatasetArn.of_xml)
+          (Xml.child xml_arg0 "DatasetArn") in
+      make ?endTime ?creationTime ?numberOfDocuments ?message ?status
+        ?description ?datasetS3Uri ?datasetType ?datasetName ?datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let numberOfDocuments =
+        field_map json__ "NumberOfDocuments" NumberOfDocuments.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let status = field_map json__ "Status" DatasetStatus.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let datasetS3Uri = field_map json__ "DatasetS3Uri" S3Uri.of_json in
+      let datasetType = field_map json__ "DatasetType" DatasetType.of_json in
+      let datasetName =
+        field_map json__ "DatasetName" ComprehendArnName.of_json in
+      let datasetArn =
+        field_map json__ "DatasetArn" ComprehendDatasetArn.of_json in
+      make ?endTime ?creationTime ?numberOfDocuments ?message ?status
+        ?description ?datasetS3Uri ?datasetType ?datasetName ?datasetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Properties associated with the dataset."]
+module ToxicLabels =
+  struct
+    type nonrec t =
+      {
+      labels: ListOfToxicContent.t option
+        [@ocaml.doc "Array of toxic content types identified in the string."];
+      toxicity: Float_.t option
+        [@ocaml.doc
+          "Overall toxicity score for the string. Value range is zero to one, where one is the highest confidence."]}
+    let make ?labels = fun ?toxicity -> fun () -> { labels; toxicity }
+    let to_value x =
+      structure_to_value
+        [("Labels", (Option.map x.labels ~f:ListOfToxicContent.to_value));
+        ("Toxicity", (Option.map x.toxicity ~f:Float_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let toxicity =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Toxicity") in
+      let labels =
+        (Option.map ~f:ListOfToxicContent.of_xml)
+          (Xml.child xml_arg0 "Labels") in
+      make ?toxicity ?labels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let toxicity = field_map json__ "Toxicity" Float_.of_json in
+      let labels = field_map json__ "Labels" ListOfToxicContent.of_json in
+      make ?toxicity ?labels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Toxicity analysis result for one string. For more information about toxicity detection, see Toxicity detection in the Amazon Comprehend Developer Guide."]
+module TextSegment =
+  struct
+    type nonrec t =
+      {
+      text: CustomerInputString.t [@ocaml.doc "The text content."]}
+    let context_ = "TextSegment"
+    let make ~text = fun () -> { text }
+    let to_value x =
+      structure_to_value
+        [("Text", (Some (CustomerInputString.to_value x.text)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let text =
+        CustomerInputString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
+      make ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let text = field_map_exn json__ "Text" CustomerInputString.of_json in
+      make ~text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One of the of text strings. Each string has a size limit of 1KB."]
 module PiiEntity =
   struct
     type nonrec t =
       {
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend has in the accuracy of the detection."];
       type_: PiiEntityType.t option [@ocaml.doc "The entity's type."];
       beginOffset: Integer.t option
         [@ocaml.doc
-          "A character offset in the input text that shows where the PII entity begins (the first character is at position 0). The offset returns the position of each UTF-8 code point in the string. A code point is the abstract character from a particular graphical representation. For example, a multi-byte UTF-8 character maps to a single code point."];
+          "The zero-based offset from the beginning of the source text to the first character in the entity."];
       endOffset: Integer.t option
         [@ocaml.doc
-          "A character offset in the input text that shows where the PII entity ends. The offset returns the position of each UTF-8 code point in the string. A code point is the abstract character from a particular graphical representation. For example, a multi-byte UTF-8 character maps to a single code point."]}
+          "The zero-based offset from the beginning of the source text to the last character in the entity."]}
     let make ?score =
       fun ?type_ ->
         fun ?beginOffset ->
@@ -4901,7 +7310,7 @@ module PiiEntity =
             fun () -> { score; type_; beginOffset; endOffset }
     let to_value x =
       structure_to_value
-        [("Score", (Option.map x.score ~f:Float.to_value));
+        [("Score", (Option.map x.score ~f:Float_.to_value));
         ("Type", (Option.map x.type_ ~f:PiiEntityType.to_value));
         ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
         ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value))]
@@ -4913,40 +7322,336 @@ module PiiEntity =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
       let type_ =
         (Option.map ~f:PiiEntityType.of_xml) (Xml.child xml_arg0 "Type") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       make ?endOffset ?beginOffset ?type_ ?score ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let type_ = field_map json "Type" PiiEntityType.of_json in
-      let score = field_map json "Score" Float.of_json in
+    let of_json json__ =
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let type_ = field_map json__ "Type" PiiEntityType.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
       make ?endOffset ?beginOffset ?type_ ?score ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about a PII entity."]
+module ListOfExtractedCharacters =
+  struct
+    type nonrec t = ExtractedCharactersListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExtractedCharactersListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExtractedCharactersListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfExtractedCharacters"
+        ~of_json:ExtractedCharactersListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Block =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option [@ocaml.doc "Unique identifier for the block."];
+      blockType: BlockType.t option
+        [@ocaml.doc
+          "The block represents a line of text or one word of text. WORD - A word that's detected on a document page. A word is one or more ISO basic Latin script characters that aren't separated by spaces. LINE - A string of tab-delimited, contiguous words that are detected on a document page"];
+      text: String_.t option
+        [@ocaml.doc "The word or line of text extracted from the block."];
+      page: Integer.t option
+        [@ocaml.doc "Page number where the block appears."];
+      geometry: Geometry.t option
+        [@ocaml.doc
+          "Co-ordinates of the rectangle or polygon that contains the text."];
+      relationships: ListOfRelationships.t option
+        [@ocaml.doc
+          "A list of child blocks of the current block. For example, a LINE object has child blocks for each WORD block that's part of the line of text."]}
+    let make ?id =
+      fun ?blockType ->
+        fun ?text ->
+          fun ?page ->
+            fun ?geometry ->
+              fun ?relationships ->
+                fun () ->
+                  { id; blockType; text; page; geometry; relationships }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:String_.to_value));
+        ("BlockType", (Option.map x.blockType ~f:BlockType.to_value));
+        ("Text", (Option.map x.text ~f:String_.to_value));
+        ("Page", (Option.map x.page ~f:Integer.to_value));
+        ("Geometry", (Option.map x.geometry ~f:Geometry.to_value));
+        ("Relationships",
+          (Option.map x.relationships ~f:ListOfRelationships.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let relationships =
+        (Option.map ~f:ListOfRelationships.of_xml)
+          (Xml.child xml_arg0 "Relationships") in
+      let geometry =
+        (Option.map ~f:Geometry.of_xml) (Xml.child xml_arg0 "Geometry") in
+      let page = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Page") in
+      let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
+      let blockType =
+        (Option.map ~f:BlockType.of_xml) (Xml.child xml_arg0 "BlockType") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?relationships ?geometry ?page ?text ?blockType ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let relationships =
+        field_map json__ "Relationships" ListOfRelationships.of_json in
+      let geometry = field_map json__ "Geometry" Geometry.of_json in
+      let page = field_map json__ "Page" Integer.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let blockType = field_map json__ "BlockType" BlockType.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      make ?relationships ?geometry ?page ?text ?blockType ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about each word or line of text in the input document. For additional information, see Block in the Amazon Textract API reference."]
+module DocumentTypeListItem =
+  struct
+    type nonrec t =
+      {
+      page: Integer.t option [@ocaml.doc "Page number."];
+      type_: DocumentType.t option [@ocaml.doc "Document type."]}
+    let make ?page = fun ?type_ -> fun () -> { page; type_ }
+    let to_value x =
+      structure_to_value
+        [("Page", (Option.map x.page ~f:Integer.to_value));
+        ("Type", (Option.map x.type_ ~f:DocumentType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:DocumentType.of_xml) (Xml.child xml_arg0 "Type") in
+      let page = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Page") in
+      make ?type_ ?page ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" DocumentType.of_json in
+      let page = field_map json__ "Page" Integer.of_json in
+      make ?type_ ?page ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Document type for each page in the document."]
+module ErrorsListItem =
+  struct
+    type nonrec t =
+      {
+      page: Integer.t option
+        [@ocaml.doc "Page number where the error occurred."];
+      errorCode: PageBasedErrorCode.t option
+        [@ocaml.doc "Error code for the cause of the error."];
+      errorMessage: String_.t option
+        [@ocaml.doc "Text message explaining the reason for the error."]}
+    let make ?page =
+      fun ?errorCode ->
+        fun ?errorMessage -> fun () -> { page; errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("Page", (Option.map x.page ~f:Integer.to_value));
+        ("ErrorCode",
+          (Option.map x.errorCode ~f:PageBasedErrorCode.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:PageBasedErrorCode.of_xml)
+          (Xml.child xml_arg0 "ErrorCode") in
+      let page = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Page") in
+      make ?errorMessage ?errorCode ?page ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" PageBasedErrorCode.of_json in
+      let page = field_map json__ "Page" Integer.of_json in
+      make ?errorMessage ?errorCode ?page ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Text extraction encountered one or more page-level errors in the input document. The ErrorCode contains one of the following values: TEXTRACT_BAD_PAGE - Amazon Textract cannot read the page. For more information about page limits in Amazon Textract, see Page Quotas in Amazon Textract. TEXTRACT_PROVISIONED_THROUGHPUT_EXCEEDED - The number of requests exceeded your throughput limit. For more information about throughput quotas in Amazon Textract, see Default quotas in Amazon Textract. PAGE_CHARACTERS_EXCEEDED - Too many text characters on the page (10,000 characters maximum). PAGE_SIZE_EXCEEDED - The maximum page size is 10 MB. INTERNAL_SERVER_ERROR - The request encountered a service issue. Try the API request again."]
+module DatasetAugmentedManifestsList =
+  struct
+    type nonrec t = DatasetAugmentedManifestsListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatasetAugmentedManifestsListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:DatasetAugmentedManifestsListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatasetAugmentedManifestsList"
+        ~of_json:DatasetAugmentedManifestsListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DatasetDataFormat =
+  struct
+    type nonrec t =
+      | COMPREHEND_CSV 
+      | AUGMENTED_MANIFEST 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMPREHEND_CSV -> "COMPREHEND_CSV"
+      | AUGMENTED_MANIFEST -> "AUGMENTED_MANIFEST"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMPREHEND_CSV" -> COMPREHEND_CSV
+      | "AUGMENTED_MANIFEST" -> AUGMENTED_MANIFEST
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DatasetDataFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DatasetDataFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module DatasetDocumentClassifierInputDataConfig =
+  struct
+    type nonrec t =
+      {
+      s3Uri: S3Uri.t
+        [@ocaml.doc
+          "The Amazon S3 URI for the input data. The S3 bucket must be in the same Region as the API endpoint that you are calling. The URI can point to a single input file or it can provide the prefix for a collection of input files. For example, if you use the URI S3://bucketName/prefix, if the prefix is a single file, Amazon Comprehend uses that file as input. If more than one file begins with the prefix, Amazon Comprehend uses all of them as input. This parameter is required if you set DataFormat to COMPREHEND_CSV."];
+      labelDelimiter: LabelDelimiter.t option
+        [@ocaml.doc
+          "Indicates the delimiter used to separate each label for training a multi-label classifier. The default delimiter between labels is a pipe (|). You can use a different character as a delimiter (if it's an allowed character) by specifying it under Delimiter for labels. If the training documents use a delimiter other than the default or the delimiter you specify, the labels on that line will be combined to make a single unique label, such as LABELLABELLABEL."]}
+    let context_ = "DatasetDocumentClassifierInputDataConfig"
+    let make ?labelDelimiter =
+      fun ~s3Uri -> fun () -> { labelDelimiter; s3Uri }
+    let to_value x =
+      structure_to_value
+        [("S3Uri", (Some (S3Uri.to_value x.s3Uri)));
+        ("LabelDelimiter",
+          (Option.map x.labelDelimiter ~f:LabelDelimiter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelDelimiter =
+        (Option.map ~f:LabelDelimiter.of_xml)
+          (Xml.child xml_arg0 "LabelDelimiter") in
+      let s3Uri =
+        S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
+      make ?labelDelimiter ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelDelimiter =
+        field_map json__ "LabelDelimiter" LabelDelimiter.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
+      make ?labelDelimiter ~s3Uri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the dataset input data configuration for a document classifier model. For more information on how the input file is formatted, see Preparing training data in the Comprehend Developer Guide."]
+module DatasetEntityRecognizerInputDataConfig =
+  struct
+    type nonrec t =
+      {
+      annotations: DatasetEntityRecognizerAnnotations.t option
+        [@ocaml.doc
+          "The S3 location of the annotation documents for your custom entity recognizer."];
+      documents: DatasetEntityRecognizerDocuments.t
+        [@ocaml.doc
+          "The format and location of the training documents for your custom entity recognizer."];
+      entityList: DatasetEntityRecognizerEntityList.t option
+        [@ocaml.doc
+          "The S3 location of the entity list for your custom entity recognizer."]}
+    let context_ = "DatasetEntityRecognizerInputDataConfig"
+    let make ?annotations =
+      fun ?entityList ->
+        fun ~documents -> fun () -> { annotations; entityList; documents }
+    let to_value x =
+      structure_to_value
+        [("Annotations",
+           (Option.map x.annotations
+              ~f:DatasetEntityRecognizerAnnotations.to_value));
+        ("Documents",
+          (Some (DatasetEntityRecognizerDocuments.to_value x.documents)));
+        ("EntityList",
+          (Option.map x.entityList
+             ~f:DatasetEntityRecognizerEntityList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entityList =
+        (Option.map ~f:DatasetEntityRecognizerEntityList.of_xml)
+          (Xml.child xml_arg0 "EntityList") in
+      let documents =
+        DatasetEntityRecognizerDocuments.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Documents") in
+      let annotations =
+        (Option.map ~f:DatasetEntityRecognizerAnnotations.of_xml)
+          (Xml.child xml_arg0 "Annotations") in
+      make ?entityList ~documents ?annotations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entityList =
+        field_map json__ "EntityList"
+          DatasetEntityRecognizerEntityList.of_json in
+      let documents =
+        field_map_exn json__ "Documents"
+          DatasetEntityRecognizerDocuments.of_json in
+      let annotations =
+        field_map json__ "Annotations"
+          DatasetEntityRecognizerAnnotations.of_json in
+      make ?entityList ~documents ?annotations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the format and location of the input data. You must provide either the Annotations parameter or the EntityList parameter."]
 module EntityLabel =
   struct
     type nonrec t =
       {
       name: PiiEntityType.t option [@ocaml.doc "The name of the label."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend has in the accuracy of the detection."]}
     let make ?name = fun ?score -> fun () -> { name; score }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:PiiEntityType.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let name =
         (Option.map ~f:PiiEntityType.of_xml) (Xml.child xml_arg0 "Name") in
       make ?score ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let name = field_map json "Name" PiiEntityType.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let name = field_map json__ "Name" PiiEntityType.of_json in
       make ?score ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4956,24 +7661,31 @@ module DocumentClass =
     type nonrec t =
       {
       name: String_.t option [@ocaml.doc "The name of the class."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The confidence score that Amazon Comprehend has this class correctly attributed."]}
-    let make ?name = fun ?score -> fun () -> { name; score }
+          "The confidence score that Amazon Comprehend has this class correctly attributed."];
+      page: Integer.t option
+        [@ocaml.doc
+          "Page number in the input document. This field is present in the response only if your request includes the Byte parameter."]}
+    let make ?name =
+      fun ?score -> fun ?page -> fun () -> { name; score; page }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value));
+        ("Page", (Option.map x.page ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let page = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Page") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?score ?name ()
+      make ?page ?score ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ?score ?name ()
+    let of_json json__ =
+      let page = field_map json__ "Page" Integer.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?page ?score ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the class that categorizes the document being analyzed"]
@@ -4982,27 +7694,71 @@ module DocumentLabel =
     type nonrec t =
       {
       name: String_.t option [@ocaml.doc "The name of the label."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The confidence score that Amazon Comprehend has this label correctly attributed."]}
-    let make ?name = fun ?score -> fun () -> { name; score }
+          "The confidence score that Amazon Comprehend has this label correctly attributed."];
+      page: Integer.t option
+        [@ocaml.doc
+          "Page number where the label occurs. This field is present in the response only if your request includes the Byte parameter."]}
+    let make ?name =
+      fun ?score -> fun ?page -> fun () -> { name; score; page }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value));
+        ("Page", (Option.map x.page ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let page = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Page") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?score ?name ()
+      make ?page ?score ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ?score ?name ()
+    let of_json json__ =
+      let page = field_map json__ "Page" Integer.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?page ?score ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies one of the label or labels that categorize the document being analyzed."]
+module WarningsListItem =
+  struct
+    type nonrec t =
+      {
+      page: Integer.t option
+        [@ocaml.doc "Page number in the input document."];
+      warnCode: PageBasedWarningCode.t option
+        [@ocaml.doc "The type of warning."];
+      warnMessage: String_.t option
+        [@ocaml.doc "Text message associated with the warning."]}
+    let make ?page =
+      fun ?warnCode ->
+        fun ?warnMessage -> fun () -> { page; warnCode; warnMessage }
+    let to_value x =
+      structure_to_value
+        [("Page", (Option.map x.page ~f:Integer.to_value));
+        ("WarnCode",
+          (Option.map x.warnCode ~f:PageBasedWarningCode.to_value));
+        ("WarnMessage", (Option.map x.warnMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let warnMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "WarnMessage") in
+      let warnCode =
+        (Option.map ~f:PageBasedWarningCode.of_xml)
+          (Xml.child xml_arg0 "WarnCode") in
+      let page = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Page") in
+      make ?warnMessage ?warnCode ?page ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let warnMessage = field_map json__ "WarnMessage" String_.of_json in
+      let warnCode = field_map json__ "WarnCode" PageBasedWarningCode.of_json in
+      let page = field_map json__ "Page" Integer.of_json in
+      make ?warnMessage ?warnCode ?page ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The system identified one of the following warnings while processing the input document: The document to classify is plain text, but the classifier is a native document model. The document to classify is semi-structured, but the classifier is a plain-text model."]
 module BatchItemError =
   struct
     type nonrec t =
@@ -5031,14 +7787,43 @@ module BatchItemError =
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Index") in
       make ?errorMessage ?errorCode ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
-      let index = field_map json "Index" Integer.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      let index = field_map json__ "Index" Integer.of_json in
       make ?errorMessage ?errorCode ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an error that occurred while processing a document in a batch. The operation returns on BatchItemError object for each document that contained an error."]
+module BatchDetectTargetedSentimentItemResult =
+  struct
+    type nonrec t =
+      {
+      index: Integer.t option
+        [@ocaml.doc "The zero-based index of this result in the input list."];
+      entities: ListOfTargetedSentimentEntities.t option
+        [@ocaml.doc "An array of targeted sentiment entities."]}
+    let make ?index = fun ?entities -> fun () -> { index; entities }
+    let to_value x =
+      structure_to_value
+        [("Index", (Option.map x.index ~f:Integer.to_value));
+        ("Entities",
+          (Option.map x.entities ~f:ListOfTargetedSentimentEntities.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entities =
+        (Option.map ~f:ListOfTargetedSentimentEntities.of_xml)
+          (Xml.child xml_arg0 "Entities") in
+      let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Index") in
+      make ?entities ?index ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entities =
+        field_map json__ "Entities" ListOfTargetedSentimentEntities.of_json in
+      let index = field_map json__ "Index" Integer.of_json in
+      make ?entities ?index ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Analysis results for one of the documents in the batch."]
 module BatchDetectSyntaxItemResult =
   struct
     type nonrec t =
@@ -5063,28 +7848,14 @@ module BatchDetectSyntaxItemResult =
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Index") in
       make ?syntaxTokens ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let syntaxTokens =
-        field_map json "SyntaxTokens" ListOfSyntaxTokens.of_json in
-      let index = field_map json "Index" Integer.of_json in
+        field_map json__ "SyntaxTokens" ListOfSyntaxTokens.of_json in
+      let index = field_map json__ "Index" Integer.of_json in
       make ?syntaxTokens ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result of calling the operation. The operation returns one object that is successfully processed by the operation."]
-module CustomerInputString =
-  struct
-    type nonrec t = string
-    let context_ = "CustomerInputString"
-    let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CustomerInputString" j
-    let to_json = simple_to_json to_value
-  end
 module BatchDetectSentimentItemResult =
   struct
     type nonrec t =
@@ -5116,11 +7887,11 @@ module BatchDetectSentimentItemResult =
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Index") in
       make ?sentimentScore ?sentiment ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sentimentScore =
-        field_map json "SentimentScore" SentimentScore.of_json in
-      let sentiment = field_map json "Sentiment" SentimentType.of_json in
-      let index = field_map json "Index" Integer.of_json in
+        field_map json__ "SentimentScore" SentimentScore.of_json in
+      let sentiment = field_map json__ "Sentiment" SentimentType.of_json in
+      let index = field_map json__ "Index" Integer.of_json in
       make ?sentimentScore ?sentiment ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5149,9 +7920,9 @@ module BatchDetectKeyPhrasesItemResult =
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Index") in
       make ?keyPhrases ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyPhrases = field_map json "KeyPhrases" ListOfKeyPhrases.of_json in
-      let index = field_map json "Index" Integer.of_json in
+    let of_json json__ =
+      let keyPhrases = field_map json__ "KeyPhrases" ListOfKeyPhrases.of_json in
+      let index = field_map json__ "Index" Integer.of_json in
       make ?keyPhrases ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5178,9 +7949,9 @@ module BatchDetectEntitiesItemResult =
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Index") in
       make ?entities ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entities = field_map json "Entities" ListOfEntities.of_json in
-      let index = field_map json "Index" Integer.of_json in
+    let of_json json__ =
+      let entities = field_map json__ "Entities" ListOfEntities.of_json in
+      let index = field_map json__ "Index" Integer.of_json in
       make ?entities ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5209,14 +7980,154 @@ module BatchDetectDominantLanguageItemResult =
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Index") in
       make ?languages ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languages =
-        field_map json "Languages" ListOfDominantLanguages.of_json in
-      let index = field_map json "Index" Integer.of_json in
+        field_map json__ "Languages" ListOfDominantLanguages.of_json in
+      let index = field_map json__ "Index" Integer.of_json in
       make ?languages ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result of calling the operation. The operation returns one object for each document that is successfully processed by the operation."]
+module FlywheelProperties =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel."];
+      activeModelArn: ComprehendModelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the active model version."];
+      dataAccessRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend permission to access the flywheel data."];
+      taskConfig: TaskConfig.t option
+        [@ocaml.doc
+          "Configuration about the model associated with a flywheel."];
+      dataLakeS3Uri: S3Uri.t option
+        [@ocaml.doc "Amazon S3 URI of the data lake location."];
+      dataSecurityConfig: DataSecurityConfig.t option
+        [@ocaml.doc "Data security configuration."];
+      status: FlywheelStatus.t option
+        [@ocaml.doc "The status of the flywheel."];
+      modelType: ModelType.t option
+        [@ocaml.doc "Model type of the flywheel's model."];
+      message: AnyLengthString.t option
+        [@ocaml.doc "A description of the status of the flywheel."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "Creation time of the flywheel."];
+      lastModifiedTime: Timestamp.t option
+        [@ocaml.doc "Last modified time for the flywheel."];
+      latestFlywheelIteration: FlywheelIterationId.t option
+        [@ocaml.doc "The most recent flywheel iteration."]}
+    let make ?flywheelArn =
+      fun ?activeModelArn ->
+        fun ?dataAccessRoleArn ->
+          fun ?taskConfig ->
+            fun ?dataLakeS3Uri ->
+              fun ?dataSecurityConfig ->
+                fun ?status ->
+                  fun ?modelType ->
+                    fun ?message ->
+                      fun ?creationTime ->
+                        fun ?lastModifiedTime ->
+                          fun ?latestFlywheelIteration ->
+                            fun () ->
+                              {
+                                flywheelArn;
+                                activeModelArn;
+                                dataAccessRoleArn;
+                                taskConfig;
+                                dataLakeS3Uri;
+                                dataSecurityConfig;
+                                status;
+                                modelType;
+                                message;
+                                creationTime;
+                                lastModifiedTime;
+                                latestFlywheelIteration
+                              }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value));
+        ("ActiveModelArn",
+          (Option.map x.activeModelArn ~f:ComprehendModelArn.to_value));
+        ("DataAccessRoleArn",
+          (Option.map x.dataAccessRoleArn ~f:IamRoleArn.to_value));
+        ("TaskConfig", (Option.map x.taskConfig ~f:TaskConfig.to_value));
+        ("DataLakeS3Uri", (Option.map x.dataLakeS3Uri ~f:S3Uri.to_value));
+        ("DataSecurityConfig",
+          (Option.map x.dataSecurityConfig ~f:DataSecurityConfig.to_value));
+        ("Status", (Option.map x.status ~f:FlywheelStatus.to_value));
+        ("ModelType", (Option.map x.modelType ~f:ModelType.to_value));
+        ("Message", (Option.map x.message ~f:AnyLengthString.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value));
+        ("LatestFlywheelIteration",
+          (Option.map x.latestFlywheelIteration
+             ~f:FlywheelIterationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestFlywheelIteration =
+        (Option.map ~f:FlywheelIterationId.of_xml)
+          (Xml.child xml_arg0 "LatestFlywheelIteration") in
+      let lastModifiedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let message =
+        (Option.map ~f:AnyLengthString.of_xml) (Xml.child xml_arg0 "Message") in
+      let modelType =
+        (Option.map ~f:ModelType.of_xml) (Xml.child xml_arg0 "ModelType") in
+      let status =
+        (Option.map ~f:FlywheelStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let dataSecurityConfig =
+        (Option.map ~f:DataSecurityConfig.of_xml)
+          (Xml.child xml_arg0 "DataSecurityConfig") in
+      let dataLakeS3Uri =
+        (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "DataLakeS3Uri") in
+      let taskConfig =
+        (Option.map ~f:TaskConfig.of_xml) (Xml.child xml_arg0 "TaskConfig") in
+      let dataAccessRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "DataAccessRoleArn") in
+      let activeModelArn =
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "ActiveModelArn") in
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
+      make ?latestFlywheelIteration ?lastModifiedTime ?creationTime ?message
+        ?modelType ?status ?dataSecurityConfig ?dataLakeS3Uri ?taskConfig
+        ?dataAccessRoleArn ?activeModelArn ?flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestFlywheelIteration =
+        field_map json__ "LatestFlywheelIteration"
+          FlywheelIterationId.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let modelType = field_map json__ "ModelType" ModelType.of_json in
+      let status = field_map json__ "Status" FlywheelStatus.of_json in
+      let dataSecurityConfig =
+        field_map json__ "DataSecurityConfig" DataSecurityConfig.of_json in
+      let dataLakeS3Uri = field_map json__ "DataLakeS3Uri" S3Uri.of_json in
+      let taskConfig = field_map json__ "TaskConfig" TaskConfig.of_json in
+      let dataAccessRoleArn =
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let activeModelArn =
+        field_map json__ "ActiveModelArn" ComprehendModelArn.of_json in
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?latestFlywheelIteration ?lastModifiedTime ?creationTime ?message
+        ?modelType ?status ?dataSecurityConfig ?dataLakeS3Uri ?taskConfig
+        ?dataAccessRoleArn ?activeModelArn ?flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The flywheel properties."]
 module InternalServerException =
   struct
     type nonrec t = {
@@ -5231,12 +8142,45 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal server error occurred. Retry your request."]
 module InvalidRequestException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      reason: InvalidRequestReason.t option ;
+      detail: InvalidRequestDetail.t option }
+    let make ?message =
+      fun ?reason -> fun ?detail -> fun () -> { message; reason; detail }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("Reason", (Option.map x.reason ~f:InvalidRequestReason.to_value));
+        ("Detail", (Option.map x.detail ~f:InvalidRequestDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let detail =
+        (Option.map ~f:InvalidRequestDetail.of_xml)
+          (Xml.child xml_arg0 "Detail") in
+      let reason =
+        (Option.map ~f:InvalidRequestReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?detail ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let detail = field_map json__ "Detail" InvalidRequestDetail.of_json in
+      let reason = field_map json__ "Reason" InvalidRequestReason.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?detail ?reason ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request is invalid."]
+module KmsKeyValidationException =
   struct
     type nonrec t = {
       message: String_.t option }
@@ -5250,11 +8194,90 @@ module InvalidRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The request is invalid."]
+  end[@@ocaml.doc
+       "The KMS customer managed key (CMK) entered cannot be validated. Verify the key and re-enter it."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified resource ARN was not found. Check the ARN and try your request again."]
+module TooManyRequestsException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of requests exceeds the limit. Resubmit your request later."]
+module UpdateDataSecurityConfig =
+  struct
+    type nonrec t =
+      {
+      modelKmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "ID for the KMS key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+      volumeKmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "ID for the KMS key that Amazon Comprehend uses to encrypt the volume."];
+      vpcConfig: VpcConfig.t option }
+    let make ?modelKmsKeyId =
+      fun ?volumeKmsKeyId ->
+        fun ?vpcConfig ->
+          fun () -> { modelKmsKeyId; volumeKmsKeyId; vpcConfig }
+    let to_value x =
+      structure_to_value
+        [("ModelKmsKeyId", (Option.map x.modelKmsKeyId ~f:KmsKeyId.to_value));
+        ("VolumeKmsKeyId",
+          (Option.map x.volumeKmsKeyId ~f:KmsKeyId.to_value));
+        ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConfig =
+        (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "VpcConfig") in
+      let volumeKmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "VolumeKmsKeyId") in
+      let modelKmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "ModelKmsKeyId") in
+      make ?vpcConfig ?volumeKmsKeyId ?modelKmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
+      let modelKmsKeyId = field_map json__ "ModelKmsKeyId" KmsKeyId.of_json in
+      make ?vpcConfig ?volumeKmsKeyId ?modelKmsKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Data security configuration."]
 module ResourceInUseException =
   struct
     type nonrec t = {
@@ -5269,8 +8292,8 @@ module ResourceInUseException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5289,32 +8312,12 @@ module ResourceLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The maximum number of resources per account has been exceeded. Review the resources, and then try your request again."]
-module ResourceNotFoundException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The specified resource ARN was not found. Check the ARN and try your request again."]
 module ResourceUnavailableException =
   struct
     type nonrec t = {
@@ -5329,32 +8332,12 @@ module ResourceUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified resource is not available. Check the resource and try your request again."]
-module TooManyRequestsException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The number of requests exceeds the limit. Resubmit your request later."]
 module ConcurrentModificationException =
   struct
     type nonrec t = {
@@ -5369,8 +8352,8 @@ module ConcurrentModificationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5389,8 +8372,8 @@ module TooManyTagKeysException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5399,6 +8382,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5432,8 +8418,8 @@ module TooManyTagsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5442,6 +8428,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5475,32 +8464,12 @@ module JobNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified job was not found. Check the job ID and try again."]
-module KmsKeyValidationException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The KMS customer managed key (CMK) entered cannot be validated. Verify the key and re-enter it."]
 module ClientRequestTokenString =
   struct
     type nonrec t = string
@@ -5593,8 +8562,8 @@ module InvalidFilterException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5603,6 +8572,9 @@ module TopicsDetectionJobPropertiesList =
   struct
     type nonrec t = TopicsDetectionJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TopicsDetectionJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -5685,13 +8657,13 @@ module TopicsDetectionJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5700,6 +8672,9 @@ module TargetedSentimentDetectionJobPropertiesList =
   struct
     type nonrec t = TargetedSentimentDetectionJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetedSentimentDetectionJobProperties.to_value))
         |> (fun x -> `List x)
@@ -5766,21 +8741,24 @@ module TargetedSentimentDetectionJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information for filtering a list of dominant language detection jobs. For more information, see the operation."]
+       "Provides information for filtering a list of dominant language detection jobs. For more information, see the ListTargetedSentimentDetectionJobs operation."]
 module SentimentDetectionJobPropertiesList =
   struct
     type nonrec t = SentimentDetectionJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SentimentDetectionJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -5846,13 +8824,13 @@ module SentimentDetectionJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5861,6 +8839,9 @@ module PiiEntitiesDetectionJobPropertiesList =
   struct
     type nonrec t = PiiEntitiesDetectionJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PiiEntitiesDetectionJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -5927,13 +8908,13 @@ module PiiEntitiesDetectionJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5942,6 +8923,9 @@ module KeyPhrasesDetectionJobPropertiesList =
   struct
     type nonrec t = KeyPhrasesDetectionJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyPhrasesDetectionJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -6008,21 +8992,163 @@ module KeyPhrasesDetectionJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information for filtering a list of dominant language detection jobs. For more information, see the operation."]
+module FlywheelSummaryList =
+  struct
+    type nonrec t = FlywheelSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FlywheelSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FlywheelSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FlywheelSummaryList"
+        ~of_json:FlywheelSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FlywheelFilter =
+  struct
+    type nonrec t =
+      {
+      status: FlywheelStatus.t option
+        [@ocaml.doc "Filter the flywheels based on the flywheel status."];
+      creationTimeAfter: Timestamp.t option
+        [@ocaml.doc
+          "Filter the flywheels to include flywheels created after the specified time."];
+      creationTimeBefore: Timestamp.t option
+        [@ocaml.doc
+          "Filter the flywheels to include flywheels created before the specified time."]}
+    let make ?status =
+      fun ?creationTimeAfter ->
+        fun ?creationTimeBefore ->
+          fun () -> { status; creationTimeAfter; creationTimeBefore }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:FlywheelStatus.to_value));
+        ("CreationTimeAfter",
+          (Option.map x.creationTimeAfter ~f:Timestamp.to_value));
+        ("CreationTimeBefore",
+          (Option.map x.creationTimeBefore ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTimeBefore =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationTimeBefore") in
+      let creationTimeAfter =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationTimeAfter") in
+      let status =
+        (Option.map ~f:FlywheelStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?creationTimeBefore ?creationTimeAfter ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTimeBefore =
+        field_map json__ "CreationTimeBefore" Timestamp.of_json in
+      let creationTimeAfter =
+        field_map json__ "CreationTimeAfter" Timestamp.of_json in
+      let status = field_map json__ "Status" FlywheelStatus.of_json in
+      make ?creationTimeBefore ?creationTimeAfter ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filter the flywheels based on creation time or flywheel status."]
+module FlywheelIterationPropertiesList =
+  struct
+    type nonrec t = FlywheelIterationProperties.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FlywheelIterationProperties.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FlywheelIterationProperties.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FlywheelIterationPropertiesList"
+        ~of_json:FlywheelIterationProperties.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FlywheelIterationFilter =
+  struct
+    type nonrec t =
+      {
+      creationTimeAfter: Timestamp.t option
+        [@ocaml.doc
+          "Filter the flywheel iterations to include iterations created after the specified time."];
+      creationTimeBefore: Timestamp.t option
+        [@ocaml.doc
+          "Filter the flywheel iterations to include iterations created before the specified time."]}
+    let make ?creationTimeAfter =
+      fun ?creationTimeBefore ->
+        fun () -> { creationTimeAfter; creationTimeBefore }
+    let to_value x =
+      structure_to_value
+        [("CreationTimeAfter",
+           (Option.map x.creationTimeAfter ~f:Timestamp.to_value));
+        ("CreationTimeBefore",
+          (Option.map x.creationTimeBefore ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTimeBefore =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationTimeBefore") in
+      let creationTimeAfter =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationTimeAfter") in
+      make ?creationTimeBefore ?creationTimeAfter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTimeBefore =
+        field_map json__ "CreationTimeBefore" Timestamp.of_json in
+      let creationTimeAfter =
+        field_map json__ "CreationTimeAfter" Timestamp.of_json in
+      make ?creationTimeBefore ?creationTimeAfter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filter the flywheel iterations based on creation time."]
 module EventsDetectionJobPropertiesList =
   struct
     type nonrec t = EventsDetectionJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventsDetectionJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -6088,13 +9214,13 @@ module EventsDetectionJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6103,6 +9229,9 @@ module EntityRecognizerPropertiesList =
   struct
     type nonrec t = EntityRecognizerProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityRecognizerProperties.to_value)) |>
         (fun x -> `List x)
@@ -6169,22 +9298,25 @@ module EntityRecognizerFilter =
         (Option.map ~f:ModelStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?submitTimeAfter ?submitTimeBefore ?recognizerName ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
       let recognizerName =
-        field_map json "RecognizerName" ComprehendArnName.of_json in
-      let status = field_map json "Status" ModelStatus.of_json in
+        field_map json__ "RecognizerName" ComprehendArnName.of_json in
+      let status = field_map json__ "Status" ModelStatus.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?recognizerName ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information for filtering a list of entity recognizers. You can only specify one filtering parameter in a request. For more information, see the operation./>"]
+       "Provides information for filtering a list of entity recognizers. You can only specify one filtering parameter in a request. For more information, see the ListEntityRecognizers operation./>"]
 module EntityRecognizerSummariesList =
   struct
     type nonrec t = EntityRecognizerSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityRecognizerSummary.to_value)) |>
         (fun x -> `List x)
@@ -6211,6 +9343,9 @@ module EntitiesDetectionJobPropertiesList =
   struct
     type nonrec t = EntitiesDetectionJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntitiesDetectionJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -6276,13 +9411,13 @@ module EntitiesDetectionJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6291,6 +9426,9 @@ module EndpointPropertiesList =
   struct
     type nonrec t = EndpointProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointProperties.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6357,13 +9495,13 @@ module EndpointFilter =
           (Xml.child xml_arg0 "ModelArn") in
       make ?creationTimeAfter ?creationTimeBefore ?status ?modelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let creationTimeAfter =
-        field_map json "CreationTimeAfter" Timestamp.of_json in
+        field_map json__ "CreationTimeAfter" Timestamp.of_json in
       let creationTimeBefore =
-        field_map json "CreationTimeBefore" Timestamp.of_json in
-      let status = field_map json "Status" EndpointStatus.of_json in
-      let modelArn = field_map json "ModelArn" ComprehendModelArn.of_json in
+        field_map json__ "CreationTimeBefore" Timestamp.of_json in
+      let status = field_map json__ "Status" EndpointStatus.of_json in
+      let modelArn = field_map json__ "ModelArn" ComprehendModelArn.of_json in
       make ?creationTimeAfter ?creationTimeBefore ?status ?modelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6372,6 +9510,9 @@ module DominantLanguageDetectionJobPropertiesList =
   struct
     type nonrec t = DominantLanguageDetectionJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DominantLanguageDetectionJobProperties.to_value))
         |> (fun x -> `List x)
@@ -6438,13 +9579,13 @@ module DominantLanguageDetectionJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6453,6 +9594,9 @@ module DocumentClassifierPropertiesList =
   struct
     type nonrec t = DocumentClassifierProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentClassifierProperties.to_value)) |>
         (fun x -> `List x)
@@ -6525,23 +9669,26 @@ module DocumentClassifierFilter =
       make ?submitTimeAfter ?submitTimeBefore ?documentClassifierName ?status
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
       let documentClassifierName =
-        field_map json "DocumentClassifierName" ComprehendArnName.of_json in
-      let status = field_map json "Status" ModelStatus.of_json in
+        field_map json__ "DocumentClassifierName" ComprehendArnName.of_json in
+      let status = field_map json__ "Status" ModelStatus.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?documentClassifierName ?status
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information for filtering a list of document classifiers. You can only specify one filtering parameter in a request. For more information, see the operation."]
+       "Provides information for filtering a list of document classifiers. You can only specify one filtering parameter in a request. For more information, see the ListDocumentClassifiers operation."]
 module DocumentClassifierSummariesList =
   struct
     type nonrec t = DocumentClassifierSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentClassifierSummary.to_value)) |>
         (fun x -> `List x)
@@ -6568,6 +9715,9 @@ module DocumentClassificationJobPropertiesList =
   struct
     type nonrec t = DocumentClassificationJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentClassificationJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -6634,17 +9784,125 @@ module DocumentClassificationJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information for filtering a list of document classification jobs. For more information, see the operation. You can provide only one filter parameter in each request."]
+module DatasetPropertiesList =
+  struct
+    type nonrec t = DatasetProperties.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatasetProperties.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DatasetProperties.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatasetPropertiesList"
+        ~of_json:DatasetProperties.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DatasetFilter =
+  struct
+    type nonrec t =
+      {
+      status: DatasetStatus.t option
+        [@ocaml.doc "Filter the datasets based on the dataset status."];
+      datasetType: DatasetType.t option
+        [@ocaml.doc "Filter the datasets based on the dataset type."];
+      creationTimeAfter: Timestamp.t option
+        [@ocaml.doc
+          "Filter the datasets to include datasets created after the specified time."];
+      creationTimeBefore: Timestamp.t option
+        [@ocaml.doc
+          "Filter the datasets to include datasets created before the specified time."]}
+    let make ?status =
+      fun ?datasetType ->
+        fun ?creationTimeAfter ->
+          fun ?creationTimeBefore ->
+            fun () ->
+              { status; datasetType; creationTimeAfter; creationTimeBefore }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:DatasetStatus.to_value));
+        ("DatasetType", (Option.map x.datasetType ~f:DatasetType.to_value));
+        ("CreationTimeAfter",
+          (Option.map x.creationTimeAfter ~f:Timestamp.to_value));
+        ("CreationTimeBefore",
+          (Option.map x.creationTimeBefore ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTimeBefore =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationTimeBefore") in
+      let creationTimeAfter =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationTimeAfter") in
+      let datasetType =
+        (Option.map ~f:DatasetType.of_xml) (Xml.child xml_arg0 "DatasetType") in
+      let status =
+        (Option.map ~f:DatasetStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?creationTimeBefore ?creationTimeAfter ?datasetType ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTimeBefore =
+        field_map json__ "CreationTimeBefore" Timestamp.of_json in
+      let creationTimeAfter =
+        field_map json__ "CreationTimeAfter" Timestamp.of_json in
+      let datasetType = field_map json__ "DatasetType" DatasetType.of_json in
+      let status = field_map json__ "Status" DatasetStatus.of_json in
+      make ?creationTimeBefore ?creationTimeAfter ?datasetType ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filter the datasets based on creation time or dataset status."]
+module ListOfToxicLabels =
+  struct
+    type nonrec t = ToxicLabels.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ToxicLabels.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ToxicLabels.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfToxicLabels" ~of_json:ToxicLabels.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TextSizeLimitExceededException =
   struct
     type nonrec t = {
@@ -6659,8 +9917,8 @@ module TextSizeLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6679,12 +9937,40 @@ module UnsupportedLanguageException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Amazon Comprehend can't process the language of the input text. For custom entity recognition APIs, only English, Spanish, French, Italian, German, or Portuguese are accepted. For a list of supported languages, see supported-languages."]
+       "Amazon Comprehend can't process the language of the input text. For a list of supported languages, Supported languages in the Comprehend Developer Guide."]
+module ListOfTextSegments =
+  struct
+    type nonrec t = TextSegment.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TextSegment.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TextSegment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfTextSegments" ~of_json:TextSegment.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SyntaxLanguageCode =
   struct
     type nonrec t =
@@ -6727,6 +10013,9 @@ module ListOfPiiEntities =
   struct
     type nonrec t = PiiEntity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PiiEntity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6745,6 +10034,122 @@ module ListOfPiiEntities =
                      | _ -> true))) ~f:PiiEntity.of_xml)
     let of_json j =
       list_of_json ~kind:"ListOfPiiEntities" ~of_json:PiiEntity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DocumentMetadata =
+  struct
+    type nonrec t =
+      {
+      pages: Integer.t option [@ocaml.doc "Number of pages in the document."];
+      extractedCharacters: ListOfExtractedCharacters.t option
+        [@ocaml.doc
+          "List of pages in the document, with the number of characters extracted from each page."]}
+    let make ?pages =
+      fun ?extractedCharacters -> fun () -> { pages; extractedCharacters }
+    let to_value x =
+      structure_to_value
+        [("Pages", (Option.map x.pages ~f:Integer.to_value));
+        ("ExtractedCharacters",
+          (Option.map x.extractedCharacters
+             ~f:ListOfExtractedCharacters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let extractedCharacters =
+        (Option.map ~f:ListOfExtractedCharacters.of_xml)
+          (Xml.child xml_arg0 "ExtractedCharacters") in
+      let pages = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Pages") in
+      make ?extractedCharacters ?pages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let extractedCharacters =
+        field_map json__ "ExtractedCharacters"
+          ListOfExtractedCharacters.of_json in
+      let pages = field_map json__ "Pages" Integer.of_json in
+      make ?extractedCharacters ?pages ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the document, discovered during text extraction."]
+module ListOfBlocks =
+  struct
+    type nonrec t = Block.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Block.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Block.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfBlocks" ~of_json:Block.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListOfDocumentType =
+  struct
+    type nonrec t = DocumentTypeListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DocumentTypeListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DocumentTypeListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfDocumentType"
+        ~of_json:DocumentTypeListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListOfErrors =
+  struct
+    type nonrec t = ErrorsListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ErrorsListItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ErrorsListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfErrors" ~of_json:ErrorsListItem.of_json j
     let to_json v = composed_to_json to_value v
   end
 module EntityRecognizerEndpointArn =
@@ -6767,6 +10172,38 @@ module EntityRecognizerEndpointArn =
     let of_json j = string_of_json ~kind:"EntityRecognizerEndpointArn" j
     let to_json = simple_to_json to_value
   end
+module SemiStructuredDocumentBlob =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module FlywheelS3Uri =
+  struct
+    type nonrec t = string
+    let context_ = "FlywheelS3Uri"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"s3://[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9](/.*)?"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FlywheelS3Uri" j
+    let to_json = simple_to_json to_value
+  end
 module ComprehendEndpointName =
   struct
     type nonrec t = string
@@ -6786,10 +10223,89 @@ module ComprehendEndpointName =
     let of_json j = string_of_json ~kind:"ComprehendEndpointName" j
     let to_json = simple_to_json to_value
   end
+module DatasetInputDataConfig =
+  struct
+    type nonrec t =
+      {
+      augmentedManifests: DatasetAugmentedManifestsList.t option
+        [@ocaml.doc
+          "A list of augmented manifest files that provide training data for your custom model. An augmented manifest file is a labeled dataset that is produced by Amazon SageMaker Ground Truth."];
+      dataFormat: DatasetDataFormat.t option
+        [@ocaml.doc
+          "COMPREHEND_CSV: The data format is a two-column CSV file, where the first column contains labels and the second column contains documents. AUGMENTED_MANIFEST: The data format"];
+      documentClassifierInputDataConfig:
+        DatasetDocumentClassifierInputDataConfig.t option
+        [@ocaml.doc
+          "The input properties for training a document classifier model. For more information on how the input file is formatted, see Preparing training data in the Comprehend Developer Guide."];
+      entityRecognizerInputDataConfig:
+        DatasetEntityRecognizerInputDataConfig.t option
+        [@ocaml.doc
+          "The input properties for training an entity recognizer model."]}
+    let make ?augmentedManifests =
+      fun ?dataFormat ->
+        fun ?documentClassifierInputDataConfig ->
+          fun ?entityRecognizerInputDataConfig ->
+            fun () ->
+              {
+                augmentedManifests;
+                dataFormat;
+                documentClassifierInputDataConfig;
+                entityRecognizerInputDataConfig
+              }
+    let to_value x =
+      structure_to_value
+        [("AugmentedManifests",
+           (Option.map x.augmentedManifests
+              ~f:DatasetAugmentedManifestsList.to_value));
+        ("DataFormat",
+          (Option.map x.dataFormat ~f:DatasetDataFormat.to_value));
+        ("DocumentClassifierInputDataConfig",
+          (Option.map x.documentClassifierInputDataConfig
+             ~f:DatasetDocumentClassifierInputDataConfig.to_value));
+        ("EntityRecognizerInputDataConfig",
+          (Option.map x.entityRecognizerInputDataConfig
+             ~f:DatasetEntityRecognizerInputDataConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entityRecognizerInputDataConfig =
+        (Option.map ~f:DatasetEntityRecognizerInputDataConfig.of_xml)
+          (Xml.child xml_arg0 "EntityRecognizerInputDataConfig") in
+      let documentClassifierInputDataConfig =
+        (Option.map ~f:DatasetDocumentClassifierInputDataConfig.of_xml)
+          (Xml.child xml_arg0 "DocumentClassifierInputDataConfig") in
+      let dataFormat =
+        (Option.map ~f:DatasetDataFormat.of_xml)
+          (Xml.child xml_arg0 "DataFormat") in
+      let augmentedManifests =
+        (Option.map ~f:DatasetAugmentedManifestsList.of_xml)
+          (Xml.child xml_arg0 "AugmentedManifests") in
+      make ?entityRecognizerInputDataConfig
+        ?documentClassifierInputDataConfig ?dataFormat ?augmentedManifests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entityRecognizerInputDataConfig =
+        field_map json__ "EntityRecognizerInputDataConfig"
+          DatasetEntityRecognizerInputDataConfig.of_json in
+      let documentClassifierInputDataConfig =
+        field_map json__ "DocumentClassifierInputDataConfig"
+          DatasetDocumentClassifierInputDataConfig.of_json in
+      let dataFormat =
+        field_map json__ "DataFormat" DatasetDataFormat.of_json in
+      let augmentedManifests =
+        field_map json__ "AugmentedManifests"
+          DatasetAugmentedManifestsList.of_json in
+      make ?entityRecognizerInputDataConfig
+        ?documentClassifierInputDataConfig ?dataFormat ?augmentedManifests ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the format and location of the input data for the dataset."]
 module ListOfEntityLabels =
   struct
     type nonrec t = EntityLabel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityLabel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6814,6 +10330,9 @@ module ListOfClasses =
   struct
     type nonrec t = DocumentClass.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentClass.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6838,6 +10357,9 @@ module ListOfLabels =
   struct
     type nonrec t = DocumentLabel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentLabel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6858,6 +10380,33 @@ module ListOfLabels =
       list_of_json ~kind:"ListOfLabels" ~of_json:DocumentLabel.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListOfWarnings =
+  struct
+    type nonrec t = WarningsListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WarningsListItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WarningsListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfWarnings" ~of_json:WarningsListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DocumentClassifierEndpointArn =
   struct
     type nonrec t = string
@@ -6868,7 +10417,7 @@ module DocumentClassifierEndpointArn =
           ((check_string_max i ~max:256) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"arn:aws(-[^:]+)?:comprehend:[a-zA-Z0-9-]*:[0-9]{12}:document-classifier-endpoint/[a-zA-Z0-9](-*[a-zA-Z0-9])*"));
+                  ~pattern:"arn:aws(-[^:]+)?:comprehend:[a-zA-Z0-9-]*:([0-9]{12}|aws):document-classifier-endpoint/[a-zA-Z0-9](-*[a-zA-Z0-9])*"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -6882,6 +10431,9 @@ module BatchItemErrorList =
   struct
     type nonrec t = BatchItemError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchItemError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6917,19 +10469,22 @@ module BatchSizeLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The number of documents in the request exceeds the limit of 25. Try your request again with fewer documents."]
-module ListOfDetectSyntaxResult =
+module ListOfDetectTargetedSentimentResult =
   struct
-    type nonrec t = BatchDetectSyntaxItemResult.t list
+    type nonrec t = BatchDetectTargetedSentimentItemResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:BatchDetectSyntaxItemResult.to_value)) |>
-        (fun x -> `List x)
+      (xs |> (List.map ~f:BatchDetectTargetedSentimentItemResult.to_value))
+        |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -6943,16 +10498,21 @@ module ListOfDetectSyntaxResult =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:BatchDetectSyntaxItemResult.of_xml)
+                     | _ -> true)))
+           ~f:BatchDetectTargetedSentimentItemResult.of_xml)
     let of_json j =
-      list_of_json ~kind:"ListOfDetectSyntaxResult"
-        ~of_json:BatchDetectSyntaxItemResult.of_json j
+      list_of_json ~kind:"ListOfDetectTargetedSentimentResult"
+        ~of_json:BatchDetectTargetedSentimentItemResult.of_json j
     let to_json v = composed_to_json to_value v
   end
 module CustomerInputStringList =
   struct
     type nonrec t = CustomerInputString.t list
-    let make i = i
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomerInputString.to_value)) |>
         (fun x -> `List x)
@@ -6975,10 +10535,42 @@ module CustomerInputStringList =
         ~of_json:CustomerInputString.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListOfDetectSyntaxResult =
+  struct
+    type nonrec t = BatchDetectSyntaxItemResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchDetectSyntaxItemResult.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BatchDetectSyntaxItemResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfDetectSyntaxResult"
+        ~of_json:BatchDetectSyntaxItemResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ListOfDetectSentimentResult =
   struct
     type nonrec t = BatchDetectSentimentItemResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDetectSentimentItemResult.to_value)) |>
         (fun x -> `List x)
@@ -7005,6 +10597,9 @@ module ListOfDetectKeyPhrasesResult =
   struct
     type nonrec t = BatchDetectKeyPhrasesItemResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDetectKeyPhrasesItemResult.to_value)) |>
         (fun x -> `List x)
@@ -7031,6 +10626,9 @@ module ListOfDetectEntitiesResult =
   struct
     type nonrec t = BatchDetectEntitiesItemResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDetectEntitiesItemResult.to_value)) |>
         (fun x -> `List x)
@@ -7057,6 +10655,9 @@ module ListOfDetectDominantLanguageResult =
   struct
     type nonrec t = BatchDetectDominantLanguageItemResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDetectDominantLanguageItemResult.to_value)) |>
         (fun x -> `List x)
@@ -7080,9 +10681,170 @@ module ListOfDetectDominantLanguageResult =
         ~of_json:BatchDetectDominantLanguageItemResult.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UpdateFlywheelResponse =
+  struct
+    type nonrec t =
+      {
+      flywheelProperties: FlywheelProperties.t option
+        [@ocaml.doc "The flywheel properties."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?flywheelProperties = fun () -> { flywheelProperties }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "KmsKeyValidationException" ->
+          `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "KmsKeyValidationException" ->
+          `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `KmsKeyValidationException e ->
+          `Assoc
+            [("error", (`String "KmsKeyValidationException"));
+            ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FlywheelProperties",
+           (Option.map x.flywheelProperties ~f:FlywheelProperties.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let flywheelProperties =
+        (Option.map ~f:FlywheelProperties.of_xml)
+          (Xml.child xml_arg0 "FlywheelProperties") in
+      make ?flywheelProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let flywheelProperties =
+        field_map json__ "FlywheelProperties" FlywheelProperties.of_json in
+      make ?flywheelProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the configuration information for an existing flywheel."]
+module UpdateFlywheelRequest =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the flywheel to update."];
+      activeModelArn: ComprehendModelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the active model version."];
+      dataAccessRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend permission to access the flywheel data."];
+      dataSecurityConfig: UpdateDataSecurityConfig.t option
+        [@ocaml.doc "Flywheel data security configuration."]}
+    let context_ = "UpdateFlywheelRequest"
+    let make ?activeModelArn =
+      fun ?dataAccessRoleArn ->
+        fun ?dataSecurityConfig ->
+          fun ~flywheelArn ->
+            fun () ->
+              {
+                activeModelArn;
+                dataAccessRoleArn;
+                dataSecurityConfig;
+                flywheelArn
+              }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Some (ComprehendFlywheelArn.to_value x.flywheelArn)));
+        ("ActiveModelArn",
+          (Option.map x.activeModelArn ~f:ComprehendModelArn.to_value));
+        ("DataAccessRoleArn",
+          (Option.map x.dataAccessRoleArn ~f:IamRoleArn.to_value));
+        ("DataSecurityConfig",
+          (Option.map x.dataSecurityConfig
+             ~f:UpdateDataSecurityConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataSecurityConfig =
+        (Option.map ~f:UpdateDataSecurityConfig.of_xml)
+          (Xml.child xml_arg0 "DataSecurityConfig") in
+      let dataAccessRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "DataAccessRoleArn") in
+      let activeModelArn =
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "ActiveModelArn") in
+      let flywheelArn =
+        ComprehendFlywheelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FlywheelArn") in
+      make ?dataSecurityConfig ?dataAccessRoleArn ?activeModelArn
+        ~flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataSecurityConfig =
+        field_map json__ "DataSecurityConfig"
+          UpdateDataSecurityConfig.of_json in
+      let dataAccessRoleArn =
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let activeModelArn =
+        field_map json__ "ActiveModelArn" ComprehendModelArn.of_json in
+      let flywheelArn =
+        field_map_exn json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?dataSecurityConfig ?dataAccessRoleArn ?activeModelArn
+        ~flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the configuration information for an existing flywheel."]
 module UpdateEndpointResponse =
   struct
-    type nonrec t = unit
+    type nonrec t =
+      {
+      desiredModelArn: ComprehendModelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the new model."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -7092,7 +10854,7 @@ module UpdateEndpointResponse =
       | `ResourceUnavailableException of ResourceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
+    let make ?desiredModelArn = fun () -> { desiredModelArn }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -7169,14 +10931,24 @@ module UpdateEndpointResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    let to_value x =
+      structure_to_value
+        [("DesiredModelArn",
+           (Option.map x.desiredModelArn ~f:ComprehendModelArn.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let desiredModelArn =
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "DesiredModelArn") in
+      make ?desiredModelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let desiredModelArn =
+        field_map json__ "DesiredModelArn" ComprehendModelArn.of_json in
+      make ?desiredModelArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates information about the specified endpoint."]
+  end[@@ocaml.doc
+       "Updates information about the specified endpoint. For information about endpoints, see Managing endpoints."]
 module UpdateEndpointRequest =
   struct
     type nonrec t =
@@ -7192,19 +10964,23 @@ module UpdateEndpointRequest =
           "The desired number of inference units to be used by the model using this endpoint. Each inference unit represents of a throughput of 100 characters per second."];
       desiredDataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "Data access role ARN to use in case the new model is encrypted with a customer CMK."]}
+          "Data access role ARN to use in case the new model is encrypted with a customer CMK."];
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel"]}
     let context_ = "UpdateEndpointRequest"
     let make ?desiredModelArn =
       fun ?desiredInferenceUnits ->
         fun ?desiredDataAccessRoleArn ->
-          fun ~endpointArn ->
-            fun () ->
-              {
-                desiredModelArn;
-                desiredInferenceUnits;
-                desiredDataAccessRoleArn;
-                endpointArn
-              }
+          fun ?flywheelArn ->
+            fun ~endpointArn ->
+              fun () ->
+                {
+                  desiredModelArn;
+                  desiredInferenceUnits;
+                  desiredDataAccessRoleArn;
+                  flywheelArn;
+                  endpointArn
+                }
     let to_value x =
       structure_to_value
         [("EndpointArn",
@@ -7215,9 +10991,14 @@ module UpdateEndpointRequest =
           (Option.map x.desiredInferenceUnits
              ~f:InferenceUnitsInteger.to_value));
         ("DesiredDataAccessRoleArn",
-          (Option.map x.desiredDataAccessRoleArn ~f:IamRoleArn.to_value))]
+          (Option.map x.desiredDataAccessRoleArn ~f:IamRoleArn.to_value));
+        ("FlywheelArn",
+          (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
       let desiredDataAccessRoleArn =
         (Option.map ~f:IamRoleArn.of_xml)
           (Xml.child xml_arg0 "DesiredDataAccessRoleArn") in
@@ -7230,22 +11011,26 @@ module UpdateEndpointRequest =
       let endpointArn =
         ComprehendEndpointArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
-      make ?desiredDataAccessRoleArn ?desiredInferenceUnits ?desiredModelArn
-        ~endpointArn ()
+      make ?flywheelArn ?desiredDataAccessRoleArn ?desiredInferenceUnits
+        ?desiredModelArn ~endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
       let desiredDataAccessRoleArn =
-        field_map json "DesiredDataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DesiredDataAccessRoleArn" IamRoleArn.of_json in
       let desiredInferenceUnits =
-        field_map json "DesiredInferenceUnits" InferenceUnitsInteger.of_json in
+        field_map json__ "DesiredInferenceUnits"
+          InferenceUnitsInteger.of_json in
       let desiredModelArn =
-        field_map json "DesiredModelArn" ComprehendModelArn.of_json in
+        field_map json__ "DesiredModelArn" ComprehendModelArn.of_json in
       let endpointArn =
-        field_map_exn json "EndpointArn" ComprehendEndpointArn.of_json in
-      make ?desiredDataAccessRoleArn ?desiredInferenceUnits ?desiredModelArn
-        ~endpointArn ()
+        field_map_exn json__ "EndpointArn" ComprehendEndpointArn.of_json in
+      make ?flywheelArn ?desiredDataAccessRoleArn ?desiredInferenceUnits
+        ?desiredModelArn ~endpointArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates information about the specified endpoint."]
+  end[@@ocaml.doc
+       "Updates information about the specified endpoint. For information about endpoints, see Managing endpoints."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -7352,10 +11137,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ComprehendArn.of_json in
+        field_map_exn json__ "ResourceArn" ComprehendArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7464,10 +11249,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ComprehendArn.of_json in
+        field_map_exn json__ "ResourceArn" ComprehendArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7559,9 +11344,10 @@ module StopTrainingEntityRecognizerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EntityRecognizerArn") in
       make ~entityRecognizerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entityRecognizerArn =
-        field_map_exn json "EntityRecognizerArn" EntityRecognizerArn.of_json in
+        field_map_exn json__ "EntityRecognizerArn"
+          EntityRecognizerArn.of_json in
       make ~entityRecognizerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7653,9 +11439,9 @@ module StopTrainingDocumentClassifierRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentClassifierArn") in
       make ~documentClassifierArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentClassifierArn =
-        field_map_exn json "DocumentClassifierArn"
+        field_map_exn json__ "DocumentClassifierArn"
           DocumentClassifierArn.of_json in
       make ~documentClassifierArn ()
     let to_json v = composed_to_json to_value v
@@ -7728,13 +11514,13 @@ module StopTargetedSentimentDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops a targeted sentiment detection job in progress. If the job state is IN_PROGRESS the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is be stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
+       "Stops a targeted sentiment detection job in progress. If the job state is IN_PROGRESS, the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is be stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
 module StopTargetedSentimentDetectionJobRequest =
   struct
     type nonrec t =
@@ -7752,11 +11538,12 @@ module StopTargetedSentimentDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops a targeted sentiment detection job in progress. If the job state is IN_PROGRESS the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is be stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
+       "Stops a targeted sentiment detection job in progress. If the job state is IN_PROGRESS, the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is be stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
 module StopSentimentDetectionJobResponse =
   struct
     type nonrec t =
@@ -7823,13 +11610,13 @@ module StopSentimentDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops a sentiment detection job in progress. If the job state is IN_PROGRESS the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is be stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
+       "Stops a sentiment detection job in progress. If the job state is IN_PROGRESS, the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is be stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
 module StopSentimentDetectionJobRequest =
   struct
     type nonrec t =
@@ -7846,11 +11633,12 @@ module StopSentimentDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops a sentiment detection job in progress. If the job state is IN_PROGRESS the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is be stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
+       "Stops a sentiment detection job in progress. If the job state is IN_PROGRESS, the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is be stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
 module StopPiiEntitiesDetectionJobResponse =
   struct
     type nonrec t =
@@ -7917,9 +11705,9 @@ module StopPiiEntitiesDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a PII entities detection job in progress."]
@@ -7940,8 +11728,9 @@ module StopPiiEntitiesDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a PII entities detection job in progress."]
 module StopKeyPhrasesDetectionJobResponse =
@@ -8011,9 +11800,9 @@ module StopKeyPhrasesDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8035,8 +11824,9 @@ module StopKeyPhrasesDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops a key phrases detection job in progress. If the job state is IN_PROGRESS the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
@@ -8105,9 +11895,9 @@ module StopEventsDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops an events detection job in progress."]
@@ -8127,8 +11917,9 @@ module StopEventsDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops an events detection job in progress."]
 module StopEntitiesDetectionJobResponse =
@@ -8197,9 +11988,9 @@ module StopEntitiesDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8220,8 +12011,9 @@ module StopEntitiesDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops an entities detection job in progress. If the job state is IN_PROGRESS the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
@@ -8292,9 +12084,9 @@ module StopDominantLanguageDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8316,8 +12108,9 @@ module StopDominantLanguageDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops a dominant language detection job in progress. If the job state is IN_PROGRESS the job is marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state; otherwise the job is stopped and put into the STOPPED state. If the job is in the COMPLETED or FAILED state when you call the StopDominantLanguageDetectionJob operation, the operation returns a 400 Internal Request Exception. When a job is stopped, any documents already processed are written to the output location."]
@@ -8330,7 +12123,7 @@ module StartTopicsDetectionJobResponse =
           "The identifier generated for the job. To get the status of the job, use this identifier with the DescribeTopicDetectionJob operation."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the topics detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:topics-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:document-classification-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the topics detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:topics-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:document-classification-job/1234abcd12ab34cd56ef1234567890ab"];
       jobStatus: JobStatus.t option
         [@ocaml.doc
           "The status of the job: SUBMITTED - The job has been received and is queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. To get details, use the DescribeTopicDetectionJob operation."]}
@@ -8338,6 +12131,7 @@ module StartTopicsDetectionJobResponse =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -8351,6 +12145,8 @@ module StartTopicsDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_json json)
       | "TooManyTagsException" ->
@@ -8366,6 +12162,8 @@ module StartTopicsDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | "TooManyTagsException" ->
@@ -8386,6 +12184,10 @@ module StartTopicsDetectionJobResponse =
           `Assoc
             [("error", (`String "KmsKeyValidationException"));
             ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `TooManyRequestsException e ->
           `Assoc
             [("error", (`String "TooManyRequestsException"));
@@ -8413,10 +12215,10 @@ module StartTopicsDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8433,7 +12235,7 @@ module StartTopicsDetectionJobRequest =
           "Specifies where to send the output files. The output is a compressed archive with two files, topic-terms.csv that lists the terms associated with each topic, and doc-topics.csv that lists the documents associated with each topic"];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data. For more information, see https://docs.aws.amazon.com/comprehend/latest/dg/access-control-managing-permissions.html#auth-role-permissions."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data. For more information, see Role-based permissions."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       numberOfTopics: NumberOfTopicsInteger.t option
         [@ocaml.doc "The number of topics to detect."];
@@ -8442,13 +12244,13 @@ module StartTopicsDetectionJobRequest =
           "A unique identifier for the request. If you do not set the client request token, Amazon Comprehend generates one."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for your topic detection job. For more information, see Amazon VPC."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the topics detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the topics detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
     let context_ = "StartTopicsDetectionJobRequest"
     let make ?jobName =
       fun ?numberOfTopics ->
@@ -8517,21 +12319,22 @@ module StartTopicsDetectionJobRequest =
         ?numberOfTopics ?jobName ~dataAccessRoleArn ~outputDataConfig
         ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let numberOfTopics =
-        field_map json "NumberOfTopics" NumberOfTopicsInteger.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "NumberOfTopics" NumberOfTopicsInteger.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken
         ?numberOfTopics ?jobName ~dataAccessRoleArn ~outputDataConfig
         ~inputDataConfig ()
@@ -8544,17 +12347,18 @@ module StartTargetedSentimentDetectionJobResponse =
       {
       jobId: JobId.t option
         [@ocaml.doc
-          "The identifier generated for the job. To get the status of a job, use this identifier with the operation."];
+          "The identifier generated for the job. To get the status of a job, use this identifier with the DescribeTargetedSentimentDetectionJob operation."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the targeted sentiment detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:targeted-sentiment-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:targeted-sentiment-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the targeted sentiment detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:targeted-sentiment-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:targeted-sentiment-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobStatus: JobStatus.t option
         [@ocaml.doc
-          "The status of the job. SUBMITTED - The job has been received and is queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. To get details, use the operation."]}
+          "The status of the job. SUBMITTED - The job has been received and is queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. To get details, use the DescribeTargetedSentimentDetectionJob operation."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -8568,6 +12372,8 @@ module StartTargetedSentimentDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_json json)
       | "TooManyTagsException" ->
@@ -8583,6 +12389,8 @@ module StartTargetedSentimentDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | "TooManyTagsException" ->
@@ -8603,6 +12411,10 @@ module StartTargetedSentimentDetectionJobResponse =
           `Assoc
             [("error", (`String "KmsKeyValidationException"));
             ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `TooManyRequestsException e ->
           `Assoc
             [("error", (`String "TooManyRequestsException"));
@@ -8630,14 +12442,14 @@ module StartTargetedSentimentDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an asynchronous targeted sentiment detection job for a collection of documents. Use the operation to track the status of a job."]
+       "Starts an asynchronous targeted sentiment detection job for a collection of documents. Use the DescribeTargetedSentimentDetectionJob operation to track the status of a job."]
 module StartTargetedSentimentDetectionJobRequest =
   struct
     type nonrec t =
@@ -8647,11 +12459,11 @@ module StartTargetedSentimentDetectionJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data. For more information, see Role-based permissions."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data. For more information, see Role-based permissions."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "The language of the input documents. You can specify any of the primary languages supported by Amazon Comprehend. All documents must be in the same language."];
+          "The language of the input documents. Currently, English is the only supported language."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
           "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
@@ -8661,7 +12473,7 @@ module StartTargetedSentimentDetectionJobRequest =
       vpcConfig: VpcConfig.t option ;
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the targeted sentiment detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the targeted sentiment detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
     let context_ = "StartTargetedSentimentDetectionJobRequest"
     let make ?jobName =
       fun ?clientRequestToken ->
@@ -8728,26 +12540,27 @@ module StartTargetedSentimentDetectionJobRequest =
       make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ~languageCode
         ?jobName ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ~languageCode
         ?jobName ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an asynchronous targeted sentiment detection job for a collection of documents. Use the operation to track the status of a job."]
+       "Starts an asynchronous targeted sentiment detection job for a collection of documents. Use the DescribeTargetedSentimentDetectionJob operation to track the status of a job."]
 module StartSentimentDetectionJobResponse =
   struct
     type nonrec t =
@@ -8757,7 +12570,7 @@ module StartSentimentDetectionJobResponse =
           "The identifier generated for the job. To get the status of a job, use this identifier with the operation."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the sentiment detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:sentiment-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:sentiment-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the sentiment detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:sentiment-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:sentiment-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobStatus: JobStatus.t option
         [@ocaml.doc
           "The status of the job. SUBMITTED - The job has been received and is queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. To get details, use the operation."]}
@@ -8765,6 +12578,7 @@ module StartSentimentDetectionJobResponse =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -8778,6 +12592,8 @@ module StartSentimentDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_json json)
       | "TooManyTagsException" ->
@@ -8793,6 +12609,8 @@ module StartSentimentDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | "TooManyTagsException" ->
@@ -8813,6 +12631,10 @@ module StartSentimentDetectionJobResponse =
           `Assoc
             [("error", (`String "KmsKeyValidationException"));
             ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `TooManyRequestsException e ->
           `Assoc
             [("error", (`String "TooManyRequestsException"));
@@ -8840,10 +12662,10 @@ module StartSentimentDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8859,7 +12681,7 @@ module StartSentimentDetectionJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data. For more information, see https://docs.aws.amazon.com/comprehend/latest/dg/access-control-managing-permissions.html#auth-role-permissions."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data. For more information, see Role-based permissions."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       languageCode: LanguageCode.t
         [@ocaml.doc
@@ -8869,13 +12691,13 @@ module StartSentimentDetectionJobRequest =
           "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for your sentiment detection job. For more information, see Amazon VPC."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the sentiment detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the sentiment detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
     let context_ = "StartSentimentDetectionJobRequest"
     let make ?jobName =
       fun ?clientRequestToken ->
@@ -8942,21 +12764,22 @@ module StartSentimentDetectionJobRequest =
       make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ~languageCode
         ?jobName ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ~languageCode
         ?jobName ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
@@ -8970,12 +12793,13 @@ module StartPiiEntitiesDetectionJobResponse =
         [@ocaml.doc "The identifier generated for the job."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the PII entity detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:pii-entities-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:pii-entities-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the PII entity detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:pii-entities-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:pii-entities-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobStatus: JobStatus.t option [@ocaml.doc "The status of the job."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -8989,6 +12813,8 @@ module StartPiiEntitiesDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_json json)
       | "TooManyTagsException" ->
@@ -9004,6 +12830,8 @@ module StartPiiEntitiesDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | "TooManyTagsException" ->
@@ -9024,6 +12852,10 @@ module StartPiiEntitiesDetectionJobResponse =
           `Assoc
             [("error", (`String "KmsKeyValidationException"));
             ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `TooManyRequestsException e ->
           `Assoc
             [("error", (`String "TooManyRequestsException"));
@@ -9051,10 +12883,10 @@ module StartPiiEntitiesDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9076,16 +12908,17 @@ module StartPiiEntitiesDetectionJobRequest =
           "Provides configuration parameters for PII entity redaction. This parameter is required if you set the Mode parameter to ONLY_REDACTION. In that case, you must provide a RedactionConfig definition that includes the PiiEntityTypes parameter."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       languageCode: LanguageCode.t
-        [@ocaml.doc "The language of the input documents."];
+        [@ocaml.doc
+          "The language of the input documents. Enter the language code for English (en) or Spanish (es)."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
           "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the PII entities detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the PII entities detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
     let context_ = "StartPiiEntitiesDetectionJobRequest"
     let make ?redactionConfig =
       fun ?jobName ->
@@ -9155,22 +12988,23 @@ module StartPiiEntitiesDetectionJobRequest =
         ~dataAccessRoleArn ?redactionConfig ~mode ~outputDataConfig
         ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let redactionConfig =
-        field_map json "RedactionConfig" RedactionConfig.of_json in
-      let mode = field_map_exn json "Mode" PiiEntitiesDetectionMode.of_json in
+        field_map json__ "RedactionConfig" RedactionConfig.of_json in
+      let mode = field_map_exn json__ "Mode" PiiEntitiesDetectionMode.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ?tags ?clientRequestToken ~languageCode ?jobName
         ~dataAccessRoleArn ?redactionConfig ~mode ~outputDataConfig
         ~inputDataConfig ()
@@ -9186,7 +13020,7 @@ module StartKeyPhrasesDetectionJobResponse =
           "The identifier generated for the job. To get the status of a job, use this identifier with the operation."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the key phrase detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:key-phrases-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:key-phrases-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the key phrase detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:key-phrases-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:key-phrases-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobStatus: JobStatus.t option
         [@ocaml.doc
           "The status of the job. SUBMITTED - The job has been received and is queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. To get details, use the operation."]}
@@ -9194,6 +13028,7 @@ module StartKeyPhrasesDetectionJobResponse =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -9207,6 +13042,8 @@ module StartKeyPhrasesDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_json json)
       | "TooManyTagsException" ->
@@ -9222,6 +13059,8 @@ module StartKeyPhrasesDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | "TooManyTagsException" ->
@@ -9242,6 +13081,10 @@ module StartKeyPhrasesDetectionJobResponse =
           `Assoc
             [("error", (`String "KmsKeyValidationException"));
             ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `TooManyRequestsException e ->
           `Assoc
             [("error", (`String "TooManyRequestsException"));
@@ -9269,10 +13112,10 @@ module StartKeyPhrasesDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9288,7 +13131,7 @@ module StartKeyPhrasesDetectionJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data. For more information, see https://docs.aws.amazon.com/comprehend/latest/dg/access-control-managing-permissions.html#auth-role-permissions."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data. For more information, see Role-based permissions."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       languageCode: LanguageCode.t
         [@ocaml.doc
@@ -9298,13 +13141,13 @@ module StartKeyPhrasesDetectionJobRequest =
           "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for your key phrases detection job. For more information, see Amazon VPC."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the key phrases detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the key phrases detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
     let context_ = "StartKeyPhrasesDetectionJobRequest"
     let make ?jobName =
       fun ?clientRequestToken ->
@@ -9371,26 +13214,163 @@ module StartKeyPhrasesDetectionJobRequest =
       make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ~languageCode
         ?jobName ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ~languageCode
         ?jobName ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts an asynchronous key phrase detection job for a collection of documents. Use the operation to track the status of a job."]
+module StartFlywheelIterationResponse =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t option ;
+      flywheelIterationId: FlywheelIterationId.t option }
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?flywheelArn =
+      fun ?flywheelIterationId ->
+        fun () -> { flywheelArn; flywheelIterationId }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value));
+        ("FlywheelIterationId",
+          (Option.map x.flywheelIterationId ~f:FlywheelIterationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let flywheelIterationId =
+        (Option.map ~f:FlywheelIterationId.of_xml)
+          (Xml.child xml_arg0 "FlywheelIterationId") in
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
+      make ?flywheelIterationId ?flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let flywheelIterationId =
+        field_map json__ "FlywheelIterationId" FlywheelIterationId.of_json in
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?flywheelIterationId ?flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Start the flywheel iteration.This operation uses any new datasets to train a new model version. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module StartFlywheelIterationRequest =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t
+        [@ocaml.doc "The ARN of the flywheel."];
+      clientRequestToken: ClientRequestTokenString.t option
+        [@ocaml.doc
+          "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."]}
+    let context_ = "StartFlywheelIterationRequest"
+    let make ?clientRequestToken =
+      fun ~flywheelArn -> fun () -> { clientRequestToken; flywheelArn }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Some (ComprehendFlywheelArn.to_value x.flywheelArn)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken
+             ~f:ClientRequestTokenString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestTokenString.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let flywheelArn =
+        ComprehendFlywheelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FlywheelArn") in
+      make ?clientRequestToken ~flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      let flywheelArn =
+        field_map_exn json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?clientRequestToken ~flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Start the flywheel iteration.This operation uses any new datasets to train a new model version. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
 module StartEventsDetectionJobResponse =
   struct
     type nonrec t =
@@ -9400,13 +13380,14 @@ module StartEventsDetectionJobResponse =
           "An unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the events detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:events-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:events-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the events detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:events-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:events-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobStatus: JobStatus.t option
         [@ocaml.doc "The status of the events detection job."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -9420,6 +13401,8 @@ module StartEventsDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_json json)
       | "TooManyTagsException" ->
@@ -9435,6 +13418,8 @@ module StartEventsDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | "TooManyTagsException" ->
@@ -9455,6 +13440,10 @@ module StartEventsDetectionJobResponse =
           `Assoc
             [("error", (`String "KmsKeyValidationException"));
             ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `TooManyRequestsException e ->
           `Assoc
             [("error", (`String "TooManyRequestsException"));
@@ -9482,10 +13471,10 @@ module StartEventsDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9501,7 +13490,7 @@ module StartEventsDetectionJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       jobName: JobName.t option
         [@ocaml.doc "The identifier of the events detection job."];
       languageCode: LanguageCode.t
@@ -9513,7 +13502,7 @@ module StartEventsDetectionJobRequest =
         [@ocaml.doc "The types of events to detect in the input documents."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the events detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the events detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
     let context_ = "StartEventsDetectionJobRequest"
     let make ?jobName =
       fun ?clientRequestToken ->
@@ -9576,21 +13565,22 @@ module StartEventsDetectionJobRequest =
       make ?tags ~targetEventTypes ?clientRequestToken ~languageCode ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let targetEventTypes =
-        field_map_exn json "TargetEventTypes" TargetEventTypes.of_json in
+        field_map_exn json__ "TargetEventTypes" TargetEventTypes.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ?tags ~targetEventTypes ?clientRequestToken ~languageCode ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
@@ -9605,21 +13595,27 @@ module StartEntitiesDetectionJobResponse =
           "The identifier generated for the job. To get the status of job, use this identifier with the operation."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the entities detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:entities-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:entities-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the entities detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:entities-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:entities-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobStatus: JobStatus.t option
         [@ocaml.doc
-          "The status of the job. SUBMITTED - The job has been received and is queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. To get details, use the operation. STOP_REQUESTED - Amazon Comprehend has received a stop request for the job and is processing the request. STOPPED - The job was successfully stopped without completing."]}
+          "The status of the job. SUBMITTED - The job has been received and is queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. To get details, use the operation. STOP_REQUESTED - Amazon Comprehend has received a stop request for the job and is processing the request. STOPPED - The job was successfully stopped without completing."];
+      entityRecognizerArn: EntityRecognizerArn.t option
+        [@ocaml.doc "The ARN of the custom entity recognition model."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ResourceUnavailableException of ResourceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?jobId =
-      fun ?jobArn -> fun ?jobStatus -> fun () -> { jobId; jobArn; jobStatus }
+      fun ?jobArn ->
+        fun ?jobStatus ->
+          fun ?entityRecognizerArn ->
+            fun () -> { jobId; jobArn; jobStatus; entityRecognizerArn }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -9628,6 +13624,8 @@ module StartEntitiesDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ResourceUnavailableException" ->
@@ -9648,6 +13646,8 @@ module StartEntitiesDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ResourceUnavailableException" ->
@@ -9673,6 +13673,10 @@ module StartEntitiesDetectionJobResponse =
           `Assoc
             [("error", (`String "KmsKeyValidationException"));
             ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -9698,21 +13702,28 @@ module StartEntitiesDetectionJobResponse =
       structure_to_value
         [("JobId", (Option.map x.jobId ~f:JobId.to_value));
         ("JobArn", (Option.map x.jobArn ~f:ComprehendArn.to_value));
-        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value))]
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
+        ("EntityRecognizerArn",
+          (Option.map x.entityRecognizerArn ~f:EntityRecognizerArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let entityRecognizerArn =
+        (Option.map ~f:EntityRecognizerArn.of_xml)
+          (Xml.child xml_arg0 "EntityRecognizerArn") in
       let jobStatus =
         (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
       let jobArn =
         (Option.map ~f:ComprehendArn.of_xml) (Xml.child xml_arg0 "JobArn") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
-      make ?jobStatus ?jobArn ?jobId ()
+      make ?entityRecognizerArn ?jobStatus ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
-      make ?jobStatus ?jobArn ?jobId ()
+    let of_json json__ =
+      let entityRecognizerArn =
+        field_map json__ "EntityRecognizerArn" EntityRecognizerArn.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?entityRecognizerArn ?jobStatus ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts an asynchronous entity detection job for a collection of documents. Use the operation to track the status of a job. This API can be used for either standard entity detection or custom entity recognition. In order to be used for custom entity recognition, the optional EntityRecognizerArn must be used in order to provide access to the recognizer being used to detect the custom entity."]
@@ -9727,7 +13738,7 @@ module StartEntitiesDetectionJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data. For more information, see https://docs.aws.amazon.com/comprehend/latest/dg/access-control-managing-permissions.html#auth-role-permissions."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data. For more information, see Role-based permissions."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       entityRecognizerArn: EntityRecognizerArn.t option
         [@ocaml.doc
@@ -9740,13 +13751,16 @@ module StartEntitiesDetectionJobRequest =
           "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for your entity detection job. For more information, see Amazon VPC."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the entities detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the entities detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."];
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the flywheel associated with the model to use."]}
     let context_ = "StartEntitiesDetectionJobRequest"
     let make ?jobName =
       fun ?entityRecognizerArn ->
@@ -9754,23 +13768,25 @@ module StartEntitiesDetectionJobRequest =
           fun ?volumeKmsKeyId ->
             fun ?vpcConfig ->
               fun ?tags ->
-                fun ~inputDataConfig ->
-                  fun ~outputDataConfig ->
-                    fun ~dataAccessRoleArn ->
-                      fun ~languageCode ->
-                        fun () ->
-                          {
-                            jobName;
-                            entityRecognizerArn;
-                            clientRequestToken;
-                            volumeKmsKeyId;
-                            vpcConfig;
-                            tags;
-                            inputDataConfig;
-                            outputDataConfig;
-                            dataAccessRoleArn;
-                            languageCode
-                          }
+                fun ?flywheelArn ->
+                  fun ~inputDataConfig ->
+                    fun ~outputDataConfig ->
+                      fun ~dataAccessRoleArn ->
+                        fun ~languageCode ->
+                          fun () ->
+                            {
+                              jobName;
+                              entityRecognizerArn;
+                              clientRequestToken;
+                              volumeKmsKeyId;
+                              vpcConfig;
+                              tags;
+                              flywheelArn;
+                              inputDataConfig;
+                              outputDataConfig;
+                              dataAccessRoleArn;
+                              languageCode
+                            }
     let to_value x =
       structure_to_value
         [("InputDataConfig",
@@ -9789,9 +13805,14 @@ module StartEntitiesDetectionJobRequest =
         ("VolumeKmsKeyId",
           (Option.map x.volumeKmsKeyId ~f:KmsKeyId.to_value));
         ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("FlywheelArn",
+          (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let vpcConfig =
         (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "VpcConfig") in
@@ -9817,30 +13838,33 @@ module StartEntitiesDetectionJobRequest =
       let inputDataConfig =
         InputDataConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
-      make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ~languageCode
-        ?entityRecognizerArn ?jobName ~dataAccessRoleArn ~outputDataConfig
-        ~inputDataConfig ()
+      make ?flywheelArn ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken
+        ~languageCode ?entityRecognizerArn ?jobName ~dataAccessRoleArn
+        ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let entityRecognizerArn =
-        field_map json "EntityRecognizerArn" EntityRecognizerArn.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "EntityRecognizerArn" EntityRecognizerArn.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
-      make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ~languageCode
-        ?entityRecognizerArn ?jobName ~dataAccessRoleArn ~outputDataConfig
-        ~inputDataConfig ()
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
+      make ?flywheelArn ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken
+        ~languageCode ?entityRecognizerArn ?jobName ~dataAccessRoleArn
+        ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts an asynchronous entity detection job for a collection of documents. Use the operation to track the status of a job. This API can be used for either standard entity detection or custom entity recognition. In order to be used for custom entity recognition, the optional EntityRecognizerArn must be used in order to provide access to the recognizer being used to detect the custom entity."]
@@ -9853,7 +13877,7 @@ module StartDominantLanguageDetectionJobResponse =
           "The identifier generated for the job. To get the status of a job, use this identifier with the operation."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the dominant language detection job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:dominant-language-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:dominant-language-detection-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the dominant language detection job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:dominant-language-detection-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:dominant-language-detection-job/1234abcd12ab34cd56ef1234567890ab"];
       jobStatus: JobStatus.t option
         [@ocaml.doc
           "The status of the job. SUBMITTED - The job has been received and is queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. To get details, use the operation."]}
@@ -9861,6 +13885,7 @@ module StartDominantLanguageDetectionJobResponse =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -9874,6 +13899,8 @@ module StartDominantLanguageDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_json json)
       | "TooManyTagsException" ->
@@ -9889,6 +13916,8 @@ module StartDominantLanguageDetectionJobResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | "TooManyTagsException" ->
@@ -9909,6 +13938,10 @@ module StartDominantLanguageDetectionJobResponse =
           `Assoc
             [("error", (`String "KmsKeyValidationException"));
             ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `TooManyRequestsException e ->
           `Assoc
             [("error", (`String "TooManyRequestsException"));
@@ -9936,10 +13969,10 @@ module StartDominantLanguageDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9955,20 +13988,20 @@ module StartDominantLanguageDetectionJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data. For more information, see https://docs.aws.amazon.com/comprehend/latest/dg/access-control-managing-permissions.html#auth-role-permissions."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data. For more information, see Role-based permissions."];
       jobName: JobName.t option [@ocaml.doc "An identifier for the job."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
           "A unique identifier for the request. If you do not set the client request token, Amazon Comprehend generates one."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for your dominant language detection job. For more information, see Amazon VPC."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the dominant language detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the dominant language detection job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
     let context_ = "StartDominantLanguageDetectionJobRequest"
     let make ?jobName =
       fun ?clientRequestToken ->
@@ -10029,19 +14062,20 @@ module StartDominantLanguageDetectionJobRequest =
       make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
@@ -10053,24 +14087,30 @@ module StartDocumentClassificationJobResponse =
       {
       jobId: JobId.t option
         [@ocaml.doc
-          "The identifier generated for the job. To get the status of the job, use this identifier with the operation."];
+          "The identifier generated for the job. To get the status of the job, use this identifier with the DescribeDocumentClassificationJob operation."];
       jobArn: ComprehendArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the document classification job. It is a unique, fully qualified identifier for the job. It includes the AWS account, Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:document-classification-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:document-classification-job/1234abcd12ab34cd56ef1234567890ab"];
+          "The Amazon Resource Name (ARN) of the document classification job. It is a unique, fully qualified identifier for the job. It includes the Amazon Web Services account, Amazon Web Services Region, and the job ID. The format of the ARN is as follows: arn:<partition>:comprehend:<region>:<account-id>:document-classification-job/<job-id> The following is an example job ARN: arn:aws:comprehend:us-west-2:111122223333:document-classification-job/1234abcd12ab34cd56ef1234567890ab"];
       jobStatus: JobStatus.t option
         [@ocaml.doc
-          "The status of the job: SUBMITTED - The job has been received and queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. For details, use the operation. STOP_REQUESTED - Amazon Comprehend has received a stop request for the job and is processing the request. STOPPED - The job was successfully stopped without completing."]}
+          "The status of the job: SUBMITTED - The job has been received and queued for processing. IN_PROGRESS - Amazon Comprehend is processing the job. COMPLETED - The job was successfully completed and the output is available. FAILED - The job did not complete. For details, use the DescribeDocumentClassificationJob operation. STOP_REQUESTED - Amazon Comprehend has received a stop request for the job and is processing the request. STOPPED - The job was successfully stopped without completing."];
+      documentClassifierArn: DocumentClassifierArn.t option
+        [@ocaml.doc "The ARN of the custom classification model."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ResourceUnavailableException of ResourceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?jobId =
-      fun ?jobArn -> fun ?jobStatus -> fun () -> { jobId; jobArn; jobStatus }
+      fun ?jobArn ->
+        fun ?jobStatus ->
+          fun ?documentClassifierArn ->
+            fun () -> { jobId; jobArn; jobStatus; documentClassifierArn }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -10079,6 +14119,8 @@ module StartDocumentClassificationJobResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ResourceUnavailableException" ->
@@ -10099,6 +14141,8 @@ module StartDocumentClassificationJobResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "KmsKeyValidationException" ->
           `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ResourceUnavailableException" ->
@@ -10124,6 +14168,10 @@ module StartDocumentClassificationJobResponse =
           `Assoc
             [("error", (`String "KmsKeyValidationException"));
             ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -10149,30 +14197,39 @@ module StartDocumentClassificationJobResponse =
       structure_to_value
         [("JobId", (Option.map x.jobId ~f:JobId.to_value));
         ("JobArn", (Option.map x.jobArn ~f:ComprehendArn.to_value));
-        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value))]
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
+        ("DocumentClassifierArn",
+          (Option.map x.documentClassifierArn
+             ~f:DocumentClassifierArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentClassifierArn =
+        (Option.map ~f:DocumentClassifierArn.of_xml)
+          (Xml.child xml_arg0 "DocumentClassifierArn") in
       let jobStatus =
         (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
       let jobArn =
         (Option.map ~f:ComprehendArn.of_xml) (Xml.child xml_arg0 "JobArn") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
-      make ?jobStatus ?jobArn ?jobId ()
+      make ?documentClassifierArn ?jobStatus ?jobArn ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobArn = field_map json "JobArn" ComprehendArn.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
-      make ?jobStatus ?jobArn ?jobId ()
+    let of_json json__ =
+      let documentClassifierArn =
+        field_map json__ "DocumentClassifierArn"
+          DocumentClassifierArn.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobArn = field_map json__ "JobArn" ComprehendArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?documentClassifierArn ?jobStatus ?jobArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an asynchronous document classification job. Use the operation to track the progress of the job."]
+       "Starts an asynchronous document classification job using a custom classification model. Use the DescribeDocumentClassificationJob operation to track the progress of the job."]
 module StartDocumentClassificationJobRequest =
   struct
     type nonrec t =
       {
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
-      documentClassifierArn: DocumentClassifierArn.t
+      documentClassifierArn: DocumentClassifierArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the document classifier to use to process the job."];
       inputDataConfig: InputDataConfig.t
@@ -10182,46 +14239,52 @@ module StartDocumentClassificationJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
           "A unique identifier for the request. If you do not set the client request token, Amazon Comprehend generates one."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for your document classification job. For more information, see Amazon VPC."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the document classification job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the document classification job. A tag is a key-value pair that adds metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."];
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the flywheel associated with the model to use."]}
     let context_ = "StartDocumentClassificationJobRequest"
     let make ?jobName =
-      fun ?clientRequestToken ->
-        fun ?volumeKmsKeyId ->
-          fun ?vpcConfig ->
-            fun ?tags ->
-              fun ~documentClassifierArn ->
-                fun ~inputDataConfig ->
-                  fun ~outputDataConfig ->
-                    fun ~dataAccessRoleArn ->
-                      fun () ->
-                        {
-                          jobName;
-                          clientRequestToken;
-                          volumeKmsKeyId;
-                          vpcConfig;
-                          tags;
-                          documentClassifierArn;
-                          inputDataConfig;
-                          outputDataConfig;
-                          dataAccessRoleArn
-                        }
+      fun ?documentClassifierArn ->
+        fun ?clientRequestToken ->
+          fun ?volumeKmsKeyId ->
+            fun ?vpcConfig ->
+              fun ?tags ->
+                fun ?flywheelArn ->
+                  fun ~inputDataConfig ->
+                    fun ~outputDataConfig ->
+                      fun ~dataAccessRoleArn ->
+                        fun () ->
+                          {
+                            jobName;
+                            documentClassifierArn;
+                            clientRequestToken;
+                            volumeKmsKeyId;
+                            vpcConfig;
+                            tags;
+                            flywheelArn;
+                            inputDataConfig;
+                            outputDataConfig;
+                            dataAccessRoleArn
+                          }
     let to_value x =
       structure_to_value
         [("JobName", (Option.map x.jobName ~f:JobName.to_value));
         ("DocumentClassifierArn",
-          (Some (DocumentClassifierArn.to_value x.documentClassifierArn)));
+          (Option.map x.documentClassifierArn
+             ~f:DocumentClassifierArn.to_value));
         ("InputDataConfig",
           (Some (InputDataConfig.to_value x.inputDataConfig)));
         ("OutputDataConfig",
@@ -10234,9 +14297,14 @@ module StartDocumentClassificationJobRequest =
         ("VolumeKmsKeyId",
           (Option.map x.volumeKmsKeyId ~f:KmsKeyId.to_value));
         ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("FlywheelArn",
+          (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let vpcConfig =
         (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "VpcConfig") in
@@ -10255,36 +14323,39 @@ module StartDocumentClassificationJobRequest =
         InputDataConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
       let documentClassifierArn =
-        DocumentClassifierArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DocumentClassifierArn") in
+        (Option.map ~f:DocumentClassifierArn.of_xml)
+          (Xml.child xml_arg0 "DocumentClassifierArn") in
       let jobName =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
-      make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken
+      make ?flywheelArn ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig
-        ~documentClassifierArn ?jobName ()
+        ?documentClassifierArn ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       let documentClassifierArn =
-        field_map_exn json "DocumentClassifierArn"
+        field_map json__ "DocumentClassifierArn"
           DocumentClassifierArn.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      make ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      make ?flywheelArn ?tags ?vpcConfig ?volumeKmsKeyId ?clientRequestToken
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig
-        ~documentClassifierArn ?jobName ()
+        ?documentClassifierArn ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an asynchronous document classification job. Use the operation to track the progress of the job."]
+       "Starts an asynchronous document classification job using a custom classification model. Use the DescribeDocumentClassificationJob operation to track the progress of the job."]
 module PutResourcePolicyResponse =
   struct
     type nonrec t =
@@ -10349,13 +14420,13 @@ module PutResourcePolicyResponse =
           (Xml.child xml_arg0 "PolicyRevisionId") in
       make ?policyRevisionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyRevisionId =
-        field_map json "PolicyRevisionId" PolicyRevisionId.of_json in
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
       make ?policyRevisionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches a resource-based policy to a custom model. You can use this policy to authorize an entity in another AWS account to import the custom model, which replicates it in Amazon Comprehend in their account."]
+       "Attaches a resource-based policy to a custom model. You can use this policy to authorize an entity in another Amazon Web Services account to import the custom model, which replicates it in Amazon Comprehend in their account."]
 module PutResourcePolicyRequest =
   struct
     type nonrec t =
@@ -10393,16 +14464,17 @@ module PutResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?policyRevisionId ~resourcePolicy ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyRevisionId =
-        field_map json "PolicyRevisionId" PolicyRevisionId.of_json in
-      let resourcePolicy = field_map_exn json "ResourcePolicy" Policy.of_json in
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
+      let resourcePolicy =
+        field_map_exn json__ "ResourcePolicy" Policy.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ComprehendModelArn.of_json in
+        field_map_exn json__ "ResourceArn" ComprehendModelArn.of_json in
       make ?policyRevisionId ~resourcePolicy ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches a resource-based policy to a custom model. You can use this policy to authorize an entity in another AWS account to import the custom model, which replicates it in Amazon Comprehend in their account."]
+       "Attaches a resource-based policy to a custom model. You can use this policy to authorize an entity in another Amazon Web Services account to import the custom model, which replicates it in Amazon Comprehend in their account."]
 module ListTopicsDetectionJobsResponse =
   struct
     type nonrec t =
@@ -10485,10 +14557,10 @@ module ListTopicsDetectionJobsResponse =
           (Xml.child xml_arg0 "TopicsDetectionJobPropertiesList") in
       make ?nextToken ?topicsDetectionJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let topicsDetectionJobPropertiesList =
-        field_map json "TopicsDetectionJobPropertiesList"
+        field_map json__ "TopicsDetectionJobPropertiesList"
           TopicsDetectionJobPropertiesList.of_json in
       make ?nextToken ?topicsDetectionJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -10528,10 +14600,11 @@ module ListTopicsDetectionJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filter = field_map json "Filter" TopicsDetectionJobFilter.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filter = field_map json__ "Filter" TopicsDetectionJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10618,10 +14691,10 @@ module ListTargetedSentimentDetectionJobsResponse =
           (Xml.child xml_arg0 "TargetedSentimentDetectionJobPropertiesList") in
       make ?nextToken ?targetedSentimentDetectionJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let targetedSentimentDetectionJobPropertiesList =
-        field_map json "TargetedSentimentDetectionJobPropertiesList"
+        field_map json__ "TargetedSentimentDetectionJobPropertiesList"
           TargetedSentimentDetectionJobPropertiesList.of_json in
       make ?nextToken ?targetedSentimentDetectionJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -10662,11 +14735,12 @@ module ListTargetedSentimentDetectionJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" TargetedSentimentDetectionJobFilter.of_json in
+        field_map json__ "Filter" TargetedSentimentDetectionJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10740,9 +14814,9 @@ module ListTagsForResourceResponse =
           (Xml.child xml_arg0 "ResourceArn") in
       make ?tags ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let resourceArn = field_map json "ResourceArn" ComprehendArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ComprehendArn.of_json in
       make ?tags ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10766,9 +14840,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" ComprehendArn.of_json in
+        field_map_exn json__ "ResourceArn" ComprehendArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10855,10 +14929,10 @@ module ListSentimentDetectionJobsResponse =
           (Xml.child xml_arg0 "SentimentDetectionJobPropertiesList") in
       make ?nextToken ?sentimentDetectionJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let sentimentDetectionJobPropertiesList =
-        field_map json "SentimentDetectionJobPropertiesList"
+        field_map json__ "SentimentDetectionJobPropertiesList"
           SentimentDetectionJobPropertiesList.of_json in
       make ?nextToken ?sentimentDetectionJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -10898,11 +14972,12 @@ module ListSentimentDetectionJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" SentimentDetectionJobFilter.of_json in
+        field_map json__ "Filter" SentimentDetectionJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10989,10 +15064,10 @@ module ListPiiEntitiesDetectionJobsResponse =
           (Xml.child xml_arg0 "PiiEntitiesDetectionJobPropertiesList") in
       make ?nextToken ?piiEntitiesDetectionJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let piiEntitiesDetectionJobPropertiesList =
-        field_map json "PiiEntitiesDetectionJobPropertiesList"
+        field_map json__ "PiiEntitiesDetectionJobPropertiesList"
           PiiEntitiesDetectionJobPropertiesList.of_json in
       make ?nextToken ?piiEntitiesDetectionJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -11031,11 +15106,12 @@ module ListPiiEntitiesDetectionJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" PiiEntitiesDetectionJobFilter.of_json in
+        field_map json__ "Filter" PiiEntitiesDetectionJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11122,10 +15198,10 @@ module ListKeyPhrasesDetectionJobsResponse =
           (Xml.child xml_arg0 "KeyPhrasesDetectionJobPropertiesList") in
       make ?nextToken ?keyPhrasesDetectionJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let keyPhrasesDetectionJobPropertiesList =
-        field_map json "KeyPhrasesDetectionJobPropertiesList"
+        field_map json__ "KeyPhrasesDetectionJobPropertiesList"
           KeyPhrasesDetectionJobPropertiesList.of_json in
       make ?nextToken ?keyPhrasesDetectionJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -11165,15 +15241,292 @@ module ListKeyPhrasesDetectionJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" KeyPhrasesDetectionJobFilter.of_json in
+        field_map json__ "Filter" KeyPhrasesDetectionJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Get a list of key phrase detection jobs that you have submitted."]
+module ListFlywheelsResponse =
+  struct
+    type nonrec t =
+      {
+      flywheelSummaryList: FlywheelSummaryList.t option
+        [@ocaml.doc
+          "A list of flywheel properties retrieved by the service in response to the request."];
+      nextToken: String_.t option
+        [@ocaml.doc "Identifies the next page of results to return."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidFilterException of InvalidFilterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?flywheelSummaryList =
+      fun ?nextToken -> fun () -> { flywheelSummaryList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidFilterException" ->
+          `InvalidFilterException (InvalidFilterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidFilterException" ->
+          `InvalidFilterException (InvalidFilterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidFilterException e ->
+          `Assoc
+            [("error", (`String "InvalidFilterException"));
+            ("details", (InvalidFilterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FlywheelSummaryList",
+           (Option.map x.flywheelSummaryList ~f:FlywheelSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let flywheelSummaryList =
+        (Option.map ~f:FlywheelSummaryList.of_xml)
+          (Xml.child xml_arg0 "FlywheelSummaryList") in
+      make ?nextToken ?flywheelSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let flywheelSummaryList =
+        field_map json__ "FlywheelSummaryList" FlywheelSummaryList.of_json in
+      make ?nextToken ?flywheelSummaryList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a list of the flywheels that you have created."]
+module ListFlywheelsRequest =
+  struct
+    type nonrec t =
+      {
+      filter: FlywheelFilter.t option
+        [@ocaml.doc
+          "Filters the flywheels that are returned. You can filter flywheels on their status, or the date and time that they were submitted. You can only set one filter at a time."];
+      nextToken: String_.t option
+        [@ocaml.doc "Identifies the next page of results to return."];
+      maxResults: MaxResultsInteger.t option
+        [@ocaml.doc
+          "Maximum number of results to return in a response. The default is 100."]}
+    let make ?filter =
+      fun ?nextToken ->
+        fun ?maxResults -> fun () -> { filter; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("Filter", (Option.map x.filter ~f:FlywheelFilter.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filter =
+        (Option.map ~f:FlywheelFilter.of_xml) (Xml.child xml_arg0 "Filter") in
+      make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filter = field_map json__ "Filter" FlywheelFilter.of_json in
+      make ?maxResults ?nextToken ?filter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a list of the flywheels that you have created."]
+module ListFlywheelIterationHistoryResponse =
+  struct
+    type nonrec t =
+      {
+      flywheelIterationPropertiesList:
+        FlywheelIterationPropertiesList.t option
+        [@ocaml.doc "List of flywheel iteration properties"];
+      nextToken: String_.t option [@ocaml.doc "Next token"]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidFilterException of InvalidFilterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?flywheelIterationPropertiesList =
+      fun ?nextToken ->
+        fun () -> { flywheelIterationPropertiesList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidFilterException" ->
+          `InvalidFilterException (InvalidFilterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidFilterException" ->
+          `InvalidFilterException (InvalidFilterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidFilterException e ->
+          `Assoc
+            [("error", (`String "InvalidFilterException"));
+            ("details", (InvalidFilterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FlywheelIterationPropertiesList",
+           (Option.map x.flywheelIterationPropertiesList
+              ~f:FlywheelIterationPropertiesList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let flywheelIterationPropertiesList =
+        (Option.map ~f:FlywheelIterationPropertiesList.of_xml)
+          (Xml.child xml_arg0 "FlywheelIterationPropertiesList") in
+      make ?nextToken ?flywheelIterationPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let flywheelIterationPropertiesList =
+        field_map json__ "FlywheelIterationPropertiesList"
+          FlywheelIterationPropertiesList.of_json in
+      make ?nextToken ?flywheelIterationPropertiesList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the history of a flywheel iteration. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module ListFlywheelIterationHistoryRequest =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t
+        [@ocaml.doc "The ARN of the flywheel."];
+      filter: FlywheelIterationFilter.t option
+        [@ocaml.doc
+          "Filter the flywheel iteration history based on creation time."];
+      nextToken: String_.t option [@ocaml.doc "Next token"];
+      maxResults: MaxResultsInteger.t option
+        [@ocaml.doc "Maximum number of iteration history results to return"]}
+    let context_ = "ListFlywheelIterationHistoryRequest"
+    let make ?filter =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~flywheelArn ->
+            fun () -> { filter; nextToken; maxResults; flywheelArn }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Some (ComprehendFlywheelArn.to_value x.flywheelArn)));
+        ("Filter", (Option.map x.filter ~f:FlywheelIterationFilter.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filter =
+        (Option.map ~f:FlywheelIterationFilter.of_xml)
+          (Xml.child xml_arg0 "Filter") in
+      let flywheelArn =
+        ComprehendFlywheelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FlywheelArn") in
+      make ?maxResults ?nextToken ?filter ~flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filter = field_map json__ "Filter" FlywheelIterationFilter.of_json in
+      let flywheelArn =
+        field_map_exn json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?maxResults ?nextToken ?filter ~flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the history of a flywheel iteration. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
 module ListEventsDetectionJobsResponse =
   struct
     type nonrec t =
@@ -11256,10 +15609,10 @@ module ListEventsDetectionJobsResponse =
           (Xml.child xml_arg0 "EventsDetectionJobPropertiesList") in
       make ?nextToken ?eventsDetectionJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let eventsDetectionJobPropertiesList =
-        field_map json "EventsDetectionJobPropertiesList"
+        field_map json__ "EventsDetectionJobPropertiesList"
           EventsDetectionJobPropertiesList.of_json in
       make ?nextToken ?eventsDetectionJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -11298,10 +15651,11 @@ module ListEventsDetectionJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filter = field_map json "Filter" EventsDetectionJobFilter.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filter = field_map json__ "Filter" EventsDetectionJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11386,10 +15740,10 @@ module ListEntityRecognizersResponse =
           (Xml.child xml_arg0 "EntityRecognizerPropertiesList") in
       make ?nextToken ?entityRecognizerPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let entityRecognizerPropertiesList =
-        field_map json "EntityRecognizerPropertiesList"
+        field_map json__ "EntityRecognizerPropertiesList"
           EntityRecognizerPropertiesList.of_json in
       make ?nextToken ?entityRecognizerPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -11428,10 +15782,11 @@ module ListEntityRecognizersRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filter = field_map json "Filter" EntityRecognizerFilter.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filter = field_map json__ "Filter" EntityRecognizerFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11443,7 +15798,7 @@ module ListEntityRecognizerSummariesResponse =
       entityRecognizerSummariesList: EntityRecognizerSummariesList.t option
         [@ocaml.doc "The list entity recognizer summaries."];
       nextToken: String_.t option
-        [@ocaml.doc "The list entity recognizer summaries."]}
+        [@ocaml.doc "Identifies the next page of results to return."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -11507,10 +15862,10 @@ module ListEntityRecognizerSummariesResponse =
           (Xml.child xml_arg0 "EntityRecognizerSummariesList") in
       make ?nextToken ?entityRecognizerSummariesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let entityRecognizerSummariesList =
-        field_map json "EntityRecognizerSummariesList"
+        field_map json__ "EntityRecognizerSummariesList"
           EntityRecognizerSummariesList.of_json in
       make ?nextToken ?entityRecognizerSummariesList ()
     let to_json v = composed_to_json to_value v
@@ -11541,9 +15896,10 @@ module ListEntityRecognizerSummariesRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11630,10 +15986,10 @@ module ListEntitiesDetectionJobsResponse =
           (Xml.child xml_arg0 "EntitiesDetectionJobPropertiesList") in
       make ?nextToken ?entitiesDetectionJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let entitiesDetectionJobPropertiesList =
-        field_map json "EntitiesDetectionJobPropertiesList"
+        field_map json__ "EntitiesDetectionJobPropertiesList"
           EntitiesDetectionJobPropertiesList.of_json in
       make ?nextToken ?entitiesDetectionJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -11673,10 +16029,12 @@ module ListEntitiesDetectionJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filter = field_map json "Filter" EntitiesDetectionJobFilter.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filter =
+        field_map json__ "Filter" EntitiesDetectionJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11752,15 +16110,15 @@ module ListEndpointsResponse =
           (Xml.child xml_arg0 "EndpointPropertiesList") in
       make ?nextToken ?endpointPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let endpointPropertiesList =
-        field_map json "EndpointPropertiesList"
+        field_map json__ "EndpointPropertiesList"
           EndpointPropertiesList.of_json in
       make ?nextToken ?endpointPropertiesList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of all existing endpoints that you've created."]
+       "Gets a list of all existing endpoints that you've created. For information about endpoints, see Managing endpoints."]
 module ListEndpointsRequest =
   struct
     type nonrec t =
@@ -11793,14 +16151,15 @@ module ListEndpointsRequest =
         (Option.map ~f:EndpointFilter.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filter = field_map json "Filter" EndpointFilter.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filter = field_map json__ "Filter" EndpointFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of all existing endpoints that you've created."]
+       "Gets a list of all existing endpoints that you've created. For information about endpoints, see Managing endpoints."]
 module ListDominantLanguageDetectionJobsResponse =
   struct
     type nonrec t =
@@ -11883,10 +16242,10 @@ module ListDominantLanguageDetectionJobsResponse =
           (Xml.child xml_arg0 "DominantLanguageDetectionJobPropertiesList") in
       make ?nextToken ?dominantLanguageDetectionJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let dominantLanguageDetectionJobPropertiesList =
-        field_map json "DominantLanguageDetectionJobPropertiesList"
+        field_map json__ "DominantLanguageDetectionJobPropertiesList"
           DominantLanguageDetectionJobPropertiesList.of_json in
       make ?nextToken ?dominantLanguageDetectionJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -11927,11 +16286,12 @@ module ListDominantLanguageDetectionJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" DominantLanguageDetectionJobFilter.of_json in
+        field_map json__ "Filter" DominantLanguageDetectionJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12017,10 +16377,10 @@ module ListDocumentClassifiersResponse =
           (Xml.child xml_arg0 "DocumentClassifierPropertiesList") in
       make ?nextToken ?documentClassifierPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let documentClassifierPropertiesList =
-        field_map json "DocumentClassifierPropertiesList"
+        field_map json__ "DocumentClassifierPropertiesList"
           DocumentClassifierPropertiesList.of_json in
       make ?nextToken ?documentClassifierPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -12060,10 +16420,11 @@ module ListDocumentClassifiersRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filter = field_map json "Filter" DocumentClassifierFilter.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filter = field_map json__ "Filter" DocumentClassifierFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12140,10 +16501,10 @@ module ListDocumentClassifierSummariesResponse =
           (Xml.child xml_arg0 "DocumentClassifierSummariesList") in
       make ?nextToken ?documentClassifierSummariesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let documentClassifierSummariesList =
-        field_map json "DocumentClassifierSummariesList"
+        field_map json__ "DocumentClassifierSummariesList"
           DocumentClassifierSummariesList.of_json in
       make ?nextToken ?documentClassifierSummariesList ()
     let to_json v = composed_to_json to_value v
@@ -12174,9 +16535,10 @@ module ListDocumentClassifierSummariesRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12262,10 +16624,10 @@ module ListDocumentClassificationJobsResponse =
           (Xml.child xml_arg0 "DocumentClassificationJobPropertiesList") in
       make ?nextToken ?documentClassificationJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let documentClassificationJobPropertiesList =
-        field_map json "DocumentClassificationJobPropertiesList"
+        field_map json__ "DocumentClassificationJobPropertiesList"
           DocumentClassificationJobPropertiesList.of_json in
       make ?nextToken ?documentClassificationJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -12305,15 +16667,164 @@ module ListDocumentClassificationJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" DocumentClassificationJobFilter.of_json in
+        field_map json__ "Filter" DocumentClassificationJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets a list of the documentation classification jobs that you have submitted."]
+module ListDatasetsResponse =
+  struct
+    type nonrec t =
+      {
+      datasetPropertiesList: DatasetPropertiesList.t option
+        [@ocaml.doc "The dataset properties list."];
+      nextToken: String_.t option
+        [@ocaml.doc "Identifies the next page of results to return."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidFilterException of InvalidFilterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?datasetPropertiesList =
+      fun ?nextToken -> fun () -> { datasetPropertiesList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidFilterException" ->
+          `InvalidFilterException (InvalidFilterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidFilterException" ->
+          `InvalidFilterException (InvalidFilterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidFilterException e ->
+          `Assoc
+            [("error", (`String "InvalidFilterException"));
+            ("details", (InvalidFilterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DatasetPropertiesList",
+           (Option.map x.datasetPropertiesList
+              ~f:DatasetPropertiesList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let datasetPropertiesList =
+        (Option.map ~f:DatasetPropertiesList.of_xml)
+          (Xml.child xml_arg0 "DatasetPropertiesList") in
+      make ?nextToken ?datasetPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let datasetPropertiesList =
+        field_map json__ "DatasetPropertiesList"
+          DatasetPropertiesList.of_json in
+      make ?nextToken ?datasetPropertiesList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the datasets that you have configured in this Region. For more information about datasets, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module ListDatasetsRequest =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel."];
+      filter: DatasetFilter.t option
+        [@ocaml.doc "Filters the datasets to be returned in the response."];
+      nextToken: String_.t option
+        [@ocaml.doc "Identifies the next page of results to return."];
+      maxResults: MaxResultsInteger.t option
+        [@ocaml.doc
+          "Maximum number of results to return in a response. The default is 100."]}
+    let make ?flywheelArn =
+      fun ?filter ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun () -> { flywheelArn; filter; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value));
+        ("Filter", (Option.map x.filter ~f:DatasetFilter.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filter =
+        (Option.map ~f:DatasetFilter.of_xml) (Xml.child xml_arg0 "Filter") in
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
+      make ?maxResults ?nextToken ?filter ?flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filter = field_map json__ "Filter" DatasetFilter.of_json in
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?maxResults ?nextToken ?filter ?flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the datasets that you have configured in this Region. For more information about datasets, see Flywheel overview in the Amazon Comprehend Developer Guide."]
 module ImportModelResponse =
   struct
     type nonrec t =
@@ -12435,12 +16946,12 @@ module ImportModelResponse =
           (Xml.child xml_arg0 "ModelArn") in
       make ?modelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelArn = field_map json "ModelArn" ComprehendModelArn.of_json in
+    let of_json json__ =
+      let modelArn = field_map json__ "ModelArn" ComprehendModelArn.of_json in
       make ?modelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new custom model that replicates a source custom model that you import. The source model can be in your AWS account or another one. If the source model is in another AWS account, then it must have a resource-based policy that authorizes you to import it. The source model must be in the same AWS region that you're using when you import. You can't import a model that's in a different region."]
+       "Creates a new custom model that replicates a source custom model that you import. The source model can be in your Amazon Web Services account or another one. If the source model is in another Amazon Web Services account, then it must have a resource-based policy that authorizes you to import it. The source model must be in the same Amazon Web Services Region that you're using when you import. You can't import a model that's in a different Region."]
 module ImportModelRequest =
   struct
     type nonrec t =
@@ -12453,16 +16964,16 @@ module ImportModelRequest =
           "The name to assign to the custom model that is created in Amazon Comprehend by this import."];
       versionName: VersionName.t option
         [@ocaml.doc
-          "The version name given to the custom model that is created by this import. Version names can have a maximum of 256 characters. Alphanumeric characters, hyphens (-) and underscores (_) are allowed. The version name must be unique among all models with the same classifier name in the account/AWS Region."];
+          "The version name given to the custom model that is created by this import. Version names can have a maximum of 256 characters. Alphanumeric characters, hyphens (-) and underscores (_) are allowed. The version name must be unique among all models with the same classifier name in the account/Region."];
       modelKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the KMS key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Management (IAM) role that allows Amazon Comprehend to use Amazon Key Management Service (KMS) to encrypt or decrypt the custom model."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend permission to use Amazon Key Management Service (KMS) to encrypt or decrypt the custom model."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the custom model that is created by this import. A tag is a key-value pair that adds as a metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+          "Tags to associate with the custom model that is created by this import. A tag is a key-value pair that adds as a metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
     let context_ = "ImportModelRequest"
     let make ?modelName =
       fun ?versionName ->
@@ -12508,27 +17019,266 @@ module ImportModelRequest =
       make ?tags ?dataAccessRoleArn ?modelKmsKeyId ?versionName ?modelName
         ~sourceModelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let modelKmsKeyId = field_map json "ModelKmsKeyId" KmsKeyId.of_json in
-      let versionName = field_map json "VersionName" VersionName.of_json in
-      let modelName = field_map json "ModelName" ComprehendArnName.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let modelKmsKeyId = field_map json__ "ModelKmsKeyId" KmsKeyId.of_json in
+      let versionName = field_map json__ "VersionName" VersionName.of_json in
+      let modelName = field_map json__ "ModelName" ComprehendArnName.of_json in
       let sourceModelArn =
-        field_map_exn json "SourceModelArn" ComprehendModelArn.of_json in
+        field_map_exn json__ "SourceModelArn" ComprehendModelArn.of_json in
       make ?tags ?dataAccessRoleArn ?modelKmsKeyId ?versionName ?modelName
         ~sourceModelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new custom model that replicates a source custom model that you import. The source model can be in your AWS account or another one. If the source model is in another AWS account, then it must have a resource-based policy that authorizes you to import it. The source model must be in the same AWS region that you're using when you import. You can't import a model that's in a different region."]
+       "Creates a new custom model that replicates a source custom model that you import. The source model can be in your Amazon Web Services account or another one. If the source model is in another Amazon Web Services account, then it must have a resource-based policy that authorizes you to import it. The source model must be in the same Amazon Web Services Region that you're using when you import. You can't import a model that's in a different Region."]
+module DetectToxicContentResponse =
+  struct
+    type nonrec t =
+      {
+      resultList: ListOfToxicLabels.t option
+        [@ocaml.doc
+          "Results of the content moderation analysis. Each entry in the results list contains a list of toxic content types identified in the text, along with a confidence score for each content type. The results list also includes a toxicity score for each entry in the results list."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
+      | `UnsupportedLanguageException of UnsupportedLanguageException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resultList = fun () -> { resultList }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TextSizeLimitExceededException" ->
+          `TextSizeLimitExceededException
+            (TextSizeLimitExceededException.of_json json)
+      | "UnsupportedLanguageException" ->
+          `UnsupportedLanguageException
+            (UnsupportedLanguageException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TextSizeLimitExceededException" ->
+          `TextSizeLimitExceededException
+            (TextSizeLimitExceededException.of_xml xml)
+      | "UnsupportedLanguageException" ->
+          `UnsupportedLanguageException
+            (UnsupportedLanguageException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TextSizeLimitExceededException e ->
+          `Assoc
+            [("error", (`String "TextSizeLimitExceededException"));
+            ("details", (TextSizeLimitExceededException.to_json e))]
+      | `UnsupportedLanguageException e ->
+          `Assoc
+            [("error", (`String "UnsupportedLanguageException"));
+            ("details", (UnsupportedLanguageException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResultList",
+           (Option.map x.resultList ~f:ListOfToxicLabels.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resultList =
+        (Option.map ~f:ListOfToxicLabels.of_xml)
+          (Xml.child xml_arg0 "ResultList") in
+      make ?resultList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resultList =
+        field_map json__ "ResultList" ListOfToxicLabels.of_json in
+      make ?resultList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Performs toxicity analysis on the list of text strings that you provide as input. The API response contains a results list that matches the size of the input list. For more information about toxicity detection, see Toxicity detection in the Amazon Comprehend Developer Guide."]
+module DetectToxicContentRequest =
+  struct
+    type nonrec t =
+      {
+      textSegments: ListOfTextSegments.t
+        [@ocaml.doc
+          "A list of up to 10 text strings. Each string has a maximum size of 1 KB, and the maximum size of the list is 10 KB."];
+      languageCode: LanguageCode.t
+        [@ocaml.doc
+          "The language of the input text. Currently, English is the only supported language."]}
+    let context_ = "DetectToxicContentRequest"
+    let make ~textSegments =
+      fun ~languageCode -> fun () -> { textSegments; languageCode }
+    let to_value x =
+      structure_to_value
+        [("TextSegments",
+           (Some (ListOfTextSegments.to_value x.textSegments)));
+        ("LanguageCode", (Some (LanguageCode.to_value x.languageCode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let languageCode =
+        LanguageCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LanguageCode") in
+      let textSegments =
+        ListOfTextSegments.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TextSegments") in
+      make ~languageCode ~textSegments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let languageCode =
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let textSegments =
+        field_map_exn json__ "TextSegments" ListOfTextSegments.of_json in
+      make ~languageCode ~textSegments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Performs toxicity analysis on the list of text strings that you provide as input. The API response contains a results list that matches the size of the input list. For more information about toxicity detection, see Toxicity detection in the Amazon Comprehend Developer Guide."]
+module DetectTargetedSentimentResponse =
+  struct
+    type nonrec t =
+      {
+      entities: ListOfTargetedSentimentEntities.t option
+        [@ocaml.doc
+          "Targeted sentiment analysis for each of the entities identified in the input text."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
+      | `UnsupportedLanguageException of UnsupportedLanguageException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entities = fun () -> { entities }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TextSizeLimitExceededException" ->
+          `TextSizeLimitExceededException
+            (TextSizeLimitExceededException.of_json json)
+      | "UnsupportedLanguageException" ->
+          `UnsupportedLanguageException
+            (UnsupportedLanguageException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TextSizeLimitExceededException" ->
+          `TextSizeLimitExceededException
+            (TextSizeLimitExceededException.of_xml xml)
+      | "UnsupportedLanguageException" ->
+          `UnsupportedLanguageException
+            (UnsupportedLanguageException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TextSizeLimitExceededException e ->
+          `Assoc
+            [("error", (`String "TextSizeLimitExceededException"));
+            ("details", (TextSizeLimitExceededException.to_json e))]
+      | `UnsupportedLanguageException e ->
+          `Assoc
+            [("error", (`String "UnsupportedLanguageException"));
+            ("details", (UnsupportedLanguageException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Entities",
+           (Option.map x.entities ~f:ListOfTargetedSentimentEntities.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entities =
+        (Option.map ~f:ListOfTargetedSentimentEntities.of_xml)
+          (Xml.child xml_arg0 "Entities") in
+      make ?entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entities =
+        field_map json__ "Entities" ListOfTargetedSentimentEntities.of_json in
+      make ?entities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inspects the input text and returns a sentiment analysis for each entity identified in the text. For more information about targeted sentiment, see Targeted sentiment in the Amazon Comprehend Developer Guide."]
+module DetectTargetedSentimentRequest =
+  struct
+    type nonrec t =
+      {
+      text: CustomerInputString.t
+        [@ocaml.doc
+          "A UTF-8 text string. The maximum string length is 5 KB."];
+      languageCode: LanguageCode.t
+        [@ocaml.doc
+          "The language of the input documents. Currently, English is the only supported language."]}
+    let context_ = "DetectTargetedSentimentRequest"
+    let make ~text = fun ~languageCode -> fun () -> { text; languageCode }
+    let to_value x =
+      structure_to_value
+        [("Text", (Some (CustomerInputString.to_value x.text)));
+        ("LanguageCode", (Some (LanguageCode.to_value x.languageCode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let languageCode =
+        LanguageCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LanguageCode") in
+      let text =
+        CustomerInputString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
+      make ~languageCode ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let languageCode =
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let text = field_map_exn json__ "Text" CustomerInputString.of_json in
+      make ~languageCode ~text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inspects the input text and returns a sentiment analysis for each entity identified in the text. For more information about targeted sentiment, see Targeted sentiment in the Amazon Comprehend Developer Guide."]
 module DetectSyntaxResponse =
   struct
     type nonrec t =
       {
       syntaxTokens: ListOfSyntaxTokens.t option
         [@ocaml.doc
-          "A collection of syntax tokens describing the text. For each token, the response provides the text, the token type, where the text begins and ends, and the level of confidence that Amazon Comprehend has that the token is correct. For a list of token types, see how-syntax."]}
+          "A collection of syntax tokens describing the text. For each token, the response provides the text, the token type, where the text begins and ends, and the level of confidence that Amazon Comprehend has that the token is correct. For a list of token types, see Syntax in the Comprehend Developer Guide."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -12599,20 +17349,19 @@ module DetectSyntaxResponse =
           (Xml.child xml_arg0 "SyntaxTokens") in
       make ?syntaxTokens ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let syntaxTokens =
-        field_map json "SyntaxTokens" ListOfSyntaxTokens.of_json in
+        field_map json__ "SyntaxTokens" ListOfSyntaxTokens.of_json in
       make ?syntaxTokens ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspects text for syntax and the part of speech of words in the document. For more information, how-syntax."]
+       "Inspects text for syntax and the part of speech of words in the document. For more information, see Syntax in the Comprehend Developer Guide."]
 module DetectSyntaxRequest =
   struct
     type nonrec t =
       {
       text: CustomerInputString.t
-        [@ocaml.doc
-          "A UTF-8 string. Each string must contain fewer that 5,000 bytes of UTF encoded characters."];
+        [@ocaml.doc "A UTF-8 string. The maximum string size is 5 KB."];
       languageCode: SyntaxLanguageCode.t
         [@ocaml.doc
           "The language code of the input documents. You can specify any of the following languages supported by Amazon Comprehend: German (\"de\"), English (\"en\"), Spanish (\"es\"), French (\"fr\"), Italian (\"it\"), or Portuguese (\"pt\")."]}
@@ -12632,14 +17381,14 @@ module DetectSyntaxRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~languageCode ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" SyntaxLanguageCode.of_json in
-      let text = field_map_exn json "Text" CustomerInputString.of_json in
+        field_map_exn json__ "LanguageCode" SyntaxLanguageCode.of_json in
+      let text = field_map_exn json__ "Text" CustomerInputString.of_json in
       make ~languageCode ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspects text for syntax and the part of speech of words in the document. For more information, how-syntax."]
+       "Inspects text for syntax and the part of speech of words in the document. For more information, see Syntax in the Comprehend Developer Guide."]
 module DetectSentimentResponse =
   struct
     type nonrec t =
@@ -12724,10 +17473,10 @@ module DetectSentimentResponse =
         (Option.map ~f:SentimentType.of_xml) (Xml.child xml_arg0 "Sentiment") in
       make ?sentimentScore ?sentiment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sentimentScore =
-        field_map json "SentimentScore" SentimentScore.of_json in
-      let sentiment = field_map json "Sentiment" SentimentType.of_json in
+        field_map json__ "SentimentScore" SentimentScore.of_json in
+      let sentiment = field_map json__ "Sentiment" SentimentType.of_json in
       make ?sentimentScore ?sentiment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12737,8 +17486,7 @@ module DetectSentimentRequest =
     type nonrec t =
       {
       text: CustomerInputString.t
-        [@ocaml.doc
-          "A UTF-8 text string. Each string must contain fewer that 5,000 bytes of UTF-8 encoded characters."];
+        [@ocaml.doc "A UTF-8 text string. The maximum string size is 5 KB."];
       languageCode: LanguageCode.t
         [@ocaml.doc
           "The language of the input documents. You can specify any of the primary languages supported by Amazon Comprehend. All documents must be in the same language."]}
@@ -12758,10 +17506,10 @@ module DetectSentimentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~languageCode ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let text = field_map_exn json "Text" CustomerInputString.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let text = field_map_exn json__ "Text" CustomerInputString.of_json in
       make ~languageCode ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12842,8 +17590,8 @@ module DetectPiiEntitiesResponse =
           (Xml.child xml_arg0 "Entities") in
       make ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entities = field_map json "Entities" ListOfPiiEntities.of_json in
+    let of_json json__ =
+      let entities = field_map json__ "Entities" ListOfPiiEntities.of_json in
       make ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12854,9 +17602,10 @@ module DetectPiiEntitiesRequest =
       {
       text: String_.t
         [@ocaml.doc
-          "A UTF-8 text string. Each string must contain fewer that 5,000 bytes of UTF-8 encoded characters."];
+          "A UTF-8 text string. The maximum string size is 100 KB."];
       languageCode: LanguageCode.t
-        [@ocaml.doc "The language of the input documents."]}
+        [@ocaml.doc
+          "The language of the input text. Enter the language code for English (en) or Spanish (es)."]}
     let context_ = "DetectPiiEntitiesRequest"
     let make ~text = fun ~languageCode -> fun () -> { text; languageCode }
     let to_value x =
@@ -12872,10 +17621,10 @@ module DetectPiiEntitiesRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~languageCode ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let text = field_map_exn json "Text" String_.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let text = field_map_exn json__ "Text" String_.of_json in
       make ~languageCode ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12957,8 +17706,8 @@ module DetectKeyPhrasesResponse =
           (Xml.child xml_arg0 "KeyPhrases") in
       make ?keyPhrases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyPhrases = field_map json "KeyPhrases" ListOfKeyPhrases.of_json in
+    let of_json json__ =
+      let keyPhrases = field_map json__ "KeyPhrases" ListOfKeyPhrases.of_json in
       make ?keyPhrases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detects the key noun phrases found in the text."]
@@ -12968,7 +17717,7 @@ module DetectKeyPhrasesRequest =
       {
       text: CustomerInputString.t
         [@ocaml.doc
-          "A UTF-8 text string. Each string must contain fewer that 5,000 bytes of UTF-8 encoded characters."];
+          "A UTF-8 text string. The string must contain less than 100 KB of UTF-8 encoded characters."];
       languageCode: LanguageCode.t
         [@ocaml.doc
           "The language of the input documents. You can specify any of the primary languages supported by Amazon Comprehend. All documents must be in the same language."]}
@@ -12988,10 +17737,10 @@ module DetectKeyPhrasesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~languageCode ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let text = field_map_exn json "Text" CustomerInputString.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let text = field_map_exn json__ "Text" CustomerInputString.of_json in
       make ~languageCode ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detects the key noun phrases found in the text."]
@@ -13001,7 +17750,19 @@ module DetectEntitiesResponse =
       {
       entities: ListOfEntities.t option
         [@ocaml.doc
-          "A collection of entities identified in the input text. For each entity, the response provides the entity text, entity type, where the entity text begins and ends, and the level of confidence that Amazon Comprehend has in the detection. If your request uses a custom entity recognition model, Amazon Comprehend detects the entities that the model is trained to recognize. Otherwise, it detects the default entity types. For a list of default entity types, see how-entities."]}
+          "A collection of entities identified in the input text. For each entity, the response provides the entity text, entity type, where the entity text begins and ends, and the level of confidence that Amazon Comprehend has in the detection. If your request uses a custom entity recognition model, Amazon Comprehend detects the entities that the model is trained to recognize. Otherwise, it detects the default entity types. For a list of default entity types, see Entities in the Comprehend Developer Guide."];
+      documentMetadata: DocumentMetadata.t option
+        [@ocaml.doc
+          "Information about the document, discovered during text extraction. This field is present in the response only if your request used the Byte parameter."];
+      documentType: ListOfDocumentType.t option
+        [@ocaml.doc
+          "The document type for each page in the input document. This field is present in the response only if your request used the Byte parameter."];
+      blocks: ListOfBlocks.t option
+        [@ocaml.doc
+          "Information about each block of text in the input document. Blocks are nested. A page block contains a block for each line of text, which contains a block for each word. The Block content for a Word input document does not include a Geometry field. The Block field is not present in the response for plain-text inputs."];
+      errors: ListOfErrors.t option
+        [@ocaml.doc
+          "Page-level errors that the system detected while processing the input document. The field is empty if the system encountered no errors."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -13009,7 +17770,13 @@ module DetectEntitiesResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `UnsupportedLanguageException of UnsupportedLanguageException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?entities = fun () -> { entities }
+    let make ?entities =
+      fun ?documentMetadata ->
+        fun ?documentType ->
+          fun ?blocks ->
+            fun ?errors ->
+              fun () ->
+                { entities; documentMetadata; documentType; blocks; errors }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -13074,45 +17841,92 @@ module DetectEntitiesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Entities", (Option.map x.entities ~f:ListOfEntities.to_value))]
+        [("Entities", (Option.map x.entities ~f:ListOfEntities.to_value));
+        ("DocumentMetadata",
+          (Option.map x.documentMetadata ~f:DocumentMetadata.to_value));
+        ("DocumentType",
+          (Option.map x.documentType ~f:ListOfDocumentType.to_value));
+        ("Blocks", (Option.map x.blocks ~f:ListOfBlocks.to_value));
+        ("Errors", (Option.map x.errors ~f:ListOfErrors.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:ListOfErrors.of_xml) (Xml.child xml_arg0 "Errors") in
+      let blocks =
+        (Option.map ~f:ListOfBlocks.of_xml) (Xml.child xml_arg0 "Blocks") in
+      let documentType =
+        (Option.map ~f:ListOfDocumentType.of_xml)
+          (Xml.child xml_arg0 "DocumentType") in
+      let documentMetadata =
+        (Option.map ~f:DocumentMetadata.of_xml)
+          (Xml.child xml_arg0 "DocumentMetadata") in
       let entities =
         (Option.map ~f:ListOfEntities.of_xml) (Xml.child xml_arg0 "Entities") in
-      make ?entities ()
+      make ?errors ?blocks ?documentType ?documentMetadata ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entities = field_map json "Entities" ListOfEntities.of_json in
-      make ?entities ()
+    let of_json json__ =
+      let errors = field_map json__ "Errors" ListOfErrors.of_json in
+      let blocks = field_map json__ "Blocks" ListOfBlocks.of_json in
+      let documentType =
+        field_map json__ "DocumentType" ListOfDocumentType.of_json in
+      let documentMetadata =
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
+      let entities = field_map json__ "Entities" ListOfEntities.of_json in
+      make ?errors ?blocks ?documentType ?documentMetadata ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspects text for named entities, and returns information about them. For more information, about named entities, see how-entities."]
+       "Detects named entities in input text when you use the pre-trained model. Detects custom entities if you have a custom entity recognition model. When detecting named entities using the pre-trained model, use plain text as the input. For more information about named entities, see Entities in the Comprehend Developer Guide. When you use a custom entity recognition model, you can input plain text or you can upload a single-page input document (text, PDF, Word, or image). If the system detects errors while processing a page in the input document, the API response includes an entry in Errors for each error. If the system detects a document-level error in your input document, the API returns an InvalidRequestException error response. For details about this exception, see Errors in semi-structured documents in the Comprehend Developer Guide."]
 module DetectEntitiesRequest =
   struct
     type nonrec t =
       {
-      text: CustomerInputString.t
+      text: CustomerInputString.t option
         [@ocaml.doc
-          "A UTF-8 text string. Each string must contain fewer that 5,000 bytes of UTF-8 encoded characters."];
+          "A UTF-8 text string. The maximum string size is 100 KB. If you enter text using this parameter, do not use the Bytes parameter."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language of the input documents. You can specify any of the primary languages supported by Amazon Comprehend. All documents must be in the same language. If your request includes the endpoint for a custom entity recognition model, Amazon Comprehend uses the language of your custom model, and it ignores any language code that you specify here."];
+          "The language of the input documents. You can specify any of the primary languages supported by Amazon Comprehend. If your request includes the endpoint for a custom entity recognition model, Amazon Comprehend uses the language of your custom model, and it ignores any language code that you specify here. All input documents must be in the same language."];
       endpointArn: EntityRecognizerEndpointArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name of an endpoint that is associated with a custom entity recognition model. Provide an endpoint if you want to detect entities by using your own custom model instead of the default model that is used by Amazon Comprehend. If you specify an endpoint, Amazon Comprehend uses the language of your custom model, and it ignores any language code that you provide in your request."]}
-    let context_ = "DetectEntitiesRequest"
-    let make ?languageCode =
-      fun ?endpointArn ->
-        fun ~text -> fun () -> { languageCode; endpointArn; text }
+          "The Amazon Resource Name of an endpoint that is associated with a custom entity recognition model. Provide an endpoint if you want to detect entities by using your own custom model instead of the default model that is used by Amazon Comprehend. If you specify an endpoint, Amazon Comprehend uses the language of your custom model, and it ignores any language code that you provide in your request. For information about endpoints, see Managing endpoints."];
+      bytes: SemiStructuredDocumentBlob.t option
+        [@ocaml.doc
+          "This field applies only when you use a custom entity recognition model that was trained with PDF annotations. For other cases, enter your text input in the Text field. Use the Bytes parameter to input a text, PDF, Word or image file. Using a plain-text file in the Bytes parameter is equivelent to using the Text parameter (the Entities field in the response is identical). You can also use the Bytes parameter to input an Amazon Textract DetectDocumentText or AnalyzeDocument output file. Provide the input document as a sequence of base64-encoded bytes. If your code uses an Amazon Web Services SDK to detect entities, the SDK may encode the document file bytes for you. The maximum length of this field depends on the input document type. For details, see Inputs for real-time custom analysis in the Comprehend Developer Guide. If you use the Bytes parameter, do not use the Text parameter."];
+      documentReaderConfig: DocumentReaderConfig.t option
+        [@ocaml.doc
+          "Provides configuration parameters to override the default actions for extracting text from PDF documents and image files."]}
+    let make ?text =
+      fun ?languageCode ->
+        fun ?endpointArn ->
+          fun ?bytes ->
+            fun ?documentReaderConfig ->
+              fun () ->
+                {
+                  text;
+                  languageCode;
+                  endpointArn;
+                  bytes;
+                  documentReaderConfig
+                }
     let to_value x =
       structure_to_value
-        [("Text", (Some (CustomerInputString.to_value x.text)));
+        [("Text", (Option.map x.text ~f:CustomerInputString.to_value));
         ("LanguageCode",
           (Option.map x.languageCode ~f:LanguageCode.to_value));
         ("EndpointArn",
-          (Option.map x.endpointArn ~f:EntityRecognizerEndpointArn.to_value))]
+          (Option.map x.endpointArn ~f:EntityRecognizerEndpointArn.to_value));
+        ("Bytes",
+          (Option.map x.bytes ~f:SemiStructuredDocumentBlob.to_value));
+        ("DocumentReaderConfig",
+          (Option.map x.documentReaderConfig ~f:DocumentReaderConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentReaderConfig =
+        (Option.map ~f:DocumentReaderConfig.of_xml)
+          (Xml.child xml_arg0 "DocumentReaderConfig") in
+      let bytes =
+        (Option.map ~f:SemiStructuredDocumentBlob.of_xml)
+          (Xml.child xml_arg0 "Bytes") in
       let endpointArn =
         (Option.map ~f:EntityRecognizerEndpointArn.of_xml)
           (Xml.child xml_arg0 "EndpointArn") in
@@ -13120,26 +17934,29 @@ module DetectEntitiesRequest =
         (Option.map ~f:LanguageCode.of_xml)
           (Xml.child xml_arg0 "LanguageCode") in
       let text =
-        CustomerInputString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
-      make ?endpointArn ?languageCode ~text ()
+        (Option.map ~f:CustomerInputString.of_xml)
+          (Xml.child xml_arg0 "Text") in
+      make ?documentReaderConfig ?bytes ?endpointArn ?languageCode ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let documentReaderConfig =
+        field_map json__ "DocumentReaderConfig" DocumentReaderConfig.of_json in
+      let bytes = field_map json__ "Bytes" SemiStructuredDocumentBlob.of_json in
       let endpointArn =
-        field_map json "EndpointArn" EntityRecognizerEndpointArn.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let text = field_map_exn json "Text" CustomerInputString.of_json in
-      make ?endpointArn ?languageCode ~text ()
+        field_map json__ "EndpointArn" EntityRecognizerEndpointArn.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let text = field_map json__ "Text" CustomerInputString.of_json in
+      make ?documentReaderConfig ?bytes ?endpointArn ?languageCode ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspects text for named entities, and returns information about them. For more information, about named entities, see how-entities."]
+       "Detects named entities in input text when you use the pre-trained model. Detects custom entities if you have a custom entity recognition model. When detecting named entities using the pre-trained model, use plain text as the input. For more information about named entities, see Entities in the Comprehend Developer Guide. When you use a custom entity recognition model, you can input plain text or you can upload a single-page input document (text, PDF, Word, or image). If the system detects errors while processing a page in the input document, the API response includes an entry in Errors for each error. If the system detects a document-level error in your input document, the API returns an InvalidRequestException error response. For details about this exception, see Errors in semi-structured documents in the Comprehend Developer Guide."]
 module DetectDominantLanguageResponse =
   struct
     type nonrec t =
       {
       languages: ListOfDominantLanguages.t option
         [@ocaml.doc
-          "The languages that Amazon Comprehend detected in the input text. For each language, the response returns the RFC 5646 language code and the level of confidence that Amazon Comprehend has in the accuracy of its inference. For more information about RFC 5646, see Tags for Identifying Languages on the IETF Tools web site."]}
+          "Array of languages that Amazon Comprehend detected in the input text. The array is sorted in descending order of the score (the dominant language is always the first element in the array). For each language, the response returns the RFC 5646 language code and the level of confidence that Amazon Comprehend has in the accuracy of its inference. For more information about RFC 5646, see Tags for Identifying Languages on the IETF Tools web site."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -13199,9 +18016,9 @@ module DetectDominantLanguageResponse =
           (Xml.child xml_arg0 "Languages") in
       make ?languages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languages =
-        field_map json "Languages" ListOfDominantLanguages.of_json in
+        field_map json__ "Languages" ListOfDominantLanguages.of_json in
       make ?languages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13212,7 +18029,7 @@ module DetectDominantLanguageRequest =
       {
       text: CustomerInputString.t
         [@ocaml.doc
-          "A UTF-8 text string. Each string should contain at least 20 characters and must contain fewer that 5,000 bytes of UTF-8 encoded characters."]}
+          "A UTF-8 text string. The string must contain at least 20 characters. The maximum string size is 100 KB."]}
     let context_ = "DetectDominantLanguageRequest"
     let make ~text = fun () -> { text }
     let to_value x =
@@ -13225,8 +18042,8 @@ module DetectDominantLanguageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let text = field_map_exn json "Text" CustomerInputString.of_json in
+    let of_json json__ =
+      let text = field_map_exn json__ "Text" CustomerInputString.of_json in
       make ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13305,9 +18122,9 @@ module DescribeTopicsDetectionJobResponse =
           (Xml.child xml_arg0 "TopicsDetectionJobProperties") in
       make ?topicsDetectionJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let topicsDetectionJobProperties =
-        field_map json "TopicsDetectionJobProperties"
+        field_map json__ "TopicsDetectionJobProperties"
           TopicsDetectionJobProperties.of_json in
       make ?topicsDetectionJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -13330,8 +18147,9 @@ module DescribeTopicsDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with a topic detection job. Use this operation to get the status of a detection job."]
@@ -13411,9 +18229,9 @@ module DescribeTargetedSentimentDetectionJobResponse =
           (Xml.child xml_arg0 "TargetedSentimentDetectionJobProperties") in
       make ?targetedSentimentDetectionJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetedSentimentDetectionJobProperties =
-        field_map json "TargetedSentimentDetectionJobProperties"
+        field_map json__ "TargetedSentimentDetectionJobProperties"
           TargetedSentimentDetectionJobProperties.of_json in
       make ?targetedSentimentDetectionJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -13425,7 +18243,7 @@ module DescribeTargetedSentimentDetectionJobRequest =
       {
       jobId: JobId.t
         [@ocaml.doc
-          "The identifier that Amazon Comprehend generated for the job. The operation returns this identifier in its response."]}
+          "The identifier that Amazon Comprehend generated for the job. The StartTargetedSentimentDetectionJob operation returns this identifier in its response."]}
     let context_ = "DescribeTargetedSentimentDetectionJobRequest"
     let make ~jobId = fun () -> { jobId }
     let to_value x =
@@ -13436,8 +18254,9 @@ module DescribeTargetedSentimentDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with a targeted sentiment detection job. Use this operation to get the status of the job."]
@@ -13517,9 +18336,9 @@ module DescribeSentimentDetectionJobResponse =
           (Xml.child xml_arg0 "SentimentDetectionJobProperties") in
       make ?sentimentDetectionJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sentimentDetectionJobProperties =
-        field_map json "SentimentDetectionJobProperties"
+        field_map json__ "SentimentDetectionJobProperties"
           SentimentDetectionJobProperties.of_json in
       make ?sentimentDetectionJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -13542,8 +18361,9 @@ module DescribeSentimentDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with a sentiment detection job. Use this operation to get the status of a detection job."]
@@ -13639,13 +18459,13 @@ module DescribeResourcePolicyResponse =
       make ?policyRevisionId ?lastModifiedTime ?creationTime ?resourcePolicy
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyRevisionId =
-        field_map json "PolicyRevisionId" PolicyRevisionId.of_json in
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let resourcePolicy = field_map json "ResourcePolicy" Policy.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let resourcePolicy = field_map json__ "ResourcePolicy" Policy.of_json in
       make ?policyRevisionId ?lastModifiedTime ?creationTime ?resourcePolicy
         ()
     let to_json v = composed_to_json to_value v
@@ -13657,7 +18477,7 @@ module DescribeResourcePolicyRequest =
       {
       resourceArn: ComprehendModelArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the policy to describe."]}
+          "The Amazon Resource Name (ARN) of the custom model version that has the resource policy."]}
     let context_ = "DescribeResourcePolicyRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -13670,9 +18490,9 @@ module DescribeResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" ComprehendModelArn.of_json in
+        field_map_exn json__ "ResourceArn" ComprehendModelArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13751,9 +18571,9 @@ module DescribePiiEntitiesDetectionJobResponse =
           (Xml.child xml_arg0 "PiiEntitiesDetectionJobProperties") in
       make ?piiEntitiesDetectionJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let piiEntitiesDetectionJobProperties =
-        field_map json "PiiEntitiesDetectionJobProperties"
+        field_map json__ "PiiEntitiesDetectionJobProperties"
           PiiEntitiesDetectionJobProperties.of_json in
       make ?piiEntitiesDetectionJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -13776,8 +18596,9 @@ module DescribePiiEntitiesDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with a PII entities detection job. For example, you can use this operation to get the job status."]
@@ -13857,9 +18678,9 @@ module DescribeKeyPhrasesDetectionJobResponse =
           (Xml.child xml_arg0 "KeyPhrasesDetectionJobProperties") in
       make ?keyPhrasesDetectionJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let keyPhrasesDetectionJobProperties =
-        field_map json "KeyPhrasesDetectionJobProperties"
+        field_map json__ "KeyPhrasesDetectionJobProperties"
           KeyPhrasesDetectionJobProperties.of_json in
       make ?keyPhrasesDetectionJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -13871,7 +18692,7 @@ module DescribeKeyPhrasesDetectionJobRequest =
       {
       jobId: JobId.t
         [@ocaml.doc
-          "The identifier that Amazon Comprehend generated for the job. The operation returns this identifier in its response."]}
+          "The identifier that Amazon Comprehend generated for the job. The StartKeyPhrasesDetectionJob operation returns this identifier in its response."]}
     let context_ = "DescribeKeyPhrasesDetectionJobRequest"
     let make ~jobId = fun () -> { jobId }
     let to_value x =
@@ -13882,11 +18703,235 @@ module DescribeKeyPhrasesDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with a key phrases detection job. Use this operation to get the status of a detection job."]
+module DescribeFlywheelResponse =
+  struct
+    type nonrec t =
+      {
+      flywheelProperties: FlywheelProperties.t option
+        [@ocaml.doc "The flywheel properties."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?flywheelProperties = fun () -> { flywheelProperties }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FlywheelProperties",
+           (Option.map x.flywheelProperties ~f:FlywheelProperties.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let flywheelProperties =
+        (Option.map ~f:FlywheelProperties.of_xml)
+          (Xml.child xml_arg0 "FlywheelProperties") in
+      make ?flywheelProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let flywheelProperties =
+        field_map json__ "FlywheelProperties" FlywheelProperties.of_json in
+      make ?flywheelProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides configuration information about the flywheel. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module DescribeFlywheelRequest =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel."]}
+    let context_ = "DescribeFlywheelRequest"
+    let make ~flywheelArn = fun () -> { flywheelArn }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Some (ComprehendFlywheelArn.to_value x.flywheelArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let flywheelArn =
+        ComprehendFlywheelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FlywheelArn") in
+      make ~flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let flywheelArn =
+        field_map_exn json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ~flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides configuration information about the flywheel. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module DescribeFlywheelIterationResponse =
+  struct
+    type nonrec t =
+      {
+      flywheelIterationProperties: FlywheelIterationProperties.t option
+        [@ocaml.doc "The configuration properties of a flywheel iteration."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?flywheelIterationProperties =
+      fun () -> { flywheelIterationProperties }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FlywheelIterationProperties",
+           (Option.map x.flywheelIterationProperties
+              ~f:FlywheelIterationProperties.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let flywheelIterationProperties =
+        (Option.map ~f:FlywheelIterationProperties.of_xml)
+          (Xml.child xml_arg0 "FlywheelIterationProperties") in
+      make ?flywheelIterationProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let flywheelIterationProperties =
+        field_map json__ "FlywheelIterationProperties"
+          FlywheelIterationProperties.of_json in
+      make ?flywheelIterationProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve the configuration properties of a flywheel iteration. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module DescribeFlywheelIterationRequest =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t ;
+      flywheelIterationId: FlywheelIterationId.t }
+    let context_ = "DescribeFlywheelIterationRequest"
+    let make ~flywheelArn =
+      fun ~flywheelIterationId ->
+        fun () -> { flywheelArn; flywheelIterationId }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Some (ComprehendFlywheelArn.to_value x.flywheelArn)));
+        ("FlywheelIterationId",
+          (Some (FlywheelIterationId.to_value x.flywheelIterationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let flywheelIterationId =
+        FlywheelIterationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FlywheelIterationId") in
+      let flywheelArn =
+        ComprehendFlywheelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FlywheelArn") in
+      make ~flywheelIterationId ~flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let flywheelIterationId =
+        field_map_exn json__ "FlywheelIterationId"
+          FlywheelIterationId.of_json in
+      let flywheelArn =
+        field_map_exn json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ~flywheelIterationId ~flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve the configuration properties of a flywheel iteration. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
 module DescribeEventsDetectionJobResponse =
   struct
     type nonrec t =
@@ -13962,9 +19007,9 @@ module DescribeEventsDetectionJobResponse =
           (Xml.child xml_arg0 "EventsDetectionJobProperties") in
       make ?eventsDetectionJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventsDetectionJobProperties =
-        field_map json "EventsDetectionJobProperties"
+        field_map json__ "EventsDetectionJobProperties"
           EventsDetectionJobProperties.of_json in
       make ?eventsDetectionJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -13985,8 +19030,9 @@ module DescribeEventsDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the status and details of an events detection job."]
 module DescribeEntityRecognizerResponse =
@@ -14064,9 +19110,9 @@ module DescribeEntityRecognizerResponse =
           (Xml.child xml_arg0 "EntityRecognizerProperties") in
       make ?entityRecognizerProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entityRecognizerProperties =
-        field_map json "EntityRecognizerProperties"
+        field_map json__ "EntityRecognizerProperties"
           EntityRecognizerProperties.of_json in
       make ?entityRecognizerProperties ()
     let to_json v = composed_to_json to_value v
@@ -14092,9 +19138,10 @@ module DescribeEntityRecognizerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EntityRecognizerArn") in
       make ~entityRecognizerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entityRecognizerArn =
-        field_map_exn json "EntityRecognizerArn" EntityRecognizerArn.of_json in
+        field_map_exn json__ "EntityRecognizerArn"
+          EntityRecognizerArn.of_json in
       make ~entityRecognizerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14174,9 +19221,9 @@ module DescribeEntitiesDetectionJobResponse =
           (Xml.child xml_arg0 "EntitiesDetectionJobProperties") in
       make ?entitiesDetectionJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entitiesDetectionJobProperties =
-        field_map json "EntitiesDetectionJobProperties"
+        field_map json__ "EntitiesDetectionJobProperties"
           EntitiesDetectionJobProperties.of_json in
       make ?entitiesDetectionJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -14188,7 +19235,7 @@ module DescribeEntitiesDetectionJobRequest =
       {
       jobId: JobId.t
         [@ocaml.doc
-          "The identifier that Amazon Comprehend generated for the job. The operation returns this identifier in its response."]}
+          "The identifier that Amazon Comprehend generated for the job. The StartEntitiesDetectionJob operation returns this identifier in its response."]}
     let context_ = "DescribeEntitiesDetectionJobRequest"
     let make ~jobId = fun () -> { jobId }
     let to_value x =
@@ -14199,8 +19246,9 @@ module DescribeEntitiesDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with an entities detection job. Use this operation to get the status of a detection job."]
@@ -14277,13 +19325,13 @@ module DescribeEndpointResponse =
           (Xml.child xml_arg0 "EndpointProperties") in
       make ?endpointProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointProperties =
-        field_map json "EndpointProperties" EndpointProperties.of_json in
+        field_map json__ "EndpointProperties" EndpointProperties.of_json in
       make ?endpointProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the properties associated with a specific endpoint. Use this operation to get the status of an endpoint."]
+       "Gets the properties associated with a specific endpoint. Use this operation to get the status of an endpoint. For information about endpoints, see Managing endpoints."]
 module DescribeEndpointRequest =
   struct
     type nonrec t =
@@ -14304,13 +19352,13 @@ module DescribeEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ~endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointArn =
-        field_map_exn json "EndpointArn" ComprehendEndpointArn.of_json in
+        field_map_exn json__ "EndpointArn" ComprehendEndpointArn.of_json in
       make ~endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the properties associated with a specific endpoint. Use this operation to get the status of an endpoint."]
+       "Gets the properties associated with a specific endpoint. Use this operation to get the status of an endpoint. For information about endpoints, see Managing endpoints."]
 module DescribeDominantLanguageDetectionJobResponse =
   struct
     type nonrec t =
@@ -14387,9 +19435,9 @@ module DescribeDominantLanguageDetectionJobResponse =
           (Xml.child xml_arg0 "DominantLanguageDetectionJobProperties") in
       make ?dominantLanguageDetectionJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dominantLanguageDetectionJobProperties =
-        field_map json "DominantLanguageDetectionJobProperties"
+        field_map json__ "DominantLanguageDetectionJobProperties"
           DominantLanguageDetectionJobProperties.of_json in
       make ?dominantLanguageDetectionJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -14401,7 +19449,7 @@ module DescribeDominantLanguageDetectionJobRequest =
       {
       jobId: JobId.t
         [@ocaml.doc
-          "The identifier that Amazon Comprehend generated for the job. The operation returns this identifier in its response."]}
+          "The identifier that Amazon Comprehend generated for the job. The StartDominantLanguageDetectionJob operation returns this identifier in its response."]}
     let context_ = "DescribeDominantLanguageDetectionJobRequest"
     let make ~jobId = fun () -> { jobId }
     let to_value x =
@@ -14412,8 +19460,9 @@ module DescribeDominantLanguageDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with a dominant language detection job. Use this operation to get the status of a detection job."]
@@ -14492,9 +19541,9 @@ module DescribeDocumentClassifierResponse =
           (Xml.child xml_arg0 "DocumentClassifierProperties") in
       make ?documentClassifierProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentClassifierProperties =
-        field_map json "DocumentClassifierProperties"
+        field_map json__ "DocumentClassifierProperties"
           DocumentClassifierProperties.of_json in
       make ?documentClassifierProperties ()
     let to_json v = composed_to_json to_value v
@@ -14506,7 +19555,7 @@ module DescribeDocumentClassifierRequest =
       {
       documentClassifierArn: DocumentClassifierArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the document classifier. The operation returns this identifier in its response."]}
+          "The Amazon Resource Name (ARN) that identifies the document classifier. The CreateDocumentClassifier operation returns this identifier in its response."]}
     let context_ = "DescribeDocumentClassifierRequest"
     let make ~documentClassifierArn = fun () -> { documentClassifierArn }
     let to_value x =
@@ -14520,9 +19569,9 @@ module DescribeDocumentClassifierRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentClassifierArn") in
       make ~documentClassifierArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentClassifierArn =
-        field_map_exn json "DocumentClassifierArn"
+        field_map_exn json__ "DocumentClassifierArn"
           DocumentClassifierArn.of_json in
       make ~documentClassifierArn ()
     let to_json v = composed_to_json to_value v
@@ -14604,9 +19653,9 @@ module DescribeDocumentClassificationJobResponse =
           (Xml.child xml_arg0 "DocumentClassificationJobProperties") in
       make ?documentClassificationJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentClassificationJobProperties =
-        field_map json "DocumentClassificationJobProperties"
+        field_map json__ "DocumentClassificationJobProperties"
           DocumentClassificationJobProperties.of_json in
       make ?documentClassificationJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -14618,7 +19667,7 @@ module DescribeDocumentClassificationJobRequest =
       {
       jobId: JobId.t
         [@ocaml.doc
-          "The identifier that Amazon Comprehend generated for the job. The operation returns this identifier in its response."]}
+          "The identifier that Amazon Comprehend generated for the job. The StartDocumentClassificationJob operation returns this identifier in its response."]}
     let context_ = "DescribeDocumentClassificationJobRequest"
     let make ~jobId = fun () -> { jobId }
     let to_value x =
@@ -14629,11 +19678,116 @@ module DescribeDocumentClassificationJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with a document classification job. Use this operation to get the status of a classification job."]
+module DescribeDatasetResponse =
+  struct
+    type nonrec t =
+      {
+      datasetProperties: DatasetProperties.t option
+        [@ocaml.doc "The dataset properties."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?datasetProperties = fun () -> { datasetProperties }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DatasetProperties",
+           (Option.map x.datasetProperties ~f:DatasetProperties.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datasetProperties =
+        (Option.map ~f:DatasetProperties.of_xml)
+          (Xml.child xml_arg0 "DatasetProperties") in
+      make ?datasetProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datasetProperties =
+        field_map json__ "DatasetProperties" DatasetProperties.of_json in
+      make ?datasetProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the dataset that you specify. For more information about datasets, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module DescribeDatasetRequest =
+  struct
+    type nonrec t =
+      {
+      datasetArn: ComprehendDatasetArn.t
+        [@ocaml.doc "The ARN of the dataset."]}
+    let context_ = "DescribeDatasetRequest"
+    let make ~datasetArn = fun () -> { datasetArn }
+    let to_value x =
+      structure_to_value
+        [("DatasetArn", (Some (ComprehendDatasetArn.to_value x.datasetArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datasetArn =
+        ComprehendDatasetArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
+      make ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datasetArn =
+        field_map_exn json__ "DatasetArn" ComprehendDatasetArn.of_json in
+      make ~datasetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the dataset that you specify. For more information about datasets, see Flywheel overview in the Amazon Comprehend Developer Guide."]
 module DeleteResourcePolicyResponse =
   struct
     type nonrec t = unit
@@ -14719,15 +19873,129 @@ module DeleteResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?policyRevisionId ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyRevisionId =
-        field_map json "PolicyRevisionId" PolicyRevisionId.of_json in
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ComprehendModelArn.of_json in
+        field_map_exn json__ "ResourceArn" ComprehendModelArn.of_json in
       make ?policyRevisionId ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a resource-based policy that is attached to a custom model."]
+module DeleteFlywheelResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourceUnavailableException of ResourceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourceUnavailableException" ->
+          `ResourceUnavailableException
+            (ResourceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourceUnavailableException" ->
+          `ResourceUnavailableException
+            (ResourceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ResourceUnavailableException"));
+            ("details", (ResourceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a flywheel. When you delete the flywheel, Amazon Comprehend does not delete the data lake or the model associated with the flywheel. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module DeleteFlywheelRequest =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the flywheel to delete."]}
+    let context_ = "DeleteFlywheelRequest"
+    let make ~flywheelArn = fun () -> { flywheelArn }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Some (ComprehendFlywheelArn.to_value x.flywheelArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let flywheelArn =
+        ComprehendFlywheelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FlywheelArn") in
+      make ~flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let flywheelArn =
+        field_map_exn json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ~flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a flywheel. When you delete the flywheel, Amazon Comprehend does not delete the data lake or the model associated with the flywheel. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
 module DeleteEntityRecognizerResponse =
   struct
     type nonrec t = unit
@@ -14835,9 +20103,10 @@ module DeleteEntityRecognizerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EntityRecognizerArn") in
       make ~entityRecognizerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entityRecognizerArn =
-        field_map_exn json "EntityRecognizerArn" EntityRecognizerArn.of_json in
+        field_map_exn json__ "EntityRecognizerArn"
+          EntityRecognizerArn.of_json in
       make ~entityRecognizerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14917,7 +20186,7 @@ module DeleteEndpointResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a model-specific endpoint for a previously-trained custom model. All endpoints must be deleted in order for the model to be deleted."]
+       "Deletes a model-specific endpoint for a previously-trained custom model. All endpoints must be deleted in order for the model to be deleted. For information about endpoints, see Managing endpoints."]
 module DeleteEndpointRequest =
   struct
     type nonrec t =
@@ -14938,13 +20207,13 @@ module DeleteEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ~endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointArn =
-        field_map_exn json "EndpointArn" ComprehendEndpointArn.of_json in
+        field_map_exn json__ "EndpointArn" ComprehendEndpointArn.of_json in
       make ~endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a model-specific endpoint for a previously-trained custom model. All endpoints must be deleted in order for the model to be deleted."]
+       "Deletes a model-specific endpoint for a previously-trained custom model. All endpoints must be deleted in order for the model to be deleted. For information about endpoints, see Managing endpoints."]
 module DeleteDocumentClassifierResponse =
   struct
     type nonrec t = unit
@@ -15052,14 +20321,281 @@ module DeleteDocumentClassifierRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentClassifierArn") in
       make ~documentClassifierArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentClassifierArn =
-        field_map_exn json "DocumentClassifierArn"
+        field_map_exn json__ "DocumentClassifierArn"
           DocumentClassifierArn.of_json in
       make ~documentClassifierArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a previously created document classifier Only those classifiers that are in terminated states (IN_ERROR, TRAINED) will be deleted. If an active inference job is using the model, a ResourceInUseException will be returned. This is an asynchronous action that puts the classifier into a DELETING state, and it is then removed by a background job. Once removed, the classifier disappears from your account and is no longer available for use."]
+module CreateFlywheelResponse =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc "The Amazon Resource Number (ARN) of the flywheel."];
+      activeModelArn: ComprehendModelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the active model version."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `KmsKeyValidationException of KmsKeyValidationException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourceUnavailableException of ResourceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
+      | `UnsupportedLanguageException of UnsupportedLanguageException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?flywheelArn =
+      fun ?activeModelArn -> fun () -> { flywheelArn; activeModelArn }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "KmsKeyValidationException" ->
+          `KmsKeyValidationException (KmsKeyValidationException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourceUnavailableException" ->
+          `ResourceUnavailableException
+            (ResourceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
+      | "UnsupportedLanguageException" ->
+          `UnsupportedLanguageException
+            (UnsupportedLanguageException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "KmsKeyValidationException" ->
+          `KmsKeyValidationException (KmsKeyValidationException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourceUnavailableException" ->
+          `ResourceUnavailableException
+            (ResourceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "UnsupportedLanguageException" ->
+          `UnsupportedLanguageException
+            (UnsupportedLanguageException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `KmsKeyValidationException e ->
+          `Assoc
+            [("error", (`String "KmsKeyValidationException"));
+            ("details", (KmsKeyValidationException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ResourceUnavailableException"));
+            ("details", (ResourceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
+      | `UnsupportedLanguageException e ->
+          `Assoc
+            [("error", (`String "UnsupportedLanguageException"));
+            ("details", (UnsupportedLanguageException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value));
+        ("ActiveModelArn",
+          (Option.map x.activeModelArn ~f:ComprehendModelArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let activeModelArn =
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "ActiveModelArn") in
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
+      make ?activeModelArn ?flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let activeModelArn =
+        field_map json__ "ActiveModelArn" ComprehendModelArn.of_json in
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?activeModelArn ?flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A flywheel is an Amazon Web Services resource that orchestrates the ongoing training of a model for custom classification or custom entity recognition. You can create a flywheel to start with an existing trained model, or Comprehend can create and train a new model. When you create the flywheel, Comprehend creates a data lake in your account. The data lake holds the training data and test data for all versions of the model. To use a flywheel with an existing trained model, you specify the active model version. Comprehend copies the model's training data and test data into the flywheel's data lake. To use the flywheel with a new model, you need to provide a dataset for training data (and optional test data) when you create the flywheel. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module CreateFlywheelRequest =
+  struct
+    type nonrec t =
+      {
+      flywheelName: ComprehendArnName.t [@ocaml.doc "Name for the flywheel."];
+      activeModelArn: ComprehendModelArn.t option
+        [@ocaml.doc
+          "To associate an existing model with the flywheel, specify the Amazon Resource Number (ARN) of the model version. Do not set TaskConfig or ModelType if you specify an ActiveModelArn."];
+      dataAccessRoleArn: IamRoleArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend the permissions required to access the flywheel data in the data lake."];
+      taskConfig: TaskConfig.t option
+        [@ocaml.doc
+          "Configuration about the model associated with the flywheel. You need to set TaskConfig if you are creating a flywheel for a new model."];
+      modelType: ModelType.t option
+        [@ocaml.doc
+          "The model type. You need to set ModelType if you are creating a flywheel for a new model."];
+      dataLakeS3Uri: FlywheelS3Uri.t
+        [@ocaml.doc
+          "Enter the S3 location for the data lake. You can specify a new S3 bucket or a new folder of an existing S3 bucket. The flywheel creates the data lake at this location."];
+      dataSecurityConfig: DataSecurityConfig.t option
+        [@ocaml.doc "Data security configurations."];
+      clientRequestToken: ClientRequestTokenString.t option
+        [@ocaml.doc
+          "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
+      tags: TagList.t option
+        [@ocaml.doc "The tags to associate with this flywheel."]}
+    let context_ = "CreateFlywheelRequest"
+    let make ?activeModelArn =
+      fun ?taskConfig ->
+        fun ?modelType ->
+          fun ?dataSecurityConfig ->
+            fun ?clientRequestToken ->
+              fun ?tags ->
+                fun ~flywheelName ->
+                  fun ~dataAccessRoleArn ->
+                    fun ~dataLakeS3Uri ->
+                      fun () ->
+                        {
+                          activeModelArn;
+                          taskConfig;
+                          modelType;
+                          dataSecurityConfig;
+                          clientRequestToken;
+                          tags;
+                          flywheelName;
+                          dataAccessRoleArn;
+                          dataLakeS3Uri
+                        }
+    let to_value x =
+      structure_to_value
+        [("FlywheelName", (Some (ComprehendArnName.to_value x.flywheelName)));
+        ("ActiveModelArn",
+          (Option.map x.activeModelArn ~f:ComprehendModelArn.to_value));
+        ("DataAccessRoleArn",
+          (Some (IamRoleArn.to_value x.dataAccessRoleArn)));
+        ("TaskConfig", (Option.map x.taskConfig ~f:TaskConfig.to_value));
+        ("ModelType", (Option.map x.modelType ~f:ModelType.to_value));
+        ("DataLakeS3Uri", (Some (FlywheelS3Uri.to_value x.dataLakeS3Uri)));
+        ("DataSecurityConfig",
+          (Option.map x.dataSecurityConfig ~f:DataSecurityConfig.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken
+             ~f:ClientRequestTokenString.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestTokenString.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let dataSecurityConfig =
+        (Option.map ~f:DataSecurityConfig.of_xml)
+          (Xml.child xml_arg0 "DataSecurityConfig") in
+      let dataLakeS3Uri =
+        FlywheelS3Uri.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataLakeS3Uri") in
+      let modelType =
+        (Option.map ~f:ModelType.of_xml) (Xml.child xml_arg0 "ModelType") in
+      let taskConfig =
+        (Option.map ~f:TaskConfig.of_xml) (Xml.child xml_arg0 "TaskConfig") in
+      let dataAccessRoleArn =
+        IamRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataAccessRoleArn") in
+      let activeModelArn =
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "ActiveModelArn") in
+      let flywheelName =
+        ComprehendArnName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FlywheelName") in
+      make ?tags ?clientRequestToken ?dataSecurityConfig ~dataLakeS3Uri
+        ?modelType ?taskConfig ~dataAccessRoleArn ?activeModelArn
+        ~flywheelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      let dataSecurityConfig =
+        field_map json__ "DataSecurityConfig" DataSecurityConfig.of_json in
+      let dataLakeS3Uri =
+        field_map_exn json__ "DataLakeS3Uri" FlywheelS3Uri.of_json in
+      let modelType = field_map json__ "ModelType" ModelType.of_json in
+      let taskConfig = field_map json__ "TaskConfig" TaskConfig.of_json in
+      let dataAccessRoleArn =
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let activeModelArn =
+        field_map json__ "ActiveModelArn" ComprehendModelArn.of_json in
+      let flywheelName =
+        field_map_exn json__ "FlywheelName" ComprehendArnName.of_json in
+      make ?tags ?clientRequestToken ?dataSecurityConfig ~dataLakeS3Uri
+        ?modelType ?taskConfig ~dataAccessRoleArn ?activeModelArn
+        ~flywheelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A flywheel is an Amazon Web Services resource that orchestrates the ongoing training of a model for custom classification or custom entity recognition. You can create a flywheel to start with an existing trained model, or Comprehend can create and train a new model. When you create the flywheel, Comprehend creates a data lake in your account. The data lake holds the training data and test data for all versions of the model. To use a flywheel with an existing trained model, you specify the active model version. Comprehend copies the model's training data and test data into the flywheel's data lake. To use the flywheel with a new model, you need to provide a dataset for training data (and optional test data) when you create the flywheel. For more information about flywheels, see Flywheel overview in the Amazon Comprehend Developer Guide."]
 module CreateEntityRecognizerResponse =
   struct
     type nonrec t =
@@ -15173,50 +20709,50 @@ module CreateEntityRecognizerResponse =
           (Xml.child xml_arg0 "EntityRecognizerArn") in
       make ?entityRecognizerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entityRecognizerArn =
-        field_map json "EntityRecognizerArn" EntityRecognizerArn.of_json in
+        field_map json__ "EntityRecognizerArn" EntityRecognizerArn.of_json in
       make ?entityRecognizerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an entity recognizer using submitted files. After your CreateEntityRecognizer request is submitted, you can check job status using the API."]
+       "Creates an entity recognizer using submitted files. After your CreateEntityRecognizer request is submitted, you can check job status using the DescribeEntityRecognizer API."]
 module CreateEntityRecognizerRequest =
   struct
     type nonrec t =
       {
       recognizerName: ComprehendArnName.t
         [@ocaml.doc
-          "The name given to the newly created recognizer. Recognizer names can be a maximum of 256 characters. Alphanumeric characters, hyphens (-) and underscores (_) are allowed. The name must be unique in the account/region."];
+          "The name given to the newly created recognizer. Recognizer names can be a maximum of 256 characters. Alphanumeric characters, hyphens (-) and underscores (_) are allowed. The name must be unique in the account/Region."];
       versionName: VersionName.t option
         [@ocaml.doc
-          "The version name given to the newly created recognizer. Version names can be a maximum of 256 characters. Alphanumeric characters, hyphens (-) and underscores (_) are allowed. The version name must be unique among all models with the same recognizer name in the account/ AWS Region."];
+          "The version name given to the newly created recognizer. Version names can be a maximum of 256 characters. Alphanumeric characters, hyphens (-) and underscores (_) are allowed. The version name must be unique among all models with the same recognizer name in the account/Region."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Management (IAM) role that grants Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the entity recognizer being created. A tag is a key-value pair that adds as a metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."];
+          "Tags to associate with the entity recognizer. A tag is a key-value pair that adds as a metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."];
       inputDataConfig: EntityRecognizerInputDataConfig.t
         [@ocaml.doc
-          "Specifies the format and location of the input data. The S3 bucket containing the input data must be located in the same region as the entity recognizer being created."];
+          "Specifies the format and location of the input data. The S3 bucket containing the input data must be located in the same Region as the entity recognizer being created."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
           "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "You can specify any of the following languages supported by Amazon Comprehend: English (\"en\"), Spanish (\"es\"), French (\"fr\"), Italian (\"it\"), German (\"de\"), or Portuguese (\"pt\"). All documents must be in the same language."];
+          "You can specify any of the following languages: English (\"en\"), Spanish (\"es\"), French (\"fr\"), Italian (\"it\"), German (\"de\"), or Portuguese (\"pt\"). If you plan to use this entity recognizer with PDF, Word, or image input files, you must specify English as the language. All training documents must be in the same language."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for your custom entity recognizer. For more information, see Amazon VPC."];
       modelKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the KMS key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       modelPolicy: Policy.t option
         [@ocaml.doc
-          "The JSON resource-based policy to attach to your custom entity recognizer model. You can use this policy to allow another AWS account to import your custom model. Provide your JSON as a UTF-8 encoded string without line breaks. To provide valid JSON for your policy, enclose the attribute names and values in double quotes. If the JSON body is also enclosed in double quotes, then you must escape the double quotes that are inside the policy: \"\\{\\\"attribute\\\": \\\"value\\\", \\\"attribute\\\": \\[\\\"value\\\"\\]\\}\" To avoid escaping quotes, you can use single quotes to enclose the policy and double quotes to enclose the JSON names and values: '\\{\"attribute\": \"value\", \"attribute\": \\[\"value\"\\]\\}'"]}
+          "The JSON resource-based policy to attach to your custom entity recognizer model. You can use this policy to allow another Amazon Web Services account to import your custom model. Provide your JSON as a UTF-8 encoded string without line breaks. To provide valid JSON for your policy, enclose the attribute names and values in double quotes. If the JSON body is also enclosed in double quotes, then you must escape the double quotes that are inside the policy: \"\\{\\\"attribute\\\": \\\"value\\\", \\\"attribute\\\": \\[\\\"value\\\"\\]\\}\" To avoid escaping quotes, you can use single quotes to enclose the policy and double quotes to enclose the JSON names and values: '\\{\"attribute\": \"value\", \"attribute\": \\[\"value\"\\]\\}'"]}
     let context_ = "CreateEntityRecognizerRequest"
     let make ?versionName =
       fun ?tags ->
@@ -15294,37 +20830,41 @@ module CreateEntityRecognizerRequest =
         ~languageCode ?clientRequestToken ~inputDataConfig ?tags
         ~dataAccessRoleArn ?versionName ~recognizerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelPolicy = field_map json "ModelPolicy" Policy.of_json in
-      let modelKmsKeyId = field_map json "ModelKmsKeyId" KmsKeyId.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let modelPolicy = field_map json__ "ModelPolicy" Policy.of_json in
+      let modelKmsKeyId = field_map json__ "ModelKmsKeyId" KmsKeyId.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig"
+        field_map_exn json__ "InputDataConfig"
           EntityRecognizerInputDataConfig.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
-      let versionName = field_map json "VersionName" VersionName.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let versionName = field_map json__ "VersionName" VersionName.of_json in
       let recognizerName =
-        field_map_exn json "RecognizerName" ComprehendArnName.of_json in
+        field_map_exn json__ "RecognizerName" ComprehendArnName.of_json in
       make ?modelPolicy ?modelKmsKeyId ?vpcConfig ?volumeKmsKeyId
         ~languageCode ?clientRequestToken ~inputDataConfig ?tags
         ~dataAccessRoleArn ?versionName ~recognizerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an entity recognizer using submitted files. After your CreateEntityRecognizer request is submitted, you can check job status using the API."]
+       "Creates an entity recognizer using submitted files. After your CreateEntityRecognizer request is submitted, you can check job status using the DescribeEntityRecognizer API."]
 module CreateEndpointResponse =
   struct
     type nonrec t =
       {
       endpointArn: ComprehendEndpointArn.t option
         [@ocaml.doc
-          "The Amazon Resource Number (ARN) of the endpoint being created."]}
+          "The Amazon Resource Number (ARN) of the endpoint being created."];
+      modelArn: ComprehendModelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the model to which the endpoint is attached."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -15335,7 +20875,8 @@ module CreateEndpointResponse =
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?endpointArn = fun () -> { endpointArn }
+    let make ?endpointArn =
+      fun ?modelArn -> fun () -> { endpointArn; modelArn }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -15423,21 +20964,26 @@ module CreateEndpointResponse =
     let to_value x =
       structure_to_value
         [("EndpointArn",
-           (Option.map x.endpointArn ~f:ComprehendEndpointArn.to_value))]
+           (Option.map x.endpointArn ~f:ComprehendEndpointArn.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ComprehendModelArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let modelArn =
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "ModelArn") in
       let endpointArn =
         (Option.map ~f:ComprehendEndpointArn.of_xml)
           (Xml.child xml_arg0 "EndpointArn") in
-      make ?endpointArn ()
+      make ?modelArn ?endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let modelArn = field_map json__ "ModelArn" ComprehendModelArn.of_json in
       let endpointArn =
-        field_map json "EndpointArn" ComprehendEndpointArn.of_json in
-      make ?endpointArn ()
+        field_map json__ "EndpointArn" ComprehendEndpointArn.of_json in
+      make ?modelArn ?endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a model-specific endpoint for synchronous inference for a previously trained custom model"]
+       "Creates a model-specific endpoint for synchronous inference for a previously trained custom model For information about endpoints, see Managing endpoints."]
 module CreateEndpointRequest =
   struct
     type nonrec t =
@@ -15445,7 +20991,7 @@ module CreateEndpointRequest =
       endpointName: ComprehendEndpointName.t
         [@ocaml.doc
           "This is the descriptive suffix that becomes part of the EndpointArn used for all subsequent requests to this resource."];
-      modelArn: ComprehendModelArn.t
+      modelArn: ComprehendModelArn.t option
         [@ocaml.doc
           "The Amazon Resource Number (ARN) of the model to which the endpoint will be attached."];
       desiredInferenceUnits: InferenceUnitsInteger.t
@@ -15456,31 +21002,36 @@ module CreateEndpointRequest =
           "An idempotency token provided by the customer. If this token matches a previous endpoint creation request, Amazon Comprehend will not return a ResourceInUseException."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags associated with the endpoint being created. A tag is a key-value pair that adds metadata to the endpoint. For example, a tag with \"Sales\" as the key might be added to an endpoint to indicate its use by the sales department."];
+          "Tags to associate with the endpoint. A tag is a key-value pair that adds metadata to the endpoint. For example, a tag with \"Sales\" as the key might be added to an endpoint to indicate its use by the sales department."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS identity and Access Management (IAM) role that grants Amazon Comprehend read access to trained custom models encrypted with a customer managed key (ModelKmsKeyId)."]}
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to trained custom models encrypted with a customer managed key (ModelKmsKeyId)."];
+      flywheelArn: ComprehendFlywheelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the flywheel to which the endpoint will be attached."]}
     let context_ = "CreateEndpointRequest"
-    let make ?clientRequestToken =
-      fun ?tags ->
-        fun ?dataAccessRoleArn ->
-          fun ~endpointName ->
-            fun ~modelArn ->
-              fun ~desiredInferenceUnits ->
-                fun () ->
-                  {
-                    clientRequestToken;
-                    tags;
-                    dataAccessRoleArn;
-                    endpointName;
-                    modelArn;
-                    desiredInferenceUnits
-                  }
+    let make ?modelArn =
+      fun ?clientRequestToken ->
+        fun ?tags ->
+          fun ?dataAccessRoleArn ->
+            fun ?flywheelArn ->
+              fun ~endpointName ->
+                fun ~desiredInferenceUnits ->
+                  fun () ->
+                    {
+                      modelArn;
+                      clientRequestToken;
+                      tags;
+                      dataAccessRoleArn;
+                      flywheelArn;
+                      endpointName;
+                      desiredInferenceUnits
+                    }
     let to_value x =
       structure_to_value
         [("EndpointName",
            (Some (ComprehendEndpointName.to_value x.endpointName)));
-        ("ModelArn", (Some (ComprehendModelArn.to_value x.modelArn)));
+        ("ModelArn", (Option.map x.modelArn ~f:ComprehendModelArn.to_value));
         ("DesiredInferenceUnits",
           (Some (InferenceUnitsInteger.to_value x.desiredInferenceUnits)));
         ("ClientRequestToken",
@@ -15488,9 +21039,14 @@ module CreateEndpointRequest =
              ~f:ClientRequestTokenString.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("DataAccessRoleArn",
-          (Option.map x.dataAccessRoleArn ~f:IamRoleArn.to_value))]
+          (Option.map x.dataAccessRoleArn ~f:IamRoleArn.to_value));
+        ("FlywheelArn",
+          (Option.map x.flywheelArn ~f:ComprehendFlywheelArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flywheelArn =
+        (Option.map ~f:ComprehendFlywheelArn.of_xml)
+          (Xml.child xml_arg0 "FlywheelArn") in
       let dataAccessRoleArn =
         (Option.map ~f:IamRoleArn.of_xml)
           (Xml.child xml_arg0 "DataAccessRoleArn") in
@@ -15502,31 +21058,34 @@ module CreateEndpointRequest =
         InferenceUnitsInteger.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DesiredInferenceUnits") in
       let modelArn =
-        ComprehendModelArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ModelArn") in
+        (Option.map ~f:ComprehendModelArn.of_xml)
+          (Xml.child xml_arg0 "ModelArn") in
       let endpointName =
         ComprehendEndpointName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointName") in
-      make ?dataAccessRoleArn ?tags ?clientRequestToken
-        ~desiredInferenceUnits ~modelArn ~endpointName ()
+      make ?flywheelArn ?dataAccessRoleArn ?tags ?clientRequestToken
+        ~desiredInferenceUnits ?modelArn ~endpointName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let flywheelArn =
+        field_map json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let desiredInferenceUnits =
-        field_map_exn json "DesiredInferenceUnits"
+        field_map_exn json__ "DesiredInferenceUnits"
           InferenceUnitsInteger.of_json in
-      let modelArn = field_map_exn json "ModelArn" ComprehendModelArn.of_json in
+      let modelArn = field_map json__ "ModelArn" ComprehendModelArn.of_json in
       let endpointName =
-        field_map_exn json "EndpointName" ComprehendEndpointName.of_json in
-      make ?dataAccessRoleArn ?tags ?clientRequestToken
-        ~desiredInferenceUnits ~modelArn ~endpointName ()
+        field_map_exn json__ "EndpointName" ComprehendEndpointName.of_json in
+      make ?flywheelArn ?dataAccessRoleArn ?tags ?clientRequestToken
+        ~desiredInferenceUnits ?modelArn ~endpointName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a model-specific endpoint for synchronous inference for a previously trained custom model"]
+       "Creates a model-specific endpoint for synchronous inference for a previously trained custom model For information about endpoints, see Managing endpoints."]
 module CreateDocumentClassifierResponse =
   struct
     type nonrec t =
@@ -15641,13 +21200,14 @@ module CreateDocumentClassifierResponse =
           (Xml.child xml_arg0 "DocumentClassifierArn") in
       make ?documentClassifierArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentClassifierArn =
-        field_map json "DocumentClassifierArn" DocumentClassifierArn.of_json in
+        field_map json__ "DocumentClassifierArn"
+          DocumentClassifierArn.of_json in
       make ?documentClassifierArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new document classifier that you can use to categorize documents. To create a classifier, you provide a set of training documents that labeled with the categories that you want to use. After the classifier is trained you can use it to categorize a set of labeled documents into the categories. For more information, see how-document-classification."]
+       "Creates a new document classifier that you can use to categorize documents. To create a classifier, you provide a set of training documents that are labeled with the categories that you want to use. For more information, see Training classifier models in the Comprehend Developer Guide."]
 module CreateDocumentClassifierRequest =
   struct
     type nonrec t =
@@ -15656,40 +21216,40 @@ module CreateDocumentClassifierRequest =
         [@ocaml.doc "The name of the document classifier."];
       versionName: VersionName.t option
         [@ocaml.doc
-          "The version name given to the newly created classifier. Version names can have a maximum of 256 characters. Alphanumeric characters, hyphens (-) and underscores (_) are allowed. The version name must be unique among all models with the same classifier name in the account/AWS Region."];
+          "The version name given to the newly created classifier. Version names can have a maximum of 256 characters. Alphanumeric characters, hyphens (-) and underscores (_) are allowed. The version name must be unique among all models with the same classifier name in the Amazon Web Services account/Amazon Web Services Region."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Management (IAM) role that grants Amazon Comprehend read access to your input data."];
+          "The Amazon Resource Name (ARN) of the IAM role that grants Amazon Comprehend read access to your input data."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be associated with the document classifier being created. A tag is a key-value pair that adds as a metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."];
+          "Tags to associate with the document classifier. A tag is a key-value pair that adds as a metadata to a resource used by Amazon Comprehend. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."];
       inputDataConfig: DocumentClassifierInputDataConfig.t
         [@ocaml.doc
           "Specifies the format and location of the input data for the job."];
       outputDataConfig: DocumentClassifierOutputDataConfig.t option
         [@ocaml.doc
-          "Enables the addition of output results configuration parameters for custom classifier jobs."];
+          "Specifies the location for the output files from a custom classifier job. This parameter is required for a request that creates a native document model."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
           "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "The language of the input documents. You can specify any of the following languages supported by Amazon Comprehend: German (\"de\"), English (\"en\"), Spanish (\"es\"), French (\"fr\"), Italian (\"it\"), or Portuguese (\"pt\"). All documents must be in the same language."];
+          "The language of the input documents. You can specify any of the languages supported by Amazon Comprehend. All documents must be in the same language."];
       volumeKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the Amazon Web Services Key Management Service (KMS) key that Amazon Comprehend uses to encrypt data on the storage volume attached to the ML compute instance(s) that process the analysis job. The VolumeKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "Configuration parameters for an optional private Virtual Private Cloud (VPC) containing the resources you are using for your custom classifier. For more information, see Amazon VPC."];
       mode: DocumentClassifierMode.t option
         [@ocaml.doc
-          "Indicates the mode in which the classifier will be trained. The classifier can be trained in multi-class mode, which identifies one and only one class for each document, or multi-label mode, which identifies one or more labels for each document. In multi-label mode, multiple labels for an individual document are separated by a delimiter. The default delimiter between labels is a pipe (|)."];
+          "Indicates the mode in which the classifier will be trained. The classifier can be trained in multi-class (single-label) mode or multi-label mode. Multi-class mode identifies a single class label for each document and multi-label mode identifies one or more class labels for each document. Multiple labels for an individual document are separated by a delimiter. The default delimiter between labels is a pipe (|)."];
       modelKmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "ID for the AWS Key Management Service (KMS) key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
+          "ID for the KMS key that Amazon Comprehend uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following formats: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\""];
       modelPolicy: Policy.t option
         [@ocaml.doc
-          "The resource-based policy to attach to your custom document classifier model. You can use this policy to allow another AWS account to import your custom model. Provide your policy as a JSON body that you enter as a UTF-8 encoded string without line breaks. To provide valid JSON, enclose the attribute names and values in double quotes. If the JSON body is also enclosed in double quotes, then you must escape the double quotes that are inside the policy: \"\\{\\\"attribute\\\": \\\"value\\\", \\\"attribute\\\": \\[\\\"value\\\"\\]\\}\" To avoid escaping quotes, you can use single quotes to enclose the policy and double quotes to enclose the JSON names and values: '\\{\"attribute\": \"value\", \"attribute\": \\[\"value\"\\]\\}'"]}
+          "The resource-based policy to attach to your custom document classifier model. You can use this policy to allow another Amazon Web Services account to import your custom model. Provide your policy as a JSON body that you enter as a UTF-8 encoded string without line breaks. To provide valid JSON, enclose the attribute names and values in double quotes. If the JSON body is also enclosed in double quotes, then you must escape the double quotes that are inside the policy: \"\\{\\\"attribute\\\": \\\"value\\\", \\\"attribute\\\": \\[\\\"value\\\"\\]\\}\" To avoid escaping quotes, you can use single quotes to enclose the policy and double quotes to enclose the JSON names and values: '\\{\"attribute\": \"value\", \"attribute\": \\[\"value\"\\]\\}'"]}
     let context_ = "CreateDocumentClassifierRequest"
     let make ?versionName =
       fun ?tags ->
@@ -15782,34 +21342,235 @@ module CreateDocumentClassifierRequest =
         ~languageCode ?clientRequestToken ?outputDataConfig ~inputDataConfig
         ?tags ~dataAccessRoleArn ?versionName ~documentClassifierName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelPolicy = field_map json "ModelPolicy" Policy.of_json in
-      let modelKmsKeyId = field_map json "ModelKmsKeyId" KmsKeyId.of_json in
-      let mode = field_map json "Mode" DocumentClassifierMode.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfig.of_json in
-      let volumeKmsKeyId = field_map json "VolumeKmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let modelPolicy = field_map json__ "ModelPolicy" Policy.of_json in
+      let modelKmsKeyId = field_map json__ "ModelKmsKeyId" KmsKeyId.of_json in
+      let mode = field_map json__ "Mode" DocumentClassifierMode.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
+      let volumeKmsKeyId = field_map json__ "VolumeKmsKeyId" KmsKeyId.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig"
+        field_map json__ "OutputDataConfig"
           DocumentClassifierOutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig"
+        field_map_exn json__ "InputDataConfig"
           DocumentClassifierInputDataConfig.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
-      let versionName = field_map json "VersionName" VersionName.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let versionName = field_map json__ "VersionName" VersionName.of_json in
       let documentClassifierName =
-        field_map_exn json "DocumentClassifierName" ComprehendArnName.of_json in
+        field_map_exn json__ "DocumentClassifierName"
+          ComprehendArnName.of_json in
       make ?modelPolicy ?modelKmsKeyId ?mode ?vpcConfig ?volumeKmsKeyId
         ~languageCode ?clientRequestToken ?outputDataConfig ~inputDataConfig
         ?tags ~dataAccessRoleArn ?versionName ~documentClassifierName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new document classifier that you can use to categorize documents. To create a classifier, you provide a set of training documents that labeled with the categories that you want to use. After the classifier is trained you can use it to categorize a set of labeled documents into the categories. For more information, see how-document-classification."]
+       "Creates a new document classifier that you can use to categorize documents. To create a classifier, you provide a set of training documents that are labeled with the categories that you want to use. For more information, see Training classifier models in the Comprehend Developer Guide."]
+module CreateDatasetResponse =
+  struct
+    type nonrec t =
+      {
+      datasetArn: ComprehendDatasetArn.t option
+        [@ocaml.doc "The ARN of the dataset."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?datasetArn = fun () -> { datasetArn }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DatasetArn",
+           (Option.map x.datasetArn ~f:ComprehendDatasetArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datasetArn =
+        (Option.map ~f:ComprehendDatasetArn.of_xml)
+          (Xml.child xml_arg0 "DatasetArn") in
+      make ?datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datasetArn =
+        field_map json__ "DatasetArn" ComprehendDatasetArn.of_json in
+      make ?datasetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a dataset to upload training or test data for a model associated with a flywheel. For more information about datasets, see Flywheel overview in the Amazon Comprehend Developer Guide."]
+module CreateDatasetRequest =
+  struct
+    type nonrec t =
+      {
+      flywheelArn: ComprehendFlywheelArn.t
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the flywheel of the flywheel to receive the data."];
+      datasetName: ComprehendArnName.t [@ocaml.doc "Name of the dataset."];
+      datasetType: DatasetType.t option
+        [@ocaml.doc
+          "The dataset type. You can specify that the data in a dataset is for training the model or for testing the model."];
+      description: Description.t option
+        [@ocaml.doc "Description of the dataset."];
+      inputDataConfig: DatasetInputDataConfig.t
+        [@ocaml.doc
+          "Information about the input data configuration. The type of input data varies based on the format of the input and whether the data is for a classifier model or an entity recognition model."];
+      clientRequestToken: ClientRequestTokenString.t option
+        [@ocaml.doc
+          "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend generates one."];
+      tags: TagList.t option [@ocaml.doc "Tags for the dataset."]}
+    let context_ = "CreateDatasetRequest"
+    let make ?datasetType =
+      fun ?description ->
+        fun ?clientRequestToken ->
+          fun ?tags ->
+            fun ~flywheelArn ->
+              fun ~datasetName ->
+                fun ~inputDataConfig ->
+                  fun () ->
+                    {
+                      datasetType;
+                      description;
+                      clientRequestToken;
+                      tags;
+                      flywheelArn;
+                      datasetName;
+                      inputDataConfig
+                    }
+    let to_value x =
+      structure_to_value
+        [("FlywheelArn",
+           (Some (ComprehendFlywheelArn.to_value x.flywheelArn)));
+        ("DatasetName", (Some (ComprehendArnName.to_value x.datasetName)));
+        ("DatasetType", (Option.map x.datasetType ~f:DatasetType.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("InputDataConfig",
+          (Some (DatasetInputDataConfig.to_value x.inputDataConfig)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken
+             ~f:ClientRequestTokenString.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestTokenString.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let inputDataConfig =
+        DatasetInputDataConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let datasetType =
+        (Option.map ~f:DatasetType.of_xml) (Xml.child xml_arg0 "DatasetType") in
+      let datasetName =
+        ComprehendArnName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
+      let flywheelArn =
+        ComprehendFlywheelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FlywheelArn") in
+      make ?tags ?clientRequestToken ~inputDataConfig ?description
+        ?datasetType ~datasetName ~flywheelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      let inputDataConfig =
+        field_map_exn json__ "InputDataConfig" DatasetInputDataConfig.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let datasetType = field_map json__ "DatasetType" DatasetType.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" ComprehendArnName.of_json in
+      let flywheelArn =
+        field_map_exn json__ "FlywheelArn" ComprehendFlywheelArn.of_json in
+      make ?tags ?clientRequestToken ~inputDataConfig ?description
+        ?datasetType ~datasetName ~flywheelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a dataset to upload training or test data for a model associated with a flywheel. For more information about datasets, see Flywheel overview in the Amazon Comprehend Developer Guide."]
 module ContainsPiiEntitiesResponse =
   struct
     type nonrec t =
@@ -15886,8 +21647,8 @@ module ContainsPiiEntitiesResponse =
           (Xml.child xml_arg0 "Labels") in
       make ?labels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labels = field_map json "Labels" ListOfEntityLabels.of_json in
+    let of_json json__ =
+      let labels = field_map json__ "Labels" ListOfEntityLabels.of_json in
       make ?labels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15898,7 +21659,7 @@ module ContainsPiiEntitiesRequest =
       {
       text: String_.t
         [@ocaml.doc
-          "Creates a new document classification request to analyze a single document in real-time, returning personally identifiable information (PII) entity labels."];
+          "A UTF-8 text string. The maximum string size is 100 KB."];
       languageCode: LanguageCode.t
         [@ocaml.doc "The language of the input documents."]}
     let context_ = "ContainsPiiEntitiesRequest"
@@ -15916,10 +21677,10 @@ module ContainsPiiEntitiesRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~languageCode ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let text = field_map_exn json "Text" String_.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let text = field_map_exn json__ "Text" String_.of_json in
       make ~languageCode ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15930,17 +21691,43 @@ module ClassifyDocumentResponse =
       {
       classes: ListOfClasses.t option
         [@ocaml.doc
-          "The classes used by the document being analyzed. These are used for multi-class trained models. Individual classes are mutually exclusive and each document is expected to have only a single class assigned to it. For example, an animal can be a dog or a cat, but not both at the same time."];
+          "The classes used by the document being analyzed. These are used for models trained in multi-class mode. Individual classes are mutually exclusive and each document is expected to have only a single class assigned to it. For example, an animal can be a dog or a cat, but not both at the same time. For prompt safety classification, the response includes only two classes (SAFE_PROMPT and UNSAFE_PROMPT), along with a confidence score for each class. The value range of the score is zero to one, where one is the highest confidence."];
       labels: ListOfLabels.t option
         [@ocaml.doc
-          "The labels used the document being analyzed. These are used for multi-label trained models. Individual labels represent different categories that are related in some manner and are not mutually exclusive. For example, a movie can be just an action movie, or it can be an action movie, a science fiction movie, and a comedy, all at the same time."]}
+          "The labels used in the document being analyzed. These are used for multi-label trained models. Individual labels represent different categories that are related in some manner and are not mutually exclusive. For example, a movie can be just an action movie, or it can be an action movie, a science fiction movie, and a comedy, all at the same time."];
+      documentMetadata: DocumentMetadata.t option
+        [@ocaml.doc
+          "Extraction information about the document. This field is present in the response only if your request includes the Byte parameter."];
+      documentType: ListOfDocumentType.t option
+        [@ocaml.doc
+          "The document type for each page in the input document. This field is present in the response only if your request includes the Byte parameter."];
+      errors: ListOfErrors.t option
+        [@ocaml.doc
+          "Page-level errors that the system detected while processing the input document. The field is empty if the system encountered no errors."];
+      warnings: ListOfWarnings.t option
+        [@ocaml.doc
+          "Warnings detected while processing the input document. The response includes a warning if there is a mismatch between the input document type and the model type associated with the endpoint that you specified. The response can also include warnings for individual pages that have a mismatch. The field is empty if the system generated no warnings."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceUnavailableException of ResourceUnavailableException.t 
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?classes = fun ?labels -> fun () -> { classes; labels }
+    let make ?classes =
+      fun ?labels ->
+        fun ?documentMetadata ->
+          fun ?documentType ->
+            fun ?errors ->
+              fun ?warnings ->
+                fun () ->
+                  {
+                    classes;
+                    labels;
+                    documentMetadata;
+                    documentType;
+                    errors;
+                    warnings
+                  }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -15996,66 +21783,114 @@ module ClassifyDocumentResponse =
     let to_value x =
       structure_to_value
         [("Classes", (Option.map x.classes ~f:ListOfClasses.to_value));
-        ("Labels", (Option.map x.labels ~f:ListOfLabels.to_value))]
+        ("Labels", (Option.map x.labels ~f:ListOfLabels.to_value));
+        ("DocumentMetadata",
+          (Option.map x.documentMetadata ~f:DocumentMetadata.to_value));
+        ("DocumentType",
+          (Option.map x.documentType ~f:ListOfDocumentType.to_value));
+        ("Errors", (Option.map x.errors ~f:ListOfErrors.to_value));
+        ("Warnings", (Option.map x.warnings ~f:ListOfWarnings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warnings =
+        (Option.map ~f:ListOfWarnings.of_xml) (Xml.child xml_arg0 "Warnings") in
+      let errors =
+        (Option.map ~f:ListOfErrors.of_xml) (Xml.child xml_arg0 "Errors") in
+      let documentType =
+        (Option.map ~f:ListOfDocumentType.of_xml)
+          (Xml.child xml_arg0 "DocumentType") in
+      let documentMetadata =
+        (Option.map ~f:DocumentMetadata.of_xml)
+          (Xml.child xml_arg0 "DocumentMetadata") in
       let labels =
         (Option.map ~f:ListOfLabels.of_xml) (Xml.child xml_arg0 "Labels") in
       let classes =
         (Option.map ~f:ListOfClasses.of_xml) (Xml.child xml_arg0 "Classes") in
-      make ?labels ?classes ()
+      make ?warnings ?errors ?documentType ?documentMetadata ?labels ?classes
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labels = field_map json "Labels" ListOfLabels.of_json in
-      let classes = field_map json "Classes" ListOfClasses.of_json in
-      make ?labels ?classes ()
+    let of_json json__ =
+      let warnings = field_map json__ "Warnings" ListOfWarnings.of_json in
+      let errors = field_map json__ "Errors" ListOfErrors.of_json in
+      let documentType =
+        field_map json__ "DocumentType" ListOfDocumentType.of_json in
+      let documentMetadata =
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
+      let labels = field_map json__ "Labels" ListOfLabels.of_json in
+      let classes = field_map json__ "Classes" ListOfClasses.of_json in
+      make ?warnings ?errors ?documentType ?documentMetadata ?labels ?classes
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new document classification request to analyze a single document in real-time, using a previously created and trained custom model and an endpoint."]
+       "Creates a classification request to analyze a single document in real-time. ClassifyDocument supports the following model types: Custom classifier - a custom model that you have created and trained. For input, you can provide plain text, a single-page document (PDF, Word, or image), or Amazon Textract API output. For more information, see Custom classification in the Amazon Comprehend Developer Guide. Prompt safety classifier - Amazon Comprehend provides a pre-trained model for classifying input prompts for generative AI applications. For input, you provide English plain text input. For prompt safety classification, the response includes only the Classes field. For more information about prompt safety classifiers, see Prompt safety classification in the Amazon Comprehend Developer Guide. If the system detects errors while processing a page in the input document, the API response includes an Errors field that describes the errors. If the system detects a document-level error in your input document, the API returns an InvalidRequestException error response. For details about this exception, see Errors in semi-structured documents in the Comprehend Developer Guide."]
 module ClassifyDocumentRequest =
   struct
     type nonrec t =
       {
-      text: CustomerInputString.t
-        [@ocaml.doc "The document text to be analyzed."];
+      text: CustomerInputString.t option
+        [@ocaml.doc
+          "The document text to be analyzed. If you enter text using this parameter, do not use the Bytes parameter."];
       endpointArn: DocumentClassifierEndpointArn.t
-        [@ocaml.doc "The Amazon Resource Number (ARN) of the endpoint."]}
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the endpoint. For prompt safety classification, Amazon Comprehend provides the endpoint ARN. For more information about prompt safety classifiers, see Prompt safety classification in the Amazon Comprehend Developer Guide For custom classification, you create an endpoint for your custom model. For more information, see Using Amazon Comprehend endpoints."];
+      bytes: SemiStructuredDocumentBlob.t option
+        [@ocaml.doc
+          "Use the Bytes parameter to input a text, PDF, Word or image file. When you classify a document using a custom model, you can also use the Bytes parameter to input an Amazon Textract DetectDocumentText or AnalyzeDocument output file. To classify a document using the prompt safety classifier, use the Text parameter for input. Provide the input document as a sequence of base64-encoded bytes. If your code uses an Amazon Web Services SDK to classify documents, the SDK may encode the document file bytes for you. The maximum length of this field depends on the input document type. For details, see Inputs for real-time custom analysis in the Comprehend Developer Guide. If you use the Bytes parameter, do not use the Text parameter."];
+      documentReaderConfig: DocumentReaderConfig.t option
+        [@ocaml.doc
+          "Provides configuration parameters to override the default actions for extracting text from PDF documents and image files."]}
     let context_ = "ClassifyDocumentRequest"
-    let make ~text = fun ~endpointArn -> fun () -> { text; endpointArn }
+    let make ?text =
+      fun ?bytes ->
+        fun ?documentReaderConfig ->
+          fun ~endpointArn ->
+            fun () -> { text; bytes; documentReaderConfig; endpointArn }
     let to_value x =
       structure_to_value
-        [("Text", (Some (CustomerInputString.to_value x.text)));
+        [("Text", (Option.map x.text ~f:CustomerInputString.to_value));
         ("EndpointArn",
-          (Some (DocumentClassifierEndpointArn.to_value x.endpointArn)))]
+          (Some (DocumentClassifierEndpointArn.to_value x.endpointArn)));
+        ("Bytes",
+          (Option.map x.bytes ~f:SemiStructuredDocumentBlob.to_value));
+        ("DocumentReaderConfig",
+          (Option.map x.documentReaderConfig ~f:DocumentReaderConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let documentReaderConfig =
+        (Option.map ~f:DocumentReaderConfig.of_xml)
+          (Xml.child xml_arg0 "DocumentReaderConfig") in
+      let bytes =
+        (Option.map ~f:SemiStructuredDocumentBlob.of_xml)
+          (Xml.child xml_arg0 "Bytes") in
       let endpointArn =
         DocumentClassifierEndpointArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       let text =
-        CustomerInputString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
-      make ~endpointArn ~text ()
+        (Option.map ~f:CustomerInputString.of_xml)
+          (Xml.child xml_arg0 "Text") in
+      make ?documentReaderConfig ?bytes ~endpointArn ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let documentReaderConfig =
+        field_map json__ "DocumentReaderConfig" DocumentReaderConfig.of_json in
+      let bytes = field_map json__ "Bytes" SemiStructuredDocumentBlob.of_json in
       let endpointArn =
-        field_map_exn json "EndpointArn"
+        field_map_exn json__ "EndpointArn"
           DocumentClassifierEndpointArn.of_json in
-      let text = field_map_exn json "Text" CustomerInputString.of_json in
-      make ~endpointArn ~text ()
+      let text = field_map json__ "Text" CustomerInputString.of_json in
+      make ?documentReaderConfig ?bytes ~endpointArn ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new document classification request to analyze a single document in real-time, using a previously created and trained custom model and an endpoint."]
-module BatchDetectSyntaxResponse =
+       "Creates a classification request to analyze a single document in real-time. ClassifyDocument supports the following model types: Custom classifier - a custom model that you have created and trained. For input, you can provide plain text, a single-page document (PDF, Word, or image), or Amazon Textract API output. For more information, see Custom classification in the Amazon Comprehend Developer Guide. Prompt safety classifier - Amazon Comprehend provides a pre-trained model for classifying input prompts for generative AI applications. For input, you provide English plain text input. For prompt safety classification, the response includes only the Classes field. For more information about prompt safety classifiers, see Prompt safety classification in the Amazon Comprehend Developer Guide. If the system detects errors while processing a page in the input document, the API response includes an Errors field that describes the errors. If the system detects a document-level error in your input document, the API returns an InvalidRequestException error response. For details about this exception, see Errors in semi-structured documents in the Comprehend Developer Guide."]
+module BatchDetectTargetedSentimentResponse =
   struct
     type nonrec t =
       {
-      resultList: ListOfDetectSyntaxResult.t
+      resultList: ListOfDetectTargetedSentimentResult.t option
         [@ocaml.doc
           "A list of objects containing the results of the operation. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If all of the documents contain an error, the ResultList is empty."];
-      errorList: BatchItemErrorList.t
-        [@ocaml.doc
-          "A list containing one object for each document that contained an error. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If there are no errors in the batch, the ErrorList is empty."]}
+      errorList: BatchItemErrorList.t option
+        [@ocaml.doc "List of errors that the operation can return."]}
     type nonrec error =
       [
         `BatchSizeLimitExceededException of BatchSizeLimitExceededException.t 
@@ -16064,9 +21899,8 @@ module BatchDetectSyntaxResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `UnsupportedLanguageException of UnsupportedLanguageException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchDetectSyntaxResponse"
-    let make ~resultList =
-      fun ~errorList -> fun () -> { resultList; errorList }
+    let make ?resultList =
+      fun ?errorList -> fun () -> { resultList; errorList }
     let error_of_json name json =
       match name with
       | "BatchSizeLimitExceededException" ->
@@ -16132,34 +21966,178 @@ module BatchDetectSyntaxResponse =
     let to_value x =
       structure_to_value
         [("ResultList",
-           (Some (ListOfDetectSyntaxResult.to_value x.resultList)));
-        ("ErrorList", (Some (BatchItemErrorList.to_value x.errorList)))]
+           (Option.map x.resultList
+              ~f:ListOfDetectTargetedSentimentResult.to_value));
+        ("ErrorList",
+          (Option.map x.errorList ~f:BatchItemErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errorList =
-        BatchItemErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorList") in
+        (Option.map ~f:BatchItemErrorList.of_xml)
+          (Xml.child xml_arg0 "ErrorList") in
       let resultList =
-        ListOfDetectSyntaxResult.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResultList") in
-      make ~errorList ~resultList ()
+        (Option.map ~f:ListOfDetectTargetedSentimentResult.of_xml)
+          (Xml.child xml_arg0 "ResultList") in
+      make ?errorList ?resultList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorList =
-        field_map_exn json "ErrorList" BatchItemErrorList.of_json in
+    let of_json json__ =
+      let errorList = field_map json__ "ErrorList" BatchItemErrorList.of_json in
       let resultList =
-        field_map_exn json "ResultList" ListOfDetectSyntaxResult.of_json in
-      make ~errorList ~resultList ()
+        field_map json__ "ResultList"
+          ListOfDetectTargetedSentimentResult.of_json in
+      make ?errorList ?resultList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspects the text of a batch of documents for the syntax and part of speech of the words in the document and returns information about them. For more information, see how-syntax."]
+       "Inspects a batch of documents and returns a sentiment analysis for each entity identified in the documents. For more information about targeted sentiment, see Targeted sentiment in the Amazon Comprehend Developer Guide."]
+module BatchDetectTargetedSentimentRequest =
+  struct
+    type nonrec t =
+      {
+      textList: CustomerInputStringList.t
+        [@ocaml.doc
+          "A list containing the UTF-8 encoded text of the input documents. The list can contain a maximum of 25 documents. The maximum size of each document is 5 KB."];
+      languageCode: LanguageCode.t
+        [@ocaml.doc
+          "The language of the input documents. Currently, English is the only supported language."]}
+    let context_ = "BatchDetectTargetedSentimentRequest"
+    let make ~textList =
+      fun ~languageCode -> fun () -> { textList; languageCode }
+    let to_value x =
+      structure_to_value
+        [("TextList", (Some (CustomerInputStringList.to_value x.textList)));
+        ("LanguageCode", (Some (LanguageCode.to_value x.languageCode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let languageCode =
+        LanguageCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LanguageCode") in
+      let textList =
+        CustomerInputStringList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TextList") in
+      make ~languageCode ~textList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let languageCode =
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let textList =
+        field_map_exn json__ "TextList" CustomerInputStringList.of_json in
+      make ~languageCode ~textList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inspects a batch of documents and returns a sentiment analysis for each entity identified in the documents. For more information about targeted sentiment, see Targeted sentiment in the Amazon Comprehend Developer Guide."]
+module BatchDetectSyntaxResponse =
+  struct
+    type nonrec t =
+      {
+      resultList: ListOfDetectSyntaxResult.t option
+        [@ocaml.doc
+          "A list of objects containing the results of the operation. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If all of the documents contain an error, the ResultList is empty."];
+      errorList: BatchItemErrorList.t option
+        [@ocaml.doc
+          "A list containing one object for each document that contained an error. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If there are no errors in the batch, the ErrorList is empty."]}
+    type nonrec error =
+      [
+        `BatchSizeLimitExceededException of BatchSizeLimitExceededException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
+      | `UnsupportedLanguageException of UnsupportedLanguageException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resultList =
+      fun ?errorList -> fun () -> { resultList; errorList }
+    let error_of_json name json =
+      match name with
+      | "BatchSizeLimitExceededException" ->
+          `BatchSizeLimitExceededException
+            (BatchSizeLimitExceededException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TextSizeLimitExceededException" ->
+          `TextSizeLimitExceededException
+            (TextSizeLimitExceededException.of_json json)
+      | "UnsupportedLanguageException" ->
+          `UnsupportedLanguageException
+            (UnsupportedLanguageException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BatchSizeLimitExceededException" ->
+          `BatchSizeLimitExceededException
+            (BatchSizeLimitExceededException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TextSizeLimitExceededException" ->
+          `TextSizeLimitExceededException
+            (TextSizeLimitExceededException.of_xml xml)
+      | "UnsupportedLanguageException" ->
+          `UnsupportedLanguageException
+            (UnsupportedLanguageException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BatchSizeLimitExceededException e ->
+          `Assoc
+            [("error", (`String "BatchSizeLimitExceededException"));
+            ("details", (BatchSizeLimitExceededException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TextSizeLimitExceededException e ->
+          `Assoc
+            [("error", (`String "TextSizeLimitExceededException"));
+            ("details", (TextSizeLimitExceededException.to_json e))]
+      | `UnsupportedLanguageException e ->
+          `Assoc
+            [("error", (`String "UnsupportedLanguageException"));
+            ("details", (UnsupportedLanguageException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResultList",
+           (Option.map x.resultList ~f:ListOfDetectSyntaxResult.to_value));
+        ("ErrorList",
+          (Option.map x.errorList ~f:BatchItemErrorList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorList =
+        (Option.map ~f:BatchItemErrorList.of_xml)
+          (Xml.child xml_arg0 "ErrorList") in
+      let resultList =
+        (Option.map ~f:ListOfDetectSyntaxResult.of_xml)
+          (Xml.child xml_arg0 "ResultList") in
+      make ?errorList ?resultList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorList = field_map json__ "ErrorList" BatchItemErrorList.of_json in
+      let resultList =
+        field_map json__ "ResultList" ListOfDetectSyntaxResult.of_json in
+      make ?errorList ?resultList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inspects the text of a batch of documents for the syntax and part of speech of the words in the document and returns information about them. For more information, see Syntax in the Comprehend Developer Guide."]
 module BatchDetectSyntaxRequest =
   struct
     type nonrec t =
       {
       textList: CustomerInputStringList.t
         [@ocaml.doc
-          "A list containing the text of the input documents. The list can contain a maximum of 25 documents. Each document must contain fewer that 5,000 bytes of UTF-8 encoded characters."];
+          "A list containing the UTF-8 encoded text of the input documents. The list can contain a maximum of 25 documents. The maximum size for each document is 5 KB."];
       languageCode: SyntaxLanguageCode.t
         [@ocaml.doc
           "The language of the input documents. You can specify any of the following languages supported by Amazon Comprehend: German (\"de\"), English (\"en\"), Spanish (\"es\"), French (\"fr\"), Italian (\"it\"), or Portuguese (\"pt\"). All documents must be in the same language."]}
@@ -16180,23 +22158,23 @@ module BatchDetectSyntaxRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TextList") in
       make ~languageCode ~textList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" SyntaxLanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" SyntaxLanguageCode.of_json in
       let textList =
-        field_map_exn json "TextList" CustomerInputStringList.of_json in
+        field_map_exn json__ "TextList" CustomerInputStringList.of_json in
       make ~languageCode ~textList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspects the text of a batch of documents for the syntax and part of speech of the words in the document and returns information about them. For more information, see how-syntax."]
+       "Inspects the text of a batch of documents for the syntax and part of speech of the words in the document and returns information about them. For more information, see Syntax in the Comprehend Developer Guide."]
 module BatchDetectSentimentResponse =
   struct
     type nonrec t =
       {
-      resultList: ListOfDetectSentimentResult.t
+      resultList: ListOfDetectSentimentResult.t option
         [@ocaml.doc
           "A list of objects containing the results of the operation. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If all of the documents contain an error, the ResultList is empty."];
-      errorList: BatchItemErrorList.t
+      errorList: BatchItemErrorList.t option
         [@ocaml.doc
           "A list containing one object for each document that contained an error. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If there are no errors in the batch, the ErrorList is empty."]}
     type nonrec error =
@@ -16207,9 +22185,8 @@ module BatchDetectSentimentResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `UnsupportedLanguageException of UnsupportedLanguageException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchDetectSentimentResponse"
-    let make ~resultList =
-      fun ~errorList -> fun () -> { resultList; errorList }
+    let make ?resultList =
+      fun ?errorList -> fun () -> { resultList; errorList }
     let error_of_json name json =
       match name with
       | "BatchSizeLimitExceededException" ->
@@ -16275,24 +22252,24 @@ module BatchDetectSentimentResponse =
     let to_value x =
       structure_to_value
         [("ResultList",
-           (Some (ListOfDetectSentimentResult.to_value x.resultList)));
-        ("ErrorList", (Some (BatchItemErrorList.to_value x.errorList)))]
+           (Option.map x.resultList ~f:ListOfDetectSentimentResult.to_value));
+        ("ErrorList",
+          (Option.map x.errorList ~f:BatchItemErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errorList =
-        BatchItemErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorList") in
+        (Option.map ~f:BatchItemErrorList.of_xml)
+          (Xml.child xml_arg0 "ErrorList") in
       let resultList =
-        ListOfDetectSentimentResult.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResultList") in
-      make ~errorList ~resultList ()
+        (Option.map ~f:ListOfDetectSentimentResult.of_xml)
+          (Xml.child xml_arg0 "ResultList") in
+      make ?errorList ?resultList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorList =
-        field_map_exn json "ErrorList" BatchItemErrorList.of_json in
+    let of_json json__ =
+      let errorList = field_map json__ "ErrorList" BatchItemErrorList.of_json in
       let resultList =
-        field_map_exn json "ResultList" ListOfDetectSentimentResult.of_json in
-      make ~errorList ~resultList ()
+        field_map json__ "ResultList" ListOfDetectSentimentResult.of_json in
+      make ?errorList ?resultList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Inspects a batch of documents and returns an inference of the prevailing sentiment, POSITIVE, NEUTRAL, MIXED, or NEGATIVE, in each one."]
@@ -16302,7 +22279,7 @@ module BatchDetectSentimentRequest =
       {
       textList: CustomerInputStringList.t
         [@ocaml.doc
-          "A list containing the text of the input documents. The list can contain a maximum of 25 documents. Each document must contain fewer that 5,000 bytes of UTF-8 encoded characters."];
+          "A list containing the UTF-8 encoded text of the input documents. The list can contain a maximum of 25 documents. The maximum size of each document is 5 KB."];
       languageCode: LanguageCode.t
         [@ocaml.doc
           "The language of the input documents. You can specify any of the primary languages supported by Amazon Comprehend. All documents must be in the same language."]}
@@ -16323,11 +22300,11 @@ module BatchDetectSentimentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TextList") in
       make ~languageCode ~textList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let textList =
-        field_map_exn json "TextList" CustomerInputStringList.of_json in
+        field_map_exn json__ "TextList" CustomerInputStringList.of_json in
       make ~languageCode ~textList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16336,10 +22313,10 @@ module BatchDetectKeyPhrasesResponse =
   struct
     type nonrec t =
       {
-      resultList: ListOfDetectKeyPhrasesResult.t
+      resultList: ListOfDetectKeyPhrasesResult.t option
         [@ocaml.doc
           "A list of objects containing the results of the operation. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If all of the documents contain an error, the ResultList is empty."];
-      errorList: BatchItemErrorList.t
+      errorList: BatchItemErrorList.t option
         [@ocaml.doc
           "A list containing one object for each document that contained an error. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If there are no errors in the batch, the ErrorList is empty."]}
     type nonrec error =
@@ -16350,9 +22327,8 @@ module BatchDetectKeyPhrasesResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `UnsupportedLanguageException of UnsupportedLanguageException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchDetectKeyPhrasesResponse"
-    let make ~resultList =
-      fun ~errorList -> fun () -> { resultList; errorList }
+    let make ?resultList =
+      fun ?errorList -> fun () -> { resultList; errorList }
     let error_of_json name json =
       match name with
       | "BatchSizeLimitExceededException" ->
@@ -16418,24 +22394,24 @@ module BatchDetectKeyPhrasesResponse =
     let to_value x =
       structure_to_value
         [("ResultList",
-           (Some (ListOfDetectKeyPhrasesResult.to_value x.resultList)));
-        ("ErrorList", (Some (BatchItemErrorList.to_value x.errorList)))]
+           (Option.map x.resultList ~f:ListOfDetectKeyPhrasesResult.to_value));
+        ("ErrorList",
+          (Option.map x.errorList ~f:BatchItemErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errorList =
-        BatchItemErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorList") in
+        (Option.map ~f:BatchItemErrorList.of_xml)
+          (Xml.child xml_arg0 "ErrorList") in
       let resultList =
-        ListOfDetectKeyPhrasesResult.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResultList") in
-      make ~errorList ~resultList ()
+        (Option.map ~f:ListOfDetectKeyPhrasesResult.of_xml)
+          (Xml.child xml_arg0 "ResultList") in
+      make ?errorList ?resultList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorList =
-        field_map_exn json "ErrorList" BatchItemErrorList.of_json in
+    let of_json json__ =
+      let errorList = field_map json__ "ErrorList" BatchItemErrorList.of_json in
       let resultList =
-        field_map_exn json "ResultList" ListOfDetectKeyPhrasesResult.of_json in
-      make ~errorList ~resultList ()
+        field_map json__ "ResultList" ListOfDetectKeyPhrasesResult.of_json in
+      make ?errorList ?resultList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Detects the key noun phrases found in a batch of documents."]
@@ -16445,7 +22421,7 @@ module BatchDetectKeyPhrasesRequest =
       {
       textList: CustomerInputStringList.t
         [@ocaml.doc
-          "A list containing the text of the input documents. The list can contain a maximum of 25 documents. Each document must contain fewer that 5,000 bytes of UTF-8 encoded characters."];
+          "A list containing the UTF-8 encoded text of the input documents. The list can contain a maximum of 25 documents. The maximum size of each document is 5 KB."];
       languageCode: LanguageCode.t
         [@ocaml.doc
           "The language of the input documents. You can specify any of the primary languages supported by Amazon Comprehend. All documents must be in the same language."]}
@@ -16466,11 +22442,11 @@ module BatchDetectKeyPhrasesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TextList") in
       make ~languageCode ~textList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let textList =
-        field_map_exn json "TextList" CustomerInputStringList.of_json in
+        field_map_exn json__ "TextList" CustomerInputStringList.of_json in
       make ~languageCode ~textList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16479,10 +22455,10 @@ module BatchDetectEntitiesResponse =
   struct
     type nonrec t =
       {
-      resultList: ListOfDetectEntitiesResult.t
+      resultList: ListOfDetectEntitiesResult.t option
         [@ocaml.doc
           "A list of objects containing the results of the operation. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If all of the documents contain an error, the ResultList is empty."];
-      errorList: BatchItemErrorList.t
+      errorList: BatchItemErrorList.t option
         [@ocaml.doc
           "A list containing one object for each document that contained an error. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If there are no errors in the batch, the ErrorList is empty."]}
     type nonrec error =
@@ -16493,9 +22469,8 @@ module BatchDetectEntitiesResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `UnsupportedLanguageException of UnsupportedLanguageException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchDetectEntitiesResponse"
-    let make ~resultList =
-      fun ~errorList -> fun () -> { resultList; errorList }
+    let make ?resultList =
+      fun ?errorList -> fun () -> { resultList; errorList }
     let error_of_json name json =
       match name with
       | "BatchSizeLimitExceededException" ->
@@ -16561,34 +22536,34 @@ module BatchDetectEntitiesResponse =
     let to_value x =
       structure_to_value
         [("ResultList",
-           (Some (ListOfDetectEntitiesResult.to_value x.resultList)));
-        ("ErrorList", (Some (BatchItemErrorList.to_value x.errorList)))]
+           (Option.map x.resultList ~f:ListOfDetectEntitiesResult.to_value));
+        ("ErrorList",
+          (Option.map x.errorList ~f:BatchItemErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errorList =
-        BatchItemErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorList") in
+        (Option.map ~f:BatchItemErrorList.of_xml)
+          (Xml.child xml_arg0 "ErrorList") in
       let resultList =
-        ListOfDetectEntitiesResult.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResultList") in
-      make ~errorList ~resultList ()
+        (Option.map ~f:ListOfDetectEntitiesResult.of_xml)
+          (Xml.child xml_arg0 "ResultList") in
+      make ?errorList ?resultList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorList =
-        field_map_exn json "ErrorList" BatchItemErrorList.of_json in
+    let of_json json__ =
+      let errorList = field_map json__ "ErrorList" BatchItemErrorList.of_json in
       let resultList =
-        field_map_exn json "ResultList" ListOfDetectEntitiesResult.of_json in
-      make ~errorList ~resultList ()
+        field_map json__ "ResultList" ListOfDetectEntitiesResult.of_json in
+      make ?errorList ?resultList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspects the text of a batch of documents for named entities and returns information about them. For more information about named entities, see how-entities"]
+       "Inspects the text of a batch of documents for named entities and returns information about them. For more information about named entities, see Entities in the Comprehend Developer Guide."]
 module BatchDetectEntitiesRequest =
   struct
     type nonrec t =
       {
       textList: CustomerInputStringList.t
         [@ocaml.doc
-          "A list containing the text of the input documents. The list can contain a maximum of 25 documents. Each document must contain fewer than 5,000 bytes of UTF-8 encoded characters."];
+          "A list containing the UTF-8 encoded text of the input documents. The list can contain a maximum of 25 documents. The maximum size of each document is 5 KB."];
       languageCode: LanguageCode.t
         [@ocaml.doc
           "The language of the input documents. You can specify any of the primary languages supported by Amazon Comprehend. All documents must be in the same language."]}
@@ -16609,23 +22584,23 @@ module BatchDetectEntitiesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TextList") in
       make ~languageCode ~textList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let textList =
-        field_map_exn json "TextList" CustomerInputStringList.of_json in
+        field_map_exn json__ "TextList" CustomerInputStringList.of_json in
       make ~languageCode ~textList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspects the text of a batch of documents for named entities and returns information about them. For more information about named entities, see how-entities"]
+       "Inspects the text of a batch of documents for named entities and returns information about them. For more information about named entities, see Entities in the Comprehend Developer Guide."]
 module BatchDetectDominantLanguageResponse =
   struct
     type nonrec t =
       {
-      resultList: ListOfDetectDominantLanguageResult.t
+      resultList: ListOfDetectDominantLanguageResult.t option
         [@ocaml.doc
           "A list of objects containing the results of the operation. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If all of the documents contain an error, the ResultList is empty."];
-      errorList: BatchItemErrorList.t
+      errorList: BatchItemErrorList.t option
         [@ocaml.doc
           "A list containing one object for each document that contained an error. The results are sorted in ascending order by the Index field and match the order of the documents in the input list. If there are no errors in the batch, the ErrorList is empty."]}
     type nonrec error =
@@ -16635,9 +22610,8 @@ module BatchDetectDominantLanguageResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchDetectDominantLanguageResponse"
-    let make ~resultList =
-      fun ~errorList -> fun () -> { resultList; errorList }
+    let make ?resultList =
+      fun ?errorList -> fun () -> { resultList; errorList }
     let error_of_json name json =
       match name with
       | "BatchSizeLimitExceededException" ->
@@ -16693,25 +22667,26 @@ module BatchDetectDominantLanguageResponse =
     let to_value x =
       structure_to_value
         [("ResultList",
-           (Some (ListOfDetectDominantLanguageResult.to_value x.resultList)));
-        ("ErrorList", (Some (BatchItemErrorList.to_value x.errorList)))]
+           (Option.map x.resultList
+              ~f:ListOfDetectDominantLanguageResult.to_value));
+        ("ErrorList",
+          (Option.map x.errorList ~f:BatchItemErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errorList =
-        BatchItemErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorList") in
+        (Option.map ~f:BatchItemErrorList.of_xml)
+          (Xml.child xml_arg0 "ErrorList") in
       let resultList =
-        ListOfDetectDominantLanguageResult.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResultList") in
-      make ~errorList ~resultList ()
+        (Option.map ~f:ListOfDetectDominantLanguageResult.of_xml)
+          (Xml.child xml_arg0 "ResultList") in
+      make ?errorList ?resultList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorList =
-        field_map_exn json "ErrorList" BatchItemErrorList.of_json in
+    let of_json json__ =
+      let errorList = field_map json__ "ErrorList" BatchItemErrorList.of_json in
       let resultList =
-        field_map_exn json "ResultList"
+        field_map json__ "ResultList"
           ListOfDetectDominantLanguageResult.of_json in
-      make ~errorList ~resultList ()
+      make ?errorList ?resultList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Determines the dominant language of the input text for a batch of documents. For a list of languages that Amazon Comprehend can detect, see Amazon Comprehend Supported Languages."]
@@ -16721,7 +22696,7 @@ module BatchDetectDominantLanguageRequest =
       {
       textList: CustomerInputStringList.t
         [@ocaml.doc
-          "A list containing the text of the input documents. The list can contain a maximum of 25 documents. Each document should contain at least 20 characters and must contain fewer than 5,000 bytes of UTF-8 encoded characters."]}
+          "A list containing the UTF-8 encoded text of the input documents. The list can contain a maximum of 25 documents. Each document should contain at least 20 characters. The maximum size of each document is 5 KB."]}
     let context_ = "BatchDetectDominantLanguageRequest"
     let make ~textList = fun () -> { textList }
     let to_value x =
@@ -16734,9 +22709,9 @@ module BatchDetectDominantLanguageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TextList") in
       make ~textList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textList =
-        field_map_exn json "TextList" CustomerInputStringList.of_json in
+        field_map_exn json__ "TextList" CustomerInputStringList.of_json in
       make ~textList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

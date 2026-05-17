@@ -83,19 +83,19 @@ let create_job_for_devices =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deviceJobConfig =
+         flag "device-job-config" (optional json_arg)
+           ~doc:"JSON DeviceJobConfig"
        and deviceIds =
          flag "device-ids" (required json_arg) ~doc:"JSON DeviceIdList"
-       and deviceJobConfig =
-         flag "device-job-config" (required json_arg)
-           ~doc:"JSON DeviceJobConfig"
        and jobType = flag "job-type" (required json_arg) ~doc:"JSON JobType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_job_for_devices
            (Values.CreateJobForDevicesRequest.make
-              ~deviceIds:(Values.DeviceIdList.of_json deviceIds)
-              ~deviceJobConfig:(Values.DeviceJobConfig.of_json
+              ?deviceJobConfig:(Option.map ~f:Values.DeviceJobConfig.of_json
                                   deviceJobConfig)
+              ~deviceIds:(Values.DeviceIdList.of_json deviceIds)
               ~jobType:(Values.JobType.of_json jobType) ())
            (Some Values.CreateJobForDevicesResponse.to_json)
            (Some Values.CreateJobForDevicesResponse.error_to_json)])
@@ -525,15 +525,30 @@ let list_devices =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deviceAggregatedStatusFilter =
+         flag "device-aggregated-status-filter" (optional json_arg)
+           ~doc:"JSON DeviceAggregatedStatus"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxSize25"
+       and nameFilter =
+         flag "name-filter" (optional string) ~doc:"STRING NameFilter"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON ListDevicesSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_devices
-           (Values.ListDevicesRequest.make ?maxResults ?nextToken ())
-           (Some Values.ListDevicesResponse.to_json)
+           (Values.ListDevicesRequest.make
+              ?deviceAggregatedStatusFilter:(Option.map
+                                               ~f:Values.DeviceAggregatedStatus.of_json
+                                               deviceAggregatedStatusFilter)
+              ?maxResults ?nameFilter ?nextToken
+              ?sortBy:(Option.map ~f:Values.ListDevicesSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ()) (Some Values.ListDevicesResponse.to_json)
            (Some Values.ListDevicesResponse.error_to_json)])
 let list_devices_jobs =
   Command.async ~summary:""
@@ -749,6 +764,31 @@ let remove_application_instance =
               ~applicationInstanceId ())
            (Some Values.RemoveApplicationInstanceResponse.to_json)
            (Some Values.RemoveApplicationInstanceResponse.error_to_json)])
+let signal_application_instance_node_instances =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationInstanceId =
+         flag "application-instance-id" (required string)
+           ~doc:"STRING ApplicationInstanceId"
+       and nodeSignals =
+         flag "node-signals" (required json_arg) ~doc:"JSON NodeSignalList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.signal_application_instance_node_instances
+           (Values.SignalApplicationInstanceNodeInstancesRequest.make
+              ~applicationInstanceId
+              ~nodeSignals:(Values.NodeSignalList.of_json nodeSignals) ())
+           (Some
+              Values.SignalApplicationInstanceNodeInstancesResponse.to_json)
+           (Some
+              Values.SignalApplicationInstanceNodeInstancesResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -846,6 +886,8 @@ let main =
     ("provision-device", provision_device);
     ("register-package-version", register_package_version);
     ("remove-application-instance", remove_application_instance);
+    ("signal-application-instance-node-instances",
+      signal_application_instance_node_instances);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-device-metadata", update_device_metadata)]

@@ -2,6 +2,8 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AddWorkload: (AddWorkloadRequest.t, AddWorkloadResponse.t,
+  AddWorkloadResponse.error) t 
   | CreateApplication: (CreateApplicationRequest.t,
   CreateApplicationResponse.t, CreateApplicationResponse.error) t 
   | CreateComponent: (CreateComponentRequest.t, CreateComponentResponse.t,
@@ -34,6 +36,8 @@ type ('i, 'o, 'e) t =
   | DescribeProblemObservations: (DescribeProblemObservationsRequest.t,
   DescribeProblemObservationsResponse.t,
   DescribeProblemObservationsResponse.error) t 
+  | DescribeWorkload: (DescribeWorkloadRequest.t, DescribeWorkloadResponse.t,
+  DescribeWorkloadResponse.error) t 
   | ListApplications: (ListApplicationsRequest.t, ListApplicationsResponse.t,
   ListApplicationsResponse.error) t 
   | ListComponents: (ListComponentsRequest.t, ListComponentsResponse.t,
@@ -49,6 +53,10 @@ type ('i, 'o, 'e) t =
   ListProblemsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListWorkloads: (ListWorkloadsRequest.t, ListWorkloadsResponse.t,
+  ListWorkloadsResponse.error) t 
+  | RemoveWorkload: (RemoveWorkloadRequest.t, RemoveWorkloadResponse.t,
+  RemoveWorkloadResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -62,8 +70,13 @@ type ('i, 'o, 'e) t =
   UpdateComponentConfigurationResponse.error) t 
   | UpdateLogPattern: (UpdateLogPatternRequest.t, UpdateLogPatternResponse.t,
   UpdateLogPatternResponse.error) t 
+  | UpdateProblem: (UpdateProblemRequest.t, UpdateProblemResponse.t,
+  UpdateProblemResponse.error) t 
+  | UpdateWorkload: (UpdateWorkloadRequest.t, UpdateWorkloadResponse.t,
+  UpdateWorkloadResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AddWorkload -> `POST
   | CreateApplication -> `POST
   | CreateComponent -> `POST
   | CreateLogPattern -> `POST
@@ -78,6 +91,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeObservation -> `POST
   | DescribeProblem -> `POST
   | DescribeProblemObservations -> `POST
+  | DescribeWorkload -> `POST
   | ListApplications -> `POST
   | ListComponents -> `POST
   | ListConfigurationHistory -> `POST
@@ -85,15 +99,20 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListLogPatterns -> `POST
   | ListProblems -> `POST
   | ListTagsForResource -> `POST
+  | ListWorkloads -> `POST
+  | RemoveWorkload -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateApplication -> `POST
   | UpdateComponent -> `POST
   | UpdateComponentConfiguration -> `POST
   | UpdateLogPattern -> `POST
+  | UpdateProblem -> `POST
+  | UpdateWorkload -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AddWorkload -> (Format.kasprintf Uri.of_string) "/"
       | CreateApplication -> (Format.kasprintf Uri.of_string) "/"
       | CreateComponent -> (Format.kasprintf Uri.of_string) "/"
       | CreateLogPattern -> (Format.kasprintf Uri.of_string) "/"
@@ -110,6 +129,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeObservation -> (Format.kasprintf Uri.of_string) "/"
       | DescribeProblem -> (Format.kasprintf Uri.of_string) "/"
       | DescribeProblemObservations -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeWorkload -> (Format.kasprintf Uri.of_string) "/"
       | ListApplications -> (Format.kasprintf Uri.of_string) "/"
       | ListComponents -> (Format.kasprintf Uri.of_string) "/"
       | ListConfigurationHistory -> (Format.kasprintf Uri.of_string) "/"
@@ -117,15 +137,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListLogPatterns -> (Format.kasprintf Uri.of_string) "/"
       | ListProblems -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ListWorkloads -> (Format.kasprintf Uri.of_string) "/"
+      | RemoveWorkload -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateApplication -> (Format.kasprintf Uri.of_string) "/"
       | UpdateComponent -> (Format.kasprintf Uri.of_string) "/"
       | UpdateComponentConfiguration -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateLogPattern -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateLogPattern -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateProblem -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateWorkload -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | AddWorkload ->
+      let json = AddWorkloadRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "EC2WindowsBarleyService.AddWorkload")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateApplication ->
       let json = CreateApplicationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -242,6 +274,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "EC2WindowsBarleyService.DescribeProblemObservations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWorkload ->
+      let json = DescribeWorkloadRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "EC2WindowsBarleyService.DescribeWorkload")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListApplications ->
       let json = ListApplicationsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -299,6 +339,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "EC2WindowsBarleyService.ListTagsForResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListWorkloads ->
+      let json = ListWorkloadsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "EC2WindowsBarleyService.ListWorkloads")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RemoveWorkload ->
+      let json = RemoveWorkloadRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "EC2WindowsBarleyService.RemoveWorkload")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -348,6 +404,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "EC2WindowsBarleyService.UpdateLogPattern")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateProblem ->
+      let json = UpdateProblemRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "EC2WindowsBarleyService.UpdateProblem")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateWorkload ->
+      let json = UpdateWorkloadRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "EC2WindowsBarleyService.UpdateWorkload")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -371,6 +443,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | AddWorkload ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AddWorkloadResponse.of_json json)
+      else Error (parse_aws_error (Some AddWorkloadResponse.error_of_json))
   | CreateApplication ->
       if is_success
       then
@@ -483,6 +561,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeProblemObservationsResponse.error_of_json))
+  | DescribeWorkload ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWorkloadResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeWorkloadResponse.error_of_json))
   | ListApplications ->
       if is_success
       then
@@ -535,6 +620,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListWorkloads ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListWorkloadsResponse.of_json json)
+      else Error (parse_aws_error (Some ListWorkloadsResponse.error_of_json))
+  | RemoveWorkload ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RemoveWorkloadResponse.of_json json)
+      else
+        Error (parse_aws_error (Some RemoveWorkloadResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -578,3 +676,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateLogPatternResponse.of_json json)
       else
         Error (parse_aws_error (Some UpdateLogPatternResponse.error_of_json))
+  | UpdateProblem ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateProblemResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateProblemResponse.error_of_json))
+  | UpdateWorkload ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateWorkloadResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateWorkloadResponse.error_of_json))

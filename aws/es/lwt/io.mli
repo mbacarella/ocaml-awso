@@ -16,6 +16,18 @@ val associate_package :
       AssociatePackageRequest.t ->
         (AssociatePackageResponse.t, AssociatePackageResponse.error) Result.t
           Lwt.t
+val authorize_vpc_endpoint_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AuthorizeVpcEndpointAccessRequest.t ->
+        (AuthorizeVpcEndpointAccessResponse.t,
+          AuthorizeVpcEndpointAccessResponse.error) Result.t Lwt.t
+val cancel_domain_config_change :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelDomainConfigChangeRequest.t ->
+        (CancelDomainConfigChangeResponse.t,
+          CancelDomainConfigChangeResponse.error) Result.t Lwt.t
 val cancel_elasticsearch_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -41,6 +53,12 @@ val create_package :
     ?cfg:Awso.Cfg.t ->
       CreatePackageRequest.t ->
         (CreatePackageResponse.t, CreatePackageResponse.error) Result.t Lwt.t
+val create_vpc_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateVpcEndpointRequest.t ->
+        (CreateVpcEndpointResponse.t, CreateVpcEndpointResponse.error)
+          Result.t Lwt.t
 val delete_elasticsearch_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -69,6 +87,12 @@ val delete_package :
     ?cfg:Awso.Cfg.t ->
       DeletePackageRequest.t ->
         (DeletePackageResponse.t, DeletePackageResponse.error) Result.t Lwt.t
+val delete_vpc_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteVpcEndpointRequest.t ->
+        (DeleteVpcEndpointResponse.t, DeleteVpcEndpointResponse.error)
+          Result.t Lwt.t
 val describe_domain_auto_tunes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -140,6 +164,12 @@ val describe_reserved_elasticsearch_instances :
         (DescribeReservedElasticsearchInstancesResponse.t,
           DescribeReservedElasticsearchInstancesResponse.error) Result.t
           Lwt.t
+val describe_vpc_endpoints :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeVpcEndpointsRequest.t ->
+        (DescribeVpcEndpointsResponse.t, DescribeVpcEndpointsResponse.error)
+          Result.t Lwt.t
 val dissociate_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -205,6 +235,24 @@ val list_tags :
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
         (ListTagsResponse.t, ListTagsResponse.error) Result.t Lwt.t
+val list_vpc_endpoint_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcEndpointAccessRequest.t ->
+        (ListVpcEndpointAccessResponse.t,
+          ListVpcEndpointAccessResponse.error) Result.t Lwt.t
+val list_vpc_endpoints :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcEndpointsRequest.t ->
+        (ListVpcEndpointsResponse.t, ListVpcEndpointsResponse.error) Result.t
+          Lwt.t
+val list_vpc_endpoints_for_domain :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcEndpointsForDomainRequest.t ->
+        (ListVpcEndpointsForDomainResponse.t,
+          ListVpcEndpointsForDomainResponse.error) Result.t Lwt.t
 val purchase_reserved_elasticsearch_instance_offering :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -222,6 +270,12 @@ val reject_inbound_cross_cluster_search_connection :
 val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> RemoveTagsRequest.t -> (unit, unit) Result.t Lwt.t
+val revoke_vpc_endpoint_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RevokeVpcEndpointAccessRequest.t ->
+        (RevokeVpcEndpointAccessResponse.t,
+          RevokeVpcEndpointAccessResponse.error) Result.t Lwt.t
 val start_elasticsearch_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -240,6 +294,12 @@ val update_package :
     ?cfg:Awso.Cfg.t ->
       UpdatePackageRequest.t ->
         (UpdatePackageResponse.t, UpdatePackageResponse.error) Result.t Lwt.t
+val update_vpc_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateVpcEndpointRequest.t ->
+        (UpdateVpcEndpointResponse.t, UpdateVpcEndpointResponse.error)
+          Result.t Lwt.t
 val upgrade_elasticsearch_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

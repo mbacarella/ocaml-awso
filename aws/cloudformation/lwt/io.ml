@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let activate_organizations_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ActivateOrganizationsAccess input
 let activate_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ActivateType input
 let batch_describe_type_configurations ?endpoint_url ?cfg input =
@@ -21,16 +23,24 @@ let continue_update_rollback ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ContinueUpdateRollback input
 let create_change_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateChangeSet input
+let create_generated_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateGeneratedTemplate input
 let create_stack ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStack input
 let create_stack_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStackInstances input
+let create_stack_refactor ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateStackRefactor input
 let create_stack_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStackSet input
+let deactivate_organizations_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeactivateOrganizationsAccess input
 let deactivate_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeactivateType input
 let delete_change_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteChangeSet input
+let delete_generated_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteGeneratedTemplate input
 let delete_stack ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStack input
 let delete_stack_instances ?endpoint_url ?cfg input =
@@ -45,14 +55,24 @@ let describe_change_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeChangeSet input
 let describe_change_set_hooks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeChangeSetHooks input
+let describe_events ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeEvents input
+let describe_generated_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeGeneratedTemplate input
+let describe_organizations_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeOrganizationsAccess input
 let describe_publisher ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribePublisher input
+let describe_resource_scan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeResourceScan input
 let describe_stack_drift_detection_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStackDriftDetectionStatus input
 let describe_stack_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStackEvents input
 let describe_stack_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStackInstance input
+let describe_stack_refactor ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeStackRefactor input
 let describe_stack_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStackResource input
 let describe_stack_resource_drifts ?endpoint_url ?cfg input =
@@ -79,6 +99,12 @@ let estimate_template_cost ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EstimateTemplateCost input
 let execute_change_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExecuteChangeSet input
+let execute_stack_refactor ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExecuteStackRefactor input
+let get_generated_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetGeneratedTemplate input
+let get_hook_result ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetHookResult input
 let get_stack_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStackPolicy input
 let get_template ?endpoint_url ?cfg input =
@@ -91,12 +117,30 @@ let list_change_sets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListChangeSets input
 let list_exports ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListExports input
+let list_generated_templates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListGeneratedTemplates input
+let list_hook_results ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListHookResults input
 let list_imports ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImports input
+let list_resource_scan_related_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceScanRelatedResources input
+let list_resource_scan_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceScanResources input
+let list_resource_scans ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceScans input
+let list_stack_instance_resource_drifts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListStackInstanceResourceDrifts input
 let list_stack_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStackInstances input
+let list_stack_refactor_actions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListStackRefactorActions input
+let list_stack_refactors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListStackRefactors input
 let list_stack_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStackResources input
+let list_stack_set_auto_deployment_targets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListStackSetAutoDeploymentTargets input
 let list_stack_set_operation_results ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStackSetOperationResults input
 let list_stack_set_operations ?endpoint_url ?cfg input =
@@ -129,10 +173,14 @@ let set_type_default_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetTypeDefaultVersion input
 let signal_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SignalResource input
+let start_resource_scan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartResourceScan input
 let stop_stack_set_operation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopStackSetOperation input
 let test_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TestType input
+let update_generated_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateGeneratedTemplate input
 let update_stack ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateStack input
 let update_stack_instances ?endpoint_url ?cfg input =

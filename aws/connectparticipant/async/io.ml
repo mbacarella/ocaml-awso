@@ -11,14 +11,20 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let cancel_participant_authentication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelParticipantAuthentication input
 let complete_attachment_upload ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CompleteAttachmentUpload input
 let create_participant_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateParticipantConnection input
+let describe_view ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeView input
 let disconnect_participant ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisconnectParticipant input
 let get_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAttachment input
+let get_authentication_url ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAuthenticationUrl input
 let get_transcript ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTranscript input
 let send_event ?endpoint_url ?cfg input =

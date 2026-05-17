@@ -24,6 +24,284 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module MaxLocalMediaSizeInMB =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2000000) >>=
+             (fun () -> check_int_min i ~min:64));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxLocalMediaSizeInMB" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module StrategyOnFullSize =
+  struct
+    type nonrec t =
+      | DELETE_OLDEST_MEDIA 
+      | DENY_NEW_MEDIA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DELETE_OLDEST_MEDIA -> "DELETE_OLDEST_MEDIA"
+      | DENY_NEW_MEDIA -> "DENY_NEW_MEDIA"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DELETE_OLDEST_MEDIA" -> DELETE_OLDEST_MEDIA
+      | "DENY_NEW_MEDIA" -> DENY_NEW_MEDIA
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration StrategyOnFullSize" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StrategyOnFullSize" j)
+    let to_json = simple_to_json to_value
+  end
+module MediaUriSecretArn =
+  struct
+    type nonrec t = string
+    let context_ = "MediaUriSecretArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[a-z\\d-]+:secretsmanager:[a-z0-9-]+:[0-9]+:secret:[a-zA-Z0-9_.-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MediaUriSecretArn" j
+    let to_json = simple_to_json to_value
+  end
+module MediaUriType =
+  struct
+    type nonrec t =
+      | RTSP_URI 
+      | FILE_URI 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RTSP_URI -> "RTSP_URI"
+      | FILE_URI -> "FILE_URI"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RTSP_URI" -> RTSP_URI
+      | "FILE_URI" -> FILE_URI
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MediaUriType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MediaUriType" j)
+    let to_json = simple_to_json to_value
+  end
+module DurationInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3600) >>=
+             (fun () -> check_int_min i ~min:60));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DurationInSeconds" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ScheduleExpression =
+  struct
+    type nonrec t = string
+    let context_ = "ScheduleExpression"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:11) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"[^\\n]{11,100}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ScheduleExpression" j
+    let to_json = simple_to_json to_value
+  end
+module DeleteAfterUpload =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module EdgeRetentionInHours =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:720) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for EdgeRetentionInHours" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LocalSizeConfig =
+  struct
+    type nonrec t =
+      {
+      maxLocalMediaSizeInMB: MaxLocalMediaSizeInMB.t option
+        [@ocaml.doc
+          "The overall maximum size of the media that you want to store for a stream on the Edge Agent."];
+      strategyOnFullSize: StrategyOnFullSize.t option
+        [@ocaml.doc
+          "The strategy to perform when a stream\226\128\153s MaxLocalMediaSizeInMB limit is reached."]}
+    let make ?maxLocalMediaSizeInMB =
+      fun ?strategyOnFullSize ->
+        fun () -> { maxLocalMediaSizeInMB; strategyOnFullSize }
+    let to_value x =
+      structure_to_value
+        [("MaxLocalMediaSizeInMB",
+           (Option.map x.maxLocalMediaSizeInMB
+              ~f:MaxLocalMediaSizeInMB.to_value));
+        ("StrategyOnFullSize",
+          (Option.map x.strategyOnFullSize ~f:StrategyOnFullSize.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let strategyOnFullSize =
+        (Option.map ~f:StrategyOnFullSize.of_xml)
+          (Xml.child xml_arg0 "StrategyOnFullSize") in
+      let maxLocalMediaSizeInMB =
+        (Option.map ~f:MaxLocalMediaSizeInMB.of_xml)
+          (Xml.child xml_arg0 "MaxLocalMediaSizeInMB") in
+      make ?strategyOnFullSize ?maxLocalMediaSizeInMB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let strategyOnFullSize =
+        field_map json__ "StrategyOnFullSize" StrategyOnFullSize.of_json in
+      let maxLocalMediaSizeInMB =
+        field_map json__ "MaxLocalMediaSizeInMB"
+          MaxLocalMediaSizeInMB.of_json in
+      make ?strategyOnFullSize ?maxLocalMediaSizeInMB ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration details that include the maximum size of the media (MaxLocalMediaSizeInMB) that you want to store for a stream on the Edge Agent, as well as the strategy that should be used (StrategyOnFullSize) when a stream's maximum size has been reached."]
+module MediaSourceConfig =
+  struct
+    type nonrec t =
+      {
+      mediaUriSecretArn: MediaUriSecretArn.t
+        [@ocaml.doc
+          "The Amazon Web Services Secrets Manager ARN for the username and password of the camera, or a local media file location."];
+      mediaUriType: MediaUriType.t
+        [@ocaml.doc
+          "The Uniform Resource Identifier (URI) type. The FILE_URI value can be used to stream local media files. Preview only supports the RTSP_URI media source URI format ."]}
+    let context_ = "MediaSourceConfig"
+    let make ~mediaUriSecretArn =
+      fun ~mediaUriType -> fun () -> { mediaUriSecretArn; mediaUriType }
+    let to_value x =
+      structure_to_value
+        [("MediaUriSecretArn",
+           (Some (MediaUriSecretArn.to_value x.mediaUriSecretArn)));
+        ("MediaUriType", (Some (MediaUriType.to_value x.mediaUriType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mediaUriType =
+        MediaUriType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MediaUriType") in
+      let mediaUriSecretArn =
+        MediaUriSecretArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MediaUriSecretArn") in
+      make ~mediaUriType ~mediaUriSecretArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mediaUriType =
+        field_map_exn json__ "MediaUriType" MediaUriType.of_json in
+      let mediaUriSecretArn =
+        field_map_exn json__ "MediaUriSecretArn" MediaUriSecretArn.of_json in
+      make ~mediaUriType ~mediaUriSecretArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration details that consist of the credentials required (MediaUriSecretArn and MediaUriType) to access the media files that are streamed to the camera."]
+module ScheduleConfig =
+  struct
+    type nonrec t =
+      {
+      scheduleExpression: ScheduleExpression.t
+        [@ocaml.doc
+          "The Quartz cron expression that takes care of scheduling jobs to record from the camera, or local media file, onto the Edge Agent. If the ScheduleExpression is not provided for the RecorderConfig, then the Edge Agent will always be set to recording mode. For more information about Quartz, refer to the Cron Trigger Tutorial page to understand the valid expressions and its use."];
+      durationInSeconds: DurationInSeconds.t
+        [@ocaml.doc
+          "The total duration to record the media. If the ScheduleExpression attribute is provided, then the DurationInSeconds attribute should also be specified."]}
+    let context_ = "ScheduleConfig"
+    let make ~scheduleExpression =
+      fun ~durationInSeconds ->
+        fun () -> { scheduleExpression; durationInSeconds }
+    let to_value x =
+      structure_to_value
+        [("ScheduleExpression",
+           (Some (ScheduleExpression.to_value x.scheduleExpression)));
+        ("DurationInSeconds",
+          (Some (DurationInSeconds.to_value x.durationInSeconds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationInSeconds =
+        DurationInSeconds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DurationInSeconds") in
+      let scheduleExpression =
+        ScheduleExpression.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ScheduleExpression") in
+      make ~durationInSeconds ~scheduleExpression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationInSeconds =
+        field_map_exn json__ "DurationInSeconds" DurationInSeconds.of_json in
+      let scheduleExpression =
+        field_map_exn json__ "ScheduleExpression" ScheduleExpression.of_json in
+      make ~durationInSeconds ~scheduleExpression ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This API enables you to specify the duration that the camera, or local media file, should record onto the Edge Agent. The ScheduleConfig consists of the ScheduleExpression and the DurationInMinutes attributes. If the ScheduleConfig is not provided in the RecorderConfig, then the Edge Agent will always be set to recording mode. If the ScheduleConfig is not provided in the UploaderConfig, then the Edge Agent will upload at regular intervals (every 1 hour)."]
 module MessageTtlSeconds =
   struct
     type nonrec t = int
@@ -40,6 +318,227 @@ module MessageTtlSeconds =
       Int.of_string
         (string_of_xml ~kind:"an integer for MessageTtlSeconds" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DeletionConfig =
+  struct
+    type nonrec t =
+      {
+      edgeRetentionInHours: EdgeRetentionInHours.t option
+        [@ocaml.doc
+          "The number of hours that you want to retain the data in the stream on the Edge Agent. The default value of the retention time is 720 hours, which translates to 30 days."];
+      localSizeConfig: LocalSizeConfig.t option
+        [@ocaml.doc
+          "The value of the local size required in order to delete the edge configuration."];
+      deleteAfterUpload: DeleteAfterUpload.t option
+        [@ocaml.doc
+          "The boolean value used to indicate whether or not you want to mark the media for deletion, once it has been uploaded to the Kinesis Video Stream cloud. The media files can be deleted if any of the deletion configuration values are set to true, such as when the limit for the EdgeRetentionInHours, or the MaxLocalMediaSizeInMB, has been reached. Since the default value is set to true, configure the uploader schedule such that the media files are not being deleted before they are initially uploaded to the Amazon Web Services cloud."]}
+    let make ?edgeRetentionInHours =
+      fun ?localSizeConfig ->
+        fun ?deleteAfterUpload ->
+          fun () ->
+            { edgeRetentionInHours; localSizeConfig; deleteAfterUpload }
+    let to_value x =
+      structure_to_value
+        [("EdgeRetentionInHours",
+           (Option.map x.edgeRetentionInHours
+              ~f:EdgeRetentionInHours.to_value));
+        ("LocalSizeConfig",
+          (Option.map x.localSizeConfig ~f:LocalSizeConfig.to_value));
+        ("DeleteAfterUpload",
+          (Option.map x.deleteAfterUpload ~f:DeleteAfterUpload.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deleteAfterUpload =
+        (Option.map ~f:DeleteAfterUpload.of_xml)
+          (Xml.child xml_arg0 "DeleteAfterUpload") in
+      let localSizeConfig =
+        (Option.map ~f:LocalSizeConfig.of_xml)
+          (Xml.child xml_arg0 "LocalSizeConfig") in
+      let edgeRetentionInHours =
+        (Option.map ~f:EdgeRetentionInHours.of_xml)
+          (Xml.child xml_arg0 "EdgeRetentionInHours") in
+      make ?deleteAfterUpload ?localSizeConfig ?edgeRetentionInHours ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deleteAfterUpload =
+        field_map json__ "DeleteAfterUpload" DeleteAfterUpload.of_json in
+      let localSizeConfig =
+        field_map json__ "LocalSizeConfig" LocalSizeConfig.of_json in
+      let edgeRetentionInHours =
+        field_map json__ "EdgeRetentionInHours" EdgeRetentionInHours.of_json in
+      make ?deleteAfterUpload ?localSizeConfig ?edgeRetentionInHours ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration details required to delete the connection of the stream from the Edge Agent."]
+module HubDeviceArn =
+  struct
+    type nonrec t = string
+    let context_ = "HubDeviceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[a-z\\d-]+:iot:[a-z0-9-]+:[0-9]+:thing/[a-zA-Z0-9_.-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HubDeviceArn" j
+    let to_json = simple_to_json to_value
+  end
+module RecorderConfig =
+  struct
+    type nonrec t =
+      {
+      mediaSourceConfig: MediaSourceConfig.t
+        [@ocaml.doc
+          "The configuration details that consist of the credentials required (MediaUriSecretArn and MediaUriType) to access the media files streamed to the camera."];
+      scheduleConfig: ScheduleConfig.t option
+        [@ocaml.doc
+          "The configuration that consists of the ScheduleExpression and the DurationInMinutes details that specify the scheduling to record from a camera, or local media file, onto the Edge Agent. If the ScheduleExpression attribute is not provided, then the Edge Agent will always be set to recording mode."]}
+    let context_ = "RecorderConfig"
+    let make ?scheduleConfig =
+      fun ~mediaSourceConfig ->
+        fun () -> { scheduleConfig; mediaSourceConfig }
+    let to_value x =
+      structure_to_value
+        [("MediaSourceConfig",
+           (Some (MediaSourceConfig.to_value x.mediaSourceConfig)));
+        ("ScheduleConfig",
+          (Option.map x.scheduleConfig ~f:ScheduleConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scheduleConfig =
+        (Option.map ~f:ScheduleConfig.of_xml)
+          (Xml.child xml_arg0 "ScheduleConfig") in
+      let mediaSourceConfig =
+        MediaSourceConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MediaSourceConfig") in
+      make ?scheduleConfig ~mediaSourceConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scheduleConfig =
+        field_map json__ "ScheduleConfig" ScheduleConfig.of_json in
+      let mediaSourceConfig =
+        field_map_exn json__ "MediaSourceConfig" MediaSourceConfig.of_json in
+      make ?scheduleConfig ~mediaSourceConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The recorder configuration consists of the local MediaSourceConfig details that are used as credentials to access the local media files streamed on the camera."]
+module UploaderConfig =
+  struct
+    type nonrec t =
+      {
+      scheduleConfig: ScheduleConfig.t
+        [@ocaml.doc
+          "The configuration that consists of the ScheduleExpression and the DurationInMinutes details that specify the scheduling to record from a camera, or local media file, onto the Edge Agent. If the ScheduleConfig is not provided in this UploaderConfig, then the Edge Agent will upload at regular intervals (every 1 hour)."]}
+    let context_ = "UploaderConfig"
+    let make ~scheduleConfig = fun () -> { scheduleConfig }
+    let to_value x =
+      structure_to_value
+        [("ScheduleConfig",
+           (Some (ScheduleConfig.to_value x.scheduleConfig)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scheduleConfig =
+        ScheduleConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ScheduleConfig") in
+      make ~scheduleConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scheduleConfig =
+        field_map_exn json__ "ScheduleConfig" ScheduleConfig.of_json in
+      make ~scheduleConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that consists of the ScheduleExpression and the DurationInMinutes details that specify the scheduling to record from a camera, or local media file, onto the Edge Agent. If the ScheduleConfig is not provided in the UploaderConfig, then the Edge Agent will upload at regular intervals (every 1 hour)."]
+module DestinationUri =
+  struct
+    type nonrec t = string
+    let context_ = "DestinationUri"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z_0-9]+:(//)?([^/]+)/?([^*]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DestinationUri" j
+    let to_json = simple_to_json to_value
+  end
+module FormatConfigKey =
+  struct
+    type nonrec t =
+      | JPEGQuality 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | JPEGQuality -> "JPEGQuality" | Non_static_id s -> s
+    let of_string =
+      function | "JPEGQuality" -> JPEGQuality | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FormatConfigKey" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FormatConfigKey" j)
+    let to_json = simple_to_json to_value
+  end
+module FormatConfigValue =
+  struct
+    type nonrec t = string
+    let context_ = "FormatConfigValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z_0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FormatConfigValue" j
+    let to_json = simple_to_json to_value
+  end
+module DestinationRegion =
+  struct
+    type nonrec t = string
+    let context_ = "DestinationRegion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:9) >>=
+             (fun () ->
+                (check_string_max i ~max:14) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-z]+(-[a-z]+)?-[a-z]+-[0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DestinationRegion" j
     let to_json = simple_to_json to_value
   end
 module TagKey =
@@ -175,7 +674,7 @@ module ResourceARN =
                 (check_string_max i ~max:1024) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"arn:aws:kinesisvideo:[a-z0-9-]+:[0-9]+:[a-z]+/[a-zA-Z0-9_.-]+/[0-9]+")));
+                       ~pattern:"arn:[a-z\\d-]+:kinesisvideo:[a-z0-9-]+:[0-9]+:[a-z]+/[a-zA-Z0-9_.-]+/[0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -292,12 +791,19 @@ module ChannelType =
   struct
     type nonrec t =
       | SINGLE_MASTER 
+      | FULL_MESH 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | SINGLE_MASTER -> "SINGLE_MASTER" | Non_static_id s -> s
+      function
+      | SINGLE_MASTER -> "SINGLE_MASTER"
+      | FULL_MESH -> "FULL_MESH"
+      | Non_static_id s -> s
     let of_string =
-      function | "SINGLE_MASTER" -> SINGLE_MASTER | x -> Non_static_id x
+      function
+      | "SINGLE_MASTER" -> SINGLE_MASTER
+      | "FULL_MESH" -> FULL_MESH
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -312,7 +818,7 @@ module SingleMasterConfiguration =
       {
       messageTtlSeconds: MessageTtlSeconds.t option
         [@ocaml.doc
-          "The period of time a signaling channel retains underlivered messages before they are discarded."]}
+          "The period of time (in seconds) a signaling channel retains undelivered messages before they are discarded. Use to update this value."]}
     let make ?messageTtlSeconds = fun () -> { messageTtlSeconds }
     let to_value x =
       structure_to_value
@@ -325,24 +831,147 @@ module SingleMasterConfiguration =
           (Xml.child xml_arg0 "MessageTtlSeconds") in
       make ?messageTtlSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let messageTtlSeconds =
-        field_map json "MessageTtlSeconds" MessageTtlSeconds.of_json in
+        field_map json__ "MessageTtlSeconds" MessageTtlSeconds.of_json in
       make ?messageTtlSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains the configuration for the SINGLE_MASTER channel type."]
+module EdgeConfig =
+  struct
+    type nonrec t =
+      {
+      hubDeviceArn: HubDeviceArn.t
+        [@ocaml.doc
+          "The \"Internet of Things (IoT) Thing\" Arn of the stream."];
+      recorderConfig: RecorderConfig.t
+        [@ocaml.doc
+          "The recorder configuration consists of the local MediaSourceConfig details, that are used as credentials to access the local media files streamed on the camera."];
+      uploaderConfig: UploaderConfig.t option
+        [@ocaml.doc
+          "The uploader configuration contains the ScheduleExpression details that are used to schedule upload jobs for the recorded media files from the Edge Agent to a Kinesis Video Stream."];
+      deletionConfig: DeletionConfig.t option
+        [@ocaml.doc
+          "The deletion configuration is made up of the retention time (EdgeRetentionInHours) and local size configuration (LocalSizeConfig) details that are used to make the deletion."]}
+    let context_ = "EdgeConfig"
+    let make ?uploaderConfig =
+      fun ?deletionConfig ->
+        fun ~hubDeviceArn ->
+          fun ~recorderConfig ->
+            fun () ->
+              { uploaderConfig; deletionConfig; hubDeviceArn; recorderConfig
+              }
+    let to_value x =
+      structure_to_value
+        [("HubDeviceArn", (Some (HubDeviceArn.to_value x.hubDeviceArn)));
+        ("RecorderConfig", (Some (RecorderConfig.to_value x.recorderConfig)));
+        ("UploaderConfig",
+          (Option.map x.uploaderConfig ~f:UploaderConfig.to_value));
+        ("DeletionConfig",
+          (Option.map x.deletionConfig ~f:DeletionConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deletionConfig =
+        (Option.map ~f:DeletionConfig.of_xml)
+          (Xml.child xml_arg0 "DeletionConfig") in
+      let uploaderConfig =
+        (Option.map ~f:UploaderConfig.of_xml)
+          (Xml.child xml_arg0 "UploaderConfig") in
+      let recorderConfig =
+        RecorderConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RecorderConfig") in
+      let hubDeviceArn =
+        HubDeviceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HubDeviceArn") in
+      make ?deletionConfig ?uploaderConfig ~recorderConfig ~hubDeviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deletionConfig =
+        field_map json__ "DeletionConfig" DeletionConfig.of_json in
+      let uploaderConfig =
+        field_map json__ "UploaderConfig" UploaderConfig.of_json in
+      let recorderConfig =
+        field_map_exn json__ "RecorderConfig" RecorderConfig.of_json in
+      let hubDeviceArn =
+        field_map_exn json__ "HubDeviceArn" HubDeviceArn.of_json in
+      make ?deletionConfig ?uploaderConfig ~recorderConfig ~hubDeviceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A description of the stream's edge configuration that will be used to sync with the Edge Agent IoT Greengrass component. The Edge Agent component will run on an IoT Hub Device setup at your premise."]
+module FailedStatusDetails =
+  struct
+    type nonrec t = string
+    let context_ = "FailedStatusDetails"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FailedStatusDetails" j
+    let to_json = simple_to_json to_value
+  end
+module SyncStatus =
+  struct
+    type nonrec t =
+      | SYNCING 
+      | ACKNOWLEDGED 
+      | IN_SYNC 
+      | SYNC_FAILED 
+      | DELETING 
+      | DELETE_FAILED 
+      | DELETING_ACKNOWLEDGED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SYNCING -> "SYNCING"
+      | ACKNOWLEDGED -> "ACKNOWLEDGED"
+      | IN_SYNC -> "IN_SYNC"
+      | SYNC_FAILED -> "SYNC_FAILED"
+      | DELETING -> "DELETING"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | DELETING_ACKNOWLEDGED -> "DELETING_ACKNOWLEDGED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SYNCING" -> SYNCING
+      | "ACKNOWLEDGED" -> ACKNOWLEDGED
+      | "IN_SYNC" -> IN_SYNC
+      | "SYNC_FAILED" -> SYNC_FAILED
+      | "DELETING" -> DELETING
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | "DELETING_ACKNOWLEDGED" -> DELETING_ACKNOWLEDGED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SyncStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SyncStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ChannelProtocol =
   struct
     type nonrec t =
       | WSS 
       | HTTPS 
+      | WEBRTC 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | WSS -> "WSS" | HTTPS -> "HTTPS" | Non_static_id s -> s
+      function
+      | WSS -> "WSS"
+      | HTTPS -> "HTTPS"
+      | WEBRTC -> "WEBRTC"
+      | Non_static_id s -> s
     let of_string =
-      function | "WSS" -> WSS | "HTTPS" -> HTTPS | x -> Non_static_id x
+      function
+      | "WSS" -> WSS
+      | "HTTPS" -> HTTPS
+      | "WEBRTC" -> WEBRTC
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -364,6 +993,88 @@ module ResourceEndpoint =
     let of_json j = string_of_json ~kind:"ResourceEndpoint" j
     let to_json = simple_to_json to_value
   end
+module Type =
+  struct
+    type nonrec t = string
+    let context_ = "Type"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Type" j
+    let to_json = simple_to_json to_value
+  end
+module JobStatusDetails =
+  struct
+    type nonrec t = string
+    let context_ = "JobStatusDetails"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JobStatusDetails" j
+    let to_json = simple_to_json to_value
+  end
+module RecorderStatus =
+  struct
+    type nonrec t =
+      | SUCCESS 
+      | USER_ERROR 
+      | SYSTEM_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCESS -> "SUCCESS"
+      | USER_ERROR -> "USER_ERROR"
+      | SYSTEM_ERROR -> "SYSTEM_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCESS" -> SUCCESS
+      | "USER_ERROR" -> USER_ERROR
+      | "SYSTEM_ERROR" -> SYSTEM_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RecorderStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecorderStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module UploaderStatus =
+  struct
+    type nonrec t =
+      | SUCCESS 
+      | USER_ERROR 
+      | SYSTEM_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCESS -> "SUCCESS"
+      | USER_ERROR -> "USER_ERROR"
+      | SYSTEM_ERROR -> "SYSTEM_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCESS" -> SUCCESS
+      | "USER_ERROR" -> USER_ERROR
+      | "SYSTEM_ERROR" -> SYSTEM_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UploaderStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UploaderStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -375,6 +1086,270 @@ module ErrorMessage =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module DefaultStorageTier =
+  struct
+    type nonrec t =
+      | HOT 
+      | WARM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | HOT -> "HOT" | WARM -> "WARM" | Non_static_id s -> s
+    let of_string =
+      function | "HOT" -> HOT | "WARM" -> WARM | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DefaultStorageTier" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DefaultStorageTier" j)
+    let to_json = simple_to_json to_value
+  end
+module ConfigurationStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConfigurationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ConfigurationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module NotificationDestinationConfig =
+  struct
+    type nonrec t =
+      {
+      uri: DestinationUri.t
+        [@ocaml.doc
+          "The Uniform Resource Identifier (URI) that identifies where the images will be delivered."]}
+    let context_ = "NotificationDestinationConfig"
+    let make ~uri = fun () -> { uri }
+    let to_value x =
+      structure_to_value [("Uri", (Some (DestinationUri.to_value x.uri)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uri =
+        DestinationUri.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Uri") in
+      make ~uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uri = field_map_exn json__ "Uri" DestinationUri.of_json in
+      make ~uri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that contains the information required to deliver a notification to a customer."]
+module MediaStorageConfigurationStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MediaStorageConfigurationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MediaStorageConfigurationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Format_ =
+  struct
+    type nonrec t =
+      | JPEG 
+      | PNG 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | JPEG -> "JPEG" | PNG -> "PNG" | Non_static_id s -> s
+    let of_string =
+      function | "JPEG" -> JPEG | "PNG" -> PNG | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Format" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Format" j)
+    let to_json = simple_to_json to_value
+  end
+module FormatConfig =
+  struct
+    type nonrec t = (FormatConfigKey.t * FormatConfigValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((FormatConfigKey.of_string chopped),
+                              (FormatConfigValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (FormatConfigKey.to_value x) |>
+                    (fun x ->
+                       (FormatConfigValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:FormatConfigKey.of_string
+        ~of_json:FormatConfigValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module HeightPixels =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2160) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for HeightPixels" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageGenerationDestinationConfig =
+  struct
+    type nonrec t =
+      {
+      uri: DestinationUri.t
+        [@ocaml.doc
+          "The Uniform Resource Identifier (URI) that identifies where the images will be delivered."];
+      destinationRegion: DestinationRegion.t
+        [@ocaml.doc
+          "The Amazon Web Services Region of the S3 bucket where images will be delivered. This DestinationRegion must match the Region where the stream is located."]}
+    let context_ = "ImageGenerationDestinationConfig"
+    let make ~uri =
+      fun ~destinationRegion -> fun () -> { uri; destinationRegion }
+    let to_value x =
+      structure_to_value
+        [("Uri", (Some (DestinationUri.to_value x.uri)));
+        ("DestinationRegion",
+          (Some (DestinationRegion.to_value x.destinationRegion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationRegion =
+        DestinationRegion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationRegion") in
+      let uri =
+        DestinationUri.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Uri") in
+      make ~destinationRegion ~uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationRegion =
+        field_map_exn json__ "DestinationRegion" DestinationRegion.of_json in
+      let uri = field_map_exn json__ "Uri" DestinationUri.of_json in
+      make ~destinationRegion ~uri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that contains the information required to deliver images to a customer."]
+module ImageSelectorType =
+  struct
+    type nonrec t =
+      | SERVER_TIMESTAMP 
+      | PRODUCER_TIMESTAMP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SERVER_TIMESTAMP -> "SERVER_TIMESTAMP"
+      | PRODUCER_TIMESTAMP -> "PRODUCER_TIMESTAMP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SERVER_TIMESTAMP" -> SERVER_TIMESTAMP
+      | "PRODUCER_TIMESTAMP" -> PRODUCER_TIMESTAMP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImageSelectorType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImageSelectorType" j)
+    let to_json = simple_to_json to_value
+  end
+module SamplingInterval =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SamplingInterval" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module WidthPixels =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3840) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for WidthPixels" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module Tag =
@@ -401,9 +1376,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -422,7 +1397,7 @@ module StreamInfo =
         [@ocaml.doc "The MediaType of the stream."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "The ID of the AWS Key Management Service (AWS KMS) key that Kinesis Video Streams uses to encrypt data on the stream."];
+          "The ID of the Key Management Service (KMS) key that Kinesis Video Streams uses to encrypt data on the stream."];
       version: Version.t option [@ocaml.doc "The version of the stream."];
       status: Status.t option [@ocaml.doc "The status of the stream."];
       creationTime: Timestamp.t option
@@ -487,17 +1462,17 @@ module StreamInfo =
       make ?dataRetentionInHours ?creationTime ?status ?version ?kmsKeyId
         ?mediaType ?streamARN ?streamName ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataRetentionInHours =
-        field_map json "DataRetentionInHours" DataRetentionInHours.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let version = field_map json "Version" Version.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let mediaType = field_map json "MediaType" MediaType.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
-      let deviceName = field_map json "DeviceName" DeviceName.of_json in
+        field_map json__ "DataRetentionInHours" DataRetentionInHours.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let version = field_map json__ "Version" Version.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let mediaType = field_map json__ "MediaType" MediaType.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      let deviceName = field_map json__ "DeviceName" DeviceName.of_json in
       make ?dataRetentionInHours ?creationTime ?status ?version ?kmsKeyId
         ?mediaType ?streamARN ?streamName ?deviceName ()
     let to_json v = composed_to_json to_value v
@@ -589,21 +1564,103 @@ module ChannelInfo =
       make ?version ?singleMasterConfiguration ?creationTime ?channelStatus
         ?channelType ?channelARN ?channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Version.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Version.of_json in
       let singleMasterConfiguration =
-        field_map json "SingleMasterConfiguration"
+        field_map json__ "SingleMasterConfiguration"
           SingleMasterConfiguration.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let channelStatus = field_map json "ChannelStatus" Status.of_json in
-      let channelType = field_map json "ChannelType" ChannelType.of_json in
-      let channelARN = field_map json "ChannelARN" ResourceARN.of_json in
-      let channelName = field_map json "ChannelName" ChannelName.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let channelStatus = field_map json__ "ChannelStatus" Status.of_json in
+      let channelType = field_map json__ "ChannelType" ChannelType.of_json in
+      let channelARN = field_map json__ "ChannelARN" ResourceARN.of_json in
+      let channelName = field_map json__ "ChannelName" ChannelName.of_json in
       make ?version ?singleMasterConfiguration ?creationTime ?channelStatus
         ?channelType ?channelARN ?channelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that encapsulates a signaling channel's metadata and properties."]
+module ListEdgeAgentConfigurationsEdgeConfig =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option [@ocaml.doc "The name of the stream."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the stream."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the stream first created the edge config."];
+      lastUpdatedTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the stream last updated the edge config."];
+      syncStatus: SyncStatus.t option
+        [@ocaml.doc
+          "The current sync status of the stream's edge configuration."];
+      failedStatusDetails: FailedStatusDetails.t option
+        [@ocaml.doc "A description of the generated failure status."];
+      edgeConfig: EdgeConfig.t option }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?creationTime ->
+          fun ?lastUpdatedTime ->
+            fun ?syncStatus ->
+              fun ?failedStatusDetails ->
+                fun ?edgeConfig ->
+                  fun () ->
+                    {
+                      streamName;
+                      streamARN;
+                      creationTime;
+                      lastUpdatedTime;
+                      syncStatus;
+                      failedStatusDetails;
+                      edgeConfig
+                    }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:Timestamp.to_value));
+        ("SyncStatus", (Option.map x.syncStatus ~f:SyncStatus.to_value));
+        ("FailedStatusDetails",
+          (Option.map x.failedStatusDetails ~f:FailedStatusDetails.to_value));
+        ("EdgeConfig", (Option.map x.edgeConfig ~f:EdgeConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let edgeConfig =
+        (Option.map ~f:EdgeConfig.of_xml) (Xml.child xml_arg0 "EdgeConfig") in
+      let failedStatusDetails =
+        (Option.map ~f:FailedStatusDetails.of_xml)
+          (Xml.child xml_arg0 "FailedStatusDetails") in
+      let syncStatus =
+        (Option.map ~f:SyncStatus.of_xml) (Xml.child xml_arg0 "SyncStatus") in
+      let lastUpdatedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?edgeConfig ?failedStatusDetails ?syncStatus ?lastUpdatedTime
+        ?creationTime ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let edgeConfig = field_map json__ "EdgeConfig" EdgeConfig.of_json in
+      let failedStatusDetails =
+        field_map json__ "FailedStatusDetails" FailedStatusDetails.of_json in
+      let syncStatus = field_map json__ "SyncStatus" SyncStatus.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?edgeConfig ?failedStatusDetails ?syncStatus ?lastUpdatedTime
+        ?creationTime ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A description of a single stream's edge configuration."]
 module ResourceEndpointListItem =
   struct
     type nonrec t =
@@ -631,14 +1688,14 @@ module ResourceEndpointListItem =
           (Xml.child xml_arg0 "Protocol") in
       make ?resourceEndpoint ?protocol ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceEndpoint =
-        field_map json "ResourceEndpoint" ResourceEndpoint.of_json in
-      let protocol = field_map json "Protocol" ChannelProtocol.of_json in
+        field_map json__ "ResourceEndpoint" ResourceEndpoint.of_json in
+      let protocol = field_map json__ "Protocol" ChannelProtocol.of_json in
       make ?resourceEndpoint ?protocol ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that describes the endpoint of the signaling channel returned by the GetSignalingChannelEndpoint API."]
+       "An object that describes the endpoint of the signaling channel returned by the GetSignalingChannelEndpoint API. The media server endpoint will correspond to the WEBRTC Protocol."]
 module ChannelRole =
   struct
     type nonrec t =
@@ -672,6 +1729,9 @@ module ListOfProtocols =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelProtocol.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -692,6 +1752,186 @@ module ListOfProtocols =
       list_of_json ~kind:"ListOfProtocols" ~of_json:ChannelProtocol.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MappedResourceConfigurationListItem =
+  struct
+    type nonrec t =
+      {
+      type_: Type.t option
+        [@ocaml.doc
+          "The type of the associated resource for the kinesis video stream."];
+      aRN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Kinesis Video Stream resource, associated with the stream."]}
+    let make ?type_ = fun ?aRN -> fun () -> { type_; aRN }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:Type.to_value));
+        ("ARN", (Option.map x.aRN ~f:ResourceARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aRN = (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ARN") in
+      let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?aRN ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" ResourceARN.of_json in
+      let type_ = field_map json__ "Type" Type.of_json in make ?aRN ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that encapsulates, or contains, the media storage configuration properties."]
+module LastRecorderStatus =
+  struct
+    type nonrec t =
+      {
+      jobStatusDetails: JobStatusDetails.t option
+        [@ocaml.doc
+          "A description of a recorder job\226\128\153s latest status."];
+      lastCollectedTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the recorder job was last executed and media stored to local disk."];
+      lastUpdatedTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the recorder status was last updated."];
+      recorderStatus: RecorderStatus.t option
+        [@ocaml.doc "The status of the latest recorder job."]}
+    let make ?jobStatusDetails =
+      fun ?lastCollectedTime ->
+        fun ?lastUpdatedTime ->
+          fun ?recorderStatus ->
+            fun () ->
+              {
+                jobStatusDetails;
+                lastCollectedTime;
+                lastUpdatedTime;
+                recorderStatus
+              }
+    let to_value x =
+      structure_to_value
+        [("JobStatusDetails",
+           (Option.map x.jobStatusDetails ~f:JobStatusDetails.to_value));
+        ("LastCollectedTime",
+          (Option.map x.lastCollectedTime ~f:Timestamp.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:Timestamp.to_value));
+        ("RecorderStatus",
+          (Option.map x.recorderStatus ~f:RecorderStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recorderStatus =
+        (Option.map ~f:RecorderStatus.of_xml)
+          (Xml.child xml_arg0 "RecorderStatus") in
+      let lastUpdatedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let lastCollectedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastCollectedTime") in
+      let jobStatusDetails =
+        (Option.map ~f:JobStatusDetails.of_xml)
+          (Xml.child xml_arg0 "JobStatusDetails") in
+      make ?recorderStatus ?lastUpdatedTime ?lastCollectedTime
+        ?jobStatusDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recorderStatus =
+        field_map json__ "RecorderStatus" RecorderStatus.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let lastCollectedTime =
+        field_map json__ "LastCollectedTime" Timestamp.of_json in
+      let jobStatusDetails =
+        field_map json__ "JobStatusDetails" JobStatusDetails.of_json in
+      make ?recorderStatus ?lastUpdatedTime ?lastCollectedTime
+        ?jobStatusDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The latest status of a stream's edge recording job."]
+module LastUploaderStatus =
+  struct
+    type nonrec t =
+      {
+      jobStatusDetails: JobStatusDetails.t option
+        [@ocaml.doc
+          "A description of an uploader job\226\128\153s latest status."];
+      lastCollectedTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the uploader job was last executed and media collected to the cloud."];
+      lastUpdatedTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the uploader status was last updated."];
+      uploaderStatus: UploaderStatus.t option
+        [@ocaml.doc "The status of the latest uploader job."]}
+    let make ?jobStatusDetails =
+      fun ?lastCollectedTime ->
+        fun ?lastUpdatedTime ->
+          fun ?uploaderStatus ->
+            fun () ->
+              {
+                jobStatusDetails;
+                lastCollectedTime;
+                lastUpdatedTime;
+                uploaderStatus
+              }
+    let to_value x =
+      structure_to_value
+        [("JobStatusDetails",
+           (Option.map x.jobStatusDetails ~f:JobStatusDetails.to_value));
+        ("LastCollectedTime",
+          (Option.map x.lastCollectedTime ~f:Timestamp.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:Timestamp.to_value));
+        ("UploaderStatus",
+          (Option.map x.uploaderStatus ~f:UploaderStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uploaderStatus =
+        (Option.map ~f:UploaderStatus.of_xml)
+          (Xml.child xml_arg0 "UploaderStatus") in
+      let lastUpdatedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let lastCollectedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastCollectedTime") in
+      let jobStatusDetails =
+        (Option.map ~f:JobStatusDetails.of_xml)
+          (Xml.child xml_arg0 "JobStatusDetails") in
+      make ?uploaderStatus ?lastUpdatedTime ?lastCollectedTime
+        ?jobStatusDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uploaderStatus =
+        field_map json__ "UploaderStatus" UploaderStatus.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let lastCollectedTime =
+        field_map json__ "LastCollectedTime" Timestamp.of_json in
+      let jobStatusDetails =
+        field_map json__ "JobStatusDetails" JobStatusDetails.of_json in
+      make ?uploaderStatus ?lastUpdatedTime ?lastCollectedTime
+        ?jobStatusDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The latest status of a stream\226\128\153s edge to cloud uploader job."]
+module AccessDeniedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You do not have required permissions to perform this operation."]
 module ClientLimitExceededException =
   struct
     type nonrec t = {
@@ -706,8 +1946,8 @@ module ClientLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -726,30 +1966,11 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value for this input parameter is invalid."]
-module NotAuthorizedException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The caller is not authorized to perform this operation."]
 module ResourceInUseException =
   struct
     type nonrec t = {
@@ -764,12 +1985,12 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The signaling channel is currently not available for this operation."]
+       "When the input StreamARN or ChannelARN in CLOUD_STORAGE_MODE is already mapped to a different Kinesis Video Stream resource, or if the provided input StreamARN or ChannelARN is not in Active status, try one of the following : The DescribeMediaStorageConfiguration API to determine what the stream given channel is mapped to. The DescribeMappedResourceConfiguration API to determine the channel that the given stream is mapped to. The DescribeStream or DescribeSignalingChannel API to determine the status of the resource."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -784,8 +2005,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -804,13 +2025,40 @@ module VersionMismatchException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The stream version that you specified is not the latest version. To get the latest version, use the DescribeStream API."]
-module AccessDeniedException =
+module StreamStorageConfiguration =
+  struct
+    type nonrec t =
+      {
+      defaultStorageTier: DefaultStorageTier.t
+        [@ocaml.doc
+          "The default storage tier for the stream data. This setting determines the storage class used for stream data, affecting both performance characteristics and storage costs. Available storage tiers: HOT - Optimized for frequent access with the lowest latency and highest performance. Ideal for real-time applications and frequently accessed data. WARM - Balanced performance and cost for moderately accessed data. Suitable for data that is accessed regularly but not continuously."]}
+    let context_ = "StreamStorageConfiguration"
+    let make ~defaultStorageTier = fun () -> { defaultStorageTier }
+    let to_value x =
+      structure_to_value
+        [("DefaultStorageTier",
+           (Some (DefaultStorageTier.to_value x.defaultStorageTier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let defaultStorageTier =
+        DefaultStorageTier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DefaultStorageTier") in
+      make ~defaultStorageTier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let defaultStorageTier =
+        field_map_exn json__ "DefaultStorageTier" DefaultStorageTier.of_json in
+      make ~defaultStorageTier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for stream storage, including the default storage tier for stream data. This configuration determines how stream data is stored and accessed, with different tiers offering varying levels of performance and cost optimization."]
+module NotAuthorizedException =
   struct
     type nonrec t = {
       message: ErrorMessage.t option }
@@ -824,12 +2072,206 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The caller is not authorized to perform this operation."]
+module NoDataRetentionException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Stream data retention in hours is equal to zero."]
+module NotificationConfiguration =
+  struct
+    type nonrec t =
+      {
+      status: ConfigurationStatus.t
+        [@ocaml.doc
+          "Indicates if a notification configuration is enabled or disabled."];
+      destinationConfig: NotificationDestinationConfig.t
+        [@ocaml.doc
+          "The destination information required to deliver a notification to a customer."]}
+    let context_ = "NotificationConfiguration"
+    let make ~status =
+      fun ~destinationConfig -> fun () -> { status; destinationConfig }
+    let to_value x =
+      structure_to_value
+        [("Status", (Some (ConfigurationStatus.to_value x.status)));
+        ("DestinationConfig",
+          (Some (NotificationDestinationConfig.to_value x.destinationConfig)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationConfig =
+        NotificationDestinationConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationConfig") in
+      let status =
+        ConfigurationStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      make ~destinationConfig ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationConfig =
+        field_map_exn json__ "DestinationConfig"
+          NotificationDestinationConfig.of_json in
+      let status = field_map_exn json__ "Status" ConfigurationStatus.of_json in
+      make ~destinationConfig ~status ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You do not have required permissions to perform this operation."]
+       "Use this API to configure Amazon Simple Notification Service (Amazon SNS) notifications for when fragments become available in a stream. If this parameter is null, the configuration will be deleted from the stream. See Notifications in Kinesis Video Streams for more information."]
+module MediaStorageConfiguration =
+  struct
+    type nonrec t =
+      {
+      streamARN: ResourceARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the stream."];
+      status: MediaStorageConfigurationStatus.t
+        [@ocaml.doc "The status of the media storage configuration."]}
+    let context_ = "MediaStorageConfiguration"
+    let make ?streamARN = fun ~status -> fun () -> { streamARN; status }
+    let to_value x =
+      structure_to_value
+        [("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("Status",
+          (Some (MediaStorageConfigurationStatus.to_value x.status)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        MediaStorageConfigurationStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      make ~status ?streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map_exn json__ "Status" MediaStorageConfigurationStatus.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      make ~status ?streamARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that encapsulates, or contains, the media storage configuration properties. If StorageStatus is enabled, the data will be stored in the StreamARN provided. In order for WebRTC Ingestion to work, the stream must have data retention enabled. If StorageStatus is disabled, no data will be stored, and the StreamARN parameter will not be needed."]
+module ImageGenerationConfiguration =
+  struct
+    type nonrec t =
+      {
+      status: ConfigurationStatus.t
+        [@ocaml.doc
+          "Indicates whether the ContinuousImageGenerationConfigurations API is enabled or disabled."];
+      imageSelectorType: ImageSelectorType.t
+        [@ocaml.doc
+          "The origin of the Server or Producer timestamps to use to generate the images."];
+      destinationConfig: ImageGenerationDestinationConfig.t
+        [@ocaml.doc
+          "The structure that contains the information required to deliver images to a customer."];
+      samplingInterval: SamplingInterval.t
+        [@ocaml.doc
+          "The time interval in milliseconds (ms) at which the images need to be generated from the stream. The minimum value that can be provided is 200 ms. If the timestamp range is less than the sampling interval, the Image from the StartTimestamp will be returned if available."];
+      format: Format_.t [@ocaml.doc "The accepted image format."];
+      formatConfig: FormatConfig.t option
+        [@ocaml.doc
+          "The list of a key-value pair structure that contains extra parameters that can be applied when the image is generated. The FormatConfig key is the JPEGQuality, which indicates the JPEG quality key to be used to generate the image. The FormatConfig value accepts ints from 1 to 100. If the value is 1, the image will be generated with less quality and the best compression. If the value is 100, the image will be generated with the best quality and less compression. If no value is provided, the default value of the JPEGQuality key will be set to 80."];
+      widthPixels: WidthPixels.t option
+        [@ocaml.doc
+          "The width of the output image that is used in conjunction with the HeightPixels parameter. When both WidthPixels and HeightPixels parameters are provided, the image will be stretched to fit the specified aspect ratio. If only the WidthPixels parameter is provided, its original aspect ratio will be used to calculate the HeightPixels ratio. If neither parameter is provided, the original image size will be returned."];
+      heightPixels: HeightPixels.t option
+        [@ocaml.doc
+          "The height of the output image that is used in conjunction with the WidthPixels parameter. When both HeightPixels and WidthPixels parameters are provided, the image will be stretched to fit the specified aspect ratio. If only the HeightPixels parameter is provided, its original aspect ratio will be used to calculate the WidthPixels ratio. If neither parameter is provided, the original image size will be returned."]}
+    let context_ = "ImageGenerationConfiguration"
+    let make ?formatConfig =
+      fun ?widthPixels ->
+        fun ?heightPixels ->
+          fun ~status ->
+            fun ~imageSelectorType ->
+              fun ~destinationConfig ->
+                fun ~samplingInterval ->
+                  fun ~format ->
+                    fun () ->
+                      {
+                        formatConfig;
+                        widthPixels;
+                        heightPixels;
+                        status;
+                        imageSelectorType;
+                        destinationConfig;
+                        samplingInterval;
+                        format
+                      }
+    let to_value x =
+      structure_to_value
+        [("Status", (Some (ConfigurationStatus.to_value x.status)));
+        ("ImageSelectorType",
+          (Some (ImageSelectorType.to_value x.imageSelectorType)));
+        ("DestinationConfig",
+          (Some
+             (ImageGenerationDestinationConfig.to_value x.destinationConfig)));
+        ("SamplingInterval",
+          (Some (SamplingInterval.to_value x.samplingInterval)));
+        ("Format", (Some (Format_.to_value x.format)));
+        ("FormatConfig",
+          (Option.map x.formatConfig ~f:FormatConfig.to_value));
+        ("WidthPixels", (Option.map x.widthPixels ~f:WidthPixels.to_value));
+        ("HeightPixels",
+          (Option.map x.heightPixels ~f:HeightPixels.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let heightPixels =
+        (Option.map ~f:HeightPixels.of_xml)
+          (Xml.child xml_arg0 "HeightPixels") in
+      let widthPixels =
+        (Option.map ~f:WidthPixels.of_xml) (Xml.child xml_arg0 "WidthPixels") in
+      let formatConfig =
+        (Option.map ~f:FormatConfig.of_xml)
+          (Xml.child xml_arg0 "FormatConfig") in
+      let format =
+        Format_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Format") in
+      let samplingInterval =
+        SamplingInterval.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SamplingInterval") in
+      let destinationConfig =
+        ImageGenerationDestinationConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationConfig") in
+      let imageSelectorType =
+        ImageSelectorType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ImageSelectorType") in
+      let status =
+        ConfigurationStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      make ?heightPixels ?widthPixels ?formatConfig ~format ~samplingInterval
+        ~destinationConfig ~imageSelectorType ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let heightPixels = field_map json__ "HeightPixels" HeightPixels.of_json in
+      let widthPixels = field_map json__ "WidthPixels" WidthPixels.of_json in
+      let formatConfig = field_map json__ "FormatConfig" FormatConfig.of_json in
+      let format = field_map_exn json__ "Format" Format_.of_json in
+      let samplingInterval =
+        field_map_exn json__ "SamplingInterval" SamplingInterval.of_json in
+      let destinationConfig =
+        field_map_exn json__ "DestinationConfig"
+          ImageGenerationDestinationConfig.of_json in
+      let imageSelectorType =
+        field_map_exn json__ "ImageSelectorType" ImageSelectorType.of_json in
+      let status = field_map_exn json__ "Status" ConfigurationStatus.of_json in
+      make ?heightPixels ?widthPixels ?formatConfig ~format ~samplingInterval
+        ~destinationConfig ~imageSelectorType ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that contains the information required for the KVS images delivery. If null, the configuration will be deleted from the stream."]
 module DataRetentionChangeInHours =
   struct
     type nonrec t = int
@@ -888,8 +2330,8 @@ module InvalidResourceFormatException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The format of the StreamARN is invalid."]
@@ -901,6 +2343,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -934,12 +2379,12 @@ module TagsPerResourceExceededLimitException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have exceeded the limit of tags that you can associate with the resource. Kinesis video streams support up to 50 tags."]
+       "You have exceeded the limit of tags that you can associate with the resource. A Kinesis video stream can support up to 50 tags."]
 module ResourceTags =
   struct
     type nonrec t = (TagKey.t * TagValue.t) list
@@ -965,6 +2410,8 @@ module ResourceTags =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -980,6 +2427,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1008,7 +2458,7 @@ module NextToken =
         ok_or_failwith
           ((check_string_min i ~min:0) >>=
              (fun () ->
-                (check_string_max i ~max:512) >>=
+                (check_string_max i ~max:1024) >>=
                   (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9+/=]*")));
         i
     let of_string x = x
@@ -1023,6 +2473,9 @@ module StreamInfoList =
   struct
     type nonrec t = StreamInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StreamInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1089,11 +2542,11 @@ module StreamNameCondition =
           (Xml.child xml_arg0 "ComparisonOperator") in
       make ?comparisonValue ?comparisonOperator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comparisonValue =
-        field_map json "ComparisonValue" StreamName.of_json in
+        field_map json__ "ComparisonValue" StreamName.of_json in
       let comparisonOperator =
-        field_map json "ComparisonOperator" ComparisonOperator.of_json in
+        field_map json__ "ComparisonOperator" ComparisonOperator.of_json in
       make ?comparisonValue ?comparisonOperator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1102,6 +2555,9 @@ module ChannelInfoList =
   struct
     type nonrec t = ChannelInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1150,19 +2606,72 @@ module ChannelNameCondition =
           (Xml.child xml_arg0 "ComparisonOperator") in
       make ?comparisonValue ?comparisonOperator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comparisonValue =
-        field_map json "ComparisonValue" ChannelName.of_json in
+        field_map json__ "ComparisonValue" ChannelName.of_json in
       let comparisonOperator =
-        field_map json "ComparisonOperator" ComparisonOperator.of_json in
+        field_map json__ "ComparisonOperator" ComparisonOperator.of_json in
       make ?comparisonValue ?comparisonOperator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An optional input parameter for the ListSignalingChannels API. When this parameter is specified while invoking ListSignalingChannels, the API returns only the channels that satisfy a condition specified in ChannelNameCondition."]
+module ListEdgeAgentConfigurationsEdgeConfigList =
+  struct
+    type nonrec t = ListEdgeAgentConfigurationsEdgeConfig.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListEdgeAgentConfigurationsEdgeConfig.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ListEdgeAgentConfigurationsEdgeConfig.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListEdgeAgentConfigurationsEdgeConfigList"
+        ~of_json:ListEdgeAgentConfigurationsEdgeConfig.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListEdgeAgentConfigurationsInputLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListEdgeAgentConfigurationsInputLimit"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourceEndpointList =
   struct
     type nonrec t = ResourceEndpointListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceEndpointListItem.to_value)) |>
         (fun x -> `List x)
@@ -1209,9 +2718,9 @@ module SingleMasterChannelEndpointConfiguration =
           (Xml.child xml_arg0 "Protocols") in
       make ?role ?protocols ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let role = field_map json "Role" ChannelRole.of_json in
-      let protocols = field_map json "Protocols" ListOfProtocols.of_json in
+    let of_json json__ =
+      let role = field_map json__ "Role" ChannelRole.of_json in
+      let protocols = field_map json__ "Protocols" ListOfProtocols.of_json in
       make ?role ?protocols ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1239,6 +2748,7 @@ module APIName =
       | GET_HLS_STREAMING_SESSION_URL 
       | GET_DASH_STREAMING_SESSION_URL 
       | GET_CLIP 
+      | GET_IMAGES 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1250,6 +2760,7 @@ module APIName =
       | GET_HLS_STREAMING_SESSION_URL -> "GET_HLS_STREAMING_SESSION_URL"
       | GET_DASH_STREAMING_SESSION_URL -> "GET_DASH_STREAMING_SESSION_URL"
       | GET_CLIP -> "GET_CLIP"
+      | GET_IMAGES -> "GET_IMAGES"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1260,6 +2771,7 @@ module APIName =
       | "GET_HLS_STREAMING_SESSION_URL" -> GET_HLS_STREAMING_SESSION_URL
       | "GET_DASH_STREAMING_SESSION_URL" -> GET_DASH_STREAMING_SESSION_URL
       | "GET_CLIP" -> GET_CLIP
+      | "GET_IMAGES" -> GET_IMAGES
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1269,6 +2781,118 @@ module APIName =
     let of_json j = of_string (string_of_json ~kind:"APIName" j)
     let to_json = simple_to_json to_value
   end
+module MappedResourceConfigurationList =
+  struct
+    type nonrec t = MappedResourceConfigurationListItem.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MappedResourceConfigurationListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:MappedResourceConfigurationListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MappedResourceConfigurationList"
+        ~of_json:MappedResourceConfigurationListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MappedResourceConfigurationListLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for MappedResourceConfigurationListLimit"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module EdgeAgentStatus =
+  struct
+    type nonrec t =
+      {
+      lastRecorderStatus: LastRecorderStatus.t option
+        [@ocaml.doc
+          "The latest status of a stream\226\128\153s edge recording job."];
+      lastUploaderStatus: LastUploaderStatus.t option
+        [@ocaml.doc
+          "The latest status of a stream\226\128\153s edge to cloud uploader job."]}
+    let make ?lastRecorderStatus =
+      fun ?lastUploaderStatus ->
+        fun () -> { lastRecorderStatus; lastUploaderStatus }
+    let to_value x =
+      structure_to_value
+        [("LastRecorderStatus",
+           (Option.map x.lastRecorderStatus ~f:LastRecorderStatus.to_value));
+        ("LastUploaderStatus",
+          (Option.map x.lastUploaderStatus ~f:LastUploaderStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUploaderStatus =
+        (Option.map ~f:LastUploaderStatus.of_xml)
+          (Xml.child xml_arg0 "LastUploaderStatus") in
+      let lastRecorderStatus =
+        (Option.map ~f:LastRecorderStatus.of_xml)
+          (Xml.child xml_arg0 "LastRecorderStatus") in
+      make ?lastUploaderStatus ?lastRecorderStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUploaderStatus =
+        field_map json__ "LastUploaderStatus" LastUploaderStatus.of_json in
+      let lastRecorderStatus =
+        field_map json__ "LastRecorderStatus" LastRecorderStatus.of_json in
+      make ?lastUploaderStatus ?lastRecorderStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains the latest status details for an edge agent's recorder and uploader jobs. Use this information to determine the current health of an edge agent."]
+module StreamEdgeConfigurationNotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Exception rendered when the Amazon Kinesis Video Stream can't find a stream's edge configuration that you specified."]
 module AccountStreamLimitExceededException =
   struct
     type nonrec t = {
@@ -1283,8 +2907,8 @@ module AccountStreamLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1303,8 +2927,8 @@ module DeviceStreamLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Not implemented."]
@@ -1322,8 +2946,8 @@ module InvalidDeviceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Not implemented."]
@@ -1341,12 +2965,12 @@ module AccountChannelLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have reached the maximum limit of active signaling channels for this AWS account in this region."]
+       "You have reached the maximum limit of active signaling channels for this Amazon Web Services account in this region."]
 module TagOnCreateList =
   struct
     type nonrec t = Tag.t list
@@ -1355,6 +2979,9 @@ module TagOnCreateList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1375,6 +3002,159 @@ module TagOnCreateList =
       list_of_json ~kind:"TagOnCreateList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UpdateStreamStorageConfigurationOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `VersionMismatchException of VersionMismatchException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "VersionMismatchException" ->
+          `VersionMismatchException (VersionMismatchException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "VersionMismatchException" ->
+          `VersionMismatchException (VersionMismatchException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `VersionMismatchException e ->
+          `Assoc
+            [("error", (`String "VersionMismatchException"));
+            ("details", (VersionMismatchException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the storage configuration for an existing Kinesis video stream. This operation allows you to modify the storage tier settings for a stream, enabling you to optimize storage costs and performance based on your access patterns. UpdateStreamStorageConfiguration is an asynchronous operation. You must have permissions for the KinesisVideo:UpdateStreamStorageConfiguration action."]
+module UpdateStreamStorageConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream for which you want to update the storage configuration."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the stream for which you want to update the storage configuration."];
+      currentVersion: Version.t
+        [@ocaml.doc
+          "The version of the stream whose storage configuration you want to change. To get the version, call either the DescribeStream or the ListStreams API."];
+      streamStorageConfiguration: StreamStorageConfiguration.t
+        [@ocaml.doc
+          "The new storage configuration for the stream. This includes the default storage tier that determines how stream data is stored and accessed. Different storage tiers offer varying levels of performance and cost optimization to match your specific use case requirements."]}
+    let context_ = "UpdateStreamStorageConfigurationInput"
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ~currentVersion ->
+          fun ~streamStorageConfiguration ->
+            fun () ->
+              {
+                streamName;
+                streamARN;
+                currentVersion;
+                streamStorageConfiguration
+              }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("CurrentVersion", (Some (Version.to_value x.currentVersion)));
+        ("StreamStorageConfiguration",
+          (Some
+             (StreamStorageConfiguration.to_value
+                x.streamStorageConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamStorageConfiguration =
+        StreamStorageConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "StreamStorageConfiguration") in
+      let currentVersion =
+        Version.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CurrentVersion") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ~streamStorageConfiguration ~currentVersion ?streamARN ?streamName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamStorageConfiguration =
+        field_map_exn json__ "StreamStorageConfiguration"
+          StreamStorageConfiguration.of_json in
+      let currentVersion =
+        field_map_exn json__ "CurrentVersion" Version.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ~streamStorageConfiguration ~currentVersion ?streamARN ?streamName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the storage configuration for an existing Kinesis video stream. This operation allows you to modify the storage tier settings for a stream, enabling you to optimize storage costs and performance based on your access patterns. UpdateStreamStorageConfiguration is an asynchronous operation. You must have permissions for the KinesisVideo:UpdateStreamStorageConfiguration action."]
 module UpdateStreamOutput =
   struct
     type nonrec t = unit
@@ -1517,13 +3297,13 @@ module UpdateStreamInput =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ?mediaType ?deviceName ~currentVersion ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mediaType = field_map json "MediaType" MediaType.of_json in
-      let deviceName = field_map json "DeviceName" DeviceName.of_json in
+    let of_json json__ =
+      let mediaType = field_map json__ "MediaType" MediaType.of_json in
+      let deviceName = field_map json__ "DeviceName" DeviceName.of_json in
       let currentVersion =
-        field_map_exn json "CurrentVersion" Version.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+        field_map_exn json__ "CurrentVersion" Version.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ?mediaType ?deviceName ~currentVersion ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1627,7 +3407,7 @@ module UpdateSignalingChannelInput =
           "The current version of the signaling channel that you want to update."];
       singleMasterConfiguration: SingleMasterConfiguration.t option
         [@ocaml.doc
-          "The structure containing the configuration for the SINGLE_MASTER type of the signaling channel that you want to update."]}
+          "The structure containing the configuration for the SINGLE_MASTER type of the signaling channel that you want to update. This parameter and the channel message's time-to-live are required for channels with the SINGLE_MASTER channel type."]}
     let context_ = "UpdateSignalingChannelInput"
     let make ?singleMasterConfiguration =
       fun ~channelARN ->
@@ -1653,17 +3433,405 @@ module UpdateSignalingChannelInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ChannelARN") in
       make ?singleMasterConfiguration ~currentVersion ~channelARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let singleMasterConfiguration =
-        field_map json "SingleMasterConfiguration"
+        field_map json__ "SingleMasterConfiguration"
           SingleMasterConfiguration.of_json in
       let currentVersion =
-        field_map_exn json "CurrentVersion" Version.of_json in
-      let channelARN = field_map_exn json "ChannelARN" ResourceARN.of_json in
+        field_map_exn json__ "CurrentVersion" Version.of_json in
+      let channelARN = field_map_exn json__ "ChannelARN" ResourceARN.of_json in
       make ?singleMasterConfiguration ~currentVersion ~channelARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the existing signaling channel. This is an asynchronous operation and takes time to complete. If the MessageTtlSeconds value is updated (either increased or reduced), it only applies to new messages sent via this channel after it's been updated. Existing messages are still expired as per the previous MessageTtlSeconds value."]
+module UpdateNotificationConfigurationOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NoDataRetentionException of NoDataRetentionException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NoDataRetentionException e ->
+          `Assoc
+            [("error", (`String "NoDataRetentionException"));
+            ("details", (NoDataRetentionException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the notification information for a stream."]
+module UpdateNotificationConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream from which to update the notification configuration. You must specify either the StreamName or the StreamARN."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Kinesis video stream from where you want to update the notification configuration. You must specify either the StreamName or the StreamARN."];
+      notificationConfiguration: NotificationConfiguration.t option
+        [@ocaml.doc
+          "The structure containing the information required for notifications. If the structure is null, the configuration will be deleted from the stream."]}
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?notificationConfiguration ->
+          fun () -> { streamName; streamARN; notificationConfiguration }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("NotificationConfiguration",
+          (Option.map x.notificationConfiguration
+             ~f:NotificationConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notificationConfiguration =
+        (Option.map ~f:NotificationConfiguration.of_xml)
+          (Xml.child xml_arg0 "NotificationConfiguration") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?notificationConfiguration ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notificationConfiguration =
+        field_map json__ "NotificationConfiguration"
+          NotificationConfiguration.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?notificationConfiguration ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the notification information for a stream."]
+module UpdateMediaStorageConfigurationOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NoDataRetentionException of NoDataRetentionException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NoDataRetentionException e ->
+          `Assoc
+            [("error", (`String "NoDataRetentionException"));
+            ("details", (NoDataRetentionException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a SignalingChannel to a stream to store the media. There are two signaling modes that you can specify : If StorageStatus is enabled, the data will be stored in the StreamARN provided. In order for WebRTC Ingestion to work, the stream must have data retention enabled. If StorageStatus is disabled, no data will be stored, and the StreamARN parameter will not be needed. If StorageStatus is enabled, direct peer-to-peer (master-viewer) connections no longer occur. Peers connect directly to the storage session. You must call the JoinStorageSession API to trigger an SDP offer send and establish a connection between a peer and the storage session."]
+module UpdateMediaStorageConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      channelARN: ResourceARN.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the channel."];
+      mediaStorageConfiguration: MediaStorageConfiguration.t
+        [@ocaml.doc
+          "A structure that encapsulates, or contains, the media storage configuration properties."]}
+    let context_ = "UpdateMediaStorageConfigurationInput"
+    let make ~channelARN =
+      fun ~mediaStorageConfiguration ->
+        fun () -> { channelARN; mediaStorageConfiguration }
+    let to_value x =
+      structure_to_value
+        [("ChannelARN", (Some (ResourceARN.to_value x.channelARN)));
+        ("MediaStorageConfiguration",
+          (Some
+             (MediaStorageConfiguration.to_value x.mediaStorageConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mediaStorageConfiguration =
+        MediaStorageConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "MediaStorageConfiguration") in
+      let channelARN =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelARN") in
+      make ~mediaStorageConfiguration ~channelARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mediaStorageConfiguration =
+        field_map_exn json__ "MediaStorageConfiguration"
+          MediaStorageConfiguration.of_json in
+      let channelARN = field_map_exn json__ "ChannelARN" ResourceARN.of_json in
+      make ~mediaStorageConfiguration ~channelARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a SignalingChannel to a stream to store the media. There are two signaling modes that you can specify : If StorageStatus is enabled, the data will be stored in the StreamARN provided. In order for WebRTC Ingestion to work, the stream must have data retention enabled. If StorageStatus is disabled, no data will be stored, and the StreamARN parameter will not be needed. If StorageStatus is enabled, direct peer-to-peer (master-viewer) connections no longer occur. Peers connect directly to the storage session. You must call the JoinStorageSession API to trigger an SDP offer send and establish a connection between a peer and the storage session."]
+module UpdateImageGenerationConfigurationOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NoDataRetentionException of NoDataRetentionException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NoDataRetentionException e ->
+          `Assoc
+            [("error", (`String "NoDataRetentionException"));
+            ("details", (NoDataRetentionException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the StreamInfo and ImageProcessingConfiguration fields."]
+module UpdateImageGenerationConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream from which to update the image generation configuration. You must specify either the StreamName or the StreamARN."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Kinesis video stream from where you want to update the image generation configuration. You must specify either the StreamName or the StreamARN."];
+      imageGenerationConfiguration: ImageGenerationConfiguration.t option
+        [@ocaml.doc
+          "The structure that contains the information required for the KVS images delivery. If the structure is null, the configuration will be deleted from the stream."]}
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?imageGenerationConfiguration ->
+          fun () -> { streamName; streamARN; imageGenerationConfiguration }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("ImageGenerationConfiguration",
+          (Option.map x.imageGenerationConfiguration
+             ~f:ImageGenerationConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageGenerationConfiguration =
+        (Option.map ~f:ImageGenerationConfiguration.of_xml)
+          (Xml.child xml_arg0 "ImageGenerationConfiguration") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?imageGenerationConfiguration ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageGenerationConfiguration =
+        field_map json__ "ImageGenerationConfiguration"
+          ImageGenerationConfiguration.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?imageGenerationConfiguration ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the StreamInfo and ImageProcessingConfiguration fields."]
 module UpdateDataRetentionOutput =
   struct
     type nonrec t = unit
@@ -1750,7 +3918,7 @@ module UpdateDataRetentionOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Increases or decreases the stream's data retention period by the value that you specify. To indicate whether you want to increase or decrease the data retention period, specify the Operation parameter in the request body. In the request, you must specify either the StreamName or the StreamARN. The retention period that you specify replaces the current value. This operation requires permission for the KinesisVideo:UpdateDataRetention action. Changing the data retention period affects the data in the stream as follows: If the data retention period is increased, existing data is retained for the new retention period. For example, if the data retention period is increased from one hour to seven hours, all existing data is retained for seven hours. If the data retention period is decreased, existing data is retained for the new retention period. For example, if the data retention period is decreased from seven hours to one hour, all existing data is retained for one hour, and any data older than one hour is deleted immediately."]
+       "Increases or decreases the stream's data retention period by the value that you specify. To indicate whether you want to increase or decrease the data retention period, specify the Operation parameter in the request body. In the request, you must specify either the StreamName or the StreamARN. This operation requires permission for the KinesisVideo:UpdateDataRetention action. Changing the data retention period affects the data in the stream as follows: If the data retention period is increased, existing data is retained for the new retention period. For example, if the data retention period is increased from one hour to seven hours, all existing data is retained for seven hours. If the data retention period is decreased, existing data is retained for the new retention period. For example, if the data retention period is decreased from seven hours to one hour, all existing data is retained for one hour, and any data older than one hour is deleted immediately."]
 module UpdateDataRetentionInput =
   struct
     type nonrec t =
@@ -1769,7 +3937,7 @@ module UpdateDataRetentionInput =
           "Indicates whether you want to increase or decrease the retention period."];
       dataRetentionChangeInHours: DataRetentionChangeInHours.t
         [@ocaml.doc
-          "The retention period, in hours. The value you specify replaces the current value. The maximum value for this parameter is 87600 (ten years)."]}
+          "The number of hours to adjust the current retention by. The value you specify is added to or subtracted from the current value, depending on the operation. The minimum value for data retention is 0 and the maximum value is 87600 (ten years)."]}
     let context_ = "UpdateDataRetentionInput"
     let make ?streamName =
       fun ?streamARN ->
@@ -1814,21 +3982,21 @@ module UpdateDataRetentionInput =
       make ~dataRetentionChangeInHours ~operation ~currentVersion ?streamARN
         ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataRetentionChangeInHours =
-        field_map_exn json "DataRetentionChangeInHours"
+        field_map_exn json__ "DataRetentionChangeInHours"
           DataRetentionChangeInHours.of_json in
       let operation =
-        field_map_exn json "Operation" UpdateDataRetentionOperation.of_json in
+        field_map_exn json__ "Operation" UpdateDataRetentionOperation.of_json in
       let currentVersion =
-        field_map_exn json "CurrentVersion" Version.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+        field_map_exn json__ "CurrentVersion" Version.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ~dataRetentionChangeInHours ~operation ~currentVersion ?streamARN
         ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Increases or decreases the stream's data retention period by the value that you specify. To indicate whether you want to increase or decrease the data retention period, specify the Operation parameter in the request body. In the request, you must specify either the StreamName or the StreamARN. The retention period that you specify replaces the current value. This operation requires permission for the KinesisVideo:UpdateDataRetention action. Changing the data retention period affects the data in the stream as follows: If the data retention period is increased, existing data is retained for the new retention period. For example, if the data retention period is increased from one hour to seven hours, all existing data is retained for seven hours. If the data retention period is decreased, existing data is retained for the new retention period. For example, if the data retention period is decreased from seven hours to one hour, all existing data is retained for one hour, and any data older than one hour is deleted immediately."]
+       "Increases or decreases the stream's data retention period by the value that you specify. To indicate whether you want to increase or decrease the data retention period, specify the Operation parameter in the request body. In the request, you must specify either the StreamName or the StreamARN. This operation requires permission for the KinesisVideo:UpdateDataRetention action. Changing the data retention period affects the data in the stream as follows: If the data retention period is increased, existing data is retained for the new retention period. For example, if the data retention period is increased from one hour to seven hours, all existing data is retained for seven hours. If the data retention period is decreased, existing data is retained for the new retention period. For example, if the data retention period is decreased from seven hours to one hour, all existing data is retained for one hour, and any data older than one hour is deleted immediately."]
 module UntagStreamOutput =
   struct
     type nonrec t = unit
@@ -1942,10 +4110,10 @@ module UntagStreamInput =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       make ~tagKeyList ?streamName ?streamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeyList = field_map_exn json "TagKeyList" TagKeyList.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
+    let of_json json__ =
+      let tagKeyList = field_map_exn json__ "TagKeyList" TagKeyList.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
       make ~tagKeyList ?streamName ?streamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2046,9 +4214,10 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeyList ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeyList = field_map_exn json "TagKeyList" TagKeyList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let tagKeyList = field_map_exn json__ "TagKeyList" TagKeyList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~tagKeyList ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2144,7 +4313,7 @@ module TagStreamOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more tags to a stream. A tag is a key-value pair (the value is optional) that you can define and assign to AWS resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide. You must provide either the StreamName or the StreamARN. This operation requires permission for the KinesisVideo:TagStream action. Kinesis video streams support up to 50 tags."]
+       "Adds one or more tags to a stream. A tag is a key-value pair (the value is optional) that you can define and assign to Amazon Web Services resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. For more information, see Using Cost Allocation Tags in the Billing and Cost Management and Cost Management User Guide. You must provide either the StreamName or the StreamARN. This operation requires permission for the KinesisVideo:TagStream action. A Kinesis video stream can support up to 50 tags."]
 module TagStreamInput =
   struct
     type nonrec t =
@@ -2177,14 +4346,14 @@ module TagStreamInput =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       make ~tags ?streamName ?streamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" ResourceTags.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" ResourceTags.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
       make ~tags ?streamName ?streamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more tags to a stream. A tag is a key-value pair (the value is optional) that you can define and assign to AWS resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide. You must provide either the StreamName or the StreamARN. This operation requires permission for the KinesisVideo:TagStream action. Kinesis video streams support up to 50 tags."]
+       "Adds one or more tags to a stream. A tag is a key-value pair (the value is optional) that you can define and assign to Amazon Web Services resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. For more information, see Using Cost Allocation Tags in the Billing and Cost Management and Cost Management User Guide. You must provide either the StreamName or the StreamARN. This operation requires permission for the KinesisVideo:TagStream action. A Kinesis video stream can support up to 50 tags."]
 module TagResourceOutput =
   struct
     type nonrec t = unit
@@ -2265,7 +4434,7 @@ module TagResourceOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more tags to a signaling channel. A tag is a key-value pair (the value is optional) that you can define and assign to AWS resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide."]
+       "Adds one or more tags to a signaling channel. A tag is a key-value pair (the value is optional) that you can define and assign to Amazon Web Services resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. For more information, see Using Cost Allocation Tags in the Billing and Cost Management and Cost Management User Guide."]
 module TagResourceInput =
   struct
     type nonrec t =
@@ -2291,13 +4460,216 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more tags to a signaling channel. A tag is a key-value pair (the value is optional) that you can define and assign to AWS resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide."]
+       "Adds one or more tags to a signaling channel. A tag is a key-value pair (the value is optional) that you can define and assign to Amazon Web Services resources. If you specify a tag that already exists, the tag value is replaced with the value that you specify in the request. For more information, see Using Cost Allocation Tags in the Billing and Cost Management and Cost Management User Guide."]
+module StartEdgeConfigurationUpdateOutput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream from which the edge configuration was updated."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the stream."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which a stream\226\128\153s edge configuration was first created."];
+      lastUpdatedTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which a stream\226\128\153s edge configuration was last updated."];
+      syncStatus: SyncStatus.t option
+        [@ocaml.doc
+          "The current sync status of the stream's edge configuration. When you invoke this API, the sync status will be set to the SYNCING state. Use the DescribeEdgeConfiguration API to get the latest status of the edge configuration."];
+      failedStatusDetails: FailedStatusDetails.t option
+        [@ocaml.doc "A description of the generated failure status."];
+      edgeConfig: EdgeConfig.t option
+        [@ocaml.doc
+          "A description of the stream's edge configuration that will be used to sync with the Edge Agent IoT Greengrass component. The Edge Agent component will run on an IoT Hub Device setup at your premise."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NoDataRetentionException of NoDataRetentionException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?creationTime ->
+          fun ?lastUpdatedTime ->
+            fun ?syncStatus ->
+              fun ?failedStatusDetails ->
+                fun ?edgeConfig ->
+                  fun () ->
+                    {
+                      streamName;
+                      streamARN;
+                      creationTime;
+                      lastUpdatedTime;
+                      syncStatus;
+                      failedStatusDetails;
+                      edgeConfig
+                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NoDataRetentionException e ->
+          `Assoc
+            [("error", (`String "NoDataRetentionException"));
+            ("details", (NoDataRetentionException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:Timestamp.to_value));
+        ("SyncStatus", (Option.map x.syncStatus ~f:SyncStatus.to_value));
+        ("FailedStatusDetails",
+          (Option.map x.failedStatusDetails ~f:FailedStatusDetails.to_value));
+        ("EdgeConfig", (Option.map x.edgeConfig ~f:EdgeConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let edgeConfig =
+        (Option.map ~f:EdgeConfig.of_xml) (Xml.child xml_arg0 "EdgeConfig") in
+      let failedStatusDetails =
+        (Option.map ~f:FailedStatusDetails.of_xml)
+          (Xml.child xml_arg0 "FailedStatusDetails") in
+      let syncStatus =
+        (Option.map ~f:SyncStatus.of_xml) (Xml.child xml_arg0 "SyncStatus") in
+      let lastUpdatedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?edgeConfig ?failedStatusDetails ?syncStatus ?lastUpdatedTime
+        ?creationTime ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let edgeConfig = field_map json__ "EdgeConfig" EdgeConfig.of_json in
+      let failedStatusDetails =
+        field_map json__ "FailedStatusDetails" FailedStatusDetails.of_json in
+      let syncStatus = field_map json__ "SyncStatus" SyncStatus.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?edgeConfig ?failedStatusDetails ?syncStatus ?lastUpdatedTime
+        ?creationTime ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An asynchronous API that updates a stream\226\128\153s existing edge configuration. The Kinesis Video Stream will sync the stream\226\128\153s edge configuration with the Edge Agent IoT Greengrass component that runs on an IoT Hub Device, setup at your premise. The time to sync can vary and depends on the connectivity of the Hub Device. The SyncStatus will be updated as the edge configuration is acknowledged, and synced with the Edge Agent. If this API is invoked for the first time, a new edge configuration will be created for the stream, and the sync status will be set to SYNCING. You will have to wait for the sync status to reach a terminal state such as: IN_SYNC, or SYNC_FAILED, before using this API again. If you invoke this API during the syncing process, a ResourceInUseException will be thrown. The connectivity of the stream\226\128\153s edge configuration and the Edge Agent will be retried for 15 minutes. After 15 minutes, the status will transition into the SYNC_FAILED state. To move an edge configuration from one device to another, use DeleteEdgeConfiguration to delete the current edge configuration. You can then invoke StartEdgeConfigurationUpdate with an updated Hub Device ARN."]
+module StartEdgeConfigurationUpdateInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream whose edge configuration you want to update. Specify either the StreamName or the StreamARN."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the stream. Specify either the StreamName or the StreamARN."];
+      edgeConfig: EdgeConfig.t
+        [@ocaml.doc
+          "The edge configuration details required to invoke the update process."]}
+    let context_ = "StartEdgeConfigurationUpdateInput"
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ~edgeConfig -> fun () -> { streamName; streamARN; edgeConfig }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("EdgeConfig", (Some (EdgeConfig.to_value x.edgeConfig)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let edgeConfig =
+        EdgeConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EdgeConfig") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ~edgeConfig ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let edgeConfig = field_map_exn json__ "EdgeConfig" EdgeConfig.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ~edgeConfig ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An asynchronous API that updates a stream\226\128\153s existing edge configuration. The Kinesis Video Stream will sync the stream\226\128\153s edge configuration with the Edge Agent IoT Greengrass component that runs on an IoT Hub Device, setup at your premise. The time to sync can vary and depends on the connectivity of the Hub Device. The SyncStatus will be updated as the edge configuration is acknowledged, and synced with the Edge Agent. If this API is invoked for the first time, a new edge configuration will be created for the stream, and the sync status will be set to SYNCING. You will have to wait for the sync status to reach a terminal state such as: IN_SYNC, or SYNC_FAILED, before using this API again. If you invoke this API during the syncing process, a ResourceInUseException will be thrown. The connectivity of the stream\226\128\153s edge configuration and the Edge Agent will be retried for 15 minutes. After 15 minutes, the status will transition into the SYNC_FAILED state. To move an edge configuration from one device to another, use DeleteEdgeConfiguration to delete the current edge configuration. You can then invoke StartEdgeConfigurationUpdate with an updated Hub Device ARN."]
 module ListTagsForStreamOutput =
   struct
     type nonrec t =
@@ -2388,9 +4760,9 @@ module ListTagsForStreamOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?tags ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" ResourceTags.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" ResourceTags.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?tags ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2425,10 +4797,10 @@ module ListTagsForStreamInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?streamName ?streamARN ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamName = field_map json "StreamName" StreamName.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?streamName ?streamARN ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2512,9 +4884,9 @@ module ListTagsForResourceOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?tags ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" ResourceTags.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" ResourceTags.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?tags ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2545,9 +4917,10 @@ module ListTagsForResourceInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~resourceARN ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ~resourceARN ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2615,10 +4988,10 @@ module ListStreamsOutput =
           (Xml.child xml_arg0 "StreamInfoList") in
       make ?nextToken ?streamInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let streamInfoList =
-        field_map json "StreamInfoList" StreamInfoList.of_json in
+        field_map json__ "StreamInfoList" StreamInfoList.of_json in
       make ?nextToken ?streamInfoList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2659,12 +5032,12 @@ module ListStreamsInput =
           (Xml.child xml_arg0 "MaxResults") in
       make ?streamNameCondition ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamNameCondition =
-        field_map json "StreamNameCondition" StreamNameCondition.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "StreamNameCondition" StreamNameCondition.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListStreamsInputLimit.of_json in
+        field_map json__ "MaxResults" ListStreamsInputLimit.of_json in
       make ?streamNameCondition ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2741,10 +5114,10 @@ module ListSignalingChannelsOutput =
           (Xml.child xml_arg0 "ChannelInfoList") in
       make ?nextToken ?channelInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let channelInfoList =
-        field_map json "ChannelInfoList" ChannelInfoList.of_json in
+        field_map json__ "ChannelInfoList" ChannelInfoList.of_json in
       make ?nextToken ?channelInfoList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2785,16 +5158,146 @@ module ListSignalingChannelsInput =
           (Xml.child xml_arg0 "MaxResults") in
       make ?channelNameCondition ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelNameCondition =
-        field_map json "ChannelNameCondition" ChannelNameCondition.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ChannelNameCondition" ChannelNameCondition.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListStreamsInputLimit.of_json in
+        field_map json__ "MaxResults" ListStreamsInputLimit.of_json in
       make ?channelNameCondition ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns an array of ChannelInfo objects. Each object describes a signaling channel. To retrieve only those channels that satisfy a specific condition, you can specify a ChannelNameCondition."]
+module ListEdgeAgentConfigurationsOutput =
+  struct
+    type nonrec t =
+      {
+      edgeConfigs: ListEdgeAgentConfigurationsEdgeConfigList.t option
+        [@ocaml.doc "A description of a single stream's edge configuration."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the response is truncated, the call returns this element with a given token. To get the next batch of edge configurations, use this token in your next request."]}
+    type nonrec error =
+      [ `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?edgeConfigs =
+      fun ?nextToken -> fun () -> { edgeConfigs; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EdgeConfigs",
+           (Option.map x.edgeConfigs
+              ~f:ListEdgeAgentConfigurationsEdgeConfigList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let edgeConfigs =
+        (Option.map ~f:ListEdgeAgentConfigurationsEdgeConfigList.of_xml)
+          (Xml.child xml_arg0 "EdgeConfigs") in
+      make ?nextToken ?edgeConfigs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let edgeConfigs =
+        field_map json__ "EdgeConfigs"
+          ListEdgeAgentConfigurationsEdgeConfigList.of_json in
+      make ?nextToken ?edgeConfigs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns an array of edge configurations associated with the specified Edge Agent. In the request, you must specify the Edge Agent HubDeviceArn."]
+module ListEdgeAgentConfigurationsInput =
+  struct
+    type nonrec t =
+      {
+      hubDeviceArn: HubDeviceArn.t
+        [@ocaml.doc
+          "The \"Internet of Things (IoT) Thing\" Arn of the edge agent."];
+      maxResults: ListEdgeAgentConfigurationsInputLimit.t option
+        [@ocaml.doc
+          "The maximum number of edge configurations to return in the response. The default is 5."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If you specify this parameter, when the result of a ListEdgeAgentConfigurations operation is truncated, the call returns the NextToken in the response. To get another batch of edge configurations, provide this token in your next request."]}
+    let context_ = "ListEdgeAgentConfigurationsInput"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~hubDeviceArn ->
+          fun () -> { maxResults; nextToken; hubDeviceArn }
+    let to_value x =
+      structure_to_value
+        [("HubDeviceArn", (Some (HubDeviceArn.to_value x.hubDeviceArn)));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListEdgeAgentConfigurationsInputLimit.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListEdgeAgentConfigurationsInputLimit.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let hubDeviceArn =
+        HubDeviceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HubDeviceArn") in
+      make ?nextToken ?maxResults ~hubDeviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          ListEdgeAgentConfigurationsInputLimit.of_json in
+      let hubDeviceArn =
+        field_map_exn json__ "HubDeviceArn" HubDeviceArn.of_json in
+      make ?nextToken ?maxResults ~hubDeviceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns an array of edge configurations associated with the specified Edge Agent. In the request, you must specify the Edge Agent HubDeviceArn."]
 module GetSignalingChannelEndpointOutput =
   struct
     type nonrec t =
@@ -2880,13 +5383,13 @@ module GetSignalingChannelEndpointOutput =
           (Xml.child xml_arg0 "ResourceEndpointList") in
       make ?resourceEndpointList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceEndpointList =
-        field_map json "ResourceEndpointList" ResourceEndpointList.of_json in
+        field_map json__ "ResourceEndpointList" ResourceEndpointList.of_json in
       make ?resourceEndpointList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides an endpoint for the specified signaling channel to send and receive messages. This API uses the SingleMasterChannelEndpointConfiguration input parameter, which consists of the Protocols and Role properties. Protocols is used to determine the communication mechanism. For example, if you specify WSS as the protocol, this API produces a secure websocket endpoint. If you specify HTTPS as the protocol, this API generates an HTTPS endpoint. Role determines the messaging permissions. A MASTER role results in this API generating an endpoint that a client can use to communicate with any of the viewers on the channel. A VIEWER role results in this API generating an endpoint that a client can use to communicate only with a MASTER."]
+       "Provides an endpoint for the specified signaling channel to send and receive messages. This API uses the SingleMasterChannelEndpointConfiguration input parameter, which consists of the Protocols and Role properties. Protocols is used to determine the communication mechanism. For example, if you specify WSS as the protocol, this API produces a secure websocket endpoint. If you specify HTTPS as the protocol, this API generates an HTTPS endpoint. If you specify WEBRTC as the protocol, but the signaling channel isn't configured for ingestion, you will receive the error InvalidArgumentException. Role determines the messaging permissions. A MASTER role results in this API generating an endpoint that a client can use to communicate with any of the viewers on the channel. A VIEWER role results in this API generating an endpoint that a client can use to communicate only with a MASTER."]
 module GetSignalingChannelEndpointInput =
   struct
     type nonrec t =
@@ -2918,15 +5421,15 @@ module GetSignalingChannelEndpointInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ChannelARN") in
       make ?singleMasterChannelEndpointConfiguration ~channelARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let singleMasterChannelEndpointConfiguration =
-        field_map json "SingleMasterChannelEndpointConfiguration"
+        field_map json__ "SingleMasterChannelEndpointConfiguration"
           SingleMasterChannelEndpointConfiguration.of_json in
-      let channelARN = field_map_exn json "ChannelARN" ResourceARN.of_json in
+      let channelARN = field_map_exn json__ "ChannelARN" ResourceARN.of_json in
       make ?singleMasterChannelEndpointConfiguration ~channelARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides an endpoint for the specified signaling channel to send and receive messages. This API uses the SingleMasterChannelEndpointConfiguration input parameter, which consists of the Protocols and Role properties. Protocols is used to determine the communication mechanism. For example, if you specify WSS as the protocol, this API produces a secure websocket endpoint. If you specify HTTPS as the protocol, this API generates an HTTPS endpoint. Role determines the messaging permissions. A MASTER role results in this API generating an endpoint that a client can use to communicate with any of the viewers on the channel. A VIEWER role results in this API generating an endpoint that a client can use to communicate only with a MASTER."]
+       "Provides an endpoint for the specified signaling channel to send and receive messages. This API uses the SingleMasterChannelEndpointConfiguration input parameter, which consists of the Protocols and Role properties. Protocols is used to determine the communication mechanism. For example, if you specify WSS as the protocol, this API produces a secure websocket endpoint. If you specify HTTPS as the protocol, this API generates an HTTPS endpoint. If you specify WEBRTC as the protocol, but the signaling channel isn't configured for ingestion, you will receive the error InvalidArgumentException. Role determines the messaging permissions. A MASTER role results in this API generating an endpoint that a client can use to communicate with any of the viewers on the channel. A VIEWER role results in this API generating an endpoint that a client can use to communicate only with a MASTER."]
 module GetDataEndpointOutput =
   struct
     type nonrec t =
@@ -3002,8 +5505,8 @@ module GetDataEndpointOutput =
           (Xml.child xml_arg0 "DataEndpoint") in
       make ?dataEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataEndpoint = field_map json "DataEndpoint" DataEndpoint.of_json in
+    let of_json json__ =
+      let dataEndpoint = field_map json__ "DataEndpoint" DataEndpoint.of_json in
       make ?dataEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3040,14 +5543,143 @@ module GetDataEndpointInput =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ~aPIName ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aPIName = field_map_exn json "APIName" APIName.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+    let of_json json__ =
+      let aPIName = field_map_exn json__ "APIName" APIName.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ~aPIName ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets an endpoint for a specified stream for either reading or writing. Use this endpoint in your application to read from the specified stream (using the GetMedia or GetMediaForFragmentList operations) or write to it (using the PutMedia operation). The returned endpoint does not have the API name appended. The client needs to add the API name to the returned endpoint. In the request, specify the stream either by StreamName or StreamARN."]
+module DescribeStreamStorageConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option [@ocaml.doc "The name of the stream."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the stream."];
+      streamStorageConfiguration: StreamStorageConfiguration.t option
+        [@ocaml.doc
+          "The current storage configuration for the stream, including the default storage tier and other storage-related settings."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamStorageConfiguration ->
+          fun () -> { streamName; streamARN; streamStorageConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("StreamStorageConfiguration",
+          (Option.map x.streamStorageConfiguration
+             ~f:StreamStorageConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamStorageConfiguration =
+        (Option.map ~f:StreamStorageConfiguration.of_xml)
+          (Xml.child xml_arg0 "StreamStorageConfiguration") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamStorageConfiguration ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamStorageConfiguration =
+        field_map json__ "StreamStorageConfiguration"
+          StreamStorageConfiguration.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamStorageConfiguration ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the current storage configuration for the specified Kinesis video stream. In the request, you must specify either the StreamName or the StreamARN. You must have permissions for the KinesisVideo:DescribeStreamStorageConfiguration action."]
+module DescribeStreamStorageConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream for which you want to retrieve the storage configuration."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the stream for which you want to retrieve the storage configuration."]}
+    let make ?streamName =
+      fun ?streamARN -> fun () -> { streamName; streamARN }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the current storage configuration for the specified Kinesis video stream. In the request, you must specify either the StreamName or the StreamARN. You must have permissions for the KinesisVideo:DescribeStreamStorageConfiguration action."]
 module DescribeStreamOutput =
   struct
     type nonrec t =
@@ -3120,8 +5752,8 @@ module DescribeStreamOutput =
         (Option.map ~f:StreamInfo.of_xml) (Xml.child xml_arg0 "StreamInfo") in
       make ?streamInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamInfo = field_map json "StreamInfo" StreamInfo.of_json in
+    let of_json json__ =
+      let streamInfo = field_map json__ "StreamInfo" StreamInfo.of_json in
       make ?streamInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3147,9 +5779,9 @@ module DescribeStreamInput =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3227,8 +5859,8 @@ module DescribeSignalingChannelOutput =
         (Option.map ~f:ChannelInfo.of_xml) (Xml.child xml_arg0 "ChannelInfo") in
       make ?channelInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelInfo = field_map json "ChannelInfo" ChannelInfo.of_json in
+    let of_json json__ =
+      let channelInfo = field_map json__ "ChannelInfo" ChannelInfo.of_json in
       make ?channelInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3257,13 +5889,700 @@ module DescribeSignalingChannelInput =
         (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "ChannelName") in
       make ?channelARN ?channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelARN = field_map json "ChannelARN" ResourceARN.of_json in
-      let channelName = field_map json "ChannelName" ChannelName.of_json in
+    let of_json json__ =
+      let channelARN = field_map json__ "ChannelARN" ResourceARN.of_json in
+      let channelName = field_map json__ "ChannelName" ChannelName.of_json in
       make ?channelARN ?channelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the most current information about the signaling channel. You must specify either the name or the Amazon Resource Name (ARN) of the channel that you want to describe."]
+module DescribeNotificationConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      notificationConfiguration: NotificationConfiguration.t option
+        [@ocaml.doc
+          "The structure that contains the information required for notifications. If the structure is null, the configuration will be deleted from the stream."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?notificationConfiguration =
+      fun () -> { notificationConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NotificationConfiguration",
+           (Option.map x.notificationConfiguration
+              ~f:NotificationConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notificationConfiguration =
+        (Option.map ~f:NotificationConfiguration.of_xml)
+          (Xml.child xml_arg0 "NotificationConfiguration") in
+      make ?notificationConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notificationConfiguration =
+        field_map json__ "NotificationConfiguration"
+          NotificationConfiguration.of_json in
+      make ?notificationConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the NotificationConfiguration for a given Kinesis video stream."]
+module DescribeNotificationConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream from which to retrieve the notification configuration. You must specify either the StreamName or the StreamARN."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Kinesis video stream from where you want to retrieve the notification configuration. You must specify either the StreamName or the StreamARN."]}
+    let make ?streamName =
+      fun ?streamARN -> fun () -> { streamName; streamARN }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the NotificationConfiguration for a given Kinesis video stream."]
+module DescribeMediaStorageConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      mediaStorageConfiguration: MediaStorageConfiguration.t option
+        [@ocaml.doc
+          "A structure that encapsulates, or contains, the media storage configuration properties."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?mediaStorageConfiguration =
+      fun () -> { mediaStorageConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MediaStorageConfiguration",
+           (Option.map x.mediaStorageConfiguration
+              ~f:MediaStorageConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mediaStorageConfiguration =
+        (Option.map ~f:MediaStorageConfiguration.of_xml)
+          (Xml.child xml_arg0 "MediaStorageConfiguration") in
+      make ?mediaStorageConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mediaStorageConfiguration =
+        field_map json__ "MediaStorageConfiguration"
+          MediaStorageConfiguration.of_json in
+      make ?mediaStorageConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the most current information about the channel. Specify the ChannelName or ChannelARN in the input."]
+module DescribeMediaStorageConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      channelName: ChannelName.t option
+        [@ocaml.doc "The name of the channel."];
+      channelARN: ResourceARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the channel."]}
+    let make ?channelName =
+      fun ?channelARN -> fun () -> { channelName; channelARN }
+    let to_value x =
+      structure_to_value
+        [("ChannelName", (Option.map x.channelName ~f:ChannelName.to_value));
+        ("ChannelARN", (Option.map x.channelARN ~f:ResourceARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let channelARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ChannelARN") in
+      let channelName =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "ChannelName") in
+      make ?channelARN ?channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let channelARN = field_map json__ "ChannelARN" ResourceARN.of_json in
+      let channelName = field_map json__ "ChannelName" ChannelName.of_json in
+      make ?channelARN ?channelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the most current information about the channel. Specify the ChannelName or ChannelARN in the input."]
+module DescribeMappedResourceConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      mappedResourceConfigurationList:
+        MappedResourceConfigurationList.t option
+        [@ocaml.doc
+          "A structure that encapsulates, or contains, the media storage configuration properties."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token that was used in the NextTokenrequest to fetch the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?mappedResourceConfigurationList =
+      fun ?nextToken ->
+        fun () -> { mappedResourceConfigurationList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MappedResourceConfigurationList",
+           (Option.map x.mappedResourceConfigurationList
+              ~f:MappedResourceConfigurationList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let mappedResourceConfigurationList =
+        (Option.map ~f:MappedResourceConfigurationList.of_xml)
+          (Xml.child xml_arg0 "MappedResourceConfigurationList") in
+      make ?nextToken ?mappedResourceConfigurationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let mappedResourceConfigurationList =
+        field_map json__ "MappedResourceConfigurationList"
+          MappedResourceConfigurationList.of_json in
+      make ?nextToken ?mappedResourceConfigurationList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the most current information about the stream. The streamName or streamARN should be provided in the input."]
+module DescribeMappedResourceConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option [@ocaml.doc "The name of the stream."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the stream."];
+      maxResults: MappedResourceConfigurationListLimit.t option
+        [@ocaml.doc
+          "The maximum number of results to return in the response."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to provide in your next request, to get another batch of results."]}
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () -> { streamName; streamARN; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:MappedResourceConfigurationListLimit.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MappedResourceConfigurationListLimit.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?nextToken ?maxResults ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          MappedResourceConfigurationListLimit.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?nextToken ?maxResults ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the most current information about the stream. The streamName or streamARN should be provided in the input."]
+module DescribeImageGenerationConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      imageGenerationConfiguration: ImageGenerationConfiguration.t option
+        [@ocaml.doc
+          "The structure that contains the information required for the Kinesis video stream (KVS) images delivery. If this structure is null, the configuration will be deleted from the stream."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?imageGenerationConfiguration =
+      fun () -> { imageGenerationConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ImageGenerationConfiguration",
+           (Option.map x.imageGenerationConfiguration
+              ~f:ImageGenerationConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageGenerationConfiguration =
+        (Option.map ~f:ImageGenerationConfiguration.of_xml)
+          (Xml.child xml_arg0 "ImageGenerationConfiguration") in
+      make ?imageGenerationConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageGenerationConfiguration =
+        field_map json__ "ImageGenerationConfiguration"
+          ImageGenerationConfiguration.of_json in
+      make ?imageGenerationConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the ImageGenerationConfiguration for a given Kinesis video stream."]
+module DescribeImageGenerationConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream from which to retrieve the image generation configuration. You must specify either the StreamName or the StreamARN."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Kinesis video stream from which to retrieve the image generation configuration. You must specify either the StreamName or the StreamARN."]}
+    let make ?streamName =
+      fun ?streamARN -> fun () -> { streamName; streamARN }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the ImageGenerationConfiguration for a given Kinesis video stream."]
+module DescribeEdgeConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream from which the edge configuration was updated."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the stream."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which a stream\226\128\153s edge configuration was first created."];
+      lastUpdatedTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which a stream\226\128\153s edge configuration was last updated."];
+      syncStatus: SyncStatus.t option
+        [@ocaml.doc "The latest status of the edge configuration update."];
+      failedStatusDetails: FailedStatusDetails.t option
+        [@ocaml.doc "A description of the generated failure status."];
+      edgeConfig: EdgeConfig.t option
+        [@ocaml.doc
+          "A description of the stream's edge configuration that will be used to sync with the Edge Agent IoT Greengrass component. The Edge Agent component will run on an IoT Hub Device setup at your premise."];
+      edgeAgentStatus: EdgeAgentStatus.t option
+        [@ocaml.doc
+          "An object that contains the latest status details for an edge agent's recorder and uploader jobs. Use this information to determine the current health of an edge agent."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `StreamEdgeConfigurationNotFoundException of
+          StreamEdgeConfigurationNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?creationTime ->
+          fun ?lastUpdatedTime ->
+            fun ?syncStatus ->
+              fun ?failedStatusDetails ->
+                fun ?edgeConfig ->
+                  fun ?edgeAgentStatus ->
+                    fun () ->
+                      {
+                        streamName;
+                        streamARN;
+                        creationTime;
+                        lastUpdatedTime;
+                        syncStatus;
+                        failedStatusDetails;
+                        edgeConfig;
+                        edgeAgentStatus
+                      }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "StreamEdgeConfigurationNotFoundException" ->
+          `StreamEdgeConfigurationNotFoundException
+            (StreamEdgeConfigurationNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "StreamEdgeConfigurationNotFoundException" ->
+          `StreamEdgeConfigurationNotFoundException
+            (StreamEdgeConfigurationNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `StreamEdgeConfigurationNotFoundException e ->
+          `Assoc
+            [("error", (`String "StreamEdgeConfigurationNotFoundException"));
+            ("details", (StreamEdgeConfigurationNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:Timestamp.to_value));
+        ("SyncStatus", (Option.map x.syncStatus ~f:SyncStatus.to_value));
+        ("FailedStatusDetails",
+          (Option.map x.failedStatusDetails ~f:FailedStatusDetails.to_value));
+        ("EdgeConfig", (Option.map x.edgeConfig ~f:EdgeConfig.to_value));
+        ("EdgeAgentStatus",
+          (Option.map x.edgeAgentStatus ~f:EdgeAgentStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let edgeAgentStatus =
+        (Option.map ~f:EdgeAgentStatus.of_xml)
+          (Xml.child xml_arg0 "EdgeAgentStatus") in
+      let edgeConfig =
+        (Option.map ~f:EdgeConfig.of_xml) (Xml.child xml_arg0 "EdgeConfig") in
+      let failedStatusDetails =
+        (Option.map ~f:FailedStatusDetails.of_xml)
+          (Xml.child xml_arg0 "FailedStatusDetails") in
+      let syncStatus =
+        (Option.map ~f:SyncStatus.of_xml) (Xml.child xml_arg0 "SyncStatus") in
+      let lastUpdatedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?edgeAgentStatus ?edgeConfig ?failedStatusDetails ?syncStatus
+        ?lastUpdatedTime ?creationTime ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let edgeAgentStatus =
+        field_map json__ "EdgeAgentStatus" EdgeAgentStatus.of_json in
+      let edgeConfig = field_map json__ "EdgeConfig" EdgeConfig.of_json in
+      let failedStatusDetails =
+        field_map json__ "FailedStatusDetails" FailedStatusDetails.of_json in
+      let syncStatus = field_map json__ "SyncStatus" SyncStatus.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?edgeAgentStatus ?edgeConfig ?failedStatusDetails ?syncStatus
+        ?lastUpdatedTime ?creationTime ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a stream\226\128\153s edge configuration that was set using the StartEdgeConfigurationUpdate API and the latest status of the edge agent's recorder and uploader jobs. Use this API to get the status of the configuration to determine if the configuration is in sync with the Edge Agent. Use this API to evaluate the health of the Edge Agent."]
+module DescribeEdgeConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream whose edge configuration you want to update. Specify either the StreamName or the StreamARN."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the stream. Specify either the StreamNameor the StreamARN."]}
+    let make ?streamName =
+      fun ?streamARN -> fun () -> { streamName; streamARN }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a stream\226\128\153s edge configuration that was set using the StartEdgeConfigurationUpdate API and the latest status of the edge agent's recorder and uploader jobs. Use this API to get the status of the configuration to determine if the configuration is in sync with the Edge Agent. Use this API to evaluate the health of the Edge Agent."]
 module DeleteStreamOutput =
   struct
     type nonrec t = unit
@@ -3377,9 +6696,9 @@ module DeleteStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
       make ?currentVersion ~streamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let currentVersion = field_map json "CurrentVersion" Version.of_json in
-      let streamARN = field_map_exn json "StreamARN" ResourceARN.of_json in
+    let of_json json__ =
+      let currentVersion = field_map json__ "CurrentVersion" Version.of_json in
+      let streamARN = field_map_exn json__ "StreamARN" ResourceARN.of_json in
       make ?currentVersion ~streamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3497,13 +6816,125 @@ module DeleteSignalingChannelInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ChannelARN") in
       make ?currentVersion ~channelARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let currentVersion = field_map json "CurrentVersion" Version.of_json in
-      let channelARN = field_map_exn json "ChannelARN" ResourceARN.of_json in
+    let of_json json__ =
+      let currentVersion = field_map json__ "CurrentVersion" Version.of_json in
+      let channelARN = field_map_exn json__ "ChannelARN" ResourceARN.of_json in
       make ?currentVersion ~channelARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a specified signaling channel. DeleteSignalingChannel is an asynchronous operation. If you don't specify the channel's current version, the most recent version is deleted."]
+module DeleteEdgeConfigurationOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `StreamEdgeConfigurationNotFoundException of
+          StreamEdgeConfigurationNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "StreamEdgeConfigurationNotFoundException" ->
+          `StreamEdgeConfigurationNotFoundException
+            (StreamEdgeConfigurationNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "StreamEdgeConfigurationNotFoundException" ->
+          `StreamEdgeConfigurationNotFoundException
+            (StreamEdgeConfigurationNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `StreamEdgeConfigurationNotFoundException e ->
+          `Assoc
+            [("error", (`String "StreamEdgeConfigurationNotFoundException"));
+            ("details", (StreamEdgeConfigurationNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An asynchronous API that deletes a stream\226\128\153s existing edge configuration, as well as the corresponding media from the Edge Agent. When you invoke this API, the sync status is set to DELETING. A deletion process starts, in which active edge jobs are stopped and all media is deleted from the edge device. The time to delete varies, depending on the total amount of stored media. If the deletion process fails, the sync status changes to DELETE_FAILED. You will need to re-try the deletion. When the deletion process has completed successfully, the edge configuration is no longer accessible."]
+module DeleteEdgeConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream from which to delete the edge configuration. Specify either the StreamName or the StreamARN."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the stream. Specify either the StreamName or the StreamARN."]}
+    let make ?streamName =
+      fun ?streamARN -> fun () -> { streamName; streamARN }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An asynchronous API that deletes a stream\226\128\153s existing edge configuration, as well as the corresponding media from the Edge Agent. When you invoke this API, the sync status is set to DELETING. A deletion process starts, in which active edge jobs are stopped and all media is deleted from the edge device. The time to delete varies, depending on the total amount of stored media. If the deletion process fails, the sync status changes to DELETE_FAILED. You will need to re-try the deletion. When the deletion process has completed successfully, the edge configuration is no longer accessible."]
 module CreateStreamOutput =
   struct
     type nonrec t =
@@ -3613,8 +7044,8 @@ module CreateStreamOutput =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       make ?streamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
       make ?streamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3625,7 +7056,7 @@ module CreateStreamInput =
       {
       deviceName: DeviceName.t option
         [@ocaml.doc
-          "The name of the device that is writing to the stream. In the current implementation, Kinesis Video Streams does not use this name."];
+          "The name of the device that is writing to the stream. In the current implementation, Kinesis Video Streams doesn't use this name."];
       streamName: StreamName.t
         [@ocaml.doc
           "A name for the stream that you are creating. The stream name is an identifier for the stream, and must be unique for each account and region."];
@@ -3634,29 +7065,34 @@ module CreateStreamInput =
           "The media type of the stream. Consumers of the stream can use this information when processing the stream. For more information about media types, see Media Types. If you choose to specify the MediaType, see Naming Requirements for guidelines. Example valid values include \"video/h264\" and \"video/h264,audio/aac\". This parameter is optional; the default value is null (or empty in JSON)."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "The ID of the AWS Key Management Service (AWS KMS) key that you want Kinesis Video Streams to use to encrypt stream data. If no key ID is specified, the default, Kinesis Video-managed key (aws/kinesisvideo) is used. For more information, see DescribeKey."];
+          "The ID of the Key Management Service (KMS) key that you want Kinesis Video Streams to use to encrypt stream data. If no key ID is specified, the default, Kinesis Video-managed key (aws/kinesisvideo) is used. For more information, see DescribeKey."];
       dataRetentionInHours: DataRetentionInHours.t option
         [@ocaml.doc
-          "The number of hours that you want to retain the data in the stream. Kinesis Video Streams retains the data in a data store that is associated with the stream. The default value is 0, indicating that the stream does not persist data. When the DataRetentionInHours value is 0, consumers can still consume the fragments that remain in the service host buffer, which has a retention time limit of 5 minutes and a retention memory limit of 200 MB. Fragments are removed from the buffer when either limit is reached."];
+          "The number of hours that you want to retain the data in the stream. Kinesis Video Streams retains the data in a data store that is associated with the stream. The default value is 0, indicating that the stream does not persist data. The minimum is 1 hour. When the DataRetentionInHours value is 0, consumers can still consume the fragments that remain in the service host buffer, which has a retention time limit of 5 minutes and a retention memory limit of 200 MB. Fragments are removed from the buffer when either limit is reached."];
       tags: ResourceTags.t option
         [@ocaml.doc
-          "A list of tags to associate with the specified stream. Each tag is a key-value pair (the value is optional)."]}
+          "A list of tags to associate with the specified stream. Each tag is a key-value pair (the value is optional)."];
+      streamStorageConfiguration: StreamStorageConfiguration.t option
+        [@ocaml.doc
+          "The configuration for the stream's storage, including the default storage tier for stream data. This configuration determines how stream data is stored and accessed, with different tiers offering varying levels of performance and cost optimization. If not specified, the stream will use the default storage configuration with HOT tier for optimal performance."]}
     let context_ = "CreateStreamInput"
     let make ?deviceName =
       fun ?mediaType ->
         fun ?kmsKeyId ->
           fun ?dataRetentionInHours ->
             fun ?tags ->
-              fun ~streamName ->
-                fun () ->
-                  {
-                    deviceName;
-                    mediaType;
-                    kmsKeyId;
-                    dataRetentionInHours;
-                    tags;
-                    streamName
-                  }
+              fun ?streamStorageConfiguration ->
+                fun ~streamName ->
+                  fun () ->
+                    {
+                      deviceName;
+                      mediaType;
+                      kmsKeyId;
+                      dataRetentionInHours;
+                      tags;
+                      streamStorageConfiguration;
+                      streamName
+                    }
     let to_value x =
       structure_to_value
         [("DeviceName", (Option.map x.deviceName ~f:DeviceName.to_value));
@@ -3665,9 +7101,15 @@ module CreateStreamInput =
         ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
         ("DataRetentionInHours",
           (Option.map x.dataRetentionInHours ~f:DataRetentionInHours.to_value));
-        ("Tags", (Option.map x.tags ~f:ResourceTags.to_value))]
+        ("Tags", (Option.map x.tags ~f:ResourceTags.to_value));
+        ("StreamStorageConfiguration",
+          (Option.map x.streamStorageConfiguration
+             ~f:StreamStorageConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamStorageConfiguration =
+        (Option.map ~f:StreamStorageConfiguration.of_xml)
+          (Xml.child xml_arg0 "StreamStorageConfiguration") in
       let tags =
         (Option.map ~f:ResourceTags.of_xml) (Xml.child xml_arg0 "Tags") in
       let dataRetentionInHours =
@@ -3682,19 +7124,22 @@ module CreateStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       let deviceName =
         (Option.map ~f:DeviceName.of_xml) (Xml.child xml_arg0 "DeviceName") in
-      make ?tags ?dataRetentionInHours ?kmsKeyId ?mediaType ~streamName
-        ?deviceName ()
+      make ?streamStorageConfiguration ?tags ?dataRetentionInHours ?kmsKeyId
+        ?mediaType ~streamName ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" ResourceTags.of_json in
+    let of_json json__ =
+      let streamStorageConfiguration =
+        field_map json__ "StreamStorageConfiguration"
+          StreamStorageConfiguration.of_json in
+      let tags = field_map json__ "Tags" ResourceTags.of_json in
       let dataRetentionInHours =
-        field_map json "DataRetentionInHours" DataRetentionInHours.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let mediaType = field_map json "MediaType" MediaType.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      let deviceName = field_map json "DeviceName" DeviceName.of_json in
-      make ?tags ?dataRetentionInHours ?kmsKeyId ?mediaType ~streamName
-        ?deviceName ()
+        field_map json__ "DataRetentionInHours" DataRetentionInHours.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let mediaType = field_map json__ "MediaType" MediaType.of_json in
+      let streamName = field_map_exn json__ "StreamName" StreamName.of_json in
+      let deviceName = field_map json__ "DeviceName" DeviceName.of_json in
+      make ?streamStorageConfiguration ?tags ?dataRetentionInHours ?kmsKeyId
+        ?mediaType ~streamName ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new Kinesis video stream. When you create a new stream, Kinesis Video Streams assigns it a version number. When you change the stream's metadata, Kinesis Video Streams updates the version. CreateStream is an asynchronous operation. For information about how the service works, see How it Works. You must have permissions for the KinesisVideo:CreateStream action."]
@@ -3794,8 +7239,8 @@ module CreateSignalingChannelOutput =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ChannelARN") in
       make ?channelARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelARN = field_map json "ChannelARN" ResourceARN.of_json in
+    let of_json json__ =
+      let channelARN = field_map json__ "ChannelARN" ResourceARN.of_json in
       make ?channelARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3806,13 +7251,13 @@ module CreateSignalingChannelInput =
       {
       channelName: ChannelName.t
         [@ocaml.doc
-          "A name for the signaling channel that you are creating. It must be unique for each AWS account and AWS Region."];
+          "A name for the signaling channel that you are creating. It must be unique for each Amazon Web Services account and Amazon Web Services Region."];
       channelType: ChannelType.t option
         [@ocaml.doc
           "A type of the signaling channel that you are creating. Currently, SINGLE_MASTER is the only supported channel type."];
       singleMasterConfiguration: SingleMasterConfiguration.t option
         [@ocaml.doc
-          "A structure containing the configuration for the SINGLE_MASTER channel type."];
+          "A structure containing the configuration for the SINGLE_MASTER channel type. The default configuration for the channel message's time to live is 60 seconds (1 minute)."];
       tags: TagOnCreateList.t option
         [@ocaml.doc
           "A set of tags (key-value pairs) that you want to associate with this channel."]}
@@ -3845,13 +7290,14 @@ module CreateSignalingChannelInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ?tags ?singleMasterConfiguration ?channelType ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagOnCreateList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagOnCreateList.of_json in
       let singleMasterConfiguration =
-        field_map json "SingleMasterConfiguration"
+        field_map json__ "SingleMasterConfiguration"
           SingleMasterConfiguration.of_json in
-      let channelType = field_map json "ChannelType" ChannelType.of_json in
-      let channelName = field_map_exn json "ChannelName" ChannelName.of_json in
+      let channelType = field_map json__ "ChannelType" ChannelType.of_json in
+      let channelName =
+        field_map_exn json__ "ChannelName" ChannelName.of_json in
       make ?tags ?singleMasterConfiguration ?channelType ~channelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

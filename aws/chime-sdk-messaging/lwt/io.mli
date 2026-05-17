@@ -68,6 +68,11 @@ val delete_channel_moderator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteChannelModeratorRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_messaging_streaming_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteMessagingStreamingConfigurationsRequest.t ->
+        (unit, unit) Result.t Lwt.t
 val describe_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -140,6 +145,12 @@ val get_messaging_session_endpoint :
       GetMessagingSessionEndpointRequest.t ->
         (GetMessagingSessionEndpointResponse.t,
           GetMessagingSessionEndpointResponse.error) Result.t Lwt.t
+val get_messaging_streaming_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetMessagingStreamingConfigurationsRequest.t ->
+        (GetMessagingStreamingConfigurationsResponse.t,
+          GetMessagingStreamingConfigurationsResponse.error) Result.t Lwt.t
 val list_channel_bans :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -195,24 +206,48 @@ val list_channels_moderated_by_app_instance_user :
         (ListChannelsModeratedByAppInstanceUserResponse.t,
           ListChannelsModeratedByAppInstanceUserResponse.error) Result.t
           Lwt.t
+val list_sub_channels :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSubChannelsRequest.t ->
+        (ListSubChannelsResponse.t, ListSubChannelsResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val put_channel_expiration_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutChannelExpirationSettingsRequest.t ->
+        (PutChannelExpirationSettingsResponse.t,
+          PutChannelExpirationSettingsResponse.error) Result.t Lwt.t
 val put_channel_membership_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutChannelMembershipPreferencesRequest.t ->
         (PutChannelMembershipPreferencesResponse.t,
           PutChannelMembershipPreferencesResponse.error) Result.t Lwt.t
+val put_messaging_streaming_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutMessagingStreamingConfigurationsRequest.t ->
+        (PutMessagingStreamingConfigurationsResponse.t,
+          PutMessagingStreamingConfigurationsResponse.error) Result.t Lwt.t
 val redact_channel_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RedactChannelMessageRequest.t ->
         (RedactChannelMessageResponse.t, RedactChannelMessageResponse.error)
           Result.t Lwt.t
+val search_channels :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SearchChannelsRequest.t ->
+        (SearchChannelsResponse.t, SearchChannelsResponse.error) Result.t
+          Lwt.t
 val send_channel_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

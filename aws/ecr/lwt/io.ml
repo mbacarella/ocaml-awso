@@ -26,6 +26,8 @@ let create_pull_through_cache_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePullThroughCacheRule input
 let create_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRepository input
+let create_repository_creation_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRepositoryCreationTemplate input
 let delete_lifecycle_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLifecyclePolicy input
 let delete_pull_through_cache_rule ?endpoint_url ?cfg input =
@@ -34,12 +36,20 @@ let delete_registry_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRegistryPolicy input
 let delete_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRepository input
+let delete_repository_creation_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRepositoryCreationTemplate input
 let delete_repository_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRepositoryPolicy input
+let delete_signing_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteSigningConfiguration input
+let deregister_pull_time_update_exclusion ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeregisterPullTimeUpdateExclusion input
 let describe_image_replication_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeImageReplicationStatus input
 let describe_image_scan_findings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeImageScanFindings input
+let describe_image_signing_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeImageSigningStatus input
 let describe_images ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeImages input
 let describe_pull_through_cache_rules ?endpoint_url ?cfg input =
@@ -48,6 +58,10 @@ let describe_registry ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRegistry input
 let describe_repositories ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRepositories input
+let describe_repository_creation_templates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeRepositoryCreationTemplates input
+let get_account_setting ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAccountSetting input
 let get_authorization_token ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAuthorizationToken input
 let get_download_url_for_layer ?endpoint_url ?cfg input =
@@ -62,12 +76,20 @@ let get_registry_scanning_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRegistryScanningConfiguration input
 let get_repository_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRepositoryPolicy input
+let get_signing_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSigningConfiguration input
 let initiate_layer_upload ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.InitiateLayerUpload input
+let list_image_referrers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListImageReferrers input
 let list_images ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImages input
+let list_pull_time_update_exclusions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPullTimeUpdateExclusions input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let put_account_setting ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutAccountSetting input
 let put_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutImage input
 let put_image_scanning_configuration ?endpoint_url ?cfg input =
@@ -82,6 +104,10 @@ let put_registry_scanning_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutRegistryScanningConfiguration input
 let put_replication_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutReplicationConfiguration input
+let put_signing_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutSigningConfiguration input
+let register_pull_time_update_exclusion ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RegisterPullTimeUpdateExclusion input
 let set_repository_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetRepositoryPolicy input
 let start_image_scan ?endpoint_url ?cfg input =
@@ -92,5 +118,13 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_image_storage_class ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateImageStorageClass input
+let update_pull_through_cache_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePullThroughCacheRule input
+let update_repository_creation_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRepositoryCreationTemplate input
 let upload_layer_part ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UploadLayerPart input
+let validate_pull_through_cache_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ValidatePullThroughCacheRule input

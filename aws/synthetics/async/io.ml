@@ -11,24 +11,42 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let associate_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateResource input
 let create_canary ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCanary input
+let create_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateGroup input
 let delete_canary ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCanary input
+let delete_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteGroup input
 let describe_canaries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCanaries input
 let describe_canaries_last_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCanariesLastRun input
 let describe_runtime_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRuntimeVersions input
+let disassociate_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateResource input
 let get_canary ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCanary input
 let get_canary_runs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCanaryRuns input
+let get_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetGroup input
+let list_associated_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAssociatedGroups input
+let list_group_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListGroupResources input
+let list_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListGroups input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let start_canary ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartCanary input
+let start_canary_dry_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCanaryDryRun input
 let stop_canary ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopCanary input
 let tag_resource ?endpoint_url ?cfg input =

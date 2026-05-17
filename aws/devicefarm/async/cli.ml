@@ -151,12 +151,25 @@ let create_project =
        and defaultJobTimeoutMinutes =
          flag "default-job-timeout-minutes" (optional int)
            ~doc:"INT JobTimeoutMinutes"
+       and vpcConfig =
+         flag "vpc-config" (optional json_arg) ~doc:"JSON VpcConfig"
+       and environmentVariables =
+         flag "environment-variables" (optional json_arg)
+           ~doc:"JSON EnvironmentVariables"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string)
+           ~doc:"STRING AmazonRoleResourceName"
        and name = flag "name" (required string) ~doc:"STRING Name" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_project
-           (Values.CreateProjectRequest.make ?defaultJobTimeoutMinutes ~name
-              ()) (Some Values.CreateProjectResult.to_json)
+           (Values.CreateProjectRequest.make ?defaultJobTimeoutMinutes
+              ?vpcConfig:(Option.map ~f:Values.VpcConfig.of_json vpcConfig)
+              ?environmentVariables:(Option.map
+                                       ~f:Values.EnvironmentVariables.of_json
+                                       environmentVariables)
+              ?executionRoleArn ~name ())
+           (Some Values.CreateProjectResult.to_json)
            (Some Values.CreateProjectResult.error_to_json)])
 let create_remote_access_session =
   Command.async ~summary:""
@@ -168,21 +181,12 @@ let create_remote_access_session =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and appArn =
+         flag "app-arn" (optional string) ~doc:"STRING AmazonResourceName"
        and instanceArn =
          flag "instance-arn" (optional string)
            ~doc:"STRING AmazonResourceName"
-       and sshPublicKey =
-         flag "ssh-public-key" (optional string) ~doc:"STRING SshPublicKey"
-       and remoteDebugEnabled =
-         flag "remote-debug-enabled" (optional bool) ~doc:"BOOL Boolean"
-       and remoteRecordEnabled =
-         flag "remote-record-enabled" (optional bool) ~doc:"BOOL Boolean"
-       and remoteRecordAppArn =
-         flag "remote-record-app-arn" (optional string)
-           ~doc:"STRING AmazonResourceName"
        and name = flag "name" (optional string) ~doc:"STRING Name"
-       and clientId =
-         flag "client-id" (optional string) ~doc:"STRING ClientId"
        and configuration =
          flag "configuration" (optional json_arg)
            ~doc:"JSON CreateRemoteAccessSessionConfiguration"
@@ -199,9 +203,8 @@ let create_remote_access_session =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_remote_access_session
-           (Values.CreateRemoteAccessSessionRequest.make ?instanceArn
-              ?sshPublicKey ?remoteDebugEnabled ?remoteRecordEnabled
-              ?remoteRecordAppArn ?name ?clientId
+           (Values.CreateRemoteAccessSessionRequest.make ?appArn ?instanceArn
+              ?name
               ?configuration:(Option.map
                                 ~f:Values.CreateRemoteAccessSessionConfiguration.of_json
                                 configuration)
@@ -555,6 +558,9 @@ let get_device_pool_compatibility =
        and configuration =
          flag "configuration" (optional json_arg)
            ~doc:"JSON ScheduleRunConfiguration"
+       and projectArn =
+         flag "project-arn" (optional string)
+           ~doc:"STRING AmazonResourceName"
        and devicePoolArn =
          flag "device-pool-arn" (required string)
            ~doc:"STRING AmazonResourceName" in
@@ -566,7 +572,7 @@ let get_device_pool_compatibility =
               ?test:(Option.map ~f:Values.ScheduleRunTest.of_json test)
               ?configuration:(Option.map
                                 ~f:Values.ScheduleRunConfiguration.of_json
-                                configuration) ~devicePoolArn ())
+                                configuration) ?projectArn ~devicePoolArn ())
            (Some Values.GetDevicePoolCompatibilityResult.to_json)
            (Some Values.GetDevicePoolCompatibilityResult.error_to_json)])
 let get_instance_profile =
@@ -1670,13 +1676,26 @@ let update_project =
        and defaultJobTimeoutMinutes =
          flag "default-job-timeout-minutes" (optional int)
            ~doc:"INT JobTimeoutMinutes"
+       and vpcConfig =
+         flag "vpc-config" (optional json_arg) ~doc:"JSON VpcConfig"
+       and environmentVariables =
+         flag "environment-variables" (optional json_arg)
+           ~doc:"JSON EnvironmentVariables"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string)
+           ~doc:"STRING AmazonRoleResourceName"
        and arn =
          flag "arn" (required string) ~doc:"STRING AmazonResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_project
            (Values.UpdateProjectRequest.make ?name ?defaultJobTimeoutMinutes
-              ~arn ()) (Some Values.UpdateProjectResult.to_json)
+              ?vpcConfig:(Option.map ~f:Values.VpcConfig.of_json vpcConfig)
+              ?environmentVariables:(Option.map
+                                       ~f:Values.EnvironmentVariables.of_json
+                                       environmentVariables)
+              ?executionRoleArn ~arn ())
+           (Some Values.UpdateProjectResult.to_json)
            (Some Values.UpdateProjectResult.error_to_json)])
 let update_test_grid_project =
   Command.async ~summary:""

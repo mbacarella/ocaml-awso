@@ -2,14 +2,24 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | PutActionInteractions: (PutActionInteractionsRequest.t, unit, unit) t 
+  | PutActions: (PutActionsRequest.t, unit, unit) t 
   | PutEvents: (PutEventsRequest.t, unit, unit) t 
   | PutItems: (PutItemsRequest.t, unit, unit) t 
   | PutUsers: (PutUsersRequest.t, unit, unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
-  function | PutEvents -> `POST | PutItems -> `POST | PutUsers -> `POST
+  function
+  | PutActionInteractions -> `POST
+  | PutActions -> `POST
+  | PutEvents -> `POST
+  | PutItems -> `POST
+  | PutUsers -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | PutActionInteractions ->
+          (Format.kasprintf Uri.of_string) "/action-interactions"
+      | PutActions -> (Format.kasprintf Uri.of_string) "/actions"
       | PutEvents -> (Format.kasprintf Uri.of_string) "/events"
       | PutItems -> (Format.kasprintf Uri.of_string) "/items"
       | PutUsers -> (Format.kasprintf Uri.of_string) "/users")
@@ -17,6 +27,52 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | PutActionInteractions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("trackingId",
+                           (StringType.to_value
+                              req.PutActionInteractionsRequest.trackingId));
+                      Some
+                        ("actionInteractions",
+                          (ActionInteractionsList.to_value
+                             req.PutActionInteractionsRequest.actionInteractions))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutActions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("datasetArn",
+                           (Arn.to_value req.PutActionsRequest.datasetArn));
+                      Some
+                        ("actions",
+                          (ActionList.to_value req.PutActionsRequest.actions))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutEvents ->
       let (headers, body) =
         let headers =
@@ -137,6 +193,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | PutActionInteractions ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutActions -> if is_success then Ok () else Error (parse_aws_error None)
   | PutEvents -> if is_success then Ok () else Error (parse_aws_error None)
   | PutItems -> if is_success then Ok () else Error (parse_aws_error None)
   | PutUsers -> if is_success then Ok () else Error (parse_aws_error None)

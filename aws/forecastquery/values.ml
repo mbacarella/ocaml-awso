@@ -69,9 +69,9 @@ module DataPoint =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?value ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" Double.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" Double.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?value ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -94,6 +94,9 @@ module TimeSeries =
   struct
     type nonrec t = DataPoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataPoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -137,6 +140,8 @@ module Predictions =
                     (fun x -> (TimeSeries.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -195,7 +200,7 @@ module Forecast =
       {
       predictions: Predictions.t option
         [@ocaml.doc
-          "The forecast. The string of the string-to-array map is one of the following values: p10 p50 p90"]}
+          "The forecast. The string of the string-to-array map is one of the following values: p10 p50 p90 The default setting is \\[\"0.1\", \"0.5\", \"0.9\"\\]. Use the optional ForecastTypes parameter of the CreateForecast operation to change the values. The values will vary depending on how this is set, with a minimum of 1 and a maximum of 5."]}
     let make ?predictions = fun () -> { predictions }
     let to_value x =
       structure_to_value
@@ -206,8 +211,8 @@ module Forecast =
         (Option.map ~f:Predictions.of_xml) (Xml.child xml_arg0 "Predictions") in
       make ?predictions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let predictions = field_map json "Predictions" Predictions.of_json in
+    let of_json json__ =
+      let predictions = field_map json__ "Predictions" Predictions.of_json in
       make ?predictions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -226,8 +231,8 @@ module InvalidInputException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value is invalid or is too long."]
@@ -245,8 +250,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The token is not valid. Tokens expire after 24 hours."]
@@ -264,8 +269,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -284,8 +289,8 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource is in use."]
@@ -303,31 +308,12 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "We can't find that resource. Check the information that you've provided and try again."]
-module Arn =
-  struct
-    type nonrec t = string
-    let context_ = "Arn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () ->
-                check_pattern i ~pattern:"arn:([a-z\\d-]+):forecast:.*:.*:.+"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Arn" j
-    let to_json = simple_to_json to_value
-  end
 module DateTime =
   struct
     type nonrec t = string
@@ -367,12 +353,33 @@ module Filters =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:AttributeName.of_string
         ~of_json:AttributeValue.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module LongArn =
+  struct
+    type nonrec t = string
+    let context_ = "LongArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:300) >>=
+             (fun () ->
+                check_pattern i ~pattern:"arn:([a-z\\d-]+):forecast:.*:.*:.+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LongArn" j
+    let to_json = simple_to_json to_value
   end
 module NextToken =
   struct
@@ -392,6 +399,166 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end
+module Arn =
+  struct
+    type nonrec t = string
+    let context_ = "Arn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i ~pattern:"arn:([a-z\\d-]+):forecast:.*:.*:.+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Arn" j
+    let to_json = simple_to_json to_value
+  end
+module QueryWhatIfForecastResponse =
+  struct
+    type nonrec t = {
+      forecast: Forecast.t option }
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?forecast = fun () -> { forecast }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Forecast", (Option.map x.forecast ~f:Forecast.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let forecast =
+        (Option.map ~f:Forecast.of_xml) (Xml.child xml_arg0 "Forecast") in
+      make ?forecast ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let forecast = field_map json__ "Forecast" Forecast.of_json in
+      make ?forecast ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a what-if forecast."]
+module QueryWhatIfForecastRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastArn: LongArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast to query."];
+      startDate: DateTime.t option
+        [@ocaml.doc
+          "The start date for the what-if forecast. Specify the date using this format: yyyy-MM-dd'T'HH:mm:ss (ISO 8601 format). For example, 2015-01-01T08:00:00."];
+      endDate: DateTime.t option
+        [@ocaml.doc
+          "The end date for the what-if forecast. Specify the date using this format: yyyy-MM-dd'T'HH:mm:ss (ISO 8601 format). For example, 2015-01-01T20:00:00."];
+      filters: Filters.t
+        [@ocaml.doc
+          "The filtering criteria to apply when retrieving the forecast. For example, to get the forecast for client_21 in the electricity usage dataset, specify the following: \\{\"item_id\" : \"client_21\"\\} To get the full what-if forecast, use the CreateForecastExportJob operation."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the result of the previous request was truncated, the response includes a NextToken. To retrieve the next set of results, use the token in the next request. Tokens expire after 24 hours."]}
+    let context_ = "QueryWhatIfForecastRequest"
+    let make ?startDate =
+      fun ?endDate ->
+        fun ?nextToken ->
+          fun ~whatIfForecastArn ->
+            fun ~filters ->
+              fun () ->
+                { startDate; endDate; nextToken; whatIfForecastArn; filters }
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastArn", (Some (LongArn.to_value x.whatIfForecastArn)));
+        ("StartDate", (Option.map x.startDate ~f:DateTime.to_value));
+        ("EndDate", (Option.map x.endDate ~f:DateTime.to_value));
+        ("Filters", (Some (Filters.to_value x.filters)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filters =
+        Filters.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Filters") in
+      let endDate =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "EndDate") in
+      let startDate =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "StartDate") in
+      let whatIfForecastArn =
+        LongArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfForecastArn") in
+      make ?nextToken ~filters ?endDate ?startDate ~whatIfForecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters = field_map_exn json__ "Filters" Filters.of_json in
+      let endDate = field_map json__ "EndDate" DateTime.of_json in
+      let startDate = field_map json__ "StartDate" DateTime.of_json in
+      let whatIfForecastArn =
+        field_map_exn json__ "WhatIfForecastArn" LongArn.of_json in
+      make ?nextToken ~filters ?endDate ?startDate ~whatIfForecastArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a what-if forecast."]
 module QueryForecastResponse =
   struct
     type nonrec t =
@@ -470,8 +637,8 @@ module QueryForecastResponse =
         (Option.map ~f:Forecast.of_xml) (Xml.child xml_arg0 "Forecast") in
       make ?forecast ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forecast = field_map json "Forecast" Forecast.of_json in
+    let of_json json__ =
+      let forecast = field_map json__ "Forecast" Forecast.of_json in
       make ?forecast ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -524,12 +691,12 @@ module QueryForecastRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ForecastArn") in
       make ?nextToken ~filters ?endDate ?startDate ~forecastArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filters = field_map_exn json "Filters" Filters.of_json in
-      let endDate = field_map json "EndDate" DateTime.of_json in
-      let startDate = field_map json "StartDate" DateTime.of_json in
-      let forecastArn = field_map_exn json "ForecastArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters = field_map_exn json__ "Filters" Filters.of_json in
+      let endDate = field_map json__ "EndDate" DateTime.of_json in
+      let startDate = field_map json__ "StartDate" DateTime.of_json in
+      let forecastArn = field_map_exn json__ "ForecastArn" Arn.of_json in
       make ?nextToken ~filters ?endDate ?startDate ~forecastArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

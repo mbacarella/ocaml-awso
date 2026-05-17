@@ -123,8 +123,7 @@ module Io : Awso.Http.Io.S with type 'a t := 'a Lwt.t = struct
       let headers = Cohttp.of_headers resp in
       let status = Cohttp.of_status resp in
       Cohttp.Body.to_string body
-      >|= fun body_str ->
-      Awso.Http.Response.make ~version ~headers ~body:body_str status
+      >|= fun body_str -> Awso.Http.Response.make ~version ~headers ~body:body_str status
     ;;
   end
 

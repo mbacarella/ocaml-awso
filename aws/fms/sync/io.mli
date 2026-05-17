@@ -10,6 +10,18 @@ val associate_third_party_firewall :
       AssociateThirdPartyFirewallRequest.t ->
         (AssociateThirdPartyFirewallResponse.t,
           AssociateThirdPartyFirewallResponse.error) Result.t
+val batch_associate_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchAssociateResourceRequest.t ->
+        (BatchAssociateResourceResponse.t,
+          BatchAssociateResourceResponse.error) Result.t
+val batch_disassociate_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchDisassociateResourceRequest.t ->
+        (BatchDisassociateResourceResponse.t,
+          BatchDisassociateResourceResponse.error) Result.t
 val delete_apps_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteAppsListRequest.t -> (unit, unit) Result.t
@@ -23,6 +35,9 @@ val delete_policy :
 val delete_protocols_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteProtocolsListRequest.t -> (unit, unit) Result.t
+val delete_resource_set :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteResourceSetRequest.t -> (unit, unit) Result.t
 val disassociate_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -38,6 +53,11 @@ val get_admin_account :
     ?cfg:Awso.Cfg.t ->
       GetAdminAccountRequest.t ->
         (GetAdminAccountResponse.t, GetAdminAccountResponse.error) Result.t
+val get_admin_scope :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAdminScopeRequest.t ->
+        (GetAdminScopeResponse.t, GetAdminScopeResponse.error) Result.t
 val get_apps_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -71,6 +91,11 @@ val get_protocols_list :
     ?cfg:Awso.Cfg.t ->
       GetProtocolsListRequest.t ->
         (GetProtocolsListResponse.t, GetProtocolsListResponse.error) Result.t
+val get_resource_set :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourceSetRequest.t ->
+        (GetResourceSetResponse.t, GetResourceSetResponse.error) Result.t
 val get_third_party_firewall_association_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -83,6 +108,18 @@ val get_violation_details :
       GetViolationDetailsRequest.t ->
         (GetViolationDetailsResponse.t, GetViolationDetailsResponse.error)
           Result.t
+val list_admin_accounts_for_organization :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAdminAccountsForOrganizationRequest.t ->
+        (ListAdminAccountsForOrganizationResponse.t,
+          ListAdminAccountsForOrganizationResponse.error) Result.t
+val list_admins_managing_account :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAdminsManagingAccountRequest.t ->
+        (ListAdminsManagingAccountResponse.t,
+          ListAdminsManagingAccountResponse.error) Result.t
 val list_apps_lists :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -94,6 +131,12 @@ val list_compliance_status :
       ListComplianceStatusRequest.t ->
         (ListComplianceStatusResponse.t, ListComplianceStatusResponse.error)
           Result.t
+val list_discovered_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDiscoveredResourcesRequest.t ->
+        (ListDiscoveredResourcesResponse.t,
+          ListDiscoveredResourcesResponse.error) Result.t
 val list_member_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -111,6 +154,17 @@ val list_protocols_lists :
       ListProtocolsListsRequest.t ->
         (ListProtocolsListsResponse.t, ListProtocolsListsResponse.error)
           Result.t
+val list_resource_set_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListResourceSetResourcesRequest.t ->
+        (ListResourceSetResourcesResponse.t,
+          ListResourceSetResourcesResponse.error) Result.t
+val list_resource_sets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListResourceSetsRequest.t ->
+        (ListResourceSetsResponse.t, ListResourceSetsResponse.error) Result.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -123,6 +177,9 @@ val list_third_party_firewall_firewall_policies :
       ListThirdPartyFirewallFirewallPoliciesRequest.t ->
         (ListThirdPartyFirewallFirewallPoliciesResponse.t,
           ListThirdPartyFirewallFirewallPoliciesResponse.error) Result.t
+val put_admin_account :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> PutAdminAccountRequest.t -> (unit, unit) Result.t
 val put_apps_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -142,6 +199,11 @@ val put_protocols_list :
     ?cfg:Awso.Cfg.t ->
       PutProtocolsListRequest.t ->
         (PutProtocolsListResponse.t, PutProtocolsListResponse.error) Result.t
+val put_resource_set :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourceSetRequest.t ->
+        (PutResourceSetResponse.t, PutResourceSetResponse.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

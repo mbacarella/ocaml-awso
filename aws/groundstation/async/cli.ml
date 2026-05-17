@@ -38,8 +38,7 @@ let cancel_contact =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and contactId =
-         flag "contact-id" (required string) ~doc:"STRING String" in
+       and contactId = flag "contact-id" (required string) ~doc:"STRING Uuid" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.cancel_contact (Values.CancelContactRequest.make ~contactId ())
@@ -56,15 +55,15 @@ let create_config =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and name = flag "name" (required string) ~doc:"STRING SafeName"
        and configData =
-         flag "config-data" (required json_arg) ~doc:"JSON ConfigTypeData"
-       and name = flag "name" (required string) ~doc:"STRING SafeName" in
+         flag "config-data" (required json_arg) ~doc:"JSON ConfigTypeData" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_config
            (Values.CreateConfigRequest.make
-              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
-              ~configData:(Values.ConfigTypeData.of_json configData) ~name ())
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~name
+              ~configData:(Values.ConfigTypeData.of_json configData) ())
            (Some Values.ConfigIdResponse.to_json)
            (Some Values.ConfigIdResponse.error_to_json)])
 let create_dataflow_endpoint_group =
@@ -78,6 +77,12 @@ let create_dataflow_endpoint_group =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and contactPrePassDurationSeconds =
+         flag "contact-pre-pass-duration-seconds" (optional int)
+           ~doc:"INT DataflowEndpointGroupDurationInSeconds"
+       and contactPostPassDurationSeconds =
+         flag "contact-post-pass-duration-seconds" (optional int)
+           ~doc:"INT DataflowEndpointGroupDurationInSeconds"
        and endpointDetails =
          flag "endpoint-details" (required json_arg)
            ~doc:"JSON EndpointDetailsList" in
@@ -86,10 +91,75 @@ let create_dataflow_endpoint_group =
            Io.create_dataflow_endpoint_group
            (Values.CreateDataflowEndpointGroupRequest.make
               ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds
               ~endpointDetails:(Values.EndpointDetailsList.of_json
                                   endpointDetails) ())
            (Some Values.DataflowEndpointGroupIdResponse.to_json)
            (Some Values.DataflowEndpointGroupIdResponse.error_to_json)])
+let create_dataflow_endpoint_group_v2 =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and contactPrePassDurationSeconds =
+         flag "contact-pre-pass-duration-seconds" (optional int)
+           ~doc:"INT DataflowEndpointGroupDurationInSeconds"
+       and contactPostPassDurationSeconds =
+         flag "contact-post-pass-duration-seconds" (optional int)
+           ~doc:"INT DataflowEndpointGroupDurationInSeconds"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and endpoints =
+         flag "endpoints" (required json_arg)
+           ~doc:"JSON CreateEndpointDetailsList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_dataflow_endpoint_group_v2
+           (Values.CreateDataflowEndpointGroupV2Request.make
+              ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ~endpoints:(Values.CreateEndpointDetailsList.of_json endpoints)
+              ()) (Some Values.CreateDataflowEndpointGroupV2Response.to_json)
+           (Some Values.CreateDataflowEndpointGroupV2Response.error_to_json)])
+let create_ephemeris =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and satelliteId =
+         flag "satellite-id" (optional string) ~doc:"STRING Uuid"
+       and enabled = flag "enabled" (optional bool) ~doc:"BOOL Boolean"
+       and priority =
+         flag "priority" (optional int) ~doc:"INT CustomerEphemerisPriority"
+       and expirationTime =
+         flag "expiration-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and kmsKeyArn =
+         flag "kms-key-arn" (optional string) ~doc:"STRING KeyArn"
+       and ephemeris =
+         flag "ephemeris" (optional json_arg) ~doc:"JSON EphemerisData"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and name = flag "name" (required string) ~doc:"STRING SafeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_ephemeris
+           (Values.CreateEphemerisRequest.make ?satelliteId ?enabled
+              ?priority
+              ?expirationTime:(Option.map ~f:Values.Timestamp.of_json
+                                 expirationTime) ?kmsKeyArn
+              ?ephemeris:(Option.map ~f:Values.EphemerisData.of_json
+                            ephemeris)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~name ())
+           (Some Values.EphemerisIdResponse.to_json)
+           (Some Values.EphemerisIdResponse.error_to_json)])
 let create_mission_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -100,31 +170,42 @@ let create_mission_profile =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and contactPostPassDurationSeconds =
-         flag "contact-post-pass-duration-seconds" (optional int)
-           ~doc:"INT DurationInSeconds"
        and contactPrePassDurationSeconds =
          flag "contact-pre-pass-duration-seconds" (optional int)
            ~doc:"INT DurationInSeconds"
+       and contactPostPassDurationSeconds =
+         flag "contact-post-pass-duration-seconds" (optional int)
+           ~doc:"INT DurationInSeconds"
+       and telemetrySinkConfigArn =
+         flag "telemetry-sink-config-arn" (optional string)
+           ~doc:"STRING ConfigArn"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and streamsKmsKey =
+         flag "streams-kms-key" (optional json_arg) ~doc:"JSON KmsKey"
+       and streamsKmsRole =
+         flag "streams-kms-role" (optional string) ~doc:"STRING RoleArn"
+       and name = flag "name" (required string) ~doc:"STRING SafeName"
+       and minimumViableContactDurationSeconds =
+         flag "minimum-viable-contact-duration-seconds" (required int)
+           ~doc:"INT PositiveDurationInSeconds"
        and dataflowEdges =
          flag "dataflow-edges" (required json_arg)
            ~doc:"JSON DataflowEdgeList"
-       and minimumViableContactDurationSeconds =
-         flag "minimum-viable-contact-duration-seconds" (required int)
-           ~doc:"INT DurationInSeconds"
-       and name = flag "name" (required string) ~doc:"STRING SafeName"
        and trackingConfigArn =
          flag "tracking-config-arn" (required string) ~doc:"STRING ConfigArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_mission_profile
            (Values.CreateMissionProfileRequest.make
-              ?contactPostPassDurationSeconds ?contactPrePassDurationSeconds
+              ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds
+              ?telemetrySinkConfigArn
               ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?streamsKmsKey:(Option.map ~f:Values.KmsKey.of_json
+                                streamsKmsKey) ?streamsKmsRole ~name
+              ~minimumViableContactDurationSeconds
               ~dataflowEdges:(Values.DataflowEdgeList.of_json dataflowEdges)
-              ~minimumViableContactDurationSeconds ~name ~trackingConfigArn
-              ()) (Some Values.MissionProfileIdResponse.to_json)
+              ~trackingConfigArn ())
+           (Some Values.MissionProfileIdResponse.to_json)
            (Some Values.MissionProfileIdResponse.error_to_json)])
 let delete_config =
   Command.async ~summary:""
@@ -136,7 +217,7 @@ let delete_config =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and configId = flag "config-id" (required string) ~doc:"STRING String"
+       and configId = flag "config-id" (required string) ~doc:"STRING Uuid"
        and configType =
          flag "config-type" (required json_arg)
            ~doc:"JSON ConfigCapabilityType" in
@@ -159,7 +240,7 @@ let delete_dataflow_endpoint_group =
            ~doc:"URL override endpoint url"
        and dataflowEndpointGroupId =
          flag "dataflow-endpoint-group-id" (required string)
-           ~doc:"STRING String" in
+           ~doc:"STRING Uuid" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_dataflow_endpoint_group
@@ -167,6 +248,24 @@ let delete_dataflow_endpoint_group =
               ~dataflowEndpointGroupId ())
            (Some Values.DataflowEndpointGroupIdResponse.to_json)
            (Some Values.DataflowEndpointGroupIdResponse.error_to_json)])
+let delete_ephemeris =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ephemerisId =
+         flag "ephemeris-id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_ephemeris
+           (Values.DeleteEphemerisRequest.make ~ephemerisId ())
+           (Some Values.EphemerisIdResponse.to_json)
+           (Some Values.EphemerisIdResponse.error_to_json)])
 let delete_mission_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -178,7 +277,7 @@ let delete_mission_profile =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and missionProfileId =
-         flag "mission-profile-id" (required string) ~doc:"STRING String" in
+         flag "mission-profile-id" (required string) ~doc:"STRING Uuid" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_mission_profile
@@ -195,14 +294,84 @@ let describe_contact =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and contactId =
-         flag "contact-id" (required string) ~doc:"STRING String" in
+       and contactId = flag "contact-id" (required string) ~doc:"STRING Uuid" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_contact
            (Values.DescribeContactRequest.make ~contactId ())
            (Some Values.DescribeContactResponse.to_json)
            (Some Values.DescribeContactResponse.error_to_json)])
+let describe_contact_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and contactId = flag "contact-id" (required string) ~doc:"STRING Uuid"
+       and versionId = flag "version-id" (required int) ~doc:"INT VersionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_contact_version
+           (Values.DescribeContactVersionRequest.make ~contactId ~versionId
+              ()) (Some Values.DescribeContactVersionResponse.to_json)
+           (Some Values.DescribeContactVersionResponse.error_to_json)])
+let describe_ephemeris =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ephemerisId =
+         flag "ephemeris-id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_ephemeris
+           (Values.DescribeEphemerisRequest.make ~ephemerisId ())
+           (Some Values.DescribeEphemerisResponse.to_json)
+           (Some Values.DescribeEphemerisResponse.error_to_json)])
+let get_agent_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and agentId = flag "agent-id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_agent_configuration
+           (Values.GetAgentConfigurationRequest.make ~agentId ())
+           (Some Values.GetAgentConfigurationResponse.to_json)
+           (Some Values.GetAgentConfigurationResponse.error_to_json)])
+let get_agent_task_response_url =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and agentId = flag "agent-id" (required string) ~doc:"STRING Uuid"
+       and taskId = flag "task-id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_agent_task_response_url
+           (Values.GetAgentTaskResponseUrlRequest.make ~agentId ~taskId ())
+           (Some Values.GetAgentTaskResponseUrlResponse.to_json)
+           (Some Values.GetAgentTaskResponseUrlResponse.error_to_json)])
 let get_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -213,7 +382,7 @@ let get_config =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and configId = flag "config-id" (required string) ~doc:"STRING String"
+       and configId = flag "config-id" (required string) ~doc:"STRING Uuid"
        and configType =
          flag "config-type" (required json_arg)
            ~doc:"JSON ConfigCapabilityType" in
@@ -236,7 +405,7 @@ let get_dataflow_endpoint_group =
            ~doc:"URL override endpoint url"
        and dataflowEndpointGroupId =
          flag "dataflow-endpoint-group-id" (required string)
-           ~doc:"STRING String" in
+           ~doc:"STRING Uuid" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_dataflow_endpoint_group
@@ -254,8 +423,8 @@ let get_minute_usage =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and month = flag "month" (required int) ~doc:"INT Integer"
-       and year = flag "year" (required int) ~doc:"INT Integer" in
+       and month = flag "month" (required int) ~doc:"INT Month"
+       and year = flag "year" (required int) ~doc:"INT Year" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_minute_usage
@@ -273,7 +442,7 @@ let get_mission_profile =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and missionProfileId =
-         flag "mission-profile-id" (required string) ~doc:"STRING String" in
+         flag "mission-profile-id" (required string) ~doc:"STRING Uuid" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_mission_profile
@@ -291,12 +460,35 @@ let get_satellite =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and satelliteId =
-         flag "satellite-id" (required string) ~doc:"STRING String" in
+         flag "satellite-id" (required string) ~doc:"STRING Uuid" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_satellite (Values.GetSatelliteRequest.make ~satelliteId ())
            (Some Values.GetSatelliteResponse.to_json)
            (Some Values.GetSatelliteResponse.error_to_json)])
+let list_antennas =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and groundStationId =
+         flag "ground-station-id" (required string)
+           ~doc:"STRING GroundStationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_antennas
+           (Values.ListAntennasRequest.make ?maxResults ?nextToken
+              ~groundStationId ()) (Some Values.ListAntennasResponse.to_json)
+           (Some Values.ListAntennasResponse.error_to_json)])
 let list_configs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -307,15 +499,38 @@ let list_configs =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_configs
            (Values.ListConfigsRequest.make ?maxResults ?nextToken ())
            (Some Values.ListConfigsResponse.to_json)
            (Some Values.ListConfigsResponse.error_to_json)])
+let list_contact_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and contactId = flag "contact-id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_contact_versions
+           (Values.ListContactVersionsRequest.make ?maxResults ?nextToken
+              ~contactId ())
+           (Some Values.ListContactVersionsResponse.to_json)
+           (Some Values.ListContactVersionsResponse.error_to_json)])
 let list_contacts =
   Command.async ~summary:""
     ([%map_open.Command
@@ -326,30 +541,36 @@ let list_contacts =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and groundStation =
-         flag "ground-station" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+         flag "ground-station" (optional string)
+           ~doc:"STRING GroundStationName"
+       and satelliteArn =
+         flag "satellite-arn" (optional string) ~doc:"STRING satelliteArn"
        and missionProfileArn =
          flag "mission-profile-arn" (optional string)
            ~doc:"STRING MissionProfileArn"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and satelliteArn =
-         flag "satellite-arn" (optional string) ~doc:"STRING satelliteArn"
-       and endTime =
-         flag "end-time" (required json_arg) ~doc:"JSON Timestamp"
+       and ephemeris =
+         flag "ephemeris" (optional json_arg) ~doc:"JSON EphemerisFilter"
+       and statusList =
+         flag "status-list" (required json_arg) ~doc:"JSON StatusList"
        and startTime =
          flag "start-time" (required json_arg) ~doc:"JSON Timestamp"
-       and statusList =
-         flag "status-list" (required json_arg) ~doc:"JSON StatusList" in
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON Timestamp" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_contacts
-           (Values.ListContactsRequest.make ?groundStation ?maxResults
-              ?missionProfileArn ?nextToken ?satelliteArn
-              ~endTime:(Values.Timestamp.of_json endTime)
+           (Values.ListContactsRequest.make ?maxResults ?nextToken
+              ?groundStation ?satelliteArn ?missionProfileArn
+              ?ephemeris:(Option.map ~f:Values.EphemerisFilter.of_json
+                            ephemeris)
+              ~statusList:(Values.StatusList.of_json statusList)
               ~startTime:(Values.Timestamp.of_json startTime)
-              ~statusList:(Values.StatusList.of_json statusList) ())
+              ~endTime:(Values.Timestamp.of_json endTime) ())
            (Some Values.ListContactsResponse.to_json)
            (Some Values.ListContactsResponse.error_to_json)])
 let list_dataflow_endpoint_groups =
@@ -362,9 +583,10 @@ let list_dataflow_endpoint_groups =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_dataflow_endpoint_groups
@@ -372,6 +594,83 @@ let list_dataflow_endpoint_groups =
               ?nextToken ())
            (Some Values.ListDataflowEndpointGroupsResponse.to_json)
            (Some Values.ListDataflowEndpointGroupsResponse.error_to_json)])
+let list_ephemerides =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and satelliteId =
+         flag "satellite-id" (optional string) ~doc:"STRING Uuid"
+       and ephemerisType =
+         flag "ephemeris-type" (optional json_arg) ~doc:"JSON EphemerisType"
+       and statusList =
+         flag "status-list" (optional json_arg)
+           ~doc:"JSON EphemerisStatusList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON Timestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_ephemerides
+           (Values.ListEphemeridesRequest.make ?satelliteId
+              ?ephemerisType:(Option.map ~f:Values.EphemerisType.of_json
+                                ephemerisType)
+              ?statusList:(Option.map ~f:Values.EphemerisStatusList.of_json
+                             statusList) ?maxResults ?nextToken
+              ~startTime:(Values.Timestamp.of_json startTime)
+              ~endTime:(Values.Timestamp.of_json endTime) ())
+           (Some Values.ListEphemeridesResponse.to_json)
+           (Some Values.ListEphemeridesResponse.error_to_json)])
+let list_ground_station_reservations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reservationTypes =
+         flag "reservation-types" (optional json_arg)
+           ~doc:"JSON ReservationTypeFilterList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and groundStationId =
+         flag "ground-station-id" (required string)
+           ~doc:"STRING GroundStationName"
+       and startTime =
+         flag "start-time" (required json_arg)
+           ~doc:"JSON SyntheticTimestamp_epoch_seconds"
+       and endTime =
+         flag "end-time" (required json_arg)
+           ~doc:"JSON SyntheticTimestamp_epoch_seconds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_ground_station_reservations
+           (Values.ListGroundStationReservationsRequest.make
+              ?reservationTypes:(Option.map
+                                   ~f:Values.ReservationTypeFilterList.of_json
+                                   reservationTypes) ?maxResults ?nextToken
+              ~groundStationId
+              ~startTime:(Values.SyntheticTimestamp_epoch_seconds.of_json
+                            startTime)
+              ~endTime:(Values.SyntheticTimestamp_epoch_seconds.of_json
+                          endTime) ())
+           (Some Values.ListGroundStationReservationsResponse.to_json)
+           (Some Values.ListGroundStationReservationsResponse.error_to_json)])
 let list_ground_stations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -382,17 +681,17 @@ let list_ground_stations =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
        and satelliteId =
-         flag "satellite-id" (optional string) ~doc:"STRING String" in
+         flag "satellite-id" (optional string) ~doc:"STRING Uuid"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_ground_stations
-           (Values.ListGroundStationsRequest.make ?maxResults ?nextToken
-              ?satelliteId ())
-           (Some Values.ListGroundStationsResponse.to_json)
+           (Values.ListGroundStationsRequest.make ?satelliteId ?maxResults
+              ?nextToken ()) (Some Values.ListGroundStationsResponse.to_json)
            (Some Values.ListGroundStationsResponse.error_to_json)])
 let list_mission_profiles =
   Command.async ~summary:""
@@ -404,9 +703,10 @@ let list_mission_profiles =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_mission_profiles
@@ -423,9 +723,10 @@ let list_satellites =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_satellites
@@ -443,14 +744,14 @@ let list_tags_for_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING String" in
+         flag "resource-arn" (required string) ~doc:"STRING AnyArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_tags_for_resource
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
-let reserve_contact =
+let register_agent =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -461,25 +762,55 @@ let reserve_contact =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
-       and endTime =
-         flag "end-time" (required json_arg) ~doc:"JSON Timestamp"
-       and groundStation =
-         flag "ground-station" (required string) ~doc:"STRING String"
+       and discoveryData =
+         flag "discovery-data" (required json_arg) ~doc:"JSON DiscoveryData"
+       and agentDetails =
+         flag "agent-details" (required json_arg) ~doc:"JSON AgentDetails" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.register_agent
+           (Values.RegisterAgentRequest.make
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ~discoveryData:(Values.DiscoveryData.of_json discoveryData)
+              ~agentDetails:(Values.AgentDetails.of_json agentDetails) ())
+           (Some Values.RegisterAgentResponse.to_json)
+           (Some Values.RegisterAgentResponse.error_to_json)])
+let reserve_contact =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and satelliteArn =
+         flag "satellite-arn" (optional string) ~doc:"STRING satelliteArn"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and trackingOverrides =
+         flag "tracking-overrides" (optional json_arg)
+           ~doc:"JSON TrackingOverrides"
        and missionProfileArn =
          flag "mission-profile-arn" (required string)
            ~doc:"STRING MissionProfileArn"
-       and satelliteArn =
-         flag "satellite-arn" (required string) ~doc:"STRING satelliteArn"
        and startTime =
-         flag "start-time" (required json_arg) ~doc:"JSON Timestamp" in
+         flag "start-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON Timestamp"
+       and groundStation =
+         flag "ground-station" (required string)
+           ~doc:"STRING GroundStationName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.reserve_contact
-           (Values.ReserveContactRequest.make
+           (Values.ReserveContactRequest.make ?satelliteArn
               ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
-              ~endTime:(Values.Timestamp.of_json endTime) ~groundStation
-              ~missionProfileArn ~satelliteArn
-              ~startTime:(Values.Timestamp.of_json startTime) ())
+              ?trackingOverrides:(Option.map
+                                    ~f:Values.TrackingOverrides.of_json
+                                    trackingOverrides) ~missionProfileArn
+              ~startTime:(Values.Timestamp.of_json startTime)
+              ~endTime:(Values.Timestamp.of_json endTime) ~groundStation ())
            (Some Values.ContactIdResponse.to_json)
            (Some Values.ContactIdResponse.error_to_json)])
 let tag_resource =
@@ -493,7 +824,7 @@ let tag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING String"
+         flag "resource-arn" (required string) ~doc:"STRING AnyArn"
        and tags = flag "tags" (required json_arg) ~doc:"JSON TagsMap" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -513,7 +844,7 @@ let untag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING String"
+         flag "resource-arn" (required string) ~doc:"STRING AnyArn"
        and tagKeys = flag "tag-keys" (required json_arg) ~doc:"JSON TagKeys" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -522,6 +853,34 @@ let untag_resource =
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_agent_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and agentId = flag "agent-id" (required string) ~doc:"STRING Uuid"
+       and taskId = flag "task-id" (required string) ~doc:"STRING Uuid"
+       and aggregateStatus =
+         flag "aggregate-status" (required json_arg)
+           ~doc:"JSON AggregateStatus"
+       and componentStatuses =
+         flag "component-statuses" (required json_arg)
+           ~doc:"JSON ComponentStatusList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_agent_status
+           (Values.UpdateAgentStatusRequest.make ~agentId ~taskId
+              ~aggregateStatus:(Values.AggregateStatus.of_json
+                                  aggregateStatus)
+              ~componentStatuses:(Values.ComponentStatusList.of_json
+                                    componentStatuses) ())
+           (Some Values.UpdateAgentStatusResponse.to_json)
+           (Some Values.UpdateAgentStatusResponse.error_to_json)])
 let update_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -532,22 +891,70 @@ let update_config =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and configData =
-         flag "config-data" (required json_arg) ~doc:"JSON ConfigTypeData"
-       and configId = flag "config-id" (required string) ~doc:"STRING String"
+       and configId = flag "config-id" (required string) ~doc:"STRING Uuid"
+       and name = flag "name" (required string) ~doc:"STRING SafeName"
        and configType =
          flag "config-type" (required json_arg)
            ~doc:"JSON ConfigCapabilityType"
-       and name = flag "name" (required string) ~doc:"STRING SafeName" in
+       and configData =
+         flag "config-data" (required json_arg) ~doc:"JSON ConfigTypeData" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_config
-           (Values.UpdateConfigRequest.make
-              ~configData:(Values.ConfigTypeData.of_json configData)
-              ~configId
+           (Values.UpdateConfigRequest.make ~configId ~name
               ~configType:(Values.ConfigCapabilityType.of_json configType)
-              ~name ()) (Some Values.ConfigIdResponse.to_json)
+              ~configData:(Values.ConfigTypeData.of_json configData) ())
+           (Some Values.ConfigIdResponse.to_json)
            (Some Values.ConfigIdResponse.error_to_json)])
+let update_contact =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and trackingOverrides =
+         flag "tracking-overrides" (optional json_arg)
+           ~doc:"JSON TrackingOverrides"
+       and satelliteArn =
+         flag "satellite-arn" (optional string) ~doc:"STRING satelliteArn"
+       and contactId = flag "contact-id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_contact
+           (Values.UpdateContactRequest.make ?clientToken
+              ?trackingOverrides:(Option.map
+                                    ~f:Values.TrackingOverrides.of_json
+                                    trackingOverrides) ?satelliteArn
+              ~contactId ()) (Some Values.UpdateContactResponse.to_json)
+           (Some Values.UpdateContactResponse.error_to_json)])
+let update_ephemeris =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING SafeName"
+       and priority =
+         flag "priority" (optional int) ~doc:"INT EphemerisPriority"
+       and ephemerisId =
+         flag "ephemeris-id" (required string) ~doc:"STRING Uuid"
+       and enabled = flag "enabled" (required bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_ephemeris
+           (Values.UpdateEphemerisRequest.make ?name ?priority ~ephemerisId
+              ~enabled ()) (Some Values.EphemerisIdResponse.to_json)
+           (Some Values.EphemerisIdResponse.error_to_json)])
 let update_mission_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -558,31 +965,41 @@ let update_mission_profile =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and contactPostPassDurationSeconds =
-         flag "contact-post-pass-duration-seconds" (optional int)
-           ~doc:"INT DurationInSeconds"
+       and name = flag "name" (optional string) ~doc:"STRING SafeName"
        and contactPrePassDurationSeconds =
          flag "contact-pre-pass-duration-seconds" (optional int)
            ~doc:"INT DurationInSeconds"
+       and contactPostPassDurationSeconds =
+         flag "contact-post-pass-duration-seconds" (optional int)
+           ~doc:"INT DurationInSeconds"
+       and minimumViableContactDurationSeconds =
+         flag "minimum-viable-contact-duration-seconds" (optional int)
+           ~doc:"INT PositiveDurationInSeconds"
        and dataflowEdges =
          flag "dataflow-edges" (optional json_arg)
            ~doc:"JSON DataflowEdgeList"
-       and minimumViableContactDurationSeconds =
-         flag "minimum-viable-contact-duration-seconds" (optional int)
-           ~doc:"INT DurationInSeconds"
-       and name = flag "name" (optional string) ~doc:"STRING SafeName"
        and trackingConfigArn =
          flag "tracking-config-arn" (optional string) ~doc:"STRING ConfigArn"
+       and telemetrySinkConfigArn =
+         flag "telemetry-sink-config-arn" (optional string)
+           ~doc:"STRING ConfigArn"
+       and streamsKmsKey =
+         flag "streams-kms-key" (optional json_arg) ~doc:"JSON KmsKey"
+       and streamsKmsRole =
+         flag "streams-kms-role" (optional string) ~doc:"STRING RoleArn"
        and missionProfileId =
-         flag "mission-profile-id" (required string) ~doc:"STRING String" in
+         flag "mission-profile-id" (required string) ~doc:"STRING Uuid" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_mission_profile
-           (Values.UpdateMissionProfileRequest.make
-              ?contactPostPassDurationSeconds ?contactPrePassDurationSeconds
+           (Values.UpdateMissionProfileRequest.make ?name
+              ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds
+              ?minimumViableContactDurationSeconds
               ?dataflowEdges:(Option.map ~f:Values.DataflowEdgeList.of_json
-                                dataflowEdges)
-              ?minimumViableContactDurationSeconds ?name ?trackingConfigArn
+                                dataflowEdges) ?trackingConfigArn
+              ?telemetrySinkConfigArn
+              ?streamsKmsKey:(Option.map ~f:Values.KmsKey.of_json
+                                streamsKmsKey) ?streamsKmsRole
               ~missionProfileId ())
            (Some Values.MissionProfileIdResponse.to_json)
            (Some Values.MissionProfileIdResponse.error_to_json)])
@@ -592,25 +1009,40 @@ let main =
     [("cancel-contact", cancel_contact);
     ("create-config", create_config);
     ("create-dataflow-endpoint-group", create_dataflow_endpoint_group);
+    ("create-dataflow-endpoint-group-v2", create_dataflow_endpoint_group_v2);
+    ("create-ephemeris", create_ephemeris);
     ("create-mission-profile", create_mission_profile);
     ("delete-config", delete_config);
     ("delete-dataflow-endpoint-group", delete_dataflow_endpoint_group);
+    ("delete-ephemeris", delete_ephemeris);
     ("delete-mission-profile", delete_mission_profile);
     ("describe-contact", describe_contact);
+    ("describe-contact-version", describe_contact_version);
+    ("describe-ephemeris", describe_ephemeris);
+    ("get-agent-configuration", get_agent_configuration);
+    ("get-agent-task-response-url", get_agent_task_response_url);
     ("get-config", get_config);
     ("get-dataflow-endpoint-group", get_dataflow_endpoint_group);
     ("get-minute-usage", get_minute_usage);
     ("get-mission-profile", get_mission_profile);
     ("get-satellite", get_satellite);
+    ("list-antennas", list_antennas);
     ("list-configs", list_configs);
+    ("list-contact-versions", list_contact_versions);
     ("list-contacts", list_contacts);
     ("list-dataflow-endpoint-groups", list_dataflow_endpoint_groups);
+    ("list-ephemerides", list_ephemerides);
+    ("list-ground-station-reservations", list_ground_station_reservations);
     ("list-ground-stations", list_ground_stations);
     ("list-mission-profiles", list_mission_profiles);
     ("list-satellites", list_satellites);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("register-agent", register_agent);
     ("reserve-contact", reserve_contact);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-agent-status", update_agent_status);
     ("update-config", update_config);
+    ("update-contact", update_contact);
+    ("update-ephemeris", update_ephemeris);
     ("update-mission-profile", update_mission_profile)]

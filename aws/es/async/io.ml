@@ -18,6 +18,10 @@ let add_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddTags input
 let associate_package ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociatePackage input
+let authorize_vpc_endpoint_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AuthorizeVpcEndpointAccess input
+let cancel_domain_config_change ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelDomainConfigChange input
 let cancel_elasticsearch_service_software_update ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelElasticsearchServiceSoftwareUpdate
     input
@@ -29,6 +33,8 @@ let create_outbound_cross_cluster_search_connection ?endpoint_url ?cfg input
     Endpoints.CreateOutboundCrossClusterSearchConnection input
 let create_package ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePackage input
+let create_vpc_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVpcEndpoint input
 let delete_elasticsearch_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteElasticsearchDomain input
 let delete_elasticsearch_service_role ?endpoint_url ?cfg input =
@@ -42,6 +48,8 @@ let delete_outbound_cross_cluster_search_connection ?endpoint_url ?cfg input
     Endpoints.DeleteOutboundCrossClusterSearchConnection input
 let delete_package ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePackage input
+let delete_vpc_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVpcEndpoint input
 let describe_domain_auto_tunes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDomainAutoTunes input
 let describe_domain_change_progress ?endpoint_url ?cfg input =
@@ -72,6 +80,8 @@ let describe_reserved_elasticsearch_instance_offerings ?endpoint_url ?cfg
 let describe_reserved_elasticsearch_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReservedElasticsearchInstances
     input
+let describe_vpc_endpoints ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVpcEndpoints input
 let dissociate_package ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DissociatePackage input
 let get_compatible_elasticsearch_versions ?endpoint_url ?cfg input =
@@ -94,6 +104,12 @@ let list_packages_for_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPackagesForDomain input
 let list_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTags input
+let list_vpc_endpoint_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVpcEndpointAccess input
+let list_vpc_endpoints ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVpcEndpoints input
+let list_vpc_endpoints_for_domain ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVpcEndpointsForDomain input
 let purchase_reserved_elasticsearch_instance_offering ?endpoint_url ?cfg
   input =
   eval ?endpoint_url ?cfg
@@ -103,6 +119,8 @@ let reject_inbound_cross_cluster_search_connection ?endpoint_url ?cfg input =
     input
 let remove_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveTags input
+let revoke_vpc_endpoint_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RevokeVpcEndpointAccess input
 let start_elasticsearch_service_software_update ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartElasticsearchServiceSoftwareUpdate
     input
@@ -110,5 +128,7 @@ let update_elasticsearch_domain_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateElasticsearchDomainConfig input
 let update_package ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePackage input
+let update_vpc_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateVpcEndpoint input
 let upgrade_elasticsearch_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpgradeElasticsearchDomain input

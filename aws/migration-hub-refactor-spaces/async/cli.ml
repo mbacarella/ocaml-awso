@@ -103,6 +103,9 @@ let create_route =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and defaultRoute =
+         flag "default-route" (optional json_arg)
+           ~doc:"JSON DefaultRouteInput"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and uriPathRoute =
          flag "uri-path-route" (optional json_arg)
@@ -121,6 +124,8 @@ let create_route =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_route
            (Values.CreateRouteRequest.make ?clientToken
+              ?defaultRoute:(Option.map ~f:Values.DefaultRouteInput.of_json
+                               defaultRoute)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?uriPathRoute:(Option.map ~f:Values.UriPathRouteInput.of_json
                                uriPathRoute) ~applicationIdentifier
@@ -596,6 +601,36 @@ let untag_resource =
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_route =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and activationState =
+         flag "activation-state" (required json_arg)
+           ~doc:"JSON RouteActivationState"
+       and applicationIdentifier =
+         flag "application-identifier" (required string)
+           ~doc:"STRING ApplicationId"
+       and environmentIdentifier =
+         flag "environment-identifier" (required string)
+           ~doc:"STRING EnvironmentId"
+       and routeIdentifier =
+         flag "route-identifier" (required string) ~doc:"STRING RouteId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_route
+           (Values.UpdateRouteRequest.make
+              ~activationState:(Values.RouteActivationState.of_json
+                                  activationState) ~applicationIdentifier
+              ~environmentIdentifier ~routeIdentifier ())
+           (Some Values.UpdateRouteResponse.to_json)
+           (Some Values.UpdateRouteResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -621,4 +656,5 @@ let main =
     ("list-tags-for-resource", list_tags_for_resource);
     ("put-resource-policy", put_resource_policy);
     ("tag-resource", tag_resource);
-    ("untag-resource", untag_resource)]
+    ("untag-resource", untag_resource);
+    ("update-route", update_route)]

@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let cancel_flow_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelFlowExecutions input
 let create_connector_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateConnectorProfile input
 let create_flow ?endpoint_url ?cfg input =
@@ -41,6 +43,8 @@ let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let register_connector ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterConnector input
+let reset_connector_metadata_cache ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ResetConnectorMetadataCache input
 let start_flow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartFlow input
 let stop_flow ?endpoint_url ?cfg input =
@@ -53,5 +57,7 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_connector_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateConnectorProfile input
+let update_connector_registration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateConnectorRegistration input
 let update_flow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFlow input

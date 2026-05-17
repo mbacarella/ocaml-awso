@@ -62,6 +62,8 @@ type ('i, 'o, 'e) t =
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
   | UpdateFileSystem: (UpdateFileSystemRequest.t, FileSystemDescription.t,
   FileSystemDescription.error) t 
+  | UpdateFileSystemProtection: (UpdateFileSystemProtectionRequest.t,
+  FileSystemProtectionDescription.t, FileSystemProtectionDescription.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateAccessPoint -> `POST
@@ -94,6 +96,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateFileSystem -> `PUT
+  | UpdateFileSystemProtection -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -126,10 +129,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/2015-02-01/mount-targets/%s"
             (MountTargetId.to_header x.DeleteMountTargetRequest.mountTargetId)
       | DeleteReplicationConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/2015-02-01/file-systems/%s/replication-configuration"
-            (FileSystemId.to_header
-               x.DeleteReplicationConfigurationRequest.sourceFileSystemId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2015-02-01/file-systems/%s/replication-configuration"
+               (FileSystemId.to_header
+                  x.DeleteReplicationConfigurationRequest.sourceFileSystemId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("deletionMode", (DeletionMode.to_header v)))
+                  x.deletionMode])
       | DeleteTags ->
           (Format.kasprintf Uri.of_string) "/2015-02-01/delete-tags/%s"
             (FileSystemId.to_header x.DeleteTagsRequest.fileSystemId)
@@ -264,7 +272,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some ("tagKeys", (TagKeys.to_header x.tagKeys))])
       | UpdateFileSystem ->
           (Format.kasprintf Uri.of_string) "/2015-02-01/file-systems/%s"
-            (FileSystemId.to_header x.UpdateFileSystemRequest.fileSystemId))
+            (FileSystemId.to_header x.UpdateFileSystemRequest.fileSystemId)
+      | UpdateFileSystemProtection ->
+          (Format.kasprintf Uri.of_string)
+            "/2015-02-01/file-systems/%s/protection"
+            (FileSystemId.to_header
+               x.UpdateFileSystemProtectionRequest.fileSystemId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -364,6 +377,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.CreateMountTargetRequest.subnetId));
                       Option.map req.CreateMountTargetRequest.ipAddress
                         ~f:(fun x -> ("IpAddress", (IpAddress.to_value x)));
+                      Option.map req.CreateMountTargetRequest.ipv6Address
+                        ~f:(fun x ->
+                              ("Ipv6Address", (Ipv6Address.to_value x)));
+                      Option.map req.CreateMountTargetRequest.ipAddressType
+                        ~f:(fun x ->
+                              ("IpAddressType", (IpAddressType.to_value x)));
                       Option.map req.CreateMountTargetRequest.securityGroups
                         ~f:(fun x ->
                               ("SecurityGroups", (SecurityGroups.to_value x)))])
@@ -518,6 +537,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFileSystem -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateFileSystemProtection ->
+      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -714,3 +735,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (FileSystemDescription.of_json (response_to_json resp))
       else Error (parse_aws_error (Some FileSystemDescription.error_of_json))
+  | UpdateFileSystemProtection ->
+      if is_success
+      then
+        Ok (FileSystemProtectionDescription.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some FileSystemProtectionDescription.error_of_json))

@@ -46,6 +46,71 @@ let accept_inbound_connection =
            (Values.AcceptInboundConnectionRequest.make ~connectionId ())
            (Some Values.AcceptInboundConnectionResponse.to_json)
            (Some Values.AcceptInboundConnectionResponse.error_to_json)])
+let add_data_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING DataSourceDescription"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and name = flag "name" (required string) ~doc:"STRING DataSourceName"
+       and dataSourceType =
+         flag "data-source-type" (required json_arg)
+           ~doc:"JSON DataSourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.add_data_source
+           (Values.AddDataSourceRequest.make ?description ~domainName ~name
+              ~dataSourceType:(Values.DataSourceType.of_json dataSourceType)
+              ()) (Some Values.AddDataSourceResponse.to_json)
+           (Some Values.AddDataSourceResponse.error_to_json)])
+let add_direct_query_data_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING DirectQueryDataSourceDescription"
+       and openSearchArns =
+         flag "open-search-arns" (optional json_arg)
+           ~doc:"JSON DirectQueryOpenSearchARNList"
+       and dataSourceAccessPolicy =
+         flag "data-source-access-policy" (optional string)
+           ~doc:"STRING PolicyDocument"
+       and tagList = flag "tag-list" (optional json_arg) ~doc:"JSON TagList"
+       and dataSourceName =
+         flag "data-source-name" (required string)
+           ~doc:"STRING DirectQueryDataSourceName"
+       and dataSourceType =
+         flag "data-source-type" (required json_arg)
+           ~doc:"JSON DirectQueryDataSourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.add_direct_query_data_source
+           (Values.AddDirectQueryDataSourceRequest.make ?description
+              ?openSearchArns:(Option.map
+                                 ~f:Values.DirectQueryOpenSearchARNList.of_json
+                                 openSearchArns) ?dataSourceAccessPolicy
+              ?tagList:(Option.map ~f:Values.TagList.of_json tagList)
+              ~dataSourceName
+              ~dataSourceType:(Values.DirectQueryDataSourceType.of_json
+                                 dataSourceType) ())
+           (Some Values.AddDirectQueryDataSourceResponse.to_json)
+           (Some Values.AddDirectQueryDataSourceResponse.error_to_json)])
 let add_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -73,6 +138,12 @@ let associate_package =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and prerequisitePackageIDList =
+         flag "prerequisite-package-i-d-list" (optional json_arg)
+           ~doc:"JSON PackageIDList"
+       and associationConfiguration =
+         flag "association-configuration" (optional json_arg)
+           ~doc:"JSON PackageAssociationConfiguration"
        and packageID =
          flag "package-i-d" (required string) ~doc:"STRING PackageID"
        and domainName =
@@ -80,9 +151,87 @@ let associate_package =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_package
-           (Values.AssociatePackageRequest.make ~packageID ~domainName ())
+           (Values.AssociatePackageRequest.make
+              ?prerequisitePackageIDList:(Option.map
+                                            ~f:Values.PackageIDList.of_json
+                                            prerequisitePackageIDList)
+              ?associationConfiguration:(Option.map
+                                           ~f:Values.PackageAssociationConfiguration.of_json
+                                           associationConfiguration)
+              ~packageID ~domainName ())
            (Some Values.AssociatePackageResponse.to_json)
            (Some Values.AssociatePackageResponse.error_to_json)])
+let associate_packages =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and packageList =
+         flag "package-list" (required json_arg)
+           ~doc:"JSON PackageDetailsForAssociationList"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_packages
+           (Values.AssociatePackagesRequest.make
+              ~packageList:(Values.PackageDetailsForAssociationList.of_json
+                              packageList) ~domainName ())
+           (Some Values.AssociatePackagesResponse.to_json)
+           (Some Values.AssociatePackagesResponse.error_to_json)])
+let authorize_vpc_endpoint_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and account =
+         flag "account" (optional string) ~doc:"STRING AWSAccount"
+       and service =
+         flag "service" (optional json_arg) ~doc:"JSON AWSServicePrincipal"
+       and serviceOptions =
+         flag "service-options" (optional json_arg)
+           ~doc:"JSON ServiceOptions"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.authorize_vpc_endpoint_access
+           (Values.AuthorizeVpcEndpointAccessRequest.make ?account
+              ?service:(Option.map ~f:Values.AWSServicePrincipal.of_json
+                          service)
+              ?serviceOptions:(Option.map ~f:Values.ServiceOptions.of_json
+                                 serviceOptions) ~domainName ())
+           (Some Values.AuthorizeVpcEndpointAccessResponse.to_json)
+           (Some Values.AuthorizeVpcEndpointAccessResponse.error_to_json)])
+let cancel_domain_config_change =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL DryRun"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_domain_config_change
+           (Values.CancelDomainConfigChangeRequest.make ?dryRun ~domainName
+              ()) (Some Values.CancelDomainConfigChangeResponse.to_json)
+           (Some Values.CancelDomainConfigChangeResponse.error_to_json)])
 let cancel_service_software_update =
   Command.async ~summary:""
     ([%map_open.Command
@@ -101,6 +250,43 @@ let cancel_service_software_update =
            (Values.CancelServiceSoftwareUpdateRequest.make ~domainName ())
            (Some Values.CancelServiceSoftwareUpdateResponse.to_json)
            (Some Values.CancelServiceSoftwareUpdateResponse.error_to_json)])
+let create_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and dataSources =
+         flag "data-sources" (optional json_arg) ~doc:"JSON DataSources"
+       and iamIdentityCenterOptions =
+         flag "iam-identity-center-options" (optional json_arg)
+           ~doc:"JSON IamIdentityCenterOptionsInput"
+       and appConfigs =
+         flag "app-configs" (optional json_arg) ~doc:"JSON AppConfigs"
+       and tagList = flag "tag-list" (optional json_arg) ~doc:"JSON TagList"
+       and kmsKeyArn =
+         flag "kms-key-arn" (optional string) ~doc:"STRING KmsKeyArn"
+       and name = flag "name" (required string) ~doc:"STRING ApplicationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_application
+           (Values.CreateApplicationRequest.make ?clientToken
+              ?dataSources:(Option.map ~f:Values.DataSources.of_json
+                              dataSources)
+              ?iamIdentityCenterOptions:(Option.map
+                                           ~f:Values.IamIdentityCenterOptionsInput.of_json
+                                           iamIdentityCenterOptions)
+              ?appConfigs:(Option.map ~f:Values.AppConfigs.of_json appConfigs)
+              ?tagList:(Option.map ~f:Values.TagList.of_json tagList)
+              ?kmsKeyArn ~name ())
+           (Some Values.CreateApplicationResponse.to_json)
+           (Some Values.CreateApplicationResponse.error_to_json)])
 let create_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -120,6 +306,9 @@ let create_domain =
        and accessPolicies =
          flag "access-policies" (optional string)
            ~doc:"STRING PolicyDocument"
+       and iPAddressType =
+         flag "i-p-address-type" (optional json_arg)
+           ~doc:"JSON IPAddressType"
        and snapshotOptions =
          flag "snapshot-options" (optional json_arg)
            ~doc:"JSON SnapshotOptions"
@@ -146,10 +335,28 @@ let create_domain =
        and advancedSecurityOptions =
          flag "advanced-security-options" (optional json_arg)
            ~doc:"JSON AdvancedSecurityOptionsInput"
+       and identityCenterOptions =
+         flag "identity-center-options" (optional json_arg)
+           ~doc:"JSON IdentityCenterOptionsInput"
        and tagList = flag "tag-list" (optional json_arg) ~doc:"JSON TagList"
        and autoTuneOptions =
          flag "auto-tune-options" (optional json_arg)
            ~doc:"JSON AutoTuneOptionsInput"
+       and offPeakWindowOptions =
+         flag "off-peak-window-options" (optional json_arg)
+           ~doc:"JSON OffPeakWindowOptions"
+       and softwareUpdateOptions =
+         flag "software-update-options" (optional json_arg)
+           ~doc:"JSON SoftwareUpdateOptions"
+       and aIMLOptions =
+         flag "a-i-m-l-options" (optional json_arg)
+           ~doc:"JSON AIMLOptionsInput"
+       and deploymentStrategyOptions =
+         flag "deployment-strategy-options" (optional json_arg)
+           ~doc:"JSON DeploymentStrategyOptions"
+       and automatedSnapshotPauseOptions =
+         flag "automated-snapshot-pause-options" (optional json_arg)
+           ~doc:"JSON AutomatedSnapshotPauseRequestOptions"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName" in
        fun () ->
@@ -160,6 +367,8 @@ let create_domain =
                                 clusterConfig)
               ?eBSOptions:(Option.map ~f:Values.EBSOptions.of_json eBSOptions)
               ?accessPolicies
+              ?iPAddressType:(Option.map ~f:Values.IPAddressType.of_json
+                                iPAddressType)
               ?snapshotOptions:(Option.map ~f:Values.SnapshotOptions.of_json
                                   snapshotOptions)
               ?vPCOptions:(Option.map ~f:Values.VPCOptions.of_json vPCOptions)
@@ -182,12 +391,52 @@ let create_domain =
               ?advancedSecurityOptions:(Option.map
                                           ~f:Values.AdvancedSecurityOptionsInput.of_json
                                           advancedSecurityOptions)
+              ?identityCenterOptions:(Option.map
+                                        ~f:Values.IdentityCenterOptionsInput.of_json
+                                        identityCenterOptions)
               ?tagList:(Option.map ~f:Values.TagList.of_json tagList)
               ?autoTuneOptions:(Option.map
                                   ~f:Values.AutoTuneOptionsInput.of_json
-                                  autoTuneOptions) ~domainName ())
-           (Some Values.CreateDomainResponse.to_json)
+                                  autoTuneOptions)
+              ?offPeakWindowOptions:(Option.map
+                                       ~f:Values.OffPeakWindowOptions.of_json
+                                       offPeakWindowOptions)
+              ?softwareUpdateOptions:(Option.map
+                                        ~f:Values.SoftwareUpdateOptions.of_json
+                                        softwareUpdateOptions)
+              ?aIMLOptions:(Option.map ~f:Values.AIMLOptionsInput.of_json
+                              aIMLOptions)
+              ?deploymentStrategyOptions:(Option.map
+                                            ~f:Values.DeploymentStrategyOptions.of_json
+                                            deploymentStrategyOptions)
+              ?automatedSnapshotPauseOptions:(Option.map
+                                                ~f:Values.AutomatedSnapshotPauseRequestOptions.of_json
+                                                automatedSnapshotPauseOptions)
+              ~domainName ()) (Some Values.CreateDomainResponse.to_json)
            (Some Values.CreateDomainResponse.error_to_json)])
+let create_index =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and indexName =
+         flag "index-name" (required string) ~doc:"STRING IndexName"
+       and indexSchema =
+         flag "index-schema" (required json_arg) ~doc:"JSON IndexSchema" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_index
+           (Values.CreateIndexRequest.make ~domainName ~indexName
+              ~indexSchema:(Values.IndexSchema.of_json indexSchema) ())
+           (Some Values.CreateIndexResponse.to_json)
+           (Some Values.CreateIndexResponse.error_to_json)])
 let create_outbound_connection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -198,6 +447,12 @@ let create_outbound_connection =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and connectionMode =
+         flag "connection-mode" (optional json_arg)
+           ~doc:"JSON ConnectionMode"
+       and connectionProperties =
+         flag "connection-properties" (optional json_arg)
+           ~doc:"JSON ConnectionProperties"
        and localDomainInfo =
          flag "local-domain-info" (required json_arg)
            ~doc:"JSON DomainInformationContainer"
@@ -211,6 +466,11 @@ let create_outbound_connection =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_outbound_connection
            (Values.CreateOutboundConnectionRequest.make
+              ?connectionMode:(Option.map ~f:Values.ConnectionMode.of_json
+                                 connectionMode)
+              ?connectionProperties:(Option.map
+                                       ~f:Values.ConnectionProperties.of_json
+                                       connectionProperties)
               ~localDomainInfo:(Values.DomainInformationContainer.of_json
                                   localDomainInfo)
               ~remoteDomainInfo:(Values.DomainInformationContainer.of_json
@@ -230,6 +490,17 @@ let create_package =
        and packageDescription =
          flag "package-description" (optional string)
            ~doc:"STRING PackageDescription"
+       and packageConfiguration =
+         flag "package-configuration" (optional json_arg)
+           ~doc:"JSON PackageConfiguration"
+       and engineVersion =
+         flag "engine-version" (optional string) ~doc:"STRING EngineVersion"
+       and packageVendingOptions =
+         flag "package-vending-options" (optional json_arg)
+           ~doc:"JSON PackageVendingOptions"
+       and packageEncryptionOptions =
+         flag "package-encryption-options" (optional json_arg)
+           ~doc:"JSON PackageEncryptionOptions"
        and packageName =
          flag "package-name" (required string) ~doc:"STRING PackageName"
        and packageType =
@@ -239,11 +510,98 @@ let create_package =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_package
-           (Values.CreatePackageRequest.make ?packageDescription ~packageName
+           (Values.CreatePackageRequest.make ?packageDescription
+              ?packageConfiguration:(Option.map
+                                       ~f:Values.PackageConfiguration.of_json
+                                       packageConfiguration) ?engineVersion
+              ?packageVendingOptions:(Option.map
+                                        ~f:Values.PackageVendingOptions.of_json
+                                        packageVendingOptions)
+              ?packageEncryptionOptions:(Option.map
+                                           ~f:Values.PackageEncryptionOptions.of_json
+                                           packageEncryptionOptions)
+              ~packageName
               ~packageType:(Values.PackageType.of_json packageType)
               ~packageSource:(Values.PackageSource.of_json packageSource) ())
            (Some Values.CreatePackageResponse.to_json)
            (Some Values.CreatePackageResponse.error_to_json)])
+let create_vpc_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and domainArn =
+         flag "domain-arn" (required string) ~doc:"STRING DomainArn"
+       and vpcOptions =
+         flag "vpc-options" (required json_arg) ~doc:"JSON VPCOptions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_vpc_endpoint
+           (Values.CreateVpcEndpointRequest.make ?clientToken ~domainArn
+              ~vpcOptions:(Values.VPCOptions.of_json vpcOptions) ())
+           (Some Values.CreateVpcEndpointResponse.to_json)
+           (Some Values.CreateVpcEndpointResponse.error_to_json)])
+let delete_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_application
+           (Values.DeleteApplicationRequest.make ~id ())
+           (Some Values.DeleteApplicationResponse.to_json)
+           (Some Values.DeleteApplicationResponse.error_to_json)])
+let delete_data_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and name = flag "name" (required string) ~doc:"STRING DataSourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_data_source
+           (Values.DeleteDataSourceRequest.make ~domainName ~name ())
+           (Some Values.DeleteDataSourceResponse.to_json)
+           (Some Values.DeleteDataSourceResponse.error_to_json)])
+let delete_direct_query_data_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataSourceName =
+         flag "data-source-name" (required string)
+           ~doc:"STRING DirectQueryDataSourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_direct_query_data_source
+           (Values.DeleteDirectQueryDataSourceRequest.make ~dataSourceName ())
+           None None])
 let delete_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -279,6 +637,26 @@ let delete_inbound_connection =
            (Values.DeleteInboundConnectionRequest.make ~connectionId ())
            (Some Values.DeleteInboundConnectionResponse.to_json)
            (Some Values.DeleteInboundConnectionResponse.error_to_json)])
+let delete_index =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and indexName =
+         flag "index-name" (required string) ~doc:"STRING IndexName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_index
+           (Values.DeleteIndexRequest.make ~domainName ~indexName ())
+           (Some Values.DeleteIndexResponse.to_json)
+           (Some Values.DeleteIndexResponse.error_to_json)])
 let delete_outbound_connection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -314,6 +692,46 @@ let delete_package =
            Io.delete_package (Values.DeletePackageRequest.make ~packageID ())
            (Some Values.DeletePackageResponse.to_json)
            (Some Values.DeletePackageResponse.error_to_json)])
+let delete_vpc_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcEndpointId =
+         flag "vpc-endpoint-id" (required string) ~doc:"STRING VpcEndpointId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_endpoint
+           (Values.DeleteVpcEndpointRequest.make ~vpcEndpointId ())
+           (Some Values.DeleteVpcEndpointResponse.to_json)
+           (Some Values.DeleteVpcEndpointResponse.error_to_json)])
+let deregister_capability =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationId =
+         flag "application-id" (required string) ~doc:"STRING ApplicationId"
+       and capabilityName =
+         flag "capability-name" (required string)
+           ~doc:"STRING CapabilityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.deregister_capability
+           (Values.DeregisterCapabilityRequest.make ~applicationId
+              ~capabilityName ())
+           (Some Values.DeregisterCapabilityResponse.to_json)
+           (Some Values.DeregisterCapabilityResponse.error_to_json)])
 let describe_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -393,6 +811,42 @@ let describe_domain_config =
            (Values.DescribeDomainConfigRequest.make ~domainName ())
            (Some Values.DescribeDomainConfigResponse.to_json)
            (Some Values.DescribeDomainConfigResponse.error_to_json)])
+let describe_domain_health =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_domain_health
+           (Values.DescribeDomainHealthRequest.make ~domainName ())
+           (Some Values.DescribeDomainHealthResponse.to_json)
+           (Some Values.DescribeDomainHealthResponse.error_to_json)])
+let describe_domain_nodes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_domain_nodes
+           (Values.DescribeDomainNodesRequest.make ~domainName ())
+           (Some Values.DescribeDomainNodesResponse.to_json)
+           (Some Values.DescribeDomainNodesResponse.error_to_json)])
 let describe_domains =
   Command.async ~summary:""
     ([%map_open.Command
@@ -412,6 +866,28 @@ let describe_domains =
               ~domainNames:(Values.DomainNameList.of_json domainNames) ())
            (Some Values.DescribeDomainsResponse.to_json)
            (Some Values.DescribeDomainsResponse.error_to_json)])
+let describe_dry_run_progress =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRunId = flag "dry-run-id" (optional string) ~doc:"STRING GUID"
+       and loadDryRunConfig =
+         flag "load-dry-run-config" (optional bool) ~doc:"BOOL Boolean"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_dry_run_progress
+           (Values.DescribeDryRunProgressRequest.make ?dryRunId
+              ?loadDryRunConfig ~domainName ())
+           (Some Values.DescribeDryRunProgressResponse.to_json)
+           (Some Values.DescribeDryRunProgressResponse.error_to_json)])
 let describe_inbound_connections =
   Command.async ~summary:""
     ([%map_open.Command
@@ -436,6 +912,28 @@ let describe_inbound_connections =
               ?maxResults ?nextToken ())
            (Some Values.DescribeInboundConnectionsResponse.to_json)
            (Some Values.DescribeInboundConnectionsResponse.error_to_json)])
+let describe_insight_details =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and showHtmlContent =
+         flag "show-html-content" (optional bool) ~doc:"BOOL Boolean"
+       and entity =
+         flag "entity" (required json_arg) ~doc:"JSON InsightEntity"
+       and insightId = flag "insight-id" (required string) ~doc:"STRING GUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_insight_details
+           (Values.DescribeInsightDetailsRequest.make ?showHtmlContent
+              ~entity:(Values.InsightEntity.of_json entity) ~insightId ())
+           (Some Values.DescribeInsightDetailsResponse.to_json)
+           (Some Values.DescribeInsightDetailsResponse.error_to_json)])
 let describe_instance_type_limits =
   Command.async ~summary:""
     ([%map_open.Command
@@ -559,6 +1057,27 @@ let describe_reserved_instances =
               ?maxResults ?nextToken ())
            (Some Values.DescribeReservedInstancesResponse.to_json)
            (Some Values.DescribeReservedInstancesResponse.error_to_json)])
+let describe_vpc_endpoints =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcEndpointIds =
+         flag "vpc-endpoint-ids" (required json_arg)
+           ~doc:"JSON VpcEndpointIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_vpc_endpoints
+           (Values.DescribeVpcEndpointsRequest.make
+              ~vpcEndpointIds:(Values.VpcEndpointIdList.of_json
+                                 vpcEndpointIds) ())
+           (Some Values.DescribeVpcEndpointsResponse.to_json)
+           (Some Values.DescribeVpcEndpointsResponse.error_to_json)])
 let dissociate_package =
   Command.async ~summary:""
     ([%map_open.Command
@@ -579,6 +1098,65 @@ let dissociate_package =
            (Values.DissociatePackageRequest.make ~packageID ~domainName ())
            (Some Values.DissociatePackageResponse.to_json)
            (Some Values.DissociatePackageResponse.error_to_json)])
+let dissociate_packages =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and packageList =
+         flag "package-list" (required json_arg) ~doc:"JSON PackageIDList"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.dissociate_packages
+           (Values.DissociatePackagesRequest.make
+              ~packageList:(Values.PackageIDList.of_json packageList)
+              ~domainName ())
+           (Some Values.DissociatePackagesResponse.to_json)
+           (Some Values.DissociatePackagesResponse.error_to_json)])
+let get_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_application (Values.GetApplicationRequest.make ~id ())
+           (Some Values.GetApplicationResponse.to_json)
+           (Some Values.GetApplicationResponse.error_to_json)])
+let get_capability =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationId =
+         flag "application-id" (required string) ~doc:"STRING ApplicationId"
+       and capabilityName =
+         flag "capability-name" (required string)
+           ~doc:"STRING CapabilityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_capability
+           (Values.GetCapabilityRequest.make ~applicationId ~capabilityName
+              ()) (Some Values.GetCapabilityResponse.to_json)
+           (Some Values.GetCapabilityResponse.error_to_json)])
 let get_compatible_versions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -597,6 +1175,102 @@ let get_compatible_versions =
            (Values.GetCompatibleVersionsRequest.make ?domainName ())
            (Some Values.GetCompatibleVersionsResponse.to_json)
            (Some Values.GetCompatibleVersionsResponse.error_to_json)])
+let get_data_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and name = flag "name" (required string) ~doc:"STRING DataSourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_source
+           (Values.GetDataSourceRequest.make ~domainName ~name ())
+           (Some Values.GetDataSourceResponse.to_json)
+           (Some Values.GetDataSourceResponse.error_to_json)])
+let get_default_application_setting =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_default_application_setting
+           (Values.GetDefaultApplicationSettingRequest.make ())
+           (Some Values.GetDefaultApplicationSettingResponse.to_json)
+           (Some Values.GetDefaultApplicationSettingResponse.error_to_json)])
+let get_direct_query_data_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataSourceName =
+         flag "data-source-name" (required string)
+           ~doc:"STRING DirectQueryDataSourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_direct_query_data_source
+           (Values.GetDirectQueryDataSourceRequest.make ~dataSourceName ())
+           (Some Values.GetDirectQueryDataSourceResponse.to_json)
+           (Some Values.GetDirectQueryDataSourceResponse.error_to_json)])
+let get_domain_maintenance_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and maintenanceId =
+         flag "maintenance-id" (required string) ~doc:"STRING RequestId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_domain_maintenance_status
+           (Values.GetDomainMaintenanceStatusRequest.make ~domainName
+              ~maintenanceId ())
+           (Some Values.GetDomainMaintenanceStatusResponse.to_json)
+           (Some Values.GetDomainMaintenanceStatusResponse.error_to_json)])
+let get_index =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and indexName =
+         flag "index-name" (required string) ~doc:"STRING IndexName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_index
+           (Values.GetIndexRequest.make ~domainName ~indexName ())
+           (Some Values.GetIndexResponse.to_json)
+           (Some Values.GetIndexResponse.error_to_json)])
 let get_package_version_history =
   Command.async ~summary:""
     ([%map_open.Command
@@ -660,6 +1334,95 @@ let get_upgrade_status =
            (Values.GetUpgradeStatusRequest.make ~domainName ())
            (Some Values.GetUpgradeStatusResponse.to_json)
            (Some Values.GetUpgradeStatusResponse.error_to_json)])
+let list_applications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and statuses =
+         flag "statuses" (optional json_arg) ~doc:"JSON ApplicationStatuses"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_applications
+           (Values.ListApplicationsRequest.make ?nextToken
+              ?statuses:(Option.map ~f:Values.ApplicationStatuses.of_json
+                           statuses) ?maxResults ())
+           (Some Values.ListApplicationsResponse.to_json)
+           (Some Values.ListApplicationsResponse.error_to_json)])
+let list_data_sources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_data_sources
+           (Values.ListDataSourcesRequest.make ~domainName ())
+           (Some Values.ListDataSourcesResponse.to_json)
+           (Some Values.ListDataSourcesResponse.error_to_json)])
+let list_direct_query_data_sources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_direct_query_data_sources
+           (Values.ListDirectQueryDataSourcesRequest.make ?nextToken ())
+           (Some Values.ListDirectQueryDataSourcesResponse.to_json)
+           (Some Values.ListDirectQueryDataSourcesResponse.error_to_json)])
+let list_domain_maintenances =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and action =
+         flag "action" (optional json_arg) ~doc:"JSON MaintenanceType"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON MaintenanceStatus"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_domain_maintenances
+           (Values.ListDomainMaintenancesRequest.make
+              ?action:(Option.map ~f:Values.MaintenanceType.of_json action)
+              ?status:(Option.map ~f:Values.MaintenanceStatus.of_json status)
+              ?maxResults ?nextToken ~domainName ())
+           (Some Values.ListDomainMaintenancesResponse.to_json)
+           (Some Values.ListDomainMaintenancesResponse.error_to_json)])
 let list_domain_names =
   Command.async ~summary:""
     ([%map_open.Command
@@ -702,6 +1465,37 @@ let list_domains_for_package =
               ~packageID ())
            (Some Values.ListDomainsForPackageResponse.to_json)
            (Some Values.ListDomainsForPackageResponse.error_to_json)])
+let list_insights =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and timeRange =
+         flag "time-range" (optional json_arg) ~doc:"JSON InsightTimeRange"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON InsightSortOrder"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT InsightPageSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and entity =
+         flag "entity" (required json_arg) ~doc:"JSON InsightEntity" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_insights
+           (Values.ListInsightsRequest.make
+              ?timeRange:(Option.map ~f:Values.InsightTimeRange.of_json
+                            timeRange)
+              ?sortOrder:(Option.map ~f:Values.InsightSortOrder.of_json
+                            sortOrder) ?maxResults ?nextToken
+              ~entity:(Values.InsightEntity.of_json entity) ())
+           (Some Values.ListInsightsResponse.to_json)
+           (Some Values.ListInsightsResponse.error_to_json)])
 let list_instance_type_details =
   Command.async ~summary:""
     ([%map_open.Command
@@ -718,13 +1512,19 @@ let list_instance_type_details =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and retrieveAZs =
+         flag "retrieve-a-zs" (optional bool) ~doc:"BOOL Boolean"
+       and instanceType =
+         flag "instance-type" (optional string)
+           ~doc:"STRING InstanceTypeString"
        and engineVersion =
          flag "engine-version" (required string) ~doc:"STRING VersionString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_instance_type_details
            (Values.ListInstanceTypeDetailsRequest.make ?domainName
-              ?maxResults ?nextToken ~engineVersion ())
+              ?maxResults ?nextToken ?retrieveAZs ?instanceType
+              ~engineVersion ())
            (Some Values.ListInstanceTypeDetailsResponse.to_json)
            (Some Values.ListInstanceTypeDetailsResponse.error_to_json)])
 let list_packages_for_domain =
@@ -750,6 +1550,29 @@ let list_packages_for_domain =
               ~domainName ())
            (Some Values.ListPackagesForDomainResponse.to_json)
            (Some Values.ListPackagesForDomainResponse.error_to_json)])
+let list_scheduled_actions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_scheduled_actions
+           (Values.ListScheduledActionsRequest.make ?maxResults ?nextToken
+              ~domainName ())
+           (Some Values.ListScheduledActionsResponse.to_json)
+           (Some Values.ListScheduledActionsResponse.error_to_json)])
 let list_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -786,6 +1609,65 @@ let list_versions =
            (Values.ListVersionsRequest.make ?maxResults ?nextToken ())
            (Some Values.ListVersionsResponse.to_json)
            (Some Values.ListVersionsResponse.error_to_json)])
+let list_vpc_endpoint_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_endpoint_access
+           (Values.ListVpcEndpointAccessRequest.make ?nextToken ~domainName
+              ()) (Some Values.ListVpcEndpointAccessResponse.to_json)
+           (Some Values.ListVpcEndpointAccessResponse.error_to_json)])
+let list_vpc_endpoints =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_endpoints
+           (Values.ListVpcEndpointsRequest.make ?nextToken ())
+           (Some Values.ListVpcEndpointsResponse.to_json)
+           (Some Values.ListVpcEndpointsResponse.error_to_json)])
+let list_vpc_endpoints_for_domain =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_endpoints_for_domain
+           (Values.ListVpcEndpointsForDomainRequest.make ?nextToken
+              ~domainName ())
+           (Some Values.ListVpcEndpointsForDomainResponse.to_json)
+           (Some Values.ListVpcEndpointsForDomainResponse.error_to_json)])
 let purchase_reserved_instance_offering =
   Command.async ~summary:""
     ([%map_open.Command
@@ -812,6 +1694,54 @@ let purchase_reserved_instance_offering =
            (Some Values.PurchaseReservedInstanceOfferingResponse.to_json)
            (Some
               Values.PurchaseReservedInstanceOfferingResponse.error_to_json)])
+let put_default_application_setting =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string) ~doc:"STRING ARN"
+       and setAsDefault =
+         flag "set-as-default" (required bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_default_application_setting
+           (Values.PutDefaultApplicationSettingRequest.make ~applicationArn
+              ~setAsDefault ())
+           (Some Values.PutDefaultApplicationSettingResponse.to_json)
+           (Some Values.PutDefaultApplicationSettingResponse.error_to_json)])
+let register_capability =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationId =
+         flag "application-id" (required string) ~doc:"STRING ApplicationId"
+       and capabilityName =
+         flag "capability-name" (required string)
+           ~doc:"STRING CapabilityName"
+       and capabilityConfig =
+         flag "capability-config" (required json_arg)
+           ~doc:"JSON CapabilityBaseRequestConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.register_capability
+           (Values.RegisterCapabilityRequest.make ~applicationId
+              ~capabilityName
+              ~capabilityConfig:(Values.CapabilityBaseRequestConfig.of_json
+                                   capabilityConfig) ())
+           (Some Values.RegisterCapabilityResponse.to_json)
+           (Some Values.RegisterCapabilityResponse.error_to_json)])
 let reject_inbound_connection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -848,7 +1778,36 @@ let remove_tags =
            Io.remove_tags
            (Values.RemoveTagsRequest.make ~aRN
               ~tagKeys:(Values.StringList.of_json tagKeys) ()) None None])
-let start_service_software_update =
+let revoke_vpc_endpoint_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and account =
+         flag "account" (optional string) ~doc:"STRING AWSAccount"
+       and service =
+         flag "service" (optional json_arg) ~doc:"JSON AWSServicePrincipal"
+       and serviceOptions =
+         flag "service-options" (optional json_arg)
+           ~doc:"JSON ServiceOptions"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.revoke_vpc_endpoint_access
+           (Values.RevokeVpcEndpointAccessRequest.make ?account
+              ?service:(Option.map ~f:Values.AWSServicePrincipal.of_json
+                          service)
+              ?serviceOptions:(Option.map ~f:Values.ServiceOptions.of_json
+                                 serviceOptions) ~domainName ())
+           (Some Values.RevokeVpcEndpointAccessResponse.to_json)
+           (Some Values.RevokeVpcEndpointAccessResponse.error_to_json)])
+let rollback_service_software_update =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -862,10 +1821,148 @@ let start_service_software_update =
          flag "domain-name" (required string) ~doc:"STRING DomainName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.rollback_service_software_update
+           (Values.RollbackServiceSoftwareUpdateRequest.make ~domainName ())
+           (Some Values.RollbackServiceSoftwareUpdateResponse.to_json)
+           (Some Values.RollbackServiceSoftwareUpdateResponse.error_to_json)])
+let start_domain_maintenance =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nodeId = flag "node-id" (optional string) ~doc:"STRING NodeId"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and action =
+         flag "action" (required json_arg) ~doc:"JSON MaintenanceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_domain_maintenance
+           (Values.StartDomainMaintenanceRequest.make ?nodeId ~domainName
+              ~action:(Values.MaintenanceType.of_json action) ())
+           (Some Values.StartDomainMaintenanceResponse.to_json)
+           (Some Values.StartDomainMaintenanceResponse.error_to_json)])
+let start_service_software_update =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scheduleAt =
+         flag "schedule-at" (optional json_arg) ~doc:"JSON ScheduleAt"
+       and desiredStartTime =
+         flag "desired-start-time" (optional json_arg) ~doc:"JSON Long"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_service_software_update
-           (Values.StartServiceSoftwareUpdateRequest.make ~domainName ())
+           (Values.StartServiceSoftwareUpdateRequest.make
+              ?scheduleAt:(Option.map ~f:Values.ScheduleAt.of_json scheduleAt)
+              ?desiredStartTime:(Option.map ~f:Values.Long.of_json
+                                   desiredStartTime) ~domainName ())
            (Some Values.StartServiceSoftwareUpdateResponse.to_json)
            (Some Values.StartServiceSoftwareUpdateResponse.error_to_json)])
+let update_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataSources =
+         flag "data-sources" (optional json_arg) ~doc:"JSON DataSources"
+       and appConfigs =
+         flag "app-configs" (optional json_arg) ~doc:"JSON AppConfigs"
+       and id = flag "id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_application
+           (Values.UpdateApplicationRequest.make
+              ?dataSources:(Option.map ~f:Values.DataSources.of_json
+                              dataSources)
+              ?appConfigs:(Option.map ~f:Values.AppConfigs.of_json appConfigs)
+              ~id ()) (Some Values.UpdateApplicationResponse.to_json)
+           (Some Values.UpdateApplicationResponse.error_to_json)])
+let update_data_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING DataSourceDescription"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON DataSourceStatus"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and name = flag "name" (required string) ~doc:"STRING DataSourceName"
+       and dataSourceType =
+         flag "data-source-type" (required json_arg)
+           ~doc:"JSON DataSourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_data_source
+           (Values.UpdateDataSourceRequest.make ?description
+              ?status:(Option.map ~f:Values.DataSourceStatus.of_json status)
+              ~domainName ~name
+              ~dataSourceType:(Values.DataSourceType.of_json dataSourceType)
+              ()) (Some Values.UpdateDataSourceResponse.to_json)
+           (Some Values.UpdateDataSourceResponse.error_to_json)])
+let update_direct_query_data_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING DirectQueryDataSourceDescription"
+       and openSearchArns =
+         flag "open-search-arns" (optional json_arg)
+           ~doc:"JSON DirectQueryOpenSearchARNList"
+       and dataSourceAccessPolicy =
+         flag "data-source-access-policy" (optional string)
+           ~doc:"STRING PolicyDocument"
+       and dataSourceName =
+         flag "data-source-name" (required string)
+           ~doc:"STRING DirectQueryDataSourceName"
+       and dataSourceType =
+         flag "data-source-type" (required json_arg)
+           ~doc:"JSON DirectQueryDataSourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_direct_query_data_source
+           (Values.UpdateDirectQueryDataSourceRequest.make ?description
+              ?openSearchArns:(Option.map
+                                 ~f:Values.DirectQueryOpenSearchARNList.of_json
+                                 openSearchArns) ?dataSourceAccessPolicy
+              ~dataSourceName
+              ~dataSourceType:(Values.DirectQueryDataSourceType.of_json
+                                 dataSourceType) ())
+           (Some Values.UpdateDirectQueryDataSourceResponse.to_json)
+           (Some Values.UpdateDirectQueryDataSourceResponse.error_to_json)])
 let update_domain_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -894,6 +1991,9 @@ let update_domain_config =
        and accessPolicies =
          flag "access-policies" (optional string)
            ~doc:"STRING PolicyDocument"
+       and iPAddressType =
+         flag "i-p-address-type" (optional json_arg)
+           ~doc:"JSON IPAddressType"
        and logPublishingOptions =
          flag "log-publishing-options" (optional json_arg)
            ~doc:"JSON LogPublishingOptions"
@@ -909,10 +2009,30 @@ let update_domain_config =
        and advancedSecurityOptions =
          flag "advanced-security-options" (optional json_arg)
            ~doc:"JSON AdvancedSecurityOptionsInput"
+       and identityCenterOptions =
+         flag "identity-center-options" (optional json_arg)
+           ~doc:"JSON IdentityCenterOptionsInput"
        and autoTuneOptions =
          flag "auto-tune-options" (optional json_arg)
            ~doc:"JSON AutoTuneOptions"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL DryRun"
+       and dryRunMode =
+         flag "dry-run-mode" (optional json_arg) ~doc:"JSON DryRunMode"
+       and offPeakWindowOptions =
+         flag "off-peak-window-options" (optional json_arg)
+           ~doc:"JSON OffPeakWindowOptions"
+       and softwareUpdateOptions =
+         flag "software-update-options" (optional json_arg)
+           ~doc:"JSON SoftwareUpdateOptions"
+       and aIMLOptions =
+         flag "a-i-m-l-options" (optional json_arg)
+           ~doc:"JSON AIMLOptionsInput"
+       and deploymentStrategyOptions =
+         flag "deployment-strategy-options" (optional json_arg)
+           ~doc:"JSON DeploymentStrategyOptions"
+       and automatedSnapshotPauseOptions =
+         flag "automated-snapshot-pause-options" (optional json_arg)
+           ~doc:"JSON AutomatedSnapshotPauseRequestOptions"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName" in
        fun () ->
@@ -929,6 +2049,8 @@ let update_domain_config =
                                  cognitoOptions)
               ?advancedOptions:(Option.map ~f:Values.AdvancedOptions.of_json
                                   advancedOptions) ?accessPolicies
+              ?iPAddressType:(Option.map ~f:Values.IPAddressType.of_json
+                                iPAddressType)
               ?logPublishingOptions:(Option.map
                                        ~f:Values.LogPublishingOptions.of_json
                                        logPublishingOptions)
@@ -944,10 +2066,52 @@ let update_domain_config =
               ?advancedSecurityOptions:(Option.map
                                           ~f:Values.AdvancedSecurityOptionsInput.of_json
                                           advancedSecurityOptions)
+              ?identityCenterOptions:(Option.map
+                                        ~f:Values.IdentityCenterOptionsInput.of_json
+                                        identityCenterOptions)
               ?autoTuneOptions:(Option.map ~f:Values.AutoTuneOptions.of_json
-                                  autoTuneOptions) ?dryRun ~domainName ())
+                                  autoTuneOptions) ?dryRun
+              ?dryRunMode:(Option.map ~f:Values.DryRunMode.of_json dryRunMode)
+              ?offPeakWindowOptions:(Option.map
+                                       ~f:Values.OffPeakWindowOptions.of_json
+                                       offPeakWindowOptions)
+              ?softwareUpdateOptions:(Option.map
+                                        ~f:Values.SoftwareUpdateOptions.of_json
+                                        softwareUpdateOptions)
+              ?aIMLOptions:(Option.map ~f:Values.AIMLOptionsInput.of_json
+                              aIMLOptions)
+              ?deploymentStrategyOptions:(Option.map
+                                            ~f:Values.DeploymentStrategyOptions.of_json
+                                            deploymentStrategyOptions)
+              ?automatedSnapshotPauseOptions:(Option.map
+                                                ~f:Values.AutomatedSnapshotPauseRequestOptions.of_json
+                                                automatedSnapshotPauseOptions)
+              ~domainName ())
            (Some Values.UpdateDomainConfigResponse.to_json)
            (Some Values.UpdateDomainConfigResponse.error_to_json)])
+let update_index =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and indexName =
+         flag "index-name" (required string) ~doc:"STRING IndexName"
+       and indexSchema =
+         flag "index-schema" (required json_arg) ~doc:"JSON IndexSchema" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_index
+           (Values.UpdateIndexRequest.make ~domainName ~indexName
+              ~indexSchema:(Values.IndexSchema.of_json indexSchema) ())
+           (Some Values.UpdateIndexResponse.to_json)
+           (Some Values.UpdateIndexResponse.error_to_json)])
 let update_package =
   Command.async ~summary:""
     ([%map_open.Command
@@ -963,6 +2127,12 @@ let update_package =
            ~doc:"STRING PackageDescription"
        and commitMessage =
          flag "commit-message" (optional string) ~doc:"STRING CommitMessage"
+       and packageConfiguration =
+         flag "package-configuration" (optional json_arg)
+           ~doc:"JSON PackageConfiguration"
+       and packageEncryptionOptions =
+         flag "package-encryption-options" (optional json_arg)
+           ~doc:"JSON PackageEncryptionOptions"
        and packageID =
          flag "package-i-d" (required string) ~doc:"STRING PackageID"
        and packageSource =
@@ -971,10 +2141,95 @@ let update_package =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_package
            (Values.UpdatePackageRequest.make ?packageDescription
-              ?commitMessage ~packageID
+              ?commitMessage
+              ?packageConfiguration:(Option.map
+                                       ~f:Values.PackageConfiguration.of_json
+                                       packageConfiguration)
+              ?packageEncryptionOptions:(Option.map
+                                           ~f:Values.PackageEncryptionOptions.of_json
+                                           packageEncryptionOptions)
+              ~packageID
               ~packageSource:(Values.PackageSource.of_json packageSource) ())
            (Some Values.UpdatePackageResponse.to_json)
            (Some Values.UpdatePackageResponse.error_to_json)])
+let update_package_scope =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and packageID =
+         flag "package-i-d" (required string) ~doc:"STRING PackageID"
+       and operation =
+         flag "operation" (required json_arg)
+           ~doc:"JSON PackageScopeOperationEnum"
+       and packageUserList =
+         flag "package-user-list" (required json_arg)
+           ~doc:"JSON PackageUserList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_package_scope
+           (Values.UpdatePackageScopeRequest.make ~packageID
+              ~operation:(Values.PackageScopeOperationEnum.of_json operation)
+              ~packageUserList:(Values.PackageUserList.of_json
+                                  packageUserList) ())
+           (Some Values.UpdatePackageScopeResponse.to_json)
+           (Some Values.UpdatePackageScopeResponse.error_to_json)])
+let update_scheduled_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and desiredStartTime =
+         flag "desired-start-time" (optional json_arg) ~doc:"JSON Long"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and actionID =
+         flag "action-i-d" (required string) ~doc:"STRING String"
+       and actionType =
+         flag "action-type" (required json_arg) ~doc:"JSON ActionType"
+       and scheduleAt =
+         flag "schedule-at" (required json_arg) ~doc:"JSON ScheduleAt" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_scheduled_action
+           (Values.UpdateScheduledActionRequest.make
+              ?desiredStartTime:(Option.map ~f:Values.Long.of_json
+                                   desiredStartTime) ~domainName ~actionID
+              ~actionType:(Values.ActionType.of_json actionType)
+              ~scheduleAt:(Values.ScheduleAt.of_json scheduleAt) ())
+           (Some Values.UpdateScheduledActionResponse.to_json)
+           (Some Values.UpdateScheduledActionResponse.error_to_json)])
+let update_vpc_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcEndpointId =
+         flag "vpc-endpoint-id" (required string) ~doc:"STRING VpcEndpointId"
+       and vpcOptions =
+         flag "vpc-options" (required json_arg) ~doc:"JSON VPCOptions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_vpc_endpoint
+           (Values.UpdateVpcEndpointRequest.make ~vpcEndpointId
+              ~vpcOptions:(Values.VPCOptions.of_json vpcOptions) ())
+           (Some Values.UpdateVpcEndpointResponse.to_json)
+           (Some Values.UpdateVpcEndpointResponse.error_to_json)])
 let upgrade_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1006,44 +2261,92 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-inbound-connection", accept_inbound_connection);
+    ("add-data-source", add_data_source);
+    ("add-direct-query-data-source", add_direct_query_data_source);
     ("add-tags", add_tags);
     ("associate-package", associate_package);
+    ("associate-packages", associate_packages);
+    ("authorize-vpc-endpoint-access", authorize_vpc_endpoint_access);
+    ("cancel-domain-config-change", cancel_domain_config_change);
     ("cancel-service-software-update", cancel_service_software_update);
+    ("create-application", create_application);
     ("create-domain", create_domain);
+    ("create-index", create_index);
     ("create-outbound-connection", create_outbound_connection);
     ("create-package", create_package);
+    ("create-vpc-endpoint", create_vpc_endpoint);
+    ("delete-application", delete_application);
+    ("delete-data-source", delete_data_source);
+    ("delete-direct-query-data-source", delete_direct_query_data_source);
     ("delete-domain", delete_domain);
     ("delete-inbound-connection", delete_inbound_connection);
+    ("delete-index", delete_index);
     ("delete-outbound-connection", delete_outbound_connection);
     ("delete-package", delete_package);
+    ("delete-vpc-endpoint", delete_vpc_endpoint);
+    ("deregister-capability", deregister_capability);
     ("describe-domain", describe_domain);
     ("describe-domain-auto-tunes", describe_domain_auto_tunes);
     ("describe-domain-change-progress", describe_domain_change_progress);
     ("describe-domain-config", describe_domain_config);
+    ("describe-domain-health", describe_domain_health);
+    ("describe-domain-nodes", describe_domain_nodes);
     ("describe-domains", describe_domains);
+    ("describe-dry-run-progress", describe_dry_run_progress);
     ("describe-inbound-connections", describe_inbound_connections);
+    ("describe-insight-details", describe_insight_details);
     ("describe-instance-type-limits", describe_instance_type_limits);
     ("describe-outbound-connections", describe_outbound_connections);
     ("describe-packages", describe_packages);
     ("describe-reserved-instance-offerings",
       describe_reserved_instance_offerings);
     ("describe-reserved-instances", describe_reserved_instances);
+    ("describe-vpc-endpoints", describe_vpc_endpoints);
     ("dissociate-package", dissociate_package);
+    ("dissociate-packages", dissociate_packages);
+    ("get-application", get_application);
+    ("get-capability", get_capability);
     ("get-compatible-versions", get_compatible_versions);
+    ("get-data-source", get_data_source);
+    ("get-default-application-setting", get_default_application_setting);
+    ("get-direct-query-data-source", get_direct_query_data_source);
+    ("get-domain-maintenance-status", get_domain_maintenance_status);
+    ("get-index", get_index);
     ("get-package-version-history", get_package_version_history);
     ("get-upgrade-history", get_upgrade_history);
     ("get-upgrade-status", get_upgrade_status);
+    ("list-applications", list_applications);
+    ("list-data-sources", list_data_sources);
+    ("list-direct-query-data-sources", list_direct_query_data_sources);
+    ("list-domain-maintenances", list_domain_maintenances);
     ("list-domain-names", list_domain_names);
     ("list-domains-for-package", list_domains_for_package);
+    ("list-insights", list_insights);
     ("list-instance-type-details", list_instance_type_details);
     ("list-packages-for-domain", list_packages_for_domain);
+    ("list-scheduled-actions", list_scheduled_actions);
     ("list-tags", list_tags);
     ("list-versions", list_versions);
+    ("list-vpc-endpoint-access", list_vpc_endpoint_access);
+    ("list-vpc-endpoints", list_vpc_endpoints);
+    ("list-vpc-endpoints-for-domain", list_vpc_endpoints_for_domain);
     ("purchase-reserved-instance-offering",
       purchase_reserved_instance_offering);
+    ("put-default-application-setting", put_default_application_setting);
+    ("register-capability", register_capability);
     ("reject-inbound-connection", reject_inbound_connection);
     ("remove-tags", remove_tags);
+    ("revoke-vpc-endpoint-access", revoke_vpc_endpoint_access);
+    ("rollback-service-software-update", rollback_service_software_update);
+    ("start-domain-maintenance", start_domain_maintenance);
     ("start-service-software-update", start_service_software_update);
+    ("update-application", update_application);
+    ("update-data-source", update_data_source);
+    ("update-direct-query-data-source", update_direct_query_data_source);
     ("update-domain-config", update_domain_config);
+    ("update-index", update_index);
     ("update-package", update_package);
+    ("update-package-scope", update_package_scope);
+    ("update-scheduled-action", update_scheduled_action);
+    ("update-vpc-endpoint", update_vpc_endpoint);
     ("upgrade-domain", upgrade_domain)]

@@ -25,6 +25,34 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module NetworkType =
+  struct
+    type nonrec t =
+      | Ipv4 
+      | Ipv6 
+      | Dual_stack 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ipv4 -> "ipv4"
+      | Ipv6 -> "ipv6"
+      | Dual_stack -> "dual_stack"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ipv4" -> Ipv4
+      | "ipv6" -> Ipv6
+      | "dual_stack" -> Dual_stack
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkType" j)
+    let to_json = simple_to_json to_value
+  end
 module Integer =
   struct
     type nonrec t = int
@@ -50,6 +78,33 @@ module String_ =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
+  end
+module NetworkTypeList =
+  struct
+    type nonrec t = NetworkType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NetworkType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NetworkType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkTypeList" ~of_json:NetworkType.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module Endpoint =
   struct
@@ -78,10 +133,10 @@ module Endpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
       make ?uRL ?port ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uRL = field_map json "URL" String_.of_json in
-      let port = field_map json "Port" Integer.of_json in
-      let address = field_map json "Address" String_.of_json in
+    let of_json json__ =
+      let uRL = field_map json__ "URL" String_.of_json in
+      let port = field_map json__ "Port" Integer.of_json in
+      let address = field_map json__ "Address" String_.of_json in
       make ?uRL ?port ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -105,32 +160,47 @@ module Subnet =
       subnetIdentifier: String_.t option
         [@ocaml.doc "The system-assigned identifier for the subnet."];
       subnetAvailabilityZone: String_.t option
-        [@ocaml.doc "The Availability Zone (AZ) for the subnet."]}
+        [@ocaml.doc "The Availability Zone (AZ) for the subnet."];
+      supportedNetworkTypes: NetworkTypeList.t option
+        [@ocaml.doc
+          "The network types supported by this subnet. Returns an array of strings that can include ipv4, ipv6, or both, indicating whether the subnet supports IPv4 only, IPv6 only, or dual-stack deployments."]}
     let make ?subnetIdentifier =
       fun ?subnetAvailabilityZone ->
-        fun () -> { subnetIdentifier; subnetAvailabilityZone }
+        fun ?supportedNetworkTypes ->
+          fun () ->
+            { subnetIdentifier; subnetAvailabilityZone; supportedNetworkTypes
+            }
     let to_value x =
       structure_to_value
         [("SubnetIdentifier",
            (Option.map x.subnetIdentifier ~f:String_.to_value));
         ("SubnetAvailabilityZone",
-          (Option.map x.subnetAvailabilityZone ~f:String_.to_value))]
+          (Option.map x.subnetAvailabilityZone ~f:String_.to_value));
+        ("SupportedNetworkTypes",
+          (Option.map x.supportedNetworkTypes ~f:NetworkTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedNetworkTypes =
+        (Option.map ~f:NetworkTypeList.of_xml)
+          (Xml.child xml_arg0 "SupportedNetworkTypes") in
       let subnetAvailabilityZone =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SubnetAvailabilityZone") in
       let subnetIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SubnetIdentifier") in
-      make ?subnetAvailabilityZone ?subnetIdentifier ()
+      make ?supportedNetworkTypes ?subnetAvailabilityZone ?subnetIdentifier
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let supportedNetworkTypes =
+        field_map json__ "SupportedNetworkTypes" NetworkTypeList.of_json in
       let subnetAvailabilityZone =
-        field_map json "SubnetAvailabilityZone" String_.of_json in
+        field_map json__ "SubnetAvailabilityZone" String_.of_json in
       let subnetIdentifier =
-        field_map json "SubnetIdentifier" String_.of_json in
-      make ?subnetAvailabilityZone ?subnetIdentifier ()
+        field_map json__ "SubnetIdentifier" String_.of_json in
+      make ?supportedNetworkTypes ?subnetAvailabilityZone ?subnetIdentifier
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the subnet associated with a DAX cluster. This parameter refers to subnets defined in Amazon Virtual Private Cloud (Amazon VPC) and used with DAX."]
@@ -154,9 +224,9 @@ module NodeTypeSpecificValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
       make ?value ?nodeType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
       make ?value ?nodeType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -226,15 +296,15 @@ module Node =
       make ?parameterGroupStatus ?nodeStatus ?availabilityZone
         ?nodeCreateTime ?endpoint ?nodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroupStatus =
-        field_map json "ParameterGroupStatus" String_.of_json in
-      let nodeStatus = field_map json "NodeStatus" String_.of_json in
+        field_map json__ "ParameterGroupStatus" String_.of_json in
+      let nodeStatus = field_map json__ "NodeStatus" String_.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let nodeCreateTime = field_map json "NodeCreateTime" TStamp.of_json in
-      let endpoint = field_map json "Endpoint" Endpoint.of_json in
-      let nodeId = field_map json "NodeId" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let nodeCreateTime = field_map json__ "NodeCreateTime" TStamp.of_json in
+      let endpoint = field_map json__ "Endpoint" Endpoint.of_json in
+      let nodeId = field_map json__ "NodeId" String_.of_json in
       make ?parameterGroupStatus ?nodeStatus ?availabilityZone
         ?nodeCreateTime ?endpoint ?nodeId ()
     let to_json v = composed_to_json to_value v
@@ -243,6 +313,9 @@ module NodeIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -318,10 +391,10 @@ module SecurityGroupMembership =
           (Xml.child xml_arg0 "SecurityGroupIdentifier") in
       make ?status ?securityGroupIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
       let securityGroupIdentifier =
-        field_map json "SecurityGroupIdentifier" String_.of_json in
+        field_map json__ "SecurityGroupIdentifier" String_.of_json in
       make ?status ?securityGroupIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An individual VPC security group and its status."]
@@ -329,6 +402,9 @@ module SubnetList =
   struct
     type nonrec t = Subnet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subnet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -405,6 +481,9 @@ module NodeTypeSpecificValueList =
   struct
     type nonrec t = NodeTypeSpecificValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeTypeSpecificValue.to_value)) |>
         (fun x -> `List x)
@@ -520,6 +599,9 @@ module NodeList =
   struct
     type nonrec t = Node.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Node.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -563,9 +645,9 @@ module NotificationConfiguration =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TopicArn") in
       make ?topicStatus ?topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicStatus = field_map json "TopicStatus" String_.of_json in
-      let topicArn = field_map json "TopicArn" String_.of_json in
+    let of_json json__ =
+      let topicStatus = field_map json__ "TopicStatus" String_.of_json in
+      let topicArn = field_map json__ "TopicArn" String_.of_json in
       make ?topicStatus ?topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -606,13 +688,13 @@ module ParameterGroupStatus =
           (Xml.child xml_arg0 "ParameterGroupName") in
       make ?nodeIdsToReboot ?parameterApplyStatus ?parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodeIdsToReboot =
-        field_map json "NodeIdsToReboot" NodeIdentifierList.of_json in
+        field_map json__ "NodeIdsToReboot" NodeIdentifierList.of_json in
       let parameterApplyStatus =
-        field_map json "ParameterApplyStatus" String_.of_json in
+        field_map json__ "ParameterApplyStatus" String_.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
       make ?nodeIdsToReboot ?parameterApplyStatus ?parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The status of a parameter group."]
@@ -633,8 +715,8 @@ module SSEDescription =
         (Option.map ~f:SSEStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" SSEStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" SSEStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -643,6 +725,9 @@ module SecurityGroupMembershipList =
   struct
     type nonrec t = SecurityGroupMembership.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupMembership.to_value)) |>
         (fun x -> `List x)
@@ -700,9 +785,9 @@ module ParameterNameValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ParameterName") in
       make ?parameterValue ?parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameterValue = field_map json "ParameterValue" String_.of_json in
-      let parameterName = field_map json "ParameterName" String_.of_json in
+    let of_json json__ =
+      let parameterValue = field_map json__ "ParameterValue" String_.of_json in
+      let parameterName = field_map json__ "ParameterName" String_.of_json in
       make ?parameterValue ?parameterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An individual DAX parameter."]
@@ -727,12 +812,12 @@ module Tag =
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A description of a tag. Every tag is a key-value pair. You can add up to 50 tags to a single DAX cluster. AWS-assigned tag names and values are automatically assigned the aws: prefix, which the user cannot assign. AWS-assigned tag names do not count towards the tag limit of 50. User-assigned tag names have the prefix user:. You cannot backdate the application of a tag."]
+       "A description of a tag. Every tag is a key-value pair. You can add up to 50 tags to a single DAX cluster. Amazon Web Services-assigned tag names and values are automatically assigned the aws: prefix, which the user cannot assign. Amazon Web Services-assigned tag names do not count towards the tag limit of 50. User-assigned tag names have the prefix user:. You cannot backdate the application of a tag."]
 module SubnetGroup =
   struct
     type nonrec t =
@@ -745,21 +830,37 @@ module SubnetGroup =
         [@ocaml.doc
           "The Amazon Virtual Private Cloud identifier (VPC ID) of the subnet group."];
       subnets: SubnetList.t option
-        [@ocaml.doc "A list of subnets associated with the subnet group."]}
+        [@ocaml.doc "A list of subnets associated with the subnet group."];
+      supportedNetworkTypes: NetworkTypeList.t option
+        [@ocaml.doc
+          "The network types supported by this subnet. Returns an array of strings that can include ipv4, ipv6, or both, indicating whether the subnet group supports IPv4 only, IPv6 only, or dual-stack deployments."]}
     let make ?subnetGroupName =
       fun ?description ->
         fun ?vpcId ->
           fun ?subnets ->
-            fun () -> { subnetGroupName; description; vpcId; subnets }
+            fun ?supportedNetworkTypes ->
+              fun () ->
+                {
+                  subnetGroupName;
+                  description;
+                  vpcId;
+                  subnets;
+                  supportedNetworkTypes
+                }
     let to_value x =
       structure_to_value
         [("SubnetGroupName",
            (Option.map x.subnetGroupName ~f:String_.to_value));
         ("Description", (Option.map x.description ~f:String_.to_value));
         ("VpcId", (Option.map x.vpcId ~f:String_.to_value));
-        ("Subnets", (Option.map x.subnets ~f:SubnetList.to_value))]
+        ("Subnets", (Option.map x.subnets ~f:SubnetList.to_value));
+        ("SupportedNetworkTypes",
+          (Option.map x.supportedNetworkTypes ~f:NetworkTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedNetworkTypes =
+        (Option.map ~f:NetworkTypeList.of_xml)
+          (Xml.child xml_arg0 "SupportedNetworkTypes") in
       let subnets =
         (Option.map ~f:SubnetList.of_xml) (Xml.child xml_arg0 "Subnets") in
       let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VpcId") in
@@ -767,14 +868,19 @@ module SubnetGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       let subnetGroupName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SubnetGroupName") in
-      make ?subnets ?vpcId ?description ?subnetGroupName ()
+      make ?supportedNetworkTypes ?subnets ?vpcId ?description
+        ?subnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnets = field_map json "Subnets" SubnetList.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let subnetGroupName = field_map json "SubnetGroupName" String_.of_json in
-      make ?subnets ?vpcId ?description ?subnetGroupName ()
+    let of_json json__ =
+      let supportedNetworkTypes =
+        field_map json__ "SupportedNetworkTypes" NetworkTypeList.of_json in
+      let subnets = field_map json__ "Subnets" SubnetList.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let subnetGroupName =
+        field_map json__ "SubnetGroupName" String_.of_json in
+      make ?supportedNetworkTypes ?subnets ?vpcId ?description
+        ?subnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of one of the following actions: CreateSubnetGroup ModifySubnetGroup"]
@@ -876,20 +982,20 @@ module Parameter =
         ?description ?nodeTypeSpecificValues ?parameterValue ?parameterType
         ?parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeType = field_map json "ChangeType" ChangeType.of_json in
-      let isModifiable = field_map json "IsModifiable" IsModifiable.of_json in
-      let allowedValues = field_map json "AllowedValues" String_.of_json in
-      let dataType = field_map json "DataType" String_.of_json in
-      let source = field_map json "Source" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let changeType = field_map json__ "ChangeType" ChangeType.of_json in
+      let isModifiable = field_map json__ "IsModifiable" IsModifiable.of_json in
+      let allowedValues = field_map json__ "AllowedValues" String_.of_json in
+      let dataType = field_map json__ "DataType" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let nodeTypeSpecificValues =
-        field_map json "NodeTypeSpecificValues"
+        field_map json__ "NodeTypeSpecificValues"
           NodeTypeSpecificValueList.of_json in
-      let parameterValue = field_map json "ParameterValue" String_.of_json in
+      let parameterValue = field_map json__ "ParameterValue" String_.of_json in
       let parameterType =
-        field_map json "ParameterType" ParameterType.of_json in
-      let parameterName = field_map json "ParameterName" String_.of_json in
+        field_map json__ "ParameterType" ParameterType.of_json in
+      let parameterName = field_map json__ "ParameterName" String_.of_json in
       make ?changeType ?isModifiable ?allowedValues ?dataType ?source
         ?description ?nodeTypeSpecificValues ?parameterValue ?parameterType
         ?parameterName ()
@@ -920,10 +1026,10 @@ module ParameterGroup =
           (Xml.child xml_arg0 "ParameterGroupName") in
       make ?description ?parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
       make ?description ?parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -963,11 +1069,11 @@ module Event =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceName") in
       make ?date ?message ?sourceType ?sourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let date = field_map json "Date" TStamp.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
-      let sourceName = field_map json "SourceName" String_.of_json in
+    let of_json json__ =
+      let date = field_map json__ "Date" TStamp.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let sourceName = field_map json__ "SourceName" String_.of_json in
       make ?date ?message ?sourceType ?sourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1022,7 +1128,10 @@ module Cluster =
           "The description of the server-side encryption status on the specified DAX cluster."];
       clusterEndpointEncryptionType: ClusterEndpointEncryptionType.t option
         [@ocaml.doc
-          "The type of encryption supported by the cluster's endpoint. Values are: NONE for no encryption TLS for Transport Layer Security"]}
+          "The type of encryption supported by the cluster's endpoint. Values are: NONE for no encryption TLS for Transport Layer Security"];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The IP address type of the cluster. Values are: ipv4 - IPv4 addresses only ipv6 - IPv6 addresses only dual_stack - Both IPv4 and IPv6 addresses"]}
     let make ?clusterName =
       fun ?description ->
         fun ?clusterArn ->
@@ -1041,27 +1150,29 @@ module Cluster =
                                   fun ?parameterGroup ->
                                     fun ?sSEDescription ->
                                       fun ?clusterEndpointEncryptionType ->
-                                        fun () ->
-                                          {
-                                            clusterName;
-                                            description;
-                                            clusterArn;
-                                            totalNodes;
-                                            activeNodes;
-                                            nodeType;
-                                            status;
-                                            clusterDiscoveryEndpoint;
-                                            nodeIdsToRemove;
-                                            nodes;
-                                            preferredMaintenanceWindow;
-                                            notificationConfiguration;
-                                            subnetGroup;
-                                            securityGroups;
-                                            iamRoleArn;
-                                            parameterGroup;
-                                            sSEDescription;
-                                            clusterEndpointEncryptionType
-                                          }
+                                        fun ?networkType ->
+                                          fun () ->
+                                            {
+                                              clusterName;
+                                              description;
+                                              clusterArn;
+                                              totalNodes;
+                                              activeNodes;
+                                              nodeType;
+                                              status;
+                                              clusterDiscoveryEndpoint;
+                                              nodeIdsToRemove;
+                                              nodes;
+                                              preferredMaintenanceWindow;
+                                              notificationConfiguration;
+                                              subnetGroup;
+                                              securityGroups;
+                                              iamRoleArn;
+                                              parameterGroup;
+                                              sSEDescription;
+                                              clusterEndpointEncryptionType;
+                                              networkType
+                                            }
     let to_value x =
       structure_to_value
         [("ClusterName", (Option.map x.clusterName ~f:String_.to_value));
@@ -1093,9 +1204,12 @@ module Cluster =
           (Option.map x.sSEDescription ~f:SSEDescription.to_value));
         ("ClusterEndpointEncryptionType",
           (Option.map x.clusterEndpointEncryptionType
-             ~f:ClusterEndpointEncryptionType.to_value))]
+             ~f:ClusterEndpointEncryptionType.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let clusterEndpointEncryptionType =
         (Option.map ~f:ClusterEndpointEncryptionType.of_xml)
           (Xml.child xml_arg0 "ClusterEndpointEncryptionType") in
@@ -1142,46 +1256,48 @@ module Cluster =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       let clusterName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterName") in
-      make ?clusterEndpointEncryptionType ?sSEDescription ?parameterGroup
-        ?iamRoleArn ?securityGroups ?subnetGroup ?notificationConfiguration
-        ?preferredMaintenanceWindow ?nodes ?nodeIdsToRemove
-        ?clusterDiscoveryEndpoint ?status ?nodeType ?activeNodes ?totalNodes
-        ?clusterArn ?description ?clusterName ()
+      make ?networkType ?clusterEndpointEncryptionType ?sSEDescription
+        ?parameterGroup ?iamRoleArn ?securityGroups ?subnetGroup
+        ?notificationConfiguration ?preferredMaintenanceWindow ?nodes
+        ?nodeIdsToRemove ?clusterDiscoveryEndpoint ?status ?nodeType
+        ?activeNodes ?totalNodes ?clusterArn ?description ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
       let clusterEndpointEncryptionType =
-        field_map json "ClusterEndpointEncryptionType"
+        field_map json__ "ClusterEndpointEncryptionType"
           ClusterEndpointEncryptionType.of_json in
       let sSEDescription =
-        field_map json "SSEDescription" SSEDescription.of_json in
+        field_map json__ "SSEDescription" SSEDescription.of_json in
       let parameterGroup =
-        field_map json "ParameterGroup" ParameterGroupStatus.of_json in
-      let iamRoleArn = field_map json "IamRoleArn" String_.of_json in
+        field_map json__ "ParameterGroup" ParameterGroupStatus.of_json in
+      let iamRoleArn = field_map json__ "IamRoleArn" String_.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroupMembershipList.of_json in
-      let subnetGroup = field_map json "SubnetGroup" String_.of_json in
+        field_map json__ "SecurityGroups" SecurityGroupMembershipList.of_json in
+      let subnetGroup = field_map json__ "SubnetGroup" String_.of_json in
       let notificationConfiguration =
-        field_map json "NotificationConfiguration"
+        field_map json__ "NotificationConfiguration"
           NotificationConfiguration.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
-      let nodes = field_map json "Nodes" NodeList.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
+      let nodes = field_map json__ "Nodes" NodeList.of_json in
       let nodeIdsToRemove =
-        field_map json "NodeIdsToRemove" NodeIdentifierList.of_json in
+        field_map json__ "NodeIdsToRemove" NodeIdentifierList.of_json in
       let clusterDiscoveryEndpoint =
-        field_map json "ClusterDiscoveryEndpoint" Endpoint.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
-      let activeNodes = field_map json "ActiveNodes" IntegerOptional.of_json in
-      let totalNodes = field_map json "TotalNodes" IntegerOptional.of_json in
-      let clusterArn = field_map json "ClusterArn" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let clusterName = field_map json "ClusterName" String_.of_json in
-      make ?clusterEndpointEncryptionType ?sSEDescription ?parameterGroup
-        ?iamRoleArn ?securityGroups ?subnetGroup ?notificationConfiguration
-        ?preferredMaintenanceWindow ?nodes ?nodeIdsToRemove
-        ?clusterDiscoveryEndpoint ?status ?nodeType ?activeNodes ?totalNodes
-        ?clusterArn ?description ?clusterName ()
+        field_map json__ "ClusterDiscoveryEndpoint" Endpoint.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let activeNodes =
+        field_map json__ "ActiveNodes" IntegerOptional.of_json in
+      let totalNodes = field_map json__ "TotalNodes" IntegerOptional.of_json in
+      let clusterArn = field_map json__ "ClusterArn" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let clusterName = field_map json__ "ClusterName" String_.of_json in
+      make ?networkType ?clusterEndpointEncryptionType ?sSEDescription
+        ?parameterGroup ?iamRoleArn ?securityGroups ?subnetGroup
+        ?notificationConfiguration ?preferredMaintenanceWindow ?nodes
+        ?nodeIdsToRemove ?clusterDiscoveryEndpoint ?status ?nodeType
+        ?activeNodes ?totalNodes ?clusterArn ?description ?clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains all of the attributes of a specific DAX cluster."]
@@ -1248,6 +1364,19 @@ module SubnetInUse =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The requested subnet is being used by another subnet group."]
+module SubnetNotAllowedFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified subnet can't be used for the requested network type. This error occurs when either there aren't enough subnets of the required network type to create the cluster, or when you try to use a subnet that doesn't support the requested network type (for example, trying to create a dual-stack cluster with a subnet that doesn't have IPv6 CIDR)."]
 module SubnetQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -1265,6 +1394,9 @@ module SubnetIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1300,8 +1432,8 @@ module InvalidParameterCombinationException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AwsQueryErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" AwsQueryErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Two or more incompatible parameters were specified."]
@@ -1333,8 +1465,8 @@ module InvalidParameterValueException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AwsQueryErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" AwsQueryErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value for a parameter is invalid."]
@@ -1354,6 +1486,9 @@ module ParameterNameValueList =
   struct
     type nonrec t = ParameterNameValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterNameValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1404,6 +1539,9 @@ module SecurityGroupIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1442,6 +1580,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1477,6 +1618,9 @@ module KeyList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1571,11 +1715,14 @@ module NodeQuotaForCustomerExceededFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have attempted to exceed the maximum number of nodes for your AWS account."]
+       "You have attempted to exceed the maximum number of nodes for your Amazon Web Services account."]
 module AvailabilityZoneList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1600,6 +1747,9 @@ module SubnetGroupList =
   struct
     type nonrec t = SubnetGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1624,6 +1774,9 @@ module SubnetGroupNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1648,6 +1801,9 @@ module ParameterList =
   struct
     type nonrec t = Parameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Parameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1672,6 +1828,9 @@ module ParameterGroupList =
   struct
     type nonrec t = ParameterGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1697,6 +1856,9 @@ module ParameterGroupNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1721,6 +1883,9 @@ module EventList =
   struct
     type nonrec t = Event.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Event.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1744,6 +1909,9 @@ module ClusterList =
   struct
     type nonrec t = Cluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Cluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1768,6 +1936,9 @@ module ClusterNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1875,7 +2046,7 @@ module ClusterQuotaForCustomerExceededFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have attempted to exceed the maximum number of DAX clusters for your AWS account."]
+       "You have attempted to exceed the maximum number of DAX clusters for your Amazon Web Services account."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = unit
@@ -1888,7 +2059,7 @@ module ServiceQuotaExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have reached the maximum number of x509 certificates that can be created for encrypted clusters in a 30 day period. Contact AWS customer support to discuss options for continuing to create encrypted clusters."]
+       "You have reached the maximum number of x509 certificates that can be created for encrypted clusters in a 30 day period. Contact Amazon Web Services customer support to discuss options for continuing to create encrypted clusters."]
 module SSESpecification =
   struct
     type nonrec t =
@@ -1908,8 +2079,8 @@ module SSESpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map_exn json "Enabled" SSEEnabled.of_json in
+    let of_json json__ =
+      let enabled = field_map_exn json__ "Enabled" SSEEnabled.of_json in
       make ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1925,6 +2096,7 @@ module UpdateSubnetGroupResponse =
       | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
       | `SubnetGroupNotFoundFault of SubnetGroupNotFoundFault.t 
       | `SubnetInUse of SubnetInUse.t 
+      | `SubnetNotAllowedFault of SubnetNotAllowedFault.t 
       | `SubnetQuotaExceededFault of SubnetQuotaExceededFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?subnetGroup = fun () -> { subnetGroup }
@@ -1937,6 +2109,8 @@ module UpdateSubnetGroupResponse =
       | "SubnetGroupNotFoundFault" ->
           `SubnetGroupNotFoundFault (SubnetGroupNotFoundFault.of_json json)
       | "SubnetInUse" -> `SubnetInUse (SubnetInUse.of_json json)
+      | "SubnetNotAllowedFault" ->
+          `SubnetNotAllowedFault (SubnetNotAllowedFault.of_json json)
       | "SubnetQuotaExceededFault" ->
           `SubnetQuotaExceededFault (SubnetQuotaExceededFault.of_json json)
       | name ->
@@ -1951,6 +2125,8 @@ module UpdateSubnetGroupResponse =
       | "SubnetGroupNotFoundFault" ->
           `SubnetGroupNotFoundFault (SubnetGroupNotFoundFault.of_xml xml)
       | "SubnetInUse" -> `SubnetInUse (SubnetInUse.of_xml xml)
+      | "SubnetNotAllowedFault" ->
+          `SubnetNotAllowedFault (SubnetNotAllowedFault.of_xml xml)
       | "SubnetQuotaExceededFault" ->
           `SubnetQuotaExceededFault (SubnetQuotaExceededFault.of_xml xml)
       | name ->
@@ -1973,6 +2149,10 @@ module UpdateSubnetGroupResponse =
           `Assoc
             [("error", (`String "SubnetInUse"));
             ("details", (SubnetInUse.to_json e))]
+      | `SubnetNotAllowedFault e ->
+          `Assoc
+            [("error", (`String "SubnetNotAllowedFault"));
+            ("details", (SubnetNotAllowedFault.to_json e))]
       | `SubnetQuotaExceededFault e ->
           `Assoc
             [("error", (`String "SubnetQuotaExceededFault"));
@@ -1991,8 +2171,8 @@ module UpdateSubnetGroupResponse =
         (Option.map ~f:SubnetGroup.of_xml) (Xml.child xml_arg0 "SubnetGroup") in
       make ?subnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetGroup = field_map json "SubnetGroup" SubnetGroup.of_json in
+    let of_json json__ =
+      let subnetGroup = field_map json__ "SubnetGroup" SubnetGroup.of_json in
       make ?subnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies an existing subnet group."]
@@ -2028,11 +2208,12 @@ module UpdateSubnetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetGroupName") in
       make ?subnetIds ?description ~subnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetIds = field_map json "SubnetIds" SubnetIdentifierList.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let subnetIds =
+        field_map json__ "SubnetIds" SubnetIdentifierList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let subnetGroupName =
-        field_map_exn json "SubnetGroupName" String_.of_json in
+        field_map_exn json__ "SubnetGroupName" String_.of_json in
       make ?subnetIds ?description ~subnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies an existing subnet group."]
@@ -2129,9 +2310,9 @@ module UpdateParameterGroupResponse =
           (Xml.child xml_arg0 "ParameterGroup") in
       make ?parameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroup =
-        field_map json "ParameterGroup" ParameterGroup.of_json in
+        field_map json__ "ParameterGroup" ParameterGroup.of_json in
       make ?parameterGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2165,12 +2346,12 @@ module UpdateParameterGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ~parameterNameValues ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterNameValues =
-        field_map_exn json "ParameterNameValues"
+        field_map_exn json__ "ParameterNameValues"
           ParameterNameValueList.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ~parameterNameValues ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2284,8 +2465,8 @@ module UpdateClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2372,19 +2553,20 @@ module UpdateClusterRequest =
         ?notificationTopicArn ?preferredMaintenanceWindow ?description
         ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIdentifierList.of_json in
+        field_map json__ "SecurityGroupIds"
+          SecurityGroupIdentifierList.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
       let notificationTopicStatus =
-        field_map json "NotificationTopicStatus" String_.of_json in
+        field_map json__ "NotificationTopicStatus" String_.of_json in
       let notificationTopicArn =
-        field_map json "NotificationTopicArn" String_.of_json in
+        field_map json__ "NotificationTopicArn" String_.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
       make ?securityGroupIds ?parameterGroupName ?notificationTopicStatus
         ?notificationTopicArn ?preferredMaintenanceWindow ?description
         ~clusterName ()
@@ -2490,8 +2672,8 @@ module UntagResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes the association of tags from a DAX resource. You can call UntagResource up to 5 times per second, per account."]
@@ -2521,9 +2703,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tagKeys ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" KeyList.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" KeyList.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ~tagKeys ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2631,8 +2813,8 @@ module TagResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates a set of tags with a DAX resource. You can call TagResource up to 5 times per second, per account."]
@@ -2660,9 +2842,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tags ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ~tags ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2763,8 +2945,8 @@ module RebootNodeResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2793,9 +2975,9 @@ module RebootNodeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
       make ~nodeId ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodeId = field_map_exn json "NodeId" String_.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
+    let of_json json__ =
+      let nodeId = field_map_exn json__ "NodeId" String_.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
       make ~nodeId ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2899,9 +3081,9 @@ module ListTagsResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2931,9 +3113,9 @@ module ListTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ?nextToken ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ?nextToken ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2944,7 +3126,7 @@ module IncreaseReplicationFactorResponse =
       {
       cluster: Cluster.t option
         [@ocaml.doc
-          "A description of the DAX cluster. with its new replication factor."]}
+          "A description of the DAX cluster, with its new replication factor."]}
     type nonrec error =
       [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
       | `InsufficientClusterCapacityFault of
@@ -3072,8 +3254,8 @@ module IncreaseReplicationFactorResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds one or more nodes to a DAX cluster."]
@@ -3114,12 +3296,12 @@ module IncreaseReplicationFactorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
       make ?availabilityZones ~newReplicationFactor ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZoneList.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZoneList.of_json in
       let newReplicationFactor =
-        field_map_exn json "NewReplicationFactor" Integer.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
+        field_map_exn json__ "NewReplicationFactor" Integer.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
       make ?availabilityZones ~newReplicationFactor ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds one or more nodes to a DAX cluster."]
@@ -3187,10 +3369,10 @@ module DescribeSubnetGroupsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?subnetGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subnetGroups =
-        field_map json "SubnetGroups" SubnetGroupList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "SubnetGroups" SubnetGroupList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?subnetGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3229,11 +3411,11 @@ module DescribeSubnetGroupsRequest =
           (Xml.child xml_arg0 "SubnetGroupNames") in
       make ?nextToken ?maxResults ?subnetGroupNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
       let subnetGroupNames =
-        field_map json "SubnetGroupNames" SubnetGroupNameList.of_json in
+        field_map json__ "SubnetGroupNames" SubnetGroupNameList.of_json in
       make ?nextToken ?maxResults ?subnetGroupNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3327,9 +3509,9 @@ module DescribeParametersResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?parameters ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParameterList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParameterList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?parameters ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3376,12 +3558,12 @@ module DescribeParametersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ?nextToken ?maxResults ?source ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
-      let source = field_map json "Source" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let source = field_map json__ "Source" String_.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ?nextToken ?maxResults ?source ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3476,10 +3658,10 @@ module DescribeParameterGroupsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?parameterGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroups =
-        field_map json "ParameterGroups" ParameterGroupList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "ParameterGroups" ParameterGroupList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?parameterGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3519,11 +3701,11 @@ module DescribeParameterGroupsRequest =
           (Xml.child xml_arg0 "ParameterGroupNames") in
       make ?nextToken ?maxResults ?parameterGroupNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
       let parameterGroupNames =
-        field_map json "ParameterGroupNames" ParameterGroupNameList.of_json in
+        field_map json__ "ParameterGroupNames" ParameterGroupNameList.of_json in
       make ?nextToken ?maxResults ?parameterGroupNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3604,9 +3786,9 @@ module DescribeEventsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?events ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" EventList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" EventList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?events ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3682,14 +3864,14 @@ module DescribeEventsRequest =
       make ?nextToken ?maxResults ?duration ?endTime ?startTime ?sourceType
         ?sourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
-      let duration = field_map json "Duration" IntegerOptional.of_json in
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
-      let sourceName = field_map json "SourceName" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let duration = field_map json__ "Duration" IntegerOptional.of_json in
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let sourceName = field_map json__ "SourceName" String_.of_json in
       make ?nextToken ?maxResults ?duration ?endTime ?startTime ?sourceType
         ?sourceName ()
     let to_json v = composed_to_json to_value v
@@ -3773,9 +3955,9 @@ module DescribeDefaultParametersResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?parameters ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParameterList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParameterList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?parameters ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3806,9 +3988,9 @@ module DescribeDefaultParametersRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3897,9 +4079,9 @@ module DescribeClustersResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?clusters ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusters = field_map json "Clusters" ClusterList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let clusters = field_map json__ "Clusters" ClusterList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?clusters ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3937,11 +4119,11 @@ module DescribeClustersRequest =
           (Xml.child xml_arg0 "ClusterNames") in
       make ?nextToken ?maxResults ?clusterNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" IntegerOptional.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
       let clusterNames =
-        field_map json "ClusterNames" ClusterNameList.of_json in
+        field_map json__ "ClusterNames" ClusterNameList.of_json in
       make ?nextToken ?maxResults ?clusterNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4011,8 +4193,9 @@ module DeleteSubnetGroupResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DeletionMessage") in
       make ?deletionMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deletionMessage = field_map json "DeletionMessage" String_.of_json in
+    let of_json json__ =
+      let deletionMessage =
+        field_map json__ "DeletionMessage" String_.of_json in
       make ?deletionMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4035,9 +4218,9 @@ module DeleteSubnetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetGroupName") in
       make ~subnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subnetGroupName =
-        field_map_exn json "SubnetGroupName" String_.of_json in
+        field_map_exn json__ "SubnetGroupName" String_.of_json in
       make ~subnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4135,8 +4318,9 @@ module DeleteParameterGroupResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DeletionMessage") in
       make ?deletionMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deletionMessage = field_map json "DeletionMessage" String_.of_json in
+    let of_json json__ =
+      let deletionMessage =
+        field_map json__ "DeletionMessage" String_.of_json in
       make ?deletionMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4160,9 +4344,9 @@ module DeleteParameterGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4254,8 +4438,8 @@ module DeleteClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4278,8 +4462,8 @@ module DeleteClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
       make ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
+    let of_json json__ =
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
       make ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4380,8 +4564,8 @@ module DecreaseReplicationFactorResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4438,14 +4622,14 @@ module DecreaseReplicationFactorRequest =
       make ?nodeIdsToRemove ?availabilityZones ~newReplicationFactor
         ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodeIdsToRemove =
-        field_map json "NodeIdsToRemove" NodeIdentifierList.of_json in
+        field_map json__ "NodeIdsToRemove" NodeIdentifierList.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZoneList.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZoneList.of_json in
       let newReplicationFactor =
-        field_map_exn json "NewReplicationFactor" Integer.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
+        field_map_exn json__ "NewReplicationFactor" Integer.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
       make ?nodeIdsToRemove ?availabilityZones ~newReplicationFactor
         ~clusterName ()
     let to_json v = composed_to_json to_value v
@@ -4463,6 +4647,7 @@ module CreateSubnetGroupResponse =
       | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
       | `SubnetGroupAlreadyExistsFault of SubnetGroupAlreadyExistsFault.t 
       | `SubnetGroupQuotaExceededFault of SubnetGroupQuotaExceededFault.t 
+      | `SubnetNotAllowedFault of SubnetNotAllowedFault.t 
       | `SubnetQuotaExceededFault of SubnetQuotaExceededFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?subnetGroup = fun () -> { subnetGroup }
@@ -4478,6 +4663,8 @@ module CreateSubnetGroupResponse =
       | "SubnetGroupQuotaExceededFault" ->
           `SubnetGroupQuotaExceededFault
             (SubnetGroupQuotaExceededFault.of_json json)
+      | "SubnetNotAllowedFault" ->
+          `SubnetNotAllowedFault (SubnetNotAllowedFault.of_json json)
       | "SubnetQuotaExceededFault" ->
           `SubnetQuotaExceededFault (SubnetQuotaExceededFault.of_json json)
       | name ->
@@ -4495,6 +4682,8 @@ module CreateSubnetGroupResponse =
       | "SubnetGroupQuotaExceededFault" ->
           `SubnetGroupQuotaExceededFault
             (SubnetGroupQuotaExceededFault.of_xml xml)
+      | "SubnetNotAllowedFault" ->
+          `SubnetNotAllowedFault (SubnetNotAllowedFault.of_xml xml)
       | "SubnetQuotaExceededFault" ->
           `SubnetQuotaExceededFault (SubnetQuotaExceededFault.of_xml xml)
       | name ->
@@ -4517,6 +4706,10 @@ module CreateSubnetGroupResponse =
           `Assoc
             [("error", (`String "SubnetGroupQuotaExceededFault"));
             ("details", (SubnetGroupQuotaExceededFault.to_json e))]
+      | `SubnetNotAllowedFault e ->
+          `Assoc
+            [("error", (`String "SubnetNotAllowedFault"));
+            ("details", (SubnetNotAllowedFault.to_json e))]
       | `SubnetQuotaExceededFault e ->
           `Assoc
             [("error", (`String "SubnetQuotaExceededFault"));
@@ -4535,8 +4728,8 @@ module CreateSubnetGroupResponse =
         (Option.map ~f:SubnetGroup.of_xml) (Xml.child xml_arg0 "SubnetGroup") in
       make ?subnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetGroup = field_map json "SubnetGroup" SubnetGroup.of_json in
+    let of_json json__ =
+      let subnetGroup = field_map json__ "SubnetGroup" SubnetGroup.of_json in
       make ?subnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new subnet group."]
@@ -4573,12 +4766,12 @@ module CreateSubnetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetGroupName") in
       make ~subnetIds ?description ~subnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subnetIds =
-        field_map_exn json "SubnetIds" SubnetIdentifierList.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map_exn json__ "SubnetIds" SubnetIdentifierList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let subnetGroupName =
-        field_map_exn json "SubnetGroupName" String_.of_json in
+        field_map_exn json__ "SubnetGroupName" String_.of_json in
       make ~subnetIds ?description ~subnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new subnet group."]
@@ -4689,9 +4882,9 @@ module CreateParameterGroupResponse =
           (Xml.child xml_arg0 "ParameterGroup") in
       make ?parameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroup =
-        field_map json "ParameterGroup" ParameterGroup.of_json in
+        field_map json__ "ParameterGroup" ParameterGroup.of_json in
       make ?parameterGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4723,10 +4916,10 @@ module CreateParameterGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ?description ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ?description ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4930,8 +5123,8 @@ module CreateClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4950,7 +5143,7 @@ module CreateClusterRequest =
         [@ocaml.doc "A description of the cluster."];
       replicationFactor: Integer.t
         [@ocaml.doc
-          "The number of nodes in the DAX cluster. A replication factor of 1 will create a single-node cluster, without any read replicas. For additional fault tolerance, you can create a multiple node cluster with one or more read replicas. To do this, set ReplicationFactor to a number between 3 (one primary and two read replicas) and 10 (one primary and nine read replicas). If the AvailabilityZones parameter is provided, its length must equal the ReplicationFactor. AWS recommends that you have at least two read replicas per cluster."];
+          "The number of nodes in the DAX cluster. A replication factor of 1 will create a single-node cluster, without any read replicas. For additional fault tolerance, you can create a multiple node cluster with one or more read replicas. To do this, set ReplicationFactor to a number between 3 (one primary and two read replicas) and 10 (one primary and nine read replicas). If the AvailabilityZones parameter is provided, its length must equal the ReplicationFactor. Amazon Web Services recommends that you have at least two read replicas per cluster."];
       availabilityZones: AvailabilityZoneList.t option
         [@ocaml.doc
           "The Availability Zones (AZs) in which the cluster nodes will reside after the cluster has been created or updated. If provided, the length of this list must equal the ReplicationFactor parameter. If you omit this parameter, DAX will spread the nodes across Availability Zones for the highest availability."];
@@ -4979,7 +5172,10 @@ module CreateClusterRequest =
           "Represents the settings used to enable server-side encryption on the cluster."];
       clusterEndpointEncryptionType: ClusterEndpointEncryptionType.t option
         [@ocaml.doc
-          "The type of encryption the cluster's endpoint should support. Values are: NONE for no encryption TLS for Transport Layer Security"]}
+          "The type of encryption the cluster's endpoint should support. Values are: NONE for no encryption TLS for Transport Layer Security"];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "Specifies the IP protocol(s) the cluster uses for network communications. Values are: ipv4 - The cluster is accessible only through IPv4 addresses ipv6 - The cluster is accessible only through IPv6 addresses dual_stack - The cluster is accessible through both IPv4 and IPv6 addresses. If no explicit NetworkType is provided, the network type is derived based on the subnet group's configuration."]}
     let context_ = "CreateClusterRequest"
     let make ?description =
       fun ?availabilityZones ->
@@ -4991,27 +5187,29 @@ module CreateClusterRequest =
                   fun ?tags ->
                     fun ?sSESpecification ->
                       fun ?clusterEndpointEncryptionType ->
-                        fun ~clusterName ->
-                          fun ~nodeType ->
-                            fun ~replicationFactor ->
-                              fun ~iamRoleArn ->
-                                fun () ->
-                                  {
-                                    description;
-                                    availabilityZones;
-                                    subnetGroupName;
-                                    securityGroupIds;
-                                    preferredMaintenanceWindow;
-                                    notificationTopicArn;
-                                    parameterGroupName;
-                                    tags;
-                                    sSESpecification;
-                                    clusterEndpointEncryptionType;
-                                    clusterName;
-                                    nodeType;
-                                    replicationFactor;
-                                    iamRoleArn
-                                  }
+                        fun ?networkType ->
+                          fun ~clusterName ->
+                            fun ~nodeType ->
+                              fun ~replicationFactor ->
+                                fun ~iamRoleArn ->
+                                  fun () ->
+                                    {
+                                      description;
+                                      availabilityZones;
+                                      subnetGroupName;
+                                      securityGroupIds;
+                                      preferredMaintenanceWindow;
+                                      notificationTopicArn;
+                                      parameterGroupName;
+                                      tags;
+                                      sSESpecification;
+                                      clusterEndpointEncryptionType;
+                                      networkType;
+                                      clusterName;
+                                      nodeType;
+                                      replicationFactor;
+                                      iamRoleArn
+                                    }
     let to_value x =
       structure_to_value
         [("ClusterName", (Some (String_.to_value x.clusterName)));
@@ -5037,9 +5235,12 @@ module CreateClusterRequest =
           (Option.map x.sSESpecification ~f:SSESpecification.to_value));
         ("ClusterEndpointEncryptionType",
           (Option.map x.clusterEndpointEncryptionType
-             ~f:ClusterEndpointEncryptionType.to_value))]
+             ~f:ClusterEndpointEncryptionType.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let clusterEndpointEncryptionType =
         (Option.map ~f:ClusterEndpointEncryptionType.of_xml)
           (Xml.child xml_arg0 "ClusterEndpointEncryptionType") in
@@ -5077,38 +5278,41 @@ module CreateClusterRequest =
       let clusterName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterName") in
-      make ?clusterEndpointEncryptionType ?sSESpecification ?tags
-        ?parameterGroupName ~iamRoleArn ?notificationTopicArn
+      make ?networkType ?clusterEndpointEncryptionType ?sSESpecification
+        ?tags ?parameterGroupName ~iamRoleArn ?notificationTopicArn
         ?preferredMaintenanceWindow ?securityGroupIds ?subnetGroupName
         ?availabilityZones ~replicationFactor ?description ~nodeType
         ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
       let clusterEndpointEncryptionType =
-        field_map json "ClusterEndpointEncryptionType"
+        field_map json__ "ClusterEndpointEncryptionType"
           ClusterEndpointEncryptionType.of_json in
       let sSESpecification =
-        field_map json "SSESpecification" SSESpecification.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "SSESpecification" SSESpecification.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
-      let iamRoleArn = field_map_exn json "IamRoleArn" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
+      let iamRoleArn = field_map_exn json__ "IamRoleArn" String_.of_json in
       let notificationTopicArn =
-        field_map json "NotificationTopicArn" String_.of_json in
+        field_map json__ "NotificationTopicArn" String_.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIdentifierList.of_json in
-      let subnetGroupName = field_map json "SubnetGroupName" String_.of_json in
+        field_map json__ "SecurityGroupIds"
+          SecurityGroupIdentifierList.of_json in
+      let subnetGroupName =
+        field_map json__ "SubnetGroupName" String_.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZoneList.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZoneList.of_json in
       let replicationFactor =
-        field_map_exn json "ReplicationFactor" Integer.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let nodeType = field_map_exn json "NodeType" String_.of_json in
-      let clusterName = field_map_exn json "ClusterName" String_.of_json in
-      make ?clusterEndpointEncryptionType ?sSESpecification ?tags
-        ?parameterGroupName ~iamRoleArn ?notificationTopicArn
+        field_map_exn json__ "ReplicationFactor" Integer.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let nodeType = field_map_exn json__ "NodeType" String_.of_json in
+      let clusterName = field_map_exn json__ "ClusterName" String_.of_json in
+      make ?networkType ?clusterEndpointEncryptionType ?sSESpecification
+        ?tags ?parameterGroupName ~iamRoleArn ?notificationTopicArn
         ?preferredMaintenanceWindow ?securityGroupIds ?subnetGroupName
         ?availabilityZones ~replicationFactor ?description ~nodeType
         ~clusterName ()

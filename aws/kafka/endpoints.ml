@@ -11,10 +11,24 @@ type ('i, 'o, 'e) t =
   CreateClusterV2Response.error) t 
   | CreateConfiguration: (CreateConfigurationRequest.t,
   CreateConfigurationResponse.t, CreateConfigurationResponse.error) t 
+  | CreateReplicator: (CreateReplicatorRequest.t, CreateReplicatorResponse.t,
+  CreateReplicatorResponse.error) t 
+  | CreateTopic: (CreateTopicRequest.t, CreateTopicResponse.t,
+  CreateTopicResponse.error) t 
+  | CreateVpcConnection: (CreateVpcConnectionRequest.t,
+  CreateVpcConnectionResponse.t, CreateVpcConnectionResponse.error) t 
   | DeleteCluster: (DeleteClusterRequest.t, DeleteClusterResponse.t,
   DeleteClusterResponse.error) t 
+  | DeleteClusterPolicy: (DeleteClusterPolicyRequest.t,
+  DeleteClusterPolicyResponse.t, DeleteClusterPolicyResponse.error) t 
   | DeleteConfiguration: (DeleteConfigurationRequest.t,
   DeleteConfigurationResponse.t, DeleteConfigurationResponse.error) t 
+  | DeleteReplicator: (DeleteReplicatorRequest.t, DeleteReplicatorResponse.t,
+  DeleteReplicatorResponse.error) t 
+  | DeleteTopic: (DeleteTopicRequest.t, DeleteTopicResponse.t,
+  DeleteTopicResponse.error) t 
+  | DeleteVpcConnection: (DeleteVpcConnectionRequest.t,
+  DeleteVpcConnectionResponse.t, DeleteVpcConnectionResponse.error) t 
   | DescribeCluster: (DescribeClusterRequest.t, DescribeClusterResponse.t,
   DescribeClusterResponse.error) t 
   | DescribeClusterV2: (DescribeClusterV2Request.t,
@@ -22,11 +36,23 @@ type ('i, 'o, 'e) t =
   | DescribeClusterOperation: (DescribeClusterOperationRequest.t,
   DescribeClusterOperationResponse.t, DescribeClusterOperationResponse.error)
   t 
+  | DescribeClusterOperationV2: (DescribeClusterOperationV2Request.t,
+  DescribeClusterOperationV2Response.t,
+  DescribeClusterOperationV2Response.error) t 
   | DescribeConfiguration: (DescribeConfigurationRequest.t,
   DescribeConfigurationResponse.t, DescribeConfigurationResponse.error) t 
   | DescribeConfigurationRevision: (DescribeConfigurationRevisionRequest.t,
   DescribeConfigurationRevisionResponse.t,
   DescribeConfigurationRevisionResponse.error) t 
+  | DescribeReplicator: (DescribeReplicatorRequest.t,
+  DescribeReplicatorResponse.t, DescribeReplicatorResponse.error) t 
+  | DescribeTopic: (DescribeTopicRequest.t, DescribeTopicResponse.t,
+  DescribeTopicResponse.error) t 
+  | DescribeTopicPartitions: (DescribeTopicPartitionsRequest.t,
+  DescribeTopicPartitionsResponse.t, DescribeTopicPartitionsResponse.error) t
+  
+  | DescribeVpcConnection: (DescribeVpcConnectionRequest.t,
+  DescribeVpcConnectionResponse.t, DescribeVpcConnectionResponse.error) t 
   | BatchDisassociateScramSecret: (BatchDisassociateScramSecretRequest.t,
   BatchDisassociateScramSecretResponse.t,
   BatchDisassociateScramSecretResponse.error) t 
@@ -35,8 +61,13 @@ type ('i, 'o, 'e) t =
   | GetCompatibleKafkaVersions: (GetCompatibleKafkaVersionsRequest.t,
   GetCompatibleKafkaVersionsResponse.t,
   GetCompatibleKafkaVersionsResponse.error) t 
+  | GetClusterPolicy: (GetClusterPolicyRequest.t, GetClusterPolicyResponse.t,
+  GetClusterPolicyResponse.error) t 
   | ListClusterOperations: (ListClusterOperationsRequest.t,
   ListClusterOperationsResponse.t, ListClusterOperationsResponse.error) t 
+  | ListClusterOperationsV2: (ListClusterOperationsV2Request.t,
+  ListClusterOperationsV2Response.t, ListClusterOperationsV2Response.error) t
+  
   | ListClusters: (ListClustersRequest.t, ListClustersResponse.t,
   ListClustersResponse.error) t 
   | ListClustersV2: (ListClustersV2Request.t, ListClustersV2Response.t,
@@ -50,10 +81,24 @@ type ('i, 'o, 'e) t =
   ListKafkaVersionsResponse.t, ListKafkaVersionsResponse.error) t 
   | ListNodes: (ListNodesRequest.t, ListNodesResponse.t,
   ListNodesResponse.error) t 
+  | ListReplicators: (ListReplicatorsRequest.t, ListReplicatorsResponse.t,
+  ListReplicatorsResponse.error) t 
   | ListScramSecrets: (ListScramSecretsRequest.t, ListScramSecretsResponse.t,
   ListScramSecretsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListClientVpcConnections: (ListClientVpcConnectionsRequest.t,
+  ListClientVpcConnectionsResponse.t, ListClientVpcConnectionsResponse.error)
+  t 
+  | ListTopics: (ListTopicsRequest.t, ListTopicsResponse.t,
+  ListTopicsResponse.error) t 
+  | ListVpcConnections: (ListVpcConnectionsRequest.t,
+  ListVpcConnectionsResponse.t, ListVpcConnectionsResponse.error) t 
+  | RejectClientVpcConnection: (RejectClientVpcConnectionRequest.t,
+  RejectClientVpcConnectionResponse.t,
+  RejectClientVpcConnectionResponse.error) t 
+  | PutClusterPolicy: (PutClusterPolicyRequest.t, PutClusterPolicyResponse.t,
+  PutClusterPolicyResponse.error) t 
   | RebootBroker: (RebootBrokerRequest.t, RebootBrokerResponse.t,
   RebootBrokerResponse.error) t 
   | TagResource: (TagResourceRequest.t, unit, unit) t 
@@ -76,33 +121,61 @@ type ('i, 'o, 'e) t =
   UpdateClusterKafkaVersionResponse.error) t 
   | UpdateMonitoring: (UpdateMonitoringRequest.t, UpdateMonitoringResponse.t,
   UpdateMonitoringResponse.error) t 
+  | UpdateRebalancing: (UpdateRebalancingRequest.t,
+  UpdateRebalancingResponse.t, UpdateRebalancingResponse.error) t 
+  | UpdateReplicationInfo: (UpdateReplicationInfoRequest.t,
+  UpdateReplicationInfoResponse.t, UpdateReplicationInfoResponse.error) t 
   | UpdateSecurity: (UpdateSecurityRequest.t, UpdateSecurityResponse.t,
   UpdateSecurityResponse.error) t 
+  | UpdateStorage: (UpdateStorageRequest.t, UpdateStorageResponse.t,
+  UpdateStorageResponse.error) t 
+  | UpdateTopic: (UpdateTopicRequest.t, UpdateTopicResponse.t,
+  UpdateTopicResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | BatchAssociateScramSecret -> `POST
   | CreateCluster -> `POST
   | CreateClusterV2 -> `POST
   | CreateConfiguration -> `POST
+  | CreateReplicator -> `POST
+  | CreateTopic -> `POST
+  | CreateVpcConnection -> `POST
   | DeleteCluster -> `DELETE
+  | DeleteClusterPolicy -> `DELETE
   | DeleteConfiguration -> `DELETE
+  | DeleteReplicator -> `DELETE
+  | DeleteTopic -> `DELETE
+  | DeleteVpcConnection -> `DELETE
   | DescribeCluster -> `GET
   | DescribeClusterV2 -> `GET
   | DescribeClusterOperation -> `GET
+  | DescribeClusterOperationV2 -> `GET
   | DescribeConfiguration -> `GET
   | DescribeConfigurationRevision -> `GET
+  | DescribeReplicator -> `GET
+  | DescribeTopic -> `GET
+  | DescribeTopicPartitions -> `GET
+  | DescribeVpcConnection -> `GET
   | BatchDisassociateScramSecret -> `PATCH
   | GetBootstrapBrokers -> `GET
   | GetCompatibleKafkaVersions -> `GET
+  | GetClusterPolicy -> `GET
   | ListClusterOperations -> `GET
+  | ListClusterOperationsV2 -> `GET
   | ListClusters -> `GET
   | ListClustersV2 -> `GET
   | ListConfigurationRevisions -> `GET
   | ListConfigurations -> `GET
   | ListKafkaVersions -> `GET
   | ListNodes -> `GET
+  | ListReplicators -> `GET
   | ListScramSecrets -> `GET
   | ListTagsForResource -> `GET
+  | ListClientVpcConnections -> `GET
+  | ListTopics -> `GET
+  | ListVpcConnections -> `GET
+  | RejectClientVpcConnection -> `PUT
+  | PutClusterPolicy -> `PUT
   | RebootBroker -> `PUT
   | TagResource -> `POST
   | UntagResource -> `DELETE
@@ -114,7 +187,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateClusterConfiguration -> `PUT
   | UpdateClusterKafkaVersion -> `PUT
   | UpdateMonitoring -> `PUT
+  | UpdateRebalancing -> `PUT
+  | UpdateReplicationInfo -> `PUT
   | UpdateSecurity -> `PATCH
+  | UpdateStorage -> `PUT
+  | UpdateTopic -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -127,6 +204,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/api/v2/clusters"
       | CreateConfiguration ->
           (Format.kasprintf Uri.of_string) "/v1/configurations"
+      | CreateReplicator ->
+          (Format.kasprintf Uri.of_string) "/replication/v1/replicators"
+      | CreateTopic ->
+          (Format.kasprintf Uri.of_string) "/v1/clusters/%s/topics"
+            (Zz__string.to_header x.CreateTopicRequest.clusterArn)
+      | CreateVpcConnection ->
+          (Format.kasprintf Uri.of_string) "/v1/vpc-connection"
       | DeleteCluster ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/clusters/%s"
@@ -135,9 +219,28 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("currentVersion", (Zz__string.to_header v)))
                   x.currentVersion])
+      | DeleteClusterPolicy ->
+          (Format.kasprintf Uri.of_string) "/v1/clusters/%s/policy"
+            (Zz__string.to_header x.DeleteClusterPolicyRequest.clusterArn)
       | DeleteConfiguration ->
           (Format.kasprintf Uri.of_string) "/v1/configurations/%s"
             (Zz__string.to_header x.DeleteConfigurationRequest.arn)
+      | DeleteReplicator ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/replication/v1/replicators/%s"
+               (Zz__string.to_header x.DeleteReplicatorRequest.replicatorArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("currentVersion", (Zz__string.to_header v)))
+                  x.currentVersion])
+      | DeleteTopic ->
+          (Format.kasprintf Uri.of_string) "/v1/clusters/%s/topics/%s"
+            (Zz__string.to_header x.DeleteTopicRequest.clusterArn)
+            (Zz__string.to_header x.DeleteTopicRequest.topicName)
+      | DeleteVpcConnection ->
+          (Format.kasprintf Uri.of_string) "/v1/vpc-connection/%s"
+            (Zz__string.to_header x.DeleteVpcConnectionRequest.arn)
       | DescribeCluster ->
           (Format.kasprintf Uri.of_string) "/v1/clusters/%s"
             (Zz__string.to_header x.DescribeClusterRequest.clusterArn)
@@ -148,6 +251,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/v1/operations/%s"
             (Zz__string.to_header
                x.DescribeClusterOperationRequest.clusterOperationArn)
+      | DescribeClusterOperationV2 ->
+          (Format.kasprintf Uri.of_string) "/api/v2/operations/%s"
+            (Zz__string.to_header
+               x.DescribeClusterOperationV2Request.clusterOperationArn)
       | DescribeConfiguration ->
           (Format.kasprintf Uri.of_string) "/v1/configurations/%s"
             (Zz__string.to_header x.DescribeConfigurationRequest.arn)
@@ -157,6 +264,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (Zz__string.to_header x.DescribeConfigurationRevisionRequest.arn)
             (Zz__long.to_header
                x.DescribeConfigurationRevisionRequest.revision)
+      | DescribeReplicator ->
+          (Format.kasprintf Uri.of_string) "/replication/v1/replicators/%s"
+            (Zz__string.to_header x.DescribeReplicatorRequest.replicatorArn)
+      | DescribeTopic ->
+          (Format.kasprintf Uri.of_string) "/v1/clusters/%s/topics/%s"
+            (Zz__string.to_header x.DescribeTopicRequest.clusterArn)
+            (Zz__string.to_header x.DescribeTopicRequest.topicName)
+      | DescribeTopicPartitions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/v1/clusters/%s/topics/%s/partitions"
+               (Zz__string.to_header
+                  x.DescribeTopicPartitionsRequest.clusterArn)
+               (Zz__string.to_header
+                  x.DescribeTopicPartitionsRequest.topicName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
+      | DescribeVpcConnection ->
+          (Format.kasprintf Uri.of_string) "/v1/vpc-connection/%s"
+            (Zz__string.to_header x.DescribeVpcConnectionRequest.arn)
       | BatchDisassociateScramSecret ->
           (Format.kasprintf Uri.of_string) "/v1/clusters/%s/scram-secrets"
             (Zz__string.to_header
@@ -172,11 +304,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("clusterArn", (Zz__string.to_header v)))
                   x.clusterArn])
+      | GetClusterPolicy ->
+          (Format.kasprintf Uri.of_string) "/v1/clusters/%s/policy"
+            (Zz__string.to_header x.GetClusterPolicyRequest.clusterArn)
       | ListClusterOperations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/clusters/%s/operations"
                (Zz__string.to_header
                   x.ListClusterOperationsRequest.clusterArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
+      | ListClusterOperationsV2 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/api/v2/clusters/%s/operations"
+               (Zz__string.to_header
+                  x.ListClusterOperationsV2Request.clusterArn))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -258,6 +406,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
                  x.nextToken])
+      | ListReplicators ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/replication/v1/replicators")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("replicatorNameFilter", (Zz__string.to_header v)))
+                 x.replicatorNameFilter])
       | ListScramSecrets ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/clusters/%s/scram-secrets"
@@ -272,6 +434,51 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/v1/tags/%s"
             (Zz__string.to_header x.ListTagsForResourceRequest.resourceArn)
+      | ListClientVpcConnections ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/v1/clusters/%s/client-vpc-connections"
+               (Zz__string.to_header
+                  x.ListClientVpcConnectionsRequest.clusterArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
+      | ListTopics ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/clusters/%s/topics"
+               (Zz__string.to_header x.ListTopicsRequest.clusterArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("topicNameFilter", (Zz__string.to_header v)))
+                 x.topicNameFilter])
+      | ListVpcConnections ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/vpc-connections")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
+      | RejectClientVpcConnection ->
+          (Format.kasprintf Uri.of_string)
+            "/v1/clusters/%s/client-vpc-connection"
+            (Zz__string.to_header
+               x.RejectClientVpcConnectionRequest.clusterArn)
+      | PutClusterPolicy ->
+          (Format.kasprintf Uri.of_string) "/v1/clusters/%s/policy"
+            (Zz__string.to_header x.PutClusterPolicyRequest.clusterArn)
       | RebootBroker ->
           (Format.kasprintf Uri.of_string) "/v1/clusters/%s/reboot-broker"
             (Zz__string.to_header x.RebootBrokerRequest.clusterArn)
@@ -310,9 +517,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateMonitoring ->
           (Format.kasprintf Uri.of_string) "/v1/clusters/%s/monitoring"
             (Zz__string.to_header x.UpdateMonitoringRequest.clusterArn)
+      | UpdateRebalancing ->
+          (Format.kasprintf Uri.of_string) "/v1/clusters/%s/rebalancing"
+            (Zz__string.to_header x.UpdateRebalancingRequest.clusterArn)
+      | UpdateReplicationInfo ->
+          (Format.kasprintf Uri.of_string)
+            "/replication/v1/replicators/%s/replication-info"
+            (Zz__string.to_header
+               x.UpdateReplicationInfoRequest.replicatorArn)
       | UpdateSecurity ->
           (Format.kasprintf Uri.of_string) "/v1/clusters/%s/security"
-            (Zz__string.to_header x.UpdateSecurityRequest.clusterArn))
+            (Zz__string.to_header x.UpdateSecurityRequest.clusterArn)
+      | UpdateStorage ->
+          (Format.kasprintf Uri.of_string) "/v1/clusters/%s/storage"
+            (Zz__string.to_header x.UpdateStorageRequest.clusterArn)
+      | UpdateTopic ->
+          (Format.kasprintf Uri.of_string) "/v1/clusters/%s/topics/%s"
+            (Zz__string.to_header x.UpdateTopicRequest.clusterArn)
+            (Zz__string.to_header x.UpdateTopicRequest.topicName))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -350,6 +572,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("brokerNodeGroupInfo",
                            (BrokerNodeGroupInfo.to_value
                               req.CreateClusterRequest.brokerNodeGroupInfo));
+                      Option.map req.CreateClusterRequest.rebalancing
+                        ~f:(fun x ->
+                              ("rebalancing", (Rebalancing.to_value x)));
                       Option.map
                         req.CreateClusterRequest.clientAuthentication
                         ~f:(fun x ->
@@ -386,7 +611,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (Zz__integerMin1Max15.to_value
                              req.CreateClusterRequest.numberOfBrokerNodes));
                       Option.map req.CreateClusterRequest.tags
-                        ~f:(fun x -> ("tags", (Zz__mapOf__string.to_value x)))])
+                        ~f:(fun x -> ("tags", (Zz__mapOf__string.to_value x)));
+                      Option.map req.CreateClusterRequest.storageMode
+                        ~f:(fun x ->
+                              ("storageMode", (StorageMode.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -454,8 +682,121 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateReplicator ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateReplicatorRequest.description
+                         ~f:(fun x ->
+                               ("description",
+                                 (Zz__stringMax1024.to_value x)));
+                      Some
+                        ("kafkaClusters",
+                          (Zz__listOfKafkaCluster.to_value
+                             req.CreateReplicatorRequest.kafkaClusters));
+                      Some
+                        ("replicationInfoList",
+                          (Zz__listOfReplicationInfo.to_value
+                             req.CreateReplicatorRequest.replicationInfoList));
+                      Some
+                        ("replicatorName",
+                          (Zz__stringMin1Max128Pattern09AZaZ09AZaZ0.to_value
+                             req.CreateReplicatorRequest.replicatorName));
+                      Some
+                        ("serviceExecutionRoleArn",
+                          (Zz__string.to_value
+                             req.CreateReplicatorRequest.serviceExecutionRoleArn));
+                      Option.map req.CreateReplicatorRequest.tags
+                        ~f:(fun x -> ("tags", (Zz__mapOf__string.to_value x)));
+                      Option.map req.CreateReplicatorRequest.logDelivery
+                        ~f:(fun x ->
+                              ("logDelivery", (LogDelivery.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTopic ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("topicName",
+                           (Zz__string.to_value
+                              req.CreateTopicRequest.topicName));
+                      Some
+                        ("partitionCount",
+                          (Zz__integerMin1.to_value
+                             req.CreateTopicRequest.partitionCount));
+                      Some
+                        ("replicationFactor",
+                          (Zz__integerMin1.to_value
+                             req.CreateTopicRequest.replicationFactor));
+                      Option.map req.CreateTopicRequest.configs
+                        ~f:(fun x -> ("configs", (Zz__string.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateVpcConnection ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("targetClusterArn",
+                           (Zz__string.to_value
+                              req.CreateVpcConnectionRequest.targetClusterArn));
+                      Some
+                        ("authentication",
+                          (Zz__string.to_value
+                             req.CreateVpcConnectionRequest.authentication));
+                      Some
+                        ("vpcId",
+                          (Zz__string.to_value
+                             req.CreateVpcConnectionRequest.vpcId));
+                      Some
+                        ("clientSubnets",
+                          (Zz__listOf__string.to_value
+                             req.CreateVpcConnectionRequest.clientSubnets));
+                      Some
+                        ("securityGroups",
+                          (Zz__listOf__string.to_value
+                             req.CreateVpcConnectionRequest.securityGroups));
+                      Option.map req.CreateVpcConnectionRequest.tags
+                        ~f:(fun x -> ("tags", (Zz__mapOf__string.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteCluster -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteClusterPolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteConfiguration -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteReplicator -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTopic -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteVpcConnection -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeCluster ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -465,10 +806,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeClusterOperation ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeClusterOperationV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeConfigurationRevision ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeReplicator ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTopic ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTopicPartitions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeVpcConnection ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | BatchDisassociateScramSecret ->
@@ -479,7 +835,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetCompatibleKafkaVersions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetClusterPolicy ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListClusterOperations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListClusterOperationsV2 ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListClusters ->
@@ -500,12 +862,27 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListNodes ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListReplicators ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListScramSecrets ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListClientVpcConnections ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTopics ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVpcConnections ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RejectClientVpcConnection ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | PutClusterPolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | RebootBroker -> Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
@@ -538,7 +915,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateClusterKafkaVersion ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateMonitoring -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRebalancing -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateReplicationInfo -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSecurity -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateStorage -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateTopic -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -611,16 +992,55 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateConfigurationResponse.error_of_json))
+  | CreateReplicator ->
+      if is_success
+      then Ok (CreateReplicatorResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateReplicatorResponse.error_of_json))
+  | CreateTopic ->
+      if is_success
+      then Ok (CreateTopicResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateTopicResponse.error_of_json))
+  | CreateVpcConnection ->
+      if is_success
+      then Ok (CreateVpcConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateVpcConnectionResponse.error_of_json))
   | DeleteCluster ->
       if is_success
       then Ok (DeleteClusterResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DeleteClusterResponse.error_of_json))
+  | DeleteClusterPolicy ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteClusterPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteClusterPolicyResponse.error_of_json))
   | DeleteConfiguration ->
       if is_success
       then Ok (DeleteConfigurationResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DeleteConfigurationResponse.error_of_json))
+  | DeleteReplicator ->
+      if is_success
+      then Ok (DeleteReplicatorResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteReplicatorResponse.error_of_json))
+  | DeleteTopic ->
+      if is_success
+      then Ok (DeleteTopicResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteTopicResponse.error_of_json))
+  | DeleteVpcConnection ->
+      if is_success
+      then Ok (DeleteVpcConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteVpcConnectionResponse.error_of_json))
   | DescribeCluster ->
       if is_success
       then Ok (DescribeClusterResponse.of_json (response_to_json resp))
@@ -640,6 +1060,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeClusterOperationResponse.error_of_json))
+  | DescribeClusterOperationV2 ->
+      if is_success
+      then
+        Ok
+          (DescribeClusterOperationV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeClusterOperationV2Response.error_of_json))
   | DescribeConfiguration ->
       if is_success
       then Ok (DescribeConfigurationResponse.of_json (response_to_json resp))
@@ -656,6 +1085,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeConfigurationRevisionResponse.error_of_json))
+  | DescribeReplicator ->
+      if is_success
+      then Ok (DescribeReplicatorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeReplicatorResponse.error_of_json))
+  | DescribeTopic ->
+      if is_success
+      then Ok (DescribeTopicResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeTopicResponse.error_of_json))
+  | DescribeTopicPartitions ->
+      if is_success
+      then
+        Ok (DescribeTopicPartitionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTopicPartitionsResponse.error_of_json))
+  | DescribeVpcConnection ->
+      if is_success
+      then Ok (DescribeVpcConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeVpcConnectionResponse.error_of_json))
   | BatchDisassociateScramSecret ->
       if is_success
       then
@@ -681,12 +1134,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetCompatibleKafkaVersionsResponse.error_of_json))
+  | GetClusterPolicy ->
+      if is_success
+      then Ok (GetClusterPolicyResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetClusterPolicyResponse.error_of_json))
   | ListClusterOperations ->
       if is_success
       then Ok (ListClusterOperationsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListClusterOperationsResponse.error_of_json))
+  | ListClusterOperationsV2 ->
+      if is_success
+      then
+        Ok (ListClusterOperationsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListClusterOperationsV2Response.error_of_json))
   | ListClusters ->
       if is_success
       then Ok (ListClustersResponse.of_json (response_to_json resp))
@@ -721,6 +1187,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListNodesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListNodesResponse.error_of_json))
+  | ListReplicators ->
+      if is_success
+      then Ok (ListReplicatorsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListReplicatorsResponse.error_of_json))
   | ListScramSecrets ->
       if is_success
       then Ok (ListScramSecretsResponse.of_json (response_to_json resp))
@@ -732,6 +1203,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListClientVpcConnections ->
+      if is_success
+      then
+        Ok (ListClientVpcConnectionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListClientVpcConnectionsResponse.error_of_json))
+  | ListTopics ->
+      if is_success
+      then Ok (ListTopicsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTopicsResponse.error_of_json))
+  | ListVpcConnections ->
+      if is_success
+      then Ok (ListVpcConnectionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListVpcConnectionsResponse.error_of_json))
+  | RejectClientVpcConnection ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (RejectClientVpcConnectionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some RejectClientVpcConnectionResponse.error_of_json))
+  | PutClusterPolicy ->
+      if is_success
+      then Ok (PutClusterPolicyResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some PutClusterPolicyResponse.error_of_json))
   | RebootBroker ->
       if is_success
       then Ok (RebootBrokerResponse.of_json (response_to_json resp))
@@ -791,8 +1296,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (UpdateMonitoringResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateMonitoringResponse.error_of_json))
+  | UpdateRebalancing ->
+      if is_success
+      then Ok (UpdateRebalancingResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateRebalancingResponse.error_of_json))
+  | UpdateReplicationInfo ->
+      if is_success
+      then Ok (UpdateReplicationInfoResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateReplicationInfoResponse.error_of_json))
   | UpdateSecurity ->
       if is_success
       then Ok (UpdateSecurityResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateSecurityResponse.error_of_json))
+  | UpdateStorage ->
+      if is_success
+      then Ok (UpdateStorageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateStorageResponse.error_of_json))
+  | UpdateTopic ->
+      if is_success
+      then Ok (UpdateTopicResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateTopicResponse.error_of_json))

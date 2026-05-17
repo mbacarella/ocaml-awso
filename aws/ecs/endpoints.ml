@@ -6,6 +6,11 @@ type ('i, 'o, 'e) t =
   CreateCapacityProviderResponse.t, CreateCapacityProviderResponse.error) t 
   | CreateCluster: (CreateClusterRequest.t, CreateClusterResponse.t,
   CreateClusterResponse.error) t 
+  | CreateDaemon: (CreateDaemonRequest.t, CreateDaemonResponse.t,
+  CreateDaemonResponse.error) t 
+  | CreateExpressGatewayService: (CreateExpressGatewayServiceRequest.t,
+  CreateExpressGatewayServiceResponse.t,
+  CreateExpressGatewayServiceResponse.error) t 
   | CreateService: (CreateServiceRequest.t, CreateServiceResponse.t,
   CreateServiceResponse.error) t 
   | CreateTaskSet: (CreateTaskSetRequest.t, CreateTaskSetResponse.t,
@@ -18,8 +23,18 @@ type ('i, 'o, 'e) t =
   DeleteCapacityProviderResponse.t, DeleteCapacityProviderResponse.error) t 
   | DeleteCluster: (DeleteClusterRequest.t, DeleteClusterResponse.t,
   DeleteClusterResponse.error) t 
+  | DeleteDaemon: (DeleteDaemonRequest.t, DeleteDaemonResponse.t,
+  DeleteDaemonResponse.error) t 
+  | DeleteDaemonTaskDefinition: (DeleteDaemonTaskDefinitionRequest.t,
+  DeleteDaemonTaskDefinitionResponse.t,
+  DeleteDaemonTaskDefinitionResponse.error) t 
+  | DeleteExpressGatewayService: (DeleteExpressGatewayServiceRequest.t,
+  DeleteExpressGatewayServiceResponse.t,
+  DeleteExpressGatewayServiceResponse.error) t 
   | DeleteService: (DeleteServiceRequest.t, DeleteServiceResponse.t,
   DeleteServiceResponse.error) t 
+  | DeleteTaskDefinitions: (DeleteTaskDefinitionsRequest.t,
+  DeleteTaskDefinitionsResponse.t, DeleteTaskDefinitionsResponse.error) t 
   | DeleteTaskSet: (DeleteTaskSetRequest.t, DeleteTaskSetResponse.t,
   DeleteTaskSetResponse.error) t 
   | DeregisterContainerInstance: (DeregisterContainerInstanceRequest.t,
@@ -36,6 +51,26 @@ type ('i, 'o, 'e) t =
   | DescribeContainerInstances: (DescribeContainerInstancesRequest.t,
   DescribeContainerInstancesResponse.t,
   DescribeContainerInstancesResponse.error) t 
+  | DescribeDaemon: (DescribeDaemonRequest.t, DescribeDaemonResponse.t,
+  DescribeDaemonResponse.error) t 
+  | DescribeDaemonDeployments: (DescribeDaemonDeploymentsRequest.t,
+  DescribeDaemonDeploymentsResponse.t,
+  DescribeDaemonDeploymentsResponse.error) t 
+  | DescribeDaemonRevisions: (DescribeDaemonRevisionsRequest.t,
+  DescribeDaemonRevisionsResponse.t, DescribeDaemonRevisionsResponse.error) t
+  
+  | DescribeDaemonTaskDefinition: (DescribeDaemonTaskDefinitionRequest.t,
+  DescribeDaemonTaskDefinitionResponse.t,
+  DescribeDaemonTaskDefinitionResponse.error) t 
+  | DescribeExpressGatewayService: (DescribeExpressGatewayServiceRequest.t,
+  DescribeExpressGatewayServiceResponse.t,
+  DescribeExpressGatewayServiceResponse.error) t 
+  | DescribeServiceDeployments: (DescribeServiceDeploymentsRequest.t,
+  DescribeServiceDeploymentsResponse.t,
+  DescribeServiceDeploymentsResponse.error) t 
+  | DescribeServiceRevisions: (DescribeServiceRevisionsRequest.t,
+  DescribeServiceRevisionsResponse.t, DescribeServiceRevisionsResponse.error)
+  t 
   | DescribeServices: (DescribeServicesRequest.t, DescribeServicesResponse.t,
   DescribeServicesResponse.error) t 
   | DescribeTaskDefinition: (DescribeTaskDefinitionRequest.t,
@@ -48,6 +83,8 @@ type ('i, 'o, 'e) t =
   DiscoverPollEndpointResponse.t, DiscoverPollEndpointResponse.error) t 
   | ExecuteCommand: (ExecuteCommandRequest.t, ExecuteCommandResponse.t,
   ExecuteCommandResponse.error) t 
+  | GetTaskProtection: (GetTaskProtectionRequest.t,
+  GetTaskProtectionResponse.t, GetTaskProtectionResponse.error) t 
   | ListAccountSettings: (ListAccountSettingsRequest.t,
   ListAccountSettingsResponse.t, ListAccountSettingsResponse.error) t 
   | ListAttributes: (ListAttributesRequest.t, ListAttributesResponse.t,
@@ -56,8 +93,20 @@ type ('i, 'o, 'e) t =
   ListClustersResponse.error) t 
   | ListContainerInstances: (ListContainerInstancesRequest.t,
   ListContainerInstancesResponse.t, ListContainerInstancesResponse.error) t 
+  | ListDaemonDeployments: (ListDaemonDeploymentsRequest.t,
+  ListDaemonDeploymentsResponse.t, ListDaemonDeploymentsResponse.error) t 
+  | ListDaemonTaskDefinitions: (ListDaemonTaskDefinitionsRequest.t,
+  ListDaemonTaskDefinitionsResponse.t,
+  ListDaemonTaskDefinitionsResponse.error) t 
+  | ListDaemons: (ListDaemonsRequest.t, ListDaemonsResponse.t,
+  ListDaemonsResponse.error) t 
+  | ListServiceDeployments: (ListServiceDeploymentsRequest.t,
+  ListServiceDeploymentsResponse.t, ListServiceDeploymentsResponse.error) t 
   | ListServices: (ListServicesRequest.t, ListServicesResponse.t,
   ListServicesResponse.error) t 
+  | ListServicesByNamespace: (ListServicesByNamespaceRequest.t,
+  ListServicesByNamespaceResponse.t, ListServicesByNamespaceResponse.error) t
+  
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListTaskDefinitionFamilies: (ListTaskDefinitionFamiliesRequest.t,
@@ -80,11 +129,16 @@ type ('i, 'o, 'e) t =
   | RegisterContainerInstance: (RegisterContainerInstanceRequest.t,
   RegisterContainerInstanceResponse.t,
   RegisterContainerInstanceResponse.error) t 
+  | RegisterDaemonTaskDefinition: (RegisterDaemonTaskDefinitionRequest.t,
+  RegisterDaemonTaskDefinitionResponse.t,
+  RegisterDaemonTaskDefinitionResponse.error) t 
   | RegisterTaskDefinition: (RegisterTaskDefinitionRequest.t,
   RegisterTaskDefinitionResponse.t, RegisterTaskDefinitionResponse.error) t 
   | RunTask: (RunTaskRequest.t, RunTaskResponse.t, RunTaskResponse.error) t 
   | StartTask: (StartTaskRequest.t, StartTaskResponse.t,
   StartTaskResponse.error) t 
+  | StopServiceDeployment: (StopServiceDeploymentRequest.t,
+  StopServiceDeploymentResponse.t, StopServiceDeploymentResponse.error) t 
   | StopTask: (StopTaskRequest.t, StopTaskResponse.t, StopTaskResponse.error)
   t 
   | SubmitAttachmentStateChanges: (SubmitAttachmentStateChangesRequest.t,
@@ -110,41 +164,67 @@ type ('i, 'o, 'e) t =
   | UpdateContainerInstancesState: (UpdateContainerInstancesStateRequest.t,
   UpdateContainerInstancesStateResponse.t,
   UpdateContainerInstancesStateResponse.error) t 
+  | UpdateDaemon: (UpdateDaemonRequest.t, UpdateDaemonResponse.t,
+  UpdateDaemonResponse.error) t 
+  | UpdateExpressGatewayService: (UpdateExpressGatewayServiceRequest.t,
+  UpdateExpressGatewayServiceResponse.t,
+  UpdateExpressGatewayServiceResponse.error) t 
   | UpdateService: (UpdateServiceRequest.t, UpdateServiceResponse.t,
   UpdateServiceResponse.error) t 
   | UpdateServicePrimaryTaskSet: (UpdateServicePrimaryTaskSetRequest.t,
   UpdateServicePrimaryTaskSetResponse.t,
   UpdateServicePrimaryTaskSetResponse.error) t 
+  | UpdateTaskProtection: (UpdateTaskProtectionRequest.t,
+  UpdateTaskProtectionResponse.t, UpdateTaskProtectionResponse.error) t 
   | UpdateTaskSet: (UpdateTaskSetRequest.t, UpdateTaskSetResponse.t,
   UpdateTaskSetResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateCapacityProvider -> `POST
   | CreateCluster -> `POST
+  | CreateDaemon -> `POST
+  | CreateExpressGatewayService -> `POST
   | CreateService -> `POST
   | CreateTaskSet -> `POST
   | DeleteAccountSetting -> `POST
   | DeleteAttributes -> `POST
   | DeleteCapacityProvider -> `POST
   | DeleteCluster -> `POST
+  | DeleteDaemon -> `POST
+  | DeleteDaemonTaskDefinition -> `POST
+  | DeleteExpressGatewayService -> `POST
   | DeleteService -> `POST
+  | DeleteTaskDefinitions -> `POST
   | DeleteTaskSet -> `POST
   | DeregisterContainerInstance -> `POST
   | DeregisterTaskDefinition -> `POST
   | DescribeCapacityProviders -> `POST
   | DescribeClusters -> `POST
   | DescribeContainerInstances -> `POST
+  | DescribeDaemon -> `POST
+  | DescribeDaemonDeployments -> `POST
+  | DescribeDaemonRevisions -> `POST
+  | DescribeDaemonTaskDefinition -> `POST
+  | DescribeExpressGatewayService -> `POST
+  | DescribeServiceDeployments -> `POST
+  | DescribeServiceRevisions -> `POST
   | DescribeServices -> `POST
   | DescribeTaskDefinition -> `POST
   | DescribeTaskSets -> `POST
   | DescribeTasks -> `POST
   | DiscoverPollEndpoint -> `POST
   | ExecuteCommand -> `POST
+  | GetTaskProtection -> `POST
   | ListAccountSettings -> `POST
   | ListAttributes -> `POST
   | ListClusters -> `POST
   | ListContainerInstances -> `POST
+  | ListDaemonDeployments -> `POST
+  | ListDaemonTaskDefinitions -> `POST
+  | ListDaemons -> `POST
+  | ListServiceDeployments -> `POST
   | ListServices -> `POST
+  | ListServicesByNamespace -> `POST
   | ListTagsForResource -> `POST
   | ListTaskDefinitionFamilies -> `POST
   | ListTaskDefinitions -> `POST
@@ -154,9 +234,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutAttributes -> `POST
   | PutClusterCapacityProviders -> `POST
   | RegisterContainerInstance -> `POST
+  | RegisterDaemonTaskDefinition -> `POST
   | RegisterTaskDefinition -> `POST
   | RunTask -> `POST
   | StartTask -> `POST
+  | StopServiceDeployment -> `POST
   | StopTask -> `POST
   | SubmitAttachmentStateChanges -> `POST
   | SubmitContainerStateChange -> `POST
@@ -168,38 +250,60 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateClusterSettings -> `POST
   | UpdateContainerAgent -> `POST
   | UpdateContainerInstancesState -> `POST
+  | UpdateDaemon -> `POST
+  | UpdateExpressGatewayService -> `POST
   | UpdateService -> `POST
   | UpdateServicePrimaryTaskSet -> `POST
+  | UpdateTaskProtection -> `POST
   | UpdateTaskSet -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateCapacityProvider -> (Format.kasprintf Uri.of_string) "/"
       | CreateCluster -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDaemon -> (Format.kasprintf Uri.of_string) "/"
+      | CreateExpressGatewayService -> (Format.kasprintf Uri.of_string) "/"
       | CreateService -> (Format.kasprintf Uri.of_string) "/"
       | CreateTaskSet -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAccountSetting -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAttributes -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCapacityProvider -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCluster -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDaemon -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDaemonTaskDefinition -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteExpressGatewayService -> (Format.kasprintf Uri.of_string) "/"
       | DeleteService -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteTaskDefinitions -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTaskSet -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterContainerInstance -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterTaskDefinition -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCapacityProviders -> (Format.kasprintf Uri.of_string) "/"
       | DescribeClusters -> (Format.kasprintf Uri.of_string) "/"
       | DescribeContainerInstances -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDaemon -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDaemonDeployments -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDaemonRevisions -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDaemonTaskDefinition -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeExpressGatewayService -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeServiceDeployments -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeServiceRevisions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeServices -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTaskDefinition -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTaskSets -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTasks -> (Format.kasprintf Uri.of_string) "/"
       | DiscoverPollEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | ExecuteCommand -> (Format.kasprintf Uri.of_string) "/"
+      | GetTaskProtection -> (Format.kasprintf Uri.of_string) "/"
       | ListAccountSettings -> (Format.kasprintf Uri.of_string) "/"
       | ListAttributes -> (Format.kasprintf Uri.of_string) "/"
       | ListClusters -> (Format.kasprintf Uri.of_string) "/"
       | ListContainerInstances -> (Format.kasprintf Uri.of_string) "/"
+      | ListDaemonDeployments -> (Format.kasprintf Uri.of_string) "/"
+      | ListDaemonTaskDefinitions -> (Format.kasprintf Uri.of_string) "/"
+      | ListDaemons -> (Format.kasprintf Uri.of_string) "/"
+      | ListServiceDeployments -> (Format.kasprintf Uri.of_string) "/"
       | ListServices -> (Format.kasprintf Uri.of_string) "/"
+      | ListServicesByNamespace -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListTaskDefinitionFamilies -> (Format.kasprintf Uri.of_string) "/"
       | ListTaskDefinitions -> (Format.kasprintf Uri.of_string) "/"
@@ -209,9 +313,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutAttributes -> (Format.kasprintf Uri.of_string) "/"
       | PutClusterCapacityProviders -> (Format.kasprintf Uri.of_string) "/"
       | RegisterContainerInstance -> (Format.kasprintf Uri.of_string) "/"
+      | RegisterDaemonTaskDefinition -> (Format.kasprintf Uri.of_string) "/"
       | RegisterTaskDefinition -> (Format.kasprintf Uri.of_string) "/"
       | RunTask -> (Format.kasprintf Uri.of_string) "/"
       | StartTask -> (Format.kasprintf Uri.of_string) "/"
+      | StopServiceDeployment -> (Format.kasprintf Uri.of_string) "/"
       | StopTask -> (Format.kasprintf Uri.of_string) "/"
       | SubmitAttachmentStateChanges -> (Format.kasprintf Uri.of_string) "/"
       | SubmitContainerStateChange -> (Format.kasprintf Uri.of_string) "/"
@@ -223,8 +329,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateClusterSettings -> (Format.kasprintf Uri.of_string) "/"
       | UpdateContainerAgent -> (Format.kasprintf Uri.of_string) "/"
       | UpdateContainerInstancesState -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateDaemon -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateExpressGatewayService -> (Format.kasprintf Uri.of_string) "/"
       | UpdateService -> (Format.kasprintf Uri.of_string) "/"
       | UpdateServicePrimaryTaskSet -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateTaskProtection -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTaskSet -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
@@ -246,6 +355,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonEC2ContainerServiceV20141113.CreateCluster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateDaemon ->
+      let json = CreateDaemonRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonEC2ContainerServiceV20141113.CreateDaemon")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateExpressGatewayService ->
+      let json = CreateExpressGatewayServiceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.CreateExpressGatewayService")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateService ->
       let json = CreateServiceRequest.to_json req in
@@ -301,6 +427,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerServiceV20141113.DeleteCluster")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDaemon ->
+      let json = DeleteDaemonRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonEC2ContainerServiceV20141113.DeleteDaemon")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDaemonTaskDefinition ->
+      let json = DeleteDaemonTaskDefinitionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DeleteDaemonTaskDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteExpressGatewayService ->
+      let json = DeleteExpressGatewayServiceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DeleteExpressGatewayService")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteService ->
       let json = DeleteServiceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -309,6 +461,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonEC2ContainerServiceV20141113.DeleteService")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteTaskDefinitions ->
+      let json = DeleteTaskDefinitionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DeleteTaskDefinitions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteTaskSet ->
       let json = DeleteTaskSetRequest.to_json req in
@@ -364,6 +525,69 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerServiceV20141113.DescribeContainerInstances")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDaemon ->
+      let json = DescribeDaemonRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DescribeDaemon")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDaemonDeployments ->
+      let json = DescribeDaemonDeploymentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DescribeDaemonDeployments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDaemonRevisions ->
+      let json = DescribeDaemonRevisionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DescribeDaemonRevisions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDaemonTaskDefinition ->
+      let json = DescribeDaemonTaskDefinitionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DescribeDaemonTaskDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeExpressGatewayService ->
+      let json = DescribeExpressGatewayServiceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DescribeExpressGatewayService")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeServiceDeployments ->
+      let json = DescribeServiceDeploymentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DescribeServiceDeployments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeServiceRevisions ->
+      let json = DescribeServiceRevisionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.DescribeServiceRevisions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeServices ->
       let json = DescribeServicesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -418,6 +642,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerServiceV20141113.ExecuteCommand")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetTaskProtection ->
+      let json = GetTaskProtectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.GetTaskProtection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAccountSettings ->
       let json = ListAccountSettingsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -453,6 +686,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerServiceV20141113.ListContainerInstances")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDaemonDeployments ->
+      let json = ListDaemonDeploymentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.ListDaemonDeployments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDaemonTaskDefinitions ->
+      let json = ListDaemonTaskDefinitionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.ListDaemonTaskDefinitions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDaemons ->
+      let json = ListDaemonsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonEC2ContainerServiceV20141113.ListDaemons")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListServiceDeployments ->
+      let json = ListServiceDeploymentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.ListServiceDeployments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListServices ->
       let json = ListServicesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -460,6 +728,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonEC2ContainerServiceV20141113.ListServices")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListServicesByNamespace ->
+      let json = ListServicesByNamespaceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.ListServicesByNamespace")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
@@ -541,6 +818,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerServiceV20141113.RegisterContainerInstance")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RegisterDaemonTaskDefinition ->
+      let json = RegisterDaemonTaskDefinitionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.RegisterDaemonTaskDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RegisterTaskDefinition ->
       let json = RegisterTaskDefinitionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -565,6 +851,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonEC2ContainerServiceV20141113.StartTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopServiceDeployment ->
+      let json = StopServiceDeploymentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.StopServiceDeployment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopTask ->
       let json = StopTaskRequest.to_json req in
@@ -663,6 +958,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerServiceV20141113.UpdateContainerInstancesState")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateDaemon ->
+      let json = UpdateDaemonRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonEC2ContainerServiceV20141113.UpdateDaemon")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateExpressGatewayService ->
+      let json = UpdateExpressGatewayServiceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.UpdateExpressGatewayService")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateService ->
       let json = UpdateServiceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -680,6 +992,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonEC2ContainerServiceV20141113.UpdateServicePrimaryTaskSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateTaskProtection ->
+      let json = UpdateTaskProtectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerServiceV20141113.UpdateTaskProtection")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateTaskSet ->
       let json = UpdateTaskSetRequest.to_json req in
@@ -728,6 +1049,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateClusterResponse.of_json json)
       else Error (parse_aws_error (Some CreateClusterResponse.error_of_json))
+  | CreateDaemon ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDaemonResponse.of_json json)
+      else Error (parse_aws_error (Some CreateDaemonResponse.error_of_json))
+  | CreateExpressGatewayService ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateExpressGatewayServiceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateExpressGatewayServiceResponse.error_of_json))
   | CreateService ->
       if is_success
       then
@@ -770,12 +1106,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteClusterResponse.of_json json)
       else Error (parse_aws_error (Some DeleteClusterResponse.error_of_json))
+  | DeleteDaemon ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteDaemonResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteDaemonResponse.error_of_json))
+  | DeleteDaemonTaskDefinition ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteDaemonTaskDefinitionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDaemonTaskDefinitionResponse.error_of_json))
+  | DeleteExpressGatewayService ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteExpressGatewayServiceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteExpressGatewayServiceResponse.error_of_json))
   | DeleteService ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteServiceResponse.of_json json)
       else Error (parse_aws_error (Some DeleteServiceResponse.error_of_json))
+  | DeleteTaskDefinitions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteTaskDefinitionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteTaskDefinitionsResponse.error_of_json))
   | DeleteTaskSet ->
       if is_success
       then
@@ -825,6 +1193,67 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeContainerInstancesResponse.error_of_json))
+  | DescribeDaemon ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDaemonResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeDaemonResponse.error_of_json))
+  | DescribeDaemonDeployments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDaemonDeploymentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDaemonDeploymentsResponse.error_of_json))
+  | DescribeDaemonRevisions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDaemonRevisionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDaemonRevisionsResponse.error_of_json))
+  | DescribeDaemonTaskDefinition ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDaemonTaskDefinitionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDaemonTaskDefinitionResponse.error_of_json))
+  | DescribeExpressGatewayService ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeExpressGatewayServiceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeExpressGatewayServiceResponse.error_of_json))
+  | DescribeServiceDeployments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeServiceDeploymentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeServiceDeploymentsResponse.error_of_json))
+  | DescribeServiceRevisions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeServiceRevisionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeServiceRevisionsResponse.error_of_json))
   | DescribeServices ->
       if is_success
       then
@@ -869,6 +1298,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ExecuteCommandResponse.of_json json)
       else
         Error (parse_aws_error (Some ExecuteCommandResponse.error_of_json))
+  | GetTaskProtection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTaskProtectionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetTaskProtectionResponse.error_of_json))
   | ListAccountSettings ->
       if is_success
       then
@@ -899,12 +1336,53 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListContainerInstancesResponse.error_of_json))
+  | ListDaemonDeployments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDaemonDeploymentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListDaemonDeploymentsResponse.error_of_json))
+  | ListDaemonTaskDefinitions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDaemonTaskDefinitionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListDaemonTaskDefinitionsResponse.error_of_json))
+  | ListDaemons ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDaemonsResponse.of_json json)
+      else Error (parse_aws_error (Some ListDaemonsResponse.error_of_json))
+  | ListServiceDeployments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListServiceDeploymentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListServiceDeploymentsResponse.error_of_json))
   | ListServices ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListServicesResponse.of_json json)
       else Error (parse_aws_error (Some ListServicesResponse.error_of_json))
+  | ListServicesByNamespace ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListServicesByNamespaceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListServicesByNamespaceResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -977,6 +1455,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some RegisterContainerInstanceResponse.error_of_json))
+  | RegisterDaemonTaskDefinition ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RegisterDaemonTaskDefinitionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RegisterDaemonTaskDefinitionResponse.error_of_json))
   | RegisterTaskDefinition ->
       if is_success
       then
@@ -998,6 +1485,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (StartTaskResponse.of_json json)
       else Error (parse_aws_error (Some StartTaskResponse.error_of_json))
+  | StopServiceDeployment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopServiceDeploymentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StopServiceDeploymentResponse.error_of_json))
   | StopTask ->
       if is_success
       then
@@ -1082,6 +1577,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateContainerInstancesStateResponse.error_of_json))
+  | UpdateDaemon ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDaemonResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateDaemonResponse.error_of_json))
+  | UpdateExpressGatewayService ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateExpressGatewayServiceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateExpressGatewayServiceResponse.error_of_json))
   | UpdateService ->
       if is_success
       then
@@ -1097,6 +1607,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateServicePrimaryTaskSetResponse.error_of_json))
+  | UpdateTaskProtection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateTaskProtectionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateTaskProtectionResponse.error_of_json))
   | UpdateTaskSet ->
       if is_success
       then

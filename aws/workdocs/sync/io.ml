@@ -37,6 +37,8 @@ let delete_custom_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCustomMetadata input
 let delete_document ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDocument input
+let delete_document_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDocumentVersion input
 let delete_folder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFolder input
 let delete_folder_contents ?endpoint_url ?cfg input =
@@ -85,6 +87,10 @@ let remove_all_resource_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveAllResourcePermissions input
 let remove_resource_permission ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveResourcePermission input
+let restore_document_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RestoreDocumentVersions input
+let search_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchResources input
 let update_document ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDocument input
 let update_document_version ?endpoint_url ?cfg input =

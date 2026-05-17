@@ -160,7 +160,7 @@ let create_deployment =
            ~doc:"URL override endpoint url"
        and deploymentName =
          flag "deployment-name" (optional string)
-           ~doc:"STRING NonEmptyString"
+           ~doc:"STRING DeploymentNameString"
        and components =
          flag "components" (optional json_arg)
            ~doc:"JSON ComponentDeploymentSpecifications"
@@ -170,6 +170,9 @@ let create_deployment =
        and deploymentPolicies =
          flag "deployment-policies" (optional json_arg)
            ~doc:"JSON DeploymentPolicies"
+       and parentTargetArn =
+         flag "parent-target-arn" (optional string)
+           ~doc:"STRING ThingGroupARN"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and clientToken =
          flag "client-token" (optional string)
@@ -188,7 +191,7 @@ let create_deployment =
                                       iotJobConfiguration)
               ?deploymentPolicies:(Option.map
                                      ~f:Values.DeploymentPolicies.of_json
-                                     deploymentPolicies)
+                                     deploymentPolicies) ?parentTargetArn
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?clientToken
               ~targetArn ()) (Some Values.CreateDeploymentResponse.to_json)
            (Some Values.CreateDeploymentResponse.error_to_json)])
@@ -226,6 +229,22 @@ let delete_core_device =
            Io.delete_core_device
            (Values.DeleteCoreDeviceRequest.make ~coreDeviceThingName ()) None
            None])
+let delete_deployment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deploymentId =
+         flag "deployment-id" (required string) ~doc:"STRING NonEmptyString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_deployment
+           (Values.DeleteDeploymentRequest.make ~deploymentId ()) None None])
 let describe_component =
   Command.async ~summary:""
     ([%map_open.Command
@@ -296,6 +315,12 @@ let get_component_version_artifact =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and s3EndpointType =
+         flag "s3-endpoint-type" (optional json_arg)
+           ~doc:"JSON S3EndpointType"
+       and iotEndpointType =
+         flag "iot-endpoint-type" (optional json_arg)
+           ~doc:"JSON IotEndpointType"
        and arn =
          flag "arn" (required string) ~doc:"STRING ComponentVersionARN"
        and artifactName =
@@ -303,8 +328,12 @@ let get_component_version_artifact =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_component_version_artifact
-           (Values.GetComponentVersionArtifactRequest.make ~arn ~artifactName
-              ()) (Some Values.GetComponentVersionArtifactResponse.to_json)
+           (Values.GetComponentVersionArtifactRequest.make
+              ?s3EndpointType:(Option.map ~f:Values.S3EndpointType.of_json
+                                 s3EndpointType)
+              ?iotEndpointType:(Option.map ~f:Values.IotEndpointType.of_json
+                                  iotEndpointType) ~arn ~artifactName ())
+           (Some Values.GetComponentVersionArtifactResponse.to_json)
            (Some Values.GetComponentVersionArtifactResponse.error_to_json)])
 let get_connectivity_info =
   Command.async ~summary:""
@@ -468,13 +497,16 @@ let list_core_devices =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT DefaultMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextTokenString" in
+         flag "next-token" (optional string) ~doc:"STRING NextTokenString"
+       and runtime =
+         flag "runtime" (optional string)
+           ~doc:"STRING CoreDeviceRuntimeString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_core_devices
            (Values.ListCoreDevicesRequest.make ?thingGroupArn
               ?status:(Option.map ~f:Values.CoreDeviceStatus.of_json status)
-              ?maxResults ?nextToken ())
+              ?maxResults ?nextToken ?runtime ())
            (Some Values.ListCoreDevicesResponse.to_json)
            (Some Values.ListCoreDevicesResponse.error_to_json)])
 let list_deployments =
@@ -492,6 +524,9 @@ let list_deployments =
        and historyFilter =
          flag "history-filter" (optional json_arg)
            ~doc:"JSON DeploymentHistoryFilter"
+       and parentTargetArn =
+         flag "parent-target-arn" (optional string)
+           ~doc:"STRING ThingGroupARN"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT DefaultMaxResults"
        and nextToken =
@@ -502,8 +537,8 @@ let list_deployments =
            (Values.ListDeploymentsRequest.make ?targetArn
               ?historyFilter:(Option.map
                                 ~f:Values.DeploymentHistoryFilter.of_json
-                                historyFilter) ?maxResults ?nextToken ())
-           (Some Values.ListDeploymentsResponse.to_json)
+                                historyFilter) ?parentTargetArn ?maxResults
+              ?nextToken ()) (Some Values.ListDeploymentsResponse.to_json)
            (Some Values.ListDeploymentsResponse.error_to_json)])
 let list_effective_deployments =
   Command.async ~summary:""
@@ -543,6 +578,9 @@ let list_installed_components =
          flag "max-results" (optional int) ~doc:"INT DefaultMaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextTokenString"
+       and topologyFilter =
+         flag "topology-filter" (optional json_arg)
+           ~doc:"JSON InstalledComponentTopologyFilter"
        and coreDeviceThingName =
          flag "core-device-thing-name" (required string)
            ~doc:"STRING CoreDeviceThingName" in
@@ -550,7 +588,9 @@ let list_installed_components =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_installed_components
            (Values.ListInstalledComponentsRequest.make ?maxResults ?nextToken
-              ~coreDeviceThingName ())
+              ?topologyFilter:(Option.map
+                                 ~f:Values.InstalledComponentTopologyFilter.of_json
+                                 topologyFilter) ~coreDeviceThingName ())
            (Some Values.ListInstalledComponentsResponse.to_json)
            (Some Values.ListInstalledComponentsResponse.error_to_json)])
 let list_tags_for_resource =
@@ -582,16 +622,18 @@ let resolve_component_candidates =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and platform =
-         flag "platform" (required json_arg) ~doc:"JSON ComponentPlatform"
+         flag "platform" (optional json_arg) ~doc:"JSON ComponentPlatform"
        and componentCandidates =
-         flag "component-candidates" (required json_arg)
+         flag "component-candidates" (optional json_arg)
            ~doc:"JSON ComponentCandidateList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.resolve_component_candidates
            (Values.ResolveComponentCandidatesRequest.make
-              ~platform:(Values.ComponentPlatform.of_json platform)
-              ~componentCandidates:(Values.ComponentCandidateList.of_json
+              ?platform:(Option.map ~f:Values.ComponentPlatform.of_json
+                           platform)
+              ?componentCandidates:(Option.map
+                                      ~f:Values.ComponentCandidateList.of_json
                                       componentCandidates) ())
            (Some Values.ResolveComponentCandidatesResponse.to_json)
            (Some Values.ResolveComponentCandidatesResponse.error_to_json)])
@@ -673,6 +715,7 @@ let main =
     ("create-deployment", create_deployment);
     ("delete-component", delete_component);
     ("delete-core-device", delete_core_device);
+    ("delete-deployment", delete_deployment);
     ("describe-component", describe_component);
     ("disassociate-service-role-from-account",
       disassociate_service_role_from_account);

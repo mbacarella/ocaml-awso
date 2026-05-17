@@ -33,6 +33,12 @@ val get_configuration_set_event_destinations :
         (GetConfigurationSetEventDestinationsResponse.t,
           GetConfigurationSetEventDestinationsResponse.error) Result.t
           Async.Deferred.t
+val list_configuration_sets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConfigurationSetsRequest.t ->
+        (ListConfigurationSetsResponse.t,
+          ListConfigurationSetsResponse.error) Result.t Async.Deferred.t
 val send_voice_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

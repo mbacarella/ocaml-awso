@@ -55,6 +55,9 @@ type ('i, 'o, 'e) t =
   DeleteApplicationVpcConfigurationResponse.error) t 
   | DescribeApplication: (DescribeApplicationRequest.t,
   DescribeApplicationResponse.t, DescribeApplicationResponse.error) t 
+  | DescribeApplicationOperation: (DescribeApplicationOperationRequest.t,
+  DescribeApplicationOperationResponse.t,
+  DescribeApplicationOperationResponse.error) t 
   | DescribeApplicationSnapshot: (DescribeApplicationSnapshotRequest.t,
   DescribeApplicationSnapshotResponse.t,
   DescribeApplicationSnapshotResponse.error) t 
@@ -63,6 +66,9 @@ type ('i, 'o, 'e) t =
   DescribeApplicationVersionResponse.error) t 
   | DiscoverInputSchema: (DiscoverInputSchemaRequest.t,
   DiscoverInputSchemaResponse.t, DiscoverInputSchemaResponse.error) t 
+  | ListApplicationOperations: (ListApplicationOperationsRequest.t,
+  ListApplicationOperationsResponse.t,
+  ListApplicationOperationsResponse.error) t 
   | ListApplicationSnapshots: (ListApplicationSnapshotsRequest.t,
   ListApplicationSnapshotsResponse.t, ListApplicationSnapshotsResponse.error)
   t 
@@ -108,9 +114,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteApplicationSnapshot -> `POST
   | DeleteApplicationVpcConfiguration -> `POST
   | DescribeApplication -> `POST
+  | DescribeApplicationOperation -> `POST
   | DescribeApplicationSnapshot -> `POST
   | DescribeApplicationVersion -> `POST
   | DiscoverInputSchema -> `POST
+  | ListApplicationOperations -> `POST
   | ListApplicationSnapshots -> `POST
   | ListApplicationVersions -> `POST
   | ListApplications -> `POST
@@ -150,9 +158,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteApplicationVpcConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeApplication -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeApplicationOperation -> (Format.kasprintf Uri.of_string) "/"
       | DescribeApplicationSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | DescribeApplicationVersion -> (Format.kasprintf Uri.of_string) "/"
       | DiscoverInputSchema -> (Format.kasprintf Uri.of_string) "/"
+      | ListApplicationOperations -> (Format.kasprintf Uri.of_string) "/"
       | ListApplicationSnapshots -> (Format.kasprintf Uri.of_string) "/"
       | ListApplicationVersions -> (Format.kasprintf Uri.of_string) "/"
       | ListApplications -> (Format.kasprintf Uri.of_string) "/"
@@ -318,6 +328,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "KinesisAnalytics_20180523.DescribeApplication")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeApplicationOperation ->
+      let json = DescribeApplicationOperationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "KinesisAnalytics_20180523.DescribeApplicationOperation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeApplicationSnapshot ->
       let json = DescribeApplicationSnapshotRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -343,6 +362,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "KinesisAnalytics_20180523.DiscoverInputSchema")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListApplicationOperations ->
+      let json = ListApplicationOperationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "KinesisAnalytics_20180523.ListApplicationOperations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListApplicationSnapshots ->
       let json = ListApplicationSnapshotsRequest.to_json req in
@@ -611,6 +639,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeApplicationResponse.error_of_json))
+  | DescribeApplicationOperation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeApplicationOperationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeApplicationOperationResponse.error_of_json))
   | DescribeApplicationSnapshot ->
       if is_success
       then
@@ -637,6 +674,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DiscoverInputSchemaResponse.error_of_json))
+  | ListApplicationOperations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListApplicationOperationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationOperationsResponse.error_of_json))
   | ListApplicationSnapshots ->
       if is_success
       then

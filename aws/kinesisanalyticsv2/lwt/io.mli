@@ -105,6 +105,12 @@ val describe_application :
       DescribeApplicationRequest.t ->
         (DescribeApplicationResponse.t, DescribeApplicationResponse.error)
           Result.t Lwt.t
+val describe_application_operation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeApplicationOperationRequest.t ->
+        (DescribeApplicationOperationResponse.t,
+          DescribeApplicationOperationResponse.error) Result.t Lwt.t
 val describe_application_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -123,6 +129,12 @@ val discover_input_schema :
       DiscoverInputSchemaRequest.t ->
         (DiscoverInputSchemaResponse.t, DiscoverInputSchemaResponse.error)
           Result.t Lwt.t
+val list_application_operations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListApplicationOperationsRequest.t ->
+        (ListApplicationOperationsResponse.t,
+          ListApplicationOperationsResponse.error) Result.t Lwt.t
 val list_application_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

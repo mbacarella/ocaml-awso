@@ -56,6 +56,50 @@ module Truncated =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module LongArn =
+  struct
+    type nonrec t = string
+    let context_ = "LongArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LongArn" j
+    let to_json = simple_to_json to_value
+  end
+module VariableName =
+  struct
+    type nonrec t = string
+    let context_ = "VariableName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VariableName" j
+    let to_json = simple_to_json to_value
+  end
+module VariableValue =
+  struct
+    type nonrec t = string
+    let context_ = "VariableValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VariableValue" j
+    let to_json = simple_to_json to_value
+  end
 module CloudWatchLogsLogGroup =
   struct
     type nonrec t =
@@ -73,8 +117,8 @@ module CloudWatchLogsLogGroup =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "logGroupArn") in
       make ?logGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroupArn = field_map json "logGroupArn" Arn.of_json in
+    let of_json json__ =
+      let logGroupArn = field_map json__ "logGroupArn" Arn.of_json in
       make ?logGroupArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -120,7 +164,7 @@ module HistoryEventExecutionDataDetails =
       {
       truncated: Truncated.t option
         [@ocaml.doc
-          "Indicates whether input or output was truncated in the response. Always false for API calls."]}
+          "Indicates whether input or output was truncated in the response. Always false for API calls. In CloudWatch logs, the value will be true if the data is truncated due to size limits."]}
     let make ?truncated = fun () -> { truncated }
     let to_value x =
       structure_to_value
@@ -131,8 +175,8 @@ module HistoryEventExecutionDataDetails =
         (Option.map ~f:Truncated.of_xml) (Xml.child xml_arg0 "truncated") in
       make ?truncated ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let truncated = field_map json "truncated" Truncated.of_json in
+    let of_json json__ =
+      let truncated = field_map json__ "truncated" Truncated.of_json in
       make ?truncated ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -178,6 +222,79 @@ module Identity =
     let of_json j = string_of_json ~kind:"Identity" j
     let to_json = simple_to_json to_value
   end
+module EvaluationFailureLocation =
+  struct
+    type nonrec t = string
+    let context_ = "EvaluationFailureLocation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EvaluationFailureLocation" j
+    let to_json = simple_to_json to_value
+  end
+module StateName =
+  struct
+    type nonrec t = string
+    let context_ = "StateName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:80) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StateName" j
+    let to_json = simple_to_json to_value
+  end
+module RedriveCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RedriveCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TaskCredentials =
+  struct
+    type nonrec t =
+      {
+      roleArn: LongArn.t option
+        [@ocaml.doc
+          "The ARN of an IAM role that Step Functions assumes for the task. The role can allow cross-account access to resources."]}
+    let make ?roleArn = fun () -> { roleArn }
+    let to_value x =
+      structure_to_value
+        [("roleArn", (Option.map x.roleArn ~f:LongArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleArn =
+        (Option.map ~f:LongArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      make ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleArn = field_map json__ "roleArn" LongArn.of_json in
+      make ?roleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about the credentials that Step Functions uses for a task."]
 module Name =
   struct
     type nonrec t = string
@@ -211,6 +328,59 @@ module UnsignedInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module AssignedVariables =
+  struct
+    type nonrec t = (VariableName.t * VariableValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((VariableName.of_string chopped),
+                              (VariableValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (VariableName.to_value x) |>
+                    (fun x -> (VariableValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:VariableName.of_string
+        ~of_json:VariableValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AssignedVariablesDetails =
+  struct
+    type nonrec t =
+      {
+      truncated: Truncated.t option
+        [@ocaml.doc
+          "Indicates whether assigned variables were truncated in the response. Always false for API calls. In CloudWatch logs, the value will be true if the data is truncated due to size limits."]}
+    let make ?truncated = fun () -> { truncated }
+    let to_value x =
+      structure_to_value
+        [("truncated", (Option.map x.truncated ~f:Truncated.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let truncated =
+        (Option.map ~f:Truncated.of_xml) (Xml.child xml_arg0 "truncated") in
+      make ?truncated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let truncated = field_map json__ "truncated" Truncated.of_json in
+      make ?truncated ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details about assigned variables in an execution history event."]
 module ConnectorParameters =
   struct
     type nonrec t = string
@@ -229,13 +399,85 @@ module ConnectorParameters =
     let of_json j = string_of_json ~kind:"ConnectorParameters" j
     let to_json = simple_to_json to_value
   end
+module ValidateStateMachineDefinitionCode =
+  struct
+    type nonrec t = string
+    let context_ = "ValidateStateMachineDefinitionCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ValidateStateMachineDefinitionCode" j
+    let to_json = simple_to_json to_value
+  end
+module ValidateStateMachineDefinitionLocation =
+  struct
+    type nonrec t = string
+    let context_ = "ValidateStateMachineDefinitionLocation"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ValidateStateMachineDefinitionLocation" j
+    let to_json = simple_to_json to_value
+  end
+module ValidateStateMachineDefinitionMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ValidateStateMachineDefinitionMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ValidateStateMachineDefinitionMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ValidateStateMachineDefinitionSeverity =
+  struct
+    type nonrec t =
+      | ERROR 
+      | WARNING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ERROR -> "ERROR"
+      | WARNING -> "WARNING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ERROR" -> ERROR
+      | "WARNING" -> WARNING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ValidateStateMachineDefinitionSeverity"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ValidateStateMachineDefinitionSeverity" j)
+    let to_json = simple_to_json to_value
+  end
 module LogDestination =
   struct
     type nonrec t =
       {
       cloudWatchLogsLogGroup: CloudWatchLogsLogGroup.t option
         [@ocaml.doc
-          "An object describing a CloudWatch log group. For more information, see AWS::Logs::LogGroup in the AWS CloudFormation User Guide."]}
+          "An object describing a CloudWatch log group. For more information, see AWS::Logs::LogGroup in the CloudFormation User Guide."]}
     let make ?cloudWatchLogsLogGroup = fun () -> { cloudWatchLogsLogGroup }
     let to_value x =
       structure_to_value
@@ -249,12 +491,152 @@ module LogDestination =
           (Xml.child xml_arg0 "cloudWatchLogsLogGroup") in
       make ?cloudWatchLogsLogGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchLogsLogGroup =
-        field_map json "cloudWatchLogsLogGroup"
+        field_map json__ "cloudWatchLogsLogGroup"
           CloudWatchLogsLogGroup.of_json in
       make ?cloudWatchLogsLogGroup ()
     let to_json v = composed_to_json to_value v
+  end
+module VersionWeight =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for VersionWeight" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module HTTPBody =
+  struct
+    type nonrec t = string
+    let context_ = "HTTPBody"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HTTPBody" j
+    let to_json = simple_to_json to_value
+  end
+module HTTPHeaders =
+  struct
+    type nonrec t = string
+    let context_ = "HTTPHeaders"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HTTPHeaders" j
+    let to_json = simple_to_json to_value
+  end
+module HTTPMethod =
+  struct
+    type nonrec t = string
+    let context_ = "HTTPMethod"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HTTPMethod" j
+    let to_json = simple_to_json to_value
+  end
+module HTTPProtocol =
+  struct
+    type nonrec t = string
+    let context_ = "HTTPProtocol"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HTTPProtocol" j
+    let to_json = simple_to_json to_value
+  end
+module URL =
+  struct
+    type nonrec t = string
+    let context_ = "URL"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"URL" j
+    let to_json = simple_to_json to_value
+  end
+module HTTPStatusCode =
+  struct
+    type nonrec t = string
+    let context_ = "HTTPStatusCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HTTPStatusCode" j
+    let to_json = simple_to_json to_value
+  end
+module HTTPStatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "HTTPStatusMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HTTPStatusMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ExceptionHandlerIndex =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ExceptionHandlerIndex" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RetryBackoffIntervalSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RetryBackoffIntervalSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
   end
 module TagKey =
   struct
@@ -337,6 +719,7 @@ module ExecutionStatus =
       | FAILED 
       | TIMED_OUT 
       | ABORTED 
+      | PENDING_REDRIVE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -346,6 +729,7 @@ module ExecutionStatus =
       | FAILED -> "FAILED"
       | TIMED_OUT -> "TIMED_OUT"
       | ABORTED -> "ABORTED"
+      | PENDING_REDRIVE -> "PENDING_REDRIVE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -354,6 +738,7 @@ module ExecutionStatus =
       | "FAILED" -> FAILED
       | "TIMED_OUT" -> TIMED_OUT
       | "ABORTED" -> ABORTED
+      | "PENDING_REDRIVE" -> PENDING_REDRIVE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -385,9 +770,9 @@ module ActivityFailedEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -414,9 +799,9 @@ module ActivityScheduleFailedEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -425,7 +810,7 @@ module ActivityScheduledEventDetails =
   struct
     type nonrec t =
       {
-      resource: Arn.t
+      resource: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the scheduled activity."];
       input: SensitiveData.t option
@@ -439,23 +824,22 @@ module ActivityScheduledEventDetails =
       heartbeatInSeconds: TimeoutInSeconds.t option
         [@ocaml.doc
           "The maximum allowed duration between two heartbeats for the activity task."]}
-    let context_ = "ActivityScheduledEventDetails"
-    let make ?input =
-      fun ?inputDetails ->
-        fun ?timeoutInSeconds ->
-          fun ?heartbeatInSeconds ->
-            fun ~resource ->
+    let make ?resource =
+      fun ?input ->
+        fun ?inputDetails ->
+          fun ?timeoutInSeconds ->
+            fun ?heartbeatInSeconds ->
               fun () ->
                 {
+                  resource;
                   input;
                   inputDetails;
                   timeoutInSeconds;
-                  heartbeatInSeconds;
-                  resource
+                  heartbeatInSeconds
                 }
     let to_value x =
       structure_to_value
-        [("resource", (Some (Arn.to_value x.resource)));
+        [("resource", (Option.map x.resource ~f:Arn.to_value));
         ("input", (Option.map x.input ~f:SensitiveData.to_value));
         ("inputDetails",
           (Option.map x.inputDetails
@@ -478,22 +862,22 @@ module ActivityScheduledEventDetails =
       let input =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "input") in
       let resource =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resource") in
       make ?heartbeatInSeconds ?timeoutInSeconds ?inputDetails ?input
-        ~resource ()
+        ?resource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let heartbeatInSeconds =
-        field_map json "heartbeatInSeconds" TimeoutInSeconds.of_json in
+        field_map json__ "heartbeatInSeconds" TimeoutInSeconds.of_json in
       let timeoutInSeconds =
-        field_map json "timeoutInSeconds" TimeoutInSeconds.of_json in
+        field_map json__ "timeoutInSeconds" TimeoutInSeconds.of_json in
       let inputDetails =
-        field_map json "inputDetails"
+        field_map json__ "inputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let input = field_map json "input" SensitiveData.of_json in
-      let resource = field_map_exn json "resource" Arn.of_json in
+      let input = field_map json__ "input" SensitiveData.of_json in
+      let resource = field_map json__ "resource" Arn.of_json in
       make ?heartbeatInSeconds ?timeoutInSeconds ?inputDetails ?input
-        ~resource ()
+        ?resource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about an activity scheduled during an execution."]
@@ -514,8 +898,8 @@ module ActivityStartedEventDetails =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "workerName") in
       make ?workerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workerName = field_map json "workerName" Identity.of_json in
+    let of_json json__ =
+      let workerName = field_map json__ "workerName" Identity.of_json in
       make ?workerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -547,11 +931,11 @@ module ActivitySucceededEventDetails =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
       make ?outputDetails ?output ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputDetails =
-        field_map json "outputDetails"
+        field_map json__ "outputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let output = field_map json "output" SensitiveData.of_json in
+      let output = field_map json__ "output" SensitiveData.of_json in
       make ?outputDetails ?output ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -578,13 +962,62 @@ module ActivityTimedOutEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about an activity timeout that occurred during an execution."]
+module EvaluationFailedEventDetails =
+  struct
+    type nonrec t =
+      {
+      error: SensitiveError.t option
+        [@ocaml.doc "The error code of the failure."];
+      cause: SensitiveCause.t option
+        [@ocaml.doc
+          "A more detailed explanation of the cause of the failure."];
+      location: EvaluationFailureLocation.t option
+        [@ocaml.doc
+          "The location of the field in the state in which the evaluation error occurred."];
+      state: StateName.t option
+        [@ocaml.doc
+          "The name of the state in which the evaluation error occurred."]}
+    let make ?error =
+      fun ?cause ->
+        fun ?location ->
+          fun ?state -> fun () -> { error; cause; location; state }
+    let to_value x =
+      structure_to_value
+        [("error", (Option.map x.error ~f:SensitiveError.to_value));
+        ("cause", (Option.map x.cause ~f:SensitiveCause.to_value));
+        ("location",
+          (Option.map x.location ~f:EvaluationFailureLocation.to_value));
+        ("state", (Option.map x.state ~f:StateName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:StateName.of_xml) (Xml.child xml_arg0 "state") in
+      let location =
+        (Option.map ~f:EvaluationFailureLocation.of_xml)
+          (Xml.child xml_arg0 "location") in
+      let cause =
+        (Option.map ~f:SensitiveCause.of_xml) (Xml.child xml_arg0 "cause") in
+      let error =
+        (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
+      make ?state ?location ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "state" StateName.of_json in
+      let location =
+        field_map json__ "location" EvaluationFailureLocation.of_json in
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      make ?state ?location ?cause ?error ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about an evaluation failure that occurred while processing a state, for example, when a JSONata expression throws an error. This event will only be present in state machines that have QueryLanguage set to JSONata, or individual states set to JSONata."]
 module EventId =
   struct
     type nonrec t = Int64.t
@@ -620,9 +1053,9 @@ module ExecutionAbortedEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about an abort of an execution."]
@@ -648,12 +1081,36 @@ module ExecutionFailedEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about an execution failure event."]
+module ExecutionRedrivenEventDetails =
+  struct
+    type nonrec t =
+      {
+      redriveCount: RedriveCount.t option
+        [@ocaml.doc
+          "The number of times you've redriven an execution. If you have not yet redriven an execution, the redriveCount is 0. This count is not updated for redrives that failed to start or are pending to be redriven."]}
+    let make ?redriveCount = fun () -> { redriveCount }
+    let to_value x =
+      structure_to_value
+        [("redriveCount",
+           (Option.map x.redriveCount ~f:RedriveCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redriveCount =
+        (Option.map ~f:RedriveCount.of_xml)
+          (Xml.child xml_arg0 "redriveCount") in
+      make ?redriveCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redriveCount = field_map json__ "redriveCount" RedriveCount.of_json in
+      make ?redriveCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains details about a redriven execution."]
 module ExecutionStartedEventDetails =
   struct
     type nonrec t =
@@ -666,34 +1123,66 @@ module ExecutionStartedEventDetails =
           "Contains details about the input for an execution history event."];
       roleArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM role used for executing AWS Lambda tasks."]}
+          "The Amazon Resource Name (ARN) of the IAM role used for executing Lambda tasks."];
+      stateMachineAliasArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies a state machine alias used for starting the state machine execution."];
+      stateMachineVersionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies a state machine version used for starting the state machine execution."]}
     let make ?input =
       fun ?inputDetails ->
-        fun ?roleArn -> fun () -> { input; inputDetails; roleArn }
+        fun ?roleArn ->
+          fun ?stateMachineAliasArn ->
+            fun ?stateMachineVersionArn ->
+              fun () ->
+                {
+                  input;
+                  inputDetails;
+                  roleArn;
+                  stateMachineAliasArn;
+                  stateMachineVersionArn
+                }
     let to_value x =
       structure_to_value
         [("input", (Option.map x.input ~f:SensitiveData.to_value));
         ("inputDetails",
           (Option.map x.inputDetails
              ~f:HistoryEventExecutionDataDetails.to_value));
-        ("roleArn", (Option.map x.roleArn ~f:Arn.to_value))]
+        ("roleArn", (Option.map x.roleArn ~f:Arn.to_value));
+        ("stateMachineAliasArn",
+          (Option.map x.stateMachineAliasArn ~f:Arn.to_value));
+        ("stateMachineVersionArn",
+          (Option.map x.stateMachineVersionArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let stateMachineVersionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineVersionArn") in
+      let stateMachineAliasArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineAliasArn") in
       let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "roleArn") in
       let inputDetails =
         (Option.map ~f:HistoryEventExecutionDataDetails.of_xml)
           (Xml.child xml_arg0 "inputDetails") in
       let input =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "input") in
-      make ?roleArn ?inputDetails ?input ()
+      make ?stateMachineVersionArn ?stateMachineAliasArn ?roleArn
+        ?inputDetails ?input ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "roleArn" Arn.of_json in
+    let of_json json__ =
+      let stateMachineVersionArn =
+        field_map json__ "stateMachineVersionArn" Arn.of_json in
+      let stateMachineAliasArn =
+        field_map json__ "stateMachineAliasArn" Arn.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
       let inputDetails =
-        field_map json "inputDetails"
+        field_map json__ "inputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let input = field_map json "input" SensitiveData.of_json in
-      make ?roleArn ?inputDetails ?input ()
+      let input = field_map json__ "input" SensitiveData.of_json in
+      make ?stateMachineVersionArn ?stateMachineAliasArn ?roleArn
+        ?inputDetails ?input ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about the start of the execution."]
 module ExecutionSucceededEventDetails =
@@ -723,11 +1212,11 @@ module ExecutionSucceededEventDetails =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
       make ?outputDetails ?output ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputDetails =
-        field_map json "outputDetails"
+        field_map json__ "outputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let output = field_map json "output" SensitiveData.of_json in
+      let output = field_map json__ "output" SensitiveData.of_json in
       make ?outputDetails ?output ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -754,9 +1243,9 @@ module ExecutionTimedOutEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -819,6 +1308,13 @@ module HistoryEventType =
       | WaitStateAborted 
       | WaitStateEntered 
       | WaitStateExited 
+      | MapRunAborted 
+      | MapRunFailed 
+      | MapRunStarted 
+      | MapRunSucceeded 
+      | ExecutionRedriven 
+      | MapRunRedriven 
+      | EvaluationFailed 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -878,6 +1374,13 @@ module HistoryEventType =
       | WaitStateAborted -> "WaitStateAborted"
       | WaitStateEntered -> "WaitStateEntered"
       | WaitStateExited -> "WaitStateExited"
+      | MapRunAborted -> "MapRunAborted"
+      | MapRunFailed -> "MapRunFailed"
+      | MapRunStarted -> "MapRunStarted"
+      | MapRunSucceeded -> "MapRunSucceeded"
+      | ExecutionRedriven -> "ExecutionRedriven"
+      | MapRunRedriven -> "MapRunRedriven"
+      | EvaluationFailed -> "EvaluationFailed"
       | Non_static_id s -> s
     let of_string =
       function
@@ -936,6 +1439,13 @@ module HistoryEventType =
       | "WaitStateAborted" -> WaitStateAborted
       | "WaitStateEntered" -> WaitStateEntered
       | "WaitStateExited" -> WaitStateExited
+      | "MapRunAborted" -> MapRunAborted
+      | "MapRunFailed" -> MapRunFailed
+      | "MapRunStarted" -> MapRunStarted
+      | "MapRunSucceeded" -> MapRunSucceeded
+      | "ExecutionRedriven" -> ExecutionRedriven
+      | "MapRunRedriven" -> MapRunRedriven
+      | "EvaluationFailed" -> EvaluationFailed
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -967,13 +1477,13 @@ module LambdaFunctionFailedEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains details about a lambda function that failed during an execution."]
+       "Contains details about a Lambda function that failed during an execution."]
 module LambdaFunctionScheduleFailedEventDetails =
   struct
     type nonrec t =
@@ -996,45 +1506,59 @@ module LambdaFunctionScheduleFailedEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains details about a failed lambda function schedule event that occurred during an execution."]
+       "Contains details about a failed Lambda function schedule event that occurred during an execution."]
 module LambdaFunctionScheduledEventDetails =
   struct
     type nonrec t =
       {
-      resource: Arn.t
+      resource: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the scheduled lambda function."];
+          "The Amazon Resource Name (ARN) of the scheduled Lambda function."];
       input: SensitiveData.t option
         [@ocaml.doc
-          "The JSON data input to the lambda function. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
+          "The JSON data input to the Lambda function. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       inputDetails: HistoryEventExecutionDataDetails.t option
         [@ocaml.doc
           "Contains details about input for an execution history event."];
       timeoutInSeconds: TimeoutInSeconds.t option
-        [@ocaml.doc "The maximum allowed duration of the lambda function."]}
-    let context_ = "LambdaFunctionScheduledEventDetails"
-    let make ?input =
-      fun ?inputDetails ->
-        fun ?timeoutInSeconds ->
-          fun ~resource ->
-            fun () -> { input; inputDetails; timeoutInSeconds; resource }
+        [@ocaml.doc "The maximum allowed duration of the Lambda function."];
+      taskCredentials: TaskCredentials.t option
+        [@ocaml.doc "The credentials that Step Functions uses for the task."]}
+    let make ?resource =
+      fun ?input ->
+        fun ?inputDetails ->
+          fun ?timeoutInSeconds ->
+            fun ?taskCredentials ->
+              fun () ->
+                {
+                  resource;
+                  input;
+                  inputDetails;
+                  timeoutInSeconds;
+                  taskCredentials
+                }
     let to_value x =
       structure_to_value
-        [("resource", (Some (Arn.to_value x.resource)));
+        [("resource", (Option.map x.resource ~f:Arn.to_value));
         ("input", (Option.map x.input ~f:SensitiveData.to_value));
         ("inputDetails",
           (Option.map x.inputDetails
              ~f:HistoryEventExecutionDataDetails.to_value));
         ("timeoutInSeconds",
-          (Option.map x.timeoutInSeconds ~f:TimeoutInSeconds.to_value))]
+          (Option.map x.timeoutInSeconds ~f:TimeoutInSeconds.to_value));
+        ("taskCredentials",
+          (Option.map x.taskCredentials ~f:TaskCredentials.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskCredentials =
+        (Option.map ~f:TaskCredentials.of_xml)
+          (Xml.child xml_arg0 "taskCredentials") in
       let timeoutInSeconds =
         (Option.map ~f:TimeoutInSeconds.of_xml)
           (Xml.child xml_arg0 "timeoutInSeconds") in
@@ -1044,21 +1568,25 @@ module LambdaFunctionScheduledEventDetails =
       let input =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "input") in
       let resource =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
-      make ?timeoutInSeconds ?inputDetails ?input ~resource ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resource") in
+      make ?taskCredentials ?timeoutInSeconds ?inputDetails ?input ?resource
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let taskCredentials =
+        field_map json__ "taskCredentials" TaskCredentials.of_json in
       let timeoutInSeconds =
-        field_map json "timeoutInSeconds" TimeoutInSeconds.of_json in
+        field_map json__ "timeoutInSeconds" TimeoutInSeconds.of_json in
       let inputDetails =
-        field_map json "inputDetails"
+        field_map json__ "inputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let input = field_map json "input" SensitiveData.of_json in
-      let resource = field_map_exn json "resource" Arn.of_json in
-      make ?timeoutInSeconds ?inputDetails ?input ~resource ()
+      let input = field_map json__ "input" SensitiveData.of_json in
+      let resource = field_map json__ "resource" Arn.of_json in
+      make ?taskCredentials ?timeoutInSeconds ?inputDetails ?input ?resource
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains details about a lambda function scheduled during an execution."]
+       "Contains details about a Lambda function scheduled during an execution."]
 module LambdaFunctionStartFailedEventDetails =
   struct
     type nonrec t =
@@ -1081,9 +1609,9 @@ module LambdaFunctionStartFailedEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1094,7 +1622,7 @@ module LambdaFunctionSucceededEventDetails =
       {
       output: SensitiveData.t option
         [@ocaml.doc
-          "The JSON data output by the lambda function. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
+          "The JSON data output by the Lambda function. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       outputDetails: HistoryEventExecutionDataDetails.t option
         [@ocaml.doc
           "Contains details about the output of an execution history event."]}
@@ -1115,15 +1643,15 @@ module LambdaFunctionSucceededEventDetails =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
       make ?outputDetails ?output ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputDetails =
-        field_map json "outputDetails"
+        field_map json__ "outputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let output = field_map json "output" SensitiveData.of_json in
+      let output = field_map json__ "output" SensitiveData.of_json in
       make ?outputDetails ?output ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains details about a lambda function that successfully terminated during an execution."]
+       "Contains details about a Lambda function that successfully terminated during an execution."]
 module LambdaFunctionTimedOutEventDetails =
   struct
     type nonrec t =
@@ -1146,13 +1674,13 @@ module LambdaFunctionTimedOutEventDetails =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
       make ?cause ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains details about a lambda function timeout that occurred during an execution."]
+       "Contains details about a Lambda function timeout that occurred during an execution."]
 module MapIterationEventDetails =
   struct
     type nonrec t =
@@ -1175,11 +1703,95 @@ module MapIterationEventDetails =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?index ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let index = field_map json "index" UnsignedInteger.of_json in
-      let name = field_map json "name" Name.of_json in make ?index ?name ()
+    let of_json json__ =
+      let index = field_map json__ "index" UnsignedInteger.of_json in
+      let name = field_map json__ "name" Name.of_json in make ?index ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about an iteration of a Map state."]
+module MapRunFailedEventDetails =
+  struct
+    type nonrec t =
+      {
+      error: SensitiveError.t option
+        [@ocaml.doc "The error code of the Map Run failure."];
+      cause: SensitiveCause.t option
+        [@ocaml.doc
+          "A more detailed explanation of the cause of the failure."]}
+    let make ?error = fun ?cause -> fun () -> { error; cause }
+    let to_value x =
+      structure_to_value
+        [("error", (Option.map x.error ~f:SensitiveError.to_value));
+        ("cause", (Option.map x.cause ~f:SensitiveCause.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cause =
+        (Option.map ~f:SensitiveCause.of_xml) (Xml.child xml_arg0 "cause") in
+      let error =
+        (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
+      make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      make ?cause ?error ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about a Map Run failure event that occurred during a state machine execution."]
+module MapRunRedrivenEventDetails =
+  struct
+    type nonrec t =
+      {
+      mapRunArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a Map Run that was redriven."];
+      redriveCount: RedriveCount.t option
+        [@ocaml.doc
+          "The number of times the Map Run has been redriven at this point in the execution's history including this event. The redrive count for a redriven Map Run is always greater than 0."]}
+    let make ?mapRunArn =
+      fun ?redriveCount -> fun () -> { mapRunArn; redriveCount }
+    let to_value x =
+      structure_to_value
+        [("mapRunArn", (Option.map x.mapRunArn ~f:LongArn.to_value));
+        ("redriveCount",
+          (Option.map x.redriveCount ~f:RedriveCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redriveCount =
+        (Option.map ~f:RedriveCount.of_xml)
+          (Xml.child xml_arg0 "redriveCount") in
+      let mapRunArn =
+        (Option.map ~f:LongArn.of_xml) (Xml.child xml_arg0 "mapRunArn") in
+      make ?redriveCount ?mapRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redriveCount = field_map json__ "redriveCount" RedriveCount.of_json in
+      let mapRunArn = field_map json__ "mapRunArn" LongArn.of_json in
+      make ?redriveCount ?mapRunArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains details about a Map Run that was redriven."]
+module MapRunStartedEventDetails =
+  struct
+    type nonrec t =
+      {
+      mapRunArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a Map Run that was started."]}
+    let make ?mapRunArn = fun () -> { mapRunArn }
+    let to_value x =
+      structure_to_value
+        [("mapRunArn", (Option.map x.mapRunArn ~f:LongArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mapRunArn =
+        (Option.map ~f:LongArn.of_xml) (Xml.child xml_arg0 "mapRunArn") in
+      make ?mapRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mapRunArn = field_map json__ "mapRunArn" LongArn.of_json in
+      make ?mapRunArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about a Map Run that was started during a state machine execution."]
 module MapStateStartedEventDetails =
   struct
     type nonrec t =
@@ -1196,8 +1808,8 @@ module MapStateStartedEventDetails =
         (Option.map ~f:UnsignedInteger.of_xml) (Xml.child xml_arg0 "length") in
       make ?length ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let length = field_map json "length" UnsignedInteger.of_json in
+    let of_json json__ =
+      let length = field_map json__ "length" UnsignedInteger.of_json in
       make ?length ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a Map state that was started."]
@@ -1205,20 +1817,19 @@ module StateEnteredEventDetails =
   struct
     type nonrec t =
       {
-      name: Name.t [@ocaml.doc "The name of the state."];
+      name: Name.t option [@ocaml.doc "The name of the state."];
       input: SensitiveData.t option
         [@ocaml.doc
           "The string that contains the JSON input data for the state. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       inputDetails: HistoryEventExecutionDataDetails.t option
         [@ocaml.doc
           "Contains details about the input for an execution history event."]}
-    let context_ = "StateEnteredEventDetails"
-    let make ?input =
-      fun ?inputDetails ->
-        fun ~name -> fun () -> { input; inputDetails; name }
+    let make ?name =
+      fun ?input ->
+        fun ?inputDetails -> fun () -> { name; input; inputDetails }
     let to_value x =
       structure_to_value
-        [("name", (Some (Name.to_value x.name)));
+        [("name", (Option.map x.name ~f:Name.to_value));
         ("input", (Option.map x.input ~f:SensitiveData.to_value));
         ("inputDetails",
           (Option.map x.inputDetails
@@ -1230,17 +1841,16 @@ module StateEnteredEventDetails =
           (Xml.child xml_arg0 "inputDetails") in
       let input =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "input") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?inputDetails ?input ~name ()
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      make ?inputDetails ?input ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputDetails =
-        field_map json "inputDetails"
+        field_map json__ "inputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let input = field_map json "input" SensitiveData.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      make ?inputDetails ?input ~name ()
+      let input = field_map json__ "input" SensitiveData.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?inputDetails ?input ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about a state entered during an execution."]
@@ -1248,44 +1858,76 @@ module StateExitedEventDetails =
   struct
     type nonrec t =
       {
-      name: Name.t
+      name: Name.t option
         [@ocaml.doc
-          "The name of the state. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the state. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       output: SensitiveData.t option
         [@ocaml.doc
           "The JSON output data of the state. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       outputDetails: HistoryEventExecutionDataDetails.t option
         [@ocaml.doc
-          "Contains details about the output of an execution history event."]}
-    let context_ = "StateExitedEventDetails"
-    let make ?output =
-      fun ?outputDetails ->
-        fun ~name -> fun () -> { output; outputDetails; name }
+          "Contains details about the output of an execution history event."];
+      assignedVariables: AssignedVariables.t option
+        [@ocaml.doc
+          "Map of variable name and value as a serialized JSON representation."];
+      assignedVariablesDetails: AssignedVariablesDetails.t option
+        [@ocaml.doc
+          "Provides details about input or output in an execution history event."]}
+    let make ?name =
+      fun ?output ->
+        fun ?outputDetails ->
+          fun ?assignedVariables ->
+            fun ?assignedVariablesDetails ->
+              fun () ->
+                {
+                  name;
+                  output;
+                  outputDetails;
+                  assignedVariables;
+                  assignedVariablesDetails
+                }
     let to_value x =
       structure_to_value
-        [("name", (Some (Name.to_value x.name)));
+        [("name", (Option.map x.name ~f:Name.to_value));
         ("output", (Option.map x.output ~f:SensitiveData.to_value));
         ("outputDetails",
           (Option.map x.outputDetails
-             ~f:HistoryEventExecutionDataDetails.to_value))]
+             ~f:HistoryEventExecutionDataDetails.to_value));
+        ("assignedVariables",
+          (Option.map x.assignedVariables ~f:AssignedVariables.to_value));
+        ("assignedVariablesDetails",
+          (Option.map x.assignedVariablesDetails
+             ~f:AssignedVariablesDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let assignedVariablesDetails =
+        (Option.map ~f:AssignedVariablesDetails.of_xml)
+          (Xml.child xml_arg0 "assignedVariablesDetails") in
+      let assignedVariables =
+        (Option.map ~f:AssignedVariables.of_xml)
+          (Xml.child xml_arg0 "assignedVariables") in
       let outputDetails =
         (Option.map ~f:HistoryEventExecutionDataDetails.of_xml)
           (Xml.child xml_arg0 "outputDetails") in
       let output =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?outputDetails ?output ~name ()
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      make ?assignedVariablesDetails ?assignedVariables ?outputDetails
+        ?output ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let assignedVariablesDetails =
+        field_map json__ "assignedVariablesDetails"
+          AssignedVariablesDetails.of_json in
+      let assignedVariables =
+        field_map json__ "assignedVariables" AssignedVariables.of_json in
       let outputDetails =
-        field_map json "outputDetails"
+        field_map json__ "outputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let output = field_map json "output" SensitiveData.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      make ?outputDetails ?output ~name ()
+      let output = field_map json__ "output" SensitiveData.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?assignedVariablesDetails ?assignedVariables ?outputDetails
+        ?output ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about an exit from a state during an execution."]
@@ -1293,24 +1935,23 @@ module TaskFailedEventDetails =
   struct
     type nonrec t =
       {
-      resourceType: Name.t
-        [@ocaml.doc "The action of the resource called by a task state."];
-      resource: Name.t
+      resourceType: Name.t option
         [@ocaml.doc "The service name of the resource in a task state."];
+      resource: Name.t option
+        [@ocaml.doc "The action of the resource called by a task state."];
       error: SensitiveError.t option
         [@ocaml.doc "The error code of the failure."];
       cause: SensitiveCause.t option
         [@ocaml.doc
           "A more detailed explanation of the cause of the failure."]}
-    let context_ = "TaskFailedEventDetails"
-    let make ?error =
-      fun ?cause ->
-        fun ~resourceType ->
-          fun ~resource -> fun () -> { error; cause; resourceType; resource }
+    let make ?resourceType =
+      fun ?resource ->
+        fun ?error ->
+          fun ?cause -> fun () -> { resourceType; resource; error; cause }
     let to_value x =
       structure_to_value
-        [("resourceType", (Some (Name.to_value x.resourceType)));
-        ("resource", (Some (Name.to_value x.resource)));
+        [("resourceType", (Option.map x.resourceType ~f:Name.to_value));
+        ("resource", (Option.map x.resource ~f:Name.to_value));
         ("error", (Option.map x.error ~f:SensitiveError.to_value));
         ("cause", (Option.map x.cause ~f:SensitiveCause.to_value))]
     let to_query v = to_query to_value v
@@ -1320,64 +1961,73 @@ module TaskFailedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       let resource =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resource") in
       let resourceType =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ?cause ?error ~resource ~resourceType ()
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resourceType") in
+      make ?cause ?error ?resource ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
-      let resource = field_map_exn json "resource" Name.of_json in
-      let resourceType = field_map_exn json "resourceType" Name.of_json in
-      make ?cause ?error ~resource ~resourceType ()
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      let resource = field_map json__ "resource" Name.of_json in
+      let resourceType = field_map json__ "resourceType" Name.of_json in
+      make ?cause ?error ?resource ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about a task failure event."]
 module TaskScheduledEventDetails =
   struct
     type nonrec t =
       {
-      resourceType: Name.t
-        [@ocaml.doc "The action of the resource called by a task state."];
-      resource: Name.t
+      resourceType: Name.t option
         [@ocaml.doc "The service name of the resource in a task state."];
-      region: Name.t [@ocaml.doc "The region of the scheduled task"];
-      parameters: ConnectorParameters.t
+      resource: Name.t option
+        [@ocaml.doc "The action of the resource called by a task state."];
+      region: Name.t option [@ocaml.doc "The region of the scheduled task"];
+      parameters: ConnectorParameters.t option
         [@ocaml.doc
           "The JSON data passed to the resource referenced in a task state. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       timeoutInSeconds: TimeoutInSeconds.t option
         [@ocaml.doc "The maximum allowed duration of the task."];
       heartbeatInSeconds: TimeoutInSeconds.t option
         [@ocaml.doc
-          "The maximum allowed duration between two heartbeats for the task."]}
-    let context_ = "TaskScheduledEventDetails"
-    let make ?timeoutInSeconds =
-      fun ?heartbeatInSeconds ->
-        fun ~resourceType ->
-          fun ~resource ->
-            fun ~region ->
-              fun ~parameters ->
-                fun () ->
-                  {
-                    timeoutInSeconds;
-                    heartbeatInSeconds;
-                    resourceType;
-                    resource;
-                    region;
-                    parameters
-                  }
+          "The maximum allowed duration between two heartbeats for the task."];
+      taskCredentials: TaskCredentials.t option
+        [@ocaml.doc "The credentials that Step Functions uses for the task."]}
+    let make ?resourceType =
+      fun ?resource ->
+        fun ?region ->
+          fun ?parameters ->
+            fun ?timeoutInSeconds ->
+              fun ?heartbeatInSeconds ->
+                fun ?taskCredentials ->
+                  fun () ->
+                    {
+                      resourceType;
+                      resource;
+                      region;
+                      parameters;
+                      timeoutInSeconds;
+                      heartbeatInSeconds;
+                      taskCredentials
+                    }
     let to_value x =
       structure_to_value
-        [("resourceType", (Some (Name.to_value x.resourceType)));
-        ("resource", (Some (Name.to_value x.resource)));
-        ("region", (Some (Name.to_value x.region)));
-        ("parameters", (Some (ConnectorParameters.to_value x.parameters)));
+        [("resourceType", (Option.map x.resourceType ~f:Name.to_value));
+        ("resource", (Option.map x.resource ~f:Name.to_value));
+        ("region", (Option.map x.region ~f:Name.to_value));
+        ("parameters",
+          (Option.map x.parameters ~f:ConnectorParameters.to_value));
         ("timeoutInSeconds",
           (Option.map x.timeoutInSeconds ~f:TimeoutInSeconds.to_value));
         ("heartbeatInSeconds",
-          (Option.map x.heartbeatInSeconds ~f:TimeoutInSeconds.to_value))]
+          (Option.map x.heartbeatInSeconds ~f:TimeoutInSeconds.to_value));
+        ("taskCredentials",
+          (Option.map x.taskCredentials ~f:TaskCredentials.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskCredentials =
+        (Option.map ~f:TaskCredentials.of_xml)
+          (Xml.child xml_arg0 "taskCredentials") in
       let heartbeatInSeconds =
         (Option.map ~f:TimeoutInSeconds.of_xml)
           (Xml.child xml_arg0 "heartbeatInSeconds") in
@@ -1385,29 +2035,30 @@ module TaskScheduledEventDetails =
         (Option.map ~f:TimeoutInSeconds.of_xml)
           (Xml.child xml_arg0 "timeoutInSeconds") in
       let parameters =
-        ConnectorParameters.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "parameters") in
-      let region =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "region") in
+        (Option.map ~f:ConnectorParameters.of_xml)
+          (Xml.child xml_arg0 "parameters") in
+      let region = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "region") in
       let resource =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resource") in
       let resourceType =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ?heartbeatInSeconds ?timeoutInSeconds ~parameters ~region
-        ~resource ~resourceType ()
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resourceType") in
+      make ?taskCredentials ?heartbeatInSeconds ?timeoutInSeconds ?parameters
+        ?region ?resource ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let taskCredentials =
+        field_map json__ "taskCredentials" TaskCredentials.of_json in
       let heartbeatInSeconds =
-        field_map json "heartbeatInSeconds" TimeoutInSeconds.of_json in
+        field_map json__ "heartbeatInSeconds" TimeoutInSeconds.of_json in
       let timeoutInSeconds =
-        field_map json "timeoutInSeconds" TimeoutInSeconds.of_json in
+        field_map json__ "timeoutInSeconds" TimeoutInSeconds.of_json in
       let parameters =
-        field_map_exn json "parameters" ConnectorParameters.of_json in
-      let region = field_map_exn json "region" Name.of_json in
-      let resource = field_map_exn json "resource" Name.of_json in
-      let resourceType = field_map_exn json "resourceType" Name.of_json in
-      make ?heartbeatInSeconds ?timeoutInSeconds ~parameters ~region
-        ~resource ~resourceType ()
+        field_map json__ "parameters" ConnectorParameters.of_json in
+      let region = field_map json__ "region" Name.of_json in
+      let resource = field_map json__ "resource" Name.of_json in
+      let resourceType = field_map json__ "resourceType" Name.of_json in
+      make ?taskCredentials ?heartbeatInSeconds ?timeoutInSeconds ?parameters
+        ?region ?resource ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about a task scheduled during an execution."]
@@ -1415,24 +2066,23 @@ module TaskStartFailedEventDetails =
   struct
     type nonrec t =
       {
-      resourceType: Name.t
-        [@ocaml.doc "The action of the resource called by a task state."];
-      resource: Name.t
+      resourceType: Name.t option
         [@ocaml.doc "The service name of the resource in a task state."];
+      resource: Name.t option
+        [@ocaml.doc "The action of the resource called by a task state."];
       error: SensitiveError.t option
         [@ocaml.doc "The error code of the failure."];
       cause: SensitiveCause.t option
         [@ocaml.doc
           "A more detailed explanation of the cause of the failure."]}
-    let context_ = "TaskStartFailedEventDetails"
-    let make ?error =
-      fun ?cause ->
-        fun ~resourceType ->
-          fun ~resource -> fun () -> { error; cause; resourceType; resource }
+    let make ?resourceType =
+      fun ?resource ->
+        fun ?error ->
+          fun ?cause -> fun () -> { resourceType; resource; error; cause }
     let to_value x =
       structure_to_value
-        [("resourceType", (Some (Name.to_value x.resourceType)));
-        ("resource", (Some (Name.to_value x.resource)));
+        [("resourceType", (Option.map x.resourceType ~f:Name.to_value));
+        ("resource", (Option.map x.resource ~f:Name.to_value));
         ("error", (Option.map x.error ~f:SensitiveError.to_value));
         ("cause", (Option.map x.cause ~f:SensitiveCause.to_value))]
     let to_query v = to_query to_value v
@@ -1442,17 +2092,17 @@ module TaskStartFailedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       let resource =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resource") in
       let resourceType =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ?cause ?error ~resource ~resourceType ()
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resourceType") in
+      make ?cause ?error ?resource ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
-      let resource = field_map_exn json "resource" Name.of_json in
-      let resourceType = field_map_exn json "resourceType" Name.of_json in
-      make ?cause ?error ~resource ~resourceType ()
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      let resource = field_map json__ "resource" Name.of_json in
+      let resourceType = field_map json__ "resourceType" Name.of_json in
+      make ?cause ?error ?resource ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about a task that failed to start during an execution."]
@@ -1460,29 +2110,28 @@ module TaskStartedEventDetails =
   struct
     type nonrec t =
       {
-      resourceType: Name.t
-        [@ocaml.doc "The action of the resource called by a task state."];
-      resource: Name.t
-        [@ocaml.doc "The service name of the resource in a task state."]}
-    let context_ = "TaskStartedEventDetails"
-    let make ~resourceType =
-      fun ~resource -> fun () -> { resourceType; resource }
+      resourceType: Name.t option
+        [@ocaml.doc "The service name of the resource in a task state."];
+      resource: Name.t option
+        [@ocaml.doc "The action of the resource called by a task state."]}
+    let make ?resourceType =
+      fun ?resource -> fun () -> { resourceType; resource }
     let to_value x =
       structure_to_value
-        [("resourceType", (Some (Name.to_value x.resourceType)));
-        ("resource", (Some (Name.to_value x.resource)))]
+        [("resourceType", (Option.map x.resourceType ~f:Name.to_value));
+        ("resource", (Option.map x.resource ~f:Name.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resource =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resource") in
       let resourceType =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ~resource ~resourceType ()
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resourceType") in
+      make ?resource ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resource = field_map_exn json "resource" Name.of_json in
-      let resourceType = field_map_exn json "resourceType" Name.of_json in
-      make ~resource ~resourceType ()
+    let of_json json__ =
+      let resource = field_map json__ "resource" Name.of_json in
+      let resourceType = field_map json__ "resourceType" Name.of_json in
+      make ?resource ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the start of a task during an execution."]
@@ -1490,24 +2139,23 @@ module TaskSubmitFailedEventDetails =
   struct
     type nonrec t =
       {
-      resourceType: Name.t
-        [@ocaml.doc "The action of the resource called by a task state."];
-      resource: Name.t
+      resourceType: Name.t option
         [@ocaml.doc "The service name of the resource in a task state."];
+      resource: Name.t option
+        [@ocaml.doc "The action of the resource called by a task state."];
       error: SensitiveError.t option
         [@ocaml.doc "The error code of the failure."];
       cause: SensitiveCause.t option
         [@ocaml.doc
           "A more detailed explanation of the cause of the failure."]}
-    let context_ = "TaskSubmitFailedEventDetails"
-    let make ?error =
-      fun ?cause ->
-        fun ~resourceType ->
-          fun ~resource -> fun () -> { error; cause; resourceType; resource }
+    let make ?resourceType =
+      fun ?resource ->
+        fun ?error ->
+          fun ?cause -> fun () -> { resourceType; resource; error; cause }
     let to_value x =
       structure_to_value
-        [("resourceType", (Some (Name.to_value x.resourceType)));
-        ("resource", (Some (Name.to_value x.resource)));
+        [("resourceType", (Option.map x.resourceType ~f:Name.to_value));
+        ("resource", (Option.map x.resource ~f:Name.to_value));
         ("error", (Option.map x.error ~f:SensitiveError.to_value));
         ("cause", (Option.map x.cause ~f:SensitiveCause.to_value))]
     let to_query v = to_query to_value v
@@ -1517,17 +2165,17 @@ module TaskSubmitFailedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       let resource =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resource") in
       let resourceType =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ?cause ?error ~resource ~resourceType ()
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resourceType") in
+      make ?cause ?error ?resource ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
-      let resource = field_map_exn json "resource" Name.of_json in
-      let resourceType = field_map_exn json "resourceType" Name.of_json in
-      make ?cause ?error ~resource ~resourceType ()
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      let resource = field_map json__ "resource" Name.of_json in
+      let resourceType = field_map json__ "resourceType" Name.of_json in
+      make ?cause ?error ?resource ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about a task that failed to submit during an execution."]
@@ -1535,26 +2183,25 @@ module TaskSubmittedEventDetails =
   struct
     type nonrec t =
       {
-      resourceType: Name.t
-        [@ocaml.doc "The action of the resource called by a task state."];
-      resource: Name.t
+      resourceType: Name.t option
         [@ocaml.doc "The service name of the resource in a task state."];
+      resource: Name.t option
+        [@ocaml.doc "The action of the resource called by a task state."];
       output: SensitiveData.t option
         [@ocaml.doc
           "The response from a resource when a task has started. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       outputDetails: HistoryEventExecutionDataDetails.t option
         [@ocaml.doc
           "Contains details about the output of an execution history event."]}
-    let context_ = "TaskSubmittedEventDetails"
-    let make ?output =
-      fun ?outputDetails ->
-        fun ~resourceType ->
-          fun ~resource ->
-            fun () -> { output; outputDetails; resourceType; resource }
+    let make ?resourceType =
+      fun ?resource ->
+        fun ?output ->
+          fun ?outputDetails ->
+            fun () -> { resourceType; resource; output; outputDetails }
     let to_value x =
       structure_to_value
-        [("resourceType", (Some (Name.to_value x.resourceType)));
-        ("resource", (Some (Name.to_value x.resource)));
+        [("resourceType", (Option.map x.resourceType ~f:Name.to_value));
+        ("resource", (Option.map x.resource ~f:Name.to_value));
         ("output", (Option.map x.output ~f:SensitiveData.to_value));
         ("outputDetails",
           (Option.map x.outputDetails
@@ -1567,45 +2214,44 @@ module TaskSubmittedEventDetails =
       let output =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
       let resource =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resource") in
       let resourceType =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ?outputDetails ?output ~resource ~resourceType ()
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resourceType") in
+      make ?outputDetails ?output ?resource ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputDetails =
-        field_map json "outputDetails"
+        field_map json__ "outputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let output = field_map json "output" SensitiveData.of_json in
-      let resource = field_map_exn json "resource" Name.of_json in
-      let resourceType = field_map_exn json "resourceType" Name.of_json in
-      make ?outputDetails ?output ~resource ~resourceType ()
+      let output = field_map json__ "output" SensitiveData.of_json in
+      let resource = field_map json__ "resource" Name.of_json in
+      let resourceType = field_map json__ "resourceType" Name.of_json in
+      make ?outputDetails ?output ?resource ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about a task submitted to a resource ."]
 module TaskSucceededEventDetails =
   struct
     type nonrec t =
       {
-      resourceType: Name.t
-        [@ocaml.doc "The action of the resource called by a task state."];
-      resource: Name.t
+      resourceType: Name.t option
         [@ocaml.doc "The service name of the resource in a task state."];
+      resource: Name.t option
+        [@ocaml.doc "The action of the resource called by a task state."];
       output: SensitiveData.t option
         [@ocaml.doc
           "The full JSON response from a resource when a task has succeeded. This response becomes the output of the related task. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       outputDetails: HistoryEventExecutionDataDetails.t option
         [@ocaml.doc
           "Contains details about the output of an execution history event."]}
-    let context_ = "TaskSucceededEventDetails"
-    let make ?output =
-      fun ?outputDetails ->
-        fun ~resourceType ->
-          fun ~resource ->
-            fun () -> { output; outputDetails; resourceType; resource }
+    let make ?resourceType =
+      fun ?resource ->
+        fun ?output ->
+          fun ?outputDetails ->
+            fun () -> { resourceType; resource; output; outputDetails }
     let to_value x =
       structure_to_value
-        [("resourceType", (Some (Name.to_value x.resourceType)));
-        ("resource", (Some (Name.to_value x.resource)));
+        [("resourceType", (Option.map x.resourceType ~f:Name.to_value));
+        ("resource", (Option.map x.resource ~f:Name.to_value));
         ("output", (Option.map x.output ~f:SensitiveData.to_value));
         ("outputDetails",
           (Option.map x.outputDetails
@@ -1618,19 +2264,19 @@ module TaskSucceededEventDetails =
       let output =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
       let resource =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resource") in
       let resourceType =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ?outputDetails ?output ~resource ~resourceType ()
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resourceType") in
+      make ?outputDetails ?output ?resource ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputDetails =
-        field_map json "outputDetails"
+        field_map json__ "outputDetails"
           HistoryEventExecutionDataDetails.of_json in
-      let output = field_map json "output" SensitiveData.of_json in
-      let resource = field_map_exn json "resource" Name.of_json in
-      let resourceType = field_map_exn json "resourceType" Name.of_json in
-      make ?outputDetails ?output ~resource ~resourceType ()
+      let output = field_map json__ "output" SensitiveData.of_json in
+      let resource = field_map json__ "resource" Name.of_json in
+      let resourceType = field_map json__ "resourceType" Name.of_json in
+      make ?outputDetails ?output ?resource ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the successful completion of a task state."]
@@ -1638,24 +2284,23 @@ module TaskTimedOutEventDetails =
   struct
     type nonrec t =
       {
-      resourceType: Name.t
-        [@ocaml.doc "The action of the resource called by a task state."];
-      resource: Name.t
+      resourceType: Name.t option
         [@ocaml.doc "The service name of the resource in a task state."];
+      resource: Name.t option
+        [@ocaml.doc "The action of the resource called by a task state."];
       error: SensitiveError.t option
         [@ocaml.doc "The error code of the failure."];
       cause: SensitiveCause.t option
         [@ocaml.doc
           "A more detailed explanation of the cause of the failure."]}
-    let context_ = "TaskTimedOutEventDetails"
-    let make ?error =
-      fun ?cause ->
-        fun ~resourceType ->
-          fun ~resource -> fun () -> { error; cause; resourceType; resource }
+    let make ?resourceType =
+      fun ?resource ->
+        fun ?error ->
+          fun ?cause -> fun () -> { resourceType; resource; error; cause }
     let to_value x =
       structure_to_value
-        [("resourceType", (Some (Name.to_value x.resourceType)));
-        ("resource", (Some (Name.to_value x.resource)));
+        [("resourceType", (Option.map x.resourceType ~f:Name.to_value));
+        ("resource", (Option.map x.resource ~f:Name.to_value));
         ("error", (Option.map x.error ~f:SensitiveError.to_value));
         ("cause", (Option.map x.cause ~f:SensitiveCause.to_value))]
     let to_query v = to_query to_value v
@@ -1665,20 +2310,83 @@ module TaskTimedOutEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       let resource =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resource") in
       let resourceType =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ?cause ?error ~resource ~resourceType ()
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "resourceType") in
+      make ?cause ?error ?resource ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
-      let resource = field_map_exn json "resource" Name.of_json in
-      let resourceType = field_map_exn json "resourceType" Name.of_json in
-      make ?cause ?error ~resource ~resourceType ()
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      let resource = field_map json__ "resource" Name.of_json in
+      let resourceType = field_map json__ "resourceType" Name.of_json in
+      make ?cause ?error ?resource ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about a resource timeout that occurred during an execution."]
+module ValidateStateMachineDefinitionDiagnostic =
+  struct
+    type nonrec t =
+      {
+      severity: ValidateStateMachineDefinitionSeverity.t option
+        [@ocaml.doc
+          "A value of ERROR means that you cannot create or update a state machine with this definition. WARNING level diagnostics alert you to potential issues, but they will not prevent you from creating or updating your state machine."];
+      code: ValidateStateMachineDefinitionCode.t option
+        [@ocaml.doc "Identifying code for the diagnostic."];
+      message: ValidateStateMachineDefinitionMessage.t option
+        [@ocaml.doc "Message describing the diagnostic condition."];
+      location: ValidateStateMachineDefinitionLocation.t option
+        [@ocaml.doc
+          "Location of the issue in the state machine, if available. For errors specific to a field, the location could be in the format: /States/<StateName>/<FieldName>, for example: /States/FailState/ErrorPath."]}
+    let make ?severity =
+      fun ?code ->
+        fun ?message ->
+          fun ?location -> fun () -> { severity; code; message; location }
+    let to_value x =
+      structure_to_value
+        [("severity",
+           (Option.map x.severity
+              ~f:ValidateStateMachineDefinitionSeverity.to_value));
+        ("code",
+          (Option.map x.code ~f:ValidateStateMachineDefinitionCode.to_value));
+        ("message",
+          (Option.map x.message
+             ~f:ValidateStateMachineDefinitionMessage.to_value));
+        ("location",
+          (Option.map x.location
+             ~f:ValidateStateMachineDefinitionLocation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let location =
+        (Option.map ~f:ValidateStateMachineDefinitionLocation.of_xml)
+          (Xml.child xml_arg0 "location") in
+      let message =
+        (Option.map ~f:ValidateStateMachineDefinitionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      let code =
+        (Option.map ~f:ValidateStateMachineDefinitionCode.of_xml)
+          (Xml.child xml_arg0 "code") in
+      let severity =
+        (Option.map ~f:ValidateStateMachineDefinitionSeverity.of_xml)
+          (Xml.child xml_arg0 "severity") in
+      make ?location ?message ?code ?severity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let location =
+        field_map json__ "location"
+          ValidateStateMachineDefinitionLocation.of_json in
+      let message =
+        field_map json__ "message"
+          ValidateStateMachineDefinitionMessage.of_json in
+      let code =
+        field_map json__ "code" ValidateStateMachineDefinitionCode.of_json in
+      let severity =
+        field_map json__ "severity"
+          ValidateStateMachineDefinitionSeverity.of_json in
+      make ?location ?message ?code ?severity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes potential issues found during state machine validation. Rather than raise an exception, validation will return a list of diagnostic elements containing diagnostic information. The ValidateStateMachineDefinitionlAPI might add new diagnostics in the future, adjust diagnostic codes, or change the message wording. Your automated processes should only rely on the value of the result field value (OK, FAIL). Do not rely on the exact order, count, or wording of diagnostic messages. List of warning codes NO_DOLLAR No .$ on a field that appears to be a JSONPath or Intrinsic Function. NO_PATH Field value looks like a path, but field name does not end with 'Path'. PASS_RESULT_IS_STATIC Attempt to use a path in the result of a pass state. List of error codes INVALID_JSON_DESCRIPTION JSON syntax problem found. MISSING_DESCRIPTION Received a null or empty workflow input. SCHEMA_VALIDATION_FAILED Schema validation reported errors. INVALID_RESOURCE The value of a Task-state resource field is invalid. MISSING_END_STATE The workflow does not have a terminal state. DUPLICATE_STATE_NAME The same state name appears more than once. INVALID_STATE_NAME The state name does not follow the naming convention. STATE_MACHINE_NAME_EMPTY The state machine name has not been specified. STATE_MACHINE_NAME_INVALID The state machine name does not follow the naming convention. STATE_MACHINE_NAME_TOO_LONG The state name exceeds the allowed length. STATE_MACHINE_NAME_ALREADY_EXISTS The state name already exists. DUPLICATE_LABEL_NAME A label name appears more than once. INVALID_LABEL_NAME You have provided an invalid label name. MISSING_TRANSITION_TARGET The value of \"Next\" field doesn't match a known state name. TOO_DEEPLY_NESTED The states are too deeply nested."]
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -1690,6 +2398,103 @@ module ErrorMessage =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ValidationExceptionReason =
+  struct
+    type nonrec t =
+      | API_DOES_NOT_SUPPORT_LABELED_ARNS 
+      | MISSING_REQUIRED_PARAMETER 
+      | CANNOT_UPDATE_COMPLETED_MAP_RUN 
+      | INVALID_ROUTING_CONFIGURATION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | API_DOES_NOT_SUPPORT_LABELED_ARNS ->
+          "API_DOES_NOT_SUPPORT_LABELED_ARNS"
+      | MISSING_REQUIRED_PARAMETER -> "MISSING_REQUIRED_PARAMETER"
+      | CANNOT_UPDATE_COMPLETED_MAP_RUN -> "CANNOT_UPDATE_COMPLETED_MAP_RUN"
+      | INVALID_ROUTING_CONFIGURATION -> "INVALID_ROUTING_CONFIGURATION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "API_DOES_NOT_SUPPORT_LABELED_ARNS" ->
+          API_DOES_NOT_SUPPORT_LABELED_ARNS
+      | "MISSING_REQUIRED_PARAMETER" -> MISSING_REQUIRED_PARAMETER
+      | "CANNOT_UPDATE_COMPLETED_MAP_RUN" -> CANNOT_UPDATE_COMPLETED_MAP_RUN
+      | "INVALID_ROUTING_CONFIGURATION" -> INVALID_ROUTING_CONFIGURATION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ValidationExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ValidationExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module EncryptionType =
+  struct
+    type nonrec t =
+      | AWS_OWNED_KEY 
+      | CUSTOMER_MANAGED_KMS_KEY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS_OWNED_KEY -> "AWS_OWNED_KEY"
+      | CUSTOMER_MANAGED_KMS_KEY -> "CUSTOMER_MANAGED_KMS_KEY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS_OWNED_KEY" -> AWS_OWNED_KEY
+      | "CUSTOMER_MANAGED_KMS_KEY" -> CUSTOMER_MANAGED_KMS_KEY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EncryptionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EncryptionType" j)
+    let to_json = simple_to_json to_value
+  end
+module KmsDataKeyReusePeriodSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:60));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for KmsDataKeyReusePeriodSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module KmsKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyId" j
     let to_json = simple_to_json to_value
   end
 module IncludeExecutionData =
@@ -1709,6 +2514,9 @@ module LogDestinationList =
   struct
     type nonrec t = LogDestination.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LogDestination.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1774,6 +2582,355 @@ module Enabled =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module RoutingConfigurationListItem =
+  struct
+    type nonrec t =
+      {
+      stateMachineVersionArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies one or two state machine versions defined in the routing configuration. If you specify the ARN of a second version, it must belong to the same state machine as the first version."];
+      weight: VersionWeight.t
+        [@ocaml.doc
+          "The percentage of traffic you want to route to a state machine version. The sum of the weights in the routing configuration must be equal to 100."]}
+    let context_ = "RoutingConfigurationListItem"
+    let make ~stateMachineVersionArn =
+      fun ~weight -> fun () -> { stateMachineVersionArn; weight }
+    let to_value x =
+      structure_to_value
+        [("stateMachineVersionArn",
+           (Some (Arn.to_value x.stateMachineVersionArn)));
+        ("weight", (Some (VersionWeight.to_value x.weight)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let weight =
+        VersionWeight.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "weight") in
+      let stateMachineVersionArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineVersionArn") in
+      make ~weight ~stateMachineVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let weight = field_map_exn json__ "weight" VersionWeight.of_json in
+      let stateMachineVersionArn =
+        field_map_exn json__ "stateMachineVersionArn" Arn.of_json in
+      make ~weight ~stateMachineVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about the routing configuration of a state machine alias. In a routing configuration, you define an array of objects that specify up to two state machine versions. You also specify the percentage of traffic to be routed to each version."]
+module InspectionDataRequest =
+  struct
+    type nonrec t =
+      {
+      protocol: HTTPProtocol.t option
+        [@ocaml.doc "The protocol used to make the HTTP request."];
+      method_: HTTPMethod.t option
+        [@ocaml.doc "The HTTP method used for the HTTP request."];
+      url: URL.t option
+        [@ocaml.doc "The API endpoint used for the HTTP request."];
+      headers: HTTPHeaders.t option
+        [@ocaml.doc "The request headers associated with the HTTP request."];
+      body: HTTPBody.t option
+        [@ocaml.doc "The request body for the HTTP request."]}
+    let make ?protocol =
+      fun ?method_ ->
+        fun ?url ->
+          fun ?headers ->
+            fun ?body -> fun () -> { protocol; method_; url; headers; body }
+    let to_value x =
+      structure_to_value
+        [("protocol", (Option.map x.protocol ~f:HTTPProtocol.to_value));
+        ("method", (Option.map x.method_ ~f:HTTPMethod.to_value));
+        ("url", (Option.map x.url ~f:URL.to_value));
+        ("headers", (Option.map x.headers ~f:HTTPHeaders.to_value));
+        ("body", (Option.map x.body ~f:HTTPBody.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let body = (Option.map ~f:HTTPBody.of_xml) (Xml.child xml_arg0 "body") in
+      let headers =
+        (Option.map ~f:HTTPHeaders.of_xml) (Xml.child xml_arg0 "headers") in
+      let url = (Option.map ~f:URL.of_xml) (Xml.child xml_arg0 "url") in
+      let method_ =
+        (Option.map ~f:HTTPMethod.of_xml) (Xml.child xml_arg0 "method") in
+      let protocol =
+        (Option.map ~f:HTTPProtocol.of_xml) (Xml.child xml_arg0 "protocol") in
+      make ?body ?headers ?url ?method_ ?protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let body = field_map json__ "body" HTTPBody.of_json in
+      let headers = field_map json__ "headers" HTTPHeaders.of_json in
+      let url = field_map json__ "url" URL.of_json in
+      let method_ = field_map json__ "method" HTTPMethod.of_json in
+      let protocol = field_map json__ "protocol" HTTPProtocol.of_json in
+      make ?body ?headers ?url ?method_ ?protocol ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains additional details about the state's execution, including its input and output data processing flow, and HTTP request information."]
+module InspectionDataResponse =
+  struct
+    type nonrec t =
+      {
+      protocol: HTTPProtocol.t option
+        [@ocaml.doc "The protocol used to return the HTTP response."];
+      statusCode: HTTPStatusCode.t option
+        [@ocaml.doc "The HTTP response status code for the HTTP response."];
+      statusMessage: HTTPStatusMessage.t option
+        [@ocaml.doc "The message associated with the HTTP status code."];
+      headers: HTTPHeaders.t option
+        [@ocaml.doc
+          "The response headers associated with the HTTP response."];
+      body: HTTPBody.t option [@ocaml.doc "The HTTP response returned."]}
+    let make ?protocol =
+      fun ?statusCode ->
+        fun ?statusMessage ->
+          fun ?headers ->
+            fun ?body ->
+              fun () ->
+                { protocol; statusCode; statusMessage; headers; body }
+    let to_value x =
+      structure_to_value
+        [("protocol", (Option.map x.protocol ~f:HTTPProtocol.to_value));
+        ("statusCode", (Option.map x.statusCode ~f:HTTPStatusCode.to_value));
+        ("statusMessage",
+          (Option.map x.statusMessage ~f:HTTPStatusMessage.to_value));
+        ("headers", (Option.map x.headers ~f:HTTPHeaders.to_value));
+        ("body", (Option.map x.body ~f:HTTPBody.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let body = (Option.map ~f:HTTPBody.of_xml) (Xml.child xml_arg0 "body") in
+      let headers =
+        (Option.map ~f:HTTPHeaders.of_xml) (Xml.child xml_arg0 "headers") in
+      let statusMessage =
+        (Option.map ~f:HTTPStatusMessage.of_xml)
+          (Xml.child xml_arg0 "statusMessage") in
+      let statusCode =
+        (Option.map ~f:HTTPStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      let protocol =
+        (Option.map ~f:HTTPProtocol.of_xml) (Xml.child xml_arg0 "protocol") in
+      make ?body ?headers ?statusMessage ?statusCode ?protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let body = field_map json__ "body" HTTPBody.of_json in
+      let headers = field_map json__ "headers" HTTPHeaders.of_json in
+      let statusMessage =
+        field_map json__ "statusMessage" HTTPStatusMessage.of_json in
+      let statusCode = field_map json__ "statusCode" HTTPStatusCode.of_json in
+      let protocol = field_map json__ "protocol" HTTPProtocol.of_json in
+      make ?body ?headers ?statusMessage ?statusCode ?protocol ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains additional details about the state's execution, including its input and output data processing flow, and HTTP response information. The inspectionLevel request parameter specifies which details are returned."]
+module InspectionErrorDetails =
+  struct
+    type nonrec t =
+      {
+      catchIndex: ExceptionHandlerIndex.t option
+        [@ocaml.doc
+          "The array index of the Catch which handled the exception."];
+      retryIndex: ExceptionHandlerIndex.t option
+        [@ocaml.doc
+          "The array index of the Retry which handled the exception."];
+      retryBackoffIntervalSeconds: RetryBackoffIntervalSeconds.t option
+        [@ocaml.doc
+          "The duration in seconds of the backoff for a retry on a failed state invocation."]}
+    let make ?catchIndex =
+      fun ?retryIndex ->
+        fun ?retryBackoffIntervalSeconds ->
+          fun () -> { catchIndex; retryIndex; retryBackoffIntervalSeconds }
+    let to_value x =
+      structure_to_value
+        [("catchIndex",
+           (Option.map x.catchIndex ~f:ExceptionHandlerIndex.to_value));
+        ("retryIndex",
+          (Option.map x.retryIndex ~f:ExceptionHandlerIndex.to_value));
+        ("retryBackoffIntervalSeconds",
+          (Option.map x.retryBackoffIntervalSeconds
+             ~f:RetryBackoffIntervalSeconds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retryBackoffIntervalSeconds =
+        (Option.map ~f:RetryBackoffIntervalSeconds.of_xml)
+          (Xml.child xml_arg0 "retryBackoffIntervalSeconds") in
+      let retryIndex =
+        (Option.map ~f:ExceptionHandlerIndex.of_xml)
+          (Xml.child xml_arg0 "retryIndex") in
+      let catchIndex =
+        (Option.map ~f:ExceptionHandlerIndex.of_xml)
+          (Xml.child xml_arg0 "catchIndex") in
+      make ?retryBackoffIntervalSeconds ?retryIndex ?catchIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retryBackoffIntervalSeconds =
+        field_map json__ "retryBackoffIntervalSeconds"
+          RetryBackoffIntervalSeconds.of_json in
+      let retryIndex =
+        field_map json__ "retryIndex" ExceptionHandlerIndex.of_json in
+      let catchIndex =
+        field_map json__ "catchIndex" ExceptionHandlerIndex.of_json in
+      make ?retryBackoffIntervalSeconds ?retryIndex ?catchIndex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object containing data about a handled exception in the tested state."]
+module InspectionMaxConcurrency =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InspectionMaxConcurrency"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InspectionToleratedFailureCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InspectionToleratedFailureCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InspectionToleratedFailurePercentage =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:100.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module MockErrorOutput =
+  struct
+    type nonrec t =
+      {
+      error: SensitiveError.t option
+        [@ocaml.doc
+          "A string denoting the error code of the exception thrown when invoking the tested state. This field is required if mock.errorOutput is specified."];
+      cause: SensitiveCause.t option
+        [@ocaml.doc
+          "A string containing the cause of the exception thrown when executing the state's logic."]}
+    let make ?error = fun ?cause -> fun () -> { error; cause }
+    let to_value x =
+      structure_to_value
+        [("error", (Option.map x.error ~f:SensitiveError.to_value));
+        ("cause", (Option.map x.cause ~f:SensitiveCause.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cause =
+        (Option.map ~f:SensitiveCause.of_xml) (Xml.child xml_arg0 "cause") in
+      let error =
+        (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
+      make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      make ?cause ?error ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A JSON object that contains a mocked error."]
+module MockResponseValidationMode =
+  struct
+    type nonrec t =
+      | STRICT 
+      | PRESENT 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STRICT -> "STRICT"
+      | PRESENT -> "PRESENT"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STRICT" -> STRICT
+      | "PRESENT" -> PRESENT
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MockResponseValidationMode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MockResponseValidationMode" j)
+    let to_json = simple_to_json to_value
+  end
+module MapIterationFailureCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MapIterationFailureCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RetrierRetryCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RetrierRetryCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TestStateStateName =
+  struct
+    type nonrec t = string
+    let context_ = "TestStateStateName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:80) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TestStateStateName" j
+    let to_json = simple_to_json to_value
+  end
 module Tag =
   struct
     type nonrec t =
@@ -1792,12 +2949,46 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" TagValue.of_json in
-      let key = field_map json "key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "value" TagValue.of_json in
+      let key = field_map json__ "key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Tags are key-value pairs that can be associated with Step Functions state machines and activities. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
+       "Tags are key-value pairs that can be associated with Step Functions state machines and activities. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the Amazon Web Services Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
+module KmsKeyState =
+  struct
+    type nonrec t =
+      | DISABLED 
+      | PENDING_DELETION 
+      | PENDING_IMPORT 
+      | UNAVAILABLE 
+      | CREATING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DISABLED -> "DISABLED"
+      | PENDING_DELETION -> "PENDING_DELETION"
+      | PENDING_IMPORT -> "PENDING_IMPORT"
+      | UNAVAILABLE -> "UNAVAILABLE"
+      | CREATING -> "CREATING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DISABLED" -> DISABLED
+      | "PENDING_DELETION" -> PENDING_DELETION
+      | "PENDING_IMPORT" -> PENDING_IMPORT
+      | "UNAVAILABLE" -> UNAVAILABLE
+      | "CREATING" -> CREATING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KmsKeyState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KmsKeyState" j)
+    let to_json = simple_to_json to_value
+  end
 module BilledDuration =
   struct
     type nonrec t = Int64.t
@@ -1843,171 +3034,347 @@ module StateMachineListItem =
   struct
     type nonrec t =
       {
-      stateMachineArn: Arn.t
+      stateMachineArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the state machine."];
-      name: Name.t
+      name: Name.t option
         [@ocaml.doc
-          "The name of the state machine. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
-      type_: StateMachineType.t ;
-      creationDate: Timestamp.t
+          "The name of the state machine. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+      type_: StateMachineType.t option ;
+      creationDate: Timestamp.t option
         [@ocaml.doc "The date the state machine is created."]}
-    let context_ = "StateMachineListItem"
-    let make ~stateMachineArn =
-      fun ~name ->
-        fun ~type_ ->
-          fun ~creationDate ->
+    let make ?stateMachineArn =
+      fun ?name ->
+        fun ?type_ ->
+          fun ?creationDate ->
             fun () -> { stateMachineArn; name; type_; creationDate }
     let to_value x =
       structure_to_value
-        [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
-        ("name", (Some (Name.to_value x.name)));
-        ("type", (Some (StateMachineType.to_value x.type_)));
-        ("creationDate", (Some (Timestamp.to_value x.creationDate)))]
+        [("stateMachineArn", (Option.map x.stateMachineArn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("type", (Option.map x.type_ ~f:StateMachineType.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let creationDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
       let type_ =
-        StateMachineType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:StateMachineType.of_xml) (Xml.child xml_arg0 "type") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let stateMachineArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
-      make ~creationDate ~type_ ~name ~stateMachineArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "stateMachineArn") in
+      make ?creationDate ?type_ ?name ?stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
-      let type_ = field_map_exn json "type" StateMachineType.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      make ~creationDate ~type_ ~name ~stateMachineArn ()
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let type_ = field_map json__ "type" StateMachineType.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let stateMachineArn = field_map json__ "stateMachineArn" Arn.of_json in
+      make ?creationDate ?type_ ?name ?stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about the state machine."]
-module ExecutionListItem =
+module StateMachineVersionListItem =
   struct
     type nonrec t =
       {
-      executionArn: Arn.t
+      stateMachineVersionArn: LongArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the execution."];
-      stateMachineArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the executed state machine."];
-      name: Name.t
-        [@ocaml.doc
-          "The name of the execution. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
-      status: ExecutionStatus.t
-        [@ocaml.doc "The current status of the execution."];
-      startDate: Timestamp.t [@ocaml.doc "The date the execution started."];
-      stopDate: Timestamp.t option
-        [@ocaml.doc
-          "If the execution already ended, the date the execution stopped."]}
-    let context_ = "ExecutionListItem"
-    let make ?stopDate =
-      fun ~executionArn ->
-        fun ~stateMachineArn ->
-          fun ~name ->
-            fun ~status ->
-              fun ~startDate ->
-                fun () ->
-                  {
-                    stopDate;
-                    executionArn;
-                    stateMachineArn;
-                    name;
-                    status;
-                    startDate
-                  }
+          "The Amazon Resource Name (ARN) that identifies a state machine version. The version ARN is a combination of state machine ARN and the version number separated by a colon (:). For example, stateMachineARN:1."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The creation date of a state machine version."]}
+    let make ?stateMachineVersionArn =
+      fun ?creationDate -> fun () -> { stateMachineVersionArn; creationDate }
     let to_value x =
       structure_to_value
-        [("executionArn", (Some (Arn.to_value x.executionArn)));
-        ("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
-        ("name", (Some (Name.to_value x.name)));
-        ("status", (Some (ExecutionStatus.to_value x.status)));
-        ("startDate", (Some (Timestamp.to_value x.startDate)));
+        [("stateMachineVersionArn",
+           (Option.map x.stateMachineVersionArn ~f:LongArn.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let stateMachineVersionArn =
+        (Option.map ~f:LongArn.of_xml)
+          (Xml.child xml_arg0 "stateMachineVersionArn") in
+      make ?creationDate ?stateMachineVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let stateMachineVersionArn =
+        field_map json__ "stateMachineVersionArn" LongArn.of_json in
+      make ?creationDate ?stateMachineVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains details about a specific state machine version."]
+module StateMachineAliasListItem =
+  struct
+    type nonrec t =
+      {
+      stateMachineAliasArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies a state machine alias. The alias ARN is a combination of state machine ARN and the alias name separated by a colon (:). For example, stateMachineARN:PROD."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The creation date of a state machine alias."]}
+    let make ?stateMachineAliasArn =
+      fun ?creationDate -> fun () -> { stateMachineAliasArn; creationDate }
+    let to_value x =
+      structure_to_value
+        [("stateMachineAliasArn",
+           (Option.map x.stateMachineAliasArn ~f:LongArn.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let stateMachineAliasArn =
+        (Option.map ~f:LongArn.of_xml)
+          (Xml.child xml_arg0 "stateMachineAliasArn") in
+      make ?creationDate ?stateMachineAliasArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let stateMachineAliasArn =
+        field_map json__ "stateMachineAliasArn" LongArn.of_json in
+      make ?creationDate ?stateMachineAliasArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains details about a specific state machine alias."]
+module MapRunListItem =
+  struct
+    type nonrec t =
+      {
+      executionArn: Arn.t option
+        [@ocaml.doc
+          "The executionArn of the execution from which the Map Run was started."];
+      mapRunArn: LongArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Map Run."];
+      stateMachineArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the executed state machine."];
+      startDate: Timestamp.t option
+        [@ocaml.doc "The date on which the Map Run started."];
+      stopDate: Timestamp.t option
+        [@ocaml.doc "The date on which the Map Run stopped."]}
+    let make ?executionArn =
+      fun ?mapRunArn ->
+        fun ?stateMachineArn ->
+          fun ?startDate ->
+            fun ?stopDate ->
+              fun () ->
+                {
+                  executionArn;
+                  mapRunArn;
+                  stateMachineArn;
+                  startDate;
+                  stopDate
+                }
+    let to_value x =
+      structure_to_value
+        [("executionArn", (Option.map x.executionArn ~f:Arn.to_value));
+        ("mapRunArn", (Option.map x.mapRunArn ~f:LongArn.to_value));
+        ("stateMachineArn", (Option.map x.stateMachineArn ~f:Arn.to_value));
+        ("startDate", (Option.map x.startDate ~f:Timestamp.to_value));
         ("stopDate", (Option.map x.stopDate ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let stopDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "stopDate") in
       let startDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startDate") in
-      let status =
-        ExecutionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startDate") in
       let stateMachineArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "stateMachineArn") in
+      let mapRunArn =
+        (Option.map ~f:LongArn.of_xml) (Xml.child xml_arg0 "mapRunArn") in
       let executionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
-      make ?stopDate ~startDate ~status ~name ~stateMachineArn ~executionArn
-        ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "executionArn") in
+      make ?stopDate ?startDate ?stateMachineArn ?mapRunArn ?executionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stopDate = field_map json "stopDate" Timestamp.of_json in
-      let startDate = field_map_exn json "startDate" Timestamp.of_json in
-      let status = field_map_exn json "status" ExecutionStatus.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      let executionArn = field_map_exn json "executionArn" Arn.of_json in
-      make ?stopDate ~startDate ~status ~name ~stateMachineArn ~executionArn
-        ()
+    let of_json json__ =
+      let stopDate = field_map json__ "stopDate" Timestamp.of_json in
+      let startDate = field_map json__ "startDate" Timestamp.of_json in
+      let stateMachineArn = field_map json__ "stateMachineArn" Arn.of_json in
+      let mapRunArn = field_map json__ "mapRunArn" LongArn.of_json in
+      let executionArn = field_map json__ "executionArn" Arn.of_json in
+      make ?stopDate ?startDate ?stateMachineArn ?mapRunArn ?executionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains details about a specific Map Run."]
+module ExecutionListItem =
+  struct
+    type nonrec t =
+      {
+      executionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the execution."];
+      stateMachineArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine that ran the execution."];
+      name: Name.t option
+        [@ocaml.doc
+          "The name of the execution. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+      status: ExecutionStatus.t option
+        [@ocaml.doc "The current status of the execution."];
+      startDate: Timestamp.t option
+        [@ocaml.doc "The date the execution started."];
+      stopDate: Timestamp.t option
+        [@ocaml.doc
+          "If the execution already ended, the date the execution stopped."];
+      mapRunArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a Map Run. This field is returned only if mapRunArn was specified in the ListExecutions API action. If stateMachineArn was specified in ListExecutions, the mapRunArn isn't returned."];
+      itemCount: UnsignedInteger.t option
+        [@ocaml.doc
+          "The total number of items processed in a child workflow execution. This field is returned only if mapRunArn was specified in the ListExecutions API action. If stateMachineArn was specified in ListExecutions, the itemCount field isn't returned."];
+      stateMachineVersionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine version associated with the execution. If the state machine execution was started with an unqualified ARN, it returns null. If the execution was started using a stateMachineAliasArn, both the stateMachineAliasArn and stateMachineVersionArn parameters contain the respective values."];
+      stateMachineAliasArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine alias used to start an execution. If the state machine execution was started with an unqualified ARN or a version ARN, it returns null."];
+      redriveCount: RedriveCount.t option
+        [@ocaml.doc
+          "The number of times you've redriven an execution. If you have not yet redriven an execution, the redriveCount is 0. This count is only updated when you successfully redrive an execution."];
+      redriveDate: Timestamp.t option
+        [@ocaml.doc "The date the execution was last redriven."]}
+    let make ?executionArn =
+      fun ?stateMachineArn ->
+        fun ?name ->
+          fun ?status ->
+            fun ?startDate ->
+              fun ?stopDate ->
+                fun ?mapRunArn ->
+                  fun ?itemCount ->
+                    fun ?stateMachineVersionArn ->
+                      fun ?stateMachineAliasArn ->
+                        fun ?redriveCount ->
+                          fun ?redriveDate ->
+                            fun () ->
+                              {
+                                executionArn;
+                                stateMachineArn;
+                                name;
+                                status;
+                                startDate;
+                                stopDate;
+                                mapRunArn;
+                                itemCount;
+                                stateMachineVersionArn;
+                                stateMachineAliasArn;
+                                redriveCount;
+                                redriveDate
+                              }
+    let to_value x =
+      structure_to_value
+        [("executionArn", (Option.map x.executionArn ~f:Arn.to_value));
+        ("stateMachineArn", (Option.map x.stateMachineArn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("status", (Option.map x.status ~f:ExecutionStatus.to_value));
+        ("startDate", (Option.map x.startDate ~f:Timestamp.to_value));
+        ("stopDate", (Option.map x.stopDate ~f:Timestamp.to_value));
+        ("mapRunArn", (Option.map x.mapRunArn ~f:LongArn.to_value));
+        ("itemCount", (Option.map x.itemCount ~f:UnsignedInteger.to_value));
+        ("stateMachineVersionArn",
+          (Option.map x.stateMachineVersionArn ~f:Arn.to_value));
+        ("stateMachineAliasArn",
+          (Option.map x.stateMachineAliasArn ~f:Arn.to_value));
+        ("redriveCount",
+          (Option.map x.redriveCount ~f:RedriveCount.to_value));
+        ("redriveDate", (Option.map x.redriveDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redriveDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "redriveDate") in
+      let redriveCount =
+        (Option.map ~f:RedriveCount.of_xml)
+          (Xml.child xml_arg0 "redriveCount") in
+      let stateMachineAliasArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineAliasArn") in
+      let stateMachineVersionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineVersionArn") in
+      let itemCount =
+        (Option.map ~f:UnsignedInteger.of_xml)
+          (Xml.child xml_arg0 "itemCount") in
+      let mapRunArn =
+        (Option.map ~f:LongArn.of_xml) (Xml.child xml_arg0 "mapRunArn") in
+      let stopDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "stopDate") in
+      let startDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startDate") in
+      let status =
+        (Option.map ~f:ExecutionStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      let stateMachineArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "stateMachineArn") in
+      let executionArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "executionArn") in
+      make ?redriveDate ?redriveCount ?stateMachineAliasArn
+        ?stateMachineVersionArn ?itemCount ?mapRunArn ?stopDate ?startDate
+        ?status ?name ?stateMachineArn ?executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redriveDate = field_map json__ "redriveDate" Timestamp.of_json in
+      let redriveCount = field_map json__ "redriveCount" RedriveCount.of_json in
+      let stateMachineAliasArn =
+        field_map json__ "stateMachineAliasArn" Arn.of_json in
+      let stateMachineVersionArn =
+        field_map json__ "stateMachineVersionArn" Arn.of_json in
+      let itemCount = field_map json__ "itemCount" UnsignedInteger.of_json in
+      let mapRunArn = field_map json__ "mapRunArn" LongArn.of_json in
+      let stopDate = field_map json__ "stopDate" Timestamp.of_json in
+      let startDate = field_map json__ "startDate" Timestamp.of_json in
+      let status = field_map json__ "status" ExecutionStatus.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let stateMachineArn = field_map json__ "stateMachineArn" Arn.of_json in
+      let executionArn = field_map json__ "executionArn" Arn.of_json in
+      make ?redriveDate ?redriveCount ?stateMachineAliasArn
+        ?stateMachineVersionArn ?itemCount ?mapRunArn ?stopDate ?startDate
+        ?status ?name ?stateMachineArn ?executionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about an execution."]
 module ActivityListItem =
   struct
     type nonrec t =
       {
-      activityArn: Arn.t
+      activityArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the activity."];
-      name: Name.t
+      name: Name.t option
         [@ocaml.doc
-          "The name of the activity. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
-      creationDate: Timestamp.t
+          "The name of the activity. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+      creationDate: Timestamp.t option
         [@ocaml.doc "The date the activity is created."]}
-    let context_ = "ActivityListItem"
-    let make ~activityArn =
-      fun ~name ->
-        fun ~creationDate -> fun () -> { activityArn; name; creationDate }
+    let make ?activityArn =
+      fun ?name ->
+        fun ?creationDate -> fun () -> { activityArn; name; creationDate }
     let to_value x =
       structure_to_value
-        [("activityArn", (Some (Arn.to_value x.activityArn)));
-        ("name", (Some (Name.to_value x.name)));
-        ("creationDate", (Some (Timestamp.to_value x.creationDate)))]
+        [("activityArn", (Option.map x.activityArn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let creationDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationDate") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let activityArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
-      make ~creationDate ~name ~activityArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "activityArn") in
+      make ?creationDate ?name ?activityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let activityArn = field_map_exn json "activityArn" Arn.of_json in
-      make ~creationDate ~name ~activityArn ()
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let activityArn = field_map json__ "activityArn" Arn.of_json in
+      make ?creationDate ?name ?activityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about an activity."]
 module HistoryEvent =
   struct
     type nonrec t =
       {
-      timestamp: Timestamp.t
-        [@ocaml.doc "The date and time the event occurred."];
-      type_: HistoryEventType.t [@ocaml.doc "The type of the event."];
-      id: EventId.t
+      timestamp: Timestamp.t option
+        [@ocaml.doc
+          "The date and time the event occurred, expressed in seconds and fractional milliseconds since the Unix epoch, which is defined as January 1, 1970, at 00:00:00 Coordinated Universal Time (UTC)."];
+      type_: HistoryEventType.t option [@ocaml.doc "The type of the event."];
+      id: EventId.t option
         [@ocaml.doc
           "The id of the event. Events are numbered sequentially, starting at one."];
       previousEventId: EventId.t option
@@ -2043,6 +3410,9 @@ module HistoryEvent =
       executionSucceededEventDetails: ExecutionSucceededEventDetails.t option ;
       executionAbortedEventDetails: ExecutionAbortedEventDetails.t option ;
       executionTimedOutEventDetails: ExecutionTimedOutEventDetails.t option ;
+      executionRedrivenEventDetails: ExecutionRedrivenEventDetails.t option
+        [@ocaml.doc
+          "Contains details about the redrive attempt of an execution."];
       mapStateStartedEventDetails: MapStateStartedEventDetails.t option
         [@ocaml.doc "Contains details about Map state that was started."];
       mapIterationStartedEventDetails: MapIterationEventDetails.t option
@@ -2070,80 +3440,112 @@ module HistoryEvent =
       lambdaFunctionSucceededEventDetails:
         LambdaFunctionSucceededEventDetails.t option
         [@ocaml.doc
-          "Contains details about a lambda function that terminated successfully during an execution."];
+          "Contains details about a Lambda function that terminated successfully during an execution."];
       lambdaFunctionTimedOutEventDetails:
         LambdaFunctionTimedOutEventDetails.t option ;
       stateEnteredEventDetails: StateEnteredEventDetails.t option ;
-      stateExitedEventDetails: StateExitedEventDetails.t option }
-    let context_ = "HistoryEvent"
-    let make ?previousEventId =
-      fun ?activityFailedEventDetails ->
-        fun ?activityScheduleFailedEventDetails ->
-          fun ?activityScheduledEventDetails ->
-            fun ?activityStartedEventDetails ->
-              fun ?activitySucceededEventDetails ->
-                fun ?activityTimedOutEventDetails ->
-                  fun ?taskFailedEventDetails ->
-                    fun ?taskScheduledEventDetails ->
-                      fun ?taskStartFailedEventDetails ->
-                        fun ?taskStartedEventDetails ->
-                          fun ?taskSubmitFailedEventDetails ->
-                            fun ?taskSubmittedEventDetails ->
-                              fun ?taskSucceededEventDetails ->
-                                fun ?taskTimedOutEventDetails ->
-                                  fun ?executionFailedEventDetails ->
-                                    fun ?executionStartedEventDetails ->
-                                      fun ?executionSucceededEventDetails ->
-                                        fun ?executionAbortedEventDetails ->
-                                          fun ?executionTimedOutEventDetails
+      stateExitedEventDetails: StateExitedEventDetails.t option ;
+      mapRunStartedEventDetails: MapRunStartedEventDetails.t option
+        [@ocaml.doc
+          "Contains details, such as mapRunArn, and the start date and time of a Map Run. mapRunArn is the Amazon Resource Name (ARN) of the Map Run that was started."];
+      mapRunFailedEventDetails: MapRunFailedEventDetails.t option
+        [@ocaml.doc
+          "Contains error and cause details about a Map Run that failed."];
+      mapRunRedrivenEventDetails: MapRunRedrivenEventDetails.t option
+        [@ocaml.doc
+          "Contains details about the redrive attempt of a Map Run."];
+      evaluationFailedEventDetails: EvaluationFailedEventDetails.t option
+        [@ocaml.doc
+          "Contains details about an evaluation failure that occurred while processing a state."]}
+    let make ?timestamp =
+      fun ?type_ ->
+        fun ?id ->
+          fun ?previousEventId ->
+            fun ?activityFailedEventDetails ->
+              fun ?activityScheduleFailedEventDetails ->
+                fun ?activityScheduledEventDetails ->
+                  fun ?activityStartedEventDetails ->
+                    fun ?activitySucceededEventDetails ->
+                      fun ?activityTimedOutEventDetails ->
+                        fun ?taskFailedEventDetails ->
+                          fun ?taskScheduledEventDetails ->
+                            fun ?taskStartFailedEventDetails ->
+                              fun ?taskStartedEventDetails ->
+                                fun ?taskSubmitFailedEventDetails ->
+                                  fun ?taskSubmittedEventDetails ->
+                                    fun ?taskSucceededEventDetails ->
+                                      fun ?taskTimedOutEventDetails ->
+                                        fun ?executionFailedEventDetails ->
+                                          fun ?executionStartedEventDetails
                                             ->
-                                            fun ?mapStateStartedEventDetails
+                                            fun
+                                              ?executionSucceededEventDetails
                                               ->
                                               fun
-                                                ?mapIterationStartedEventDetails
+                                                ?executionAbortedEventDetails
                                                 ->
                                                 fun
-                                                  ?mapIterationSucceededEventDetails
+                                                  ?executionTimedOutEventDetails
                                                   ->
                                                   fun
-                                                    ?mapIterationFailedEventDetails
+                                                    ?executionRedrivenEventDetails
                                                     ->
                                                     fun
-                                                      ?mapIterationAbortedEventDetails
+                                                      ?mapStateStartedEventDetails
                                                       ->
                                                       fun
-                                                        ?lambdaFunctionFailedEventDetails
+                                                        ?mapIterationStartedEventDetails
                                                         ->
                                                         fun
-                                                          ?lambdaFunctionScheduleFailedEventDetails
+                                                          ?mapIterationSucceededEventDetails
                                                           ->
                                                           fun
-                                                            ?lambdaFunctionScheduledEventDetails
+                                                            ?mapIterationFailedEventDetails
                                                             ->
                                                             fun
-                                                              ?lambdaFunctionStartFailedEventDetails
+                                                              ?mapIterationAbortedEventDetails
                                                               ->
                                                               fun
-                                                                ?lambdaFunctionSucceededEventDetails
+                                                                ?lambdaFunctionFailedEventDetails
                                                                 ->
                                                                 fun
-                                                                  ?lambdaFunctionTimedOutEventDetails
+                                                                  ?lambdaFunctionScheduleFailedEventDetails
                                                                   ->
                                                                   fun
+                                                                    ?lambdaFunctionScheduledEventDetails
+                                                                    ->
+                                                                    fun
+                                                                    ?lambdaFunctionStartFailedEventDetails
+                                                                    ->
+                                                                    fun
+                                                                    ?lambdaFunctionSucceededEventDetails
+                                                                    ->
+                                                                    fun
+                                                                    ?lambdaFunctionTimedOutEventDetails
+                                                                    ->
+                                                                    fun
                                                                     ?stateEnteredEventDetails
                                                                     ->
                                                                     fun
                                                                     ?stateExitedEventDetails
                                                                     ->
                                                                     fun
-                                                                    ~timestamp
+                                                                    ?mapRunStartedEventDetails
                                                                     ->
                                                                     fun
-                                                                    ~type_ ->
-                                                                    fun ~id
+                                                                    ?mapRunFailedEventDetails
+                                                                    ->
+                                                                    fun
+                                                                    ?mapRunRedrivenEventDetails
+                                                                    ->
+                                                                    fun
+                                                                    ?evaluationFailedEventDetails
                                                                     ->
                                                                     fun () ->
                                                                     {
+                                                                    timestamp;
+                                                                    type_;
+                                                                    id;
                                                                     previousEventId;
                                                                     activityFailedEventDetails;
                                                                     activityScheduleFailedEventDetails;
@@ -2164,6 +3566,7 @@ module HistoryEvent =
                                                                     executionSucceededEventDetails;
                                                                     executionAbortedEventDetails;
                                                                     executionTimedOutEventDetails;
+                                                                    executionRedrivenEventDetails;
                                                                     mapStateStartedEventDetails;
                                                                     mapIterationStartedEventDetails;
                                                                     mapIterationSucceededEventDetails;
@@ -2177,15 +3580,16 @@ module HistoryEvent =
                                                                     lambdaFunctionTimedOutEventDetails;
                                                                     stateEnteredEventDetails;
                                                                     stateExitedEventDetails;
-                                                                    timestamp;
-                                                                    type_;
-                                                                    id
+                                                                    mapRunStartedEventDetails;
+                                                                    mapRunFailedEventDetails;
+                                                                    mapRunRedrivenEventDetails;
+                                                                    evaluationFailedEventDetails
                                                                     }
     let to_value x =
       structure_to_value
-        [("timestamp", (Some (Timestamp.to_value x.timestamp)));
-        ("type", (Some (HistoryEventType.to_value x.type_)));
-        ("id", (Some (EventId.to_value x.id)));
+        [("timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
+        ("type", (Option.map x.type_ ~f:HistoryEventType.to_value));
+        ("id", (Option.map x.id ~f:EventId.to_value));
         ("previousEventId",
           (Option.map x.previousEventId ~f:EventId.to_value));
         ("activityFailedEventDetails",
@@ -2245,6 +3649,9 @@ module HistoryEvent =
         ("executionTimedOutEventDetails",
           (Option.map x.executionTimedOutEventDetails
              ~f:ExecutionTimedOutEventDetails.to_value));
+        ("executionRedrivenEventDetails",
+          (Option.map x.executionRedrivenEventDetails
+             ~f:ExecutionRedrivenEventDetails.to_value));
         ("mapStateStartedEventDetails",
           (Option.map x.mapStateStartedEventDetails
              ~f:MapStateStartedEventDetails.to_value));
@@ -2283,9 +3690,33 @@ module HistoryEvent =
              ~f:StateEnteredEventDetails.to_value));
         ("stateExitedEventDetails",
           (Option.map x.stateExitedEventDetails
-             ~f:StateExitedEventDetails.to_value))]
+             ~f:StateExitedEventDetails.to_value));
+        ("mapRunStartedEventDetails",
+          (Option.map x.mapRunStartedEventDetails
+             ~f:MapRunStartedEventDetails.to_value));
+        ("mapRunFailedEventDetails",
+          (Option.map x.mapRunFailedEventDetails
+             ~f:MapRunFailedEventDetails.to_value));
+        ("mapRunRedrivenEventDetails",
+          (Option.map x.mapRunRedrivenEventDetails
+             ~f:MapRunRedrivenEventDetails.to_value));
+        ("evaluationFailedEventDetails",
+          (Option.map x.evaluationFailedEventDetails
+             ~f:EvaluationFailedEventDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let evaluationFailedEventDetails =
+        (Option.map ~f:EvaluationFailedEventDetails.of_xml)
+          (Xml.child xml_arg0 "evaluationFailedEventDetails") in
+      let mapRunRedrivenEventDetails =
+        (Option.map ~f:MapRunRedrivenEventDetails.of_xml)
+          (Xml.child xml_arg0 "mapRunRedrivenEventDetails") in
+      let mapRunFailedEventDetails =
+        (Option.map ~f:MapRunFailedEventDetails.of_xml)
+          (Xml.child xml_arg0 "mapRunFailedEventDetails") in
+      let mapRunStartedEventDetails =
+        (Option.map ~f:MapRunStartedEventDetails.of_xml)
+          (Xml.child xml_arg0 "mapRunStartedEventDetails") in
       let stateExitedEventDetails =
         (Option.map ~f:StateExitedEventDetails.of_xml)
           (Xml.child xml_arg0 "stateExitedEventDetails") in
@@ -2325,6 +3756,9 @@ module HistoryEvent =
       let mapStateStartedEventDetails =
         (Option.map ~f:MapStateStartedEventDetails.of_xml)
           (Xml.child xml_arg0 "mapStateStartedEventDetails") in
+      let executionRedrivenEventDetails =
+        (Option.map ~f:ExecutionRedrivenEventDetails.of_xml)
+          (Xml.child xml_arg0 "executionRedrivenEventDetails") in
       let executionTimedOutEventDetails =
         (Option.map ~f:ExecutionTimedOutEventDetails.of_xml)
           (Xml.child xml_arg0 "executionTimedOutEventDetails") in
@@ -2384,14 +3818,14 @@ module HistoryEvent =
           (Xml.child xml_arg0 "activityFailedEventDetails") in
       let previousEventId =
         (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "previousEventId") in
-      let id = EventId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let id = (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "id") in
       let type_ =
-        HistoryEventType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+        (Option.map ~f:HistoryEventType.of_xml) (Xml.child xml_arg0 "type") in
       let timestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "timestamp") in
-      make ?stateExitedEventDetails ?stateEnteredEventDetails
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "timestamp") in
+      make ?evaluationFailedEventDetails ?mapRunRedrivenEventDetails
+        ?mapRunFailedEventDetails ?mapRunStartedEventDetails
+        ?stateExitedEventDetails ?stateEnteredEventDetails
         ?lambdaFunctionTimedOutEventDetails
         ?lambdaFunctionSucceededEventDetails
         ?lambdaFunctionStartFailedEventDetails
@@ -2400,119 +3834,138 @@ module HistoryEvent =
         ?lambdaFunctionFailedEventDetails ?mapIterationAbortedEventDetails
         ?mapIterationFailedEventDetails ?mapIterationSucceededEventDetails
         ?mapIterationStartedEventDetails ?mapStateStartedEventDetails
-        ?executionTimedOutEventDetails ?executionAbortedEventDetails
-        ?executionSucceededEventDetails ?executionStartedEventDetails
-        ?executionFailedEventDetails ?taskTimedOutEventDetails
-        ?taskSucceededEventDetails ?taskSubmittedEventDetails
-        ?taskSubmitFailedEventDetails ?taskStartedEventDetails
-        ?taskStartFailedEventDetails ?taskScheduledEventDetails
-        ?taskFailedEventDetails ?activityTimedOutEventDetails
-        ?activitySucceededEventDetails ?activityStartedEventDetails
-        ?activityScheduledEventDetails ?activityScheduleFailedEventDetails
-        ?activityFailedEventDetails ?previousEventId ~id ~type_ ~timestamp ()
+        ?executionRedrivenEventDetails ?executionTimedOutEventDetails
+        ?executionAbortedEventDetails ?executionSucceededEventDetails
+        ?executionStartedEventDetails ?executionFailedEventDetails
+        ?taskTimedOutEventDetails ?taskSucceededEventDetails
+        ?taskSubmittedEventDetails ?taskSubmitFailedEventDetails
+        ?taskStartedEventDetails ?taskStartFailedEventDetails
+        ?taskScheduledEventDetails ?taskFailedEventDetails
+        ?activityTimedOutEventDetails ?activitySucceededEventDetails
+        ?activityStartedEventDetails ?activityScheduledEventDetails
+        ?activityScheduleFailedEventDetails ?activityFailedEventDetails
+        ?previousEventId ?id ?type_ ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let evaluationFailedEventDetails =
+        field_map json__ "evaluationFailedEventDetails"
+          EvaluationFailedEventDetails.of_json in
+      let mapRunRedrivenEventDetails =
+        field_map json__ "mapRunRedrivenEventDetails"
+          MapRunRedrivenEventDetails.of_json in
+      let mapRunFailedEventDetails =
+        field_map json__ "mapRunFailedEventDetails"
+          MapRunFailedEventDetails.of_json in
+      let mapRunStartedEventDetails =
+        field_map json__ "mapRunStartedEventDetails"
+          MapRunStartedEventDetails.of_json in
       let stateExitedEventDetails =
-        field_map json "stateExitedEventDetails"
+        field_map json__ "stateExitedEventDetails"
           StateExitedEventDetails.of_json in
       let stateEnteredEventDetails =
-        field_map json "stateEnteredEventDetails"
+        field_map json__ "stateEnteredEventDetails"
           StateEnteredEventDetails.of_json in
       let lambdaFunctionTimedOutEventDetails =
-        field_map json "lambdaFunctionTimedOutEventDetails"
+        field_map json__ "lambdaFunctionTimedOutEventDetails"
           LambdaFunctionTimedOutEventDetails.of_json in
       let lambdaFunctionSucceededEventDetails =
-        field_map json "lambdaFunctionSucceededEventDetails"
+        field_map json__ "lambdaFunctionSucceededEventDetails"
           LambdaFunctionSucceededEventDetails.of_json in
       let lambdaFunctionStartFailedEventDetails =
-        field_map json "lambdaFunctionStartFailedEventDetails"
+        field_map json__ "lambdaFunctionStartFailedEventDetails"
           LambdaFunctionStartFailedEventDetails.of_json in
       let lambdaFunctionScheduledEventDetails =
-        field_map json "lambdaFunctionScheduledEventDetails"
+        field_map json__ "lambdaFunctionScheduledEventDetails"
           LambdaFunctionScheduledEventDetails.of_json in
       let lambdaFunctionScheduleFailedEventDetails =
-        field_map json "lambdaFunctionScheduleFailedEventDetails"
+        field_map json__ "lambdaFunctionScheduleFailedEventDetails"
           LambdaFunctionScheduleFailedEventDetails.of_json in
       let lambdaFunctionFailedEventDetails =
-        field_map json "lambdaFunctionFailedEventDetails"
+        field_map json__ "lambdaFunctionFailedEventDetails"
           LambdaFunctionFailedEventDetails.of_json in
       let mapIterationAbortedEventDetails =
-        field_map json "mapIterationAbortedEventDetails"
+        field_map json__ "mapIterationAbortedEventDetails"
           MapIterationEventDetails.of_json in
       let mapIterationFailedEventDetails =
-        field_map json "mapIterationFailedEventDetails"
+        field_map json__ "mapIterationFailedEventDetails"
           MapIterationEventDetails.of_json in
       let mapIterationSucceededEventDetails =
-        field_map json "mapIterationSucceededEventDetails"
+        field_map json__ "mapIterationSucceededEventDetails"
           MapIterationEventDetails.of_json in
       let mapIterationStartedEventDetails =
-        field_map json "mapIterationStartedEventDetails"
+        field_map json__ "mapIterationStartedEventDetails"
           MapIterationEventDetails.of_json in
       let mapStateStartedEventDetails =
-        field_map json "mapStateStartedEventDetails"
+        field_map json__ "mapStateStartedEventDetails"
           MapStateStartedEventDetails.of_json in
+      let executionRedrivenEventDetails =
+        field_map json__ "executionRedrivenEventDetails"
+          ExecutionRedrivenEventDetails.of_json in
       let executionTimedOutEventDetails =
-        field_map json "executionTimedOutEventDetails"
+        field_map json__ "executionTimedOutEventDetails"
           ExecutionTimedOutEventDetails.of_json in
       let executionAbortedEventDetails =
-        field_map json "executionAbortedEventDetails"
+        field_map json__ "executionAbortedEventDetails"
           ExecutionAbortedEventDetails.of_json in
       let executionSucceededEventDetails =
-        field_map json "executionSucceededEventDetails"
+        field_map json__ "executionSucceededEventDetails"
           ExecutionSucceededEventDetails.of_json in
       let executionStartedEventDetails =
-        field_map json "executionStartedEventDetails"
+        field_map json__ "executionStartedEventDetails"
           ExecutionStartedEventDetails.of_json in
       let executionFailedEventDetails =
-        field_map json "executionFailedEventDetails"
+        field_map json__ "executionFailedEventDetails"
           ExecutionFailedEventDetails.of_json in
       let taskTimedOutEventDetails =
-        field_map json "taskTimedOutEventDetails"
+        field_map json__ "taskTimedOutEventDetails"
           TaskTimedOutEventDetails.of_json in
       let taskSucceededEventDetails =
-        field_map json "taskSucceededEventDetails"
+        field_map json__ "taskSucceededEventDetails"
           TaskSucceededEventDetails.of_json in
       let taskSubmittedEventDetails =
-        field_map json "taskSubmittedEventDetails"
+        field_map json__ "taskSubmittedEventDetails"
           TaskSubmittedEventDetails.of_json in
       let taskSubmitFailedEventDetails =
-        field_map json "taskSubmitFailedEventDetails"
+        field_map json__ "taskSubmitFailedEventDetails"
           TaskSubmitFailedEventDetails.of_json in
       let taskStartedEventDetails =
-        field_map json "taskStartedEventDetails"
+        field_map json__ "taskStartedEventDetails"
           TaskStartedEventDetails.of_json in
       let taskStartFailedEventDetails =
-        field_map json "taskStartFailedEventDetails"
+        field_map json__ "taskStartFailedEventDetails"
           TaskStartFailedEventDetails.of_json in
       let taskScheduledEventDetails =
-        field_map json "taskScheduledEventDetails"
+        field_map json__ "taskScheduledEventDetails"
           TaskScheduledEventDetails.of_json in
       let taskFailedEventDetails =
-        field_map json "taskFailedEventDetails"
+        field_map json__ "taskFailedEventDetails"
           TaskFailedEventDetails.of_json in
       let activityTimedOutEventDetails =
-        field_map json "activityTimedOutEventDetails"
+        field_map json__ "activityTimedOutEventDetails"
           ActivityTimedOutEventDetails.of_json in
       let activitySucceededEventDetails =
-        field_map json "activitySucceededEventDetails"
+        field_map json__ "activitySucceededEventDetails"
           ActivitySucceededEventDetails.of_json in
       let activityStartedEventDetails =
-        field_map json "activityStartedEventDetails"
+        field_map json__ "activityStartedEventDetails"
           ActivityStartedEventDetails.of_json in
       let activityScheduledEventDetails =
-        field_map json "activityScheduledEventDetails"
+        field_map json__ "activityScheduledEventDetails"
           ActivityScheduledEventDetails.of_json in
       let activityScheduleFailedEventDetails =
-        field_map json "activityScheduleFailedEventDetails"
+        field_map json__ "activityScheduleFailedEventDetails"
           ActivityScheduleFailedEventDetails.of_json in
       let activityFailedEventDetails =
-        field_map json "activityFailedEventDetails"
+        field_map json__ "activityFailedEventDetails"
           ActivityFailedEventDetails.of_json in
-      let previousEventId = field_map json "previousEventId" EventId.of_json in
-      let id = field_map_exn json "id" EventId.of_json in
-      let type_ = field_map_exn json "type" HistoryEventType.of_json in
-      let timestamp = field_map_exn json "timestamp" Timestamp.of_json in
-      make ?stateExitedEventDetails ?stateEnteredEventDetails
+      let previousEventId =
+        field_map json__ "previousEventId" EventId.of_json in
+      let id = field_map json__ "id" EventId.of_json in
+      let type_ = field_map json__ "type" HistoryEventType.of_json in
+      let timestamp = field_map json__ "timestamp" Timestamp.of_json in
+      make ?evaluationFailedEventDetails ?mapRunRedrivenEventDetails
+        ?mapRunFailedEventDetails ?mapRunStartedEventDetails
+        ?stateExitedEventDetails ?stateEnteredEventDetails
         ?lambdaFunctionTimedOutEventDetails
         ?lambdaFunctionSucceededEventDetails
         ?lambdaFunctionStartFailedEventDetails
@@ -2521,154 +3974,171 @@ module HistoryEvent =
         ?lambdaFunctionFailedEventDetails ?mapIterationAbortedEventDetails
         ?mapIterationFailedEventDetails ?mapIterationSucceededEventDetails
         ?mapIterationStartedEventDetails ?mapStateStartedEventDetails
-        ?executionTimedOutEventDetails ?executionAbortedEventDetails
-        ?executionSucceededEventDetails ?executionStartedEventDetails
-        ?executionFailedEventDetails ?taskTimedOutEventDetails
-        ?taskSucceededEventDetails ?taskSubmittedEventDetails
-        ?taskSubmitFailedEventDetails ?taskStartedEventDetails
-        ?taskStartFailedEventDetails ?taskScheduledEventDetails
-        ?taskFailedEventDetails ?activityTimedOutEventDetails
-        ?activitySucceededEventDetails ?activityStartedEventDetails
-        ?activityScheduledEventDetails ?activityScheduleFailedEventDetails
-        ?activityFailedEventDetails ?previousEventId ~id ~type_ ~timestamp ()
+        ?executionRedrivenEventDetails ?executionTimedOutEventDetails
+        ?executionAbortedEventDetails ?executionSucceededEventDetails
+        ?executionStartedEventDetails ?executionFailedEventDetails
+        ?taskTimedOutEventDetails ?taskSucceededEventDetails
+        ?taskSubmittedEventDetails ?taskSubmitFailedEventDetails
+        ?taskStartedEventDetails ?taskStartFailedEventDetails
+        ?taskScheduledEventDetails ?taskFailedEventDetails
+        ?activityTimedOutEventDetails ?activitySucceededEventDetails
+        ?activityStartedEventDetails ?activityScheduledEventDetails
+        ?activityScheduleFailedEventDetails ?activityFailedEventDetails
+        ?previousEventId ?id ?type_ ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about the events of an execution."]
-module InvalidArn =
+module VariableNameList =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    type nonrec t = VariableName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VariableName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The provided Amazon Resource Name (ARN) is invalid."]
-module InvalidDefinition =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The provided Amazon States Language definition is invalid."]
-module InvalidLoggingConfiguration =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VariableName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VariableNameList" ~of_json:VariableName.of_json j
     let to_json v = composed_to_json to_value v
   end
-module InvalidTracingConfiguration =
+module LongObject =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module UnsignedLong =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ValidateStateMachineDefinitionDiagnosticList =
+  struct
+    type nonrec t = ValidateStateMachineDefinitionDiagnostic.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ValidateStateMachineDefinitionDiagnostic.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ValidateStateMachineDefinitionDiagnostic.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ValidateStateMachineDefinitionDiagnosticList"
+        ~of_json:ValidateStateMachineDefinitionDiagnostic.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValidateStateMachineDefinitionResultCode =
+  struct
+    type nonrec t =
+      | OK 
+      | FAIL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | OK -> "OK" | FAIL -> "FAIL" | Non_static_id s -> s
+    let of_string =
+      function | "OK" -> OK | "FAIL" -> FAIL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ValidateStateMachineDefinitionResultCode"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ValidateStateMachineDefinitionResultCode" j)
+    let to_json = simple_to_json to_value
+  end
+module ValidateStateMachineDefinitionTruncated =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ValidationException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      reason: ValidationExceptionReason.t option
+        [@ocaml.doc
+          "The input does not satisfy the constraints specified by an Amazon Web Services service."]}
+    let make ?message = fun ?reason -> fun () -> { message; reason }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
+      make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Your tracingConfiguration key does not match, or enabled has not been set to true or false."]
-module MissingRequiredParameter =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Request is missing a required parameter. This error occurs if both definition and roleArn are not specified."]
-module StateMachineDeleting =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified state machine is being deleted."]
-module StateMachineDoesNotExist =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified state machine does not exist."]
+       "The input does not satisfy the constraints specified by an Amazon Web Services service."]
 module Definition =
   struct
     type nonrec t = string
@@ -2687,6 +4157,320 @@ module Definition =
     let of_json j = string_of_json ~kind:"Definition" j
     let to_json = simple_to_json to_value
   end
+module ValidateStateMachineDefinitionMaxResult =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ValidateStateMachineDefinitionMaxResult"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updating or deleting a resource can cause an inconsistent state. This error occurs when there're concurrent requests for DeleteStateMachineVersion, PublishStateMachineVersion, or UpdateStateMachine with the publish parameter set to true. HTTP Status Code: 409"]
+module InvalidArn =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The provided Amazon Resource Name (ARN) is not valid."]
+module InvalidDefinition =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The provided Amazon States Language definition is not valid."]
+module InvalidEncryptionConfiguration =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Received when encryptionConfiguration is specified but various conditions exist which make the configuration invalid. For example, if type is set to CUSTOMER_MANAGED_KMS_KEY, but kmsKeyId is null, or kmsDataKeyReusePeriodSeconds is not between 60 and 900, or the KMS key is not symmetric or inactive."]
+module InvalidLoggingConfiguration =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration is not valid."]
+module InvalidTracingConfiguration =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Your tracingConfiguration key does not match, or enabled has not been set to true or false."]
+module KmsAccessDeniedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Either your KMS key policy or API caller does not have the required permissions."]
+module KmsThrottlingException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Received when KMS returns ThrottlingException for a KMS call that Step Functions makes on behalf of the caller."]
+module MissingRequiredParameter =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Request is missing a required parameter. This error occurs if both definition and roleArn are not specified."]
+module RevisionId =
+  struct
+    type nonrec t = string
+    let context_ = "RevisionId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RevisionId" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request would cause a service quota to be exceeded. HTTP Status Code: 402"]
+module StateMachineDeleting =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified state machine is being deleted."]
+module StateMachineDoesNotExist =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified state machine does not exist."]
+module EncryptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "An alias, alias ARN, key ID, or key ARN of a symmetric encryption KMS key to encrypt data. To specify a KMS key in a different Amazon Web Services account, you must use the key ARN or alias ARN."];
+      kmsDataKeyReusePeriodSeconds: KmsDataKeyReusePeriodSeconds.t option
+        [@ocaml.doc
+          "Maximum duration that Step Functions will reuse data keys. When the period expires, Step Functions will call GenerateDataKey. Only applies to customer managed keys."];
+      type_: EncryptionType.t [@ocaml.doc "Encryption type"]}
+    let context_ = "EncryptionConfiguration"
+    let make ?kmsKeyId =
+      fun ?kmsDataKeyReusePeriodSeconds ->
+        fun ~type_ ->
+          fun () -> { kmsKeyId; kmsDataKeyReusePeriodSeconds; type_ }
+    let to_value x =
+      structure_to_value
+        [("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("kmsDataKeyReusePeriodSeconds",
+          (Option.map x.kmsDataKeyReusePeriodSeconds
+             ~f:KmsDataKeyReusePeriodSeconds.to_value));
+        ("type", (Some (EncryptionType.to_value x.type_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        EncryptionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let kmsDataKeyReusePeriodSeconds =
+        (Option.map ~f:KmsDataKeyReusePeriodSeconds.of_xml)
+          (Xml.child xml_arg0 "kmsDataKeyReusePeriodSeconds") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      make ~type_ ?kmsDataKeyReusePeriodSeconds ?kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" EncryptionType.of_json in
+      let kmsDataKeyReusePeriodSeconds =
+        field_map json__ "kmsDataKeyReusePeriodSeconds"
+          KmsDataKeyReusePeriodSeconds.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      make ~type_ ?kmsDataKeyReusePeriodSeconds ?kmsKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Settings to configure server-side encryption. For additional control over security, you can encrypt your data using a customer-managed key for Step Functions state machines and activities. You can configure a symmetric KMS key and data key reuse period when creating or updating a State Machine, and when creating an Activity. The execution history and state machine definition will be encrypted with the key applied to the State Machine. Activity inputs will be encrypted with the key applied to the Activity. Step Functions automatically enables encryption at rest using Amazon Web Services owned keys at no charge. However, KMS charges apply when using a customer managed key. For more information about pricing, see Key Management Service pricing. For more information on KMS, see What is Key Management Service?"]
 module LoggingConfiguration =
   struct
     type nonrec t =
@@ -2723,22 +4507,35 @@ module LoggingConfiguration =
         (Option.map ~f:LogLevel.of_xml) (Xml.child xml_arg0 "level") in
       make ?destinations ?includeExecutionData ?level ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinations =
-        field_map json "destinations" LogDestinationList.of_json in
+        field_map json__ "destinations" LogDestinationList.of_json in
       let includeExecutionData =
-        field_map json "includeExecutionData" IncludeExecutionData.of_json in
-      let level = field_map json "level" LogLevel.of_json in
+        field_map json__ "includeExecutionData" IncludeExecutionData.of_json in
+      let level = field_map json__ "level" LogLevel.of_json in
       make ?destinations ?includeExecutionData ?level ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The LoggingConfiguration data type is used to set CloudWatch Logs options."]
+module Publish =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module TracingConfiguration =
   struct
     type nonrec t =
       {
       enabled: Enabled.t option
-        [@ocaml.doc "When set to true, AWS X-Ray tracing is enabled."]}
+        [@ocaml.doc "When set to true, X-Ray tracing is enabled."]}
     let make ?enabled = fun () -> { enabled }
     let to_value x =
       structure_to_value
@@ -2749,12 +4546,26 @@ module TracingConfiguration =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "enabled" Enabled.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "enabled" Enabled.of_json in
       make ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Selects whether or not the state machine's AWS X-Ray tracing is enabled. Default is false"]
+       "Selects whether or not the state machine's X-Ray tracing is enabled. Default is false"]
+module VersionDescription =
+  struct
+    type nonrec t = string
+    let context_ = "VersionDescription"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VersionDescription" j
+    let to_json = simple_to_json to_value
+  end
 module ResourceNotFound =
   struct
     type nonrec t =
@@ -2775,17 +4586,113 @@ module ResourceNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "resourceName" Arn.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "resourceName" Arn.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Could not find the referenced resource. Only state machine and activity ARNs are supported."]
+  end[@@ocaml.doc "Could not find the referenced resource."]
+module AliasDescription =
+  struct
+    type nonrec t = string
+    let context_ = "AliasDescription"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AliasDescription" j
+    let to_json = simple_to_json to_value
+  end
+module RoutingConfigurationList =
+  struct
+    type nonrec t = RoutingConfigurationListItem.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RoutingConfigurationListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RoutingConfigurationListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RoutingConfigurationList"
+        ~of_json:RoutingConfigurationListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxConcurrency =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxConcurrency" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ToleratedFailureCount =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ToleratedFailurePercentage =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:100.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2805,6 +4712,446 @@ module TagKeyList =
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InspectionData =
+  struct
+    type nonrec t =
+      {
+      input: SensitiveData.t option [@ocaml.doc "The raw state input."];
+      afterArguments: SensitiveData.t option
+        [@ocaml.doc
+          "The input after Step Functions applies an Arguments filter. This event will only be present when QueryLanguage for the state machine or individual states is set to JSONata. For more info, see Transforming data with Step Functions."];
+      afterInputPath: SensitiveData.t option
+        [@ocaml.doc
+          "The input after Step Functions applies the InputPath filter. Not populated when QueryLanguage is JSONata."];
+      afterParameters: SensitiveData.t option
+        [@ocaml.doc
+          "The effective input after Step Functions applies the Parameters filter. Not populated when QueryLanguage is JSONata."];
+      result: SensitiveData.t option [@ocaml.doc "The state's raw result."];
+      afterResultSelector: SensitiveData.t option
+        [@ocaml.doc
+          "The effective result after Step Functions applies the ResultSelector filter. Not populated when QueryLanguage is JSONata."];
+      afterResultPath: SensitiveData.t option
+        [@ocaml.doc
+          "The effective result combined with the raw state input after Step Functions applies the ResultPath filter. Not populated when QueryLanguage is JSONata."];
+      request: InspectionDataRequest.t option
+        [@ocaml.doc
+          "The raw HTTP request that is sent when you test an HTTP Task."];
+      response: InspectionDataResponse.t option
+        [@ocaml.doc
+          "The raw HTTP response that is returned when you test an HTTP Task."];
+      variables: SensitiveData.t option
+        [@ocaml.doc
+          "JSON string that contains the set of workflow variables after execution of the state. The set will include variables assigned in the state and variables set up as test state input."];
+      errorDetails: InspectionErrorDetails.t option
+        [@ocaml.doc
+          "An object containing data about a handled exception in the tested state."];
+      afterItemsPath: SensitiveData.t option
+        [@ocaml.doc
+          "The effective input after the ItemsPath filter is applied. Not populated when the QueryLanguage is JSONata."];
+      afterItemSelector: SensitiveData.t option
+        [@ocaml.doc
+          "An array containing the inputs for each Map iteration, transformed by the ItemSelector specified in a Map state."];
+      afterItemBatcher: SensitiveData.t option
+        [@ocaml.doc
+          "The effective input after the ItemBatcher filter is applied in a Map state."];
+      afterItemsPointer: SensitiveData.t option
+        [@ocaml.doc
+          "The effective input after the ItemsPointer filter is applied in a Map state."];
+      toleratedFailureCount: InspectionToleratedFailureCount.t option
+        [@ocaml.doc
+          "The tolerated failure threshold for a Map state as defined in number of Map state iterations."];
+      toleratedFailurePercentage:
+        InspectionToleratedFailurePercentage.t option
+        [@ocaml.doc
+          "The tolerated failure threshold for a Map state as defined in percentage of Map state iterations."];
+      maxConcurrency: InspectionMaxConcurrency.t option
+        [@ocaml.doc "The max concurrency of the Map state."]}
+    let make ?input =
+      fun ?afterArguments ->
+        fun ?afterInputPath ->
+          fun ?afterParameters ->
+            fun ?result ->
+              fun ?afterResultSelector ->
+                fun ?afterResultPath ->
+                  fun ?request ->
+                    fun ?response ->
+                      fun ?variables ->
+                        fun ?errorDetails ->
+                          fun ?afterItemsPath ->
+                            fun ?afterItemSelector ->
+                              fun ?afterItemBatcher ->
+                                fun ?afterItemsPointer ->
+                                  fun ?toleratedFailureCount ->
+                                    fun ?toleratedFailurePercentage ->
+                                      fun ?maxConcurrency ->
+                                        fun () ->
+                                          {
+                                            input;
+                                            afterArguments;
+                                            afterInputPath;
+                                            afterParameters;
+                                            result;
+                                            afterResultSelector;
+                                            afterResultPath;
+                                            request;
+                                            response;
+                                            variables;
+                                            errorDetails;
+                                            afterItemsPath;
+                                            afterItemSelector;
+                                            afterItemBatcher;
+                                            afterItemsPointer;
+                                            toleratedFailureCount;
+                                            toleratedFailurePercentage;
+                                            maxConcurrency
+                                          }
+    let to_value x =
+      structure_to_value
+        [("input", (Option.map x.input ~f:SensitiveData.to_value));
+        ("afterArguments",
+          (Option.map x.afterArguments ~f:SensitiveData.to_value));
+        ("afterInputPath",
+          (Option.map x.afterInputPath ~f:SensitiveData.to_value));
+        ("afterParameters",
+          (Option.map x.afterParameters ~f:SensitiveData.to_value));
+        ("result", (Option.map x.result ~f:SensitiveData.to_value));
+        ("afterResultSelector",
+          (Option.map x.afterResultSelector ~f:SensitiveData.to_value));
+        ("afterResultPath",
+          (Option.map x.afterResultPath ~f:SensitiveData.to_value));
+        ("request", (Option.map x.request ~f:InspectionDataRequest.to_value));
+        ("response",
+          (Option.map x.response ~f:InspectionDataResponse.to_value));
+        ("variables", (Option.map x.variables ~f:SensitiveData.to_value));
+        ("errorDetails",
+          (Option.map x.errorDetails ~f:InspectionErrorDetails.to_value));
+        ("afterItemsPath",
+          (Option.map x.afterItemsPath ~f:SensitiveData.to_value));
+        ("afterItemSelector",
+          (Option.map x.afterItemSelector ~f:SensitiveData.to_value));
+        ("afterItemBatcher",
+          (Option.map x.afterItemBatcher ~f:SensitiveData.to_value));
+        ("afterItemsPointer",
+          (Option.map x.afterItemsPointer ~f:SensitiveData.to_value));
+        ("toleratedFailureCount",
+          (Option.map x.toleratedFailureCount
+             ~f:InspectionToleratedFailureCount.to_value));
+        ("toleratedFailurePercentage",
+          (Option.map x.toleratedFailurePercentage
+             ~f:InspectionToleratedFailurePercentage.to_value));
+        ("maxConcurrency",
+          (Option.map x.maxConcurrency ~f:InspectionMaxConcurrency.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxConcurrency =
+        (Option.map ~f:InspectionMaxConcurrency.of_xml)
+          (Xml.child xml_arg0 "maxConcurrency") in
+      let toleratedFailurePercentage =
+        (Option.map ~f:InspectionToleratedFailurePercentage.of_xml)
+          (Xml.child xml_arg0 "toleratedFailurePercentage") in
+      let toleratedFailureCount =
+        (Option.map ~f:InspectionToleratedFailureCount.of_xml)
+          (Xml.child xml_arg0 "toleratedFailureCount") in
+      let afterItemsPointer =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "afterItemsPointer") in
+      let afterItemBatcher =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "afterItemBatcher") in
+      let afterItemSelector =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "afterItemSelector") in
+      let afterItemsPath =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "afterItemsPath") in
+      let errorDetails =
+        (Option.map ~f:InspectionErrorDetails.of_xml)
+          (Xml.child xml_arg0 "errorDetails") in
+      let variables =
+        (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "variables") in
+      let response =
+        (Option.map ~f:InspectionDataResponse.of_xml)
+          (Xml.child xml_arg0 "response") in
+      let request =
+        (Option.map ~f:InspectionDataRequest.of_xml)
+          (Xml.child xml_arg0 "request") in
+      let afterResultPath =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "afterResultPath") in
+      let afterResultSelector =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "afterResultSelector") in
+      let result =
+        (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "result") in
+      let afterParameters =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "afterParameters") in
+      let afterInputPath =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "afterInputPath") in
+      let afterArguments =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "afterArguments") in
+      let input =
+        (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "input") in
+      make ?maxConcurrency ?toleratedFailurePercentage ?toleratedFailureCount
+        ?afterItemsPointer ?afterItemBatcher ?afterItemSelector
+        ?afterItemsPath ?errorDetails ?variables ?response ?request
+        ?afterResultPath ?afterResultSelector ?result ?afterParameters
+        ?afterInputPath ?afterArguments ?input ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxConcurrency =
+        field_map json__ "maxConcurrency" InspectionMaxConcurrency.of_json in
+      let toleratedFailurePercentage =
+        field_map json__ "toleratedFailurePercentage"
+          InspectionToleratedFailurePercentage.of_json in
+      let toleratedFailureCount =
+        field_map json__ "toleratedFailureCount"
+          InspectionToleratedFailureCount.of_json in
+      let afterItemsPointer =
+        field_map json__ "afterItemsPointer" SensitiveData.of_json in
+      let afterItemBatcher =
+        field_map json__ "afterItemBatcher" SensitiveData.of_json in
+      let afterItemSelector =
+        field_map json__ "afterItemSelector" SensitiveData.of_json in
+      let afterItemsPath =
+        field_map json__ "afterItemsPath" SensitiveData.of_json in
+      let errorDetails =
+        field_map json__ "errorDetails" InspectionErrorDetails.of_json in
+      let variables = field_map json__ "variables" SensitiveData.of_json in
+      let response =
+        field_map json__ "response" InspectionDataResponse.of_json in
+      let request = field_map json__ "request" InspectionDataRequest.of_json in
+      let afterResultPath =
+        field_map json__ "afterResultPath" SensitiveData.of_json in
+      let afterResultSelector =
+        field_map json__ "afterResultSelector" SensitiveData.of_json in
+      let result = field_map json__ "result" SensitiveData.of_json in
+      let afterParameters =
+        field_map json__ "afterParameters" SensitiveData.of_json in
+      let afterInputPath =
+        field_map json__ "afterInputPath" SensitiveData.of_json in
+      let afterArguments =
+        field_map json__ "afterArguments" SensitiveData.of_json in
+      let input = field_map json__ "input" SensitiveData.of_json in
+      make ?maxConcurrency ?toleratedFailurePercentage ?toleratedFailureCount
+        ?afterItemsPointer ?afterItemBatcher ?afterItemSelector
+        ?afterItemsPath ?errorDetails ?variables ?response ?request
+        ?afterResultPath ?afterResultSelector ?result ?afterParameters
+        ?afterInputPath ?afterArguments ?input ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains additional details about the state's execution, including its input and output data processing flow, and HTTP request and response information."]
+module InvalidExecutionInput =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The provided JSON input data is not valid."]
+module TestExecutionStatus =
+  struct
+    type nonrec t =
+      | SUCCEEDED 
+      | FAILED 
+      | RETRIABLE 
+      | CAUGHT_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | RETRIABLE -> "RETRIABLE"
+      | CAUGHT_ERROR -> "CAUGHT_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | "RETRIABLE" -> RETRIABLE
+      | "CAUGHT_ERROR" -> CAUGHT_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TestExecutionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TestExecutionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module InspectionLevel =
+  struct
+    type nonrec t =
+      | INFO 
+      | DEBUG 
+      | TRACE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INFO -> "INFO"
+      | DEBUG -> "DEBUG"
+      | TRACE -> "TRACE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INFO" -> INFO
+      | "DEBUG" -> DEBUG
+      | "TRACE" -> TRACE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InspectionLevel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InspectionLevel" j)
+    let to_json = simple_to_json to_value
+  end
+module MockInput =
+  struct
+    type nonrec t =
+      {
+      result: SensitiveData.t option
+        [@ocaml.doc
+          "A JSON string containing the mocked result of the state invocation."];
+      errorOutput: MockErrorOutput.t option
+        [@ocaml.doc
+          "The mocked error output when calling TestState. When specified, the mocked response is returned as a JSON object that contains an error and cause field."];
+      fieldValidationMode: MockResponseValidationMode.t option
+        [@ocaml.doc
+          "Determines the level of strictness when validating mocked results against their respective API models. Values include: STRICT: All required fields must be present, and all present fields must conform to the API's schema. PRESENT: All present fields must conform to the API's schema. NONE: No validation is performed. If no value is specified, the default value is STRICT."]}
+    let make ?result =
+      fun ?errorOutput ->
+        fun ?fieldValidationMode ->
+          fun () -> { result; errorOutput; fieldValidationMode }
+    let to_value x =
+      structure_to_value
+        [("result", (Option.map x.result ~f:SensitiveData.to_value));
+        ("errorOutput",
+          (Option.map x.errorOutput ~f:MockErrorOutput.to_value));
+        ("fieldValidationMode",
+          (Option.map x.fieldValidationMode
+             ~f:MockResponseValidationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fieldValidationMode =
+        (Option.map ~f:MockResponseValidationMode.of_xml)
+          (Xml.child xml_arg0 "fieldValidationMode") in
+      let errorOutput =
+        (Option.map ~f:MockErrorOutput.of_xml)
+          (Xml.child xml_arg0 "errorOutput") in
+      let result =
+        (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "result") in
+      make ?fieldValidationMode ?errorOutput ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fieldValidationMode =
+        field_map json__ "fieldValidationMode"
+          MockResponseValidationMode.of_json in
+      let errorOutput =
+        field_map json__ "errorOutput" MockErrorOutput.of_json in
+      let result = field_map json__ "result" SensitiveData.of_json in
+      make ?fieldValidationMode ?errorOutput ?result ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A JSON object that contains a mocked result or errorOutput."]
+module RevealSecrets =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module TestStateConfiguration =
+  struct
+    type nonrec t =
+      {
+      retrierRetryCount: RetrierRetryCount.t option
+        [@ocaml.doc
+          "The number of retry attempts that have occurred for the state's Retry that applies to the mocked error."];
+      errorCausedByState: TestStateStateName.t option
+        [@ocaml.doc
+          "The name of the state from which an error originates when an error is mocked for a Map or Parallel state."];
+      mapIterationFailureCount: MapIterationFailureCount.t option
+        [@ocaml.doc
+          "The number of Map state iterations that failed during the Map state invocation."];
+      mapItemReaderData: SensitiveData.t option
+        [@ocaml.doc
+          "The data read by ItemReader in Distributed Map states as found in its original source."]}
+    let make ?retrierRetryCount =
+      fun ?errorCausedByState ->
+        fun ?mapIterationFailureCount ->
+          fun ?mapItemReaderData ->
+            fun () ->
+              {
+                retrierRetryCount;
+                errorCausedByState;
+                mapIterationFailureCount;
+                mapItemReaderData
+              }
+    let to_value x =
+      structure_to_value
+        [("retrierRetryCount",
+           (Option.map x.retrierRetryCount ~f:RetrierRetryCount.to_value));
+        ("errorCausedByState",
+          (Option.map x.errorCausedByState ~f:TestStateStateName.to_value));
+        ("mapIterationFailureCount",
+          (Option.map x.mapIterationFailureCount
+             ~f:MapIterationFailureCount.to_value));
+        ("mapItemReaderData",
+          (Option.map x.mapItemReaderData ~f:SensitiveData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mapItemReaderData =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "mapItemReaderData") in
+      let mapIterationFailureCount =
+        (Option.map ~f:MapIterationFailureCount.of_xml)
+          (Xml.child xml_arg0 "mapIterationFailureCount") in
+      let errorCausedByState =
+        (Option.map ~f:TestStateStateName.of_xml)
+          (Xml.child xml_arg0 "errorCausedByState") in
+      let retrierRetryCount =
+        (Option.map ~f:RetrierRetryCount.of_xml)
+          (Xml.child xml_arg0 "retrierRetryCount") in
+      make ?mapItemReaderData ?mapIterationFailureCount ?errorCausedByState
+        ?retrierRetryCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mapItemReaderData =
+        field_map json__ "mapItemReaderData" SensitiveData.of_json in
+      let mapIterationFailureCount =
+        field_map json__ "mapIterationFailureCount"
+          MapIterationFailureCount.of_json in
+      let errorCausedByState =
+        field_map json__ "errorCausedByState" TestStateStateName.of_json in
+      let retrierRetryCount =
+        field_map json__ "retrierRetryCount" RetrierRetryCount.of_json in
+      make ?mapItemReaderData ?mapIterationFailureCount ?errorCausedByState
+        ?retrierRetryCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains configurations for the tested state."]
 module TooManyTags =
   struct
     type nonrec t =
@@ -2825,17 +5172,20 @@ module TooManyTags =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "resourceName" Arn.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "resourceName" Arn.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You've exceeded the number of tags allowed for a resource. See the Limits Topic in the AWS Step Functions Developer Guide."]
+       "You've exceeded the number of tags allowed for a resource. See the Limits Topic in the Step Functions Developer Guide."]
 module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2869,11 +5219,40 @@ module ExecutionDoesNotExist =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified execution does not exist."]
+module KmsInvalidStateException =
+  struct
+    type nonrec t =
+      {
+      kmsKeyState: KmsKeyState.t option
+        [@ocaml.doc
+          "Current status of the KMS; key. For example: DISABLED, PENDING_DELETION, PENDING_IMPORT, UNAVAILABLE, CREATING."];
+      message: ErrorMessage.t option }
+    let make ?kmsKeyState =
+      fun ?message -> fun () -> { kmsKeyState; message }
+    let to_value x =
+      structure_to_value
+        [("kmsKeyState", (Option.map x.kmsKeyState ~f:KmsKeyState.to_value));
+        ("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      let kmsKeyState =
+        (Option.map ~f:KmsKeyState.of_xml) (Xml.child xml_arg0 "kmsKeyState") in
+      make ?message ?kmsKeyState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      let kmsKeyState = field_map json__ "kmsKeyState" KmsKeyState.of_json in
+      make ?message ?kmsKeyState ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The KMS key is not in valid state, for example: Disabled or Deleted."]
 module BillingDetails =
   struct
     type nonrec t =
@@ -2902,11 +5281,12 @@ module BillingDetails =
           (Xml.child xml_arg0 "billedMemoryUsedInMB") in
       make ?billedDurationInMilliseconds ?billedMemoryUsedInMB ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let billedDurationInMilliseconds =
-        field_map json "billedDurationInMilliseconds" BilledDuration.of_json in
+        field_map json__ "billedDurationInMilliseconds"
+          BilledDuration.of_json in
       let billedMemoryUsedInMB =
-        field_map json "billedMemoryUsedInMB" BilledMemoryUsed.of_json in
+        field_map json__ "billedMemoryUsedInMB" BilledMemoryUsed.of_json in
       make ?billedDurationInMilliseconds ?billedMemoryUsedInMB ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that describes workflow billing details."]
@@ -2928,30 +5308,11 @@ module CloudWatchEventsExecutionDataDetails =
           (Xml.child xml_arg0 "included") in
       make ?included ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let included = field_map json "included" IncludedDetails.of_json in
+    let of_json json__ =
+      let included = field_map json__ "included" IncludedDetails.of_json in
       make ?included ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides details about execution input or output."]
-module InvalidExecutionInput =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The provided JSON input data is invalid."]
 module InvalidName =
   struct
     type nonrec t = {
@@ -2966,11 +5327,11 @@ module InvalidName =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The provided name is invalid."]
+  end[@@ocaml.doc "The provided name is not valid."]
 module StateMachineTypeNotSupported =
   struct
     type nonrec t = {
@@ -2985,11 +5346,11 @@ module StateMachineTypeNotSupported =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "State machine type is not supported."]
 module SyncExecutionStatus =
   struct
     type nonrec t =
@@ -3039,6 +5400,31 @@ module TraceHeader =
     let of_json j = string_of_json ~kind:"TraceHeader" j
     let to_json = simple_to_json to_value
   end
+module IncludedData =
+  struct
+    type nonrec t =
+      | ALL_DATA 
+      | METADATA_ONLY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL_DATA -> "ALL_DATA"
+      | METADATA_ONLY -> "METADATA_ONLY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL_DATA" -> ALL_DATA
+      | "METADATA_ONLY" -> METADATA_ONLY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IncludedData" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IncludedData" j)
+    let to_json = simple_to_json to_value
+  end
 module ExecutionAlreadyExists =
   struct
     type nonrec t = {
@@ -3053,8 +5439,8 @@ module ExecutionAlreadyExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3073,8 +5459,8 @@ module ExecutionLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3093,11 +5479,11 @@ module InvalidOutput =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The provided JSON output data is invalid."]
+  end[@@ocaml.doc "The provided JSON output data is not valid."]
 module InvalidToken =
   struct
     type nonrec t = {
@@ -3112,11 +5498,11 @@ module InvalidToken =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The provided token is invalid."]
+  end[@@ocaml.doc "The provided token is not valid."]
 module TaskDoesNotExist =
   struct
     type nonrec t = {
@@ -3131,11 +5517,11 @@ module TaskDoesNotExist =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "The activity does not exist."]
 module TaskTimedOut =
   struct
     type nonrec t = {
@@ -3150,11 +5536,12 @@ module TaskTimedOut =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The task token has either expired or the task associated with the token has already been closed."]
 module TaskToken =
   struct
     type nonrec t = string
@@ -3162,7 +5549,7 @@ module TaskToken =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
+          ((check_string_max i ~max:2048) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -3171,6 +5558,46 @@ module TaskToken =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TaskToken" j
+    let to_json = simple_to_json to_value
+  end
+module ExecutionNotRedrivable =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The execution Amazon Resource Name (ARN) that you specified for executionArn cannot be redriven."]
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[!-~]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
 module PageToken =
@@ -3195,6 +5622,9 @@ module StateMachineList =
   struct
     type nonrec t = StateMachineListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StateMachineListItem.to_value)) |>
         (fun x -> `List x)
@@ -3234,10 +5664,98 @@ module PageSize =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module StateMachineVersionList =
+  struct
+    type nonrec t = StateMachineVersionListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StateMachineVersionListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:StateMachineVersionListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StateMachineVersionList"
+        ~of_json:StateMachineVersionListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StateMachineAliasList =
+  struct
+    type nonrec t = StateMachineAliasListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StateMachineAliasListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:StateMachineAliasListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StateMachineAliasList"
+        ~of_json:StateMachineAliasListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MapRunList =
+  struct
+    type nonrec t = MapRunListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MapRunListItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MapRunListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MapRunList" ~of_json:MapRunListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ExecutionList =
   struct
     type nonrec t = ExecutionListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExecutionListItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3276,10 +5794,40 @@ module ListExecutionsPageToken =
     let of_json j = string_of_json ~kind:"ListExecutionsPageToken" j
     let to_json = simple_to_json to_value
   end
+module ExecutionRedriveFilter =
+  struct
+    type nonrec t =
+      | REDRIVEN 
+      | NOT_REDRIVEN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REDRIVEN -> "REDRIVEN"
+      | NOT_REDRIVEN -> "NOT_REDRIVEN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REDRIVEN" -> REDRIVEN
+      | "NOT_REDRIVEN" -> NOT_REDRIVEN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExecutionRedriveFilter" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExecutionRedriveFilter" j)
+    let to_json = simple_to_json to_value
+  end
 module ActivityList =
   struct
     type nonrec t = ActivityListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActivityListItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3304,6 +5852,9 @@ module HistoryEventList =
   struct
     type nonrec t = HistoryEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HistoryEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3364,8 +5915,8 @@ module ActivityDoesNotExist =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified activity does not exist."]
@@ -3383,8 +5934,8 @@ module ActivityWorkerLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3394,13 +5945,26 @@ module SensitiveDataJobInput =
     type nonrec t = string
     let context_ = "SensitiveDataJobInput"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:262144); i
+      let open Result in ok_or_failwith (check_string_max i ~max:1048576); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"SensitiveDataJobInput" j
+    let to_json = simple_to_json to_value
+  end
+module MapRunLabel =
+  struct
+    type nonrec t = string
+    let context_ = "MapRunLabel"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MapRunLabel" j
     let to_json = simple_to_json to_value
   end
 module StateMachineStatus =
@@ -3429,6 +5993,338 @@ module StateMachineStatus =
     let of_json j = of_string (string_of_json ~kind:"StateMachineStatus" j)
     let to_json = simple_to_json to_value
   end
+module VariableReferences =
+  struct
+    type nonrec t = (StateName.t * VariableNameList.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types StateName VariableNameList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (StateName.to_value x) |>
+                    (fun x ->
+                       (VariableNameList.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:StateName.of_string
+        ~of_json:VariableNameList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MapRunExecutionCounts =
+  struct
+    type nonrec t =
+      {
+      pending: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of child workflow executions that were started by a Map Run, but haven't started executing yet."];
+      running: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of child workflow executions that were started by a Map Run and are currently in-progress."];
+      succeeded: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of child workflow executions that were started by a Map Run and have completed successfully."];
+      failed: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of child workflow executions that were started by a Map Run, but have failed."];
+      timedOut: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of child workflow executions that were started by a Map Run and have timed out."];
+      aborted: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of child workflow executions that were started by a Map Run and were running, but were either stopped by the user or by Step Functions because the Map Run failed."];
+      total: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of child workflow executions that were started by a Map Run."];
+      resultsWritten: UnsignedLong.t option
+        [@ocaml.doc
+          "Returns the count of child workflow executions whose results were written by ResultWriter. For more information, see ResultWriter in the Step Functions Developer Guide."];
+      failuresNotRedrivable: LongObject.t option
+        [@ocaml.doc
+          "The number of FAILED, ABORTED, or TIMED_OUT child workflow executions that cannot be redriven because their execution status is terminal. For example, child workflows with an execution status of FAILED, ABORTED, or TIMED_OUT and a redriveStatus of NOT_REDRIVABLE."];
+      pendingRedrive: LongObject.t option
+        [@ocaml.doc
+          "The number of unsuccessful child workflow executions currently waiting to be redriven. The status of these child workflow executions could be FAILED, ABORTED, or TIMED_OUT in the original execution attempt or a previous redrive attempt."]}
+    let make ?pending =
+      fun ?running ->
+        fun ?succeeded ->
+          fun ?failed ->
+            fun ?timedOut ->
+              fun ?aborted ->
+                fun ?total ->
+                  fun ?resultsWritten ->
+                    fun ?failuresNotRedrivable ->
+                      fun ?pendingRedrive ->
+                        fun () ->
+                          {
+                            pending;
+                            running;
+                            succeeded;
+                            failed;
+                            timedOut;
+                            aborted;
+                            total;
+                            resultsWritten;
+                            failuresNotRedrivable;
+                            pendingRedrive
+                          }
+    let to_value x =
+      structure_to_value
+        [("pending", (Option.map x.pending ~f:UnsignedLong.to_value));
+        ("running", (Option.map x.running ~f:UnsignedLong.to_value));
+        ("succeeded", (Option.map x.succeeded ~f:UnsignedLong.to_value));
+        ("failed", (Option.map x.failed ~f:UnsignedLong.to_value));
+        ("timedOut", (Option.map x.timedOut ~f:UnsignedLong.to_value));
+        ("aborted", (Option.map x.aborted ~f:UnsignedLong.to_value));
+        ("total", (Option.map x.total ~f:UnsignedLong.to_value));
+        ("resultsWritten",
+          (Option.map x.resultsWritten ~f:UnsignedLong.to_value));
+        ("failuresNotRedrivable",
+          (Option.map x.failuresNotRedrivable ~f:LongObject.to_value));
+        ("pendingRedrive",
+          (Option.map x.pendingRedrive ~f:LongObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pendingRedrive =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "pendingRedrive") in
+      let failuresNotRedrivable =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "failuresNotRedrivable") in
+      let resultsWritten =
+        (Option.map ~f:UnsignedLong.of_xml)
+          (Xml.child xml_arg0 "resultsWritten") in
+      let total =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "total") in
+      let aborted =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "aborted") in
+      let timedOut =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "timedOut") in
+      let failed =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "failed") in
+      let succeeded =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "succeeded") in
+      let running =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "running") in
+      let pending =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "pending") in
+      make ?pendingRedrive ?failuresNotRedrivable ?resultsWritten ?total
+        ?aborted ?timedOut ?failed ?succeeded ?running ?pending ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pendingRedrive =
+        field_map json__ "pendingRedrive" LongObject.of_json in
+      let failuresNotRedrivable =
+        field_map json__ "failuresNotRedrivable" LongObject.of_json in
+      let resultsWritten =
+        field_map json__ "resultsWritten" UnsignedLong.of_json in
+      let total = field_map json__ "total" UnsignedLong.of_json in
+      let aborted = field_map json__ "aborted" UnsignedLong.of_json in
+      let timedOut = field_map json__ "timedOut" UnsignedLong.of_json in
+      let failed = field_map json__ "failed" UnsignedLong.of_json in
+      let succeeded = field_map json__ "succeeded" UnsignedLong.of_json in
+      let running = field_map json__ "running" UnsignedLong.of_json in
+      let pending = field_map json__ "pending" UnsignedLong.of_json in
+      make ?pendingRedrive ?failuresNotRedrivable ?resultsWritten ?total
+        ?aborted ?timedOut ?failed ?succeeded ?running ?pending ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about all of the child workflow executions started by a Map Run."]
+module MapRunItemCounts =
+  struct
+    type nonrec t =
+      {
+      pending: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of items to process in child workflow executions that haven't started running yet."];
+      running: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of items being processed in child workflow executions that are currently in-progress."];
+      succeeded: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of items processed in child workflow executions that have completed successfully."];
+      failed: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of items processed in child workflow executions that have failed."];
+      timedOut: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of items processed in child workflow executions that have timed out."];
+      aborted: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of items processed in child workflow executions that were either stopped by the user or by Step Functions, because the Map Run failed."];
+      total: UnsignedLong.t option
+        [@ocaml.doc
+          "The total number of items processed in all the child workflow executions started by a Map Run."];
+      resultsWritten: UnsignedLong.t option
+        [@ocaml.doc
+          "Returns the count of items whose results were written by ResultWriter. For more information, see ResultWriter in the Step Functions Developer Guide."];
+      failuresNotRedrivable: LongObject.t option
+        [@ocaml.doc
+          "The number of FAILED, ABORTED, or TIMED_OUT items in child workflow executions that cannot be redriven because the execution status of those child workflows is terminal. For example, child workflows with an execution status of FAILED, ABORTED, or TIMED_OUT and a redriveStatus of NOT_REDRIVABLE."];
+      pendingRedrive: LongObject.t option
+        [@ocaml.doc
+          "The number of unsuccessful items in child workflow executions currently waiting to be redriven."]}
+    let make ?pending =
+      fun ?running ->
+        fun ?succeeded ->
+          fun ?failed ->
+            fun ?timedOut ->
+              fun ?aborted ->
+                fun ?total ->
+                  fun ?resultsWritten ->
+                    fun ?failuresNotRedrivable ->
+                      fun ?pendingRedrive ->
+                        fun () ->
+                          {
+                            pending;
+                            running;
+                            succeeded;
+                            failed;
+                            timedOut;
+                            aborted;
+                            total;
+                            resultsWritten;
+                            failuresNotRedrivable;
+                            pendingRedrive
+                          }
+    let to_value x =
+      structure_to_value
+        [("pending", (Option.map x.pending ~f:UnsignedLong.to_value));
+        ("running", (Option.map x.running ~f:UnsignedLong.to_value));
+        ("succeeded", (Option.map x.succeeded ~f:UnsignedLong.to_value));
+        ("failed", (Option.map x.failed ~f:UnsignedLong.to_value));
+        ("timedOut", (Option.map x.timedOut ~f:UnsignedLong.to_value));
+        ("aborted", (Option.map x.aborted ~f:UnsignedLong.to_value));
+        ("total", (Option.map x.total ~f:UnsignedLong.to_value));
+        ("resultsWritten",
+          (Option.map x.resultsWritten ~f:UnsignedLong.to_value));
+        ("failuresNotRedrivable",
+          (Option.map x.failuresNotRedrivable ~f:LongObject.to_value));
+        ("pendingRedrive",
+          (Option.map x.pendingRedrive ~f:LongObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pendingRedrive =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "pendingRedrive") in
+      let failuresNotRedrivable =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "failuresNotRedrivable") in
+      let resultsWritten =
+        (Option.map ~f:UnsignedLong.of_xml)
+          (Xml.child xml_arg0 "resultsWritten") in
+      let total =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "total") in
+      let aborted =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "aborted") in
+      let timedOut =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "timedOut") in
+      let failed =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "failed") in
+      let succeeded =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "succeeded") in
+      let running =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "running") in
+      let pending =
+        (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "pending") in
+      make ?pendingRedrive ?failuresNotRedrivable ?resultsWritten ?total
+        ?aborted ?timedOut ?failed ?succeeded ?running ?pending ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pendingRedrive =
+        field_map json__ "pendingRedrive" LongObject.of_json in
+      let failuresNotRedrivable =
+        field_map json__ "failuresNotRedrivable" LongObject.of_json in
+      let resultsWritten =
+        field_map json__ "resultsWritten" UnsignedLong.of_json in
+      let total = field_map json__ "total" UnsignedLong.of_json in
+      let aborted = field_map json__ "aborted" UnsignedLong.of_json in
+      let timedOut = field_map json__ "timedOut" UnsignedLong.of_json in
+      let failed = field_map json__ "failed" UnsignedLong.of_json in
+      let succeeded = field_map json__ "succeeded" UnsignedLong.of_json in
+      let running = field_map json__ "running" UnsignedLong.of_json in
+      let pending = field_map json__ "pending" UnsignedLong.of_json in
+      make ?pendingRedrive ?failuresNotRedrivable ?resultsWritten ?total
+        ?aborted ?timedOut ?failed ?succeeded ?running ?pending ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about items that were processed in all of the child workflow executions that were started by a Map Run."]
+module MapRunStatus =
+  struct
+    type nonrec t =
+      | RUNNING 
+      | SUCCEEDED 
+      | FAILED 
+      | ABORTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RUNNING -> "RUNNING"
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | ABORTED -> "ABORTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RUNNING" -> RUNNING
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | "ABORTED" -> ABORTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MapRunStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MapRunStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ExecutionRedriveStatus =
+  struct
+    type nonrec t =
+      | REDRIVABLE 
+      | NOT_REDRIVABLE 
+      | REDRIVABLE_BY_MAP_RUN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REDRIVABLE -> "REDRIVABLE"
+      | NOT_REDRIVABLE -> "NOT_REDRIVABLE"
+      | REDRIVABLE_BY_MAP_RUN -> "REDRIVABLE_BY_MAP_RUN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REDRIVABLE" -> REDRIVABLE
+      | "NOT_REDRIVABLE" -> NOT_REDRIVABLE
+      | "REDRIVABLE_BY_MAP_RUN" -> REDRIVABLE_BY_MAP_RUN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExecutionRedriveStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExecutionRedriveStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module StateMachineAlreadyExists =
   struct
     type nonrec t = {
@@ -3443,8 +6339,8 @@ module StateMachineAlreadyExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3463,12 +6359,54 @@ module StateMachineLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The maximum number of state machines has been reached. Existing state machines must be deleted before a new state machine can be created."]
+module CharacterRestrictedName =
+  struct
+    type nonrec t = string
+    let context_ = "CharacterRestrictedName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:80) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?=.*[a-zA-Z_\\-\\.])[a-zA-Z0-9_\\-\\.]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CharacterRestrictedName" j
+    let to_json = simple_to_json to_value
+  end
+module ActivityAlreadyExists =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Activity already exists. EncryptionConfiguration may not be updated."]
 module ActivityLimitExceeded =
   struct
     type nonrec t = {
@@ -3483,70 +6421,256 @@ module ActivityLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The maximum number of activities has been reached. Existing activities must be deleted before a new activity can be created."]
+module ValidateStateMachineDefinitionOutput =
+  struct
+    type nonrec t =
+      {
+      result: ValidateStateMachineDefinitionResultCode.t option
+        [@ocaml.doc
+          "The result value will be OK when no syntax errors are found, or FAIL if the workflow definition does not pass verification."];
+      diagnostics: ValidateStateMachineDefinitionDiagnosticList.t option
+        [@ocaml.doc
+          "An array of diagnostic errors and warnings found during validation of the state machine definition. Since warnings do not prevent deploying your workflow definition, the result value could be OK even when warning diagnostics are present in the response."];
+      truncated: ValidateStateMachineDefinitionTruncated.t option
+        [@ocaml.doc
+          "The result value will be true if the number of diagnostics found in the workflow definition exceeds maxResults. When all diagnostics results are returned, the value will be false."]}
+    type nonrec error =
+      [ `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?result =
+      fun ?diagnostics ->
+        fun ?truncated -> fun () -> { result; diagnostics; truncated }
+    let error_of_json name json =
+      match name with
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("result",
+           (Option.map x.result
+              ~f:ValidateStateMachineDefinitionResultCode.to_value));
+        ("diagnostics",
+          (Option.map x.diagnostics
+             ~f:ValidateStateMachineDefinitionDiagnosticList.to_value));
+        ("truncated",
+          (Option.map x.truncated
+             ~f:ValidateStateMachineDefinitionTruncated.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let truncated =
+        (Option.map ~f:ValidateStateMachineDefinitionTruncated.of_xml)
+          (Xml.child xml_arg0 "truncated") in
+      let diagnostics =
+        (Option.map ~f:ValidateStateMachineDefinitionDiagnosticList.of_xml)
+          (Xml.child xml_arg0 "diagnostics") in
+      let result =
+        (Option.map ~f:ValidateStateMachineDefinitionResultCode.of_xml)
+          (Xml.child xml_arg0 "result") in
+      make ?truncated ?diagnostics ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let truncated =
+        field_map json__ "truncated"
+          ValidateStateMachineDefinitionTruncated.of_json in
+      let diagnostics =
+        field_map json__ "diagnostics"
+          ValidateStateMachineDefinitionDiagnosticList.of_json in
+      let result =
+        field_map json__ "result"
+          ValidateStateMachineDefinitionResultCode.of_json in
+      make ?truncated ?diagnostics ?result ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Validates the syntax of a state machine definition specified in Amazon States Language (ASL), a JSON-based, structured language. You can validate that a state machine definition is correct without creating a state machine resource. Suggested uses for ValidateStateMachineDefinition: Integrate automated checks into your code review or Continuous Integration (CI) process to check state machine definitions before starting deployments. Run validation from a Git pre-commit hook to verify the definition before committing to your source repository. Validation will look for problems in your state machine definition and return a result and a list of diagnostic elements. The result value will be OK when your workflow definition can be successfully created or updated. Note the result can be OK even when diagnostic warnings are present in the response. The result value will be FAIL when the workflow definition contains errors that would prevent you from creating or updating your state machine. The list of ValidateStateMachineDefinitionDiagnostic data elements can contain zero or more WARNING and/or ERROR elements. The ValidateStateMachineDefinition API might add new diagnostics in the future, adjust diagnostic codes, or change the message wording. Your automated processes should only rely on the value of the result field value (OK, FAIL). Do not rely on the exact order, count, or wording of diagnostic messages."]
+module ValidateStateMachineDefinitionInput =
+  struct
+    type nonrec t =
+      {
+      definition: Definition.t
+        [@ocaml.doc
+          "The Amazon States Language definition of the state machine. For more information, see Amazon States Language (ASL)."];
+      type_: StateMachineType.t option
+        [@ocaml.doc
+          "The target type of state machine for this definition. The default is STANDARD."];
+      severity: ValidateStateMachineDefinitionSeverity.t option
+        [@ocaml.doc
+          "Minimum level of diagnostics to return. ERROR returns only ERROR diagnostics, whereas WARNING returns both WARNING and ERROR diagnostics. The default is ERROR."];
+      maxResults: ValidateStateMachineDefinitionMaxResult.t option
+        [@ocaml.doc
+          "The maximum number of diagnostics that are returned per call. The default and maximum value is 100. Setting the value to 0 will also use the default of 100. If the number of diagnostics returned in the response exceeds maxResults, the value of the truncated field in the response will be set to true."]}
+    let context_ = "ValidateStateMachineDefinitionInput"
+    let make ?type_ =
+      fun ?severity ->
+        fun ?maxResults ->
+          fun ~definition ->
+            fun () -> { type_; severity; maxResults; definition }
+    let to_value x =
+      structure_to_value
+        [("definition", (Some (Definition.to_value x.definition)));
+        ("type", (Option.map x.type_ ~f:StateMachineType.to_value));
+        ("severity",
+          (Option.map x.severity
+             ~f:ValidateStateMachineDefinitionSeverity.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ValidateStateMachineDefinitionMaxResult.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ValidateStateMachineDefinitionMaxResult.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let severity =
+        (Option.map ~f:ValidateStateMachineDefinitionSeverity.of_xml)
+          (Xml.child xml_arg0 "severity") in
+      let type_ =
+        (Option.map ~f:StateMachineType.of_xml) (Xml.child xml_arg0 "type") in
+      let definition =
+        Definition.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "definition") in
+      make ?maxResults ?severity ?type_ ~definition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "maxResults"
+          ValidateStateMachineDefinitionMaxResult.of_json in
+      let severity =
+        field_map json__ "severity"
+          ValidateStateMachineDefinitionSeverity.of_json in
+      let type_ = field_map json__ "type" StateMachineType.of_json in
+      let definition = field_map_exn json__ "definition" Definition.of_json in
+      make ?maxResults ?severity ?type_ ~definition ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Validates the syntax of a state machine definition specified in Amazon States Language (ASL), a JSON-based, structured language. You can validate that a state machine definition is correct without creating a state machine resource. Suggested uses for ValidateStateMachineDefinition: Integrate automated checks into your code review or Continuous Integration (CI) process to check state machine definitions before starting deployments. Run validation from a Git pre-commit hook to verify the definition before committing to your source repository. Validation will look for problems in your state machine definition and return a result and a list of diagnostic elements. The result value will be OK when your workflow definition can be successfully created or updated. Note the result can be OK even when diagnostic warnings are present in the response. The result value will be FAIL when the workflow definition contains errors that would prevent you from creating or updating your state machine. The list of ValidateStateMachineDefinitionDiagnostic data elements can contain zero or more WARNING and/or ERROR elements. The ValidateStateMachineDefinition API might add new diagnostics in the future, adjust diagnostic codes, or change the message wording. Your automated processes should only rely on the value of the result field value (OK, FAIL). Do not rely on the exact order, count, or wording of diagnostic messages."]
 module UpdateStateMachineOutput =
   struct
     type nonrec t =
       {
-      updateDate: Timestamp.t
-        [@ocaml.doc "The date and time the state machine was updated."]}
+      updateDate: Timestamp.t option
+        [@ocaml.doc "The date and time the state machine was updated."];
+      revisionId: RevisionId.t option
+        [@ocaml.doc "The revision identifier for the updated state machine."];
+      stateMachineVersionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the published state machine version. If the publish parameter isn't set to true, this field returns null."]}
     type nonrec error =
-      [ `InvalidArn of InvalidArn.t 
+      [ `ConflictException of ConflictException.t 
+      | `InvalidArn of InvalidArn.t 
       | `InvalidDefinition of InvalidDefinition.t 
+      | `InvalidEncryptionConfiguration of InvalidEncryptionConfiguration.t 
       | `InvalidLoggingConfiguration of InvalidLoggingConfiguration.t 
       | `InvalidTracingConfiguration of InvalidTracingConfiguration.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `MissingRequiredParameter of MissingRequiredParameter.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `StateMachineDeleting of StateMachineDeleting.t 
       | `StateMachineDoesNotExist of StateMachineDoesNotExist.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateStateMachineOutput"
-    let make ~updateDate = fun () -> { updateDate }
+    let make ?updateDate =
+      fun ?revisionId ->
+        fun ?stateMachineVersionArn ->
+          fun () -> { updateDate; revisionId; stateMachineVersionArn }
     let error_of_json name json =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
       | "InvalidDefinition" ->
           `InvalidDefinition (InvalidDefinition.of_json json)
+      | "InvalidEncryptionConfiguration" ->
+          `InvalidEncryptionConfiguration
+            (InvalidEncryptionConfiguration.of_json json)
       | "InvalidLoggingConfiguration" ->
           `InvalidLoggingConfiguration
             (InvalidLoggingConfiguration.of_json json)
       | "InvalidTracingConfiguration" ->
           `InvalidTracingConfiguration
             (InvalidTracingConfiguration.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | "MissingRequiredParameter" ->
           `MissingRequiredParameter (MissingRequiredParameter.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "StateMachineDeleting" ->
           `StateMachineDeleting (StateMachineDeleting.of_json json)
       | "StateMachineDoesNotExist" ->
           `StateMachineDoesNotExist (StateMachineDoesNotExist.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
       | "InvalidDefinition" ->
           `InvalidDefinition (InvalidDefinition.of_xml xml)
+      | "InvalidEncryptionConfiguration" ->
+          `InvalidEncryptionConfiguration
+            (InvalidEncryptionConfiguration.of_xml xml)
       | "InvalidLoggingConfiguration" ->
           `InvalidLoggingConfiguration
             (InvalidLoggingConfiguration.of_xml xml)
       | "InvalidTracingConfiguration" ->
           `InvalidTracingConfiguration
             (InvalidTracingConfiguration.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | "MissingRequiredParameter" ->
           `MissingRequiredParameter (MissingRequiredParameter.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "StateMachineDeleting" ->
           `StateMachineDeleting (StateMachineDeleting.of_xml xml)
       | "StateMachineDoesNotExist" ->
           `StateMachineDoesNotExist (StateMachineDoesNotExist.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InvalidArn e ->
           `Assoc
             [("error", (`String "InvalidArn"));
@@ -3555,6 +6679,10 @@ module UpdateStateMachineOutput =
           `Assoc
             [("error", (`String "InvalidDefinition"));
             ("details", (InvalidDefinition.to_json e))]
+      | `InvalidEncryptionConfiguration e ->
+          `Assoc
+            [("error", (`String "InvalidEncryptionConfiguration"));
+            ("details", (InvalidEncryptionConfiguration.to_json e))]
       | `InvalidLoggingConfiguration e ->
           `Assoc
             [("error", (`String "InvalidLoggingConfiguration"));
@@ -3563,10 +6691,22 @@ module UpdateStateMachineOutput =
           `Assoc
             [("error", (`String "InvalidTracingConfiguration"));
             ("details", (InvalidTracingConfiguration.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `MissingRequiredParameter e ->
           `Assoc
             [("error", (`String "MissingRequiredParameter"));
             ("details", (MissingRequiredParameter.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `StateMachineDeleting e ->
           `Assoc
             [("error", (`String "StateMachineDeleting"));
@@ -3575,6 +6715,10 @@ module UpdateStateMachineOutput =
           `Assoc
             [("error", (`String "StateMachineDoesNotExist"));
             ("details", (StateMachineDoesNotExist.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3582,20 +6726,30 @@ module UpdateStateMachineOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("updateDate", (Some (Timestamp.to_value x.updateDate)))]
+        [("updateDate", (Option.map x.updateDate ~f:Timestamp.to_value));
+        ("revisionId", (Option.map x.revisionId ~f:RevisionId.to_value));
+        ("stateMachineVersionArn",
+          (Option.map x.stateMachineVersionArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let stateMachineVersionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineVersionArn") in
+      let revisionId =
+        (Option.map ~f:RevisionId.of_xml) (Xml.child xml_arg0 "revisionId") in
       let updateDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updateDate") in
-      make ~updateDate ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updateDate") in
+      make ?stateMachineVersionArn ?revisionId ?updateDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateDate = field_map_exn json "updateDate" Timestamp.of_json in
-      make ~updateDate ()
+    let of_json json__ =
+      let stateMachineVersionArn =
+        field_map json__ "stateMachineVersionArn" Arn.of_json in
+      let revisionId = field_map json__ "revisionId" RevisionId.of_json in
+      let updateDate = field_map json__ "updateDate" Timestamp.of_json in
+      make ?stateMachineVersionArn ?revisionId ?updateDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing state machine by modifying its definition, roleArn, or loggingConfiguration. Running executions will continue to use the previous definition and roleArn. You must include at least one of definition or roleArn or you will receive a MissingRequiredParameter error. All StartExecution calls within a few seconds will use the updated definition and roleArn. Executions started immediately after calling UpdateStateMachine may use the previous state machine definition and roleArn."]
+       "Updates an existing state machine by modifying its definition, roleArn, loggingConfiguration, or EncryptionConfiguration. Running executions will continue to use the previous definition and roleArn. You must include at least one of definition or roleArn or you will receive a MissingRequiredParameter error. A qualified state machine ARN refers to a Distributed Map state defined within a state machine. For example, the qualified state machine ARN arn:partition:states:region:account-id:stateMachine:stateMachineName/mapStateLabel refers to a Distributed Map state with a label mapStateLabel in the state machine named stateMachineName. A qualified state machine ARN can either refer to a Distributed Map state defined within a state machine, a version ARN, or an alias ARN. The following are some examples of qualified and unqualified state machine ARNs: The following qualified state machine ARN refers to a Distributed Map state with a label mapStateLabel in a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine/mapStateLabel If you provide a qualified state machine ARN that refers to a Distributed Map state, the request fails with ValidationException. The following qualified state machine ARN refers to an alias named PROD. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine:PROD> If you provide a qualified state machine ARN that refers to a version ARN or an alias ARN, the request starts execution for that version or alias. The following unqualified state machine ARN refers to a state machine named myStateMachine. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine> After you update your state machine, you can set the publish parameter to true in the same action to publish a new version. This way, you can opt-in to strict versioning of your state machine. Step Functions assigns monotonically increasing integers for state machine versions, starting at version number 1. All StartExecution calls within a few seconds use the updated definition and roleArn. Executions started immediately after you call UpdateStateMachine may use the previous state machine definition and roleArn."]
 module UpdateStateMachineInput =
   struct
     type nonrec t =
@@ -3610,23 +6764,37 @@ module UpdateStateMachineInput =
           "The Amazon Resource Name (ARN) of the IAM role of the state machine."];
       loggingConfiguration: LoggingConfiguration.t option
         [@ocaml.doc
-          "The LoggingConfiguration data type is used to set CloudWatch Logs options."];
+          "Use the LoggingConfiguration data type to set CloudWatch Logs options."];
       tracingConfiguration: TracingConfiguration.t option
-        [@ocaml.doc "Selects whether AWS X-Ray tracing is enabled."]}
+        [@ocaml.doc "Selects whether X-Ray tracing is enabled."];
+      publish: Publish.t option
+        [@ocaml.doc
+          "Specifies whether the state machine version is published. The default is false. To publish a version after updating the state machine, set publish to true."];
+      versionDescription: VersionDescription.t option
+        [@ocaml.doc
+          "An optional description of the state machine version to publish. You can only specify the versionDescription parameter if you've set publish to true."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc "Settings to configure server-side encryption."]}
     let context_ = "UpdateStateMachineInput"
     let make ?definition =
       fun ?roleArn ->
         fun ?loggingConfiguration ->
           fun ?tracingConfiguration ->
-            fun ~stateMachineArn ->
-              fun () ->
-                {
-                  definition;
-                  roleArn;
-                  loggingConfiguration;
-                  tracingConfiguration;
-                  stateMachineArn
-                }
+            fun ?publish ->
+              fun ?versionDescription ->
+                fun ?encryptionConfiguration ->
+                  fun ~stateMachineArn ->
+                    fun () ->
+                      {
+                        definition;
+                        roleArn;
+                        loggingConfiguration;
+                        tracingConfiguration;
+                        publish;
+                        versionDescription;
+                        encryptionConfiguration;
+                        stateMachineArn
+                      }
     let to_value x =
       structure_to_value
         [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
@@ -3635,9 +6803,23 @@ module UpdateStateMachineInput =
         ("loggingConfiguration",
           (Option.map x.loggingConfiguration ~f:LoggingConfiguration.to_value));
         ("tracingConfiguration",
-          (Option.map x.tracingConfiguration ~f:TracingConfiguration.to_value))]
+          (Option.map x.tracingConfiguration ~f:TracingConfiguration.to_value));
+        ("publish", (Option.map x.publish ~f:Publish.to_value));
+        ("versionDescription",
+          (Option.map x.versionDescription ~f:VersionDescription.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
+      let versionDescription =
+        (Option.map ~f:VersionDescription.of_xml)
+          (Xml.child xml_arg0 "versionDescription") in
+      let publish =
+        (Option.map ~f:Publish.of_xml) (Xml.child xml_arg0 "publish") in
       let tracingConfiguration =
         (Option.map ~f:TracingConfiguration.of_xml)
           (Xml.child xml_arg0 "tracingConfiguration") in
@@ -3650,22 +6832,289 @@ module UpdateStateMachineInput =
       let stateMachineArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
-      make ?tracingConfiguration ?loggingConfiguration ?roleArn ?definition
+      make ?encryptionConfiguration ?versionDescription ?publish
+        ?tracingConfiguration ?loggingConfiguration ?roleArn ?definition
         ~stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let versionDescription =
+        field_map json__ "versionDescription" VersionDescription.of_json in
+      let publish = field_map json__ "publish" Publish.of_json in
       let tracingConfiguration =
-        field_map json "tracingConfiguration" TracingConfiguration.of_json in
+        field_map json__ "tracingConfiguration" TracingConfiguration.of_json in
       let loggingConfiguration =
-        field_map json "loggingConfiguration" LoggingConfiguration.of_json in
-      let roleArn = field_map json "roleArn" Arn.of_json in
-      let definition = field_map json "definition" Definition.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      make ?tracingConfiguration ?loggingConfiguration ?roleArn ?definition
+        field_map json__ "loggingConfiguration" LoggingConfiguration.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
+      let definition = field_map json__ "definition" Definition.of_json in
+      let stateMachineArn =
+        field_map_exn json__ "stateMachineArn" Arn.of_json in
+      make ?encryptionConfiguration ?versionDescription ?publish
+        ?tracingConfiguration ?loggingConfiguration ?roleArn ?definition
         ~stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing state machine by modifying its definition, roleArn, or loggingConfiguration. Running executions will continue to use the previous definition and roleArn. You must include at least one of definition or roleArn or you will receive a MissingRequiredParameter error. All StartExecution calls within a few seconds will use the updated definition and roleArn. Executions started immediately after calling UpdateStateMachine may use the previous state machine definition and roleArn."]
+       "Updates an existing state machine by modifying its definition, roleArn, loggingConfiguration, or EncryptionConfiguration. Running executions will continue to use the previous definition and roleArn. You must include at least one of definition or roleArn or you will receive a MissingRequiredParameter error. A qualified state machine ARN refers to a Distributed Map state defined within a state machine. For example, the qualified state machine ARN arn:partition:states:region:account-id:stateMachine:stateMachineName/mapStateLabel refers to a Distributed Map state with a label mapStateLabel in the state machine named stateMachineName. A qualified state machine ARN can either refer to a Distributed Map state defined within a state machine, a version ARN, or an alias ARN. The following are some examples of qualified and unqualified state machine ARNs: The following qualified state machine ARN refers to a Distributed Map state with a label mapStateLabel in a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine/mapStateLabel If you provide a qualified state machine ARN that refers to a Distributed Map state, the request fails with ValidationException. The following qualified state machine ARN refers to an alias named PROD. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine:PROD> If you provide a qualified state machine ARN that refers to a version ARN or an alias ARN, the request starts execution for that version or alias. The following unqualified state machine ARN refers to a state machine named myStateMachine. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine> After you update your state machine, you can set the publish parameter to true in the same action to publish a new version. This way, you can opt-in to strict versioning of your state machine. Step Functions assigns monotonically increasing integers for state machine versions, starting at version number 1. All StartExecution calls within a few seconds use the updated definition and roleArn. Executions started immediately after you call UpdateStateMachine may use the previous state machine definition and roleArn."]
+module UpdateStateMachineAliasOutput =
+  struct
+    type nonrec t =
+      {
+      updateDate: Timestamp.t option
+        [@ocaml.doc "The date and time the state machine alias was updated."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InvalidArn of InvalidArn.t 
+      | `ResourceNotFound of ResourceNotFound.t 
+      | `StateMachineDeleting of StateMachineDeleting.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?updateDate = fun () -> { updateDate }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "ResourceNotFound" ->
+          `ResourceNotFound (ResourceNotFound.of_json json)
+      | "StateMachineDeleting" ->
+          `StateMachineDeleting (StateMachineDeleting.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "ResourceNotFound" -> `ResourceNotFound (ResourceNotFound.of_xml xml)
+      | "StateMachineDeleting" ->
+          `StateMachineDeleting (StateMachineDeleting.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `ResourceNotFound e ->
+          `Assoc
+            [("error", (`String "ResourceNotFound"));
+            ("details", (ResourceNotFound.to_json e))]
+      | `StateMachineDeleting e ->
+          `Assoc
+            [("error", (`String "StateMachineDeleting"));
+            ("details", (StateMachineDeleting.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("updateDate", (Option.map x.updateDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updateDate") in
+      make ?updateDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateDate = field_map json__ "updateDate" Timestamp.of_json in
+      make ?updateDate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of an existing state machine alias by modifying its description or routingConfiguration. You must specify at least one of the description or routingConfiguration parameters to update a state machine alias. UpdateStateMachineAlias is an idempotent API. Step Functions bases the idempotency check on the stateMachineAliasArn, description, and routingConfiguration parameters. Requests with the same parameters return an idempotent response. This operation is eventually consistent. All StartExecution requests made within a few seconds use the latest alias configuration. Executions started immediately after calling UpdateStateMachineAlias may use the previous routing configuration. Related operations: CreateStateMachineAlias DescribeStateMachineAlias ListStateMachineAliases DeleteStateMachineAlias"]
+module UpdateStateMachineAliasInput =
+  struct
+    type nonrec t =
+      {
+      stateMachineAliasArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine alias."];
+      description: AliasDescription.t option
+        [@ocaml.doc "A description of the state machine alias."];
+      routingConfiguration: RoutingConfigurationList.t option
+        [@ocaml.doc
+          "The routing configuration of the state machine alias. An array of RoutingConfig objects that specifies up to two state machine versions that the alias starts executions for."]}
+    let context_ = "UpdateStateMachineAliasInput"
+    let make ?description =
+      fun ?routingConfiguration ->
+        fun ~stateMachineAliasArn ->
+          fun () ->
+            { description; routingConfiguration; stateMachineAliasArn }
+    let to_value x =
+      structure_to_value
+        [("stateMachineAliasArn",
+           (Some (Arn.to_value x.stateMachineAliasArn)));
+        ("description",
+          (Option.map x.description ~f:AliasDescription.to_value));
+        ("routingConfiguration",
+          (Option.map x.routingConfiguration
+             ~f:RoutingConfigurationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let routingConfiguration =
+        (Option.map ~f:RoutingConfigurationList.of_xml)
+          (Xml.child xml_arg0 "routingConfiguration") in
+      let description =
+        (Option.map ~f:AliasDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let stateMachineAliasArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineAliasArn") in
+      make ?routingConfiguration ?description ~stateMachineAliasArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let routingConfiguration =
+        field_map json__ "routingConfiguration"
+          RoutingConfigurationList.of_json in
+      let description =
+        field_map json__ "description" AliasDescription.of_json in
+      let stateMachineAliasArn =
+        field_map_exn json__ "stateMachineAliasArn" Arn.of_json in
+      make ?routingConfiguration ?description ~stateMachineAliasArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of an existing state machine alias by modifying its description or routingConfiguration. You must specify at least one of the description or routingConfiguration parameters to update a state machine alias. UpdateStateMachineAlias is an idempotent API. Step Functions bases the idempotency check on the stateMachineAliasArn, description, and routingConfiguration parameters. Requests with the same parameters return an idempotent response. This operation is eventually consistent. All StartExecution requests made within a few seconds use the latest alias configuration. Executions started immediately after calling UpdateStateMachineAlias may use the previous routing configuration. Related operations: CreateStateMachineAlias DescribeStateMachineAlias ListStateMachineAliases DeleteStateMachineAlias"]
+module UpdateMapRunOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidArn of InvalidArn.t 
+      | `ResourceNotFound of ResourceNotFound.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "ResourceNotFound" ->
+          `ResourceNotFound (ResourceNotFound.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "ResourceNotFound" -> `ResourceNotFound (ResourceNotFound.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `ResourceNotFound e ->
+          `Assoc
+            [("error", (`String "ResourceNotFound"));
+            ("details", (ResourceNotFound.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an in-progress Map Run's configuration to include changes to the settings that control maximum concurrency and Map Run failure."]
+module UpdateMapRunInput =
+  struct
+    type nonrec t =
+      {
+      mapRunArn: LongArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of a Map Run."];
+      maxConcurrency: MaxConcurrency.t option
+        [@ocaml.doc
+          "The maximum number of child workflow executions that can be specified to run in parallel for the Map Run at the same time."];
+      toleratedFailurePercentage: ToleratedFailurePercentage.t option
+        [@ocaml.doc
+          "The maximum percentage of failed items before the Map Run fails."];
+      toleratedFailureCount: ToleratedFailureCount.t option
+        [@ocaml.doc
+          "The maximum number of failed items before the Map Run fails."]}
+    let context_ = "UpdateMapRunInput"
+    let make ?maxConcurrency =
+      fun ?toleratedFailurePercentage ->
+        fun ?toleratedFailureCount ->
+          fun ~mapRunArn ->
+            fun () ->
+              {
+                maxConcurrency;
+                toleratedFailurePercentage;
+                toleratedFailureCount;
+                mapRunArn
+              }
+    let to_value x =
+      structure_to_value
+        [("mapRunArn", (Some (LongArn.to_value x.mapRunArn)));
+        ("maxConcurrency",
+          (Option.map x.maxConcurrency ~f:MaxConcurrency.to_value));
+        ("toleratedFailurePercentage",
+          (Option.map x.toleratedFailurePercentage
+             ~f:ToleratedFailurePercentage.to_value));
+        ("toleratedFailureCount",
+          (Option.map x.toleratedFailureCount
+             ~f:ToleratedFailureCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let toleratedFailureCount =
+        (Option.map ~f:ToleratedFailureCount.of_xml)
+          (Xml.child xml_arg0 "toleratedFailureCount") in
+      let toleratedFailurePercentage =
+        (Option.map ~f:ToleratedFailurePercentage.of_xml)
+          (Xml.child xml_arg0 "toleratedFailurePercentage") in
+      let maxConcurrency =
+        (Option.map ~f:MaxConcurrency.of_xml)
+          (Xml.child xml_arg0 "maxConcurrency") in
+      let mapRunArn =
+        LongArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mapRunArn") in
+      make ?toleratedFailureCount ?toleratedFailurePercentage ?maxConcurrency
+        ~mapRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let toleratedFailureCount =
+        field_map json__ "toleratedFailureCount"
+          ToleratedFailureCount.of_json in
+      let toleratedFailurePercentage =
+        field_map json__ "toleratedFailurePercentage"
+          ToleratedFailurePercentage.of_json in
+      let maxConcurrency =
+        field_map json__ "maxConcurrency" MaxConcurrency.of_json in
+      let mapRunArn = field_map_exn json__ "mapRunArn" LongArn.of_json in
+      make ?toleratedFailureCount ?toleratedFailurePercentage ?maxConcurrency
+        ~mapRunArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an in-progress Map Run's configuration to include changes to the settings that control maximum concurrency and Map Run failure."]
 module UntagResourceOutput =
   struct
     type nonrec t = unit
@@ -3736,12 +7185,252 @@ module UntagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Remove a tag from a Step Functions resource"]
+module TestStateOutput =
+  struct
+    type nonrec t =
+      {
+      output: SensitiveData.t option
+        [@ocaml.doc
+          "The JSON output data of the state. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
+      error: SensitiveError.t option
+        [@ocaml.doc
+          "The error returned when the execution of a state fails."];
+      cause: SensitiveCause.t option
+        [@ocaml.doc
+          "A detailed explanation of the cause for the error when the execution of a state fails."];
+      inspectionData: InspectionData.t option
+        [@ocaml.doc
+          "Returns additional details about the state's execution, including its input and output data processing flow, and HTTP request and response information. The inspectionLevel request parameter specifies which details are returned."];
+      nextState: StateName.t option
+        [@ocaml.doc
+          "The name of the next state to transition to. If you haven't defined a next state in your definition or if the execution of the state fails, this field doesn't contain a value."];
+      status: TestExecutionStatus.t option
+        [@ocaml.doc "The execution status of the state."]}
+    type nonrec error =
+      [ `InvalidArn of InvalidArn.t 
+      | `InvalidDefinition of InvalidDefinition.t 
+      | `InvalidExecutionInput of InvalidExecutionInput.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?output =
+      fun ?error ->
+        fun ?cause ->
+          fun ?inspectionData ->
+            fun ?nextState ->
+              fun ?status ->
+                fun () ->
+                  { output; error; cause; inspectionData; nextState; status }
+    let error_of_json name json =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "InvalidDefinition" ->
+          `InvalidDefinition (InvalidDefinition.of_json json)
+      | "InvalidExecutionInput" ->
+          `InvalidExecutionInput (InvalidExecutionInput.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "InvalidDefinition" ->
+          `InvalidDefinition (InvalidDefinition.of_xml xml)
+      | "InvalidExecutionInput" ->
+          `InvalidExecutionInput (InvalidExecutionInput.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `InvalidDefinition e ->
+          `Assoc
+            [("error", (`String "InvalidDefinition"));
+            ("details", (InvalidDefinition.to_json e))]
+      | `InvalidExecutionInput e ->
+          `Assoc
+            [("error", (`String "InvalidExecutionInput"));
+            ("details", (InvalidExecutionInput.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("output", (Option.map x.output ~f:SensitiveData.to_value));
+        ("error", (Option.map x.error ~f:SensitiveError.to_value));
+        ("cause", (Option.map x.cause ~f:SensitiveCause.to_value));
+        ("inspectionData",
+          (Option.map x.inspectionData ~f:InspectionData.to_value));
+        ("nextState", (Option.map x.nextState ~f:StateName.to_value));
+        ("status", (Option.map x.status ~f:TestExecutionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:TestExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let nextState =
+        (Option.map ~f:StateName.of_xml) (Xml.child xml_arg0 "nextState") in
+      let inspectionData =
+        (Option.map ~f:InspectionData.of_xml)
+          (Xml.child xml_arg0 "inspectionData") in
+      let cause =
+        (Option.map ~f:SensitiveCause.of_xml) (Xml.child xml_arg0 "cause") in
+      let error =
+        (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
+      let output =
+        (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
+      make ?status ?nextState ?inspectionData ?cause ?error ?output ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" TestExecutionStatus.of_json in
+      let nextState = field_map json__ "nextState" StateName.of_json in
+      let inspectionData =
+        field_map json__ "inspectionData" InspectionData.of_json in
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      let output = field_map json__ "output" SensitiveData.of_json in
+      make ?status ?nextState ?inspectionData ?cause ?error ?output ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Accepts the definition of a single state and executes it. You can test a state without creating a state machine or updating an existing state machine. Using this API, you can test the following: A state's input and output processing data flow An Amazon Web Services service integration request and response An HTTP Task request and response You can call this API on only one state at a time. The states that you can test include the following: All Task types except Activity Pass Wait Choice Succeed Fail The TestState API assumes an IAM role which must contain the required IAM permissions for the resources your state is accessing. For information about the permissions a state might need, see IAM permissions to test a state. The TestState API can run for up to five minutes. If the execution of a state exceeds this duration, it fails with the States.Timeout error. TestState only supports the following when a mock is specified: Activity tasks, .sync or .waitForTaskToken service integration patterns, Parallel, or Map states."]
+module TestStateInput =
+  struct
+    type nonrec t =
+      {
+      definition: Definition.t
+        [@ocaml.doc
+          "The Amazon States Language (ASL) definition of the state or state machine."];
+      roleArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the execution role with the required IAM permissions for the state."];
+      input: SensitiveData.t option
+        [@ocaml.doc
+          "A string that contains the JSON input data for the state."];
+      inspectionLevel: InspectionLevel.t option
+        [@ocaml.doc
+          "Determines the values to return when a state is tested. You can specify one of the following types: INFO: Shows the final state output. By default, Step Functions sets inspectionLevel to INFO if you don't specify a level. DEBUG: Shows the final state output along with the input and output data processing result. TRACE: Shows the HTTP request and response for an HTTP Task. This level also shows the final state output along with the input and output data processing result. Each of these levels also provide information about the status of the state execution and the next state to transition to."];
+      revealSecrets: RevealSecrets.t option
+        [@ocaml.doc
+          "Specifies whether or not to include secret information in the test result. For HTTP Tasks, a secret includes the data that an EventBridge connection adds to modify the HTTP request headers, query parameters, and body. Step Functions doesn't omit any information included in the state definition or the HTTP response. If you set revealSecrets to true, you must make sure that the IAM user that calls the TestState API has permission for the states:RevealSecrets action. For an example of IAM policy that sets the states:RevealSecrets permission, see IAM permissions to test a state. Without this permission, Step Functions throws an access denied error. By default, revealSecrets is set to false."];
+      variables: SensitiveData.t option
+        [@ocaml.doc
+          "JSON object literal that sets variables used in the state under test. Object keys are the variable names and values are the variable values."];
+      stateName: TestStateStateName.t option
+        [@ocaml.doc
+          "Denotes the particular state within a state machine definition to be tested. If this field is specified, the definition must contain a fully-formed state machine definition."];
+      mock: MockInput.t option
+        [@ocaml.doc
+          "Defines a mocked result or error for the state under test. A mock can only be specified for Task, Map, or Parallel states. If it is specified for another state type, an exception will be thrown."];
+      context: SensitiveData.t option
+        [@ocaml.doc
+          "A JSON string representing a valid Context object for the state under test. This field may only be specified if a mock is specified in the same request."];
+      stateConfiguration: TestStateConfiguration.t option
+        [@ocaml.doc "Contains configurations for the state under test."]}
+    let context_ = "TestStateInput"
+    let make ?roleArn =
+      fun ?input ->
+        fun ?inspectionLevel ->
+          fun ?revealSecrets ->
+            fun ?variables ->
+              fun ?stateName ->
+                fun ?mock ->
+                  fun ?context ->
+                    fun ?stateConfiguration ->
+                      fun ~definition ->
+                        fun () ->
+                          {
+                            roleArn;
+                            input;
+                            inspectionLevel;
+                            revealSecrets;
+                            variables;
+                            stateName;
+                            mock;
+                            context;
+                            stateConfiguration;
+                            definition
+                          }
+    let to_value x =
+      structure_to_value
+        [("definition", (Some (Definition.to_value x.definition)));
+        ("roleArn", (Option.map x.roleArn ~f:Arn.to_value));
+        ("input", (Option.map x.input ~f:SensitiveData.to_value));
+        ("inspectionLevel",
+          (Option.map x.inspectionLevel ~f:InspectionLevel.to_value));
+        ("revealSecrets",
+          (Option.map x.revealSecrets ~f:RevealSecrets.to_value));
+        ("variables", (Option.map x.variables ~f:SensitiveData.to_value));
+        ("stateName",
+          (Option.map x.stateName ~f:TestStateStateName.to_value));
+        ("mock", (Option.map x.mock ~f:MockInput.to_value));
+        ("context", (Option.map x.context ~f:SensitiveData.to_value));
+        ("stateConfiguration",
+          (Option.map x.stateConfiguration ~f:TestStateConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stateConfiguration =
+        (Option.map ~f:TestStateConfiguration.of_xml)
+          (Xml.child xml_arg0 "stateConfiguration") in
+      let context =
+        (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "context") in
+      let mock = (Option.map ~f:MockInput.of_xml) (Xml.child xml_arg0 "mock") in
+      let stateName =
+        (Option.map ~f:TestStateStateName.of_xml)
+          (Xml.child xml_arg0 "stateName") in
+      let variables =
+        (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "variables") in
+      let revealSecrets =
+        (Option.map ~f:RevealSecrets.of_xml)
+          (Xml.child xml_arg0 "revealSecrets") in
+      let inspectionLevel =
+        (Option.map ~f:InspectionLevel.of_xml)
+          (Xml.child xml_arg0 "inspectionLevel") in
+      let input =
+        (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "input") in
+      let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let definition =
+        Definition.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "definition") in
+      make ?stateConfiguration ?context ?mock ?stateName ?variables
+        ?revealSecrets ?inspectionLevel ?input ?roleArn ~definition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stateConfiguration =
+        field_map json__ "stateConfiguration" TestStateConfiguration.of_json in
+      let context = field_map json__ "context" SensitiveData.of_json in
+      let mock = field_map json__ "mock" MockInput.of_json in
+      let stateName = field_map json__ "stateName" TestStateStateName.of_json in
+      let variables = field_map json__ "variables" SensitiveData.of_json in
+      let revealSecrets =
+        field_map json__ "revealSecrets" RevealSecrets.of_json in
+      let inspectionLevel =
+        field_map json__ "inspectionLevel" InspectionLevel.of_json in
+      let input = field_map json__ "input" SensitiveData.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
+      let definition = field_map_exn json__ "definition" Definition.of_json in
+      make ?stateConfiguration ?context ?mock ?stateName ?variables
+        ?revealSecrets ?inspectionLevel ?input ?roleArn ~definition ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Accepts the definition of a single state and executes it. You can test a state without creating a state machine or updating an existing state machine. Using this API, you can test the following: A state's input and output processing data flow An Amazon Web Services service integration request and response An HTTP Task request and response You can call this API on only one state at a time. The states that you can test include the following: All Task types except Activity Pass Wait Choice Succeed Fail The TestState API assumes an IAM role which must contain the required IAM permissions for the resources your state is accessing. For information about the permissions a state might need, see IAM permissions to test a state. The TestState API can run for up to five minutes. If the execution of a state exceeds this duration, it fails with the States.Timeout error. TestState only supports the following when a mock is specified: Activity tasks, .sync or .waitForTaskToken service integration patterns, Parallel, or Map states."]
 module TagResourceOutput =
   struct
     type nonrec t = unit
@@ -3794,7 +7483,7 @@ module TagResourceOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Add a tag to a Step Functions resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
+       "Add a tag to a Step Functions resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the Amazon Web Services Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
 module TagResourceInput =
   struct
     type nonrec t =
@@ -3819,29 +7508,41 @@ module TagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Add a tag to a Step Functions resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
+       "Add a tag to a Step Functions resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the Amazon Web Services Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
 module StopExecutionOutput =
   struct
     type nonrec t =
       {
-      stopDate: Timestamp.t [@ocaml.doc "The date the execution is stopped."]}
+      stopDate: Timestamp.t option
+        [@ocaml.doc "The date the execution is stopped."]}
     type nonrec error =
       [ `ExecutionDoesNotExist of ExecutionDoesNotExist.t 
       | `InvalidArn of InvalidArn.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StopExecutionOutput"
-    let make ~stopDate = fun () -> { stopDate }
+    let make ?stopDate = fun () -> { stopDate }
     let error_of_json name json =
       match name with
       | "ExecutionDoesNotExist" ->
           `ExecutionDoesNotExist (ExecutionDoesNotExist.of_json json)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3850,6 +7551,14 @@ module StopExecutionOutput =
       | "ExecutionDoesNotExist" ->
           `ExecutionDoesNotExist (ExecutionDoesNotExist.of_xml xml)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3862,6 +7571,22 @@ module StopExecutionOutput =
           `Assoc
             [("error", (`String "InvalidArn"));
             ("details", (InvalidArn.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3869,20 +7594,19 @@ module StopExecutionOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("stopDate", (Some (Timestamp.to_value x.stopDate)))]
+        [("stopDate", (Option.map x.stopDate ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let stopDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stopDate") in
-      make ~stopDate ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "stopDate") in
+      make ?stopDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stopDate = field_map_exn json "stopDate" Timestamp.of_json in
-      make ~stopDate ()
+    let of_json json__ =
+      let stopDate = field_map json__ "stopDate" Timestamp.of_json in
+      make ?stopDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops an execution. This API action is not supported by EXPRESS state machines."]
+       "Stops an execution. This API action is not supported by EXPRESS state machines. For an execution with encryption enabled, Step Functions will encrypt the error and cause fields using the KMS key for the execution role. A caller can stop an execution without using any KMS permissions in the execution role if the caller provides a null value for both error and cause fields because no data needs to be encrypted."]
 module StopExecutionInput =
   struct
     type nonrec t =
@@ -3914,31 +7638,31 @@ module StopExecutionInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
       make ?cause ?error ~executionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
-      let executionArn = field_map_exn json "executionArn" Arn.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      let executionArn = field_map_exn json__ "executionArn" Arn.of_json in
       make ?cause ?error ~executionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops an execution. This API action is not supported by EXPRESS state machines."]
+       "Stops an execution. This API action is not supported by EXPRESS state machines. For an execution with encryption enabled, Step Functions will encrypt the error and cause fields using the KMS key for the execution role. A caller can stop an execution without using any KMS permissions in the execution role if the caller provides a null value for both error and cause fields because no data needs to be encrypted."]
 module StartSyncExecutionOutput =
   struct
     type nonrec t =
       {
-      executionArn: Arn.t
+      executionArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the execution."];
       stateMachineArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the state machine."];
       name: Name.t option [@ocaml.doc "The name of the execution."];
-      startDate: Timestamp.t
+      startDate: Timestamp.t option
         [@ocaml.doc "The date the execution is started."];
-      stopDate: Timestamp.t
+      stopDate: Timestamp.t option
         [@ocaml.doc
           "If the execution has already ended, the date the execution stopped."];
-      status: SyncExecutionStatus.t
+      status: SyncExecutionStatus.t option
         [@ocaml.doc "The current status of the execution."];
       error: SensitiveError.t option
         [@ocaml.doc "The error code of the failure."];
@@ -3955,7 +7679,7 @@ module StartSyncExecutionOutput =
       outputDetails: CloudWatchEventsExecutionDataDetails.t option ;
       traceHeader: TraceHeader.t option
         [@ocaml.doc
-          "The AWS X-Ray trace header that was passed to the execution."];
+          "The X-Ray trace header that was passed to the execution. For X-Ray traces, all Amazon Web Services services use the X-Amzn-Trace-Id header from the HTTP request. Using the header is the preferred mechanism to identify a trace. StartExecution and StartSyncExecution API operations can also use traceHeader from the body of the request payload. If both sources are provided, Step Functions will use the header value (preferred) over the value in the request body."];
       billingDetails: BillingDetails.t option
         [@ocaml.doc
           "An object that describes workflow billing details, including billed duration and memory use."]}
@@ -3963,29 +7687,35 @@ module StartSyncExecutionOutput =
       [ `InvalidArn of InvalidArn.t 
       | `InvalidExecutionInput of InvalidExecutionInput.t 
       | `InvalidName of InvalidName.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `StateMachineDeleting of StateMachineDeleting.t 
       | `StateMachineDoesNotExist of StateMachineDoesNotExist.t 
       | `StateMachineTypeNotSupported of StateMachineTypeNotSupported.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartSyncExecutionOutput"
-    let make ?stateMachineArn =
-      fun ?name ->
-        fun ?error ->
-          fun ?cause ->
-            fun ?input ->
-              fun ?inputDetails ->
-                fun ?output ->
-                  fun ?outputDetails ->
-                    fun ?traceHeader ->
-                      fun ?billingDetails ->
-                        fun ~executionArn ->
-                          fun ~startDate ->
-                            fun ~stopDate ->
-                              fun ~status ->
+    let make ?executionArn =
+      fun ?stateMachineArn ->
+        fun ?name ->
+          fun ?startDate ->
+            fun ?stopDate ->
+              fun ?status ->
+                fun ?error ->
+                  fun ?cause ->
+                    fun ?input ->
+                      fun ?inputDetails ->
+                        fun ?output ->
+                          fun ?outputDetails ->
+                            fun ?traceHeader ->
+                              fun ?billingDetails ->
                                 fun () ->
                                   {
+                                    executionArn;
                                     stateMachineArn;
                                     name;
+                                    startDate;
+                                    stopDate;
+                                    status;
                                     error;
                                     cause;
                                     input;
@@ -3993,11 +7723,7 @@ module StartSyncExecutionOutput =
                                     output;
                                     outputDetails;
                                     traceHeader;
-                                    billingDetails;
-                                    executionArn;
-                                    startDate;
-                                    stopDate;
-                                    status
+                                    billingDetails
                                   }
     let error_of_json name json =
       match name with
@@ -4005,6 +7731,12 @@ module StartSyncExecutionOutput =
       | "InvalidExecutionInput" ->
           `InvalidExecutionInput (InvalidExecutionInput.of_json json)
       | "InvalidName" -> `InvalidName (InvalidName.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | "StateMachineDeleting" ->
           `StateMachineDeleting (StateMachineDeleting.of_json json)
       | "StateMachineDoesNotExist" ->
@@ -4021,6 +7753,12 @@ module StartSyncExecutionOutput =
       | "InvalidExecutionInput" ->
           `InvalidExecutionInput (InvalidExecutionInput.of_xml xml)
       | "InvalidName" -> `InvalidName (InvalidName.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | "StateMachineDeleting" ->
           `StateMachineDeleting (StateMachineDeleting.of_xml xml)
       | "StateMachineDoesNotExist" ->
@@ -4044,6 +7782,18 @@ module StartSyncExecutionOutput =
           `Assoc
             [("error", (`String "InvalidName"));
             ("details", (InvalidName.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `StateMachineDeleting e ->
           `Assoc
             [("error", (`String "StateMachineDeleting"));
@@ -4063,12 +7813,12 @@ module StartSyncExecutionOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("executionArn", (Some (Arn.to_value x.executionArn)));
+        [("executionArn", (Option.map x.executionArn ~f:Arn.to_value));
         ("stateMachineArn", (Option.map x.stateMachineArn ~f:Arn.to_value));
         ("name", (Option.map x.name ~f:Name.to_value));
-        ("startDate", (Some (Timestamp.to_value x.startDate)));
-        ("stopDate", (Some (Timestamp.to_value x.stopDate)));
-        ("status", (Some (SyncExecutionStatus.to_value x.status)));
+        ("startDate", (Option.map x.startDate ~f:Timestamp.to_value));
+        ("stopDate", (Option.map x.stopDate ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:SyncExecutionStatus.to_value));
         ("error", (Option.map x.error ~f:SensitiveError.to_value));
         ("cause", (Option.map x.cause ~f:SensitiveCause.to_value));
         ("input", (Option.map x.input ~f:SensitiveData.to_value));
@@ -4104,48 +7854,47 @@ module StartSyncExecutionOutput =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       let status =
-        SyncExecutionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:SyncExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let stopDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stopDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "stopDate") in
       let startDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startDate") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let stateMachineArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "stateMachineArn") in
       let executionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "executionArn") in
       make ?billingDetails ?traceHeader ?outputDetails ?output ?inputDetails
-        ?input ?cause ?error ~status ~stopDate ~startDate ?name
-        ?stateMachineArn ~executionArn ()
+        ?input ?cause ?error ?status ?stopDate ?startDate ?name
+        ?stateMachineArn ?executionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let billingDetails =
-        field_map json "billingDetails" BillingDetails.of_json in
-      let traceHeader = field_map json "traceHeader" TraceHeader.of_json in
+        field_map json__ "billingDetails" BillingDetails.of_json in
+      let traceHeader = field_map json__ "traceHeader" TraceHeader.of_json in
       let outputDetails =
-        field_map json "outputDetails"
+        field_map json__ "outputDetails"
           CloudWatchEventsExecutionDataDetails.of_json in
-      let output = field_map json "output" SensitiveData.of_json in
+      let output = field_map json__ "output" SensitiveData.of_json in
       let inputDetails =
-        field_map json "inputDetails"
+        field_map json__ "inputDetails"
           CloudWatchEventsExecutionDataDetails.of_json in
-      let input = field_map json "input" SensitiveData.of_json in
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
-      let status = field_map_exn json "status" SyncExecutionStatus.of_json in
-      let stopDate = field_map_exn json "stopDate" Timestamp.of_json in
-      let startDate = field_map_exn json "startDate" Timestamp.of_json in
-      let name = field_map json "name" Name.of_json in
-      let stateMachineArn = field_map json "stateMachineArn" Arn.of_json in
-      let executionArn = field_map_exn json "executionArn" Arn.of_json in
+      let input = field_map json__ "input" SensitiveData.of_json in
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      let status = field_map json__ "status" SyncExecutionStatus.of_json in
+      let stopDate = field_map json__ "stopDate" Timestamp.of_json in
+      let startDate = field_map json__ "startDate" Timestamp.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let stateMachineArn = field_map json__ "stateMachineArn" Arn.of_json in
+      let executionArn = field_map json__ "executionArn" Arn.of_json in
       make ?billingDetails ?traceHeader ?outputDetails ?output ?inputDetails
-        ?input ?cause ?error ~status ~stopDate ~startDate ?name
-        ?stateMachineArn ~executionArn ()
+        ?input ?cause ?error ?status ?stopDate ?startDate ?name
+        ?stateMachineArn ?executionArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts a Synchronous Express state machine execution."]
+  end[@@ocaml.doc
+       "Starts a Synchronous Express state machine execution. StartSyncExecution is not available for STANDARD workflows. StartSyncExecution will return a 200 OK response, even if your execution fails, because the status code in the API response doesn't reflect function errors. Error codes are reserved for errors that prevent your execution from running, such as permissions errors, limit errors, or issues with your state machine code and configuration. This API action isn't logged in CloudTrail."]
 module StartSyncExecutionInput =
   struct
     type nonrec t =
@@ -4156,24 +7905,34 @@ module StartSyncExecutionInput =
       name: Name.t option [@ocaml.doc "The name of the execution."];
       input: SensitiveData.t option
         [@ocaml.doc
-          "The string that contains the JSON input data for the execution, for example: \"input\": \"\\{\\\"first_name\\\" : \\\"test\\\"\\}\" If you don't include any JSON input data, you still must include the two braces, for example: \"input\": \"\\{\\}\" Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
+          "The string that contains the JSON input data for the execution, for example: \"\\{\\\"first_name\\\" : \\\"Alejandro\\\"\\}\" If you don't include any JSON input data, you still must include the two braces, for example: \"\\{\\}\" Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       traceHeader: TraceHeader.t option
         [@ocaml.doc
-          "Passes the AWS X-Ray trace header. The trace header can also be passed in the request payload."]}
+          "Passes the X-Ray trace header. The trace header can also be passed in the request payload. For X-Ray traces, all Amazon Web Services services use the X-Amzn-Trace-Id header from the HTTP request. Using the header is the preferred mechanism to identify a trace. StartExecution and StartSyncExecution API operations can also use traceHeader from the body of the request payload. If both sources are provided, Step Functions will use the header value (preferred) over the value in the request body."];
+      includedData: IncludedData.t option
+        [@ocaml.doc
+          "If your state machine definition is encrypted with a KMS key, callers must have kms:Decrypt permission to decrypt the definition. Alternatively, you can call the API with includedData = METADATA_ONLY to get a successful response without the encrypted definition."]}
     let context_ = "StartSyncExecutionInput"
     let make ?name =
       fun ?input ->
         fun ?traceHeader ->
-          fun ~stateMachineArn ->
-            fun () -> { name; input; traceHeader; stateMachineArn }
+          fun ?includedData ->
+            fun ~stateMachineArn ->
+              fun () ->
+                { name; input; traceHeader; includedData; stateMachineArn }
     let to_value x =
       structure_to_value
         [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
         ("name", (Option.map x.name ~f:Name.to_value));
         ("input", (Option.map x.input ~f:SensitiveData.to_value));
-        ("traceHeader", (Option.map x.traceHeader ~f:TraceHeader.to_value))]
+        ("traceHeader", (Option.map x.traceHeader ~f:TraceHeader.to_value));
+        ("includedData",
+          (Option.map x.includedData ~f:IncludedData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let includedData =
+        (Option.map ~f:IncludedData.of_xml)
+          (Xml.child xml_arg0 "includedData") in
       let traceHeader =
         (Option.map ~f:TraceHeader.of_xml) (Xml.child xml_arg0 "traceHeader") in
       let input =
@@ -4182,24 +7941,27 @@ module StartSyncExecutionInput =
       let stateMachineArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
-      make ?traceHeader ?input ?name ~stateMachineArn ()
+      make ?includedData ?traceHeader ?input ?name ~stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let traceHeader = field_map json "traceHeader" TraceHeader.of_json in
-      let input = field_map json "input" SensitiveData.of_json in
-      let name = field_map json "name" Name.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      make ?traceHeader ?input ?name ~stateMachineArn ()
+    let of_json json__ =
+      let includedData = field_map json__ "includedData" IncludedData.of_json in
+      let traceHeader = field_map json__ "traceHeader" TraceHeader.of_json in
+      let input = field_map json__ "input" SensitiveData.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let stateMachineArn =
+        field_map_exn json__ "stateMachineArn" Arn.of_json in
+      make ?includedData ?traceHeader ?input ?name ~stateMachineArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts a Synchronous Express state machine execution."]
+  end[@@ocaml.doc
+       "Starts a Synchronous Express state machine execution. StartSyncExecution is not available for STANDARD workflows. StartSyncExecution will return a 200 OK response, even if your execution fails, because the status code in the API response doesn't reflect function errors. Error codes are reserved for errors that prevent your execution from running, such as permissions errors, limit errors, or issues with your state machine code and configuration. This API action isn't logged in CloudTrail."]
 module StartExecutionOutput =
   struct
     type nonrec t =
       {
-      executionArn: Arn.t
+      executionArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the execution."];
-      startDate: Timestamp.t
+      startDate: Timestamp.t option
         [@ocaml.doc "The date the execution is started."]}
     type nonrec error =
       [ `ExecutionAlreadyExists of ExecutionAlreadyExists.t 
@@ -4207,12 +7969,15 @@ module StartExecutionOutput =
       | `InvalidArn of InvalidArn.t 
       | `InvalidExecutionInput of InvalidExecutionInput.t 
       | `InvalidName of InvalidName.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `StateMachineDeleting of StateMachineDeleting.t 
       | `StateMachineDoesNotExist of StateMachineDoesNotExist.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartExecutionOutput"
-    let make ~executionArn =
-      fun ~startDate -> fun () -> { executionArn; startDate }
+    let make ?executionArn =
+      fun ?startDate -> fun () -> { executionArn; startDate }
     let error_of_json name json =
       match name with
       | "ExecutionAlreadyExists" ->
@@ -4223,10 +7988,18 @@ module StartExecutionOutput =
       | "InvalidExecutionInput" ->
           `InvalidExecutionInput (InvalidExecutionInput.of_json json)
       | "InvalidName" -> `InvalidName (InvalidName.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | "StateMachineDeleting" ->
           `StateMachineDeleting (StateMachineDeleting.of_json json)
       | "StateMachineDoesNotExist" ->
           `StateMachineDoesNotExist (StateMachineDoesNotExist.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4240,10 +8013,18 @@ module StartExecutionOutput =
       | "InvalidExecutionInput" ->
           `InvalidExecutionInput (InvalidExecutionInput.of_xml xml)
       | "InvalidName" -> `InvalidName (InvalidName.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | "StateMachineDeleting" ->
           `StateMachineDeleting (StateMachineDeleting.of_xml xml)
       | "StateMachineDoesNotExist" ->
           `StateMachineDoesNotExist (StateMachineDoesNotExist.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4268,6 +8049,18 @@ module StartExecutionOutput =
           `Assoc
             [("error", (`String "InvalidName"));
             ("details", (InvalidName.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `StateMachineDeleting e ->
           `Assoc
             [("error", (`String "StateMachineDeleting"));
@@ -4276,6 +8069,10 @@ module StartExecutionOutput =
           `Assoc
             [("error", (`String "StateMachineDoesNotExist"));
             ("details", (StateMachineDoesNotExist.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4283,40 +8080,39 @@ module StartExecutionOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("executionArn", (Some (Arn.to_value x.executionArn)));
-        ("startDate", (Some (Timestamp.to_value x.startDate)))]
+        [("executionArn", (Option.map x.executionArn ~f:Arn.to_value));
+        ("startDate", (Option.map x.startDate ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startDate") in
       let executionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
-      make ~startDate ~executionArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "executionArn") in
+      make ?startDate ?executionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startDate = field_map_exn json "startDate" Timestamp.of_json in
-      let executionArn = field_map_exn json "executionArn" Arn.of_json in
-      make ~startDate ~executionArn ()
+    let of_json json__ =
+      let startDate = field_map json__ "startDate" Timestamp.of_json in
+      let executionArn = field_map json__ "executionArn" Arn.of_json in
+      make ?startDate ?executionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a state machine execution. StartExecution is idempotent. If StartExecution is called with the same name and input as a running execution, the call will succeed and return the same response as the original request. If the execution is closed or if the input is different, it will return a 400 ExecutionAlreadyExists error. Names can be reused after 90 days."]
+       "Starts a state machine execution. A qualified state machine ARN can either refer to a Distributed Map state defined within a state machine, a version ARN, or an alias ARN. The following are some examples of qualified and unqualified state machine ARNs: The following qualified state machine ARN refers to a Distributed Map state with a label mapStateLabel in a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine/mapStateLabel If you provide a qualified state machine ARN that refers to a Distributed Map state, the request fails with ValidationException. The following qualified state machine ARN refers to an alias named PROD. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine:PROD> If you provide a qualified state machine ARN that refers to a version ARN or an alias ARN, the request starts execution for that version or alias. The following unqualified state machine ARN refers to a state machine named myStateMachine. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine> If you start an execution with an unqualified state machine ARN, Step Functions uses the latest revision of the state machine for the execution. To start executions of a state machine version, call StartExecution and provide the version ARN or the ARN of an alias that points to the version. StartExecution is idempotent for STANDARD workflows. For a STANDARD workflow, if you call StartExecution with the same name and input as a running execution, the call succeeds and return the same response as the original request. If the execution is closed or if the input is different, it returns a 400 ExecutionAlreadyExists error. You can reuse names after 90 days. StartExecution isn't idempotent for EXPRESS workflows."]
 module StartExecutionInput =
   struct
     type nonrec t =
       {
       stateMachineArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the state machine to execute."];
+          "The Amazon Resource Name (ARN) of the state machine to execute. The stateMachineArn parameter accepts one of the following inputs: An unqualified state machine ARN \226\128\147 Refers to a state machine ARN that isn't qualified with a version or alias ARN. The following is an example of an unqualified state machine ARN. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine> Step Functions doesn't associate state machine executions that you start with an unqualified ARN with a version. This is true even if that version uses the same revision that the execution used. A state machine version ARN \226\128\147 Refers to a version ARN, which is a combination of state machine ARN and the version number separated by a colon (:). The following is an example of the ARN for version 10. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine>:10 Step Functions doesn't associate executions that you start with a version ARN with any aliases that point to that version. A state machine alias ARN \226\128\147 Refers to an alias ARN, which is a combination of state machine ARN and the alias name separated by a colon (:). The following is an example of the ARN for an alias named PROD. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine:PROD> Step Functions associates executions that you start with an alias ARN with that alias and the state machine version used for that execution."];
       name: Name.t option
         [@ocaml.doc
-          "The name of the execution. This name must be unique for your AWS account, region, and state machine for 90 days. For more information, see Limits Related to State Machine Executions in the AWS Step Functions Developer Guide. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "Optional name of the execution. This name must be unique for your Amazon Web Services account, Region, and state machine for 90 days. For more information, see Limits Related to State Machine Executions in the Step Functions Developer Guide. If you don't provide a name for the execution, Step Functions automatically generates a universally unique identifier (UUID) as the execution name. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       input: SensitiveData.t option
         [@ocaml.doc
-          "The string that contains the JSON input data for the execution, for example: \"input\": \"\\{\\\"first_name\\\" : \\\"test\\\"\\}\" If you don't include any JSON input data, you still must include the two braces, for example: \"input\": \"\\{\\}\" Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
+          "The string that contains the JSON input data for the execution, for example: \"\\{\\\"first_name\\\" : \\\"Alejandro\\\"\\}\" If you don't include any JSON input data, you still must include the two braces, for example: \"\\{\\}\" Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       traceHeader: TraceHeader.t option
         [@ocaml.doc
-          "Passes the AWS X-Ray trace header. The trace header can also be passed in the request payload."]}
+          "Passes the X-Ray trace header. The trace header can also be passed in the request payload. For X-Ray traces, all Amazon Web Services services use the X-Amzn-Trace-Id header from the HTTP request. Using the header is the preferred mechanism to identify a trace. StartExecution and StartSyncExecution API operations can also use traceHeader from the body of the request payload. If both sources are provided, Step Functions will use the header value (preferred) over the value in the request body."]}
     let context_ = "StartExecutionInput"
     let make ?name =
       fun ?input ->
@@ -4341,20 +8137,24 @@ module StartExecutionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ?traceHeader ?input ?name ~stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let traceHeader = field_map json "traceHeader" TraceHeader.of_json in
-      let input = field_map json "input" SensitiveData.of_json in
-      let name = field_map json "name" Name.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
+    let of_json json__ =
+      let traceHeader = field_map json__ "traceHeader" TraceHeader.of_json in
+      let input = field_map json__ "input" SensitiveData.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let stateMachineArn =
+        field_map_exn json__ "stateMachineArn" Arn.of_json in
       make ?traceHeader ?input ?name ~stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a state machine execution. StartExecution is idempotent. If StartExecution is called with the same name and input as a running execution, the call will succeed and return the same response as the original request. If the execution is closed or if the input is different, it will return a 400 ExecutionAlreadyExists error. Names can be reused after 90 days."]
+       "Starts a state machine execution. A qualified state machine ARN can either refer to a Distributed Map state defined within a state machine, a version ARN, or an alias ARN. The following are some examples of qualified and unqualified state machine ARNs: The following qualified state machine ARN refers to a Distributed Map state with a label mapStateLabel in a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine/mapStateLabel If you provide a qualified state machine ARN that refers to a Distributed Map state, the request fails with ValidationException. The following qualified state machine ARN refers to an alias named PROD. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine:PROD> If you provide a qualified state machine ARN that refers to a version ARN or an alias ARN, the request starts execution for that version or alias. The following unqualified state machine ARN refers to a state machine named myStateMachine. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine> If you start an execution with an unqualified state machine ARN, Step Functions uses the latest revision of the state machine for the execution. To start executions of a state machine version, call StartExecution and provide the version ARN or the ARN of an alias that points to the version. StartExecution is idempotent for STANDARD workflows. For a STANDARD workflow, if you call StartExecution with the same name and input as a running execution, the call succeeds and return the same response as the original request. If the execution is closed or if the input is different, it returns a 400 ExecutionAlreadyExists error. You can reuse names after 90 days. StartExecution isn't idempotent for EXPRESS workflows."]
 module SendTaskSuccessOutput =
   struct
     type nonrec t = unit
     type nonrec error =
       [ `InvalidOutput of InvalidOutput.t  | `InvalidToken of InvalidToken.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `TaskDoesNotExist of TaskDoesNotExist.t 
       | `TaskTimedOut of TaskTimedOut.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -4363,6 +8163,12 @@ module SendTaskSuccessOutput =
       match name with
       | "InvalidOutput" -> `InvalidOutput (InvalidOutput.of_json json)
       | "InvalidToken" -> `InvalidToken (InvalidToken.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | "TaskDoesNotExist" ->
           `TaskDoesNotExist (TaskDoesNotExist.of_json json)
       | "TaskTimedOut" -> `TaskTimedOut (TaskTimedOut.of_json json)
@@ -4373,6 +8179,12 @@ module SendTaskSuccessOutput =
       match name with
       | "InvalidOutput" -> `InvalidOutput (InvalidOutput.of_xml xml)
       | "InvalidToken" -> `InvalidToken (InvalidToken.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | "TaskDoesNotExist" -> `TaskDoesNotExist (TaskDoesNotExist.of_xml xml)
       | "TaskTimedOut" -> `TaskTimedOut (TaskTimedOut.of_xml xml)
       | name ->
@@ -4387,6 +8199,18 @@ module SendTaskSuccessOutput =
           `Assoc
             [("error", (`String "InvalidToken"));
             ("details", (InvalidToken.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `TaskDoesNotExist e ->
           `Assoc
             [("error", (`String "TaskDoesNotExist"));
@@ -4408,7 +8232,7 @@ module SendTaskSuccessOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by activity workers and task states using the callback pattern to report that the task identified by the taskToken completed successfully."]
+       "Used by activity workers, Task states using the callback pattern, and optionally Task states using the job run pattern to report that the task identified by the taskToken completed successfully."]
 module SendTaskSuccessInput =
   struct
     type nonrec t =
@@ -4435,13 +8259,13 @@ module SendTaskSuccessInput =
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ~output ~taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let output = field_map_exn json "output" SensitiveData.of_json in
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
+    let of_json json__ =
+      let output = field_map_exn json__ "output" SensitiveData.of_json in
+      let taskToken = field_map_exn json__ "taskToken" TaskToken.of_json in
       make ~output ~taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by activity workers and task states using the callback pattern to report that the task identified by the taskToken completed successfully."]
+       "Used by activity workers, Task states using the callback pattern, and optionally Task states using the job run pattern to report that the task identified by the taskToken completed successfully."]
 module SendTaskHeartbeatOutput =
   struct
     type nonrec t = unit
@@ -4494,7 +8318,7 @@ module SendTaskHeartbeatOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by activity workers and task states using the callback pattern to report to Step Functions that the task represented by the specified taskToken is still making progress. This action resets the Heartbeat clock. The Heartbeat threshold is specified in the state machine's Amazon States Language definition (HeartbeatSeconds). This action does not in itself create an event in the execution history. However, if the task times out, the execution history contains an ActivityTimedOut entry for activities, or a TaskTimedOut entry for for tasks using the job run or callback pattern. The Timeout of a task, defined in the state machine's Amazon States Language definition, is its maximum allowed duration, regardless of the number of SendTaskHeartbeat requests received. Use HeartbeatSeconds to configure the timeout interval for heartbeats."]
+       "Used by activity workers and Task states using the callback pattern, and optionally Task states using the job run pattern to report to Step Functions that the task represented by the specified taskToken is still making progress. This action resets the Heartbeat clock. The Heartbeat threshold is specified in the state machine's Amazon States Language definition (HeartbeatSeconds). This action does not in itself create an event in the execution history. However, if the task times out, the execution history contains an ActivityTimedOut entry for activities, or a TaskTimedOut entry for tasks using the job run or callback pattern. The Timeout of a task, defined in the state machine's Amazon States Language definition, is its maximum allowed duration, regardless of the number of SendTaskHeartbeat requests received. Use HeartbeatSeconds to configure the timeout interval for heartbeats."]
 module SendTaskHeartbeatInput =
   struct
     type nonrec t =
@@ -4514,17 +8338,20 @@ module SendTaskHeartbeatInput =
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ~taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
+    let of_json json__ =
+      let taskToken = field_map_exn json__ "taskToken" TaskToken.of_json in
       make ~taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by activity workers and task states using the callback pattern to report to Step Functions that the task represented by the specified taskToken is still making progress. This action resets the Heartbeat clock. The Heartbeat threshold is specified in the state machine's Amazon States Language definition (HeartbeatSeconds). This action does not in itself create an event in the execution history. However, if the task times out, the execution history contains an ActivityTimedOut entry for activities, or a TaskTimedOut entry for for tasks using the job run or callback pattern. The Timeout of a task, defined in the state machine's Amazon States Language definition, is its maximum allowed duration, regardless of the number of SendTaskHeartbeat requests received. Use HeartbeatSeconds to configure the timeout interval for heartbeats."]
+       "Used by activity workers and Task states using the callback pattern, and optionally Task states using the job run pattern to report to Step Functions that the task represented by the specified taskToken is still making progress. This action resets the Heartbeat clock. The Heartbeat threshold is specified in the state machine's Amazon States Language definition (HeartbeatSeconds). This action does not in itself create an event in the execution history. However, if the task times out, the execution history contains an ActivityTimedOut entry for activities, or a TaskTimedOut entry for tasks using the job run or callback pattern. The Timeout of a task, defined in the state machine's Amazon States Language definition, is its maximum allowed duration, regardless of the number of SendTaskHeartbeat requests received. Use HeartbeatSeconds to configure the timeout interval for heartbeats."]
 module SendTaskFailureOutput =
   struct
     type nonrec t = unit
     type nonrec error =
       [ `InvalidToken of InvalidToken.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `TaskDoesNotExist of TaskDoesNotExist.t 
       | `TaskTimedOut of TaskTimedOut.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -4532,6 +8359,12 @@ module SendTaskFailureOutput =
     let error_of_json name json =
       match name with
       | "InvalidToken" -> `InvalidToken (InvalidToken.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | "TaskDoesNotExist" ->
           `TaskDoesNotExist (TaskDoesNotExist.of_json json)
       | "TaskTimedOut" -> `TaskTimedOut (TaskTimedOut.of_json json)
@@ -4541,6 +8374,12 @@ module SendTaskFailureOutput =
     let error_of_xml name xml =
       match name with
       | "InvalidToken" -> `InvalidToken (InvalidToken.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | "TaskDoesNotExist" -> `TaskDoesNotExist (TaskDoesNotExist.of_xml xml)
       | "TaskTimedOut" -> `TaskTimedOut (TaskTimedOut.of_xml xml)
       | name ->
@@ -4551,6 +8390,18 @@ module SendTaskFailureOutput =
           `Assoc
             [("error", (`String "InvalidToken"));
             ("details", (InvalidToken.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `TaskDoesNotExist e ->
           `Assoc
             [("error", (`String "TaskDoesNotExist"));
@@ -4572,7 +8423,7 @@ module SendTaskFailureOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by activity workers and task states using the callback pattern to report that the task identified by the taskToken failed."]
+       "Used by activity workers, Task states using the callback pattern, and optionally Task states using the job run pattern to report that the task identified by the taskToken failed. For an execution with encryption enabled, Step Functions will encrypt the error and cause fields using the KMS key for the execution role. A caller can mark a task as fail without using any KMS permissions in the execution role if the caller provides a null value for both error and cause fields because no data needs to be encrypted."]
 module SendTaskFailureInput =
   struct
     type nonrec t =
@@ -4604,14 +8455,279 @@ module SendTaskFailureInput =
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?cause ?error ~taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cause = field_map json "cause" SensitiveCause.of_json in
-      let error = field_map json "error" SensitiveError.of_json in
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
+    let of_json json__ =
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      let taskToken = field_map_exn json__ "taskToken" TaskToken.of_json in
       make ?cause ?error ~taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by activity workers and task states using the callback pattern to report that the task identified by the taskToken failed."]
+       "Used by activity workers, Task states using the callback pattern, and optionally Task states using the job run pattern to report that the task identified by the taskToken failed. For an execution with encryption enabled, Step Functions will encrypt the error and cause fields using the KMS key for the execution role. A caller can mark a task as fail without using any KMS permissions in the execution role if the caller provides a null value for both error and cause fields because no data needs to be encrypted."]
+module RedriveExecutionOutput =
+  struct
+    type nonrec t =
+      {
+      redriveDate: Timestamp.t option
+        [@ocaml.doc "The date the execution was last redriven."]}
+    type nonrec error =
+      [ `ExecutionDoesNotExist of ExecutionDoesNotExist.t 
+      | `ExecutionLimitExceeded of ExecutionLimitExceeded.t 
+      | `ExecutionNotRedrivable of ExecutionNotRedrivable.t 
+      | `InvalidArn of InvalidArn.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?redriveDate = fun () -> { redriveDate }
+    let error_of_json name json =
+      match name with
+      | "ExecutionDoesNotExist" ->
+          `ExecutionDoesNotExist (ExecutionDoesNotExist.of_json json)
+      | "ExecutionLimitExceeded" ->
+          `ExecutionLimitExceeded (ExecutionLimitExceeded.of_json json)
+      | "ExecutionNotRedrivable" ->
+          `ExecutionNotRedrivable (ExecutionNotRedrivable.of_json json)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ExecutionDoesNotExist" ->
+          `ExecutionDoesNotExist (ExecutionDoesNotExist.of_xml xml)
+      | "ExecutionLimitExceeded" ->
+          `ExecutionLimitExceeded (ExecutionLimitExceeded.of_xml xml)
+      | "ExecutionNotRedrivable" ->
+          `ExecutionNotRedrivable (ExecutionNotRedrivable.of_xml xml)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ExecutionDoesNotExist e ->
+          `Assoc
+            [("error", (`String "ExecutionDoesNotExist"));
+            ("details", (ExecutionDoesNotExist.to_json e))]
+      | `ExecutionLimitExceeded e ->
+          `Assoc
+            [("error", (`String "ExecutionLimitExceeded"));
+            ("details", (ExecutionLimitExceeded.to_json e))]
+      | `ExecutionNotRedrivable e ->
+          `Assoc
+            [("error", (`String "ExecutionNotRedrivable"));
+            ("details", (ExecutionNotRedrivable.to_json e))]
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("redriveDate", (Option.map x.redriveDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redriveDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "redriveDate") in
+      make ?redriveDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redriveDate = field_map json__ "redriveDate" Timestamp.of_json in
+      make ?redriveDate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Restarts unsuccessful executions of Standard workflows that didn't complete successfully in the last 14 days. These include failed, aborted, or timed out executions. When you redrive an execution, it continues the failed execution from the unsuccessful step and uses the same input. Step Functions preserves the results and execution history of the successful steps, and doesn't rerun these steps when you redrive an execution. Redriven executions use the same state machine definition and execution ARN as the original execution attempt. For workflows that include an Inline Map or Parallel state, RedriveExecution API action reschedules and redrives only the iterations and branches that failed or aborted. To redrive a workflow that includes a Distributed Map state whose Map Run failed, you must redrive the parent workflow. The parent workflow redrives all the unsuccessful states, including a failed Map Run. If a Map Run was not started in the original execution attempt, the redriven parent workflow starts the Map Run. This API action is not supported by EXPRESS state machines. However, you can restart the unsuccessful executions of Express child workflows in a Distributed Map by redriving its Map Run. When you redrive a Map Run, the Express child workflows are rerun using the StartExecution API action. For more information, see Redriving Map Runs. You can redrive executions if your original execution meets the following conditions: The execution status isn't SUCCEEDED. Your workflow execution has not exceeded the redrivable period of 14 days. Redrivable period refers to the time during which you can redrive a given execution. This period starts from the day a state machine completes its execution. The workflow execution has not exceeded the maximum open time of one year. For more information about state machine quotas, see Quotas related to state machine executions. The execution event history count is less than 24,999. Redriven executions append their event history to the existing event history. Make sure your workflow execution contains less than 24,999 events to accommodate the ExecutionRedriven history event and at least one other history event."]
+module RedriveExecutionInput =
+  struct
+    type nonrec t =
+      {
+      executionArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the execution to be redriven."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If you don\226\128\153t specify a client token, the Amazon Web Services SDK automatically generates a client token and uses it for the request to ensure idempotency. The API will return idempotent responses for the last 10 client tokens used to successfully redrive the execution. These client tokens are valid for up to 15 minutes after they are first used."]}
+    let context_ = "RedriveExecutionInput"
+    let make ?clientToken =
+      fun ~executionArn -> fun () -> { clientToken; executionArn }
+    let to_value x =
+      structure_to_value
+        [("executionArn", (Some (Arn.to_value x.executionArn)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let executionArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
+      make ?clientToken ~executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let executionArn = field_map_exn json__ "executionArn" Arn.of_json in
+      make ?clientToken ~executionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Restarts unsuccessful executions of Standard workflows that didn't complete successfully in the last 14 days. These include failed, aborted, or timed out executions. When you redrive an execution, it continues the failed execution from the unsuccessful step and uses the same input. Step Functions preserves the results and execution history of the successful steps, and doesn't rerun these steps when you redrive an execution. Redriven executions use the same state machine definition and execution ARN as the original execution attempt. For workflows that include an Inline Map or Parallel state, RedriveExecution API action reschedules and redrives only the iterations and branches that failed or aborted. To redrive a workflow that includes a Distributed Map state whose Map Run failed, you must redrive the parent workflow. The parent workflow redrives all the unsuccessful states, including a failed Map Run. If a Map Run was not started in the original execution attempt, the redriven parent workflow starts the Map Run. This API action is not supported by EXPRESS state machines. However, you can restart the unsuccessful executions of Express child workflows in a Distributed Map by redriving its Map Run. When you redrive a Map Run, the Express child workflows are rerun using the StartExecution API action. For more information, see Redriving Map Runs. You can redrive executions if your original execution meets the following conditions: The execution status isn't SUCCEEDED. Your workflow execution has not exceeded the redrivable period of 14 days. Redrivable period refers to the time during which you can redrive a given execution. This period starts from the day a state machine completes its execution. The workflow execution has not exceeded the maximum open time of one year. For more information about state machine quotas, see Quotas related to state machine executions. The execution event history count is less than 24,999. Redriven executions append their event history to the existing event history. Make sure your workflow execution contains less than 24,999 events to accommodate the ExecutionRedriven history event and at least one other history event."]
+module PublishStateMachineVersionOutput =
+  struct
+    type nonrec t =
+      {
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The date the version was created."];
+      stateMachineVersionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) (ARN) that identifies the state machine version."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InvalidArn of InvalidArn.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `StateMachineDeleting of StateMachineDeleting.t 
+      | `StateMachineDoesNotExist of StateMachineDoesNotExist.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?creationDate =
+      fun ?stateMachineVersionArn ->
+        fun () -> { creationDate; stateMachineVersionArn }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "StateMachineDeleting" ->
+          `StateMachineDeleting (StateMachineDeleting.of_json json)
+      | "StateMachineDoesNotExist" ->
+          `StateMachineDoesNotExist (StateMachineDoesNotExist.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "StateMachineDeleting" ->
+          `StateMachineDeleting (StateMachineDeleting.of_xml xml)
+      | "StateMachineDoesNotExist" ->
+          `StateMachineDoesNotExist (StateMachineDoesNotExist.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `StateMachineDeleting e ->
+          `Assoc
+            [("error", (`String "StateMachineDeleting"));
+            ("details", (StateMachineDeleting.to_json e))]
+      | `StateMachineDoesNotExist e ->
+          `Assoc
+            [("error", (`String "StateMachineDoesNotExist"));
+            ("details", (StateMachineDoesNotExist.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("stateMachineVersionArn",
+          (Option.map x.stateMachineVersionArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stateMachineVersionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineVersionArn") in
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      make ?stateMachineVersionArn ?creationDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stateMachineVersionArn =
+        field_map json__ "stateMachineVersionArn" Arn.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      make ?stateMachineVersionArn ?creationDate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a version from the current revision of a state machine. Use versions to create immutable snapshots of your state machine. You can start executions from versions either directly or with an alias. To create an alias, use CreateStateMachineAlias. You can publish up to 1000 versions for each state machine. You must manually delete unused versions using the DeleteStateMachineVersion API action. PublishStateMachineVersion is an idempotent API. It doesn't create a duplicate state machine version if it already exists for the current revision. Step Functions bases PublishStateMachineVersion's idempotency check on the stateMachineArn, name, and revisionId parameters. Requests with the same parameters return a successful idempotent response. If you don't specify a revisionId, Step Functions checks for a previously published version of the state machine's current revision. Related operations: DeleteStateMachineVersion ListStateMachineVersions"]
+module PublishStateMachineVersionInput =
+  struct
+    type nonrec t =
+      {
+      stateMachineArn: Arn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the state machine."];
+      revisionId: RevisionId.t option
+        [@ocaml.doc
+          "Only publish the state machine version if the current state machine's revision ID matches the specified ID. Use this option to avoid publishing a version if the state machine changed since you last updated it. If the specified revision ID doesn't match the state machine's current revision ID, the API returns ConflictException. To specify an initial revision ID for a state machine with no revision ID assigned, specify the string INITIAL for the revisionId parameter. For example, you can specify a revisionID of INITIAL when you create a state machine using the CreateStateMachine API action."];
+      description: VersionDescription.t option
+        [@ocaml.doc "An optional description of the state machine version."]}
+    let context_ = "PublishStateMachineVersionInput"
+    let make ?revisionId =
+      fun ?description ->
+        fun ~stateMachineArn ->
+          fun () -> { revisionId; description; stateMachineArn }
+    let to_value x =
+      structure_to_value
+        [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
+        ("revisionId", (Option.map x.revisionId ~f:RevisionId.to_value));
+        ("description",
+          (Option.map x.description ~f:VersionDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:VersionDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let revisionId =
+        (Option.map ~f:RevisionId.of_xml) (Xml.child xml_arg0 "revisionId") in
+      let stateMachineArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
+      make ?description ?revisionId ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description" VersionDescription.of_json in
+      let revisionId = field_map json__ "revisionId" RevisionId.of_json in
+      let stateMachineArn =
+        field_map_exn json__ "stateMachineArn" Arn.of_json in
+      make ?description ?revisionId ~stateMachineArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a version from the current revision of a state machine. Use versions to create immutable snapshots of your state machine. You can start executions from versions either directly or with an alias. To create an alias, use CreateStateMachineAlias. You can publish up to 1000 versions for each state machine. You must manually delete unused versions using the DeleteStateMachineVersion API action. PublishStateMachineVersion is an idempotent API. It doesn't create a duplicate state machine version if it already exists for the current revision. Step Functions bases PublishStateMachineVersion's idempotency check on the stateMachineArn, name, and revisionId parameters. Requests with the same parameters return a successful idempotent response. If you don't specify a revisionId, Step Functions checks for a previously published version of the state machine's current revision. Related operations: DeleteStateMachineVersion ListStateMachineVersions"]
 module ListTagsForResourceOutput =
   struct
     type nonrec t =
@@ -4659,8 +8775,8 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List tags for a given resource. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
@@ -4682,8 +8798,8 @@ module ListTagsForResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4692,16 +8808,15 @@ module ListStateMachinesOutput =
   struct
     type nonrec t =
       {
-      stateMachines: StateMachineList.t ;
+      stateMachines: StateMachineList.t option ;
       nextToken: PageToken.t option
         [@ocaml.doc
           "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InvalidToken of InvalidToken.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListStateMachinesOutput"
-    let make ?nextToken =
-      fun ~stateMachines -> fun () -> { nextToken; stateMachines }
+    let make ?stateMachines =
+      fun ?nextToken -> fun () -> { stateMachines; nextToken }
     let error_of_json name json =
       match name with
       | "InvalidToken" -> `InvalidToken (InvalidToken.of_json json)
@@ -4727,22 +8842,22 @@ module ListStateMachinesOutput =
     let to_value x =
       structure_to_value
         [("stateMachines",
-           (Some (StateMachineList.to_value x.stateMachines)));
+           (Option.map x.stateMachines ~f:StateMachineList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let stateMachines =
-        StateMachineList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateMachines") in
-      make ?nextToken ~stateMachines ()
+        (Option.map ~f:StateMachineList.of_xml)
+          (Xml.child xml_arg0 "stateMachines") in
+      make ?nextToken ?stateMachines ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PageToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
       let stateMachines =
-        field_map_exn json "stateMachines" StateMachineList.of_json in
-      make ?nextToken ~stateMachines ()
+        field_map json__ "stateMachines" StateMachineList.of_json in
+      make ?nextToken ?stateMachines ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the existing state machines. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
@@ -4770,39 +8885,34 @@ module ListStateMachinesInput =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PageToken.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the existing state machines. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
-module ListExecutionsOutput =
+module ListStateMachineVersionsOutput =
   struct
     type nonrec t =
       {
-      executions: ExecutionList.t
-        [@ocaml.doc "The list of matching executions."];
-      nextToken: ListExecutionsPageToken.t option
+      stateMachineVersions: StateMachineVersionList.t option
+        [@ocaml.doc "Versions for the state machine."];
+      nextToken: PageToken.t option
         [@ocaml.doc
           "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InvalidArn of InvalidArn.t  | `InvalidToken of InvalidToken.t 
-      | `StateMachineDoesNotExist of StateMachineDoesNotExist.t 
-      | `StateMachineTypeNotSupported of StateMachineTypeNotSupported.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListExecutionsOutput"
-    let make ?nextToken =
-      fun ~executions -> fun () -> { nextToken; executions }
+    let make ?stateMachineVersions =
+      fun ?nextToken -> fun () -> { stateMachineVersions; nextToken }
     let error_of_json name json =
       match name with
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
       | "InvalidToken" -> `InvalidToken (InvalidToken.of_json json)
-      | "StateMachineDoesNotExist" ->
-          `StateMachineDoesNotExist (StateMachineDoesNotExist.of_json json)
-      | "StateMachineTypeNotSupported" ->
-          `StateMachineTypeNotSupported
-            (StateMachineTypeNotSupported.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4810,11 +8920,8 @@ module ListExecutionsOutput =
       match name with
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
       | "InvalidToken" -> `InvalidToken (InvalidToken.of_xml xml)
-      | "StateMachineDoesNotExist" ->
-          `StateMachineDoesNotExist (StateMachineDoesNotExist.of_xml xml)
-      | "StateMachineTypeNotSupported" ->
-          `StateMachineTypeNotSupported
-            (StateMachineTypeNotSupported.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4827,14 +8934,10 @@ module ListExecutionsOutput =
           `Assoc
             [("error", (`String "InvalidToken"));
             ("details", (InvalidToken.to_json e))]
-      | `StateMachineDoesNotExist e ->
+      | `ValidationException e ->
           `Assoc
-            [("error", (`String "StateMachineDoesNotExist"));
-            ("details", (StateMachineDoesNotExist.to_json e))]
-      | `StateMachineTypeNotSupported e ->
-          `Assoc
-            [("error", (`String "StateMachineTypeNotSupported"));
-            ("details", (StateMachineTypeNotSupported.to_json e))]
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4842,115 +8945,133 @@ module ListExecutionsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("executions", (Some (ExecutionList.to_value x.executions)));
-        ("nextToken",
-          (Option.map x.nextToken ~f:ListExecutionsPageToken.to_value))]
+        [("stateMachineVersions",
+           (Option.map x.stateMachineVersions
+              ~f:StateMachineVersionList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:ListExecutionsPageToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
-      let executions =
-        ExecutionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "executions") in
-      make ?nextToken ~executions ()
+        (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let stateMachineVersions =
+        (Option.map ~f:StateMachineVersionList.of_xml)
+          (Xml.child xml_arg0 "stateMachineVersions") in
+      make ?nextToken ?stateMachineVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken =
-        field_map json "nextToken" ListExecutionsPageToken.of_json in
-      let executions = field_map_exn json "executions" ExecutionList.of_json in
-      make ?nextToken ~executions ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let stateMachineVersions =
+        field_map json__ "stateMachineVersions"
+          StateMachineVersionList.of_json in
+      make ?nextToken ?stateMachineVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the executions of a state machine that meet the filtering criteria. Results are sorted by time, with the most recent execution first. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
-module ListExecutionsInput =
+       "Lists versions for the specified state machine Amazon Resource Name (ARN). The results are sorted in descending order of the version creation time. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. Related operations: PublishStateMachineVersion DeleteStateMachineVersion"]
+module ListStateMachineVersionsInput =
   struct
     type nonrec t =
       {
       stateMachineArn: Arn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the state machine."];
+      nextToken: PageToken.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the state machine whose executions is listed."];
-      statusFilter: ExecutionStatus.t option
-        [@ocaml.doc
-          "If specified, only list the executions whose current execution status matches the given filter."];
+          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."];
       maxResults: PageSize.t option
         [@ocaml.doc
-          "The maximum number of results that are returned per call. You can use nextToken to obtain further pages of results. The default is 100 and the maximum allowed page size is 1000. A value of 0 uses the default. This is only an upper limit. The actual number of results returned per call might be fewer than the specified maximum."];
-      nextToken: ListExecutionsPageToken.t option
-        [@ocaml.doc
-          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
-    let context_ = "ListExecutionsInput"
-    let make ?statusFilter =
+          "The maximum number of results that are returned per call. You can use nextToken to obtain further pages of results. The default is 100 and the maximum allowed page size is 1000. A value of 0 uses the default. This is only an upper limit. The actual number of results returned per call might be fewer than the specified maximum."]}
+    let context_ = "ListStateMachineVersionsInput"
+    let make ?nextToken =
       fun ?maxResults ->
-        fun ?nextToken ->
-          fun ~stateMachineArn ->
-            fun () ->
-              { statusFilter; maxResults; nextToken; stateMachineArn }
+        fun ~stateMachineArn ->
+          fun () -> { nextToken; maxResults; stateMachineArn }
     let to_value x =
       structure_to_value
         [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
-        ("statusFilter",
-          (Option.map x.statusFilter ~f:ExecutionStatus.to_value));
-        ("maxResults", (Option.map x.maxResults ~f:PageSize.to_value));
-        ("nextToken",
-          (Option.map x.nextToken ~f:ListExecutionsPageToken.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:PageSize.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:ListExecutionsPageToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
-      let statusFilter =
-        (Option.map ~f:ExecutionStatus.of_xml)
-          (Xml.child xml_arg0 "statusFilter") in
+      let nextToken =
+        (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let stateMachineArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
-      make ?nextToken ?maxResults ?statusFilter ~stateMachineArn ()
+      make ?maxResults ?nextToken ~stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken =
-        field_map json "nextToken" ListExecutionsPageToken.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let statusFilter =
-        field_map json "statusFilter" ExecutionStatus.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      make ?nextToken ?maxResults ?statusFilter ~stateMachineArn ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let stateMachineArn =
+        field_map_exn json__ "stateMachineArn" Arn.of_json in
+      make ?maxResults ?nextToken ~stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the executions of a state machine that meet the filtering criteria. Results are sorted by time, with the most recent execution first. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
-module ListActivitiesOutput =
+       "Lists versions for the specified state machine Amazon Resource Name (ARN). The results are sorted in descending order of the version creation time. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. Related operations: PublishStateMachineVersion DeleteStateMachineVersion"]
+module ListStateMachineAliasesOutput =
   struct
     type nonrec t =
       {
-      activities: ActivityList.t [@ocaml.doc "The list of activities."];
+      stateMachineAliases: StateMachineAliasList.t option
+        [@ocaml.doc "Aliases for the state machine."];
       nextToken: PageToken.t option
         [@ocaml.doc
           "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
     type nonrec error =
-      [ `InvalidToken of InvalidToken.t 
+      [ `InvalidArn of InvalidArn.t  | `InvalidToken of InvalidToken.t 
+      | `ResourceNotFound of ResourceNotFound.t 
+      | `StateMachineDeleting of StateMachineDeleting.t 
+      | `StateMachineDoesNotExist of StateMachineDoesNotExist.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListActivitiesOutput"
-    let make ?nextToken =
-      fun ~activities -> fun () -> { nextToken; activities }
+    let make ?stateMachineAliases =
+      fun ?nextToken -> fun () -> { stateMachineAliases; nextToken }
     let error_of_json name json =
       match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
       | "InvalidToken" -> `InvalidToken (InvalidToken.of_json json)
+      | "ResourceNotFound" ->
+          `ResourceNotFound (ResourceNotFound.of_json json)
+      | "StateMachineDeleting" ->
+          `StateMachineDeleting (StateMachineDeleting.of_json json)
+      | "StateMachineDoesNotExist" ->
+          `StateMachineDoesNotExist (StateMachineDoesNotExist.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
       | "InvalidToken" -> `InvalidToken (InvalidToken.of_xml xml)
+      | "ResourceNotFound" -> `ResourceNotFound (ResourceNotFound.of_xml xml)
+      | "StateMachineDeleting" ->
+          `StateMachineDeleting (StateMachineDeleting.of_xml xml)
+      | "StateMachineDoesNotExist" ->
+          `StateMachineDoesNotExist (StateMachineDoesNotExist.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
       | `InvalidToken e ->
           `Assoc
             [("error", (`String "InvalidToken"));
             ("details", (InvalidToken.to_json e))]
+      | `ResourceNotFound e ->
+          `Assoc
+            [("error", (`String "ResourceNotFound"));
+            ("details", (ResourceNotFound.to_json e))]
+      | `StateMachineDeleting e ->
+          `Assoc
+            [("error", (`String "StateMachineDeleting"));
+            ("details", (StateMachineDeleting.to_json e))]
+      | `StateMachineDoesNotExist e ->
+          `Assoc
+            [("error", (`String "StateMachineDoesNotExist"));
+            ("details", (StateMachineDoesNotExist.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4958,61 +9079,77 @@ module ListActivitiesOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("activities", (Some (ActivityList.to_value x.activities)));
+        [("stateMachineAliases",
+           (Option.map x.stateMachineAliases
+              ~f:StateMachineAliasList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let activities =
-        ActivityList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activities") in
-      make ?nextToken ~activities ()
+      let stateMachineAliases =
+        (Option.map ~f:StateMachineAliasList.of_xml)
+          (Xml.child xml_arg0 "stateMachineAliases") in
+      make ?nextToken ?stateMachineAliases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PageToken.of_json in
-      let activities = field_map_exn json "activities" ActivityList.of_json in
-      make ?nextToken ~activities ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let stateMachineAliases =
+        field_map json__ "stateMachineAliases" StateMachineAliasList.of_json in
+      make ?nextToken ?stateMachineAliases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the existing activities. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
-module ListActivitiesInput =
+       "Lists aliases for a specified state machine ARN. Results are sorted by time, with the most recently created aliases listed first. To list aliases that reference a state machine version, you can specify the version ARN in the stateMachineArn parameter. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. Related operations: CreateStateMachineAlias DescribeStateMachineAlias UpdateStateMachineAlias DeleteStateMachineAlias"]
+module ListStateMachineAliasesInput =
   struct
     type nonrec t =
       {
-      maxResults: PageSize.t option
+      stateMachineArn: Arn.t
         [@ocaml.doc
-          "The maximum number of results that are returned per call. You can use nextToken to obtain further pages of results. The default is 100 and the maximum allowed page size is 1000. A value of 0 uses the default. This is only an upper limit. The actual number of results returned per call might be fewer than the specified maximum."];
+          "The Amazon Resource Name (ARN) of the state machine for which you want to list aliases. If you specify a state machine version ARN, this API returns a list of aliases for that version."];
       nextToken: PageToken.t option
         [@ocaml.doc
-          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."];
+      maxResults: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of results that are returned per call. You can use nextToken to obtain further pages of results. The default is 100 and the maximum allowed page size is 1000. A value of 0 uses the default. This is only an upper limit. The actual number of results returned per call might be fewer than the specified maximum."]}
+    let context_ = "ListStateMachineAliasesInput"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~stateMachineArn ->
+          fun () -> { nextToken; maxResults; stateMachineArn }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:PageSize.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
+        [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
+        ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:PageSize.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      let nextToken =
+        (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let stateMachineArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
+      make ?maxResults ?nextToken ~stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PageToken.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let stateMachineArn =
+        field_map_exn json__ "stateMachineArn" Arn.of_json in
+      make ?maxResults ?nextToken ~stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the existing activities. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
-module GetExecutionHistoryOutput =
+       "Lists aliases for a specified state machine ARN. Results are sorted by time, with the most recently created aliases listed first. To list aliases that reference a state machine version, you can specify the version ARN in the stateMachineArn parameter. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. Related operations: CreateStateMachineAlias DescribeStateMachineAlias UpdateStateMachineAlias DeleteStateMachineAlias"]
+module ListMapRunsOutput =
   struct
     type nonrec t =
       {
-      events: HistoryEventList.t
-        [@ocaml.doc "The list of events that occurred in the execution."];
+      mapRuns: MapRunList.t option
+        [@ocaml.doc
+          "An array that lists information related to a Map Run, such as the Amazon Resource Name (ARN) of the Map Run and the ARN of the state machine that started the Map Run."];
       nextToken: PageToken.t option
         [@ocaml.doc
           "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
@@ -5020,8 +9157,7 @@ module GetExecutionHistoryOutput =
       [ `ExecutionDoesNotExist of ExecutionDoesNotExist.t 
       | `InvalidArn of InvalidArn.t  | `InvalidToken of InvalidToken.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetExecutionHistoryOutput"
-    let make ?nextToken = fun ~events -> fun () -> { nextToken; events }
+    let make ?mapRuns = fun ?nextToken -> fun () -> { mapRuns; nextToken }
     let error_of_json name json =
       match name with
       | "ExecutionDoesNotExist" ->
@@ -5060,21 +9196,428 @@ module GetExecutionHistoryOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("events", (Some (HistoryEventList.to_value x.events)));
+        [("mapRuns", (Option.map x.mapRuns ~f:MapRunList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let mapRuns =
+        (Option.map ~f:MapRunList.of_xml) (Xml.child xml_arg0 "mapRuns") in
+      make ?nextToken ?mapRuns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let mapRuns = field_map json__ "mapRuns" MapRunList.of_json in
+      make ?nextToken ?mapRuns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all Map Runs that were started by a given state machine execution. Use this API action to obtain Map Run ARNs, and then call DescribeMapRun to obtain more information, if needed."]
+module ListMapRunsInput =
+  struct
+    type nonrec t =
+      {
+      executionArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the execution for which the Map Runs must be listed."];
+      maxResults: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of results that are returned per call. You can use nextToken to obtain further pages of results. The default is 100 and the maximum allowed page size is 1000. A value of 0 uses the default. This is only an upper limit. The actual number of results returned per call might be fewer than the specified maximum."];
+      nextToken: PageToken.t option
+        [@ocaml.doc
+          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
+    let context_ = "ListMapRunsInput"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~executionArn ->
+          fun () -> { maxResults; nextToken; executionArn }
+    let to_value x =
+      structure_to_value
+        [("executionArn", (Some (Arn.to_value x.executionArn)));
+        ("maxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let executionArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
+      make ?nextToken ?maxResults ~executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let executionArn = field_map_exn json__ "executionArn" Arn.of_json in
+      make ?nextToken ?maxResults ~executionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all Map Runs that were started by a given state machine execution. Use this API action to obtain Map Run ARNs, and then call DescribeMapRun to obtain more information, if needed."]
+module ListExecutionsOutput =
+  struct
+    type nonrec t =
+      {
+      executions: ExecutionList.t option
+        [@ocaml.doc "The list of matching executions."];
+      nextToken: ListExecutionsPageToken.t option
+        [@ocaml.doc
+          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
+    type nonrec error =
+      [ `InvalidArn of InvalidArn.t  | `InvalidToken of InvalidToken.t 
+      | `ResourceNotFound of ResourceNotFound.t 
+      | `StateMachineDoesNotExist of StateMachineDoesNotExist.t 
+      | `StateMachineTypeNotSupported of StateMachineTypeNotSupported.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?executions =
+      fun ?nextToken -> fun () -> { executions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "InvalidToken" -> `InvalidToken (InvalidToken.of_json json)
+      | "ResourceNotFound" ->
+          `ResourceNotFound (ResourceNotFound.of_json json)
+      | "StateMachineDoesNotExist" ->
+          `StateMachineDoesNotExist (StateMachineDoesNotExist.of_json json)
+      | "StateMachineTypeNotSupported" ->
+          `StateMachineTypeNotSupported
+            (StateMachineTypeNotSupported.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "InvalidToken" -> `InvalidToken (InvalidToken.of_xml xml)
+      | "ResourceNotFound" -> `ResourceNotFound (ResourceNotFound.of_xml xml)
+      | "StateMachineDoesNotExist" ->
+          `StateMachineDoesNotExist (StateMachineDoesNotExist.of_xml xml)
+      | "StateMachineTypeNotSupported" ->
+          `StateMachineTypeNotSupported
+            (StateMachineTypeNotSupported.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `InvalidToken e ->
+          `Assoc
+            [("error", (`String "InvalidToken"));
+            ("details", (InvalidToken.to_json e))]
+      | `ResourceNotFound e ->
+          `Assoc
+            [("error", (`String "ResourceNotFound"));
+            ("details", (ResourceNotFound.to_json e))]
+      | `StateMachineDoesNotExist e ->
+          `Assoc
+            [("error", (`String "StateMachineDoesNotExist"));
+            ("details", (StateMachineDoesNotExist.to_json e))]
+      | `StateMachineTypeNotSupported e ->
+          `Assoc
+            [("error", (`String "StateMachineTypeNotSupported"));
+            ("details", (StateMachineTypeNotSupported.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("executions", (Option.map x.executions ~f:ExecutionList.to_value));
+        ("nextToken",
+          (Option.map x.nextToken ~f:ListExecutionsPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:ListExecutionsPageToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let executions =
+        (Option.map ~f:ExecutionList.of_xml)
+          (Xml.child xml_arg0 "executions") in
+      make ?nextToken ?executions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken =
+        field_map json__ "nextToken" ListExecutionsPageToken.of_json in
+      let executions = field_map json__ "executions" ExecutionList.of_json in
+      make ?nextToken ?executions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all executions of a state machine or a Map Run. You can list all executions related to a state machine by specifying a state machine Amazon Resource Name (ARN), or those related to a Map Run by specifying a Map Run ARN. Using this API action, you can also list all redriven executions. You can also provide a state machine alias ARN or version ARN to list the executions associated with a specific alias or version. Results are sorted by time, with the most recent execution first. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
+module ListExecutionsInput =
+  struct
+    type nonrec t =
+      {
+      stateMachineArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine whose executions is listed. You can specify either a mapRunArn or a stateMachineArn, but not both. You can also return a list of executions associated with a specific alias or version, by specifying an alias ARN or a version ARN in the stateMachineArn parameter."];
+      statusFilter: ExecutionStatus.t option
+        [@ocaml.doc
+          "If specified, only list the executions whose current execution status matches the given filter. If you provide a PENDING_REDRIVE statusFilter, you must specify mapRunArn. For more information, see Child workflow execution redrive behaviour in the Step Functions Developer Guide. If you provide a stateMachineArn and a PENDING_REDRIVE statusFilter, the API returns a validation exception."];
+      maxResults: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of results that are returned per call. You can use nextToken to obtain further pages of results. The default is 100 and the maximum allowed page size is 1000. A value of 0 uses the default. This is only an upper limit. The actual number of results returned per call might be fewer than the specified maximum."];
+      nextToken: ListExecutionsPageToken.t option
+        [@ocaml.doc
+          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."];
+      mapRunArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Map Run that started the child workflow executions. If the mapRunArn field is specified, a list of all of the child workflow executions started by a Map Run is returned. For more information, see Examining Map Run in the Step Functions Developer Guide. You can specify either a mapRunArn or a stateMachineArn, but not both."];
+      redriveFilter: ExecutionRedriveFilter.t option
+        [@ocaml.doc
+          "Sets a filter to list executions based on whether or not they have been redriven. For a Distributed Map, redriveFilter sets a filter to list child workflow executions based on whether or not they have been redriven. If you do not provide a redriveFilter, Step Functions returns a list of both redriven and non-redriven executions. If you provide a state machine ARN in redriveFilter, the API returns a validation exception."]}
+    let make ?stateMachineArn =
+      fun ?statusFilter ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun ?mapRunArn ->
+              fun ?redriveFilter ->
+                fun () ->
+                  {
+                    stateMachineArn;
+                    statusFilter;
+                    maxResults;
+                    nextToken;
+                    mapRunArn;
+                    redriveFilter
+                  }
+    let to_value x =
+      structure_to_value
+        [("stateMachineArn", (Option.map x.stateMachineArn ~f:Arn.to_value));
+        ("statusFilter",
+          (Option.map x.statusFilter ~f:ExecutionStatus.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("nextToken",
+          (Option.map x.nextToken ~f:ListExecutionsPageToken.to_value));
+        ("mapRunArn", (Option.map x.mapRunArn ~f:LongArn.to_value));
+        ("redriveFilter",
+          (Option.map x.redriveFilter ~f:ExecutionRedriveFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redriveFilter =
+        (Option.map ~f:ExecutionRedriveFilter.of_xml)
+          (Xml.child xml_arg0 "redriveFilter") in
+      let mapRunArn =
+        (Option.map ~f:LongArn.of_xml) (Xml.child xml_arg0 "mapRunArn") in
+      let nextToken =
+        (Option.map ~f:ListExecutionsPageToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let statusFilter =
+        (Option.map ~f:ExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "statusFilter") in
+      let stateMachineArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "stateMachineArn") in
+      make ?redriveFilter ?mapRunArn ?nextToken ?maxResults ?statusFilter
+        ?stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redriveFilter =
+        field_map json__ "redriveFilter" ExecutionRedriveFilter.of_json in
+      let mapRunArn = field_map json__ "mapRunArn" LongArn.of_json in
+      let nextToken =
+        field_map json__ "nextToken" ListExecutionsPageToken.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let statusFilter =
+        field_map json__ "statusFilter" ExecutionStatus.of_json in
+      let stateMachineArn = field_map json__ "stateMachineArn" Arn.of_json in
+      make ?redriveFilter ?mapRunArn ?nextToken ?maxResults ?statusFilter
+        ?stateMachineArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all executions of a state machine or a Map Run. You can list all executions related to a state machine by specifying a state machine Amazon Resource Name (ARN), or those related to a Map Run by specifying a Map Run ARN. Using this API action, you can also list all redriven executions. You can also provide a state machine alias ARN or version ARN to list the executions associated with a specific alias or version. Results are sorted by time, with the most recent execution first. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
+module ListActivitiesOutput =
+  struct
+    type nonrec t =
+      {
+      activities: ActivityList.t option
+        [@ocaml.doc "The list of activities."];
+      nextToken: PageToken.t option
+        [@ocaml.doc
+          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
+    type nonrec error =
+      [ `InvalidToken of InvalidToken.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?activities =
+      fun ?nextToken -> fun () -> { activities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidToken" -> `InvalidToken (InvalidToken.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidToken" -> `InvalidToken (InvalidToken.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidToken e ->
+          `Assoc
+            [("error", (`String "InvalidToken"));
+            ("details", (InvalidToken.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("activities", (Option.map x.activities ~f:ActivityList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let activities =
+        (Option.map ~f:ActivityList.of_xml) (Xml.child xml_arg0 "activities") in
+      make ?nextToken ?activities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let activities = field_map json__ "activities" ActivityList.of_json in
+      make ?nextToken ?activities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the existing activities. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
+module ListActivitiesInput =
+  struct
+    type nonrec t =
+      {
+      maxResults: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of results that are returned per call. You can use nextToken to obtain further pages of results. The default is 100 and the maximum allowed page size is 1000. A value of 0 uses the default. This is only an upper limit. The actual number of results returned per call might be fewer than the specified maximum."];
+      nextToken: PageToken.t option
+        [@ocaml.doc
+          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the existing activities. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
+module GetExecutionHistoryOutput =
+  struct
+    type nonrec t =
+      {
+      events: HistoryEventList.t option
+        [@ocaml.doc "The list of events that occurred in the execution."];
+      nextToken: PageToken.t option
+        [@ocaml.doc
+          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
+    type nonrec error =
+      [ `ExecutionDoesNotExist of ExecutionDoesNotExist.t 
+      | `InvalidArn of InvalidArn.t  | `InvalidToken of InvalidToken.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?events = fun ?nextToken -> fun () -> { events; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ExecutionDoesNotExist" ->
+          `ExecutionDoesNotExist (ExecutionDoesNotExist.of_json json)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "InvalidToken" -> `InvalidToken (InvalidToken.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ExecutionDoesNotExist" ->
+          `ExecutionDoesNotExist (ExecutionDoesNotExist.of_xml xml)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "InvalidToken" -> `InvalidToken (InvalidToken.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ExecutionDoesNotExist e ->
+          `Assoc
+            [("error", (`String "ExecutionDoesNotExist"));
+            ("details", (ExecutionDoesNotExist.to_json e))]
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `InvalidToken e ->
+          `Assoc
+            [("error", (`String "InvalidToken"));
+            ("details", (InvalidToken.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("events", (Option.map x.events ~f:HistoryEventList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let events =
-        HistoryEventList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "events") in
-      make ?nextToken ~events ()
+        (Option.map ~f:HistoryEventList.of_xml) (Xml.child xml_arg0 "events") in
+      make ?nextToken ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PageToken.of_json in
-      let events = field_map_exn json "events" HistoryEventList.of_json in
-      make ?nextToken ~events ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let events = field_map json__ "events" HistoryEventList.of_json in
+      make ?nextToken ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the history of the specified execution as a list of events. By default, the results are returned in ascending order of the timeStamp of the events. Use the reverseOrder parameter to get the latest events first. If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error. This API action is not supported by EXPRESS state machines."]
@@ -5136,14 +9679,14 @@ module GetExecutionHistoryInput =
       make ?includeExecutionData ?nextToken ?reverseOrder ?maxResults
         ~executionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeExecutionData =
-        field_map json "includeExecutionData"
+        field_map json__ "includeExecutionData"
           IncludeExecutionDataGetExecutionHistory.of_json in
-      let nextToken = field_map json "nextToken" PageToken.of_json in
-      let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let executionArn = field_map_exn json "executionArn" Arn.of_json in
+      let nextToken = field_map json__ "nextToken" PageToken.of_json in
+      let reverseOrder = field_map json__ "reverseOrder" ReverseOrder.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let executionArn = field_map_exn json__ "executionArn" Arn.of_json in
       make ?includeExecutionData ?nextToken ?reverseOrder ?maxResults
         ~executionArn ()
     let to_json v = composed_to_json to_value v
@@ -5163,6 +9706,9 @@ module GetActivityTaskOutput =
       [ `ActivityDoesNotExist of ActivityDoesNotExist.t 
       | `ActivityWorkerLimitExceeded of ActivityWorkerLimitExceeded.t 
       | `InvalidArn of InvalidArn.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?taskToken = fun ?input -> fun () -> { taskToken; input }
     let error_of_json name json =
@@ -5173,6 +9719,12 @@ module GetActivityTaskOutput =
           `ActivityWorkerLimitExceeded
             (ActivityWorkerLimitExceeded.of_json json)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5184,6 +9736,12 @@ module GetActivityTaskOutput =
           `ActivityWorkerLimitExceeded
             (ActivityWorkerLimitExceeded.of_xml xml)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5200,6 +9758,18 @@ module GetActivityTaskOutput =
           `Assoc
             [("error", (`String "InvalidArn"));
             ("details", (InvalidArn.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5218,13 +9788,13 @@ module GetActivityTaskOutput =
         (Option.map ~f:TaskToken.of_xml) (Xml.child xml_arg0 "taskToken") in
       make ?input ?taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let input = field_map json "input" SensitiveDataJobInput.of_json in
-      let taskToken = field_map json "taskToken" TaskToken.of_json in
+    let of_json json__ =
+      let input = field_map json__ "input" SensitiveDataJobInput.of_json in
+      let taskToken = field_map json__ "taskToken" TaskToken.of_json in
       make ?input ?taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by workers to retrieve a task (with the specified activity ARN) which has been scheduled for execution by a running state machine. This initiates a long poll, where the service holds the HTTP connection open and responds as soon as a task becomes available (i.e. an execution of a task of this type is needed.) The maximum time the service holds on to the request before responding is 60 seconds. If no task is available within 60 seconds, the poll returns a taskToken with a null string. Workers should set their client side socket timeout to at least 65 seconds (5 seconds higher than the maximum time the service may hold the poll request). Polling with GetActivityTask can cause latency in some implementations. See Avoid Latency When Polling for Activity Tasks in the Step Functions Developer Guide."]
+       "Used by workers to retrieve a task (with the specified activity ARN) which has been scheduled for execution by a running state machine. This initiates a long poll, where the service holds the HTTP connection open and responds as soon as a task becomes available (i.e. an execution of a task of this type is needed.) The maximum time the service holds on to the request before responding is 60 seconds. If no task is available within 60 seconds, the poll returns a taskToken with a null string. This API action isn't logged in CloudTrail. Workers should set their client side socket timeout to at least 65 seconds (5 seconds higher than the maximum time the service may hold the poll request). Polling with GetActivityTask can cause latency in some implementations. See Avoid Latency When Polling for Activity Tasks in the Step Functions Developer Guide."]
 module GetActivityTaskInput =
   struct
     type nonrec t =
@@ -5250,67 +9820,99 @@ module GetActivityTaskInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
       make ?workerName ~activityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workerName = field_map json "workerName" Name.of_json in
-      let activityArn = field_map_exn json "activityArn" Arn.of_json in
+    let of_json json__ =
+      let workerName = field_map json__ "workerName" Name.of_json in
+      let activityArn = field_map_exn json__ "activityArn" Arn.of_json in
       make ?workerName ~activityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used by workers to retrieve a task (with the specified activity ARN) which has been scheduled for execution by a running state machine. This initiates a long poll, where the service holds the HTTP connection open and responds as soon as a task becomes available (i.e. an execution of a task of this type is needed.) The maximum time the service holds on to the request before responding is 60 seconds. If no task is available within 60 seconds, the poll returns a taskToken with a null string. Workers should set their client side socket timeout to at least 65 seconds (5 seconds higher than the maximum time the service may hold the poll request). Polling with GetActivityTask can cause latency in some implementations. See Avoid Latency When Polling for Activity Tasks in the Step Functions Developer Guide."]
+       "Used by workers to retrieve a task (with the specified activity ARN) which has been scheduled for execution by a running state machine. This initiates a long poll, where the service holds the HTTP connection open and responds as soon as a task becomes available (i.e. an execution of a task of this type is needed.) The maximum time the service holds on to the request before responding is 60 seconds. If no task is available within 60 seconds, the poll returns a taskToken with a null string. This API action isn't logged in CloudTrail. Workers should set their client side socket timeout to at least 65 seconds (5 seconds higher than the maximum time the service may hold the poll request). Polling with GetActivityTask can cause latency in some implementations. See Avoid Latency When Polling for Activity Tasks in the Step Functions Developer Guide."]
 module DescribeStateMachineOutput =
   struct
     type nonrec t =
       {
-      stateMachineArn: Arn.t
+      stateMachineArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the state machine."];
-      name: Name.t
+          "The Amazon Resource Name (ARN) that identifies the state machine. If you specified a state machine version ARN in your request, the API returns the version ARN. The version ARN is a combination of state machine ARN and the version number separated by a colon (:). For example, stateMachineARN:1."];
+      name: Name.t option
         [@ocaml.doc
-          "The name of the state machine. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the state machine. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       status: StateMachineStatus.t option
         [@ocaml.doc "The current status of the state machine."];
-      definition: Definition.t
+      definition: Definition.t option
         [@ocaml.doc
-          "The Amazon States Language definition of the state machine. See Amazon States Language."];
-      roleArn: Arn.t
+          "The Amazon States Language definition of the state machine. See Amazon States Language. If called with includedData = METADATA_ONLY, the returned definition will be \\{\\}."];
+      roleArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM role used when creating this state machine. (The IAM role maintains security by granting Step Functions access to AWS resources.)"];
-      type_: StateMachineType.t
+          "The Amazon Resource Name (ARN) of the IAM role used when creating this state machine. (The IAM role maintains security by granting Step Functions access to Amazon Web Services resources.)"];
+      type_: StateMachineType.t option
         [@ocaml.doc "The type of the state machine (STANDARD or EXPRESS)."];
-      creationDate: Timestamp.t
-        [@ocaml.doc "The date the state machine is created."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc
+          "The date the state machine is created. For a state machine version, creationDate is the date the version was created."];
       loggingConfiguration: LoggingConfiguration.t option ;
       tracingConfiguration: TracingConfiguration.t option
-        [@ocaml.doc "Selects whether AWS X-Ray tracing is enabled."]}
+        [@ocaml.doc "Selects whether X-Ray tracing is enabled."];
+      label: MapRunLabel.t option
+        [@ocaml.doc
+          "A user-defined or an auto-generated string that identifies a Map state. This parameter is present only if the stateMachineArn specified in input is a qualified state machine ARN."];
+      revisionId: RevisionId.t option
+        [@ocaml.doc
+          "The revision identifier for the state machine. Use the revisionId parameter to compare between versions of a state machine configuration used for executions without performing a diff of the properties, such as definition and roleArn."];
+      description: VersionDescription.t option
+        [@ocaml.doc "The description of the state machine version."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc "Settings to configure server-side encryption."];
+      variableReferences: VariableReferences.t option
+        [@ocaml.doc
+          "A map of state name to a list of variables referenced by that state. States that do not use variable references will not be shown in the response."]}
     type nonrec error =
       [ `InvalidArn of InvalidArn.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `StateMachineDoesNotExist of StateMachineDoesNotExist.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeStateMachineOutput"
-    let make ?status =
-      fun ?loggingConfiguration ->
-        fun ?tracingConfiguration ->
-          fun ~stateMachineArn ->
-            fun ~name ->
-              fun ~definition ->
-                fun ~roleArn ->
-                  fun ~type_ ->
-                    fun ~creationDate ->
-                      fun () ->
-                        {
-                          status;
-                          loggingConfiguration;
-                          tracingConfiguration;
-                          stateMachineArn;
-                          name;
-                          definition;
-                          roleArn;
-                          type_;
-                          creationDate
-                        }
+    let make ?stateMachineArn =
+      fun ?name ->
+        fun ?status ->
+          fun ?definition ->
+            fun ?roleArn ->
+              fun ?type_ ->
+                fun ?creationDate ->
+                  fun ?loggingConfiguration ->
+                    fun ?tracingConfiguration ->
+                      fun ?label ->
+                        fun ?revisionId ->
+                          fun ?description ->
+                            fun ?encryptionConfiguration ->
+                              fun ?variableReferences ->
+                                fun () ->
+                                  {
+                                    stateMachineArn;
+                                    name;
+                                    status;
+                                    definition;
+                                    roleArn;
+                                    type_;
+                                    creationDate;
+                                    loggingConfiguration;
+                                    tracingConfiguration;
+                                    label;
+                                    revisionId;
+                                    description;
+                                    encryptionConfiguration;
+                                    variableReferences
+                                  }
     let error_of_json name json =
       match name with
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | "StateMachineDoesNotExist" ->
           `StateMachineDoesNotExist (StateMachineDoesNotExist.of_json json)
       | name ->
@@ -5319,6 +9921,12 @@ module DescribeStateMachineOutput =
     let error_of_xml name xml =
       match name with
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | "StateMachineDoesNotExist" ->
           `StateMachineDoesNotExist (StateMachineDoesNotExist.of_xml xml)
       | name ->
@@ -5329,6 +9937,18 @@ module DescribeStateMachineOutput =
           `Assoc
             [("error", (`String "InvalidArn"));
             ("details", (InvalidArn.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `StateMachineDoesNotExist e ->
           `Assoc
             [("error", (`String "StateMachineDoesNotExist"));
@@ -5340,19 +9960,41 @@ module DescribeStateMachineOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
-        ("name", (Some (Name.to_value x.name)));
+        [("stateMachineArn", (Option.map x.stateMachineArn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
         ("status", (Option.map x.status ~f:StateMachineStatus.to_value));
-        ("definition", (Some (Definition.to_value x.definition)));
-        ("roleArn", (Some (Arn.to_value x.roleArn)));
-        ("type", (Some (StateMachineType.to_value x.type_)));
-        ("creationDate", (Some (Timestamp.to_value x.creationDate)));
+        ("definition", (Option.map x.definition ~f:Definition.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:Arn.to_value));
+        ("type", (Option.map x.type_ ~f:StateMachineType.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
         ("loggingConfiguration",
           (Option.map x.loggingConfiguration ~f:LoggingConfiguration.to_value));
         ("tracingConfiguration",
-          (Option.map x.tracingConfiguration ~f:TracingConfiguration.to_value))]
+          (Option.map x.tracingConfiguration ~f:TracingConfiguration.to_value));
+        ("label", (Option.map x.label ~f:MapRunLabel.to_value));
+        ("revisionId", (Option.map x.revisionId ~f:RevisionId.to_value));
+        ("description",
+          (Option.map x.description ~f:VersionDescription.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value));
+        ("variableReferences",
+          (Option.map x.variableReferences ~f:VariableReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let variableReferences =
+        (Option.map ~f:VariableReferences.of_xml)
+          (Xml.child xml_arg0 "variableReferences") in
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
+      let description =
+        (Option.map ~f:VersionDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let revisionId =
+        (Option.map ~f:RevisionId.of_xml) (Xml.child xml_arg0 "revisionId") in
+      let label =
+        (Option.map ~f:MapRunLabel.of_xml) (Xml.child xml_arg0 "label") in
       let tracingConfiguration =
         (Option.map ~f:TracingConfiguration.of_xml)
           (Xml.child xml_arg0 "tracingConfiguration") in
@@ -5360,118 +10002,168 @@ module DescribeStateMachineOutput =
         (Option.map ~f:LoggingConfiguration.of_xml)
           (Xml.child xml_arg0 "loggingConfiguration") in
       let creationDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
       let type_ =
-        StateMachineType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      let roleArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+        (Option.map ~f:StateMachineType.of_xml) (Xml.child xml_arg0 "type") in
+      let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "roleArn") in
       let definition =
-        Definition.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "definition") in
+        (Option.map ~f:Definition.of_xml) (Xml.child xml_arg0 "definition") in
       let status =
         (Option.map ~f:StateMachineStatus.of_xml)
           (Xml.child xml_arg0 "status") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let stateMachineArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
-      make ?tracingConfiguration ?loggingConfiguration ~creationDate ~type_
-        ~roleArn ~definition ?status ~name ~stateMachineArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "stateMachineArn") in
+      make ?variableReferences ?encryptionConfiguration ?description
+        ?revisionId ?label ?tracingConfiguration ?loggingConfiguration
+        ?creationDate ?type_ ?roleArn ?definition ?status ?name
+        ?stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let variableReferences =
+        field_map json__ "variableReferences" VariableReferences.of_json in
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let description =
+        field_map json__ "description" VersionDescription.of_json in
+      let revisionId = field_map json__ "revisionId" RevisionId.of_json in
+      let label = field_map json__ "label" MapRunLabel.of_json in
       let tracingConfiguration =
-        field_map json "tracingConfiguration" TracingConfiguration.of_json in
+        field_map json__ "tracingConfiguration" TracingConfiguration.of_json in
       let loggingConfiguration =
-        field_map json "loggingConfiguration" LoggingConfiguration.of_json in
-      let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
-      let type_ = field_map_exn json "type" StateMachineType.of_json in
-      let roleArn = field_map_exn json "roleArn" Arn.of_json in
-      let definition = field_map_exn json "definition" Definition.of_json in
-      let status = field_map json "status" StateMachineStatus.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      make ?tracingConfiguration ?loggingConfiguration ~creationDate ~type_
-        ~roleArn ~definition ?status ~name ~stateMachineArn ()
+        field_map json__ "loggingConfiguration" LoggingConfiguration.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let type_ = field_map json__ "type" StateMachineType.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
+      let definition = field_map json__ "definition" Definition.of_json in
+      let status = field_map json__ "status" StateMachineStatus.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let stateMachineArn = field_map json__ "stateMachineArn" Arn.of_json in
+      make ?variableReferences ?encryptionConfiguration ?description
+        ?revisionId ?label ?tracingConfiguration ?loggingConfiguration
+        ?creationDate ?type_ ?roleArn ?definition ?status ?name
+        ?stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a state machine. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
+       "Provides information about a state machine's definition, its IAM role Amazon Resource Name (ARN), and configuration. A qualified state machine ARN can either refer to a Distributed Map state defined within a state machine, a version ARN, or an alias ARN. The following are some examples of qualified and unqualified state machine ARNs: The following qualified state machine ARN refers to a Distributed Map state with a label mapStateLabel in a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine/mapStateLabel If you provide a qualified state machine ARN that refers to a Distributed Map state, the request fails with ValidationException. The following qualified state machine ARN refers to an alias named PROD. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine:PROD> If you provide a qualified state machine ARN that refers to a version ARN or an alias ARN, the request starts execution for that version or alias. The following unqualified state machine ARN refers to a state machine named myStateMachine. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine> This API action returns the details for a state machine version if the stateMachineArn you specify is a state machine version ARN. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
 module DescribeStateMachineInput =
   struct
     type nonrec t =
       {
       stateMachineArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the state machine to describe."]}
+          "The Amazon Resource Name (ARN) of the state machine for which you want the information. If you specify a state machine version ARN, this API returns details about that version. The version ARN is a combination of state machine ARN and the version number separated by a colon (:). For example, stateMachineARN:1."];
+      includedData: IncludedData.t option
+        [@ocaml.doc
+          "If your state machine definition is encrypted with a KMS key, callers must have kms:Decrypt permission to decrypt the definition. Alternatively, you can call the API with includedData = METADATA_ONLY to get a successful response without the encrypted definition. When calling a labelled ARN for an encrypted state machine, the includedData = METADATA_ONLY parameter will not apply because Step Functions needs to decrypt the entire state machine definition to get the Distributed Map state\226\128\153s definition. In this case, the API caller needs to have kms:Decrypt permission."]}
     let context_ = "DescribeStateMachineInput"
-    let make ~stateMachineArn = fun () -> { stateMachineArn }
+    let make ?includedData =
+      fun ~stateMachineArn -> fun () -> { includedData; stateMachineArn }
     let to_value x =
       structure_to_value
-        [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)))]
+        [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
+        ("includedData",
+          (Option.map x.includedData ~f:IncludedData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let includedData =
+        (Option.map ~f:IncludedData.of_xml)
+          (Xml.child xml_arg0 "includedData") in
       let stateMachineArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
-      make ~stateMachineArn ()
+      make ?includedData ~stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      make ~stateMachineArn ()
+    let of_json json__ =
+      let includedData = field_map json__ "includedData" IncludedData.of_json in
+      let stateMachineArn =
+        field_map_exn json__ "stateMachineArn" Arn.of_json in
+      make ?includedData ~stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a state machine. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
+       "Provides information about a state machine's definition, its IAM role Amazon Resource Name (ARN), and configuration. A qualified state machine ARN can either refer to a Distributed Map state defined within a state machine, a version ARN, or an alias ARN. The following are some examples of qualified and unqualified state machine ARNs: The following qualified state machine ARN refers to a Distributed Map state with a label mapStateLabel in a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine/mapStateLabel If you provide a qualified state machine ARN that refers to a Distributed Map state, the request fails with ValidationException. The following qualified state machine ARN refers to an alias named PROD. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine:PROD> If you provide a qualified state machine ARN that refers to a version ARN or an alias ARN, the request starts execution for that version or alias. The following unqualified state machine ARN refers to a state machine named myStateMachine. arn:<partition>:states:<region>:<account-id>:stateMachine:<myStateMachine> This API action returns the details for a state machine version if the stateMachineArn you specify is a state machine version ARN. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
 module DescribeStateMachineForExecutionOutput =
   struct
     type nonrec t =
       {
-      stateMachineArn: Arn.t
+      stateMachineArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the state machine associated with the execution."];
-      name: Name.t
+      name: Name.t option
         [@ocaml.doc
           "The name of the state machine associated with the execution."];
-      definition: Definition.t
+      definition: Definition.t option
         [@ocaml.doc
           "The Amazon States Language definition of the state machine. See Amazon States Language."];
-      roleArn: Arn.t
+      roleArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM role of the State Machine for the execution."];
-      updateDate: Timestamp.t
+      updateDate: Timestamp.t option
         [@ocaml.doc
           "The date and time the state machine associated with an execution was updated. For a newly created state machine, this is the creation date."];
       loggingConfiguration: LoggingConfiguration.t option ;
       tracingConfiguration: TracingConfiguration.t option
-        [@ocaml.doc "Selects whether AWS X-Ray tracing is enabled."]}
+        [@ocaml.doc "Selects whether X-Ray tracing is enabled."];
+      mapRunArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Map Run that started the child workflow execution. This field is returned only if the executionArn is a child workflow execution that was started by a Distributed Map state."];
+      label: MapRunLabel.t option
+        [@ocaml.doc
+          "A user-defined or an auto-generated string that identifies a Map state. This field is returned only if the executionArn is a child workflow execution that was started by a Distributed Map state."];
+      revisionId: RevisionId.t option
+        [@ocaml.doc
+          "The revision identifier for the state machine. The first revision ID when you create the state machine is null. Use the state machine revisionId parameter to compare the revision of a state machine with the configuration of the state machine used for executions without performing a diff of the properties, such as definition and roleArn."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc "Settings to configure server-side encryption."];
+      variableReferences: VariableReferences.t option
+        [@ocaml.doc
+          "A map of state name to a list of variables referenced by that state. States that do not use variable references will not be shown in the response."]}
     type nonrec error =
       [ `ExecutionDoesNotExist of ExecutionDoesNotExist.t 
       | `InvalidArn of InvalidArn.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeStateMachineForExecutionOutput"
-    let make ?loggingConfiguration =
-      fun ?tracingConfiguration ->
-        fun ~stateMachineArn ->
-          fun ~name ->
-            fun ~definition ->
-              fun ~roleArn ->
-                fun ~updateDate ->
-                  fun () ->
-                    {
-                      loggingConfiguration;
-                      tracingConfiguration;
-                      stateMachineArn;
-                      name;
-                      definition;
-                      roleArn;
-                      updateDate
-                    }
+    let make ?stateMachineArn =
+      fun ?name ->
+        fun ?definition ->
+          fun ?roleArn ->
+            fun ?updateDate ->
+              fun ?loggingConfiguration ->
+                fun ?tracingConfiguration ->
+                  fun ?mapRunArn ->
+                    fun ?label ->
+                      fun ?revisionId ->
+                        fun ?encryptionConfiguration ->
+                          fun ?variableReferences ->
+                            fun () ->
+                              {
+                                stateMachineArn;
+                                name;
+                                definition;
+                                roleArn;
+                                updateDate;
+                                loggingConfiguration;
+                                tracingConfiguration;
+                                mapRunArn;
+                                label;
+                                revisionId;
+                                encryptionConfiguration;
+                                variableReferences
+                              }
     let error_of_json name json =
       match name with
       | "ExecutionDoesNotExist" ->
           `ExecutionDoesNotExist (ExecutionDoesNotExist.of_json json)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5480,6 +10172,12 @@ module DescribeStateMachineForExecutionOutput =
       | "ExecutionDoesNotExist" ->
           `ExecutionDoesNotExist (ExecutionDoesNotExist.of_xml xml)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5492,6 +10190,18 @@ module DescribeStateMachineForExecutionOutput =
           `Assoc
             [("error", (`String "InvalidArn"));
             ("details", (InvalidArn.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5499,17 +10209,37 @@ module DescribeStateMachineForExecutionOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
-        ("name", (Some (Name.to_value x.name)));
-        ("definition", (Some (Definition.to_value x.definition)));
-        ("roleArn", (Some (Arn.to_value x.roleArn)));
-        ("updateDate", (Some (Timestamp.to_value x.updateDate)));
+        [("stateMachineArn", (Option.map x.stateMachineArn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("definition", (Option.map x.definition ~f:Definition.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:Arn.to_value));
+        ("updateDate", (Option.map x.updateDate ~f:Timestamp.to_value));
         ("loggingConfiguration",
           (Option.map x.loggingConfiguration ~f:LoggingConfiguration.to_value));
         ("tracingConfiguration",
-          (Option.map x.tracingConfiguration ~f:TracingConfiguration.to_value))]
+          (Option.map x.tracingConfiguration ~f:TracingConfiguration.to_value));
+        ("mapRunArn", (Option.map x.mapRunArn ~f:LongArn.to_value));
+        ("label", (Option.map x.label ~f:MapRunLabel.to_value));
+        ("revisionId", (Option.map x.revisionId ~f:RevisionId.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value));
+        ("variableReferences",
+          (Option.map x.variableReferences ~f:VariableReferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let variableReferences =
+        (Option.map ~f:VariableReferences.of_xml)
+          (Xml.child xml_arg0 "variableReferences") in
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
+      let revisionId =
+        (Option.map ~f:RevisionId.of_xml) (Xml.child xml_arg0 "revisionId") in
+      let label =
+        (Option.map ~f:MapRunLabel.of_xml) (Xml.child xml_arg0 "label") in
+      let mapRunArn =
+        (Option.map ~f:LongArn.of_xml) (Xml.child xml_arg0 "mapRunArn") in
       let tracingConfiguration =
         (Option.map ~f:TracingConfiguration.of_xml)
           (Xml.child xml_arg0 "tracingConfiguration") in
@@ -5517,80 +10247,447 @@ module DescribeStateMachineForExecutionOutput =
         (Option.map ~f:LoggingConfiguration.of_xml)
           (Xml.child xml_arg0 "loggingConfiguration") in
       let updateDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updateDate") in
-      let roleArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updateDate") in
+      let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "roleArn") in
       let definition =
-        Definition.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "definition") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:Definition.of_xml) (Xml.child xml_arg0 "definition") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let stateMachineArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
-      make ?tracingConfiguration ?loggingConfiguration ~updateDate ~roleArn
-        ~definition ~name ~stateMachineArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "stateMachineArn") in
+      make ?variableReferences ?encryptionConfiguration ?revisionId ?label
+        ?mapRunArn ?tracingConfiguration ?loggingConfiguration ?updateDate
+        ?roleArn ?definition ?name ?stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let variableReferences =
+        field_map json__ "variableReferences" VariableReferences.of_json in
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let revisionId = field_map json__ "revisionId" RevisionId.of_json in
+      let label = field_map json__ "label" MapRunLabel.of_json in
+      let mapRunArn = field_map json__ "mapRunArn" LongArn.of_json in
       let tracingConfiguration =
-        field_map json "tracingConfiguration" TracingConfiguration.of_json in
+        field_map json__ "tracingConfiguration" TracingConfiguration.of_json in
       let loggingConfiguration =
-        field_map json "loggingConfiguration" LoggingConfiguration.of_json in
-      let updateDate = field_map_exn json "updateDate" Timestamp.of_json in
-      let roleArn = field_map_exn json "roleArn" Arn.of_json in
-      let definition = field_map_exn json "definition" Definition.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      make ?tracingConfiguration ?loggingConfiguration ~updateDate ~roleArn
-        ~definition ~name ~stateMachineArn ()
+        field_map json__ "loggingConfiguration" LoggingConfiguration.of_json in
+      let updateDate = field_map json__ "updateDate" Timestamp.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
+      let definition = field_map json__ "definition" Definition.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let stateMachineArn = field_map json__ "stateMachineArn" Arn.of_json in
+      make ?variableReferences ?encryptionConfiguration ?revisionId ?label
+        ?mapRunArn ?tracingConfiguration ?loggingConfiguration ?updateDate
+        ?roleArn ?definition ?name ?stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the state machine associated with a specific execution. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
+       "Provides information about a state machine's definition, its execution role ARN, and configuration. If a Map Run dispatched the execution, this action returns the Map Run Amazon Resource Name (ARN) in the response. The state machine returned is the state machine associated with the Map Run. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
 module DescribeStateMachineForExecutionInput =
   struct
     type nonrec t =
       {
       executionArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the execution you want state machine information for."]}
+          "The Amazon Resource Name (ARN) of the execution you want state machine information for."];
+      includedData: IncludedData.t option
+        [@ocaml.doc
+          "If your state machine definition is encrypted with a KMS key, callers must have kms:Decrypt permission to decrypt the definition. Alternatively, you can call the API with includedData = METADATA_ONLY to get a successful response without the encrypted definition."]}
     let context_ = "DescribeStateMachineForExecutionInput"
-    let make ~executionArn = fun () -> { executionArn }
+    let make ?includedData =
+      fun ~executionArn -> fun () -> { includedData; executionArn }
     let to_value x =
       structure_to_value
-        [("executionArn", (Some (Arn.to_value x.executionArn)))]
+        [("executionArn", (Some (Arn.to_value x.executionArn)));
+        ("includedData",
+          (Option.map x.includedData ~f:IncludedData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let includedData =
+        (Option.map ~f:IncludedData.of_xml)
+          (Xml.child xml_arg0 "includedData") in
       let executionArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
-      make ~executionArn ()
+      make ?includedData ~executionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let executionArn = field_map_exn json "executionArn" Arn.of_json in
-      make ~executionArn ()
+    let of_json json__ =
+      let includedData = field_map json__ "includedData" IncludedData.of_json in
+      let executionArn = field_map_exn json__ "executionArn" Arn.of_json in
+      make ?includedData ~executionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the state machine associated with a specific execution. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
+       "Provides information about a state machine's definition, its execution role ARN, and configuration. If a Map Run dispatched the execution, this action returns the Map Run Amazon Resource Name (ARN) in the response. The state machine returned is the state machine associated with the Map Run. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
+module DescribeStateMachineAliasOutput =
+  struct
+    type nonrec t =
+      {
+      stateMachineAliasArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine alias."];
+      name: Name.t option [@ocaml.doc "The name of the state machine alias."];
+      description: AliasDescription.t option
+        [@ocaml.doc "A description of the alias."];
+      routingConfiguration: RoutingConfigurationList.t option
+        [@ocaml.doc "The routing configuration of the alias."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The date the state machine alias was created."];
+      updateDate: Timestamp.t option
+        [@ocaml.doc
+          "The date the state machine alias was last updated. For a newly created state machine, this is the same as the creation date."]}
+    type nonrec error =
+      [ `InvalidArn of InvalidArn.t 
+      | `ResourceNotFound of ResourceNotFound.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?stateMachineAliasArn =
+      fun ?name ->
+        fun ?description ->
+          fun ?routingConfiguration ->
+            fun ?creationDate ->
+              fun ?updateDate ->
+                fun () ->
+                  {
+                    stateMachineAliasArn;
+                    name;
+                    description;
+                    routingConfiguration;
+                    creationDate;
+                    updateDate
+                  }
+    let error_of_json name json =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "ResourceNotFound" ->
+          `ResourceNotFound (ResourceNotFound.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "ResourceNotFound" -> `ResourceNotFound (ResourceNotFound.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `ResourceNotFound e ->
+          `Assoc
+            [("error", (`String "ResourceNotFound"));
+            ("details", (ResourceNotFound.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("stateMachineAliasArn",
+           (Option.map x.stateMachineAliasArn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("description",
+          (Option.map x.description ~f:AliasDescription.to_value));
+        ("routingConfiguration",
+          (Option.map x.routingConfiguration
+             ~f:RoutingConfigurationList.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("updateDate", (Option.map x.updateDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updateDate") in
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let routingConfiguration =
+        (Option.map ~f:RoutingConfigurationList.of_xml)
+          (Xml.child xml_arg0 "routingConfiguration") in
+      let description =
+        (Option.map ~f:AliasDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      let stateMachineAliasArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineAliasArn") in
+      make ?updateDate ?creationDate ?routingConfiguration ?description ?name
+        ?stateMachineAliasArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateDate = field_map json__ "updateDate" Timestamp.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let routingConfiguration =
+        field_map json__ "routingConfiguration"
+          RoutingConfigurationList.of_json in
+      let description =
+        field_map json__ "description" AliasDescription.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let stateMachineAliasArn =
+        field_map json__ "stateMachineAliasArn" Arn.of_json in
+      make ?updateDate ?creationDate ?routingConfiguration ?description ?name
+        ?stateMachineAliasArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about a state machine alias. Related operations: CreateStateMachineAlias ListStateMachineAliases UpdateStateMachineAlias DeleteStateMachineAlias"]
+module DescribeStateMachineAliasInput =
+  struct
+    type nonrec t =
+      {
+      stateMachineAliasArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine alias."]}
+    let context_ = "DescribeStateMachineAliasInput"
+    let make ~stateMachineAliasArn = fun () -> { stateMachineAliasArn }
+    let to_value x =
+      structure_to_value
+        [("stateMachineAliasArn",
+           (Some (Arn.to_value x.stateMachineAliasArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stateMachineAliasArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineAliasArn") in
+      make ~stateMachineAliasArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stateMachineAliasArn =
+        field_map_exn json__ "stateMachineAliasArn" Arn.of_json in
+      make ~stateMachineAliasArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about a state machine alias. Related operations: CreateStateMachineAlias ListStateMachineAliases UpdateStateMachineAlias DeleteStateMachineAlias"]
+module DescribeMapRunOutput =
+  struct
+    type nonrec t =
+      {
+      mapRunArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies a Map Run."];
+      executionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the execution in which the Map Run was started."];
+      status: MapRunStatus.t option
+        [@ocaml.doc "The current status of the Map Run."];
+      startDate: Timestamp.t option
+        [@ocaml.doc "The date when the Map Run was started."];
+      stopDate: Timestamp.t option
+        [@ocaml.doc "The date when the Map Run was stopped."];
+      maxConcurrency: MaxConcurrency.t option
+        [@ocaml.doc
+          "The maximum number of child workflow executions configured to run in parallel for the Map Run at the same time."];
+      toleratedFailurePercentage: ToleratedFailurePercentage.t option
+        [@ocaml.doc
+          "The maximum percentage of failed child workflow executions before the Map Run fails."];
+      toleratedFailureCount: ToleratedFailureCount.t option
+        [@ocaml.doc
+          "The maximum number of failed child workflow executions before the Map Run fails."];
+      itemCounts: MapRunItemCounts.t option
+        [@ocaml.doc
+          "A JSON object that contains information about the total number of items, and the item count for each processing status, such as pending and failed."];
+      executionCounts: MapRunExecutionCounts.t option
+        [@ocaml.doc
+          "A JSON object that contains information about the total number of child workflow executions for the Map Run, and the count of child workflow executions for each status, such as failed and succeeded."];
+      redriveCount: RedriveCount.t option
+        [@ocaml.doc
+          "The number of times you've redriven a Map Run. If you have not yet redriven a Map Run, the redriveCount is 0. This count is only updated if you successfully redrive a Map Run."];
+      redriveDate: Timestamp.t option
+        [@ocaml.doc
+          "The date a Map Run was last redriven. If you have not yet redriven a Map Run, the redriveDate is null."]}
+    type nonrec error =
+      [ `InvalidArn of InvalidArn.t 
+      | `ResourceNotFound of ResourceNotFound.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?mapRunArn =
+      fun ?executionArn ->
+        fun ?status ->
+          fun ?startDate ->
+            fun ?stopDate ->
+              fun ?maxConcurrency ->
+                fun ?toleratedFailurePercentage ->
+                  fun ?toleratedFailureCount ->
+                    fun ?itemCounts ->
+                      fun ?executionCounts ->
+                        fun ?redriveCount ->
+                          fun ?redriveDate ->
+                            fun () ->
+                              {
+                                mapRunArn;
+                                executionArn;
+                                status;
+                                startDate;
+                                stopDate;
+                                maxConcurrency;
+                                toleratedFailurePercentage;
+                                toleratedFailureCount;
+                                itemCounts;
+                                executionCounts;
+                                redriveCount;
+                                redriveDate
+                              }
+    let error_of_json name json =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "ResourceNotFound" ->
+          `ResourceNotFound (ResourceNotFound.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "ResourceNotFound" -> `ResourceNotFound (ResourceNotFound.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `ResourceNotFound e ->
+          `Assoc
+            [("error", (`String "ResourceNotFound"));
+            ("details", (ResourceNotFound.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("mapRunArn", (Option.map x.mapRunArn ~f:LongArn.to_value));
+        ("executionArn", (Option.map x.executionArn ~f:Arn.to_value));
+        ("status", (Option.map x.status ~f:MapRunStatus.to_value));
+        ("startDate", (Option.map x.startDate ~f:Timestamp.to_value));
+        ("stopDate", (Option.map x.stopDate ~f:Timestamp.to_value));
+        ("maxConcurrency",
+          (Option.map x.maxConcurrency ~f:MaxConcurrency.to_value));
+        ("toleratedFailurePercentage",
+          (Option.map x.toleratedFailurePercentage
+             ~f:ToleratedFailurePercentage.to_value));
+        ("toleratedFailureCount",
+          (Option.map x.toleratedFailureCount
+             ~f:ToleratedFailureCount.to_value));
+        ("itemCounts",
+          (Option.map x.itemCounts ~f:MapRunItemCounts.to_value));
+        ("executionCounts",
+          (Option.map x.executionCounts ~f:MapRunExecutionCounts.to_value));
+        ("redriveCount",
+          (Option.map x.redriveCount ~f:RedriveCount.to_value));
+        ("redriveDate", (Option.map x.redriveDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redriveDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "redriveDate") in
+      let redriveCount =
+        (Option.map ~f:RedriveCount.of_xml)
+          (Xml.child xml_arg0 "redriveCount") in
+      let executionCounts =
+        (Option.map ~f:MapRunExecutionCounts.of_xml)
+          (Xml.child xml_arg0 "executionCounts") in
+      let itemCounts =
+        (Option.map ~f:MapRunItemCounts.of_xml)
+          (Xml.child xml_arg0 "itemCounts") in
+      let toleratedFailureCount =
+        (Option.map ~f:ToleratedFailureCount.of_xml)
+          (Xml.child xml_arg0 "toleratedFailureCount") in
+      let toleratedFailurePercentage =
+        (Option.map ~f:ToleratedFailurePercentage.of_xml)
+          (Xml.child xml_arg0 "toleratedFailurePercentage") in
+      let maxConcurrency =
+        (Option.map ~f:MaxConcurrency.of_xml)
+          (Xml.child xml_arg0 "maxConcurrency") in
+      let stopDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "stopDate") in
+      let startDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startDate") in
+      let status =
+        (Option.map ~f:MapRunStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let executionArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "executionArn") in
+      let mapRunArn =
+        (Option.map ~f:LongArn.of_xml) (Xml.child xml_arg0 "mapRunArn") in
+      make ?redriveDate ?redriveCount ?executionCounts ?itemCounts
+        ?toleratedFailureCount ?toleratedFailurePercentage ?maxConcurrency
+        ?stopDate ?startDate ?status ?executionArn ?mapRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redriveDate = field_map json__ "redriveDate" Timestamp.of_json in
+      let redriveCount = field_map json__ "redriveCount" RedriveCount.of_json in
+      let executionCounts =
+        field_map json__ "executionCounts" MapRunExecutionCounts.of_json in
+      let itemCounts = field_map json__ "itemCounts" MapRunItemCounts.of_json in
+      let toleratedFailureCount =
+        field_map json__ "toleratedFailureCount"
+          ToleratedFailureCount.of_json in
+      let toleratedFailurePercentage =
+        field_map json__ "toleratedFailurePercentage"
+          ToleratedFailurePercentage.of_json in
+      let maxConcurrency =
+        field_map json__ "maxConcurrency" MaxConcurrency.of_json in
+      let stopDate = field_map json__ "stopDate" Timestamp.of_json in
+      let startDate = field_map json__ "startDate" Timestamp.of_json in
+      let status = field_map json__ "status" MapRunStatus.of_json in
+      let executionArn = field_map json__ "executionArn" Arn.of_json in
+      let mapRunArn = field_map json__ "mapRunArn" LongArn.of_json in
+      make ?redriveDate ?redriveCount ?executionCounts ?itemCounts
+        ?toleratedFailureCount ?toleratedFailurePercentage ?maxConcurrency
+        ?stopDate ?startDate ?status ?executionArn ?mapRunArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about a Map Run's configuration, progress, and results. If you've redriven a Map Run, this API action also returns information about the redrives of that Map Run. For more information, see Examining Map Run in the Step Functions Developer Guide."]
+module DescribeMapRunInput =
+  struct
+    type nonrec t =
+      {
+      mapRunArn: LongArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies a Map Run."]}
+    let context_ = "DescribeMapRunInput"
+    let make ~mapRunArn = fun () -> { mapRunArn }
+    let to_value x =
+      structure_to_value
+        [("mapRunArn", (Some (LongArn.to_value x.mapRunArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mapRunArn =
+        LongArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mapRunArn") in
+      make ~mapRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mapRunArn = field_map_exn json__ "mapRunArn" LongArn.of_json in
+      make ~mapRunArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about a Map Run's configuration, progress, and results. If you've redriven a Map Run, this API action also returns information about the redrives of that Map Run. For more information, see Examining Map Run in the Step Functions Developer Guide."]
 module DescribeExecutionOutput =
   struct
     type nonrec t =
       {
-      executionArn: Arn.t
+      executionArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the execution."];
-      stateMachineArn: Arn.t
+      stateMachineArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the executed stated machine."];
       name: Name.t option
         [@ocaml.doc
-          "The name of the execution. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
-      status: ExecutionStatus.t
+          "The name of the execution. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+      status: ExecutionStatus.t option
         [@ocaml.doc "The current status of the execution."];
-      startDate: Timestamp.t
+      startDate: Timestamp.t option
         [@ocaml.doc "The date the execution is started."];
       stopDate: Timestamp.t option
         [@ocaml.doc
-          "If the execution has already ended, the date the execution stopped."];
+          "If the execution ended, the date the execution stopped."];
       input: SensitiveData.t option
         [@ocaml.doc
           "The string that contains the JSON input data of the execution. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
@@ -5601,42 +10698,95 @@ module DescribeExecutionOutput =
       outputDetails: CloudWatchEventsExecutionDataDetails.t option ;
       traceHeader: TraceHeader.t option
         [@ocaml.doc
-          "The AWS X-Ray trace header that was passed to the execution."]}
+          "The X-Ray trace header that was passed to the execution. For X-Ray traces, all Amazon Web Services services use the X-Amzn-Trace-Id header from the HTTP request. Using the header is the preferred mechanism to identify a trace. StartExecution and StartSyncExecution API operations can also use traceHeader from the body of the request payload. If both sources are provided, Step Functions will use the header value (preferred) over the value in the request body."];
+      mapRunArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies a Map Run, which dispatched this execution."];
+      error: SensitiveError.t option
+        [@ocaml.doc
+          "The error string if the state machine execution failed."];
+      cause: SensitiveCause.t option
+        [@ocaml.doc
+          "The cause string if the state machine execution failed."];
+      stateMachineVersionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine version associated with the execution. The version ARN is a combination of state machine ARN and the version number separated by a colon (:). For example, stateMachineARN:1. If you start an execution from a StartExecution request without specifying a state machine version or alias ARN, Step Functions returns a null value."];
+      stateMachineAliasArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine alias associated with the execution. The alias ARN is a combination of state machine ARN and the alias name separated by a colon (:). For example, stateMachineARN:PROD. If you start an execution from a StartExecution request with a state machine version ARN, this field will be null."];
+      redriveCount: RedriveCount.t option
+        [@ocaml.doc
+          "The number of times you've redriven an execution. If you have not yet redriven an execution, the redriveCount is 0. This count is only updated if you successfully redrive an execution."];
+      redriveDate: Timestamp.t option
+        [@ocaml.doc
+          "The date the execution was last redriven. If you have not yet redriven an execution, the redriveDate is null. The redriveDate is unavailable if you redrive a Map Run that starts child workflow executions of type EXPRESS."];
+      redriveStatus: ExecutionRedriveStatus.t option
+        [@ocaml.doc
+          "Indicates whether or not an execution can be redriven at a given point in time. For executions of type STANDARD, redriveStatus is NOT_REDRIVABLE if calling the RedriveExecution API action would return the ExecutionNotRedrivable error. For a Distributed Map that includes child workflows of type STANDARD, redriveStatus indicates whether or not the Map Run can redrive child workflow executions. For a Distributed Map that includes child workflows of type EXPRESS, redriveStatus indicates whether or not the Map Run can redrive child workflow executions. You can redrive failed or timed out EXPRESS workflows only if they're a part of a Map Run. When you redrive the Map Run, these workflows are restarted using the StartExecution API action."];
+      redriveStatusReason: SensitiveData.t option
+        [@ocaml.doc
+          "When redriveStatus is NOT_REDRIVABLE, redriveStatusReason specifies the reason why an execution cannot be redriven. For executions of type STANDARD, or for a Distributed Map that includes child workflows of type STANDARD, redriveStatusReason can include one of the following reasons: State machine is in DELETING status. Execution is RUNNING and cannot be redriven. Execution is SUCCEEDED and cannot be redriven. Execution was started before the launch of RedriveExecution. Execution history event limit exceeded. Execution has exceeded the max execution time. Execution redrivable period exceeded. For a Distributed Map that includes child workflows of type EXPRESS, redriveStatusReason is only returned if the child workflows are not redrivable. This happens when the child workflow executions have completed successfully."]}
     type nonrec error =
       [ `ExecutionDoesNotExist of ExecutionDoesNotExist.t 
       | `InvalidArn of InvalidArn.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsInvalidStateException of KmsInvalidStateException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeExecutionOutput"
-    let make ?name =
-      fun ?stopDate ->
-        fun ?input ->
-          fun ?inputDetails ->
-            fun ?output ->
-              fun ?outputDetails ->
-                fun ?traceHeader ->
-                  fun ~executionArn ->
-                    fun ~stateMachineArn ->
-                      fun ~status ->
-                        fun ~startDate ->
-                          fun () ->
-                            {
-                              name;
-                              stopDate;
-                              input;
-                              inputDetails;
-                              output;
-                              outputDetails;
-                              traceHeader;
-                              executionArn;
-                              stateMachineArn;
-                              status;
-                              startDate
-                            }
+    let make ?executionArn =
+      fun ?stateMachineArn ->
+        fun ?name ->
+          fun ?status ->
+            fun ?startDate ->
+              fun ?stopDate ->
+                fun ?input ->
+                  fun ?inputDetails ->
+                    fun ?output ->
+                      fun ?outputDetails ->
+                        fun ?traceHeader ->
+                          fun ?mapRunArn ->
+                            fun ?error ->
+                              fun ?cause ->
+                                fun ?stateMachineVersionArn ->
+                                  fun ?stateMachineAliasArn ->
+                                    fun ?redriveCount ->
+                                      fun ?redriveDate ->
+                                        fun ?redriveStatus ->
+                                          fun ?redriveStatusReason ->
+                                            fun () ->
+                                              {
+                                                executionArn;
+                                                stateMachineArn;
+                                                name;
+                                                status;
+                                                startDate;
+                                                stopDate;
+                                                input;
+                                                inputDetails;
+                                                output;
+                                                outputDetails;
+                                                traceHeader;
+                                                mapRunArn;
+                                                error;
+                                                cause;
+                                                stateMachineVersionArn;
+                                                stateMachineAliasArn;
+                                                redriveCount;
+                                                redriveDate;
+                                                redriveStatus;
+                                                redriveStatusReason
+                                              }
     let error_of_json name json =
       match name with
       | "ExecutionDoesNotExist" ->
           `ExecutionDoesNotExist (ExecutionDoesNotExist.of_json json)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5645,6 +10795,12 @@ module DescribeExecutionOutput =
       | "ExecutionDoesNotExist" ->
           `ExecutionDoesNotExist (ExecutionDoesNotExist.of_xml xml)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsInvalidStateException" ->
+          `KmsInvalidStateException (KmsInvalidStateException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5657,6 +10813,18 @@ module DescribeExecutionOutput =
           `Assoc
             [("error", (`String "InvalidArn"));
             ("details", (InvalidArn.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsInvalidStateException e ->
+          `Assoc
+            [("error", (`String "KmsInvalidStateException"));
+            ("details", (KmsInvalidStateException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5664,11 +10832,11 @@ module DescribeExecutionOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("executionArn", (Some (Arn.to_value x.executionArn)));
-        ("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
+        [("executionArn", (Option.map x.executionArn ~f:Arn.to_value));
+        ("stateMachineArn", (Option.map x.stateMachineArn ~f:Arn.to_value));
         ("name", (Option.map x.name ~f:Name.to_value));
-        ("status", (Some (ExecutionStatus.to_value x.status)));
-        ("startDate", (Some (Timestamp.to_value x.startDate)));
+        ("status", (Option.map x.status ~f:ExecutionStatus.to_value));
+        ("startDate", (Option.map x.startDate ~f:Timestamp.to_value));
         ("stopDate", (Option.map x.stopDate ~f:Timestamp.to_value));
         ("input", (Option.map x.input ~f:SensitiveData.to_value));
         ("inputDetails",
@@ -5678,9 +10846,46 @@ module DescribeExecutionOutput =
         ("outputDetails",
           (Option.map x.outputDetails
              ~f:CloudWatchEventsExecutionDataDetails.to_value));
-        ("traceHeader", (Option.map x.traceHeader ~f:TraceHeader.to_value))]
+        ("traceHeader", (Option.map x.traceHeader ~f:TraceHeader.to_value));
+        ("mapRunArn", (Option.map x.mapRunArn ~f:LongArn.to_value));
+        ("error", (Option.map x.error ~f:SensitiveError.to_value));
+        ("cause", (Option.map x.cause ~f:SensitiveCause.to_value));
+        ("stateMachineVersionArn",
+          (Option.map x.stateMachineVersionArn ~f:Arn.to_value));
+        ("stateMachineAliasArn",
+          (Option.map x.stateMachineAliasArn ~f:Arn.to_value));
+        ("redriveCount",
+          (Option.map x.redriveCount ~f:RedriveCount.to_value));
+        ("redriveDate", (Option.map x.redriveDate ~f:Timestamp.to_value));
+        ("redriveStatus",
+          (Option.map x.redriveStatus ~f:ExecutionRedriveStatus.to_value));
+        ("redriveStatusReason",
+          (Option.map x.redriveStatusReason ~f:SensitiveData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let redriveStatusReason =
+        (Option.map ~f:SensitiveData.of_xml)
+          (Xml.child xml_arg0 "redriveStatusReason") in
+      let redriveStatus =
+        (Option.map ~f:ExecutionRedriveStatus.of_xml)
+          (Xml.child xml_arg0 "redriveStatus") in
+      let redriveDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "redriveDate") in
+      let redriveCount =
+        (Option.map ~f:RedriveCount.of_xml)
+          (Xml.child xml_arg0 "redriveCount") in
+      let stateMachineAliasArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineAliasArn") in
+      let stateMachineVersionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineVersionArn") in
+      let cause =
+        (Option.map ~f:SensitiveCause.of_xml) (Xml.child xml_arg0 "cause") in
+      let error =
+        (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
+      let mapRunArn =
+        (Option.map ~f:LongArn.of_xml) (Xml.child xml_arg0 "mapRunArn") in
       let traceHeader =
         (Option.map ~f:TraceHeader.of_xml) (Xml.child xml_arg0 "traceHeader") in
       let outputDetails =
@@ -5696,85 +10901,113 @@ module DescribeExecutionOutput =
       let stopDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "stopDate") in
       let startDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startDate") in
       let status =
-        ExecutionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ExecutionStatus.of_xml) (Xml.child xml_arg0 "status") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let stateMachineArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "stateMachineArn") in
       let executionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
-      make ?traceHeader ?outputDetails ?output ?inputDetails ?input ?stopDate
-        ~startDate ~status ?name ~stateMachineArn ~executionArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "executionArn") in
+      make ?redriveStatusReason ?redriveStatus ?redriveDate ?redriveCount
+        ?stateMachineAliasArn ?stateMachineVersionArn ?cause ?error
+        ?mapRunArn ?traceHeader ?outputDetails ?output ?inputDetails ?input
+        ?stopDate ?startDate ?status ?name ?stateMachineArn ?executionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let traceHeader = field_map json "traceHeader" TraceHeader.of_json in
+    let of_json json__ =
+      let redriveStatusReason =
+        field_map json__ "redriveStatusReason" SensitiveData.of_json in
+      let redriveStatus =
+        field_map json__ "redriveStatus" ExecutionRedriveStatus.of_json in
+      let redriveDate = field_map json__ "redriveDate" Timestamp.of_json in
+      let redriveCount = field_map json__ "redriveCount" RedriveCount.of_json in
+      let stateMachineAliasArn =
+        field_map json__ "stateMachineAliasArn" Arn.of_json in
+      let stateMachineVersionArn =
+        field_map json__ "stateMachineVersionArn" Arn.of_json in
+      let cause = field_map json__ "cause" SensitiveCause.of_json in
+      let error = field_map json__ "error" SensitiveError.of_json in
+      let mapRunArn = field_map json__ "mapRunArn" LongArn.of_json in
+      let traceHeader = field_map json__ "traceHeader" TraceHeader.of_json in
       let outputDetails =
-        field_map json "outputDetails"
+        field_map json__ "outputDetails"
           CloudWatchEventsExecutionDataDetails.of_json in
-      let output = field_map json "output" SensitiveData.of_json in
+      let output = field_map json__ "output" SensitiveData.of_json in
       let inputDetails =
-        field_map json "inputDetails"
+        field_map json__ "inputDetails"
           CloudWatchEventsExecutionDataDetails.of_json in
-      let input = field_map json "input" SensitiveData.of_json in
-      let stopDate = field_map json "stopDate" Timestamp.of_json in
-      let startDate = field_map_exn json "startDate" Timestamp.of_json in
-      let status = field_map_exn json "status" ExecutionStatus.of_json in
-      let name = field_map json "name" Name.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      let executionArn = field_map_exn json "executionArn" Arn.of_json in
-      make ?traceHeader ?outputDetails ?output ?inputDetails ?input ?stopDate
-        ~startDate ~status ?name ~stateMachineArn ~executionArn ()
+      let input = field_map json__ "input" SensitiveData.of_json in
+      let stopDate = field_map json__ "stopDate" Timestamp.of_json in
+      let startDate = field_map json__ "startDate" Timestamp.of_json in
+      let status = field_map json__ "status" ExecutionStatus.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let stateMachineArn = field_map json__ "stateMachineArn" Arn.of_json in
+      let executionArn = field_map json__ "executionArn" Arn.of_json in
+      make ?redriveStatusReason ?redriveStatus ?redriveDate ?redriveCount
+        ?stateMachineAliasArn ?stateMachineVersionArn ?cause ?error
+        ?mapRunArn ?traceHeader ?outputDetails ?output ?inputDetails ?input
+        ?stopDate ?startDate ?status ?name ?stateMachineArn ?executionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an execution. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
+       "Provides information about a state machine execution, such as the state machine associated with the execution, the execution input and output, and relevant execution metadata. If you've redriven an execution, you can use this API action to return information about the redrives of that execution. In addition, you can use this API action to return the Map Run Amazon Resource Name (ARN) if the execution was dispatched by a Map Run. If you specify a version or alias ARN when you call the StartExecution API action, DescribeExecution returns that ARN. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. Executions of an EXPRESS state machine aren't supported by DescribeExecution unless a Map Run dispatched them."]
 module DescribeExecutionInput =
   struct
     type nonrec t =
       {
       executionArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the execution to describe."]}
+          "The Amazon Resource Name (ARN) of the execution to describe."];
+      includedData: IncludedData.t option
+        [@ocaml.doc
+          "If your state machine definition is encrypted with a KMS key, callers must have kms:Decrypt permission to decrypt the definition. Alternatively, you can call DescribeStateMachine API with includedData = METADATA_ONLY to get a successful response without the encrypted definition."]}
     let context_ = "DescribeExecutionInput"
-    let make ~executionArn = fun () -> { executionArn }
+    let make ?includedData =
+      fun ~executionArn -> fun () -> { includedData; executionArn }
     let to_value x =
       structure_to_value
-        [("executionArn", (Some (Arn.to_value x.executionArn)))]
+        [("executionArn", (Some (Arn.to_value x.executionArn)));
+        ("includedData",
+          (Option.map x.includedData ~f:IncludedData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let includedData =
+        (Option.map ~f:IncludedData.of_xml)
+          (Xml.child xml_arg0 "includedData") in
       let executionArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
-      make ~executionArn ()
+      make ?includedData ~executionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let executionArn = field_map_exn json "executionArn" Arn.of_json in
-      make ~executionArn ()
+    let of_json json__ =
+      let includedData = field_map json__ "includedData" IncludedData.of_json in
+      let executionArn = field_map_exn json__ "executionArn" Arn.of_json in
+      make ?includedData ~executionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an execution. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. This API action is not supported by EXPRESS state machines."]
+       "Provides information about a state machine execution, such as the state machine associated with the execution, the execution input and output, and relevant execution metadata. If you've redriven an execution, you can use this API action to return information about the redrives of that execution. In addition, you can use this API action to return the Map Run Amazon Resource Name (ARN) if the execution was dispatched by a Map Run. If you specify a version or alias ARN when you call the StartExecution API action, DescribeExecution returns that ARN. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. Executions of an EXPRESS state machine aren't supported by DescribeExecution unless a Map Run dispatched them."]
 module DescribeActivityOutput =
   struct
     type nonrec t =
       {
-      activityArn: Arn.t
+      activityArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the activity."];
-      name: Name.t
+      name: Name.t option
         [@ocaml.doc
-          "The name of the activity. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
-      creationDate: Timestamp.t
-        [@ocaml.doc "The date the activity is created."]}
+          "The name of the activity. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The date the activity is created."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc "Settings for configured server-side encryption."]}
     type nonrec error =
       [ `ActivityDoesNotExist of ActivityDoesNotExist.t 
       | `InvalidArn of InvalidArn.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeActivityOutput"
-    let make ~activityArn =
-      fun ~name ->
-        fun ~creationDate -> fun () -> { activityArn; name; creationDate }
+    let make ?activityArn =
+      fun ?name ->
+        fun ?creationDate ->
+          fun ?encryptionConfiguration ->
+            fun () ->
+              { activityArn; name; creationDate; encryptionConfiguration }
     let error_of_json name json =
       match name with
       | "ActivityDoesNotExist" ->
@@ -5807,25 +11040,32 @@ module DescribeActivityOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("activityArn", (Some (Arn.to_value x.activityArn)));
-        ("name", (Some (Name.to_value x.name)));
-        ("creationDate", (Some (Timestamp.to_value x.creationDate)))]
+        [("activityArn", (Option.map x.activityArn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
       let creationDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationDate") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let activityArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
-      make ~creationDate ~name ~activityArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "activityArn") in
+      make ?encryptionConfiguration ?creationDate ?name ?activityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let activityArn = field_map_exn json "activityArn" Arn.of_json in
-      make ~creationDate ~name ~activityArn ()
+    let of_json json__ =
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let activityArn = field_map json__ "activityArn" Arn.of_json in
+      make ?encryptionConfiguration ?creationDate ?name ?activityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an activity. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
@@ -5847,36 +11087,54 @@ module DescribeActivityInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
       make ~activityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let activityArn = field_map_exn json "activityArn" Arn.of_json in
+    let of_json json__ =
+      let activityArn = field_map_exn json__ "activityArn" Arn.of_json in
       make ~activityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an activity. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes."]
-module DeleteStateMachineOutput =
+module DeleteStateMachineVersionOutput =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `InvalidArn of InvalidArn.t 
+      [ `ConflictException of ConflictException.t 
+      | `InvalidArn of InvalidArn.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InvalidArn e ->
           `Assoc
             [("error", (`String "InvalidArn"));
             ("details", (InvalidArn.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5890,7 +11148,81 @@ module DeleteStateMachineOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a state machine. This is an asynchronous operation: It sets the state machine's status to DELETING and begins the deletion process. For EXPRESSstate machines, the deletion will happen eventually (usually less than a minute). Running executions may emit logs after DeleteStateMachine API is called."]
+       "Deletes a state machine version. After you delete a version, you can't call StartExecution using that version's ARN or use the version with a state machine alias. Deleting a state machine version won't terminate its in-progress executions. You can't delete a state machine version currently referenced by one or more aliases. Before you delete a version, you must either delete the aliases or update them to point to another state machine version. Related operations: PublishStateMachineVersion ListStateMachineVersions"]
+module DeleteStateMachineVersionInput =
+  struct
+    type nonrec t =
+      {
+      stateMachineVersionArn: LongArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine version to delete."]}
+    let context_ = "DeleteStateMachineVersionInput"
+    let make ~stateMachineVersionArn = fun () -> { stateMachineVersionArn }
+    let to_value x =
+      structure_to_value
+        [("stateMachineVersionArn",
+           (Some (LongArn.to_value x.stateMachineVersionArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stateMachineVersionArn =
+        LongArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineVersionArn") in
+      make ~stateMachineVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stateMachineVersionArn =
+        field_map_exn json__ "stateMachineVersionArn" LongArn.of_json in
+      make ~stateMachineVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a state machine version. After you delete a version, you can't call StartExecution using that version's ARN or use the version with a state machine alias. Deleting a state machine version won't terminate its in-progress executions. You can't delete a state machine version currently referenced by one or more aliases. Before you delete a version, you must either delete the aliases or update them to point to another state machine version. Related operations: PublishStateMachineVersion ListStateMachineVersions"]
+module DeleteStateMachineOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidArn of InvalidArn.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a state machine. This is an asynchronous operation. It sets the state machine's status to DELETING and begins the deletion process. A state machine is deleted only when all its executions are completed. On the next state transition, the state machine's executions are terminated. A qualified state machine ARN can either refer to a Distributed Map state defined within a state machine, a version ARN, or an alias ARN. The following are some examples of qualified and unqualified state machine ARNs: The following qualified state machine ARN refers to a Distributed Map state with a label mapStateLabel in a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine/mapStateLabel If you provide a qualified state machine ARN that refers to a Distributed Map state, the request fails with ValidationException. The following unqualified state machine ARN refers to a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine This API action also deletes all versions and aliases associated with a state machine. For EXPRESS state machines, the deletion happens eventually (usually in less than a minute). Running executions may emit logs after DeleteStateMachine API is called."]
 module DeleteStateMachineInput =
   struct
     type nonrec t =
@@ -5910,12 +11242,104 @@ module DeleteStateMachineInput =
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ~stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
+    let of_json json__ =
+      let stateMachineArn =
+        field_map_exn json__ "stateMachineArn" Arn.of_json in
       make ~stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a state machine. This is an asynchronous operation: It sets the state machine's status to DELETING and begins the deletion process. For EXPRESSstate machines, the deletion will happen eventually (usually less than a minute). Running executions may emit logs after DeleteStateMachine API is called."]
+       "Deletes a state machine. This is an asynchronous operation. It sets the state machine's status to DELETING and begins the deletion process. A state machine is deleted only when all its executions are completed. On the next state transition, the state machine's executions are terminated. A qualified state machine ARN can either refer to a Distributed Map state defined within a state machine, a version ARN, or an alias ARN. The following are some examples of qualified and unqualified state machine ARNs: The following qualified state machine ARN refers to a Distributed Map state with a label mapStateLabel in a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine/mapStateLabel If you provide a qualified state machine ARN that refers to a Distributed Map state, the request fails with ValidationException. The following unqualified state machine ARN refers to a state machine named myStateMachine. arn:partition:states:region:account-id:stateMachine:myStateMachine This API action also deletes all versions and aliases associated with a state machine. For EXPRESS state machines, the deletion happens eventually (usually in less than a minute). Running executions may emit logs after DeleteStateMachine API is called."]
+module DeleteStateMachineAliasOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InvalidArn of InvalidArn.t 
+      | `ResourceNotFound of ResourceNotFound.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "ResourceNotFound" ->
+          `ResourceNotFound (ResourceNotFound.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "ResourceNotFound" -> `ResourceNotFound (ResourceNotFound.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `ResourceNotFound e ->
+          `Assoc
+            [("error", (`String "ResourceNotFound"));
+            ("details", (ResourceNotFound.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a state machine alias. After you delete a state machine alias, you can't use it to start executions. When you delete a state machine alias, Step Functions doesn't delete the state machine versions that alias references. Related operations: CreateStateMachineAlias DescribeStateMachineAlias ListStateMachineAliases UpdateStateMachineAlias"]
+module DeleteStateMachineAliasInput =
+  struct
+    type nonrec t =
+      {
+      stateMachineAliasArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the state machine alias to delete."]}
+    let context_ = "DeleteStateMachineAliasInput"
+    let make ~stateMachineAliasArn = fun () -> { stateMachineAliasArn }
+    let to_value x =
+      structure_to_value
+        [("stateMachineAliasArn",
+           (Some (Arn.to_value x.stateMachineAliasArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stateMachineAliasArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineAliasArn") in
+      make ~stateMachineAliasArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stateMachineAliasArn =
+        field_map_exn json__ "stateMachineAliasArn" Arn.of_json in
+      make ~stateMachineAliasArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a state machine alias. After you delete a state machine alias, you can't use it to start executions. When you delete a state machine alias, Step Functions doesn't delete the state machine versions that alias references. Related operations: CreateStateMachineAlias DescribeStateMachineAlias ListStateMachineAliases UpdateStateMachineAlias"]
 module DeleteActivityOutput =
   struct
     type nonrec t = unit
@@ -5971,8 +11395,8 @@ module DeleteActivityInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
       make ~activityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let activityArn = field_map_exn json "activityArn" Arn.of_json in
+    let of_json json__ =
+      let activityArn = field_map_exn json__ "activityArn" Arn.of_json in
       make ~activityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an activity."]
@@ -5980,31 +11404,45 @@ module CreateStateMachineOutput =
   struct
     type nonrec t =
       {
-      stateMachineArn: Arn.t
+      stateMachineArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the created state machine."];
-      creationDate: Timestamp.t
-        [@ocaml.doc "The date the state machine is created."]}
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The date the state machine is created."];
+      stateMachineVersionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the created state machine version. If you do not set the publish parameter to true, this field returns null value."]}
     type nonrec error =
-      [ `InvalidArn of InvalidArn.t 
+      [ `ConflictException of ConflictException.t 
+      | `InvalidArn of InvalidArn.t 
       | `InvalidDefinition of InvalidDefinition.t 
+      | `InvalidEncryptionConfiguration of InvalidEncryptionConfiguration.t 
       | `InvalidLoggingConfiguration of InvalidLoggingConfiguration.t 
       | `InvalidName of InvalidName.t 
       | `InvalidTracingConfiguration of InvalidTracingConfiguration.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
       | `StateMachineAlreadyExists of StateMachineAlreadyExists.t 
       | `StateMachineDeleting of StateMachineDeleting.t 
       | `StateMachineLimitExceeded of StateMachineLimitExceeded.t 
       | `StateMachineTypeNotSupported of StateMachineTypeNotSupported.t 
       | `TooManyTags of TooManyTags.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateStateMachineOutput"
-    let make ~stateMachineArn =
-      fun ~creationDate -> fun () -> { stateMachineArn; creationDate }
+    let make ?stateMachineArn =
+      fun ?creationDate ->
+        fun ?stateMachineVersionArn ->
+          fun () -> { stateMachineArn; creationDate; stateMachineVersionArn }
     let error_of_json name json =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
       | "InvalidDefinition" ->
           `InvalidDefinition (InvalidDefinition.of_json json)
+      | "InvalidEncryptionConfiguration" ->
+          `InvalidEncryptionConfiguration
+            (InvalidEncryptionConfiguration.of_json json)
       | "InvalidLoggingConfiguration" ->
           `InvalidLoggingConfiguration
             (InvalidLoggingConfiguration.of_json json)
@@ -6012,6 +11450,10 @@ module CreateStateMachineOutput =
       | "InvalidTracingConfiguration" ->
           `InvalidTracingConfiguration
             (InvalidTracingConfiguration.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | "StateMachineAlreadyExists" ->
           `StateMachineAlreadyExists (StateMachineAlreadyExists.of_json json)
       | "StateMachineDeleting" ->
@@ -6022,14 +11464,21 @@ module CreateStateMachineOutput =
           `StateMachineTypeNotSupported
             (StateMachineTypeNotSupported.of_json json)
       | "TooManyTags" -> `TooManyTags (TooManyTags.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
       | "InvalidDefinition" ->
           `InvalidDefinition (InvalidDefinition.of_xml xml)
+      | "InvalidEncryptionConfiguration" ->
+          `InvalidEncryptionConfiguration
+            (InvalidEncryptionConfiguration.of_xml xml)
       | "InvalidLoggingConfiguration" ->
           `InvalidLoggingConfiguration
             (InvalidLoggingConfiguration.of_xml xml)
@@ -6037,6 +11486,10 @@ module CreateStateMachineOutput =
       | "InvalidTracingConfiguration" ->
           `InvalidTracingConfiguration
             (InvalidTracingConfiguration.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | "StateMachineAlreadyExists" ->
           `StateMachineAlreadyExists (StateMachineAlreadyExists.of_xml xml)
       | "StateMachineDeleting" ->
@@ -6047,10 +11500,16 @@ module CreateStateMachineOutput =
           `StateMachineTypeNotSupported
             (StateMachineTypeNotSupported.of_xml xml)
       | "TooManyTags" -> `TooManyTags (TooManyTags.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InvalidArn e ->
           `Assoc
             [("error", (`String "InvalidArn"));
@@ -6059,6 +11518,10 @@ module CreateStateMachineOutput =
           `Assoc
             [("error", (`String "InvalidDefinition"));
             ("details", (InvalidDefinition.to_json e))]
+      | `InvalidEncryptionConfiguration e ->
+          `Assoc
+            [("error", (`String "InvalidEncryptionConfiguration"));
+            ("details", (InvalidEncryptionConfiguration.to_json e))]
       | `InvalidLoggingConfiguration e ->
           `Assoc
             [("error", (`String "InvalidLoggingConfiguration"));
@@ -6071,6 +11534,14 @@ module CreateStateMachineOutput =
           `Assoc
             [("error", (`String "InvalidTracingConfiguration"));
             ("details", (InvalidTracingConfiguration.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `StateMachineAlreadyExists e ->
           `Assoc
             [("error", (`String "StateMachineAlreadyExists"));
@@ -6091,6 +11562,10 @@ module CreateStateMachineOutput =
           `Assoc
             [("error", (`String "TooManyTags"));
             ("details", (TooManyTags.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -6098,32 +11573,37 @@ module CreateStateMachineOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("stateMachineArn", (Some (Arn.to_value x.stateMachineArn)));
-        ("creationDate", (Some (Timestamp.to_value x.creationDate)))]
+        [("stateMachineArn", (Option.map x.stateMachineArn ~f:Arn.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("stateMachineVersionArn",
+          (Option.map x.stateMachineVersionArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let stateMachineVersionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineVersionArn") in
       let creationDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
       let stateMachineArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
-      make ~creationDate ~stateMachineArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "stateMachineArn") in
+      make ?stateMachineVersionArn ?creationDate ?stateMachineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
-      let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
-      make ~creationDate ~stateMachineArn ()
+    let of_json json__ =
+      let stateMachineVersionArn =
+        field_map json__ "stateMachineVersionArn" Arn.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let stateMachineArn = field_map json__ "stateMachineArn" Arn.of_json in
+      make ?stateMachineVersionArn ?creationDate ?stateMachineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a state machine. A state machine consists of a collection of states that can do work (Task states), determine to which states to transition next (Choice states), stop an execution with an error (Fail states), and so on. State machines are specified using a JSON-based, structured language. For more information, see Amazon States Language in the AWS Step Functions User Guide. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. CreateStateMachine is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if it was already created. CreateStateMachine's idempotency check is based on the state machine name, definition, type, LoggingConfiguration and TracingConfiguration. If a following request has a different roleArn or tags, Step Functions will ignore these differences and treat it as an idempotent request of the previous. In this case, roleArn and tags will not be updated, even if they are different."]
+       "Creates a state machine. A state machine consists of a collection of states that can do work (Task states), determine to which states to transition next (Choice states), stop an execution with an error (Fail states), and so on. State machines are specified using a JSON-based, structured language. For more information, see Amazon States Language in the Step Functions User Guide. If you set the publish parameter of this API action to true, it publishes version 1 as the first revision of the state machine. For additional control over security, you can encrypt your data using a customer-managed key for Step Functions state machines. You can configure a symmetric KMS key and data key reuse period when creating or updating a State Machine. The execution history and state machine definition will be encrypted with the key applied to the State Machine. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. CreateStateMachine is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if it was already created. CreateStateMachine's idempotency check is based on the state machine name, definition, type, LoggingConfiguration, TracingConfiguration, and EncryptionConfiguration The check is also based on the publish and versionDescription parameters. If a following request has a different roleArn or tags, Step Functions will ignore these differences and treat it as an idempotent request of the previous. In this case, roleArn and tags will not be updated, even if they are different."]
 module CreateStateMachineInput =
   struct
     type nonrec t =
       {
       name: Name.t
         [@ocaml.doc
-          "The name of the state machine. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the state machine. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       definition: Definition.t
         [@ocaml.doc
           "The Amazon States Language definition of the state machine. See Amazon States Language."];
@@ -6135,30 +11615,44 @@ module CreateStateMachineInput =
           "Determines whether a Standard or Express state machine is created. The default is STANDARD. You cannot update the type of a state machine once it has been created."];
       loggingConfiguration: LoggingConfiguration.t option
         [@ocaml.doc
-          "Defines what execution history events are logged and where they are logged. By default, the level is set to OFF. For more information see Log Levels in the AWS Step Functions User Guide."];
+          "Defines what execution history events are logged and where they are logged. By default, the level is set to OFF. For more information see Log Levels in the Step Functions User Guide."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be added when creating a state machine. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."];
+          "Tags to be added when creating a state machine. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the Amazon Web Services Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."];
       tracingConfiguration: TracingConfiguration.t option
-        [@ocaml.doc "Selects whether AWS X-Ray tracing is enabled."]}
+        [@ocaml.doc "Selects whether X-Ray tracing is enabled."];
+      publish: Publish.t option
+        [@ocaml.doc
+          "Set to true to publish the first version of the state machine during creation. The default is false."];
+      versionDescription: VersionDescription.t option
+        [@ocaml.doc
+          "Sets description about the state machine version. You can only set the description if the publish parameter is set to true. Otherwise, if you set versionDescription, but publish to false, this API action throws ValidationException."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc "Settings to configure server-side encryption."]}
     let context_ = "CreateStateMachineInput"
     let make ?type_ =
       fun ?loggingConfiguration ->
         fun ?tags ->
           fun ?tracingConfiguration ->
-            fun ~name ->
-              fun ~definition ->
-                fun ~roleArn ->
-                  fun () ->
-                    {
-                      type_;
-                      loggingConfiguration;
-                      tags;
-                      tracingConfiguration;
-                      name;
-                      definition;
-                      roleArn
-                    }
+            fun ?publish ->
+              fun ?versionDescription ->
+                fun ?encryptionConfiguration ->
+                  fun ~name ->
+                    fun ~definition ->
+                      fun ~roleArn ->
+                        fun () ->
+                          {
+                            type_;
+                            loggingConfiguration;
+                            tags;
+                            tracingConfiguration;
+                            publish;
+                            versionDescription;
+                            encryptionConfiguration;
+                            name;
+                            definition;
+                            roleArn
+                          }
     let to_value x =
       structure_to_value
         [("name", (Some (Name.to_value x.name)));
@@ -6169,9 +11663,23 @@ module CreateStateMachineInput =
           (Option.map x.loggingConfiguration ~f:LoggingConfiguration.to_value));
         ("tags", (Option.map x.tags ~f:TagList.to_value));
         ("tracingConfiguration",
-          (Option.map x.tracingConfiguration ~f:TracingConfiguration.to_value))]
+          (Option.map x.tracingConfiguration ~f:TracingConfiguration.to_value));
+        ("publish", (Option.map x.publish ~f:Publish.to_value));
+        ("versionDescription",
+          (Option.map x.versionDescription ~f:VersionDescription.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
+      let versionDescription =
+        (Option.map ~f:VersionDescription.of_xml)
+          (Xml.child xml_arg0 "versionDescription") in
+      let publish =
+        (Option.map ~f:Publish.of_xml) (Xml.child xml_arg0 "publish") in
       let tracingConfiguration =
         (Option.map ~f:TracingConfiguration.of_xml)
           (Xml.child xml_arg0 "tracingConfiguration") in
@@ -6188,67 +11696,271 @@ module CreateStateMachineInput =
           (Xml.child_exn ~context:context_ xml_arg0 "definition") in
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?tracingConfiguration ?tags ?loggingConfiguration ?type_ ~roleArn
+      make ?encryptionConfiguration ?versionDescription ?publish
+        ?tracingConfiguration ?tags ?loggingConfiguration ?type_ ~roleArn
         ~definition ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let versionDescription =
+        field_map json__ "versionDescription" VersionDescription.of_json in
+      let publish = field_map json__ "publish" Publish.of_json in
       let tracingConfiguration =
-        field_map json "tracingConfiguration" TracingConfiguration.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map json__ "tracingConfiguration" TracingConfiguration.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let loggingConfiguration =
-        field_map json "loggingConfiguration" LoggingConfiguration.of_json in
-      let type_ = field_map json "type" StateMachineType.of_json in
-      let roleArn = field_map_exn json "roleArn" Arn.of_json in
-      let definition = field_map_exn json "definition" Definition.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      make ?tracingConfiguration ?tags ?loggingConfiguration ?type_ ~roleArn
+        field_map json__ "loggingConfiguration" LoggingConfiguration.of_json in
+      let type_ = field_map json__ "type" StateMachineType.of_json in
+      let roleArn = field_map_exn json__ "roleArn" Arn.of_json in
+      let definition = field_map_exn json__ "definition" Definition.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
+      make ?encryptionConfiguration ?versionDescription ?publish
+        ?tracingConfiguration ?tags ?loggingConfiguration ?type_ ~roleArn
         ~definition ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a state machine. A state machine consists of a collection of states that can do work (Task states), determine to which states to transition next (Choice states), stop an execution with an error (Fail states), and so on. State machines are specified using a JSON-based, structured language. For more information, see Amazon States Language in the AWS Step Functions User Guide. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. CreateStateMachine is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if it was already created. CreateStateMachine's idempotency check is based on the state machine name, definition, type, LoggingConfiguration and TracingConfiguration. If a following request has a different roleArn or tags, Step Functions will ignore these differences and treat it as an idempotent request of the previous. In this case, roleArn and tags will not be updated, even if they are different."]
+       "Creates a state machine. A state machine consists of a collection of states that can do work (Task states), determine to which states to transition next (Choice states), stop an execution with an error (Fail states), and so on. State machines are specified using a JSON-based, structured language. For more information, see Amazon States Language in the Step Functions User Guide. If you set the publish parameter of this API action to true, it publishes version 1 as the first revision of the state machine. For additional control over security, you can encrypt your data using a customer-managed key for Step Functions state machines. You can configure a symmetric KMS key and data key reuse period when creating or updating a State Machine. The execution history and state machine definition will be encrypted with the key applied to the State Machine. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. CreateStateMachine is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if it was already created. CreateStateMachine's idempotency check is based on the state machine name, definition, type, LoggingConfiguration, TracingConfiguration, and EncryptionConfiguration The check is also based on the publish and versionDescription parameters. If a following request has a different roleArn or tags, Step Functions will ignore these differences and treat it as an idempotent request of the previous. In this case, roleArn and tags will not be updated, even if they are different."]
+module CreateStateMachineAliasOutput =
+  struct
+    type nonrec t =
+      {
+      stateMachineAliasArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the created state machine alias."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The date the state machine alias was created."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InvalidArn of InvalidArn.t  | `InvalidName of InvalidName.t 
+      | `ResourceNotFound of ResourceNotFound.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `StateMachineDeleting of StateMachineDeleting.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?stateMachineAliasArn =
+      fun ?creationDate -> fun () -> { stateMachineAliasArn; creationDate }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_json json)
+      | "InvalidName" -> `InvalidName (InvalidName.of_json json)
+      | "ResourceNotFound" ->
+          `ResourceNotFound (ResourceNotFound.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "StateMachineDeleting" ->
+          `StateMachineDeleting (StateMachineDeleting.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InvalidArn" -> `InvalidArn (InvalidArn.of_xml xml)
+      | "InvalidName" -> `InvalidName (InvalidName.of_xml xml)
+      | "ResourceNotFound" -> `ResourceNotFound (ResourceNotFound.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "StateMachineDeleting" ->
+          `StateMachineDeleting (StateMachineDeleting.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InvalidArn e ->
+          `Assoc
+            [("error", (`String "InvalidArn"));
+            ("details", (InvalidArn.to_json e))]
+      | `InvalidName e ->
+          `Assoc
+            [("error", (`String "InvalidName"));
+            ("details", (InvalidName.to_json e))]
+      | `ResourceNotFound e ->
+          `Assoc
+            [("error", (`String "ResourceNotFound"));
+            ("details", (ResourceNotFound.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `StateMachineDeleting e ->
+          `Assoc
+            [("error", (`String "StateMachineDeleting"));
+            ("details", (StateMachineDeleting.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("stateMachineAliasArn",
+           (Option.map x.stateMachineAliasArn ~f:Arn.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let stateMachineAliasArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "stateMachineAliasArn") in
+      make ?creationDate ?stateMachineAliasArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let stateMachineAliasArn =
+        field_map json__ "stateMachineAliasArn" Arn.of_json in
+      make ?creationDate ?stateMachineAliasArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an alias for a state machine that points to one or two versions of the same state machine. You can set your application to call StartExecution with an alias and update the version the alias uses without changing the client's code. You can also map an alias to split StartExecution requests between two versions of a state machine. To do this, add a second RoutingConfig object in the routingConfiguration parameter. You must also specify the percentage of execution run requests each version should receive in both RoutingConfig objects. Step Functions randomly chooses which version runs a given execution based on the percentage you specify. To create an alias that points to a single version, specify a single RoutingConfig object with a weight set to 100. You can create up to 100 aliases for each state machine. You must delete unused aliases using the DeleteStateMachineAlias API action. CreateStateMachineAlias is an idempotent API. Step Functions bases the idempotency check on the stateMachineArn, description, name, and routingConfiguration parameters. Requests that contain the same values for these parameters return a successful idempotent response without creating a duplicate resource. Related operations: DescribeStateMachineAlias ListStateMachineAliases UpdateStateMachineAlias DeleteStateMachineAlias"]
+module CreateStateMachineAliasInput =
+  struct
+    type nonrec t =
+      {
+      description: AliasDescription.t option
+        [@ocaml.doc "A description for the state machine alias."];
+      name: CharacterRestrictedName.t
+        [@ocaml.doc
+          "The name of the state machine alias. To avoid conflict with version ARNs, don't use an integer in the name of the alias."];
+      routingConfiguration: RoutingConfigurationList.t
+        [@ocaml.doc
+          "The routing configuration of a state machine alias. The routing configuration shifts execution traffic between two state machine versions. routingConfiguration contains an array of RoutingConfig objects that specify up to two state machine versions. Step Functions then randomly choses which version to run an execution with based on the weight assigned to each RoutingConfig."]}
+    let context_ = "CreateStateMachineAliasInput"
+    let make ?description =
+      fun ~name ->
+        fun ~routingConfiguration ->
+          fun () -> { description; name; routingConfiguration }
+    let to_value x =
+      structure_to_value
+        [("description",
+           (Option.map x.description ~f:AliasDescription.to_value));
+        ("name", (Some (CharacterRestrictedName.to_value x.name)));
+        ("routingConfiguration",
+          (Some (RoutingConfigurationList.to_value x.routingConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let routingConfiguration =
+        RoutingConfigurationList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "routingConfiguration") in
+      let name =
+        CharacterRestrictedName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let description =
+        (Option.map ~f:AliasDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      make ~routingConfiguration ~name ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let routingConfiguration =
+        field_map_exn json__ "routingConfiguration"
+          RoutingConfigurationList.of_json in
+      let name = field_map_exn json__ "name" CharacterRestrictedName.of_json in
+      let description =
+        field_map json__ "description" AliasDescription.of_json in
+      make ~routingConfiguration ~name ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an alias for a state machine that points to one or two versions of the same state machine. You can set your application to call StartExecution with an alias and update the version the alias uses without changing the client's code. You can also map an alias to split StartExecution requests between two versions of a state machine. To do this, add a second RoutingConfig object in the routingConfiguration parameter. You must also specify the percentage of execution run requests each version should receive in both RoutingConfig objects. Step Functions randomly chooses which version runs a given execution based on the percentage you specify. To create an alias that points to a single version, specify a single RoutingConfig object with a weight set to 100. You can create up to 100 aliases for each state machine. You must delete unused aliases using the DeleteStateMachineAlias API action. CreateStateMachineAlias is an idempotent API. Step Functions bases the idempotency check on the stateMachineArn, description, name, and routingConfiguration parameters. Requests that contain the same values for these parameters return a successful idempotent response without creating a duplicate resource. Related operations: DescribeStateMachineAlias ListStateMachineAliases UpdateStateMachineAlias DeleteStateMachineAlias"]
 module CreateActivityOutput =
   struct
     type nonrec t =
       {
-      activityArn: Arn.t
+      activityArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the created activity."];
-      creationDate: Timestamp.t
+      creationDate: Timestamp.t option
         [@ocaml.doc "The date the activity is created."]}
     type nonrec error =
-      [ `ActivityLimitExceeded of ActivityLimitExceeded.t 
-      | `InvalidName of InvalidName.t  | `TooManyTags of TooManyTags.t 
+      [ `ActivityAlreadyExists of ActivityAlreadyExists.t 
+      | `ActivityLimitExceeded of ActivityLimitExceeded.t 
+      | `InvalidEncryptionConfiguration of InvalidEncryptionConfiguration.t 
+      | `InvalidName of InvalidName.t 
+      | `KmsAccessDeniedException of KmsAccessDeniedException.t 
+      | `KmsThrottlingException of KmsThrottlingException.t 
+      | `TooManyTags of TooManyTags.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateActivityOutput"
-    let make ~activityArn =
-      fun ~creationDate -> fun () -> { activityArn; creationDate }
+    let make ?activityArn =
+      fun ?creationDate -> fun () -> { activityArn; creationDate }
     let error_of_json name json =
       match name with
+      | "ActivityAlreadyExists" ->
+          `ActivityAlreadyExists (ActivityAlreadyExists.of_json json)
       | "ActivityLimitExceeded" ->
           `ActivityLimitExceeded (ActivityLimitExceeded.of_json json)
+      | "InvalidEncryptionConfiguration" ->
+          `InvalidEncryptionConfiguration
+            (InvalidEncryptionConfiguration.of_json json)
       | "InvalidName" -> `InvalidName (InvalidName.of_json json)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_json json)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_json json)
       | "TooManyTags" -> `TooManyTags (TooManyTags.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ActivityAlreadyExists" ->
+          `ActivityAlreadyExists (ActivityAlreadyExists.of_xml xml)
       | "ActivityLimitExceeded" ->
           `ActivityLimitExceeded (ActivityLimitExceeded.of_xml xml)
+      | "InvalidEncryptionConfiguration" ->
+          `InvalidEncryptionConfiguration
+            (InvalidEncryptionConfiguration.of_xml xml)
       | "InvalidName" -> `InvalidName (InvalidName.of_xml xml)
+      | "KmsAccessDeniedException" ->
+          `KmsAccessDeniedException (KmsAccessDeniedException.of_xml xml)
+      | "KmsThrottlingException" ->
+          `KmsThrottlingException (KmsThrottlingException.of_xml xml)
       | "TooManyTags" -> `TooManyTags (TooManyTags.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ActivityAlreadyExists e ->
+          `Assoc
+            [("error", (`String "ActivityAlreadyExists"));
+            ("details", (ActivityAlreadyExists.to_json e))]
       | `ActivityLimitExceeded e ->
           `Assoc
             [("error", (`String "ActivityLimitExceeded"));
             ("details", (ActivityLimitExceeded.to_json e))]
+      | `InvalidEncryptionConfiguration e ->
+          `Assoc
+            [("error", (`String "InvalidEncryptionConfiguration"));
+            ("details", (InvalidEncryptionConfiguration.to_json e))]
       | `InvalidName e ->
           `Assoc
             [("error", (`String "InvalidName"));
             ("details", (InvalidName.to_json e))]
+      | `KmsAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "KmsAccessDeniedException"));
+            ("details", (KmsAccessDeniedException.to_json e))]
+      | `KmsThrottlingException e ->
+          `Assoc
+            [("error", (`String "KmsThrottlingException"));
+            ("details", (KmsThrottlingException.to_json e))]
       | `TooManyTags e ->
           `Assoc
             [("error", (`String "TooManyTags"));
@@ -6260,51 +11972,63 @@ module CreateActivityOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("activityArn", (Some (Arn.to_value x.activityArn)));
-        ("creationDate", (Some (Timestamp.to_value x.creationDate)))]
+        [("activityArn", (Option.map x.activityArn ~f:Arn.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let creationDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
       let activityArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
-      make ~creationDate ~activityArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "activityArn") in
+      make ?creationDate ?activityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
-      let activityArn = field_map_exn json "activityArn" Arn.of_json in
-      make ~creationDate ~activityArn ()
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let activityArn = field_map json__ "activityArn" Arn.of_json in
+      make ?creationDate ?activityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an activity. An activity is a task that you write in any programming language and host on any machine that has access to AWS Step Functions. Activities must poll Step Functions using the GetActivityTask API action and respond using SendTask* API actions. This function lets Step Functions know the existence of your activity and returns an identifier for use in a state machine and when polling from the activity. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. CreateActivity is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if it was already created. CreateActivity's idempotency check is based on the activity name. If a following request has different tags values, Step Functions will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different."]
+       "Creates an activity. An activity is a task that you write in any programming language and host on any machine that has access to Step Functions. Activities must poll Step Functions using the GetActivityTask API action and respond using SendTask* API actions. This function lets Step Functions know the existence of your activity and returns an identifier for use in a state machine and when polling from the activity. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. CreateActivity is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if it was already created. CreateActivity's idempotency check is based on the activity name. If a following request has different tags values, Step Functions will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different."]
 module CreateActivityInput =
   struct
     type nonrec t =
       {
       name: Name.t
         [@ocaml.doc
-          "The name of the activity to create. This name must be unique for your AWS account and region for 90 days. For more information, see Limits Related to State Machine Executions in the AWS Step Functions Developer Guide. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the activity to create. This name must be unique for your Amazon Web Services account and region for 90 days. For more information, see Limits Related to State Machine Executions in the Step Functions Developer Guide. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F, U+FFFE-FFFF) surrogates (U+D800-DFFF) invalid characters ( U+10FFFF) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       tags: TagList.t option
         [@ocaml.doc
-          "The list of tags to add to a resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]}
+          "The list of tags to add to a resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the Amazon Web Services Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc "Settings to configure server-side encryption."]}
     let context_ = "CreateActivityInput"
-    let make ?tags = fun ~name -> fun () -> { tags; name }
+    let make ?tags =
+      fun ?encryptionConfiguration ->
+        fun ~name -> fun () -> { tags; encryptionConfiguration; name }
     let to_value x =
       structure_to_value
         [("name", (Some (Name.to_value x.name)));
-        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?tags ~name ()
+      make ?encryptionConfiguration ?tags ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      make ?tags ~name ()
+    let of_json json__ =
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
+      make ?encryptionConfiguration ?tags ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an activity. An activity is a task that you write in any programming language and host on any machine that has access to AWS Step Functions. Activities must poll Step Functions using the GetActivityTask API action and respond using SendTask* API actions. This function lets Step Functions know the existence of your activity and returns an identifier for use in a state machine and when polling from the activity. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. CreateActivity is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if it was already created. CreateActivity's idempotency check is based on the activity name. If a following request has different tags values, Step Functions will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different."]
+       "Creates an activity. An activity is a task that you write in any programming language and host on any machine that has access to Step Functions. Activities must poll Step Functions using the GetActivityTask API action and respond using SendTask* API actions. This function lets Step Functions know the existence of your activity and returns an identifier for use in a state machine and when polling from the activity. This operation is eventually consistent. The results are best effort and may not reflect very recent updates and changes. CreateActivity is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if it was already created. CreateActivity's idempotency check is based on the activity name. If a following request has different tags values, Step Functions will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different."]

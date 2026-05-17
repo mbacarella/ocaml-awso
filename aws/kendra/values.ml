@@ -25,6 +25,99 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module AccessControlConfigurationId =
+  struct
+    type nonrec t = string
+    let context_ = "AccessControlConfigurationId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccessControlConfigurationId" j
+    let to_json = simple_to_json to_value
+  end
+module AccessControlConfigurationName =
+  struct
+    type nonrec t = string
+    let context_ = "AccessControlConfigurationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S\\s]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccessControlConfigurationName" j
+    let to_json = simple_to_json to_value
+  end
+module AccessControlConfigurationSummary =
+  struct
+    type nonrec t =
+      {
+      id: AccessControlConfigurationId.t option
+        [@ocaml.doc "The identifier of the access control configuration."]}
+    let make ?id = fun () -> { id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:AccessControlConfigurationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        (Option.map ~f:AccessControlConfigurationId.of_xml)
+          (Xml.child xml_arg0 "Id") in
+      make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "Id" AccessControlConfigurationId.of_json in
+      make ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary information on an access control configuration that you created for your documents in an index."]
+module AccessControlConfigurationSummaryList =
+  struct
+    type nonrec t = AccessControlConfigurationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccessControlConfigurationSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:AccessControlConfigurationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccessControlConfigurationSummaryList"
+        ~of_json:AccessControlConfigurationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module S3ObjectKey =
   struct
     type nonrec t = string
@@ -49,7 +142,7 @@ module AccessControlListConfiguration =
       {
       keyPath: S3ObjectKey.t option
         [@ocaml.doc
-          "Path to the Amazon Web Services S3 bucket that contains the ACL files."]}
+          "Path to the Amazon S3 bucket that contains the ACL files."]}
     let make ?keyPath = fun () -> { keyPath }
     let to_value x =
       structure_to_value
@@ -60,8 +153,8 @@ module AccessControlListConfiguration =
         (Option.map ~f:S3ObjectKey.of_xml) (Xml.child xml_arg0 "KeyPath") in
       make ?keyPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyPath = field_map json "KeyPath" S3ObjectKey.of_json in
+    let of_json json__ =
+      let keyPath = field_map json__ "KeyPath" S3ObjectKey.of_json in
       make ?keyPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -100,11 +193,12 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "You don't have sufficient access to perform this action. Please ensure you have the required permission policies and user accounts and try again."]
 module ColumnName =
   struct
     type nonrec t = string
@@ -146,9 +240,9 @@ module AclConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "AllowedGroupsColumnName") in
       make ~allowedGroupsColumnName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowedGroupsColumnName =
-        field_map_exn json "AllowedGroupsColumnName" ColumnName.of_json in
+        field_map_exn json__ "AllowedGroupsColumnName" ColumnName.of_json in
       make ~allowedGroupsColumnName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -251,26 +345,25 @@ module Highlight =
   struct
     type nonrec t =
       {
-      beginOffset: Integer.t
+      beginOffset: Integer.t option
         [@ocaml.doc
           "The zero-based location in the response string where the highlight starts."];
-      endOffset: Integer.t
+      endOffset: Integer.t option
         [@ocaml.doc
           "The zero-based location in the response string where the highlight ends."];
       topAnswer: Boolean.t option
         [@ocaml.doc
           "Indicates whether the response is the best response. True if this is the best response; otherwise, false."];
       type_: HighlightType.t option [@ocaml.doc "The highlight type."]}
-    let context_ = "Highlight"
-    let make ?topAnswer =
-      fun ?type_ ->
-        fun ~beginOffset ->
-          fun ~endOffset ->
-            fun () -> { topAnswer; type_; beginOffset; endOffset }
+    let make ?beginOffset =
+      fun ?endOffset ->
+        fun ?topAnswer ->
+          fun ?type_ ->
+            fun () -> { beginOffset; endOffset; topAnswer; type_ }
     let to_value x =
       structure_to_value
-        [("BeginOffset", (Some (Integer.to_value x.beginOffset)));
-        ("EndOffset", (Some (Integer.to_value x.endOffset)));
+        [("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
+        ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value));
         ("TopAnswer", (Option.map x.topAnswer ~f:Boolean.to_value));
         ("Type", (Option.map x.type_ ~f:HighlightType.to_value))]
     let to_query v = to_query to_value v
@@ -280,18 +373,17 @@ module Highlight =
       let topAnswer =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "TopAnswer") in
       let endOffset =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EndOffset") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EndOffset") in
       let beginOffset =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BeginOffset") in
-      make ?type_ ?topAnswer ~endOffset ~beginOffset ()
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
+      make ?type_ ?topAnswer ?endOffset ?beginOffset ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" HighlightType.of_json in
-      let topAnswer = field_map json "TopAnswer" Boolean.of_json in
-      let endOffset = field_map_exn json "EndOffset" Integer.of_json in
-      let beginOffset = field_map_exn json "BeginOffset" Integer.of_json in
-      make ?type_ ?topAnswer ~endOffset ~beginOffset ()
+    let of_json json__ =
+      let type_ = field_map json__ "Type" HighlightType.of_json in
+      let topAnswer = field_map json__ "TopAnswer" Boolean.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      make ?type_ ?topAnswer ?endOffset ?beginOffset ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information that you can use to highlight a search result so that your users can quickly identify terms in the response."]
@@ -299,6 +391,9 @@ module HighlightList =
   struct
     type nonrec t = Highlight.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Highlight.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -340,9 +435,9 @@ module TextWithHighlights =
       let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
       make ?highlights ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let highlights = field_map json "Highlights" HighlightList.of_json in
-      let text = field_map json "Text" String_.of_json in
+    let of_json json__ =
+      let highlights = field_map json__ "Highlights" HighlightList.of_json in
+      let text = field_map json__ "Text" String_.of_json in
       make ?highlights ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -367,9 +462,9 @@ module AdditionalResultAttributeValue =
           (Xml.child xml_arg0 "TextWithHighlightsValue") in
       make ?textWithHighlightsValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textWithHighlightsValue =
-        field_map json "TextWithHighlightsValue" TextWithHighlights.of_json in
+        field_map json__ "TextWithHighlightsValue" TextWithHighlights.of_json in
       make ?textWithHighlightsValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An attribute returned with a document from a search."]
@@ -377,46 +472,50 @@ module AdditionalResultAttribute =
   struct
     type nonrec t =
       {
-      key: String_.t [@ocaml.doc "The key that identifies the attribute."];
-      valueType: AdditionalResultAttributeValueType.t
+      key: String_.t option
+        [@ocaml.doc "The key that identifies the attribute."];
+      valueType: AdditionalResultAttributeValueType.t option
         [@ocaml.doc "The data type of the Value property."];
-      value: AdditionalResultAttributeValue.t
+      value: AdditionalResultAttributeValue.t option
         [@ocaml.doc "An object that contains the attribute value."]}
-    let context_ = "AdditionalResultAttribute"
-    let make ~key =
-      fun ~valueType -> fun ~value -> fun () -> { key; valueType; value }
+    let make ?key =
+      fun ?valueType -> fun ?value -> fun () -> { key; valueType; value }
     let to_value x =
       structure_to_value
-        [("Key", (Some (String_.to_value x.key)));
+        [("Key", (Option.map x.key ~f:String_.to_value));
         ("ValueType",
-          (Some (AdditionalResultAttributeValueType.to_value x.valueType)));
-        ("Value", (Some (AdditionalResultAttributeValue.to_value x.value)))]
+          (Option.map x.valueType
+             ~f:AdditionalResultAttributeValueType.to_value));
+        ("Value",
+          (Option.map x.value ~f:AdditionalResultAttributeValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
-        AdditionalResultAttributeValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+        (Option.map ~f:AdditionalResultAttributeValue.of_xml)
+          (Xml.child xml_arg0 "Value") in
       let valueType =
-        AdditionalResultAttributeValueType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ValueType") in
-      let key =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ~value ~valueType ~key ()
+        (Option.map ~f:AdditionalResultAttributeValueType.of_xml)
+          (Xml.child xml_arg0 "ValueType") in
+      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?value ?valueType ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let value =
-        field_map_exn json "Value" AdditionalResultAttributeValue.of_json in
+        field_map json__ "Value" AdditionalResultAttributeValue.of_json in
       let valueType =
-        field_map_exn json "ValueType"
+        field_map json__ "ValueType"
           AdditionalResultAttributeValueType.of_json in
-      let key = field_map_exn json "Key" String_.of_json in
-      make ~value ~valueType ~key ()
+      let key = field_map json__ "Key" String_.of_json in
+      make ?value ?valueType ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An attribute returned from an index query."]
 module AdditionalResultAttributeList =
   struct
     type nonrec t = AdditionalResultAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdditionalResultAttribute.to_value)) |>
         (fun x -> `List x)
@@ -439,6 +538,699 @@ module AdditionalResultAttributeList =
         ~of_json:AdditionalResultAttribute.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SiteUrl =
+  struct
+    type nonrec t = string
+    let context_ = "SiteUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^https:\\/\\/[a-zA-Z0-9_\\-\\.]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SiteUrl" j
+    let to_json = simple_to_json to_value
+  end
+module SiteId =
+  struct
+    type nonrec t = string
+    let context_ = "SiteId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[A-Za-z0-9-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SiteId" j
+    let to_json = simple_to_json to_value
+  end
+module SecretArn =
+  struct
+    type nonrec t = string
+    let context_ = "SecretArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1284) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretArn" j
+    let to_json = simple_to_json to_value
+  end
+module S3BucketName =
+  struct
+    type nonrec t = string
+    let context_ = "S3BucketName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3BucketName" j
+    let to_json = simple_to_json to_value
+  end
+module S3Path =
+  struct
+    type nonrec t =
+      {
+      bucket: S3BucketName.t
+        [@ocaml.doc "The name of the S3 bucket that contains the file."];
+      key: S3ObjectKey.t [@ocaml.doc "The name of the file."]}
+    let context_ = "S3Path"
+    let make ~bucket = fun ~key -> fun () -> { bucket; key }
+    let to_value x =
+      structure_to_value
+        [("Bucket", (Some (S3BucketName.to_value x.bucket)));
+        ("Key", (Some (S3ObjectKey.to_value x.key)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let key =
+        S3ObjectKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      let bucket =
+        S3BucketName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
+      make ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map_exn json__ "Key" S3ObjectKey.of_json in
+      let bucket = field_map_exn json__ "Bucket" S3BucketName.of_json in
+      make ~key ~bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information required to find a specific file in an Amazon S3 bucket."]
+module AlfrescoEntity =
+  struct
+    type nonrec t =
+      | Wiki 
+      | Blog 
+      | DocumentLibrary 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Wiki -> "wiki"
+      | Blog -> "blog"
+      | DocumentLibrary -> "documentLibrary"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "wiki" -> Wiki
+      | "blog" -> Blog
+      | "documentLibrary" -> DocumentLibrary
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AlfrescoEntity" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AlfrescoEntity" j)
+    let to_json = simple_to_json to_value
+  end
+module EntityFilter =
+  struct
+    type nonrec t = AlfrescoEntity.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AlfrescoEntity.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AlfrescoEntity.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EntityFilter" ~of_json:AlfrescoEntity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SubnetId =
+  struct
+    type nonrec t = string
+    let context_ = "SubnetId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\-0-9a-zA-Z]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubnetId" j
+    let to_json = simple_to_json to_value
+  end
+module SubnetIdList =
+  struct
+    type nonrec t = SubnetId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:6) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SubnetId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubnetIdList" ~of_json:SubnetId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VpcSecurityGroupId =
+  struct
+    type nonrec t = string
+    let context_ = "VpcSecurityGroupId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"[-0-9a-zA-Z]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcSecurityGroupId" j
+    let to_json = simple_to_json to_value
+  end
+module SecurityGroupIdList =
+  struct
+    type nonrec t = VpcSecurityGroupId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcSecurityGroupId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcSecurityGroupId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityGroupIdList"
+        ~of_json:VpcSecurityGroupId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DataSourceVpcConfiguration =
+  struct
+    type nonrec t =
+      {
+      subnetIds: SubnetIdList.t
+        [@ocaml.doc
+          "A list of identifiers for subnets within your Amazon VPC. The subnets should be able to connect to each other in the VPC, and they should have outgoing access to the Internet through a NAT device."];
+      securityGroupIds: SecurityGroupIdList.t
+        [@ocaml.doc
+          "A list of identifiers of security groups within your Amazon VPC. The security groups should enable Amazon Kendra to connect to the data source."]}
+    let context_ = "DataSourceVpcConfiguration"
+    let make ~subnetIds =
+      fun ~securityGroupIds -> fun () -> { subnetIds; securityGroupIds }
+    let to_value x =
+      structure_to_value
+        [("SubnetIds", (Some (SubnetIdList.to_value x.subnetIds)));
+        ("SecurityGroupIds",
+          (Some (SecurityGroupIdList.to_value x.securityGroupIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let securityGroupIds =
+        SecurityGroupIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupIds") in
+      let subnetIds =
+        SubnetIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
+      make ~securityGroupIds ~subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let securityGroupIds =
+        field_map_exn json__ "SecurityGroupIds" SecurityGroupIdList.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIdList.of_json in
+      make ~securityGroupIds ~subnetIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information to connect to an Amazon VPC."]
+module IndexFieldName =
+  struct
+    type nonrec t = string
+    let context_ = "IndexFieldName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:30) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\P{C}*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IndexFieldName" j
+    let to_json = simple_to_json to_value
+  end
+module DataSourceFieldName =
+  struct
+    type nonrec t = string
+    let context_ = "DataSourceFieldName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z][a-zA-Z0-9_.]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DataSourceFieldName" j
+    let to_json = simple_to_json to_value
+  end
+module DataSourceDateFieldFormat =
+  struct
+    type nonrec t = string
+    let context_ = "DataSourceDateFieldFormat"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:40) >>=
+                  (fun () -> check_pattern i ~pattern:"^(?!\\s).*(?<!\\s)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DataSourceDateFieldFormat" j
+    let to_json = simple_to_json to_value
+  end
+module DataSourceToIndexFieldMapping =
+  struct
+    type nonrec t =
+      {
+      dataSourceFieldName: DataSourceFieldName.t
+        [@ocaml.doc
+          "The name of the field in the data source. You must first create the index field using the UpdateIndex API."];
+      dateFieldFormat: DataSourceDateFieldFormat.t option
+        [@ocaml.doc
+          "The format for date fields in the data source. If the field specified in DataSourceFieldName is a date field, you must specify the date format. If the field is not a date field, an exception is thrown."];
+      indexFieldName: IndexFieldName.t
+        [@ocaml.doc
+          "The name of the index field to map to the data source field. The index field type must match the data source field type."]}
+    let context_ = "DataSourceToIndexFieldMapping"
+    let make ?dateFieldFormat =
+      fun ~dataSourceFieldName ->
+        fun ~indexFieldName ->
+          fun () -> { dateFieldFormat; dataSourceFieldName; indexFieldName }
+    let to_value x =
+      structure_to_value
+        [("DataSourceFieldName",
+           (Some (DataSourceFieldName.to_value x.dataSourceFieldName)));
+        ("DateFieldFormat",
+          (Option.map x.dateFieldFormat ~f:DataSourceDateFieldFormat.to_value));
+        ("IndexFieldName", (Some (IndexFieldName.to_value x.indexFieldName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let indexFieldName =
+        IndexFieldName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IndexFieldName") in
+      let dateFieldFormat =
+        (Option.map ~f:DataSourceDateFieldFormat.of_xml)
+          (Xml.child xml_arg0 "DateFieldFormat") in
+      let dataSourceFieldName =
+        DataSourceFieldName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataSourceFieldName") in
+      make ~indexFieldName ?dateFieldFormat ~dataSourceFieldName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let indexFieldName =
+        field_map_exn json__ "IndexFieldName" IndexFieldName.of_json in
+      let dateFieldFormat =
+        field_map json__ "DateFieldFormat" DataSourceDateFieldFormat.of_json in
+      let dataSourceFieldName =
+        field_map_exn json__ "DataSourceFieldName"
+          DataSourceFieldName.of_json in
+      make ~indexFieldName ?dateFieldFormat ~dataSourceFieldName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Maps attributes or field names of the documents synced from the data source to Amazon Kendra index field names. You can set up field mappings for each data source when calling CreateDataSource or UpdateDataSource API. To create custom fields, use the UpdateIndex API to first create an index field and then map to the data source field. For more information, see Mapping data source fields."]
+module DataSourceToIndexFieldMappingList =
+  struct
+    type nonrec t = DataSourceToIndexFieldMapping.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataSourceToIndexFieldMapping.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataSourceToIndexFieldMapping.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataSourceToIndexFieldMappingList"
+        ~of_json:DataSourceToIndexFieldMapping.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DataSourceInclusionsExclusionsStringsMember =
+  struct
+    type nonrec t = string
+    let context_ = "DataSourceInclusionsExclusionsStringsMember"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:300) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"DataSourceInclusionsExclusionsStringsMember" j
+    let to_json = simple_to_json to_value
+  end
+module DataSourceInclusionsExclusionsStrings =
+  struct
+    type nonrec t = DataSourceInclusionsExclusionsStringsMember.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:250) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:DataSourceInclusionsExclusionsStringsMember.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:DataSourceInclusionsExclusionsStringsMember.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataSourceInclusionsExclusionsStrings"
+        ~of_json:DataSourceInclusionsExclusionsStringsMember.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AlfrescoConfiguration =
+  struct
+    type nonrec t =
+      {
+      siteUrl: SiteUrl.t
+        [@ocaml.doc
+          "The URL of the Alfresco site. For example, https://hostname:8080."];
+      siteId: SiteId.t
+        [@ocaml.doc
+          "The identifier of the Alfresco site. For example, my-site."];
+      secretArn: SecretArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the key-value pairs required to connect to your Alfresco data source. The secret must contain a JSON structure with the following keys: username\226\128\148The user name of the Alfresco account. password\226\128\148The password of the Alfresco account."];
+      sslCertificateS3Path: S3Path.t
+        [@ocaml.doc
+          "The path to the SSL certificate stored in an Amazon S3 bucket. You use this to connect to Alfresco if you require a secure SSL connection. You can simply generate a self-signed X509 certificate on any computer using OpenSSL. For an example of using OpenSSL to create an X509 certificate, see Create and sign an X509 certificate."];
+      crawlSystemFolders: Boolean.t option
+        [@ocaml.doc "TRUE to index shared files."];
+      crawlComments: Boolean.t option
+        [@ocaml.doc "TRUE to index comments of blogs and other content."];
+      entityFilter: EntityFilter.t option
+        [@ocaml.doc
+          "Specify whether to index document libraries, wikis, or blogs. You can specify one or more of these options."];
+      documentLibraryFieldMappings:
+        DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Alfresco document libraries to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Alfresco fields. For more information, see Mapping data source fields. The Alfresco data source field names must exist in your Alfresco custom metadata."];
+      blogFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Alfresco blogs to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Alfresco fields. For more information, see Mapping data source fields. The Alfresco data source field names must exist in your Alfresco custom metadata."];
+      wikiFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Alfresco wikis to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Alfresco fields. For more information, see Mapping data source fields. The Alfresco data source field names must exist in your Alfresco custom metadata."];
+      inclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to include certain files in your Alfresco data source. Files that match the patterns are included in the index. Files that don't match the patterns are excluded from the index. If a file matches both an inclusion pattern and an exclusion pattern, the exclusion pattern takes precedence and the file isn't included in the index."];
+      exclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to exclude certain files in your Alfresco data source. Files that match the patterns are excluded from the index. Files that don't match the patterns are included in the index. If a file matches both an inclusion pattern and an exclusion pattern, the exclusion pattern takes precedence and the file isn't included in the index."];
+      vpcConfiguration: DataSourceVpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration information for an Amazon Virtual Private Cloud to connect to your Alfresco. For more information, see Configuring a VPC."]}
+    let context_ = "AlfrescoConfiguration"
+    let make ?crawlSystemFolders =
+      fun ?crawlComments ->
+        fun ?entityFilter ->
+          fun ?documentLibraryFieldMappings ->
+            fun ?blogFieldMappings ->
+              fun ?wikiFieldMappings ->
+                fun ?inclusionPatterns ->
+                  fun ?exclusionPatterns ->
+                    fun ?vpcConfiguration ->
+                      fun ~siteUrl ->
+                        fun ~siteId ->
+                          fun ~secretArn ->
+                            fun ~sslCertificateS3Path ->
+                              fun () ->
+                                {
+                                  crawlSystemFolders;
+                                  crawlComments;
+                                  entityFilter;
+                                  documentLibraryFieldMappings;
+                                  blogFieldMappings;
+                                  wikiFieldMappings;
+                                  inclusionPatterns;
+                                  exclusionPatterns;
+                                  vpcConfiguration;
+                                  siteUrl;
+                                  siteId;
+                                  secretArn;
+                                  sslCertificateS3Path
+                                }
+    let to_value x =
+      structure_to_value
+        [("SiteUrl", (Some (SiteUrl.to_value x.siteUrl)));
+        ("SiteId", (Some (SiteId.to_value x.siteId)));
+        ("SecretArn", (Some (SecretArn.to_value x.secretArn)));
+        ("SslCertificateS3Path",
+          (Some (S3Path.to_value x.sslCertificateS3Path)));
+        ("CrawlSystemFolders",
+          (Option.map x.crawlSystemFolders ~f:Boolean.to_value));
+        ("CrawlComments", (Option.map x.crawlComments ~f:Boolean.to_value));
+        ("EntityFilter",
+          (Option.map x.entityFilter ~f:EntityFilter.to_value));
+        ("DocumentLibraryFieldMappings",
+          (Option.map x.documentLibraryFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("BlogFieldMappings",
+          (Option.map x.blogFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("WikiFieldMappings",
+          (Option.map x.wikiFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("InclusionPatterns",
+          (Option.map x.inclusionPatterns
+             ~f:DataSourceInclusionsExclusionsStrings.to_value));
+        ("ExclusionPatterns",
+          (Option.map x.exclusionPatterns
+             ~f:DataSourceInclusionsExclusionsStrings.to_value));
+        ("VpcConfiguration",
+          (Option.map x.vpcConfiguration
+             ~f:DataSourceVpcConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConfiguration =
+        (Option.map ~f:DataSourceVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
+      let exclusionPatterns =
+        (Option.map ~f:DataSourceInclusionsExclusionsStrings.of_xml)
+          (Xml.child xml_arg0 "ExclusionPatterns") in
+      let inclusionPatterns =
+        (Option.map ~f:DataSourceInclusionsExclusionsStrings.of_xml)
+          (Xml.child xml_arg0 "InclusionPatterns") in
+      let wikiFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "WikiFieldMappings") in
+      let blogFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "BlogFieldMappings") in
+      let documentLibraryFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "DocumentLibraryFieldMappings") in
+      let entityFilter =
+        (Option.map ~f:EntityFilter.of_xml)
+          (Xml.child xml_arg0 "EntityFilter") in
+      let crawlComments =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "CrawlComments") in
+      let crawlSystemFolders =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "CrawlSystemFolders") in
+      let sslCertificateS3Path =
+        S3Path.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SslCertificateS3Path") in
+      let secretArn =
+        SecretArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecretArn") in
+      let siteId =
+        SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
+      let siteUrl =
+        SiteUrl.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteUrl") in
+      make ?vpcConfiguration ?exclusionPatterns ?inclusionPatterns
+        ?wikiFieldMappings ?blogFieldMappings ?documentLibraryFieldMappings
+        ?entityFilter ?crawlComments ?crawlSystemFolders
+        ~sslCertificateS3Path ~secretArn ~siteId ~siteUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
+      let exclusionPatterns =
+        field_map json__ "ExclusionPatterns"
+          DataSourceInclusionsExclusionsStrings.of_json in
+      let inclusionPatterns =
+        field_map json__ "InclusionPatterns"
+          DataSourceInclusionsExclusionsStrings.of_json in
+      let wikiFieldMappings =
+        field_map json__ "WikiFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let blogFieldMappings =
+        field_map json__ "BlogFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let documentLibraryFieldMappings =
+        field_map json__ "DocumentLibraryFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let entityFilter = field_map json__ "EntityFilter" EntityFilter.of_json in
+      let crawlComments = field_map json__ "CrawlComments" Boolean.of_json in
+      let crawlSystemFolders =
+        field_map json__ "CrawlSystemFolders" Boolean.of_json in
+      let sslCertificateS3Path =
+        field_map_exn json__ "SslCertificateS3Path" S3Path.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
+      let siteUrl = field_map_exn json__ "SiteUrl" SiteUrl.of_json in
+      make ?vpcConfiguration ?exclusionPatterns ?inclusionPatterns
+        ?wikiFieldMappings ?blogFieldMappings ?documentLibraryFieldMappings
+        ?entityFilter ?crawlComments ?crawlSystemFolders
+        ~sslCertificateS3Path ~secretArn ~siteId ~siteUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information to connect to Alfresco as your data source. Support for AlfrescoConfiguration ended May 2023. We recommend migrating to or using the Alfresco data source template schema / TemplateConfiguration API."]
 module AmazonResourceName =
   struct
     type nonrec t = string
@@ -485,10 +1277,10 @@ module FailedEntity =
       {
       entityId: EntityId.t option
         [@ocaml.doc
-          "The identifier of the user or group in your Amazon Web Services SSO identity source. For example, a user ID could be an email."];
+          "The identifier of the user or group in your IAM Identity Center identity source. For example, a user ID could be an email."];
       errorMessage: ErrorMessage.t option
         [@ocaml.doc
-          "The reason the user or group in your Amazon Web Services SSO identity source failed to properly configure with your Amazon Kendra experience."]}
+          "The reason the user or group in your IAM Identity Center identity source failed to properly configure with your Amazon Kendra experience."]}
     let make ?entityId =
       fun ?errorMessage -> fun () -> { entityId; errorMessage }
     let to_value x =
@@ -505,13 +1297,13 @@ module FailedEntity =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "EntityId") in
       make ?errorMessage ?entityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let entityId = field_map json "EntityId" EntityId.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let entityId = field_map json__ "EntityId" EntityId.of_json in
       make ?errorMessage ?entityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information on the users or groups in your Amazon Web Services SSO identity source that failed to properly configure with your Amazon Kendra experience."]
+       "Information on the users or groups in your IAM Identity Center identity source that failed to properly configure with your Amazon Kendra experience."]
 module AssociateEntitiesToExperienceFailedEntityList =
   struct
     type nonrec t = FailedEntity.t list
@@ -520,6 +1312,9 @@ module AssociateEntitiesToExperienceFailedEntityList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FailedEntity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -608,7 +1403,7 @@ module EntityConfiguration =
       {
       entityId: EntityId.t
         [@ocaml.doc
-          "The identifier of a user or group in your Amazon Web Services SSO identity source. For example, a user ID could be an email."];
+          "The identifier of a user or group in your IAM Identity Center identity source. For example, a user ID could be an email."];
       entityType: EntityType.t
         [@ocaml.doc
           "Specifies whether you are configuring a User or a Group."]}
@@ -628,13 +1423,13 @@ module EntityConfiguration =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       make ~entityType ~entityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entityType = field_map_exn json "EntityType" EntityType.of_json in
-      let entityId = field_map_exn json "EntityId" EntityId.of_json in
+    let of_json json__ =
+      let entityType = field_map_exn json__ "EntityType" EntityType.of_json in
+      let entityId = field_map_exn json__ "EntityId" EntityId.of_json in
       make ~entityType ~entityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information for users or groups in your Amazon Web Services SSO identity source to grant access your Amazon Kendra experience."]
+       "Provides the configuration information for users or groups in your IAM Identity Center identity source to grant access your Amazon Kendra experience."]
 module AssociateEntityList =
   struct
     type nonrec t = EntityConfiguration.t list
@@ -643,6 +1438,9 @@ module AssociateEntityList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -676,7 +1474,7 @@ module AssociateEntitiesToExperienceRequest =
           "The identifier of the index for your Amazon Kendra experience."];
       entityList: AssociateEntityList.t
         [@ocaml.doc
-          "Lists users or groups in your Amazon Web Services SSO identity source."]}
+          "Lists users or groups in your IAM Identity Center identity source."]}
     let context_ = "AssociateEntitiesToExperienceRequest"
     let make ~id =
       fun ~indexId ->
@@ -697,15 +1495,15 @@ module AssociateEntitiesToExperienceRequest =
         ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~entityList ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entityList =
-        field_map_exn json "EntityList" AssociateEntityList.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ExperienceId.of_json in
+        field_map_exn json__ "EntityList" AssociateEntityList.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ExperienceId.of_json in
       make ~entityList ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Grants users or groups in your Amazon Web Services SSO identity source access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Grants users or groups in your IAM Identity Center identity source access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module ValidationException =
   struct
     type nonrec t = {
@@ -720,11 +1518,12 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The input fails to satisfy the constraints set by the Amazon Kendra service. Please provide the correct input and try again."]
 module ThrottlingException =
   struct
     type nonrec t = {
@@ -739,11 +1538,12 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The request was denied due to request throttling. Please reduce the number of requests and try again."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -758,11 +1558,12 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The resource you want to use doesn\226\128\153t exist. Please check you have provided the correct resource and try again."]
 module ResourceAlreadyExistException =
   struct
     type nonrec t = {
@@ -777,11 +1578,12 @@ module ResourceAlreadyExistException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The resource you want to use already exists. Please check you have provided the correct resource and try again."]
 module InternalServerException =
   struct
     type nonrec t = {
@@ -796,11 +1598,12 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "An issue occurred with the internal server used for your Amazon Kendra service. Please wait a few minutes and try again, or contact Support for help."]
 module AssociateEntitiesToExperienceResponse =
   struct
     type nonrec t =
@@ -808,7 +1611,7 @@ module AssociateEntitiesToExperienceResponse =
       failedEntityList:
         AssociateEntitiesToExperienceFailedEntityList.t option
         [@ocaml.doc
-          "Lists the users or groups in your Amazon Web Services SSO identity source that failed to properly configure with your Amazon Kendra experience."]}
+          "Lists the users or groups in your IAM Identity Center identity source that failed to properly configure with your Amazon Kendra experience."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -896,14 +1699,14 @@ module AssociateEntitiesToExperienceResponse =
           (Xml.child xml_arg0 "FailedEntityList") in
       make ?failedEntityList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedEntityList =
-        field_map json "FailedEntityList"
+        field_map json__ "FailedEntityList"
           AssociateEntitiesToExperienceFailedEntityList.of_json in
       make ?failedEntityList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Grants users or groups in your Amazon Web Services SSO identity source access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Grants users or groups in your IAM Identity Center identity source access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module Persona =
   struct
     type nonrec t =
@@ -929,10 +1732,10 @@ module EntityPersonaConfiguration =
       {
       entityId: EntityId.t
         [@ocaml.doc
-          "The identifier of a user or group in your Amazon Web Services SSO identity source. For example, a user ID could be an email."];
+          "The identifier of a user or group in your IAM Identity Center identity source. For example, a user ID could be an email."];
       persona: Persona.t
         [@ocaml.doc
-          "The persona that defines the specific permissions of the user or group in your Amazon Web Services SSO identity source. The available personas or access roles are Owner and Viewer. For more information on these personas, see Providing access to your search page."]}
+          "The persona that defines the specific permissions of the user or group in your IAM Identity Center identity source. The available personas or access roles are Owner and Viewer. For more information on these personas, see Providing access to your search page."]}
     let context_ = "EntityPersonaConfiguration"
     let make ~entityId = fun ~persona -> fun () -> { entityId; persona }
     let to_value x =
@@ -947,13 +1750,13 @@ module EntityPersonaConfiguration =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       make ~persona ~entityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let persona = field_map_exn json "Persona" Persona.of_json in
-      let entityId = field_map_exn json "EntityId" EntityId.of_json in
+    let of_json json__ =
+      let persona = field_map_exn json__ "Persona" Persona.of_json in
+      let entityId = field_map_exn json__ "EntityId" EntityId.of_json in
       make ~persona ~entityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information for users or groups in your Amazon Web Services SSO identity source for access to your Amazon Kendra experience. Specific permissions are defined for each user or group once they are granted access to your Amazon Kendra experience."]
+       "Provides the configuration information for users or groups in your IAM Identity Center identity source for access to your Amazon Kendra experience. Specific permissions are defined for each user or group once they are granted access to your Amazon Kendra experience."]
 module EntityPersonaConfigurationList =
   struct
     type nonrec t = EntityPersonaConfiguration.t list
@@ -962,6 +1765,9 @@ module EntityPersonaConfigurationList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityPersonaConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -995,7 +1801,7 @@ module AssociatePersonasToEntitiesRequest =
           "The identifier of the index for your Amazon Kendra experience."];
       personas: EntityPersonaConfigurationList.t
         [@ocaml.doc
-          "The personas that define the specific permissions of users or groups in your Amazon Web Services SSO identity source. The available personas or access roles are Owner and Viewer. For more information on these personas, see Providing access to your search page."]}
+          "The personas that define the specific permissions of users or groups in your IAM Identity Center identity source. The available personas or access roles are Owner and Viewer. For more information on these personas, see Providing access to your search page."]}
     let context_ = "AssociatePersonasToEntitiesRequest"
     let make ~id =
       fun ~indexId -> fun ~personas -> fun () -> { id; indexId; personas }
@@ -1016,15 +1822,16 @@ module AssociatePersonasToEntitiesRequest =
         ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~personas ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let personas =
-        field_map_exn json "Personas" EntityPersonaConfigurationList.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ExperienceId.of_json in
+        field_map_exn json__ "Personas"
+          EntityPersonaConfigurationList.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ExperienceId.of_json in
       make ~personas ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines the specific permissions of users or groups in your Amazon Web Services SSO identity source with access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Defines the specific permissions of users or groups in your IAM Identity Center identity source with access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module FailedEntityList =
   struct
     type nonrec t = FailedEntity.t list
@@ -1033,6 +1840,9 @@ module FailedEntityList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FailedEntity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1059,7 +1869,7 @@ module AssociatePersonasToEntitiesResponse =
       {
       failedEntityList: FailedEntityList.t option
         [@ocaml.doc
-          "Lists the users or groups in your Amazon Web Services SSO identity source that failed to properly configure with your Amazon Kendra experience."]}
+          "Lists the users or groups in your IAM Identity Center identity source that failed to properly configure with your Amazon Kendra experience."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -1146,13 +1956,13 @@ module AssociatePersonasToEntitiesResponse =
           (Xml.child xml_arg0 "FailedEntityList") in
       make ?failedEntityList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedEntityList =
-        field_map json "FailedEntityList" FailedEntityList.of_json in
+        field_map json__ "FailedEntityList" FailedEntityList.of_json in
       make ?failedEntityList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines the specific permissions of users or groups in your Amazon Web Services SSO identity source with access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Defines the specific permissions of users or groups in your IAM Identity Center identity source with access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module Timestamp =
   struct
     type nonrec t = string
@@ -1200,6 +2010,9 @@ module DocumentAttributeStringListValue =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1228,7 +2041,8 @@ module DocumentAttributeValue =
       stringValue: DocumentAttributeStringValue.t option
         [@ocaml.doc "A string, such as \"department\"."];
       stringListValue: DocumentAttributeStringListValue.t option
-        [@ocaml.doc "A list of strings."];
+        [@ocaml.doc
+          "A list of strings. The default maximum length or number of strings is 10."];
       longValue: Long.t option [@ocaml.doc "A long integer value."];
       dateValue: Timestamp.t option
         [@ocaml.doc
@@ -1261,18 +2075,18 @@ module DocumentAttributeValue =
           (Xml.child xml_arg0 "StringValue") in
       make ?dateValue ?longValue ?stringListValue ?stringValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dateValue = field_map json "DateValue" Timestamp.of_json in
-      let longValue = field_map json "LongValue" Long.of_json in
+    let of_json json__ =
+      let dateValue = field_map json__ "DateValue" Timestamp.of_json in
+      let longValue = field_map json__ "LongValue" Long.of_json in
       let stringListValue =
-        field_map json "StringListValue"
+        field_map json__ "StringListValue"
           DocumentAttributeStringListValue.of_json in
       let stringValue =
-        field_map json "StringValue" DocumentAttributeStringValue.of_json in
+        field_map json__ "StringValue" DocumentAttributeStringValue.of_json in
       make ?dateValue ?longValue ?stringListValue ?stringValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The value of a custom document attribute. You can only provide one value for a custom attribute."]
+       "The value of a document attribute. You can only provide one value for a document attribute."]
 module DocumentAttributeKey =
   struct
     type nonrec t = string
@@ -1318,47 +2132,47 @@ module DocumentAttribute =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" DocumentAttributeValue.of_json in
-      let key = field_map_exn json "Key" DocumentAttributeKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" DocumentAttributeValue.of_json in
+      let key = field_map_exn json__ "Key" DocumentAttributeKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A custom attribute value assigned to a document. For more information on how to create custom document attributes, see Custom Attributes."]
+       "A document attribute or metadata field. To create custom document attributes, see Custom attributes."]
 module rec
   AttributeFilter:sig
                     type nonrec t =
                       {
                       andAllFilters: AttributeFilterList.t option
                         [@ocaml.doc
-                          "Performs a logical AND operation on all supplied filters."];
+                          "Performs a logical AND operation on all filters that you specify."];
                       orAllFilters: AttributeFilterList.t option
                         [@ocaml.doc
-                          "Performs a logical OR operation on all supplied filters."];
+                          "Performs a logical OR operation on all filters that you specify."];
                       notFilter: AttributeFilter.t option
                         [@ocaml.doc
-                          "Performs a logical NOT operation on all supplied filters."];
+                          "Performs a logical NOT operation on all filters that you specify."];
                       equalsTo: DocumentAttribute.t option
                         [@ocaml.doc
-                          "Performs an equals operation on two document attributes."];
+                          "Performs an equals operation on document attributes/fields and their values."];
                       containsAll: DocumentAttribute.t option
                         [@ocaml.doc
-                          "Returns true when a document contains all of the specified document attributes. This filter is only applicable to StringListValue metadata."];
+                          "Returns true when a document contains all of the specified document attributes/fields. This filter is only applicable to StringListValue."];
                       containsAny: DocumentAttribute.t option
                         [@ocaml.doc
-                          "Returns true when a document contains any of the specified document attributes. This filter is only applicable to StringListValue metadata."];
+                          "Returns true when a document contains any of the specified document attributes/fields. This filter is only applicable to StringListValue."];
                       greaterThan: DocumentAttribute.t option
                         [@ocaml.doc
-                          "Performs a greater than operation on two document attributes. Use with a document attribute of type Date or Long."];
+                          "Performs a greater than operation on document attributes/fields and their values. Use with the document attribute type Date or Long."];
                       greaterThanOrEquals: DocumentAttribute.t option
                         [@ocaml.doc
-                          "Performs a greater or equals than operation on two document attributes. Use with a document attribute of type Date or Long."];
+                          "Performs a greater or equals than operation on document attributes/fields and their values. Use with the document attribute type Date or Long."];
                       lessThan: DocumentAttribute.t option
                         [@ocaml.doc
-                          "Performs a less than operation on two document attributes. Use with a document attribute of type Date or Long."];
+                          "Performs a less than operation on document attributes/fields and their values. Use with the document attribute type Date or Long."];
                       lessThanOrEquals: DocumentAttribute.t option
                         [@ocaml.doc
-                          "Performs a less than or equals operation on two document attributes. Use with a document attribute of type Date or Long."]}
+                          "Performs a less than or equals operation on document attributes/fields and their values. Use with the document attribute type Date or Long."]}
                     val make :
                       ?andAllFilters:AttributeFilterList.t ->
                         ?orAllFilters:AttributeFilterList.t ->
@@ -1383,34 +2197,34 @@ module rec
       {
       andAllFilters: AttributeFilterList.t option
         [@ocaml.doc
-          "Performs a logical AND operation on all supplied filters."];
+          "Performs a logical AND operation on all filters that you specify."];
       orAllFilters: AttributeFilterList.t option
         [@ocaml.doc
-          "Performs a logical OR operation on all supplied filters."];
+          "Performs a logical OR operation on all filters that you specify."];
       notFilter: AttributeFilter.t option
         [@ocaml.doc
-          "Performs a logical NOT operation on all supplied filters."];
+          "Performs a logical NOT operation on all filters that you specify."];
       equalsTo: DocumentAttribute.t option
         [@ocaml.doc
-          "Performs an equals operation on two document attributes."];
+          "Performs an equals operation on document attributes/fields and their values."];
       containsAll: DocumentAttribute.t option
         [@ocaml.doc
-          "Returns true when a document contains all of the specified document attributes. This filter is only applicable to StringListValue metadata."];
+          "Returns true when a document contains all of the specified document attributes/fields. This filter is only applicable to StringListValue."];
       containsAny: DocumentAttribute.t option
         [@ocaml.doc
-          "Returns true when a document contains any of the specified document attributes. This filter is only applicable to StringListValue metadata."];
+          "Returns true when a document contains any of the specified document attributes/fields. This filter is only applicable to StringListValue."];
       greaterThan: DocumentAttribute.t option
         [@ocaml.doc
-          "Performs a greater than operation on two document attributes. Use with a document attribute of type Date or Long."];
+          "Performs a greater than operation on document attributes/fields and their values. Use with the document attribute type Date or Long."];
       greaterThanOrEquals: DocumentAttribute.t option
         [@ocaml.doc
-          "Performs a greater or equals than operation on two document attributes. Use with a document attribute of type Date or Long."];
+          "Performs a greater or equals than operation on document attributes/fields and their values. Use with the document attribute type Date or Long."];
       lessThan: DocumentAttribute.t option
         [@ocaml.doc
-          "Performs a less than operation on two document attributes. Use with a document attribute of type Date or Long."];
+          "Performs a less than operation on document attributes/fields and their values. Use with the document attribute type Date or Long."];
       lessThanOrEquals: DocumentAttribute.t option
         [@ocaml.doc
-          "Performs a less than or equals operation on two document attributes. Use with a document attribute of type Date or Long."]}
+          "Performs a less than or equals operation on document attributes/fields and their values. Use with the document attribute type Date or Long."]}
     let make ?andAllFilters =
       fun ?orAllFilters ->
         fun ?notFilter ->
@@ -1489,30 +2303,30 @@ module rec
         ?containsAny ?containsAll ?equalsTo ?notFilter ?orAllFilters
         ?andAllFilters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lessThanOrEquals =
-        field_map json "LessThanOrEquals" DocumentAttribute.of_json in
-      let lessThan = field_map json "LessThan" DocumentAttribute.of_json in
+        field_map json__ "LessThanOrEquals" DocumentAttribute.of_json in
+      let lessThan = field_map json__ "LessThan" DocumentAttribute.of_json in
       let greaterThanOrEquals =
-        field_map json "GreaterThanOrEquals" DocumentAttribute.of_json in
+        field_map json__ "GreaterThanOrEquals" DocumentAttribute.of_json in
       let greaterThan =
-        field_map json "GreaterThan" DocumentAttribute.of_json in
+        field_map json__ "GreaterThan" DocumentAttribute.of_json in
       let containsAny =
-        field_map json "ContainsAny" DocumentAttribute.of_json in
+        field_map json__ "ContainsAny" DocumentAttribute.of_json in
       let containsAll =
-        field_map json "ContainsAll" DocumentAttribute.of_json in
-      let equalsTo = field_map json "EqualsTo" DocumentAttribute.of_json in
-      let notFilter = field_map json "NotFilter" AttributeFilter.of_json in
+        field_map json__ "ContainsAll" DocumentAttribute.of_json in
+      let equalsTo = field_map json__ "EqualsTo" DocumentAttribute.of_json in
+      let notFilter = field_map json__ "NotFilter" AttributeFilter.of_json in
       let orAllFilters =
-        field_map json "OrAllFilters" AttributeFilterList.of_json in
+        field_map json__ "OrAllFilters" AttributeFilterList.of_json in
       let andAllFilters =
-        field_map json "AndAllFilters" AttributeFilterList.of_json in
+        field_map json__ "AndAllFilters" AttributeFilterList.of_json in
       make ?lessThanOrEquals ?lessThan ?greaterThanOrEquals ?greaterThan
         ?containsAny ?containsAll ?equalsTo ?notFilter ?orAllFilters
         ?andAllFilters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides filtering the query results based on document attributes. When you use the AndAllFilters or OrAllFilters, filters you can use 2 layers under the first attribute filter. For example, you can use: <AndAllFilters> <OrAllFilters> <EqualsTo> If you use more than 2 layers, you receive a ValidationException exception with the message \"AttributeFilter cannot have a depth of more than 2.\" If you use more than 10 attribute filters in a given list for AndAllFilters or OrAllFilters, you receive a ValidationException with the message \"AttributeFilter cannot have a length of more than 10\"."]
+       "Filters the search results based on document attributes or fields. You can filter results using attributes for your particular documents. The attributes must exist in your index. For example, if your documents include the custom attribute \"Department\", you can filter documents that belong to the \"HR\" department. You would use the EqualsTo operation to filter results or documents with \"Department\" equals to \"HR\". You can use AndAllFilters and OrAllFilters in combination with each other or with other operations such as EqualsTo. For example: AndAllFilters EqualsTo: \"Department\", \"HR\" OrAllFilters ContainsAny: \"Project Name\", \\[\"new hires\", \"new hiring\"\\] This example filters results or documents that belong to the HR department AND belong to projects that contain \"new hires\" OR \"new hiring\" in the project name (must use ContainAny with StringListValue). This example is filtering with a depth of 2. You cannot filter more than a depth of 2, otherwise you receive a ValidationException exception with the message \"AttributeFilter cannot have a depth of more than 2.\" Also, if you use more than 10 attribute filters in a given list for AndAllFilters or OrAllFilters, you receive a ValidationException with the message \"AttributeFilter cannot have a length of more than 10\". For examples of using AttributeFilter, see Using document attributes to filter search results."]
  and
   AttributeFilterList:sig
                         type nonrec t = AttributeFilter.t list
@@ -1527,6 +2341,9 @@ module rec
   struct
     type nonrec t = AttributeFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1548,28 +2365,505 @@ module rec
         ~of_json:AttributeFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
-module SecretArn =
+module ObjectBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module SuggestableConfig =
+  struct
+    type nonrec t =
+      {
+      attributeName: DocumentAttributeKey.t option
+        [@ocaml.doc "The name of the document field/attribute."];
+      suggestable: ObjectBoolean.t option
+        [@ocaml.doc
+          "TRUE means the document field/attribute is suggestible, so the contents within the field can be used for query suggestions."]}
+    let make ?attributeName =
+      fun ?suggestable -> fun () -> { attributeName; suggestable }
+    let to_value x =
+      structure_to_value
+        [("AttributeName",
+           (Option.map x.attributeName ~f:DocumentAttributeKey.to_value));
+        ("Suggestable", (Option.map x.suggestable ~f:ObjectBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let suggestable =
+        (Option.map ~f:ObjectBoolean.of_xml)
+          (Xml.child xml_arg0 "Suggestable") in
+      let attributeName =
+        (Option.map ~f:DocumentAttributeKey.of_xml)
+          (Xml.child xml_arg0 "AttributeName") in
+      make ?suggestable ?attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let suggestable = field_map json__ "Suggestable" ObjectBoolean.of_json in
+      let attributeName =
+        field_map json__ "AttributeName" DocumentAttributeKey.of_json in
+      make ?suggestable ?attributeName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information for a document field/attribute that you want to base query suggestions on."]
+module SuggestableConfigList =
+  struct
+    type nonrec t = SuggestableConfig.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SuggestableConfig.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SuggestableConfig.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SuggestableConfigList"
+        ~of_json:SuggestableConfig.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AttributeSuggestionsMode =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | INACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | INACTIVE -> "INACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "INACTIVE" -> INACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AttributeSuggestionsMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AttributeSuggestionsMode" j)
+    let to_json = simple_to_json to_value
+  end
+module AttributeSuggestionsDescribeConfig =
+  struct
+    type nonrec t =
+      {
+      suggestableConfigList: SuggestableConfigList.t option
+        [@ocaml.doc
+          "The list of fields/attributes that you want to set as suggestible for query suggestions."];
+      attributeSuggestionsMode: AttributeSuggestionsMode.t option
+        [@ocaml.doc
+          "The mode is set to either ACTIVE or INACTIVE. If the Mode for query history is set to ENABLED when calling UpdateQuerySuggestionsConfig and AttributeSuggestionsMode to use fields/attributes is set to ACTIVE, and you haven't set your SuggestionTypes preference to DOCUMENT_ATTRIBUTES, then Amazon Kendra uses the query history."]}
+    let make ?suggestableConfigList =
+      fun ?attributeSuggestionsMode ->
+        fun () -> { suggestableConfigList; attributeSuggestionsMode }
+    let to_value x =
+      structure_to_value
+        [("SuggestableConfigList",
+           (Option.map x.suggestableConfigList
+              ~f:SuggestableConfigList.to_value));
+        ("AttributeSuggestionsMode",
+          (Option.map x.attributeSuggestionsMode
+             ~f:AttributeSuggestionsMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributeSuggestionsMode =
+        (Option.map ~f:AttributeSuggestionsMode.of_xml)
+          (Xml.child xml_arg0 "AttributeSuggestionsMode") in
+      let suggestableConfigList =
+        (Option.map ~f:SuggestableConfigList.of_xml)
+          (Xml.child xml_arg0 "SuggestableConfigList") in
+      make ?attributeSuggestionsMode ?suggestableConfigList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributeSuggestionsMode =
+        field_map json__ "AttributeSuggestionsMode"
+          AttributeSuggestionsMode.of_json in
+      let suggestableConfigList =
+        field_map json__ "SuggestableConfigList"
+          SuggestableConfigList.of_json in
+      make ?attributeSuggestionsMode ?suggestableConfigList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information on the configuration of document fields/attributes that you want to base query suggestions on. To change your configuration, use AttributeSuggestionsUpdateConfig and then call UpdateQuerySuggestionsConfig."]
+module Token =
   struct
     type nonrec t = string
-    let context_ = "SecretArn"
+    let context_ = "Token"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:1284) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}")));
+                (check_string_max i ~max:100000) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\P{C}*$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SecretArn" j
+    let of_json j = string_of_json ~kind:"Token" j
     let to_json = simple_to_json to_value
   end
+module PrincipalName =
+  struct
+    type nonrec t = string
+    let context_ = "PrincipalName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\P{C}*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrincipalName" j
+    let to_json = simple_to_json to_value
+  end
+module Groups =
+  struct
+    type nonrec t = PrincipalName.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2048) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PrincipalName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PrincipalName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Groups" ~of_json:PrincipalName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DataSourceId =
+  struct
+    type nonrec t = string
+    let context_ = "DataSourceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-zA-Z0-9][a-zA-Z0-9_-]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DataSourceId" j
+    let to_json = simple_to_json to_value
+  end
+module DataSourceGroup =
+  struct
+    type nonrec t =
+      {
+      groupId: PrincipalName.t
+        [@ocaml.doc
+          "The identifier of the group you want to add to your list of groups. This is for filtering search results based on the groups' access to documents."];
+      dataSourceId: DataSourceId.t
+        [@ocaml.doc
+          "The identifier of the data source group you want to add to your list of data source groups. This is for filtering search results based on the groups' access to documents in that data source."]}
+    let context_ = "DataSourceGroup"
+    let make ~groupId =
+      fun ~dataSourceId -> fun () -> { groupId; dataSourceId }
+    let to_value x =
+      structure_to_value
+        [("GroupId", (Some (PrincipalName.to_value x.groupId)));
+        ("DataSourceId", (Some (DataSourceId.to_value x.dataSourceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataSourceId =
+        DataSourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
+      let groupId =
+        PrincipalName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
+      make ~dataSourceId ~groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataSourceId =
+        field_map_exn json__ "DataSourceId" DataSourceId.of_json in
+      let groupId = field_map_exn json__ "GroupId" PrincipalName.of_json in
+      make ~dataSourceId ~groupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Data source information for user context filtering."]
+module DataSourceGroups =
+  struct
+    type nonrec t = DataSourceGroup.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2048) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataSourceGroup.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataSourceGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataSourceGroups" ~of_json:DataSourceGroup.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module UserContext =
+  struct
+    type nonrec t =
+      {
+      token: Token.t option
+        [@ocaml.doc
+          "The user context token for filtering search results for a user. It must be a JWT or a JSON token."];
+      userId: PrincipalName.t option
+        [@ocaml.doc
+          "The identifier of the user you want to filter search results based on their access to documents."];
+      groups: Groups.t option
+        [@ocaml.doc
+          "The list of groups you want to filter search results based on the groups' access to documents."];
+      dataSourceGroups: DataSourceGroups.t option
+        [@ocaml.doc
+          "The list of data source groups you want to filter search results based on groups' access to documents in that data source."]}
+    let make ?token =
+      fun ?userId ->
+        fun ?groups ->
+          fun ?dataSourceGroups ->
+            fun () -> { token; userId; groups; dataSourceGroups }
+    let to_value x =
+      structure_to_value
+        [("Token", (Option.map x.token ~f:Token.to_value));
+        ("UserId", (Option.map x.userId ~f:PrincipalName.to_value));
+        ("Groups", (Option.map x.groups ~f:Groups.to_value));
+        ("DataSourceGroups",
+          (Option.map x.dataSourceGroups ~f:DataSourceGroups.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataSourceGroups =
+        (Option.map ~f:DataSourceGroups.of_xml)
+          (Xml.child xml_arg0 "DataSourceGroups") in
+      let groups =
+        (Option.map ~f:Groups.of_xml) (Xml.child xml_arg0 "Groups") in
+      let userId =
+        (Option.map ~f:PrincipalName.of_xml) (Xml.child xml_arg0 "UserId") in
+      let token = (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "Token") in
+      make ?dataSourceGroups ?groups ?userId ?token ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataSourceGroups =
+        field_map json__ "DataSourceGroups" DataSourceGroups.of_json in
+      let groups = field_map json__ "Groups" Groups.of_json in
+      let userId = field_map json__ "UserId" PrincipalName.of_json in
+      let token = field_map json__ "Token" Token.of_json in
+      make ?dataSourceGroups ?groups ?userId ?token ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the user context for an Amazon Kendra index. User context filtering is a kind of personalized search with the benefit of controlling access to documents. For example, not all teams that search the company portal for information should access top-secret company documents, nor are these documents relevant to all users. Only specific users or groups of teams given access to top-secret documents should see these documents in their search results. You provide one of the following: User token User ID, the groups the user belongs to, and any data sources the groups can access. If you provide both, an exception is thrown. If you're using an Amazon Kendra Gen AI Enterprise Edition index, you can use UserId, Groups, and DataSourceGroups to filter content. If you set the UserId to a particular user ID, it also includes all public documents. Amazon Kendra Gen AI Enterprise Edition indices don't support token based document filtering. If you're using an Amazon Kendra Gen AI Enterprise Edition index, Amazon Kendra returns a ValidationException error if the Token field has a non-null value."]
+module DocumentAttributeKeyList =
+  struct
+    type nonrec t = DocumentAttributeKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DocumentAttributeKey.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DocumentAttributeKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DocumentAttributeKeyList"
+        ~of_json:DocumentAttributeKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AttributeSuggestionsGetConfig =
+  struct
+    type nonrec t =
+      {
+      suggestionAttributes: DocumentAttributeKeyList.t option
+        [@ocaml.doc
+          "The list of document field/attribute keys or field names to use for query suggestions. If the content within any of the fields match what your user starts typing as their query, then the field content is returned as a query suggestion."];
+      additionalResponseAttributes: DocumentAttributeKeyList.t option
+        [@ocaml.doc
+          "The list of additional document field/attribute keys or field names to include in the response. You can use additional fields to provide extra information in the response. Additional fields are not used to based suggestions on."];
+      attributeFilter: AttributeFilter.t option
+        [@ocaml.doc
+          "Filters the search results based on document fields/attributes."];
+      userContext: UserContext.t option
+        [@ocaml.doc
+          "Applies user context filtering so that only users who are given access to certain documents see these document in their search results."]}
+    let make ?suggestionAttributes =
+      fun ?additionalResponseAttributes ->
+        fun ?attributeFilter ->
+          fun ?userContext ->
+            fun () ->
+              {
+                suggestionAttributes;
+                additionalResponseAttributes;
+                attributeFilter;
+                userContext
+              }
+    let to_value x =
+      structure_to_value
+        [("SuggestionAttributes",
+           (Option.map x.suggestionAttributes
+              ~f:DocumentAttributeKeyList.to_value));
+        ("AdditionalResponseAttributes",
+          (Option.map x.additionalResponseAttributes
+             ~f:DocumentAttributeKeyList.to_value));
+        ("AttributeFilter",
+          (Option.map x.attributeFilter ~f:AttributeFilter.to_value));
+        ("UserContext", (Option.map x.userContext ~f:UserContext.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userContext =
+        (Option.map ~f:UserContext.of_xml) (Xml.child xml_arg0 "UserContext") in
+      let attributeFilter =
+        (Option.map ~f:AttributeFilter.of_xml)
+          (Xml.child xml_arg0 "AttributeFilter") in
+      let additionalResponseAttributes =
+        (Option.map ~f:DocumentAttributeKeyList.of_xml)
+          (Xml.child xml_arg0 "AdditionalResponseAttributes") in
+      let suggestionAttributes =
+        (Option.map ~f:DocumentAttributeKeyList.of_xml)
+          (Xml.child xml_arg0 "SuggestionAttributes") in
+      make ?userContext ?attributeFilter ?additionalResponseAttributes
+        ?suggestionAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userContext = field_map json__ "UserContext" UserContext.of_json in
+      let attributeFilter =
+        field_map json__ "AttributeFilter" AttributeFilter.of_json in
+      let additionalResponseAttributes =
+        field_map json__ "AdditionalResponseAttributes"
+          DocumentAttributeKeyList.of_json in
+      let suggestionAttributes =
+        field_map json__ "SuggestionAttributes"
+          DocumentAttributeKeyList.of_json in
+      make ?userContext ?attributeFilter ?additionalResponseAttributes
+        ?suggestionAttributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information for the document fields/attributes that you want to base query suggestions on."]
+module AttributeSuggestionsUpdateConfig =
+  struct
+    type nonrec t =
+      {
+      suggestableConfigList: SuggestableConfigList.t option
+        [@ocaml.doc
+          "The list of fields/attributes that you want to set as suggestible for query suggestions."];
+      attributeSuggestionsMode: AttributeSuggestionsMode.t option
+        [@ocaml.doc
+          "You can set the mode to ACTIVE or INACTIVE. You must also set SuggestionTypes as either QUERY or DOCUMENT_ATTRIBUTES and then call GetQuerySuggestions. If Mode to use query history is set to ENABLED when calling UpdateQuerySuggestionsConfig and AttributeSuggestionsMode to use fields/attributes is set to ACTIVE, and you haven't set your SuggestionTypes preference to DOCUMENT_ATTRIBUTES, then Amazon Kendra uses the query history."]}
+    let make ?suggestableConfigList =
+      fun ?attributeSuggestionsMode ->
+        fun () -> { suggestableConfigList; attributeSuggestionsMode }
+    let to_value x =
+      structure_to_value
+        [("SuggestableConfigList",
+           (Option.map x.suggestableConfigList
+              ~f:SuggestableConfigList.to_value));
+        ("AttributeSuggestionsMode",
+          (Option.map x.attributeSuggestionsMode
+             ~f:AttributeSuggestionsMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributeSuggestionsMode =
+        (Option.map ~f:AttributeSuggestionsMode.of_xml)
+          (Xml.child xml_arg0 "AttributeSuggestionsMode") in
+      let suggestableConfigList =
+        (Option.map ~f:SuggestableConfigList.of_xml)
+          (Xml.child xml_arg0 "SuggestableConfigList") in
+      make ?attributeSuggestionsMode ?suggestableConfigList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributeSuggestionsMode =
+        field_map json__ "AttributeSuggestionsMode"
+          AttributeSuggestionsMode.of_json in
+      let suggestableConfigList =
+        field_map json__ "SuggestableConfigList"
+          SuggestableConfigList.of_json in
+      make ?attributeSuggestionsMode ?suggestableConfigList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration information for the document fields/attributes that you want to base query suggestions on. To deactivate using documents fields for query suggestions, set the mode to INACTIVE. You must also set SuggestionTypes as either QUERY or DOCUMENT_ATTRIBUTES and then call GetQuerySuggestions. If you set to QUERY, then Amazon Kendra uses the query history to base suggestions on. If you set to DOCUMENT_ATTRIBUTES, then Amazon Kendra uses the contents of document fields to base suggestions on."]
 module Port =
   struct
     type nonrec t = int
@@ -1620,7 +2914,7 @@ module BasicAuthenticationConfiguration =
           "The port number of the website host you want to connect to using authentication credentials. For example, the port for https://a.example.com/page1.html is 443, the standard port for HTTPS."];
       credentials: SecretArn.t
         [@ocaml.doc
-          "Your secret ARN, which you can create in Secrets Manager You use a secret if basic authentication credentials are required to connect to a website. The secret stores your credentials of user name and password."]}
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret. You create a secret to store your credentials in Secrets Manager You use a secret if basic authentication credentials are required to connect to a website. The secret stores your credentials of user name and password."]}
     let context_ = "BasicAuthenticationConfiguration"
     let make ~host =
       fun ~port -> fun ~credentials -> fun () -> { host; port; credentials }
@@ -1640,10 +2934,10 @@ module BasicAuthenticationConfiguration =
         Host.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Host") in
       make ~credentials ~port ~host ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let credentials = field_map_exn json "Credentials" SecretArn.of_json in
-      let port = field_map_exn json "Port" Port.of_json in
-      let host = field_map_exn json "Host" Host.of_json in
+    let of_json json__ =
+      let credentials = field_map_exn json__ "Credentials" SecretArn.of_json in
+      let port = field_map_exn json__ "Port" Port.of_json in
+      let host = field_map_exn json__ "Host" Host.of_json in
       make ~credentials ~port ~host ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1656,6 +2950,9 @@ module BasicAuthenticationConfigurationList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BasicAuthenticationConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1699,9 +2996,9 @@ module AuthenticationConfiguration =
           (Xml.child xml_arg0 "BasicAuthentication") in
       make ?basicAuthentication ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let basicAuthentication =
-        field_map json "BasicAuthentication"
+        field_map json__ "BasicAuthentication"
           BasicAuthenticationConfigurationList.of_json in
       make ?basicAuthentication ()
     let to_json v = composed_to_json to_value v
@@ -1733,6 +3030,9 @@ module DocumentIdList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1774,27 +3074,6 @@ module DataSourceSyncJobId =
     let of_json j = string_of_json ~kind:"DataSourceSyncJobId" j
     let to_json = simple_to_json to_value
   end
-module DataSourceId =
-  struct
-    type nonrec t = string
-    let context_ = "DataSourceId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:100) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"[a-zA-Z0-9][a-zA-Z0-9_-]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DataSourceId" j
-    let to_json = simple_to_json to_value
-  end
 module DataSourceSyncJobMetricTarget =
   struct
     type nonrec t =
@@ -1823,11 +3102,11 @@ module DataSourceSyncJobMetricTarget =
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ?dataSourceSyncJobId ~dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataSourceSyncJobId =
-        field_map json "DataSourceSyncJobId" DataSourceSyncJobId.of_json in
+        field_map json__ "DataSourceSyncJobId" DataSourceSyncJobId.of_json in
       let dataSourceId =
-        field_map_exn json "DataSourceId" DataSourceId.of_json in
+        field_map_exn json__ "DataSourceId" DataSourceId.of_json in
       make ?dataSourceSyncJobId ~dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1868,17 +3147,17 @@ module BatchDeleteDocumentRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?dataSourceSyncJobMetricTarget ~documentIdList ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataSourceSyncJobMetricTarget =
-        field_map json "DataSourceSyncJobMetricTarget"
+        field_map json__ "DataSourceSyncJobMetricTarget"
           DataSourceSyncJobMetricTarget.of_json in
       let documentIdList =
-        field_map_exn json "DocumentIdList" DocumentIdList.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+        field_map_exn json__ "DocumentIdList" DocumentIdList.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?dataSourceSyncJobMetricTarget ~documentIdList ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more documents from an index. The documents must have been added with the BatchPutDocument API. The documents are deleted asynchronously. You can see the progress of the deletion by using Amazon Web Services CloudWatch. Any error messages related to the processing of the batch are sent to you CloudWatch log."]
+       "Removes one or more documents from an index. The documents must have been added with the BatchPutDocument API. The documents are deleted asynchronously. You can see the progress of the deletion by using Amazon Web Services CloudWatch. Any error messages related to the processing of the batch are sent to your Amazon Web Services CloudWatch log. You can also use the BatchGetDocumentStatus API to monitor the progress of deleting your documents. Deleting documents from an index using BatchDeleteDocument could take up to an hour or more, depending on the number of documents you want to delete."]
 module ConflictException =
   struct
     type nonrec t = {
@@ -1893,11 +3172,12 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "A conflict occurred with the request. Please fix any inconsistences with your resources and try again."]
 module ErrorCode =
   struct
     type nonrec t =
@@ -1930,6 +3210,9 @@ module BatchDeleteDocumentResponseFailedDocument =
       id: DocumentId.t option
         [@ocaml.doc
           "The identifier of the document that couldn't be removed from the index."];
+      dataSourceId: DataSourceId.t option
+        [@ocaml.doc
+          "The identifier of the data source connector that the document belongs to."];
       errorCode: ErrorCode.t option
         [@ocaml.doc
           "The error code for why the document couldn't be removed from the index."];
@@ -1937,11 +3220,15 @@ module BatchDeleteDocumentResponseFailedDocument =
         [@ocaml.doc
           "An explanation for why the document couldn't be removed from the index."]}
     let make ?id =
-      fun ?errorCode ->
-        fun ?errorMessage -> fun () -> { id; errorCode; errorMessage }
+      fun ?dataSourceId ->
+        fun ?errorCode ->
+          fun ?errorMessage ->
+            fun () -> { id; dataSourceId; errorCode; errorMessage }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:DocumentId.to_value));
+        ("DataSourceId",
+          (Option.map x.dataSourceId ~f:DataSourceId.to_value));
         ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("ErrorMessage",
           (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
@@ -1952,14 +3239,18 @@ module BatchDeleteDocumentResponseFailedDocument =
           (Xml.child xml_arg0 "ErrorMessage") in
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let dataSourceId =
+        (Option.map ~f:DataSourceId.of_xml)
+          (Xml.child xml_arg0 "DataSourceId") in
       let id = (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?errorMessage ?errorCode ?id ()
+      make ?errorMessage ?errorCode ?dataSourceId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let id = field_map json "Id" DocumentId.of_json in
-      make ?errorMessage ?errorCode ?id ()
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let id = field_map json__ "Id" DocumentId.of_json in
+      make ?errorMessage ?errorCode ?dataSourceId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about documents that could not be removed from an index by the BatchDeleteDocument API."]
@@ -1967,6 +3258,9 @@ module BatchDeleteDocumentResponseFailedDocuments =
   struct
     type nonrec t = BatchDeleteDocumentResponseFailedDocument.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDeleteDocumentResponseFailedDocument.to_value))
         |> (fun x -> `List x)
@@ -2082,18 +3376,272 @@ module BatchDeleteDocumentResponse =
           (Xml.child xml_arg0 "FailedDocuments") in
       make ?failedDocuments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedDocuments =
-        field_map json "FailedDocuments"
+        field_map json__ "FailedDocuments"
           BatchDeleteDocumentResponseFailedDocuments.of_json in
       make ?failedDocuments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more documents from an index. The documents must have been added with the BatchPutDocument API. The documents are deleted asynchronously. You can see the progress of the deletion by using Amazon Web Services CloudWatch. Any error messages related to the processing of the batch are sent to you CloudWatch log."]
+       "Removes one or more documents from an index. The documents must have been added with the BatchPutDocument API. The documents are deleted asynchronously. You can see the progress of the deletion by using Amazon Web Services CloudWatch. Any error messages related to the processing of the batch are sent to your Amazon Web Services CloudWatch log. You can also use the BatchGetDocumentStatus API to monitor the progress of deleting your documents. Deleting documents from an index using BatchDeleteDocument could take up to an hour or more, depending on the number of documents you want to delete."]
+module FeaturedResultsSetId =
+  struct
+    type nonrec t = string
+    let context_ = "FeaturedResultsSetId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z-0-9]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FeaturedResultsSetId" j
+    let to_json = simple_to_json to_value
+  end
+module BatchDeleteFeaturedResultsSetError =
+  struct
+    type nonrec t =
+      {
+      id: FeaturedResultsSetId.t option
+        [@ocaml.doc
+          "The identifier of the set of featured results that couldn't be removed from the index."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "The error code for why the set of featured results couldn't be removed from the index."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "An explanation for why the set of featured results couldn't be removed from the index."]}
+    let make ?id =
+      fun ?errorCode ->
+        fun ?errorMessage -> fun () -> { id; errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:FeaturedResultsSetId.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let id =
+        (Option.map ~f:FeaturedResultsSetId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?errorMessage ?errorCode ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let id = field_map json__ "Id" FeaturedResultsSetId.of_json in
+      make ?errorMessage ?errorCode ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about a set of featured results that couldn't be removed from an index by the BatchDeleteFeaturedResultsSet API."]
+module BatchDeleteFeaturedResultsSetErrors =
+  struct
+    type nonrec t = BatchDeleteFeaturedResultsSetError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchDeleteFeaturedResultsSetError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:BatchDeleteFeaturedResultsSetError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchDeleteFeaturedResultsSetErrors"
+        ~of_json:BatchDeleteFeaturedResultsSetError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FeaturedResultsSetIdList =
+  struct
+    type nonrec t = FeaturedResultsSetId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FeaturedResultsSetId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FeaturedResultsSetId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FeaturedResultsSetIdList"
+        ~of_json:FeaturedResultsSetId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchDeleteFeaturedResultsSetRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index used for featuring results."];
+      featuredResultsSetIds: FeaturedResultsSetIdList.t
+        [@ocaml.doc
+          "The identifiers of the featured results sets that you want to delete."]}
+    let context_ = "BatchDeleteFeaturedResultsSetRequest"
+    let make ~indexId =
+      fun ~featuredResultsSetIds ->
+        fun () -> { indexId; featuredResultsSetIds }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("FeaturedResultsSetIds",
+          (Some (FeaturedResultsSetIdList.to_value x.featuredResultsSetIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let featuredResultsSetIds =
+        FeaturedResultsSetIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FeaturedResultsSetIds") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ~featuredResultsSetIds ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let featuredResultsSetIds =
+        field_map_exn json__ "FeaturedResultsSetIds"
+          FeaturedResultsSetIdList.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ~featuredResultsSetIds ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes one or more sets of featured results. Features results are placed above all other results for certain queries. If there's an exact match of a query, then one or more specific documents are featured in the search results."]
+module BatchDeleteFeaturedResultsSetResponse =
+  struct
+    type nonrec t =
+      {
+      errors: BatchDeleteFeaturedResultsSetErrors.t option
+        [@ocaml.doc
+          "The list of errors for the featured results set IDs, explaining why they couldn't be removed from the index."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?errors = fun () -> { errors }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Errors",
+           (Option.map x.errors
+              ~f:BatchDeleteFeaturedResultsSetErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:BatchDeleteFeaturedResultsSetErrors.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors =
+        field_map json__ "Errors" BatchDeleteFeaturedResultsSetErrors.of_json in
+      make ?errors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes one or more sets of featured results. Features results are placed above all other results for certain queries. If there's an exact match of a query, then one or more specific documents are featured in the search results."]
 module DocumentAttributeList =
   struct
     type nonrec t = DocumentAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2119,8 +3667,7 @@ module DocumentInfo =
   struct
     type nonrec t =
       {
-      documentId: DocumentId.t
-        [@ocaml.doc "The unique identifier of the document."];
+      documentId: DocumentId.t [@ocaml.doc "The identifier of the document."];
       attributes: DocumentAttributeList.t option
         [@ocaml.doc
           "Attributes that identify a specific version of a document to check. The only valid attributes are: version datasourceId jobExecutionId The attributes follow these rules: dataSourceId and jobExecutionId must be used together. version is ignored if dataSourceId and jobExecutionId are not provided. If dataSourceId and jobExecutionId are provided, but version is not, the version defaults to \"0\"."]}
@@ -2142,10 +3689,10 @@ module DocumentInfo =
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentId") in
       make ?attributes ~documentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" DocumentAttributeList.of_json in
-      let documentId = field_map_exn json "DocumentId" DocumentId.of_json in
+        field_map json__ "Attributes" DocumentAttributeList.of_json in
+      let documentId = field_map_exn json__ "DocumentId" DocumentId.of_json in
       make ?attributes ~documentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2158,6 +3705,9 @@ module DocumentInfoList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2205,10 +3755,10 @@ module BatchGetDocumentStatusRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ~documentInfoList ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentInfoList =
-        field_map_exn json "DocumentInfoList" DocumentInfoList.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+        field_map_exn json__ "DocumentInfoList" DocumentInfoList.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ~documentInfoList ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2255,7 +3805,7 @@ module Status =
     type nonrec t =
       {
       documentId: DocumentId.t option
-        [@ocaml.doc "The unique identifier of the document."];
+        [@ocaml.doc "The identifier of the document."];
       documentStatus: DocumentStatus.t option
         [@ocaml.doc
           "The current status of a document. If the document was submitted for deletion, the status is NOT_FOUND after the document is deleted."];
@@ -2290,12 +3840,12 @@ module Status =
         (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "DocumentId") in
       make ?failureReason ?failureCode ?documentStatus ?documentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failureReason = field_map json "FailureReason" String_.of_json in
-      let failureCode = field_map json "FailureCode" String_.of_json in
+    let of_json json__ =
+      let failureReason = field_map json__ "FailureReason" String_.of_json in
+      let failureCode = field_map json__ "FailureCode" String_.of_json in
       let documentStatus =
-        field_map json "DocumentStatus" DocumentStatus.of_json in
-      let documentId = field_map json "DocumentId" DocumentId.of_json in
+        field_map json__ "DocumentStatus" DocumentStatus.of_json in
+      let documentId = field_map json__ "DocumentId" DocumentId.of_json in
       make ?failureReason ?failureCode ?documentStatus ?documentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2304,6 +3854,9 @@ module DocumentStatusList =
   struct
     type nonrec t = Status.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Status.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2330,19 +3883,25 @@ module BatchGetDocumentStatusResponseError =
       {
       documentId: DocumentId.t option
         [@ocaml.doc
-          "The unique identifier of the document whose status could not be retrieved."];
+          "The identifier of the document whose status could not be retrieved."];
+      dataSourceId: DataSourceId.t option
+        [@ocaml.doc
+          "The identifier of the data source connector that the failed document belongs to."];
       errorCode: ErrorCode.t option
         [@ocaml.doc "Indicates the source of the error."];
       errorMessage: ErrorMessage.t option
         [@ocaml.doc
           "States that the API could not get the status of a document. This could be because the request is not valid or there is a system error."]}
     let make ?documentId =
-      fun ?errorCode ->
-        fun ?errorMessage ->
-          fun () -> { documentId; errorCode; errorMessage }
+      fun ?dataSourceId ->
+        fun ?errorCode ->
+          fun ?errorMessage ->
+            fun () -> { documentId; dataSourceId; errorCode; errorMessage }
     let to_value x =
       structure_to_value
         [("DocumentId", (Option.map x.documentId ~f:DocumentId.to_value));
+        ("DataSourceId",
+          (Option.map x.dataSourceId ~f:DataSourceId.to_value));
         ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("ErrorMessage",
           (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
@@ -2353,15 +3912,19 @@ module BatchGetDocumentStatusResponseError =
           (Xml.child xml_arg0 "ErrorMessage") in
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let dataSourceId =
+        (Option.map ~f:DataSourceId.of_xml)
+          (Xml.child xml_arg0 "DataSourceId") in
       let documentId =
         (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "DocumentId") in
-      make ?errorMessage ?errorCode ?documentId ()
+      make ?errorMessage ?errorCode ?dataSourceId ?documentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let documentId = field_map json "DocumentId" DocumentId.of_json in
-      make ?errorMessage ?errorCode ?documentId ()
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let documentId = field_map json__ "DocumentId" DocumentId.of_json in
+      make ?errorMessage ?errorCode ?dataSourceId ?documentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a response when the status of a document could not be retrieved."]
@@ -2369,6 +3932,9 @@ module BatchGetDocumentStatusResponseErrors =
   struct
     type nonrec t = BatchGetDocumentStatusResponseError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchGetDocumentStatusResponseError.to_value)) |>
         (fun x -> `List x)
@@ -2493,11 +4059,12 @@ module BatchGetDocumentStatusResponse =
           (Xml.child xml_arg0 "Errors") in
       make ?documentStatusList ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentStatusList =
-        field_map json "DocumentStatusList" DocumentStatusList.of_json in
+        field_map json__ "DocumentStatusList" DocumentStatusList.of_json in
       let errors =
-        field_map json "Errors" BatchGetDocumentStatusResponseErrors.of_json in
+        field_map json__ "Errors"
+          BatchGetDocumentStatusResponseErrors.of_json in
       make ?documentStatusList ?errors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2537,57 +4104,6 @@ module Title =
     let of_json j = string_of_json ~kind:"Title" j
     let to_json = simple_to_json to_value
   end
-module S3BucketName =
-  struct
-    type nonrec t = string
-    let context_ = "S3BucketName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:3) >>=
-             (fun () ->
-                (check_string_max i ~max:63) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"S3BucketName" j
-    let to_json = simple_to_json to_value
-  end
-module S3Path =
-  struct
-    type nonrec t =
-      {
-      bucket: S3BucketName.t
-        [@ocaml.doc "The name of the S3 bucket that contains the file."];
-      key: S3ObjectKey.t [@ocaml.doc "The name of the file."]}
-    let context_ = "S3Path"
-    let make ~bucket = fun ~key -> fun () -> { bucket; key }
-    let to_value x =
-      structure_to_value
-        [("Bucket", (Some (S3BucketName.to_value x.bucket)));
-        ("Key", (Some (S3ObjectKey.to_value x.key)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let key =
-        S3ObjectKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      let bucket =
-        S3BucketName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
-      make ~key ~bucket ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map_exn json "Key" S3ObjectKey.of_json in
-      let bucket = field_map_exn json "Bucket" S3BucketName.of_json in
-      make ~key ~bucket ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information required to find a specific file in an Amazon S3 bucket."]
 module ReadAccessType =
   struct
     type nonrec t =
@@ -2626,26 +4142,6 @@ module PrincipalType =
     let of_json j = of_string (string_of_json ~kind:"PrincipalType" j)
     let to_json = simple_to_json to_value
   end
-module PrincipalName =
-  struct
-    type nonrec t = string
-    let context_ = "PrincipalName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:200) >>=
-                  (fun () -> check_pattern i ~pattern:"^\\P{C}*$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PrincipalName" j
-    let to_json = simple_to_json to_value
-  end
 module Principal =
   struct
     type nonrec t =
@@ -2653,7 +4149,8 @@ module Principal =
       name: PrincipalName.t [@ocaml.doc "The name of the user or group."];
       type_: PrincipalType.t [@ocaml.doc "The type of principal."];
       access: ReadAccessType.t
-        [@ocaml.doc "Whether to allow or deny access to the principal."];
+        [@ocaml.doc
+          "Whether to allow or deny document access to the principal."];
       dataSourceId: DataSourceId.t option
         [@ocaml.doc
           "The identifier of the data source the principal should access documents from."]}
@@ -2685,19 +4182,22 @@ module Principal =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?dataSourceId ~access ~type_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceId = field_map json "DataSourceId" DataSourceId.of_json in
-      let access = field_map_exn json "Access" ReadAccessType.of_json in
-      let type_ = field_map_exn json "Type" PrincipalType.of_json in
-      let name = field_map_exn json "Name" PrincipalName.of_json in
+    let of_json json__ =
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let access = field_map_exn json__ "Access" ReadAccessType.of_json in
+      let type_ = field_map_exn json__ "Type" PrincipalType.of_json in
+      let name = field_map_exn json__ "Name" PrincipalName.of_json in
       make ?dataSourceId ~access ~type_ ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides user and group information for document access filtering."]
+       "Provides user and group information for user context filtering."]
 module PrincipalList =
   struct
     type nonrec t = Principal.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Principal.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2737,9 +4237,9 @@ module HierarchicalPrincipal =
           (Xml.child_exn ~context:context_ xml_arg0 "PrincipalList") in
       make ~principalList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let principalList =
-        field_map_exn json "PrincipalList" PrincipalList.of_json in
+        field_map_exn json__ "PrincipalList" PrincipalList.of_json in
       make ~principalList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2752,6 +4252,9 @@ module HierarchicalPrincipalList =
         ok_or_failwith
           ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HierarchicalPrincipal.to_value)) |>
         (fun x -> `List x)
@@ -2782,6 +4285,13 @@ module ContentType =
       | MS_WORD 
       | PLAIN_TEXT 
       | PPT 
+      | RTF 
+      | XML 
+      | XSLT 
+      | MS_EXCEL 
+      | CSV 
+      | JSON 
+      | MD 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2791,6 +4301,13 @@ module ContentType =
       | MS_WORD -> "MS_WORD"
       | PLAIN_TEXT -> "PLAIN_TEXT"
       | PPT -> "PPT"
+      | RTF -> "RTF"
+      | XML -> "XML"
+      | XSLT -> "XSLT"
+      | MS_EXCEL -> "MS_EXCEL"
+      | CSV -> "CSV"
+      | JSON -> "JSON"
+      | MD -> "MD"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2799,6 +4316,13 @@ module ContentType =
       | "MS_WORD" -> MS_WORD
       | "PLAIN_TEXT" -> PLAIN_TEXT
       | "PPT" -> PPT
+      | "RTF" -> RTF
+      | "XML" -> XML
+      | "XSLT" -> XSLT
+      | "MS_EXCEL" -> MS_EXCEL
+      | "CSV" -> CSV
+      | "JSON" -> JSON
+      | "MD" -> MD
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2825,7 +4349,8 @@ module Document =
     type nonrec t =
       {
       id: DocumentId.t
-        [@ocaml.doc "A unique identifier of the document in the index."];
+        [@ocaml.doc
+          "A identifier of the document in the index. Note, each document ID must be unique per index. You cannot create a data source to index your documents with their unique IDs and then use the BatchPutDocument API to index the same documents, or vice versa. You can delete a data source and then use the BatchPutDocument API to index the same documents, or vice versa."];
       title: Title.t option [@ocaml.doc "The title of the document."];
       blob: Blob.t option
         [@ocaml.doc
@@ -2836,12 +4361,16 @@ module Document =
           "Custom attributes to apply to the document. Use the custom attributes to provide additional information for searching, to provide facets for refining searches, and to provide additional information in the query response. For example, 'DataSourceId' and 'DataSourceSyncJobId' are custom attributes that provide information on the synchronization of documents running on a data source. Note, 'DataSourceSyncJobId' could be an optional custom attribute as Amazon Kendra will use the ID of a running sync job."];
       accessControlList: PrincipalList.t option
         [@ocaml.doc
-          "Information on user and group access rights, which is used for user context filtering."];
+          "Information on principals (users and/or groups) and which documents they should have access to. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."];
       hierarchicalAccessControlList: HierarchicalPrincipalList.t option
         [@ocaml.doc
           "The list of principal lists that define the hierarchy for which documents users should have access to."];
       contentType: ContentType.t option
-        [@ocaml.doc "The file type of the document in the Blob field."]}
+        [@ocaml.doc
+          "The file type of the document in the Blob field. If you want to index snippets or subsets of HTML documents instead of the entirety of the HTML documents, you must add the HTML start and closing tags (<HTML>content</HTML>) around the content."];
+      accessControlConfigurationId: AccessControlConfigurationId.t option
+        [@ocaml.doc
+          "The identifier of the access control configuration that you want to apply to the document."]}
     let context_ = "Document"
     let make ?title =
       fun ?blob ->
@@ -2850,18 +4379,20 @@ module Document =
             fun ?accessControlList ->
               fun ?hierarchicalAccessControlList ->
                 fun ?contentType ->
-                  fun ~id ->
-                    fun () ->
-                      {
-                        title;
-                        blob;
-                        s3Path;
-                        attributes;
-                        accessControlList;
-                        hierarchicalAccessControlList;
-                        contentType;
-                        id
-                      }
+                  fun ?accessControlConfigurationId ->
+                    fun ~id ->
+                      fun () ->
+                        {
+                          title;
+                          blob;
+                          s3Path;
+                          attributes;
+                          accessControlList;
+                          hierarchicalAccessControlList;
+                          contentType;
+                          accessControlConfigurationId;
+                          id
+                        }
     let to_value x =
       structure_to_value
         [("Id", (Some (DocumentId.to_value x.id)));
@@ -2875,9 +4406,15 @@ module Document =
         ("HierarchicalAccessControlList",
           (Option.map x.hierarchicalAccessControlList
              ~f:HierarchicalPrincipalList.to_value));
-        ("ContentType", (Option.map x.contentType ~f:ContentType.to_value))]
+        ("ContentType", (Option.map x.contentType ~f:ContentType.to_value));
+        ("AccessControlConfigurationId",
+          (Option.map x.accessControlConfigurationId
+             ~f:AccessControlConfigurationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accessControlConfigurationId =
+        (Option.map ~f:AccessControlConfigurationId.of_xml)
+          (Xml.child xml_arg0 "AccessControlConfigurationId") in
       let contentType =
         (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "ContentType") in
       let hierarchicalAccessControlList =
@@ -2895,24 +4432,29 @@ module Document =
       let title = (Option.map ~f:Title.of_xml) (Xml.child xml_arg0 "Title") in
       let id =
         DocumentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?contentType ?hierarchicalAccessControlList ?accessControlList
-        ?attributes ?s3Path ?blob ?title ~id ()
+      make ?accessControlConfigurationId ?contentType
+        ?hierarchicalAccessControlList ?accessControlList ?attributes ?s3Path
+        ?blob ?title ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contentType = field_map json "ContentType" ContentType.of_json in
+    let of_json json__ =
+      let accessControlConfigurationId =
+        field_map json__ "AccessControlConfigurationId"
+          AccessControlConfigurationId.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
       let hierarchicalAccessControlList =
-        field_map json "HierarchicalAccessControlList"
+        field_map json__ "HierarchicalAccessControlList"
           HierarchicalPrincipalList.of_json in
       let accessControlList =
-        field_map json "AccessControlList" PrincipalList.of_json in
+        field_map json__ "AccessControlList" PrincipalList.of_json in
       let attributes =
-        field_map json "Attributes" DocumentAttributeList.of_json in
-      let s3Path = field_map json "S3Path" S3Path.of_json in
-      let blob = field_map json "Blob" Blob.of_json in
-      let title = field_map json "Title" Title.of_json in
-      let id = field_map_exn json "Id" DocumentId.of_json in
-      make ?contentType ?hierarchicalAccessControlList ?accessControlList
-        ?attributes ?s3Path ?blob ?title ~id ()
+        field_map json__ "Attributes" DocumentAttributeList.of_json in
+      let s3Path = field_map json__ "S3Path" S3Path.of_json in
+      let blob = field_map json__ "Blob" Blob.of_json in
+      let title = field_map json__ "Title" Title.of_json in
+      let id = field_map_exn json__ "Id" DocumentId.of_json in
+      make ?accessControlConfigurationId ?contentType
+        ?hierarchicalAccessControlList ?accessControlList ?attributes ?s3Path
+        ?blob ?title ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A document in an index."]
 module DocumentList =
@@ -2923,6 +4465,9 @@ module DocumentList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Document.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2990,14 +4535,15 @@ module DocumentAttributeTarget =
       make ?targetDocumentAttributeValue
         ?targetDocumentAttributeValueDeletion ?targetDocumentAttributeKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetDocumentAttributeValue =
-        field_map json "TargetDocumentAttributeValue"
+        field_map json__ "TargetDocumentAttributeValue"
           DocumentAttributeValue.of_json in
       let targetDocumentAttributeValueDeletion =
-        field_map json "TargetDocumentAttributeValueDeletion" Boolean.of_json in
+        field_map json__ "TargetDocumentAttributeValueDeletion"
+          Boolean.of_json in
       let targetDocumentAttributeKey =
-        field_map json "TargetDocumentAttributeKey"
+        field_map json__ "TargetDocumentAttributeKey"
           DocumentAttributeKey.of_json in
       make ?targetDocumentAttributeValue
         ?targetDocumentAttributeValueDeletion ?targetDocumentAttributeKey ()
@@ -3098,12 +4644,13 @@ module DocumentAttributeCondition =
              "ConditionDocumentAttributeKey") in
       make ?conditionOnValue ~operator ~conditionDocumentAttributeKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conditionOnValue =
-        field_map json "ConditionOnValue" DocumentAttributeValue.of_json in
-      let operator = field_map_exn json "Operator" ConditionOperator.of_json in
+        field_map json__ "ConditionOnValue" DocumentAttributeValue.of_json in
+      let operator =
+        field_map_exn json__ "Operator" ConditionOperator.of_json in
       let conditionDocumentAttributeKey =
-        field_map_exn json "ConditionDocumentAttributeKey"
+        field_map_exn json__ "ConditionDocumentAttributeKey"
           DocumentAttributeKey.of_json in
       make ?conditionOnValue ~operator ~conditionDocumentAttributeKey ()
     let to_json v = composed_to_json to_value v
@@ -3146,12 +4693,12 @@ module InlineCustomDocumentEnrichmentConfiguration =
           (Xml.child xml_arg0 "Condition") in
       make ?documentContentDeletion ?target ?condition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentContentDeletion =
-        field_map json "DocumentContentDeletion" Boolean.of_json in
-      let target = field_map json "Target" DocumentAttributeTarget.of_json in
+        field_map json__ "DocumentContentDeletion" Boolean.of_json in
+      let target = field_map json__ "Target" DocumentAttributeTarget.of_json in
       let condition =
-        field_map json "Condition" DocumentAttributeCondition.of_json in
+        field_map json__ "Condition" DocumentAttributeCondition.of_json in
       make ?documentContentDeletion ?target ?condition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3165,6 +4712,9 @@ module InlineCustomDocumentEnrichmentConfigurationList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:InlineCustomDocumentEnrichmentConfiguration.to_value))
@@ -3220,7 +4770,7 @@ module HookConfiguration =
           "The condition used for when a Lambda function should be invoked. For example, you can specify a condition that if there are empty date-time values, then Amazon Kendra should invoke a function that inserts the current date-time."];
       lambdaArn: LambdaArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role with permission to run a Lambda function during ingestion. For more information, see IAM roles for Amazon Kendra."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to run a Lambda function during ingestion. For more information, see an IAM roles for Amazon Kendra."];
       s3Bucket: S3BucketName.t
         [@ocaml.doc
           "Stores the original, raw documents or the structured, parsed documents before and after altering them. For more information, see Data contracts for Lambda functions."]}
@@ -3249,11 +4799,11 @@ module HookConfiguration =
           (Xml.child xml_arg0 "InvocationCondition") in
       make ~s3Bucket ~lambdaArn ?invocationCondition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Bucket = field_map_exn json "S3Bucket" S3BucketName.of_json in
-      let lambdaArn = field_map_exn json "LambdaArn" LambdaArn.of_json in
+    let of_json json__ =
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3BucketName.of_json in
+      let lambdaArn = field_map_exn json__ "LambdaArn" LambdaArn.of_json in
       let invocationCondition =
-        field_map json "InvocationCondition"
+        field_map json__ "InvocationCondition"
           DocumentAttributeCondition.of_json in
       make ~s3Bucket ~lambdaArn ?invocationCondition ()
     let to_json v = composed_to_json to_value v
@@ -3275,7 +4825,7 @@ module CustomDocumentEnrichmentConfiguration =
           "Configuration information for invoking a Lambda function in Lambda on the structured documents with their metadata and text extracted. You can use a Lambda function to apply advanced logic for creating, modifying, or deleting document metadata and content. For more information, see Advanced data manipulation."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role with permission to run PreExtractionHookConfiguration and PostExtractionHookConfiguration for altering document metadata and content during the document ingestion process. For more information, see IAM roles for Amazon Kendra."]}
+          "The Amazon Resource Name (ARN) of an IAM role with permission to run PreExtractionHookConfiguration and PostExtractionHookConfiguration for altering document metadata and content during the document ingestion process. For more information, see an IAM roles for Amazon Kendra."]}
     let make ?inlineConfigurations =
       fun ?preExtractionHookConfiguration ->
         fun ?postExtractionHookConfiguration ->
@@ -3315,16 +4865,16 @@ module CustomDocumentEnrichmentConfiguration =
       make ?roleArn ?postExtractionHookConfiguration
         ?preExtractionHookConfiguration ?inlineConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let postExtractionHookConfiguration =
-        field_map json "PostExtractionHookConfiguration"
+        field_map json__ "PostExtractionHookConfiguration"
           HookConfiguration.of_json in
       let preExtractionHookConfiguration =
-        field_map json "PreExtractionHookConfiguration"
+        field_map json__ "PreExtractionHookConfiguration"
           HookConfiguration.of_json in
       let inlineConfigurations =
-        field_map json "InlineConfigurations"
+        field_map json__ "InlineConfigurations"
           InlineCustomDocumentEnrichmentConfigurationList.of_json in
       make ?roleArn ?postExtractionHookConfiguration
         ?preExtractionHookConfiguration ?inlineConfigurations ()
@@ -3340,10 +4890,10 @@ module BatchPutDocumentRequest =
           "The identifier of the index to add the documents to. You need to create the index first using the CreateIndex API."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role that is allowed to run the BatchPutDocument API. For more information, see IAM Roles for Amazon Kendra."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to access your S3 bucket. For more information, see IAM access roles for Amazon Kendra."];
       documents: DocumentList.t
         [@ocaml.doc
-          "One or more documents to add to the index. Documents have the following file size limits. 5 MB total size for inline documents 50 MB total size for files from an S3 bucket 5 MB extracted text for any file For more information about file size and transaction per second quotas, see Quotas."];
+          "One or more documents to add to the index. Documents have the following file size limits. 50 MB total size for any file 5 MB extracted text for any file For more information, see Quotas."];
       customDocumentEnrichmentConfiguration:
         CustomDocumentEnrichmentConfiguration.t option
         [@ocaml.doc
@@ -3383,18 +4933,18 @@ module BatchPutDocumentRequest =
       make ?customDocumentEnrichmentConfiguration ~documents ?roleArn
         ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customDocumentEnrichmentConfiguration =
-        field_map json "CustomDocumentEnrichmentConfiguration"
+        field_map json__ "CustomDocumentEnrichmentConfiguration"
           CustomDocumentEnrichmentConfiguration.of_json in
-      let documents = field_map_exn json "Documents" DocumentList.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+      let documents = field_map_exn json__ "Documents" DocumentList.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?customDocumentEnrichmentConfiguration ~documents ?roleArn
         ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more documents to an index. The BatchPutDocument API enables you to ingest inline documents or a set of documents stored in an Amazon S3 bucket. Use this API to ingest your text and unstructured text into an index, add custom attributes to the documents, and to attach an access control list to the documents added to the index. The documents are indexed asynchronously. You can see the progress of the batch using Amazon Web Services CloudWatch. Any error messages related to processing the batch are sent to your Amazon Web Services CloudWatch log."]
+       "Adds one or more documents to an index. The BatchPutDocument API enables you to ingest inline documents or a set of documents stored in an Amazon S3 bucket. Use this API to ingest your text and unstructured text into an index, add custom attributes to the documents, and to attach an access control list to the documents added to the index. The documents are indexed asynchronously. You can see the progress of the batch using Amazon Web Services CloudWatch. Any error messages related to processing the batch are sent to your Amazon Web Services CloudWatch log. You can also use the BatchGetDocumentStatus API to monitor the progress of indexing your documents. For an example of ingesting inline documents using Python and Java SDKs, see Adding files directly to an index."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
@@ -3409,17 +4959,20 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "You have exceeded the set limits for your Amazon Kendra service. Please see Quotas for more information, or contact Support to inquire about an increase of limits."]
 module BatchPutDocumentResponseFailedDocument =
   struct
     type nonrec t =
       {
-      id: DocumentId.t option
-        [@ocaml.doc "The unique identifier of the document."];
+      id: DocumentId.t option [@ocaml.doc "The identifier of the document."];
+      dataSourceId: DataSourceId.t option
+        [@ocaml.doc
+          "The identifier of the data source connector that the failed document belongs to."];
       errorCode: ErrorCode.t option
         [@ocaml.doc
           "The type of error that caused the document to fail to be indexed."];
@@ -3427,11 +4980,15 @@ module BatchPutDocumentResponseFailedDocument =
         [@ocaml.doc
           "A description of the reason why the document could not be indexed."]}
     let make ?id =
-      fun ?errorCode ->
-        fun ?errorMessage -> fun () -> { id; errorCode; errorMessage }
+      fun ?dataSourceId ->
+        fun ?errorCode ->
+          fun ?errorMessage ->
+            fun () -> { id; dataSourceId; errorCode; errorMessage }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:DocumentId.to_value));
+        ("DataSourceId",
+          (Option.map x.dataSourceId ~f:DataSourceId.to_value));
         ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("ErrorMessage",
           (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
@@ -3442,14 +4999,18 @@ module BatchPutDocumentResponseFailedDocument =
           (Xml.child xml_arg0 "ErrorMessage") in
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let dataSourceId =
+        (Option.map ~f:DataSourceId.of_xml)
+          (Xml.child xml_arg0 "DataSourceId") in
       let id = (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?errorMessage ?errorCode ?id ()
+      make ?errorMessage ?errorCode ?dataSourceId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let id = field_map json "Id" DocumentId.of_json in
-      make ?errorMessage ?errorCode ?id ()
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let id = field_map json__ "Id" DocumentId.of_json in
+      make ?errorMessage ?errorCode ?dataSourceId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about a document that could not be indexed."]
@@ -3457,6 +5018,9 @@ module BatchPutDocumentResponseFailedDocuments =
   struct
     type nonrec t = BatchPutDocumentResponseFailedDocument.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchPutDocumentResponseFailedDocument.to_value))
         |> (fun x -> `List x)
@@ -3486,7 +5050,7 @@ module BatchPutDocumentResponse =
       {
       failedDocuments: BatchPutDocumentResponseFailedDocuments.t option
         [@ocaml.doc
-          "A list of documents that were not added to the index because the document failed a validation check. Each document contains an error message that indicates why the document couldn't be added to the index. If there was an error adding a document to an index the error is reported in your Amazon Web Services CloudWatch log. For more information, see Monitoring Amazon Kendra with Amazon CloudWatch Logs"]}
+          "A list of documents that were not added to the index because the document failed a validation check. Each document contains an error message that indicates why the document couldn't be added to the index. If there was an error adding a document to an index the error is reported in your Amazon Web Services CloudWatch log. For more information, see Monitoring Amazon Kendra with Amazon CloudWatch logs."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -3583,14 +5147,14 @@ module BatchPutDocumentResponse =
           (Xml.child xml_arg0 "FailedDocuments") in
       make ?failedDocuments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedDocuments =
-        field_map json "FailedDocuments"
+        field_map json__ "FailedDocuments"
           BatchPutDocumentResponseFailedDocuments.of_json in
       make ?failedDocuments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more documents to an index. The BatchPutDocument API enables you to ingest inline documents or a set of documents stored in an Amazon S3 bucket. Use this API to ingest your text and unstructured text into an index, add custom attributes to the documents, and to attach an access control list to the documents added to the index. The documents are indexed asynchronously. You can see the progress of the batch using Amazon Web Services CloudWatch. Any error messages related to processing the batch are sent to your Amazon Web Services CloudWatch log."]
+       "Adds one or more documents to an index. The BatchPutDocument API enables you to ingest inline documents or a set of documents stored in an Amazon S3 bucket. Use this API to ingest your text and unstructured text into an index, add custom attributes to the documents, and to attach an access control list to the documents added to the index. The documents are indexed asynchronously. You can see the progress of the batch using Amazon Web Services CloudWatch. Any error messages related to processing the batch are sent to your Amazon Web Services CloudWatch log. You can also use the BatchGetDocumentStatus API to monitor the progress of indexing your documents. For an example of ingesting inline documents using Python and Java SDKs, see Adding files directly to an index."]
 module EnterpriseId =
   struct
     type nonrec t = string
@@ -3611,330 +5175,6 @@ module EnterpriseId =
     let of_json j = string_of_json ~kind:"EnterpriseId" j
     let to_json = simple_to_json to_value
   end
-module SubnetId =
-  struct
-    type nonrec t = string
-    let context_ = "SubnetId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:200) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\-0-9a-zA-Z]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SubnetId" j
-    let to_json = simple_to_json to_value
-  end
-module SubnetIdList =
-  struct
-    type nonrec t = SubnetId.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:6) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:SubnetId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"SubnetIdList" ~of_json:SubnetId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module VpcSecurityGroupId =
-  struct
-    type nonrec t = string
-    let context_ = "VpcSecurityGroupId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:200) >>=
-                  (fun () -> check_pattern i ~pattern:"[-0-9a-zA-Z]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VpcSecurityGroupId" j
-    let to_json = simple_to_json to_value
-  end
-module SecurityGroupIdList =
-  struct
-    type nonrec t = VpcSecurityGroupId.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:VpcSecurityGroupId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:VpcSecurityGroupId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"SecurityGroupIdList"
-        ~of_json:VpcSecurityGroupId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module DataSourceVpcConfiguration =
-  struct
-    type nonrec t =
-      {
-      subnetIds: SubnetIdList.t
-        [@ocaml.doc
-          "A list of identifiers for subnets within your Amazon VPC. The subnets should be able to connect to each other in the VPC, and they should have outgoing access to the Internet through a NAT device."];
-      securityGroupIds: SecurityGroupIdList.t
-        [@ocaml.doc
-          "A list of identifiers of security groups within your Amazon VPC. The security groups should enable Amazon Kendra to connect to the data source."]}
-    let context_ = "DataSourceVpcConfiguration"
-    let make ~subnetIds =
-      fun ~securityGroupIds -> fun () -> { subnetIds; securityGroupIds }
-    let to_value x =
-      structure_to_value
-        [("SubnetIds", (Some (SubnetIdList.to_value x.subnetIds)));
-        ("SecurityGroupIds",
-          (Some (SecurityGroupIdList.to_value x.securityGroupIds)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let securityGroupIds =
-        SecurityGroupIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupIds") in
-      let subnetIds =
-        SubnetIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
-      make ~securityGroupIds ~subnetIds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" SecurityGroupIdList.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIdList.of_json in
-      make ~securityGroupIds ~subnetIds ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides the configuration information to connect to an Amazon VPC."]
-module IndexFieldName =
-  struct
-    type nonrec t = string
-    let context_ = "IndexFieldName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:30) >>=
-                  (fun () -> check_pattern i ~pattern:"^\\P{C}*$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IndexFieldName" j
-    let to_json = simple_to_json to_value
-  end
-module DataSourceFieldName =
-  struct
-    type nonrec t = string
-    let context_ = "DataSourceFieldName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:100) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^[a-zA-Z][a-zA-Z0-9_.]*$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DataSourceFieldName" j
-    let to_json = simple_to_json to_value
-  end
-module DataSourceDateFieldFormat =
-  struct
-    type nonrec t = string
-    let context_ = "DataSourceDateFieldFormat"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:4) >>=
-             (fun () ->
-                (check_string_max i ~max:40) >>=
-                  (fun () -> check_pattern i ~pattern:"^(?!\\s).*(?<!\\s)$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DataSourceDateFieldFormat" j
-    let to_json = simple_to_json to_value
-  end
-module DataSourceToIndexFieldMapping =
-  struct
-    type nonrec t =
-      {
-      dataSourceFieldName: DataSourceFieldName.t
-        [@ocaml.doc
-          "The name of the column or attribute in the data source."];
-      dateFieldFormat: DataSourceDateFieldFormat.t option
-        [@ocaml.doc "The type of data stored in the column or attribute."];
-      indexFieldName: IndexFieldName.t
-        [@ocaml.doc "The name of the field in the index."]}
-    let context_ = "DataSourceToIndexFieldMapping"
-    let make ?dateFieldFormat =
-      fun ~dataSourceFieldName ->
-        fun ~indexFieldName ->
-          fun () -> { dateFieldFormat; dataSourceFieldName; indexFieldName }
-    let to_value x =
-      structure_to_value
-        [("DataSourceFieldName",
-           (Some (DataSourceFieldName.to_value x.dataSourceFieldName)));
-        ("DateFieldFormat",
-          (Option.map x.dateFieldFormat ~f:DataSourceDateFieldFormat.to_value));
-        ("IndexFieldName", (Some (IndexFieldName.to_value x.indexFieldName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let indexFieldName =
-        IndexFieldName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexFieldName") in
-      let dateFieldFormat =
-        (Option.map ~f:DataSourceDateFieldFormat.of_xml)
-          (Xml.child xml_arg0 "DateFieldFormat") in
-      let dataSourceFieldName =
-        DataSourceFieldName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSourceFieldName") in
-      make ~indexFieldName ?dateFieldFormat ~dataSourceFieldName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexFieldName =
-        field_map_exn json "IndexFieldName" IndexFieldName.of_json in
-      let dateFieldFormat =
-        field_map json "DateFieldFormat" DataSourceDateFieldFormat.of_json in
-      let dataSourceFieldName =
-        field_map_exn json "DataSourceFieldName" DataSourceFieldName.of_json in
-      make ~indexFieldName ?dateFieldFormat ~dataSourceFieldName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Maps a column or attribute in the data source to an index field. You must first create the fields in the index using the UpdateIndex API."]
-module DataSourceToIndexFieldMappingList =
-  struct
-    type nonrec t = DataSourceToIndexFieldMapping.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:DataSourceToIndexFieldMapping.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DataSourceToIndexFieldMapping.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DataSourceToIndexFieldMappingList"
-        ~of_json:DataSourceToIndexFieldMapping.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module DataSourceInclusionsExclusionsStringsMember =
-  struct
-    type nonrec t = string
-    let context_ = "DataSourceInclusionsExclusionsStringsMember"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:150) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json ~kind:"DataSourceInclusionsExclusionsStringsMember" j
-    let to_json = simple_to_json to_value
-  end
-module DataSourceInclusionsExclusionsStrings =
-  struct
-    type nonrec t = DataSourceInclusionsExclusionsStringsMember.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:0));
-        i
-    let to_value xs =
-      (xs |>
-         (List.map ~f:DataSourceInclusionsExclusionsStringsMember.to_value))
-        |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true)))
-           ~f:DataSourceInclusionsExclusionsStringsMember.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DataSourceInclusionsExclusionsStrings"
-        ~of_json:DataSourceInclusionsExclusionsStringsMember.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module BoxConfiguration =
   struct
     type nonrec t =
@@ -3944,7 +5184,7 @@ module BoxConfiguration =
           "The identifier of the Box Enterprise platform. You can find the enterprise ID in the Box Developer Console settings or when you create an app in Box and download your authentication credentials. For example, 801234567."];
       secretArn: SecretArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the key-value pairs required to connect to your Box platform. The secret must contain a JSON structure with the following keys: clientID\226\128\148The identifier of the client OAuth 2.0 authentication application created in Box. clientSecret\226\128\148A set of characters known only to the OAuth 2.0 authentication application created in Box. publicKeyId\226\128\148The identifier of the public key contained within an identity certificate. privateKey\226\128\148A set of characters that make up an encryption key. passphrase\226\128\148A set of characters that act like a password. You create an application in Box to generate the keys or credentials required for the secret. For more information, see Authentication for a Box data source."];
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the key-value pairs required to connect to your Box platform. The secret must contain a JSON structure with the following keys: clientID\226\128\148The identifier of the client OAuth 2.0 authentication application created in Box. clientSecret\226\128\148A set of characters known only to the OAuth 2.0 authentication application created in Box. publicKeyId\226\128\148The identifier of the public key contained within an identity certificate. privateKey\226\128\148A set of characters that make up an encryption key. passphrase\226\128\148A set of characters that act like a password. You create an application in Box to generate the keys or credentials required for the secret. For more information, see Using a Box data source."];
       useChangeLog: Boolean.t option
         [@ocaml.doc
           "TRUE to use the Slack change log to determine which documents require updating in the index. Depending on the data source change log's size, it may take longer for Amazon Kendra to use the change log than to scan all of your documents."];
@@ -4074,34 +5314,35 @@ module BoxConfiguration =
         ?fileFieldMappings ?crawlWebLinks ?crawlTasks ?crawlComments
         ?useChangeLog ~secretArn ~enterpriseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcConfiguration =
-        field_map json "VpcConfiguration" DataSourceVpcConfiguration.of_json in
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
       let exclusionPatterns =
-        field_map json "ExclusionPatterns"
+        field_map json__ "ExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPatterns =
-        field_map json "InclusionPatterns"
+        field_map json__ "InclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let webLinkFieldMappings =
-        field_map json "WebLinkFieldMappings"
+        field_map json__ "WebLinkFieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let commentFieldMappings =
-        field_map json "CommentFieldMappings"
+        field_map json__ "CommentFieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let taskFieldMappings =
-        field_map json "TaskFieldMappings"
+        field_map json__ "TaskFieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let fileFieldMappings =
-        field_map json "FileFieldMappings"
+        field_map json__ "FileFieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
-      let crawlWebLinks = field_map json "CrawlWebLinks" Boolean.of_json in
-      let crawlTasks = field_map json "CrawlTasks" Boolean.of_json in
-      let crawlComments = field_map json "CrawlComments" Boolean.of_json in
-      let useChangeLog = field_map json "UseChangeLog" Boolean.of_json in
-      let secretArn = field_map_exn json "SecretArn" SecretArn.of_json in
+      let crawlWebLinks = field_map json__ "CrawlWebLinks" Boolean.of_json in
+      let crawlTasks = field_map json__ "CrawlTasks" Boolean.of_json in
+      let crawlComments = field_map json__ "CrawlComments" Boolean.of_json in
+      let useChangeLog = field_map json__ "UseChangeLog" Boolean.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
       let enterpriseId =
-        field_map_exn json "EnterpriseId" EnterpriseId.of_json in
+        field_map_exn json__ "EnterpriseId" EnterpriseId.of_json in
       make ?vpcConfiguration ?exclusionPatterns ?inclusionPatterns
         ?webLinkFieldMappings ?commentFieldMappings ?taskFieldMappings
         ?fileFieldMappings ?crawlWebLinks ?crawlTasks ?crawlComments
@@ -4145,10 +5386,10 @@ module CapacityUnitsConfiguration =
       {
       storageCapacityUnits: StorageCapacityUnit.t
         [@ocaml.doc
-          "The amount of extra storage capacity for an index. A single capacity unit provides 30 GB of storage space or 100,000 documents, whichever is reached first."];
+          "The amount of extra storage capacity for an index. A single capacity unit provides 30 GB of storage space or 100,000 documents, whichever is reached first. You can add up to 100 extra capacity units."];
       queryCapacityUnits: QueryCapacityUnit.t
         [@ocaml.doc
-          "The amount of extra query capacity for an index and GetQuerySuggestions capacity. A single extra capacity unit for an index provides 0.1 queries per second or approximately 8,000 queries per day. GetQuerySuggestions capacity is five times the provisioned query capacity for an index, or the base capacity of 2.5 calls per second, whichever is higher. For example, the base capacity for an index is 0.1 queries per second, and GetQuerySuggestions capacity has a base of 2.5 calls per second. If you add another 0.1 queries per second to total 0.2 queries per second for an index, the GetQuerySuggestions capacity is 2.5 calls per second (higher than five times 0.2 queries per second)."]}
+          "The amount of extra query capacity for an index and GetQuerySuggestions capacity. A single extra capacity unit for an index provides 0.1 queries per second or approximately 8,000 queries per day. You can add up to 100 extra capacity units. GetQuerySuggestions capacity is five times the provisioned query capacity for an index, or the base capacity of 2.5 calls per second, whichever is higher. For example, the base capacity for an index is 0.1 queries per second, and GetQuerySuggestions capacity has a base of 2.5 calls per second. If you add another 0.1 queries per second to total 0.2 queries per second for an index, the GetQuerySuggestions capacity is 2.5 calls per second (higher than five times 0.2 queries per second)."]}
     let context_ = "CapacityUnitsConfiguration"
     let make ~storageCapacityUnits =
       fun ~queryCapacityUnits ->
@@ -4169,11 +5410,12 @@ module CapacityUnitsConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "StorageCapacityUnits") in
       make ~queryCapacityUnits ~storageCapacityUnits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryCapacityUnits =
-        field_map_exn json "QueryCapacityUnits" QueryCapacityUnit.of_json in
+        field_map_exn json__ "QueryCapacityUnits" QueryCapacityUnit.of_json in
       let storageCapacityUnits =
-        field_map_exn json "StorageCapacityUnits" StorageCapacityUnit.of_json in
+        field_map_exn json__ "StorageCapacityUnits"
+          StorageCapacityUnit.of_json in
       make ~queryCapacityUnits ~storageCapacityUnits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4186,6 +5428,9 @@ module ChangeDetectingColumns =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4244,8 +5489,8 @@ module ClearQuerySuggestionsRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4273,11 +5518,9 @@ module ClickFeedback =
     type nonrec t =
       {
       resultId: ResultId.t
-        [@ocaml.doc
-          "The unique identifier of the search result that was clicked."];
+        [@ocaml.doc "The identifier of the search result that was clicked."];
       clickTime: Timestamp.t
-        [@ocaml.doc
-          "The Unix timestamp of the date and time that the result was clicked."]}
+        [@ocaml.doc "The Unix timestamp when the result was clicked."]}
     let context_ = "ClickFeedback"
     let make ~resultId = fun ~clickTime -> fun () -> { resultId; clickTime }
     let to_value x =
@@ -4293,9 +5536,9 @@ module ClickFeedback =
         ResultId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResultId") in
       make ~clickTime ~resultId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clickTime = field_map_exn json "ClickTime" Timestamp.of_json in
-      let resultId = field_map_exn json "ResultId" ResultId.of_json in
+    let of_json json__ =
+      let clickTime = field_map_exn json__ "ClickTime" Timestamp.of_json in
+      let resultId = field_map_exn json__ "ResultId" ResultId.of_json in
       make ~clickTime ~resultId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4304,6 +5547,9 @@ module ClickFeedbackList =
   struct
     type nonrec t = ClickFeedback.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClickFeedback.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4342,13 +5588,411 @@ module ClientTokenName =
     let of_json j = string_of_json ~kind:"ClientTokenName" j
     let to_json = simple_to_json to_value
   end
+module SortOrder =
+  struct
+    type nonrec t =
+      | DESC 
+      | ASC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | DESC -> "DESC" | ASC -> "ASC" | Non_static_id s -> s
+    let of_string =
+      function | "DESC" -> DESC | "ASC" -> ASC | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
+    let to_json = simple_to_json to_value
+  end
+module SortingConfiguration =
+  struct
+    type nonrec t =
+      {
+      documentAttributeKey: DocumentAttributeKey.t
+        [@ocaml.doc
+          "The name of the document attribute used to sort the response. You can use any field that has the Sortable flag set to true. You can also sort by any of the following built-in attributes: _category _created_at _last_updated_at _version _view_count"];
+      sortOrder: SortOrder.t
+        [@ocaml.doc
+          "The order that the results should be returned in. In case of ties, the relevance assigned to the result by Amazon Kendra is used as the tie-breaker."]}
+    let context_ = "SortingConfiguration"
+    let make ~documentAttributeKey =
+      fun ~sortOrder -> fun () -> { documentAttributeKey; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("DocumentAttributeKey",
+           (Some (DocumentAttributeKey.to_value x.documentAttributeKey)));
+        ("SortOrder", (Some (SortOrder.to_value x.sortOrder)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        SortOrder.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SortOrder") in
+      let documentAttributeKey =
+        DocumentAttributeKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DocumentAttributeKey") in
+      make ~sortOrder ~documentAttributeKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map_exn json__ "SortOrder" SortOrder.of_json in
+      let documentAttributeKey =
+        field_map_exn json__ "DocumentAttributeKey"
+          DocumentAttributeKey.of_json in
+      make ~sortOrder ~documentAttributeKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the document attribute to use to sort the response to a Amazon Kendra query. You can specify a single attribute for sorting. The attribute must have the Sortable flag set to true, otherwise Amazon Kendra returns an exception. You can sort attributes of the following types. Date value Long value String value You can't sort attributes of the following type. String list value"]
+module SortingConfigurationList =
+  struct
+    type nonrec t = SortingConfiguration.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SortingConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SortingConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SortingConfigurationList"
+        ~of_json:SortingConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MissingAttributeKeyStrategy =
+  struct
+    type nonrec t =
+      | IGNORE 
+      | COLLAPSE 
+      | EXPAND 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IGNORE -> "IGNORE"
+      | COLLAPSE -> "COLLAPSE"
+      | EXPAND -> "EXPAND"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IGNORE" -> IGNORE
+      | "COLLAPSE" -> COLLAPSE
+      | "EXPAND" -> EXPAND
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MissingAttributeKeyStrategy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MissingAttributeKeyStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module ExpandConfiguration =
+  struct
+    type nonrec t =
+      {
+      maxResultItemsToExpand: Integer.t option
+        [@ocaml.doc
+          "The number of collapsed search result groups to expand. If you set this value to 10, for example, only the first 10 out of 100 result groups will have expand functionality."];
+      maxExpandedResultsPerItem: Integer.t option
+        [@ocaml.doc
+          "The number of expanded results to show per collapsed primary document. For instance, if you set this value to 3, then at most 3 results per collapsed group will be displayed."]}
+    let make ?maxResultItemsToExpand =
+      fun ?maxExpandedResultsPerItem ->
+        fun () -> { maxResultItemsToExpand; maxExpandedResultsPerItem }
+    let to_value x =
+      structure_to_value
+        [("MaxResultItemsToExpand",
+           (Option.map x.maxResultItemsToExpand ~f:Integer.to_value));
+        ("MaxExpandedResultsPerItem",
+          (Option.map x.maxExpandedResultsPerItem ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxExpandedResultsPerItem =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "MaxExpandedResultsPerItem") in
+      let maxResultItemsToExpand =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "MaxResultItemsToExpand") in
+      make ?maxExpandedResultsPerItem ?maxResultItemsToExpand ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxExpandedResultsPerItem =
+        field_map json__ "MaxExpandedResultsPerItem" Integer.of_json in
+      let maxResultItemsToExpand =
+        field_map json__ "MaxResultItemsToExpand" Integer.of_json in
+      make ?maxExpandedResultsPerItem ?maxResultItemsToExpand ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the configuration information needed to customize how collapsed search result groups expand."]
+module CollapseConfiguration =
+  struct
+    type nonrec t =
+      {
+      documentAttributeKey: DocumentAttributeKey.t
+        [@ocaml.doc
+          "The document attribute used to group search results. You can use any attribute that has the Sortable flag set to true. You can also sort by any of the following built-in attributes:\"_category\",\"_created_at\", \"_last_updated_at\", \"_version\", \"_view_count\"."];
+      sortingConfigurations: SortingConfigurationList.t option
+        [@ocaml.doc
+          "A prioritized list of document attributes/fields that determine the primary document among those in a collapsed group."];
+      missingAttributeKeyStrategy: MissingAttributeKeyStrategy.t option
+        [@ocaml.doc
+          "Specifies the behavior for documents without a value for the collapse attribute. Amazon Kendra offers three customization options: Choose to COLLAPSE all documents with null or missing values in one group. This is the default configuration. Choose to IGNORE documents with null or missing values. Ignored documents will not appear in query results. Choose to EXPAND each document with a null or missing value into a group of its own."];
+      expand: Boolean.t option
+        [@ocaml.doc "Specifies whether to expand the collapsed results."];
+      expandConfiguration: ExpandConfiguration.t option
+        [@ocaml.doc
+          "Provides configuration information to customize expansion options for a collapsed group."]}
+    let context_ = "CollapseConfiguration"
+    let make ?sortingConfigurations =
+      fun ?missingAttributeKeyStrategy ->
+        fun ?expand ->
+          fun ?expandConfiguration ->
+            fun ~documentAttributeKey ->
+              fun () ->
+                {
+                  sortingConfigurations;
+                  missingAttributeKeyStrategy;
+                  expand;
+                  expandConfiguration;
+                  documentAttributeKey
+                }
+    let to_value x =
+      structure_to_value
+        [("DocumentAttributeKey",
+           (Some (DocumentAttributeKey.to_value x.documentAttributeKey)));
+        ("SortingConfigurations",
+          (Option.map x.sortingConfigurations
+             ~f:SortingConfigurationList.to_value));
+        ("MissingAttributeKeyStrategy",
+          (Option.map x.missingAttributeKeyStrategy
+             ~f:MissingAttributeKeyStrategy.to_value));
+        ("Expand", (Option.map x.expand ~f:Boolean.to_value));
+        ("ExpandConfiguration",
+          (Option.map x.expandConfiguration ~f:ExpandConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expandConfiguration =
+        (Option.map ~f:ExpandConfiguration.of_xml)
+          (Xml.child xml_arg0 "ExpandConfiguration") in
+      let expand =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Expand") in
+      let missingAttributeKeyStrategy =
+        (Option.map ~f:MissingAttributeKeyStrategy.of_xml)
+          (Xml.child xml_arg0 "MissingAttributeKeyStrategy") in
+      let sortingConfigurations =
+        (Option.map ~f:SortingConfigurationList.of_xml)
+          (Xml.child xml_arg0 "SortingConfigurations") in
+      let documentAttributeKey =
+        DocumentAttributeKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DocumentAttributeKey") in
+      make ?expandConfiguration ?expand ?missingAttributeKeyStrategy
+        ?sortingConfigurations ~documentAttributeKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expandConfiguration =
+        field_map json__ "ExpandConfiguration" ExpandConfiguration.of_json in
+      let expand = field_map json__ "Expand" Boolean.of_json in
+      let missingAttributeKeyStrategy =
+        field_map json__ "MissingAttributeKeyStrategy"
+          MissingAttributeKeyStrategy.of_json in
+      let sortingConfigurations =
+        field_map json__ "SortingConfigurations"
+          SortingConfigurationList.of_json in
+      let documentAttributeKey =
+        field_map_exn json__ "DocumentAttributeKey"
+          DocumentAttributeKey.of_json in
+      make ?expandConfiguration ?expand ?missingAttributeKeyStrategy
+        ?sortingConfigurations ~documentAttributeKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies how to group results by document attribute value, and how to display them collapsed/expanded under a designated primary document for each group."]
+module Url =
+  struct
+    type nonrec t = string
+    let context_ = "Url"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(https?|ftp|file):\\/\\/([^\\s]*)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Url" j
+    let to_json = simple_to_json to_value
+  end
+module ExpandedResultItem =
+  struct
+    type nonrec t =
+      {
+      id: ResultId.t option
+        [@ocaml.doc "The identifier for the expanded result."];
+      documentId: DocumentId.t option
+        [@ocaml.doc "The idenitifier of the document."];
+      documentTitle: TextWithHighlights.t option ;
+      documentExcerpt: TextWithHighlights.t option ;
+      documentURI: Url.t option
+        [@ocaml.doc "The URI of the original location of the document."];
+      documentAttributes: DocumentAttributeList.t option
+        [@ocaml.doc
+          "An array of document attributes assigned to a document in the search results. For example, the document author (\"_author\") or the source URI (\"_source_uri\") of the document."]}
+    let make ?id =
+      fun ?documentId ->
+        fun ?documentTitle ->
+          fun ?documentExcerpt ->
+            fun ?documentURI ->
+              fun ?documentAttributes ->
+                fun () ->
+                  {
+                    id;
+                    documentId;
+                    documentTitle;
+                    documentExcerpt;
+                    documentURI;
+                    documentAttributes
+                  }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ResultId.to_value));
+        ("DocumentId", (Option.map x.documentId ~f:DocumentId.to_value));
+        ("DocumentTitle",
+          (Option.map x.documentTitle ~f:TextWithHighlights.to_value));
+        ("DocumentExcerpt",
+          (Option.map x.documentExcerpt ~f:TextWithHighlights.to_value));
+        ("DocumentURI", (Option.map x.documentURI ~f:Url.to_value));
+        ("DocumentAttributes",
+          (Option.map x.documentAttributes ~f:DocumentAttributeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let documentAttributes =
+        (Option.map ~f:DocumentAttributeList.of_xml)
+          (Xml.child xml_arg0 "DocumentAttributes") in
+      let documentURI =
+        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "DocumentURI") in
+      let documentExcerpt =
+        (Option.map ~f:TextWithHighlights.of_xml)
+          (Xml.child xml_arg0 "DocumentExcerpt") in
+      let documentTitle =
+        (Option.map ~f:TextWithHighlights.of_xml)
+          (Xml.child xml_arg0 "DocumentTitle") in
+      let documentId =
+        (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "DocumentId") in
+      let id = (Option.map ~f:ResultId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?documentAttributes ?documentURI ?documentExcerpt ?documentTitle
+        ?documentId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let documentAttributes =
+        field_map json__ "DocumentAttributes" DocumentAttributeList.of_json in
+      let documentURI = field_map json__ "DocumentURI" Url.of_json in
+      let documentExcerpt =
+        field_map json__ "DocumentExcerpt" TextWithHighlights.of_json in
+      let documentTitle =
+        field_map json__ "DocumentTitle" TextWithHighlights.of_json in
+      let documentId = field_map json__ "DocumentId" DocumentId.of_json in
+      let id = field_map json__ "Id" ResultId.of_json in
+      make ?documentAttributes ?documentURI ?documentExcerpt ?documentTitle
+        ?documentId ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A single expanded result in a collapsed group of search results. An expanded result item contains information about an expanded result document within a collapsed group of search results. This includes the original location of the document, a list of attributes assigned to the document, and relevant text from the document that satisfies the query."]
+module ExpandedResultList =
+  struct
+    type nonrec t = ExpandedResultItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExpandedResultItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExpandedResultItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExpandedResultList"
+        ~of_json:ExpandedResultItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CollapsedResultDetail =
+  struct
+    type nonrec t =
+      {
+      documentAttribute: DocumentAttribute.t option
+        [@ocaml.doc
+          "The value of the document attribute that results are collapsed on."];
+      expandedResults: ExpandedResultList.t option
+        [@ocaml.doc "A list of results in the collapsed group."]}
+    let make ?documentAttribute =
+      fun ?expandedResults ->
+        fun () -> { documentAttribute; expandedResults }
+    let to_value x =
+      structure_to_value
+        [("DocumentAttribute",
+           (Option.map x.documentAttribute ~f:DocumentAttribute.to_value));
+        ("ExpandedResults",
+          (Option.map x.expandedResults ~f:ExpandedResultList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expandedResults =
+        (Option.map ~f:ExpandedResultList.of_xml)
+          (Xml.child xml_arg0 "ExpandedResults") in
+      let documentAttribute =
+        (Option.map ~f:DocumentAttribute.of_xml)
+          (Xml.child xml_arg0 "DocumentAttribute") in
+      make ?expandedResults ?documentAttribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expandedResults =
+        field_map json__ "ExpandedResults" ExpandedResultList.of_json in
+      let documentAttribute =
+        field_map json__ "DocumentAttribute" DocumentAttribute.of_json in
+      make ?expandedResults ?documentAttribute ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details about a collapsed group of search results."]
 module ColumnConfiguration =
   struct
     type nonrec t =
       {
       documentIdColumnName: ColumnName.t
-        [@ocaml.doc
-          "The column that provides the document's unique identifier."];
+        [@ocaml.doc "The column that provides the document's identifier."];
       documentDataColumnName: ColumnName.t
         [@ocaml.doc "The column that contains the contents of the document."];
       documentTitleColumnName: ColumnName.t option
@@ -4406,24 +6050,101 @@ module ColumnConfiguration =
       make ~changeDetectingColumns ?fieldMappings ?documentTitleColumnName
         ~documentDataColumnName ~documentIdColumnName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let changeDetectingColumns =
-        field_map_exn json "ChangeDetectingColumns"
+        field_map_exn json__ "ChangeDetectingColumns"
           ChangeDetectingColumns.of_json in
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let documentTitleColumnName =
-        field_map json "DocumentTitleColumnName" ColumnName.of_json in
+        field_map json__ "DocumentTitleColumnName" ColumnName.of_json in
       let documentDataColumnName =
-        field_map_exn json "DocumentDataColumnName" ColumnName.of_json in
+        field_map_exn json__ "DocumentDataColumnName" ColumnName.of_json in
       let documentIdColumnName =
-        field_map_exn json "DocumentIdColumnName" ColumnName.of_json in
+        field_map_exn json__ "DocumentIdColumnName" ColumnName.of_json in
       make ~changeDetectingColumns ?fieldMappings ?documentTitleColumnName
         ~documentDataColumnName ~documentIdColumnName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about how Amazon Kendra should use the columns of a database in an index."]
+module QueryText =
+  struct
+    type nonrec t = string
+    let context_ = "QueryText"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryText" j
+    let to_json = simple_to_json to_value
+  end
+module ConflictingItem =
+  struct
+    type nonrec t =
+      {
+      queryText: QueryText.t option
+        [@ocaml.doc "The text of the conflicting query."];
+      setName: String_.t option
+        [@ocaml.doc
+          "The name for the set of featured results that the conflicting query belongs to."];
+      setId: String_.t option
+        [@ocaml.doc
+          "The identifier of the set of featured results that the conflicting query belongs to."]}
+    let make ?queryText =
+      fun ?setName -> fun ?setId -> fun () -> { queryText; setName; setId }
+    let to_value x =
+      structure_to_value
+        [("QueryText", (Option.map x.queryText ~f:QueryText.to_value));
+        ("SetName", (Option.map x.setName ~f:String_.to_value));
+        ("SetId", (Option.map x.setId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let setId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SetId") in
+      let setName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SetName") in
+      let queryText =
+        (Option.map ~f:QueryText.of_xml) (Xml.child xml_arg0 "QueryText") in
+      make ?setId ?setName ?queryText ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let setId = field_map json__ "SetId" String_.of_json in
+      let setName = field_map json__ "SetName" String_.of_json in
+      let queryText = field_map json__ "QueryText" QueryText.of_json in
+      make ?setId ?setName ?queryText ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a conflicting query used across different sets of featured results. When you create a featured results set, you must check that the queries are unique per featured results set for each index."]
+module ConflictingItems =
+  struct
+    type nonrec t = ConflictingItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConflictingItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConflictingItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConflictingItems" ~of_json:ConflictingItem.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module ConfluenceAttachmentFieldName =
   struct
     type nonrec t =
@@ -4518,13 +6239,13 @@ module ConfluenceAttachmentToIndexFieldMapping =
           (Xml.child xml_arg0 "DataSourceFieldName") in
       make ?indexFieldName ?dateFieldFormat ?dataSourceFieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let indexFieldName =
-        field_map json "IndexFieldName" IndexFieldName.of_json in
+        field_map json__ "IndexFieldName" IndexFieldName.of_json in
       let dateFieldFormat =
-        field_map json "DateFieldFormat" DataSourceDateFieldFormat.of_json in
+        field_map json__ "DateFieldFormat" DataSourceDateFieldFormat.of_json in
       let dataSourceFieldName =
-        field_map json "DataSourceFieldName"
+        field_map json__ "DataSourceFieldName"
           ConfluenceAttachmentFieldName.of_json in
       make ?indexFieldName ?dateFieldFormat ?dataSourceFieldName ()
     let to_json v = composed_to_json to_value v
@@ -4538,6 +6259,9 @@ module ConfluenceAttachmentFieldMappingsList =
         ok_or_failwith
           ((check_list_max i ~max:11) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfluenceAttachmentToIndexFieldMapping.to_value))
         |> (fun x -> `List x)
@@ -4567,7 +6291,7 @@ module ConfluenceAttachmentConfiguration =
       {
       crawlAttachments: Boolean.t option
         [@ocaml.doc
-          "Indicates whether Amazon Kendra indexes attachments to the pages and blogs in the Confluence data source."];
+          "TRUE to index attachments of pages and blogs in Confluence."];
       attachmentFieldMappings: ConfluenceAttachmentFieldMappingsList.t option
         [@ocaml.doc
           "Maps attributes or field names of Confluence attachments to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Confluence fields. For more information, see Mapping data source fields. The Confluence data source field names must exist in your Confluence custom metadata. If you specify the AttachentFieldMappings parameter, you must specify at least one field mapping."]}
@@ -4591,16 +6315,44 @@ module ConfluenceAttachmentConfiguration =
           (Xml.child xml_arg0 "CrawlAttachments") in
       make ?attachmentFieldMappings ?crawlAttachments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentFieldMappings =
-        field_map json "AttachmentFieldMappings"
+        field_map json__ "AttachmentFieldMappings"
           ConfluenceAttachmentFieldMappingsList.of_json in
       let crawlAttachments =
-        field_map json "CrawlAttachments" Boolean.of_json in
+        field_map json__ "CrawlAttachments" Boolean.of_json in
       make ?attachmentFieldMappings ?crawlAttachments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Configuration of attachment settings for the Confluence data source. Attachment settings are optional, if you don't specify settings attachments, Amazon Kendra won't index them."]
+module ConfluenceAuthenticationType =
+  struct
+    type nonrec t =
+      | HTTP_BASIC 
+      | PAT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HTTP_BASIC -> "HTTP_BASIC"
+      | PAT -> "PAT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HTTP_BASIC" -> HTTP_BASIC
+      | "PAT" -> PAT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConfluenceAuthenticationType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConfluenceAuthenticationType" j)
+    let to_json = simple_to_json to_value
+  end
 module ConfluenceBlogFieldName =
   struct
     type nonrec t =
@@ -4687,13 +6439,14 @@ module ConfluenceBlogToIndexFieldMapping =
           (Xml.child xml_arg0 "DataSourceFieldName") in
       make ?indexFieldName ?dateFieldFormat ?dataSourceFieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let indexFieldName =
-        field_map json "IndexFieldName" IndexFieldName.of_json in
+        field_map json__ "IndexFieldName" IndexFieldName.of_json in
       let dateFieldFormat =
-        field_map json "DateFieldFormat" DataSourceDateFieldFormat.of_json in
+        field_map json__ "DateFieldFormat" DataSourceDateFieldFormat.of_json in
       let dataSourceFieldName =
-        field_map json "DataSourceFieldName" ConfluenceBlogFieldName.of_json in
+        field_map json__ "DataSourceFieldName"
+          ConfluenceBlogFieldName.of_json in
       make ?indexFieldName ?dateFieldFormat ?dataSourceFieldName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4706,6 +6459,9 @@ module ConfluenceBlogFieldMappingsList =
         ok_or_failwith
           ((check_list_max i ~max:9) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfluenceBlogToIndexFieldMapping.to_value)) |>
         (fun x -> `List x)
@@ -4749,36 +6505,53 @@ module ConfluenceBlogConfiguration =
           (Xml.child xml_arg0 "BlogFieldMappings") in
       make ?blogFieldMappings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blogFieldMappings =
-        field_map json "BlogFieldMappings"
+        field_map json__ "BlogFieldMappings"
           ConfluenceBlogFieldMappingsList.of_json in
       make ?blogFieldMappings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Configuration of blog settings for the Confluence data source. Blogs are always indexed unless filtered from the index by the ExclusionPatterns or InclusionPatterns fields in the ConfluenceConfiguration object."]
-module Url =
+module ProxyConfiguration =
   struct
-    type nonrec t = string
-    let context_ = "Url"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^(https?|ftp|file):\\/\\/([^\\s]*)")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      host: Host.t
+        [@ocaml.doc
+          "The name of the website host you want to connect to via a web proxy server. For example, the host name of https://a.example.com/page1.html is \"a.example.com\"."];
+      port: Port.t
+        [@ocaml.doc
+          "The port number of the website host you want to connect to via a web proxy server. For example, the port for https://a.example.com/page1.html is 443, the standard port for HTTPS."];
+      credentials: SecretArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret. You create a secret to store your credentials in Secrets Manager The credentials are optional. You use a secret if web proxy credentials are required to connect to a website host. Amazon Kendra currently support basic authentication to connect to a web proxy server. The secret stores your credentials."]}
+    let context_ = "ProxyConfiguration"
+    let make ?credentials =
+      fun ~host -> fun ~port -> fun () -> { credentials; host; port }
+    let to_value x =
+      structure_to_value
+        [("Host", (Some (Host.to_value x.host)));
+        ("Port", (Some (Port.to_value x.port)));
+        ("Credentials", (Option.map x.credentials ~f:SecretArn.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Url" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let credentials =
+        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "Credentials") in
+      let port =
+        Port.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Port") in
+      let host =
+        Host.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Host") in
+      make ?credentials ~port ~host ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let credentials = field_map json__ "Credentials" SecretArn.of_json in
+      let port = field_map_exn json__ "Port" Port.of_json in
+      let host = field_map_exn json__ "Host" Host.of_json in
+      make ?credentials ~port ~host ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information for a web proxy to connect to website hosts."]
 module ConfluenceVersion =
   struct
     type nonrec t =
@@ -4824,6 +6597,9 @@ module ConfluenceSpaceList =
     type nonrec t = ConfluenceSpaceIdentifier.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfluenceSpaceIdentifier.to_value)) |>
         (fun x -> `List x)
@@ -4917,17 +6693,18 @@ module ConfluenceSpaceToIndexFieldMapping =
           (Xml.child xml_arg0 "DataSourceFieldName") in
       make ?indexFieldName ?dateFieldFormat ?dataSourceFieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let indexFieldName =
-        field_map json "IndexFieldName" IndexFieldName.of_json in
+        field_map json__ "IndexFieldName" IndexFieldName.of_json in
       let dateFieldFormat =
-        field_map json "DateFieldFormat" DataSourceDateFieldFormat.of_json in
+        field_map json__ "DateFieldFormat" DataSourceDateFieldFormat.of_json in
       let dataSourceFieldName =
-        field_map json "DataSourceFieldName" ConfluenceSpaceFieldName.of_json in
+        field_map json__ "DataSourceFieldName"
+          ConfluenceSpaceFieldName.of_json in
       make ?indexFieldName ?dateFieldFormat ?dataSourceFieldName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       ">Maps attributes or field names of Confluence spaces to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Confluence fields. For more information, see Mapping data source fields. The Confluence data source field names must exist in your Confluence custom metadata."]
+       "Maps attributes or field names of Confluence spaces to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Confluence fields. For more information, see Mapping data source fields. The Confluence data source field names must exist in your Confluence custom metadata."]
 module ConfluenceSpaceFieldMappingsList =
   struct
     type nonrec t = ConfluenceSpaceToIndexFieldMapping.t list
@@ -4936,6 +6713,9 @@ module ConfluenceSpaceFieldMappingsList =
         ok_or_failwith
           ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfluenceSpaceToIndexFieldMapping.to_value)) |>
         (fun x -> `List x)
@@ -4965,10 +6745,9 @@ module ConfluenceSpaceConfiguration =
       {
       crawlPersonalSpaces: Boolean.t option
         [@ocaml.doc
-          "Specifies whether Amazon Kendra should index personal spaces. Users can add restrictions to items in personal spaces. If personal spaces are indexed, queries without user context information may return restricted items from a personal space in their results. For more information, see Filtering on user context."];
+          "TRUE to index personal spaces. You can add restrictions to items in personal spaces. If personal spaces are indexed, queries without user context information may return restricted items from a personal space in their results. For more information, see Filtering on user context."];
       crawlArchivedSpaces: Boolean.t option
-        [@ocaml.doc
-          "Specifies whether Amazon Kendra should index archived spaces."];
+        [@ocaml.doc "TRUE to index archived spaces."];
       includeSpaces: ConfluenceSpaceList.t option
         [@ocaml.doc
           "A list of space keys for Confluence spaces. If you include a key, the blogs, documents, and attachments in the space are indexed. Spaces that aren't in the list aren't indexed. A space in the list must exist. Otherwise, Amazon Kendra logs an error when the data source is synchronized. If a space is in both the IncludeSpaces and the ExcludeSpaces list, the space is excluded."];
@@ -5024,18 +6803,18 @@ module ConfluenceSpaceConfiguration =
       make ?spaceFieldMappings ?excludeSpaces ?includeSpaces
         ?crawlArchivedSpaces ?crawlPersonalSpaces ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spaceFieldMappings =
-        field_map json "SpaceFieldMappings"
+        field_map json__ "SpaceFieldMappings"
           ConfluenceSpaceFieldMappingsList.of_json in
       let excludeSpaces =
-        field_map json "ExcludeSpaces" ConfluenceSpaceList.of_json in
+        field_map json__ "ExcludeSpaces" ConfluenceSpaceList.of_json in
       let includeSpaces =
-        field_map json "IncludeSpaces" ConfluenceSpaceList.of_json in
+        field_map json__ "IncludeSpaces" ConfluenceSpaceList.of_json in
       let crawlArchivedSpaces =
-        field_map json "CrawlArchivedSpaces" Boolean.of_json in
+        field_map json__ "CrawlArchivedSpaces" Boolean.of_json in
       let crawlPersonalSpaces =
-        field_map json "CrawlPersonalSpaces" Boolean.of_json in
+        field_map json__ "CrawlPersonalSpaces" Boolean.of_json in
       make ?spaceFieldMappings ?excludeSpaces ?includeSpaces
         ?crawlArchivedSpaces ?crawlPersonalSpaces ()
     let to_json v = composed_to_json to_value v
@@ -5136,17 +6915,18 @@ module ConfluencePageToIndexFieldMapping =
           (Xml.child xml_arg0 "DataSourceFieldName") in
       make ?indexFieldName ?dateFieldFormat ?dataSourceFieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let indexFieldName =
-        field_map json "IndexFieldName" IndexFieldName.of_json in
+        field_map json__ "IndexFieldName" IndexFieldName.of_json in
       let dateFieldFormat =
-        field_map json "DateFieldFormat" DataSourceDateFieldFormat.of_json in
+        field_map json__ "DateFieldFormat" DataSourceDateFieldFormat.of_json in
       let dataSourceFieldName =
-        field_map json "DataSourceFieldName" ConfluencePageFieldName.of_json in
+        field_map json__ "DataSourceFieldName"
+          ConfluencePageFieldName.of_json in
       make ?indexFieldName ?dateFieldFormat ?dataSourceFieldName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       ">Maps attributes or field names of Confluence pages to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Confluence fields. For more information, see Mapping data source fields. The Confluence data source field names must exist in your Confluence custom metadata."]
+       "Maps attributes or field names of Confluence pages to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Confluence fields. For more information, see Mapping data source fields. The Confluence data source field names must exist in your Confluence custom metadata."]
 module ConfluencePageFieldMappingsList =
   struct
     type nonrec t = ConfluencePageToIndexFieldMapping.t list
@@ -5155,6 +6935,9 @@ module ConfluencePageFieldMappingsList =
         ok_or_failwith
           ((check_list_max i ~max:12) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfluencePageToIndexFieldMapping.to_value)) |>
         (fun x -> `List x)
@@ -5184,7 +6967,7 @@ module ConfluencePageConfiguration =
       {
       pageFieldMappings: ConfluencePageFieldMappingsList.t option
         [@ocaml.doc
-          ">Maps attributes or field names of Confluence pages to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Confluence fields. For more information, see Mapping data source fields. The Confluence data source field names must exist in your Confluence custom metadata. If you specify the PageFieldMappings parameter, you must specify at least one field mapping."]}
+          "Maps attributes or field names of Confluence pages to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Confluence fields. For more information, see Mapping data source fields. The Confluence data source field names must exist in your Confluence custom metadata. If you specify the PageFieldMappings parameter, you must specify at least one field mapping."]}
     let make ?pageFieldMappings = fun () -> { pageFieldMappings }
     let to_value x =
       structure_to_value
@@ -5198,9 +6981,9 @@ module ConfluencePageConfiguration =
           (Xml.child xml_arg0 "PageFieldMappings") in
       make ?pageFieldMappings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pageFieldMappings =
-        field_map json "PageFieldMappings"
+        field_map json__ "PageFieldMappings"
           ConfluencePageFieldMappingsList.of_json in
       make ?pageFieldMappings ()
     let to_json v = composed_to_json to_value v
@@ -5215,10 +6998,10 @@ module ConfluenceConfiguration =
           "The URL of your Confluence instance. Use the full URL of the server. For example, https://server.example.com:port/. You can also use an IP address, for example, https://192.168.1.113/."];
       secretArn: SecretArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the key-value pairs required to connect to your Confluence server. The secret must contain a JSON structure with the following keys: username\226\128\148The user name or email address of a user with administrative privileges for the Confluence server. password\226\128\148The password associated with the user logging in to the Confluence server."];
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the user name and password required to connect to the Confluence instance. If you use Confluence Cloud, you use a generated API token as the password. You can also provide authentication credentials in the form of a personal access token. For more information, see Using a Confluence data source."];
       version: ConfluenceVersion.t
         [@ocaml.doc
-          "Specifies the version of the Confluence installation that you are connecting to."];
+          "The version or the type of Confluence installation to connect to."];
       spaceConfiguration: ConfluenceSpaceConfiguration.t option
         [@ocaml.doc
           "Configuration information for indexing Confluence spaces."];
@@ -5239,7 +7022,13 @@ module ConfluenceConfiguration =
           "A list of regular expression patterns to include certain blog posts, pages, spaces, or attachments in your Confluence. Content that matches the patterns are included in the index. Content that doesn't match the patterns is excluded from the index. If content matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the content isn't included in the index."];
       exclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
         [@ocaml.doc
-          ">A list of regular expression patterns to exclude certain blog posts, pages, spaces, or attachments in your Confluence. Content that matches the patterns are excluded from the index. Content that doesn't match the patterns is included in the index. If content matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the content isn't included in the index."]}
+          "A list of regular expression patterns to exclude certain blog posts, pages, spaces, or attachments in your Confluence. Content that matches the patterns are excluded from the index. Content that doesn't match the patterns is included in the index. If content matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the content isn't included in the index."];
+      proxyConfiguration: ProxyConfiguration.t option
+        [@ocaml.doc
+          "Configuration information to connect to your Confluence URL instance via a web proxy. You can use this option for Confluence Server. You must provide the website host name and port number. For example, the host name of https://a.example.com/page1.html is \"a.example.com\" and the port is 443, the standard port for HTTPS. Web proxy credentials are optional and you can use them to connect to a web proxy server that requires basic authentication of user name and password. To store web proxy credentials, you use a secret in Secrets Manager. It is recommended that you follow best security practices when configuring your web proxy. This includes setting up throttling, setting up logging and monitoring, and applying security patches on a regular basis. If you use your web proxy with multiple data sources, sync jobs that occur at the same time could strain the load on your proxy. It is recommended you prepare your proxy beforehand for any security and load requirements."];
+      authenticationType: ConfluenceAuthenticationType.t option
+        [@ocaml.doc
+          "Whether you want to connect to Confluence using basic authentication of user name and password, or a personal access token. You can use a personal access token for Confluence Server."]}
     let context_ = "ConfluenceConfiguration"
     let make ?spaceConfiguration =
       fun ?pageConfiguration ->
@@ -5248,22 +7037,26 @@ module ConfluenceConfiguration =
             fun ?vpcConfiguration ->
               fun ?inclusionPatterns ->
                 fun ?exclusionPatterns ->
-                  fun ~serverUrl ->
-                    fun ~secretArn ->
-                      fun ~version ->
-                        fun () ->
-                          {
-                            spaceConfiguration;
-                            pageConfiguration;
-                            blogConfiguration;
-                            attachmentConfiguration;
-                            vpcConfiguration;
-                            inclusionPatterns;
-                            exclusionPatterns;
-                            serverUrl;
-                            secretArn;
-                            version
-                          }
+                  fun ?proxyConfiguration ->
+                    fun ?authenticationType ->
+                      fun ~serverUrl ->
+                        fun ~secretArn ->
+                          fun ~version ->
+                            fun () ->
+                              {
+                                spaceConfiguration;
+                                pageConfiguration;
+                                blogConfiguration;
+                                attachmentConfiguration;
+                                vpcConfiguration;
+                                inclusionPatterns;
+                                exclusionPatterns;
+                                proxyConfiguration;
+                                authenticationType;
+                                serverUrl;
+                                secretArn;
+                                version
+                              }
     let to_value x =
       structure_to_value
         [("ServerUrl", (Some (Url.to_value x.serverUrl)));
@@ -5289,9 +7082,20 @@ module ConfluenceConfiguration =
              ~f:DataSourceInclusionsExclusionsStrings.to_value));
         ("ExclusionPatterns",
           (Option.map x.exclusionPatterns
-             ~f:DataSourceInclusionsExclusionsStrings.to_value))]
+             ~f:DataSourceInclusionsExclusionsStrings.to_value));
+        ("ProxyConfiguration",
+          (Option.map x.proxyConfiguration ~f:ProxyConfiguration.to_value));
+        ("AuthenticationType",
+          (Option.map x.authenticationType
+             ~f:ConfluenceAuthenticationType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let authenticationType =
+        (Option.map ~f:ConfluenceAuthenticationType.of_xml)
+          (Xml.child xml_arg0 "AuthenticationType") in
+      let proxyConfiguration =
+        (Option.map ~f:ProxyConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProxyConfiguration") in
       let exclusionPatterns =
         (Option.map ~f:DataSourceInclusionsExclusionsStrings.of_xml)
           (Xml.child xml_arg0 "ExclusionPatterns") in
@@ -5321,37 +7125,45 @@ module ConfluenceConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretArn") in
       let serverUrl =
         Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerUrl") in
-      make ?exclusionPatterns ?inclusionPatterns ?vpcConfiguration
-        ?attachmentConfiguration ?blogConfiguration ?pageConfiguration
-        ?spaceConfiguration ~version ~secretArn ~serverUrl ()
+      make ?authenticationType ?proxyConfiguration ?exclusionPatterns
+        ?inclusionPatterns ?vpcConfiguration ?attachmentConfiguration
+        ?blogConfiguration ?pageConfiguration ?spaceConfiguration ~version
+        ~secretArn ~serverUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let authenticationType =
+        field_map json__ "AuthenticationType"
+          ConfluenceAuthenticationType.of_json in
+      let proxyConfiguration =
+        field_map json__ "ProxyConfiguration" ProxyConfiguration.of_json in
       let exclusionPatterns =
-        field_map json "ExclusionPatterns"
+        field_map json__ "ExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPatterns =
-        field_map json "InclusionPatterns"
+        field_map json__ "InclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let vpcConfiguration =
-        field_map json "VpcConfiguration" DataSourceVpcConfiguration.of_json in
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
       let attachmentConfiguration =
-        field_map json "AttachmentConfiguration"
+        field_map json__ "AttachmentConfiguration"
           ConfluenceAttachmentConfiguration.of_json in
       let blogConfiguration =
-        field_map json "BlogConfiguration"
+        field_map json__ "BlogConfiguration"
           ConfluenceBlogConfiguration.of_json in
       let pageConfiguration =
-        field_map json "PageConfiguration"
+        field_map json__ "PageConfiguration"
           ConfluencePageConfiguration.of_json in
       let spaceConfiguration =
-        field_map json "SpaceConfiguration"
+        field_map json__ "SpaceConfiguration"
           ConfluenceSpaceConfiguration.of_json in
-      let version = field_map_exn json "Version" ConfluenceVersion.of_json in
-      let secretArn = field_map_exn json "SecretArn" SecretArn.of_json in
-      let serverUrl = field_map_exn json "ServerUrl" Url.of_json in
-      make ?exclusionPatterns ?inclusionPatterns ?vpcConfiguration
-        ?attachmentConfiguration ?blogConfiguration ?pageConfiguration
-        ?spaceConfiguration ~version ~secretArn ~serverUrl ()
+      let version = field_map_exn json__ "Version" ConfluenceVersion.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let serverUrl = field_map_exn json__ "ServerUrl" Url.of_json in
+      make ?authenticationType ?proxyConfiguration ?exclusionPatterns
+        ?inclusionPatterns ?vpcConfiguration ?attachmentConfiguration
+        ?blogConfiguration ?pageConfiguration ?spaceConfiguration ~version
+        ~secretArn ~serverUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the configuration information to connect to Confluence as your data source."]
@@ -5449,7 +7261,7 @@ module ConnectionConfiguration =
         [@ocaml.doc "The name of the table that contains the document data."];
       secretArn: SecretArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of credentials stored in Secrets Manager. The credentials should be a user/password pair. For more information, see Using a Database Data Source. For more information about Secrets Manager, see What Is Secrets Manager in the Secrets Manager user guide."]}
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret that stores the credentials. The credentials should be a user-password pair. For more information, see Using a Database Data Source. For more information about Secrets Manager, see What Is Secrets Manager in the Secrets Manager user guide."]}
     let context_ = "ConnectionConfiguration"
     let make ~databaseHost =
       fun ~databasePort ->
@@ -5490,19 +7302,32 @@ module ConnectionConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseHost") in
       make ~secretArn ~tableName ~databaseName ~databasePort ~databaseHost ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretArn = field_map_exn json "SecretArn" SecretArn.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let tableName = field_map_exn json__ "TableName" TableName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" DatabaseName.of_json in
+        field_map_exn json__ "DatabaseName" DatabaseName.of_json in
       let databasePort =
-        field_map_exn json "DatabasePort" DatabasePort.of_json in
+        field_map_exn json__ "DatabasePort" DatabasePort.of_json in
       let databaseHost =
-        field_map_exn json "DatabaseHost" DatabaseHost.of_json in
+        field_map_exn json__ "DatabaseHost" DatabaseHost.of_json in
       make ~secretArn ~tableName ~databaseName ~databasePort ~databaseHost ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the configuration information that's required to connect to a database."]
+module Content =
+  struct
+    type nonrec t = string
+    let context_ = "Content"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Content" j
+    let to_json = simple_to_json to_value
+  end
 module FaqId =
   struct
     type nonrec t = string
@@ -5533,6 +7358,9 @@ module FaqIdsList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FaqId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5561,6 +7389,9 @@ module DataSourceIdList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataSourceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5617,12 +7448,12 @@ module ContentSourceConfiguration =
           (Xml.child xml_arg0 "DataSourceIds") in
       make ?directPutContent ?faqIds ?dataSourceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directPutContent =
-        field_map json "DirectPutContent" Boolean.of_json in
-      let faqIds = field_map json "FaqIds" FaqIdsList.of_json in
+        field_map json__ "DirectPutContent" Boolean.of_json in
+      let faqIds = field_map json__ "FaqIds" FaqIdsList.of_json in
       let dataSourceIds =
-        field_map json "DataSourceIds" DataSourceIdList.of_json in
+        field_map json__ "DataSourceIds" DataSourceIdList.of_json in
       make ?directPutContent ?faqIds ?dataSourceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5664,11 +7495,11 @@ module Correction =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
       make ?correctedTerm ?term ?endOffset ?beginOffset ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let correctedTerm = field_map json "CorrectedTerm" String_.of_json in
-      let term = field_map json "Term" String_.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
+    let of_json json__ =
+      let correctedTerm = field_map json__ "CorrectedTerm" String_.of_json in
+      let term = field_map json__ "Term" String_.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
       make ?correctedTerm ?term ?endOffset ?beginOffset ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A corrected misspelled word in a query."]
@@ -5676,6 +7507,9 @@ module CorrectionList =
   struct
     type nonrec t = Correction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Correction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5714,6 +7548,219 @@ module CrawlDepth =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\P{C}*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module CreateAccessControlConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index to create an access control configuration for your documents."];
+      name: AccessControlConfigurationName.t
+        [@ocaml.doc "A name for the access control configuration."];
+      description: Description.t option
+        [@ocaml.doc "A description for the access control configuration."];
+      accessControlList: PrincipalList.t option
+        [@ocaml.doc
+          "Information on principals (users and/or groups) and which documents they should have access to. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."];
+      hierarchicalAccessControlList: HierarchicalPrincipalList.t option
+        [@ocaml.doc
+          "The list of principal lists that define the hierarchy for which documents users should have access to."];
+      clientToken: ClientTokenName.t option
+        [@ocaml.doc
+          "A token that you provide to identify the request to create an access control configuration. Multiple calls to the CreateAccessControlConfiguration API with the same client token will create only one access control configuration."]}
+    let context_ = "CreateAccessControlConfigurationRequest"
+    let make ?description =
+      fun ?accessControlList ->
+        fun ?hierarchicalAccessControlList ->
+          fun ?clientToken ->
+            fun ~indexId ->
+              fun ~name ->
+                fun () ->
+                  {
+                    description;
+                    accessControlList;
+                    hierarchicalAccessControlList;
+                    clientToken;
+                    indexId;
+                    name
+                  }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("Name", (Some (AccessControlConfigurationName.to_value x.name)));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("AccessControlList",
+          (Option.map x.accessControlList ~f:PrincipalList.to_value));
+        ("HierarchicalAccessControlList",
+          (Option.map x.hierarchicalAccessControlList
+             ~f:HierarchicalPrincipalList.to_value));
+        ("ClientToken",
+          (Option.map x.clientToken ~f:ClientTokenName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientTokenName.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      let hierarchicalAccessControlList =
+        (Option.map ~f:HierarchicalPrincipalList.of_xml)
+          (Xml.child xml_arg0 "HierarchicalAccessControlList") in
+      let accessControlList =
+        (Option.map ~f:PrincipalList.of_xml)
+          (Xml.child xml_arg0 "AccessControlList") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let name =
+        AccessControlConfigurationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ?clientToken ?hierarchicalAccessControlList ?accessControlList
+        ?description ~name ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "ClientToken" ClientTokenName.of_json in
+      let hierarchicalAccessControlList =
+        field_map json__ "HierarchicalAccessControlList"
+          HierarchicalPrincipalList.of_json in
+      let accessControlList =
+        field_map json__ "AccessControlList" PrincipalList.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name =
+        field_map_exn json__ "Name" AccessControlConfigurationName.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?clientToken ?hierarchicalAccessControlList ?accessControlList
+        ?description ~name ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an access configuration for your documents. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents. You can use this to re-configure your existing document level access control without indexing all of your documents again. For example, your index contains top-secret company documents that only certain employees or users should access. One of these users leaves the company or switches to a team that should be blocked from accessing top-secret documents. The user still has access to top-secret documents because the user had access when your documents were previously indexed. You can create a specific access control configuration for the user with deny access. You can later update the access control configuration to allow access if the user returns to the company and re-joins the 'top-secret' team. You can re-configure access control for your documents as circumstances change. To apply your access control configuration to certain documents, you call the BatchPutDocument API with the AccessControlConfigurationId included in the Document object. If you use an S3 bucket as a data source, you update the .metadata.json with the AccessControlConfigurationId and synchronize your data source. Amazon Kendra currently only supports access control configuration for S3 data sources and documents indexed using the BatchPutDocument API. You can't configure access control using CreateAccessControlConfiguration for an Amazon Kendra Gen AI Enterprise Edition index. Amazon Kendra will return a ValidationException error for a Gen_AI_ENTERPRISE_EDITION index."]
+module CreateAccessControlConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      id: AccessControlConfigurationId.t option
+        [@ocaml.doc
+          "The identifier of the access control configuration for your documents in an index."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id = fun () -> { id }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:AccessControlConfigurationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        (Option.map ~f:AccessControlConfigurationId.of_xml)
+          (Xml.child xml_arg0 "Id") in
+      make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "Id" AccessControlConfigurationId.of_json in
+      make ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an access configuration for your documents. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents. You can use this to re-configure your existing document level access control without indexing all of your documents again. For example, your index contains top-secret company documents that only certain employees or users should access. One of these users leaves the company or switches to a team that should be blocked from accessing top-secret documents. The user still has access to top-secret documents because the user had access when your documents were previously indexed. You can create a specific access control configuration for the user with deny access. You can later update the access control configuration to allow access if the user returns to the company and re-joins the 'top-secret' team. You can re-configure access control for your documents as circumstances change. To apply your access control configuration to certain documents, you call the BatchPutDocument API with the AccessControlConfigurationId included in the Document object. If you use an S3 bucket as a data source, you update the .metadata.json with the AccessControlConfigurationId and synchronize your data source. Amazon Kendra currently only supports access control configuration for S3 data sources and documents indexed using the BatchPutDocument API. You can't configure access control using CreateAccessControlConfiguration for an Amazon Kendra Gen AI Enterprise Edition index. Amazon Kendra will return a ValidationException error for a Gen_AI_ENTERPRISE_EDITION index."]
 module TagValue =
   struct
     type nonrec t = string
@@ -5756,7 +7803,7 @@ module Tag =
       {
       key: TagKey.t
         [@ocaml.doc
-          "The key for the tag. Keys are not case sensitive and must be unique for the index, FAQ, or data source."];
+          "The key for the tag. Keys are not case sensitive and must be unique for the index, FAQ, data source, or other resource."];
       value: TagValue.t
         [@ocaml.doc
           "The value associated with the tag. The value may be an empty string but it can't be null."]}
@@ -5774,13 +7821,13 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of key/value pairs that identify an index, FAQ, or data source. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - \\@."]
+       "A key-value pair that identifies or categorizes an index, FAQ, data source, or other resource. TA tag key and value can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - \\@."]
 module TagList =
   struct
     type nonrec t = Tag.t list
@@ -5790,6 +7837,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5844,26 +7894,6 @@ module LanguageCode =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The code for a language. The default language is English. For more information on supported languages, including their codes, see Adding documents in languages other than English."]
-module Description =
-  struct
-    type nonrec t = string
-    let context_ = "Description"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:1000) >>=
-                  (fun () -> check_pattern i ~pattern:"^\\P{C}*$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Description" j
-    let to_json = simple_to_json to_value
-  end
 module DataSourceType =
   struct
     type nonrec t =
@@ -5881,6 +7911,11 @@ module DataSourceType =
       | FSX 
       | SLACK 
       | BOX 
+      | QUIP 
+      | JIRA 
+      | GITHUB 
+      | ALFRESCO 
+      | TEMPLATE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5899,6 +7934,11 @@ module DataSourceType =
       | FSX -> "FSX"
       | SLACK -> "SLACK"
       | BOX -> "BOX"
+      | QUIP -> "QUIP"
+      | JIRA -> "JIRA"
+      | GITHUB -> "GITHUB"
+      | ALFRESCO -> "ALFRESCO"
+      | TEMPLATE -> "TEMPLATE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -5916,6 +7956,11 @@ module DataSourceType =
       | "FSX" -> FSX
       | "SLACK" -> SLACK
       | "BOX" -> BOX
+      | "QUIP" -> QUIP
+      | "JIRA" -> JIRA
+      | "GITHUB" -> GITHUB
+      | "ALFRESCO" -> ALFRESCO
+      | "TEMPLATE" -> TEMPLATE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -6040,20 +8085,20 @@ module WorkDocsConfiguration =
       make ?fieldMappings ?exclusionPatterns ?inclusionPatterns ?useChangeLog
         ?crawlComments ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let exclusionPatterns =
-        field_map json "ExclusionPatterns"
+        field_map json__ "ExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPatterns =
-        field_map json "InclusionPatterns"
+        field_map json__ "InclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
-      let useChangeLog = field_map json "UseChangeLog" Boolean.of_json in
-      let crawlComments = field_map json "CrawlComments" Boolean.of_json in
+      let useChangeLog = field_map json__ "UseChangeLog" Boolean.of_json in
+      let crawlComments = field_map json__ "CrawlComments" Boolean.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?fieldMappings ?exclusionPatterns ?inclusionPatterns ?useChangeLog
         ?crawlComments ~organizationId ()
     let to_json v = composed_to_json to_value v
@@ -6088,6 +8133,9 @@ module SiteMapsList =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SiteMap.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6127,12 +8175,12 @@ module SiteMapsConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "SiteMaps") in
       make ~siteMaps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let siteMaps = field_map_exn json "SiteMaps" SiteMapsList.of_json in
+    let of_json json__ =
+      let siteMaps = field_map_exn json__ "SiteMaps" SiteMapsList.of_json in
       make ~siteMaps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information for the sitemap URLs to crawl. When selecting websites to index, you must adhere to the Amazon Acceptable Use Policy and all other Amazon terms. Remember that you must only use Amazon Kendra Web Crawler to index your own webpages, or webpages that you have authorization to index."]
+       "Provides the configuration information for the sitemap URLs to crawl. When selecting websites to index, you must adhere to the Amazon Acceptable Use Policy and all other Amazon terms. Remember that you must only use Amazon Kendra Web Crawler to index your own web pages, or web pages that you have authorization to index."]
 module WebCrawlerMode =
   struct
     type nonrec t =
@@ -6191,6 +8239,9 @@ module SeedUrlList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SeedUrl.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6220,7 +8271,7 @@ module SeedUrlConfiguration =
           "The list of seed or starting point URLs of the websites you want to crawl. The list can include a maximum of 100 seed URLs."];
       webCrawlerMode: WebCrawlerMode.t option
         [@ocaml.doc
-          "You can choose one of the following modes: HOST_ONLY \226\128\147 crawl only the website host names. For example, if the seed URL is \"abc.example.com\", then only URLs with host name \"abc.example.com\" are crawled. SUBDOMAINS \226\128\147 crawl the website host names with subdomains. For example, if the seed URL is \"abc.example.com\", then \"a.abc.example.com\" and \"b.abc.example.com\" are also crawled. EVERYTHING \226\128\147 crawl the website host names with subdomains and other domains that the webpages link to. The default mode is set to HOST_ONLY."]}
+          "You can choose one of the following modes: HOST_ONLY\226\128\148crawl only the website host names. For example, if the seed URL is \"abc.example.com\", then only URLs with host name \"abc.example.com\" are crawled. SUBDOMAINS\226\128\148crawl the website host names with subdomains. For example, if the seed URL is \"abc.example.com\", then \"a.abc.example.com\" and \"b.abc.example.com\" are also crawled. EVERYTHING\226\128\148crawl the website host names with subdomains and other domains that the web pages link to. The default mode is set to HOST_ONLY."]}
     let context_ = "SeedUrlConfiguration"
     let make ?webCrawlerMode =
       fun ~seedUrls -> fun () -> { webCrawlerMode; seedUrls }
@@ -6239,21 +8290,21 @@ module SeedUrlConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "SeedUrls") in
       make ?webCrawlerMode ~seedUrls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let webCrawlerMode =
-        field_map json "WebCrawlerMode" WebCrawlerMode.of_json in
-      let seedUrls = field_map_exn json "SeedUrls" SeedUrlList.of_json in
+        field_map json__ "WebCrawlerMode" WebCrawlerMode.of_json in
+      let seedUrls = field_map_exn json__ "SeedUrls" SeedUrlList.of_json in
       make ?webCrawlerMode ~seedUrls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information for the seed or starting point URLs to crawl. When selecting websites to index, you must adhere to the Amazon Acceptable Use Policy and all other Amazon terms. Remember that you must only use Amazon Kendra Web Crawler to index your own webpages, or webpages that you have authorization to index."]
+       "Provides the configuration information for the seed or starting point URLs to crawl. When selecting websites to index, you must adhere to the Amazon Acceptable Use Policy and all other Amazon terms. Remember that you must only use Amazon Kendra Web Crawler to index your own web pages, or web pages that you have authorization to index."]
 module Urls =
   struct
     type nonrec t =
       {
       seedUrlConfiguration: SeedUrlConfiguration.t option
         [@ocaml.doc
-          "Configuration of the seed or starting point URLs of the websites you want to crawl. You can choose to crawl only the website host names, or the website host names with subdomains, or the website host names with subdomains and other domains that the webpages link to. You can list up to 100 seed URLs."];
+          "Configuration of the seed or starting point URLs of the websites you want to crawl. You can choose to crawl only the website host names, or the website host names with subdomains, or the website host names with subdomains and other domains that the web pages link to. You can list up to 100 seed URLs."];
       siteMapsConfiguration: SiteMapsConfiguration.t option
         [@ocaml.doc
           "Configuration of the sitemap URLs of the websites you want to crawl. Only URLs belonging to the same website host names are crawled. You can list up to three sitemap URLs."]}
@@ -6278,54 +8329,16 @@ module Urls =
           (Xml.child xml_arg0 "SeedUrlConfiguration") in
       make ?siteMapsConfiguration ?seedUrlConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let siteMapsConfiguration =
-        field_map json "SiteMapsConfiguration" SiteMapsConfiguration.of_json in
+        field_map json__ "SiteMapsConfiguration"
+          SiteMapsConfiguration.of_json in
       let seedUrlConfiguration =
-        field_map json "SeedUrlConfiguration" SeedUrlConfiguration.of_json in
+        field_map json__ "SeedUrlConfiguration" SeedUrlConfiguration.of_json in
       make ?siteMapsConfiguration ?seedUrlConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information of the URLs to crawl. You can only crawl websites that use the secure communication protocol, Hypertext Transfer Protocol Secure (HTTPS). If you receive an error when crawling a website, it could be that the website is blocked from crawling. When selecting websites to index, you must adhere to the Amazon Acceptable Use Policy and all other Amazon terms. Remember that you must only use Amazon Kendra Web Crawler to index your own webpages, or webpages that you have authorization to index."]
-module ProxyConfiguration =
-  struct
-    type nonrec t =
-      {
-      host: Host.t
-        [@ocaml.doc
-          "The name of the website host you want to connect to via a web proxy server. For example, the host name of https://a.example.com/page1.html is \"a.example.com\"."];
-      port: Port.t
-        [@ocaml.doc
-          "The port number of the website host you want to connect to via a web proxy server. For example, the port for https://a.example.com/page1.html is 443, the standard port for HTTPS."];
-      credentials: SecretArn.t option
-        [@ocaml.doc
-          "Your secret ARN, which you can create in Secrets Manager The credentials are optional. You use a secret if web proxy credentials are required to connect to a website host. Amazon Kendra currently support basic authentication to connect to a web proxy server. The secret stores your credentials."]}
-    let context_ = "ProxyConfiguration"
-    let make ?credentials =
-      fun ~host -> fun ~port -> fun () -> { credentials; host; port }
-    let to_value x =
-      structure_to_value
-        [("Host", (Some (Host.to_value x.host)));
-        ("Port", (Some (Port.to_value x.port)));
-        ("Credentials", (Option.map x.credentials ~f:SecretArn.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let credentials =
-        (Option.map ~f:SecretArn.of_xml) (Xml.child xml_arg0 "Credentials") in
-      let port =
-        Port.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Port") in
-      let host =
-        Host.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Host") in
-      make ?credentials ~port ~host ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let credentials = field_map json "Credentials" SecretArn.of_json in
-      let port = field_map_exn json "Port" Port.of_json in
-      let host = field_map_exn json "Host" Host.of_json in
-      make ?credentials ~port ~host ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides the configuration information for a web proxy to connect to website hosts."]
+       "Provides the configuration information of the URLs to crawl. You can only crawl websites that use the secure communication protocol, Hypertext Transfer Protocol Secure (HTTPS). If you receive an error when crawling a website, it could be that the website is blocked from crawling. When selecting websites to index, you must adhere to the Amazon Acceptable Use Policy and all other Amazon terms. Remember that you must only use Amazon Kendra Web Crawler to index your own web pages, or web pages that you have authorization to index."]
 module MaxUrlsPerMinuteCrawlRate =
   struct
     type nonrec t = int
@@ -6387,17 +8400,17 @@ module WebCrawlerConfiguration =
       {
       urls: Urls.t
         [@ocaml.doc
-          "Specifies the seed or starting point URLs of the websites or the sitemap URLs of the websites you want to crawl. You can include website subdomains. You can list up to 100 seed URLs and up to three sitemap URLs. You can only crawl websites that use the secure communication protocol, Hypertext Transfer Protocol Secure (HTTPS). If you receive an error when crawling a website, it could be that the website is blocked from crawling. When selecting websites to index, you must adhere to the Amazon Acceptable Use Policy and all other Amazon terms. Remember that you must only use Amazon Kendra Web Crawler to index your own webpages, or webpages that you have authorization to index."];
+          "Specifies the seed or starting point URLs of the websites or the sitemap URLs of the websites you want to crawl. You can include website subdomains. You can list up to 100 seed URLs and up to three sitemap URLs. You can only crawl websites that use the secure communication protocol, Hypertext Transfer Protocol Secure (HTTPS). If you receive an error when crawling a website, it could be that the website is blocked from crawling. When selecting websites to index, you must adhere to the Amazon Acceptable Use Policy and all other Amazon terms. Remember that you must only use Amazon Kendra Web Crawler to index your own web pages, or web pages that you have authorization to index."];
       crawlDepth: CrawlDepth.t option
         [@ocaml.doc
-          "Specifies the number of levels in a website that you want to crawl. The first level begins from the website seed or starting point URL. For example, if a website has 3 levels \226\128\147 index level (i.e. seed in this example), sections level, and subsections level \226\128\147 and you are only interested in crawling information up to the sections level (i.e. levels 0-1), you can set your depth to 1. The default crawl depth is set to 2."];
+          "The 'depth' or number of levels from the seed level to crawl. For example, the seed URL page is depth 1 and any hyperlinks on this page that are also crawled are depth 2."];
       maxLinksPerPage: MaxLinksPerPage.t option
         [@ocaml.doc
-          "The maximum number of URLs on a webpage to include when crawling a website. This number is per webpage. As a website\226\128\153s webpages are crawled, any URLs the webpages link to are also crawled. URLs on a webpage are crawled in order of appearance. The default maximum links per page is 100."];
+          "The maximum number of URLs on a web page to include when crawling a website. This number is per web page. As a website\226\128\153s web pages are crawled, any URLs the web pages link to are also crawled. URLs on a web page are crawled in order of appearance. The default maximum links per page is 100."];
       maxContentSizePerPageInMegaBytes:
         MaxContentSizePerPageInMegaBytes.t option
         [@ocaml.doc
-          "The maximum size (in MB) of a webpage or attachment to crawl. Files larger than this size (in MB) are skipped/not crawled. The default maximum size of a webpage or attachment is set to 50 MB."];
+          "The maximum size (in MB) of a web page or attachment to crawl. Files larger than this size (in MB) are skipped/not crawled. The default maximum size of a web page or attachment is set to 50 MB."];
       maxUrlsPerMinuteCrawlRate: MaxUrlsPerMinuteCrawlRate.t option
         [@ocaml.doc
           "The maximum number of URLs crawled per website host per minute. A minimum of one URL is required. The default maximum number of URLs crawled per website host per minute is 300."];
@@ -6412,7 +8425,7 @@ module WebCrawlerConfiguration =
           "Configuration information required to connect to your internal websites via a web proxy. You must provide the website host name and port number. For example, the host name of https://a.example.com/page1.html is \"a.example.com\" and the port is 443, the standard port for HTTPS. Web proxy credentials are optional and you can use them to connect to a web proxy server that requires basic authentication. To store web proxy credentials, you use a secret in Secrets Manager."];
       authenticationConfiguration: AuthenticationConfiguration.t option
         [@ocaml.doc
-          "Configuration information required to connect to websites using authentication. You can connect to websites using basic authentication of user name and password. You must provide the website host name and port number. For example, the host name of https://a.example.com/page1.html is \"a.example.com\" and the port is 443, the standard port for HTTPS. You use a secret in Secrets Manager to store your authentication credentials."]}
+          "Configuration information required to connect to websites using authentication. You can connect to websites using basic authentication of user name and password. You use a secret in Secrets Manager to store your authentication credentials. You must provide the website host name and port number. For example, the host name of https://a.example.com/page1.html is \"a.example.com\" and the port is 443, the standard port for HTTPS."]}
     let context_ = "WebCrawlerConfiguration"
     let make ?crawlDepth =
       fun ?maxLinksPerPage ->
@@ -6490,28 +8503,28 @@ module WebCrawlerConfiguration =
         ?maxUrlsPerMinuteCrawlRate ?maxContentSizePerPageInMegaBytes
         ?maxLinksPerPage ?crawlDepth ~urls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationConfiguration =
-        field_map json "AuthenticationConfiguration"
+        field_map json__ "AuthenticationConfiguration"
           AuthenticationConfiguration.of_json in
       let proxyConfiguration =
-        field_map json "ProxyConfiguration" ProxyConfiguration.of_json in
+        field_map json__ "ProxyConfiguration" ProxyConfiguration.of_json in
       let urlExclusionPatterns =
-        field_map json "UrlExclusionPatterns"
+        field_map json__ "UrlExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let urlInclusionPatterns =
-        field_map json "UrlInclusionPatterns"
+        field_map json__ "UrlInclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let maxUrlsPerMinuteCrawlRate =
-        field_map json "MaxUrlsPerMinuteCrawlRate"
+        field_map json__ "MaxUrlsPerMinuteCrawlRate"
           MaxUrlsPerMinuteCrawlRate.of_json in
       let maxContentSizePerPageInMegaBytes =
-        field_map json "MaxContentSizePerPageInMegaBytes"
+        field_map json__ "MaxContentSizePerPageInMegaBytes"
           MaxContentSizePerPageInMegaBytes.of_json in
       let maxLinksPerPage =
-        field_map json "MaxLinksPerPage" MaxLinksPerPage.of_json in
-      let crawlDepth = field_map json "CrawlDepth" CrawlDepth.of_json in
-      let urls = field_map_exn json "Urls" Urls.of_json in
+        field_map json__ "MaxLinksPerPage" MaxLinksPerPage.of_json in
+      let crawlDepth = field_map json__ "CrawlDepth" CrawlDepth.of_json in
+      let urls = field_map_exn json__ "Urls" Urls.of_json in
       make ?authenticationConfiguration ?proxyConfiguration
         ?urlExclusionPatterns ?urlInclusionPatterns
         ?maxUrlsPerMinuteCrawlRate ?maxContentSizePerPageInMegaBytes
@@ -6519,6 +8532,42 @@ module WebCrawlerConfiguration =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the configuration information required for Amazon Kendra Web Crawler."]
+module Template =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The template schema used for the data source, where templates schemas are supported. See Data source template schemas."]
+module TemplateConfiguration =
+  struct
+    type nonrec t =
+      {
+      template: Template.t option
+        [@ocaml.doc
+          "The template schema used for the data source, where templates schemas are supported. See Data source template schemas."]}
+    let make ?template = fun () -> { template }
+    let to_value x =
+      structure_to_value
+        [("Template", (Option.map x.template ~f:Template.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let template =
+        (Option.map ~f:Template.of_xml) (Xml.child xml_arg0 "Template") in
+      make ?template ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let template = field_map json__ "Template" Template.of_json in
+      make ?template ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a template for the configuration information to connect to your data source."]
 module TeamId =
   struct
     type nonrec t = string
@@ -6578,6 +8627,9 @@ module SlackEntityList =
         ok_or_failwith
           ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SlackEntity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6624,6 +8676,9 @@ module PublicChannelFilter =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6648,6 +8703,9 @@ module PrivateChannelFilter =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6839,46 +8897,50 @@ module SlackConfiguration =
         ~sinceCrawlDate ?excludeArchived ?crawlBotMessage ?useChangeLog
         ~slackEntityList ?vpcConfiguration ~secretArn ~teamId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let exclusionPatterns =
-        field_map json "ExclusionPatterns"
+        field_map json__ "ExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPatterns =
-        field_map json "InclusionPatterns"
+        field_map json__ "InclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let publicChannelFilter =
-        field_map json "PublicChannelFilter" PublicChannelFilter.of_json in
+        field_map json__ "PublicChannelFilter" PublicChannelFilter.of_json in
       let privateChannelFilter =
-        field_map json "PrivateChannelFilter" PrivateChannelFilter.of_json in
+        field_map json__ "PrivateChannelFilter" PrivateChannelFilter.of_json in
       let lookBackPeriod =
-        field_map json "LookBackPeriod" LookBackPeriod.of_json in
+        field_map json__ "LookBackPeriod" LookBackPeriod.of_json in
       let sinceCrawlDate =
-        field_map_exn json "SinceCrawlDate" SinceCrawlDate.of_json in
-      let excludeArchived = field_map json "ExcludeArchived" Boolean.of_json in
-      let crawlBotMessage = field_map json "CrawlBotMessage" Boolean.of_json in
-      let useChangeLog = field_map json "UseChangeLog" Boolean.of_json in
+        field_map_exn json__ "SinceCrawlDate" SinceCrawlDate.of_json in
+      let excludeArchived =
+        field_map json__ "ExcludeArchived" Boolean.of_json in
+      let crawlBotMessage =
+        field_map json__ "CrawlBotMessage" Boolean.of_json in
+      let useChangeLog = field_map json__ "UseChangeLog" Boolean.of_json in
       let slackEntityList =
-        field_map_exn json "SlackEntityList" SlackEntityList.of_json in
+        field_map_exn json__ "SlackEntityList" SlackEntityList.of_json in
       let vpcConfiguration =
-        field_map json "VpcConfiguration" DataSourceVpcConfiguration.of_json in
-      let secretArn = field_map_exn json "SecretArn" SecretArn.of_json in
-      let teamId = field_map_exn json "TeamId" TeamId.of_json in
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let teamId = field_map_exn json__ "TeamId" TeamId.of_json in
       make ?fieldMappings ?exclusionPatterns ?inclusionPatterns
         ?publicChannelFilter ?privateChannelFilter ?lookBackPeriod
         ~sinceCrawlDate ?excludeArchived ?crawlBotMessage ?useChangeLog
         ~slackEntityList ?vpcConfiguration ~secretArn ~teamId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information to connect to Slack as your data source."]
+       "Provides the configuration information to connect to Slack as your data source. Amazon Kendra now supports an upgraded Slack connector. You must now use the TemplateConfiguration object instead of the SlackConfiguration object to configure your connector. Connectors configured using the older console and API architecture will continue to function as configured. However, you won\226\128\153t be able to edit or update them. If you want to edit or update your connector configuration, you must create a new connector. We recommended migrating your connector workflow to the upgraded version. Support for connectors configured using the older architecture is scheduled to end by June 2024."]
 module SharePointVersion =
   struct
     type nonrec t =
       | SHAREPOINT_2013 
       | SHAREPOINT_2016 
       | SHAREPOINT_ONLINE 
+      | SHAREPOINT_2019 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -6886,12 +8948,14 @@ module SharePointVersion =
       | SHAREPOINT_2013 -> "SHAREPOINT_2013"
       | SHAREPOINT_2016 -> "SHAREPOINT_2016"
       | SHAREPOINT_ONLINE -> "SHAREPOINT_ONLINE"
+      | SHAREPOINT_2019 -> "SHAREPOINT_2019"
       | Non_static_id s -> s
     let of_string =
       function
       | "SHAREPOINT_2013" -> SHAREPOINT_2013
       | "SHAREPOINT_2016" -> SHAREPOINT_2016
       | "SHAREPOINT_ONLINE" -> SHAREPOINT_ONLINE
+      | "SHAREPOINT_2019" -> SHAREPOINT_2019
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -6911,6 +8975,9 @@ module SharePointUrlList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Url.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6931,32 +8998,60 @@ module SharePointUrlList =
       list_of_json ~kind:"SharePointUrlList" ~of_json:Url.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SharePointOnlineAuthenticationType =
+  struct
+    type nonrec t =
+      | HTTP_BASIC 
+      | OAUTH2 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HTTP_BASIC -> "HTTP_BASIC"
+      | OAUTH2 -> "OAUTH2"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HTTP_BASIC" -> HTTP_BASIC
+      | "OAUTH2" -> OAUTH2
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SharePointOnlineAuthenticationType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SharePointOnlineAuthenticationType" j)
+    let to_json = simple_to_json to_value
+  end
 module SharePointConfiguration =
   struct
     type nonrec t =
       {
       sharePointVersion: SharePointVersion.t
-        [@ocaml.doc
-          "The version of Microsoft SharePoint that you are using as a data source."];
+        [@ocaml.doc "The version of Microsoft SharePoint that you use."];
       urls: SharePointUrlList.t
         [@ocaml.doc
-          "The URLs of the Microsoft SharePoint site that contains the documents that should be indexed."];
+          "The Microsoft SharePoint site URLs for the documents you want to index."];
       secretArn: SecretArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of credentials stored in Secrets Manager. The credentials should be a user/password pair. If you use SharePoint Server, you also need to provide the sever domain name as part of the credentials. For more information, see Using a Microsoft SharePoint Data Source. For more information about Secrets Manager see What Is Secrets Manager in the Secrets Manager user guide."];
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the user name and password required to connect to the SharePoint instance. For more information, see Microsoft SharePoint."];
       crawlAttachments: Boolean.t option
-        [@ocaml.doc
-          "TRUE to include attachments to documents stored in your Microsoft SharePoint site in the index; otherwise, FALSE."];
+        [@ocaml.doc "TRUE to index document attachments."];
       useChangeLog: Boolean.t option
         [@ocaml.doc
           "TRUE to use the SharePoint change log to determine which documents require updating in the index. Depending on the change log's size, it may take longer for Amazon Kendra to use the change log than to scan all of your documents in SharePoint."];
       inclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
         [@ocaml.doc
-          "A list of regular expression patterns to include certain documents in your SharePoint. Documents that match the patterns are included in the index. Documents that don't match the patterns are excluded from the index. If a document matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the document isn't included in the index. The regex is applied to the display URL of the SharePoint document."];
+          "A list of regular expression patterns to include certain documents in your SharePoint. Documents that match the patterns are included in the index. Documents that don't match the patterns are excluded from the index. If a document matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the document isn't included in the index. The regex applies to the display URL of the SharePoint document."];
       exclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
         [@ocaml.doc
-          "A list of regular expression patterns to exclude certain documents in your SharePoint. Documents that match the patterns are excluded from the index. Documents that don't match the patterns are included in the index. If a document matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the document isn't included in the index. The regex is applied to the display URL of the SharePoint document."];
-      vpcConfiguration: DataSourceVpcConfiguration.t option ;
+          "A list of regular expression patterns to exclude certain documents in your SharePoint. Documents that match the patterns are excluded from the index. Documents that don't match the patterns are included in the index. If a document matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the document isn't included in the index. The regex applies to the display URL of the SharePoint document."];
+      vpcConfiguration: DataSourceVpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration information for an Amazon Virtual Private Cloud to connect to your Microsoft SharePoint. For more information, see Configuring a VPC."];
       fieldMappings: DataSourceToIndexFieldMappingList.t option
         [@ocaml.doc
           "A list of DataSourceToIndexFieldMapping objects that map SharePoint data source attributes or field names to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to SharePoint fields. For more information, see Mapping data source fields. The SharePoint data source field names must exist in your SharePoint custom metadata."];
@@ -6964,9 +9059,16 @@ module SharePointConfiguration =
         [@ocaml.doc
           "The Microsoft SharePoint attribute field that contains the title of the document."];
       disableLocalGroups: Boolean.t option
+        [@ocaml.doc "TRUE to disable local groups information."];
+      sslCertificateS3Path: S3Path.t option
         [@ocaml.doc
-          "A Boolean value that specifies whether local groups are disabled (True) or enabled (False)."];
-      sslCertificateS3Path: S3Path.t option }
+          "The path to the SSL certificate stored in an Amazon S3 bucket. You use this to connect to SharePoint Server if you require a secure SSL connection. You can generate a self-signed X509 certificate on any computer using OpenSSL. For an example of using OpenSSL to create an X509 certificate, see Create and sign an X509 certificate."];
+      authenticationType: SharePointOnlineAuthenticationType.t option
+        [@ocaml.doc
+          "Whether you want to connect to SharePoint Online using basic authentication of user name and password, or OAuth authentication of user name, password, client ID, and client secret, or AD App-only authentication of client secret."];
+      proxyConfiguration: ProxyConfiguration.t option
+        [@ocaml.doc
+          "Configuration information to connect to your Microsoft SharePoint site URLs via instance via a web proxy. You can use this option for SharePoint Server. You must provide the website host name and port number. For example, the host name of https://a.example.com/page1.html is \"a.example.com\" and the port is 443, the standard port for HTTPS. Web proxy credentials are optional and you can use them to connect to a web proxy server that requires basic authentication of user name and password. To store web proxy credentials, you use a secret in Secrets Manager. It is recommended that you follow best security practices when configuring your web proxy. This includes setting up throttling, setting up logging and monitoring, and applying security patches on a regular basis. If you use your web proxy with multiple data sources, sync jobs that occur at the same time could strain the load on your proxy. It is recommended you prepare your proxy beforehand for any security and load requirements."]}
     let context_ = "SharePointConfiguration"
     let make ?crawlAttachments =
       fun ?useChangeLog ->
@@ -6977,24 +9079,28 @@ module SharePointConfiguration =
                 fun ?documentTitleFieldName ->
                   fun ?disableLocalGroups ->
                     fun ?sslCertificateS3Path ->
-                      fun ~sharePointVersion ->
-                        fun ~urls ->
-                          fun ~secretArn ->
-                            fun () ->
-                              {
-                                crawlAttachments;
-                                useChangeLog;
-                                inclusionPatterns;
-                                exclusionPatterns;
-                                vpcConfiguration;
-                                fieldMappings;
-                                documentTitleFieldName;
-                                disableLocalGroups;
-                                sslCertificateS3Path;
-                                sharePointVersion;
-                                urls;
-                                secretArn
-                              }
+                      fun ?authenticationType ->
+                        fun ?proxyConfiguration ->
+                          fun ~sharePointVersion ->
+                            fun ~urls ->
+                              fun ~secretArn ->
+                                fun () ->
+                                  {
+                                    crawlAttachments;
+                                    useChangeLog;
+                                    inclusionPatterns;
+                                    exclusionPatterns;
+                                    vpcConfiguration;
+                                    fieldMappings;
+                                    documentTitleFieldName;
+                                    disableLocalGroups;
+                                    sslCertificateS3Path;
+                                    authenticationType;
+                                    proxyConfiguration;
+                                    sharePointVersion;
+                                    urls;
+                                    secretArn
+                                  }
     let to_value x =
       structure_to_value
         [("SharePointVersion",
@@ -7022,9 +9128,20 @@ module SharePointConfiguration =
         ("DisableLocalGroups",
           (Option.map x.disableLocalGroups ~f:Boolean.to_value));
         ("SslCertificateS3Path",
-          (Option.map x.sslCertificateS3Path ~f:S3Path.to_value))]
+          (Option.map x.sslCertificateS3Path ~f:S3Path.to_value));
+        ("AuthenticationType",
+          (Option.map x.authenticationType
+             ~f:SharePointOnlineAuthenticationType.to_value));
+        ("ProxyConfiguration",
+          (Option.map x.proxyConfiguration ~f:ProxyConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let proxyConfiguration =
+        (Option.map ~f:ProxyConfiguration.of_xml)
+          (Xml.child xml_arg0 "ProxyConfiguration") in
+      let authenticationType =
+        (Option.map ~f:SharePointOnlineAuthenticationType.of_xml)
+          (Xml.child xml_arg0 "AuthenticationType") in
       let sslCertificateS3Path =
         (Option.map ~f:S3Path.of_xml)
           (Xml.child xml_arg0 "SslCertificateS3Path") in
@@ -7060,40 +9177,46 @@ module SharePointConfiguration =
       let sharePointVersion =
         SharePointVersion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SharePointVersion") in
-      make ?sslCertificateS3Path ?disableLocalGroups ?documentTitleFieldName
-        ?fieldMappings ?vpcConfiguration ?exclusionPatterns
-        ?inclusionPatterns ?useChangeLog ?crawlAttachments ~secretArn ~urls
-        ~sharePointVersion ()
+      make ?proxyConfiguration ?authenticationType ?sslCertificateS3Path
+        ?disableLocalGroups ?documentTitleFieldName ?fieldMappings
+        ?vpcConfiguration ?exclusionPatterns ?inclusionPatterns ?useChangeLog
+        ?crawlAttachments ~secretArn ~urls ~sharePointVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let proxyConfiguration =
+        field_map json__ "ProxyConfiguration" ProxyConfiguration.of_json in
+      let authenticationType =
+        field_map json__ "AuthenticationType"
+          SharePointOnlineAuthenticationType.of_json in
       let sslCertificateS3Path =
-        field_map json "SslCertificateS3Path" S3Path.of_json in
+        field_map json__ "SslCertificateS3Path" S3Path.of_json in
       let disableLocalGroups =
-        field_map json "DisableLocalGroups" Boolean.of_json in
+        field_map json__ "DisableLocalGroups" Boolean.of_json in
       let documentTitleFieldName =
-        field_map json "DocumentTitleFieldName" DataSourceFieldName.of_json in
+        field_map json__ "DocumentTitleFieldName" DataSourceFieldName.of_json in
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let vpcConfiguration =
-        field_map json "VpcConfiguration" DataSourceVpcConfiguration.of_json in
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
       let exclusionPatterns =
-        field_map json "ExclusionPatterns"
+        field_map json__ "ExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPatterns =
-        field_map json "InclusionPatterns"
+        field_map json__ "InclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
-      let useChangeLog = field_map json "UseChangeLog" Boolean.of_json in
+      let useChangeLog = field_map json__ "UseChangeLog" Boolean.of_json in
       let crawlAttachments =
-        field_map json "CrawlAttachments" Boolean.of_json in
-      let secretArn = field_map_exn json "SecretArn" SecretArn.of_json in
-      let urls = field_map_exn json "Urls" SharePointUrlList.of_json in
+        field_map json__ "CrawlAttachments" Boolean.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let urls = field_map_exn json__ "Urls" SharePointUrlList.of_json in
       let sharePointVersion =
-        field_map_exn json "SharePointVersion" SharePointVersion.of_json in
-      make ?sslCertificateS3Path ?disableLocalGroups ?documentTitleFieldName
-        ?fieldMappings ?vpcConfiguration ?exclusionPatterns
-        ?inclusionPatterns ?useChangeLog ?crawlAttachments ~secretArn ~urls
-        ~sharePointVersion ()
+        field_map_exn json__ "SharePointVersion" SharePointVersion.of_json in
+      make ?proxyConfiguration ?authenticationType ?sslCertificateS3Path
+        ?disableLocalGroups ?documentTitleFieldName ?fieldMappings
+        ?vpcConfiguration ?exclusionPatterns ?inclusionPatterns ?useChangeLog
+        ?crawlAttachments ~secretArn ~urls ~sharePointVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the configuration information to connect to Microsoft SharePoint as your data source."]
@@ -7102,8 +9225,7 @@ module ServiceNowServiceCatalogConfiguration =
     type nonrec t =
       {
       crawlAttachments: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether Amazon Kendra should crawl attachments to the service catalog items."];
+        [@ocaml.doc "TRUE to index attachments to service catalog items."];
       includeAttachmentFilePatterns:
         DataSourceInclusionsExclusionsStrings.t option
         [@ocaml.doc
@@ -7179,23 +9301,23 @@ module ServiceNowServiceCatalogConfiguration =
         ?excludeAttachmentFilePatterns ?includeAttachmentFilePatterns
         ?crawlAttachments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let documentTitleFieldName =
-        field_map json "DocumentTitleFieldName" DataSourceFieldName.of_json in
+        field_map json__ "DocumentTitleFieldName" DataSourceFieldName.of_json in
       let documentDataFieldName =
-        field_map_exn json "DocumentDataFieldName"
+        field_map_exn json__ "DocumentDataFieldName"
           DataSourceFieldName.of_json in
       let excludeAttachmentFilePatterns =
-        field_map json "ExcludeAttachmentFilePatterns"
+        field_map json__ "ExcludeAttachmentFilePatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let includeAttachmentFilePatterns =
-        field_map json "IncludeAttachmentFilePatterns"
+        field_map json__ "IncludeAttachmentFilePatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let crawlAttachments =
-        field_map json "CrawlAttachments" Boolean.of_json in
+        field_map json__ "CrawlAttachments" Boolean.of_json in
       make ?fieldMappings ?documentTitleFieldName ~documentDataFieldName
         ?excludeAttachmentFilePatterns ?includeAttachmentFilePatterns
         ?crawlAttachments ()
@@ -7228,16 +9350,15 @@ module ServiceNowKnowledgeArticleConfiguration =
     type nonrec t =
       {
       crawlAttachments: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether Amazon Kendra should index attachments to knowledge articles."];
+        [@ocaml.doc "TRUE to index attachments to knowledge articles."];
       includeAttachmentFilePatterns:
         DataSourceInclusionsExclusionsStrings.t option
         [@ocaml.doc
-          "A list of regular expression patterns to include certain attachments of knowledge articles in your ServiceNow. Item that match the patterns are included in the index. Items that don't match the patterns are excluded from the index. If an item matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the item isn't included in the index. The regex is applied to the field specified in the PatternTargetField."];
+          "A list of regular expression patterns applied to include knowledge article attachments. Attachments that match the patterns are included in the index. Items that don't match the patterns are excluded from the index. If an item matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the item isn't included in the index."];
       excludeAttachmentFilePatterns:
         DataSourceInclusionsExclusionsStrings.t option
         [@ocaml.doc
-          "A list of regular expression patterns to exclude certain attachments of knowledge articles in your ServiceNow. Item that match the patterns are excluded from the index. Items that don't match the patterns are included in the index. If an item matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the item isn't included in the index. The regex is applied to the field specified in the PatternTargetField."];
+          "A list of regular expression patterns applied to exclude certain knowledge article attachments. Attachments that match the patterns are excluded from the index. Items that don't match the patterns are included in the index. If an item matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the item isn't included in the index."];
       documentDataFieldName: DataSourceFieldName.t
         [@ocaml.doc
           "The name of the ServiceNow field that is mapped to the index document contents field in the Amazon Kendra index."];
@@ -7316,26 +9437,26 @@ module ServiceNowKnowledgeArticleConfiguration =
         ~documentDataFieldName ?excludeAttachmentFilePatterns
         ?includeAttachmentFilePatterns ?crawlAttachments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filterQuery =
-        field_map json "FilterQuery"
+        field_map json__ "FilterQuery"
           ServiceNowKnowledgeArticleFilterQuery.of_json in
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let documentTitleFieldName =
-        field_map json "DocumentTitleFieldName" DataSourceFieldName.of_json in
+        field_map json__ "DocumentTitleFieldName" DataSourceFieldName.of_json in
       let documentDataFieldName =
-        field_map_exn json "DocumentDataFieldName"
+        field_map_exn json__ "DocumentDataFieldName"
           DataSourceFieldName.of_json in
       let excludeAttachmentFilePatterns =
-        field_map json "ExcludeAttachmentFilePatterns"
+        field_map json__ "ExcludeAttachmentFilePatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let includeAttachmentFilePatterns =
-        field_map json "IncludeAttachmentFilePatterns"
+        field_map json__ "IncludeAttachmentFilePatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let crawlAttachments =
-        field_map json "CrawlAttachments" Boolean.of_json in
+        field_map json__ "CrawlAttachments" Boolean.of_json in
       make ?filterQuery ?fieldMappings ?documentTitleFieldName
         ~documentDataFieldName ?excludeAttachmentFilePatterns
         ?includeAttachmentFilePatterns ?crawlAttachments ()
@@ -7429,7 +9550,7 @@ module ServiceNowConfiguration =
           "The ServiceNow instance that the data source connects to. The host endpoint should look like the following: \\{instance\\}.service-now.com."];
       secretArn: SecretArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Secrets Manager secret that contains the user name and password required to connect to the ServiceNow instance."];
+          "The Amazon Resource Name (ARN) of the Secrets Manager secret that contains the user name and password required to connect to the ServiceNow instance. You can also provide OAuth authentication credentials of user name, password, client ID, and client secret. For more information, see Using a ServiceNow data source."];
       serviceNowBuildVersion: ServiceNowBuildVersionType.t
         [@ocaml.doc
           "The identifier of the release that the ServiceNow host is running. If the host is not running the LONDON release, use OTHERS."];
@@ -7443,7 +9564,7 @@ module ServiceNowConfiguration =
           "Configuration information for crawling service catalogs in the ServiceNow site."];
       authenticationType: ServiceNowAuthenticationType.t option
         [@ocaml.doc
-          "The type of authentication used to connect to the ServiceNow instance. If you choose HTTP_BASIC, Amazon Kendra is authenticated using the user name and password provided in the Secrets Manager secret in the SecretArn field. When you choose OAUTH2, Amazon Kendra is authenticated using the OAuth token and secret provided in the Secrets Manager secret, and the user name and password are used to determine which information Amazon Kendra has access to. When you use OAUTH2 authentication, you must generate a token and a client secret using the ServiceNow console. For more information, see Using a ServiceNow data source."]}
+          "The type of authentication used to connect to the ServiceNow instance. If you choose HTTP_BASIC, Amazon Kendra is authenticated using the user name and password provided in the Secrets Manager secret in the SecretArn field. If you choose OAUTH2, Amazon Kendra is authenticated using the credentials of client ID, client secret, user name and password. When you use OAUTH2 authentication, you must generate a token and a client secret using the ServiceNow console. For more information, see Using a ServiceNow data source."]}
     let context_ = "ServiceNowConfiguration"
     let make ?knowledgeArticleConfiguration =
       fun ?serviceCatalogConfiguration ->
@@ -7500,21 +9621,21 @@ module ServiceNowConfiguration =
         ?knowledgeArticleConfiguration ~serviceNowBuildVersion ~secretArn
         ~hostUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationType =
-        field_map json "AuthenticationType"
+        field_map json__ "AuthenticationType"
           ServiceNowAuthenticationType.of_json in
       let serviceCatalogConfiguration =
-        field_map json "ServiceCatalogConfiguration"
+        field_map json__ "ServiceCatalogConfiguration"
           ServiceNowServiceCatalogConfiguration.of_json in
       let knowledgeArticleConfiguration =
-        field_map json "KnowledgeArticleConfiguration"
+        field_map json__ "KnowledgeArticleConfiguration"
           ServiceNowKnowledgeArticleConfiguration.of_json in
       let serviceNowBuildVersion =
-        field_map_exn json "ServiceNowBuildVersion"
+        field_map_exn json__ "ServiceNowBuildVersion"
           ServiceNowBuildVersionType.of_json in
-      let secretArn = field_map_exn json "SecretArn" SecretArn.of_json in
-      let hostUrl = field_map_exn json "HostUrl" ServiceNowHostUrl.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let hostUrl = field_map_exn json__ "HostUrl" ServiceNowHostUrl.of_json in
       make ?authenticationType ?serviceCatalogConfiguration
         ?knowledgeArticleConfiguration ~serviceNowBuildVersion ~secretArn
         ~hostUrl ()
@@ -7649,17 +9770,17 @@ module SalesforceStandardObjectConfiguration =
       make ?fieldMappings ?documentTitleFieldName ~documentDataFieldName
         ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let documentTitleFieldName =
-        field_map json "DocumentTitleFieldName" DataSourceFieldName.of_json in
+        field_map json__ "DocumentTitleFieldName" DataSourceFieldName.of_json in
       let documentDataFieldName =
-        field_map_exn json "DocumentDataFieldName"
+        field_map_exn json__ "DocumentDataFieldName"
           DataSourceFieldName.of_json in
       let name =
-        field_map_exn json "Name" SalesforceStandardObjectName.of_json in
+        field_map_exn json__ "Name" SalesforceStandardObjectName.of_json in
       make ?fieldMappings ?documentTitleFieldName ~documentDataFieldName
         ~name ()
     let to_json v = composed_to_json to_value v
@@ -7673,6 +9794,9 @@ module SalesforceStandardObjectConfigurationList =
         ok_or_failwith
           ((check_list_max i ~max:17) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SalesforceStandardObjectConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -7726,12 +9850,12 @@ module SalesforceStandardObjectAttachmentConfiguration =
           (Xml.child xml_arg0 "DocumentTitleFieldName") in
       make ?fieldMappings ?documentTitleFieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let documentTitleFieldName =
-        field_map json "DocumentTitleFieldName" DataSourceFieldName.of_json in
+        field_map json__ "DocumentTitleFieldName" DataSourceFieldName.of_json in
       make ?fieldMappings ?documentTitleFieldName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7778,14 +9902,14 @@ module SalesforceStandardKnowledgeArticleTypeConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentDataFieldName") in
       make ?fieldMappings ?documentTitleFieldName ~documentDataFieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let documentTitleFieldName =
-        field_map json "DocumentTitleFieldName" DataSourceFieldName.of_json in
+        field_map json__ "DocumentTitleFieldName" DataSourceFieldName.of_json in
       let documentDataFieldName =
-        field_map_exn json "DocumentDataFieldName"
+        field_map_exn json__ "DocumentDataFieldName"
           DataSourceFieldName.of_json in
       make ?fieldMappings ?documentTitleFieldName ~documentDataFieldName ()
     let to_json v = composed_to_json to_value v
@@ -7830,6 +9954,9 @@ module SalesforceKnowledgeArticleStateList =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SalesforceKnowledgeArticleState.to_value)) |>
         (fun x -> `List x)
@@ -7930,17 +10057,17 @@ module SalesforceCustomKnowledgeArticleTypeConfiguration =
       make ?fieldMappings ?documentTitleFieldName ~documentDataFieldName
         ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let documentTitleFieldName =
-        field_map json "DocumentTitleFieldName" DataSourceFieldName.of_json in
+        field_map json__ "DocumentTitleFieldName" DataSourceFieldName.of_json in
       let documentDataFieldName =
-        field_map_exn json "DocumentDataFieldName"
+        field_map_exn json__ "DocumentDataFieldName"
           DataSourceFieldName.of_json in
       let name =
-        field_map_exn json "Name"
+        field_map_exn json__ "Name"
           SalesforceCustomKnowledgeArticleTypeName.of_json in
       make ?fieldMappings ?documentTitleFieldName ~documentDataFieldName
         ~name ()
@@ -7955,6 +10082,9 @@ module SalesforceCustomKnowledgeArticleTypeConfigurationList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -8033,15 +10163,15 @@ module SalesforceKnowledgeArticleConfiguration =
       make ?customKnowledgeArticleTypeConfigurations
         ?standardKnowledgeArticleTypeConfiguration ~includedStates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customKnowledgeArticleTypeConfigurations =
-        field_map json "CustomKnowledgeArticleTypeConfigurations"
+        field_map json__ "CustomKnowledgeArticleTypeConfigurations"
           SalesforceCustomKnowledgeArticleTypeConfigurationList.of_json in
       let standardKnowledgeArticleTypeConfiguration =
-        field_map json "StandardKnowledgeArticleTypeConfiguration"
+        field_map json__ "StandardKnowledgeArticleTypeConfiguration"
           SalesforceStandardKnowledgeArticleTypeConfiguration.of_json in
       let includedStates =
-        field_map_exn json "IncludedStates"
+        field_map_exn json__ "IncludedStates"
           SalesforceKnowledgeArticleStateList.of_json in
       make ?customKnowledgeArticleTypeConfigurations
         ?standardKnowledgeArticleTypeConfiguration ~includedStates ()
@@ -8086,6 +10216,9 @@ module SalesforceChatterFeedIncludeFilterTypes =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SalesforceChatterFeedIncludeFilterType.to_value))
         |> (fun x -> `List x)
@@ -8167,17 +10300,17 @@ module SalesforceChatterFeedConfiguration =
       make ?includeFilterTypes ?fieldMappings ?documentTitleFieldName
         ~documentDataFieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeFilterTypes =
-        field_map json "IncludeFilterTypes"
+        field_map json__ "IncludeFilterTypes"
           SalesforceChatterFeedIncludeFilterTypes.of_json in
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let documentTitleFieldName =
-        field_map json "DocumentTitleFieldName" DataSourceFieldName.of_json in
+        field_map json__ "DocumentTitleFieldName" DataSourceFieldName.of_json in
       let documentDataFieldName =
-        field_map_exn json "DocumentDataFieldName"
+        field_map_exn json__ "DocumentDataFieldName"
           DataSourceFieldName.of_json in
       make ?includeFilterTypes ?fieldMappings ?documentTitleFieldName
         ~documentDataFieldName ()
@@ -8193,7 +10326,7 @@ module SalesforceConfiguration =
           "The instance URL for the Salesforce site that you want to index."];
       secretArn: SecretArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an Secrets Managersecret that contains the key/value pairs required to connect to your Salesforce instance. The secret must contain a JSON structure with the following keys: authenticationUrl - The OAUTH endpoint that Amazon Kendra connects to get an OAUTH token. consumerKey - The application public key generated when you created your Salesforce application. consumerSecret - The application private key generated when you created your Salesforce application. password - The password associated with the user logging in to the Salesforce instance. securityToken - The token associated with the user account logging in to the Salesforce instance. username - The user name of the user logging in to the Salesforce instance."];
+          "The Amazon Resource Name (ARN) of an Secrets Managersecret that contains the key/value pairs required to connect to your Salesforce instance. The secret must contain a JSON structure with the following keys: authenticationUrl - The OAUTH endpoint that Amazon Kendra connects to get an OAUTH token. consumerKey - The application public key generated when you created your Salesforce application. consumerSecret - The application private key generated when you created your Salesforce application. password - The password associated with the user logging in to the Salesforce instance. securityToken - The token associated with the user logging in to the Salesforce instance. username - The user name of the user logging in to the Salesforce instance."];
       standardObjectConfigurations:
         SalesforceStandardObjectConfigurationList.t option
         [@ocaml.doc
@@ -8299,29 +10432,29 @@ module SalesforceConfiguration =
         ?chatterFeedConfiguration ?knowledgeArticleConfiguration
         ?standardObjectConfigurations ~secretArn ~serverUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let excludeAttachmentFilePatterns =
-        field_map json "ExcludeAttachmentFilePatterns"
+        field_map json__ "ExcludeAttachmentFilePatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let includeAttachmentFilePatterns =
-        field_map json "IncludeAttachmentFilePatterns"
+        field_map json__ "IncludeAttachmentFilePatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let standardObjectAttachmentConfiguration =
-        field_map json "StandardObjectAttachmentConfiguration"
+        field_map json__ "StandardObjectAttachmentConfiguration"
           SalesforceStandardObjectAttachmentConfiguration.of_json in
       let crawlAttachments =
-        field_map json "CrawlAttachments" Boolean.of_json in
+        field_map json__ "CrawlAttachments" Boolean.of_json in
       let chatterFeedConfiguration =
-        field_map json "ChatterFeedConfiguration"
+        field_map json__ "ChatterFeedConfiguration"
           SalesforceChatterFeedConfiguration.of_json in
       let knowledgeArticleConfiguration =
-        field_map json "KnowledgeArticleConfiguration"
+        field_map json__ "KnowledgeArticleConfiguration"
           SalesforceKnowledgeArticleConfiguration.of_json in
       let standardObjectConfigurations =
-        field_map json "StandardObjectConfigurations"
+        field_map json__ "StandardObjectConfigurations"
           SalesforceStandardObjectConfigurationList.of_json in
-      let secretArn = field_map_exn json "SecretArn" SecretArn.of_json in
-      let serverUrl = field_map_exn json "ServerUrl" Url.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let serverUrl = field_map_exn json__ "ServerUrl" Url.of_json in
       make ?excludeAttachmentFilePatterns ?includeAttachmentFilePatterns
         ?standardObjectAttachmentConfiguration ?crawlAttachments
         ?chatterFeedConfiguration ?knowledgeArticleConfiguration
@@ -8346,8 +10479,8 @@ module DocumentsMetadataConfiguration =
         (Option.map ~f:S3ObjectKey.of_xml) (Xml.child xml_arg0 "S3Prefix") in
       make ?s3Prefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Prefix = field_map json "S3Prefix" S3ObjectKey.of_json in
+    let of_json json__ =
+      let s3Prefix = field_map json__ "S3Prefix" S3ObjectKey.of_json in
       make ?s3Prefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8363,10 +10496,10 @@ module S3DataSourceConfiguration =
           "A list of S3 prefixes for the documents that should be included in the index."];
       inclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
         [@ocaml.doc
-          "A list of glob patterns for documents that should be indexed. If a document that matches an inclusion pattern also matches an exclusion pattern, the document is not indexed. Some examples are: *.txt will include all text files in a directory (files with the extension .txt). **/*.txt will include all text files in a directory and its subdirectories. *tax* will include all files in a directory that contain 'tax' in the file name, such as 'tax', 'taxes', 'income_tax'."];
+          "A list of glob patterns (patterns that can expand a wildcard pattern into a list of path names that match the given pattern) for certain file names and file types to include in your index. If a document matches both an inclusion and exclusion prefix or pattern, the exclusion prefix takes precendence and the document is not indexed. Examples of glob patterns include: /myapp/config/*\226\128\148All files inside config directory. **/*.png\226\128\148All .png files in all directories. **/*.\\{png, ico, md\\}\226\128\148All .png, .ico or .md files in all directories. /myapp/src/**/*.ts\226\128\148All .ts files inside src directory (and all its subdirectories). **/!(*.module).ts\226\128\148All .ts files but not .module.ts *.png , *.jpg\226\128\148All PNG and JPEG image files in a directory (files with the extensions .png and .jpg). *internal*\226\128\148All files in a directory that contain 'internal' in the file name, such as 'internal', 'internal_only', 'company_internal'. **/*internal*\226\128\148All internal-related files in a directory and its subdirectories. For more examples, see Use of Exclude and Include Filters in the Amazon Web Services CLI Command Reference."];
       exclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
         [@ocaml.doc
-          "A list of glob patterns for documents that should not be indexed. If a document that matches an inclusion prefix or inclusion pattern also matches an exclusion pattern, the document is not indexed. Some examples are: *.png , *.jpg will exclude all PNG and JPEG image files in a directory (files with the extensions .png and .jpg). *internal* will exclude all files in a directory that contain 'internal' in the file name, such as 'internal', 'internal_only', 'company_internal'. **/*internal* will exclude all internal-related files in a directory and its subdirectories."];
+          "A list of glob patterns (patterns that can expand a wildcard pattern into a list of path names that match the given pattern) for certain file names and file types to exclude from your index. If a document matches both an inclusion and exclusion prefix or pattern, the exclusion prefix takes precendence and the document is not indexed. Examples of glob patterns include: /myapp/config/*\226\128\148All files inside config directory. **/*.png\226\128\148All .png files in all directories. **/*.\\{png, ico, md\\}\226\128\148All .png, .ico or .md files in all directories. /myapp/src/**/*.ts\226\128\148All .ts files inside src directory (and all its subdirectories). **/!(*.module).ts\226\128\148All .ts files but not .module.ts *.png , *.jpg\226\128\148All PNG and JPEG image files in a directory (files with the extensions .png and .jpg). *internal*\226\128\148All files in a directory that contain 'internal' in the file name, such as 'internal', 'internal_only', 'company_internal'. **/*internal*\226\128\148All internal-related files in a directory and its subdirectories. For more examples, see Use of Exclude and Include Filters in the Amazon Web Services CLI Command Reference."];
       documentsMetadataConfiguration: DocumentsMetadataConfiguration.t option ;
       accessControlListConfiguration: AccessControlListConfiguration.t option
         [@ocaml.doc
@@ -8429,29 +10562,262 @@ module S3DataSourceConfiguration =
         ?exclusionPatterns ?inclusionPatterns ?inclusionPrefixes ~bucketName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessControlListConfiguration =
-        field_map json "AccessControlListConfiguration"
+        field_map json__ "AccessControlListConfiguration"
           AccessControlListConfiguration.of_json in
       let documentsMetadataConfiguration =
-        field_map json "DocumentsMetadataConfiguration"
+        field_map json__ "DocumentsMetadataConfiguration"
           DocumentsMetadataConfiguration.of_json in
       let exclusionPatterns =
-        field_map json "ExclusionPatterns"
+        field_map json__ "ExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPatterns =
-        field_map json "InclusionPatterns"
+        field_map json__ "InclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPrefixes =
-        field_map json "InclusionPrefixes"
+        field_map json__ "InclusionPrefixes"
           DataSourceInclusionsExclusionsStrings.of_json in
-      let bucketName = field_map_exn json "BucketName" S3BucketName.of_json in
+      let bucketName = field_map_exn json__ "BucketName" S3BucketName.of_json in
       make ?accessControlListConfiguration ?documentsMetadataConfiguration
         ?exclusionPatterns ?inclusionPatterns ?inclusionPrefixes ~bucketName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information to connect to an Amazon S3 bucket."]
+       "Provides the configuration information to connect to an Amazon S3 bucket. Amazon Kendra now supports an upgraded Amazon S3 connector. You must now use the TemplateConfiguration object instead of the S3DataSourceConfiguration object to configure your connector. Connectors configured using the older console and API architecture will continue to function as configured. However, you won't be able to edit or update them. If you want to edit or update your connector configuration, you must create a new connector. We recommended migrating your connector workflow to the upgraded version. Support for connectors configured using the older architecture is scheduled to end by June 2024."]
+module FolderId =
+  struct
+    type nonrec t = string
+    let context_ = "FolderId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:500) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FolderId" j
+    let to_json = simple_to_json to_value
+  end
+module FolderIdList =
+  struct
+    type nonrec t = FolderId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FolderId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FolderId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FolderIdList" ~of_json:FolderId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Domain =
+  struct
+    type nonrec t = string
+    let context_ = "Domain"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^(?!-)[A-Za-z0-9-].*(?<!-)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Domain" j
+    let to_json = simple_to_json to_value
+  end
+module QuipConfiguration =
+  struct
+    type nonrec t =
+      {
+      domain: Domain.t
+        [@ocaml.doc
+          "The Quip site domain. For example, https://quip-company.quipdomain.com/browse. The domain in this example is \"quipdomain\"."];
+      secretArn: SecretArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the key-value pairs that are required to connect to your Quip. The secret must contain a JSON structure with the following keys: accessToken\226\128\148The token created in Quip. For more information, see Using a Quip data source."];
+      crawlFileComments: Boolean.t option
+        [@ocaml.doc "TRUE to index file comments."];
+      crawlChatRooms: Boolean.t option
+        [@ocaml.doc "TRUE to index the contents of chat rooms."];
+      crawlAttachments: Boolean.t option
+        [@ocaml.doc "TRUE to index attachments."];
+      folderIds: FolderIdList.t option
+        [@ocaml.doc
+          "The identifiers of the Quip folders you want to index. You can find the folder ID in your browser URL when you access your folder in Quip. For example, https://quip-company.quipdomain.com/zlLuOVNSarTL/folder-name. The folder ID in this example is \"zlLuOVNSarTL\"."];
+      threadFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Quip threads to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Quip fields. For more information, see Mapping data source fields. The Quip field names must exist in your Quip custom metadata."];
+      messageFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Quip messages to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Quip fields. For more information, see Mapping data source fields. The Quip field names must exist in your Quip custom metadata."];
+      attachmentFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Quip attachments to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Quip fields. For more information, see Mapping data source fields. The Quip field names must exist in your Quip custom metadata."];
+      inclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to include certain files in your Quip file system. Files that match the patterns are included in the index. Files that don't match the patterns are excluded from the index. If a file matches both an inclusion pattern and an exclusion pattern, the exclusion pattern takes precedence, and the file isn't included in the index."];
+      exclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to exclude certain files in your Quip file system. Files that match the patterns are excluded from the index. Files that don\226\128\153t match the patterns are included in the index. If a file matches both an inclusion pattern and an exclusion pattern, the exclusion pattern takes precedence, and the file isn't included in the index."];
+      vpcConfiguration: DataSourceVpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration information for an Amazon Virtual Private Cloud (VPC) to connect to your Quip. For more information, see Configuring a VPC."]}
+    let context_ = "QuipConfiguration"
+    let make ?crawlFileComments =
+      fun ?crawlChatRooms ->
+        fun ?crawlAttachments ->
+          fun ?folderIds ->
+            fun ?threadFieldMappings ->
+              fun ?messageFieldMappings ->
+                fun ?attachmentFieldMappings ->
+                  fun ?inclusionPatterns ->
+                    fun ?exclusionPatterns ->
+                      fun ?vpcConfiguration ->
+                        fun ~domain ->
+                          fun ~secretArn ->
+                            fun () ->
+                              {
+                                crawlFileComments;
+                                crawlChatRooms;
+                                crawlAttachments;
+                                folderIds;
+                                threadFieldMappings;
+                                messageFieldMappings;
+                                attachmentFieldMappings;
+                                inclusionPatterns;
+                                exclusionPatterns;
+                                vpcConfiguration;
+                                domain;
+                                secretArn
+                              }
+    let to_value x =
+      structure_to_value
+        [("Domain", (Some (Domain.to_value x.domain)));
+        ("SecretArn", (Some (SecretArn.to_value x.secretArn)));
+        ("CrawlFileComments",
+          (Option.map x.crawlFileComments ~f:Boolean.to_value));
+        ("CrawlChatRooms", (Option.map x.crawlChatRooms ~f:Boolean.to_value));
+        ("CrawlAttachments",
+          (Option.map x.crawlAttachments ~f:Boolean.to_value));
+        ("FolderIds", (Option.map x.folderIds ~f:FolderIdList.to_value));
+        ("ThreadFieldMappings",
+          (Option.map x.threadFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("MessageFieldMappings",
+          (Option.map x.messageFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("AttachmentFieldMappings",
+          (Option.map x.attachmentFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("InclusionPatterns",
+          (Option.map x.inclusionPatterns
+             ~f:DataSourceInclusionsExclusionsStrings.to_value));
+        ("ExclusionPatterns",
+          (Option.map x.exclusionPatterns
+             ~f:DataSourceInclusionsExclusionsStrings.to_value));
+        ("VpcConfiguration",
+          (Option.map x.vpcConfiguration
+             ~f:DataSourceVpcConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConfiguration =
+        (Option.map ~f:DataSourceVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
+      let exclusionPatterns =
+        (Option.map ~f:DataSourceInclusionsExclusionsStrings.of_xml)
+          (Xml.child xml_arg0 "ExclusionPatterns") in
+      let inclusionPatterns =
+        (Option.map ~f:DataSourceInclusionsExclusionsStrings.of_xml)
+          (Xml.child xml_arg0 "InclusionPatterns") in
+      let attachmentFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "AttachmentFieldMappings") in
+      let messageFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "MessageFieldMappings") in
+      let threadFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "ThreadFieldMappings") in
+      let folderIds =
+        (Option.map ~f:FolderIdList.of_xml) (Xml.child xml_arg0 "FolderIds") in
+      let crawlAttachments =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "CrawlAttachments") in
+      let crawlChatRooms =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "CrawlChatRooms") in
+      let crawlFileComments =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "CrawlFileComments") in
+      let secretArn =
+        SecretArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecretArn") in
+      let domain =
+        Domain.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
+      make ?vpcConfiguration ?exclusionPatterns ?inclusionPatterns
+        ?attachmentFieldMappings ?messageFieldMappings ?threadFieldMappings
+        ?folderIds ?crawlAttachments ?crawlChatRooms ?crawlFileComments
+        ~secretArn ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
+      let exclusionPatterns =
+        field_map json__ "ExclusionPatterns"
+          DataSourceInclusionsExclusionsStrings.of_json in
+      let inclusionPatterns =
+        field_map json__ "InclusionPatterns"
+          DataSourceInclusionsExclusionsStrings.of_json in
+      let attachmentFieldMappings =
+        field_map json__ "AttachmentFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let messageFieldMappings =
+        field_map json__ "MessageFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let threadFieldMappings =
+        field_map json__ "ThreadFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let folderIds = field_map json__ "FolderIds" FolderIdList.of_json in
+      let crawlAttachments =
+        field_map json__ "CrawlAttachments" Boolean.of_json in
+      let crawlChatRooms = field_map json__ "CrawlChatRooms" Boolean.of_json in
+      let crawlFileComments =
+        field_map json__ "CrawlFileComments" Boolean.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let domain = field_map_exn json__ "Domain" Domain.of_json in
+      make ?vpcConfiguration ?exclusionPatterns ?inclusionPatterns
+        ?attachmentFieldMappings ?messageFieldMappings ?threadFieldMappings
+        ?folderIds ?crawlAttachments ?crawlChatRooms ?crawlFileComments
+        ~secretArn ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information to connect to Quip as your data source."]
 module TenantDomain =
   struct
     type nonrec t = string
@@ -8505,6 +10871,9 @@ module OneDriveUserList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OneDriveUser.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8531,7 +10900,7 @@ module OneDriveUsers =
       {
       oneDriveUserList: OneDriveUserList.t option
         [@ocaml.doc
-          "A list of users whose documents should be indexed. Specify the user names in email format, for example, username\\@tenantdomain. If you need to index the documents of more than 100 users, use the OneDriveUserS3Path field to specify the location of a file containing a list of users."];
+          "A list of users whose documents should be indexed. Specify the user names in email format, for example, username\\@tenantdomain. If you need to index the documents of more than 10 users, use the OneDriveUserS3Path field to specify the location of a file containing a list of users."];
       oneDriveUserS3Path: S3Path.t option
         [@ocaml.doc
           "The S3 bucket location of a file containing a list of users whose documents should be indexed."]}
@@ -8554,11 +10923,11 @@ module OneDriveUsers =
           (Xml.child xml_arg0 "OneDriveUserList") in
       make ?oneDriveUserS3Path ?oneDriveUserList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oneDriveUserS3Path =
-        field_map json "OneDriveUserS3Path" S3Path.of_json in
+        field_map json__ "OneDriveUserS3Path" S3Path.of_json in
       let oneDriveUserList =
-        field_map json "OneDriveUserList" OneDriveUserList.of_json in
+        field_map json__ "OneDriveUserList" OneDriveUserList.of_json in
       make ?oneDriveUserS3Path ?oneDriveUserList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "User accounts whose documents should be indexed."]
@@ -8570,7 +10939,7 @@ module OneDriveConfiguration =
         [@ocaml.doc "The Azure Active Directory domain of the organization."];
       secretArn: SecretArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an Secrets Managersecret that contains the user name and password to connect to OneDrive. The user namd should be the application ID for the OneDrive application, and the password is the application key for the OneDrive application."];
+          "The Amazon Resource Name (ARN) of an Secrets Managersecret that contains the user name and password to connect to OneDrive. The user name should be the application ID for the OneDrive application, and the password is the application key for the OneDrive application."];
       oneDriveUsers: OneDriveUsers.t
         [@ocaml.doc
           "A list of user accounts whose documents should be indexed."];
@@ -8584,8 +10953,7 @@ module OneDriveConfiguration =
         [@ocaml.doc
           "A list of DataSourceToIndexFieldMapping objects that map OneDrive data source attributes or field names to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to OneDrive fields. For more information, see Mapping data source fields. The OneDrive data source field names must exist in your OneDrive custom metadata."];
       disableLocalGroups: Boolean.t option
-        [@ocaml.doc
-          "A Boolean value that specifies whether local groups are disabled (True) or enabled (False)."]}
+        [@ocaml.doc "TRUE to disable local groups information."]}
     let context_ = "OneDriveConfiguration"
     let make ?inclusionPatterns =
       fun ?exclusionPatterns ->
@@ -8646,28 +11014,398 @@ module OneDriveConfiguration =
       make ?disableLocalGroups ?fieldMappings ?exclusionPatterns
         ?inclusionPatterns ~oneDriveUsers ~secretArn ~tenantDomain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disableLocalGroups =
-        field_map json "DisableLocalGroups" Boolean.of_json in
+        field_map json__ "DisableLocalGroups" Boolean.of_json in
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let exclusionPatterns =
-        field_map json "ExclusionPatterns"
+        field_map json__ "ExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPatterns =
-        field_map json "InclusionPatterns"
+        field_map json__ "InclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let oneDriveUsers =
-        field_map_exn json "OneDriveUsers" OneDriveUsers.of_json in
-      let secretArn = field_map_exn json "SecretArn" SecretArn.of_json in
+        field_map_exn json__ "OneDriveUsers" OneDriveUsers.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
       let tenantDomain =
-        field_map_exn json "TenantDomain" TenantDomain.of_json in
+        field_map_exn json__ "TenantDomain" TenantDomain.of_json in
       make ?disableLocalGroups ?fieldMappings ?exclusionPatterns
         ?inclusionPatterns ~oneDriveUsers ~secretArn ~tenantDomain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the configuration information to connect to OneDrive as your data source."]
+module Project =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j = list_of_json ~kind:"Project" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module JiraStatus =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"JiraStatus" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module JiraAccountUrl =
+  struct
+    type nonrec t = string
+    let context_ = "JiraAccountUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^https:\\/\\/[a-zA-Z0-9_\\-\\.]+(\\.atlassian\\.net\\/)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JiraAccountUrl" j
+    let to_json = simple_to_json to_value
+  end
+module IssueType =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j = list_of_json ~kind:"IssueType" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IssueSubEntity =
+  struct
+    type nonrec t =
+      | COMMENTS 
+      | ATTACHMENTS 
+      | WORKLOGS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMMENTS -> "COMMENTS"
+      | ATTACHMENTS -> "ATTACHMENTS"
+      | WORKLOGS -> "WORKLOGS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMMENTS" -> COMMENTS
+      | "ATTACHMENTS" -> ATTACHMENTS
+      | "WORKLOGS" -> WORKLOGS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IssueSubEntity" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IssueSubEntity" j)
+    let to_json = simple_to_json to_value
+  end
+module IssueSubEntityFilter =
+  struct
+    type nonrec t = IssueSubEntity.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IssueSubEntity.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IssueSubEntity.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IssueSubEntityFilter"
+        ~of_json:IssueSubEntity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module JiraConfiguration =
+  struct
+    type nonrec t =
+      {
+      jiraAccountUrl: JiraAccountUrl.t
+        [@ocaml.doc
+          "The URL of the Jira account. For example, company.atlassian.net."];
+      secretArn: SecretArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a secret in Secrets Manager contains the key-value pairs required to connect to your Jira data source. The secret must contain a JSON structure with the following keys: jiraId\226\128\148The Jira user name or email. jiraCredentials\226\128\148The Jira API token. For more information, see Using a Jira data source."];
+      useChangeLog: Boolean.t option
+        [@ocaml.doc
+          "TRUE to use the Jira change log to determine which documents require updating in the index. Depending on the change log's size, it may take longer for Amazon Kendra to use the change log than to scan all of your documents in Jira."];
+      project: Project.t option
+        [@ocaml.doc
+          "Specify which projects to crawl in your Jira data source. You can specify one or more Jira project IDs."];
+      issueType: IssueType.t option
+        [@ocaml.doc
+          "Specify which issue types to crawl in your Jira data source. You can specify one or more of these options to crawl."];
+      status: JiraStatus.t option
+        [@ocaml.doc
+          "Specify which statuses to crawl in your Jira data source. You can specify one or more of these options to crawl."];
+      issueSubEntityFilter: IssueSubEntityFilter.t option
+        [@ocaml.doc
+          "Specify whether to crawl comments, attachments, and work logs. You can specify one or more of these options."];
+      attachmentFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Jira attachments to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Jira fields. For more information, see Mapping data source fields. The Jira data source field names must exist in your Jira custom metadata."];
+      commentFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Jira comments to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Jira fields. For more information, see Mapping data source fields. The Jira data source field names must exist in your Jira custom metadata."];
+      issueFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Jira issues to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Jira fields. For more information, see Mapping data source fields. The Jira data source field names must exist in your Jira custom metadata."];
+      projectFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Jira projects to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Jira fields. For more information, see Mapping data source fields. The Jira data source field names must exist in your Jira custom metadata."];
+      workLogFieldMappings: DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of Jira work logs to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to Jira fields. For more information, see Mapping data source fields. The Jira data source field names must exist in your Jira custom metadata."];
+      inclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to include certain file paths, file names, and file types in your Jira data source. Files that match the patterns are included in the index. Files that don't match the patterns are excluded from the index. If a file matches both an inclusion pattern and an exclusion pattern, the exclusion pattern takes precedence and the file isn't included in the index."];
+      exclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to exclude certain file paths, file names, and file types in your Jira data source. Files that match the patterns are excluded from the index. Files that don\226\128\153t match the patterns are included in the index. If a file matches both an inclusion pattern and an exclusion pattern, the exclusion pattern takes precedence and the file isn't included in the index."];
+      vpcConfiguration: DataSourceVpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration information for an Amazon Virtual Private Cloud to connect to your Jira. For more information, see Configuring a VPC."]}
+    let context_ = "JiraConfiguration"
+    let make ?useChangeLog =
+      fun ?project ->
+        fun ?issueType ->
+          fun ?status ->
+            fun ?issueSubEntityFilter ->
+              fun ?attachmentFieldMappings ->
+                fun ?commentFieldMappings ->
+                  fun ?issueFieldMappings ->
+                    fun ?projectFieldMappings ->
+                      fun ?workLogFieldMappings ->
+                        fun ?inclusionPatterns ->
+                          fun ?exclusionPatterns ->
+                            fun ?vpcConfiguration ->
+                              fun ~jiraAccountUrl ->
+                                fun ~secretArn ->
+                                  fun () ->
+                                    {
+                                      useChangeLog;
+                                      project;
+                                      issueType;
+                                      status;
+                                      issueSubEntityFilter;
+                                      attachmentFieldMappings;
+                                      commentFieldMappings;
+                                      issueFieldMappings;
+                                      projectFieldMappings;
+                                      workLogFieldMappings;
+                                      inclusionPatterns;
+                                      exclusionPatterns;
+                                      vpcConfiguration;
+                                      jiraAccountUrl;
+                                      secretArn
+                                    }
+    let to_value x =
+      structure_to_value
+        [("JiraAccountUrl",
+           (Some (JiraAccountUrl.to_value x.jiraAccountUrl)));
+        ("SecretArn", (Some (SecretArn.to_value x.secretArn)));
+        ("UseChangeLog", (Option.map x.useChangeLog ~f:Boolean.to_value));
+        ("Project", (Option.map x.project ~f:Project.to_value));
+        ("IssueType", (Option.map x.issueType ~f:IssueType.to_value));
+        ("Status", (Option.map x.status ~f:JiraStatus.to_value));
+        ("IssueSubEntityFilter",
+          (Option.map x.issueSubEntityFilter ~f:IssueSubEntityFilter.to_value));
+        ("AttachmentFieldMappings",
+          (Option.map x.attachmentFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("CommentFieldMappings",
+          (Option.map x.commentFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("IssueFieldMappings",
+          (Option.map x.issueFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("ProjectFieldMappings",
+          (Option.map x.projectFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("WorkLogFieldMappings",
+          (Option.map x.workLogFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("InclusionPatterns",
+          (Option.map x.inclusionPatterns
+             ~f:DataSourceInclusionsExclusionsStrings.to_value));
+        ("ExclusionPatterns",
+          (Option.map x.exclusionPatterns
+             ~f:DataSourceInclusionsExclusionsStrings.to_value));
+        ("VpcConfiguration",
+          (Option.map x.vpcConfiguration
+             ~f:DataSourceVpcConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConfiguration =
+        (Option.map ~f:DataSourceVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
+      let exclusionPatterns =
+        (Option.map ~f:DataSourceInclusionsExclusionsStrings.of_xml)
+          (Xml.child xml_arg0 "ExclusionPatterns") in
+      let inclusionPatterns =
+        (Option.map ~f:DataSourceInclusionsExclusionsStrings.of_xml)
+          (Xml.child xml_arg0 "InclusionPatterns") in
+      let workLogFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "WorkLogFieldMappings") in
+      let projectFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "ProjectFieldMappings") in
+      let issueFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "IssueFieldMappings") in
+      let commentFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "CommentFieldMappings") in
+      let attachmentFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "AttachmentFieldMappings") in
+      let issueSubEntityFilter =
+        (Option.map ~f:IssueSubEntityFilter.of_xml)
+          (Xml.child xml_arg0 "IssueSubEntityFilter") in
+      let status =
+        (Option.map ~f:JiraStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let issueType =
+        (Option.map ~f:IssueType.of_xml) (Xml.child xml_arg0 "IssueType") in
+      let project =
+        (Option.map ~f:Project.of_xml) (Xml.child xml_arg0 "Project") in
+      let useChangeLog =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "UseChangeLog") in
+      let secretArn =
+        SecretArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecretArn") in
+      let jiraAccountUrl =
+        JiraAccountUrl.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "JiraAccountUrl") in
+      make ?vpcConfiguration ?exclusionPatterns ?inclusionPatterns
+        ?workLogFieldMappings ?projectFieldMappings ?issueFieldMappings
+        ?commentFieldMappings ?attachmentFieldMappings ?issueSubEntityFilter
+        ?status ?issueType ?project ?useChangeLog ~secretArn ~jiraAccountUrl
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
+      let exclusionPatterns =
+        field_map json__ "ExclusionPatterns"
+          DataSourceInclusionsExclusionsStrings.of_json in
+      let inclusionPatterns =
+        field_map json__ "InclusionPatterns"
+          DataSourceInclusionsExclusionsStrings.of_json in
+      let workLogFieldMappings =
+        field_map json__ "WorkLogFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let projectFieldMappings =
+        field_map json__ "ProjectFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let issueFieldMappings =
+        field_map json__ "IssueFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let commentFieldMappings =
+        field_map json__ "CommentFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let attachmentFieldMappings =
+        field_map json__ "AttachmentFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let issueSubEntityFilter =
+        field_map json__ "IssueSubEntityFilter" IssueSubEntityFilter.of_json in
+      let status = field_map json__ "Status" JiraStatus.of_json in
+      let issueType = field_map json__ "IssueType" IssueType.of_json in
+      let project = field_map json__ "Project" Project.of_json in
+      let useChangeLog = field_map json__ "UseChangeLog" Boolean.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let jiraAccountUrl =
+        field_map_exn json__ "JiraAccountUrl" JiraAccountUrl.of_json in
+      make ?vpcConfiguration ?exclusionPatterns ?inclusionPatterns
+        ?workLogFieldMappings ?projectFieldMappings ?issueFieldMappings
+        ?commentFieldMappings ?attachmentFieldMappings ?issueSubEntityFilter
+        ?status ?issueType ?project ?useChangeLog ~secretArn ~jiraAccountUrl
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information to connect to Jira as your data source."]
 module UserAccount =
   struct
     type nonrec t = string
@@ -8697,6 +11435,9 @@ module ExcludeUserAccountsList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserAccount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8747,6 +11488,9 @@ module ExcludeSharedDrivesList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SharedDriveId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8796,6 +11540,9 @@ module ExcludeMimeTypesList =
         ok_or_failwith
           ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MimeType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8905,28 +11652,677 @@ module GoogleDriveConfiguration =
       make ?excludeSharedDrives ?excludeUserAccounts ?excludeMimeTypes
         ?fieldMappings ?exclusionPatterns ?inclusionPatterns ~secretArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let excludeSharedDrives =
-        field_map json "ExcludeSharedDrives" ExcludeSharedDrivesList.of_json in
+        field_map json__ "ExcludeSharedDrives"
+          ExcludeSharedDrivesList.of_json in
       let excludeUserAccounts =
-        field_map json "ExcludeUserAccounts" ExcludeUserAccountsList.of_json in
+        field_map json__ "ExcludeUserAccounts"
+          ExcludeUserAccountsList.of_json in
       let excludeMimeTypes =
-        field_map json "ExcludeMimeTypes" ExcludeMimeTypesList.of_json in
+        field_map json__ "ExcludeMimeTypes" ExcludeMimeTypesList.of_json in
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let exclusionPatterns =
-        field_map json "ExclusionPatterns"
+        field_map json__ "ExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPatterns =
-        field_map json "InclusionPatterns"
+        field_map json__ "InclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
-      let secretArn = field_map_exn json "SecretArn" SecretArn.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
       make ?excludeSharedDrives ?excludeUserAccounts ?excludeMimeTypes
         ?fieldMappings ?exclusionPatterns ?inclusionPatterns ~secretArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the configuration information to connect to Google Drive as your data source."]
+module Type =
+  struct
+    type nonrec t =
+      | SAAS 
+      | ON_PREMISE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SAAS -> "SAAS"
+      | ON_PREMISE -> "ON_PREMISE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SAAS" -> SAAS
+      | "ON_PREMISE" -> ON_PREMISE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Type" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Type" j)
+    let to_json = simple_to_json to_value
+  end
+module StringList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StringList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OrganizationName =
+  struct
+    type nonrec t = string
+    let context_ = "OrganizationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:60) >>=
+                  (fun () -> check_pattern i ~pattern:"^[A-Za-z0-9_.-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OrganizationName" j
+    let to_json = simple_to_json to_value
+  end
+module SaaSConfiguration =
+  struct
+    type nonrec t =
+      {
+      organizationName: OrganizationName.t
+        [@ocaml.doc
+          "The name of the organization of the GitHub Enterprise Cloud (SaaS) account you want to connect to. You can find your organization name by logging into GitHub desktop and selecting Your organizations under your profile picture dropdown."];
+      hostUrl: Url.t
+        [@ocaml.doc
+          "The GitHub host URL or API endpoint URL. For example, https://api.github.com."]}
+    let context_ = "SaaSConfiguration"
+    let make ~organizationName =
+      fun ~hostUrl -> fun () -> { organizationName; hostUrl }
+    let to_value x =
+      structure_to_value
+        [("OrganizationName",
+           (Some (OrganizationName.to_value x.organizationName)));
+        ("HostUrl", (Some (Url.to_value x.hostUrl)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hostUrl =
+        Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HostUrl") in
+      let organizationName =
+        OrganizationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationName") in
+      make ~hostUrl ~organizationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hostUrl = field_map_exn json__ "HostUrl" Url.of_json in
+      let organizationName =
+        field_map_exn json__ "OrganizationName" OrganizationName.of_json in
+      make ~hostUrl ~organizationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information to connect to GitHub Enterprise Cloud (SaaS)."]
+module RepositoryName =
+  struct
+    type nonrec t = string
+    let context_ = "RepositoryName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[A-Za-z0-9_.-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RepositoryName" j
+    let to_json = simple_to_json to_value
+  end
+module RepositoryNames =
+  struct
+    type nonrec t = RepositoryName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RepositoryName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RepositoryName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RepositoryNames" ~of_json:RepositoryName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OnPremiseConfiguration =
+  struct
+    type nonrec t =
+      {
+      hostUrl: Url.t
+        [@ocaml.doc
+          "The GitHub host URL or API endpoint URL. For example, https://on-prem-host-url/api/v3/"];
+      organizationName: OrganizationName.t
+        [@ocaml.doc
+          "The name of the organization of the GitHub Enterprise Server (on-premises) account you want to connect to. You can find your organization name by logging into GitHub desktop and selecting Your organizations under your profile picture dropdown."];
+      sslCertificateS3Path: S3Path.t
+        [@ocaml.doc
+          "The path to the SSL certificate stored in an Amazon S3 bucket. You use this to connect to GitHub if you require a secure SSL connection. You can simply generate a self-signed X509 certificate on any computer using OpenSSL. For an example of using OpenSSL to create an X509 certificate, see Create and sign an X509 certificate."]}
+    let context_ = "OnPremiseConfiguration"
+    let make ~hostUrl =
+      fun ~organizationName ->
+        fun ~sslCertificateS3Path ->
+          fun () -> { hostUrl; organizationName; sslCertificateS3Path }
+    let to_value x =
+      structure_to_value
+        [("HostUrl", (Some (Url.to_value x.hostUrl)));
+        ("OrganizationName",
+          (Some (OrganizationName.to_value x.organizationName)));
+        ("SslCertificateS3Path",
+          (Some (S3Path.to_value x.sslCertificateS3Path)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sslCertificateS3Path =
+        S3Path.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SslCertificateS3Path") in
+      let organizationName =
+        OrganizationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationName") in
+      let hostUrl =
+        Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HostUrl") in
+      make ~sslCertificateS3Path ~organizationName ~hostUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sslCertificateS3Path =
+        field_map_exn json__ "SslCertificateS3Path" S3Path.of_json in
+      let organizationName =
+        field_map_exn json__ "OrganizationName" OrganizationName.of_json in
+      let hostUrl = field_map_exn json__ "HostUrl" Url.of_json in
+      make ~sslCertificateS3Path ~organizationName ~hostUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information to connect to GitHub Enterprise Server (on premises)."]
+module GitHubDocumentCrawlProperties =
+  struct
+    type nonrec t =
+      {
+      crawlRepositoryDocuments: Boolean.t option
+        [@ocaml.doc "TRUE to index all files with a repository."];
+      crawlIssue: Boolean.t option
+        [@ocaml.doc "TRUE to index all issues within a repository."];
+      crawlIssueComment: Boolean.t option
+        [@ocaml.doc "TRUE to index all comments on issues."];
+      crawlIssueCommentAttachment: Boolean.t option
+        [@ocaml.doc "TRUE to include all comment attachments for issues."];
+      crawlPullRequest: Boolean.t option
+        [@ocaml.doc "TRUE to index all pull requests within a repository."];
+      crawlPullRequestComment: Boolean.t option
+        [@ocaml.doc "TRUE to index all comments on pull requests."];
+      crawlPullRequestCommentAttachment: Boolean.t option
+        [@ocaml.doc
+          "TRUE to include all comment attachments for pull requests."]}
+    let make ?crawlRepositoryDocuments =
+      fun ?crawlIssue ->
+        fun ?crawlIssueComment ->
+          fun ?crawlIssueCommentAttachment ->
+            fun ?crawlPullRequest ->
+              fun ?crawlPullRequestComment ->
+                fun ?crawlPullRequestCommentAttachment ->
+                  fun () ->
+                    {
+                      crawlRepositoryDocuments;
+                      crawlIssue;
+                      crawlIssueComment;
+                      crawlIssueCommentAttachment;
+                      crawlPullRequest;
+                      crawlPullRequestComment;
+                      crawlPullRequestCommentAttachment
+                    }
+    let to_value x =
+      structure_to_value
+        [("CrawlRepositoryDocuments",
+           (Option.map x.crawlRepositoryDocuments ~f:Boolean.to_value));
+        ("CrawlIssue", (Option.map x.crawlIssue ~f:Boolean.to_value));
+        ("CrawlIssueComment",
+          (Option.map x.crawlIssueComment ~f:Boolean.to_value));
+        ("CrawlIssueCommentAttachment",
+          (Option.map x.crawlIssueCommentAttachment ~f:Boolean.to_value));
+        ("CrawlPullRequest",
+          (Option.map x.crawlPullRequest ~f:Boolean.to_value));
+        ("CrawlPullRequestComment",
+          (Option.map x.crawlPullRequestComment ~f:Boolean.to_value));
+        ("CrawlPullRequestCommentAttachment",
+          (Option.map x.crawlPullRequestCommentAttachment ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let crawlPullRequestCommentAttachment =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "CrawlPullRequestCommentAttachment") in
+      let crawlPullRequestComment =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "CrawlPullRequestComment") in
+      let crawlPullRequest =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "CrawlPullRequest") in
+      let crawlIssueCommentAttachment =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "CrawlIssueCommentAttachment") in
+      let crawlIssueComment =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "CrawlIssueComment") in
+      let crawlIssue =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "CrawlIssue") in
+      let crawlRepositoryDocuments =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "CrawlRepositoryDocuments") in
+      make ?crawlPullRequestCommentAttachment ?crawlPullRequestComment
+        ?crawlPullRequest ?crawlIssueCommentAttachment ?crawlIssueComment
+        ?crawlIssue ?crawlRepositoryDocuments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let crawlPullRequestCommentAttachment =
+        field_map json__ "CrawlPullRequestCommentAttachment" Boolean.of_json in
+      let crawlPullRequestComment =
+        field_map json__ "CrawlPullRequestComment" Boolean.of_json in
+      let crawlPullRequest =
+        field_map json__ "CrawlPullRequest" Boolean.of_json in
+      let crawlIssueCommentAttachment =
+        field_map json__ "CrawlIssueCommentAttachment" Boolean.of_json in
+      let crawlIssueComment =
+        field_map json__ "CrawlIssueComment" Boolean.of_json in
+      let crawlIssue = field_map json__ "CrawlIssue" Boolean.of_json in
+      let crawlRepositoryDocuments =
+        field_map json__ "CrawlRepositoryDocuments" Boolean.of_json in
+      make ?crawlPullRequestCommentAttachment ?crawlPullRequestComment
+        ?crawlPullRequest ?crawlIssueCommentAttachment ?crawlIssueComment
+        ?crawlIssue ?crawlRepositoryDocuments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information to include certain types of GitHub content. You can configure to index repository files only, or also include issues and pull requests, comments, and comment attachments."]
+module GitHubConfiguration =
+  struct
+    type nonrec t =
+      {
+      saaSConfiguration: SaaSConfiguration.t option
+        [@ocaml.doc
+          "Configuration information to connect to GitHub Enterprise Cloud (SaaS)."];
+      onPremiseConfiguration: OnPremiseConfiguration.t option
+        [@ocaml.doc
+          "Configuration information to connect to GitHub Enterprise Server (on premises)."];
+      type_: Type.t option
+        [@ocaml.doc
+          "The type of GitHub service you want to connect to\226\128\148GitHub Enterprise Cloud (SaaS) or GitHub Enterprise Server (on premises)."];
+      secretArn: SecretArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the key-value pairs required to connect to your GitHub. The secret must contain a JSON structure with the following keys: personalToken\226\128\148The access token created in GitHub. For more information on creating a token in GitHub, see Using a GitHub data source."];
+      useChangeLog: Boolean.t option
+        [@ocaml.doc
+          "TRUE to use the GitHub change log to determine which documents require updating in the index. Depending on the GitHub change log's size, it may take longer for Amazon Kendra to use the change log than to scan all of your documents in GitHub."];
+      gitHubDocumentCrawlProperties: GitHubDocumentCrawlProperties.t option
+        [@ocaml.doc
+          "Configuration information to include certain types of GitHub content. You can configure to index repository files only, or also include issues and pull requests, comments, and comment attachments."];
+      repositoryFilter: RepositoryNames.t option
+        [@ocaml.doc
+          "A list of names of the specific repositories you want to index."];
+      inclusionFolderNamePatterns: StringList.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to include certain folder names in your GitHub repository or repositories. Folder names that match the patterns are included in the index. Folder names that don't match the patterns are excluded from the index. If a folder matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the folder isn't included in the index."];
+      inclusionFileTypePatterns: StringList.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to include certain file types in your GitHub repository or repositories. File types that match the patterns are included in the index. File types that don't match the patterns are excluded from the index. If a file matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the file isn't included in the index."];
+      inclusionFileNamePatterns: StringList.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to include certain file names in your GitHub repository or repositories. File names that match the patterns are included in the index. File names that don't match the patterns are excluded from the index. If a file matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the file isn't included in the index."];
+      exclusionFolderNamePatterns: StringList.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to exclude certain folder names in your GitHub repository or repositories. Folder names that match the patterns are excluded from the index. Folder names that don't match the patterns are included in the index. If a folder matches both an exclusion and inclusion pattern, the exclusion pattern takes precedence and the folder isn't included in the index."];
+      exclusionFileTypePatterns: StringList.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to exclude certain file types in your GitHub repository or repositories. File types that match the patterns are excluded from the index. File types that don't match the patterns are included in the index. If a file matches both an exclusion and inclusion pattern, the exclusion pattern takes precedence and the file isn't included in the index."];
+      exclusionFileNamePatterns: StringList.t option
+        [@ocaml.doc
+          "A list of regular expression patterns to exclude certain file names in your GitHub repository or repositories. File names that match the patterns are excluded from the index. File names that don't match the patterns are included in the index. If a file matches both an exclusion and inclusion pattern, the exclusion pattern takes precedence and the file isn't included in the index."];
+      vpcConfiguration: DataSourceVpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration information of an Amazon Virtual Private Cloud to connect to your GitHub. For more information, see Configuring a VPC."];
+      gitHubRepositoryConfigurationFieldMappings:
+        DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map GitHub repository attributes or field names to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to GitHub fields. For more information, see Mapping data source fields. The GitHub data source field names must exist in your GitHub custom metadata."];
+      gitHubCommitConfigurationFieldMappings:
+        DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of GitHub commits to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to GitHub fields. For more information, see Mapping data source fields. The GitHub data source field names must exist in your GitHub custom metadata."];
+      gitHubIssueDocumentConfigurationFieldMappings:
+        DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of GitHub issues to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to GitHub fields. For more information, see Mapping data source fields. The GitHub data source field names must exist in your GitHub custom metadata."];
+      gitHubIssueCommentConfigurationFieldMappings:
+        DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of GitHub issue comments to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to GitHub fields. For more information, see Mapping data source fields. The GitHub data source field names must exist in your GitHub custom metadata."];
+      gitHubIssueAttachmentConfigurationFieldMappings:
+        DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of GitHub issue attachments to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to GitHub fields. For more information, see Mapping data source fields. The GitHub data source field names must exist in your GitHub custom metadata."];
+      gitHubPullRequestCommentConfigurationFieldMappings:
+        DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of GitHub pull request comments to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to GitHub fields. For more information, see Mapping data source fields. The GitHub data source field names must exist in your GitHub custom metadata."];
+      gitHubPullRequestDocumentConfigurationFieldMappings:
+        DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of GitHub pull requests to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to GitHub fields. For more information, see Mapping data source fields. The GitHub data source field names must exist in your GitHub custom metadata."];
+      gitHubPullRequestDocumentAttachmentConfigurationFieldMappings:
+        DataSourceToIndexFieldMappingList.t option
+        [@ocaml.doc
+          "A list of DataSourceToIndexFieldMapping objects that map attributes or field names of GitHub pull request attachments to Amazon Kendra index field names. To create custom fields, use the UpdateIndex API before you map to GitHub fields. For more information, see Mapping data source fields. The GitHub data source field names must exist in your GitHub custom metadata."]}
+    let context_ = "GitHubConfiguration"
+    let make ?saaSConfiguration =
+      fun ?onPremiseConfiguration ->
+        fun ?type_ ->
+          fun ?useChangeLog ->
+            fun ?gitHubDocumentCrawlProperties ->
+              fun ?repositoryFilter ->
+                fun ?inclusionFolderNamePatterns ->
+                  fun ?inclusionFileTypePatterns ->
+                    fun ?inclusionFileNamePatterns ->
+                      fun ?exclusionFolderNamePatterns ->
+                        fun ?exclusionFileTypePatterns ->
+                          fun ?exclusionFileNamePatterns ->
+                            fun ?vpcConfiguration ->
+                              fun ?gitHubRepositoryConfigurationFieldMappings
+                                ->
+                                fun ?gitHubCommitConfigurationFieldMappings
+                                  ->
+                                  fun
+                                    ?gitHubIssueDocumentConfigurationFieldMappings
+                                    ->
+                                    fun
+                                      ?gitHubIssueCommentConfigurationFieldMappings
+                                      ->
+                                      fun
+                                        ?gitHubIssueAttachmentConfigurationFieldMappings
+                                        ->
+                                        fun
+                                          ?gitHubPullRequestCommentConfigurationFieldMappings
+                                          ->
+                                          fun
+                                            ?gitHubPullRequestDocumentConfigurationFieldMappings
+                                            ->
+                                            fun
+                                              ?gitHubPullRequestDocumentAttachmentConfigurationFieldMappings
+                                              ->
+                                              fun ~secretArn ->
+                                                fun () ->
+                                                  {
+                                                    saaSConfiguration;
+                                                    onPremiseConfiguration;
+                                                    type_;
+                                                    useChangeLog;
+                                                    gitHubDocumentCrawlProperties;
+                                                    repositoryFilter;
+                                                    inclusionFolderNamePatterns;
+                                                    inclusionFileTypePatterns;
+                                                    inclusionFileNamePatterns;
+                                                    exclusionFolderNamePatterns;
+                                                    exclusionFileTypePatterns;
+                                                    exclusionFileNamePatterns;
+                                                    vpcConfiguration;
+                                                    gitHubRepositoryConfigurationFieldMappings;
+                                                    gitHubCommitConfigurationFieldMappings;
+                                                    gitHubIssueDocumentConfigurationFieldMappings;
+                                                    gitHubIssueCommentConfigurationFieldMappings;
+                                                    gitHubIssueAttachmentConfigurationFieldMappings;
+                                                    gitHubPullRequestCommentConfigurationFieldMappings;
+                                                    gitHubPullRequestDocumentConfigurationFieldMappings;
+                                                    gitHubPullRequestDocumentAttachmentConfigurationFieldMappings;
+                                                    secretArn
+                                                  }
+    let to_value x =
+      structure_to_value
+        [("SaaSConfiguration",
+           (Option.map x.saaSConfiguration ~f:SaaSConfiguration.to_value));
+        ("OnPremiseConfiguration",
+          (Option.map x.onPremiseConfiguration
+             ~f:OnPremiseConfiguration.to_value));
+        ("Type", (Option.map x.type_ ~f:Type.to_value));
+        ("SecretArn", (Some (SecretArn.to_value x.secretArn)));
+        ("UseChangeLog", (Option.map x.useChangeLog ~f:Boolean.to_value));
+        ("GitHubDocumentCrawlProperties",
+          (Option.map x.gitHubDocumentCrawlProperties
+             ~f:GitHubDocumentCrawlProperties.to_value));
+        ("RepositoryFilter",
+          (Option.map x.repositoryFilter ~f:RepositoryNames.to_value));
+        ("InclusionFolderNamePatterns",
+          (Option.map x.inclusionFolderNamePatterns ~f:StringList.to_value));
+        ("InclusionFileTypePatterns",
+          (Option.map x.inclusionFileTypePatterns ~f:StringList.to_value));
+        ("InclusionFileNamePatterns",
+          (Option.map x.inclusionFileNamePatterns ~f:StringList.to_value));
+        ("ExclusionFolderNamePatterns",
+          (Option.map x.exclusionFolderNamePatterns ~f:StringList.to_value));
+        ("ExclusionFileTypePatterns",
+          (Option.map x.exclusionFileTypePatterns ~f:StringList.to_value));
+        ("ExclusionFileNamePatterns",
+          (Option.map x.exclusionFileNamePatterns ~f:StringList.to_value));
+        ("VpcConfiguration",
+          (Option.map x.vpcConfiguration
+             ~f:DataSourceVpcConfiguration.to_value));
+        ("GitHubRepositoryConfigurationFieldMappings",
+          (Option.map x.gitHubRepositoryConfigurationFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("GitHubCommitConfigurationFieldMappings",
+          (Option.map x.gitHubCommitConfigurationFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("GitHubIssueDocumentConfigurationFieldMappings",
+          (Option.map x.gitHubIssueDocumentConfigurationFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("GitHubIssueCommentConfigurationFieldMappings",
+          (Option.map x.gitHubIssueCommentConfigurationFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("GitHubIssueAttachmentConfigurationFieldMappings",
+          (Option.map x.gitHubIssueAttachmentConfigurationFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("GitHubPullRequestCommentConfigurationFieldMappings",
+          (Option.map x.gitHubPullRequestCommentConfigurationFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("GitHubPullRequestDocumentConfigurationFieldMappings",
+          (Option.map x.gitHubPullRequestDocumentConfigurationFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value));
+        ("GitHubPullRequestDocumentAttachmentConfigurationFieldMappings",
+          (Option.map
+             x.gitHubPullRequestDocumentAttachmentConfigurationFieldMappings
+             ~f:DataSourceToIndexFieldMappingList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gitHubPullRequestDocumentAttachmentConfigurationFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0
+             "GitHubPullRequestDocumentAttachmentConfigurationFieldMappings") in
+      let gitHubPullRequestDocumentConfigurationFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0
+             "GitHubPullRequestDocumentConfigurationFieldMappings") in
+      let gitHubPullRequestCommentConfigurationFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0
+             "GitHubPullRequestCommentConfigurationFieldMappings") in
+      let gitHubIssueAttachmentConfigurationFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0
+             "GitHubIssueAttachmentConfigurationFieldMappings") in
+      let gitHubIssueCommentConfigurationFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "GitHubIssueCommentConfigurationFieldMappings") in
+      let gitHubIssueDocumentConfigurationFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "GitHubIssueDocumentConfigurationFieldMappings") in
+      let gitHubCommitConfigurationFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "GitHubCommitConfigurationFieldMappings") in
+      let gitHubRepositoryConfigurationFieldMappings =
+        (Option.map ~f:DataSourceToIndexFieldMappingList.of_xml)
+          (Xml.child xml_arg0 "GitHubRepositoryConfigurationFieldMappings") in
+      let vpcConfiguration =
+        (Option.map ~f:DataSourceVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
+      let exclusionFileNamePatterns =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "ExclusionFileNamePatterns") in
+      let exclusionFileTypePatterns =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "ExclusionFileTypePatterns") in
+      let exclusionFolderNamePatterns =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "ExclusionFolderNamePatterns") in
+      let inclusionFileNamePatterns =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "InclusionFileNamePatterns") in
+      let inclusionFileTypePatterns =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "InclusionFileTypePatterns") in
+      let inclusionFolderNamePatterns =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "InclusionFolderNamePatterns") in
+      let repositoryFilter =
+        (Option.map ~f:RepositoryNames.of_xml)
+          (Xml.child xml_arg0 "RepositoryFilter") in
+      let gitHubDocumentCrawlProperties =
+        (Option.map ~f:GitHubDocumentCrawlProperties.of_xml)
+          (Xml.child xml_arg0 "GitHubDocumentCrawlProperties") in
+      let useChangeLog =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "UseChangeLog") in
+      let secretArn =
+        SecretArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecretArn") in
+      let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "Type") in
+      let onPremiseConfiguration =
+        (Option.map ~f:OnPremiseConfiguration.of_xml)
+          (Xml.child xml_arg0 "OnPremiseConfiguration") in
+      let saaSConfiguration =
+        (Option.map ~f:SaaSConfiguration.of_xml)
+          (Xml.child xml_arg0 "SaaSConfiguration") in
+      make ?gitHubPullRequestDocumentAttachmentConfigurationFieldMappings
+        ?gitHubPullRequestDocumentConfigurationFieldMappings
+        ?gitHubPullRequestCommentConfigurationFieldMappings
+        ?gitHubIssueAttachmentConfigurationFieldMappings
+        ?gitHubIssueCommentConfigurationFieldMappings
+        ?gitHubIssueDocumentConfigurationFieldMappings
+        ?gitHubCommitConfigurationFieldMappings
+        ?gitHubRepositoryConfigurationFieldMappings ?vpcConfiguration
+        ?exclusionFileNamePatterns ?exclusionFileTypePatterns
+        ?exclusionFolderNamePatterns ?inclusionFileNamePatterns
+        ?inclusionFileTypePatterns ?inclusionFolderNamePatterns
+        ?repositoryFilter ?gitHubDocumentCrawlProperties ?useChangeLog
+        ~secretArn ?type_ ?onPremiseConfiguration ?saaSConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gitHubPullRequestDocumentAttachmentConfigurationFieldMappings =
+        field_map json__
+          "GitHubPullRequestDocumentAttachmentConfigurationFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let gitHubPullRequestDocumentConfigurationFieldMappings =
+        field_map json__
+          "GitHubPullRequestDocumentConfigurationFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let gitHubPullRequestCommentConfigurationFieldMappings =
+        field_map json__ "GitHubPullRequestCommentConfigurationFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let gitHubIssueAttachmentConfigurationFieldMappings =
+        field_map json__ "GitHubIssueAttachmentConfigurationFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let gitHubIssueCommentConfigurationFieldMappings =
+        field_map json__ "GitHubIssueCommentConfigurationFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let gitHubIssueDocumentConfigurationFieldMappings =
+        field_map json__ "GitHubIssueDocumentConfigurationFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let gitHubCommitConfigurationFieldMappings =
+        field_map json__ "GitHubCommitConfigurationFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let gitHubRepositoryConfigurationFieldMappings =
+        field_map json__ "GitHubRepositoryConfigurationFieldMappings"
+          DataSourceToIndexFieldMappingList.of_json in
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
+      let exclusionFileNamePatterns =
+        field_map json__ "ExclusionFileNamePatterns" StringList.of_json in
+      let exclusionFileTypePatterns =
+        field_map json__ "ExclusionFileTypePatterns" StringList.of_json in
+      let exclusionFolderNamePatterns =
+        field_map json__ "ExclusionFolderNamePatterns" StringList.of_json in
+      let inclusionFileNamePatterns =
+        field_map json__ "InclusionFileNamePatterns" StringList.of_json in
+      let inclusionFileTypePatterns =
+        field_map json__ "InclusionFileTypePatterns" StringList.of_json in
+      let inclusionFolderNamePatterns =
+        field_map json__ "InclusionFolderNamePatterns" StringList.of_json in
+      let repositoryFilter =
+        field_map json__ "RepositoryFilter" RepositoryNames.of_json in
+      let gitHubDocumentCrawlProperties =
+        field_map json__ "GitHubDocumentCrawlProperties"
+          GitHubDocumentCrawlProperties.of_json in
+      let useChangeLog = field_map json__ "UseChangeLog" Boolean.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      let type_ = field_map json__ "Type" Type.of_json in
+      let onPremiseConfiguration =
+        field_map json__ "OnPremiseConfiguration"
+          OnPremiseConfiguration.of_json in
+      let saaSConfiguration =
+        field_map json__ "SaaSConfiguration" SaaSConfiguration.of_json in
+      make ?gitHubPullRequestDocumentAttachmentConfigurationFieldMappings
+        ?gitHubPullRequestDocumentConfigurationFieldMappings
+        ?gitHubPullRequestCommentConfigurationFieldMappings
+        ?gitHubIssueAttachmentConfigurationFieldMappings
+        ?gitHubIssueCommentConfigurationFieldMappings
+        ?gitHubIssueDocumentConfigurationFieldMappings
+        ?gitHubCommitConfigurationFieldMappings
+        ?gitHubRepositoryConfigurationFieldMappings ?vpcConfiguration
+        ?exclusionFileNamePatterns ?exclusionFileTypePatterns
+        ?exclusionFolderNamePatterns ?inclusionFileNamePatterns
+        ?inclusionFileTypePatterns ?inclusionFolderNamePatterns
+        ?repositoryFilter ?gitHubDocumentCrawlProperties ?useChangeLog
+        ~secretArn ?type_ ?onPremiseConfiguration ?saaSConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the configuration information to connect to GitHub as your data source. Amazon Kendra now supports an upgraded GitHub connector. You must now use the TemplateConfiguration object instead of the GitHubConfiguration object to configure your connector. Connectors configured using the older console and API architecture will continue to function as configured. However, you won\226\128\153t be able to edit or update them. If you want to edit or update your connector configuration, you must create a new connector. We recommended migrating your connector workflow to the upgraded version. Support for connectors configured using the older architecture is scheduled to end by June 2024."]
 module FsxFileSystemType =
   struct
     type nonrec t =
@@ -9049,29 +12445,29 @@ module FsxConfiguration =
       make ?fieldMappings ?exclusionPatterns ?inclusionPatterns ?secretArn
         ~vpcConfiguration ~fileSystemType ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fieldMappings =
-        field_map json "FieldMappings"
+        field_map json__ "FieldMappings"
           DataSourceToIndexFieldMappingList.of_json in
       let exclusionPatterns =
-        field_map json "ExclusionPatterns"
+        field_map json__ "ExclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
       let inclusionPatterns =
-        field_map json "InclusionPatterns"
+        field_map json__ "InclusionPatterns"
           DataSourceInclusionsExclusionsStrings.of_json in
-      let secretArn = field_map json "SecretArn" SecretArn.of_json in
+      let secretArn = field_map json__ "SecretArn" SecretArn.of_json in
       let vpcConfiguration =
-        field_map_exn json "VpcConfiguration"
+        field_map_exn json__ "VpcConfiguration"
           DataSourceVpcConfiguration.of_json in
       let fileSystemType =
-        field_map_exn json "FileSystemType" FsxFileSystemType.of_json in
+        field_map_exn json__ "FileSystemType" FsxFileSystemType.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ?fieldMappings ?exclusionPatterns ?inclusionPatterns ?secretArn
         ~vpcConfiguration ~fileSystemType ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information to connect to Amazon FSx as your data source."]
+       "Provides the configuration information to connect to Amazon FSx as your data source. Amazon Kendra now supports an upgraded Amazon FSx Windows connector. You must now use the TemplateConfiguration object instead of the FsxConfiguration object to configure your connector. Connectors configured using the older console and API architecture will continue to function as configured. However, you won't be able to edit or update them. If you want to edit or update your connector configuration, you must create a new connector. We recommended migrating your connector workflow to the upgraded version. Support for connectors configured using the older architecture is scheduled to end by June 2024."]
 module QueryIdentifiersEnclosingOption =
   struct
     type nonrec t =
@@ -9122,9 +12518,9 @@ module SqlConfiguration =
           (Xml.child xml_arg0 "QueryIdentifiersEnclosingOption") in
       make ?queryIdentifiersEnclosingOption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryIdentifiersEnclosingOption =
-        field_map json "QueryIdentifiersEnclosingOption"
+        field_map json__ "QueryIdentifiersEnclosingOption"
           QueryIdentifiersEnclosingOption.of_json in
       make ?queryIdentifiersEnclosingOption ()
     let to_json v = composed_to_json to_value v
@@ -9235,32 +12631,34 @@ module DatabaseConfiguration =
       make ?sqlConfiguration ?aclConfiguration ~columnConfiguration
         ?vpcConfiguration ~connectionConfiguration ~databaseEngineType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sqlConfiguration =
-        field_map json "SqlConfiguration" SqlConfiguration.of_json in
+        field_map json__ "SqlConfiguration" SqlConfiguration.of_json in
       let aclConfiguration =
-        field_map json "AclConfiguration" AclConfiguration.of_json in
+        field_map json__ "AclConfiguration" AclConfiguration.of_json in
       let columnConfiguration =
-        field_map_exn json "ColumnConfiguration" ColumnConfiguration.of_json in
+        field_map_exn json__ "ColumnConfiguration"
+          ColumnConfiguration.of_json in
       let vpcConfiguration =
-        field_map json "VpcConfiguration" DataSourceVpcConfiguration.of_json in
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
       let connectionConfiguration =
-        field_map_exn json "ConnectionConfiguration"
+        field_map_exn json__ "ConnectionConfiguration"
           ConnectionConfiguration.of_json in
       let databaseEngineType =
-        field_map_exn json "DatabaseEngineType" DatabaseEngineType.of_json in
+        field_map_exn json__ "DatabaseEngineType" DatabaseEngineType.of_json in
       make ?sqlConfiguration ?aclConfiguration ~columnConfiguration
         ?vpcConfiguration ~connectionConfiguration ~databaseEngineType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information to connect to a index."]
+       "Provides the configuration information to an Amazon Kendra supported database."]
 module DataSourceConfiguration =
   struct
     type nonrec t =
       {
       s3Configuration: S3DataSourceConfiguration.t option
         [@ocaml.doc
-          "Provides the configuration information to connect to an Amazon S3 bucket as your data source."];
+          "Provides the configuration information to connect to an Amazon S3 bucket as your data source. Amazon Kendra now supports an upgraded Amazon S3 connector. You must now use the TemplateConfiguration object instead of the S3DataSourceConfiguration object to configure your connector. Connectors configured using the older console and API architecture will continue to function as configured. However, you won't be able to edit or update them. If you want to edit or update your connector configuration, you must create a new connector. We recommended migrating your connector workflow to the upgraded version. Support for connectors configured using the older architecture is scheduled to end by June 2024."];
       sharePointConfiguration: SharePointConfiguration.t option
         [@ocaml.doc
           "Provides the configuration information to connect to Microsoft SharePoint as your data source."];
@@ -9288,13 +12686,28 @@ module DataSourceConfiguration =
           "Provides the configuration information to connect to Amazon WorkDocs as your data source."];
       fsxConfiguration: FsxConfiguration.t option
         [@ocaml.doc
-          "Provides the configuration information to connect to Amazon FSx as your data source."];
+          "Provides the configuration information to connect to Amazon FSx as your data source. Amazon Kendra now supports an upgraded Amazon FSx Windows connector. You must now use the TemplateConfiguration object instead of the FsxConfiguration object to configure your connector. Connectors configured using the older console and API architecture will continue to function as configured. However, you won't be able to edit or update them. If you want to edit or update your connector configuration, you must create a new connector. We recommended migrating your connector workflow to the upgraded version. Support for connectors configured using the older architecture is scheduled to end by June 2024."];
       slackConfiguration: SlackConfiguration.t option
         [@ocaml.doc
-          "Provides the configuration information to connect to Slack as your data source."];
+          "Provides the configuration information to connect to Slack as your data source. Amazon Kendra now supports an upgraded Slack connector. You must now use the TemplateConfiguration object instead of the SlackConfiguration object to configure your connector. Connectors configured using the older console and API architecture will continue to function as configured. However, you won't be able to edit or update them. If you want to edit or update your connector configuration, you must create a new connector. We recommended migrating your connector workflow to the upgraded version. Support for connectors configured using the older architecture is scheduled to end by June 2024."];
       boxConfiguration: BoxConfiguration.t option
         [@ocaml.doc
-          "Provides the configuration information to connect to Box as your data source."]}
+          "Provides the configuration information to connect to Box as your data source."];
+      quipConfiguration: QuipConfiguration.t option
+        [@ocaml.doc
+          "Provides the configuration information to connect to Quip as your data source."];
+      jiraConfiguration: JiraConfiguration.t option
+        [@ocaml.doc
+          "Provides the configuration information to connect to Jira as your data source."];
+      gitHubConfiguration: GitHubConfiguration.t option
+        [@ocaml.doc
+          "Provides the configuration information to connect to GitHub as your data source. Amazon Kendra now supports an upgraded GitHub connector. You must now use the TemplateConfiguration object instead of the GitHubConfiguration object to configure your connector. Connectors configured using the older console and API architecture will continue to function as configured. However, you won\226\128\153t be able to edit or update them. If you want to edit or update your connector configuration, you must create a new connector. We recommended migrating your connector workflow to the upgraded version. Support for connectors configured using the older architecture is scheduled to end by June 2024."];
+      alfrescoConfiguration: AlfrescoConfiguration.t option
+        [@ocaml.doc
+          "Provides the configuration information to connect to Alfresco as your data source. Support for AlfrescoConfiguration ended May 2023. We recommend migrating to or using the Alfresco data source template schema / TemplateConfiguration API."];
+      templateConfiguration: TemplateConfiguration.t option
+        [@ocaml.doc
+          "Provides a template for the configuration information to connect to your data source."]}
     let make ?s3Configuration =
       fun ?sharePointConfiguration ->
         fun ?databaseConfiguration ->
@@ -9308,22 +12721,32 @@ module DataSourceConfiguration =
                         fun ?fsxConfiguration ->
                           fun ?slackConfiguration ->
                             fun ?boxConfiguration ->
-                              fun () ->
-                                {
-                                  s3Configuration;
-                                  sharePointConfiguration;
-                                  databaseConfiguration;
-                                  salesforceConfiguration;
-                                  oneDriveConfiguration;
-                                  serviceNowConfiguration;
-                                  confluenceConfiguration;
-                                  googleDriveConfiguration;
-                                  webCrawlerConfiguration;
-                                  workDocsConfiguration;
-                                  fsxConfiguration;
-                                  slackConfiguration;
-                                  boxConfiguration
-                                }
+                              fun ?quipConfiguration ->
+                                fun ?jiraConfiguration ->
+                                  fun ?gitHubConfiguration ->
+                                    fun ?alfrescoConfiguration ->
+                                      fun ?templateConfiguration ->
+                                        fun () ->
+                                          {
+                                            s3Configuration;
+                                            sharePointConfiguration;
+                                            databaseConfiguration;
+                                            salesforceConfiguration;
+                                            oneDriveConfiguration;
+                                            serviceNowConfiguration;
+                                            confluenceConfiguration;
+                                            googleDriveConfiguration;
+                                            webCrawlerConfiguration;
+                                            workDocsConfiguration;
+                                            fsxConfiguration;
+                                            slackConfiguration;
+                                            boxConfiguration;
+                                            quipConfiguration;
+                                            jiraConfiguration;
+                                            gitHubConfiguration;
+                                            alfrescoConfiguration;
+                                            templateConfiguration
+                                          }
     let to_value x =
       structure_to_value
         [("S3Configuration",
@@ -9361,9 +12784,36 @@ module DataSourceConfiguration =
         ("SlackConfiguration",
           (Option.map x.slackConfiguration ~f:SlackConfiguration.to_value));
         ("BoxConfiguration",
-          (Option.map x.boxConfiguration ~f:BoxConfiguration.to_value))]
+          (Option.map x.boxConfiguration ~f:BoxConfiguration.to_value));
+        ("QuipConfiguration",
+          (Option.map x.quipConfiguration ~f:QuipConfiguration.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration ~f:JiraConfiguration.to_value));
+        ("GitHubConfiguration",
+          (Option.map x.gitHubConfiguration ~f:GitHubConfiguration.to_value));
+        ("AlfrescoConfiguration",
+          (Option.map x.alfrescoConfiguration
+             ~f:AlfrescoConfiguration.to_value));
+        ("TemplateConfiguration",
+          (Option.map x.templateConfiguration
+             ~f:TemplateConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let templateConfiguration =
+        (Option.map ~f:TemplateConfiguration.of_xml)
+          (Xml.child xml_arg0 "TemplateConfiguration") in
+      let alfrescoConfiguration =
+        (Option.map ~f:AlfrescoConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlfrescoConfiguration") in
+      let gitHubConfiguration =
+        (Option.map ~f:GitHubConfiguration.of_xml)
+          (Xml.child xml_arg0 "GitHubConfiguration") in
+      let jiraConfiguration =
+        (Option.map ~f:JiraConfiguration.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
+      let quipConfiguration =
+        (Option.map ~f:QuipConfiguration.of_xml)
+          (Xml.child xml_arg0 "QuipConfiguration") in
       let boxConfiguration =
         (Option.map ~f:BoxConfiguration.of_xml)
           (Xml.child xml_arg0 "BoxConfiguration") in
@@ -9403,52 +12853,69 @@ module DataSourceConfiguration =
       let s3Configuration =
         (Option.map ~f:S3DataSourceConfiguration.of_xml)
           (Xml.child xml_arg0 "S3Configuration") in
-      make ?boxConfiguration ?slackConfiguration ?fsxConfiguration
-        ?workDocsConfiguration ?webCrawlerConfiguration
-        ?googleDriveConfiguration ?confluenceConfiguration
-        ?serviceNowConfiguration ?oneDriveConfiguration
-        ?salesforceConfiguration ?databaseConfiguration
-        ?sharePointConfiguration ?s3Configuration ()
+      make ?templateConfiguration ?alfrescoConfiguration ?gitHubConfiguration
+        ?jiraConfiguration ?quipConfiguration ?boxConfiguration
+        ?slackConfiguration ?fsxConfiguration ?workDocsConfiguration
+        ?webCrawlerConfiguration ?googleDriveConfiguration
+        ?confluenceConfiguration ?serviceNowConfiguration
+        ?oneDriveConfiguration ?salesforceConfiguration
+        ?databaseConfiguration ?sharePointConfiguration ?s3Configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let templateConfiguration =
+        field_map json__ "TemplateConfiguration"
+          TemplateConfiguration.of_json in
+      let alfrescoConfiguration =
+        field_map json__ "AlfrescoConfiguration"
+          AlfrescoConfiguration.of_json in
+      let gitHubConfiguration =
+        field_map json__ "GitHubConfiguration" GitHubConfiguration.of_json in
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration" JiraConfiguration.of_json in
+      let quipConfiguration =
+        field_map json__ "QuipConfiguration" QuipConfiguration.of_json in
       let boxConfiguration =
-        field_map json "BoxConfiguration" BoxConfiguration.of_json in
+        field_map json__ "BoxConfiguration" BoxConfiguration.of_json in
       let slackConfiguration =
-        field_map json "SlackConfiguration" SlackConfiguration.of_json in
+        field_map json__ "SlackConfiguration" SlackConfiguration.of_json in
       let fsxConfiguration =
-        field_map json "FsxConfiguration" FsxConfiguration.of_json in
+        field_map json__ "FsxConfiguration" FsxConfiguration.of_json in
       let workDocsConfiguration =
-        field_map json "WorkDocsConfiguration" WorkDocsConfiguration.of_json in
+        field_map json__ "WorkDocsConfiguration"
+          WorkDocsConfiguration.of_json in
       let webCrawlerConfiguration =
-        field_map json "WebCrawlerConfiguration"
+        field_map json__ "WebCrawlerConfiguration"
           WebCrawlerConfiguration.of_json in
       let googleDriveConfiguration =
-        field_map json "GoogleDriveConfiguration"
+        field_map json__ "GoogleDriveConfiguration"
           GoogleDriveConfiguration.of_json in
       let confluenceConfiguration =
-        field_map json "ConfluenceConfiguration"
+        field_map json__ "ConfluenceConfiguration"
           ConfluenceConfiguration.of_json in
       let serviceNowConfiguration =
-        field_map json "ServiceNowConfiguration"
+        field_map json__ "ServiceNowConfiguration"
           ServiceNowConfiguration.of_json in
       let oneDriveConfiguration =
-        field_map json "OneDriveConfiguration" OneDriveConfiguration.of_json in
+        field_map json__ "OneDriveConfiguration"
+          OneDriveConfiguration.of_json in
       let salesforceConfiguration =
-        field_map json "SalesforceConfiguration"
+        field_map json__ "SalesforceConfiguration"
           SalesforceConfiguration.of_json in
       let databaseConfiguration =
-        field_map json "DatabaseConfiguration" DatabaseConfiguration.of_json in
+        field_map json__ "DatabaseConfiguration"
+          DatabaseConfiguration.of_json in
       let sharePointConfiguration =
-        field_map json "SharePointConfiguration"
+        field_map json__ "SharePointConfiguration"
           SharePointConfiguration.of_json in
       let s3Configuration =
-        field_map json "S3Configuration" S3DataSourceConfiguration.of_json in
-      make ?boxConfiguration ?slackConfiguration ?fsxConfiguration
-        ?workDocsConfiguration ?webCrawlerConfiguration
-        ?googleDriveConfiguration ?confluenceConfiguration
-        ?serviceNowConfiguration ?oneDriveConfiguration
-        ?salesforceConfiguration ?databaseConfiguration
-        ?sharePointConfiguration ?s3Configuration ()
+        field_map json__ "S3Configuration" S3DataSourceConfiguration.of_json in
+      make ?templateConfiguration ?alfrescoConfiguration ?gitHubConfiguration
+        ?jiraConfiguration ?quipConfiguration ?boxConfiguration
+        ?slackConfiguration ?fsxConfiguration ?workDocsConfiguration
+        ?webCrawlerConfiguration ?googleDriveConfiguration
+        ?confluenceConfiguration ?serviceNowConfiguration
+        ?oneDriveConfiguration ?salesforceConfiguration
+        ?databaseConfiguration ?sharePointConfiguration ?s3Configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the configuration information for an Amazon Kendra data source."]
@@ -9457,63 +12924,68 @@ module CreateDataSourceRequest =
     type nonrec t =
       {
       name: DataSourceName.t
-        [@ocaml.doc
-          "A unique name for the data source. A data source name can't be changed without deleting and recreating the data source."];
+        [@ocaml.doc "A name for the data source connector."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index that should be associated with this data source."];
+          "The identifier of the index you want to use with the data source connector."];
       type_: DataSourceType.t
-        [@ocaml.doc "The type of repository that contains the data source."];
+        [@ocaml.doc
+          "The type of data source repository. For example, SHAREPOINT."];
       configuration: DataSourceConfiguration.t option
         [@ocaml.doc
-          "Configuration information that is required to access the data source repository. You can't specify the Configuration parameter when the Type parameter is set to CUSTOM. If you do, you receive a ValidationException exception. The Configuration parameter is required for all other data sources."];
+          "Configuration information to connect to your data source repository. You can't specify the Configuration parameter when the Type parameter is set to CUSTOM. If you do, you receive a ValidationException exception. The Configuration parameter is required for all other data sources."];
+      vpcConfiguration: DataSourceVpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration information for an Amazon Virtual Private Cloud to connect to your data source. For more information, see Configuring a VPC."];
       description: Description.t option
-        [@ocaml.doc "A description for the data source."];
+        [@ocaml.doc "A description for the data source connector."];
       schedule: ScanSchedule.t option
         [@ocaml.doc
-          "Sets the frequency for Amazon Kendra to check the documents in your repository and update the index. If you don't set a schedule Amazon Kendra will not periodically update the index. You can call the StartDataSourceSyncJob API to update the index. You can't specify the Schedule parameter when the Type parameter is set to CUSTOM. If you do, you receive a ValidationException exception."];
+          "Sets the frequency for Amazon Kendra to check the documents in your data source repository and update the index. If you don't set a schedule Amazon Kendra will not periodically update the index. You can call the StartDataSourceSyncJob API to update the index. Specify a cron- format schedule string or an empty string to indicate that the index is updated on demand. You can't specify the Schedule parameter when the Type parameter is set to CUSTOM. If you do, you receive a ValidationException exception."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role with permission to access the data source. For more information, see IAM Roles for Amazon Kendra. You can't specify the RoleArn parameter when the Type parameter is set to CUSTOM. If you do, you receive a ValidationException exception. The RoleArn parameter is required for all other data sources."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to access the data source and required resources. For more information, see IAM access roles for Amazon Kendra.. You can't specify the RoleArn parameter when the Type parameter is set to CUSTOM. If you do, you receive a ValidationException exception. The RoleArn parameter is required for all other data sources."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of key-value pairs that identify the data source. You can use the tags to identify and organize your resources and to control access to resources."];
+          "A list of key-value pairs that identify or categorize the data source connector. You can also use tags to help control access to the data source connector. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - \\@."];
       clientToken: ClientTokenName.t option
         [@ocaml.doc
-          "A token that you provide to identify the request to create a data source. Multiple calls to the CreateDataSource API with the same client token will create only one data source."];
+          "A token that you provide to identify the request to create a data source connector. Multiple calls to the CreateDataSource API with the same client token will create only one data source connector."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The code for a language. This allows you to support a language for all documents when creating the data source. English is supported by default. For more information on supported languages, including their codes, see Adding documents in languages other than English."];
+          "The code for a language. This allows you to support a language for all documents when creating the data source connector. English is supported by default. For more information on supported languages, including their codes, see Adding documents in languages other than English."];
       customDocumentEnrichmentConfiguration:
         CustomDocumentEnrichmentConfiguration.t option
         [@ocaml.doc
-          "Configuration information for altering document metadata and content during the document ingestion process when you create a data source. For more information on how to create, modify and delete document metadata, or make other content alterations when you ingest documents into Amazon Kendra, see Customizing document metadata during the ingestion process."]}
+          "Configuration information for altering document metadata and content during the document ingestion process. For more information on how to create, modify and delete document metadata, or make other content alterations when you ingest documents into Amazon Kendra, see Customizing document metadata during the ingestion process."]}
     let context_ = "CreateDataSourceRequest"
     let make ?configuration =
-      fun ?description ->
-        fun ?schedule ->
-          fun ?roleArn ->
-            fun ?tags ->
-              fun ?clientToken ->
-                fun ?languageCode ->
-                  fun ?customDocumentEnrichmentConfiguration ->
-                    fun ~name ->
-                      fun ~indexId ->
-                        fun ~type_ ->
-                          fun () ->
-                            {
-                              configuration;
-                              description;
-                              schedule;
-                              roleArn;
-                              tags;
-                              clientToken;
-                              languageCode;
-                              customDocumentEnrichmentConfiguration;
-                              name;
-                              indexId;
-                              type_
-                            }
+      fun ?vpcConfiguration ->
+        fun ?description ->
+          fun ?schedule ->
+            fun ?roleArn ->
+              fun ?tags ->
+                fun ?clientToken ->
+                  fun ?languageCode ->
+                    fun ?customDocumentEnrichmentConfiguration ->
+                      fun ~name ->
+                        fun ~indexId ->
+                          fun ~type_ ->
+                            fun () ->
+                              {
+                                configuration;
+                                vpcConfiguration;
+                                description;
+                                schedule;
+                                roleArn;
+                                tags;
+                                clientToken;
+                                languageCode;
+                                customDocumentEnrichmentConfiguration;
+                                name;
+                                indexId;
+                                type_
+                              }
     let to_value x =
       structure_to_value
         [("Name", (Some (DataSourceName.to_value x.name)));
@@ -9521,6 +12993,9 @@ module CreateDataSourceRequest =
         ("Type", (Some (DataSourceType.to_value x.type_)));
         ("Configuration",
           (Option.map x.configuration ~f:DataSourceConfiguration.to_value));
+        ("VpcConfiguration",
+          (Option.map x.vpcConfiguration
+             ~f:DataSourceVpcConfiguration.to_value));
         ("Description", (Option.map x.description ~f:Description.to_value));
         ("Schedule", (Option.map x.schedule ~f:ScanSchedule.to_value));
         ("RoleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
@@ -9550,6 +13025,9 @@ module CreateDataSourceRequest =
         (Option.map ~f:ScanSchedule.of_xml) (Xml.child xml_arg0 "Schedule") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let vpcConfiguration =
+        (Option.map ~f:DataSourceVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
       let configuration =
         (Option.map ~f:DataSourceConfiguration.of_xml)
           (Xml.child xml_arg0 "Configuration") in
@@ -9562,36 +13040,40 @@ module CreateDataSourceRequest =
         DataSourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?customDocumentEnrichmentConfiguration ?languageCode ?clientToken
-        ?tags ?roleArn ?schedule ?description ?configuration ~type_ ~indexId
-        ~name ()
+        ?tags ?roleArn ?schedule ?description ?vpcConfiguration
+        ?configuration ~type_ ~indexId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customDocumentEnrichmentConfiguration =
-        field_map json "CustomDocumentEnrichmentConfiguration"
+        field_map json__ "CustomDocumentEnrichmentConfiguration"
           CustomDocumentEnrichmentConfiguration.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let clientToken = field_map json "ClientToken" ClientTokenName.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let schedule = field_map json "Schedule" ScanSchedule.of_json in
-      let description = field_map json "Description" Description.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" ClientTokenName.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let schedule = field_map json__ "Schedule" ScanSchedule.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
       let configuration =
-        field_map json "Configuration" DataSourceConfiguration.of_json in
-      let type_ = field_map_exn json "Type" DataSourceType.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let name = field_map_exn json "Name" DataSourceName.of_json in
+        field_map json__ "Configuration" DataSourceConfiguration.of_json in
+      let type_ = field_map_exn json__ "Type" DataSourceType.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let name = field_map_exn json__ "Name" DataSourceName.of_json in
       make ?customDocumentEnrichmentConfiguration ?languageCode ?clientToken
-        ?tags ?roleArn ?schedule ?description ?configuration ~type_ ~indexId
-        ~name ()
+        ?tags ?roleArn ?schedule ?description ?vpcConfiguration
+        ?configuration ~type_ ~indexId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a data source that you want to use with an Amazon Kendra index. You specify a name, data source connector type and description for your data source. You also specify configuration information for the data source connector. CreateDataSource is a synchronous operation. The operation returns 200 if the data source was successfully created. Otherwise, an exception is raised. Amazon S3 and custom data sources are the only supported data sources in the Amazon Web Services GovCloud (US-West) region."]
+       "Creates a data source connector that you want to use with an Amazon Kendra index. You specify a name, data source connector type and description for your data source. You also specify configuration information for the data source connector. CreateDataSource is a synchronous operation. The operation returns 200 if the data source was successfully created. Otherwise, an exception is raised. For an example of creating an index and data source using the Python SDK, see Getting started with Python SDK. For an example of creating an index and data source using the Java SDK, see Getting started with Java SDK."]
 module CreateDataSourceResponse =
   struct
     type nonrec t =
       {
-      id: DataSourceId.t
-        [@ocaml.doc "A unique identifier for the data source."]}
+      id: DataSourceId.t option
+        [@ocaml.doc "The identifier of the data source connector."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -9602,8 +13084,7 @@ module CreateDataSourceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateDataSourceResponse"
-    let make ~id = fun () -> { id }
+    let make ?id = fun () -> { id }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9689,18 +13170,17 @@ module CreateDataSourceResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Id", (Some (DataSourceId.to_value x.id)))]
+      structure_to_value [("Id", (Option.map x.id ~f:DataSourceId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id =
-        DataSourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~id ()
+      let id = (Option.map ~f:DataSourceId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" DataSourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" DataSourceId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a data source that you want to use with an Amazon Kendra index. You specify a name, data source connector type and description for your data source. You also specify configuration information for the data source connector. CreateDataSource is a synchronous operation. The operation returns 200 if the data source was successfully created. Otherwise, an exception is raised. Amazon S3 and custom data sources are the only supported data sources in the Amazon Web Services GovCloud (US-West) region."]
+       "Creates a data source connector that you want to use with an Amazon Kendra index. You specify a name, data source connector type and description for your data source. You also specify configuration information for the data source connector. CreateDataSource is a synchronous operation. The operation returns 200 if the data source was successfully created. Otherwise, an exception is raised. For an example of creating an index and data source using the Python SDK, see Getting started with Python SDK. For an example of creating an index and data source using the Java SDK, see Getting started with Java SDK."]
 module ExperienceName =
   struct
     type nonrec t = string
@@ -9749,7 +13229,7 @@ module UserIdentityConfiguration =
       {
       identityAttributeName: IdentityAttributeName.t option
         [@ocaml.doc
-          "The Amazon Web Services SSO field name that contains the identifiers of your users, such as their emails. This is used for user context filtering and for granting access to your Amazon Kendra experience. You must set up Amazon Web Services SSO with Amazon Kendra. You must include your users and groups in your Access Control List when you ingest documents into your index. For more information, see Getting started with an Amazon Web Services SSO identity source."]}
+          "The IAM Identity Center field name that contains the identifiers of your users, such as their emails. This is used for user context filtering and for granting access to your Amazon Kendra experience. You must set up IAM Identity Center with Amazon Kendra. You must include your users and groups in your Access Control List when you ingest documents into your index. For more information, see Getting started with an IAM Identity Center identity source."]}
     let make ?identityAttributeName = fun () -> { identityAttributeName }
     let to_value x =
       structure_to_value
@@ -9763,9 +13243,10 @@ module UserIdentityConfiguration =
           (Xml.child xml_arg0 "IdentityAttributeName") in
       make ?identityAttributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityAttributeName =
-        field_map json "IdentityAttributeName" IdentityAttributeName.of_json in
+        field_map json__ "IdentityAttributeName"
+          IdentityAttributeName.of_json in
       make ?identityAttributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9779,7 +13260,7 @@ module ExperienceConfiguration =
           "The identifiers of your data sources and FAQs. Or, you can specify that you want to use documents indexed via the BatchPutDocument API. This is the content you want to use for your Amazon Kendra experience."];
       userIdentityConfiguration: UserIdentityConfiguration.t option
         [@ocaml.doc
-          "The Amazon Web Services SSO field name that contains the identifiers of your users, such as their emails."]}
+          "The IAM Identity Center field name that contains the identifiers of your users, such as their emails."]}
     let make ?contentSourceConfiguration =
       fun ?userIdentityConfiguration ->
         fun () -> { contentSourceConfiguration; userIdentityConfiguration }
@@ -9801,12 +13282,12 @@ module ExperienceConfiguration =
           (Xml.child xml_arg0 "ContentSourceConfiguration") in
       make ?userIdentityConfiguration ?contentSourceConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userIdentityConfiguration =
-        field_map json "UserIdentityConfiguration"
+        field_map json__ "UserIdentityConfiguration"
           UserIdentityConfiguration.of_json in
       let contentSourceConfiguration =
-        field_map json "ContentSourceConfiguration"
+        field_map json__ "ContentSourceConfiguration"
           ContentSourceConfiguration.of_json in
       make ?userIdentityConfiguration ?contentSourceConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -9823,7 +13304,7 @@ module CreateExperienceRequest =
           "The identifier of the index for your Amazon Kendra experience."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role with permission to access Query API, QuerySuggestions API, SubmitFeedback API, and Amazon Web Services SSO that stores your user and group information. For more information, see IAM roles for Amazon Kendra."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to access Query API, GetQuerySuggestions API, and other required APIs. The role also must include permission to access IAM Identity Center that stores your user and group information. For more information, see IAM access roles for Amazon Kendra."];
       configuration: ExperienceConfiguration.t option
         [@ocaml.doc
           "Configuration information for your Amazon Kendra experience. This includes ContentSourceConfiguration, which specifies the data source IDs and/or FAQ IDs, and UserIdentityConfiguration, which specifies the user or group information to grant access to your Amazon Kendra experience."];
@@ -9878,26 +13359,26 @@ module CreateExperienceRequest =
       make ?clientToken ?description ?configuration ?roleArn ~indexId ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientTokenName.of_json in
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "ClientToken" ClientTokenName.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let configuration =
-        field_map json "Configuration" ExperienceConfiguration.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let name = field_map_exn json "Name" ExperienceName.of_json in
+        field_map json__ "Configuration" ExperienceConfiguration.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let name = field_map_exn json__ "Name" ExperienceName.of_json in
       make ?clientToken ?description ?configuration ?roleArn ~indexId ~name
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Creates an Amazon Kendra experience such as a search application. For more information on creating a search application experience, including using the Python and Java SDKs, see Building a search experience with no code."]
 module CreateExperienceResponse =
   struct
     type nonrec t =
       {
-      id: ExperienceId.t
-        [@ocaml.doc
-          "The identifier for your created Amazon Kendra experience."]}
+      id: ExperienceId.t option
+        [@ocaml.doc "The identifier of your Amazon Kendra experience."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -9907,8 +13388,7 @@ module CreateExperienceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateExperienceResponse"
-    let make ~id = fun () -> { id }
+    let make ?id = fun () -> { id }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9984,18 +13464,17 @@ module CreateExperienceResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Id", (Some (ExperienceId.to_value x.id)))]
+      structure_to_value [("Id", (Option.map x.id ~f:ExperienceId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id =
-        ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~id ()
+      let id = (Option.map ~f:ExperienceId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ExperienceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" ExperienceId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Creates an Amazon Kendra experience such as a search application. For more information on creating a search application experience, including using the Python and Java SDKs, see Building a search experience with no code."]
 module FaqName =
   struct
     type nonrec t = string
@@ -10050,21 +13529,20 @@ module CreateFaqRequest =
     type nonrec t =
       {
       indexId: IndexId.t
-        [@ocaml.doc "The identifier of the index that contains the FAQ."];
-      name: FaqName.t
-        [@ocaml.doc "The name that should be associated with the FAQ."];
+        [@ocaml.doc "The identifier of the index for the FAQ."];
+      name: FaqName.t [@ocaml.doc "A name for the FAQ."];
       description: Description.t option
-        [@ocaml.doc "A description of the FAQ."];
-      s3Path: S3Path.t [@ocaml.doc "The S3 location of the FAQ input data."];
+        [@ocaml.doc "A description for the FAQ."];
+      s3Path: S3Path.t [@ocaml.doc "The path to the FAQ file in S3."];
       roleArn: RoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role with permission to access the S3 bucket that contains the FAQs. For more information, see IAM Roles for Amazon Kendra."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to access the S3 bucket that contains the FAQ file. For more information, see IAM access roles for Amazon Kendra."];
       tags: TagList.t option
         [@ocaml.doc
           "A list of key-value pairs that identify the FAQ. You can use the tags to identify and organize your resources and to control access to resources."];
       fileFormat: FaqFileFormat.t option
         [@ocaml.doc
-          "The format of the input file. You can choose between a basic CSV format, a CSV format that includes customs attributes in a header, and a JSON format that includes custom attributes. The format must match the format of the file stored in the S3 bucket identified in the S3Path parameter. For more information, see Adding questions and answers."];
+          "The format of the FAQ input file. You can choose between a basic CSV format, a CSV format that includes customs attributes in a header, and a JSON format that includes custom attributes. The default format is CSV. The format must match the format of the file stored in the S3 bucket identified in the S3Path parameter. For more information, see Adding questions and answers."];
       clientToken: ClientTokenName.t option
         [@ocaml.doc
           "A token that you provide to identify the request to create a FAQ. Multiple calls to the CreateFaqRequest API with the same client token will create only one FAQ."];
@@ -10131,26 +13609,27 @@ module CreateFaqRequest =
       make ?languageCode ?clientToken ?fileFormat ?tags ~roleArn ~s3Path
         ?description ~name ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let clientToken = field_map json "ClientToken" ClientTokenName.of_json in
-      let fileFormat = field_map json "FileFormat" FaqFileFormat.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
-      let s3Path = field_map_exn json "S3Path" S3Path.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map_exn json "Name" FaqName.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+    let of_json json__ =
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" ClientTokenName.of_json in
+      let fileFormat = field_map json__ "FileFormat" FaqFileFormat.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
+      let s3Path = field_map_exn json__ "S3Path" S3Path.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" FaqName.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?languageCode ?clientToken ?fileFormat ?tags ~roleArn ~s3Path
         ?description ~name ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an new set of frequently asked question (FAQ) questions and answers. Adding FAQs to an index is an asynchronous operation."]
+       "Creates a set of frequently ask questions (FAQs) using a specified FAQ file stored in an Amazon S3 bucket. Adding FAQs to an index is an asynchronous operation. For an example of adding an FAQ to an index using Python and Java SDKs, see Using your FAQ file."]
 module CreateFaqResponse =
   struct
     type nonrec t =
       {
-      id: FaqId.t option [@ocaml.doc "The unique identifier of the FAQ."]}
+      id: FaqId.t option [@ocaml.doc "The identifier of the FAQ."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -10242,11 +13721,521 @@ module CreateFaqResponse =
       let id = (Option.map ~f:FaqId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" FaqId.of_json in make ?id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" FaqId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an new set of frequently asked question (FAQ) questions and answers. Adding FAQs to an index is an asynchronous operation."]
+       "Creates a set of frequently ask questions (FAQs) using a specified FAQ file stored in an Amazon S3 bucket. Adding FAQs to an index is an asynchronous operation. For an example of adding an FAQ to an index using Python and Java SDKs, see Using your FAQ file."]
+module QueryTextList =
+  struct
+    type nonrec t = QueryText.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:49) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QueryText.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QueryText.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QueryTextList" ~of_json:QueryText.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FeaturedResultsSetStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | INACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | INACTIVE -> "INACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "INACTIVE" -> INACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FeaturedResultsSetStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FeaturedResultsSetStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module FeaturedResultsSetName =
+  struct
+    type nonrec t = string
+    let context_ = "FeaturedResultsSetName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-zA-Z0-9][ a-zA-Z0-9_-]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FeaturedResultsSetName" j
+    let to_json = simple_to_json to_value
+  end
+module FeaturedResultsSetDescription =
+  struct
+    type nonrec t = string
+    let context_ = "FeaturedResultsSetDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\P{C}*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FeaturedResultsSetDescription" j
+    let to_json = simple_to_json to_value
+  end
+module FeaturedDocument =
+  struct
+    type nonrec t =
+      {
+      id: DocumentId.t option
+        [@ocaml.doc
+          "The identifier of the document to feature in the search results. You can use the Query API to search for specific documents with their document IDs included in the result items, or you can use the console."]}
+    let make ?id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("Id", (Option.map x.id ~f:DocumentId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "Id" DocumentId.of_json in make ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A featured document. This document is displayed at the top of the search results page, placed above all other results for certain queries. If there's an exact match of a query, then the document is featured in the search results."]
+module FeaturedDocumentList =
+  struct
+    type nonrec t = FeaturedDocument.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FeaturedDocument.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FeaturedDocument.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FeaturedDocumentList"
+        ~of_json:FeaturedDocument.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CreateFeaturedResultsSetRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index that you want to use for featuring results."];
+      featuredResultsSetName: FeaturedResultsSetName.t
+        [@ocaml.doc "A name for the set of featured results."];
+      description: FeaturedResultsSetDescription.t option
+        [@ocaml.doc "A description for the set of featured results."];
+      clientToken: ClientTokenName.t option
+        [@ocaml.doc
+          "A token that you provide to identify the request to create a set of featured results. Multiple calls to the CreateFeaturedResultsSet API with the same client token will create only one featured results set."];
+      status: FeaturedResultsSetStatus.t option
+        [@ocaml.doc
+          "The current status of the set of featured results. When the value is ACTIVE, featured results are ready for use. You can still configure your settings before setting the status to ACTIVE. You can set the status to ACTIVE or INACTIVE using the UpdateFeaturedResultsSet API. The queries you specify for featured results must be unique per featured results set for each index, whether the status is ACTIVE or INACTIVE."];
+      queryTexts: QueryTextList.t option
+        [@ocaml.doc
+          "A list of queries for featuring results. For more information on the list of queries, see FeaturedResultsSet."];
+      featuredDocuments: FeaturedDocumentList.t option
+        [@ocaml.doc
+          "A list of document IDs for the documents you want to feature at the top of the search results page. For more information on the list of documents, see FeaturedResultsSet."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of key-value pairs that identify or categorize the featured results set. You can also use tags to help control access to the featured results set. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols:_ . : / = + - \\@."]}
+    let context_ = "CreateFeaturedResultsSetRequest"
+    let make ?description =
+      fun ?clientToken ->
+        fun ?status ->
+          fun ?queryTexts ->
+            fun ?featuredDocuments ->
+              fun ?tags ->
+                fun ~indexId ->
+                  fun ~featuredResultsSetName ->
+                    fun () ->
+                      {
+                        description;
+                        clientToken;
+                        status;
+                        queryTexts;
+                        featuredDocuments;
+                        tags;
+                        indexId;
+                        featuredResultsSetName
+                      }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("FeaturedResultsSetName",
+          (Some (FeaturedResultsSetName.to_value x.featuredResultsSetName)));
+        ("Description",
+          (Option.map x.description ~f:FeaturedResultsSetDescription.to_value));
+        ("ClientToken",
+          (Option.map x.clientToken ~f:ClientTokenName.to_value));
+        ("Status",
+          (Option.map x.status ~f:FeaturedResultsSetStatus.to_value));
+        ("QueryTexts", (Option.map x.queryTexts ~f:QueryTextList.to_value));
+        ("FeaturedDocuments",
+          (Option.map x.featuredDocuments ~f:FeaturedDocumentList.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let featuredDocuments =
+        (Option.map ~f:FeaturedDocumentList.of_xml)
+          (Xml.child xml_arg0 "FeaturedDocuments") in
+      let queryTexts =
+        (Option.map ~f:QueryTextList.of_xml)
+          (Xml.child xml_arg0 "QueryTexts") in
+      let status =
+        (Option.map ~f:FeaturedResultsSetStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let clientToken =
+        (Option.map ~f:ClientTokenName.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      let description =
+        (Option.map ~f:FeaturedResultsSetDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let featuredResultsSetName =
+        FeaturedResultsSetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FeaturedResultsSetName") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ?tags ?featuredDocuments ?queryTexts ?status ?clientToken
+        ?description ~featuredResultsSetName ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let featuredDocuments =
+        field_map json__ "FeaturedDocuments" FeaturedDocumentList.of_json in
+      let queryTexts = field_map json__ "QueryTexts" QueryTextList.of_json in
+      let status = field_map json__ "Status" FeaturedResultsSetStatus.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" ClientTokenName.of_json in
+      let description =
+        field_map json__ "Description" FeaturedResultsSetDescription.of_json in
+      let featuredResultsSetName =
+        field_map_exn json__ "FeaturedResultsSetName"
+          FeaturedResultsSetName.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?tags ?featuredDocuments ?queryTexts ?status ?clientToken
+        ?description ~featuredResultsSetName ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a set of featured results to display at the top of the search results page. Featured results are placed above all other results for certain queries. You map specific queries to specific documents for featuring in the results. If a query contains an exact match, then one or more specific documents are featured in the search results. You can create up to 50 sets of featured results per index. You can request to increase this limit by contacting Support."]
+module FeaturedResultsSet =
+  struct
+    type nonrec t =
+      {
+      featuredResultsSetId: FeaturedResultsSetId.t option
+        [@ocaml.doc "The identifier of the set of featured results."];
+      featuredResultsSetName: FeaturedResultsSetName.t option
+        [@ocaml.doc "The name for the set of featured results."];
+      description: FeaturedResultsSetDescription.t option
+        [@ocaml.doc "The description for the set of featured results."];
+      status: FeaturedResultsSetStatus.t option
+        [@ocaml.doc
+          "The current status of the set of featured results. When the value is ACTIVE, featured results are ready for use. You can still configure your settings before setting the status to ACTIVE. You can set the status to ACTIVE or INACTIVE using the UpdateFeaturedResultsSet API. The queries you specify for featured results must be unique per featured results set for each index, whether the status is ACTIVE or INACTIVE."];
+      queryTexts: QueryTextList.t option
+        [@ocaml.doc
+          "The list of queries for featuring results. Specific queries are mapped to specific documents for featuring in the results. If a query contains an exact match, then one or more specific documents are featured in the results. The exact match applies to the full query. For example, if you only specify 'Kendra', queries such as 'How does kendra semantically rank results?' will not render the featured results. Featured results are designed for specific queries, rather than queries that are too broad in scope."];
+      featuredDocuments: FeaturedDocumentList.t option
+        [@ocaml.doc
+          "The list of document IDs for the documents you want to feature at the top of the search results page. You can use the Query API to search for specific documents with their document IDs included in the result items, or you can use the console. You can add up to four featured documents. You can request to increase this limit by contacting Support. Specific queries are mapped to specific documents for featuring in the results. If a query contains an exact match, then one or more specific documents are featured in the results. The exact match applies to the full query. For example, if you only specify 'Kendra', queries such as 'How does kendra semantically rank results?' will not render the featured results. Featured results are designed for specific queries, rather than queries that are too broad in scope."];
+      lastUpdatedTimestamp: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp when the set of featured results was last updated."];
+      creationTimestamp: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp when the set of featured results was created."]}
+    let make ?featuredResultsSetId =
+      fun ?featuredResultsSetName ->
+        fun ?description ->
+          fun ?status ->
+            fun ?queryTexts ->
+              fun ?featuredDocuments ->
+                fun ?lastUpdatedTimestamp ->
+                  fun ?creationTimestamp ->
+                    fun () ->
+                      {
+                        featuredResultsSetId;
+                        featuredResultsSetName;
+                        description;
+                        status;
+                        queryTexts;
+                        featuredDocuments;
+                        lastUpdatedTimestamp;
+                        creationTimestamp
+                      }
+    let to_value x =
+      structure_to_value
+        [("FeaturedResultsSetId",
+           (Option.map x.featuredResultsSetId
+              ~f:FeaturedResultsSetId.to_value));
+        ("FeaturedResultsSetName",
+          (Option.map x.featuredResultsSetName
+             ~f:FeaturedResultsSetName.to_value));
+        ("Description",
+          (Option.map x.description ~f:FeaturedResultsSetDescription.to_value));
+        ("Status",
+          (Option.map x.status ~f:FeaturedResultsSetStatus.to_value));
+        ("QueryTexts", (Option.map x.queryTexts ~f:QueryTextList.to_value));
+        ("FeaturedDocuments",
+          (Option.map x.featuredDocuments ~f:FeaturedDocumentList.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Long.to_value));
+        ("CreationTimestamp",
+          (Option.map x.creationTimestamp ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTimestamp =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "CreationTimestamp") in
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let featuredDocuments =
+        (Option.map ~f:FeaturedDocumentList.of_xml)
+          (Xml.child xml_arg0 "FeaturedDocuments") in
+      let queryTexts =
+        (Option.map ~f:QueryTextList.of_xml)
+          (Xml.child xml_arg0 "QueryTexts") in
+      let status =
+        (Option.map ~f:FeaturedResultsSetStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:FeaturedResultsSetDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let featuredResultsSetName =
+        (Option.map ~f:FeaturedResultsSetName.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSetName") in
+      let featuredResultsSetId =
+        (Option.map ~f:FeaturedResultsSetId.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSetId") in
+      make ?creationTimestamp ?lastUpdatedTimestamp ?featuredDocuments
+        ?queryTexts ?status ?description ?featuredResultsSetName
+        ?featuredResultsSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTimestamp =
+        field_map json__ "CreationTimestamp" Long.of_json in
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Long.of_json in
+      let featuredDocuments =
+        field_map json__ "FeaturedDocuments" FeaturedDocumentList.of_json in
+      let queryTexts = field_map json__ "QueryTexts" QueryTextList.of_json in
+      let status = field_map json__ "Status" FeaturedResultsSetStatus.of_json in
+      let description =
+        field_map json__ "Description" FeaturedResultsSetDescription.of_json in
+      let featuredResultsSetName =
+        field_map json__ "FeaturedResultsSetName"
+          FeaturedResultsSetName.of_json in
+      let featuredResultsSetId =
+        field_map json__ "FeaturedResultsSetId" FeaturedResultsSetId.of_json in
+      make ?creationTimestamp ?lastUpdatedTimestamp ?featuredDocuments
+        ?queryTexts ?status ?description ?featuredResultsSetName
+        ?featuredResultsSetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A set of featured results that are displayed at the top of your search results. Featured results are placed above all other results for certain queries. If there's an exact match of a query, then one or more specific documents are featured in the search results."]
+module FeaturedResultsConflictException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc "An explanation for the conflicting queries."];
+      conflictingItems: ConflictingItems.t option
+        [@ocaml.doc
+          "A list of the conflicting queries, including the query text, the name for the featured results set, and the identifier of the featured results set."]}
+    let make ?message =
+      fun ?conflictingItems -> fun () -> { message; conflictingItems }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("ConflictingItems",
+          (Option.map x.conflictingItems ~f:ConflictingItems.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conflictingItems =
+        (Option.map ~f:ConflictingItems.of_xml)
+          (Xml.child xml_arg0 "ConflictingItems") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?conflictingItems ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conflictingItems =
+        field_map json__ "ConflictingItems" ConflictingItems.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?conflictingItems ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An error message with a list of conflicting queries used across different sets of featured results. This occurred with the request for a new featured results set. Check that the queries you specified for featured results are unique per featured results set for each index."]
+module CreateFeaturedResultsSetResponse =
+  struct
+    type nonrec t =
+      {
+      featuredResultsSet: FeaturedResultsSet.t option
+        [@ocaml.doc
+          "Information on the set of featured results. This includes the identifier of the featured results set, whether the featured results set is active or inactive, when the featured results set was created, and more."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `FeaturedResultsConflictException of
+          FeaturedResultsConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?featuredResultsSet = fun () -> { featuredResultsSet }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "FeaturedResultsConflictException" ->
+          `FeaturedResultsConflictException
+            (FeaturedResultsConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "FeaturedResultsConflictException" ->
+          `FeaturedResultsConflictException
+            (FeaturedResultsConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `FeaturedResultsConflictException e ->
+          `Assoc
+            [("error", (`String "FeaturedResultsConflictException"));
+            ("details", (FeaturedResultsConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FeaturedResultsSet",
+           (Option.map x.featuredResultsSet ~f:FeaturedResultsSet.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let featuredResultsSet =
+        (Option.map ~f:FeaturedResultsSet.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSet") in
+      make ?featuredResultsSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let featuredResultsSet =
+        field_map json__ "FeaturedResultsSet" FeaturedResultsSet.of_json in
+      make ?featuredResultsSet ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a set of featured results to display at the top of the search results page. Featured results are placed above all other results for certain queries. You map specific queries to specific documents for featuring in the results. If a query contains an exact match, then one or more specific documents are featured in the search results. You can create up to 50 sets of featured results per index. You can request to increase this limit by contacting Support."]
 module UserNameAttributeField =
   struct
     type nonrec t = string
@@ -10400,18 +14389,19 @@ module JwtTokenTypeConfiguration =
       make ?claimRegex ?issuer ?groupAttributeField ?userNameAttributeField
         ?secretManagerArn ?uRL ~keyLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let claimRegex = field_map json "ClaimRegex" ClaimRegex.of_json in
-      let issuer = field_map json "Issuer" Issuer.of_json in
+    let of_json json__ =
+      let claimRegex = field_map json__ "ClaimRegex" ClaimRegex.of_json in
+      let issuer = field_map json__ "Issuer" Issuer.of_json in
       let groupAttributeField =
-        field_map json "GroupAttributeField" GroupAttributeField.of_json in
+        field_map json__ "GroupAttributeField" GroupAttributeField.of_json in
       let userNameAttributeField =
-        field_map json "UserNameAttributeField"
+        field_map json__ "UserNameAttributeField"
           UserNameAttributeField.of_json in
       let secretManagerArn =
-        field_map json "SecretManagerArn" RoleArn.of_json in
-      let uRL = field_map json "URL" Url.of_json in
-      let keyLocation = field_map_exn json "KeyLocation" KeyLocation.of_json in
+        field_map json__ "SecretManagerArn" RoleArn.of_json in
+      let uRL = field_map json__ "URL" Url.of_json in
+      let keyLocation =
+        field_map_exn json__ "KeyLocation" KeyLocation.of_json in
       make ?claimRegex ?issuer ?groupAttributeField ?userNameAttributeField
         ?secretManagerArn ?uRL ~keyLocation ()
     let to_json v = composed_to_json to_value v
@@ -10445,11 +14435,11 @@ module JsonTokenTypeConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "UserNameAttributeField") in
       make ~groupAttributeField ~userNameAttributeField ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupAttributeField =
-        field_map_exn json "GroupAttributeField" String_.of_json in
+        field_map_exn json__ "GroupAttributeField" String_.of_json in
       let userNameAttributeField =
-        field_map_exn json "UserNameAttributeField" String_.of_json in
+        field_map_exn json__ "UserNameAttributeField" String_.of_json in
       make ~groupAttributeField ~userNameAttributeField ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10483,21 +14473,25 @@ module UserTokenConfiguration =
           (Xml.child xml_arg0 "JwtTokenTypeConfiguration") in
       make ?jsonTokenTypeConfiguration ?jwtTokenTypeConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jsonTokenTypeConfiguration =
-        field_map json "JsonTokenTypeConfiguration"
+        field_map json__ "JsonTokenTypeConfiguration"
           JsonTokenTypeConfiguration.of_json in
       let jwtTokenTypeConfiguration =
-        field_map json "JwtTokenTypeConfiguration"
+        field_map json__ "JwtTokenTypeConfiguration"
           JwtTokenTypeConfiguration.of_json in
       make ?jsonTokenTypeConfiguration ?jwtTokenTypeConfiguration ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Provides the configuration information for a token."]
+  end[@@ocaml.doc
+       "Provides the configuration information for a token. If you're using an Amazon Kendra Gen AI Enterprise Edition index and you try to use UserTokenConfigurations to configure user context policy, Amazon Kendra returns a ValidationException error."]
 module UserTokenConfigurationList =
   struct
     type nonrec t = UserTokenConfiguration.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserTokenConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -10547,7 +14541,7 @@ module UserGroupResolutionConfiguration =
       {
       userGroupResolutionMode: UserGroupResolutionMode.t
         [@ocaml.doc
-          "The identity store provider (mode) you want to use to fetch access levels of groups and users. Amazon Web Services Single Sign On is currently the only available mode. Your users and groups must exist in an Amazon Web Services SSO identity source in order to use this mode."]}
+          "The identity store provider (mode) you want to use to get users and groups. IAM Identity Center is currently the only available mode. Your users and groups must exist in an IAM Identity Center identity source in order to use this mode."]}
     let context_ = "UserGroupResolutionConfiguration"
     let make ~userGroupResolutionMode = fun () -> { userGroupResolutionMode }
     let to_value x =
@@ -10561,14 +14555,14 @@ module UserGroupResolutionConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "UserGroupResolutionMode") in
       make ~userGroupResolutionMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userGroupResolutionMode =
-        field_map_exn json "UserGroupResolutionMode"
+        field_map_exn json__ "UserGroupResolutionMode"
           UserGroupResolutionMode.of_json in
       make ~userGroupResolutionMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the configuration information to fetch access levels of groups and users from an Amazon Web Services Single Sign On identity source. This is useful for setting up user context filtering, where Amazon Kendra filters search results for different users based on their group's access to documents. You can also map your users to their groups for user context filtering using the PutPrincipalMapping API. To set up an Amazon Web Services SSO identity source in the console to use with Amazon Kendra, see Getting started with an Amazon Web Services SSO identity source. You must also grant the required permissions to use Amazon Web Services SSO with Amazon Kendra. For more information, see IAM roles for Amazon Web Services SSO. Amazon Kendra currently does not support using UserGroupResolutionConfiguration with an Amazon Web Services organization member account for your Amazon Web Services SSO identify source. You must create your index in the management account for the organization in order to use UserGroupResolutionConfiguration."]
+       "Provides the configuration information to get users and groups from an IAM Identity Center identity source. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents. You can also use the PutPrincipalMapping API to map users to their groups so that you only need to provide the user ID when you issue the query. To set up an IAM Identity Center identity source in the console to use with Amazon Kendra, see Getting started with an IAM Identity Center identity source. You must also grant the required permissions to use IAM Identity Center with Amazon Kendra. For more information, see IAM roles for IAM Identity Center. Amazon Kendra currently does not support using UserGroupResolutionConfiguration with an Amazon Web Services organization member account for your IAM Identity Center identify source. You must create your index in the management account for the organization in order to use UserGroupResolutionConfiguration. If you're using an Amazon Kendra Gen AI Enterprise Edition index, UserGroupResolutionConfiguration isn't supported."]
 module UserContextPolicy =
   struct
     type nonrec t =
@@ -10619,7 +14613,7 @@ module ServerSideEncryptionConfiguration =
       {
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "The identifier of the KMScustomer master key (CMK). Amazon Kendra doesn't support asymmetric CMKs."]}
+          "The identifier of the KMS key. Amazon Kendra doesn't support asymmetric keys."]}
     let make ?kmsKeyId = fun () -> { kmsKeyId }
     let to_value x =
       structure_to_value
@@ -10630,12 +14624,12 @@ module ServerSideEncryptionConfiguration =
         (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       make ?kmsKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
       make ?kmsKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the identifier of the KMScustomer master key (CMK) used to encrypt data indexed by Amazon Kendra. Amazon Kendra doesn't support asymmetric CMKs."]
+       "Provides the identifier of the KMS key used to encrypt data indexed by Amazon Kendra. Amazon Kendra doesn't support asymmetric keys."]
 module IndexName =
   struct
     type nonrec t = string
@@ -10662,17 +14656,20 @@ module IndexEdition =
     type nonrec t =
       | DEVELOPER_EDITION 
       | ENTERPRISE_EDITION 
+      | GEN_AI_ENTERPRISE_EDITION 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | DEVELOPER_EDITION -> "DEVELOPER_EDITION"
       | ENTERPRISE_EDITION -> "ENTERPRISE_EDITION"
+      | GEN_AI_ENTERPRISE_EDITION -> "GEN_AI_ENTERPRISE_EDITION"
       | Non_static_id s -> s
     let of_string =
       function
       | "DEVELOPER_EDITION" -> DEVELOPER_EDITION
       | "ENTERPRISE_EDITION" -> ENTERPRISE_EDITION
+      | "GEN_AI_ENTERPRISE_EDITION" -> GEN_AI_ENTERPRISE_EDITION
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -10686,13 +14683,13 @@ module CreateIndexRequest =
   struct
     type nonrec t =
       {
-      name: IndexName.t [@ocaml.doc "The name for the new index."];
+      name: IndexName.t [@ocaml.doc "A name for the index."];
       edition: IndexEdition.t option
         [@ocaml.doc
-          "The Amazon Kendra edition to use for the index. Choose DEVELOPER_EDITION for indexes intended for development, testing, or proof of concept. Use ENTERPRISE_EDITION for your production databases. Once you set the edition for an index, it can't be changed. The Edition parameter is optional. If you don't supply a value, the default is ENTERPRISE_EDITION. For more information on quota limits for enterprise and developer editions, see Quotas."];
+          "The Amazon Kendra edition to use for the index. Choose DEVELOPER_EDITION for indexes intended for development, testing, or proof of concept. Use ENTERPRISE_EDITION for production. Use GEN_AI_ENTERPRISE_EDITION for creating generative AI applications. Once you set the edition for an index, it can't be changed. The Edition parameter is optional. If you don't supply a value, the default is ENTERPRISE_EDITION. For more information on quota limits for Gen AI Enterprise Edition, Enterprise Edition, and Developer Edition indices, see Quotas."];
       roleArn: RoleArn.t
         [@ocaml.doc
-          "An Identity and Access Management (IAM) role that gives Amazon Kendra permissions to access your Amazon CloudWatch logs and metrics. This is also the role you use when you call the BatchPutDocument API to index documents from an Amazon S3 bucket."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to access your Amazon CloudWatch logs and metrics. For more information, see IAM access roles for Amazon Kendra."];
       serverSideEncryptionConfiguration:
         ServerSideEncryptionConfiguration.t option
         [@ocaml.doc
@@ -10704,16 +14701,17 @@ module CreateIndexRequest =
           "A token that you provide to identify the request to create an index. Multiple calls to the CreateIndex API with the same client token will create only one index."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of key-value pairs that identify the index. You can use the tags to identify and organize your resources and to control access to resources."];
+          "A list of key-value pairs that identify or categorize the index. You can also use tags to help control access to the index. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - \\@."];
       userTokenConfigurations: UserTokenConfigurationList.t option
-        [@ocaml.doc "The user token configuration."];
+        [@ocaml.doc
+          "The user token configuration. If you're using an Amazon Kendra Gen AI Enterprise Edition index and you try to use UserTokenConfigurations to configure user context policy, Amazon Kendra returns a ValidationException error."];
       userContextPolicy: UserContextPolicy.t option
         [@ocaml.doc
-          "The user context policy. ATTRIBUTE_FILTER All indexed content is searchable and displayable for all users. If you want to filter search results on user context, you can use the attribute filters of _user_id and _group_ids or you can provide user and group information in UserContext. USER_TOKEN Enables token-based user access control to filter search results on user context. All documents with no access control and all documents accessible to the user will be searchable and displayable."];
+          "The user context policy. If you're using an Amazon Kendra Gen AI Enterprise Edition index, you can only use ATTRIBUTE_FILTER to filter search results by user context. If you're using an Amazon Kendra Gen AI Enterprise Edition index and you try to use USER_TOKEN to configure user context policy, Amazon Kendra returns a ValidationException error. ATTRIBUTE_FILTER All indexed content is searchable and displayable for all users. If you want to filter search results on user context, you can use the attribute filters of _user_id and _group_ids or you can provide user and group information in UserContext. USER_TOKEN Enables token-based user access control to filter search results on user context. All documents with no access control and all documents accessible to the user will be searchable and displayable."];
       userGroupResolutionConfiguration:
         UserGroupResolutionConfiguration.t option
         [@ocaml.doc
-          "Enables fetching access levels of groups and users from an Amazon Web Services Single Sign On identity source. To configure this, see UserGroupResolutionConfiguration."]}
+          "Gets users and groups from IAM Identity Center identity source. To configure this, see UserGroupResolutionConfiguration. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents. If you're using an Amazon Kendra Gen AI Enterprise Edition index, UserGroupResolutionConfiguration isn't supported."]}
     let context_ = "CreateIndexRequest"
     let make ?edition =
       fun ?serverSideEncryptionConfiguration ->
@@ -10788,37 +14786,38 @@ module CreateIndexRequest =
         ?userTokenConfigurations ?tags ?clientToken ?description
         ?serverSideEncryptionConfiguration ~roleArn ?edition ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userGroupResolutionConfiguration =
-        field_map json "UserGroupResolutionConfiguration"
+        field_map json__ "UserGroupResolutionConfiguration"
           UserGroupResolutionConfiguration.of_json in
       let userContextPolicy =
-        field_map json "UserContextPolicy" UserContextPolicy.of_json in
+        field_map json__ "UserContextPolicy" UserContextPolicy.of_json in
       let userTokenConfigurations =
-        field_map json "UserTokenConfigurations"
+        field_map json__ "UserTokenConfigurations"
           UserTokenConfigurationList.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let clientToken = field_map json "ClientToken" ClientTokenName.of_json in
-      let description = field_map json "Description" Description.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" ClientTokenName.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let serverSideEncryptionConfiguration =
-        field_map json "ServerSideEncryptionConfiguration"
+        field_map json__ "ServerSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
-      let edition = field_map json "Edition" IndexEdition.of_json in
-      let name = field_map_exn json "Name" IndexName.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
+      let edition = field_map json__ "Edition" IndexEdition.of_json in
+      let name = field_map_exn json__ "Name" IndexName.of_json in
       make ?userGroupResolutionConfiguration ?userContextPolicy
         ?userTokenConfigurations ?tags ?clientToken ?description
         ?serverSideEncryptionConfiguration ~roleArn ?edition ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Kendra index. Index creation is an asynchronous API. To determine if index creation has completed, check the Status field returned from a call to DescribeIndex. The Status field is set to ACTIVE when the index is ready to use. Once the index is active you can index your documents using the BatchPutDocument API or using one of the supported data sources."]
+       "Creates an Amazon Kendra index. Index creation is an asynchronous API. To determine if index creation has completed, check the Status field returned from a call to DescribeIndex. The Status field is set to ACTIVE when the index is ready to use. Once the index is active, you can index your documents using the BatchPutDocument API or using one of the supported data sources. For an example of creating an index and data source using the Python SDK, see Getting started with Python SDK. For an example of creating an index and data source using the Java SDK, see Getting started with Java SDK."]
 module CreateIndexResponse =
   struct
     type nonrec t =
       {
       id: IndexId.t option
         [@ocaml.doc
-          "The unique identifier of the index. Use this identifier when you query an index, set up a data source, or index a document."]}
+          "The identifier of the index. Use this identifier when you query an index, set up a data source, or index a document."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -10912,11 +14911,11 @@ module CreateIndexResponse =
       let id = (Option.map ~f:IndexId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" IndexId.of_json in make ?id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" IndexId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Kendra index. Index creation is an asynchronous API. To determine if index creation has completed, check the Status field returned from a call to DescribeIndex. The Status field is set to ACTIVE when the index is ready to use. Once the index is active you can index your documents using the BatchPutDocument API or using one of the supported data sources."]
+       "Creates an Amazon Kendra index. Index creation is an asynchronous API. To determine if index creation has completed, check the Status field returned from a call to DescribeIndex. The Status field is set to ACTIVE when the index is ready to use. Once the index is active, you can index your documents using the BatchPutDocument API or using one of the supported data sources. For an example of creating an index and data source using the Python SDK, see Getting started with Python SDK. For an example of creating an index and data source using the Java SDK, see Getting started with Java SDK."]
 module QuerySuggestionsBlockListName =
   struct
     type nonrec t = string
@@ -10947,10 +14946,10 @@ module CreateQuerySuggestionsBlockListRequest =
           "The identifier of the index you want to create a query suggestions block list for."];
       name: QuerySuggestionsBlockListName.t
         [@ocaml.doc
-          "A user friendly name for the block list. For example, the block list named 'offensive-words' includes all offensive words that could appear in user queries and need to be blocked from suggestions."];
+          "A name for the block list. For example, the name 'offensive-words', which includes all offensive words that could appear in user queries and need to be blocked from suggestions."];
       description: Description.t option
         [@ocaml.doc
-          "A user-friendly description for the block list. For example, the description \"List of all offensive words that can appear in user queries and need to be blocked from suggestions.\""];
+          "A description for the block list. For example, the description \"List of all offensive words that can appear in user queries and need to be blocked from suggestions.\""];
       sourceS3Path: S3Path.t
         [@ocaml.doc
           "The S3 path to your block list text file in your S3 bucket. Each block word or phrase should be on a separate line in a text file. For information on the current quota limits for block lists, see Quotas for Amazon Kendra."];
@@ -10959,10 +14958,10 @@ module CreateQuerySuggestionsBlockListRequest =
           "A token that you provide to identify the request to create a query suggestions block list."];
       roleArn: RoleArn.t
         [@ocaml.doc
-          "The IAM (Identity and Access Management) role used by Amazon Kendra to access the block list text file in your S3 bucket. You need permissions to the role ARN (Amazon Web Services Resource Name). The role needs S3 read permissions to your file in S3 and needs to give STS (Security Token Service) assume role permissions to Amazon Kendra."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to access your S3 bucket that contains the block list text file. For more information, see IAM access roles for Amazon Kendra."];
       tags: TagList.t option
         [@ocaml.doc
-          "A tag that you can assign to a block list that categorizes the block list."]}
+          "A list of key-value pairs that identify or categorize the block list. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - \\@."]}
     let context_ = "CreateQuerySuggestionsBlockListRequest"
     let make ?description =
       fun ?clientToken ->
@@ -11012,20 +15011,21 @@ module CreateQuerySuggestionsBlockListRequest =
       make ?tags ~roleArn ?clientToken ~sourceS3Path ?description ~name
         ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
-      let clientToken = field_map json "ClientToken" ClientTokenName.of_json in
-      let sourceS3Path = field_map_exn json "SourceS3Path" S3Path.of_json in
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" ClientTokenName.of_json in
+      let sourceS3Path = field_map_exn json__ "SourceS3Path" S3Path.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let name =
-        field_map_exn json "Name" QuerySuggestionsBlockListName.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+        field_map_exn json__ "Name" QuerySuggestionsBlockListName.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?tags ~roleArn ?clientToken ~sourceS3Path ?description ~name
         ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a block list to exlcude certain queries from suggestions. Any query that contains words or phrases specified in the block list is blocked or filtered out from being shown as a suggestion. You need to provide the file location of your block list text file in your S3 bucket. In your text file, enter each block word or phrase on a separate line. For information on the current quota limits for block lists, see Quotas for Amazon Kendra. CreateQuerySuggestionsBlockList is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
+       "Creates a block list to exlcude certain queries from suggestions. Any query that contains words or phrases specified in the block list is blocked or filtered out from being shown as a suggestion. You need to provide the file location of your block list text file in your S3 bucket. In your text file, enter each block word or phrase on a separate line. For information on the current quota limits for block lists, see Quotas for Amazon Kendra. CreateQuerySuggestionsBlockList is currently not supported in the Amazon Web Services GovCloud (US-West) region. For an example of creating a block list for query suggestions using the Python SDK, see Query suggestions block list."]
 module QuerySuggestionsBlockListId =
   struct
     type nonrec t = string
@@ -11052,7 +15052,7 @@ module CreateQuerySuggestionsBlockListResponse =
     type nonrec t =
       {
       id: QuerySuggestionsBlockListId.t option
-        [@ocaml.doc "The unique identifier of the created block list."]}
+        [@ocaml.doc "The identifier of the block list."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11147,12 +15147,12 @@ module CreateQuerySuggestionsBlockListResponse =
           (Xml.child xml_arg0 "Id") in
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" QuerySuggestionsBlockListId.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" QuerySuggestionsBlockListId.of_json in
       make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a block list to exlcude certain queries from suggestions. Any query that contains words or phrases specified in the block list is blocked or filtered out from being shown as a suggestion. You need to provide the file location of your block list text file in your S3 bucket. In your text file, enter each block word or phrase on a separate line. For information on the current quota limits for block lists, see Quotas for Amazon Kendra. CreateQuerySuggestionsBlockList is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
+       "Creates a block list to exlcude certain queries from suggestions. Any query that contains words or phrases specified in the block list is blocked or filtered out from being shown as a suggestion. You need to provide the file location of your block list text file in your S3 bucket. In your text file, enter each block word or phrase on a separate line. For information on the current quota limits for block lists, see Quotas for Amazon Kendra. CreateQuerySuggestionsBlockList is currently not supported in the Amazon Web Services GovCloud (US-West) region. For an example of creating a block list for query suggestions using the Python SDK, see Query suggestions block list."]
 module ThesaurusName =
   struct
     type nonrec t = string
@@ -11179,19 +15179,18 @@ module CreateThesaurusRequest =
     type nonrec t =
       {
       indexId: IndexId.t
-        [@ocaml.doc
-          "The unique identifier of the index for the new thesaurus."];
-      name: ThesaurusName.t [@ocaml.doc "The name for the new thesaurus."];
+        [@ocaml.doc "The identifier of the index for the thesaurus."];
+      name: ThesaurusName.t [@ocaml.doc "A name for the thesaurus."];
       description: Description.t option
-        [@ocaml.doc "The description for the new thesaurus."];
+        [@ocaml.doc "A description for the thesaurus."];
       roleArn: RoleArn.t
         [@ocaml.doc
-          "An IAM role that gives Amazon Kendra permissions to access thesaurus file specified in SourceS3Path."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to access your S3 bucket that contains the thesaurus file. For more information, see IAM access roles for Amazon Kendra."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of key-value pairs that identify the thesaurus. You can use the tags to identify and organize your resources and to control access to resources."];
+          "A list of key-value pairs that identify or categorize the thesaurus. You can also use tags to help control access to the thesaurus. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - \\@."];
       sourceS3Path: S3Path.t
-        [@ocaml.doc "The thesaurus file Amazon S3 source path."];
+        [@ocaml.doc "The path to the thesaurus file in S3."];
       clientToken: ClientTokenName.t option
         [@ocaml.doc
           "A token that you provide to identify the request to create a thesaurus. Multiple calls to the CreateThesaurus API with the same client token will create only one thesaurus."]}
@@ -11244,19 +15243,20 @@ module CreateThesaurusRequest =
       make ?clientToken ~sourceS3Path ?tags ~roleArn ?description ~name
         ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientTokenName.of_json in
-      let sourceS3Path = field_map_exn json "SourceS3Path" S3Path.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map_exn json "Name" ThesaurusName.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "ClientToken" ClientTokenName.of_json in
+      let sourceS3Path = field_map_exn json__ "SourceS3Path" S3Path.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" ThesaurusName.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?clientToken ~sourceS3Path ?tags ~roleArn ?description ~name
         ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a thesaurus for an index. The thesaurus contains a list of synonyms in Solr format."]
+       "Creates a thesaurus for an index. The thesaurus contains a list of synonyms in Solr format. For an example of adding a thesaurus file to an index, see Adding custom synonyms to an index."]
 module ThesaurusId =
   struct
     type nonrec t = string
@@ -11283,7 +15283,7 @@ module CreateThesaurusResponse =
     type nonrec t =
       {
       id: ThesaurusId.t option
-        [@ocaml.doc "The unique identifier of the thesaurus."]}
+        [@ocaml.doc "The identifier of the thesaurus."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11375,75 +15375,11 @@ module CreateThesaurusResponse =
       let id = (Option.map ~f:ThesaurusId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" ThesaurusId.of_json in make ?id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" ThesaurusId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a thesaurus for an index. The thesaurus contains a list of synonyms in Solr format."]
-module DataSourceGroup =
-  struct
-    type nonrec t =
-      {
-      groupId: PrincipalName.t
-        [@ocaml.doc
-          "The identifier of the group you want to add to your list of groups. This is for filtering search results based on the groups' access to documents."];
-      dataSourceId: DataSourceId.t
-        [@ocaml.doc
-          "The identifier of the data source group you want to add to your list of data source groups. This is for filtering search results based on the groups' access to documents in that data source."]}
-    let context_ = "DataSourceGroup"
-    let make ~groupId =
-      fun ~dataSourceId -> fun () -> { groupId; dataSourceId }
-    let to_value x =
-      structure_to_value
-        [("GroupId", (Some (PrincipalName.to_value x.groupId)));
-        ("DataSourceId", (Some (DataSourceId.to_value x.dataSourceId)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let dataSourceId =
-        DataSourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
-      let groupId =
-        PrincipalName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
-      make ~dataSourceId ~groupId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceId =
-        field_map_exn json "DataSourceId" DataSourceId.of_json in
-      let groupId = field_map_exn json "GroupId" PrincipalName.of_json in
-      make ~dataSourceId ~groupId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Data source information for user context filtering."]
-module DataSourceGroups =
-  struct
-    type nonrec t = DataSourceGroup.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:2048) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:DataSourceGroup.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DataSourceGroup.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DataSourceGroups" ~of_json:DataSourceGroup.of_json
-        j
-    let to_json v = composed_to_json to_value v
-  end
+       "Creates a thesaurus for an index. The thesaurus contains a list of synonyms in Solr format. For an example of adding a thesaurus file to an index, see Adding custom synonyms to an index."]
 module DataSourceStatus =
   struct
     type nonrec t =
@@ -11485,14 +15421,15 @@ module DataSourceSummary =
       name: DataSourceName.t option
         [@ocaml.doc "The name of the data source."];
       id: DataSourceId.t option
-        [@ocaml.doc "The unique identifier for the data source."];
+        [@ocaml.doc "The identifier for the data source."];
       type_: DataSourceType.t option
         [@ocaml.doc "The type of the data source."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The UNIX datetime that the data source was created."];
+        [@ocaml.doc
+          "The Unix timestamp when the data source connector was created."];
       updatedAt: Timestamp.t option
         [@ocaml.doc
-          "The UNIX datetime that the data source was lasted updated."];
+          "The Unix timestamp when the data source connector was last updated."];
       status: DataSourceStatus.t option
         [@ocaml.doc
           "The status of the data source. When the status is ACTIVE the data source is ready to use."];
@@ -11544,22 +15481,24 @@ module DataSourceSummary =
         (Option.map ~f:DataSourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?languageCode ?status ?updatedAt ?createdAt ?type_ ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let status = field_map json "Status" DataSourceStatus.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let type_ = field_map json "Type" DataSourceType.of_json in
-      let id = field_map json "Id" DataSourceId.of_json in
-      let name = field_map json "Name" DataSourceName.of_json in
+    let of_json json__ =
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let status = field_map json__ "Status" DataSourceStatus.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let type_ = field_map json__ "Type" DataSourceType.of_json in
+      let id = field_map json__ "Id" DataSourceId.of_json in
+      let name = field_map json__ "Name" DataSourceName.of_json in
       make ?languageCode ?status ?updatedAt ?createdAt ?type_ ?id ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Summary information for an Amazon Kendra data source. Returned in a call to the DescribeDataSource API."]
+  end[@@ocaml.doc "Summary information for a Amazon Kendra data source."]
 module DataSourceSummaryList =
   struct
     type nonrec t = DataSourceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataSourceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11702,17 +15641,17 @@ module DataSourceSyncJobMetrics =
       make ?documentsScanned ?documentsFailed ?documentsDeleted
         ?documentsModified ?documentsAdded ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentsScanned =
-        field_map json "DocumentsScanned" MetricValue.of_json in
+        field_map json__ "DocumentsScanned" MetricValue.of_json in
       let documentsFailed =
-        field_map json "DocumentsFailed" MetricValue.of_json in
+        field_map json__ "DocumentsFailed" MetricValue.of_json in
       let documentsDeleted =
-        field_map json "DocumentsDeleted" MetricValue.of_json in
+        field_map json__ "DocumentsDeleted" MetricValue.of_json in
       let documentsModified =
-        field_map json "DocumentsModified" MetricValue.of_json in
+        field_map json__ "DocumentsModified" MetricValue.of_json in
       let documentsAdded =
-        field_map json "DocumentsAdded" MetricValue.of_json in
+        field_map json__ "DocumentsAdded" MetricValue.of_json in
       make ?documentsScanned ?documentsFailed ?documentsDeleted
         ?documentsModified ?documentsAdded ()
     let to_json v = composed_to_json to_value v
@@ -11723,13 +15662,13 @@ module DataSourceSyncJob =
     type nonrec t =
       {
       executionId: String_.t option
-        [@ocaml.doc "A unique identifier for the synchronization job."];
+        [@ocaml.doc "A identifier for the synchronization job."];
       startTime: Timestamp.t option
         [@ocaml.doc
-          "The UNIX datetime that the synchronization job started."];
+          "The Unix timestamp when the synchronization job started."];
       endTime: Timestamp.t option
         [@ocaml.doc
-          "The UNIX datetime that the synchronization job completed."];
+          "The Unix timestamp when the synchronization job completed."];
       status: DataSourceSyncJobStatus.t option
         [@ocaml.doc
           "The execution status of the synchronization job. When the Status field is set to SUCCEEDED, the synchronization job is done. If the status code is set to FAILED, the ErrorCode and ErrorMessage fields give you the reason for the failure."];
@@ -11802,16 +15741,17 @@ module DataSourceSyncJob =
       make ?metrics ?dataSourceErrorCode ?errorCode ?errorMessage ?status
         ?endTime ?startTime ?executionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metrics = field_map json "Metrics" DataSourceSyncJobMetrics.of_json in
+    let of_json json__ =
+      let metrics =
+        field_map json__ "Metrics" DataSourceSyncJobMetrics.of_json in
       let dataSourceErrorCode =
-        field_map json "DataSourceErrorCode" String_.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let status = field_map json "Status" DataSourceSyncJobStatus.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let startTime = field_map json "StartTime" Timestamp.of_json in
-      let executionId = field_map json "ExecutionId" String_.of_json in
+        field_map json__ "DataSourceErrorCode" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let status = field_map json__ "Status" DataSourceSyncJobStatus.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      let executionId = field_map json__ "ExecutionId" String_.of_json in
       make ?metrics ?dataSourceErrorCode ?errorCode ?errorMessage ?status
         ?endTime ?startTime ?executionId ()
     let to_json v = composed_to_json to_value v
@@ -11821,6 +15761,9 @@ module DataSourceSyncJobHistoryList =
   struct
     type nonrec t = DataSourceSyncJob.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataSourceSyncJob.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11842,15 +15785,133 @@ module DataSourceSyncJobHistoryList =
         ~of_json:DataSourceSyncJob.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DeleteAccessControlConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index for an access control configuration."];
+      id: AccessControlConfigurationId.t
+        [@ocaml.doc
+          "The identifier of the access control configuration you want to delete."]}
+    let context_ = "DeleteAccessControlConfigurationRequest"
+    let make ~indexId = fun ~id -> fun () -> { indexId; id }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("Id", (Some (AccessControlConfigurationId.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        AccessControlConfigurationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ~id ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" AccessControlConfigurationId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ~id ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an access control configuration that you created for your documents in an index. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."]
+module DeleteAccessControlConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an access control configuration that you created for your documents in an index. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."]
 module DeleteDataSourceRequest =
   struct
     type nonrec t =
       {
       id: DataSourceId.t
-        [@ocaml.doc "The unique identifier of the data source to delete."];
+        [@ocaml.doc
+          "The identifier of the data source connector you want to delete."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The unique identifier of the index associated with the data source."]}
+          "The identifier of the index used with the data source connector."]}
     let context_ = "DeleteDataSourceRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -11865,13 +15926,13 @@ module DeleteDataSourceRequest =
         DataSourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" DataSourceId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" DataSourceId.of_json in
       make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon Kendra data source. An exception is not thrown if the data source is already being deleted. While the data source is being deleted, the Status field returned by a call to the DescribeDataSource API is set to DELETING. For more information, see Deleting Data Sources."]
+       "Deletes an Amazon Kendra data source connector. An exception is not thrown if the data source is already being deleted. While the data source is being deleted, the Status field returned by a call to the DescribeDataSource API is set to DELETING. For more information, see Deleting Data Sources. Deleting an entire data source or re-syncing your index after deleting specific documents from a data source could take up to an hour or more, depending on the number of documents you want to delete."]
 module DeleteExperienceRequest =
   struct
     type nonrec t =
@@ -11881,7 +15942,7 @@ module DeleteExperienceRequest =
           "The identifier of your Amazon Kendra experience you want to delete."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index for your Amazon Kendra experience you want to delete."]}
+          "The identifier of the index for your Amazon Kendra experience."]}
     let context_ = "DeleteExperienceRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -11896,9 +15957,9 @@ module DeleteExperienceRequest =
         ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ExperienceId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ExperienceId.of_json in
       make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11992,8 +16053,10 @@ module DeleteFaqRequest =
   struct
     type nonrec t =
       {
-      id: FaqId.t [@ocaml.doc "The identifier of the FAQ to remove."];
-      indexId: IndexId.t [@ocaml.doc "The index to remove the FAQ from."]}
+      id: FaqId.t
+        [@ocaml.doc "The identifier of the FAQ you want to remove."];
+      indexId: IndexId.t
+        [@ocaml.doc "The identifier of the index for the FAQ."]}
     let context_ = "DeleteFaqRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -12007,16 +16070,18 @@ module DeleteFaqRequest =
       let id = FaqId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" FaqId.of_json in make ~indexId ~id ()
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" FaqId.of_json in
+      make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes an FAQ from an index."]
+  end[@@ocaml.doc "Removes a FAQ from an index."]
 module DeleteIndexRequest =
   struct
     type nonrec t =
       {
-      id: IndexId.t [@ocaml.doc "The identifier of the index to delete."]}
+      id: IndexId.t
+        [@ocaml.doc "The identifier of the index you want to delete."]}
     let context_ = "DeleteIndexRequest"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -12026,11 +16091,11 @@ module DeleteIndexRequest =
       let id = IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" IndexId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" IndexId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an existing Amazon Kendra index. An exception is not thrown if the index is already being deleted. While the index is being deleted, the Status field returned by a call to the DescribeIndex API is set to DELETING."]
+       "Deletes an Amazon Kendra index. An exception is not thrown if the index is already being deleted. While the index is being deleted, the Status field returned by a call to the DescribeIndex API is set to DELETING."]
 module PrincipalOrderingId =
   struct
     type nonrec t = Int64.t
@@ -12078,12 +16143,12 @@ module DeletePrincipalMappingRequest =
           "The identifier of the index you want to delete a group from."];
       dataSourceId: DataSourceId.t option
         [@ocaml.doc
-          "The identifier of the data source you want to delete a group from. This is useful if a group is tied to multiple data sources and you want to delete a group from accessing documents in a certain data source. For example, the groups \"Research\", \"Engineering\", and \"Sales and Marketing\" are all tied to the company's documents stored in the data sources Confluence and Salesforce. You want to delete \"Research\" and \"Engineering\" groups from Salesforce, so that these groups cannot access customer-related documents stored in Salesforce. Only \"Sales and Marketing\" should access documents in the Salesforce data source."];
+          "The identifier of the data source you want to delete a group from. A group can be tied to multiple data sources. You can delete a group from accessing documents in a certain data source. For example, the groups \"Research\", \"Engineering\", and \"Sales and Marketing\" are all tied to the company's documents stored in the data sources Confluence and Salesforce. You want to delete \"Research\" and \"Engineering\" groups from Salesforce, so that these groups cannot access customer-related documents stored in Salesforce. Only \"Sales and Marketing\" should access documents in the Salesforce data source."];
       groupId: GroupId.t
         [@ocaml.doc "The identifier of the group you want to delete."];
       orderingId: PrincipalOrderingId.t option
         [@ocaml.doc
-          "The timestamp identifier you specify to ensure Amazon Kendra does not override the latest DELETE action with previous actions. The highest number ID, which is the ordering ID, is the latest action you want to process and apply on top of other actions with lower number IDs. This prevents previous actions with lower number IDs from possibly overriding the latest action. The ordering ID can be the UNIX time of the last update you made to a group members list. You would then provide this list when calling PutPrincipalMapping. This ensures your DELETE action for that updated group with the latest members list doesn't get overwritten by earlier DELETE actions for the same group which are yet to be processed. The default ordering ID is the current UNIX time in milliseconds that the action was received by Amazon Kendra."]}
+          "The timestamp identifier you specify to ensure Amazon Kendra does not override the latest DELETE action with previous actions. The highest number ID, which is the ordering ID, is the latest action you want to process and apply on top of other actions with lower number IDs. This prevents previous actions with lower number IDs from possibly overriding the latest action. The ordering ID can be the Unix time of the last update you made to a group members list. You would then provide this list when calling PutPrincipalMapping. This ensures your DELETE action for that updated group with the latest members list doesn't get overwritten by earlier DELETE actions for the same group which are yet to be processed. The default ordering ID is the current Unix time in milliseconds that the action was received by Amazon Kendra."]}
     let context_ = "DeletePrincipalMappingRequest"
     let make ?dataSourceId =
       fun ?orderingId ->
@@ -12112,26 +16177,24 @@ module DeletePrincipalMappingRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?orderingId ~groupId ?dataSourceId ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let orderingId =
-        field_map json "OrderingId" PrincipalOrderingId.of_json in
-      let groupId = field_map_exn json "GroupId" GroupId.of_json in
-      let dataSourceId = field_map json "DataSourceId" DataSourceId.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+        field_map json__ "OrderingId" PrincipalOrderingId.of_json in
+      let groupId = field_map_exn json__ "GroupId" GroupId.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?orderingId ~groupId ?dataSourceId ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a group so that all users and sub groups that belong to the group can no longer access documents only available to that group. For example, after deleting the group \"Summer Interns\", all interns who belonged to that group no longer see intern-only documents in their search results. If you want to delete or replace users or sub groups of a group, you need to use the PutPrincipalMapping operation. For example, if a user in the group \"Engineering\" leaves the engineering team and another user takes their place, you provide an updated list of users or sub groups that belong to the \"Engineering\" group when calling PutPrincipalMapping. You can update your internal list of users or sub groups and input this list when calling PutPrincipalMapping. DeletePrincipalMapping is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
+       "Deletes a group so that all users that belong to the group can no longer access documents only available to that group. For example, after deleting the group \"Summer Interns\", all interns who belonged to that group no longer see intern-only documents in their search results. If you want to delete or replace users or sub groups of a group, you need to use the PutPrincipalMapping operation. For example, if a user in the group \"Engineering\" leaves the engineering team and another user takes their place, you provide an updated list of users or sub groups that belong to the \"Engineering\" group when calling PutPrincipalMapping. You can update your internal list of users or sub groups and input this list when calling PutPrincipalMapping. DeletePrincipalMapping is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
 module DeleteQuerySuggestionsBlockListRequest =
   struct
     type nonrec t =
       {
       indexId: IndexId.t
-        [@ocaml.doc
-          "The identifier of the you want to delete a block list from."];
+        [@ocaml.doc "The identifier of the index for the block list."];
       id: QuerySuggestionsBlockListId.t
-        [@ocaml.doc
-          "The unique identifier of the block list that needs to be deleted."]}
+        [@ocaml.doc "The identifier of the block list you want to delete."]}
     let context_ = "DeleteQuerySuggestionsBlockListRequest"
     let make ~indexId = fun ~id -> fun () -> { indexId; id }
     let to_value x =
@@ -12147,9 +16210,9 @@ module DeleteQuerySuggestionsBlockListRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ~id ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" QuerySuggestionsBlockListId.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" QuerySuggestionsBlockListId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ~id ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12159,10 +16222,9 @@ module DeleteThesaurusRequest =
     type nonrec t =
       {
       id: ThesaurusId.t
-        [@ocaml.doc "The identifier of the thesaurus to delete."];
+        [@ocaml.doc "The identifier of the thesaurus you want to delete."];
       indexId: IndexId.t
-        [@ocaml.doc
-          "The identifier of the index associated with the thesaurus to delete."]}
+        [@ocaml.doc "The identifier of the index for the thesaurus."]}
     let context_ = "DeleteThesaurusRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -12177,21 +16239,192 @@ module DeleteThesaurusRequest =
         ThesaurusId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ThesaurusId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ThesaurusId.of_json in
       make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes an existing Amazon Kendra thesaurus."]
+  end[@@ocaml.doc "Deletes an Amazon Kendra thesaurus."]
+module DescribeAccessControlConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index for an access control configuration."];
+      id: AccessControlConfigurationId.t
+        [@ocaml.doc
+          "The identifier of the access control configuration you want to get information on."]}
+    let context_ = "DescribeAccessControlConfigurationRequest"
+    let make ~indexId = fun ~id -> fun () -> { indexId; id }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("Id", (Some (AccessControlConfigurationId.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        AccessControlConfigurationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ~id ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" AccessControlConfigurationId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ~id ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about an access control configuration that you created for your documents in an index. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."]
+module DescribeAccessControlConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      name: AccessControlConfigurationName.t option
+        [@ocaml.doc "The name for the access control configuration."];
+      description: Description.t option
+        [@ocaml.doc "The description for the access control configuration."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "The error message containing details if there are issues processing the access control configuration."];
+      accessControlList: PrincipalList.t option
+        [@ocaml.doc
+          "Information on principals (users and/or groups) and which documents they should have access to. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."];
+      hierarchicalAccessControlList: HierarchicalPrincipalList.t option
+        [@ocaml.doc
+          "The list of principal lists that define the hierarchy for which documents users should have access to."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name =
+      fun ?description ->
+        fun ?errorMessage ->
+          fun ?accessControlList ->
+            fun ?hierarchicalAccessControlList ->
+              fun () ->
+                {
+                  name;
+                  description;
+                  errorMessage;
+                  accessControlList;
+                  hierarchicalAccessControlList
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Name",
+           (Option.map x.name ~f:AccessControlConfigurationName.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value));
+        ("AccessControlList",
+          (Option.map x.accessControlList ~f:PrincipalList.to_value));
+        ("HierarchicalAccessControlList",
+          (Option.map x.hierarchicalAccessControlList
+             ~f:HierarchicalPrincipalList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hierarchicalAccessControlList =
+        (Option.map ~f:HierarchicalPrincipalList.of_xml)
+          (Xml.child xml_arg0 "HierarchicalAccessControlList") in
+      let accessControlList =
+        (Option.map ~f:PrincipalList.of_xml)
+          (Xml.child xml_arg0 "AccessControlList") in
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:AccessControlConfigurationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?hierarchicalAccessControlList ?accessControlList ?errorMessage
+        ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hierarchicalAccessControlList =
+        field_map json__ "HierarchicalAccessControlList"
+          HierarchicalPrincipalList.of_json in
+      let accessControlList =
+        field_map json__ "AccessControlList" PrincipalList.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name =
+        field_map json__ "Name" AccessControlConfigurationName.of_json in
+      make ?hierarchicalAccessControlList ?accessControlList ?errorMessage
+        ?description ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about an access control configuration that you created for your documents in an index. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."]
 module DescribeDataSourceRequest =
   struct
     type nonrec t =
       {
       id: DataSourceId.t
-        [@ocaml.doc "The unique identifier of the data source to describe."];
+        [@ocaml.doc "The identifier of the data source connector."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index that contains the data source."]}
+          "The identifier of the index used with the data source connector."]}
     let context_ = "DescribeDataSourceRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -12206,45 +16439,48 @@ module DescribeDataSourceRequest =
         DataSourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" DataSourceId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" DataSourceId.of_json in
       make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about an Amazon Kendra data source."]
+  end[@@ocaml.doc
+       "Gets information about an Amazon Kendra data source connector."]
 module DescribeDataSourceResponse =
   struct
     type nonrec t =
       {
       id: DataSourceId.t option
-        [@ocaml.doc "The identifier of the data source."];
+        [@ocaml.doc "The identifier of the data source connector."];
       indexId: IndexId.t option
         [@ocaml.doc
-          "The identifier of the index that contains the data source."];
+          "The identifier of the index used with the data source connector."];
       name: DataSourceName.t option
-        [@ocaml.doc
-          "The name that you gave the data source when it was created."];
+        [@ocaml.doc "The name for the data source connector."];
       type_: DataSourceType.t option
-        [@ocaml.doc "The type of the data source."];
+        [@ocaml.doc "The type of the data source. For example, SHAREPOINT."];
       configuration: DataSourceConfiguration.t option
         [@ocaml.doc
-          "Describes how the data source is configured. The specific information in the description depends on the data source provider."];
+          "Configuration details for the data source connector. This shows how the data source is configured. The configuration options for a data source depend on the data source provider."];
+      vpcConfiguration: DataSourceVpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration information for an Amazon Virtual Private Cloud to connect to your data source. For more information, see Configuring a VPC."];
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "The Unix timestamp of when the data source was created."];
+          "The Unix timestamp when the data source connector was created."];
       updatedAt: Timestamp.t option
         [@ocaml.doc
-          "The Unix timestamp of when the data source was last updated."];
+          "The Unix timestamp when the data source connector was last updated."];
       description: Description.t option
-        [@ocaml.doc "The description of the data source."];
+        [@ocaml.doc "The description for the data source connector."];
       status: DataSourceStatus.t option
         [@ocaml.doc
-          "The current status of the data source. When the status is ACTIVE the data source is ready to use. When the status is FAILED, the ErrorMessage field contains the reason that the data source failed."];
+          "The current status of the data source connector. When the status is ACTIVE the data source is ready to use. When the status is FAILED, the ErrorMessage field contains the reason that the data source failed."];
       schedule: ScanSchedule.t option
         [@ocaml.doc "The schedule for Amazon Kendra to update the index."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the role that enables the data source to access its resources."];
+          "The Amazon Resource Name (ARN) of the IAM role with permission to access the data source and required resources."];
       errorMessage: ErrorMessage.t option
         [@ocaml.doc
           "When the Status field value is FAILED, the ErrorMessage field contains a description of the error that caused the data source to fail."];
@@ -12267,32 +16503,34 @@ module DescribeDataSourceResponse =
         fun ?name ->
           fun ?type_ ->
             fun ?configuration ->
-              fun ?createdAt ->
-                fun ?updatedAt ->
-                  fun ?description ->
-                    fun ?status ->
-                      fun ?schedule ->
-                        fun ?roleArn ->
-                          fun ?errorMessage ->
-                            fun ?languageCode ->
-                              fun ?customDocumentEnrichmentConfiguration ->
-                                fun () ->
-                                  {
-                                    id;
-                                    indexId;
-                                    name;
-                                    type_;
-                                    configuration;
-                                    createdAt;
-                                    updatedAt;
-                                    description;
-                                    status;
-                                    schedule;
-                                    roleArn;
-                                    errorMessage;
-                                    languageCode;
-                                    customDocumentEnrichmentConfiguration
-                                  }
+              fun ?vpcConfiguration ->
+                fun ?createdAt ->
+                  fun ?updatedAt ->
+                    fun ?description ->
+                      fun ?status ->
+                        fun ?schedule ->
+                          fun ?roleArn ->
+                            fun ?errorMessage ->
+                              fun ?languageCode ->
+                                fun ?customDocumentEnrichmentConfiguration ->
+                                  fun () ->
+                                    {
+                                      id;
+                                      indexId;
+                                      name;
+                                      type_;
+                                      configuration;
+                                      vpcConfiguration;
+                                      createdAt;
+                                      updatedAt;
+                                      description;
+                                      status;
+                                      schedule;
+                                      roleArn;
+                                      errorMessage;
+                                      languageCode;
+                                      customDocumentEnrichmentConfiguration
+                                    }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12357,6 +16595,9 @@ module DescribeDataSourceResponse =
         ("Type", (Option.map x.type_ ~f:DataSourceType.to_value));
         ("Configuration",
           (Option.map x.configuration ~f:DataSourceConfiguration.to_value));
+        ("VpcConfiguration",
+          (Option.map x.vpcConfiguration
+             ~f:DataSourceVpcConfiguration.to_value));
         ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
         ("Description", (Option.map x.description ~f:Description.to_value));
@@ -12393,6 +16634,9 @@ module DescribeDataSourceResponse =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let vpcConfiguration =
+        (Option.map ~f:DataSourceVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
       let configuration =
         (Option.map ~f:DataSourceConfiguration.of_xml)
           (Xml.child xml_arg0 "Configuration") in
@@ -12405,31 +16649,35 @@ module DescribeDataSourceResponse =
       let id = (Option.map ~f:DataSourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?customDocumentEnrichmentConfiguration ?languageCode ?errorMessage
         ?roleArn ?schedule ?status ?description ?updatedAt ?createdAt
-        ?configuration ?type_ ?name ?indexId ?id ()
+        ?vpcConfiguration ?configuration ?type_ ?name ?indexId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customDocumentEnrichmentConfiguration =
-        field_map json "CustomDocumentEnrichmentConfiguration"
+        field_map json__ "CustomDocumentEnrichmentConfiguration"
           CustomDocumentEnrichmentConfiguration.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let schedule = field_map json "Schedule" ScanSchedule.of_json in
-      let status = field_map json "Status" DataSourceStatus.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let schedule = field_map json__ "Schedule" ScanSchedule.of_json in
+      let status = field_map json__ "Status" DataSourceStatus.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
       let configuration =
-        field_map json "Configuration" DataSourceConfiguration.of_json in
-      let type_ = field_map json "Type" DataSourceType.of_json in
-      let name = field_map json "Name" DataSourceName.of_json in
-      let indexId = field_map json "IndexId" IndexId.of_json in
-      let id = field_map json "Id" DataSourceId.of_json in
+        field_map json__ "Configuration" DataSourceConfiguration.of_json in
+      let type_ = field_map json__ "Type" DataSourceType.of_json in
+      let name = field_map json__ "Name" DataSourceName.of_json in
+      let indexId = field_map json__ "IndexId" IndexId.of_json in
+      let id = field_map json__ "Id" DataSourceId.of_json in
       make ?customDocumentEnrichmentConfiguration ?languageCode ?errorMessage
         ?roleArn ?schedule ?status ?description ?updatedAt ?createdAt
-        ?configuration ?type_ ?name ?indexId ?id ()
+        ?vpcConfiguration ?configuration ?type_ ?name ?indexId ?id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about an Amazon Kendra data source."]
+  end[@@ocaml.doc
+       "Gets information about an Amazon Kendra data source connector."]
 module DescribeExperienceRequest =
   struct
     type nonrec t =
@@ -12439,7 +16687,7 @@ module DescribeExperienceRequest =
           "The identifier of your Amazon Kendra experience you want to get information on."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index for your Amazon Kendra experience you want to get information on."]}
+          "The identifier of the index for your Amazon Kendra experience."]}
     let context_ = "DescribeExperienceRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -12454,9 +16702,9 @@ module DescribeExperienceRequest =
         ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ExperienceId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ExperienceId.of_json in
       make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12553,9 +16801,9 @@ module ExperienceEndpoint =
           (Xml.child xml_arg0 "EndpointType") in
       make ?endpoint ?endpointType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpoint = field_map json "Endpoint" Endpoint.of_json in
-      let endpointType = field_map json "EndpointType" EndpointType.of_json in
+    let of_json json__ =
+      let endpoint = field_map json__ "Endpoint" Endpoint.of_json in
+      let endpointType = field_map json__ "EndpointType" EndpointType.of_json in
       make ?endpoint ?endpointType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12568,6 +16816,9 @@ module ExperienceEndpoints =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperienceEndpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12608,10 +16859,10 @@ module DescribeExperienceResponse =
           "Shows the configuration information for your Amazon Kendra experience. This includes ContentSourceConfiguration, which specifies the data source IDs and/or FAQ IDs, and UserIdentityConfiguration, which specifies the user or group information to grant access to your Amazon Kendra experience."];
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "Shows the date-time your Amazon Kendra experience was created."];
+          "The Unix timestamp when your Amazon Kendra experience was created."];
       updatedAt: Timestamp.t option
         [@ocaml.doc
-          "Shows the date-time your Amazon Kendra experience was last updated."];
+          "The Unix timestamp when your Amazon Kendra experience was last updated."];
       description: Description.t option
         [@ocaml.doc
           "Shows the description for your Amazon Kendra experience."];
@@ -12620,7 +16871,7 @@ module DescribeExperienceResponse =
           "The current processing status of your Amazon Kendra experience. When the status is ACTIVE, your Amazon Kendra experience is ready to use. When the status is FAILED, the ErrorMessage field contains the reason that this failed."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "Shows the Amazon Resource Name (ARN) of a role with permission to access Query API, QuerySuggestions API, SubmitFeedback API, and Amazon Web Services SSO that stores your user and group information."];
+          "The Amazon Resource Name (ARN) of the IAM role with permission to access the Query API, QuerySuggestions API, SubmitFeedback API, and IAM Identity Center that stores your users and groups information."];
       errorMessage: ErrorMessage.t option
         [@ocaml.doc
           "The reason your Amazon Kendra experience could not properly process."]}
@@ -12757,19 +17008,20 @@ module DescribeExperienceResponse =
       make ?errorMessage ?roleArn ?status ?description ?updatedAt ?createdAt
         ?configuration ?endpoints ?name ?indexId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let status = field_map json "Status" ExperienceStatus.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let status = field_map json__ "Status" ExperienceStatus.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       let configuration =
-        field_map json "Configuration" ExperienceConfiguration.of_json in
-      let endpoints = field_map json "Endpoints" ExperienceEndpoints.of_json in
-      let name = field_map json "Name" ExperienceName.of_json in
-      let indexId = field_map json "IndexId" IndexId.of_json in
-      let id = field_map json "Id" ExperienceId.of_json in
+        field_map json__ "Configuration" ExperienceConfiguration.of_json in
+      let endpoints =
+        field_map json__ "Endpoints" ExperienceEndpoints.of_json in
+      let name = field_map json__ "Name" ExperienceName.of_json in
+      let indexId = field_map json__ "IndexId" IndexId.of_json in
+      let id = field_map json__ "Id" ExperienceId.of_json in
       make ?errorMessage ?roleArn ?status ?description ?updatedAt ?createdAt
         ?configuration ?endpoints ?name ?indexId ?id ()
     let to_json v = composed_to_json to_value v
@@ -12779,9 +17031,11 @@ module DescribeFaqRequest =
   struct
     type nonrec t =
       {
-      id: FaqId.t [@ocaml.doc "The unique identifier of the FAQ."];
+      id: FaqId.t
+        [@ocaml.doc
+          "The identifier of the FAQ you want to get information on."];
       indexId: IndexId.t
-        [@ocaml.doc "The identifier of the index that contains the FAQ."]}
+        [@ocaml.doc "The identifier of the index for the FAQ."]}
     let context_ = "DescribeFaqRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -12795,11 +17049,12 @@ module DescribeFaqRequest =
       let id = FaqId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" FaqId.of_json in make ~indexId ~id ()
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" FaqId.of_json in
+      make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about an FAQ list."]
+  end[@@ocaml.doc "Gets information about a FAQ."]
 module FaqStatus =
   struct
     type nonrec t =
@@ -12840,28 +17095,28 @@ module DescribeFaqResponse =
       {
       id: FaqId.t option [@ocaml.doc "The identifier of the FAQ."];
       indexId: IndexId.t option
-        [@ocaml.doc "The identifier of the index that contains the FAQ."];
+        [@ocaml.doc "The identifier of the index for the FAQ."];
       name: FaqName.t option
         [@ocaml.doc "The name that you gave the FAQ when it was created."];
       description: Description.t option
         [@ocaml.doc
           "The description of the FAQ that you provided when it was created."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The date and time that the FAQ was created."];
+        [@ocaml.doc "The Unix timestamp when the FAQ was created."];
       updatedAt: Timestamp.t option
-        [@ocaml.doc "The date and time that the FAQ was last updated."];
+        [@ocaml.doc "The Unix timestamp when the FAQ was last updated."];
       s3Path: S3Path.t option ;
       status: FaqStatus.t option
         [@ocaml.doc
           "The status of the FAQ. It is ready to use when the status is ACTIVE."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the role that provides access to the S3 bucket containing the input files for the FAQ."];
+          "The Amazon Resource Name (ARN) of the IAM role that provides access to the S3 bucket containing the FAQ file."];
       errorMessage: ErrorMessage.t option
         [@ocaml.doc
           "If the Status field is FAILED, the ErrorMessage field contains the reason why the FAQ failed."];
       fileFormat: FaqFileFormat.t option
-        [@ocaml.doc "The file format used by the input files for the FAQ."];
+        [@ocaml.doc "The file format used for the FAQ file."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
           "The code for a language. This shows a supported language for the FAQ document. English is supported by default. For more information on supported languages, including their codes, see Adding documents in languages other than English."]}
@@ -13001,28 +17256,371 @@ module DescribeFaqResponse =
       make ?languageCode ?fileFormat ?errorMessage ?roleArn ?status ?s3Path
         ?updatedAt ?createdAt ?description ?name ?indexId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let fileFormat = field_map json "FileFormat" FaqFileFormat.of_json in
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let status = field_map json "Status" FaqStatus.of_json in
-      let s3Path = field_map json "S3Path" S3Path.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" FaqName.of_json in
-      let indexId = field_map json "IndexId" IndexId.of_json in
-      let id = field_map json "Id" FaqId.of_json in
+    let of_json json__ =
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let fileFormat = field_map json__ "FileFormat" FaqFileFormat.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let status = field_map json__ "Status" FaqStatus.of_json in
+      let s3Path = field_map json__ "S3Path" S3Path.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" FaqName.of_json in
+      let indexId = field_map json__ "IndexId" IndexId.of_json in
+      let id = field_map json__ "Id" FaqId.of_json in
       make ?languageCode ?fileFormat ?errorMessage ?roleArn ?status ?s3Path
         ?updatedAt ?createdAt ?description ?name ?indexId ?id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about an FAQ list."]
+  end[@@ocaml.doc "Gets information about a FAQ."]
+module DescribeFeaturedResultsSetRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index used for featuring results."];
+      featuredResultsSetId: FeaturedResultsSetId.t
+        [@ocaml.doc
+          "The identifier of the set of featured results that you want to get information on."]}
+    let context_ = "DescribeFeaturedResultsSetRequest"
+    let make ~indexId =
+      fun ~featuredResultsSetId ->
+        fun () -> { indexId; featuredResultsSetId }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("FeaturedResultsSetId",
+          (Some (FeaturedResultsSetId.to_value x.featuredResultsSetId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let featuredResultsSetId =
+        FeaturedResultsSetId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FeaturedResultsSetId") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ~featuredResultsSetId ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let featuredResultsSetId =
+        field_map_exn json__ "FeaturedResultsSetId"
+          FeaturedResultsSetId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ~featuredResultsSetId ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about a set of featured results. Features results are placed above all other results for certain queries. If there's an exact match of a query, then one or more specific documents are featured in the search results."]
+module FeaturedDocumentWithMetadata =
+  struct
+    type nonrec t =
+      {
+      id: DocumentId.t option
+        [@ocaml.doc
+          "The identifier of the featured document with its metadata. You can use the Query API to search for specific documents with their document IDs included in the result items, or you can use the console."];
+      title: String_.t option
+        [@ocaml.doc "The main title of the featured document."];
+      uRI: Url.t option
+        [@ocaml.doc "The source URI location of the featured document."]}
+    let make ?id = fun ?title -> fun ?uRI -> fun () -> { id; title; uRI }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:DocumentId.to_value));
+        ("Title", (Option.map x.title ~f:String_.to_value));
+        ("URI", (Option.map x.uRI ~f:Url.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uRI = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "URI") in
+      let title = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Title") in
+      let id = (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?uRI ?title ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uRI = field_map json__ "URI" Url.of_json in
+      let title = field_map json__ "Title" String_.of_json in
+      let id = field_map json__ "Id" DocumentId.of_json in
+      make ?uRI ?title ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A featured document with its metadata information. This document is displayed at the top of the search results page, placed above all other results for certain queries. If there's an exact match of a query, then the document is featured in the search results."]
+module FeaturedDocumentWithMetadataList =
+  struct
+    type nonrec t = FeaturedDocumentWithMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FeaturedDocumentWithMetadata.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FeaturedDocumentWithMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FeaturedDocumentWithMetadataList"
+        ~of_json:FeaturedDocumentWithMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FeaturedDocumentMissing =
+  struct
+    type nonrec t =
+      {
+      id: DocumentId.t option
+        [@ocaml.doc
+          "The identifier of the document that doesn't exist but you have specified as a featured document."]}
+    let make ?id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("Id", (Option.map x.id ~f:DocumentId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "Id" DocumentId.of_json in make ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A document ID doesn't exist but you have specified as a featured document. Amazon Kendra cannot feature the document if it doesn't exist in the index. You can check the status of a document and its ID or check for documents with status errors using the BatchGetDocumentStatus API."]
+module FeaturedDocumentMissingList =
+  struct
+    type nonrec t = FeaturedDocumentMissing.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FeaturedDocumentMissing.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FeaturedDocumentMissing.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FeaturedDocumentMissingList"
+        ~of_json:FeaturedDocumentMissing.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeFeaturedResultsSetResponse =
+  struct
+    type nonrec t =
+      {
+      featuredResultsSetId: FeaturedResultsSetId.t option
+        [@ocaml.doc "The identifier of the set of featured results."];
+      featuredResultsSetName: FeaturedResultsSetName.t option
+        [@ocaml.doc "The name for the set of featured results."];
+      description: FeaturedResultsSetDescription.t option
+        [@ocaml.doc "The description for the set of featured results."];
+      status: FeaturedResultsSetStatus.t option
+        [@ocaml.doc
+          "The current status of the set of featured results. When the value is ACTIVE, featured results are ready for use. You can still configure your settings before setting the status to ACTIVE. You can set the status to ACTIVE or INACTIVE using the UpdateFeaturedResultsSet API. The queries you specify for featured results must be unique per featured results set for each index, whether the status is ACTIVE or INACTIVE."];
+      queryTexts: QueryTextList.t option
+        [@ocaml.doc
+          "The list of queries for featuring results. For more information on the list of queries, see FeaturedResultsSet."];
+      featuredDocumentsWithMetadata:
+        FeaturedDocumentWithMetadataList.t option
+        [@ocaml.doc
+          "The list of document IDs for the documents you want to feature with their metadata information. For more information on the list of featured documents, see FeaturedResultsSet."];
+      featuredDocumentsMissing: FeaturedDocumentMissingList.t option
+        [@ocaml.doc
+          "The list of document IDs that don't exist but you have specified as featured documents. Amazon Kendra cannot feature these documents if they don't exist in the index. You can check the status of a document and its ID or check for documents with status errors using the BatchGetDocumentStatus API."];
+      lastUpdatedTimestamp: Long.t option
+        [@ocaml.doc
+          "The timestamp when the set of featured results was last updated."];
+      creationTimestamp: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp when the set of the featured results was created."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?featuredResultsSetId =
+      fun ?featuredResultsSetName ->
+        fun ?description ->
+          fun ?status ->
+            fun ?queryTexts ->
+              fun ?featuredDocumentsWithMetadata ->
+                fun ?featuredDocumentsMissing ->
+                  fun ?lastUpdatedTimestamp ->
+                    fun ?creationTimestamp ->
+                      fun () ->
+                        {
+                          featuredResultsSetId;
+                          featuredResultsSetName;
+                          description;
+                          status;
+                          queryTexts;
+                          featuredDocumentsWithMetadata;
+                          featuredDocumentsMissing;
+                          lastUpdatedTimestamp;
+                          creationTimestamp
+                        }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FeaturedResultsSetId",
+           (Option.map x.featuredResultsSetId
+              ~f:FeaturedResultsSetId.to_value));
+        ("FeaturedResultsSetName",
+          (Option.map x.featuredResultsSetName
+             ~f:FeaturedResultsSetName.to_value));
+        ("Description",
+          (Option.map x.description ~f:FeaturedResultsSetDescription.to_value));
+        ("Status",
+          (Option.map x.status ~f:FeaturedResultsSetStatus.to_value));
+        ("QueryTexts", (Option.map x.queryTexts ~f:QueryTextList.to_value));
+        ("FeaturedDocumentsWithMetadata",
+          (Option.map x.featuredDocumentsWithMetadata
+             ~f:FeaturedDocumentWithMetadataList.to_value));
+        ("FeaturedDocumentsMissing",
+          (Option.map x.featuredDocumentsMissing
+             ~f:FeaturedDocumentMissingList.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Long.to_value));
+        ("CreationTimestamp",
+          (Option.map x.creationTimestamp ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTimestamp =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "CreationTimestamp") in
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let featuredDocumentsMissing =
+        (Option.map ~f:FeaturedDocumentMissingList.of_xml)
+          (Xml.child xml_arg0 "FeaturedDocumentsMissing") in
+      let featuredDocumentsWithMetadata =
+        (Option.map ~f:FeaturedDocumentWithMetadataList.of_xml)
+          (Xml.child xml_arg0 "FeaturedDocumentsWithMetadata") in
+      let queryTexts =
+        (Option.map ~f:QueryTextList.of_xml)
+          (Xml.child xml_arg0 "QueryTexts") in
+      let status =
+        (Option.map ~f:FeaturedResultsSetStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:FeaturedResultsSetDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let featuredResultsSetName =
+        (Option.map ~f:FeaturedResultsSetName.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSetName") in
+      let featuredResultsSetId =
+        (Option.map ~f:FeaturedResultsSetId.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSetId") in
+      make ?creationTimestamp ?lastUpdatedTimestamp ?featuredDocumentsMissing
+        ?featuredDocumentsWithMetadata ?queryTexts ?status ?description
+        ?featuredResultsSetName ?featuredResultsSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTimestamp =
+        field_map json__ "CreationTimestamp" Long.of_json in
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Long.of_json in
+      let featuredDocumentsMissing =
+        field_map json__ "FeaturedDocumentsMissing"
+          FeaturedDocumentMissingList.of_json in
+      let featuredDocumentsWithMetadata =
+        field_map json__ "FeaturedDocumentsWithMetadata"
+          FeaturedDocumentWithMetadataList.of_json in
+      let queryTexts = field_map json__ "QueryTexts" QueryTextList.of_json in
+      let status = field_map json__ "Status" FeaturedResultsSetStatus.of_json in
+      let description =
+        field_map json__ "Description" FeaturedResultsSetDescription.of_json in
+      let featuredResultsSetName =
+        field_map json__ "FeaturedResultsSetName"
+          FeaturedResultsSetName.of_json in
+      let featuredResultsSetId =
+        field_map json__ "FeaturedResultsSetId" FeaturedResultsSetId.of_json in
+      make ?creationTimestamp ?lastUpdatedTimestamp ?featuredDocumentsMissing
+        ?featuredDocumentsWithMetadata ?queryTexts ?status ?description
+        ?featuredResultsSetName ?featuredResultsSetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about a set of featured results. Features results are placed above all other results for certain queries. If there's an exact match of a query, then one or more specific documents are featured in the search results."]
 module DescribeIndexRequest =
   struct
     type nonrec t =
       {
-      id: IndexId.t [@ocaml.doc "The identifier of the index to describe."]}
+      id: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index you want to get information on."]}
     let context_ = "DescribeIndexRequest"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -13032,10 +17630,10 @@ module DescribeIndexRequest =
       let id = IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" IndexId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" IndexId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an existing Amazon Kendra index."]
+  end[@@ocaml.doc "Gets information about an Amazon Kendra index."]
 module IndexStatus =
   struct
     type nonrec t =
@@ -13107,39 +17705,37 @@ module TextDocumentStatistics =
   struct
     type nonrec t =
       {
-      indexedTextDocumentsCount: IndexedTextDocumentsCount.t
+      indexedTextDocumentsCount: IndexedTextDocumentsCount.t option
         [@ocaml.doc "The number of text documents indexed."];
-      indexedTextBytes: IndexedTextBytes.t
+      indexedTextBytes: IndexedTextBytes.t option
         [@ocaml.doc "The total size, in bytes, of the indexed documents."]}
-    let context_ = "TextDocumentStatistics"
-    let make ~indexedTextDocumentsCount =
-      fun ~indexedTextBytes ->
+    let make ?indexedTextDocumentsCount =
+      fun ?indexedTextBytes ->
         fun () -> { indexedTextDocumentsCount; indexedTextBytes }
     let to_value x =
       structure_to_value
         [("IndexedTextDocumentsCount",
-           (Some
-              (IndexedTextDocumentsCount.to_value x.indexedTextDocumentsCount)));
+           (Option.map x.indexedTextDocumentsCount
+              ~f:IndexedTextDocumentsCount.to_value));
         ("IndexedTextBytes",
-          (Some (IndexedTextBytes.to_value x.indexedTextBytes)))]
+          (Option.map x.indexedTextBytes ~f:IndexedTextBytes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let indexedTextBytes =
-        IndexedTextBytes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexedTextBytes") in
+        (Option.map ~f:IndexedTextBytes.of_xml)
+          (Xml.child xml_arg0 "IndexedTextBytes") in
       let indexedTextDocumentsCount =
-        IndexedTextDocumentsCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "IndexedTextDocumentsCount") in
-      make ~indexedTextBytes ~indexedTextDocumentsCount ()
+        (Option.map ~f:IndexedTextDocumentsCount.of_xml)
+          (Xml.child xml_arg0 "IndexedTextDocumentsCount") in
+      make ?indexedTextBytes ?indexedTextDocumentsCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let indexedTextBytes =
-        field_map_exn json "IndexedTextBytes" IndexedTextBytes.of_json in
+        field_map json__ "IndexedTextBytes" IndexedTextBytes.of_json in
       let indexedTextDocumentsCount =
-        field_map_exn json "IndexedTextDocumentsCount"
+        field_map json__ "IndexedTextDocumentsCount"
           IndexedTextDocumentsCount.of_json in
-      make ~indexedTextBytes ~indexedTextDocumentsCount ()
+      make ?indexedTextBytes ?indexedTextDocumentsCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about text documents indexed in an index."]
@@ -13163,68 +17759,66 @@ module FaqStatistics =
   struct
     type nonrec t =
       {
-      indexedQuestionAnswersCount: IndexedQuestionAnswersCount.t
+      indexedQuestionAnswersCount: IndexedQuestionAnswersCount.t option
         [@ocaml.doc
-          "The total number of FAQ questions and answers contained in the index."]}
-    let context_ = "FaqStatistics"
-    let make ~indexedQuestionAnswersCount =
+          "The total number of FAQ questions and answers for an index."]}
+    let make ?indexedQuestionAnswersCount =
       fun () -> { indexedQuestionAnswersCount }
     let to_value x =
       structure_to_value
         [("IndexedQuestionAnswersCount",
-           (Some
-              (IndexedQuestionAnswersCount.to_value
-                 x.indexedQuestionAnswersCount)))]
+           (Option.map x.indexedQuestionAnswersCount
+              ~f:IndexedQuestionAnswersCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let indexedQuestionAnswersCount =
-        IndexedQuestionAnswersCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "IndexedQuestionAnswersCount") in
-      make ~indexedQuestionAnswersCount ()
+        (Option.map ~f:IndexedQuestionAnswersCount.of_xml)
+          (Xml.child xml_arg0 "IndexedQuestionAnswersCount") in
+      make ?indexedQuestionAnswersCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let indexedQuestionAnswersCount =
-        field_map_exn json "IndexedQuestionAnswersCount"
+        field_map json__ "IndexedQuestionAnswersCount"
           IndexedQuestionAnswersCount.of_json in
-      make ~indexedQuestionAnswersCount ()
+      make ?indexedQuestionAnswersCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides statistical information about the FAQ questions and answers contained in an index."]
+       "Provides statistical information about the FAQ questions and answers for an index."]
 module IndexStatistics =
   struct
     type nonrec t =
       {
-      faqStatistics: FaqStatistics.t
+      faqStatistics: FaqStatistics.t option
         [@ocaml.doc "The number of question and answer topics in the index."];
-      textDocumentStatistics: TextDocumentStatistics.t
+      textDocumentStatistics: TextDocumentStatistics.t option
         [@ocaml.doc "The number of text documents indexed."]}
-    let context_ = "IndexStatistics"
-    let make ~faqStatistics =
-      fun ~textDocumentStatistics ->
+    let make ?faqStatistics =
+      fun ?textDocumentStatistics ->
         fun () -> { faqStatistics; textDocumentStatistics }
     let to_value x =
       structure_to_value
-        [("FaqStatistics", (Some (FaqStatistics.to_value x.faqStatistics)));
+        [("FaqStatistics",
+           (Option.map x.faqStatistics ~f:FaqStatistics.to_value));
         ("TextDocumentStatistics",
-          (Some (TextDocumentStatistics.to_value x.textDocumentStatistics)))]
+          (Option.map x.textDocumentStatistics
+             ~f:TextDocumentStatistics.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let textDocumentStatistics =
-        TextDocumentStatistics.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TextDocumentStatistics") in
+        (Option.map ~f:TextDocumentStatistics.of_xml)
+          (Xml.child xml_arg0 "TextDocumentStatistics") in
       let faqStatistics =
-        FaqStatistics.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FaqStatistics") in
-      make ~textDocumentStatistics ~faqStatistics ()
+        (Option.map ~f:FaqStatistics.of_xml)
+          (Xml.child xml_arg0 "FaqStatistics") in
+      make ?textDocumentStatistics ?faqStatistics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textDocumentStatistics =
-        field_map_exn json "TextDocumentStatistics"
+        field_map json__ "TextDocumentStatistics"
           TextDocumentStatistics.of_json in
       let faqStatistics =
-        field_map_exn json "FaqStatistics" FaqStatistics.of_json in
-      make ~textDocumentStatistics ~faqStatistics ()
+        field_map json__ "FaqStatistics" FaqStatistics.of_json in
+      make ?textDocumentStatistics ?faqStatistics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about the number of documents and the number of questions and answers in an index."]
@@ -13267,11 +17861,11 @@ module Search =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Facetable") in
       make ?sortable ?displayable ?searchable ?facetable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortable = field_map json "Sortable" Boolean.of_json in
-      let displayable = field_map json "Displayable" Boolean.of_json in
-      let searchable = field_map json "Searchable" Boolean.of_json in
-      let facetable = field_map json "Facetable" Boolean.of_json in
+    let of_json json__ =
+      let sortable = field_map json__ "Sortable" Boolean.of_json in
+      let displayable = field_map json__ "Displayable" Boolean.of_json in
+      let searchable = field_map json__ "Searchable" Boolean.of_json in
+      let facetable = field_map json__ "Facetable" Boolean.of_json in
       make ?sortable ?displayable ?searchable ?facetable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13333,6 +17927,8 @@ module ValueImportanceMap =
                     (fun x -> (Importance.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -13404,7 +18000,7 @@ module Relevance =
       {
       freshness: DocumentMetadataBoolean.t option
         [@ocaml.doc
-          "Indicates that this field determines how \"fresh\" a document is. For example, if document 1 was created on November 5, and document 2 was created on October 31, document 1 is \"fresher\" than document 2. You can only set the Freshness field on one DATE type field. Only applies to DATE fields."];
+          "Indicates that this field determines how \"fresh\" a document is. For example, if document 1 was created on November 5, and document 2 was created on October 31, document 1 is \"fresher\" than document 2. Only applies to DATE fields."];
       importance: Importance.t option
         [@ocaml.doc
           "The relative importance of the field in the search. Larger numbers provide more of a boost than smaller numbers."];
@@ -13413,10 +18009,10 @@ module Relevance =
           "Specifies the time period that the boost applies to. For example, to make the boost apply to documents with the field value within the last month, you would use \"2628000s\". Once the field value is beyond the specified range, the effect of the boost drops off. The higher the importance, the faster the effect drops off. If you don't specify a value, the default is 3 months. The value of the field is a numeric string followed by the character \"s\", for example \"86400s\" for one day, or \"604800s\" for one week. Only applies to DATE fields."];
       rankOrder: Order.t option
         [@ocaml.doc
-          "Determines how values should be interpreted. When the RankOrder field is ASCENDING, higher numbers are better. For example, a document with a rating score of 10 is higher ranking than a document with a rating score of 1. When the RankOrder field is DESCENDING, lower numbers are better. For example, in a task tracking application, a priority 1 task is more important than a priority 5 task. Only applies to LONG and DOUBLE fields."];
+          "Determines how values should be interpreted. When the RankOrder field is ASCENDING, higher numbers are better. For example, a document with a rating score of 10 is higher ranking than a document with a rating score of 1. When the RankOrder field is DESCENDING, lower numbers are better. For example, in a task tracking application, a priority 1 task is more important than a priority 5 task. Only applies to LONG fields."];
       valueImportanceMap: ValueImportanceMap.t option
         [@ocaml.doc
-          "A list of values that should be given a different boost when they appear in the result list. For example, if you are boosting a field called \"department,\" query terms that match the department field are boosted in the result. However, you can add entries from the department field to boost documents with those values higher. For example, you can add entries to the map with names of departments. If you add \"HR\",5 and \"Legal\",3 those departments are given special attention when they appear in the metadata of a document. When those terms appear they are given the specified importance instead of the regular importance for the boost."]}
+          "A list of values that should be given a different boost when they appear in the result list. For example, if you are boosting a field called \"department\", query terms that match the department field are boosted in the result. However, you can add entries from the department field to boost documents with those values higher. For example, you can add entries to the map with names of departments. If you add \"HR\",5 and \"Legal\",3 those departments are given special attention when they appear in the metadata of a document. When those terms appear they are given the specified importance instead of the regular importance for the boost."]}
     let make ?freshness =
       fun ?importance ->
         fun ?duration ->
@@ -13455,18 +18051,18 @@ module Relevance =
           (Xml.child xml_arg0 "Freshness") in
       make ?valueImportanceMap ?rankOrder ?duration ?importance ?freshness ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let valueImportanceMap =
-        field_map json "ValueImportanceMap" ValueImportanceMap.of_json in
-      let rankOrder = field_map json "RankOrder" Order.of_json in
-      let duration = field_map json "Duration" Duration.of_json in
-      let importance = field_map json "Importance" Importance.of_json in
+        field_map json__ "ValueImportanceMap" ValueImportanceMap.of_json in
+      let rankOrder = field_map json__ "RankOrder" Order.of_json in
+      let duration = field_map json__ "Duration" Duration.of_json in
+      let importance = field_map json__ "Importance" Importance.of_json in
       let freshness =
-        field_map json "Freshness" DocumentMetadataBoolean.of_json in
+        field_map json__ "Freshness" DocumentMetadataBoolean.of_json in
       make ?valueImportanceMap ?rankOrder ?duration ?importance ?freshness ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information for manually tuning the relevance of a field in a search. When a query includes terms that match the field, the results are given a boost in the response based on these tuning parameters."]
+       "Provides information for tuning the relevance of a field in a search. When a query includes terms that match the field, the results are given a boost in the response based on these tuning parameters."]
 module DocumentMetadataConfigurationName =
   struct
     type nonrec t = string
@@ -13530,7 +18126,7 @@ module DocumentMetadataConfiguration =
         [@ocaml.doc "The data type of the index field."];
       relevance: Relevance.t option
         [@ocaml.doc
-          "Provides manual tuning parameters to determine how the field affects the search results."];
+          "Provides tuning parameters to determine how the field affects the search results."];
       search: Search.t option
         [@ocaml.doc
           "Provides information about how the field is used during a search."]}
@@ -13559,16 +18155,17 @@ module DocumentMetadataConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?search ?relevance ~type_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let search = field_map json "Search" Search.of_json in
-      let relevance = field_map json "Relevance" Relevance.of_json in
+    let of_json json__ =
+      let search = field_map json__ "Search" Search.of_json in
+      let relevance = field_map json__ "Relevance" Relevance.of_json in
       let type_ =
-        field_map_exn json "Type" DocumentAttributeValueType.of_json in
+        field_map_exn json__ "Type" DocumentAttributeValueType.of_json in
       let name =
-        field_map_exn json "Name" DocumentMetadataConfigurationName.of_json in
+        field_map_exn json__ "Name" DocumentMetadataConfigurationName.of_json in
       make ?search ?relevance ~type_ ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies the properties of a custom index field."]
+  end[@@ocaml.doc
+       "Specifies the properties, such as relevance tuning and searchability, of an index field."]
 module DocumentMetadataConfigurationList =
   struct
     type nonrec t = DocumentMetadataConfiguration.t list
@@ -13578,6 +18175,9 @@ module DocumentMetadataConfigurationList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentMetadataConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -13611,24 +18211,24 @@ module DescribeIndexResponse =
           "The Amazon Kendra edition used for the index. You decide the edition when you create the index."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM role that gives Amazon Kendra permission to write to your Amazon Cloudwatch logs."];
+          "The Amazon Resource Name (ARN) of the IAM role that gives Amazon Kendra permission to write to your Amazon CloudWatch logs."];
       serverSideEncryptionConfiguration:
         ServerSideEncryptionConfiguration.t option
         [@ocaml.doc
-          "The identifier of the KMScustomer master key (CMK) that is used to encrypt your data. Amazon Kendra doesn't support asymmetric CMKs."];
+          "The identifier of the KMS customer master key (CMK) that is used to encrypt your data. Amazon Kendra doesn't support asymmetric CMKs."];
       status: IndexStatus.t option
         [@ocaml.doc
           "The current status of the index. When the value is ACTIVE, the index is ready for use. If the Status field value is FAILED, the ErrorMessage field contains a message that explains why."];
       description: Description.t option
         [@ocaml.doc "The description for the index."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The Unix datetime that the index was created."];
+        [@ocaml.doc "The Unix timestamp when the index was created."];
       updatedAt: Timestamp.t option
-        [@ocaml.doc "The Unix datetime that the index was last updated."];
+        [@ocaml.doc "The Unix timestamp when the index was last updated."];
       documentMetadataConfigurations:
         DocumentMetadataConfigurationList.t option
         [@ocaml.doc
-          "Configuration settings for any metadata applied to the documents in the index."];
+          "Configuration information for document metadata or fields. Document metadata are fields or attributes associated with your documents. For example, the company department name associated with each document."];
       indexStatistics: IndexStatistics.t option
         [@ocaml.doc
           "Provides information about the number of FAQ questions and answers and the number of text documents indexed."];
@@ -13646,7 +18246,7 @@ module DescribeIndexResponse =
       userGroupResolutionConfiguration:
         UserGroupResolutionConfiguration.t option
         [@ocaml.doc
-          "Shows whether you have enabled the configuration for fetching access levels of groups and users from an Amazon Web Services Single Sign On identity source."]}
+          "Whether you have enabled IAM Identity Center identity source for your users and groups. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -13821,41 +18421,41 @@ module DescribeIndexResponse =
         ?createdAt ?description ?status ?serverSideEncryptionConfiguration
         ?roleArn ?edition ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userGroupResolutionConfiguration =
-        field_map json "UserGroupResolutionConfiguration"
+        field_map json__ "UserGroupResolutionConfiguration"
           UserGroupResolutionConfiguration.of_json in
       let userContextPolicy =
-        field_map json "UserContextPolicy" UserContextPolicy.of_json in
+        field_map json__ "UserContextPolicy" UserContextPolicy.of_json in
       let userTokenConfigurations =
-        field_map json "UserTokenConfigurations"
+        field_map json__ "UserTokenConfigurations"
           UserTokenConfigurationList.of_json in
       let capacityUnits =
-        field_map json "CapacityUnits" CapacityUnitsConfiguration.of_json in
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
+        field_map json__ "CapacityUnits" CapacityUnitsConfiguration.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
       let indexStatistics =
-        field_map json "IndexStatistics" IndexStatistics.of_json in
+        field_map json__ "IndexStatistics" IndexStatistics.of_json in
       let documentMetadataConfigurations =
-        field_map json "DocumentMetadataConfigurations"
+        field_map json__ "DocumentMetadataConfigurations"
           DocumentMetadataConfigurationList.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let status = field_map json "Status" IndexStatus.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let status = field_map json__ "Status" IndexStatus.of_json in
       let serverSideEncryptionConfiguration =
-        field_map json "ServerSideEncryptionConfiguration"
+        field_map json__ "ServerSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let edition = field_map json "Edition" IndexEdition.of_json in
-      let id = field_map json "Id" IndexId.of_json in
-      let name = field_map json "Name" IndexName.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let edition = field_map json__ "Edition" IndexEdition.of_json in
+      let id = field_map json__ "Id" IndexId.of_json in
+      let name = field_map json__ "Name" IndexName.of_json in
       make ?userGroupResolutionConfiguration ?userContextPolicy
         ?userTokenConfigurations ?capacityUnits ?errorMessage
         ?indexStatistics ?documentMetadataConfigurations ?updatedAt
         ?createdAt ?description ?status ?serverSideEncryptionConfiguration
         ?roleArn ?edition ?id ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an existing Amazon Kendra index."]
+  end[@@ocaml.doc "Gets information about an Amazon Kendra index."]
 module DescribePrincipalMappingRequest =
   struct
     type nonrec t =
@@ -13890,10 +18490,10 @@ module DescribePrincipalMappingRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ~groupId ?dataSourceId ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" GroupId.of_json in
-      let dataSourceId = field_map json "DataSourceId" DataSourceId.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" GroupId.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ~groupId ?dataSourceId ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13963,10 +18563,10 @@ module GroupOrderingIdSummary =
           "The current processing status of actions for mapping users to their groups. The status can be either PROCESSING, SUCCEEDED, DELETING, DELETED, or FAILED."];
       lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
-          "The last date-time an action was updated. An action can be a PUT or DELETE action for mapping users to their groups."];
+          "The Unix timestamp when an action was last updated. An action can be a PUT or DELETE action for mapping users to their groups."];
       receivedAt: Timestamp.t option
         [@ocaml.doc
-          "The date-time an action was received by Amazon Kendra. An action can be a PUT or DELETE action for mapping users to their groups."];
+          "The Unix timestamp when an action was received by Amazon Kendra. An action can be a PUT or DELETE action for mapping users to their groups."];
       orderingId: PrincipalOrderingId.t option
         [@ocaml.doc
           "The order in which actions should complete processing. An action can be a PUT or DELETE action for mapping users to their groups."];
@@ -14012,23 +18612,26 @@ module GroupOrderingIdSummary =
           (Xml.child xml_arg0 "Status") in
       make ?failureReason ?orderingId ?receivedAt ?lastUpdatedAt ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
       let orderingId =
-        field_map json "OrderingId" PrincipalOrderingId.of_json in
-      let receivedAt = field_map json "ReceivedAt" Timestamp.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" Timestamp.of_json in
-      let status = field_map json "Status" PrincipalMappingStatus.of_json in
+        field_map json__ "OrderingId" PrincipalOrderingId.of_json in
+      let receivedAt = field_map json__ "ReceivedAt" Timestamp.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" PrincipalMappingStatus.of_json in
       make ?failureReason ?orderingId ?receivedAt ?lastUpdatedAt ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information on the processing of PUT and DELETE actions for mapping users to their groups."]
+       "Summary information on the processing of PUT and DELETE actions for mapping users to their groups."]
 module GroupOrderingIdSummaries =
   struct
     type nonrec t = GroupOrderingIdSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupOrderingIdSummary.to_value)) |>
         (fun x -> `List x)
@@ -14066,7 +18669,7 @@ module DescribePrincipalMappingResponse =
           "Shows the identifier of the group to see information on the processing of PUT and DELETE actions for mapping users to their groups."];
       groupOrderingIdSummaries: GroupOrderingIdSummaries.t option
         [@ocaml.doc
-          "Shows the following information on the processing of PUT and DELETE actions for mapping users to their groups: Status \226\128\147 the status can be either PROCESSING, SUCCEEDED, DELETING, DELETED, or FAILED. Last updated \226\128\147 the last date-time an action was updated. Received \226\128\147 the last date-time an action was received or submitted. Ordering ID \226\128\147 the latest action that should process and apply after other actions. Failure reason \226\128\147 the reason an action could not be processed."]}
+          "Shows the following information on the processing of PUT and DELETE actions for mapping users to their groups: Status\226\128\148the status can be either PROCESSING, SUCCEEDED, DELETING, DELETED, or FAILED. Last updated\226\128\148the last date-time an action was updated. Received\226\128\148the last date-time an action was received or submitted. Ordering ID\226\128\148the latest action that should process and apply after other actions. Failure reason\226\128\148the reason an action could not be processed."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -14159,13 +18762,13 @@ module DescribePrincipalMappingResponse =
         (Option.map ~f:IndexId.of_xml) (Xml.child xml_arg0 "IndexId") in
       make ?groupOrderingIdSummaries ?groupId ?dataSourceId ?indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupOrderingIdSummaries =
-        field_map json "GroupOrderingIdSummaries"
+        field_map json__ "GroupOrderingIdSummaries"
           GroupOrderingIdSummaries.of_json in
-      let groupId = field_map json "GroupId" GroupId.of_json in
-      let dataSourceId = field_map json "DataSourceId" DataSourceId.of_json in
-      let indexId = field_map json "IndexId" IndexId.of_json in
+      let groupId = field_map json__ "GroupId" GroupId.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let indexId = field_map json__ "IndexId" IndexId.of_json in
       make ?groupOrderingIdSummaries ?groupId ?dataSourceId ?indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14177,7 +18780,8 @@ module DescribeQuerySuggestionsBlockListRequest =
       indexId: IndexId.t
         [@ocaml.doc "The identifier of the index for the block list."];
       id: QuerySuggestionsBlockListId.t
-        [@ocaml.doc "The unique identifier of the block list."]}
+        [@ocaml.doc
+          "The identifier of the block list you want to get information on."]}
     let context_ = "DescribeQuerySuggestionsBlockListRequest"
     let make ~indexId = fun ~id -> fun () -> { indexId; id }
     let to_value x =
@@ -14193,13 +18797,13 @@ module DescribeQuerySuggestionsBlockListRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ~id ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" QuerySuggestionsBlockListId.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" QuerySuggestionsBlockListId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ~id ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a block list used for query suggestions for an index. This is used to check the current settings that are applied to a block list. DescribeQuerySuggestionsBlockList is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
+       "Gets information about a block list used for query suggestions for an index. This is used to check the current settings that are applied to a block list. DescribeQuerySuggestionsBlockList is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
 module QuerySuggestionsBlockListStatus =
   struct
     type nonrec t =
@@ -14245,37 +18849,36 @@ module DescribeQuerySuggestionsBlockListResponse =
     type nonrec t =
       {
       indexId: IndexId.t option
-        [@ocaml.doc "Shows the identifier of the index for the block list."];
+        [@ocaml.doc "The identifier of the index for the block list."];
       id: QuerySuggestionsBlockListId.t option
-        [@ocaml.doc "Shows the unique identifier of the block list."];
+        [@ocaml.doc "The identifier of the block list."];
       name: QuerySuggestionsBlockListName.t option
-        [@ocaml.doc "Shows the name of the block list."];
+        [@ocaml.doc "The name of the block list."];
       description: Description.t option
-        [@ocaml.doc "Shows the description for the block list."];
+        [@ocaml.doc "The description for the block list."];
       status: QuerySuggestionsBlockListStatus.t option
         [@ocaml.doc
-          "Shows whether the current status of the block list is ACTIVE or INACTIVE."];
+          "The current status of the block list. When the value is ACTIVE, the block list is ready for use."];
       errorMessage: ErrorMessage.t option
         [@ocaml.doc
-          "Shows the error message with details when there are issues in processing the block list."];
+          "The error message containing details if there are issues processing the block list."];
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "Shows the date-time a block list for query suggestions was created."];
+          "The Unix timestamp when a block list for query suggestions was created."];
       updatedAt: Timestamp.t option
         [@ocaml.doc
-          "Shows the date-time a block list for query suggestions was last updated."];
+          "The Unix timestamp when a block list for query suggestions was last updated."];
       sourceS3Path: S3Path.t option
         [@ocaml.doc
           "Shows the current S3 path to your block list text file in your S3 bucket. Each block word or phrase should be on a separate line in a text file. For information on the current quota limits for block lists, see Quotas for Amazon Kendra."];
       itemCount: Integer.t option
         [@ocaml.doc
-          "Shows the current number of valid, non-empty words or phrases in the block list text file."];
+          "The current number of valid, non-empty words or phrases in the block list text file."];
       fileSizeBytes: Long.t option
-        [@ocaml.doc
-          "Shows the current size of the block list text file in S3."];
+        [@ocaml.doc "The current size of the block list text file in S3."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "Shows the current IAM (Identity and Access Management) role used by Amazon Kendra to access the block list text file in S3. The role needs S3 read permissions to your file in S3 and needs to give STS (Security Token Service) assume role permissions to Amazon Kendra."]}
+          "The IAM (Identity and Access Management) role used by Amazon Kendra to access the block list text file in S3. The role needs S3 read permissions to your file in S3 and needs to give STS (Security Token Service) assume role permissions to Amazon Kendra."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -14416,32 +19019,33 @@ module DescribeQuerySuggestionsBlockListResponse =
       make ?roleArn ?fileSizeBytes ?itemCount ?sourceS3Path ?updatedAt
         ?createdAt ?errorMessage ?status ?description ?name ?id ?indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let fileSizeBytes = field_map json "FileSizeBytes" Long.of_json in
-      let itemCount = field_map json "ItemCount" Integer.of_json in
-      let sourceS3Path = field_map json "SourceS3Path" S3Path.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let fileSizeBytes = field_map json__ "FileSizeBytes" Long.of_json in
+      let itemCount = field_map json__ "ItemCount" Integer.of_json in
+      let sourceS3Path = field_map json__ "SourceS3Path" S3Path.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
       let status =
-        field_map json "Status" QuerySuggestionsBlockListStatus.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" QuerySuggestionsBlockListName.of_json in
-      let id = field_map json "Id" QuerySuggestionsBlockListId.of_json in
-      let indexId = field_map json "IndexId" IndexId.of_json in
+        field_map json__ "Status" QuerySuggestionsBlockListStatus.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name =
+        field_map json__ "Name" QuerySuggestionsBlockListName.of_json in
+      let id = field_map json__ "Id" QuerySuggestionsBlockListId.of_json in
+      let indexId = field_map json__ "IndexId" IndexId.of_json in
       make ?roleArn ?fileSizeBytes ?itemCount ?sourceS3Path ?updatedAt
         ?createdAt ?errorMessage ?status ?description ?name ?id ?indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a block list used for query suggestions for an index. This is used to check the current settings that are applied to a block list. DescribeQuerySuggestionsBlockList is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
+       "Gets information about a block list used for query suggestions for an index. This is used to check the current settings that are applied to a block list. DescribeQuerySuggestionsBlockList is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
 module DescribeQuerySuggestionsConfigRequest =
   struct
     type nonrec t =
       {
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index you want to describe query suggestions settings for."]}
+          "The identifier of the index with query suggestions that you want to get information on."]}
     let context_ = "DescribeQuerySuggestionsConfigRequest"
     let make ~indexId = fun () -> { indexId }
     let to_value x =
@@ -14452,12 +19056,12 @@ module DescribeQuerySuggestionsConfigRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the settings of query suggestions for an index. This is used to check the current settings applied to query suggestions. DescribeQuerySuggestionsConfig is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
+       "Gets information on the settings of query suggestions for an index. This is used to check the current settings applied to query suggestions. DescribeQuerySuggestionsConfig is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
 module QuerySuggestionsStatus =
   struct
     type nonrec t =
@@ -14483,19 +19087,6 @@ module QuerySuggestionsStatus =
         (string_of_xml ~kind:"enumeration QuerySuggestionsStatus" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"QuerySuggestionsStatus" j)
-    let to_json = simple_to_json to_value
-  end
-module ObjectBoolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
 module Mode =
@@ -14568,31 +19159,34 @@ module DescribeQuerySuggestionsConfigResponse =
       {
       mode: Mode.t option
         [@ocaml.doc
-          "Shows whether query suggestions are currently in ENABLED mode or LEARN_ONLY mode. By default, Amazon Kendra enables query suggestions.LEARN_ONLY turns off query suggestions for your users. You can change the mode using the UpdateQuerySuggestionsConfig API."];
+          "Whether query suggestions are currently in ENABLED mode or LEARN_ONLY mode. By default, Amazon Kendra enables query suggestions.LEARN_ONLY turns off query suggestions for your users. You can change the mode using the UpdateQuerySuggestionsConfig API."];
       status: QuerySuggestionsStatus.t option
         [@ocaml.doc
-          "Shows whether the status of query suggestions settings is currently Active or Updating. Active means the current settings apply and Updating means your changed settings are in the process of applying."];
+          "Whether the status of query suggestions settings is currently ACTIVE or UPDATING. Active means the current settings apply and Updating means your changed settings are in the process of applying."];
       queryLogLookBackWindowInDays: Integer.t option
         [@ocaml.doc
-          "Shows how recent your queries are in your query log time window (in days)."];
+          "How recent your queries are in your query log time window (in days)."];
       includeQueriesWithoutUserInformation: ObjectBoolean.t option
         [@ocaml.doc
-          "Shows whether Amazon Kendra uses all queries or only uses queries that include user information to generate query suggestions."];
+          "TRUE to use all queries, otherwise use only queries that include user information to generate the query suggestions."];
       minimumNumberOfQueryingUsers: MinimumNumberOfQueryingUsers.t option
         [@ocaml.doc
-          "Shows the minimum number of unique users who must search a query in order for the query to be eligible to suggest to your users."];
+          "The minimum number of unique users who must search a query in order for the query to be eligible to suggest to your users."];
       minimumQueryCount: MinimumQueryCount.t option
         [@ocaml.doc
-          "Shows the minimum number of times a query must be searched in order for the query to be eligible to suggest to your users."];
+          "The minimum number of times a query must be searched in order for the query to be eligible to suggest to your users."];
       lastSuggestionsBuildTime: Timestamp.t option
         [@ocaml.doc
-          "Shows the date-time query suggestions for an index was last updated."];
+          "The Unix timestamp when query suggestions for an index was last updated. Amazon Kendra automatically updates suggestions every 24 hours, after you change a setting or after you apply a block list."];
       lastClearTime: Timestamp.t option
         [@ocaml.doc
-          "Shows the date-time query suggestions for an index was last cleared. After you clear suggestions, Amazon Kendra learns new suggestions based on new queries added to the query log from the time you cleared suggestions. Amazon Kendra only considers re-occurences of a query from the time you cleared suggestions."];
+          "The Unix timestamp when query suggestions for an index was last cleared. After you clear suggestions, Amazon Kendra learns new suggestions based on new queries added to the query log from the time you cleared suggestions. Amazon Kendra only considers re-occurences of a query from the time you cleared suggestions."];
       totalSuggestionsCount: Integer.t option
         [@ocaml.doc
-          "Shows the current total count of query suggestions for an index. This count can change when you update your query suggestions settings, if you filter out certain queries from suggestions using a block list, and as the query log accumulates more queries for Amazon Kendra to learn from."]}
+          "The current total count of query suggestions for an index. This count can change when you update your query suggestions settings, if you filter out certain queries from suggestions using a block list, and as the query log accumulates more queries for Amazon Kendra to learn from. If the count is much lower than you expected, it could be because Amazon Kendra needs more queries in the query history to learn from or your current query suggestions settings are too strict."];
+      attributeSuggestionsConfig: AttributeSuggestionsDescribeConfig.t option
+        [@ocaml.doc
+          "Configuration information for the document fields/attributes that you want to base query suggestions on."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -14609,18 +19203,20 @@ module DescribeQuerySuggestionsConfigResponse =
                 fun ?lastSuggestionsBuildTime ->
                   fun ?lastClearTime ->
                     fun ?totalSuggestionsCount ->
-                      fun () ->
-                        {
-                          mode;
-                          status;
-                          queryLogLookBackWindowInDays;
-                          includeQueriesWithoutUserInformation;
-                          minimumNumberOfQueryingUsers;
-                          minimumQueryCount;
-                          lastSuggestionsBuildTime;
-                          lastClearTime;
-                          totalSuggestionsCount
-                        }
+                      fun ?attributeSuggestionsConfig ->
+                        fun () ->
+                          {
+                            mode;
+                            status;
+                            queryLogLookBackWindowInDays;
+                            includeQueriesWithoutUserInformation;
+                            minimumNumberOfQueryingUsers;
+                            minimumQueryCount;
+                            lastSuggestionsBuildTime;
+                            lastClearTime;
+                            totalSuggestionsCount;
+                            attributeSuggestionsConfig
+                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -14695,9 +19291,15 @@ module DescribeQuerySuggestionsConfigResponse =
           (Option.map x.lastSuggestionsBuildTime ~f:Timestamp.to_value));
         ("LastClearTime", (Option.map x.lastClearTime ~f:Timestamp.to_value));
         ("TotalSuggestionsCount",
-          (Option.map x.totalSuggestionsCount ~f:Integer.to_value))]
+          (Option.map x.totalSuggestionsCount ~f:Integer.to_value));
+        ("AttributeSuggestionsConfig",
+          (Option.map x.attributeSuggestionsConfig
+             ~f:AttributeSuggestionsDescribeConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attributeSuggestionsConfig =
+        (Option.map ~f:AttributeSuggestionsDescribeConfig.of_xml)
+          (Xml.child xml_arg0 "AttributeSuggestionsConfig") in
       let totalSuggestionsCount =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "TotalSuggestionsCount") in
@@ -14722,45 +19324,48 @@ module DescribeQuerySuggestionsConfigResponse =
         (Option.map ~f:QuerySuggestionsStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       let mode = (Option.map ~f:Mode.of_xml) (Xml.child xml_arg0 "Mode") in
-      make ?totalSuggestionsCount ?lastClearTime ?lastSuggestionsBuildTime
-        ?minimumQueryCount ?minimumNumberOfQueryingUsers
-        ?includeQueriesWithoutUserInformation ?queryLogLookBackWindowInDays
-        ?status ?mode ()
+      make ?attributeSuggestionsConfig ?totalSuggestionsCount ?lastClearTime
+        ?lastSuggestionsBuildTime ?minimumQueryCount
+        ?minimumNumberOfQueryingUsers ?includeQueriesWithoutUserInformation
+        ?queryLogLookBackWindowInDays ?status ?mode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let attributeSuggestionsConfig =
+        field_map json__ "AttributeSuggestionsConfig"
+          AttributeSuggestionsDescribeConfig.of_json in
       let totalSuggestionsCount =
-        field_map json "TotalSuggestionsCount" Integer.of_json in
-      let lastClearTime = field_map json "LastClearTime" Timestamp.of_json in
+        field_map json__ "TotalSuggestionsCount" Integer.of_json in
+      let lastClearTime = field_map json__ "LastClearTime" Timestamp.of_json in
       let lastSuggestionsBuildTime =
-        field_map json "LastSuggestionsBuildTime" Timestamp.of_json in
+        field_map json__ "LastSuggestionsBuildTime" Timestamp.of_json in
       let minimumQueryCount =
-        field_map json "MinimumQueryCount" MinimumQueryCount.of_json in
+        field_map json__ "MinimumQueryCount" MinimumQueryCount.of_json in
       let minimumNumberOfQueryingUsers =
-        field_map json "MinimumNumberOfQueryingUsers"
+        field_map json__ "MinimumNumberOfQueryingUsers"
           MinimumNumberOfQueryingUsers.of_json in
       let includeQueriesWithoutUserInformation =
-        field_map json "IncludeQueriesWithoutUserInformation"
+        field_map json__ "IncludeQueriesWithoutUserInformation"
           ObjectBoolean.of_json in
       let queryLogLookBackWindowInDays =
-        field_map json "QueryLogLookBackWindowInDays" Integer.of_json in
-      let status = field_map json "Status" QuerySuggestionsStatus.of_json in
-      let mode = field_map json "Mode" Mode.of_json in
-      make ?totalSuggestionsCount ?lastClearTime ?lastSuggestionsBuildTime
-        ?minimumQueryCount ?minimumNumberOfQueryingUsers
-        ?includeQueriesWithoutUserInformation ?queryLogLookBackWindowInDays
-        ?status ?mode ()
+        field_map json__ "QueryLogLookBackWindowInDays" Integer.of_json in
+      let status = field_map json__ "Status" QuerySuggestionsStatus.of_json in
+      let mode = field_map json__ "Mode" Mode.of_json in
+      make ?attributeSuggestionsConfig ?totalSuggestionsCount ?lastClearTime
+        ?lastSuggestionsBuildTime ?minimumQueryCount
+        ?minimumNumberOfQueryingUsers ?includeQueriesWithoutUserInformation
+        ?queryLogLookBackWindowInDays ?status ?mode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the settings of query suggestions for an index. This is used to check the current settings applied to query suggestions. DescribeQuerySuggestionsConfig is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
+       "Gets information on the settings of query suggestions for an index. This is used to check the current settings applied to query suggestions. DescribeQuerySuggestionsConfig is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
 module DescribeThesaurusRequest =
   struct
     type nonrec t =
       {
       id: ThesaurusId.t
-        [@ocaml.doc "The identifier of the thesaurus to describe."];
-      indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index associated with the thesaurus to describe."]}
+          "The identifier of the thesaurus you want to get information on."];
+      indexId: IndexId.t
+        [@ocaml.doc "The identifier of the index for the thesaurus."]}
     let context_ = "DescribeThesaurusRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -14775,12 +19380,12 @@ module DescribeThesaurusRequest =
         ThesaurusId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ThesaurusId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ThesaurusId.of_json in
       make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an existing Amazon Kendra thesaurus."]
+  end[@@ocaml.doc "Gets information about an Amazon Kendra thesaurus."]
 module ThesaurusStatus =
   struct
     type nonrec t =
@@ -14825,8 +19430,7 @@ module DescribeThesaurusResponse =
       id: ThesaurusId.t option
         [@ocaml.doc "The identifier of the thesaurus."];
       indexId: IndexId.t option
-        [@ocaml.doc
-          "The identifier of the index associated with the thesaurus to describe."];
+        [@ocaml.doc "The identifier of the index for the thesaurus."];
       name: ThesaurusName.t option [@ocaml.doc "The thesaurus name."];
       description: Description.t option
         [@ocaml.doc "The thesaurus description."];
@@ -14837,9 +19441,10 @@ module DescribeThesaurusResponse =
         [@ocaml.doc
           "When the Status field value is FAILED, the ErrorMessage field provides more information."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The Unix datetime that the thesaurus was created."];
+        [@ocaml.doc "The Unix timestamp when the thesaurus was created."];
       updatedAt: Timestamp.t option
-        [@ocaml.doc "The Unix datetime that the thesaurus was last updated."];
+        [@ocaml.doc
+          "The Unix timestamp when the thesaurus was last updated."];
       roleArn: RoleArn.t option
         [@ocaml.doc
           "An IAM role that gives Amazon Kendra permissions to access thesaurus file specified in SourceS3Path."];
@@ -14992,25 +19597,25 @@ module DescribeThesaurusResponse =
         ?updatedAt ?createdAt ?errorMessage ?status ?description ?name
         ?indexId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let synonymRuleCount = field_map json "SynonymRuleCount" Long.of_json in
-      let termCount = field_map json "TermCount" Long.of_json in
-      let fileSizeBytes = field_map json "FileSizeBytes" Long.of_json in
-      let sourceS3Path = field_map json "SourceS3Path" S3Path.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let status = field_map json "Status" ThesaurusStatus.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" ThesaurusName.of_json in
-      let indexId = field_map json "IndexId" IndexId.of_json in
-      let id = field_map json "Id" ThesaurusId.of_json in
+    let of_json json__ =
+      let synonymRuleCount = field_map json__ "SynonymRuleCount" Long.of_json in
+      let termCount = field_map json__ "TermCount" Long.of_json in
+      let fileSizeBytes = field_map json__ "FileSizeBytes" Long.of_json in
+      let sourceS3Path = field_map json__ "SourceS3Path" S3Path.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let status = field_map json__ "Status" ThesaurusStatus.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" ThesaurusName.of_json in
+      let indexId = field_map json__ "IndexId" IndexId.of_json in
+      let id = field_map json__ "Id" ThesaurusId.of_json in
       make ?synonymRuleCount ?termCount ?fileSizeBytes ?sourceS3Path ?roleArn
         ?updatedAt ?createdAt ?errorMessage ?status ?description ?name
         ?indexId ?id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an existing Amazon Kendra thesaurus."]
+  end[@@ocaml.doc "Gets information about an Amazon Kendra thesaurus."]
 module DisassociateEntityList =
   struct
     type nonrec t = EntityConfiguration.t list
@@ -15019,6 +19624,9 @@ module DisassociateEntityList =
         ok_or_failwith
           ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -15052,7 +19660,7 @@ module DisassociateEntitiesFromExperienceRequest =
           "The identifier of the index for your Amazon Kendra experience."];
       entityList: DisassociateEntityList.t
         [@ocaml.doc
-          "Lists users or groups in your Amazon Web Services SSO identity source."]}
+          "Lists users or groups in your IAM Identity Center identity source."]}
     let context_ = "DisassociateEntitiesFromExperienceRequest"
     let make ~id =
       fun ~indexId ->
@@ -15073,22 +19681,22 @@ module DisassociateEntitiesFromExperienceRequest =
         ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~entityList ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entityList =
-        field_map_exn json "EntityList" DisassociateEntityList.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ExperienceId.of_json in
+        field_map_exn json__ "EntityList" DisassociateEntityList.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ExperienceId.of_json in
       make ~entityList ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Prevents users or groups in your Amazon Web Services SSO identity source from accessing your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Prevents users or groups in your IAM Identity Center identity source from accessing your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module DisassociateEntitiesFromExperienceResponse =
   struct
     type nonrec t =
       {
       failedEntityList: FailedEntityList.t option
         [@ocaml.doc
-          "Lists the users or groups in your Amazon Web Services SSO identity source that failed to properly remove access to your Amazon Kendra experience."]}
+          "Lists the users or groups in your IAM Identity Center identity source that failed to properly remove access to your Amazon Kendra experience."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -15164,13 +19772,13 @@ module DisassociateEntitiesFromExperienceResponse =
           (Xml.child xml_arg0 "FailedEntityList") in
       make ?failedEntityList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedEntityList =
-        field_map json "FailedEntityList" FailedEntityList.of_json in
+        field_map json__ "FailedEntityList" FailedEntityList.of_json in
       make ?failedEntityList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Prevents users or groups in your Amazon Web Services SSO identity source from accessing your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Prevents users or groups in your IAM Identity Center identity source from accessing your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module EntityIdsList =
   struct
     type nonrec t = EntityId.t list
@@ -15179,6 +19787,9 @@ module EntityIdsList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15210,7 +19821,7 @@ module DisassociatePersonasFromEntitiesRequest =
           "The identifier of the index for your Amazon Kendra experience."];
       entityIds: EntityIdsList.t
         [@ocaml.doc
-          "The identifiers of users or groups in your Amazon Web Services SSO identity source. For example, user IDs could be user emails."]}
+          "The identifiers of users or groups in your IAM Identity Center identity source. For example, user IDs could be user emails."]}
     let context_ = "DisassociatePersonasFromEntitiesRequest"
     let make ~id =
       fun ~indexId -> fun ~entityIds -> fun () -> { id; indexId; entityIds }
@@ -15230,21 +19841,21 @@ module DisassociatePersonasFromEntitiesRequest =
         ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~entityIds ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entityIds = field_map_exn json "EntityIds" EntityIdsList.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ExperienceId.of_json in
+    let of_json json__ =
+      let entityIds = field_map_exn json__ "EntityIds" EntityIdsList.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ExperienceId.of_json in
       make ~entityIds ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specific permissions of users or groups in your Amazon Web Services SSO identity source with access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Removes the specific permissions of users or groups in your IAM Identity Center identity source with access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module DisassociatePersonasFromEntitiesResponse =
   struct
     type nonrec t =
       {
       failedEntityList: FailedEntityList.t option
         [@ocaml.doc
-          "Lists the users or groups in your Amazon Web Services SSO identity source that failed to properly remove access to your Amazon Kendra experience."]}
+          "Lists the users or groups in your IAM Identity Center identity source that failed to properly remove access to your Amazon Kendra experience."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -15320,82 +19931,108 @@ module DisassociatePersonasFromEntitiesResponse =
           (Xml.child xml_arg0 "FailedEntityList") in
       make ?failedEntityList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedEntityList =
-        field_map json "FailedEntityList" FailedEntityList.of_json in
+        field_map json__ "FailedEntityList" FailedEntityList.of_json in
       make ?failedEntityList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specific permissions of users or groups in your Amazon Web Services SSO identity source with access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
-module DocumentAttributeKeyList =
-  struct
-    type nonrec t = DocumentAttributeKey.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:DocumentAttributeKey.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DocumentAttributeKey.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DocumentAttributeKeyList"
-        ~of_json:DocumentAttributeKey.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module DocumentAttributeValueCountPair =
+       "Removes the specific permissions of users or groups in your IAM Identity Center identity source with access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+module rec
+  DocumentAttributeValueCountPair:sig
+                                    type nonrec t =
+                                      {
+                                      documentAttributeValue:
+                                        DocumentAttributeValue.t option
+                                        [@ocaml.doc
+                                          "The value of the attribute/field. For example, \"HR\"."];
+                                      count: Integer.t option
+                                        [@ocaml.doc
+                                          "The number of documents in the response that have the attribute/field value for the key."];
+                                      facetResults: FacetResultList.t option
+                                        [@ocaml.doc
+                                          "Contains the results of a document attribute/field that is a nested facet. A FacetResult contains the counts for each facet nested within a facet. For example, the document attribute or facet \"Department\" includes a value called \"Engineering\". In addition, the document attribute or facet \"SubDepartment\" includes the values \"Frontend\" and \"Backend\" for documents assigned to \"Engineering\". You can display nested facets in the search results so that documents can be searched not only by department but also by a sub department within a department. The counts for documents that belong to \"Frontend\" and \"Backend\" within \"Engineering\" are returned for a query."]}
+                                    val make :
+                                      ?documentAttributeValue:DocumentAttributeValue.t
+                                        ->
+                                        ?count:Integer.t ->
+                                          ?facetResults:FacetResultList.t ->
+                                            unit -> t
+                                    val to_value : t -> Botodata.value
+                                    val to_query : t -> Client.Query.t
+                                    val of_xml : Xml.t -> t
+                                    val of_json : Yojson.Safe.t -> t
+                                    val to_json : t -> Yojson.Safe.t
+                                  end =
   struct
     type nonrec t =
       {
       documentAttributeValue: DocumentAttributeValue.t option
-        [@ocaml.doc "The value of the attribute. For example, \"HR.\""];
+        [@ocaml.doc "The value of the attribute/field. For example, \"HR\"."];
       count: Integer.t option
         [@ocaml.doc
-          "The number of documents in the response that have the attribute value for the key."]}
+          "The number of documents in the response that have the attribute/field value for the key."];
+      facetResults: FacetResultList.t option
+        [@ocaml.doc
+          "Contains the results of a document attribute/field that is a nested facet. A FacetResult contains the counts for each facet nested within a facet. For example, the document attribute or facet \"Department\" includes a value called \"Engineering\". In addition, the document attribute or facet \"SubDepartment\" includes the values \"Frontend\" and \"Backend\" for documents assigned to \"Engineering\". You can display nested facets in the search results so that documents can be searched not only by department but also by a sub department within a department. The counts for documents that belong to \"Frontend\" and \"Backend\" within \"Engineering\" are returned for a query."]}
     let make ?documentAttributeValue =
-      fun ?count -> fun () -> { documentAttributeValue; count }
+      fun ?count ->
+        fun ?facetResults ->
+          fun () -> { documentAttributeValue; count; facetResults }
     let to_value x =
       structure_to_value
         [("DocumentAttributeValue",
            (Option.map x.documentAttributeValue
               ~f:DocumentAttributeValue.to_value));
-        ("Count", (Option.map x.count ~f:Integer.to_value))]
+        ("Count", (Option.map x.count ~f:Integer.to_value));
+        ("FacetResults",
+          (Option.map x.facetResults ~f:FacetResultList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let facetResults =
+        (Option.map ~f:FacetResultList.of_xml)
+          (Xml.child xml_arg0 "FacetResults") in
       let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Count") in
       let documentAttributeValue =
         (Option.map ~f:DocumentAttributeValue.of_xml)
           (Xml.child xml_arg0 "DocumentAttributeValue") in
-      make ?count ?documentAttributeValue ()
+      make ?facetResults ?count ?documentAttributeValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map json "Count" Integer.of_json in
+    let of_json json__ =
+      let facetResults =
+        field_map json__ "FacetResults" FacetResultList.of_json in
+      let count = field_map json__ "Count" Integer.of_json in
       let documentAttributeValue =
-        field_map json "DocumentAttributeValue"
+        field_map json__ "DocumentAttributeValue"
           DocumentAttributeValue.of_json in
-      make ?count ?documentAttributeValue ()
+      make ?facetResults ?count ?documentAttributeValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the count of documents that match a particular attribute when doing a faceted search."]
-module DocumentAttributeValueCountPairList =
+       "Provides the count of documents that match a particular document attribute or field when doing a faceted search."]
+ and
+  DocumentAttributeValueCountPairList:sig
+                                        type nonrec t =
+                                          DocumentAttributeValueCountPair.t
+                                            list
+                                        val make :
+                                          DocumentAttributeValueCountPair.t
+                                            list -> t
+                                        val to_value : t -> Botodata.value
+                                        val to_query : t -> Client.Query.t
+                                        val of_xml :
+                                          Xml.t ->
+                                            DocumentAttributeValueCountPair.t
+                                              list
+                                        val of_json : Yojson.Safe.t -> t
+                                        val to_json : t -> Yojson.Safe.t
+                                        val to_header : t -> string
+                                      end =
   struct
     type nonrec t = DocumentAttributeValueCountPair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentAttributeValueCountPair.to_value)) |>
         (fun x -> `List x)
@@ -15417,15 +20054,141 @@ module DocumentAttributeValueCountPairList =
       list_of_json ~kind:"DocumentAttributeValueCountPairList"
         ~of_json:DocumentAttributeValueCountPair.of_json j
     let to_json v = composed_to_json to_value v
+  end and
+       FacetResult:sig
+                     type nonrec t =
+                       {
+                       documentAttributeKey: DocumentAttributeKey.t option
+                         [@ocaml.doc
+                           "The key for the facet values. This is the same as the DocumentAttributeKey provided in the query."];
+                       documentAttributeValueType:
+                         DocumentAttributeValueType.t option
+                         [@ocaml.doc
+                           "The data type of the facet value. This is the same as the type defined for the index field when it was created."];
+                       documentAttributeValueCountPairs:
+                         DocumentAttributeValueCountPairList.t option
+                         [@ocaml.doc
+                           "An array of key/value pairs, where the key is the value of the attribute and the count is the number of documents that share the key value."]}
+                     val make :
+                       ?documentAttributeKey:DocumentAttributeKey.t ->
+                         ?documentAttributeValueType:DocumentAttributeValueType.t
+                           ->
+                           ?documentAttributeValueCountPairs:DocumentAttributeValueCountPairList.t
+                             -> unit -> t
+                     val to_value : t -> Botodata.value
+                     val to_query : t -> Client.Query.t
+                     val of_xml : Xml.t -> t
+                     val of_json : Yojson.Safe.t -> t
+                     val to_json : t -> Yojson.Safe.t
+                   end =
+       struct
+         type nonrec t =
+           {
+           documentAttributeKey: DocumentAttributeKey.t option
+             [@ocaml.doc
+               "The key for the facet values. This is the same as the DocumentAttributeKey provided in the query."];
+           documentAttributeValueType: DocumentAttributeValueType.t option
+             [@ocaml.doc
+               "The data type of the facet value. This is the same as the type defined for the index field when it was created."];
+           documentAttributeValueCountPairs:
+             DocumentAttributeValueCountPairList.t option
+             [@ocaml.doc
+               "An array of key/value pairs, where the key is the value of the attribute and the count is the number of documents that share the key value."]}
+         let make ?documentAttributeKey =
+           fun ?documentAttributeValueType ->
+             fun ?documentAttributeValueCountPairs ->
+               fun () ->
+                 {
+                   documentAttributeKey;
+                   documentAttributeValueType;
+                   documentAttributeValueCountPairs
+                 }
+         let to_value x =
+           structure_to_value
+             [("DocumentAttributeKey",
+                (Option.map x.documentAttributeKey
+                   ~f:DocumentAttributeKey.to_value));
+             ("DocumentAttributeValueType",
+               (Option.map x.documentAttributeValueType
+                  ~f:DocumentAttributeValueType.to_value));
+             ("DocumentAttributeValueCountPairs",
+               (Option.map x.documentAttributeValueCountPairs
+                  ~f:DocumentAttributeValueCountPairList.to_value))]
+         let to_query v = to_query to_value v
+         let of_xml xml_arg0 =
+           let documentAttributeValueCountPairs =
+             (Option.map ~f:DocumentAttributeValueCountPairList.of_xml)
+               (Xml.child xml_arg0 "DocumentAttributeValueCountPairs") in
+           let documentAttributeValueType =
+             (Option.map ~f:DocumentAttributeValueType.of_xml)
+               (Xml.child xml_arg0 "DocumentAttributeValueType") in
+           let documentAttributeKey =
+             (Option.map ~f:DocumentAttributeKey.of_xml)
+               (Xml.child xml_arg0 "DocumentAttributeKey") in
+           make ?documentAttributeValueCountPairs ?documentAttributeValueType
+             ?documentAttributeKey ()
+         let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning
+                                                               "-32"]
+         let of_json json__ =
+           let documentAttributeValueCountPairs =
+             field_map json__ "DocumentAttributeValueCountPairs"
+               DocumentAttributeValueCountPairList.of_json in
+           let documentAttributeValueType =
+             field_map json__ "DocumentAttributeValueType"
+               DocumentAttributeValueType.of_json in
+           let documentAttributeKey =
+             field_map json__ "DocumentAttributeKey"
+               DocumentAttributeKey.of_json in
+           make ?documentAttributeValueCountPairs ?documentAttributeValueType
+             ?documentAttributeKey ()
+         let to_json v = composed_to_json to_value v
+       end[@@ocaml.doc "The facet values for the documents in the response."]
+ and
+  FacetResultList:sig
+                    type nonrec t = FacetResult.t list
+                    val make : FacetResult.t list -> t
+                    val to_value : t -> Botodata.value
+                    val to_query : t -> Client.Query.t
+                    val of_xml : Xml.t -> FacetResult.t list
+                    val of_json : Yojson.Safe.t -> t
+                    val to_json : t -> Yojson.Safe.t
+                    val to_header : t -> string
+                  end =
+  struct
+    type nonrec t = FacetResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FacetResult.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FacetResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FacetResultList" ~of_json:FacetResult.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module DocumentRelevanceConfiguration =
   struct
     type nonrec t =
       {
       name: DocumentMetadataConfigurationName.t
+        [@ocaml.doc "The name of the index field."];
+      relevance: Relevance.t
         [@ocaml.doc
-          "The name of the tuning configuration to override document relevance at the index level."];
-      relevance: Relevance.t }
+          "Provides information for tuning the relevance of a field in a search. When a query includes terms that match the field, the results are given a boost in the response based on these tuning parameters."]}
     let context_ = "DocumentRelevanceConfiguration"
     let make ~name = fun ~relevance -> fun () -> { name; relevance }
     let to_value x =
@@ -15442,10 +20205,10 @@ module DocumentRelevanceConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~relevance ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let relevance = field_map_exn json "Relevance" Relevance.of_json in
+    let of_json json__ =
+      let relevance = field_map_exn json__ "Relevance" Relevance.of_json in
       let name =
-        field_map_exn json "Name" DocumentMetadataConfigurationName.of_json in
+        field_map_exn json__ "Name" DocumentMetadataConfigurationName.of_json in
       make ~relevance ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15459,6 +20222,9 @@ module DocumentRelevanceOverrideConfigurationList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentRelevanceConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -15480,6 +20246,19 @@ module DocumentRelevanceOverrideConfigurationList =
       list_of_json ~kind:"DocumentRelevanceOverrideConfigurationList"
         ~of_json:DocumentRelevanceConfiguration.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module DocumentTitle =
+  struct
+    type nonrec t = string
+    let context_ = "DocumentTitle"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DocumentTitle" j
+    let to_json = simple_to_json to_value
   end
 module NameType =
   struct
@@ -15547,13 +20326,13 @@ module EntityDisplayData =
         (Option.map ~f:NameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?lastName ?firstName ?identifiedUserName ?groupName ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastName = field_map json "LastName" NameType.of_json in
-      let firstName = field_map json "FirstName" NameType.of_json in
+    let of_json json__ =
+      let lastName = field_map json__ "LastName" NameType.of_json in
+      let firstName = field_map json__ "FirstName" NameType.of_json in
       let identifiedUserName =
-        field_map json "IdentifiedUserName" NameType.of_json in
-      let groupName = field_map json "GroupName" NameType.of_json in
-      let userName = field_map json "UserName" NameType.of_json in
+        field_map json__ "IdentifiedUserName" NameType.of_json in
+      let groupName = field_map json__ "GroupName" NameType.of_json in
+      let userName = field_map json__ "UserName" NameType.of_json in
       make ?lastName ?firstName ?identifiedUserName ?groupName ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the user entity."]
@@ -15563,7 +20342,7 @@ module ExperienceEntitiesSummary =
       {
       entityId: EntityId.t option
         [@ocaml.doc
-          "The identifier of a user or group in your Amazon Web Services SSO identity source. For example, a user ID could be an email."];
+          "The identifier of a user or group in your IAM Identity Center identity source. For example, a user ID could be an email."];
       entityType: EntityType.t option
         [@ocaml.doc "Shows the type as User or Group."];
       displayData: EntityDisplayData.t option
@@ -15588,19 +20367,22 @@ module ExperienceEntitiesSummary =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "EntityId") in
       make ?displayData ?entityType ?entityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let displayData =
-        field_map json "DisplayData" EntityDisplayData.of_json in
-      let entityType = field_map json "EntityType" EntityType.of_json in
-      let entityId = field_map json "EntityId" EntityId.of_json in
+        field_map json__ "DisplayData" EntityDisplayData.of_json in
+      let entityType = field_map json__ "EntityType" EntityType.of_json in
+      let entityId = field_map json__ "EntityId" EntityId.of_json in
       make ?displayData ?entityType ?entityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Summary information for users or groups in your Amazon Web Services SSO identity source with granted access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Summary information for users or groups in your IAM Identity Center identity source with granted access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module ExperienceEntitiesSummaryList =
   struct
     type nonrec t = ExperienceEntitiesSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperienceEntitiesSummary.to_value)) |>
         (fun x -> `List x)
@@ -15633,7 +20415,7 @@ module ExperiencesSummary =
         [@ocaml.doc "The identifier of your Amazon Kendra experience."];
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "The date-time your Amazon Kendra experience was created."];
+          "The Unix timestamp when your Amazon Kendra experience was created."];
       status: ExperienceStatus.t option
         [@ocaml.doc
           "The processing status of your Amazon Kendra experience."];
@@ -15668,12 +20450,13 @@ module ExperiencesSummary =
         (Option.map ~f:ExperienceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?endpoints ?status ?createdAt ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpoints = field_map json "Endpoints" ExperienceEndpoints.of_json in
-      let status = field_map json "Status" ExperienceStatus.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let id = field_map json "Id" ExperienceId.of_json in
-      let name = field_map json "Name" ExperienceName.of_json in
+    let of_json json__ =
+      let endpoints =
+        field_map json__ "Endpoints" ExperienceEndpoints.of_json in
+      let status = field_map json__ "Status" ExperienceStatus.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let id = field_map json__ "Id" ExperienceId.of_json in
+      let name = field_map json__ "Name" ExperienceName.of_json in
       make ?endpoints ?status ?createdAt ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15682,6 +20465,9 @@ module ExperiencesSummaryList =
   struct
     type nonrec t = ExperiencesSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperiencesSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15703,35 +20489,113 @@ module ExperiencesSummaryList =
         ~of_json:ExperiencesSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Facet =
+module TopDocumentAttributeValueCountPairsSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:5000) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for TopDocumentAttributeValueCountPairsSize"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module rec
+  Facet:sig
+          type nonrec t =
+            {
+            documentAttributeKey: DocumentAttributeKey.t option
+              [@ocaml.doc "The unique key for the document attribute."];
+            facets: FacetList.t option
+              [@ocaml.doc
+                "An array of document attributes that are nested facets within a facet. For example, the document attribute or facet \"Department\" includes a value called \"Engineering\". In addition, the document attribute or facet \"SubDepartment\" includes the values \"Frontend\" and \"Backend\" for documents assigned to \"Engineering\". You can display nested facets in the search results so that documents can be searched not only by department but also by a sub department within a department. This helps your users further narrow their search. You can only have one nested facet within a facet. If you want to increase this limit, contact Support."];
+            maxResults: TopDocumentAttributeValueCountPairsSize.t option
+              [@ocaml.doc
+                "Maximum number of facet values per facet. The default is 10. You can use this to limit the number of facet values to less than 10. If you want to increase the default, contact Support."]}
+          val make :
+            ?documentAttributeKey:DocumentAttributeKey.t ->
+              ?facets:FacetList.t ->
+                ?maxResults:TopDocumentAttributeValueCountPairsSize.t ->
+                  unit -> t
+          val to_value : t -> Botodata.value
+          val to_query : t -> Client.Query.t
+          val of_xml : Xml.t -> t
+          val of_json : Yojson.Safe.t -> t
+          val to_json : t -> Yojson.Safe.t
+        end =
   struct
     type nonrec t =
       {
       documentAttributeKey: DocumentAttributeKey.t option
-        [@ocaml.doc "The unique key for the document attribute."]}
-    let make ?documentAttributeKey = fun () -> { documentAttributeKey }
+        [@ocaml.doc "The unique key for the document attribute."];
+      facets: FacetList.t option
+        [@ocaml.doc
+          "An array of document attributes that are nested facets within a facet. For example, the document attribute or facet \"Department\" includes a value called \"Engineering\". In addition, the document attribute or facet \"SubDepartment\" includes the values \"Frontend\" and \"Backend\" for documents assigned to \"Engineering\". You can display nested facets in the search results so that documents can be searched not only by department but also by a sub department within a department. This helps your users further narrow their search. You can only have one nested facet within a facet. If you want to increase this limit, contact Support."];
+      maxResults: TopDocumentAttributeValueCountPairsSize.t option
+        [@ocaml.doc
+          "Maximum number of facet values per facet. The default is 10. You can use this to limit the number of facet values to less than 10. If you want to increase the default, contact Support."]}
+    let make ?documentAttributeKey =
+      fun ?facets ->
+        fun ?maxResults ->
+          fun () -> { documentAttributeKey; facets; maxResults }
     let to_value x =
       structure_to_value
         [("DocumentAttributeKey",
            (Option.map x.documentAttributeKey
-              ~f:DocumentAttributeKey.to_value))]
+              ~f:DocumentAttributeKey.to_value));
+        ("Facets", (Option.map x.facets ~f:FacetList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:TopDocumentAttributeValueCountPairsSize.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:TopDocumentAttributeValueCountPairsSize.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let facets =
+        (Option.map ~f:FacetList.of_xml) (Xml.child xml_arg0 "Facets") in
       let documentAttributeKey =
         (Option.map ~f:DocumentAttributeKey.of_xml)
           (Xml.child xml_arg0 "DocumentAttributeKey") in
-      make ?documentAttributeKey ()
+      make ?maxResults ?facets ?documentAttributeKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults"
+          TopDocumentAttributeValueCountPairsSize.of_json in
+      let facets = field_map json__ "Facets" FacetList.of_json in
       let documentAttributeKey =
-        field_map json "DocumentAttributeKey" DocumentAttributeKey.of_json in
-      make ?documentAttributeKey ()
+        field_map json__ "DocumentAttributeKey" DocumentAttributeKey.of_json in
+      make ?maxResults ?facets ?documentAttributeKey ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a document attribute"]
-module FacetList =
+  end[@@ocaml.doc
+       "Information about a document attribute or field. You can use document attributes as facets. For example, the document attribute or facet \"Department\" includes the values \"HR\", \"Engineering\", and \"Accounting\". You can display these values in the search results so that documents can be searched by department. You can display up to 10 facet values per facet for a query. If you want to increase this limit, contact Support."]
+ and
+  FacetList:sig
+              type nonrec t = Facet.t list
+              val make : Facet.t list -> t
+              val to_value : t -> Botodata.value
+              val to_query : t -> Client.Query.t
+              val of_xml : Xml.t -> Facet.t list
+              val of_json : Yojson.Safe.t -> t
+              val to_json : t -> Yojson.Safe.t
+              val to_header : t -> string
+            end =
   struct
     type nonrec t = Facet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Facet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15751,96 +20615,11 @@ module FacetList =
     let of_json j = list_of_json ~kind:"FacetList" ~of_json:Facet.of_json j
     let to_json v = composed_to_json to_value v
   end
-module FacetResult =
-  struct
-    type nonrec t =
-      {
-      documentAttributeKey: DocumentAttributeKey.t option
-        [@ocaml.doc
-          "The key for the facet values. This is the same as the DocumentAttributeKey provided in the query."];
-      documentAttributeValueType: DocumentAttributeValueType.t option
-        [@ocaml.doc
-          "The data type of the facet value. This is the same as the type defined for the index field when it was created."];
-      documentAttributeValueCountPairs:
-        DocumentAttributeValueCountPairList.t option
-        [@ocaml.doc
-          "An array of key/value pairs, where the key is the value of the attribute and the count is the number of documents that share the key value."]}
-    let make ?documentAttributeKey =
-      fun ?documentAttributeValueType ->
-        fun ?documentAttributeValueCountPairs ->
-          fun () ->
-            {
-              documentAttributeKey;
-              documentAttributeValueType;
-              documentAttributeValueCountPairs
-            }
-    let to_value x =
-      structure_to_value
-        [("DocumentAttributeKey",
-           (Option.map x.documentAttributeKey
-              ~f:DocumentAttributeKey.to_value));
-        ("DocumentAttributeValueType",
-          (Option.map x.documentAttributeValueType
-             ~f:DocumentAttributeValueType.to_value));
-        ("DocumentAttributeValueCountPairs",
-          (Option.map x.documentAttributeValueCountPairs
-             ~f:DocumentAttributeValueCountPairList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let documentAttributeValueCountPairs =
-        (Option.map ~f:DocumentAttributeValueCountPairList.of_xml)
-          (Xml.child xml_arg0 "DocumentAttributeValueCountPairs") in
-      let documentAttributeValueType =
-        (Option.map ~f:DocumentAttributeValueType.of_xml)
-          (Xml.child xml_arg0 "DocumentAttributeValueType") in
-      let documentAttributeKey =
-        (Option.map ~f:DocumentAttributeKey.of_xml)
-          (Xml.child xml_arg0 "DocumentAttributeKey") in
-      make ?documentAttributeValueCountPairs ?documentAttributeValueType
-        ?documentAttributeKey ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let documentAttributeValueCountPairs =
-        field_map json "DocumentAttributeValueCountPairs"
-          DocumentAttributeValueCountPairList.of_json in
-      let documentAttributeValueType =
-        field_map json "DocumentAttributeValueType"
-          DocumentAttributeValueType.of_json in
-      let documentAttributeKey =
-        field_map json "DocumentAttributeKey" DocumentAttributeKey.of_json in
-      make ?documentAttributeValueCountPairs ?documentAttributeValueType
-        ?documentAttributeKey ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The facet values for the documents in the response."]
-module FacetResultList =
-  struct
-    type nonrec t = FacetResult.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:FacetResult.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:FacetResult.of_xml)
-    let of_json j =
-      list_of_json ~kind:"FacetResultList" ~of_json:FacetResult.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module FaqSummary =
   struct
     type nonrec t =
       {
-      id: FaqId.t option [@ocaml.doc "The unique identifier of the FAQ."];
+      id: FaqId.t option [@ocaml.doc "The identifier of the FAQ."];
       name: FaqName.t option
         [@ocaml.doc
           "The name that you assigned the FAQ when you created or updated the FAQ."];
@@ -15848,9 +20627,9 @@ module FaqSummary =
         [@ocaml.doc
           "The current status of the FAQ. When the status is ACTIVE the FAQ is ready for use."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The UNIX datetime that the FAQ was added to the index."];
+        [@ocaml.doc "The Unix timestamp when the FAQ was created."];
       updatedAt: Timestamp.t option
-        [@ocaml.doc "The UNIX datetime that the FAQ was last updated."];
+        [@ocaml.doc "The Unix timestamp when the FAQ was last updated."];
       fileFormat: FaqFileFormat.t option
         [@ocaml.doc "The file type used to create the FAQ."];
       languageCode: LanguageCode.t option
@@ -15902,23 +20681,26 @@ module FaqSummary =
       make ?languageCode ?fileFormat ?updatedAt ?createdAt ?status ?name ?id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let fileFormat = field_map json "FileFormat" FaqFileFormat.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let status = field_map json "Status" FaqStatus.of_json in
-      let name = field_map json "Name" FaqName.of_json in
-      let id = field_map json "Id" FaqId.of_json in
+    let of_json json__ =
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let fileFormat = field_map json__ "FileFormat" FaqFileFormat.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" FaqStatus.of_json in
+      let name = field_map json__ "Name" FaqName.of_json in
+      let id = field_map json__ "Id" FaqId.of_json in
       make ?languageCode ?fileFormat ?updatedAt ?createdAt ?status ?name ?id
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about a frequently asked questions and answer contained in an index."]
+       "Summary information for frequently asked questions and answers included in an index."]
 module FaqSummaryItems =
   struct
     type nonrec t = FaqSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FaqSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15939,6 +20721,34 @@ module FaqSummaryItems =
       list_of_json ~kind:"FaqSummaryItems" ~of_json:FaqSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module QueryResultType =
+  struct
+    type nonrec t =
+      | DOCUMENT 
+      | QUESTION_ANSWER 
+      | ANSWER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DOCUMENT -> "DOCUMENT"
+      | QUESTION_ANSWER -> "QUESTION_ANSWER"
+      | ANSWER -> "ANSWER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DOCUMENT" -> DOCUMENT
+      | "QUESTION_ANSWER" -> QUESTION_ANSWER
+      | "ANSWER" -> ANSWER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QueryResultType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueryResultType" j)
+    let to_json = simple_to_json to_value
+  end
 module FeedbackToken =
   struct
     type nonrec t = string
@@ -15958,6 +20768,305 @@ module FeedbackToken =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"FeedbackToken" j
     let to_json = simple_to_json to_value
+  end
+module FeaturedResultsItem =
+  struct
+    type nonrec t =
+      {
+      id: ResultId.t option
+        [@ocaml.doc "The identifier of the featured result."];
+      type_: QueryResultType.t option
+        [@ocaml.doc
+          "The type of document within the featured result response. For example, a response could include a question-answer type that's relevant to the query."];
+      additionalAttributes: AdditionalResultAttributeList.t option
+        [@ocaml.doc
+          "One or more additional attributes associated with the featured result."];
+      documentId: DocumentId.t option
+        [@ocaml.doc "The identifier of the featured document."];
+      documentTitle: TextWithHighlights.t option ;
+      documentExcerpt: TextWithHighlights.t option ;
+      documentURI: Url.t option
+        [@ocaml.doc "The source URI location of the featured document."];
+      documentAttributes: DocumentAttributeList.t option
+        [@ocaml.doc
+          "An array of document attributes assigned to a featured document in the search results. For example, the document author (_author) or the source URI (_source_uri) of the document."];
+      feedbackToken: FeedbackToken.t option
+        [@ocaml.doc
+          "A token that identifies a particular featured result from a particular query. Use this token to provide click-through feedback for the result. For more information, see Submitting feedback."]}
+    let make ?id =
+      fun ?type_ ->
+        fun ?additionalAttributes ->
+          fun ?documentId ->
+            fun ?documentTitle ->
+              fun ?documentExcerpt ->
+                fun ?documentURI ->
+                  fun ?documentAttributes ->
+                    fun ?feedbackToken ->
+                      fun () ->
+                        {
+                          id;
+                          type_;
+                          additionalAttributes;
+                          documentId;
+                          documentTitle;
+                          documentExcerpt;
+                          documentURI;
+                          documentAttributes;
+                          feedbackToken
+                        }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ResultId.to_value));
+        ("Type", (Option.map x.type_ ~f:QueryResultType.to_value));
+        ("AdditionalAttributes",
+          (Option.map x.additionalAttributes
+             ~f:AdditionalResultAttributeList.to_value));
+        ("DocumentId", (Option.map x.documentId ~f:DocumentId.to_value));
+        ("DocumentTitle",
+          (Option.map x.documentTitle ~f:TextWithHighlights.to_value));
+        ("DocumentExcerpt",
+          (Option.map x.documentExcerpt ~f:TextWithHighlights.to_value));
+        ("DocumentURI", (Option.map x.documentURI ~f:Url.to_value));
+        ("DocumentAttributes",
+          (Option.map x.documentAttributes ~f:DocumentAttributeList.to_value));
+        ("FeedbackToken",
+          (Option.map x.feedbackToken ~f:FeedbackToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let feedbackToken =
+        (Option.map ~f:FeedbackToken.of_xml)
+          (Xml.child xml_arg0 "FeedbackToken") in
+      let documentAttributes =
+        (Option.map ~f:DocumentAttributeList.of_xml)
+          (Xml.child xml_arg0 "DocumentAttributes") in
+      let documentURI =
+        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "DocumentURI") in
+      let documentExcerpt =
+        (Option.map ~f:TextWithHighlights.of_xml)
+          (Xml.child xml_arg0 "DocumentExcerpt") in
+      let documentTitle =
+        (Option.map ~f:TextWithHighlights.of_xml)
+          (Xml.child xml_arg0 "DocumentTitle") in
+      let documentId =
+        (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "DocumentId") in
+      let additionalAttributes =
+        (Option.map ~f:AdditionalResultAttributeList.of_xml)
+          (Xml.child xml_arg0 "AdditionalAttributes") in
+      let type_ =
+        (Option.map ~f:QueryResultType.of_xml) (Xml.child xml_arg0 "Type") in
+      let id = (Option.map ~f:ResultId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?feedbackToken ?documentAttributes ?documentURI ?documentExcerpt
+        ?documentTitle ?documentId ?additionalAttributes ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let feedbackToken =
+        field_map json__ "FeedbackToken" FeedbackToken.of_json in
+      let documentAttributes =
+        field_map json__ "DocumentAttributes" DocumentAttributeList.of_json in
+      let documentURI = field_map json__ "DocumentURI" Url.of_json in
+      let documentExcerpt =
+        field_map json__ "DocumentExcerpt" TextWithHighlights.of_json in
+      let documentTitle =
+        field_map json__ "DocumentTitle" TextWithHighlights.of_json in
+      let documentId = field_map json__ "DocumentId" DocumentId.of_json in
+      let additionalAttributes =
+        field_map json__ "AdditionalAttributes"
+          AdditionalResultAttributeList.of_json in
+      let type_ = field_map json__ "Type" QueryResultType.of_json in
+      let id = field_map json__ "Id" ResultId.of_json in
+      make ?feedbackToken ?documentAttributes ?documentURI ?documentExcerpt
+        ?documentTitle ?documentId ?additionalAttributes ?type_ ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A single featured result item. A featured result is displayed at the top of the search results page, placed above all other results for certain queries. If there's an exact match of a query, then certain documents are featured in the search results."]
+module FeaturedResultsItemList =
+  struct
+    type nonrec t = FeaturedResultsItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FeaturedResultsItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FeaturedResultsItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FeaturedResultsItemList"
+        ~of_json:FeaturedResultsItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FeaturedResultsSetSummary =
+  struct
+    type nonrec t =
+      {
+      featuredResultsSetId: FeaturedResultsSetId.t option
+        [@ocaml.doc "The identifier of the set of featured results."];
+      featuredResultsSetName: FeaturedResultsSetName.t option
+        [@ocaml.doc "The name for the set of featured results."];
+      status: FeaturedResultsSetStatus.t option
+        [@ocaml.doc
+          "The current status of the set of featured results. When the value is ACTIVE, featured results are ready for use. You can still configure your settings before setting the status to ACTIVE. You can set the status to ACTIVE or INACTIVE using the UpdateFeaturedResultsSet API. The queries you specify for featured results must be unique per featured results set for each index, whether the status is ACTIVE or INACTIVE."];
+      lastUpdatedTimestamp: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp when the set of featured results was last updated."];
+      creationTimestamp: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp when the set of featured results was created."]}
+    let make ?featuredResultsSetId =
+      fun ?featuredResultsSetName ->
+        fun ?status ->
+          fun ?lastUpdatedTimestamp ->
+            fun ?creationTimestamp ->
+              fun () ->
+                {
+                  featuredResultsSetId;
+                  featuredResultsSetName;
+                  status;
+                  lastUpdatedTimestamp;
+                  creationTimestamp
+                }
+    let to_value x =
+      structure_to_value
+        [("FeaturedResultsSetId",
+           (Option.map x.featuredResultsSetId
+              ~f:FeaturedResultsSetId.to_value));
+        ("FeaturedResultsSetName",
+          (Option.map x.featuredResultsSetName
+             ~f:FeaturedResultsSetName.to_value));
+        ("Status",
+          (Option.map x.status ~f:FeaturedResultsSetStatus.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Long.to_value));
+        ("CreationTimestamp",
+          (Option.map x.creationTimestamp ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTimestamp =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "CreationTimestamp") in
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let status =
+        (Option.map ~f:FeaturedResultsSetStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let featuredResultsSetName =
+        (Option.map ~f:FeaturedResultsSetName.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSetName") in
+      let featuredResultsSetId =
+        (Option.map ~f:FeaturedResultsSetId.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSetId") in
+      make ?creationTimestamp ?lastUpdatedTimestamp ?status
+        ?featuredResultsSetName ?featuredResultsSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTimestamp =
+        field_map json__ "CreationTimestamp" Long.of_json in
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Long.of_json in
+      let status = field_map json__ "Status" FeaturedResultsSetStatus.of_json in
+      let featuredResultsSetName =
+        field_map json__ "FeaturedResultsSetName"
+          FeaturedResultsSetName.of_json in
+      let featuredResultsSetId =
+        field_map json__ "FeaturedResultsSetId" FeaturedResultsSetId.of_json in
+      make ?creationTimestamp ?lastUpdatedTimestamp ?status
+        ?featuredResultsSetName ?featuredResultsSetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary information for a set of featured results. Featured results are placed above all other results for certain queries. If there's an exact match of a query, then one or more specific documents are featured in the search results."]
+module FeaturedResultsSetSummaryItems =
+  struct
+    type nonrec t = FeaturedResultsSetSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FeaturedResultsSetSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FeaturedResultsSetSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FeaturedResultsSetSummaryItems"
+        ~of_json:FeaturedResultsSetSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SuggestionType =
+  struct
+    type nonrec t =
+      | QUERY 
+      | DOCUMENT_ATTRIBUTES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | QUERY -> "QUERY"
+      | DOCUMENT_ATTRIBUTES -> "DOCUMENT_ATTRIBUTES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "QUERY" -> QUERY
+      | "DOCUMENT_ATTRIBUTES" -> DOCUMENT_ATTRIBUTES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SuggestionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SuggestionType" j)
+    let to_json = simple_to_json to_value
+  end
+module SuggestionTypes =
+  struct
+    type nonrec t = SuggestionType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SuggestionType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SuggestionType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SuggestionTypes" ~of_json:SuggestionType.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module SuggestionQueryText =
   struct
@@ -15986,20 +21095,46 @@ module GetQuerySuggestionsRequest =
           "The text of a user's query to generate query suggestions. A query is suggested if the query prefix matches what a user starts to type as their query. Amazon Kendra does not show any suggestions if a user types fewer than two characters or more than 60 characters. A query must also have at least one search result and contain at least one word of more than four characters."];
       maxSuggestionsCount: Integer.t option
         [@ocaml.doc
-          "The maximum number of query suggestions you want to show to your users."]}
+          "The maximum number of query suggestions you want to show to your users."];
+      suggestionTypes: SuggestionTypes.t option
+        [@ocaml.doc
+          "The suggestions type to base query suggestions on. The suggestion types are query history or document fields/attributes. You can set one type or the other. If you set query history as your suggestions type, Amazon Kendra suggests queries relevant to your users based on popular queries in the query history. If you set document fields/attributes as your suggestions type, Amazon Kendra suggests queries relevant to your users based on the contents of document fields."];
+      attributeSuggestionsConfig: AttributeSuggestionsGetConfig.t option
+        [@ocaml.doc
+          "Configuration information for the document fields/attributes that you want to base query suggestions on."]}
     let context_ = "GetQuerySuggestionsRequest"
     let make ?maxSuggestionsCount =
-      fun ~indexId ->
-        fun ~queryText ->
-          fun () -> { maxSuggestionsCount; indexId; queryText }
+      fun ?suggestionTypes ->
+        fun ?attributeSuggestionsConfig ->
+          fun ~indexId ->
+            fun ~queryText ->
+              fun () ->
+                {
+                  maxSuggestionsCount;
+                  suggestionTypes;
+                  attributeSuggestionsConfig;
+                  indexId;
+                  queryText
+                }
     let to_value x =
       structure_to_value
         [("IndexId", (Some (IndexId.to_value x.indexId)));
         ("QueryText", (Some (SuggestionQueryText.to_value x.queryText)));
         ("MaxSuggestionsCount",
-          (Option.map x.maxSuggestionsCount ~f:Integer.to_value))]
+          (Option.map x.maxSuggestionsCount ~f:Integer.to_value));
+        ("SuggestionTypes",
+          (Option.map x.suggestionTypes ~f:SuggestionTypes.to_value));
+        ("AttributeSuggestionsConfig",
+          (Option.map x.attributeSuggestionsConfig
+             ~f:AttributeSuggestionsGetConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attributeSuggestionsConfig =
+        (Option.map ~f:AttributeSuggestionsGetConfig.of_xml)
+          (Xml.child xml_arg0 "AttributeSuggestionsConfig") in
+      let suggestionTypes =
+        (Option.map ~f:SuggestionTypes.of_xml)
+          (Xml.child xml_arg0 "SuggestionTypes") in
       let maxSuggestionsCount =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "MaxSuggestionsCount") in
@@ -16008,15 +21143,22 @@ module GetQuerySuggestionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QueryText") in
       let indexId =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
-      make ?maxSuggestionsCount ~queryText ~indexId ()
+      make ?attributeSuggestionsConfig ?suggestionTypes ?maxSuggestionsCount
+        ~queryText ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let attributeSuggestionsConfig =
+        field_map json__ "AttributeSuggestionsConfig"
+          AttributeSuggestionsGetConfig.of_json in
+      let suggestionTypes =
+        field_map json__ "SuggestionTypes" SuggestionTypes.of_json in
       let maxSuggestionsCount =
-        field_map json "MaxSuggestionsCount" Integer.of_json in
+        field_map json__ "MaxSuggestionsCount" Integer.of_json in
       let queryText =
-        field_map_exn json "QueryText" SuggestionQueryText.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      make ?maxSuggestionsCount ~queryText ~indexId ()
+        field_map_exn json__ "QueryText" SuggestionQueryText.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?attributeSuggestionsConfig ?suggestionTypes ?maxSuggestionsCount
+        ~queryText ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Fetches the queries that are suggested to your users. GetQuerySuggestions is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
@@ -16044,9 +21186,9 @@ module SuggestionHighlight =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
       make ?endOffset ?beginOffset ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
+    let of_json json__ =
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
       make ?endOffset ?beginOffset ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The text highlights for a single query suggestion."]
@@ -16054,6 +21196,9 @@ module SuggestionHighlightList =
   struct
     type nonrec t = SuggestionHighlight.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SuggestionHighlight.to_value)) |>
         (fun x -> `List x)
@@ -16099,10 +21244,10 @@ module SuggestionTextWithHighlights =
       let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
       make ?highlights ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let highlights =
-        field_map json "Highlights" SuggestionHighlightList.of_json in
-      let text = field_map json "Text" String_.of_json in
+        field_map json__ "Highlights" SuggestionHighlightList.of_json in
+      let text = field_map json__ "Text" String_.of_json in
       make ?highlights ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16126,42 +21271,135 @@ module SuggestionValue =
           (Xml.child xml_arg0 "Text") in
       make ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let text = field_map json "Text" SuggestionTextWithHighlights.of_json in
+    let of_json json__ =
+      let text = field_map json__ "Text" SuggestionTextWithHighlights.of_json in
       make ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The SuggestionTextWithHighlights structure information."]
+module SourceDocument =
+  struct
+    type nonrec t =
+      {
+      documentId: String_.t option
+        [@ocaml.doc
+          "The identifier of the document used for a query suggestion."];
+      suggestionAttributes: DocumentAttributeKeyList.t option
+        [@ocaml.doc
+          "The document fields/attributes used for a query suggestion."];
+      additionalAttributes: DocumentAttributeList.t option
+        [@ocaml.doc
+          "The additional fields/attributes to include in the response. You can use additional fields to provide extra information in the response. Additional fields are not used to based suggestions on."]}
+    let make ?documentId =
+      fun ?suggestionAttributes ->
+        fun ?additionalAttributes ->
+          fun () ->
+            { documentId; suggestionAttributes; additionalAttributes }
+    let to_value x =
+      structure_to_value
+        [("DocumentId", (Option.map x.documentId ~f:String_.to_value));
+        ("SuggestionAttributes",
+          (Option.map x.suggestionAttributes
+             ~f:DocumentAttributeKeyList.to_value));
+        ("AdditionalAttributes",
+          (Option.map x.additionalAttributes
+             ~f:DocumentAttributeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let additionalAttributes =
+        (Option.map ~f:DocumentAttributeList.of_xml)
+          (Xml.child xml_arg0 "AdditionalAttributes") in
+      let suggestionAttributes =
+        (Option.map ~f:DocumentAttributeKeyList.of_xml)
+          (Xml.child xml_arg0 "SuggestionAttributes") in
+      let documentId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DocumentId") in
+      make ?additionalAttributes ?suggestionAttributes ?documentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let additionalAttributes =
+        field_map json__ "AdditionalAttributes" DocumentAttributeList.of_json in
+      let suggestionAttributes =
+        field_map json__ "SuggestionAttributes"
+          DocumentAttributeKeyList.of_json in
+      let documentId = field_map json__ "DocumentId" String_.of_json in
+      make ?additionalAttributes ?suggestionAttributes ?documentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The document ID and its fields/attributes that are used for a query suggestion, if document fields set to use for query suggestions."]
+module SourceDocuments =
+  struct
+    type nonrec t = SourceDocument.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SourceDocument.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SourceDocument.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SourceDocuments" ~of_json:SourceDocument.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Suggestion =
   struct
     type nonrec t =
       {
       id: ResultId.t option
         [@ocaml.doc
-          "The unique UUID (universally unique identifier) of a single query suggestion."];
+          "The UUID (universally unique identifier) of a single query suggestion."];
       value: SuggestionValue.t option
         [@ocaml.doc
-          "The value for the unique UUID (universally unique identifier) of a single query suggestion. The value is the text string of a suggestion."]}
-    let make ?id = fun ?value -> fun () -> { id; value }
+          "The value for the UUID (universally unique identifier) of a single query suggestion. The value is the text string of a suggestion."];
+      sourceDocuments: SourceDocuments.t option
+        [@ocaml.doc
+          "The list of document IDs and their fields/attributes that are used for a single query suggestion, if document fields set to use for query suggestions."]}
+    let make ?id =
+      fun ?value ->
+        fun ?sourceDocuments -> fun () -> { id; value; sourceDocuments }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResultId.to_value));
-        ("Value", (Option.map x.value ~f:SuggestionValue.to_value))]
+        ("Value", (Option.map x.value ~f:SuggestionValue.to_value));
+        ("SourceDocuments",
+          (Option.map x.sourceDocuments ~f:SourceDocuments.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceDocuments =
+        (Option.map ~f:SourceDocuments.of_xml)
+          (Xml.child xml_arg0 "SourceDocuments") in
       let value =
         (Option.map ~f:SuggestionValue.of_xml) (Xml.child xml_arg0 "Value") in
       let id = (Option.map ~f:ResultId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?value ?id ()
+      make ?sourceDocuments ?value ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" SuggestionValue.of_json in
-      let id = field_map json "Id" ResultId.of_json in make ?value ?id ()
+    let of_json json__ =
+      let sourceDocuments =
+        field_map json__ "SourceDocuments" SourceDocuments.of_json in
+      let value = field_map json__ "Value" SuggestionValue.of_json in
+      let id = field_map json__ "Id" ResultId.of_json in
+      make ?sourceDocuments ?value ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A single query suggestion."]
 module SuggestionList =
   struct
     type nonrec t = Suggestion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Suggestion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -16206,7 +21444,7 @@ module GetQuerySuggestionsResponse =
       {
       querySuggestionsId: QuerySuggestionsId.t option
         [@ocaml.doc
-          "The unique identifier for a list of query suggestions for an index."];
+          "The identifier for a list of query suggestions for an index."];
       suggestions: SuggestionList.t option
         [@ocaml.doc "A list of query suggestions for an index."]}
     type nonrec error =
@@ -16310,10 +21548,10 @@ module GetQuerySuggestionsResponse =
           (Xml.child xml_arg0 "QuerySuggestionsId") in
       make ?suggestions ?querySuggestionsId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suggestions = field_map json "Suggestions" SuggestionList.of_json in
+    let of_json json__ =
+      let suggestions = field_map json__ "Suggestions" SuggestionList.of_json in
       let querySuggestionsId =
-        field_map json "QuerySuggestionsId" QuerySuggestionsId.of_json in
+        field_map json__ "QuerySuggestionsId" QuerySuggestionsId.of_json in
       make ?suggestions ?querySuggestionsId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16458,12 +21696,12 @@ module GetSnapshotsRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?maxResults ?nextToken ~metricType ~interval ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" Integer.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let metricType = field_map_exn json "MetricType" MetricType.of_json in
-      let interval = field_map_exn json "Interval" Interval.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let metricType = field_map_exn json__ "MetricType" MetricType.of_json in
+      let interval = field_map_exn json__ "Interval" Interval.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?maxResults ?nextToken ~metricType ~interval ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16473,9 +21711,10 @@ module TimeRange =
     type nonrec t =
       {
       startTime: Timestamp.t option
-        [@ocaml.doc "The UNIX datetime of the beginning of the time range."];
+        [@ocaml.doc
+          "The Unix timestamp for the beginning of the time range."];
       endTime: Timestamp.t option
-        [@ocaml.doc "The UNIX datetime of the end of the time range."]}
+        [@ocaml.doc "The Unix timestamp for the end of the time range."]}
     let make ?startTime = fun ?endTime -> fun () -> { startTime; endTime }
     let to_value x =
       structure_to_value
@@ -16489,9 +21728,9 @@ module TimeRange =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let startTime = field_map json "StartTime" Timestamp.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
       make ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides a range of time."]
@@ -16499,6 +21738,9 @@ module SnapshotsDataRecord =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -16523,6 +21765,9 @@ module SnapshotsDataRecords =
   struct
     type nonrec t = SnapshotsDataRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotsDataRecord.to_value)) |>
         (fun x -> `List x)
@@ -16549,6 +21794,9 @@ module SnapshotsDataHeaderFields =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -16584,18 +21832,19 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The input to the request is not valid."]
+  end[@@ocaml.doc
+       "The input to the request is not valid. Please provide the correct input and try again."]
 module GetSnapshotsResponse =
   struct
     type nonrec t =
       {
       snapShotTimeFilter: TimeRange.t option
         [@ocaml.doc
-          "The date-time for the beginning and end of the time window for the search metrics data."];
+          "The Unix timestamp for the beginning and end of the time window for the search metrics data."];
       snapshotsDataHeader: SnapshotsDataHeaderFields.t option
         [@ocaml.doc "The column headers for the search metrics data."];
       snapshotsData: SnapshotsDataRecords.t option
@@ -16695,15 +21944,15 @@ module GetSnapshotsResponse =
       make ?nextToken ?snapshotsData ?snapshotsDataHeader ?snapShotTimeFilter
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let snapshotsData =
-        field_map json "SnapshotsData" SnapshotsDataRecords.of_json in
+        field_map json__ "SnapshotsData" SnapshotsDataRecords.of_json in
       let snapshotsDataHeader =
-        field_map json "SnapshotsDataHeader"
+        field_map json__ "SnapshotsDataHeader"
           SnapshotsDataHeaderFields.of_json in
       let snapShotTimeFilter =
-        field_map json "SnapShotTimeFilter" TimeRange.of_json in
+        field_map json__ "SnapShotTimeFilter" TimeRange.of_json in
       make ?nextToken ?snapshotsData ?snapshotsDataHeader ?snapShotTimeFilter
         ()
     let to_json v = composed_to_json to_value v
@@ -16745,8 +21994,8 @@ module MemberUser =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" UserId.of_json in
+    let of_json json__ =
+      let userId = field_map_exn json__ "UserId" UserId.of_json in
       make ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The users that belong to a group."]
@@ -16759,6 +22008,9 @@ module MemberUsers =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MemberUser.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -16806,9 +22058,9 @@ module MemberGroup =
         GroupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ?dataSourceId ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceId = field_map json "DataSourceId" DataSourceId.of_json in
-      let groupId = field_map_exn json "GroupId" GroupId.of_json in
+    let of_json json__ =
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let groupId = field_map_exn json__ "GroupId" GroupId.of_json in
       make ?dataSourceId ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The sub groups that belong to a group."]
@@ -16821,6 +22073,9 @@ module MemberGroups =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MemberGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -16847,7 +22102,7 @@ module GroupMembers =
       {
       memberGroups: MemberGroups.t option
         [@ocaml.doc
-          "A list of sub groups that belong to a group. For example, the sub groups \"Research\", \"Engineering\", and \"Sales and Marketing\" all belong to the group \"Company\"."];
+          "A list of users that belong to a group. This can also include sub groups. For example, the sub groups \"Research\", \"Engineering\", and \"Sales and Marketing\" all belong to the group \"Company A\"."];
       memberUsers: MemberUsers.t option
         [@ocaml.doc
           "A list of users that belong to a group. For example, a list of interns all belong to the \"Interns\" group."];
@@ -16877,15 +22132,15 @@ module GroupMembers =
           (Xml.child xml_arg0 "MemberGroups") in
       make ?s3PathforGroupMembers ?memberUsers ?memberGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3PathforGroupMembers =
-        field_map json "S3PathforGroupMembers" S3Path.of_json in
-      let memberUsers = field_map json "MemberUsers" MemberUsers.of_json in
-      let memberGroups = field_map json "MemberGroups" MemberGroups.of_json in
+        field_map json__ "S3PathforGroupMembers" S3Path.of_json in
+      let memberUsers = field_map json__ "MemberUsers" MemberUsers.of_json in
+      let memberGroups = field_map json__ "MemberGroups" MemberGroups.of_json in
       make ?s3PathforGroupMembers ?memberUsers ?memberGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of users or sub groups that belong to a group. Users and groups are useful for filtering search results to different users based on their group's access to documents."]
+       "A list of users that belong to a group. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."]
 module GroupSummary =
   struct
     type nonrec t =
@@ -16911,109 +22166,77 @@ module GroupSummary =
         (Option.map ~f:GroupId.of_xml) (Xml.child xml_arg0 "GroupId") in
       make ?orderingId ?groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let orderingId =
-        field_map json "OrderingId" PrincipalOrderingId.of_json in
-      let groupId = field_map json "GroupId" GroupId.of_json in
+        field_map json__ "OrderingId" PrincipalOrderingId.of_json in
+      let groupId = field_map json__ "GroupId" GroupId.of_json in
       make ?orderingId ?groupId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Group summary information."]
-module Groups =
-  struct
-    type nonrec t = PrincipalName.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:2048) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:PrincipalName.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:PrincipalName.of_xml)
-    let of_json j =
-      list_of_json ~kind:"Groups" ~of_json:PrincipalName.of_json j
-    let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Summary information for groups."]
 module IndexConfigurationSummary =
   struct
     type nonrec t =
       {
-      name: IndexName.t option [@ocaml.doc "The identifier of the index."];
+      name: IndexName.t option [@ocaml.doc "The name of the index."];
       id: IndexId.t option
         [@ocaml.doc
-          "A unique identifier for the index. Use this to identify the index when you are using APIs such as Query, DescribeIndex, UpdateIndex, and DeleteIndex."];
+          "A identifier for the index. Use this to identify the index when you are using APIs such as Query, DescribeIndex, UpdateIndex, and DeleteIndex."];
       edition: IndexEdition.t option
         [@ocaml.doc
-          "Indicates whether the index is a enterprise edition index or a developer edition index."];
-      createdAt: Timestamp.t
+          "Indicates whether the index is a Enterprise Edition index or a Developer Edition index."];
+      createdAt: Timestamp.t option
         [@ocaml.doc "The Unix timestamp when the index was created."];
-      updatedAt: Timestamp.t
-        [@ocaml.doc
-          "The Unix timestamp when the index was last updated by the UpdateIndex API."];
-      status: IndexStatus.t
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "The Unix timestamp when the index was last updated."];
+      status: IndexStatus.t option
         [@ocaml.doc
           "The current status of the index. When the status is ACTIVE, the index is ready to search."]}
-    let context_ = "IndexConfigurationSummary"
     let make ?name =
       fun ?id ->
         fun ?edition ->
-          fun ~createdAt ->
-            fun ~updatedAt ->
-              fun ~status ->
+          fun ?createdAt ->
+            fun ?updatedAt ->
+              fun ?status ->
                 fun () -> { name; id; edition; createdAt; updatedAt; status }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:IndexName.to_value));
         ("Id", (Option.map x.id ~f:IndexId.to_value));
         ("Edition", (Option.map x.edition ~f:IndexEdition.to_value));
-        ("CreatedAt", (Some (Timestamp.to_value x.createdAt)));
-        ("UpdatedAt", (Some (Timestamp.to_value x.updatedAt)));
-        ("Status", (Some (IndexStatus.to_value x.status)))]
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("Status", (Option.map x.status ~f:IndexStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        IndexStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:IndexStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let updatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       let edition =
         (Option.map ~f:IndexEdition.of_xml) (Xml.child xml_arg0 "Edition") in
       let id = (Option.map ~f:IndexId.of_xml) (Xml.child xml_arg0 "Id") in
       let name = (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "Name") in
-      make ~status ~updatedAt ~createdAt ?edition ?id ?name ()
+      make ?status ?updatedAt ?createdAt ?edition ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" IndexStatus.of_json in
-      let updatedAt = field_map_exn json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "CreatedAt" Timestamp.of_json in
-      let edition = field_map json "Edition" IndexEdition.of_json in
-      let id = field_map json "Id" IndexId.of_json in
-      let name = field_map json "Name" IndexName.of_json in
-      make ~status ~updatedAt ~createdAt ?edition ?id ?name ()
+    let of_json json__ =
+      let status = field_map json__ "Status" IndexStatus.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let edition = field_map json__ "Edition" IndexEdition.of_json in
+      let id = field_map json__ "Id" IndexId.of_json in
+      let name = field_map json__ "Name" IndexName.of_json in
+      make ?status ?updatedAt ?createdAt ?edition ?id ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A summary of information on the configuration of an index."]
+  end[@@ocaml.doc "Summary information on the configuration of an index."]
 module IndexConfigurationSummaryList =
   struct
     type nonrec t = IndexConfigurationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IndexConfigurationSummary.to_value)) |>
         (fun x -> `List x)
@@ -17036,6 +22259,173 @@ module IndexConfigurationSummaryList =
         ~of_json:IndexConfigurationSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MaxResultsIntegerForListAccessControlConfigurationsRequest =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for MaxResultsIntegerForListAccessControlConfigurationsRequest"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListAccessControlConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index for the access control configuration."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "If the previous response was incomplete (because there's more data to retrieve), Amazon Kendra returns a pagination token in the response. You can use this pagination token to retrieve the next set of access control configurations."];
+      maxResults:
+        MaxResultsIntegerForListAccessControlConfigurationsRequest.t option
+        [@ocaml.doc
+          "The maximum number of access control configurations to return."]}
+    let context_ = "ListAccessControlConfigurationsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~indexId -> fun () -> { nextToken; maxResults; indexId }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:MaxResultsIntegerForListAccessControlConfigurationsRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map
+           ~f:MaxResultsIntegerForListAccessControlConfigurationsRequest.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ?maxResults ?nextToken ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults"
+          MaxResultsIntegerForListAccessControlConfigurationsRequest.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?maxResults ?nextToken ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists one or more access control configurations for an index. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."]
+module ListAccessControlConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "If the response is truncated, Amazon Kendra returns this token, which you can use in the subsequent request to retrieve the next set of access control configurations."];
+      accessControlConfigurations:
+        AccessControlConfigurationSummaryList.t option
+        [@ocaml.doc "The details of your access control configurations."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?accessControlConfigurations ->
+        fun () -> { nextToken; accessControlConfigurations }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("AccessControlConfigurations",
+          (Option.map x.accessControlConfigurations
+             ~f:AccessControlConfigurationSummaryList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessControlConfigurations =
+        (Option.map ~f:AccessControlConfigurationSummaryList.of_xml)
+          (Xml.child xml_arg0 "AccessControlConfigurations") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?accessControlConfigurations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessControlConfigurations =
+        field_map json__ "AccessControlConfigurations"
+          AccessControlConfigurationSummaryList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?accessControlConfigurations ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists one or more access control configurations for an index. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."]
 module MaxResultsIntegerForListDataSourceSyncJobsRequest =
   struct
     type nonrec t = int
@@ -17060,10 +22450,11 @@ module ListDataSourceSyncJobsRequest =
   struct
     type nonrec t =
       {
-      id: DataSourceId.t [@ocaml.doc "The identifier of the data source."];
+      id: DataSourceId.t
+        [@ocaml.doc "The identifier of the data source connector."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index that contains the data source."];
+          "The identifier of the index used with the data source connector."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If the previous response was incomplete (because there is more data to retrieve), Amazon Kendra returns a pagination token in the response. You can use this pagination token to retrieve the next set of jobs."];
@@ -17075,7 +22466,7 @@ module ListDataSourceSyncJobsRequest =
           "When specified, the synchronization jobs returned in the list are limited to jobs between the specified dates."];
       statusFilter: DataSourceSyncJobStatus.t option
         [@ocaml.doc
-          "When specified, only returns synchronization jobs with the Status field equal to the specified status."]}
+          "Only returns synchronization jobs with the Status field equal to the specified status."]}
     let context_ = "ListDataSourceSyncJobsRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -17125,28 +22516,29 @@ module ListDataSourceSyncJobsRequest =
       make ?statusFilter ?startTimeFilter ?maxResults ?nextToken ~indexId ~id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusFilter =
-        field_map json "StatusFilter" DataSourceSyncJobStatus.of_json in
+        field_map json__ "StatusFilter" DataSourceSyncJobStatus.of_json in
       let startTimeFilter =
-        field_map json "StartTimeFilter" TimeRange.of_json in
+        field_map json__ "StartTimeFilter" TimeRange.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           MaxResultsIntegerForListDataSourceSyncJobsRequest.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" DataSourceId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" DataSourceId.of_json in
       make ?statusFilter ?startTimeFilter ?maxResults ?nextToken ~indexId ~id
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets statistics about synchronizing Amazon Kendra with a data source."]
+       "Gets statistics about synchronizing a data source connector."]
 module ListDataSourceSyncJobsResponse =
   struct
     type nonrec t =
       {
       history: DataSourceSyncJobHistoryList.t option
-        [@ocaml.doc "A history of synchronization jobs for the data source."];
+        [@ocaml.doc
+          "A history of synchronization jobs for the data source connector."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If the response is truncated, Amazon Kendra returns this token that you can use in the subsequent request to retrieve the next set of jobs."]}
@@ -17237,14 +22629,14 @@ module ListDataSourceSyncJobsResponse =
           (Xml.child xml_arg0 "History") in
       make ?nextToken ?history ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let history =
-        field_map json "History" DataSourceSyncJobHistoryList.of_json in
+        field_map json__ "History" DataSourceSyncJobHistoryList.of_json in
       make ?nextToken ?history ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets statistics about synchronizing Amazon Kendra with a data source."]
+       "Gets statistics about synchronizing a data source connector."]
 module MaxResultsIntegerForListDataSourcesRequest =
   struct
     type nonrec t = int
@@ -17271,12 +22663,13 @@ module ListDataSourcesRequest =
       {
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index that contains the data source."];
+          "The identifier of the index used with one or more data source connectors."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If the previous response was incomplete (because there is more data to retrieve), Amazon Kendra returns a pagination token in the response. You can use this pagination token to retrieve the next set of data sources (DataSourceSummaryItems)."];
+          "If the previous response was incomplete (because there is more data to retrieve), Amazon Kendra returns a pagination token in the response. You can use this pagination token to retrieve the next set of data source connectors."];
       maxResults: MaxResultsIntegerForListDataSourcesRequest.t option
-        [@ocaml.doc "The maximum number of data sources to return."]}
+        [@ocaml.doc
+          "The maximum number of data source connectors to return."]}
     let context_ = "ListDataSourcesRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -17299,25 +22692,25 @@ module ListDataSourcesRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?maxResults ?nextToken ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           MaxResultsIntegerForListDataSourcesRequest.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?maxResults ?nextToken ~indexId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the data sources that you have created."]
+  end[@@ocaml.doc "Lists the data source connectors that you have created."]
 module ListDataSourcesResponse =
   struct
     type nonrec t =
       {
       summaryItems: DataSourceSummaryList.t option
         [@ocaml.doc
-          "An array of summary information for one or more data sources."];
+          "An array of summary information for one or more data source connector."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If the response is truncated, Amazon Kendra returns this token that you can use in the subsequent request to retrieve the next set of data sources."]}
+          "If the response is truncated, Amazon Kendra returns this token that you can use in the subsequent request to retrieve the next set of data source connectors."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -17397,13 +22790,13 @@ module ListDataSourcesResponse =
           (Xml.child xml_arg0 "SummaryItems") in
       make ?nextToken ?summaryItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let summaryItems =
-        field_map json "SummaryItems" DataSourceSummaryList.of_json in
+        field_map json__ "SummaryItems" DataSourceSummaryList.of_json in
       make ?nextToken ?summaryItems ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the data sources that you have created."]
+  end[@@ocaml.doc "Lists the data source connectors that you have created."]
 module MaxResultsIntegerForListEntityPersonasRequest =
   struct
     type nonrec t = int
@@ -17464,13 +22857,13 @@ module ListEntityPersonasRequest =
         ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?maxResults ?nextToken ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           MaxResultsIntegerForListEntityPersonasRequest.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ExperienceId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ExperienceId.of_json in
       make ?maxResults ?nextToken ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17481,15 +22874,16 @@ module PersonasSummary =
       {
       entityId: EntityId.t option
         [@ocaml.doc
-          "The identifier of a user or group in your Amazon Web Services SSO identity source. For example, a user ID could be an email."];
+          "The identifier of a user or group in your IAM Identity Center identity source. For example, a user ID could be an email."];
       persona: Persona.t option
         [@ocaml.doc
-          "The persona that defines the specific permissions of the user or group in your Amazon Web Services SSO identity source. The available personas or access roles are Owner and Viewer. For more information on these personas, see Providing access to your search page."];
+          "The persona that defines the specific permissions of the user or group in your IAM Identity Center identity source. The available personas or access roles are Owner and Viewer. For more information on these personas, see Providing access to your search page."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The date-time the summary information was created."];
+        [@ocaml.doc
+          "The Unix timestamp when the summary information was created."];
       updatedAt: Timestamp.t option
         [@ocaml.doc
-          "The date-time the summary information was last updated."]}
+          "The Unix timestamp when the summary information was last updated."]}
     let make ?entityId =
       fun ?persona ->
         fun ?createdAt ->
@@ -17513,19 +22907,22 @@ module PersonasSummary =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "EntityId") in
       make ?updatedAt ?createdAt ?persona ?entityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let persona = field_map json "Persona" Persona.of_json in
-      let entityId = field_map json "EntityId" EntityId.of_json in
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let persona = field_map json__ "Persona" Persona.of_json in
+      let entityId = field_map json__ "EntityId" EntityId.of_json in
       make ?updatedAt ?createdAt ?persona ?entityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Summary information for users or groups in your Amazon Web Services SSO identity source. This applies to users and groups with specific permissions that define their level of access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Summary information for users or groups in your IAM Identity Center identity source. This applies to users and groups with specific permissions that define their level of access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module PersonasSummaryList =
   struct
     type nonrec t = PersonasSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PersonasSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -17636,10 +23033,10 @@ module ListEntityPersonasResponse =
           (Xml.child xml_arg0 "SummaryItems") in
       make ?nextToken ?summaryItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let summaryItems =
-        field_map json "SummaryItems" PersonasSummaryList.of_json in
+        field_map json__ "SummaryItems" PersonasSummaryList.of_json in
       make ?nextToken ?summaryItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17674,14 +23071,14 @@ module ListExperienceEntitiesRequest =
         ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?nextToken ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" ExperienceId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" ExperienceId.of_json in
       make ?nextToken ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists users or groups in your Amazon Web Services SSO identity source that are granted access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Lists users or groups in your IAM Identity Center identity source that are granted access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module ListExperienceEntitiesResponse =
   struct
     type nonrec t =
@@ -17772,14 +23169,14 @@ module ListExperienceEntitiesResponse =
           (Xml.child xml_arg0 "SummaryItems") in
       make ?nextToken ?summaryItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let summaryItems =
-        field_map json "SummaryItems" ExperienceEntitiesSummaryList.of_json in
+        field_map json__ "SummaryItems" ExperienceEntitiesSummaryList.of_json in
       make ?nextToken ?summaryItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists users or groups in your Amazon Web Services SSO identity source that are granted access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+       "Lists users or groups in your IAM Identity Center identity source that are granted access to your Amazon Kendra experience. You can create an Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
 module MaxResultsIntegerForListExperiencesRequest =
   struct
     type nonrec t = int
@@ -17835,12 +23232,12 @@ module ListExperiencesRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?maxResults ?nextToken ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           MaxResultsIntegerForListExperiencesRequest.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?maxResults ?nextToken ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17934,10 +23331,10 @@ module ListExperiencesResponse =
           (Xml.child xml_arg0 "SummaryItems") in
       make ?nextToken ?summaryItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let summaryItems =
-        field_map json "SummaryItems" ExperiencesSummaryList.of_json in
+        field_map json__ "SummaryItems" ExperiencesSummaryList.of_json in
       make ?nextToken ?summaryItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17966,8 +23363,7 @@ module ListFaqsRequest =
   struct
     type nonrec t =
       {
-      indexId: IndexId.t
-        [@ocaml.doc "The index that contains the FAQ lists."];
+      indexId: IndexId.t [@ocaml.doc "The index for the FAQs."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If the previous response was incomplete (because there is more data to retrieve), Amazon Kendra returns a pagination token in the response. You can use this pagination token to retrieve the next set of FAQs."];
@@ -17996,15 +23392,15 @@ module ListFaqsRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?maxResults ?nextToken ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           MaxResultsIntegerForListFaqsRequest.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?maxResults ?nextToken ~indexId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets a list of FAQ lists associated with an index."]
+  end[@@ocaml.doc "Gets a list of FAQs associated with an index."]
 module ListFaqsResponse =
   struct
     type nonrec t =
@@ -18014,7 +23410,7 @@ module ListFaqsResponse =
           "If the response is truncated, Amazon Kendra returns this token that you can use in the subsequent request to retrieve the next set of FAQs."];
       faqSummaryItems: FaqSummaryItems.t option
         [@ocaml.doc
-          "information about the FAQs associated with the specified index."]}
+          "Summary information about the FAQs for a specified index."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -18094,13 +23490,178 @@ module ListFaqsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?faqSummaryItems ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let faqSummaryItems =
-        field_map json "FaqSummaryItems" FaqSummaryItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "FaqSummaryItems" FaqSummaryItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?faqSummaryItems ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets a list of FAQ lists associated with an index."]
+  end[@@ocaml.doc "Gets a list of FAQs associated with an index."]
+module MaxResultsIntegerForListFeaturedResultsSetsRequest =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for MaxResultsIntegerForListFeaturedResultsSetsRequest"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListFeaturedResultsSetsRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index used for featuring results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the response is truncated, Amazon Kendra returns a pagination token in the response. You can use this pagination token to retrieve the next set of featured results sets."];
+      maxResults: MaxResultsIntegerForListFeaturedResultsSetsRequest.t option
+        [@ocaml.doc "The maximum number of featured results sets to return."]}
+    let context_ = "ListFeaturedResultsSetsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~indexId -> fun () -> { nextToken; maxResults; indexId }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:MaxResultsIntegerForListFeaturedResultsSetsRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map
+           ~f:MaxResultsIntegerForListFeaturedResultsSetsRequest.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ?maxResults ?nextToken ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults"
+          MaxResultsIntegerForListFeaturedResultsSetsRequest.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?maxResults ?nextToken ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all your sets of featured results for a given index. Features results are placed above all other results for certain queries. If there's an exact match of a query, then one or more specific documents are featured in the search results."]
+module ListFeaturedResultsSetsResponse =
+  struct
+    type nonrec t =
+      {
+      featuredResultsSetSummaryItems: FeaturedResultsSetSummaryItems.t option
+        [@ocaml.doc
+          "An array of summary information for one or more featured results sets."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the response is truncated, Amazon Kendra returns a pagination token in the response."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?featuredResultsSetSummaryItems =
+      fun ?nextToken ->
+        fun () -> { featuredResultsSetSummaryItems; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FeaturedResultsSetSummaryItems",
+           (Option.map x.featuredResultsSetSummaryItems
+              ~f:FeaturedResultsSetSummaryItems.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let featuredResultsSetSummaryItems =
+        (Option.map ~f:FeaturedResultsSetSummaryItems.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSetSummaryItems") in
+      make ?nextToken ?featuredResultsSetSummaryItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let featuredResultsSetSummaryItems =
+        field_map json__ "FeaturedResultsSetSummaryItems"
+          FeaturedResultsSetSummaryItems.of_json in
+      make ?nextToken ?featuredResultsSetSummaryItems ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all your sets of featured results for a given index. Features results are placed above all other results for certain queries. If there's an exact match of a query, then one or more specific documents are featured in the search results."]
 module MaxResultsIntegerForListPrincipalsRequest =
   struct
     type nonrec t = int
@@ -18175,15 +23736,15 @@ module ListGroupsOlderThanOrderingIdRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?maxResults ?nextToken ~orderingId ?dataSourceId ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           MaxResultsIntegerForListPrincipalsRequest.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let orderingId =
-        field_map_exn json "OrderingId" PrincipalOrderingId.of_json in
-      let dataSourceId = field_map json "DataSourceId" DataSourceId.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+        field_map_exn json__ "OrderingId" PrincipalOrderingId.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?maxResults ?nextToken ~orderingId ?dataSourceId ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18192,6 +23753,9 @@ module ListOfGroupSummaries =
   struct
     type nonrec t = GroupSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -18311,10 +23875,10 @@ module ListGroupsOlderThanOrderingIdResponse =
           (Xml.child xml_arg0 "GroupsSummaries") in
       make ?nextToken ?groupsSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let groupsSummaries =
-        field_map json "GroupsSummaries" ListOfGroupSummaries.of_json in
+        field_map json__ "GroupsSummaries" ListOfGroupSummaries.of_json in
       make ?nextToken ?groupsSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18345,9 +23909,9 @@ module ListIndicesRequest =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If the previous response was incomplete (because there is more data to retrieve), Amazon Kendra returns a pagination token in the response. You can use this pagination token to retrieve the next set of indexes (DataSourceSummaryItems)."];
+          "If the previous response was incomplete (because there is more data to retrieve), Amazon Kendra returns a pagination token in the response. You can use this pagination token to retrieve the next set of indexes."];
       maxResults: MaxResultsIntegerForListIndicesRequest.t option
-        [@ocaml.doc "The maximum number of data sources to return."]}
+        [@ocaml.doc "The maximum number of indices to return."]}
     let make ?nextToken =
       fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
@@ -18365,11 +23929,11 @@ module ListIndicesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           MaxResultsIntegerForListIndicesRequest.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the Amazon Kendra indexes that you created."]
@@ -18455,10 +24019,10 @@ module ListIndicesResponse =
           (Xml.child xml_arg0 "IndexConfigurationSummaryItems") in
       make ?nextToken ?indexConfigurationSummaryItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let indexConfigurationSummaryItems =
-        field_map json "IndexConfigurationSummaryItems"
+        field_map json__ "IndexConfigurationSummaryItems"
           IndexConfigurationSummaryList.of_json in
       make ?nextToken ?indexConfigurationSummaryItems ()
     let to_json v = composed_to_json to_value v
@@ -18518,12 +24082,12 @@ module ListQuerySuggestionsBlockListsRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?maxResults ?nextToken ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           MaxResultsIntegerForListQuerySuggestionsBlockLists.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?maxResults ?nextToken ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18539,10 +24103,10 @@ module QuerySuggestionsBlockListSummary =
       status: QuerySuggestionsBlockListStatus.t option
         [@ocaml.doc "The status of the block list."];
       createdAt: Timestamp.t option
-        [@ocaml.doc
-          "The date-time summary information for a query suggestions block list was last created."];
+        [@ocaml.doc "The Unix timestamp when the block list was created."];
       updatedAt: Timestamp.t option
-        [@ocaml.doc "The date-time the block list was last updated."];
+        [@ocaml.doc
+          "The Unix timestamp when the block list was last updated."];
       itemCount: Integer.t option
         [@ocaml.doc "The number of items in the block list file."]}
     let make ?id =
@@ -18582,14 +24146,15 @@ module QuerySuggestionsBlockListSummary =
           (Xml.child xml_arg0 "Id") in
       make ?itemCount ?updatedAt ?createdAt ?status ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let itemCount = field_map json "ItemCount" Integer.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+    let of_json json__ =
+      let itemCount = field_map json__ "ItemCount" Integer.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       let status =
-        field_map json "Status" QuerySuggestionsBlockListStatus.of_json in
-      let name = field_map json "Name" QuerySuggestionsBlockListName.of_json in
-      let id = field_map json "Id" QuerySuggestionsBlockListId.of_json in
+        field_map json__ "Status" QuerySuggestionsBlockListStatus.of_json in
+      let name =
+        field_map json__ "Name" QuerySuggestionsBlockListName.of_json in
+      let id = field_map json__ "Id" QuerySuggestionsBlockListId.of_json in
       make ?itemCount ?updatedAt ?createdAt ?status ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18598,6 +24163,9 @@ module QuerySuggestionsBlockListSummaryItems =
   struct
     type nonrec t = QuerySuggestionsBlockListSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QuerySuggestionsBlockListSummary.to_value)) |>
         (fun x -> `List x)
@@ -18711,10 +24279,10 @@ module ListQuerySuggestionsBlockListsResponse =
           (Xml.child xml_arg0 "BlockListSummaryItems") in
       make ?nextToken ?blockListSummaryItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let blockListSummaryItems =
-        field_map json "BlockListSummaryItems"
+        field_map json__ "BlockListSummaryItems"
           QuerySuggestionsBlockListSummaryItems.of_json in
       make ?nextToken ?blockListSummaryItems ()
     let to_json v = composed_to_json to_value v
@@ -18726,7 +24294,7 @@ module ListTagsForResourceRequest =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the index, FAQ, or data source to get a list of tags for."]}
+          "The Amazon Resource Name (ARN) of the index, FAQ, data source, or other resource to get a list of tags for. For example, the ARN of an index is constructed as follows: arn:aws:kendra:your-region:your-account-id:index/index-id For information on how to construct an ARN for all types of Amazon Kendra resources, see Resource types."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceARN = fun () -> { resourceARN }
     let to_value x =
@@ -18739,13 +24307,13 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of tags associated with a specified resource. Indexes, FAQs, and data sources can have tags associated with them."]
+       "Gets a list of tags associated with a resource. Indexes, FAQs, data sources, and other resources can have tags associated with them."]
 module ResourceUnavailableException =
   struct
     type nonrec t = {
@@ -18760,18 +24328,19 @@ module ResourceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The resource you want to use isn't available. Please check you have provided the correct resource and try again."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
       tags: TagList.t option
         [@ocaml.doc
-          "A list of tags associated with the index, FAQ, or data source."]}
+          "A list of tags associated with the index, FAQ, data source, or other resource."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -18845,11 +24414,11 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of tags associated with a specified resource. Indexes, FAQs, and data sources can have tags associated with them."]
+       "Gets a list of tags associated with a resource. Indexes, FAQs, data sources, and other resources can have tags associated with them."]
 module MaxResultsIntegerForListThesauriRequest =
   struct
     type nonrec t = int
@@ -18875,8 +24444,7 @@ module ListThesauriRequest =
     type nonrec t =
       {
       indexId: IndexId.t
-        [@ocaml.doc
-          "The identifier of the index associated with the thesaurus to list."];
+        [@ocaml.doc "The identifier of the index with one or more thesauri."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If the previous response was incomplete (because there is more data to retrieve), Amazon Kendra returns a pagination token in the response. You can use this pagination token to retrieve the next set of thesauri (ThesaurusSummaryItems)."];
@@ -18904,16 +24472,15 @@ module ListThesauriRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?maxResults ?nextToken ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           MaxResultsIntegerForListThesauriRequest.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?maxResults ?nextToken ~indexId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Lists the Amazon Kendra thesauri associated with an index."]
+  end[@@ocaml.doc "Lists the thesauri for an index."]
 module ThesaurusSummary =
   struct
     type nonrec t =
@@ -18924,9 +24491,10 @@ module ThesaurusSummary =
       status: ThesaurusStatus.t option
         [@ocaml.doc "The status of the thesaurus."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The Unix datetime that the thesaurus was created."];
+        [@ocaml.doc "The Unix timestamp when the thesaurus was created."];
       updatedAt: Timestamp.t option
-        [@ocaml.doc "The Unix datetime that the thesaurus was last updated."]}
+        [@ocaml.doc
+          "The Unix timestamp when the thesaurus was last updated."]}
     let make ?id =
       fun ?name ->
         fun ?status ->
@@ -18953,12 +24521,12 @@ module ThesaurusSummary =
       let id = (Option.map ~f:ThesaurusId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?updatedAt ?createdAt ?status ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let status = field_map json "Status" ThesaurusStatus.of_json in
-      let name = field_map json "Name" ThesaurusName.of_json in
-      let id = field_map json "Id" ThesaurusId.of_json in
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" ThesaurusStatus.of_json in
+      let name = field_map json__ "Name" ThesaurusName.of_json in
+      let id = field_map json__ "Id" ThesaurusId.of_json in
       make ?updatedAt ?createdAt ?status ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18967,6 +24535,9 @@ module ThesaurusSummaryItems =
   struct
     type nonrec t = ThesaurusSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ThesaurusSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -19079,14 +24650,14 @@ module ListThesauriResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?thesaurusSummaryItems ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thesaurusSummaryItems =
-        field_map json "ThesaurusSummaryItems" ThesaurusSummaryItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ThesaurusSummaryItems"
+          ThesaurusSummaryItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?thesaurusSummaryItems ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Lists the Amazon Kendra thesauri associated with an index."]
+  end[@@ocaml.doc "Lists the thesauri for an index."]
 module PutPrincipalMappingRequest =
   struct
     type nonrec t =
@@ -19102,13 +24673,13 @@ module PutPrincipalMappingRequest =
           "The identifier of the group you want to map its users to."];
       groupMembers: GroupMembers.t
         [@ocaml.doc
-          "The list that contains your users or sub groups that belong the same group. For example, the group \"Company\" includes the user \"CEO\" and the sub groups \"Research\", \"Engineering\", and \"Sales and Marketing\". If you have more than 1000 users and/or sub groups for a single group, you need to provide the path to the S3 file that lists your users and sub groups for a group. Your sub groups can contain more than 1000 users, but the list of sub groups that belong to a group (and/or users) must be no more than 1000."];
+          "The list that contains your users that belong the same group. This can include sub groups that belong to a group. For example, the group \"Company A\" includes the user \"CEO\" and the sub groups \"Research\", \"Engineering\", and \"Sales and Marketing\". If you have more than 1000 users and/or sub groups for a single group, you need to provide the path to the S3 file that lists your users and sub groups for a group. Your sub groups can contain more than 1000 users, but the list of sub groups that belong to a group (and/or users) must be no more than 1000."];
       orderingId: PrincipalOrderingId.t option
         [@ocaml.doc
-          "The timestamp identifier you specify to ensure Amazon Kendra does not override the latest PUT action with previous actions. The highest number ID, which is the ordering ID, is the latest action you want to process and apply on top of other actions with lower number IDs. This prevents previous actions with lower number IDs from possibly overriding the latest action. The ordering ID can be the UNIX time of the last update you made to a group members list. You would then provide this list when calling PutPrincipalMapping. This ensures your PUT action for that updated group with the latest members list doesn't get overwritten by earlier PUT actions for the same group which are yet to be processed. The default ordering ID is the current UNIX time in milliseconds that the action was received by Amazon Kendra."];
+          "The timestamp identifier you specify to ensure Amazon Kendra doesn't override the latest PUT action with previous actions. The highest number ID, which is the ordering ID, is the latest action you want to process and apply on top of other actions with lower number IDs. This prevents previous actions with lower number IDs from possibly overriding the latest action. The ordering ID can be the Unix time of the last update you made to a group members list. You would then provide this list when calling PutPrincipalMapping. This ensures your PUT action for that updated group with the latest members list doesn't get overwritten by earlier PUT actions for the same group which are yet to be processed. The default ordering ID is the current Unix time in milliseconds that the action was received by Amazon Kendra."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role that has access to the S3 file that contains your list of users or sub groups that belong to a group. For more information, see IAM roles for Amazon Kendra."]}
+          "The Amazon Resource Name (ARN) of an IAM role that has access to the S3 file that contains your list of users that belong to a group. For more information, see IAM roles for Amazon Kendra."]}
     let context_ = "PutPrincipalMappingRequest"
     let make ?dataSourceId =
       fun ?orderingId ->
@@ -19155,20 +24726,20 @@ module PutPrincipalMappingRequest =
       make ?roleArn ?orderingId ~groupMembers ~groupId ?dataSourceId ~indexId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let orderingId =
-        field_map json "OrderingId" PrincipalOrderingId.of_json in
+        field_map json__ "OrderingId" PrincipalOrderingId.of_json in
       let groupMembers =
-        field_map_exn json "GroupMembers" GroupMembers.of_json in
-      let groupId = field_map_exn json "GroupId" GroupId.of_json in
-      let dataSourceId = field_map json "DataSourceId" DataSourceId.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+        field_map_exn json__ "GroupMembers" GroupMembers.of_json in
+      let groupId = field_map_exn json__ "GroupId" GroupId.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" DataSourceId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?roleArn ?orderingId ~groupMembers ~groupId ?dataSourceId ~indexId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Maps users to their groups so that you only need to provide the user ID when you issue the query. You can also map sub groups to groups. For example, the group \"Company Intellectual Property Teams\" includes sub groups \"Research\" and \"Engineering\". These sub groups include their own list of users or people who work in these teams. Only users who work in research and engineering, and therefore belong in the intellectual property group, can see top-secret company documents in their search results. You map users to their groups when you want to filter search results for different users based on their group\226\128\153s access to documents. For more information on filtering search results for different users, see Filtering on user context. If more than five PUT actions for a group are currently processing, a validation exception is thrown. PutPrincipalMapping is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
+       "Maps users to their groups so that you only need to provide the user ID when you issue the query. You can also map sub groups to groups. For example, the group \"Company Intellectual Property Teams\" includes sub groups \"Research\" and \"Engineering\". These sub groups include their own list of users or people who work in these teams. Only users who work in research and engineering, and therefore belong in the intellectual property group, can see top-secret company documents in their search results. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents. For more information, see Filtering on user context. If more than five PUT actions for a group are currently processing, a validation exception is thrown."]
 module QueryId =
   struct
     type nonrec t = string
@@ -19211,76 +24782,6 @@ module VisitorId =
     let of_json j = string_of_json ~kind:"VisitorId" j
     let to_json = simple_to_json to_value
   end
-module Token =
-  struct
-    type nonrec t = string
-    let context_ = "Token"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:100000) >>=
-                  (fun () -> check_pattern i ~pattern:"^\\P{C}*$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Token" j
-    let to_json = simple_to_json to_value
-  end
-module UserContext =
-  struct
-    type nonrec t =
-      {
-      token: Token.t option
-        [@ocaml.doc
-          "The user context token for filtering search results for a user. It must be a JWT or a JSON token."];
-      userId: PrincipalName.t option
-        [@ocaml.doc
-          "The identifier of the user you want to filter search results based on their access to documents."];
-      groups: Groups.t option
-        [@ocaml.doc
-          "The list of groups you want to filter search results based on the groups' access to documents."];
-      dataSourceGroups: DataSourceGroups.t option
-        [@ocaml.doc
-          "The list of data source groups you want to filter search results based on groups' access to documents in that data source."]}
-    let make ?token =
-      fun ?userId ->
-        fun ?groups ->
-          fun ?dataSourceGroups ->
-            fun () -> { token; userId; groups; dataSourceGroups }
-    let to_value x =
-      structure_to_value
-        [("Token", (Option.map x.token ~f:Token.to_value));
-        ("UserId", (Option.map x.userId ~f:PrincipalName.to_value));
-        ("Groups", (Option.map x.groups ~f:Groups.to_value));
-        ("DataSourceGroups",
-          (Option.map x.dataSourceGroups ~f:DataSourceGroups.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let dataSourceGroups =
-        (Option.map ~f:DataSourceGroups.of_xml)
-          (Xml.child xml_arg0 "DataSourceGroups") in
-      let groups =
-        (Option.map ~f:Groups.of_xml) (Xml.child xml_arg0 "Groups") in
-      let userId =
-        (Option.map ~f:PrincipalName.of_xml) (Xml.child xml_arg0 "UserId") in
-      let token = (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "Token") in
-      make ?dataSourceGroups ?groups ?userId ?token ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceGroups =
-        field_map json "DataSourceGroups" DataSourceGroups.of_json in
-      let groups = field_map json "Groups" Groups.of_json in
-      let userId = field_map json "UserId" PrincipalName.of_json in
-      let token = field_map json "Token" Token.of_json in
-      make ?dataSourceGroups ?groups ?userId ?token ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides information about the user context for an Amazon Kendra index. This is used for filtering search results for different users based on their access to documents. You provide one of the following: User token User ID, the groups the user belongs to, and any data sources the groups can access. If you provide both, an exception is thrown."]
 module SpellCorrectionConfiguration =
   struct
     type nonrec t =
@@ -19302,140 +24803,39 @@ module SpellCorrectionConfiguration =
              "IncludeQuerySpellCheckSuggestions") in
       make ~includeQuerySpellCheckSuggestions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeQuerySpellCheckSuggestions =
-        field_map_exn json "IncludeQuerySpellCheckSuggestions"
+        field_map_exn json__ "IncludeQuerySpellCheckSuggestions"
           Boolean.of_json in
       make ~includeQuerySpellCheckSuggestions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the configuration information for suggested query spell corrections. Suggested spell corrections are based on words that appear in your indexed documents and how closely a corrected word matches a misspelled word. This feature is designed with certain defaults or limits. For information on the current limits and how to request more support for some limits, see the Spell Checker documentation."]
-module SortOrder =
-  struct
-    type nonrec t =
-      | DESC 
-      | ASC 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | DESC -> "DESC" | ASC -> "ASC" | Non_static_id s -> s
-    let of_string =
-      function | "DESC" -> DESC | "ASC" -> ASC | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
-    let to_json = simple_to_json to_value
-  end
-module SortingConfiguration =
-  struct
-    type nonrec t =
-      {
-      documentAttributeKey: DocumentAttributeKey.t
-        [@ocaml.doc
-          "The name of the document attribute used to sort the response. You can use any field that has the Sortable flag set to true. You can also sort by any of the following built-in attributes: _category _created_at _last_updated_at _version _view_count"];
-      sortOrder: SortOrder.t
-        [@ocaml.doc
-          "The order that the results should be returned in. In case of ties, the relevance assigned to the result by Amazon Kendra is used as the tie-breaker."]}
-    let context_ = "SortingConfiguration"
-    let make ~documentAttributeKey =
-      fun ~sortOrder -> fun () -> { documentAttributeKey; sortOrder }
-    let to_value x =
-      structure_to_value
-        [("DocumentAttributeKey",
-           (Some (DocumentAttributeKey.to_value x.documentAttributeKey)));
-        ("SortOrder", (Some (SortOrder.to_value x.sortOrder)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let sortOrder =
-        SortOrder.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SortOrder") in
-      let documentAttributeKey =
-        DocumentAttributeKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DocumentAttributeKey") in
-      make ~sortOrder ~documentAttributeKey ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortOrder = field_map_exn json "SortOrder" SortOrder.of_json in
-      let documentAttributeKey =
-        field_map_exn json "DocumentAttributeKey"
-          DocumentAttributeKey.of_json in
-      make ~sortOrder ~documentAttributeKey ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Specifies the document attribute to use to sort the response to a Amazon Kendra query. You can specify a single attribute for sorting. The attribute must have the Sortable flag set to true, otherwise Amazon Kendra returns an exception. You can sort attributes of the following types. Date value Long value String value You can't sort attributes of the following type. String list value"]
-module QueryText =
-  struct
-    type nonrec t = string
-    let context_ = "QueryText"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1000) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QueryText" j
-    let to_json = simple_to_json to_value
-  end
-module QueryResultType =
-  struct
-    type nonrec t =
-      | DOCUMENT 
-      | QUESTION_ANSWER 
-      | ANSWER 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | DOCUMENT -> "DOCUMENT"
-      | QUESTION_ANSWER -> "QUESTION_ANSWER"
-      | ANSWER -> "ANSWER"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "DOCUMENT" -> DOCUMENT
-      | "QUESTION_ANSWER" -> QUESTION_ANSWER
-      | "ANSWER" -> ANSWER
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration QueryResultType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"QueryResultType" j)
-    let to_json = simple_to_json to_value
-  end
 module QueryRequest =
   struct
     type nonrec t =
       {
       indexId: IndexId.t
+        [@ocaml.doc "The identifier of the index for the search."];
+      queryText: QueryText.t option
         [@ocaml.doc
-          "The unique identifier of the index to search. The identifier is returned in the response from the CreateIndex API."];
-      queryText: QueryText.t option [@ocaml.doc "The text to search for."];
+          "The input query text for the search. Amazon Kendra truncates queries at 30 token words, which excludes punctuation and stop words. Truncation still applies if you use Boolean or more advanced, complex queries. For example, Timeoff AND October AND Category:HR is counted as 3 tokens: timeoff, october, hr. For more information, see Searching with advanced query syntax in the Amazon Kendra Developer Guide."];
       attributeFilter: AttributeFilter.t option
         [@ocaml.doc
-          "Enables filtered searches based on document attributes. You can only provide one attribute filter; however, the AndAllFilters, NotFilter, and OrAllFilters parameters contain a list of other filters. The AttributeFilter parameter enables you to create a set of filtering rules that a document must satisfy to be included in the query results."];
+          "Filters search results by document fields/attributes. You can only provide one attribute filter; however, the AndAllFilters, NotFilter, and OrAllFilters parameters contain a list of other filters. The AttributeFilter parameter means you can create a set of filtering rules that a document must satisfy to be included in the query results. For Amazon Kendra Gen AI Enterprise Edition indices use AttributeFilter to enable document filtering for end users using _email_id or include public documents (_email_id=null)."];
       facets: FacetList.t option
         [@ocaml.doc
-          "An array of documents attributes. Amazon Kendra returns a count for each attribute key specified. You can use this information to help narrow the search for your user."];
+          "An array of documents fields/attributes for faceted search. Amazon Kendra returns a count for each field key specified. This helps your users narrow their search."];
       requestedDocumentAttributes: DocumentAttributeKeyList.t option
         [@ocaml.doc
-          "An array of document attributes to include in the response. No other document attributes are included in the response. By default all document attributes are included in the response."];
+          "An array of document fields/attributes to include in the response. You can limit the response to include certain document fields. By default, all document attributes are included in the response."];
       queryResultTypeFilter: QueryResultType.t option
         [@ocaml.doc
-          "Sets the type of query. Only results for the specified query type are returned."];
+          "Sets the type of query result or response. Only results for the specified type are returned."];
       documentRelevanceOverrideConfigurations:
         DocumentRelevanceOverrideConfigurationList.t option
         [@ocaml.doc
-          "Overrides relevance tuning configurations of fields or attributes set at the index level. If you use this API to override the relevance tuning configured at the index level, but there is no relevance tuning configured at the index level, then Amazon Kendra does not apply any relevance tuning. If there is relevance tuning configured at the index level, but you do not use this API to override any relevance tuning in the index, then Amazon Kendra uses the relevance tuning that is configured at the index level. If there is relevance tuning configured for fields at the index level, but you use this API to override only some of these fields, then for the fields you did not override, the importance is set to 1."];
+          "Overrides relevance tuning configurations of fields/attributes set at the index level. If you use this API to override the relevance tuning configured at the index level, but there is no relevance tuning configured at the index level, then Amazon Kendra does not apply any relevance tuning. If there is relevance tuning configured for fields at the index level, and you use this API to override only some of these fields, then for the fields you did not override, the importance is set to 1."];
       pageNumber: Integer.t option
         [@ocaml.doc
           "Query results are returned in pages the size of the PageSize parameter. By default, Amazon Kendra returns the first page of results. Use this parameter to get result pages after the first one."];
@@ -19445,13 +24845,19 @@ module QueryRequest =
       sortingConfiguration: SortingConfiguration.t option
         [@ocaml.doc
           "Provides information that determines how the results of the query are sorted. You can set the field that Amazon Kendra should sort the results on, and specify whether the results should be sorted in ascending or descending order. In the case of ties in sorting the results, the results are sorted by relevance. If you don't provide sorting configuration, the results are sorted by the relevance that Amazon Kendra determines for the result."];
+      sortingConfigurations: SortingConfigurationList.t option
+        [@ocaml.doc
+          "Provides configuration information to determine how the results of a query are sorted. You can set upto 3 fields that Amazon Kendra should sort the results on, and specify whether the results should be sorted in ascending or descending order. The sort field quota can be increased. If you don't provide a sorting configuration, the results are sorted by the relevance that Amazon Kendra determines for the result. In the case of ties in sorting the results, the results are sorted by relevance."];
       userContext: UserContext.t option
         [@ocaml.doc "The user context token or user and group information."];
       visitorId: VisitorId.t option
         [@ocaml.doc
           "Provides an identifier for a specific user. The VisitorId should be a unique identifier, such as a GUID. Don't use personally identifiable information, such as the user's email address, as the VisitorId."];
       spellCorrectionConfiguration: SpellCorrectionConfiguration.t option
-        [@ocaml.doc "Enables suggested spell corrections for queries."]}
+        [@ocaml.doc "Enables suggested spell corrections for queries."];
+      collapseConfiguration: CollapseConfiguration.t option
+        [@ocaml.doc
+          "Provides configuration to determine how to group results by document attribute value, and how to display them (collapsed or expanded) under a designated primary document for each group."]}
     let context_ = "QueryRequest"
     let make ?queryText =
       fun ?attributeFilter ->
@@ -19462,26 +24868,30 @@ module QueryRequest =
                 fun ?pageNumber ->
                   fun ?pageSize ->
                     fun ?sortingConfiguration ->
-                      fun ?userContext ->
-                        fun ?visitorId ->
-                          fun ?spellCorrectionConfiguration ->
-                            fun ~indexId ->
-                              fun () ->
-                                {
-                                  queryText;
-                                  attributeFilter;
-                                  facets;
-                                  requestedDocumentAttributes;
-                                  queryResultTypeFilter;
-                                  documentRelevanceOverrideConfigurations;
-                                  pageNumber;
-                                  pageSize;
-                                  sortingConfiguration;
-                                  userContext;
-                                  visitorId;
-                                  spellCorrectionConfiguration;
-                                  indexId
-                                }
+                      fun ?sortingConfigurations ->
+                        fun ?userContext ->
+                          fun ?visitorId ->
+                            fun ?spellCorrectionConfiguration ->
+                              fun ?collapseConfiguration ->
+                                fun ~indexId ->
+                                  fun () ->
+                                    {
+                                      queryText;
+                                      attributeFilter;
+                                      facets;
+                                      requestedDocumentAttributes;
+                                      queryResultTypeFilter;
+                                      documentRelevanceOverrideConfigurations;
+                                      pageNumber;
+                                      pageSize;
+                                      sortingConfiguration;
+                                      sortingConfigurations;
+                                      userContext;
+                                      visitorId;
+                                      spellCorrectionConfiguration;
+                                      collapseConfiguration;
+                                      indexId
+                                    }
     let to_value x =
       structure_to_value
         [("IndexId", (Some (IndexId.to_value x.indexId)));
@@ -19501,13 +24911,22 @@ module QueryRequest =
         ("PageSize", (Option.map x.pageSize ~f:Integer.to_value));
         ("SortingConfiguration",
           (Option.map x.sortingConfiguration ~f:SortingConfiguration.to_value));
+        ("SortingConfigurations",
+          (Option.map x.sortingConfigurations
+             ~f:SortingConfigurationList.to_value));
         ("UserContext", (Option.map x.userContext ~f:UserContext.to_value));
         ("VisitorId", (Option.map x.visitorId ~f:VisitorId.to_value));
         ("SpellCorrectionConfiguration",
           (Option.map x.spellCorrectionConfiguration
-             ~f:SpellCorrectionConfiguration.to_value))]
+             ~f:SpellCorrectionConfiguration.to_value));
+        ("CollapseConfiguration",
+          (Option.map x.collapseConfiguration
+             ~f:CollapseConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let collapseConfiguration =
+        (Option.map ~f:CollapseConfiguration.of_xml)
+          (Xml.child xml_arg0 "CollapseConfiguration") in
       let spellCorrectionConfiguration =
         (Option.map ~f:SpellCorrectionConfiguration.of_xml)
           (Xml.child xml_arg0 "SpellCorrectionConfiguration") in
@@ -19515,6 +24934,9 @@ module QueryRequest =
         (Option.map ~f:VisitorId.of_xml) (Xml.child xml_arg0 "VisitorId") in
       let userContext =
         (Option.map ~f:UserContext.of_xml) (Xml.child xml_arg0 "UserContext") in
+      let sortingConfigurations =
+        (Option.map ~f:SortingConfigurationList.of_xml)
+          (Xml.child xml_arg0 "SortingConfigurations") in
       let sortingConfiguration =
         (Option.map ~f:SortingConfiguration.of_xml)
           (Xml.child xml_arg0 "SortingConfiguration") in
@@ -19540,43 +24962,49 @@ module QueryRequest =
         (Option.map ~f:QueryText.of_xml) (Xml.child xml_arg0 "QueryText") in
       let indexId =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
-      make ?spellCorrectionConfiguration ?visitorId ?userContext
-        ?sortingConfiguration ?pageSize ?pageNumber
-        ?documentRelevanceOverrideConfigurations ?queryResultTypeFilter
-        ?requestedDocumentAttributes ?facets ?attributeFilter ?queryText
-        ~indexId ()
+      make ?collapseConfiguration ?spellCorrectionConfiguration ?visitorId
+        ?userContext ?sortingConfigurations ?sortingConfiguration ?pageSize
+        ?pageNumber ?documentRelevanceOverrideConfigurations
+        ?queryResultTypeFilter ?requestedDocumentAttributes ?facets
+        ?attributeFilter ?queryText ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let collapseConfiguration =
+        field_map json__ "CollapseConfiguration"
+          CollapseConfiguration.of_json in
       let spellCorrectionConfiguration =
-        field_map json "SpellCorrectionConfiguration"
+        field_map json__ "SpellCorrectionConfiguration"
           SpellCorrectionConfiguration.of_json in
-      let visitorId = field_map json "VisitorId" VisitorId.of_json in
-      let userContext = field_map json "UserContext" UserContext.of_json in
+      let visitorId = field_map json__ "VisitorId" VisitorId.of_json in
+      let userContext = field_map json__ "UserContext" UserContext.of_json in
+      let sortingConfigurations =
+        field_map json__ "SortingConfigurations"
+          SortingConfigurationList.of_json in
       let sortingConfiguration =
-        field_map json "SortingConfiguration" SortingConfiguration.of_json in
-      let pageSize = field_map json "PageSize" Integer.of_json in
-      let pageNumber = field_map json "PageNumber" Integer.of_json in
+        field_map json__ "SortingConfiguration" SortingConfiguration.of_json in
+      let pageSize = field_map json__ "PageSize" Integer.of_json in
+      let pageNumber = field_map json__ "PageNumber" Integer.of_json in
       let documentRelevanceOverrideConfigurations =
-        field_map json "DocumentRelevanceOverrideConfigurations"
+        field_map json__ "DocumentRelevanceOverrideConfigurations"
           DocumentRelevanceOverrideConfigurationList.of_json in
       let queryResultTypeFilter =
-        field_map json "QueryResultTypeFilter" QueryResultType.of_json in
+        field_map json__ "QueryResultTypeFilter" QueryResultType.of_json in
       let requestedDocumentAttributes =
-        field_map json "RequestedDocumentAttributes"
+        field_map json__ "RequestedDocumentAttributes"
           DocumentAttributeKeyList.of_json in
-      let facets = field_map json "Facets" FacetList.of_json in
+      let facets = field_map json__ "Facets" FacetList.of_json in
       let attributeFilter =
-        field_map json "AttributeFilter" AttributeFilter.of_json in
-      let queryText = field_map json "QueryText" QueryText.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      make ?spellCorrectionConfiguration ?visitorId ?userContext
-        ?sortingConfiguration ?pageSize ?pageNumber
-        ?documentRelevanceOverrideConfigurations ?queryResultTypeFilter
-        ?requestedDocumentAttributes ?facets ?attributeFilter ?queryText
-        ~indexId ()
+        field_map json__ "AttributeFilter" AttributeFilter.of_json in
+      let queryText = field_map json__ "QueryText" QueryText.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?collapseConfiguration ?spellCorrectionConfiguration ?visitorId
+        ?userContext ?sortingConfigurations ?sortingConfiguration ?pageSize
+        ?pageNumber ?documentRelevanceOverrideConfigurations
+        ?queryResultTypeFilter ?requestedDocumentAttributes ?facets
+        ?attributeFilter ?queryText ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Searches an active index. Use this API to search your documents using query. The Query API enables to do faceted search and to filter results based on document attributes. It also enables you to provide user context that Amazon Kendra uses to enforce document access control in the search results. Amazon Kendra searches your index for text content and question and answer (FAQ) content. By default the response contains three types of results. Relevant passages Matching FAQs Relevant documents You can specify that the query return only one type of result using the QueryResultTypeConfig parameter. Each query returns the 100 most relevant results."]
+       "Searches an index given an input query. If you are working with large language models (LLMs) or implementing retrieval augmented generation (RAG) systems, you can use Amazon Kendra's Retrieve API, which can return longer semantically relevant passages. We recommend using the Retrieve API instead of filing a service limit increase to increase the Query API document excerpt length. You can configure boosting or relevance tuning at the query level to override boosting at the index level, filter based on document fields/attributes and faceted search, and filter based on the user or their group access to documents. You can also include certain fields in the response that might provide useful additional information. A query response contains three types of results. Relevant suggested answers. The answers can be either a text excerpt or table excerpt. The answer can be highlighted in the excerpt. Matching FAQs or questions-answer from your FAQ file. Relevant documents. This result type includes an excerpt of the document with the document title. The searched terms can be highlighted in the excerpt. You can specify that the query return only one type of result using the QueryResultTypeFilter parameter. Each query returns the 100 most relevant results. If you filter result type to only question-answers, a maximum of four results are returned. If you filter result type to only answers, a maximum of three results are returned. If you're using an Amazon Kendra Gen AI Enterprise Edition index, you can only use ATTRIBUTE_FILTER to filter search results by user context. If you're using an Amazon Kendra Gen AI Enterprise Edition index and you try to use USER_TOKEN to configure user context policy, Amazon Kendra returns a ValidationException error."]
 module WarningMessage =
   struct
     type nonrec t = string
@@ -19641,9 +25069,9 @@ module Warning =
         (Option.map ~f:WarningMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "Code" WarningCode.of_json in
-      let message = field_map json "Message" WarningMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "Code" WarningCode.of_json in
+      let message = field_map json__ "Message" WarningMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19656,6 +25084,9 @@ module WarningList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Warning.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -19720,10 +25151,10 @@ module SpellCorrectedQuery =
           (Xml.child xml_arg0 "SuggestedQueryText") in
       make ?corrections ?suggestedQueryText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let corrections = field_map json "Corrections" CorrectionList.of_json in
+    let of_json json__ =
+      let corrections = field_map json__ "Corrections" CorrectionList.of_json in
       let suggestedQueryText =
-        field_map json "SuggestedQueryText" SuggestedQueryText.of_json in
+        field_map json__ "SuggestedQueryText" SuggestedQueryText.of_json in
       make ?corrections ?suggestedQueryText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A query with suggested spell corrections."]
@@ -19731,6 +25162,9 @@ module SpellCorrectedQueryList =
   struct
     type nonrec t = SpellCorrectedQuery.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SpellCorrectedQuery.to_value)) |>
         (fun x -> `List x)
@@ -19753,6 +25187,160 @@ module SpellCorrectedQueryList =
         ~of_json:SpellCorrectedQuery.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TableCell =
+  struct
+    type nonrec t =
+      {
+      value: String_.t option
+        [@ocaml.doc
+          "The actual value or content within a table cell. A table cell could contain a date value of a year, or a string value of text, for example."];
+      topAnswer: Boolean.t option
+        [@ocaml.doc
+          "TRUE if the response of the table cell is the top answer. This is the cell value or content with the highest confidence score or is the most relevant to the query."];
+      highlighted: Boolean.t option
+        [@ocaml.doc
+          "TRUE means that the table cell has a high enough confidence and is relevant to the query, so the value or content should be highlighted."];
+      header: Boolean.t option
+        [@ocaml.doc
+          "TRUE means that the table cell should be treated as a header."]}
+    let make ?value =
+      fun ?topAnswer ->
+        fun ?highlighted ->
+          fun ?header -> fun () -> { value; topAnswer; highlighted; header }
+    let to_value x =
+      structure_to_value
+        [("Value", (Option.map x.value ~f:String_.to_value));
+        ("TopAnswer", (Option.map x.topAnswer ~f:Boolean.to_value));
+        ("Highlighted", (Option.map x.highlighted ~f:Boolean.to_value));
+        ("Header", (Option.map x.header ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let header =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Header") in
+      let highlighted =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Highlighted") in
+      let topAnswer =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "TopAnswer") in
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      make ?header ?highlighted ?topAnswer ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let header = field_map json__ "Header" Boolean.of_json in
+      let highlighted = field_map json__ "Highlighted" Boolean.of_json in
+      let topAnswer = field_map json__ "TopAnswer" Boolean.of_json in
+      let value = field_map json__ "Value" String_.of_json in
+      make ?header ?highlighted ?topAnswer ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about a table cell in a table excerpt."]
+module TableCellList =
+  struct
+    type nonrec t = TableCell.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TableCell.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TableCell.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TableCellList" ~of_json:TableCell.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TableRow =
+  struct
+    type nonrec t =
+      {
+      cells: TableCellList.t option
+        [@ocaml.doc "A list of table cells in a row."]}
+    let make ?cells = fun () -> { cells }
+    let to_value x =
+      structure_to_value
+        [("Cells", (Option.map x.cells ~f:TableCellList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cells =
+        (Option.map ~f:TableCellList.of_xml) (Xml.child xml_arg0 "Cells") in
+      make ?cells ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cells = field_map json__ "Cells" TableCellList.of_json in
+      make ?cells ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a row in a table excerpt."]
+module TableRowList =
+  struct
+    type nonrec t = TableRow.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TableRow.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TableRow.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TableRowList" ~of_json:TableRow.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TableExcerpt =
+  struct
+    type nonrec t =
+      {
+      rows: TableRowList.t option
+        [@ocaml.doc "A list of rows in the table excerpt."];
+      totalNumberOfRows: Integer.t option
+        [@ocaml.doc
+          "A count of the number of rows in the original table within the document."]}
+    let make ?rows =
+      fun ?totalNumberOfRows -> fun () -> { rows; totalNumberOfRows }
+    let to_value x =
+      structure_to_value
+        [("Rows", (Option.map x.rows ~f:TableRowList.to_value));
+        ("TotalNumberOfRows",
+          (Option.map x.totalNumberOfRows ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalNumberOfRows =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfRows") in
+      let rows =
+        (Option.map ~f:TableRowList.of_xml) (Xml.child xml_arg0 "Rows") in
+      make ?totalNumberOfRows ?rows ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalNumberOfRows =
+        field_map json__ "TotalNumberOfRows" Integer.of_json in
+      let rows = field_map json__ "Rows" TableRowList.of_json in
+      make ?totalNumberOfRows ?rows ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An excerpt from a table within a document. The table excerpt displays up to five columns and three rows, depending on how many table cells are relevant to the query and how many columns are available in the original table. The top most relevant cell is displayed in the table excerpt, along with the next most relevant cells."]
 module ScoreConfidence =
   struct
     type nonrec t =
@@ -19793,7 +25381,7 @@ module ScoreAttributes =
       {
       scoreConfidence: ScoreConfidence.t option
         [@ocaml.doc
-          "A relative ranking for how well the response matches the query."]}
+          "A relative ranking for how relevant the response is to the query."]}
     let make ?scoreConfidence = fun () -> { scoreConfidence }
     let to_value x =
       structure_to_value
@@ -19806,25 +25394,51 @@ module ScoreAttributes =
           (Xml.child xml_arg0 "ScoreConfidence") in
       make ?scoreConfidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scoreConfidence =
-        field_map json "ScoreConfidence" ScoreConfidence.of_json in
+        field_map json__ "ScoreConfidence" ScoreConfidence.of_json in
       make ?scoreConfidence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a relative ranking that indicates how confident Amazon Kendra is that the response matches the query."]
+       "Provides a relative ranking that indicates how confident Amazon Kendra is that the response is relevant to the query."]
+module QueryResultFormat =
+  struct
+    type nonrec t =
+      | TABLE 
+      | TEXT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | TABLE -> "TABLE" | TEXT -> "TEXT" | Non_static_id s -> s
+    let of_string =
+      function | "TABLE" -> TABLE | "TEXT" -> TEXT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QueryResultFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueryResultFormat" j)
+    let to_json = simple_to_json to_value
+  end
 module QueryResultItem =
   struct
     type nonrec t =
       {
       id: ResultId.t option
-        [@ocaml.doc "The unique identifier for the query result."];
-      type_: QueryResultType.t option [@ocaml.doc "The type of document."];
+        [@ocaml.doc
+          "The unique identifier for the query result item id (Id) and the query result item document id (DocumentId) combined. The value of this field changes with every request, even when you have the same documents."];
+      type_: QueryResultType.t option
+        [@ocaml.doc
+          "The type of document within the response. For example, a response could include a question-answer that's relevant to the query."];
+      format: QueryResultFormat.t option
+        [@ocaml.doc
+          "If the Type of document within the response is ANSWER, then it is either a TABLE answer or TEXT answer. If it's a table answer, a table excerpt is returned in TableExcerpt. If it's a text answer, a text excerpt is returned in DocumentExcerpt."];
       additionalAttributes: AdditionalResultAttributeList.t option
         [@ocaml.doc
-          "One or more additional attributes associated with the query result."];
+          "One or more additional fields/attributes associated with the query result."];
       documentId: DocumentId.t option
-        [@ocaml.doc "The unique identifier for the document."];
+        [@ocaml.doc "The identifier for the document."];
       documentTitle: TextWithHighlights.t option
         [@ocaml.doc
           "The title of the document. Contains the text of the title and information for highlighting the relevant terms in the title."];
@@ -19835,40 +25449,52 @@ module QueryResultItem =
         [@ocaml.doc "The URI of the original location of the document."];
       documentAttributes: DocumentAttributeList.t option
         [@ocaml.doc
-          "An array of document attributes for the document that the query result maps to. For example, the document author (Author) or the source URI (SourceUri) of the document."];
+          "An array of document fields/attributes assigned to a document in the search results. For example, the document author (_author) or the source URI (_source_uri) of the document."];
       scoreAttributes: ScoreAttributes.t option
         [@ocaml.doc
-          "Indicates the confidence that Amazon Kendra has that a result matches the query that you provided. Each result is placed into a bin that indicates the confidence, VERY_HIGH, HIGH, MEDIUM and LOW. You can use the score to determine if a response meets the confidence needed for your application. The field is only set to LOW when the Type field is set to DOCUMENT and Amazon Kendra is not confident that the result matches the query."];
+          "Indicates the confidence level of Amazon Kendra providing a relevant result for the query. Each result is placed into a bin that indicates the confidence, VERY_HIGH, HIGH, MEDIUM and LOW. You can use the score to determine if a response meets the confidence needed for your application. The field is only set to LOW when the Type field is set to DOCUMENT and Amazon Kendra is not confident that the result is relevant to the query."];
       feedbackToken: FeedbackToken.t option
         [@ocaml.doc
-          "A token that identifies a particular result from a particular query. Use this token to provide click-through feedback for the result. For more information, see Submitting feedback ."]}
+          "A token that identifies a particular result from a particular query. Use this token to provide click-through feedback for the result. For more information, see Submitting feedback."];
+      tableExcerpt: TableExcerpt.t option
+        [@ocaml.doc "An excerpt from a table within a document."];
+      collapsedResultDetail: CollapsedResultDetail.t option
+        [@ocaml.doc
+          "Provides details about a collapsed group of search results."]}
     let make ?id =
       fun ?type_ ->
-        fun ?additionalAttributes ->
-          fun ?documentId ->
-            fun ?documentTitle ->
-              fun ?documentExcerpt ->
-                fun ?documentURI ->
-                  fun ?documentAttributes ->
-                    fun ?scoreAttributes ->
-                      fun ?feedbackToken ->
-                        fun () ->
-                          {
-                            id;
-                            type_;
-                            additionalAttributes;
-                            documentId;
-                            documentTitle;
-                            documentExcerpt;
-                            documentURI;
-                            documentAttributes;
-                            scoreAttributes;
-                            feedbackToken
-                          }
+        fun ?format ->
+          fun ?additionalAttributes ->
+            fun ?documentId ->
+              fun ?documentTitle ->
+                fun ?documentExcerpt ->
+                  fun ?documentURI ->
+                    fun ?documentAttributes ->
+                      fun ?scoreAttributes ->
+                        fun ?feedbackToken ->
+                          fun ?tableExcerpt ->
+                            fun ?collapsedResultDetail ->
+                              fun () ->
+                                {
+                                  id;
+                                  type_;
+                                  format;
+                                  additionalAttributes;
+                                  documentId;
+                                  documentTitle;
+                                  documentExcerpt;
+                                  documentURI;
+                                  documentAttributes;
+                                  scoreAttributes;
+                                  feedbackToken;
+                                  tableExcerpt;
+                                  collapsedResultDetail
+                                }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResultId.to_value));
         ("Type", (Option.map x.type_ ~f:QueryResultType.to_value));
+        ("Format", (Option.map x.format ~f:QueryResultFormat.to_value));
         ("AdditionalAttributes",
           (Option.map x.additionalAttributes
              ~f:AdditionalResultAttributeList.to_value));
@@ -19883,9 +25509,20 @@ module QueryResultItem =
         ("ScoreAttributes",
           (Option.map x.scoreAttributes ~f:ScoreAttributes.to_value));
         ("FeedbackToken",
-          (Option.map x.feedbackToken ~f:FeedbackToken.to_value))]
+          (Option.map x.feedbackToken ~f:FeedbackToken.to_value));
+        ("TableExcerpt",
+          (Option.map x.tableExcerpt ~f:TableExcerpt.to_value));
+        ("CollapsedResultDetail",
+          (Option.map x.collapsedResultDetail
+             ~f:CollapsedResultDetail.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let collapsedResultDetail =
+        (Option.map ~f:CollapsedResultDetail.of_xml)
+          (Xml.child xml_arg0 "CollapsedResultDetail") in
+      let tableExcerpt =
+        (Option.map ~f:TableExcerpt.of_xml)
+          (Xml.child xml_arg0 "TableExcerpt") in
       let feedbackToken =
         (Option.map ~f:FeedbackToken.of_xml)
           (Xml.child xml_arg0 "FeedbackToken") in
@@ -19908,34 +25545,44 @@ module QueryResultItem =
       let additionalAttributes =
         (Option.map ~f:AdditionalResultAttributeList.of_xml)
           (Xml.child xml_arg0 "AdditionalAttributes") in
+      let format =
+        (Option.map ~f:QueryResultFormat.of_xml)
+          (Xml.child xml_arg0 "Format") in
       let type_ =
         (Option.map ~f:QueryResultType.of_xml) (Xml.child xml_arg0 "Type") in
       let id = (Option.map ~f:ResultId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?feedbackToken ?scoreAttributes ?documentAttributes ?documentURI
-        ?documentExcerpt ?documentTitle ?documentId ?additionalAttributes
-        ?type_ ?id ()
+      make ?collapsedResultDetail ?tableExcerpt ?feedbackToken
+        ?scoreAttributes ?documentAttributes ?documentURI ?documentExcerpt
+        ?documentTitle ?documentId ?additionalAttributes ?format ?type_ ?id
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let collapsedResultDetail =
+        field_map json__ "CollapsedResultDetail"
+          CollapsedResultDetail.of_json in
+      let tableExcerpt = field_map json__ "TableExcerpt" TableExcerpt.of_json in
       let feedbackToken =
-        field_map json "FeedbackToken" FeedbackToken.of_json in
+        field_map json__ "FeedbackToken" FeedbackToken.of_json in
       let scoreAttributes =
-        field_map json "ScoreAttributes" ScoreAttributes.of_json in
+        field_map json__ "ScoreAttributes" ScoreAttributes.of_json in
       let documentAttributes =
-        field_map json "DocumentAttributes" DocumentAttributeList.of_json in
-      let documentURI = field_map json "DocumentURI" Url.of_json in
+        field_map json__ "DocumentAttributes" DocumentAttributeList.of_json in
+      let documentURI = field_map json__ "DocumentURI" Url.of_json in
       let documentExcerpt =
-        field_map json "DocumentExcerpt" TextWithHighlights.of_json in
+        field_map json__ "DocumentExcerpt" TextWithHighlights.of_json in
       let documentTitle =
-        field_map json "DocumentTitle" TextWithHighlights.of_json in
-      let documentId = field_map json "DocumentId" DocumentId.of_json in
+        field_map json__ "DocumentTitle" TextWithHighlights.of_json in
+      let documentId = field_map json__ "DocumentId" DocumentId.of_json in
       let additionalAttributes =
-        field_map json "AdditionalAttributes"
+        field_map json__ "AdditionalAttributes"
           AdditionalResultAttributeList.of_json in
-      let type_ = field_map json "Type" QueryResultType.of_json in
-      let id = field_map json "Id" ResultId.of_json in
-      make ?feedbackToken ?scoreAttributes ?documentAttributes ?documentURI
-        ?documentExcerpt ?documentTitle ?documentId ?additionalAttributes
-        ?type_ ?id ()
+      let format = field_map json__ "Format" QueryResultFormat.of_json in
+      let type_ = field_map json__ "Type" QueryResultType.of_json in
+      let id = field_map json__ "Id" ResultId.of_json in
+      make ?collapsedResultDetail ?tableExcerpt ?feedbackToken
+        ?scoreAttributes ?documentAttributes ?documentURI ?documentExcerpt
+        ?documentTitle ?documentId ?additionalAttributes ?format ?type_ ?id
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A single query result. A query result contains information about a document returned by the query. This includes the original location of the document, a list of attributes assigned to the document, and relevant text from the document that satisfies the query."]
@@ -19943,6 +25590,9 @@ module QueryResultItemList =
   struct
     type nonrec t = QueryResultItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QueryResultItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -19970,21 +25620,24 @@ module QueryResult =
       {
       queryId: QueryId.t option
         [@ocaml.doc
-          "The unique identifier for the search. You use QueryId to identify the search when using the feedback API."];
+          "The identifier for the search. You also use QueryId to identify the search when using the SubmitFeedback API."];
       resultItems: QueryResultItemList.t option
         [@ocaml.doc "The results of the search."];
       facetResults: FacetResultList.t option
         [@ocaml.doc
-          "Contains the facet results. A FacetResult contains the counts for each attribute key that was specified in the Facets input parameter."];
+          "Contains the facet results. A FacetResult contains the counts for each field/attribute key that was specified in the Facets input parameter."];
       totalNumberOfResults: Integer.t option
         [@ocaml.doc
-          "The total number of items found by the search; however, you can only retrieve up to 100 items. For example, if the search found 192 items, you can only retrieve the first 100 of the items."];
+          "The total number of items found by the search. However, you can only retrieve up to 100 items. For example, if the search found 192 items, you can only retrieve the first 100 of the items."];
       warnings: WarningList.t option
         [@ocaml.doc
           "A list of warning codes and their messages on problems with your query. Amazon Kendra currently only supports one type of warning, which is a warning on invalid syntax used in the query. For examples of invalid query syntax, see Searching with advanced query syntax."];
       spellCorrectedQueries: SpellCorrectedQueryList.t option
         [@ocaml.doc
-          "A list of information related to suggested spell corrections for a query."]}
+          "A list of information related to suggested spell corrections for a query."];
+      featuredResultsItems: FeaturedResultsItemList.t option
+        [@ocaml.doc
+          "The list of featured result items. Featured results are displayed at the top of the search results page, placed above all other results for certain queries. If there's an exact match of a query, then certain documents are featured in the search results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -20000,15 +25653,17 @@ module QueryResult =
           fun ?totalNumberOfResults ->
             fun ?warnings ->
               fun ?spellCorrectedQueries ->
-                fun () ->
-                  {
-                    queryId;
-                    resultItems;
-                    facetResults;
-                    totalNumberOfResults;
-                    warnings;
-                    spellCorrectedQueries
-                  }
+                fun ?featuredResultsItems ->
+                  fun () ->
+                    {
+                      queryId;
+                      resultItems;
+                      facetResults;
+                      totalNumberOfResults;
+                      warnings;
+                      spellCorrectedQueries;
+                      featuredResultsItems
+                    }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -20095,9 +25750,15 @@ module QueryResult =
         ("Warnings", (Option.map x.warnings ~f:WarningList.to_value));
         ("SpellCorrectedQueries",
           (Option.map x.spellCorrectedQueries
-             ~f:SpellCorrectedQueryList.to_value))]
+             ~f:SpellCorrectedQueryList.to_value));
+        ("FeaturedResultsItems",
+          (Option.map x.featuredResultsItems
+             ~f:FeaturedResultsItemList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let featuredResultsItems =
+        (Option.map ~f:FeaturedResultsItemList.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsItems") in
       let spellCorrectedQueries =
         (Option.map ~f:SpellCorrectedQueryList.of_xml)
           (Xml.child xml_arg0 "SpellCorrectedQueries") in
@@ -20114,26 +25775,29 @@ module QueryResult =
           (Xml.child xml_arg0 "ResultItems") in
       let queryId =
         (Option.map ~f:QueryId.of_xml) (Xml.child xml_arg0 "QueryId") in
-      make ?spellCorrectedQueries ?warnings ?totalNumberOfResults
-        ?facetResults ?resultItems ?queryId ()
+      make ?featuredResultsItems ?spellCorrectedQueries ?warnings
+        ?totalNumberOfResults ?facetResults ?resultItems ?queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let featuredResultsItems =
+        field_map json__ "FeaturedResultsItems"
+          FeaturedResultsItemList.of_json in
       let spellCorrectedQueries =
-        field_map json "SpellCorrectedQueries"
+        field_map json__ "SpellCorrectedQueries"
           SpellCorrectedQueryList.of_json in
-      let warnings = field_map json "Warnings" WarningList.of_json in
+      let warnings = field_map json__ "Warnings" WarningList.of_json in
       let totalNumberOfResults =
-        field_map json "TotalNumberOfResults" Integer.of_json in
+        field_map json__ "TotalNumberOfResults" Integer.of_json in
       let facetResults =
-        field_map json "FacetResults" FacetResultList.of_json in
+        field_map json__ "FacetResults" FacetResultList.of_json in
       let resultItems =
-        field_map json "ResultItems" QueryResultItemList.of_json in
-      let queryId = field_map json "QueryId" QueryId.of_json in
-      make ?spellCorrectedQueries ?warnings ?totalNumberOfResults
-        ?facetResults ?resultItems ?queryId ()
+        field_map json__ "ResultItems" QueryResultItemList.of_json in
+      let queryId = field_map json__ "QueryId" QueryId.of_json in
+      make ?featuredResultsItems ?spellCorrectedQueries ?warnings
+        ?totalNumberOfResults ?facetResults ?resultItems ?queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Searches an active index. Use this API to search your documents using query. The Query API enables to do faceted search and to filter results based on document attributes. It also enables you to provide user context that Amazon Kendra uses to enforce document access control in the search results. Amazon Kendra searches your index for text content and question and answer (FAQ) content. By default the response contains three types of results. Relevant passages Matching FAQs Relevant documents You can specify that the query return only one type of result using the QueryResultTypeConfig parameter. Each query returns the 100 most relevant results."]
+       "Searches an index given an input query. If you are working with large language models (LLMs) or implementing retrieval augmented generation (RAG) systems, you can use Amazon Kendra's Retrieve API, which can return longer semantically relevant passages. We recommend using the Retrieve API instead of filing a service limit increase to increase the Query API document excerpt length. You can configure boosting or relevance tuning at the query level to override boosting at the index level, filter based on document fields/attributes and faceted search, and filter based on the user or their group access to documents. You can also include certain fields in the response that might provide useful additional information. A query response contains three types of results. Relevant suggested answers. The answers can be either a text excerpt or table excerpt. The answer can be highlighted in the excerpt. Matching FAQs or questions-answer from your FAQ file. Relevant documents. This result type includes an excerpt of the document with the document title. The searched terms can be highlighted in the excerpt. You can specify that the query return only one type of result using the QueryResultTypeFilter parameter. Each query returns the 100 most relevant results. If you filter result type to only question-answers, a maximum of four results are returned. If you filter result type to only answers, a maximum of three results are returned. If you're using an Amazon Kendra Gen AI Enterprise Edition index, you can only use ATTRIBUTE_FILTER to filter search results by user context. If you're using an Amazon Kendra Gen AI Enterprise Edition index and you try to use USER_TOKEN to configure user context policy, Amazon Kendra returns a ValidationException error."]
 module RelevanceType =
   struct
     type nonrec t =
@@ -20165,10 +25829,10 @@ module RelevanceFeedback =
       {
       resultId: ResultId.t
         [@ocaml.doc
-          "The unique identifier of the search result that the user provided relevance feedback for."];
+          "The identifier of the search result that the user provided relevance feedback for."];
       relevanceValue: RelevanceType.t
         [@ocaml.doc
-          "Whether to document was relevant or not relevant to the search."]}
+          "Whether the document was relevant or not relevant to the search."]}
     let context_ = "RelevanceFeedback"
     let make ~resultId =
       fun ~relevanceValue -> fun () -> { resultId; relevanceValue }
@@ -20185,10 +25849,10 @@ module RelevanceFeedback =
         ResultId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResultId") in
       make ~relevanceValue ~resultId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let relevanceValue =
-        field_map_exn json "RelevanceValue" RelevanceType.of_json in
-      let resultId = field_map_exn json "ResultId" ResultId.of_json in
+        field_map_exn json__ "RelevanceValue" RelevanceType.of_json in
+      let resultId = field_map_exn json__ "ResultId" ResultId.of_json in
       make ~relevanceValue ~resultId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20197,6 +25861,9 @@ module RelevanceFeedbackList =
   struct
     type nonrec t = RelevanceFeedback.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RelevanceFeedback.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -20232,20 +25899,361 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The resource you want to use is currently in use. Please check you have provided the correct resource and try again."]
+module RetrieveRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index to retrieve relevant passages for the search."];
+      queryText: QueryText.t
+        [@ocaml.doc
+          "The input query text to retrieve relevant passages for the search. Amazon Kendra truncates queries at 30 token words, which excludes punctuation and stop words. Truncation still applies if you use Boolean or more advanced, complex queries. For example, Timeoff AND October AND Category:HR is counted as 3 tokens: timeoff, october, hr. For more information, see Searching with advanced query syntax in the Amazon Kendra Developer Guide."];
+      attributeFilter: AttributeFilter.t option
+        [@ocaml.doc
+          "Filters search results by document fields/attributes. You can only provide one attribute filter; however, the AndAllFilters, NotFilter, and OrAllFilters parameters contain a list of other filters. The AttributeFilter parameter means you can create a set of filtering rules that a document must satisfy to be included in the query results. For Amazon Kendra Gen AI Enterprise Edition indices use AttributeFilter to enable document filtering for end users using _email_id or include public documents (_email_id=null)."];
+      requestedDocumentAttributes: DocumentAttributeKeyList.t option
+        [@ocaml.doc
+          "A list of document fields/attributes to include in the response. You can limit the response to include certain document fields. By default, all document fields are included in the response."];
+      documentRelevanceOverrideConfigurations:
+        DocumentRelevanceOverrideConfigurationList.t option
+        [@ocaml.doc
+          "Overrides relevance tuning configurations of fields/attributes set at the index level. If you use this API to override the relevance tuning configured at the index level, but there is no relevance tuning configured at the index level, then Amazon Kendra does not apply any relevance tuning. If there is relevance tuning configured for fields at the index level, and you use this API to override only some of these fields, then for the fields you did not override, the importance is set to 1."];
+      pageNumber: Integer.t option
+        [@ocaml.doc
+          "Retrieved relevant passages are returned in pages the size of the PageSize parameter. By default, Amazon Kendra returns the first page of results. Use this parameter to get result pages after the first one."];
+      pageSize: Integer.t option
+        [@ocaml.doc
+          "Sets the number of retrieved relevant passages that are returned in each page of results. The default page size is 10. The maximum number of results returned is 100. If you ask for more than 100 results, only 100 are returned."];
+      userContext: UserContext.t option
+        [@ocaml.doc "The user context token or user and group information."]}
+    let context_ = "RetrieveRequest"
+    let make ?attributeFilter =
+      fun ?requestedDocumentAttributes ->
+        fun ?documentRelevanceOverrideConfigurations ->
+          fun ?pageNumber ->
+            fun ?pageSize ->
+              fun ?userContext ->
+                fun ~indexId ->
+                  fun ~queryText ->
+                    fun () ->
+                      {
+                        attributeFilter;
+                        requestedDocumentAttributes;
+                        documentRelevanceOverrideConfigurations;
+                        pageNumber;
+                        pageSize;
+                        userContext;
+                        indexId;
+                        queryText
+                      }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("QueryText", (Some (QueryText.to_value x.queryText)));
+        ("AttributeFilter",
+          (Option.map x.attributeFilter ~f:AttributeFilter.to_value));
+        ("RequestedDocumentAttributes",
+          (Option.map x.requestedDocumentAttributes
+             ~f:DocumentAttributeKeyList.to_value));
+        ("DocumentRelevanceOverrideConfigurations",
+          (Option.map x.documentRelevanceOverrideConfigurations
+             ~f:DocumentRelevanceOverrideConfigurationList.to_value));
+        ("PageNumber", (Option.map x.pageNumber ~f:Integer.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:Integer.to_value));
+        ("UserContext", (Option.map x.userContext ~f:UserContext.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userContext =
+        (Option.map ~f:UserContext.of_xml) (Xml.child xml_arg0 "UserContext") in
+      let pageSize =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let pageNumber =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "PageNumber") in
+      let documentRelevanceOverrideConfigurations =
+        (Option.map ~f:DocumentRelevanceOverrideConfigurationList.of_xml)
+          (Xml.child xml_arg0 "DocumentRelevanceOverrideConfigurations") in
+      let requestedDocumentAttributes =
+        (Option.map ~f:DocumentAttributeKeyList.of_xml)
+          (Xml.child xml_arg0 "RequestedDocumentAttributes") in
+      let attributeFilter =
+        (Option.map ~f:AttributeFilter.of_xml)
+          (Xml.child xml_arg0 "AttributeFilter") in
+      let queryText =
+        QueryText.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryText") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ?userContext ?pageSize ?pageNumber
+        ?documentRelevanceOverrideConfigurations ?requestedDocumentAttributes
+        ?attributeFilter ~queryText ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userContext = field_map json__ "UserContext" UserContext.of_json in
+      let pageSize = field_map json__ "PageSize" Integer.of_json in
+      let pageNumber = field_map json__ "PageNumber" Integer.of_json in
+      let documentRelevanceOverrideConfigurations =
+        field_map json__ "DocumentRelevanceOverrideConfigurations"
+          DocumentRelevanceOverrideConfigurationList.of_json in
+      let requestedDocumentAttributes =
+        field_map json__ "RequestedDocumentAttributes"
+          DocumentAttributeKeyList.of_json in
+      let attributeFilter =
+        field_map json__ "AttributeFilter" AttributeFilter.of_json in
+      let queryText = field_map_exn json__ "QueryText" QueryText.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?userContext ?pageSize ?pageNumber
+        ?documentRelevanceOverrideConfigurations ?requestedDocumentAttributes
+        ?attributeFilter ~queryText ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves relevant passages or text excerpts given an input query. This API is similar to the Query API. However, by default, the Query API only returns excerpt passages of up to 100 token words. With the Retrieve API, you can retrieve longer passages of up to 200 token words and up to 100 semantically relevant passages. This doesn't include question-answer or FAQ type responses from your index. The passages are text excerpts that can be semantically extracted from multiple documents and multiple parts of the same document. If in extreme cases your documents produce zero passages using the Retrieve API, you can alternatively use the Query API and its types of responses. You can also do the following: Override boosting at the index level Filter based on document fields or attributes Filter based on the user or their group access to documents View the confidence score bucket for a retrieved passage result. The confidence bucket provides a relative ranking that indicates how confident Amazon Kendra is that the response is relevant to the query. Confidence score buckets are currently available only for English. You can also include certain fields in the response that might provide useful additional information. The Retrieve API shares the number of query capacity units that you set for your index. For more information on what's included in a single capacity unit and the default base capacity for an index, see Adjusting capacity. If you're using an Amazon Kendra Gen AI Enterprise Edition index, you can only use ATTRIBUTE_FILTER to filter search results by user context. If you're using an Amazon Kendra Gen AI Enterprise Edition index and you try to use USER_TOKEN to configure user context policy, Amazon Kendra returns a ValidationException error."]
+module RetrieveResultItem =
+  struct
+    type nonrec t =
+      {
+      id: ResultId.t option
+        [@ocaml.doc "The identifier of the relevant passage result."];
+      documentId: DocumentId.t option
+        [@ocaml.doc "The identifier of the document."];
+      documentTitle: DocumentTitle.t option
+        [@ocaml.doc "The title of the document."];
+      content: Content.t option
+        [@ocaml.doc "The contents of the relevant passage."];
+      documentURI: Url.t option
+        [@ocaml.doc "The URI of the original location of the document."];
+      documentAttributes: DocumentAttributeList.t option
+        [@ocaml.doc
+          "An array of document fields/attributes assigned to a document in the search results. For example, the document author (_author) or the source URI (_source_uri) of the document."];
+      scoreAttributes: ScoreAttributes.t option
+        [@ocaml.doc
+          "The confidence score bucket for a retrieved passage result. The confidence bucket provides a relative ranking that indicates how confident Amazon Kendra is that the response is relevant to the query."]}
+    let make ?id =
+      fun ?documentId ->
+        fun ?documentTitle ->
+          fun ?content ->
+            fun ?documentURI ->
+              fun ?documentAttributes ->
+                fun ?scoreAttributes ->
+                  fun () ->
+                    {
+                      id;
+                      documentId;
+                      documentTitle;
+                      content;
+                      documentURI;
+                      documentAttributes;
+                      scoreAttributes
+                    }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ResultId.to_value));
+        ("DocumentId", (Option.map x.documentId ~f:DocumentId.to_value));
+        ("DocumentTitle",
+          (Option.map x.documentTitle ~f:DocumentTitle.to_value));
+        ("Content", (Option.map x.content ~f:Content.to_value));
+        ("DocumentURI", (Option.map x.documentURI ~f:Url.to_value));
+        ("DocumentAttributes",
+          (Option.map x.documentAttributes ~f:DocumentAttributeList.to_value));
+        ("ScoreAttributes",
+          (Option.map x.scoreAttributes ~f:ScoreAttributes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scoreAttributes =
+        (Option.map ~f:ScoreAttributes.of_xml)
+          (Xml.child xml_arg0 "ScoreAttributes") in
+      let documentAttributes =
+        (Option.map ~f:DocumentAttributeList.of_xml)
+          (Xml.child xml_arg0 "DocumentAttributes") in
+      let documentURI =
+        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "DocumentURI") in
+      let content =
+        (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Content") in
+      let documentTitle =
+        (Option.map ~f:DocumentTitle.of_xml)
+          (Xml.child xml_arg0 "DocumentTitle") in
+      let documentId =
+        (Option.map ~f:DocumentId.of_xml) (Xml.child xml_arg0 "DocumentId") in
+      let id = (Option.map ~f:ResultId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?scoreAttributes ?documentAttributes ?documentURI ?content
+        ?documentTitle ?documentId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scoreAttributes =
+        field_map json__ "ScoreAttributes" ScoreAttributes.of_json in
+      let documentAttributes =
+        field_map json__ "DocumentAttributes" DocumentAttributeList.of_json in
+      let documentURI = field_map json__ "DocumentURI" Url.of_json in
+      let content = field_map json__ "Content" Content.of_json in
+      let documentTitle =
+        field_map json__ "DocumentTitle" DocumentTitle.of_json in
+      let documentId = field_map json__ "DocumentId" DocumentId.of_json in
+      let id = field_map json__ "Id" ResultId.of_json in
+      make ?scoreAttributes ?documentAttributes ?documentURI ?content
+        ?documentTitle ?documentId ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A single retrieved relevant passage result."]
+module RetrieveResultItemList =
+  struct
+    type nonrec t = RetrieveResultItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RetrieveResultItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RetrieveResultItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RetrieveResultItemList"
+        ~of_json:RetrieveResultItem.of_json j
+    let to_json v = composed_to_json to_value v
   end
+module RetrieveResult =
+  struct
+    type nonrec t =
+      {
+      queryId: QueryId.t option
+        [@ocaml.doc
+          "The identifier of query used for the search. You also use QueryId to identify the search when using the Submitfeedback API."];
+      resultItems: RetrieveResultItemList.t option
+        [@ocaml.doc
+          "The results of the retrieved relevant passages for the search."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?queryId =
+      fun ?resultItems -> fun () -> { queryId; resultItems }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("QueryId", (Option.map x.queryId ~f:QueryId.to_value));
+        ("ResultItems",
+          (Option.map x.resultItems ~f:RetrieveResultItemList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resultItems =
+        (Option.map ~f:RetrieveResultItemList.of_xml)
+          (Xml.child xml_arg0 "ResultItems") in
+      let queryId =
+        (Option.map ~f:QueryId.of_xml) (Xml.child xml_arg0 "QueryId") in
+      make ?resultItems ?queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resultItems =
+        field_map json__ "ResultItems" RetrieveResultItemList.of_json in
+      let queryId = field_map json__ "QueryId" QueryId.of_json in
+      make ?resultItems ?queryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves relevant passages or text excerpts given an input query. This API is similar to the Query API. However, by default, the Query API only returns excerpt passages of up to 100 token words. With the Retrieve API, you can retrieve longer passages of up to 200 token words and up to 100 semantically relevant passages. This doesn't include question-answer or FAQ type responses from your index. The passages are text excerpts that can be semantically extracted from multiple documents and multiple parts of the same document. If in extreme cases your documents produce zero passages using the Retrieve API, you can alternatively use the Query API and its types of responses. You can also do the following: Override boosting at the index level Filter based on document fields or attributes Filter based on the user or their group access to documents View the confidence score bucket for a retrieved passage result. The confidence bucket provides a relative ranking that indicates how confident Amazon Kendra is that the response is relevant to the query. Confidence score buckets are currently available only for English. You can also include certain fields in the response that might provide useful additional information. The Retrieve API shares the number of query capacity units that you set for your index. For more information on what's included in a single capacity unit and the default base capacity for an index, see Adjusting capacity. If you're using an Amazon Kendra Gen AI Enterprise Edition index, you can only use ATTRIBUTE_FILTER to filter search results by user context. If you're using an Amazon Kendra Gen AI Enterprise Edition index and you try to use USER_TOKEN to configure user context policy, Amazon Kendra returns a ValidationException error."]
 module StartDataSourceSyncJobRequest =
   struct
     type nonrec t =
       {
       id: DataSourceId.t
-        [@ocaml.doc "The identifier of the data source to synchronize."];
+        [@ocaml.doc
+          "The identifier of the data source connector to synchronize."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index that contains the data source."]}
+          "The identifier of the index used with the data source connector."]}
     let context_ = "StartDataSourceSyncJobRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -20260,13 +26268,13 @@ module StartDataSourceSyncJobRequest =
         DataSourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" DataSourceId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" DataSourceId.of_json in
       make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a synchronization job for a data source. If a synchronization job is already in progress, Amazon Kendra returns a ResourceInUseException exception."]
+       "Starts a synchronization job for a data source connector. If a synchronization job is already in progress, Amazon Kendra returns a ResourceInUseException exception. Re-syncing your data source with your index after modifying, adding, or deleting documents from your data source respository could take up to an hour or more, depending on the number of documents to sync."]
 module StartDataSourceSyncJobResponse =
   struct
     type nonrec t =
@@ -20364,22 +26372,22 @@ module StartDataSourceSyncJobResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ExecutionId") in
       make ?executionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let executionId = field_map json "ExecutionId" String_.of_json in
+    let of_json json__ =
+      let executionId = field_map json__ "ExecutionId" String_.of_json in
       make ?executionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a synchronization job for a data source. If a synchronization job is already in progress, Amazon Kendra returns a ResourceInUseException exception."]
+       "Starts a synchronization job for a data source connector. If a synchronization job is already in progress, Amazon Kendra returns a ResourceInUseException exception. Re-syncing your data source with your index after modifying, adding, or deleting documents from your data source respository could take up to an hour or more, depending on the number of documents to sync."]
 module StopDataSourceSyncJobRequest =
   struct
     type nonrec t =
       {
       id: DataSourceId.t
         [@ocaml.doc
-          "The identifier of the data source for which to stop the synchronization jobs."];
+          "The identifier of the data source connector for which to stop the synchronization jobs."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index that contains the data source."]}
+          "The identifier of the index used with the data source connector."]}
     let context_ = "StopDataSourceSyncJobRequest"
     let make ~id = fun ~indexId -> fun () -> { id; indexId }
     let to_value x =
@@ -20394,9 +26402,9 @@ module StopDataSourceSyncJobRequest =
         DataSourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~indexId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let id = field_map_exn json "Id" DataSourceId.of_json in
+    let of_json json__ =
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let id = field_map_exn json__ "Id" DataSourceId.of_json in
       make ~indexId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20447,13 +26455,14 @@ module SubmitFeedbackRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?relevanceFeedbackItems ?clickFeedbackItems ~queryId ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let relevanceFeedbackItems =
-        field_map json "RelevanceFeedbackItems" RelevanceFeedbackList.of_json in
+        field_map json__ "RelevanceFeedbackItems"
+          RelevanceFeedbackList.of_json in
       let clickFeedbackItems =
-        field_map json "ClickFeedbackItems" ClickFeedbackList.of_json in
-      let queryId = field_map_exn json "QueryId" QueryId.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+        field_map json__ "ClickFeedbackItems" ClickFeedbackList.of_json in
+      let queryId = field_map_exn json__ "QueryId" QueryId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?relevanceFeedbackItems ?clickFeedbackItems ~queryId ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20467,6 +26476,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -20492,10 +26504,10 @@ module TagResourceRequest =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the index, FAQ, or data source to tag."];
+          "The Amazon Resource Name (ARN) of the index, FAQ, data source, or other resource to add a tag. For example, the ARN of an index is constructed as follows: arn:aws:kendra:your-region:your-account-id:index/index-id For information on how to construct an ARN for all types of Amazon Kendra resources, see Resource types."];
       tags: TagList.t
         [@ocaml.doc
-          "A list of tag keys to add to the index, FAQ, or data source. If a tag already exists, the existing value is replaced with the new value."]}
+          "A list of tag keys to add to the index, FAQ, data source, or other resource. If a tag already exists, the existing value is replaced with the new value."]}
     let context_ = "TagResourceRequest"
     let make ~resourceARN = fun ~tags -> fun () -> { resourceARN; tags }
     let to_value x =
@@ -20511,14 +26523,14 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified tag to the specified index, FAQ, or data source resource. If the tag already exists, the existing value is replaced with the new value."]
+       "Adds the specified tag to the specified index, FAQ, data source, or other resource. If the tag already exists, the existing value is replaced with the new value."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -20596,17 +26608,17 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified tag to the specified index, FAQ, or data source resource. If the tag already exists, the existing value is replaced with the new value."]
+       "Adds the specified tag to the specified index, FAQ, data source, or other resource. If the tag already exists, the existing value is replaced with the new value."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the index, FAQ, or data source to remove the tag from."];
+          "The Amazon Resource Name (ARN) of the index, FAQ, data source, or other resource to remove a tag. For example, the ARN of an index is constructed as follows: arn:aws:kendra:your-region:your-account-id:index/index-id For information on how to construct an ARN for all types of Amazon Kendra resources, see Resource types."];
       tagKeys: TagKeyList.t
         [@ocaml.doc
-          "A list of tag keys to remove from the index, FAQ, or data source. If a tag key does not exist on the resource, it is ignored."]}
+          "A list of tag keys to remove from the index, FAQ, data source, or other resource. If a tag key doesn't exist for the resource, it is ignored."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceARN =
       fun ~tagKeys -> fun () -> { resourceARN; tagKeys }
@@ -20624,13 +26636,14 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes a tag from an index, FAQ, or a data source."]
+  end[@@ocaml.doc
+       "Removes a tag from an index, FAQ, data source, or other resource."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -20707,58 +26720,247 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes a tag from an index, FAQ, or a data source."]
+  end[@@ocaml.doc
+       "Removes a tag from an index, FAQ, data source, or other resource."]
+module UpdateAccessControlConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index for an access control configuration."];
+      id: AccessControlConfigurationId.t
+        [@ocaml.doc
+          "The identifier of the access control configuration you want to update."];
+      name: AccessControlConfigurationName.t option
+        [@ocaml.doc "A new name for the access control configuration."];
+      description: Description.t option
+        [@ocaml.doc
+          "A new description for the access control configuration."];
+      accessControlList: PrincipalList.t option
+        [@ocaml.doc
+          "Information you want to update on principals (users and/or groups) and which documents they should have access to. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents."];
+      hierarchicalAccessControlList: HierarchicalPrincipalList.t option
+        [@ocaml.doc
+          "The updated list of principal lists that define the hierarchy for which documents users should have access to."]}
+    let context_ = "UpdateAccessControlConfigurationRequest"
+    let make ?name =
+      fun ?description ->
+        fun ?accessControlList ->
+          fun ?hierarchicalAccessControlList ->
+            fun ~indexId ->
+              fun ~id ->
+                fun () ->
+                  {
+                    name;
+                    description;
+                    accessControlList;
+                    hierarchicalAccessControlList;
+                    indexId;
+                    id
+                  }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("Id", (Some (AccessControlConfigurationId.to_value x.id)));
+        ("Name",
+          (Option.map x.name ~f:AccessControlConfigurationName.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("AccessControlList",
+          (Option.map x.accessControlList ~f:PrincipalList.to_value));
+        ("HierarchicalAccessControlList",
+          (Option.map x.hierarchicalAccessControlList
+             ~f:HierarchicalPrincipalList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hierarchicalAccessControlList =
+        (Option.map ~f:HierarchicalPrincipalList.of_xml)
+          (Xml.child xml_arg0 "HierarchicalAccessControlList") in
+      let accessControlList =
+        (Option.map ~f:PrincipalList.of_xml)
+          (Xml.child xml_arg0 "AccessControlList") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:AccessControlConfigurationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let id =
+        AccessControlConfigurationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ?hierarchicalAccessControlList ?accessControlList ?description
+        ?name ~id ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hierarchicalAccessControlList =
+        field_map json__ "HierarchicalAccessControlList"
+          HierarchicalPrincipalList.of_json in
+      let accessControlList =
+        field_map json__ "AccessControlList" PrincipalList.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name =
+        field_map json__ "Name" AccessControlConfigurationName.of_json in
+      let id = field_map_exn json__ "Id" AccessControlConfigurationId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?hierarchicalAccessControlList ?accessControlList ?description
+        ?name ~id ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an access control configuration for your documents in an index. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents. You can update an access control configuration you created without indexing all of your documents again. For example, your index contains top-secret company documents that only certain employees or users should access. You created an 'allow' access control configuration for one user who recently joined the 'top-secret' team, switching from a team with 'deny' access to top-secret documents. However, the user suddenly returns to their previous team and should no longer have access to top secret documents. You can update the access control configuration to re-configure access control for your documents as circumstances change. You call the BatchPutDocument API to apply the updated access control configuration, with the AccessControlConfigurationId included in the Document object. If you use an S3 bucket as a data source, you synchronize your data source to apply the AccessControlConfigurationId in the .metadata.json file. Amazon Kendra currently only supports access control configuration for S3 data sources and documents indexed using the BatchPutDocument API. You can't configure access control using CreateAccessControlConfiguration for an Amazon Kendra Gen AI Enterprise Edition index. Amazon Kendra will return a ValidationException error for a Gen_AI_ENTERPRISE_EDITION index."]
+module UpdateAccessControlConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an access control configuration for your documents in an index. This includes user and group access information for your documents. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents. You can update an access control configuration you created without indexing all of your documents again. For example, your index contains top-secret company documents that only certain employees or users should access. You created an 'allow' access control configuration for one user who recently joined the 'top-secret' team, switching from a team with 'deny' access to top-secret documents. However, the user suddenly returns to their previous team and should no longer have access to top secret documents. You can update the access control configuration to re-configure access control for your documents as circumstances change. You call the BatchPutDocument API to apply the updated access control configuration, with the AccessControlConfigurationId included in the Document object. If you use an S3 bucket as a data source, you synchronize your data source to apply the AccessControlConfigurationId in the .metadata.json file. Amazon Kendra currently only supports access control configuration for S3 data sources and documents indexed using the BatchPutDocument API. You can't configure access control using CreateAccessControlConfiguration for an Amazon Kendra Gen AI Enterprise Edition index. Amazon Kendra will return a ValidationException error for a Gen_AI_ENTERPRISE_EDITION index."]
 module UpdateDataSourceRequest =
   struct
     type nonrec t =
       {
       id: DataSourceId.t
-        [@ocaml.doc "The unique identifier of the data source to update."];
-      name: DataSourceName.t option
         [@ocaml.doc
-          "The name of the data source to update. The name of the data source can't be updated. To rename a data source you must delete the data source and re-create it."];
+          "The identifier of the data source connector you want to update."];
+      name: DataSourceName.t option
+        [@ocaml.doc "A new name for the data source connector."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index that contains the data source to update."];
+          "The identifier of the index used with the data source connector."];
       configuration: DataSourceConfiguration.t option
         [@ocaml.doc
-          "Configuration information for an Amazon Kendra data source you want to update."];
+          "Configuration information you want to update for the data source connector."];
+      vpcConfiguration: DataSourceVpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration information for an Amazon Virtual Private Cloud to connect to your data source. For more information, see Configuring a VPC."];
       description: Description.t option
-        [@ocaml.doc "The new description for the data source."];
+        [@ocaml.doc "A new description for the data source connector."];
       schedule: ScanSchedule.t option
-        [@ocaml.doc "The new update schedule for the data source."];
+        [@ocaml.doc
+          "The sync schedule you want to update for the data source connector."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the new role to use when the data source is accessing resources on your behalf."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to access the data source and required resources. For more information, see IAM roles for Amazon Kendra."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The code for a language. This allows you to support a language for all documents when updating the data source. English is supported by default. For more information on supported languages, including their codes, see Adding documents in languages other than English."];
+          "The code for a language you want to update for the data source connector. This allows you to support a language for all documents when updating the data source. English is supported by default. For more information on supported languages, including their codes, see Adding documents in languages other than English."];
       customDocumentEnrichmentConfiguration:
         CustomDocumentEnrichmentConfiguration.t option
         [@ocaml.doc
-          "Configuration information for altering document metadata and content during the document ingestion process when you update a data source. For more information on how to create, modify and delete document metadata, or make other content alterations when you ingest documents into Amazon Kendra, see Customizing document metadata during the ingestion process."]}
+          "Configuration information you want to update for altering document metadata and content during the document ingestion process. For more information on how to create, modify and delete document metadata, or make other content alterations when you ingest documents into Amazon Kendra, see Customizing document metadata during the ingestion process."]}
     let context_ = "UpdateDataSourceRequest"
     let make ?name =
       fun ?configuration ->
-        fun ?description ->
-          fun ?schedule ->
-            fun ?roleArn ->
-              fun ?languageCode ->
-                fun ?customDocumentEnrichmentConfiguration ->
-                  fun ~id ->
-                    fun ~indexId ->
-                      fun () ->
-                        {
-                          name;
-                          configuration;
-                          description;
-                          schedule;
-                          roleArn;
-                          languageCode;
-                          customDocumentEnrichmentConfiguration;
-                          id;
-                          indexId
-                        }
+        fun ?vpcConfiguration ->
+          fun ?description ->
+            fun ?schedule ->
+              fun ?roleArn ->
+                fun ?languageCode ->
+                  fun ?customDocumentEnrichmentConfiguration ->
+                    fun ~id ->
+                      fun ~indexId ->
+                        fun () ->
+                          {
+                            name;
+                            configuration;
+                            vpcConfiguration;
+                            description;
+                            schedule;
+                            roleArn;
+                            languageCode;
+                            customDocumentEnrichmentConfiguration;
+                            id;
+                            indexId
+                          }
     let to_value x =
       structure_to_value
         [("Id", (Some (DataSourceId.to_value x.id)));
@@ -20766,6 +26968,9 @@ module UpdateDataSourceRequest =
         ("IndexId", (Some (IndexId.to_value x.indexId)));
         ("Configuration",
           (Option.map x.configuration ~f:DataSourceConfiguration.to_value));
+        ("VpcConfiguration",
+          (Option.map x.vpcConfiguration
+             ~f:DataSourceVpcConfiguration.to_value));
         ("Description", (Option.map x.description ~f:Description.to_value));
         ("Schedule", (Option.map x.schedule ~f:ScanSchedule.to_value));
         ("RoleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
@@ -20788,6 +26993,9 @@ module UpdateDataSourceRequest =
         (Option.map ~f:ScanSchedule.of_xml) (Xml.child xml_arg0 "Schedule") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let vpcConfiguration =
+        (Option.map ~f:DataSourceVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "VpcConfiguration") in
       let configuration =
         (Option.map ~f:DataSourceConfiguration.of_xml)
           (Xml.child xml_arg0 "Configuration") in
@@ -20798,25 +27006,30 @@ module UpdateDataSourceRequest =
       let id =
         DataSourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?customDocumentEnrichmentConfiguration ?languageCode ?roleArn
-        ?schedule ?description ?configuration ~indexId ?name ~id ()
+        ?schedule ?description ?vpcConfiguration ?configuration ~indexId
+        ?name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customDocumentEnrichmentConfiguration =
-        field_map json "CustomDocumentEnrichmentConfiguration"
+        field_map json__ "CustomDocumentEnrichmentConfiguration"
           CustomDocumentEnrichmentConfiguration.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let schedule = field_map json "Schedule" ScanSchedule.of_json in
-      let description = field_map json "Description" Description.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let schedule = field_map json__ "Schedule" ScanSchedule.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let vpcConfiguration =
+        field_map json__ "VpcConfiguration"
+          DataSourceVpcConfiguration.of_json in
       let configuration =
-        field_map json "Configuration" DataSourceConfiguration.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let name = field_map json "Name" DataSourceName.of_json in
-      let id = field_map_exn json "Id" DataSourceId.of_json in
+        field_map json__ "Configuration" DataSourceConfiguration.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let name = field_map json__ "Name" DataSourceName.of_json in
+      let id = field_map_exn json__ "Id" DataSourceId.of_json in
       make ?customDocumentEnrichmentConfiguration ?languageCode ?roleArn
-        ?schedule ?description ?configuration ~indexId ?name ~id ()
+        ?schedule ?description ?vpcConfiguration ?configuration ~indexId
+        ?name ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates an existing Amazon Kendra data source."]
+  end[@@ocaml.doc "Updates an Amazon Kendra data source connector."]
 module UpdateExperienceRequest =
   struct
     type nonrec t =
@@ -20825,20 +27038,18 @@ module UpdateExperienceRequest =
         [@ocaml.doc
           "The identifier of your Amazon Kendra experience you want to update."];
       name: ExperienceName.t option
-        [@ocaml.doc
-          "The name of your Amazon Kendra experience you want to update."];
+        [@ocaml.doc "A new name for your Amazon Kendra experience."];
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index for your Amazon Kendra experience you want to update."];
+          "The identifier of the index for your Amazon Kendra experience."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role with permission to access Query API, QuerySuggestions API, SubmitFeedback API, and Amazon Web Services SSO that stores your user and group information. For more information, see IAM roles for Amazon Kendra."];
+          "The Amazon Resource Name (ARN) of an IAM role with permission to access the Query API, QuerySuggestions API, SubmitFeedback API, and IAM Identity Center that stores your users and groups information. For more information, see IAM roles for Amazon Kendra."];
       configuration: ExperienceConfiguration.t option
         [@ocaml.doc
-          "Configuration information for your Amazon Kendra you want to update."];
+          "Configuration information you want to update for your Amazon Kendra experience."];
       description: Description.t option
-        [@ocaml.doc
-          "The description of your Amazon Kendra experience you want to update."]}
+        [@ocaml.doc "A new description for your Amazon Kendra experience."]}
     let context_ = "UpdateExperienceRequest"
     let make ?name =
       fun ?roleArn ->
@@ -20874,44 +27085,248 @@ module UpdateExperienceRequest =
         ExperienceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?description ?configuration ?roleArn ~indexId ?name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
       let configuration =
-        field_map json "Configuration" ExperienceConfiguration.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let name = field_map json "Name" ExperienceName.of_json in
-      let id = field_map_exn json "Id" ExperienceId.of_json in
+        field_map json__ "Configuration" ExperienceConfiguration.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let name = field_map json__ "Name" ExperienceName.of_json in
+      let id = field_map_exn json__ "Id" ExperienceId.of_json in
       make ?description ?configuration ?roleArn ~indexId ?name ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates your Amazon Kendra experience such as a search application. For more information on creating a search application experience, see Building a search experience with no code."]
+module UpdateFeaturedResultsSetRequest =
+  struct
+    type nonrec t =
+      {
+      indexId: IndexId.t
+        [@ocaml.doc
+          "The identifier of the index used for featuring results."];
+      featuredResultsSetId: FeaturedResultsSetId.t
+        [@ocaml.doc
+          "The identifier of the set of featured results that you want to update."];
+      featuredResultsSetName: FeaturedResultsSetName.t option
+        [@ocaml.doc "A new name for the set of featured results."];
+      description: FeaturedResultsSetDescription.t option
+        [@ocaml.doc "A new description for the set of featured results."];
+      status: FeaturedResultsSetStatus.t option
+        [@ocaml.doc
+          "You can set the status to ACTIVE or INACTIVE. When the value is ACTIVE, featured results are ready for use. You can still configure your settings before setting the status to ACTIVE. The queries you specify for featured results must be unique per featured results set for each index, whether the status is ACTIVE or INACTIVE."];
+      queryTexts: QueryTextList.t option
+        [@ocaml.doc
+          "A list of queries for featuring results. For more information on the list of queries, see FeaturedResultsSet."];
+      featuredDocuments: FeaturedDocumentList.t option
+        [@ocaml.doc
+          "A list of document IDs for the documents you want to feature at the top of the search results page. For more information on the list of featured documents, see FeaturedResultsSet."]}
+    let context_ = "UpdateFeaturedResultsSetRequest"
+    let make ?featuredResultsSetName =
+      fun ?description ->
+        fun ?status ->
+          fun ?queryTexts ->
+            fun ?featuredDocuments ->
+              fun ~indexId ->
+                fun ~featuredResultsSetId ->
+                  fun () ->
+                    {
+                      featuredResultsSetName;
+                      description;
+                      status;
+                      queryTexts;
+                      featuredDocuments;
+                      indexId;
+                      featuredResultsSetId
+                    }
+    let to_value x =
+      structure_to_value
+        [("IndexId", (Some (IndexId.to_value x.indexId)));
+        ("FeaturedResultsSetId",
+          (Some (FeaturedResultsSetId.to_value x.featuredResultsSetId)));
+        ("FeaturedResultsSetName",
+          (Option.map x.featuredResultsSetName
+             ~f:FeaturedResultsSetName.to_value));
+        ("Description",
+          (Option.map x.description ~f:FeaturedResultsSetDescription.to_value));
+        ("Status",
+          (Option.map x.status ~f:FeaturedResultsSetStatus.to_value));
+        ("QueryTexts", (Option.map x.queryTexts ~f:QueryTextList.to_value));
+        ("FeaturedDocuments",
+          (Option.map x.featuredDocuments ~f:FeaturedDocumentList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let featuredDocuments =
+        (Option.map ~f:FeaturedDocumentList.of_xml)
+          (Xml.child xml_arg0 "FeaturedDocuments") in
+      let queryTexts =
+        (Option.map ~f:QueryTextList.of_xml)
+          (Xml.child xml_arg0 "QueryTexts") in
+      let status =
+        (Option.map ~f:FeaturedResultsSetStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:FeaturedResultsSetDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let featuredResultsSetName =
+        (Option.map ~f:FeaturedResultsSetName.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSetName") in
+      let featuredResultsSetId =
+        FeaturedResultsSetId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FeaturedResultsSetId") in
+      let indexId =
+        IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
+      make ?featuredDocuments ?queryTexts ?status ?description
+        ?featuredResultsSetName ~featuredResultsSetId ~indexId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let featuredDocuments =
+        field_map json__ "FeaturedDocuments" FeaturedDocumentList.of_json in
+      let queryTexts = field_map json__ "QueryTexts" QueryTextList.of_json in
+      let status = field_map json__ "Status" FeaturedResultsSetStatus.of_json in
+      let description =
+        field_map json__ "Description" FeaturedResultsSetDescription.of_json in
+      let featuredResultsSetName =
+        field_map json__ "FeaturedResultsSetName"
+          FeaturedResultsSetName.of_json in
+      let featuredResultsSetId =
+        field_map_exn json__ "FeaturedResultsSetId"
+          FeaturedResultsSetId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?featuredDocuments ?queryTexts ?status ?description
+        ?featuredResultsSetName ~featuredResultsSetId ~indexId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a set of featured results. Features results are placed above all other results for certain queries. You map specific queries to specific documents for featuring in the results. If a query contains an exact match of a query, then one or more specific documents are featured in the search results."]
+module UpdateFeaturedResultsSetResponse =
+  struct
+    type nonrec t =
+      {
+      featuredResultsSet: FeaturedResultsSet.t option
+        [@ocaml.doc
+          "Information on the set of featured results. This includes the identifier of the featured results set, whether the featured results set is active or inactive, when the featured results set was last updated, and more."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `FeaturedResultsConflictException of
+          FeaturedResultsConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?featuredResultsSet = fun () -> { featuredResultsSet }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "FeaturedResultsConflictException" ->
+          `FeaturedResultsConflictException
+            (FeaturedResultsConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "FeaturedResultsConflictException" ->
+          `FeaturedResultsConflictException
+            (FeaturedResultsConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `FeaturedResultsConflictException e ->
+          `Assoc
+            [("error", (`String "FeaturedResultsConflictException"));
+            ("details", (FeaturedResultsConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FeaturedResultsSet",
+           (Option.map x.featuredResultsSet ~f:FeaturedResultsSet.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let featuredResultsSet =
+        (Option.map ~f:FeaturedResultsSet.of_xml)
+          (Xml.child xml_arg0 "FeaturedResultsSet") in
+      make ?featuredResultsSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let featuredResultsSet =
+        field_map json__ "FeaturedResultsSet" FeaturedResultsSet.of_json in
+      make ?featuredResultsSet ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a set of featured results. Features results are placed above all other results for certain queries. You map specific queries to specific documents for featuring in the results. If a query contains an exact match of a query, then one or more specific documents are featured in the search results."]
 module UpdateIndexRequest =
   struct
     type nonrec t =
       {
-      id: IndexId.t [@ocaml.doc "The identifier of the index to update."];
-      name: IndexName.t option
-        [@ocaml.doc "The name of the index to update."];
+      id: IndexId.t
+        [@ocaml.doc "The identifier of the index you want to update."];
+      name: IndexName.t option [@ocaml.doc "A new name for the index."];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "A new IAM role that gives Amazon Kendra permission to access your Amazon CloudWatch logs."];
+          "An Identity and Access Management (IAM) role that gives Amazon Kendra permission to access Amazon CloudWatch logs and metrics."];
       description: Description.t option
         [@ocaml.doc "A new description for the index."];
       documentMetadataConfigurationUpdates:
         DocumentMetadataConfigurationList.t option
-        [@ocaml.doc "The document metadata you want to update."];
+        [@ocaml.doc
+          "The document metadata configuration you want to update for the index. Document metadata are fields or attributes associated with your documents. For example, the company department name associated with each document."];
       capacityUnits: CapacityUnitsConfiguration.t option
         [@ocaml.doc
           "Sets the number of additional document storage and query capacity units that should be used by the index. You can change the capacity of the index up to 5 times per day, or make 5 API calls. If you are using extra storage units, you can't reduce the storage capacity below what is required to meet the storage needs for your index."];
       userTokenConfigurations: UserTokenConfigurationList.t option
-        [@ocaml.doc "The user token configuration."];
+        [@ocaml.doc
+          "The user token configuration. If you're using an Amazon Kendra Gen AI Enterprise Edition index and you try to use UserTokenConfigurations to configure user context policy, Amazon Kendra returns a ValidationException error."];
       userContextPolicy: UserContextPolicy.t option
-        [@ocaml.doc "The user context policy."];
+        [@ocaml.doc
+          "The user context policy. If you're using an Amazon Kendra Gen AI Enterprise Edition index, you can only use ATTRIBUTE_FILTER to filter search results by user context. If you're using an Amazon Kendra Gen AI Enterprise Edition index and you try to use USER_TOKEN to configure user context policy, Amazon Kendra returns a ValidationException error."];
       userGroupResolutionConfiguration:
         UserGroupResolutionConfiguration.t option
         [@ocaml.doc
-          "Enables fetching access levels of groups and users from an Amazon Web Services Single Sign On identity source. To configure this, see UserGroupResolutionConfiguration."]}
+          "Gets users and groups from IAM Identity Center identity source. To configure this, see UserGroupResolutionConfiguration. This is useful for user context filtering, where search results are filtered based on the user or their group access to documents. If you're using an Amazon Kendra Gen AI Enterprise Edition index, UserGroupResolutionConfiguration isn't supported."]}
     let context_ = "UpdateIndexRequest"
     let make ?name =
       fun ?roleArn ->
@@ -20981,42 +27396,42 @@ module UpdateIndexRequest =
         ?documentMetadataConfigurationUpdates ?description ?roleArn ?name ~id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userGroupResolutionConfiguration =
-        field_map json "UserGroupResolutionConfiguration"
+        field_map json__ "UserGroupResolutionConfiguration"
           UserGroupResolutionConfiguration.of_json in
       let userContextPolicy =
-        field_map json "UserContextPolicy" UserContextPolicy.of_json in
+        field_map json__ "UserContextPolicy" UserContextPolicy.of_json in
       let userTokenConfigurations =
-        field_map json "UserTokenConfigurations"
+        field_map json__ "UserTokenConfigurations"
           UserTokenConfigurationList.of_json in
       let capacityUnits =
-        field_map json "CapacityUnits" CapacityUnitsConfiguration.of_json in
+        field_map json__ "CapacityUnits" CapacityUnitsConfiguration.of_json in
       let documentMetadataConfigurationUpdates =
-        field_map json "DocumentMetadataConfigurationUpdates"
+        field_map json__ "DocumentMetadataConfigurationUpdates"
           DocumentMetadataConfigurationList.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let name = field_map json "Name" IndexName.of_json in
-      let id = field_map_exn json "Id" IndexId.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let name = field_map json__ "Name" IndexName.of_json in
+      let id = field_map_exn json__ "Id" IndexId.of_json in
       make ?userGroupResolutionConfiguration ?userContextPolicy
         ?userTokenConfigurations ?capacityUnits
         ?documentMetadataConfigurationUpdates ?description ?roleArn ?name ~id
         ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates an existing Amazon Kendra index."]
+  end[@@ocaml.doc "Updates an Amazon Kendra index."]
 module UpdateQuerySuggestionsBlockListRequest =
   struct
     type nonrec t =
       {
       indexId: IndexId.t
-        [@ocaml.doc "The identifier of the index for a block list."];
+        [@ocaml.doc "The identifier of the index for the block list."];
       id: QuerySuggestionsBlockListId.t
-        [@ocaml.doc "The unique identifier of a block list."];
+        [@ocaml.doc "The identifier of the block list you want to update."];
       name: QuerySuggestionsBlockListName.t option
-        [@ocaml.doc "The name of a block list."];
+        [@ocaml.doc "A new name for the block list."];
       description: Description.t option
-        [@ocaml.doc "The description for a block list."];
+        [@ocaml.doc "A new description for the block list."];
       sourceS3Path: S3Path.t option
         [@ocaml.doc
           "The S3 path where your block list text file sits in S3. If you update your block list and provide the same path to the block list text file in S3, then Amazon Kendra reloads the file to refresh the block list. Amazon Kendra does not automatically refresh your block list. You need to call the UpdateQuerySuggestionsBlockList API to refresh you block list. If you update your block list, then Amazon Kendra asynchronously refreshes all query suggestions with the latest content in the S3 file. This means changes might not take effect immediately."];
@@ -21059,13 +27474,14 @@ module UpdateQuerySuggestionsBlockListRequest =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
       make ?roleArn ?sourceS3Path ?description ?name ~id ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let sourceS3Path = field_map json "SourceS3Path" S3Path.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" QuerySuggestionsBlockListName.of_json in
-      let id = field_map_exn json "Id" QuerySuggestionsBlockListId.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let sourceS3Path = field_map json__ "SourceS3Path" S3Path.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name =
+        field_map json__ "Name" QuerySuggestionsBlockListName.of_json in
+      let id = field_map_exn json__ "Id" QuerySuggestionsBlockListId.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
       make ?roleArn ?sourceS3Path ?description ?name ~id ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21076,7 +27492,7 @@ module UpdateQuerySuggestionsConfigRequest =
       {
       indexId: IndexId.t
         [@ocaml.doc
-          "The identifier of the index you want to update query suggestions settings for."];
+          "The identifier of the index with query suggestions you want to update."];
       mode: Mode.t option
         [@ocaml.doc
           "Set the mode to ENABLED or LEARN_ONLY. By default, Amazon Kendra enables query suggestions. LEARN_ONLY mode allows you to turn off query suggestions. You can to update this at any time. In LEARN_ONLY mode, Amazon Kendra continues to learn from new queries to keep suggestions up to date for when you are ready to switch to ENABLED mode again."];
@@ -21091,23 +27507,28 @@ module UpdateQuerySuggestionsConfigRequest =
           "The minimum number of unique users who must search a query in order for the query to be eligible to suggest to your users. Increasing this number might decrease the number of suggestions. However, this ensures a query is searched by many users and is truly popular to suggest to users. How you tune this setting depends on your specific needs."];
       minimumQueryCount: MinimumQueryCount.t option
         [@ocaml.doc
-          "The the minimum number of times a query must be searched in order to be eligible to suggest to your users. Decreasing this number increases the number of suggestions. However, this affects the quality of suggestions as it sets a low bar for a query to be considered popular to suggest to users. How you tune this setting depends on your specific needs."]}
+          "The the minimum number of times a query must be searched in order to be eligible to suggest to your users. Decreasing this number increases the number of suggestions. However, this affects the quality of suggestions as it sets a low bar for a query to be considered popular to suggest to users. How you tune this setting depends on your specific needs."];
+      attributeSuggestionsConfig: AttributeSuggestionsUpdateConfig.t option
+        [@ocaml.doc
+          "Configuration information for the document fields/attributes that you want to base query suggestions on."]}
     let context_ = "UpdateQuerySuggestionsConfigRequest"
     let make ?mode =
       fun ?queryLogLookBackWindowInDays ->
         fun ?includeQueriesWithoutUserInformation ->
           fun ?minimumNumberOfQueryingUsers ->
             fun ?minimumQueryCount ->
-              fun ~indexId ->
-                fun () ->
-                  {
-                    mode;
-                    queryLogLookBackWindowInDays;
-                    includeQueriesWithoutUserInformation;
-                    minimumNumberOfQueryingUsers;
-                    minimumQueryCount;
-                    indexId
-                  }
+              fun ?attributeSuggestionsConfig ->
+                fun ~indexId ->
+                  fun () ->
+                    {
+                      mode;
+                      queryLogLookBackWindowInDays;
+                      includeQueriesWithoutUserInformation;
+                      minimumNumberOfQueryingUsers;
+                      minimumQueryCount;
+                      attributeSuggestionsConfig;
+                      indexId
+                    }
     let to_value x =
       structure_to_value
         [("IndexId", (Some (IndexId.to_value x.indexId)));
@@ -21121,9 +27542,15 @@ module UpdateQuerySuggestionsConfigRequest =
           (Option.map x.minimumNumberOfQueryingUsers
              ~f:MinimumNumberOfQueryingUsers.to_value));
         ("MinimumQueryCount",
-          (Option.map x.minimumQueryCount ~f:MinimumQueryCount.to_value))]
+          (Option.map x.minimumQueryCount ~f:MinimumQueryCount.to_value));
+        ("AttributeSuggestionsConfig",
+          (Option.map x.attributeSuggestionsConfig
+             ~f:AttributeSuggestionsUpdateConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attributeSuggestionsConfig =
+        (Option.map ~f:AttributeSuggestionsUpdateConfig.of_xml)
+          (Xml.child xml_arg0 "AttributeSuggestionsConfig") in
       let minimumQueryCount =
         (Option.map ~f:MinimumQueryCount.of_xml)
           (Xml.child xml_arg0 "MinimumQueryCount") in
@@ -21139,44 +27566,47 @@ module UpdateQuerySuggestionsConfigRequest =
       let mode = (Option.map ~f:Mode.of_xml) (Xml.child xml_arg0 "Mode") in
       let indexId =
         IndexId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexId") in
-      make ?minimumQueryCount ?minimumNumberOfQueryingUsers
-        ?includeQueriesWithoutUserInformation ?queryLogLookBackWindowInDays
-        ?mode ~indexId ()
+      make ?attributeSuggestionsConfig ?minimumQueryCount
+        ?minimumNumberOfQueryingUsers ?includeQueriesWithoutUserInformation
+        ?queryLogLookBackWindowInDays ?mode ~indexId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let attributeSuggestionsConfig =
+        field_map json__ "AttributeSuggestionsConfig"
+          AttributeSuggestionsUpdateConfig.of_json in
       let minimumQueryCount =
-        field_map json "MinimumQueryCount" MinimumQueryCount.of_json in
+        field_map json__ "MinimumQueryCount" MinimumQueryCount.of_json in
       let minimumNumberOfQueryingUsers =
-        field_map json "MinimumNumberOfQueryingUsers"
+        field_map json__ "MinimumNumberOfQueryingUsers"
           MinimumNumberOfQueryingUsers.of_json in
       let includeQueriesWithoutUserInformation =
-        field_map json "IncludeQueriesWithoutUserInformation"
+        field_map json__ "IncludeQueriesWithoutUserInformation"
           ObjectBoolean.of_json in
       let queryLogLookBackWindowInDays =
-        field_map json "QueryLogLookBackWindowInDays" Integer.of_json in
-      let mode = field_map json "Mode" Mode.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      make ?minimumQueryCount ?minimumNumberOfQueryingUsers
-        ?includeQueriesWithoutUserInformation ?queryLogLookBackWindowInDays
-        ?mode ~indexId ()
+        field_map json__ "QueryLogLookBackWindowInDays" Integer.of_json in
+      let mode = field_map json__ "Mode" Mode.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      make ?attributeSuggestionsConfig ?minimumQueryCount
+        ?minimumNumberOfQueryingUsers ?includeQueriesWithoutUserInformation
+        ?queryLogLookBackWindowInDays ?mode ~indexId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the settings of query suggestions for an index. Amazon Kendra supports partial updates, so you only need to provide the fields you want to update. If an update is currently processing (i.e. 'happening'), you need to wait for the update to finish before making another update. Updates to query suggestions settings might not take effect right away. The time for your updated settings to take effect depends on the updates made and the number of search queries in your index. You can still enable/disable query suggestions at any time. UpdateQuerySuggestionsConfig is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
+       "Updates the settings of query suggestions for an index. Amazon Kendra supports partial updates, so you only need to provide the fields you want to update. If an update is currently processing, you need to wait for the update to finish before making another update. Updates to query suggestions settings might not take effect right away. The time for your updated settings to take effect depends on the updates made and the number of search queries in your index. You can still enable/disable query suggestions at any time. UpdateQuerySuggestionsConfig is currently not supported in the Amazon Web Services GovCloud (US-West) region."]
 module UpdateThesaurusRequest =
   struct
     type nonrec t =
       {
       id: ThesaurusId.t
-        [@ocaml.doc "The identifier of the thesaurus to update."];
+        [@ocaml.doc "The identifier of the thesaurus you want to update."];
       name: ThesaurusName.t option
-        [@ocaml.doc "The updated name of the thesaurus."];
+        [@ocaml.doc "A new name for the thesaurus."];
       indexId: IndexId.t
-        [@ocaml.doc
-          "The identifier of the index associated with the thesaurus to update."];
+        [@ocaml.doc "The identifier of the index for the thesaurus."];
       description: Description.t option
-        [@ocaml.doc "The updated description of the thesaurus."];
+        [@ocaml.doc "A new description for the thesaurus."];
       roleArn: RoleArn.t option
-        [@ocaml.doc "The updated role ARN of the thesaurus."];
+        [@ocaml.doc
+          "An IAM role that gives Amazon Kendra permissions to access thesaurus file specified in SourceS3Path."];
       sourceS3Path: S3Path.t option }
     let context_ = "UpdateThesaurusRequest"
     let make ?name =
@@ -21211,13 +27641,13 @@ module UpdateThesaurusRequest =
         ThesaurusId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?sourceS3Path ?roleArn ?description ~indexId ?name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceS3Path = field_map json "SourceS3Path" S3Path.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let indexId = field_map_exn json "IndexId" IndexId.of_json in
-      let name = field_map json "Name" ThesaurusName.of_json in
-      let id = field_map_exn json "Id" ThesaurusId.of_json in
+    let of_json json__ =
+      let sourceS3Path = field_map json__ "SourceS3Path" S3Path.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let indexId = field_map_exn json__ "IndexId" IndexId.of_json in
+      let name = field_map json__ "Name" ThesaurusName.of_json in
+      let id = field_map_exn json__ "Id" ThesaurusId.of_json in
       make ?sourceS3Path ?roleArn ?description ~indexId ?name ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates a thesaurus file associated with an index."]
+  end[@@ocaml.doc "Updates a thesaurus for an index."]

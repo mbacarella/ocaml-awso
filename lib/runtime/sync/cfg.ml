@@ -22,31 +22,31 @@ let get ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output () =
   let file path of_string =
     match path () with
     | None -> Ok None
-    | Some file ->
+    | Some file -> (
       let contents = file_contents file in
-      (match of_string contents with
-       | Error e -> Error e
-       | Ok r -> Ok (Some (file, r)))
+      match of_string contents with
+      | Error e -> Error e
+      | Ok r -> Ok (Some (file, r)))
   in
   match file Awso.Cfg.Config_file.path Awso.Cfg.Config_file.of_string with
   | Error e -> Error e
-  | Ok config_file ->
-    (match
-       file
-         Awso.Cfg.Shared_credentials_file.path
-         Awso.Cfg.Shared_credentials_file.of_string
-     with
-     | Error e -> Error e
-     | Ok shared_credentials_file ->
-       Awso.Cfg.make
-         ?config_file
-         ?shared_credentials_file
-         ?profile
-         ?aws_access_key_id
-         ?aws_secret_access_key
-         ?region
-         ?output
-         ())
+  | Ok config_file -> (
+    match
+      file
+        Awso.Cfg.Shared_credentials_file.path
+        Awso.Cfg.Shared_credentials_file.of_string
+    with
+    | Error e -> Error e
+    | Ok shared_credentials_file ->
+      Awso.Cfg.make
+        ?config_file
+        ?shared_credentials_file
+        ?profile
+        ?aws_access_key_id
+        ?aws_secret_access_key
+        ?region
+        ?output
+        ())
 ;;
 
 let get_exn ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output () =

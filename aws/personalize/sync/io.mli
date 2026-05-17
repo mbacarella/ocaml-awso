@@ -17,6 +17,12 @@ val create_campaign :
     ?cfg:Awso.Cfg.t ->
       CreateCampaignRequest.t ->
         (CreateCampaignResponse.t, CreateCampaignResponse.error) Result.t
+val create_data_deletion_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDataDeletionJobRequest.t ->
+        (CreateDataDeletionJobResponse.t,
+          CreateDataDeletionJobResponse.error) Result.t
 val create_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -51,6 +57,12 @@ val create_filter :
     ?cfg:Awso.Cfg.t ->
       CreateFilterRequest.t ->
         (CreateFilterResponse.t, CreateFilterResponse.error) Result.t
+val create_metric_attribution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateMetricAttributionRequest.t ->
+        (CreateMetricAttributionResponse.t,
+          CreateMetricAttributionResponse.error) Result.t
 val create_recommender :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -88,6 +100,10 @@ val delete_event_tracker :
 val delete_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteFilterRequest.t -> (unit, unit) Result.t
+val delete_metric_attribution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteMetricAttributionRequest.t -> (unit, unit) Result.t
 val delete_recommender :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteRecommenderRequest.t -> (unit, unit) Result.t
@@ -120,6 +136,12 @@ val describe_campaign :
     ?cfg:Awso.Cfg.t ->
       DescribeCampaignRequest.t ->
         (DescribeCampaignResponse.t, DescribeCampaignResponse.error) Result.t
+val describe_data_deletion_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDataDeletionJobRequest.t ->
+        (DescribeDataDeletionJobResponse.t,
+          DescribeDataDeletionJobResponse.error) Result.t
 val describe_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -160,6 +182,12 @@ val describe_filter :
     ?cfg:Awso.Cfg.t ->
       DescribeFilterRequest.t ->
         (DescribeFilterResponse.t, DescribeFilterResponse.error) Result.t
+val describe_metric_attribution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMetricAttributionRequest.t ->
+        (DescribeMetricAttributionResponse.t,
+          DescribeMetricAttributionResponse.error) Result.t
 val describe_recipe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -210,6 +238,12 @@ val list_campaigns :
     ?cfg:Awso.Cfg.t ->
       ListCampaignsRequest.t ->
         (ListCampaignsResponse.t, ListCampaignsResponse.error) Result.t
+val list_data_deletion_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDataDeletionJobsRequest.t ->
+        (ListDataDeletionJobsResponse.t, ListDataDeletionJobsResponse.error)
+          Result.t
 val list_dataset_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -244,6 +278,18 @@ val list_filters :
     ?cfg:Awso.Cfg.t ->
       ListFiltersRequest.t ->
         (ListFiltersResponse.t, ListFiltersResponse.error) Result.t
+val list_metric_attribution_metrics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMetricAttributionMetricsRequest.t ->
+        (ListMetricAttributionMetricsResponse.t,
+          ListMetricAttributionMetricsResponse.error) Result.t
+val list_metric_attributions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMetricAttributionsRequest.t ->
+        (ListMetricAttributionsResponse.t,
+          ListMetricAttributionsResponse.error) Result.t
 val list_recipes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -276,6 +322,16 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t
+val start_recommender :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartRecommenderRequest.t ->
+        (StartRecommenderResponse.t, StartRecommenderResponse.error) Result.t
+val stop_recommender :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopRecommenderRequest.t ->
+        (StopRecommenderResponse.t, StopRecommenderResponse.error) Result.t
 val stop_solution_version_creation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -295,9 +351,25 @@ val update_campaign :
     ?cfg:Awso.Cfg.t ->
       UpdateCampaignRequest.t ->
         (UpdateCampaignResponse.t, UpdateCampaignResponse.error) Result.t
+val update_dataset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDatasetRequest.t ->
+        (UpdateDatasetResponse.t, UpdateDatasetResponse.error) Result.t
+val update_metric_attribution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateMetricAttributionRequest.t ->
+        (UpdateMetricAttributionResponse.t,
+          UpdateMetricAttributionResponse.error) Result.t
 val update_recommender :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRecommenderRequest.t ->
         (UpdateRecommenderResponse.t, UpdateRecommenderResponse.error)
           Result.t
+val update_solution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSolutionRequest.t ->
+        (UpdateSolutionResponse.t, UpdateSolutionResponse.error) Result.t

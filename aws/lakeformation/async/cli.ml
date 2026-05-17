@@ -52,6 +52,34 @@ let add_l_f_tags_to_resource =
               ~lFTags:(Values.LFTagsList.of_json lFTags) ())
            (Some Values.AddLFTagsToResourceResponse.to_json)
            (Some Values.AddLFTagsToResourceResponse.error_to_json)])
+let assume_decorated_role_with_s_a_m_l =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and durationSeconds =
+         flag "duration-seconds" (optional int)
+           ~doc:"INT CredentialTimeoutDurationSecondInteger"
+       and sAMLAssertion =
+         flag "s-a-m-l-assertion" (required string)
+           ~doc:"STRING SAMLAssertionString"
+       and roleArn =
+         flag "role-arn" (required string) ~doc:"STRING IAMRoleArn"
+       and principalArn =
+         flag "principal-arn" (required string)
+           ~doc:"STRING IAMSAMLProviderArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.assume_decorated_role_with_s_a_m_l
+           (Values.AssumeDecoratedRoleWithSAMLRequest.make ?durationSeconds
+              ~sAMLAssertion ~roleArn ~principalArn ())
+           (Some Values.AssumeDecoratedRoleWithSAMLResponse.to_json)
+           (Some Values.AssumeDecoratedRoleWithSAMLResponse.error_to_json)])
 let batch_grant_permissions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -177,6 +205,97 @@ let create_l_f_tag =
               ~tagValues:(Values.TagValueList.of_json tagValues) ())
            (Some Values.CreateLFTagResponse.to_json)
            (Some Values.CreateLFTagResponse.error_to_json)])
+let create_l_f_tag_expression =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionString"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and name = flag "name" (required string) ~doc:"STRING NameString"
+       and expression =
+         flag "expression" (required json_arg) ~doc:"JSON Expression" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_l_f_tag_expression
+           (Values.CreateLFTagExpressionRequest.make ?description ?catalogId
+              ~name ~expression:(Values.Expression.of_json expression) ())
+           (Some Values.CreateLFTagExpressionResponse.to_json)
+           (Some Values.CreateLFTagExpressionResponse.error_to_json)])
+let create_lake_formation_identity_center_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and instanceArn =
+         flag "instance-arn" (optional string)
+           ~doc:"STRING IdentityCenterInstanceArn"
+       and externalFiltering =
+         flag "external-filtering" (optional json_arg)
+           ~doc:"JSON ExternalFilteringConfiguration"
+       and shareRecipients =
+         flag "share-recipients" (optional json_arg)
+           ~doc:"JSON DataLakePrincipalList"
+       and serviceIntegrations =
+         flag "service-integrations" (optional json_arg)
+           ~doc:"JSON ServiceIntegrationList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_lake_formation_identity_center_configuration
+           (Values.CreateLakeFormationIdentityCenterConfigurationRequest.make
+              ?catalogId ?instanceArn
+              ?externalFiltering:(Option.map
+                                    ~f:Values.ExternalFilteringConfiguration.of_json
+                                    externalFiltering)
+              ?shareRecipients:(Option.map
+                                  ~f:Values.DataLakePrincipalList.of_json
+                                  shareRecipients)
+              ?serviceIntegrations:(Option.map
+                                      ~f:Values.ServiceIntegrationList.of_json
+                                      serviceIntegrations) ())
+           (Some
+              Values.CreateLakeFormationIdentityCenterConfigurationResponse.to_json)
+           (Some
+              Values.CreateLakeFormationIdentityCenterConfigurationResponse.error_to_json)])
+let create_lake_formation_opt_in =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and condition =
+         flag "condition" (optional json_arg) ~doc:"JSON Condition"
+       and principal =
+         flag "principal" (required json_arg) ~doc:"JSON DataLakePrincipal"
+       and resource =
+         flag "resource" (required json_arg) ~doc:"JSON Resource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_lake_formation_opt_in
+           (Values.CreateLakeFormationOptInRequest.make
+              ?condition:(Option.map ~f:Values.Condition.of_json condition)
+              ~principal:(Values.DataLakePrincipal.of_json principal)
+              ~resource:(Values.Resource.of_json resource) ())
+           (Some Values.CreateLakeFormationOptInResponse.to_json)
+           (Some Values.CreateLakeFormationOptInResponse.error_to_json)])
 let delete_data_cells_filter =
   Command.async ~summary:""
     ([%map_open.Command
@@ -221,6 +340,71 @@ let delete_l_f_tag =
            (Values.DeleteLFTagRequest.make ?catalogId ~tagKey ())
            (Some Values.DeleteLFTagResponse.to_json)
            (Some Values.DeleteLFTagResponse.error_to_json)])
+let delete_l_f_tag_expression =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_l_f_tag_expression
+           (Values.DeleteLFTagExpressionRequest.make ?catalogId ~name ())
+           (Some Values.DeleteLFTagExpressionResponse.to_json)
+           (Some Values.DeleteLFTagExpressionResponse.error_to_json)])
+let delete_lake_formation_identity_center_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_lake_formation_identity_center_configuration
+           (Values.DeleteLakeFormationIdentityCenterConfigurationRequest.make
+              ?catalogId ())
+           (Some
+              Values.DeleteLakeFormationIdentityCenterConfigurationResponse.to_json)
+           (Some
+              Values.DeleteLakeFormationIdentityCenterConfigurationResponse.error_to_json)])
+let delete_lake_formation_opt_in =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and condition =
+         flag "condition" (optional json_arg) ~doc:"JSON Condition"
+       and principal =
+         flag "principal" (required json_arg) ~doc:"JSON DataLakePrincipal"
+       and resource =
+         flag "resource" (required json_arg) ~doc:"JSON Resource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_lake_formation_opt_in
+           (Values.DeleteLakeFormationOptInRequest.make
+              ?condition:(Option.map ~f:Values.Condition.of_json condition)
+              ~principal:(Values.DataLakePrincipal.of_json principal)
+              ~resource:(Values.Resource.of_json resource) ())
+           (Some Values.DeleteLakeFormationOptInResponse.to_json)
+           (Some Values.DeleteLakeFormationOptInResponse.error_to_json)])
 let delete_objects_on_cancel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -269,6 +453,27 @@ let deregister_resource =
            (Values.DeregisterResourceRequest.make ~resourceArn ())
            (Some Values.DeregisterResourceResponse.to_json)
            (Some Values.DeregisterResourceResponse.error_to_json)])
+let describe_lake_formation_identity_center_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_lake_formation_identity_center_configuration
+           (Values.DescribeLakeFormationIdentityCenterConfigurationRequest.make
+              ?catalogId ())
+           (Some
+              Values.DescribeLakeFormationIdentityCenterConfigurationResponse.to_json)
+           (Some
+              Values.DescribeLakeFormationIdentityCenterConfigurationResponse.error_to_json)])
 let describe_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -326,6 +531,48 @@ let extend_transaction =
            (Values.ExtendTransactionRequest.make ?transactionId ())
            (Some Values.ExtendTransactionResponse.to_json)
            (Some Values.ExtendTransactionResponse.error_to_json)])
+let get_data_cells_filter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tableCatalogId =
+         flag "table-catalog-id" (required string)
+           ~doc:"STRING CatalogIdString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_cells_filter
+           (Values.GetDataCellsFilterRequest.make ~tableCatalogId
+              ~databaseName ~tableName ~name ())
+           (Some Values.GetDataCellsFilterResponse.to_json)
+           (Some Values.GetDataCellsFilterResponse.error_to_json)])
+let get_data_lake_principal =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_lake_principal
+           (Values.GetDataLakePrincipalRequest.make ())
+           (Some Values.GetDataLakePrincipalResponse.to_json)
+           (Some Values.GetDataLakePrincipalResponse.error_to_json)])
 let get_data_lake_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -387,6 +634,25 @@ let get_l_f_tag =
            Io.get_l_f_tag (Values.GetLFTagRequest.make ?catalogId ~tagKey ())
            (Some Values.GetLFTagResponse.to_json)
            (Some Values.GetLFTagResponse.error_to_json)])
+let get_l_f_tag_expression =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_l_f_tag_expression
+           (Values.GetLFTagExpressionRequest.make ?catalogId ~name ())
+           (Some Values.GetLFTagExpressionResponse.to_json)
+           (Some Values.GetLFTagExpressionResponse.error_to_json)])
 let get_query_state =
   Command.async ~summary:""
     ([%map_open.Command
@@ -485,6 +751,41 @@ let get_table_objects =
               ?maxResults ?nextToken ~databaseName ~tableName ())
            (Some Values.GetTableObjectsResponse.to_json)
            (Some Values.GetTableObjectsResponse.error_to_json)])
+let get_temporary_data_location_credentials =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and durationSeconds =
+         flag "duration-seconds" (optional int)
+           ~doc:"INT CredentialTimeoutDurationSecondInteger"
+       and auditContext =
+         flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
+       and dataLocations =
+         flag "data-locations" (optional json_arg) ~doc:"JSON PathStringList"
+       and credentialsScope =
+         flag "credentials-scope" (optional json_arg)
+           ~doc:"JSON CredentialsScope" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_temporary_data_location_credentials
+           (Values.GetTemporaryDataLocationCredentialsRequest.make
+              ?durationSeconds
+              ?auditContext:(Option.map ~f:Values.AuditContext.of_json
+                               auditContext)
+              ?dataLocations:(Option.map ~f:Values.PathStringList.of_json
+                                dataLocations)
+              ?credentialsScope:(Option.map
+                                   ~f:Values.CredentialsScope.of_json
+                                   credentialsScope) ())
+           (Some Values.GetTemporaryDataLocationCredentialsResponse.to_json)
+           (Some
+              Values.GetTemporaryDataLocationCredentialsResponse.error_to_json)])
 let get_temporary_glue_partition_credentials =
   Command.async ~summary:""
     ([%map_open.Command
@@ -502,13 +803,13 @@ let get_temporary_glue_partition_credentials =
            ~doc:"INT CredentialTimeoutDurationSecondInteger"
        and auditContext =
          flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
+       and supportedPermissionTypes =
+         flag "supported-permission-types" (optional json_arg)
+           ~doc:"JSON PermissionTypeList"
        and tableArn =
          flag "table-arn" (required string) ~doc:"STRING ResourceArnString"
        and partition =
-         flag "partition" (required json_arg) ~doc:"JSON PartitionValueList"
-       and supportedPermissionTypes =
-         flag "supported-permission-types" (required json_arg)
-           ~doc:"JSON PermissionTypeList" in
+         flag "partition" (required json_arg) ~doc:"JSON PartitionValueList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_temporary_glue_partition_credentials
@@ -516,10 +817,12 @@ let get_temporary_glue_partition_credentials =
               ?permissions:(Option.map ~f:Values.PermissionList.of_json
                               permissions) ?durationSeconds
               ?auditContext:(Option.map ~f:Values.AuditContext.of_json
-                               auditContext) ~tableArn
-              ~partition:(Values.PartitionValueList.of_json partition)
-              ~supportedPermissionTypes:(Values.PermissionTypeList.of_json
-                                           supportedPermissionTypes) ())
+                               auditContext)
+              ?supportedPermissionTypes:(Option.map
+                                           ~f:Values.PermissionTypeList.of_json
+                                           supportedPermissionTypes)
+              ~tableArn
+              ~partition:(Values.PartitionValueList.of_json partition) ())
            (Some Values.GetTemporaryGluePartitionCredentialsResponse.to_json)
            (Some
               Values.GetTemporaryGluePartitionCredentialsResponse.error_to_json)])
@@ -540,11 +843,15 @@ let get_temporary_glue_table_credentials =
            ~doc:"INT CredentialTimeoutDurationSecondInteger"
        and auditContext =
          flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
-       and tableArn =
-         flag "table-arn" (required string) ~doc:"STRING ResourceArnString"
        and supportedPermissionTypes =
-         flag "supported-permission-types" (required json_arg)
-           ~doc:"JSON PermissionTypeList" in
+         flag "supported-permission-types" (optional json_arg)
+           ~doc:"JSON PermissionTypeList"
+       and s3Path = flag "s3-path" (optional string) ~doc:"STRING PathString"
+       and querySessionContext =
+         flag "query-session-context" (optional json_arg)
+           ~doc:"JSON QuerySessionContext"
+       and tableArn =
+         flag "table-arn" (required string) ~doc:"STRING ResourceArnString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_temporary_glue_table_credentials
@@ -552,9 +859,13 @@ let get_temporary_glue_table_credentials =
               ?permissions:(Option.map ~f:Values.PermissionList.of_json
                               permissions) ?durationSeconds
               ?auditContext:(Option.map ~f:Values.AuditContext.of_json
-                               auditContext) ~tableArn
-              ~supportedPermissionTypes:(Values.PermissionTypeList.of_json
-                                           supportedPermissionTypes) ())
+                               auditContext)
+              ?supportedPermissionTypes:(Option.map
+                                           ~f:Values.PermissionTypeList.of_json
+                                           supportedPermissionTypes) ?s3Path
+              ?querySessionContext:(Option.map
+                                      ~f:Values.QuerySessionContext.of_json
+                                      querySessionContext) ~tableArn ())
            (Some Values.GetTemporaryGlueTableCredentialsResponse.to_json)
            (Some
               Values.GetTemporaryGlueTableCredentialsResponse.error_to_json)])
@@ -619,6 +930,8 @@ let grant_permissions =
            ~doc:"URL override endpoint url"
        and catalogId =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and condition =
+         flag "condition" (optional json_arg) ~doc:"JSON Condition"
        and permissionsWithGrantOption =
          flag "permissions-with-grant-option" (optional json_arg)
            ~doc:"JSON PermissionList"
@@ -632,6 +945,7 @@ let grant_permissions =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.grant_permissions
            (Values.GrantPermissionsRequest.make ?catalogId
+              ?condition:(Option.map ~f:Values.Condition.of_json condition)
               ?permissionsWithGrantOption:(Option.map
                                              ~f:Values.PermissionList.of_json
                                              permissionsWithGrantOption)
@@ -662,6 +976,28 @@ let list_data_cells_filter =
               ?nextToken ?maxResults ())
            (Some Values.ListDataCellsFilterResponse.to_json)
            (Some Values.ListDataCellsFilterResponse.error_to_json)])
+let list_l_f_tag_expressions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_l_f_tag_expressions
+           (Values.ListLFTagExpressionsRequest.make ?catalogId ?maxResults
+              ?nextToken ())
+           (Some Values.ListLFTagExpressionsResponse.to_json)
+           (Some Values.ListLFTagExpressionsResponse.error_to_json)])
 let list_l_f_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -689,6 +1025,33 @@ let list_l_f_tags =
                                     resourceShareType) ?maxResults ?nextToken
               ()) (Some Values.ListLFTagsResponse.to_json)
            (Some Values.ListLFTagsResponse.error_to_json)])
+let list_lake_formation_opt_ins =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and principal =
+         flag "principal" (optional json_arg) ~doc:"JSON DataLakePrincipal"
+       and resource =
+         flag "resource" (optional json_arg) ~doc:"JSON Resource"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_lake_formation_opt_ins
+           (Values.ListLakeFormationOptInsRequest.make
+              ?principal:(Option.map ~f:Values.DataLakePrincipal.of_json
+                            principal)
+              ?resource:(Option.map ~f:Values.Resource.of_json resource)
+              ?maxResults ?nextToken ())
+           (Some Values.ListLakeFormationOptInsResponse.to_json)
+           (Some Values.ListLakeFormationOptInsResponse.error_to_json)])
 let list_permissions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -849,6 +1212,16 @@ let register_resource =
            ~doc:"BOOL NullableBoolean"
        and roleArn =
          flag "role-arn" (optional string) ~doc:"STRING IAMRoleArn"
+       and withFederation =
+         flag "with-federation" (optional bool) ~doc:"BOOL NullableBoolean"
+       and hybridAccessEnabled =
+         flag "hybrid-access-enabled" (optional bool)
+           ~doc:"BOOL NullableBoolean"
+       and withPrivilegedAccess =
+         flag "with-privileged-access" (optional bool) ~doc:"BOOL Boolean"
+       and expectedResourceOwnerAccount =
+         flag "expected-resource-owner-account" (optional string)
+           ~doc:"STRING AccountIdString"
        and resourceArn =
          flag "resource-arn" (required string)
            ~doc:"STRING ResourceArnString" in
@@ -856,8 +1229,9 @@ let register_resource =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.register_resource
            (Values.RegisterResourceRequest.make ?useServiceLinkedRole
-              ?roleArn ~resourceArn ())
-           (Some Values.RegisterResourceResponse.to_json)
+              ?roleArn ?withFederation ?hybridAccessEnabled
+              ?withPrivilegedAccess ?expectedResourceOwnerAccount
+              ~resourceArn ()) (Some Values.RegisterResourceResponse.to_json)
            (Some Values.RegisterResourceResponse.error_to_json)])
 let remove_l_f_tags_from_resource =
   Command.async ~summary:""
@@ -895,6 +1269,8 @@ let revoke_permissions =
            ~doc:"URL override endpoint url"
        and catalogId =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and condition =
+         flag "condition" (optional json_arg) ~doc:"JSON Condition"
        and permissionsWithGrantOption =
          flag "permissions-with-grant-option" (optional json_arg)
            ~doc:"JSON PermissionList"
@@ -908,6 +1284,7 @@ let revoke_permissions =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.revoke_permissions
            (Values.RevokePermissionsRequest.make ?catalogId
+              ?condition:(Option.map ~f:Values.Condition.of_json condition)
               ?permissionsWithGrantOption:(Option.map
                                              ~f:Values.PermissionList.of_json
                                              permissionsWithGrantOption)
@@ -928,7 +1305,8 @@ let search_databases_by_l_f_tags =
            ~doc:"URL override endpoint url"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT SearchPageSize"
        and catalogId =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
        and expression =
@@ -952,7 +1330,8 @@ let search_tables_by_l_f_tags =
            ~doc:"URL override endpoint url"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT SearchPageSize"
        and catalogId =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
        and expression =
@@ -1009,6 +1388,25 @@ let start_transaction =
                                   transactionType) ())
            (Some Values.StartTransactionResponse.to_json)
            (Some Values.StartTransactionResponse.error_to_json)])
+let update_data_cells_filter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tableData =
+         flag "table-data" (required json_arg) ~doc:"JSON DataCellsFilter" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_data_cells_filter
+           (Values.UpdateDataCellsFilterRequest.make
+              ~tableData:(Values.DataCellsFilter.of_json tableData) ())
+           (Some Values.UpdateDataCellsFilterResponse.to_json)
+           (Some Values.UpdateDataCellsFilterResponse.error_to_json)])
 let update_l_f_tag =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1038,6 +1436,75 @@ let update_l_f_tag =
                                  tagValuesToAdd) ~tagKey ())
            (Some Values.UpdateLFTagResponse.to_json)
            (Some Values.UpdateLFTagResponse.error_to_json)])
+let update_l_f_tag_expression =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionString"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and name = flag "name" (required string) ~doc:"STRING NameString"
+       and expression =
+         flag "expression" (required json_arg) ~doc:"JSON Expression" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_l_f_tag_expression
+           (Values.UpdateLFTagExpressionRequest.make ?description ?catalogId
+              ~name ~expression:(Values.Expression.of_json expression) ())
+           (Some Values.UpdateLFTagExpressionResponse.to_json)
+           (Some Values.UpdateLFTagExpressionResponse.error_to_json)])
+let update_lake_formation_identity_center_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and shareRecipients =
+         flag "share-recipients" (optional json_arg)
+           ~doc:"JSON DataLakePrincipalList"
+       and serviceIntegrations =
+         flag "service-integrations" (optional json_arg)
+           ~doc:"JSON ServiceIntegrationList"
+       and applicationStatus =
+         flag "application-status" (optional json_arg)
+           ~doc:"JSON ApplicationStatus"
+       and externalFiltering =
+         flag "external-filtering" (optional json_arg)
+           ~doc:"JSON ExternalFilteringConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_lake_formation_identity_center_configuration
+           (Values.UpdateLakeFormationIdentityCenterConfigurationRequest.make
+              ?catalogId
+              ?shareRecipients:(Option.map
+                                  ~f:Values.DataLakePrincipalList.of_json
+                                  shareRecipients)
+              ?serviceIntegrations:(Option.map
+                                      ~f:Values.ServiceIntegrationList.of_json
+                                      serviceIntegrations)
+              ?applicationStatus:(Option.map
+                                    ~f:Values.ApplicationStatus.of_json
+                                    applicationStatus)
+              ?externalFiltering:(Option.map
+                                    ~f:Values.ExternalFilteringConfiguration.of_json
+                                    externalFiltering) ())
+           (Some
+              Values.UpdateLakeFormationIdentityCenterConfigurationResponse.to_json)
+           (Some
+              Values.UpdateLakeFormationIdentityCenterConfigurationResponse.error_to_json)])
 let update_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1048,6 +1515,14 @@ let update_resource =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and withFederation =
+         flag "with-federation" (optional bool) ~doc:"BOOL NullableBoolean"
+       and hybridAccessEnabled =
+         flag "hybrid-access-enabled" (optional bool)
+           ~doc:"BOOL NullableBoolean"
+       and expectedResourceOwnerAccount =
+         flag "expected-resource-owner-account" (optional string)
+           ~doc:"STRING AccountIdString"
        and roleArn =
          flag "role-arn" (required string) ~doc:"STRING IAMRoleArn"
        and resourceArn =
@@ -1056,8 +1531,9 @@ let update_resource =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_resource
-           (Values.UpdateResourceRequest.make ~roleArn ~resourceArn ())
-           (Some Values.UpdateResourceResponse.to_json)
+           (Values.UpdateResourceRequest.make ?withFederation
+              ?hybridAccessEnabled ?expectedResourceOwnerAccount ~roleArn
+              ~resourceArn ()) (Some Values.UpdateResourceResponse.to_json)
            (Some Values.UpdateResourceResponse.error_to_json)])
 let update_table_objects =
   Command.async ~summary:""
@@ -1122,27 +1598,44 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-l-f-tags-to-resource", add_l_f_tags_to_resource);
+    ("assume-decorated-role-with-s-a-m-l",
+      assume_decorated_role_with_s_a_m_l);
     ("batch-grant-permissions", batch_grant_permissions);
     ("batch-revoke-permissions", batch_revoke_permissions);
     ("cancel-transaction", cancel_transaction);
     ("commit-transaction", commit_transaction);
     ("create-data-cells-filter", create_data_cells_filter);
     ("create-l-f-tag", create_l_f_tag);
+    ("create-l-f-tag-expression", create_l_f_tag_expression);
+    ("create-lake-formation-identity-center-configuration",
+      create_lake_formation_identity_center_configuration);
+    ("create-lake-formation-opt-in", create_lake_formation_opt_in);
     ("delete-data-cells-filter", delete_data_cells_filter);
     ("delete-l-f-tag", delete_l_f_tag);
+    ("delete-l-f-tag-expression", delete_l_f_tag_expression);
+    ("delete-lake-formation-identity-center-configuration",
+      delete_lake_formation_identity_center_configuration);
+    ("delete-lake-formation-opt-in", delete_lake_formation_opt_in);
     ("delete-objects-on-cancel", delete_objects_on_cancel);
     ("deregister-resource", deregister_resource);
+    ("describe-lake-formation-identity-center-configuration",
+      describe_lake_formation_identity_center_configuration);
     ("describe-resource", describe_resource);
     ("describe-transaction", describe_transaction);
     ("extend-transaction", extend_transaction);
+    ("get-data-cells-filter", get_data_cells_filter);
+    ("get-data-lake-principal", get_data_lake_principal);
     ("get-data-lake-settings", get_data_lake_settings);
     ("get-effective-permissions-for-path",
       get_effective_permissions_for_path);
     ("get-l-f-tag", get_l_f_tag);
+    ("get-l-f-tag-expression", get_l_f_tag_expression);
     ("get-query-state", get_query_state);
     ("get-query-statistics", get_query_statistics);
     ("get-resource-l-f-tags", get_resource_l_f_tags);
     ("get-table-objects", get_table_objects);
+    ("get-temporary-data-location-credentials",
+      get_temporary_data_location_credentials);
     ("get-temporary-glue-partition-credentials",
       get_temporary_glue_partition_credentials);
     ("get-temporary-glue-table-credentials",
@@ -1151,7 +1644,9 @@ let main =
     ("get-work-units", get_work_units);
     ("grant-permissions", grant_permissions);
     ("list-data-cells-filter", list_data_cells_filter);
+    ("list-l-f-tag-expressions", list_l_f_tag_expressions);
     ("list-l-f-tags", list_l_f_tags);
+    ("list-lake-formation-opt-ins", list_lake_formation_opt_ins);
     ("list-permissions", list_permissions);
     ("list-resources", list_resources);
     ("list-table-storage-optimizers", list_table_storage_optimizers);
@@ -1164,7 +1659,11 @@ let main =
     ("search-tables-by-l-f-tags", search_tables_by_l_f_tags);
     ("start-query-planning", start_query_planning);
     ("start-transaction", start_transaction);
+    ("update-data-cells-filter", update_data_cells_filter);
     ("update-l-f-tag", update_l_f_tag);
+    ("update-l-f-tag-expression", update_l_f_tag_expression);
+    ("update-lake-formation-identity-center-configuration",
+      update_lake_formation_identity_center_configuration);
     ("update-resource", update_resource);
     ("update-table-objects", update_table_objects);
     ("update-table-storage-optimizer", update_table_storage_optimizer)]

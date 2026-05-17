@@ -100,9 +100,9 @@ module SubDomainSetting =
           (Xml.child_exn ~context:context_ xml_arg0 "prefix") in
       make ~branchName ~prefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let prefix = field_map_exn json "prefix" DomainPrefix.of_json in
+    let of_json json__ =
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let prefix = field_map_exn json__ "prefix" DomainPrefix.of_json in
       make ~branchName ~prefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the settings for the subdomain."]
@@ -287,43 +287,103 @@ module AutoSubDomainCreationPattern =
     let of_json j = string_of_json ~kind:"AutoSubDomainCreationPattern" j
     let to_json = simple_to_json to_value
   end
+module CertificateArn =
+  struct
+    type nonrec t = string
+    let context_ = "CertificateArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws:acm:[a-z0-9-]+:\\d{12}:certificate\\/.+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificateArn" j
+    let to_json = simple_to_json to_value
+  end
+module CertificateType =
+  struct
+    type nonrec t =
+      | AMPLIFY_MANAGED 
+      | CUSTOM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AMPLIFY_MANAGED -> "AMPLIFY_MANAGED"
+      | CUSTOM -> "CUSTOM"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AMPLIFY_MANAGED" -> AMPLIFY_MANAGED
+      | "CUSTOM" -> CUSTOM
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CertificateType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CertificateType" j)
+    let to_json = simple_to_json to_value
+  end
+module CertificateVerificationDNSRecord =
+  struct
+    type nonrec t = string
+    let context_ = "CertificateVerificationDNSRecord"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1000); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificateVerificationDNSRecord" j
+    let to_json = simple_to_json to_value
+  end
 module SubDomain =
   struct
     type nonrec t =
       {
-      subDomainSetting: SubDomainSetting.t
+      subDomainSetting: SubDomainSetting.t option
         [@ocaml.doc "Describes the settings for the subdomain."];
-      verified: Verified.t
+      verified: Verified.t option
         [@ocaml.doc "The verified status of the subdomain"];
-      dnsRecord: DNSRecord.t [@ocaml.doc "The DNS record for the subdomain."]}
-    let context_ = "SubDomain"
-    let make ~subDomainSetting =
-      fun ~verified ->
-        fun ~dnsRecord -> fun () -> { subDomainSetting; verified; dnsRecord }
+      dnsRecord: DNSRecord.t option
+        [@ocaml.doc "The DNS record for the subdomain."]}
+    let make ?subDomainSetting =
+      fun ?verified ->
+        fun ?dnsRecord -> fun () -> { subDomainSetting; verified; dnsRecord }
     let to_value x =
       structure_to_value
         [("subDomainSetting",
-           (Some (SubDomainSetting.to_value x.subDomainSetting)));
-        ("verified", (Some (Verified.to_value x.verified)));
-        ("dnsRecord", (Some (DNSRecord.to_value x.dnsRecord)))]
+           (Option.map x.subDomainSetting ~f:SubDomainSetting.to_value));
+        ("verified", (Option.map x.verified ~f:Verified.to_value));
+        ("dnsRecord", (Option.map x.dnsRecord ~f:DNSRecord.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dnsRecord =
-        DNSRecord.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "dnsRecord") in
+        (Option.map ~f:DNSRecord.of_xml) (Xml.child xml_arg0 "dnsRecord") in
       let verified =
-        Verified.of_xml (Xml.child_exn ~context:context_ xml_arg0 "verified") in
+        (Option.map ~f:Verified.of_xml) (Xml.child xml_arg0 "verified") in
       let subDomainSetting =
-        SubDomainSetting.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "subDomainSetting") in
-      make ~dnsRecord ~verified ~subDomainSetting ()
+        (Option.map ~f:SubDomainSetting.of_xml)
+          (Xml.child xml_arg0 "subDomainSetting") in
+      make ?dnsRecord ?verified ?subDomainSetting ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dnsRecord = field_map_exn json "dnsRecord" DNSRecord.of_json in
-      let verified = field_map_exn json "verified" Verified.of_json in
+    let of_json json__ =
+      let dnsRecord = field_map json__ "dnsRecord" DNSRecord.of_json in
+      let verified = field_map json__ "verified" Verified.of_json in
       let subDomainSetting =
-        field_map_exn json "subDomainSetting" SubDomainSetting.of_json in
-      make ~dnsRecord ~verified ~subDomainSetting ()
+        field_map json__ "subDomainSetting" SubDomainSetting.of_json in
+      make ?dnsRecord ?verified ?subDomainSetting ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The subdomain for the domain association."]
 module AssociatedResource =
@@ -342,6 +402,28 @@ module AssociatedResource =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AssociatedResource" j
+    let to_json = simple_to_json to_value
+  end
+module StackArn =
+  struct
+    type nonrec t = string
+    let context_ = "StackArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws:cloudformation:[a-z0-9-]+:\\d{12}:stack/.+/.+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StackArn" j
     let to_json = simple_to_json to_value
   end
 module CustomDomain =
@@ -512,6 +594,8 @@ module EnvironmentVariables =
                     (fun x -> (EnvValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -609,6 +693,31 @@ module AutoBranchCreationPattern =
     let of_json j = string_of_json ~kind:"AutoBranchCreationPattern" j
     let to_json = simple_to_json to_value
   end
+module CacheConfigType =
+  struct
+    type nonrec t =
+      | AMPLIFY_MANAGED 
+      | AMPLIFY_MANAGED_NO_COOKIES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AMPLIFY_MANAGED -> "AMPLIFY_MANAGED"
+      | AMPLIFY_MANAGED_NO_COOKIES -> "AMPLIFY_MANAGED_NO_COOKIES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AMPLIFY_MANAGED" -> AMPLIFY_MANAGED
+      | "AMPLIFY_MANAGED_NO_COOKIES" -> AMPLIFY_MANAGED_NO_COOKIES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CacheConfigType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CacheConfigType" j)
+    let to_json = simple_to_json to_value
+  end
 module CustomRule =
   struct
     type nonrec t =
@@ -619,7 +728,7 @@ module CustomRule =
         [@ocaml.doc "The target pattern for a URL rewrite or redirect rule."];
       status: Status.t option
         [@ocaml.doc
-          "The status code for a URL rewrite or redirect rule. 200 Represents a 200 rewrite rule. 301 Represents a 301 (moved pemanently) redirect rule. This and all future requests should be directed to the target URL. 302 Represents a 302 temporary redirect rule. 404 Represents a 404 redirect rule. 404-200 Represents a 404 rewrite rule."];
+          "The status code for a URL rewrite or redirect rule. 200 Represents a 200 rewrite rule. 301 Represents a 301 (moved permanently) redirect rule. This and all future requests should be directed to the target URL. 302 Represents a 302 temporary redirect rule. 404 Represents a 404 redirect rule. 404-200 Represents a 404 rewrite rule."];
       condition: Condition.t option
         [@ocaml.doc
           "The condition for a URL rewrite or redirect rule, such as a country code."]}
@@ -646,14 +755,42 @@ module CustomRule =
         Source.of_xml (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ?condition ?status ~target ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let condition = field_map json "condition" Condition.of_json in
-      let status = field_map json "status" Status.of_json in
-      let target = field_map_exn json "target" Target.of_json in
-      let source = field_map_exn json "source" Source.of_json in
+    let of_json json__ =
+      let condition = field_map json__ "condition" Condition.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let target = field_map_exn json__ "target" Target.of_json in
+      let source = field_map_exn json__ "source" Source.of_json in
       make ?condition ?status ~target ~source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a custom rewrite or redirect rule."]
+module BuildComputeType =
+  struct
+    type nonrec t =
+      | STANDARD_8GB 
+      | LARGE_16GB 
+      | XLARGE_72GB 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD_8GB -> "STANDARD_8GB"
+      | LARGE_16GB -> "LARGE_16GB"
+      | XLARGE_72GB -> "XLARGE_72GB"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD_8GB" -> STANDARD_8GB
+      | "LARGE_16GB" -> LARGE_16GB
+      | "XLARGE_72GB" -> XLARGE_72GB
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BuildComputeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BuildComputeType" j)
+    let to_json = simple_to_json to_value
+  end
 module LastDeployTime =
   struct
     type nonrec t = string
@@ -664,6 +801,74 @@ module LastDeployTime =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module StatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "StatusReason"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1000); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StatusReason" j
+    let to_json = simple_to_json to_value
+  end
+module WafStatus =
+  struct
+    type nonrec t =
+      | ASSOCIATING 
+      | ASSOCIATION_FAILED 
+      | ASSOCIATION_SUCCESS 
+      | DISASSOCIATING 
+      | DISASSOCIATION_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ASSOCIATING -> "ASSOCIATING"
+      | ASSOCIATION_FAILED -> "ASSOCIATION_FAILED"
+      | ASSOCIATION_SUCCESS -> "ASSOCIATION_SUCCESS"
+      | DISASSOCIATING -> "DISASSOCIATING"
+      | DISASSOCIATION_FAILED -> "DISASSOCIATION_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ASSOCIATING" -> ASSOCIATING
+      | "ASSOCIATION_FAILED" -> ASSOCIATION_FAILED
+      | "ASSOCIATION_SUCCESS" -> ASSOCIATION_SUCCESS
+      | "DISASSOCIATING" -> DISASSOCIATING
+      | "DISASSOCIATION_FAILED" -> DISASSOCIATION_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration WafStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WafStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module WebAclArn =
+  struct
+    type nonrec t = string
+    let context_ = "WebAclArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"^arn:aws:wafv2:.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WebAclArn" j
     let to_json = simple_to_json to_value
   end
 module ArtifactsUrl =
@@ -708,6 +913,7 @@ module EndTime =
 module JobStatus =
   struct
     type nonrec t =
+      | CREATED 
       | PENDING 
       | PROVISIONING 
       | RUNNING 
@@ -719,6 +925,7 @@ module JobStatus =
     let make i = i
     let to_string =
       function
+      | CREATED -> "CREATED"
       | PENDING -> "PENDING"
       | PROVISIONING -> "PROVISIONING"
       | RUNNING -> "RUNNING"
@@ -729,6 +936,7 @@ module JobStatus =
       | Non_static_id s -> s
     let of_string =
       function
+      | "CREATED" -> CREATED
       | "PENDING" -> PENDING
       | "PROVISIONING" -> PROVISIONING
       | "RUNNING" -> RUNNING
@@ -780,6 +988,8 @@ module Screenshots =
                     (fun x -> (ThumbnailUrl.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -797,20 +1007,6 @@ module StartTime =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
-module StatusReason =
-  struct
-    type nonrec t = string
-    let context_ = "StatusReason"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1000); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StatusReason" j
     let to_json = simple_to_json to_value
   end
 module StepName =
@@ -853,6 +1049,26 @@ module TestConfigUrl =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TestConfigUrl" j
+    let to_json = simple_to_json to_value
+  end
+module AppId =
+  struct
+    type nonrec t = string
+    let context_ = "AppId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"d[a-z0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AppId" j
     let to_json = simple_to_json to_value
   end
 module CreateTime =
@@ -1054,10 +1270,56 @@ module JobType =
     let of_json j = of_string (string_of_json ~kind:"JobType" j)
     let to_json = simple_to_json to_value
   end
+module SourceUrl =
+  struct
+    type nonrec t = string
+    let context_ = "SourceUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:3000) >>=
+             (fun () -> check_pattern i ~pattern:"^(s3|https|http)://.*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceUrl" j
+    let to_json = simple_to_json to_value
+  end
+module SourceUrlType =
+  struct
+    type nonrec t =
+      | ZIP 
+      | BUCKET_PREFIX 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ZIP -> "ZIP"
+      | BUCKET_PREFIX -> "BUCKET_PREFIX"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ZIP" -> ZIP
+      | "BUCKET_PREFIX" -> BUCKET_PREFIX
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SourceUrlType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SourceUrlType" j)
+    let to_json = simple_to_json to_value
+  end
 module AutoSubDomainCreationPatterns =
   struct
     type nonrec t = AutoSubDomainCreationPattern.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoSubDomainCreationPattern.to_value)) |>
         (fun x -> `List x)
@@ -1099,20 +1361,55 @@ module AutoSubDomainIAMRole =
     let of_json j = string_of_json ~kind:"AutoSubDomainIAMRole" j
     let to_json = simple_to_json to_value
   end
-module CertificateVerificationDNSRecord =
+module Certificate =
   struct
-    type nonrec t = string
-    let context_ = "CertificateVerificationDNSRecord"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1000); i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      type_: CertificateType.t option
+        [@ocaml.doc
+          "The type of SSL/TLS certificate that you want to use. Specify AMPLIFY_MANAGED to use the default certificate that Amplify provisions for you. Specify CUSTOM to use your own certificate that you have already added to Certificate Manager in your Amazon Web Services account. Make sure you request (or import) the certificate in the US East (N. Virginia) Region (us-east-1). For more information about using ACM, see Importing certificates into Certificate Manager in the ACM User guide."];
+      customCertificateArn: CertificateArn.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) for a custom certificate that you have already added to Certificate Manager in your Amazon Web Services account. This field is required only when the certificate type is CUSTOM."];
+      certificateVerificationDNSRecord:
+        CertificateVerificationDNSRecord.t option
+        [@ocaml.doc "The DNS record for certificate verification."]}
+    let make ?type_ =
+      fun ?customCertificateArn ->
+        fun ?certificateVerificationDNSRecord ->
+          fun () ->
+            { type_; customCertificateArn; certificateVerificationDNSRecord }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:CertificateType.to_value));
+        ("customCertificateArn",
+          (Option.map x.customCertificateArn ~f:CertificateArn.to_value));
+        ("certificateVerificationDNSRecord",
+          (Option.map x.certificateVerificationDNSRecord
+             ~f:CertificateVerificationDNSRecord.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CertificateVerificationDNSRecord" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let certificateVerificationDNSRecord =
+        (Option.map ~f:CertificateVerificationDNSRecord.of_xml)
+          (Xml.child xml_arg0 "certificateVerificationDNSRecord") in
+      let customCertificateArn =
+        (Option.map ~f:CertificateArn.of_xml)
+          (Xml.child xml_arg0 "customCertificateArn") in
+      let type_ =
+        (Option.map ~f:CertificateType.of_xml) (Xml.child xml_arg0 "type") in
+      make ?certificateVerificationDNSRecord ?customCertificateArn ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateVerificationDNSRecord =
+        field_map json__ "certificateVerificationDNSRecord"
+          CertificateVerificationDNSRecord.of_json in
+      let customCertificateArn =
+        field_map json__ "customCertificateArn" CertificateArn.of_json in
+      let type_ = field_map json__ "type" CertificateType.of_json in
+      make ?certificateVerificationDNSRecord ?customCertificateArn ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the current SSL/TLS certificate that is in use for the domain. If you are using CreateDomainAssociation to create a new domain association, Certificate describes the new certificate that you are creating."]
 module DomainAssociationArn =
   struct
     type nonrec t = string
@@ -1153,7 +1450,9 @@ module DomainStatus =
       | PENDING_VERIFICATION 
       | IN_PROGRESS 
       | AVAILABLE 
+      | IMPORTING_CUSTOM_CERTIFICATE 
       | PENDING_DEPLOYMENT 
+      | AWAITING_APP_CNAME 
       | FAILED 
       | CREATING 
       | REQUESTING_CERTIFICATE 
@@ -1165,7 +1464,9 @@ module DomainStatus =
       | PENDING_VERIFICATION -> "PENDING_VERIFICATION"
       | IN_PROGRESS -> "IN_PROGRESS"
       | AVAILABLE -> "AVAILABLE"
+      | IMPORTING_CUSTOM_CERTIFICATE -> "IMPORTING_CUSTOM_CERTIFICATE"
       | PENDING_DEPLOYMENT -> "PENDING_DEPLOYMENT"
+      | AWAITING_APP_CNAME -> "AWAITING_APP_CNAME"
       | FAILED -> "FAILED"
       | CREATING -> "CREATING"
       | REQUESTING_CERTIFICATE -> "REQUESTING_CERTIFICATE"
@@ -1176,7 +1477,9 @@ module DomainStatus =
       | "PENDING_VERIFICATION" -> PENDING_VERIFICATION
       | "IN_PROGRESS" -> IN_PROGRESS
       | "AVAILABLE" -> AVAILABLE
+      | "IMPORTING_CUSTOM_CERTIFICATE" -> IMPORTING_CUSTOM_CERTIFICATE
       | "PENDING_DEPLOYMENT" -> PENDING_DEPLOYMENT
+      | "AWAITING_APP_CNAME" -> AWAITING_APP_CNAME
       | "FAILED" -> FAILED
       | "CREATING" -> CREATING
       | "REQUESTING_CERTIFICATE" -> REQUESTING_CERTIFICATE
@@ -1207,7 +1510,10 @@ module SubDomains =
   struct
     type nonrec t = SubDomain.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:255); i
+      let open Result in ok_or_failwith (check_list_max i ~max:500); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubDomain.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1228,6 +1534,46 @@ module SubDomains =
       list_of_json ~kind:"SubDomains" ~of_json:SubDomain.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UpdateStatus =
+  struct
+    type nonrec t =
+      | REQUESTING_CERTIFICATE 
+      | PENDING_VERIFICATION 
+      | IMPORTING_CUSTOM_CERTIFICATE 
+      | PENDING_DEPLOYMENT 
+      | AWAITING_APP_CNAME 
+      | UPDATE_COMPLETE 
+      | UPDATE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REQUESTING_CERTIFICATE -> "REQUESTING_CERTIFICATE"
+      | PENDING_VERIFICATION -> "PENDING_VERIFICATION"
+      | IMPORTING_CUSTOM_CERTIFICATE -> "IMPORTING_CUSTOM_CERTIFICATE"
+      | PENDING_DEPLOYMENT -> "PENDING_DEPLOYMENT"
+      | AWAITING_APP_CNAME -> "AWAITING_APP_CNAME"
+      | UPDATE_COMPLETE -> "UPDATE_COMPLETE"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REQUESTING_CERTIFICATE" -> REQUESTING_CERTIFICATE
+      | "PENDING_VERIFICATION" -> PENDING_VERIFICATION
+      | "IMPORTING_CUSTOM_CERTIFICATE" -> IMPORTING_CUSTOM_CERTIFICATE
+      | "PENDING_DEPLOYMENT" -> PENDING_DEPLOYMENT
+      | "AWAITING_APP_CNAME" -> AWAITING_APP_CNAME
+      | "UPDATE_COMPLETE" -> UPDATE_COMPLETE
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UpdateStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UpdateStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ActiveJobId =
   struct
     type nonrec t = string
@@ -1246,6 +1592,9 @@ module AssociatedResources =
   struct
     type nonrec t = AssociatedResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssociatedResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1267,6 +1616,29 @@ module AssociatedResources =
         ~of_json:AssociatedResource.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Backend =
+  struct
+    type nonrec t =
+      {
+      stackArn: StackArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the CloudFormation stack."]}
+    let make ?stackArn = fun () -> { stackArn }
+    let to_value x =
+      structure_to_value
+        [("stackArn", (Option.map x.stackArn ~f:StackArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stackArn =
+        (Option.map ~f:StackArn.of_xml) (Xml.child xml_arg0 "stackArn") in
+      make ?stackArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stackArn = field_map json__ "stackArn" StackArn.of_json in
+      make ?stackArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the backend associated with an Amplify Branch. This property is available to Amplify Gen 2 apps only. When you deploy an application with Amplify Gen 2, you provision the app's backend infrastructure using Typescript code."]
 module BackendEnvironmentArn =
   struct
     type nonrec t = string
@@ -1305,11 +1677,34 @@ module BranchArn =
     let of_json j = string_of_json ~kind:"BranchArn" j
     let to_json = simple_to_json to_value
   end
+module ComputeRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "ComputeRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"(?s).*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComputeRoleArn" j
+    let to_json = simple_to_json to_value
+  end
 module CustomDomains =
   struct
     type nonrec t = CustomDomain.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:255); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomDomain.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1349,6 +1744,19 @@ module DisplayName =
     let to_json = simple_to_json to_value
   end
 module EnableNotification =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module EnableSkewProtection =
   struct
     type nonrec t = bool
     let make i = i
@@ -1408,6 +1816,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1535,26 +1945,6 @@ module AppArn =
     let of_json j = string_of_json ~kind:"AppArn" j
     let to_json = simple_to_json to_value
   end
-module AppId =
-  struct
-    type nonrec t = string
-    let context_ = "AppId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:20) >>=
-                  (fun () -> check_pattern i ~pattern:"d[a-z0-9]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AppId" j
-    let to_json = simple_to_json to_value
-  end
 module AutoBranchCreationConfig =
   struct
     type nonrec t =
@@ -1662,26 +2052,27 @@ module AutoBranchCreationConfig =
         ?enablePerformanceMode ?enableBasicAuth ?basicAuthCredentials
         ?environmentVariables ?enableAutoBuild ?framework ?stage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pullRequestEnvironmentName =
-        field_map json "pullRequestEnvironmentName"
+        field_map json__ "pullRequestEnvironmentName"
           PullRequestEnvironmentName.of_json in
       let enablePullRequestPreview =
-        field_map json "enablePullRequestPreview"
+        field_map json__ "enablePullRequestPreview"
           EnablePullRequestPreview.of_json in
-      let buildSpec = field_map json "buildSpec" BuildSpec.of_json in
+      let buildSpec = field_map json__ "buildSpec" BuildSpec.of_json in
       let enablePerformanceMode =
-        field_map json "enablePerformanceMode" EnablePerformanceMode.of_json in
+        field_map json__ "enablePerformanceMode"
+          EnablePerformanceMode.of_json in
       let enableBasicAuth =
-        field_map json "enableBasicAuth" EnableBasicAuth.of_json in
+        field_map json__ "enableBasicAuth" EnableBasicAuth.of_json in
       let basicAuthCredentials =
-        field_map json "basicAuthCredentials" BasicAuthCredentials.of_json in
+        field_map json__ "basicAuthCredentials" BasicAuthCredentials.of_json in
       let environmentVariables =
-        field_map json "environmentVariables" EnvironmentVariables.of_json in
+        field_map json__ "environmentVariables" EnvironmentVariables.of_json in
       let enableAutoBuild =
-        field_map json "enableAutoBuild" EnableAutoBuild.of_json in
-      let framework = field_map json "framework" Framework.of_json in
-      let stage = field_map json "stage" Stage.of_json in
+        field_map json__ "enableAutoBuild" EnableAutoBuild.of_json in
+      let framework = field_map json__ "framework" Framework.of_json in
+      let stage = field_map json__ "stage" Stage.of_json in
       make ?pullRequestEnvironmentName ?enablePullRequestPreview ?buildSpec
         ?enablePerformanceMode ?enableBasicAuth ?basicAuthCredentials
         ?environmentVariables ?enableAutoBuild ?framework ?stage ()
@@ -1691,6 +2082,9 @@ module AutoBranchCreationPatterns =
   struct
     type nonrec t = AutoBranchCreationPattern.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoBranchCreationPattern.to_value)) |>
         (fun x -> `List x)
@@ -1713,6 +2107,31 @@ module AutoBranchCreationPatterns =
         ~of_json:AutoBranchCreationPattern.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CacheConfig =
+  struct
+    type nonrec t =
+      {
+      type_: CacheConfigType.t
+        [@ocaml.doc
+          "The type of cache configuration to use for an Amplify app. The AMPLIFY_MANAGED cache configuration automatically applies an optimized cache configuration for your app based on its platform, routing rules, and rewrite rules. The AMPLIFY_MANAGED_NO_COOKIES cache configuration type is the same as AMPLIFY_MANAGED, except that it excludes all cookies from the cache key. This is the default setting."]}
+    let context_ = "CacheConfig"
+    let make ~type_ = fun () -> { type_ }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (CacheConfigType.to_value x.type_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        CacheConfigType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" CacheConfigType.of_json in
+      make ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the cache configuration for an Amplify app. For more information about how Amplify applies an optimal cache configuration for your app based on the type of content that is being served, see Managing cache configuration in the Amplify User guide."]
 module CustomHeaders =
   struct
     type nonrec t = string
@@ -1737,6 +2156,9 @@ module CustomRules =
   struct
     type nonrec t = CustomRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1814,6 +2236,33 @@ module EnableBranchAutoDeletion =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module JobConfig =
+  struct
+    type nonrec t =
+      {
+      buildComputeType: BuildComputeType.t
+        [@ocaml.doc
+          "Specifies the size of the build instance. Amplify supports three instance sizes: STANDARD_8GB, LARGE_16GB, and XLARGE_72GB. If you don't specify a value, Amplify uses the STANDARD_8GB default. The following list describes the CPU, memory, and storage capacity for each build instance type: STANDARD_8GB vCPUs: 4 Memory: 8 GiB Disk space: 128 GB LARGE_16GB vCPUs: 8 Memory: 16 GiB Disk space: 128 GB XLARGE_72GB vCPUs: 36 Memory: 72 GiB Disk space: 256 GB"]}
+    let context_ = "JobConfig"
+    let make ~buildComputeType = fun () -> { buildComputeType }
+    let to_value x =
+      structure_to_value
+        [("buildComputeType",
+           (Some (BuildComputeType.to_value x.buildComputeType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let buildComputeType =
+        BuildComputeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "buildComputeType") in
+      make ~buildComputeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let buildComputeType =
+        field_map_exn json__ "buildComputeType" BuildComputeType.of_json in
+      make ~buildComputeType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration details that apply to the jobs for an Amplify app. Use JobConfig to apply configuration to jobs, such as customizing the build instance size when you create or update an Amplify app. For more information about customizable build instances, see Custom build instances in the Amplify User Guide."]
 module Name =
   struct
     type nonrec t = string
@@ -1839,17 +2288,20 @@ module Platform =
     type nonrec t =
       | WEB 
       | WEB_DYNAMIC 
+      | WEB_COMPUTE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | WEB -> "WEB"
       | WEB_DYNAMIC -> "WEB_DYNAMIC"
+      | WEB_COMPUTE -> "WEB_COMPUTE"
       | Non_static_id s -> s
     let of_string =
       function
       | "WEB" -> WEB
       | "WEB_DYNAMIC" -> WEB_DYNAMIC
+      | "WEB_COMPUTE" -> WEB_COMPUTE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1898,12 +2350,12 @@ module ProductionBranch =
           (Xml.child xml_arg0 "lastDeployTime") in
       make ?branchName ?thumbnailUrl ?status ?lastDeployTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branchName = field_map json "branchName" BranchName.of_json in
-      let thumbnailUrl = field_map json "thumbnailUrl" ThumbnailUrl.of_json in
-      let status = field_map json "status" Status.of_json in
+    let of_json json__ =
+      let branchName = field_map json__ "branchName" BranchName.of_json in
+      let thumbnailUrl = field_map json__ "thumbnailUrl" ThumbnailUrl.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let lastDeployTime =
-        field_map json "lastDeployTime" LastDeployTime.of_json in
+        field_map json__ "lastDeployTime" LastDeployTime.of_json in
       make ?branchName ?thumbnailUrl ?status ?lastDeployTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1976,20 +2428,75 @@ module ServiceRoleArn =
     let of_json j = string_of_json ~kind:"ServiceRoleArn" j
     let to_json = simple_to_json to_value
   end
+module WafConfiguration =
+  struct
+    type nonrec t =
+      {
+      webAclArn: WebAclArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the web ACL associated with an Amplify app."];
+      wafStatus: WafStatus.t option
+        [@ocaml.doc
+          "The status of the process to associate or disassociate a web ACL to an Amplify app."];
+      statusReason: StatusReason.t option
+        [@ocaml.doc
+          "The reason for the current status of the Firewall configuration."]}
+    let make ?webAclArn =
+      fun ?wafStatus ->
+        fun ?statusReason -> fun () -> { webAclArn; wafStatus; statusReason }
+    let to_value x =
+      structure_to_value
+        [("webAclArn", (Option.map x.webAclArn ~f:WebAclArn.to_value));
+        ("wafStatus", (Option.map x.wafStatus ~f:WafStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:StatusReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:StatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let wafStatus =
+        (Option.map ~f:WafStatus.of_xml) (Xml.child xml_arg0 "wafStatus") in
+      let webAclArn =
+        (Option.map ~f:WebAclArn.of_xml) (Xml.child xml_arg0 "webAclArn") in
+      make ?statusReason ?wafStatus ?webAclArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let wafStatus = field_map json__ "wafStatus" WafStatus.of_json in
+      let webAclArn = field_map json__ "webAclArn" WebAclArn.of_json in
+      make ?statusReason ?wafStatus ?webAclArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the Firewall configuration for a hosted Amplify application. Firewall support enables you to protect your web applications with a direct integration with WAF. For more information about using WAF protections for an Amplify application, see Firewall support for hosted sites in the Amplify User Guide."]
+module WebhookCreateTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
 module Step =
   struct
     type nonrec t =
       {
-      stepName: StepName.t [@ocaml.doc "The name of the execution step."];
-      startTime: StartTime.t
+      stepName: StepName.t option
+        [@ocaml.doc "The name of the execution step."];
+      startTime: StartTime.t option
         [@ocaml.doc "The start date and time of the execution step."];
-      status: JobStatus.t [@ocaml.doc "The status of the execution step."];
-      endTime: EndTime.t
+      status: JobStatus.t option
+        [@ocaml.doc "The status of the execution step."];
+      endTime: EndTime.t option
         [@ocaml.doc "The end date and time of the execution step."];
       logUrl: LogUrl.t option
         [@ocaml.doc "The URL to the logs for the execution step."];
       artifactsUrl: ArtifactsUrl.t option
-        [@ocaml.doc "The URL to the artifact for the execution step."];
+        [@ocaml.doc "The URL to the build artifact for the execution step."];
       testArtifactsUrl: TestArtifactsUrl.t option
         [@ocaml.doc "The URL to the test artifact for the execution step."];
       testConfigUrl: TestConfigUrl.t option
@@ -2003,38 +2510,37 @@ module Step =
       context: Context.t option
         [@ocaml.doc
           "The context for the current step. Includes a build image if the step is build."]}
-    let context_ = "Step"
-    let make ?logUrl =
-      fun ?artifactsUrl ->
-        fun ?testArtifactsUrl ->
-          fun ?testConfigUrl ->
-            fun ?screenshots ->
-              fun ?statusReason ->
-                fun ?context ->
-                  fun ~stepName ->
-                    fun ~startTime ->
-                      fun ~status ->
-                        fun ~endTime ->
+    let make ?stepName =
+      fun ?startTime ->
+        fun ?status ->
+          fun ?endTime ->
+            fun ?logUrl ->
+              fun ?artifactsUrl ->
+                fun ?testArtifactsUrl ->
+                  fun ?testConfigUrl ->
+                    fun ?screenshots ->
+                      fun ?statusReason ->
+                        fun ?context ->
                           fun () ->
                             {
+                              stepName;
+                              startTime;
+                              status;
+                              endTime;
                               logUrl;
                               artifactsUrl;
                               testArtifactsUrl;
                               testConfigUrl;
                               screenshots;
                               statusReason;
-                              context;
-                              stepName;
-                              startTime;
-                              status;
-                              endTime
+                              context
                             }
     let to_value x =
       structure_to_value
-        [("stepName", (Some (StepName.to_value x.stepName)));
-        ("startTime", (Some (StartTime.to_value x.startTime)));
-        ("status", (Some (JobStatus.to_value x.status)));
-        ("endTime", (Some (EndTime.to_value x.endTime)));
+        [("stepName", (Option.map x.stepName ~f:StepName.to_value));
+        ("startTime", (Option.map x.startTime ~f:StartTime.to_value));
+        ("status", (Option.map x.status ~f:JobStatus.to_value));
+        ("endTime", (Option.map x.endTime ~f:EndTime.to_value));
         ("logUrl", (Option.map x.logUrl ~f:LogUrl.to_value));
         ("artifactsUrl",
           (Option.map x.artifactsUrl ~f:ArtifactsUrl.to_value));
@@ -2067,35 +2573,34 @@ module Step =
       let logUrl =
         (Option.map ~f:LogUrl.of_xml) (Xml.child xml_arg0 "logUrl") in
       let endTime =
-        EndTime.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
+        (Option.map ~f:EndTime.of_xml) (Xml.child xml_arg0 "endTime") in
       let status =
-        JobStatus.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       let startTime =
-        StartTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
+        (Option.map ~f:StartTime.of_xml) (Xml.child xml_arg0 "startTime") in
       let stepName =
-        StepName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "stepName") in
+        (Option.map ~f:StepName.of_xml) (Xml.child xml_arg0 "stepName") in
       make ?context ?statusReason ?screenshots ?testConfigUrl
-        ?testArtifactsUrl ?artifactsUrl ?logUrl ~endTime ~status ~startTime
-        ~stepName ()
+        ?testArtifactsUrl ?artifactsUrl ?logUrl ?endTime ?status ?startTime
+        ?stepName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let context = field_map json "context" Context.of_json in
-      let statusReason = field_map json "statusReason" StatusReason.of_json in
-      let screenshots = field_map json "screenshots" Screenshots.of_json in
+    let of_json json__ =
+      let context = field_map json__ "context" Context.of_json in
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let screenshots = field_map json__ "screenshots" Screenshots.of_json in
       let testConfigUrl =
-        field_map json "testConfigUrl" TestConfigUrl.of_json in
+        field_map json__ "testConfigUrl" TestConfigUrl.of_json in
       let testArtifactsUrl =
-        field_map json "testArtifactsUrl" TestArtifactsUrl.of_json in
-      let artifactsUrl = field_map json "artifactsUrl" ArtifactsUrl.of_json in
-      let logUrl = field_map json "logUrl" LogUrl.of_json in
-      let endTime = field_map_exn json "endTime" EndTime.of_json in
-      let status = field_map_exn json "status" JobStatus.of_json in
-      let startTime = field_map_exn json "startTime" StartTime.of_json in
-      let stepName = field_map_exn json "stepName" StepName.of_json in
+        field_map json__ "testArtifactsUrl" TestArtifactsUrl.of_json in
+      let artifactsUrl = field_map json__ "artifactsUrl" ArtifactsUrl.of_json in
+      let logUrl = field_map json__ "logUrl" LogUrl.of_json in
+      let endTime = field_map json__ "endTime" EndTime.of_json in
+      let status = field_map json__ "status" JobStatus.of_json in
+      let startTime = field_map json__ "startTime" StartTime.of_json in
+      let stepName = field_map json__ "stepName" StepName.of_json in
       make ?context ?statusReason ?screenshots ?testConfigUrl
-        ?testArtifactsUrl ?artifactsUrl ?logUrl ~endTime ~status ~startTime
-        ~stepName ()
+        ?testArtifactsUrl ?artifactsUrl ?logUrl ?endTime ?status ?startTime
+        ?stepName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an execution step, for an execution job, for an Amplify app."]
@@ -2130,81 +2635,81 @@ module Webhook =
   struct
     type nonrec t =
       {
-      webhookArn: WebhookArn.t
+      webhookArn: WebhookArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the webhook."];
-      webhookId: WebhookId.t [@ocaml.doc "The ID of the webhook."];
-      webhookUrl: WebhookUrl.t [@ocaml.doc "The URL of the webhook."];
-      branchName: BranchName.t
+      webhookId: WebhookId.t option [@ocaml.doc "The ID of the webhook."];
+      webhookUrl: WebhookUrl.t option [@ocaml.doc "The URL of the webhook."];
+      appId: AppId.t option [@ocaml.doc "The unique ID of an Amplify app."];
+      branchName: BranchName.t option
         [@ocaml.doc "The name for a branch that is part of an Amplify app."];
-      description: Description.t
+      description: Description.t option
         [@ocaml.doc "The description for a webhook."];
-      createTime: CreateTime.t
-        [@ocaml.doc "The create date and time for a webhook."];
-      updateTime: UpdateTime.t
-        [@ocaml.doc "Updates the date and time for a webhook."]}
-    let context_ = "Webhook"
-    let make ~webhookArn =
-      fun ~webhookId ->
-        fun ~webhookUrl ->
-          fun ~branchName ->
-            fun ~description ->
-              fun ~createTime ->
-                fun ~updateTime ->
-                  fun () ->
-                    {
-                      webhookArn;
-                      webhookId;
-                      webhookUrl;
-                      branchName;
-                      description;
-                      createTime;
-                      updateTime
-                    }
+      createTime: CreateTime.t option
+        [@ocaml.doc
+          "A timestamp of when Amplify created the webhook in your Git repository."];
+      updateTime: UpdateTime.t option
+        [@ocaml.doc
+          "A timestamp of when Amplify updated the webhook in your Git repository."]}
+    let make ?webhookArn =
+      fun ?webhookId ->
+        fun ?webhookUrl ->
+          fun ?appId ->
+            fun ?branchName ->
+              fun ?description ->
+                fun ?createTime ->
+                  fun ?updateTime ->
+                    fun () ->
+                      {
+                        webhookArn;
+                        webhookId;
+                        webhookUrl;
+                        appId;
+                        branchName;
+                        description;
+                        createTime;
+                        updateTime
+                      }
     let to_value x =
       structure_to_value
-        [("webhookArn", (Some (WebhookArn.to_value x.webhookArn)));
-        ("webhookId", (Some (WebhookId.to_value x.webhookId)));
-        ("webhookUrl", (Some (WebhookUrl.to_value x.webhookUrl)));
-        ("branchName", (Some (BranchName.to_value x.branchName)));
-        ("description", (Some (Description.to_value x.description)));
-        ("createTime", (Some (CreateTime.to_value x.createTime)));
-        ("updateTime", (Some (UpdateTime.to_value x.updateTime)))]
+        [("webhookArn", (Option.map x.webhookArn ~f:WebhookArn.to_value));
+        ("webhookId", (Option.map x.webhookId ~f:WebhookId.to_value));
+        ("webhookUrl", (Option.map x.webhookUrl ~f:WebhookUrl.to_value));
+        ("appId", (Option.map x.appId ~f:AppId.to_value));
+        ("branchName", (Option.map x.branchName ~f:BranchName.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("createTime", (Option.map x.createTime ~f:CreateTime.to_value));
+        ("updateTime", (Option.map x.updateTime ~f:UpdateTime.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        UpdateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updateTime") in
+        (Option.map ~f:UpdateTime.of_xml) (Xml.child xml_arg0 "updateTime") in
       let createTime =
-        CreateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createTime") in
+        (Option.map ~f:CreateTime.of_xml) (Xml.child xml_arg0 "createTime") in
       let description =
-        Description.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "description") in
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let branchName =
-        BranchName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "branchName") in
+        (Option.map ~f:BranchName.of_xml) (Xml.child xml_arg0 "branchName") in
+      let appId = (Option.map ~f:AppId.of_xml) (Xml.child xml_arg0 "appId") in
       let webhookUrl =
-        WebhookUrl.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "webhookUrl") in
+        (Option.map ~f:WebhookUrl.of_xml) (Xml.child xml_arg0 "webhookUrl") in
       let webhookId =
-        WebhookId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "webhookId") in
+        (Option.map ~f:WebhookId.of_xml) (Xml.child xml_arg0 "webhookId") in
       let webhookArn =
-        WebhookArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "webhookArn") in
-      make ~updateTime ~createTime ~description ~branchName ~webhookUrl
-        ~webhookId ~webhookArn ()
+        (Option.map ~f:WebhookArn.of_xml) (Xml.child xml_arg0 "webhookArn") in
+      make ?updateTime ?createTime ?description ?branchName ?appId
+        ?webhookUrl ?webhookId ?webhookArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "updateTime" UpdateTime.of_json in
-      let createTime = field_map_exn json "createTime" CreateTime.of_json in
-      let description = field_map_exn json "description" Description.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let webhookUrl = field_map_exn json "webhookUrl" WebhookUrl.of_json in
-      let webhookId = field_map_exn json "webhookId" WebhookId.of_json in
-      let webhookArn = field_map_exn json "webhookArn" WebhookArn.of_json in
-      make ~updateTime ~createTime ~description ~branchName ~webhookUrl
-        ~webhookId ~webhookArn ()
+    let of_json json__ =
+      let updateTime = field_map json__ "updateTime" UpdateTime.of_json in
+      let createTime = field_map json__ "createTime" CreateTime.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let branchName = field_map json__ "branchName" BranchName.of_json in
+      let appId = field_map json__ "appId" AppId.of_json in
+      let webhookUrl = field_map json__ "webhookUrl" WebhookUrl.of_json in
+      let webhookId = field_map json__ "webhookId" WebhookId.of_json in
+      let webhookArn = field_map json__ "webhookArn" WebhookArn.of_json in
+      make ?updateTime ?createTime ?description ?branchName ?appId
+        ?webhookUrl ?webhookId ?webhookArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a webhook that connects repository events to an Amplify app."]
@@ -2212,97 +2717,116 @@ module JobSummary =
   struct
     type nonrec t =
       {
-      jobArn: JobArn.t
+      jobArn: JobArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the job."];
-      jobId: JobId.t [@ocaml.doc "The unique ID for the job."];
-      commitId: CommitId.t
+      jobId: JobId.t option [@ocaml.doc "The unique ID for the job."];
+      commitId: CommitId.t option
         [@ocaml.doc
           "The commit ID from a third-party repository provider for the job."];
-      commitMessage: CommitMessage.t
+      commitMessage: CommitMessage.t option
         [@ocaml.doc
           "The commit message from a third-party repository provider for the job."];
-      commitTime: CommitTime.t
+      commitTime: CommitTime.t option
         [@ocaml.doc "The commit date and time for the job."];
-      startTime: StartTime.t
+      startTime: StartTime.t option
         [@ocaml.doc "The start date and time for the job."];
-      status: JobStatus.t [@ocaml.doc "The current status for the job."];
+      status: JobStatus.t option
+        [@ocaml.doc "The current status for the job."];
       endTime: EndTime.t option
         [@ocaml.doc "The end date and time for the job."];
-      jobType: JobType.t
+      jobType: JobType.t option
         [@ocaml.doc
-          "The type for the job. If the value is RELEASE, the job was manually released from its source by using the StartJob API. If the value is RETRY, the job was manually retried using the StartJob API. If the value is WEB_HOOK, the job was automatically triggered by webhooks."]}
-    let context_ = "JobSummary"
-    let make ?endTime =
-      fun ~jobArn ->
-        fun ~jobId ->
-          fun ~commitId ->
-            fun ~commitMessage ->
-              fun ~commitTime ->
-                fun ~startTime ->
-                  fun ~status ->
-                    fun ~jobType ->
-                      fun () ->
-                        {
-                          endTime;
-                          jobArn;
-                          jobId;
-                          commitId;
-                          commitMessage;
-                          commitTime;
-                          startTime;
-                          status;
-                          jobType
-                        }
+          "The type for the job. If the value is RELEASE, the job was manually released from its source by using the StartJob API. This value is available only for apps that are connected to a repository. If the value is RETRY, the job was manually retried using the StartJob API. If the value is WEB_HOOK, the job was automatically triggered by webhooks. If the value is MANUAL, the job is for a manually deployed app. Manually deployed apps are not connected to a Git repository."];
+      sourceUrl: SourceUrl.t option
+        [@ocaml.doc
+          "The source URL for the files to deploy. The source URL can be either an HTTP GET URL that is publicly accessible and downloads a single .zip file, or an Amazon S3 bucket and prefix."];
+      sourceUrlType: SourceUrlType.t option
+        [@ocaml.doc
+          "The type of source specified by the sourceURL. If the value is ZIP, the source is a .zip file. If the value is BUCKET_PREFIX, the source is an Amazon S3 bucket and prefix. If no value is specified, the default is ZIP."]}
+    let make ?jobArn =
+      fun ?jobId ->
+        fun ?commitId ->
+          fun ?commitMessage ->
+            fun ?commitTime ->
+              fun ?startTime ->
+                fun ?status ->
+                  fun ?endTime ->
+                    fun ?jobType ->
+                      fun ?sourceUrl ->
+                        fun ?sourceUrlType ->
+                          fun () ->
+                            {
+                              jobArn;
+                              jobId;
+                              commitId;
+                              commitMessage;
+                              commitTime;
+                              startTime;
+                              status;
+                              endTime;
+                              jobType;
+                              sourceUrl;
+                              sourceUrlType
+                            }
     let to_value x =
       structure_to_value
-        [("jobArn", (Some (JobArn.to_value x.jobArn)));
-        ("jobId", (Some (JobId.to_value x.jobId)));
-        ("commitId", (Some (CommitId.to_value x.commitId)));
-        ("commitMessage", (Some (CommitMessage.to_value x.commitMessage)));
-        ("commitTime", (Some (CommitTime.to_value x.commitTime)));
-        ("startTime", (Some (StartTime.to_value x.startTime)));
-        ("status", (Some (JobStatus.to_value x.status)));
+        [("jobArn", (Option.map x.jobArn ~f:JobArn.to_value));
+        ("jobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("commitId", (Option.map x.commitId ~f:CommitId.to_value));
+        ("commitMessage",
+          (Option.map x.commitMessage ~f:CommitMessage.to_value));
+        ("commitTime", (Option.map x.commitTime ~f:CommitTime.to_value));
+        ("startTime", (Option.map x.startTime ~f:StartTime.to_value));
+        ("status", (Option.map x.status ~f:JobStatus.to_value));
         ("endTime", (Option.map x.endTime ~f:EndTime.to_value));
-        ("jobType", (Some (JobType.to_value x.jobType)))]
+        ("jobType", (Option.map x.jobType ~f:JobType.to_value));
+        ("sourceUrl", (Option.map x.sourceUrl ~f:SourceUrl.to_value));
+        ("sourceUrlType",
+          (Option.map x.sourceUrlType ~f:SourceUrlType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceUrlType =
+        (Option.map ~f:SourceUrlType.of_xml)
+          (Xml.child xml_arg0 "sourceUrlType") in
+      let sourceUrl =
+        (Option.map ~f:SourceUrl.of_xml) (Xml.child xml_arg0 "sourceUrl") in
       let jobType =
-        JobType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobType") in
+        (Option.map ~f:JobType.of_xml) (Xml.child xml_arg0 "jobType") in
       let endTime =
         (Option.map ~f:EndTime.of_xml) (Xml.child xml_arg0 "endTime") in
       let status =
-        JobStatus.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       let startTime =
-        StartTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
+        (Option.map ~f:StartTime.of_xml) (Xml.child xml_arg0 "startTime") in
       let commitTime =
-        CommitTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "commitTime") in
+        (Option.map ~f:CommitTime.of_xml) (Xml.child xml_arg0 "commitTime") in
       let commitMessage =
-        CommitMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "commitMessage") in
+        (Option.map ~f:CommitMessage.of_xml)
+          (Xml.child xml_arg0 "commitMessage") in
       let commitId =
-        CommitId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commitId") in
-      let jobId =
-        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
+        (Option.map ~f:CommitId.of_xml) (Xml.child xml_arg0 "commitId") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       let jobArn =
-        JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
-      make ~jobType ?endTime ~status ~startTime ~commitTime ~commitMessage
-        ~commitId ~jobId ~jobArn ()
+        (Option.map ~f:JobArn.of_xml) (Xml.child xml_arg0 "jobArn") in
+      make ?sourceUrlType ?sourceUrl ?jobType ?endTime ?status ?startTime
+        ?commitTime ?commitMessage ?commitId ?jobId ?jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobType = field_map_exn json "jobType" JobType.of_json in
-      let endTime = field_map json "endTime" EndTime.of_json in
-      let status = field_map_exn json "status" JobStatus.of_json in
-      let startTime = field_map_exn json "startTime" StartTime.of_json in
-      let commitTime = field_map_exn json "commitTime" CommitTime.of_json in
+    let of_json json__ =
+      let sourceUrlType =
+        field_map json__ "sourceUrlType" SourceUrlType.of_json in
+      let sourceUrl = field_map json__ "sourceUrl" SourceUrl.of_json in
+      let jobType = field_map json__ "jobType" JobType.of_json in
+      let endTime = field_map json__ "endTime" EndTime.of_json in
+      let status = field_map json__ "status" JobStatus.of_json in
+      let startTime = field_map json__ "startTime" StartTime.of_json in
+      let commitTime = field_map json__ "commitTime" CommitTime.of_json in
       let commitMessage =
-        field_map_exn json "commitMessage" CommitMessage.of_json in
-      let commitId = field_map_exn json "commitId" CommitId.of_json in
-      let jobId = field_map_exn json "jobId" JobId.of_json in
-      let jobArn = field_map_exn json "jobArn" JobArn.of_json in
-      make ~jobType ?endTime ~status ~startTime ~commitTime ~commitMessage
-        ~commitId ~jobId ~jobArn ()
+        field_map json__ "commitMessage" CommitMessage.of_json in
+      let commitId = field_map json__ "commitId" CommitId.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      let jobArn = field_map json__ "jobArn" JobArn.of_json in
+      make ?sourceUrlType ?sourceUrl ?jobType ?endTime ?status ?startTime
+        ?commitTime ?commitMessage ?commitId ?jobId ?jobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the summary for an execution job for an Amplify app."]
@@ -2310,11 +2834,11 @@ module DomainAssociation =
   struct
     type nonrec t =
       {
-      domainAssociationArn: DomainAssociationArn.t
+      domainAssociationArn: DomainAssociationArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the domain association."];
-      domainName: DomainName.t [@ocaml.doc "The name of the domain."];
-      enableAutoSubDomain: EnableAutoSubDomain.t
+      domainName: DomainName.t option [@ocaml.doc "The name of the domain."];
+      enableAutoSubDomain: EnableAutoSubDomain.t option
         [@ocaml.doc
           "Enables the automated creation of subdomains for branches."];
       autoSubDomainCreationPatterns: AutoSubDomainCreationPatterns.t option
@@ -2322,70 +2846,89 @@ module DomainAssociation =
       autoSubDomainIAMRole: AutoSubDomainIAMRole.t option
         [@ocaml.doc
           "The required AWS Identity and Access Management (IAM) service role for the Amazon Resource Name (ARN) for automatically creating subdomains."];
-      domainStatus: DomainStatus.t
+      domainStatus: DomainStatus.t option
         [@ocaml.doc "The current status of the domain association."];
-      statusReason: StatusReason.t
+      updateStatus: UpdateStatus.t option
         [@ocaml.doc
-          "The reason for the current status of the domain association."];
+          "The status of the domain update operation that is currently in progress. The following list describes the valid update states. REQUESTING_CERTIFICATE The certificate is in the process of being updated. PENDING_VERIFICATION Indicates that an Amplify managed certificate is in the process of being verified. This occurs during the creation of a custom domain or when a custom domain is updated to use a managed certificate. IMPORTING_CUSTOM_CERTIFICATE Indicates that an Amplify custom certificate is in the process of being imported. This occurs during the creation of a custom domain or when a custom domain is updated to use a custom certificate. PENDING_DEPLOYMENT Indicates that the subdomain or certificate changes are being propagated. AWAITING_APP_CNAME Amplify is waiting for CNAME records corresponding to subdomains to be propagated. If your custom domain is on Route\194\16053, Amplify handles this for you automatically. For more information about custom domains, see Setting up custom domains in the Amplify Hosting User Guide. UPDATE_COMPLETE The certificate has been associated with a domain. UPDATE_FAILED The certificate has failed to be provisioned or associated, and there is no existing active certificate to roll back to."];
+      statusReason: StatusReason.t option
+        [@ocaml.doc
+          "Additional information that describes why the domain association is in the current state."];
       certificateVerificationDNSRecord:
         CertificateVerificationDNSRecord.t option
         [@ocaml.doc "The DNS record for certificate verification."];
-      subDomains: SubDomains.t
-        [@ocaml.doc "The subdomains for the domain association."]}
-    let context_ = "DomainAssociation"
-    let make ?autoSubDomainCreationPatterns =
-      fun ?autoSubDomainIAMRole ->
-        fun ?certificateVerificationDNSRecord ->
-          fun ~domainAssociationArn ->
-            fun ~domainName ->
-              fun ~enableAutoSubDomain ->
-                fun ~domainStatus ->
-                  fun ~statusReason ->
-                    fun ~subDomains ->
-                      fun () ->
-                        {
-                          autoSubDomainCreationPatterns;
-                          autoSubDomainIAMRole;
-                          certificateVerificationDNSRecord;
-                          domainAssociationArn;
-                          domainName;
-                          enableAutoSubDomain;
-                          domainStatus;
-                          statusReason;
-                          subDomains
-                        }
+      subDomains: SubDomains.t option
+        [@ocaml.doc "The subdomains for the domain association."];
+      certificate: Certificate.t option
+        [@ocaml.doc
+          "Describes the SSL/TLS certificate for the domain association. This can be your own custom certificate or the default certificate that Amplify provisions for you. If you are updating your domain to use a different certificate, certificate points to the new certificate that is being created instead of the current active certificate. Otherwise, certificate points to the current active certificate."]}
+    let make ?domainAssociationArn =
+      fun ?domainName ->
+        fun ?enableAutoSubDomain ->
+          fun ?autoSubDomainCreationPatterns ->
+            fun ?autoSubDomainIAMRole ->
+              fun ?domainStatus ->
+                fun ?updateStatus ->
+                  fun ?statusReason ->
+                    fun ?certificateVerificationDNSRecord ->
+                      fun ?subDomains ->
+                        fun ?certificate ->
+                          fun () ->
+                            {
+                              domainAssociationArn;
+                              domainName;
+                              enableAutoSubDomain;
+                              autoSubDomainCreationPatterns;
+                              autoSubDomainIAMRole;
+                              domainStatus;
+                              updateStatus;
+                              statusReason;
+                              certificateVerificationDNSRecord;
+                              subDomains;
+                              certificate
+                            }
     let to_value x =
       structure_to_value
         [("domainAssociationArn",
-           (Some (DomainAssociationArn.to_value x.domainAssociationArn)));
-        ("domainName", (Some (DomainName.to_value x.domainName)));
+           (Option.map x.domainAssociationArn
+              ~f:DomainAssociationArn.to_value));
+        ("domainName", (Option.map x.domainName ~f:DomainName.to_value));
         ("enableAutoSubDomain",
-          (Some (EnableAutoSubDomain.to_value x.enableAutoSubDomain)));
+          (Option.map x.enableAutoSubDomain ~f:EnableAutoSubDomain.to_value));
         ("autoSubDomainCreationPatterns",
           (Option.map x.autoSubDomainCreationPatterns
              ~f:AutoSubDomainCreationPatterns.to_value));
         ("autoSubDomainIAMRole",
           (Option.map x.autoSubDomainIAMRole ~f:AutoSubDomainIAMRole.to_value));
-        ("domainStatus", (Some (DomainStatus.to_value x.domainStatus)));
-        ("statusReason", (Some (StatusReason.to_value x.statusReason)));
+        ("domainStatus",
+          (Option.map x.domainStatus ~f:DomainStatus.to_value));
+        ("updateStatus",
+          (Option.map x.updateStatus ~f:UpdateStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:StatusReason.to_value));
         ("certificateVerificationDNSRecord",
           (Option.map x.certificateVerificationDNSRecord
              ~f:CertificateVerificationDNSRecord.to_value));
-        ("subDomains", (Some (SubDomains.to_value x.subDomains)))]
+        ("subDomains", (Option.map x.subDomains ~f:SubDomains.to_value));
+        ("certificate", (Option.map x.certificate ~f:Certificate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let certificate =
+        (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "certificate") in
       let subDomains =
-        SubDomains.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "subDomains") in
+        (Option.map ~f:SubDomains.of_xml) (Xml.child xml_arg0 "subDomains") in
       let certificateVerificationDNSRecord =
         (Option.map ~f:CertificateVerificationDNSRecord.of_xml)
           (Xml.child xml_arg0 "certificateVerificationDNSRecord") in
       let statusReason =
-        StatusReason.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "statusReason") in
+        (Option.map ~f:StatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let updateStatus =
+        (Option.map ~f:UpdateStatus.of_xml)
+          (Xml.child xml_arg0 "updateStatus") in
       let domainStatus =
-        DomainStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainStatus") in
+        (Option.map ~f:DomainStatus.of_xml)
+          (Xml.child xml_arg0 "domainStatus") in
       let autoSubDomainIAMRole =
         (Option.map ~f:AutoSubDomainIAMRole.of_xml)
           (Xml.child xml_arg0 "autoSubDomainIAMRole") in
@@ -2393,91 +2936,92 @@ module DomainAssociation =
         (Option.map ~f:AutoSubDomainCreationPatterns.of_xml)
           (Xml.child xml_arg0 "autoSubDomainCreationPatterns") in
       let enableAutoSubDomain =
-        EnableAutoSubDomain.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "enableAutoSubDomain") in
+        (Option.map ~f:EnableAutoSubDomain.of_xml)
+          (Xml.child xml_arg0 "enableAutoSubDomain") in
       let domainName =
-        DomainName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainName") in
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       let domainAssociationArn =
-        DomainAssociationArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainAssociationArn") in
-      make ~subDomains ?certificateVerificationDNSRecord ~statusReason
-        ~domainStatus ?autoSubDomainIAMRole ?autoSubDomainCreationPatterns
-        ~enableAutoSubDomain ~domainName ~domainAssociationArn ()
+        (Option.map ~f:DomainAssociationArn.of_xml)
+          (Xml.child xml_arg0 "domainAssociationArn") in
+      make ?certificate ?subDomains ?certificateVerificationDNSRecord
+        ?statusReason ?updateStatus ?domainStatus ?autoSubDomainIAMRole
+        ?autoSubDomainCreationPatterns ?enableAutoSubDomain ?domainName
+        ?domainAssociationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subDomains = field_map_exn json "subDomains" SubDomains.of_json in
+    let of_json json__ =
+      let certificate = field_map json__ "certificate" Certificate.of_json in
+      let subDomains = field_map json__ "subDomains" SubDomains.of_json in
       let certificateVerificationDNSRecord =
-        field_map json "certificateVerificationDNSRecord"
+        field_map json__ "certificateVerificationDNSRecord"
           CertificateVerificationDNSRecord.of_json in
-      let statusReason =
-        field_map_exn json "statusReason" StatusReason.of_json in
-      let domainStatus =
-        field_map_exn json "domainStatus" DomainStatus.of_json in
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let updateStatus = field_map json__ "updateStatus" UpdateStatus.of_json in
+      let domainStatus = field_map json__ "domainStatus" DomainStatus.of_json in
       let autoSubDomainIAMRole =
-        field_map json "autoSubDomainIAMRole" AutoSubDomainIAMRole.of_json in
+        field_map json__ "autoSubDomainIAMRole" AutoSubDomainIAMRole.of_json in
       let autoSubDomainCreationPatterns =
-        field_map json "autoSubDomainCreationPatterns"
+        field_map json__ "autoSubDomainCreationPatterns"
           AutoSubDomainCreationPatterns.of_json in
       let enableAutoSubDomain =
-        field_map_exn json "enableAutoSubDomain" EnableAutoSubDomain.of_json in
-      let domainName = field_map_exn json "domainName" DomainName.of_json in
+        field_map json__ "enableAutoSubDomain" EnableAutoSubDomain.of_json in
+      let domainName = field_map json__ "domainName" DomainName.of_json in
       let domainAssociationArn =
-        field_map_exn json "domainAssociationArn"
-          DomainAssociationArn.of_json in
-      make ~subDomains ?certificateVerificationDNSRecord ~statusReason
-        ~domainStatus ?autoSubDomainIAMRole ?autoSubDomainCreationPatterns
-        ~enableAutoSubDomain ~domainName ~domainAssociationArn ()
+        field_map json__ "domainAssociationArn" DomainAssociationArn.of_json in
+      make ?certificate ?subDomains ?certificateVerificationDNSRecord
+        ?statusReason ?updateStatus ?domainStatus ?autoSubDomainIAMRole
+        ?autoSubDomainCreationPatterns ?enableAutoSubDomain ?domainName
+        ?domainAssociationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a domain association that associates a custom domain with an Amplify app."]
+       "Describes the association between a custom domain and an Amplify app."]
 module Branch =
   struct
     type nonrec t =
       {
-      branchArn: BranchArn.t
+      branchArn: BranchArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for a branch that is part of an Amplify app."];
-      branchName: BranchName.t
+      branchName: BranchName.t option
         [@ocaml.doc
           "The name for the branch that is part of an Amplify app."];
-      description: Description.t
+      description: Description.t option
         [@ocaml.doc
           "The description for the branch that is part of an Amplify app."];
       tags: TagMap.t option
         [@ocaml.doc "The tag for the branch of an Amplify app."];
-      stage: Stage.t
+      stage: Stage.t option
         [@ocaml.doc
           "The current stage for the branch that is part of an Amplify app."];
-      displayName: DisplayName.t
+      displayName: DisplayName.t option
         [@ocaml.doc
           "The display name for the branch. This is used as the default domain prefix."];
-      enableNotification: EnableNotification.t
+      enableNotification: EnableNotification.t option
         [@ocaml.doc
           "Enables notifications for a branch that is part of an Amplify app."];
-      createTime: CreateTime.t
-        [@ocaml.doc
-          "The creation date and time for a branch that is part of an Amplify app."];
-      updateTime: UpdateTime.t
-        [@ocaml.doc
-          "The last updated date and time for a branch that is part of an Amplify app."];
-      environmentVariables: EnvironmentVariables.t
+      createTime: CreateTime.t option
+        [@ocaml.doc "A timestamp of when Amplify created the branch."];
+      updateTime: UpdateTime.t option
+        [@ocaml.doc "A timestamp for the last updated time for a branch."];
+      environmentVariables: EnvironmentVariables.t option
         [@ocaml.doc
           "The environment variables specific to a branch of an Amplify app."];
-      enableAutoBuild: EnableAutoBuild.t
+      enableAutoBuild: EnableAutoBuild.t option
         [@ocaml.doc
           "Enables auto-building on push for a branch of an Amplify app."];
-      customDomains: CustomDomains.t
+      enableSkewProtection: EnableSkewProtection.t option
+        [@ocaml.doc
+          "Specifies whether the skew protection feature is enabled for the branch. Deployment skew protection is available to Amplify applications to eliminate version skew issues between client and servers in web applications. When you apply skew protection to a branch, you can ensure that your clients always interact with the correct version of server-side assets, regardless of when a deployment occurs. For more information about skew protection, see Skew protection for Amplify deployments in the Amplify User Guide."];
+      customDomains: CustomDomains.t option
         [@ocaml.doc "The custom domains for a branch of an Amplify app."];
-      framework: Framework.t
+      framework: Framework.t option
         [@ocaml.doc "The framework for a branch of an Amplify app."];
-      activeJobId: ActiveJobId.t
+      activeJobId: ActiveJobId.t option
         [@ocaml.doc
           "The ID of the active job for a branch of an Amplify app."];
-      totalNumberOfJobs: TotalNumberOfJobs.t
+      totalNumberOfJobs: TotalNumberOfJobs.t option
         [@ocaml.doc
           "The total number of jobs that are part of an Amplify app."];
-      enableBasicAuth: EnableBasicAuth.t
+      enableBasicAuth: EnableBasicAuth.t option
         [@ocaml.doc
           "Enables basic authorization for a branch of an Amplify app."];
       enablePerformanceMode: EnablePerformanceMode.t option
@@ -2491,13 +3035,13 @@ module Branch =
       buildSpec: BuildSpec.t option
         [@ocaml.doc
           "The build specification (build spec) content for the branch of an Amplify app."];
-      ttl: TTL.t
+      ttl: TTL.t option
         [@ocaml.doc
           "The content Time to Live (TTL) for the website in seconds."];
       associatedResources: AssociatedResources.t option
         [@ocaml.doc
           "A list of custom resources that are linked to this branch."];
-      enablePullRequestPreview: EnablePullRequestPreview.t
+      enablePullRequestPreview: EnablePullRequestPreview.t option
         [@ocaml.doc "Enables pull request previews for the branch."];
       pullRequestEnvironmentName: PullRequestEnvironmentName.t option
         [@ocaml.doc "The Amplify environment name for the pull request."];
@@ -2509,90 +3053,109 @@ module Branch =
           "The source branch if the branch is a pull request branch."];
       backendEnvironmentArn: BackendEnvironmentArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for a backend environment that is part of an Amplify app."]}
-    let context_ = "Branch"
-    let make ?tags =
-      fun ?enablePerformanceMode ->
-        fun ?thumbnailUrl ->
-          fun ?basicAuthCredentials ->
-            fun ?buildSpec ->
-              fun ?associatedResources ->
-                fun ?pullRequestEnvironmentName ->
-                  fun ?destinationBranch ->
-                    fun ?sourceBranch ->
-                      fun ?backendEnvironmentArn ->
-                        fun ~branchArn ->
-                          fun ~branchName ->
-                            fun ~description ->
-                              fun ~stage ->
-                                fun ~displayName ->
-                                  fun ~enableNotification ->
-                                    fun ~createTime ->
-                                      fun ~updateTime ->
-                                        fun ~environmentVariables ->
-                                          fun ~enableAutoBuild ->
-                                            fun ~customDomains ->
-                                              fun ~framework ->
-                                                fun ~activeJobId ->
-                                                  fun ~totalNumberOfJobs ->
-                                                    fun ~enableBasicAuth ->
-                                                      fun ~ttl ->
-                                                        fun
-                                                          ~enablePullRequestPreview
-                                                          ->
-                                                          fun () ->
-                                                            {
-                                                              tags;
-                                                              enablePerformanceMode;
-                                                              thumbnailUrl;
-                                                              basicAuthCredentials;
-                                                              buildSpec;
-                                                              associatedResources;
-                                                              pullRequestEnvironmentName;
-                                                              destinationBranch;
-                                                              sourceBranch;
-                                                              backendEnvironmentArn;
-                                                              branchArn;
-                                                              branchName;
-                                                              description;
-                                                              stage;
-                                                              displayName;
-                                                              enableNotification;
-                                                              createTime;
-                                                              updateTime;
-                                                              environmentVariables;
-                                                              enableAutoBuild;
-                                                              customDomains;
-                                                              framework;
-                                                              activeJobId;
-                                                              totalNumberOfJobs;
-                                                              enableBasicAuth;
-                                                              ttl;
-                                                              enablePullRequestPreview
-                                                            }
+          "The Amazon Resource Name (ARN) for a backend environment that is part of an Amplify app. This property is available to Amplify Gen 1 apps only. When you deploy an application with Amplify Gen 2, you provision the app's backend infrastructure using Typescript code."];
+      backend: Backend.t option ;
+      computeRoleArn: ComputeRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role for a branch of an SSR app. The Compute role allows the Amplify Hosting compute service to securely access specific Amazon Web Services resources based on the role's permissions. For more information about the SSR Compute role, see Adding an SSR Compute role in the Amplify User Guide."]}
+    let make ?branchArn =
+      fun ?branchName ->
+        fun ?description ->
+          fun ?tags ->
+            fun ?stage ->
+              fun ?displayName ->
+                fun ?enableNotification ->
+                  fun ?createTime ->
+                    fun ?updateTime ->
+                      fun ?environmentVariables ->
+                        fun ?enableAutoBuild ->
+                          fun ?enableSkewProtection ->
+                            fun ?customDomains ->
+                              fun ?framework ->
+                                fun ?activeJobId ->
+                                  fun ?totalNumberOfJobs ->
+                                    fun ?enableBasicAuth ->
+                                      fun ?enablePerformanceMode ->
+                                        fun ?thumbnailUrl ->
+                                          fun ?basicAuthCredentials ->
+                                            fun ?buildSpec ->
+                                              fun ?ttl ->
+                                                fun ?associatedResources ->
+                                                  fun
+                                                    ?enablePullRequestPreview
+                                                    ->
+                                                    fun
+                                                      ?pullRequestEnvironmentName
+                                                      ->
+                                                      fun ?destinationBranch
+                                                        ->
+                                                        fun ?sourceBranch ->
+                                                          fun
+                                                            ?backendEnvironmentArn
+                                                            ->
+                                                            fun ?backend ->
+                                                              fun
+                                                                ?computeRoleArn
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    branchArn;
+                                                                    branchName;
+                                                                    description;
+                                                                    tags;
+                                                                    stage;
+                                                                    displayName;
+                                                                    enableNotification;
+                                                                    createTime;
+                                                                    updateTime;
+                                                                    environmentVariables;
+                                                                    enableAutoBuild;
+                                                                    enableSkewProtection;
+                                                                    customDomains;
+                                                                    framework;
+                                                                    activeJobId;
+                                                                    totalNumberOfJobs;
+                                                                    enableBasicAuth;
+                                                                    enablePerformanceMode;
+                                                                    thumbnailUrl;
+                                                                    basicAuthCredentials;
+                                                                    buildSpec;
+                                                                    ttl;
+                                                                    associatedResources;
+                                                                    enablePullRequestPreview;
+                                                                    pullRequestEnvironmentName;
+                                                                    destinationBranch;
+                                                                    sourceBranch;
+                                                                    backendEnvironmentArn;
+                                                                    backend;
+                                                                    computeRoleArn
+                                                                  }
     let to_value x =
       structure_to_value
-        [("branchArn", (Some (BranchArn.to_value x.branchArn)));
-        ("branchName", (Some (BranchName.to_value x.branchName)));
-        ("description", (Some (Description.to_value x.description)));
+        [("branchArn", (Option.map x.branchArn ~f:BranchArn.to_value));
+        ("branchName", (Option.map x.branchName ~f:BranchName.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("stage", (Some (Stage.to_value x.stage)));
-        ("displayName", (Some (DisplayName.to_value x.displayName)));
+        ("stage", (Option.map x.stage ~f:Stage.to_value));
+        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
         ("enableNotification",
-          (Some (EnableNotification.to_value x.enableNotification)));
-        ("createTime", (Some (CreateTime.to_value x.createTime)));
-        ("updateTime", (Some (UpdateTime.to_value x.updateTime)));
+          (Option.map x.enableNotification ~f:EnableNotification.to_value));
+        ("createTime", (Option.map x.createTime ~f:CreateTime.to_value));
+        ("updateTime", (Option.map x.updateTime ~f:UpdateTime.to_value));
         ("environmentVariables",
-          (Some (EnvironmentVariables.to_value x.environmentVariables)));
+          (Option.map x.environmentVariables ~f:EnvironmentVariables.to_value));
         ("enableAutoBuild",
-          (Some (EnableAutoBuild.to_value x.enableAutoBuild)));
-        ("customDomains", (Some (CustomDomains.to_value x.customDomains)));
-        ("framework", (Some (Framework.to_value x.framework)));
-        ("activeJobId", (Some (ActiveJobId.to_value x.activeJobId)));
+          (Option.map x.enableAutoBuild ~f:EnableAutoBuild.to_value));
+        ("enableSkewProtection",
+          (Option.map x.enableSkewProtection ~f:EnableSkewProtection.to_value));
+        ("customDomains",
+          (Option.map x.customDomains ~f:CustomDomains.to_value));
+        ("framework", (Option.map x.framework ~f:Framework.to_value));
+        ("activeJobId", (Option.map x.activeJobId ~f:ActiveJobId.to_value));
         ("totalNumberOfJobs",
-          (Some (TotalNumberOfJobs.to_value x.totalNumberOfJobs)));
+          (Option.map x.totalNumberOfJobs ~f:TotalNumberOfJobs.to_value));
         ("enableBasicAuth",
-          (Some (EnableBasicAuth.to_value x.enableBasicAuth)));
+          (Option.map x.enableBasicAuth ~f:EnableBasicAuth.to_value));
         ("enablePerformanceMode",
           (Option.map x.enablePerformanceMode
              ~f:EnablePerformanceMode.to_value));
@@ -2601,12 +3164,12 @@ module Branch =
         ("basicAuthCredentials",
           (Option.map x.basicAuthCredentials ~f:BasicAuthCredentials.to_value));
         ("buildSpec", (Option.map x.buildSpec ~f:BuildSpec.to_value));
-        ("ttl", (Some (TTL.to_value x.ttl)));
+        ("ttl", (Option.map x.ttl ~f:TTL.to_value));
         ("associatedResources",
           (Option.map x.associatedResources ~f:AssociatedResources.to_value));
         ("enablePullRequestPreview",
-          (Some
-             (EnablePullRequestPreview.to_value x.enablePullRequestPreview)));
+          (Option.map x.enablePullRequestPreview
+             ~f:EnablePullRequestPreview.to_value));
         ("pullRequestEnvironmentName",
           (Option.map x.pullRequestEnvironmentName
              ~f:PullRequestEnvironmentName.to_value));
@@ -2615,9 +3178,17 @@ module Branch =
         ("sourceBranch", (Option.map x.sourceBranch ~f:BranchName.to_value));
         ("backendEnvironmentArn",
           (Option.map x.backendEnvironmentArn
-             ~f:BackendEnvironmentArn.to_value))]
+             ~f:BackendEnvironmentArn.to_value));
+        ("backend", (Option.map x.backend ~f:Backend.to_value));
+        ("computeRoleArn",
+          (Option.map x.computeRoleArn ~f:ComputeRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let computeRoleArn =
+        (Option.map ~f:ComputeRoleArn.of_xml)
+          (Xml.child xml_arg0 "computeRoleArn") in
+      let backend =
+        (Option.map ~f:Backend.of_xml) (Xml.child xml_arg0 "backend") in
       let backendEnvironmentArn =
         (Option.map ~f:BackendEnvironmentArn.of_xml)
           (Xml.child xml_arg0 "backendEnvironmentArn") in
@@ -2630,13 +3201,12 @@ module Branch =
         (Option.map ~f:PullRequestEnvironmentName.of_xml)
           (Xml.child xml_arg0 "pullRequestEnvironmentName") in
       let enablePullRequestPreview =
-        EnablePullRequestPreview.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "enablePullRequestPreview") in
+        (Option.map ~f:EnablePullRequestPreview.of_xml)
+          (Xml.child xml_arg0 "enablePullRequestPreview") in
       let associatedResources =
         (Option.map ~f:AssociatedResources.of_xml)
           (Xml.child xml_arg0 "associatedResources") in
-      let ttl = TTL.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ttl") in
+      let ttl = (Option.map ~f:TTL.of_xml) (Xml.child xml_arg0 "ttl") in
       let buildSpec =
         (Option.map ~f:BuildSpec.of_xml) (Xml.child xml_arg0 "buildSpec") in
       let basicAuthCredentials =
@@ -2649,111 +3219,111 @@ module Branch =
         (Option.map ~f:EnablePerformanceMode.of_xml)
           (Xml.child xml_arg0 "enablePerformanceMode") in
       let enableBasicAuth =
-        EnableBasicAuth.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "enableBasicAuth") in
+        (Option.map ~f:EnableBasicAuth.of_xml)
+          (Xml.child xml_arg0 "enableBasicAuth") in
       let totalNumberOfJobs =
-        TotalNumberOfJobs.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "totalNumberOfJobs") in
+        (Option.map ~f:TotalNumberOfJobs.of_xml)
+          (Xml.child xml_arg0 "totalNumberOfJobs") in
       let activeJobId =
-        ActiveJobId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activeJobId") in
+        (Option.map ~f:ActiveJobId.of_xml) (Xml.child xml_arg0 "activeJobId") in
       let framework =
-        Framework.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "framework") in
+        (Option.map ~f:Framework.of_xml) (Xml.child xml_arg0 "framework") in
       let customDomains =
-        CustomDomains.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "customDomains") in
+        (Option.map ~f:CustomDomains.of_xml)
+          (Xml.child xml_arg0 "customDomains") in
+      let enableSkewProtection =
+        (Option.map ~f:EnableSkewProtection.of_xml)
+          (Xml.child xml_arg0 "enableSkewProtection") in
       let enableAutoBuild =
-        EnableAutoBuild.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "enableAutoBuild") in
+        (Option.map ~f:EnableAutoBuild.of_xml)
+          (Xml.child xml_arg0 "enableAutoBuild") in
       let environmentVariables =
-        EnvironmentVariables.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentVariables") in
+        (Option.map ~f:EnvironmentVariables.of_xml)
+          (Xml.child xml_arg0 "environmentVariables") in
       let updateTime =
-        UpdateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updateTime") in
+        (Option.map ~f:UpdateTime.of_xml) (Xml.child xml_arg0 "updateTime") in
       let createTime =
-        CreateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createTime") in
+        (Option.map ~f:CreateTime.of_xml) (Xml.child xml_arg0 "createTime") in
       let enableNotification =
-        EnableNotification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "enableNotification") in
+        (Option.map ~f:EnableNotification.of_xml)
+          (Xml.child xml_arg0 "enableNotification") in
       let displayName =
-        DisplayName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "displayName") in
-      let stage =
-        Stage.of_xml (Xml.child_exn ~context:context_ xml_arg0 "stage") in
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
+      let stage = (Option.map ~f:Stage.of_xml) (Xml.child xml_arg0 "stage") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let description =
-        Description.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "description") in
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let branchName =
-        BranchName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "branchName") in
+        (Option.map ~f:BranchName.of_xml) (Xml.child xml_arg0 "branchName") in
       let branchArn =
-        BranchArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "branchArn") in
-      make ?backendEnvironmentArn ?sourceBranch ?destinationBranch
-        ?pullRequestEnvironmentName ~enablePullRequestPreview
-        ?associatedResources ~ttl ?buildSpec ?basicAuthCredentials
-        ?thumbnailUrl ?enablePerformanceMode ~enableBasicAuth
-        ~totalNumberOfJobs ~activeJobId ~framework ~customDomains
-        ~enableAutoBuild ~environmentVariables ~updateTime ~createTime
-        ~enableNotification ~displayName ~stage ?tags ~description
-        ~branchName ~branchArn ()
+        (Option.map ~f:BranchArn.of_xml) (Xml.child xml_arg0 "branchArn") in
+      make ?computeRoleArn ?backend ?backendEnvironmentArn ?sourceBranch
+        ?destinationBranch ?pullRequestEnvironmentName
+        ?enablePullRequestPreview ?associatedResources ?ttl ?buildSpec
+        ?basicAuthCredentials ?thumbnailUrl ?enablePerformanceMode
+        ?enableBasicAuth ?totalNumberOfJobs ?activeJobId ?framework
+        ?customDomains ?enableSkewProtection ?enableAutoBuild
+        ?environmentVariables ?updateTime ?createTime ?enableNotification
+        ?displayName ?stage ?tags ?description ?branchName ?branchArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let computeRoleArn =
+        field_map json__ "computeRoleArn" ComputeRoleArn.of_json in
+      let backend = field_map json__ "backend" Backend.of_json in
       let backendEnvironmentArn =
-        field_map json "backendEnvironmentArn" BackendEnvironmentArn.of_json in
-      let sourceBranch = field_map json "sourceBranch" BranchName.of_json in
+        field_map json__ "backendEnvironmentArn"
+          BackendEnvironmentArn.of_json in
+      let sourceBranch = field_map json__ "sourceBranch" BranchName.of_json in
       let destinationBranch =
-        field_map json "destinationBranch" BranchName.of_json in
+        field_map json__ "destinationBranch" BranchName.of_json in
       let pullRequestEnvironmentName =
-        field_map json "pullRequestEnvironmentName"
+        field_map json__ "pullRequestEnvironmentName"
           PullRequestEnvironmentName.of_json in
       let enablePullRequestPreview =
-        field_map_exn json "enablePullRequestPreview"
+        field_map json__ "enablePullRequestPreview"
           EnablePullRequestPreview.of_json in
       let associatedResources =
-        field_map json "associatedResources" AssociatedResources.of_json in
-      let ttl = field_map_exn json "ttl" TTL.of_json in
-      let buildSpec = field_map json "buildSpec" BuildSpec.of_json in
+        field_map json__ "associatedResources" AssociatedResources.of_json in
+      let ttl = field_map json__ "ttl" TTL.of_json in
+      let buildSpec = field_map json__ "buildSpec" BuildSpec.of_json in
       let basicAuthCredentials =
-        field_map json "basicAuthCredentials" BasicAuthCredentials.of_json in
-      let thumbnailUrl = field_map json "thumbnailUrl" ThumbnailUrl.of_json in
+        field_map json__ "basicAuthCredentials" BasicAuthCredentials.of_json in
+      let thumbnailUrl = field_map json__ "thumbnailUrl" ThumbnailUrl.of_json in
       let enablePerformanceMode =
-        field_map json "enablePerformanceMode" EnablePerformanceMode.of_json in
+        field_map json__ "enablePerformanceMode"
+          EnablePerformanceMode.of_json in
       let enableBasicAuth =
-        field_map_exn json "enableBasicAuth" EnableBasicAuth.of_json in
+        field_map json__ "enableBasicAuth" EnableBasicAuth.of_json in
       let totalNumberOfJobs =
-        field_map_exn json "totalNumberOfJobs" TotalNumberOfJobs.of_json in
-      let activeJobId = field_map_exn json "activeJobId" ActiveJobId.of_json in
-      let framework = field_map_exn json "framework" Framework.of_json in
+        field_map json__ "totalNumberOfJobs" TotalNumberOfJobs.of_json in
+      let activeJobId = field_map json__ "activeJobId" ActiveJobId.of_json in
+      let framework = field_map json__ "framework" Framework.of_json in
       let customDomains =
-        field_map_exn json "customDomains" CustomDomains.of_json in
+        field_map json__ "customDomains" CustomDomains.of_json in
+      let enableSkewProtection =
+        field_map json__ "enableSkewProtection" EnableSkewProtection.of_json in
       let enableAutoBuild =
-        field_map_exn json "enableAutoBuild" EnableAutoBuild.of_json in
+        field_map json__ "enableAutoBuild" EnableAutoBuild.of_json in
       let environmentVariables =
-        field_map_exn json "environmentVariables"
-          EnvironmentVariables.of_json in
-      let updateTime = field_map_exn json "updateTime" UpdateTime.of_json in
-      let createTime = field_map_exn json "createTime" CreateTime.of_json in
+        field_map json__ "environmentVariables" EnvironmentVariables.of_json in
+      let updateTime = field_map json__ "updateTime" UpdateTime.of_json in
+      let createTime = field_map json__ "createTime" CreateTime.of_json in
       let enableNotification =
-        field_map_exn json "enableNotification" EnableNotification.of_json in
-      let displayName = field_map_exn json "displayName" DisplayName.of_json in
-      let stage = field_map_exn json "stage" Stage.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let description = field_map_exn json "description" Description.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let branchArn = field_map_exn json "branchArn" BranchArn.of_json in
-      make ?backendEnvironmentArn ?sourceBranch ?destinationBranch
-        ?pullRequestEnvironmentName ~enablePullRequestPreview
-        ?associatedResources ~ttl ?buildSpec ?basicAuthCredentials
-        ?thumbnailUrl ?enablePerformanceMode ~enableBasicAuth
-        ~totalNumberOfJobs ~activeJobId ~framework ~customDomains
-        ~enableAutoBuild ~environmentVariables ~updateTime ~createTime
-        ~enableNotification ~displayName ~stage ?tags ~description
-        ~branchName ~branchArn ()
+        field_map json__ "enableNotification" EnableNotification.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let stage = field_map json__ "stage" Stage.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let branchName = field_map json__ "branchName" BranchName.of_json in
+      let branchArn = field_map json__ "branchArn" BranchArn.of_json in
+      make ?computeRoleArn ?backend ?backendEnvironmentArn ?sourceBranch
+        ?destinationBranch ?pullRequestEnvironmentName
+        ?enablePullRequestPreview ?associatedResources ?ttl ?buildSpec
+        ?basicAuthCredentials ?thumbnailUrl ?enablePerformanceMode
+        ?enableBasicAuth ?totalNumberOfJobs ?activeJobId ?framework
+        ?customDomains ?enableSkewProtection ?enableAutoBuild
+        ?environmentVariables ?updateTime ?createTime ?enableNotification
+        ?displayName ?stage ?tags ?description ?branchName ?branchArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The branch for an Amplify app, which maps to a third-party repository branch."]
@@ -2761,10 +3331,10 @@ module BackendEnvironment =
   struct
     type nonrec t =
       {
-      backendEnvironmentArn: BackendEnvironmentArn.t
+      backendEnvironmentArn: BackendEnvironmentArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for a backend environment that is part of an Amplify app."];
-      environmentName: EnvironmentName.t
+      environmentName: EnvironmentName.t option
         [@ocaml.doc
           "The name for a backend environment that is part of an Amplify app."];
       stackName: StackName.t option
@@ -2772,140 +3342,144 @@ module BackendEnvironment =
           "The AWS CloudFormation stack name of a backend environment."];
       deploymentArtifacts: DeploymentArtifacts.t option
         [@ocaml.doc "The name of deployment artifacts."];
-      createTime: CreateTime.t
+      createTime: CreateTime.t option
         [@ocaml.doc
           "The creation date and time for a backend environment that is part of an Amplify app."];
-      updateTime: UpdateTime.t
+      updateTime: UpdateTime.t option
         [@ocaml.doc
           "The last updated date and time for a backend environment that is part of an Amplify app."]}
-    let context_ = "BackendEnvironment"
-    let make ?stackName =
-      fun ?deploymentArtifacts ->
-        fun ~backendEnvironmentArn ->
-          fun ~environmentName ->
-            fun ~createTime ->
-              fun ~updateTime ->
+    let make ?backendEnvironmentArn =
+      fun ?environmentName ->
+        fun ?stackName ->
+          fun ?deploymentArtifacts ->
+            fun ?createTime ->
+              fun ?updateTime ->
                 fun () ->
                   {
-                    stackName;
-                    deploymentArtifacts;
                     backendEnvironmentArn;
                     environmentName;
+                    stackName;
+                    deploymentArtifacts;
                     createTime;
                     updateTime
                   }
     let to_value x =
       structure_to_value
         [("backendEnvironmentArn",
-           (Some (BackendEnvironmentArn.to_value x.backendEnvironmentArn)));
+           (Option.map x.backendEnvironmentArn
+              ~f:BackendEnvironmentArn.to_value));
         ("environmentName",
-          (Some (EnvironmentName.to_value x.environmentName)));
+          (Option.map x.environmentName ~f:EnvironmentName.to_value));
         ("stackName", (Option.map x.stackName ~f:StackName.to_value));
         ("deploymentArtifacts",
           (Option.map x.deploymentArtifacts ~f:DeploymentArtifacts.to_value));
-        ("createTime", (Some (CreateTime.to_value x.createTime)));
-        ("updateTime", (Some (UpdateTime.to_value x.updateTime)))]
+        ("createTime", (Option.map x.createTime ~f:CreateTime.to_value));
+        ("updateTime", (Option.map x.updateTime ~f:UpdateTime.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        UpdateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updateTime") in
+        (Option.map ~f:UpdateTime.of_xml) (Xml.child xml_arg0 "updateTime") in
       let createTime =
-        CreateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createTime") in
+        (Option.map ~f:CreateTime.of_xml) (Xml.child xml_arg0 "createTime") in
       let deploymentArtifacts =
         (Option.map ~f:DeploymentArtifacts.of_xml)
           (Xml.child xml_arg0 "deploymentArtifacts") in
       let stackName =
         (Option.map ~f:StackName.of_xml) (Xml.child xml_arg0 "stackName") in
       let environmentName =
-        EnvironmentName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+        (Option.map ~f:EnvironmentName.of_xml)
+          (Xml.child xml_arg0 "environmentName") in
       let backendEnvironmentArn =
-        BackendEnvironmentArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironmentArn") in
-      make ~updateTime ~createTime ?deploymentArtifacts ?stackName
-        ~environmentName ~backendEnvironmentArn ()
+        (Option.map ~f:BackendEnvironmentArn.of_xml)
+          (Xml.child xml_arg0 "backendEnvironmentArn") in
+      make ?updateTime ?createTime ?deploymentArtifacts ?stackName
+        ?environmentName ?backendEnvironmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "updateTime" UpdateTime.of_json in
-      let createTime = field_map_exn json "createTime" CreateTime.of_json in
+    let of_json json__ =
+      let updateTime = field_map json__ "updateTime" UpdateTime.of_json in
+      let createTime = field_map json__ "createTime" CreateTime.of_json in
       let deploymentArtifacts =
-        field_map json "deploymentArtifacts" DeploymentArtifacts.of_json in
-      let stackName = field_map json "stackName" StackName.of_json in
+        field_map json__ "deploymentArtifacts" DeploymentArtifacts.of_json in
+      let stackName = field_map json__ "stackName" StackName.of_json in
       let environmentName =
-        field_map_exn json "environmentName" EnvironmentName.of_json in
+        field_map json__ "environmentName" EnvironmentName.of_json in
       let backendEnvironmentArn =
-        field_map_exn json "backendEnvironmentArn"
+        field_map json__ "backendEnvironmentArn"
           BackendEnvironmentArn.of_json in
-      make ~updateTime ~createTime ?deploymentArtifacts ?stackName
-        ~environmentName ~backendEnvironmentArn ()
+      make ?updateTime ?createTime ?deploymentArtifacts ?stackName
+        ?environmentName ?backendEnvironmentArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the backend environment for an Amplify app."]
+  end[@@ocaml.doc
+       "Describes the backend environment associated with a Branch of a Gen 1 Amplify app. Amplify Gen 1 applications are created using Amplify Studio or the Amplify command line interface (CLI)."]
 module Artifact =
   struct
     type nonrec t =
       {
-      artifactFileName: ArtifactFileName.t
+      artifactFileName: ArtifactFileName.t option
         [@ocaml.doc "The file name for the artifact."];
-      artifactId: ArtifactId.t [@ocaml.doc "The unique ID for the artifact."]}
-    let context_ = "Artifact"
-    let make ~artifactFileName =
-      fun ~artifactId -> fun () -> { artifactFileName; artifactId }
+      artifactId: ArtifactId.t option
+        [@ocaml.doc "The unique ID for the artifact."]}
+    let make ?artifactFileName =
+      fun ?artifactId -> fun () -> { artifactFileName; artifactId }
     let to_value x =
       structure_to_value
         [("artifactFileName",
-           (Some (ArtifactFileName.to_value x.artifactFileName)));
-        ("artifactId", (Some (ArtifactId.to_value x.artifactId)))]
+           (Option.map x.artifactFileName ~f:ArtifactFileName.to_value));
+        ("artifactId", (Option.map x.artifactId ~f:ArtifactId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let artifactId =
-        ArtifactId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "artifactId") in
+        (Option.map ~f:ArtifactId.of_xml) (Xml.child xml_arg0 "artifactId") in
       let artifactFileName =
-        ArtifactFileName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "artifactFileName") in
-      make ~artifactId ~artifactFileName ()
+        (Option.map ~f:ArtifactFileName.of_xml)
+          (Xml.child xml_arg0 "artifactFileName") in
+      make ?artifactId ?artifactFileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let artifactId = field_map_exn json "artifactId" ArtifactId.of_json in
+    let of_json json__ =
+      let artifactId = field_map json__ "artifactId" ArtifactId.of_json in
       let artifactFileName =
-        field_map_exn json "artifactFileName" ArtifactFileName.of_json in
-      make ~artifactId ~artifactFileName ()
+        field_map json__ "artifactFileName" ArtifactFileName.of_json in
+      make ?artifactId ?artifactFileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an artifact."]
 module App =
   struct
     type nonrec t =
       {
-      appId: AppId.t [@ocaml.doc "The unique ID of the Amplify app."];
-      appArn: AppArn.t
+      appId: AppId.t option [@ocaml.doc "The unique ID of the Amplify app."];
+      appArn: AppArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the Amplify app."];
-      name: Name.t [@ocaml.doc "The name for the Amplify app."];
+      name: Name.t option [@ocaml.doc "The name for the Amplify app."];
       tags: TagMap.t option [@ocaml.doc "The tag for the Amplify app."];
-      description: Description.t
+      description: Description.t option
         [@ocaml.doc "The description for the Amplify app."];
-      repository: Repository.t
+      repository: Repository.t option
         [@ocaml.doc "The Git repository for the Amplify app."];
-      platform: Platform.t [@ocaml.doc "The platform for the Amplify app."];
-      createTime: CreateTime.t
-        [@ocaml.doc "Creates a date and time for the Amplify app."];
-      updateTime: UpdateTime.t
-        [@ocaml.doc "Updates the date and time for the Amplify app."];
+      platform: Platform.t option
+        [@ocaml.doc
+          "The platform for the Amplify app. For a static app, set the platform type to WEB. For a dynamic server-side rendered (SSR) app, set the platform type to WEB_COMPUTE. For an app requiring Amplify Hosting's original SSR support only, set the platform type to WEB_DYNAMIC. If you are deploying an SSG only app with Next.js 14 or later, you must use the platform type WEB_COMPUTE."];
+      createTime: CreateTime.t option
+        [@ocaml.doc "A timestamp of when Amplify created the application."];
+      updateTime: UpdateTime.t option
+        [@ocaml.doc "A timestamp of when Amplify updated the application."];
+      computeRoleArn: ComputeRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role for an SSR app. The Compute role allows the Amplify Hosting compute service to securely access specific Amazon Web Services resources based on the role's permissions. For more information about the SSR Compute role, see Adding an SSR Compute role in the Amplify User Guide."];
       iamServiceRoleArn: ServiceRoleArn.t option
         [@ocaml.doc
-          "The AWS Identity and Access Management (IAM) service role for the Amazon Resource Name (ARN) of the Amplify app."];
-      environmentVariables: EnvironmentVariables.t
-        [@ocaml.doc "The environment variables for the Amplify app."];
-      defaultDomain: DefaultDomain.t
+          "The Amazon Resource Name (ARN) of the IAM service role for the Amplify app."];
+      environmentVariables: EnvironmentVariables.t option
+        [@ocaml.doc
+          "The environment variables for the Amplify app. For a list of the environment variables that are accessible to Amplify by default, see Amplify Environment variables in the Amplify Hosting User Guide."];
+      defaultDomain: DefaultDomain.t option
         [@ocaml.doc "The default domain for the Amplify app."];
-      enableBranchAutoBuild: EnableBranchAutoBuild.t
+      enableBranchAutoBuild: EnableBranchAutoBuild.t option
         [@ocaml.doc
           "Enables the auto-building of branches for the Amplify app."];
       enableBranchAutoDeletion: EnableBranchAutoDeletion.t option
         [@ocaml.doc
-          "Automatically disconnect a branch in the Amplify Console when you delete a branch from your Git repository."];
-      enableBasicAuth: EnableBasicAuth.t
+          "Automatically disconnect a branch in the Amplify console when you delete a branch from your Git repository."];
+      enableBasicAuth: EnableBasicAuth.t option
         [@ocaml.doc
           "Enables basic authorization for the Amplify app's branches."];
       basicAuthCredentials: BasicAuthCredentials.t option
@@ -2932,82 +3506,118 @@ module App =
           "Describes the automated branch creation configuration for the Amplify app."];
       repositoryCloneMethod: RepositoryCloneMethod.t option
         [@ocaml.doc
-          "The authentication protocol to use to access the Git repository for an Amplify app. For a GitHub repository, specify TOKEN. For an Amazon Web Services CodeCommit repository, specify SIGV4. For GitLab and Bitbucket repositories, specify SSH."]}
-    let context_ = "App"
-    let make ?tags =
-      fun ?iamServiceRoleArn ->
-        fun ?enableBranchAutoDeletion ->
-          fun ?basicAuthCredentials ->
-            fun ?customRules ->
-              fun ?productionBranch ->
-                fun ?buildSpec ->
-                  fun ?customHeaders ->
-                    fun ?enableAutoBranchCreation ->
-                      fun ?autoBranchCreationPatterns ->
-                        fun ?autoBranchCreationConfig ->
-                          fun ?repositoryCloneMethod ->
-                            fun ~appId ->
-                              fun ~appArn ->
-                                fun ~name ->
-                                  fun ~description ->
-                                    fun ~repository ->
-                                      fun ~platform ->
-                                        fun ~createTime ->
-                                          fun ~updateTime ->
-                                            fun ~environmentVariables ->
-                                              fun ~defaultDomain ->
-                                                fun ~enableBranchAutoBuild ->
-                                                  fun ~enableBasicAuth ->
-                                                    fun () ->
-                                                      {
-                                                        tags;
-                                                        iamServiceRoleArn;
-                                                        enableBranchAutoDeletion;
-                                                        basicAuthCredentials;
-                                                        customRules;
-                                                        productionBranch;
-                                                        buildSpec;
-                                                        customHeaders;
-                                                        enableAutoBranchCreation;
-                                                        autoBranchCreationPatterns;
-                                                        autoBranchCreationConfig;
-                                                        repositoryCloneMethod;
-                                                        appId;
-                                                        appArn;
-                                                        name;
-                                                        description;
-                                                        repository;
-                                                        platform;
-                                                        createTime;
-                                                        updateTime;
-                                                        environmentVariables;
-                                                        defaultDomain;
-                                                        enableBranchAutoBuild;
-                                                        enableBasicAuth
-                                                      }
+          "This is for internal use. The Amplify service uses this parameter to specify the authentication protocol to use to access the Git repository for an Amplify app. Amplify specifies TOKEN for a GitHub repository, SIGV4 for an Amazon Web Services CodeCommit repository, and SSH for GitLab and Bitbucket repositories."];
+      cacheConfig: CacheConfig.t option
+        [@ocaml.doc
+          "The cache configuration for the Amplify app. If you don't specify the cache configuration type, Amplify uses the default AMPLIFY_MANAGED setting."];
+      webhookCreateTime: WebhookCreateTime.t option
+        [@ocaml.doc
+          "A timestamp of when Amplify created the webhook in your Git repository."];
+      wafConfiguration: WafConfiguration.t option
+        [@ocaml.doc
+          "Describes the Firewall configuration for the Amplify app. Firewall support enables you to protect your hosted applications with a direct integration with WAF."];
+      jobConfig: JobConfig.t option
+        [@ocaml.doc
+          "The configuration details that apply to the jobs for an Amplify app."]}
+    let make ?appId =
+      fun ?appArn ->
+        fun ?name ->
+          fun ?tags ->
+            fun ?description ->
+              fun ?repository ->
+                fun ?platform ->
+                  fun ?createTime ->
+                    fun ?updateTime ->
+                      fun ?computeRoleArn ->
+                        fun ?iamServiceRoleArn ->
+                          fun ?environmentVariables ->
+                            fun ?defaultDomain ->
+                              fun ?enableBranchAutoBuild ->
+                                fun ?enableBranchAutoDeletion ->
+                                  fun ?enableBasicAuth ->
+                                    fun ?basicAuthCredentials ->
+                                      fun ?customRules ->
+                                        fun ?productionBranch ->
+                                          fun ?buildSpec ->
+                                            fun ?customHeaders ->
+                                              fun ?enableAutoBranchCreation
+                                                ->
+                                                fun
+                                                  ?autoBranchCreationPatterns
+                                                  ->
+                                                  fun
+                                                    ?autoBranchCreationConfig
+                                                    ->
+                                                    fun
+                                                      ?repositoryCloneMethod
+                                                      ->
+                                                      fun ?cacheConfig ->
+                                                        fun
+                                                          ?webhookCreateTime
+                                                          ->
+                                                          fun
+                                                            ?wafConfiguration
+                                                            ->
+                                                            fun ?jobConfig ->
+                                                              fun () ->
+                                                                {
+                                                                  appId;
+                                                                  appArn;
+                                                                  name;
+                                                                  tags;
+                                                                  description;
+                                                                  repository;
+                                                                  platform;
+                                                                  createTime;
+                                                                  updateTime;
+                                                                  computeRoleArn;
+                                                                  iamServiceRoleArn;
+                                                                  environmentVariables;
+                                                                  defaultDomain;
+                                                                  enableBranchAutoBuild;
+                                                                  enableBranchAutoDeletion;
+                                                                  enableBasicAuth;
+                                                                  basicAuthCredentials;
+                                                                  customRules;
+                                                                  productionBranch;
+                                                                  buildSpec;
+                                                                  customHeaders;
+                                                                  enableAutoBranchCreation;
+                                                                  autoBranchCreationPatterns;
+                                                                  autoBranchCreationConfig;
+                                                                  repositoryCloneMethod;
+                                                                  cacheConfig;
+                                                                  webhookCreateTime;
+                                                                  wafConfiguration;
+                                                                  jobConfig
+                                                                }
     let to_value x =
       structure_to_value
-        [("appId", (Some (AppId.to_value x.appId)));
-        ("appArn", (Some (AppArn.to_value x.appArn)));
-        ("name", (Some (Name.to_value x.name)));
+        [("appId", (Option.map x.appId ~f:AppId.to_value));
+        ("appArn", (Option.map x.appArn ~f:AppArn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("description", (Some (Description.to_value x.description)));
-        ("repository", (Some (Repository.to_value x.repository)));
-        ("platform", (Some (Platform.to_value x.platform)));
-        ("createTime", (Some (CreateTime.to_value x.createTime)));
-        ("updateTime", (Some (UpdateTime.to_value x.updateTime)));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("repository", (Option.map x.repository ~f:Repository.to_value));
+        ("platform", (Option.map x.platform ~f:Platform.to_value));
+        ("createTime", (Option.map x.createTime ~f:CreateTime.to_value));
+        ("updateTime", (Option.map x.updateTime ~f:UpdateTime.to_value));
+        ("computeRoleArn",
+          (Option.map x.computeRoleArn ~f:ComputeRoleArn.to_value));
         ("iamServiceRoleArn",
           (Option.map x.iamServiceRoleArn ~f:ServiceRoleArn.to_value));
         ("environmentVariables",
-          (Some (EnvironmentVariables.to_value x.environmentVariables)));
-        ("defaultDomain", (Some (DefaultDomain.to_value x.defaultDomain)));
+          (Option.map x.environmentVariables ~f:EnvironmentVariables.to_value));
+        ("defaultDomain",
+          (Option.map x.defaultDomain ~f:DefaultDomain.to_value));
         ("enableBranchAutoBuild",
-          (Some (EnableBranchAutoBuild.to_value x.enableBranchAutoBuild)));
+          (Option.map x.enableBranchAutoBuild
+             ~f:EnableBranchAutoBuild.to_value));
         ("enableBranchAutoDeletion",
           (Option.map x.enableBranchAutoDeletion
              ~f:EnableBranchAutoDeletion.to_value));
         ("enableBasicAuth",
-          (Some (EnableBasicAuth.to_value x.enableBasicAuth)));
+          (Option.map x.enableBasicAuth ~f:EnableBasicAuth.to_value));
         ("basicAuthCredentials",
           (Option.map x.basicAuthCredentials ~f:BasicAuthCredentials.to_value));
         ("customRules", (Option.map x.customRules ~f:CustomRules.to_value));
@@ -3027,9 +3637,25 @@ module App =
              ~f:AutoBranchCreationConfig.to_value));
         ("repositoryCloneMethod",
           (Option.map x.repositoryCloneMethod
-             ~f:RepositoryCloneMethod.to_value))]
+             ~f:RepositoryCloneMethod.to_value));
+        ("cacheConfig", (Option.map x.cacheConfig ~f:CacheConfig.to_value));
+        ("webhookCreateTime",
+          (Option.map x.webhookCreateTime ~f:WebhookCreateTime.to_value));
+        ("wafConfiguration",
+          (Option.map x.wafConfiguration ~f:WafConfiguration.to_value));
+        ("jobConfig", (Option.map x.jobConfig ~f:JobConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobConfig =
+        (Option.map ~f:JobConfig.of_xml) (Xml.child xml_arg0 "jobConfig") in
+      let wafConfiguration =
+        (Option.map ~f:WafConfiguration.of_xml)
+          (Xml.child xml_arg0 "wafConfiguration") in
+      let webhookCreateTime =
+        (Option.map ~f:WebhookCreateTime.of_xml)
+          (Xml.child xml_arg0 "webhookCreateTime") in
+      let cacheConfig =
+        (Option.map ~f:CacheConfig.of_xml) (Xml.child xml_arg0 "cacheConfig") in
       let repositoryCloneMethod =
         (Option.map ~f:RepositoryCloneMethod.of_xml)
           (Xml.child xml_arg0 "repositoryCloneMethod") in
@@ -3056,103 +3682,110 @@ module App =
         (Option.map ~f:BasicAuthCredentials.of_xml)
           (Xml.child xml_arg0 "basicAuthCredentials") in
       let enableBasicAuth =
-        EnableBasicAuth.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "enableBasicAuth") in
+        (Option.map ~f:EnableBasicAuth.of_xml)
+          (Xml.child xml_arg0 "enableBasicAuth") in
       let enableBranchAutoDeletion =
         (Option.map ~f:EnableBranchAutoDeletion.of_xml)
           (Xml.child xml_arg0 "enableBranchAutoDeletion") in
       let enableBranchAutoBuild =
-        EnableBranchAutoBuild.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "enableBranchAutoBuild") in
+        (Option.map ~f:EnableBranchAutoBuild.of_xml)
+          (Xml.child xml_arg0 "enableBranchAutoBuild") in
       let defaultDomain =
-        DefaultDomain.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "defaultDomain") in
+        (Option.map ~f:DefaultDomain.of_xml)
+          (Xml.child xml_arg0 "defaultDomain") in
       let environmentVariables =
-        EnvironmentVariables.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentVariables") in
+        (Option.map ~f:EnvironmentVariables.of_xml)
+          (Xml.child xml_arg0 "environmentVariables") in
       let iamServiceRoleArn =
         (Option.map ~f:ServiceRoleArn.of_xml)
           (Xml.child xml_arg0 "iamServiceRoleArn") in
+      let computeRoleArn =
+        (Option.map ~f:ComputeRoleArn.of_xml)
+          (Xml.child xml_arg0 "computeRoleArn") in
       let updateTime =
-        UpdateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updateTime") in
+        (Option.map ~f:UpdateTime.of_xml) (Xml.child xml_arg0 "updateTime") in
       let createTime =
-        CreateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createTime") in
+        (Option.map ~f:CreateTime.of_xml) (Xml.child xml_arg0 "createTime") in
       let platform =
-        Platform.of_xml (Xml.child_exn ~context:context_ xml_arg0 "platform") in
+        (Option.map ~f:Platform.of_xml) (Xml.child xml_arg0 "platform") in
       let repository =
-        Repository.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "repository") in
+        (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       let description =
-        Description.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "description") in
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let appArn =
-        AppArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      let appId =
-        AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ?repositoryCloneMethod ?autoBranchCreationConfig
+        (Option.map ~f:AppArn.of_xml) (Xml.child xml_arg0 "appArn") in
+      let appId = (Option.map ~f:AppId.of_xml) (Xml.child xml_arg0 "appId") in
+      make ?jobConfig ?wafConfiguration ?webhookCreateTime ?cacheConfig
+        ?repositoryCloneMethod ?autoBranchCreationConfig
         ?autoBranchCreationPatterns ?enableAutoBranchCreation ?customHeaders
         ?buildSpec ?productionBranch ?customRules ?basicAuthCredentials
-        ~enableBasicAuth ?enableBranchAutoDeletion ~enableBranchAutoBuild
-        ~defaultDomain ~environmentVariables ?iamServiceRoleArn ~updateTime
-        ~createTime ~platform ~repository ~description ?tags ~name ~appArn
-        ~appId ()
+        ?enableBasicAuth ?enableBranchAutoDeletion ?enableBranchAutoBuild
+        ?defaultDomain ?environmentVariables ?iamServiceRoleArn
+        ?computeRoleArn ?updateTime ?createTime ?platform ?repository
+        ?description ?tags ?name ?appArn ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let jobConfig = field_map json__ "jobConfig" JobConfig.of_json in
+      let wafConfiguration =
+        field_map json__ "wafConfiguration" WafConfiguration.of_json in
+      let webhookCreateTime =
+        field_map json__ "webhookCreateTime" WebhookCreateTime.of_json in
+      let cacheConfig = field_map json__ "cacheConfig" CacheConfig.of_json in
       let repositoryCloneMethod =
-        field_map json "repositoryCloneMethod" RepositoryCloneMethod.of_json in
+        field_map json__ "repositoryCloneMethod"
+          RepositoryCloneMethod.of_json in
       let autoBranchCreationConfig =
-        field_map json "autoBranchCreationConfig"
+        field_map json__ "autoBranchCreationConfig"
           AutoBranchCreationConfig.of_json in
       let autoBranchCreationPatterns =
-        field_map json "autoBranchCreationPatterns"
+        field_map json__ "autoBranchCreationPatterns"
           AutoBranchCreationPatterns.of_json in
       let enableAutoBranchCreation =
-        field_map json "enableAutoBranchCreation"
+        field_map json__ "enableAutoBranchCreation"
           EnableAutoBranchCreation.of_json in
       let customHeaders =
-        field_map json "customHeaders" CustomHeaders.of_json in
-      let buildSpec = field_map json "buildSpec" BuildSpec.of_json in
+        field_map json__ "customHeaders" CustomHeaders.of_json in
+      let buildSpec = field_map json__ "buildSpec" BuildSpec.of_json in
       let productionBranch =
-        field_map json "productionBranch" ProductionBranch.of_json in
-      let customRules = field_map json "customRules" CustomRules.of_json in
+        field_map json__ "productionBranch" ProductionBranch.of_json in
+      let customRules = field_map json__ "customRules" CustomRules.of_json in
       let basicAuthCredentials =
-        field_map json "basicAuthCredentials" BasicAuthCredentials.of_json in
+        field_map json__ "basicAuthCredentials" BasicAuthCredentials.of_json in
       let enableBasicAuth =
-        field_map_exn json "enableBasicAuth" EnableBasicAuth.of_json in
+        field_map json__ "enableBasicAuth" EnableBasicAuth.of_json in
       let enableBranchAutoDeletion =
-        field_map json "enableBranchAutoDeletion"
+        field_map json__ "enableBranchAutoDeletion"
           EnableBranchAutoDeletion.of_json in
       let enableBranchAutoBuild =
-        field_map_exn json "enableBranchAutoBuild"
+        field_map json__ "enableBranchAutoBuild"
           EnableBranchAutoBuild.of_json in
       let defaultDomain =
-        field_map_exn json "defaultDomain" DefaultDomain.of_json in
+        field_map json__ "defaultDomain" DefaultDomain.of_json in
       let environmentVariables =
-        field_map_exn json "environmentVariables"
-          EnvironmentVariables.of_json in
+        field_map json__ "environmentVariables" EnvironmentVariables.of_json in
       let iamServiceRoleArn =
-        field_map json "iamServiceRoleArn" ServiceRoleArn.of_json in
-      let updateTime = field_map_exn json "updateTime" UpdateTime.of_json in
-      let createTime = field_map_exn json "createTime" CreateTime.of_json in
-      let platform = field_map_exn json "platform" Platform.of_json in
-      let repository = field_map_exn json "repository" Repository.of_json in
-      let description = field_map_exn json "description" Description.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let appArn = field_map_exn json "appArn" AppArn.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
-      make ?repositoryCloneMethod ?autoBranchCreationConfig
+        field_map json__ "iamServiceRoleArn" ServiceRoleArn.of_json in
+      let computeRoleArn =
+        field_map json__ "computeRoleArn" ComputeRoleArn.of_json in
+      let updateTime = field_map json__ "updateTime" UpdateTime.of_json in
+      let createTime = field_map json__ "createTime" CreateTime.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let repository = field_map json__ "repository" Repository.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let appArn = field_map json__ "appArn" AppArn.of_json in
+      let appId = field_map json__ "appId" AppId.of_json in
+      make ?jobConfig ?wafConfiguration ?webhookCreateTime ?cacheConfig
+        ?repositoryCloneMethod ?autoBranchCreationConfig
         ?autoBranchCreationPatterns ?enableAutoBranchCreation ?customHeaders
         ?buildSpec ?productionBranch ?customRules ?basicAuthCredentials
-        ~enableBasicAuth ?enableBranchAutoDeletion ~enableBranchAutoBuild
-        ~defaultDomain ~environmentVariables ?iamServiceRoleArn ~updateTime
-        ~createTime ~platform ~repository ~description ?tags ~name ~appArn
-        ~appId ()
+        ?enableBasicAuth ?enableBranchAutoDeletion ?enableBranchAutoBuild
+        ?defaultDomain ?environmentVariables ?iamServiceRoleArn
+        ?computeRoleArn ?updateTime ?createTime ?platform ?repository
+        ?description ?tags ?name ?appArn ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the different branches of a repository for building, deploying, and hosting an Amplify app."]
@@ -3160,6 +3793,9 @@ module Steps =
   struct
     type nonrec t = Step.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Step.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3243,8 +3879,8 @@ module BadRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request contains unexpected data."]
@@ -3262,8 +3898,8 @@ module DependentServiceFailureException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3282,8 +3918,8 @@ module InternalFailureException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3302,8 +3938,8 @@ module NotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An entity was not found during an operation."]
@@ -3321,16 +3957,55 @@ module UnauthorizedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An operation failed due to a lack of access."]
+module CertificateSettings =
+  struct
+    type nonrec t =
+      {
+      type_: CertificateType.t
+        [@ocaml.doc
+          "The certificate type. Specify AMPLIFY_MANAGED to use the default certificate that Amplify provisions for you. Specify CUSTOM to use your own certificate that you have already added to Certificate Manager in your Amazon Web Services account. Make sure you request (or import) the certificate in the US East (N. Virginia) Region (us-east-1). For more information about using ACM, see Importing certificates into Certificate Manager in the ACM User guide."];
+      customCertificateArn: CertificateArn.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) for the custom certificate that you have already added to Certificate Manager in your Amazon Web Services account. This field is required only when the certificate type is CUSTOM."]}
+    let context_ = "CertificateSettings"
+    let make ?customCertificateArn =
+      fun ~type_ -> fun () -> { customCertificateArn; type_ }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (CertificateType.to_value x.type_)));
+        ("customCertificateArn",
+          (Option.map x.customCertificateArn ~f:CertificateArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customCertificateArn =
+        (Option.map ~f:CertificateArn.of_xml)
+          (Xml.child xml_arg0 "customCertificateArn") in
+      let type_ =
+        CertificateType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?customCertificateArn ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customCertificateArn =
+        field_map json__ "customCertificateArn" CertificateArn.of_json in
+      let type_ = field_map_exn json__ "type" CertificateType.of_json in
+      make ?customCertificateArn ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The type of SSL/TLS certificate to use for your custom domain. If a certificate type isn't specified, Amplify uses the default AMPLIFY_MANAGED certificate."]
 module SubDomainSettings =
   struct
     type nonrec t = SubDomainSetting.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:255); i
+      let open Result in ok_or_failwith (check_list_max i ~max:500); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubDomainSetting.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3393,27 +4068,24 @@ module OauthToken =
 module ResourceNotFoundException =
   struct
     type nonrec t = {
-      code: Code.t ;
-      message: ErrorMessage.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+      code: Code.t option ;
+      message: ErrorMessage.t option }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("code", (Some (Code.to_value x.code)));
-        ("message", (Some (ErrorMessage.to_value x.message)))]
+        [("code", (Option.map x.code ~f:Code.to_value));
+        ("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      let code =
-        Code.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
-      make ~message ~code ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      let code = (Option.map ~f:Code.of_xml) (Xml.child xml_arg0 "code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      let code = field_map_exn json "code" Code.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      let code = field_map json__ "code" Code.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An operation failed due to a non-existent resource."]
 module ResourceArn =
@@ -3444,6 +4116,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3477,8 +4152,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3499,24 +4174,6 @@ module JobReason =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"JobReason" j
-    let to_json = simple_to_json to_value
-  end
-module SourceUrl =
-  struct
-    type nonrec t = string
-    let context_ = "SourceUrl"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:3000) >>=
-             (fun () -> check_pattern i ~pattern:"(?s).*"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SourceUrl" j
     let to_json = simple_to_json to_value
   end
 module NextToken =
@@ -3541,6 +4198,9 @@ module Webhooks =
   struct
     type nonrec t = Webhook.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Webhook.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3566,7 +4226,7 @@ module MaxResults =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:0));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -3582,6 +4242,9 @@ module JobSummaries =
   struct
     type nonrec t = JobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3607,6 +4270,9 @@ module DomainAssociations =
     type nonrec t = DomainAssociation.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:255); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainAssociation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3633,6 +4299,9 @@ module Branches =
     type nonrec t = Branch.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:255); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Branch.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3656,6 +4325,9 @@ module BackendEnvironments =
   struct
     type nonrec t = BackendEnvironment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BackendEnvironment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3681,6 +4353,9 @@ module Artifacts =
   struct
     type nonrec t = Artifact.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Artifact.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3705,6 +4380,9 @@ module Apps =
   struct
     type nonrec t = App.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:App.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3724,35 +4402,50 @@ module Apps =
     let of_json j = list_of_json ~kind:"Apps" ~of_json:App.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MaxResultsForListApps =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsForListApps" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Job =
   struct
     type nonrec t =
       {
-      summary: JobSummary.t
+      summary: JobSummary.t option
         [@ocaml.doc
           "Describes the summary for an execution job for an Amplify app."];
-      steps: Steps.t
+      steps: Steps.t option
         [@ocaml.doc
           "The execution steps for an execution job, for an Amplify app."]}
-    let context_ = "Job"
-    let make ~summary = fun ~steps -> fun () -> { summary; steps }
+    let make ?summary = fun ?steps -> fun () -> { summary; steps }
     let to_value x =
       structure_to_value
-        [("summary", (Some (JobSummary.to_value x.summary)));
-        ("steps", (Some (Steps.to_value x.steps)))]
+        [("summary", (Option.map x.summary ~f:JobSummary.to_value));
+        ("steps", (Option.map x.steps ~f:Steps.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let steps =
-        Steps.of_xml (Xml.child_exn ~context:context_ xml_arg0 "steps") in
+      let steps = (Option.map ~f:Steps.of_xml) (Xml.child xml_arg0 "steps") in
       let summary =
-        JobSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "summary") in
-      make ~steps ~summary ()
+        (Option.map ~f:JobSummary.of_xml) (Xml.child xml_arg0 "summary") in
+      make ?steps ?summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let steps = field_map_exn json "steps" Steps.of_json in
-      let summary = field_map_exn json "summary" JobSummary.of_json in
-      make ~steps ~summary ()
+    let of_json json__ =
+      let steps = field_map json__ "steps" Steps.of_json in
+      let summary = field_map json__ "summary" JobSummary.of_json in
+      make ?steps ?summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an execution job for an Amplify app."]
 module ArtifactUrl =
@@ -3790,6 +4483,8 @@ module FileUploadUrls =
                     (fun x -> (UploadUrl.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3818,6 +4513,8 @@ module FileMap =
                     (fun x -> (MD5Hash.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3829,7 +4526,7 @@ module UpdateWebhookResult =
   struct
     type nonrec t =
       {
-      webhook: Webhook.t
+      webhook: Webhook.t option
         [@ocaml.doc
           "Describes a webhook that connects repository events to an Amplify app."]}
     type nonrec error =
@@ -3840,8 +4537,7 @@ module UpdateWebhookResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateWebhookResult"
-    let make ~webhook = fun () -> { webhook }
+    let make ?webhook = fun () -> { webhook }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -3901,16 +4597,17 @@ module UpdateWebhookResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("webhook", (Some (Webhook.to_value x.webhook)))]
+      structure_to_value
+        [("webhook", (Option.map x.webhook ~f:Webhook.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let webhook =
-        Webhook.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
-      make ~webhook ()
+        (Option.map ~f:Webhook.of_xml) (Xml.child xml_arg0 "webhook") in
+      make ?webhook ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhook = field_map_exn json "webhook" Webhook.of_json in
-      make ~webhook ()
+    let of_json json__ =
+      let webhook = field_map json__ "webhook" Webhook.of_json in
+      make ?webhook ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the update webhook request."]
 module UpdateWebhookRequest =
@@ -3942,10 +4639,10 @@ module UpdateWebhookRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "webhookId") in
       make ?description ?branchName ~webhookId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "description" Description.of_json in
-      let branchName = field_map json "branchName" BranchName.of_json in
-      let webhookId = field_map_exn json "webhookId" WebhookId.of_json in
+    let of_json json__ =
+      let description = field_map json__ "description" Description.of_json in
+      let branchName = field_map json__ "branchName" BranchName.of_json in
+      let webhookId = field_map_exn json__ "webhookId" WebhookId.of_json in
       make ?description ?branchName ~webhookId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the update webhook request."]
@@ -3953,7 +4650,7 @@ module UpdateDomainAssociationResult =
   struct
     type nonrec t =
       {
-      domainAssociation: DomainAssociation.t
+      domainAssociation: DomainAssociation.t option
         [@ocaml.doc
           "Describes a domain association, which associates a custom domain with an Amplify app."]}
     type nonrec error =
@@ -3964,8 +4661,7 @@ module UpdateDomainAssociationResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateDomainAssociationResult"
-    let make ~domainAssociation = fun () -> { domainAssociation }
+    let make ?domainAssociation = fun () -> { domainAssociation }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -4027,18 +4723,18 @@ module UpdateDomainAssociationResult =
     let to_value x =
       structure_to_value
         [("domainAssociation",
-           (Some (DomainAssociation.to_value x.domainAssociation)))]
+           (Option.map x.domainAssociation ~f:DomainAssociation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let domainAssociation =
-        DomainAssociation.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainAssociation") in
-      make ~domainAssociation ()
+        (Option.map ~f:DomainAssociation.of_xml)
+          (Xml.child xml_arg0 "domainAssociation") in
+      make ?domainAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainAssociation =
-        field_map_exn json "domainAssociation" DomainAssociation.of_json in
-      make ~domainAssociation ()
+        field_map json__ "domainAssociation" DomainAssociation.of_json in
+      make ?domainAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure for the update domain association request."]
@@ -4058,23 +4754,28 @@ module UpdateDomainAssociationRequest =
           "Sets the branch patterns for automatic subdomain creation."];
       autoSubDomainIAMRole: AutoSubDomainIAMRole.t option
         [@ocaml.doc
-          "The required AWS Identity and Access Management (IAM) service role for the Amazon Resource Name (ARN) for automatically creating subdomains."]}
+          "The required AWS Identity and Access Management (IAM) service role for the Amazon Resource Name (ARN) for automatically creating subdomains."];
+      certificateSettings: CertificateSettings.t option
+        [@ocaml.doc
+          "The type of SSL/TLS certificate to use for your custom domain."]}
     let context_ = "UpdateDomainAssociationRequest"
     let make ?enableAutoSubDomain =
       fun ?subDomainSettings ->
         fun ?autoSubDomainCreationPatterns ->
           fun ?autoSubDomainIAMRole ->
-            fun ~appId ->
-              fun ~domainName ->
-                fun () ->
-                  {
-                    enableAutoSubDomain;
-                    subDomainSettings;
-                    autoSubDomainCreationPatterns;
-                    autoSubDomainIAMRole;
-                    appId;
-                    domainName
-                  }
+            fun ?certificateSettings ->
+              fun ~appId ->
+                fun ~domainName ->
+                  fun () ->
+                    {
+                      enableAutoSubDomain;
+                      subDomainSettings;
+                      autoSubDomainCreationPatterns;
+                      autoSubDomainIAMRole;
+                      certificateSettings;
+                      appId;
+                      domainName
+                    }
     let to_value x =
       structure_to_value
         [("appId", (Some (AppId.to_value x.appId)));
@@ -4087,9 +4788,14 @@ module UpdateDomainAssociationRequest =
           (Option.map x.autoSubDomainCreationPatterns
              ~f:AutoSubDomainCreationPatterns.to_value));
         ("autoSubDomainIAMRole",
-          (Option.map x.autoSubDomainIAMRole ~f:AutoSubDomainIAMRole.to_value))]
+          (Option.map x.autoSubDomainIAMRole ~f:AutoSubDomainIAMRole.to_value));
+        ("certificateSettings",
+          (Option.map x.certificateSettings ~f:CertificateSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let certificateSettings =
+        (Option.map ~f:CertificateSettings.of_xml)
+          (Xml.child xml_arg0 "certificateSettings") in
       let autoSubDomainIAMRole =
         (Option.map ~f:AutoSubDomainIAMRole.of_xml)
           (Xml.child xml_arg0 "autoSubDomainIAMRole") in
@@ -4107,23 +4813,27 @@ module UpdateDomainAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "domainName") in
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ?autoSubDomainIAMRole ?autoSubDomainCreationPatterns
-        ?subDomainSettings ?enableAutoSubDomain ~domainName ~appId ()
+      make ?certificateSettings ?autoSubDomainIAMRole
+        ?autoSubDomainCreationPatterns ?subDomainSettings
+        ?enableAutoSubDomain ~domainName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let certificateSettings =
+        field_map json__ "certificateSettings" CertificateSettings.of_json in
       let autoSubDomainIAMRole =
-        field_map json "autoSubDomainIAMRole" AutoSubDomainIAMRole.of_json in
+        field_map json__ "autoSubDomainIAMRole" AutoSubDomainIAMRole.of_json in
       let autoSubDomainCreationPatterns =
-        field_map json "autoSubDomainCreationPatterns"
+        field_map json__ "autoSubDomainCreationPatterns"
           AutoSubDomainCreationPatterns.of_json in
       let subDomainSettings =
-        field_map json "subDomainSettings" SubDomainSettings.of_json in
+        field_map json__ "subDomainSettings" SubDomainSettings.of_json in
       let enableAutoSubDomain =
-        field_map json "enableAutoSubDomain" EnableAutoSubDomain.of_json in
-      let domainName = field_map_exn json "domainName" DomainName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
-      make ?autoSubDomainIAMRole ?autoSubDomainCreationPatterns
-        ?subDomainSettings ?enableAutoSubDomain ~domainName ~appId ()
+        field_map json__ "enableAutoSubDomain" EnableAutoSubDomain.of_json in
+      let domainName = field_map_exn json__ "domainName" DomainName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ?certificateSettings ?autoSubDomainIAMRole
+        ?autoSubDomainCreationPatterns ?subDomainSettings
+        ?enableAutoSubDomain ~domainName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request structure for the update domain association request."]
@@ -4131,7 +4841,7 @@ module UpdateBranchResult =
   struct
     type nonrec t =
       {
-      branch: Branch.t
+      branch: Branch.t option
         [@ocaml.doc
           "The branch for an Amplify app, which maps to a third-party repository branch."]}
     type nonrec error =
@@ -4142,8 +4852,7 @@ module UpdateBranchResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateBranchResult"
-    let make ~branch = fun () -> { branch }
+    let make ?branch = fun () -> { branch }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -4203,16 +4912,17 @@ module UpdateBranchResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("branch", (Some (Branch.to_value x.branch)))]
+      structure_to_value
+        [("branch", (Option.map x.branch ~f:Branch.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let branch =
-        Branch.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branch") in
-      make ~branch ()
+        (Option.map ~f:Branch.of_xml) (Xml.child xml_arg0 "branch") in
+      make ?branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branch = field_map_exn json "branch" Branch.of_json in
-      make ~branch ()
+    let of_json json__ =
+      let branch = field_map json__ "branch" Branch.of_json in
+      make ?branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the update branch request."]
 module UpdateBranchRequest =
@@ -4220,7 +4930,7 @@ module UpdateBranchRequest =
     type nonrec t =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
-      branchName: BranchName.t [@ocaml.doc "The name for the branch."];
+      branchName: BranchName.t [@ocaml.doc "The name of the branch."];
       description: Description.t option
         [@ocaml.doc "The description for the branch."];
       framework: Framework.t option
@@ -4231,6 +4941,9 @@ module UpdateBranchRequest =
         [@ocaml.doc "Enables notifications for the branch."];
       enableAutoBuild: EnableAutoBuild.t option
         [@ocaml.doc "Enables auto building for the branch."];
+      enableSkewProtection: EnableSkewProtection.t option
+        [@ocaml.doc
+          "Specifies whether the skew protection feature is enabled for the branch. Deployment skew protection is available to Amplify applications to eliminate version skew issues between client and servers in web applications. When you apply skew protection to a branch, you can ensure that your clients always interact with the correct version of server-side assets, regardless of when a deployment occurs. For more information about skew protection, see Skew protection for Amplify deployments in the Amplify User Guide."];
       environmentVariables: EnvironmentVariables.t option
         [@ocaml.doc "The environment variables for the branch."];
       basicAuthCredentials: BasicAuthCredentials.t option
@@ -4255,45 +4968,57 @@ module UpdateBranchRequest =
         [@ocaml.doc "The Amplify environment name for the pull request."];
       backendEnvironmentArn: BackendEnvironmentArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for a backend environment that is part of an Amplify app."]}
+          "The Amazon Resource Name (ARN) for a backend environment that is part of a Gen 1 Amplify app. This field is available to Amplify Gen 1 apps only where the backend is created using Amplify Studio or the Amplify command line interface (CLI)."];
+      backend: Backend.t option
+        [@ocaml.doc
+          "The backend for a Branch of an Amplify app. Use for a backend created from an CloudFormation stack. This field is available to Amplify Gen 2 apps only. When you deploy an application with Amplify Gen 2, you provision the app's backend infrastructure using Typescript code."];
+      computeRoleArn: ComputeRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to assign to a branch of an SSR app. The SSR Compute role allows the Amplify Hosting compute service to securely access specific Amazon Web Services resources based on the role's permissions. For more information about the SSR Compute role, see Adding an SSR Compute role in the Amplify User Guide."]}
     let context_ = "UpdateBranchRequest"
     let make ?description =
       fun ?framework ->
         fun ?stage ->
           fun ?enableNotification ->
             fun ?enableAutoBuild ->
-              fun ?environmentVariables ->
-                fun ?basicAuthCredentials ->
-                  fun ?enableBasicAuth ->
-                    fun ?enablePerformanceMode ->
-                      fun ?buildSpec ->
-                        fun ?ttl ->
-                          fun ?displayName ->
-                            fun ?enablePullRequestPreview ->
-                              fun ?pullRequestEnvironmentName ->
-                                fun ?backendEnvironmentArn ->
-                                  fun ~appId ->
-                                    fun ~branchName ->
-                                      fun () ->
-                                        {
-                                          description;
-                                          framework;
-                                          stage;
-                                          enableNotification;
-                                          enableAutoBuild;
-                                          environmentVariables;
-                                          basicAuthCredentials;
-                                          enableBasicAuth;
-                                          enablePerformanceMode;
-                                          buildSpec;
-                                          ttl;
-                                          displayName;
-                                          enablePullRequestPreview;
-                                          pullRequestEnvironmentName;
-                                          backendEnvironmentArn;
-                                          appId;
-                                          branchName
-                                        }
+              fun ?enableSkewProtection ->
+                fun ?environmentVariables ->
+                  fun ?basicAuthCredentials ->
+                    fun ?enableBasicAuth ->
+                      fun ?enablePerformanceMode ->
+                        fun ?buildSpec ->
+                          fun ?ttl ->
+                            fun ?displayName ->
+                              fun ?enablePullRequestPreview ->
+                                fun ?pullRequestEnvironmentName ->
+                                  fun ?backendEnvironmentArn ->
+                                    fun ?backend ->
+                                      fun ?computeRoleArn ->
+                                        fun ~appId ->
+                                          fun ~branchName ->
+                                            fun () ->
+                                              {
+                                                description;
+                                                framework;
+                                                stage;
+                                                enableNotification;
+                                                enableAutoBuild;
+                                                enableSkewProtection;
+                                                environmentVariables;
+                                                basicAuthCredentials;
+                                                enableBasicAuth;
+                                                enablePerformanceMode;
+                                                buildSpec;
+                                                ttl;
+                                                displayName;
+                                                enablePullRequestPreview;
+                                                pullRequestEnvironmentName;
+                                                backendEnvironmentArn;
+                                                backend;
+                                                computeRoleArn;
+                                                appId;
+                                                branchName
+                                              }
     let to_value x =
       structure_to_value
         [("appId", (Some (AppId.to_value x.appId)));
@@ -4305,6 +5030,8 @@ module UpdateBranchRequest =
           (Option.map x.enableNotification ~f:EnableNotification.to_value));
         ("enableAutoBuild",
           (Option.map x.enableAutoBuild ~f:EnableAutoBuild.to_value));
+        ("enableSkewProtection",
+          (Option.map x.enableSkewProtection ~f:EnableSkewProtection.to_value));
         ("environmentVariables",
           (Option.map x.environmentVariables ~f:EnvironmentVariables.to_value));
         ("basicAuthCredentials",
@@ -4325,9 +5052,17 @@ module UpdateBranchRequest =
              ~f:PullRequestEnvironmentName.to_value));
         ("backendEnvironmentArn",
           (Option.map x.backendEnvironmentArn
-             ~f:BackendEnvironmentArn.to_value))]
+             ~f:BackendEnvironmentArn.to_value));
+        ("backend", (Option.map x.backend ~f:Backend.to_value));
+        ("computeRoleArn",
+          (Option.map x.computeRoleArn ~f:ComputeRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let computeRoleArn =
+        (Option.map ~f:ComputeRoleArn.of_xml)
+          (Xml.child xml_arg0 "computeRoleArn") in
+      let backend =
+        (Option.map ~f:Backend.of_xml) (Xml.child xml_arg0 "backend") in
       let backendEnvironmentArn =
         (Option.map ~f:BackendEnvironmentArn.of_xml)
           (Xml.child xml_arg0 "backendEnvironmentArn") in
@@ -4354,6 +5089,9 @@ module UpdateBranchRequest =
       let environmentVariables =
         (Option.map ~f:EnvironmentVariables.of_xml)
           (Xml.child xml_arg0 "environmentVariables") in
+      let enableSkewProtection =
+        (Option.map ~f:EnableSkewProtection.of_xml)
+          (Xml.child xml_arg0 "enableSkewProtection") in
       let enableAutoBuild =
         (Option.map ~f:EnableAutoBuild.of_xml)
           (Xml.child xml_arg0 "enableAutoBuild") in
@@ -4370,61 +5108,69 @@ module UpdateBranchRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "branchName") in
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ?backendEnvironmentArn ?pullRequestEnvironmentName
-        ?enablePullRequestPreview ?displayName ?ttl ?buildSpec
-        ?enablePerformanceMode ?enableBasicAuth ?basicAuthCredentials
-        ?environmentVariables ?enableAutoBuild ?enableNotification ?stage
-        ?framework ?description ~branchName ~appId ()
+      make ?computeRoleArn ?backend ?backendEnvironmentArn
+        ?pullRequestEnvironmentName ?enablePullRequestPreview ?displayName
+        ?ttl ?buildSpec ?enablePerformanceMode ?enableBasicAuth
+        ?basicAuthCredentials ?environmentVariables ?enableSkewProtection
+        ?enableAutoBuild ?enableNotification ?stage ?framework ?description
+        ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let computeRoleArn =
+        field_map json__ "computeRoleArn" ComputeRoleArn.of_json in
+      let backend = field_map json__ "backend" Backend.of_json in
       let backendEnvironmentArn =
-        field_map json "backendEnvironmentArn" BackendEnvironmentArn.of_json in
+        field_map json__ "backendEnvironmentArn"
+          BackendEnvironmentArn.of_json in
       let pullRequestEnvironmentName =
-        field_map json "pullRequestEnvironmentName"
+        field_map json__ "pullRequestEnvironmentName"
           PullRequestEnvironmentName.of_json in
       let enablePullRequestPreview =
-        field_map json "enablePullRequestPreview"
+        field_map json__ "enablePullRequestPreview"
           EnablePullRequestPreview.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let ttl = field_map json "ttl" TTL.of_json in
-      let buildSpec = field_map json "buildSpec" BuildSpec.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let ttl = field_map json__ "ttl" TTL.of_json in
+      let buildSpec = field_map json__ "buildSpec" BuildSpec.of_json in
       let enablePerformanceMode =
-        field_map json "enablePerformanceMode" EnablePerformanceMode.of_json in
+        field_map json__ "enablePerformanceMode"
+          EnablePerformanceMode.of_json in
       let enableBasicAuth =
-        field_map json "enableBasicAuth" EnableBasicAuth.of_json in
+        field_map json__ "enableBasicAuth" EnableBasicAuth.of_json in
       let basicAuthCredentials =
-        field_map json "basicAuthCredentials" BasicAuthCredentials.of_json in
+        field_map json__ "basicAuthCredentials" BasicAuthCredentials.of_json in
       let environmentVariables =
-        field_map json "environmentVariables" EnvironmentVariables.of_json in
+        field_map json__ "environmentVariables" EnvironmentVariables.of_json in
+      let enableSkewProtection =
+        field_map json__ "enableSkewProtection" EnableSkewProtection.of_json in
       let enableAutoBuild =
-        field_map json "enableAutoBuild" EnableAutoBuild.of_json in
+        field_map json__ "enableAutoBuild" EnableAutoBuild.of_json in
       let enableNotification =
-        field_map json "enableNotification" EnableNotification.of_json in
-      let stage = field_map json "stage" Stage.of_json in
-      let framework = field_map json "framework" Framework.of_json in
-      let description = field_map json "description" Description.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
-      make ?backendEnvironmentArn ?pullRequestEnvironmentName
-        ?enablePullRequestPreview ?displayName ?ttl ?buildSpec
-        ?enablePerformanceMode ?enableBasicAuth ?basicAuthCredentials
-        ?environmentVariables ?enableAutoBuild ?enableNotification ?stage
-        ?framework ?description ~branchName ~appId ()
+        field_map json__ "enableNotification" EnableNotification.of_json in
+      let stage = field_map json__ "stage" Stage.of_json in
+      let framework = field_map json__ "framework" Framework.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ?computeRoleArn ?backend ?backendEnvironmentArn
+        ?pullRequestEnvironmentName ?enablePullRequestPreview ?displayName
+        ?ttl ?buildSpec ?enablePerformanceMode ?enableBasicAuth
+        ?basicAuthCredentials ?environmentVariables ?enableSkewProtection
+        ?enableAutoBuild ?enableNotification ?stage ?framework ?description
+        ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the update branch request."]
 module UpdateAppResult =
   struct
     type nonrec t =
       {
-      app: App.t [@ocaml.doc "Represents the updated Amplify app."]}
+      app: App.t option [@ocaml.doc "Represents the updated Amplify app."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateAppResult"
-    let make ~app = fun () -> { app }
+    let make ?app = fun () -> { app }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -4474,14 +5220,14 @@ module UpdateAppResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("app", (Some (App.to_value x.app)))]
+      structure_to_value [("app", (Option.map x.app ~f:App.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
-      make ~app ()
+      let app = (Option.map ~f:App.of_xml) (Xml.child xml_arg0 "app") in
+      make ?app ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let app = field_map_exn json "app" App.of_json in make ~app ()
+    let of_json json__ =
+      let app = field_map json__ "app" App.of_json in make ?app ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for an Amplify app update request."]
 module UpdateAppRequest =
@@ -4493,17 +5239,21 @@ module UpdateAppRequest =
       description: Description.t option
         [@ocaml.doc "The description for an Amplify app."];
       platform: Platform.t option
-        [@ocaml.doc "The platform for an Amplify app."];
+        [@ocaml.doc
+          "The platform for the Amplify app. For a static app, set the platform type to WEB. For a dynamic server-side rendered (SSR) app, set the platform type to WEB_COMPUTE. For an app requiring Amplify Hosting's original SSR support only, set the platform type to WEB_DYNAMIC. If you are deploying an SSG only app with Next.js version 14 or later, you must set the platform type to WEB_COMPUTE."];
+      computeRoleArn: ComputeRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to assign to an SSR app. The SSR Compute role allows the Amplify Hosting compute service to securely access specific Amazon Web Services resources based on the role's permissions. For more information about the SSR Compute role, see Adding an SSR Compute role in the Amplify User Guide."];
       iamServiceRoleArn: ServiceRoleArn.t option
         [@ocaml.doc
-          "The AWS Identity and Access Management (IAM) service role for an Amplify app."];
+          "The Amazon Resource Name (ARN) of the IAM service role for the Amplify app."];
       environmentVariables: EnvironmentVariables.t option
         [@ocaml.doc "The environment variables for an Amplify app."];
       enableBranchAutoBuild: EnableAutoBuild.t option
         [@ocaml.doc "Enables branch auto-building for an Amplify app."];
       enableBranchAutoDeletion: EnableBranchAutoDeletion.t option
         [@ocaml.doc
-          "Automatically disconnects a branch in the Amplify Console when you delete a branch from your Git repository."];
+          "Automatically disconnects a branch in the Amplify console when you delete a branch from your Git repository."];
       enableBasicAuth: EnableBasicAuth.t option
         [@ocaml.doc "Enables basic authorization for an Amplify app."];
       basicAuthCredentials: BasicAuthCredentials.t option
@@ -4526,61 +5276,74 @@ module UpdateAppRequest =
         [@ocaml.doc
           "The automated branch creation configuration for an Amplify app."];
       repository: Repository.t option
-        [@ocaml.doc "The name of the repository for an Amplify app"];
+        [@ocaml.doc "The name of the Git repository for an Amplify app."];
       oauthToken: OauthToken.t option
         [@ocaml.doc
-          "The OAuth token for a third-party source control system for an Amplify app. The token is used to create a webhook and a read-only deploy key. The OAuth token is not stored."];
+          "The OAuth token for a third-party source control system for an Amplify app. The OAuth token is used to create a webhook and a read-only deploy key using SSH cloning. The OAuth token is not stored. Use oauthToken for repository providers other than GitHub, such as Bitbucket or CodeCommit. To authorize access to GitHub as your repository provider, use accessToken. You must specify either oauthToken or accessToken when you update an app. Existing Amplify apps deployed from a GitHub repository using OAuth continue to work with CI/CD. However, we strongly recommend that you migrate these apps to use the GitHub App. For more information, see Migrating an existing OAuth app to the Amplify GitHub App in the Amplify User Guide ."];
       accessToken: AccessToken.t option
         [@ocaml.doc
-          "The personal access token for a third-party source control system for an Amplify app. The token is used to create webhook and a read-only deploy key. The token is not stored."]}
+          "The personal access token for a GitHub repository for an Amplify app. The personal access token is used to authorize access to a GitHub repository using the Amplify GitHub App. The token is not stored. Use accessToken for GitHub repositories only. To authorize access to a repository provider such as Bitbucket or CodeCommit, use oauthToken. You must specify either accessToken or oauthToken when you update an app. Existing Amplify apps deployed from a GitHub repository using OAuth continue to work with CI/CD. However, we strongly recommend that you migrate these apps to use the GitHub App. For more information, see Migrating an existing OAuth app to the Amplify GitHub App in the Amplify User Guide ."];
+      jobConfig: JobConfig.t option
+        [@ocaml.doc
+          "Describes the configuration details that apply to the jobs for an Amplify app."];
+      cacheConfig: CacheConfig.t option
+        [@ocaml.doc "The cache configuration for the Amplify app."]}
     let context_ = "UpdateAppRequest"
     let make ?name =
       fun ?description ->
         fun ?platform ->
-          fun ?iamServiceRoleArn ->
-            fun ?environmentVariables ->
-              fun ?enableBranchAutoBuild ->
-                fun ?enableBranchAutoDeletion ->
-                  fun ?enableBasicAuth ->
-                    fun ?basicAuthCredentials ->
-                      fun ?customRules ->
-                        fun ?buildSpec ->
-                          fun ?customHeaders ->
-                            fun ?enableAutoBranchCreation ->
-                              fun ?autoBranchCreationPatterns ->
-                                fun ?autoBranchCreationConfig ->
-                                  fun ?repository ->
-                                    fun ?oauthToken ->
-                                      fun ?accessToken ->
-                                        fun ~appId ->
-                                          fun () ->
-                                            {
-                                              name;
-                                              description;
-                                              platform;
-                                              iamServiceRoleArn;
-                                              environmentVariables;
-                                              enableBranchAutoBuild;
-                                              enableBranchAutoDeletion;
-                                              enableBasicAuth;
-                                              basicAuthCredentials;
-                                              customRules;
-                                              buildSpec;
-                                              customHeaders;
-                                              enableAutoBranchCreation;
-                                              autoBranchCreationPatterns;
-                                              autoBranchCreationConfig;
-                                              repository;
-                                              oauthToken;
-                                              accessToken;
-                                              appId
-                                            }
+          fun ?computeRoleArn ->
+            fun ?iamServiceRoleArn ->
+              fun ?environmentVariables ->
+                fun ?enableBranchAutoBuild ->
+                  fun ?enableBranchAutoDeletion ->
+                    fun ?enableBasicAuth ->
+                      fun ?basicAuthCredentials ->
+                        fun ?customRules ->
+                          fun ?buildSpec ->
+                            fun ?customHeaders ->
+                              fun ?enableAutoBranchCreation ->
+                                fun ?autoBranchCreationPatterns ->
+                                  fun ?autoBranchCreationConfig ->
+                                    fun ?repository ->
+                                      fun ?oauthToken ->
+                                        fun ?accessToken ->
+                                          fun ?jobConfig ->
+                                            fun ?cacheConfig ->
+                                              fun ~appId ->
+                                                fun () ->
+                                                  {
+                                                    name;
+                                                    description;
+                                                    platform;
+                                                    computeRoleArn;
+                                                    iamServiceRoleArn;
+                                                    environmentVariables;
+                                                    enableBranchAutoBuild;
+                                                    enableBranchAutoDeletion;
+                                                    enableBasicAuth;
+                                                    basicAuthCredentials;
+                                                    customRules;
+                                                    buildSpec;
+                                                    customHeaders;
+                                                    enableAutoBranchCreation;
+                                                    autoBranchCreationPatterns;
+                                                    autoBranchCreationConfig;
+                                                    repository;
+                                                    oauthToken;
+                                                    accessToken;
+                                                    jobConfig;
+                                                    cacheConfig;
+                                                    appId
+                                                  }
     let to_value x =
       structure_to_value
         [("appId", (Some (AppId.to_value x.appId)));
         ("name", (Option.map x.name ~f:Name.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
         ("platform", (Option.map x.platform ~f:Platform.to_value));
+        ("computeRoleArn",
+          (Option.map x.computeRoleArn ~f:ComputeRoleArn.to_value));
         ("iamServiceRoleArn",
           (Option.map x.iamServiceRoleArn ~f:ServiceRoleArn.to_value));
         ("environmentVariables",
@@ -4609,9 +5372,15 @@ module UpdateAppRequest =
              ~f:AutoBranchCreationConfig.to_value));
         ("repository", (Option.map x.repository ~f:Repository.to_value));
         ("oauthToken", (Option.map x.oauthToken ~f:OauthToken.to_value));
-        ("accessToken", (Option.map x.accessToken ~f:AccessToken.to_value))]
+        ("accessToken", (Option.map x.accessToken ~f:AccessToken.to_value));
+        ("jobConfig", (Option.map x.jobConfig ~f:JobConfig.to_value));
+        ("cacheConfig", (Option.map x.cacheConfig ~f:CacheConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cacheConfig =
+        (Option.map ~f:CacheConfig.of_xml) (Xml.child xml_arg0 "cacheConfig") in
+      let jobConfig =
+        (Option.map ~f:JobConfig.of_xml) (Xml.child xml_arg0 "jobConfig") in
       let accessToken =
         (Option.map ~f:AccessToken.of_xml) (Xml.child xml_arg0 "accessToken") in
       let oauthToken =
@@ -4652,6 +5421,9 @@ module UpdateAppRequest =
       let iamServiceRoleArn =
         (Option.map ~f:ServiceRoleArn.of_xml)
           (Xml.child xml_arg0 "iamServiceRoleArn") in
+      let computeRoleArn =
+        (Option.map ~f:ComputeRoleArn.of_xml)
+          (Xml.child xml_arg0 "computeRoleArn") in
       let platform =
         (Option.map ~f:Platform.of_xml) (Xml.child xml_arg0 "platform") in
       let description =
@@ -4659,53 +5431,57 @@ module UpdateAppRequest =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ?accessToken ?oauthToken ?repository ?autoBranchCreationConfig
-        ?autoBranchCreationPatterns ?enableAutoBranchCreation ?customHeaders
-        ?buildSpec ?customRules ?basicAuthCredentials ?enableBasicAuth
-        ?enableBranchAutoDeletion ?enableBranchAutoBuild
-        ?environmentVariables ?iamServiceRoleArn ?platform ?description ?name
-        ~appId ()
+      make ?cacheConfig ?jobConfig ?accessToken ?oauthToken ?repository
+        ?autoBranchCreationConfig ?autoBranchCreationPatterns
+        ?enableAutoBranchCreation ?customHeaders ?buildSpec ?customRules
+        ?basicAuthCredentials ?enableBasicAuth ?enableBranchAutoDeletion
+        ?enableBranchAutoBuild ?environmentVariables ?iamServiceRoleArn
+        ?computeRoleArn ?platform ?description ?name ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
-      let oauthToken = field_map json "oauthToken" OauthToken.of_json in
-      let repository = field_map json "repository" Repository.of_json in
+    let of_json json__ =
+      let cacheConfig = field_map json__ "cacheConfig" CacheConfig.of_json in
+      let jobConfig = field_map json__ "jobConfig" JobConfig.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
+      let oauthToken = field_map json__ "oauthToken" OauthToken.of_json in
+      let repository = field_map json__ "repository" Repository.of_json in
       let autoBranchCreationConfig =
-        field_map json "autoBranchCreationConfig"
+        field_map json__ "autoBranchCreationConfig"
           AutoBranchCreationConfig.of_json in
       let autoBranchCreationPatterns =
-        field_map json "autoBranchCreationPatterns"
+        field_map json__ "autoBranchCreationPatterns"
           AutoBranchCreationPatterns.of_json in
       let enableAutoBranchCreation =
-        field_map json "enableAutoBranchCreation"
+        field_map json__ "enableAutoBranchCreation"
           EnableAutoBranchCreation.of_json in
       let customHeaders =
-        field_map json "customHeaders" CustomHeaders.of_json in
-      let buildSpec = field_map json "buildSpec" BuildSpec.of_json in
-      let customRules = field_map json "customRules" CustomRules.of_json in
+        field_map json__ "customHeaders" CustomHeaders.of_json in
+      let buildSpec = field_map json__ "buildSpec" BuildSpec.of_json in
+      let customRules = field_map json__ "customRules" CustomRules.of_json in
       let basicAuthCredentials =
-        field_map json "basicAuthCredentials" BasicAuthCredentials.of_json in
+        field_map json__ "basicAuthCredentials" BasicAuthCredentials.of_json in
       let enableBasicAuth =
-        field_map json "enableBasicAuth" EnableBasicAuth.of_json in
+        field_map json__ "enableBasicAuth" EnableBasicAuth.of_json in
       let enableBranchAutoDeletion =
-        field_map json "enableBranchAutoDeletion"
+        field_map json__ "enableBranchAutoDeletion"
           EnableBranchAutoDeletion.of_json in
       let enableBranchAutoBuild =
-        field_map json "enableBranchAutoBuild" EnableAutoBuild.of_json in
+        field_map json__ "enableBranchAutoBuild" EnableAutoBuild.of_json in
       let environmentVariables =
-        field_map json "environmentVariables" EnvironmentVariables.of_json in
+        field_map json__ "environmentVariables" EnvironmentVariables.of_json in
       let iamServiceRoleArn =
-        field_map json "iamServiceRoleArn" ServiceRoleArn.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" Name.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
-      make ?accessToken ?oauthToken ?repository ?autoBranchCreationConfig
-        ?autoBranchCreationPatterns ?enableAutoBranchCreation ?customHeaders
-        ?buildSpec ?customRules ?basicAuthCredentials ?enableBasicAuth
-        ?enableBranchAutoDeletion ?enableBranchAutoBuild
-        ?environmentVariables ?iamServiceRoleArn ?platform ?description ?name
-        ~appId ()
+        field_map json__ "iamServiceRoleArn" ServiceRoleArn.of_json in
+      let computeRoleArn =
+        field_map json__ "computeRoleArn" ComputeRoleArn.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ?cacheConfig ?jobConfig ?accessToken ?oauthToken ?repository
+        ?autoBranchCreationConfig ?autoBranchCreationPatterns
+        ?enableAutoBranchCreation ?customHeaders ?buildSpec ?customRules
+        ?basicAuthCredentials ?enableBasicAuth ?enableBranchAutoDeletion
+        ?enableBranchAutoBuild ?environmentVariables ?iamServiceRoleArn
+        ?computeRoleArn ?platform ?description ?name ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the update app request."]
 module UntagResourceResponse =
@@ -4791,9 +5567,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the untag resource request."]
@@ -4877,9 +5654,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4888,7 +5666,7 @@ module StopJobResult =
   struct
     type nonrec t =
       {
-      jobSummary: JobSummary.t [@ocaml.doc "The summary for the job."]}
+      jobSummary: JobSummary.t option [@ocaml.doc "The summary for the job."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -4896,8 +5674,7 @@ module StopJobResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StopJobResult"
-    let make ~jobSummary = fun () -> { jobSummary }
+    let make ?jobSummary = fun () -> { jobSummary }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -4956,17 +5733,16 @@ module StopJobResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("jobSummary", (Some (JobSummary.to_value x.jobSummary)))]
+        [("jobSummary", (Option.map x.jobSummary ~f:JobSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let jobSummary =
-        JobSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobSummary") in
-      make ~jobSummary ()
+        (Option.map ~f:JobSummary.of_xml) (Xml.child xml_arg0 "jobSummary") in
+      make ?jobSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobSummary = field_map_exn json "jobSummary" JobSummary.of_json in
-      make ~jobSummary ()
+    let of_json json__ =
+      let jobSummary = field_map json__ "jobSummary" JobSummary.of_json in
+      make ?jobSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the stop job request."]
 module StopJobRequest =
@@ -4975,7 +5751,8 @@ module StopJobRequest =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
       branchName: BranchName.t
-        [@ocaml.doc "The name for the branch, for the job."];
+        [@ocaml.doc
+          "The name of the branch to use for the stop job request."];
       jobId: JobId.t [@ocaml.doc "The unique id for the job."]}
     let context_ = "StopJobRequest"
     let make ~appId =
@@ -4996,10 +5773,10 @@ module StopJobRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~jobId ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" JobId.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ~jobId ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the stop job request."]
@@ -5007,7 +5784,7 @@ module StartJobResult =
   struct
     type nonrec t =
       {
-      jobSummary: JobSummary.t [@ocaml.doc "The summary for the job."]}
+      jobSummary: JobSummary.t option [@ocaml.doc "The summary for the job."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -5015,8 +5792,7 @@ module StartJobResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartJobResult"
-    let make ~jobSummary = fun () -> { jobSummary }
+    let make ?jobSummary = fun () -> { jobSummary }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5075,17 +5851,16 @@ module StartJobResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("jobSummary", (Some (JobSummary.to_value x.jobSummary)))]
+        [("jobSummary", (Option.map x.jobSummary ~f:JobSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let jobSummary =
-        JobSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobSummary") in
-      make ~jobSummary ()
+        (Option.map ~f:JobSummary.of_xml) (Xml.child xml_arg0 "jobSummary") in
+      make ?jobSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobSummary = field_map_exn json "jobSummary" JobSummary.of_json in
-      make ~jobSummary ()
+    let of_json json__ =
+      let jobSummary = field_map json__ "jobSummary" JobSummary.of_json in
+      make ?jobSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the run job request."]
 module StartJobRequest =
@@ -5093,7 +5868,8 @@ module StartJobRequest =
     type nonrec t =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
-      branchName: BranchName.t [@ocaml.doc "The branch name for the job."];
+      branchName: BranchName.t
+        [@ocaml.doc "The name of the branch to use for the job."];
       jobId: JobId.t option
         [@ocaml.doc
           "The unique ID for an existing job. This is required if the value of jobType is RETRY."];
@@ -5101,7 +5877,7 @@ module StartJobRequest =
         [@ocaml.doc
           "Describes the type for the job. The job type RELEASE starts a new job with the latest change from the specified branch. This value is available only for apps that are connected to a repository. The job type RETRY retries an existing job. If the job type value is RETRY, the jobId is also required."];
       jobReason: JobReason.t option
-        [@ocaml.doc "A descriptive reason for starting this job."];
+        [@ocaml.doc "A descriptive reason for starting the job."];
       commitId: CommitId.t option
         [@ocaml.doc
           "The commit ID from a third-party repository provider for the job."];
@@ -5163,16 +5939,16 @@ module StartJobRequest =
       make ?commitTime ?commitMessage ?commitId ?jobReason ~jobType ?jobId
         ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let commitTime = field_map json "commitTime" CommitTime.of_json in
+    let of_json json__ =
+      let commitTime = field_map json__ "commitTime" CommitTime.of_json in
       let commitMessage =
-        field_map json "commitMessage" CommitMessage.of_json in
-      let commitId = field_map json "commitId" CommitId.of_json in
-      let jobReason = field_map json "jobReason" JobReason.of_json in
-      let jobType = field_map_exn json "jobType" JobType.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+        field_map json__ "commitMessage" CommitMessage.of_json in
+      let commitId = field_map json__ "commitId" CommitId.of_json in
+      let jobReason = field_map json__ "jobReason" JobReason.of_json in
+      let jobType = field_map_exn json__ "jobType" JobType.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?commitTime ?commitMessage ?commitId ?jobReason ~jobType ?jobId
         ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
@@ -5181,7 +5957,7 @@ module StartDeploymentResult =
   struct
     type nonrec t =
       {
-      jobSummary: JobSummary.t [@ocaml.doc "The summary for the job."]}
+      jobSummary: JobSummary.t option [@ocaml.doc "The summary for the job."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -5189,8 +5965,7 @@ module StartDeploymentResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartDeploymentResult"
-    let make ~jobSummary = fun () -> { jobSummary }
+    let make ?jobSummary = fun () -> { jobSummary }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5249,17 +6024,16 @@ module StartDeploymentResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("jobSummary", (Some (JobSummary.to_value x.jobSummary)))]
+        [("jobSummary", (Option.map x.jobSummary ~f:JobSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let jobSummary =
-        JobSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobSummary") in
-      make ~jobSummary ()
+        (Option.map ~f:JobSummary.of_xml) (Xml.child xml_arg0 "jobSummary") in
+      make ?jobSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobSummary = field_map_exn json "jobSummary" JobSummary.of_json in
-      make ~jobSummary ()
+    let of_json json__ =
+      let jobSummary = field_map json__ "jobSummary" JobSummary.of_json in
+      make ?jobSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the start a deployment request."]
 module StartDeploymentRequest =
@@ -5268,27 +6042,37 @@ module StartDeploymentRequest =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
       branchName: BranchName.t
-        [@ocaml.doc "The name for the branch, for the job."];
+        [@ocaml.doc "The name of the branch to use for the deployment job."];
       jobId: JobId.t option
         [@ocaml.doc
-          "The job ID for this deployment, generated by the create deployment request."];
+          "The job ID for this deployment that is generated by the CreateDeployment request."];
       sourceUrl: SourceUrl.t option
         [@ocaml.doc
-          "The source URL for this deployment, used when calling start deployment without create deployment. The source URL can be any HTTP GET URL that is publicly accessible and downloads a single .zip file."]}
+          "The source URL for the deployment that is used when calling StartDeployment without CreateDeployment. The source URL can be either an HTTP GET URL that is publicly accessible and downloads a single .zip file, or an Amazon S3 bucket and prefix."];
+      sourceUrlType: SourceUrlType.t option
+        [@ocaml.doc
+          "The type of source specified by the sourceURL. If the value is ZIP, the source is a .zip file. If the value is BUCKET_PREFIX, the source is an Amazon S3 bucket and prefix. If no value is specified, the default is ZIP."]}
     let context_ = "StartDeploymentRequest"
     let make ?jobId =
       fun ?sourceUrl ->
-        fun ~appId ->
-          fun ~branchName ->
-            fun () -> { jobId; sourceUrl; appId; branchName }
+        fun ?sourceUrlType ->
+          fun ~appId ->
+            fun ~branchName ->
+              fun () ->
+                { jobId; sourceUrl; sourceUrlType; appId; branchName }
     let to_value x =
       structure_to_value
         [("appId", (Some (AppId.to_value x.appId)));
         ("branchName", (Some (BranchName.to_value x.branchName)));
         ("jobId", (Option.map x.jobId ~f:JobId.to_value));
-        ("sourceUrl", (Option.map x.sourceUrl ~f:SourceUrl.to_value))]
+        ("sourceUrl", (Option.map x.sourceUrl ~f:SourceUrl.to_value));
+        ("sourceUrlType",
+          (Option.map x.sourceUrlType ~f:SourceUrlType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceUrlType =
+        (Option.map ~f:SourceUrlType.of_xml)
+          (Xml.child xml_arg0 "sourceUrlType") in
       let sourceUrl =
         (Option.map ~f:SourceUrl.of_xml) (Xml.child xml_arg0 "sourceUrl") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
@@ -5297,14 +6081,16 @@ module StartDeploymentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "branchName") in
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ?sourceUrl ?jobId ~branchName ~appId ()
+      make ?sourceUrlType ?sourceUrl ?jobId ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceUrl = field_map json "sourceUrl" SourceUrl.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
-      make ?sourceUrl ?jobId ~branchName ~appId ()
+    let of_json json__ =
+      let sourceUrlType =
+        field_map json__ "sourceUrlType" SourceUrlType.of_json in
+      let sourceUrl = field_map json__ "sourceUrl" SourceUrl.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ?sourceUrlType ?sourceUrl ?jobId ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request structure for the start a deployment request."]
@@ -5312,7 +6098,7 @@ module ListWebhooksResult =
   struct
     type nonrec t =
       {
-      webhooks: Webhooks.t [@ocaml.doc "A list of webhooks."];
+      webhooks: Webhooks.t option [@ocaml.doc "A list of webhooks."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "A pagination token. If non-null, the pagination token is returned in a result. Pass its value in another request to retrieve more entries."]}
@@ -5322,8 +6108,7 @@ module ListWebhooksResult =
       | `LimitExceededException of LimitExceededException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListWebhooksResult"
-    let make ?nextToken = fun ~webhooks -> fun () -> { nextToken; webhooks }
+    let make ?webhooks = fun ?nextToken -> fun () -> { webhooks; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5374,20 +6159,20 @@ module ListWebhooksResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("webhooks", (Some (Webhooks.to_value x.webhooks)));
+        [("webhooks", (Option.map x.webhooks ~f:Webhooks.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let webhooks =
-        Webhooks.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhooks") in
-      make ?nextToken ~webhooks ()
+        (Option.map ~f:Webhooks.of_xml) (Xml.child xml_arg0 "webhooks") in
+      make ?nextToken ?webhooks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let webhooks = field_map_exn json "webhooks" Webhooks.of_json in
-      make ?nextToken ~webhooks ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let webhooks = field_map json__ "webhooks" Webhooks.of_json in
+      make ?nextToken ?webhooks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the list webhooks request."]
 module ListWebhooksRequest =
@@ -5420,10 +6205,10 @@ module ListWebhooksRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?maxResults ?nextToken ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the list webhooks request."]
@@ -5487,8 +6272,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response for the list tags for resource request."]
 module ListTagsForResourceRequest =
@@ -5509,8 +6294,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5519,7 +6305,7 @@ module ListJobsResult =
   struct
     type nonrec t =
       {
-      jobSummaries: JobSummaries.t
+      jobSummaries: JobSummaries.t option
         [@ocaml.doc "The result structure for the list job result request."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -5530,9 +6316,8 @@ module ListJobsResult =
       | `LimitExceededException of LimitExceededException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListJobsResult"
-    let make ?nextToken =
-      fun ~jobSummaries -> fun () -> { nextToken; jobSummaries }
+    let make ?jobSummaries =
+      fun ?nextToken -> fun () -> { jobSummaries; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5583,22 +6368,22 @@ module ListJobsResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("jobSummaries", (Some (JobSummaries.to_value x.jobSummaries)));
+        [("jobSummaries",
+           (Option.map x.jobSummaries ~f:JobSummaries.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let jobSummaries =
-        JobSummaries.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobSummaries") in
-      make ?nextToken ~jobSummaries ()
+        (Option.map ~f:JobSummaries.of_xml)
+          (Xml.child xml_arg0 "jobSummaries") in
+      make ?nextToken ?jobSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let jobSummaries =
-        field_map_exn json "jobSummaries" JobSummaries.of_json in
-      make ?nextToken ~jobSummaries ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let jobSummaries = field_map json__ "jobSummaries" JobSummaries.of_json in
+      make ?nextToken ?jobSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The maximum number of records to list in a single response."]
@@ -5607,7 +6392,8 @@ module ListJobsRequest =
     type nonrec t =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
-      branchName: BranchName.t [@ocaml.doc "The name for a branch."];
+      branchName: BranchName.t
+        [@ocaml.doc "The name of the branch to use for the request."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "A pagination token. Set to null to start listing steps from the start. If a non-null pagination token is returned in a result, pass its value in here to list more steps."];
@@ -5639,11 +6425,11 @@ module ListJobsRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?maxResults ?nextToken ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the list jobs request."]
@@ -5651,7 +6437,7 @@ module ListDomainAssociationsResult =
   struct
     type nonrec t =
       {
-      domainAssociations: DomainAssociations.t
+      domainAssociations: DomainAssociations.t option
         [@ocaml.doc "A list of domain associations."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -5661,9 +6447,8 @@ module ListDomainAssociationsResult =
       | `InternalFailureException of InternalFailureException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDomainAssociationsResult"
-    let make ?nextToken =
-      fun ~domainAssociations -> fun () -> { nextToken; domainAssociations }
+    let make ?domainAssociations =
+      fun ?nextToken -> fun () -> { domainAssociations; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5707,22 +6492,22 @@ module ListDomainAssociationsResult =
     let to_value x =
       structure_to_value
         [("domainAssociations",
-           (Some (DomainAssociations.to_value x.domainAssociations)));
+           (Option.map x.domainAssociations ~f:DomainAssociations.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let domainAssociations =
-        DomainAssociations.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainAssociations") in
-      make ?nextToken ~domainAssociations ()
+        (Option.map ~f:DomainAssociations.of_xml)
+          (Xml.child xml_arg0 "domainAssociations") in
+      make ?nextToken ?domainAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let domainAssociations =
-        field_map_exn json "domainAssociations" DomainAssociations.of_json in
-      make ?nextToken ~domainAssociations ()
+        field_map json__ "domainAssociations" DomainAssociations.of_json in
+      make ?nextToken ?domainAssociations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure for the list domain association request."]
@@ -5756,10 +6541,10 @@ module ListDomainAssociationsRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?maxResults ?nextToken ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5768,7 +6553,7 @@ module ListBranchesResult =
   struct
     type nonrec t =
       {
-      branches: Branches.t
+      branches: Branches.t option
         [@ocaml.doc "A list of branches for an Amplify app."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -5778,8 +6563,7 @@ module ListBranchesResult =
       | `InternalFailureException of InternalFailureException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListBranchesResult"
-    let make ?nextToken = fun ~branches -> fun () -> { nextToken; branches }
+    let make ?branches = fun ?nextToken -> fun () -> { branches; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5822,20 +6606,20 @@ module ListBranchesResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("branches", (Some (Branches.to_value x.branches)));
+        [("branches", (Option.map x.branches ~f:Branches.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let branches =
-        Branches.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branches") in
-      make ?nextToken ~branches ()
+        (Option.map ~f:Branches.of_xml) (Xml.child xml_arg0 "branches") in
+      make ?nextToken ?branches ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let branches = field_map_exn json "branches" Branches.of_json in
-      make ?nextToken ~branches ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let branches = field_map json__ "branches" Branches.of_json in
+      make ?nextToken ?branches ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the list branches request."]
 module ListBranchesRequest =
@@ -5868,10 +6652,10 @@ module ListBranchesRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?maxResults ?nextToken ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the list branches request."]
@@ -5879,7 +6663,7 @@ module ListBackendEnvironmentsResult =
   struct
     type nonrec t =
       {
-      backendEnvironments: BackendEnvironments.t
+      backendEnvironments: BackendEnvironments.t option
         [@ocaml.doc "The list of backend environments for an Amplify app."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -5889,10 +6673,8 @@ module ListBackendEnvironmentsResult =
       | `InternalFailureException of InternalFailureException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListBackendEnvironmentsResult"
-    let make ?nextToken =
-      fun ~backendEnvironments ->
-        fun () -> { nextToken; backendEnvironments }
+    let make ?backendEnvironments =
+      fun ?nextToken -> fun () -> { backendEnvironments; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5936,22 +6718,22 @@ module ListBackendEnvironmentsResult =
     let to_value x =
       structure_to_value
         [("backendEnvironments",
-           (Some (BackendEnvironments.to_value x.backendEnvironments)));
+           (Option.map x.backendEnvironments ~f:BackendEnvironments.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let backendEnvironments =
-        BackendEnvironments.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironments") in
-      make ?nextToken ~backendEnvironments ()
+        (Option.map ~f:BackendEnvironments.of_xml)
+          (Xml.child xml_arg0 "backendEnvironments") in
+      make ?nextToken ?backendEnvironments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let backendEnvironments =
-        field_map_exn json "backendEnvironments" BackendEnvironments.of_json in
-      make ?nextToken ~backendEnvironments ()
+        field_map json__ "backendEnvironments" BackendEnvironments.of_json in
+      make ?nextToken ?backendEnvironments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure for the list backend environments result."]
@@ -5994,12 +6776,12 @@ module ListBackendEnvironmentsRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ?environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let environmentName =
-        field_map json "environmentName" EnvironmentName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+        field_map json__ "environmentName" EnvironmentName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?maxResults ?nextToken ?environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6008,7 +6790,7 @@ module ListArtifactsResult =
   struct
     type nonrec t =
       {
-      artifacts: Artifacts.t [@ocaml.doc "A list of artifacts."];
+      artifacts: Artifacts.t option [@ocaml.doc "A list of artifacts."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "A pagination token. If a non-null pagination token is returned in a result, pass its value in another request to retrieve more entries."]}
@@ -6018,9 +6800,8 @@ module ListArtifactsResult =
       | `LimitExceededException of LimitExceededException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListArtifactsResult"
-    let make ?nextToken =
-      fun ~artifacts -> fun () -> { nextToken; artifacts }
+    let make ?artifacts =
+      fun ?nextToken -> fun () -> { artifacts; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6071,21 +6852,20 @@ module ListArtifactsResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("artifacts", (Some (Artifacts.to_value x.artifacts)));
+        [("artifacts", (Option.map x.artifacts ~f:Artifacts.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let artifacts =
-        Artifacts.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "artifacts") in
-      make ?nextToken ~artifacts ()
+        (Option.map ~f:Artifacts.of_xml) (Xml.child xml_arg0 "artifacts") in
+      make ?nextToken ?artifacts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let artifacts = field_map_exn json "artifacts" Artifacts.of_json in
-      make ?nextToken ~artifacts ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let artifacts = field_map json__ "artifacts" Artifacts.of_json in
+      make ?nextToken ?artifacts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the list artifacts request."]
 module ListArtifactsRequest =
@@ -6131,12 +6911,12 @@ module ListArtifactsRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~jobId ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let jobId = field_map_exn json "jobId" JobId.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?maxResults ?nextToken ~jobId ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6145,7 +6925,7 @@ module ListAppsResult =
   struct
     type nonrec t =
       {
-      apps: Apps.t [@ocaml.doc "A list of Amplify apps."];
+      apps: Apps.t option [@ocaml.doc "A list of Amplify apps."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "A pagination token. Set to null to start listing apps from start. If non-null, the pagination token is returned in a result. Pass its value in here to list more projects."]}
@@ -6154,8 +6934,7 @@ module ListAppsResult =
       | `InternalFailureException of InternalFailureException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAppsResult"
-    let make ?nextToken = fun ~apps -> fun () -> { nextToken; apps }
+    let make ?apps = fun ?nextToken -> fun () -> { apps; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6198,20 +6977,19 @@ module ListAppsResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("apps", (Some (Apps.to_value x.apps)));
+        [("apps", (Option.map x.apps ~f:Apps.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let apps =
-        Apps.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apps") in
-      make ?nextToken ~apps ()
+      let apps = (Option.map ~f:Apps.of_xml) (Xml.child xml_arg0 "apps") in
+      make ?nextToken ?apps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let apps = field_map_exn json "apps" Apps.of_json in
-      make ?nextToken ~apps ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let apps = field_map json__ "apps" Apps.of_json in
+      make ?nextToken ?apps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for an Amplify app list request."]
 module ListAppsRequest =
@@ -6221,7 +6999,7 @@ module ListAppsRequest =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A pagination token. If non-null, the pagination token is returned in a result. Pass its value in another request to retrieve more entries."];
-      maxResults: MaxResults.t option
+      maxResults: MaxResultsForListApps.t option
         [@ocaml.doc
           "The maximum number of records to list in a single response."]}
     let make ?nextToken =
@@ -6229,18 +7007,21 @@ module ListAppsRequest =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxResultsForListApps.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+        (Option.map ~f:MaxResultsForListApps.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "maxResults" MaxResultsForListApps.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the list apps request."]
@@ -6248,7 +7029,8 @@ module GetWebhookResult =
   struct
     type nonrec t =
       {
-      webhook: Webhook.t [@ocaml.doc "Describes the structure of a webhook."]}
+      webhook: Webhook.t option
+        [@ocaml.doc "Describes the structure of a webhook."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -6256,8 +7038,7 @@ module GetWebhookResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetWebhookResult"
-    let make ~webhook = fun () -> { webhook }
+    let make ?webhook = fun () -> { webhook }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6315,16 +7096,17 @@ module GetWebhookResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("webhook", (Some (Webhook.to_value x.webhook)))]
+      structure_to_value
+        [("webhook", (Option.map x.webhook ~f:Webhook.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let webhook =
-        Webhook.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
-      make ~webhook ()
+        (Option.map ~f:Webhook.of_xml) (Xml.child xml_arg0 "webhook") in
+      make ?webhook ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhook = field_map_exn json "webhook" Webhook.of_json in
-      make ~webhook ()
+    let of_json json__ =
+      let webhook = field_map json__ "webhook" Webhook.of_json in
+      make ?webhook ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the get webhook request."]
 module GetWebhookRequest =
@@ -6344,15 +7126,15 @@ module GetWebhookRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "webhookId") in
       make ~webhookId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhookId = field_map_exn json "webhookId" WebhookId.of_json in
+    let of_json json__ =
+      let webhookId = field_map_exn json__ "webhookId" WebhookId.of_json in
       make ~webhookId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the get webhook request."]
 module GetJobResult =
   struct
     type nonrec t = {
-      job: Job.t }
+      job: Job.t option }
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -6360,8 +7142,7 @@ module GetJobResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetJobResult"
-    let make ~job = fun () -> { job }
+    let make ?job = fun () -> { job }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6419,14 +7200,14 @@ module GetJobResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("job", (Some (Job.to_value x.job)))]
+      structure_to_value [("job", (Option.map x.job ~f:Job.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let job = Job.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
-      make ~job ()
+      let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
+      make ?job ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let job = field_map_exn json "job" Job.of_json in make ~job ()
+    let of_json json__ =
+      let job = field_map json__ "job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a job for a branch of an Amplify app."]
 module GetJobRequest =
@@ -6434,7 +7215,8 @@ module GetJobRequest =
     type nonrec t =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
-      branchName: BranchName.t [@ocaml.doc "The branch name for the job."];
+      branchName: BranchName.t
+        [@ocaml.doc "The name of the branch to use for the job."];
       jobId: JobId.t [@ocaml.doc "The unique ID for the job."]}
     let context_ = "GetJobRequest"
     let make ~appId =
@@ -6455,10 +7237,10 @@ module GetJobRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~jobId ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" JobId.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ~jobId ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the get job request."]
@@ -6466,7 +7248,7 @@ module GetDomainAssociationResult =
   struct
     type nonrec t =
       {
-      domainAssociation: DomainAssociation.t
+      domainAssociation: DomainAssociation.t option
         [@ocaml.doc
           "Describes the structure of a domain association, which associates a custom domain with an Amplify app."]}
     type nonrec error =
@@ -6475,8 +7257,7 @@ module GetDomainAssociationResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDomainAssociationResult"
-    let make ~domainAssociation = fun () -> { domainAssociation }
+    let make ?domainAssociation = fun () -> { domainAssociation }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6528,18 +7309,18 @@ module GetDomainAssociationResult =
     let to_value x =
       structure_to_value
         [("domainAssociation",
-           (Some (DomainAssociation.to_value x.domainAssociation)))]
+           (Option.map x.domainAssociation ~f:DomainAssociation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let domainAssociation =
-        DomainAssociation.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainAssociation") in
-      make ~domainAssociation ()
+        (Option.map ~f:DomainAssociation.of_xml)
+          (Xml.child xml_arg0 "domainAssociation") in
+      make ?domainAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainAssociation =
-        field_map_exn json "domainAssociation" DomainAssociation.of_json in
-      make ~domainAssociation ()
+        field_map json__ "domainAssociation" DomainAssociation.of_json in
+      make ?domainAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure for the get domain association request."]
@@ -6564,9 +7345,9 @@ module GetDomainAssociationRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~domainName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "domainName" DomainName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "domainName" DomainName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ~domainName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6574,15 +7355,14 @@ module GetDomainAssociationRequest =
 module GetBranchResult =
   struct
     type nonrec t = {
-      branch: Branch.t }
+      branch: Branch.t option }
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetBranchResult"
-    let make ~branch = fun () -> { branch }
+    let make ?branch = fun () -> { branch }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6632,16 +7412,17 @@ module GetBranchResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("branch", (Some (Branch.to_value x.branch)))]
+      structure_to_value
+        [("branch", (Option.map x.branch ~f:Branch.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let branch =
-        Branch.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branch") in
-      make ~branch ()
+        (Option.map ~f:Branch.of_xml) (Xml.child xml_arg0 "branch") in
+      make ?branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branch = field_map_exn json "branch" Branch.of_json in
-      make ~branch ()
+    let of_json json__ =
+      let branch = field_map json__ "branch" Branch.of_json in
+      make ?branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a branch for an Amplify app."]
 module GetBranchRequest =
@@ -6649,7 +7430,7 @@ module GetBranchRequest =
     type nonrec t =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
-      branchName: BranchName.t [@ocaml.doc "The name for the branch."]}
+      branchName: BranchName.t [@ocaml.doc "The name of the branch."]}
     let context_ = "GetBranchRequest"
     let make ~appId = fun ~branchName -> fun () -> { appId; branchName }
     let to_value x =
@@ -6665,9 +7446,9 @@ module GetBranchRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the get branch request."]
@@ -6675,7 +7456,7 @@ module GetBackendEnvironmentResult =
   struct
     type nonrec t =
       {
-      backendEnvironment: BackendEnvironment.t
+      backendEnvironment: BackendEnvironment.t option
         [@ocaml.doc "Describes the backend environment for an Amplify app."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -6683,8 +7464,7 @@ module GetBackendEnvironmentResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetBackendEnvironmentResult"
-    let make ~backendEnvironment = fun () -> { backendEnvironment }
+    let make ?backendEnvironment = fun () -> { backendEnvironment }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6736,18 +7516,18 @@ module GetBackendEnvironmentResult =
     let to_value x =
       structure_to_value
         [("backendEnvironment",
-           (Some (BackendEnvironment.to_value x.backendEnvironment)))]
+           (Option.map x.backendEnvironment ~f:BackendEnvironment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let backendEnvironment =
-        BackendEnvironment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironment") in
-      make ~backendEnvironment ()
+        (Option.map ~f:BackendEnvironment.of_xml)
+          (Xml.child xml_arg0 "backendEnvironment") in
+      make ?backendEnvironment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backendEnvironment =
-        field_map_exn json "backendEnvironment" BackendEnvironment.of_json in
-      make ~backendEnvironment ()
+        field_map json__ "backendEnvironment" BackendEnvironment.of_json in
+      make ?backendEnvironment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure for the get backend environment result."]
@@ -6775,10 +7555,10 @@ module GetBackendEnvironmentRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentName =
-        field_map_exn json "environmentName" EnvironmentName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+        field_map_exn json__ "environmentName" EnvironmentName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6787,8 +7567,9 @@ module GetArtifactUrlResult =
   struct
     type nonrec t =
       {
-      artifactId: ArtifactId.t [@ocaml.doc "The unique ID for an artifact."];
-      artifactUrl: ArtifactUrl.t
+      artifactId: ArtifactId.t option
+        [@ocaml.doc "The unique ID for an artifact."];
+      artifactUrl: ArtifactUrl.t option
         [@ocaml.doc "The presigned URL for the artifact."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -6797,9 +7578,8 @@ module GetArtifactUrlResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetArtifactUrlResult"
-    let make ~artifactId =
-      fun ~artifactUrl -> fun () -> { artifactId; artifactUrl }
+    let make ?artifactId =
+      fun ?artifactUrl -> fun () -> { artifactId; artifactUrl }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6858,22 +7638,20 @@ module GetArtifactUrlResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("artifactId", (Some (ArtifactId.to_value x.artifactId)));
-        ("artifactUrl", (Some (ArtifactUrl.to_value x.artifactUrl)))]
+        [("artifactId", (Option.map x.artifactId ~f:ArtifactId.to_value));
+        ("artifactUrl", (Option.map x.artifactUrl ~f:ArtifactUrl.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let artifactUrl =
-        ArtifactUrl.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "artifactUrl") in
+        (Option.map ~f:ArtifactUrl.of_xml) (Xml.child xml_arg0 "artifactUrl") in
       let artifactId =
-        ArtifactId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "artifactId") in
-      make ~artifactUrl ~artifactId ()
+        (Option.map ~f:ArtifactId.of_xml) (Xml.child xml_arg0 "artifactId") in
+      make ?artifactUrl ?artifactId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let artifactUrl = field_map_exn json "artifactUrl" ArtifactUrl.of_json in
-      let artifactId = field_map_exn json "artifactId" ArtifactId.of_json in
-      make ~artifactUrl ~artifactId ()
+    let of_json json__ =
+      let artifactUrl = field_map json__ "artifactUrl" ArtifactUrl.of_json in
+      let artifactId = field_map json__ "artifactId" ArtifactId.of_json in
+      make ?artifactUrl ?artifactId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the result structure for the get artifact request."]
@@ -6894,8 +7672,8 @@ module GetArtifactUrlRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "artifactId") in
       make ~artifactId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let artifactId = field_map_exn json "artifactId" ArtifactId.of_json in
+    let of_json json__ =
+      let artifactId = field_map_exn json__ "artifactId" ArtifactId.of_json in
       make ~artifactId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6903,15 +7681,14 @@ module GetArtifactUrlRequest =
 module GetAppResult =
   struct
     type nonrec t = {
-      app: App.t }
+      app: App.t option }
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetAppResult"
-    let make ~app = fun () -> { app }
+    let make ?app = fun () -> { app }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6961,16 +7738,16 @@ module GetAppResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("app", (Some (App.to_value x.app)))]
+      structure_to_value [("app", (Option.map x.app ~f:App.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
-      make ~app ()
+      let app = (Option.map ~f:App.of_xml) (Xml.child xml_arg0 "app") in
+      make ?app ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let app = field_map_exn json "app" App.of_json in make ~app ()
+    let of_json json__ =
+      let app = field_map json__ "app" App.of_json in make ?app ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns an existing Amplify app by appID."]
+  end[@@ocaml.doc "Returns an existing Amplify app specified by an app ID."]
 module GetAppRequest =
   struct
     type nonrec t =
@@ -6986,8 +7763,9 @@ module GetAppRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appId = field_map_exn json "appId" AppId.of_json in make ~appId ()
+    let of_json json__ =
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the get app request."]
 module GenerateAccessLogsResult =
@@ -7060,8 +7838,9 @@ module GenerateAccessLogsResult =
         (Option.map ~f:LogUrl.of_xml) (Xml.child xml_arg0 "logUrl") in
       make ?logUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logUrl = field_map json "logUrl" LogUrl.of_json in make ?logUrl ()
+    let of_json json__ =
+      let logUrl = field_map json__ "logUrl" LogUrl.of_json in
+      make ?logUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure for the generate access logs request."]
@@ -7101,11 +7880,11 @@ module GenerateAccessLogsRequest =
         (Option.map ~f:StartTime.of_xml) (Xml.child xml_arg0 "startTime") in
       make ~appId ~domainName ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appId = field_map_exn json "appId" AppId.of_json in
-      let domainName = field_map_exn json "domainName" DomainName.of_json in
-      let endTime = field_map json "endTime" EndTime.of_json in
-      let startTime = field_map json "startTime" StartTime.of_json in
+    let of_json json__ =
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      let domainName = field_map_exn json__ "domainName" DomainName.of_json in
+      let endTime = field_map json__ "endTime" EndTime.of_json in
+      let startTime = field_map json__ "startTime" StartTime.of_json in
       make ~appId ~domainName ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7114,7 +7893,7 @@ module DeleteWebhookResult =
   struct
     type nonrec t =
       {
-      webhook: Webhook.t
+      webhook: Webhook.t option
         [@ocaml.doc
           "Describes a webhook that connects repository events to an Amplify app."]}
     type nonrec error =
@@ -7124,8 +7903,7 @@ module DeleteWebhookResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteWebhookResult"
-    let make ~webhook = fun () -> { webhook }
+    let make ?webhook = fun () -> { webhook }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -7183,16 +7961,17 @@ module DeleteWebhookResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("webhook", (Some (Webhook.to_value x.webhook)))]
+      structure_to_value
+        [("webhook", (Option.map x.webhook ~f:Webhook.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let webhook =
-        Webhook.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
-      make ~webhook ()
+        (Option.map ~f:Webhook.of_xml) (Xml.child xml_arg0 "webhook") in
+      make ?webhook ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhook = field_map_exn json "webhook" Webhook.of_json in
-      make ~webhook ()
+    let of_json json__ =
+      let webhook = field_map json__ "webhook" Webhook.of_json in
+      make ?webhook ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the delete webhook request."]
 module DeleteWebhookRequest =
@@ -7212,15 +7991,15 @@ module DeleteWebhookRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "webhookId") in
       make ~webhookId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhookId = field_map_exn json "webhookId" WebhookId.of_json in
+    let of_json json__ =
+      let webhookId = field_map_exn json__ "webhookId" WebhookId.of_json in
       make ~webhookId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the delete webhook request."]
 module DeleteJobResult =
   struct
     type nonrec t = {
-      jobSummary: JobSummary.t }
+      jobSummary: JobSummary.t option }
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -7228,8 +8007,7 @@ module DeleteJobResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteJobResult"
-    let make ~jobSummary = fun () -> { jobSummary }
+    let make ?jobSummary = fun () -> { jobSummary }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -7288,17 +8066,16 @@ module DeleteJobResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("jobSummary", (Some (JobSummary.to_value x.jobSummary)))]
+        [("jobSummary", (Option.map x.jobSummary ~f:JobSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let jobSummary =
-        JobSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobSummary") in
-      make ~jobSummary ()
+        (Option.map ~f:JobSummary.of_xml) (Xml.child xml_arg0 "jobSummary") in
+      make ?jobSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobSummary = field_map_exn json "jobSummary" JobSummary.of_json in
-      make ~jobSummary ()
+    let of_json json__ =
+      let jobSummary = field_map json__ "jobSummary" JobSummary.of_json in
+      make ?jobSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the delete job request."]
 module DeleteJobRequest =
@@ -7307,7 +8084,7 @@ module DeleteJobRequest =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
       branchName: BranchName.t
-        [@ocaml.doc "The name for the branch, for the job."];
+        [@ocaml.doc "The name of the branch to use for the job."];
       jobId: JobId.t [@ocaml.doc "The unique ID for the job."]}
     let context_ = "DeleteJobRequest"
     let make ~appId =
@@ -7328,17 +8105,17 @@ module DeleteJobRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~jobId ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" JobId.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ~jobId ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the delete job request."]
 module DeleteDomainAssociationResult =
   struct
     type nonrec t = {
-      domainAssociation: DomainAssociation.t }
+      domainAssociation: DomainAssociation.t option }
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `DependentServiceFailureException of
@@ -7347,8 +8124,7 @@ module DeleteDomainAssociationResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteDomainAssociationResult"
-    let make ~domainAssociation = fun () -> { domainAssociation }
+    let make ?domainAssociation = fun () -> { domainAssociation }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -7410,18 +8186,18 @@ module DeleteDomainAssociationResult =
     let to_value x =
       structure_to_value
         [("domainAssociation",
-           (Some (DomainAssociation.to_value x.domainAssociation)))]
+           (Option.map x.domainAssociation ~f:DomainAssociation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let domainAssociation =
-        DomainAssociation.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainAssociation") in
-      make ~domainAssociation ()
+        (Option.map ~f:DomainAssociation.of_xml)
+          (Xml.child xml_arg0 "domainAssociation") in
+      make ?domainAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainAssociation =
-        field_map_exn json "domainAssociation" DomainAssociation.of_json in
-      make ~domainAssociation ()
+        field_map json__ "domainAssociation" DomainAssociation.of_json in
+      make ?domainAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a domain association for an Amplify app."]
 module DeleteDomainAssociationRequest =
@@ -7445,9 +8221,9 @@ module DeleteDomainAssociationRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~domainName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "domainName" DomainName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "domainName" DomainName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ~domainName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7456,7 +8232,7 @@ module DeleteBranchResult =
   struct
     type nonrec t =
       {
-      branch: Branch.t
+      branch: Branch.t option
         [@ocaml.doc
           "The branch for an Amplify app, which maps to a third-party repository branch."]}
     type nonrec error =
@@ -7467,8 +8243,7 @@ module DeleteBranchResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteBranchResult"
-    let make ~branch = fun () -> { branch }
+    let make ?branch = fun () -> { branch }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -7528,16 +8303,17 @@ module DeleteBranchResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("branch", (Some (Branch.to_value x.branch)))]
+      structure_to_value
+        [("branch", (Option.map x.branch ~f:Branch.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let branch =
-        Branch.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branch") in
-      make ~branch ()
+        (Option.map ~f:Branch.of_xml) (Xml.child xml_arg0 "branch") in
+      make ?branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branch = field_map_exn json "branch" Branch.of_json in
-      make ~branch ()
+    let of_json json__ =
+      let branch = field_map json__ "branch" Branch.of_json in
+      make ?branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the delete branch request."]
 module DeleteBranchRequest =
@@ -7545,7 +8321,7 @@ module DeleteBranchRequest =
     type nonrec t =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
-      branchName: BranchName.t [@ocaml.doc "The name for the branch."]}
+      branchName: BranchName.t [@ocaml.doc "The name of the branch."]}
     let context_ = "DeleteBranchRequest"
     let make ~appId = fun ~branchName -> fun () -> { appId; branchName }
     let to_value x =
@@ -7561,9 +8337,9 @@ module DeleteBranchRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the delete branch request."]
@@ -7571,7 +8347,7 @@ module DeleteBackendEnvironmentResult =
   struct
     type nonrec t =
       {
-      backendEnvironment: BackendEnvironment.t
+      backendEnvironment: BackendEnvironment.t option
         [@ocaml.doc "Describes the backend environment for an Amplify app."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -7581,8 +8357,7 @@ module DeleteBackendEnvironmentResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteBackendEnvironmentResult"
-    let make ~backendEnvironment = fun () -> { backendEnvironment }
+    let make ?backendEnvironment = fun () -> { backendEnvironment }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -7644,18 +8419,18 @@ module DeleteBackendEnvironmentResult =
     let to_value x =
       structure_to_value
         [("backendEnvironment",
-           (Some (BackendEnvironment.to_value x.backendEnvironment)))]
+           (Option.map x.backendEnvironment ~f:BackendEnvironment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let backendEnvironment =
-        BackendEnvironment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironment") in
-      make ~backendEnvironment ()
+        (Option.map ~f:BackendEnvironment.of_xml)
+          (Xml.child xml_arg0 "backendEnvironment") in
+      make ?backendEnvironment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backendEnvironment =
-        field_map_exn json "backendEnvironment" BackendEnvironment.of_json in
-      make ~backendEnvironment ()
+        field_map json__ "backendEnvironment" BackendEnvironment.of_json in
+      make ?backendEnvironment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure of the delete backend environment result."]
@@ -7683,10 +8458,10 @@ module DeleteBackendEnvironmentRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let environmentName =
-        field_map_exn json "environmentName" EnvironmentName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+        field_map_exn json__ "environmentName" EnvironmentName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7694,7 +8469,7 @@ module DeleteBackendEnvironmentRequest =
 module DeleteAppResult =
   struct
     type nonrec t = {
-      app: App.t }
+      app: App.t option }
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `DependentServiceFailureException of
@@ -7703,8 +8478,7 @@ module DeleteAppResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteAppResult"
-    let make ~app = fun () -> { app }
+    let make ?app = fun () -> { app }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -7764,14 +8538,14 @@ module DeleteAppResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("app", (Some (App.to_value x.app)))]
+      structure_to_value [("app", (Option.map x.app ~f:App.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
-      make ~app ()
+      let app = (Option.map ~f:App.of_xml) (Xml.child xml_arg0 "app") in
+      make ?app ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let app = field_map_exn json "app" App.of_json in make ~app ()
+    let of_json json__ =
+      let app = field_map json__ "app" App.of_json in make ?app ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the delete app request."]
 module DeleteAppRequest =
@@ -7789,8 +8563,9 @@ module DeleteAppRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appId = field_map_exn json "appId" AppId.of_json in make ~appId ()
+    let of_json json__ =
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the request structure for the delete app request."]
@@ -7798,7 +8573,7 @@ module CreateWebhookResult =
   struct
     type nonrec t =
       {
-      webhook: Webhook.t
+      webhook: Webhook.t option
         [@ocaml.doc
           "Describes a webhook that connects repository events to an Amplify app."]}
     type nonrec error =
@@ -7810,8 +8585,7 @@ module CreateWebhookResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateWebhookResult"
-    let make ~webhook = fun () -> { webhook }
+    let make ?webhook = fun () -> { webhook }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -7879,16 +8653,17 @@ module CreateWebhookResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("webhook", (Some (Webhook.to_value x.webhook)))]
+      structure_to_value
+        [("webhook", (Option.map x.webhook ~f:Webhook.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let webhook =
-        Webhook.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
-      make ~webhook ()
+        (Option.map ~f:Webhook.of_xml) (Xml.child xml_arg0 "webhook") in
+      make ?webhook ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhook = field_map_exn json "webhook" Webhook.of_json in
-      make ~webhook ()
+    let of_json json__ =
+      let webhook = field_map json__ "webhook" Webhook.of_json in
+      make ?webhook ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for the create webhook request."]
 module CreateWebhookRequest =
@@ -7920,10 +8695,10 @@ module CreateWebhookRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?description ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "description" Description.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let description = field_map json__ "description" Description.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?description ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the create webhook request."]
@@ -7931,7 +8706,7 @@ module CreateDomainAssociationResult =
   struct
     type nonrec t =
       {
-      domainAssociation: DomainAssociation.t
+      domainAssociation: DomainAssociation.t option
         [@ocaml.doc
           "Describes the structure of a domain association, which associates a custom domain with an Amplify app."]}
     type nonrec error =
@@ -7943,8 +8718,7 @@ module CreateDomainAssociationResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateDomainAssociationResult"
-    let make ~domainAssociation = fun () -> { domainAssociation }
+    let make ?domainAssociation = fun () -> { domainAssociation }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -8014,18 +8788,18 @@ module CreateDomainAssociationResult =
     let to_value x =
       structure_to_value
         [("domainAssociation",
-           (Some (DomainAssociation.to_value x.domainAssociation)))]
+           (Option.map x.domainAssociation ~f:DomainAssociation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let domainAssociation =
-        DomainAssociation.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainAssociation") in
-      make ~domainAssociation ()
+        (Option.map ~f:DomainAssociation.of_xml)
+          (Xml.child xml_arg0 "domainAssociation") in
+      make ?domainAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainAssociation =
-        field_map_exn json "domainAssociation" DomainAssociation.of_json in
-      make ~domainAssociation ()
+        field_map json__ "domainAssociation" DomainAssociation.of_json in
+      make ?domainAssociation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure for the create domain association request."]
@@ -8046,23 +8820,28 @@ module CreateDomainAssociationRequest =
           "Sets the branch patterns for automatic subdomain creation."];
       autoSubDomainIAMRole: AutoSubDomainIAMRole.t option
         [@ocaml.doc
-          "The required AWS Identity and Access Management (IAM) service role for the Amazon Resource Name (ARN) for automatically creating subdomains."]}
+          "The required AWS Identity and Access Management (IAM) service role for the Amazon Resource Name (ARN) for automatically creating subdomains."];
+      certificateSettings: CertificateSettings.t option
+        [@ocaml.doc
+          "The type of SSL/TLS certificate to use for your custom domain. If you don't specify a certificate type, Amplify uses the default certificate that it provisions and manages for you."]}
     let context_ = "CreateDomainAssociationRequest"
     let make ?enableAutoSubDomain =
       fun ?autoSubDomainCreationPatterns ->
         fun ?autoSubDomainIAMRole ->
-          fun ~appId ->
-            fun ~domainName ->
-              fun ~subDomainSettings ->
-                fun () ->
-                  {
-                    enableAutoSubDomain;
-                    autoSubDomainCreationPatterns;
-                    autoSubDomainIAMRole;
-                    appId;
-                    domainName;
-                    subDomainSettings
-                  }
+          fun ?certificateSettings ->
+            fun ~appId ->
+              fun ~domainName ->
+                fun ~subDomainSettings ->
+                  fun () ->
+                    {
+                      enableAutoSubDomain;
+                      autoSubDomainCreationPatterns;
+                      autoSubDomainIAMRole;
+                      certificateSettings;
+                      appId;
+                      domainName;
+                      subDomainSettings
+                    }
     let to_value x =
       structure_to_value
         [("appId", (Some (AppId.to_value x.appId)));
@@ -8075,9 +8854,14 @@ module CreateDomainAssociationRequest =
           (Option.map x.autoSubDomainCreationPatterns
              ~f:AutoSubDomainCreationPatterns.to_value));
         ("autoSubDomainIAMRole",
-          (Option.map x.autoSubDomainIAMRole ~f:AutoSubDomainIAMRole.to_value))]
+          (Option.map x.autoSubDomainIAMRole ~f:AutoSubDomainIAMRole.to_value));
+        ("certificateSettings",
+          (Option.map x.certificateSettings ~f:CertificateSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let certificateSettings =
+        (Option.map ~f:CertificateSettings.of_xml)
+          (Xml.child xml_arg0 "certificateSettings") in
       let autoSubDomainIAMRole =
         (Option.map ~f:AutoSubDomainIAMRole.of_xml)
           (Xml.child xml_arg0 "autoSubDomainIAMRole") in
@@ -8095,23 +8879,27 @@ module CreateDomainAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "domainName") in
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ?autoSubDomainIAMRole ?autoSubDomainCreationPatterns
-        ~subDomainSettings ?enableAutoSubDomain ~domainName ~appId ()
+      make ?certificateSettings ?autoSubDomainIAMRole
+        ?autoSubDomainCreationPatterns ~subDomainSettings
+        ?enableAutoSubDomain ~domainName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let certificateSettings =
+        field_map json__ "certificateSettings" CertificateSettings.of_json in
       let autoSubDomainIAMRole =
-        field_map json "autoSubDomainIAMRole" AutoSubDomainIAMRole.of_json in
+        field_map json__ "autoSubDomainIAMRole" AutoSubDomainIAMRole.of_json in
       let autoSubDomainCreationPatterns =
-        field_map json "autoSubDomainCreationPatterns"
+        field_map json__ "autoSubDomainCreationPatterns"
           AutoSubDomainCreationPatterns.of_json in
       let subDomainSettings =
-        field_map_exn json "subDomainSettings" SubDomainSettings.of_json in
+        field_map_exn json__ "subDomainSettings" SubDomainSettings.of_json in
       let enableAutoSubDomain =
-        field_map json "enableAutoSubDomain" EnableAutoSubDomain.of_json in
-      let domainName = field_map_exn json "domainName" DomainName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
-      make ?autoSubDomainIAMRole ?autoSubDomainCreationPatterns
-        ~subDomainSettings ?enableAutoSubDomain ~domainName ~appId ()
+        field_map json__ "enableAutoSubDomain" EnableAutoSubDomain.of_json in
+      let domainName = field_map_exn json__ "domainName" DomainName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ?certificateSettings ?autoSubDomainIAMRole
+        ?autoSubDomainCreationPatterns ~subDomainSettings
+        ?enableAutoSubDomain ~domainName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request structure for the create domain association request."]
@@ -8122,10 +8910,10 @@ module CreateDeploymentResult =
       jobId: JobId.t option
         [@ocaml.doc
           "The job ID for this deployment. will supply to start deployment api."];
-      fileUploadUrls: FileUploadUrls.t
+      fileUploadUrls: FileUploadUrls.t option
         [@ocaml.doc
           "When the fileMap argument is provided in the request, fileUploadUrls will contain a map of file names to upload URLs."];
-      zipUploadUrl: UploadUrl.t
+      zipUploadUrl: UploadUrl.t option
         [@ocaml.doc
           "When the fileMap argument is not provided in the request, this zipUploadUrl is returned."]}
     type nonrec error =
@@ -8134,10 +8922,9 @@ module CreateDeploymentResult =
       | `LimitExceededException of LimitExceededException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateDeploymentResult"
     let make ?jobId =
-      fun ~fileUploadUrls ->
-        fun ~zipUploadUrl ->
+      fun ?fileUploadUrls ->
+        fun ?zipUploadUrl ->
           fun () -> { jobId; fileUploadUrls; zipUploadUrl }
     let error_of_json name json =
       match name with
@@ -8190,25 +8977,25 @@ module CreateDeploymentResult =
     let to_value x =
       structure_to_value
         [("jobId", (Option.map x.jobId ~f:JobId.to_value));
-        ("fileUploadUrls", (Some (FileUploadUrls.to_value x.fileUploadUrls)));
-        ("zipUploadUrl", (Some (UploadUrl.to_value x.zipUploadUrl)))]
+        ("fileUploadUrls",
+          (Option.map x.fileUploadUrls ~f:FileUploadUrls.to_value));
+        ("zipUploadUrl", (Option.map x.zipUploadUrl ~f:UploadUrl.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let zipUploadUrl =
-        UploadUrl.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "zipUploadUrl") in
+        (Option.map ~f:UploadUrl.of_xml) (Xml.child xml_arg0 "zipUploadUrl") in
       let fileUploadUrls =
-        FileUploadUrls.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "fileUploadUrls") in
+        (Option.map ~f:FileUploadUrls.of_xml)
+          (Xml.child xml_arg0 "fileUploadUrls") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
-      make ~zipUploadUrl ~fileUploadUrls ?jobId ()
+      make ?zipUploadUrl ?fileUploadUrls ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let zipUploadUrl = field_map_exn json "zipUploadUrl" UploadUrl.of_json in
+    let of_json json__ =
+      let zipUploadUrl = field_map json__ "zipUploadUrl" UploadUrl.of_json in
       let fileUploadUrls =
-        field_map_exn json "fileUploadUrls" FileUploadUrls.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
-      make ~zipUploadUrl ~fileUploadUrls ?jobId ()
+        field_map json__ "fileUploadUrls" FileUploadUrls.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      make ?zipUploadUrl ?fileUploadUrls ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure for the create a new deployment request."]
@@ -8218,7 +9005,7 @@ module CreateDeploymentRequest =
       {
       appId: AppId.t [@ocaml.doc "The unique ID for an Amplify app."];
       branchName: BranchName.t
-        [@ocaml.doc "The name for the branch, for the job."];
+        [@ocaml.doc "The name of the branch to use for the job."];
       fileMap: FileMap.t option
         [@ocaml.doc
           "An optional file map that contains the file name as the key and the file content md5 hash as the value. If this argument is provided, the service will generate a unique upload URL per file. Otherwise, the service will only generate a single upload URL for the zipped files."]}
@@ -8242,10 +9029,10 @@ module CreateDeploymentRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?fileMap ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileMap = field_map json "fileMap" FileMap.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+    let of_json json__ =
+      let fileMap = field_map json__ "fileMap" FileMap.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?fileMap ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8254,7 +9041,7 @@ module CreateBranchResult =
   struct
     type nonrec t =
       {
-      branch: Branch.t
+      branch: Branch.t option
         [@ocaml.doc
           "Describes the branch for an Amplify app, which maps to a third-party repository branch."]}
     type nonrec error =
@@ -8266,8 +9053,7 @@ module CreateBranchResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateBranchResult"
-    let make ~branch = fun () -> { branch }
+    let make ?branch = fun () -> { branch }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -8335,16 +9121,17 @@ module CreateBranchResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("branch", (Some (Branch.to_value x.branch)))]
+      structure_to_value
+        [("branch", (Option.map x.branch ~f:Branch.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let branch =
-        Branch.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branch") in
-      make ~branch ()
+        (Option.map ~f:Branch.of_xml) (Xml.child xml_arg0 "branch") in
+      make ?branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branch = field_map_exn json "branch" Branch.of_json in
-      make ~branch ()
+    let of_json json__ =
+      let branch = field_map json__ "branch" Branch.of_json in
+      make ?branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result structure for create branch request."]
 module CreateBranchRequest =
@@ -8363,6 +9150,9 @@ module CreateBranchRequest =
         [@ocaml.doc "Enables notifications for the branch."];
       enableAutoBuild: EnableAutoBuild.t option
         [@ocaml.doc "Enables auto building for the branch."];
+      enableSkewProtection: EnableSkewProtection.t option
+        [@ocaml.doc
+          "Specifies whether the skew protection feature is enabled for the branch. Deployment skew protection is available to Amplify applications to eliminate version skew issues between client and servers in web applications. When you apply skew protection to a branch, you can ensure that your clients always interact with the correct version of server-side assets, regardless of when a deployment occurs. For more information about skew protection, see Skew protection for Amplify deployments in the Amplify User Guide."];
       environmentVariables: EnvironmentVariables.t option
         [@ocaml.doc "The environment variables for the branch."];
       basicAuthCredentials: BasicAuthCredentials.t option
@@ -8388,47 +9178,59 @@ module CreateBranchRequest =
         [@ocaml.doc "The Amplify environment name for the pull request."];
       backendEnvironmentArn: BackendEnvironmentArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for a backend environment that is part of an Amplify app."]}
+          "The Amazon Resource Name (ARN) for a backend environment that is part of a Gen 1 Amplify app. This field is available to Amplify Gen 1 apps only where the backend is created using Amplify Studio or the Amplify command line interface (CLI)."];
+      backend: Backend.t option
+        [@ocaml.doc
+          "The backend for a Branch of an Amplify app. Use for a backend created from an CloudFormation stack. This field is available to Amplify Gen 2 apps only. When you deploy an application with Amplify Gen 2, you provision the app's backend infrastructure using Typescript code."];
+      computeRoleArn: ComputeRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to assign to a branch of an SSR app. The SSR Compute role allows the Amplify Hosting compute service to securely access specific Amazon Web Services resources based on the role's permissions. For more information about the SSR Compute role, see Adding an SSR Compute role in the Amplify User Guide."]}
     let context_ = "CreateBranchRequest"
     let make ?description =
       fun ?stage ->
         fun ?framework ->
           fun ?enableNotification ->
             fun ?enableAutoBuild ->
-              fun ?environmentVariables ->
-                fun ?basicAuthCredentials ->
-                  fun ?enableBasicAuth ->
-                    fun ?enablePerformanceMode ->
-                      fun ?tags ->
-                        fun ?buildSpec ->
-                          fun ?ttl ->
-                            fun ?displayName ->
-                              fun ?enablePullRequestPreview ->
-                                fun ?pullRequestEnvironmentName ->
-                                  fun ?backendEnvironmentArn ->
-                                    fun ~appId ->
-                                      fun ~branchName ->
-                                        fun () ->
-                                          {
-                                            description;
-                                            stage;
-                                            framework;
-                                            enableNotification;
-                                            enableAutoBuild;
-                                            environmentVariables;
-                                            basicAuthCredentials;
-                                            enableBasicAuth;
-                                            enablePerformanceMode;
-                                            tags;
-                                            buildSpec;
-                                            ttl;
-                                            displayName;
-                                            enablePullRequestPreview;
-                                            pullRequestEnvironmentName;
-                                            backendEnvironmentArn;
-                                            appId;
-                                            branchName
-                                          }
+              fun ?enableSkewProtection ->
+                fun ?environmentVariables ->
+                  fun ?basicAuthCredentials ->
+                    fun ?enableBasicAuth ->
+                      fun ?enablePerformanceMode ->
+                        fun ?tags ->
+                          fun ?buildSpec ->
+                            fun ?ttl ->
+                              fun ?displayName ->
+                                fun ?enablePullRequestPreview ->
+                                  fun ?pullRequestEnvironmentName ->
+                                    fun ?backendEnvironmentArn ->
+                                      fun ?backend ->
+                                        fun ?computeRoleArn ->
+                                          fun ~appId ->
+                                            fun ~branchName ->
+                                              fun () ->
+                                                {
+                                                  description;
+                                                  stage;
+                                                  framework;
+                                                  enableNotification;
+                                                  enableAutoBuild;
+                                                  enableSkewProtection;
+                                                  environmentVariables;
+                                                  basicAuthCredentials;
+                                                  enableBasicAuth;
+                                                  enablePerformanceMode;
+                                                  tags;
+                                                  buildSpec;
+                                                  ttl;
+                                                  displayName;
+                                                  enablePullRequestPreview;
+                                                  pullRequestEnvironmentName;
+                                                  backendEnvironmentArn;
+                                                  backend;
+                                                  computeRoleArn;
+                                                  appId;
+                                                  branchName
+                                                }
     let to_value x =
       structure_to_value
         [("appId", (Some (AppId.to_value x.appId)));
@@ -8440,6 +9242,8 @@ module CreateBranchRequest =
           (Option.map x.enableNotification ~f:EnableNotification.to_value));
         ("enableAutoBuild",
           (Option.map x.enableAutoBuild ~f:EnableAutoBuild.to_value));
+        ("enableSkewProtection",
+          (Option.map x.enableSkewProtection ~f:EnableSkewProtection.to_value));
         ("environmentVariables",
           (Option.map x.environmentVariables ~f:EnvironmentVariables.to_value));
         ("basicAuthCredentials",
@@ -8461,9 +9265,17 @@ module CreateBranchRequest =
              ~f:PullRequestEnvironmentName.to_value));
         ("backendEnvironmentArn",
           (Option.map x.backendEnvironmentArn
-             ~f:BackendEnvironmentArn.to_value))]
+             ~f:BackendEnvironmentArn.to_value));
+        ("backend", (Option.map x.backend ~f:Backend.to_value));
+        ("computeRoleArn",
+          (Option.map x.computeRoleArn ~f:ComputeRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let computeRoleArn =
+        (Option.map ~f:ComputeRoleArn.of_xml)
+          (Xml.child xml_arg0 "computeRoleArn") in
+      let backend =
+        (Option.map ~f:Backend.of_xml) (Xml.child xml_arg0 "backend") in
       let backendEnvironmentArn =
         (Option.map ~f:BackendEnvironmentArn.of_xml)
           (Xml.child xml_arg0 "backendEnvironmentArn") in
@@ -8491,6 +9303,9 @@ module CreateBranchRequest =
       let environmentVariables =
         (Option.map ~f:EnvironmentVariables.of_xml)
           (Xml.child xml_arg0 "environmentVariables") in
+      let enableSkewProtection =
+        (Option.map ~f:EnableSkewProtection.of_xml)
+          (Xml.child xml_arg0 "enableSkewProtection") in
       let enableAutoBuild =
         (Option.map ~f:EnableAutoBuild.of_xml)
           (Xml.child xml_arg0 "enableAutoBuild") in
@@ -8507,54 +9322,63 @@ module CreateBranchRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "branchName") in
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ?backendEnvironmentArn ?pullRequestEnvironmentName
-        ?enablePullRequestPreview ?displayName ?ttl ?buildSpec ?tags
-        ?enablePerformanceMode ?enableBasicAuth ?basicAuthCredentials
-        ?environmentVariables ?enableAutoBuild ?enableNotification ?framework
-        ?stage ?description ~branchName ~appId ()
+      make ?computeRoleArn ?backend ?backendEnvironmentArn
+        ?pullRequestEnvironmentName ?enablePullRequestPreview ?displayName
+        ?ttl ?buildSpec ?tags ?enablePerformanceMode ?enableBasicAuth
+        ?basicAuthCredentials ?environmentVariables ?enableSkewProtection
+        ?enableAutoBuild ?enableNotification ?framework ?stage ?description
+        ~branchName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let computeRoleArn =
+        field_map json__ "computeRoleArn" ComputeRoleArn.of_json in
+      let backend = field_map json__ "backend" Backend.of_json in
       let backendEnvironmentArn =
-        field_map json "backendEnvironmentArn" BackendEnvironmentArn.of_json in
+        field_map json__ "backendEnvironmentArn"
+          BackendEnvironmentArn.of_json in
       let pullRequestEnvironmentName =
-        field_map json "pullRequestEnvironmentName"
+        field_map json__ "pullRequestEnvironmentName"
           PullRequestEnvironmentName.of_json in
       let enablePullRequestPreview =
-        field_map json "enablePullRequestPreview"
+        field_map json__ "enablePullRequestPreview"
           EnablePullRequestPreview.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let ttl = field_map json "ttl" TTL.of_json in
-      let buildSpec = field_map json "buildSpec" BuildSpec.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let ttl = field_map json__ "ttl" TTL.of_json in
+      let buildSpec = field_map json__ "buildSpec" BuildSpec.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let enablePerformanceMode =
-        field_map json "enablePerformanceMode" EnablePerformanceMode.of_json in
+        field_map json__ "enablePerformanceMode"
+          EnablePerformanceMode.of_json in
       let enableBasicAuth =
-        field_map json "enableBasicAuth" EnableBasicAuth.of_json in
+        field_map json__ "enableBasicAuth" EnableBasicAuth.of_json in
       let basicAuthCredentials =
-        field_map json "basicAuthCredentials" BasicAuthCredentials.of_json in
+        field_map json__ "basicAuthCredentials" BasicAuthCredentials.of_json in
       let environmentVariables =
-        field_map json "environmentVariables" EnvironmentVariables.of_json in
+        field_map json__ "environmentVariables" EnvironmentVariables.of_json in
+      let enableSkewProtection =
+        field_map json__ "enableSkewProtection" EnableSkewProtection.of_json in
       let enableAutoBuild =
-        field_map json "enableAutoBuild" EnableAutoBuild.of_json in
+        field_map json__ "enableAutoBuild" EnableAutoBuild.of_json in
       let enableNotification =
-        field_map json "enableNotification" EnableNotification.of_json in
-      let framework = field_map json "framework" Framework.of_json in
-      let stage = field_map json "stage" Stage.of_json in
-      let description = field_map json "description" Description.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
-      make ?backendEnvironmentArn ?pullRequestEnvironmentName
-        ?enablePullRequestPreview ?displayName ?ttl ?buildSpec ?tags
-        ?enablePerformanceMode ?enableBasicAuth ?basicAuthCredentials
-        ?environmentVariables ?enableAutoBuild ?enableNotification ?framework
-        ?stage ?description ~branchName ~appId ()
+        field_map json__ "enableNotification" EnableNotification.of_json in
+      let framework = field_map json__ "framework" Framework.of_json in
+      let stage = field_map json__ "stage" Stage.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ?computeRoleArn ?backend ?backendEnvironmentArn
+        ?pullRequestEnvironmentName ?enablePullRequestPreview ?displayName
+        ?ttl ?buildSpec ?tags ?enablePerformanceMode ?enableBasicAuth
+        ?basicAuthCredentials ?environmentVariables ?enableSkewProtection
+        ?enableAutoBuild ?enableNotification ?framework ?stage ?description
+        ~branchName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure for the create branch request."]
 module CreateBackendEnvironmentResult =
   struct
     type nonrec t =
       {
-      backendEnvironment: BackendEnvironment.t
+      backendEnvironment: BackendEnvironment.t option
         [@ocaml.doc "Describes the backend environment for an Amplify app."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -8563,8 +9387,7 @@ module CreateBackendEnvironmentResult =
       | `NotFoundException of NotFoundException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateBackendEnvironmentResult"
-    let make ~backendEnvironment = fun () -> { backendEnvironment }
+    let make ?backendEnvironment = fun () -> { backendEnvironment }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -8624,18 +9447,18 @@ module CreateBackendEnvironmentResult =
     let to_value x =
       structure_to_value
         [("backendEnvironment",
-           (Some (BackendEnvironment.to_value x.backendEnvironment)))]
+           (Option.map x.backendEnvironment ~f:BackendEnvironment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let backendEnvironment =
-        BackendEnvironment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironment") in
-      make ~backendEnvironment ()
+        (Option.map ~f:BackendEnvironment.of_xml)
+          (Xml.child xml_arg0 "backendEnvironment") in
+      make ?backendEnvironment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backendEnvironment =
-        field_map_exn json "backendEnvironment" BackendEnvironment.of_json in
-      make ~backendEnvironment ()
+        field_map json__ "backendEnvironment" BackendEnvironment.of_json in
+      make ?backendEnvironment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result structure for the create backend environment request."]
@@ -8680,13 +9503,13 @@ module CreateBackendEnvironmentRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?deploymentArtifacts ?stackName ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentArtifacts =
-        field_map json "deploymentArtifacts" DeploymentArtifacts.of_json in
-      let stackName = field_map json "stackName" StackName.of_json in
+        field_map json__ "deploymentArtifacts" DeploymentArtifacts.of_json in
+      let stackName = field_map json__ "stackName" StackName.of_json in
       let environmentName =
-        field_map_exn json "environmentName" EnvironmentName.of_json in
-      let appId = field_map_exn json "appId" AppId.of_json in
+        field_map_exn json__ "environmentName" EnvironmentName.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
       make ?deploymentArtifacts ?stackName ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8694,7 +9517,7 @@ module CreateBackendEnvironmentRequest =
 module CreateAppResult =
   struct
     type nonrec t = {
-      app: App.t }
+      app: App.t option }
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `DependentServiceFailureException of
@@ -8703,8 +9526,7 @@ module CreateAppResult =
       | `LimitExceededException of LimitExceededException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAppResult"
-    let make ~app = fun () -> { app }
+    let make ?app = fun () -> { app }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -8764,44 +9586,49 @@ module CreateAppResult =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("app", (Some (App.to_value x.app)))]
+      structure_to_value [("app", (Option.map x.app ~f:App.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
-      make ~app ()
+      let app = (Option.map ~f:App.of_xml) (Xml.child xml_arg0 "app") in
+      make ?app ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let app = field_map_exn json "app" App.of_json in make ~app ()
+    let of_json json__ =
+      let app = field_map json__ "app" App.of_json in make ?app ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new Amplify app."]
 module CreateAppRequest =
   struct
     type nonrec t =
       {
-      name: Name.t [@ocaml.doc "The name for an Amplify app."];
+      name: Name.t [@ocaml.doc "The name of the Amplify app."];
       description: Description.t option
-        [@ocaml.doc "The description for an Amplify app."];
+        [@ocaml.doc "The description of the Amplify app."];
       repository: Repository.t option
-        [@ocaml.doc "The repository for an Amplify app."];
+        [@ocaml.doc "The Git repository for the Amplify app."];
       platform: Platform.t option
-        [@ocaml.doc "The platform or framework for an Amplify app."];
+        [@ocaml.doc
+          "The platform for the Amplify app. For a static app, set the platform type to WEB. For a dynamic server-side rendered (SSR) app, set the platform type to WEB_COMPUTE. For an app requiring Amplify Hosting's original SSR support only, set the platform type to WEB_DYNAMIC. If you are deploying an SSG only app with Next.js version 14 or later, you must set the platform type to WEB_COMPUTE and set the artifacts baseDirectory to .next in the application's build settings. For an example of the build specification settings, see Amplify build settings for a Next.js 14 SSG application in the Amplify Hosting User Guide."];
+      computeRoleArn: ComputeRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to assign to an SSR app. The SSR Compute role allows the Amplify Hosting compute service to securely access specific Amazon Web Services resources based on the role's permissions. For more information about the SSR Compute role, see Adding an SSR Compute role in the Amplify User Guide."];
       iamServiceRoleArn: ServiceRoleArn.t option
         [@ocaml.doc
-          "The AWS Identity and Access Management (IAM) service role for an Amplify app."];
+          "The Amazon Resource Name (ARN) of the IAM service role for the Amplify app."];
       oauthToken: OauthToken.t option
         [@ocaml.doc
-          "The OAuth token for a third-party source control system for an Amplify app. The OAuth token is used to create a webhook and a read-only deploy key. The OAuth token is not stored."];
+          "The OAuth token for a third-party source control system for an Amplify app. The OAuth token is used to create a webhook and a read-only deploy key using SSH cloning. The OAuth token is not stored. Use oauthToken for repository providers other than GitHub, such as Bitbucket or CodeCommit. To authorize access to GitHub as your repository provider, use accessToken. You must specify either oauthToken or accessToken when you create a new app. Existing Amplify apps deployed from a GitHub repository using OAuth continue to work with CI/CD. However, we strongly recommend that you migrate these apps to use the GitHub App. For more information, see Migrating an existing OAuth app to the Amplify GitHub App in the Amplify User Guide ."];
       accessToken: AccessToken.t option
         [@ocaml.doc
-          "The personal access token for a third-party source control system for an Amplify app. The personal access token is used to create a webhook and a read-only deploy key. The token is not stored."];
+          "The personal access token for a GitHub repository for an Amplify app. The personal access token is used to authorize access to a GitHub repository using the Amplify GitHub App. The token is not stored. Use accessToken for GitHub repositories only. To authorize access to a repository provider such as Bitbucket or CodeCommit, use oauthToken. You must specify either accessToken or oauthToken when you create a new app. Existing Amplify apps deployed from a GitHub repository using OAuth continue to work with CI/CD. However, we strongly recommend that you migrate these apps to use the GitHub App. For more information, see Migrating an existing OAuth app to the Amplify GitHub App in the Amplify User Guide ."];
       environmentVariables: EnvironmentVariables.t option
-        [@ocaml.doc "The environment variables map for an Amplify app."];
+        [@ocaml.doc
+          "The environment variables map for an Amplify app. For a list of the environment variables that are accessible to Amplify by default, see Amplify Environment variables in the Amplify Hosting User Guide."];
       enableBranchAutoBuild: EnableBranchAutoBuild.t option
         [@ocaml.doc
           "Enables the auto building of branches for an Amplify app."];
       enableBranchAutoDeletion: EnableBranchAutoDeletion.t option
         [@ocaml.doc
-          "Automatically disconnects a branch in the Amplify Console when you delete a branch from your Git repository."];
+          "Automatically disconnects a branch in the Amplify console when you delete a branch from your Git repository."];
       enableBasicAuth: EnableBasicAuth.t option
         [@ocaml.doc
           "Enables basic authorization for an Amplify app. This will apply to all branches that are part of this app."];
@@ -8824,55 +9651,68 @@ module CreateAppRequest =
           "The automated branch creation glob patterns for an Amplify app."];
       autoBranchCreationConfig: AutoBranchCreationConfig.t option
         [@ocaml.doc
-          "The automated branch creation configuration for an Amplify app."]}
+          "The automated branch creation configuration for an Amplify app."];
+      jobConfig: JobConfig.t option
+        [@ocaml.doc
+          "Describes the configuration details that apply to the jobs for an Amplify app."];
+      cacheConfig: CacheConfig.t option
+        [@ocaml.doc "The cache configuration for the Amplify app."]}
     let context_ = "CreateAppRequest"
     let make ?description =
       fun ?repository ->
         fun ?platform ->
-          fun ?iamServiceRoleArn ->
-            fun ?oauthToken ->
-              fun ?accessToken ->
-                fun ?environmentVariables ->
-                  fun ?enableBranchAutoBuild ->
-                    fun ?enableBranchAutoDeletion ->
-                      fun ?enableBasicAuth ->
-                        fun ?basicAuthCredentials ->
-                          fun ?customRules ->
-                            fun ?tags ->
-                              fun ?buildSpec ->
-                                fun ?customHeaders ->
-                                  fun ?enableAutoBranchCreation ->
-                                    fun ?autoBranchCreationPatterns ->
-                                      fun ?autoBranchCreationConfig ->
-                                        fun ~name ->
-                                          fun () ->
-                                            {
-                                              description;
-                                              repository;
-                                              platform;
-                                              iamServiceRoleArn;
-                                              oauthToken;
-                                              accessToken;
-                                              environmentVariables;
-                                              enableBranchAutoBuild;
-                                              enableBranchAutoDeletion;
-                                              enableBasicAuth;
-                                              basicAuthCredentials;
-                                              customRules;
-                                              tags;
-                                              buildSpec;
-                                              customHeaders;
-                                              enableAutoBranchCreation;
-                                              autoBranchCreationPatterns;
-                                              autoBranchCreationConfig;
-                                              name
-                                            }
+          fun ?computeRoleArn ->
+            fun ?iamServiceRoleArn ->
+              fun ?oauthToken ->
+                fun ?accessToken ->
+                  fun ?environmentVariables ->
+                    fun ?enableBranchAutoBuild ->
+                      fun ?enableBranchAutoDeletion ->
+                        fun ?enableBasicAuth ->
+                          fun ?basicAuthCredentials ->
+                            fun ?customRules ->
+                              fun ?tags ->
+                                fun ?buildSpec ->
+                                  fun ?customHeaders ->
+                                    fun ?enableAutoBranchCreation ->
+                                      fun ?autoBranchCreationPatterns ->
+                                        fun ?autoBranchCreationConfig ->
+                                          fun ?jobConfig ->
+                                            fun ?cacheConfig ->
+                                              fun ~name ->
+                                                fun () ->
+                                                  {
+                                                    description;
+                                                    repository;
+                                                    platform;
+                                                    computeRoleArn;
+                                                    iamServiceRoleArn;
+                                                    oauthToken;
+                                                    accessToken;
+                                                    environmentVariables;
+                                                    enableBranchAutoBuild;
+                                                    enableBranchAutoDeletion;
+                                                    enableBasicAuth;
+                                                    basicAuthCredentials;
+                                                    customRules;
+                                                    tags;
+                                                    buildSpec;
+                                                    customHeaders;
+                                                    enableAutoBranchCreation;
+                                                    autoBranchCreationPatterns;
+                                                    autoBranchCreationConfig;
+                                                    jobConfig;
+                                                    cacheConfig;
+                                                    name
+                                                  }
     let to_value x =
       structure_to_value
         [("name", (Some (Name.to_value x.name)));
         ("description", (Option.map x.description ~f:Description.to_value));
         ("repository", (Option.map x.repository ~f:Repository.to_value));
         ("platform", (Option.map x.platform ~f:Platform.to_value));
+        ("computeRoleArn",
+          (Option.map x.computeRoleArn ~f:ComputeRoleArn.to_value));
         ("iamServiceRoleArn",
           (Option.map x.iamServiceRoleArn ~f:ServiceRoleArn.to_value));
         ("oauthToken", (Option.map x.oauthToken ~f:OauthToken.to_value));
@@ -8902,9 +9742,15 @@ module CreateAppRequest =
              ~f:AutoBranchCreationPatterns.to_value));
         ("autoBranchCreationConfig",
           (Option.map x.autoBranchCreationConfig
-             ~f:AutoBranchCreationConfig.to_value))]
+             ~f:AutoBranchCreationConfig.to_value));
+        ("jobConfig", (Option.map x.jobConfig ~f:JobConfig.to_value));
+        ("cacheConfig", (Option.map x.cacheConfig ~f:CacheConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cacheConfig =
+        (Option.map ~f:CacheConfig.of_xml) (Xml.child xml_arg0 "cacheConfig") in
+      let jobConfig =
+        (Option.map ~f:JobConfig.of_xml) (Xml.child xml_arg0 "jobConfig") in
       let autoBranchCreationConfig =
         (Option.map ~f:AutoBranchCreationConfig.of_xml)
           (Xml.child xml_arg0 "autoBranchCreationConfig") in
@@ -8944,6 +9790,9 @@ module CreateAppRequest =
       let iamServiceRoleArn =
         (Option.map ~f:ServiceRoleArn.of_xml)
           (Xml.child xml_arg0 "iamServiceRoleArn") in
+      let computeRoleArn =
+        (Option.map ~f:ComputeRoleArn.of_xml)
+          (Xml.child xml_arg0 "computeRoleArn") in
       let platform =
         (Option.map ~f:Platform.of_xml) (Xml.child xml_arg0 "platform") in
       let repository =
@@ -8952,52 +9801,57 @@ module CreateAppRequest =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?autoBranchCreationConfig ?autoBranchCreationPatterns
-        ?enableAutoBranchCreation ?customHeaders ?buildSpec ?tags
-        ?customRules ?basicAuthCredentials ?enableBasicAuth
+      make ?cacheConfig ?jobConfig ?autoBranchCreationConfig
+        ?autoBranchCreationPatterns ?enableAutoBranchCreation ?customHeaders
+        ?buildSpec ?tags ?customRules ?basicAuthCredentials ?enableBasicAuth
         ?enableBranchAutoDeletion ?enableBranchAutoBuild
         ?environmentVariables ?accessToken ?oauthToken ?iamServiceRoleArn
-        ?platform ?repository ?description ~name ()
+        ?computeRoleArn ?platform ?repository ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let cacheConfig = field_map json__ "cacheConfig" CacheConfig.of_json in
+      let jobConfig = field_map json__ "jobConfig" JobConfig.of_json in
       let autoBranchCreationConfig =
-        field_map json "autoBranchCreationConfig"
+        field_map json__ "autoBranchCreationConfig"
           AutoBranchCreationConfig.of_json in
       let autoBranchCreationPatterns =
-        field_map json "autoBranchCreationPatterns"
+        field_map json__ "autoBranchCreationPatterns"
           AutoBranchCreationPatterns.of_json in
       let enableAutoBranchCreation =
-        field_map json "enableAutoBranchCreation"
+        field_map json__ "enableAutoBranchCreation"
           EnableAutoBranchCreation.of_json in
       let customHeaders =
-        field_map json "customHeaders" CustomHeaders.of_json in
-      let buildSpec = field_map json "buildSpec" BuildSpec.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let customRules = field_map json "customRules" CustomRules.of_json in
+        field_map json__ "customHeaders" CustomHeaders.of_json in
+      let buildSpec = field_map json__ "buildSpec" BuildSpec.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let customRules = field_map json__ "customRules" CustomRules.of_json in
       let basicAuthCredentials =
-        field_map json "basicAuthCredentials" BasicAuthCredentials.of_json in
+        field_map json__ "basicAuthCredentials" BasicAuthCredentials.of_json in
       let enableBasicAuth =
-        field_map json "enableBasicAuth" EnableBasicAuth.of_json in
+        field_map json__ "enableBasicAuth" EnableBasicAuth.of_json in
       let enableBranchAutoDeletion =
-        field_map json "enableBranchAutoDeletion"
+        field_map json__ "enableBranchAutoDeletion"
           EnableBranchAutoDeletion.of_json in
       let enableBranchAutoBuild =
-        field_map json "enableBranchAutoBuild" EnableBranchAutoBuild.of_json in
+        field_map json__ "enableBranchAutoBuild"
+          EnableBranchAutoBuild.of_json in
       let environmentVariables =
-        field_map json "environmentVariables" EnvironmentVariables.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
-      let oauthToken = field_map json "oauthToken" OauthToken.of_json in
+        field_map json__ "environmentVariables" EnvironmentVariables.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
+      let oauthToken = field_map json__ "oauthToken" OauthToken.of_json in
       let iamServiceRoleArn =
-        field_map json "iamServiceRoleArn" ServiceRoleArn.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let repository = field_map json "repository" Repository.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      make ?autoBranchCreationConfig ?autoBranchCreationPatterns
-        ?enableAutoBranchCreation ?customHeaders ?buildSpec ?tags
-        ?customRules ?basicAuthCredentials ?enableBasicAuth
+        field_map json__ "iamServiceRoleArn" ServiceRoleArn.of_json in
+      let computeRoleArn =
+        field_map json__ "computeRoleArn" ComputeRoleArn.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let repository = field_map json__ "repository" Repository.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
+      make ?cacheConfig ?jobConfig ?autoBranchCreationConfig
+        ?autoBranchCreationPatterns ?enableAutoBranchCreation ?customHeaders
+        ?buildSpec ?tags ?customRules ?basicAuthCredentials ?enableBasicAuth
         ?enableBranchAutoDeletion ?enableBranchAutoBuild
         ?environmentVariables ?accessToken ?oauthToken ?iamServiceRoleArn
-        ?platform ?repository ?description ~name ()
+        ?computeRoleArn ?platform ?repository ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request structure used to create apps in Amplify."]

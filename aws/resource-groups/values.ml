@@ -34,7 +34,7 @@ module GroupConfigurationParameterValue =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9:_-]+")));
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9:\\/\\._-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -68,6 +68,9 @@ module GroupConfigurationParameterValueList =
   struct
     type nonrec t = GroupConfigurationParameterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupConfigurationParameterValue.to_value)) |>
         (fun x -> `List x)
@@ -119,15 +122,96 @@ module GroupConfigurationParameter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "Values" GroupConfigurationParameterValueList.of_json in
+        field_map json__ "Values"
+          GroupConfigurationParameterValueList.of_json in
       let name =
-        field_map_exn json "Name" GroupConfigurationParameterName.of_json in
+        field_map_exn json__ "Name" GroupConfigurationParameterName.of_json in
       make ?values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A parameter for a group configuration item. For details about group service configuration syntax, see Service configurations for resource groups."]
+module Query =
+  struct
+    type nonrec t = string
+    let context_ = "Query"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4096) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Query" j
+    let to_json = simple_to_json to_value
+  end
+module QueryType =
+  struct
+    type nonrec t =
+      | TAG_FILTERS_1_0 
+      | CLOUDFORMATION_STACK_1_0 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TAG_FILTERS_1_0 -> "TAG_FILTERS_1_0"
+      | CLOUDFORMATION_STACK_1_0 -> "CLOUDFORMATION_STACK_1_0"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TAG_FILTERS_1_0" -> TAG_FILTERS_1_0
+      | "CLOUDFORMATION_STACK_1_0" -> CLOUDFORMATION_STACK_1_0
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QueryType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueryType" j)
+    let to_json = simple_to_json to_value
+  end
+module ApplicationArn =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[a-z]+)*:resource-groups:[a-z]{2}(-[a-z]+)+-\\d{1}:[0-9]{12}:group/[a-zA-Z0-9_\\.-]{1,150}/[a-zA-Z0-9]{22,26}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationArn" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationTagKey =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationTagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"awsApplication"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationTagKey" j
+    let to_json = simple_to_json to_value
+  end
 module GroupFilterValue =
   struct
     type nonrec t = string
@@ -137,10 +221,10 @@ module GroupFilterValue =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:128) >>=
+                (check_string_max i ~max:300) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"AWS::(AllSupported|[a-zA-Z0-9]+::[a-zA-Z0-9]+)")));
+                       ~pattern:"AWS::(AllSupported|[a-zA-Z0-9]+::[a-zA-Z0-9]+)|[\\s\\p{L}0-9_\\.-]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -148,6 +232,24 @@ module GroupFilterValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"GroupFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module ListGroupingStatusesFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "ListGroupingStatusesFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"SUCCESS|FAILED|IN_PROGRESS|SKIPPED|arn:aws(-[a-z]+)*:[a-z0-9\\-]*:([a-z]{2}(-[a-z]+)+-\\d{1})?:([0-9]{12})?:.+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ListGroupingStatusesFilterValue" j
     let to_json = simple_to_json to_value
   end
 module ResourceArn =
@@ -246,6 +348,9 @@ module GroupParameterList =
   struct
     type nonrec t = GroupConfigurationParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupConfigurationParameter.to_value)) |>
         (fun x -> `List x)
@@ -267,49 +372,6 @@ module GroupParameterList =
       list_of_json ~kind:"GroupParameterList"
         ~of_json:GroupConfigurationParameter.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module Query =
-  struct
-    type nonrec t = string
-    let context_ = "Query"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:4096) >>=
-             (fun () -> check_pattern i ~pattern:"[\\s\\S]*"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Query" j
-    let to_json = simple_to_json to_value
-  end
-module QueryType =
-  struct
-    type nonrec t =
-      | TAG_FILTERS_1_0 
-      | CLOUDFORMATION_STACK_1_0 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | TAG_FILTERS_1_0 -> "TAG_FILTERS_1_0"
-      | CLOUDFORMATION_STACK_1_0 -> "CLOUDFORMATION_STACK_1_0"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "TAG_FILTERS_1_0" -> TAG_FILTERS_1_0
-      | "CLOUDFORMATION_STACK_1_0" -> CLOUDFORMATION_STACK_1_0
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration QueryType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"QueryType" j)
-    let to_json = simple_to_json to_value
   end
 module ErrorCode =
   struct
@@ -352,6 +414,8 @@ module QueryErrorCode =
     type nonrec t =
       | CLOUDFORMATION_STACK_INACTIVE 
       | CLOUDFORMATION_STACK_NOT_EXISTING 
+      | CLOUDFORMATION_STACK_UNASSUMABLE_ROLE 
+      | RESOURCE_TYPE_NOT_SUPPORTED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -359,12 +423,18 @@ module QueryErrorCode =
       | CLOUDFORMATION_STACK_INACTIVE -> "CLOUDFORMATION_STACK_INACTIVE"
       | CLOUDFORMATION_STACK_NOT_EXISTING ->
           "CLOUDFORMATION_STACK_NOT_EXISTING"
+      | CLOUDFORMATION_STACK_UNASSUMABLE_ROLE ->
+          "CLOUDFORMATION_STACK_UNASSUMABLE_ROLE"
+      | RESOURCE_TYPE_NOT_SUPPORTED -> "RESOURCE_TYPE_NOT_SUPPORTED"
       | Non_static_id s -> s
     let of_string =
       function
       | "CLOUDFORMATION_STACK_INACTIVE" -> CLOUDFORMATION_STACK_INACTIVE
       | "CLOUDFORMATION_STACK_NOT_EXISTING" ->
           CLOUDFORMATION_STACK_NOT_EXISTING
+      | "CLOUDFORMATION_STACK_UNASSUMABLE_ROLE" ->
+          CLOUDFORMATION_STACK_UNASSUMABLE_ROLE
+      | "RESOURCE_TYPE_NOT_SUPPORTED" -> RESOURCE_TYPE_NOT_SUPPORTED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -387,6 +457,259 @@ module QueryErrorMessage =
     let of_json j = string_of_json ~kind:"QueryErrorMessage" j
     let to_json = simple_to_json to_value
   end
+module GroupArnV2 =
+  struct
+    type nonrec t = string
+    let context_ = "GroupArnV2"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[a-z]+)*:resource-groups:[a-z]{2}(-[a-z]+)+-\\d{1}:[0-9]{12}:group/([a-zA-Z0-9_\\.-]{1,300}|[a-zA-Z0-9_\\.-]{1,150}/[a-z0-9]{26})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GroupArnV2" j
+    let to_json = simple_to_json to_value
+  end
+module GroupName =
+  struct
+    type nonrec t = string
+    let context_ = "GroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:300) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-zA-Z0-9_\\.-]{1,300}|[a-zA-Z0-9_\\.-]{1,150}/[a-z0-9]{26}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GroupName" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceQuery =
+  struct
+    type nonrec t =
+      {
+      type_: QueryType.t
+        [@ocaml.doc
+          "The type of the query to perform. This can have one of two values: CLOUDFORMATION_STACK_1_0: Specifies that you want the group to contain the members of an CloudFormation stack. The Query contains a StackIdentifier element with an Amazon resource name (ARN) for a CloudFormation stack. TAG_FILTERS_1_0: Specifies that you want the group to include resource that have tags that match the query."];
+      query: Query.t
+        [@ocaml.doc
+          "The query that defines a group or a search. The contents depends on the value of the Type element. ResourceTypeFilters \226\128\147 Applies to all ResourceQuery objects of either Type. This element contains one of the following two items: The value AWS::AllSupported. This causes the ResourceQuery to match resources of any resource type that also match the query. A list (a JSON array) of resource type identifiers that limit the query to only resources of the specified types. For the complete list of resource types that you can use in the array value for ResourceTypeFilters, see Resources you can use with Resource Groups and Tag Editor in the Resource Groups User Guide. Example: \"ResourceTypeFilters\": \\[\"AWS::AllSupported\"\\] or \"ResourceTypeFilters\": \\[\"AWS::EC2::Instance\", \"AWS::S3::Bucket\"\\] TagFilters \226\128\147 applicable only if Type = TAG_FILTERS_1_0. The Query contains a JSON string that represents a collection of simple tag filters. The JSON string uses a syntax similar to the GetResources operation, but uses only the ResourceTypeFilters and TagFilters fields. If you specify more than one tag key, only resources that match all tag keys, and at least one value of each specified tag key, are returned in your query. If you specify more than one value for a tag key, a resource matches the filter if it has a tag key value that matches any of the specified values. For example, consider the following sample query for resources that have two tags, Stage and Version, with two values each: \\[\\{\"Stage\":\\[\"Test\",\"Deploy\"\\]\\},\\{\"Version\":\\[\"1\",\"2\"\\]\\}\\] The results of this resource query could include the following. An Amazon EC2 instance that has the following two tags: \\{\"Stage\":\"Deploy\"\\}, and \\{\"Version\":\"2\"\\} An S3 bucket that has the following two tags: \\{\"Stage\":\"Test\"\\}, and \\{\"Version\":\"1\"\\} The resource query results would not include the following items in the results, however. An Amazon EC2 instance that has only the following tag: \\{\"Stage\":\"Deploy\"\\}. The instance does not have all of the tag keys specified in the filter, so it is excluded from the results. An RDS database that has the following two tags: \\{\"Stage\":\"Archived\"\\} and \\{\"Version\":\"4\"\\} The database has all of the tag keys, but none of those keys has an associated value that matches at least one of the specified values in the filter. Example: \"TagFilters\": \\[ \\{ \"Key\": \"Stage\", \"Values\": \\[ \"Gamma\", \"Beta\" \\] \\} StackIdentifier \226\128\147 applicable only if Type = CLOUDFORMATION_STACK_1_0. The value of this parameter is the Amazon Resource Name (ARN) of the CloudFormation stack whose resources you want included in the group."]}
+    let context_ = "ResourceQuery"
+    let make ~type_ = fun ~query -> fun () -> { type_; query }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (QueryType.to_value x.type_)));
+        ("Query", (Some (Query.to_value x.query)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let query =
+        Query.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Query") in
+      let type_ =
+        QueryType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ~query ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let query = field_map_exn json__ "Query" Query.of_json in
+      let type_ = field_map_exn json__ "Type" QueryType.of_json in
+      make ~query ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The query you can use to define a resource group or a search for resources. A ResourceQuery specifies both a query Type and a Query string as JSON string objects. See the examples section for example JSON strings. For more information about creating a resource group with a resource query, see Build queries and groups in Resource Groups in the Resource Groups User Guide When you combine all of the elements together into a single string, any double quotes that are embedded inside another double quote pair must be escaped by preceding the embedded double quote with a backslash character (\\). For example, a complete ResourceQuery parameter must be formatted like the following CLI parameter example: --resource-query '\\{\"Type\":\"TAG_FILTERS_1_0\",\"Query\":\"\\{\\\"ResourceTypeFilters\\\":\\[\\\"AWS::AllSupported\\\"\\],\\\"TagFilters\\\":\\[\\{\\\"Key\\\":\\\"Stage\\\",\\\"Values\\\":\\[\\\"Test\\\"\\]\\}\\]\\}\"\\}' In the preceding example, all of the double quote characters in the value part of the Query element must be escaped because the value itself is surrounded by double quotes. For more information, see Quoting strings in the Command Line Interface User Guide. For the complete list of resource types that you can use in the array value for ResourceTypeFilters, see Resources you can use with Resource Groups and Tag Editor in the Resource Groups User Guide. For example: \"ResourceTypeFilters\":\\[\"AWS::S3::Bucket\", \"AWS::EC2::Instance\"\\]"]
+module RoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "RoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:(aws[a-zA-Z-]*)?:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagSyncTaskArn =
+  struct
+    type nonrec t = string
+    let context_ = "TagSyncTaskArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[a-z]+)*:resource-groups:[a-z]{2}(-[a-z]+)+-\\d{1}:[0-9]{12}:group/[a-zA-Z0-9_\\.-]{1,150}/[a-z0-9]{26}/tag-sync-task/[a-z0-9]{26}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagSyncTaskArn" j
+    let to_json = simple_to_json to_value
+  end
+module TagSyncTaskStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ACTIVE -> "ACTIVE" | ERROR -> "ERROR" | Non_static_id s -> s
+    let of_string =
+      function | "ACTIVE" -> ACTIVE | "ERROR" -> ERROR | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TagSyncTaskStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TagSyncTaskStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Criticality =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for Criticality" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_pattern i ~pattern:"[\\sa-zA-Z0-9_\\.-]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module DisplayName =
+  struct
+    type nonrec t = string
+    let context_ = "DisplayName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:300) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DisplayName" j
+    let to_json = simple_to_json to_value
+  end
 module GroupArn =
   struct
     type nonrec t = string
@@ -399,7 +722,7 @@ module GroupArn =
                 (check_string_max i ~max:1600) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"arn:aws(-[a-z]+)*:resource-groups:[a-z]{2}(-[a-z]+)+-\\d{1}:[0-9]{12}:group/[a-zA-Z0-9_\\.-]{1,128}")));
+                       ~pattern:"arn:aws(-[a-z]+)*:resource-groups:[a-z]{2}(-[a-z]+)+-\\d{1}:[0-9]{12}:group/([a-zA-Z0-9_\\.-]{1,300}|[a-zA-Z0-9_\\.-]{1,150}/[a-z0-9]{26})")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -409,60 +732,84 @@ module GroupArn =
     let of_json j = string_of_json ~kind:"GroupArn" j
     let to_json = simple_to_json to_value
   end
-module GroupName =
+module Owner =
   struct
     type nonrec t = string
-    let context_ = "GroupName"
+    let context_ = "Owner"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_\\.-]+")));
+                (check_string_max i ~max:300) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"GroupName" j
+    let of_json j = string_of_json ~kind:"Owner" j
     let to_json = simple_to_json to_value
   end
-module Description =
+module ApplicationTag =
   struct
-    type nonrec t = string
-    let context_ = "Description"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:512) >>=
-             (fun () -> check_pattern i ~pattern:"[\\sa-zA-Z0-9_\\.-]*"));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = (ApplicationTagKey.t * ApplicationArn.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ApplicationTagKey.of_string chopped),
+                              (ApplicationArn.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ApplicationTagKey.to_value x) |>
+                    (fun x ->
+                       (ApplicationArn.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Description" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ApplicationTagKey.of_string
+        ~of_json:ApplicationArn.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module GroupFilterName =
   struct
     type nonrec t =
       | Resource_type 
       | Configuration_type 
+      | Owner 
+      | Display_name 
+      | Criticality 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Resource_type -> "resource-type"
       | Configuration_type -> "configuration-type"
+      | Owner -> "owner"
+      | Display_name -> "display-name"
+      | Criticality -> "criticality"
       | Non_static_id s -> s
     let of_string =
       function
       | "resource-type" -> Resource_type
       | "configuration-type" -> Configuration_type
+      | "owner" -> Owner
+      | "display-name" -> Display_name
+      | "criticality" -> Criticality
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -480,6 +827,9 @@ module GroupFilterValues =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupFilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -501,11 +851,129 @@ module GroupFilterValues =
         ~of_json:GroupFilterValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module GroupingStatus =
+  struct
+    type nonrec t =
+      | SUCCESS 
+      | FAILED 
+      | IN_PROGRESS 
+      | SKIPPED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCESS -> "SUCCESS"
+      | FAILED -> "FAILED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SKIPPED -> "SKIPPED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCESS" -> SUCCESS
+      | "FAILED" -> FAILED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SKIPPED" -> SKIPPED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration GroupingStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"GroupingStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module GroupingType =
+  struct
+    type nonrec t =
+      | GROUP 
+      | UNGROUP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GROUP -> "GROUP"
+      | UNGROUP -> "UNGROUP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GROUP" -> GROUP
+      | "UNGROUP" -> UNGROUP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration GroupingType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"GroupingType" j)
+    let to_json = simple_to_json to_value
+  end
+module ListGroupingStatusesFilterName =
+  struct
+    type nonrec t =
+      | Status 
+      | Resource_arn 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Status -> "status"
+      | Resource_arn -> "resource-arn"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "status" -> Status
+      | "resource-arn" -> Resource_arn
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ListGroupingStatusesFilterName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ListGroupingStatusesFilterName" j)
+    let to_json = simple_to_json to_value
+  end
+module ListGroupingStatusesFilterValues =
+  struct
+    type nonrec t = ListGroupingStatusesFilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListGroupingStatusesFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListGroupingStatusesFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListGroupingStatusesFilterValues"
+        ~of_json:ListGroupingStatusesFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResourceIdentifier =
   struct
     type nonrec t =
       {
-      resourceArn: ResourceArn.t option [@ocaml.doc "The ARN of a resource."];
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The Amazon resource name (ARN) of a resource."];
       resourceType: ResourceType.t option
         [@ocaml.doc
           "The resource type of a resource, such as AWS::EC2::Instance."]}
@@ -525,9 +993,9 @@ module ResourceIdentifier =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?resourceType ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       make ?resourceType ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -548,8 +1016,8 @@ module ResourceStatus =
           (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" ResourceStatusValue.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" ResourceStatusValue.of_json in
       make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -581,6 +1049,9 @@ module ResourceFilterValues =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -630,63 +1101,93 @@ module GroupConfigurationItem =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?parameters ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" GroupParameterList.of_json in
-      let type_ = field_map_exn json "Type" GroupConfigurationType.of_json in
+    let of_json json__ =
+      let parameters =
+        field_map json__ "Parameters" GroupParameterList.of_json in
+      let type_ = field_map_exn json__ "Type" GroupConfigurationType.of_json in
       make ?parameters ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An item in a group configuration. A group service configuration can have one or more items. For details about group service configuration syntax, see Service configurations for resource groups."]
-module ResourceQuery =
+module GroupLifecycleEventsDesiredStatus =
   struct
     type nonrec t =
-      {
-      type_: QueryType.t
-        [@ocaml.doc
-          "The type of the query. You can use the following values: CLOUDFORMATION_STACK_1_0: Specifies that the Query contains an ARN for a CloudFormation stack. TAG_FILTERS_1_0: Specifies that the Query parameter contains a JSON string that represents a collection of simple tag filters for resource types and tags. The JSON string uses a syntax similar to the GetResources operation, but uses only the ResourceTypeFilters and TagFilters fields. If you specify more than one tag key, only resources that match all tag keys, and at least one value of each specified tag key, are returned in your query. If you specify more than one value for a tag key, a resource matches the filter if it has a tag key value that matches any of the specified values. For example, consider the following sample query for resources that have two tags, Stage and Version, with two values each: \\[\\{\"Stage\":\\[\"Test\",\"Deploy\"\\]\\},\\{\"Version\":\\[\"1\",\"2\"\\]\\}\\] The results of this query could include the following. An EC2 instance that has the following two tags: \\{\"Stage\":\"Deploy\"\\}, and \\{\"Version\":\"2\"\\} An S3 bucket that has the following two tags: \\{\"Stage\":\"Test\"\\}, and \\{\"Version\":\"1\"\\} The query would not include the following items in the results, however. An EC2 instance that has only the following tag: \\{\"Stage\":\"Deploy\"\\}. The instance does not have all of the tag keys specified in the filter, so it is excluded from the results. An RDS database that has the following two tags: \\{\"Stage\":\"Archived\"\\} and \\{\"Version\":\"4\"\\} The database has all of the tag keys, but none of those keys has an associated value that matches at least one of the specified values in the filter."];
-      query: Query.t
-        [@ocaml.doc "The query that defines a group or a search."]}
-    let context_ = "ResourceQuery"
-    let make ~type_ = fun ~query -> fun () -> { type_; query }
-    let to_value x =
-      structure_to_value
-        [("Type", (Some (QueryType.to_value x.type_)));
-        ("Query", (Some (Query.to_value x.query)))]
+      | ACTIVE 
+      | INACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | INACTIVE -> "INACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "INACTIVE" -> INACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let query =
-        Query.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Query") in
-      let type_ =
-        QueryType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ~query ~type_ ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let query = field_map_exn json "Query" Query.of_json in
-      let type_ = field_map_exn json "Type" QueryType.of_json in
-      make ~query ~type_ ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The query that is used to define a resource group or a search for resources. A query specifies both a query type and a query string as a JSON object. See the examples section for example JSON strings. The examples that follow are shown as standard JSON strings. If you include such a string as a parameter to the AWS CLI or an SDK API, you might need to 'escape' the string into a single line. For example, see the Quoting strings in the AWS CLI User Guide. Example 1 The following generic example shows a resource query JSON string that includes only resources that meet the following criteria: The resource type must be either resource_type1 or resource_type2. The resource must have a tag Key1 with a value of either ValueA or ValueB. The resource must have a tag Key2 with a value of either ValueC or ValueD. \\{ \"Type\": \"TAG_FILTERS_1_0\", \"Query\": \\{ \"ResourceTypeFilters\": \\[ \"resource_type1\", \"resource_type2\"\\], \"TagFilters\": \\[ \\{ \"Key\": \"Key1\", \"Values\": \\[\"ValueA\",\"ValueB\"\\] \\}, \\{ \"Key\":\"Key2\", \"Values\":\\[\"ValueC\",\"ValueD\"\\] \\} \\] \\} \\} This has the equivalent \"shortcut\" syntax of the following: \\{ \"Type\": \"TAG_FILTERS_1_0\", \"Query\": \\{ \"ResourceTypeFilters\": \\[ \"resource_type1\", \"resource_type2\"\\], \"TagFilters\": \\[ \\{ \"Key1\": \\[\"ValueA\",\"ValueB\"\\] \\}, \\{ \"Key2\": \\[\"ValueC\",\"ValueD\"\\] \\} \\] \\} \\} Example 2 The following example shows a resource query JSON string that includes only Amazon EC2 instances that are tagged Stage with a value of Test. \\{ \"Type\": \"TAG_FILTERS_1_0\", \"Query\": \"\\{ \"ResourceTypeFilters\": \"AWS::EC2::Instance\", \"TagFilters\": \\{ \"Stage\": \"Test\" \\} \\} \\} Example 3 The following example shows a resource query JSON string that includes resource of any supported type as long as it is tagged Stage with a value of Prod. \\{ \"Type\": \"TAG_FILTERS_1_0\", \"Query\": \\{ \"ResourceTypeFilters\": \"AWS::AllSupported\", \"TagFilters\": \\{ \"Stage\": \"Prod\" \\} \\} \\} Example 4 The following example shows a resource query JSON string that includes only Amazon EC2 instances and Amazon S3 buckets that are part of the specified AWS CloudFormation stack. \\{ \"Type\": \"CLOUDFORMATION_STACK_1_0\", \"Query\": \\{ \"ResourceTypeFilters\": \\[ \"AWS::EC2::Instance\", \"AWS::S3::Bucket\" \\], \"StackIdentifier\": \"arn:aws:cloudformation:us-west-2:123456789012:stack/AWStestuseraccount/fb0d5000-aba8-00e8-aa9e-50d5cEXAMPLE\" \\} \\}"]
-module TagKey =
+      of_string
+        (string_of_xml ~kind:"enumeration GroupLifecycleEventsDesiredStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"GroupLifecycleEventsDesiredStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module GroupLifecycleEventsStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | INACTIVE 
+      | IN_PROGRESS 
+      | ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | INACTIVE -> "INACTIVE"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | ERROR -> "ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "INACTIVE" -> INACTIVE
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "ERROR" -> ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration GroupLifecycleEventsStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"GroupLifecycleEventsStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module GroupLifecycleEventsStatusMessage =
   struct
     type nonrec t = string
-    let context_ = "TagKey"
+    let context_ = "GroupLifecycleEventsStatusMessage"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
+    let of_json j =
+      string_of_json ~kind:"GroupLifecycleEventsStatusMessage" j
     let to_json = simple_to_json to_value
   end
 module FailedResource =
@@ -695,7 +1196,7 @@ module FailedResource =
       {
       resourceArn: ResourceArn.t option
         [@ocaml.doc
-          "The ARN of the resource that failed to be added or removed."];
+          "The Amazon resource name (ARN) of the resource that failed to be added or removed."];
       errorMessage: ErrorMessage.t option
         [@ocaml.doc "The error message text associated with the failure."];
       errorCode: ErrorCode.t option
@@ -720,10 +1221,10 @@ module FailedResource =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?errorCode ?errorMessage ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       make ?errorCode ?errorMessage ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -745,44 +1246,20 @@ module PendingResource =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       make ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that identifies a resource that is currently pending addition to the group as a member. Adding a resource to a resource group happens asynchronously as a background task and this one isn't completed yet."]
-module TagValue =
-  struct
-    type nonrec t = string
-    let context_ = "TagValue"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
-    let to_json = simple_to_json to_value
-  end
 module QueryError =
   struct
     type nonrec t =
       {
       errorCode: QueryErrorCode.t option
-        [@ocaml.doc
-          "Possible values are CLOUDFORMATION_STACK_INACTIVE and CLOUDFORMATION_STACK_NOT_EXISTING."];
+        [@ocaml.doc "Specifies the error code that was raised."];
       message: QueryErrorMessage.t option
-        [@ocaml.doc
-          "A message that explains the ErrorCode value. Messages might state that the specified CloudFormation stack does not exist (or no longer exists). For CLOUDFORMATION_STACK_INACTIVE, the message typically states that the CloudFormation stack has a status that is not (or no longer) active, such as CREATE_FAILED."]}
+        [@ocaml.doc "A message that explains the ErrorCode."]}
     let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
@@ -798,13 +1275,148 @@ module QueryError =
           (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" QueryErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" QueryErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" QueryErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" QueryErrorCode.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A two-part error structure that can occur in ListGroupResources or SearchResources operations on CloudFormation stack-based queries. The error occurs if the CloudFormation stack on which the query is based either does not exist, or has a status that renders the stack inactive. A QueryError occurrence does not necessarily mean that AWS Resource Groups could not complete the operation, but the resulting group might have no member resources."]
+       "A two-part error structure that can occur in ListGroupResources or SearchResources."]
+module TagSyncTaskItem =
+  struct
+    type nonrec t =
+      {
+      groupArn: GroupArnV2.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the application group."];
+      groupName: GroupName.t option
+        [@ocaml.doc "The name of the application group."];
+      taskArn: TagSyncTaskArn.t option
+        [@ocaml.doc "The Amazon resource name (ARN) of the tag-sync task."];
+      tagKey: TagKey.t option [@ocaml.doc "The tag key."];
+      tagValue: TagValue.t option [@ocaml.doc "The tag value."];
+      resourceQuery: ResourceQuery.t option ;
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the role assumed by the service to tag and untag resources on your behalf."];
+      status: TagSyncTaskStatus.t option
+        [@ocaml.doc
+          "The status of the tag-sync task. Valid values include: ACTIVE - The tag-sync task is actively managing resources in the application by adding or removing the awsApplication tag from resources when they are tagged or untagged with the specified tag key-value pair. ERROR - The tag-sync task is not actively managing resources in the application. Review the ErrorMessage for more information about resolving the error."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "The specific error message in cases where the tag-sync task status is Error."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the tag-sync task was created."]}
+    let make ?groupArn =
+      fun ?groupName ->
+        fun ?taskArn ->
+          fun ?tagKey ->
+            fun ?tagValue ->
+              fun ?resourceQuery ->
+                fun ?roleArn ->
+                  fun ?status ->
+                    fun ?errorMessage ->
+                      fun ?createdAt ->
+                        fun () ->
+                          {
+                            groupArn;
+                            groupName;
+                            taskArn;
+                            tagKey;
+                            tagValue;
+                            resourceQuery;
+                            roleArn;
+                            status;
+                            errorMessage;
+                            createdAt
+                          }
+    let to_value x =
+      structure_to_value
+        [("GroupArn", (Option.map x.groupArn ~f:GroupArnV2.to_value));
+        ("GroupName", (Option.map x.groupName ~f:GroupName.to_value));
+        ("TaskArn", (Option.map x.taskArn ~f:TagSyncTaskArn.to_value));
+        ("TagKey", (Option.map x.tagKey ~f:TagKey.to_value));
+        ("TagValue", (Option.map x.tagValue ~f:TagValue.to_value));
+        ("ResourceQuery",
+          (Option.map x.resourceQuery ~f:ResourceQuery.to_value));
+        ("RoleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("Status", (Option.map x.status ~f:TagSyncTaskStatus.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let status =
+        (Option.map ~f:TagSyncTaskStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let resourceQuery =
+        (Option.map ~f:ResourceQuery.of_xml)
+          (Xml.child xml_arg0 "ResourceQuery") in
+      let tagValue =
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "TagValue") in
+      let tagKey =
+        (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "TagKey") in
+      let taskArn =
+        (Option.map ~f:TagSyncTaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
+      let groupName =
+        (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
+      let groupArn =
+        (Option.map ~f:GroupArnV2.of_xml) (Xml.child xml_arg0 "GroupArn") in
+      make ?createdAt ?errorMessage ?status ?roleArn ?resourceQuery ?tagValue
+        ?tagKey ?taskArn ?groupName ?groupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let status = field_map json__ "Status" TagSyncTaskStatus.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let resourceQuery =
+        field_map json__ "ResourceQuery" ResourceQuery.of_json in
+      let tagValue = field_map json__ "TagValue" TagValue.of_json in
+      let tagKey = field_map json__ "TagKey" TagKey.of_json in
+      let taskArn = field_map json__ "TaskArn" TagSyncTaskArn.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
+      let groupArn = field_map json__ "GroupArn" GroupArnV2.of_json in
+      make ?createdAt ?errorMessage ?status ?roleArn ?resourceQuery ?tagValue
+        ?tagKey ?taskArn ?groupName ?groupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Amazon resource name (ARN) of the tag-sync task."]
+module ListTagSyncTasksFilter =
+  struct
+    type nonrec t =
+      {
+      groupArn: GroupArnV2.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the application group."];
+      groupName: GroupName.t option
+        [@ocaml.doc "The name of the application group."]}
+    let make ?groupArn = fun ?groupName -> fun () -> { groupArn; groupName }
+    let to_value x =
+      structure_to_value
+        [("GroupArn", (Option.map x.groupArn ~f:GroupArnV2.to_value));
+        ("GroupName", (Option.map x.groupName ~f:GroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupName =
+        (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
+      let groupArn =
+        (Option.map ~f:GroupArnV2.of_xml) (Xml.child xml_arg0 "GroupArn") in
+      make ?groupName ?groupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
+      let groupArn = field_map json__ "GroupArn" GroupArnV2.of_json in
+      make ?groupName ?groupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns tag-sync tasks filtered by the Amazon resource name (ARN) or name of a specified application group."]
 module GroupIdentifier =
   struct
     type nonrec t =
@@ -812,60 +1424,148 @@ module GroupIdentifier =
       groupName: GroupName.t option
         [@ocaml.doc "The name of the resource group."];
       groupArn: GroupArn.t option
-        [@ocaml.doc "The ARN of the resource group."]}
-    let make ?groupName = fun ?groupArn -> fun () -> { groupName; groupArn }
+        [@ocaml.doc "The Amazon resource name (ARN) of the resource group."];
+      description: Description.t option
+        [@ocaml.doc "The description of the application group."];
+      criticality: Criticality.t option
+        [@ocaml.doc
+          "The critical rank of the application group on a scale of 1 to 10, with a rank of 1 being the most critical, and a rank of 10 being least critical."];
+      owner: Owner.t option
+        [@ocaml.doc
+          "A name, email address or other identifier for the person or group who is considered as the owner of this group within your organization."];
+      displayName: DisplayName.t option
+        [@ocaml.doc
+          "The name of the application group, which you can change at any time."]}
+    let make ?groupName =
+      fun ?groupArn ->
+        fun ?description ->
+          fun ?criticality ->
+            fun ?owner ->
+              fun ?displayName ->
+                fun () ->
+                  {
+                    groupName;
+                    groupArn;
+                    description;
+                    criticality;
+                    owner;
+                    displayName
+                  }
     let to_value x =
       structure_to_value
         [("GroupName", (Option.map x.groupName ~f:GroupName.to_value));
-        ("GroupArn", (Option.map x.groupArn ~f:GroupArn.to_value))]
+        ("GroupArn", (Option.map x.groupArn ~f:GroupArn.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Criticality", (Option.map x.criticality ~f:Criticality.to_value));
+        ("Owner", (Option.map x.owner ~f:Owner.to_value));
+        ("DisplayName", (Option.map x.displayName ~f:DisplayName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "DisplayName") in
+      let owner = (Option.map ~f:Owner.of_xml) (Xml.child xml_arg0 "Owner") in
+      let criticality =
+        (Option.map ~f:Criticality.of_xml) (Xml.child xml_arg0 "Criticality") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       let groupArn =
         (Option.map ~f:GroupArn.of_xml) (Xml.child xml_arg0 "GroupArn") in
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
-      make ?groupArn ?groupName ()
+      make ?displayName ?owner ?criticality ?description ?groupArn ?groupName
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupArn = field_map json "GroupArn" GroupArn.of_json in
-      let groupName = field_map json "GroupName" GroupName.of_json in
-      make ?groupArn ?groupName ()
+    let of_json json__ =
+      let displayName = field_map json__ "DisplayName" DisplayName.of_json in
+      let owner = field_map json__ "Owner" Owner.of_json in
+      let criticality = field_map json__ "Criticality" Criticality.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let groupArn = field_map json__ "GroupArn" GroupArn.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
+      make ?displayName ?owner ?criticality ?description ?groupArn ?groupName
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The unique identifiers for a resource group."]
 module Group =
   struct
     type nonrec t =
       {
-      groupArn: GroupArn.t [@ocaml.doc "The ARN of the resource group."];
-      name: GroupName.t [@ocaml.doc "The name of the resource group."];
+      groupArn: GroupArnV2.t option
+        [@ocaml.doc "The Amazon resource name (ARN) of the resource group."];
+      name: GroupName.t option [@ocaml.doc "The name of the resource group."];
       description: Description.t option
-        [@ocaml.doc "The description of the resource group."]}
-    let context_ = "Group"
-    let make ?description =
-      fun ~groupArn -> fun ~name -> fun () -> { description; groupArn; name }
+        [@ocaml.doc "The description of the resource group."];
+      criticality: Criticality.t option
+        [@ocaml.doc
+          "The critical rank of the application group on a scale of 1 to 10, with a rank of 1 being the most critical, and a rank of 10 being least critical."];
+      owner: Owner.t option
+        [@ocaml.doc
+          "A name, email address or other identifier for the person or group who is considered as the owner of this application group within your organization."];
+      displayName: DisplayName.t option
+        [@ocaml.doc
+          "The name of the application group, which you can change at any time."];
+      applicationTag: ApplicationTag.t option
+        [@ocaml.doc
+          "A tag that defines the application group membership. This tag is only supported for application groups."]}
+    let make ?groupArn =
+      fun ?name ->
+        fun ?description ->
+          fun ?criticality ->
+            fun ?owner ->
+              fun ?displayName ->
+                fun ?applicationTag ->
+                  fun () ->
+                    {
+                      groupArn;
+                      name;
+                      description;
+                      criticality;
+                      owner;
+                      displayName;
+                      applicationTag
+                    }
     let to_value x =
       structure_to_value
-        [("GroupArn", (Some (GroupArn.to_value x.groupArn)));
-        ("Name", (Some (GroupName.to_value x.name)));
-        ("Description", (Option.map x.description ~f:Description.to_value))]
+        [("GroupArn", (Option.map x.groupArn ~f:GroupArnV2.to_value));
+        ("Name", (Option.map x.name ~f:GroupName.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Criticality", (Option.map x.criticality ~f:Criticality.to_value));
+        ("Owner", (Option.map x.owner ~f:Owner.to_value));
+        ("DisplayName", (Option.map x.displayName ~f:DisplayName.to_value));
+        ("ApplicationTag",
+          (Option.map x.applicationTag ~f:ApplicationTag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationTag =
+        (Option.map ~f:ApplicationTag.of_xml)
+          (Xml.child xml_arg0 "ApplicationTag") in
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "DisplayName") in
+      let owner = (Option.map ~f:Owner.of_xml) (Xml.child xml_arg0 "Owner") in
+      let criticality =
+        (Option.map ~f:Criticality.of_xml) (Xml.child xml_arg0 "Criticality") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
-      let name =
-        GroupName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let name = (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "Name") in
       let groupArn =
-        GroupArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GroupArn") in
-      make ?description ~name ~groupArn ()
+        (Option.map ~f:GroupArnV2.of_xml) (Xml.child xml_arg0 "GroupArn") in
+      make ?applicationTag ?displayName ?owner ?criticality ?description
+        ?name ?groupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map_exn json "Name" GroupName.of_json in
-      let groupArn = field_map_exn json "GroupArn" GroupArn.of_json in
-      make ?description ~name ~groupArn ()
+    let of_json json__ =
+      let applicationTag =
+        field_map json__ "ApplicationTag" ApplicationTag.of_json in
+      let displayName = field_map json__ "DisplayName" DisplayName.of_json in
+      let owner = field_map json__ "Owner" Owner.of_json in
+      let criticality = field_map json__ "Criticality" Criticality.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" GroupName.of_json in
+      let groupArn = field_map json__ "GroupArn" GroupArnV2.of_json in
+      make ?applicationTag ?displayName ?owner ?criticality ?description
+        ?name ?groupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A resource group that contains AWS resources. You can assign resources to the group by associating either of the following elements with the group: ResourceQuery - Use a resource query to specify a set of tag keys and values. All resources in the same AWS Region and AWS account that have those keys with the same values are included in the group. You can add a resource query when you create the group, or later by using the PutGroupConfiguration operation. GroupConfiguration - Use a service configuration to associate the group with an AWS service. The configuration specifies which resource types can be included in the group."]
+       "A resource group that contains Amazon Web Services resources. You can assign resources to the group by associating either of the following elements with the group: ResourceQuery - Use a resource query to specify a set of tag keys and values. All resources in the same Amazon Web Services Region and Amazon Web Services account that have those keys with the same values are included in the group. You can add a resource query when you create the group, or later by using the PutGroupConfiguration operation. GroupConfiguration - Use a service configuration to associate the group with an Amazon Web Services service. The configuration specifies which resource types can be included in the group."]
 module GroupFilter =
   struct
     type nonrec t =
@@ -892,13 +1592,122 @@ module GroupFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" GroupFilterValues.of_json in
-      let name = field_map_exn json "Name" GroupFilterName.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "Values" GroupFilterValues.of_json in
+      let name = field_map_exn json__ "Name" GroupFilterName.of_json in
       make ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A filter collection that you can use to restrict the results from a List operation to only those you want to include."]
+module GroupingStatusesItem =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The Amazon resource name (ARN) of a resource."];
+      action: GroupingType.t option
+        [@ocaml.doc
+          "Describes the resource grouping action with values of GROUP or UNGROUP."];
+      status: GroupingStatus.t option
+        [@ocaml.doc
+          "Describes the resource grouping status with values of SUCCESS, FAILED, IN_PROGRESS, or SKIPPED."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc "A message that explains the ErrorCode."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc "Specifies the error code that was raised."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "A timestamp of when the status was last updated."]}
+    let make ?resourceArn =
+      fun ?action ->
+        fun ?status ->
+          fun ?errorMessage ->
+            fun ?errorCode ->
+              fun ?updatedAt ->
+                fun () ->
+                  {
+                    resourceArn;
+                    action;
+                    status;
+                    errorMessage;
+                    errorCode;
+                    updatedAt
+                  }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("Action", (Option.map x.action ~f:GroupingType.to_value));
+        ("Status", (Option.map x.status ~f:GroupingStatus.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let status =
+        (Option.map ~f:GroupingStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let action =
+        (Option.map ~f:GroupingType.of_xml) (Xml.child xml_arg0 "Action") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?updatedAt ?errorCode ?errorMessage ?status ?action ?resourceArn
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let status = field_map json__ "Status" GroupingStatus.of_json in
+      let action = field_map json__ "Action" GroupingType.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      make ?updatedAt ?errorCode ?errorMessage ?status ?action ?resourceArn
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The information about a grouping or ungrouping resource action."]
+module ListGroupingStatusesFilter =
+  struct
+    type nonrec t =
+      {
+      name: ListGroupingStatusesFilterName.t
+        [@ocaml.doc
+          "The name of the filter. Filter names are case-sensitive."];
+      values: ListGroupingStatusesFilterValues.t
+        [@ocaml.doc
+          "One or more filter values. Allowed filter values vary by resource filter name, and are case-sensitive."]}
+    let context_ = "ListGroupingStatusesFilter"
+    let make ~name = fun ~values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (ListGroupingStatusesFilterName.to_value x.name)));
+        ("Values",
+          (Some (ListGroupingStatusesFilterValues.to_value x.values)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        ListGroupingStatusesFilterValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let name =
+        ListGroupingStatusesFilterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map_exn json__ "Values"
+          ListGroupingStatusesFilterValues.of_json in
+      let name =
+        field_map_exn json__ "Name" ListGroupingStatusesFilterName.of_json in
+      make ~values ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A filter name and value pair that is used to obtain more specific results from the list of grouping statuses."]
 module ListGroupResourcesItem =
   struct
     type nonrec t =
@@ -922,9 +1731,10 @@ module ListGroupResourcesItem =
           (Xml.child xml_arg0 "Identifier") in
       make ?status ?identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ResourceStatus.of_json in
-      let identifier = field_map json "Identifier" ResourceIdentifier.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ResourceStatus.of_json in
+      let identifier =
+        field_map json__ "Identifier" ResourceIdentifier.of_json in
       make ?status ?identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -955,9 +1765,9 @@ module ResourceFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" ResourceFilterValues.of_json in
-      let name = field_map_exn json "Name" ResourceFilterName.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "Values" ResourceFilterValues.of_json in
+      let name = field_map_exn json__ "Name" ResourceFilterName.of_json in
       make ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -980,6 +1790,9 @@ module GroupConfigurationList =
     type nonrec t = GroupConfigurationItem.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupConfigurationItem.to_value)) |>
         (fun x -> `List x)
@@ -1046,8 +1859,8 @@ module BadRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1066,8 +1879,8 @@ module ForbiddenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1076,37 +1889,36 @@ module GroupQuery =
   struct
     type nonrec t =
       {
-      groupName: GroupName.t
+      groupName: GroupName.t option
         [@ocaml.doc
           "The name of the resource group that is associated with the specified resource query."];
-      resourceQuery: ResourceQuery.t
+      resourceQuery: ResourceQuery.t option
         [@ocaml.doc
-          "The resource query that determines which AWS resources are members of the associated resource group."]}
-    let context_ = "GroupQuery"
-    let make ~groupName =
-      fun ~resourceQuery -> fun () -> { groupName; resourceQuery }
+          "The resource query that determines which Amazon Web Services resources are members of the associated resource group."]}
+    let make ?groupName =
+      fun ?resourceQuery -> fun () -> { groupName; resourceQuery }
     let to_value x =
       structure_to_value
-        [("GroupName", (Some (GroupName.to_value x.groupName)));
-        ("ResourceQuery", (Some (ResourceQuery.to_value x.resourceQuery)))]
+        [("GroupName", (Option.map x.groupName ~f:GroupName.to_value));
+        ("ResourceQuery",
+          (Option.map x.resourceQuery ~f:ResourceQuery.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceQuery =
-        ResourceQuery.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceQuery") in
+        (Option.map ~f:ResourceQuery.of_xml)
+          (Xml.child xml_arg0 "ResourceQuery") in
       let groupName =
-        GroupName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
-      make ~resourceQuery ~groupName ()
+        (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
+      make ?resourceQuery ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceQuery =
-        field_map_exn json "ResourceQuery" ResourceQuery.of_json in
-      let groupName = field_map_exn json "GroupName" GroupName.of_json in
-      make ~resourceQuery ~groupName ()
+        field_map json__ "ResourceQuery" ResourceQuery.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
+      make ?resourceQuery ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A mapping of a query attached to a resource group that determines the AWS resources that are members of the group."]
+       "A mapping of a query attached to a resource group that determines the Amazon Web Services resources that are members of the group."]
 module InternalServerErrorException =
   struct
     type nonrec t = {
@@ -1121,8 +1933,8 @@ module InternalServerErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1141,8 +1953,8 @@ module MethodNotAllowedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1161,8 +1973,8 @@ module NotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more of the specified resources don't exist."]
@@ -1180,8 +1992,8 @@ module TooManyRequestsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1198,7 +2010,7 @@ module GroupString =
                 (check_string_max i ~max:1600) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"(arn:aws(-[a-z]+)*:resource-groups:[a-z]{2}(-[a-z]+)+-\\d{1}:[0-9]{12}:group/)?[a-zA-Z0-9_\\.-]{1,128}")));
+                       ~pattern:"[a-zA-Z0-9_\\.-]{1,300}|[a-zA-Z0-9_\\.-]{1,150}/[a-z0-9]{26}|arn:aws(-[a-z]+)*:resource-groups:[a-z]{2}(-[a-z]+)+-\\d{1}:[0-9]{12}:group/([a-zA-Z0-9_\\.-]{1,300}|[a-zA-Z0-9_\\.-]{1,150}/[a-z0-9]{26})")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1208,10 +2020,99 @@ module GroupString =
     let of_json j = string_of_json ~kind:"GroupString" j
     let to_json = simple_to_json to_value
   end
+module GroupStringV2 =
+  struct
+    type nonrec t = string
+    let context_ = "GroupStringV2"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-zA-Z0-9_\\.-]{1,300}|[a-zA-Z0-9_\\.-]{1,150}/[a-z0-9]{26}|arn:aws(-[a-z]+)*:resource-groups:[a-z]{2}(-[a-z]+)+-\\d{1}:[0-9]{12}:group/([a-zA-Z0-9_\\.-]{1,300}|[a-zA-Z0-9_\\.-]{1,150}/[a-z0-9]{26})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GroupStringV2" j
+    let to_json = simple_to_json to_value
+  end
+module AccountSettings =
+  struct
+    type nonrec t =
+      {
+      groupLifecycleEventsDesiredStatus:
+        GroupLifecycleEventsDesiredStatus.t option
+        [@ocaml.doc
+          "The desired target status of the group lifecycle events feature. If"];
+      groupLifecycleEventsStatus: GroupLifecycleEventsStatus.t option
+        [@ocaml.doc
+          "The current status of the group lifecycle events feature."];
+      groupLifecycleEventsStatusMessage:
+        GroupLifecycleEventsStatusMessage.t option
+        [@ocaml.doc
+          "The text of any error message occurs during an attempt to turn group lifecycle events on or off."]}
+    let make ?groupLifecycleEventsDesiredStatus =
+      fun ?groupLifecycleEventsStatus ->
+        fun ?groupLifecycleEventsStatusMessage ->
+          fun () ->
+            {
+              groupLifecycleEventsDesiredStatus;
+              groupLifecycleEventsStatus;
+              groupLifecycleEventsStatusMessage
+            }
+    let to_value x =
+      structure_to_value
+        [("GroupLifecycleEventsDesiredStatus",
+           (Option.map x.groupLifecycleEventsDesiredStatus
+              ~f:GroupLifecycleEventsDesiredStatus.to_value));
+        ("GroupLifecycleEventsStatus",
+          (Option.map x.groupLifecycleEventsStatus
+             ~f:GroupLifecycleEventsStatus.to_value));
+        ("GroupLifecycleEventsStatusMessage",
+          (Option.map x.groupLifecycleEventsStatusMessage
+             ~f:GroupLifecycleEventsStatusMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupLifecycleEventsStatusMessage =
+        (Option.map ~f:GroupLifecycleEventsStatusMessage.of_xml)
+          (Xml.child xml_arg0 "GroupLifecycleEventsStatusMessage") in
+      let groupLifecycleEventsStatus =
+        (Option.map ~f:GroupLifecycleEventsStatus.of_xml)
+          (Xml.child xml_arg0 "GroupLifecycleEventsStatus") in
+      let groupLifecycleEventsDesiredStatus =
+        (Option.map ~f:GroupLifecycleEventsDesiredStatus.of_xml)
+          (Xml.child xml_arg0 "GroupLifecycleEventsDesiredStatus") in
+      make ?groupLifecycleEventsStatusMessage ?groupLifecycleEventsStatus
+        ?groupLifecycleEventsDesiredStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupLifecycleEventsStatusMessage =
+        field_map json__ "GroupLifecycleEventsStatusMessage"
+          GroupLifecycleEventsStatusMessage.of_json in
+      let groupLifecycleEventsStatus =
+        field_map json__ "GroupLifecycleEventsStatus"
+          GroupLifecycleEventsStatus.of_json in
+      let groupLifecycleEventsDesiredStatus =
+        field_map json__ "GroupLifecycleEventsDesiredStatus"
+          GroupLifecycleEventsDesiredStatus.of_json in
+      make ?groupLifecycleEventsStatusMessage ?groupLifecycleEventsStatus
+        ?groupLifecycleEventsDesiredStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Resource Groups settings for this Amazon Web Services account."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1235,6 +2136,9 @@ module FailedResourceList =
   struct
     type nonrec t = FailedResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FailedResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1260,6 +2164,9 @@ module PendingResourceList =
   struct
     type nonrec t = PendingResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PendingResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1289,6 +2196,9 @@ module ResourceArnList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1330,6 +2240,8 @@ module Tags =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1337,6 +2249,26 @@ module Tags =
         ~of_json:TagValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UnauthorizedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because it doesn't have valid credentials for the target resource."]
 module NextToken =
   struct
     type nonrec t = string
@@ -1362,6 +2294,9 @@ module QueryErrorList =
   struct
     type nonrec t = QueryError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QueryError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1386,6 +2321,9 @@ module ResourceIdentifierList =
   struct
     type nonrec t = ResourceIdentifier.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceIdentifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1407,26 +2345,6 @@ module ResourceIdentifierList =
         ~of_json:ResourceIdentifier.of_json j
     let to_json v = composed_to_json to_value v
   end
-module UnauthorizedException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The request was rejected because it doesn't have valid credentials for the target resource."]
 module MaxResults =
   struct
     type nonrec t = int
@@ -1445,10 +2363,69 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module TagSyncTaskList =
+  struct
+    type nonrec t = TagSyncTaskItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagSyncTaskItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagSyncTaskItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TagSyncTaskList" ~of_json:TagSyncTaskItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListTagSyncTasksFilterList =
+  struct
+    type nonrec t = ListTagSyncTasksFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListTagSyncTasksFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListTagSyncTasksFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListTagSyncTasksFilterList"
+        ~of_json:ListTagSyncTasksFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module GroupIdentifierList =
   struct
     type nonrec t = GroupIdentifier.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupIdentifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1474,6 +2451,9 @@ module GroupList =
   struct
     type nonrec t = Group.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Group.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1497,6 +2477,9 @@ module GroupFilterList =
   struct
     type nonrec t = GroupFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1517,10 +2500,71 @@ module GroupFilterList =
       list_of_json ~kind:"GroupFilterList" ~of_json:GroupFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module GroupingStatusesList =
+  struct
+    type nonrec t = GroupingStatusesItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupingStatusesItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupingStatusesItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupingStatusesList"
+        ~of_json:GroupingStatusesItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListGroupingStatusesFilterList =
+  struct
+    type nonrec t = ListGroupingStatusesFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListGroupingStatusesFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListGroupingStatusesFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListGroupingStatusesFilterList"
+        ~of_json:ListGroupingStatusesFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ListGroupResourcesItemList =
   struct
     type nonrec t = ListGroupResourcesItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListGroupResourcesItem.to_value)) |>
         (fun x -> `List x)
@@ -1547,6 +2591,9 @@ module ResourceFilterList =
   struct
     type nonrec t = ResourceFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1618,19 +2665,40 @@ module GroupConfiguration =
           (Xml.child xml_arg0 "Configuration") in
       make ?failureReason ?status ?proposedConfiguration ?configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "FailureReason"
+        field_map json__ "FailureReason"
           GroupConfigurationFailureReason.of_json in
-      let status = field_map json "Status" GroupConfigurationStatus.of_json in
+      let status = field_map json__ "Status" GroupConfigurationStatus.of_json in
       let proposedConfiguration =
-        field_map json "ProposedConfiguration" GroupConfigurationList.of_json in
+        field_map json__ "ProposedConfiguration"
+          GroupConfigurationList.of_json in
       let configuration =
-        field_map json "Configuration" GroupConfigurationList.of_json in
+        field_map json__ "Configuration" GroupConfigurationList.of_json in
       make ?failureReason ?status ?proposedConfiguration ?configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A service configuration associated with a resource group. The configuration options are determined by the AWS service that defines the Type, and specifies which resources can be included in the group. You can add a service configuration when you create the group by using CreateGroup, or later by using the PutGroupConfiguration operation. For details about group service configuration syntax, see Service configurations for resource groups."]
+       "A service configuration associated with a resource group. The configuration options are determined by the Amazon Web Services service that defines the Type, and specifies which resources can be included in the group. You can add a service configuration when you create the group by using CreateGroup, or later by using the PutGroupConfiguration operation. For details about group service configuration syntax, see Service configurations for resource groups."]
+module CreateGroupName =
+  struct
+    type nonrec t = string
+    let context_ = "CreateGroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:300) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_\\.-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CreateGroupName" j
+    let to_json = simple_to_json to_value
+  end
 module UpdateGroupQueryOutput =
   struct
     type nonrec t =
@@ -1722,8 +2790,8 @@ module UpdateGroupQueryOutput =
         (Option.map ~f:GroupQuery.of_xml) (Xml.child xml_arg0 "GroupQuery") in
       make ?groupQuery ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupQuery = field_map json "GroupQuery" GroupQuery.of_json in
+    let of_json json__ =
+      let groupQuery = field_map json__ "GroupQuery" GroupQuery.of_json in
       make ?groupQuery ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1735,10 +2803,11 @@ module UpdateGroupQueryInput =
       groupName: GroupName.t option
         [@ocaml.doc "Don't use this parameter. Use Group instead."];
       group: GroupString.t option
-        [@ocaml.doc "The name or the ARN of the resource group to query."];
+        [@ocaml.doc
+          "The name or the Amazon resource name (ARN) of the resource group to query."];
       resourceQuery: ResourceQuery.t
         [@ocaml.doc
-          "The resource query to determine which AWS resources are members of this resource group. A resource group can contain either a Configuration or a ResourceQuery, but not both."]}
+          "The resource query to determine which Amazon Web Services resources are members of this resource group. A resource group can contain either a Configuration or a ResourceQuery, but not both."]}
     let context_ = "UpdateGroupQueryInput"
     let make ?groupName =
       fun ?group ->
@@ -1759,11 +2828,11 @@ module UpdateGroupQueryInput =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ~resourceQuery ?group ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceQuery =
-        field_map_exn json "ResourceQuery" ResourceQuery.of_json in
-      let group = field_map json "Group" GroupString.of_json in
-      let groupName = field_map json "GroupName" GroupName.of_json in
+        field_map_exn json__ "ResourceQuery" ResourceQuery.of_json in
+      let group = field_map json__ "Group" GroupString.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
       make ~resourceQuery ?group ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1856,8 +2925,8 @@ module UpdateGroupOutput =
       let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let group = field_map json "Group" Group.of_json in make ?group ()
+    let of_json json__ =
+      let group = field_map json__ "Group" Group.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the description for an existing group. You cannot update the name of a resource group. Minimum permissions To run this command, you must have the following permissions: resource-groups:UpdateGroup"]
@@ -1867,44 +2936,197 @@ module UpdateGroupInput =
       {
       groupName: GroupName.t option
         [@ocaml.doc "Don't use this parameter. Use Group instead."];
-      group: GroupString.t option
-        [@ocaml.doc "The name or the ARN of the resource group to modify."];
+      group: GroupStringV2.t option
+        [@ocaml.doc "The name or the ARN of the resource group to update."];
       description: Description.t option
         [@ocaml.doc
-          "The new description that you want to update the resource group with. Descriptions can contain letters, numbers, hyphens, underscores, periods, and spaces."]}
+          "The new description that you want to update the resource group with. Descriptions can contain letters, numbers, hyphens, underscores, periods, and spaces."];
+      criticality: Criticality.t option
+        [@ocaml.doc
+          "The critical rank of the application group on a scale of 1 to 10, with a rank of 1 being the most critical, and a rank of 10 being least critical."];
+      owner: Owner.t option
+        [@ocaml.doc
+          "A name, email address or other identifier for the person or group who is considered as the owner of this application group within your organization."];
+      displayName: DisplayName.t option
+        [@ocaml.doc
+          "The name of the application group, which you can change at any time."]}
     let make ?groupName =
       fun ?group ->
-        fun ?description -> fun () -> { groupName; group; description }
+        fun ?description ->
+          fun ?criticality ->
+            fun ?owner ->
+              fun ?displayName ->
+                fun () ->
+                  {
+                    groupName;
+                    group;
+                    description;
+                    criticality;
+                    owner;
+                    displayName
+                  }
     let to_value x =
       structure_to_value
         [("GroupName", (Option.map x.groupName ~f:GroupName.to_value));
-        ("Group", (Option.map x.group ~f:GroupString.to_value));
-        ("Description", (Option.map x.description ~f:Description.to_value))]
+        ("Group", (Option.map x.group ~f:GroupStringV2.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Criticality", (Option.map x.criticality ~f:Criticality.to_value));
+        ("Owner", (Option.map x.owner ~f:Owner.to_value));
+        ("DisplayName", (Option.map x.displayName ~f:DisplayName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "DisplayName") in
+      let owner = (Option.map ~f:Owner.of_xml) (Xml.child xml_arg0 "Owner") in
+      let criticality =
+        (Option.map ~f:Criticality.of_xml) (Xml.child xml_arg0 "Criticality") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       let group =
-        (Option.map ~f:GroupString.of_xml) (Xml.child xml_arg0 "Group") in
+        (Option.map ~f:GroupStringV2.of_xml) (Xml.child xml_arg0 "Group") in
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
-      make ?description ?group ?groupName ()
+      make ?displayName ?owner ?criticality ?description ?group ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
-      let group = field_map json "Group" GroupString.of_json in
-      let groupName = field_map json "GroupName" GroupName.of_json in
-      make ?description ?group ?groupName ()
+    let of_json json__ =
+      let displayName = field_map json__ "DisplayName" DisplayName.of_json in
+      let owner = field_map json__ "Owner" Owner.of_json in
+      let criticality = field_map json__ "Criticality" Criticality.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let group = field_map json__ "Group" GroupStringV2.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
+      make ?displayName ?owner ?criticality ?description ?group ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the description for an existing group. You cannot update the name of a resource group. Minimum permissions To run this command, you must have the following permissions: resource-groups:UpdateGroup"]
+module UpdateAccountSettingsOutput =
+  struct
+    type nonrec t =
+      {
+      accountSettings: AccountSettings.t option
+        [@ocaml.doc
+          "A structure that displays the status of the optional features in the account."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `MethodNotAllowedException of MethodNotAllowedException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accountSettings = fun () -> { accountSettings }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `MethodNotAllowedException e ->
+          `Assoc
+            [("error", (`String "MethodNotAllowedException"));
+            ("details", (MethodNotAllowedException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccountSettings",
+           (Option.map x.accountSettings ~f:AccountSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountSettings =
+        (Option.map ~f:AccountSettings.of_xml)
+          (Xml.child xml_arg0 "AccountSettings") in
+      make ?accountSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountSettings =
+        field_map json__ "AccountSettings" AccountSettings.of_json in
+      make ?accountSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Turns on or turns off optional features in Resource Groups. The preceding example shows that the request to turn on group lifecycle events is IN_PROGRESS. You can call the GetAccountSettings operation to check for completion by looking for GroupLifecycleEventsStatus to change to ACTIVE."]
+module UpdateAccountSettingsInput =
+  struct
+    type nonrec t =
+      {
+      groupLifecycleEventsDesiredStatus:
+        GroupLifecycleEventsDesiredStatus.t option
+        [@ocaml.doc
+          "Specifies whether you want to turn group lifecycle events on or off. You can't turn on group lifecycle events if your resource groups quota is greater than 2,000."]}
+    let make ?groupLifecycleEventsDesiredStatus =
+      fun () -> { groupLifecycleEventsDesiredStatus }
+    let to_value x =
+      structure_to_value
+        [("GroupLifecycleEventsDesiredStatus",
+           (Option.map x.groupLifecycleEventsDesiredStatus
+              ~f:GroupLifecycleEventsDesiredStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupLifecycleEventsDesiredStatus =
+        (Option.map ~f:GroupLifecycleEventsDesiredStatus.of_xml)
+          (Xml.child xml_arg0 "GroupLifecycleEventsDesiredStatus") in
+      make ?groupLifecycleEventsDesiredStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupLifecycleEventsDesiredStatus =
+        field_map json__ "GroupLifecycleEventsDesiredStatus"
+          GroupLifecycleEventsDesiredStatus.of_json in
+      make ?groupLifecycleEventsDesiredStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Turns on or turns off optional features in Resource Groups. The preceding example shows that the request to turn on group lifecycle events is IN_PROGRESS. You can call the GetAccountSettings operation to check for completion by looking for GroupLifecycleEventsStatus to change to ACTIVE."]
 module UntagOutput =
   struct
     type nonrec t =
       {
-      arn: GroupArn.t option
+      arn: GroupArnV2.t option
         [@ocaml.doc
-          "The ARN of the resource group from which tags have been removed."];
+          "The Amazon resource name (ARN) of the resource group from which tags have been removed."];
       keys: TagKeyList.t option
         [@ocaml.doc "The keys of the tags that were removed."]}
     type nonrec error =
@@ -1984,18 +3206,19 @@ module UntagOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Arn", (Option.map x.arn ~f:GroupArn.to_value));
+        [("Arn", (Option.map x.arn ~f:GroupArnV2.to_value));
         ("Keys", (Option.map x.keys ~f:TagKeyList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let keys =
         (Option.map ~f:TagKeyList.of_xml) (Xml.child xml_arg0 "Keys") in
-      let arn = (Option.map ~f:GroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let arn = (Option.map ~f:GroupArnV2.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?keys ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keys = field_map json "Keys" TagKeyList.of_json in
-      let arn = field_map json "Arn" GroupArn.of_json in make ?keys ?arn ()
+    let of_json json__ =
+      let keys = field_map json__ "Keys" TagKeyList.of_json in
+      let arn = field_map json__ "Arn" GroupArnV2.of_json in
+      make ?keys ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes tags from a specified resource group. Minimum permissions To run this command, you must have the following permissions: resource-groups:Untag"]
@@ -2003,27 +3226,27 @@ module UntagInput =
   struct
     type nonrec t =
       {
-      arn: GroupArn.t
+      arn: GroupArnV2.t
         [@ocaml.doc
-          "The ARN of the resource group from which to remove tags. The command removed both the specified keys and any values associated with those keys."];
+          "The Amazon resource name (ARN) of the resource group from which to remove tags. The command removed both the specified keys and any values associated with those keys."];
       keys: TagKeyList.t [@ocaml.doc "The keys of the tags to be removed."]}
     let context_ = "UntagInput"
     let make ~arn = fun ~keys -> fun () -> { arn; keys }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (GroupArn.to_value x.arn)));
+        [("Arn", (Some (GroupArnV2.to_value x.arn)));
         ("Keys", (Some (TagKeyList.to_value x.keys)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let keys =
         TagKeyList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Keys") in
       let arn =
-        GroupArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        GroupArnV2.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~keys ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keys = field_map_exn json "Keys" TagKeyList.of_json in
-      let arn = field_map_exn json "Arn" GroupArn.of_json in
+    let of_json json__ =
+      let keys = field_map_exn json__ "Keys" TagKeyList.of_json in
+      let arn = field_map_exn json__ "Arn" GroupArnV2.of_json in
       make ~keys ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2135,29 +3358,29 @@ module UngroupResourcesOutput =
           (Xml.child xml_arg0 "Succeeded") in
       make ?pending ?failed ?succeeded ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pending = field_map json "Pending" PendingResourceList.of_json in
-      let failed = field_map json "Failed" FailedResourceList.of_json in
-      let succeeded = field_map json "Succeeded" ResourceArnList.of_json in
+    let of_json json__ =
+      let pending = field_map json__ "Pending" PendingResourceList.of_json in
+      let failed = field_map json__ "Failed" FailedResourceList.of_json in
+      let succeeded = field_map json__ "Succeeded" ResourceArnList.of_json in
       make ?pending ?failed ?succeeded ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified resources from the specified group. Minimum permissions To run this command, you must have the following permissions: resource-groups:UngroupResources"]
+       "Removes the specified resources from the specified group. This operation works only with static groups that you populated using the GroupResources operation. It doesn't work with any resource groups that are automatically populated by tag-based or CloudFormation stack-based queries. Minimum permissions To run this command, you must have the following permissions: resource-groups:UngroupResources"]
 module UngroupResourcesInput =
   struct
     type nonrec t =
       {
-      group: GroupString.t
+      group: GroupStringV2.t
         [@ocaml.doc
-          "The name or the ARN of the resource group from which to remove the resources."];
+          "The name or the Amazon resource name (ARN) of the resource group from which to remove the resources."];
       resourceArns: ResourceArnList.t
         [@ocaml.doc
-          "The ARNs of the resources to be removed from the group."]}
+          "The Amazon resource names (ARNs) of the resources to be removed from the group."]}
     let context_ = "UngroupResourcesInput"
     let make ~group = fun ~resourceArns -> fun () -> { group; resourceArns }
     let to_value x =
       structure_to_value
-        [("Group", (Some (GroupString.to_value x.group)));
+        [("Group", (Some (GroupStringV2.to_value x.group)));
         ("ResourceArns", (Some (ResourceArnList.to_value x.resourceArns)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -2165,22 +3388,24 @@ module UngroupResourcesInput =
         ResourceArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArns") in
       let group =
-        GroupString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Group") in
+        GroupStringV2.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Group") in
       make ~resourceArns ~group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArns =
-        field_map_exn json "ResourceArns" ResourceArnList.of_json in
-      let group = field_map_exn json "Group" GroupString.of_json in
+        field_map_exn json__ "ResourceArns" ResourceArnList.of_json in
+      let group = field_map_exn json__ "Group" GroupStringV2.of_json in
       make ~resourceArns ~group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified resources from the specified group. Minimum permissions To run this command, you must have the following permissions: resource-groups:UngroupResources"]
+       "Removes the specified resources from the specified group. This operation works only with static groups that you populated using the GroupResources operation. It doesn't work with any resource groups that are automatically populated by tag-based or CloudFormation stack-based queries. Minimum permissions To run this command, you must have the following permissions: resource-groups:UngroupResources"]
 module TagOutput =
   struct
     type nonrec t =
       {
-      arn: GroupArn.t option [@ocaml.doc "The ARN of the tagged resource."];
+      arn: GroupArnV2.t option
+        [@ocaml.doc "The Amazon resource name (ARN) of the tagged resource."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags that have been added to the specified resource group."]}
@@ -2261,26 +3486,28 @@ module TagOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Arn", (Option.map x.arn ~f:GroupArn.to_value));
+        [("Arn", (Option.map x.arn ~f:GroupArnV2.to_value));
         ("Tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
-      let arn = (Option.map ~f:GroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let arn = (Option.map ~f:GroupArnV2.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let arn = field_map json "Arn" GroupArn.of_json in make ?tags ?arn ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let arn = field_map json__ "Arn" GroupArnV2.of_json in
+      make ?tags ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds tags to a resource group with the specified ARN. Existing tags on a resource group are not changed if they are not specified in the request parameters. Do not store personally identifiable information (PII) or other confidential or sensitive information in tags. We use tags to provide you with billing and administration services. Tags are not intended to be used for private or sensitive data. Minimum permissions To run this command, you must have the following permissions: resource-groups:Tag"]
+       "Adds tags to a resource group with the specified Amazon resource name (ARN). Existing tags on a resource group are not changed if they are not specified in the request parameters. Do not store personally identifiable information (PII) or other confidential or sensitive information in tags. We use tags to provide you with billing and administration services. Tags are not intended to be used for private or sensitive data. Minimum permissions To run this command, you must have the following permissions: resource-groups:Tag"]
 module TagInput =
   struct
     type nonrec t =
       {
-      arn: GroupArn.t
-        [@ocaml.doc "The ARN of the resource group to which to add tags."];
+      arn: GroupArnV2.t
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the resource group to which to add tags."];
       tags: Tags.t
         [@ocaml.doc
           "The tags to add to the specified resource group. A tag is a string-to-string map of key-value pairs."]}
@@ -2288,23 +3515,249 @@ module TagInput =
     let make ~arn = fun ~tags -> fun () -> { arn; tags }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (GroupArn.to_value x.arn)));
+        [("Arn", (Some (GroupArnV2.to_value x.arn)));
         ("Tags", (Some (Tags.to_value x.tags)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags =
         Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       let arn =
-        GroupArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        GroupArnV2.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tags ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let arn = field_map_exn json "Arn" GroupArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let arn = field_map_exn json__ "Arn" GroupArnV2.of_json in
       make ~tags ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds tags to a resource group with the specified ARN. Existing tags on a resource group are not changed if they are not specified in the request parameters. Do not store personally identifiable information (PII) or other confidential or sensitive information in tags. We use tags to provide you with billing and administration services. Tags are not intended to be used for private or sensitive data. Minimum permissions To run this command, you must have the following permissions: resource-groups:Tag"]
+       "Adds tags to a resource group with the specified Amazon resource name (ARN). Existing tags on a resource group are not changed if they are not specified in the request parameters. Do not store personally identifiable information (PII) or other confidential or sensitive information in tags. We use tags to provide you with billing and administration services. Tags are not intended to be used for private or sensitive data. Minimum permissions To run this command, you must have the following permissions: resource-groups:Tag"]
+module StartTagSyncTaskOutput =
+  struct
+    type nonrec t =
+      {
+      groupArn: GroupArnV2.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the application group for which you want to add or remove resources."];
+      groupName: GroupName.t option
+        [@ocaml.doc
+          "The name of the application group to onboard and sync resources."];
+      taskArn: TagSyncTaskArn.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the new tag-sync task."];
+      tagKey: TagKey.t option
+        [@ocaml.doc "The tag key of the tag-sync task."];
+      tagValue: TagValue.t option
+        [@ocaml.doc "The tag value of the tag-sync task."];
+      resourceQuery: ResourceQuery.t option ;
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the role assumed by the service to tag and untag resources on your behalf."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `MethodNotAllowedException of MethodNotAllowedException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?groupArn =
+      fun ?groupName ->
+        fun ?taskArn ->
+          fun ?tagKey ->
+            fun ?tagValue ->
+              fun ?resourceQuery ->
+                fun ?roleArn ->
+                  fun () ->
+                    {
+                      groupArn;
+                      groupName;
+                      taskArn;
+                      tagKey;
+                      tagValue;
+                      resourceQuery;
+                      roleArn
+                    }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `MethodNotAllowedException e ->
+          `Assoc
+            [("error", (`String "MethodNotAllowedException"));
+            ("details", (MethodNotAllowedException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GroupArn", (Option.map x.groupArn ~f:GroupArnV2.to_value));
+        ("GroupName", (Option.map x.groupName ~f:GroupName.to_value));
+        ("TaskArn", (Option.map x.taskArn ~f:TagSyncTaskArn.to_value));
+        ("TagKey", (Option.map x.tagKey ~f:TagKey.to_value));
+        ("TagValue", (Option.map x.tagValue ~f:TagValue.to_value));
+        ("ResourceQuery",
+          (Option.map x.resourceQuery ~f:ResourceQuery.to_value));
+        ("RoleArn", (Option.map x.roleArn ~f:RoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let resourceQuery =
+        (Option.map ~f:ResourceQuery.of_xml)
+          (Xml.child xml_arg0 "ResourceQuery") in
+      let tagValue =
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "TagValue") in
+      let tagKey =
+        (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "TagKey") in
+      let taskArn =
+        (Option.map ~f:TagSyncTaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
+      let groupName =
+        (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
+      let groupArn =
+        (Option.map ~f:GroupArnV2.of_xml) (Xml.child xml_arg0 "GroupArn") in
+      make ?roleArn ?resourceQuery ?tagValue ?tagKey ?taskArn ?groupName
+        ?groupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let resourceQuery =
+        field_map json__ "ResourceQuery" ResourceQuery.of_json in
+      let tagValue = field_map json__ "TagValue" TagValue.of_json in
+      let tagKey = field_map json__ "TagKey" TagKey.of_json in
+      let taskArn = field_map json__ "TaskArn" TagSyncTaskArn.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
+      let groupArn = field_map json__ "GroupArn" GroupArnV2.of_json in
+      make ?roleArn ?resourceQuery ?tagValue ?tagKey ?taskArn ?groupName
+        ?groupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new tag-sync task to onboard and sync resources tagged with a specific tag key-value pair to an application. To start a tag-sync task, you need a resource tagging role. The resource tagging role grants permissions to tag and untag applications resources and must include a trust policy that allows Resource Groups to assume the role and perform resource tagging tasks on your behalf. For instructions on creating a tag-sync task, see Create a tag-sync using the Resource Groups API in the Amazon Web Services Service Catalog AppRegistry Administrator Guide. Minimum permissions To run this command, you must have the following permissions: resource-groups:StartTagSyncTask on the application group resource-groups:CreateGroup iam:PassRole on the role provided in the request"]
+module StartTagSyncTaskInput =
+  struct
+    type nonrec t =
+      {
+      group: GroupStringV2.t
+        [@ocaml.doc
+          "The Amazon resource name (ARN) or name of the application group for which you want to create a tag-sync task."];
+      tagKey: TagKey.t option
+        [@ocaml.doc
+          "The tag key. Resources tagged with this tag key-value pair will be added to the application. If a resource with this tag is later untagged, the tag-sync task removes the resource from the application. When using the TagKey parameter, you must also specify the TagValue parameter. If you specify a tag key-value pair, you can't use the ResourceQuery parameter."];
+      tagValue: TagValue.t option
+        [@ocaml.doc
+          "The tag value. Resources tagged with this tag key-value pair will be added to the application. If a resource with this tag is later untagged, the tag-sync task removes the resource from the application. When using the TagValue parameter, you must also specify the TagKey parameter. If you specify a tag key-value pair, you can't use the ResourceQuery parameter."];
+      resourceQuery: ResourceQuery.t option
+        [@ocaml.doc
+          "The query you can use to create the tag-sync task. With this method, all resources matching the query are added to the specified application group. A ResourceQuery specifies both a query Type and a Query string as JSON string objects. For more information on defining a resource query for a tag-sync task, see the tag-based query type in Types of resource group queries in Resource Groups User Guide. When using the ResourceQuery parameter, you cannot use the TagKey and TagValue parameters. When you combine all of the elements together into a single string, any double quotes that are embedded inside another double quote pair must be escaped by preceding the embedded double quote with a backslash character (\\). For example, a complete ResourceQuery parameter must be formatted like the following CLI parameter example: --resource-query '\\{\"Type\":\"TAG_FILTERS_1_0\",\"Query\":\"\\{\\\"ResourceTypeFilters\\\":\\[\\\"AWS::AllSupported\\\"\\],\\\"TagFilters\\\":\\[\\{\\\"Key\\\":\\\"Stage\\\",\\\"Values\\\":\\[\\\"Test\\\"\\]\\}\\]\\}\"\\}' In the preceding example, all of the double quote characters in the value part of the Query element must be escaped because the value itself is surrounded by double quotes. For more information, see Quoting strings in the Command Line Interface User Guide. For the complete list of resource types that you can use in the array value for ResourceTypeFilters, see Resources you can use with Resource Groups and Tag Editor in the Resource Groups User Guide. For example: \"ResourceTypeFilters\":\\[\"AWS::S3::Bucket\", \"AWS::EC2::Instance\"\\]"];
+      roleArn: RoleArn.t
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the role assumed by the service to tag and untag resources on your behalf."]}
+    let context_ = "StartTagSyncTaskInput"
+    let make ?tagKey =
+      fun ?tagValue ->
+        fun ?resourceQuery ->
+          fun ~group ->
+            fun ~roleArn ->
+              fun () -> { tagKey; tagValue; resourceQuery; group; roleArn }
+    let to_value x =
+      structure_to_value
+        [("Group", (Some (GroupStringV2.to_value x.group)));
+        ("TagKey", (Option.map x.tagKey ~f:TagKey.to_value));
+        ("TagValue", (Option.map x.tagValue ~f:TagValue.to_value));
+        ("ResourceQuery",
+          (Option.map x.resourceQuery ~f:ResourceQuery.to_value));
+        ("RoleArn", (Some (RoleArn.to_value x.roleArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleArn =
+        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
+      let resourceQuery =
+        (Option.map ~f:ResourceQuery.of_xml)
+          (Xml.child xml_arg0 "ResourceQuery") in
+      let tagValue =
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "TagValue") in
+      let tagKey =
+        (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "TagKey") in
+      let group =
+        GroupStringV2.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Group") in
+      make ~roleArn ?resourceQuery ?tagValue ?tagKey ~group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
+      let resourceQuery =
+        field_map json__ "ResourceQuery" ResourceQuery.of_json in
+      let tagValue = field_map json__ "TagValue" TagValue.of_json in
+      let tagKey = field_map json__ "TagKey" TagKey.of_json in
+      let group = field_map_exn json__ "Group" GroupStringV2.of_json in
+      make ~roleArn ?resourceQuery ?tagValue ?tagKey ~group ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new tag-sync task to onboard and sync resources tagged with a specific tag key-value pair to an application. To start a tag-sync task, you need a resource tagging role. The resource tagging role grants permissions to tag and untag applications resources and must include a trust policy that allows Resource Groups to assume the role and perform resource tagging tasks on your behalf. For instructions on creating a tag-sync task, see Create a tag-sync using the Resource Groups API in the Amazon Web Services Service Catalog AppRegistry Administrator Guide. Minimum permissions To run this command, you must have the following permissions: resource-groups:StartTagSyncTask on the application group resource-groups:CreateGroup iam:PassRole on the role provided in the request"]
 module SearchResourcesOutput =
   struct
     type nonrec t =
@@ -2317,7 +3770,7 @@ module SearchResourcesOutput =
           "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."];
       queryErrors: QueryErrorList.t option
         [@ocaml.doc
-          "A list of QueryError objects. Each error is an object that contains ErrorCode and Message structures. Possible values for ErrorCode are CLOUDFORMATION_STACK_INACTIVE and CLOUDFORMATION_STACK_NOT_EXISTING."]}
+          "A list of QueryError objects. Each error contains an ErrorCode and Message. Possible values for ErrorCode: CLOUDFORMATION_STACK_INACTIVE CLOUDFORMATION_STACK_NOT_EXISTING CLOUDFORMATION_STACK_UNASSUMABLE_ROLE"]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -2416,15 +3869,15 @@ module SearchResourcesOutput =
           (Xml.child xml_arg0 "ResourceIdentifiers") in
       make ?queryErrors ?nextToken ?resourceIdentifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryErrors = field_map json "QueryErrors" QueryErrorList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let queryErrors = field_map json__ "QueryErrors" QueryErrorList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resourceIdentifiers =
-        field_map json "ResourceIdentifiers" ResourceIdentifierList.of_json in
+        field_map json__ "ResourceIdentifiers" ResourceIdentifierList.of_json in
       make ?queryErrors ?nextToken ?resourceIdentifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of AWS resource identifiers that matches the specified query. The query uses the same format as a resource query in a CreateGroup or UpdateGroupQuery operation. Minimum permissions To run this command, you must have the following permissions: resource-groups:SearchResources cloudformation:DescribeStacks cloudformation:ListStackResources tag:GetResources"]
+       "Returns a list of Amazon Web Services resource identifiers that matches the specified query. The query uses the same format as a resource query in a CreateGroup or UpdateGroupQuery operation. Minimum permissions To run this command, you must have the following permissions: resource-groups:SearchResources cloudformation:DescribeStacks cloudformation:ListStackResources tag:GetResources"]
 module SearchResourcesInput =
   struct
     type nonrec t =
@@ -2459,15 +3912,15 @@ module SearchResourcesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceQuery") in
       make ?nextToken ?maxResults ~resourceQuery ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let resourceQuery =
-        field_map_exn json "ResourceQuery" ResourceQuery.of_json in
+        field_map_exn json__ "ResourceQuery" ResourceQuery.of_json in
       make ?nextToken ?maxResults ~resourceQuery ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of AWS resource identifiers that matches the specified query. The query uses the same format as a resource query in a CreateGroup or UpdateGroupQuery operation. Minimum permissions To run this command, you must have the following permissions: resource-groups:SearchResources cloudformation:DescribeStacks cloudformation:ListStackResources tag:GetResources"]
+       "Returns a list of Amazon Web Services resource identifiers that matches the specified query. The query uses the same format as a resource query in a CreateGroup or UpdateGroupQuery operation. Minimum permissions To run this command, you must have the following permissions: resource-groups:SearchResources cloudformation:DescribeStacks cloudformation:ListStackResources tag:GetResources"]
 module PutGroupConfigurationOutput =
   struct
     type nonrec t = unit
@@ -2561,10 +4014,10 @@ module PutGroupConfigurationInput =
       {
       group: GroupString.t option
         [@ocaml.doc
-          "The name or ARN of the resource group with the configuration that you want to update."];
+          "The name or Amazon resource name (ARN) of the resource group with the configuration that you want to update."];
       configuration: GroupConfigurationList.t option
         [@ocaml.doc
-          "The new configuration to associate with the specified group. A configuration associates the resource group with an AWS service and specifies how the service can interact with the resources in the group. A configuration is an array of GroupConfigurationItem elements. For information about the syntax of a service configuration, see Service configurations for resource groups. A resource group can contain either a Configuration or a ResourceQuery, but not both."]}
+          "The new configuration to associate with the specified group. A configuration associates the resource group with an Amazon Web Services service and specifies how the service can interact with the resources in the group. A configuration is an array of GroupConfigurationItem elements. For information about the syntax of a service configuration, see Service configurations for Resource Groups. A resource group can contain either a Configuration or a ResourceQuery, but not both."]}
     let make ?group =
       fun ?configuration -> fun () -> { group; configuration }
     let to_value x =
@@ -2581,14 +4034,164 @@ module PutGroupConfigurationInput =
         (Option.map ~f:GroupString.of_xml) (Xml.child xml_arg0 "Group") in
       make ?configuration ?group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map json "Configuration" GroupConfigurationList.of_json in
-      let group = field_map json "Group" GroupString.of_json in
+        field_map json__ "Configuration" GroupConfigurationList.of_json in
+      let group = field_map json__ "Group" GroupString.of_json in
       make ?configuration ?group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Attaches a service configuration to the specified group. This occurs asynchronously, and can take time to complete. You can use GetGroupConfiguration to check the status of the update. Minimum permissions To run this command, you must have the following permissions: resource-groups:PutGroupConfiguration"]
+module ListTagSyncTasksOutput =
+  struct
+    type nonrec t =
+      {
+      tagSyncTasks: TagSyncTaskList.t option
+        [@ocaml.doc
+          "A list of tag-sync tasks and information about each task."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `MethodNotAllowedException of MethodNotAllowedException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tagSyncTasks =
+      fun ?nextToken -> fun () -> { tagSyncTasks; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `MethodNotAllowedException e ->
+          `Assoc
+            [("error", (`String "MethodNotAllowedException"));
+            ("details", (MethodNotAllowedException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TagSyncTasks",
+           (Option.map x.tagSyncTasks ~f:TagSyncTaskList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let tagSyncTasks =
+        (Option.map ~f:TagSyncTaskList.of_xml)
+          (Xml.child xml_arg0 "TagSyncTasks") in
+      make ?nextToken ?tagSyncTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tagSyncTasks =
+        field_map json__ "TagSyncTasks" TagSyncTaskList.of_json in
+      make ?nextToken ?tagSyncTasks ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of tag-sync tasks. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListTagSyncTasks with the group passed in the filters as the resource or * if using no filters"]
+module ListTagSyncTasksInput =
+  struct
+    type nonrec t =
+      {
+      filters: ListTagSyncTasksFilterList.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) or name of the application group for which you want to return a list of tag-sync tasks."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the response."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value provided by a previous call's NextToken response to indicate where the output should continue from."]}
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Filters",
+           (Option.map x.filters ~f:ListTagSyncTasksFilterList.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:ListTagSyncTasksFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" ListTagSyncTasksFilterList.of_json in
+      make ?nextToken ?maxResults ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of tag-sync tasks. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListTagSyncTasks with the group passed in the filters as the resource or * if using no filters"]
 module ListGroupsOutput =
   struct
     type nonrec t =
@@ -2687,22 +4290,22 @@ module ListGroupsOutput =
           (Xml.child xml_arg0 "GroupIdentifiers") in
       make ?nextToken ?groups ?groupIdentifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let groups = field_map json "Groups" GroupList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let groups = field_map json__ "Groups" GroupList.of_json in
       let groupIdentifiers =
-        field_map json "GroupIdentifiers" GroupIdentifierList.of_json in
+        field_map json__ "GroupIdentifiers" GroupIdentifierList.of_json in
       make ?nextToken ?groups ?groupIdentifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of existing resource groups in your account. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListGroups"]
+       "Returns a list of existing Resource Groups in your account. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListGroups"]
 module ListGroupsInput =
   struct
     type nonrec t =
       {
       filters: GroupFilterList.t option
         [@ocaml.doc
-          "Filters, formatted as GroupFilter objects, that you want to apply to a ListGroups operation. resource-type - Filter the results to include only those of the specified resource types. Specify up to five resource types in the format AWS::ServiceCode::ResourceType . For example, AWS::EC2::Instance, or AWS::S3::Bucket. configuration-type - Filter the results to include only those groups that have the specified configuration types attached. The current supported values are: AWS:EC2::CapacityReservationPool AWS:EC2::HostManagement"];
+          "Filters, formatted as GroupFilter objects, that you want to apply to a ListGroups operation. resource-type - Filter the results to include only those resource groups that have the specified resource type in their ResourceTypeFilter. For example, AWS::EC2::Instance would return any resource group with a ResourceTypeFilter that includes AWS::EC2::Instance. configuration-type - Filter the results to include only those groups that have the specified configuration types attached. The current supported values are: AWS::ResourceGroups::ApplicationGroup AWS::AppRegistry::Application AWS::AppRegistry::ApplicationResourceGroup AWS::CloudFormation::Stack AWS::EC2::CapacityReservationPool AWS::EC2::HostManagement AWS::NetworkFirewall::RuleGroup"];
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that the service might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."];
@@ -2727,14 +4330,173 @@ module ListGroupsInput =
         (Option.map ~f:GroupFilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let filters = field_map json "Filters" GroupFilterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters = field_map json__ "Filters" GroupFilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of existing resource groups in your account. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListGroups"]
+       "Returns a list of existing Resource Groups in your account. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListGroups"]
+module ListGroupingStatusesOutput =
+  struct
+    type nonrec t =
+      {
+      group: GroupStringV2.t option
+        [@ocaml.doc
+          "The application group identifier, expressed as an Amazon resource name (ARN) or the application group name."];
+      groupingStatuses: GroupingStatusesList.t option
+        [@ocaml.doc
+          "Returns details about the grouping or ungrouping status of the resources in the specified application group."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `MethodNotAllowedException of MethodNotAllowedException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?group =
+      fun ?groupingStatuses ->
+        fun ?nextToken -> fun () -> { group; groupingStatuses; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `MethodNotAllowedException e ->
+          `Assoc
+            [("error", (`String "MethodNotAllowedException"));
+            ("details", (MethodNotAllowedException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Group", (Option.map x.group ~f:GroupStringV2.to_value));
+        ("GroupingStatuses",
+          (Option.map x.groupingStatuses ~f:GroupingStatusesList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let groupingStatuses =
+        (Option.map ~f:GroupingStatusesList.of_xml)
+          (Xml.child xml_arg0 "GroupingStatuses") in
+      let group =
+        (Option.map ~f:GroupStringV2.of_xml) (Xml.child xml_arg0 "Group") in
+      make ?nextToken ?groupingStatuses ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let groupingStatuses =
+        field_map json__ "GroupingStatuses" GroupingStatusesList.of_json in
+      let group = field_map json__ "Group" GroupStringV2.of_json in
+      make ?nextToken ?groupingStatuses ?group ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the status of the last grouping or ungrouping action for each resource in the specified application group."]
+module ListGroupingStatusesInput =
+  struct
+    type nonrec t =
+      {
+      group: GroupStringV2.t
+        [@ocaml.doc
+          "The application group identifier, expressed as an Amazon resource name (ARN) or the application group name."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of resources and their statuses returned in the response."];
+      filters: ListGroupingStatusesFilterList.t option
+        [@ocaml.doc
+          "The filter name and value pair that is used to return more specific results from a list of resources."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value provided by a previous call's NextToken response to indicate where the output should continue from."]}
+    let context_ = "ListGroupingStatusesInput"
+    let make ?maxResults =
+      fun ?filters ->
+        fun ?nextToken ->
+          fun ~group -> fun () -> { maxResults; filters; nextToken; group }
+    let to_value x =
+      structure_to_value
+        [("Group", (Some (GroupStringV2.to_value x.group)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("Filters",
+          (Option.map x.filters ~f:ListGroupingStatusesFilterList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filters =
+        (Option.map ~f:ListGroupingStatusesFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let group =
+        GroupStringV2.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Group") in
+      make ?nextToken ?filters ?maxResults ~group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters =
+        field_map json__ "Filters" ListGroupingStatusesFilterList.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let group = field_map_exn json__ "Group" GroupStringV2.of_json in
+      make ?nextToken ?filters ?maxResults ~group ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the status of the last grouping or ungrouping action for each resource in the specified application group."]
 module ListGroupResourcesOutput =
   struct
     type nonrec t =
@@ -2750,7 +4512,7 @@ module ListGroupResourcesOutput =
           "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."];
       queryErrors: QueryErrorList.t option
         [@ocaml.doc
-          "A list of QueryError objects. Each error is an object that contains ErrorCode and Message structures. Possible values for ErrorCode are CLOUDFORMATION_STACK_INACTIVE and CLOUDFORMATION_STACK_NOT_EXISTING."]}
+          "A list of QueryError objects. Each error contains an ErrorCode and Message. Possible values for ErrorCode are CLOUDFORMATION_STACK_INACTIVE, CLOUDFORMATION_STACK_NOT_EXISTING, CLOUDFORMATION_STACK_UNASSUMABLE_ROLE and RESOURCE_TYPE_NOT_SUPPORTED."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -2865,17 +4627,17 @@ module ListGroupResourcesOutput =
           (Xml.child xml_arg0 "Resources") in
       make ?queryErrors ?nextToken ?resourceIdentifiers ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryErrors = field_map json "QueryErrors" QueryErrorList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let queryErrors = field_map json__ "QueryErrors" QueryErrorList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resourceIdentifiers =
-        field_map json "ResourceIdentifiers" ResourceIdentifierList.of_json in
+        field_map json__ "ResourceIdentifiers" ResourceIdentifierList.of_json in
       let resources =
-        field_map json "Resources" ListGroupResourcesItemList.of_json in
+        field_map json__ "Resources" ListGroupResourcesItemList.of_json in
       make ?queryErrors ?nextToken ?resourceIdentifiers ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of ARNs of the resources that are members of a specified resource group. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListGroupResources cloudformation:DescribeStacks cloudformation:ListStackResources tag:GetResources"]
+       "Returns a list of Amazon resource names (ARNs) of the resources that are members of a specified resource group. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListGroupResources cloudformation:DescribeStacks cloudformation:ListStackResources tag:GetResources"]
 module ListGroupResourcesInput =
   struct
     type nonrec t =
@@ -2883,11 +4645,12 @@ module ListGroupResourcesInput =
       groupName: GroupName.t option
         [@ocaml.doc
           "Deprecated - don't use this parameter. Use the Group request field instead."];
-      group: GroupString.t option
-        [@ocaml.doc "The name or the ARN of the resource group"];
+      group: GroupStringV2.t option
+        [@ocaml.doc
+          "The name or the Amazon resource name (ARN) of the resource group."];
       filters: ResourceFilterList.t option
         [@ocaml.doc
-          "Filters, formatted as ResourceFilter objects, that you want to apply to a ListGroupResources operation. Filters the results to include only those of the specified resource types. resource-type - Filter resources by their type. Specify up to five resource types in the format AWS::ServiceCode::ResourceType. For example, AWS::EC2::Instance, or AWS::S3::Bucket. When you specify a resource-type filter for ListGroupResources, AWS Resource Groups validates your filter resource types against the types that are defined in the query associated with the group. For example, if a group contains only S3 buckets because its query specifies only that resource type, but your resource-type filter includes EC2 instances, AWS Resource Groups does not filter for EC2 instances. In this case, a ListGroupResources request returns a BadRequestException error with a message similar to the following: The resource types specified as filters in the request are not valid. The error includes a list of resource types that failed the validation because they are not part of the query associated with the group. This validation doesn't occur when the group query specifies AWS::AllSupported, because a group based on such a query can contain any of the allowed resource types for the query type (tag-based or AWS CloudFormation stack-based queries)."];
+          "Filters, formatted as ResourceFilter objects, that you want to apply to a ListGroupResources operation. Filters the results to include only those of the specified resource types. resource-type - Filter resources by their type. Specify up to five resource types in the format AWS::ServiceCode::ResourceType. For example, AWS::EC2::Instance, or AWS::S3::Bucket. When you specify a resource-type filter for ListGroupResources, Resource Groups validates your filter resource types against the types that are defined in the query associated with the group. For example, if a group contains only S3 buckets because its query specifies only that resource type, but your resource-type filter includes EC2 instances, AWS Resource Groups does not filter for EC2 instances. In this case, a ListGroupResources request returns a BadRequestException error with a message similar to the following: The resource types specified as filters in the request are not valid. The error includes a list of resource types that failed the validation because they are not part of the query associated with the group. This validation doesn't occur when the group query specifies AWS::AllSupported, because a group based on such a query can contain any of the allowed resource types for the query type (tag-based or Amazon CloudFront stack-based queries)."];
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that the service might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."];
@@ -2903,7 +4666,7 @@ module ListGroupResourcesInput =
     let to_value x =
       structure_to_value
         [("GroupName", (Option.map x.groupName ~f:GroupName.to_value));
-        ("Group", (Option.map x.group ~f:GroupString.to_value));
+        ("Group", (Option.map x.group ~f:GroupStringV2.to_value));
         ("Filters", (Option.map x.filters ~f:ResourceFilterList.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
@@ -2917,34 +4680,34 @@ module ListGroupResourcesInput =
         (Option.map ~f:ResourceFilterList.of_xml)
           (Xml.child xml_arg0 "Filters") in
       let group =
-        (Option.map ~f:GroupString.of_xml) (Xml.child xml_arg0 "Group") in
+        (Option.map ~f:GroupStringV2.of_xml) (Xml.child xml_arg0 "Group") in
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?nextToken ?maxResults ?filters ?group ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let filters = field_map json "Filters" ResourceFilterList.of_json in
-      let group = field_map json "Group" GroupString.of_json in
-      let groupName = field_map json "GroupName" GroupName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters = field_map json__ "Filters" ResourceFilterList.of_json in
+      let group = field_map json__ "Group" GroupStringV2.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
       make ?nextToken ?maxResults ?filters ?group ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of ARNs of the resources that are members of a specified resource group. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListGroupResources cloudformation:DescribeStacks cloudformation:ListStackResources tag:GetResources"]
+       "Returns a list of Amazon resource names (ARNs) of the resources that are members of a specified resource group. Minimum permissions To run this command, you must have the following permissions: resource-groups:ListGroupResources cloudformation:DescribeStacks cloudformation:ListStackResources tag:GetResources"]
 module GroupResourcesOutput =
   struct
     type nonrec t =
       {
       succeeded: ResourceArnList.t option
         [@ocaml.doc
-          "A list of ARNs of resources that were successfully added to the group by this operation."];
+          "A list of Amazon resource names (ARNs) of the resources that this operation successfully added to the group."];
       failed: FailedResourceList.t option
         [@ocaml.doc
-          "A list of ARNs of any resources that failed to be added to the group by this operation."];
+          "A list of Amazon resource names (ARNs) of any resources that this operation failed to add to the group."];
       pending: PendingResourceList.t option
         [@ocaml.doc
-          "A list of ARNs of any resources that are still in the process of being added to the group by this operation. These pending additions continue asynchronously. You can check the status of pending additions by using the ListGroupResources operation, and checking the Resources array in the response and the Status field of each object in that array."]}
+          "A list of Amazon resource names (ARNs) of any resources that this operation is still in the process adding to the group. These pending additions continue asynchronously. You can check the status of pending additions by using the ListGroupResources operation, and checking the Resources array in the response and the Status field of each object in that array."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -3039,29 +4802,29 @@ module GroupResourcesOutput =
           (Xml.child xml_arg0 "Succeeded") in
       make ?pending ?failed ?succeeded ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pending = field_map json "Pending" PendingResourceList.of_json in
-      let failed = field_map json "Failed" FailedResourceList.of_json in
-      let succeeded = field_map json "Succeeded" ResourceArnList.of_json in
+    let of_json json__ =
+      let pending = field_map json__ "Pending" PendingResourceList.of_json in
+      let failed = field_map json__ "Failed" FailedResourceList.of_json in
+      let succeeded = field_map json__ "Succeeded" ResourceArnList.of_json in
       make ?pending ?failed ?succeeded ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified resources to the specified group. Minimum permissions To run this command, you must have the following permissions: resource-groups:GroupResources"]
+       "Adds the specified resources to the specified group. You can only use this operation with the following groups: AWS::EC2::HostManagement AWS::EC2::CapacityReservationPool AWS::ResourceGroups::ApplicationGroup Other resource group types and resource types are not currently supported by this operation. Minimum permissions To run this command, you must have the following permissions: resource-groups:GroupResources"]
 module GroupResourcesInput =
   struct
     type nonrec t =
       {
-      group: GroupString.t
+      group: GroupStringV2.t
         [@ocaml.doc
-          "The name or the ARN of the resource group to add resources to."];
+          "The name or the Amazon resource name (ARN) of the resource group to add resources to."];
       resourceArns: ResourceArnList.t
         [@ocaml.doc
-          "The list of ARNs for resources to be added to the group."]}
+          "The list of Amazon resource names (ARNs) of the resources to be added to the group."]}
     let context_ = "GroupResourcesInput"
     let make ~group = fun ~resourceArns -> fun () -> { group; resourceArns }
     let to_value x =
       structure_to_value
-        [("Group", (Some (GroupString.to_value x.group)));
+        [("Group", (Some (GroupStringV2.to_value x.group)));
         ("ResourceArns", (Some (ResourceArnList.to_value x.resourceArns)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -3069,23 +4832,25 @@ module GroupResourcesInput =
         ResourceArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArns") in
       let group =
-        GroupString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Group") in
+        GroupStringV2.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Group") in
       make ~resourceArns ~group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArns =
-        field_map_exn json "ResourceArns" ResourceArnList.of_json in
-      let group = field_map_exn json "Group" GroupString.of_json in
+        field_map_exn json__ "ResourceArns" ResourceArnList.of_json in
+      let group = field_map_exn json__ "Group" GroupStringV2.of_json in
       make ~resourceArns ~group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified resources to the specified group. Minimum permissions To run this command, you must have the following permissions: resource-groups:GroupResources"]
+       "Adds the specified resources to the specified group. You can only use this operation with the following groups: AWS::EC2::HostManagement AWS::EC2::CapacityReservationPool AWS::ResourceGroups::ApplicationGroup Other resource group types and resource types are not currently supported by this operation. Minimum permissions To run this command, you must have the following permissions: resource-groups:GroupResources"]
 module GetTagsOutput =
   struct
     type nonrec t =
       {
-      arn: GroupArn.t option
-        [@ocaml.doc "The ARN of the tagged resource group."];
+      arn: GroupArnV2.t option
+        [@ocaml.doc
+          "TheAmazon resource name (ARN) of the tagged resource group."];
       tags: Tags.t option
         [@ocaml.doc "The tags associated with the specified resource group."]}
     type nonrec error =
@@ -3165,42 +4930,257 @@ module GetTagsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Arn", (Option.map x.arn ~f:GroupArn.to_value));
+        [("Arn", (Option.map x.arn ~f:GroupArnV2.to_value));
         ("Tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
-      let arn = (Option.map ~f:GroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let arn = (Option.map ~f:GroupArnV2.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let arn = field_map json "Arn" GroupArn.of_json in make ?tags ?arn ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let arn = field_map json__ "Arn" GroupArnV2.of_json in
+      make ?tags ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of tags that are associated with a resource group, specified by an ARN. Minimum permissions To run this command, you must have the following permissions: resource-groups:GetTags"]
+       "Returns a list of tags that are associated with a resource group, specified by an Amazon resource name (ARN). Minimum permissions To run this command, you must have the following permissions: resource-groups:GetTags"]
 module GetTagsInput =
   struct
     type nonrec t =
       {
-      arn: GroupArn.t
+      arn: GroupArnV2.t
         [@ocaml.doc
-          "The ARN of the resource group whose tags you want to retrieve."]}
+          "The Amazon resource name (ARN) of the resource group whose tags you want to retrieve."]}
     let context_ = "GetTagsInput"
     let make ~arn = fun () -> { arn }
     let to_value x =
-      structure_to_value [("Arn", (Some (GroupArn.to_value x.arn)))]
+      structure_to_value [("Arn", (Some (GroupArnV2.to_value x.arn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let arn =
-        GroupArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        GroupArnV2.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" GroupArn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" GroupArnV2.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of tags that are associated with a resource group, specified by an ARN. Minimum permissions To run this command, you must have the following permissions: resource-groups:GetTags"]
+       "Returns a list of tags that are associated with a resource group, specified by an Amazon resource name (ARN). Minimum permissions To run this command, you must have the following permissions: resource-groups:GetTags"]
+module GetTagSyncTaskOutput =
+  struct
+    type nonrec t =
+      {
+      groupArn: GroupArnV2.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the application group."];
+      groupName: GroupName.t option
+        [@ocaml.doc "The name of the application group."];
+      taskArn: TagSyncTaskArn.t option
+        [@ocaml.doc "The Amazon resource name (ARN) of the tag-sync task."];
+      tagKey: TagKey.t option [@ocaml.doc "The tag key."];
+      tagValue: TagValue.t option [@ocaml.doc "The tag value."];
+      resourceQuery: ResourceQuery.t option ;
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the role assumed by Resource Groups to tag and untag resources on your behalf. For more information about this role, review Tag-sync required permissions."];
+      status: TagSyncTaskStatus.t option
+        [@ocaml.doc
+          "The status of the tag-sync task. Valid values include: ACTIVE - The tag-sync task is actively managing resources in the application by adding or removing the awsApplication tag from resources when they are tagged or untagged with the specified tag key-value pair. ERROR - The tag-sync task is not actively managing resources in the application. Review the ErrorMessage for more information about resolving the error."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "The specific error message in cases where the tag-sync task status is ERROR."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the tag-sync task was created."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `MethodNotAllowedException of MethodNotAllowedException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?groupArn =
+      fun ?groupName ->
+        fun ?taskArn ->
+          fun ?tagKey ->
+            fun ?tagValue ->
+              fun ?resourceQuery ->
+                fun ?roleArn ->
+                  fun ?status ->
+                    fun ?errorMessage ->
+                      fun ?createdAt ->
+                        fun () ->
+                          {
+                            groupArn;
+                            groupName;
+                            taskArn;
+                            tagKey;
+                            tagValue;
+                            resourceQuery;
+                            roleArn;
+                            status;
+                            errorMessage;
+                            createdAt
+                          }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `MethodNotAllowedException e ->
+          `Assoc
+            [("error", (`String "MethodNotAllowedException"));
+            ("details", (MethodNotAllowedException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GroupArn", (Option.map x.groupArn ~f:GroupArnV2.to_value));
+        ("GroupName", (Option.map x.groupName ~f:GroupName.to_value));
+        ("TaskArn", (Option.map x.taskArn ~f:TagSyncTaskArn.to_value));
+        ("TagKey", (Option.map x.tagKey ~f:TagKey.to_value));
+        ("TagValue", (Option.map x.tagValue ~f:TagValue.to_value));
+        ("ResourceQuery",
+          (Option.map x.resourceQuery ~f:ResourceQuery.to_value));
+        ("RoleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("Status", (Option.map x.status ~f:TagSyncTaskStatus.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let status =
+        (Option.map ~f:TagSyncTaskStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let resourceQuery =
+        (Option.map ~f:ResourceQuery.of_xml)
+          (Xml.child xml_arg0 "ResourceQuery") in
+      let tagValue =
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "TagValue") in
+      let tagKey =
+        (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "TagKey") in
+      let taskArn =
+        (Option.map ~f:TagSyncTaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
+      let groupName =
+        (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
+      let groupArn =
+        (Option.map ~f:GroupArnV2.of_xml) (Xml.child xml_arg0 "GroupArn") in
+      make ?createdAt ?errorMessage ?status ?roleArn ?resourceQuery ?tagValue
+        ?tagKey ?taskArn ?groupName ?groupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let status = field_map json__ "Status" TagSyncTaskStatus.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let resourceQuery =
+        field_map json__ "ResourceQuery" ResourceQuery.of_json in
+      let tagValue = field_map json__ "TagValue" TagValue.of_json in
+      let tagKey = field_map json__ "TagKey" TagKey.of_json in
+      let taskArn = field_map json__ "TaskArn" TagSyncTaskArn.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
+      let groupArn = field_map json__ "GroupArn" GroupArnV2.of_json in
+      make ?createdAt ?errorMessage ?status ?roleArn ?resourceQuery ?tagValue
+        ?tagKey ?taskArn ?groupName ?groupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a specified tag-sync task. Minimum permissions To run this command, you must have the following permissions: resource-groups:GetTagSyncTask on the application group"]
+module GetTagSyncTaskInput =
+  struct
+    type nonrec t =
+      {
+      taskArn: TagSyncTaskArn.t
+        [@ocaml.doc "The Amazon resource name (ARN) of the tag-sync task."]}
+    let context_ = "GetTagSyncTaskInput"
+    let make ~taskArn = fun () -> { taskArn }
+    let to_value x =
+      structure_to_value
+        [("TaskArn", (Some (TagSyncTaskArn.to_value x.taskArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskArn =
+        TagSyncTaskArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
+      make ~taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskArn = field_map_exn json__ "TaskArn" TagSyncTaskArn.of_json in
+      make ~taskArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a specified tag-sync task. Minimum permissions To run this command, you must have the following permissions: resource-groups:GetTagSyncTask on the application group"]
 module GetGroupQueryOutput =
   struct
     type nonrec t =
@@ -3292,8 +5272,8 @@ module GetGroupQueryOutput =
         (Option.map ~f:GroupQuery.of_xml) (Xml.child xml_arg0 "GroupQuery") in
       make ?groupQuery ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupQuery = field_map json "GroupQuery" GroupQuery.of_json in
+    let of_json json__ =
+      let groupQuery = field_map json__ "GroupQuery" GroupQuery.of_json in
       make ?groupQuery ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3305,7 +5285,8 @@ module GetGroupQueryInput =
       groupName: GroupName.t option
         [@ocaml.doc "Don't use this parameter. Use Group instead."];
       group: GroupString.t option
-        [@ocaml.doc "The name or the ARN of the resource group to query."]}
+        [@ocaml.doc
+          "The name or the Amazon resource name (ARN) of the resource group to query."]}
     let make ?groupName = fun ?group -> fun () -> { groupName; group }
     let to_value x =
       structure_to_value
@@ -3319,9 +5300,9 @@ module GetGroupQueryInput =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?group ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let group = field_map json "Group" GroupString.of_json in
-      let groupName = field_map json "GroupName" GroupName.of_json in
+    let of_json json__ =
+      let group = field_map json__ "Group" GroupString.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
       make ?group ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3331,7 +5312,8 @@ module GetGroupOutput =
     type nonrec t =
       {
       group: Group.t option
-        [@ocaml.doc "A full description of the resource group."]}
+        [@ocaml.doc
+          "A structure that contains the metadata details for the specified resource group. Use GetGroupQuery and GetGroupConfiguration to get those additional details of the resource group."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -3414,8 +5396,8 @@ module GetGroupOutput =
       let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let group = field_map json "Group" Group.of_json in make ?group ()
+    let of_json json__ =
+      let group = field_map json__ "Group" Group.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about a specified resource group. Minimum permissions To run this command, you must have the following permissions: resource-groups:GetGroup"]
@@ -3426,24 +5408,25 @@ module GetGroupInput =
       groupName: GroupName.t option
         [@ocaml.doc
           "Deprecated - don't use this parameter. Use Group instead."];
-      group: GroupString.t option
-        [@ocaml.doc "The name or the ARN of the resource group to retrieve."]}
+      group: GroupStringV2.t option
+        [@ocaml.doc
+          "The name or the Amazon resource name (ARN) of the resource group to retrieve."]}
     let make ?groupName = fun ?group -> fun () -> { groupName; group }
     let to_value x =
       structure_to_value
         [("GroupName", (Option.map x.groupName ~f:GroupName.to_value));
-        ("Group", (Option.map x.group ~f:GroupString.to_value))]
+        ("Group", (Option.map x.group ~f:GroupStringV2.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let group =
-        (Option.map ~f:GroupString.of_xml) (Xml.child xml_arg0 "Group") in
+        (Option.map ~f:GroupStringV2.of_xml) (Xml.child xml_arg0 "Group") in
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?group ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let group = field_map json "Group" GroupString.of_json in
-      let groupName = field_map json "GroupName" GroupName.of_json in
+    let of_json json__ =
+      let group = field_map json__ "Group" GroupStringV2.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
       make ?group ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3454,7 +5437,7 @@ module GetGroupConfigurationOutput =
       {
       groupConfiguration: GroupConfiguration.t option
         [@ocaml.doc
-          "The service configuration associated with the specified group. For details about the service configuration syntax, see Service configurations for resource groups."]}
+          "A structure that describes the service configuration attached with the specified group. For details about the service configuration syntax, see Service configurations for Resource Groups."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -3541,19 +5524,20 @@ module GetGroupConfigurationOutput =
           (Xml.child xml_arg0 "GroupConfiguration") in
       make ?groupConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupConfiguration =
-        field_map json "GroupConfiguration" GroupConfiguration.of_json in
+        field_map json__ "GroupConfiguration" GroupConfiguration.of_json in
       make ?groupConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the service configuration associated with the specified resource group. For details about the service configuration syntax, see Service configurations for resource groups. Minimum permissions To run this command, you must have the following permissions: resource-groups:GetGroupConfiguration"]
+       "Retrieves the service configuration associated with the specified resource group. For details about the service configuration syntax, see Service configurations for Resource Groups. Minimum permissions To run this command, you must have the following permissions: resource-groups:GetGroupConfiguration"]
 module GetGroupConfigurationInput =
   struct
     type nonrec t =
       {
       group: GroupString.t option
-        [@ocaml.doc "The name or the ARN of the resource group."]}
+        [@ocaml.doc
+          "The name or the Amazon resource name (ARN) of the resource group for which you want to retrive the service configuration."]}
     let make ?group = fun () -> { group }
     let to_value x =
       structure_to_value
@@ -3564,12 +5548,103 @@ module GetGroupConfigurationInput =
         (Option.map ~f:GroupString.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let group = field_map json "Group" GroupString.of_json in
+    let of_json json__ =
+      let group = field_map json__ "Group" GroupString.of_json in
       make ?group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the service configuration associated with the specified resource group. For details about the service configuration syntax, see Service configurations for resource groups. Minimum permissions To run this command, you must have the following permissions: resource-groups:GetGroupConfiguration"]
+       "Retrieves the service configuration associated with the specified resource group. For details about the service configuration syntax, see Service configurations for Resource Groups. Minimum permissions To run this command, you must have the following permissions: resource-groups:GetGroupConfiguration"]
+module GetAccountSettingsOutput =
+  struct
+    type nonrec t =
+      {
+      accountSettings: AccountSettings.t option
+        [@ocaml.doc
+          "The current settings for the optional features in Resource Groups."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `MethodNotAllowedException of MethodNotAllowedException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accountSettings = fun () -> { accountSettings }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "MethodNotAllowedException" ->
+          `MethodNotAllowedException (MethodNotAllowedException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `MethodNotAllowedException e ->
+          `Assoc
+            [("error", (`String "MethodNotAllowedException"));
+            ("details", (MethodNotAllowedException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccountSettings",
+           (Option.map x.accountSettings ~f:AccountSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountSettings =
+        (Option.map ~f:AccountSettings.of_xml)
+          (Xml.child xml_arg0 "AccountSettings") in
+      make ?accountSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountSettings =
+        field_map json__ "AccountSettings" AccountSettings.of_json in
+      make ?accountSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the current status of optional features in Resource Groups."]
 module DeleteGroupOutput =
   struct
     type nonrec t =
@@ -3658,8 +5733,8 @@ module DeleteGroupOutput =
       let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let group = field_map json "Group" Group.of_json in make ?group ()
+    let of_json json__ =
+      let group = field_map json__ "Group" Group.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the specified resource group. Deleting a resource group does not delete any resources that are members of the group; it only deletes the group structure. Minimum permissions To run this command, you must have the following permissions: resource-groups:DeleteGroup"]
@@ -3670,24 +5745,25 @@ module DeleteGroupInput =
       groupName: GroupName.t option
         [@ocaml.doc
           "Deprecated - don't use this parameter. Use Group instead."];
-      group: GroupString.t option
-        [@ocaml.doc "The name or the ARN of the resource group to delete."]}
+      group: GroupStringV2.t option
+        [@ocaml.doc
+          "The name or the Amazon resource name (ARN) of the resource group to delete."]}
     let make ?groupName = fun ?group -> fun () -> { groupName; group }
     let to_value x =
       structure_to_value
         [("GroupName", (Option.map x.groupName ~f:GroupName.to_value));
-        ("Group", (Option.map x.group ~f:GroupString.to_value))]
+        ("Group", (Option.map x.group ~f:GroupStringV2.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let group =
-        (Option.map ~f:GroupString.of_xml) (Xml.child xml_arg0 "Group") in
+        (Option.map ~f:GroupStringV2.of_xml) (Xml.child xml_arg0 "Group") in
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?group ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let group = field_map json "Group" GroupString.of_json in
-      let groupName = field_map json "GroupName" GroupName.of_json in
+    let of_json json__ =
+      let group = field_map json__ "Group" GroupStringV2.of_json in
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
       make ?group ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3704,7 +5780,7 @@ module CreateGroupOutput =
       tags: Tags.t option [@ocaml.doc "The tags associated with the group."];
       groupConfiguration: GroupConfiguration.t option
         [@ocaml.doc
-          "The service configuration associated with the resource group. For details about the syntax of a service configuration, see Service configurations for resource groups."]}
+          "The service configuration associated with the resource group. For details about the syntax of a service configuration, see Service configurations for Resource Groups."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -3795,55 +5871,84 @@ module CreateGroupOutput =
       let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
       make ?groupConfiguration ?tags ?resourceQuery ?group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupConfiguration =
-        field_map json "GroupConfiguration" GroupConfiguration.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "GroupConfiguration" GroupConfiguration.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let resourceQuery =
-        field_map json "ResourceQuery" ResourceQuery.of_json in
-      let group = field_map json "Group" Group.of_json in
+        field_map json__ "ResourceQuery" ResourceQuery.of_json in
+      let group = field_map json__ "Group" Group.of_json in
       make ?groupConfiguration ?tags ?resourceQuery ?group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a resource group with the specified name and description. You can optionally include a resource query, or a service configuration. For more information about constructing a resource query, see Create a tag-based group in Resource Groups. For more information about service configurations, see Service configurations for resource groups. Minimum permissions To run this command, you must have the following permissions: resource-groups:CreateGroup"]
+       "Creates a resource group with the specified name and description. You can optionally include either a resource query or a service configuration. For more information about constructing a resource query, see Build queries and groups in Resource Groups in the Resource Groups User Guide. For more information about service-linked groups and service configurations, see Service configurations for Resource Groups. Minimum permissions To run this command, you must have the following permissions: resource-groups:CreateGroup"]
 module CreateGroupInput =
   struct
     type nonrec t =
       {
-      name: GroupName.t
+      name: CreateGroupName.t
         [@ocaml.doc
-          "The name of the group, which is the identifier of the group in other operations. You can't change the name of a resource group after you create it. A resource group name can consist of letters, numbers, hyphens, periods, and underscores. The name cannot start with AWS or aws; these are reserved. A resource group name must be unique within each AWS Region in your AWS account."];
+          "The name of the group, which is the identifier of the group in other operations. You can't change the name of a resource group after you create it. A resource group name can consist of letters, numbers, hyphens, periods, and underscores. The name cannot start with AWS, aws, or any other possible capitalization; these are reserved. A resource group name must be unique within each Amazon Web Services Region in your Amazon Web Services account."];
       description: Description.t option
         [@ocaml.doc
           "The description of the resource group. Descriptions can consist of letters, numbers, hyphens, underscores, periods, and spaces."];
       resourceQuery: ResourceQuery.t option
         [@ocaml.doc
-          "The resource query that determines which AWS resources are members of this group. For more information about resource queries, see Create a tag-based group in Resource Groups. A resource group can contain either a ResourceQuery or a Configuration, but not both."];
+          "The resource query that determines which Amazon Web Services resources are members of this group. For more information about resource queries, see Create a tag-based group in Resource Groups. A resource group can contain either a ResourceQuery or a Configuration, but not both."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags to add to the group. A tag is key-value pair string."];
       configuration: GroupConfigurationList.t option
         [@ocaml.doc
-          "A configuration associates the resource group with an AWS service and specifies how the service can interact with the resources in the group. A configuration is an array of GroupConfigurationItem elements. For details about the syntax of service configurations, see Service configurations for resource groups. A resource group can contain either a Configuration or a ResourceQuery, but not both."]}
+          "A configuration associates the resource group with an Amazon Web Services service and specifies how the service can interact with the resources in the group. A configuration is an array of GroupConfigurationItem elements. For details about the syntax of service configurations, see Service configurations for Resource Groups. A resource group can contain either a Configuration or a ResourceQuery, but not both."];
+      criticality: Criticality.t option
+        [@ocaml.doc
+          "The critical rank of the application group on a scale of 1 to 10, with a rank of 1 being the most critical, and a rank of 10 being least critical."];
+      owner: Owner.t option
+        [@ocaml.doc
+          "A name, email address or other identifier for the person or group who is considered as the owner of this application group within your organization."];
+      displayName: DisplayName.t option
+        [@ocaml.doc
+          "The name of the application group, which you can change at any time."]}
     let context_ = "CreateGroupInput"
     let make ?description =
       fun ?resourceQuery ->
         fun ?tags ->
           fun ?configuration ->
-            fun ~name ->
-              fun () ->
-                { description; resourceQuery; tags; configuration; name }
+            fun ?criticality ->
+              fun ?owner ->
+                fun ?displayName ->
+                  fun ~name ->
+                    fun () ->
+                      {
+                        description;
+                        resourceQuery;
+                        tags;
+                        configuration;
+                        criticality;
+                        owner;
+                        displayName;
+                        name
+                      }
     let to_value x =
       structure_to_value
-        [("Name", (Some (GroupName.to_value x.name)));
+        [("Name", (Some (CreateGroupName.to_value x.name)));
         ("Description", (Option.map x.description ~f:Description.to_value));
         ("ResourceQuery",
           (Option.map x.resourceQuery ~f:ResourceQuery.to_value));
         ("Tags", (Option.map x.tags ~f:Tags.to_value));
         ("Configuration",
-          (Option.map x.configuration ~f:GroupConfigurationList.to_value))]
+          (Option.map x.configuration ~f:GroupConfigurationList.to_value));
+        ("Criticality", (Option.map x.criticality ~f:Criticality.to_value));
+        ("Owner", (Option.map x.owner ~f:Owner.to_value));
+        ("DisplayName", (Option.map x.displayName ~f:DisplayName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "DisplayName") in
+      let owner = (Option.map ~f:Owner.of_xml) (Xml.child xml_arg0 "Owner") in
+      let criticality =
+        (Option.map ~f:Criticality.of_xml) (Xml.child xml_arg0 "Criticality") in
       let configuration =
         (Option.map ~f:GroupConfigurationList.of_xml)
           (Xml.child xml_arg0 "Configuration") in
@@ -3854,18 +5959,48 @@ module CreateGroupInput =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       let name =
-        GroupName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?configuration ?tags ?resourceQuery ?description ~name ()
+        CreateGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?displayName ?owner ?criticality ?configuration ?tags
+        ?resourceQuery ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let displayName = field_map json__ "DisplayName" DisplayName.of_json in
+      let owner = field_map json__ "Owner" Owner.of_json in
+      let criticality = field_map json__ "Criticality" Criticality.of_json in
       let configuration =
-        field_map json "Configuration" GroupConfigurationList.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "Configuration" GroupConfigurationList.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let resourceQuery =
-        field_map json "ResourceQuery" ResourceQuery.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map_exn json "Name" GroupName.of_json in
-      make ?configuration ?tags ?resourceQuery ?description ~name ()
+        field_map json__ "ResourceQuery" ResourceQuery.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" CreateGroupName.of_json in
+      make ?displayName ?owner ?criticality ?configuration ?tags
+        ?resourceQuery ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a resource group with the specified name and description. You can optionally include a resource query, or a service configuration. For more information about constructing a resource query, see Create a tag-based group in Resource Groups. For more information about service configurations, see Service configurations for resource groups. Minimum permissions To run this command, you must have the following permissions: resource-groups:CreateGroup"]
+       "Creates a resource group with the specified name and description. You can optionally include either a resource query or a service configuration. For more information about constructing a resource query, see Build queries and groups in Resource Groups in the Resource Groups User Guide. For more information about service-linked groups and service configurations, see Service configurations for Resource Groups. Minimum permissions To run this command, you must have the following permissions: resource-groups:CreateGroup"]
+module CancelTagSyncTaskInput =
+  struct
+    type nonrec t =
+      {
+      taskArn: TagSyncTaskArn.t
+        [@ocaml.doc "The Amazon resource name (ARN) of the tag-sync task."]}
+    let context_ = "CancelTagSyncTaskInput"
+    let make ~taskArn = fun () -> { taskArn }
+    let to_value x =
+      structure_to_value
+        [("TaskArn", (Some (TagSyncTaskArn.to_value x.taskArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskArn =
+        TagSyncTaskArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
+      make ~taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskArn = field_map_exn json__ "TaskArn" TagSyncTaskArn.of_json in
+      make ~taskArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels the specified tag-sync task. Minimum permissions To run this command, you must have the following permissions: resource-groups:CancelTagSyncTask on the application group resource-groups:DeleteGroup"]

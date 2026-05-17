@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let create_accessor ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAccessor input
 let create_member ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateMember input
 let create_network ?endpoint_url ?cfg input =
@@ -19,10 +21,14 @@ let create_node ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateNode input
 let create_proposal ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateProposal input
+let delete_accessor ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAccessor input
 let delete_member ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMember input
 let delete_node ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteNode input
+let get_accessor ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAccessor input
 let get_member ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMember input
 let get_network ?endpoint_url ?cfg input =
@@ -31,6 +37,8 @@ let get_node ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetNode input
 let get_proposal ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetProposal input
+let list_accessors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAccessors input
 let list_invitations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListInvitations input
 let list_members ?endpoint_url ?cfg input =

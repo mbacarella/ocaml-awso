@@ -2,6 +2,7 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | DeleteConnection: (DeleteConnectionRequest.t, unit, unit) t 
   | DeleteThingShadow: (DeleteThingShadowRequest.t,
   DeleteThingShadowResponse.t, DeleteThingShadowResponse.error) t 
   | GetRetainedMessage: (GetRetainedMessageRequest.t,
@@ -18,6 +19,7 @@ type ('i, 'o, 'e) t =
   UpdateThingShadowResponse.t, UpdateThingShadowResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | DeleteConnection -> `DELETE
   | DeleteThingShadow -> `DELETE
   | GetRetainedMessage -> `GET
   | GetThingShadow -> `GET
@@ -28,6 +30,19 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | DeleteConnection ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/connections/%s"
+               (ClientId.to_header x.DeleteConnectionRequest.clientId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("cleanSession", (CleanSession.to_header v)))
+                  x.cleanSession;
+               Option.map
+                 ~f:(fun v ->
+                       ("preventWillMessage",
+                         (PreventWillMessage.to_header v)))
+                 x.preventWillMessage])
       | DeleteThingShadow ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/things/%s/shadow"
@@ -74,7 +89,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Option.map ~f:(fun v -> ("qos", (Qos.to_header v))) x.qos;
                Option.map ~f:(fun v -> ("retain", (Retain.to_header v)))
-                 x.retain])
+                 x.retain;
+               Option.map
+                 ~f:(fun v -> ("contentType", (ContentType.to_header v)))
+                 x.contentType;
+               Option.map
+                 ~f:(fun v -> ("responseTopic", (ResponseTopic.to_header v)))
+                 x.responseTopic;
+               Option.map
+                 ~f:(fun v -> ("messageExpiry", (MessageExpiry.to_header v)))
+                 x.messageExpiry])
       | UpdateThingShadow ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/things/%s/shadow"
@@ -86,6 +110,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | DeleteConnection -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteThingShadow -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetRetainedMessage ->
       let (headers, body) = (None, None) in
@@ -100,7 +125,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | Publish ->
-      let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+      let headers =
+        Some
+          ((List.filter_opt
+              [Option.map req.PublishRequest.userProperties
+                 ~f:(fun x ->
+                       ("x-amz-mqtt5-user-properties",
+                         (UserProperties.to_header x)));
+              Option.map req.PublishRequest.payloadFormatIndicator
+                ~f:(fun x ->
+                      ("x-amz-mqtt5-payload-format-indicator",
+                        (PayloadFormatIndicator.to_header x)));
+              Option.map req.PublishRequest.correlationData
+                ~f:(fun x ->
+                      ("x-amz-mqtt5-correlation-data",
+                        (CorrelationData.to_header x)))])
+             |> Awso.Http.Headers.of_list) in
       let body = Option.map req.payload ~f:Payload.to_header in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateThingShadow ->
@@ -155,6 +195,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | DeleteConnection ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteThingShadow ->
       if is_success
       then

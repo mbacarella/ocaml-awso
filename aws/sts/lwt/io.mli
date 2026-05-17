@@ -17,6 +17,11 @@ val assume_role_with_web_identity :
       AssumeRoleWithWebIdentityRequest.t ->
         (AssumeRoleWithWebIdentityResponse.t,
           AssumeRoleWithWebIdentityResponse.error) Result.t Lwt.t
+val assume_root :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssumeRootRequest.t ->
+        (AssumeRootResponse.t, AssumeRootResponse.error) Result.t Lwt.t
 val decode_authorization_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -35,6 +40,12 @@ val get_caller_identity :
       GetCallerIdentityRequest.t ->
         (GetCallerIdentityResponse.t, GetCallerIdentityResponse.error)
           Result.t Lwt.t
+val get_delegated_access_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDelegatedAccessTokenRequest.t ->
+        (GetDelegatedAccessTokenResponse.t,
+          GetDelegatedAccessTokenResponse.error) Result.t Lwt.t
 val get_federation_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -47,3 +58,9 @@ val get_session_token :
       GetSessionTokenRequest.t ->
         (GetSessionTokenResponse.t, GetSessionTokenResponse.error) Result.t
           Lwt.t
+val get_web_identity_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetWebIdentityTokenRequest.t ->
+        (GetWebIdentityTokenResponse.t, GetWebIdentityTokenResponse.error)
+          Result.t Lwt.t

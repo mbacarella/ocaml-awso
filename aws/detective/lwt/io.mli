@@ -4,6 +4,18 @@ val accept_invitation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptInvitationRequest.t -> (unit, unit) Result.t Lwt.t
+val batch_get_graph_member_datasources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetGraphMemberDatasourcesRequest.t ->
+        (BatchGetGraphMemberDatasourcesResponse.t,
+          BatchGetGraphMemberDatasourcesResponse.error) Result.t Lwt.t
+val batch_get_membership_datasources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetMembershipDatasourcesRequest.t ->
+        (BatchGetMembershipDatasourcesResponse.t,
+          BatchGetMembershipDatasourcesResponse.error) Result.t Lwt.t
 val create_graph :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -39,16 +51,40 @@ val enable_organization_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableOrganizationAdminAccountRequest.t -> (unit, unit) Result.t Lwt.t
+val get_investigation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetInvestigationRequest.t ->
+        (GetInvestigationResponse.t, GetInvestigationResponse.error) Result.t
+          Lwt.t
 val get_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMembersRequest.t ->
         (GetMembersResponse.t, GetMembersResponse.error) Result.t Lwt.t
+val list_datasource_packages :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDatasourcePackagesRequest.t ->
+        (ListDatasourcePackagesResponse.t,
+          ListDatasourcePackagesResponse.error) Result.t Lwt.t
 val list_graphs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGraphsRequest.t ->
         (ListGraphsResponse.t, ListGraphsResponse.error) Result.t Lwt.t
+val list_indicators :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListIndicatorsRequest.t ->
+        (ListIndicatorsResponse.t, ListIndicatorsResponse.error) Result.t
+          Lwt.t
+val list_investigations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInvestigationsRequest.t ->
+        (ListInvestigationsResponse.t, ListInvestigationsResponse.error)
+          Result.t Lwt.t
 val list_invitations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -76,6 +112,12 @@ val reject_invitation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectInvitationRequest.t -> (unit, unit) Result.t Lwt.t
+val start_investigation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartInvestigationRequest.t ->
+        (StartInvestigationResponse.t, StartInvestigationResponse.error)
+          Result.t Lwt.t
 val start_monitoring_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -90,6 +132,14 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
+val update_datasource_packages :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDatasourcePackagesRequest.t -> (unit, unit) Result.t Lwt.t
+val update_investigation_state :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateInvestigationStateRequest.t -> (unit, unit) Result.t Lwt.t
 val update_organization_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -23,6 +23,56 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module MediaCapabilities =
+  struct
+    type nonrec t =
+      | SendReceive 
+      | Send 
+      | Receive 
+      | None 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SendReceive -> "SendReceive"
+      | Send -> "Send"
+      | Receive -> "Receive"
+      | None -> "None"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SendReceive" -> SendReceive
+      | "Send" -> Send
+      | "Receive" -> Receive
+      | "None" -> None
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MediaCapabilities" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MediaCapabilities" j)
+    let to_json = simple_to_json to_value
+  end
+module AttendeeMax =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:250) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AttendeeMax" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module MeetingFeatureStatus =
   struct
     type nonrec t =
@@ -47,6 +97,103 @@ module MeetingFeatureStatus =
       of_string
         (string_of_xml ~kind:"enumeration MeetingFeatureStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"MeetingFeatureStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ContentResolution =
+  struct
+    type nonrec t =
+      | None 
+      | FHD 
+      | UHD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | None -> "None"
+      | FHD -> "FHD"
+      | UHD -> "UHD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "None" -> None
+      | "FHD" -> FHD
+      | "UHD" -> UHD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ContentResolution" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ContentResolution" j)
+    let to_json = simple_to_json to_value
+  end
+module VideoResolution =
+  struct
+    type nonrec t =
+      | None 
+      | HD 
+      | FHD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | None -> "None"
+      | HD -> "HD"
+      | FHD -> "FHD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "None" -> None
+      | "HD" -> HD
+      | "FHD" -> FHD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration VideoResolution" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VideoResolution" j)
+    let to_json = simple_to_json to_value
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z+-=._:/]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\w+-=\\.:/@]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
 module String_ =
@@ -279,6 +426,8 @@ module TranscribeLanguageCode =
       | Ja_JP 
       | Ko_KR 
       | Zh_CN 
+      | Th_TH 
+      | Hi_IN 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -295,6 +444,8 @@ module TranscribeLanguageCode =
       | Ja_JP -> "ja-JP"
       | Ko_KR -> "ko-KR"
       | Zh_CN -> "zh-CN"
+      | Th_TH -> "th-TH"
+      | Hi_IN -> "hi-IN"
       | Non_static_id s -> s
     let of_string =
       function
@@ -310,6 +461,8 @@ module TranscribeLanguageCode =
       | "ja-JP" -> Ja_JP
       | "ko-KR" -> Ko_KR
       | "zh-CN" -> Zh_CN
+      | "th-TH" -> Th_TH
+      | "hi-IN" -> Hi_IN
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -427,6 +580,7 @@ module TranscribeRegion =
       | Eu_west_2 
       | Sa_east_1 
       | Auto 
+      | Us_gov_west_1 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -443,6 +597,7 @@ module TranscribeRegion =
       | Eu_west_2 -> "eu-west-2"
       | Sa_east_1 -> "sa-east-1"
       | Auto -> "auto"
+      | Us_gov_west_1 -> "us-gov-west-1"
       | Non_static_id s -> s
     let of_string =
       function
@@ -458,6 +613,7 @@ module TranscribeRegion =
       | "eu-west-2" -> Eu_west_2
       | "sa-east-1" -> Sa_east_1
       | "auto" -> Auto
+      | "us-gov-west-1" -> Us_gov_west_1
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -498,6 +654,66 @@ module TranscribeVocabularyFilterMethod =
       of_string (string_of_json ~kind:"TranscribeVocabularyFilterMethod" j)
     let to_json = simple_to_json to_value
   end
+module TranscribeVocabularyNamesOrFilterNamesString =
+  struct
+    type nonrec t = string
+    let context_ = "TranscribeVocabularyNamesOrFilterNamesString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:3000) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9,-._]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"TranscribeVocabularyNamesOrFilterNamesString" j
+    let to_json = simple_to_json to_value
+  end
+module AttendeeCapabilities =
+  struct
+    type nonrec t =
+      {
+      audio: MediaCapabilities.t
+        [@ocaml.doc "The audio capability assigned to an attendee."];
+      video: MediaCapabilities.t
+        [@ocaml.doc "The video capability assigned to an attendee."];
+      content: MediaCapabilities.t
+        [@ocaml.doc "The content capability assigned to an attendee."]}
+    let context_ = "AttendeeCapabilities"
+    let make ~audio =
+      fun ~video -> fun ~content -> fun () -> { audio; video; content }
+    let to_value x =
+      structure_to_value
+        [("Audio", (Some (MediaCapabilities.to_value x.audio)));
+        ("Video", (Some (MediaCapabilities.to_value x.video)));
+        ("Content", (Some (MediaCapabilities.to_value x.content)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let content =
+        MediaCapabilities.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Content") in
+      let video =
+        MediaCapabilities.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Video") in
+      let audio =
+        MediaCapabilities.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Audio") in
+      make ~content ~video ~audio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let content = field_map_exn json__ "Content" MediaCapabilities.of_json in
+      let video = field_map_exn json__ "Video" MediaCapabilities.of_json in
+      let audio = field_map_exn json__ "Audio" MediaCapabilities.of_json in
+      make ~content ~video ~audio ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The media capabilities of an attendee: audio, video, or content. You use the capabilities with a set of values that control what the capabilities can do, such as SendReceive data. For more information, refer to and . When using capabilities, be aware of these corner cases: If you specify MeetingFeatures:Video:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Video will be rejected with ValidationError 400. If you specify MeetingFeatures:Content:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Content will be rejected with ValidationError 400. You can't set content capabilities to SendReceive or Receive unless you also set video capabilities to SendReceive or Receive. If you don't set the video capability to receive, the response will contain an HTTP 400 Bad Request status code. However, you can set your video capability to receive and you set your content capability to not receive. If meeting features is defined as Video:MaxResolution:None but Content:MaxResolution is defined as something other than None and attendee capabilities are not defined in the API request, then the default attendee video capability is set to Receive and attendee content capability is set to SendReceive. This is because content SendReceive requires video to be at least Receive. When you change an audio capability from None or Receive to Send or SendReceive , and an attendee unmutes their microphone, audio flows from the attendee to the other meeting participants. When you change a video or content capability from None or Receive to Send or SendReceive , and the attendee turns on their video or content streams, remote attendees can receive those streams, but only after media renegotiation between the client and the Amazon Chime back-end server."]
 module ExternalUserId =
   struct
     type nonrec t = string
@@ -552,6 +768,29 @@ module JoinTokenString =
     let of_json j = string_of_json ~kind:"JoinTokenString" j
     let to_json = simple_to_json to_value
   end
+module AttendeeFeatures =
+  struct
+    type nonrec t =
+      {
+      maxCount: AttendeeMax.t option
+        [@ocaml.doc
+          "The maximum number of attendees allowed into the meeting."]}
+    let make ?maxCount = fun () -> { maxCount }
+    let to_value x =
+      structure_to_value
+        [("MaxCount", (Option.map x.maxCount ~f:AttendeeMax.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxCount =
+        (Option.map ~f:AttendeeMax.of_xml) (Xml.child xml_arg0 "MaxCount") in
+      make ?maxCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxCount = field_map json__ "MaxCount" AttendeeMax.of_json in
+      make ?maxCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the maximum number of attendees allowed into the meeting. If you specify FHD for MeetingFeatures:Video:MaxResolution, or if you specify UHD for MeetingFeatures:Content:MaxResolution, the maximum number of attendees changes from the default of 250 to 25."]
 module AudioFeatures =
   struct
     type nonrec t =
@@ -571,13 +810,146 @@ module AudioFeatures =
           (Xml.child xml_arg0 "EchoReduction") in
       make ?echoReduction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let echoReduction =
-        field_map json "EchoReduction" MeetingFeatureStatus.of_json in
+        field_map json__ "EchoReduction" MeetingFeatureStatus.of_json in
       make ?echoReduction ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An optional category of meeting features that contains audio-specific configurations, such as operating parameters for Amazon Voice Focus."]
+module ContentFeatures =
+  struct
+    type nonrec t =
+      {
+      maxResolution: ContentResolution.t option
+        [@ocaml.doc
+          "The maximum resolution for the meeting content. Defaults to FHD. To use UHD, you must also provide a MeetingFeatures:Attendee:MaxCount value and override the default size limit of 250 attendees."]}
+    let make ?maxResolution = fun () -> { maxResolution }
+    let to_value x =
+      structure_to_value
+        [("MaxResolution",
+           (Option.map x.maxResolution ~f:ContentResolution.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResolution =
+        (Option.map ~f:ContentResolution.of_xml)
+          (Xml.child xml_arg0 "MaxResolution") in
+      make ?maxResolution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResolution =
+        field_map json__ "MaxResolution" ContentResolution.of_json in
+      make ?maxResolution ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the content (screen share) features for the meeting. Applies to all attendees. If you specify MeetingFeatures:Content:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Content will be rejected with ValidationError 400."]
+module VideoFeatures =
+  struct
+    type nonrec t =
+      {
+      maxResolution: VideoResolution.t option
+        [@ocaml.doc
+          "The maximum video resolution for the meeting. Applies to all attendees. Defaults to HD. To use FHD, you must also provide a MeetingFeatures:Attendee:MaxCount value and override the default size limit of 250 attendees."]}
+    let make ?maxResolution = fun () -> { maxResolution }
+    let to_value x =
+      structure_to_value
+        [("MaxResolution",
+           (Option.map x.maxResolution ~f:VideoResolution.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResolution =
+        (Option.map ~f:VideoResolution.of_xml)
+          (Xml.child xml_arg0 "MaxResolution") in
+      make ?maxResolution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResolution =
+        field_map json__ "MaxResolution" VideoResolution.of_json in
+      make ?maxResolution ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The video features set for the meeting. Applies to all attendees. If you specify MeetingFeatures:Video:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Video will be rejected with ValidationError 400."]
+module TenantId =
+  struct
+    type nonrec t = string
+    let context_ = "TenantId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?!.*?(.)\\1{3})[-_!@#$a-zA-Z0-9]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TenantId" j
+    let to_json = simple_to_json to_value
+  end
+module RetryAfterSeconds =
+  struct
+    type nonrec t = string
+    let context_ = "RetryAfterSeconds"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RetryAfterSeconds" j
+    let to_json = simple_to_json to_value
+  end
+module AmazonResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "AmazonResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () -> check_pattern i ~pattern:"^arn:.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AmazonResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t [@ocaml.doc "The tag's key."];
+      value: TagValue.t [@ocaml.doc "The tag's value."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A key-value pair that you define."]
 module EngineTranscribeMedicalSettings =
   struct
     type nonrec t =
@@ -595,7 +967,7 @@ module EngineTranscribeMedicalSettings =
           "The name of the vocabulary passed to Amazon Transcribe Medical."];
       region: TranscribeMedicalRegion.t option
         [@ocaml.doc
-          "The AWS Region passed to Amazon Transcribe Medical. If you don't specify a Region, Amazon Chime uses the meeting's Region."];
+          "The Amazon Web Services Region passed to Amazon Transcribe Medical. If you don't specify a Region, Amazon Chime uses the meeting's Region."];
       contentIdentificationType:
         TranscribeMedicalContentIdentificationType.t option
         [@ocaml.doc
@@ -650,17 +1022,17 @@ module EngineTranscribeMedicalSettings =
       make ?contentIdentificationType ?region ?vocabularyName ~type_
         ~specialty ~languageCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contentIdentificationType =
-        field_map json "ContentIdentificationType"
+        field_map json__ "ContentIdentificationType"
           TranscribeMedicalContentIdentificationType.of_json in
-      let region = field_map json "Region" TranscribeMedicalRegion.of_json in
-      let vocabularyName = field_map json "VocabularyName" String_.of_json in
-      let type_ = field_map_exn json "Type" TranscribeMedicalType.of_json in
+      let region = field_map json__ "Region" TranscribeMedicalRegion.of_json in
+      let vocabularyName = field_map json__ "VocabularyName" String_.of_json in
+      let type_ = field_map_exn json__ "Type" TranscribeMedicalType.of_json in
       let specialty =
-        field_map_exn json "Specialty" TranscribeMedicalSpecialty.of_json in
+        field_map_exn json__ "Specialty" TranscribeMedicalSpecialty.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode"
+        field_map_exn json__ "LanguageCode"
           TranscribeMedicalLanguageCode.of_json in
       make ?contentIdentificationType ?region ?vocabularyName ~type_
         ~specialty ~languageCode ()
@@ -673,44 +1045,53 @@ module EngineTranscribeSettings =
       {
       languageCode: TranscribeLanguageCode.t option
         [@ocaml.doc
-          "The language code specified for the Amazon Transcribe engine."];
+          "Specify the language code that represents the language spoken. If you're unsure of the language spoken in your audio, consider using IdentifyLanguage to enable automatic language identification."];
       vocabularyFilterMethod: TranscribeVocabularyFilterMethod.t option
-        [@ocaml.doc "The filtering method passed to Amazon Transcribe."];
+        [@ocaml.doc
+          "Specify how you want your vocabulary filter applied to your transcript. To replace words with ***, choose mask. To delete words, choose remove. To flag words without changing them, choose tag."];
       vocabularyFilterName: String_.t option
         [@ocaml.doc
-          "The name of the vocabulary filter passed to Amazon Transcribe."];
+          "Specify the name of the custom vocabulary filter that you want to use when processing your transcription. Note that vocabulary filter names are case sensitive. If you use Amazon Transcribe in multiple Regions, the vocabulary filter must be available in Amazon Transcribe in each Region. If you include IdentifyLanguage and want to use one or more vocabulary filters with your transcription, use the VocabularyFilterNames parameter instead."];
       vocabularyName: String_.t option
         [@ocaml.doc
-          "The name of the vocabulary passed to Amazon Transcribe."];
+          "Specify the name of the custom vocabulary that you want to use when processing your transcription. Note that vocabulary names are case sensitive. If you use Amazon Transcribe multiple Regions, the vocabulary must be available in Amazon Transcribe in each Region. If you include IdentifyLanguage and want to use one or more custom vocabularies with your transcription, use the VocabularyNames parameter instead."];
       region: TranscribeRegion.t option
         [@ocaml.doc
-          "The AWS Region passed to Amazon Transcribe. If you don't specify a Region, Amazon Chime uses the meeting's Region."];
+          "The Amazon Web Services Region in which to use Amazon Transcribe. If you don't specify a Region, then the MediaRegion of the meeting is used. However, if Amazon Transcribe is not available in the MediaRegion, then a TranscriptFailed event is sent. Use auto to use Amazon Transcribe in a Region near the meeting\226\128\153s MediaRegion. For more information, refer to Choosing a transcription Region in the Amazon Chime SDK Developer Guide."];
       enablePartialResultsStabilization: Boolean.t option
         [@ocaml.doc
-          "Generates partial transcription results that are less likely to change as meeting attendees speak. It does so by only allowing the last few words from the partial results to change."];
+          "Enables partial result stabilization for your transcription. Partial result stabilization can reduce latency in your output, but may impact accuracy."];
       partialResultsStability: TranscribePartialResultsStability.t option
         [@ocaml.doc
-          "The stabity level of a partial results transcription. Determines how stable you want the transcription results to be. A higher level means the transcription results are less likely to change."];
+          "Specify the level of stability to use when you enable partial results stabilization (EnablePartialResultsStabilization). Low stability provides the highest accuracy. High stability transcribes faster, but with slightly lower accuracy."];
       contentIdentificationType: TranscribeContentIdentificationType.t option
         [@ocaml.doc
-          "Set this field to PII to identify personally identifiable information in the transcription output."];
+          "Labels all personally identifiable information (PII) identified in your transcript. If you don't include PiiEntityTypes, all PII is identified. You can\226\128\153t set ContentIdentificationType and ContentRedactionType."];
       contentRedactionType: TranscribeContentRedactionType.t option
         [@ocaml.doc
-          "Set this field to PII to redact personally identifiable information in the transcription output. Content redaction is performed only upon complete transcription of the audio segments. You can\226\128\153t set ContentRedactionType and ContentIdentificationType in the same request. If you set both, your request returns a BadRequestException."];
+          "Content redaction is performed at the segment level. If you don't include PiiEntityTypes, all PII is redacted. You can\226\128\153t set ContentRedactionType and ContentIdentificationType."];
       piiEntityTypes: TranscribePiiEntityTypes.t option
         [@ocaml.doc
-          "Lists the PII entity types you want to identify or redact. To specify entity types, you must enable ContentIdentificationType or ContentRedactionType. PIIEntityTypes must be comma-separated. The available values are: BANK_ACCOUNT_NUMBER, BANK_ROUTING, CREDIT_DEBIT_NUMBER, CREDIT_DEBIT_CVV, CREDIT_DEBIT_EXPIRY, PIN, EMAIL, ADDRESS, NAME, PHONE, SSN, and ALL. PiiEntityTypes is an optional parameter with a default value of ALL."];
+          "Specify which types of personally identifiable information (PII) you want to redact in your transcript. You can include as many types as you'd like, or you can select ALL. Values must be comma-separated and can include: ADDRESS, BANK_ACCOUNT_NUMBER, BANK_ROUTING, CREDIT_DEBIT_CVV, CREDIT_DEBIT_EXPIRY CREDIT_DEBIT_NUMBER, EMAIL,NAME, PHONE, PIN, SSN, or ALL. Note that if you include PiiEntityTypes, you must also include ContentIdentificationType or ContentRedactionType. If you include ContentRedactionType or ContentIdentificationType, but do not include PiiEntityTypes, all PII is redacted or identified."];
       languageModelName: TranscribeLanguageModelName.t option
         [@ocaml.doc
-          "The name of the language model used during transcription."];
+          "Specify the name of the custom language model that you want to use when processing your transcription. Note that language model names are case sensitive. The language of the specified language model must match the language code. If the languages don't match, the custom language model isn't applied. There are no errors or warnings associated with a language mismatch. If you use Amazon Transcribe in multiple Regions, the custom language model must be available in Amazon Transcribe in each Region."];
       identifyLanguage: Boolean.t option
         [@ocaml.doc
-          "Automatically identifies the language spoken in media files."];
+          "Enables automatic language identification for your transcription. If you include IdentifyLanguage, you can optionally use LanguageOptions to include a list of language codes that you think may be present in your audio stream. Including language options can improve transcription accuracy. You can also use PreferredLanguage to include a preferred language. Doing so can help Amazon Transcribe identify the language faster. You must include either LanguageCode or IdentifyLanguage. Language identification can't be combined with custom language models or redaction."];
       languageOptions: TranscribeLanguageOptions.t option
         [@ocaml.doc
-          "Language codes for the languages that you want to identify. You must provide at least 2 codes."];
+          "Specify two or more language codes that represent the languages you think may be present in your media; including more than five is not recommended. If you're unsure what languages are present, do not include this parameter. Including language options can improve the accuracy of language identification. If you include LanguageOptions, you must also include IdentifyLanguage. You can only include one language dialect per language. For example, you cannot include en-US and en-AU."];
       preferredLanguage: TranscribeLanguageCode.t option
-        [@ocaml.doc "Language code for the preferred language."]}
+        [@ocaml.doc
+          "Specify a preferred language from the subset of languages codes you specified in LanguageOptions. You can only use this parameter if you include IdentifyLanguage and LanguageOptions."];
+      vocabularyNames: TranscribeVocabularyNamesOrFilterNamesString.t option
+        [@ocaml.doc
+          "Specify the names of the custom vocabularies that you want to use when processing your transcription. Note that vocabulary names are case sensitive. If you use Amazon Transcribe in multiple Regions, the vocabulary must be available in Amazon Transcribe in each Region. If you don't include IdentifyLanguage and want to use a custom vocabulary with your transcription, use the VocabularyName parameter instead."];
+      vocabularyFilterNames:
+        TranscribeVocabularyNamesOrFilterNamesString.t option
+        [@ocaml.doc
+          "Specify the names of the custom vocabulary filters that you want to use when processing your transcription. Note that vocabulary filter names are case sensitive. If you use Amazon Transcribe in multiple Regions, the vocabulary filter must be available in Amazon Transcribe in each Region. If you're not including IdentifyLanguage and want to use a custom vocabulary filter with your transcription, use the VocabularyFilterName parameter instead."]}
     let make ?languageCode =
       fun ?vocabularyFilterMethod ->
         fun ?vocabularyFilterName ->
@@ -725,23 +1106,27 @@ module EngineTranscribeSettings =
                           fun ?identifyLanguage ->
                             fun ?languageOptions ->
                               fun ?preferredLanguage ->
-                                fun () ->
-                                  {
-                                    languageCode;
-                                    vocabularyFilterMethod;
-                                    vocabularyFilterName;
-                                    vocabularyName;
-                                    region;
-                                    enablePartialResultsStabilization;
-                                    partialResultsStability;
-                                    contentIdentificationType;
-                                    contentRedactionType;
-                                    piiEntityTypes;
-                                    languageModelName;
-                                    identifyLanguage;
-                                    languageOptions;
-                                    preferredLanguage
-                                  }
+                                fun ?vocabularyNames ->
+                                  fun ?vocabularyFilterNames ->
+                                    fun () ->
+                                      {
+                                        languageCode;
+                                        vocabularyFilterMethod;
+                                        vocabularyFilterName;
+                                        vocabularyName;
+                                        region;
+                                        enablePartialResultsStabilization;
+                                        partialResultsStability;
+                                        contentIdentificationType;
+                                        contentRedactionType;
+                                        piiEntityTypes;
+                                        languageModelName;
+                                        identifyLanguage;
+                                        languageOptions;
+                                        preferredLanguage;
+                                        vocabularyNames;
+                                        vocabularyFilterNames
+                                      }
     let to_value x =
       structure_to_value
         [("LanguageCode",
@@ -774,9 +1159,21 @@ module EngineTranscribeSettings =
         ("LanguageOptions",
           (Option.map x.languageOptions ~f:TranscribeLanguageOptions.to_value));
         ("PreferredLanguage",
-          (Option.map x.preferredLanguage ~f:TranscribeLanguageCode.to_value))]
+          (Option.map x.preferredLanguage ~f:TranscribeLanguageCode.to_value));
+        ("VocabularyNames",
+          (Option.map x.vocabularyNames
+             ~f:TranscribeVocabularyNamesOrFilterNamesString.to_value));
+        ("VocabularyFilterNames",
+          (Option.map x.vocabularyFilterNames
+             ~f:TranscribeVocabularyNamesOrFilterNamesString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let vocabularyFilterNames =
+        (Option.map ~f:TranscribeVocabularyNamesOrFilterNamesString.of_xml)
+          (Xml.child xml_arg0 "VocabularyFilterNames") in
+      let vocabularyNames =
+        (Option.map ~f:TranscribeVocabularyNamesOrFilterNamesString.of_xml)
+          (Xml.child xml_arg0 "VocabularyNames") in
       let preferredLanguage =
         (Option.map ~f:TranscribeLanguageCode.of_xml)
           (Xml.child xml_arg0 "PreferredLanguage") in
@@ -817,73 +1214,92 @@ module EngineTranscribeSettings =
       let languageCode =
         (Option.map ~f:TranscribeLanguageCode.of_xml)
           (Xml.child xml_arg0 "LanguageCode") in
-      make ?preferredLanguage ?languageOptions ?identifyLanguage
-        ?languageModelName ?piiEntityTypes ?contentRedactionType
-        ?contentIdentificationType ?partialResultsStability
-        ?enablePartialResultsStabilization ?region ?vocabularyName
-        ?vocabularyFilterName ?vocabularyFilterMethod ?languageCode ()
+      make ?vocabularyFilterNames ?vocabularyNames ?preferredLanguage
+        ?languageOptions ?identifyLanguage ?languageModelName ?piiEntityTypes
+        ?contentRedactionType ?contentIdentificationType
+        ?partialResultsStability ?enablePartialResultsStabilization ?region
+        ?vocabularyName ?vocabularyFilterName ?vocabularyFilterMethod
+        ?languageCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let vocabularyFilterNames =
+        field_map json__ "VocabularyFilterNames"
+          TranscribeVocabularyNamesOrFilterNamesString.of_json in
+      let vocabularyNames =
+        field_map json__ "VocabularyNames"
+          TranscribeVocabularyNamesOrFilterNamesString.of_json in
       let preferredLanguage =
-        field_map json "PreferredLanguage" TranscribeLanguageCode.of_json in
+        field_map json__ "PreferredLanguage" TranscribeLanguageCode.of_json in
       let languageOptions =
-        field_map json "LanguageOptions" TranscribeLanguageOptions.of_json in
+        field_map json__ "LanguageOptions" TranscribeLanguageOptions.of_json in
       let identifyLanguage =
-        field_map json "IdentifyLanguage" Boolean.of_json in
+        field_map json__ "IdentifyLanguage" Boolean.of_json in
       let languageModelName =
-        field_map json "LanguageModelName"
+        field_map json__ "LanguageModelName"
           TranscribeLanguageModelName.of_json in
       let piiEntityTypes =
-        field_map json "PiiEntityTypes" TranscribePiiEntityTypes.of_json in
+        field_map json__ "PiiEntityTypes" TranscribePiiEntityTypes.of_json in
       let contentRedactionType =
-        field_map json "ContentRedactionType"
+        field_map json__ "ContentRedactionType"
           TranscribeContentRedactionType.of_json in
       let contentIdentificationType =
-        field_map json "ContentIdentificationType"
+        field_map json__ "ContentIdentificationType"
           TranscribeContentIdentificationType.of_json in
       let partialResultsStability =
-        field_map json "PartialResultsStability"
+        field_map json__ "PartialResultsStability"
           TranscribePartialResultsStability.of_json in
       let enablePartialResultsStabilization =
-        field_map json "EnablePartialResultsStabilization" Boolean.of_json in
-      let region = field_map json "Region" TranscribeRegion.of_json in
-      let vocabularyName = field_map json "VocabularyName" String_.of_json in
+        field_map json__ "EnablePartialResultsStabilization" Boolean.of_json in
+      let region = field_map json__ "Region" TranscribeRegion.of_json in
+      let vocabularyName = field_map json__ "VocabularyName" String_.of_json in
       let vocabularyFilterName =
-        field_map json "VocabularyFilterName" String_.of_json in
+        field_map json__ "VocabularyFilterName" String_.of_json in
       let vocabularyFilterMethod =
-        field_map json "VocabularyFilterMethod"
+        field_map json__ "VocabularyFilterMethod"
           TranscribeVocabularyFilterMethod.of_json in
       let languageCode =
-        field_map json "LanguageCode" TranscribeLanguageCode.of_json in
-      make ?preferredLanguage ?languageOptions ?identifyLanguage
-        ?languageModelName ?piiEntityTypes ?contentRedactionType
-        ?contentIdentificationType ?partialResultsStability
-        ?enablePartialResultsStabilization ?region ?vocabularyName
-        ?vocabularyFilterName ?vocabularyFilterMethod ?languageCode ()
+        field_map json__ "LanguageCode" TranscribeLanguageCode.of_json in
+      make ?vocabularyFilterNames ?vocabularyNames ?preferredLanguage
+        ?languageOptions ?identifyLanguage ?languageModelName ?piiEntityTypes
+        ?contentRedactionType ?contentIdentificationType
+        ?partialResultsStability ?enablePartialResultsStabilization ?region
+        ?vocabularyName ?vocabularyFilterName ?vocabularyFilterMethod
+        ?languageCode ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Settings specific to the Amazon Transcribe engine."]
+  end[@@ocaml.doc
+       "Settings specific for Amazon Transcribe as the live transcription engine. If you specify an invalid combination of parameters, a TranscriptFailed event will be sent with the contents of the BadRequestException generated by Amazon Transcribe. For more information on each parameter and which combinations are valid, refer to the StartStreamTranscription API in the Amazon Transcribe Developer Guide."]
 module Attendee =
   struct
     type nonrec t =
       {
       externalUserId: ExternalUserId.t option
         [@ocaml.doc
-          "The Amazon Chime SDK external user ID. An idempotency token. Links the attendee to an identity managed by a builder application."];
+          "The Amazon Chime SDK external user ID. An idempotency token. Links the attendee to an identity managed by a builder application. Pattern: \\[-_&\\@+=,()\\{\\}\\\\[\\\\]\\/\194\171\194\187.:|'\"#a-zA-Z0-9\195\128-\195\191\\s\\]* Values that begin with aws: are reserved. You can't configure a value that uses this prefix. Case insensitive."];
       attendeeId: GuidString.t option
         [@ocaml.doc "The Amazon Chime SDK attendee ID."];
       joinToken: JoinTokenString.t option
-        [@ocaml.doc "The join token used by the Amazon Chime SDK attendee."]}
+        [@ocaml.doc "The join token used by the Amazon Chime SDK attendee."];
+      capabilities: AttendeeCapabilities.t option
+        [@ocaml.doc
+          "The capabilities assigned to an attendee: audio, video, or content. You use the capabilities with a set of values that control what the capabilities can do, such as SendReceive data. For more information about those values, see . When using capabilities, be aware of these corner cases: If you specify MeetingFeatures:Video:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Video will be rejected with ValidationError 400. If you specify MeetingFeatures:Content:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Content will be rejected with ValidationError 400. You can't set content capabilities to SendReceive or Receive unless you also set video capabilities to SendReceive or Receive. If you don't set the video capability to receive, the response will contain an HTTP 400 Bad Request status code. However, you can set your video capability to receive and you set your content capability to not receive. If meeting features is defined as Video:MaxResolution:None but Content:MaxResolution is defined as something other than None and attendee capabilities are not defined in the API request, then the default attendee video capability is set to Receive and attendee content capability is set to SendReceive. This is because content SendReceive requires video to be at least Receive. When you change an audio capability from None or Receive to Send or SendReceive , and if the attendee left their microphone unmuted, audio will flow from the attendee to the other meeting participants. When you change a video or content capability from None or Receive to Send or SendReceive , and if the attendee turned on their video or content streams, remote attendees can receive those streams, but only after media renegotiation between the client and the Amazon Chime back-end server."]}
     let make ?externalUserId =
       fun ?attendeeId ->
-        fun ?joinToken -> fun () -> { externalUserId; attendeeId; joinToken }
+        fun ?joinToken ->
+          fun ?capabilities ->
+            fun () -> { externalUserId; attendeeId; joinToken; capabilities }
     let to_value x =
       structure_to_value
         [("ExternalUserId",
            (Option.map x.externalUserId ~f:ExternalUserId.to_value));
         ("AttendeeId", (Option.map x.attendeeId ~f:GuidString.to_value));
-        ("JoinToken", (Option.map x.joinToken ~f:JoinTokenString.to_value))]
+        ("JoinToken", (Option.map x.joinToken ~f:JoinTokenString.to_value));
+        ("Capabilities",
+          (Option.map x.capabilities ~f:AttendeeCapabilities.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let capabilities =
+        (Option.map ~f:AttendeeCapabilities.of_xml)
+          (Xml.child xml_arg0 "Capabilities") in
       let joinToken =
         (Option.map ~f:JoinTokenString.of_xml)
           (Xml.child xml_arg0 "JoinToken") in
@@ -892,14 +1308,16 @@ module Attendee =
       let externalUserId =
         (Option.map ~f:ExternalUserId.of_xml)
           (Xml.child xml_arg0 "ExternalUserId") in
-      make ?joinToken ?attendeeId ?externalUserId ()
+      make ?capabilities ?joinToken ?attendeeId ?externalUserId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let joinToken = field_map json "JoinToken" JoinTokenString.of_json in
-      let attendeeId = field_map json "AttendeeId" GuidString.of_json in
+    let of_json json__ =
+      let capabilities =
+        field_map json__ "Capabilities" AttendeeCapabilities.of_json in
+      let joinToken = field_map json__ "JoinToken" JoinTokenString.of_json in
+      let attendeeId = field_map json__ "AttendeeId" GuidString.of_json in
       let externalUserId =
-        field_map json "ExternalUserId" ExternalUserId.of_json in
-      make ?joinToken ?attendeeId ?externalUserId ()
+        field_map json__ "ExternalUserId" ExternalUserId.of_json in
+      make ?capabilities ?joinToken ?attendeeId ?externalUserId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An Amazon Chime SDK meeting attendee. Includes a unique AttendeeId and JoinToken. The JoinToken allows a client to authenticate and join as the specified attendee. The JoinToken expires when the meeting ends, or when DeleteAttendee is called. After that, the attendee is unable to join the meeting. We recommend securely transferring each JoinToken from your server application to the client so that no other client has access to the token except for the one authorized to represent the attendee."]
@@ -929,12 +1347,18 @@ module MediaPlacement =
       audioFallbackUrl: String_.t option
         [@ocaml.doc "The audio fallback URL."];
       signalingUrl: String_.t option [@ocaml.doc "The signaling URL."];
-      turnControlUrl: String_.t option [@ocaml.doc "The turn control URL."];
-      screenDataUrl: String_.t option [@ocaml.doc "The screen data URL."];
+      turnControlUrl: String_.t option
+        [@ocaml.doc
+          "The turn control URL. This parameter is deprecated and no longer used by the Amazon Chime SDK."];
+      screenDataUrl: String_.t option
+        [@ocaml.doc
+          "The screen data URL. This parameter is deprecated and no longer used by the Amazon Chime SDK."];
       screenViewingUrl: String_.t option
-        [@ocaml.doc "The screen viewing URL."];
+        [@ocaml.doc
+          "The screen viewing URL. This parameter is deprecated and no longer used by the Amazon Chime SDK."];
       screenSharingUrl: String_.t option
-        [@ocaml.doc "The screen sharing URL."];
+        [@ocaml.doc
+          "The screen sharing URL. This parameter is deprecated and no longer used by the Amazon Chime SDK."];
       eventIngestionUrl: String_.t option
         [@ocaml.doc "The event ingestion URL."]}
     let make ?audioHostUrl =
@@ -996,19 +1420,19 @@ module MediaPlacement =
         ?screenDataUrl ?turnControlUrl ?signalingUrl ?audioFallbackUrl
         ?audioHostUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventIngestionUrl =
-        field_map json "EventIngestionUrl" String_.of_json in
+        field_map json__ "EventIngestionUrl" String_.of_json in
       let screenSharingUrl =
-        field_map json "ScreenSharingUrl" String_.of_json in
+        field_map json__ "ScreenSharingUrl" String_.of_json in
       let screenViewingUrl =
-        field_map json "ScreenViewingUrl" String_.of_json in
-      let screenDataUrl = field_map json "ScreenDataUrl" String_.of_json in
-      let turnControlUrl = field_map json "TurnControlUrl" String_.of_json in
-      let signalingUrl = field_map json "SignalingUrl" String_.of_json in
+        field_map json__ "ScreenViewingUrl" String_.of_json in
+      let screenDataUrl = field_map json__ "ScreenDataUrl" String_.of_json in
+      let turnControlUrl = field_map json__ "TurnControlUrl" String_.of_json in
+      let signalingUrl = field_map json__ "SignalingUrl" String_.of_json in
       let audioFallbackUrl =
-        field_map json "AudioFallbackUrl" String_.of_json in
-      let audioHostUrl = field_map json "AudioHostUrl" String_.of_json in
+        field_map json__ "AudioFallbackUrl" String_.of_json in
+      let audioHostUrl = field_map json__ "AudioHostUrl" String_.of_json in
       make ?eventIngestionUrl ?screenSharingUrl ?screenViewingUrl
         ?screenDataUrl ?turnControlUrl ?signalingUrl ?audioFallbackUrl
         ?audioHostUrl ()
@@ -1039,23 +1463,48 @@ module MeetingFeaturesConfiguration =
       {
       audio: AudioFeatures.t option
         [@ocaml.doc
-          "The configuration settings for the audio features available to a meeting."]}
-    let make ?audio = fun () -> { audio }
+          "The configuration settings for the audio features available to a meeting."];
+      video: VideoFeatures.t option
+        [@ocaml.doc
+          "The configuration settings for the video features available to a meeting."];
+      content: ContentFeatures.t option
+        [@ocaml.doc
+          "The configuration settings for the content features available to a meeting."];
+      attendee: AttendeeFeatures.t option
+        [@ocaml.doc
+          "The configuration settings for the attendee features available to a meeting."]}
+    let make ?audio =
+      fun ?video ->
+        fun ?content ->
+          fun ?attendee -> fun () -> { audio; video; content; attendee }
     let to_value x =
       structure_to_value
-        [("Audio", (Option.map x.audio ~f:AudioFeatures.to_value))]
+        [("Audio", (Option.map x.audio ~f:AudioFeatures.to_value));
+        ("Video", (Option.map x.video ~f:VideoFeatures.to_value));
+        ("Content", (Option.map x.content ~f:ContentFeatures.to_value));
+        ("Attendee", (Option.map x.attendee ~f:AttendeeFeatures.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attendee =
+        (Option.map ~f:AttendeeFeatures.of_xml)
+          (Xml.child xml_arg0 "Attendee") in
+      let content =
+        (Option.map ~f:ContentFeatures.of_xml) (Xml.child xml_arg0 "Content") in
+      let video =
+        (Option.map ~f:VideoFeatures.of_xml) (Xml.child xml_arg0 "Video") in
       let audio =
         (Option.map ~f:AudioFeatures.of_xml) (Xml.child xml_arg0 "Audio") in
-      make ?audio ()
+      make ?attendee ?content ?video ?audio ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let audio = field_map json "Audio" AudioFeatures.of_json in
-      make ?audio ()
+    let of_json json__ =
+      let attendee = field_map json__ "Attendee" AttendeeFeatures.of_json in
+      let content = field_map json__ "Content" ContentFeatures.of_json in
+      let video = field_map json__ "Video" VideoFeatures.of_json in
+      let audio = field_map json__ "Audio" AudioFeatures.of_json in
+      make ?attendee ?content ?video ?audio ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration settings of the features available to a meeting.>"]
+       "The configuration settings of the features available to a meeting."]
 module PrimaryMeetingId =
   struct
     type nonrec t = string
@@ -1074,13 +1523,44 @@ module PrimaryMeetingId =
     let of_json j = string_of_json ~kind:"PrimaryMeetingId" j
     let to_json = simple_to_json to_value
   end
+module TenantIdList =
+  struct
+    type nonrec t = TenantId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TenantId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TenantId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TenantIdList" ~of_json:TenantId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CreateAttendeeError =
   struct
     type nonrec t =
       {
       externalUserId: ExternalUserId.t option
         [@ocaml.doc
-          "The Amazon Chime SDK external user ID. An idempotency token. Links the attendee to an identity managed by a builder application."];
+          "The Amazon Chime SDK external user ID. An idempotency token. Links the attendee to an identity managed by a builder application. Pattern: \\[-_&\\@+=,()\\{\\}\\\\[\\\\]\\/\194\171\194\187.:|'\"#a-zA-Z0-9\195\128-\195\191\\s\\]* Values that begin with aws: are reserved. You can't configure a value that uses this prefix. Case insensitive."];
       errorCode: String_.t option [@ocaml.doc "The error code."];
       errorMessage: String_.t option [@ocaml.doc "The error message."]}
     let make ?externalUserId =
@@ -1104,52 +1584,49 @@ module CreateAttendeeError =
           (Xml.child xml_arg0 "ExternalUserId") in
       make ?errorMessage ?errorCode ?externalUserId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
       let externalUserId =
-        field_map json "ExternalUserId" ExternalUserId.of_json in
+        field_map json__ "ExternalUserId" ExternalUserId.of_json in
       make ?errorMessage ?errorCode ?externalUserId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The list of errors returned when errors are encountered during the BatchCreateAttendee and CreateAttendee actions. This includes external user IDs, error codes, and error messages."]
-module RetryAfterSeconds =
-  struct
-    type nonrec t = string
-    let context_ = "RetryAfterSeconds"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RetryAfterSeconds" j
-    let to_json = simple_to_json to_value
-  end
 module CreateAttendeeRequestItem =
   struct
     type nonrec t =
       {
       externalUserId: ExternalUserId.t
         [@ocaml.doc
-          "The Amazon Chime SDK external user ID. An idempotency token. Links the attendee to an identity managed by a builder application."]}
+          "The Amazon Chime SDK external user ID. An idempotency token. Links the attendee to an identity managed by a builder application. Pattern: \\[-_&\\@+=,()\\{\\}\\\\[\\\\]\\/\194\171\194\187.:|'\"#a-zA-Z0-9\195\128-\195\191\\s\\]* Values that begin with aws: are reserved. You can't configure a value that uses this prefix. Case insensitive."];
+      capabilities: AttendeeCapabilities.t option
+        [@ocaml.doc "A list of one or more capabilities."]}
     let context_ = "CreateAttendeeRequestItem"
-    let make ~externalUserId = fun () -> { externalUserId }
+    let make ?capabilities =
+      fun ~externalUserId -> fun () -> { capabilities; externalUserId }
     let to_value x =
       structure_to_value
         [("ExternalUserId",
-           (Some (ExternalUserId.to_value x.externalUserId)))]
+           (Some (ExternalUserId.to_value x.externalUserId)));
+        ("Capabilities",
+          (Option.map x.capabilities ~f:AttendeeCapabilities.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let capabilities =
+        (Option.map ~f:AttendeeCapabilities.of_xml)
+          (Xml.child xml_arg0 "Capabilities") in
       let externalUserId =
         ExternalUserId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExternalUserId") in
-      make ~externalUserId ()
+      make ?capabilities ~externalUserId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let capabilities =
+        field_map json__ "Capabilities" AttendeeCapabilities.of_json in
       let externalUserId =
-        field_map_exn json "ExternalUserId" ExternalUserId.of_json in
-      make ~externalUserId ()
+        field_map_exn json__ "ExternalUserId" ExternalUserId.of_json in
+      make ?capabilities ~externalUserId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon Chime SDK attendee fields to create, used with the BatchCreateAttendee action."]
@@ -1175,74 +1652,29 @@ module Arn =
     let of_json j = string_of_json ~kind:"Arn" j
     let to_json = simple_to_json to_value
   end
-module TranscriptionConfiguration =
+module AttendeeIdItem =
   struct
     type nonrec t =
       {
-      engineTranscribeSettings: EngineTranscribeSettings.t option
-        [@ocaml.doc
-          "The transcription configuration settings passed to Amazon Transcribe."];
-      engineTranscribeMedicalSettings:
-        EngineTranscribeMedicalSettings.t option
-        [@ocaml.doc
-          "The transcription configuration settings passed to Amazon Transcribe Medical."]}
-    let make ?engineTranscribeSettings =
-      fun ?engineTranscribeMedicalSettings ->
-        fun () ->
-          { engineTranscribeSettings; engineTranscribeMedicalSettings }
+      attendeeId: GuidString.t
+        [@ocaml.doc "A list of one or more attendee IDs."]}
+    let context_ = "AttendeeIdItem"
+    let make ~attendeeId = fun () -> { attendeeId }
     let to_value x =
       structure_to_value
-        [("EngineTranscribeSettings",
-           (Option.map x.engineTranscribeSettings
-              ~f:EngineTranscribeSettings.to_value));
-        ("EngineTranscribeMedicalSettings",
-          (Option.map x.engineTranscribeMedicalSettings
-             ~f:EngineTranscribeMedicalSettings.to_value))]
+        [("AttendeeId", (Some (GuidString.to_value x.attendeeId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let engineTranscribeMedicalSettings =
-        (Option.map ~f:EngineTranscribeMedicalSettings.of_xml)
-          (Xml.child xml_arg0 "EngineTranscribeMedicalSettings") in
-      let engineTranscribeSettings =
-        (Option.map ~f:EngineTranscribeSettings.of_xml)
-          (Xml.child xml_arg0 "EngineTranscribeSettings") in
-      make ?engineTranscribeMedicalSettings ?engineTranscribeSettings ()
+      let attendeeId =
+        GuidString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttendeeId") in
+      make ~attendeeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let engineTranscribeMedicalSettings =
-        field_map json "EngineTranscribeMedicalSettings"
-          EngineTranscribeMedicalSettings.of_json in
-      let engineTranscribeSettings =
-        field_map json "EngineTranscribeSettings"
-          EngineTranscribeSettings.of_json in
-      make ?engineTranscribeMedicalSettings ?engineTranscribeSettings ()
+    let of_json json__ =
+      let attendeeId = field_map_exn json__ "AttendeeId" GuidString.of_json in
+      make ~attendeeId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The configuration for the current transcription operation. Must contain EngineTranscribeSettings or EngineTranscribeMedicalSettings."]
-module AttendeeList =
-  struct
-    type nonrec t = Attendee.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Attendee.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Attendee.of_xml)
-    let of_json j =
-      list_of_json ~kind:"AttendeeList" ~of_json:Attendee.of_json j
-    let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "A structure that contains one or more attendee IDs."]
 module BadRequestException =
   struct
     type nonrec t =
@@ -1269,14 +1701,47 @@ module BadRequestException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" String_.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
       make ?requestId ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input parameters don't match the service's restrictions."]
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      code: String_.t option ;
+      message: String_.t option ;
+      requestId: String_.t option
+        [@ocaml.doc "The ID of the request involved in the conflict."]}
+    let make ?code =
+      fun ?message ->
+        fun ?requestId -> fun () -> { code; message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value));
+        ("RequestId", (Option.map x.requestId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      make ?requestId ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Multiple instances of the same request have been made simultaneously."]
 module ForbiddenException =
   struct
     type nonrec t =
@@ -1303,10 +1768,10 @@ module ForbiddenException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" String_.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
       make ?requestId ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1319,7 +1784,7 @@ module NotFoundException =
       message: String_.t option ;
       requestId: String_.t option
         [@ocaml.doc
-          "The request id associated with the call responsible for the exception."]}
+          "The request ID associated with the call responsible for the exception."]}
     let make ?code =
       fun ?message ->
         fun ?requestId -> fun () -> { code; message; requestId }
@@ -1337,159 +1802,22 @@ module NotFoundException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" String_.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
       make ?requestId ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "One or more of the resources in the request does not exist in the system."]
-module ResultMax =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for ResultMax" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module Meeting =
-  struct
-    type nonrec t =
-      {
-      meetingId: GuidString.t option
-        [@ocaml.doc "The Amazon Chime SDK meeting ID."];
-      meetingHostId: ExternalUserId.t option [@ocaml.doc "Reserved."];
-      externalMeetingId: ExternalMeetingId.t option
-        [@ocaml.doc "The external meeting ID."];
-      mediaRegion: MediaRegion.t option
-        [@ocaml.doc
-          "The Region in which you create the meeting. Available values: af-south-1, ap-northeast-1, ap-northeast-2, ap-south-1, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-east-2, us-west-1, us-west-2. Available values in AWS GovCloud (US) Regions: us-gov-east-1, us-gov-west-1."];
-      mediaPlacement: MediaPlacement.t option
-        [@ocaml.doc "The media placement for the meeting."];
-      meetingFeatures: MeetingFeaturesConfiguration.t option
-        [@ocaml.doc
-          "The features available to a meeting, such as Amazon Voice Focus."];
-      primaryMeetingId: PrimaryMeetingId.t option
-        [@ocaml.doc
-          "When specified, replicates the media from the primary meeting to this meeting."]}
-    let make ?meetingId =
-      fun ?meetingHostId ->
-        fun ?externalMeetingId ->
-          fun ?mediaRegion ->
-            fun ?mediaPlacement ->
-              fun ?meetingFeatures ->
-                fun ?primaryMeetingId ->
-                  fun () ->
-                    {
-                      meetingId;
-                      meetingHostId;
-                      externalMeetingId;
-                      mediaRegion;
-                      mediaPlacement;
-                      meetingFeatures;
-                      primaryMeetingId
-                    }
-    let to_value x =
-      structure_to_value
-        [("MeetingId", (Option.map x.meetingId ~f:GuidString.to_value));
-        ("MeetingHostId",
-          (Option.map x.meetingHostId ~f:ExternalUserId.to_value));
-        ("ExternalMeetingId",
-          (Option.map x.externalMeetingId ~f:ExternalMeetingId.to_value));
-        ("MediaRegion", (Option.map x.mediaRegion ~f:MediaRegion.to_value));
-        ("MediaPlacement",
-          (Option.map x.mediaPlacement ~f:MediaPlacement.to_value));
-        ("MeetingFeatures",
-          (Option.map x.meetingFeatures
-             ~f:MeetingFeaturesConfiguration.to_value));
-        ("PrimaryMeetingId",
-          (Option.map x.primaryMeetingId ~f:PrimaryMeetingId.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let primaryMeetingId =
-        (Option.map ~f:PrimaryMeetingId.of_xml)
-          (Xml.child xml_arg0 "PrimaryMeetingId") in
-      let meetingFeatures =
-        (Option.map ~f:MeetingFeaturesConfiguration.of_xml)
-          (Xml.child xml_arg0 "MeetingFeatures") in
-      let mediaPlacement =
-        (Option.map ~f:MediaPlacement.of_xml)
-          (Xml.child xml_arg0 "MediaPlacement") in
-      let mediaRegion =
-        (Option.map ~f:MediaRegion.of_xml) (Xml.child xml_arg0 "MediaRegion") in
-      let externalMeetingId =
-        (Option.map ~f:ExternalMeetingId.of_xml)
-          (Xml.child xml_arg0 "ExternalMeetingId") in
-      let meetingHostId =
-        (Option.map ~f:ExternalUserId.of_xml)
-          (Xml.child xml_arg0 "MeetingHostId") in
-      let meetingId =
-        (Option.map ~f:GuidString.of_xml) (Xml.child xml_arg0 "MeetingId") in
-      make ?primaryMeetingId ?meetingFeatures ?mediaPlacement ?mediaRegion
-        ?externalMeetingId ?meetingHostId ?meetingId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let primaryMeetingId =
-        field_map json "PrimaryMeetingId" PrimaryMeetingId.of_json in
-      let meetingFeatures =
-        field_map json "MeetingFeatures" MeetingFeaturesConfiguration.of_json in
-      let mediaPlacement =
-        field_map json "MediaPlacement" MediaPlacement.of_json in
-      let mediaRegion = field_map json "MediaRegion" MediaRegion.of_json in
-      let externalMeetingId =
-        field_map json "ExternalMeetingId" ExternalMeetingId.of_json in
-      let meetingHostId =
-        field_map json "MeetingHostId" ExternalUserId.of_json in
-      let meetingId = field_map json "MeetingId" GuidString.of_json in
-      make ?primaryMeetingId ?meetingFeatures ?mediaPlacement ?mediaRegion
-        ?externalMeetingId ?meetingHostId ?meetingId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A meeting created using the Amazon Chime SDK."]
-module BatchCreateAttendeeErrorList =
-  struct
-    type nonrec t = CreateAttendeeError.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:CreateAttendeeError.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:CreateAttendeeError.of_xml)
-    let of_json j =
-      list_of_json ~kind:"BatchCreateAttendeeErrorList"
-        ~of_json:CreateAttendeeError.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module LimitExceededException =
+module ServiceFailureException =
   struct
     type nonrec t =
       {
       code: String_.t option ;
       message: String_.t option ;
       requestId: String_.t option
-        [@ocaml.doc
-          "The request id associated with the call responsible for the exception."]}
+        [@ocaml.doc "The ID of the failed request."]}
     let make ?code =
       fun ?message ->
         fun ?requestId -> fun () -> { code; message; requestId }
@@ -1507,13 +1835,13 @@ module LimitExceededException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" String_.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
       make ?requestId ?message ?code ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The request exceeds the resource limit."]
+  end[@@ocaml.doc "The service encountered an unexpected error."]
 module ServiceUnavailableException =
   struct
     type nonrec t =
@@ -1550,15 +1878,49 @@ module ServiceUnavailableException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?retryAfterSeconds ?requestId ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
-      let requestId = field_map json "RequestId" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" String_.of_json in
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
       make ?retryAfterSeconds ?requestId ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is currently unavailable."]
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      code: String_.t option ;
+      message: String_.t option ;
+      requestId: String_.t option
+        [@ocaml.doc
+          "The ID of the request that exceeded the throttling limit."]}
+    let make ?code =
+      fun ?message ->
+        fun ?requestId -> fun () -> { code; message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value));
+        ("RequestId", (Option.map x.requestId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      make ?requestId ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of customer requests exceeds the request rate limit."]
 module UnauthorizedException =
   struct
     type nonrec t =
@@ -1585,13 +1947,424 @@ module UnauthorizedException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" String_.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
       make ?requestId ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The user isn't authorized to request a resource."]
+module LimitExceededException =
+  struct
+    type nonrec t =
+      {
+      code: String_.t option ;
+      message: String_.t option ;
+      requestId: String_.t option
+        [@ocaml.doc
+          "The request id associated with the call responsible for the exception."]}
+    let make ?code =
+      fun ?message ->
+        fun ?requestId -> fun () -> { code; message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value));
+        ("RequestId", (Option.map x.requestId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      make ?requestId ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request exceeds the resource limit."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t =
+      {
+      code: String_.t option ;
+      message: String_.t option ;
+      requestId: String_.t option
+        [@ocaml.doc "The ID of the resource that couldn't be found."];
+      resourceName: AmazonResourceName.t option
+        [@ocaml.doc "The name of the resource that couldn't be found."]}
+    let make ?code =
+      fun ?message ->
+        fun ?requestId ->
+          fun ?resourceName ->
+            fun () -> { code; message; requestId; resourceName }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value));
+        ("RequestId", (Option.map x.requestId ~f:String_.to_value));
+        ("ResourceName",
+          (Option.map x.resourceName ~f:AmazonResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceName =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceName") in
+      let requestId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?resourceName ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceName =
+        field_map json__ "ResourceName" AmazonResourceName.of_json in
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      make ?resourceName ?requestId ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource that you want to tag couldn't be found."]
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TooManyTagsException =
+  struct
+    type nonrec t =
+      {
+      code: String_.t option ;
+      message: String_.t option ;
+      requestId: String_.t option
+        [@ocaml.doc "The ID of the request that contains too many tags."];
+      resourceName: AmazonResourceName.t option
+        [@ocaml.doc "The name of the resource that received too many tags."]}
+    let make ?code =
+      fun ?message ->
+        fun ?requestId ->
+          fun ?resourceName ->
+            fun () -> { code; message; requestId; resourceName }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value));
+        ("RequestId", (Option.map x.requestId ~f:String_.to_value));
+        ("ResourceName",
+          (Option.map x.resourceName ~f:AmazonResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceName =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceName") in
+      let requestId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?resourceName ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceName =
+        field_map json__ "ResourceName" AmazonResourceName.of_json in
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      make ?resourceName ?requestId ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Too many tags were added to the specified resource."]
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TranscriptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      engineTranscribeSettings: EngineTranscribeSettings.t option
+        [@ocaml.doc
+          "The transcription configuration settings passed to Amazon Transcribe."];
+      engineTranscribeMedicalSettings:
+        EngineTranscribeMedicalSettings.t option
+        [@ocaml.doc
+          "The transcription configuration settings passed to Amazon Transcribe Medical."]}
+    let make ?engineTranscribeSettings =
+      fun ?engineTranscribeMedicalSettings ->
+        fun () ->
+          { engineTranscribeSettings; engineTranscribeMedicalSettings }
+    let to_value x =
+      structure_to_value
+        [("EngineTranscribeSettings",
+           (Option.map x.engineTranscribeSettings
+              ~f:EngineTranscribeSettings.to_value));
+        ("EngineTranscribeMedicalSettings",
+          (Option.map x.engineTranscribeMedicalSettings
+             ~f:EngineTranscribeMedicalSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let engineTranscribeMedicalSettings =
+        (Option.map ~f:EngineTranscribeMedicalSettings.of_xml)
+          (Xml.child xml_arg0 "EngineTranscribeMedicalSettings") in
+      let engineTranscribeSettings =
+        (Option.map ~f:EngineTranscribeSettings.of_xml)
+          (Xml.child xml_arg0 "EngineTranscribeSettings") in
+      make ?engineTranscribeMedicalSettings ?engineTranscribeSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let engineTranscribeMedicalSettings =
+        field_map json__ "EngineTranscribeMedicalSettings"
+          EngineTranscribeMedicalSettings.of_json in
+      let engineTranscribeSettings =
+        field_map json__ "EngineTranscribeSettings"
+          EngineTranscribeSettings.of_json in
+      make ?engineTranscribeMedicalSettings ?engineTranscribeSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for the current transcription operation. Must contain EngineTranscribeSettings or EngineTranscribeMedicalSettings."]
+module AttendeeList =
+  struct
+    type nonrec t = Attendee.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Attendee.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Attendee.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttendeeList" ~of_json:Attendee.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResultMax =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for ResultMax" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Meeting =
+  struct
+    type nonrec t =
+      {
+      meetingId: GuidString.t option
+        [@ocaml.doc "The Amazon Chime SDK meeting ID."];
+      meetingHostId: ExternalUserId.t option [@ocaml.doc "Reserved."];
+      externalMeetingId: ExternalMeetingId.t option
+        [@ocaml.doc
+          "The external meeting ID. Pattern: \\[-_&\\@+=,()\\{\\}\\\\[\\\\]\\/\194\171\194\187.:|'\"#a-zA-Z0-9\195\128-\195\191\\s\\]* Values that begin with aws: are reserved. You can't configure a value that uses this prefix. Case insensitive."];
+      mediaRegion: MediaRegion.t option
+        [@ocaml.doc
+          "The Region in which you create the meeting. Available values: af-south-1, ap-northeast-1, ap-northeast-2, ap-south-1, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-east-2, us-west-1, us-west-2. Available values in Amazon Web Services GovCloud (US) Regions: us-gov-east-1, us-gov-west-1."];
+      mediaPlacement: MediaPlacement.t option
+        [@ocaml.doc "The media placement for the meeting."];
+      meetingFeatures: MeetingFeaturesConfiguration.t option
+        [@ocaml.doc
+          "The features available to a meeting, such as echo reduction."];
+      primaryMeetingId: PrimaryMeetingId.t option
+        [@ocaml.doc
+          "When specified, replicates the media from the primary meeting to this meeting."];
+      tenantIds: TenantIdList.t option [@ocaml.doc "Array of strings."];
+      meetingArn: AmazonResourceName.t option
+        [@ocaml.doc "The ARN of the meeting."]}
+    let make ?meetingId =
+      fun ?meetingHostId ->
+        fun ?externalMeetingId ->
+          fun ?mediaRegion ->
+            fun ?mediaPlacement ->
+              fun ?meetingFeatures ->
+                fun ?primaryMeetingId ->
+                  fun ?tenantIds ->
+                    fun ?meetingArn ->
+                      fun () ->
+                        {
+                          meetingId;
+                          meetingHostId;
+                          externalMeetingId;
+                          mediaRegion;
+                          mediaPlacement;
+                          meetingFeatures;
+                          primaryMeetingId;
+                          tenantIds;
+                          meetingArn
+                        }
+    let to_value x =
+      structure_to_value
+        [("MeetingId", (Option.map x.meetingId ~f:GuidString.to_value));
+        ("MeetingHostId",
+          (Option.map x.meetingHostId ~f:ExternalUserId.to_value));
+        ("ExternalMeetingId",
+          (Option.map x.externalMeetingId ~f:ExternalMeetingId.to_value));
+        ("MediaRegion", (Option.map x.mediaRegion ~f:MediaRegion.to_value));
+        ("MediaPlacement",
+          (Option.map x.mediaPlacement ~f:MediaPlacement.to_value));
+        ("MeetingFeatures",
+          (Option.map x.meetingFeatures
+             ~f:MeetingFeaturesConfiguration.to_value));
+        ("PrimaryMeetingId",
+          (Option.map x.primaryMeetingId ~f:PrimaryMeetingId.to_value));
+        ("TenantIds", (Option.map x.tenantIds ~f:TenantIdList.to_value));
+        ("MeetingArn",
+          (Option.map x.meetingArn ~f:AmazonResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let meetingArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "MeetingArn") in
+      let tenantIds =
+        (Option.map ~f:TenantIdList.of_xml) (Xml.child xml_arg0 "TenantIds") in
+      let primaryMeetingId =
+        (Option.map ~f:PrimaryMeetingId.of_xml)
+          (Xml.child xml_arg0 "PrimaryMeetingId") in
+      let meetingFeatures =
+        (Option.map ~f:MeetingFeaturesConfiguration.of_xml)
+          (Xml.child xml_arg0 "MeetingFeatures") in
+      let mediaPlacement =
+        (Option.map ~f:MediaPlacement.of_xml)
+          (Xml.child xml_arg0 "MediaPlacement") in
+      let mediaRegion =
+        (Option.map ~f:MediaRegion.of_xml) (Xml.child xml_arg0 "MediaRegion") in
+      let externalMeetingId =
+        (Option.map ~f:ExternalMeetingId.of_xml)
+          (Xml.child xml_arg0 "ExternalMeetingId") in
+      let meetingHostId =
+        (Option.map ~f:ExternalUserId.of_xml)
+          (Xml.child xml_arg0 "MeetingHostId") in
+      let meetingId =
+        (Option.map ~f:GuidString.of_xml) (Xml.child xml_arg0 "MeetingId") in
+      make ?meetingArn ?tenantIds ?primaryMeetingId ?meetingFeatures
+        ?mediaPlacement ?mediaRegion ?externalMeetingId ?meetingHostId
+        ?meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let meetingArn =
+        field_map json__ "MeetingArn" AmazonResourceName.of_json in
+      let tenantIds = field_map json__ "TenantIds" TenantIdList.of_json in
+      let primaryMeetingId =
+        field_map json__ "PrimaryMeetingId" PrimaryMeetingId.of_json in
+      let meetingFeatures =
+        field_map json__ "MeetingFeatures"
+          MeetingFeaturesConfiguration.of_json in
+      let mediaPlacement =
+        field_map json__ "MediaPlacement" MediaPlacement.of_json in
+      let mediaRegion = field_map json__ "MediaRegion" MediaRegion.of_json in
+      let externalMeetingId =
+        field_map json__ "ExternalMeetingId" ExternalMeetingId.of_json in
+      let meetingHostId =
+        field_map json__ "MeetingHostId" ExternalUserId.of_json in
+      let meetingId = field_map json__ "MeetingId" GuidString.of_json in
+      make ?meetingArn ?tenantIds ?primaryMeetingId ?meetingFeatures
+        ?mediaPlacement ?mediaRegion ?externalMeetingId ?meetingHostId
+        ?meetingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A meeting created using the Amazon Chime SDK."]
+module BatchCreateAttendeeErrorList =
+  struct
+    type nonrec t = CreateAttendeeError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CreateAttendeeError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CreateAttendeeError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchCreateAttendeeErrorList"
+        ~of_json:CreateAttendeeError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ClientRequestToken =
   struct
     type nonrec t = string
@@ -1620,6 +2393,9 @@ module CreateMeetingWithAttendeesRequestItemList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreateAttendeeRequestItem.to_value)) |>
         (fun x -> `List x)
@@ -1642,13 +2418,40 @@ module CreateMeetingWithAttendeesRequestItemList =
         ~of_json:CreateAttendeeRequestItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MediaPlacementNetworkType =
+  struct
+    type nonrec t =
+      | Ipv4Only 
+      | DualStack 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ipv4Only -> "Ipv4Only"
+      | DualStack -> "DualStack"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Ipv4Only" -> Ipv4Only
+      | "DualStack" -> DualStack
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MediaPlacementNetworkType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MediaPlacementNetworkType" j)
+    let to_json = simple_to_json to_value
+  end
 module NotificationsConfiguration =
   struct
     type nonrec t =
       {
       lambdaFunctionArn: Arn.t option
         [@ocaml.doc
-          "The ARN of the AWS Lambda function in the notifications configuration."];
+          "The ARN of the Amazon Web Services Lambda function in the notifications configuration."];
       snsTopicArn: Arn.t option [@ocaml.doc "The ARN of the SNS topic."];
       sqsQueueArn: Arn.t option [@ocaml.doc "The ARN of the SQS queue."]}
     let make ?lambdaFunctionArn =
@@ -1671,10 +2474,11 @@ module NotificationsConfiguration =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "LambdaFunctionArn") in
       make ?sqsQueueArn ?snsTopicArn ?lambdaFunctionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sqsQueueArn = field_map json "SqsQueueArn" Arn.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" Arn.of_json in
-      let lambdaFunctionArn = field_map json "LambdaFunctionArn" Arn.of_json in
+    let of_json json__ =
+      let sqsQueueArn = field_map json__ "SqsQueueArn" Arn.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" Arn.of_json in
+      let lambdaFunctionArn =
+        field_map json__ "LambdaFunctionArn" Arn.of_json in
       make ?sqsQueueArn ?snsTopicArn ?lambdaFunctionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1705,14 +2509,46 @@ module UnprocessableEntityException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" String_.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
       make ?requestId ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was well-formed but was unable to be followed due to semantic errors."]
+module AttendeeIdsList =
+  struct
+    type nonrec t = AttendeeIdItem.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:250) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttendeeIdItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AttendeeIdItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttendeeIdsList" ~of_json:AttendeeIdItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CreateAttendeeRequestItemList =
   struct
     type nonrec t = CreateAttendeeRequestItem.t list
@@ -1722,6 +2558,9 @@ module CreateAttendeeRequestItemList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreateAttendeeRequestItem.to_value)) |>
         (fun x -> `List x)
@@ -1744,6 +2583,445 @@ module CreateAttendeeRequestItemList =
         ~of_json:CreateAttendeeRequestItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UpdateAttendeeCapabilitiesResponse =
+  struct
+    type nonrec t =
+      {
+      attendee: Attendee.t option [@ocaml.doc "The updated attendee data."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?attendee = fun () -> { attendee }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Attendee", (Option.map x.attendee ~f:Attendee.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attendee =
+        (Option.map ~f:Attendee.of_xml) (Xml.child xml_arg0 "Attendee") in
+      make ?attendee ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attendee = field_map json__ "Attendee" Attendee.of_json in
+      make ?attendee ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The capabilities that you want to update. You use the capabilities with a set of values that control what the capabilities can do, such as SendReceive data. For more information about those values, see . When using capabilities, be aware of these corner cases: If you specify MeetingFeatures:Video:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Video will be rejected with ValidationError 400. If you specify MeetingFeatures:Content:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Content will be rejected with ValidationError 400. You can't set content capabilities to SendReceive or Receive unless you also set video capabilities to SendReceive or Receive. If you don't set the video capability to receive, the response will contain an HTTP 400 Bad Request status code. However, you can set your video capability to receive and you set your content capability to not receive. If meeting features is defined as Video:MaxResolution:None but Content:MaxResolution is defined as something other than None and attendee capabilities are not defined in the API request, then the default attendee video capability is set to Receive and attendee content capability is set to SendReceive. This is because content SendReceive requires video to be at least Receive. When you change an audio capability from None or Receive to Send or SendReceive , and if the attendee left their microphone unmuted, audio will flow from the attendee to the other meeting participants. When you change a video or content capability from None or Receive to Send or SendReceive , and if the attendee turned on their video or content streams, remote attendees can receive those streams, but only after media renegotiation between the client and the Amazon Chime back-end server."]
+module UpdateAttendeeCapabilitiesRequest =
+  struct
+    type nonrec t =
+      {
+      meetingId: GuidString.t
+        [@ocaml.doc
+          "The ID of the meeting associated with the update request."];
+      attendeeId: GuidString.t
+        [@ocaml.doc
+          "The ID of the attendee associated with the update request."];
+      capabilities: AttendeeCapabilities.t
+        [@ocaml.doc "The capabilities that you want to update."]}
+    let context_ = "UpdateAttendeeCapabilitiesRequest"
+    let make ~meetingId =
+      fun ~attendeeId ->
+        fun ~capabilities ->
+          fun () -> { meetingId; attendeeId; capabilities }
+    let to_value x =
+      structure_to_value
+        [("MeetingId", (Some (GuidString.to_value x.meetingId)));
+        ("AttendeeId", (Some (GuidString.to_value x.attendeeId)));
+        ("Capabilities",
+          (Some (AttendeeCapabilities.to_value x.capabilities)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capabilities =
+        AttendeeCapabilities.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Capabilities") in
+      let attendeeId =
+        GuidString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttendeeId") in
+      let meetingId =
+        GuidString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
+      make ~capabilities ~attendeeId ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capabilities =
+        field_map_exn json__ "Capabilities" AttendeeCapabilities.of_json in
+      let attendeeId = field_map_exn json__ "AttendeeId" GuidString.of_json in
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
+      make ~capabilities ~attendeeId ~meetingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The capabilities that you want to update. You use the capabilities with a set of values that control what the capabilities can do, such as SendReceive data. For more information about those values, see . When using capabilities, be aware of these corner cases: If you specify MeetingFeatures:Video:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Video will be rejected with ValidationError 400. If you specify MeetingFeatures:Content:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Content will be rejected with ValidationError 400. You can't set content capabilities to SendReceive or Receive unless you also set video capabilities to SendReceive or Receive. If you don't set the video capability to receive, the response will contain an HTTP 400 Bad Request status code. However, you can set your video capability to receive and you set your content capability to not receive. If meeting features is defined as Video:MaxResolution:None but Content:MaxResolution is defined as something other than None and attendee capabilities are not defined in the API request, then the default attendee video capability is set to Receive and attendee content capability is set to SendReceive. This is because content SendReceive requires video to be at least Receive. When you change an audio capability from None or Receive to Send or SendReceive , and if the attendee left their microphone unmuted, audio will flow from the attendee to the other meeting participants. When you change a video or content capability from None or Receive to Send or SendReceive , and if the attendee turned on their video or content streams, remote attendees can receive those streams, but only after media renegotiation between the client and the Amazon Chime back-end server."]
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the specified tags from the specified resources. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from a resource that were already removed. Note the following: To remove tags from a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for removing tags. For more information, see the documentation for the service whose resource you want to untag. You can only tag resources that are located in the specified Amazon Web Services Region for the calling Amazon Web Services account. Minimum permissions In addition to the tag:UntagResources permission required by this operation, you must also have the remove tags permission defined by the service that created the resource. For example, to remove the tags from an Amazon EC2 instance using the UntagResources operation, you must have both of the following permissions: tag:UntagResource ChimeSDKMeetings:DeleteTags"]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "The ARN of the resource that you're removing tags from."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc "The tag keys being removed from the resources."]}
+    let context_ = "UntagResourceRequest"
+    let make ~resourceARN =
+      fun ~tagKeys -> fun () -> { resourceARN; tagKeys }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~tagKeys ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the specified tags from the specified resources. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from a resource that were already removed. Note the following: To remove tags from a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for removing tags. For more information, see the documentation for the service whose resource you want to untag. You can only tag resources that are located in the specified Amazon Web Services Region for the calling Amazon Web Services account. Minimum permissions In addition to the tag:UntagResources permission required by this operation, you must also have the remove tags permission defined by the service that created the resource. For example, to remove the tags from an Amazon EC2 instance using the UntagResources operation, you must have both of the following permissions: tag:UntagResource ChimeSDKMeetings:DeleteTags"]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource that supports tags."]
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc "The ARN of the resource."];
+      tags: TagList.t [@ocaml.doc "Lists the requested tags."]}
+    let context_ = "TagResourceRequest"
+    let make ~resourceARN = fun ~tags -> fun () -> { resourceARN; tags }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("Tags", (Some (TagList.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~tags ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource that supports tags."]
 module StopMeetingTranscriptionRequest =
   struct
     type nonrec t =
@@ -1763,11 +3041,12 @@ module StopMeetingTranscriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~meetingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
+    let of_json json__ =
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
       make ~meetingId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Stops transcription for the specified meetingId."]
+  end[@@ocaml.doc
+       "Stops transcription for the specified meetingId. For more information, refer to Using Amazon Chime SDK live transcription in the Amazon Chime SDK Developer Guide. By default, Amazon Transcribe may use and store audio content processed by the service to develop and improve Amazon Web Services AI/ML services as further described in section 50 of the Amazon Web Services Service Terms. Using Amazon Transcribe may be subject to federal and state laws or regulations regarding the recording or interception of electronic communications. It is your and your end users\226\128\153 responsibility to comply with all applicable laws regarding the recording, including properly notifying all participants in a recorded session or communication that the session or communication is being recorded, and obtaining all necessary consents. You can opt out from Amazon Web Services using audio content to develop and improve Amazon Web Services AI/ML services by configuring an AI services opt out policy using Amazon Web Services Organizations."]
 module StartMeetingTranscriptionRequest =
   struct
     type nonrec t =
@@ -1799,14 +3078,151 @@ module StartMeetingTranscriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~transcriptionConfiguration ~meetingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transcriptionConfiguration =
-        field_map_exn json "TranscriptionConfiguration"
+        field_map_exn json__ "TranscriptionConfiguration"
           TranscriptionConfiguration.of_json in
-      let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
       make ~transcriptionConfiguration ~meetingId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts transcription for the specified meetingId."]
+  end[@@ocaml.doc
+       "Starts transcription for the specified meetingId. For more information, refer to Using Amazon Chime SDK live transcription in the Amazon Chime SDK Developer Guide. If you specify an invalid configuration, a TranscriptFailed event will be sent with the contents of the BadRequestException generated by Amazon Transcribe. For more information on each parameter and which combinations are valid, refer to the StartStreamTranscription API in the Amazon Transcribe Developer Guide. By default, Amazon Transcribe may use and store audio content processed by the service to develop and improve Amazon Web Services AI/ML services as further described in section 50 of the Amazon Web Services Service Terms. Using Amazon Transcribe may be subject to federal and state laws or regulations regarding the recording or interception of electronic communications. It is your and your end users\226\128\153 responsibility to comply with all applicable laws regarding the recording, including properly notifying all participants in a recorded session or communication that the session or communication is being recorded, and obtaining all necessary consents. You can opt out from Amazon Web Services using audio content to develop and improve AWS AI/ML services by configuring an AI services opt out policy using Amazon Web Services Organizations."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      tags: TagList.t option
+        [@ocaml.doc "The tags requested for the specified resource."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the tags available for the specified resource."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc "The ARN of the resource."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~resourceARN = fun () -> { resourceARN }
+    let to_value x =
+      structure_to_value
+        [("arn", (Some (AmazonResourceName.to_value x.resourceARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+      make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the tags available for the specified resource."]
 module ListAttendeesResponse =
   struct
     type nonrec t =
@@ -1819,6 +3235,10 @@ module ListAttendeesResponse =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?attendees =
       fun ?nextToken -> fun () -> { attendees; nextToken }
@@ -1830,6 +3250,15 @@ module ListAttendeesResponse =
           `ForbiddenException (ForbiddenException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -1841,6 +3270,15 @@ module ListAttendeesResponse =
           `ForbiddenException (ForbiddenException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -1857,6 +3295,22 @@ module ListAttendeesResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -1874,9 +3328,9 @@ module ListAttendeesResponse =
         (Option.map ~f:AttendeeList.of_xml) (Xml.child xml_arg0 "Attendees") in
       make ?nextToken ?attendees ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let attendees = field_map json "Attendees" AttendeeList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let attendees = field_map json__ "Attendees" AttendeeList.of_json in
       make ?nextToken ?attendees ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1911,10 +3365,10 @@ module ListAttendeesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ?maxResults ?nextToken ~meetingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultMax.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultMax.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
       make ?maxResults ?nextToken ~meetingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1929,6 +3383,10 @@ module GetMeetingResponse =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?meeting = fun () -> { meeting }
     let error_of_json name json =
@@ -1939,6 +3397,15 @@ module GetMeetingResponse =
           `ForbiddenException (ForbiddenException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -1950,6 +3417,15 @@ module GetMeetingResponse =
           `ForbiddenException (ForbiddenException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -1966,6 +3442,22 @@ module GetMeetingResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -1980,8 +3472,8 @@ module GetMeetingResponse =
         (Option.map ~f:Meeting.of_xml) (Xml.child xml_arg0 "Meeting") in
       make ?meeting ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let meeting = field_map json "Meeting" Meeting.of_json in
+    let of_json json__ =
+      let meeting = field_map json__ "Meeting" Meeting.of_json in
       make ?meeting ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2003,8 +3495,8 @@ module GetMeetingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~meetingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
+    let of_json json__ =
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
       make ~meetingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2019,6 +3511,10 @@ module GetAttendeeResponse =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?attendee = fun () -> { attendee }
     let error_of_json name json =
@@ -2029,6 +3525,15 @@ module GetAttendeeResponse =
           `ForbiddenException (ForbiddenException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2040,6 +3545,15 @@ module GetAttendeeResponse =
           `ForbiddenException (ForbiddenException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2056,6 +3570,22 @@ module GetAttendeeResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2070,8 +3600,8 @@ module GetAttendeeResponse =
         (Option.map ~f:Attendee.of_xml) (Xml.child xml_arg0 "Attendee") in
       make ?attendee ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attendee = field_map json "Attendee" Attendee.of_json in
+    let of_json json__ =
+      let attendee = field_map json__ "Attendee" Attendee.of_json in
       make ?attendee ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2100,9 +3630,9 @@ module GetAttendeeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~attendeeId ~meetingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attendeeId = field_map_exn json "AttendeeId" GuidString.of_json in
-      let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
+    let of_json json__ =
+      let attendeeId = field_map_exn json__ "AttendeeId" GuidString.of_json in
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
       make ~attendeeId ~meetingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2124,8 +3654,8 @@ module DeleteMeetingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~meetingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
+    let of_json json__ =
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
       make ~meetingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2154,9 +3684,9 @@ module DeleteAttendeeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~attendeeId ~meetingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attendeeId = field_map_exn json "AttendeeId" GuidString.of_json in
-      let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
+    let of_json json__ =
+      let attendeeId = field_map_exn json__ "AttendeeId" GuidString.of_json in
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
       make ~attendeeId ~meetingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2176,8 +3706,12 @@ module CreateMeetingWithAttendeesResponse =
           "If the action fails for one or more of the attendees in the request, a list of the attendees is returned, along with error codes and error messages."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
       | `LimitExceededException of LimitExceededException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?meeting =
@@ -2187,11 +3721,19 @@ module CreateMeetingWithAttendeesResponse =
       match name with
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "UnauthorizedException" ->
           `UnauthorizedException (UnauthorizedException.of_json json)
       | name ->
@@ -2201,11 +3743,19 @@ module CreateMeetingWithAttendeesResponse =
       match name with
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "UnauthorizedException" ->
           `UnauthorizedException (UnauthorizedException.of_xml xml)
       | name ->
@@ -2216,14 +3766,30 @@ module CreateMeetingWithAttendeesResponse =
           `Assoc
             [("error", (`String "BadRequestException"));
             ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
       | `LimitExceededException e ->
           `Assoc
             [("error", (`String "LimitExceededException"));
             ("details", (LimitExceededException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
             ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `UnauthorizedException e ->
           `Assoc
             [("error", (`String "UnauthorizedException"));
@@ -2250,15 +3816,15 @@ module CreateMeetingWithAttendeesResponse =
         (Option.map ~f:Meeting.of_xml) (Xml.child xml_arg0 "Meeting") in
       make ?errors ?attendees ?meeting ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "Errors" BatchCreateAttendeeErrorList.of_json in
-      let attendees = field_map json "Attendees" AttendeeList.of_json in
-      let meeting = field_map json "Meeting" Meeting.of_json in
+        field_map json__ "Errors" BatchCreateAttendeeErrorList.of_json in
+      let attendees = field_map json__ "Attendees" AttendeeList.of_json in
+      let meeting = field_map json__ "Meeting" Meeting.of_json in
       make ?errors ?attendees ?meeting ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Chime SDK meeting in the specified media Region, with attendees. For more information about specifying media Regions, see Amazon Chime SDK Media Regions in the Amazon Chime Developer Guide. For more information about the Amazon Chime SDK, see Using the Amazon Chime SDK in the Amazon Chime Developer Guide."]
+       "Creates a new Amazon Chime SDK meeting in the specified media Region, with attendees. For more information about specifying media Regions, see Available Regions and Using meeting Regions, both in the Amazon Chime SDK Developer Guide. For more information about the Amazon Chime SDK, see Using the Amazon Chime SDK in the Amazon Chime SDK Developer Guide. If you use this API in conjuction with the and APIs, and you don't specify the MeetingFeatures.Content.MaxResolution or MeetingFeatures.Video.MaxResolution parameters, the following defaults are used: Content.MaxResolution: FHD Video.MaxResolution: HD"]
 module CreateMeetingWithAttendeesRequest =
   struct
     type nonrec t =
@@ -2268,10 +3834,11 @@ module CreateMeetingWithAttendeesRequest =
           "The unique identifier for the client request. Use a different token for different meetings."];
       mediaRegion: MediaRegion.t
         [@ocaml.doc
-          "The Region in which to create the meeting. Available values: af-south-1, ap-northeast-1, ap-northeast-2, ap-south-1, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-east-2, us-west-1, us-west-2. Available values in AWS GovCloud (US) Regions: us-gov-east-1, us-gov-west-1."];
+          "The Region in which to create the meeting. Available values: af-south-1, ap-northeast-1, ap-northeast-2, ap-south-1, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-east-2, us-west-1, us-west-2. Available values in Amazon Web Services GovCloud (US) Regions: us-gov-east-1, us-gov-west-1."];
       meetingHostId: ExternalUserId.t option [@ocaml.doc "Reserved."];
       externalMeetingId: ExternalMeetingId.t
-        [@ocaml.doc "The external meeting ID."];
+        [@ocaml.doc
+          "The external meeting ID. Pattern: \\[-_&\\@+=,()\\{\\}\\\\[\\\\]\\/\194\171\194\187.:|'\"#a-zA-Z0-9\195\128-\195\191\\s\\]* Values that begin with aws: are reserved. You can't configure a value that uses this prefix. Case insensitive."];
       meetingFeatures: MeetingFeaturesConfiguration.t option
         [@ocaml.doc
           "Lists the audio and video features enabled for a meeting, such as echo reduction."];
@@ -2283,27 +3850,40 @@ module CreateMeetingWithAttendeesRequest =
           "The attendee information, including attendees' IDs and join tokens."];
       primaryMeetingId: PrimaryMeetingId.t option
         [@ocaml.doc
-          "When specified, replicates the media from the primary meeting to the new meeting."]}
+          "When specified, replicates the media from the primary meeting to the new meeting."];
+      tenantIds: TenantIdList.t option
+        [@ocaml.doc
+          "A consistent and opaque identifier, created and maintained by the builder to represent a segment of their users."];
+      tags: TagList.t option [@ocaml.doc "The tags in the request."];
+      mediaPlacementNetworkType: MediaPlacementNetworkType.t option
+        [@ocaml.doc
+          "The type of network for the media placement. Either IPv4 only or dual-stack (IPv4 and IPv6)."]}
     let context_ = "CreateMeetingWithAttendeesRequest"
     let make ?meetingHostId =
       fun ?meetingFeatures ->
         fun ?notificationsConfiguration ->
           fun ?primaryMeetingId ->
-            fun ~clientRequestToken ->
-              fun ~mediaRegion ->
-                fun ~externalMeetingId ->
-                  fun ~attendees ->
-                    fun () ->
-                      {
-                        meetingHostId;
-                        meetingFeatures;
-                        notificationsConfiguration;
-                        primaryMeetingId;
-                        clientRequestToken;
-                        mediaRegion;
-                        externalMeetingId;
-                        attendees
-                      }
+            fun ?tenantIds ->
+              fun ?tags ->
+                fun ?mediaPlacementNetworkType ->
+                  fun ~clientRequestToken ->
+                    fun ~mediaRegion ->
+                      fun ~externalMeetingId ->
+                        fun ~attendees ->
+                          fun () ->
+                            {
+                              meetingHostId;
+                              meetingFeatures;
+                              notificationsConfiguration;
+                              primaryMeetingId;
+                              tenantIds;
+                              tags;
+                              mediaPlacementNetworkType;
+                              clientRequestToken;
+                              mediaRegion;
+                              externalMeetingId;
+                              attendees
+                            }
     let to_value x =
       structure_to_value
         [("ClientRequestToken",
@@ -2323,9 +3903,20 @@ module CreateMeetingWithAttendeesRequest =
           (Some
              (CreateMeetingWithAttendeesRequestItemList.to_value x.attendees)));
         ("PrimaryMeetingId",
-          (Option.map x.primaryMeetingId ~f:PrimaryMeetingId.to_value))]
+          (Option.map x.primaryMeetingId ~f:PrimaryMeetingId.to_value));
+        ("TenantIds", (Option.map x.tenantIds ~f:TenantIdList.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("MediaPlacementNetworkType",
+          (Option.map x.mediaPlacementNetworkType
+             ~f:MediaPlacementNetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let mediaPlacementNetworkType =
+        (Option.map ~f:MediaPlacementNetworkType.of_xml)
+          (Xml.child xml_arg0 "MediaPlacementNetworkType") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let tenantIds =
+        (Option.map ~f:TenantIdList.of_xml) (Xml.child xml_arg0 "TenantIds") in
       let primaryMeetingId =
         (Option.map ~f:PrimaryMeetingId.of_xml)
           (Xml.child xml_arg0 "PrimaryMeetingId") in
@@ -2350,34 +3941,41 @@ module CreateMeetingWithAttendeesRequest =
       let clientRequestToken =
         ClientRequestToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
-      make ?primaryMeetingId ~attendees ?notificationsConfiguration
-        ?meetingFeatures ~externalMeetingId ?meetingHostId ~mediaRegion
-        ~clientRequestToken ()
+      make ?mediaPlacementNetworkType ?tags ?tenantIds ?primaryMeetingId
+        ~attendees ?notificationsConfiguration ?meetingFeatures
+        ~externalMeetingId ?meetingHostId ~mediaRegion ~clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let mediaPlacementNetworkType =
+        field_map json__ "MediaPlacementNetworkType"
+          MediaPlacementNetworkType.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let tenantIds = field_map json__ "TenantIds" TenantIdList.of_json in
       let primaryMeetingId =
-        field_map json "PrimaryMeetingId" PrimaryMeetingId.of_json in
+        field_map json__ "PrimaryMeetingId" PrimaryMeetingId.of_json in
       let attendees =
-        field_map_exn json "Attendees"
+        field_map_exn json__ "Attendees"
           CreateMeetingWithAttendeesRequestItemList.of_json in
       let notificationsConfiguration =
-        field_map json "NotificationsConfiguration"
+        field_map json__ "NotificationsConfiguration"
           NotificationsConfiguration.of_json in
       let meetingFeatures =
-        field_map json "MeetingFeatures" MeetingFeaturesConfiguration.of_json in
+        field_map json__ "MeetingFeatures"
+          MeetingFeaturesConfiguration.of_json in
       let externalMeetingId =
-        field_map_exn json "ExternalMeetingId" ExternalMeetingId.of_json in
+        field_map_exn json__ "ExternalMeetingId" ExternalMeetingId.of_json in
       let meetingHostId =
-        field_map json "MeetingHostId" ExternalUserId.of_json in
-      let mediaRegion = field_map_exn json "MediaRegion" MediaRegion.of_json in
+        field_map json__ "MeetingHostId" ExternalUserId.of_json in
+      let mediaRegion =
+        field_map_exn json__ "MediaRegion" MediaRegion.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      make ?primaryMeetingId ~attendees ?notificationsConfiguration
-        ?meetingFeatures ~externalMeetingId ?meetingHostId ~mediaRegion
-        ~clientRequestToken ()
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      make ?mediaPlacementNetworkType ?tags ?tenantIds ?primaryMeetingId
+        ~attendees ?notificationsConfiguration ?meetingFeatures
+        ~externalMeetingId ?meetingHostId ~mediaRegion ~clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Chime SDK meeting in the specified media Region, with attendees. For more information about specifying media Regions, see Amazon Chime SDK Media Regions in the Amazon Chime Developer Guide. For more information about the Amazon Chime SDK, see Using the Amazon Chime SDK in the Amazon Chime Developer Guide."]
+       "Creates a new Amazon Chime SDK meeting in the specified media Region, with attendees. For more information about specifying media Regions, see Available Regions and Using meeting Regions, both in the Amazon Chime SDK Developer Guide. For more information about the Amazon Chime SDK, see Using the Amazon Chime SDK in the Amazon Chime SDK Developer Guide. If you use this API in conjuction with the and APIs, and you don't specify the MeetingFeatures.Content.MaxResolution or MeetingFeatures.Video.MaxResolution parameters, the following defaults are used: Content.MaxResolution: FHD Video.MaxResolution: HD"]
 module CreateMeetingResponse =
   struct
     type nonrec t =
@@ -2387,8 +3985,12 @@ module CreateMeetingResponse =
           "The meeting information, including the meeting ID and MediaPlacement."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
       | `LimitExceededException of LimitExceededException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?meeting = fun () -> { meeting }
@@ -2396,11 +3998,19 @@ module CreateMeetingResponse =
       match name with
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "UnauthorizedException" ->
           `UnauthorizedException (UnauthorizedException.of_json json)
       | name ->
@@ -2410,11 +4020,19 @@ module CreateMeetingResponse =
       match name with
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "UnauthorizedException" ->
           `UnauthorizedException (UnauthorizedException.of_xml xml)
       | name ->
@@ -2425,14 +4043,30 @@ module CreateMeetingResponse =
           `Assoc
             [("error", (`String "BadRequestException"));
             ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
       | `LimitExceededException e ->
           `Assoc
             [("error", (`String "LimitExceededException"));
             ("details", (LimitExceededException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
             ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `UnauthorizedException e ->
           `Assoc
             [("error", (`String "UnauthorizedException"));
@@ -2451,12 +4085,12 @@ module CreateMeetingResponse =
         (Option.map ~f:Meeting.of_xml) (Xml.child xml_arg0 "Meeting") in
       make ?meeting ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let meeting = field_map json "Meeting" Meeting.of_json in
+    let of_json json__ =
+      let meeting = field_map json__ "Meeting" Meeting.of_json in
       make ?meeting ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Chime SDK meeting in the specified media Region with no initial attendees. For more information about specifying media Regions, see Amazon Chime SDK Media Regions in the Amazon Chime Developer Guide. For more information about the Amazon Chime SDK, see Using the Amazon Chime SDK in the Amazon Chime Developer Guide."]
+       "Creates a new Amazon Chime SDK meeting in the specified media Region with no initial attendees. For more information about specifying media Regions, see Available Regions and Using meeting Regions, both in the Amazon Chime SDK Developer Guide. For more information about the Amazon Chime SDK, see Using the Amazon Chime SDK in the Amazon Chime SDK Developer Guide. If you use this API in conjuction with the and APIs, and you don't specify the MeetingFeatures.Content.MaxResolution or MeetingFeatures.Video.MaxResolution parameters, the following defaults are used: Content.MaxResolution: FHD Video.MaxResolution: HD"]
 module CreateMeetingRequest =
   struct
     type nonrec t =
@@ -2466,10 +4100,11 @@ module CreateMeetingRequest =
           "The unique identifier for the client request. Use a different token for different meetings."];
       mediaRegion: MediaRegion.t
         [@ocaml.doc
-          "The Region in which to create the meeting. Available values: af-south-1, ap-northeast-1, ap-northeast-2, ap-south-1, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-east-2, us-west-1, us-west-2. Available values in AWS GovCloud (US) Regions: us-gov-east-1, us-gov-west-1."];
+          "The Region in which to create the meeting. Available values: af-south-1, ap-northeast-1, ap-northeast-2, ap-south-1, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-east-2, us-west-1, us-west-2. Available values in Amazon Web Services GovCloud (US) Regions: us-gov-east-1, us-gov-west-1."];
       meetingHostId: ExternalUserId.t option [@ocaml.doc "Reserved."];
       externalMeetingId: ExternalMeetingId.t
-        [@ocaml.doc "The external meeting ID."];
+        [@ocaml.doc
+          "The external meeting ID. Pattern: \\[-_&\\@+=,()\\{\\}\\\\[\\\\]\\/\194\171\194\187.:|'\"#a-zA-Z0-9\195\128-\195\191\\s\\]* Values that begin with aws: are reserved. You can't configure a value that uses this prefix. Case insensitive."];
       notificationsConfiguration: NotificationsConfiguration.t option
         [@ocaml.doc
           "The configuration for resource targets to receive notifications when meeting and attendee events occur."];
@@ -2478,25 +4113,40 @@ module CreateMeetingRequest =
           "Lists the audio and video features enabled for a meeting, such as echo reduction."];
       primaryMeetingId: PrimaryMeetingId.t option
         [@ocaml.doc
-          "When specified, replicates the media from the primary meeting to the new meeting."]}
+          "When specified, replicates the media from the primary meeting to the new meeting."];
+      tenantIds: TenantIdList.t option
+        [@ocaml.doc
+          "A consistent and opaque identifier, created and maintained by the builder to represent a segment of their users."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Applies one or more tags to an Amazon Chime SDK meeting. Note the following: Not all resources have tags. For a list of services with resources that support tagging using this operation, see Services that support the Resource Groups Tagging API. If the resource doesn't yet support this operation, the resource's service might support tagging using its own API operations. For more information, refer to the documentation for that service. Each resource can have up to 50 tags. For other limits, see Tag Naming and Usage Conventions in the AWS General Reference. You can only tag resources that are located in the specified Amazon Web Services Region for the Amazon Web Services account. To add tags to a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for adding tags. For more information, see the documentation for each service. Do not store personally identifiable information (PII) or other confidential or sensitive information in tags. We use tags to provide you with billing and administration services. Tags are not intended to be used for private or sensitive data. Minimum permissions In addition to the tag:TagResources permission required by this operation, you must also have the tagging permission defined by the service that created the resource. For example, to tag a ChimeSDKMeetings instance using the TagResources operation, you must have both of the following permissions: tag:TagResources ChimeSDKMeetings:CreateTags Some services might have specific requirements for tagging some resources. For example, to tag an Amazon S3 bucket, you must also have the s3:GetBucketTagging permission. If the expected minimum permissions don't work, check the documentation for that service's tagging APIs for more information."];
+      mediaPlacementNetworkType: MediaPlacementNetworkType.t option
+        [@ocaml.doc
+          "The type of network for the media placement. Either IPv4 only or dual-stack (IPv4 and IPv6)."]}
     let context_ = "CreateMeetingRequest"
     let make ?meetingHostId =
       fun ?notificationsConfiguration ->
         fun ?meetingFeatures ->
           fun ?primaryMeetingId ->
-            fun ~clientRequestToken ->
-              fun ~mediaRegion ->
-                fun ~externalMeetingId ->
-                  fun () ->
-                    {
-                      meetingHostId;
-                      notificationsConfiguration;
-                      meetingFeatures;
-                      primaryMeetingId;
-                      clientRequestToken;
-                      mediaRegion;
-                      externalMeetingId
-                    }
+            fun ?tenantIds ->
+              fun ?tags ->
+                fun ?mediaPlacementNetworkType ->
+                  fun ~clientRequestToken ->
+                    fun ~mediaRegion ->
+                      fun ~externalMeetingId ->
+                        fun () ->
+                          {
+                            meetingHostId;
+                            notificationsConfiguration;
+                            meetingFeatures;
+                            primaryMeetingId;
+                            tenantIds;
+                            tags;
+                            mediaPlacementNetworkType;
+                            clientRequestToken;
+                            mediaRegion;
+                            externalMeetingId
+                          }
     let to_value x =
       structure_to_value
         [("ClientRequestToken",
@@ -2513,9 +4163,20 @@ module CreateMeetingRequest =
           (Option.map x.meetingFeatures
              ~f:MeetingFeaturesConfiguration.to_value));
         ("PrimaryMeetingId",
-          (Option.map x.primaryMeetingId ~f:PrimaryMeetingId.to_value))]
+          (Option.map x.primaryMeetingId ~f:PrimaryMeetingId.to_value));
+        ("TenantIds", (Option.map x.tenantIds ~f:TenantIdList.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("MediaPlacementNetworkType",
+          (Option.map x.mediaPlacementNetworkType
+             ~f:MediaPlacementNetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let mediaPlacementNetworkType =
+        (Option.map ~f:MediaPlacementNetworkType.of_xml)
+          (Xml.child xml_arg0 "MediaPlacementNetworkType") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let tenantIds =
+        (Option.map ~f:TenantIdList.of_xml) (Xml.child xml_arg0 "TenantIds") in
       let primaryMeetingId =
         (Option.map ~f:PrimaryMeetingId.of_xml)
           (Xml.child xml_arg0 "PrimaryMeetingId") in
@@ -2537,29 +4198,38 @@ module CreateMeetingRequest =
       let clientRequestToken =
         ClientRequestToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
-      make ?primaryMeetingId ?meetingFeatures ?notificationsConfiguration
-        ~externalMeetingId ?meetingHostId ~mediaRegion ~clientRequestToken ()
+      make ?mediaPlacementNetworkType ?tags ?tenantIds ?primaryMeetingId
+        ?meetingFeatures ?notificationsConfiguration ~externalMeetingId
+        ?meetingHostId ~mediaRegion ~clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let mediaPlacementNetworkType =
+        field_map json__ "MediaPlacementNetworkType"
+          MediaPlacementNetworkType.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let tenantIds = field_map json__ "TenantIds" TenantIdList.of_json in
       let primaryMeetingId =
-        field_map json "PrimaryMeetingId" PrimaryMeetingId.of_json in
+        field_map json__ "PrimaryMeetingId" PrimaryMeetingId.of_json in
       let meetingFeatures =
-        field_map json "MeetingFeatures" MeetingFeaturesConfiguration.of_json in
+        field_map json__ "MeetingFeatures"
+          MeetingFeaturesConfiguration.of_json in
       let notificationsConfiguration =
-        field_map json "NotificationsConfiguration"
+        field_map json__ "NotificationsConfiguration"
           NotificationsConfiguration.of_json in
       let externalMeetingId =
-        field_map_exn json "ExternalMeetingId" ExternalMeetingId.of_json in
+        field_map_exn json__ "ExternalMeetingId" ExternalMeetingId.of_json in
       let meetingHostId =
-        field_map json "MeetingHostId" ExternalUserId.of_json in
-      let mediaRegion = field_map_exn json "MediaRegion" MediaRegion.of_json in
+        field_map json__ "MeetingHostId" ExternalUserId.of_json in
+      let mediaRegion =
+        field_map_exn json__ "MediaRegion" MediaRegion.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      make ?primaryMeetingId ?meetingFeatures ?notificationsConfiguration
-        ~externalMeetingId ?meetingHostId ~mediaRegion ~clientRequestToken ()
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      make ?mediaPlacementNetworkType ?tags ?tenantIds ?primaryMeetingId
+        ?meetingFeatures ?notificationsConfiguration ~externalMeetingId
+        ?meetingHostId ~mediaRegion ~clientRequestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Chime SDK meeting in the specified media Region with no initial attendees. For more information about specifying media Regions, see Amazon Chime SDK Media Regions in the Amazon Chime Developer Guide. For more information about the Amazon Chime SDK, see Using the Amazon Chime SDK in the Amazon Chime Developer Guide."]
+       "Creates a new Amazon Chime SDK meeting in the specified media Region with no initial attendees. For more information about specifying media Regions, see Available Regions and Using meeting Regions, both in the Amazon Chime SDK Developer Guide. For more information about the Amazon Chime SDK, see Using the Amazon Chime SDK in the Amazon Chime SDK Developer Guide. If you use this API in conjuction with the and APIs, and you don't specify the MeetingFeatures.Content.MaxResolution or MeetingFeatures.Video.MaxResolution parameters, the following defaults are used: Content.MaxResolution: FHD Video.MaxResolution: HD"]
 module CreateAttendeeResponse =
   struct
     type nonrec t =
@@ -2572,7 +4242,9 @@ module CreateAttendeeResponse =
       | `ForbiddenException of ForbiddenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `UnauthorizedException of UnauthorizedException.t 
       | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -2587,9 +4259,13 @@ module CreateAttendeeResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "UnauthorizedException" ->
           `UnauthorizedException (UnauthorizedException.of_json json)
       | "UnprocessableEntityException" ->
@@ -2608,9 +4284,13 @@ module CreateAttendeeResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "UnauthorizedException" ->
           `UnauthorizedException (UnauthorizedException.of_xml xml)
       | "UnprocessableEntityException" ->
@@ -2636,10 +4316,18 @@ module CreateAttendeeResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
             ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `UnauthorizedException e ->
           `Assoc
             [("error", (`String "UnauthorizedException"));
@@ -2662,8 +4350,8 @@ module CreateAttendeeResponse =
         (Option.map ~f:Attendee.of_xml) (Xml.child xml_arg0 "Attendee") in
       make ?attendee ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attendee = field_map json "Attendee" Attendee.of_json in
+    let of_json json__ =
+      let attendee = field_map json__ "Attendee" Attendee.of_json in
       make ?attendee ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2675,32 +4363,92 @@ module CreateAttendeeRequest =
       meetingId: GuidString.t [@ocaml.doc "The unique ID of the meeting."];
       externalUserId: ExternalUserId.t
         [@ocaml.doc
-          "The Amazon Chime SDK external user ID. An idempotency token. Links the attendee to an identity managed by a builder application."]}
+          "The Amazon Chime SDK external user ID. An idempotency token. Links the attendee to an identity managed by a builder application. Pattern: \\[-_&\\@+=,()\\{\\}\\\\[\\\\]\\/\194\171\194\187.:|'\"#a-zA-Z0-9\195\128-\195\191\\s\\]* Values that begin with aws: are reserved. You can't configure a value that uses this prefix."];
+      capabilities: AttendeeCapabilities.t option
+        [@ocaml.doc
+          "The capabilities (audio, video, or content) that you want to grant an attendee. If you don't specify capabilities, all users have send and receive capabilities on all media channels by default. You use the capabilities with a set of values that control what the capabilities can do, such as SendReceive data. For more information about those values, see . When using capabilities, be aware of these corner cases: If you specify MeetingFeatures:Video:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Video will be rejected with ValidationError 400. If you specify MeetingFeatures:Content:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Content will be rejected with ValidationError 400. You can't set content capabilities to SendReceive or Receive unless you also set video capabilities to SendReceive or Receive. If you don't set the video capability to receive, the response will contain an HTTP 400 Bad Request status code. However, you can set your video capability to receive and you set your content capability to not receive. If meeting features is defined as Video:MaxResolution:None but Content:MaxResolution is defined as something other than None and attendee capabilities are not defined in the API request, then the default attendee video capability is set to Receive and attendee content capability is set to SendReceive. This is because content SendReceive requires video to be at least Receive. When you change an audio capability from None or Receive to Send or SendReceive , and if the attendee left their microphone unmuted, audio will flow from the attendee to the other meeting participants. When you change a video or content capability from None or Receive to Send or SendReceive , and if the attendee turned on their video or content streams, remote attendees can receive those streams, but only after media renegotiation between the client and the Amazon Chime back-end server."]}
     let context_ = "CreateAttendeeRequest"
-    let make ~meetingId =
-      fun ~externalUserId -> fun () -> { meetingId; externalUserId }
+    let make ?capabilities =
+      fun ~meetingId ->
+        fun ~externalUserId ->
+          fun () -> { capabilities; meetingId; externalUserId }
     let to_value x =
       structure_to_value
         [("MeetingId", (Some (GuidString.to_value x.meetingId)));
-        ("ExternalUserId", (Some (ExternalUserId.to_value x.externalUserId)))]
+        ("ExternalUserId", (Some (ExternalUserId.to_value x.externalUserId)));
+        ("Capabilities",
+          (Option.map x.capabilities ~f:AttendeeCapabilities.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let capabilities =
+        (Option.map ~f:AttendeeCapabilities.of_xml)
+          (Xml.child xml_arg0 "Capabilities") in
       let externalUserId =
         ExternalUserId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExternalUserId") in
       let meetingId =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
-      make ~externalUserId ~meetingId ()
+      make ?capabilities ~externalUserId ~meetingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let capabilities =
+        field_map json__ "Capabilities" AttendeeCapabilities.of_json in
       let externalUserId =
-        field_map_exn json "ExternalUserId" ExternalUserId.of_json in
-      let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
-      make ~externalUserId ~meetingId ()
+        field_map_exn json__ "ExternalUserId" ExternalUserId.of_json in
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
+      make ?capabilities ~externalUserId ~meetingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new attendee for an active Amazon Chime SDK meeting. For more information about the Amazon Chime SDK, see Using the Amazon Chime SDK in the Amazon Chime Developer Guide."]
+module BatchUpdateAttendeeCapabilitiesExceptRequest =
+  struct
+    type nonrec t =
+      {
+      meetingId: GuidString.t
+        [@ocaml.doc
+          "The ID of the meeting associated with the update request."];
+      excludedAttendeeIds: AttendeeIdsList.t
+        [@ocaml.doc
+          "The AttendeeIDs that you want to exclude from one or more capabilities."];
+      capabilities: AttendeeCapabilities.t
+        [@ocaml.doc
+          "The capabilities (audio, video, or content) that you want to update."]}
+    let context_ = "BatchUpdateAttendeeCapabilitiesExceptRequest"
+    let make ~meetingId =
+      fun ~excludedAttendeeIds ->
+        fun ~capabilities ->
+          fun () -> { meetingId; excludedAttendeeIds; capabilities }
+    let to_value x =
+      structure_to_value
+        [("MeetingId", (Some (GuidString.to_value x.meetingId)));
+        ("ExcludedAttendeeIds",
+          (Some (AttendeeIdsList.to_value x.excludedAttendeeIds)));
+        ("Capabilities",
+          (Some (AttendeeCapabilities.to_value x.capabilities)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capabilities =
+        AttendeeCapabilities.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Capabilities") in
+      let excludedAttendeeIds =
+        AttendeeIdsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExcludedAttendeeIds") in
+      let meetingId =
+        GuidString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
+      make ~capabilities ~excludedAttendeeIds ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capabilities =
+        field_map_exn json__ "Capabilities" AttendeeCapabilities.of_json in
+      let excludedAttendeeIds =
+        field_map_exn json__ "ExcludedAttendeeIds" AttendeeIdsList.of_json in
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
+      make ~capabilities ~excludedAttendeeIds ~meetingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates AttendeeCapabilities except the capabilities listed in an ExcludedAttendeeIds table. You use the capabilities with a set of values that control what the capabilities can do, such as SendReceive data. For more information about those values, see . When using capabilities, be aware of these corner cases: If you specify MeetingFeatures:Video:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Video will be rejected with ValidationError 400. If you specify MeetingFeatures:Content:MaxResolution:None when you create a meeting, all API requests that include SendReceive, Send, or Receive for AttendeeCapabilities:Content will be rejected with ValidationError 400. You can't set content capabilities to SendReceive or Receive unless you also set video capabilities to SendReceive or Receive. If you don't set the video capability to receive, the response will contain an HTTP 400 Bad Request status code. However, you can set your video capability to receive and you set your content capability to not receive. If meeting features is defined as Video:MaxResolution:None but Content:MaxResolution is defined as something other than None and attendee capabilities are not defined in the API request, then the default attendee video capability is set to Receive and attendee content capability is set to SendReceive. This is because content SendReceive requires video to be at least Receive. When you change an audio capability from None or Receive to Send or SendReceive , and if the attendee left their microphone unmuted, audio will flow from the attendee to the other meeting participants. When you change a video or content capability from None or Receive to Send or SendReceive , and if the attendee turned on their video or content streams, remote attendees can receive those streams, but only after media renegotiation between the client and the Amazon Chime back-end server."]
 module BatchCreateAttendeeResponse =
   struct
     type nonrec t =
@@ -2716,8 +4464,11 @@ module BatchCreateAttendeeResponse =
       | `ForbiddenException of ForbiddenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `UnauthorizedException of UnauthorizedException.t 
+      | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?attendees = fun ?errors -> fun () -> { attendees; errors }
     let error_of_json name json =
@@ -2730,11 +4481,18 @@ module BatchCreateAttendeeResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "UnauthorizedException" ->
           `UnauthorizedException (UnauthorizedException.of_json json)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2748,11 +4506,18 @@ module BatchCreateAttendeeResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "UnauthorizedException" ->
           `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2773,14 +4538,26 @@ module BatchCreateAttendeeResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
             ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `UnauthorizedException e ->
           `Assoc
             [("error", (`String "UnauthorizedException"));
             ("details", (UnauthorizedException.to_json e))]
+      | `UnprocessableEntityException e ->
+          `Assoc
+            [("error", (`String "UnprocessableEntityException"));
+            ("details", (UnprocessableEntityException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2800,10 +4577,10 @@ module BatchCreateAttendeeResponse =
         (Option.map ~f:AttendeeList.of_xml) (Xml.child xml_arg0 "Attendees") in
       make ?errors ?attendees ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "Errors" BatchCreateAttendeeErrorList.of_json in
-      let attendees = field_map json "Attendees" AttendeeList.of_json in
+        field_map json__ "Errors" BatchCreateAttendeeErrorList.of_json in
+      let attendees = field_map json__ "Attendees" AttendeeList.of_json in
       make ?errors ?attendees ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2836,10 +4613,11 @@ module BatchCreateAttendeeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~attendees ~meetingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attendees =
-        field_map_exn json "Attendees" CreateAttendeeRequestItemList.of_json in
-      let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
+        field_map_exn json__ "Attendees"
+          CreateAttendeeRequestItemList.of_json in
+      let meetingId = field_map_exn json__ "MeetingId" GuidString.of_json in
       make ~attendees ~meetingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

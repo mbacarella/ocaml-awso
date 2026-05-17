@@ -25,20 +25,35 @@ let batch_get_blueprints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetBlueprints input
 let batch_get_crawlers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetCrawlers input
+let batch_get_custom_entity_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetCustomEntityTypes input
+let batch_get_data_quality_result ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetDataQualityResult input
 let batch_get_dev_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetDevEndpoints input
 let batch_get_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetJobs input
 let batch_get_partition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetPartition input
+let batch_get_table_optimizer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetTableOptimizer input
 let batch_get_triggers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetTriggers input
 let batch_get_workflows ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetWorkflows input
+let batch_put_data_quality_statistic_annotation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchPutDataQualityStatisticAnnotation
+    input
 let batch_stop_job_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchStopJobRun input
 let batch_update_partition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchUpdatePartition input
+let cancel_data_quality_rule_recommendation_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelDataQualityRuleRecommendationRun
+    input
+let cancel_data_quality_ruleset_evaluation_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelDataQualityRulesetEvaluationRun
+    input
 let cancel_m_l_task_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelMLTaskRun input
 let cancel_statement ?endpoint_url ?cfg input =
@@ -47,16 +62,33 @@ let check_schema_version_validity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CheckSchemaVersionValidity input
 let create_blueprint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBlueprint input
+let create_catalog ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCatalog input
 let create_classifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateClassifier input
+let create_column_statistics_task_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateColumnStatisticsTaskSettings input
 let create_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateConnection input
 let create_crawler ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCrawler input
+let create_custom_entity_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCustomEntityType input
+let create_data_quality_ruleset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDataQualityRuleset input
 let create_database ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDatabase input
 let create_dev_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDevEndpoint input
+let create_glue_identity_center_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateGlueIdentityCenterConfiguration
+    input
+let create_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIntegration input
+let create_integration_resource_property ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIntegrationResourceProperty input
+let create_integration_table_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIntegrationTableProperties input
 let create_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateJob input
 let create_m_l_transform ?endpoint_url ?cfg input =
@@ -77,28 +109,51 @@ let create_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSession input
 let create_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTable input
+let create_table_optimizer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTableOptimizer input
 let create_trigger ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTrigger input
+let create_usage_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateUsageProfile input
 let create_user_defined_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateUserDefinedFunction input
 let create_workflow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWorkflow input
 let delete_blueprint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBlueprint input
+let delete_catalog ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCatalog input
 let delete_classifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteClassifier input
 let delete_column_statistics_for_partition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteColumnStatisticsForPartition input
 let delete_column_statistics_for_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteColumnStatisticsForTable input
+let delete_column_statistics_task_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteColumnStatisticsTaskSettings input
 let delete_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteConnection input
+let delete_connection_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteConnectionType input
 let delete_crawler ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCrawler input
+let delete_custom_entity_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCustomEntityType input
+let delete_data_quality_ruleset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDataQualityRuleset input
 let delete_database ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDatabase input
 let delete_dev_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDevEndpoint input
+let delete_glue_identity_center_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteGlueIdentityCenterConfiguration
+    input
+let delete_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIntegration input
+let delete_integration_resource_property ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIntegrationResourceProperty input
+let delete_integration_table_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIntegrationTableProperties input
 let delete_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteJob input
 let delete_m_l_transform ?endpoint_url ?cfg input =
@@ -121,22 +176,38 @@ let delete_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSession input
 let delete_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTable input
+let delete_table_optimizer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTableOptimizer input
 let delete_table_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTableVersion input
 let delete_trigger ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTrigger input
+let delete_usage_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteUsageProfile input
 let delete_user_defined_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUserDefinedFunction input
 let delete_workflow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWorkflow input
+let describe_connection_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeConnectionType input
+let describe_entity ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeEntity input
+let describe_inbound_integrations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInboundIntegrations input
+let describe_integrations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIntegrations input
 let get_blueprint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBlueprint input
 let get_blueprint_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBlueprintRun input
 let get_blueprint_runs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBlueprintRuns input
+let get_catalog ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCatalog input
 let get_catalog_import_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCatalogImportStatus input
+let get_catalogs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCatalogs input
 let get_classifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetClassifier input
 let get_classifiers ?endpoint_url ?cfg input =
@@ -145,6 +216,12 @@ let get_column_statistics_for_partition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetColumnStatisticsForPartition input
 let get_column_statistics_for_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetColumnStatisticsForTable input
+let get_column_statistics_task_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetColumnStatisticsTaskRun input
+let get_column_statistics_task_runs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetColumnStatisticsTaskRuns input
+let get_column_statistics_task_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetColumnStatisticsTaskSettings input
 let get_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetConnection input
 let get_connections ?endpoint_url ?cfg input =
@@ -155,8 +232,22 @@ let get_crawler_metrics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCrawlerMetrics input
 let get_crawlers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCrawlers input
+let get_custom_entity_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCustomEntityType input
 let get_data_catalog_encryption_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDataCatalogEncryptionSettings input
+let get_data_quality_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataQualityModel input
+let get_data_quality_model_result ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataQualityModelResult input
+let get_data_quality_result ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataQualityResult input
+let get_data_quality_rule_recommendation_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataQualityRuleRecommendationRun input
+let get_data_quality_ruleset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataQualityRuleset input
+let get_data_quality_ruleset_evaluation_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataQualityRulesetEvaluationRun input
 let get_database ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDatabase input
 let get_databases ?endpoint_url ?cfg input =
@@ -167,6 +258,14 @@ let get_dev_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDevEndpoint input
 let get_dev_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDevEndpoints input
+let get_entity_records ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetEntityRecords input
+let get_glue_identity_center_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetGlueIdentityCenterConfiguration input
+let get_integration_resource_property ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIntegrationResourceProperty input
+let get_integration_table_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIntegrationTableProperties input
 let get_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetJob input
 let get_job_bookmark ?endpoint_url ?cfg input =
@@ -187,6 +286,8 @@ let get_m_l_transforms ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMLTransforms input
 let get_mapping ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMapping input
+let get_materialized_view_refresh_task_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMaterializedViewRefreshTaskRun input
 let get_partition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPartition input
 let get_partition_indexes ?endpoint_url ?cfg input =
@@ -219,6 +320,8 @@ let get_statement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStatement input
 let get_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTable input
+let get_table_optimizer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTableOptimizer input
 let get_table_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTableVersion input
 let get_table_versions ?endpoint_url ?cfg input =
@@ -237,6 +340,8 @@ let get_unfiltered_partitions_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUnfilteredPartitionsMetadata input
 let get_unfiltered_table_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUnfilteredTableMetadata input
+let get_usage_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetUsageProfile input
 let get_user_defined_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUserDefinedFunction input
 let get_user_defined_functions ?endpoint_url ?cfg input =
@@ -253,14 +358,42 @@ let import_catalog_to_glue ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportCatalogToGlue input
 let list_blueprints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBlueprints input
+let list_column_statistics_task_runs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListColumnStatisticsTaskRuns input
+let list_connection_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConnectionTypes input
 let list_crawlers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCrawlers input
+let list_crawls ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCrawls input
+let list_custom_entity_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCustomEntityTypes input
+let list_data_quality_results ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDataQualityResults input
+let list_data_quality_rule_recommendation_runs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDataQualityRuleRecommendationRuns
+    input
+let list_data_quality_ruleset_evaluation_runs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDataQualityRulesetEvaluationRuns
+    input
+let list_data_quality_rulesets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDataQualityRulesets input
+let list_data_quality_statistic_annotations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDataQualityStatisticAnnotations input
+let list_data_quality_statistics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDataQualityStatistics input
 let list_dev_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDevEndpoints input
+let list_entities ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListEntities input
+let list_integration_resource_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListIntegrationResourceProperties input
 let list_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListJobs input
 let list_m_l_transforms ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMLTransforms input
+let list_materialized_view_refresh_task_runs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMaterializedViewRefreshTaskRuns input
 let list_registries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRegistries input
 let list_schema_versions ?endpoint_url ?cfg input =
@@ -271,12 +404,20 @@ let list_sessions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSessions input
 let list_statements ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStatements input
+let list_table_optimizer_runs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTableOptimizerRuns input
 let list_triggers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTriggers input
+let list_usage_profiles ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListUsageProfiles input
 let list_workflows ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWorkflows input
+let modify_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyIntegration input
 let put_data_catalog_encryption_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutDataCatalogEncryptionSettings input
+let put_data_quality_profile_annotation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutDataQualityProfileAnnotation input
 let put_resource_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let put_schema_version_metadata ?endpoint_url ?cfg input =
@@ -285,6 +426,8 @@ let put_workflow_run_properties ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutWorkflowRunProperties input
 let query_schema_version_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.QuerySchemaVersionMetadata input
+let register_connection_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RegisterConnectionType input
 let register_schema_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterSchemaVersion input
 let remove_schema_version_metadata ?endpoint_url ?cfg input =
@@ -299,10 +442,21 @@ let search_tables ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchTables input
 let start_blueprint_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartBlueprintRun input
+let start_column_statistics_task_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartColumnStatisticsTaskRun input
+let start_column_statistics_task_run_schedule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartColumnStatisticsTaskRunSchedule
+    input
 let start_crawler ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartCrawler input
 let start_crawler_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartCrawlerSchedule input
+let start_data_quality_rule_recommendation_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartDataQualityRuleRecommendationRun
+    input
+let start_data_quality_ruleset_evaluation_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartDataQualityRulesetEvaluationRun
+    input
 let start_export_labels_task_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartExportLabelsTaskRun input
 let start_import_labels_task_run ?endpoint_url ?cfg input =
@@ -313,14 +467,22 @@ let start_m_l_evaluation_task_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMLEvaluationTaskRun input
 let start_m_l_labeling_set_generation_task_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMLLabelingSetGenerationTaskRun input
+let start_materialized_view_refresh_task_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartMaterializedViewRefreshTaskRun input
 let start_trigger ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartTrigger input
 let start_workflow_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartWorkflowRun input
+let stop_column_statistics_task_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopColumnStatisticsTaskRun input
+let stop_column_statistics_task_run_schedule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopColumnStatisticsTaskRunSchedule input
 let stop_crawler ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopCrawler input
 let stop_crawler_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopCrawlerSchedule input
+let stop_materialized_view_refresh_task_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopMaterializedViewRefreshTaskRun input
 let stop_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopSession input
 let stop_trigger ?endpoint_url ?cfg input =
@@ -329,28 +491,45 @@ let stop_workflow_run ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopWorkflowRun input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
+let test_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TestConnection input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_blueprint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateBlueprint input
+let update_catalog ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCatalog input
 let update_classifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateClassifier input
 let update_column_statistics_for_partition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateColumnStatisticsForPartition input
 let update_column_statistics_for_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateColumnStatisticsForTable input
+let update_column_statistics_task_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateColumnStatisticsTaskSettings input
 let update_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateConnection input
 let update_crawler ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCrawler input
 let update_crawler_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCrawlerSchedule input
+let update_data_quality_ruleset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDataQualityRuleset input
 let update_database ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDatabase input
 let update_dev_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDevEndpoint input
+let update_glue_identity_center_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateGlueIdentityCenterConfiguration
+    input
+let update_integration_resource_property ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateIntegrationResourceProperty input
+let update_integration_table_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateIntegrationTableProperties input
 let update_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateJob input
+let update_job_from_source_control ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateJobFromSourceControl input
 let update_m_l_transform ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateMLTransform input
 let update_partition ?endpoint_url ?cfg input =
@@ -359,10 +538,16 @@ let update_registry ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateRegistry input
 let update_schema ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSchema input
+let update_source_control_from_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSourceControlFromJob input
 let update_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTable input
+let update_table_optimizer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTableOptimizer input
 let update_trigger ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTrigger input
+let update_usage_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateUsageProfile input
 let update_user_defined_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateUserDefinedFunction input
 let update_workflow ?endpoint_url ?cfg input =

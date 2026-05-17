@@ -70,6 +70,58 @@ let batch_get_custom_data_identifiers =
               ?ids:(Option.map ~f:Values.Zz__listOf__string.of_json ids) ())
            (Some Values.BatchGetCustomDataIdentifiersResponse.to_json)
            (Some Values.BatchGetCustomDataIdentifiersResponse.error_to_json)])
+let batch_update_automated_discovery_accounts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accounts =
+         flag "accounts" (optional json_arg)
+           ~doc:"JSON __listOfAutomatedDiscoveryAccountUpdate" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_update_automated_discovery_accounts
+           (Values.BatchUpdateAutomatedDiscoveryAccountsRequest.make
+              ?accounts:(Option.map
+                           ~f:Values.Zz__listOfAutomatedDiscoveryAccountUpdate.of_json
+                           accounts) ())
+           (Some Values.BatchUpdateAutomatedDiscoveryAccountsResponse.to_json)
+           (Some
+              Values.BatchUpdateAutomatedDiscoveryAccountsResponse.error_to_json)])
+let create_allow_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING __stringMin1Max512PatternSS"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING __string"
+       and criteria =
+         flag "criteria" (required json_arg) ~doc:"JSON AllowListCriteria"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING __stringMin1Max128Pattern" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_allow_list
+           (Values.CreateAllowListRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~clientToken
+              ~criteria:(Values.AllowListCriteria.of_json criteria) ~name ())
+           (Some Values.CreateAllowListResponse.to_json)
+           (Some Values.CreateAllowListResponse.error_to_json)])
 let create_classification_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -80,6 +132,9 @@ let create_classification_job =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and allowListIds =
+         flag "allow-list-ids" (optional json_arg)
+           ~doc:"JSON __listOf__string"
        and customDataIdentifierIds =
          flag "custom-data-identifier-ids" (optional json_arg)
            ~doc:"JSON __listOf__string"
@@ -110,6 +165,8 @@ let create_classification_job =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_classification_job
            (Values.CreateClassificationJobRequest.make
+              ?allowListIds:(Option.map ~f:Values.Zz__listOf__string.of_json
+                               allowListIds)
               ?customDataIdentifierIds:(Option.map
                                           ~f:Values.Zz__listOf__string.of_json
                                           customDataIdentifierIds)
@@ -288,6 +345,25 @@ let decline_invitations =
               ~accountIds:(Values.Zz__listOf__string.of_json accountIds) ())
            (Some Values.DeclineInvitationsResponse.to_json)
            (Some Values.DeclineInvitationsResponse.error_to_json)])
+let delete_allow_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ignoreJobChecks =
+         flag "ignore-job-checks" (optional string) ~doc:"STRING __string"
+       and id = flag "id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_allow_list
+           (Values.DeleteAllowListRequest.make ?ignoreJobChecks ~id ())
+           (Some Values.DeleteAllowListResponse.to_json)
+           (Some Values.DeleteAllowListResponse.error_to_json)])
 let delete_custom_data_identifier =
   Command.async ~summary:""
     ([%map_open.Command
@@ -572,6 +648,40 @@ let get_administrator_account =
            (Values.GetAdministratorAccountRequest.make ())
            (Some Values.GetAdministratorAccountResponse.to_json)
            (Some Values.GetAdministratorAccountResponse.error_to_json)])
+let get_allow_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_allow_list (Values.GetAllowListRequest.make ~id ())
+           (Some Values.GetAllowListResponse.to_json)
+           (Some Values.GetAllowListResponse.error_to_json)])
+let get_automated_discovery_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_automated_discovery_configuration
+           (Values.GetAutomatedDiscoveryConfigurationRequest.make ())
+           (Some Values.GetAutomatedDiscoveryConfigurationResponse.to_json)
+           (Some
+              Values.GetAutomatedDiscoveryConfigurationResponse.error_to_json)])
 let get_bucket_statistics =
   Command.async ~summary:""
     ([%map_open.Command
@@ -608,6 +718,23 @@ let get_classification_export_configuration =
            (Some Values.GetClassificationExportConfigurationResponse.to_json)
            (Some
               Values.GetClassificationExportConfigurationResponse.error_to_json)])
+let get_classification_scope =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_classification_scope
+           (Values.GetClassificationScopeRequest.make ~id ())
+           (Some Values.GetClassificationScopeResponse.to_json)
+           (Some Values.GetClassificationScopeResponse.error_to_json)])
 let get_custom_data_identifier =
   Command.async ~summary:""
     ([%map_open.Command
@@ -778,6 +905,98 @@ let get_member =
            Io.get_member (Values.GetMemberRequest.make ~id ())
            (Some Values.GetMemberResponse.to_json)
            (Some Values.GetMemberResponse.error_to_json)])
+let get_resource_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_profile
+           (Values.GetResourceProfileRequest.make ~resourceArn ())
+           (Some Values.GetResourceProfileResponse.to_json)
+           (Some Values.GetResourceProfileResponse.error_to_json)])
+let get_reveal_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_reveal_configuration
+           (Values.GetRevealConfigurationRequest.make ())
+           (Some Values.GetRevealConfigurationResponse.to_json)
+           (Some Values.GetRevealConfigurationResponse.error_to_json)])
+let get_sensitive_data_occurrences =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and findingId =
+         flag "finding-id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_sensitive_data_occurrences
+           (Values.GetSensitiveDataOccurrencesRequest.make ~findingId ())
+           (Some Values.GetSensitiveDataOccurrencesResponse.to_json)
+           (Some Values.GetSensitiveDataOccurrencesResponse.error_to_json)])
+let get_sensitive_data_occurrences_availability =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and findingId =
+         flag "finding-id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_sensitive_data_occurrences_availability
+           (Values.GetSensitiveDataOccurrencesAvailabilityRequest.make
+              ~findingId ())
+           (Some
+              Values.GetSensitiveDataOccurrencesAvailabilityResponse.to_json)
+           (Some
+              Values.GetSensitiveDataOccurrencesAvailabilityResponse.error_to_json)])
+let get_sensitivity_inspection_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_sensitivity_inspection_template
+           (Values.GetSensitivityInspectionTemplateRequest.make ~id ())
+           (Some Values.GetSensitivityInspectionTemplateResponse.to_json)
+           (Some
+              Values.GetSensitivityInspectionTemplateResponse.error_to_json)])
 let get_usage_statistics =
   Command.async ~summary:""
     ([%map_open.Command
@@ -829,6 +1048,50 @@ let get_usage_totals =
            (Values.GetUsageTotalsRequest.make ?timeRange ())
            (Some Values.GetUsageTotalsResponse.to_json)
            (Some Values.GetUsageTotalsResponse.error_to_json)])
+let list_allow_lists =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_allow_lists
+           (Values.ListAllowListsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListAllowListsResponse.to_json)
+           (Some Values.ListAllowListsResponse.error_to_json)])
+let list_automated_discovery_accounts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountIds =
+         flag "account-ids" (optional json_arg) ~doc:"JSON __listOf__string"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_automated_discovery_accounts
+           (Values.ListAutomatedDiscoveryAccountsRequest.make
+              ?accountIds:(Option.map ~f:Values.Zz__listOf__string.of_json
+                             accountIds) ?maxResults ?nextToken ())
+           (Some Values.ListAutomatedDiscoveryAccountsResponse.to_json)
+           (Some Values.ListAutomatedDiscoveryAccountsResponse.error_to_json)])
 let list_classification_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -861,6 +1124,25 @@ let list_classification_jobs =
                                sortCriteria) ())
            (Some Values.ListClassificationJobsResponse.to_json)
            (Some Values.ListClassificationJobsResponse.error_to_json)])
+let list_classification_scopes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING __string"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_classification_scopes
+           (Values.ListClassificationScopesRequest.make ?name ?nextToken ())
+           (Some Values.ListClassificationScopesResponse.to_json)
+           (Some Values.ListClassificationScopesResponse.error_to_json)])
 let list_custom_data_identifiers =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1012,6 +1294,72 @@ let list_organization_admin_accounts =
               ?nextToken ())
            (Some Values.ListOrganizationAdminAccountsResponse.to_json)
            (Some Values.ListOrganizationAdminAccountsResponse.error_to_json)])
+let list_resource_profile_artifacts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_profile_artifacts
+           (Values.ListResourceProfileArtifactsRequest.make ?nextToken
+              ~resourceArn ())
+           (Some Values.ListResourceProfileArtifactsResponse.to_json)
+           (Some Values.ListResourceProfileArtifactsResponse.error_to_json)])
+let list_resource_profile_detections =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_profile_detections
+           (Values.ListResourceProfileDetectionsRequest.make ?maxResults
+              ?nextToken ~resourceArn ())
+           (Some Values.ListResourceProfileDetectionsResponse.to_json)
+           (Some Values.ListResourceProfileDetectionsResponse.error_to_json)])
+let list_sensitivity_inspection_templates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sensitivity_inspection_templates
+           (Values.ListSensitivityInspectionTemplatesRequest.make ?maxResults
+              ?nextToken ())
+           (Some Values.ListSensitivityInspectionTemplatesResponse.to_json)
+           (Some
+              Values.ListSensitivityInspectionTemplatesResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1180,6 +1528,59 @@ let untag_resource =
               ~tagKeys:(Values.Zz__listOf__string.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_allow_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING __stringMin1Max512PatternSS"
+       and criteria =
+         flag "criteria" (required json_arg) ~doc:"JSON AllowListCriteria"
+       and id = flag "id" (required string) ~doc:"STRING __string"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING __stringMin1Max128Pattern" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_allow_list
+           (Values.UpdateAllowListRequest.make ?description
+              ~criteria:(Values.AllowListCriteria.of_json criteria) ~id ~name
+              ()) (Some Values.UpdateAllowListResponse.to_json)
+           (Some Values.UpdateAllowListResponse.error_to_json)])
+let update_automated_discovery_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and autoEnableOrganizationMembers =
+         flag "auto-enable-organization-members" (optional json_arg)
+           ~doc:"JSON AutoEnableMode"
+       and status =
+         flag "status" (required json_arg)
+           ~doc:"JSON AutomatedDiscoveryStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_automated_discovery_configuration
+           (Values.UpdateAutomatedDiscoveryConfigurationRequest.make
+              ?autoEnableOrganizationMembers:(Option.map
+                                                ~f:Values.AutoEnableMode.of_json
+                                                autoEnableOrganizationMembers)
+              ~status:(Values.AutomatedDiscoveryStatus.of_json status) ())
+           (Some Values.UpdateAutomatedDiscoveryConfigurationResponse.to_json)
+           (Some
+              Values.UpdateAutomatedDiscoveryConfigurationResponse.error_to_json)])
 let update_classification_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1200,6 +1601,28 @@ let update_classification_job =
               ~jobStatus:(Values.JobStatus.of_json jobStatus) ())
            (Some Values.UpdateClassificationJobResponse.to_json)
            (Some Values.UpdateClassificationJobResponse.error_to_json)])
+let update_classification_scope =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and s3 =
+         flag "s3" (optional json_arg)
+           ~doc:"JSON S3ClassificationScopeUpdate"
+       and id = flag "id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_classification_scope
+           (Values.UpdateClassificationScopeRequest.make
+              ?s3:(Option.map ~f:Values.S3ClassificationScopeUpdate.of_json
+                     s3) ~id ())
+           (Some Values.UpdateClassificationScopeResponse.to_json)
+           (Some Values.UpdateClassificationScopeResponse.error_to_json)])
 let update_findings_filter =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1212,6 +1635,8 @@ let update_findings_filter =
            ~doc:"URL override endpoint url"
        and action =
          flag "action" (optional json_arg) ~doc:"JSON FindingsFilterAction"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING __string"
        and description =
          flag "description" (optional string) ~doc:"STRING __string"
        and findingCriteria =
@@ -1219,18 +1644,15 @@ let update_findings_filter =
            ~doc:"JSON FindingCriteria"
        and name = flag "name" (optional string) ~doc:"STRING __string"
        and position = flag "position" (optional int) ~doc:"INT __integer"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING __string"
        and id = flag "id" (required string) ~doc:"STRING __string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_findings_filter
            (Values.UpdateFindingsFilterRequest.make
               ?action:(Option.map ~f:Values.FindingsFilterAction.of_json
-                         action) ?description
+                         action) ?clientToken ?description
               ?findingCriteria:(Option.map ~f:Values.FindingCriteria.of_json
-                                  findingCriteria) ?name ?position
-              ?clientToken ~id ())
+                                  findingCriteria) ?name ?position ~id ())
            (Some Values.UpdateFindingsFilterResponse.to_json)
            (Some Values.UpdateFindingsFilterResponse.error_to_json)])
 let update_macie_session =
@@ -1294,11 +1716,121 @@ let update_organization_configuration =
            (Values.UpdateOrganizationConfigurationRequest.make ~autoEnable ())
            (Some Values.UpdateOrganizationConfigurationResponse.to_json)
            (Some Values.UpdateOrganizationConfigurationResponse.error_to_json)])
+let update_resource_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sensitivityScoreOverride =
+         flag "sensitivity-score-override" (optional int)
+           ~doc:"INT __integer"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_resource_profile
+           (Values.UpdateResourceProfileRequest.make
+              ?sensitivityScoreOverride ~resourceArn ())
+           (Some Values.UpdateResourceProfileResponse.to_json)
+           (Some Values.UpdateResourceProfileResponse.error_to_json)])
+let update_resource_profile_detections =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and suppressDataIdentifiers =
+         flag "suppress-data-identifiers" (optional json_arg)
+           ~doc:"JSON __listOfSuppressDataIdentifier"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_resource_profile_detections
+           (Values.UpdateResourceProfileDetectionsRequest.make
+              ?suppressDataIdentifiers:(Option.map
+                                          ~f:Values.Zz__listOfSuppressDataIdentifier.of_json
+                                          suppressDataIdentifiers)
+              ~resourceArn ())
+           (Some Values.UpdateResourceProfileDetectionsResponse.to_json)
+           (Some Values.UpdateResourceProfileDetectionsResponse.error_to_json)])
+let update_reveal_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and retrievalConfiguration =
+         flag "retrieval-configuration" (optional json_arg)
+           ~doc:"JSON UpdateRetrievalConfiguration"
+       and configuration =
+         flag "configuration" (required json_arg)
+           ~doc:"JSON RevealConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_reveal_configuration
+           (Values.UpdateRevealConfigurationRequest.make
+              ?retrievalConfiguration:(Option.map
+                                         ~f:Values.UpdateRetrievalConfiguration.of_json
+                                         retrievalConfiguration)
+              ~configuration:(Values.RevealConfiguration.of_json
+                                configuration) ())
+           (Some Values.UpdateRevealConfigurationResponse.to_json)
+           (Some Values.UpdateRevealConfigurationResponse.error_to_json)])
+let update_sensitivity_inspection_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING __string"
+       and excludes =
+         flag "excludes" (optional json_arg)
+           ~doc:"JSON SensitivityInspectionTemplateExcludes"
+       and includes =
+         flag "includes" (optional json_arg)
+           ~doc:"JSON SensitivityInspectionTemplateIncludes"
+       and id = flag "id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_sensitivity_inspection_template
+           (Values.UpdateSensitivityInspectionTemplateRequest.make
+              ?description
+              ?excludes:(Option.map
+                           ~f:Values.SensitivityInspectionTemplateExcludes.of_json
+                           excludes)
+              ?includes:(Option.map
+                           ~f:Values.SensitivityInspectionTemplateIncludes.of_json
+                           includes) ~id ())
+           (Some Values.UpdateSensitivityInspectionTemplateResponse.to_json)
+           (Some
+              Values.UpdateSensitivityInspectionTemplateResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-invitation", accept_invitation);
     ("batch-get-custom-data-identifiers", batch_get_custom_data_identifiers);
+    ("batch-update-automated-discovery-accounts",
+      batch_update_automated_discovery_accounts);
+    ("create-allow-list", create_allow_list);
     ("create-classification-job", create_classification_job);
     ("create-custom-data-identifier", create_custom_data_identifier);
     ("create-findings-filter", create_findings_filter);
@@ -1306,6 +1838,7 @@ let main =
     ("create-member", create_member);
     ("create-sample-findings", create_sample_findings);
     ("decline-invitations", decline_invitations);
+    ("delete-allow-list", delete_allow_list);
     ("delete-custom-data-identifier", delete_custom_data_identifier);
     ("delete-findings-filter", delete_findings_filter);
     ("delete-invitations", delete_invitations);
@@ -1324,9 +1857,13 @@ let main =
     ("enable-macie", enable_macie);
     ("enable-organization-admin-account", enable_organization_admin_account);
     ("get-administrator-account", get_administrator_account);
+    ("get-allow-list", get_allow_list);
+    ("get-automated-discovery-configuration",
+      get_automated_discovery_configuration);
     ("get-bucket-statistics", get_bucket_statistics);
     ("get-classification-export-configuration",
       get_classification_export_configuration);
+    ("get-classification-scope", get_classification_scope);
     ("get-custom-data-identifier", get_custom_data_identifier);
     ("get-finding-statistics", get_finding_statistics);
     ("get-findings", get_findings);
@@ -1337,9 +1874,19 @@ let main =
     ("get-macie-session", get_macie_session);
     ("get-master-account", get_master_account);
     ("get-member", get_member);
+    ("get-resource-profile", get_resource_profile);
+    ("get-reveal-configuration", get_reveal_configuration);
+    ("get-sensitive-data-occurrences", get_sensitive_data_occurrences);
+    ("get-sensitive-data-occurrences-availability",
+      get_sensitive_data_occurrences_availability);
+    ("get-sensitivity-inspection-template",
+      get_sensitivity_inspection_template);
     ("get-usage-statistics", get_usage_statistics);
     ("get-usage-totals", get_usage_totals);
+    ("list-allow-lists", list_allow_lists);
+    ("list-automated-discovery-accounts", list_automated_discovery_accounts);
     ("list-classification-jobs", list_classification_jobs);
+    ("list-classification-scopes", list_classification_scopes);
     ("list-custom-data-identifiers", list_custom_data_identifiers);
     ("list-findings", list_findings);
     ("list-findings-filters", list_findings_filters);
@@ -1347,6 +1894,10 @@ let main =
     ("list-managed-data-identifiers", list_managed_data_identifiers);
     ("list-members", list_members);
     ("list-organization-admin-accounts", list_organization_admin_accounts);
+    ("list-resource-profile-artifacts", list_resource_profile_artifacts);
+    ("list-resource-profile-detections", list_resource_profile_detections);
+    ("list-sensitivity-inspection-templates",
+      list_sensitivity_inspection_templates);
     ("list-tags-for-resource", list_tags_for_resource);
     ("put-classification-export-configuration",
       put_classification_export_configuration);
@@ -1356,8 +1907,18 @@ let main =
     ("tag-resource", tag_resource);
     ("test-custom-data-identifier", test_custom_data_identifier);
     ("untag-resource", untag_resource);
+    ("update-allow-list", update_allow_list);
+    ("update-automated-discovery-configuration",
+      update_automated_discovery_configuration);
     ("update-classification-job", update_classification_job);
+    ("update-classification-scope", update_classification_scope);
     ("update-findings-filter", update_findings_filter);
     ("update-macie-session", update_macie_session);
     ("update-member-session", update_member_session);
-    ("update-organization-configuration", update_organization_configuration)]
+    ("update-organization-configuration", update_organization_configuration);
+    ("update-resource-profile", update_resource_profile);
+    ("update-resource-profile-detections",
+      update_resource_profile_detections);
+    ("update-reveal-configuration", update_reveal_configuration);
+    ("update-sensitivity-inspection-template",
+      update_sensitivity_inspection_template)]

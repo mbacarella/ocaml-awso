@@ -80,6 +80,13 @@ val create_multicast_group :
       CreateMulticastGroupRequest.t ->
         (CreateMulticastGroupResponse.t, CreateMulticastGroupResponse.error)
           Result.t Async.Deferred.t
+val create_network_analyzer_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateNetworkAnalyzerConfigurationRequest.t ->
+        (CreateNetworkAnalyzerConfigurationResponse.t,
+          CreateNetworkAnalyzerConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val create_service_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -135,6 +142,13 @@ val delete_multicast_group :
       DeleteMulticastGroupRequest.t ->
         (DeleteMulticastGroupResponse.t, DeleteMulticastGroupResponse.error)
           Result.t Async.Deferred.t
+val delete_network_analyzer_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteNetworkAnalyzerConfigurationRequest.t ->
+        (DeleteNetworkAnalyzerConfigurationResponse.t,
+          DeleteNetworkAnalyzerConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val delete_queued_messages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -153,6 +167,13 @@ val delete_wireless_device :
       DeleteWirelessDeviceRequest.t ->
         (DeleteWirelessDeviceResponse.t, DeleteWirelessDeviceResponse.error)
           Result.t Async.Deferred.t
+val delete_wireless_device_import_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWirelessDeviceImportTaskRequest.t ->
+        (DeleteWirelessDeviceImportTaskResponse.t,
+          DeleteWirelessDeviceImportTaskResponse.error) Result.t
+          Async.Deferred.t
 val delete_wireless_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -172,6 +193,12 @@ val delete_wireless_gateway_task_definition :
         (DeleteWirelessGatewayTaskDefinitionResponse.t,
           DeleteWirelessGatewayTaskDefinitionResponse.error) Result.t
           Async.Deferred.t
+val deregister_wireless_device :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeregisterWirelessDeviceRequest.t ->
+        (DeregisterWirelessDeviceResponse.t,
+          DeregisterWirelessDeviceResponse.error) Result.t Async.Deferred.t
 val disassociate_aws_account_from_partner_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -233,6 +260,13 @@ val get_device_profile :
       GetDeviceProfileRequest.t ->
         (GetDeviceProfileResponse.t, GetDeviceProfileResponse.error) Result.t
           Async.Deferred.t
+val get_event_configuration_by_resource_types :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetEventConfigurationByResourceTypesRequest.t ->
+        (GetEventConfigurationByResourceTypesResponse.t,
+          GetEventConfigurationByResourceTypesResponse.error) Result.t
+          Async.Deferred.t
 val get_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -245,6 +279,18 @@ val get_log_levels_by_resource_types :
       GetLogLevelsByResourceTypesRequest.t ->
         (GetLogLevelsByResourceTypesResponse.t,
           GetLogLevelsByResourceTypesResponse.error) Result.t
+          Async.Deferred.t
+val get_metric_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetMetricConfigurationRequest.t ->
+        (GetMetricConfigurationResponse.t,
+          GetMetricConfigurationResponse.error) Result.t Async.Deferred.t
+val get_metrics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetMetricsRequest.t ->
+        (GetMetricsResponse.t, GetMetricsResponse.error) Result.t
           Async.Deferred.t
 val get_multicast_group :
   ?endpoint_url:string ->
@@ -271,6 +317,24 @@ val get_partner_account :
       GetPartnerAccountRequest.t ->
         (GetPartnerAccountResponse.t, GetPartnerAccountResponse.error)
           Result.t Async.Deferred.t
+val get_position :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPositionRequest.t ->
+        (GetPositionResponse.t, GetPositionResponse.error) Result.t
+          Async.Deferred.t
+val get_position_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPositionConfigurationRequest.t ->
+        (GetPositionConfigurationResponse.t,
+          GetPositionConfigurationResponse.error) Result.t Async.Deferred.t
+val get_position_estimate :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPositionEstimateRequest.t ->
+        (GetPositionEstimateResponse.t, GetPositionEstimateResponse.error)
+          Result.t Async.Deferred.t
 val get_resource_event_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -283,6 +347,12 @@ val get_resource_log_level :
     ?cfg:Awso.Cfg.t ->
       GetResourceLogLevelRequest.t ->
         (GetResourceLogLevelResponse.t, GetResourceLogLevelResponse.error)
+          Result.t Async.Deferred.t
+val get_resource_position :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePositionRequest.t ->
+        (GetResourcePositionResponse.t, GetResourcePositionResponse.error)
           Result.t Async.Deferred.t
 val get_service_endpoint :
   ?endpoint_url:string ->
@@ -302,6 +372,13 @@ val get_wireless_device :
       GetWirelessDeviceRequest.t ->
         (GetWirelessDeviceResponse.t, GetWirelessDeviceResponse.error)
           Result.t Async.Deferred.t
+val get_wireless_device_import_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetWirelessDeviceImportTaskRequest.t ->
+        (GetWirelessDeviceImportTaskResponse.t,
+          GetWirelessDeviceImportTaskResponse.error) Result.t
+          Async.Deferred.t
 val get_wireless_device_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -361,6 +438,19 @@ val list_device_profiles :
       ListDeviceProfilesRequest.t ->
         (ListDeviceProfilesResponse.t, ListDeviceProfilesResponse.error)
           Result.t Async.Deferred.t
+val list_devices_for_wireless_device_import_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDevicesForWirelessDeviceImportTaskRequest.t ->
+        (ListDevicesForWirelessDeviceImportTaskResponse.t,
+          ListDevicesForWirelessDeviceImportTaskResponse.error) Result.t
+          Async.Deferred.t
+val list_event_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListEventConfigurationsRequest.t ->
+        (ListEventConfigurationsResponse.t,
+          ListEventConfigurationsResponse.error) Result.t Async.Deferred.t
 val list_fuota_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -380,12 +470,25 @@ val list_multicast_groups_by_fuota_task :
         (ListMulticastGroupsByFuotaTaskResponse.t,
           ListMulticastGroupsByFuotaTaskResponse.error) Result.t
           Async.Deferred.t
+val list_network_analyzer_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListNetworkAnalyzerConfigurationsRequest.t ->
+        (ListNetworkAnalyzerConfigurationsResponse.t,
+          ListNetworkAnalyzerConfigurationsResponse.error) Result.t
+          Async.Deferred.t
 val list_partner_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPartnerAccountsRequest.t ->
         (ListPartnerAccountsResponse.t, ListPartnerAccountsResponse.error)
           Result.t Async.Deferred.t
+val list_position_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPositionConfigurationsRequest.t ->
+        (ListPositionConfigurationsResponse.t,
+          ListPositionConfigurationsResponse.error) Result.t Async.Deferred.t
 val list_queued_messages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -404,6 +507,13 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Async.Deferred.t
+val list_wireless_device_import_tasks :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWirelessDeviceImportTasksRequest.t ->
+        (ListWirelessDeviceImportTasksResponse.t,
+          ListWirelessDeviceImportTasksResponse.error) Result.t
+          Async.Deferred.t
 val list_wireless_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -423,6 +533,12 @@ val list_wireless_gateways :
       ListWirelessGatewaysRequest.t ->
         (ListWirelessGatewaysResponse.t, ListWirelessGatewaysResponse.error)
           Result.t Async.Deferred.t
+val put_position_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutPositionConfigurationRequest.t ->
+        (PutPositionConfigurationResponse.t,
+          PutPositionConfigurationResponse.error) Result.t Async.Deferred.t
 val put_resource_log_level :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -479,6 +595,20 @@ val start_multicast_group_session :
       StartMulticastGroupSessionRequest.t ->
         (StartMulticastGroupSessionResponse.t,
           StartMulticastGroupSessionResponse.error) Result.t Async.Deferred.t
+val start_single_wireless_device_import_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartSingleWirelessDeviceImportTaskRequest.t ->
+        (StartSingleWirelessDeviceImportTaskResponse.t,
+          StartSingleWirelessDeviceImportTaskResponse.error) Result.t
+          Async.Deferred.t
+val start_wireless_device_import_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartWirelessDeviceImportTaskRequest.t ->
+        (StartWirelessDeviceImportTaskResponse.t,
+          StartWirelessDeviceImportTaskResponse.error) Result.t
+          Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -503,6 +633,13 @@ val update_destination :
       UpdateDestinationRequest.t ->
         (UpdateDestinationResponse.t, UpdateDestinationResponse.error)
           Result.t Async.Deferred.t
+val update_event_configuration_by_resource_types :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateEventConfigurationByResourceTypesRequest.t ->
+        (UpdateEventConfigurationByResourceTypesResponse.t,
+          UpdateEventConfigurationByResourceTypesResponse.error) Result.t
+          Async.Deferred.t
 val update_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -516,6 +653,12 @@ val update_log_levels_by_resource_types :
         (UpdateLogLevelsByResourceTypesResponse.t,
           UpdateLogLevelsByResourceTypesResponse.error) Result.t
           Async.Deferred.t
+val update_metric_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateMetricConfigurationRequest.t ->
+        (UpdateMetricConfigurationResponse.t,
+          UpdateMetricConfigurationResponse.error) Result.t Async.Deferred.t
 val update_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -535,6 +678,12 @@ val update_partner_account :
       UpdatePartnerAccountRequest.t ->
         (UpdatePartnerAccountResponse.t, UpdatePartnerAccountResponse.error)
           Result.t Async.Deferred.t
+val update_position :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePositionRequest.t ->
+        (UpdatePositionResponse.t, UpdatePositionResponse.error) Result.t
+          Async.Deferred.t
 val update_resource_event_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -542,12 +691,25 @@ val update_resource_event_configuration :
         (UpdateResourceEventConfigurationResponse.t,
           UpdateResourceEventConfigurationResponse.error) Result.t
           Async.Deferred.t
+val update_resource_position :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateResourcePositionRequest.t ->
+        (UpdateResourcePositionResponse.t,
+          UpdateResourcePositionResponse.error) Result.t Async.Deferred.t
 val update_wireless_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWirelessDeviceRequest.t ->
         (UpdateWirelessDeviceResponse.t, UpdateWirelessDeviceResponse.error)
           Result.t Async.Deferred.t
+val update_wireless_device_import_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateWirelessDeviceImportTaskRequest.t ->
+        (UpdateWirelessDeviceImportTaskResponse.t,
+          UpdateWirelessDeviceImportTaskResponse.error) Result.t
+          Async.Deferred.t
 val update_wireless_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

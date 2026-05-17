@@ -9,6 +9,12 @@ type ('i, 'o, 'e) t =
   | AddTags: (AddTagsRequest.t, unit, unit) t 
   | AssociatePackage: (AssociatePackageRequest.t, AssociatePackageResponse.t,
   AssociatePackageResponse.error) t 
+  | AuthorizeVpcEndpointAccess: (AuthorizeVpcEndpointAccessRequest.t,
+  AuthorizeVpcEndpointAccessResponse.t,
+  AuthorizeVpcEndpointAccessResponse.error) t 
+  | CancelDomainConfigChange: (CancelDomainConfigChangeRequest.t,
+  CancelDomainConfigChangeResponse.t, CancelDomainConfigChangeResponse.error)
+  t 
   | CancelElasticsearchServiceSoftwareUpdate:
   (CancelElasticsearchServiceSoftwareUpdateRequest.t,
   CancelElasticsearchServiceSoftwareUpdateResponse.t,
@@ -22,6 +28,8 @@ type ('i, 'o, 'e) t =
   CreateOutboundCrossClusterSearchConnectionResponse.error) t 
   | CreatePackage: (CreatePackageRequest.t, CreatePackageResponse.t,
   CreatePackageResponse.error) t 
+  | CreateVpcEndpoint: (CreateVpcEndpointRequest.t,
+  CreateVpcEndpointResponse.t, CreateVpcEndpointResponse.error) t 
   | DeleteElasticsearchDomain: (DeleteElasticsearchDomainRequest.t,
   DeleteElasticsearchDomainResponse.t,
   DeleteElasticsearchDomainResponse.error) t 
@@ -36,6 +44,8 @@ type ('i, 'o, 'e) t =
   DeleteOutboundCrossClusterSearchConnectionResponse.error) t 
   | DeletePackage: (DeletePackageRequest.t, DeletePackageResponse.t,
   DeletePackageResponse.error) t 
+  | DeleteVpcEndpoint: (DeleteVpcEndpointRequest.t,
+  DeleteVpcEndpointResponse.t, DeleteVpcEndpointResponse.error) t 
   | DescribeDomainAutoTunes: (DescribeDomainAutoTunesRequest.t,
   DescribeDomainAutoTunesResponse.t, DescribeDomainAutoTunesResponse.error) t
   
@@ -74,6 +84,8 @@ type ('i, 'o, 'e) t =
   (DescribeReservedElasticsearchInstancesRequest.t,
   DescribeReservedElasticsearchInstancesResponse.t,
   DescribeReservedElasticsearchInstancesResponse.error) t 
+  | DescribeVpcEndpoints: (DescribeVpcEndpointsRequest.t,
+  DescribeVpcEndpointsResponse.t, DescribeVpcEndpointsResponse.error) t 
   | DissociatePackage: (DissociatePackageRequest.t,
   DissociatePackageResponse.t, DissociatePackageResponse.error) t 
   | GetCompatibleElasticsearchVersions:
@@ -101,6 +113,13 @@ type ('i, 'o, 'e) t =
   ListPackagesForDomainResponse.t, ListPackagesForDomainResponse.error) t 
   | ListTags: (ListTagsRequest.t, ListTagsResponse.t, ListTagsResponse.error)
   t 
+  | ListVpcEndpointAccess: (ListVpcEndpointAccessRequest.t,
+  ListVpcEndpointAccessResponse.t, ListVpcEndpointAccessResponse.error) t 
+  | ListVpcEndpoints: (ListVpcEndpointsRequest.t, ListVpcEndpointsResponse.t,
+  ListVpcEndpointsResponse.error) t 
+  | ListVpcEndpointsForDomain: (ListVpcEndpointsForDomainRequest.t,
+  ListVpcEndpointsForDomainResponse.t,
+  ListVpcEndpointsForDomainResponse.error) t 
   | PurchaseReservedElasticsearchInstanceOffering:
   (PurchaseReservedElasticsearchInstanceOfferingRequest.t,
   PurchaseReservedElasticsearchInstanceOfferingResponse.t,
@@ -110,6 +129,9 @@ type ('i, 'o, 'e) t =
   RejectInboundCrossClusterSearchConnectionResponse.t,
   RejectInboundCrossClusterSearchConnectionResponse.error) t 
   | RemoveTags: (RemoveTagsRequest.t, unit, unit) t 
+  | RevokeVpcEndpointAccess: (RevokeVpcEndpointAccessRequest.t,
+  RevokeVpcEndpointAccessResponse.t, RevokeVpcEndpointAccessResponse.error) t
+  
   | StartElasticsearchServiceSoftwareUpdate:
   (StartElasticsearchServiceSoftwareUpdateRequest.t,
   StartElasticsearchServiceSoftwareUpdateResponse.t,
@@ -120,6 +142,8 @@ type ('i, 'o, 'e) t =
   UpdateElasticsearchDomainConfigResponse.error) t 
   | UpdatePackage: (UpdatePackageRequest.t, UpdatePackageResponse.t,
   UpdatePackageResponse.error) t 
+  | UpdateVpcEndpoint: (UpdateVpcEndpointRequest.t,
+  UpdateVpcEndpointResponse.t, UpdateVpcEndpointResponse.error) t 
   | UpgradeElasticsearchDomain: (UpgradeElasticsearchDomainRequest.t,
   UpgradeElasticsearchDomainResponse.t,
   UpgradeElasticsearchDomainResponse.error) t 
@@ -128,15 +152,19 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AcceptInboundCrossClusterSearchConnection -> `PUT
   | AddTags -> `POST
   | AssociatePackage -> `POST
+  | AuthorizeVpcEndpointAccess -> `POST
+  | CancelDomainConfigChange -> `POST
   | CancelElasticsearchServiceSoftwareUpdate -> `POST
   | CreateElasticsearchDomain -> `POST
   | CreateOutboundCrossClusterSearchConnection -> `POST
   | CreatePackage -> `POST
+  | CreateVpcEndpoint -> `POST
   | DeleteElasticsearchDomain -> `DELETE
   | DeleteElasticsearchServiceRole -> `DELETE
   | DeleteInboundCrossClusterSearchConnection -> `DELETE
   | DeleteOutboundCrossClusterSearchConnection -> `DELETE
   | DeletePackage -> `DELETE
+  | DeleteVpcEndpoint -> `DELETE
   | DescribeDomainAutoTunes -> `GET
   | DescribeDomainChangeProgress -> `GET
   | DescribeElasticsearchDomain -> `GET
@@ -148,6 +176,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribePackages -> `POST
   | DescribeReservedElasticsearchInstanceOfferings -> `GET
   | DescribeReservedElasticsearchInstances -> `GET
+  | DescribeVpcEndpoints -> `POST
   | DissociatePackage -> `POST
   | GetCompatibleElasticsearchVersions -> `GET
   | GetPackageVersionHistory -> `GET
@@ -159,12 +188,17 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListElasticsearchVersions -> `GET
   | ListPackagesForDomain -> `GET
   | ListTags -> `GET
+  | ListVpcEndpointAccess -> `GET
+  | ListVpcEndpoints -> `GET
+  | ListVpcEndpointsForDomain -> `GET
   | PurchaseReservedElasticsearchInstanceOffering -> `POST
   | RejectInboundCrossClusterSearchConnection -> `PUT
   | RemoveTags -> `POST
+  | RevokeVpcEndpointAccess -> `POST
   | StartElasticsearchServiceSoftwareUpdate -> `POST
   | UpdateElasticsearchDomainConfig -> `POST
   | UpdatePackage -> `POST
+  | UpdateVpcEndpoint -> `POST
   | UpgradeElasticsearchDomain -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -180,6 +214,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2015-01-01/packages/associate/%s/%s"
             (PackageID.to_header x.AssociatePackageRequest.packageID)
             (DomainName.to_header x.AssociatePackageRequest.domainName)
+      | AuthorizeVpcEndpointAccess ->
+          (Format.kasprintf Uri.of_string)
+            "/2015-01-01/es/domain/%s/authorizeVpcEndpointAccess"
+            (DomainName.to_header
+               x.AuthorizeVpcEndpointAccessRequest.domainName)
+      | CancelDomainConfigChange ->
+          (Format.kasprintf Uri.of_string)
+            "/2015-01-01/es/domain/%s/config/cancel"
+            (DomainName.to_header
+               x.CancelDomainConfigChangeRequest.domainName)
       | CancelElasticsearchServiceSoftwareUpdate ->
           (Format.kasprintf Uri.of_string)
             "/2015-01-01/es/serviceSoftwareUpdate/cancel"
@@ -190,6 +234,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2015-01-01/es/ccs/outboundConnection"
       | CreatePackage ->
           (Format.kasprintf Uri.of_string) "/2015-01-01/packages"
+      | CreateVpcEndpoint ->
+          (Format.kasprintf Uri.of_string) "/2015-01-01/es/vpcEndpoints"
       | DeleteElasticsearchDomain ->
           (Format.kasprintf Uri.of_string) "/2015-01-01/es/domain/%s"
             (DomainName.to_header
@@ -209,10 +255,22 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeletePackage ->
           (Format.kasprintf Uri.of_string) "/2015-01-01/packages/%s"
             (PackageID.to_header x.DeletePackageRequest.packageID)
+      | DeleteVpcEndpoint ->
+          (Format.kasprintf Uri.of_string) "/2015-01-01/es/vpcEndpoints/%s"
+            (VpcEndpointId.to_header x.DeleteVpcEndpointRequest.vpcEndpointId)
       | DescribeDomainAutoTunes ->
-          (Format.kasprintf Uri.of_string)
-            "/2015-01-01/es/domain/%s/autoTunes"
-            (DomainName.to_header x.DescribeDomainAutoTunesRequest.domainName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2015-01-01/es/domain/%s/autoTunes"
+               (DomainName.to_header
+                  x.DescribeDomainAutoTunesRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | DescribeDomainChangeProgress ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -279,6 +337,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | DescribeVpcEndpoints ->
+          (Format.kasprintf Uri.of_string)
+            "/2015-01-01/es/vpcEndpoints/describe"
       | DissociatePackage ->
           (Format.kasprintf Uri.of_string)
             "/2015-01-01/packages/dissociate/%s/%s"
@@ -383,6 +444,33 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2015-01-01/tags/")
             (List.filter_opt [Some ("arn", (ARN.to_header x.aRN))])
+      | ListVpcEndpointAccess ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2015-01-01/es/domain/%s/listVpcEndpointAccess"
+               (DomainName.to_header
+                  x.ListVpcEndpointAccessRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken])
+      | ListVpcEndpoints ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/2015-01-01/es/vpcEndpoints")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken])
+      | ListVpcEndpointsForDomain ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2015-01-01/es/domain/%s/vpcEndpoints"
+               (DomainName.to_header
+                  x.ListVpcEndpointsForDomainRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken])
       | PurchaseReservedElasticsearchInstanceOffering ->
           (Format.kasprintf Uri.of_string)
             "/2015-01-01/es/purchaseReservedInstanceOffering"
@@ -393,6 +481,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.RejectInboundCrossClusterSearchConnectionRequest.crossClusterSearchConnectionId)
       | RemoveTags ->
           (Format.kasprintf Uri.of_string) "/2015-01-01/tags-removal"
+      | RevokeVpcEndpointAccess ->
+          (Format.kasprintf Uri.of_string)
+            "/2015-01-01/es/domain/%s/revokeVpcEndpointAccess"
+            (DomainName.to_header x.RevokeVpcEndpointAccessRequest.domainName)
       | StartElasticsearchServiceSoftwareUpdate ->
           (Format.kasprintf Uri.of_string)
             "/2015-01-01/es/serviceSoftwareUpdate/start"
@@ -402,6 +494,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.UpdateElasticsearchDomainConfigRequest.domainName)
       | UpdatePackage ->
           (Format.kasprintf Uri.of_string) "/2015-01-01/packages/update"
+      | UpdateVpcEndpoint ->
+          (Format.kasprintf Uri.of_string)
+            "/2015-01-01/es/vpcEndpoints/update"
       | UpgradeElasticsearchDomain ->
           (Format.kasprintf Uri.of_string) "/2015-01-01/es/upgradeDomain")
   [@ocaml.warning "-27"])
@@ -432,6 +527,44 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AssociatePackage ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AuthorizeVpcEndpointAccess ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Account",
+                           (AWSAccount.to_value
+                              req.AuthorizeVpcEndpointAccessRequest.account))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CancelDomainConfigChange ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CancelDomainConfigChangeRequest.dryRun
+                         ~f:(fun x -> ("DryRun", (DryRun.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CancelElasticsearchServiceSoftwareUpdate ->
       let (headers, body) =
@@ -531,7 +664,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("AutoTuneOptions",
                                 (AutoTuneOptionsInput.to_value x)));
                       Option.map req.CreateElasticsearchDomainRequest.tagList
-                        ~f:(fun x -> ("TagList", (TagList.to_value x)))])
+                        ~f:(fun x -> ("TagList", (TagList.to_value x)));
+                      Option.map
+                        req.CreateElasticsearchDomainRequest.deploymentStrategyOptions
+                        ~f:(fun x ->
+                              ("DeploymentStrategyOptions",
+                                (DeploymentStrategyOptions.to_value x)));
+                      Option.map
+                        req.CreateElasticsearchDomainRequest.automatedSnapshotPauseOptions
+                        ~f:(fun x ->
+                              ("AutomatedSnapshotPauseOptions",
+                                (AutomatedSnapshotPauseRequestOptions.to_value
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -599,6 +743,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateVpcEndpoint ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DomainArn",
+                           (DomainArn.to_value
+                              req.CreateVpcEndpointRequest.domainArn));
+                      Some
+                        ("VpcOptions",
+                          (VPCOptions.to_value
+                             req.CreateVpcEndpointRequest.vpcOptions));
+                      Option.map req.CreateVpcEndpointRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteElasticsearchDomain ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteElasticsearchServiceRole ->
@@ -608,26 +779,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteOutboundCrossClusterSearchConnection ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePackage -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteVpcEndpoint -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeDomainAutoTunes ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Option.map
-                         req.DescribeDomainAutoTunesRequest.maxResults
-                         ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)));
-                      Option.map req.DescribeDomainAutoTunesRequest.nextToken
-                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
+      let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDomainChangeProgress ->
       let (headers, body) = (None, None) in
@@ -741,6 +895,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeReservedElasticsearchInstances ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeVpcEndpoints ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("VpcEndpointIds",
+                           (VpcEndpointIdList.to_value
+                              req.DescribeVpcEndpointsRequest.vpcEndpointIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DissociatePackage ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -772,6 +946,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTags ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVpcEndpointAccess ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVpcEndpoints ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVpcEndpointsForDomain ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PurchaseReservedElasticsearchInstanceOffering ->
@@ -817,6 +1000,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("TagKeys",
                           (StringList.to_value req.RemoveTagsRequest.tagKeys))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RevokeVpcEndpointAccess ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Account",
+                           (AWSAccount.to_value
+                              req.RevokeVpcEndpointAccessRequest.account))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -914,7 +1117,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                 (AutoTuneOptions.to_value x)));
                       Option.map
                         req.UpdateElasticsearchDomainConfigRequest.dryRun
-                        ~f:(fun x -> ("DryRun", (DryRun.to_value x)))])
+                        ~f:(fun x -> ("DryRun", (DryRun.to_value x)));
+                      Option.map
+                        req.UpdateElasticsearchDomainConfigRequest.deploymentStrategyOptions
+                        ~f:(fun x ->
+                              ("DeploymentStrategyOptions",
+                                (DeploymentStrategyOptions.to_value x)));
+                      Option.map
+                        req.UpdateElasticsearchDomainConfigRequest.automatedSnapshotPauseOptions
+                        ~f:(fun x ->
+                              ("AutomatedSnapshotPauseOptions",
+                                (AutomatedSnapshotPauseRequestOptions.to_value
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -946,6 +1160,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdatePackageRequest.commitMessage
                         ~f:(fun x ->
                               ("CommitMessage", (CommitMessage.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateVpcEndpoint ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("VpcEndpointId",
+                           (VpcEndpointId.to_value
+                              req.UpdateVpcEndpointRequest.vpcEndpointId));
+                      Some
+                        ("VpcOptions",
+                          (VPCOptions.to_value
+                             req.UpdateVpcEndpointRequest.vpcOptions))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1046,6 +1284,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (AssociatePackageResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some AssociatePackageResponse.error_of_json))
+  | AuthorizeVpcEndpointAccess ->
+      if is_success
+      then
+        Ok
+          (AuthorizeVpcEndpointAccessResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AuthorizeVpcEndpointAccessResponse.error_of_json))
+  | CancelDomainConfigChange ->
+      if is_success
+      then
+        Ok (CancelDomainConfigChangeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CancelDomainConfigChangeResponse.error_of_json))
   | CancelElasticsearchServiceSoftwareUpdate ->
       if is_success
       then
@@ -1081,6 +1336,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreatePackageResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreatePackageResponse.error_of_json))
+  | CreateVpcEndpoint ->
+      if is_success
+      then Ok (CreateVpcEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateVpcEndpointResponse.error_of_json))
   | DeleteElasticsearchDomain ->
       if is_success
       then
@@ -1118,6 +1379,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DeletePackageResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DeletePackageResponse.error_of_json))
+  | DeleteVpcEndpoint ->
+      if is_success
+      then Ok (DeleteVpcEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteVpcEndpointResponse.error_of_json))
   | DescribeDomainAutoTunes ->
       if is_success
       then
@@ -1226,6 +1493,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 DescribeReservedElasticsearchInstancesResponse.error_of_json))
+  | DescribeVpcEndpoints ->
+      if is_success
+      then Ok (DescribeVpcEndpointsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeVpcEndpointsResponse.error_of_json))
   | DissociatePackage ->
       if is_success
       then Ok (DissociatePackageResponse.of_json (response_to_json resp))
@@ -1301,6 +1574,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListTagsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListTagsResponse.error_of_json))
+  | ListVpcEndpointAccess ->
+      if is_success
+      then Ok (ListVpcEndpointAccessResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListVpcEndpointAccessResponse.error_of_json))
+  | ListVpcEndpoints ->
+      if is_success
+      then Ok (ListVpcEndpointsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListVpcEndpointsResponse.error_of_json))
+  | ListVpcEndpointsForDomain ->
+      if is_success
+      then
+        Ok
+          (ListVpcEndpointsForDomainResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListVpcEndpointsForDomainResponse.error_of_json))
   | PurchaseReservedElasticsearchInstanceOffering ->
       if is_success
       then
@@ -1324,6 +1617,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
              (Some
                 RejectInboundCrossClusterSearchConnectionResponse.error_of_json))
   | RemoveTags -> if is_success then Ok () else Error (parse_aws_error None)
+  | RevokeVpcEndpointAccess ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RevokeVpcEndpointAccessResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some RevokeVpcEndpointAccessResponse.error_of_json))
   | StartElasticsearchServiceSoftwareUpdate ->
       if is_success
       then
@@ -1349,6 +1652,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UpdatePackageResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdatePackageResponse.error_of_json))
+  | UpdateVpcEndpoint ->
+      if is_success
+      then Ok (UpdateVpcEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateVpcEndpointResponse.error_of_json))
   | UpgradeElasticsearchDomain ->
       if is_success
       then

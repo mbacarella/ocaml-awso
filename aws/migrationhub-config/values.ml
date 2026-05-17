@@ -135,9 +135,9 @@ module Target =
         TargetType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?id ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" TargetId.of_json in
-      let type_ = field_map_exn json "Type" TargetType.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" TargetId.of_json in
+      let type_ = field_map_exn json__ "Type" TargetType.of_json in
       make ?id ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -210,12 +210,12 @@ module HomeRegionControl =
         (Option.map ~f:ControlId.of_xml) (Xml.child xml_arg0 "ControlId") in
       make ?requestedTime ?target ?homeRegion ?controlId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestedTime =
-        field_map json "RequestedTime" RequestedTime.of_json in
-      let target = field_map json "Target" Target.of_json in
-      let homeRegion = field_map json "HomeRegion" HomeRegion.of_json in
-      let controlId = field_map json "ControlId" ControlId.of_json in
+        field_map json__ "RequestedTime" RequestedTime.of_json in
+      let target = field_map json__ "Target" Target.of_json in
+      let homeRegion = field_map json__ "HomeRegion" HomeRegion.of_json in
+      let controlId = field_map json__ "ControlId" ControlId.of_json in
       make ?requestedTime ?target ?homeRegion ?controlId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -234,8 +234,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -254,8 +254,8 @@ module InternalServerError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -274,8 +274,8 @@ module InvalidInputException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -294,8 +294,8 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -304,16 +304,15 @@ module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t ;
+      message: ErrorMessage.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc
           "The number of seconds the caller should wait before retrying."]}
-    let context_ = "ThrottlingException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessage.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("RetryAfterSeconds",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -322,15 +321,14 @@ module ThrottlingException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "RetryAfterSeconds") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "Message" ErrorMessage.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module HomeRegionControls =
@@ -338,6 +336,9 @@ module HomeRegionControls =
     type nonrec t = HomeRegionControl.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HomeRegionControl.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -415,8 +416,8 @@ module DryRunOperation =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -515,8 +516,8 @@ module GetHomeRegionResult =
         (Option.map ~f:HomeRegion.of_xml) (Xml.child xml_arg0 "HomeRegion") in
       make ?homeRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let homeRegion = field_map json "HomeRegion" HomeRegion.of_json in
+    let of_json json__ =
+      let homeRegion = field_map json__ "HomeRegion" HomeRegion.of_json in
       make ?homeRegion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -624,10 +625,10 @@ module DescribeHomeRegionControlsResult =
           (Xml.child xml_arg0 "HomeRegionControls") in
       make ?nextToken ?homeRegionControls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let homeRegionControls =
-        field_map json "HomeRegionControls" HomeRegionControls.of_json in
+        field_map json__ "HomeRegionControls" HomeRegionControls.of_json in
       make ?nextToken ?homeRegionControls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -681,18 +682,121 @@ module DescribeHomeRegionControlsRequest =
         (Option.map ~f:ControlId.of_xml) (Xml.child xml_arg0 "ControlId") in
       make ?nextToken ?maxResults ?target ?homeRegion ?controlId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           DescribeHomeRegionControlsMaxResults.of_json in
-      let target = field_map json "Target" Target.of_json in
-      let homeRegion = field_map json "HomeRegion" HomeRegion.of_json in
-      let controlId = field_map json "ControlId" ControlId.of_json in
+      let target = field_map json__ "Target" Target.of_json in
+      let homeRegion = field_map json__ "HomeRegion" HomeRegion.of_json in
+      let controlId = field_map json__ "ControlId" ControlId.of_json in
       make ?nextToken ?maxResults ?target ?homeRegion ?controlId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This API permits filtering on the ControlId and HomeRegion fields."]
+module DeleteHomeRegionControlResult =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation deletes the home region configuration for the calling account. The operation does not delete discovery or migration tracking data in the home region."]
+module DeleteHomeRegionControlRequest =
+  struct
+    type nonrec t =
+      {
+      controlId: ControlId.t
+        [@ocaml.doc
+          "A unique identifier that's generated for each home region control. It's always a string that begins with \"hrc-\" followed by 12 lowercase letters and numbers."]}
+    let context_ = "DeleteHomeRegionControlRequest"
+    let make ~controlId = fun () -> { controlId }
+    let to_value x =
+      structure_to_value
+        [("ControlId", (Some (ControlId.to_value x.controlId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let controlId =
+        ControlId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ControlId") in
+      make ~controlId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let controlId = field_map_exn json__ "ControlId" ControlId.of_json in
+      make ~controlId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation deletes the home region configuration for the calling account. The operation does not delete discovery or migration tracking data in the home region."]
 module CreateHomeRegionControlResult =
   struct
     type nonrec t =
@@ -784,9 +888,9 @@ module CreateHomeRegionControlResult =
           (Xml.child xml_arg0 "HomeRegionControl") in
       make ?homeRegionControl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let homeRegionControl =
-        field_map json "HomeRegionControl" HomeRegionControl.of_json in
+        field_map json__ "HomeRegionControl" HomeRegionControl.of_json in
       make ?homeRegionControl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -823,10 +927,10 @@ module CreateHomeRegionControlRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HomeRegion") in
       make ?dryRun ~target ~homeRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
-      let target = field_map_exn json "Target" Target.of_json in
-      let homeRegion = field_map_exn json "HomeRegion" HomeRegion.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
+      let target = field_map_exn json__ "Target" Target.of_json in
+      let homeRegion = field_map_exn json__ "HomeRegion" HomeRegion.of_json in
       make ?dryRun ~target ~homeRegion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

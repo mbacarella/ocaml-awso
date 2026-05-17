@@ -65,6 +65,53 @@ let batch_get_stream_key =
               ~arns:(Values.StreamKeyArnList.of_json arns) ())
            (Some Values.BatchGetStreamKeyResponse.to_json)
            (Some Values.BatchGetStreamKeyResponse.error_to_json)])
+let batch_start_viewer_session_revocation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and viewerSessions =
+         flag "viewer-sessions" (required json_arg)
+           ~doc:"JSON BatchStartViewerSessionRevocationViewerSessionList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_start_viewer_session_revocation
+           (Values.BatchStartViewerSessionRevocationRequest.make
+              ~viewerSessions:(Values.BatchStartViewerSessionRevocationViewerSessionList.of_json
+                                 viewerSessions) ())
+           (Some Values.BatchStartViewerSessionRevocationResponse.to_json)
+           (Some
+              Values.BatchStartViewerSessionRevocationResponse.error_to_json)])
+let create_ad_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING AdConfigurationName"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and mediaTailorPlaybackConfigurations =
+         flag "media-tailor-playback-configurations" (required json_arg)
+           ~doc:"JSON MediaTailorPlaybackConfigurationsList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_ad_configuration
+           (Values.CreateAdConfigurationRequest.make ?name
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~mediaTailorPlaybackConfigurations:(Values.MediaTailorPlaybackConfigurationsList.of_json
+                                                    mediaTailorPlaybackConfigurations)
+              ()) (Some Values.CreateAdConfigurationResponse.to_json)
+           (Some Values.CreateAdConfigurationResponse.error_to_json)])
 let create_channel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -75,26 +122,87 @@ let create_channel =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and authorized = flag "authorized" (optional bool) ~doc:"BOOL Boolean"
+       and name = flag "name" (optional string) ~doc:"STRING ChannelName"
        and latencyMode =
          flag "latency-mode" (optional json_arg)
            ~doc:"JSON ChannelLatencyMode"
-       and name = flag "name" (optional string) ~doc:"STRING ChannelName"
+       and type_ = flag "type-" (optional json_arg) ~doc:"JSON ChannelType"
+       and authorized = flag "authorized" (optional bool) ~doc:"BOOL Boolean"
        and recordingConfigurationArn =
          flag "recording-configuration-arn" (optional string)
            ~doc:"STRING ChannelRecordingConfigurationArn"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
-       and type_ = flag "type-" (optional json_arg) ~doc:"JSON ChannelType" in
+       and insecureIngest =
+         flag "insecure-ingest" (optional bool) ~doc:"BOOL Boolean"
+       and preset =
+         flag "preset" (optional json_arg) ~doc:"JSON TranscodePreset"
+       and playbackRestrictionPolicyArn =
+         flag "playback-restriction-policy-arn" (optional string)
+           ~doc:"STRING ChannelPlaybackRestrictionPolicyArn"
+       and multitrackInputConfiguration =
+         flag "multitrack-input-configuration" (optional json_arg)
+           ~doc:"JSON MultitrackInputConfiguration"
+       and containerFormat =
+         flag "container-format" (optional json_arg)
+           ~doc:"JSON ContainerFormat"
+       and adConfigurationArn =
+         flag "ad-configuration-arn" (optional string)
+           ~doc:"STRING ChannelAdConfigurationArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_channel
-           (Values.CreateChannelRequest.make ?authorized
+           (Values.CreateChannelRequest.make ?name
               ?latencyMode:(Option.map ~f:Values.ChannelLatencyMode.of_json
-                              latencyMode) ?name ?recordingConfigurationArn
-              ?tags:(Option.map ~f:Values.Tags.of_json tags)
-              ?type_:(Option.map ~f:Values.ChannelType.of_json type_) ())
+                              latencyMode)
+              ?type_:(Option.map ~f:Values.ChannelType.of_json type_)
+              ?authorized ?recordingConfigurationArn
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ?insecureIngest
+              ?preset:(Option.map ~f:Values.TranscodePreset.of_json preset)
+              ?playbackRestrictionPolicyArn
+              ?multitrackInputConfiguration:(Option.map
+                                               ~f:Values.MultitrackInputConfiguration.of_json
+                                               multitrackInputConfiguration)
+              ?containerFormat:(Option.map ~f:Values.ContainerFormat.of_json
+                                  containerFormat) ?adConfigurationArn ())
            (Some Values.CreateChannelResponse.to_json)
            (Some Values.CreateChannelResponse.error_to_json)])
+let create_playback_restriction_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and allowedCountries =
+         flag "allowed-countries" (optional json_arg)
+           ~doc:"JSON PlaybackRestrictionPolicyAllowedCountryList"
+       and allowedOrigins =
+         flag "allowed-origins" (optional json_arg)
+           ~doc:"JSON PlaybackRestrictionPolicyAllowedOriginList"
+       and enableStrictOriginEnforcement =
+         flag "enable-strict-origin-enforcement" (optional bool)
+           ~doc:"BOOL PlaybackRestrictionPolicyEnableStrictOriginEnforcement"
+       and name =
+         flag "name" (optional string)
+           ~doc:"STRING PlaybackRestrictionPolicyName"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_playback_restriction_policy
+           (Values.CreatePlaybackRestrictionPolicyRequest.make
+              ?allowedCountries:(Option.map
+                                   ~f:Values.PlaybackRestrictionPolicyAllowedCountryList.of_json
+                                   allowedCountries)
+              ?allowedOrigins:(Option.map
+                                 ~f:Values.PlaybackRestrictionPolicyAllowedOriginList.of_json
+                                 allowedOrigins)
+              ?enableStrictOriginEnforcement ?name
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ())
+           (Some Values.CreatePlaybackRestrictionPolicyResponse.to_json)
+           (Some Values.CreatePlaybackRestrictionPolicyResponse.error_to_json)])
 let create_recording_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -112,6 +220,12 @@ let create_recording_configuration =
        and thumbnailConfiguration =
          flag "thumbnail-configuration" (optional json_arg)
            ~doc:"JSON ThumbnailConfiguration"
+       and recordingReconnectWindowSeconds =
+         flag "recording-reconnect-window-seconds" (optional int)
+           ~doc:"INT RecordingReconnectWindowSeconds"
+       and renditionConfiguration =
+         flag "rendition-configuration" (optional json_arg)
+           ~doc:"JSON RenditionConfiguration"
        and destinationConfiguration =
          flag "destination-configuration" (required json_arg)
            ~doc:"JSON DestinationConfiguration" in
@@ -123,6 +237,10 @@ let create_recording_configuration =
               ?thumbnailConfiguration:(Option.map
                                          ~f:Values.ThumbnailConfiguration.of_json
                                          thumbnailConfiguration)
+              ?recordingReconnectWindowSeconds
+              ?renditionConfiguration:(Option.map
+                                         ~f:Values.RenditionConfiguration.of_json
+                                         renditionConfiguration)
               ~destinationConfiguration:(Values.DestinationConfiguration.of_json
                                            destinationConfiguration) ())
            (Some Values.CreateRecordingConfigurationResponse.to_json)
@@ -147,6 +265,22 @@ let create_stream_key =
               ?tags:(Option.map ~f:Values.Tags.of_json tags) ~channelArn ())
            (Some Values.CreateStreamKeyResponse.to_json)
            (Some Values.CreateStreamKeyResponse.error_to_json)])
+let delete_ad_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and arn =
+         flag "arn" (required string) ~doc:"STRING AdConfigurationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_ad_configuration
+           (Values.DeleteAdConfigurationRequest.make ~arn ()) None None])
 let delete_channel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -180,6 +314,24 @@ let delete_playback_key_pair =
            (Values.DeletePlaybackKeyPairRequest.make ~arn ())
            (Some Values.DeletePlaybackKeyPairResponse.to_json)
            (Some Values.DeletePlaybackKeyPairResponse.error_to_json)])
+let delete_playback_restriction_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and arn =
+         flag "arn" (required string)
+           ~doc:"STRING PlaybackRestrictionPolicyArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_playback_restriction_policy
+           (Values.DeletePlaybackRestrictionPolicyRequest.make ~arn ()) None
+           None])
 let delete_recording_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -212,6 +364,24 @@ let delete_stream_key =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_stream_key (Values.DeleteStreamKeyRequest.make ~arn ())
            None None])
+let get_ad_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and arn =
+         flag "arn" (required string) ~doc:"STRING AdConfigurationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ad_configuration
+           (Values.GetAdConfigurationRequest.make ~arn ())
+           (Some Values.GetAdConfigurationResponse.to_json)
+           (Some Values.GetAdConfigurationResponse.error_to_json)])
 let get_channel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -246,6 +416,25 @@ let get_playback_key_pair =
            (Values.GetPlaybackKeyPairRequest.make ~arn ())
            (Some Values.GetPlaybackKeyPairResponse.to_json)
            (Some Values.GetPlaybackKeyPairResponse.error_to_json)])
+let get_playback_restriction_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and arn =
+         flag "arn" (required string)
+           ~doc:"STRING PlaybackRestrictionPolicyArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_playback_restriction_policy
+           (Values.GetPlaybackRestrictionPolicyRequest.make ~arn ())
+           (Some Values.GetPlaybackRestrictionPolicyResponse.to_json)
+           (Some Values.GetPlaybackRestrictionPolicyResponse.error_to_json)])
 let get_recording_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -341,6 +530,47 @@ let import_playback_key_pair =
               ~publicKeyMaterial ())
            (Some Values.ImportPlaybackKeyPairResponse.to_json)
            (Some Values.ImportPlaybackKeyPairResponse.error_to_json)])
+let insert_ad_break =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and channelArn =
+         flag "channel-arn" (required string) ~doc:"STRING ChannelArn"
+       and durationSeconds =
+         flag "duration-seconds" (required int) ~doc:"INT AdDurationSeconds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.insert_ad_break
+           (Values.InsertAdBreakRequest.make ~channelArn ~durationSeconds ())
+           (Some Values.InsertAdBreakResponse.to_json)
+           (Some Values.InsertAdBreakResponse.error_to_json)])
+let list_ad_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxAdConfigurationResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_ad_configurations
+           (Values.ListAdConfigurationsRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListAdConfigurationsResponse.to_json)
+           (Some Values.ListAdConfigurationsResponse.error_to_json)])
 let list_channels =
   Command.async ~summary:""
     ([%map_open.Command
@@ -356,15 +586,23 @@ let list_channels =
        and filterByRecordingConfigurationArn =
          flag "filter-by-recording-configuration-arn" (optional string)
            ~doc:"STRING ChannelRecordingConfigurationArn"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxChannelResults"
+       and filterByPlaybackRestrictionPolicyArn =
+         flag "filter-by-playback-restriction-policy-arn" (optional string)
+           ~doc:"STRING ChannelPlaybackRestrictionPolicyArn"
+       and filterByAdConfigurationArn =
+         flag "filter-by-ad-configuration-arn" (optional string)
+           ~doc:"STRING ChannelAdConfigurationArn"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxChannelResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_channels
            (Values.ListChannelsRequest.make ?filterByName
-              ?filterByRecordingConfigurationArn ?maxResults ?nextToken ())
+              ?filterByRecordingConfigurationArn
+              ?filterByPlaybackRestrictionPolicyArn
+              ?filterByAdConfigurationArn ?nextToken ?maxResults ())
            (Some Values.ListChannelsResponse.to_json)
            (Some Values.ListChannelsResponse.error_to_json)])
 let list_playback_key_pairs =
@@ -377,17 +615,39 @@ let list_playback_key_pairs =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and maxResults =
          flag "max-results" (optional int)
-           ~doc:"INT MaxPlaybackKeyPairResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+           ~doc:"INT MaxPlaybackKeyPairResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_playback_key_pairs
-           (Values.ListPlaybackKeyPairsRequest.make ?maxResults ?nextToken ())
+           (Values.ListPlaybackKeyPairsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListPlaybackKeyPairsResponse.to_json)
            (Some Values.ListPlaybackKeyPairsResponse.error_to_json)])
+let list_playback_restriction_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxPlaybackRestrictionPolicyResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_playback_restriction_policies
+           (Values.ListPlaybackRestrictionPoliciesRequest.make ?nextToken
+              ?maxResults ())
+           (Some Values.ListPlaybackRestrictionPoliciesResponse.to_json)
+           (Some Values.ListPlaybackRestrictionPoliciesResponse.error_to_json)])
 let list_recording_configurations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -398,16 +658,16 @@ let list_recording_configurations =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and maxResults =
          flag "max-results" (optional int)
-           ~doc:"INT MaxRecordingConfigurationResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+           ~doc:"INT MaxRecordingConfigurationResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_recording_configurations
-           (Values.ListRecordingConfigurationsRequest.make ?maxResults
-              ?nextToken ())
+           (Values.ListRecordingConfigurationsRequest.make ?nextToken
+              ?maxResults ())
            (Some Values.ListRecordingConfigurationsResponse.to_json)
            (Some Values.ListRecordingConfigurationsResponse.error_to_json)])
 let list_stream_keys =
@@ -420,16 +680,16 @@ let list_stream_keys =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxStreamKeyResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxStreamKeyResults"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChannelArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_stream_keys
-           (Values.ListStreamKeysRequest.make ?maxResults ?nextToken
+           (Values.ListStreamKeysRequest.make ?nextToken ?maxResults
               ~channelArn ()) (Some Values.ListStreamKeysResponse.to_json)
            (Some Values.ListStreamKeysResponse.error_to_json)])
 let list_stream_sessions =
@@ -442,16 +702,16 @@ let list_stream_sessions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxStreamResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxStreamResults"
        and channelArn =
          flag "channel-arn" (required string) ~doc:"STRING ChannelArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_stream_sessions
-           (Values.ListStreamSessionsRequest.make ?maxResults ?nextToken
+           (Values.ListStreamSessionsRequest.make ?nextToken ?maxResults
               ~channelArn ())
            (Some Values.ListStreamSessionsResponse.to_json)
            (Some Values.ListStreamSessionsResponse.error_to_json)])
@@ -467,16 +727,16 @@ let list_streams =
            ~doc:"URL override endpoint url"
        and filterBy =
          flag "filter-by" (optional json_arg) ~doc:"JSON StreamFilters"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxStreamResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxStreamResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_streams
            (Values.ListStreamsRequest.make
               ?filterBy:(Option.map ~f:Values.StreamFilters.of_json filterBy)
-              ?maxResults ?nextToken ())
+              ?nextToken ?maxResults ())
            (Some Values.ListStreamsResponse.to_json)
            (Some Values.ListStreamsResponse.error_to_json)])
 let list_tags_for_resource =
@@ -516,6 +776,30 @@ let put_metadata =
            Io.put_metadata
            (Values.PutMetadataRequest.make ~channelArn ~metadata ()) None
            None])
+let start_viewer_session_revocation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and viewerSessionVersionsLessThanOrEqualTo =
+         flag "viewer-session-versions-less-than-or-equal-to" (optional int)
+           ~doc:"INT ViewerSessionVersion"
+       and channelArn =
+         flag "channel-arn" (required string) ~doc:"STRING ChannelArn"
+       and viewerId =
+         flag "viewer-id" (required string) ~doc:"STRING ViewerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_viewer_session_revocation
+           (Values.StartViewerSessionRevocationRequest.make
+              ?viewerSessionVersionsLessThanOrEqualTo ~channelArn ~viewerId
+              ()) (Some Values.StartViewerSessionRevocationResponse.to_json)
+           (Some Values.StartViewerSessionRevocationResponse.error_to_json)])
 let stop_stream =
   Command.async ~summary:""
     ([%map_open.Command
@@ -584,53 +868,132 @@ let update_channel =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and authorized = flag "authorized" (optional bool) ~doc:"BOOL Boolean"
+       and name = flag "name" (optional string) ~doc:"STRING ChannelName"
        and latencyMode =
          flag "latency-mode" (optional json_arg)
            ~doc:"JSON ChannelLatencyMode"
-       and name = flag "name" (optional string) ~doc:"STRING ChannelName"
+       and type_ = flag "type-" (optional json_arg) ~doc:"JSON ChannelType"
+       and authorized = flag "authorized" (optional bool) ~doc:"BOOL Boolean"
        and recordingConfigurationArn =
          flag "recording-configuration-arn" (optional string)
            ~doc:"STRING ChannelRecordingConfigurationArn"
-       and type_ = flag "type-" (optional json_arg) ~doc:"JSON ChannelType"
+       and insecureIngest =
+         flag "insecure-ingest" (optional bool) ~doc:"BOOL Boolean"
+       and preset =
+         flag "preset" (optional json_arg) ~doc:"JSON TranscodePreset"
+       and playbackRestrictionPolicyArn =
+         flag "playback-restriction-policy-arn" (optional string)
+           ~doc:"STRING ChannelPlaybackRestrictionPolicyArn"
+       and multitrackInputConfiguration =
+         flag "multitrack-input-configuration" (optional json_arg)
+           ~doc:"JSON MultitrackInputConfiguration"
+       and containerFormat =
+         flag "container-format" (optional json_arg)
+           ~doc:"JSON ContainerFormat"
+       and adConfigurationArn =
+         flag "ad-configuration-arn" (optional string)
+           ~doc:"STRING ChannelAdConfigurationArn"
        and arn = flag "arn" (required string) ~doc:"STRING ChannelArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_channel
-           (Values.UpdateChannelRequest.make ?authorized
+           (Values.UpdateChannelRequest.make ?name
               ?latencyMode:(Option.map ~f:Values.ChannelLatencyMode.of_json
-                              latencyMode) ?name ?recordingConfigurationArn
-              ?type_:(Option.map ~f:Values.ChannelType.of_json type_) ~arn ())
-           (Some Values.UpdateChannelResponse.to_json)
+                              latencyMode)
+              ?type_:(Option.map ~f:Values.ChannelType.of_json type_)
+              ?authorized ?recordingConfigurationArn ?insecureIngest
+              ?preset:(Option.map ~f:Values.TranscodePreset.of_json preset)
+              ?playbackRestrictionPolicyArn
+              ?multitrackInputConfiguration:(Option.map
+                                               ~f:Values.MultitrackInputConfiguration.of_json
+                                               multitrackInputConfiguration)
+              ?containerFormat:(Option.map ~f:Values.ContainerFormat.of_json
+                                  containerFormat) ?adConfigurationArn ~arn
+              ()) (Some Values.UpdateChannelResponse.to_json)
            (Some Values.UpdateChannelResponse.error_to_json)])
+let update_playback_restriction_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and allowedCountries =
+         flag "allowed-countries" (optional json_arg)
+           ~doc:"JSON PlaybackRestrictionPolicyAllowedCountryList"
+       and allowedOrigins =
+         flag "allowed-origins" (optional json_arg)
+           ~doc:"JSON PlaybackRestrictionPolicyAllowedOriginList"
+       and enableStrictOriginEnforcement =
+         flag "enable-strict-origin-enforcement" (optional bool)
+           ~doc:"BOOL PlaybackRestrictionPolicyEnableStrictOriginEnforcement"
+       and name =
+         flag "name" (optional string)
+           ~doc:"STRING PlaybackRestrictionPolicyName"
+       and arn =
+         flag "arn" (required string)
+           ~doc:"STRING PlaybackRestrictionPolicyArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_playback_restriction_policy
+           (Values.UpdatePlaybackRestrictionPolicyRequest.make
+              ?allowedCountries:(Option.map
+                                   ~f:Values.PlaybackRestrictionPolicyAllowedCountryList.of_json
+                                   allowedCountries)
+              ?allowedOrigins:(Option.map
+                                 ~f:Values.PlaybackRestrictionPolicyAllowedOriginList.of_json
+                                 allowedOrigins)
+              ?enableStrictOriginEnforcement ?name ~arn ())
+           (Some Values.UpdatePlaybackRestrictionPolicyResponse.to_json)
+           (Some Values.UpdatePlaybackRestrictionPolicyResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-get-channel", batch_get_channel);
     ("batch-get-stream-key", batch_get_stream_key);
+    ("batch-start-viewer-session-revocation",
+      batch_start_viewer_session_revocation);
+    ("create-ad-configuration", create_ad_configuration);
     ("create-channel", create_channel);
+    ("create-playback-restriction-policy",
+      create_playback_restriction_policy);
     ("create-recording-configuration", create_recording_configuration);
     ("create-stream-key", create_stream_key);
+    ("delete-ad-configuration", delete_ad_configuration);
     ("delete-channel", delete_channel);
     ("delete-playback-key-pair", delete_playback_key_pair);
+    ("delete-playback-restriction-policy",
+      delete_playback_restriction_policy);
     ("delete-recording-configuration", delete_recording_configuration);
     ("delete-stream-key", delete_stream_key);
+    ("get-ad-configuration", get_ad_configuration);
     ("get-channel", get_channel);
     ("get-playback-key-pair", get_playback_key_pair);
+    ("get-playback-restriction-policy", get_playback_restriction_policy);
     ("get-recording-configuration", get_recording_configuration);
     ("get-stream", get_stream);
     ("get-stream-key", get_stream_key);
     ("get-stream-session", get_stream_session);
     ("import-playback-key-pair", import_playback_key_pair);
+    ("insert-ad-break", insert_ad_break);
+    ("list-ad-configurations", list_ad_configurations);
     ("list-channels", list_channels);
     ("list-playback-key-pairs", list_playback_key_pairs);
+    ("list-playback-restriction-policies",
+      list_playback_restriction_policies);
     ("list-recording-configurations", list_recording_configurations);
     ("list-stream-keys", list_stream_keys);
     ("list-stream-sessions", list_stream_sessions);
     ("list-streams", list_streams);
     ("list-tags-for-resource", list_tags_for_resource);
     ("put-metadata", put_metadata);
+    ("start-viewer-session-revocation", start_viewer_session_revocation);
     ("stop-stream", stop_stream);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-channel", update_channel)]
+    ("update-channel", update_channel);
+    ("update-playback-restriction-policy",
+      update_playback_restriction_policy)]

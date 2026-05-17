@@ -185,6 +185,14 @@ let create_custom_line_item =
          flag "billing-period-range" (optional json_arg)
            ~doc:"JSON CustomLineItemBillingPeriodRange"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and computationRule =
+         flag "computation-rule" (optional json_arg)
+           ~doc:"JSON ComputationRuleEnum"
+       and presentationDetails =
+         flag "presentation-details" (optional json_arg)
+           ~doc:"JSON PresentationObject"
        and name =
          flag "name" (required string) ~doc:"STRING CustomLineItemName"
        and description =
@@ -203,8 +211,14 @@ let create_custom_line_item =
               ?billingPeriodRange:(Option.map
                                      ~f:Values.CustomLineItemBillingPeriodRange.of_json
                                      billingPeriodRange)
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
-              ~description ~billingGroupArn
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?accountId
+              ?computationRule:(Option.map
+                                  ~f:Values.ComputationRuleEnum.of_json
+                                  computationRule)
+              ?presentationDetails:(Option.map
+                                      ~f:Values.PresentationObject.of_json
+                                      presentationDetails) ~name ~description
+              ~billingGroupArn
               ~chargeDetails:(Values.CustomLineItemChargeDetails.of_json
                                 chargeDetails) ())
            (Some Values.CreateCustomLineItemOutput.to_json)
@@ -254,24 +268,34 @@ let create_pricing_rule =
        and description =
          flag "description" (optional string)
            ~doc:"STRING PricingRuleDescription"
+       and modifierPercentage =
+         flag "modifier-percentage" (optional float)
+           ~doc:"FLOAT ModifierPercentage"
        and service = flag "service" (optional string) ~doc:"STRING Service"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and billingEntity =
+         flag "billing-entity" (optional string) ~doc:"STRING BillingEntity"
+       and tiering =
+         flag "tiering" (optional json_arg) ~doc:"JSON CreateTieringInput"
+       and usageType =
+         flag "usage-type" (optional string) ~doc:"STRING UsageType"
+       and operation =
+         flag "operation" (optional string) ~doc:"STRING Operation"
        and name = flag "name" (required string) ~doc:"STRING PricingRuleName"
        and scope =
          flag "scope" (required json_arg) ~doc:"JSON PricingRuleScope"
        and type_ =
-         flag "type-" (required json_arg) ~doc:"JSON PricingRuleType"
-       and modifierPercentage =
-         flag "modifier-percentage" (required float)
-           ~doc:"FLOAT ModifierPercentage" in
+         flag "type-" (required json_arg) ~doc:"JSON PricingRuleType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_pricing_rule
            (Values.CreatePricingRuleInput.make ?clientToken ?description
-              ?service ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
+              ?modifierPercentage ?service
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?billingEntity
+              ?tiering:(Option.map ~f:Values.CreateTieringInput.of_json
+                          tiering) ?usageType ?operation ~name
               ~scope:(Values.PricingRuleScope.of_json scope)
-              ~type_:(Values.PricingRuleType.of_json type_)
-              ~modifierPercentage ())
+              ~type_:(Values.PricingRuleType.of_json type_) ())
            (Some Values.CreatePricingRuleOutput.to_json)
            (Some Values.CreatePricingRuleOutput.error_to_json)])
 let delete_billing_group =
@@ -390,6 +414,39 @@ let disassociate_pricing_rules =
                                   pricingRuleArns) ())
            (Some Values.DisassociatePricingRulesOutput.to_json)
            (Some Values.DisassociatePricingRulesOutput.error_to_json)])
+let get_billing_group_cost_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and billingPeriodRange =
+         flag "billing-period-range" (optional json_arg)
+           ~doc:"JSON BillingPeriodRange"
+       and groupBy =
+         flag "group-by" (optional json_arg)
+           ~doc:"JSON GroupByAttributesList"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxBillingGroupCostReportResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and arn = flag "arn" (required string) ~doc:"STRING BillingGroupArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_billing_group_cost_report
+           (Values.GetBillingGroupCostReportInput.make
+              ?billingPeriodRange:(Option.map
+                                     ~f:Values.BillingPeriodRange.of_json
+                                     billingPeriodRange)
+              ?groupBy:(Option.map ~f:Values.GroupByAttributesList.of_json
+                          groupBy) ?maxResults ?nextToken ~arn ())
+           (Some Values.GetBillingGroupCostReportOutput.to_json)
+           (Some Values.GetBillingGroupCostReportOutput.error_to_json)])
 let list_account_associations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -473,6 +530,35 @@ let list_billing_groups =
                           filters) ())
            (Some Values.ListBillingGroupsOutput.to_json)
            (Some Values.ListBillingGroupsOutput.error_to_json)])
+let list_custom_line_item_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxCustomLineItemResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListCustomLineItemVersionsFilter"
+       and arn = flag "arn" (required string) ~doc:"STRING CustomLineItemArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_custom_line_item_versions
+           (Values.ListCustomLineItemVersionsInput.make ?maxResults
+              ?nextToken
+              ?filters:(Option.map
+                          ~f:Values.ListCustomLineItemVersionsFilter.of_json
+                          filters) ~arn ())
+           (Some Values.ListCustomLineItemVersionsOutput.to_json)
+           (Some Values.ListCustomLineItemVersionsOutput.error_to_json)])
 let list_custom_line_items =
   Command.async ~summary:""
     ([%map_open.Command
@@ -486,7 +572,8 @@ let list_custom_line_items =
        and billingPeriod =
          flag "billing-period" (optional string) ~doc:"STRING BillingPeriod"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxBillingGroupResults"
+         flag "max-results" (optional int)
+           ~doc:"INT MaxCustomLineItemResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and filters =
@@ -721,6 +808,9 @@ let update_billing_group =
        and description =
          flag "description" (optional string)
            ~doc:"STRING BillingGroupDescription"
+       and accountGrouping =
+         flag "account-grouping" (optional json_arg)
+           ~doc:"JSON UpdateBillingGroupAccountGrouping"
        and arn = flag "arn" (required string) ~doc:"STRING BillingGroupArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -730,7 +820,10 @@ let update_billing_group =
               ?computationPreference:(Option.map
                                         ~f:Values.ComputationPreference.of_json
                                         computationPreference) ?description
-              ~arn ()) (Some Values.UpdateBillingGroupOutput.to_json)
+              ?accountGrouping:(Option.map
+                                  ~f:Values.UpdateBillingGroupAccountGrouping.of_json
+                                  accountGrouping) ~arn ())
+           (Some Values.UpdateBillingGroupOutput.to_json)
            (Some Values.UpdateBillingGroupOutput.error_to_json)])
 let update_custom_line_item =
   Command.async ~summary:""
@@ -743,7 +836,7 @@ let update_custom_line_item =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and name =
-         flag "name" (optional string) ~doc:"STRING BillingGroupName"
+         flag "name" (optional string) ~doc:"STRING CustomLineItemName"
        and description =
          flag "description" (optional string)
            ~doc:"STRING CustomLineItemDescription"
@@ -806,13 +899,17 @@ let update_pricing_rule =
        and modifierPercentage =
          flag "modifier-percentage" (optional float)
            ~doc:"FLOAT ModifierPercentage"
+       and tiering =
+         flag "tiering" (optional json_arg) ~doc:"JSON UpdateTieringInput"
        and arn = flag "arn" (required string) ~doc:"STRING PricingRuleArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_pricing_rule
            (Values.UpdatePricingRuleInput.make ?name ?description
               ?type_:(Option.map ~f:Values.PricingRuleType.of_json type_)
-              ?modifierPercentage ~arn ())
+              ?modifierPercentage
+              ?tiering:(Option.map ~f:Values.UpdateTieringInput.of_json
+                          tiering) ~arn ())
            (Some Values.UpdatePricingRuleOutput.to_json)
            (Some Values.UpdatePricingRuleOutput.error_to_json)])
 let main =
@@ -834,9 +931,11 @@ let main =
     ("delete-pricing-rule", delete_pricing_rule);
     ("disassociate-accounts", disassociate_accounts);
     ("disassociate-pricing-rules", disassociate_pricing_rules);
+    ("get-billing-group-cost-report", get_billing_group_cost_report);
     ("list-account-associations", list_account_associations);
     ("list-billing-group-cost-reports", list_billing_group_cost_reports);
     ("list-billing-groups", list_billing_groups);
+    ("list-custom-line-item-versions", list_custom_line_item_versions);
     ("list-custom-line-items", list_custom_line_items);
     ("list-pricing-plans", list_pricing_plans);
     ("list-pricing-plans-associated-with-pricing-rule",

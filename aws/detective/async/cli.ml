@@ -44,6 +44,48 @@ let accept_invitation =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.accept_invitation
            (Values.AcceptInvitationRequest.make ~graphArn ()) None None])
+let batch_get_graph_member_datasources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and graphArn =
+         flag "graph-arn" (required string) ~doc:"STRING GraphArn"
+       and accountIds =
+         flag "account-ids" (required json_arg)
+           ~doc:"JSON AccountIdExtendedList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_graph_member_datasources
+           (Values.BatchGetGraphMemberDatasourcesRequest.make ~graphArn
+              ~accountIds:(Values.AccountIdExtendedList.of_json accountIds)
+              ())
+           (Some Values.BatchGetGraphMemberDatasourcesResponse.to_json)
+           (Some Values.BatchGetGraphMemberDatasourcesResponse.error_to_json)])
+let batch_get_membership_datasources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and graphArns =
+         flag "graph-arns" (required json_arg) ~doc:"JSON GraphArnList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_membership_datasources
+           (Values.BatchGetMembershipDatasourcesRequest.make
+              ~graphArns:(Values.GraphArnList.of_json graphArns) ())
+           (Some Values.BatchGetMembershipDatasourcesResponse.to_json)
+           (Some Values.BatchGetMembershipDatasourcesResponse.error_to_json)])
 let create_graph =
   Command.async ~summary:""
     ([%map_open.Command
@@ -192,6 +234,27 @@ let enable_organization_admin_account =
            Io.enable_organization_admin_account
            (Values.EnableOrganizationAdminAccountRequest.make ~accountId ())
            None None])
+let get_investigation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and graphArn =
+         flag "graph-arn" (required string) ~doc:"STRING GraphArn"
+       and investigationId =
+         flag "investigation-id" (required string)
+           ~doc:"STRING InvestigationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_investigation
+           (Values.GetInvestigationRequest.make ~graphArn ~investigationId ())
+           (Some Values.GetInvestigationResponse.to_json)
+           (Some Values.GetInvestigationResponse.error_to_json)])
 let get_members =
   Command.async ~summary:""
     ([%map_open.Command
@@ -213,6 +276,29 @@ let get_members =
               ~accountIds:(Values.AccountIdList.of_json accountIds) ())
            (Some Values.GetMembersResponse.to_json)
            (Some Values.GetMembersResponse.error_to_json)])
+let list_datasource_packages =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MemberResultsLimit"
+       and graphArn =
+         flag "graph-arn" (required string) ~doc:"STRING GraphArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_datasource_packages
+           (Values.ListDatasourcePackagesRequest.make ?nextToken ?maxResults
+              ~graphArn ())
+           (Some Values.ListDatasourcePackagesResponse.to_json)
+           (Some Values.ListDatasourcePackagesResponse.error_to_json)])
 let list_graphs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -233,6 +319,67 @@ let list_graphs =
            (Values.ListGraphsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListGraphsResponse.to_json)
            (Some Values.ListGraphsResponse.error_to_json)])
+let list_indicators =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and indicatorType =
+         flag "indicator-type" (optional json_arg) ~doc:"JSON IndicatorType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING AiPaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and graphArn =
+         flag "graph-arn" (required string) ~doc:"STRING GraphArn"
+       and investigationId =
+         flag "investigation-id" (required string)
+           ~doc:"STRING InvestigationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_indicators
+           (Values.ListIndicatorsRequest.make
+              ?indicatorType:(Option.map ~f:Values.IndicatorType.of_json
+                                indicatorType) ?nextToken ?maxResults
+              ~graphArn ~investigationId ())
+           (Some Values.ListIndicatorsResponse.to_json)
+           (Some Values.ListIndicatorsResponse.error_to_json)])
+let list_investigations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING AiPaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON FilterCriteria"
+       and sortCriteria =
+         flag "sort-criteria" (optional json_arg) ~doc:"JSON SortCriteria"
+       and graphArn =
+         flag "graph-arn" (required string) ~doc:"STRING GraphArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_investigations
+           (Values.ListInvestigationsRequest.make ?nextToken ?maxResults
+              ?filterCriteria:(Option.map ~f:Values.FilterCriteria.of_json
+                                 filterCriteria)
+              ?sortCriteria:(Option.map ~f:Values.SortCriteria.of_json
+                               sortCriteria) ~graphArn ())
+           (Some Values.ListInvestigationsResponse.to_json)
+           (Some Values.ListInvestigationsResponse.error_to_json)])
 let list_invitations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -330,6 +477,32 @@ let reject_invitation =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.reject_invitation
            (Values.RejectInvitationRequest.make ~graphArn ()) None None])
+let start_investigation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and graphArn =
+         flag "graph-arn" (required string) ~doc:"STRING GraphArn"
+       and entityArn =
+         flag "entity-arn" (required string) ~doc:"STRING EntityArn"
+       and scopeStartTime =
+         flag "scope-start-time" (required json_arg) ~doc:"JSON Timestamp"
+       and scopeEndTime =
+         flag "scope-end-time" (required json_arg) ~doc:"JSON Timestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_investigation
+           (Values.StartInvestigationRequest.make ~graphArn ~entityArn
+              ~scopeStartTime:(Values.Timestamp.of_json scopeStartTime)
+              ~scopeEndTime:(Values.Timestamp.of_json scopeEndTime) ())
+           (Some Values.StartInvestigationResponse.to_json)
+           (Some Values.StartInvestigationResponse.error_to_json)])
 let start_monitoring_member =
   Command.async ~summary:""
     ([%map_open.Command
@@ -390,6 +563,49 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_datasource_packages =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and graphArn =
+         flag "graph-arn" (required string) ~doc:"STRING GraphArn"
+       and datasourcePackages =
+         flag "datasource-packages" (required json_arg)
+           ~doc:"JSON DatasourcePackageList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_datasource_packages
+           (Values.UpdateDatasourcePackagesRequest.make ~graphArn
+              ~datasourcePackages:(Values.DatasourcePackageList.of_json
+                                     datasourcePackages) ()) None None])
+let update_investigation_state =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and graphArn =
+         flag "graph-arn" (required string) ~doc:"STRING GraphArn"
+       and investigationId =
+         flag "investigation-id" (required string)
+           ~doc:"STRING InvestigationId"
+       and state = flag "state" (required json_arg) ~doc:"JSON State" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_investigation_state
+           (Values.UpdateInvestigationStateRequest.make ~graphArn
+              ~investigationId ~state:(Values.State.of_json state) ()) None
+           None])
 let update_organization_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -413,6 +629,9 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-invitation", accept_invitation);
+    ("batch-get-graph-member-datasources",
+      batch_get_graph_member_datasources);
+    ("batch-get-membership-datasources", batch_get_membership_datasources);
     ("create-graph", create_graph);
     ("create-members", create_members);
     ("delete-graph", delete_graph);
@@ -423,14 +642,21 @@ let main =
       disable_organization_admin_account);
     ("disassociate-membership", disassociate_membership);
     ("enable-organization-admin-account", enable_organization_admin_account);
+    ("get-investigation", get_investigation);
     ("get-members", get_members);
+    ("list-datasource-packages", list_datasource_packages);
     ("list-graphs", list_graphs);
+    ("list-indicators", list_indicators);
+    ("list-investigations", list_investigations);
     ("list-invitations", list_invitations);
     ("list-members", list_members);
     ("list-organization-admin-accounts", list_organization_admin_accounts);
     ("list-tags-for-resource", list_tags_for_resource);
     ("reject-invitation", reject_invitation);
+    ("start-investigation", start_investigation);
     ("start-monitoring-member", start_monitoring_member);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-datasource-packages", update_datasource_packages);
+    ("update-investigation-state", update_investigation_state);
     ("update-organization-configuration", update_organization_configuration)]

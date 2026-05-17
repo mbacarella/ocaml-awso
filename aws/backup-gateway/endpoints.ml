@@ -13,6 +13,18 @@ type ('i, 'o, 'e) t =
   | DisassociateGatewayFromServer: (DisassociateGatewayFromServerInput.t,
   DisassociateGatewayFromServerOutput.t,
   DisassociateGatewayFromServerOutput.error) t 
+  | GetBandwidthRateLimitSchedule: (GetBandwidthRateLimitScheduleInput.t,
+  GetBandwidthRateLimitScheduleOutput.t,
+  GetBandwidthRateLimitScheduleOutput.error) t 
+  | GetGateway: (GetGatewayInput.t, GetGatewayOutput.t,
+  GetGatewayOutput.error) t 
+  | GetHypervisor: (GetHypervisorInput.t, GetHypervisorOutput.t,
+  GetHypervisorOutput.error) t 
+  | GetHypervisorPropertyMappings: (GetHypervisorPropertyMappingsInput.t,
+  GetHypervisorPropertyMappingsOutput.t,
+  GetHypervisorPropertyMappingsOutput.error) t 
+  | GetVirtualMachine: (GetVirtualMachineInput.t, GetVirtualMachineOutput.t,
+  GetVirtualMachineOutput.error) t 
   | ImportHypervisorConfiguration: (ImportHypervisorConfigurationInput.t,
   ImportHypervisorConfigurationOutput.t,
   ImportHypervisorConfigurationOutput.error) t 
@@ -24,8 +36,18 @@ type ('i, 'o, 'e) t =
   ListTagsForResourceOutput.t, ListTagsForResourceOutput.error) t 
   | ListVirtualMachines: (ListVirtualMachinesInput.t,
   ListVirtualMachinesOutput.t, ListVirtualMachinesOutput.error) t 
+  | PutBandwidthRateLimitSchedule: (PutBandwidthRateLimitScheduleInput.t,
+  PutBandwidthRateLimitScheduleOutput.t,
+  PutBandwidthRateLimitScheduleOutput.error) t 
+  | PutHypervisorPropertyMappings: (PutHypervisorPropertyMappingsInput.t,
+  PutHypervisorPropertyMappingsOutput.t,
+  PutHypervisorPropertyMappingsOutput.error) t 
   | PutMaintenanceStartTime: (PutMaintenanceStartTimeInput.t,
   PutMaintenanceStartTimeOutput.t, PutMaintenanceStartTimeOutput.error) t 
+  | StartVirtualMachinesMetadataSync:
+  (StartVirtualMachinesMetadataSyncInput.t,
+  StartVirtualMachinesMetadataSyncOutput.t,
+  StartVirtualMachinesMetadataSyncOutput.error) t 
   | TagResource: (TagResourceInput.t, TagResourceOutput.t,
   TagResourceOutput.error) t 
   | TestHypervisorConfiguration: (TestHypervisorConfigurationInput.t,
@@ -35,6 +57,8 @@ type ('i, 'o, 'e) t =
   UntagResourceOutput.error) t 
   | UpdateGatewayInformation: (UpdateGatewayInformationInput.t,
   UpdateGatewayInformationOutput.t, UpdateGatewayInformationOutput.error) t 
+  | UpdateGatewaySoftwareNow: (UpdateGatewaySoftwareNowInput.t,
+  UpdateGatewaySoftwareNowOutput.t, UpdateGatewaySoftwareNowOutput.error) t 
   | UpdateHypervisor: (UpdateHypervisorInput.t, UpdateHypervisorOutput.t,
   UpdateHypervisorOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
@@ -44,16 +68,25 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteGateway -> `POST
   | DeleteHypervisor -> `POST
   | DisassociateGatewayFromServer -> `POST
+  | GetBandwidthRateLimitSchedule -> `POST
+  | GetGateway -> `POST
+  | GetHypervisor -> `POST
+  | GetHypervisorPropertyMappings -> `POST
+  | GetVirtualMachine -> `POST
   | ImportHypervisorConfiguration -> `POST
   | ListGateways -> `POST
   | ListHypervisors -> `POST
   | ListTagsForResource -> `POST
   | ListVirtualMachines -> `POST
+  | PutBandwidthRateLimitSchedule -> `POST
+  | PutHypervisorPropertyMappings -> `POST
   | PutMaintenanceStartTime -> `POST
+  | StartVirtualMachinesMetadataSync -> `POST
   | TagResource -> `POST
   | TestHypervisorConfiguration -> `POST
   | UntagResource -> `POST
   | UpdateGatewayInformation -> `POST
+  | UpdateGatewaySoftwareNow -> `POST
   | UpdateHypervisor -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -63,16 +96,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteGateway -> (Format.kasprintf Uri.of_string) "/"
       | DeleteHypervisor -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateGatewayFromServer -> (Format.kasprintf Uri.of_string) "/"
+      | GetBandwidthRateLimitSchedule -> (Format.kasprintf Uri.of_string) "/"
+      | GetGateway -> (Format.kasprintf Uri.of_string) "/"
+      | GetHypervisor -> (Format.kasprintf Uri.of_string) "/"
+      | GetHypervisorPropertyMappings -> (Format.kasprintf Uri.of_string) "/"
+      | GetVirtualMachine -> (Format.kasprintf Uri.of_string) "/"
       | ImportHypervisorConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | ListGateways -> (Format.kasprintf Uri.of_string) "/"
       | ListHypervisors -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListVirtualMachines -> (Format.kasprintf Uri.of_string) "/"
+      | PutBandwidthRateLimitSchedule -> (Format.kasprintf Uri.of_string) "/"
+      | PutHypervisorPropertyMappings -> (Format.kasprintf Uri.of_string) "/"
       | PutMaintenanceStartTime -> (Format.kasprintf Uri.of_string) "/"
+      | StartVirtualMachinesMetadataSync ->
+          (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | TestHypervisorConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateGatewayInformation -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateGatewaySoftwareNow -> (Format.kasprintf Uri.of_string) "/"
       | UpdateHypervisor -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
@@ -119,6 +162,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "BackupOnPremises_v20210101.DisassociateGatewayFromServer")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetBandwidthRateLimitSchedule ->
+      let json = GetBandwidthRateLimitScheduleInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "BackupOnPremises_v20210101.GetBandwidthRateLimitSchedule")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetGateway ->
+      let json = GetGatewayInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "BackupOnPremises_v20210101.GetGateway")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetHypervisor ->
+      let json = GetHypervisorInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "BackupOnPremises_v20210101.GetHypervisor")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetHypervisorPropertyMappings ->
+      let json = GetHypervisorPropertyMappingsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "BackupOnPremises_v20210101.GetHypervisorPropertyMappings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetVirtualMachine ->
+      let json = GetVirtualMachineInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "BackupOnPremises_v20210101.GetVirtualMachine")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ImportHypervisorConfiguration ->
       let json = ImportHypervisorConfigurationInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -160,6 +245,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "BackupOnPremises_v20210101.ListVirtualMachines")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutBandwidthRateLimitSchedule ->
+      let json = PutBandwidthRateLimitScheduleInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "BackupOnPremises_v20210101.PutBandwidthRateLimitSchedule")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutHypervisorPropertyMappings ->
+      let json = PutHypervisorPropertyMappingsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "BackupOnPremises_v20210101.PutHypervisorPropertyMappings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutMaintenanceStartTime ->
       let json = PutMaintenanceStartTimeInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -168,6 +271,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "BackupOnPremises_v20210101.PutMaintenanceStartTime")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartVirtualMachinesMetadataSync ->
+      let json = StartVirtualMachinesMetadataSyncInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "BackupOnPremises_v20210101.StartVirtualMachinesMetadataSync")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceInput.to_json req in
@@ -202,6 +314,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "BackupOnPremises_v20210101.UpdateGatewayInformation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateGatewaySoftwareNow ->
+      let json = UpdateGatewaySoftwareNowInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "BackupOnPremises_v20210101.UpdateGatewaySoftwareNow")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateHypervisor ->
       let json = UpdateHypervisorInput.to_json req in
@@ -271,6 +392,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateGatewayFromServerOutput.error_of_json))
+  | GetBandwidthRateLimitSchedule ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetBandwidthRateLimitScheduleOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetBandwidthRateLimitScheduleOutput.error_of_json))
+  | GetGateway ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetGatewayOutput.of_json json)
+      else Error (parse_aws_error (Some GetGatewayOutput.error_of_json))
+  | GetHypervisor ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetHypervisorOutput.of_json json)
+      else Error (parse_aws_error (Some GetHypervisorOutput.error_of_json))
+  | GetHypervisorPropertyMappings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetHypervisorPropertyMappingsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetHypervisorPropertyMappingsOutput.error_of_json))
+  | GetVirtualMachine ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetVirtualMachineOutput.of_json json)
+      else
+        Error (parse_aws_error (Some GetVirtualMachineOutput.error_of_json))
   | ImportHypervisorConfiguration ->
       if is_success
       then
@@ -308,6 +466,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListVirtualMachinesOutput.error_of_json))
+  | PutBandwidthRateLimitSchedule ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutBandwidthRateLimitScheduleOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutBandwidthRateLimitScheduleOutput.error_of_json))
+  | PutHypervisorPropertyMappings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutHypervisorPropertyMappingsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutHypervisorPropertyMappingsOutput.error_of_json))
   | PutMaintenanceStartTime ->
       if is_success
       then
@@ -316,6 +492,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some PutMaintenanceStartTimeOutput.error_of_json))
+  | StartVirtualMachinesMetadataSync ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartVirtualMachinesMetadataSyncOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartVirtualMachinesMetadataSyncOutput.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -346,6 +531,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateGatewayInformationOutput.error_of_json))
+  | UpdateGatewaySoftwareNow ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateGatewaySoftwareNowOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateGatewaySoftwareNowOutput.error_of_json))
   | UpdateHypervisor ->
       if is_success
       then
